@@ -1,5 +1,5 @@
-- [ ] pass custom endowments at require time
+- [x] pass custom endowments at require time
 - [ ] pass custom endowments at config time
-- [ ] set custom prelude in browserify via plugin
+- [x] set custom prelude in browserify via plugin
 - [ ] find safe platform api - sesify something in metamask?
 - [ ] browserify the prelude

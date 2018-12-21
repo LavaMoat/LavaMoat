@@ -2,11 +2,11 @@
 
 (function() {
 
-  function outer(modules, cache, entry) {
+  function outer(modules, cache, entryPoints) {
     // Save the require from previous bundle to this closure if any
     var previousRequire = typeof require == "function" && require
 
-    function newRequire(name, jumped){
+    function newRequire(name, jumped, providedEndowments){
       // SES - ignore cache
       // // check cache
       // if (cache[name]) {
@@ -19,26 +19,33 @@
         // SES - ignore cache
         // var module = cache[name] = { exports: {} }
         const module = { exports: {} }
-        const moduleInitializer = moduleData[0]
+        let moduleInitializer = moduleData[0]
 
-        const endowments = {
-          console: {
-            assert: console.assert.bind(console),
-            debug: console.debug.bind(console),
-            error: console.error.bind(console),
-            info: console.info.bind(console),
-            log: console.log.bind(console),
-            warn: console.warn.bind(console),
-          },
+        // if not an entrypoint, wrap in SES
+        if (!entryPoints.includes(name)) {
+          const defaultEndowments = {
+            console: {
+              assert: console.assert.bind(console),
+              debug: console.debug.bind(console),
+              error: console.error.bind(console),
+              info: console.info.bind(console),
+              log: console.log.bind(console),
+              warn: console.warn.bind(console),
+            },
+          }
+          const endowments = Object.assign(defaultEndowments, providedEndowments)
+
+          const realm = SES.makeSESRootRealm()
+          const wrappedInitializer = realm.evaluate(`(${moduleInitializer})`, endowments)
+          // overwrite the module initializer with the SES-wrapped version
+          moduleInitializer = wrappedInitializer
         }
-        const realm = SES.makeSESRootRealm()
-        const wrappedInitializer = realm.evaluate(`(${moduleInitializer})`, endowments)
 
-        wrappedInitializer.call(module.exports, scopedRequire, module, module.exports)
+        moduleInitializer.call(module.exports, scopedRequire, module, module.exports)
 
-        function scopedRequire (requestedName) {
+        function scopedRequire (requestedName, providedEndowments) {
           var id = moduleData[1][requestedName] || requestedName
-          return newRequire(id)
+          return newRequire(id, false, providedEndowments)
         }
 
         return module.exports
@@ -61,8 +68,8 @@
       throw err
     }
 
-    // load entry points
-    for(var i=0; i<entry.length; i++) newRequire(entry[i])
+    // load entryPoints
+    for(var i=0; i<entryPoints.length; i++) newRequire(entryPoints[i])
 
     // Override the current require with this new one
     return newRequire
