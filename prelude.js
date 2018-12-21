@@ -12,12 +12,14 @@
         return cache[name].exports
       }
       // check our modules
-      if (modules[name]) {
-        var module = cache[name] = {exports:{}}
-        modules[name][0].call(module.exports, function(x){
-          var id = modules[name][1][x]
-          return newRequire(id || x)
-        }, module, module.exports, outer, modules, cache, entry)
+      const moduleData = modules[name]
+      if (moduleData) {
+        var module = cache[name] = { exports:{} }
+        moduleData[0].call(module.exports, scopedRequire, module, module.exports)
+        function scopedRequire (requestedName) {
+          var id = moduleData[1][requestedName]
+          return newRequire(id || requestedName)
+        }
         return module
       }
       // we dont have it, look somewhere else
