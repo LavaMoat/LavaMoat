@@ -21,15 +21,15 @@
         const module = { exports: {} }
         const moduleInitializer = moduleData[0]
 
-        const endowments = {}
+        const endowments = { console }
         const realm = SES.makeSESRootRealm()
         const wrappedInitializer = realm.evaluate(`(${moduleInitializer})`, endowments)
 
         wrappedInitializer.call(module.exports, scopedRequire, module, module.exports)
 
         function scopedRequire (requestedName) {
-          var id = moduleData[1][requestedName]
-          return newRequire(id || requestedName)
+          var id = moduleData[1][requestedName] || requestedName
+          return newRequire(id)
         }
 
         return module.exports
