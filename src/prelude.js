@@ -21,7 +21,16 @@
         const module = { exports: {} }
         const moduleInitializer = moduleData[0]
 
-        const endowments = { console }
+        const endowments = {
+          console: {
+            assert: console.assert.bind(console),
+            debug: console.debug.bind(console),
+            error: console.error.bind(console),
+            info: console.info.bind(console),
+            log: console.log.bind(console),
+            warn: console.warn.bind(console),
+          },
+        }
         const realm = SES.makeSESRootRealm()
         const wrappedInitializer = realm.evaluate(`(${moduleInitializer})`, endowments)
 
