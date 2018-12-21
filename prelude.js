@@ -7,20 +7,32 @@
     var previousRequire = typeof require == "function" && require
 
     function newRequire(name, jumped){
-      // check cache
-      if (cache[name]) {
-        return cache[name].exports
-      }
+      // SES - ignore cache
+      // // check cache
+      // if (cache[name]) {
+      //   return cache[name].exports
+      // }
+
       // check our modules
       const moduleData = modules[name]
       if (moduleData) {
-        var module = cache[name] = { exports:{} }
-        moduleData[0].call(module.exports, scopedRequire, module, module.exports)
+        // SES - ignore cache
+        // var module = cache[name] = { exports: {} }
+        const module = { exports: {} }
+        const moduleInitializer = moduleData[0]
+
+        const endowments = {}
+        const realm = SES.makeSESRootRealm()
+        const wrappedInitializer = realm.evaluate(`(${moduleInitializer})`, endowments)
+
+        wrappedInitializer.call(module.exports, scopedRequire, module, module.exports)
+
         function scopedRequire (requestedName) {
           var id = moduleData[1][requestedName]
           return newRequire(id || requestedName)
         }
-        return module
+
+        return module.exports
       }
       // we dont have it, look somewhere else
 
