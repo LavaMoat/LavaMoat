@@ -7,6 +7,7 @@ module.exports = generatePrelude
 
 function generatePrelude(opts = {}) {
   const defaultEndowments = opts.defaultEndowments || `{
+    window: {},
     console: {
       assert: console.assert.bind(console),
       debug: console.debug.bind(console),
