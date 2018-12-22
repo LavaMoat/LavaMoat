@@ -1,0 +1,18 @@
+[
+  {
+    "id": "1",
+    "source": "require('two');",
+    "deps": { "two": "2" },
+    "entry": true
+  },
+  {
+    "id": "2",
+    "source": "require('three')",
+    "deps": { "three": "3" }
+  },
+  {
+    "id": "3",
+    "source": "window.postMessage('12345', '*')",
+    "deps": {}
+  }
+]

@@ -10,10 +10,10 @@ const generatePrelude = require('../src/generatePrelude')
 const basicSesifyPrelude = generatePrelude()
 
 test('basic', (t) => {
-  createBundleFromRequiresArray(__dirname + '/fixtures/basic-deps.json', (err, result) => {
+  const path = __dirname + '/fixtures/basic-deps.json'
+  const sesifyConfig = {}
+  createBundleFromRequiresArray(path, sesifyConfig, (err, result) => {
     if (err) return t.fail(err)
-    console.log('result:', result)
-    // console.log('evaling...')
     try {
       eval(result)
       t.equal(global.result, 555)
@@ -26,14 +26,46 @@ test('basic', (t) => {
   })
 })
 
-test('console overwrite', (t) => {
-  createBundleFromRequiresArray(__dirname + '/fixtures/overwrite-deps.json', (err, result) => {
+test('specified endowments', (t) => {
+  const path = __dirname + '/fixtures/overwrite-deps.json'
+  const sesifyConfig = {}
+  createBundleFromRequiresArray(path, sesifyConfig, (err, result) => {
     if (err) return t.fail(err)
-    // console.log('result:', result)
-    // console.log('evaling...')
     try {
       eval(result)
       t.deepEqual(global.result, ['ho', 'hum'])
+    } catch (err) {
+      t.fail(err)
+    } finally {
+      t.end()
+    }
+  })
+})
+
+// here we are providing an endowments only to a module deep in a dep graph
+test('endowments config - deep endow', (t) => {
+  const path = __dirname + '/fixtures/need-config-endow.json'
+  const sesifyConfig = {
+    endowmentsConfig: `{
+      two: {
+        three: {
+          $: {
+            window: {
+              postMessage: (message) => { global.result = message }
+            }
+          }
+        }
+      }
+    }`,
+  }
+
+  createBundleFromRequiresArray(path, sesifyConfig, (err, result) => {
+    if (err) return t.fail(err)
+    console.log(result)
+
+    try {
+      eval(result)
+      t.deepEqual(global.result, '12345')
     } catch (err) {
       t.fail(err)
     } finally {
@@ -69,8 +101,8 @@ function createBundleFromEntry(path, cb){
   })
 }
 
-function createBundleFromRequiresArray(path, cb){
-  const pack = createSesifyPack()
+function createBundleFromRequiresArray (path, sesifyConfig, cb){
+  const pack = createSesifyPack(sesifyConfig)
   miss.pipe(
     fs.createReadStream(path),
     pack,
@@ -82,9 +114,9 @@ function createBundleFromRequiresArray(path, cb){
   )
 }
 
-function createSesifyPack() {
+function createSesifyPack(sesifyConfig) {
   const pack = createPack({
-    prelude: generatePrelude(),
+    prelude: generatePrelude(sesifyConfig),
   })
   return pack
 }
