@@ -1,5 +1,8 @@
 - [x] pass custom endowments at require time
 - [ ] pass custom endowments at config time
+  - [ ] get config into bundle
+  - [ ] lookup config by module id / dep path
 - [x] set custom prelude in browserify via plugin
 - [ ] find safe platform api - sesify something in metamask?
 - [ ] browserify the prelude
+- [ ] share realm for all files in module?

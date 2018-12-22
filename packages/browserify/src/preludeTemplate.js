@@ -1,5 +1,4 @@
-// modified from original browser-pack prelude for readability + SES support
-
+// Sesify Prelude
 (function() {
 
   function outer(modules, cache, entryPoints) {
@@ -7,32 +6,15 @@
     var previousRequire = typeof require == "function" && require
 
     function newRequire(name, jumped, providedEndowments){
-      // SES - ignore cache
-      // // check cache
-      // if (cache[name]) {
-      //   return cache[name].exports
-      // }
-
       // check our modules
       const moduleData = modules[name]
       if (moduleData) {
-        // SES - ignore cache
-        // var module = cache[name] = { exports: {} }
         const module = { exports: {} }
         let moduleInitializer = moduleData[0]
 
         // if not an entrypoint, wrap in SES
         if (!entryPoints.includes(name)) {
-          const defaultEndowments = {
-            console: {
-              assert: console.assert.bind(console),
-              debug: console.debug.bind(console),
-              error: console.error.bind(console),
-              info: console.info.bind(console),
-              log: console.log.bind(console),
-              warn: console.warn.bind(console),
-            },
-          }
+          const defaultEndowments = __defaultEndowments
           const endowments = Object.assign(defaultEndowments, providedEndowments)
 
           const realm = SES.makeSESRootRealm()
