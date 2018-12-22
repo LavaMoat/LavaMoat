@@ -1,23 +1,27 @@
 // Sesify Prelude
 (function() {
 
-  function outer(modules, cache, entryPoints) {
-    // Save the require from previous bundle to this closure if any
-    var previousRequire = typeof require == "function" && require
+// START of injected code from sessDist
+  __sessDist__
+// START of injected code from sessDist
 
-    const endowmentsConfig = (
+  const endowmentsConfig = (
 // START of injected code from endowmentsConfig
 __endowmentsConfig__
 // END of injected code from endowmentsConfig
-    )
+  )
 
-    function createDefaultEndowments () {
-      return (
+  function createDefaultEndowments () {
+    return (
 // START of injected code from defaultEndowments
 __defaultEndowments__
 // END of injected code from defaultEndowments
-      )
-    }
+    )
+  }
+
+  function outer(modules, cache, entryPoints) {
+    // Save the require from previous bundle to this closure if any
+    var previousRequire = typeof require == "function" && require
 
     function newRequire(name, jumped, providedEndowments, scopedEndowmentsConfig){
       // check our modules
