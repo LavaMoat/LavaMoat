@@ -5,13 +5,14 @@ const miss = require('mississippi')
 const browserify = require('browserify')
 const sesifyPlugin = require('../src/index')
 const { SES } = require('../src/ses.js')
+const generatePrelude = require('../src/generatePrelude')
 
-const sesifyPrelude = fs.readFileSync(__dirname + '/../src/prelude.js', 'utf8')
+const basicSesifyPrelude = generatePrelude()
 
 test('basic', (t) => {
-  createBundleFromFixture(__dirname + '/fixtures/basic-deps.json', (err, result) => {
+  createBundleFromRequiresArray(__dirname + '/fixtures/basic-deps.json', (err, result) => {
     if (err) return t.fail(err)
-    // console.log('result:', result)
+    console.log('result:', result)
     // console.log('evaling...')
     try {
       eval(result)
@@ -26,7 +27,7 @@ test('basic', (t) => {
 })
 
 test('console overwrite', (t) => {
-  createBundleFromFixture(__dirname + '/fixtures/overwrite-deps.json', (err, result) => {
+  createBundleFromRequiresArray(__dirname + '/fixtures/overwrite-deps.json', (err, result) => {
     if (err) return t.fail(err)
     // console.log('result:', result)
     // console.log('evaling...')
@@ -42,12 +43,9 @@ test('console overwrite', (t) => {
 })
 
 test('browserify plugin', (t) => {
-  const b = browserify()
-  b.add(__dirname + '/fixtures/nothing.js')
-  b.plugin(sesifyPlugin)
-  b.bundle(function (err, src) {
+  createBundleFromEntry(__dirname + '/fixtures/nothing.js', (err, bundle) => {
     if (err) return t.fail(err)
-    t.assert(src.toString().includes(sesifyPrelude))
+    t.assert(bundle.includes(basicSesifyPrelude))
     t.end()
   })
 })
@@ -57,13 +55,21 @@ test('browserify plugin - alternate', (t) => {
   b.add(__dirname + '/fixtures/nothing.js')
   b.bundle(function (err, src) {
     if (err) return t.fail(err)
-    t.assert(src.toString().includes(sesifyPrelude))
+    t.assert(src.toString().includes(basicSesifyPrelude))
     t.end()
   })
 })
 
+function createBundleFromEntry(path, cb){
+  const b = browserify({ plugin: sesifyPlugin })
+  b.add(path)
+  b.bundle(function (err, src) {
+    if (err) return cb(err)
+    cb(null, src.toString())
+  })
+}
 
-function createBundleFromFixture(path, cb){
+function createBundleFromRequiresArray(path, cb){
   const pack = createSesifyPack()
   miss.pipe(
     fs.createReadStream(path),
@@ -78,7 +84,7 @@ function createBundleFromFixture(path, cb){
 
 function createSesifyPack() {
   const pack = createPack({
-    prelude: sesifyPrelude,
+    prelude: generatePrelude(),
   })
   return pack
 }
