@@ -5,7 +5,21 @@
     // Save the require from previous bundle to this closure if any
     var previousRequire = typeof require == "function" && require
 
-    function newRequire(name, jumped, providedEndowments){
+    const endowmentsConfig = (
+// START of injected code from endowmentsConfig
+__endowmentsConfig__
+// END of injected code from endowmentsConfig
+    )
+
+    function createDefaultEndowments () {
+      return (
+// START of injected code from defaultEndowments
+__defaultEndowments__
+// END of injected code from defaultEndowments
+      )
+    }
+
+    function newRequire(name, jumped, providedEndowments, scopedEndowmentsConfig){
       // check our modules
       const moduleData = modules[name]
       if (moduleData) {
@@ -14,8 +28,9 @@
 
         // if not an entrypoint, wrap in SES
         if (!entryPoints.includes(name)) {
-          const defaultEndowments = __defaultEndowments
-          const endowments = Object.assign(defaultEndowments, providedEndowments)
+          const defaultEndowments = createDefaultEndowments()
+          const endowmentsFromConfig = scopedEndowmentsConfig['$']
+          const endowments = Object.assign(defaultEndowments, providedEndowments, endowmentsFromConfig)
 
           const realm = SES.makeSESRootRealm()
           const wrappedInitializer = realm.evaluate(`(${moduleInitializer})`, endowments)
@@ -26,8 +41,9 @@
         moduleInitializer.call(module.exports, scopedRequire, module, module.exports)
 
         function scopedRequire (requestedName, providedEndowments) {
+          const childEndowmentsConfig = scopedEndowmentsConfig[requestedName] || {}
           var id = moduleData[1][requestedName] || requestedName
-          return newRequire(id, false, providedEndowments)
+          return newRequire(id, false, providedEndowments, childEndowmentsConfig)
         }
 
         return module.exports
@@ -51,7 +67,7 @@
     }
 
     // load entryPoints
-    for(var i=0; i<entryPoints.length; i++) newRequire(entryPoints[i])
+    for(var i=0; i<entryPoints.length; i++) newRequire(entryPoints[i], false, null, endowmentsConfig)
 
     // Override the current require with this new one
     return newRequire

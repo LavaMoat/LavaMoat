@@ -19,8 +19,8 @@ function generatePrelude(opts = {}) {
   const endowmentsConfig = opts.endowmentsConfig || '{}'
 
   let output = preludeTemplate
-  output = output.replace('__defaultEndowments', defaultEndowments)
-  output = output.replace('__endowmentsConfig', endowmentsConfig)
+  output = output.replace('__defaultEndowments__', defaultEndowments)
+  output = output.replace('__endowmentsConfig__', endowmentsConfig)
 
   return output
 }
