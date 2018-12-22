@@ -1,6 +1,6 @@
 // slightly modified by kumavis for better browserify support
 
-module.exports = (function (exports) {
+const { SES } = (function (exports) {
   'use strict';
 
   // Copyright (C) 2018 Agoric

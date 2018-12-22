@@ -4,7 +4,6 @@ const createPack = require('browser-pack')
 const miss = require('mississippi')
 const browserify = require('browserify')
 const sesifyPlugin = require('../src/index')
-const { SES } = require('../src/ses.js')
 const generatePrelude = require('../src/generatePrelude')
 
 const basicSesifyPrelude = generatePrelude()
@@ -61,7 +60,6 @@ test('endowments config - deep endow', (t) => {
 
   createBundleFromRequiresArray(path, sesifyConfig, (err, result) => {
     if (err) return t.fail(err)
-    console.log(result)
 
     try {
       eval(result)
