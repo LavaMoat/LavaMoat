@@ -10,3 +10,4 @@ module.exports = function (browserify, pluginOpts) {
 }
 
 module.exports.prelude = generatePrelude()
+module.exports.generatePrelude = generatePrelude

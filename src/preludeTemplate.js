@@ -5,11 +5,13 @@
   __sessDist__
 // START of injected code from sessDist
 
-  const endowmentsConfig = (
+  const sesEval = (code) => SES.makeSESRootRealm().evaluate(code)
+
+  const endowmentsConfig = (function(){
 // START of injected code from endowmentsConfig
 __endowmentsConfig__
 // END of injected code from endowmentsConfig
-  )
+  })()
 
   function createDefaultEndowments () {
     return (
@@ -23,7 +25,7 @@ __defaultEndowments__
     // Save the require from previous bundle to this closure if any
     var previousRequire = typeof require == "function" && require
 
-    function newRequire(name, jumped, providedEndowments, scopedEndowmentsConfig){
+    function newRequire(name, jumped, providedEndowments, scopedEndowmentsConfig, depPath){
       // check our modules
       const moduleData = modules[name]
       if (moduleData) {
@@ -42,12 +44,17 @@ __defaultEndowments__
           moduleInitializer = wrappedInitializer
         }
 
-        moduleInitializer.call(module.exports, scopedRequire, module, module.exports)
+        // the following are exposed to the moduleInitializer https://github.com/browserify/browser-pack/blob/master/prelude.js#L38
+        // some of these are dangerous to expose
+        moduleInitializer.call(module.exports, scopedRequire, module, module.exports, outer, modules)
 
         function scopedRequire (requestedName, providedEndowments) {
           const childEndowmentsConfig = scopedEndowmentsConfig[requestedName] || {}
           var id = moduleData[1][requestedName] || requestedName
-          return newRequire(id, false, providedEndowments, childEndowmentsConfig)
+          // this is just for debugging
+          const childDepPath = depPath.slice()
+          childDepPath.push(requestedName)
+          return newRequire(id, false, providedEndowments, childEndowmentsConfig, childDepPath)
         }
 
         return module.exports
@@ -71,7 +78,7 @@ __defaultEndowments__
     }
 
     // load entryPoints
-    for(var i=0; i<entryPoints.length; i++) newRequire(entryPoints[i], false, null, endowmentsConfig)
+    for(var i=0; i<entryPoints.length; i++) newRequire(entryPoints[i], false, null, endowmentsConfig, [])
 
     // Override the current require with this new one
     return newRequire
