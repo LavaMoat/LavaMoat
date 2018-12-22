@@ -45,7 +45,8 @@ test('specified endowments', (t) => {
 test('endowments config - deep endow', (t) => {
   const path = __dirname + '/fixtures/need-config-endow.json'
   const sesifyConfig = {
-    endowmentsConfig: `{
+    endowmentsConfig: `
+    return {
       two: {
         three: {
           $: {

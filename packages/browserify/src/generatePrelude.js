@@ -18,7 +18,7 @@ function generatePrelude(opts = {}) {
     },
   }`
 
-  const endowmentsConfig = opts.endowmentsConfig || '{}'
+  const endowmentsConfig = opts.endowmentsConfig || 'return {}'
 
   let output = preludeTemplate
   output = output.replace('__sessDist__', sessDist)
