@@ -48,13 +48,16 @@ __defaultEndowments__
         globalCache[moduleDepPath] = localCache
 
         let moduleInitializer = moduleData[0]
+        const configForModule = configDeepGet(endowmentsConfig, moduleDepPath)
+
+        const isEntryPoint = entryPoints.includes(name)
 
         // if not an entrypoint, wrap in SES
-        if (!entryPoints.includes(name)) {
+        if (!isEntryPoint && !configForModule.skipSes) {
 
           const defaultEndowments = createDefaultEndowments()
           // const endowmentsFromConfig = scopedEndowmentsConfig['$']
-          const endowmentsFromConfig = configDeepGet(endowmentsConfig, moduleDepPath)
+          const endowmentsFromConfig = configForModule.$
           const endowments = Object.assign(defaultEndowments, providedEndowments, endowmentsFromConfig)
 
           // here we are caching the realm based on the slug, but actually
@@ -126,7 +129,7 @@ __defaultEndowments__
   }
 
   function configDeepGet(config, path) {
-    return path.reduce((current, key) => current[key] || {}, config).$
+    return path.reduce((current, key) => current[key] || {}, config)
   }
 
 })()
