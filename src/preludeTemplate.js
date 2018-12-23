@@ -21,6 +21,8 @@ __defaultEndowments__
     )
   }
 
+  const realms = {}
+
   function outer(modules, cache, entryPoints) {
     // Save the require from previous bundle to this closure if any
     var previousRequire = typeof require == "function" && require
@@ -34,11 +36,22 @@ __defaultEndowments__
 
         // if not an entrypoint, wrap in SES
         if (!entryPoints.includes(name)) {
+          const moduleDepPath = toModuleDepPath(depPath)
+
           const defaultEndowments = createDefaultEndowments()
-          const endowmentsFromConfig = scopedEndowmentsConfig['$']
+          // const endowmentsFromConfig = scopedEndowmentsConfig['$']
+          const endowmentsFromConfig = configDeepGet(endowmentsConfig, moduleDepPath)
           const endowments = Object.assign(defaultEndowments, providedEndowments, endowmentsFromConfig)
 
-          const realm = SES.makeSESRootRealm()
+          // here we are caching the realm based on the slug, but actually
+          // we could cache the initialized module instead
+          const moduleDepPathSlug = moduleDepPath.join(' > ')
+          let realm = realms[moduleDepPathSlug]
+          if (!realm) {
+            realm = SES.makeSESRootRealm()
+            realms[moduleDepPathSlug] = realm
+          }
+
           const wrappedInitializer = realm.evaluate(`(${moduleInitializer})`, endowments)
           // overwrite the module initializer with the SES-wrapped version
           moduleInitializer = wrappedInitializer
@@ -85,5 +98,21 @@ __defaultEndowments__
   }
 
   return outer
+
+  function toModuleDepPath(depthPath) {
+    const moduleDepPath = []
+    depthPath.forEach((pathPart) => {
+      const pathInitial = pathPart.split('/')[0]
+      // skip relative resolution
+      if (['.','..'].includes(pathInitial)) return
+      // otherwise keep module name
+      moduleDepPath.push(pathInitial)
+    })
+    return moduleDepPath
+  }
+
+  function configDeepGet(config, path) {
+    return path.reduce((current, key) => current[key] || {}, config).$
+  }
 
 })()
