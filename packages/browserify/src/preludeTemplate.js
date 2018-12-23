@@ -23,7 +23,7 @@ __defaultEndowments__
 
   const realms = {}
 
-  function outer(modules, cache, entryPoints) {
+  function outer(modules, globalCache, entryPoints) {
     // Save the require from previous bundle to this closure if any
     var previousRequire = typeof require == "function" && require
 
@@ -31,12 +31,26 @@ __defaultEndowments__
       // check our modules
       const moduleData = modules[name]
       if (moduleData) {
+
+        const moduleDepPath = toModuleDepPath(depPath)
+
+        // check our local cache
+        const localCache = globalCache[moduleDepPath] || {}
+        if (localCache[name]) {
+          const module = localCache[name]
+          return module.exports
+        }
+
+        // prepare the module to be initialized
         const module = { exports: {} }
+        // save module to localCache
+        localCache[name] = module
+        globalCache[moduleDepPath] = localCache
+
         let moduleInitializer = moduleData[0]
 
         // if not an entrypoint, wrap in SES
         if (!entryPoints.includes(name)) {
-          const moduleDepPath = toModuleDepPath(depPath)
 
           const defaultEndowments = createDefaultEndowments()
           // const endowmentsFromConfig = scopedEndowmentsConfig['$']
