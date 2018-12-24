@@ -4,8 +4,9 @@
   - [x] lookup config by module id / dep path
   - [?] how to deal with entry point name if entries specified by id / multiple entry points
 - [x] include SES in prelude
+- [x] share realm for all files in module?
 
-- [ ] share realm for all files in module?
+- [x] make global module config as well
 - [ ] battletest via metamask
   - [ ] find sane default endowments
 - [ ] set custom prelude in browserify via plugin

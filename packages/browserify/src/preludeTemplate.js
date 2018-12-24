@@ -48,7 +48,7 @@ __defaultEndowments__
         globalCache[moduleDepPath] = localCache
 
         let moduleInitializer = moduleData[0]
-        const configForModule = configDeepGet(endowmentsConfig, moduleDepPath)
+        const configForModule = getConfigForModule(endowmentsConfig, moduleDepPath)
         const moduleDepPathSlug = moduleDepPath.join(' > ')
 
         const isEntryPoint = entryPoints.includes(name)
@@ -65,7 +65,6 @@ __defaultEndowments__
           let realm = preferredRealm || realms[moduleDepPathSlug]
           if (!realm) {
             console.log('realm for:', moduleDepPathSlug)
-            console.log(depPath)
             realm = SES.makeSESRootRealm()
             realms[moduleDepPathSlug] = realm
           }
@@ -135,8 +134,11 @@ __defaultEndowments__
     return moduleDepPath
   }
 
-  function configDeepGet(config, path) {
-    return path.reduce((current, key) => current[key] || {}, config)
+  function getConfigForModule(config, path) {
+    const moduleName = path.slice(-1)[0]
+    const globalConfig = (config.global || {})[moduleName]
+    const depConfig = path.reduce((current, key) => current[key] || {}, config.dependencies)
+    return Object.assign({}, globalConfig, depConfig)
   }
 
 })()
