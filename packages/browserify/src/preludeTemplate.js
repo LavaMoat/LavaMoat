@@ -27,7 +27,7 @@ __defaultEndowments__
     // Save the require from previous bundle to this closure if any
     var previousRequire = typeof require == "function" && require
 
-    function newRequire(name, jumped, providedEndowments, scopedEndowmentsConfig, depPath){
+    function newRequire(name, jumped, providedEndowments, scopedEndowmentsConfig, depPath, preferredRealm){
       // check our modules
       const moduleData = modules[name]
       if (moduleData) {
@@ -49,6 +49,7 @@ __defaultEndowments__
 
         let moduleInitializer = moduleData[0]
         const configForModule = configDeepGet(endowmentsConfig, moduleDepPath)
+        const moduleDepPathSlug = moduleDepPath.join(' > ')
 
         const isEntryPoint = entryPoints.includes(name)
 
@@ -60,11 +61,11 @@ __defaultEndowments__
           const endowmentsFromConfig = configForModule.$
           const endowments = Object.assign(defaultEndowments, providedEndowments, endowmentsFromConfig)
 
-          // here we are caching the realm based on the slug, but actually
-          // we could cache the initialized module instead
-          const moduleDepPathSlug = moduleDepPath.join(' > ')
-          let realm = realms[moduleDepPathSlug]
+          // here we are caching the realm based on the slug
+          let realm = preferredRealm || realms[moduleDepPathSlug]
           if (!realm) {
+            console.log('realm for:', moduleDepPathSlug)
+            console.log(depPath)
             realm = SES.makeSESRootRealm()
             realms[moduleDepPathSlug] = realm
           }
@@ -81,10 +82,16 @@ __defaultEndowments__
         function scopedRequire (requestedName, providedEndowments) {
           const childEndowmentsConfig = scopedEndowmentsConfig[requestedName] || {}
           var id = moduleData[1][requestedName] || requestedName
+          // recursive requires dont hit cache so it inf loops, so we shortcircuit
+          if (id === name) {
+            console.log('recursive:', requestedName)
+            return module.exports
+          }
           // this is just for debugging
           const childDepPath = depPath.slice()
           childDepPath.push(requestedName)
-          return newRequire(id, false, providedEndowments, childEndowmentsConfig, childDepPath)
+          const realmForChild = preferredRealm || (configForModule.shareRealmWithChildren && realms[moduleDepPathSlug])
+          return newRequire(id, false, providedEndowments, childEndowmentsConfig, childDepPath, realmForChild)
         }
 
         return module.exports
