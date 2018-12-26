@@ -5,7 +5,8 @@
   __sessDist__
 // START of injected code from sessDist
 
-  const sesEval = (code) => SES.makeSESRootRealm().evaluate(code)
+  const globalRealm = SES.makeSESRootRealm()
+  const sesEval = (code) => globalRealm.evaluate(code)
 
   const endowmentsConfig = (function(){
 // START of injected code from endowmentsConfig
@@ -89,7 +90,11 @@ __defaultEndowments__
           // this is just for debugging
           const childDepPath = depPath.slice()
           childDepPath.push(requestedName)
-          const realmForChild = preferredRealm || (configForModule.shareRealmWithChildren && realms[moduleDepPathSlug])
+          const realmForChild = preferredRealm
+            // global realm
+            || (endowmentsConfig.useGlobalRealm && globalRealm)
+            // realm inheritance
+            || (configForModule.shareRealmWithChildren && realms[moduleDepPathSlug])
           return newRequire(id, false, providedEndowments, childEndowmentsConfig, childDepPath, realmForChild)
         }
 
@@ -114,7 +119,9 @@ __defaultEndowments__
     }
 
     // load entryPoints
-    for(var i=0; i<entryPoints.length; i++) newRequire(entryPoints[i], false, null, endowmentsConfig, [])
+    for (var i=0; i<entryPoints.length; i++) {
+      newRequire(entryPoints[i], false, null, endowmentsConfig, [])
+    }
 
     // Override the current require with this new one
     return newRequire

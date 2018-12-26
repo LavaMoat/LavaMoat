@@ -6,8 +6,12 @@
 - [x] include SES in prelude
 - [x] share realm for all files in module?
 
+- [ ] if we keep cache per-module (to avoid module.exports modifications) but share a global realm, are we safe?
+  - [ ] clearTimeout/clearInterval interference
+  - [ ] realm modifications, e.g. globals?
+- [ ] handle module names with @xyz/abc format
 - [x] make global module config as well
-- [ ] allow some sort of global realm sharing
+- [x] allow some sort of global realm sharing
 - [ ] allow global caching
 - [ ] lockdown everything thats passed to modules
   - [ ] wrap newRequire, etc
