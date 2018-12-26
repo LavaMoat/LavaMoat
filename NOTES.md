@@ -7,6 +7,13 @@
 - [x] share realm for all files in module?
 
 - [x] make global module config as well
+- [ ] allow some sort of global realm sharing
+- [ ] allow global caching
+- [ ] lockdown everything thats passed to modules
+  - [ ] wrap newRequire, etc
+  - [ ] remove excessive + dangerous moduleInitializer args
+    - [ ] investigate why corejs was using arguments[4] and see if others are too
+- [ ] allow less restrictive sandboxing modes
 - [ ] battletest via metamask
   - [ ] find sane default endowments
 - [ ] set custom prelude in browserify via plugin
@@ -14,5 +21,3 @@
   - [ ] plugin without breaking things via b.reset()?  
 - [?] browserify the prelude
 - [ ] cleanup prelude
-- [ ] remove excessive + dangerous moduleInitializer args
-  - [ ] investigate why corejs was using arguments[4] and see if others are too
