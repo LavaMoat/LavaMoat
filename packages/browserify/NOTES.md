@@ -5,23 +5,29 @@
   - [?] how to deal with entry point name if entries specified by id / multiple entry points
 - [x] include SES in prelude
 - [x] share realm for all files in module?
-
-- [ ] if we keep cache per-module (to avoid module.exports modifications) but share a global realm, are we safe?
-  - [ ] clearTimeout/clearInterval interference
-  - [ ] realm modifications, e.g. globals?
-- [ ] handle module names with @xyz/abc format
 - [x] make global module config as well
 - [x] allow some sort of global realm sharing
-- [ ] allow global caching
-- [ ] lockdown everything thats passed to modules
+
+- [ ] lockdown everything thats passed to module initializer
   - [ ] wrap newRequire, etc
   - [ ] remove excessive + dangerous moduleInitializer args
     - [ ] investigate why corejs was using arguments[4] and see if others are too
-- [ ] allow less restrictive sandboxing modes
+- [ ] handle module names with @xyz/abc format
+- [ ] allow less restrictive sandboxing modes (prototype.toString())
 - [ ] battletest via metamask
+  - [x] background boot works : )
+  - [ ] contentscript doesnt?
   - [ ] find sane default endowments
 - [ ] set custom prelude in browserify via plugin
   - [x] works but sometimes breaks things...
   - [ ] plugin without breaking things via b.reset()?  
-- [?] browserify the prelude
 - [ ] cleanup prelude
+- [?] browserify the prelude
+- [?] allow global caching ?
+
+questions:
+
+are we safe if we keep cache per-module (to avoid module.exports modifications) but share a global realm
+  - clearTimeout/clearInterval interference
+  - realm modifications, e.g. globals?
+  - definitely endowments
