@@ -53,9 +53,10 @@ __defaultEndowments__
         const moduleDepPathSlug = moduleDepPath.join(' > ')
 
         const isEntryPoint = entryPoints.includes(name)
+        const isRelativeToEntryPoint = moduleDepPath.length < 1
 
-        // if not an entrypoint, wrap in SES
-        if (!isEntryPoint && !configForModule.skipSes) {
+        // if not an entrypoint or not explicitly skipped, wrap in SES
+        if (!isEntryPoint && !isRelativeToEntryPoint && !configForModule.skipSes) {
 
           const defaultEndowments = createDefaultEndowments()
           // const endowmentsFromConfig = scopedEndowmentsConfig['$']
