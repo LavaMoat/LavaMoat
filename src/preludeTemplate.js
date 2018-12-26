@@ -84,7 +84,7 @@ __defaultEndowments__
           var id = moduleData[1][requestedName] || requestedName
           // recursive requires dont hit cache so it inf loops, so we shortcircuit
           if (id === name) {
-            console.log('recursive:', requestedName)
+            if (name !== 'timers') console.log('recursive:', requestedName)
             return module.exports
           }
           // this is just for debugging
