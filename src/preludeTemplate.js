@@ -25,6 +25,9 @@ __defaultEndowments__
   const realms = {}
 
   function outer(modules, globalCache, entryPoints) {
+    // deep freeze so we can pass to moduleInitializers
+    deepFreeze(modules)
+
     // Save the require from previous bundle to this closure if any
     var previousRequire = typeof require == "function" && require
 
@@ -78,7 +81,10 @@ __defaultEndowments__
 
         // the following are exposed to the moduleInitializer https://github.com/browserify/browser-pack/blob/master/prelude.js#L38
         // some of these are dangerous to expose
-        moduleInitializer.call(module.exports, scopedRequire, module, module.exports, outer, modules)
+
+        // browserify browser-resolve uses arguments[4] to do direct module initializations
+        // we allow this by deepFreezing the modules obj
+        moduleInitializer.call(module.exports, scopedRequire, module, module.exports, null, modules)
 
         function scopedRequire (requestedName, providedEndowments) {
           const childEndowmentsConfig = scopedEndowmentsConfig[requestedName] || {}
@@ -148,5 +154,21 @@ __defaultEndowments__
     const depConfig = path.reduce((current, key) => current[key] || {}, config.dependencies)
     return Object.assign({}, globalConfig, depConfig)
   }
+
+  function deepFreeze (o) {
+    Object.freeze(o)
+
+    Object.getOwnPropertyNames(o).forEach(function (prop) {
+      if (o.hasOwnProperty(prop)
+      && o[prop] !== null
+      && (typeof o[prop] === "object" || typeof o[prop] === "function")
+      && !Object.isFrozen(o[prop])) {
+        deepFreeze(o[prop])
+      }
+    })
+
+    return o
+  }
+
 
 })()
