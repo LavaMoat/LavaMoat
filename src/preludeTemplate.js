@@ -80,9 +80,8 @@ __defaultEndowments__
         }
 
         // the following are exposed to the moduleInitializer https://github.com/browserify/browser-pack/blob/master/prelude.js#L38
-        // some of these are dangerous to expose
-
-        // browserify browser-resolve uses arguments[4] to do direct module initializations
+        // some of these may be dangerous to expose
+        // eg browserify browser-resolve uses arguments[4] to do direct module initializations
         // we allow this by deepFreezing the modules obj
         moduleInitializer.call(module.exports, scopedRequire, module, module.exports, null, modules)
 
