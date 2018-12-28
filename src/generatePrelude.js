@@ -16,6 +16,9 @@ function generatePrelude(opts = {}) {
       log: console.log.bind(console),
       warn: console.warn.bind(console),
     },
+    setTimeout: window.setTimeout.bind(window),
+    clearTimeout: window.clearTimeout.bind(window),
+    atob: window.atob.bind(window),
   }`
 
   const endowmentsConfig = opts.endowmentsConfig || 'return {}'
