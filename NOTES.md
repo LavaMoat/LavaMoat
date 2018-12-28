@@ -8,10 +8,12 @@
 - [x] make global module config as well
 - [x] allow some sort of global realm sharing
 
+- [ ] need to not break sourcemaps
 - [ ] lockdown everything thats passed to module initializer
   - [ ] wrap newRequire, etc
   - [ ] remove excessive + dangerous moduleInitializer args
     - [ ] investigate why corejs was using arguments[4] and see if others are too
+- [ ] try using the frozen realm + container architecture
 - [ ] handle module names with @xyz/abc format
 - [ ] allow less restrictive sandboxing modes (prototype.toString())
 - [ ] battletest via metamask

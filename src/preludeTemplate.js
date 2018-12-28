@@ -51,12 +51,14 @@ __defaultEndowments__
         localCache[name] = module
         globalCache[moduleDepPath] = localCache
 
-        let moduleInitializer = moduleData[0]
+        const moduleSource = moduleData[0]
         const configForModule = getConfigForModule(endowmentsConfig, moduleDepPath)
         const moduleDepPathSlug = moduleDepPath.join(' > ')
 
         const isEntryPoint = entryPoints.includes(name)
         const isRelativeToEntryPoint = moduleDepPath.length < 1
+
+        let moduleInitializer
 
         // if not an entrypoint or not explicitly skipped, wrap in SES
         if (!isEntryPoint && !isRelativeToEntryPoint && !configForModule.skipSes) {
@@ -74,16 +76,31 @@ __defaultEndowments__
             realms[moduleDepPathSlug] = realm
           }
 
-          const wrappedInitializer = realm.evaluate(`(${moduleInitializer})`, endowments)
+          const wrappedInitializer = realm.evaluate(`(${moduleSource})`, endowments)
           // overwrite the module initializer with the SES-wrapped version
           moduleInitializer = wrappedInitializer
+        } else {
+          moduleInitializer = eval(`(${moduleSource})`)
         }
 
         // the following are exposed to the moduleInitializer https://github.com/browserify/browser-pack/blob/master/prelude.js#L38
         // some of these may be dangerous to expose
         // eg browserify browser-resolve uses arguments[4] to do direct module initializations
         // we allow this by deepFreezing the modules obj
-        moduleInitializer.call(module.exports, scopedRequire, module, module.exports, null, modules)
+        const modulesProxy = new Proxy({}, {
+          get (_, targetModuleId) {
+            const fakeModuleDefinition = [fakeModuleInitializer]
+            return fakeModuleDefinition
+            
+            function fakeModuleInitializer () {
+              const targetModuleExports = newRequire(targetModuleId, false, providedEndowments, scopedEndowmentsConfig, depPath, preferredRealm)
+              // const targetModuleExports = scopedRequire(targetModuleId)
+              module.exports = targetModuleExports
+            }
+          }
+        })
+
+        moduleInitializer.call(module.exports, scopedRequire, module, module.exports, null, modulesProxy)
 
         function scopedRequire (requestedName, providedEndowments) {
           const childEndowmentsConfig = scopedEndowmentsConfig[requestedName] || {}
