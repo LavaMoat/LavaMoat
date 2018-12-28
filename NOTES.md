@@ -7,6 +7,9 @@
 - [x] share realm for all files in module?
 - [x] make global module config as well
 - [x] allow some sort of global realm sharing
+- [x] set custom prelude in browserify via plugin
+  - [x] works but sometimes breaks things...
+  - [x] plugin without breaking things via b.reset()?  
 
 - [ ] need to not break sourcemaps
 - [ ] lockdown everything thats passed to module initializer
@@ -18,11 +21,9 @@
 - [ ] allow less restrictive sandboxing modes (prototype.toString())
 - [ ] battletest via metamask
   - [x] background boot works : )
+  - [x] sent first tx for background-only sesified
   - [ ] contentscript doesnt?
   - [ ] find sane default endowments
-- [ ] set custom prelude in browserify via plugin
-  - [x] works but sometimes breaks things...
-  - [ ] plugin without breaking things via b.reset()?  
 - [ ] cleanup prelude
 - [?] browserify the prelude
 - [?] allow global caching ?
