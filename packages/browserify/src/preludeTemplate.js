@@ -76,11 +76,11 @@ __defaultEndowments__
             realms[moduleDepPathSlug] = realm
           }
 
-          const wrappedInitializer = realm.evaluate(`(${moduleSource})`, endowments)
+          const wrappedInitializer = realm.evaluate(`${moduleSource}`, endowments)
           // overwrite the module initializer with the SES-wrapped version
           moduleInitializer = wrappedInitializer
         } else {
-          moduleInitializer = eval(`(${moduleSource})`)
+          moduleInitializer = eval(`${moduleSource}`)
         }
 
         // the following are exposed to the moduleInitializer https://github.com/browserify/browser-pack/blob/master/prelude.js#L38

@@ -13,12 +13,12 @@ module.exports = function (browserify, pluginOpts) {
 
   defaults.generateModuleInitializer = function (row) {
     const moduleInitSrc = [
-      `// source file: ${row.sourceFile}\n`,
-      'function(require,module,exports){\n',
+      `//# sourceURL=${row.sourceFile}`,
+      '(function(require,module,exports){',
       // combineSourceMap.removeComments(row.source),
       row.source,
-      '\n}',
-    ].join('')
+      '})',
+    ].join('\n')
     return escapeCodeAsString(moduleInitSrc)
   }
 
