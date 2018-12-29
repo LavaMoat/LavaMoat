@@ -5,8 +5,9 @@
   __sessDist__
 // START of injected code from sessDist
 
-  const globalRealm = SES.makeSESRootRealm()
-  const sesEval = (code) => globalRealm.evaluate(code)
+  const realm = SES.makeSESRootRealm()
+  // helper for setting up endowmentsConfig
+  const sesEval = (code) => realm.evaluate(code)
 
   const endowmentsConfig = (function(){
 // START of injected code from endowmentsConfig
@@ -22,16 +23,11 @@ __defaultEndowments__
     )
   }
 
-  const realms = {}
-
   function outer(modules, globalCache, entryPoints) {
-    // deep freeze so we can pass to moduleInitializers
-    deepFreeze(modules)
-
     // Save the require from previous bundle to this closure if any
     var previousRequire = typeof require == "function" && require
 
-    function newRequire(name, jumped, providedEndowments, scopedEndowmentsConfig, depPath, preferredRealm){
+    function newRequire(name, jumped, providedEndowments, scopedEndowmentsConfig, depPath){
       // check our modules
       const moduleData = modules[name]
       if (moduleData) {
@@ -68,14 +64,6 @@ __defaultEndowments__
           const endowmentsFromConfig = configForModule.$
           const endowments = Object.assign(defaultEndowments, providedEndowments, endowmentsFromConfig)
 
-          // here we are caching the realm based on the slug
-          let realm = preferredRealm || realms[moduleDepPathSlug]
-          if (!realm) {
-            console.log('realm for:', moduleDepPathSlug)
-            realm = SES.makeSESRootRealm()
-            realms[moduleDepPathSlug] = realm
-          }
-
           const wrappedInitializer = realm.evaluate(`${moduleSource}`, endowments)
           // overwrite the module initializer with the SES-wrapped version
           moduleInitializer = wrappedInitializer
@@ -83,17 +71,17 @@ __defaultEndowments__
           moduleInitializer = eval(`${moduleSource}`)
         }
 
-        // the following are exposed to the moduleInitializer https://github.com/browserify/browser-pack/blob/master/prelude.js#L38
-        // some of these may be dangerous to expose
-        // eg browserify browser-resolve uses arguments[4] to do direct module initializations
-        // we allow this by deepFreezing the modules obj
+        // this modules interface is exposed to the moduleInitializer https://github.com/browserify/browser-pack/blob/master/prelude.js#L38
+        // eg browserify's browser-resolve uses arguments[4] to do direct module initializations
+        // this proxy shims this behavior
+        // TODO: would be better to just fix this by removing the indirection
         const modulesProxy = new Proxy({}, {
           get (_, targetModuleId) {
             const fakeModuleDefinition = [fakeModuleInitializer]
             return fakeModuleDefinition
-            
+
             function fakeModuleInitializer () {
-              const targetModuleExports = newRequire(targetModuleId, false, providedEndowments, scopedEndowmentsConfig, depPath, preferredRealm)
+              const targetModuleExports = newRequire(targetModuleId, false, providedEndowments, scopedEndowmentsConfig, depPath)
               // const targetModuleExports = scopedRequire(targetModuleId)
               module.exports = targetModuleExports
             }
@@ -113,12 +101,7 @@ __defaultEndowments__
           // this is just for debugging
           const childDepPath = depPath.slice()
           childDepPath.push(requestedName)
-          const realmForChild = preferredRealm
-            // global realm
-            || (endowmentsConfig.useGlobalRealm && globalRealm)
-            // realm inheritance
-            || (configForModule.shareRealmWithChildren && realms[moduleDepPathSlug])
-          return newRequire(id, false, providedEndowments, childEndowmentsConfig, childDepPath, realmForChild)
+          return newRequire(id, false, providedEndowments, childEndowmentsConfig, childDepPath)
         }
 
         return module.exports
