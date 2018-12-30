@@ -10,23 +10,24 @@
 - [x] set custom prelude in browserify via plugin
   - [x] works but sometimes breaks things...
   - [x] plugin without breaking things via b.reset()?  
+- [x] need to not break sourcemaps
+  - [x] good enough for now
+  - [x] handle module names with @xyz/abc format
+- [x] lockdown everything thats passed to module initializer
+  - [x] wrap newRequire, etc
+  - [x] remove excessive + dangerous moduleInitializer args
+    - [x] investigate why corejs was using arguments[4] and see if others are too
+- [x] cleanup prelude
 
-- [ ] need to not break sourcemaps
-- [ ] lockdown everything thats passed to module initializer
-  - [ ] wrap newRequire, etc
-  - [ ] remove excessive + dangerous moduleInitializer args
-    - [ ] investigate why corejs was using arguments[4] and see if others are too
-- [ ] try using the frozen realm + container architecture
-- [ ] handle module names with @xyz/abc format
+- [?] try using the frozen realm + container architecture
 - [ ] allow less restrictive sandboxing modes (prototype.toString())
 - [ ] battletest via metamask
   - [x] background boot works : )
   - [x] sent first tx for background-only sesified
   - [ ] contentscript doesnt?
   - [ ] find sane default endowments
-- [ ] cleanup prelude
 - [?] browserify the prelude
-- [?] allow global caching ?
+- [?] is global caching safe? (no)
 
 questions:
 
