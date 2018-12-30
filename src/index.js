@@ -8,7 +8,6 @@ module.exports = function (browserify, pluginOpts) {
   const defaults = {
     raw: true,
     prelude: generatePrelude(pluginOpts),
-    // prelude: 'console.log',
   }
 
   defaults.generateModuleInitializer = function (row) {
