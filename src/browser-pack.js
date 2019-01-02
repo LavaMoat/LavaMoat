@@ -1,4 +1,7 @@
 // modified from browser-pack
+// changes:
+// - break out generateModuleInitializer
+
 const assert = require('assert');
 var JSONStream = require('JSONStream');
 var defined = require('defined');
