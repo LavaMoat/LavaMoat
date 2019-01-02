@@ -23,7 +23,11 @@ function generatePrelude(opts = {}) {
   return global
   `
 
-  const endowmentsConfig = opts.endowmentsConfig || 'return {}'
+  let endowmentsConfig = opts.endowmentsConfig || 'return {}'
+  // allow endowmentsConfig to be specified as a function for better refresh
+  if (typeof opts.endowmentsConfig === 'function') {
+    endowmentsConfig = opts.endowmentsConfig()
+  }
 
   let output = preludeTemplate
   output = output.replace('__sessDist__', sessDist)
