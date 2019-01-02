@@ -43,7 +43,6 @@ __defaultEndowments__
   // this is serialized and run in SES
   // mostly just exists to expose variables to internalRequire
   function internalRequireWrapper (modules, globalCache, endowmentsConfig, createDefaultEndowments, realm, rootEval) {
-    //# sourceURL=internalRequire
     return internalRequire
 
     function internalRequire (moduleId, providedEndowments, scopedEndowmentsConfig, depPath) {
@@ -157,6 +156,7 @@ __defaultEndowments__
       return Object.assign({}, globalConfig, depConfig)
     }
 
+    //# sourceURL=internalRequire
   }
 
 })()
