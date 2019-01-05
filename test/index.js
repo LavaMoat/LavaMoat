@@ -1,11 +1,10 @@
 const fs = require('fs')
 const test = require('tape')
-const createPack = require('browser-pack')
 const miss = require('mississippi')
 const browserify = require('browserify')
 const sesifyPlugin = require('../src/index')
-const generatePrelude = require('../src/generatePrelude')
 
+const { generatePrelude, createSesifyPacker } = sesifyPlugin
 const basicSesifyPrelude = generatePrelude()
 
 test('basic', (t) => {
@@ -15,7 +14,7 @@ test('basic', (t) => {
     if (err) return t.fail(err)
     try {
       eval(result)
-      t.equal(global.result, 555)
+      t.equal(global.testResult, 555)
     } catch (err) {
       console.log(err.stack)
       t.fail(err)
@@ -32,7 +31,7 @@ test('specified endowments', (t) => {
     if (err) return t.fail(err)
     try {
       eval(result)
-      t.deepEqual(global.result, ['ho', 'hum'])
+      t.deepEqual(global.testResult, ['ho', 'hum'])
     } catch (err) {
       t.fail(err)
     } finally {
@@ -46,17 +45,21 @@ test('endowments config - deep endow', (t) => {
   const path = __dirname + '/fixtures/need-config-endow.json'
   const sesifyConfig = {
     endowmentsConfig: `
-    return {
-      two: {
-        three: {
-          $: {
-            window: {
-              postMessage: (message) => { global.result = message }
-            }
-          }
+      const postMessageEndowment = {
+        window: {
+          postMessage: (message) => { global.testResult = message }
         }
       }
-    }`,
+
+      return {
+        dependencies: {
+          "two": {
+            "three": {
+              $: postMessageEndowment,
+            },
+          },
+        },
+      }`,
   }
 
   createBundleFromRequiresArray(path, sesifyConfig, (err, result) => {
@@ -64,7 +67,7 @@ test('endowments config - deep endow', (t) => {
 
     try {
       eval(result)
-      t.deepEqual(global.result, '12345')
+      t.deepEqual(global.testResult, '12345')
     } catch (err) {
       t.fail(err)
     } finally {
@@ -81,16 +84,6 @@ test('browserify plugin', (t) => {
   })
 })
 
-test('browserify plugin - alternate', (t) => {
-  const b = browserify({ prelude: sesifyPlugin.prelude })
-  b.add(__dirname + '/fixtures/nothing.js')
-  b.bundle(function (err, src) {
-    if (err) return t.fail(err)
-    t.assert(src.toString().includes(basicSesifyPrelude))
-    t.end()
-  })
-})
-
 function createBundleFromEntry(path, cb){
   const b = browserify({ plugin: sesifyPlugin })
   b.add(path)
@@ -101,7 +94,11 @@ function createBundleFromEntry(path, cb){
 }
 
 function createBundleFromRequiresArray (path, sesifyConfig, cb){
-  const pack = createSesifyPack(sesifyConfig)
+  const packOpts = Object.assign({}, {
+    raw: false,
+    defaultEndowments: 'return {}',
+  }, sesifyConfig)
+  const pack = createSesifyPacker(packOpts)
   miss.pipe(
     fs.createReadStream(path),
     pack,
@@ -111,11 +108,4 @@ function createBundleFromRequiresArray (path, sesifyConfig, cb){
       cb(err)
     },
   )
-}
-
-function createSesifyPack(sesifyConfig) {
-  const pack = createPack({
-    prelude: generatePrelude(sesifyConfig),
-  })
-  return pack
 }

@@ -1,8 +1,8 @@
 [
   {
     "id": "a1b5af78",
-    "source": "global.result = require('./foo')(5)",
-    "deps": { "./foo": "b8f69fa5" },
+    "source": "global.testResult = require('foo')(5)",
+    "deps": { "foo": "b8f69fa5" },
     "entry": true
   },
   {
