@@ -2,6 +2,7 @@ const test = require('tape')
 const { createBundleFromRequiresArray, createBundleFromEntry } = require('./util')
 const { generatePrelude } = require('../src/index')
 
+
 test('basic - bundle works', (t) => {
   const path = __dirname + '/fixtures/basic-deps.json'
   const sesifyConfig = {}
