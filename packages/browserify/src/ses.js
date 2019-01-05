@@ -1,4 +1,6 @@
 // slightly modified by kumavis for better browserify support
+// - made exports easy to use
+// - realms fix: `if (isBrowser) isNode = false`
 
 const { SES } = (function (exports) {
   'use strict';
