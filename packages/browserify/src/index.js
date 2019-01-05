@@ -10,12 +10,21 @@ module.exports = function (browserify, pluginOpts) {
 
   // override browserify/browser-pack prelude
   function setupPlugin() {
-    const defaults = {
-      raw: true,
-      prelude: generatePrelude(pluginOpts),
-    }
+    const customPack = createSesifyPacker(pluginOpts)
+    // replace the standard browser-pack with our custom packer
+    browserify.pipeline.splice('pack', 1, customPack)
+  }
 
-    defaults.generateModuleInitializer = function (row) {
+}
+
+module.exports.generatePrelude = generatePrelude
+module.exports.createSesifyPacker = createSesifyPacker
+
+function createSesifyPacker (opts) {
+  const defaults = {
+    raw: true,
+    prelude: generatePrelude(opts),
+    generateModuleInitializer: (row) => {
       const moduleInitSrc = [
         `//# sourceURL=${row.sourceFile}`,
         '(function(require,module,exports){',
@@ -24,17 +33,13 @@ module.exports = function (browserify, pluginOpts) {
         '})',
       ].join('\n')
       return escapeCodeAsString(moduleInitSrc)
-    }
-
-    const opts = Object.assign({}, browserify._options, defaults, pluginOpts)
-    const customPack = createCustomPack(opts)
-    // replace the standard browser-pack with our custom packer
-    browserify.pipeline.splice('pack', 1, customPack)
+    },
   }
 
+  const packOpts = Object.assign({}, defaults, opts)
+  const customPack = createCustomPack(packOpts)
+  return customPack
 }
-
-module.exports.generatePrelude = generatePrelude
 
 function escapeCodeAsString (source) {
   const escapedSource = source
