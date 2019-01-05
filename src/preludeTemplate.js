@@ -32,7 +32,7 @@ __defaultEndowments__
     // get nested endowments config
     const scopedEndowmentsConfig = endowmentsConfig.dependencies || {}
     // create SES-wrapped internalRequire
-    const createInternalRequire = realm.evaluate(`(${internalRequireWrapper})`)
+    const createInternalRequire = realm.evaluate(`(${internalRequireWrapper})`, { console })
     const safeInternalRequire = createInternalRequire(modules, globalCache, endowmentsConfig, createDefaultEndowments, realm, eval)
     // load entryPoints
     for (let entryId of entryPoints) {
@@ -79,7 +79,8 @@ __defaultEndowments__
       let moduleInitializer
 
       // determine if its a SES-wrapped or naked module initialization
-      if (!isEntryModule && !configForModule.skipSes) {
+      const runInSes = !isEntryModule && !configForModule.skipSes
+      if (runInSes) {
         // prepare endowments
         const defaultEndowments = createDefaultEndowments()
         const endowmentsFromConfig = configForModule.$
@@ -152,7 +153,7 @@ __defaultEndowments__
     function getConfigForModule(config, path) {
       const moduleName = path.slice(-1)[0]
       const globalConfig = (config.global || {})[moduleName]
-      const depConfig = path.reduce((current, key) => current[key] || {}, config.dependencies)
+      const depConfig = path.reduce((current, key) => current[key] || {}, config.dependencies || {})
       return Object.assign({}, globalConfig, depConfig)
     }
 
