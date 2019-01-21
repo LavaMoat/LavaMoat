@@ -1,6 +1,8 @@
 const fs = require('fs')
 const generatePrelude = require('./generatePrelude')
 const createCustomPack = require('./browser-pack')
+const { createConfigSpy } = require('./generateConfig')
+
 
 /*  export a Browserify plugin  */
 module.exports = function (browserify, pluginOpts) {
@@ -13,6 +15,11 @@ module.exports = function (browserify, pluginOpts) {
     const customPack = createSesifyPacker(pluginOpts)
     // replace the standard browser-pack with our custom packer
     browserify.pipeline.splice('pack', 1, customPack)
+    if (pluginOpts.autoConfig) {
+      browserify.pipeline.splice('label', 0, createConfigSpy({
+        onResult: pluginOpts.autoConfig,
+      }))
+    }
   }
 
 }

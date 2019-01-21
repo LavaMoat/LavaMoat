@@ -29,6 +29,10 @@
 - [?] browserify the prelude
 - [?] is global caching safe? (no)
 
+# tofu parser
+ - analyze required files for platform API usage
+ - use this to spit out a sesify config file (or something)
+
 questions:
 
 are we safe if we keep cache per-module (to avoid module.exports modifications) but share a global realm
