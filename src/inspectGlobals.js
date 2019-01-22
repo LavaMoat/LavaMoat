@@ -5,13 +5,17 @@ const moduleScope = [
   'module',
   'exports',
   'require',
-  // browserify
-  'global',
   // used for extra module features (usually module override via browser field)
   'arguments',
   // common in UMD builds
   'define',
   'this',
+]
+
+const globalRefs = [
+  'global',
+  'window',
+  'self',
 ]
 
 const browserPlatformGlobals = [
@@ -87,10 +91,25 @@ module.exports = inspectGlobals
 
 function inspectGlobals (code, debugLabel) {
   const ast = acornGlobals.parse(code)
-  const result = acornGlobals(ast)
+  const results = acornGlobals(ast)
 
-  const filteredResults = result.filter((variable) => {
+  // check for global refs with member expressions
+  results.forEach(variable => {
+    // do nothing if not a global ref
+    if (!globalRefs.includes(variable.name)) return
+    // if global, check for MemberExpression
+    variable.nodes.forEach(identifierNode => {
+      const maybeMemberExpression = identifierNode.parents[identifierNode.parents.length - 2]
+      if (!maybeMemberExpression || maybeMemberExpression.type !== 'MemberExpression') return
+      // add to potential results
+      results.push(maybeMemberExpression.property)
+    })
+  })
+
+  const filteredResults = results.filter((variable) => {
     const variableName = variable.name
+    // skip if a global ref
+    if (globalRefs.includes(variableName)) return false
     // skip if module global
     if (moduleScope.includes(variableName)) return false
     // check if in SES's whitelist
