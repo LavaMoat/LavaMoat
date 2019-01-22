@@ -31,10 +31,8 @@ test('config - deep endow', (t) => {
 
       return {
         dependencies: {
-          "two": {
-            "three": {
-              $: postMessageEndowment,
-            },
+          "two three": {
+            $: postMessageEndowment,
           },
         },
       }`,
