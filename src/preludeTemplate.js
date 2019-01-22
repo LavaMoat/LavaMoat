@@ -29,14 +29,12 @@ __defaultEndowments__
   function loadBundle (modules, _, entryPoints) {
     // setup our global module cache
     const globalCache = {}
-    // get nested endowments config
-    const scopedEndowmentsConfig = endowmentsConfig.dependencies || {}
     // create SES-wrapped internalRequire
     const createInternalRequire = realm.evaluate(`(${internalRequireWrapper})`, { console })
     const safeInternalRequire = createInternalRequire(modules, globalCache, endowmentsConfig, createDefaultEndowments, realm, eval)
     // load entryPoints
     for (let entryId of entryPoints) {
-      safeInternalRequire(entryId, null, scopedEndowmentsConfig, [])
+      safeInternalRequire(entryId, null, [])
     }
   }
 
@@ -45,7 +43,7 @@ __defaultEndowments__
   function internalRequireWrapper (modules, globalCache, endowmentsConfig, createDefaultEndowments, realm, rootEval) {
     return internalRequire
 
-    function internalRequire (moduleId, providedEndowments, scopedEndowmentsConfig, depPath) {
+    function internalRequire (moduleId, providedEndowments, depPath) {
       const moduleData = modules[moduleId]
 
       // if we dont have it, throw an error
@@ -102,7 +100,7 @@ __defaultEndowments__
           return fakeModuleDefinition
 
           function fakeModuleInitializer () {
-            const targetModuleExports = internalRequire(targetModuleId, providedEndowments, scopedEndowmentsConfig, depPath)
+            const targetModuleExports = internalRequire(targetModuleId, providedEndowments, depPath)
             // const targetModuleExports = scopedRequire(targetModuleId)
             module.exports = targetModuleExports
           }
@@ -119,7 +117,6 @@ __defaultEndowments__
       // this is the require method passed to the module initializer
       // it has a context of the current dependency path and nested config
       function scopedRequire (requestedName, providedEndowments) {
-        const childEndowmentsConfig = scopedEndowmentsConfig[requestedName] || {}
         const moduleDeps = moduleData[1]
         const id = moduleDeps[requestedName] || requestedName
         // recursive requires dont hit cache so it inf loops, so we shortcircuit
@@ -131,7 +128,7 @@ __defaultEndowments__
         // update the dependency path for the child require
         const childDepPath = depPath.slice()
         childDepPath.push(requestedName)
-        return internalRequire(id, providedEndowments, childEndowmentsConfig, childDepPath)
+        return internalRequire(id, providedEndowments, childDepPath)
       }
     }
 
@@ -153,7 +150,8 @@ __defaultEndowments__
     function getConfigForModule(config, path) {
       const moduleName = path.slice(-1)[0]
       const globalConfig = (config.global || {})[moduleName]
-      const depConfig = path.reduce((current, key) => current[key] || {}, config.dependencies || {})
+      const depPathSlug = path.join(' ')
+      const depConfig = (config.dependencies || {})[depPathSlug]
       return Object.assign({}, globalConfig, depConfig)
     }
 
