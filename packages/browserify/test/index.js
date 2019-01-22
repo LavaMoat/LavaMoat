@@ -1,3 +1,5 @@
 require('./basic')
 require('./config')
 require('./attacks')
+require('./inspectGlobals')
+require('./calculateDepPaths')
