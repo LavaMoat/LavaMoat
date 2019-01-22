@@ -3,7 +3,7 @@ const moduleNameFromPath = require('module-name-from-path')
 const flatMap = require('lodash.flatmap')
 const inspectGlobals = require('./inspectGlobals')
 
-module.exports = { createConfigSpy }
+module.exports = { createConfigSpy, calculateDepPaths }
 
 const rootSlug = '<root>'
 const ignoredGlobals = [
