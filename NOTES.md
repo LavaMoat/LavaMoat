@@ -30,15 +30,21 @@
 - [?] is global caching safe? (no)
 
 # tofu parser
-- [ ] mvp
+- [x] mvp
     - [x] analyze required files for platform API usage
     - [x] use this to spit out a sesify config file (or something)
-    - [ ] get dependency info
+    - [x] get dependency info
+    - [x] use generated config
 - [ ] not terrible
     - [ ] more granular autogen config
+        - [ ] detect API usage on global
     - [ ] easy user override
     - [ ] user config defaultGlobals
     - [ ] verify basic safety
+- [ ] fancy
+    - [ ] permissions as higher abstractions (network, persistence, DOM)
+    - [ ] permissions sorted by risk (?)
+
 
 questions:
 
