@@ -23,7 +23,7 @@ function createConfigSpy ({ onResult }) {
     // skip for project files (files not from deps)
     if (!isDependency) return
     // gather config info
-    const foundGlobals = inspectGlobals(dep.source)
+    const foundGlobals = inspectGlobals(dep.source, dep.id)
     // skip if no results
     if (!foundGlobals.length) return
     // add globals to map
@@ -44,21 +44,35 @@ function createConfigSpy ({ onResult }) {
 }
 
 function generateConfig (globalMap) {
-  const defaultGlobals = ['console', 'btoa']
+  const defaultGlobals = [
+    'console',
+    'atob',
+    'btoa',
+  ]
   let moduleGlobalContent = []
   Object.keys(globalMap).map(moduleName => {
     const moduleGlobals = globalMap[moduleName]
     if (!moduleGlobals) return
     const globalNames = Array.from(moduleGlobals.values()).filter(glob => !defaultGlobals.includes(glob))
     if (!globalNames.length) return
-    moduleGlobalContent.push(`moduleGlobals['${moduleName}'] = Object.assign({}, defaultGlobals, { ${globalNames.join(', ')} }`)
+    moduleGlobalContent.push(`expose('${moduleName}', ${JSON.stringify(globalNames)})`)
   })
   return (`
 const rootGlobal = {}
-const globalRefs = { self: rootGlobal, window: rootGlobal }
+const globalRefs = { self: rootGlobal, window: rootGlobal, global: rootGlobal }
 const defaultGlobals = { ${defaultGlobals.join(', ')} }
-// set per-module globals config
 const moduleGlobals = {}
+
+function expose (moduleName, globalNames) {
+  const globalsToExpose = {}
+  globalNames.forEach(glob => {
+    const value = self[glob]
+    if (value) globalsToExpose[glob] = value
+  })
+  moduleGlobals[moduleName] = Object.assign({}, defaultGlobals, globalsToExpose)
+}
+
+// set per-module globals config
 ${moduleGlobalContent.join('\n')}
 // set in dep graph
 // depGraph goes here
