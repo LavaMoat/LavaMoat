@@ -12,6 +12,7 @@
     "browser-pack": "^6.1.0",
     "combine-source-map": "^0.8.0",
     "defined": "^1.0.0",
+    "lodash.flatmap": "^4.5.0",
     "mississippi": "^3.0.0",
     "module-name-from-path": "git+https://git@github.com/kumavis/module-name-from-path.git",
     "safe-buffer": "^5.1.2",

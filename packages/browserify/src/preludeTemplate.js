@@ -15,14 +15,6 @@ __endowmentsConfig__
 // END of injected code from endowmentsConfig
   })()
 
-  function createDefaultEndowments () {
-    return (function(){
-// START of injected code from defaultEndowments
-__defaultEndowments__
-// END of injected code from defaultEndowments
-    })()
-  }
-
   return loadBundle
 
 
@@ -31,7 +23,7 @@ __defaultEndowments__
     const globalCache = {}
     // create SES-wrapped internalRequire
     const createInternalRequire = realm.evaluate(`(${internalRequireWrapper})`, { console })
-    const safeInternalRequire = createInternalRequire(modules, globalCache, endowmentsConfig, createDefaultEndowments, realm, eval)
+    const safeInternalRequire = createInternalRequire(modules, globalCache, endowmentsConfig, realm, eval)
     // load entryPoints
     for (let entryId of entryPoints) {
       safeInternalRequire(entryId, null, [])
@@ -40,7 +32,7 @@ __defaultEndowments__
 
   // this is serialized and run in SES
   // mostly just exists to expose variables to internalRequire
-  function internalRequireWrapper (modules, globalCache, endowmentsConfig, createDefaultEndowments, realm, rootEval) {
+  function internalRequireWrapper (modules, globalCache, endowmentsConfig, realm, rootEval) {
     return internalRequire
 
     function internalRequire (moduleId, providedEndowments, depPath) {
@@ -80,9 +72,16 @@ __defaultEndowments__
       const runInSes = !isEntryModule && !configForModule.skipSes
       if (runInSes) {
         // prepare endowments
-        const defaultEndowments = createDefaultEndowments()
         const endowmentsFromConfig = configForModule.$
-        const endowments = Object.assign(defaultEndowments, providedEndowments, endowmentsFromConfig)
+        let endowments = Object.assign({}, endowmentsConfig.defaultGlobals, providedEndowments, endowmentsFromConfig)
+        // special case for exposing window
+        if (endowments.window) {
+          endowments = Object.assign({}, endowments.window, endowments)
+        }
+        // set global references
+        endowments.global = endowments
+        endowments.window = endowments
+        endowments.self = endowments
         // set the module initializer as the SES-wrapped version
         moduleInitializer = realm.evaluate(`${moduleSource}`, endowments)
       } else {
