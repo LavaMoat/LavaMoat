@@ -18,6 +18,11 @@ const globalRefs = [
   'self',
 ]
 
+const ignoredGlobals = [
+  // we handle this elsewhere
+  'global',
+]
+
 const browserPlatformGlobals = [
   // surely harmless
   'console',
@@ -84,6 +89,62 @@ const browserPlatformGlobals = [
   'Element',
   'Event',
   'Blob',
+  'SVGPathElement',
+  'SVGPathSeg',
+  'SVGPathSegArcAbs',
+  'SVGPathSegArcRel',
+  'SVGPathSegClosePath',
+  'SVGPathSegCurvetoCubicAbs',
+  'SVGPathSegCurvetoCubicRel',
+  'SVGPathSegCurvetoCubicSmoothAbs',
+  'SVGPathSegCurvetoCubicSmoothRel',
+  'SVGPathSegCurvetoQuadraticAbs',
+  'SVGPathSegCurvetoQuadraticRel',
+  'SVGPathSegCurvetoQuadraticSmoothAbs',
+  'SVGPathSegCurvetoQuadraticSmoothRel',
+  'SVGPathSegLinetoAbs',
+  'SVGPathSegLinetoHorizontalAbs',
+  'SVGPathSegLinetoHorizontalRel',
+  'SVGPathSegLinetoRel',
+  'SVGPathSegLinetoVerticalAbs',
+  'SVGPathSegLinetoVerticalRel',
+  'SVGPathSegList',
+  'SVGPathSegMovetoAbs',
+  'SVGPathSegMovetoRel',
+  'File',
+  'InstallTrigger',
+  'MSStream',
+  'MediaStream', 
+  'RTCPeerConnection', 
+  // etc
+  'addEventListener',
+  'removeEventListener',
+  'confirm',
+  'dispatchEvent',
+  'mozInnerScreenX',
+  'mozInnerScreenY',
+  'mozRequestAnimationFrame',
+  'msPerformance',
+  'msRequestAnimationFrame',
+  'oRequestAnimationFrame',
+  'opera',
+  'webkitPerformance',
+  'webkitRequestAnimationFrame',
+  'webkitRequestFileSystem',
+  'getSelection',
+  'indexedDB',
+  'innerHeight',
+  'innerWidth',
+  'onresize',
+  'open',
+  'pageXOffset',
+  'pageYOffset',
+  'prompt',
+  'scrollBy',
+  'scrollX',
+  'scrollY',
+  'top',
+  'MessageChannel',
 ]
 
 module.exports = inspectGlobals
@@ -92,46 +153,67 @@ module.exports = inspectGlobals
 function inspectGlobals (code, debugLabel) {
   const ast = acornGlobals.parse(code)
   const results = acornGlobals(ast)
+  const globalNames = []
 
   // check for global refs with member expressions
   results.forEach(variable => {
-    // do nothing if not a global ref
-    if (!globalRefs.includes(variable.name)) return
+    const variableName = variable.name
+    // skip if module global
+    if (moduleScope.includes(variableName)) return
+
+    // if not a global ref, add as is
+    if (!globalRefs.includes(variableName)) {
+      maybeAddGlobalName(variableName, debugLabel)
+      return
+    }
+
     // if global, check for MemberExpression
     variable.nodes.forEach(identifierNode => {
       const maybeMemberExpression = identifierNode.parents[identifierNode.parents.length - 2]
-      if (!maybeMemberExpression || maybeMemberExpression.type !== 'MemberExpression') return
-      // add to potential results
-      results.push(maybeMemberExpression.property)
+      // if not part of a member expression, ignore
+      // this could break things but usually its just checking if we're in the browser
+      if (!maybeMemberExpression || maybeMemberExpression.type !== 'MemberExpression') {
+        // maybeAddGlobalName(variableName)
+        return
+      }
+      const propertyNode = maybeMemberExpression.property
+      // if a computed lookup, keep global
+      if (maybeMemberExpression.computed) {
+        maybeAddGlobalName(variableName)
+        return
+      }
+      // add property to results
+      maybeAddGlobalName(propertyNode.name, debugLabel)
     })
   })
 
-  const filteredResults = results.filter((variable) => {
-    const variableName = variable.name
-    // skip if a global ref
-    if (globalRefs.includes(variableName)) return false
-    // skip if module global
-    if (moduleScope.includes(variableName)) return false
-    // check if in SES's whitelist
+  function maybeAddGlobalName (variableName, debugLabel) {
+    // ignore if in SES's whitelist (safe JS features)
     const whitelistStatus = whitelist[variableName]
     if (whitelistStatus) {
       // skip if exactly true (fully whitelisted)
-      if (whitelistStatus === true) return false
+      if (whitelistStatus === true) return
       // skip if '*' (whitelisted but checks inheritance(?))
-      if (whitelistStatus === '*') return false
+      if (whitelistStatus === '*') return
       // inspect if partial whitelist
-      if (typeof whitelistStatus === 'object') return false
+      if (typeof whitelistStatus === 'object') return
     }
-
-    // only recognize platform globals
-    if (browserPlatformGlobals.includes(variableName)) {
-      return true
+    // skip ignored globals
+    if (ignoredGlobals.includes(variableName)) return
+    // ignore unknown non-platform globals
+    if (!browserPlatformGlobals.includes(variableName)) {
+      console.warn(`!! IGNORING GLOBAL "${variableName}" from "${debugLabel || ''}"`)
+      return
     }
-
-    /// ignore non-standard globals
-    console.log(`!! ${variableName} ${debugLabel}`)
-    return false
-  })
+    // add variable to results
+    globalNames.push(variableName)
+  }
   
-  return filteredResults
+  return globalNames
+}
+
+function removeFromArray (array, entry) {
+  const index = array.indexOf(entry)
+  if (index === -1) return
+  array.splice(index, 1)
 }

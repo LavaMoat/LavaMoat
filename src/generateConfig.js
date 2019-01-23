@@ -35,7 +35,7 @@ function createConfigSpy ({ onResult }) {
     if (!isDependency) return
     // gather config info
     const foundGlobals = inspectGlobals(dep.source, moduleName)
-    const globalNames = foundGlobals.map(variable => variable.name).filter(name => !ignoredGlobals.includes(name))
+    const globalNames = foundGlobals.filter(name => !ignoredGlobals.includes(name))
     // skip if no results
     if (!globalNames.length) return
     // add globals to map

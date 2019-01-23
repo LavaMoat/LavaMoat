@@ -31,19 +31,23 @@
 
 # tofu parser
 - [x] mvp
-    - [x] analyze required files for platform API usage
-    - [x] use this to spit out a sesify config file (or something)
-    - [x] get dependency info
-    - [x] use generated config
+  - [x] analyze required files for platform API usage
+  - [x] use this to spit out a sesify config file (or something)
+  - [x] get dependency info
+  - [x] use generated config
 - [ ] not terrible
-    - [ ] more granular autogen config
-        - [ ] detect API usage on global
-    - [ ] easy user override
-    - [ ] user config defaultGlobals
-    - [ ] verify basic safety
+  - [ ] more granular autogen config
+    - [x] detect API usage on global
+    - [x] dont pass window if no property accessed
+    - [ ] granularity on certain apis, e.g. document
+    - [ ] browserify insertGlobal is ruining the parsing of properties on global
+  - [x] user config defaultGlobals
+  - [ ] easy user override
+    - [ ] likely need revDeps pointers at run time
+  - [ ] verify basic safety review
 - [ ] fancy
-    - [ ] permissions as higher abstractions (network, persistence, DOM)
-    - [ ] permissions sorted by risk (?)
+  - [ ] permissions as higher abstractions (network, persistence, DOM)
+  - [ ] permissions sorted by risk (?)
 
 
 questions:
