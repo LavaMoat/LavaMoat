@@ -32,8 +32,14 @@
   - [x] contentscript doesnt?
   - [x] find sane default endowments
 
+- [ ] support granular config
+  - [x] actually expose api from granular config
+  - [ ] ensure we keep the "this" context, esp for deepGets
+  - [ ] ensure we dont break Constructors with our "this" fix
+- [ ] browserify insertGlobal is ruining the parsing of properties on global
 - [ ] sourcemaps
-- [ ] allow less restrictive sandboxing modes (prototype.toString())
+- [ ] (external) allow less restrictive sandboxing modes (prototype.toString())
+- [ ] (external) closer control over global? pass in "window" such that (window.Object === Object)
 
 - [?] browserify the prelude
 
@@ -48,7 +54,8 @@
     - [x] detect API usage on global
     - [x] dont pass window if no property accessed
     - [x] granularity on certain apis, e.g. document
-    - [ ] limit granularity to actual platform API surface, e.g. not "location.href.indexOf"
+    - [ ] raise platform api granularity to common denominator (e.g. dedupe "location" and "location.href"), including defaultGlobals
+    - [ ] maybe limit granularity to actual platform API surface (e.g. not "location.href.indexOf")
     - [ ] browserify insertGlobal is ruining the parsing of properties on global
         - bc declaring the global object and passing it into a closure causes acorn-globals to ignore the uses of the global var
   - [x] user config defaultGlobals
@@ -56,7 +63,7 @@
     - [ ] likely need revDeps pointers at run time
   - [ ] use SES.confine instead of realm.evaluate
   - [ ] update ses
-  - [ ] verify basic safety review
+  - [ ] basic safety review
 - [ ] fancy
   - [ ] permissions as higher abstractions (network, persistence, DOM)
   - [ ] permissions sorted by risk (?)
