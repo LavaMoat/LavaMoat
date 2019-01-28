@@ -5,7 +5,7 @@ test('basic', (t) => {
   const globals = inspectGlobals(`
     atob
   `)
-  t.equal(globals[0], 'atob')
+  t.deepEqual(globals, ['atob'])
   t.end()
 })
 
@@ -13,7 +13,7 @@ test('picking out properties on window', (t) => {
   const globals = inspectGlobals(`
     window.location
   `)
-  t.equal(globals[0], 'location')
+  t.deepEqual(globals, ['location'])
   t.end()
 })
 
@@ -21,7 +21,7 @@ test('picking out properties on global', (t) => {
   const globals = inspectGlobals(`
     global.localStorage
   `)
-  t.equal(globals[0], 'localStorage')
+  t.deepEqual(globals, ['localStorage'])
   t.end()
 })
 
@@ -30,7 +30,7 @@ test('picking out properties on self', (t) => {
   const globals = inspectGlobals(`
     self.WebSocket
   `)
-  t.equal(globals[0], 'WebSocket')
+  t.deepEqual(globals, ['WebSocket'])
   t.end()
 })
 
@@ -47,7 +47,7 @@ test('not picking up programmatic property lookups', (t) => {
   const globals = inspectGlobals(`
     window[key]
   `)
-  t.deepEqual(globals[0], 'window')
+  t.deepEqual(globals, ['window'])
   t.end()
 })
 
@@ -56,7 +56,7 @@ test('picking up programmatic property lookups + explicit', (t) => {
     window[key]
     window.location
   `)
-  t.deepEqual(globals, ['window', 'location'])
+  t.deepEqual(globals, ['location', 'window'])
   t.end()
 })
 
@@ -99,5 +99,32 @@ test('ignore globalRef without property lookup', (t) => {
     typeof window === undefined
   `)
   t.deepEqual(globals, [])
+  t.end()
+})
+
+test('get granular platform api', (t) => {
+  const globals = inspectGlobals(`
+    document.createElement('blink')
+    location.href
+    navigator.userAgent
+  `)
+  t.deepEqual(globals, ['document.createElement', 'location.href', 'navigator.userAgent'])
+  t.end()
+})
+
+test('get granular platform api when nested under global', (t) => {
+  const globals = inspectGlobals(`
+    window.location.href
+  `)
+  t.deepEqual(globals, ['location.href'])
+  t.end()
+})
+
+test('take platform api, up to computed', (t) => {
+  const globals = inspectGlobals(`
+    document.body.children[imaginarySubkey]
+    window.location.href[imaginarySubkey]
+  `)
+  t.deepEqual(globals, ['document.body.children', 'location.href'])
   t.end()
 })

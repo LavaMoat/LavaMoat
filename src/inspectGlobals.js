@@ -152,44 +152,42 @@ module.exports = inspectGlobals
 
 function inspectGlobals (code, debugLabel) {
   const ast = acornGlobals.parse(code)
-  const results = acornGlobals(ast)
+  const detectedGlobals = acornGlobals(ast)
   const globalNames = []
 
   // check for global refs with member expressions
-  results.forEach(variable => {
+  detectedGlobals.forEach(variable => {
     const variableName = variable.name
     // skip if module global
     if (moduleScope.includes(variableName)) return
-
-    // if not a global ref, add as is
-    if (!globalRefs.includes(variableName)) {
-      maybeAddGlobalName(variableName, debugLabel)
-      return
-    }
-
-    // if global, check for MemberExpression
+    // expose API as granularly as possible
     variable.nodes.forEach(identifierNode => {
-      const maybeMemberExpression = identifierNode.parents[identifierNode.parents.length - 2]
-      // if not part of a member expression, ignore
-      // this could break things but usually its just checking if we're in the browser
-      if (!maybeMemberExpression || maybeMemberExpression.type !== 'MemberExpression') {
-        // maybeAddGlobalName(variableName)
-        return
-      }
-      const propertyNode = maybeMemberExpression.property
-      // if a computed lookup, keep global
-      if (maybeMemberExpression.computed) {
+      const memberExpressions = getMemberExpressionNesting(identifierNode)
+      // if not used in any member expressions AND is not a global ref, expose as is
+      if (!memberExpressions.length) {
+        // skip if global and only used for detecting presence 
+        if (globalRefs.includes(variableName) && isUndefinedCheck(identifierNode)) return
         maybeAddGlobalName(variableName)
         return
       }
-      // add property to results
-      maybeAddGlobalName(propertyNode.name, debugLabel)
+      const memberKeys = getKeysForMemberExpressionChain(memberExpressions)
+      // if nested API lookup begins with a globalRef, drop it
+      if (globalRefs.includes(memberKeys[0])) {
+        memberKeys.shift()
+      }
+      // add nested API
+      const nestedName = memberKeys.join('.')
+      maybeAddGlobalName(nestedName)
     })
   })
 
+  // we sort to provide a more deterministic result
+  return globalNames.sort()
+
   function maybeAddGlobalName (variableName, debugLabel) {
+    const apiRoot = variableName.split('.')[0]
     // ignore if in SES's whitelist (safe JS features)
-    const whitelistStatus = whitelist[variableName]
+    const whitelistStatus = whitelist[apiRoot]
     if (whitelistStatus) {
       // skip if exactly true (fully whitelisted)
       if (whitelistStatus === true) return
@@ -199,17 +197,47 @@ function inspectGlobals (code, debugLabel) {
       if (typeof whitelistStatus === 'object') return
     }
     // skip ignored globals
-    if (ignoredGlobals.includes(variableName)) return
+    if (ignoredGlobals.includes(apiRoot)) return
     // ignore unknown non-platform globals
-    if (!browserPlatformGlobals.includes(variableName)) {
-      console.warn(`!! IGNORING GLOBAL "${variableName}" from "${debugLabel || ''}"`)
+    if (!browserPlatformGlobals.includes(apiRoot)) {
+      // console.warn(`!! IGNORING GLOBAL "${apiRoot}" from "${debugLabel || ''}"`)
       return
     }
     // add variable to results
     globalNames.push(variableName)
   }
   
-  return globalNames
+}
+
+function getMemberExpressionNesting (identifierNode) {
+  const parents = identifierNode.parents.slice(0,-1)
+  const memberExpressions = getTailmostMatchingChain(parents, isDirectMemberExpression).reverse()
+  return memberExpressions
+}
+
+function getKeysForMemberExpressionChain (memberExpressions) {
+  const keys = memberExpressions.map(member => member.property.name)
+  const rootMemberExpression = memberExpressions[0]
+  const rootName = rootMemberExpression.object.name
+  keys.unshift(rootName)
+  return keys
+}
+
+function isDirectMemberExpression (node) {
+  return node.type === 'MemberExpression' && !node.computed
+}
+
+function isUndefinedCheck (identifierNode) {
+  const parentExpression = identifierNode.parents[identifierNode.parents.length - 2]
+  const isTypeof = (parentExpression.type === 'UnaryExpression' || parentExpression.operator === 'typeof')
+  return isTypeof
+}
+
+function getTailmostMatchingChain (items, matcher) {
+  const onlyMatched = items.map(item => matcher(item) ? item : null)
+  const lastIndex = onlyMatched.lastIndexOf(null)
+  if (lastIndex === -1) return onlyMatched.slice()
+  return onlyMatched.slice(lastIndex + 1)
 }
 
 function removeFromArray (array, entry) {
