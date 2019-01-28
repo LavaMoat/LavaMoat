@@ -2,6 +2,7 @@ const through = require('through2')
 const moduleNameFromPath = require('module-name-from-path')
 const flatMap = require('lodash.flatmap')
 const inspectGlobals = require('./inspectGlobals')
+const pathSeperator = require('path').sep
 
 module.exports = { createConfigSpy, calculateDepPaths }
 
@@ -27,7 +28,12 @@ function createConfigSpy ({ onResult }) {
   return configSpy
 
   function inspectDependency (dep) {
+    // "dep.id" must be full fs path for this to work
+    const filePathFirstPart = dep.id.split(pathSeperator)[0]
     const moduleName = moduleNameFromPath(dep.id)
+    if (!moduleName && !['.','..',''].includes(filePathFirstPart)) {
+      throw new Error(`Sesify - Config Autogen - Failed to parse module name. first part: "${filePathFirstPart}"`)
+    }
     // moduleName is falsy for project files not from dependencies
     const isDependency = !!moduleName
     updateModuleDeps(isDependency ? moduleName : rootSlug, dep.deps)
