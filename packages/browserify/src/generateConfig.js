@@ -124,13 +124,46 @@ const depConfig = {}
 function getAndBindGlobals (globalNames) {
   const selectedGlobals = {}
   globalNames.forEach(glob => {
-    let value = self[glob]
-    if (!value) return
+    let value = deepGet(self, glob)
+    if (value === undefined) return
     // necesary for 'setTimeout' etc
     if (typeof value === 'function') value = value.bind(window)
-    selectedGlobals[glob] = value
+    deepSet(selectedGlobals, glob, value)
   })
   return selectedGlobals
+}
+
+function deepGet (obj, pathName) {
+  let result = obj
+  pathName.split('.').forEach(pathPart => {
+    if (result === null) {
+      result = undefined
+      return
+    }
+    if (result === undefined) {
+      return
+    }
+    result = result[pathPart]
+  })
+  return result
+}
+
+function deepSet (obj, pathName, value) {
+  let parent = obj
+  const pathParts = pathName.split('.')
+  const lastPathPart = pathParts[pathParts.length-1]
+  pathParts.slice(0,-1).forEach(pathPart => {
+    const prevParent = parent
+    parent = parent[pathPart]
+    if (parent === null) {
+      throw new Error('DeepSet - unable to set "'+pathName+'" on null')
+    }
+    if (parent === undefined) {
+      parent = {}
+      prevParent[pathPart] = parent
+    }
+  })
+  parent[lastPathPart] = value
 }
 
 function exposeToModule (moduleName, globalNames) {
