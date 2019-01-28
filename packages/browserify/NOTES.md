@@ -1,3 +1,9 @@
+# the big ones
+- [ ] (external) SES prototype.toString etc
+- [ ] autogen granularity
+- [ ] sourcemaps
+
+# sesify prelude/kernel
 - [x] pass custom endowments at require time
 - [x] pass custom endowments at config time
   - [x] get config into bundle
@@ -18,16 +24,18 @@
   - [x] remove excessive + dangerous moduleInitializer args
     - [x] investigate why corejs was using arguments[4] and see if others are too
 - [x] cleanup prelude
-
-- [?] try using the frozen realm + container architecture
-- [ ] allow less restrictive sandboxing modes (prototype.toString())
-- [ ] battletest via metamask
+- [x] is global caching safe? (no)
+- [x] try using the frozen realm + container architecture
+- [x] battletest via metamask
   - [x] background boot works : )
   - [x] sent first tx for background-only sesified
-  - [ ] contentscript doesnt?
-  - [ ] find sane default endowments
+  - [x] contentscript doesnt?
+  - [x] find sane default endowments
+
+- [ ] sourcemaps
+- [ ] allow less restrictive sandboxing modes (prototype.toString())
+
 - [?] browserify the prelude
-- [?] is global caching safe? (no)
 
 # tofu parser
 - [x] mvp
@@ -39,20 +47,16 @@
   - [ ] more granular autogen config
     - [x] detect API usage on global
     - [x] dont pass window if no property accessed
-    - [ ] granularity on certain apis, e.g. document
+    - [x] granularity on certain apis, e.g. document
+    - [ ] limit granularity to actual platform API surface, e.g. not "location.href.indexOf"
     - [ ] browserify insertGlobal is ruining the parsing of properties on global
+        - bc declaring the global object and passing it into a closure causes acorn-globals to ignore the uses of the global var
   - [x] user config defaultGlobals
   - [ ] easy user override
     - [ ] likely need revDeps pointers at run time
+  - [ ] use SES.confine instead of realm.evaluate
+  - [ ] update ses
   - [ ] verify basic safety review
 - [ ] fancy
   - [ ] permissions as higher abstractions (network, persistence, DOM)
   - [ ] permissions sorted by risk (?)
-
-
-questions:
-
-are we safe if we keep cache per-module (to avoid module.exports modifications) but share a global realm
-  - clearTimeout/clearInterval interference
-  - realm modifications, e.g. globals?
-  - definitely endowments
