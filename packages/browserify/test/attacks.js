@@ -1,11 +1,11 @@
 const test = require('tape')
-const { createBundleFromRequiresArray } = require('./util')
+const { createBundleFromRequiresArrayPath } = require('./util')
 
 
 test('attack - prevent primitive modification', (t) => {
   const path = __dirname + '/fixtures/attack-primitives.json'
   const sesifyConfig = {}
-  createBundleFromRequiresArray(path, sesifyConfig, (err, result) => {
+  createBundleFromRequiresArrayPath(path, sesifyConfig, (err, result) => {
     if (err) return t.fail(err)
     try {
       eval(result)
@@ -21,7 +21,7 @@ test('attack - prevent primitive modification', (t) => {
 test('attack - limit platform api', (t) => {
   const path = __dirname + '/fixtures/attack-platform.json'
   const sesifyConfig = {}
-  createBundleFromRequiresArray(path, sesifyConfig, (err, result) => {
+  createBundleFromRequiresArrayPath(path, sesifyConfig, (err, result) => {
     if (err) return t.fail(err)
     try {
       eval(result)
@@ -37,7 +37,7 @@ test('attack - limit platform api', (t) => {
 test('attack - prevent module cache attack', (t) => {
   const path = __dirname + '/fixtures/attack-deps-cache.json'
   const sesifyConfig = {}
-  createBundleFromRequiresArray(path, sesifyConfig, (err, result) => {
+  createBundleFromRequiresArrayPath(path, sesifyConfig, (err, result) => {
     if (err) return t.fail(err)
     try {
       eval(result)
