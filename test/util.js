@@ -2,6 +2,7 @@ const fs = require('fs')
 const test = require('tape')
 const miss = require('mississippi')
 const browserify = require('browserify')
+const from = require('from')
 const sesifyPlugin = require('../src/index')
 
 const { generatePrelude, createSesifyPacker } = sesifyPlugin
@@ -10,6 +11,7 @@ const basicSesifyPrelude = generatePrelude()
 module.exports = {
   createBundleFromEntry,
   createBundleFromRequiresArray,
+  createBundleFromRequiresArrayPath,
 }
 
 function createBundleFromEntry(path, cb){
@@ -21,14 +23,18 @@ function createBundleFromEntry(path, cb){
   })
 }
 
-function createBundleFromRequiresArray (path, sesifyConfig, cb){
+function createBundleFromRequiresArrayPath (path, sesifyConfig, cb){
+  const depsArray = require(path)
+  createBundleFromRequiresArray(depsArray, sesifyConfig, cb)
+}
+
+function createBundleFromRequiresArray (depsArray, sesifyConfig, cb){
   const packOpts = Object.assign({}, {
-    raw: false,
     defaultEndowments: 'return {}',
   }, sesifyConfig)
   const pack = createSesifyPacker(packOpts)
   miss.pipe(
-    fs.createReadStream(path),
+    from(depsArray),
     pack,
     miss.concat((result) => cb(null, result.toString())),
     (err) => {

@@ -1,5 +1,4 @@
 const test = require('tape')
-const { createBundleFromRequiresArray } = require('./util')
 const { createConfigSpy } = require('../src/generateConfig')
 const from = require('from')
 const pump = require('pump')

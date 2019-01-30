@@ -1,11 +1,11 @@
 const test = require('tape')
-const { createBundleFromRequiresArray } = require('./util')
+const { createBundleFromRequiresArrayPath } = require('./util')
 
 
 test('config - require-time specified endowments', (t) => {
   const path = __dirname + '/fixtures/overwrite-deps.json'
   const sesifyConfig = {}
-  createBundleFromRequiresArray(path, sesifyConfig, (err, result) => {
+  createBundleFromRequiresArrayPath(path, sesifyConfig, (err, result) => {
     if (err) return t.fail(err)
     try {
       eval(result)
@@ -38,7 +38,7 @@ test('config - deep endow', (t) => {
       }`,
   }
 
-  createBundleFromRequiresArray(path, sesifyConfig, (err, result) => {
+  createBundleFromRequiresArrayPath(path, sesifyConfig, (err, result) => {
     if (err) return t.fail(err)
 
     try {

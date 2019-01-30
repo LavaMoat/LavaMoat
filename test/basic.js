@@ -1,12 +1,12 @@
 const test = require('tape')
-const { createBundleFromRequiresArray, createBundleFromEntry } = require('./util')
+const { createBundleFromRequiresArrayPath, createBundleFromEntry } = require('./util')
 const { generatePrelude } = require('../src/index')
 
 
 test('basic - bundle works', (t) => {
   const path = __dirname + '/fixtures/basic-deps.json'
   const sesifyConfig = {}
-  createBundleFromRequiresArray(path, sesifyConfig, (err, result) => {
+  createBundleFromRequiresArrayPath(path, sesifyConfig, (err, result) => {
     if (err) return t.fail(err)
     try {
       eval(result)
