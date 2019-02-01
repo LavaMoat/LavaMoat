@@ -66,7 +66,11 @@ function createConfigSpy ({ onResult }) {
     // const uniqueResult = Array.from(new Set(mergedDeps))
     // moduleDepGraph[moduleName] = uniqueResult
     // reverse dep graph
-    const newDeps = Array.from(new Set(Object.values(fileDeps).map(moduleNameFromPath)))
+    
+    // get unique dependency paths 
+    const depFullPaths = unique(Object.values(fileDeps).filter(Boolean))
+    // get unique dependency modules
+    const newDeps = unique(depFullPaths.map(moduleNameFromPath))
     newDeps.forEach(depName => {
       // entry point
       if (!depName) return
@@ -208,4 +212,8 @@ function calculateDepPaths (moduleName, reverseDepGraph, partialPath) {
 
 function serializeStringArray (array) {
   return '[' + array.map(entry => `'${entry}'`).join(', ') + ']'
+}
+
+function unique(arr) {
+  return Array.from(new Set(arr))
 }
