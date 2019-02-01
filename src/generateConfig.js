@@ -67,7 +67,7 @@ function createConfigSpy ({ onResult }) {
     // moduleDepGraph[moduleName] = uniqueResult
     // reverse dep graph
     
-    // get unique dependency paths 
+    // get unique dependency paths (dep paths are false when skipped)
     const depFullPaths = unique(Object.values(fileDeps).filter(Boolean))
     // get unique dependency modules
     const newDeps = unique(depFullPaths.map(moduleNameFromPath))
