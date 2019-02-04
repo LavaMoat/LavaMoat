@@ -16,6 +16,7 @@ function extractSourceMaps (sourceCode) {
   const converter = convertSourceMap.fromSource(sourceCode)
   // if (!converter) throw new Error('Unable to find original inlined sourcemap')
   const maps = converter && converter.toObject()
+  const sourceContent = maps && maps.sourcesContent[0]
   const code = convertSourceMap.removeComments(sourceCode)
   return { code, maps }
 }

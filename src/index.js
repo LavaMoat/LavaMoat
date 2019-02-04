@@ -29,13 +29,16 @@ module.exports.generatePrelude = generatePrelude
 module.exports.createSesifyPacker = createSesifyPacker
 
 function createSesifyPacker (opts) {
+  const onSourcemap = opts.onSourcemap || (row => row.sourceFile)
   const defaults = {
     raw: true,
     prelude: generatePrelude(opts),
     generateModuleInitializer: (row) => {
       const wrappedBundle = wrapIntoBundle(row.source)
+      const sourceMappingURL = onSourcemap(row, wrappedBundle)
       // for now, ignore new sourcemap and just append original filename 
-      const moduleInitSrc = `${wrappedBundle.code}\n//# sourceURL=${row.sourceFile}`
+      let moduleInitSrc = wrappedBundle.code
+      if (sourceMappingURL) moduleInitSrc += `\n//# sourceMappingURL=${sourceMappingURL}`
       return escapeCodeAsString(moduleInitSrc)
     },
   }

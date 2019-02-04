@@ -12,12 +12,14 @@ test('sourcemaps - adjust maps for wrapper', async (t) => {
   `)
 
   const result = UglifyJS.minify({ './foo.js': fooSource }, {
+    // skip logical compression like removing unused stuff
     compress: false,
     sourceMap: {
       filename: './foo.js',
+      // inline sourcemaps with sources included
       url: 'inline',
       includeSources: true,
-    }
+    },
   })
 
   if (result.error) t.ifError(result.error)
