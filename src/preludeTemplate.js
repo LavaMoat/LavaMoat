@@ -18,12 +18,20 @@ __endowmentsConfig__
   return loadBundle
 
 
+  // this performs an unsafeEval in the context of the provided endowments
+  function evalWithEndowments(code, endowments) {
+    console.log('unsafeEvalWithEndowments', endowments)
+    with (endowments) {
+      return eval(code)
+    }
+  }
+
   function loadBundle (modules, _, entryPoints) {
     // setup our global module cache
     const globalCache = {}
     // create SES-wrapped internalRequire
     const createInternalRequire = realm.evaluate(`(${internalRequireWrapper})`, { console })
-    const safeInternalRequire = createInternalRequire(modules, globalCache, endowmentsConfig, realm, eval)
+    const safeInternalRequire = createInternalRequire(modules, globalCache, endowmentsConfig, realm, eval, evalWithEndowments)
     // load entryPoints
     for (let entryId of entryPoints) {
       safeInternalRequire(entryId, null, [])
@@ -32,7 +40,7 @@ __endowmentsConfig__
 
   // this is serialized and run in SES
   // mostly just exists to expose variables to internalRequire
-  function internalRequireWrapper (modules, globalCache, endowmentsConfig, realm, rootEval) {
+  function internalRequireWrapper (modules, globalCache, endowmentsConfig, realm, unsafeEval, unsafeEvalWithEndowments) {
     return internalRequire
 
     function internalRequire (moduleId, providedEndowments, depPath) {
@@ -66,27 +74,30 @@ __endowmentsConfig__
       const moduleSource = moduleData[0]
       const configForModule = getConfigForModule(endowmentsConfig, moduleDepPath)
       const isEntryModule = moduleDepPath.length < 1
-      let moduleInitializer
 
-      // determine if its a SES-wrapped or naked module initialization
-      const runInSes = !isEntryModule && !configForModule.skipSes
-      if (runInSes) {
-        // prepare endowments
-        const endowmentsFromConfig = configForModule.$
-        let endowments = Object.assign({}, endowmentsConfig.defaultGlobals, providedEndowments, endowmentsFromConfig)
-        // special case for exposing window
-        if (endowments.window) {
-          endowments = Object.assign({}, endowments.window, endowments)
-        }
-        // set global references
+      // prepare endowments
+      const endowmentsFromConfig = configForModule.$
+      let endowments = Object.assign({}, endowmentsConfig.defaultGlobals, providedEndowments, endowmentsFromConfig)
+      // special case for exposing window
+      if (endowments.window) {
+        endowments = Object.assign({}, endowments.window, endowments)
+      }
+      // set global references, skip if from entry module
+      if (!isEntryModule) {
         endowments.global = endowments
         endowments.window = endowments
         endowments.self = endowments
+      }
+
+      // determine if its a SES-wrapped or naked module initialization
+      let moduleInitializer
+      const runInSes = !isEntryModule && !configForModule.skipSes
+      if (runInSes) {
         // set the module initializer as the SES-wrapped version
         moduleInitializer = realm.evaluate(`${moduleSource}`, endowments)
       } else {
         // set the module initializer as the unwrapped version
-        moduleInitializer = rootEval(`${moduleSource}`)
+        moduleInitializer = unsafeEvalWithEndowments(`${moduleSource}`, endowments)
       }
 
       // this "modules" interface is exposed to the moduleInitializer https://github.com/browserify/browser-pack/blob/master/prelude.js#L38
