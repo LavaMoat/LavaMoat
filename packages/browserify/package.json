@@ -27,7 +27,11 @@
     "@babel/preset-env": "^7.2.3",
     "babelify": "^10.0.0",
     "browserify": "^16.2.3",
-    "from": "^0.1.7"
+    "convert-source-map": "^1.6.0",
+    "from": "^0.1.7",
+    "offset-sourcemap-lines": "^1.0.1",
+    "source-map": "^0.7.3",
+    "uglify-js": "^3.4.9"
   },
   "scripts": {
     "test": "node test"

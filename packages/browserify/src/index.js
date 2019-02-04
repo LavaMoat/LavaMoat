@@ -2,6 +2,7 @@ const fs = require('fs')
 const generatePrelude = require('./generatePrelude')
 const createCustomPack = require('./browser-pack')
 const { createConfigSpy } = require('./generateConfig')
+const { wrapIntoBundle } = require('./sourcemaps')
 
 
 /*  export a Browserify plugin  */
@@ -32,13 +33,9 @@ function createSesifyPacker (opts) {
     raw: true,
     prelude: generatePrelude(opts),
     generateModuleInitializer: (row) => {
-      const moduleInitSrc = [
-        `//# sourceURL=${row.sourceFile}`,
-        '(function(require,module,exports){',
-        // combineSourceMap.removeComments(row.source),
-        row.source,
-        '})',
-      ].join('\n')
+      const wrappedBundle = wrapIntoBundle(row.source)
+      // for now, ignore new sourcemap and just append original filename 
+      const moduleInitSrc = `${wrappedBundle.code}\n//# sourceURL=${row.sourceFile}`
       return escapeCodeAsString(moduleInitSrc)
     },
   }
