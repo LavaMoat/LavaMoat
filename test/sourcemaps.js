@@ -1,8 +1,7 @@
 const test = require('tape')
 const UglifyJS = require('uglify-js')
-const convertSourceMap = require('convert-source-map')
-const offsetSourcemapLines = require('offset-sourcemap-lines')
 const { SourceMapConsumer } = require('source-map')
+const { wrapIntoBundle } = require('../src/sourcemaps')
 
 
 test('sourcemaps - adjust maps for wrapper', async (t) => {
@@ -33,33 +32,6 @@ test('sourcemaps - adjust maps for wrapper', async (t) => {
 
   t.end()
 })
-
-function wrapIntoBundle (source) {
-  // extract sourcemaps
-  const sourceBundle = extractSourceMaps(source)
-  // create wrapper + update sourcemaps
-  const transformedBundle = transformToWrapped(sourceBundle)
-  return transformedBundle
-}
-
-function extractSourceMaps (sourceCode) {
-  const converter = convertSourceMap.fromSource(sourceCode)
-  if (!converter) throw new Error('Unable to find original inlined sourcemap')
-  const maps = converter.toObject()
-  const code = convertSourceMap.removeComments(sourceCode)
-  return { code, maps }
-}
-
-function transformToWrapped (bundle) {
-  const start = '(function(require,module,exports){\n'
-  const end = '\n})'
-
-  const offsetLinesCount = start.match(/\n/g).length
-  const maps = offsetSourcemapLines(bundle.maps, offsetLinesCount)
-  const code = start + bundle.code + end
-    
-  return { code, maps }
-}
 
 function indicesOf (substring, string) {
   const result = []
