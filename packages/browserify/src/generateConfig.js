@@ -128,13 +128,26 @@ const depConfig = {}
 function getAndBindGlobals (globalNames) {
   const selectedGlobals = {}
   globalNames.forEach(glob => {
-    let value = deepGet(self, glob)
+    const value = deepGetAndBind(self, glob)
     if (value === undefined) return
-    // necesary for 'setTimeout' etc
-    if (typeof value === 'function') value = value.bind(window)
     deepSet(selectedGlobals, glob, value)
   })
   return selectedGlobals
+}
+
+function deepGetAndBind(obj, pathName) {
+  const pathParts = pathName.split('.')
+  const parentPath = pathParts.slice(0,-1).join('.')
+  const childKey = pathParts[pathParts.length-1]
+  let parent = parentPath ? deepGet(window, parentPath) : window
+  if (!parent) return parent
+  const value = parent[childKey]
+  if (typeof value === 'function') {
+    const boundValue = value.bind(parent)
+    boundValue.boundTo = parent
+    return boundValue
+  }
+  return value
 }
 
 function deepGet (obj, pathName) {
