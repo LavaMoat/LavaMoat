@@ -139,13 +139,12 @@ function deepGetAndBind(obj, pathName) {
   const pathParts = pathName.split('.')
   const parentPath = pathParts.slice(0,-1).join('.')
   const childKey = pathParts[pathParts.length-1]
-  let parent = parentPath ? deepGet(window, parentPath) : window
+  const globalRef = typeof self !== 'undefined' ? self : global
+  const parent = parentPath ? deepGet(globalRef, parentPath) : globalRef
   if (!parent) return parent
   const value = parent[childKey]
   if (typeof value === 'function') {
-    const boundValue = value.bind(parent)
-    boundValue.boundTo = parent
-    return boundValue
+    return value.bind(parent)
   }
   return value
 }
