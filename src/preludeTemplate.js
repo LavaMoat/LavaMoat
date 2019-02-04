@@ -20,7 +20,6 @@ __endowmentsConfig__
 
   // this performs an unsafeEval in the context of the provided endowments
   function evalWithEndowments(code, endowments) {
-    console.log('unsafeEvalWithEndowments', endowments)
     with (endowments) {
       return eval(code)
     }
