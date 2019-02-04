@@ -31,7 +31,7 @@ __endowmentsConfig__
     const globalCache = {}
     // create SES-wrapped internalRequire
     const createInternalRequire = realm.evaluate(`(${internalRequireWrapper})`, { console })
-    const safeInternalRequire = createInternalRequire(modules, globalCache, endowmentsConfig, realm, eval, evalWithEndowments)
+    const safeInternalRequire = createInternalRequire(modules, globalCache, endowmentsConfig, realm, eval, evalWithEndowments, window)
     // load entryPoints
     for (let entryId of entryPoints) {
       safeInternalRequire(entryId, null, [])
@@ -40,7 +40,7 @@ __endowmentsConfig__
 
   // this is serialized and run in SES
   // mostly just exists to expose variables to internalRequire
-  function internalRequireWrapper (modules, globalCache, endowmentsConfig, realm, unsafeEval, unsafeEvalWithEndowments) {
+  function internalRequireWrapper (modules, globalCache, endowmentsConfig, realm, unsafeEval, unsafeEvalWithEndowments, windowGlobal) {
     return internalRequire
 
     function internalRequire (moduleId, providedEndowments, depPath) {
@@ -83,7 +83,11 @@ __endowmentsConfig__
         endowments = Object.assign({}, endowments.window, endowments)
       }
       // set global references, skip if from entry module
-      if (!isEntryModule) {
+      if (isEntryModule) {
+        endowments.global = windowGlobal
+        endowments.window = windowGlobal
+        endowments.self = windowGlobal
+      } else {
         endowments.global = endowments
         endowments.window = endowments
         endowments.self = endowments
