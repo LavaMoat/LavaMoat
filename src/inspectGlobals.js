@@ -59,6 +59,11 @@ const browserPlatformGlobals = [
   'localStorage',
   'postMessage',
   // browser classes
+  'AudioContext',
+  'AudioNode',
+  'AudioBufferSourceNode',
+  'OfflineAudioContext',
+  'OscillatorNode',
   'DOMError',
   'DOMException',
   'ErrorEvent',
