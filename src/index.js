@@ -13,9 +13,28 @@ module.exports = function (browserify, pluginOpts) {
 
   // override browserify/browser-pack prelude
   function setupPlugin() {
+    // helper to read config at path
+    if (typeof pluginOpts.config === 'string') {
+      pluginOpts.endowmentsConfig = () => {
+        // load latest config
+        const filename = pluginOpts.config
+        return fs.readFileSync(filename, 'utf8')
+      }
+    }
+
     const customPack = createSesifyPacker(pluginOpts)
     // replace the standard browser-pack with our custom packer
     browserify.pipeline.splice('pack', 1, customPack)
+
+    // helper to dump autoconfig to a file
+    if (pluginOpts.writeAutoConfig) {
+      const filename = pluginOpts.writeAutoConfig
+      pluginOpts.autoConfig = function writeAutoConfig (config) {
+        fs.writeFileSync(filename, config)
+        console.log(`Sesify Autoconfig - wrote to "${filename}"`)
+      }
+    }
+    // if autoconfig activated, insert hook
     if (pluginOpts.autoConfig) {
       browserify.pipeline.splice('label', 0, createConfigSpy({
         onResult: pluginOpts.autoConfig,
