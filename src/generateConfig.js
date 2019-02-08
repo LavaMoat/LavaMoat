@@ -202,7 +202,8 @@ const config = {
   global: {},
   defaultGlobals,
 }
-  `)
+
+return config`)
 }
 
 
