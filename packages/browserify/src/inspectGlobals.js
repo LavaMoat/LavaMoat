@@ -187,7 +187,11 @@ function inspectGlobals (code, debugLabel) {
   })
 
   // we sort to provide a more deterministic result
-  return globalNames.sort()
+  const sortedNames = globalNames.sort()
+  // reduce to remove explicit results that overlap with higher results
+  const reducedNames = reduceToTopmostApiCalls(sortedNames)
+  
+  return reducedNames
 
   function maybeAddGlobalName (variableName, debugLabel) {
     const apiRoot = variableName.split('.')[0]
@@ -249,4 +253,20 @@ function removeFromArray (array, entry) {
   const index = array.indexOf(entry)
   if (index === -1) return
   array.splice(index, 1)
+}
+
+// if array contains 'x' and 'x.y' just keep 'x'
+function reduceToTopmostApiCalls (array) {
+  return array.filter((entry) => {
+    const parts = entry.split('.')
+    if (parts.length === 1) return true
+    // 'x.y.z' has parents 'x' and 'x.y'
+    const parentParts = parts.slice(0, -1)
+    const parents = parentParts.map((_, index) => parentParts.slice(0, index + 1).join('.'))
+    // dont include this if a parent appears in the array
+    const parentsAlreadyInArray = parents.some(parent => array.includes(parent))
+    if (parentsAlreadyInArray) return false
+    // if no parents found, ok to include
+    return true
+  })
 }
