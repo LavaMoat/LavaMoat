@@ -128,3 +128,14 @@ test('take platform api, up to computed', (t) => {
   t.deepEqual(globals, ['document.body.children', 'location.href'])
   t.end()
 })
+
+test('raise globals to highest used', (t) => {
+  const globals = inspectGlobals(`
+    location.href
+    location
+    document.body.children
+    document.body.children.indexOf
+  `)
+  t.deepEqual(globals, ['document.body.children', 'location'])
+  t.end()
+})
