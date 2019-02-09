@@ -2,6 +2,7 @@
 - [ ] (external) SES prototype.toString etc
 - [ ] autogen granularity
 - [ ] sourcemaps
+- [ ] do call with agoric/MM
 
 # sesify prelude/kernel
 - [x] pass custom endowments at require time
@@ -34,10 +35,16 @@
 
 - [ ] support granular config
   - [x] actually expose api from granular config
-  - [ ] ensure we keep the "this" context, esp for deepGets
+  - [x] ensure we keep the "this" context, esp for deepGets
   - [ ] ensure we dont break Constructors with our "this" fix
-- [ ] browserify insertGlobal is ruining the parsing of properties on global
+- [x] browserify insertGlobal is ruining the parsing of properties on global
 - [ ] sourcemaps
+  - [x] needs to be able to compose over existing sourcemaps
+  - [ ] needs to work when there are no existing sourcemaps
+  - [x] config to specify inline or file
+  - [x] config to dump map somewhere file
+  - [?] ahhhhh nested inline sourcemaps?? not my problem??
+
 - [ ] (external) allow less restrictive sandboxing modes (prototype.toString())
 - [ ] (external) closer control over global? pass in "window" such that (window.Object === Object)
 
@@ -59,11 +66,19 @@
     - [ ] browserify insertGlobal is ruining the parsing of properties on global
         - bc declaring the global object and passing it into a closure causes acorn-globals to ignore the uses of the global var
   - [x] user config defaultGlobals
+  - [ ] location and document.location is redundant
+  - [ ] location and location.href trigers page reload < !!! wow ouch !!! >
   - [ ] easy user override
     - [ ] likely need revDeps pointers at run time
   - [ ] use SES.confine instead of realm.evaluate
   - [ ] update ses
   - [ ] basic safety review
+  - [ ] use autogen config if set to generate ?
 - [ ] fancy
   - [ ] permissions as higher abstractions (network, persistence, DOM)
   - [ ] permissions sorted by risk (?)
+
+# usability
+  - [ ] cli support
+    - [x] config gen
+    - [ ] config read
