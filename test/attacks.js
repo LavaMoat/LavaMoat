@@ -73,7 +73,7 @@ test('attack - prevent module cache attack', (t) => {
     },
     {
       "id": "b8f69fa5",
-      "source": "require('check-if-hacked').check = () => true",
+      "source": "try { require('check-if-hacked').check = () => true } catch (_) {}",
       "deps": {
         "check-if-hacked": "c4a5f69f"
       }
