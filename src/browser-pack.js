@@ -52,7 +52,7 @@ module.exports = function (opts) {
 
     function generateModuleInitializer (row) {
       return [
-        'function(require,module,exports){\n',
+        'function moduleInitializer (require,module,exports) {\n',
         combineSourceMap.removeComments(row.source),
         '\n}',
       ].join('')
