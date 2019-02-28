@@ -6,6 +6,10 @@
 // END of injected code from sessDist
 
   const realm = SES.makeSESRootRealm()
+  const harden = realm.makeRequire({ '@agoric/harden': true })('@agoric/harden')
+  // add full platform api to harden fringeSet
+  harden(Uint8Array.prototype)
+  
   // helper for setting up endowmentsConfig
   const sesEval = (code) => realm.evaluate(code)
 
@@ -31,7 +35,7 @@ __endowmentsConfig__
     const globalCache = {}
     // create SES-wrapped internalRequire
     const createInternalRequire = realm.evaluate(`(${internalRequireWrapper})`, { console })
-    const safeInternalRequire = createInternalRequire(modules, globalCache, endowmentsConfig, realm, eval, evalWithEndowments, globalRef)
+    const safeInternalRequire = createInternalRequire(modules, globalCache, endowmentsConfig, realm, eval, evalWithEndowments, globalRef, harden)
     // load entryPoints
     for (let entryId of entryPoints) {
       safeInternalRequire(entryId, null, [])
@@ -40,7 +44,7 @@ __endowmentsConfig__
 
   // this is serialized and run in SES
   // mostly just exists to expose variables to internalRequire
-  function internalRequireWrapper (modules, globalCache, endowmentsConfig, realm, unsafeEval, unsafeEvalWithEndowments, globalRef) {
+  function internalRequireWrapper (modules, globalCache, endowmentsConfig, realm, unsafeEval, unsafeEvalWithEndowments, globalRef, harden) {
     return internalRequire
 
     function internalRequire (moduleId, providedEndowments, depPath) {
@@ -58,11 +62,12 @@ __endowmentsConfig__
       const moduleDepPathSlug = moduleDepPath.join(' > ')
 
       // check our local cache, return exports if hit
-      let localCache = globalCache[moduleDepPathSlug]
-      if (!localCache) {
-        localCache = {}
-        globalCache[moduleDepPathSlug] = localCache
-      }
+      const localCache = globalCache
+      // let localCache = globalCache[moduleDepPathSlug]
+      // if (!localCache) {
+      //   localCache = {}
+      //   globalCache[moduleDepPathSlug] = localCache
+      // }
       if (localCache[moduleId]) {
         const module = localCache[moduleId]
         return module.exports
@@ -123,6 +128,9 @@ __endowmentsConfig__
 
       // initialize the module with the correct context
       moduleInitializer.call(module.exports, scopedRequire, module, module.exports, null, modulesProxy)
+
+      // harden the result
+      if (runInSes) harden(module.exports)
 
       // return the exports
       return module.exports
