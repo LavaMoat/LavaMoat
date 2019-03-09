@@ -58,6 +58,7 @@ const browserPlatformGlobals = [
   'history',
   'localStorage',
   'postMessage',
+  'Math',
   // browser classes
   'AudioContext',
   'AudioNode',
