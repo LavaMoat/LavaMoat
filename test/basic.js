@@ -12,7 +12,6 @@ test('basic - bundle works', (t) => {
       eval(result)
       t.equal(global.testResult, 555)
     } catch (err) {
-      console.log(err.stack)
       t.fail(err)
     } finally {
       t.end()

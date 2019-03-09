@@ -35,11 +35,9 @@ module.exports = function (browserify, pluginOpts) {
       }
     }
     // if autoconfig activated, insert hook
-    if (pluginOpts.autoConfig) {
-      browserify.pipeline.splice('label', 0, createConfigSpy({
-        onResult: pluginOpts.autoConfig,
-      }))
-    }
+    browserify.pipeline.splice('label', 0, createConfigSpy({
+      onResult: pluginOpts.autoConfig,
+    }))
   }
 
 }

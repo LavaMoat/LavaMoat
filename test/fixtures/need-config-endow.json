@@ -1,17 +1,17 @@
 [
   {
-    "id": "1",
+    "id": "/1.js",
     "source": "require('two');",
-    "deps": { "two": "2" },
+    "deps": { "two": "/node_modules/2/index.js" },
     "entry": true
   },
   {
-    "id": "2",
+    "id": "/node_modules/2/index.js",
     "source": "require('three')",
-    "deps": { "three": "3" }
+    "deps": { "three": "/node_modules/3/index.js" }
   },
   {
-    "id": "3",
+    "id": "/node_modules/3/index.js",
     "source": "window.postMessage('12345', '*')",
     "deps": {}
   }
