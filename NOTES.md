@@ -1,8 +1,22 @@
 # the big ones
+- [x] autogen granularity
+- [x] sourcemaps
+- [x] do call with agoric/MM
 - [ ] (external) SES prototype.toString etc
-- [ ] autogen granularity
-- [ ] sourcemaps
-- [ ] do call with agoric/MM
+- [ ] perf
+
+# make perf better
+  - reduce instantiations
+    - allow module cache under certain conditions
+      - cant harden exports?
+    - lazy instantiation via "universal proxy"
+      - my guess: we use most things on boot
+  - improve instantiation perf
+    - transform src with endowments injection (build time slow down)
+
+# dangers of module cache
+- mutating the exports
+- cant be done if it includes unhardenables (?)
 
 # sesify prelude/kernel
 - [x] pass custom endowments at require time
