@@ -34,7 +34,7 @@ __endowmentsConfig__
     const safeInternalRequire = createInternalRequire(modules, globalCache, endowmentsConfig, realm, eval, evalWithEndowments, globalRef)
     // load entryPoints
     for (let entryId of entryPoints) {
-      safeInternalRequire(entryId, null, [])
+      safeInternalRequire(entryId, [])
     }
   }
 
@@ -43,7 +43,7 @@ __endowmentsConfig__
   function internalRequireWrapper (modules, globalCache, endowmentsConfig, realm, unsafeEval, unsafeEvalWithEndowments, globalRef) {
     return internalRequire
 
-    function internalRequire (moduleId, providedEndowments, depPath) {
+    function internalRequire (moduleId, depPath) {
       const moduleData = modules[moduleId]
 
       // if we dont have it, throw an error
@@ -77,7 +77,7 @@ __endowmentsConfig__
 
       // prepare endowments
       const endowmentsFromConfig = configForModule.$
-      let endowments = Object.assign({}, endowmentsConfig.defaultGlobals, providedEndowments, endowmentsFromConfig)
+      let endowments = Object.assign({}, endowmentsConfig.defaultGlobals, endowmentsFromConfig)
       // special case for exposing window
       if (endowments.window) {
         endowments = Object.assign({}, endowments.window, endowments)
@@ -98,10 +98,20 @@ __endowmentsConfig__
       const runInSes = !isEntryModule && !configForModule.skipSes
       if (runInSes) {
         // set the module initializer as the SES-wrapped version
-        moduleInitializer = realm.evaluate(`${moduleSource}`, endowments)
+        const cacheSlug = `init-ses-${moduleId}`
+        moduleInitializer = globalCache[cacheSlug]
+        if (!moduleInitializer) {
+          moduleInitializer = realm.evaluate(`${moduleSource}`)
+          globalCache[cacheSlug] = moduleInitializer
+        }
       } else {
         // set the module initializer as the unwrapped version
-        moduleInitializer = unsafeEvalWithEndowments(`${moduleSource}`, endowments)
+        const cacheSlug = `init-raw-${moduleId}`
+        moduleInitializer = globalCache[cacheSlug]
+        if (!moduleInitializer) {
+          moduleInitializer = unsafeEval(`${moduleSource}`)
+          globalCache[cacheSlug] = moduleInitializer
+        }
       }
 
       // this "modules" interface is exposed to the moduleInitializer https://github.com/browserify/browser-pack/blob/master/prelude.js#L38
@@ -114,7 +124,7 @@ __endowmentsConfig__
           return fakeModuleDefinition
 
           function fakeModuleInitializer () {
-            const targetModuleExports = internalRequire(targetModuleId, providedEndowments, depPath)
+            const targetModuleExports = internalRequire(targetModuleId, depPath)
             // const targetModuleExports = scopedRequire(targetModuleId)
             module.exports = targetModuleExports
           }
@@ -122,7 +132,7 @@ __endowmentsConfig__
       })
 
       // initialize the module with the correct context
-      moduleInitializer.call(module.exports, scopedRequire, module, module.exports, null, modulesProxy)
+      moduleInitializer.call(module.exports, scopedRequire, module, module.exports, null, modulesProxy, endowments)
 
       // return the exports
       return module.exports
@@ -130,7 +140,7 @@ __endowmentsConfig__
 
       // this is the require method passed to the module initializer
       // it has a context of the current dependency path and nested config
-      function scopedRequire (requestedName, providedEndowments) {
+      function scopedRequire (requestedName) {
         const moduleDeps = moduleData[1]
         const id = moduleDeps[requestedName] || requestedName
         // recursive requires dont hit cache so it inf loops, so we shortcircuit
@@ -142,7 +152,7 @@ __endowmentsConfig__
         // update the dependency path for the child require
         const childDepPath = depPath.slice()
         childDepPath.push(requestedName)
-        return internalRequire(id, providedEndowments, childDepPath)
+        return internalRequire(id, childDepPath)
       }
     }
 

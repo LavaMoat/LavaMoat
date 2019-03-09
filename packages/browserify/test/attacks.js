@@ -5,13 +5,13 @@ const { createBundleFromRequiresArray } = require('./util')
 test('attack - prevent primitive modification', (t) => {
   const depsArray = [
     {
-      "id": "a1b5af78",
+      "id": "/1.js",
       "source": "require('foo'); global.testResult = Object.xyz",
-      "deps": { "foo": "b8f69fa5" },
+      "deps": { "foo": "/node_modules/2/index.js" },
       "entry": true
     },
     {
-      "id": "b8f69fa5",
+      "id": "/node_modules/2/index.js",
       "source": "try { Object.xyz = 123 } catch (_) { }",
       "deps": {}
     }
@@ -34,13 +34,13 @@ test('attack - prevent primitive modification', (t) => {
 test('attack - limit platform api', (t) => {
   const depsArray = [
     {
-      "id": "a1b5af78",
+      "id": "/1.js",
       "source": "global.testResult = require('foo')",
-      "deps": { "foo": "b8f69fa5" },
+      "deps": { "foo": "/node_modules/2/index.js" },
       "entry": true
     },
     {
-      "id": "b8f69fa5",
+      "id": "/node_modules/2/index.js",
       "source": "module.exports = console",
       "deps": {}
     }
@@ -63,23 +63,23 @@ test('attack - limit platform api', (t) => {
 test('attack - prevent module cache attack', (t) => {
   const depsArray = [
     {
-      "id": "a1b5af78",
+      "id": "/1.js",
       "source": "require('attacker'); global.testResult = require('check-if-hacked').check()",
       "deps": {
-        "attacker": "b8f69fa5",
-        "check-if-hacked": "c4a5f69f"
+        "attacker": "/node_modules/2/index.js",
+        "check-if-hacked": "/node_modules/3/index.js"
       },
       "entry": true
     },
     {
-      "id": "b8f69fa5",
+      "id": "/node_modules/2/index.js",
       "source": "try { require('check-if-hacked').check = () => true } catch (_) {}",
       "deps": {
-        "check-if-hacked": "c4a5f69f"
+        "check-if-hacked": "/node_modules/3/index.js"
       }
     },
     {
-      "id": "c4a5f69f",
+      "id": "/node_modules/3/index.js",
       "source": "module.exports.check = () => false",
       "deps": {}
     }
