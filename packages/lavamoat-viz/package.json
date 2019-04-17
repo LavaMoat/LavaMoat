@@ -3,8 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "d3": "^5.9.2",
+    "merkle-patricia-tree": "^3.0.0",
+    "obs-store": "^4.0.2",
+    "pify": "^4.0.1",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
+    "react-hyperscript": "^3.2.0",
     "react-scripts": "2.1.8"
   },
   "scripts": {
@@ -17,9 +22,9 @@
     "extends": "react-app"
   },
   "browserslist": [
-    ">0.2%",
+    ">2%",
     "not dead",
-    "not ie <= 11",
+    "not ie all",
     "not op_mini all"
   ]
 }
