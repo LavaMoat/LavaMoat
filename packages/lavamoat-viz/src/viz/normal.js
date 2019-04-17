@@ -15,7 +15,9 @@ function renderGraph(state, actions) {
     const isSelected = selectedNode === node.id
 
     const color = node.color
-    const radius = isSelected ? 10 : 5
+    const normalRadius = ('radius' in node) ? node.radius : 5
+    const radius = isSelected ? (normalRadius * 2) : normalRadius
+    const label = node.label || node.id
 
     return (
 
@@ -26,7 +28,7 @@ function renderGraph(state, actions) {
         cy: node.y,
         onClick: () => actions.selectNode(node.id)
       }, [
-        s('title', `${node.id}`),
+        s('title', `${label}`),
       ])
 
     )

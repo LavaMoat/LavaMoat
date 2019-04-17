@@ -46,7 +46,7 @@ class ForceGraph extends React.Component {
     if (!graph) return null
 
     return (
-      renderGraph({ graph })
+      renderGraph({ graph }, this.props.actions)
     )
   }
 }
