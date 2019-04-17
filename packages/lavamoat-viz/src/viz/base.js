@@ -12,9 +12,8 @@ function renderGraph(state, actions, { renderNode, renderLink }) {
 
   return (
 
-    s('svg', {
-      width: 960,
-      height: 600,
+    s('g', {
+      className: 'graph',
     }, [
       s('g', { className: 'links' }, links.map((link) => renderLink(link, state, actions))),
       s('g', { className: 'nodes' }, nodes.map((node) => renderNode(node, state, actions))),

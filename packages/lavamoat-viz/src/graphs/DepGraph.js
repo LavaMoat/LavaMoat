@@ -8,7 +8,9 @@ const {
   createLinkToNext,
   createLinkToRandomNonNext,
 } = require('./util')
+
 const data = require('../data/deps-inpage.json')
+// const data = require('../data/deps-background.json')
 
 class DepGraph extends React.Component {
   constructor () {
@@ -57,8 +59,11 @@ class DepGraph extends React.Component {
 
   render () {
     return (
-      <div>
-        <ForceGraph graphStore={this.graphStore}/>
+      <div className="fullSize">
+        <svg width="100%" height="100%">
+          <ForceGraph graphStore={this.graphStore}/>
+        </svg>
+        {ForceGraph.createStyle()}
       </div>
     )
   }

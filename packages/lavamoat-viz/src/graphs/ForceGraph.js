@@ -46,22 +46,23 @@ class ForceGraph extends React.Component {
     if (!graph) return null
 
     return (
-      <div>
-        {renderGraph({ graph })}
-        {style(`
-          .links line {
-            stroke: #999;
-            stroke-opacity: 0.6;
-          }
-        `)}
-      </div>
+      renderGraph({ graph })
     )
   }
 }
 
 module.exports = ForceGraph
 
-function style(styleContent) {
+ForceGraph.createStyle = () => {
+  return style(`
+    .links line {
+      stroke: #999;
+      stroke-opacity: 0.6;
+    }
+  `)
+}
+
+function style (styleContent) {
   return (
     <style dangerouslySetInnerHTML={{__html: styleContent}} />
   )
