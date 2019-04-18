@@ -11,29 +11,51 @@ const {
   createLinkToRandomNonNext,
 } = require('./util')
 
-// const data = require('../data/deps-inpage.json')
-// const data = require('../data/deps-background.json')
-const data = require('../data/deps-ui.json')
-// const data = require('../data/deps-libs.json')
+// const bundleData = require('../data/deps-inpage.json')
+// const bundleData = require('../data/deps-background.json')
+const bundleData = require('../data/deps-ui.json')
+// const bundleData = require('../data/deps-libs.json')
 
 class DepGraph extends React.Component {
   constructor () {
     super()
 
+    // prepare empty graph
     const nodes = []
     const links = []
+    const container = {
+      width: 0,
+      height: 0,
+    }
+    this.graph = { nodes, links, container }
     
-    Object.keys(data).forEach(parentId => {
-      const { file, deps, size, entry } = data[parentId]
+    // populate graph with bundleData
+    this.createModuleGraph(bundleData)
+
+    // contain graph in observable store
+    this.graphStore = new ObservableStore(this.graph)
+  }
+
+  createModuleGraph (bundleData) {
+    const { nodes, links } = this.graph
+    
+    // for each module, create node and links 
+    Object.keys(bundleData).forEach(parentId => {
+      const { file, packageName, deps, size, entry } = bundleData[parentId]
       const scale = 1 / 20
       const radius = scale * Math.sqrt(size)
       const fileSizeLabel = labelForFileSize(size)
-      const label = `${fileSizeLabel} ${file}`
-      const color = entry ? 'blue' : 'green'
-
+      const label = `${fileSizeLabel} ${packageName}\n${file}`
+      const isEntryPackage = packageName === '<entry>'
+      // entry module is orange
+      // entry pacakge (app code) is blue
+      // deps are green
+      let color = entry ? 'orange' : (isEntryPackage ? 'blue' : 'green')
+      // create node for modules
       nodes.push(
         createNode({ id: parentId, radius, label, color })
       )
+      // create links for deps
       Object.keys(deps).forEach(depName => {
         const childId = deps[depName]
         links.push(
@@ -44,21 +66,13 @@ class DepGraph extends React.Component {
 
     // handle missing nodes (e.g. external deps)
     links.forEach(link => {
-      if (!data[link.target]) {
+      if (!bundleData[link.target]) {
         nodes.push(
           createNode({ id: link.target, radius: 0 })
         )
       }
     })
 
-    const container = {
-      width: 0,
-      height: 0,
-    }
-
-    let graph = { nodes, links, container }
-
-    this.graphStore = new ObservableStore(graph)
   }
 
   onResize (size) {
