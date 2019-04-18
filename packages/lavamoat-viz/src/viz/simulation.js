@@ -1,8 +1,5 @@
 const d3 = require('d3')
 
-const graphWidth = 960
-const graphHeight = 600
-
 module.exports = { setupSimulation, setupSimulationForces }
 
 function setupSimulation(state) {
@@ -14,6 +11,8 @@ function setupSimulation(state) {
 function setupSimulationForces (simulation, state) {
   const nodes = Object.values(state.nodes)
   const links = Object.values(state.links)
+  const graphWidth = state.size.width || 0
+  const graphHeight = state.size.height || 0
 
   simulation
     .nodes(nodes)
@@ -32,7 +31,7 @@ function setupSimulationForces (simulation, state) {
     .restart()
 }
 
-function createForce(forceFn) {
+function createForce (forceFn) {
   let nodes
   const result = (alpha) => { forceFn(nodes, alpha) }
   result.initialize = (_nodes) => { nodes = _nodes }

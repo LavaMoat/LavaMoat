@@ -13,6 +13,7 @@ function mergeGraph (oldGraph, newGraph, middlePoint) {
   graph.links = newGraph.links.map((link) => {
     return Object.assign({}, graphIndex.links[link.id], link)
   })
+  graph.container = newGraph.container
   return graph
 }
 

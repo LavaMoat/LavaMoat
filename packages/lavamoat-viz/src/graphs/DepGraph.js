@@ -1,5 +1,7 @@
 const React = require('react')
 const ObservableStore = require('obs-store')
+const GraphContainer = require('./GraphContainer')
+// const ResizeComponent = require('./ResizeComponent')
 const ForceGraph = require('./ForceGraph')
 const {
   createNode,
@@ -50,24 +52,35 @@ class DepGraph extends React.Component {
       }
     })
 
-    let graph = { nodes, links }
+    const container = {
+      width: 1,
+      height: 1,
+    }
+
+    let graph = { nodes, links, container }
 
     const graphStore = new ObservableStore(graph)
     this.graphStore = graphStore
   }
 
-  addNode () {
-    const graph = this.graphStore.getState()
-    const node = createNode()
-    graph.nodes.push(node)
-
-    const { nodes, links } = graph
-    links.push(createLinkToRandomNonNext({ node, nodes }))
-    links.push(createLinkToRandomNonNext({ node, nodes }))
-
-
-    this.graphStore.putState(graph)
+  onResize (containerRect) {
+    const { height, width } = containerRect
+    const container = { height, width }
+    this.graphStore.updateState({ container })
   }
+
+  // addNode () {
+  //   const graph = this.graphStore.getState()
+  //   const node = createNode()
+  //   graph.nodes.push(node)
+
+  //   const { nodes, links } = graph
+  //   links.push(createLinkToRandomNonNext({ node, nodes }))
+  //   links.push(createLinkToRandomNonNext({ node, nodes }))
+
+
+  //   this.graphStore.putState(graph)
+  // }
 
   render () {
     const actions = {
@@ -75,10 +88,10 @@ class DepGraph extends React.Component {
     }
 
     return (
-      <div className="fullSize">
-        <svg width="100%" height="100%">
+      <div className="fullSize" ref={this.containerRef}>
+        <GraphContainer>
           <ForceGraph graphStore={this.graphStore} actions={actions}/>
-        </svg>
+        </GraphContainer>
         {ForceGraph.createStyle()}
       </div>
     )

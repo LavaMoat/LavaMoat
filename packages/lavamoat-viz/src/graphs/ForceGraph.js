@@ -2,12 +2,14 @@ const React = require('react')
 const { buildGraph, mergeGraph } = require('../viz/build')
 const { setupSimulation, setupSimulationForces } = require('../viz/simulation')
 const renderGraph = require('../viz/normal')
+const SizeContext = require('./GraphContainer').SizeContext
 
 
 class ForceGraph extends React.Component {
+
   componentDidMount () {
     // setup force simulation
-    this.graph = { nodes: [], links: [] }
+    this.graph = { nodes: [], links: [], container: {}, size: { height: 0, width: 0 } }
     this.simulation = setupSimulation(this.graph)
 
     // setup update graph on change
@@ -16,7 +18,10 @@ class ForceGraph extends React.Component {
     this.updateGraph(graphStore.getState())
 
     // setup re-render on simulation update
-    this.simulation.on('tick', () => this.forceUpdate())
+    this.simulation.on('tick', () => {
+      
+      this.forceUpdate()
+    })
   }
 
   componentWillUnmount () {
@@ -29,14 +34,19 @@ class ForceGraph extends React.Component {
   updateGraph (newGraph) {
     // merge with existing graph
     const currentGraph = this.graph
+    const size = this.context
     const middlePoint = {
       // x: 960/2,
       // y: 600/2,
-      x: 960/2,
-      y: 0,
+      x: size.width/2,
+      y: size.height/2,
     }
     const mergedGraph = mergeGraph(currentGraph, newGraph, middlePoint)
     this.graph = mergedGraph
+
+    // copy size information
+    this.graph.size = size
+
     // reset simulation
     setupSimulationForces(this.simulation, mergedGraph)
   }
@@ -52,6 +62,8 @@ class ForceGraph extends React.Component {
 }
 
 module.exports = ForceGraph
+
+ForceGraph.contextType = SizeContext
 
 ForceGraph.createStyle = () => {
   return style(`
