@@ -11,8 +11,8 @@ function setupSimulation(state) {
 function setupSimulationForces (simulation, state) {
   const nodes = Object.values(state.nodes)
   const links = Object.values(state.links)
-  const graphWidth = state.size.width || 0
-  const graphHeight = state.size.height || 0
+  const graphWidth = state.container.width || 0
+  const graphHeight = state.container.height || 0
 
   simulation
     .nodes(nodes)
@@ -25,8 +25,9 @@ function setupSimulationForces (simulation, state) {
     // translate nodes around the center
     .force('center', d3.forceCenter(graphWidth / 2, graphHeight / 2))
     // push nodes towards the center
-    .force('x', d3.forceX(graphWidth / 2, 0.05))
-    .force('y', d3.forceY(graphHeight / 2, 0.05))
+    .force('x', d3.forceX(graphWidth / 2, 0.5))
+    .force('y', d3.forceY(graphHeight / 2, 0.5))
+    .alpha(1)
     .alphaTarget(0)
     .restart()
 }

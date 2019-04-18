@@ -27,7 +27,6 @@ class DepGraph extends React.Component {
       const { file, deps, size, entry } = data[parentId]
       const scale = 1 / 20
       const radius = scale * Math.sqrt(size)
-      // const radius = 5
       const fileSizeLabel = labelForFileSize(size)
       const label = `${fileSizeLabel} ${file}`
       const color = entry ? 'blue' : 'green'
@@ -53,34 +52,19 @@ class DepGraph extends React.Component {
     })
 
     const container = {
-      width: 1,
-      height: 1,
+      width: 0,
+      height: 0,
     }
 
     let graph = { nodes, links, container }
 
-    const graphStore = new ObservableStore(graph)
-    this.graphStore = graphStore
+    this.graphStore = new ObservableStore(graph)
   }
 
-  onResize (containerRect) {
-    const { height, width } = containerRect
-    const container = { height, width }
-    this.graphStore.updateState({ container })
+  onResize (size) {
+    console.log('new size', size)
+    this.graphStore.updateState({ container: size })
   }
-
-  // addNode () {
-  //   const graph = this.graphStore.getState()
-  //   const node = createNode()
-  //   graph.nodes.push(node)
-
-  //   const { nodes, links } = graph
-  //   links.push(createLinkToRandomNonNext({ node, nodes }))
-  //   links.push(createLinkToRandomNonNext({ node, nodes }))
-
-
-  //   this.graphStore.putState(graph)
-  // }
 
   render () {
     const actions = {
@@ -89,7 +73,7 @@ class DepGraph extends React.Component {
 
     return (
       <div className="fullSize" ref={this.containerRef}>
-        <GraphContainer>
+        <GraphContainer onSize={size => this.onResize(size)}>
           <ForceGraph graphStore={this.graphStore} actions={actions}/>
         </GraphContainer>
         {ForceGraph.createStyle()}
