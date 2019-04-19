@@ -3,6 +3,10 @@
 - async dist is large
 - sentry dist is large
 - other views / tools
-  - view all bundles as one
-  - modules by size
-  - view as packages
+  - [x] modules by size
+  - [x] view as packages
+  - [x] measure size without sourcemaps
+  - [ ] view all bundles as one
+  - [ ] differentiate between package versions
+  - [ ] highlight redundant packages of different versions
+  - [ ] highlight redundant packages across bundles
