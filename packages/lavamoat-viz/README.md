@@ -1,3 +1,11 @@
+# MetaMask Dependency Explorer
+
+This is an experiment in exploring metamask's js bundles and dependency graph.
+
+
+
+
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
