@@ -1,11 +1,6 @@
 const React = require('react')
 const ObservableStore = require('obs-store')
-const GraphContainer = require('./GraphContainer')
-const ForceGraph = require('./ForceGraph')
-const {
-  createNode,
-  createLink,
-} = require('./util')
+const { GraphContainer, ForceGraph, util: { createNode, createLink } } = require('react-force-directed')
 
 
 class DepGraph extends React.Component {
@@ -25,7 +20,6 @@ class DepGraph extends React.Component {
   }
 
   componentWillReceiveProps (nextProps) {
-    console.log('componentWillReceiveProps', nextProps)
     // recalculate graph if `mode` or `bundleData` change
     if (this.props.mode !== nextProps.mode || this.props.bundleData !== nextProps.bundleData) {
       const { bundleData, mode } = nextProps
