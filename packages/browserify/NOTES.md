@@ -1,3 +1,62 @@
+# new todo
+- [ ] shared instances of modules
+  - [ ] revert the seperation of eval / global injection
+- [ ] make config like agoric prototype
+  - [ ] config is json
+  - [ ] global-grabbing engine needs to move to sesify prelude
+
+# berlin notes
+next TC39 meeting <<<----
+  end of July 23-25th
+  RSVP via agoric
+TC53:
+  - SES as a js derived standard for use in IoT/wearables
+  - why this target?
+    - less backwards conmpat pressure
+module semantics:
+  - live bindings via "export let x"
+  - does pass by reference
+  - export as default does not pass by reference (!)
+root realms:
+  - Brave case has 3 realms
+  - 2 combined realms that are not confined
+  - use SES to contril the comms between them
+  - Root Realm vs Root SES Realm (FrozenRealm)
+  - SES Realms dont require an iframe now
+  - factoring into two steps
+    - creation of RootRealm
+    - securing a RootRealm from the inside
+  - harden()
+    - does not walk up proto chains
+
+### summary of components
+- Config
+  - auto config generation
+    - tofu rich parsing
+      - read/write
+  - user config overrides
+  - config
+    - agoric prototype: https://github.com/erights/legacy-todo/blob/master/manifest.json
+      - per-package:
+        - modules
+        - globals
+
+  - per package or per package path?
+  - config requires whitelist of dep graph?
+  - CSP style config for auto generating attenuations
+
+- Containment
+  - can happen less granularly than modules
+    - in addition to granularity of modules
+  - module instance per path? purity?
+    - no, it explodes
+  - if config per-path we need to split eval and endowments
+    - if you want special config, do higher level containment
+  - how to correctly specify the global object
+  - how to do attenuations
+    - specify module/global replacements
+    - maybe add a config for common attenuations
+
 # the big ones
 - [x] autogen granularity
 - [x] sourcemaps
