@@ -76,7 +76,7 @@ __endowmentsConfig__
       const isEntryModule = moduleDepPath.length < 1
 
       // prepare endowments
-      const endowmentsFromConfig = configForModule.$
+      const endowmentsFromConfig = generateEndowmentsForConfig(configForModule)
       let endowments = Object.assign({}, endowmentsConfig.defaultGlobals, providedEndowments, endowmentsFromConfig)
       // special case for exposing window
       if (endowments.window) {
@@ -149,7 +149,7 @@ __endowmentsConfig__
       }
     }
 
-    function toModuleDepPath(depPath) {
+    function toModuleDepPath (depPath) {
       const moduleDepPath = []
       depPath.forEach((requestedName) => {
         const nameParts = requestedName.split('/')
@@ -157,19 +157,77 @@ __endowmentsConfig__
         // skip relative resolution
         if (['.','..'].includes(nameInitial)) return
         // fix for scoped module names
-        const moduleName = nameInitial.includes('@') ? `${nameParts[0]}/${nameParts[1]}` : nameInitial
+        const packageName = nameInitial.includes('@') ? `${nameParts[0]}/${nameParts[1]}` : nameInitial
         // record module name
-        moduleDepPath.push(moduleName)
+        moduleDepPath.push(packageName)
       })
       return moduleDepPath
     }
 
-    function getConfigForModule(config, path) {
-      const moduleName = path.slice(-1)[0]
-      const globalConfig = (config.global || {})[moduleName]
-      const depPathSlug = path.join(' ')
-      const depConfig = (config.dependencies || {})[depPathSlug]
-      return Object.assign({}, globalConfig, depConfig)
+    function getConfigForModule (config, path) {
+      const packageName = path.slice(-1)[0]
+      const packageConfig = (config.resources || {})[packageName] || {}
+      return packageConfig
+    }
+
+    function generateEndowmentsForConfig (config) {
+      if (!config.globals) return {}
+      const globals = {}
+      Object.entries(config.globals).forEach(([globalPath, configValue]) => {
+        if (configValue !== true) {
+          throw new Error('Sesify - unknown value for config globals')
+        }
+        const value = deepGetAndBind(globalRef, globalPath)
+        if (value === undefined) return
+        deepSet(globals, globalPath, value)
+      })
+      return globals
+    }
+
+    function deepGetAndBind(obj, pathName) {
+      const pathParts = pathName.split('.')
+      const parentPath = pathParts.slice(0,-1).join('.')
+      const childKey = pathParts[pathParts.length-1]
+      const parent = parentPath ? deepGet(globalRef, parentPath) : globalRef
+      if (!parent) return parent
+      const value = parent[childKey]
+      if (typeof value === 'function') {
+        return value.bind(parent)
+      }
+      return value
+    }
+
+    function deepGet (obj, pathName) {
+      let result = obj
+      pathName.split('.').forEach(pathPart => {
+        if (result === null) {
+          result = undefined
+          return
+        }
+        if (result === undefined) {
+          return
+        }
+        result = result[pathPart]
+      })
+      return result
+    }
+
+    function deepSet (obj, pathName, value) {
+      let parent = obj
+      const pathParts = pathName.split('.')
+      const lastPathPart = pathParts[pathParts.length-1]
+      pathParts.slice(0,-1).forEach(pathPart => {
+        const prevParent = parent
+        parent = parent[pathPart]
+        if (parent === null) {
+          throw new Error('DeepSet - unable to set "'+pathName+'" on null')
+        }
+        if (parent === undefined) {
+          parent = {}
+          prevParent[pathPart] = parent
+        }
+      })
+      parent[lastPathPart] = value
     }
 
     //# sourceURL=internalRequire

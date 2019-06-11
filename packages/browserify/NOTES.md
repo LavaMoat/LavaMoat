@@ -7,10 +7,11 @@
 - [ ] new config
   - [x] make config like agoric prototype
   - [x] config is json
-  - [ ] config -> endowments in sesify prelude
+  - [x] config -> endowments in sesify prelude
+  - [x] need tests that generate config then use it 
   - [ ] get packageName from modules stream
   - [ ] cleanup old config generation
-  - [ ] need tests that generate config then use it 
+- [ ] cleanup prelude
 - [ ] try on metamask
 
 # berlin notes

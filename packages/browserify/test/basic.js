@@ -28,31 +28,35 @@ test('basic - browserify plugin', async (t) => {
   t.assert(bundle.includes(basicSesifyPrelude))
 })
 
-// test('basic - config and bundle', async (t) => {
-//   const files = [{
-//     // id must be full path
-//     id: './apple.js',
-//     deps: {
-//       'banana': './node_modules/banana/index.js',
-//     },
-//     source: 'global.testResult = require("banana")()',
-//     entry: true,
-//   }, {
-//     // non-entry
-//     id: './node_modules/banana/index.js',
-//     deps: {},
-//     source: 'module.exports = () => location.href',
-//   }]
-//   const config = await generateConfigFromFiles({ files })
-//   console.log(JSON.stringify(config, null, 2))
-//   const prelude = generatePrelude({ endowmentsConfig: config })
-//   const bundle = await createBundleFromRequiresArray(files, { endowmentsConfig: config })
+test('basic - config and bundle', async (t) => {
+  const files = [{
+    // id must be full path
+    id: './apple.js',
+    deps: {
+      'banana': './node_modules/banana/index.js',
+    },
+    source: 'global.testResult = require("banana")()',
+    entry: true,
+  }, {
+    // non-entry
+    id: './node_modules/banana/index.js',
+    deps: {},
+    source: 'module.exports = () => location.href',
+  }]
+  const config = await generateConfigFromFiles({ files })
+  const prelude = generatePrelude({ endowmentsConfig: config })
+  const bundle = await createBundleFromRequiresArray(files, { endowmentsConfig: config })
 
-//   t.assert(prelude.includes('"banana": true'), 'prelude includes banana config')
-//   t.assert(bundle.includes(prelude), 'bundle includes expected prelude')
+  t.assert(prelude.includes('"banana": true'), 'prelude includes banana config')
+  t.assert(bundle.includes(prelude), 'bundle includes expected prelude')
 
-//   const testHref = 'https://funky.town.gov/yolo?snake=yes'
-//   const location = { href: testHref }
-//   eval(bundle)
-//   t.equal(global.testResult, 123, testHref)
-// })
+  const testHref = 'https://funky.town.gov/yolo?snake=yes'
+  global.location = { href: testHref }
+  eval(bundle)
+  try {
+    eval(bundle)
+  } catch (err) {
+    t.fail(`eval of bundle failed:\n${err.stack || err}`)
+  }
+  t.equal(global.testResult, testHref, 'test result matches expected')
+})
