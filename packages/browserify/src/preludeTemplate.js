@@ -55,13 +55,13 @@ __endowmentsConfig__
 
       // parse requirePath for module boundries
       const moduleDepPath = toModuleDepPath(depPath)
-      const moduleDepPathSlug = moduleDepPath.join(' > ')
+      const moduleCacheSlug = moduleId
 
       // check our local cache, return exports if hit
-      let localCache = globalCache[moduleDepPathSlug]
+      let localCache = globalCache[moduleCacheSlug]
       if (!localCache) {
         localCache = {}
-        globalCache[moduleDepPathSlug] = localCache
+        globalCache[moduleCacheSlug] = localCache
       }
       if (localCache[moduleId]) {
         const module = localCache[moduleId]
@@ -124,6 +124,9 @@ __endowmentsConfig__
       // initialize the module with the correct context
       moduleInitializer.call(module.exports, scopedRequire, module, module.exports, null, modulesProxy)
 
+      // prevent module.exports from being modified
+      Object.freeze(module.exports)
+
       // return the exports
       return module.exports
 
@@ -136,7 +139,7 @@ __endowmentsConfig__
         // recursive requires dont hit cache so it inf loops, so we shortcircuit
         // this only seems to happen with the "timers" which uses and is used by "process"
         if (id === moduleId) {
-          if (requestedName !== 'timers') console.log('recursive:', requestedName)
+          if (requestedName !== 'timers') throw new Error('Sesify - recursive require detected')
           return module.exports
         }
         // update the dependency path for the child require
