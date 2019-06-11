@@ -19,6 +19,7 @@
     "lodash.flatmap": "^4.5.0",
     "mississippi": "^3.0.0",
     "module-name-from-path": "git+https://git@github.com/kumavis/module-name-from-path.git",
+    "pify": "^4.0.1",
     "safe-buffer": "^5.1.2",
     "ses": "^0.1.3",
     "tape": "^4.9.1",

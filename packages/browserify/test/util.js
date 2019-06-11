@@ -3,6 +3,7 @@ const test = require('tape')
 const miss = require('mississippi')
 const browserify = require('browserify')
 const from = require('from')
+const pify = require('pify')
 const sesifyPlugin = require('../src/index')
 
 const { generatePrelude, createSesifyPacker } = sesifyPlugin
@@ -14,32 +15,29 @@ module.exports = {
   createBundleFromRequiresArrayPath,
 }
 
-function createBundleFromEntry(path, cb){
+async function createBundleFromEntry (path) {
   const b = browserify({ plugin: sesifyPlugin })
   b.add(path)
-  b.bundle(function (err, src) {
-    if (err) return cb(err)
-    cb(null, src.toString())
-  })
+  const src = await pify(cb => b.bundle(cb))()
+  return src.toString()
 }
 
-function createBundleFromRequiresArrayPath (path, sesifyConfig, cb){
+async function createBundleFromRequiresArrayPath (path, sesifyConfig) {
   const depsArray = require(path)
-  createBundleFromRequiresArray(depsArray, sesifyConfig, cb)
+  return createBundleFromRequiresArray(depsArray, sesifyConfig)
 }
 
-function createBundleFromRequiresArray (depsArray, sesifyConfig, cb){
+async function createBundleFromRequiresArray (depsArray, sesifyConfig) {
   const packOpts = Object.assign({}, {
     defaultEndowments: 'return {}',
   }, sesifyConfig)
   const pack = createSesifyPacker(packOpts)
-  miss.pipe(
-    from(depsArray),
-    pack,
-    miss.concat((result) => cb(null, result.toString())),
-    (err) => {
-      if (!err) return
-      cb(err)
-    },
-  )
+  return new Promise((resolve, reject) => {
+    miss.pipe(
+      from(depsArray),
+      pack,
+      miss.concat((result) => resolve(result.toString())),
+      (err) => { if (err) reject(err) },
+    )
+  })
 }

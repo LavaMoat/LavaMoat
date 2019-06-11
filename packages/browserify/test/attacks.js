@@ -1,8 +1,9 @@
-const test = require('tape')
+const test = require('tape-promise').default(require('tape'))
+
 const { createBundleFromRequiresArray } = require('./util')
 
 
-test('attack - prevent primitive modification', (t) => {
+test('attack - prevent primitive modification', async (t) => {
   const depsArray = [
     {
       "id": "/1.js",
@@ -18,20 +19,13 @@ test('attack - prevent primitive modification', (t) => {
   ]
   
   const sesifyConfig = {}
-  createBundleFromRequiresArray(depsArray, sesifyConfig, (err, result) => {
-    if (err) return t.fail(err)
-    try {
-      eval(result)
-      t.equal(global.testResult, undefined)
-    } catch (err) {
-      t.fail(err)
-    } finally {
-      t.end()
-    }
-  })
+  const result = await createBundleFromRequiresArray(depsArray, sesifyConfig)
+  
+  eval(result)
+  t.equal(global.testResult, undefined)
 })
 
-test('attack - limit platform api', (t) => {
+test('attack - limit platform api', async (t) => {
   const depsArray = [
     {
       "id": "/1.js",
@@ -47,20 +41,13 @@ test('attack - limit platform api', (t) => {
   ]
   
   const sesifyConfig = {}
-  createBundleFromRequiresArray(depsArray, sesifyConfig, (err, result) => {
-    if (err) return t.fail(err)
-    try {
-      eval(result)
-      t.equal(global.testResult, undefined)
-    } catch (err) {
-      t.fail(err)
-    } finally {
-      t.end()
-    }
-  })
+  const result = await createBundleFromRequiresArray(depsArray, sesifyConfig)
+
+  eval(result)
+  t.equal(global.testResult, undefined)
 })
 
-test('attack - prevent module cache attack', (t) => {
+test('attack - prevent module cache attack', async (t) => {
   const depsArray = [
     {
       "id": "/1.js",
@@ -86,15 +73,8 @@ test('attack - prevent module cache attack', (t) => {
   ]
   
   const sesifyConfig = {}
-  createBundleFromRequiresArray(depsArray, sesifyConfig, (err, result) => {
-    if (err) return t.fail(err)
-    try {
-      eval(result)
-      t.equal(global.testResult, false)
-    } catch (err) {
-      t.fail(err)
-    } finally {
-      t.end()
-    }
-  })
+  const result = await createBundleFromRequiresArray(depsArray, sesifyConfig)
+
+  eval(result)
+  t.equal(global.testResult, false)
 })
