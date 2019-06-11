@@ -1,9 +1,6 @@
 const test = require('tape-promise').default(require('tape'))
-const from = require('from')
-const pump = require('pump')
-const toStream = require('mississippi').to.obj
 
-const { createConfigSpy } = require('../src/generateConfig')
+const { generateConfigFromFiles } = require('./util')
 
 test('empty config', async (t) => {
   const files = []
@@ -74,27 +71,4 @@ test('config with skipped deps', async (t) => {
       },
     },
   }, 'config matches expected')
-  t.end()
 })
-
-
-async function generateConfigFromFiles({ files }) {
-  const configSource = await filesToConfigSource({ files })
-  const config = JSON.parse(configSource)
-  return config
-}
-
-async function filesToConfigSource({ files }) {
-  return new Promise((resolve, reject) => {
-    const configSpy = createConfigSpy({ onResult: resolve })
-    const sink = toStream((data, encoding, cb) => cb())
-    pump(
-      from(files),
-      configSpy,
-      sink,
-      (err) => {
-        if (err) return reject(err)
-      }
-    )
-  })
-}
