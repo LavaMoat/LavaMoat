@@ -1,39 +1,57 @@
 const test = require('tape-promise').default(require('tape'))
 
-const { createBundleFromRequiresArrayPath } = require('./util')
+const { createBundleFromRequiresArray } = require('./util')
 
-
-test('config - require-time specified endowments', async (t) => {
-  const path = __dirname + '/fixtures/overwrite-deps.json'
-  const sesifyConfig = {}
-  const result = await createBundleFromRequiresArrayPath(path, sesifyConfig)
-
-  eval(result)
-  t.deepEqual(global.testResult, ['ho', 'hum'])
-})
 
 // here we are providing an endowments only to a module deep in a dep graph
 test('config - deep endow', async (t) => {
-  const path = __dirname + '/fixtures/need-config-endow.json'
-  const sesifyConfig = {
-    endowmentsConfig: `
-      const postMessageEndowment = {
-        window: {
-          postMessage: (message) => { global.testResult = message }
+  const entries = [
+    {
+      "id": "/one.js",
+      "source": "require('two');",
+      "deps": { "two": "/node_modules/two/index.js" },
+      "entry": true
+    },
+    {
+      "id": "/node_modules/two/index.js",
+      "source": "require('three')",
+      "deps": { "three": "/node_modules/three/index.js" }
+    },
+    {
+      "id": "/node_modules/three/index.js",
+      "source": "window.postMessage('12345', '*')",
+      "deps": {}
+    }
+  ]
+  
+  const config = {
+    resources: {
+      '<root>': {
+        modules: {
+          'two': true
+        }
+      },
+      'two': {
+        modules: {
+          'three': true
+        }
+      },
+      'three': {
+        globals: {
+          'window.postMessage': true
         }
       }
-
-      return {
-        dependencies: {
-          "two three": {
-            $: postMessageEndowment,
-          },
-        },
-      }`,
+    }
   }
 
-  const result = await createBundleFromRequiresArrayPath(path, sesifyConfig)
-    
-  eval(result)
-  t.deepEqual(global.testResult, '12345')
+  const bundle = await createBundleFromRequiresArray(entries, { endowmentsConfig: config })
+  
+  let testResult
+  global.window = { postMessage: (message) => { testResult = message } }
+  try {
+    eval(bundle)
+  } catch (err) {
+    t.fail(`eval of bundle failed:\n${err.stack || err}`)
+  }
+  t.deepEqual(testResult, '12345')
 })
