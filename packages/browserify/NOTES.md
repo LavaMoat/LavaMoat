@@ -1,12 +1,16 @@
 # new todo
 - [ ] update SES
-  - [ ] some issue with SES kernel running in strict mode
-- [ ] shared instances of modules
-  - [ ] revert the seperation of eval / global injection
-  - [ ] update cache key generator
-- [ ] make config like agoric prototype
-  - [ ] config is json
-  - [ ] global-grabbing engine needs to move to sesify prelude
+  - [ ] some issue with prelude or SES kernel running in strict mode
+- [x] shared instances of modules
+  - [x] revert the seperation of eval / global injection
+  - [x] update cache key generator
+- [ ] new config
+  - [x] make config like agoric prototype
+  - [x] config is json
+  - [ ] config -> endowments in sesify prelude
+  - [ ] get packageName from modules stream
+  - [ ] cleanup old config generation
+- [ ] try on metamask
 
 # berlin notes
 next TC39 meeting <<<----
