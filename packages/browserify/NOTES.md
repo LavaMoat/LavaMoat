@@ -1,6 +1,9 @@
 # new todo
+- [ ] update SES
+  - [ ] some issue with SES kernel running in strict mode
 - [ ] shared instances of modules
   - [ ] revert the seperation of eval / global injection
+  - [ ] update cache key generator
 - [ ] make config like agoric prototype
   - [ ] config is json
   - [ ] global-grabbing engine needs to move to sesify prelude
