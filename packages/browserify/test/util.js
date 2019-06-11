@@ -4,7 +4,6 @@ const miss = require('mississippi')
 const browserify = require('browserify')
 const from = require('from')
 const sesifyPlugin = require('../src/index')
-const { createConfigSpy } = require('../src/generateConfig')
 
 const { generatePrelude, createSesifyPacker } = sesifyPlugin
 const basicSesifyPrelude = generatePrelude()
@@ -36,7 +35,6 @@ function createBundleFromRequiresArray (depsArray, sesifyConfig, cb){
   const pack = createSesifyPacker(packOpts)
   miss.pipe(
     from(depsArray),
-    createConfigSpy(),
     pack,
     miss.concat((result) => cb(null, result.toString())),
     (err) => {

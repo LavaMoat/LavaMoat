@@ -14,8 +14,7 @@ const ignoredGlobals = [
   'eval',
 ]
 
-function createConfigSpy (opts = {}) {
-  const { onResult } = opts
+function createConfigSpy ({ onResult }) {
   const globalMap = {}
   const moduleDepGraph = {}
   const reverseDepGraph = {}
@@ -23,23 +22,8 @@ function createConfigSpy (opts = {}) {
   const configSpy = through.obj((dep, _, cb) => {
     // gather config info
     inspectDependency(dep)
-    
-    // transform code to pull out globals from endowments
-    const moduleName = moduleNameFromPath(dep.id)
-    const globalSet = globalMap[moduleName] || []
-    const topLevelGlobals = Array.from(globalSet).map(item => item.split('.')[0])
-    const uniqueGlobals = Array.from(new Set(topLevelGlobals))
-    // add global refs, which are never part of detected globals
-    uniqueGlobals.push('window')
-    uniqueGlobals.push('self')
-    uniqueGlobals.push('global')
-    // pull out globals from endowments (arguments[5] so we dont introduce a variable name and dont overlap browserify arguments)
-    const globalInits = `const { ${uniqueGlobals} } = arguments[5]`
-    const result = `${globalInits}\n${dep.source}`
-    dep.source = result
-    
+    // pass dep through normally
     cb(null, dep)
-
   }, onEnd)
   return configSpy
 
@@ -71,7 +55,7 @@ function createConfigSpy (opts = {}) {
 
   function onEnd (cb) {
     const config = generateConfig(globalMap, moduleDepGraph, reverseDepGraph)
-    if (onResult) onResult(config)
+    onResult(config)
     cb()
   }
 
