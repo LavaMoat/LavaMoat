@@ -1,17 +1,14 @@
-const test = require('tape')
-const { createConfigSpy } = require('../src/generateConfig')
+const test = require('tape-promise').default(require('tape'))
 const from = require('from')
 const pump = require('pump')
 const toStream = require('mississippi').to.obj
 
+const { createConfigSpy } = require('../src/generateConfig')
+
 test('empty config', async (t) => {
   const files = []
   const config = await generateConfigFromFiles({ files })
-  t.equal(typeof config, 'object')
-  t.equal(typeof config.defaultGlobals, 'object')
-  t.deepEqual(config.dependencies, {})
-  t.deepEqual(config.global, {})
-  t.end()
+  t.deepEqual(config, { resources: {} }, 'config matches expected')
 })
 
 test('basic config', async (t) => {
@@ -29,13 +26,21 @@ test('basic config', async (t) => {
     source: 'location.href',
   }]
   const config = await generateConfigFromFiles({ files })
-  t.equal(typeof config, 'object')
-  t.equal(typeof config.defaultGlobals, 'object')
-  t.deepEqual(Object.keys(config.dependencies), ['banana'])
-  t.deepEqual(Object.keys(config.dependencies.banana), ['$'])
-  t.deepEqual(config.dependencies.banana.$.location.href, 'https://example.com')
-  t.deepEqual(config.global, {})
-  t.end()
+
+  t.deepEqual(config, {
+    resources: {
+      '<root>': {
+        modules: {
+          'banana': true,
+        },
+      },
+      'banana': {
+        globals: {
+          'location.href': true,
+        },
+      }
+    },
+  }, 'config matched expected')
 })
 
 test('config with skipped deps', async (t) => {
@@ -54,26 +59,28 @@ test('config with skipped deps', async (t) => {
     source: 'location.href',
   }]
   const config = await generateConfigFromFiles({ files })
-  t.equal(typeof config, 'object')
-  t.equal(typeof config.defaultGlobals, 'object')
-  t.deepEqual(Object.keys(config.dependencies), ['banana'])
-  t.deepEqual(Object.keys(config.dependencies.banana), ['$'])
-  t.deepEqual(config.dependencies.banana.$.location.href, 'https://example.com')
-  t.deepEqual(config.global, {})
+
+  t.deepEqual(config, {
+    resources: {
+      '<root>': {
+        modules: {
+          'banana': true,
+        },
+      },
+      'banana': {
+        globals: {
+          'location.href': true,
+        },
+      },
+    },
+  }, 'config matches expected')
   t.end()
 })
 
 
 async function generateConfigFromFiles({ files }) {
   const configSource = await filesToConfigSource({ files })
-  // for eval context
-  const sesEval = (code) => eval(code)
-  const location = { href: 'https://example.com' }
-  const rootGlobal = { location }
-  const self = rootGlobal
-  const window = rootGlobal
-  // evaluate config source
-  const config = eval(`(function(){${configSource}; return config })()`)
+  const config = JSON.parse(configSource)
   return config
 }
 
