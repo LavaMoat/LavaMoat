@@ -10,6 +10,7 @@
   - [ ] config -> endowments in sesify prelude
   - [ ] get packageName from modules stream
   - [ ] cleanup old config generation
+  - [ ] need tests that generate config then use it 
 - [ ] try on metamask
 
 # berlin notes
