@@ -1,5 +1,5 @@
 const acornGlobals = require('acorn-globals')
-const whitelist = require('./sesWhitelist').buildWhitelist()
+const whitelist = require('../lib/sesWhitelist').buildWhitelist()
 const moduleScope = [
   // commonjs basics
   'module',

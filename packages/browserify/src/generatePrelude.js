@@ -1,7 +1,7 @@
 // prelude content modified from original browser-pack prelude for readability + SES support
 const fs = require('fs')
 const preludeTemplate = fs.readFileSync(__dirname + '/preludeTemplate.js', 'utf8')
-const sessDist = fs.readFileSync(__dirname + '/ses.js', 'utf8')
+const sessDist = fs.readFileSync(__dirname + '/../lib/ses.js', 'utf8')
 
 module.exports = generatePrelude
 
