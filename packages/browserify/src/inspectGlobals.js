@@ -1,5 +1,6 @@
 const acornGlobals = require('acorn-globals')
 const whitelist = require('../lib/sesWhitelist').buildWhitelist()
+
 const moduleScope = [
   // commonjs basics
   'module',
@@ -28,6 +29,7 @@ const browserPlatformGlobals = [
   'console',
   'btoa',
   'atob',
+  // this will refer to the safe SES eval
   'eval',
   // global refs
   'window',
@@ -155,45 +157,52 @@ const browserPlatformGlobals = [
 
 module.exports = inspectGlobals
 
-function inspectGlobals (code, debugLabel) {
+function inspectGlobals (code) {
   const ast = acornGlobals.parse(code)
   const detectedGlobals = acornGlobals(ast)
   const globalNames = []
 
   // check for global refs with member expressions
-  detectedGlobals.forEach(variable => {
+  detectedGlobals.forEach(inspectDetectedGlobalVariables)
+
+  // we sort to provide a more deterministic result
+  const sortedNames = globalNames.sort()
+  // reduce to remove more deep results that overlap with broader results
+  // e.g. [`x.y.z`, `x.y`] can be reduced to just [`x.y`]
+  const reducedNames = reduceToTopmostApiCalls(sortedNames)
+  return reducedNames
+
+  function inspectDetectedGlobalVariables (variable) {
     const variableName = variable.name
     // skip if module global
     if (moduleScope.includes(variableName)) return
     // expose API as granularly as possible
     variable.nodes.forEach(identifierNode => {
-      const memberExpressions = getMemberExpressionNesting(identifierNode)
-      // if not used in any member expressions AND is not a global ref, expose as is
-      if (!memberExpressions.length) {
-        // skip if global and only used for detecting presence
-        if (globalRefs.includes(variableName) && isUndefinedCheck(identifierNode)) return
-        maybeAddGlobalName(variableName)
-        return
-      }
-      const memberKeys = getKeysForMemberExpressionChain(memberExpressions)
-      // if nested API lookup begins with a globalRef, drop it
-      if (globalRefs.includes(memberKeys[0])) {
-        memberKeys.shift()
-      }
-      // add nested API
-      const nestedName = memberKeys.join('.')
-      maybeAddGlobalName(nestedName)
+      inspectIdentifierForMembershipChain(variableName, identifierNode)
     })
-  })
+  }
 
-  // we sort to provide a more deterministic result
-  const sortedNames = globalNames.sort()
-  // reduce to remove explicit results that overlap with higher results
-  const reducedNames = reduceToTopmostApiCalls(sortedNames)
+  function inspectIdentifierForMembershipChain (variableName, identifierNode) {
+    const memberExpressions = getMemberExpressionNesting(identifierNode)
+    // if not used in any member expressions AND is not a global ref, expose as is
+    if (!memberExpressions.length) {
+      // skip if global and only used for detecting presence
+      // this is a bit of a hack to prevent exposing things that aren't actually used
+      if (globalRefs.includes(variableName) && isUndefinedCheck(identifierNode)) return
+      maybeAddGlobalName(variableName)
+      return
+    }
+    const memberKeys = getKeysForMemberExpressionChain(memberExpressions)
+    // if nested API lookup begins with a globalRef, drop it
+    if (globalRefs.includes(memberKeys[0])) {
+      memberKeys.shift()
+    }
+    // add nested API
+    const nestedName = memberKeys.join('.')
+    maybeAddGlobalName(nestedName)
+  }
 
-  return reducedNames
-
-  function maybeAddGlobalName (variableName, debugLabel) {
+  function maybeAddGlobalName (variableName) {
     const apiRoot = variableName.split('.')[0]
     // ignore if in SES's whitelist (safe JS features)
     const whitelistStatus = whitelist[apiRoot]
@@ -246,12 +255,6 @@ function getTailmostMatchingChain (items, matcher) {
   const lastIndex = onlyMatched.lastIndexOf(null)
   if (lastIndex === -1) return onlyMatched.slice()
   return onlyMatched.slice(lastIndex + 1)
-}
-
-function removeFromArray (array, entry) {
-  const index = array.indexOf(entry)
-  if (index === -1) return
-  array.splice(index, 1)
 }
 
 // if array contains 'x' and 'x.y' just keep 'x'
