@@ -16,18 +16,15 @@ const ignoredGlobals = [
   'eval'
 ]
 
+// createConfigSpy creates a pass-through object stream for the Browserify pipeline.
+// it analyses modules for global namespace usages, and generates a config for Sesify.
+// it calls `onResult` with the config when the stream ends.
+
 function createConfigSpy ({ onResult }) {
-  const globalMap = {}
-  const moduleDepGraph = {}
-  const reverseDepGraph = {}
+  const packageToGlobals = {}
   const packageToModules = {}
 
-  const configSpy = through.obj((module, _, cb) => {
-    // gather config info
-    inspectModule(module)
-    // pass module through normally
-    cb(null, module)
-  }, onEnd)
+  const configSpy = createSpy(inspectModule, onBuildEnd)
   return configSpy
 
   function inspectModule (module) {
@@ -35,8 +32,6 @@ function createConfigSpy ({ onResult }) {
     // initialize mapping from package to module
     const packageModules = packageToModules[packageName] = packageToModules[packageName] || {}
     packageModules[module.id] = module
-    // add to dep graph
-    updatePackageDeps(packageName, module.deps)
     // skip for project files (files not from deps)
     const isDependency = packageName === rootSlug
     if (isDependency) return
@@ -46,45 +41,19 @@ function createConfigSpy ({ onResult }) {
     // skip if no results
     if (!globalNames.length) return
     // add globals to map
-    const moduleGlobals = globalMap[packageName]
-    if (moduleGlobals) {
-      globalNames.forEach(glob => moduleGlobals.add(glob))
+    const packageGlobals = packageToGlobals[packageName]
+    if (packageGlobals) {
+      globalNames.forEach(glob => packageGlobals.add(glob))
     } else {
-      globalMap[packageName] = new Set(globalNames)
+      packageToGlobals[packageName] = new Set(globalNames)
     }
   }
 
-  function onEnd (cb) {
-    const config = generateConfig2({ globalMap, moduleDepGraph, reverseDepGraph, packageToModules })
+  function onBuildEnd () {
+    // generate the final config
+    const config = generateConfig({ packageToGlobals, packageToModules })
+    // report result
     onResult(config)
-    cb()
-  }
-
-  function updatePackageDeps (packageName, fileDeps) {
-    // // normal dep graph
-    // const deps = moduleDepGraph[packageName] || []
-    // const mergedDeps = Object.values(fileDeps).map(packageNameFromPath).concat(deps)
-    // const uniqueResult = Array.from(new Set(mergedDeps))
-    // moduleDepGraph[packageName] = uniqueResult
-    // reverse dep graph
-
-    // get unique dependency paths (dep paths are false when skipped)
-    const depFullPaths = unique(Object.values(fileDeps).filter(Boolean))
-    // get unique dependency modules
-    const newDeps = unique(depFullPaths.map(packageNameFromPath))
-    newDeps.forEach(depName => {
-      // entry point
-      if (!depName) return
-      // intermodule require
-      if (depName === packageName) return
-      // add dependant to revDepGraph
-      let revDeps = reverseDepGraph[depName]
-      if (!revDeps) {
-        revDeps = new Set()
-        reverseDepGraph[depName] = revDeps
-      }
-      revDeps.add(packageName)
-    })
   }
 }
 
@@ -100,9 +69,7 @@ function aggregateDeps (packageModules) {
   return depsArray
 }
 
-function generateConfig2 ({ globalMap, moduleDepGraph, reverseDepGraph, packageToModules }) {
-  // package -> deps
-  // package -> globals
+function generateConfig ({ packageToGlobals, packageToModules }) {
   const resources = {}
   const config = { resources }
   Object.entries(packageToModules).forEach(([packageName, packageModules]) => {
@@ -113,8 +80,8 @@ function generateConfig2 ({ globalMap, moduleDepGraph, reverseDepGraph, packageT
       modules = fromEntries(packageDeps.map(dep => [dep, true]))
     }
     // get globals
-    if (globalMap[packageName]) {
-      const detectedGlobals = Array.from(globalMap[packageName].values())
+    if (packageToGlobals[packageName]) {
+      const detectedGlobals = Array.from(packageToGlobals[packageName].values())
       globals = fromEntries(detectedGlobals.map(globalPath => [globalPath, true]))
     }
     // set config for package
@@ -122,124 +89,6 @@ function generateConfig2 ({ globalMap, moduleDepGraph, reverseDepGraph, packageT
   })
 
   return JSON.stringify(config, null, 2)
-}
-
-function generateConfig ({ globalMap, moduleDepGraph, reverseDepGraph, packageToModules }) {
-  const defaultGlobals = [
-    // safe
-    'console',
-    'atob',
-    'btoa',
-    // frequently used
-    'setTimeout',
-    'clearTimeout',
-    'clearInterval',
-    'setInterval'
-  ]
-  let moduleGlobalContent = []
-  let depGraphContent = []
-  Object.keys(globalMap).map(packageName => {
-    const moduleGlobals = globalMap[packageName]
-    if (!moduleGlobals) return
-    const globalNames = Array.from(moduleGlobals.values()).filter(glob => !defaultGlobals.includes(glob))
-    if (!globalNames.length) return
-    // generate code for module globals config
-    const globalsList = serializeStringArray(globalNames)
-    moduleGlobalContent.push(`exposeToModule('${packageName}', ${globalsList})`)
-    // generate code for putting config in dep graph
-    const depPaths = calculateDepPaths(packageName, reverseDepGraph)
-    const depPathSlugs = depPaths.map(pathParts => pathParts.slice(1).join(' '))
-    const depLines = depPathSlugs.map(pathSlug => `exposeToDep('${packageName}', '${pathSlug}')`)
-    depGraphContent = depGraphContent.concat(depLines)
-  })
-
-  return (`
-// these are used for global detection by some modules
-const safeObjects = sesEval('({ Object, Symbol })')
-
-const defaultGlobals = Object.assign({}, getAndBindGlobals(${serializeStringArray(defaultGlobals)}), safeObjects)
-const moduleGlobals = {}
-const depConfig = {}
-
-function getAndBindGlobals (globalNames) {
-  const selectedGlobals = {}
-  globalNames.forEach(glob => {
-    const value = deepGetAndBind(self, glob)
-    if (value === undefined) return
-    deepSet(selectedGlobals, glob, value)
-  })
-  return selectedGlobals
-}
-
-function deepGetAndBind(obj, pathName) {
-  const pathParts = pathName.split('.')
-  const parentPath = pathParts.slice(0,-1).join('.')
-  const childKey = pathParts[pathParts.length-1]
-  const globalRef = typeof self !== 'undefined' ? self : global
-  const parent = parentPath ? deepGet(globalRef, parentPath) : globalRef
-  if (!parent) return parent
-  const value = parent[childKey]
-  if (typeof value === 'function') {
-    return value.bind(parent)
-  }
-  return value
-}
-
-function deepGet (obj, pathName) {
-  let result = obj
-  pathName.split('.').forEach(pathPart => {
-    if (result === null) {
-      result = undefined
-      return
-    }
-    if (result === undefined) {
-      return
-    }
-    result = result[pathPart]
-  })
-  return result
-}
-
-function deepSet (obj, pathName, value) {
-  let parent = obj
-  const pathParts = pathName.split('.')
-  const lastPathPart = pathParts[pathParts.length-1]
-  pathParts.slice(0,-1).forEach(pathPart => {
-    const prevParent = parent
-    parent = parent[pathPart]
-    if (parent === null) {
-      throw new Error('DeepSet - unable to set "'+pathName+'" on null')
-    }
-    if (parent === undefined) {
-      parent = {}
-      prevParent[pathPart] = parent
-    }
-  })
-  parent[lastPathPart] = value
-}
-
-function exposeToModule (packageName, globalNames) {
-  const globalsToExpose = getAndBindGlobals(globalNames)
-  moduleGlobals[packageName] = Object.assign({}, defaultGlobals, globalsToExpose)
-}
-
-function exposeToDep (packageName, depPath) {
-  depConfig[depPath] = { $: moduleGlobals[packageName] }
-}
-
-// set per-module globals config
-${moduleGlobalContent.join('\n')}
-// set in dep graph
-// depGraph goes here
-${depGraphContent.join('\n')}
-
-const config = {
-  dependencies: depConfig,
-  global: {},
-  defaultGlobals,
-}
-
-return config`)
 }
 
 function calculateDepPaths (packageName, reverseDepGraph, partialPath) {
@@ -258,14 +107,6 @@ function calculateDepPaths (packageName, reverseDepGraph, partialPath) {
   })
 }
 
-function serializeStringArray (array) {
-  return '[' + array.map(entry => `'${entry}'`).join(', ') + ']'
-}
-
-function unique (arr) {
-  return Array.from(new Set(arr))
-}
-
 function packageNameFromModule (module) {
   // get package name from module.id full path
   return packageNameFromModuleId(module.id)
@@ -281,4 +122,18 @@ function packageNameFromModuleId (moduleId) {
   if (isAppLevel) return rootSlug
   // otherwise fail
   throw new Error(`Sesify - Config Autogen - Failed to parse module name. first part: "${filePathFirstPart}"`)
+}
+
+function createSpy (onData, onEnd) {
+  return through.obj((data, _, cb) => {
+    // give data to observer fn
+    onData(data)
+    // pass the data through normally
+    cb(null, data)
+  }, (cb) => {
+    // call flush observer
+    onEnd()
+    // end normally
+    cb()
+  })
 }
