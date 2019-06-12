@@ -43,7 +43,7 @@ test('config - deep endow', async (t) => {
     }
   }
 
-  const bundle = await createBundleFromRequiresArray(entries, { endowmentsConfig: config })
+  const bundle = await createBundleFromRequiresArray(entries, { sesifyConfig: config })
 
   let testResult
   global.window = { postMessage: (message) => { testResult = message } }

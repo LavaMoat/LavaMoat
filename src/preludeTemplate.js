@@ -6,13 +6,13 @@
 // END of injected code from sessDist
 
   const realm = SES.makeSESRootRealm()
-  // helper for setting up endowmentsConfig
+  // helper for setting up sesifyConfig
   const sesEval = (code) => realm.evaluate(code)
 
-  const endowmentsConfig = (function(){
-// START of injected code from endowmentsConfig
-__endowmentsConfig__
-// END of injected code from endowmentsConfig
+  const sesifyConfig = (function(){
+// START of injected code from sesifyConfig
+__sesifyConfig__
+// END of injected code from sesifyConfig
   })()
 
   return loadBundle
@@ -31,7 +31,7 @@ __endowmentsConfig__
     const globalCache = {}
     // create SES-wrapped internalRequire
     const createInternalRequire = realm.evaluate(`(${internalRequireWrapper})`, { console })
-    const safeInternalRequire = createInternalRequire(modules, globalCache, endowmentsConfig, realm, eval, evalWithEndowments, globalRef)
+    const safeInternalRequire = createInternalRequire(modules, globalCache, sesifyConfig, realm, eval, evalWithEndowments, globalRef)
     // load entryPoints
     for (let entryId of entryPoints) {
       safeInternalRequire(entryId, null, [])
@@ -40,7 +40,7 @@ __endowmentsConfig__
 
   // this is serialized and run in SES
   // mostly just exists to expose variables to internalRequire
-  function internalRequireWrapper (modules, globalCache, endowmentsConfig, realm, unsafeEval, unsafeEvalWithEndowments, globalRef) {
+  function internalRequireWrapper (modules, globalCache, sesifyConfig, realm, unsafeEval, unsafeEvalWithEndowments, globalRef) {
     return internalRequire
 
     function internalRequire (moduleId, providedEndowments, depPath) {
@@ -72,12 +72,12 @@ __endowmentsConfig__
       const module = { exports: {} }
       localCache[moduleId] = module
       const moduleSource = moduleData[0]
-      const configForModule = getConfigForModule(endowmentsConfig, moduleDepPath)
+      const configForModule = getConfigForModule(sesifyConfig, moduleDepPath)
       const isEntryModule = moduleDepPath.length < 1
 
       // prepare endowments
       const endowmentsFromConfig = generateEndowmentsForConfig(configForModule)
-      let endowments = Object.assign({}, endowmentsConfig.defaultGlobals, providedEndowments, endowmentsFromConfig)
+      let endowments = Object.assign({}, sesifyConfig.defaultGlobals, providedEndowments, endowmentsFromConfig)
       // special case for exposing window
       if (endowments.window) {
         endowments = Object.assign({}, endowments.window, endowments)

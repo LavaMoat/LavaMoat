@@ -1,4 +1,9 @@
-// prelude content modified from original browser-pack prelude for readability + SES support
+// The "prelude" is the kernel of a browserify bundle. It initializes the modules and
+// provides the `require` api. Sesify's prelude content has been modified significantly from the
+// original `browser-pack` prelude for readability + sandboxing in SES containers
+// The prelude is defined in the `preludeTemplate` file, and here we inject the dynamic components,
+// such as the upgradeable SES and app specific config.
+
 const fs = require('fs')
 const preludeTemplate = fs.readFileSync(__dirname + '/preludeTemplate.js', 'utf8')
 const sessDist = fs.readFileSync(__dirname + '/../lib/ses.js', 'utf8')
@@ -6,22 +11,22 @@ const sessDist = fs.readFileSync(__dirname + '/../lib/ses.js', 'utf8')
 module.exports = generatePrelude
 
 function generatePrelude (opts = {}) {
-  const endowmentsConfig = parseEndowmentsConfig(opts.endowmentsConfig)
+  const sesifyConfig = parseConfig(opts.sesifyConfig)
 
   let output = preludeTemplate
   output = output.replace('__sessDist__', sessDist)
-  output = output.replace('__endowmentsConfig__', endowmentsConfig)
+  output = output.replace('__sesifyConfig__', sesifyConfig)
 
   return output
 }
 
-function parseEndowmentsConfig (config) {
+function parseConfig (config) {
   switch (typeof config) {
     case 'string':
       return config
-    // allow endowmentsConfig to be specified as a function for loading fresh result under watchify
+    // allow sesifyConfig to be specified as a function for loading fresh result under watchify
     case 'function':
-      return parseEndowmentsConfig(config())
+      return parseConfig(config())
     case 'object':
       const configJson = JSON.stringify(config, null, 2)
       return `return ${configJson}`

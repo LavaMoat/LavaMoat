@@ -14,7 +14,7 @@ module.exports = function (browserify, pluginOpts) {
   function setupPlugin () {
     // helper to read config at path
     if (typeof pluginOpts.config === 'string') {
-      pluginOpts.endowmentsConfig = () => {
+      pluginOpts.sesifyConfig = () => {
         // load latest config
         const filename = pluginOpts.config
         return fs.readFileSync(filename, 'utf8')

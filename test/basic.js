@@ -44,8 +44,8 @@ test('basic - config and bundle', async (t) => {
     source: 'module.exports = () => location.href'
   }]
   const config = await generateConfigFromFiles({ files })
-  const prelude = generatePrelude({ endowmentsConfig: config })
-  const bundle = await createBundleFromRequiresArray(files, { endowmentsConfig: config })
+  const prelude = generatePrelude({ sesifyConfig: config })
+  const bundle = await createBundleFromRequiresArray(files, { sesifyConfig: config })
 
   t.assert(prelude.includes('"banana": true'), 'prelude includes banana config')
   t.assert(bundle.includes(prelude), 'bundle includes expected prelude')
