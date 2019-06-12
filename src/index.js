@@ -1,6 +1,6 @@
 const fs = require('fs')
 const generatePrelude = require('./generatePrelude')
-const createCustomPack = require('./browser-pack')
+const createCustomPack = require('../lib/browser-pack')
 const { createConfigSpy } = require('./generateConfig')
 const { wrapIntoBundle } = require('./sourcemaps')
 
