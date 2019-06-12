@@ -6,7 +6,7 @@
 // g -> [ d ]
 
 // d <- [ a, b, c, g]
-// c <- [ a, b ] 
+// c <- [ a, b ]
 // b <- [ a ]
 // e <- [ a ]
 // f <- [ e ]
@@ -23,7 +23,6 @@ const test = require('tape')
 const flatMap = require('lodash.flatmap')
 const { calculateDepPaths } = require('../src/generateConfig')
 
-
 test('walk reverse dep graph', (t) => {
   const reverseDepGraph = {
     d: new Set(['a', 'b', 'c', 'g']),
@@ -31,9 +30,9 @@ test('walk reverse dep graph', (t) => {
     b: new Set(['a']),
     e: new Set(['a']),
     f: new Set(['e']),
-    g: new Set(['f']),
+    g: new Set(['f'])
   }
-  
+
   const depPaths = calculateDepPaths('d', reverseDepGraph)
   t.deepEqual(depPaths, [
     [ 'a', 'd' ],

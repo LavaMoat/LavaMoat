@@ -13,14 +13,14 @@ test('basic config', async (t) => {
     // id must be full path
     id: './apple.js',
     deps: {
-      'banana': './node_modules/banana/index.js',
+      'banana': './node_modules/banana/index.js'
     },
-    source: 'require("banana")',
+    source: 'require("banana")'
   }, {
     // non-entry
     id: './node_modules/banana/index.js',
     deps: {},
-    source: 'location.href',
+    source: 'location.href'
   }]
   const config = await generateConfigFromFiles({ files })
 
@@ -28,15 +28,15 @@ test('basic config', async (t) => {
     resources: {
       '<root>': {
         modules: {
-          'banana': true,
-        },
+          'banana': true
+        }
       },
       'banana': {
         globals: {
-          'location.href': true,
-        },
+          'location.href': true
+        }
       }
-    },
+    }
   }, 'config matched expected')
 })
 
@@ -46,14 +46,14 @@ test('config with skipped deps', async (t) => {
     id: './apple.js',
     deps: {
       'banana': './node_modules/banana/index.js',
-      'snakefruit': false,
+      'snakefruit': false
     },
-    source: 'require("banana")',
+    source: 'require("banana")'
   }, {
     // non-entry
     id: './node_modules/banana/index.js',
     deps: {},
-    source: 'location.href',
+    source: 'location.href'
   }]
   const config = await generateConfigFromFiles({ files })
 
@@ -61,14 +61,14 @@ test('config with skipped deps', async (t) => {
     resources: {
       '<root>': {
         modules: {
-          'banana': true,
-        },
+          'banana': true
+        }
       },
       'banana': {
         globals: {
-          'location.href': true,
-        },
-      },
-    },
+          'location.href': true
+        }
+      }
+    }
   }, 'config matches expected')
 })

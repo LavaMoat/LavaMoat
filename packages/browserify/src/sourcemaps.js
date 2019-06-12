@@ -3,7 +3,6 @@ const offsetSourcemapLines = require('offset-sourcemap-lines')
 
 module.exports = { wrapIntoBundle }
 
-
 function wrapIntoBundle (source) {
   // extract sourcemaps
   const sourceBundle = extractSourceMaps(source)
@@ -28,6 +27,6 @@ function transformToWrapped (bundle) {
   const offsetLinesCount = start.match(/\n/g).length
   const maps = bundle.maps && offsetSourcemapLines(bundle.maps, offsetLinesCount)
   const code = start + bundle.code + end
-    
+
   return { code, maps }
 }

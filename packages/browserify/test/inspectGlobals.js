@@ -25,7 +25,6 @@ test('picking out properties on global', (t) => {
   t.end()
 })
 
-
 test('picking out properties on self', (t) => {
   const globals = inspectGlobals(`
     self.WebSocket
