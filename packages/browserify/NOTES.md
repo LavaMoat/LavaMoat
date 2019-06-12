@@ -9,8 +9,8 @@
   - [x] config is json
   - [x] config -> endowments in sesify prelude
   - [x] need tests that generate config then use it 
+  - [x] cleanup old config generation
   - [ ] get packageName from modules stream
-  - [ ] cleanup old config generation
 - [ ] cleanup prelude
 - [ ] try on metamask
 
