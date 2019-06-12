@@ -7,7 +7,6 @@ const pify = require('pify')
 const pump = require('pump')
 const toStream = require('mississippi').to.obj
 
-
 const sesifyPlugin = require('../src/index')
 const { createConfigSpy } = require('../src/generateConfig')
 
@@ -19,7 +18,7 @@ module.exports = {
   createBundleFromRequiresArray,
   createBundleFromRequiresArrayPath,
   generateConfigFromFiles,
-  filesToConfigSource,
+  filesToConfigSource
 }
 
 async function createBundleFromEntry (path) {
@@ -36,7 +35,7 @@ async function createBundleFromRequiresArrayPath (path, sesifyConfig) {
 
 async function createBundleFromRequiresArray (depsArray, sesifyConfig) {
   const packOpts = Object.assign({}, {
-    defaultEndowments: 'return {}',
+    defaultEndowments: 'return {}'
   }, sesifyConfig)
   const pack = createSesifyPacker(packOpts)
   return new Promise((resolve, reject) => {
@@ -44,18 +43,18 @@ async function createBundleFromRequiresArray (depsArray, sesifyConfig) {
       from(depsArray),
       pack,
       miss.concat((result) => resolve(result.toString())),
-      (err) => { if (err) reject(err) },
+      (err) => { if (err) reject(err) }
     )
   })
 }
 
-async function generateConfigFromFiles({ files }) {
+async function generateConfigFromFiles ({ files }) {
   const configSource = await filesToConfigSource({ files })
   const config = JSON.parse(configSource)
   return config
 }
 
-async function filesToConfigSource({ files }) {
+async function filesToConfigSource ({ files }) {
   return new Promise((resolve, reject) => {
     const configSpy = createConfigSpy({ onResult: resolve })
     const sink = toStream((data, encoding, cb) => cb())

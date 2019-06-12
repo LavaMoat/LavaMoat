@@ -5,8 +5,7 @@ const sessDist = fs.readFileSync(__dirname + '/ses.js', 'utf8')
 
 module.exports = generatePrelude
 
-function generatePrelude(opts = {}) {
-
+function generatePrelude (opts = {}) {
   const endowmentsConfig = parseEndowmentsConfig(opts.endowmentsConfig)
 
   let output = preludeTemplate
@@ -26,7 +25,7 @@ function parseEndowmentsConfig (config) {
     case 'object':
       const configJson = JSON.stringify(config, null, 2)
       return `return ${configJson}`
-    case 'undefined': 
+    case 'undefined':
       return 'return {}'
     default:
       throw new Error('Sesify - unrecognized endowments config option')

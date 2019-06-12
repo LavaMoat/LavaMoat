@@ -2,28 +2,27 @@ const test = require('tape-promise').default(require('tape'))
 
 const { createBundleFromRequiresArray } = require('./util')
 
-
 // here we are providing an endowments only to a module deep in a dep graph
 test('config - deep endow', async (t) => {
   const entries = [
     {
-      "id": "/one.js",
-      "source": "require('two');",
-      "deps": { "two": "/node_modules/two/index.js" },
-      "entry": true
+      'id': '/one.js',
+      'source': "require('two');",
+      'deps': { 'two': '/node_modules/two/index.js' },
+      'entry': true
     },
     {
-      "id": "/node_modules/two/index.js",
-      "source": "require('three')",
-      "deps": { "three": "/node_modules/three/index.js" }
+      'id': '/node_modules/two/index.js',
+      'source': "require('three')",
+      'deps': { 'three': '/node_modules/three/index.js' }
     },
     {
-      "id": "/node_modules/three/index.js",
-      "source": "window.postMessage('12345', '*')",
-      "deps": {}
+      'id': '/node_modules/three/index.js',
+      'source': "window.postMessage('12345', '*')",
+      'deps': {}
     }
   ]
-  
+
   const config = {
     resources: {
       '<root>': {
@@ -45,7 +44,7 @@ test('config - deep endow', async (t) => {
   }
 
   const bundle = await createBundleFromRequiresArray(entries, { endowmentsConfig: config })
-  
+
   let testResult
   global.window = { postMessage: (message) => { testResult = message } }
   try {

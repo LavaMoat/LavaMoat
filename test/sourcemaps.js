@@ -3,7 +3,6 @@ const UglifyJS = require('uglify-js')
 const { SourceMapConsumer } = require('source-map')
 const { wrapIntoBundle } = require('../src/sourcemaps')
 
-
 test('sourcemaps - adjust maps for wrapper', async (t) => {
   const fooSource = (`
   var two = 1 + 1
@@ -18,8 +17,8 @@ test('sourcemaps - adjust maps for wrapper', async (t) => {
       filename: './foo.js',
       // inline sourcemaps with sources included
       url: 'inline',
-      includeSources: true,
-    },
+      includeSources: true
+    }
   })
 
   if (result.error) t.ifError(result.error)
@@ -50,17 +49,17 @@ async function validateBundleSourcemaps (t, bundle) {
 
   const sourceLines = bundle.code.split('\n')
   sourceLines.map(line => indicesOf(targetSlug, line))
-  .forEach((errorIndices, lineIndex) => {
+    .forEach((errorIndices, lineIndex) => {
     // if (errorIndex === null) return console.log('line does not contain "new Error"')
-    errorIndices.forEach((errorIndex) => {
-      const position = { line: lineIndex + 1, column: errorIndex }
-      const result = consumer.originalPositionFor(position)
-      if (!result.source) return t.fail(`missing source for position: ${position}`)
-      const sourceContent = consumer.sourceContentFor(result.source)
-      const sourceLines = sourceContent.split('\n')
-      const line = sourceLines[result.line - 1]
-      if (!line.includes(targetSlug)) t.fail(`could not find target "${targetSlug}" in source`)
+      errorIndices.forEach((errorIndex) => {
+        const position = { line: lineIndex + 1, column: errorIndex }
+        const result = consumer.originalPositionFor(position)
+        if (!result.source) return t.fail(`missing source for position: ${position}`)
+        const sourceContent = consumer.sourceContentFor(result.source)
+        const sourceLines = sourceContent.split('\n')
+        const line = sourceLines[result.line - 1]
+        if (!line.includes(targetSlug)) t.fail(`could not find target "${targetSlug}" in source`)
+      })
     })
-  })
   t.ok(true, 'sourcemaps look ok')
 }

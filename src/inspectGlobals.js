@@ -9,18 +9,18 @@ const moduleScope = [
   'arguments',
   // common in UMD builds
   'define',
-  'this',
+  'this'
 ]
 
 const globalRefs = [
   'global',
   'window',
-  'self',
+  'self'
 ]
 
 const ignoredGlobals = [
   // we handle this elsewhere
-  'global',
+  'global'
 ]
 
 const browserPlatformGlobals = [
@@ -120,8 +120,8 @@ const browserPlatformGlobals = [
   'File',
   'InstallTrigger',
   'MSStream',
-  'MediaStream', 
-  'RTCPeerConnection', 
+  'MediaStream',
+  'RTCPeerConnection',
   // etc
   'addEventListener',
   'removeEventListener',
@@ -150,11 +150,10 @@ const browserPlatformGlobals = [
   'scrollX',
   'scrollY',
   'top',
-  'MessageChannel',
+  'MessageChannel'
 ]
 
 module.exports = inspectGlobals
-
 
 function inspectGlobals (code, debugLabel) {
   const ast = acornGlobals.parse(code)
@@ -171,7 +170,7 @@ function inspectGlobals (code, debugLabel) {
       const memberExpressions = getMemberExpressionNesting(identifierNode)
       // if not used in any member expressions AND is not a global ref, expose as is
       if (!memberExpressions.length) {
-        // skip if global and only used for detecting presence 
+        // skip if global and only used for detecting presence
         if (globalRefs.includes(variableName) && isUndefinedCheck(identifierNode)) return
         maybeAddGlobalName(variableName)
         return
@@ -191,7 +190,7 @@ function inspectGlobals (code, debugLabel) {
   const sortedNames = globalNames.sort()
   // reduce to remove explicit results that overlap with higher results
   const reducedNames = reduceToTopmostApiCalls(sortedNames)
-  
+
   return reducedNames
 
   function maybeAddGlobalName (variableName, debugLabel) {
@@ -216,11 +215,10 @@ function inspectGlobals (code, debugLabel) {
     // add variable to results
     globalNames.push(variableName)
   }
-  
 }
 
 function getMemberExpressionNesting (identifierNode) {
-  const parents = identifierNode.parents.slice(0,-1)
+  const parents = identifierNode.parents.slice(0, -1)
   const memberExpressions = getTailmostMatchingChain(parents, isDirectMemberExpression).reverse()
   return memberExpressions
 }

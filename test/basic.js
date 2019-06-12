@@ -6,7 +6,7 @@ const {
   createBundleFromRequiresArray,
   createBundleFromRequiresArrayPath,
   createBundleFromEntry,
-  generateConfigFromFiles,
+  generateConfigFromFiles
 } = require('./util')
 
 test('basic - bundle works', async (t) => {
@@ -33,15 +33,15 @@ test('basic - config and bundle', async (t) => {
     // id must be full path
     id: './apple.js',
     deps: {
-      'banana': './node_modules/banana/index.js',
+      'banana': './node_modules/banana/index.js'
     },
     source: 'global.testResult = require("banana")()',
-    entry: true,
+    entry: true
   }, {
     // non-entry
     id: './node_modules/banana/index.js',
     deps: {},
-    source: 'module.exports = () => location.href',
+    source: 'module.exports = () => location.href'
   }]
   const config = await generateConfigFromFiles({ files })
   const prelude = generatePrelude({ endowmentsConfig: config })
