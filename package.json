@@ -42,7 +42,8 @@
   },
   "scripts": {
     "test": "node test",
-    "lint": "standard src test"
+    "lint": "standard src test",
+    "lint:fix": "standard src test --fix"
   },
   "author": "",
   "license": "ISC"
