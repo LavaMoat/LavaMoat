@@ -2,6 +2,7 @@ const fs = require('fs')
 const generatePrelude = require('./generatePrelude')
 const createCustomPack = require('../lib/browser-pack')
 const { createConfigSpy } = require('./generateConfig')
+const createPackageNameStream = require('./packageName')
 const { wrapIntoBundle } = require('./sourcemaps')
 
 /*  export a Browserify plugin  */
@@ -25,17 +26,20 @@ module.exports = function (browserify, pluginOpts) {
     // replace the standard browser-pack with our custom packer
     browserify.pipeline.splice('pack', 1, customPack)
 
+    // inject package name into module data
+    browserify.pipeline.splice('emit-deps', 0, createPackageNameStream())
+
     // helper to dump autoconfig to a file
     if (pluginOpts.writeAutoConfig) {
       const filename = pluginOpts.writeAutoConfig
       pluginOpts.autoConfig = function writeAutoConfig (config) {
         fs.writeFileSync(filename, config)
-        console.log(`Sesify Autoconfig - wrote to "${filename}"`)
+        console.warn(`Sesify Autoconfig - wrote to "${filename}"`)
       }
     }
     // if autoconfig activated, insert hook
     if (pluginOpts.autoConfig) {
-      browserify.pipeline.splice('label', 0, createConfigSpy({
+      browserify.pipeline.splice('emit-deps', 0, createConfigSpy({
         onResult: pluginOpts.autoConfig
       }))
     }
