@@ -36,11 +36,13 @@
     "from": "^0.1.7",
     "offset-sourcemap-lines": "^1.0.1",
     "source-map": "^0.7.3",
+    "standard": "^12.0.1",
     "tape-promise": "^4.0.0",
     "uglify-js": "^3.4.9"
   },
   "scripts": {
-    "test": "node test"
+    "test": "node test",
+    "lint": "standard src test"
   },
   "author": "",
   "license": "ISC"
