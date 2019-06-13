@@ -1,13 +1,18 @@
 // Sesify Prelude
-(function() {
+;(function() {
 
+  // define SES
+  const SES = (function(){
+    const module = {}
+    ;(function(){
 // START of injected code from sessDist
-  __sessDist__
+__sessDist__
 // END of injected code from sessDist
+    })()
+    return module.exports
+  })()
 
   const realm = SES.makeSESRootRealm()
-  // helper for setting up sesifyConfig
-  const sesEval = (code) => realm.evaluate(code)
 
   const sesifyConfig = (function(){
 // START of injected code from sesifyConfig
