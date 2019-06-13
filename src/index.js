@@ -1,4 +1,5 @@
 const fs = require('fs')
+const mergeDeep = require('merge-deep')
 const generatePrelude = require('./generatePrelude')
 const createCustomPack = require('../lib/browser-pack')
 const { createConfigSpy } = require('./generateConfig')
@@ -18,7 +19,17 @@ module.exports = function (browserify, pluginOpts) {
       pluginOpts.sesifyConfig = () => {
         // load latest config
         const filename = pluginOpts.config
-        return fs.readFileSync(filename, 'utf8')
+        const configSource = fs.readFileSync(filename, 'utf8')
+        // if override specified, merge
+        if (pluginOpts.configOverride) {
+          const filename = pluginOpts.configOverride
+          const configOverrideSource = fs.readFileSync(filename, 'utf8')
+          const initialConfig = JSON.parse(configSource)
+          const overrideConfig = JSON.parse(configOverrideSource)
+          const config = mergeDeep(initialConfig, overrideConfig)
+          return config
+        }
+        return configSource
       }
     }
 
@@ -28,6 +39,14 @@ module.exports = function (browserify, pluginOpts) {
 
     // inject package name into module data
     browserify.pipeline.splice('emit-deps', 0, createPackageNameStream())
+
+    // quick globalRef detect hack
+    browserify.pipeline.splice('emit-deps', 0, require('through2').obj((module,_,cb) => {
+      module.source = module.source
+        .split(`Function('return this')()`)
+        .join(`(global || self || window)`)
+        cb(null, module)
+    }))
 
     // helper to dump autoconfig to a file
     if (pluginOpts.writeAutoConfig) {
