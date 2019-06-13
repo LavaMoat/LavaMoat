@@ -12,7 +12,9 @@ __sessDist__
     return module.exports
   })()
 
-  const realm = SES.makeSESRootRealm()
+  const realm = SES.makeSESRootRealm({
+    mathRandomMode: 'allow',
+  })
 
   const sesifyConfig = (function(){
 // START of injected code from sesifyConfig
@@ -77,7 +79,7 @@ __sesifyConfig__
       const module = { exports: {} }
       localCache[moduleId] = module
       const moduleSource = moduleData[0]
-      const configForModule = getConfigForModule(sesifyConfig, moduleDepPath)
+      const configForModule = getConfigForPackage(sesifyConfig, moduleDepPath)
       const isEntryModule = moduleDepPath.length < 1
 
       // prepare endowments
@@ -87,20 +89,25 @@ __sesifyConfig__
       if (endowments.window) {
         endowments = Object.assign({}, endowments.window, endowments)
       }
-      // set global references, skip if from entry module
-      if (isEntryModule) {
-        endowments.global = globalRef
-        endowments.window = globalRef
-        endowments.self = globalRef
-      } else {
+
+      // const runInSes = !isEntryModule && !configForModule.skipSes
+      // const runInSes = true
+      const environment = configForModule.environment || 'frozen'
+      const runInSes = environment === 'frozen'
+
+      // set global references, skip if not run in SES
+      if (runInSes) {
         endowments.global = endowments
         endowments.window = endowments
         endowments.self = endowments
+      } else {
+        endowments.global = globalRef
+        endowments.window = globalRef
+        endowments.self = globalRef
       }
 
       // determine if its a SES-wrapped or naked module initialization
       let moduleInitializer
-      const runInSes = !isEntryModule && !configForModule.skipSes
       if (runInSes) {
         // set the module initializer as the SES-wrapped version
         moduleInitializer = realm.evaluate(`${moduleSource}`, endowments)
@@ -130,7 +137,10 @@ __sesifyConfig__
       moduleInitializer.call(module.exports, scopedRequire, module, module.exports, null, modulesProxy)
 
       // prevent module.exports from being modified
-      Object.freeze(module.exports)
+      const containment = configForModule.containment || 'freeze'
+      if (containment === 'freeze') {
+        Object.freeze(module.exports)
+      }
 
       // return the exports
       return module.exports
@@ -144,13 +154,14 @@ __sesifyConfig__
         // recursive requires dont hit cache so it inf loops, so we shortcircuit
         // this only seems to happen with the "timers" which uses and is used by "process"
         if (id === moduleId) {
-          if (requestedName !== 'timers') throw new Error('Sesify - recursive require detected')
+          if (['timers', 'buffer'].includes(requestedName) === false) throw new Error(`Sesify - recursive require detected: "${requestedName}"`)
           return module.exports
         }
         // update the dependency path for the child require
         const childDepPath = depPath.slice()
         childDepPath.push(requestedName)
-        return internalRequire(id, providedEndowments, childDepPath)
+        const moduleExports = internalRequire(id, providedEndowments, childDepPath)
+        return moduleExports
       }
     }
 
@@ -169,8 +180,8 @@ __sesifyConfig__
       return moduleDepPath
     }
 
-    function getConfigForModule (config, path) {
-      const packageName = path.slice(-1)[0]
+    function getConfigForPackage (config, path) {
+      const packageName = path.slice(-1)[0] || '<entry>'
       const packageConfig = (config.resources || {})[packageName] || {}
       return packageConfig
     }
