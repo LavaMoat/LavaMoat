@@ -6,18 +6,21 @@ const { createBundleFromRequiresArray } = require('./util')
 test('config - deep endow', async (t) => {
   const entries = [
     {
-      'id': '/one.js',
+      'id': 1,
+      'file': '/one.js',
       'source': "require('two');",
-      'deps': { 'two': '/node_modules/two/index.js' },
+      'deps': { 'two': 2 },
       'entry': true
     },
     {
-      'id': '/node_modules/two/index.js',
+      'id': 2,
+      'file': '/node_modules/two/index.js',
       'source': "require('three')",
-      'deps': { 'three': '/node_modules/three/index.js' }
+      'deps': { 'three': 3 }
     },
     {
-      'id': '/node_modules/three/index.js',
+      'id': 3,
+      'file': '/node_modules/three/index.js',
       'source': "window.postMessage('12345', '*')",
       'deps': {}
     }
