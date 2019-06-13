@@ -24,7 +24,12 @@ function generatePrelude (opts = {}) {
 function parseConfig (config) {
   switch (typeof config) {
     case 'string':
-      return config
+      // parse as json if possible, otherwise interpret as js
+      if (isJsonString(config)) {
+        return `return ${config}`
+      } else {
+        return config
+      }
     // allow sesifyConfig to be specified as a function for loading fresh result under watchify
     case 'function':
       return parseConfig(config())
@@ -35,5 +40,14 @@ function parseConfig (config) {
       return 'return {}'
     default:
       throw new Error('Sesify - unrecognized endowments config option')
+  }
+}
+
+function isJsonString (input) {
+  try {
+    JSON.parse(input)
+    return true
+  } catch (err) {
+    return false
   }
 }
