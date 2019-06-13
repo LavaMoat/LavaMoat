@@ -9,6 +9,8 @@ const toStream = require('mississippi').to.obj
 
 const sesifyPlugin = require('../src/index')
 const { createConfigSpy } = require('../src/generateConfig')
+const createPackageNameStream = require('../src/packageName')
+
 
 const { generatePrelude, createSesifyPacker } = sesifyPlugin
 const basicSesifyPrelude = generatePrelude()
@@ -60,6 +62,7 @@ async function filesToConfigSource ({ files }) {
     const sink = toStream((data, encoding, cb) => cb())
     pump(
       from(files),
+      createPackageNameStream(),
       configSpy,
       sink,
       (err) => {

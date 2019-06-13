@@ -31,15 +31,17 @@ test('basic - browserify plugin', async (t) => {
 test('basic - config and bundle', async (t) => {
   const files = [{
     // id must be full path
-    id: './apple.js',
+    id: 1,
+    file: './apple.js',
     deps: {
-      'banana': './node_modules/banana/index.js'
+      'banana': 2
     },
     source: 'global.testResult = require("banana")()',
     entry: true
   }, {
     // non-entry
-    id: './node_modules/banana/index.js',
+    id: 2,
+    file: './node_modules/banana/index.js',
     deps: {},
     source: 'module.exports = () => location.href'
   }]
