@@ -1,6 +1,6 @@
 # new todo
-- [ ] update SES
-  - [ ] some issue with prelude or SES kernel running in strict mode
+- [x] update SES
+  - [x] some issue with prelude or SES kernel running in strict mode
 - [x] shared instances of modules
   - [x] revert the seperation of eval / global injection
   - [x] update cache key generator
@@ -10,7 +10,12 @@
   - [x] config -> endowments in sesify prelude
   - [x] need tests that generate config then use it 
   - [x] cleanup old config generation
-  - [ ] get packageName from modules stream
+  - [x] get packageName from modules stream
+  - [ ] enforce configuration
+    - [ ] fail at buildtime if deps violation
+    - [x] enforce globals
+  - [x] allow easy override of configuration
+  - [ ] no longer de-duping overlapping namespaces?
 - [ ] cleanup prelude
 - [ ] try on metamask
 
