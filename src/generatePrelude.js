@@ -5,6 +5,7 @@
 // such as the upgradeable SES and app specific config.
 
 const fs = require('fs')
+const jsonStringify = require('json-stable-stringify')
 const preludeTemplate = fs.readFileSync(__dirname + '/preludeTemplate.js', 'utf8')
 const sessDist = fs.readFileSync(__dirname + '/../lib/ses.js', 'utf8')
 
@@ -28,7 +29,7 @@ function parseConfig (config) {
     case 'function':
       return parseConfig(config())
     case 'object':
-      const configJson = JSON.stringify(config, null, 2)
+      const configJson = jsonStringify(config, { space: 2 })
       return `return ${configJson}`
     case 'undefined':
       return 'return {}'

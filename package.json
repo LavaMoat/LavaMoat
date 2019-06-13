@@ -15,6 +15,7 @@
     "combine-source-map": "^0.8.0",
     "defined": "^1.0.0",
     "fromentries": "^1.1.0",
+    "json-stable-stringify": "^1.0.1",
     "lodash.flatmap": "^4.5.0",
     "mississippi": "^3.0.0",
     "module-name-from-path": "git+https://git@github.com/kumavis/module-name-from-path.git",

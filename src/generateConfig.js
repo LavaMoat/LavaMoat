@@ -1,5 +1,6 @@
 const through = require('through2')
 const fromEntries = require('fromentries')
+const jsonStringify = require('json-stable-stringify')
 
 const inspectGlobals = require('./inspectGlobals')
 
@@ -92,7 +93,7 @@ function generateConfig ({ packageToGlobals, packageToModules, moduleIdToPackage
     resources[packageName] = { modules, globals }
   })
 
-  return JSON.stringify(config, null, 2)
+  return jsonStringify(config, { space: 2 })
 }
 
 function createSpy (onData, onEnd) {
