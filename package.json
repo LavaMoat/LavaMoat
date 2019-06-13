@@ -17,6 +17,7 @@
     "fromentries": "^1.1.0",
     "json-stable-stringify": "^1.0.1",
     "lodash.flatmap": "^4.5.0",
+    "merge-deep": "^3.0.2",
     "mississippi": "^3.0.0",
     "module-name-from-path": "git+https://git@github.com/kumavis/module-name-from-path.git",
     "offset-sourcemap-lines": "^1.0.1",
