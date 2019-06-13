@@ -92,7 +92,7 @@ __sesifyConfig__
 
       // const runInSes = !isEntryModule && !configForModule.skipSes
       // const runInSes = true
-      const environment = configForModule.environment || 'frozen'
+      const environment = configForModule.environment || isEntryModule ? null : 'frozen'
       const runInSes = environment === 'frozen'
 
       // set global references, skip if not run in SES
