@@ -10,15 +10,15 @@ test('empty config', async (t) => {
 
 test('basic config', async (t) => {
   const files = [{
-    id: 1,
+    id: './apple.js',
     file: './apple.js',
     deps: {
-      'banana': 2
+      'banana': './node_modules/banana/index.js'
     },
     source: 'require("banana")'
   }, {
     // non-entry
-    id: 2,
+    id: './node_modules/banana/index.js',
     file: './node_modules/banana/index.js',
     deps: {},
     source: 'location.href'
@@ -44,16 +44,16 @@ test('basic config', async (t) => {
 test('config with skipped deps', async (t) => {
   const files = [{
     // id must be full path
-    id: 1,
+    id: './apple.js',
     file: './apple.js',
     deps: {
-      'banana': 2,
+      'banana': './node_modules/banana/index.js',
       'snakefruit': false
     },
     source: 'require("banana")'
   }, {
     // non-entry
-    id: 2,
+    id: './node_modules/banana/index.js',
     file: './node_modules/banana/index.js',
     deps: {},
     source: 'location.href'

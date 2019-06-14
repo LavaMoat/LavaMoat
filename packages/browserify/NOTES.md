@@ -16,8 +16,22 @@
     - [x] enforce globals
   - [x] allow easy override of configuration
   - [ ] no longer de-duping overlapping namespaces?
+- [ ] config moar
+  - [ ] container
+  - [ ] defensibility/hardening
+- [ ] mystery bugs
+  - [ ] `this.Object` gets transformed to `undefined.Object` in mm
 - [ ] cleanup prelude
-- [ ] try on metamask
+- [ ] sesify metamask
+  - [x] autogen config
+  - [x] setup build sys
+  - [ ] debug boot
+  - [ ] debug runtime
+- [ ] mark questions
+  - [ ] while `this` is container global, `self` is undefined
+- [ ] fix globalRefs
+  - [ ] fix objCheckSelf
+  - [ ] fix objCheckGlobal
 
 # berlin notes
 next TC39 meeting <<<----
