@@ -21,7 +21,8 @@ function extractSourceMaps (sourceCode) {
 }
 
 function transformToWrapped (bundle) {
-  const start = '(function(require,module,exports){\n'
+  const globalRef = 'const self = this; const global = this;'
+  const start = `${globalRef}\n(function(require,module,exports){\n`
   const end = '\n})'
 
   const offsetLinesCount = start.match(/\n/g).length
