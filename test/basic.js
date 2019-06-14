@@ -1,5 +1,6 @@
 const test = require('tape-promise').default(require('tape'))
 const pify = require('pify')
+const clone = require('clone')
 
 const { generatePrelude } = require('../src/index')
 const {
@@ -31,23 +32,23 @@ test('basic - browserify plugin', async (t) => {
 test('basic - config and bundle', async (t) => {
   const files = [{
     // id must be full path
-    id: 1,
+    id: './apple.js',
     file: './apple.js',
     deps: {
-      'banana': 2
+      'banana': './node_modules/banana/index.js',
     },
     source: 'global.testResult = require("banana")()',
     entry: true
   }, {
     // non-entry
-    id: 2,
+    id: './node_modules/banana/index.js',
     file: './node_modules/banana/index.js',
     deps: {},
     source: 'module.exports = () => location.href'
   }]
-  const config = await generateConfigFromFiles({ files })
-  const prelude = generatePrelude({ sesifyConfig: config })
-  const bundle = await createBundleFromRequiresArray(files, { sesifyConfig: config })
+  const sesifyConfig = await generateConfigFromFiles({ files: clone(files) })
+  const prelude = generatePrelude({ sesifyConfig })
+  const bundle = await createBundleFromRequiresArray(clone(files), { sesifyConfig })
 
   t.assert(prelude.includes('"banana": true'), 'prelude includes banana config')
   t.assert(bundle.includes(prelude), 'bundle includes expected prelude')

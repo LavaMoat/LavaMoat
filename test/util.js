@@ -1,19 +1,14 @@
-const fs = require('fs')
-const test = require('tape')
 const miss = require('mississippi')
 const browserify = require('browserify')
 const from = require('from')
 const pify = require('pify')
 const pump = require('pump')
-const toStream = require('mississippi').to.obj
+const clone = require('clone')
+const insertGlobals = require('insert-module-globals')
+const through2 = require('through2').obj
 
 const sesifyPlugin = require('../src/index')
-const { createConfigSpy } = require('../src/generateConfig')
-const createPackageNameStream = require('../src/packageName')
 
-
-const { generatePrelude, createSesifyPacker } = sesifyPlugin
-const basicSesifyPrelude = generatePrelude()
 
 module.exports = {
   createBundleFromEntry,
@@ -23,11 +18,11 @@ module.exports = {
   filesToConfigSource
 }
 
-async function createBundleFromEntry (path) {
-  const b = browserify({ plugin: sesifyPlugin })
-  b.add(path)
-  const src = await pify(cb => b.bundle(cb))()
-  return src.toString()
+async function createBundleFromEntry (path, sesifyConfig) {
+  const bundler = browserify()
+  bundler.add(path)
+  bundler.plugin(sesifyPlugin, sesifyConfig)
+  return bundleAsync(bundler)
 }
 
 async function createBundleFromRequiresArrayPath (path, sesifyConfig) {
@@ -35,15 +30,36 @@ async function createBundleFromRequiresArrayPath (path, sesifyConfig) {
   return createBundleFromRequiresArray(depsArray, sesifyConfig)
 }
 
-async function createBundleFromRequiresArray (depsArray, sesifyConfig) {
-  const packOpts = Object.assign({}, {
-    defaultEndowments: 'return {}'
-  }, sesifyConfig)
-  const pack = createSesifyPacker(packOpts)
+async function createBundleFromRequiresArray (files, sesifyConfig) {
+  const bundler = createBrowserifyFromRequiresArray({ files, sesifyConfig })
+  return bundleAsync(bundler)
+}
+
+function createBrowserifyFromRequiresArray ({ files, sesifyConfig }) {  
+  // empty bundle but inject modules at bundle time
+  const bundler = browserify()
+  bundler.plugin(sesifyPlugin, sesifyConfig)
+  let didInject = false
+  bundler.pipeline.splice('deps', 0, through2(null, null, async (cb) => {
+    const fileInsert = createFilesInsertStream({ files })
+    // setup listener for file insertion completion    
+    const promise = pify(cb => miss.finished(fileInsert, cb))()
+    // flow files into browserify
+    fileInsert.pipe(bundler.pipeline.get('json'))
+    // wait for files to flow in
+    await promise
+    // finally complete
+    cb()
+  }))
+  
+  return bundler
+}
+
+async function transformSourceInsertGlobals (source) {
   return new Promise((resolve, reject) => {
-    miss.pipe(
-      from(depsArray),
-      pack,
+    pump(
+      from([source]),
+      insertGlobals(),
       miss.concat((result) => resolve(result.toString())),
       (err) => { if (err) reject(err) }
     )
@@ -57,17 +73,35 @@ async function generateConfigFromFiles ({ files }) {
 }
 
 async function filesToConfigSource ({ files }) {
-  return new Promise((resolve, reject) => {
-    const configSpy = createConfigSpy({ onResult: resolve })
-    const sink = toStream((data, encoding, cb) => cb())
-    pump(
-      from(files),
-      createPackageNameStream(),
-      configSpy,
-      sink,
-      (err) => {
-        if (err) return reject(err)
-      }
-    )
+  let sesifyConfig
+  const promise = new Promise((resolve) => {
+    sesifyConfig = { autoConfig: resolve }
   })
+
+  const bundler = createBrowserifyFromRequiresArray({ files, sesifyConfig })
+  await bundleAsync(bundler)
+  const config = await promise
+  return config
+}
+
+async function bundleAsync (bundler) {  
+  const src = await pify(cb => bundler.bundle(cb))()
+  return src.toString()
+}
+
+function createTransformSourceInsertGlobalsStream () {
+  return through2(async (module, _, cb) => {
+    const transformed = await transformSourceInsertGlobals(module.source)
+    module.source = transformed
+    cb(null, module)
+  })
+}
+
+function createFilesInsertStream ({ files }) {
+  return miss.pipeline.obj(
+    // clone the files so they arent mutated
+    from(clone(files)),
+    // insert module globals, just like browserify
+    createTransformSourceInsertGlobalsStream(),
+  )
 }

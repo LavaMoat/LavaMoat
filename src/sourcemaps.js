@@ -21,7 +21,7 @@ function extractSourceMaps (sourceCode) {
 }
 
 function transformToWrapped (bundle) {
-  const globalRef = 'const self = this; const global = this;'
+  const globalRef = 'const self = this;'
   const start = `${globalRef}\n(function(require,module,exports){\n`
   const end = '\n})'
 

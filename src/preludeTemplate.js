@@ -62,7 +62,9 @@ __sesifyConfig__
 
       // parse requirePath for module boundries
       const moduleDepPath = toModuleDepPath(depPath)
+      const packageName = getPackageName(moduleDepPath)
       const moduleCacheSlug = moduleId
+
 
       // check our local cache, return exports if hit
       let localCache = globalCache[moduleCacheSlug]
@@ -79,7 +81,7 @@ __sesifyConfig__
       const module = { exports: {} }
       localCache[moduleId] = module
       const moduleSource = moduleData[0]
-      const configForModule = getConfigForPackage(sesifyConfig, moduleDepPath)
+      const configForModule = getConfigForPackage(sesifyConfig, packageName)
       const isEntryModule = moduleDepPath.length < 1
 
       // prepare endowments
@@ -96,15 +98,15 @@ __sesifyConfig__
       const runInSes = environment === 'frozen'
 
       // set global references, skip if not run in SES
-      if (runInSes) {
-        endowments.global = endowments
-        endowments.window = endowments
-        endowments.self = endowments
-      } else {
-        endowments.global = globalRef
-        endowments.window = globalRef
-        endowments.self = globalRef
-      }
+      // if (runInSes) {
+      //   endowments.global = endowments
+      //   endowments.window = endowments
+      //   endowments.self = endowments
+      // } else {
+      //   endowments.global = globalRef
+      //   endowments.window = globalRef
+      //   endowments.self = globalRef
+      // }
 
       // determine if its a SES-wrapped or naked module initialization
       let moduleInitializer
@@ -114,6 +116,9 @@ __sesifyConfig__
       } else {
         // set the module initializer as the unwrapped version
         moduleInitializer = unsafeEvalWithEndowments(`${moduleSource}`, endowments)
+      }
+      if (typeof moduleInitializer !== 'function') {
+        throw new Error('Sesify - moduleInitializer is not defined correctly')
       }
 
       // this "modules" interface is exposed to the moduleInitializer https://github.com/browserify/browser-pack/blob/master/prelude.js#L38
@@ -134,7 +139,12 @@ __sesifyConfig__
       })
 
       // initialize the module with the correct context
-      moduleInitializer.call(module.exports, scopedRequire, module, module.exports, null, modulesProxy)
+      try {
+        moduleInitializer.call(module.exports, scopedRequire, module, module.exports, null, modulesProxy)
+      } catch (err) {
+        console.warn(`Sesify - Error instantiating module "${moduleId}" from package "${packageName}"`)
+        throw err
+      }
 
       // prevent module.exports from being modified
       const containment = configForModule.containment || 'freeze'
@@ -154,14 +164,21 @@ __sesifyConfig__
         // recursive requires dont hit cache so it inf loops, so we shortcircuit
         // this only seems to happen with the "timers" which uses and is used by "process"
         if (id === moduleId) {
-          if (['timers', 'buffer'].includes(requestedName) === false) throw new Error(`Sesify - recursive require detected: "${requestedName}"`)
+          if (['timers', 'buffer'].includes(requestedName) === false) {
+            throw new Error(`Sesify - recursive require detected: "${requestedName}"`)
+          }
           return module.exports
         }
         // update the dependency path for the child require
         const childDepPath = depPath.slice()
         childDepPath.push(requestedName)
         const moduleExports = internalRequire(id, providedEndowments, childDepPath)
-        return moduleExports
+        if (typeof moduleExports === 'object') {
+          // return moduleExports
+          return Object.assign({}, moduleExports)
+        } else {
+          return moduleExports
+        }
       }
     }
 
@@ -180,10 +197,14 @@ __sesifyConfig__
       return moduleDepPath
     }
 
-    function getConfigForPackage (config, path) {
-      const packageName = path.slice(-1)[0] || '<entry>'
+    function getConfigForPackage (config, packageName) {
       const packageConfig = (config.resources || {})[packageName] || {}
       return packageConfig
+    }
+
+    function getPackageName (path) {
+      const packageName = path.slice(-1)[0] || '<entry>'
+      return packageName
     }
 
     function generateEndowmentsForConfig (config) {
