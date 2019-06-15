@@ -75,3 +75,42 @@ test('config with skipped deps', async (t) => {
     }
   }, 'config matches expected')
 })
+
+
+test('config ignores global refs', async (t) => {
+  const files = [{
+    // id must be full path
+    id: './entry.js',
+    file: './entry.js',
+    deps: {
+      'test': './node_modules/test/index.js'
+    },
+    source: 'require("test")'
+  }, {
+    // non-entry
+    id: './node_modules/test/index.js',
+    file: './node_modules/test/index.js',
+    deps: {},
+    source: `
+    const href = window.location.href;
+    const xhr = new window.XMLHttpRequest;
+    `
+  }]
+  const config = await generateConfigFromFiles({ files })
+
+  t.deepEqual(config, {
+    resources: {
+      '<root>': {
+        modules: {
+          'test': true
+        }
+      },
+      'test': {
+        globals: {
+          'location.href': true,
+          'XMLHttpRequest': true,
+        }
+      }
+    }
+  }, 'config matches expected')
+})
