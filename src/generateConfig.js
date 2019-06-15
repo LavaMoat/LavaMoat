@@ -9,8 +9,9 @@ const rootSlug = '<root>'
 module.exports = { rootSlug, createConfigSpy }
 
 const ignoredGlobals = [
-  // we point this at the global manually
+  // we point at these manually
   'self',
+  'window',
   // this is handled by SES
   'eval'
 ]

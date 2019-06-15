@@ -9,30 +9,18 @@ test('empty config', async (t) => {
 })
 
 test('basic config', async (t) => {
-  const files = [{
-    id: './apple.js',
-    file: './apple.js',
-    deps: {
-      'banana': './node_modules/banana/index.js'
-    },
-    source: 'require("banana")'
-  }, {
-    // non-entry
-    id: './node_modules/banana/index.js',
-    file: './node_modules/banana/index.js',
-    deps: {},
-    source: 'location.href'
-  }]
-  const config = await generateConfigFromFiles({ files })
+  const config = await createConfigForTest(`
+    location.href
+  `)
 
   t.deepEqual(config, {
     resources: {
       '<root>': {
         modules: {
-          'banana': true
+          'test': true
         }
       },
-      'banana': {
+      'test': {
         globals: {
           'location.href': true
         }
@@ -78,25 +66,10 @@ test('config with skipped deps', async (t) => {
 
 
 test('config ignores global refs', async (t) => {
-  const files = [{
-    // id must be full path
-    id: './entry.js',
-    file: './entry.js',
-    deps: {
-      'test': './node_modules/test/index.js'
-    },
-    source: 'require("test")'
-  }, {
-    // non-entry
-    id: './node_modules/test/index.js',
-    file: './node_modules/test/index.js',
-    deps: {},
-    source: `
+  const config = await createConfigForTest(`
     const href = window.location.href;
     const xhr = new window.XMLHttpRequest;
-    `
-  }]
-  const config = await generateConfigFromFiles({ files })
+  `)
 
   t.deepEqual(config, {
     resources: {
@@ -114,3 +87,55 @@ test('config ignores global refs', async (t) => {
     }
   }, 'config matches expected')
 })
+
+test('config ignores global refs when properties are not accessed', async (t) => {
+  const config = await createConfigForTest(`
+    typeof window !== undefined
+  `)
+
+  t.deepEqual(config, {
+    resources: {
+      '<root>': {
+        modules: {
+          'test': true
+        }
+      },
+    }
+  }, 'config matches expected')
+})
+
+test('config ignores global refs accessed with whitelist items', async (t) => {
+  const config = await createConfigForTest(`
+    window.Object === Object
+  `)
+
+  t.deepEqual(config, {
+    resources: {
+      '<root>': {
+        modules: {
+          'test': true
+        }
+      },
+    }
+  }, 'config matches expected')
+})
+
+async function createConfigForTest (testSource) {
+  const files = [{
+    // id must be full path
+    id: './entry.js',
+    file: './entry.js',
+    deps: {
+      'test': './node_modules/test/index.js'
+    },
+    source: 'require("test")'
+  }, {
+    // non-entry
+    id: './node_modules/test/index.js',
+    file: './node_modules/test/index.js',
+    deps: {},
+    source: testSource
+  }]
+  const config = await generateConfigFromFiles({ files })
+  return config
+}
