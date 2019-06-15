@@ -4,6 +4,10 @@
 - [x] shared instances of modules
   - [x] revert the seperation of eval / global injection
   - [x] update cache key generator
+- [x] mark question: while `this` is container global, `self` is undefined
+- [x] fix globalRefs
+  - [x] fix objCheckSelf
+  - [x] fix objCheckGlobal
 - [ ] new config
   - [x] make config like agoric prototype
   - [x] config is json
@@ -11,14 +15,17 @@
   - [x] need tests that generate config then use it 
   - [x] cleanup old config generation
   - [x] get packageName from modules stream
+  - [x] allow easy override of configuration
+  - [ ] no longer de-duping overlapping namespaces?
+- [ ] config advanced
+  - [ ] environment/container options
+    - [ ] autogen config from "alt environment heuristics"
+  - [ ] defensibility/hardening options
+    - [ ] harden/deep-freeze exports (needs test)
+    - [x] require time, magic copy as default
   - [ ] enforce configuration
     - [ ] fail at buildtime if deps violation
     - [x] enforce globals
-  - [x] allow easy override of configuration
-  - [ ] no longer de-duping overlapping namespaces?
-- [ ] config moar
-  - [ ] container
-  - [ ] defensibility/hardening
 - [ ] mystery bugs
   - [ ] `this.Object` gets transformed to `undefined.Object` in mm
 - [ ] cleanup prelude
@@ -27,13 +34,32 @@
   - [x] setup build sys
   - [ ] debug boot
   - [ ] debug runtime
-- [ ] mark questions
-  - [ ] while `this` is container global, `self` is undefined
-- [ ] fix globalRefs
-  - [ ] fix objCheckSelf
-  - [ ] fix objCheckGlobal
 - [ ] improve pluginOpts
   - [ ] config vs sesifyConfig
+
+### alt environment heuristics
+```js
+<obj>.hasOwnProperty = <value>
+<obj>.toString = <value>
+```
+
+### cli testing
+eval in sesify bundle
+```
+echo 'console.log(self.process === process)' | browserify - --detect-globals false --no-builtins -p [ './src/index.js' --sesifyConfig '{"resources":{"<entry>":{"globals":{"console":true,"process":true}}}}' ] | node
+```
+eval in ses
+```
+node -p "try { require('ses').makeSESRootRealm().evaluate('const x = {}; x.hasOwnProperty = ()=>{}') } catch (err) { console.log(err.message) }"
+```
+npm bug workaround
+```
+npm unlink sesify && npm i && npm link sesify
+```
+
+### trail of dead
+- https://github.com/substack/node-deep-equal/issues/62
+- https://github.com/Starcounter-Jack/JSON-Patch/pull/227
 
 # berlin notes
 next TC39 meeting <<<----
