@@ -32,6 +32,8 @@
 - [ ] fix globalRefs
   - [ ] fix objCheckSelf
   - [ ] fix objCheckGlobal
+- [ ] improve pluginOpts
+  - [ ] config vs sesifyConfig
 
 # berlin notes
 next TC39 meeting <<<----
