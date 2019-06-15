@@ -87,26 +87,16 @@ __sesifyConfig__
       // prepare endowments
       const endowmentsFromConfig = generateEndowmentsForConfig(configForModule)
       let endowments = Object.assign({}, sesifyConfig.defaultGlobals, providedEndowments, endowmentsFromConfig)
+      // special circular reference for endowments to fix globalRef in SES
+      // see https://github.com/Agoric/SES/issues/123
+      endowments._endowments = endowments
       // special case for exposing window
       if (endowments.window) {
         endowments = Object.assign({}, endowments.window, endowments)
       }
 
-      // const runInSes = !isEntryModule && !configForModule.skipSes
-      // const runInSes = true
       const environment = configForModule.environment || isEntryModule ? null : 'frozen'
       const runInSes = environment === 'frozen'
-
-      // set global references, skip if not run in SES
-      // if (runInSes) {
-      //   endowments.global = endowments
-      //   endowments.window = endowments
-      //   endowments.self = endowments
-      // } else {
-      //   endowments.global = globalRef
-      //   endowments.window = globalRef
-      //   endowments.self = globalRef
-      // }
 
       // determine if its a SES-wrapped or naked module initialization
       let moduleInitializer

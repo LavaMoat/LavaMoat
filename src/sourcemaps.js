@@ -21,8 +21,15 @@ function extractSourceMaps (sourceCode) {
 }
 
 function transformToWrapped (bundle) {
-  const globalRef = 'const self = this;'
-  const start = `${globalRef}\n(function(require,module,exports){\n`
+  const setupGlobalRef = [
+    // create new global obj
+    'const self = {}, window = self;',
+    // copy properties from actual endowments and global
+    // see https://github.com/Agoric/SES/issues/123
+    'Object.defineProperties(self, Object.getOwnPropertyDescriptors(_endowments));',
+    'Object.defineProperties(self, Object.getOwnPropertyDescriptors(this));',
+  ].join('\n')
+  const start = `${setupGlobalRef}\n(function(require,module,exports){\n`
   const end = '\n})'
 
   const offsetLinesCount = start.match(/\n/g).length

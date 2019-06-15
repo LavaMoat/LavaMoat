@@ -40,7 +40,7 @@ test('config - deep endow', async (t) => {
       },
       'three': {
         globals: {
-          'window.postMessage': true
+          'postMessage': true
         }
       }
     }
@@ -49,7 +49,7 @@ test('config - deep endow', async (t) => {
   const bundle = await createBundleFromRequiresArray(entries, { sesifyConfig: config })
 
   let testResult
-  global.window = { postMessage: (message) => { testResult = message } }
+  global.postMessage = (message) => { testResult = message }
   try {
     eval(bundle)
   } catch (err) {
