@@ -183,10 +183,15 @@ __sesifyConfig__
     }
 
     function magicCopy (target, source) {
-      const props = Object.getOwnPropertyDescriptors(source)
-      // cant override prototype
-      delete props.prototype
-      Object.defineProperties(target, props)
+      try {
+        const props = Object.getOwnPropertyDescriptors(source)
+        // cant override prototype
+        delete props.prototype
+        Object.defineProperties(target, props)
+      } catch (err) {
+        console.warn('Sesify - Error performing magic copy:', err.message)
+        throw err
+      }
       return target
     }
 

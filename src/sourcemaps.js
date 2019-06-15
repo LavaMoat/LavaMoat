@@ -26,8 +26,13 @@ function transformToWrapped (bundle) {
     'const self = {}, window = self;',
     // copy properties from actual endowments and global
     // see https://github.com/Agoric/SES/issues/123
-    'Object.defineProperties(self, Object.getOwnPropertyDescriptors(_endowments));',
-    'Object.defineProperties(self, Object.getOwnPropertyDescriptors(this));',
+    'try {',
+    '  Object.defineProperties(self, Object.getOwnPropertyDescriptors(_endowments));',
+    '  Object.defineProperties(self, Object.getOwnPropertyDescriptors(this));',
+    '} catch (err) {',
+    '  console.warn(`Sesify - Error performing globalRef setup:`, err.message)',
+    '  throw err',
+    '}',
   ].join('\n')
   const start = `${setupGlobalRef}\n(function(require,module,exports){\n`
   const end = '\n})'
