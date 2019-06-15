@@ -163,13 +163,31 @@ __sesifyConfig__
         const childDepPath = depPath.slice()
         childDepPath.push(requestedName)
         const moduleExports = internalRequire(id, providedEndowments, childDepPath)
-        if (typeof moduleExports === 'object') {
-          // return moduleExports
-          return Object.assign({}, moduleExports)
-        } else {
-          return moduleExports
+        // create a mutable copy
+        switch (typeof moduleExports) {
+          case 'object':
+            return magicCopy({}, moduleExports)
+          case 'function':
+            let copy
+            if (Function.prototype.toString.call(moduleExports).includes('class')) {
+                copy = class ClassCopy extends moduleExports {}
+              } else {
+                copy = function () { return moduleExports.apply(this, arguments) }
+              }
+              return magicCopy(copy, moduleExports)
+          default:
+            // maybe safe?
+            return moduleExports
         }
       }
+    }
+
+    function magicCopy (target, source) {
+      const props = Object.getOwnPropertyDescriptors(source)
+      // cant override prototype
+      delete props.prototype
+      Object.defineProperties(target, props)
+      return target
     }
 
     function toModuleDepPath (depPath) {
