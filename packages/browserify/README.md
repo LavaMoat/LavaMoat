@@ -11,7 +11,7 @@ It attempts to reduce this risk in three ways:
 
 1 and 2 are provided by the SES container. Platform access can be passed in via configuration.
 
-3 is achieved by providing a fresh instantiation of each `require`'d module each time its requested.
+3 is achieved by providing a mutable copy of the `require`'d module's exports. Mutating the module's copy of the exports does not affect other modules.
 
 
 [BrowserifyGithub]: https://github.com/browserify/browserify
