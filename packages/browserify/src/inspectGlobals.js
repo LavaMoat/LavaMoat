@@ -157,8 +157,7 @@ const browserPlatformGlobals = [
 
 module.exports = inspectGlobals
 
-function inspectGlobals (code) {
-  const ast = acornGlobals.parse(code)
+function inspectGlobals (ast) {
   const detectedGlobals = acornGlobals(ast)
   const globalNames = []
 

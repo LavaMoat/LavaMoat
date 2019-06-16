@@ -2,13 +2,13 @@ const test = require('tape-promise').default(require('tape'))
 
 const { generateConfigFromFiles } = require('./util')
 
-test('empty config', async (t) => {
+test('generateConfig - empty config', async (t) => {
   const files = []
   const config = await generateConfigFromFiles({ files })
   t.deepEqual(config, { resources: {} }, 'config matches expected')
 })
 
-test('basic config', async (t) => {
+test('generateConfig - basic config', async (t) => {
   const config = await createConfigForTest(`
     location.href
   `)
@@ -29,7 +29,7 @@ test('basic config', async (t) => {
   }, 'config matched expected')
 })
 
-test('config with skipped deps', async (t) => {
+test('generateConfig - config with skipped deps', async (t) => {
   const files = [{
     // id must be full path
     id: './apple.js',
@@ -65,7 +65,7 @@ test('config with skipped deps', async (t) => {
 })
 
 
-test('config ignores global refs', async (t) => {
+test('generateConfig - config ignores global refs', async (t) => {
   const config = await createConfigForTest(`
     const href = window.location.href;
     const xhr = new window.XMLHttpRequest;
@@ -88,7 +88,7 @@ test('config ignores global refs', async (t) => {
   }, 'config matches expected')
 })
 
-test('config ignores global refs when properties are not accessed', async (t) => {
+test('generateConfig - config ignores global refs when properties are not accessed', async (t) => {
   const config = await createConfigForTest(`
     typeof window !== undefined
   `)
@@ -104,7 +104,7 @@ test('config ignores global refs when properties are not accessed', async (t) =>
   }, 'config matches expected')
 })
 
-test('config ignores global refs accessed with whitelist items', async (t) => {
+test('generateConfig - config ignores global refs accessed with whitelist items', async (t) => {
   const config = await createConfigForTest(`
     window.Object === Object
   `)
@@ -116,6 +116,48 @@ test('config ignores global refs accessed with whitelist items', async (t) => {
           'test': true
         }
       },
+    }
+  }, 'config matches expected')
+})
+
+test('generateConfig - unfrozen environment - primordial modification', async (t) => {
+  const config = await createConfigForTest(`
+    const href = window.location.href;
+    Array.prototype.bogosort = () => 'yolo';
+  `)
+
+  t.deepEqual(config, {
+    resources: {
+      '<root>': {
+        modules: {
+          'test': true
+        }
+      },
+      'test': {
+        globals: {
+          'location.href': true,
+        },
+        environment: 'unfrozen'
+      }
+    }
+  }, 'config matches expected')
+})
+
+test('generateConfig - unfrozen environment - protected names', async (t) => {
+  const config = await createConfigForTest(`
+    module.exports.toString = () => 'cant do this when frozen';
+  `)
+
+  t.deepEqual(config, {
+    resources: {
+      '<root>': {
+        modules: {
+          'test': true
+        }
+      },
+      'test': {
+        environment: 'unfrozen'
+      }
     }
   }, 'config matches expected')
 })
