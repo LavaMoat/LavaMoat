@@ -3,7 +3,8 @@
 
   // define SES
   const SES = (function(){
-    const module = {}
+    const exports = {}
+    const module = { exports }
     ;(function(){
 // START of injected code from sessDist
 __sessDist__
