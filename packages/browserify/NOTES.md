@@ -19,7 +19,8 @@
   - [ ] no longer de-duping overlapping namespaces? (needs test)
 - [ ] config advanced
   - [ ] environment/container options
-    - [ ] autogen config from "alt environment heuristics"
+    - [x] autogen config from "alt environment heuristics"
+    - [ ] execute unfrozen in fresh realm
   - [ ] defensibility/hardening options
     - [ ] harden/deep-freeze exports (needs test)
     - [x] require time, magic copy as default
@@ -34,8 +35,14 @@
   - [x] setup build sys
   - [ ] debug boot
   - [ ] debug runtime
+  - [ ] gulp task for autogen
 - [ ] improve pluginOpts
   - [ ] config vs sesifyConfig
+  - [ ] if autoconfig, use that config
+- [ ] question
+  - [ ] sesify with unfrozen realm
+    - should be on Realm.evaluate, verify
+  - [x] how to create a copy of a fn class
 
 ### alt environment heuristics
 ```js

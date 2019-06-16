@@ -84,7 +84,11 @@ test('moduleExports - decorate an import - function class', async (t) => {
     source: `
       const FunctionClass = require('test')
       const instance = new FunctionClass()
-      global.testResult = { abc: instance.abc, xyz: FunctionClass.xyz }
+      global.testResult = {
+        abc: instance.abc,
+        jkl: instance.jkl(),
+        xyz: FunctionClass.xyz,
+      }
     `,
     entry: true
   }, {
@@ -107,11 +111,12 @@ test('moduleExports - decorate an import - function class', async (t) => {
     source: `
       module.exports = FunctionClass
       function FunctionClass () { this.abc = 123 }
+      FunctionClass.prototype.jkl = () => 'yes'
     `,
   }]
 
   const result = await evalModulesArray(t, { files })
-  t.deepEqual(result, { abc: 123, xyz: 42 })
+  t.deepEqual(result, { abc: 123, jkl: 'yes', xyz: 42 })
 })
 
 test('moduleExports - decorate an import - class syntax', async (t) => {
@@ -125,7 +130,12 @@ test('moduleExports - decorate an import - class syntax', async (t) => {
     source: `
       const ModernClass = require('test')
       const instance = new ModernClass()
-      global.testResult = { abc: instance.abc, xyz: ModernClass.xyz }
+      
+      global.testResult = {
+        abc: instance.abc,
+        jkl: ModernClass.jkl,
+        xyz: ModernClass.xyz,
+       }
     `,
     entry: true
   }, {
@@ -151,12 +161,78 @@ test('moduleExports - decorate an import - class syntax', async (t) => {
           this.abc = 123
         }
       }
+      ModernClass.jkl = 101
       module.exports = ModernClass
     `,
   }]
 
   const result = await evalModulesArray(t, { files })
-  t.deepEqual(result, { abc: 123, xyz: 42 })
+  t.deepEqual(result, {
+    abc: 123,
+    jkl: 101,
+    xyz: 42
+  })
+})
+
+
+test('moduleExports - decorate an import - class syntax subclass', async (t) => {
+  const files = [{
+    // id must be full path
+    id: './entry.js',
+    file: './entry.js',
+    deps: {
+      'test': './node_modules/test/index.js'
+    },
+    source: `
+      const NewClass = require('test')
+      const instance = new NewClass()
+      
+      global.testResult = {
+        abc: instance.abc,
+        jkl: NewClass.jkl,
+       }
+    `,
+    entry: true
+  }, {
+    // non-entry
+    id: './node_modules/test/index.js',
+    file: './node_modules/test/index.js',
+    deps: {
+      './alt': './node_modules/test/alt.js'
+    },
+    source: `
+      const BaseClass = require('./alt')
+      
+      class NewClass extends BaseClass {
+        constructor () {
+          super()
+          this.abc = 456
+        }
+      }
+
+      module.exports = NewClass
+    `,
+  }, {
+    // non-entry
+    id: './node_modules/test/alt.js',
+    file: './node_modules/test/alt.js',
+    deps: {},
+    source: `
+      class BaseClass {
+        constructor () {
+          this.abc = 123
+        }
+      }
+      BaseClass.jkl = 101
+      module.exports = BaseClass
+    `,
+  }]
+
+  const result = await evalModulesArray(t, { files })
+  t.deepEqual(result, {
+    abc: 456,
+    jkl: 101,
+  })
 })
 
 async function evalModulesArray (t, { files, pluginOpts = {} }) {
