@@ -16,7 +16,7 @@
   - [x] cleanup old config generation
   - [x] get packageName from modules stream
   - [x] allow easy override of configuration
-  - [ ] no longer de-duping overlapping namespaces?
+  - [ ] no longer de-duping overlapping namespaces? (needs test)
 - [ ] config advanced
   - [ ] environment/container options
     - [ ] autogen config from "alt environment heuristics"

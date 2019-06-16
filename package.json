@@ -12,6 +12,7 @@
   "dependencies": {
     "JSONStream": "^1.3.5",
     "acorn-globals": "^4.3.0",
+    "acorn-walk": "^6.1.1",
     "combine-source-map": "^0.8.0",
     "defined": "^1.0.0",
     "fromentries": "^1.1.0",

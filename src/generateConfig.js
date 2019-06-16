@@ -1,10 +1,13 @@
 const through = require('through2')
 const fromEntries = require('fromentries')
 const jsonStringify = require('json-stable-stringify')
+const acornGlobals = require('acorn-globals')
 
 const inspectGlobals = require('./inspectGlobals')
+const { inspectEnvironment, environmentTypes, environmentTypeStrings } = require('./inspectEnvironment')
 
 const rootSlug = '<root>'
+const defaultEnvironment = environmentTypes.frozen
 
 module.exports = { rootSlug, createConfigSpy }
 
@@ -21,6 +24,7 @@ const ignoredGlobals = [
 // it calls `onResult` with the config when the stream ends.
 
 function createConfigSpy ({ onResult }) {
+  const packageToEnvironments = {}
   const packageToGlobals = {}
   const packageToModules = {}
   const moduleIdToPackageName = {}
@@ -38,7 +42,22 @@ function createConfigSpy ({ onResult }) {
     const isDependency = packageName === rootSlug
     if (isDependency) return
     // gather config info
-    const foundGlobals = inspectGlobals(module.source, packageName)
+    const ast = acornGlobals.parse(module.source)
+    // get global usage
+    inspectForGlobals(ast, packageName)
+    // get eval environment
+    inspectForEnvironment(ast, packageName)
+  }
+
+  function inspectForEnvironment (ast, packageName) {
+    const result = inspectEnvironment(ast, packageName)
+    // initialize results for package
+    const environments = packageToEnvironments[packageName] = packageToEnvironments[packageName] || []
+    environments.push(result)
+  }
+
+  function inspectForGlobals (ast, packageName) {
+    const foundGlobals = inspectGlobals(ast, packageName)
     const globalNames = foundGlobals.filter(name => !ignoredGlobals.includes(name))
     // skip if no results
     if (!globalNames.length) return
@@ -51,9 +70,40 @@ function createConfigSpy ({ onResult }) {
     }
   }
 
+  function generateConfig () {
+    const resources = {}
+    const config = { resources }
+    Object.entries(packageToModules).forEach(([packageName, packageModules]) => {
+      let globals, modules, environment
+      // get dependencies
+      const packageDeps = aggregateDeps({ packageModules, moduleIdToPackageName })
+      if (packageDeps.length) {
+        modules = fromEntries(packageDeps.map(dep => [dep, true]))
+      }
+      // get globals
+      if (packageToGlobals[packageName]) {
+        const detectedGlobals = Array.from(packageToGlobals[packageName].values())
+        globals = fromEntries(detectedGlobals.map(globalPath => [globalPath, true]))
+      }
+      // get environment
+      const environments = packageToEnvironments[packageName]
+      if (environments) {
+        const bestEnvironment = environments.sort()[environments.length-1]
+        const isDefault = bestEnvironment === defaultEnvironment
+        environment = isDefault ? undefined : environmentTypeStrings[bestEnvironment]
+      }
+      // skip package config if there are no settings needed
+      if (!modules && !globals && !environment) return
+      // set config for package
+      resources[packageName] = { modules, globals, environment }
+    })
+
+    return jsonStringify(config, { space: 2 })
+  }
+
   function onBuildEnd () {
     // generate the final config
-    const config = generateConfig({ packageToGlobals, packageToModules, moduleIdToPackageName })
+    const config = generateConfig()
     // report result
     onResult(config)
   }
@@ -71,30 +121,6 @@ function aggregateDeps ({ packageModules, moduleIdToPackageName }) {
   })
   const depsArray = Array.from(deps.values())
   return depsArray
-}
-
-function generateConfig ({ packageToGlobals, packageToModules, moduleIdToPackageName }) {
-  const resources = {}
-  const config = { resources }
-  Object.entries(packageToModules).forEach(([packageName, packageModules]) => {
-    let globals, modules
-    // get dependencies
-    const packageDeps = aggregateDeps({ packageModules, moduleIdToPackageName })
-    if (packageDeps.length) {
-      modules = fromEntries(packageDeps.map(dep => [dep, true]))
-    }
-    // get globals
-    if (packageToGlobals[packageName]) {
-      const detectedGlobals = Array.from(packageToGlobals[packageName].values())
-      globals = fromEntries(detectedGlobals.map(globalPath => [globalPath, true]))
-    }
-    // skip package config if there are no settings needed
-    if (!modules && !globals) return
-    // set config for package
-    resources[packageName] = { modules, globals }
-  })
-
-  return jsonStringify(config, { space: 2 })
 }
 
 function createSpy (onData, onEnd) {
