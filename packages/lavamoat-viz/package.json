@@ -2,7 +2,6 @@
   "name": "test",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://kumavis.github.io/metamask-deps-explorer",
   "dependencies": {
     "@babel/core": "7.2.2",
     "@svgr/webpack": "4.1.0",
@@ -67,7 +66,7 @@
     "start": "node scripts/start.js",
     "build": "node scripts/build.js",
     "test": "node scripts/test.js",
-    "deploy": "gh-pages -d build"
+    "deploy": "npm run build && gh-pages -d build"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -130,5 +129,17 @@
   "devDependencies": {
     "gh-pages": "^2.0.1",
     "source-map-explorer": "^1.8.0"
-  }
+  },
+  "description": "This is an experiment in exploring metamask's js bundles and dependency graph. See it here: https://kumavis.github.io/metamask-deps-explorer-sesify",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kumavis/metamask-deps-explorer-sesify.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kumavis/metamask-deps-explorer-sesify/issues"
+  },
+  "homepage": "https://kumavis.github.io/metamask-deps-explorer-sesify"
 }
