@@ -7,7 +7,7 @@
 const fs = require('fs')
 const jsonStringify = require('json-stable-stringify')
 const preludeTemplate = fs.readFileSync(__dirname + '/preludeTemplate.js', 'utf8')
-const sessDist = fs.readFileSync(__dirname + '/../node_modules/ses/dist/ses.umd.js', 'utf8')
+const sessDist = fs.readFileSync(__dirname + '/../lib/ses.umd.js', 'utf8')
 
 module.exports = generatePrelude
 
