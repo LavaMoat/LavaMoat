@@ -168,15 +168,18 @@ __sesifyConfig__
           case 'object':
             return magicCopy({}, moduleExports)
           case 'function':
-            let copy
-            if (Function.prototype.toString.call(moduleExports).includes('class')) {
-                copy = class ClassCopy extends moduleExports {}
+            // supports both normal functions and both styles of classes
+            const copy = function (...args) {
+              if (new.target) {
+                return Reflect.construct(moduleExports, args, new.target)
               } else {
-                copy = function () { return moduleExports.apply(this, arguments) }
+                return Reflect.apply(moduleExports, this, args)
               }
-              return magicCopy(copy, moduleExports)
+            }
+            magicCopy(copy, moduleExports)
+            return copy
           default:
-            // maybe safe?
+            // safe as is
             return moduleExports
         }
       }
@@ -185,9 +188,8 @@ __sesifyConfig__
     function magicCopy (target, source) {
       try {
         const props = Object.getOwnPropertyDescriptors(source)
-        // cant override prototype
-        delete props.prototype
         Object.defineProperties(target, props)
+        Reflect.setPrototypeOf(target, Reflect.getPrototypeOf(source))
       } catch (err) {
         console.warn('Sesify - Error performing magic copy:', err.message)
         throw err
