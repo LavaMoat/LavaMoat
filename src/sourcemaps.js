@@ -1,14 +1,14 @@
 const convertSourceMap = require('convert-source-map')
 const offsetSourcemapLines = require('offset-sourcemap-lines')
 
-module.exports = { wrapIntoBundle }
+module.exports = { wrapIntoModuleInitializer }
 
-function wrapIntoBundle (source) {
+function wrapIntoModuleInitializer (source) {
   // extract sourcemaps
-  const sourceBundle = extractSourceMaps(source)
+  const sourceMeta = extractSourceMaps(source)
   // create wrapper + update sourcemaps
-  const transformedBundle = transformToWrapped(sourceBundle)
-  return transformedBundle
+  const newSourceMeta = transformToWrapped(sourceMeta)
+  return newSourceMeta
 }
 
 function extractSourceMaps (sourceCode) {
@@ -20,7 +20,7 @@ function extractSourceMaps (sourceCode) {
   return { code, maps }
 }
 
-function transformToWrapped (bundle) {
+function transformToWrapped (sourceMeta) {
   // create the wrapper around the module content
   // 1. create new global obj
   // 2. copy properties from actual endowments and global
@@ -38,14 +38,19 @@ function transformToWrapped (bundle) {
     throw err
   }
   return function (require,module,exports) {
+    try {
 __MODULE_CONTENT__
+    } catch (err) {
+      if (console) console.warn(err.stack || err.message)
+      throw err
+    }
   }
 }}).call(this)`
 
   const [start, end] = moduleWrapperSource.split('__MODULE_CONTENT__')
   const offsetLinesCount = start.match(/\n/g).length
-  const maps = bundle.maps && offsetSourcemapLines(bundle.maps, offsetLinesCount)
-  const code = `${start}${bundle.code}${end}`
-
-  return { code, maps }
+  const maps = sourceMeta.maps && offsetSourcemapLines(sourceMeta.maps, offsetLinesCount)
+  const code = `${start}${sourceMeta.code}${end}`
+  const newSourceMeta = { code, maps }
+  return newSourceMeta
 }

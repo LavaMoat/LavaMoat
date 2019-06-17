@@ -4,7 +4,7 @@ const generatePrelude = require('./generatePrelude')
 const createCustomPack = require('../lib/browser-pack')
 const { createConfigSpy } = require('./generateConfig')
 const createPackageNameStream = require('./packageName')
-const { wrapIntoBundle } = require('./sourcemaps')
+const { wrapIntoModuleInitializer } = require('./sourcemaps')
 
 /*  export a Browserify plugin  */
 module.exports = function (browserify, pluginOpts) {
@@ -66,7 +66,7 @@ function createSesifyPacker (opts) {
     raw: true,
     prelude: generatePrelude(opts),
     generateModuleInitializer: (row) => {
-      const wrappedBundle = wrapIntoBundle(row.source)
+      const wrappedBundle = wrapIntoModuleInitializer(row.source)
       const sourceMappingURL = onSourcemap(row, wrappedBundle)
       // for now, ignore new sourcemap and just append original filename
       let moduleInitSrc = wrappedBundle.code

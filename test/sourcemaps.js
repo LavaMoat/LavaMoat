@@ -1,7 +1,7 @@
 const test = require('tape')
 const UglifyJS = require('uglify-js')
 const { SourceMapConsumer } = require('source-map')
-const { wrapIntoBundle } = require('../src/sourcemaps')
+const { wrapIntoModuleInitializer } = require('../src/sourcemaps')
 
 test('sourcemaps - adjust maps for wrapper', async (t) => {
   const fooSource = (`
@@ -28,8 +28,8 @@ test('sourcemaps - adjust maps for wrapper', async (t) => {
   t.equal(indicesOf('\n', result.code).length, 1)
 
   // wrap into bundle with external sourcemaps
-  const wrappedBundle = wrapIntoBundle(result.code)
-  await validateBundleSourcemaps(t, wrappedBundle)
+  const wrappedSourceMeta = wrapIntoModuleInitializer(result.code)
+  await validateSourcemaps(t, wrappedSourceMeta)
   
   t.end()
 })
@@ -42,14 +42,14 @@ function indicesOf (substring, string) {
 }
 
 // this is not perfecct - just a heuristic
-async function validateBundleSourcemaps (t, bundle) {
+async function validateSourcemaps (t, sourceMeta) {
   const targetSlug = 'new Error'
-  const consumer = await new SourceMapConsumer(bundle.maps)
+  const consumer = await new SourceMapConsumer(sourceMeta.maps)
   t.ok(consumer.hasContentsOfAllSources(), 'has the contents of all sources')
 
-  const bundleLines = bundle.code.split('\n')
+  const sourceLines = sourceMeta.code.split('\n')
 
-  bundleLines
+  sourceLines
     .map(line => indicesOf(targetSlug, line))
     .forEach((errorIndices, lineIndex) => {
     // if (errorIndex === null) return console.log('line does not contain "new Error"')
@@ -59,7 +59,7 @@ async function validateBundleSourcemaps (t, bundle) {
         if (!result.source) {
           t.fail(`missing source for position: ${JSON.stringify(position)}`)
           console.warn('=======')
-          console.warn(contentForPosition(bundleLines, position))
+          console.warn(contentForPosition(sourceLines, position))
           console.warn('=======')
           return
         }
