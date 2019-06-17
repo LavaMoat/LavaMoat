@@ -38,12 +38,7 @@ function transformToWrapped (sourceMeta) {
     throw err
   }
   return function (require,module,exports) {
-    try {
 __MODULE_CONTENT__
-    } catch (err) {
-      if (console) console.warn(err.stack || err.message)
-      throw err
-    }
   }
 }}).call(this)`
 
