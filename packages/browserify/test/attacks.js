@@ -31,14 +31,14 @@ test('attack - limit platform api', async (t) => {
     {
       'id': '/1.js',
       'file': '/1.js',
-      'source': "global.testResult = !!require('foo')",
+      'source': "global.testResult = typeof require('foo') === 'function'",
       'deps': { 'foo': '/node_modules/2/index.js' },
       'entry': true
     },
     {
       'id': '/node_modules/2/index.js',
       'file': '/node_modules/2/index.js',
-      'source': 'module.exports = console',
+      'source': 'try { module.exports = setTimeout } catch (_) {}',
       'deps': {}
     }
   ]
