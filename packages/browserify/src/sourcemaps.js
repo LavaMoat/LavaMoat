@@ -21,25 +21,31 @@ function extractSourceMaps (sourceCode) {
 }
 
 function transformToWrapped (bundle) {
-  const setupGlobalRef = [
-    // create new global obj
-    'const self = {}, window = self;',
-    // copy properties from actual endowments and global
-    // see https://github.com/Agoric/SES/issues/123
-    'try {',
-    '  Object.defineProperties(self, Object.getOwnPropertyDescriptors(_endowments));',
-    '  Object.defineProperties(self, Object.getOwnPropertyDescriptors(this));',
-    '} catch (err) {',
-    '  console.warn(`Sesify - Error performing globalRef setup:`, err.message)',
-    '  throw err',
-    '}',
-  ].join('\n')
-  const start = `${setupGlobalRef}\n(function(require,module,exports){\n`
-  const end = '\n})'
+  // create the wrapper around the module content
+  // 1. create new global obj
+  // 2. copy properties from actual endowments and global
+  // see https://github.com/Agoric/SES/issues/123
+  // 3. return a moduleInitializer fn
+  const moduleWrapperSource =
 
+`(${function () {
+  const self = {}, window = self;
+  try {
+    Object.defineProperties(self, Object.getOwnPropertyDescriptors(_endowments));
+    Object.defineProperties(self, Object.getOwnPropertyDescriptors(this));
+  } catch (err) {
+    console.warn(`Sesify - Error performing globalRef setup:`, err.message)
+    throw err
+  }
+  return function (require,module,exports) {
+__MODULE_CONTENT__
+  }
+}}).call(this)`
+
+  const [start, end] = moduleWrapperSource.split('__MODULE_CONTENT__')
   const offsetLinesCount = start.match(/\n/g).length
   const maps = bundle.maps && offsetSourcemapLines(bundle.maps, offsetLinesCount)
-  const code = start + bundle.code + end
+  const code = `${start}${bundle.code}${end}`
 
   return { code, maps }
 }
