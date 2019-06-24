@@ -6,15 +6,28 @@
     const exports = {}
     const module = { exports }
     ;(function(){
-// START of injected code from sessDist
-__sessDist__
-// END of injected code from sessDist
+// START of injected code from sesDist
+__sesDist__
+// END of injected code from sesDist
+    })()
+    return module.exports
+  })()
+
+  // define Muta
+  const Muta = (function(){
+    const exports = {}
+    const module = { exports }
+    ;(function(){
+// START of injected code from muta
+__mutaDist__
+// END of injected code from muta
     })()
     return module.exports
   })()
 
   const realm = SES.makeSESRootRealm({
     mathRandomMode: 'allow',
+    errorStackMode: 'allow',
   })
 
   const sesifyConfig = (function(){
@@ -39,7 +52,7 @@ __sesifyConfig__
     const globalCache = {}
     // create SES-wrapped internalRequire
     const createInternalRequire = realm.evaluate(`(${internalRequireWrapper})`, { console })
-    const safeInternalRequire = createInternalRequire(modules, globalCache, sesifyConfig, realm, eval, evalWithEndowments, globalRef)
+    const safeInternalRequire = createInternalRequire(modules, globalCache, sesifyConfig, realm, eval, evalWithEndowments, globalRef, Muta)
     // load entryPoints
     for (let entryId of entryPoints) {
       safeInternalRequire(entryId, null, [])
@@ -48,7 +61,7 @@ __sesifyConfig__
 
   // this is serialized and run in SES
   // mostly just exists to expose variables to internalRequire
-  function internalRequireWrapper (modules, globalCache, sesifyConfig, realm, unsafeEval, unsafeEvalWithEndowments, globalRef) {
+  function internalRequireWrapper (modules, globalCache, sesifyConfig, realm, unsafeEval, unsafeEvalWithEndowments, globalRef, Muta) {
     return internalRequire
 
     function internalRequire (moduleId, providedEndowments, depPath) {
@@ -138,10 +151,10 @@ __sesifyConfig__
       }
 
       // prevent module.exports from being modified
-      const containment = configForModule.containment || 'freeze'
-      if (containment === 'freeze') {
-        Object.freeze(module.exports)
-      }
+      // const containment = configForModule.containment || 'freeze'
+      // if (containment === 'freeze') {
+      //   Object.freeze(module.exports)
+      // }
 
       // return the exports
       return module.exports
@@ -164,25 +177,28 @@ __sesifyConfig__
         const childDepPath = depPath.slice()
         childDepPath.push(requestedName)
         const moduleExports = internalRequire(id, providedEndowments, childDepPath)
-        // create a mutable copy
-        switch (typeof moduleExports) {
-          case 'object':
-            return magicCopy({}, moduleExports)
-          case 'function':
-            // supports both normal functions and both styles of classes
-            const copy = function (...args) {
-              if (new.target) {
-                return Reflect.construct(moduleExports, args, new.target)
-              } else {
-                return Reflect.apply(moduleExports, this, args)
-              }
-            }
-            magicCopy(copy, moduleExports)
-            return copy
-          default:
-            // safe as is
-            return moduleExports
-        }
+        const copy = Muta(moduleExports)
+        // console.log('copy', copy)
+        return copy
+        // // create a mutable copy
+        // switch (typeof moduleExports) {
+        //   case 'object':
+        //     return magicCopy({}, moduleExports)
+        //   case 'function':
+        //     // supports both normal functions and both styles of classes
+        //     const copy = function (...args) {
+        //       if (new.target) {
+        //         return Reflect.construct(moduleExports, args, new.target)
+        //       } else {
+        //         return Reflect.apply(moduleExports, this, args)
+        //       }
+        //     }
+        //     magicCopy(copy, moduleExports)
+        //     return copy
+        //   default:
+        //     // safe as is
+        //     return moduleExports
+        // }
       }
     }
 

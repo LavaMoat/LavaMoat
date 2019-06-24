@@ -235,6 +235,53 @@ test('moduleExports - decorate an import - class syntax subclass', async (t) => 
   })
 })
 
+
+
+test('moduleExports - late modified exports', async (t) => {
+  const files = [{
+    // id must be full path
+    id: './entry.js',
+    file: './entry.js',
+    deps: {
+      'test': './node_modules/test/index.js'
+    },
+    entry: true,
+    source: `(${function(){
+      const test = require('test')
+      test.doLateExportsModify()
+      const { abc, xyz } = test
+      global.testResult = { abc, xyz }
+    }})()`,
+  }, {
+    // non-entry
+    id: './node_modules/test/index.js',
+    file: './node_modules/test/index.js',
+    deps: {
+      './alt': './node_modules/test/alt.js'
+    },
+    source: `(${function(){
+      module.exports = require('./alt')
+    }})()`,
+  }, {
+    // non-entry
+    id: './node_modules/test/alt.js',
+    file: './node_modules/test/alt.js',
+    deps: {},
+    source: `(${function(){
+      module.exports = {
+        abc: 123,
+        doLateExportsModify: () => {
+          module.exports.abc = 456
+          module.exports.xyz = 789
+        }
+      }
+    }})()`,
+  }]
+
+  const result = await evalModulesArray(t, { files })
+  t.deepEqual(result, { abc: 456, xyz: 789 })
+})
+
 async function evalModulesArray (t, { files, pluginOpts = {} }) {
   const bundle = await createBundleFromRequiresArray(files, pluginOpts)
 
