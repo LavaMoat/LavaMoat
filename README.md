@@ -1,6 +1,6 @@
 # Sesify - Browserify Plugin for Secure EcmaScript
 
-**NOTE: under rapid develop, do not use, etc**
+**NOTE: under rapid develop, not ready for production use, has not been audited, etc**
 
 Sesify is a [browserify][BrowserifyGithub] plugin for generating app bundles where modules are defined in [SES][SesGithub] containers. It aims to reduce the risk of "supplychain attacks", malicious code in the app dependency graph.
 
