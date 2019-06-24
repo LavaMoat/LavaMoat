@@ -27,6 +27,7 @@
   - [ ] enforce configuration
     - [ ] fail at buildtime if deps violation
     - [x] enforce globals
+  - [ ] move SES config into sesify config
 - [ ] mystery bugs
   - [ ] `this.Object` gets transformed to `undefined.Object` in mm
 - [ ] cleanup prelude
@@ -43,6 +44,10 @@
   - [ ] sesify with unfrozen realm
     - should be on Realm.evaluate, verify
   - [x] how to create a copy of a fn class
+- [ ] moduleExports wrap
+  - [ ] make a version of muta that wraps fns correctly
+    - [ ] apply/construct wrapper
+    - [ ] without json-patch stuff
 
 ### alt environment heuristics
 ```js
