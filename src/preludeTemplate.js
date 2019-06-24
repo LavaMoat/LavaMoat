@@ -1,18 +1,26 @@
 // Sesify Prelude
-(function() {
+;(function() {
 
+  // define SES
+  const SES = (function(){
+    const exports = {}
+    const module = { exports }
+    ;(function(){
 // START of injected code from sessDist
-  __sessDist__
+__sessDist__
 // END of injected code from sessDist
+    })()
+    return module.exports
+  })()
 
-  const realm = SES.makeSESRootRealm()
-  // helper for setting up endowmentsConfig
-  const sesEval = (code) => realm.evaluate(code)
+  const realm = SES.makeSESRootRealm({
+    mathRandomMode: 'allow',
+  })
 
-  const endowmentsConfig = (function(){
-// START of injected code from endowmentsConfig
-__endowmentsConfig__
-// END of injected code from endowmentsConfig
+  const sesifyConfig = (function(){
+// START of injected code from sesifyConfig
+__sesifyConfig__
+// END of injected code from sesifyConfig
   })()
 
   return loadBundle
@@ -31,19 +39,19 @@ __endowmentsConfig__
     const globalCache = {}
     // create SES-wrapped internalRequire
     const createInternalRequire = realm.evaluate(`(${internalRequireWrapper})`, { console })
-    const safeInternalRequire = createInternalRequire(modules, globalCache, endowmentsConfig, realm, eval, evalWithEndowments, globalRef)
+    const safeInternalRequire = createInternalRequire(modules, globalCache, sesifyConfig, realm, eval, evalWithEndowments, globalRef)
     // load entryPoints
     for (let entryId of entryPoints) {
-      safeInternalRequire(entryId, [])
+      safeInternalRequire(entryId, null, [])
     }
   }
 
   // this is serialized and run in SES
   // mostly just exists to expose variables to internalRequire
-  function internalRequireWrapper (modules, globalCache, endowmentsConfig, realm, unsafeEval, unsafeEvalWithEndowments, globalRef) {
+  function internalRequireWrapper (modules, globalCache, sesifyConfig, realm, unsafeEval, unsafeEvalWithEndowments, globalRef) {
     return internalRequire
 
-    function internalRequire (moduleId, depPath) {
+    function internalRequire (moduleId, providedEndowments, depPath) {
       const moduleData = modules[moduleId]
 
       // if we dont have it, throw an error
@@ -55,13 +63,15 @@ __endowmentsConfig__
 
       // parse requirePath for module boundries
       const moduleDepPath = toModuleDepPath(depPath)
-      const moduleDepPathSlug = moduleDepPath.join(' > ')
+      const packageName = getPackageName(moduleDepPath)
+      const moduleCacheSlug = moduleId
+
 
       // check our local cache, return exports if hit
-      let localCache = globalCache[moduleDepPathSlug]
+      let localCache = globalCache[moduleCacheSlug]
       if (!localCache) {
         localCache = {}
-        globalCache[moduleDepPathSlug] = localCache
+        globalCache[moduleCacheSlug] = localCache
       }
       if (localCache[moduleId]) {
         const module = localCache[moduleId]
@@ -72,46 +82,34 @@ __endowmentsConfig__
       const module = { exports: {} }
       localCache[moduleId] = module
       const moduleSource = moduleData[0]
-      const configForModule = getConfigForModule(endowmentsConfig, moduleDepPath)
+      const configForModule = getConfigForPackage(sesifyConfig, packageName)
       const isEntryModule = moduleDepPath.length < 1
 
       // prepare endowments
-      const endowmentsFromConfig = configForModule.$
-      let endowments = Object.assign({}, endowmentsConfig.defaultGlobals, endowmentsFromConfig)
+      const endowmentsFromConfig = generateEndowmentsForConfig(configForModule)
+      let endowments = Object.assign({}, sesifyConfig.defaultGlobals, providedEndowments, endowmentsFromConfig)
+      // special circular reference for endowments to fix globalRef in SES
+      // see https://github.com/Agoric/SES/issues/123
+      endowments._endowments = endowments
       // special case for exposing window
       if (endowments.window) {
         endowments = Object.assign({}, endowments.window, endowments)
       }
-      // set global references, skip if from entry module
-      if (isEntryModule) {
-        endowments.global = globalRef
-        endowments.window = globalRef
-        endowments.self = globalRef
-      } else {
-        endowments.global = endowments
-        endowments.window = endowments
-        endowments.self = endowments
-      }
+
+      const environment = configForModule.environment || isEntryModule ? null : 'frozen'
+      const runInSes = environment === 'frozen'
 
       // determine if its a SES-wrapped or naked module initialization
       let moduleInitializer
-      const runInSes = !isEntryModule && !configForModule.skipSes
       if (runInSes) {
         // set the module initializer as the SES-wrapped version
-        const cacheSlug = `init-ses-${moduleId}`
-        moduleInitializer = globalCache[cacheSlug]
-        if (!moduleInitializer) {
-          moduleInitializer = realm.evaluate(`${moduleSource}`)
-          globalCache[cacheSlug] = moduleInitializer
-        }
+        moduleInitializer = realm.evaluate(`${moduleSource}`, endowments)
       } else {
         // set the module initializer as the unwrapped version
-        const cacheSlug = `init-raw-${moduleId}`
-        moduleInitializer = globalCache[cacheSlug]
-        if (!moduleInitializer) {
-          moduleInitializer = unsafeEval(`${moduleSource}`)
-          globalCache[cacheSlug] = moduleInitializer
-        }
+        moduleInitializer = unsafeEvalWithEndowments(`${moduleSource}`, endowments)
+      }
+      if (typeof moduleInitializer !== 'function') {
+        throw new Error('Sesify - moduleInitializer is not defined correctly')
       }
 
       // this "modules" interface is exposed to the moduleInitializer https://github.com/browserify/browser-pack/blob/master/prelude.js#L38
@@ -124,7 +122,7 @@ __endowmentsConfig__
           return fakeModuleDefinition
 
           function fakeModuleInitializer () {
-            const targetModuleExports = internalRequire(targetModuleId, depPath)
+            const targetModuleExports = internalRequire(targetModuleId, providedEndowments, depPath)
             // const targetModuleExports = scopedRequire(targetModuleId)
             module.exports = targetModuleExports
           }
@@ -132,7 +130,18 @@ __endowmentsConfig__
       })
 
       // initialize the module with the correct context
-      moduleInitializer.call(module.exports, scopedRequire, module, module.exports, null, modulesProxy, endowments)
+      try {
+        moduleInitializer.call(module.exports, scopedRequire, module, module.exports, null, modulesProxy)
+      } catch (err) {
+        console.warn(`Sesify - Error instantiating module "${moduleId}" from package "${packageName}"`)
+        throw err
+      }
+
+      // prevent module.exports from being modified
+      const containment = configForModule.containment || 'freeze'
+      if (containment === 'freeze') {
+        Object.freeze(module.exports)
+      }
 
       // return the exports
       return module.exports
@@ -140,23 +149,56 @@ __endowmentsConfig__
 
       // this is the require method passed to the module initializer
       // it has a context of the current dependency path and nested config
-      function scopedRequire (requestedName) {
+      function scopedRequire (requestedName, providedEndowments) {
         const moduleDeps = moduleData[1]
         const id = moduleDeps[requestedName] || requestedName
         // recursive requires dont hit cache so it inf loops, so we shortcircuit
         // this only seems to happen with the "timers" which uses and is used by "process"
         if (id === moduleId) {
-          if (requestedName !== 'timers') console.log('recursive:', requestedName)
+          if (['timers', 'buffer'].includes(requestedName) === false) {
+            throw new Error(`Sesify - recursive require detected: "${requestedName}"`)
+          }
           return module.exports
         }
         // update the dependency path for the child require
         const childDepPath = depPath.slice()
         childDepPath.push(requestedName)
-        return internalRequire(id, childDepPath)
+        const moduleExports = internalRequire(id, providedEndowments, childDepPath)
+        // create a mutable copy
+        switch (typeof moduleExports) {
+          case 'object':
+            return magicCopy({}, moduleExports)
+          case 'function':
+            // supports both normal functions and both styles of classes
+            const copy = function (...args) {
+              if (new.target) {
+                return Reflect.construct(moduleExports, args, new.target)
+              } else {
+                return Reflect.apply(moduleExports, this, args)
+              }
+            }
+            magicCopy(copy, moduleExports)
+            return copy
+          default:
+            // safe as is
+            return moduleExports
+        }
       }
     }
 
-    function toModuleDepPath(depPath) {
+    function magicCopy (target, source) {
+      try {
+        const props = Object.getOwnPropertyDescriptors(source)
+        Object.defineProperties(target, props)
+        Reflect.setPrototypeOf(target, Reflect.getPrototypeOf(source))
+      } catch (err) {
+        console.warn('Sesify - Error performing magic copy:', err.message)
+        throw err
+      }
+      return target
+    }
+
+    function toModuleDepPath (depPath) {
       const moduleDepPath = []
       depPath.forEach((requestedName) => {
         const nameParts = requestedName.split('/')
@@ -164,19 +206,81 @@ __endowmentsConfig__
         // skip relative resolution
         if (['.','..'].includes(nameInitial)) return
         // fix for scoped module names
-        const moduleName = nameInitial.includes('@') ? `${nameParts[0]}/${nameParts[1]}` : nameInitial
+        const packageName = nameInitial.includes('@') ? `${nameParts[0]}/${nameParts[1]}` : nameInitial
         // record module name
-        moduleDepPath.push(moduleName)
+        moduleDepPath.push(packageName)
       })
       return moduleDepPath
     }
 
-    function getConfigForModule(config, path) {
-      const moduleName = path.slice(-1)[0]
-      const globalConfig = (config.global || {})[moduleName]
-      const depPathSlug = path.join(' ')
-      const depConfig = (config.dependencies || {})[depPathSlug]
-      return Object.assign({}, globalConfig, depConfig)
+    function getConfigForPackage (config, packageName) {
+      const packageConfig = (config.resources || {})[packageName] || {}
+      return packageConfig
+    }
+
+    function getPackageName (path) {
+      const packageName = path.slice(-1)[0] || '<entry>'
+      return packageName
+    }
+
+    function generateEndowmentsForConfig (config) {
+      if (!config.globals) return {}
+      const globals = {}
+      Object.entries(config.globals).forEach(([globalPath, configValue]) => {
+        if (configValue !== true) {
+          throw new Error('Sesify - unknown value for config globals')
+        }
+        const value = deepGetAndBind(globalRef, globalPath)
+        if (value === undefined) return
+        deepSet(globals, globalPath, value)
+      })
+      return globals
+    }
+
+    function deepGetAndBind(obj, pathName) {
+      const pathParts = pathName.split('.')
+      const parentPath = pathParts.slice(0,-1).join('.')
+      const childKey = pathParts[pathParts.length-1]
+      const parent = parentPath ? deepGet(globalRef, parentPath) : globalRef
+      if (!parent) return parent
+      const value = parent[childKey]
+      if (typeof value === 'function') {
+        return value.bind(parent)
+      }
+      return value
+    }
+
+    function deepGet (obj, pathName) {
+      let result = obj
+      pathName.split('.').forEach(pathPart => {
+        if (result === null) {
+          result = undefined
+          return
+        }
+        if (result === undefined) {
+          return
+        }
+        result = result[pathPart]
+      })
+      return result
+    }
+
+    function deepSet (obj, pathName, value) {
+      let parent = obj
+      const pathParts = pathName.split('.')
+      const lastPathPart = pathParts[pathParts.length-1]
+      pathParts.slice(0,-1).forEach(pathPart => {
+        const prevParent = parent
+        parent = parent[pathPart]
+        if (parent === null) {
+          throw new Error('DeepSet - unable to set "'+pathName+'" on null')
+        }
+        if (parent === undefined) {
+          parent = {}
+          prevParent[pathPart] = parent
+        }
+      })
+      parent[lastPathPart] = value
     }
 
     //# sourceURL=internalRequire

@@ -1,3 +1,130 @@
+# new todo
+- [x] update SES
+  - [x] some issue with prelude or SES kernel running in strict mode
+- [x] shared instances of modules
+  - [x] revert the seperation of eval / global injection
+  - [x] update cache key generator
+- [x] mark question: while `this` is container global, `self` is undefined
+- [x] fix globalRefs
+  - [x] fix objCheckSelf
+  - [x] fix objCheckGlobal
+- [ ] new config
+  - [x] make config like agoric prototype
+  - [x] config is json
+  - [x] config -> endowments in sesify prelude
+  - [x] need tests that generate config then use it 
+  - [x] cleanup old config generation
+  - [x] get packageName from modules stream
+  - [x] allow easy override of configuration
+  - [ ] no longer de-duping overlapping namespaces? (needs test)
+- [ ] config advanced
+  - [ ] environment/container options
+    - [x] autogen config from "alt environment heuristics"
+    - [ ] execute unfrozen in fresh realm
+  - [ ] defensibility/hardening options
+    - [ ] harden/deep-freeze exports (needs test)
+    - [x] require time, magic copy as default
+  - [ ] enforce configuration
+    - [ ] fail at buildtime if deps violation
+    - [x] enforce globals
+  - [ ] move SES config into sesify config
+- [ ] mystery bugs
+  - [ ] `this.Object` gets transformed to `undefined.Object` in mm
+- [ ] cleanup prelude
+- [ ] sesify metamask
+  - [x] autogen config
+  - [x] setup build sys
+  - [ ] debug boot
+  - [ ] debug runtime
+  - [ ] gulp task for autogen
+- [ ] improve pluginOpts
+  - [ ] config vs sesifyConfig
+  - [ ] if autoconfig, use that config
+- [ ] question
+  - [ ] sesify with unfrozen realm
+    - should be on Realm.evaluate, verify
+  - [x] how to create a copy of a fn class
+- [ ] moduleExports wrap
+  - [ ] make a version of muta that wraps fns correctly
+    - [ ] apply/construct wrapper
+    - [ ] without json-patch stuff
+
+### alt environment heuristics
+```js
+<obj>.hasOwnProperty = <value>
+<obj>.toString = <value>
+```
+
+### cli testing
+eval in sesify bundle
+```
+echo 'console.log(self.process === process)' | browserify - --detect-globals false --no-builtins -p [ './src/index.js' --sesifyConfig '{"resources":{"<entry>":{"globals":{"console":true,"process":true}}}}' ] | node
+```
+eval in ses
+```
+node -p "try { require('ses').makeSESRootRealm().evaluate('const x = {}; x.hasOwnProperty = ()=>{}') } catch (err) { console.log(err.message) }"
+```
+npm bug workaround
+```
+npm unlink sesify && npm i && npm link sesify
+```
+
+### trail of dead
+- https://github.com/substack/node-deep-equal/issues/62
+- https://github.com/Starcounter-Jack/JSON-Patch/pull/227
+
+# berlin notes
+next TC39 meeting <<<----
+  end of July 23-25th
+  RSVP via agoric
+TC53:
+  - SES as a js derived standard for use in IoT/wearables
+  - why this target?
+    - less backwards conmpat pressure
+module semantics:
+  - live bindings via "export let x"
+  - does pass by reference
+  - export as default does not pass by reference (!)
+root realms:
+  - Brave case has 3 realms
+  - 2 combined realms that are not confined
+  - use SES to contril the comms between them
+  - Root Realm vs Root SES Realm (FrozenRealm)
+  - SES Realms dont require an iframe now
+  - factoring into two steps
+    - creation of RootRealm
+    - securing a RootRealm from the inside
+  - harden()
+    - does not walk up proto chains
+
+### summary of components
+- Config
+  - auto config generation
+    - tofu rich parsing
+      - read/write
+  - user config overrides
+  - config
+    - agoric prototype: https://github.com/erights/legacy-todo/blob/master/manifest.json
+      - per-package:
+        - modules
+        - globals
+
+  - per package or per package path?
+  - config requires whitelist of dep graph?
+  - CSP style config for auto generating attenuations
+
+- Containment
+  - can happen less granularly than modules
+    - in addition to granularity of modules
+  - module instance per path? purity?
+    - no, it explodes
+  - if config per-path we need to split eval and endowments
+    - if you want special config, do higher level containment
+  - how to correctly specify the global object
+  - how to do attenuations
+    - specify module/global replacements
+    - maybe add a config for common attenuations
+
 # the big ones
 - [x] autogen granularity
 - [x] sourcemaps
