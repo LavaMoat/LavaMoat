@@ -1,9 +1,10 @@
 const fs = require('fs')
+const mergeDeep = require('merge-deep')
 const generatePrelude = require('./generatePrelude')
-const createCustomPack = require('./browser-pack')
+const createCustomPack = require('../lib/browser-pack')
 const { createConfigSpy } = require('./generateConfig')
-const { wrapIntoBundle } = require('./sourcemaps')
-
+const createPackageNameStream = require('./packageName')
+const { wrapIntoModuleInitializer } = require('./sourcemaps')
 
 /*  export a Browserify plugin  */
 module.exports = function (browserify, pluginOpts) {
@@ -12,13 +13,23 @@ module.exports = function (browserify, pluginOpts) {
   setupPlugin()
 
   // override browserify/browser-pack prelude
-  function setupPlugin() {
+  function setupPlugin () {
     // helper to read config at path
     if (typeof pluginOpts.config === 'string') {
-      pluginOpts.endowmentsConfig = () => {
+      pluginOpts.sesifyConfig = () => {
         // load latest config
         const filename = pluginOpts.config
-        return fs.readFileSync(filename, 'utf8')
+        const configSource = fs.readFileSync(filename, 'utf8')
+        // if override specified, merge
+        if (pluginOpts.configOverride) {
+          const filename = pluginOpts.configOverride
+          const configOverrideSource = fs.readFileSync(filename, 'utf8')
+          const initialConfig = JSON.parse(configSource)
+          const overrideConfig = JSON.parse(configOverrideSource)
+          const config = mergeDeep(initialConfig, overrideConfig)
+          return config
+        }
+        return configSource
       }
     }
 
@@ -26,20 +37,24 @@ module.exports = function (browserify, pluginOpts) {
     // replace the standard browser-pack with our custom packer
     browserify.pipeline.splice('pack', 1, customPack)
 
+    // inject package name into module data
+    browserify.pipeline.splice('emit-deps', 0, createPackageNameStream())
+
     // helper to dump autoconfig to a file
     if (pluginOpts.writeAutoConfig) {
       const filename = pluginOpts.writeAutoConfig
       pluginOpts.autoConfig = function writeAutoConfig (config) {
         fs.writeFileSync(filename, config)
-        console.log(`Sesify Autoconfig - wrote to "${filename}"`)
+        console.warn(`Sesify Autoconfig - wrote to "${filename}"`)
       }
     }
     // if autoconfig activated, insert hook
-    browserify.pipeline.splice('label', 0, createConfigSpy({
-      onResult: pluginOpts.autoConfig,
-    }))
+    if (pluginOpts.autoConfig) {
+      browserify.pipeline.splice('emit-deps', 0, createConfigSpy({
+        onResult: pluginOpts.autoConfig
+      }))
+    }
   }
-
 }
 
 module.exports.generatePrelude = generatePrelude
@@ -51,13 +66,13 @@ function createSesifyPacker (opts) {
     raw: true,
     prelude: generatePrelude(opts),
     generateModuleInitializer: (row) => {
-      const wrappedBundle = wrapIntoBundle(row.source)
+      const wrappedBundle = wrapIntoModuleInitializer(row.source)
       const sourceMappingURL = onSourcemap(row, wrappedBundle)
-      // for now, ignore new sourcemap and just append original filename 
+      // for now, ignore new sourcemap and just append original filename
       let moduleInitSrc = wrappedBundle.code
       if (sourceMappingURL) moduleInitSrc += `\n//# sourceMappingURL=${sourceMappingURL}`
       return escapeCodeAsString(moduleInitSrc)
-    },
+    }
   }
 
   const packOpts = Object.assign({}, defaults, opts)

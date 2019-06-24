@@ -1,12 +1,14 @@
 [
   {
-    "id": "/1.js",
+    "id": "./1.js",
+    "file": "./1.js",
     "source": "global.testResult = require('foo')(5)",
-    "deps": { "foo": "/node_modules/2/index.js" },
+    "deps": { "foo": "./node_modules/2/index.js" },
     "entry": true
   },
   {
-    "id": "/node_modules/2/index.js",
+    "id": "./node_modules/2/index.js",
+    "file": "./node_modules/2/index.js",
     "source": "module.exports = function (n) { return n * 111 }",
     "deps": {}
   }

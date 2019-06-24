@@ -1,8 +1,7 @@
 const test = require('tape')
 const UglifyJS = require('uglify-js')
 const { SourceMapConsumer } = require('source-map')
-const { wrapIntoBundle } = require('../src/sourcemaps')
-
+const { wrapIntoModuleInitializer } = require('../src/sourcemaps')
 
 test('sourcemaps - adjust maps for wrapper', async (t) => {
   const fooSource = (`
@@ -18,8 +17,8 @@ test('sourcemaps - adjust maps for wrapper', async (t) => {
       filename: './foo.js',
       // inline sourcemaps with sources included
       url: 'inline',
-      includeSources: true,
-    },
+      includeSources: true
+    }
   })
 
   if (result.error) t.ifError(result.error)
@@ -29,9 +28,9 @@ test('sourcemaps - adjust maps for wrapper', async (t) => {
   t.equal(indicesOf('\n', result.code).length, 1)
 
   // wrap into bundle with external sourcemaps
-  const wrappedBundle = wrapIntoBundle(result.code)
-  await validateBundleSourcemaps(t, wrappedBundle)
-
+  const wrappedSourceMeta = wrapIntoModuleInitializer(result.code)
+  await validateSourcemaps(t, wrappedSourceMeta)
+  
   t.end()
 })
 
@@ -43,24 +42,36 @@ function indicesOf (substring, string) {
 }
 
 // this is not perfecct - just a heuristic
-async function validateBundleSourcemaps (t, bundle) {
+async function validateSourcemaps (t, sourceMeta) {
   const targetSlug = 'new Error'
-  const consumer = await new SourceMapConsumer(bundle.maps)
+  const consumer = await new SourceMapConsumer(sourceMeta.maps)
   t.ok(consumer.hasContentsOfAllSources(), 'has the contents of all sources')
 
-  const sourceLines = bundle.code.split('\n')
-  sourceLines.map(line => indicesOf(targetSlug, line))
-  .forEach((errorIndices, lineIndex) => {
+  const sourceLines = sourceMeta.code.split('\n')
+
+  sourceLines
+    .map(line => indicesOf(targetSlug, line))
+    .forEach((errorIndices, lineIndex) => {
     // if (errorIndex === null) return console.log('line does not contain "new Error"')
-    errorIndices.forEach((errorIndex) => {
-      const position = { line: lineIndex + 1, column: errorIndex }
-      const result = consumer.originalPositionFor(position)
-      if (!result.source) return t.fail(`missing source for position: ${position}`)
-      const sourceContent = consumer.sourceContentFor(result.source)
-      const sourceLines = sourceContent.split('\n')
-      const line = sourceLines[result.line - 1]
-      if (!line.includes(targetSlug)) t.fail(`could not find target "${targetSlug}" in source`)
+      errorIndices.forEach((errorIndex) => {
+        const position = { line: lineIndex + 1, column: errorIndex }
+        const result = consumer.originalPositionFor(position)
+        if (!result.source) {
+          t.fail(`missing source for position: ${JSON.stringify(position)}`)
+          console.warn('=======')
+          console.warn(contentForPosition(sourceLines, position))
+          console.warn('=======')
+          return
+        }
+        const sourceContent = consumer.sourceContentFor(result.source)
+        const sourceLines = sourceContent.split('\n')
+        const line = sourceLines[result.line - 1]
+        if (!line.includes(targetSlug)) t.fail(`could not find target "${targetSlug}" in source`)
+      })
     })
-  })
   t.ok(true, 'sourcemaps look ok')
+}
+
+function contentForPosition (sourceLines, position) {
+  return sourceLines[position.line-1].slice(position.column)
 }
