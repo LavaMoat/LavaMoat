@@ -4,6 +4,84 @@
 - [ ] make config like agoric prototype
   - [ ] config is json
   - [ ] global-grabbing engine needs to move to sesify prelude
+- [x] update SES
+  - [x] some issue with prelude or SES kernel running in strict mode
+- [x] shared instances of modules
+  - [x] revert the seperation of eval / global injection
+  - [x] update cache key generator
+- [x] mark question: while `this` is container global, `self` is undefined
+- [x] fix globalRefs
+  - [x] fix objCheckSelf
+  - [x] fix objCheckGlobal
+- [ ] new config
+  - [x] make config like agoric prototype
+  - [x] config is json
+  - [x] config -> endowments in sesify prelude
+  - [x] need tests that generate config then use it 
+  - [x] cleanup old config generation
+  - [x] get packageName from modules stream
+  - [x] allow easy override of configuration
+  - [ ] no longer de-duping overlapping namespaces? (needs test)
+- [ ] config advanced
+  - [ ] environment/container options
+    - [x] autogen config from "alt environment heuristics"
+    - [ ] execute unfrozen in fresh realm
+  - [ ] defensibility/hardening options
+    - [ ] harden/deep-freeze exports (needs test)
+    - [x] require time, magic copy as default
+  - [ ] enforce configuration
+    - [ ] fail at buildtime if deps violation
+    - [x] enforce globals
+  - [ ] move SES config into sesify config
+- [ ] mystery bugs
+  - [ ] `this.Object` gets transformed to `undefined.Object` in mm
+- [ ] cleanup prelude
+- [ ] sesify metamask
+  - [x] autogen config
+  - [x] setup build sys
+  - [ ] debug boot
+  - [ ] debug runtime
+  - [ ] gulp task for autogen
+- [ ] improve pluginOpts
+  - [ ] config vs sesifyConfig
+  - [ ] if autoconfig, use that config
+- [ ] question
+  - [ ] sesify with unfrozen realm
+    - should be on Realm.evaluate, verify
+  - [x] how to create a copy of a fn class
+- [ ] moduleExports wrap
+  - [ ] make a version of muta that wraps fns correctly
+    - [ ] apply/construct wrapper
+    - [ ] without json-patch stuff
+
+if autogen config
+  - allow browserPack to pause stream until config is generated
+  - generate config then unpause browserPack
+  - back pressure could cause a dead lock (?)
+
+### alt environment heuristics
+```js
+<obj>.hasOwnProperty = <value>
+<obj>.toString = <value>
+```
+
+### cli testing
+eval in sesify bundle
+```
+echo 'console.log(self.process === process)' | browserify - --detect-globals false --no-builtins -p [ './src/index.js' --sesifyConfig '{"resources":{"<entry>":{"globals":{"console":true,"process":true}}}}' ] | node
+```
+eval in ses
+```
+node -p "try { require('ses').makeSESRootRealm().evaluate('const x = {}; x.hasOwnProperty = ()=>{}') } catch (err) { console.log(err.message) }"
+```
+npm bug workaround
+```
+npm unlink sesify && npm i && npm link sesify
+```
+
+### trail of dead
+- https://github.com/substack/node-deep-equal/issues/62
+- https://github.com/Starcounter-Jack/JSON-Patch/pull/227
 
 # berlin notes
 next TC39 meeting <<<----
