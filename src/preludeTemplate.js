@@ -171,44 +171,56 @@ __sesifyConfig__
       // this is the require method passed to the module initializer
       // it has a context of the current dependency path and nested config
       function scopedRequire (requestedName, providedEndowments) {
-        const moduleDeps = moduleData[1]
-        const id = moduleDeps[requestedName] || requestedName
-        // recursive requires dont hit cache so it inf loops, so we shortcircuit
-        // this only seems to happen with the "timers" which uses and is used by "process"
-        if (id === moduleId) {
-          if (['timers', 'buffer'].includes(requestedName) === false) {
-            throw new Error(`Sesify - recursive require detected: "${requestedName}"`)
-          }
-          return module.exports
+        const parentModuleId = moduleId
+        const parentModule = module
+        const parentModuleDeps = moduleData[1]
+        const parentModuleDepPath = moduleDepPath
+        return publicRequire({ requestedName, providedEndowments, parentModuleId, parentModule, parentModuleDeps, parentModuleDepPath })
+      }
+
+    }
+
+    function publicRequire ({ requestedName, providedEndowments, parentModuleId, parentModule, parentModuleDeps, parentModuleDepPath }) {
+      const id = parentModuleDeps[requestedName] || requestedName
+      // recursive requires dont hit cache so it inf loops, so we shortcircuit
+      // this only seems to happen with the "timers" which uses and is used by "process"
+      if (id === parentModuleId) {
+        if (['timers', 'buffer'].includes(requestedName) === false) {
+          throw new Error(`Sesify - recursive require detected: "${requestedName}"`)
         }
-        // update the dependency path for the child require
-        const childDepPath = depPath.slice()
-        childDepPath.push(requestedName)
-        // load (or fetch cached) module
-        const moduleExports = internalRequire(id, providedEndowments, childDepPath)
-        // create a mutable copy
-        switch (typeof moduleExports) {
-          case 'object':
-            return magicCopy({}, moduleExports)
-          case 'function':
-            // supports both normal functions and both styles of classes
-            const copy = function (...args) {
-              if (new.target) {
-                return Reflect.construct(moduleExports, args, new.target)
-              } else {
-                return Reflect.apply(moduleExports, this, args)
-              }
+        return parentModule.exports
+      }
+      // update the dependency path for the child require
+      const childDepPath = parentModuleDepPath.slice()
+      childDepPath.push(requestedName)
+      // load (or fetch cached) module
+      const moduleExports = internalRequire(id, providedEndowments, childDepPath)
+      return magicCopy(moduleExports)
+    }
+
+    function magicCopy (ref) {
+      // create a mutable copy
+      switch (typeof ref) {
+        case 'object':
+          return magicCopyInternal({}, ref)
+        case 'function':
+          // supports both normal functions and both styles of classes
+          const copy = function (...args) {
+            if (new.target) {
+              return Reflect.construct(ref, args, new.target)
+            } else {
+              return Reflect.apply(ref, this, args)
             }
-            magicCopy(copy, moduleExports)
-            return copy
-          default:
-            // safe as is
-            return moduleExports
-        }
+          }
+          magicCopyInternal(copy, ref)
+          return copy
+        default:
+          // safe as is
+          return ref
       }
     }
 
-    function magicCopy (target, source) {
+    function magicCopyInternal (target, source) {
       try {
         const props = Object.getOwnPropertyDescriptors(source)
         Object.defineProperties(target, props)
