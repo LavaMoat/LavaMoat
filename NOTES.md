@@ -1,12 +1,9 @@
 # new todo
-<<<<<<< HEAD
 - [ ] shared instances of modules
   - [ ] revert the seperation of eval / global injection
 - [ ] make config like agoric prototype
   - [ ] config is json
   - [ ] global-grabbing engine needs to move to sesify prelude
-=======
->>>>>>> 7c1bd54b8fa18fa596449587b9dc6737d217dbdb
 - [x] update SES
   - [x] some issue with prelude or SES kernel running in strict mode
 - [x] shared instances of modules
@@ -57,14 +54,11 @@
     - [ ] apply/construct wrapper
     - [ ] without json-patch stuff
 
-<<<<<<< HEAD
 if autogen config
   - allow browserPack to pause stream until config is generated
   - generate config then unpause browserPack
   - back pressure could cause a dead lock (?)
 
-=======
->>>>>>> 7c1bd54b8fa18fa596449587b9dc6737d217dbdb
 ### alt environment heuristics
 ```js
 <obj>.hasOwnProperty = <value>
