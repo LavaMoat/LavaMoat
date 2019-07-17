@@ -1,6 +1,18 @@
 // Sesify Prelude
 ;(function() {
 
+  // define kowtow
+  const kowtow = (function(){
+    const exports = {}
+    const module = { exports }
+    ;(function(){
+// START of injected code from kowtowDist
+__kowtowDist__
+// END of injected code from kowtowDist
+    })()
+    return module.exports
+  })()
+
   // define SES
   const SES = (function(){
     const exports = {}
@@ -139,8 +151,17 @@ __sesifyConfig__
 
       // prevent module.exports from being modified
       const containment = configForModule.containment || 'freeze'
-      if (containment === 'freeze') {
-        Object.freeze(module.exports)
+      switch (containment) {
+        case 'kowtow':
+          // do nothing, set at import time
+          break
+        case 'freeze':
+          // Todo: deepFreeze/harden
+          Object.freeze(module.exports)
+          break
+
+        default:
+          throw new Error(`Sesify - Unknown exports protection ${containment}`)
       }
 
       // return the exports
@@ -163,6 +184,7 @@ __sesifyConfig__
         // update the dependency path for the child require
         const childDepPath = depPath.slice()
         childDepPath.push(requestedName)
+        // load (or fetch cached) module
         const moduleExports = internalRequire(id, providedEndowments, childDepPath)
         // create a mutable copy
         switch (typeof moduleExports) {

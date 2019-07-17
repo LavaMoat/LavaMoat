@@ -1,9 +1,9 @@
 # new todo
-- [ ] shared instances of modules
-  - [ ] revert the seperation of eval / global injection
-- [ ] make config like agoric prototype
-  - [ ] config is json
-  - [ ] global-grabbing engine needs to move to sesify prelude
+- [x] shared instances of modules
+  - [x] revert the seperation of eval / global injection
+- [x] make config like agoric prototype
+  - [x] config is json
+  - [x] global-grabbing engine needs to move to sesify prelude
 - [x] update SES
   - [x] some issue with prelude or SES kernel running in strict mode
 - [x] shared instances of modules
