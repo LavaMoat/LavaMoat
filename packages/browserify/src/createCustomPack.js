@@ -1,6 +1,7 @@
 // modified from browser-pack
 // changes:
 // - break out generateModuleInitializer
+// - break out bundleEntryForModule
 
 const assert = require('assert');
 var JSONStream = require('JSONStream');
@@ -46,7 +47,12 @@ module.exports = function (opts) {
     var lineno = 1 + newlinesIn(prelude);
     var sourcemap;
 
+    if (opts.generateModuleInitializer && opts.bundleEntryForModule) {
+      throw new Error('Sesify CustomPack: conflicting options for "generateModuleInitializer" and "bundleEntryForModule". Can only set one.')
+    }
+
     opts.generateModuleInitializer = opts.generateModuleInitializer || generateModuleInitializer
+    opts.bundleEntryForModule = opts.bundleEntryForModule || bundleEntryForModule
 
     return stream;
 
@@ -55,6 +61,20 @@ module.exports = function (opts) {
         'function moduleInitializer (require,module,exports) {\n',
         combineSourceMap.removeComments(row.source),
         '\n}',
+      ].join('')
+    }
+
+    function bundleEntryForModule (row) {
+      return [
+        '[',
+        opts.generateModuleInitializer(row),
+        ',',
+        '{' + Object.keys(row.deps || {}).sort().map(function (key) {
+            return JSON.stringify(key) + ':'
+                + JSON.stringify(row.deps[key])
+            ;
+        }).join(',') + '}',
+        ']'
       ].join('')
     }
 
@@ -84,17 +104,10 @@ module.exports = function (opts) {
         }
 
         var wrappedSource = [
-            (first ? '' : ','),
-            JSON.stringify(row.id),
-            ':[',
-            opts.generateModuleInitializer(row),
-            ',',
-            '{' + Object.keys(row.deps || {}).sort().map(function (key) {
-                return JSON.stringify(key) + ':'
-                    + JSON.stringify(row.deps[key])
-                ;
-            }).join(',') + '}',
-            ']'
+          (first ? '' : ','),
+          JSON.stringify(row.id),
+          ':',
+          opts.bundleEntryForModule(row),
         ].join('');
 
         stream.push(Buffer.from(wrappedSource, 'utf8'));

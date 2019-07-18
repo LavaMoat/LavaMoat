@@ -1,7 +1,7 @@
 const fs = require('fs')
 const mergeDeep = require('merge-deep')
 const generatePrelude = require('./generatePrelude')
-const createCustomPack = require('../lib/browser-pack')
+const createCustomPack = require('./createCustomPack')
 const { createConfigSpy } = require('./generateConfig')
 const createPackageNameStream = require('./packageName')
 const { wrapIntoModuleInitializer } = require('./sourcemaps')
