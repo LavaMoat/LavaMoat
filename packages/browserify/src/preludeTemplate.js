@@ -171,16 +171,16 @@ __sesifyConfig__
       // this is the require method passed to the module initializer
       // it has a context of the current dependency path and nested config
       function scopedRequire (requestedName, providedEndowments) {
-        const parentModuleId = moduleId
         const parentModule = module
-        const parentModuleDeps = moduleData.deps
-        const parentModuleDepPath = moduleDepPath
-        return publicRequire({ requestedName, providedEndowments, parentModuleId, parentModule, parentModuleDeps, parentModuleDepPath })
+        const parentModuleData = moduleData
+        return publicRequire({ requestedName, providedEndowments, parentModule, parentModuleData, moduleDepPath })
       }
 
     }
 
-    function publicRequire ({ requestedName, providedEndowments, parentModuleId, parentModule, parentModuleDeps, parentModuleDepPath }) {
+    function publicRequire ({ requestedName, providedEndowments, parentModule, parentModuleData, moduleDepPath }) {
+      const parentModuleId = parentModuleData.id
+      const parentModuleDeps = parentModuleData.deps
       const id = parentModuleDeps[requestedName] || requestedName
       // recursive requires dont hit cache so it inf loops, so we shortcircuit
       // this only seems to happen with the "timers" which uses and is used by "process"
@@ -191,7 +191,7 @@ __sesifyConfig__
         return parentModule.exports
       }
       // update the dependency path for the child require
-      const childDepPath = parentModuleDepPath.slice()
+      const childDepPath = moduleDepPath.slice()
       childDepPath.push(requestedName)
       // load (or fetch cached) module
       const moduleExports = internalRequire(id, providedEndowments, childDepPath)
