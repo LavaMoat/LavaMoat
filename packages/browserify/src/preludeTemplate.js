@@ -93,7 +93,7 @@ __sesifyConfig__
       // prepare the module to be initialized
       const module = { exports: {} }
       localCache[moduleId] = module
-      const moduleSource = moduleData[0]
+      const moduleSource = moduleData.source
       const configForModule = getConfigForPackage(sesifyConfig, packageName)
       const isEntryModule = moduleDepPath.length < 1
 
@@ -173,7 +173,7 @@ __sesifyConfig__
       function scopedRequire (requestedName, providedEndowments) {
         const parentModuleId = moduleId
         const parentModule = module
-        const parentModuleDeps = moduleData[1]
+        const parentModuleDeps = moduleData.deps
         const parentModuleDepPath = moduleDepPath
         return publicRequire({ requestedName, providedEndowments, parentModuleId, parentModule, parentModuleDeps, parentModuleDepPath })
       }
