@@ -51,7 +51,7 @@ __sesifyConfig__
     const globalCache = {}
     // create SES-wrapped internalRequire
     const createInternalRequire = realm.evaluate(`(${internalRequireWrapper})`, { console })
-    const safeInternalRequire = createInternalRequire(modules, globalCache, sesifyConfig, realm, eval, evalWithEndowments, globalRef)
+    const safeInternalRequire = createInternalRequire(modules, globalCache, sesifyConfig, realm, eval, evalWithEndowments, globalRef, kowtow)
     // load entryPoints
     for (let entryId of entryPoints) {
       safeInternalRequire(entryId, null, [])
@@ -60,7 +60,7 @@ __sesifyConfig__
 
   // this is serialized and run in SES
   // mostly just exists to expose variables to internalRequire
-  function internalRequireWrapper (modules, globalCache, sesifyConfig, realm, unsafeEval, unsafeEvalWithEndowments, globalRef) {
+  function internalRequireWrapper (modules, globalCache, sesifyConfig, realm, unsafeEval, unsafeEvalWithEndowments, globalRef, kowtow) {
     return internalRequire
 
     function internalRequire (moduleId, providedEndowments, depPath) {
@@ -190,7 +190,7 @@ __sesifyConfig__
 
     function protectExportsInstantiationTime (moduleExports, config) {
       // moduleExports instantion-time protection
-      const containment = config.containment || 'freeze'
+      const containment = config.containment || 'kowtow'
       switch (containment) {
         case 'kowtow':
           // do nothing, set at import time
@@ -209,7 +209,7 @@ __sesifyConfig__
     }
 
     function protectExportsRequireTime (moduleExports, config) {
-      const containment = config.containment || 'freeze'
+      const containment = config.containment || 'kowtow'
       switch (containment) {
         // create kowtow view
         case 'kowtow':
