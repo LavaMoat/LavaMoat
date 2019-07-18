@@ -149,23 +149,7 @@ __sesifyConfig__
         throw err
       }
 
-      // prevent module.exports from being modified
-      const containment = configForModule.containment || 'freeze'
-      switch (containment) {
-        case 'kowtow':
-          // do nothing, set at import time
-          break
-        case 'freeze':
-          // Todo: deepFreeze/harden
-          Object.freeze(module.exports)
-          break
-
-        default:
-          throw new Error(`Sesify - Unknown exports protection ${containment}`)
-      }
-
-      // return the exports
-      return module.exports
+      return protectExportsInstantiationTime(module.exports, configForModule)
 
 
       // this is the require method passed to the module initializer
@@ -181,21 +165,61 @@ __sesifyConfig__
     function publicRequire ({ requestedName, providedEndowments, parentModule, parentModuleData, moduleDepPath }) {
       const parentModuleId = parentModuleData.id
       const parentModuleDeps = parentModuleData.deps
-      const id = parentModuleDeps[requestedName] || requestedName
+      const moduleId = parentModuleDeps[requestedName] || requestedName
       // recursive requires dont hit cache so it inf loops, so we shortcircuit
       // this only seems to happen with the "timers" which uses and is used by "process"
-      if (id === parentModuleId) {
+      if (moduleId === parentModuleId) {
         if (['timers', 'buffer'].includes(requestedName) === false) {
           throw new Error(`Sesify - recursive require detected: "${requestedName}"`)
         }
         return parentModule.exports
       }
+      // look up config for module
+      const moduleData = modules[moduleId]
+      const packageName = moduleData.package
+      const configForModule = getConfigForPackage(sesifyConfig, packageName)
+
       // update the dependency path for the child require
       const childDepPath = moduleDepPath.slice()
       childDepPath.push(requestedName)
       // load (or fetch cached) module
-      const moduleExports = internalRequire(id, providedEndowments, childDepPath)
-      return magicCopy(moduleExports)
+      const moduleExports = internalRequire(moduleId, providedEndowments, childDepPath)
+      // moduleExports require-time protection
+      return protectExportsRequireTime(moduleExports, configForModule)
+    }
+
+    function protectExportsInstantiationTime (moduleExports, config) {
+      // moduleExports instantion-time protection
+      const containment = config.containment || 'freeze'
+      switch (containment) {
+        case 'kowtow':
+          // do nothing, set at import time
+          break
+        case 'freeze':
+          // Todo: deepFreeze/harden
+          Object.freeze(moduleExports)
+          break
+
+        default:
+          throw new Error(`Sesify - Unknown exports protection ${containment}`)
+      }
+
+      // return the exports
+      return moduleExports
+    }
+
+    function protectExportsRequireTime (moduleExports, config) {
+      const containment = config.containment || 'freeze'
+      switch (containment) {
+        // create kowtow view
+        case 'kowtow':
+          return kowtow()(moduleExports)
+        // already frozen
+        case 'freeze':
+          return magicCopy(moduleExports)
+        default:
+          throw new Error(`Sesify - Unknown exports protection ${containment}`)
+      }
     }
 
     function magicCopy (ref) {
