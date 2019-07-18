@@ -17,6 +17,10 @@ It attempts to reduce this risk in three ways:
 [BrowserifyGithub]: https://github.com/browserify/browserify
 [SesGithub]: https://github.com/agoric/SES
 
-### video demonstration (8 mins)
+### videos demonstration (8 mins)
 
-[![sesify demonstration video](https://img.youtube.com/vi/S2_rjQ-_Nnw/0.jpg)](https://www.youtube.com/watch?v=S2_rjQ-_Nnw)
+early demo (8 mins)
+[![early demo (8 mins)](https://img.youtube.com/vi/S2_rjQ-_Nnw/0.jpg)](https://www.youtube.com/watch?v=S2_rjQ-_Nnw)
+
+progress update with data viz on Agoric call Jul 13, 2019 (~1 hr)
+[![progress update with data viz on Agoric call](https://img.youtube.com/vi/jMWXA4JqFqI/0.jpg)](https://www.youtube.com/watch?v=jMWXA4JqFqI)
