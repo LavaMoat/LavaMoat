@@ -1,5 +1,6 @@
 const fs = require('fs')
 const mergeDeep = require('merge-deep')
+const jsonStringify = require('json-stable-stringify')
 const generatePrelude = require('./generatePrelude')
 const createCustomPack = require('./createCustomPack')
 const { createConfigSpy } = require('./generateConfig')
@@ -65,25 +66,21 @@ function createSesifyPacker (opts) {
   const defaults = {
     raw: true,
     prelude: generatePrelude(opts),
-    generateModuleInitializer: (row) => {
-      const wrappedBundle = wrapIntoModuleInitializer(row.source)
-      const sourceMappingURL = onSourcemap(row, wrappedBundle)
+    bundleEntryForModule: (entry) => {
+      const result = Object.assign({}, entry)
+      const wrappedBundle = wrapIntoModuleInitializer(entry.source)
+      const sourceMappingURL = onSourcemap(entry, wrappedBundle)
       // for now, ignore new sourcemap and just append original filename
       let moduleInitSrc = wrappedBundle.code
       if (sourceMappingURL) moduleInitSrc += `\n//# sourceMappingURL=${sourceMappingURL}`
-      return escapeCodeAsString(moduleInitSrc)
+      // put wrapped source into final moduleEntry
+      result.source = moduleInitSrc
+      const serializedEntry = jsonStringify(result)
+      return serializedEntry
     }
   }
 
   const packOpts = Object.assign({}, defaults, opts)
   const customPack = createCustomPack(packOpts)
   return customPack
-}
-
-function escapeCodeAsString (source) {
-  const escapedSource = source
-    .split('\\').join('\\\\')
-    .split('$').join('\\$')
-    .split('`').join('\\`')
-  return `\`${escapedSource}\``
 }
