@@ -27,6 +27,7 @@ __sessDist__
 
   const realm = SES.makeSESRootRealm({
     mathRandomMode: 'allow',
+    errorStackMode: 'allow',
   })
 
   const sesifyConfig = (function(){
@@ -190,8 +191,8 @@ __sesifyConfig__
 
     function protectExportsInstantiationTime (moduleExports, config) {
       // moduleExports instantion-time protection
-      const containment = config.containment || 'kowtow'
-      switch (containment) {
+      const exportsDefense = config.exportsDefense || 'kowtow'
+      switch (exportsDefense) {
         case 'kowtow':
           // do nothing, set at import time
           break
@@ -201,7 +202,7 @@ __sesifyConfig__
           break
 
         default:
-          throw new Error(`Sesify - Unknown exports protection ${containment}`)
+          throw new Error(`Sesify - Unknown exports protection ${exportsDefense}`)
       }
 
       // return the exports
@@ -209,8 +210,8 @@ __sesifyConfig__
     }
 
     function protectExportsRequireTime (moduleExports, config) {
-      const containment = config.containment || 'kowtow'
-      switch (containment) {
+      const exportsDefense = config.exportsDefense || 'kowtow'
+      switch (exportsDefense) {
         // create kowtow view
         case 'kowtow':
           return kowtow()(moduleExports)
