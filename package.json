@@ -18,7 +18,7 @@
     "fromentries": "^1.1.0",
     "insert-module-globals": "^7.2.0",
     "json-stable-stringify": "^1.0.1",
-    "kowtow": "^1.0.2",
+    "kowtow": "^1.0.6",
     "lodash.flatmap": "^4.5.0",
     "merge-deep": "^3.0.2",
     "mississippi": "^3.0.0",
