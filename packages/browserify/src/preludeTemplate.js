@@ -1,6 +1,18 @@
 // Sesify Prelude
 ;(function() {
 
+  // define kowtow
+  const kowtow = (function(){
+    const exports = {}
+    const module = { exports }
+    ;(function(){
+// START of injected code from kowtowDist
+__kowtowDist__
+// END of injected code from kowtowDist
+    })()
+    return module.exports
+  })()
+
   // define SES
   const SES = (function(){
     const exports = {}
@@ -15,6 +27,7 @@ __sessDist__
 
   const realm = SES.makeSESRootRealm({
     mathRandomMode: 'allow',
+    errorStackMode: 'allow',
   })
 
   const sesifyConfig = (function(){
@@ -39,7 +52,7 @@ __sesifyConfig__
     const globalCache = {}
     // create SES-wrapped internalRequire
     const createInternalRequire = realm.evaluate(`(${internalRequireWrapper})`, { console })
-    const safeInternalRequire = createInternalRequire(modules, globalCache, sesifyConfig, realm, eval, evalWithEndowments, globalRef)
+    const safeInternalRequire = createInternalRequire(modules, globalCache, sesifyConfig, realm, eval, evalWithEndowments, globalRef, kowtow)
     // load entryPoints
     for (let entryId of entryPoints) {
       safeInternalRequire(entryId, null, [])
@@ -48,7 +61,7 @@ __sesifyConfig__
 
   // this is serialized and run in SES
   // mostly just exists to expose variables to internalRequire
-  function internalRequireWrapper (modules, globalCache, sesifyConfig, realm, unsafeEval, unsafeEvalWithEndowments, globalRef) {
+  function internalRequireWrapper (modules, globalCache, sesifyConfig, realm, unsafeEval, unsafeEvalWithEndowments, globalRef, kowtow) {
     return internalRequire
 
     function internalRequire (moduleId, providedEndowments, depPath) {
@@ -81,7 +94,7 @@ __sesifyConfig__
       // prepare the module to be initialized
       const module = { exports: {} }
       localCache[moduleId] = module
-      const moduleSource = moduleData[0]
+      const moduleSource = moduleData.source
       const configForModule = getConfigForPackage(sesifyConfig, packageName)
       const isEntryModule = moduleDepPath.length < 1
 
@@ -137,56 +150,102 @@ __sesifyConfig__
         throw err
       }
 
-      // prevent module.exports from being modified
-      const containment = configForModule.containment || 'freeze'
-      if (containment === 'freeze') {
-        Object.freeze(module.exports)
-      }
-
-      // return the exports
-      return module.exports
+      return protectExportsInstantiationTime(module.exports, configForModule)
 
 
       // this is the require method passed to the module initializer
       // it has a context of the current dependency path and nested config
       function scopedRequire (requestedName, providedEndowments) {
-        const moduleDeps = moduleData[1]
-        const id = moduleDeps[requestedName] || requestedName
-        // recursive requires dont hit cache so it inf loops, so we shortcircuit
-        // this only seems to happen with the "timers" which uses and is used by "process"
-        if (id === moduleId) {
-          if (['timers', 'buffer'].includes(requestedName) === false) {
-            throw new Error(`Sesify - recursive require detected: "${requestedName}"`)
-          }
-          return module.exports
+        const parentModule = module
+        const parentModuleData = moduleData
+        return publicRequire({ requestedName, providedEndowments, parentModule, parentModuleData, moduleDepPath })
+      }
+
+    }
+
+    function publicRequire ({ requestedName, providedEndowments, parentModule, parentModuleData, moduleDepPath }) {
+      const parentModuleId = parentModuleData.id
+      const parentModuleDeps = parentModuleData.deps
+      const moduleId = parentModuleDeps[requestedName] || requestedName
+      // recursive requires dont hit cache so it inf loops, so we shortcircuit
+      // this only seems to happen with the "timers" which uses and is used by "process"
+      if (moduleId === parentModuleId) {
+        if (['timers', 'buffer'].includes(requestedName) === false) {
+          throw new Error(`Sesify - recursive require detected: "${requestedName}"`)
         }
-        // update the dependency path for the child require
-        const childDepPath = depPath.slice()
-        childDepPath.push(requestedName)
-        const moduleExports = internalRequire(id, providedEndowments, childDepPath)
-        // create a mutable copy
-        switch (typeof moduleExports) {
-          case 'object':
-            return magicCopy({}, moduleExports)
-          case 'function':
-            // supports both normal functions and both styles of classes
-            const copy = function (...args) {
-              if (new.target) {
-                return Reflect.construct(moduleExports, args, new.target)
-              } else {
-                return Reflect.apply(moduleExports, this, args)
-              }
-            }
-            magicCopy(copy, moduleExports)
-            return copy
-          default:
-            // safe as is
-            return moduleExports
-        }
+        return parentModule.exports
+      }
+      // look up config for module
+      const moduleData = modules[moduleId]
+      const packageName = moduleData.package
+      const configForModule = getConfigForPackage(sesifyConfig, packageName)
+
+      // update the dependency path for the child require
+      const childDepPath = moduleDepPath.slice()
+      childDepPath.push(requestedName)
+      // load (or fetch cached) module
+      const moduleExports = internalRequire(moduleId, providedEndowments, childDepPath)
+      // moduleExports require-time protection
+      return protectExportsRequireTime(moduleExports, configForModule)
+    }
+
+    function protectExportsInstantiationTime (moduleExports, config) {
+      // moduleExports instantion-time protection
+      const exportsDefense = config.exportsDefense || 'kowtow'
+      switch (exportsDefense) {
+        case 'kowtow':
+          // do nothing, set at import time
+          break
+        case 'freeze':
+          // Todo: deepFreeze/harden
+          Object.freeze(moduleExports)
+          break
+
+        default:
+          throw new Error(`Sesify - Unknown exports protection ${exportsDefense}`)
+      }
+
+      // return the exports
+      return moduleExports
+    }
+
+    function protectExportsRequireTime (moduleExports, config) {
+      const exportsDefense = config.exportsDefense || 'kowtow'
+      switch (exportsDefense) {
+        // create kowtow view
+        case 'kowtow':
+          return kowtow()(moduleExports)
+        // already frozen
+        case 'freeze':
+          return magicCopy(moduleExports)
+        default:
+          throw new Error(`Sesify - Unknown exports protection ${containment}`)
       }
     }
 
-    function magicCopy (target, source) {
+    function magicCopy (ref) {
+      // create a mutable copy
+      switch (typeof ref) {
+        case 'object':
+          return magicCopyInternal({}, ref)
+        case 'function':
+          // supports both normal functions and both styles of classes
+          const copy = function (...args) {
+            if (new.target) {
+              return Reflect.construct(ref, args, new.target)
+            } else {
+              return Reflect.apply(ref, this, args)
+            }
+          }
+          magicCopyInternal(copy, ref)
+          return copy
+        default:
+          // safe as is
+          return ref
+      }
+    }
+
+    function magicCopyInternal (target, source) {
       try {
         const props = Object.getOwnPropertyDescriptors(source)
         Object.defineProperties(target, props)
