@@ -1,8 +1,10 @@
 const React = require('react')
 const ObservableStore = require('obs-store')
 const { GraphContainer, ForceGraph, util: { createNode, createLink } } = require('react-force-directed')
+const exampleConfig = require('../example-config.js')
+
 // const configData = require('../data/config.json')
-const configData = self.CONFIG
+const configData = self.CONFIG || exampleConfig
 
 class DepGraph extends React.Component {
 
@@ -16,20 +18,22 @@ class DepGraph extends React.Component {
 
   componentDidMount () {
     // generate graph
-    const { bundleData, mode } = this.props
-    this.updateGraph(bundleData, mode)
+    const { bundleData, mode, sesifyMode } = this.props
+    this.updateGraph(bundleData, { mode, sesifyMode })
   }
 
   componentWillReceiveProps (nextProps) {
     // recalculate graph if `mode` or `bundleData` change
-    if (this.props.mode !== nextProps.mode || this.props.bundleData !== nextProps.bundleData) {
-      const { bundleData, mode } = nextProps
-      this.updateGraph(bundleData, mode)
+    if (this.props.mode !== nextProps.mode
+      || this.props.bundleData !== nextProps.bundleData
+      || this.props.sesifyMode !== nextProps.sesifyMode) {
+      const { bundleData, mode, sesifyMode } = nextProps
+      this.updateGraph(bundleData, { mode, sesifyMode })
     }
   }
 
-  updateGraph (bundleData, mode) {
-    const { nodes, links } = createGraphByMode(bundleData, mode)
+  updateGraph (bundleData, { mode, sesifyMode }) {
+    const { nodes, links } = createGraphByMode(bundleData, { mode, sesifyMode })
     this.graphStore.updateState({ nodes, links })
   }
 
@@ -56,16 +60,16 @@ class DepGraph extends React.Component {
 module.exports = DepGraph
 
 
-function createGraphByMode (bundleData, mode) {
+function createGraphByMode (bundleData, { mode, sesifyMode }) {
   // create graph for mode
   if (mode === 'modules') {
-    return createModuleGraph(bundleData)
+    return createModuleGraph(bundleData, { sesifyMode })
   } else {
-    return createPackageGraph(bundleData)
+    return createPackageGraph(bundleData, { sesifyMode })
   }
 }
 
-function createPackageGraph (bundleData) {
+function createPackageGraph (bundleData, { sesifyMode }) {
   const packageData = {}
   
   // create a fake `bundleData` using the packages
@@ -92,10 +96,10 @@ function createPackageGraph (bundleData) {
     })
   })
 
-  return createModuleGraph(packageData)
+  return createModuleGraph(packageData, { sesifyMode })
 }
 
-function createModuleGraph (bundleData) {
+function createModuleGraph (bundleData, { sesifyMode }) {
   const nodes = [], links = []
 
   // for each module, create node and links 
@@ -106,7 +110,10 @@ function createModuleGraph (bundleData) {
     const configLabel = JSON.stringify(configForPackage, null, 2)
     const label = `${packageName}\n${file}\n${configLabel}`
     const isEntryPackage = packageName === '<root>'
-    const color = isEntryPackage ? 'purple' : getColorForConfig(configForPackage)
+    const isSesify = sesifyMode === 'sesify'
+    console.log({sesifyMode})
+    const sesifyColor = isEntryPackage ? 'purple' : getColorForConfig(configForPackage)
+    const color = isSesify ? sesifyColor : 'red'
     // create node for modules
     nodes.push(
       createNode({ id: parentId, radius, label, color })
