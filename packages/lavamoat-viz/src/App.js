@@ -36,11 +36,6 @@ class App extends Component {
     return (
       <div className="App">
         <Nav
-          routes={bundleNames}
-          activeRoute={this.state.bundle}
-          onNavigate={(target) => this.selectBundle(target)}
-          />
-        <Nav
           routes={routes}
           activeRoute={this.state.mode}
           onNavigate={(target) => this.selectMode(target)}
