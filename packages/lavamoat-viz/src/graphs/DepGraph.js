@@ -1,7 +1,8 @@
 const React = require('react')
 const ObservableStore = require('obs-store')
 const { GraphContainer, ForceGraph, util: { createNode, createLink } } = require('react-force-directed')
-const configData = require('../data/config.json')
+// const configData = require('../data/config.json')
+const configData = self.CONFIG
 
 class DepGraph extends React.Component {
 

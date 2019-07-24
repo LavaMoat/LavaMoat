@@ -126,6 +126,7 @@
       "@babel/preset-env"
     ]
   },
+  "servedPath": "./",
   "devDependencies": {
     "gh-pages": "^2.0.1",
     "source-map-explorer": "^1.8.0"

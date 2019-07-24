@@ -3,9 +3,12 @@ import './App.css'
 import Nav from './views/nav'
 const DepGraph = require('./graphs/DepGraph')
 
-const bundles = {
-  'background': require('./data/deps.json'),
-}
+// const bundles = {
+//   'background': require('./data/deps.json'),
+// }
+
+/* eslint-disable no-restricted-globals */
+const bundles = { background: self.DEPS }
 const bundleNames = Object.keys(bundles)
 
 const routes = ['packages', 'modules']
