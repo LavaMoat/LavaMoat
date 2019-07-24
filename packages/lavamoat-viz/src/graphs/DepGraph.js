@@ -140,6 +140,7 @@ const redAlertGlobals = [
   'document.body.appendChild',
   'location',
   'XMLHttpRequest',
+  'fetch',
   'WebSocket',
   'crypto',
 ]
