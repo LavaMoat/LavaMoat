@@ -51,6 +51,12 @@ __sesifyConfig__
   }
 
   function loadBundle (modules, _, entryPoints) {
+    // debug - log module content instead of execution
+    if (process.env.MODULE_DUMP) {
+      const moduleData = modules[process.env.MODULE_DUMP]
+      console.log(JSON.stringify(moduleData))
+      return
+    }
     const globalRef = (typeof self !== 'undefined') ? self : global
     // setup our global module cache
     const globalCache = {}
