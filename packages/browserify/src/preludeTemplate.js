@@ -29,6 +29,10 @@ __sessDist__
     mathRandomMode: 'allow',
     errorStackMode: 'allow',
   })
+  const sesRequire = realm.makeRequire({
+    '@agoric/harden': true,
+  })
+  const harden = sesRequire('@agoric/harden')
 
   const sesifyConfig = (function(){
 // START of injected code from sesifyConfig
@@ -52,7 +56,7 @@ __sesifyConfig__
     const globalCache = {}
     // create SES-wrapped internalRequire
     const createInternalRequire = realm.evaluate(`(${internalRequireWrapper})`, { console })
-    const safeInternalRequire = createInternalRequire(modules, globalCache, sesifyConfig, realm, eval, evalWithEndowments, globalRef, kowtow)
+    const safeInternalRequire = createInternalRequire(modules, globalCache, sesifyConfig, realm, harden, eval, evalWithEndowments, globalRef, kowtow)
     // load entryPoints
     for (let entryId of entryPoints) {
       safeInternalRequire(entryId, null, [])
@@ -61,7 +65,7 @@ __sesifyConfig__
 
   // this is serialized and run in SES
   // mostly just exists to expose variables to internalRequire
-  function internalRequireWrapper (modules, globalCache, sesifyConfig, realm, unsafeEval, unsafeEvalWithEndowments, globalRef, kowtow) {
+  function internalRequireWrapper (modules, globalCache, sesifyConfig, realm, harden, unsafeEval, unsafeEvalWithEndowments, globalRef, kowtow) {
     return internalRequire
 
     function internalRequire (moduleId, providedEndowments, depPath) {
@@ -191,8 +195,14 @@ __sesifyConfig__
 
     function protectExportsInstantiationTime (moduleExports, config) {
       // moduleExports instantion-time protection
-      const exportsDefense = config.exportsDefense || 'kowtow'
+      const exportsDefense = config.exportsDefense || 'harden'
       switch (exportsDefense) {
+        // harden exports
+        case 'harden':
+          // something breaks if we dont manually harden the prototype
+          harden(Reflect.getPrototypeOf(moduleExports))
+          harden(moduleExports)
+          break
         case 'kowtow':
           // do nothing, set at import time
           break
@@ -210,8 +220,11 @@ __sesifyConfig__
     }
 
     function protectExportsRequireTime (moduleExports, config) {
-      const exportsDefense = config.exportsDefense || 'kowtow'
+      const exportsDefense = config.exportsDefense || 'harden'
       switch (exportsDefense) {
+        // already hardened
+        case 'harden':
+          return magicCopy(moduleExports)
         // create kowtow view
         case 'kowtow':
           return kowtow()(moduleExports)
@@ -230,7 +243,7 @@ __sesifyConfig__
           return magicCopyInternal({}, ref)
         case 'function':
           // supports both normal functions and both styles of classes
-          const copy = function (...args) {
+          const copy = function magicCopyFnWrapper (...args) {
             if (new.target) {
               return Reflect.construct(ref, args, new.target)
             } else {
