@@ -23,12 +23,13 @@
   - [x] allow easy override of configuration
   - [ ] no longer de-duping overlapping namespaces? (needs test)
 - [ ] config advanced
-  - [ ] environment/container options
+  - [ ] execution environment options
     - [x] autogen config from "alt environment heuristics"
     - [ ] execute unfrozen in fresh realm
   - [ ] defensibility/hardening options
-    - [ ] harden/deep-freeze exports (needs test)
-    - [x] require time, magic copy as default
+    - [x] magic copy
+    - [x] kowtow
+    - [x] @agoric/harden
   - [ ] enforce configuration
     - [ ] fail at buildtime if deps violation
     - [x] enforce globals
@@ -49,10 +50,6 @@
   - [ ] sesify with unfrozen realm
     - should be on Realm.evaluate, verify
   - [x] how to create a copy of a fn class
-- [ ] moduleExports wrap
-  - [ ] make a version of muta that wraps fns correctly
-    - [ ] apply/construct wrapper
-    - [ ] without json-patch stuff
 
 if autogen config
   - allow browserPack to pause stream until config is generated
