@@ -259,7 +259,11 @@ __sesifyConfig__
       // create a mutable copy
       switch (typeof ref) {
         case 'object':
-          return magicCopyInternal({}, ref)
+          if (Array.isArray(ref)) {
+            return magicCopyInternal([], ref)
+          } else {
+            return magicCopyInternal({}, ref)
+          }
         case 'function':
           // supports both normal functions and both styles of classes
           const copy = function magicCopyFnWrapper (...args) {

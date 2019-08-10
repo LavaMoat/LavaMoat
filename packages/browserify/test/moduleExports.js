@@ -235,6 +235,34 @@ test('moduleExports - decorate an import - class syntax subclass', async (t) => 
   })
 })
 
+
+test('moduleExports - exprot an array', async (t) => {
+  const files = [{
+    // id must be full path
+    id: './entry.js',
+    file: './entry.js',
+    deps: {
+      'test': './node_modules/test/index.js'
+    },
+    source: `
+      const result = require('test')
+      global.testResult = Array.isArray(result)
+    `,
+    entry: true
+  }, {
+    // non-entry
+    id: './node_modules/test/index.js',
+    file: './node_modules/test/index.js',
+    deps: {},
+    source: `
+      module.exports = [1,2,3]
+    `,
+  }]
+
+  const result = await evalModulesArray(t, { files })
+  t.deepEqual(result, true)
+})
+
 async function evalModulesArray (t, { files, pluginOpts = {} }) {
   const bundle = await createBundleFromRequiresArray(files, pluginOpts)
 
