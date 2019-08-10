@@ -215,7 +215,6 @@ __sesifyConfig__
           break
         // harden exports
         case 'harden':
-          console.log('HARDEN')
           // something breaks if we dont manually harden the prototype
           harden(Reflect.getPrototypeOf(moduleExports))
           harden(moduleExports)
