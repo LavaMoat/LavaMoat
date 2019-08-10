@@ -174,6 +174,7 @@ __sesifyConfig__
     }
 
     function publicRequire ({ requestedName, providedEndowments, parentModule, parentModuleData, moduleDepPath }) {
+      const parentPackageName = parentModuleData.package
       const parentModuleId = parentModuleData.id
       const parentModuleDeps = parentModuleData.deps
       const moduleId = parentModuleDeps[requestedName] || requestedName
@@ -196,21 +197,31 @@ __sesifyConfig__
       // load (or fetch cached) module
       const moduleExports = internalRequire(moduleId, providedEndowments, childDepPath)
       // moduleExports require-time protection
-      return protectExportsRequireTime(moduleExports, configForModule)
+      if (parentPackageName && packageName === parentPackageName) {
+        // return raw if same package
+        return moduleExports
+      } else {
+        // return exports protected as specified in config
+        return protectExportsRequireTime(moduleExports, configForModule)
+      }
     }
 
     function protectExportsInstantiationTime (moduleExports, config) {
       // moduleExports instantion-time protection
-      const exportsDefense = config.exportsDefense || 'harden'
+      const exportsDefense = config.exportsDefense || 'magicCopy'
       switch (exportsDefense) {
+        case 'magicCopy':
+          // do nothing, handled at import time
+          break
         // harden exports
         case 'harden':
+          console.log('HARDEN')
           // something breaks if we dont manually harden the prototype
           harden(Reflect.getPrototypeOf(moduleExports))
           harden(moduleExports)
           break
         case 'kowtow':
-          // do nothing, set at import time
+          // do nothing, handled at import time
           break
         case 'freeze':
           // Todo: deepFreeze/harden
@@ -226,8 +237,10 @@ __sesifyConfig__
     }
 
     function protectExportsRequireTime (moduleExports, config) {
-      const exportsDefense = config.exportsDefense || 'harden'
+      const exportsDefense = config.exportsDefense || 'magicCopy'
       switch (exportsDefense) {
+        case 'magicCopy':
+          return magicCopy(moduleExports)
         // already hardened
         case 'harden':
           return magicCopy(moduleExports)

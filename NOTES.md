@@ -29,7 +29,9 @@
   - [ ] defensibility/hardening options
     - [x] magic copy
     - [x] kowtow
-    - [x] @agoric/harden
+    - [x] return raw if same package (dont defense)
+    - [ ] @agoric/harden
+      - ? metamask error hardening proto chain
   - [ ] enforce configuration
     - [ ] fail at buildtime if deps violation
     - [x] enforce globals
