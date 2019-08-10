@@ -21,7 +21,9 @@ const globalRefs = [
 
 const ignoredGlobals = [
   // we handle this elsewhere
-  'global'
+  'global',
+  // safe
+  'Math',
 ]
 
 const browserPlatformGlobals = [
@@ -152,7 +154,9 @@ const browserPlatformGlobals = [
   'scrollX',
   'scrollY',
   'top',
-  'MessageChannel'
+  'MessageChannel',
+  // js builtins
+  'RegExp',
 ]
 
 module.exports = inspectGlobals
@@ -203,16 +207,16 @@ function inspectGlobals (ast) {
 
   function maybeAddGlobalName (variableName) {
     const apiRoot = variableName.split('.')[0]
-    // ignore if in SES's whitelist (safe JS features)
-    const whitelistStatus = whitelist[apiRoot]
-    if (whitelistStatus) {
-      // skip if exactly true (fully whitelisted)
-      if (whitelistStatus === true) return
-      // skip if '*' (whitelisted but checks inheritance(?))
-      if (whitelistStatus === '*') return
-      // inspect if partial whitelist
-      if (typeof whitelistStatus === 'object') return
-    }
+    // // ignore if in SES's whitelist (safe JS features)
+    // const whitelistStatus = whitelist[apiRoot]
+    // if (whitelistStatus) {
+    //   // skip if exactly true (fully whitelisted)
+    //   if (whitelistStatus === true) return
+    //   // skip if '*' (whitelisted but checks inheritance(?))
+    //   if (whitelistStatus === '*') return
+    //   // inspect if partial whitelist
+    //   if (typeof whitelistStatus === 'object') return
+    // }
     // skip ignored globals
     if (ignoredGlobals.includes(apiRoot)) return
     // ignore unknown non-platform globals
