@@ -236,7 +236,7 @@ test('moduleExports - decorate an import - class syntax subclass', async (t) => 
 })
 
 
-test('moduleExports - exprot an array', async (t) => {
+test('moduleExports - exported array passes Array.isArray', async (t) => {
   const files = [{
     // id must be full path
     id: './entry.js',
