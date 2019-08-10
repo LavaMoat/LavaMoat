@@ -323,7 +323,14 @@ __sesifyConfig__
         }
         const value = deepGetAndBind(globalRef, globalPath)
         if (value === undefined) return
-        deepSet(globals, globalPath, value)
+        // TODO: actually match prop descriptor
+        const propDesc = {
+          value,
+          configurable: true,
+          writable: true,
+          enumerable: true,
+        }
+        deepDefine(globals, globalPath, propDesc)
       })
       return globals
     }
@@ -356,7 +363,7 @@ __sesifyConfig__
       return result
     }
 
-    function deepSet (obj, pathName, value) {
+    function deepDefine (obj, pathName, propDesc) {
       let parent = obj
       const pathParts = pathName.split('.')
       const lastPathPart = pathParts[pathParts.length-1]
@@ -371,7 +378,7 @@ __sesifyConfig__
           prevParent[pathPart] = parent
         }
       })
-      parent[lastPathPart] = value
+      Object.defineProperty(parent, lastPathPart, propDesc)
     }
 
     //# sourceURL=internalRequire
