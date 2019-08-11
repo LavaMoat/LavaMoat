@@ -52,7 +52,7 @@ __sesifyConfig__
 
   function loadBundle (modules, _, entryPoints) {
     // debug - log module content instead of execution
-    if (process.env.MODULE_DUMP) {
+    if (typeof process !== 'undefined' && process.env.MODULE_DUMP) {
       const moduleData = modules[process.env.MODULE_DUMP]
       console.log(JSON.stringify(moduleData))
       return
@@ -178,6 +178,11 @@ __sesifyConfig__
       const parentModuleId = parentModuleData.id
       const parentModuleDeps = parentModuleData.deps
       const moduleId = parentModuleDeps[requestedName] || requestedName
+
+      if (!(requestedName in parentModuleData.deps)) {
+        console.warn(`missing dep: ${parentPackageName} requested ${requestedName}`)
+      }
+
       // recursive requires dont hit cache so it inf loops, so we shortcircuit
       // this only seems to happen with the "timers" which uses and is used by "process"
       if (moduleId === parentModuleId) {
