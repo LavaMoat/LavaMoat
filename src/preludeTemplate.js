@@ -72,6 +72,7 @@ __sesifyConfig__
   // this is serialized and run in SES
   // mostly just exists to expose variables to internalRequire
   function internalRequireWrapper (modules, globalCache, sesifyConfig, realm, harden, unsafeEval, unsafeEvalWithEndowments, globalRef, kowtow) {
+    const globalStore = {}
     return internalRequire
 
     function internalRequire (moduleId, providedEndowments, depPath) {
@@ -111,13 +112,7 @@ __sesifyConfig__
       // prepare endowments
       const endowmentsFromConfig = generateEndowmentsForConfig(configForModule)
       let endowments = Object.assign({}, sesifyConfig.defaultGlobals, providedEndowments, endowmentsFromConfig)
-      // special circular reference for endowments to fix globalRef in SES
-      // see https://github.com/Agoric/SES/issues/123
-      endowments._endowments = endowments
-      // special case for exposing window
-      if (endowments.window) {
-        endowments = Object.assign({}, endowments.window, endowments)
-      }
+      const globalsProxyForModule = createGlobalsProxyForModule(globalStore, configForModule, endowments)
 
       const environment = configForModule.environment || isEntryModule ? null : 'frozen'
       const runInSes = environment === 'frozen'
@@ -126,7 +121,7 @@ __sesifyConfig__
       let moduleInitializer
       if (runInSes) {
         // set the module initializer as the SES-wrapped version
-        moduleInitializer = realm.evaluate(`${moduleSource}`, endowments)
+        moduleInitializer = realm.evaluate(`${moduleSource}`, {}, { sloppyGlobals: globalsProxyForModule })
       } else {
         // set the module initializer as the unwrapped version
         moduleInitializer = unsafeEvalWithEndowments(`${moduleSource}`, endowments)
@@ -326,6 +321,8 @@ __sesifyConfig__
       if (!config.globals) return {}
       const globals = {}
       Object.entries(config.globals).forEach(([globalPath, configValue]) => {
+        // writes to globals handled elsewhere
+        if (configValue === 'write') return
         if (configValue !== true) {
           throw new Error('Sesify - unknown value for config globals')
         }
@@ -388,6 +385,54 @@ __sesifyConfig__
       })
       Object.defineProperty(parent, lastPathPart, propDesc)
     }
+
+    function createGlobalsProxyForModule (globalStore, configForModule, endowments) {
+      const globalRefKeys = ['window', 'self', 'global']
+      const globalsConfig = configForModule.globals || {}
+      const globalTopLevelKeys = Reflect.ownKeys(globalsConfig).map(key => key.split('.')[0])
+      const globalsProxy = new Proxy(Object.create(null), {
+          // reads
+          has (_, key) {
+            console.warn('globalWrite: has', key)
+            if (globalRefKeys.includes(key)) return true
+            if (!globalTopLevelKeys.includes(key)) return false
+            return key in globalStore || key in endowments
+          },
+          ownKeys (_) {
+            console.warn('globalWrite: ownKeys')
+            return [...globalTopLevelKeys, ...globalRefKeys]
+          },
+          get (_, key) {
+            console.warn('globalWrite: get', key)
+            if (globalRefKeys.includes(key)) return globalsProxy
+            if (!globalTopLevelKeys.includes(key)) return undefined
+            return key in globalStore ? globalStore[key] : endowments[key] 
+          },
+          getOwnPropertyDescriptor (_, key) {
+            console.warn('globalWrite: getOwnPropertyDescriptor', key)
+            if (globalRefKeys.includes(key)) return { value: globalsProxy, writable: false, enumerable: true, configurable: false }
+            if (!globalTopLevelKeys.includes(key)) return undefined
+            return key in globalStore ? Reflect.getOwnPropertyDescriptor(globalStore, key) : Reflect.getOwnPropertyDescriptor(endowments, key)
+          },
+          // writes
+          set (_, key, value) {
+            console.warn('globalWrite: set', key)
+            if (globalRefKeys.includes(key)) return false
+            if (globalsConfig[key] !== 'write') return false
+            globalStore[key] = value
+            return true
+          },
+          defineProperty (_, key, propDescriptor) {
+            console.warn('globalWrite: defineProperty', key, propDescriptor)
+            if (globalRefKeys.includes(key)) return false
+            if (globalsConfig[key] !== 'write') return false
+            Reflect.defineProperty(globalStore, key, propDescriptor)
+            return true
+          },
+        })
+
+        return globalsProxy
+      }
 
     //# sourceURL=internalRequire
   }
