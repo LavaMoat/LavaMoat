@@ -131,7 +131,7 @@ __sesifyConfig__
         const globalsConfig = configForModule.globals || {}
         prepareRealmGlobalFromConfig(moduleRealm, globalsConfig, endowments)
         // execute in module realm with modified realm global
-        moduleInitializer = moduleRealm.evaluate(`${moduleSource}`, endowments)
+        moduleInitializer = moduleRealm.evaluate(`${moduleSource}`)
       } else {
         // set the module initializer as the unwrapped version
         moduleInitializer = unsafeEvalWithEndowments(`${moduleSource}`, endowments)
