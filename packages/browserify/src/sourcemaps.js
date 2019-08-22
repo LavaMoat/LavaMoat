@@ -29,14 +29,6 @@ function transformToWrapped (sourceMeta) {
   const moduleWrapperSource =
 
 `(${function () {
-  const self = {}, window = self;
-  try {
-    Object.defineProperties(self, Object.getOwnPropertyDescriptors(_endowments));
-    Object.defineProperties(self, Object.getOwnPropertyDescriptors(this));
-  } catch (err) {
-    console.warn(`Sesify - Error performing globalRef setup:`, err.message)
-    throw err
-  }
   return function (require,module,exports) {
 __MODULE_CONTENT__
   }

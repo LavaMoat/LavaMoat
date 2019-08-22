@@ -415,31 +415,42 @@ __sesifyConfig__
       // lookup top level read + write access keys
       const topLevelWriteAccessKeys = getTopLevelWriteAccessFromPackageConfig(globalsConfig)
       const topLevelReadAccessKeys = getTopLevelReadAccessFromPackageConfig(globalsConfig)
+      const globalThisRefs = ['self', 'window', 'global']
       // define accessors
+      const moduleRealmGlobal = moduleRealm.global
       topLevelReadAccessKeys.forEach(key => {
-        Object.defineProperty(moduleRealm.global, key, {
+        Object.defineProperty(moduleRealmGlobal, key, {
           get () {
             if (globalStore.has(key)) {
               console.warn('read (only) from globalStore', key, globalStore[key])
               return globalStore.get(key)
             } else {
               console.warn('read (only) from realm global', key)
-              endowments[key]
+              return endowments[key]
             }
           },
         })
       })
       topLevelWriteAccessKeys.forEach(key => {
-        Object.defineProperty(moduleRealm.global, key, {
+        Object.defineProperty(moduleRealmGlobal, key, {
           get () {
-            console.warn('read from global', key)
-            return globalStore.get(key)
+            if (globalStore.has(key)) {
+              console.warn('read from globalStore', key, globalStore[key])
+              return globalStore.get(key)
+            } else {
+              console.warn('read from realm global', key)
+              return endowments[key]
+            }
           },
           set (value) {
             console.warn('write to global', key, value)
             globalStore.set(key, value)
           },
         })
+      })
+      // set circular globalRefs
+      globalThisRefs.forEach(key => {
+        moduleRealmGlobal[key] = moduleRealmGlobal
       })
     }
 
