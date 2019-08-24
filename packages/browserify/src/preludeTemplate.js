@@ -415,7 +415,7 @@ __sesifyConfig__
       // lookup top level read + write access keys
       const topLevelWriteAccessKeys = getTopLevelWriteAccessFromPackageConfig(globalsConfig)
       const topLevelReadAccessKeys = getTopLevelReadAccessFromPackageConfig(globalsConfig)
-      const globalThisRefs = ['self', 'window', 'global']
+      const globalThisRefs = ['self', 'window', 'globalThis']
       // define accessors
       const moduleRealmGlobal = moduleRealm.global
       topLevelReadAccessKeys.forEach(key => {
