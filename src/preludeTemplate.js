@@ -446,11 +446,8 @@ __sesifyConfig__
             console.warn('write to global', key, value)
             globalStore.set(key, value)
           },
-          delete () {
-            console.warn('write (delete) to global', key)
-            // we dont remove it because we could accidentally reveal a value on the compartment global
-            globalStore.set(key, undefined)
-          }
+          enumerable: true,
+          configurable: true,
         })
       })
       // set circular globalRefs
