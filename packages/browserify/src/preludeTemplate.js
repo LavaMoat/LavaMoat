@@ -72,6 +72,7 @@ __sesifyConfig__
   // this is serialized and run in SES
   // mostly just exists to expose variables to internalRequire
   function internalRequireWrapper (modules, globalCache, sesifyConfig, realm, harden, unsafeEval, unsafeEvalWithEndowments, globalRef, kowtow) {
+    const globalStore = new Map()
     return internalRequire
 
     function internalRequire (moduleId, providedEndowments, depPath) {
@@ -126,7 +127,11 @@ __sesifyConfig__
       let moduleInitializer
       if (runInSes) {
         // set the module initializer as the SES-wrapped version
-        moduleInitializer = realm.evaluate(`${moduleSource}`, endowments)
+        const moduleRealm = realm.global.Realm.makeCompartment()
+        const globalsConfig = configForModule.globals || {}
+        prepareRealmGlobalFromConfig(moduleRealm, globalsConfig, endowments)
+        // execute in module realm with modified realm global
+        moduleInitializer = moduleRealm.evaluate(`${moduleSource}`)
       } else {
         // set the module initializer as the unwrapped version
         moduleInitializer = unsafeEvalWithEndowments(`${moduleSource}`, endowments)
@@ -326,6 +331,8 @@ __sesifyConfig__
       if (!config.globals) return {}
       const globals = {}
       Object.entries(config.globals).forEach(([globalPath, configValue]) => {
+        // write access handled elsewhere
+        if (configValue === 'write') return
         if (configValue !== true) {
           throw new Error('Sesify - unknown value for config globals')
         }
@@ -387,6 +394,66 @@ __sesifyConfig__
         }
       })
       Object.defineProperty(parent, lastPathPart, propDesc)
+    }
+
+    function getTopLevelReadAccessFromPackageConfig (globalsConfig) {
+      const result = Object.entries(globalsConfig)
+        .filter(([key, value]) => value === 'read' || value === true || (value === 'write' && key.split('.').length > 1))
+        .map(([key]) => key.split('.')[0])
+      // return unique array
+      return Array.from(new Set(result))
+    }
+
+    function getTopLevelWriteAccessFromPackageConfig (globalsConfig) {
+      const result = Object.entries(globalsConfig)
+        .filter(([key, value]) => value === 'write' && key.split('.').length === 1)
+        .map(([key]) => key)
+      return result
+    }
+
+    function prepareRealmGlobalFromConfig (moduleRealm, globalsConfig, endowments) {
+      // lookup top level read + write access keys
+      const topLevelWriteAccessKeys = getTopLevelWriteAccessFromPackageConfig(globalsConfig)
+      const topLevelReadAccessKeys = getTopLevelReadAccessFromPackageConfig(globalsConfig)
+      const globalThisRefs = ['self', 'window', 'globalThis']
+      // define accessors
+      const moduleRealmGlobal = moduleRealm.global
+      topLevelReadAccessKeys.forEach(key => {
+        Object.defineProperty(moduleRealmGlobal, key, {
+          get () {
+            if (globalStore.has(key)) {
+              console.warn('read (only) from globalStore', key, globalStore[key])
+              return globalStore.get(key)
+            } else {
+              console.warn('read (only) from realm global', key)
+              return endowments[key]
+            }
+          },
+        })
+      })
+      topLevelWriteAccessKeys.forEach(key => {
+        Object.defineProperty(moduleRealmGlobal, key, {
+          get () {
+            if (globalStore.has(key)) {
+              console.warn('read from globalStore', key, globalStore[key])
+              return globalStore.get(key)
+            } else {
+              console.warn('read from realm global', key)
+              return endowments[key]
+            }
+          },
+          set (value) {
+            console.warn('write to global', key, value)
+            globalStore.set(key, value)
+          },
+          enumerable: true,
+          configurable: true,
+        })
+      })
+      // set circular globalRefs
+      globalThisRefs.forEach(key => {
+        moduleRealmGlobal[key] = moduleRealmGlobal
+      })
     }
 
     //# sourceURL=internalRequire

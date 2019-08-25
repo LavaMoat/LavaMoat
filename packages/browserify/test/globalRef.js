@@ -64,12 +64,12 @@ test('globalRef - ensure endowments are accessible on globals', async (t) => {
  
   contextHasPostMessage = typeof postMessage !== 'undefined'
   selfHasPostMessage = !!self.postMessage
-  try { checkSelf = self.postMessage === postMessage } catch (err) { checkSelf = err.message }
   try { checkThis = this.postMessage === postMessage } catch (err) { checkThis = err.message }
+  try { checkSelf = self.postMessage === postMessage } catch (err) { checkSelf = err.message }
   try { checkWindow = window.postMessage === postMessage } catch (err) { checkWindow = err.message }
   try { checkGlobal = global.postMessage === postMessage } catch (err) { checkGlobal = err.message }
 
-  module.exports = { checkSelf, checkThis, checkWindow, checkGlobal, contextHasPostMessage, selfHasPostMessage }
+  module.exports = { checkThis, checkSelf, checkWindow, checkGlobal, contextHasPostMessage, selfHasPostMessage }
   `
   const sesifyConfig = {
     resources: {
