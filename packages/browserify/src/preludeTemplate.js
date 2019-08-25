@@ -338,7 +338,7 @@ __sesifyConfig__
 
     function generateEndowmentsForConfig (config) {
       if (!config.globals) return {}
-      const globals = {}
+      const endowments = {}
       Object.entries(config.globals).forEach(([globalPath, configValue]) => {
         // write access handled elsewhere
         if (configValue === 'write') return
@@ -354,9 +354,9 @@ __sesifyConfig__
           writable: true,
           enumerable: true,
         }
-        deepDefine(globals, globalPath, propDesc)
+        deepDefine(endowments, globalPath, propDesc)
       })
-      return globals
+      return endowments
     }
 
     function deepGetAndBind(obj, pathName) {
@@ -367,9 +367,14 @@ __sesifyConfig__
       if (!parent) return parent
       const value = parent[childKey]
       if (typeof value === 'function') {
-        return value.bind(parent)
+        // bind and copy
+        const newValue = value.bind(parent)
+        Object.defineProperties(newValue, Object.getOwnPropertyDescriptors(value))
+        return newValue
+      } else {
+        // return as is
+        return value
       }
-      return value
     }
 
     function deepGet (obj, pathName) {
@@ -391,7 +396,8 @@ __sesifyConfig__
       let parent = obj
       const pathParts = pathName.split('.')
       const lastPathPart = pathParts[pathParts.length-1]
-      pathParts.slice(0,-1).forEach(pathPart => {
+      const allButLastPart = pathParts.slice(0,-1)
+      allButLastPart.forEach(pathPart => {
         const prevParent = parent
         parent = parent[pathPart]
         if (parent === null) {
