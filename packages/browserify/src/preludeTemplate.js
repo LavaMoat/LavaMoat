@@ -198,6 +198,15 @@ __sesifyConfig__
       }
       // look up config for module
       const moduleData = modules[moduleId]
+
+      // if we dont have it, throw an error
+      // TODO: dedupe this with internalRequire
+      if (!moduleData) {
+        const err = new Error('Cannot find module \'' + moduleId + '\'')
+        err.code = 'MODULE_NOT_FOUND'
+        throw err
+      }
+
       const packageName = moduleData.package
       const configForModule = getConfigForPackage(sesifyConfig, packageName)
 
