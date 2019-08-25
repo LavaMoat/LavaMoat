@@ -87,7 +87,7 @@ __sesifyConfig__
 
       // parse requirePath for module boundries
       const moduleDepPath = toModuleDepPath(depPath)
-      const packageName = getPackageName(moduleDepPath)
+      const packageName = moduleData.package
       const moduleCacheSlug = moduleId
 
 
