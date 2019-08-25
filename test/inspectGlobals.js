@@ -45,6 +45,7 @@ test('inspectGlobals - not picking up properties from non-global self', (t) => {
 
 test('inspectGlobals - not picking up programmatic property lookups', (t) => {
   const globals = inspectGlobalsTest(`
+    const key = 'hello'
     window[key]
   `)
   t.deepEqual(globals, ['window'])
@@ -53,6 +54,7 @@ test('inspectGlobals - not picking up programmatic property lookups', (t) => {
 
 test('inspectGlobals - picking up programmatic property lookups + explicit', (t) => {
   const globals = inspectGlobalsTest(`
+    const key = 'hello'
     window[key]
     window.location
   `)
@@ -60,19 +62,19 @@ test('inspectGlobals - picking up programmatic property lookups + explicit', (t)
   t.end()
 })
 
-test('inspectGlobals - not picking out userspace global', (t) => {
+test('inspectGlobals - picking up userspace global', (t) => {
   const globals = inspectGlobalsTest(`
     xyz = true
   `)
-  t.deepEqual(globals, [])
+  t.deepEqual(globals, ['xyz'])
   t.end()
 })
 
-test('inspectGlobals - not picking out userspace global on globalRef', (t) => {
+test('inspectGlobals - picking up userspace global on globalRef', (t) => {
   const globals = inspectGlobalsTest(`
     global.xyz = true
   `)
-  t.deepEqual(globals, [])
+  t.deepEqual(globals, ['xyz'])
   t.end()
 })
 
@@ -87,6 +89,7 @@ test('inspectGlobals - not picking up js language features', (t) => {
 
 test('inspectGlobals - not picking up global ref', (t) => {
   const globals = inspectGlobalsTest(`
+    const key = 'hello'
     global
     global[key]
   `)
@@ -122,8 +125,9 @@ test('inspectGlobals - get granular platform api when nested under global', (t) 
 
 test('inspectGlobals - take platform api, up to computed', (t) => {
   const globals = inspectGlobalsTest(`
-    document.body.children[imaginarySubkey]
-    window.location.href[imaginarySubkey]
+    const key = 'hello'
+    document.body.children[key]
+    window.location.href[key]
   `)
   t.deepEqual(globals, ['document.body.children', 'location.href'])
   t.end()

@@ -1,5 +1,4 @@
 const acornGlobals = require('acorn-globals')
-const whitelist = require('../lib/sesWhitelist').buildWhitelist()
 
 const moduleScope = [
   // commonjs basics
@@ -16,147 +15,70 @@ const moduleScope = [
 const globalRefs = [
   'global',
   'window',
-  'self'
+  'self',
+  'globalThis',
 ]
 
 const ignoredGlobals = [
   // we handle this elsewhere
   'global',
-  // safe
-  'Math',
 ]
 
-const browserPlatformGlobals = [
-  // surely harmless
-  'console',
-  'btoa',
-  'atob',
-  // this will refer to the safe SES eval
-  'eval',
-  // global refs
-  'window',
-  'self',
-  // timing
-  'setTimeout',
-  'clearTimeout',
-  'clearInterval',
-  'setInterval',
-  'cancelAnimationFrame',
-  'requestAnimationFrame',
-  // browser APIs
-  'location',
-  'screen',
-  'navigator',
-  'performance',
-  'document',
-  'fetch',
-  'XMLHttpRequest',
-  'crypto',
-  'msCrypto',
-  'name',
-  'chrome',
-  'MSApp',
-  'browser',
-  'Intl',
-  'getComputedStyle',
-  'history',
-  'localStorage',
-  'postMessage',
-  'Math',
-  // browser classes
-  'AudioContext',
-  'AudioNode',
-  'AudioBufferSourceNode',
-  'OfflineAudioContext',
-  'OscillatorNode',
-  'DOMError',
-  'DOMException',
-  'ErrorEvent',
-  'Headers',
-  'Request',
-  'Response',
-  'TextDecoder',
-  'TextEncoder',
-  'MutationObserver',
-  'PromiseRejectionEvent',
-  'DOMParser',
-  'Image',
-  'SVGElement',
-  'MediaStreamTrack',
-  'RTCIceGatherer',
-  'mozRTCPeerConnection',
-  'webkitMediaStream',
-  'webkitRTCPeerConnection',
-  'FileReader',
-  'FormData',
-  'URLSearchParams',
-  'WebSocket',
-  'Worker',
-  'RTCSessionDescription',
-  'Node',
-  'ActiveXObject',
-  'DocumentTouch',
-  'Element',
-  'Event',
-  'Blob',
-  'SVGPathElement',
-  'SVGPathSeg',
-  'SVGPathSegArcAbs',
-  'SVGPathSegArcRel',
-  'SVGPathSegClosePath',
-  'SVGPathSegCurvetoCubicAbs',
-  'SVGPathSegCurvetoCubicRel',
-  'SVGPathSegCurvetoCubicSmoothAbs',
-  'SVGPathSegCurvetoCubicSmoothRel',
-  'SVGPathSegCurvetoQuadraticAbs',
-  'SVGPathSegCurvetoQuadraticRel',
-  'SVGPathSegCurvetoQuadraticSmoothAbs',
-  'SVGPathSegCurvetoQuadraticSmoothRel',
-  'SVGPathSegLinetoAbs',
-  'SVGPathSegLinetoHorizontalAbs',
-  'SVGPathSegLinetoHorizontalRel',
-  'SVGPathSegLinetoRel',
-  'SVGPathSegLinetoVerticalAbs',
-  'SVGPathSegLinetoVerticalRel',
-  'SVGPathSegList',
-  'SVGPathSegMovetoAbs',
-  'SVGPathSegMovetoRel',
-  'File',
-  'InstallTrigger',
-  'MSStream',
-  'MediaStream',
-  'RTCPeerConnection',
-  // etc
-  'addEventListener',
-  'removeEventListener',
-  'confirm',
-  'dispatchEvent',
-  'mozInnerScreenX',
-  'mozInnerScreenY',
-  'mozRequestAnimationFrame',
-  'msPerformance',
-  'msRequestAnimationFrame',
-  'oRequestAnimationFrame',
-  'opera',
-  'webkitPerformance',
-  'webkitRequestAnimationFrame',
-  'webkitRequestFileSystem',
-  'getSelection',
-  'indexedDB',
-  'innerHeight',
-  'innerWidth',
-  'onresize',
-  'open',
-  'pageXOffset',
-  'pageYOffset',
-  'prompt',
-  'scrollBy',
-  'scrollX',
-  'scrollY',
-  'top',
-  'MessageChannel',
-  // js builtins
+// available in SES realms
+// from Object.getOwnPropertyNames(realm.global)
+const standardGlobals = [
+  'Infinity',
+  'NaN',
+  'undefined',
+  'isFinite',
+  'isNaN',
+  'parseFloat',
+  'parseInt',
+  'decodeURI',
+  'decodeURIComponent',
+  'encodeURI',
+  'encodeURIComponent',
+  'Array',
+  'ArrayBuffer',
+  'Boolean',
+  'DataView',
+  'Date',
+  'Error',
+  'EvalError',
+  'Float32Array',
+  'Float64Array',
+  'Int8Array',
+  'Int16Array',
+  'Int32Array',
+  'Map',
+  'Number',
+  'Object',
+  'Promise',
+  'Proxy',
+  'RangeError',
+  'ReferenceError',
   'RegExp',
+  'Set',
+  'String',
+  'Symbol',
+  'SyntaxError',
+  'TypeError',
+  'Uint8Array',
+  'Uint8ClampedArray',
+  'Uint16Array',
+  'Uint32Array',
+  'URIError',
+  'WeakMap',
+  'WeakSet',
+  'JSON',
+  'Math',
+  'Reflect',
+  'escape',
+  'unescape',
+  'Intl',
+  'Realm',
+  'eval',
+  'Function',
 ]
 
 module.exports = inspectGlobals
@@ -207,23 +129,10 @@ function inspectGlobals (ast) {
 
   function maybeAddGlobalName (variableName) {
     const apiRoot = variableName.split('.')[0]
-    // // ignore if in SES's whitelist (safe JS features)
-    // const whitelistStatus = whitelist[apiRoot]
-    // if (whitelistStatus) {
-    //   // skip if exactly true (fully whitelisted)
-    //   if (whitelistStatus === true) return
-    //   // skip if '*' (whitelisted but checks inheritance(?))
-    //   if (whitelistStatus === '*') return
-    //   // inspect if partial whitelist
-    //   if (typeof whitelistStatus === 'object') return
-    // }
     // skip ignored globals
     if (ignoredGlobals.includes(apiRoot)) return
     // ignore unknown non-platform globals
-    if (!browserPlatformGlobals.includes(apiRoot)) {
-      // console.warn(`!! IGNORING GLOBAL "${apiRoot}" from "${debugLabel || ''}"`)
-      return
-    }
+    if (standardGlobals.includes(apiRoot)) return
     // add variable to results
     globalNames.push(variableName)
   }
