@@ -454,6 +454,13 @@ __sesifyConfig__
       globalThisRefs.forEach(key => {
         moduleRealmGlobal[key] = moduleRealmGlobal
       })
+      // support certain globalThis getters
+      const origFunction = moduleRealmGlobal.Function
+      const newFunction = (src) => {
+        return origFunction(src).bind(moduleRealmGlobal)
+      }
+      Object.defineProperties(newFunction, Object.getOwnPropertyDescriptors(origFunction))
+      moduleRealmGlobal.Function = newFunction
     }
 
     //# sourceURL=internalRequire
