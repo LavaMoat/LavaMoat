@@ -437,10 +437,8 @@ __sesifyConfig__
         Object.defineProperty(moduleRealmGlobal, key, {
           get () {
             if (globalStore.has(key)) {
-              console.warn('read (only) from globalStore', key, globalStore[key])
               return globalStore.get(key)
             } else {
-              console.warn('read (only) from realm global', key)
               return endowments[key]
             }
           },
@@ -450,15 +448,12 @@ __sesifyConfig__
         Object.defineProperty(moduleRealmGlobal, key, {
           get () {
             if (globalStore.has(key)) {
-              console.warn('read from globalStore', key, globalStore[key])
               return globalStore.get(key)
             } else {
-              console.warn('read from realm global', key)
               return endowments[key]
             }
           },
           set (value) {
-            console.warn('write to global', key, value)
             globalStore.set(key, value)
           },
           enumerable: true,
