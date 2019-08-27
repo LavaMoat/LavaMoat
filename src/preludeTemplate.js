@@ -439,6 +439,8 @@ __sesifyConfig__
       const globalThisRefs = ['self', 'window', 'globalThis']
       // define accessors
       const moduleRealmGlobal = moduleRealm.global
+
+      // allow read access via globalStore or moduleRealmGlobal
       topLevelReadAccessKeys.forEach(key => {
         Object.defineProperty(moduleRealmGlobal, key, {
           get () {
@@ -450,6 +452,9 @@ __sesifyConfig__
           },
         })
       })
+
+      // allow write access to globalStore
+      // read access via globalStore or moduleRealmGlobal
       topLevelWriteAccessKeys.forEach(key => {
         Object.defineProperty(moduleRealmGlobal, key, {
           get () {
@@ -466,6 +471,7 @@ __sesifyConfig__
           configurable: true,
         })
       })
+
       // set circular globalRefs
       globalThisRefs.forEach(key => {
         moduleRealmGlobal[key] = moduleRealmGlobal
