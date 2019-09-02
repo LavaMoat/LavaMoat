@@ -1,18 +1,6 @@
 // Sesify Prelude
 ;(function() {
 
-  // define kowtow
-  const kowtow = (function(){
-    const exports = {}
-    const module = { exports }
-    ;(function(){
-// START of injected code from kowtowDist
-__kowtowDist__
-// END of injected code from kowtowDist
-    })()
-    return module.exports
-  })()
-
   // define SES
   const SES = (function(){
     const exports = {}
@@ -62,7 +50,7 @@ __sesifyConfig__
     const globalCache = {}
     // create SES-wrapped internalRequire
     const createInternalRequire = realm.evaluate(`(${internalRequireWrapper})`, { console })
-    const safeInternalRequire = createInternalRequire(modules, globalCache, sesifyConfig, realm, harden, eval, evalWithEndowments, globalRef, kowtow)
+    const safeInternalRequire = createInternalRequire(modules, globalCache, sesifyConfig, realm, harden, eval, evalWithEndowments, globalRef)
     // load entryPoints
     for (let entryId of entryPoints) {
       safeInternalRequire(entryId, null, [])
@@ -71,7 +59,7 @@ __sesifyConfig__
 
   // this is serialized and run in SES
   // mostly just exists to expose variables to internalRequire
-  function internalRequireWrapper (modules, globalCache, sesifyConfig, realm, harden, unsafeEval, unsafeEvalWithEndowments, globalRef, kowtow) {
+  function internalRequireWrapper (modules, globalCache, sesifyConfig, realm, harden, unsafeEval, unsafeEvalWithEndowments, globalRef) {
     const globalStore = new Map()
     return internalRequire
 
@@ -244,9 +232,6 @@ __sesifyConfig__
           harden(Reflect.getPrototypeOf(moduleExports))
           harden(moduleExports)
           break
-        case 'kowtow':
-          // do nothing, handled at import time
-          break
         case 'freeze':
           // Todo: deepFreeze/harden
           Object.freeze(moduleExports)
@@ -268,9 +253,6 @@ __sesifyConfig__
         // already hardened
         case 'harden':
           return magicCopy(moduleExports)
-        // create kowtow view
-        case 'kowtow':
-          return kowtow()(moduleExports)
         // already frozen
         case 'freeze':
           return magicCopy(moduleExports)

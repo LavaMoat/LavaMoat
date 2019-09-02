@@ -19,7 +19,6 @@
     "fromentries": "^1.1.0",
     "insert-module-globals": "^7.2.0",
     "json-stable-stringify": "^1.0.1",
-    "kowtow": "^1.0.6",
     "lodash.flatmap": "^4.5.0",
     "merge-deep": "^3.0.2",
     "mississippi": "^3.0.0",
@@ -52,8 +51,6 @@
     "test": "node test",
     "lint": "standard src test",
     "lint:fix": "standard src test --fix",
-    "deps:build": "npm run deps:build:kowtow",
-    "deps:build:kowtow": "echo 'module.exports = require(`kowtow`)' | browserify - -s kowtow > lib/kowtow.umd.js"
   },
   "author": "",
   "license": "ISC",
