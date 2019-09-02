@@ -1,9 +1,10 @@
 {
   "name": "sesify",
   "version": "3.0.0",
-  "description": "",
+  "description": "browserify plugin for sandboxing dependencies with SES",
   "main": "src/index.js",
   "directories": {
+    "lib": "lib",
     "test": "test"
   },
   "engines": {
@@ -55,5 +56,13 @@
     "deps:build:kowtow": "echo 'module.exports = require(`kowtow`)' | browserify - -s kowtow > lib/kowtow.umd.js"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MetaMask/sesify.git"
+  },
+  "bugs": {
+    "url": "https://github.com/MetaMask/sesify/issues"
+  },
+  "homepage": "https://github.com/MetaMask/sesify#readme"
 }
