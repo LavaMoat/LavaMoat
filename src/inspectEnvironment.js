@@ -11,20 +11,6 @@ const environmentTypeStrings = {
   2: 'unfrozen',
 }
 
-const protectedList = [
-  'constructor',
-  'hasOwnProperty',
-  'isPrototypeOf',
-  'propertyIsEnumerable',
-  'toLocaleString',
-  'toString',
-  'valueOf',
-  '__defineGetter__',
-  '__defineSetter__',
-  '__lookupGetter__',
-  '__lookupSetter__',
-]
-
 const primordialPaths = [
   ['Object'],
   ['Array']
@@ -52,14 +38,7 @@ function walkForProtectedAssignment (ast, results) {
       // skip if property name is a variable
       if (computed) return
       if (property.type !== 'Identifier') return
-      // check if property name is protected 
-      const propertyName = property.name
-      const isProtected = protectedList.includes(propertyName)
-      if (isProtected) {
-        results.push(node)
-        return
-      }
-      // also check for assignment to primordial
+      // check for assignment to primordial
       const memberPath = memberExpressionChainToPath(left)
       const match = primordialPaths.some(
         primordial => partialArrayMatch(primordial, memberPath)

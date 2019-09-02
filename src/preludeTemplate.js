@@ -87,7 +87,7 @@ __sesifyConfig__
 
       // parse requirePath for module boundries
       const moduleDepPath = toModuleDepPath(depPath)
-      const packageName = getPackageName(moduleDepPath)
+      const packageName = moduleData.package
       const moduleCacheSlug = moduleId
 
 
@@ -105,7 +105,8 @@ __sesifyConfig__
       // prepare the module to be initialized
       const module = { exports: {} }
       localCache[moduleId] = module
-      const moduleSource = moduleData.source
+      const moduleSourceLabel = `// moduleSource: ${moduleData.file}`
+      const moduleSource = `${moduleData.source}\n\n${moduleSourceLabel}`
       const configForModule = getConfigForPackage(sesifyConfig, packageName)
       const isEntryModule = moduleDepPath.length < 1
 
@@ -131,7 +132,12 @@ __sesifyConfig__
         const globalsConfig = configForModule.globals || {}
         prepareRealmGlobalFromConfig(moduleRealm, globalsConfig, endowments)
         // execute in module realm with modified realm global
-        moduleInitializer = moduleRealm.evaluate(`${moduleSource}`)
+        try {
+          moduleInitializer = moduleRealm.evaluate(`${moduleSource}`)
+        } catch (err) {
+          console.warn(`Sesify - Error evaluating module "${moduleId}" from package "${packageName}"`)
+          throw err
+        }
       } else {
         // set the module initializer as the unwrapped version
         moduleInitializer = unsafeEvalWithEndowments(`${moduleSource}`, endowments)
@@ -198,6 +204,15 @@ __sesifyConfig__
       }
       // look up config for module
       const moduleData = modules[moduleId]
+
+      // if we dont have it, throw an error
+      // TODO: dedupe this with internalRequire
+      if (!moduleData) {
+        const err = new Error('Cannot find module \'' + moduleId + '\'')
+        err.code = 'MODULE_NOT_FOUND'
+        throw err
+      }
+
       const packageName = moduleData.package
       const configForModule = getConfigForPackage(sesifyConfig, packageName)
 
@@ -329,7 +344,7 @@ __sesifyConfig__
 
     function generateEndowmentsForConfig (config) {
       if (!config.globals) return {}
-      const globals = {}
+      const endowments = {}
       Object.entries(config.globals).forEach(([globalPath, configValue]) => {
         // write access handled elsewhere
         if (configValue === 'write') return
@@ -345,9 +360,9 @@ __sesifyConfig__
           writable: true,
           enumerable: true,
         }
-        deepDefine(globals, globalPath, propDesc)
+        deepDefine(endowments, globalPath, propDesc)
       })
-      return globals
+      return endowments
     }
 
     function deepGetAndBind(obj, pathName) {
@@ -358,9 +373,14 @@ __sesifyConfig__
       if (!parent) return parent
       const value = parent[childKey]
       if (typeof value === 'function') {
-        return value.bind(parent)
+        // bind and copy
+        const newValue = value.bind(parent)
+        Object.defineProperties(newValue, Object.getOwnPropertyDescriptors(value))
+        return newValue
+      } else {
+        // return as is
+        return value
       }
-      return value
     }
 
     function deepGet (obj, pathName) {
@@ -382,7 +402,8 @@ __sesifyConfig__
       let parent = obj
       const pathParts = pathName.split('.')
       const lastPathPart = pathParts[pathParts.length-1]
-      pathParts.slice(0,-1).forEach(pathPart => {
+      const allButLastPart = pathParts.slice(0,-1)
+      allButLastPart.forEach(pathPart => {
         const prevParent = parent
         parent = parent[pathPart]
         if (parent === null) {
@@ -418,42 +439,50 @@ __sesifyConfig__
       const globalThisRefs = ['self', 'window', 'globalThis']
       // define accessors
       const moduleRealmGlobal = moduleRealm.global
+
+      // allow read access via globalStore or moduleRealmGlobal
       topLevelReadAccessKeys.forEach(key => {
         Object.defineProperty(moduleRealmGlobal, key, {
           get () {
             if (globalStore.has(key)) {
-              console.warn('read (only) from globalStore', key, globalStore[key])
               return globalStore.get(key)
             } else {
-              console.warn('read (only) from realm global', key)
               return endowments[key]
             }
           },
         })
       })
+
+      // allow write access to globalStore
+      // read access via globalStore or moduleRealmGlobal
       topLevelWriteAccessKeys.forEach(key => {
         Object.defineProperty(moduleRealmGlobal, key, {
           get () {
             if (globalStore.has(key)) {
-              console.warn('read from globalStore', key, globalStore[key])
               return globalStore.get(key)
             } else {
-              console.warn('read from realm global', key)
               return endowments[key]
             }
           },
           set (value) {
-            console.warn('write to global', key, value)
             globalStore.set(key, value)
           },
           enumerable: true,
           configurable: true,
         })
       })
+
       // set circular globalRefs
       globalThisRefs.forEach(key => {
         moduleRealmGlobal[key] = moduleRealmGlobal
       })
+      // support certain globalThis getters
+      const origFunction = moduleRealmGlobal.Function
+      const newFunction = (src) => {
+        return origFunction(src).bind(moduleRealmGlobal)
+      }
+      Object.defineProperties(newFunction, Object.getOwnPropertyDescriptors(origFunction))
+      moduleRealmGlobal.Function = newFunction
     }
 
     //# sourceURL=internalRequire

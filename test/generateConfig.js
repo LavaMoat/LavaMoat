@@ -9,14 +9,14 @@ test('generateConfig - empty config', async (t) => {
 })
 
 test('generateConfig - basic config', async (t) => {
-  const config = await createConfigForTest(`
+  const config = await createConfigForTest(function(){
     location.href
-  `)
+  })
 
   t.deepEqual(config, {
     resources: {
       '<root>': {
-        modules: {
+        packages: {
           'test': true
         }
       },
@@ -51,7 +51,7 @@ test('generateConfig - config with skipped deps', async (t) => {
   t.deepEqual(config, {
     resources: {
       '<root>': {
-        modules: {
+        packages: {
           'banana': true
         }
       },
@@ -66,15 +66,15 @@ test('generateConfig - config with skipped deps', async (t) => {
 
 
 test('generateConfig - config ignores global refs', async (t) => {
-  const config = await createConfigForTest(`
+  const config = await createConfigForTest(function(){
     const href = window.location.href;
     const xhr = new window.XMLHttpRequest;
-  `)
+  })
 
   t.deepEqual(config, {
     resources: {
       '<root>': {
-        modules: {
+        packages: {
           'test': true
         }
       },
@@ -89,14 +89,14 @@ test('generateConfig - config ignores global refs', async (t) => {
 })
 
 test('generateConfig - config ignores global refs when properties are not accessed', async (t) => {
-  const config = await createConfigForTest(`
+  const config = await createConfigForTest(function(){
     typeof window !== undefined
-  `)
+  })
 
   t.deepEqual(config, {
     resources: {
       '<root>': {
-        modules: {
+        packages: {
           'test': true
         }
       },
@@ -105,14 +105,14 @@ test('generateConfig - config ignores global refs when properties are not access
 })
 
 test('generateConfig - config ignores global refs accessed with whitelist items', async (t) => {
-  const config = await createConfigForTest(`
+  const config = await createConfigForTest(function(){
     window.Object === Object
-  `)
+  })
 
   t.deepEqual(config, {
     resources: {
       '<root>': {
-        modules: {
+        packages: {
           'test': true
         }
       },
@@ -121,15 +121,15 @@ test('generateConfig - config ignores global refs accessed with whitelist items'
 })
 
 test('generateConfig - unfrozen environment - primordial modification', async (t) => {
-  const config = await createConfigForTest(`
+  const config = await createConfigForTest(function(){
     const href = window.location.href;
     Array.prototype.bogosort = () => 'yolo';
-  `)
+  })
 
   t.deepEqual(config, {
     resources: {
       '<root>': {
-        modules: {
+        packages: {
           'test': true
         }
       },
@@ -143,26 +143,7 @@ test('generateConfig - unfrozen environment - primordial modification', async (t
   }, 'config matches expected')
 })
 
-test('generateConfig - unfrozen environment - protected names', async (t) => {
-  const config = await createConfigForTest(`
-    module.exports.toString = () => 'cant do this when frozen';
-  `)
-
-  t.deepEqual(config, {
-    resources: {
-      '<root>': {
-        modules: {
-          'test': true
-        }
-      },
-      'test': {
-        environment: 'unfrozen'
-      }
-    }
-  }, 'config matches expected')
-})
-
-async function createConfigForTest (testSource) {
+async function createConfigForTest (testFn) {
   const files = [{
     // id must be full path
     id: './entry.js',
@@ -176,8 +157,12 @@ async function createConfigForTest (testSource) {
     id: './node_modules/test/index.js',
     file: './node_modules/test/index.js',
     deps: {},
-    source: testSource
+    source: fnToCodeBlock(testFn)
   }]
   const config = await generateConfigFromFiles({ files })
   return config
+}
+
+function fnToCodeBlock (fn) {
+  return fn.toString().split('\n').slice(1,-1).join('\n')
 }
