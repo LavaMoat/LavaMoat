@@ -4,9 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
-    "@bradleymeck/tofu": "^1.1.0",
-    "acorn-globals": "^4.3.3",
-    "ses": "^0.5.3"
+    "acorn-globals": "^4.3.3"
   },
   "devDependencies": {
     "tape": "^4.11.0"
