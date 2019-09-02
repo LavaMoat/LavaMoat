@@ -14,7 +14,7 @@ test('inspectEnvironment - assignment to toString on prototype', (t) => {
   const environment = inspectEnvironmentTest(`
     MyClass.prototype.toString = () => 'hello'
   `)
-  t.deepEqual(environment, environmentTypes.unfrozen)
+  t.deepEqual(environment, environmentTypes.frozen)
   t.end()
 })
 
@@ -22,7 +22,7 @@ test('inspectEnvironment - assignment to toString', (t) => {
   const environment = inspectEnvironmentTest(`
     exports.toString = () => 'hello'
   `)
-  t.deepEqual(environment, environmentTypes.unfrozen)
+  t.deepEqual(environment, environmentTypes.frozen)
   t.end()
 })
 

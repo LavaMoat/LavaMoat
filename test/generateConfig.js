@@ -143,25 +143,6 @@ test('generateConfig - unfrozen environment - primordial modification', async (t
   }, 'config matches expected')
 })
 
-test('generateConfig - unfrozen environment - protected names', async (t) => {
-  const config = await createConfigForTest(function () {
-    module.exports.toString = () => 'cant do this when frozen';
-  })
-
-  t.deepEqual(config, {
-    resources: {
-      '<root>': {
-        packages: {
-          'test': true
-        }
-      },
-      'test': {
-        environment: 'unfrozen'
-      }
-    }
-  }, 'config matches expected')
-})
-
 async function createConfigForTest (testFn) {
   const files = [{
     // id must be full path
