@@ -2,22 +2,14 @@ const through = require('through2')
 const fromEntries = require('fromentries')
 const jsonStringify = require('json-stable-stringify')
 const acornGlobals = require('acorn-globals')
-
-const inspectGlobals = require('./inspectGlobals')
+const { inspectSource, utils: { mergeConfig, mapToObj } } = require('sesify-tofu')
 const { inspectEnvironment, environmentTypes, environmentTypeStrings } = require('./inspectEnvironment')
 
-const rootSlug = '<root>'
 const defaultEnvironment = environmentTypes.frozen
+const rootSlug = '<root>'
 
 module.exports = { rootSlug, createConfigSpy }
 
-const ignoredGlobals = [
-  // we point at these manually
-  'self',
-  'window',
-  // this is handled by SES
-  'eval'
-]
 
 // createConfigSpy creates a pass-through object stream for the Browserify pipeline.
 // it analyses modules for global namespace usages, and generates a config for Sesify.
@@ -41,12 +33,11 @@ function createConfigSpy ({ onResult }) {
     // skip for project files (files not from deps)
     const isDependency = packageName === rootSlug
     if (isDependency) return
-    // gather config info
-    const ast = acornGlobals.parse(module.source)
-    // get global usage
-    inspectForGlobals(ast, packageName)
     // get eval environment
+    const ast = acornGlobals.parse(module.source)
     inspectForEnvironment(ast, packageName)
+    // get global usage
+    inspectForGlobals(module.source, packageName)
   }
 
   function inspectForEnvironment (ast, packageName) {
@@ -54,19 +45,24 @@ function createConfigSpy ({ onResult }) {
     // initialize results for package
     const environments = packageToEnvironments[packageName] = packageToEnvironments[packageName] || []
     environments.push(result)
-  }
+   }
 
-  function inspectForGlobals (ast, packageName) {
-    const foundGlobals = inspectGlobals(ast, packageName)
-    const globalNames = foundGlobals.filter(name => !ignoredGlobals.includes(name))
+  function inspectForGlobals (source, packageName) {
+    const foundGlobals = inspectSource(source, {
+      // browserify commonjs scope
+      ignoredRefs: ['global', 'require', 'module', 'exports', 'arguments'],
+      // browser global refs
+      globalRefs: ['globalThis', 'self', 'window'],
+    })
     // skip if no results
-    if (!globalNames.length) return
-    // add globals to map
+    if (!foundGlobals.size) return
     const packageGlobals = packageToGlobals[packageName]
     if (packageGlobals) {
-      globalNames.forEach(glob => packageGlobals.add(glob))
+      // merge maps
+      packageToGlobals[packageName] = mergeConfig(packageGlobals, foundGlobals)
     } else {
-      packageToGlobals[packageName] = new Set(globalNames)
+      // new map
+      packageToGlobals[packageName] = foundGlobals
     }
   }
 
@@ -74,16 +70,20 @@ function createConfigSpy ({ onResult }) {
     const resources = {}
     const config = { resources }
     Object.entries(packageToModules).forEach(([packageName, packageModules]) => {
-      let globals, modules, environment
+      let globals, packages, environment
       // get dependencies
       const packageDeps = aggregateDeps({ packageModules, moduleIdToPackageName })
       if (packageDeps.length) {
-        modules = fromEntries(packageDeps.map(dep => [dep, true]))
+        packages = fromEntries(packageDeps.map(dep => [dep, true]))
       }
       // get globals
       if (packageToGlobals[packageName]) {
-        const detectedGlobals = Array.from(packageToGlobals[packageName].values())
-        globals = fromEntries(detectedGlobals.map(globalPath => [globalPath, true]))
+        globals = mapToObj(packageToGlobals[packageName])
+        // prefer "true" over "read" for clearer difference between
+        // read/write syntax highlighting
+        Object.keys(globals).forEach(key => {
+          if (globals[key] === 'read') globals[key] = true
+        })
       }
       // get environment
       const environments = packageToEnvironments[packageName]
@@ -93,9 +93,9 @@ function createConfigSpy ({ onResult }) {
         environment = isDefault ? undefined : environmentTypeStrings[bestEnvironment]
       }
       // skip package config if there are no settings needed
-      if (!modules && !globals && !environment) return
+      if (!packages && !globals && !environment) return
       // set config for package
-      resources[packageName] = { modules, globals, environment }
+      resources[packageName] = { packages, globals, environment }
     })
 
     return jsonStringify(config, { space: 2 })
