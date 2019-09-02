@@ -6,6 +6,10 @@ module.exports = {
   isUndefinedCheck,
   getTailmostMatchingChain,
   reduceToTopmostApiCalls,
+  addGlobalUsage,
+  mergeConfig,
+  objToMap,
+  mapToObj,
 }
 
 function getMemberExpressionNesting(identifierNode) {
@@ -61,4 +65,30 @@ function reduceToTopmostApiCalls(globalsConfig) {
     }
     // if no parents found, ok to include
   })
+}
+
+function addGlobalUsage (globalsConfig, identifierPath, identifierUse) {
+  // add variable to results, if not already set
+  if (globalsConfig.has(identifierPath) && identifierUse !== 'write') return
+  globalsConfig.set(identifierPath, identifierUse)
+}
+
+function mergeConfig (configA, configB) {
+  const newConfig = new Map(configA)
+  Array.from(configB.entries()).forEach(([path, value]) => {
+    addGlobalUsage(newConfig, path, value)
+  })
+  reduceToTopmostApiCalls(newConfig)
+  return newConfig
+}
+
+function objToMap (obj) {
+  return new Map(Object.entries(obj))
+}
+
+// Object.fromEntries not available in node v10
+function mapToObj (map) {
+  const obj = {}
+  map.forEach(([key, value]) => obj[key] = value)
+  return obj
 }

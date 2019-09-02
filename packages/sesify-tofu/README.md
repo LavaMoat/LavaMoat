@@ -1,6 +1,6 @@
 ### sesify-tofu
 
-This is the TOFU (trust-on-first-use) static and analysis tool used by sesify.
+This is the TOFU (trust-on-first-use) static analysis tool used by sesify to automatically generate useable config
 
 ### security note
 
