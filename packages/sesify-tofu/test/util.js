@@ -1,5 +1,5 @@
 const test = require('tape')
-const { utils: { mergeConfig, objToMap } } = require('../src/index')
+const { utils: { mergeConfig, objToMap, mapToObj } } = require('../src/index')
 
 testMerge('upgrades reads to writes', {
   'abc': 'write',
@@ -34,18 +34,8 @@ testMerge('non-overlapping', {
 function testMerge (label, configA, configB, expectedResultObj) {
   test(label, (t) => {
     const result = mergeConfig(objToMap(configA), objToMap(configB))
-    const resultSorted = [...result.entries()].sort(sortBy(0))
-    const expectedSorted = Object.entries(expectedResultObj).sort(sortBy(0))
-  
-    t.deepEqual(resultSorted, expectedSorted)
+    const resultObj = mapToObj(result)
+    t.deepEqual(resultObj, expectedResultObj)
     t.end()
   })
-}
-
-function sortBy(key) {
-  return (a,b) => {
-    const vA = a[key], vB = b[key]
-    if (vA === vB) return 0
-    return vA > vB ? 1 : -1
-  }
 }

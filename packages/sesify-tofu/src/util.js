@@ -89,6 +89,6 @@ function objToMap (obj) {
 // Object.fromEntries not available in node v10
 function mapToObj (map) {
   const obj = {}
-  map.forEach(([key, value]) => obj[key] = value)
+  map.forEach((value, key) => obj[key] = value)
   return obj
 }
