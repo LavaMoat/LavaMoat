@@ -1,5 +1,5 @@
 const acornGlobals = require('acorn-globals')
-const standardJsGlobals = require('./standardGlobals.json')
+const standardJsGlobals = require('./standardGlobals.js')
 
 const {
   getMemberExpressionNesting,

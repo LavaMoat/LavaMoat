@@ -18,6 +18,10 @@ testInspect('detects global reads', {}, function() {
   'abc': 'read',
 })
 
+testInspect('doesnt detect "this"', {}, function() {
+  const x = this
+}, {})
+
 testInspect('detects reads on globalRefs', {
   globalRefs: ['zzz']
 }, function() {

@@ -1,4 +1,5 @@
-[
+module.exports = [
+  // Reflect.ownKeys(realm.global)
   "Infinity",
   "NaN",
   "undefined",
@@ -50,5 +51,7 @@
   "Realm",
   "eval",
   "Function",
-  "SES"
+  "SES",
+  // additional
+  "this",
 ]
