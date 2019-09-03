@@ -22,6 +22,10 @@ testInspect('doesnt detect "this"', {}, function() {
   const x = this
 }, {})
 
+testInspect('doesnt detect properties on "this"', {}, function() {
+  this.xyz
+}, {})
+
 testInspect('detects reads on globalRefs', {
   globalRefs: ['zzz']
 }, function() {

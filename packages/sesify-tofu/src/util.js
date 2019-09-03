@@ -21,11 +21,21 @@ function getMemberExpressionNesting(identifierNode) {
 }
 
 function getKeysForMemberExpressionChain(memberExpressions) {
-  const keys = memberExpressions.map(member => member.property.name)
+  const keys = memberExpressions.map(member => getNameFromNode(member.property))
   const rootMemberExpression = memberExpressions[0]
-  const rootName = rootMemberExpression.object.name
+  const rootName = getNameFromNode(rootMemberExpression.object)
   keys.unshift(rootName)
   return keys
+}
+
+function getNameFromNode (node) {
+  if (node.type === 'Identifier') {
+    return node.name
+  } else if (node.type === 'ThisExpression') {
+    return 'this'
+  } else {
+    throw new Error(`unknown ast node type when trying to get name: "${node.type}"`)
+  }
 }
 
 function isDirectMemberExpression(node) {
