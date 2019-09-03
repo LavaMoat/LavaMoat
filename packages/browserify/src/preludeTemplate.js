@@ -109,8 +109,8 @@ __sesifyConfig__
         endowments = Object.assign({}, endowments.window, endowments)
       }
 
-      const environment = configForModule.environment || isEntryModule ? null : 'frozen'
-      const runInSes = environment === 'frozen'
+      const environment = configForModule.environment || (isEntryModule ? 'unfrozen' : 'frozen')
+      const runInSes = environment !== 'unfrozen'
 
       // determine if its a SES-wrapped or naked module initialization
       let moduleInitializer
@@ -418,7 +418,7 @@ __sesifyConfig__
       // lookup top level read + write access keys
       const topLevelWriteAccessKeys = getTopLevelWriteAccessFromPackageConfig(globalsConfig)
       const topLevelReadAccessKeys = getTopLevelReadAccessFromPackageConfig(globalsConfig)
-      const globalThisRefs = ['self', 'window', 'globalThis']
+      const globalThisRefs = ['self', 'window', 'globalThis', 'global']
       // define accessors
       const moduleRealmGlobal = moduleRealm.global
 

@@ -10,31 +10,31 @@ test('config - deep endow', async (t) => {
       'file': '/one.js',
       'source': "require('two');",
       'deps': { 'two': '/node_modules/two/index.js' },
-      'entry': true
+      'entry': true,
     },
     {
       'id': '/node_modules/two/index.js',
       'file': '/node_modules/two/index.js',
       'source': "require('three')",
-      'deps': { 'three': '/node_modules/three/index.js', }
+      'deps': { 'three': '/node_modules/three/index.js', },
     },
     {
       'id': '/node_modules/three/index.js',
       'file': '/node_modules/three/index.js',
       'source': "window.postMessage('12345', '*')",
-      'deps': {}
+      'deps': {},
     }
   ]
 
   const config = {
     resources: {
       '<root>': {
-        modules: {
+        packages: {
           'two': true
         }
       },
       'two': {
-        modules: {
+        packages: {
           'three': true
         }
       },

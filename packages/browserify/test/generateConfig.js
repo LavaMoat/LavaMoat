@@ -29,6 +29,24 @@ test('generateConfig - basic config', async (t) => {
   }, 'config matched expected')
 })
 
+test('generateConfig - ignore various refs', async (t) => {
+  const config = await createConfigForTest(function(){
+    const js = [this]
+    const ignored = [global, require, module, exports, arguments]
+    const globalRefs = [typeof globalThis, typeof self, typeof window]
+  })
+
+  t.deepEqual(config, {
+    resources: {
+      '<root>': {
+        packages: {
+          'test': true
+        }
+      },
+    }
+  }, 'config matched expected')
+})
+
 test('generateConfig - config with skipped deps', async (t) => {
   const files = [{
     // id must be full path
