@@ -65,9 +65,10 @@ function inspectSource (source, {
     }
     // if not used in any member expressions AND is not a global ref, expose as is
     if (!hasMembershipChain) {
-      // skip if global and only used for detecting presence
-      // this is a bit of a hack to prevent exposing things that aren't actually used
-      if (globalRefs.includes(variableName) && isUndefinedCheck(identifierNode)) return
+      if (globalRefs.includes(variableName)) return
+      // // skip if global and only used for detecting presence
+      // // this is a bit of a hack to prevent exposing things that aren't actually used
+      // if (globalRefs.includes(variableName) && isUndefinedCheck(identifierNode)) return
       maybeAddGlobalUsage(variableName, identifierUse)
       return
     }
