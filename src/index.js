@@ -8,7 +8,17 @@ const createPackageNameStream = require('./packageName')
 const { wrapIntoModuleInitializer } = require('./sourcemaps')
 
 /*  export a Browserify plugin  */
-module.exports = function (browserify, pluginOpts) {
+module.exports = plugin
+
+// these are the reccomended arguments for sesify to work well with browserify
+module.exports.args = {
+  // this option helps with parsing global usage
+  insertGlobalVars: {
+    global: false,
+  }
+}
+
+function plugin (browserify, pluginOpts) {
   // setup the plugin in a re-bundle friendly way
   browserify.on('reset', setupPlugin)
   setupPlugin()
