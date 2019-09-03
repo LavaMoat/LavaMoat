@@ -59,7 +59,7 @@ testInspect('detects implicit global writes with mixed usage', {}, function() {
   'z': 'write',
 })
 
-testInspect('detects assignment to globalRefs', {
+testInspect('detects assignment to property on globalRefs', {
   globalRefs: ['zzz']
 }, function() {
   zzz.abc = true
@@ -67,7 +67,13 @@ testInspect('detects assignment to globalRefs', {
   'abc': 'write',
 })
 
-testInspect('detects assignment to globalRefs', {
+testInspect('never suggest access to full globalRef', {
+  globalRefs: ['zzz']
+}, function() {
+  const x = zzz
+}, {})
+
+testInspect('detects assignment to property on globalRefs', {
   globalRefs: ['zzz']
 }, function() {
   zzz.abc = xyz.abc
@@ -87,9 +93,9 @@ testInspect('elevating computed property lookups to globalRef', {
   globalRefs: ['abc']
 }, function(){
   const key = 'hello'
-  abc[key]
+  abc.xyz[key]
 }, {
-  'abc': 'read'
+  'xyz': 'read'
 })
 
 testInspect('elevating computed property lookups to globalRef', {
@@ -105,10 +111,9 @@ testInspect('picking up mixed explicit and computed property lookups', {
   globalRefs: ['window'],
 }, function(){
   const key = 'hello'
-  window[key]
-  window.location
+  window.location[key]
+  window.location.href
 }, {
-  'window': 'read',
   'location': 'read',
 })
 
