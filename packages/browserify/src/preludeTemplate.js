@@ -127,6 +127,7 @@ __sesifyConfig__
           throw err
         }
       } else {
+        endowments.global = globalRef
         // set the module initializer as the unwrapped version
         moduleInitializer = unsafeEvalWithEndowments(`${moduleSource}`, endowments)
       }
@@ -456,6 +457,10 @@ __sesifyConfig__
 
       // set circular globalRefs
       globalThisRefs.forEach(key => {
+        // if globalRef is actually an endowment, ignore
+        if (topLevelReadAccessKeys.includes(key)) return
+        if (topLevelWriteAccessKeys.includes(key)) return
+        // set circular ref to global
         moduleRealmGlobal[key] = moduleRealmGlobal
       })
       // support certain globalThis getters
