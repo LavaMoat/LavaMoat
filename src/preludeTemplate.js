@@ -433,6 +433,9 @@ __sesifyConfig__
               return endowments[key]
             }
           },
+          set () {
+            console.warn(`sesify: ignoring write attempt to read-access global "${key}"`)
+          }
         })
       })
 
