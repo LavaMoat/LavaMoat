@@ -24,20 +24,20 @@ function createConfigSpy ({ onResult }) {
   const configSpy = createSpy(inspectModule, onBuildEnd)
   return configSpy
 
-  function inspectModule (module) {
-    const packageName = module.package
-    moduleIdToPackageName[module.id] = packageName
+  function inspectModule (moduleData) {
+    const packageName = moduleData.package
+    moduleIdToPackageName[moduleData.id] = packageName
     // initialize mapping from package to module
     const packageModules = packageToModules[packageName] = packageToModules[packageName] || {}
-    packageModules[module.id] = module
+    packageModules[moduleData.id] = moduleData
     // skip for project files (files not from deps)
     const isDependency = packageName === rootSlug
     if (isDependency) return
     // get eval environment
-    const ast = acornGlobals.parse(module.source)
+    const ast = acornGlobals.parse(moduleData.source)
     inspectForEnvironment(ast, packageName)
     // get global usage
-    inspectForGlobals(module.source, packageName)
+    inspectForGlobals(moduleData, packageName)
   }
 
   function inspectForEnvironment (ast, packageName) {
@@ -47,13 +47,16 @@ function createConfigSpy ({ onResult }) {
     environments.push(result)
    }
 
-  function inspectForGlobals (source, packageName) {
+  function inspectForGlobals (moduleData, packageName) {
+    const { source, file } = moduleData
     const foundGlobals = inspectSource(source, {
       // browserify commonjs scope
       ignoredRefs: ['global', 'require', 'module', 'exports', 'arguments'],
       // browser global refs
       globalRefs: ['globalThis', 'self', 'window'],
     })
+    // add globalUsage info
+    moduleData.globalUsage = mapToObj(foundGlobals)
     // skip if no results
     if (!foundGlobals.size) return
     const packageGlobals = packageToGlobals[packageName]
