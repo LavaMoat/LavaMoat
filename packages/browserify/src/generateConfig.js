@@ -51,9 +51,9 @@ function createConfigSpy ({ onResult }) {
     const { source, file } = moduleData
     const foundGlobals = inspectSource(source, {
       // browserify commonjs scope
-      ignoredRefs: ['global', 'require', 'module', 'exports', 'arguments'],
-      // browser global refs
-      globalRefs: ['globalThis', 'self', 'window'],
+      ignoredRefs: ['require', 'module', 'exports', 'arguments'],
+      // browser global refs + browserify global
+      globalRefs: ['globalThis', 'self', 'window', 'global'],
     })
     // add globalUsage info
     moduleData.globalUsage = mapToObj(foundGlobals)
