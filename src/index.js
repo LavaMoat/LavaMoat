@@ -4,7 +4,7 @@ const jsonStringify = require('json-stable-stringify')
 const generatePrelude = require('./generatePrelude')
 const createCustomPack = require('./createCustomPack')
 const { createConfigSpy } = require('./generateConfig')
-const createPackageNameStream = require('./packageName')
+const createPackageDataStream = require('./packageData')
 const { wrapIntoModuleInitializer } = require('./sourcemaps')
 
 /*  export a Browserify plugin  */
@@ -49,7 +49,7 @@ function plugin (browserify, pluginOpts) {
     browserify.pipeline.splice('pack', 1, customPack)
 
     // inject package name into module data
-    browserify.pipeline.splice('emit-deps', 0, createPackageNameStream())
+    browserify.pipeline.splice('emit-deps', 0, createPackageDataStream())
 
     // helper to dump autoconfig to a file
     if (pluginOpts.writeAutoConfig) {

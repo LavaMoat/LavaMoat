@@ -22,6 +22,7 @@
     "module-name-from-path": "git+https://git@github.com/kumavis/module-name-from-path.git",
     "offset-sourcemap-lines": "^1.0.1",
     "pify": "^4.0.1",
+    "resolve-package-path": "^1.2.7",
     "safe-buffer": "^5.1.2",
     "sesify-tofu": "^2.0.4",
     "tape": "^4.9.1",
