@@ -1,6 +1,6 @@
 {
   "name": "sesify",
-  "version": "4.1.0",
+  "version": "4.1.1",
   "description": "browserify plugin for sandboxing dependencies with SES",
   "main": "src/index.js",
   "directories": {
