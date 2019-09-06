@@ -23,7 +23,7 @@
     "offset-sourcemap-lines": "^1.0.1",
     "pify": "^4.0.1",
     "safe-buffer": "^5.1.2",
-    "sesify-tofu": "^2.0.3",
+    "sesify-tofu": "^2.0.4",
     "tape": "^4.9.1",
     "through2": "^3.0.0",
     "umd": "^3.0.3"
