@@ -93,8 +93,11 @@ __sesifyConfig__
       // prepare the module to be initialized
       const module = { exports: {} }
       localCache[moduleId] = module
-      const moduleSourceLabel = `// moduleSource: ${moduleData.file}`
-      const moduleSource = `${moduleData.source}\n\n${moduleSourceLabel}`
+      let moduleSource = `(${moduleData.source})`
+      if (moduleData.file) {
+        const moduleSourceLabel = `// moduleSource: ${moduleData.file}`
+        moduleSource += `\n\n${moduleSourceLabel}`
+      }
       const configForModule = getConfigForPackage(sesifyConfig, packageName)
       const isEntryModule = moduleDepPath.length < 1
 
