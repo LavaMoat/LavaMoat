@@ -1,111 +1,3 @@
-# new todo
-- [x] shared instances of modules
-  - [x] revert the seperation of eval / global injection
-- [x] make config like agoric prototype
-  - [x] config is json
-  - [x] global-grabbing engine needs to move to sesify prelude
-- [x] update SES
-  - [x] some issue with prelude or SES kernel running in strict mode
-- [x] shared instances of modules
-  - [x] revert the seperation of eval / global injection
-  - [x] update cache key generator
-- [x] mark question: while `this` is container global, `self` is undefined
-- [x] fix globalRefs
-  - [x] fix objCheckSelf
-  - [x] fix objCheckGlobal
-- [ ] new config
-  - [x] make config like agoric prototype
-  - [x] config is json
-  - [x] config -> endowments in sesify prelude
-  - [x] need tests that generate config then use it 
-  - [x] cleanup old config generation
-  - [x] get packageName from modules stream
-  - [x] allow easy override of configuration
-  - [ ] no longer de-duping overlapping namespaces? (needs test)
-- [ ] config advanced
-  - [ ] execution environment options
-    - [x] autogen config from "alt environment heuristics"
-    - [ ] execute unfrozen in fresh realm
-  - [ ] defensibility/hardening options
-    - [x] magic copy
-    - [x] kowtow
-    - [x] return raw if same package (dont defense)
-    - [ ] @agoric/harden
-      - ? metamask error hardening proto chain
-  - [ ] enforce configuration
-    - [ ] fail at buildtime if deps violation
-    - [x] enforce globals
-  - [ ] move SES config into sesify config
-- [ ] mystery bugs
-  - [ ] `this.Object` gets transformed to `undefined.Object` in mm
-- [ ] cleanup prelude
-- [ ] sesify metamask
-  - [x] autogen config
-  - [x] setup build sys
-  - [ ] debug boot
-  - [ ] debug runtime
-  - [ ] gulp task for autogen
-- [ ] improve pluginOpts
-  - [ ] config vs sesifyConfig
-  - [ ] if autoconfig, use that config
-- [ ] question
-  - [ ] sesify with unfrozen realm
-    - should be on Realm.evaluate, verify
-  - [x] how to create a copy of a fn class
-
-if autogen config
-  - allow browserPack to pause stream until config is generated
-  - generate config then unpause browserPack
-  - back pressure could cause a dead lock (?)
-
-### alt environment heuristics
-```js
-<obj>.hasOwnProperty = <value>
-<obj>.toString = <value>
-```
-
-### cli testing
-eval in sesify bundle
-```
-echo 'console.log(self.process === process)' | browserify - --detect-globals false --no-builtins -p [ './src/index.js' --sesifyConfig '{"resources":{"<entry>":{"globals":{"console":true,"process":true}}}}' ] | node
-```
-eval in ses
-```
-node -p "try { require('ses').makeSESRootRealm().evaluate('const x = {}; x.hasOwnProperty = ()=>{}') } catch (err) { console.log(err.message) }"
-```
-npm bug workaround
-```
-npm unlink sesify && npm i && npm link sesify
-```
-
-### trail of dead
-- https://github.com/substack/node-deep-equal/issues/62
-- https://github.com/Starcounter-Jack/JSON-Patch/pull/227
-
-# berlin notes
-next TC39 meeting <<<----
-  end of July 23-25th
-  RSVP via agoric
-TC53:
-  - SES as a js derived standard for use in IoT/wearables
-  - why this target?
-    - less backwards conmpat pressure
-module semantics:
-  - live bindings via "export let x"
-  - does pass by reference
-  - export as default does not pass by reference (!)
-root realms:
-  - Brave case has 3 realms
-  - 2 combined realms that are not confined
-  - use SES to contril the comms between them
-  - Root Realm vs Root SES Realm (FrozenRealm)
-  - SES Realms dont require an iframe now
-  - factoring into two steps
-    - creation of RootRealm
-    - securing a RootRealm from the inside
-  - harden()
-    - does not walk up proto chains
-
 ### summary of components
 - Config
   - auto config generation
@@ -134,25 +26,163 @@ root realms:
     - specify module/global replacements
     - maybe add a config for common attenuations
 
-# the big ones
-- [x] autogen granularity
-- [x] sourcemaps
-- [x] do call with agoric/MM
-- [ ] (external) SES prototype.toString etc
-- [ ] perf
 
-# make perf better
-  - reduce instantiations
-    - allow module cache under certain conditions
-      - cant harden exports?
-    - lazy instantiation via "universal proxy"
-      - my guess: we use most things on boot
-  - improve instantiation perf
-    - transform src with endowments injection (build time slow down)
+### recent notes + todo
+- importer can decorate: common
+- importer can see late sets: uncommonn
 
-# dangers of module cache
-- mutating the exports
-- cant be done if it includes unhardenables (?)
+
+SES
+  - thoughts
+    - worried im blocked by the `typeof xyz` erroring issue
+    - can work around `globalThis.Object === Object`
+    - need to summarize endowments-sloppyGlobals-globalThis requirements
+  - [x] ok a plan of action
+    - use compartments
+    - remove sloppyGlobals
+    - define getters/setters on readable/writable globals
+  - [ ] autoconfig / global detection does not support writes
+    - re-examine tofu
+    - otherwise consider whats needed to detect
+  - [ ] evaluate current proposal
+    - await feedback
+    - [x] examine for differences in using getters on endowments
+    - [ ] test in metamask
+      - [ ] Symbol.iterator, Symbol.asyncIterator, Symbol.toStringTag
+  - [ ] document and diagram scope
+    - endowments
+    - realm.global
+    - cjs module source
+  - [ ] endowment ref tree generation is kinda broken
+    - [ ] how to handle deep sets?
+  - [ ] Function constructor globalThis hack (?)
+
+- also interested in doing deeper dep analysis for dep dashboard
+  - draw lines for global writes to global reads
+
+debug bundle sesh in metamask
+- ??
+  -- in sentry deps, mod.require is undefined. `module.require` appears in node
+    maybe fine, as we already use this in browserify and its not supported
+  - "obs-store" doesnt have localStorage access despite use?
+  - [x] setTimeout not whitelisted for package "process"
+    - problem: packageName is "_process"
+  - ui <root> deps maps "react-dom" to "react-dom", not moduleId (why?)
+    - external deps (uideps bundle)
+  - metamask minifying the whole bundle, including kernel?
+
+- sesify
+  - [x] allow deletes for global writes
+  - [x] must support globalThis getter via Function
+  - [x] loading "buffer" fails - seems not added to parent modules deps map (witnessed in bn.js)
+      why: node_modules/ethjs-abi/node_modules/bn.js/lib/bn.js | grep "'buf' + 'fer'"
+      need to upgrade to a proper error
+  - [ ] drop console warns
+  - [ ] debugging: label package + file name
+  - [ ] globals
+    - [ ] global writes
+      - [x] feature
+      - [ ] test
+      - [ ] autoconfig
+    - [ ] inspect globals
+      - [x] should check for anything
+        - [x] "Blob"
+        - [x] "regeneratorRuntime"
+      - [x] fix endowment generation
+        - [x] Blob.prototype is undefined
+  - [x] workaround for assigning to __proto__
+  - [ ] endowments
+    - [ ] make sure generateEndowments works correctly with globalStore
+      - seeing an error with regeneratorRuntime.mark in eth-json-rpc-middleware / json-rpc-engine
+      - cant call defineProperty on a string (`location.href.indexOf`)
+  - [ ] options
+    - [ ] conflicts when autogen + config is specified
+    - [ ] use autogen config in output
+    - [ ] investigate "unfrozen" reccomendation reasoning
+  - [ ] DevEx
+    - [ ] seems to break on live reload
+      - doesnt seem to get new config on reload?
+      - reload on config change only works once?
+- babel-thing
+  - [x] handle frozen prototype writes to `next` (iterator)
+  - [ ] length of array is writable but not configurable, so defining 'length' fails (in bignumber.js)
+
+- metamask
+  - [x] "content-hash" current version contains reserved word "package"
+  - [x] sentry does weird shit, maybe remove it for now
+  - [x] inpage, cleanContextForImports called before var dec? (due to error?)
+  - [x] transforming ui with babel-thing
+  - [ ] shouldnt need regeneratorRuntime ?
+    - getting it in eth-json-rpc-middleware / json-rpc-engine
+  - [ ] aes-js (old ver) modifies Array.prototype
+    dep paths:
+      <root>
+      eth-hd-keyring
+      eth-simple-keyring
+      gaba
+        ethereumjs-wallet
+          aes-js
+
+# older todo
+- [x] shared instances of modules
+  - [x] revert the seperation of eval / global injection
+- [x] make config like agoric prototype
+  - [x] config is json
+  - [x] global-grabbing engine needs to move to sesify prelude
+- [x] update SES
+  - [x] some issue with prelude or SES kernel running in strict mode
+- [x] shared instances of modules
+  - [x] revert the seperation of eval / global injection
+  - [x] update cache key generator
+- [x] mark question: while `this` is container global, `self` is undefined
+- [x] fix globalRefs
+  - [x] fix objCheckSelf
+  - [x] fix objCheckGlobal
+- [x] new config
+  - [x] make config like agoric prototype
+  - [x] config is json
+  - [x] config -> endowments in sesify prelude
+  - [x] need tests that generate config then use it 
+  - [x] cleanup old config generation
+  - [x] get packageName from modules stream
+  - [x] allow easy override of configuration
+  - [x] no longer de-duping overlapping namespaces? (needs test)
+- [ ] config advanced
+  - [ ] execution environment options
+    - [x] autogen config from "alt environment heuristics"
+    - [ ] execute unfrozen in fresh realm
+  - [ ] defensibility/hardening options
+    - [x] magic copy
+    - [x] kowtow
+    - [x] return raw if same package (dont defense)
+    - [ ] @agoric/harden
+      - ? metamask error hardening proto chain
+  - [ ] enforce configuration
+    - [ ] fail at buildtime if deps violation
+    - [x] enforce globals
+  - [ ] move SES config into sesify config
+- [x] mystery bugs
+  - [x] `this.Object` gets transformed to `undefined.Object` in mm
+- [ ] cleanup prelude
+- [ ] sesify metamask
+  - [x] autogen config
+  - [x] setup build sys
+  - [x] debug boot
+  - [ ] debug runtime
+  - [x] gulp task for autogen
+- [ ] improve pluginOpts
+  - [ ] config vs sesifyConfig
+  - [ ] if autoconfig, use that config
+- [ ] question
+  - [x] sesify with unfrozen realm
+    - should be on Realm.evaluate, verify
+  - [x] how to create a copy of a fn class
+
+if autogen config
+  - allow browserPack to pause stream until config is generated
+  - generate config then unpause browserPack
+  - back pressure could cause a dead lock (?)
+
 
 # sesify prelude/kernel
 - [x] pass custom endowments at require time
@@ -207,28 +237,67 @@ root realms:
   - [x] get dependency info
   - [x] use generated config
 - [ ] not terrible
-  - [ ] more granular autogen config
+  - [x] more granular autogen config
     - [x] detect API usage on global
     - [x] dont pass window if no property accessed
     - [x] granularity on certain apis, e.g. document
-    - [ ] raise platform api granularity to common denominator (e.g. dedupe "location" and "location.href"), including defaultGlobals
-    - [ ] maybe limit granularity to actual platform API surface (e.g. not "location.href.indexOf")
-    - [ ] browserify insertGlobal is ruining the parsing of properties on global
+    - [x] raise platform api granularity to common denominator (e.g. dedupe "location" and "location.href"), including defaultGlobals
+    - [?] maybe limit granularity to actual platform API surface (e.g. not "location.href.indexOf")
+    - [x] browserify insertGlobal is ruining the parsing of properties on global
         - bc declaring the global object and passing it into a closure causes acorn-globals to ignore the uses of the global var
   - [x] user config defaultGlobals
-  - [ ] location and document.location is redundant
-  - [ ] location and location.href trigers page reload < !!! wow ouch !!! >
-  - [ ] easy user override
-    - [ ] likely need revDeps pointers at run time
-  - [ ] use SES.confine instead of realm.evaluate
-  - [ ] update ses
-  - [ ] basic safety review
-  - [ ] use autogen config if set to generate ?
-- [ ] fancy
-  - [ ] permissions as higher abstractions (network, persistence, DOM)
-  - [ ] permissions sorted by risk (?)
+  - [?] location and document.location is redundant
+  - [x] location and location.href trigers page reload < !!! wow ouch !!! >
+  - [x] easy user override
+    - [x] likely need revDeps pointers at run time
+  - [x] use SES.confine instead of realm.evaluate
+  - [x] update ses
 
-# usability
-  - [ ] cli support
-    - [x] config gen
-    - [ ] config read
+# audit
+- [ ] basic safety review
+- [ ] LA audit
+
+# devx
+- [ ] use autogen config if set to generate ?
+- [ ] cli support (?)
+  - [x] config gen
+  - [x] config read
+- [ ] lots of config noise due to console, setTimeout
+
+# idea icenbox
+- [ ] permissions as higher abstractions (network, persistence, DOM)
+- [ ] permissions sorted by risk (?)
+
+# the big ones
+- [x] autogen granularity
+- [x] sourcemaps
+- [x] do call with agoric/MM
+- [ ] (external) SES prototype.toString etc
+- [ ] perf
+
+# make perf better
+  - reduce instantiations
+    - allow module cache under certain conditions
+      - cant harden exports?
+    - lazy instantiation via "universal proxy"
+      - my guess: we use most things on boot
+  - improve instantiation perf
+    - transform src with endowments injection (build time slow down)
+
+# dangers of module cache
+- mutating the exports
+- cant be done if it includes unhardenables (?)
+
+### cli testing
+eval in sesify bundle
+```
+echo 'console.log(self.process === process)' | browserify - --detect-globals false --no-builtins -p [ './src/index.js' --sesifyConfig '{"resources":{"<entry>":{"globals":{"console":true,"process":true}}}}' ] | node
+```
+eval in ses
+```
+node -p "try { require('ses').makeSESRootRealm().evaluate('const x = {}; x.hasOwnProperty = ()=>{}') } catch (err) { console.log(err.message) }"
+```
+npm bug workaround
+```
+npm unlink sesify && npm i && npm link sesify
+```
