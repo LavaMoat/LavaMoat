@@ -86,7 +86,7 @@ function createSesifyPacker (opts) {
       // serialize final module entry
       const serializedDeps = jsonStringify(deps)
       // TODO: re-add "file" for better debugging
-      const serializedEntry = `{ package: "${package}", deps: ${serializedDeps}, source: ${moduleInitSrc} }`
+      const serializedEntry = `{ package: "${package}", deps: ${serializedDeps}, source: ${moduleInitSrc}\n}`
       return serializedEntry
     }
   }
