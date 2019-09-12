@@ -49,6 +49,7 @@
     "react-dev-utils": "^8.0.0",
     "react-dom": "^16.8.6",
     "react-force-directed": "^1.0.2",
+    "react-force-graph": "^1.24.1",
     "react-hyperscript": "^3.2.0",
     "react-sizeme": "^2.5.2",
     "resolve": "1.10.0",
