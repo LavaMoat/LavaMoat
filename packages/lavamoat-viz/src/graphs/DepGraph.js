@@ -1,7 +1,9 @@
+import { ForceGraph2D, ForceGraph3D } from 'react-force-graph'
+
 const React = require('react')
 const ObservableStore = require('obs-store')
 const { GraphContainer, ForceGraph, util: { createNode, createLink } } = require('react-force-directed')
-const exampleConfig = require('../example-config.js')
+const exampleConfig = require('../example-config.json')
 
 // const configData = require('../data/config.json')
 const configData = self.CONFIG || exampleConfig
@@ -14,12 +16,38 @@ class DepGraph extends React.Component {
     this.graph = { nodes: [], links: [], container: { width: 0, height: 0 } }
     // contain graph in observable store
     this.graphStore = new ObservableStore(this.graph)
+    this.triggerForceUpdate = this.triggerForceUpdate.bind(this)
+    
+    this.state = {
+      data: {
+        nodes: [{ id: 0 }],
+        links: []
+      }
+    };
   }
 
   componentDidMount () {
+    const { graphStore } = this
     // generate graph
     const { bundleData, mode, sesifyMode } = this.props
     this.updateGraph(bundleData, { mode, sesifyMode })
+    graphStore.subscribe(this.triggerForceUpdate)
+
+    window.xyz = this.fg
+
+    this.fg.d3Force('link').strength(1)
+  }
+
+  componentWillUnmount () {
+    const { graphStore } = this
+    graphStore.unsubscribe(this.triggerForceUpdate)
+  }
+
+  triggerForceUpdate () {
+    console.log('triggerForceUpdate', this.graphStore.getState())
+    this.setState(() => ({ data: this.graphStore.getState() }))
+    // this.graph = this.graphStore.getState()
+    // this.forceUpdate()
   }
 
   componentWillReceiveProps (nextProps) {
@@ -37,27 +65,33 @@ class DepGraph extends React.Component {
     this.graphStore.updateState({ nodes, links })
   }
 
-  onResize (size) {
-    this.graphStore.updateState({ container: size })
-  }
+  // onResize (size) {
+  //   this.graphStore.updateState({ container: size })
+  // }
 
   render () {
     const actions = {
       selectNode: console.log
     }
 
+    const { data } = this.state
+
     return (
-      <div className="fullSize" ref={this.containerRef}>
-        <GraphContainer onSize={size => this.onResize(size)}>
-          <ForceGraph graphStore={this.graphStore} actions={actions}/>
-        </GraphContainer>
-        {ForceGraph.createStyle()}
-      </div>
+      <ForceGraph2D
+        ref={el => this.fg = el}
+        graphData={data}
+        linkDirectionalArrowLength={4}
+        linkDirectionalArrowRelPos={1}
+        onNodeHover={(node) => {
+          if (!node) return
+          console.log(node)
+        }}
+      />
     )
   }
 }
 
-module.exports = DepGraph
+export { DepGraph }
 
 
 function createGraphByMode (bundleData, { mode, sesifyMode }) {
@@ -119,7 +153,7 @@ function createModuleGraph (bundleData, { sesifyMode }) {
     )
     // create links for deps
     Object.keys(deps).forEach(depName => {
-      const childId = deps[depName]
+      const childId = String(deps[depName])
       links.push(
         createLink({ source: parentId, target: childId })
       )

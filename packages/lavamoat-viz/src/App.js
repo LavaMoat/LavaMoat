@@ -1,8 +1,9 @@
 import React, { Component } from 'react'
 import './App.css'
 import Nav from './views/nav'
-const DepGraph = require('./graphs/DepGraph')
-const exampleDeps = require('./example-deps.js')
+
+const { DepGraph } = require('./graphs/DepGraph')
+const exampleDeps = require('./example-deps.json')
 // const bundles = {
 //   'background': require('./data/deps.json'),
 // }

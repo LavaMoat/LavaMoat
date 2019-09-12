@@ -1,0 +1,1563 @@
+{
+  "resources": {
+    "<root>": {
+      "packages": {
+        "@babel/runtime": true,
+        "@sentry/browser": true,
+        "abi-decoder": true,
+        "asmcrypto.js": true,
+        "assert": true,
+        "await-semaphore": true,
+        "bignumber.js": true,
+        "bn.js": true,
+        "browserify-unibabel": true,
+        "buffer": true,
+        "clone": true,
+        "content-hash": true,
+        "debounce": true,
+        "debounce-stream": true,
+        "deep-extend": true,
+        "dnode": true,
+        "end-of-stream": true,
+        "eth-block-tracker": true,
+        "eth-contract-metadata": true,
+        "eth-ens-namehash": true,
+        "eth-json-rpc-filters": true,
+        "eth-json-rpc-infura": true,
+        "eth-json-rpc-middleware": true,
+        "eth-keyring-controller": true,
+        "eth-ledger-bridge-keyring": true,
+        "eth-query": true,
+        "eth-sig-util": true,
+        "eth-trezor-keyring": true,
+        "ethereumjs-tx": true,
+        "ethereumjs-util": true,
+        "ethereumjs-wallet": true,
+        "etherscan-link": true,
+        "ethjs-contract": true,
+        "ethjs-query": true,
+        "events": true,
+        "extend": true,
+        "extension-port-stream": true,
+        "extensionizer": true,
+        "fast-json-patch": true,
+        "gaba": true,
+        "human-standard-token-abi": true,
+        "json-rpc-engine": true,
+        "json-rpc-middleware-stream": true,
+        "jsonschema": true,
+        "loglevel": true,
+        "luxon": true,
+        "nonce-tracker": true,
+        "obj-multiplex": true,
+        "obs-store": true,
+        "percentile": true,
+        "pify": true,
+        "process": true,
+        "promise-to-callback": true,
+        "pump": true,
+        "ramda": true,
+        "readable-stream": true,
+        "reselect": true,
+        "safe-event-emitter": true,
+        "single-call-balance-checker-abi": true,
+        "swappable-obj-proxy": true,
+        "through2": true,
+        "url": true,
+        "web3": true,
+        "xtend": true
+      }
+    },
+    "@babel/runtime": {
+      "packages": {
+        "babel-runtime": true,
+        "regenerator-runtime": true
+      }
+    },
+    "@sentry/browser": {
+      "globals": {
+        "DOMError": true,
+        "DOMException": true,
+        "ErrorEvent": true,
+        "Headers": true,
+        "Request": true,
+        "Response": true,
+        "XMLHttpRequest": true,
+        "clearTimeout": true,
+        "document": true,
+        "setTimeout": true
+      },
+      "packages": {
+        "@sentry/core": true,
+        "process": true
+      }
+    },
+    "@sentry/core": {
+      "globals": {
+        "clearTimeout": true,
+        "console.log": true,
+        "setTimeout": true
+      },
+      "packages": {
+        "@sentry/hub": true,
+        "@sentry/minimal": true,
+        "@sentry/types": true,
+        "@sentry/utils": true
+      }
+    },
+    "@sentry/hub": {
+      "globals": {
+        "setTimeout": true
+      },
+      "packages": {
+        "@sentry/utils": true
+      }
+    },
+    "@sentry/minimal": {
+      "packages": {
+        "@sentry/hub": true
+      }
+    },
+    "@sentry/utils": {
+      "globals": {
+        "console.error": true
+      },
+      "packages": {
+        "process": true
+      }
+    },
+    "abi-decoder": {
+      "packages": {
+        "web3-eth-abi": true,
+        "web3-utils": true
+      }
+    },
+    "aes-js": {
+      "environment": "unfrozen",
+      "packages": {
+        "buffer": true
+      }
+    },
+    "asmcrypto.js": {
+      "globals": {
+        "atob": true,
+        "btoa": true,
+        "crypto": true,
+        "msCrypto": true
+      },
+      "packages": {
+        "buffer": true,
+        "crypto-browserify": true,
+        "process": true
+      }
+    },
+    "asn1.js": {
+      "packages": {
+        "bn.js": true,
+        "buffer": true,
+        "inherits": true,
+        "minimalistic-assert": true,
+        "vm-browserify": true
+      }
+    },
+    "assert": {
+      "globals": {
+        "Buffer": true
+      },
+      "packages": {
+        "util": true
+      }
+    },
+    "async": {
+      "globals": {
+        "clearTimeout": true,
+        "console": true,
+        "define": true,
+        "setTimeout": true
+      },
+      "packages": {
+        "lodash": true,
+        "process": true,
+        "timers-browserify": true
+      }
+    },
+    "await-semaphore": {
+      "packages": {
+        "process": true,
+        "timers-browserify": true
+      }
+    },
+    "babel-runtime": {
+      "packages": {
+        "core-js": true,
+        "regenerator-runtime": true
+      }
+    },
+    "backoff": {
+      "globals": {
+        "clearTimeout": true,
+        "setTimeout": true
+      },
+      "packages": {
+        "events": true,
+        "precond": true,
+        "util": true
+      }
+    },
+    "base-x": {
+      "packages": {
+        "safe-buffer": true
+      }
+    },
+    "bignumber.js": {
+      "globals": {
+        "crypto": true,
+        "define": true
+      },
+      "packages": {
+        "crypto-browserify": true
+      }
+    },
+    "bip39": {
+      "packages": {
+        "create-hash": true,
+        "pbkdf2": true,
+        "randombytes": true,
+        "safe-buffer": true,
+        "unorm": true
+      }
+    },
+    "bip66": {
+      "packages": {
+        "safe-buffer": true
+      }
+    },
+    "bn.js": {
+      "packages": {
+        "browser-resolve": true
+      }
+    },
+    "brorand": {
+      "globals": {
+        "crypto": true,
+        "msCrypto": true
+      },
+      "packages": {
+        "browser-resolve": true
+      }
+    },
+    "browser-passworder": {
+      "globals": {
+        "btoa": true,
+        "crypto.getRandomValues": true,
+        "crypto.subtle.decrypt": true,
+        "crypto.subtle.deriveKey": true,
+        "crypto.subtle.encrypt": true,
+        "crypto.subtle.importKey": true
+      },
+      "packages": {
+        "browserify-unibabel": true
+      }
+    },
+    "browser-resolve": {
+      "packages": {
+        "core-js": true
+      }
+    },
+    "browserify-aes": {
+      "packages": {
+        "buffer": true,
+        "buffer-xor": true,
+        "cipher-base": true,
+        "evp_bytestokey": true,
+        "inherits": true,
+        "safe-buffer": true
+      }
+    },
+    "browserify-cipher": {
+      "packages": {
+        "browserify-aes": true,
+        "browserify-des": true,
+        "evp_bytestokey": true
+      }
+    },
+    "browserify-des": {
+      "packages": {
+        "buffer": true,
+        "cipher-base": true,
+        "des.js": true,
+        "inherits": true
+      }
+    },
+    "browserify-rsa": {
+      "packages": {
+        "bn.js": true,
+        "buffer": true,
+        "randombytes": true
+      }
+    },
+    "browserify-sha3": {
+      "packages": {
+        "buffer": true,
+        "js-sha3": true
+      }
+    },
+    "browserify-sign": {
+      "packages": {
+        "bn.js": true,
+        "browserify-rsa": true,
+        "buffer": true,
+        "create-hash": true,
+        "create-hmac": true,
+        "elliptic": true,
+        "inherits": true,
+        "parse-asn1": true,
+        "stream-browserify": true
+      }
+    },
+    "browserify-unibabel": {
+      "globals": {
+        "atob": true,
+        "btoa": true
+      }
+    },
+    "bs58": {
+      "packages": {
+        "base-x": true
+      }
+    },
+    "bs58check": {
+      "packages": {
+        "bs58": true,
+        "buffer": true,
+        "create-hash": true
+      }
+    },
+    "btoa": {
+      "packages": {
+        "buffer": true
+      }
+    },
+    "buffer": {
+      "globals": {
+        "console": true
+      },
+      "packages": {
+        "base64-js": true,
+        "ieee754": true
+      }
+    },
+    "buffer-xor": {
+      "packages": {
+        "buffer": true
+      }
+    },
+    "cids": {
+      "packages": {
+        "buffer": true,
+        "class-is": true,
+        "is-buffer": true,
+        "multibase": true,
+        "multicodec": true,
+        "multihashes": true
+      }
+    },
+    "cipher-base": {
+      "packages": {
+        "inherits": true,
+        "safe-buffer": true,
+        "stream-browserify": true,
+        "string_decoder": true
+      }
+    },
+    "clone": {
+      "packages": {
+        "buffer": true
+      }
+    },
+    "coinstring": {
+      "packages": {
+        "bs58": true,
+        "buffer": true,
+        "create-hash": true
+      }
+    },
+    "content-hash": {
+      "packages": {
+        "buffer": true,
+        "cids": true,
+        "multicodec": true,
+        "multihashes": true
+      }
+    },
+    "cookiejar": {
+      "globals": {
+        "console.warn": true
+      }
+    },
+    "core-js": {
+      "globals": {
+        "PromiseRejectionEvent": true,
+        "__e": "write",
+        "__g": "write",
+        "document.createTextNode": true,
+        "postMessage": true,
+        "setTimeout": true
+      }
+    },
+    "core-util-is": {
+      "packages": {
+        "is-buffer": true
+      }
+    },
+    "create-ecdh": {
+      "packages": {
+        "bn.js": true,
+        "buffer": true,
+        "elliptic": true
+      }
+    },
+    "create-hash": {
+      "packages": {
+        "buffer": true,
+        "cipher-base": true,
+        "inherits": true,
+        "md5.js": true,
+        "ripemd160": true,
+        "sha.js": true
+      }
+    },
+    "create-hmac": {
+      "packages": {
+        "cipher-base": true,
+        "create-hash": true,
+        "inherits": true,
+        "ripemd160": true,
+        "safe-buffer": true,
+        "sha.js": true
+      }
+    },
+    "cross-fetch": {
+      "globals": {
+        "Blob": true,
+        "FileReader": true,
+        "FormData": true,
+        "URLSearchParams.prototype.isPrototypeOf": true,
+        "XMLHttpRequest": true
+      }
+    },
+    "crypto-browserify": {
+      "packages": {
+        "browserify-cipher": true,
+        "browserify-sign": true,
+        "create-ecdh": true,
+        "create-hash": true,
+        "create-hmac": true,
+        "diffie-hellman": true,
+        "pbkdf2": true,
+        "public-encrypt": true,
+        "randombytes": true,
+        "randomfill": true
+      }
+    },
+    "crypto-js": {
+      "globals": {
+        "define": true
+      }
+    },
+    "debounce": {
+      "globals": {
+        "clearTimeout": true,
+        "setTimeout": true
+      }
+    },
+    "debounce-stream": {
+      "packages": {
+        "debounce": true,
+        "duplexer": true,
+        "through": true
+      }
+    },
+    "deep-extend": {
+      "packages": {
+        "buffer": true
+      }
+    },
+    "des.js": {
+      "packages": {
+        "inherits": true,
+        "minimalistic-assert": true
+      }
+    },
+    "diffie-hellman": {
+      "packages": {
+        "bn.js": true,
+        "buffer": true,
+        "miller-rabin": true,
+        "randombytes": true
+      }
+    },
+    "dnode": {
+      "packages": {
+        "dnode-protocol": true,
+        "jsonify": true,
+        "process": true,
+        "stream-browserify": true
+      }
+    },
+    "dnode-protocol": {
+      "packages": {
+        "events": true,
+        "traverse": true
+      }
+    },
+    "duplexer": {
+      "packages": {
+        "stream-browserify": true
+      }
+    },
+    "elliptic": {
+      "packages": {
+        "bn.js": true,
+        "brorand": true,
+        "hash.js": true,
+        "hmac-drbg": true,
+        "inherits": true,
+        "minimalistic-assert": true,
+        "minimalistic-crypto-utils": true
+      }
+    },
+    "end-of-stream": {
+      "packages": {
+        "once": true
+      }
+    },
+    "eth-block-tracker": {
+      "globals": {
+        "clearTimeout": true,
+        "console.error": true,
+        "setTimeout": true
+      },
+      "packages": {
+        "eth-query": true,
+        "pify": true,
+        "safe-event-emitter": true
+      }
+    },
+    "eth-ens-namehash": {
+      "globals": {
+        "name": "write"
+      },
+      "packages": {
+        "buffer": true,
+        "idna-uts46-hx": true,
+        "js-sha3": true
+      }
+    },
+    "eth-hd-keyring": {
+      "packages": {
+        "bip39": true,
+        "buffer": true,
+        "eth-sig-util": true,
+        "ethereumjs-util": true,
+        "ethereumjs-wallet": true,
+        "events": true
+      }
+    },
+    "eth-json-rpc-errors": {
+      "packages": {
+        "fast-safe-stringify": true
+      }
+    },
+    "eth-json-rpc-filters": {
+      "globals": {
+        "console.error": true,
+        "results": "write"
+      },
+      "packages": {
+        "await-semaphore": true,
+        "eth-json-rpc-middleware": true,
+        "eth-query": true,
+        "json-rpc-engine": true,
+        "lodash.flatmap": true,
+        "pify": true,
+        "safe-event-emitter": true
+      }
+    },
+    "eth-json-rpc-infura": {
+      "globals": {
+        "setTimeout": true
+      },
+      "packages": {
+        "cross-fetch": true,
+        "eth-json-rpc-errors": true,
+        "eth-json-rpc-middleware": true,
+        "json-rpc-engine": true
+      }
+    },
+    "eth-json-rpc-middleware": {
+      "globals": {
+        "console.error": true,
+        "fetch": true,
+        "setTimeout": true
+      },
+      "packages": {
+        "btoa": true,
+        "clone": true,
+        "eth-json-rpc-errors": true,
+        "eth-sig-util": true,
+        "fetch-ponyfill": true,
+        "json-rpc-engine": true,
+        "json-stable-stringify": true,
+        "pify": true,
+        "safe-event-emitter": true,
+        "url": true
+      }
+    },
+    "eth-keyring-controller": {
+      "packages": {
+        "bip39": true,
+        "browser-passworder": true,
+        "eth-hd-keyring": true,
+        "eth-sig-util": true,
+        "eth-simple-keyring": true,
+        "ethereumjs-util": true,
+        "events": true,
+        "loglevel": true,
+        "obs-store": true
+      }
+    },
+    "eth-ledger-bridge-keyring": {
+      "globals": {
+        "addEventListener": true,
+        "document.createElement": true,
+        "document.head.appendChild": true,
+        "fetch": true
+      },
+      "packages": {
+        "buffer": true,
+        "eth-sig-util": true,
+        "ethereumjs-util": true,
+        "events": true,
+        "hdkey": true
+      }
+    },
+    "eth-method-registry": {
+      "packages": {
+        "ethjs": true
+      }
+    },
+    "eth-phishing-detect": {
+      "packages": {
+        "fast-levenshtein": true
+      }
+    },
+    "eth-query": {
+      "packages": {
+        "json-rpc-random-id": true,
+        "xtend": true
+      }
+    },
+    "eth-sig-util": {
+      "packages": {
+        "buffer": true,
+        "ethereumjs-abi": true,
+        "ethereumjs-util": true,
+        "tweetnacl": true,
+        "tweetnacl-util": true
+      }
+    },
+    "eth-simple-keyring": {
+      "packages": {
+        "buffer": true,
+        "eth-sig-util": true,
+        "ethereumjs-util": true,
+        "ethereumjs-wallet": true,
+        "events": true
+      }
+    },
+    "eth-trezor-keyring": {
+      "globals": {
+        "console.log": true,
+        "setTimeout": true
+      },
+      "packages": {
+        "buffer": true,
+        "ethereumjs-tx": true,
+        "ethereumjs-util": true,
+        "events": true,
+        "hdkey": true,
+        "trezor-connect": true
+      }
+    },
+    "ethereumjs-abi": {
+      "packages": {
+        "bn.js": true,
+        "buffer": true,
+        "ethereumjs-util": true
+      }
+    },
+    "ethereumjs-tx": {
+      "packages": {
+        "buffer": true,
+        "ethereum-common": true,
+        "ethereumjs-util": true
+      }
+    },
+    "ethereumjs-util": {
+      "packages": {
+        "assert": true,
+        "bn.js": true,
+        "buffer": true,
+        "create-hash": true,
+        "ethjs-util": true,
+        "keccak": true,
+        "keccakjs": true,
+        "rlp": true,
+        "safe-buffer": true,
+        "secp256k1": true
+      }
+    },
+    "ethereumjs-wallet": {
+      "packages": {
+        "aes-js": true,
+        "bs58check": true,
+        "buffer": true,
+        "crypto-browserify": true,
+        "ethereumjs-util": true,
+        "hdkey": true,
+        "scrypt.js": true,
+        "utf8": true,
+        "uuid": true
+      }
+    },
+    "ethers": {
+      "globals": {
+        "console.log": true,
+        "name": true
+      },
+      "packages": {
+        "bn.js": true,
+        "js-sha3": true
+      }
+    },
+    "ethjs": {
+      "globals": {
+        "clearInterval": true,
+        "setInterval": true
+      },
+      "packages": {
+        "bn.js": true,
+        "buffer": true,
+        "ethjs-abi": true,
+        "ethjs-contract": true,
+        "ethjs-filter": true,
+        "ethjs-provider-http": true,
+        "ethjs-query": true,
+        "ethjs-unit": true,
+        "ethjs-util": true,
+        "js-sha3": true,
+        "number-to-bn": true
+      }
+    },
+    "ethjs-abi": {
+      "packages": {
+        "bn.js": true,
+        "buffer": true,
+        "js-sha3": true,
+        "number-to-bn": true
+      }
+    },
+    "ethjs-contract": {
+      "packages": {
+        "babel-runtime": true,
+        "ethjs-abi": true,
+        "ethjs-filter": true,
+        "ethjs-util": true,
+        "js-sha3": true,
+        "promise-to-callback": true
+      }
+    },
+    "ethjs-filter": {
+      "globals": {
+        "clearInterval": true,
+        "setInterval": true
+      }
+    },
+    "ethjs-format": {
+      "packages": {
+        "ethjs-schema": true,
+        "ethjs-util": true,
+        "number-to-bn": true,
+        "strip-hex-prefix": true
+      }
+    },
+    "ethjs-provider-http": {
+      "packages": {
+        "xhr2": true
+      }
+    },
+    "ethjs-query": {
+      "globals": {
+        "console": true
+      },
+      "packages": {
+        "babel-runtime": true,
+        "ethjs-format": true,
+        "ethjs-rpc": true,
+        "promise-to-callback": true
+      }
+    },
+    "ethjs-rpc": {
+      "packages": {
+        "promise-to-callback": true
+      }
+    },
+    "ethjs-unit": {
+      "packages": {
+        "bn.js": true,
+        "number-to-bn": true
+      }
+    },
+    "ethjs-util": {
+      "packages": {
+        "buffer": true,
+        "is-hex-prefixed": true,
+        "strip-hex-prefix": true
+      }
+    },
+    "events": {
+      "globals": {
+        "console": true
+      }
+    },
+    "evp_bytestokey": {
+      "packages": {
+        "md5.js": true,
+        "safe-buffer": true
+      }
+    },
+    "extension-port-stream": {
+      "packages": {
+        "buffer": true,
+        "readable-stream": true,
+        "util": true
+      }
+    },
+    "extensionizer": {
+      "globals": {
+        "browser": true,
+        "chrome": true
+      }
+    },
+    "fast-json-patch": {
+      "globals": {
+        "addEventListener": true,
+        "clearTimeout": true,
+        "removeEventListener": true,
+        "setTimeout": true
+      },
+      "packages": {
+        "fast-deep-equal": true
+      }
+    },
+    "fast-levenshtein": {
+      "globals": {
+        "Intl": true,
+        "Levenshtein": "write",
+        "console.log": true,
+        "define": true,
+        "importScripts": true,
+        "postMessage": true
+      }
+    },
+    "fetch-ponyfill": {
+      "globals": {
+        "Blob": true,
+        "FileReader": true,
+        "FormData": true,
+        "URLSearchParams.prototype.isPrototypeOf": true,
+        "define": true
+      }
+    },
+    "gaba": {
+      "globals": {
+        "clearTimeout": true,
+        "console.error": true,
+        "fetch": true,
+        "name": true,
+        "setTimeout": true
+      },
+      "packages": {
+        "await-semaphore": true,
+        "buffer": true,
+        "eth-contract-metadata": true,
+        "eth-json-rpc-infura": true,
+        "eth-keyring-controller": true,
+        "eth-method-registry": true,
+        "eth-phishing-detect": true,
+        "eth-query": true,
+        "eth-sig-util": true,
+        "ethereumjs-tx": true,
+        "ethereumjs-util": true,
+        "ethereumjs-wallet": true,
+        "ethjs-query": true,
+        "events": true,
+        "human-standard-collectible-abi": true,
+        "human-standard-token-abi": true,
+        "isomorphic-fetch": true,
+        "jsonschema": true,
+        "single-call-balance-checker-abi": true,
+        "uuid": true,
+        "web3": true,
+        "web3-provider-engine": true
+      }
+    },
+    "hash-base": {
+      "packages": {
+        "buffer": true,
+        "inherits": true,
+        "safe-buffer": true,
+        "stream-browserify": true
+      }
+    },
+    "hash.js": {
+      "packages": {
+        "inherits": true,
+        "minimalistic-assert": true
+      }
+    },
+    "hdkey": {
+      "packages": {
+        "assert": true,
+        "buffer": true,
+        "coinstring": true,
+        "crypto-browserify": true,
+        "safe-buffer": true,
+        "secp256k1": true
+      }
+    },
+    "hmac-drbg": {
+      "packages": {
+        "hash.js": true,
+        "minimalistic-assert": true,
+        "minimalistic-crypto-utils": true
+      }
+    },
+    "https-browserify": {
+      "packages": {
+        "stream-http": true,
+        "url": true
+      }
+    },
+    "idna-uts46-hx": {
+      "globals": {
+        "define": true
+      },
+      "packages": {
+        "punycode": true
+      }
+    },
+    "isomorphic-fetch": {
+      "globals": {
+        "fetch.bind": true
+      },
+      "packages": {
+        "whatwg-fetch": true
+      }
+    },
+    "js-sha3": {
+      "globals": {
+        "navigator.userAgent.indexOf": true
+      },
+      "packages": {
+        "process": true
+      }
+    },
+    "json-rpc-engine": {
+      "globals": {
+        "console.error": true
+      },
+      "packages": {
+        "async": true,
+        "eth-json-rpc-errors": true,
+        "promise-to-callback": true,
+        "safe-event-emitter": true
+      }
+    },
+    "json-rpc-middleware-stream": {
+      "packages": {
+        "readable-stream": true
+      }
+    },
+    "json-stable-stringify": {
+      "packages": {
+        "jsonify": true
+      }
+    },
+    "jsonschema": {
+      "packages": {
+        "url": true
+      }
+    },
+    "keccak": {
+      "packages": {
+        "inherits": true,
+        "safe-buffer": true,
+        "stream-browserify": true
+      }
+    },
+    "keccakjs": {
+      "packages": {
+        "browserify-sha3": true
+      }
+    },
+    "loglevel": {
+      "globals": {
+        "console": true,
+        "define": true,
+        "document.cookie": true,
+        "localStorage": true,
+        "log": "write"
+      }
+    },
+    "luxon": {
+      "globals": {
+        "Intl": true
+      }
+    },
+    "md5.js": {
+      "packages": {
+        "hash-base": true,
+        "inherits": true,
+        "safe-buffer": true
+      }
+    },
+    "miller-rabin": {
+      "packages": {
+        "bn.js": true,
+        "brorand": true
+      }
+    },
+    "multibase": {
+      "packages": {
+        "base-x": true,
+        "buffer": true
+      }
+    },
+    "multicodec": {
+      "packages": {
+        "buffer": true,
+        "varint": true
+      }
+    },
+    "multihashes": {
+      "packages": {
+        "bs58": true,
+        "buffer": true,
+        "varint": true
+      }
+    },
+    "nonce-tracker": {
+      "packages": {
+        "assert": true,
+        "await-semaphore": true,
+        "ethjs-query": true
+      }
+    },
+    "number-to-bn": {
+      "packages": {
+        "bn.js": true,
+        "strip-hex-prefix": true
+      }
+    },
+    "obj-multiplex": {
+      "globals": {
+        "console.warn": true
+      },
+      "packages": {
+        "end-of-stream": true,
+        "once": true,
+        "readable-stream": true
+      }
+    },
+    "obs-store": {
+      "globals": {
+        "localStorage": true
+      },
+      "packages": {
+        "safe-event-emitter": true,
+        "stream-browserify": true,
+        "through2": true,
+        "xtend": true
+      }
+    },
+    "once": {
+      "packages": {
+        "wrappy": true
+      }
+    },
+    "os-browserify": {
+      "globals": {
+        "location": true,
+        "navigator": true
+      }
+    },
+    "parse-asn1": {
+      "packages": {
+        "asn1.js": true,
+        "browserify-aes": true,
+        "buffer": true,
+        "evp_bytestokey": true,
+        "pbkdf2": true
+      }
+    },
+    "pbkdf2": {
+      "globals": {
+        "crypto": true,
+        "process": true
+      },
+      "packages": {
+        "create-hash": true,
+        "is-buffer": true,
+        "process": true,
+        "ripemd160": true,
+        "safe-buffer": true,
+        "sha.js": true
+      }
+    },
+    "precond": {
+      "packages": {
+        "util": true
+      }
+    },
+    "process": {
+      "globals": {
+        "clearTimeout": true,
+        "setTimeout": true
+      }
+    },
+    "process-nextick-args": {
+      "packages": {
+        "process": true
+      }
+    },
+    "promise-to-callback": {
+      "packages": {
+        "is-fn": true,
+        "set-immediate-shim": true
+      }
+    },
+    "public-encrypt": {
+      "packages": {
+        "bn.js": true,
+        "browserify-rsa": true,
+        "buffer": true,
+        "create-hash": true,
+        "parse-asn1": true,
+        "randombytes": true
+      }
+    },
+    "pump": {
+      "packages": {
+        "browser-resolve": true,
+        "end-of-stream": true,
+        "once": true,
+        "process": true
+      }
+    },
+    "punycode": {
+      "globals": {
+        "define": true
+      }
+    },
+    "randombytes": {
+      "globals": {
+        "crypto": true,
+        "msCrypto": true
+      },
+      "packages": {
+        "process": true,
+        "safe-buffer": true
+      }
+    },
+    "randomfill": {
+      "globals": {
+        "crypto": true,
+        "msCrypto": true
+      },
+      "packages": {
+        "process": true,
+        "randombytes": true,
+        "safe-buffer": true
+      }
+    },
+    "randomhex": {
+      "globals": {
+        "crypto": true,
+        "msCrypto": true
+      }
+    },
+    "readable-stream": {
+      "packages": {
+        "browser-resolve": true,
+        "core-util-is": true,
+        "events": true,
+        "inherits": true,
+        "isarray": true,
+        "process": true,
+        "process-nextick-args": true,
+        "safe-buffer": true,
+        "string_decoder": true,
+        "timers-browserify": true,
+        "util-deprecate": true
+      }
+    },
+    "regenerator-runtime": {
+      "globals": {
+        "regeneratorRuntime": "write"
+      }
+    },
+    "ripemd160": {
+      "packages": {
+        "buffer": true,
+        "hash-base": true,
+        "inherits": true
+      }
+    },
+    "rlp": {
+      "packages": {
+        "assert": true,
+        "buffer": true
+      }
+    },
+    "safe-buffer": {
+      "packages": {
+        "buffer": true
+      }
+    },
+    "safe-event-emitter": {
+      "globals": {
+        "setTimeout": true
+      },
+      "packages": {
+        "events": true,
+        "util": true
+      }
+    },
+    "scrypt.js": {
+      "packages": {
+        "scryptsy": true
+      }
+    },
+    "scryptsy": {
+      "packages": {
+        "buffer": true,
+        "pbkdf2": true
+      }
+    },
+    "secp256k1": {
+      "packages": {
+        "bip66": true,
+        "bn.js": true,
+        "create-hash": true,
+        "elliptic": true,
+        "is-buffer": true,
+        "safe-buffer": true
+      }
+    },
+    "semaphore": {
+      "globals": {
+        "define": true,
+        "setTimeout": true
+      },
+      "packages": {
+        "process": true
+      }
+    },
+    "set-immediate-shim": {
+      "globals": {
+        "setTimeout.apply": true
+      },
+      "packages": {
+        "timers-browserify": true
+      }
+    },
+    "sha.js": {
+      "packages": {
+        "inherits": true,
+        "safe-buffer": true
+      }
+    },
+    "stream-browserify": {
+      "packages": {
+        "events": true,
+        "inherits": true,
+        "readable-stream": true
+      }
+    },
+    "stream-http": {
+      "globals": {
+        "Blob": true,
+        "MSStreamReader": true,
+        "ReadableStream": true,
+        "VBArray": true,
+        "XDomainRequest": true,
+        "XMLHttpRequest": true,
+        "fetch": true,
+        "location.protocol.search": true
+      },
+      "packages": {
+        "buffer": true,
+        "builtin-status-codes": true,
+        "inherits": true,
+        "process": true,
+        "readable-stream": true,
+        "to-arraybuffer": true,
+        "url": true,
+        "xtend": true
+      }
+    },
+    "string_decoder": {
+      "packages": {
+        "safe-buffer": true
+      }
+    },
+    "strip-hex-prefix": {
+      "packages": {
+        "is-hex-prefixed": true
+      }
+    },
+    "through": {
+      "packages": {
+        "process": true,
+        "stream-browserify": true
+      }
+    },
+    "through2": {
+      "packages": {
+        "process": true,
+        "readable-stream": true,
+        "util": true,
+        "xtend": true
+      }
+    },
+    "timers-browserify": {
+      "globals": {
+        "clearInterval": true,
+        "clearTimeout": true,
+        "setInterval": true,
+        "setTimeout": true
+      },
+      "packages": {
+        "process": true
+      }
+    },
+    "to-arraybuffer": {
+      "packages": {
+        "buffer": true
+      }
+    },
+    "trezor-connect": {
+      "globals": {
+        "__TREZOR_CONNECT_SRC": true,
+        "addEventListener": true,
+        "btoa": true,
+        "chrome": true,
+        "clearInterval": true,
+        "clearTimeout": true,
+        "console": true,
+        "document.body": true,
+        "document.createElement": true,
+        "document.createTextNode": true,
+        "document.getElementById": true,
+        "document.querySelectorAll": true,
+        "fetch": true,
+        "location.pathname": true,
+        "location.protocol": true,
+        "navigator": true,
+        "open": true,
+        "removeEventListener": true,
+        "setInterval": true,
+        "setTimeout": true
+      },
+      "packages": {
+        "@babel/runtime": true,
+        "events": true,
+        "whatwg-fetch": true
+      }
+    },
+    "tweetnacl": {
+      "globals": {
+        "crypto": true,
+        "msCrypto": true,
+        "nacl": "write"
+      },
+      "packages": {
+        "browser-resolve": true
+      }
+    },
+    "tweetnacl-util": {
+      "globals": {
+        "atob": true,
+        "btoa": true
+      },
+      "packages": {
+        "browser-resolve": true
+      }
+    },
+    "underscore": {
+      "globals": {
+        "clearTimeout": true,
+        "define": true,
+        "global": true,
+        "self": true,
+        "setTimeout": true
+      }
+    },
+    "unorm": {
+      "globals": {
+        "define": true
+      }
+    },
+    "url": {
+      "packages": {
+        "punycode": true,
+        "querystring-es3": true
+      }
+    },
+    "utf8": {
+      "globals": {
+        "define": true
+      }
+    },
+    "util": {
+      "globals": {
+        "console.error": true,
+        "console.log": true,
+        "console.trace": true,
+        "process": true
+      },
+      "packages": {
+        "inherits": true,
+        "process": true
+      }
+    },
+    "util-deprecate": {
+      "globals": {
+        "console.trace": true,
+        "console.warn": true,
+        "localStorage": true
+      }
+    },
+    "uuid": {
+      "globals": {
+        "crypto": true,
+        "msCrypto": true
+      }
+    },
+    "vm-browserify": {
+      "globals": {
+        "document.body.appendChild": true,
+        "document.body.removeChild": true,
+        "document.createElement": true
+      }
+    },
+    "web3": {
+      "globals": {
+        "Web3": "write",
+        "XMLHttpRequest": "write",
+        "clearTimeout": true,
+        "console.error": true,
+        "setTimeout": true
+      },
+      "packages": {
+        "bignumber.js": true,
+        "buffer": true,
+        "crypto-js": true,
+        "utf8": true,
+        "xhr2-cookies": true
+      }
+    },
+    "web3-eth-abi": {
+      "packages": {
+        "ethers": true,
+        "underscore": true,
+        "web3-utils": true
+      }
+    },
+    "web3-provider-engine": {
+      "globals": {
+        "WebSocket": true,
+        "console": true,
+        "setTimeout": true
+      },
+      "packages": {
+        "async": true,
+        "backoff": true,
+        "browser-resolve": true,
+        "buffer": true,
+        "eth-block-tracker": true,
+        "eth-json-rpc-filters": true,
+        "eth-json-rpc-infura": true,
+        "eth-json-rpc-middleware": true,
+        "eth-sig-util": true,
+        "ethereumjs-tx": true,
+        "ethereumjs-util": true,
+        "events": true,
+        "json-stable-stringify": true,
+        "semaphore": true,
+        "util": true,
+        "xtend": true
+      }
+    },
+    "web3-utils": {
+      "globals": {
+        "setTimeout": true
+      },
+      "packages": {
+        "bn.js": true,
+        "eth-lib": true,
+        "ethjs-unit": true,
+        "number-to-bn": true,
+        "randomhex": true,
+        "underscore": true,
+        "utf8": true
+      }
+    },
+    "whatwg-fetch": {
+      "globals": {
+        "Blob": true,
+        "DOMException": true,
+        "FileReader": true,
+        "FormData": true,
+        "Headers": "write",
+        "Request": "write",
+        "Response": "write",
+        "URLSearchParams.prototype.isPrototypeOf": true,
+        "XMLHttpRequest": true,
+        "define": true,
+        "fetch": "write"
+      }
+    },
+    "xhr2": {
+      "globals": {
+        "XMLHttpRequest": true
+      }
+    },
+    "xhr2-cookies": {
+      "globals": {
+        "console.warn": true
+      },
+      "packages": {
+        "buffer": true,
+        "cookiejar": true,
+        "https-browserify": true,
+        "os-browserify": true,
+        "process": true,
+        "stream-http": true,
+        "url": true
+      }
+    }
+  }
+}
