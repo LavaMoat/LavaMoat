@@ -111,7 +111,6 @@ function createModuleGraph (bundleData, { sesifyMode }) {
     const label = `${packageName}\n${file}\n${configLabel}`
     const isEntryPackage = packageName === '<root>'
     const isSesify = sesifyMode === 'sesify'
-    console.log({sesifyMode})
     const sesifyColor = isEntryPackage ? 'purple' : getColorForConfig(configForPackage)
     const color = isSesify ? sesifyColor : 'red'
     // create node for modules
