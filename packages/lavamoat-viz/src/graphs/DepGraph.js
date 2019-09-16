@@ -82,6 +82,7 @@ class DepGraph extends React.Component {
         graphData={data}
         linkDirectionalArrowLength={4}
         linkDirectionalArrowRelPos={1}
+        nodeLabel={'label'}
         onNodeHover={(node) => {
           if (!node) return
           console.log(node)
@@ -107,26 +108,25 @@ function createPackageGraph (bundleData, { sesifyMode }) {
   const packageData = {}
   
   // create a fake `bundleData` using the packages
-  Object.keys(bundleData).forEach(parentId => {
-    const module = bundleData[parentId]
-    const { package: packageName } = module
+  Object.entries(bundleData).forEach(([parentId, moduleData]) => {
+    const packageName = getPackageVersionName(moduleData)
     let pack = packageData[packageName]
-    // if first module in package, initialize with module
+    // if first moduleData in package, initialize with moduleData
     if (!pack) {
-      pack = Object.assign({}, module)
-      pack.file = `${packageName} files`
+      pack = Object.assign({}, moduleData)
+      pack.file = packageName
       pack.entry = (packageName === '<root>')
       pack.deps = {}
       packageData[packageName] = pack
     } else {
       // package already exists, just need add size (deps added later)
-      const { size } = module
+      const { size } = moduleData
       pack.size += size
     }
     // add deps
-    Object.values(module.deps).forEach(id => {
+    Object.values(moduleData.deps).forEach(childId => {
       // use `id` so that there are not redundant links. the actual key is not important.
-      pack.deps[id] = bundleData[id].package
+      pack.deps[childId] = getPackageVersionName(bundleData[childId])
     })
   })
 
@@ -137,13 +137,15 @@ function createModuleGraph (bundleData, { sesifyMode }) {
   const nodes = [], links = []
 
   // for each module, create node and links 
-  Object.keys(bundleData).forEach(parentId => {
-    const { file, package:packageName, deps, size, entry } = bundleData[parentId]
+  Object.entries(bundleData).forEach(([parentId, parentData]) => {
+    const { file, deps, size, entry, packageName } = parentData
+    const packageVersionName = getPackageVersionName(parentData)
     const radius = 5
     const configForPackage = configData.resources[packageName] || {}
     const configLabel = JSON.stringify(configForPackage, null, 2)
-    const label = `${packageName}\n${file}\n${configLabel}`
-    const isEntryPackage = packageName === '<root>'
+    // const label = `${packageVersionName}\n${file}\n${configLabel}`
+    const label = `${file}`
+    const isEntryPackage = packageVersionName === '<root>'
     const isSesify = sesifyMode === 'sesify'
     const sesifyColor = isEntryPackage ? 'purple' : getColorForConfig(configForPackage)
     const color = isSesify ? sesifyColor : 'red'
@@ -202,4 +204,12 @@ function getColorForConfig (packageConfig) {
   }
   // has globals but nothing scary
   return 'orange'
+}
+
+function getPackageVersionName ({ packageName, packageVersion }) {
+  if (packageVersion) {
+    return `${packageName}@${packageVersion}`
+  } else {
+    return packageName
+  }
 }
