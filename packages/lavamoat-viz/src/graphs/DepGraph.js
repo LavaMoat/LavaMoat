@@ -1,4 +1,4 @@
-import { ForceGraph2D, ForceGraph3D } from 'react-force-graph'
+import { ForceGraph2D, ForceGraph3D, ForceGraphVR } from 'react-force-graph'
 
 const React = require('react')
 const ObservableStore = require('obs-store')
