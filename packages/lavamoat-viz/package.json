@@ -3,7 +3,6 @@
   "description": "This is a graph visualization generator exploring a sesify bundle's dependency graph and permissions.",
   "main": "index.js",
   "version": "3.0.0",
-  "private": true,
   "dependencies": {
     "@babel/core": "7.2.2",
     "@svgr/webpack": "4.1.0",
