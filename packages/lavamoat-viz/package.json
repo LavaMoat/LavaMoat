@@ -1,6 +1,6 @@
 {
   "name": "sesify-viz",
-  "description": "This is an experiment in exploring metamask's js bundles and dependency graph. See it here: https://kumavis.github.io/metamask-deps-explorer-sesify",
+  "description": "This is a graph visualization generator exploring a sesify bundle's dependency graph and permissions.",
   "main": "index.js",
   "version": "3.0.0",
   "private": true,
@@ -137,16 +137,13 @@
     "gh-pages": "^2.0.1",
     "source-map-explorer": "^1.8.0"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/kumavis/metamask-deps-explorer-sesify.git"
-  },
-  "author": "",
+  "repository": "git+https://github.com/kumavis/sesify-viz.git",
+  "author": "kumavis <aaron@kumavis.me>",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/kumavis/metamask-deps-explorer-sesify/issues"
+    "url": "https://github.com/kumavis/sesify-viz/issues"
   },
-  "homepage": "https://kumavis.github.io/metamask-deps-explorer-sesify",
+  "homepage": "https://kumavis.github.io/sesify-viz",
   "bin": {
     "sesify-viz": "./bin/index.js"
   }

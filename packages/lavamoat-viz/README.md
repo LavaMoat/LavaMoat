@@ -1,6 +1,6 @@
 # sesify-viz
 
-quick hack to generate a data viz of your dep graph
+This is a graph visualization generator exploring a sesify bundle's dependency graph and permissions.
 
 ### example
 
