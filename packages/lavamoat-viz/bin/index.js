@@ -12,7 +12,7 @@ if (!dest) throw new Error('missing cli argument "--dest')
 if (!deps) throw new Error('missing cli argument "--deps')
 if (!config) throw new Error('missing cli argument "--config')
 
-const source = path.resolve(__dirname, '/../dist/')
+const source = path.join(__dirname, '/../dist/')
 
 main()
 
