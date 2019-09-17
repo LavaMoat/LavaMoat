@@ -36,7 +36,7 @@ class DepGraph extends React.Component {
     if (this.props.mode !== nextProps.mode
       || this.props.bundleData !== nextProps.bundleData
       || this.props.sesifyMode !== nextProps.sesifyMode) {
-      triggerGraphUpdate(nextProps)
+      this.triggerGraphUpdate(nextProps)
     }
   }
 
