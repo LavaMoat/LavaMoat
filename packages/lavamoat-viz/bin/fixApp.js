@@ -7,7 +7,7 @@ const htmlPath = path.resolve(__dirname, '../dist/index.html')
 let indexContent = fs.readFileSync(htmlPath, 'utf8')
 // fix relative urls
 indexContent = indexContent
-  .split(`"/metamask-deps-explorer-sesify/`)
+  .split(`"/sesify-viz/`)
   .join(`"./`)
 // insert data script
 indexContent = indexContent
