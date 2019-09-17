@@ -2,7 +2,7 @@
   "name": "sesify-viz",
   "description": "This is a graph visualization generator exploring a sesify bundle's dependency graph and permissions.",
   "main": "index.js",
-  "version": "3.0.2",
+  "version": "3.0.3",
   "dependencies": {
     "ncp": "^2.0.0",
     "pify": "^4.0.1",
