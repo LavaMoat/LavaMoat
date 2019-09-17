@@ -4,6 +4,7 @@ const React = require('react')
 const ObservableStore = require('obs-store')
 const { GraphContainer, ForceGraph, util: { createNode, createLink } } = require('react-force-directed')
 const exampleConfig = require('../example-config.json')
+const d3 = require('d3')
 
 // const configData = require('../data/config.json')
 const configData = self.CONFIG || exampleConfig
@@ -21,12 +22,15 @@ class DepGraph extends React.Component {
   }
 
   componentDidMount () {
+    const { forceGraph } = this
     const { bundleData, mode, sesifyMode } = this.props
     this.updateGraph(bundleData, { mode, sesifyMode })
 
-    window.xyz = this.fg
+    window.xyz = forceGraph
 
-    this.fg.d3Force('link').strength(1)
+    forceGraph.d3Force('charge').strength(-50)
+    forceGraph.d3Force('x', d3.forceX(0, 1))
+    forceGraph.d3Force('y', d3.forceY(0, 1))
   }
 
   componentWillReceiveProps (nextProps) {
@@ -77,7 +81,7 @@ class DepGraph extends React.Component {
           {selectedNodeLabel}
         </pre>
         <ForceGraph2D
-          ref={el => this.fg = el}
+          ref={el => this.forceGraph = el}
           graphData={data}
           linkDirectionalArrowLength={4}
           linkDirectionalArrowRelPos={1}
