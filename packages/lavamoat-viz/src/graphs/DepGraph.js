@@ -46,23 +46,37 @@ class DepGraph extends React.Component {
 
   render () {
     const actions = {
-      selectNode: console.log
+      selectNode: (node) => {
+        this.setState(() => ({ selectedNode: node }))
+      }
     }
 
-    const { data } = this.state
+    const { data, selectedNode } = this.state
+    const selectedNodeLabel = selectedNode ? `${selectedNode.label}\n${selectedNode.configLabel}` : 'select a node'
 
     return (
-      <ForceGraph2D
-        ref={el => this.fg = el}
-        graphData={data}
-        linkDirectionalArrowLength={4}
-        linkDirectionalArrowRelPos={1}
-        nodeLabel={'label'}
-        onNodeHover={(node) => {
-          if (!node) return
-          console.log(node)
-        }}
-      />
+      <>
+        <pre style={{
+          position: 'absolute',
+          background: 'rgba(232, 232, 232, 0.78)',
+          padding: '12px',
+          // draw on top of graph
+          zIndex: 1,
+        }}>
+          {selectedNodeLabel}
+        </pre>
+        <ForceGraph2D
+          ref={el => this.fg = el}
+          graphData={data}
+          linkDirectionalArrowLength={4}
+          linkDirectionalArrowRelPos={1}
+          nodeLabel={'label'}
+          onNodeHover={(node) => {
+            if (!node) return
+            actions.selectNode(node)
+          }}
+        />
+      </>
     )
   }
 }
@@ -118,7 +132,6 @@ function createModuleGraph (bundleData, { sesifyMode }) {
     const radius = 5
     const configForPackage = configData.resources[packageName] || {}
     const configLabel = JSON.stringify(configForPackage, null, 2)
-    // const label = `${packageVersionName}\n${file}\n${configLabel}`
     const label = `${file}`
     const isEntryPackage = packageVersionName === '<root>'
     const isSesify = sesifyMode === 'sesify'
@@ -126,7 +139,7 @@ function createModuleGraph (bundleData, { sesifyMode }) {
     const color = isSesify ? sesifyColor : 'red'
     // create node for modules
     nodes.push(
-      createNode({ id: parentId, radius, label, color })
+      createNode({ id: parentId, radius, label, configLabel, color })
     )
     // create links for deps
     Object.keys(deps).forEach(depName => {
