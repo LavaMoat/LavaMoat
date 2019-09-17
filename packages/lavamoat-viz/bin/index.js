@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 const fs = require('fs')
+const path = require('path')
 const argv = require('yargs').argv
 const { ncp } = require('ncp')
 const pify = require('pify')
@@ -11,7 +12,7 @@ if (!dest) throw new Error('missing cli argument "--dest')
 if (!deps) throw new Error('missing cli argument "--deps')
 if (!config) throw new Error('missing cli argument "--config')
 
-const source = __dirname + '/app'
+const source = path.resolve(__dirname, '/../dist/')
 
 main()
 
