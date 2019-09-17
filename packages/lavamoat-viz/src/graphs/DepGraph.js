@@ -13,41 +13,20 @@ class DepGraph extends React.Component {
   constructor () {
     super()
     // prepare empty graph
-    this.graph = { nodes: [], links: [], container: { width: 0, height: 0 } }
-    // contain graph in observable store
-    this.graphStore = new ObservableStore(this.graph)
-    this.triggerForceUpdate = this.triggerForceUpdate.bind(this)
-    
+    const graph = { nodes: [], links: [], container: { width: 0, height: 0 } }
+
     this.state = {
-      data: {
-        nodes: [{ id: 0 }],
-        links: []
-      }
+      data: graph,
     };
   }
 
   componentDidMount () {
-    const { graphStore } = this
-    // generate graph
     const { bundleData, mode, sesifyMode } = this.props
     this.updateGraph(bundleData, { mode, sesifyMode })
-    graphStore.subscribe(this.triggerForceUpdate)
 
     window.xyz = this.fg
 
     this.fg.d3Force('link').strength(1)
-  }
-
-  componentWillUnmount () {
-    const { graphStore } = this
-    graphStore.unsubscribe(this.triggerForceUpdate)
-  }
-
-  triggerForceUpdate () {
-    console.log('triggerForceUpdate', this.graphStore.getState())
-    this.setState(() => ({ data: this.graphStore.getState() }))
-    // this.graph = this.graphStore.getState()
-    // this.forceUpdate()
   }
 
   componentWillReceiveProps (nextProps) {
@@ -61,13 +40,9 @@ class DepGraph extends React.Component {
   }
 
   updateGraph (bundleData, { mode, sesifyMode }) {
-    const { nodes, links } = createGraphByMode(bundleData, { mode, sesifyMode })
-    this.graphStore.updateState({ nodes, links })
+    const newGraph = createGraphByMode(bundleData, { mode, sesifyMode })
+    this.setState(() => ({ data: newGraph }))
   }
-
-  // onResize (size) {
-  //   this.graphStore.updateState({ container: size })
-  // }
 
   render () {
     const actions = {
