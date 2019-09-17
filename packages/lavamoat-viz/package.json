@@ -73,7 +73,7 @@
     "build": "node scripts/build.js",
     "test": "node scripts/test.js",
     "deploy": "npm run build && gh-pages -d build",
-    "dist": "rm -r ./dist && cp -R ./build ./dist && node bin/fixApp.js"
+    "dist": "rm -rf ./dist && cp -R ./build ./dist && node bin/fixApp.js"
   },
   "eslintConfig": {
     "extends": "react-app"
