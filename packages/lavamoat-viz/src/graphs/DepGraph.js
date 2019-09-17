@@ -41,6 +41,17 @@ class DepGraph extends React.Component {
 
   updateGraph (bundleData, { mode, sesifyMode }) {
     const newGraph = createGraphByMode(bundleData, { mode, sesifyMode })
+    // create a map for faster lookups by id
+    const nodeLookup = new Map(newGraph.nodes.map(node => [node.id, node]))
+    // copy simulation data from old graph
+    const oldGraph = this.state.data
+    oldGraph.nodes.forEach((oldNode) => {
+      const newNode = nodeLookup.get(oldNode.id)
+      if (!newNode) return
+      const { x, y, vx, vy } = oldNode
+      Object.assign(newNode, { x, y, vx, vy })
+    })
+    // commit new graph
     this.setState(() => ({ data: newGraph }))
   }
 
