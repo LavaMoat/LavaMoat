@@ -2,7 +2,6 @@ import { ForceGraph2D, ForceGraph3D, ForceGraphVR } from 'react-force-graph'
 
 const React = require('react')
 const ObservableStore = require('obs-store')
-const { GraphContainer, ForceGraph, util: { createNode, createLink } } = require('react-force-directed')
 const exampleConfig = require('../example-config.json')
 const d3 = require('d3')
 
@@ -23,8 +22,7 @@ class DepGraph extends React.Component {
 
   componentDidMount () {
     const { forceGraph } = this
-    const { bundleData, mode, sesifyMode } = this.props
-    this.updateGraph(bundleData, { mode, sesifyMode })
+    this.triggerGraphUpdate()
 
     window.xyz = forceGraph
 
@@ -38,13 +36,18 @@ class DepGraph extends React.Component {
     if (this.props.mode !== nextProps.mode
       || this.props.bundleData !== nextProps.bundleData
       || this.props.sesifyMode !== nextProps.sesifyMode) {
-      const { bundleData, mode, sesifyMode } = nextProps
-      this.updateGraph(bundleData, { mode, sesifyMode })
+      triggerGraphUpdate(nextProps)
     }
   }
 
-  updateGraph (bundleData, { mode, sesifyMode }) {
-    const newGraph = createGraphByMode(bundleData, { mode, sesifyMode })
+  triggerGraphUpdate (newProps = this.props) {
+    const { state } = this
+    const { bundleData } = newProps
+    this.updateGraph(bundleData, newProps, state)
+  }
+
+  updateGraph (bundleData, props, state) {
+    const newGraph = createGraphByMode(bundleData, props, state)
     // create a map for faster lookups by id
     const nodeLookup = new Map(newGraph.nodes.map(node => [node.id, node]))
     // copy simulation data from old graph
@@ -63,6 +66,7 @@ class DepGraph extends React.Component {
     const actions = {
       selectNode: (node) => {
         this.setState(() => ({ selectedNode: node }))
+        this.triggerGraphUpdate()
       }
     }
 
@@ -90,6 +94,8 @@ class DepGraph extends React.Component {
             if (!node) return
             actions.selectNode(node)
           }}
+          linkWidth={(link) => link.width}
+          linkColor={(link) => link.color}
         />
       </>
     )
@@ -99,16 +105,16 @@ class DepGraph extends React.Component {
 export { DepGraph }
 
 
-function createGraphByMode (bundleData, { mode, sesifyMode }) {
+function createGraphByMode (bundleData, { mode, sesifyMode }, { selectedNode }) {
   // create graph for mode
   if (mode === 'modules') {
-    return createModuleGraph(bundleData, { sesifyMode })
+    return createModuleGraph(bundleData, { sesifyMode }, { selectedNode })
   } else {
-    return createPackageGraph(bundleData, { sesifyMode })
+    return createPackageGraph(bundleData, { sesifyMode }, { selectedNode })
   }
 }
 
-function createPackageGraph (bundleData, { sesifyMode }) {
+function createPackageGraph (bundleData, { sesifyMode }, { selectedNode }) {
   const packageData = {}
   
   // create a fake `bundleData` using the packages
@@ -134,10 +140,10 @@ function createPackageGraph (bundleData, { sesifyMode }) {
     })
   })
 
-  return createModuleGraph(packageData, { sesifyMode })
+  return createModuleGraph(packageData, { sesifyMode }, { selectedNode })
 }
 
-function createModuleGraph (bundleData, { sesifyMode }) {
+function createModuleGraph (bundleData, { sesifyMode }, { selectedNode }) {
   const nodes = [], links = []
 
   // for each module, create node and links 
@@ -156,11 +162,27 @@ function createModuleGraph (bundleData, { sesifyMode }) {
     nodes.push(
       createNode({ id: parentId, radius, label, configLabel, color })
     )
+    const selectedNodeId = selectedNode && selectedNode.id
+
     // create links for deps
     Object.keys(deps).forEach(depName => {
       const childId = String(deps[depName])
+
+      let width = undefined
+      let color = undefined
+
+      if (parentId === selectedNodeId) {
+        width = 3
+        color = 'green'
+      }
+
+      if (childId === selectedNodeId) {
+        width = 3
+        color = 'blue'
+      }
+
       links.push(
-        createLink({ source: parentId, target: childId })
+        createLink({ color, width, source: parentId, target: childId })
       )
     })
   })
@@ -215,4 +237,24 @@ function getPackageVersionName ({ packageName, packageVersion }) {
   } else {
     return packageName
   }
+}
+
+function createLink(params) {
+  const { source, target } = params
+  const link = Object.assign({
+    id: `${source}-${target}`,
+    source,
+    target,
+    // value: 1,
+    // distance: 30,
+  }, params)
+  return link
+}
+
+function createNode(params) {
+  const node = Object.assign({
+    // color: 'green',
+    radius: 5,
+  }, params)
+  return node
 }
