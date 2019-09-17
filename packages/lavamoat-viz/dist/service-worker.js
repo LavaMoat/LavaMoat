@@ -14,7 +14,7 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/3.6.3/workbox-sw.js");
 
 importScripts(
-  "/metamask-deps-explorer-sesify/precache-manifest.0b02e8e75b2e52efec0339752a64a103.js"
+  "/sesify-viz/precache-manifest.ccd7a267a2e9f91bb77c86aba4105de3.js"
 );
 
 workbox.clientsClaim();
@@ -28,7 +28,7 @@ self.__precacheManifest = [].concat(self.__precacheManifest || []);
 workbox.precaching.suppressWarnings();
 workbox.precaching.precacheAndRoute(self.__precacheManifest, {});
 
-workbox.routing.registerNavigationRoute("/metamask-deps-explorer-sesify/index.html", {
+workbox.routing.registerNavigationRoute("/sesify-viz/index.html", {
   
   blacklist: [/^\/_/,/\/[^\/]+\.[^\/]+$/],
 });
