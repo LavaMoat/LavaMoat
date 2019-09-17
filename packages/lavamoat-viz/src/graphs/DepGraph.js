@@ -136,7 +136,9 @@ function createPackageGraph (bundleData, { sesifyMode }, { selectedNode }) {
     // add deps
     Object.values(moduleData.deps).forEach(childId => {
       // use `id` so that there are not redundant links. the actual key is not important.
-      pack.deps[childId] = getPackageVersionName(bundleData[childId])
+      const childModuleData = bundleData[childId]
+      if (!childModuleData) return console.warn(`dep is external module ${childId}`)
+      pack.deps[childId] = getPackageVersionName(childModuleData)
     })
   })
 
