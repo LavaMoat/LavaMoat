@@ -77,7 +77,7 @@ function createSesifyPacker (opts) {
     raw: true,
     prelude: generatePrelude(opts),
     bundleEntryForModule: (entry) => {
-      const { package, source, deps } = entry
+      const { package: packageName, source, deps } = entry
       const wrappedBundle = wrapIntoModuleInitializer(source)
       const sourceMappingURL = onSourcemap(entry, wrappedBundle)
       // for now, ignore new sourcemap and just append original filename
@@ -86,7 +86,7 @@ function createSesifyPacker (opts) {
       // serialize final module entry
       const serializedDeps = jsonStringify(deps)
       // TODO: re-add "file" for better debugging
-      const serializedEntry = `{ package: "${package}", deps: ${serializedDeps}, source: ${moduleInitSrc}\n}`
+      const serializedEntry = `{ package: "${packageName}", deps: ${serializedDeps}, source: ${moduleInitSrc}\n}`
       return serializedEntry
     }
   }
