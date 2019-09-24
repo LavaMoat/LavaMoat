@@ -123,7 +123,8 @@ debug bundle sesh in metamask
         ethereumjs-wallet
           aes-js
 
-# older todo
+# older bundleEntryForModule
+todo
 - [x] shared instances of modules
   - [x] revert the seperation of eval / global injection
 - [x] make config like agoric prototype
@@ -263,6 +264,9 @@ if autogen config
   - [x] config gen
   - [x] config read
 - [ ] lots of config noise due to console, setTimeout
+- [ ] sourcemaps
+  - metamask sourcemaps are already a mess
+  - then sesify sourcemaps get a bit worse
 
 # idea icenbox
 - [ ] permissions as higher abstractions (network, persistence, DOM)
