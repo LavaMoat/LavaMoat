@@ -35,7 +35,7 @@ function packageDataForModule (moduleData) {
     const isAppLevel = ['.', '..', ''].includes(filePathFirstPart)
     // otherwise fail
     if (!isAppLevel) {
-      throw new Error(`Sesify - Config Autogen - Failed to parse module name. first part: "${filePathFirstPart}"`)
+      throw new Error(`Sesify - Config Autogen - Failed to parse module name. first part: "${filePathFirstPart}" full path: "${path}"`)
     }
     packageName = rootSlug
   }
