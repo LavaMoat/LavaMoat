@@ -22,6 +22,20 @@ __sessDist__
   })
   const harden = sesRequire('@agoric/harden')
 
+  // define makeMagicCopy
+  const makeMagicCopy = (function(){
+    const exports = {}
+    const module = { exports }
+    ;(function(){
+// START of injected code from magicCopy
+__magicCopy__
+// END of injected code from magicCopy
+    })()
+    return module.exports
+  })()
+
+  const magicCopy = realm.evaluate(`(${makeMagicCopy})()`)
+
   const sesifyConfig = (function(){
 // START of injected code from sesifyConfig
 __sesifyConfig__
@@ -50,7 +64,7 @@ __sesifyConfig__
     const globalCache = {}
     // create SES-wrapped internalRequire
     const createInternalRequire = realm.evaluate(`(${internalRequireWrapper})`, { console })
-    const safeInternalRequire = createInternalRequire(modules, globalCache, sesifyConfig, realm, harden, eval, evalWithEndowments, globalRef)
+    const safeInternalRequire = createInternalRequire(modules, globalCache, sesifyConfig, realm, harden, magicCopy, eval, evalWithEndowments, globalRef)
     // load entryPoints
     for (let entryId of entryPoints) {
       safeInternalRequire(entryId, null, [])
@@ -59,7 +73,7 @@ __sesifyConfig__
 
   // this is serialized and run in SES
   // mostly just exists to expose variables to internalRequire
-  function internalRequireWrapper (modules, globalCache, sesifyConfig, realm, harden, unsafeEval, unsafeEvalWithEndowments, globalRef) {
+  function internalRequireWrapper (modules, globalCache, sesifyConfig, realm, harden, magicCopy, unsafeEval, unsafeEvalWithEndowments, globalRef) {
     const globalStore = new Map()
     return internalRequire
 
@@ -263,44 +277,6 @@ __sesifyConfig__
         default:
           throw new Error(`Sesify - Unknown exports protection ${containment}`)
       }
-    }
-
-    function magicCopy (ref) {
-      // create a mutable copy
-      switch (typeof ref) {
-        case 'object':
-          if (Array.isArray(ref)) {
-            return magicCopyInternal([], ref)
-          } else {
-            return magicCopyInternal({}, ref)
-          }
-        case 'function':
-          // supports both normal functions and both styles of classes
-          const copy = function magicCopyFnWrapper (...args) {
-            if (new.target) {
-              return Reflect.construct(ref, args, new.target)
-            } else {
-              return Reflect.apply(ref, this, args)
-            }
-          }
-          magicCopyInternal(copy, ref)
-          return copy
-        default:
-          // safe as is
-          return ref
-      }
-    }
-
-    function magicCopyInternal (target, source) {
-      try {
-        const props = Object.getOwnPropertyDescriptors(source)
-        Object.defineProperties(target, props)
-        Reflect.setPrototypeOf(target, Reflect.getPrototypeOf(source))
-      } catch (err) {
-        console.warn('Sesify - Error performing magic copy:', err.message)
-        throw err
-      }
-      return target
     }
 
     function toModuleDepPath (depPath) {

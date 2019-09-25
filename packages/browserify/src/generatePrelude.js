@@ -8,6 +8,7 @@ const fs = require('fs')
 const jsonStringify = require('json-stable-stringify')
 const preludeTemplate = fs.readFileSync(__dirname + '/preludeTemplate.js', 'utf8')
 const sessDist = fs.readFileSync(__dirname + '/../lib/ses.umd.js', 'utf8')
+const magicCopySrc = fs.readFileSync(__dirname + '/magicCopy.js', 'utf8')
 
 module.exports = generatePrelude
 
@@ -16,6 +17,7 @@ function generatePrelude (opts = {}) {
 
   let output = preludeTemplate
   output = output.replace('__sessDist__', sessDist)
+  output = output.replace('__magicCopy__', magicCopySrc)
   output = output.replace('__sesifyConfig__', sesifyConfig)
 
   return output
