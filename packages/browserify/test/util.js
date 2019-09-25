@@ -31,7 +31,7 @@ async function createBundleFromRequiresArray (files, sesifyConfig) {
   return bundleAsync(bundler)
 }
 
-function createBrowserifyFromRequiresArray ({ files, sesifyConfig }) {  
+function createBrowserifyFromRequiresArray ({ files, sesifyConfig }) {
   // empty bundle but inject modules at bundle time
   const bifyOpts = Object.assign({}, sesifyPlugin.args)
   const bundler = browserify([], bifyOpts)
@@ -42,11 +42,13 @@ function createBrowserifyFromRequiresArray ({ files, sesifyConfig }) {
   mdeps.resolve = (id, parent, cb) => {
     const parentModule = files.find(f => f.id === parent.id)
     const moduleId = parentModule ? parentModule.deps[id] : id
-    const module = files.find(f => f.id === moduleId)
-
-    const file = module.file
+    const moduleData = files.find(f => f.id === moduleId)
+    if (!moduleData) {
+      throw new Error(`could not find "${moduleId}" in files:\n${files.map(f => f.id).join('\n')}`)
+    }
+    const file = moduleData.file
     const pkg = null
-    const fakePath = module.file
+    const fakePath = moduleData.file
     cb(null, file, pkg, fakePath)
   }
 
@@ -82,7 +84,7 @@ async function filesToConfigSource ({ files }) {
   return config
 }
 
-async function bundleAsync (bundler) {  
+async function bundleAsync (bundler) {
   const src = await pify(cb => bundler.bundle(cb))()
   return src.toString()
 }
