@@ -51,29 +51,51 @@ test('attack - limit platform api', async (t) => {
 })
 
 test('attack - prevent module cache attack', async (t) => {
+
+  function defineAttacker () {
+    try {
+      require('victim').action = () => true
+    } catch (_) {}
+  }
+
+  function defineVictim () {
+    module.exports.action = () => false
+  }
+
+  await testEntryAttackerVictim(t, { defineAttacker, defineVictim })
+})
+
+async function testEntryAttackerVictim (t, { defineAttacker, defineVictim }) {
+
+  function defineEntry () {
+    require('attacker')
+    const result = require('victim').action()
+    global.testResult = result
+  }
+
   const depsArray = [
     {
       'id': '/1.js',
       'file': '/1.js',
-      'source': "require('attacker'); global.testResult = require('check-if-hacked').check()",
+      'source': `(${defineEntry})()`,
       'deps': {
         'attacker': '/node_modules/2/index.js',
-        'check-if-hacked': '/node_modules/3/index.js'
+        'victim': '/node_modules/3/index.js'
       },
       'entry': true
     },
     {
       'id': '/node_modules/2/index.js',
       'file': '/node_modules/2/index.js',
-      'source': "try { require('check-if-hacked').check = () => true } catch (_) {}",
+      'source': `(${defineAttacker})()`,
       'deps': {
-        'check-if-hacked': '/node_modules/3/index.js'
+        'victim': '/node_modules/3/index.js'
       }
     },
     {
       'id': '/node_modules/3/index.js',
       'file': '/node_modules/3/index.js',
-      'source': 'module.exports.check = () => false',
+      'source': `(${defineVictim})()`,
       'deps': {}
     }
   ]
@@ -83,4 +105,4 @@ test('attack - prevent module cache attack', async (t) => {
 
   eval(result)
   t.equal(global.testResult, false)
-})
+}
