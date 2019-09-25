@@ -65,6 +65,26 @@ test('attack - prevent module cache attack', async (t) => {
   await testEntryAttackerVictim(t, { defineAttacker, defineVictim })
 })
 
+test('attack - prevent module cache attack in proto chain', async (t) => {
+
+  function defineAttacker () {
+    try {
+      const victim = require('victim')
+      Object.getPrototypeOf(victim).action = () => true
+    } catch (_) {}
+  }
+
+  function defineVictim () {
+    const parent = {
+      action: () => false
+    }
+    const child = Object.create(parent)
+    module.exports = child
+  }
+
+  await testEntryAttackerVictim(t, { defineAttacker, defineVictim })
+})
+
 async function testEntryAttackerVictim (t, { defineAttacker, defineVictim }) {
 
   function defineEntry () {
