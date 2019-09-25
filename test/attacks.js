@@ -95,26 +95,26 @@ async function testEntryAttackerVictim (t, { defineAttacker, defineVictim }) {
 
   const depsArray = [
     {
-      'id': '/1.js',
-      'file': '/1.js',
+      'id': '/entry.js',
+      'file': '/entry.js',
       'source': `(${defineEntry})()`,
       'deps': {
-        'attacker': '/node_modules/2/index.js',
-        'victim': '/node_modules/3/index.js'
+        'attacker': '/node_modules/attacker/index.js',
+        'victim': '/node_modules/victim/index.js'
       },
       'entry': true
     },
     {
-      'id': '/node_modules/2/index.js',
-      'file': '/node_modules/2/index.js',
+      'id': '/node_modules/attacker/index.js',
+      'file': '/node_modules/attacker/index.js',
       'source': `(${defineAttacker})()`,
       'deps': {
-        'victim': '/node_modules/3/index.js'
+        'victim': '/node_modules/victim/index.js'
       }
     },
     {
-      'id': '/node_modules/3/index.js',
-      'file': '/node_modules/3/index.js',
+      'id': '/node_modules/victim/index.js',
+      'file': '/node_modules/victim/index.js',
       'source': `(${defineVictim})()`,
       'deps': {}
     }

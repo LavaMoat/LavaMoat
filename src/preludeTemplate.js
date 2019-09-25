@@ -23,7 +23,7 @@ __sessDist__
   const harden = sesRequire('@agoric/harden')
 
   // define makeMagicCopy
-  const makeMagicCopy = (function(){
+  const unsafeMakeMagicCopy = (function(){
     const exports = {}
     const module = { exports }
     ;(function(){
@@ -34,7 +34,7 @@ __magicCopy__
     return module.exports
   })()
 
-  const magicCopy = realm.evaluate(`(${makeMagicCopy})()`)
+  const makeMagicCopy = realm.evaluate(`(${unsafeMakeMagicCopy})`)
 
   const sesifyConfig = (function(){
 // START of injected code from sesifyConfig
@@ -64,7 +64,7 @@ __sesifyConfig__
     const globalCache = {}
     // create SES-wrapped internalRequire
     const createInternalRequire = realm.evaluate(`(${internalRequireWrapper})`, { console })
-    const safeInternalRequire = createInternalRequire(modules, globalCache, sesifyConfig, realm, harden, magicCopy, eval, evalWithEndowments, globalRef)
+    const safeInternalRequire = createInternalRequire(modules, globalCache, sesifyConfig, realm, harden, makeMagicCopy, eval, evalWithEndowments, globalRef)
     // load entryPoints
     for (let entryId of entryPoints) {
       safeInternalRequire(entryId, null, [])
@@ -73,7 +73,8 @@ __sesifyConfig__
 
   // this is serialized and run in SES
   // mostly just exists to expose variables to internalRequire
-  function internalRequireWrapper (modules, globalCache, sesifyConfig, realm, harden, magicCopy, unsafeEval, unsafeEvalWithEndowments, globalRef) {
+  function internalRequireWrapper (modules, globalCache, sesifyConfig, realm, harden, makeMagicCopy, unsafeEval, unsafeEvalWithEndowments, globalRef) {
+    const magicCopyForPackage = new Map()
     const globalStore = new Map()
     return internalRequire
 
@@ -177,7 +178,8 @@ __sesifyConfig__
         throw err
       }
 
-      return protectExportsInstantiationTime(module.exports, configForModule)
+      const protectedExports = protectExportsInstantiationTime(module.exports, configForModule)
+      return protectedExports
 
 
       // this is the require method passed to the module initializer
@@ -233,7 +235,7 @@ __sesifyConfig__
         return moduleExports
       } else {
         // return exports protected as specified in config
-        return protectExportsRequireTime(moduleExports, configForModule)
+        return protectExportsRequireTime(parentPackageName, moduleExports, configForModule)
       }
     }
 
@@ -263,8 +265,14 @@ __sesifyConfig__
       return moduleExports
     }
 
-    function protectExportsRequireTime (moduleExports, config) {
+    function protectExportsRequireTime (parentPackageName, moduleExports, config) {
       const exportsDefense = config.exportsDefense || 'magicCopy'
+      // prepare magicCopy per package
+      let magicCopy = magicCopyForPackage.get(parentPackageName)
+      if (!magicCopy) {
+        magicCopy = makeMagicCopy()
+        magicCopyForPackage.set(parentPackageName, magicCopy)
+      }
       switch (exportsDefense) {
         case 'magicCopy':
           return magicCopy(moduleExports)
