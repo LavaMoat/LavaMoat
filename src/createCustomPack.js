@@ -48,7 +48,7 @@ module.exports = function (opts) {
     var sourcemap;
 
     if (opts.generateModuleInitializer && opts.bundleEntryForModule) {
-      throw new Error('Sesify CustomPack: conflicting options for "generateModuleInitializer" and "bundleEntryForModule". Can only set one.')
+      throw new Error('LavaMoat CustomPack: conflicting options for "generateModuleInitializer" and "bundleEntryForModule". Can only set one.')
     }
 
     opts.generateModuleInitializer = opts.generateModuleInitializer || generateModuleInitializer

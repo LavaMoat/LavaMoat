@@ -54,7 +54,7 @@ test('config - deep endow', async (t) => {
     }
   }
 
-  const bundle = await createBundleFromRequiresArray(entries, { sesifyConfig: config })
+  const bundle = await createBundleFromRequiresArray(entries, { lavamoatConfig: config })
 
   let testResult
   try {

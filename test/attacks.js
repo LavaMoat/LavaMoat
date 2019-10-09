@@ -19,8 +19,8 @@ test('attack - prevent primitive modification', async (t) => {
     }
   ]
 
-  const sesifyConfig = {}
-  const result = await createBundleFromRequiresArray(depsArray, sesifyConfig)
+  const config = {}
+  const result = await createBundleFromRequiresArray(depsArray, config)
 
   eval(result)
   t.equal(global.testResult, false)
@@ -43,8 +43,8 @@ test('attack - limit platform api', async (t) => {
     }
   ]
 
-  const sesifyConfig = {}
-  const result = await createBundleFromRequiresArray(depsArray, sesifyConfig)
+  const config = {}
+  const result = await createBundleFromRequiresArray(depsArray, config)
 
   eval(result)
   t.equal(global.testResult, false)
@@ -120,8 +120,8 @@ async function testEntryAttackerVictim (t, { defineAttacker, defineVictim }) {
     }
   ]
 
-  const sesifyConfig = {}
-  const result = await createBundleFromRequiresArray(depsArray, sesifyConfig)
+  const config = {}
+  const result = await createBundleFromRequiresArray(depsArray, config)
 
   eval(result)
   t.equal(global.testResult, false)

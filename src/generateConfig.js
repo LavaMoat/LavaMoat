@@ -12,7 +12,7 @@ module.exports = { rootSlug, createConfigSpy }
 
 
 // createConfigSpy creates a pass-through object stream for the Browserify pipeline.
-// it analyses modules for global namespace usages, and generates a config for Sesify.
+// it analyses modules for global namespace usages, and generates a config for LavaMoat.
 // it calls `onResult` with the config when the stream ends.
 
 function createConfigSpy ({ onResult }) {

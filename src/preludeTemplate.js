@@ -1,4 +1,4 @@
-// Sesify Prelude
+// LavaMoat Prelude
 ;(function() {
 
   // define SES
@@ -36,10 +36,10 @@ __magicCopy__
 
   const makeMagicCopy = realm.evaluate(`(${unsafeMakeMagicCopy})`)
 
-  const sesifyConfig = (function(){
-// START of injected code from sesifyConfig
-__sesifyConfig__
-// END of injected code from sesifyConfig
+  const lavamoatConfig = (function(){
+// START of injected code from lavamoatConfig
+__lavamoatConfig__
+// END of injected code from lavamoatConfig
   })()
 
   return loadBundle
@@ -64,7 +64,7 @@ __sesifyConfig__
     const globalCache = {}
     // create SES-wrapped internalRequire
     const createInternalRequire = realm.evaluate(`(${internalRequireWrapper})`, { console })
-    const safeInternalRequire = createInternalRequire(modules, globalCache, sesifyConfig, realm, harden, makeMagicCopy, eval, evalWithEndowments, globalRef)
+    const safeInternalRequire = createInternalRequire(modules, globalCache, lavamoatConfig, realm, harden, makeMagicCopy, eval, evalWithEndowments, globalRef)
     // load entryPoints
     for (let entryId of entryPoints) {
       safeInternalRequire(entryId, null, [])
@@ -73,7 +73,7 @@ __sesifyConfig__
 
   // this is serialized and run in SES
   // mostly just exists to expose variables to internalRequire
-  function internalRequireWrapper (modules, globalCache, sesifyConfig, realm, harden, makeMagicCopy, unsafeEval, unsafeEvalWithEndowments, globalRef) {
+  function internalRequireWrapper (modules, globalCache, lavamoatConfig, realm, harden, makeMagicCopy, unsafeEval, unsafeEvalWithEndowments, globalRef) {
     const magicCopyForPackage = new Map()
     const globalStore = new Map()
     return internalRequire
@@ -113,12 +113,12 @@ __sesifyConfig__
         const moduleSourceLabel = `// moduleSource: ${moduleData.file}`
         moduleSource += `\n\n${moduleSourceLabel}`
       }
-      const configForModule = getConfigForPackage(sesifyConfig, packageName)
+      const configForModule = getConfigForPackage(lavamoatConfig, packageName)
       const isEntryModule = moduleDepPath.length < 1
 
       // prepare endowments
       const endowmentsFromConfig = generateEndowmentsForConfig(configForModule)
-      let endowments = Object.assign({}, sesifyConfig.defaultGlobals, providedEndowments, endowmentsFromConfig)
+      let endowments = Object.assign({}, lavamoatConfig.defaultGlobals, providedEndowments, endowmentsFromConfig)
       // special circular reference for endowments to fix globalRef in SES
       // see https://github.com/Agoric/SES/issues/123
       endowments._endowments = endowments
@@ -141,7 +141,7 @@ __sesifyConfig__
         try {
           moduleInitializer = moduleRealm.evaluate(`${moduleSource}`)
         } catch (err) {
-          console.warn(`Sesify - Error evaluating module "${moduleId}" from package "${packageName}"`)
+          console.warn(`LavaMoat - Error evaluating module "${moduleId}" from package "${packageName}"`)
           throw err
         }
       } else {
@@ -150,7 +150,7 @@ __sesifyConfig__
         moduleInitializer = unsafeEvalWithEndowments(`${moduleSource}`, endowments)
       }
       if (typeof moduleInitializer !== 'function') {
-        throw new Error('Sesify - moduleInitializer is not defined correctly')
+        throw new Error('LavaMoat - moduleInitializer is not defined correctly')
       }
 
       // this "modules" interface is exposed to the moduleInitializer https://github.com/browserify/browser-pack/blob/master/prelude.js#L38
@@ -174,7 +174,7 @@ __sesifyConfig__
       try {
         moduleInitializer.call(module.exports, scopedRequire, module, module.exports, null, modulesProxy)
       } catch (err) {
-        console.warn(`Sesify - Error instantiating module "${moduleId}" from package "${packageName}"`)
+        console.warn(`LavaMoat - Error instantiating module "${moduleId}" from package "${packageName}"`)
         throw err
       }
 
@@ -206,7 +206,7 @@ __sesifyConfig__
       // this only seems to happen with the "timers" which uses and is used by "process"
       if (moduleId === parentModuleId) {
         if (['timers', 'buffer'].includes(requestedName) === false) {
-          throw new Error(`Sesify - recursive require detected: "${requestedName}"`)
+          throw new Error(`LavaMoat - recursive require detected: "${requestedName}"`)
         }
         return parentModule.exports
       }
@@ -222,7 +222,7 @@ __sesifyConfig__
       }
 
       const packageName = moduleData.package
-      const configForModule = getConfigForPackage(sesifyConfig, packageName)
+      const configForModule = getConfigForPackage(lavamoatConfig, packageName)
 
       // update the dependency path for the child require
       const childDepPath = moduleDepPath.slice()
@@ -258,7 +258,7 @@ __sesifyConfig__
           break
 
         default:
-          throw new Error(`Sesify - Unknown exports protection ${exportsDefense}`)
+          throw new Error(`LavaMoat - Unknown exports protection ${exportsDefense}`)
       }
 
       // return the exports
@@ -283,7 +283,7 @@ __sesifyConfig__
         case 'freeze':
           return magicCopy(moduleExports)
         default:
-          throw new Error(`Sesify - Unknown exports protection ${containment}`)
+          throw new Error(`LavaMoat - Unknown exports protection ${containment}`)
       }
     }
 
@@ -319,7 +319,7 @@ __sesifyConfig__
         // write access handled elsewhere
         if (configValue === 'write') return
         if (configValue !== true) {
-          throw new Error('Sesify - unknown value for config globals')
+          throw new Error('LavaMoat - unknown value for config globals')
         }
         const value = deepGetAndBind(globalRef, globalPath)
         if (value === undefined) return
@@ -421,7 +421,7 @@ __sesifyConfig__
             }
           },
           set () {
-            console.warn(`sesify: ignoring write attempt to read-access global "${key}"`)
+            console.warn(`LavaMoat: ignoring write attempt to read-access global "${key}"`)
           }
         })
       })

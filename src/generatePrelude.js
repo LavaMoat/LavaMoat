@@ -1,5 +1,5 @@
 // The "prelude" is the kernel of a browserify bundle. It initializes the modules and
-// provides the `require` api. Sesify's prelude content has been modified significantly from the
+// provides the `require` api. LavaMoat's prelude content has been modified significantly from the
 // original `browser-pack` prelude for readability + sandboxing in SES containers
 // The prelude is defined in the `preludeTemplate` file, and here we inject the dynamic components,
 // such as the upgradeable SES and app specific config.
@@ -13,12 +13,12 @@ const magicCopySrc = fs.readFileSync(__dirname + '/magicCopy.js', 'utf8')
 module.exports = generatePrelude
 
 function generatePrelude (opts = {}) {
-  const sesifyConfig = parseConfig(opts.sesifyConfig)
+  const lavamoatConfig = parseConfig(opts.lavamoatConfig)
 
   let output = preludeTemplate
   output = output.replace('__sessDist__', sessDist)
   output = output.replace('__magicCopy__', magicCopySrc)
-  output = output.replace('__sesifyConfig__', sesifyConfig)
+  output = output.replace('__lavamoatConfig__', lavamoatConfig)
 
   return output
 }
@@ -32,7 +32,7 @@ function parseConfig (config) {
       } else {
         return config
       }
-    // allow sesifyConfig to be specified as a function for loading fresh result under watchify
+    // allow lavamoatConfig to be specified as a function for loading fresh result under watchify
     case 'function':
       return parseConfig(config())
     case 'object':
@@ -41,7 +41,7 @@ function parseConfig (config) {
     case 'undefined':
       return 'return {}'
     default:
-      throw new Error('Sesify - unrecognized endowments config option')
+      throw new Error('LavaMoat - unrecognized endowments config option')
   }
 }
 
