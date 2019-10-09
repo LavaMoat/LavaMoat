@@ -1,7 +1,7 @@
 {
-  "name": "sesify",
-  "version": "4.2.2",
-  "description": "browserify plugin for sandboxing dependencies with SES",
+  "name": "lavamoat-browserify",
+  "version": "1.0.0",
+  "description": "browserify plugin for sandboxing dependencies with LavaMoat",
   "main": "src/index.js",
   "directories": {
     "lib": "lib",
@@ -50,10 +50,10 @@
   "license": "ISC",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/MetaMask/sesify.git"
+    "url": "git+https://github.com/MetaMask/lavamoat-browserify.git"
   },
   "bugs": {
-    "url": "https://github.com/MetaMask/sesify/issues"
+    "url": "https://github.com/MetaMask/lavamoat-browserify/issues"
   },
-  "homepage": "https://github.com/MetaMask/sesify#readme"
+  "homepage": "https://github.com/MetaMask/lavamoat-browserify#readme"
 }

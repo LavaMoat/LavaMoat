@@ -20,7 +20,7 @@ test('globalRef - check default containment', async (t) => {
   isUndefined.global = typeof global === "undefined"
   isUndefined.self = typeof self === "undefined"
   isUndefined.window = typeof window === "undefined"
-    
+
   module.exports = { objCheckThis, objCheckSelf, objCheckGlobal, thisIsExports, isUndefined }
   `
 
@@ -61,7 +61,7 @@ test('globalRef - check default containment', async (t) => {
 test('globalRef - ensure endowments are accessible on globals', async (t) => {
   const moduleContent = `
   let checkSelf, checkThis, checkWindow, checkGlobal, contextHasPostMessage, selfHasPostMessage
- 
+
   contextHasPostMessage = typeof postMessage !== 'undefined'
   selfHasPostMessage = !!self.postMessage
   try { checkThis = this.postMessage === postMessage } catch (err) { checkThis = err.message }
@@ -71,7 +71,7 @@ test('globalRef - ensure endowments are accessible on globals', async (t) => {
 
   module.exports = { checkThis, checkSelf, checkWindow, checkGlobal, contextHasPostMessage, selfHasPostMessage }
   `
-  const sesifyConfig = {
+  const lavamoatConfig = {
     resources: {
       'test': {
         globals: {
@@ -82,7 +82,7 @@ test('globalRef - ensure endowments are accessible on globals', async (t) => {
   }
 
   global.postMessage = () => { throw new Error('this should never be called') }
-  const result = await testCodeInNonEntryBundle(t, moduleContent, sesifyConfig)
+  const result = await testCodeInNonEntryBundle(t, moduleContent, lavamoatConfig)
   delete global.postMessage
 
   // this is how it behaves in browser via browserify
@@ -98,7 +98,7 @@ test('globalRef - ensure endowments are accessible on globals', async (t) => {
 
 })
 
-async function testCodeInNonEntryBundle (t, code, sesifyConfig = {}) {
+async function testCodeInNonEntryBundle (t, code, lavamoatConfig = {}) {
   const files = [{
     // id must be full path
     id: './apple.js',
@@ -115,8 +115,8 @@ async function testCodeInNonEntryBundle (t, code, sesifyConfig = {}) {
     deps: {},
     source: code,
   }]
-  
-  const bundle = await createBundleFromRequiresArray(files, { sesifyConfig })
+
+  const bundle = await createBundleFromRequiresArray(files, { lavamoatConfig })
 
   global.testResult = undefined
 

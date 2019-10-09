@@ -10,7 +10,7 @@ const { wrapIntoModuleInitializer } = require('./sourcemaps')
 /*  export a Browserify plugin  */
 module.exports = plugin
 
-// these are the reccomended arguments for sesify to work well with browserify
+// these are the reccomended arguments for lavaMoat to work well with browserify
 module.exports.args = {
   // this option helps with parsing global usage
   insertGlobalVars: {
@@ -27,7 +27,7 @@ function plugin (browserify, pluginOpts) {
   function setupPlugin () {
     // helper to read config at path
     if (typeof pluginOpts.config === 'string') {
-      pluginOpts.sesifyConfig = () => {
+      pluginOpts.lavaMoatConfig = () => {
         // load latest config
         const filename = pluginOpts.config
         const configSource = fs.readFileSync(filename, 'utf8')
@@ -44,7 +44,7 @@ function plugin (browserify, pluginOpts) {
       }
     }
 
-    const customPack = createSesifyPacker(pluginOpts)
+    const customPack = createLavamoatPacker(pluginOpts)
     // replace the standard browser-pack with our custom packer
     browserify.pipeline.splice('pack', 1, customPack)
 
@@ -56,7 +56,7 @@ function plugin (browserify, pluginOpts) {
       const filename = pluginOpts.writeAutoConfig
       pluginOpts.autoConfig = function writeAutoConfig (config) {
         fs.writeFileSync(filename, config)
-        console.warn(`Sesify Autoconfig - wrote to "${filename}"`)
+        console.warn(`LavaMoat Autoconfig - wrote to "${filename}"`)
       }
     }
     // if autoconfig activated, insert hook
@@ -69,9 +69,9 @@ function plugin (browserify, pluginOpts) {
 }
 
 module.exports.generatePrelude = generatePrelude
-module.exports.createSesifyPacker = createSesifyPacker
+module.exports.createLavamoatPacker = createLavamoatPacker
 
-function createSesifyPacker (opts) {
+function createLavamoatPacker (opts) {
   const onSourcemap = opts.onSourcemap || (row => row.sourceFile)
   const defaults = {
     raw: true,
