@@ -18,7 +18,7 @@ MainTemplate
         :beforeStartup
         :startup
         :afterStartup
-    render  <------------- SES wrap here
+    :render  <------------- SES wrap here
       bootstrapSource
       :modules <------------- package + config data here
     renderWithEntry
