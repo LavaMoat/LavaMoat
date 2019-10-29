@@ -4,7 +4,12 @@ const resolvePackagePath = require('resolve-package-path')
 const pathSeperator = require('path').sep
 const { rootSlug } = require('./generateConfig')
 
-module.exports = createPackageDataStream
+module.exports = {
+  createPackageDataStream,
+  decorateWithPackageData,
+  packageDataForModule,
+  packageVersionFromPath,
+}
 
 
 function createPackageDataStream () {

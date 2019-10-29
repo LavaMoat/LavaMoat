@@ -4,7 +4,7 @@ const jsonStringify = require('json-stable-stringify')
 const generatePrelude = require('./generatePrelude')
 const createCustomPack = require('./createCustomPack')
 const { createConfigSpy } = require('./generateConfig')
-const createPackageDataStream = require('./packageData')
+const { createPackageDataStream } = require('./packageData')
 const { wrapIntoModuleInitializer } = require('./sourcemaps')
 
 /*  export a Browserify plugin  */
