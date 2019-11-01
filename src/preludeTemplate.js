@@ -114,7 +114,7 @@ __lavamoatConfig__
         moduleSource += `\n\n${moduleSourceLabel}`
       }
       const configForModule = getConfigForPackage(lavamoatConfig, packageName)
-      const isEntryModule = moduleDepPath.length < 1
+      const isEntryModule = moduleData.package === '<root>'
 
       // prepare endowments
       const endowmentsFromConfig = generateEndowmentsForConfig(configForModule)
