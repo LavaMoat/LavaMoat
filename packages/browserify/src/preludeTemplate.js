@@ -46,7 +46,7 @@ __lavamoatConfig__
 
 
   // this performs an unsafeEval in the context of the provided endowments
-  function evalWithEndowments(code, endowments) {
+  function unsafeEvalWithEndowments(code, endowments) {
     with (endowments) {
       return eval(code)
     }
@@ -64,7 +64,7 @@ __lavamoatConfig__
     const globalCache = {}
     // create SES-wrapped internalRequire
     const createInternalRequire = realm.evaluate(`(${internalRequireWrapper})`, { console })
-    const safeInternalRequire = createInternalRequire(modules, globalCache, lavamoatConfig, realm, harden, makeMagicCopy, eval, evalWithEndowments, globalRef)
+    const safeInternalRequire = createInternalRequire(modules, globalCache, lavamoatConfig, realm, harden, makeMagicCopy, unsafeEvalWithEndowments, globalRef)
     // load entryPoints
     for (let entryId of entryPoints) {
       safeInternalRequire(entryId, null)
@@ -73,7 +73,7 @@ __lavamoatConfig__
 
   // this is serialized and run in SES
   // mostly just exists to expose variables to internalRequire
-  function internalRequireWrapper (modules, globalCache, lavamoatConfig, realm, harden, makeMagicCopy, unsafeEval, unsafeEvalWithEndowments, globalRef) {
+  function internalRequireWrapper (modules, globalCache, lavamoatConfig, realm, harden, makeMagicCopy, unsafeEvalWithEndowments, globalRef) {
     const magicCopyForPackage = new Map()
     const globalStore = new Map()
     return internalRequire
