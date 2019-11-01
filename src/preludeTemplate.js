@@ -67,7 +67,7 @@ __lavamoatConfig__
     const safeInternalRequire = createInternalRequire(modules, globalCache, lavamoatConfig, realm, harden, makeMagicCopy, eval, evalWithEndowments, globalRef)
     // load entryPoints
     for (let entryId of entryPoints) {
-      safeInternalRequire(entryId, null, [])
+      safeInternalRequire(entryId, null)
     }
   }
 
@@ -78,7 +78,7 @@ __lavamoatConfig__
     const globalStore = new Map()
     return internalRequire
 
-    function internalRequire (moduleId, providedEndowments, depPath) {
+    function internalRequire (moduleId, providedEndowments) {
       const moduleData = modules[moduleId]
 
       // if we dont have it, throw an error
@@ -88,11 +88,8 @@ __lavamoatConfig__
         throw err
       }
 
-      // parse requirePath for module boundries
-      const moduleDepPath = toModuleDepPath(depPath)
       const packageName = moduleData.package
       const moduleCacheSlug = moduleId
-
 
       // check our local cache, return exports if hit
       let localCache = globalCache[moduleCacheSlug]
@@ -163,7 +160,7 @@ __lavamoatConfig__
           return fakeModuleDefinition
 
           function fakeModuleInitializer () {
-            const targetModuleExports = internalRequire(targetModuleId, providedEndowments, depPath)
+            const targetModuleExports = internalRequire(targetModuleId, providedEndowments)
             // const targetModuleExports = scopedRequire(targetModuleId)
             module.exports = targetModuleExports
           }
@@ -187,12 +184,12 @@ __lavamoatConfig__
       function scopedRequire (requestedName, providedEndowments) {
         const parentModule = module
         const parentModuleData = moduleData
-        return publicRequire({ requestedName, providedEndowments, parentModule, parentModuleData, moduleDepPath })
+        return publicRequire({ requestedName, providedEndowments, parentModule, parentModuleData })
       }
 
     }
 
-    function publicRequire ({ requestedName, providedEndowments, parentModule, parentModuleData, moduleDepPath }) {
+    function publicRequire ({ requestedName, providedEndowments, parentModule, parentModuleData }) {
       const parentPackageName = parentModuleData.package
       const parentModuleId = parentModuleData.id
       const parentModuleDeps = parentModuleData.deps
@@ -224,11 +221,8 @@ __lavamoatConfig__
       const packageName = moduleData.package
       const configForModule = getConfigForPackage(lavamoatConfig, packageName)
 
-      // update the dependency path for the child require
-      const childDepPath = moduleDepPath.slice()
-      childDepPath.push(requestedName)
       // load (or fetch cached) module
-      const moduleExports = internalRequire(moduleId, providedEndowments, childDepPath)
+      const moduleExports = internalRequire(moduleId, providedEndowments)
       // moduleExports require-time protection
       if (parentPackageName && packageName === parentPackageName) {
         // return raw if same package
@@ -287,29 +281,9 @@ __lavamoatConfig__
       }
     }
 
-    function toModuleDepPath (depPath) {
-      const moduleDepPath = []
-      depPath.forEach((requestedName) => {
-        const nameParts = requestedName.split('/')
-        let nameInitial = nameParts[0]
-        // skip relative resolution
-        if (['.','..'].includes(nameInitial)) return
-        // fix for scoped module names
-        const packageName = nameInitial.includes('@') ? `${nameParts[0]}/${nameParts[1]}` : nameInitial
-        // record module name
-        moduleDepPath.push(packageName)
-      })
-      return moduleDepPath
-    }
-
     function getConfigForPackage (config, packageName) {
       const packageConfig = (config.resources || {})[packageName] || {}
       return packageConfig
-    }
-
-    function getPackageName (path) {
-      const packageName = path.slice(-1)[0] || '<entry>'
-      return packageName
     }
 
     function generateEndowmentsForConfig (config) {
