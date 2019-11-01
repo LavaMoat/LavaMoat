@@ -1,3 +1,19 @@
+
+another list of kernel todos
+- [x] isEntry based on packageName
+- [x] remove modulePath
+- [x] unify on `<entry>` or `<root>`
+- [x] remove providedEndowments
+- [ ] breakout kernel
+- [ ] unify on `depMap` (?)
+- [ ] enforce dep in config
+- [ ] test sneaky setting of packageName by dir hacks
+- [ ] comment shit you cowboy
+- [ ] module mappings
+  - [ ] requestedName -> moduleId
+  - [ ] moduleId -> { packageName, path }
+
+
 ### summary of components
 - Config
   - auto config generation
@@ -41,21 +57,21 @@ SES
     - use compartments
     - remove sloppyGlobals
     - define getters/setters on readable/writable globals
-  - [ ] autoconfig / global detection does not support writes
+  - [x] autoconfig / global detection does not support writes
     - re-examine tofu
     - otherwise consider whats needed to detect
-  - [ ] evaluate current proposal
+  - [x] evaluate current proposal (fixed in SES)
     - await feedback
     - [x] examine for differences in using getters on endowments
-    - [ ] test in metamask
-      - [ ] Symbol.iterator, Symbol.asyncIterator, Symbol.toStringTag
-  - [ ] document and diagram scope
+    - [x] test in metamask
+      - [x] Symbol.iterator, Symbol.asyncIterator, Symbol.toStringTag
+  - [x] document and diagram scope
     - endowments
     - realm.global
     - cjs module source
   - [ ] endowment ref tree generation is kinda broken
     - [ ] how to handle deep sets?
-  - [ ] Function constructor globalThis hack (?)
+  - [x] Function constructor globalThis hack (?)
 
 - also interested in doing deeper dep analysis for dep dashboard
   - draw lines for global writes to global reads
@@ -79,12 +95,12 @@ debug bundle sesh in metamask
       need to upgrade to a proper error
   - [ ] drop console warns
   - [ ] debugging: label package + file name
-  - [ ] globals
-    - [ ] global writes
+  - [x] globals
+    - [x] global writes
       - [x] feature
-      - [ ] test
-      - [ ] autoconfig
-    - [ ] inspect globals
+      - [x] test
+      - [x] autoconfig
+    - [x] inspect globals
       - [x] should check for anything
         - [x] "Blob"
         - [x] "regeneratorRuntime"
@@ -103,9 +119,9 @@ debug bundle sesh in metamask
     - [ ] seems to break on live reload
       - doesnt seem to get new config on reload?
       - reload on config change only works once?
-- babel-thing
+- [x] babel-thing (obsolete due to fix in SES)
   - [x] handle frozen prototype writes to `next` (iterator)
-  - [ ] length of array is writable but not configurable, so defining 'length' fails (in bignumber.js)
+  - [x] length of array is writable but not configurable, so defining 'length' fails (in bignumber.js)
 
 - metamask
   - [x] "content-hash" current version contains reserved word "package"
@@ -143,7 +159,7 @@ todo
   - [x] make config like agoric prototype
   - [x] config is json
   - [x] config -> endowments in sesify prelude
-  - [x] need tests that generate config then use it 
+  - [x] need tests that generate config then use it
   - [x] cleanup old config generation
   - [x] get packageName from modules stream
   - [x] allow easy override of configuration
@@ -197,7 +213,7 @@ if autogen config
 - [x] allow some sort of global realm sharing
 - [x] set custom prelude in browserify via plugin
   - [x] works but sometimes breaks things...
-  - [x] plugin without breaking things via b.reset()?  
+  - [x] plugin without breaking things via b.reset()?
 - [x] need to not break sourcemaps
   - [x] good enough for now
   - [x] handle module names with @xyz/abc format
@@ -226,8 +242,8 @@ if autogen config
   - [x] config to dump map somewhere file
   - [?] ahhhhh nested inline sourcemaps?? not my problem??
 
-- [ ] (external) allow less restrictive sandboxing modes (prototype.toString())
-- [ ] (external) closer control over global? pass in "window" such that (window.Object === Object)
+- [x] (external) allow less restrictive sandboxing modes (prototype.toString())
+- [x] (external) closer control over global? pass in "window" such that (window.Object === Object)
 
 - [?] browserify the prelude
 
@@ -268,7 +284,7 @@ if autogen config
   - metamask sourcemaps are already a mess
   - then sesify sourcemaps get a bit worse
 
-# idea icenbox
+# idea icebox
 - [ ] permissions as higher abstractions (network, persistence, DOM)
 - [ ] permissions sorted by risk (?)
 
@@ -276,7 +292,7 @@ if autogen config
 - [x] autogen granularity
 - [x] sourcemaps
 - [x] do call with agoric/MM
-- [ ] (external) SES prototype.toString etc
+- [x] (external) SES prototype.toString etc
 - [ ] perf
 
 # make perf better
@@ -295,7 +311,7 @@ if autogen config
 ### cli testing
 eval in sesify bundle
 ```
-echo 'console.log(self.process === process)' | browserify - --detect-globals false --no-builtins -p [ './src/index.js' --sesifyConfig '{"resources":{"<entry>":{"globals":{"console":true,"process":true}}}}' ] | node
+echo 'console.log(self.process === process)' | browserify - --detect-globals false --no-builtins -p [ './src/index.js' --sesifyConfig '{"resources":{"<root>":{"globals":{"console":true,"process":true}}}}' ] | node
 ```
 eval in ses
 ```
