@@ -52,13 +52,7 @@ Modules are SES eval'd with access only to the platform APIs specificied in the 
 The result is a bundle that should work just as before, but provides some protection against supplychain attacks.
 
 
-### videos demonstrations
+### videos
 
-early demo (8 mins)
-[![early demo (8 mins)](https://img.youtube.com/vi/S2_rjQ-_Nnw/0.jpg)](https://www.youtube.com/watch?v=S2_rjQ-_Nnw)
-
-progress update with data viz on Agoric call Jul 13, 2019 (~1 hr)
-[![progress update with data viz on Agoric call](https://img.youtube.com/vi/jMWXA4JqFqI/0.jpg)](https://www.youtube.com/watch?v=jMWXA4JqFqI)
-
-ethereum devcon5 lightning talk
-slides [here](https://kumavis.github.io/talk-lavamoat-devcon5/#/), talk video coming soon...
+Introduction to LavaMoat
+[![introduction to LavaMoat](https://img.youtube.com/vi/pOTEJy_FqIA/0.jpg)](https://www.youtube.com/watch?v=pOTEJy_FqIA)
