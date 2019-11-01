@@ -1,39 +1,50 @@
-# lavamoat-webpack
+# LavaMoat - a Webpack Plugin for creating LavaMoat-protected builds
 
-this is the start of a webpack plugin for LavaMoat.
+**NOTE: under rapid develop, not ready for production use, has not been audited, etc**
 
-### internals
+`lavamoat-webpack` is a [WebPack][Webpack] plugin for generating app bundles where modules are defined in [SES][SesGithub] containers. It aims to reduce the risk of "software supplychain attacks", malicious code in the app dependency graph.
 
-webpack's runtime hooks are not documented at the time of this writing.
-below seems to be the correct way to hook lavamoat into the runtime while maintaining further extensibility.
+It attempts to reduce this risk in three ways:
+  1. Prevent modifying JavaScript's primordials (Object, String, Number, Array, ...)
+  2. Limit access to the platform API (window, document, XHR, etc) per-package
+  3. Prevent packages from corrupting other packages
 
-```
-MainTemplate
-  render()
-    renderBootstrap()
-      :bootStrap
-        :localVars
-        :require <------------- lavamoat kernel here
-        :requireExtensions
-        :beforeStartup
-        :startup
-        :afterStartup
-    :render  <------------- SES wrap here
-      bootstrapSource
-      :modules <------------- package + config data here
-    renderWithEntry
-```
+1 and 2 are provided by the SES container. Platform access can be passed in via configuration.
 
-we need to force-disable `concatenateModules` to keep modules sandboxed by package.
+3 is achieved by providing a unique mutable copy of the imported module's exports. Mutating the module's copy of the exports does not affect other modules.
 
-`requireFn` implementation is part of the lavamoat kernel, it looks something like this.
+[Webpack]: https://github.com/webpack/webpack
+[SesGithub]: https://github.com/agoric/SES
 
-```js
-function require(moduleId) {
-  // TODO: check cache first
-  const packageName = packageFromId(moduleId)
-  const config = configForPackage(packageName)
-  const moduleSrc = srcForModule(moduleId)
-  const moduleExports = lavamoatInitModule(moduleSrc, config)
-  return moduleExports
-}
+### anatomy of a lavamoat bundle
+
+
+##### generic bundle content
+
+Like the result of other js bundlers, there are a few parts in the final bundle:
+
+1. kernel / loader / runtime / trusted computing base
+This is the code that initializes and runs the bundle. For example, the implementation of the `require` method.
+
+2. manifest + module sources
+This includes the js content of the module sources, as well as some config information like module name alaises.
+
+##### lavamoat bundle content
+
+The `lavamoat-webpack` plugin replaces the "main template" of the normal build system. This template takes all the modules and their metadata and outputs the final bundle content, including the kernel and lavamoat config.
+
+LavaMoat builds differ from standard builds in that they:
+
+1. include the app-specified lavamoat configuration
+
+This tells the kernel what execution environment each module should be instantiated with, and what other modules may be brought in as dependencies
+
+2. use a custom lavamoat kernel
+
+This kernel enforces the lavamoat config. When requested, a module is initialized, usually by evaluation inside a SES container. The kernel also protects the module's exports from modification via a strategy provided in the config such as SES hardening, deep copies, or copy-on-write views.
+
+3. bundle the module sources as strings
+
+Modules are SES eval'd with access only to the platform APIs specificied in the config.
+
+The result is a bundle that should work just as before, but provides some protection against supplychain attacks.
