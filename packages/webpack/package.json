@@ -5,9 +5,10 @@
     "webpack-cli": "^3.3.9"
   },
   "scripts": {
-    "build": "webpack entry.js"
+    "test": "(cd test/project1/ && webpack entry.js && node dist/main.js)"
   },
   "dependencies": {
+    "lavamoat-browserify": "1.0.2",
     "webpack-sources": "^1.4.3"
   }
 }

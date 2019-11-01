@@ -1,4 +1,4 @@
-const LavaMoatPlugin = require('./plugin')
+const LavaMoatPlugin = require('../../src/index')
 
 module.exports = {
   mode: 'production',
