@@ -78,7 +78,7 @@ __lavamoatConfig__
     const globalStore = new Map()
     return internalRequire
 
-    function internalRequire (moduleId, providedEndowments) {
+    function internalRequire (moduleId) {
       const moduleData = modules[moduleId]
 
       // if we dont have it, throw an error
@@ -115,7 +115,7 @@ __lavamoatConfig__
 
       // prepare endowments
       const endowmentsFromConfig = generateEndowmentsForConfig(configForModule)
-      let endowments = Object.assign({}, lavamoatConfig.defaultGlobals, providedEndowments, endowmentsFromConfig)
+      let endowments = Object.assign({}, lavamoatConfig.defaultGlobals, endowmentsFromConfig)
       // special circular reference for endowments to fix globalRef in SES
       // see https://github.com/Agoric/SES/issues/123
       endowments._endowments = endowments
@@ -160,7 +160,7 @@ __lavamoatConfig__
           return fakeModuleDefinition
 
           function fakeModuleInitializer () {
-            const targetModuleExports = internalRequire(targetModuleId, providedEndowments)
+            const targetModuleExports = internalRequire(targetModuleId)
             // const targetModuleExports = scopedRequire(targetModuleId)
             module.exports = targetModuleExports
           }
@@ -181,15 +181,15 @@ __lavamoatConfig__
 
       // this is the require method passed to the module initializer
       // it has a context of the current dependency path and nested config
-      function scopedRequire (requestedName, providedEndowments) {
+      function scopedRequire (requestedName) {
         const parentModule = module
         const parentModuleData = moduleData
-        return publicRequire({ requestedName, providedEndowments, parentModule, parentModuleData })
+        return publicRequire({ requestedName, parentModule, parentModuleData })
       }
 
     }
 
-    function publicRequire ({ requestedName, providedEndowments, parentModule, parentModuleData }) {
+    function publicRequire ({ requestedName, parentModule, parentModuleData }) {
       const parentPackageName = parentModuleData.package
       const parentModuleId = parentModuleData.id
       const parentModuleDeps = parentModuleData.deps
@@ -222,7 +222,7 @@ __lavamoatConfig__
       const configForModule = getConfigForPackage(lavamoatConfig, packageName)
 
       // load (or fetch cached) module
-      const moduleExports = internalRequire(moduleId, providedEndowments)
+      const moduleExports = internalRequire(moduleId)
       // moduleExports require-time protection
       if (parentPackageName && packageName === parentPackageName) {
         // return raw if same package
