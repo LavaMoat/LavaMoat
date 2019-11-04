@@ -22,45 +22,6 @@ __sessDist__
   })
   const harden = sesRequire('@agoric/harden')
 
-  // define makeMagicCopy
-  const unsafeMakeMagicCopy = (function(){
-    const exports = {}
-    const module = { exports }
-    ;(function(){
-// START of injected code from magicCopy
-__magicCopy__
-// END of injected code from magicCopy
-    })()
-    return module.exports
-  })()
-  const makeMagicCopy = realm.evaluate(`(${unsafeMakeMagicCopy})`)
-
-  // define makeGetEndowmentsForConfig
-  const unsafeMakeGetEndowmentsForConfig = (function(){
-    const exports = {}
-    const module = { exports }
-    ;(function(){
-// START of injected code from makeGetEndowmentsForConfig
-__makeGetEndowmentsForConfig__
-// END of injected code from makeGetEndowmentsForConfig
-    })()
-    return module.exports
-  })()
-  const { getEndowmentsForConfig } = realm.evaluate(`(${unsafeMakeGetEndowmentsForConfig})`)()
-
-  // define makePrepareRealmGlobalFromConfig
-  const unsafeMakePrepareRealmGlobalFromConfig = (function(){
-    const exports = {}
-    const module = { exports }
-    ;(function(){
-// START of injected code from makePrepareRealmGlobalFromConfig
-__makePrepareRealmGlobalFromConfig__
-// END of injected code from makePrepareRealmGlobalFromConfig
-    })()
-    return module.exports
-  })()
-  const { prepareRealmGlobalFromConfig } = realm.evaluate(`(${unsafeMakePrepareRealmGlobalFromConfig})`)()
-
   const lavamoatConfig = (function(){
 // START of injected code from lavamoatConfig
 __lavamoatConfig__
@@ -95,9 +56,6 @@ __lavamoatConfig__
       lavamoatConfig,
       realm,
       harden,
-      makeMagicCopy,
-      getEndowmentsForConfig,
-      prepareRealmGlobalFromConfig,
       unsafeEvalWithEndowments,
       globalRef,
     })
@@ -115,16 +73,19 @@ __lavamoatConfig__
     lavamoatConfig,
     realm,
     harden,
-    makeMagicCopy,
-    getEndowmentsForConfig,
-    prepareRealmGlobalFromConfig,
     unsafeEvalWithEndowments,
     globalRef,
   }) {
+    // "templateRequire" calls are inlined in "generatePrelude"
+    const makeMagicCopy = templateRequire('makeMagicCopy')
+    const { getEndowmentsForConfig } = templateRequire('makeGetEndowmentsForConfig')()
+    const { prepareRealmGlobalFromConfig } = templateRequire('makePrepareRealmGlobalFromConfig')()
+
     const magicCopyForPackage = new Map()
     const globalStore = new Map()
 
     return internalRequire
+
 
     function internalRequire (moduleId) {
       const moduleData = modules[moduleId]
