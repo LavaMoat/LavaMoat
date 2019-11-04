@@ -14,6 +14,7 @@ const makePrepareRealmGlobalFromConfigSrc = fs.readFileSync(__dirname + '/makePr
 
 module.exports = generatePrelude
 
+// takes the preludeTemplate and populates it with the config + libraries
 function generatePrelude (opts = {}) {
   const lavamoatConfig = parseConfig(opts.lavamoatConfig)
 
@@ -33,6 +34,7 @@ function generatePrelude (opts = {}) {
   return output
 }
 
+// this wraps the content of a commonjs module with an IIFE that returns the module.exports
 function wrapWithReturnCjsExports (label, src) {
   return (
 `// define ${label}
