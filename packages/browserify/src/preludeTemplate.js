@@ -102,6 +102,10 @@
         endowments = Object.assign({}, endowments.window, endowments)
       }
 
+      // the default environment is "unfrozen" for the app root modules, "frozen" for dependencies
+      // this may be a bad default, but was meant to ease app development
+      // "frozen" means in a SES container
+      // "unfrozen" means via unsafeEvalWithEndowments
       const environment = configForModule.environment || (isEntryModule ? 'unfrozen' : 'frozen')
       const runInSes = environment !== 'unfrozen'
 
@@ -212,16 +216,9 @@
         case 'magicCopy':
           // do nothing, handled at import time
           break
-        // harden exports
-        case 'harden':
-          // something breaks if we dont manually harden the prototype
-          harden(Reflect.getPrototypeOf(moduleExports))
-          harden(moduleExports)
-          break
-        case 'freeze':
-          // Todo: deepFreeze/harden
-          Object.freeze(moduleExports)
-          break
+        // other export protection strategies can be added here
+        // case 'harden':
+        //   ...
 
         default:
           throw new Error(`LavaMoat - Unknown exports protection ${exportsDefense}`)
@@ -242,12 +239,10 @@
       switch (exportsDefense) {
         case 'magicCopy':
           return magicCopy(moduleExports)
-        // already hardened
-        case 'harden':
-          return magicCopy(moduleExports)
-        // already frozen
-        case 'freeze':
-          return magicCopy(moduleExports)
+        // other export protection strategies can be added here
+        // case 'harden':
+        //   ...
+
         default:
           throw new Error(`LavaMoat - Unknown exports protection ${containment}`)
       }
