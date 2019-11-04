@@ -168,7 +168,7 @@ __lavamoatConfig__
         // set the module initializer as the SES-wrapped version
         const moduleRealm = realm.global.Realm.makeCompartment()
         const globalsConfig = configForModule.globals || {}
-        prepareRealmGlobalFromConfig(moduleRealm, globalsConfig, endowments)
+        prepareRealmGlobalFromConfig(moduleRealm.global, globalsConfig, endowments)
         // execute in module realm with modified realm global
         try {
           moduleInitializer = moduleRealm.evaluate(`${moduleSource}`)
@@ -336,13 +336,13 @@ __lavamoatConfig__
       return result
     }
 
-    function prepareRealmGlobalFromConfig (moduleRealm, globalsConfig, endowments) {
+    function prepareRealmGlobalFromConfig (moduleRealmGlobal, globalsConfig, endowments) {
       // lookup top level read + write access keys
       const topLevelWriteAccessKeys = getTopLevelWriteAccessFromPackageConfig(globalsConfig)
       const topLevelReadAccessKeys = getTopLevelReadAccessFromPackageConfig(globalsConfig)
       const globalThisRefs = ['self', 'window', 'globalThis', 'global']
+
       // define accessors
-      const moduleRealmGlobal = moduleRealm.global
 
       // allow read access via globalStore or moduleRealmGlobal
       topLevelReadAccessKeys.forEach(key => {

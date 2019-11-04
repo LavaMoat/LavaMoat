@@ -1,10 +1,12 @@
+// the contents of this file will be copied into the prelude template
+// this module has been written so that it required directly or copied and added to the template with a small wrapper
 module.exports = makeGetEndowmentsForConfig
+
 // utilities for generating the endowments object based on a globalRef and a config
 
 // The config uses a period-deliminated path notation to pull out deep values from objects
 // These utilities help create an object populated with only the deep properties specified in the config
 
-// the contents of this file will be copied into the prelude template
 function makeGetEndowmentsForConfig () {
 
   return {
