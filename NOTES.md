@@ -12,6 +12,12 @@ some notes
       - uses the module config's protectExportsRequireTime
     - internalRequire:
       instantiates the module in the specified context with
+  - known / potential issues
+    - sneaky setting of packageName by dir hacks?
+    - magicCopy doesnt walk the full prototype graph
+    - perf overhead
+    - doesnt solve architectural weaknesses
+    - doesnt enforce disabling scripts (yet!)
 
 LA audit kickoff todos
 - [x] clarify requireFns
@@ -28,7 +34,7 @@ another list of kernel todos
 - [x] remove providedEndowments
 - [x] enforce deps whitelist in config
 - [ ] unit test kernel components
-- [ ] breakout kernel
+- [ ] breakout kernel / kernel building utils
 - [ ] unify on `depMap` (?)
 - [ ] unify on `kernel`/`prelude`/`runtime`
 - [ ] test sneaky setting of packageName by dir hacks
