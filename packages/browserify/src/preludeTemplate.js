@@ -33,7 +33,6 @@ __magicCopy__
     })()
     return module.exports
   })()
-
   const makeMagicCopy = realm.evaluate(`(${unsafeMakeMagicCopy})`)
 
   // define makeGetEndowmentsForConfig
@@ -47,8 +46,20 @@ __makeGetEndowmentsForConfig__
     })()
     return module.exports
   })()
-
   const { getEndowmentsForConfig } = realm.evaluate(`(${unsafeMakeGetEndowmentsForConfig})`)()
+
+  // define makePrepareRealmGlobalFromConfig
+  const unsafeMakePrepareRealmGlobalFromConfig = (function(){
+    const exports = {}
+    const module = { exports }
+    ;(function(){
+// START of injected code from makePrepareRealmGlobalFromConfig
+__makePrepareRealmGlobalFromConfig__
+// END of injected code from makePrepareRealmGlobalFromConfig
+    })()
+    return module.exports
+  })()
+  const { prepareRealmGlobalFromConfig } = realm.evaluate(`(${unsafeMakePrepareRealmGlobalFromConfig})`)()
 
   const lavamoatConfig = (function(){
 // START of injected code from lavamoatConfig
@@ -86,8 +97,9 @@ __lavamoatConfig__
       harden,
       makeMagicCopy,
       getEndowmentsForConfig,
+      prepareRealmGlobalFromConfig,
       unsafeEvalWithEndowments,
-      globalRef
+      globalRef,
     })
     // load entryPoints
     for (let entryId of entryPoints) {
@@ -105,6 +117,7 @@ __lavamoatConfig__
     harden,
     makeMagicCopy,
     getEndowmentsForConfig,
+    prepareRealmGlobalFromConfig,
     unsafeEvalWithEndowments,
     globalRef,
   }) {
@@ -168,7 +181,7 @@ __lavamoatConfig__
         // set the module initializer as the SES-wrapped version
         const moduleRealm = realm.global.Realm.makeCompartment()
         const globalsConfig = configForModule.globals || {}
-        prepareRealmGlobalFromConfig(moduleRealm.global, globalsConfig, endowments)
+        prepareRealmGlobalFromConfig(moduleRealm.global, globalsConfig, endowments, globalStore)
         // execute in module realm with modified realm global
         try {
           moduleInitializer = moduleRealm.evaluate(`${moduleSource}`)
@@ -319,81 +332,6 @@ __lavamoatConfig__
     function getConfigForPackage (config, packageName) {
       const packageConfig = (config.resources || {})[packageName] || {}
       return packageConfig
-    }
-
-    function getTopLevelReadAccessFromPackageConfig (globalsConfig) {
-      const result = Object.entries(globalsConfig)
-        .filter(([key, value]) => value === 'read' || value === true || (value === 'write' && key.split('.').length > 1))
-        .map(([key]) => key.split('.')[0])
-      // return unique array
-      return Array.from(new Set(result))
-    }
-
-    function getTopLevelWriteAccessFromPackageConfig (globalsConfig) {
-      const result = Object.entries(globalsConfig)
-        .filter(([key, value]) => value === 'write' && key.split('.').length === 1)
-        .map(([key]) => key)
-      return result
-    }
-
-    function prepareRealmGlobalFromConfig (moduleRealmGlobal, globalsConfig, endowments) {
-      // lookup top level read + write access keys
-      const topLevelWriteAccessKeys = getTopLevelWriteAccessFromPackageConfig(globalsConfig)
-      const topLevelReadAccessKeys = getTopLevelReadAccessFromPackageConfig(globalsConfig)
-      const globalThisRefs = ['self', 'window', 'globalThis', 'global']
-
-      // define accessors
-
-      // allow read access via globalStore or moduleRealmGlobal
-      topLevelReadAccessKeys.forEach(key => {
-        Object.defineProperty(moduleRealmGlobal, key, {
-          get () {
-            if (globalStore.has(key)) {
-              return globalStore.get(key)
-            } else {
-              return endowments[key]
-            }
-          },
-          set () {
-            console.warn(`LavaMoat: ignoring write attempt to read-access global "${key}"`)
-          }
-        })
-      })
-
-      // allow write access to globalStore
-      // read access via globalStore or moduleRealmGlobal
-      topLevelWriteAccessKeys.forEach(key => {
-        Object.defineProperty(moduleRealmGlobal, key, {
-          get () {
-            if (globalStore.has(key)) {
-              return globalStore.get(key)
-            } else {
-              return endowments[key]
-            }
-          },
-          set (value) {
-            globalStore.set(key, value)
-          },
-          enumerable: true,
-          configurable: true,
-        })
-      })
-
-      // set circular globalRefs
-      globalThisRefs.forEach(key => {
-        // if globalRef is actually an endowment, ignore
-        if (topLevelReadAccessKeys.includes(key)) return
-        if (topLevelWriteAccessKeys.includes(key)) return
-        // set circular ref to global
-        moduleRealmGlobal[key] = moduleRealmGlobal
-      })
-      // support certain globalThis getters
-      const origFunction = moduleRealmGlobal.Function
-      const newFunction = (src) => {
-        return origFunction(src).bind(moduleRealmGlobal)
-      }
-      Object.defineProperties(newFunction, Object.getOwnPropertyDescriptors(origFunction))
-      moduleRealmGlobal.Function = newFunction
     }
 
     //# sourceURL=internalRequire
