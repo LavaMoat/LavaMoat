@@ -24,6 +24,8 @@
     }
   }
 
+  // this function is returned from the top level closure
+  // it is called by the modules collection that will be appended to this file
   function loadBundle (modules, _, entryPoints) {
     const globalRef = (typeof self !== 'undefined') ? self : global
     // create SES-wrapped internalRequire
