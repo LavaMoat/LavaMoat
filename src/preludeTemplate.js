@@ -2,16 +2,8 @@
 ;(function() {
 
   // define SES
-  const SES = (function(){
-    const exports = {}
-    const module = { exports }
-    ;(function(){
-// START of injected code from sessDist
-__sessDist__
-// END of injected code from sessDist
-    })()
-    return module.exports
-  })()
+  // "templateRequire" calls are inlined in "generatePrelude"
+  const SES = templateRequire('ses')
 
   const realm = SES.makeSESRootRealm({
     mathRandomMode: 'allow',
