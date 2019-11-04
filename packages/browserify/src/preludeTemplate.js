@@ -39,8 +39,8 @@ __lavamoatConfig__
     }
     const globalRef = (typeof self !== 'undefined') ? self : global
     // create SES-wrapped internalRequire
-    const createInternalRequire = realm.evaluate(`(${internalRequireWrapper})`, { console })
-    const safeInternalRequire = createInternalRequire({
+    const makeInternalRequire = realm.evaluate(`(${unsafeMakeInternalRequire})`, { console })
+    const internalRequire = makeInternalRequire({
       modules,
       lavamoatConfig,
       realm,
@@ -48,15 +48,15 @@ __lavamoatConfig__
       unsafeEvalWithEndowments,
       globalRef,
     })
-    // load entryPoints
+    // run each of entryPoints (ignores any exports of entryPoints)
     for (let entryId of entryPoints) {
-      safeInternalRequire(entryId, null)
+      internalRequire(entryId)
     }
   }
 
   // this is serialized and run in SES
   // mostly just exists to expose variables to internalRequire
-  function internalRequireWrapper ({
+  function unsafeMakeInternalRequire ({
     modules,
     lavamoatConfig,
     realm,
@@ -75,6 +75,10 @@ __lavamoatConfig__
     return internalRequire
 
 
+    // this function instantiaties a module from a moduleId.
+    // 1. loads the config for the module
+    // 2. instantiates in the config specified environment
+    // 3. calls config specified strategy for "protectExportsInstantiationTime"
     function internalRequire (moduleId) {
       const moduleData = modules[moduleId]
 
@@ -133,7 +137,7 @@ __lavamoatConfig__
         throw new Error('LavaMoat - moduleInitializer is not defined correctly')
       }
 
-      // this "modules" interface is exposed to the moduleInitializer https://github.com/browserify/browser-pack/blob/master/prelude.js#L38
+      // this "modules" interface is exposed to the browserify moduleInitializer https://github.com/browserify/browser-pack/blob/master/prelude.js#L38
       // browserify's browser-resolve uses arguments[4] to do direct module initializations
       // this proxy shims this behavior
       // TODO: would be better to just fix this by removing the indirection
@@ -143,8 +147,7 @@ __lavamoatConfig__
           return fakeModuleDefinition
 
           function fakeModuleInitializer () {
-            const targetModuleExports = internalRequire(targetModuleId)
-            // const targetModuleExports = scopedRequire(targetModuleId)
+            const targetModuleExports = scopedRequire(targetModuleId)
             module.exports = targetModuleExports
           }
         }
@@ -152,7 +155,7 @@ __lavamoatConfig__
 
       // initialize the module with the correct context
       try {
-        moduleInitializer.call(module.exports, scopedRequire, module, module.exports, null, modulesProxy)
+        moduleInitializer.call(module.exports, requireRelativeWithContext, module, module.exports, null, modulesProxy)
       } catch (err) {
         console.warn(`LavaMoat - Error instantiating module "${moduleId}" from package "${packageName}"`)
         throw err
@@ -162,24 +165,26 @@ __lavamoatConfig__
       return protectedExports
 
 
-      // this is the require method passed to the module initializer
-      // it has a context of the current dependency path and nested config
-      function scopedRequire (requestedName) {
-        const parentModule = module
+      // this is passed to the module initializer
+      // it adds the context of the parent module
+      function requireRelativeWithContext (requestedName) {
+        const parentModuleExports = module.exports
         const parentModuleData = moduleData
-        return publicRequire({ requestedName, parentModule, parentModuleData })
+        return requireRelative({ requestedName, parentModuleExports, parentModuleData })
       }
 
     }
 
-    function publicRequire ({ requestedName, parentModule, parentModuleData }) {
-      const parentPackageName = parentModuleData.package
+    // this resolves a module given a requestedName (eg relative path to parent) and a parentModule context
+    // the exports are processed via "protectExportsRequireTime" per the module's configuration
+    function requireRelative ({ requestedName, parentModuleExports, parentModuleData }) {
       const parentModuleId = parentModuleData.id
-      const parentModuleDeps = parentModuleData.deps
-      const moduleId = parentModuleDeps[requestedName] || requestedName
+      const parentModulePackageName = parentModuleData.package
+      const parentModuleDepsMap = parentModuleData.deps
+      const moduleId = parentModuleDepsMap[requestedName] || requestedName
 
       if (!(requestedName in parentModuleData.deps)) {
-        console.warn(`missing dep: ${parentPackageName} requested ${requestedName}`)
+        console.warn(`missing dep: ${parentModulePackageName} requested ${requestedName}`)
       }
 
       // recursive requires dont hit cache so it inf loops, so we shortcircuit
@@ -188,31 +193,24 @@ __lavamoatConfig__
         if (['timers', 'buffer'].includes(requestedName) === false) {
           throw new Error(`LavaMoat - recursive require detected: "${requestedName}"`)
         }
-        return parentModule.exports
+        return parentModuleExports
       }
-      // look up config for module
-      const moduleData = modules[moduleId]
-
-      // if we dont have it, throw an error
-      // TODO: dedupe this with internalRequire
-      if (!moduleData) {
-        const err = new Error('Cannot find module \'' + moduleId + '\'')
-        err.code = 'MODULE_NOT_FOUND'
-        throw err
-      }
-
-      const packageName = moduleData.package
-      const configForModule = getConfigForPackage(lavamoatConfig, packageName)
 
       // load module
       const moduleExports = internalRequire(moduleId)
+
+      // look up config for module
+      const moduleData = modules[moduleId]
+      const packageName = moduleData.package
+      const configForModule = getConfigForPackage(lavamoatConfig, packageName)
+
       // moduleExports require-time protection
-      if (parentPackageName && packageName === parentPackageName) {
+      if (parentModulePackageName && packageName === parentModulePackageName) {
         // return raw if same package
         return moduleExports
       } else {
         // return exports protected as specified in config
-        return protectExportsRequireTime(parentPackageName, moduleExports, configForModule)
+        return protectExportsRequireTime(parentModulePackageName, moduleExports, configForModule)
       }
     }
 
