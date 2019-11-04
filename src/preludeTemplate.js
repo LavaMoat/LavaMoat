@@ -38,13 +38,10 @@ __lavamoatConfig__
       return
     }
     const globalRef = (typeof self !== 'undefined') ? self : global
-    // setup our global module cache
-    const globalCache = {}
     // create SES-wrapped internalRequire
     const createInternalRequire = realm.evaluate(`(${internalRequireWrapper})`, { console })
     const safeInternalRequire = createInternalRequire({
       modules,
-      globalCache,
       lavamoatConfig,
       realm,
       harden,
@@ -61,7 +58,6 @@ __lavamoatConfig__
   // mostly just exists to expose variables to internalRequire
   function internalRequireWrapper ({
     modules,
-    globalCache,
     lavamoatConfig,
     realm,
     harden,
@@ -90,22 +86,8 @@ __lavamoatConfig__
       }
 
       const packageName = moduleData.package
-      const moduleCacheSlug = moduleId
-
-      // check our local cache, return exports if hit
-      let localCache = globalCache[moduleCacheSlug]
-      if (!localCache) {
-        localCache = {}
-        globalCache[moduleCacheSlug] = localCache
-      }
-      if (localCache[moduleId]) {
-        const module = localCache[moduleId]
-        return module.exports
-      }
-
       // prepare the module to be initialized
       const module = { exports: {} }
-      localCache[moduleId] = module
       let moduleSource = `(${moduleData.source})`
       if (moduleData.file) {
         const moduleSourceLabel = `// moduleSource: ${moduleData.file}`
@@ -222,7 +204,7 @@ __lavamoatConfig__
       const packageName = moduleData.package
       const configForModule = getConfigForPackage(lavamoatConfig, packageName)
 
-      // load (or fetch cached) module
+      // load module
       const moduleExports = internalRequire(moduleId)
       // moduleExports require-time protection
       if (parentPackageName && packageName === parentPackageName) {
