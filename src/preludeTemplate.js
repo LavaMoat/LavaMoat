@@ -36,6 +36,20 @@ __magicCopy__
 
   const makeMagicCopy = realm.evaluate(`(${unsafeMakeMagicCopy})`)
 
+  // define makeGetEndowmentsForConfig
+  const unsafeMakeGetEndowmentsForConfig = (function(){
+    const exports = {}
+    const module = { exports }
+    ;(function(){
+// START of injected code from makeGetEndowmentsForConfig
+__makeGetEndowmentsForConfig__
+// END of injected code from makeGetEndowmentsForConfig
+    })()
+    return module.exports
+  })()
+
+  const { getEndowmentsForConfig } = realm.evaluate(`(${unsafeMakeGetEndowmentsForConfig})`)()
+
   const lavamoatConfig = (function(){
 // START of injected code from lavamoatConfig
 __lavamoatConfig__
@@ -64,7 +78,17 @@ __lavamoatConfig__
     const globalCache = {}
     // create SES-wrapped internalRequire
     const createInternalRequire = realm.evaluate(`(${internalRequireWrapper})`, { console })
-    const safeInternalRequire = createInternalRequire(modules, globalCache, lavamoatConfig, realm, harden, makeMagicCopy, unsafeEvalWithEndowments, globalRef)
+    const safeInternalRequire = createInternalRequire({
+      modules,
+      globalCache,
+      lavamoatConfig,
+      realm,
+      harden,
+      makeMagicCopy,
+      getEndowmentsForConfig,
+      unsafeEvalWithEndowments,
+      globalRef
+    })
     // load entryPoints
     for (let entryId of entryPoints) {
       safeInternalRequire(entryId, null)
@@ -73,9 +97,20 @@ __lavamoatConfig__
 
   // this is serialized and run in SES
   // mostly just exists to expose variables to internalRequire
-  function internalRequireWrapper (modules, globalCache, lavamoatConfig, realm, harden, makeMagicCopy, unsafeEvalWithEndowments, globalRef) {
+  function internalRequireWrapper ({
+    modules,
+    globalCache,
+    lavamoatConfig,
+    realm,
+    harden,
+    makeMagicCopy,
+    getEndowmentsForConfig,
+    unsafeEvalWithEndowments,
+    globalRef,
+  }) {
     const magicCopyForPackage = new Map()
     const globalStore = new Map()
+
     return internalRequire
 
     function internalRequire (moduleId) {
@@ -114,7 +149,7 @@ __lavamoatConfig__
       const isEntryModule = moduleData.package === '<root>'
 
       // prepare endowments
-      const endowmentsFromConfig = generateEndowmentsForConfig(globalRef, configForModule)
+      const endowmentsFromConfig = getEndowmentsForConfig(globalRef, configForModule)
       let endowments = Object.assign({}, lavamoatConfig.defaultGlobals, endowmentsFromConfig)
       // special circular reference for endowments to fix globalRef in SES
       // see https://github.com/Agoric/SES/issues/123
@@ -284,81 +319,6 @@ __lavamoatConfig__
     function getConfigForPackage (config, packageName) {
       const packageConfig = (config.resources || {})[packageName] || {}
       return packageConfig
-    }
-
-    function generateEndowmentsForConfig (globalRef, config) {
-      if (!config.globals) return {}
-      const endowments = {}
-      Object.entries(config.globals).forEach(([globalPath, configValue]) => {
-        // write access handled elsewhere
-        if (configValue === 'write') return
-        if (configValue !== true) {
-          throw new Error('LavaMoat - unknown value for config globals')
-        }
-        const value = deepGetAndBind(globalRef, globalPath)
-        if (value === undefined) return
-        // TODO: actually match prop descriptor
-        const propDesc = {
-          value,
-          configurable: true,
-          writable: true,
-          enumerable: true,
-        }
-        deepDefine(endowments, globalPath, propDesc)
-      })
-      return endowments
-    }
-
-    function deepGetAndBind(globalRef, pathName) {
-      const pathParts = pathName.split('.')
-      const parentPath = pathParts.slice(0,-1).join('.')
-      const childKey = pathParts[pathParts.length-1]
-      const parent = parentPath ? deepGet(globalRef, parentPath) : globalRef
-      if (!parent) return parent
-      const value = parent[childKey]
-      if (typeof value === 'function') {
-        // bind and copy
-        const newValue = value.bind(parent)
-        Object.defineProperties(newValue, Object.getOwnPropertyDescriptors(value))
-        return newValue
-      } else {
-        // return as is
-        return value
-      }
-    }
-
-    function deepGet (obj, pathName) {
-      let result = obj
-      pathName.split('.').forEach(pathPart => {
-        if (result === null) {
-          result = undefined
-          return
-        }
-        if (result === undefined) {
-          return
-        }
-        result = result[pathPart]
-      })
-      return result
-    }
-
-    function deepDefine (obj, pathName, propDesc) {
-      let parent = obj
-      const pathParts = pathName.split('.')
-      const lastPathPart = pathParts[pathParts.length-1]
-      const allButLastPart = pathParts.slice(0,-1)
-      allButLastPart.forEach(pathPart => {
-        const prevParent = parent
-        parent = parent[pathPart]
-        if (parent === null) {
-          throw new Error('DeepSet - unable to set "'+pathName+'" on null')
-        }
-        if (parent === undefined) {
-          parent = {}
-          prevParent[pathPart] = parent
-        }
-      })
-      Object.defineProperty(parent, lastPathPart, propDesc)
     }
 
     function getTopLevelReadAccessFromPackageConfig (globalsConfig) {
