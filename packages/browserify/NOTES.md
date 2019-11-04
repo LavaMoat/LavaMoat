@@ -1,17 +1,41 @@
+some notes
+  - bundler plugins
+    - two phases: generate config, generate build
+  - lavamoat internals
+    - requireRelativeWithContext
+      - passed directly to moduleInitializer (untrusted code)
+      - calls requireRelative with parentModule context added
+    - requireRelative
+      - translates the "requestedName" (eg relative path) to a moduleId (webpack doesnt need this, it rewrites the source to use the moduleId directly)
+      - handles weird browserify-specific recursive lookups (eg buffer, timers)
+      - calls internalRequire
+      - uses the module config's protectExportsRequireTime
+    - internalRequire:
+      instantiates the module in the specified context with
+
+LA audit kickoff todos
+- [x] clarify requireFns
+- [x] audit cache, looks broken
+- [x] transfer `sesify-tofu`
+- [x] move as much code into ses as possible
+- [x] remove alternate export protection strategies (underdeveloped)
+- [x] comment shit you cowboy
 
 another list of kernel todos
 - [x] isEntry based on packageName
 - [x] remove modulePath
 - [x] unify on `<entry>` or `<root>`
 - [x] remove providedEndowments
+- [x] enforce deps whitelist in config
+- [ ] unit test kernel components
 - [ ] breakout kernel
 - [ ] unify on `depMap` (?)
-- [ ] enforce dep in config
+- [ ] unify on `kernel`/`prelude`/`runtime`
 - [ ] test sneaky setting of packageName by dir hacks
-- [ ] comment shit you cowboy
 - [ ] module mappings
   - [ ] requestedName -> moduleId
   - [ ] moduleId -> { packageName, path }
+- [ ] idea: maybe encode dep graph (and cache) as weakmap pointers so they disappear as `require` ref is dropped
 
 
 ### summary of components
