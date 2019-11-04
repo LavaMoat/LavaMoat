@@ -11,8 +11,16 @@ const {
 
 test('basic - bundle works', async (t) => {
   const path = __dirname + '/fixtures/basic-deps.json'
-  const lavamoatConfig = {}
-  const result = await createBundleFromRequiresArrayPath(path, lavamoatConfig)
+  const lavamoatConfig = {
+    "resources": {
+      "<root>": {
+        packages: {
+          "2": true,
+        }
+      },
+    }
+  }
+  const result = await createBundleFromRequiresArrayPath(path, { lavamoatConfig })
   try {
     eval(result)
     t.equal(global.testResult, 555)
