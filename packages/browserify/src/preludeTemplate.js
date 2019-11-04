@@ -14,12 +14,6 @@
   })
   const harden = sesRequire('@agoric/harden')
 
-  const lavamoatConfig = (function(){
-// START of injected code from lavamoatConfig
-__lavamoatConfig__
-// END of injected code from lavamoatConfig
-  })()
-
   return loadBundle
 
 
@@ -42,7 +36,6 @@ __lavamoatConfig__
     const makeInternalRequire = realm.evaluate(`(${unsafeMakeInternalRequire})`, { console })
     const internalRequire = makeInternalRequire({
       modules,
-      lavamoatConfig,
       realm,
       harden,
       unsafeEvalWithEndowments,
@@ -58,7 +51,6 @@ __lavamoatConfig__
   // mostly just exists to expose variables to internalRequire
   function unsafeMakeInternalRequire ({
     modules,
-    lavamoatConfig,
     realm,
     harden,
     unsafeEvalWithEndowments,
@@ -68,6 +60,11 @@ __lavamoatConfig__
     const makeMagicCopy = templateRequire('makeMagicCopy')
     const { getEndowmentsForConfig } = templateRequire('makeGetEndowmentsForConfig')()
     const { prepareRealmGlobalFromConfig } = templateRequire('makePrepareRealmGlobalFromConfig')()
+    const lavamoatConfig = (function(){
+  // START of injected code from lavamoatConfig
+  __lavamoatConfig__
+  // END of injected code from lavamoatConfig
+    })()
 
     const magicCopyForPackage = new Map()
     const globalStore = new Map()
