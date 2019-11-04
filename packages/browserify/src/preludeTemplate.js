@@ -25,12 +25,6 @@
   }
 
   function loadBundle (modules, _, entryPoints) {
-    // debug - log module content instead of execution
-    if (typeof process !== 'undefined' && process.env.MODULE_DUMP) {
-      const moduleData = modules[process.env.MODULE_DUMP]
-      console.log(JSON.stringify(moduleData))
-      return
-    }
     const globalRef = (typeof self !== 'undefined') ? self : global
     // create SES-wrapped internalRequire
     const makeInternalRequire = realm.evaluate(`(${unsafeMakeInternalRequire})`, { console })
