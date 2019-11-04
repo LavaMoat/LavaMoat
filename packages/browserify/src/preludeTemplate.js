@@ -114,7 +114,7 @@ __lavamoatConfig__
       const isEntryModule = moduleData.package === '<root>'
 
       // prepare endowments
-      const endowmentsFromConfig = generateEndowmentsForConfig(configForModule)
+      const endowmentsFromConfig = generateEndowmentsForConfig(globalRef, configForModule)
       let endowments = Object.assign({}, lavamoatConfig.defaultGlobals, endowmentsFromConfig)
       // special circular reference for endowments to fix globalRef in SES
       // see https://github.com/Agoric/SES/issues/123
@@ -286,7 +286,7 @@ __lavamoatConfig__
       return packageConfig
     }
 
-    function generateEndowmentsForConfig (config) {
+    function generateEndowmentsForConfig (globalRef, config) {
       if (!config.globals) return {}
       const endowments = {}
       Object.entries(config.globals).forEach(([globalPath, configValue]) => {
@@ -309,7 +309,7 @@ __lavamoatConfig__
       return endowments
     }
 
-    function deepGetAndBind(obj, pathName) {
+    function deepGetAndBind(globalRef, pathName) {
       const pathParts = pathName.split('.')
       const parentPath = pathParts.slice(0,-1).join('.')
       const childKey = pathParts[pathParts.length-1]
