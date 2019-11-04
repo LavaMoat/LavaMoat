@@ -94,9 +94,6 @@
       // prepare endowments
       const endowmentsFromConfig = getEndowmentsForConfig(globalRef, configForModule)
       let endowments = Object.assign({}, lavamoatConfig.defaultGlobals, endowmentsFromConfig)
-      // special circular reference for endowments to fix globalRef in SES
-      // see https://github.com/Agoric/SES/issues/123
-      endowments._endowments = endowments
       // special case for exposing window
       if (endowments.window) {
         endowments = Object.assign({}, endowments.window, endowments)
