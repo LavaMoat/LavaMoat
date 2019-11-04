@@ -7,7 +7,7 @@
 const fs = require('fs')
 const jsonStringify = require('json-stable-stringify')
 const preludeTemplate = fs.readFileSync(__dirname + '/preludeTemplate.js', 'utf8')
-const sessDist = fs.readFileSync(__dirname + '/../lib/ses.umd.js', 'utf8')
+const sesSrc = fs.readFileSync(__dirname + '/../lib/ses.umd.js', 'utf8')
 const makeMagicCopySrc = fs.readFileSync(__dirname + '/magicCopy.js', 'utf8')
 const makeGetEndowmentsForConfigSrc = fs.readFileSync(__dirname + '/makeGetEndowmentsForConfig.js', 'utf8')
 const makePrepareRealmGlobalFromConfigSrc = fs.readFileSync(__dirname + '/makePrepareRealmGlobalFromConfig.js', 'utf8')
@@ -18,9 +18,9 @@ function generatePrelude (opts = {}) {
   const lavamoatConfig = parseConfig(opts.lavamoatConfig)
 
   let output = preludeTemplate
-  output = output.replace('__sessDist__', sessDist)
   output = output.replace('__lavamoatConfig__', lavamoatConfig)
 
+  replaceTemplateRequire('ses', sesSrc)
   replaceTemplateRequire('makeMagicCopy', makeMagicCopySrc)
   replaceTemplateRequire('makeGetEndowmentsForConfig', makeGetEndowmentsForConfigSrc)
   replaceTemplateRequire('makePrepareRealmGlobalFromConfig', makePrepareRealmGlobalFromConfigSrc)
