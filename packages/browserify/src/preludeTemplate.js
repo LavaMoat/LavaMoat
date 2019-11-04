@@ -80,8 +80,8 @@
         throw err
       }
 
-      const packageName = moduleData.package
       // prepare the module to be initialized
+      const packageName = moduleData.package
       const module = { exports: {} }
       let moduleSource = `(${moduleData.source})`
       if (moduleData.file) {
@@ -209,6 +209,7 @@
       }
     }
 
+    // this is a hook for protecting exports immediately after instantiation (e.g. deep freeze)
     function protectExportsInstantiationTime (moduleExports, config) {
       // moduleExports instantion-time protection
       const exportsDefense = config.exportsDefense || 'magicCopy'
@@ -228,6 +229,7 @@
       return moduleExports
     }
 
+    // this is a hook for protecting exports right before importing (e.g. deep clone)
     function protectExportsRequireTime (parentPackageName, moduleExports, config) {
       const exportsDefense = config.exportsDefense || 'magicCopy'
       // prepare magicCopy per package
@@ -248,6 +250,8 @@
       }
     }
 
+    // this gets the lavaMoat config for a module by packageName
+    // if there were global defaults (e.g. everything gets "console") they could be applied here
     function getConfigForPackage (config, packageName) {
       const packageConfig = (config.resources || {})[packageName] || {}
       return packageConfig
