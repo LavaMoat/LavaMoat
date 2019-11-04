@@ -19,8 +19,16 @@ test('attack - prevent primitive modification', async (t) => {
     }
   ]
 
-  const config = {}
-  const result = await createBundleFromRequiresArray(depsArray, config)
+  const config = {
+    "resources": {
+      "<root>": {
+        "packages": {
+          "2": true,
+        }
+      }
+    }
+  }
+  const result = await createBundleFromRequiresArray(depsArray, { lavamoatConfig: config })
 
   eval(result)
   t.equal(global.testResult, false)
@@ -43,8 +51,16 @@ test('attack - limit platform api', async (t) => {
     }
   ]
 
-  const config = {}
-  const result = await createBundleFromRequiresArray(depsArray, config)
+  const config = {
+    "resources": {
+      "<root>": {
+        "packages": {
+          "2": true,
+        }
+      }
+    }
+  }
+  const result = await createBundleFromRequiresArray(depsArray, { lavamoatConfig: config })
 
   eval(result)
   t.equal(global.testResult, false)
@@ -120,8 +136,22 @@ async function testEntryAttackerVictim (t, { defineAttacker, defineVictim }) {
     }
   ]
 
-  const config = {}
-  const result = await createBundleFromRequiresArray(depsArray, config)
+  const config = {
+    "resources": {
+      "<root>": {
+        "packages": {
+          "attacker": true,
+          "victim": true,
+        }
+      },
+      "attacker": {
+        "packages": {
+          "victim": true,
+        }
+      },
+    }
+  }
+  const result = await createBundleFromRequiresArray(depsArray, { lavamoatConfig: config })
 
   eval(result)
   t.equal(global.testResult, false)

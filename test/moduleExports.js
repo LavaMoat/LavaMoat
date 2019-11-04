@@ -31,7 +31,17 @@ test('moduleExports - decorate an import - object', async (t) => {
     source: `module.exports = {}`,
   }]
 
-  const result = await evalModulesArray(t, { files })
+  const config = {
+    "resources": {
+      "<root>": {
+        "packages": {
+          "test": true,
+        }
+      }
+    }
+  }
+
+  const result = await evalModulesArray(t, { files, pluginOpts: { lavamoatConfig: config } })
   t.equal(result, 42)
 })
 
@@ -68,7 +78,17 @@ test('moduleExports - decorate an import - function', async (t) => {
     source: `module.exports = () => 100`,
   }]
 
-  const result = await evalModulesArray(t, { files })
+  const config = {
+    "resources": {
+      "<root>": {
+        "packages": {
+          "test": true,
+        }
+      }
+    }
+  }
+
+  const result = await evalModulesArray(t, { files, pluginOpts: { lavamoatConfig: config } })
   t.deepEqual(result, { call: 100, xyz: 42 })
 })
 
@@ -115,7 +135,17 @@ test('moduleExports - decorate an import - function class', async (t) => {
     `,
   }]
 
-  const result = await evalModulesArray(t, { files })
+  const config = {
+    "resources": {
+      "<root>": {
+        "packages": {
+          "test": true,
+        }
+      }
+    }
+  }
+
+  const result = await evalModulesArray(t, { files, pluginOpts: { lavamoatConfig: config } })
   t.deepEqual(result, { abc: 123, jkl: 'yes', xyz: 42 })
 })
 
@@ -130,7 +160,7 @@ test('moduleExports - decorate an import - class syntax', async (t) => {
     source: `
       const ModernClass = require('test')
       const instance = new ModernClass()
-      
+
       global.testResult = {
         abc: instance.abc,
         jkl: ModernClass.jkl,
@@ -166,7 +196,17 @@ test('moduleExports - decorate an import - class syntax', async (t) => {
     `,
   }]
 
-  const result = await evalModulesArray(t, { files })
+  const config = {
+    "resources": {
+      "<root>": {
+        "packages": {
+          "test": true,
+        }
+      }
+    }
+  }
+
+  const result = await evalModulesArray(t, { files, pluginOpts: { lavamoatConfig: config } })
   t.deepEqual(result, {
     abc: 123,
     jkl: 101,
@@ -186,7 +226,7 @@ test('moduleExports - decorate an import - class syntax subclass', async (t) => 
     source: `
       const NewClass = require('test')
       const instance = new NewClass()
-      
+
       global.testResult = {
         abc: instance.abc,
         jkl: NewClass.jkl,
@@ -202,7 +242,7 @@ test('moduleExports - decorate an import - class syntax subclass', async (t) => 
     },
     source: `
       const BaseClass = require('./alt')
-      
+
       class NewClass extends BaseClass {
         constructor () {
           super()
@@ -228,7 +268,17 @@ test('moduleExports - decorate an import - class syntax subclass', async (t) => 
     `,
   }]
 
-  const result = await evalModulesArray(t, { files })
+  const config = {
+    "resources": {
+      "<root>": {
+        "packages": {
+          "test": true,
+        }
+      }
+    }
+  }
+
+  const result = await evalModulesArray(t, { files, pluginOpts: { lavamoatConfig: config } })
   t.deepEqual(result, {
     abc: 456,
     jkl: 101,
@@ -259,7 +309,17 @@ test('moduleExports - exported array passes Array.isArray', async (t) => {
     `,
   }]
 
-  const result = await evalModulesArray(t, { files })
+  const config = {
+    "resources": {
+      "<root>": {
+        "packages": {
+          "test": true,
+        }
+      }
+    }
+  }
+
+  const result = await evalModulesArray(t, { files, pluginOpts: { lavamoatConfig: config } })
   t.deepEqual(result, true)
 })
 

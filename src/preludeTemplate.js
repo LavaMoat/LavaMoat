@@ -111,7 +111,7 @@
       if (runInSes) {
         // set the module initializer as the SES-wrapped version
         const moduleRealm = realm.global.Realm.makeCompartment()
-        const globalsConfig = configForModule.globals || {}
+        const globalsConfig = configForModule.globals
         prepareRealmGlobalFromConfig(moduleRealm.global, globalsConfig, endowments, globalStore)
         // execute in module realm with modified realm global
         try {
@@ -129,17 +129,21 @@
         throw new Error('LavaMoat - moduleInitializer is not defined correctly')
       }
 
-      // this "modules" interface is exposed to the browserify moduleInitializer https://github.com/browserify/browser-pack/blob/master/prelude.js#L38
-      // browserify's browser-resolve uses arguments[4] to do direct module initializations
+      // browserify goop:
+      // this "modules" interface is exposed to the browserify moduleInitializer
+      // https://github.com/browserify/browser-pack/blob/cd0bd31f8c110e19a80429019b64e887b1a82b2b/prelude.js#L38
+      // browserify's browser-resolve uses "arguments[4]" to do direct module initializations
+      // browserify seems to do this when module references are redirected by the "browser" field
       // this proxy shims this behavior
-      // TODO: would be better to just fix this by removing the indirection
-      const modulesProxy = new Proxy({}, {
+      // TODO: would be better to just fix this by removing the indirection (maybe in https://github.com/browserify/module-deps?)
+      // though here and in the original browser-pack prelude it has a side effect that it is re-instantiated from the original module (no shared closure state)
+      const directModuleInstantiationInterface = new Proxy({}, {
         get (_, targetModuleId) {
           const fakeModuleDefinition = [fakeModuleInitializer]
           return fakeModuleDefinition
 
           function fakeModuleInitializer () {
-            const targetModuleExports = scopedRequire(targetModuleId)
+            const targetModuleExports = requireRelativeWithContext(targetModuleId)
             module.exports = targetModuleExports
           }
         }
@@ -147,7 +151,7 @@
 
       // initialize the module with the correct context
       try {
-        moduleInitializer.call(module.exports, requireRelativeWithContext, module, module.exports, null, modulesProxy)
+        moduleInitializer.call(module.exports, requireRelativeWithContext, module, module.exports, null, directModuleInstantiationInterface)
       } catch (err) {
         console.warn(`LavaMoat - Error instantiating module "${moduleId}" from package "${packageName}"`)
         throw err
@@ -159,28 +163,37 @@
 
       // this is passed to the module initializer
       // it adds the context of the parent module
+      // this could be replaced via "Function.prototype.bind" if its more performant
       function requireRelativeWithContext (requestedName) {
         const parentModuleExports = module.exports
         const parentModuleData = moduleData
-        return requireRelative({ requestedName, parentModuleExports, parentModuleData })
+        const parentPackageConfig = configForModule
+        return requireRelative({ requestedName, parentModuleExports, parentModuleData, parentPackageConfig })
       }
 
     }
 
     // this resolves a module given a requestedName (eg relative path to parent) and a parentModule context
     // the exports are processed via "protectExportsRequireTime" per the module's configuration
-    function requireRelative ({ requestedName, parentModuleExports, parentModuleData }) {
+    function requireRelative ({ requestedName, parentModuleExports, parentModuleData, parentPackageConfig }) {
       const parentModuleId = parentModuleData.id
       const parentModulePackageName = parentModuleData.package
       const parentModuleDepsMap = parentModuleData.deps
-      const moduleId = parentModuleDepsMap[requestedName] || requestedName
+      const parentPackagesWhitelist = parentPackageConfig.packages
 
+      // resolve the moduleId from the requestedName
+      // this is just a warning if the entry is missing in the deps map (local requestedName -> global moduleId)
+      // if it is missing we try to fetch it anyways using the requestedName as the moduleId
+      // The dependency whitelist should still be enforced elsewhere
+      const moduleId = parentModuleDepsMap[requestedName] || requestedName
       if (!(requestedName in parentModuleData.deps)) {
         console.warn(`missing dep: ${parentModulePackageName} requested ${requestedName}`)
       }
 
+      // browserify goop:
       // recursive requires dont hit cache so it inf loops, so we shortcircuit
-      // this only seems to happen with the "timers" which uses and is used by "process"
+      // this only seems to happen with a few browserify builtins (nodejs builtin module polyfills)
+      // we could likely allow any requestedName since it can only refer to itself
       if (moduleId === parentModuleId) {
         if (['timers', 'buffer'].includes(requestedName) === false) {
           throw new Error(`LavaMoat - recursive require detected: "${requestedName}"`)
@@ -195,6 +208,13 @@
       const moduleData = modules[moduleId]
       const packageName = moduleData.package
       const configForModule = getConfigForPackage(lavamoatConfig, packageName)
+
+      // disallow requiring packages that are not in the parent's whitelist
+      const isSamePackage = packageName === parentModulePackageName
+      const isInParentWhitelist = packageName in parentPackagesWhitelist
+      if (!isSamePackage && !isInParentWhitelist) {
+        throw new Error(`LavaMoat - required package not in whitelist: package "${parentModulePackageName}" requested "${packageName}" as "${requestedName}"`)
+      }
 
       // moduleExports require-time protection
       if (parentModulePackageName && packageName === parentModulePackageName) {
@@ -251,6 +271,8 @@
     // if there were global defaults (e.g. everything gets "console") they could be applied here
     function getConfigForPackage (config, packageName) {
       const packageConfig = (config.resources || {})[packageName] || {}
+      packageConfig.globals = packageConfig.globals || {}
+      packageConfig.packages = packageConfig.packages || {}
       return packageConfig
     }
 

@@ -72,10 +72,15 @@ test('globalRef - ensure endowments are accessible on globals', async (t) => {
   module.exports = { checkThis, checkSelf, checkWindow, checkGlobal, contextHasPostMessage, selfHasPostMessage }
   `
   const lavamoatConfig = {
-    resources: {
+    "resources": {
+      "<root>": {
+        "packages": {
+          "test": true,
+        }
+      },
       'test': {
-        globals: {
-          postMessage: true,
+        "globals": {
+          "postMessage": true,
         }
       }
     }
@@ -98,7 +103,7 @@ test('globalRef - ensure endowments are accessible on globals', async (t) => {
 
 })
 
-async function testCodeInNonEntryBundle (t, code, lavamoatConfig = {}) {
+async function testCodeInNonEntryBundle (t, code, providedConfig) {
   const files = [{
     // id must be full path
     id: './apple.js',
@@ -116,7 +121,17 @@ async function testCodeInNonEntryBundle (t, code, lavamoatConfig = {}) {
     source: code,
   }]
 
-  const bundle = await createBundleFromRequiresArray(files, { lavamoatConfig })
+  const config = providedConfig || {
+    "resources": {
+      "<root>": {
+        "packages": {
+          "test": true,
+        }
+      }
+    }
+  }
+
+  const bundle = await createBundleFromRequiresArray(files, { lavamoatConfig: config })
 
   global.testResult = undefined
 

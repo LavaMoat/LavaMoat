@@ -3,7 +3,7 @@ const test = require('tape-promise').default(require('tape'))
 const { createBundleFromRequiresArray } = require('./util')
 
 // here we are providing an endowments only to a module deep in a dep graph
-test('config - deep endow', async (t) => {
+test('globalWrites - deep endow', async (t) => {
   const entries = [
     {
       'id': '/one.js',
@@ -34,7 +34,7 @@ test('config - deep endow', async (t) => {
   const config = {
     resources: {
       '<root>': {
-        modules: {
+        packages: {
           'two': true
         }
       },
@@ -42,7 +42,7 @@ test('config - deep endow', async (t) => {
         globals: {
           'xyz': 'write',
         },
-        modules: {
+        packages: {
           'three': true
         },
       },
