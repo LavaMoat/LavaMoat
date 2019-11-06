@@ -26,6 +26,7 @@ function generatePrelude (opts = {}) {
   replaceTemplateRequire('makeGetEndowmentsForConfig', makeGetEndowmentsForConfigSrc)
   replaceTemplateRequire('makePrepareRealmGlobalFromConfig', makePrepareRealmGlobalFromConfigSrc)
   replaceTemplateRequire('strategies/magicCopy', fs.readFileSync(__dirname + '/strategies/magicCopy.js', 'utf8'))
+  replaceTemplateRequire('strategies/harden', fs.readFileSync(__dirname + '/strategies/harden.js', 'utf8'))
 
   function replaceTemplateRequire (moduleName, src) {
     const wrappedSrc = wrapWithReturnCjsExports(moduleName, src)
