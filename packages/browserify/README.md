@@ -44,4 +44,5 @@ build with lavamoat-browserify, including a reference to the generated config fi
 ### videos
 
 Introduction to LavaMoat
+
 [![introduction to LavaMoat](https://img.youtube.com/vi/pOTEJy_FqIA/0.jpg)](https://www.youtube.com/watch?v=pOTEJy_FqIA)
