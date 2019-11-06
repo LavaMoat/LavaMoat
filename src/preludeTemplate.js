@@ -77,6 +77,10 @@
     const magicCopyForPackage = new Map()
     const globalStore = new Map()
 
+    const exportsDefenseStrategies = {
+      magicCopy: templateRequire('strategies/magicCopy')({ makeMagicCopy }),
+    }
+
     return internalRequire
 
 
@@ -95,81 +99,96 @@
       }
 
       // prepare the module to be initialized
-      const packageName = moduleData.package
       const module = { exports: {} }
+      const packageName = moduleData.package
       const moduleSource = moduleData.sourceString
       const configForModule = getConfigForPackage(lavamoatConfig, packageName)
       const isEntryModule = moduleData.package === '<root>'
 
-      // prepare endowments
-      const endowmentsFromConfig = getEndowmentsForConfig(globalRef, configForModule)
-      let endowments = Object.assign({}, lavamoatConfig.defaultGlobals, endowmentsFromConfig)
-      // special case for exposing window
-      if (endowments.window) {
-        endowments = Object.assign({}, endowments.window, endowments)
-      }
+      // prepare exportsDefense strategy
+      const exportsDefense = configForModule.exportsDefense || 'magicCopy'
+      const strategy = exportsDefenseStrategies[exportsDefense]
 
-      // the default environment is "unfrozen" for the app root modules, "frozen" for dependencies
-      // this may be a bad default, but was meant to ease app development
-      // "frozen" means in a SES container
-      // "unfrozen" means via unsafeEvalWithEndowments
-      const environment = configForModule.environment || (isEntryModule ? 'unfrozen' : 'frozen')
-      const runInSes = environment !== 'unfrozen'
+      let moduleExports = strategy.checkModuleExportsCache(moduleId)
 
-      // determine if its a SES-wrapped or naked module initialization
-      let moduleInitializer
-      if (runInSes) {
-        // set the module initializer as the SES-wrapped version
-        const moduleRealm = realm.global.Realm.makeCompartment()
-        const globalsConfig = configForModule.globals
-        prepareRealmGlobalFromConfig(moduleRealm.global, globalsConfig, endowments, globalStore)
-        // execute in module realm with modified realm global
-        try {
-          moduleInitializer = moduleRealm.evaluate(`${moduleSource}`)
-        } catch (err) {
-          console.warn(`LavaMoat - Error evaluating module "${moduleId}" from package "${packageName}"`)
-          throw err
+      if (moduleExports === undefined) {
+        // prepare endowments
+        const endowmentsFromConfig = getEndowmentsForConfig(globalRef, configForModule)
+        let endowments = Object.assign({}, lavamoatConfig.defaultGlobals, endowmentsFromConfig)
+        // special case for exposing window
+        if (endowments.window) {
+          endowments = Object.assign({}, endowments.window, endowments)
         }
-      } else {
-        endowments.global = globalRef
-        // set the module initializer as the unwrapped version
-        moduleInitializer = unsafeEvalWithEndowments(`${moduleSource}`, endowments)
-      }
-      if (typeof moduleInitializer !== 'function') {
-        throw new Error('LavaMoat - moduleInitializer is not defined correctly')
-      }
 
-      // browserify goop:
-      // this "modules" interface is exposed to the browserify moduleInitializer
-      // https://github.com/browserify/browser-pack/blob/cd0bd31f8c110e19a80429019b64e887b1a82b2b/prelude.js#L38
-      // browserify's browser-resolve uses "arguments[4]" to do direct module initializations
-      // browserify seems to do this when module references are redirected by the "browser" field
-      // this proxy shims this behavior
-      // TODO: would be better to just fix this by removing the indirection (maybe in https://github.com/browserify/module-deps?)
-      // though here and in the original browser-pack prelude it has a side effect that it is re-instantiated from the original module (no shared closure state)
-      const directModuleInstantiationInterface = new Proxy({}, {
-        get (_, targetModuleId) {
-          const fakeModuleDefinition = [fakeModuleInitializer]
-          return fakeModuleDefinition
+        // the default environment is "unfrozen" for the app root modules, "frozen" for dependencies
+        // this may be a bad default, but was meant to ease app development
+        // "frozen" means in a SES container
+        // "unfrozen" means via unsafeEvalWithEndowments
+        const environment = configForModule.environment || (isEntryModule ? 'unfrozen' : 'frozen')
+        const runInSes = environment !== 'unfrozen'
 
-          function fakeModuleInitializer () {
-            const targetModuleExports = requireRelativeWithContext(targetModuleId)
-            module.exports = targetModuleExports
+        // attempt moduleInitializer cache
+        let moduleInitializer = strategy.checkModuleInitializerCache(moduleId)
+        if (moduleInitializer === undefined) {
+          // determine if its a SES-wrapped or naked module initialization
+          if (runInSes) {
+            // set the module initializer as the SES-wrapped version
+            const moduleRealm = realm.global.Realm.makeCompartment()
+            const globalsConfig = configForModule.globals
+            prepareRealmGlobalFromConfig(moduleRealm.global, globalsConfig, endowments, globalStore)
+            // execute in module realm with modified realm global
+            try {
+              moduleInitializer = moduleRealm.evaluate(`${moduleSource}`)
+            } catch (err) {
+              console.warn(`LavaMoat - Error evaluating module "${moduleId}" from package "${packageName}"`)
+              throw err
+            }
+          } else {
+            endowments.global = globalRef
+            // set the module initializer as the unwrapped version
+            moduleInitializer = unsafeEvalWithEndowments(`${moduleSource}`, endowments)
+          }
+          if (typeof moduleInitializer !== 'function') {
+            throw new Error('LavaMoat - moduleInitializer is not defined correctly')
           }
         }
-      })
 
-      // initialize the module with the correct context
-      try {
-        moduleInitializer.call(module.exports, requireRelativeWithContext, module, module.exports, null, directModuleInstantiationInterface)
-      } catch (err) {
-        console.warn(`LavaMoat - Error instantiating module "${moduleId}" from package "${packageName}"`)
-        throw err
+        // browserify goop:
+        // this "modules" interface is exposed to the browserify moduleInitializer
+        // https://github.com/browserify/browser-pack/blob/cd0bd31f8c110e19a80429019b64e887b1a82b2b/prelude.js#L38
+        // browserify's browser-resolve uses "arguments[4]" to do direct module initializations
+        // browserify seems to do this when module references are redirected by the "browser" field
+        // this proxy shims this behavior
+        // TODO: would be better to just fix this by removing the indirection (maybe in https://github.com/browserify/module-deps?)
+        // though here and in the original browser-pack prelude it has a side effect that it is re-instantiated from the original module (no shared closure state)
+        const directModuleInstantiationInterface = new Proxy({}, {
+          get (_, targetModuleId) {
+            const fakeModuleDefinition = [fakeModuleInitializer]
+            return fakeModuleDefinition
+
+            function fakeModuleInitializer () {
+              const targetModuleExports = requireRelativeWithContext(targetModuleId)
+              module.exports = targetModuleExports
+            }
+          }
+        })
+
+        // initialize the module with the correct context
+        try {
+          moduleInitializer.call(module.exports, requireRelativeWithContext, module, module.exports, null, directModuleInstantiationInterface)
+          moduleExports = module.exports
+        } catch (err) {
+          console.warn(`LavaMoat - Error instantiating module "${moduleId}" from package "${packageName}"`)
+          throw err
+        }
       }
 
-      const protectedExports = protectExportsInstantiationTime(module.exports, configForModule)
-      return protectedExports
+      // cache moduleExports
+      strategy.cacheModuleExports(moduleId, moduleExports)
 
+      // finally, protect the moduleExports using the strategy's technique
+      const protectedExports = strategy.protectForInstantiationTime(moduleExports, configForModule)
+      return protectedExports
 
       // this is passed to the module initializer
       // it adds the context of the parent module
@@ -231,49 +250,10 @@
         // return raw if same package
         return moduleExports
       } else {
+        const exportsDefense = configForModule.exportsDefense || 'magicCopy'
+        const strategy = exportsDefenseStrategies[exportsDefense]
         // return exports protected as specified in config
-        return protectExportsRequireTime(parentModulePackageName, moduleExports, configForModule)
-      }
-    }
-
-    // this is a hook for protecting exports immediately after instantiation (e.g. deep freeze)
-    function protectExportsInstantiationTime (moduleExports, config) {
-      // moduleExports instantion-time protection
-      const exportsDefense = config.exportsDefense || 'magicCopy'
-      switch (exportsDefense) {
-        case 'magicCopy':
-          // do nothing, handled at import time
-          break
-        // other export protection strategies can be added here
-        // case 'harden':
-        //   ...
-
-        default:
-          throw new Error(`LavaMoat - Unknown exports protection ${exportsDefense}`)
-      }
-
-      // return the exports
-      return moduleExports
-    }
-
-    // this is a hook for protecting exports right before importing (e.g. deep clone)
-    function protectExportsRequireTime (parentPackageName, moduleExports, config) {
-      const exportsDefense = config.exportsDefense || 'magicCopy'
-      // prepare magicCopy per package
-      let magicCopy = magicCopyForPackage.get(parentPackageName)
-      if (!magicCopy) {
-        magicCopy = makeMagicCopy()
-        magicCopyForPackage.set(parentPackageName, magicCopy)
-      }
-      switch (exportsDefense) {
-        case 'magicCopy':
-          return magicCopy(moduleExports)
-        // other export protection strategies can be added here
-        // case 'harden':
-        //   ...
-
-        default:
-          throw new Error(`LavaMoat - Unknown exports protection ${containment}`)
+        return strategy.protectForRequireTime(moduleExports, parentModulePackageName)
       }
     }
 
