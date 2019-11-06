@@ -11,7 +11,7 @@ some notes
       - calls internalRequire
       - uses the module config's protectExportsRequireTime
     - internalRequire:
-      instantiates the module in the specified context with
+      - instantiates the module in the specified context with
   - known / potential issues
     - sneaky setting of packageName by dir hacks?
     - magicCopy doesnt walk the full prototype graph
@@ -42,7 +42,10 @@ another list of kernel todos
   - [ ] requestedName -> moduleId
   - [ ] moduleId -> { packageName, path }
 - [ ] idea: maybe encode dep graph (and cache) as weakmap pointers so they disappear as `require` ref is dropped
-
+- [ ] document browserify usage
+- [ ] harden strategy
+  - tests
+- [ ] fresh eval/instantion doesnt require magicCopy
 
 ### summary of components
 - Config
