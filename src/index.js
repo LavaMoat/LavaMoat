@@ -27,7 +27,7 @@ function plugin (browserify, pluginOpts) {
   function setupPlugin () {
     // helper to read config at path
     if (typeof pluginOpts.config === 'string') {
-      pluginOpts.lavaMoatConfig = () => {
+      pluginOpts.lavamoatConfig = () => {
         // load latest config
         const filename = pluginOpts.config
         const configSource = fs.readFileSync(filename, 'utf8')
@@ -42,6 +42,9 @@ function plugin (browserify, pluginOpts) {
         }
         return configSource
       }
+    } else if (pluginOpts.config !== undefined) {
+      // "config" for alias "lavamoatConfig"
+      pluginOpts.lavamoatConfig = pluginOpts.config
     }
 
     const customPack = createLavamoatPacker(pluginOpts)
