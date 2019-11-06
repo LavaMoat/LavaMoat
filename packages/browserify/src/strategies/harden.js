@@ -1,8 +1,7 @@
 module.exports = createStrategy
 
-function createStrategy ({ makeMagicCopy }) {
-  const moduleExportsCache = new Map()
-  const magicCopyForPackage = new Map()
+function createStrategy ({ harden }) {
+  const protectedModuleExportsCache = new Map()
   return {
     checkModuleInitializerCache: (moduleId) => {
       // do nothing
@@ -11,28 +10,23 @@ function createStrategy ({ makeMagicCopy }) {
       // do nothing
     },
     checkModuleExportsCache: (moduleId) => {
-      return moduleExportsCache.get(moduleId)
+      // do nothing
     },
     cacheModuleExports: (moduleId, moduleExports) => {
-      moduleExportsCache.set(moduleId, moduleExports)
+      // do nothing
     },
     checkProtectedModuleExportsCache: (moduleId) => {
-      // do nothing
+      return protectedModuleExportsCache.get(moduleId)
     },
     cacheProtectedModuleExports: (moduleId, protectedModuleExports) => {
-      // do nothing
+      protectedModuleExportsCache.set(moduleId, protectedModuleExports)
     },
     protectForInstantiationTime: (moduleExports) => {
-      // do nothing
-      return moduleExports
+      return harden(moduleExports)
     },
     protectForRequireTime: (moduleExports, parentPackageName) => {
-      let magicCopy = magicCopyForPackage.get(parentPackageName)
-      if (!magicCopy) {
-        magicCopy = makeMagicCopy()
-        magicCopyForPackage.set(parentPackageName, magicCopy)
-      }
-      return magicCopy(moduleExports)
+      // do nothing
+      return moduleExports
     },
   }
 }

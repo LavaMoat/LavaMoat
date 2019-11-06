@@ -79,6 +79,7 @@
 
     const exportsDefenseStrategies = {
       magicCopy: templateRequire('strategies/magicCopy')({ makeMagicCopy }),
+      harden: templateRequire('strategies/harden')({ harden }),
     }
 
     return internalRequire
@@ -108,6 +109,12 @@
       // prepare exportsDefense strategy
       const exportsDefense = configForModule.exportsDefense || 'magicCopy'
       const strategy = exportsDefenseStrategies[exportsDefense]
+
+      // check cache for protectedModuleExports, if present return early
+      let protectedModuleExports = strategy.checkProtectedModuleExportsCache(moduleId)
+      if (protectedModuleExports !== undefined) {
+        return protectedModuleExports
+      }
 
       let moduleExports = strategy.checkModuleExportsCache(moduleId)
 
@@ -187,8 +194,8 @@
       strategy.cacheModuleExports(moduleId, moduleExports)
 
       // finally, protect the moduleExports using the strategy's technique
-      const protectedExports = strategy.protectForInstantiationTime(moduleExports, configForModule)
-      return protectedExports
+      protectedModuleExports = strategy.protectForInstantiationTime(moduleExports, configForModule)
+      return protectedModuleExports
 
       // this is passed to the module initializer
       // it adds the context of the parent module
