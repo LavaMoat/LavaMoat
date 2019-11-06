@@ -1,6 +1,6 @@
 const test = require('tape-promise').default(require('tape'))
 
-const { generateConfigFromFiles } = require('./util')
+const { generateConfigFromFiles, fnToCodeBlock } = require('./util')
 
 test('generateConfig - empty config', async (t) => {
   const files = []
@@ -179,8 +179,4 @@ async function createConfigForTest (testFn) {
   }]
   const config = await generateConfigFromFiles({ files })
   return config
-}
-
-function fnToCodeBlock (fn) {
-  return fn.toString().split('\n').slice(1,-1).join('\n')
 }

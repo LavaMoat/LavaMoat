@@ -11,7 +11,8 @@ module.exports = {
   createBundleFromRequiresArray,
   createBundleFromRequiresArrayPath,
   generateConfigFromFiles,
-  filesToConfigSource
+  filesToConfigSource,
+  fnToCodeBlock,
 }
 
 async function createBundleFromEntry (path, lavamoatConfig) {
@@ -87,4 +88,8 @@ async function filesToConfigSource ({ files }) {
 async function bundleAsync (bundler) {
   const src = await pify(cb => bundler.bundle(cb))()
   return src.toString()
+}
+
+function fnToCodeBlock (fn) {
+  return fn.toString().split('\n').slice(1,-1).join('\n')
 }
