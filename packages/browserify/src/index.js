@@ -56,7 +56,10 @@ function plugin (browserify, pluginOpts) {
 
     // helper to dump autoconfig to a file
     if (pluginOpts.writeAutoConfig) {
-      const filename = pluginOpts.writeAutoConfig
+      const filename = pluginOpts.config
+      if (typeof filename !== 'string') {
+        throw new Error('LavaMoat - "writeAutoConfig" was specified but "config" is not a string')
+      }
       pluginOpts.autoConfig = function writeAutoConfig (config) {
         fs.writeFileSync(filename, config)
         console.warn(`LavaMoat Autoconfig - wrote to "${filename}"`)
