@@ -27,12 +27,13 @@ LA audit kickoff todos
 - [x] remove alternate export protection strategies (underdeveloped)
 - [x] comment shit you cowboy
 
-another list of kernel todos
+another list of todos
 - [x] isEntry based on packageName
 - [x] remove modulePath
 - [x] unify on `<entry>` or `<root>`
 - [x] remove providedEndowments
 - [x] enforce deps whitelist in config
+- [x] devex would be improved if `--config` was constant and `--writeAutoConfig` used the `--config` path as destination
 - [ ] unit test kernel components
 - [ ] breakout kernel / kernel building utils
 - [ ] unify on `depMap` (?)
@@ -43,6 +44,10 @@ another list of kernel todos
   - [ ] moduleId -> { packageName, path }
 - [ ] idea: maybe encode dep graph (and cache) as weakmap pointers so they disappear as `require` ref is dropped
 - [ ] document browserify usage
+
+- [ ] using `--writeAutoConfig` should create a valid build using the generated config
+
+exportsProtection strategies
 - [ ] harden strategy
   - tests
 - [ ] fresh eval/instantion doesnt require magicCopy
