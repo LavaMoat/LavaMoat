@@ -62,6 +62,18 @@
   // END of injected code from lavamoatConfig
     })()
 
+    // convert all module source to string
+    // this could happen at build time,
+    // but shipping it as code makes it easier to debug, maybe
+    for (let moduleData of Object.values(modules)) {
+      let moduleSource = `(${moduleData.source})`
+      if (moduleData.file) {
+        const moduleSourceLabel = `// moduleSource: ${moduleData.file}`
+        moduleSource += `\n\n${moduleSourceLabel}`
+      }
+      moduleData.sourceString = moduleSource
+    }
+
     const magicCopyForPackage = new Map()
     const globalStore = new Map()
 
@@ -85,11 +97,7 @@
       // prepare the module to be initialized
       const packageName = moduleData.package
       const module = { exports: {} }
-      let moduleSource = `(${moduleData.source})`
-      if (moduleData.file) {
-        const moduleSourceLabel = `// moduleSource: ${moduleData.file}`
-        moduleSource += `\n\n${moduleSourceLabel}`
-      }
+      const moduleSource = moduleData.sourceString
       const configForModule = getConfigForPackage(lavamoatConfig, packageName)
       const isEntryModule = moduleData.package === '<root>'
 
