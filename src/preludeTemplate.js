@@ -190,11 +190,8 @@
         }
       }
 
-      // cache moduleExports
-      strategy.cacheModuleExports(moduleId, moduleExports)
-
       // finally, protect the moduleExports using the strategy's technique
-      protectedModuleExports = strategy.protectForInstantiationTime(moduleExports, configForModule)
+      protectedModuleExports = strategy.protectForInitializationTime(moduleExports, moduleId)
       return protectedModuleExports
 
       // this is passed to the module initializer

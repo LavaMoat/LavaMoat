@@ -12,17 +12,13 @@ function createStrategy ({ harden }) {
     checkModuleExportsCache: (moduleId) => {
       // do nothing
     },
-    cacheModuleExports: (moduleId, moduleExports) => {
-      // do nothing
-    },
     checkProtectedModuleExportsCache: (moduleId) => {
       return protectedModuleExportsCache.get(moduleId)
     },
-    cacheProtectedModuleExports: (moduleId, protectedModuleExports) => {
+    protectForInitializationTime: (moduleExports, moduleId) => {
+      const protectedModuleExports = harden(moduleExports)
       protectedModuleExportsCache.set(moduleId, protectedModuleExports)
-    },
-    protectForInstantiationTime: (moduleExports) => {
-      return harden(moduleExports)
+      return protectedModuleExports
     },
     protectForRequireTime: (moduleExports, parentPackageName) => {
       // do nothing
