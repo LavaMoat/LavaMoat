@@ -1,2 +1,24 @@
-- name: node-10-browsers
-  uses: aquariuslt/node-browsers-github-actions@v1.0.0
+
+name: test
+
+on:
+  pull_request:
+    branches:
+      - master
+  push:
+    branches:
+      - master
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: SCM
+        uses: actions/checkout@v1
+      - name: node-10-browsers
+        uses: aquariuslt/node-browsers-github-actions@master
+      - name: Install and test
+        run: |
+          yarn install
+          yarn test
