@@ -13,16 +13,11 @@ function createStrategy ({ makeMagicCopy }) {
     checkModuleExportsCache: (moduleId) => {
       return moduleExportsCache.get(moduleId)
     },
-    cacheModuleExports: (moduleId, moduleExports) => {
-      moduleExportsCache.set(moduleId, moduleExports)
-    },
     checkProtectedModuleExportsCache: (moduleId) => {
       // do nothing
     },
-    cacheProtectedModuleExports: (moduleId, protectedModuleExports) => {
-      // do nothing
-    },
-    protectForInstantiationTime: (moduleExports) => {
+    protectForInitializationTime: (moduleExports, moduleId) => {
+      moduleExportsCache.set(moduleId, moduleExports)
       // do nothing
       return moduleExports
     },
