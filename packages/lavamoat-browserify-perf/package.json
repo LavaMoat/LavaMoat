@@ -1,0 +1,18 @@
+{
+  "devDependencies": {
+    "browserify": "^16.5.0",
+    "lavamoat-browserify": "^3.0.3",
+    "serve": "^11.2.0"
+  },
+  "scripts": {
+    "lavamoat": "browserify index.js --plugin [ lavamoat-browserify --writeAutoConfig --config ./lavamoat-config.json ] > /dev/null",
+    "build": "browserify index.js --plugin [ lavamoat-browserify --config ./lavamoat-config.json ] > bundle.js",
+    "build:harden": "browserify index.js --plugin [ lavamoat-browserify --config ./lavamoat-config-harden.json ] > bundle.js",
+    "build:unsafe": "browserify index.js > bundle.js",
+    "start": "node run.js"
+  },
+  "dependencies": {
+    "eth-sig-util": "^2.5.0",
+    "ethereumjs-wallet": "^0.6.3"
+  }
+}
