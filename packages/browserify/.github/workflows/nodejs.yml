@@ -1,24 +1,16 @@
-
-name: test
-
-on:
-  pull_request:
-    branches:
-      - master
-  push:
-    branches:
-      - master
-
+name: CI
+on: [push]
 jobs:
-  test:
+  build:
+    name: Test
     runs-on: ubuntu-latest
-
     steps:
-      - name: SCM
-        uses: actions/checkout@v1
-      - name: node-10-browsers
-        uses: aquariuslt/node-browsers-github-actions@master
-      - name: Install and test
-        run: |
-          yarn install
-          yarn test
+      - uses: actions/checkout@v1
+      # will run `yarn install` command
+      - uses: borales/actions-yarn@v2.0.2
+        with:
+          cmd: install
+      # will run `yarn test` command
+      - uses: borales/actions-yarn@v2.0.2
+        with:
+          cmd: test
