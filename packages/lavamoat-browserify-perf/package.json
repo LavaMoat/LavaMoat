@@ -5,13 +5,16 @@
     "serve": "^11.2.0"
   },
   "scripts": {
+    "start": "yarn stats && yarn chart",
     "lavamoat": "browserify index.js --plugin [ lavamoat-browserify --writeAutoConfig --config ./lavamoat-config.json ] > /dev/null",
     "build": "browserify index.js --plugin [ lavamoat-browserify --config ./lavamoat-config.json ] > bundle.js",
     "build:harden": "browserify index.js --plugin [ lavamoat-browserify --config ./lavamoat-config-harden.json ] > bundle.js",
     "build:unsafe": "browserify index.js > bundle.js",
-    "start": "node run.js"
+    "stats": "node run.js > perf.csv",
+    "chart": "cat perf.csv | chart-csv > chart.html"
   },
   "dependencies": {
+    "chart-csv": "kumavis/chart-csv#master",
     "eth-sig-util": "^2.5.0",
     "ethereumjs-wallet": "^0.6.3"
   }
