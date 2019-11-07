@@ -201,15 +201,15 @@
         const parentModuleExports = module.exports
         const parentModuleData = moduleData
         const parentPackageConfig = configForModule
-        return requireRelative({ requestedName, parentModuleExports, parentModuleData, parentPackageConfig })
+        const parentModuleId = moduleId
+        return requireRelative({ requestedName, parentModuleExports, parentModuleData, parentPackageConfig, parentModuleId })
       }
 
     }
 
     // this resolves a module given a requestedName (eg relative path to parent) and a parentModule context
     // the exports are processed via "protectExportsRequireTime" per the module's configuration
-    function requireRelative ({ requestedName, parentModuleExports, parentModuleData, parentPackageConfig }) {
-      const parentModuleId = parentModuleData.id
+    function requireRelative ({ requestedName, parentModuleExports, parentModuleData, parentPackageConfig, parentModuleId }) {
       const parentModulePackageName = parentModuleData.package
       const parentModuleDepsMap = parentModuleData.deps
       const parentPackagesWhitelist = parentPackageConfig.packages
