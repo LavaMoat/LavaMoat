@@ -1,17 +1,12 @@
 const test = require('tape-promise').default(require('tape'))
 const clone = require('clone')
-
-const { generatePrelude } = require('../src/index')
 const {
   createBundleFromRequiresArray,
-  createBundleFromRequiresArrayPath,
-  createBundleFromEntry,
-  generateConfigFromFiles,
   fnToCodeBlock,
 } = require('./util')
 
 
-test('basic - browserify bundle doesnt inject global in deps', async (t) => {
+test('exportsDefense - harden on class exports', async (t) => {
   const files = [{
     // id must be full path
     id: './apple.js',
