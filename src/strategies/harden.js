@@ -1,6 +1,7 @@
 module.exports = createStrategy
 
 function createStrategy ({ harden }) {
+  const moduleObjCache = new Map()
   const protectedModuleExportsCache = new Map()
   return {
     checkModuleInitializerCache: (moduleId) => {
@@ -10,12 +11,10 @@ function createStrategy ({ harden }) {
       // do nothing
     },
     checkModuleObjCache: (moduleId) => {
-      // do nothing
+      return moduleObjCache.get(moduleId)
     },
     cacheModuleObj: (moduleObj, moduleId) => {
-      // do nothing
-      // this may cause an inf loop if the module recurses across modules
-      // 67 -> 70 -> 67 -> ...
+      moduleObjCache.set(moduleId, moduleObj)
     },
     checkProtectedModuleExportsCache: (moduleId) => {
       return protectedModuleExportsCache.get(moduleId)
