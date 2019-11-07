@@ -9,8 +9,13 @@ function createStrategy ({ harden }) {
     cacheModuleInitializer: (moduleId, moduleInitializer) => {
       // do nothing
     },
-    checkModuleExportsCache: (moduleId) => {
+    checkModuleObjCache: (moduleId) => {
       // do nothing
+    },
+    cacheModuleObj: (moduleObj, moduleId) => {
+      // do nothing
+      // this may cause an inf loop if the module recurses across modules
+      // 67 -> 70 -> 67 -> ...
     },
     checkProtectedModuleExportsCache: (moduleId) => {
       return protectedModuleExportsCache.get(moduleId)

@@ -100,7 +100,6 @@
       }
 
       // prepare the module to be initialized
-      const module = { exports: {} }
       const packageName = moduleData.package
       const moduleSource = moduleData.sourceString
       const configForModule = getConfigForPackage(lavamoatConfig, packageName)
@@ -116,9 +115,17 @@
         return protectedModuleExports
       }
 
-      let moduleExports = strategy.checkModuleExportsCache(moduleId)
+      // check if a cached moduleObj is available
+      let moduleObj = strategy.checkModuleObjCache(moduleId)
 
-      if (moduleExports === undefined) {
+      if (moduleObj === undefined) {
+        // create the initial moduleObj
+        moduleObj = { exports: {} }
+        // cache moduleObj here
+        // this is important for multi-module circles in the dep graph
+        // if you dont cache before running the moduleInitializer
+        strategy.cacheModuleObj(moduleObj, moduleId)
+
         // prepare endowments
         const endowmentsFromConfig = getEndowmentsForConfig(globalRef, configForModule)
         let endowments = Object.assign({}, lavamoatConfig.defaultGlobals, endowmentsFromConfig)
@@ -175,15 +182,14 @@
 
             function fakeModuleInitializer () {
               const targetModuleExports = requireRelativeWithContext(targetModuleId)
-              module.exports = targetModuleExports
+              moduleObj.exports = targetModuleExports
             }
           }
         })
 
         // initialize the module with the correct context
         try {
-          moduleInitializer.call(module.exports, requireRelativeWithContext, module, module.exports, null, directModuleInstantiationInterface)
-          moduleExports = module.exports
+          moduleInitializer.call(moduleObj.exports, requireRelativeWithContext, moduleObj, moduleObj.exports, null, directModuleInstantiationInterface)
         } catch (err) {
           console.warn(`LavaMoat - Error instantiating module "${moduleId}" from package "${packageName}"`)
           throw err
@@ -191,14 +197,14 @@
       }
 
       // finally, protect the moduleExports using the strategy's technique
-      protectedModuleExports = strategy.protectForInitializationTime(moduleExports, moduleId)
+      protectedModuleExports = strategy.protectForInitializationTime(moduleObj.exports, moduleId)
       return protectedModuleExports
 
       // this is passed to the module initializer
       // it adds the context of the parent module
       // this could be replaced via "Function.prototype.bind" if its more performant
       function requireRelativeWithContext (requestedName) {
-        const parentModuleExports = module.exports
+        const parentModuleExports = moduleObj.exports
         const parentModuleData = moduleData
         const parentPackageConfig = configForModule
         const parentModuleId = moduleId
