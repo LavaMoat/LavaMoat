@@ -1,26 +1,10 @@
 const util = require('util')
 const exec = util.promisify(require('child_process').exec)
 
-const nRange = [1, 50, 100, 250, 500, 750, 1000]
-// const nRange = [1, 50]
-const tasks = {
-  'without': {
-    prep: 'yarn build:unsafe',
-    run: 'node bundle.js',
-  },
-  'with': {
-    prep: 'yarn build',
-    run: 'node bundle.js',
-  },
-  'harden': {
-    prep: 'yarn build:harden',
-    run: 'node bundle.js',
-  },
-}
+module.exports = { performTest }
 
-performTest()
 
-async function performTest () {
+async function performTest (tasks, nRange) {
   const results = {}
   for (const [taskName, task] of Object.entries(tasks)) {
     process.stderr.write(`running task "${taskName}"...\n`)
@@ -32,19 +16,19 @@ async function performTest () {
       resultsContainer.push(runTime)
     }
   }
-  process.stdout.write(resultsAsCsv(results))
+  process.stdout.write(resultsAsCsv(results, nRange))
 }
 
 async function runCommand(command) {
   const start = process.hrtime.bigint()
-  const { stdout, stderr } = await exec(command)
+  await exec(command)
   const end = process.hrtime.bigint()
   const duration = end - start
   const durationSeconds = Number(duration)/1e9
   return durationSeconds
 }
 
-function resultsAsCsv (results) {
+function resultsAsCsv (results, nRange) {
   let csv = `n, ${Object.keys(results)}\n`
 
   const stats = Object.values(results)
