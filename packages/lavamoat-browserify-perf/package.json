@@ -1,5 +1,8 @@
 {
   "scripts": {
-    "start": "(cd trials/wallet && yarn && yarn start)"
+    "start": "yarn run start:wallet && yarn run start:localOnly && yarn run start:requireLoop",
+    "start:wallet": "(cd trials/wallet && yarn && yarn start)",
+    "start:localOnly": "(cd trials/localOnly && yarn && yarn start)",
+    "start:requireLoop": "(cd trials/requireLoop && yarn && yarn start)"
   }
 }

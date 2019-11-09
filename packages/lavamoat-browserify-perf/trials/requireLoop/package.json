@@ -1,0 +1,21 @@
+{
+  "devDependencies": {
+    "browserify": "^16.5.0",
+    "lavamoat-browserify": "^3.0.3",
+    "serve": "^11.2.0"
+  },
+  "scripts": {
+    "start": "yarn stats && yarn chart",
+    "lavamoat": "browserify entry.js --plugin [ lavamoat-browserify --writeAutoConfig --config ./lavamoat-config.json ] > /dev/null",
+    "build": "browserify entry.js --plugin [ lavamoat-browserify --config ./lavamoat-config.json ] > bundle.js",
+    "build:harden": "browserify entry.js --plugin [ lavamoat-browserify --config ./lavamoat-config-harden.json ] > bundle.js",
+    "build:unsafe": "browserify entry.js > bundle.js",
+    "stats": "node index.js > perf.csv",
+    "chart": "cat perf.csv | chart-csv > chart.html"
+  },
+  "dependencies": {
+    "chart-csv": "kumavis/chart-csv#master",
+    "eth-sig-util": "^2.5.0",
+    "ethereumjs-wallet": "^0.6.3"
+  }
+}
