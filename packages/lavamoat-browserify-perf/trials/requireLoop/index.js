@@ -1,6 +1,6 @@
 const { performTest } = require('../../performTask')
 
-const nRange = [1, 50, 100, 250, 500, 750, 1000]
+const nRange = [1, 50000, 100000, 250000, 500000, 750000, 1000000]
 // const nRange = [1, 50]
 
 const tasks = {
