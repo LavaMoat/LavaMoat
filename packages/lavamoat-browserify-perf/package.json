@@ -7,6 +7,7 @@
     "start:secp256k1": "(cd trials/secp256k1-mixedAdd && yarn && yarn start)"
   },
   "dependencies": {
-    "lavamoat-browserify": "^3.0.3"
+    "lavamoat-browserify": "^3.0.3",
+    "ses": "^0.6.4"
   }
 }

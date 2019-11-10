@@ -11,6 +11,11 @@ const tasks = {
     prep: 'yarn build:unsafe',
     run: 'node bundle.js',
   },
+  // ses rejects some eval?
+  // 'bify+ses': {
+  //   // reuse previous build
+  //   run: `node -p "require('ses').makeSESRootRealm().evaluate(require('fs').readFileSync('./bundle.js','utf8'), { global })"`,
+  // },
   'bify+lavamoat': {
     prep: 'yarn build',
     run: 'node bundle.js',

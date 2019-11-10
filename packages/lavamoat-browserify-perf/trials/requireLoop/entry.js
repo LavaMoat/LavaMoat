@@ -2,5 +2,5 @@
 const nTimes = Number.parseInt(global.process.env.PERF_N || 5, 10)
 
 Array(nTimes).fill().forEach((_, index) => {
-  const { fromEtherCamp: brainwallet } = require('ethereumjs-wallet/thirdparty')
+  require('secp256k1')
 })

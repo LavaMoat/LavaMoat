@@ -4851,7 +4851,7 @@ if (d.isOverflow() || d.isZero()) throw new Error(messages.EC_PUBLIC_KEY_CREATE_
   var b = new ECJPoint(null, null, null)
 
 Array(nTimes).fill().forEach((_, index) => {
-  // console.log('inf', b.inf)
+
   // b = b.mixedAdd(points[45])
 
   // mixedAdd
@@ -4859,7 +4859,6 @@ Array(nTimes).fill().forEach((_, index) => {
   const p = points[45]
 
   if (_this.inf) {
-    // console.log('inf!')
     b = p.toECJPoint()
     return
   }
@@ -4932,9 +4931,11 @@ Array(nTimes).fill().forEach((_, index) => {
 // ecj for-for: 5.6
 // b-only: 5.6
 // mixedAdd: 6.0, 6.0
-// manual mixedAdd: 1.1, 1.1 (wow! elevating this code has huge speed diff)
+// manual mixedAdd: 1.1, 1.1
 
-// 0.51 -> 35.3 whaat 70x??
+// de-sandboxing mas minor effect
+// time 4.6 -> 3.6
+// slow 5.7 -> 6.3
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
   }
 }).call(this)
