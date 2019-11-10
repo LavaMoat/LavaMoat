@@ -1,0 +1,133 @@
+{
+  "resources": {
+    "<root>": {
+      "exportsDefense": "harden"
+    },
+    "aes-js": {
+      "exportsDefense": "harden"
+    },
+    "assert": {
+      "exportsDefense": "harden"
+    },
+    "base-x": {
+      "exportsDefense": "harden"
+    },
+    "bip66": {
+      "exportsDefense": "harden"
+    },
+    "bn.js": {
+      "exportsDefense": "harden"
+    },
+    "brorand": {
+      "exportsDefense": "harden"
+    },
+    "browserify-cipher": {
+      "exportsDefense": "harden"
+    },
+    "browserify-des": {
+      "exportsDefense": "harden"
+    },
+    "browserify-rsa": {
+      "exportsDefense": "harden"
+    },
+    "bs58": {
+      "exportsDefense": "harden"
+    },
+    "bs58check": {
+      "exportsDefense": "harden"
+    },
+    "buffer": {
+      "exportsDefense": "harden"
+    },
+    "buffer-xor": {
+      "exportsDefense": "harden"
+    },
+    "create-ecdh": {
+      "exportsDefense": "harden"
+    },
+    "create-hash": {
+      "exportsDefense": "harden"
+    },
+    "create-hmac": {
+      "exportsDefense": "harden"
+    },
+    "crypto-browserify": {
+      "exportsDefense": "harden"
+    },
+    "diffie-hellman": {
+      "exportsDefense": "harden"
+    },
+    "ethereumjs-wallet": {
+      "exportsDefense": "harden"
+    },
+    "evp_bytestokey": {
+      "exportsDefense": "harden"
+    },
+    "hmac-drbg": {
+      "exportsDefense": "harden"
+    },
+    "keccak": {
+      "exportsDefense": "harden"
+    },
+    "md5.js": {
+      "exportsDefense": "harden"
+    },
+    "miller-rabin": {
+      "exportsDefense": "harden"
+    },
+    "pbkdf2": {
+      "exportsDefense": "harden"
+    },
+    "process": {
+      "exportsDefense": "harden"
+    },
+    "process-nextick-args": {
+      "exportsDefense": "harden"
+    },
+    "public-encrypt": {
+      "exportsDefense": "harden"
+    },
+    "randombytes": {
+      "exportsDefense": "harden"
+    },
+    "randomfill": {
+      "exportsDefense": "harden"
+    },
+    "ripemd160": {
+      "exportsDefense": "harden"
+    },
+    "rlp": {
+      "exportsDefense": "harden"
+    },
+    "safe-buffer": {
+      "exportsDefense": "harden"
+    },
+    "scrypt.js": {
+      "exportsDefense": "harden"
+    },
+    "scryptsy": {
+      "exportsDefense": "harden"
+    },
+    "string_decoder": {
+      "exportsDefense": "harden"
+    },
+    "strip-hex-prefix": {
+      "exportsDefense": "harden"
+    },
+    "timers-browserify": {
+      "exportsDefense": "harden"
+    },
+    "util": {
+      "exportsDefense": "harden"
+    },
+    "util-deprecate": {
+      "exportsDefense": "harden"
+    },
+    "uuid": {
+      "exportsDefense": "harden"
+    },
+    "vm-browserify": {
+      "exportsDefense": "harden"
+    }
+  }
+}
