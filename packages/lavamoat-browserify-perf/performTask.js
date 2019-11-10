@@ -16,7 +16,9 @@ async function performTest (tasks, nRange) {
       resultsContainer.push(runTime)
     }
   }
+  // log results
   process.stdout.write(resultsAsCsv(results, nRange))
+  return results
 }
 
 async function runCommand(command) {
