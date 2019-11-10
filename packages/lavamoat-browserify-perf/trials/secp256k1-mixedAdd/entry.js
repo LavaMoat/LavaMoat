@@ -6,10 +6,6 @@ const nTimes = Number.parseInt(global.process.env.PERF_N || 5, 10)
 
 const passphrase = `brain wallet seed #${0}`
 const privKey = ethUtil.keccak256(Buffer.from(passphrase))
-// const pubKey = ethUtil.privateToPublic(privKey)
-// const address = ethUtil.publicToAddress(pubKey)
-// const addressString = ethUtil.bufferToHex(address)
-const g = require('secp256k1/lib/js/ecpointg')
 const BN = require('secp256k1/lib/js/bn')
 const ECJPoint = require('secp256k1/lib/js/ecjpoint')
 const ECPoint = require('secp256k1/lib/js/ecpoint')
@@ -67,56 +63,24 @@ if (d.isOverflow() || d.isZero()) throw new Error(messages.EC_PUBLIC_KEY_CREATE_
   var a = new ECJPoint(null, null, null)
   var b = new ECJPoint(null, null, null)
 
-  // for (var i = I; i > 0; i--) {
-  //   for (var jj = 0; jj < repr.length; jj++) {
-      // if (repr[jj] === i) {
-      //   const i = 10
-        const jj = 45
-      //   b = b.mixedAdd(points[jj])
-      // } else if (repr[jj] === -i) {
-      //   b = b.mixedAdd(negpoints[jj])
-      // }
-    // }
-
-    a = a.add(b)
-  // }
-
 Array(nTimes).fill().forEach((_, index) => {
-  // const pubKey = ethUtil.privateToPublic(privKey)
-  // ethUtil.secp256k1.publicKeyCreate(privKey, false).slice(1);
-  // assert.isBuffer(privateKey, messages.EC_PRIVATE_KEY_TYPE_INVALID)
-  // assert.isBufferLength(privateKey, 32, messages.EC_PRIVATE_KEY_LENGTH_INVALID)
-  // return secp256k1.publicKeyCreate(privateKey, false)
-  //  function publicKeyCreate (privateKey, compressed) {
 
-  // g.mul(d).toPublicKey(false)
-  // g.mul(d)
+  b = b.mixedAdd(points[45])
 
-  // for (var i = I; i > 0; i--) {
-  //   for (var jj = 0; jj < repr.length; jj++) {
-  //     if (repr[jj] === i) {
-        const i = 10
-        const jj = 45
-        b = b.mixedAdd(points[jj])
-    //   } else if (repr[jj] === -i) {
-    //     b = b.mixedAdd(negpoints[jj])
-    //   }
-    // }
-
-    // a = a.add(b)
-  // }
-
-  // return ECPoint.fromECJPoint(a)
-  // O + P = P
-
-  // mixedAdd
+  // // mixedAdd
   // const _this = b
-  // const p = points[jj]
+  // const p = points[45]
 
-  // if (_this.inf) return p.toECJPoint()
+  // if (_this.inf) {
+  //   b = p.toECJPoint()
+  //   return
+  // }
 
   // // P + O = P
-  // if (p.inf) return _this
+  // if (p.inf) {
+  //   b = _this
+  //   return
+  // }
 
   // // http://hyperelliptic.org/EFD/g1p/auto-shortw-jacobian-0.html#addition-add-1998-cmo-2
   // //   with p.z = 1
@@ -130,8 +94,12 @@ Array(nTimes).fill().forEach((_, index) => {
   // var h = u1.redSub(u2)
   // var r = s1.redSub(s2)
   // if (h.isZero()) {
-  //   if (r.isZero()) return _this.dbl()
-  //   return new ECJPoint(null, null, null)
+  //   if (r.isZero()) {
+  //     b = _this.dbl()
+  //     return
+  //   }
+  //   b = new ECJPoint(null, null, null)
+  //   return
   // }
 
   // var h2 = h.redSqr()
@@ -142,7 +110,7 @@ Array(nTimes).fill().forEach((_, index) => {
   // var ny = r.redMul(v.redISub(nx)).redISub(s1.redMul(h3))
   // var nz = _this.z.redMul(h)
 
-  // return new ECJPoint(nx, ny, nz)
+  // b = new ECJPoint(nx, ny, nz)
 })
 
 

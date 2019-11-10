@@ -4782,7 +4782,7 @@ function createStrategy ({ harden }) {
   }
 
 })()
-({1:{ package: "<root>", deps: {"ethereumjs-util":31,"safe-buffer":82,"secp256k1/lib/js/bn":88,"secp256k1/lib/js/ecjpoint":90,"secp256k1/lib/js/ecpoint":91,"secp256k1/lib/js/ecpointg":92}, source: (function () {
+({1:{ package: "<root>", deps: {"ethereumjs-util":31,"safe-buffer":82,"secp256k1/lib/js/bn":88,"secp256k1/lib/js/ecjpoint":90,"secp256k1/lib/js/ecpoint":91}, source: (function () {
   return function (require,module,exports) {
 (function (global){
 const ethUtil = require('ethereumjs-util')
@@ -4793,10 +4793,6 @@ const nTimes = Number.parseInt(global.process.env.PERF_N || 5, 10)
 
 const passphrase = `brain wallet seed #${0}`
 const privKey = ethUtil.keccak256(Buffer.from(passphrase))
-// const pubKey = ethUtil.privateToPublic(privKey)
-// const address = ethUtil.publicToAddress(pubKey)
-// const addressString = ethUtil.bufferToHex(address)
-const g = require('secp256k1/lib/js/ecpointg')
 const BN = require('secp256k1/lib/js/bn')
 const ECJPoint = require('secp256k1/lib/js/ecjpoint')
 const ECPoint = require('secp256k1/lib/js/ecpoint')
@@ -4854,82 +4850,55 @@ if (d.isOverflow() || d.isZero()) throw new Error(messages.EC_PUBLIC_KEY_CREATE_
   var a = new ECJPoint(null, null, null)
   var b = new ECJPoint(null, null, null)
 
-  // for (var i = I; i > 0; i--) {
-  //   for (var jj = 0; jj < repr.length; jj++) {
-      // if (repr[jj] === i) {
-      //   const i = 10
-        const jj = 45
-      //   b = b.mixedAdd(points[jj])
-      // } else if (repr[jj] === -i) {
-      //   b = b.mixedAdd(negpoints[jj])
-      // }
-    // }
-
-    a = a.add(b)
-  // }
-
 Array(nTimes).fill().forEach((_, index) => {
-  // const pubKey = ethUtil.privateToPublic(privKey)
-  // ethUtil.secp256k1.publicKeyCreate(privKey, false).slice(1);
-  // assert.isBuffer(privateKey, messages.EC_PRIVATE_KEY_TYPE_INVALID)
-  // assert.isBufferLength(privateKey, 32, messages.EC_PRIVATE_KEY_LENGTH_INVALID)
-  // return secp256k1.publicKeyCreate(privateKey, false)
-  //  function publicKeyCreate (privateKey, compressed) {
-
-  // g.mul(d).toPublicKey(false)
-  // g.mul(d)
-
-  // for (var i = I; i > 0; i--) {
-  //   for (var jj = 0; jj < repr.length; jj++) {
-  //     if (repr[jj] === i) {
-        const i = 10
-        const jj = 45
-        b = b.mixedAdd(points[jj])
-    //   } else if (repr[jj] === -i) {
-    //     b = b.mixedAdd(negpoints[jj])
-    //   }
-    // }
-
-    // a = a.add(b)
-  // }
-
-  // return ECPoint.fromECJPoint(a)
-  // O + P = P
+  // console.log('inf', b.inf)
+  // b = b.mixedAdd(points[45])
 
   // mixedAdd
-  // const _this = b
-  // const p = points[jj]
+  const _this = b
+  const p = points[45]
 
-  // if (_this.inf) return p.toECJPoint()
+  if (_this.inf) {
+    // console.log('inf!')
+    b = p.toECJPoint()
+    return
+  }
 
-  // // P + O = P
-  // if (p.inf) return _this
+  // P + O = P
+  if (p.inf) {
+    b = _this
+    return
+  }
 
-  // // http://hyperelliptic.org/EFD/g1p/auto-shortw-jacobian-0.html#addition-add-1998-cmo-2
-  // //   with p.z = 1
-  // // 8M + 3S + 7A
-  // var z2 = _this.z.redSqr()
-  // var u1 = _this.x
-  // var u2 = p.x.redMul(z2)
-  // var s1 = _this.y
-  // var s2 = p.y.redMul(z2).redMul(_this.z)
+  // http://hyperelliptic.org/EFD/g1p/auto-shortw-jacobian-0.html#addition-add-1998-cmo-2
+  //   with p.z = 1
+  // 8M + 3S + 7A
+  var z2 = _this.z.redSqr()
+  var u1 = _this.x
+  var u2 = p.x.redMul(z2)
+  var s1 = _this.y
+  var s2 = p.y.redMul(z2).redMul(_this.z)
 
-  // var h = u1.redSub(u2)
-  // var r = s1.redSub(s2)
-  // if (h.isZero()) {
-  //   if (r.isZero()) return _this.dbl()
-  //   return new ECJPoint(null, null, null)
-  // }
+  var h = u1.redSub(u2)
+  var r = s1.redSub(s2)
+  if (h.isZero()) {
+    if (r.isZero()) {
+      b = _this.dbl()
+      return
+    }
+    b = new ECJPoint(null, null, null)
+    return
+  }
 
-  // var h2 = h.redSqr()
-  // var v = u1.redMul(h2)
-  // var h3 = h2.redMul(h)
+  var h2 = h.redSqr()
+  var v = u1.redMul(h2)
+  var h3 = h2.redMul(h)
 
-  // var nx = r.redSqr().redIAdd(h3).redISub(v).redISub(v)
-  // var ny = r.redMul(v.redISub(nx)).redISub(s1.redMul(h3))
-  // var nz = _this.z.redMul(h)
+  var nx = r.redSqr().redIAdd(h3).redISub(v).redISub(v)
+  var ny = r.redMul(v.redISub(nx)).redISub(s1.redMul(h3))
+  var nz = _this.z.redMul(h)
 
-  // return new ECJPoint(nx, ny, nz)
+  b = new ECJPoint(nx, ny, nz)
 })
 
 
@@ -4963,7 +4932,9 @@ Array(nTimes).fill().forEach((_, index) => {
 // ecj for-for: 5.6
 // b-only: 5.6
 // mixedAdd: 6.0, 6.0
-// manual mixedAdd: 1.1, 1.1 (wow! elevating this code shows 6x speed diff)
+// manual mixedAdd: 1.1, 1.1 (wow! elevating this code has huge speed diff)
+
+// 0.51 -> 35.3 whaat 70x??
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
   }
 }).call(this)
@@ -11699,7 +11670,7 @@ var hexSliceLookupTable = (function () {
 }).call(this,require("buffer").Buffer)
   }
 }).call(this)
-},12:{ package: "cipher-base", deps: {"inherits":49,"safe-buffer":82,"stream":102,"string_decoder":103}, source: (function () {
+},12:{ package: "cipher-base", deps: {"inherits":49,"safe-buffer":82,"stream":101,"string_decoder":102}, source: (function () {
   return function (require,module,exports) {
 var Buffer = require('safe-buffer').Buffer
 var Transform = require('stream').Transform
@@ -11917,7 +11888,7 @@ function objectToString(o) {
 }).call(this,{"isBuffer":require("../../is-buffer/index.js")})
   }
 }).call(this)
-},14:{ package: "create-hash", deps: {"cipher-base":12,"inherits":49,"md5.js":59,"ripemd160":80,"sha.js":95}, source: (function () {
+},14:{ package: "create-hash", deps: {"cipher-base":12,"inherits":49,"md5.js":59,"ripemd160":80,"sha.js":94}, source: (function () {
   return function (require,module,exports) {
 'use strict'
 var inherits = require('inherits')
@@ -16628,7 +16599,7 @@ exports.defineProperties = function (self, fields, data) {
 };
   }
 }).call(this)
-},32:{ package: "ethjs-util", deps: {"buffer":11,"is-hex-prefixed":51,"strip-hex-prefix":104}, source: (function () {
+},32:{ package: "ethjs-util", deps: {"buffer":11,"is-hex-prefixed":51,"strip-hex-prefix":103}, source: (function () {
   return function (require,module,exports) {
 (function (Buffer){
 'use strict';
@@ -17382,7 +17353,7 @@ function functionBindPolyfill(context) {
 
   }
 }).call(this)
-},34:{ package: "hash-base", deps: {"inherits":49,"safe-buffer":82,"stream":102}, source: (function () {
+},34:{ package: "hash-base", deps: {"inherits":49,"safe-buffer":82,"stream":101}, source: (function () {
   return function (require,module,exports) {
 'use strict'
 var Buffer = require('safe-buffer').Buffer
@@ -19083,7 +19054,7 @@ module.exports = function (KeccakState) {
 
   }
 }).call(this)
-},55:{ package: "keccak", deps: {"inherits":49,"safe-buffer":82,"stream":102}, source: (function () {
+},55:{ package: "keccak", deps: {"inherits":49,"safe-buffer":82,"stream":101}, source: (function () {
   return function (require,module,exports) {
 'use strict'
 var Buffer = require('safe-buffer').Buffer
@@ -19172,7 +19143,7 @@ module.exports = function (KeccakState) {
 
   }
 }).call(this)
-},56:{ package: "keccak", deps: {"inherits":49,"safe-buffer":82,"stream":102}, source: (function () {
+},56:{ package: "keccak", deps: {"inherits":49,"safe-buffer":82,"stream":101}, source: (function () {
   return function (require,module,exports) {
 'use strict'
 var Buffer = require('safe-buffer').Buffer
@@ -21520,7 +21491,7 @@ function done(stream, er, data) {
 }
   }
 }).call(this)
-},70:{ package: "readable-stream", deps: {"./_stream_duplex":66,"./internal/streams/destroy":72,"./internal/streams/stream":73,"_process":64,"core-util-is":13,"inherits":49,"process-nextick-args":63,"safe-buffer":74,"timers":105,"util-deprecate":106}, source: (function () {
+},70:{ package: "readable-stream", deps: {"./_stream_duplex":66,"./internal/streams/destroy":72,"./internal/streams/stream":73,"_process":64,"core-util-is":13,"inherits":49,"process-nextick-args":63,"safe-buffer":74,"timers":104,"util-deprecate":105}, source: (function () {
   return function (require,module,exports) {
 (function (process,global,setImmediate){
 // Copyright Joyent, Inc. and other Node contributors.
@@ -23516,7 +23487,7 @@ exports.signatureImportLax = function (sig) {
 
   }
 }).call(this)
-},86:{ package: "secp256k1", deps: {"../messages.json":93,"bn.js":8,"create-hash":14,"elliptic":15,"safe-buffer":82}, source: (function () {
+},86:{ package: "secp256k1", deps: {"../messages.json":92,"bn.js":8,"create-hash":14,"elliptic":15,"safe-buffer":82}, source: (function () {
   return function (require,module,exports) {
 'use strict'
 var Buffer = require('safe-buffer').Buffer
@@ -23784,7 +23755,7 @@ exports.ecdhUnsafe = function (publicKey, privateKey, compressed) {
 
   }
 }).call(this)
-},87:{ package: "secp256k1", deps: {"./assert":84,"./der":85,"./messages.json":93}, source: (function () {
+},87:{ package: "secp256k1", deps: {"./assert":84,"./der":85,"./messages.json":92}, source: (function () {
   return function (require,module,exports) {
 'use strict'
 var assert = require('./assert')
@@ -25649,128 +25620,7 @@ module.exports = ECPoint
 
   }
 }).call(this)
-},92:{ package: "secp256k1", deps: {"./bn":88,"./ecjpoint":90,"./ecpoint":91,"safe-buffer":82}, source: (function () {
-  return function (require,module,exports) {
-'use strict'
-var Buffer = require('safe-buffer').Buffer
-var BN = require('./bn')
-var ECPoint = require('./ecpoint')
-var ECJPoint = require('./ecjpoint')
-
-function ECPointG () {
-  this.x = BN.fromBuffer(Buffer.from('79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798', 'hex'))
-  this.y = BN.fromBuffer(Buffer.from('483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8', 'hex'))
-  this.inf = false
-
-  this._precompute()
-}
-
-ECPointG.prototype._precompute = function () {
-  var ecpoint = new ECPoint(this.x, this.y)
-
-  var dstep = 4
-  var points = new Array(1 + Math.ceil(257 / dstep))
-  var acc = points[0] = ecpoint
-  for (var i = 1; i < points.length; ++i) {
-    for (var j = 0; j < dstep; j++) acc = acc.dbl()
-    points[i] = acc
-  }
-
-  this.precomputed = {
-    naf: ecpoint._getNAFPoints(7),
-    doubles: {
-      step: dstep,
-      points: points,
-      negpoints: points.map(function (p) { return p.neg() })
-    }
-  }
-}
-
-ECPointG.prototype.mul = function (num) {
-  // Algorithm 3.42 Fixed-base NAF windowing method for point multiplication
-  var step = this.precomputed.doubles.step
-  var points = this.precomputed.doubles.points
-  var negpoints = this.precomputed.doubles.negpoints
-
-  var naf = num.getNAF(1)
-  var I = ((1 << (step + 1)) - (step % 2 === 0 ? 2 : 1)) / 3
-
-  // Translate into more windowed form
-  var repr = []
-  for (var j = 0; j < naf.length; j += step) {
-    var nafW = 0
-    for (var k = j + step - 1; k >= j; k--) nafW = (nafW << 1) + naf[k]
-    repr.push(nafW)
-  }
-
-  var a = new ECJPoint(null, null, null)
-  var b = new ECJPoint(null, null, null)
-  for (var i = I; i > 0; i--) {
-    for (var jj = 0; jj < repr.length; jj++) {
-      if (repr[jj] === i) {
-        b = b.mixedAdd(points[jj])
-      } else if (repr[jj] === -i) {
-        b = b.mixedAdd(negpoints[jj])
-      }
-    }
-
-    a = a.add(b)
-  }
-
-  return ECPoint.fromECJPoint(a)
-}
-
-ECPointG.prototype.mulAdd = function (k1, p2, k2) {
-  var nafPointsP1 = this.precomputed.naf
-  var nafPointsP2 = p2._getNAFPoints1()
-  var wnd = [nafPointsP1.points, nafPointsP2.points]
-  var naf = [k1.getNAF(nafPointsP1.wnd), k2.getNAF(nafPointsP2.wnd)]
-
-  var acc = new ECJPoint(null, null, null)
-  var tmp = [null, null]
-  for (var i = Math.max(naf[0].length, naf[1].length); i >= 0; i--) {
-    var k = 0
-
-    for (; i >= 0; ++k, --i) {
-      tmp[0] = naf[0][i] | 0
-      tmp[1] = naf[1][i] | 0
-
-      if (tmp[0] !== 0 || tmp[1] !== 0) break
-    }
-
-    if (i >= 0) k += 1
-    acc = acc.dblp(k)
-
-    if (i < 0) break
-
-    for (var jj = 0; jj < 2; jj++) {
-      var z = tmp[jj]
-      var p
-      if (z === 0) {
-        continue
-      } else if (z > 0) {
-        p = wnd[jj][z >> 1]
-      } else if (z < 0) {
-        p = wnd[jj][-z >> 1].neg()
-      }
-
-      // hack: ECPoint detection
-      if (p.z === undefined) {
-        acc = acc.mixedAdd(p)
-      } else {
-        acc = acc.add(p)
-      }
-    }
-  }
-
-  return acc
-}
-
-module.exports = new ECPointG()
-
-  }
-}).call(this)
-},93:{ package: "secp256k1", deps: {}, source: (function () {
+},92:{ package: "secp256k1", deps: {}, source: (function () {
   return function (require,module,exports) {
 module.exports={
   "COMPRESSED_TYPE_INVALID": "compressed should be a boolean",
@@ -25812,7 +25662,7 @@ module.exports={
 
   }
 }).call(this)
-},94:{ package: "sha.js", deps: {"safe-buffer":82}, source: (function () {
+},93:{ package: "sha.js", deps: {"safe-buffer":82}, source: (function () {
   return function (require,module,exports) {
 var Buffer = require('safe-buffer').Buffer
 
@@ -25898,7 +25748,7 @@ module.exports = Hash
 
   }
 }).call(this)
-},95:{ package: "sha.js", deps: {"./sha":96,"./sha1":97,"./sha224":98,"./sha256":99,"./sha384":100,"./sha512":101}, source: (function () {
+},94:{ package: "sha.js", deps: {"./sha":95,"./sha1":96,"./sha224":97,"./sha256":98,"./sha384":99,"./sha512":100}, source: (function () {
   return function (require,module,exports) {
 var exports = module.exports = function SHA (algorithm) {
   algorithm = algorithm.toLowerCase()
@@ -25918,7 +25768,7 @@ exports.sha512 = require('./sha512')
 
   }
 }).call(this)
-},96:{ package: "sha.js", deps: {"./hash":94,"inherits":49,"safe-buffer":82}, source: (function () {
+},95:{ package: "sha.js", deps: {"./hash":93,"inherits":49,"safe-buffer":82}, source: (function () {
   return function (require,module,exports) {
 /*
  * A JavaScript implementation of the Secure Hash Algorithm, SHA-0, as defined
@@ -26017,7 +25867,7 @@ module.exports = Sha
 
   }
 }).call(this)
-},97:{ package: "sha.js", deps: {"./hash":94,"inherits":49,"safe-buffer":82}, source: (function () {
+},96:{ package: "sha.js", deps: {"./hash":93,"inherits":49,"safe-buffer":82}, source: (function () {
   return function (require,module,exports) {
 /*
  * A JavaScript implementation of the Secure Hash Algorithm, SHA-1, as defined
@@ -26121,7 +25971,7 @@ module.exports = Sha1
 
   }
 }).call(this)
-},98:{ package: "sha.js", deps: {"./hash":94,"./sha256":99,"inherits":49,"safe-buffer":82}, source: (function () {
+},97:{ package: "sha.js", deps: {"./hash":93,"./sha256":98,"inherits":49,"safe-buffer":82}, source: (function () {
   return function (require,module,exports) {
 /**
  * A JavaScript implementation of the Secure Hash Algorithm, SHA-256, as defined
@@ -26179,7 +26029,7 @@ module.exports = Sha224
 
   }
 }).call(this)
-},99:{ package: "sha.js", deps: {"./hash":94,"inherits":49,"safe-buffer":82}, source: (function () {
+},98:{ package: "sha.js", deps: {"./hash":93,"inherits":49,"safe-buffer":82}, source: (function () {
   return function (require,module,exports) {
 /**
  * A JavaScript implementation of the Secure Hash Algorithm, SHA-256, as defined
@@ -26319,7 +26169,7 @@ module.exports = Sha256
 
   }
 }).call(this)
-},100:{ package: "sha.js", deps: {"./hash":94,"./sha512":101,"inherits":49,"safe-buffer":82}, source: (function () {
+},99:{ package: "sha.js", deps: {"./hash":93,"./sha512":100,"inherits":49,"safe-buffer":82}, source: (function () {
   return function (require,module,exports) {
 var inherits = require('inherits')
 var SHA512 = require('./sha512')
@@ -26381,7 +26231,7 @@ module.exports = Sha384
 
   }
 }).call(this)
-},101:{ package: "sha.js", deps: {"./hash":94,"inherits":49,"safe-buffer":82}, source: (function () {
+},100:{ package: "sha.js", deps: {"./hash":93,"inherits":49,"safe-buffer":82}, source: (function () {
   return function (require,module,exports) {
 var inherits = require('inherits')
 var Hash = require('./hash')
@@ -26646,7 +26496,7 @@ module.exports = Sha512
 
   }
 }).call(this)
-},102:{ package: "stream-browserify", deps: {"events":33,"inherits":49,"readable-stream/duplex.js":65,"readable-stream/passthrough.js":76,"readable-stream/readable.js":77,"readable-stream/transform.js":78,"readable-stream/writable.js":79}, source: (function () {
+},101:{ package: "stream-browserify", deps: {"events":33,"inherits":49,"readable-stream/duplex.js":65,"readable-stream/passthrough.js":76,"readable-stream/readable.js":77,"readable-stream/transform.js":78,"readable-stream/writable.js":79}, source: (function () {
   return function (require,module,exports) {
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -26778,12 +26628,12 @@ Stream.prototype.pipe = function(dest, options) {
 
   }
 }).call(this)
-},103:{ package: "string_decoder", deps: {"dup":75,"safe-buffer":82}, source: (function () {
+},102:{ package: "string_decoder", deps: {"dup":75,"safe-buffer":82}, source: (function () {
   return function (require,module,exports) {
 arguments[4][75][0].apply(exports,arguments)
   }
 }).call(this)
-},104:{ package: "strip-hex-prefix", deps: {"is-hex-prefixed":51}, source: (function () {
+},103:{ package: "strip-hex-prefix", deps: {"is-hex-prefixed":51}, source: (function () {
   return function (require,module,exports) {
 var isHexPrefixed = require('is-hex-prefixed');
 
@@ -26802,7 +26652,7 @@ module.exports = function stripHexPrefix(str) {
 
   }
 }).call(this)
-},105:{ package: "timers-browserify", deps: {"process/browser.js":64,"timers":105}, source: (function () {
+},104:{ package: "timers-browserify", deps: {"process/browser.js":64,"timers":104}, source: (function () {
   return function (require,module,exports) {
 (function (setImmediate,clearImmediate){
 var nextTick = require('process/browser.js').nextTick;
@@ -26884,7 +26734,7 @@ exports.clearImmediate = typeof clearImmediate === "function" ? clearImmediate :
 }).call(this,require("timers").setImmediate,require("timers").clearImmediate)
   }
 }).call(this)
-},106:{ package: "util-deprecate", deps: {}, source: (function () {
+},105:{ package: "util-deprecate", deps: {}, source: (function () {
   return function (require,module,exports) {
 (function (global){
 
