@@ -11,11 +11,12 @@ yarn start
 
 ### explanation
 
-runs a dependency-using task in 4 ways:
-  - in node directly
-  - in node, via browserify (without lavamoat)
-  - in node, via browserify with lavamoat
-  - in node, via browserify with lavamoat and a hand-tuned config utilizing the `"harden"` `exportsDefense` strategy
+runs a dependency-using task in a few ways:
+  - "node" in node directly. beware: may use native modules
+  - "bify" browserify bundle in node, no protections
+  - "bify+ses" browserify bundle run in a single SES root realm
+  - "bify+lavamoat" browserify bundle with lavamoat in node, default lavamoat config
+  - "bify+lavamoat w/ harden" browserify bundle with lavamoat in node, with hand-tuned config utilizing the `"harden"` `exportsDefense` strategy when possible
 
 the tasks are run with different "n" values, indicating how many times the individual work should be done.
 
