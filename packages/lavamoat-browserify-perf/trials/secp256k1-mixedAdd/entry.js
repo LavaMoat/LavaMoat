@@ -144,8 +144,15 @@ Array(nTimes).fill().forEach((_, index) => {
 // ecj for-for: 5.6
 // b-only: 5.6
 // mixedAdd: 6.0, 6.0
-// manual mixedAdd: 1.1, 1.1
 
 // de-sandboxing mas minor effect
 // time 4.6 -> 3.6
 // slow 5.7 -> 6.3
+
+// redMul: 6.2, 6.2
+// uMul: 7.0, 7.0
+// manual uMul: 14.0, 13.2
+// new BN, new Array: 54.5, 54.1
+// new BN: 79.1, 78.5
+// new Array: 3.4, 3.3
+// uMul if-chain: 2.7, 2.7
