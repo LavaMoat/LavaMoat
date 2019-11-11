@@ -1,10 +1,11 @@
 {
   "scripts": {
-    "start": "yarn run start:wallet && yarn run start:localOnly && yarn run start:requireLoop && yarn run start:secp256k1",
+    "start": "yarn run start:wallet && yarn run start:localOnly && yarn run start:requireLoop && yarn run start:secp256k1 && yarn run start:newBN",
     "start:wallet": "(cd trials/wallet && yarn && yarn start)",
     "start:localOnly": "(cd trials/localOnly && yarn && yarn start)",
     "start:requireLoop": "(cd trials/requireLoop && yarn && yarn start)",
-    "start:secp256k1": "(cd trials/secp256k1-mixedAdd && yarn && yarn start)"
+    "start:secp256k1": "(cd trials/secp256k1-mixedAdd && yarn && yarn start)",
+    "start:newBN": "(cd trials/secp256k1-newBN && yarn && yarn start)"
   },
   "dependencies": {
     "lavamoat-browserify": "^3.0.3",

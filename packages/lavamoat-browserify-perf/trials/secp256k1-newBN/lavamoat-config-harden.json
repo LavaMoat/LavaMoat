@@ -1,0 +1,13 @@
+{
+  "resources": {
+    "safe-buffer": {
+      "exportsDefense": "harden"
+    },
+    "buffer": {
+      "exportsDefense": "harden"
+    },
+    "secp256k1": {
+      "exportsDefense": "harden"
+    }
+  }
+}

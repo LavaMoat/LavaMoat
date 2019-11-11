@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>chart-csv</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/c3/0.4.10/c3.css" rel="stylesheet" type="text/css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.15/d3.min.js" charset="utf-8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/c3/0.4.10/c3.min.js"></script>
+</head>
+<body onload="run()">
+
+<div id="graph"></div>
+
+<script>
+
+function parseCSV (csv) {
+  return csv.split('\n')
+    .filter(function (row) {
+      return !!row.trim()
+    })
+    .map(function (row) {
+      return row.split(',')
+    })
+}
+
+function haveHead (csv) {
+  return !/^\d+$/.test(csv[0][0])
+}
+
+function chart (id, csv) {
+  csv = parseCSV(csv)
+
+  var columns = []
+  var showLegend = haveHead(csv)
+
+  if (showLegend) {
+    csv.shift().forEach(function (head) {
+      columns.push([head])
+    })
+  } else {
+    for (var n = 0; n < csv[0].length; n++) {
+      columns.push([n])
+    }
+  }
+
+  csv.forEach(function (r) {
+    r.forEach(function (c, i) {
+      columns[i].push(parseFloat(c, 10))
+    })
+  })
+
+  var opts = {
+    bindto: '#' + id,
+    data: {
+      // use first column as x value
+      x: columns[0][0],
+      columns: columns,
+      type: 'line'
+    },
+    point: { show: false },
+    axis: { x: { show: true } },
+    legend: { show: showLegend }
+  }
+
+  c3.generate(opts)
+}
+
+function run () {
+  chart('graph', csv)
+}
+
+var csv = `
+n, node,bify,bify+ses,bify+lavamoat,bify+lavamoat w/ harden
+0,0.05504661,0.049856635,0.079073321,0.087242897,0.08488509
+50000,0.051620933,0.052072862,0.084026422,0.20025242,0.087477087
+100000,0.053831364,0.052748654,0.089491706,0.301430804,0.090903195
+250000,0.058136907,0.060387519,0.106847221,0.611682664,0.100279846
+500000,0.066435661,0.06802111,0.136405619,1.120970712,0.11381711
+750000,0.073868202,0.075893264,0.167437852,1.785567466,0.127734066
+1000000,0.084769993,0.086302757,0.19126444,2.185723895,0.14152288
+`
+
+</script>
+</body>
+</html>
