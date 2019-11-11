@@ -152,7 +152,7 @@
             prepareRealmGlobalFromConfig(moduleRealm.global, globalsConfig, endowments, globalStore)
             // execute in module realm with modified realm global
             try {
-              moduleInitializer = moduleRealm.evaluate(`${moduleSource}`)
+              moduleInitializer = moduleRealm.evaluate(moduleSource)
             } catch (err) {
               console.warn(`LavaMoat - Error evaluating module "${moduleId}" from package "${packageName}"`)
               throw err
@@ -160,7 +160,7 @@
           } else {
             endowments.global = globalRef
             // set the module initializer as the unwrapped version
-            moduleInitializer = unsafeEvalWithEndowments(`${moduleSource}`, endowments)
+            moduleInitializer = unsafeEvalWithEndowments(moduleSource, endowments)
           }
           if (typeof moduleInitializer !== 'function') {
             throw new Error('LavaMoat - moduleInitializer is not defined correctly')
