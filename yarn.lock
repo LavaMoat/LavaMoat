@@ -2,6 +2,11 @@
 # yarn lockfile v1
 
 
+"@agoric/make-hardener@^0.0.6":
+  version "0.0.6"
+  resolved "https://registry.yarnpkg.com/@agoric/make-hardener/-/make-hardener-0.0.6.tgz#5903748a71381bc37e23d571390aaff9973c37b2"
+  integrity sha512-OpZcNx/7bhHar0iuQ6D+FKYCMMxqKvYs4aC/bB5v/ffZaSM5sNAl98DnGL1mD9NSyZLGzAZ7D5XwJpe37BMldQ==
+
 "@babel/code-frame@^7.0.0", "@babel/code-frame@^7.5.5":
   version "7.5.5"
   resolved "https://registry.yarnpkg.com/@babel/code-frame/-/code-frame-7.5.5.tgz#bc0782f6d69f7b7d49531219699b988f669a8f9d"
@@ -1027,6 +1032,11 @@ eslint@~5.4.0:
     strip-json-comments "^2.0.1"
     table "^4.0.3"
     text-table "^0.2.0"
+
+esm@^3.2.25:
+  version "3.2.25"
+  resolved "https://registry.yarnpkg.com/esm/-/esm-3.2.25.tgz#342c18c29d56157688ba5ce31f8431fbb795cc10"
+  integrity sha512-U1suiZ2oDVWv4zPO56S0NcR5QriEahGtdN2OR6FiOG4WJvcjBVFB0qI4+eKoWFH483PKGuLuu6V8Z4T5g63UVA==
 
 espree@^4.0.0:
   version "4.1.0"
@@ -2166,6 +2176,11 @@ readable-stream@^2.0.2, readable-stream@^2.2.2, readable-stream@~2.3.6:
     string_decoder "~1.1.1"
     util-deprecate "~1.0.1"
 
+realms-shim@^1.2.1:
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/realms-shim/-/realms-shim-1.2.1.tgz#7d6afb2ad4007296b527a0b731fefd7b6620652d"
+  integrity sha512-IS1OrGSFt3k1Sv4Re2NxNrul5XCnc7XRGpaLiBKPU97RKcxVg2NbcZm2YoG5kLo9Emk5YG1gGv9zlNtplQSrMA==
+
 regexpp@^2.0.0, regexpp@^2.0.1:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/regexpp/-/regexpp-2.0.1.tgz#8d19d31cf632482b589049f8281f93dbcba4d07f"
@@ -2299,6 +2314,15 @@ semver-compare@^1.0.0:
   version "5.7.1"
   resolved "https://registry.yarnpkg.com/semver/-/semver-5.7.1.tgz#a954f931aeba508d307bbf069eff0c01c96116f7"
   integrity sha512-sauaDf/PZdVgrLTNYHRtpXa1iRiKcaebiKQ1BJdpQlWH2lCvexQdX55snPFyK7QzpudqbCI0qXFfOasHdyNDGQ==
+
+ses@^0.6.4:
+  version "0.6.4"
+  resolved "https://registry.yarnpkg.com/ses/-/ses-0.6.4.tgz#ad1f33cf8486d925f43205a37a478136d97e997f"
+  integrity sha512-EEGe8FIUSMtkqJn6bjoplpsc9UjivPwqy1XKUdnHUR99SIkXlho8HzXX7mWL1mlwzvqMt5nvqMPE7fLDRmFZpA==
+  dependencies:
+    "@agoric/make-hardener" "^0.0.6"
+    esm "^3.2.25"
+    realms-shim "^1.2.1"
 
 sesify-tofu@^2.0.4:
   version "2.0.4"

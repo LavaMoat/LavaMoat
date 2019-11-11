@@ -7,7 +7,7 @@
 const fs = require('fs')
 const jsonStringify = require('json-stable-stringify')
 const preludeTemplate = fs.readFileSync(__dirname + '/preludeTemplate.js', 'utf8')
-const sesSrc = fs.readFileSync(__dirname + '/../lib/ses.umd.js', 'utf8')
+const sesSrc = fs.readFileSync(__dirname + '/../node_modules/ses/dist/ses.cjs.js', 'utf8')
 const makeMagicCopySrc = fs.readFileSync(__dirname + '/magicCopy.js', 'utf8')
 const makeGetEndowmentsForConfigSrc = fs.readFileSync(__dirname + '/makeGetEndowmentsForConfig.js', 'utf8')
 const makePrepareRealmGlobalFromConfigSrc = fs.readFileSync(__dirname + '/makePrepareRealmGlobalFromConfig.js', 'utf8')
