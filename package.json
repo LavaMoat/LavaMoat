@@ -24,7 +24,7 @@
     "pify": "^4.0.1",
     "resolve-package-path": "^1.2.7",
     "safe-buffer": "^5.1.2",
-    "ses": "^0.6.4",
+    "ses": "0.6.4",
     "sesify-tofu": "^2.0.4",
     "tape": "^4.9.1",
     "through2": "^3.0.0",
