@@ -2315,10 +2315,9 @@ semver-compare@^1.0.0:
   resolved "https://registry.yarnpkg.com/semver/-/semver-5.7.1.tgz#a954f931aeba508d307bbf069eff0c01c96116f7"
   integrity sha512-sauaDf/PZdVgrLTNYHRtpXa1iRiKcaebiKQ1BJdpQlWH2lCvexQdX55snPFyK7QzpudqbCI0qXFfOasHdyNDGQ==
 
-ses@0.6.4:
-  version "0.6.4"
-  resolved "https://registry.yarnpkg.com/ses/-/ses-0.6.4.tgz#ad1f33cf8486d925f43205a37a478136d97e997f"
-  integrity sha512-EEGe8FIUSMtkqJn6bjoplpsc9UjivPwqy1XKUdnHUR99SIkXlho8HzXX7mWL1mlwzvqMt5nvqMPE7fLDRmFZpA==
+"ses@git+https://git@github.com/kumavis/ses#86962cee78eeee5b02f3665577a4d32677d7a86a":
+  version "0.6.5-dev.0"
+  resolved "git+https://git@github.com/kumavis/ses#86962cee78eeee5b02f3665577a4d32677d7a86a"
   dependencies:
     "@agoric/make-hardener" "^0.0.6"
     esm "^3.2.25"
