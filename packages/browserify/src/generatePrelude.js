@@ -22,6 +22,8 @@ function generatePrelude (opts = {}) {
   output = output.replace('__lavamoatConfig__', lavamoatConfig)
 
   replaceTemplateRequire('ses', sesSrc)
+  replaceTemplateRequire('cytoplasm', fs.readFileSync(require.resolve('cytoplasm'), 'utf8'))
+  replaceTemplateRequire('cytoplasm/distortions/readOnly', fs.readFileSync(require.resolve('cytoplasm/src/distortions/readOnly'), 'utf8'))
   replaceTemplateRequire('makeMagicCopy', makeMagicCopySrc)
   replaceTemplateRequire('makeGetEndowmentsForConfig', makeGetEndowmentsForConfigSrc)
   replaceTemplateRequire('makePrepareRealmGlobalFromConfig', makePrepareRealmGlobalFromConfigSrc)

@@ -15,6 +15,7 @@
     "acorn-globals": "^4.3.3",
     "acorn-walk": "^6.1.1",
     "combine-source-map": "^0.8.0",
+    "cytoplasm": "^2.0.1",
     "defined": "^1.0.0",
     "fromentries": "^1.1.0",
     "json-stable-stringify": "^1.0.1",

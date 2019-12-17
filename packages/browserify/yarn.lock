@@ -657,6 +657,11 @@ crypto-browserify@^3.0.0:
     randombytes "^2.0.0"
     randomfill "^1.0.3"
 
+cytoplasm@^2.0.1:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/cytoplasm/-/cytoplasm-2.0.1.tgz#950571b9bc90c4dccd23383d385d9877b8da6cdf"
+  integrity sha512-4/2NXHg7weRcfo5IszhnXyb5oH/3EAe8WnRQGDFfoMy4JDhmOjEuLyVAD1kvjJjFPMApns4ldWoXyLBfxNcYTQ==
+
 dash-ast@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/dash-ast/-/dash-ast-1.0.0.tgz#12029ba5fb2f8aa6f0a861795b23c1b4b6c27d37"

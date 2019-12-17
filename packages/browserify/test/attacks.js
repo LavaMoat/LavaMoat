@@ -152,7 +152,6 @@ async function testEntryAttackerVictim (t, { defineAttacker, defineVictim }) {
     }
   }
   const result = await createBundleFromRequiresArray(depsArray, { lavamoatConfig: config })
-
   eval(result)
   t.equal(global.testResult, false)
 }
