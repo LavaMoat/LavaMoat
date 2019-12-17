@@ -56,6 +56,13 @@
     const makeMagicCopy = templateRequire('makeMagicCopy')
     const { getEndowmentsForConfig } = templateRequire('makeGetEndowmentsForConfig')()
     const { prepareRealmGlobalFromConfig } = templateRequire('makePrepareRealmGlobalFromConfig')()
+    const { Membrane } = templateRequire('cytoplasm')
+    const createReadOnlyDistortion = templateRequire('cytoplasm/distortions/readOnly')
+    const exportsDefenseStrategies = {
+      magicCopy: templateRequire('strategies/magicCopy')({ makeMagicCopy }),
+      harden: templateRequire('strategies/harden')({ harden }),
+    }
+
     const lavamoatConfig = (function(){
   // START of injected code from lavamoatConfig
   __lavamoatConfig__
@@ -76,11 +83,8 @@
 
     const magicCopyForPackage = new Map()
     const globalStore = new Map()
-
-    const exportsDefenseStrategies = {
-      magicCopy: templateRequire('strategies/magicCopy')({ makeMagicCopy }),
-      harden: templateRequire('strategies/harden')({ harden }),
-    }
+    const membraneSpaceForPackage = new Map()
+    const membrane = new Membrane()
 
     return internalRequire
 
@@ -256,15 +260,32 @@
       }
 
       // moduleExports require-time protection
-      if (parentModulePackageName && packageName === parentModulePackageName) {
+      if (parentModulePackageName && isSamePackage) {
         // return raw if same package
         return moduleExports
       } else {
-        const exportsDefense = configForModule.exportsDefense || 'magicCopy'
-        const strategy = exportsDefenseStrategies[exportsDefense]
-        // return exports protected as specified in config
-        return strategy.protectForRequireTime(moduleExports, parentModulePackageName)
+        const inGraph = getMembraneGraphForPackage(packageName)
+        const outGraph = getMembraneGraphForPackage(parentModulePackageName)
+        const protectedExports = membrane.bridge(moduleExports, inGraph, outGraph)
+        return protectedExports
+        // const exportsDefense = configForModule.exportsDefense || 'magicCopy'
+        // const strategy = exportsDefenseStrategies[exportsDefense]
+        // // return exports protected as specified in config
+        // return strategy.protectForRequireTime(moduleExports, parentModulePackageName)
       }
+    }
+
+    function getMembraneGraphForPackage (packageName) {
+      if (membraneSpaceForPackage.has(packageName)) {
+        return membraneSpaceForPackage.get(packageName)
+      }
+
+      const membraneSpace = membrane.makeObjectGraph({
+        label: packageName,
+        createHandler: createReadOnlyDistortion,
+      })
+      membraneSpaceForPackage.set(packageName, membraneSpace)
+      return membraneSpace
     }
 
     // this gets the lavaMoat config for a module by packageName
