@@ -24,7 +24,7 @@
     "pify": "^4.0.1",
     "resolve-package-path": "^1.2.7",
     "safe-buffer": "^5.1.2",
-    "ses": "0.6.4",
+    "ses": "git+https://git@github.com/kumavis/ses#86962cee78eeee5b02f3665577a4d32677d7a86a",
     "sesify-tofu": "^2.0.4",
     "tape": "^4.9.1",
     "through2": "^3.0.0",
