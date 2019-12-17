@@ -45,7 +45,8 @@
     "lint": "npm run lint:standard && npm run lint:deps",
     "lint:standard": "standard src test",
     "lint:fix": "standard src test --fix",
-    "lint:deps": "depcheck --ignore-dirs=lib"
+    "lint:deps": "depcheck --ignore-dirs=lib",
+    "postinstall": "(cd node_modules/ses && npm i && npm run build)"
   },
   "author": "",
   "license": "ISC",
