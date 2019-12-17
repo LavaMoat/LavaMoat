@@ -201,7 +201,8 @@
       }
 
       // finally, protect the moduleExports using the strategy's technique
-      protectedModuleExports = strategy.protectForInitializationTime(moduleObj.exports, moduleId)
+      // protectedModuleExports = strategy.protectForInitializationTime(moduleObj.exports, moduleId)
+      protectedModuleExports = moduleObj.exports
       return protectedModuleExports
 
       // this is passed to the module initializer
