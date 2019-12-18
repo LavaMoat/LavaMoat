@@ -58,6 +58,7 @@
     const { prepareRealmGlobalFromConfig } = templateRequire('makePrepareRealmGlobalFromConfig')()
     const { Membrane } = templateRequire('cytoplasm')
     const createReadOnlyDistortion = templateRequire('cytoplasm/distortions/readOnly')
+
     const exportsDefenseStrategies = {
       magicCopy: templateRequire('strategies/magicCopy')({ makeMagicCopy }),
       harden: templateRequire('strategies/harden')({ harden }),
@@ -267,12 +268,18 @@
       } else {
         const inGraph = getMembraneGraphForPackage(packageName)
         const outGraph = getMembraneGraphForPackage(parentModulePackageName)
+        // set graph of moduleExports to read-only
+        deepWalk(moduleExports, (value) => {
+          // skip plain values
+          if (membrane.shouldSkipBridge(value)) return
+          // set this ref to read-only
+          inGraph.handlerForRef.set(value, createReadOnlyDistortion({
+            setHandlerForRef: (ref, newHandler) => inGraph.handlerForRef.set(ref, newHandler)
+          }))
+        })
+
         const protectedExports = membrane.bridge(moduleExports, inGraph, outGraph)
         return protectedExports
-        // const exportsDefense = configForModule.exportsDefense || 'magicCopy'
-        // const strategy = exportsDefenseStrategies[exportsDefense]
-        // // return exports protected as specified in config
-        // return strategy.protectForRequireTime(moduleExports, parentModulePackageName)
       }
     }
 
@@ -283,10 +290,23 @@
 
       const membraneSpace = membrane.makeObjectGraph({
         label: packageName,
-        createHandler: createReadOnlyDistortion,
+        // default is a transparent membrane handler
+        createHandler: () => Reflect,
       })
       membraneSpaceForPackage.set(packageName, membraneSpace)
       return membraneSpace
+    }
+
+    function deepWalk (value, visitor) {
+      // the value itself
+      visitor(value)
+      // the own properties
+      Object.values(Object.getOwnPropertyDescriptors(value)).map(entry => {
+        if ('value' in entry) visitor(entry.value)
+      })
+      // the prototype
+      const proto = Object.getPrototypeOf(value)
+      if (proto) visitor(proto)
     }
 
     // this gets the lavaMoat config for a module by packageName
