@@ -6,6 +6,7 @@ const createCustomPack = require('./createCustomPack')
 const { createConfigSpy } = require('./generateConfig')
 const { createPackageDataStream } = require('./packageData')
 const { wrapIntoModuleInitializer } = require('./sourcemaps')
+const { makeStringTransform } = require('browserify-transform-tools');
 
 /*  export a Browserify plugin  */
 module.exports = plugin
@@ -25,9 +26,15 @@ function plugin (browserify, pluginOpts) {
 
   // override browserify/browser-pack prelude
   function setupPlugin () {
+
+    applySesTransforms(browserify)
+
     // helper to read config at path
     if (typeof pluginOpts.config === 'string') {
       pluginOpts.lavamoatConfig = () => {
+        if (pluginOpts.writeAutoConfig) {
+          return
+        }
         // load latest config
         const filename = pluginOpts.config
         const configSource = fs.readFileSync(filename, 'utf8')
@@ -100,4 +107,23 @@ function createLavamoatPacker (opts) {
   const packOpts = Object.assign({}, defaults, opts)
   const customPack = createCustomPack(packOpts)
   return customPack
+}
+
+function applySesTransforms(browserify) {
+  const removeHtmlComment = makeStringTransform('remove-html-comment', { excludeExtension: ['.json'] }, (content, _, cb) => {
+    const hideComments = content.split('-->').join('-- >')
+    // bluebird uses eval, sorta
+    const hideEval = hideComments.split(' eval(').join(' (eval)(')
+    cb(null, hideEval)
+  })
+
+  const changeImportString = makeStringTransform('remove-import-string', { excludeExtension: ['.json'] }, (content, _, cb) => {
+    const hideImport = content.split('import').join('_import')
+    // bluebird uses eval, sorta
+    const hideEval = hideImport.split(' eval(').join(' (eval)(')
+    cb(null, hideEval)
+  })
+
+  browserify.transform(removeHtmlComment, { global: true })
+  browserify.transform(changeImportString, { global: true })
 }
