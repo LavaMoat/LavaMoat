@@ -27,7 +27,7 @@ function plugin (browserify, pluginOpts) {
   // override browserify/browser-pack prelude
   function setupPlugin () {
 
-    applySesTransform(browserify)
+    applySesTransforms(browserify)
 
     // helper to read config at path
     if (typeof pluginOpts.config === 'string') {
@@ -109,12 +109,21 @@ function createLavamoatPacker (opts) {
   return customPack
 }
 
-function applySesTransform (browserify) {
+function applySesTransforms(browserify) {
   const removeHtmlComment = makeStringTransform('remove-html-comment', { excludeExtension: ['.json'] }, (content, _, cb) => {
     const hideComments = content.split('-->').join('-- >')
     // bluebird uses eval, sorta
     const hideEval = hideComments.split(' eval(').join(' (eval)(')
     cb(null, hideEval)
   })
+
+  const changeImportString = makeStringTransform('remove-import-string', { excludeExtension: ['.json'] }, (content, _, cb) => {
+    const hideImport = content.split('import').join('_import')
+    // bluebird uses eval, sorta
+    const hideEval = hideImport.split(' eval(').join(' (eval)(')
+    cb(null, hideEval)
+  })
+
   browserify.transform(removeHtmlComment, { global: true })
+  browserify.transform(changeImportString, { global: true })
 }
