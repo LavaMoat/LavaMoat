@@ -1,6 +1,6 @@
 {
   "name": "lavamoat-browserify",
-  "version": "3.0.6",
+  "version": "3.0.8",
   "description": "browserify plugin for sandboxing dependencies with LavaMoat",
   "main": "src/index.js",
   "directories": {
@@ -8,7 +8,7 @@
     "test": "test"
   },
   "engines": {
-    "node": "^10.15.1"
+    "node": ">10.15.1"
   },
   "dependencies": {
     "JSONStream": "^1.3.5",
@@ -25,7 +25,7 @@
     "pify": "^4.0.1",
     "resolve-package-path": "^1.2.7",
     "safe-buffer": "^5.1.2",
-    "ses": "git+https://git@github.com/kumavis/ses#86962cee78eeee5b02f3665577a4d32677d7a86a",
+    "ses": "git+https://git@github.com/agoric/ses#ee242a5f50de27b75f9a130760ff95277ee0bb0b",
     "sesify-tofu": "^2.0.4",
     "tape": "^4.9.1",
     "through2": "^3.0.0",
@@ -47,7 +47,7 @@
     "lint:standard": "standard src test",
     "lint:fix": "standard src test --fix",
     "lint:deps": "depcheck --ignore-dirs=lib",
-    "postinstall": "(cd $(node -p \"require('path').resolve(require.resolve('ses/package.json'), './..')\") && npm i && npm run build)"
+    "build:ses": "(cd ./node_modules/ses && npm i && npm run build && cp ./dist/ses.umd.js ../../lib/)"
   },
   "author": "",
   "license": "ISC",
