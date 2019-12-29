@@ -24,7 +24,7 @@
     "pify": "^4.0.1",
     "resolve-package-path": "^1.2.7",
     "safe-buffer": "^5.1.2",
-    "ses": "git+https://git@github.com/kumavis/ses#86962cee78eeee5b02f3665577a4d32677d7a86a",
+    "ses": "git+https://git@github.com/agoric/ses#ee242a5f50de27b75f9a130760ff95277ee0bb0b",
     "sesify-tofu": "^2.0.4",
     "tape": "^4.9.1",
     "through2": "^3.0.0",
@@ -45,7 +45,8 @@
     "lint": "npm run lint:standard && npm run lint:deps",
     "lint:standard": "standard src test",
     "lint:fix": "standard src test --fix",
-    "lint:deps": "depcheck --ignore-dirs=lib"
+    "lint:deps": "depcheck --ignore-dirs=lib",
+    "build:ses": "(cd ./node_modules/ses && npm i && npm run build && cp ./dist/ses.umd.js ../../lib/)"
   },
   "author": "",
   "license": "ISC",
