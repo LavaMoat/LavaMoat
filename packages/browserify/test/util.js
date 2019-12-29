@@ -13,6 +13,8 @@ module.exports = {
   generateConfigFromFiles,
   filesToConfigSource,
   fnToCodeBlock,
+  testEntryAttackerVictim,
+  runSimpleOneTwo,
 }
 
 async function createBundleFromEntry (path, lavamoatConfig) {
@@ -92,4 +94,115 @@ async function bundleAsync (bundler) {
 
 function fnToCodeBlock (fn) {
   return fn.toString().split('\n').slice(1,-1).join('\n')
+}
+
+
+async function testEntryAttackerVictim (t, { defineAttacker, defineVictim }) {
+
+  function defineEntry () {
+    require('attacker')
+    const result = require('victim').action()
+    global.testResult = result
+  }
+
+  const depsArray = [
+    {
+      'id': '/entry.js',
+      'file': '/entry.js',
+      'source': `(${defineEntry})()`,
+      'deps': {
+        'attacker': '/node_modules/attacker/index.js',
+        'victim': '/node_modules/victim/index.js'
+      },
+      'entry': true
+    },
+    {
+      'id': '/node_modules/attacker/index.js',
+      'file': '/node_modules/attacker/index.js',
+      'source': `(${defineAttacker})()`,
+      'deps': {
+        'victim': '/node_modules/victim/index.js'
+      }
+    },
+    {
+      'id': '/node_modules/victim/index.js',
+      'file': '/node_modules/victim/index.js',
+      'source': `(${defineVictim})()`,
+      'deps': {}
+    }
+  ]
+
+  const config = {
+    "resources": {
+      "<root>": {
+        "packages": {
+          "attacker": true,
+          "victim": true,
+        }
+      },
+      "attacker": {
+        "packages": {
+          "victim": true,
+        }
+      },
+    }
+  }
+  const result = await createBundleFromRequiresArray(depsArray, { lavamoatConfig: config })
+  eval(result)
+  t.equal(global.testResult, false)
+}
+
+async function runSimpleOneTwo ({ defineOne, defineTwo }) {
+
+  function defineEntry () {
+    global.testResult = require('one')
+  }
+
+  const depsArray = [
+    {
+      'id': '/entry.js',
+      'file': '/entry.js',
+      'source': `(${defineEntry})()`,
+      'deps': {
+        'one': '/node_modules/one/index.js',
+        'two': '/node_modules/two/index.js'
+      },
+      'entry': true
+    },
+    {
+      'id': '/node_modules/one/index.js',
+      'file': '/node_modules/one/index.js',
+      'source': `(${defineOne})()`,
+      'deps': {
+        'two': '/node_modules/two/index.js'
+      }
+    },
+    {
+      'id': '/node_modules/two/index.js',
+      'file': '/node_modules/two/index.js',
+      'source': `(${defineTwo})()`,
+      'deps': {}
+    }
+  ]
+
+  const config = {
+    "resources": {
+      "<root>": {
+        "packages": {
+          "one": true,
+        }
+      },
+      "one": {
+        "packages": {
+          "two": true,
+        }
+      },
+    }
+  }
+
+  const result = await createBundleFromRequiresArray(depsArray, { lavamoatConfig: config })
+  delete global.testResult
+  eval(result)
+
+  return global.testResult
 }
