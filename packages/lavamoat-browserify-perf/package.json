@@ -1,5 +1,6 @@
 {
   "scripts": {
+    "serve": "serve .",
     "start": "yarn run start:wallet && yarn run start:localOnly && yarn run start:requireLoop && yarn run start:secp256k1 && yarn run start:newBN",
     "start:wallet": "(cd trials/wallet && yarn && yarn start)",
     "start:localOnly": "(cd trials/localOnly && yarn && yarn start)",
@@ -8,7 +9,12 @@
     "start:newBN": "(cd trials/secp256k1-newBN && yarn && yarn start)"
   },
   "dependencies": {
-    "lavamoat-browserify": "^3.0.3",
+    "browserify": "^16.5.0",
+    "lavamoat-browserify": "lavamoat/lavamoat-browserify#ee0637443a3bcd0ba494cade087c3e36e489d4a6",
+    "readable-stream-patch": "kumavis/readable-stream#v2-no-util-mut",
     "ses": "^0.6.4"
+  },
+  "devDependencies": {
+    "serve": "^11.2.0"
   }
 }

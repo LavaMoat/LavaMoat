@@ -18,10 +18,10 @@ const tasks = {
     prep: 'yarn build',
     run: 'node bundle.js',
   },
-  'bify+lavamoat w/ harden': {
-    prep: 'yarn build:harden',
-    run: 'node bundle.js',
-  },
+  // 'bify+lavamoat w/ harden': {
+  //   prep: 'yarn build:harden',
+  //   run: 'node bundle.js',
+  // },
 }
 
 performTest(tasks, nRange)

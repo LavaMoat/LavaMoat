@@ -109,7 +109,7 @@
         "process": true
       }
     },
-    "readable-stream": {
+    "readable-stream-patch": {
       "packages": {
         "browser-resolve": true,
         "core-util-is": true,
@@ -156,7 +156,7 @@
       "packages": {
         "events": true,
         "inherits": true,
-        "readable-stream": true
+        "readable-stream-patch": true
       }
     },
     "string_decoder": {
