@@ -9,10 +9,6 @@
     mathRandomMode: 'allow',
     errorStackMode: 'allow',
   })
-  const sesRequire = realm.makeRequire({
-    '@agoric/harden': true,
-  })
-  const harden = sesRequire('@agoric/harden')
 
   return loadBundle
 
@@ -33,7 +29,6 @@
     const internalRequire = makeInternalRequire({
       modules,
       realm,
-      harden,
       unsafeEvalWithEndowments,
       globalRef,
     })
@@ -48,21 +43,14 @@
   function unsafeMakeInternalRequire ({
     modules,
     realm,
-    harden,
     unsafeEvalWithEndowments,
     globalRef,
   }) {
     // "templateRequire" calls are inlined in "generatePrelude"
-    const makeMagicCopy = templateRequire('makeMagicCopy')
     const { getEndowmentsForConfig } = templateRequire('makeGetEndowmentsForConfig')()
     const { prepareRealmGlobalFromConfig } = templateRequire('makePrepareRealmGlobalFromConfig')()
     const { Membrane } = templateRequire('cytoplasm')
     const createReadOnlyDistortion = templateRequire('cytoplasm/distortions/readOnly')
-
-    const exportsDefenseStrategies = {
-      magicCopy: templateRequire('strategies/magicCopy')({ makeMagicCopy }),
-      harden: templateRequire('strategies/harden')({ harden }),
-    }
 
     const lavamoatConfig = (function(){
   // START of injected code from lavamoatConfig
@@ -82,7 +70,7 @@
       moduleData.sourceString = moduleSource
     }
 
-    const magicCopyForPackage = new Map()
+    const moduleCache = new Map()
     const globalStore = new Map()
     const membraneSpaceForPackage = new Map()
     const membrane = new Membrane()
@@ -95,6 +83,10 @@
     // 2. instantiates in the config specified environment
     // 3. calls config specified strategy for "protectExportsInstantiationTime"
     function internalRequire (moduleId) {
+      if (moduleCache.has(moduleId)) {
+        const moduleExports = moduleCache.get(moduleId).exports
+        return moduleExports
+      }
       const moduleData = modules[moduleId]
 
       // if we dont have it, throw an error
@@ -110,102 +102,83 @@
       const configForModule = getConfigForPackage(lavamoatConfig, packageName)
       const isEntryModule = moduleData.package === '<root>'
 
-      // prepare exportsDefense strategy
-      const exportsDefense = configForModule.exportsDefense || 'magicCopy'
-      const strategy = exportsDefenseStrategies[exportsDefense]
+      // create the initial moduleObj
+      let moduleObj = { exports: {} }
+      // cache moduleObj here
+      moduleCache.set(moduleId, moduleObj)
+      // this is important for multi-module circles in the dep graph
+      // if you dont cache before running the moduleInitializer
 
-      // check cache for protectedModuleExports, if present return early
-      let protectedModuleExports = strategy.checkProtectedModuleExportsCache(moduleId)
-      if (protectedModuleExports !== undefined) {
-        return protectedModuleExports
+      // prepare endowments
+      const endowmentsFromConfig = getEndowmentsForConfig(globalRef, configForModule)
+      let endowments = Object.assign({}, lavamoatConfig.defaultGlobals, endowmentsFromConfig)
+      // special case for exposing window
+      if (endowments.window) {
+        endowments = Object.assign({}, endowments.window, endowments)
       }
 
-      // check if a cached moduleObj is available
-      let moduleObj = strategy.checkModuleObjCache(moduleId)
+      // the default environment is "unfrozen" for the app root modules, "frozen" for dependencies
+      // this may be a bad default, but was meant to ease app development
+      // "frozen" means in a SES container
+      // "unfrozen" means via unsafeEvalWithEndowments
+      const environment = configForModule.environment || (isEntryModule ? 'unfrozen' : 'frozen')
+      const runInSes = environment !== 'unfrozen'
 
-      if (moduleObj === undefined) {
-        // create the initial moduleObj
-        moduleObj = { exports: {} }
-        // cache moduleObj here
-        // this is important for multi-module circles in the dep graph
-        // if you dont cache before running the moduleInitializer
-        strategy.cacheModuleObj(moduleObj, moduleId)
-
-        // prepare endowments
-        const endowmentsFromConfig = getEndowmentsForConfig(globalRef, configForModule)
-        let endowments = Object.assign({}, lavamoatConfig.defaultGlobals, endowmentsFromConfig)
-        // special case for exposing window
-        if (endowments.window) {
-          endowments = Object.assign({}, endowments.window, endowments)
-        }
-
-        // the default environment is "unfrozen" for the app root modules, "frozen" for dependencies
-        // this may be a bad default, but was meant to ease app development
-        // "frozen" means in a SES container
-        // "unfrozen" means via unsafeEvalWithEndowments
-        const environment = configForModule.environment || (isEntryModule ? 'unfrozen' : 'frozen')
-        const runInSes = environment !== 'unfrozen'
-
-        // attempt moduleInitializer cache
-        let moduleInitializer = strategy.checkModuleInitializerCache(moduleId)
-        if (moduleInitializer === undefined) {
-          // determine if its a SES-wrapped or naked module initialization
-          if (runInSes) {
-            // set the module initializer as the SES-wrapped version
-            const moduleRealm = realm.global.Realm.makeCompartment()
-            const globalsConfig = configForModule.globals
-            prepareRealmGlobalFromConfig(moduleRealm.global, globalsConfig, endowments, globalStore)
-            // execute in module realm with modified realm global
-            try {
-              moduleInitializer = moduleRealm.evaluate(`${moduleSource}`)
-            } catch (err) {
-              console.warn(`LavaMoat - Error evaluating module "${moduleId}" from package "${packageName}"`)
-              throw err
-            }
-          } else {
-            endowments.global = globalRef
-            // set the module initializer as the unwrapped version
-            moduleInitializer = unsafeEvalWithEndowments(`${moduleSource}`, endowments)
-          }
-          if (typeof moduleInitializer !== 'function') {
-            throw new Error('LavaMoat - moduleInitializer is not defined correctly')
-          }
-        }
-
-        // browserify goop:
-        // this "modules" interface is exposed to the browserify moduleInitializer
-        // https://github.com/browserify/browser-pack/blob/cd0bd31f8c110e19a80429019b64e887b1a82b2b/prelude.js#L38
-        // browserify's browser-resolve uses "arguments[4]" to do direct module initializations
-        // browserify seems to do this when module references are redirected by the "browser" field
-        // this proxy shims this behavior
-        // TODO: would be better to just fix this by removing the indirection (maybe in https://github.com/browserify/module-deps?)
-        // though here and in the original browser-pack prelude it has a side effect that it is re-instantiated from the original module (no shared closure state)
-        const directModuleInstantiationInterface = new Proxy({}, {
-          get (_, targetModuleId) {
-            const fakeModuleDefinition = [fakeModuleInitializer]
-            return fakeModuleDefinition
-
-            function fakeModuleInitializer () {
-              const targetModuleExports = requireRelativeWithContext(targetModuleId)
-              moduleObj.exports = targetModuleExports
-            }
-          }
-        })
-
-        // initialize the module with the correct context
+      let moduleInitializer = {}
+      // determine if its a SES-wrapped or naked module initialization
+      if (runInSes) {
+        // set the module initializer as the SES-wrapped version
+        const moduleRealm = realm.global.Realm.makeCompartment()
+        const globalsConfig = configForModule.globals
+        const packageMembraneSpace = getMembraneGraphForPackage(packageName)
+        const endowmentsMembraneSpace = getMembraneGraphForPackage('<endowments>')
+        const membraneEndowments = membrane.bridge(endowments, endowmentsMembraneSpace, packageMembraneSpace)
+        prepareRealmGlobalFromConfig(moduleRealm.global, globalsConfig, membraneEndowments, globalStore)
+        // execute in module realm with modified realm global
         try {
-          moduleInitializer.call(moduleObj.exports, requireRelativeWithContext, moduleObj, moduleObj.exports, null, directModuleInstantiationInterface)
+          moduleInitializer = moduleRealm.evaluate(`${moduleSource}`)
         } catch (err) {
-          console.warn(`LavaMoat - Error instantiating module "${moduleId}" from package "${packageName}"`)
+          console.warn(`LavaMoat - Error evaluating module "${moduleId}" from package "${packageName}"`)
           throw err
         }
+      } else {
+        endowments.global = globalRef
+        // set the module initializer as the unwrapped version
+        moduleInitializer = unsafeEvalWithEndowments(`${moduleSource}`, endowments)
+      }
+      if (typeof moduleInitializer !== 'function') {
+        throw new Error('LavaMoat - moduleInitializer is not defined correctly')
       }
 
-      // finally, protect the moduleExports using the strategy's technique
-      // protectedModuleExports = strategy.protectForInitializationTime(moduleObj.exports, moduleId)
-      protectedModuleExports = moduleObj.exports
-      return protectedModuleExports
+      // browserify goop:
+      // this "modules" interface is exposed to the browserify moduleInitializer
+      // https://github.com/browserify/browser-pack/blob/cd0bd31f8c110e19a80429019b64e887b1a82b2b/prelude.js#L38
+      // browserify's browser-resolve uses "arguments[4]" to do direct module initializations
+      // browserify seems to do this when module references are redirected by the "browser" field
+      // this proxy shims this behavior
+      // TODO: would be better to just fix this by removing the indirection (maybe in https://github.com/browserify/module-deps?)
+      // though here and in the original browser-pack prelude it has a side effect that it is re-instantiated from the original module (no shared closure state)
+      const directModuleInstantiationInterface = new Proxy({}, {
+        get (_, targetModuleId) {
+          const fakeModuleDefinition = [fakeModuleInitializer]
+          return fakeModuleDefinition
 
+          function fakeModuleInitializer () {
+            const targetModuleExports = requireRelativeWithContext(targetModuleId)
+            moduleObj.exports = targetModuleExports
+          }
+        }
+      })
+
+      // initialize the module with the correct context
+      try {
+        moduleInitializer.call(moduleObj.exports, requireRelativeWithContext, moduleObj, moduleObj.exports, null, directModuleInstantiationInterface)
+      } catch (err) {
+        console.warn(`LavaMoat - Error instantiating module "${moduleId}" from package "${packageName}"`)
+        throw err
+      }
+
+      return moduleObj.exports
       // this is passed to the module initializer
       // it adds the context of the parent module
       // this could be replaced via "Function.prototype.bind" if its more performant
