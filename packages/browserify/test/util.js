@@ -2,6 +2,7 @@ const browserify = require('browserify')
 const pify = require('pify')
 const clone = require('clone')
 const through2 = require('through2').obj
+const mergeDeep = require('merge-deep')
 
 const sesifyPlugin = require('../src/index')
 
@@ -152,7 +153,7 @@ async function testEntryAttackerVictim (t, { defineAttacker, defineVictim }) {
   t.equal(global.testResult, false)
 }
 
-async function runSimpleOneTwo ({ defineOne, defineTwo }) {
+async function runSimpleOneTwo ({ defineOne, defineTwo, config = {} }) {
 
   function defineEntry () {
     global.testResult = require('one')
@@ -185,7 +186,7 @@ async function runSimpleOneTwo ({ defineOne, defineTwo }) {
     }
   ]
 
-  const config = {
+  const _config = mergeDeep({
     "resources": {
       "<root>": {
         "packages": {
@@ -198,9 +199,9 @@ async function runSimpleOneTwo ({ defineOne, defineTwo }) {
         }
       },
     }
-  }
+  }, config)
 
-  const result = await createBundleFromRequiresArray(depsArray, { lavamoatConfig: config })
+  const result = await createBundleFromRequiresArray(depsArray, { lavamoatConfig: _config })
   delete global.testResult
   eval(result)
 
