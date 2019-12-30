@@ -130,7 +130,10 @@
         // set the module initializer as the SES-wrapped version
         const moduleRealm = realm.global.Realm.makeCompartment()
         const globalsConfig = configForModule.globals
-        prepareRealmGlobalFromConfig(moduleRealm.global, globalsConfig, endowments, globalStore)
+        const packageMembraneSpace = getMembraneGraphForPackage(packageName)
+        const endowmentsMembraneSpace = getMembraneGraphForPackage('<endowments>')
+        const membraneEndowments = membrane.bridge(endowments, endowmentsMembraneSpace, packageMembraneSpace)
+        prepareRealmGlobalFromConfig(moduleRealm.global, globalsConfig, membraneEndowments, globalStore)
         // execute in module realm with modified realm global
         try {
           moduleInitializer = moduleRealm.evaluate(`${moduleSource}`)
