@@ -8,7 +8,6 @@ const fs = require('fs')
 const jsonStringify = require('json-stable-stringify')
 const preludeTemplate = fs.readFileSync(__dirname + '/preludeTemplate.js', 'utf8')
 const sesSrc = fs.readFileSync(__dirname + '/../lib/ses.umd.js', 'utf8')
-const makeMagicCopySrc = fs.readFileSync(__dirname + '/magicCopy.js', 'utf8')
 const makeGetEndowmentsForConfigSrc = fs.readFileSync(__dirname + '/makeGetEndowmentsForConfig.js', 'utf8')
 const makePrepareRealmGlobalFromConfigSrc = fs.readFileSync(__dirname + '/makePrepareRealmGlobalFromConfig.js', 'utf8')
 
@@ -24,11 +23,8 @@ function generatePrelude (opts = {}) {
   replaceTemplateRequire('ses', sesSrc)
   replaceTemplateRequire('cytoplasm', fs.readFileSync(require.resolve('cytoplasm'), 'utf8'))
   replaceTemplateRequire('cytoplasm/distortions/readOnly', fs.readFileSync(require.resolve('cytoplasm/src/distortions/readOnly'), 'utf8'))
-  replaceTemplateRequire('makeMagicCopy', makeMagicCopySrc)
   replaceTemplateRequire('makeGetEndowmentsForConfig', makeGetEndowmentsForConfigSrc)
   replaceTemplateRequire('makePrepareRealmGlobalFromConfig', makePrepareRealmGlobalFromConfigSrc)
-  replaceTemplateRequire('strategies/magicCopy', fs.readFileSync(__dirname + '/strategies/magicCopy.js', 'utf8'))
-  replaceTemplateRequire('strategies/harden', fs.readFileSync(__dirname + '/strategies/harden.js', 'utf8'))
 
   function replaceTemplateRequire (moduleName, src) {
     const wrappedSrc = wrapWithReturnCjsExports(moduleName, src)
