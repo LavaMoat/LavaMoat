@@ -95,126 +95,31 @@ test('moduleExports - decorate an import - function', async (t) => {
   t.deepEqual(result, { call: 100, xyz: 42 })
 })
 
-
-test('moduleExports - decorate an import - function class', async (t) => {
-  const files = [{
-    // id must be full path
-    id: './entry.js',
-    file: './entry.js',
-    deps: {
-      'test': './node_modules/test/index.js'
-    },
-    source: `
-      const FunctionClass = require('test')
-      const instance = new FunctionClass()
-      global.testResult = {
-        abc: instance.abc,
-        jkl: instance.jkl(),
-        xyz: FunctionClass.xyz,
-      }
-    `,
-    entry: true
-  }, {
-    // non-entry
-    id: './node_modules/test/index.js',
-    file: './node_modules/test/index.js',
-    deps: {
-      './alt': './node_modules/test/alt.js'
-    },
-    source: `
-      const alt = require('./alt')
-      alt.xyz = 42
-      module.exports = alt
-    `,
-  }, {
-    // non-entry
-    id: './node_modules/test/alt.js',
-    file: './node_modules/test/alt.js',
-    deps: {},
-    source: `
-      module.exports = FunctionClass
-      function FunctionClass () { this.abc = 123 }
-      FunctionClass.prototype.jkl = () => 'yes'
-    `,
-  }]
-
-  const config = {
-    "resources": {
-      "<root>": {
-        "packages": {
-          "test": true,
-        }
-      }
-    }
-  }
-
-  const result = await evalModulesArray(t, { files, pluginOpts: { lavamoatConfig: config } })
-  t.deepEqual(result, { abc: 123, jkl: 'yes', xyz: 42 })
-})
-
 test('moduleExports - decorate an import - class syntax', async (t) => {
-  const files = [{
-    // id must be full path
-    id: './entry.js',
-    file: './entry.js',
-    deps: {
-      'test': './node_modules/test/index.js'
-    },
-    source: `
-      const ModernClass = require('test')
-      const instance = new ModernClass()
-
-      global.testResult = {
-        abc: instance.abc,
-        jkl: ModernClass.jkl,
-        xyz: ModernClass.xyz,
-       }
-    `,
-    entry: true
-  }, {
-    // non-entry
-    id: './node_modules/test/index.js',
-    file: './node_modules/test/index.js',
-    deps: {
-      './alt': './node_modules/test/alt.js'
-    },
-    source: `
-      const alt = require('./alt')
-      alt.xyz = 42
-      module.exports = alt
-    `,
-  }, {
-    // non-entry
-    id: './node_modules/test/alt.js',
-    file: './node_modules/test/alt.js',
-    deps: {},
-    source: `
-      class ModernClass {
-        constructor () {
-          this.abc = 123
-        }
-      }
-      ModernClass.jkl = 101
-      module.exports = ModernClass
-    `,
-  }]
-
-  const config = {
-    "resources": {
-      "<root>": {
-        "packages": {
-          "test": true,
-        }
+  function defineOne() {
+    const modernClass = require('two')
+    try {
+      modernClass.xyz = 42
+    } catch (error) {
+      module.exports = modernClass
+   }
+  }
+  function defineTwo() {
+    class ModernClass {
+      constructor() {
+        this.abc = 123
       }
     }
+    ModernClass.jkl = 101
+    module.exports = ModernClass
   }
 
-  const result = await evalModulesArray(t, { files, pluginOpts: { lavamoatConfig: config } })
-  t.deepEqual(result, {
-    abc: 123,
-    jkl: 101,
-    xyz: 42
-  })
+  const exportedModernClass = await runSimpleOneTwo({ defineOne, defineTwo })
+  const instance = new exportedModernClass()
+
+  t.equal(instance.abc, 123)
+  t.equal(exportedModernClass.jkl, 101)
+  t.equal(exportedModernClass.xyz, undefined)
 })
 
 test('moduleExports - decorate an import - class syntax subclass', async (t) => {
