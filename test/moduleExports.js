@@ -289,56 +289,19 @@ test('moduleExports - decorate an import - class syntax subclass', async (t) => 
 })
 
 
-test('moduleExports - exported array passes Array.isArray', async (t) => {
-  const files = [{
-    // id must be full path
-    id: './entry.js',
-    file: './entry.js',
-    deps: {
-      'test': './node_modules/test/index.js'
-    },
-    source: `
-      const result = require('test')
-      global.testResult = Array.isArray(result)
-    `,
-    entry: true
-  }, {
-    // non-entry
-    id: './node_modules/test/index.js',
-    file: './node_modules/test/index.js',
-    deps: {},
-    source: `
-      module.exports = [1,2,3]
-    `,
-  }]
-
-  const config = {
-    "resources": {
-      "<root>": {
-        "packages": {
-          "test": true,
-        }
-      }
-    }
+test('moduleExports - bridged array passes Array.isArray', async (t) => {
+  function defineOne() {
+    const two = require('two')
+    module.exports = two
+  }
+  function defineTwo() {
+    module.exports = [1, 2, 3]
   }
 
-  const result = await evalModulesArray(t, { files, pluginOpts: { lavamoatConfig: config } })
+  const one = await runSimpleOneTwo({ defineOne, defineTwo })
+  const result = Array.isArray(one)
   t.deepEqual(result, true)
 })
-
-async function evalModulesArray (t, { files, pluginOpts = {} }) {
-  const bundle = await createBundleFromRequiresArray(files, pluginOpts)
-
-  global.testResult = undefined
-
-  try {
-    eval(bundle)
-  } catch (err) {
-    t.fail(`eval of bundle failed:\n${err.stack || err}`)
-  }
-
-  return global.testResult
-}
 
 test('object returned from exported function should be mutable', async (t) => {
   function defineOne() {
@@ -354,3 +317,17 @@ test('object returned from exported function should be mutable', async (t) => {
 
   t.equal(one.abc, 123, "Object should be mutable")
 }) 
+
+async function evalModulesArray(t, { files, pluginOpts = {} }) {
+  const bundle = await createBundleFromRequiresArray(files, pluginOpts)
+
+  global.testResult = undefined
+
+  try {
+    eval(bundle)
+  } catch (err) {
+    t.fail(`eval of bundle failed:\n${err.stack || err}`)
+  }
+
+  return global.testResult
+}
