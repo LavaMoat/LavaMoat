@@ -49,50 +49,22 @@ test('moduleExports - decorate an import - object', async (t) => {
 })
 
 test('moduleExports - decorate an import - function', async (t) => {
-  const files = [{
-    // id must be full path
-    id: './entry.js',
-    file: './entry.js',
-    deps: {
-      'test': './node_modules/test/index.js'
-    },
-    source: `
-      const test = require('test')
-      global.testResult = { call: test(), xyz: test.xyz }
-    `,
-    entry: true
-  }, {
-    // non-entry
-    id: './node_modules/test/index.js',
-    file: './node_modules/test/index.js',
-    deps: {
-      './alt': './node_modules/test/alt.js'
-    },
-    source: `
-      const alt = require('./alt')
-      alt.xyz = 42
-      module.exports = alt
-    `,
-  }, {
-    // non-entry
-    id: './node_modules/test/alt.js',
-    file: './node_modules/test/alt.js',
-    deps: {},
-    source: `module.exports = () => 100`,
-  }]
-
-  const config = {
-    "resources": {
-      "<root>": {
-        "packages": {
-          "test": true,
-        }
-      }
+  function defineOne() {
+    const two = require('two')
+    try {
+      two.xyz = 42
+    } catch (error) {
+      module.exports = two
     }
   }
+  function defineTwo() {
+    module.exports = () => 100
+  }
 
-  const result = await evalModulesArray(t, { files, pluginOpts: { lavamoatConfig: config } })
-  t.deepEqual(result, { call: 100, xyz: 42 })
+  const one = await runSimpleOneTwo({ defineOne, defineTwo })
+  const result = {call: one(), xyz: one.xyz}
+
+  t.deepEqual(result, { call: 100, xyz: undefined })
 })
 
 test('moduleExports - decorate an import - class syntax', async (t) => {
