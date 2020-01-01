@@ -219,74 +219,42 @@ test('moduleExports - decorate an import - class syntax', async (t) => {
 
 
 test('moduleExports - decorate an import - class syntax subclass', async (t) => {
-  const files = [{
-    // id must be full path
-    id: './entry.js',
-    file: './entry.js',
-    deps: {
-      'test': './node_modules/test/index.js'
-    },
-    source: `
-      const NewClass = require('test')
-      const instance = new NewClass()
+  function defineOne() {
+    const BaseClass = require('two')
 
-      global.testResult = {
-        abc: instance.abc,
-        jkl: NewClass.jkl,
-       }
-    `,
-    entry: true
-  }, {
-    // non-entry
-    id: './node_modules/test/index.js',
-    file: './node_modules/test/index.js',
-    deps: {
-      './alt': './node_modules/test/alt.js'
-    },
-    source: `
-      const BaseClass = require('./alt')
-
-      class NewClass extends BaseClass {
-        constructor () {
-          super()
-          this.abc = 456
-        }
-      }
-
-      module.exports = NewClass
-    `,
-  }, {
-    // non-entry
-    id: './node_modules/test/alt.js',
-    file: './node_modules/test/alt.js',
-    deps: {},
-    source: `
-      class BaseClass {
-        constructor () {
-          this.abc = 123
-        }
-      }
-      BaseClass.jkl = 101
-      module.exports = BaseClass
-    `,
-  }]
-
-  const config = {
-    "resources": {
-      "<root>": {
-        "packages": {
-          "test": true,
-        }
+    class NewClass extends BaseClass {
+      constructor() {
+        super()
+        this.abc = 456
       }
     }
+
+    module.exports = NewClass
+  }
+  function defineTwo() {
+    class BaseClass {
+      constructor() {
+        this.abc = 123
+      }
+    }
+    BaseClass.jkl = 101
+    module.exports = BaseClass
   }
 
-  const result = await evalModulesArray(t, { files, pluginOpts: { lavamoatConfig: config } })
+  const NewClass = await runSimpleOneTwo({ defineOne, defineTwo })
+  const instance = new NewClass()
+
+  const result = {
+    abc: instance.abc,
+    jkl: NewClass.jkl,
+  }
+
   t.deepEqual(result, {
     abc: 456,
     jkl: 101,
   })
 })
+
 
 
 test('moduleExports - bridged array passes Array.isArray', async (t) => {
