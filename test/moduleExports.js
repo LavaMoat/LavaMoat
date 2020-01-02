@@ -55,7 +55,7 @@ test('moduleExports - decorate an import - class syntax', async (t) => {
   const exportedModernClass = await runSimpleOneTwoSamePackage({ defineOne, defineTwo })
   const instance = new exportedModernClass()
 
-  result = {
+  const result = {
     abc: instance.abc,
     jkl: exportedModernClass.jkl,
     xyz: exportedModernClass.xyz
