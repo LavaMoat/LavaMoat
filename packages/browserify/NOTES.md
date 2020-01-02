@@ -19,6 +19,24 @@ some notes
     - doesnt solve architectural weaknesses
     - doesnt enforce disabling scripts (yet!)
 
+- [ ] review the audit
+  - [ ] easy
+    - [ ] Issue I: [LavaMoat] Code Injection via Label in ​wrapWithReturnCjsExports
+    - [x] Issue G: [LavaMoat] Prevent Access to __​proto​__ from ​deepGet
+      - fixed in f903354ca64b7aa46511d6c83d13921253df6ab1
+    - [ ] Suggestion 4: [LavaMoat] Hide ​stacktraces
+  - [ ] hard
+    - [ ] Issue H: [LavaMoat] Exported Factory Function Can Return Shared Object
+      - cant fix: exported functions can return objects that should be mutable.
+      - we currently assume that classes they use are on module.exports somewhere
+      - we may be able to do something like intercept every value and ensure its prototype is protected... should all prototypes be readOnly?
+    - [ ] Issue J: [LavaMoat] Child dependencies Can Access a Parent Module’s Exports Before Harden is Applied
+      - we should disallow package-level circular deps
+      - to some degree you rely on your deps to mutate objects you give them
+  - [ ] unknown difficulty
+    - [ ] Suggestion 3: [LavaMoat] Detect Additional Primordials
+    - [ ] Suggestion 5: [LavaMoat] Stronger Magic Copy
+
 LA audit kickoff todos
 - [x] clarify requireFns
 - [x] audit cache, looks broken
