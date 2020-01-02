@@ -57,3 +57,37 @@ test('config - deep endow', async (t) => {
   }
   t.deepEqual(testResult, '12345')
 })
+
+// here we provide an illegal config value
+test('config - dunder proto not allowed in globals path', async (t) => {
+  const entries = [
+    {
+      'id': '/one.js',
+      'file': '/one.js',
+      'source': "/* empty */",
+      'deps': {},
+      'entry': true,
+    },
+  ]
+
+  const config = {
+    resources: {
+      '<root>': {
+        globals: {
+          'window.__proto__': true,
+        },
+      },
+    }
+  }
+
+  const bundle = await createBundleFromRequiresArray(entries, { lavamoatConfig: config })
+
+  let testResult
+  global.postMessage = (message) => { testResult = message }
+  try {
+    eval(bundle)
+    t.fail('did not throw as expected')
+  } catch (err) {
+    t.ok(err.message.includes('"__proto__"'))
+  }
+})
