@@ -3944,10 +3944,6 @@ You probably want a Compartment instead, like:
     mathRandomMode: 'allow',
     errorStackMode: 'allow',
   })
-  const sesRequire = realm.makeRequire({
-    '@agoric/harden': true,
-  })
-  const harden = sesRequire('@agoric/harden')
 
   return loadBundle
 
@@ -3968,7 +3964,6 @@ You probably want a Compartment instead, like:
     const internalRequire = makeInternalRequire({
       modules,
       realm,
-      harden,
       unsafeEvalWithEndowments,
       globalRef,
     })
@@ -3983,100 +3978,10 @@ You probably want a Compartment instead, like:
   function unsafeMakeInternalRequire ({
     modules,
     realm,
-    harden,
     unsafeEvalWithEndowments,
     globalRef,
   }) {
     // "templateRequire" calls are inlined in "generatePrelude"
-    const makeMagicCopy = // define makeMagicCopy
-(function(){
-  const exports = {}
-  const module = { exports }
-  ;(function(){
-// START of injected code from makeMagicCopy
-module.exports = makeMagicCopy
-
-function makeMagicCopy () {
-
-  const copyCache = new WeakMap()
-
-  return magicCopyCache
-
-  function magicCopyCache (ref) {
-    // use cache if hit
-    if (copyCache.has(ref)) {
-      return copyCache.get(ref)
-    }
-    // otherwise create copy
-    const copy = magicCopyPrepareTarget(ref)
-    // exit if copy is noop
-    if (ref === copy) {
-      return ref
-    }
-    return copy
-  }
-
-  function magicCopyPrepareTarget (ref) {
-    // create a mutable copy
-    switch (typeof ref) {
-      case 'object':
-        // return null as is
-        if (ref === null) return ref
-        // check if array or obj
-        if (Array.isArray(ref)) {
-          return magicCopyProps([], ref)
-        } else {
-          return magicCopyProps({}, ref)
-        }
-      case 'function':
-        // supports both normal functions and both styles of classes
-        const copy = function magicCopyFnWrapper (...args) {
-          if (new.target) {
-            return Reflect.construct(ref, args, new.target)
-          } else {
-            return Reflect.apply(ref, this, args)
-          }
-        }
-        magicCopyProps(copy, ref)
-        return copy
-      default:
-        // safe as is
-        return ref
-    }
-  }
-
-  function magicCopyProps (target, source) {
-    // first populate cache with result
-    // to prevent inf loops
-    copyCache.set(source, target)
-    // copy all props + prototype
-    try {
-      // copy props
-      const props = Object.getOwnPropertyDescriptors(source)
-      Object.entries(props).forEach(([key, desc]) => {
-        if (!('value' in desc)) return
-        props[key].value = magicCopyCache(desc.value)
-      })
-      Object.defineProperties(target, props)
-      // copy prototype
-      const origProto = Reflect.getPrototypeOf(source)
-      const isPrimordial = [Function.prototype, Object.prototype, Array.prototype].includes(origProto)
-      if (!isPrimordial) {
-        const protoCopy = magicCopyCache(origProto)
-        Reflect.setPrototypeOf(target, protoCopy)
-      }
-    } catch (err) {
-      // console.warn('MagicCopy - Error performing copy:', err.message)
-      throw err
-    }
-    return target
-  }
-
-}
-// END of injected code from makeMagicCopy
-  })()
-  return module.exports
-})()
     const { getEndowmentsForConfig } = // define makeGetEndowmentsForConfig
 (function(){
   const exports = {}
@@ -4534,96 +4439,6 @@ function createDistortion ({ setHandlerForRef }) {
   })()
   return module.exports
 })()
-
-    const exportsDefenseStrategies = {
-      magicCopy: // define strategies/magicCopy
-(function(){
-  const exports = {}
-  const module = { exports }
-  ;(function(){
-// START of injected code from strategies/magicCopy
-module.exports = createStrategy
-
-function createStrategy ({ makeMagicCopy }) {
-  const moduleObjCache = new Map()
-  const magicCopyForPackage = new Map()
-  return {
-    checkModuleInitializerCache: (moduleId) => {
-      // do nothing
-    },
-    cacheModuleInitializer: (moduleId, moduleInitializer) => {
-      // do nothing
-    },
-    checkModuleObjCache: (moduleId) => {
-      return moduleObjCache.get(moduleId)
-    },
-    cacheModuleObj: (moduleObj, moduleId) => {
-      moduleObjCache.set(moduleId, moduleObj)
-    },
-    checkProtectedModuleExportsCache: (moduleId) => {
-      // do nothing
-    },
-    protectForInitializationTime: (moduleExports, moduleId) => {
-      // do nothing
-      return moduleExports
-    },
-    protectForRequireTime: (moduleExports, parentPackageName) => {
-      let magicCopy = magicCopyForPackage.get(parentPackageName)
-      if (!magicCopy) {
-        magicCopy = makeMagicCopy()
-        magicCopyForPackage.set(parentPackageName, magicCopy)
-      }
-      return magicCopy(moduleExports)
-    },
-  }
-}
-// END of injected code from strategies/magicCopy
-  })()
-  return module.exports
-})()({ makeMagicCopy }),
-      harden: // define strategies/harden
-(function(){
-  const exports = {}
-  const module = { exports }
-  ;(function(){
-// START of injected code from strategies/harden
-module.exports = createStrategy
-
-function createStrategy ({ harden }) {
-  const moduleObjCache = new Map()
-  const protectedModuleExportsCache = new Map()
-  return {
-    checkModuleInitializerCache: (moduleId) => {
-      // do nothing
-    },
-    cacheModuleInitializer: (moduleId, moduleInitializer) => {
-      // do nothing
-    },
-    checkModuleObjCache: (moduleId) => {
-      return moduleObjCache.get(moduleId)
-    },
-    cacheModuleObj: (moduleObj, moduleId) => {
-      moduleObjCache.set(moduleId, moduleObj)
-    },
-    checkProtectedModuleExportsCache: (moduleId) => {
-      return protectedModuleExportsCache.get(moduleId)
-    },
-    protectForInitializationTime: (moduleExports, moduleId) => {
-      const protectedModuleExports = harden(moduleExports)
-      protectedModuleExportsCache.set(moduleId, protectedModuleExports)
-      return protectedModuleExports
-    },
-    protectForRequireTime: (moduleExports, parentPackageName) => {
-      // do nothing
-      return moduleExports
-    },
-  }
-}
-// END of injected code from strategies/harden
-  })()
-  return module.exports
-})()({ harden }),
-    }
 
     const lavamoatConfig = (function(){
   // START of injected code from lavamoatConfig
@@ -5098,7 +4913,7 @@ function createStrategy ({ harden }) {
       moduleData.sourceString = moduleSource
     }
 
-    const magicCopyForPackage = new Map()
+    const moduleCache = new Map()
     const globalStore = new Map()
     const membraneSpaceForPackage = new Map()
     const membrane = new Membrane()
@@ -5111,6 +4926,10 @@ function createStrategy ({ harden }) {
     // 2. instantiates in the config specified environment
     // 3. calls config specified strategy for "protectExportsInstantiationTime"
     function internalRequire (moduleId) {
+      if (moduleCache.has(moduleId)) {
+        const moduleExports = moduleCache.get(moduleId).exports
+        return moduleExports
+      }
       const moduleData = modules[moduleId]
 
       // if we dont have it, throw an error
@@ -5126,102 +4945,83 @@ function createStrategy ({ harden }) {
       const configForModule = getConfigForPackage(lavamoatConfig, packageName)
       const isEntryModule = moduleData.package === '<root>'
 
-      // prepare exportsDefense strategy
-      const exportsDefense = configForModule.exportsDefense || 'magicCopy'
-      const strategy = exportsDefenseStrategies[exportsDefense]
+      // create the initial moduleObj
+      let moduleObj = { exports: {} }
+      // cache moduleObj here
+      moduleCache.set(moduleId, moduleObj)
+      // this is important for multi-module circles in the dep graph
+      // if you dont cache before running the moduleInitializer
 
-      // check cache for protectedModuleExports, if present return early
-      let protectedModuleExports = strategy.checkProtectedModuleExportsCache(moduleId)
-      if (protectedModuleExports !== undefined) {
-        return protectedModuleExports
+      // prepare endowments
+      const endowmentsFromConfig = getEndowmentsForConfig(globalRef, configForModule)
+      let endowments = Object.assign({}, lavamoatConfig.defaultGlobals, endowmentsFromConfig)
+      // special case for exposing window
+      if (endowments.window) {
+        endowments = Object.assign({}, endowments.window, endowments)
       }
 
-      // check if a cached moduleObj is available
-      let moduleObj = strategy.checkModuleObjCache(moduleId)
+      // the default environment is "unfrozen" for the app root modules, "frozen" for dependencies
+      // this may be a bad default, but was meant to ease app development
+      // "frozen" means in a SES container
+      // "unfrozen" means via unsafeEvalWithEndowments
+      const environment = configForModule.environment || (isEntryModule ? 'unfrozen' : 'frozen')
+      const runInSes = environment !== 'unfrozen'
 
-      if (moduleObj === undefined) {
-        // create the initial moduleObj
-        moduleObj = { exports: {} }
-        // cache moduleObj here
-        // this is important for multi-module circles in the dep graph
-        // if you dont cache before running the moduleInitializer
-        strategy.cacheModuleObj(moduleObj, moduleId)
-
-        // prepare endowments
-        const endowmentsFromConfig = getEndowmentsForConfig(globalRef, configForModule)
-        let endowments = Object.assign({}, lavamoatConfig.defaultGlobals, endowmentsFromConfig)
-        // special case for exposing window
-        if (endowments.window) {
-          endowments = Object.assign({}, endowments.window, endowments)
-        }
-
-        // the default environment is "unfrozen" for the app root modules, "frozen" for dependencies
-        // this may be a bad default, but was meant to ease app development
-        // "frozen" means in a SES container
-        // "unfrozen" means via unsafeEvalWithEndowments
-        const environment = configForModule.environment || (isEntryModule ? 'unfrozen' : 'frozen')
-        const runInSes = environment !== 'unfrozen'
-
-        // attempt moduleInitializer cache
-        let moduleInitializer = strategy.checkModuleInitializerCache(moduleId)
-        if (moduleInitializer === undefined) {
-          // determine if its a SES-wrapped or naked module initialization
-          if (runInSes) {
-            // set the module initializer as the SES-wrapped version
-            const moduleRealm = realm.global.Realm.makeCompartment()
-            const globalsConfig = configForModule.globals
-            prepareRealmGlobalFromConfig(moduleRealm.global, globalsConfig, endowments, globalStore)
-            // execute in module realm with modified realm global
-            try {
-              moduleInitializer = moduleRealm.evaluate(`${moduleSource}`)
-            } catch (err) {
-              console.warn(`LavaMoat - Error evaluating module "${moduleId}" from package "${packageName}"`)
-              throw err
-            }
-          } else {
-            endowments.global = globalRef
-            // set the module initializer as the unwrapped version
-            moduleInitializer = unsafeEvalWithEndowments(`${moduleSource}`, endowments)
-          }
-          if (typeof moduleInitializer !== 'function') {
-            throw new Error('LavaMoat - moduleInitializer is not defined correctly')
-          }
-        }
-
-        // browserify goop:
-        // this "modules" interface is exposed to the browserify moduleInitializer
-        // https://github.com/browserify/browser-pack/blob/cd0bd31f8c110e19a80429019b64e887b1a82b2b/prelude.js#L38
-        // browserify's browser-resolve uses "arguments[4]" to do direct module initializations
-        // browserify seems to do this when module references are redirected by the "browser" field
-        // this proxy shims this behavior
-        // TODO: would be better to just fix this by removing the indirection (maybe in https://github.com/browserify/module-deps?)
-        // though here and in the original browser-pack prelude it has a side effect that it is re-instantiated from the original module (no shared closure state)
-        const directModuleInstantiationInterface = new Proxy({}, {
-          get (_, targetModuleId) {
-            const fakeModuleDefinition = [fakeModuleInitializer]
-            return fakeModuleDefinition
-
-            function fakeModuleInitializer () {
-              const targetModuleExports = requireRelativeWithContext(targetModuleId)
-              moduleObj.exports = targetModuleExports
-            }
-          }
-        })
-
-        // initialize the module with the correct context
+      let moduleInitializer = {}
+      // determine if its a SES-wrapped or naked module initialization
+      if (runInSes) {
+        // set the module initializer as the SES-wrapped version
+        const moduleRealm = realm.global.Realm.makeCompartment()
+        const globalsConfig = configForModule.globals
+        const packageMembraneSpace = getMembraneGraphForPackage(packageName)
+        const endowmentsMembraneSpace = getMembraneGraphForPackage('<endowments>')
+        const membraneEndowments = membrane.bridge(endowments, endowmentsMembraneSpace, packageMembraneSpace)
+        prepareRealmGlobalFromConfig(moduleRealm.global, globalsConfig, membraneEndowments, globalStore)
+        // execute in module realm with modified realm global
         try {
-          moduleInitializer.call(moduleObj.exports, requireRelativeWithContext, moduleObj, moduleObj.exports, null, directModuleInstantiationInterface)
+          moduleInitializer = moduleRealm.evaluate(`${moduleSource}`)
         } catch (err) {
-          console.warn(`LavaMoat - Error instantiating module "${moduleId}" from package "${packageName}"`)
+          console.warn(`LavaMoat - Error evaluating module "${moduleId}" from package "${packageName}"`)
           throw err
         }
+      } else {
+        endowments.global = globalRef
+        // set the module initializer as the unwrapped version
+        moduleInitializer = unsafeEvalWithEndowments(`${moduleSource}`, endowments)
+      }
+      if (typeof moduleInitializer !== 'function') {
+        throw new Error('LavaMoat - moduleInitializer is not defined correctly')
       }
 
-      // finally, protect the moduleExports using the strategy's technique
-      // protectedModuleExports = strategy.protectForInitializationTime(moduleObj.exports, moduleId)
-      protectedModuleExports = moduleObj.exports
-      return protectedModuleExports
+      // browserify goop:
+      // this "modules" interface is exposed to the browserify moduleInitializer
+      // https://github.com/browserify/browser-pack/blob/cd0bd31f8c110e19a80429019b64e887b1a82b2b/prelude.js#L38
+      // browserify's browser-resolve uses "arguments[4]" to do direct module initializations
+      // browserify seems to do this when module references are redirected by the "browser" field
+      // this proxy shims this behavior
+      // TODO: would be better to just fix this by removing the indirection (maybe in https://github.com/browserify/module-deps?)
+      // though here and in the original browser-pack prelude it has a side effect that it is re-instantiated from the original module (no shared closure state)
+      const directModuleInstantiationInterface = new Proxy({}, {
+        get (_, targetModuleId) {
+          const fakeModuleDefinition = [fakeModuleInitializer]
+          return fakeModuleDefinition
 
+          function fakeModuleInitializer () {
+            const targetModuleExports = requireRelativeWithContext(targetModuleId)
+            moduleObj.exports = targetModuleExports
+          }
+        }
+      })
+
+      // initialize the module with the correct context
+      try {
+        moduleInitializer.call(moduleObj.exports, requireRelativeWithContext, moduleObj, moduleObj.exports, null, directModuleInstantiationInterface)
+      } catch (err) {
+        console.warn(`LavaMoat - Error instantiating module "${moduleId}" from package "${packageName}"`)
+        throw err
+      }
+
+      return moduleObj.exports
       // this is passed to the module initializer
       // it adds the context of the parent module
       // this could be replaced via "Function.prototype.bind" if its more performant
@@ -16323,7 +16123,7 @@ ECDH.prototype.setPublicKey = function (pub, enc) {
   if (!Buffer.isBuffer(pub)) {
     pub = new Buffer(pub, enc)
   }
-  this.keys._importPublic(pub)
+  this.keys.__importPublic(pub)
   return this
 }
 
@@ -16336,7 +16136,7 @@ ECDH.prototype.setPrivateKey = function (priv, enc) {
   var _priv = new BN(priv)
   _priv = _priv.toString(16)
   this.keys = this.curve.genKeyPair()
-  this.keys._importPrivate(_priv)
+  this.keys.__importPrivate(_priv)
   return this
 }
 
@@ -20158,9 +19958,9 @@ function KeyPair(ec, options) {
 
   // KeyPair(ec, { priv: ..., pub: ... })
   if (options.priv)
-    this._importPrivate(options.priv, options.privEnc);
+    this.__importPrivate(options.priv, options.privEnc);
   if (options.pub)
-    this._importPublic(options.pub, options.pubEnc);
+    this.__importPublic(options.pub, options.pubEnc);
 }
 module.exports = KeyPair;
 
@@ -20220,7 +20020,7 @@ KeyPair.prototype.getPrivate = function getPrivate(enc) {
     return this.priv;
 };
 
-KeyPair.prototype._importPrivate = function _importPrivate(key, enc) {
+KeyPair.prototype.__importPrivate = function __importPrivate(key, enc) {
   this.priv = new BN(key, enc || 16);
 
   // Ensure that the priv won't be bigger than n, otherwise we may fail
@@ -20228,7 +20028,7 @@ KeyPair.prototype._importPrivate = function _importPrivate(key, enc) {
   this.priv = this.priv.umod(this.ec.curve.n);
 };
 
-KeyPair.prototype._importPublic = function _importPublic(key, enc) {
+KeyPair.prototype.__importPublic = function __importPublic(key, enc) {
   if (key.x || key.y) {
     // Montgomery points only have an `x` coordinate.
     // Weierstrass/Edwards points on the other hand have both `x` and
@@ -20280,7 +20080,7 @@ function Signature(options, enc) {
   if (options instanceof Signature)
     return options;
 
-  if (this._importDER(options, enc))
+  if (this.__importDER(options, enc))
     return;
 
   assert(options.r && options.s, 'Signature without r or s');
@@ -20324,7 +20124,7 @@ function rmPadding(buf) {
   return buf.slice(i);
 }
 
-Signature.prototype._importDER = function _importDER(data, enc) {
+Signature.prototype.__importDER = function __importDER(data, enc) {
   data = utils.toArray(data, enc);
   var p = new Position();
   if (data[p.place++] !== 0x30) {
@@ -24794,7 +24594,7 @@ function checkNative (algo) {
   if (global.process && !global.process.browser) {
     return Promise.resolve(false)
   }
-  if (!subtle || !subtle.importKey || !subtle.deriveBits) {
+  if (!subtle || !subtle._importKey || !subtle.deriveBits) {
     return Promise.resolve(false)
   }
   if (checks[algo] !== undefined) {
@@ -24812,7 +24612,7 @@ function checkNative (algo) {
 }
 
 function browserPbkdf2 (password, salt, iterations, length, algo) {
-  return subtle.importKey(
+  return subtle._importKey(
     'raw', password, {name: 'PBKDF2'}, false, ['deriveBits']
   ).then(function (key) {
     return subtle.deriveBits({
@@ -26775,7 +26575,7 @@ Readable.prototype.wrap = function (stream) {
   });
 
   // proxy all the other methods.
-  // important when wrapping filters and duplexes.
+  // _important when wrapping filters and duplexes.
   for (var i in stream) {
     if (this[i] === undefined && typeof stream[i] === 'function') {
       this[i] = function (method) {
@@ -26786,7 +26586,7 @@ Readable.prototype.wrap = function (stream) {
     }
   }
 
-  // proxy certain important events.
+  // proxy certain _important events.
   for (var n = 0; n < kProxyEvents.length; n++) {
     stream.on(kProxyEvents[n], this.emit.bind(this, kProxyEvents[n]));
   }
@@ -29595,7 +29395,7 @@ Script.prototype.runInContext = function (context) {
 };
 
 Script.prototype.runInThisContext = function () {
-    return eval(this.code); // maybe...
+    return (eval)(this.code); // maybe...
 };
 
 Script.prototype.runInNewContext = function (context) {
@@ -31664,7 +31464,7 @@ Wallet.prototype.toV3String = function (password, opts) {
 
 Wallet.fromPublicKey = function (pub, nonStrict) {
   if (nonStrict) {
-    pub = ethUtil.importPublic(pub);
+    pub = ethUtil._importPublic(pub);
   }
   return new Wallet(null, pub);
 };
@@ -32076,7 +31876,7 @@ exports.privateToPublic = function (privateKey) {
 /**
  * Converts a public key to the Ethereum format.
  */
-exports.importPublic = function (publicKey) {
+exports._importPublic = function (publicKey) {
     publicKey = exports.toBuffer(publicKey);
     if (publicKey.length !== 64) {
         publicKey = secp256k1.publicKeyConvert(publicKey, false).slice(1);
@@ -34773,7 +34573,7 @@ module.exports={
   "EC_PRIVATE_KEY_TWEAK_ADD_FAIL": "tweak out of range or resulting private key is invalid",
   "EC_PRIVATE_KEY_TWEAK_MUL_FAIL": "tweak out of range",
   "EC_PRIVATE_KEY_EXPORT_DER_FAIL": "couldn't export to DER format",
-  "EC_PRIVATE_KEY_IMPORT_DER_FAIL": "couldn't import from DER format",
+  "EC_PRIVATE_KEY_IMPORT_DER_FAIL": "couldn't _import from DER format",
   "EC_PUBLIC_KEYS_TYPE_INVALID": "public keys should be an Array",
   "EC_PUBLIC_KEYS_LENGTH_INVALID": "public keys Array should have at least 1 element",
   "EC_PUBLIC_KEY_TYPE_INVALID": "public key should be a Buffer",
