@@ -17,7 +17,8 @@ module.exports = {
   fnToCodeBlock,
   testEntryAttackerVictim,
   runSimpleOneTwo,
-  runAutoConfig
+  runSimpleOneTwoSamePackage,
+  runAutoConfig,
 }
 
 async function createBundleFromEntry (path, pluginOpts) {
@@ -209,6 +210,62 @@ async function runSimpleOneTwo ({ defineOne, defineTwo, config = {} }) {
 
   return global.testResult
 }
+
+async function runSimpleOneTwoSamePackage({ defineOne, defineTwo, config = {} }) {
+
+  function defineEntry() {
+    global.testResult = require('one')
+  }
+
+  const depsArray = [
+    {
+      'id': '/entry.js',
+      'file': '/entry.js',
+      'source': `(${defineEntry})()`,
+      'deps': {
+        'one': '/node_modules/one/index.js',
+        'two': '/node_modules/one/main.js'
+      },
+      'entry': true
+    },
+    {
+      'id': '/node_modules/one/index.js',
+      'file': '/node_modules/one/index.js',
+      'source': `(${defineOne})()`,
+      'deps': {
+        'two': '/node_modules/one/main.js'
+      }
+    },
+    {
+      'id': '/node_modules/one/main.js',
+      'file': '/node_modules/one/main.js',
+      'source': `(${defineTwo})()`,
+      'deps': {}
+    }
+  ]
+
+  const _config = mergeDeep({
+    "resources": {
+      "<root>": {
+        "packages": {
+          "one": true,
+        }
+      },
+      "one": {
+        "packages": {
+          "two": true,
+        }
+      },
+    }
+  }, config)
+
+  const result = await createBundleFromRequiresArray(depsArray, { lavamoatConfig: _config })
+  delete global.testResult
+  eval(result)
+
+  return global.testResult
+}
+
 
 async function runAutoConfig(t) {
 
