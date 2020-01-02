@@ -268,26 +268,10 @@ async function runSimpleOneTwoSamePackage({ defineOne, defineTwo, config = {} })
 
 
 async function runAutoConfig(t) {
-
-  const config = {
-    "resources": {
-      "<root>": {
-        "packages": {
-          "one": true,
-        }
-      },
-      "one": {
-        "packages": {
-          "two": true,
-        }
-      },
-    }
-  }
-
+  
   const tmpObj = tmp.fileSync();
 
   const result = await createBundleFromRequiresArray([], {
-    lavamoatConfig: config,
     writeAutoConfig: true,
     config: tmpObj.name,
   })
