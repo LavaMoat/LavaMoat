@@ -100,6 +100,7 @@
       const packageName = moduleData.package
       const moduleSource = moduleData.sourceString
       const configForModule = getConfigForPackage(lavamoatConfig, packageName)
+      const packageMembraneSpace = getMembraneGraphForPackage(packageName)
       const isEntryModule = moduleData.package === '<root>'
 
       // create the initial moduleObj
@@ -130,7 +131,6 @@
         // set the module initializer as the SES-wrapped version
         const moduleRealm = realm.global.Realm.makeCompartment()
         const globalsConfig = configForModule.globals
-        const packageMembraneSpace = getMembraneGraphForPackage(packageName)
         const endowmentsMembraneSpace = getMembraneGraphForPackage('<endowments>')
         const membraneEndowments = membrane.bridge(endowments, endowmentsMembraneSpace, packageMembraneSpace)
         prepareRealmGlobalFromConfig(moduleRealm.global, globalsConfig, membraneEndowments, globalStore)
@@ -178,7 +178,22 @@
         throw err
       }
 
-      return moduleObj.exports
+      const moduleExports = moduleObj.exports
+
+      // configure membrane defense
+      // defense is configured here but applied elsewhere
+      // set moduleExports graph to read-only
+      deepWalk(moduleExports, (value) => {
+        // skip plain values
+        if (membrane.shouldSkipBridge(value)) return
+        // set this ref to read-only
+        packageMembraneSpace.handlerForRef.set(value, createReadOnlyDistortion({
+          setHandlerForRef: (ref, newHandler) => packageMembraneSpace.handlerForRef.set(ref, newHandler)
+        }))
+      })
+
+      return moduleExports
+
       // this is passed to the module initializer
       // it adds the context of the parent module
       // this could be replaced via "Function.prototype.bind" if its more performant
@@ -239,18 +254,9 @@
         // return raw if same package
         return moduleExports
       } else {
+        // apply membrane protections
         const inGraph = getMembraneGraphForPackage(packageName)
         const outGraph = getMembraneGraphForPackage(parentModulePackageName)
-        // set graph of moduleExports to read-only
-        deepWalk(moduleExports, (value) => {
-          // skip plain values
-          if (membrane.shouldSkipBridge(value)) return
-          // set this ref to read-only
-          inGraph.handlerForRef.set(value, createReadOnlyDistortion({
-            setHandlerForRef: (ref, newHandler) => inGraph.handlerForRef.set(ref, newHandler)
-          }))
-        })
-
         const protectedExports = membrane.bridge(moduleExports, inGraph, outGraph)
         return protectedExports
       }
