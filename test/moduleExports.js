@@ -2,54 +2,45 @@ const test = require('tape-promise').default(require('tape'))
 const { createBundleFromRequiresArray } = require('./util')
 const {
   runSimpleOneTwo,
+  runSimpleOneTwoSamePackage
 } = require('./util')
 
 test('moduleExports - decorate an import - object', async (t) => {
   function defineOne() {
     const two = require('two')
-    try {
-      two.xyz = 42
-    } catch (error) {
-      module.exports = two
-    }
+    two.xyz = 42
+    module.exports = two
   }
   function defineTwo() {
     module.exports = {}
   }
 
-  const one = await runSimpleOneTwo({ defineOne, defineTwo })
-  const result = { one: one, xyz: one.xyz }
+  const one = await runSimpleOneTwoSamePackage({ defineOne, defineTwo })
 
-  t.deepEqual(result, { one: {}, xyz: undefined })
+  t.equal(one.xyz, 42)
 })
 
 test('moduleExports - decorate an import - function', async (t) => {
   function defineOne() {
     const two = require('two')
-    try {
-      two.xyz = 42
-    } catch (error) {
-      module.exports = two
-    }
+    two.xyz = 42
+    module.exports = two
   }
   function defineTwo() {
     module.exports = () => 100
   }
 
-  const one = await runSimpleOneTwo({ defineOne, defineTwo })
+  const one = await runSimpleOneTwoSamePackage({ defineOne, defineTwo })
   const result = {call: one(), xyz: one.xyz}
 
-  t.deepEqual(result, { call: 100, xyz: undefined })
+  t.deepEqual(result, { call: 100, xyz: 42 })
 })
 
 test('moduleExports - decorate an import - class syntax', async (t) => {
   function defineOne() {
     const modernClass = require('two')
-    try {
       modernClass.xyz = 42
-    } catch (error) {
       module.exports = modernClass
-   }
   }
   function defineTwo() {
     class ModernClass {
@@ -61,12 +52,19 @@ test('moduleExports - decorate an import - class syntax', async (t) => {
     module.exports = ModernClass
   }
 
-  const exportedModernClass = await runSimpleOneTwo({ defineOne, defineTwo })
+  const exportedModernClass = await runSimpleOneTwoSamePackage({ defineOne, defineTwo })
   const instance = new exportedModernClass()
 
-  t.equal(instance.abc, 123)
-  t.equal(exportedModernClass.jkl, 101)
-  t.equal(exportedModernClass.xyz, undefined)
+  result = {
+    abc: instance.abc,
+    jkl: exportedModernClass.jkl,
+    xyz: exportedModernClass.xyz
+  }
+  t.deepEqual(result, {
+    abc: 123,
+    jkl: 101,
+    xyz: 42
+  })
 })
 
 test('moduleExports - decorate an import - class syntax subclass', async (t) => {
