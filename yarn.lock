@@ -669,10 +669,10 @@ crypto-browserify@^3.0.0:
     randombytes "^2.0.0"
     randomfill "^1.0.3"
 
-cytoplasm@^2.0.2:
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/cytoplasm/-/cytoplasm-2.0.2.tgz#a38ba79615d1f9b77ba87f0d3b6593fed48090a4"
-  integrity sha512-qFtyafEbWFREuiGiUQcHUHAOUoSqLWd7q8Khu6R0gyV2G7G3EJEILRzC8dVunnWwS4mwUNqO+8KvgPZPezkpUA==
+cytoplasm@^2.0.4:
+  version "2.0.4"
+  resolved "https://registry.yarnpkg.com/cytoplasm/-/cytoplasm-2.0.4.tgz#5eec1b39eeba023883c636cb00af553d90924b42"
+  integrity sha512-iS2onNpqDEFNOr8FLPUIm7otKn3aEh2+W/MWzDfAgD/3g6w64oySSijNgMad+AKoAhZaniBWIaltm3HXYE/M6w==
 
 dash-ast@^1.0.0:
   version "1.0.0"
