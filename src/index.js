@@ -1,5 +1,4 @@
 const fs = require('fs')
-const path = require('path')
 const mergeDeep = require('merge-deep')
 const jsonStringify = require('json-stable-stringify')
 const generatePrelude = require('./generatePrelude')
@@ -61,24 +60,16 @@ function plugin (browserify, pluginOpts) {
 
     // inject package name into module data
     browserify.pipeline.splice('emit-deps', 0, createPackageDataStream())
+
     // helper to dump autoconfig to a file
     if (pluginOpts.writeAutoConfig) {
-      if (pluginOpts.config) {
-        const filename = pluginOpts.config
-        if (typeof filename !== 'string') {
-          throw new Error('LavaMoat - "writeAutoConfig" was specified but "config" is not a string')
-        }
-        pluginOpts.autoConfig = function writeAutoConfig (config) {
-          fs.writeFileSync(filename, config)
-          console.warn(`LavaMoat Autoconfig - wrote to "${filename}"`)
-        }
-      } else {
-        pluginOpts.autoConfig = function writeAutoConfig (config) {
-          fs.mkdirSync("./lavamoat")
-          const filename = './lavamoat/lavamoat-config.json'
-          fs.writeFileSync(path.resolve(filename), config)
-          console.warn(`LavaMoat Autoconfig - wrote to "${filename}"`)
-        }
+      const filename = pluginOpts.config
+      if (typeof filename !== 'string') {
+        throw new Error('LavaMoat - "writeAutoConfig" was specified but "config" is not a string')
+      }
+      pluginOpts.autoConfig = function writeAutoConfig (config) {
+        fs.writeFileSync(filename, config)
+        console.warn(`LavaMoat Autoconfig - wrote to "${filename}"`)
       }
     }
     // if autoconfig activated, insert hook
