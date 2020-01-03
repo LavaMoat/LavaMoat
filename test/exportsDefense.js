@@ -49,3 +49,27 @@ test('exportsDefense - indirectly imported package should be readOnly', async (t
 
   t.equal(thing.action(), true, 'Thing.prototype.action was not corrupted')
 })
+
+// I'm not sure this is a problem we should solve
+// test('exportsDefense - parent moduleExports is mutable before moduleInit completes', async (t) => {
+//   function defineOne () {
+//     const two = require('two')
+//     class Thing {
+//       action () { return true }
+//     }
+//     // use some utility to enhance your class definition
+//     two(new Thing())
+//     module.exports = Thing
+//     // Thing isnt protected until after this moduleInitializer completes
+//   }
+//   function defineTwo () {
+//     module.exports = (someClass) => {
+//       someClass.prototype.action = () => false
+//     }
+//   }
+
+//   const Thing = await runSimpleOneTwo({ defineOne, defineTwo })
+//   const thing = new Thing()
+
+//   t.equal(thing.action(), true, 'Thing.prototype.action was not corrupted')
+// })
