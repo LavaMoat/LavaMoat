@@ -20,6 +20,12 @@ function makeGetEndowmentsForConfig () {
     if (!config.globals) return {}
     const endowments = {}
     Object.entries(config.globals).forEach(([globalPath, configValue]) => {
+      const pathParts = globalPath.split('.')
+      // disallow dunder proto in path
+      const pathContainsDunderProto = pathParts.some(pathPart => pathPart === '__proto__')
+      if (pathContainsDunderProto) {
+        throw new Error(`Lavamoat - "__proto__" disallowed in globals config paths. saw "${globalPath}"`)
+      }
       // write access handled elsewhere
       if (configValue === 'write') return
       if (configValue !== true) {
