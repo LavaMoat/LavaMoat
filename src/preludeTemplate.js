@@ -10,6 +10,11 @@
     errorStackMode: 'allow',
   })
 
+  const sesRequire = realm.makeRequire({
+    '@agoric/harden': true,
+  })
+  const harden = sesRequire('@agoric/harden')
+
   return loadBundle
 
 
@@ -31,6 +36,7 @@
       realm,
       unsafeEvalWithEndowments,
       globalRef,
+      harden,
     })
     // run each of entryPoints (ignores any exports of entryPoints)
     for (let entryId of entryPoints) {
@@ -45,6 +51,7 @@
     realm,
     unsafeEvalWithEndowments,
     globalRef,
+    harden,
   }) {
     // "templateRequire" calls are inlined in "generatePrelude"
     const { getEndowmentsForConfig } = templateRequire('makeGetEndowmentsForConfig')()
@@ -83,14 +90,19 @@
     // 1. loads the config for the module
     // 2. instantiates in the config specified environment
     // 3. calls config specified strategy for "protectExportsInstantiationTime"
-    function internalRequire (moduleId) {
+    function internalRequire (_moduleId) {
+      // coerce moduleId to a string.
+      // TIL that Maps treat Numbers and Strings used as keys differently
+      const moduleId = String(_moduleId)
+
+      // check cache
       if (moduleCache.has(moduleId)) {
         const moduleExports = moduleCache.get(moduleId).exports
         return moduleExports
       }
-      const moduleData = modules[moduleId]
 
-      // if we dont have it, throw an error
+      // if we dont have an entry for this moduleId, throw an error
+      const moduleData = modules[moduleId]
       if (!moduleData) {
         const err = new Error('Cannot find module \'' + moduleId + '\'')
         err.code = 'MODULE_NOT_FOUND'
@@ -100,14 +112,24 @@
       // prepare the module to be initialized
       const packageName = moduleData.package
       const moduleSource = moduleData.sourceString
-      const configForModule = getConfigForPackage(lavamoatConfig, packageName)
-      const packageMembraneSpace = getMembraneGraphForPackage(packageName)
       const isEntryModule = moduleData.package === '<root>'
+      const configForModule = getConfigForPackage(lavamoatConfig, packageName)
+      const exportsDefense = configForModule.exportsDefense || 'readOnlyMembrane'
+
+      // select membrane space based on exportsDefense strategy
+      // this allows strategies to enable same-space optimizations
+      let packageMembraneSpace
+      if (exportsDefense === 'harden') {
+        packageMembraneSpace = getMembraneGraphForPackage('<ambient>')
+      } else {
+        packageMembraneSpace = getMembraneGraphForPackage(packageName)
+      }
 
       // create the initial moduleObj
       let moduleObj = { exports: {} }
       // cache moduleObj here
       moduleCache.set(moduleId, moduleObj)
+
       // this is important for multi-module circles in the dep graph
       // if you dont cache before running the moduleInitializer
 
@@ -132,7 +154,7 @@
         // set the module initializer as the SES-wrapped version
         const moduleRealm = realm.global.Realm.makeCompartment()
         const globalsConfig = configForModule.globals
-        const endowmentsMembraneSpace = getMembraneGraphForPackage('<endowments>')
+        const endowmentsMembraneSpace = getMembraneGraphForPackage('<ambient>')
         const membraneEndowments = membrane.bridge(endowments, endowmentsMembraneSpace, packageMembraneSpace)
         prepareRealmGlobalFromConfig(moduleRealm.global, globalsConfig, membraneEndowments, globalStore)
         // execute in module realm with modified realm global
@@ -219,7 +241,7 @@
       // this is just a warning if the entry is missing in the deps map (local requestedName -> global moduleId)
       // if it is missing we try to fetch it anyways using the requestedName as the moduleId
       // The dependency whitelist should still be enforced elsewhere
-      const moduleId = parentModuleDepsMap[requestedName] || requestedName
+      const moduleId = String(parentModuleDepsMap[requestedName] || requestedName)
       if (!(requestedName in parentModuleData.deps)) {
         console.warn(`missing dep: ${parentModulePackageName} requested ${requestedName}`)
       }
@@ -252,7 +274,13 @@
         const packageModuleIds = Object.entries(modules)
           .filter(([id, moduleData]) => moduleData.package === packageName)
           .map(([id]) => id)
-        packageModuleIds.forEach(id => internalRequire(id))
+        const packageExports = packageModuleIds.map(id => internalRequire(id))
+        // apply "harden" exports defense
+        if (exportsDefense === 'harden') {
+          packageExports.forEach(moduleExports => {
+            harden(moduleExports)
+          })
+        }
         // mark package as initialized
         isPackageInitialized.set(packageName, true)
       }
@@ -279,10 +307,8 @@
           const protectedExports = membrane.bridge(moduleExports, inGraph, outGraph)
           return protectedExports
         } else if (exportsDefense === 'harden') {
-          // first ensure all modules in package are initialized
-          // this is a workaround of the fact that inside a package, its common for modules to
-          // import and even mutate each other
-          // const packageModules =
+          // moduleExports have already been hardened in place
+          return moduleExports
         }
       }
     }

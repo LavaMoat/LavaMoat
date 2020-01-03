@@ -5,6 +5,8 @@ const clone = require('clone')
 const {
   runSimpleOneTwo,
   runSimpleOneTwoSamePackage,
+  fnToCodeBlock,
+  createBundleFromRequiresArray,
 } = require('./util')
 
 test('exportsDefense - readOnly restrictions have override workaround fix', async (t) => {
@@ -73,3 +75,42 @@ test('exportsDefense - indirectly imported package should be readOnly', async (t
 
 //   t.equal(thing.action(), true, 'Thing.prototype.action was not corrupted')
 // })
+
+test('exportsDefense - harden on class exports', async (t) => {
+
+  function defineOne () {
+    class Banana {
+      constructor () {
+        this.color = 'yellow'
+      }
+    }
+
+    module.exports = Banana
+  }
+
+  function defineTwo () {
+    // not needed
+  }
+
+  const config = {
+    resources: {
+      "one": {
+        "exportsDefense": "harden",
+      }
+    }
+  }
+
+  const Banana = await runSimpleOneTwo({ defineOne, defineTwo, config })
+
+  t.ok(Banana, 'got a result')
+  const b = new Banana()
+  t.equal(b.color, 'yellow', 'Banana instantiation worked')
+  b.color = 'green'
+  t.equal(b.color, 'green', 'Banana instance was mutable')
+  try {
+    Banana.xyz = true
+    t.equal(Banana.xyz, undefined, 'Banana class remained unmutated')
+  } catch (err) {
+    t.pass('failed to mutate hardened Banana')
+  }
+})
