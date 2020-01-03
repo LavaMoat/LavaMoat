@@ -74,6 +74,7 @@
     const globalStore = new Map()
     const membraneSpaceForPackage = new Map()
     const membrane = new Membrane()
+    const isPackageInitialized = new Map()
 
     return internalRequire
 
@@ -234,13 +235,30 @@
         return parentModuleExports
       }
 
-      // load module
-      const moduleExports = internalRequire(moduleId)
-
       // look up config for module
       const moduleData = modules[moduleId]
       const packageName = moduleData.package
+      const isEntryModule = moduleData.package === '<root>'
       const configForModule = getConfigForPackage(lavamoatConfig, packageName)
+      const exportsDefense = configForModule.exportsDefense || 'readOnlyMembrane'
+
+      // pre-initialize whole package first  (skip if entry)
+      // this is done to allow the "harden" exports defense strategy
+      // to harden modulesExports after the whole package has been initialized
+      // it is a workaround to a common pattern where modules within a package mutate
+      // each others exports
+      if (!isEntryModule && !isPackageInitialized.get(packageName)) {
+        // initialize all modules in the package
+        const packageModuleIds = Object.entries(modules)
+          .filter(([id, moduleData]) => moduleData.package === packageName)
+          .map(([id]) => id)
+        packageModuleIds.forEach(id => internalRequire(id))
+        // mark package as initialized
+        isPackageInitialized.set(packageName, true)
+      }
+
+      // load module
+      const moduleExports = internalRequire(moduleId)
 
       // disallow requiring packages that are not in the parent's whitelist
       const isSamePackage = packageName === parentModulePackageName
@@ -254,11 +272,18 @@
         // return raw if same package
         return moduleExports
       } else {
-        // apply membrane protections
-        const inGraph = getMembraneGraphForPackage(packageName)
-        const outGraph = getMembraneGraphForPackage(parentModulePackageName)
-        const protectedExports = membrane.bridge(moduleExports, inGraph, outGraph)
-        return protectedExports
+        if (exportsDefense === 'readOnlyMembrane') {
+          // apply membrane protections
+          const inGraph = getMembraneGraphForPackage(packageName)
+          const outGraph = getMembraneGraphForPackage(parentModulePackageName)
+          const protectedExports = membrane.bridge(moduleExports, inGraph, outGraph)
+          return protectedExports
+        } else if (exportsDefense === 'harden') {
+          // first ensure all modules in package are initialized
+          // this is a workaround of the fact that inside a package, its common for modules to
+          // import and even mutate each other
+          // const packageModules =
+        }
       }
     }
 
