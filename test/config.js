@@ -1,4 +1,8 @@
 const test = require('tape-promise').default(require('tape'))
+const fs = require('fs')
+const path = require('path')
+const { spawn, execSync } = require('child_process')
+const tmp = require('tmp')
 
 const { createBundleFromRequiresArray } = require('./util')
 
@@ -90,4 +94,37 @@ test('config - dunder proto not allowed in globals path', async (t) => {
   } catch (err) {
     t.ok(err.message.includes('"__proto__"'))
   }
+})
+
+test('config - default config path is generated with autoconfig if path is not specified', async (t) => {
+  const entries = [
+    {
+      'id': '/one.js',
+      'file': '/one.js',
+      'source': "/* empty */",
+      'deps': {},
+      'entry': true,
+    },
+  ]
+
+  const config = {
+    resources: {
+      '<root>': {
+      },
+    }
+  }
+
+  const tmpObj = tmp.dirSync({ keep: true });
+  const defaults = {
+    cwd: tmpObj.name,
+  };
+
+  const expectedPath = path.join(tmpObj.name, 'lavamoat/lavamoat-config.json')
+  const scriptPath = require.resolve('./runBrowserify')
+
+  t.throws(() => fs.accessSync(expectedPath), 'Config file does not yet exist')
+
+  const buildProcess = execSync(`node ${scriptPath}`, defaults)
+
+  t.doesNotThrow(() => fs.accessSync(expectedPath), 'Config file exists')
 })
