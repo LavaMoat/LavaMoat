@@ -4,12 +4,10 @@ const jsonStringify = require('json-stable-stringify')
 const acornGlobals = require('acorn-globals')
 const { inspectSource, utils: { mergeConfig, mapToObj } } = require('sesify-tofu')
 const { inspectEnvironment, environmentTypes, environmentTypeStrings } = require('./inspectEnvironment')
-
 const defaultEnvironment = environmentTypes.frozen
 const rootSlug = '<root>'
 
 module.exports = { rootSlug, createConfigSpy }
-
 
 // createConfigSpy creates a pass-through object stream for the Browserify pipeline.
 // it analyses modules for global namespace usages, and generates a config for LavaMoat.
@@ -20,7 +18,6 @@ function createConfigSpy ({ onResult }) {
   const packageToGlobals = {}
   const packageToModules = {}
   const moduleIdToPackageName = {}
-
   const configSpy = createSpy(inspectModule, onBuildEnd)
   return configSpy
 
