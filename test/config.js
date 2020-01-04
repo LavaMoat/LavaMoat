@@ -127,4 +127,5 @@ test('config - default config path is generated with autoconfig if path is not s
   const buildProcess = execSync(`node ${scriptPath}`, defaults)
 
   t.doesNotThrow(() => fs.accessSync(expectedPath), 'Config file exists')
+  t.end()
 })
