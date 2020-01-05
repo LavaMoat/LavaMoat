@@ -21,25 +21,27 @@ module.exports.args = {
 }
 
 function plugin (browserify, pluginOpts) {
-  if (!pluginOpts.config) {
-    pluginOpts.config = './lavamoat/lavamoat-config.json' 
-    const filename = './lavamoat/lavamoat-config.json'
-    if (!fs.existsSync(filename)) {
-      fs.mkdirSync("./lavamoat")
-      const defaultConfig = JSON.stringify({
-        resources: {
-          '<root>': {
-            'packages' : {
-              
-            }
-          },
-        }
-      }, null, 4)
-      fs.writeFileSync(path.resolve(filename), defaultConfig)
-      console.warn(`LavaMoat Config - wrote to "${filename}"`)
+  //pluginOpts.config is config path
+  let config
+
+  if (!pluginOpts.config && !pluginOpts.dryRun) {
+    pluginOpts.config = './lavamoat/lavamoat-config.json'
+  } 
+
+  if (!pluginOpts.lavamoatConfig) {
+    config = {
+      resources: {
+        '<root>': {
+          'packages': {
+
+          }
+        },
+      }
     }
-    
+  } else {
+    config = pluginOpts.lavamoatConfig
   }
+  
   // setup the plugin in a re-bundle friendly way
   browserify.on('reset', setupPlugin)
   setupPlugin()
@@ -55,8 +57,20 @@ function plugin (browserify, pluginOpts) {
         if (pluginOpts.writeAutoConfig) {
           return
         }
-        // load latest config
-        const filename = pluginOpts.config
+        if (config) {
+          return config
+        }
+        // load latest config path
+        let filename = pluginOpts.config
+
+        
+        if (!fs.existsSync(filename)) {
+          fs.mkdirSync("./lavamoat")
+          fs.writeFileSync(path.resolve(filename), JSON.stringify(config, null, 4))
+          console.warn(`LavaMoat Default Config - wrote to "${filename}"`)
+        }
+        
+        
         const configSource = fs.readFileSync(filename, 'utf8')
         // if override specified, merge
         if (pluginOpts.configOverride) {
@@ -87,8 +101,12 @@ function plugin (browserify, pluginOpts) {
         throw new Error('LavaMoat - "writeAutoConfig" was specified but "config" is not a string')
       }
       pluginOpts.autoConfig = function writeAutoConfig (config) {
+
+        if (!fs.existsSync(filename)) {
+          fs.mkdirSync("./lavamoat")
+        }
         fs.writeFileSync(filename, config)
-        console.warn(`LavaMoat Autoconfig - wrote to "${filename}"`)
+        console.warn(`LavaMoat Config - wrote to "${filename}"`)
       }
     }
     // if autoconfig activated, insert hook

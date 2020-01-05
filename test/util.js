@@ -151,7 +151,7 @@ async function testEntryAttackerVictim (t, { defineAttacker, defineVictim }) {
       },
     }
   }
-  const result = await createBundleFromRequiresArray(depsArray, { config })
+  const result = await createBundleFromRequiresArray(depsArray, { lavamoatConfig: config })
   eval(result)
   t.equal(global.testResult, false)
 }
@@ -270,10 +270,9 @@ async function runSimpleOneTwoSamePackage({ defineOne, defineTwo, config = {} })
 async function runAutoConfig(t) {
   
   const tmpObj = tmp.fileSync();
-
   const result = await createBundleFromRequiresArray([], {
     writeAutoConfig: true,
-    config: tmpObj.name,
+    lavamoatConfig: tmpObj.name,
   })
 
   eval(result)
