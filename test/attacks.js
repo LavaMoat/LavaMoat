@@ -31,7 +31,7 @@ test('attack - prevent primitive modification', async (t) => {
       }
     }
   }
-  const result = await createBundleFromRequiresArray(depsArray, { lavamoatConfig: config })
+  const result = await createBundleFromRequiresArray(depsArray, { config })
 
   eval(result)
   t.equal(global.testResult, false)
@@ -63,7 +63,7 @@ test('attack - limit platform api', async (t) => {
       }
     }
   }
-  const result = await createBundleFromRequiresArray(depsArray, { lavamoatConfig: config })
+  const result = await createBundleFromRequiresArray(depsArray, { config })
 
   eval(result)
   t.equal(global.testResult, false)

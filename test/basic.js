@@ -11,7 +11,7 @@ const {
 
 test('basic - bundle works', async (t) => {
   const path = __dirname + '/fixtures/basic-deps.json'
-  const lavamoatConfig = {
+  const config = {
     "resources": {
       "<root>": {
         packages: {
@@ -20,7 +20,7 @@ test('basic - bundle works', async (t) => {
       },
     }
   }
-  const result = await createBundleFromRequiresArrayPath(path, { lavamoatConfig })
+  const result = await createBundleFromRequiresArrayPath(path, { config })
   try {
     eval(result)
     t.equal(global.testResult, 555)
@@ -59,13 +59,13 @@ test('basic - browserify bundle doesnt inject global in deps', async (t) => {
     deps: {},
     source: 'global'
   }]
-  const lavamoatConfig = await generateConfigFromFiles({ files: clone(files) })
-  const bundle = await createBundleFromRequiresArray(clone(files), { lavamoatConfig })
+  const config = await generateConfigFromFiles({ files: clone(files) })
+  const bundle = await createBundleFromRequiresArray(clone(files), { config })
   const hasGlobalInjection = bundle.includes('typeof global !== \\"undefined\\" ? global :')
   t.notOk(hasGlobalInjection, 'did not inject "global" ref')
 })
 
-test('basic - lavamoatConfig and bundle', async (t) => {
+test('basic - lavamoat config and bundle', async (t) => {
   const files = [{
     // id must be full path
     id: './apple.js',
@@ -82,11 +82,11 @@ test('basic - lavamoatConfig and bundle', async (t) => {
     deps: {},
     source: 'module.exports = () => location.href'
   }]
-  const lavamoatConfig = await generateConfigFromFiles({ files: clone(files) })
-  const prelude = generatePrelude({ lavamoatConfig })
-  const bundle = await createBundleFromRequiresArray(clone(files), { lavamoatConfig })
+  const config = await generateConfigFromFiles({ files: clone(files) })
+  const prelude = generatePrelude({ config })
+  const bundle = await createBundleFromRequiresArray(clone(files), { config })
 
-  t.assert(prelude.includes('"banana": true'), 'prelude includes banana lavamoatConfig')
+  t.assert(prelude.includes('"banana": true'), 'prelude includes banana config')
   t.assert(bundle.includes(prelude), 'bundle includes expected prelude')
 
   const testHref = 'https://funky.town.gov/yolo?snake=yes'

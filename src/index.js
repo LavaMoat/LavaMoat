@@ -23,24 +23,11 @@ module.exports.args = {
 function plugin (browserify, pluginOpts) {
   //pluginOpts.config is config path
   let config
-
+  
   if (!pluginOpts.config && !pluginOpts.dryRun) {
     pluginOpts.config = './lavamoat/lavamoat-config.json'
   } 
-
-  if (!pluginOpts.lavamoatConfig) {
-    config = {
-      resources: {
-        '<root>': {
-          'packages': {
-
-          }
-        },
-      }
-    }
-  } else {
-    config = pluginOpts.lavamoatConfig
-  }
+  config = pluginOpts.config
   
   // setup the plugin in a re-bundle friendly way
   browserify.on('reset', setupPlugin)
@@ -53,7 +40,7 @@ function plugin (browserify, pluginOpts) {
 
     // helper to read config at path
     if (typeof pluginOpts.config === 'string') {
-      pluginOpts.lavamoatConfig = () => {
+      pluginOpts.config = () => {
         if (pluginOpts.writeAutoConfig) {
           return
         }
@@ -62,13 +49,6 @@ function plugin (browserify, pluginOpts) {
         }
         // load latest config path
         let filename = pluginOpts.config
-
-        
-        if (!fs.existsSync(filename)) {
-          fs.mkdirSync("./lavamoat")
-          fs.writeFileSync(path.resolve(filename), JSON.stringify(config, null, 4))
-          console.warn(`LavaMoat Default Config - wrote to "${filename}"`)
-        }
         
         
         const configSource = fs.readFileSync(filename, 'utf8')
@@ -78,14 +58,11 @@ function plugin (browserify, pluginOpts) {
           const configOverrideSource = fs.readFileSync(filename, 'utf8')
           const initialConfig = JSON.parse(configSource)
           const overrideConfig = JSON.parse(configOverrideSource)
-          const config = mergeDeep(initialConfig, overrideConfig)
-          return config
+          const mergedConfig = mergeDeep(initialConfig, overrideConfig)
+          return mergedConfig
         }
         return configSource
       }
-    } else if (pluginOpts.config !== undefined) {
-      // "config" for alias "lavamoatConfig"
-      pluginOpts.lavamoatConfig = pluginOpts.config
     } 
 
     const customPack = createLavamoatPacker(pluginOpts)
@@ -96,17 +73,20 @@ function plugin (browserify, pluginOpts) {
     browserify.pipeline.splice('emit-deps', 0, createPackageDataStream())
     // helper to dump autoconfig to a file
     if (pluginOpts.writeAutoConfig) {
-      const filename = pluginOpts.config
-      if (typeof filename !== 'string') {
+      if (typeof config !== 'string') {
         throw new Error('LavaMoat - "writeAutoConfig" was specified but "config" is not a string')
       }
-      pluginOpts.autoConfig = function writeAutoConfig (config) {
 
-        if (!fs.existsSync(filename)) {
-          fs.mkdirSync("./lavamoat")
-        }
-        fs.writeFileSync(filename, config)
-        console.warn(`LavaMoat Config - wrote to "${filename}"`)
+      if (!fs.existsSync(config)) {
+        fs.mkdirSync("./lavamoat")
+      }
+
+      pluginOpts.autoConfig = function writeAutoConfig (autoConfig) {
+
+
+        fs.writeFileSync(config, autoConfig)
+        console.warn(`LavaMoat Config - wrote to "${config}"`)
+
       }
     }
     // if autoconfig activated, insert hook

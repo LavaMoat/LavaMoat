@@ -71,7 +71,7 @@ test('globalRef - ensure endowments are accessible on globals', async (t) => {
 
   module.exports = { checkThis, checkSelf, checkWindow, checkGlobal, contextHasPostMessage, selfHasPostMessage }
   `
-  const lavamoatConfig = {
+  const config = {
     "resources": {
       "<root>": {
         "packages": {
@@ -87,7 +87,7 @@ test('globalRef - ensure endowments are accessible on globals', async (t) => {
   }
 
   global.postMessage = () => { throw new Error('this should never be called') }
-  const result = await testCodeInNonEntryBundle(t, moduleContent, lavamoatConfig)
+  const result = await testCodeInNonEntryBundle(t, moduleContent, config)
   delete global.postMessage
 
   // this is how it behaves in browser via browserify
@@ -131,7 +131,7 @@ async function testCodeInNonEntryBundle (t, code, providedConfig) {
     }
   }
 
-  const bundle = await createBundleFromRequiresArray(files, { lavamoatConfig: config })
+  const bundle = await createBundleFromRequiresArray(files, { config })
 
   global.testResult = undefined
 
