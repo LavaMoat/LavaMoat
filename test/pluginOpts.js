@@ -1,7 +1,6 @@
-const test = require('tape')
+const test = require('tape-promise').default(require('tape'))
 const { runAutoConfig } = require('./util')
 
 test("pluginOpts - returns empty config if writeAutoConfig is specified", async (t) => {
-    runAutoConfig(t)
-    t.end()
+    await runAutoConfig(t)
 })

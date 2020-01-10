@@ -275,5 +275,6 @@ async function runAutoConfig(t) {
   })
 
   eval(result)
-  t.ok(result, true)
+
+  t.ok(result)
 }

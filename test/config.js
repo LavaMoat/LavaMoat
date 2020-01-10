@@ -1,7 +1,7 @@
 const test = require('tape-promise').default(require('tape'))
 const fs = require('fs')
 const path = require('path')
-const { spawn, execSync } = require('child_process')
+const { execSync } = require('child_process')
 const tmp = require('tmp')
 
 const { createBundleFromRequiresArray } = require('./util')
@@ -100,6 +100,7 @@ test('config - default config path is generated with autoconfig if path is not s
   const tmpObj = tmp.dirSync({ keep: true });
   const defaults = {
     cwd: tmpObj.name,
+    stdio: 'inherit' 
   };
 
   const expectedPath = path.join(tmpObj.name, 'lavamoat/lavamoat-config.json')

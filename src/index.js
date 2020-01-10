@@ -22,84 +22,91 @@ module.exports.args = {
 
 function plugin (browserify, pluginOpts) {
   //pluginOpts.config is config path
-  let config
-  
-  if (!pluginOpts.config && !pluginOpts.dryRun) {
-    pluginOpts.config = './lavamoat/lavamoat-config.json'
-  } 
-  config = pluginOpts.config
-  
+  const configuration = {
+    writeAutoConfig: pluginOpts.writeAutoConfig,
+    config: function getConfig() {
+      return getConfigFrom(pluginOpts)
+    },
+    configOverride: pluginOpts.configOverride,
+    autoConfig: pluginOpts.autoConfig,
+    autoConfigPath: getConfigPath(pluginOpts)
+  }
   // setup the plugin in a re-bundle friendly way
   browserify.on('reset', setupPlugin)
   setupPlugin()
-
   // override browserify/browser-pack prelude
   function setupPlugin () {
-
+    
     applySesTransforms(browserify)
-
-    // helper to read config at path
-    if (typeof pluginOpts.config === 'string') {
-      pluginOpts.config = () => {
-        if (pluginOpts.writeAutoConfig) {
-          return
-        }
-        if (config) {
-          return config
-        }
-        // load latest config path
-        let filename = pluginOpts.config
-        
-        
-        const configSource = fs.readFileSync(filename, 'utf8')
-        // if override specified, merge
-        if (pluginOpts.configOverride) {
-          const filename = pluginOpts.configOverride
-          const configOverrideSource = fs.readFileSync(filename, 'utf8')
-          const initialConfig = JSON.parse(configSource)
-          const overrideConfig = JSON.parse(configOverrideSource)
-          const mergedConfig = mergeDeep(initialConfig, overrideConfig)
-          return mergedConfig
-        }
-        return configSource
-      }
-    } 
-
-    const customPack = createLavamoatPacker(pluginOpts)
+    
+    const customPack = createLavamoatPacker(configuration)
     // replace the standard browser-pack with our custom packer
     browserify.pipeline.splice('pack', 1, customPack)
-
+    
     // inject package name into module data
     browserify.pipeline.splice('emit-deps', 0, createPackageDataStream())
     // helper to dump autoconfig to a file
-    if (pluginOpts.writeAutoConfig) {
-      if (typeof config !== 'string') {
+    if (configuration.writeAutoConfig) {
+      if (typeof configuration.autoConfigPath !== 'string') {
         throw new Error('LavaMoat - "writeAutoConfig" was specified but "config" is not a string')
       }
 
-      if (!fs.existsSync(config)) {
+      if (!fs.existsSync(configuration.autoConfigPath)) {
         fs.mkdirSync("./lavamoat")
       }
 
-      pluginOpts.autoConfig = function writeAutoConfig (autoConfig) {
-
-
-        fs.writeFileSync(config, autoConfig)
-        console.warn(`LavaMoat Config - wrote to "${config}"`)
-
+      configuration.autoConfig = function writeAutoConfig (autoConfig) {
+        fs.writeFileSync(configuration.autoConfigPath, autoConfig)
+        console.warn(`LavaMoat Config - wrote to "${configuration.autoConfigPath}"`)
       }
+
     }
     // if autoconfig activated, insert hook
-    if (pluginOpts.autoConfig) {
+    if (configuration.autoConfig) {
       browserify.pipeline.splice('emit-deps', 0, createConfigSpy({
-        onResult: pluginOpts.autoConfig
+        onResult: configuration.autoConfig
       }))
     }
+    
   }
 }
 
 module.exports.generatePrelude = generatePrelude
 module.exports.createLavamoatPacker = createLavamoatPacker
+
+function getConfigFrom(pluginOpts) {
+  if (!pluginOpts.config && !pluginOpts.dryRun) {
+    const defaultConfig = './lavamoat/lavamoat-config.json'
+    if (pluginOpts.writeAutoConfig) {
+      return
+    }
+    if (!fs.existsSync(defaultConfig)) {
+      return {}
+    }
+    const configSource = fs.readFileSync(defaultConfig, 'utf8')
+    // if override specified, merge
+    if (pluginOpts.configOverride) {
+      const configOverride = pluginOpts.configOverride
+      const configOverrideSource = fs.readFileSync(configOverride, 'utf8')
+      const initialConfig = JSON.parse(configSource)
+      const overrideConfig = JSON.parse(configOverrideSource)
+      const mergedConfig = mergeDeep(initialConfig, overrideConfig)
+      return mergedConfig
+    }
+    return configSource
+  }
+  return pluginOpts.config
+}
+
+function getConfigPath(pluginOpts) {
+  if (pluginOpts.writeAutoConfig) {
+    if (!pluginOpts.config) {
+      const defaultConfig = './lavamoat/lavamoat-config.json'
+      return defaultConfig
+    }
+    return pluginOpts.config
+  }
+}
 
 function createLavamoatPacker (opts) {
   const onSourcemap = opts.onSourcemap || (row => row.sourceFile)
