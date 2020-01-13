@@ -75,11 +75,12 @@ module.exports.generatePrelude = generatePrelude
 module.exports.createLavamoatPacker = createLavamoatPacker
 
 function getConfigFrom(pluginOpts) {
-  if (!pluginOpts.config && !pluginOpts.dryRun) {
-    const defaultConfig = './lavamoat/lavamoat-config.json'
-    if (pluginOpts.writeAutoConfig) {
+  const pluginOptsEmpty = !Object.keys(pluginOpts).length
+  if (!pluginOpts.config) {
+    if (pluginOpts.writeAutoConfig || pluginOptsEmpty) {
       return
     }
+    const defaultConfig = './lavamoat/lavamoat-config.json'
     if (!fs.existsSync(defaultConfig)) {
       return {}
     }
