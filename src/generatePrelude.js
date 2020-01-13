@@ -15,7 +15,7 @@ module.exports = generatePrelude
 
 // takes the preludeTemplate and populates it with the config + libraries
 function generatePrelude (opts = {}) {
-  const lavamoatConfig = parseConfig(opts.config)
+  const lavamoatConfig = parseConfig(opts.getConfig)
 
   let output = preludeTemplate
   output = output.replace('__lavamoatConfig__', lavamoatConfig)

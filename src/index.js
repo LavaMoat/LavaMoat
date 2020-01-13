@@ -24,7 +24,7 @@ function plugin (browserify, pluginOpts) {
   //pluginOpts.config is config path
   const configuration = {
     writeAutoConfig: pluginOpts.writeAutoConfig,
-    config: function getConfig() {
+    getConfig: () => {
       return getConfigFrom(pluginOpts)
     },
     configOverride: pluginOpts.configOverride,
