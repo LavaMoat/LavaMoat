@@ -1,5 +1,6 @@
 const fs = require('fs')
 const path = require('path')
+const mkdirp = require('mkdirp')
 const mergeDeep = require('merge-deep')
 const jsonStringify = require('json-stable-stringify')
 const generatePrelude = require('./generatePrelude')
@@ -52,7 +53,8 @@ function plugin (browserify, pluginOpts) {
       }
 
       if (!fs.existsSync(configuration.autoConfigPath)) {
-        fs.mkdirSync("./lavamoat")
+        const configDirectory = path.dirname(configuration.autoConfigPath)
+        mkdirp.sync(configDirectory)
       }
 
       configuration.generateAutoConfig = function writeAutoConfig (autoConfig) {
