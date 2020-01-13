@@ -28,7 +28,7 @@ function plugin (browserify, pluginOpts) {
       return getConfigFrom(pluginOpts)
     },
     configOverride: pluginOpts.configOverride,
-    autoConfig: pluginOpts.autoConfig,
+    generateAutoConfig: pluginOpts.autoConfig,
     autoConfigPath: getConfigPath(pluginOpts)
   }
   // setup the plugin in a re-bundle friendly way
@@ -55,16 +55,16 @@ function plugin (browserify, pluginOpts) {
         fs.mkdirSync("./lavamoat")
       }
 
-      configuration.autoConfig = function writeAutoConfig (autoConfig) {
+      configuration.generateAutoConfig = function writeAutoConfig (autoConfig) {
         fs.writeFileSync(configuration.autoConfigPath, autoConfig)
         console.warn(`LavaMoat Config - wrote to "${configuration.autoConfigPath}"`)
       }
 
     }
     // if autoconfig activated, insert hook
-    if (configuration.autoConfig) {
+    if (configuration.generateAutoConfig) {
       browserify.pipeline.splice('emit-deps', 0, createConfigSpy({
-        onResult: configuration.autoConfig
+        onResult: configuration.generateAutoConfig
       }))
     }
     
