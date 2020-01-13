@@ -23,6 +23,7 @@ function generatePrelude (opts = {}) {
   replaceTemplateRequire('ses', sesSrc)
   replaceTemplateRequire('cytoplasm', fs.readFileSync(require.resolve('cytoplasm'), 'utf8'))
   replaceTemplateRequire('cytoplasm/distortions/readOnly', fs.readFileSync(require.resolve('cytoplasm/src/distortions/readOnly'), 'utf8'))
+  replaceTemplateRequire('harden-workaround', fs.readFileSync(require.resolve('harden-workaround/dist/harden.umd.js'), 'utf8'))
   replaceTemplateRequire('makeGetEndowmentsForConfig', makeGetEndowmentsForConfigSrc)
   replaceTemplateRequire('makePrepareRealmGlobalFromConfig', makePrepareRealmGlobalFromConfigSrc)
 

@@ -2,10 +2,9 @@
 # yarn lockfile v1
 
 
-"@agoric/make-hardener@^0.0.6":
+"@agoric/make-hardener@^0.0.6", "@agoric/make-hardener@kumavis/make-hardener#2618a9af6fab6168675665c5d05b796442538fde":
   version "0.0.6"
-  resolved "https://registry.yarnpkg.com/@agoric/make-hardener/-/make-hardener-0.0.6.tgz#5903748a71381bc37e23d571390aaff9973c37b2"
-  integrity sha512-OpZcNx/7bhHar0iuQ6D+FKYCMMxqKvYs4aC/bB5v/ffZaSM5sNAl98DnGL1mD9NSyZLGzAZ7D5XwJpe37BMldQ==
+  resolved "https://codeload.github.com/kumavis/make-hardener/tar.gz/2618a9af6fab6168675665c5d05b796442538fde"
 
 "@babel/code-frame@^7.0.0", "@babel/code-frame@^7.5.5":
   version "7.5.5"
@@ -1282,6 +1281,12 @@ graceful-fs@^4.1.2:
   version "4.2.3"
   resolved "https://registry.yarnpkg.com/graceful-fs/-/graceful-fs-4.2.3.tgz#4a12ff1b60376ef09862c2093edd908328be8423"
   integrity sha512-a30VEBm4PEdx1dRB7MFK7BejejvCvBronbLjht+sHuGYj8PHs7M/5Z+rt5lw551vZ7yfTCj4Vuyy3mSJytDWRQ==
+
+harden-workaround@kumavis/harden#0de18fd95dc7e788e4094273e50b84b9fe0b82de:
+  version "0.0.4"
+  resolved "https://codeload.github.com/kumavis/harden/tar.gz/0de18fd95dc7e788e4094273e50b84b9fe0b82de"
+  dependencies:
+    "@agoric/make-hardener" kumavis/make-hardener#2618a9af6fab6168675665c5d05b796442538fde
 
 has-ansi@^2.0.0:
   version "2.0.0"

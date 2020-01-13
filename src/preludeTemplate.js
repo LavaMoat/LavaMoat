@@ -10,11 +10,6 @@
     errorStackMode: 'allow',
   })
 
-  const sesRequire = realm.makeRequire({
-    '@agoric/harden': true,
-  })
-  const harden = sesRequire('@agoric/harden')
-
   return loadBundle
 
 
@@ -36,7 +31,6 @@
       realm,
       unsafeEvalWithEndowments,
       globalRef,
-      harden,
     })
     // run each of entryPoints (ignores any exports of entryPoints)
     for (let entryId of entryPoints) {
@@ -51,13 +45,20 @@
     realm,
     unsafeEvalWithEndowments,
     globalRef,
-    harden,
   }) {
     // "templateRequire" calls are inlined in "generatePrelude"
     const { getEndowmentsForConfig } = templateRequire('makeGetEndowmentsForConfig')()
     const { prepareRealmGlobalFromConfig } = templateRequire('makePrepareRealmGlobalFromConfig')()
     const { Membrane } = templateRequire('cytoplasm')
     const createReadOnlyDistortion = templateRequire('cytoplasm/distortions/readOnly')
+    const harden = templateRequire('harden-workaround')
+
+    // endowments
+    // have wack daniels prototypes
+    // like membrane wrapped objects from outside the realm?
+    // maybe: freeze protos? but means membranes need to tolerate a freeze
+    // ah but endowments are not readOnly
+    // could still affect global objects
 
     const lavamoatConfig = (function(){
   // START of injected code from lavamoatConfig
@@ -97,6 +98,7 @@
 
       // check cache
       if (moduleCache.has(moduleId)) {
+        // console.log(`internalRequire cache hit ${moduleId}`)
         const moduleExports = moduleCache.get(moduleId).exports
         return moduleExports
       }
@@ -114,7 +116,7 @@
       const moduleSource = moduleData.sourceString
       const isEntryModule = moduleData.package === '<root>'
       const configForModule = getConfigForPackage(lavamoatConfig, packageName)
-      const exportsDefense = configForModule.exportsDefense || 'readOnlyMembrane'
+      const exportsDefense = configForModule.exportsDefense || 'harden'
 
       // select membrane space based on exportsDefense strategy
       // this allows strategies to enable same-space optimizations
@@ -187,6 +189,7 @@
           return fakeModuleDefinition
 
           function fakeModuleInitializer () {
+            // console.log(`fakeModuleInitializer: ${moduleId} -> ${targetModuleId}`)
             const targetModuleExports = requireRelativeWithContext(targetModuleId)
             moduleObj.exports = targetModuleExports
           }
@@ -195,6 +198,7 @@
 
       // initialize the module with the correct context
       try {
+        // console.log(`internalRequire init ${moduleId}`)
         moduleInitializer.call(moduleObj.exports, requireRelativeWithContext, moduleObj, moduleObj.exports, null, directModuleInstantiationInterface)
       } catch (err) {
         console.warn(`LavaMoat - Error instantiating module "${moduleId}" from package "${packageName}"`)
@@ -260,24 +264,29 @@
       // look up config for module
       const moduleData = modules[moduleId]
       const packageName = moduleData.package
+      const isSamePackage = packageName === parentModulePackageName
       const isEntryModule = moduleData.package === '<root>'
       const configForModule = getConfigForPackage(lavamoatConfig, packageName)
-      const exportsDefense = configForModule.exportsDefense || 'readOnlyMembrane'
+      const exportsDefense = configForModule.exportsDefense || 'harden'
+
+      // console.log(`requireRelative: ${parentModulePackageName} (${parentModuleId}) -> ${packageName} (${moduleId})`)
 
       // pre-initialize whole package first  (skip if entry)
       // this is done to allow the "harden" exports defense strategy
       // to harden modulesExports after the whole package has been initialized
       // it is a workaround to a common pattern where modules within a package mutate
       // each others exports
-      if (!isEntryModule && !isPackageInitialized.get(packageName)) {
+      if (!isEntryModule && !isSamePackage && !isPackageInitialized.get(packageName)) {
         // initialize all modules in the package
         const packageModuleIds = Object.entries(modules)
           .filter(([id, moduleData]) => moduleData.package === packageName)
           .map(([id]) => id)
+        // console.log(`requireRelative: init package ${packageName} (${packageModuleIds})`)
         const packageExports = packageModuleIds.map(id => internalRequire(id))
         // apply "harden" exports defense
         if (exportsDefense === 'harden') {
-          packageExports.forEach(moduleExports => {
+          packageExports.forEach((moduleExports, index) => {
+            // console.log(`harden: applying protections: ${packageModuleIds[index]}`)
             harden(moduleExports)
           })
         }
@@ -289,7 +298,6 @@
       const moduleExports = internalRequire(moduleId)
 
       // disallow requiring packages that are not in the parent's whitelist
-      const isSamePackage = packageName === parentModulePackageName
       const isInParentWhitelist = packageName in parentPackagesWhitelist
       if (!isSamePackage && !isInParentWhitelist) {
         throw new Error(`LavaMoat - required package not in whitelist: package "${parentModulePackageName}" requested "${packageName}" as "${requestedName}"`)
@@ -307,6 +315,7 @@
           const protectedExports = membrane.bridge(moduleExports, inGraph, outGraph)
           return protectedExports
         } else if (exportsDefense === 'harden') {
+          // console.log(`harden: relativeRequire skipping protections: ${moduleId}`)
           // moduleExports have already been hardened in place
           return moduleExports
         }
