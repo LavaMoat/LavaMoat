@@ -29,13 +29,13 @@ function plugin (browserify, pluginOpts) {
   setupPlugin()
   // override browserify/browser-pack prelude
   function setupPlugin () {
-    
+
     applySesTransforms(browserify)
-    
+
     const customPack = createLavamoatPacker(configuration)
     // replace the standard browser-pack with our custom packer
     browserify.pipeline.splice('pack', 1, customPack)
-    
+
     // inject package name into module data
     browserify.pipeline.splice('emit-deps', 0, createPackageDataStream())
 
@@ -45,7 +45,7 @@ function plugin (browserify, pluginOpts) {
         onResult: configuration.writeAutoConfig
       }))
     }
-    
+
   }
 }
 
@@ -55,7 +55,7 @@ module.exports.createLavamoatPacker = createLavamoatPacker
 function getConfigurationFromPluginOpts(pluginOpts) {
   const allowedKeys = new Set(["writeAutoConfig", "config", "configOverride"])
   const invalidKeys = Reflect.ownKeys(pluginOpts).filter(key => !allowedKeys.has(key))
-  if (invalidKeys.length) throw new Error(`Lavamoat - Unrecognized options provided '${invalidKeys}'`) 
+  if (invalidKeys.length) throw new Error(`Lavamoat - Unrecognized options provided '${invalidKeys}'`)
 
   const configuration = {
     writeAutoConfig: undefined,
@@ -81,9 +81,9 @@ function getConfigurationFromPluginOpts(pluginOpts) {
           return {}
         }
         throw new Error(`Lavamoat - Configuration file not found at path: '${configPath}', use writeAutoConfig option to generate one`)
-      } 
+      }
 
-      const configSource = fs.readFileSync(defaultConfig, 'utf8')
+      const configSource = fs.readFileSync(configPath, 'utf8')
       // if override specified, merge
       if (pluginOpts.configOverride) {
         const configOverride = pluginOpts.configOverride
@@ -106,12 +106,12 @@ function getConfigurationFromPluginOpts(pluginOpts) {
       throw new Error('LavaMoat - If writeAutoConfig is specified, config must be a string')
     }
     configuration.writeAutoConfig = (configString) => {
-      const configPath = path.resolve(configuration.configPath) 
+      const configPath = path.resolve(configuration.configPath)
       //Ensure parent dir exists
       const configDirectory = path.dirname(configPath)
       mkdirp.sync(configDirectory)
       //Write config to file
-      fs.writeFileSync(configPath, configString) 
+      fs.writeFileSync(configPath, configString)
       console.warn(`LavaMoat Config - wrote to "${configPath}"`)
     }
   } else if (typeof pluginOpts.writeAutoConfig === 'function') {
