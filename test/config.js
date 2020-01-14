@@ -97,7 +97,7 @@ test('config - dunder proto not allowed in globals path', async (t) => {
 })
 
 test('config - default config path is generated with autoconfig if path is not specified', async (t) => {
-  const tmpObj = tmp.dirSync({ keep: true });
+  const tmpObj = tmp.dirSync();
   const defaults = {
     cwd: tmpObj.name,
     stdio: 'inherit' 
