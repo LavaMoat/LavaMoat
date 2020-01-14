@@ -287,7 +287,12 @@
         if (exportsDefense === 'harden') {
           packageExports.forEach((moduleExports, index) => {
             // console.log(`harden: applying protections: ${packageModuleIds[index]}`)
-            harden(moduleExports)
+            try {
+              harden(moduleExports)
+            } catch (err) {
+              const moduleId = packageModuleIds[index]
+              throw new Error(`LavaMoat - failed to harden exports for module "${moduleId}" from package "${packageName}"`)
+            }
           })
         }
         // mark package as initialized
