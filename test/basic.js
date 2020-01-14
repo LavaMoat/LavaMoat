@@ -29,11 +29,9 @@ test('basic - bundle works', async (t) => {
   }
 })
 
-test('basic - browserify plugin injects prelude', async (t) => {
-  const basicPrelude = generatePrelude()
+test('basic - bundle works if no plugin options are specified', async (t) => {
   const bundle = await createBundleFromEntry(__dirname + '/fixtures/nothing.js')
-  t.assert(basicPrelude.length > 10, 'prelude not empty')
-  t.assert(bundle.includes(basicPrelude))
+  t.doesNotThrow(() => eval(bundle))
 })
 
 test('basic - browserify bundle doesnt inject global', async (t) => {

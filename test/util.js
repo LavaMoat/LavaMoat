@@ -82,7 +82,7 @@ async function generateConfigFromFiles ({ files }) {
 async function filesToConfigSource ({ files }) {
   let pluginOpts
   const promise = new Promise((resolve) => {
-    pluginOpts = { autoConfig: resolve }
+    pluginOpts = { writeAutoConfig: resolve }
   })
 
   const bundler = createBrowserifyFromRequiresArray({ files, pluginOpts })
