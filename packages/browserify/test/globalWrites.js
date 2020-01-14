@@ -54,7 +54,7 @@ test('globalWrites - deep endow', async (t) => {
     }
   }
 
-  const bundle = await createBundleFromRequiresArray(entries, { lavamoatConfig: config })
+  const bundle = await createBundleFromRequiresArray(entries, { config })
 
   let testResult
   try {
