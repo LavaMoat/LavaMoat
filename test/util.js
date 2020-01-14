@@ -3,7 +3,6 @@ const pify = require('pify')
 const clone = require('clone')
 const through2 = require('through2').obj
 const mergeDeep = require('merge-deep')
-const tmp = require('tmp')
 
 const sesifyPlugin = require('../src/index')
 
@@ -18,10 +17,10 @@ module.exports = {
   testEntryAttackerVictim,
   runSimpleOneTwo,
   runSimpleOneTwoSamePackage,
-  runAutoConfig,
 }
 
-async function createBundleFromEntry (path, pluginOpts) {
+async function createBundleFromEntry (path, pluginOpts = {}) {
+  pluginOpts.config = pluginOpts.config || {}
   const bundler = browserify([], sesifyPlugin.args)
   bundler.add(path)
   bundler.plugin(sesifyPlugin, pluginOpts)
@@ -38,9 +37,10 @@ async function createBundleFromRequiresArray (files, pluginOpts) {
   return bundleAsync(bundler)
 }
 
-function createBrowserifyFromRequiresArray ({ files, pluginOpts }) {
+function createBrowserifyFromRequiresArray ({ files, pluginOpts = {} }) {
   // empty bundle but inject modules at bundle time
   const bifyOpts = Object.assign({}, sesifyPlugin.args)
+  pluginOpts.config = pluginOpts.config || {}
   const bundler = browserify([], bifyOpts)
   bundler.plugin(sesifyPlugin, pluginOpts)
 
@@ -82,7 +82,7 @@ async function generateConfigFromFiles ({ files }) {
 async function filesToConfigSource ({ files }) {
   let pluginOpts
   const promise = new Promise((resolve) => {
-    pluginOpts = { autoConfig: resolve }
+    pluginOpts = { writeAutoConfig: resolve }
   })
 
   const bundler = createBrowserifyFromRequiresArray({ files, pluginOpts })
@@ -204,7 +204,7 @@ async function runSimpleOneTwo ({ defineOne, defineTwo, config = {} }) {
     }
   }, config)
 
-  const result = await createBundleFromRequiresArray(depsArray, { lavamoatConfig: _config })
+  const result = await createBundleFromRequiresArray(depsArray, { config: _config })
   delete global.testResult
   eval(result)
 
@@ -259,23 +259,9 @@ async function runSimpleOneTwoSamePackage({ defineOne, defineTwo, config = {} })
     }
   }, config)
 
-  const result = await createBundleFromRequiresArray(depsArray, { lavamoatConfig: _config })
+  const result = await createBundleFromRequiresArray(depsArray, { config: _config })
   delete global.testResult
   eval(result)
 
   return global.testResult
-}
-
-
-async function runAutoConfig(t) {
-  
-  const tmpObj = tmp.fileSync();
-
-  const result = await createBundleFromRequiresArray([], {
-    writeAutoConfig: true,
-    config: tmpObj.name,
-  })
-
-  eval(result)
-  t.ok(result, true)
 }

@@ -40,7 +40,7 @@ test('circularDeps - multi-module circular deps dont inf loop', async (t) => {
       module.exports = 42
     })
   }]
-  const lavamoatConfig = {
+  const config = {
     resources: {
       "<root>": {
         "packages": {
@@ -49,7 +49,7 @@ test('circularDeps - multi-module circular deps dont inf loop', async (t) => {
       },
     }
   }
-  const bundle = await createBundleFromRequiresArray(clone(files), { lavamoatConfig })
+  const bundle = await createBundleFromRequiresArray(clone(files), { config })
 
   delete global.testResult
   eval(bundle)
