@@ -1,6 +1,11 @@
-const test = require('tape-promise').default(require('tape'))
+const {
+  generateConfigFromFiles,
+  fnToCodeBlock,
+  getTape,
+} = require('./util')
 
-const { generateConfigFromFiles, fnToCodeBlock } = require('./util')
+const test = getTape()
+
 
 test('generateConfig - empty config', async (t) => {
   const files = []

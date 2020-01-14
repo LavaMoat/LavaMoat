@@ -1,7 +1,10 @@
-const test = require('tape-promise').default(require('tape'))
 const {
     runSimpleOneTwo,
+    getTape,
 } = require('./util')
+
+const test = getTape()
+
 
 test('endowments - bridged endowments matches original endowments object', async (t) => {
     function defineOne() {

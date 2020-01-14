@@ -1,13 +1,14 @@
 "use strict"
 
-const test = require('tape-promise').default(require('tape'))
 const clone = require('clone')
 const {
   runSimpleOneTwo,
   runSimpleOneTwoSamePackage,
-  fnToCodeBlock,
-  createBundleFromRequiresArray,
+  getTape,
 } = require('./util')
+
+const test = getTape()
+
 
 test('exportsDefense - readOnly restrictions have override workaround fix', async (t) => {
   function defineOne () {

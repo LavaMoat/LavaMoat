@@ -1,4 +1,3 @@
-const test = require('tape-promise').default(require('tape'))
 const clone = require('clone')
 
 const { generatePrelude } = require('../src/index')
@@ -6,8 +5,12 @@ const {
   createBundleFromRequiresArray,
   createBundleFromRequiresArrayPath,
   createBundleFromEntry,
-  generateConfigFromFiles
+  generateConfigFromFiles,
+  getTape,
 } = require('./util')
+
+const test = getTape()
+
 
 test('basic - bundle works', async (t) => {
   const path = __dirname + '/fixtures/basic-deps.json'

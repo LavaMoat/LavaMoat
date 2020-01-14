@@ -1,10 +1,14 @@
-const test = require('tape-promise').default(require('tape'))
 const fs = require('fs')
 const path = require('path')
 const { execSync } = require('child_process')
 const tmp = require('tmp')
 
-const { createBundleFromRequiresArray } = require('./util')
+const {
+  createBundleFromRequiresArray,
+  getTape,
+} = require('./util')
+
+const test = getTape()
 
 // here we are providing an endowments only to a module deep in a dep graph
 test('config - deep endow', async (t) => {
@@ -100,7 +104,7 @@ test('config - default config path is generated with autoconfig if path is not s
   const tmpObj = tmp.dirSync();
   const defaults = {
     cwd: tmpObj.name,
-    stdio: 'inherit' 
+    stdio: 'inherit'
   };
 
   const expectedPath = path.join(tmpObj.name, 'lavamoat/lavamoat-config.json')

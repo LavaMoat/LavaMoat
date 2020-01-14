@@ -1,7 +1,10 @@
-const test = require('tape')
 const UglifyJS = require('uglify-js')
 const { SourceMapConsumer } = require('source-map')
 const { wrapIntoModuleInitializer } = require('../src/sourcemaps')
+const { getTape } = require('./util')
+
+const test = getTape()
+
 
 test('sourcemaps - adjust maps for wrapper', async (t) => {
   const fooSource = (`
@@ -30,8 +33,6 @@ test('sourcemaps - adjust maps for wrapper', async (t) => {
   // wrap into bundle with external sourcemaps
   const wrappedSourceMeta = wrapIntoModuleInitializer(result.code)
   await validateSourcemaps(t, wrappedSourceMeta)
-  
-  t.end()
 })
 
 function indicesOf (substring, string) {

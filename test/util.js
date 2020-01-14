@@ -4,10 +4,14 @@ const clone = require('clone')
 const through2 = require('through2').obj
 const mergeDeep = require('merge-deep')
 
+// our special async tape
+const test = require('tape-promise').default(require('tape'))
+
 const sesifyPlugin = require('../src/index')
 
 
 module.exports = {
+  getTape,
   createBundleFromEntry,
   createBundleFromRequiresArray,
   createBundleFromRequiresArrayPath,
@@ -17,6 +21,10 @@ module.exports = {
   testEntryAttackerVictim,
   runSimpleOneTwo,
   runSimpleOneTwoSamePackage,
+}
+
+function getTape () {
+  return test
 }
 
 async function createBundleFromEntry (path, pluginOpts = {}) {

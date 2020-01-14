@@ -1,9 +1,10 @@
-const test = require('tape-promise').default(require('tape'))
-
 const {
+  getTape,
   testEntryAttackerVictim,
-  createBundleFromRequiresArray
+  createBundleFromRequiresArray,
 } = require('./util')
+
+const test = getTape()
 
 test('attack - prevent primitive modification', async (t) => {
   const depsArray = [

@@ -1,11 +1,12 @@
-const test = require('tape-promise').default(require('tape'))
 const clone = require('clone')
 
 const {
   createBundleFromRequiresArray,
+  getTape,
 } = require('./util')
 
-// const wrapModuleContent
+const test = getTape()
+
 
 test('globalRef - check default containment', async (t) => {
   const moduleContent = `

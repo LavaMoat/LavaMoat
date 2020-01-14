@@ -1,6 +1,10 @@
-const test = require('tape-promise').default(require('tape'))
+const {
+  createBundleFromRequiresArray,
+  getTape,
+} = require('./util')
 
-const { createBundleFromRequiresArray } = require('./util')
+const test = getTape()
+
 
 // here we are providing an endowments only to a module deep in a dep graph
 test('globalWrites - deep endow', async (t) => {

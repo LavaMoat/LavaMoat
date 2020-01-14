@@ -1,9 +1,12 @@
-const test = require('tape-promise').default(require('tape'))
-const { createBundleFromRequiresArray } = require('./util')
 const {
   runSimpleOneTwo,
-  runSimpleOneTwoSamePackage
+  runSimpleOneTwoSamePackage,
+  createBundleFromRequiresArray,
+  getTape,
 } = require('./util')
+
+const test = getTape()
+
 
 test('moduleExports - decorate an import - object', async (t) => {
   function defineOne() {
@@ -131,7 +134,7 @@ test('object returned from exported function should be mutable', async (t) => {
   const one = await runSimpleOneTwo({ defineOne, defineTwo })
 
   t.equal(one.abc, 123, "Object should be mutable")
-}) 
+})
 
 async function evalModulesArray(t, { files, pluginOpts = {} }) {
   const bundle = await createBundleFromRequiresArray(files, pluginOpts)

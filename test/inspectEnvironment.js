@@ -1,61 +1,57 @@
-const test = require('tape')
 const acornGlobals = require('acorn-globals')
 const { inspectEnvironment, environmentTypes } = require('../src/inspectEnvironment')
+const { getTape } = require('./util')
 
-test('inspectEnvironment - basic', (t) => {
+const test = getTape()
+
+
+test('inspectEnvironment - basic', async (t) => {
   const environment = inspectEnvironmentTest(`
     'hello world'
   `)
   t.deepEqual(environment, environmentTypes.frozen)
-  t.end()
 })
 
-test('inspectEnvironment - assignment to toString on prototype', (t) => {
+test('inspectEnvironment - assignment to toString on prototype', async (t) => {
   const environment = inspectEnvironmentTest(`
     MyClass.prototype.toString = () => 'hello'
   `)
   t.deepEqual(environment, environmentTypes.frozen)
-  t.end()
 })
 
-test('inspectEnvironment - assignment to toString', (t) => {
+test('inspectEnvironment - assignment to toString', async (t) => {
   const environment = inspectEnvironmentTest(`
     exports.toString = () => 'hello'
   `)
   t.deepEqual(environment, environmentTypes.frozen)
-  t.end()
 })
 
-test('inspectEnvironment - assignment to frozen primordial', (t) => {
+test('inspectEnvironment - assignment to frozen primordial', async (t) => {
   const environment = inspectEnvironmentTest(`
     Array.prototype.bogoSort = () => 'hello'
   `)
   t.deepEqual(environment, environmentTypes.unfrozen)
-  t.end()
 })
 
-test('inspectEnvironment - primordial potential false positive', (t) => {
+test('inspectEnvironment - primordial potential false positive', async (t) => {
   const environment = inspectEnvironmentTest(`
     window.Array === Array
   `)
   t.deepEqual(environment, environmentTypes.frozen)
-  t.end()
 })
 
-test('inspectEnvironment - primordial potential false positive', (t) => {
+test('inspectEnvironment - primordial potential false positive', async (t) => {
   const environment = inspectEnvironmentTest(`
     const args = Array.prototype.slice.call(arguments)
   `)
   t.deepEqual(environment, environmentTypes.frozen)
-  t.end()
 })
 
-test('inspectEnvironment - primordial modify property', (t) => {
+test('inspectEnvironment - primordial modify property', async (t) => {
   const environment = inspectEnvironmentTest(`
     Object.keys.extra = 'hello'
   `)
   t.deepEqual(environment, environmentTypes.unfrozen)
-  t.end()
 })
 
 function inspectEnvironmentTest (code) {

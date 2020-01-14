@@ -1,9 +1,11 @@
-const test = require('tape-promise').default(require('tape'))
 const clone = require('clone')
 const {
   createBundleFromRequiresArray,
   fnToCodeBlock,
+  getTape,
 } = require('./util')
+
+const test = getTape()
 
 
 test('circularDeps - multi-module circular deps dont inf loop', async (t) => {
