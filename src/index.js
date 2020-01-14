@@ -59,21 +59,54 @@ function getConfigurationFromPluginOpts(pluginOpts) {
 
   const configuration = {
     writeAutoConfig: undefined,
-    getConfig: createGetConfigFrom(pluginOpts),
+    getConfig: undefined,
     configOverride: pluginOpts.configOverride,
-    autoConfigPath: getConfigPath(pluginOpts)
+    configPath: getConfigPath(pluginOpts)
+  }
+
+  if (typeof pluginOpts.config === 'object') {
+    configuration.getConfig = () => pluginOpts.config
+  } else if (typeof pluginOpts.config === 'function') {
+    configuration.getConfig = pluginOpts.config
+  } else {
+    const tolerateMissingConfig = ('writeAutoConfig' in pluginOpts)
+    configuration.getConfig = () => {
+      if (!configuration.configPath) {
+        throw new Error('LavaMoat - No configuration path')
+      }
+      const configPath = path.resolve(configuration.configPath)
+      const isMissing = !fs.existsSync(configPath)
+      if (isMissing) {
+        if (tolerateMissingConfig) {
+          return {}
+        }
+        throw new Error(`Lavamoat - Configuration file not found at path: '${configPath}', use writeAutoConfig option to generate one`)
+      } 
+
+      const configSource = fs.readFileSync(defaultConfig, 'utf8')
+      // if override specified, merge
+      if (pluginOpts.configOverride) {
+        const configOverride = pluginOpts.configOverride
+        const configOverrideSource = fs.readFileSync(configOverride, 'utf8')
+        const initialConfig = JSON.parse(configSource)
+        const overrideConfig = JSON.parse(configOverrideSource)
+        const mergedConfig = mergeDeep(initialConfig, overrideConfig)
+        return mergedConfig
+      }
+      return pluginOpts.config
+    }
   }
 
   if (!pluginOpts.writeAutoConfig) {
     // do not trigger parsing of the code for config generation
     configuration.writeAutoConfig = null
   } else if (pluginOpts.writeAutoConfig === true) {
-    //output config to a file, path configuration.autoConfigPath
-    if (!configuration.autoConfigPath) {
+    //output config to a file, path configuration.configPath
+    if (!configuration.configPath) {
       throw new Error('LavaMoat - If writeAutoConfig is specified, config must be a string')
     }
     configuration.writeAutoConfig = (configString) => {
-      const configPath = path.resolve(configuration.autoConfigPath) 
+      const configPath = path.resolve(configuration.configPath) 
       //Ensure parent dir exists
       const configDirectory = path.dirname(configPath)
       mkdirp.sync(configDirectory)
@@ -90,37 +123,6 @@ function getConfigurationFromPluginOpts(pluginOpts) {
   }
 
   return configuration
-}
-
-function createGetConfigFrom(pluginOpts) {
-  if (typeof pluginOpts.config === 'function') {
-    return pluginOpts.config
-  }
-  return () => {
-    const pluginOptsEmpty = !Object.keys(pluginOpts).length
-    if (!pluginOpts.config) {
-      // if (pluginOpts.writeAutoConfig || pluginOptsEmpty) {
-      //   return
-      // }
-      const defaultConfig = './lavamoat/lavamoat-config.json'
-      if (!fs.existsSync(defaultConfig)) {
-        return {}
-      }
-      const configSource = fs.readFileSync(defaultConfig, 'utf8')
-      // if override specified, merge
-      if (pluginOpts.configOverride) {
-        const configOverride = pluginOpts.configOverride
-        const configOverrideSource = fs.readFileSync(configOverride, 'utf8')
-        const initialConfig = JSON.parse(configSource)
-        const overrideConfig = JSON.parse(configOverrideSource)
-        const mergedConfig = mergeDeep(initialConfig, overrideConfig)
-        return mergedConfig
-      }
-      return configSource
-    }
-    return pluginOpts.config
-  }
-
 }
 
 function getConfigPath(pluginOpts) {

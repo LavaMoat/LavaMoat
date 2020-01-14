@@ -29,11 +29,6 @@ test('basic - bundle works', async (t) => {
   }
 })
 
-test('basic - bundle works if no plugin options are specified', async (t) => {
-  const bundle = await createBundleFromEntry(__dirname + '/fixtures/nothing.js')
-  t.doesNotThrow(() => eval(bundle))
-})
-
 test('basic - browserify bundle doesnt inject global', async (t) => {
   const bundle = await createBundleFromEntry(__dirname + '/fixtures/global.js')
   const hasGlobalInjection = bundle.includes('typeof global !== \"undefined\" ? global :')

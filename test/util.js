@@ -19,7 +19,8 @@ module.exports = {
   runSimpleOneTwoSamePackage,
 }
 
-async function createBundleFromEntry (path, pluginOpts) {
+async function createBundleFromEntry (path, pluginOpts = {}) {
+  pluginOpts.config = pluginOpts.config || {}
   const bundler = browserify([], sesifyPlugin.args)
   bundler.add(path)
   bundler.plugin(sesifyPlugin, pluginOpts)
@@ -36,9 +37,10 @@ async function createBundleFromRequiresArray (files, pluginOpts) {
   return bundleAsync(bundler)
 }
 
-function createBrowserifyFromRequiresArray ({ files, pluginOpts }) {
+function createBrowserifyFromRequiresArray ({ files, pluginOpts = {} }) {
   // empty bundle but inject modules at bundle time
   const bifyOpts = Object.assign({}, sesifyPlugin.args)
+  pluginOpts.config = pluginOpts.config || {}
   const bundler = browserify([], bifyOpts)
   bundler.plugin(sesifyPlugin, pluginOpts)
 
