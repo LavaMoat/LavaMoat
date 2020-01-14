@@ -1,4 +1,8 @@
 const test = require('tape-promise').default(require('tape'))
+const fs = require('fs')
+const path = require('path')
+const { execSync } = require('child_process')
+const tmp = require('tmp')
 
 const { createBundleFromRequiresArray } = require('./util')
 
@@ -46,7 +50,7 @@ test('config - deep endow', async (t) => {
     }
   }
 
-  const bundle = await createBundleFromRequiresArray(entries, { lavamoatConfig: config })
+  const bundle = await createBundleFromRequiresArray(entries, { config })
 
   let testResult
   global.postMessage = (message) => { testResult = message }
@@ -80,7 +84,7 @@ test('config - dunder proto not allowed in globals path', async (t) => {
     }
   }
 
-  const bundle = await createBundleFromRequiresArray(entries, { lavamoatConfig: config })
+  const bundle = await createBundleFromRequiresArray(entries, { config })
 
   let testResult
   global.postMessage = (message) => { testResult = message }
@@ -90,4 +94,25 @@ test('config - dunder proto not allowed in globals path', async (t) => {
   } catch (err) {
     t.ok(err.message.includes('"__proto__"'))
   }
+})
+
+test('config - default config path is generated with autoconfig if path is not specified', async (t) => {
+  const tmpObj = tmp.dirSync();
+  const defaults = {
+    cwd: tmpObj.name,
+    stdio: 'inherit' 
+  };
+
+  const expectedPath = path.join(tmpObj.name, 'lavamoat/lavamoat-config.json')
+  const scriptPath = require.resolve('./runBrowserify')
+
+  console.log(expectedPath)
+
+  t.notOk(fs.existsSync(expectedPath), 'Config file does not yet exist')
+
+  const buildProcess = execSync(`node ${scriptPath}`, defaults)
+
+  t.ok(fs.existsSync(expectedPath), 'Config file exists')
+
+  t.end()
 })
