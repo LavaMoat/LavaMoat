@@ -1,3 +1,10 @@
+process.on('unhandledRejection', error => {
+  debugger
+  // Will print "unhandledRejection err is not defined"
+  console.log('unhandledRejection', error.message);
+});
+
+
 require('./basic')
 require('./config')
 require('./attacks')
