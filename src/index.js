@@ -84,16 +84,16 @@ function getConfigurationFromPluginOpts(pluginOpts) {
       }
 
       const configSource = fs.readFileSync(configPath, 'utf8')
+      const primaryConfig = JSON.parse(configSource)
       // if override specified, merge
       if (pluginOpts.configOverride) {
         const configOverride = pluginOpts.configOverride
         const configOverrideSource = fs.readFileSync(configOverride, 'utf8')
-        const initialConfig = JSON.parse(configSource)
         const overrideConfig = JSON.parse(configOverrideSource)
-        const mergedConfig = mergeDeep(initialConfig, overrideConfig)
+        const mergedConfig = mergeDeep(primaryConfig, overrideConfig)
         return mergedConfig
       }
-      return pluginOpts.config
+      return primaryConfig
     }
   }
 
