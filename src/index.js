@@ -73,12 +73,13 @@ function getConfigurationFromPluginOpts(pluginOpts) {
       throw new Error('LavaMoat - If writeAutoConfig is specified, config must be a string')
     }
     configuration.writeAutoConfig = (configString) => {
-      if (!fs.existsSync(configuration.autoConfigPath)) {
-        const configDirectory = path.dirname(configuration.autoConfigPath)
-        mkdirp.sync(configDirectory)
-      }
-      fs.writeFileSync(configuration.autoConfigPath, configString) 
-      console.warn(`LavaMoat Config - wrote to "${configuration.autoConfigPath}"`)
+      const configPath = path.resolve(configuration.autoConfigPath) 
+      //Ensure parent dir exists
+      const configDirectory = path.dirname(configPath)
+      mkdirp.sync(configDirectory)
+      //Write config to file
+      fs.writeFileSync(configPath, configString) 
+      console.warn(`LavaMoat Config - wrote to "${configPath}"`)
     }
   } else if (typeof pluginOpts.writeAutoConfig === 'function') {
     //to be called with configuration object

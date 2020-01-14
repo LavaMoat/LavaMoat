@@ -3,7 +3,6 @@ const pify = require('pify')
 const clone = require('clone')
 const through2 = require('through2').obj
 const mergeDeep = require('merge-deep')
-const tmp = require('tmp')
 
 const sesifyPlugin = require('../src/index')
 
@@ -18,7 +17,6 @@ module.exports = {
   testEntryAttackerVictim,
   runSimpleOneTwo,
   runSimpleOneTwoSamePackage,
-  runAutoConfig,
 }
 
 async function createBundleFromEntry (path, pluginOpts) {
@@ -264,17 +262,4 @@ async function runSimpleOneTwoSamePackage({ defineOne, defineTwo, config = {} })
   eval(result)
 
   return global.testResult
-}
-
-
-async function runAutoConfig(t) {
-  
-  const tmpObj = tmp.fileSync();
-  const result = await createBundleFromRequiresArray([], {
-    writeAutoConfig: true,
-  })
-
-  eval(result)
-
-  t.ok(result)
 }
