@@ -6,6 +6,7 @@ const tmp = require('tmp')
 const {
   createBundleFromRequiresArray,
   getTape,
+  evalBundle,
 } = require('./util')
 
 const test = getTape()
@@ -16,7 +17,7 @@ test('config - deep endow', async (t) => {
     {
       'id': '/one.js',
       'file': '/one.js',
-      'source': "require('two');",
+      'source': "require('two')",
       'deps': { 'two': '/node_modules/two/index.js' },
       'entry': true,
     },
@@ -56,14 +57,11 @@ test('config - deep endow', async (t) => {
 
   const bundle = await createBundleFromRequiresArray(entries, { config })
 
-  let testResult
-  global.postMessage = (message) => { testResult = message }
-  try {
-    eval(bundle)
-  } catch (err) {
-    t.fail(`eval of bundle failed:\n${err.stack || err}`)
-  }
-  t.deepEqual(testResult, '12345')
+  let messageSentByTest
+  const testGlobal = { postMessage: (message) => { messageSentByTest = message } }
+
+  evalBundle(bundle, testGlobal)
+  t.deepEqual(messageSentByTest, '12345')
 })
 
 // here we provide an illegal config value
@@ -90,10 +88,8 @@ test('config - dunder proto not allowed in globals path', async (t) => {
 
   const bundle = await createBundleFromRequiresArray(entries, { config })
 
-  let testResult
-  global.postMessage = (message) => { testResult = message }
   try {
-    eval(bundle)
+    evalBundle(bundle)
     t.fail('did not throw as expected')
   } catch (err) {
     t.ok(err.message.includes('"__proto__"'))
@@ -101,22 +97,18 @@ test('config - dunder proto not allowed in globals path', async (t) => {
 })
 
 test('config - default config path is generated with autoconfig if path is not specified', async (t) => {
-  const tmpObj = tmp.dirSync();
-  const defaults = {
+  const tmpObj = tmp.dirSync()
+  const execOpts = {
     cwd: tmpObj.name,
     stdio: 'inherit'
-  };
+  }
 
   const expectedPath = path.join(tmpObj.name, 'lavamoat/lavamoat-config.json')
   const scriptPath = require.resolve('./runBrowserify')
 
-  console.log(expectedPath)
-
   t.notOk(fs.existsSync(expectedPath), 'Config file does not yet exist')
 
-  const buildProcess = execSync(`node ${scriptPath}`, defaults)
+  execSync(`node ${scriptPath}`, execOpts)
 
   t.ok(fs.existsSync(expectedPath), 'Config file exists')
-
-  t.end()
 })

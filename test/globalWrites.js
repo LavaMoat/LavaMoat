@@ -1,6 +1,7 @@
 const {
   createBundleFromRequiresArray,
   getTape,
+  evalBundle,
 } = require('./util')
 
 const test = getTape()
@@ -59,13 +60,7 @@ test('globalWrites - deep endow', async (t) => {
   }
 
   const bundle = await createBundleFromRequiresArray(entries, { config })
+  const result = evalBundle(bundle)
 
-  let testResult
-  try {
-    eval(bundle)
-    testResult = global.testResult
-  } catch (err) {
-    t.fail(`eval of bundle failed:\n${err.stack || err}`)
-  }
-  t.deepEqual(testResult, true)
+  t.deepEqual(result, true)
 })

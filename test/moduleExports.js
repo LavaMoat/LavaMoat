@@ -1,7 +1,6 @@
 const {
   runSimpleOneTwo,
   runSimpleOneTwoSamePackage,
-  createBundleFromRequiresArray,
   getTape,
 } = require('./util')
 
@@ -135,17 +134,3 @@ test('object returned from exported function should be mutable', async (t) => {
 
   t.equal(one.abc, 123, "Object should be mutable")
 })
-
-async function evalModulesArray(t, { files, pluginOpts = {} }) {
-  const bundle = await createBundleFromRequiresArray(files, pluginOpts)
-
-  global.testResult = undefined
-
-  try {
-    eval(bundle)
-  } catch (err) {
-    t.fail(`eval of bundle failed:\n${err.stack || err}`)
-  }
-
-  return global.testResult
-}

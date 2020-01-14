@@ -3,6 +3,7 @@ const {
   createBundleFromRequiresArray,
   fnToCodeBlock,
   getTape,
+  evalBundle,
 } = require('./util')
 
 const test = getTape()
@@ -52,10 +53,7 @@ test('circularDeps - multi-module circular deps dont inf loop', async (t) => {
     }
   }
   const bundle = await createBundleFromRequiresArray(clone(files), { config })
-
-  delete global.testResult
-  eval(bundle)
-  const result = global.testResult
+  const result = evalBundle(bundle)
 
   t.equal(result, 42, 'expected result, did not error')
 })

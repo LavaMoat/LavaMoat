@@ -1,7 +1,5 @@
-const clone = require('clone')
-
 const {
-  createBundleFromRequiresArray,
+  runSimpleOneTwo,
   getTape,
 } = require('./util')
 
@@ -9,23 +7,23 @@ const test = getTape()
 
 
 test('globalRef - check default containment', async (t) => {
-  const moduleContent = `
-  let objCheckThis, objCheckSelf, objCheckGlobal, thisIsExports
-  const isUndefined = {}
+  function defineOne () {
+    let objCheckThis, objCheckSelf, objCheckGlobal, thisIsExports
+    const isUndefined = {}
 
-  try { objCheckThis = this.Object === Object } catch (_) { }
-  try { objCheckSelf = self.Object === Object } catch (_) { }
-  try { objCheckGlobal = global.Object === Object } catch (_) { }
-  try { thisIsExports = exports === this } catch (_) { }
+    try { objCheckThis = this.Object === Object } catch (_) { }
+    try { objCheckSelf = self.Object === Object } catch (_) { }
+    try { objCheckGlobal = global.Object === Object } catch (_) { }
+    try { thisIsExports = exports === this } catch (_) { }
 
-  isUndefined.global = typeof global === "undefined"
-  isUndefined.self = typeof self === "undefined"
-  isUndefined.window = typeof window === "undefined"
+    isUndefined.global = typeof global === "undefined"
+    isUndefined.self = typeof self === "undefined"
+    isUndefined.window = typeof window === "undefined"
 
-  module.exports = { objCheckThis, objCheckSelf, objCheckGlobal, thisIsExports, isUndefined }
-  `
+    module.exports = { objCheckThis, objCheckSelf, objCheckGlobal, thisIsExports, isUndefined }
+  }
 
-  const result = await testCodeInNonEntryBundle(t, moduleContent)
+  const result = await runSimpleOneTwo({ defineOne })
 
   // this is how it behaves in browser via browserify
   t.deepEqual(result, {
@@ -57,29 +55,28 @@ test('globalRef - check default containment', async (t) => {
   // }, 'test result matches expected')
 })
 
-
-// test('globalRef - ensure apis on window are not shadowed', async (t) => {
 test('globalRef - ensure endowments are accessible on globals', async (t) => {
-  const moduleContent = `
-  let checkSelf, checkThis, checkWindow, checkGlobal, contextHasPostMessage, selfHasPostMessage
+  function defineOne () {
+    let checkSelf, checkThis, checkWindow, checkGlobal, contextHasPostMessage, selfHasPostMessage
 
-  contextHasPostMessage = typeof postMessage !== 'undefined'
-  selfHasPostMessage = !!self.postMessage
-  try { checkThis = this.postMessage === postMessage } catch (err) { checkThis = err.message }
-  try { checkSelf = self.postMessage === postMessage } catch (err) { checkSelf = err.message }
-  try { checkWindow = window.postMessage === postMessage } catch (err) { checkWindow = err.message }
-  try { checkGlobal = global.postMessage === postMessage } catch (err) { checkGlobal = err.message }
+    contextHasPostMessage = typeof postMessage !== 'undefined'
+    selfHasPostMessage =  typeof self.postMessage !== 'undefined'
+    try { checkThis = this.postMessage === postMessage } catch (err) { checkThis = err.message }
+    try { checkSelf = self.postMessage === postMessage } catch (err) { checkSelf = err.message }
+    try { checkWindow = window.postMessage === postMessage } catch (err) { checkWindow = err.message }
+    try { checkGlobal = global.postMessage === postMessage } catch (err) { checkGlobal = err.message }
 
-  module.exports = { checkThis, checkSelf, checkWindow, checkGlobal, contextHasPostMessage, selfHasPostMessage }
-  `
+    module.exports = { checkThis, checkSelf, checkWindow, checkGlobal, contextHasPostMessage, selfHasPostMessage }
+  }
+
   const config = {
     "resources": {
       "<root>": {
         "packages": {
-          "test": true,
+          "one": true,
         }
       },
-      'test': {
+      'one': {
         "globals": {
           "postMessage": true,
         }
@@ -87,9 +84,8 @@ test('globalRef - ensure endowments are accessible on globals', async (t) => {
     }
   }
 
-  global.postMessage = () => { throw new Error('this should never be called') }
-  const result = await testCodeInNonEntryBundle(t, moduleContent, config)
-  delete global.postMessage
+  const testGlobal = { postMessage: () => { throw new Error('this should never be called') } }
+  const result = await runSimpleOneTwo({ defineOne, config, testGlobal })
 
   // this is how it behaves in browser via browserify
   t.deepEqual(result, {
@@ -103,44 +99,3 @@ test('globalRef - ensure endowments are accessible on globals', async (t) => {
   }, 'test result matches expected')
 
 })
-
-async function testCodeInNonEntryBundle (t, code, providedConfig) {
-  const files = [{
-    // id must be full path
-    id: './apple.js',
-    file: './apple.js',
-    deps: {
-      'test': './node_modules/test/index.js'
-    },
-    source: 'global.testResult = require("test")',
-    entry: true
-  }, {
-    // non-entry
-    id: './node_modules/test/index.js',
-    file: './node_modules/test/index.js',
-    deps: {},
-    source: code,
-  }]
-
-  const config = providedConfig || {
-    "resources": {
-      "<root>": {
-        "packages": {
-          "test": true,
-        }
-      }
-    }
-  }
-
-  const bundle = await createBundleFromRequiresArray(files, { config })
-
-  global.testResult = undefined
-
-  try {
-    eval(bundle)
-  } catch (err) {
-    t.fail(`eval of bundle failed:\n${err.stack || err}`)
-  }
-
-  return global.testResult
-}
