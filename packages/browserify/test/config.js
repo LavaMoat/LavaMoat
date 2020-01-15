@@ -3,8 +3,12 @@ const fs = require('fs')
 const path = require('path')
 const { execSync } = require('child_process')
 const tmp = require('tmp')
+const mkdirp = require('mkdirp')
 
-const { createBundleFromRequiresArray } = require('./util')
+const { 
+  createBundleFromRequiresArray,
+  generateConfigFromFiles
+ } = require('./util')
 
 // here we are providing an endowments only to a module deep in a dep graph
 test('config - deep endow', async (t) => {
@@ -115,4 +119,38 @@ test('config - default config path is generated with autoconfig if path is not s
   t.ok(fs.existsSync(expectedPath), 'Config file exists')
 
   t.end()
+})
+
+test("config - writes a proper config to a temp dir", async (t) => {
+  const entries = [
+    {
+      'id': '/one.js',
+      'file': '/one.js',
+      'source': "require('two');",
+      'deps': { 'two': '/node_modules/two/index.js' },
+      'entry': true,
+    },
+    {
+      'id': '/node_modules/two/index.js',
+      'file': '/node_modules/two/index.js',
+      'source': "require('three')",
+      'deps': { 'three': '/node_modules/three/index.js', },
+    },
+    {
+      'id': '/node_modules/three/index.js',
+      'file': '/node_modules/three/index.js',
+      'source': "window.postMessage('12345', '*')",
+      'deps': {},
+    }
+  ]
+
+  const tmpObj = tmp.dirSync()
+  const config = await generateConfigFromFiles({ files: entries })
+  const filePath = path.join(tmpObj.name, 'lavamoat/lavamoat-config.json')
+  const configDir = path.dirname(filePath)
+
+  mkdirp.sync(configDir)
+  fs.writeFileSync(filePath, JSON.stringify(config))
+  const bundle = await createBundleFromRequiresArray([], { config: filePath })
+  t.doesNotThrow(() => eval(bundle))
 })
