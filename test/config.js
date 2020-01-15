@@ -154,3 +154,47 @@ test("config - writes a proper config to a temp dir", async (t) => {
   const bundle = await createBundleFromRequiresArray([], { config: filePath })
   t.doesNotThrow(() => eval(bundle))
 })
+
+test('Config - Config override is applied', async (t) => {
+  const config = {
+    resources: {
+      '<root>': {
+        packages: {
+          'two': true
+        }
+      },
+    }
+  }
+  const configOverride = {
+    resources: {
+      '<root>': {
+        packages: {
+          'two': true
+        }
+      },
+      'two': {
+        packages: {
+          'three': 12345678
+        }
+      },
+      'three': {
+        globals: {
+          'postMessage': true
+        }
+      }
+    }
+  }
+  const tmpObj = tmp.dirSync()
+  const filePath = path.join(tmpObj.name, 'lavamoat/lavamoat-config.json')
+  const configDir = path.dirname(filePath)
+
+  mkdirp.sync(configDir)
+  fs.writeFileSync(filePath, JSON.stringify(config))
+
+
+  const bundle = await createBundleFromRequiresArray([], { config: filePath, configOverride })
+  eval(bundle)
+  t.assert(bundle.includes('"three": 12345678'))
+
+  
+})

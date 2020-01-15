@@ -64,6 +64,7 @@ function getConfigurationFromPluginOpts(pluginOpts) {
     configPath: getConfigPath(pluginOpts)
   }
 
+  
   if (typeof pluginOpts.config === 'object') {
     configuration.getConfig = () => pluginOpts.config
   } else if (typeof pluginOpts.config === 'function') {
@@ -85,18 +86,33 @@ function getConfigurationFromPluginOpts(pluginOpts) {
 
       const configSource = fs.readFileSync(configPath, 'utf8')
       const primaryConfig = JSON.parse(configSource)
-
+      
       // if override specified, merge
       if (pluginOpts.configOverride) {
-        const configOverride = pluginOpts.configOverride
-        const configOverrideSource = fs.readFileSync(configOverride, 'utf8')
-        const overrideConfig = JSON.parse(configOverrideSource)
-        const mergedConfig = mergeDeep(primaryConfig, overrideConfig)
+        let configOverride
+        if (typeof pluginOpts.configOverride === 'function') {
+          configOverride = pluginOpts.configOverride()
+          if (typeof configOverride !== ('object' || 'string') ) {
+            throw new Error('LavaMoat - Config override function must return an object or a string.')
+          }
+        } 
+        if (typeof configOverride === 'string') {
+          const configOverrideSource = fs.readFileSync(configOverride, 'utf8')
+          configOverride = JSON.parse(configOverrideSource)
+        } else if (typeof pluginOpts.configOverride === 'object') {
+          configOverride = pluginOpts.configOverride
+        } else {
+          throw new Error('LavaMoat - Config Override must be a function, string or object')
+        }
+        const mergedConfig = mergeDeep(primaryConfig, configOverride)
         return mergedConfig
+
       }
       return primaryConfig
     }
   }
+
+  
 
   if (!pluginOpts.writeAutoConfig) {
     // do not trigger parsing of the code for config generation
