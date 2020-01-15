@@ -65,49 +65,54 @@ function getConfigurationFromPluginOpts(pluginOpts) {
   }
 
   
-  if (typeof pluginOpts.config === 'object') {
-    configuration.getConfig = () => pluginOpts.config
-  } else if (typeof pluginOpts.config === 'function') {
+  if (typeof pluginOpts.config === 'function') {
     configuration.getConfig = pluginOpts.config
   } else {
     const tolerateMissingConfig = ('writeAutoConfig' in pluginOpts)
     configuration.getConfig = () => {
-      if (!configuration.configPath) {
-        throw new Error('LavaMoat - No configuration path')
-      }
-      const configPath = path.resolve(configuration.configPath)
-      const isMissing = !fs.existsSync(configPath)
-      if (isMissing) {
-        if (tolerateMissingConfig) {
-          return {}
-        }
-        throw new Error(`Lavamoat - Configuration file not found at path: '${configPath}', use writeAutoConfig option to generate one`)
-      } 
+      
+      let configSource 
+      let primaryConfig
 
-      const configSource = fs.readFileSync(configPath, 'utf8')
-      const primaryConfig = JSON.parse(configSource)
+      if (typeof pluginOpts.config === 'string') {
+        const configPath = path.resolve(configuration.configPath)
+        const isMissing = !fs.existsSync(configPath)
+        if (!configuration.configPath) {
+          throw new Error('LavaMoat - No configuration path')
+        }
+        if (isMissing) {
+          if (tolerateMissingConfig) {
+            return {}
+          }
+          throw new Error(`Lavamoat - Configuration file not found at path: '${configPath}', use writeAutoConfig option to generate one`)
+        } 
+        configSource = fs.readFileSync(configPath, 'utf8')
+        primaryConfig = JSON.parse(configSource)
+      } else if (typeof pluginOpts.config === 'object') {
+        primaryConfig = pluginOpts.config
+      }
       
       // if override specified, merge
       if (pluginOpts.configOverride) {
-        let configOverride
-        if (typeof pluginOpts.configOverride === 'function') {
+        let configOverride = pluginOpts.configOverride
+        if (typeof configOverride === 'function') {
           configOverride = pluginOpts.configOverride()
-          if (typeof configOverride !== ('object' || 'string') ) {
+          if (typeof configOverride !== 'string' && typeof configOverride !== 'object') {
             throw new Error('LavaMoat - Config override function must return an object or a string.')
           }
         } 
+
         if (typeof configOverride === 'string') {
           const configOverrideSource = fs.readFileSync(configOverride, 'utf8')
           configOverride = JSON.parse(configOverrideSource)
-        } else if (typeof pluginOpts.configOverride === 'object') {
-          configOverride = pluginOpts.configOverride
-        } else {
+        } else if (typeof configOverride !== 'object'){
           throw new Error('LavaMoat - Config Override must be a function, string or object')
         }
         const mergedConfig = mergeDeep(primaryConfig, configOverride)
         return mergedConfig
 
       }
+      
       return primaryConfig
     }
   }

@@ -155,7 +155,7 @@ test("config - writes a proper config to a temp dir", async (t) => {
   t.doesNotThrow(() => eval(bundle))
 })
 
-test('Config - Config override is applied', async (t) => {
+test('Config - Applies config override', async (t) => {
   const config = {
     resources: {
       '<root>': {
@@ -185,16 +185,33 @@ test('Config - Config override is applied', async (t) => {
     }
   }
   const tmpObj = tmp.dirSync()
-  const filePath = path.join(tmpObj.name, 'lavamoat/lavamoat-config.json')
-  const configDir = path.dirname(filePath)
+  const configFilePath = path.join(tmpObj.name, 'lavamoat/lavamoat-config.json')
+  const overrideFilePath = path.join(tmpObj.name, 'lavamoat/lavamoat-override.json')
+  const configDir = path.dirname(configFilePath)
 
   mkdirp.sync(configDir)
-  fs.writeFileSync(filePath, JSON.stringify(config))
-
-
-  const bundle = await createBundleFromRequiresArray([], { config: filePath, configOverride })
-  eval(bundle)
-  t.assert(bundle.includes('"three": 12345678'))
-
+  fs.writeFileSync(configFilePath, JSON.stringify(config))
+  fs.writeFileSync(overrideFilePath, JSON.stringify(configOverride))
   
+  const bundle = await createBundleFromRequiresArray([], {
+    config: configFilePath,
+    configOverride
+  })
+  const stringBundle = await createBundleFromRequiresArray([], {
+    config: configFilePath,
+    configOverride: overrideFilePath
+  })
+  const functionBundle = await createBundleFromRequiresArray([], {
+    config: configFilePath,
+    configOverride: () => configOverride
+  })
+  const configObjectBundle = await createBundleFromRequiresArray([], {
+    config,
+    configOverride: () => configOverride
+  })
+
+  t.assert(bundle.includes('"three": 12345678'), "Applies override, provided as object")
+  t.assert(stringBundle.includes('"three": 12345678'), "Applies override, provided as string")
+  t.assert(functionBundle.includes('"three": 12345678'), "Applies override, provided as function")
+  t.assert(configObjectBundle.includes('"three": 12345678'), "Applies override, primary config provided as object")
 })
