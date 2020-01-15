@@ -83,17 +83,18 @@ function getConfigurationFromPluginOpts(pluginOpts) {
         throw new Error(`Lavamoat - Configuration file not found at path: '${configPath}', use writeAutoConfig option to generate one`)
       } 
 
-      const configSource = fs.readFileSync(defaultConfig, 'utf8')
+      const configSource = fs.readFileSync(configPath, 'utf8')
+      const primaryConfig = JSON.parse(configSource)
+
       // if override specified, merge
       if (pluginOpts.configOverride) {
         const configOverride = pluginOpts.configOverride
         const configOverrideSource = fs.readFileSync(configOverride, 'utf8')
-        const initialConfig = JSON.parse(configSource)
         const overrideConfig = JSON.parse(configOverrideSource)
-        const mergedConfig = mergeDeep(initialConfig, overrideConfig)
+        const mergedConfig = mergeDeep(primaryConfig, overrideConfig)
         return mergedConfig
       }
-      return pluginOpts.config
+      return primaryConfig
     }
   }
 
