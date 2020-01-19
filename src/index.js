@@ -62,7 +62,8 @@ function getConfigurationFromPluginOpts(pluginOpts) {
     getConfig: undefined,
     configPath: getConfigPath(pluginOpts)
   }
-
+  
+  const defaultOverrideConfig = '/lavamoat-config-override.json'
   
   if (typeof pluginOpts.config === 'function') {
     configuration.getConfig = pluginOpts.config
@@ -90,7 +91,6 @@ function getConfigurationFromPluginOpts(pluginOpts) {
       } else if (typeof pluginOpts.config === 'object') {
         primaryConfig = pluginOpts.config
       }
-      
       // if override specified, merge
       if (pluginOpts.configOverride) {
         let configOverride = pluginOpts.configOverride
@@ -102,7 +102,7 @@ function getConfigurationFromPluginOpts(pluginOpts) {
         } 
 
         if (typeof configOverride === 'string') {
-          const configOverrideSource = fs.readFileSync(configOverride, 'utf8')
+          const configOverrideSource = fs.readFileSync(configOverride, 'utf-8')
           configOverride = JSON.parse(configOverrideSource)
         } else if (typeof configOverride !== 'object'){
           throw new Error('LavaMoat - Config Override must be a function, string or object')
@@ -110,8 +110,18 @@ function getConfigurationFromPluginOpts(pluginOpts) {
         const mergedConfig = mergeDeep(primaryConfig, configOverride)
         return mergedConfig
 
+      } else {
+        // Otherwise, still merge but only if it already exists
+        const configOverridePath = path.join('./lavamoat', defaultOverrideConfig)
+        const resolvedPath = path.resolve(configOverridePath)
+        if (fs.existsSync(resolvedPath)) {
+          const configOverrideSource = fs.readFileSync(resolvedPath, 'utf-8')
+          const configOverride = JSON.parse(configOverrideSource)
+          const mergedConfig = mergeDeep(primaryConfig, configOverride)
+          return mergedConfig
+        }
+        return primaryConfig
       }
-      return primaryConfig
     }
   }
 
@@ -127,12 +137,11 @@ function getConfigurationFromPluginOpts(pluginOpts) {
     }
     configuration.writeAutoConfig = (configString) => {
       const configPath = path.resolve(configuration.configPath) 
-      const overrideConfigFile = '/lavamoat-config-override.json'
       //Ensure parent dir exists
       const configDirectory = path.dirname(configPath)
       mkdirp.sync(configDirectory)
       //Declare override config file path
-      const overrideConfigPath = configDirectory + overrideConfigFile
+      const overrideConfigPath = configDirectory + defaultOverrideConfig
       //Write config to file
       fs.writeFileSync(configPath, configString)
       //Write default override config to file if it doesn't already exist
