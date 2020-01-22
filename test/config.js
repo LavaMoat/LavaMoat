@@ -108,9 +108,7 @@ test('config - default config path is generated with autoconfig if path is not s
   };
 
   const expectedPath = path.join(tmpObj.name, 'lavamoat/lavamoat-config.json')
-  const scriptPath = require.resolve('./runBrowserify')
-
-  console.log(expectedPath)
+  const scriptPath = require.resolve('./fixtures/runBrowserifyAutoConfig')
 
   t.notOk(fs.existsSync(expectedPath), 'Config file does not yet exist')
 
@@ -153,4 +151,104 @@ test("config - writes a proper config to a temp dir", async (t) => {
   fs.writeFileSync(filePath, JSON.stringify(config))
   const bundle = await createBundleFromRequiresArray([], { config: filePath })
   t.doesNotThrow(() => eval(bundle))
+})
+
+test('Config - Applies config override', async (t) => {
+  const config = {
+    resources: {
+      '<root>': {
+        packages: {
+          'two': true
+        }
+      },
+    }
+  }
+  const configOverride = {
+    resources: {
+      '<root>': {
+        packages: {
+          'two': true
+        }
+      },
+      'two': {
+        packages: {
+          'three': 12345678
+        }
+      },
+      'three': {
+        globals: {
+          'postMessage': true
+        }
+      }
+    }
+  }
+  const tmpObj = tmp.dirSync()
+  const configFilePath = path.join(tmpObj.name, 'lavamoat/lavamoat-config.json')
+  const overrideFilePath = path.join(tmpObj.name, 'lavamoat/lavamoat-override.json')
+  const configDir = path.dirname(configFilePath)
+
+  mkdirp.sync(configDir)
+  fs.writeFileSync(configFilePath, JSON.stringify(config))
+  fs.writeFileSync(overrideFilePath, JSON.stringify(configOverride))
+  
+  const bundle = await createBundleFromRequiresArray([], {
+    config: configFilePath,
+    configOverride
+  })
+  const stringBundle = await createBundleFromRequiresArray([], {
+    config: configFilePath,
+    configOverride: overrideFilePath
+  })
+  const functionBundle = await createBundleFromRequiresArray([], {
+    config: configFilePath,
+    configOverride: () => configOverride
+  })
+  const configObjectBundle = await createBundleFromRequiresArray([], {
+    config,
+    configOverride: () => configOverride
+  })
+
+  t.assert(bundle.includes('"three": 12345678'), "Applies override, provided as object")
+  t.assert(stringBundle.includes('"three": 12345678'), "Applies override, provided as string")
+  t.assert(functionBundle.includes('"three": 12345678'), "Applies override, provided as function")
+  t.assert(configObjectBundle.includes('"three": 12345678'), "Applies override, primary config provided as object")
+})
+
+test("Config override is applied if not specified and already exists at default path", async (t) => {
+  const tmpObj = tmp.dirSync();
+  const defaults = {
+    cwd: tmpObj.name,
+  };
+
+  const configOverride = {
+    resources: {
+      '<root>': {
+        packages: {
+          'two': true
+        }
+      },
+      'two': {
+        packages: {
+          'three': 12345678
+        }
+      },
+      'three': {
+        globals: {
+          'postMessage': true
+        }
+      }
+    }
+  }
+
+  const configOverridePath = path.join(tmpObj.name, './lavamoat/lavamoat-config-override.json')
+  const configOverrideDir = path.dirname(configOverridePath)
+  mkdirp.sync(configOverrideDir)
+  fs.writeFileSync(configOverridePath, JSON.stringify(configOverride))
+
+  const scriptPath = require.resolve('./fixtures/runBrowserifyNoOpts')
+
+  const buildProcess = execSync(`node ${scriptPath}`, defaults)
+  const outputString = buildProcess.toString()
+
+  t.assert(outputString.includes('"three": 12345678'), "Applies override if exists but not specified")
 })
