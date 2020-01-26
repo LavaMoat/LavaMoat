@@ -3,6 +3,7 @@ const pify = require('pify')
 const clone = require('clone')
 const through2 = require('through2').obj
 const mergeDeep = require('merge-deep')
+const watchify = require('watchify')
 
 const sesifyPlugin = require('../src/index')
 
@@ -11,6 +12,7 @@ module.exports = {
   createBundleFromEntry,
   createBundleFromRequiresArray,
   createBundleFromRequiresArrayPath,
+  createWatchifyBundle,
   generateConfigFromFiles,
   filesToConfigSource,
   fnToCodeBlock,
@@ -40,7 +42,6 @@ async function createBundleFromRequiresArray (files, pluginOpts) {
 function createBrowserifyFromRequiresArray ({ files, pluginOpts = {} }) {
   // empty bundle but inject modules at bundle time
   const bifyOpts = Object.assign({}, sesifyPlugin.args)
-  pluginOpts.config = pluginOpts.config || {}
   const bundler = browserify([], bifyOpts)
   bundler.plugin(sesifyPlugin, pluginOpts)
 
@@ -98,6 +99,19 @@ async function bundleAsync (bundler) {
 
 function fnToCodeBlock (fn) {
   return fn.toString().split('\n').slice(1,-1).join('\n')
+}
+
+async function createWatchifyBundle (pluginOpts) {
+  const bundler = browserify([], {
+    cache: {},
+    packageCache: {},
+    plugin: [
+      [sesifyPlugin, pluginOpts],
+      [watchify]
+    ]
+  })
+  bundleAsync(bundler)
+  return bundler
 }
 
 
