@@ -32,7 +32,7 @@ Modules are SES eval'd with access only to the platform APIs specificied in the 
 The result is a bundle that should work just as before, but provides some protection against supplychain attacks.
 
 ## CLI Usage
-Jump to: JS Usage
+See below: JS Usage
 
 Ensure you have browserify installed:
 
@@ -49,12 +49,12 @@ browserify index.js --plugin [ lavamoat-browserify --writeAutoConfig --config �
 * `index.js` is the typical entry point for Browserify.
 * `--plugin` tells Browserify to include the following plugin in the bundle process.
 * `lavamoat-browserify` is the plugin name, which accepts 3 different arguments. All arguments are optional:
-    * `--writeAutoConfig`: Pass in `true` to tell the plugin to automatically generate a configuration file. Pass in `false` or omit the option completely otherwise.
+    * `--writeAutoConfig`: `true` tells the plugin to automatically generate a configuration file. Otherwise, pass in `false` or omit the option completely.
     * `--config`: Specifies a pre-set configuration file. Can be passed in as a direct config object (type `object`), the path to the existing config file (type `string`) or a function which returns which returns said object or file path.
 
         * When used with `writeAutoConfig`, it must be the file path to be used for the auto-generated config. `writeAutoConfig` & `config` should otherwise be mutually exclusive.
 
-    * `--configOverride`: Specifies another configuration, if any, to be merged with `config`. `configOverride` takes overwrite precedence; key `A` and its value on `configOverride` will overwrite Key `A` and its value on `config`, so use with caution. Can be passed in as an `object`, `string`, or `function` in the same sense as `config` shown above.
+    * `--configOverride`: Specifies another configuration, if any, to be merged with `config`. `configOverride` takes overwrite precedence; key `A` and its value on `configOverride` will overwrite key `A` and its value on `config`, so use with caution. Can be passed in as an `object`, `string`, or `function` in the same sense as `config` shown above.
 
 * IMPORTANT: Be mindful of the spacings at the beginning and end of the brackets `[ ... ]`, Browserify will fail without them. 
 
@@ -257,11 +257,58 @@ And voila! Spin up a server and start using your LavaMoat protected Browserify b
 
 See [lavamoat-browserify-examples](https://github.com/LavaMoat/lavamoat-browserify-examples/) for more usage examples.
 
+#### Watch for config changes with Watchify
+
+LavaMoat automatically re-builds upon any change to `lavamoat-config-override.json` when using watchify:
+
+```
+npm i --dev watchify
+```
+
+When creating the Browserify bundle, be sure to follow the instructions as per the official [watchify](https://github.com/browserify/watchify) documentation. Here is an example using LavaMoat:
+
+```javascript
+const browserify = require('browserify')
+const watchify = require('watchify')
+const fs = require('fs')
+
+const lavamoatOpts = {
+    writeAutoConfig: true
+}
+
+const bundler = browserify({
+    entries: ['./index.js'],
+    cache: {},
+    packageCache: {},
+    plugin: [
+        ['lavamoat-browserify', lavamoatOpts],
+        [watchify]
+    ]
+})
+
+bundler.on('update', bundle)
+bundle()
+
+function bundle() {
+    bundler.bundle()
+    .pipe(fs.createWriteStream('./bundle.js'))
+}
+```
+
+**IMPORTANT**: Watchify only watches files that are a part of the build's main require tree found in the entry file, therefore `lavamoat-config-override.json` is not watched by default. The workaround is to emit a `file` event from `bundler` containing the path to the override config. This makes Watchify aware of the file.
+
+```javascript
+bundler.emit(file, "./lavamoat/lavamoat-config.json")
+```
+
+Now, when changes to `lavamoat-config-override.json` are made, a new bundle is created and the original `lavamoat-config.json` is overwritten. 
+
+
 #### Config file layout
 
 Here is an example of the config file with each field explained:
 
-```json
+```
 {
     “resources": {
         “<root>”: {  
