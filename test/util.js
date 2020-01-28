@@ -107,6 +107,7 @@ async function createWatchifyBundle (pluginOpts) {
     packageCache: {},
     plugin: [
       [sesifyPlugin, pluginOpts],
+      //poll option is needed to ensure the 'update' event is properly fired after the config override file changes. Without it, the firing behavior is unpredictable due to filesystem watch not always detecting the change. 
       [watchify, {poll: true}]
     ]
   })
