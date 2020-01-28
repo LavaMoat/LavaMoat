@@ -284,21 +284,17 @@ test('Config edits trigger re-bundle if using watchify', async (t) => {
   const configFile = fs.readFileSync(configPath)
   const configFileString = configFile.toString()
   
-  await new Promise(async(resolve) => {
-    bundler.on('update', async () => {
-      await createBundleFromRequiresArray([], {})
-      const updatedConfigFile = fs.readFileSync(configPath)
-      const updatedConfigFileString = updatedConfigFile.toString()
-      rimraf.sync('./lavamoat')
-
-      t.notOk(configFileString.includes('"three": 12345678'))
-      t.ok(updatedConfigFileString.includes('"three": 12345678'))
-      resolve()
-    })
-    
+  await new Promise((resolve) => {
+    bundler.on('update', () => resolve())
     const overrideString = JSON.stringify(configDefault)
     fs.writeFileSync(overridePath, overrideString)
   })
-  
-  
+
+  await createBundleFromRequiresArray([], {})
+  const updatedConfigFile = fs.readFileSync(configPath)
+  const updatedConfigFileString = updatedConfigFile.toString()
+  rimraf.sync('./lavamoat')
+
+  t.notOk(configFileString.includes('"three": 12345678'))
+  t.ok(updatedConfigFileString.includes('"three": 12345678'))
 })
