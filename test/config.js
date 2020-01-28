@@ -285,7 +285,7 @@ test('Config edits trigger re-bundle if using watchify', async (t) => {
   const configFileString = configFile.toString()
   
   await new Promise((resolve) => {
-    bundler.on('update', () => resolve())
+    bundler.once('update', () => resolve())
     const overrideString = JSON.stringify(configDefault)
     fs.writeFileSync(overridePath, overrideString)
   })
