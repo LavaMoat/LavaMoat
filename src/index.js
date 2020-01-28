@@ -119,8 +119,8 @@ function getConfigurationFromPluginOpts(pluginOpts) {
           const configOverride = JSON.parse(configOverrideSource)
           const mergedConfig = mergeDeep(primaryConfig, configOverride)
           //Overwrite source config file 
-          const configPath = path.resolve(configuration.configPath)
-          fs.writeFileSync(configPath, JSON.stringify(mergedConfig, null, 3))
+          const configPath = configuration.configPath
+          fs.writeFileSync(configPath, JSON.stringify(mergedConfig, null, 2))
           return mergedConfig
         }
         return primaryConfig
@@ -157,7 +157,7 @@ function getConfigurationFromPluginOpts(pluginOpts) {
             }
           }
         }
-        fs.writeFileSync(overrideConfigPath, JSON.stringify(basicConfig, null, 3))
+        fs.writeFileSync(overrideConfigPath, JSON.stringify(basicConfig, null, 2))
         console.warn(`LavaMoat Override Config - wrote to "${overrideConfigPath}"`)
       }
       console.warn(`LavaMoat Config - wrote to "${configPath}"`)

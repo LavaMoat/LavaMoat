@@ -256,7 +256,6 @@ test('Config override is applied if not specified and already exists at default 
 })
 
 test('Config edits trigger re-bundle if using watchify', async (t) => {
-  t.plan(2)
   const configDefault = {
     resources: {
       '<root>': {
@@ -279,14 +278,13 @@ test('Config edits trigger re-bundle if using watchify', async (t) => {
   const configPath = './lavamoat/lavamoat-config.json'
   
   bundler.emit('file', './lavamoat/lavamoat-config-override.json')
+  
+  await new Promise(resolve => setTimeout(resolve, 1000))
 
   const configFile = fs.readFileSync(configPath)
   const configFileString = configFile.toString()
-
-  const overrideString = JSON.stringify(configDefault)
-  fs.writeFileSync(overridePath, overrideString)
-
-  await new Promise((resolve) => {
+  
+  await new Promise(async(resolve) => {
     bundler.on('update', async () => {
       await createBundleFromRequiresArray([], {})
       const updatedConfigFile = fs.readFileSync(configPath)
@@ -297,7 +295,10 @@ test('Config edits trigger re-bundle if using watchify', async (t) => {
       t.ok(updatedConfigFileString.includes('"three": 12345678'))
       resolve()
     })
+    
+    const overrideString = JSON.stringify(configDefault)
+    fs.writeFileSync(overridePath, overrideString)
   })
-
+  
   
 })

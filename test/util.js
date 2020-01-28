@@ -107,7 +107,7 @@ async function createWatchifyBundle (pluginOpts) {
     packageCache: {},
     plugin: [
       [sesifyPlugin, pluginOpts],
-      [watchify]
+      [watchify, {poll: true}]
     ]
   })
   bundleAsync(bundler)
