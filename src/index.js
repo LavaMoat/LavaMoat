@@ -31,7 +31,7 @@ function plugin (browserify, pluginOpts) {
   function setupPlugin () {
     
     applySesTransforms(browserify)
-    
+
     const customPack = createLavamoatPacker(configuration)
     // replace the standard browser-pack with our custom packer
     browserify.pipeline.splice('pack', 1, customPack)
@@ -118,6 +118,9 @@ function getConfigurationFromPluginOpts(pluginOpts) {
           const configOverrideSource = fs.readFileSync(resolvedPath, 'utf-8')
           const configOverride = JSON.parse(configOverrideSource)
           const mergedConfig = mergeDeep(primaryConfig, configOverride)
+          //Overwrite source config file 
+          const configPath = configuration.configPath
+          fs.writeFileSync(configPath, JSON.stringify(mergedConfig, null, 2))
           return mergedConfig
         }
         return primaryConfig
@@ -154,7 +157,7 @@ function getConfigurationFromPluginOpts(pluginOpts) {
             }
           }
         }
-        fs.writeFileSync(overrideConfigPath, JSON.stringify(basicConfig))
+        fs.writeFileSync(overrideConfigPath, JSON.stringify(basicConfig, null, 2))
         console.warn(`LavaMoat Override Config - wrote to "${overrideConfigPath}"`)
       }
       console.warn(`LavaMoat Config - wrote to "${configPath}"`)
@@ -177,9 +180,8 @@ function getConfigPath(pluginOpts) {
   }
   if (typeof pluginOpts.config === 'string') {
     return pluginOpts.config
-  } else {
-    return null
-  }
+  } 
+  return defaultConfig
 }
 
 function createLavamoatPacker (opts) {
