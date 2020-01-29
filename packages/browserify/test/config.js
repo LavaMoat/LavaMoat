@@ -4,10 +4,12 @@ const path = require('path')
 const { execSync } = require('child_process')
 const tmp = require('tmp')
 const mkdirp = require('mkdirp')
+const rimraf = require('rimraf')
 
 const { 
   createBundleFromRequiresArray,
-  generateConfigFromFiles
+  generateConfigFromFiles,
+  createWatchifyBundle,
  } = require('./util')
 
 // here we are providing an endowments only to a module deep in a dep graph
@@ -214,7 +216,7 @@ test('Config - Applies config override', async (t) => {
   t.assert(configObjectBundle.includes('"three": 12345678'), "Applies override, primary config provided as object")
 })
 
-test("Config override is applied if not specified and already exists at default path", async (t) => {
+test('Config override is applied if not specified and already exists at default path', async (t) => {
   const tmpObj = tmp.dirSync();
   const defaults = {
     cwd: tmpObj.name,
@@ -251,4 +253,48 @@ test("Config override is applied if not specified and already exists at default 
   const outputString = buildProcess.toString()
 
   t.assert(outputString.includes('"three": 12345678'), "Applies override if exists but not specified")
+})
+
+test('Config edits trigger re-bundle if using watchify', async (t) => {
+  const configDefault = {
+    resources: {
+      '<root>': {
+        packages: {
+          'two': true
+        }
+      },
+      'two': {
+        packages: {
+          'three': 12345678
+        }
+      }
+    }
+  }
+  const bundler = await createWatchifyBundle({
+    writeAutoConfig: true,
+  })
+
+  const overridePath = './lavamoat/lavamoat-config-override.json'
+  const configPath = './lavamoat/lavamoat-config.json'
+  
+  bundler.emit('file', './lavamoat/lavamoat-config-override.json')
+  
+  await new Promise(resolve => setTimeout(resolve, 1000))
+
+  const configFile = fs.readFileSync(configPath)
+  const configFileString = configFile.toString()
+  
+  await new Promise((resolve) => {
+    bundler.once('update', () => resolve())
+    const overrideString = JSON.stringify(configDefault)
+    fs.writeFileSync(overridePath, overrideString)
+  })
+
+  await createBundleFromRequiresArray([], {})
+  const updatedConfigFile = fs.readFileSync(configPath)
+  const updatedConfigFileString = updatedConfigFile.toString()
+  rimraf.sync('./lavamoat')
+
+  t.notOk(configFileString.includes('"three": 12345678'))
+  t.ok(updatedConfigFileString.includes('"three": 12345678'))
 })
