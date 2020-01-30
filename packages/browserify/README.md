@@ -261,7 +261,7 @@ See [lavamoat-browserify-examples](https://github.com/LavaMoat/lavamoat-browseri
 
 Here is an example of the config file with each field explained:
 
-```json
+```
 {
     “resources": {
         “<root>”: {  
