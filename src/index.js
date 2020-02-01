@@ -149,15 +149,7 @@ function getConfigurationFromPluginOpts(pluginOpts) {
       fs.writeFileSync(configPath, configString)
       //Write default override config to file if it doesn't already exist
       if (!fs.existsSync(overrideConfigPath)) {
-        const basicConfig = {
-          "resources": {
-            "<root>": {
-              "packages": {
-              }
-            }
-          }
-        }
-        fs.writeFileSync(overrideConfigPath, JSON.stringify(basicConfig, null, 2))
+        fs.writeFileSync(overrideConfigPath, configString)
         console.warn(`LavaMoat Override Config - wrote to "${overrideConfigPath}"`)
       }
       console.warn(`LavaMoat Config - wrote to "${configPath}"`)
