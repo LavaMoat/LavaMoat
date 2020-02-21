@@ -15,9 +15,11 @@ module.exports = generatePrelude
 
 // takes the preludeTemplate and populates it with the config + libraries
 function generatePrelude (opts = {}) {
+  const debugMode = Boolean(opts.debugMode)
   const lavamoatConfig = parseConfig(opts.getConfig)
 
   let output = preludeTemplate
+  output = output.replace('__lavamoatDebugMode__', debugMode ? 'true' : 'false')
   output = output.replace('__lavamoatConfig__', lavamoatConfig)
 
   replaceTemplateRequire('ses', sesSrc)
