@@ -33,7 +33,7 @@ function transformToWrapped (sourceMeta) {
   const moduleWrapperSource =
 
 `(${function () {
-  /* source: ${filename} */
+  // source: ${filename}
   return function (require,module,exports) {
 __MODULE_CONTENT__
   }
