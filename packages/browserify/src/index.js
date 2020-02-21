@@ -55,7 +55,12 @@ module.exports.generatePrelude = generatePrelude
 module.exports.createLavamoatPacker = createLavamoatPacker
 
 function getConfigurationFromPluginOpts(pluginOpts) {
-  const allowedKeys = new Set(["writeAutoConfig", "config", "configOverride"])
+  const allowedKeys = new Set([
+    "writeAutoConfig",
+    "config",
+    "configOverride",
+    "_"  //Browserify adds this as the first option when running from the command line
+  ])
   const invalidKeys = Reflect.ownKeys(pluginOpts).filter(key => !allowedKeys.has(key))
   if (invalidKeys.length) throw new Error(`Lavamoat - Unrecognized options provided '${invalidKeys}'`) 
 
