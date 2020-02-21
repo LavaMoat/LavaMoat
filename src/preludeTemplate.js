@@ -256,7 +256,13 @@
       } else {
         // apply membrane protections
         const inGraph = getMembraneGraphForPackage(packageName)
-        const outGraph = getMembraneGraphForPackage(parentModulePackageName)
+        let outGraph
+        // set <root>'s membrane space to <endowments> so it receives unwrapped refs
+        if (parentModulePackageName === '<root>') {
+          outGraph = getMembraneGraphForPackage('<endowments>')
+        } else {
+          outGraph = getMembraneGraphForPackage(parentModulePackageName)
+        }
         const protectedExports = membrane.bridge(moduleExports, inGraph, outGraph)
         return protectedExports
       }
