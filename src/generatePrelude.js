@@ -36,6 +36,9 @@ function generatePrelude (opts = {}) {
 
 // this wraps the content of a commonjs module with an IIFE that returns the module.exports
 function wrapWithReturnCjsExports (label, src) {
+  if (String(label).includes('\n')) {
+    throw new Error('Lavamoat - "wrapWithReturnCjsExports" does not allow labels with newlines')
+  }
   return (
 `// define ${label}
 (function(){
