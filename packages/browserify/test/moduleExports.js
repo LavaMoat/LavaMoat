@@ -2,7 +2,7 @@ const test = require('tape-promise').default(require('tape'))
 const { createBundleFromRequiresArray } = require('./util')
 const {
   runSimpleOneTwo,
-  runSimpleOneTwoSamePackage
+  runSimpleOneTwoSamePackage,
 } = require('./util')
 
 test('moduleExports - decorate an import - object', async (t) => {
@@ -118,7 +118,7 @@ test('moduleExports - bridged array passes Array.isArray', async (t) => {
   t.deepEqual(result, true)
 })
 
-test('object returned from exported function should be mutable', async (t) => {
+test('moduleExports - object returned from exported function should be mutable', async (t) => {
   function defineOne() {
     const two = require('two')
     const one = two.xyz()
@@ -132,6 +132,72 @@ test('object returned from exported function should be mutable', async (t) => {
 
   t.equal(one.abc, 123, "Object should be mutable")
 }) 
+
+
+
+test('moduleExports - <root> package should have <endowments> membrane space and receive unwrapped child refs', async (t) => {
+
+  const testObj = {}
+  global.get = () => testObj
+  global.check = (target) => target === testObj
+
+  function defineOne() {
+    const obj = {
+      get: () => global.get()
+    }
+    module.exports = obj
+  }
+
+  function defineEntry() {
+    const one = require('one')
+    const getResult = one.get()
+    const checkResult = global.check(getResult)
+    global.testResult = checkResult
+  }
+
+  const depsArray = [
+    {
+      'id': '/entry.js',
+      'file': '/entry.js',
+      'source': `(${defineEntry})()`,
+      'deps': {
+        'one': '/node_modules/one/index.js',
+      },
+      'entry': true
+    },
+    {
+      'id': '/node_modules/one/index.js',
+      'file': '/node_modules/one/index.js',
+      'source': `(${defineOne})()`,
+      'deps': {
+      }
+    }
+  ]
+
+  const _config = {
+    "resources": {
+      "<root>": {
+        "packages": {
+          "one": true,
+        }
+      },
+      "one": {
+        "packages": {
+        },
+        "globals": {
+          get: true
+        }
+      },
+    }
+  }
+
+  const result = await createBundleFromRequiresArray(depsArray, { config: _config })
+  delete global.testResult
+  eval(result)
+
+  t.assert(global.testResult)
+  t.end()
+})
 
 async function evalModulesArray(t, { files, pluginOpts = {} }) {
   const bundle = await createBundleFromRequiresArray(files, pluginOpts)
