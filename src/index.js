@@ -33,6 +33,8 @@ function plugin (browserify, pluginOpts) {
     applySesTransforms(browserify)
 
     const customPack = createLavamoatPacker(configuration)
+    //Pipeline.splice does not re-label inserted streams
+    customPack.label = 'pack'
     // replace the standard browser-pack with our custom packer
     browserify.pipeline.splice('pack', 1, customPack)
     
