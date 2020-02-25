@@ -10,12 +10,6 @@ const {
   createBundleFromRequiresArray,
   generateConfigFromFiles,
   createWatchifyBundle,
-  configOverride1,
-  configOverride2,
-  configOverride3,
-  configOverride4,
-  configOverride5,
-  configOverride6,
  } = require('./util')
 
 // here we are providing an endowments only to a module deep in a dep graph
@@ -305,7 +299,7 @@ test('Config edits trigger re-bundle if using watchify', async (t) => {
   t.ok(updatedConfigFileString.includes('"three": 12345678'))
 })
 
-test('Override config parser works correctly', async (t) => {
+test('Bundle fails with first configOverride', async (t) => {
   const config = {
     resources: {
       '<root>': {
@@ -321,63 +315,230 @@ test('Override config parser works correctly', async (t) => {
     }
   }
 
-  try {
-    await createBundleFromRequiresArray([], {
-      config,
-      configOverride: configOverride1
-    })
-    t.fail('Bundle should throw an error')
-  } catch (error) {
-    t.ok(error, 'Throws an error with configOverride1')
+  const configOverride = {
+    resourceeees: {
+      '<root>': {
+        packages: {
+          'two': true
+        }
+      },
+      'two': {
+        packages: {
+          'three': true
+        },
+        globals: {
+          console: true
+        }
+      }
+    }
   }
 
-  try {
-    await createBundleFromRequiresArray([], {
-      config,
-      configOverride: configOverride2
-    })
-    t.fail('Bundle should throw an error')
-  } catch (error) {
-    t.ok(error, 'Throws an error with configOverride2')
-  }
-
-  try {
-    await createBundleFromRequiresArray([], {
-      config,
-      configOverride: configOverride3
-    })
-    t.fail('Bundle should throw an error')
-  } catch (error) {
-    t.ok(error, 'Throws an error with configOverride3')
-  }
-
-  try {
-    await createBundleFromRequiresArray([], {
-      config,
-      configOverride: configOverride4
-    })
-    t.fail('Bundle should throw an error')
-  } catch (error) {
-    t.ok(error, 'Throws an error with configOverride4')
-  }
-
-  try {
-    await createBundleFromRequiresArray([], {
-      config,
-      configOverride: configOverride5
-    })
-    t.fail('Bundle should throw an error')
-  } catch (error) {
-    t.ok(error, 'Throws an error with configOverride5')
-  }
-
-  try {
-    const bundle = await createBundleFromRequiresArray([], {
-      config,
-      configOverride: configOverride6
-    })
-    t.ok(bundle, 'Does not throw an error with configOverride6')
-  } catch (error) {
-    t.fail('Bundle should not throw an error')
-  } 
+  testConfigValidator(configOverride, config, false, t)
 })
+
+test('Bundle fails with second configOverride', async (t) => {
+  const config = {
+    resources: {
+      '<root>': {
+        packages: {
+          'two': true
+        }
+      },
+      'two': {
+        packages: {
+          'three': true
+        }
+      }
+    }
+  }
+
+  const configOverride = {
+    resources: {
+      '<roooooot>': {
+        packages: {
+          'two': true
+        }
+      },
+      'two': {
+        packages: {
+          'three': true
+        },
+        globals: {
+          console: true
+        }
+      }
+    }
+  }
+
+  testConfigValidator(configOverride, config, false, t)
+})
+
+test('Bundle fails with third configOverride', async (t) => {
+  const config = {
+    resources: {
+      '<root>': {
+        packages: {
+          'two': true
+        }
+      },
+      'two': {
+        packages: {
+          'three': true
+        }
+      }
+    }
+  }
+
+  const configOverride = {
+    resources: {
+      '<roots>': {
+        packaaaaages: {
+          'two': true
+        }
+      },
+      'two': {
+        packages: {
+          'three': true
+        },
+        globals: {
+          console: true
+        }
+      }
+    }
+  }
+
+  testConfigValidator(configOverride, config, false, t)
+})
+
+test('Bundle fails with fourth configOverride', async (t) => {
+  const config = {
+    resources: {
+      '<root>': {
+        packages: {
+          'two': true
+        }
+      },
+      'two': {
+        packages: {
+          'three': true
+        }
+      }
+    }
+  }
+
+  const configOverride = {
+    resources: {
+      '<roots>': {
+        packages: {
+          'two': true
+        }
+      },
+      'two': {
+        packages: {
+          'three': true
+        },
+        globalsssssss: {
+          console: true
+        }
+      }
+    }
+  }
+
+  testConfigValidator(configOverride, config, false, t)
+})
+
+test('Bundle fails with fifth configOverride', async (t) => {
+  const config = {
+    resources: {
+      '<root>': {
+        packages: {
+          'two': true
+        }
+      },
+      'two': {
+        packages: {
+          'three': true
+        }
+      }
+    }
+  }
+
+  const configOverride = {
+    resources: {
+      '<roots>': {
+        packages: {
+          'two': true
+        }
+      },
+      'two': {
+        packages: {
+          'three': true
+        },
+        globals: {
+          console: false
+        }
+      }
+    }
+  }
+
+  testConfigValidator(configOverride, config, false, t)
+})
+
+test('Bundle passes with sixth configOverride', async (t) => {
+  const config = {
+    resources: {
+      '<root>': {
+        packages: {
+          'two': true
+        }
+      },
+      'two': {
+        packages: {
+          'three': true
+        }
+      }
+    }
+  }
+
+  const configOverride = {
+    resources: {
+      '<root>': {
+        packages: {
+          'two': true
+        }
+      },
+      'two': {
+        packages: {
+          'three': true
+        },
+        globals: {
+          console: true
+        }
+      }
+    }
+  }
+
+  testConfigValidator(configOverride, config, true, t)
+})
+
+
+
+async function testConfigValidator(configOverride, config, shouldBeValid, t) {
+  try {
+    await createBundleFromRequiresArray([], {
+      config,
+      configOverride: configOverride
+    })
+    if (shouldBeValid) {
+      t.pass('Does not throw an error with configOverride')
+    } else {
+      t.fail('Bundle should throw an error')
+    }
+  } catch (error) {
+    if (shouldBeValid) {
+      t.fail('Bundle should not throw an error')
+    } else {
+      t.pass('Throws an error with configOverride')
+    }
+  }
+}
