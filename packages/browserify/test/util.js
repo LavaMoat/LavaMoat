@@ -280,3 +280,111 @@ async function runSimpleOneTwoSamePackage({ defineOne, defineTwo, config = {} })
 
   return global.testResult
 }
+
+module.exports.configOverride1 = {
+  resourceeees: {
+    '<root>': {
+      packages: {
+        'two': true
+      }
+    },
+    'two': {
+      packages: {
+        'three': true
+      },
+      globals: {
+        console: true
+      }
+    }
+  }
+}
+
+module.exports.configOverride2 = {
+  resources: {
+    '<roooooot>': {
+      packages: {
+        'two': true
+      }
+    },
+    'two': {
+      packages: {
+        'three': true
+      },
+      globals: {
+        console: true
+      }
+    }
+  }
+}
+
+module.exports.configOverride3 = {
+  resources: {
+    '<roots>': {
+      packaaaaages: {
+        'two': true
+      }
+    },
+    'two': {
+      packages: {
+        'three': true
+      },
+      globals: {
+        console: true
+      }
+    }
+  }
+}
+
+module.exports.configOverride4 = {
+  resources: {
+    '<roots>': {
+      packages: {
+        'two': true
+      }
+    },
+    'two': {
+      packages: {
+        'three': true
+      },
+      globalsssssss: {
+        console: true
+      }
+    }
+  }
+}
+
+module.exports.configOverride5 = {
+  resources: {
+    '<roots>': {
+      packages: {
+        'two': true
+      }
+    },
+    'two': {
+      packages: {
+        'three': true
+      },
+      globals: {
+        console: false
+      }
+    }
+  }
+}
+
+module.exports.configOverride6 = {
+  resources: {
+    '<root>': {
+      packages: {
+        'two': true
+      }
+    },
+    'two': {
+      packages: {
+        'three': true
+      },
+      globals: {
+        console: true
+      }
+    }
+  }
+}
