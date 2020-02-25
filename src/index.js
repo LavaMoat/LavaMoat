@@ -108,7 +108,7 @@ function getConfigurationFromPluginOpts(pluginOpts) {
           throw new Error('LavaMoat - Config Override must be a function, string or object')
         }
         //Ensure override config was written correctly
-        parseOverrideConfig(configOverride)
+        validateConfig(configOverride)
         const mergedConfig = mergeDeep(primaryConfig, configOverride)
         return mergedConfig
 
@@ -230,7 +230,7 @@ function applySesTransforms(browserify) {
   browserify.transform(changeImportString, { global: true })
 }
 
-function parseOverrideConfig(configOverride) {
+function validateConfig(configOverride) {
   if (typeof configOverride !== 'object') {
     throw new Error("LavaMoat - Expected config override to be an object")
   }
