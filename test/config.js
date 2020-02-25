@@ -10,6 +10,12 @@ const {
   createBundleFromRequiresArray,
   generateConfigFromFiles,
   createWatchifyBundle,
+  configOverride1,
+  configOverride2,
+  configOverride3,
+  configOverride4,
+  configOverride5,
+  configOverride6,
  } = require('./util')
 
 // here we are providing an endowments only to a module deep in a dep graph
@@ -174,7 +180,7 @@ test('Config - Applies config override', async (t) => {
       },
       'two': {
         packages: {
-          'three': 12345678
+          'three': true
         }
       },
       'three': {
@@ -210,10 +216,10 @@ test('Config - Applies config override', async (t) => {
     configOverride: () => configOverride
   })
 
-  t.assert(bundle.includes('"three": 12345678'), "Applies override, provided as object")
-  t.assert(stringBundle.includes('"three": 12345678'), "Applies override, provided as string")
-  t.assert(functionBundle.includes('"three": 12345678'), "Applies override, provided as function")
-  t.assert(configObjectBundle.includes('"three": 12345678'), "Applies override, primary config provided as object")
+  t.assert(bundle.includes('"three": true'), "Applies override, provided as object")
+  t.assert(stringBundle.includes('"three": true'), "Applies override, provided as string")
+  t.assert(functionBundle.includes('"three": true'), "Applies override, provided as function")
+  t.assert(configObjectBundle.includes('"three": true'), "Applies override, primary config provided as object")
 })
 
 test('Config override is applied if not specified and already exists at default path', async (t) => {
@@ -297,4 +303,81 @@ test('Config edits trigger re-bundle if using watchify', async (t) => {
 
   t.notOk(configFileString.includes('"three": 12345678'))
   t.ok(updatedConfigFileString.includes('"three": 12345678'))
+})
+
+test('Override config parser works correctly', async (t) => {
+  const config = {
+    resources: {
+      '<root>': {
+        packages: {
+          'two': true
+        }
+      },
+      'two': {
+        packages: {
+          'three': true
+        }
+      }
+    }
+  }
+
+  try {
+    await createBundleFromRequiresArray([], {
+      config,
+      configOverride: configOverride1
+    })
+    t.fail('Bundle should throw an error')
+  } catch (error) {
+    t.ok(error, 'Throws an error with configOverride1')
+  }
+
+  try {
+    await createBundleFromRequiresArray([], {
+      config,
+      configOverride: configOverride2
+    })
+    t.fail('Bundle should throw an error')
+  } catch (error) {
+    t.ok(error, 'Throws an error with configOverride2')
+  }
+
+  try {
+    await createBundleFromRequiresArray([], {
+      config,
+      configOverride: configOverride3
+    })
+    t.fail('Bundle should throw an error')
+  } catch (error) {
+    t.ok(error, 'Throws an error with configOverride3')
+  }
+
+  try {
+    await createBundleFromRequiresArray([], {
+      config,
+      configOverride: configOverride4
+    })
+    t.fail('Bundle should throw an error')
+  } catch (error) {
+    t.ok(error, 'Throws an error with configOverride4')
+  }
+
+  try {
+    await createBundleFromRequiresArray([], {
+      config,
+      configOverride: configOverride5
+    })
+    t.fail('Bundle should throw an error')
+  } catch (error) {
+    t.ok(error, 'Throws an error with configOverride5')
+  }
+
+  try {
+    const bundle = await createBundleFromRequiresArray([], {
+      config,
+      configOverride: configOverride6
+    })
+    t.ok(bundle, 'Does not throw an error with configOverride6')
+  } catch (error) {
+    t.fail('Bundle should not throw an error')
+  } 
 })
