@@ -239,13 +239,13 @@ function validateConfig(configOverride) {
     throw new Error("LavaMoat - Expected label 'resources' for configuration key")
   }
 
-  Object.entries(configOverride['resources']).forEach((resource, index) => {
-    if (index === 0 && resource[0] !== '<root>') {
+  Object.entries(configOverride['resources']).forEach(([packageName, packageOpts], index) => {
+    if (index === 0 && packageName !== '<root>') {
       throw new Error("LavaMoat - Expected package '<root>' as first resource")
     }
-    const packageOpts = Object.keys(resource[1])
-    const packageEntries = Object.values(resource[1])
-    if (!packageOpts.every(packageOpt => packageOpt === 'globals' || packageOpt === 'packages')) {
+    const packageOptions = Object.keys(packageOpts)
+    const packageEntries = Object.values(packageOpts)
+    if (!packageOptions.every(packageOpt => packageOpt === 'globals' || packageOpt === 'packages')) {
       throw new Error("LavaMoat - Unrecognized package options. Expected 'globals' or 'packages'")
     }
 
