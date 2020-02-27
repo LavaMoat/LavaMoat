@@ -52,7 +52,6 @@ ${src}
   return module.exports
 })()`
   )
-
 }
 
 function parseConfig (config) {

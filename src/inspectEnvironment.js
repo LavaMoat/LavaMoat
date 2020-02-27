@@ -1,14 +1,14 @@
 const walk = require('acorn-walk')
 
-// higher number is less secure, more flexible 
+// higher number is less secure, more flexible
 const environmentTypes = {
-  'frozen': 1,
-  'unfrozen': 2,
+  frozen: 1,
+  unfrozen: 2
 }
 
 const environmentTypeStrings = {
   1: 'frozen',
-  2: 'unfrozen',
+  2: 'unfrozen'
 }
 
 const primordialPaths = [
@@ -30,7 +30,7 @@ function inspectEnvironment (ast) {
 
 function walkForProtectedAssignment (ast, results) {
   walk.ancestor(ast, {
-    'AssignmentExpression': function (node, parents) {
+    AssignmentExpression: function (node, parents) {
       const { left } = node
       // select for assignment to a property
       if (left.type !== 'MemberExpression') return
@@ -46,12 +46,12 @@ function walkForProtectedAssignment (ast, results) {
       if (match) {
         results.push(node)
       }
-    },
+    }
   })
 }
 
-function partialArrayMatch (a,b) {
-  for (let index in a) {
+function partialArrayMatch (a, b) {
+  for (const index in a) {
     const match = a[index] === b[index]
     if (!match) return false
   }

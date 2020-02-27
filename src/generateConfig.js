@@ -42,7 +42,7 @@ function createConfigSpy ({ onResult }) {
     // initialize results for package
     const environments = packageToEnvironments[packageName] = packageToEnvironments[packageName] || []
     environments.push(result)
-   }
+  }
 
   function inspectForGlobals (moduleData, packageName) {
     const { source, file } = moduleData
@@ -50,7 +50,7 @@ function createConfigSpy ({ onResult }) {
       // browserify commonjs scope
       ignoredRefs: ['require', 'module', 'exports', 'arguments'],
       // browser global refs + browserify global
-      globalRefs: ['globalThis', 'self', 'window', 'global'],
+      globalRefs: ['globalThis', 'self', 'window', 'global']
     })
     // add globalUsage info
     moduleData.globalUsage = mapToObj(foundGlobals)
@@ -88,7 +88,7 @@ function createConfigSpy ({ onResult }) {
       // get environment
       const environments = packageToEnvironments[packageName]
       if (environments) {
-        const bestEnvironment = environments.sort()[environments.length-1]
+        const bestEnvironment = environments.sort()[environments.length - 1]
         const isDefault = bestEnvironment === defaultEnvironment
         environment = isDefault ? undefined : environmentTypeStrings[bestEnvironment]
       }
