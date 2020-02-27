@@ -235,7 +235,7 @@ function validateConfig(configOverride) {
     throw new Error("LavaMoat - Expected config override to be an object")
   }
   
-  if (!'resources' in Object.keys(configOverride)) {
+  if (!Object.keys(configOverride).includes('resources')) {
     throw new Error("LavaMoat - Expected label 'resources' for configuration key")
   }
 
