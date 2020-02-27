@@ -242,7 +242,9 @@ function validateConfig(configOverride) {
   Object.entries(configOverride['resources']).forEach(([packageName, packageOpts], index) => {
     const packageOptions = Object.keys(packageOpts)
     const packageEntries = Object.values(packageOpts)
-    if (!packageOptions.every(packageOpt => packageOpt === 'globals' || packageOpt === 'packages')) {
+    const optionsWhitelist = ['globals', 'packages']
+    
+    if (!packageOptions.every(packageOpt => optionsWhitelist.includes(packageOpt))) {
       throw new Error("LavaMoat - Unrecognized package options. Expected 'globals' or 'packages'")
     }
 
