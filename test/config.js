@@ -354,8 +354,8 @@ test('Bundle fails with second configOverride', async (t) => {
 
   const configOverride = {
     resources: {
-      '<roooooot>': {
-        packages: {
+      '<root>': {
+        packaaaaages: {
           'two': true
         }
       },
@@ -391,8 +391,8 @@ test('Bundle fails with third configOverride', async (t) => {
 
   const configOverride = {
     resources: {
-      '<roots>': {
-        packaaaaages: {
+      '<root>': {
+        packages: {
           'two': true
         }
       },
@@ -400,7 +400,7 @@ test('Bundle fails with third configOverride', async (t) => {
         packages: {
           'three': true
         },
-        globals: {
+        globalsssssss: {
           console: true
         }
       }
@@ -428,44 +428,7 @@ test('Bundle fails with fourth configOverride', async (t) => {
 
   const configOverride = {
     resources: {
-      '<roots>': {
-        packages: {
-          'two': true
-        }
-      },
-      'two': {
-        packages: {
-          'three': true
-        },
-        globalsssssss: {
-          console: true
-        }
-      }
-    }
-  }
-
-  testConfigValidator(configOverride, config, false, t)
-})
-
-test('Bundle fails with fifth configOverride', async (t) => {
-  const config = {
-    resources: {
       '<root>': {
-        packages: {
-          'two': true
-        }
-      },
-      'two': {
-        packages: {
-          'three': true
-        }
-      }
-    }
-  }
-
-  const configOverride = {
-    resources: {
-      '<roots>': {
         packages: {
           'two': true
         }
@@ -484,7 +447,7 @@ test('Bundle fails with fifth configOverride', async (t) => {
   testConfigValidator(configOverride, config, false, t)
 })
 
-test('Bundle passes with sixth configOverride', async (t) => {
+test('Bundle passes with fifth configOverride', async (t) => {
   const config = {
     resources: {
       '<root>': {
