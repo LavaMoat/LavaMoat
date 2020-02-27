@@ -9,8 +9,6 @@ var defined = require('defined')
 var through = require('through2')
 var umd = require('umd')
 var Buffer = require('safe-buffer').Buffer
-
-var fs = require('fs')
 var path = require('path')
 
 var combineSourceMap = require('combine-source-map')
@@ -79,10 +77,10 @@ module.exports = function (opts) {
 
   function write (row, enc, next) {
     if (first && opts.standalone) {
-      var pre = umd.prelude(opts.standalone).trim()
+      const pre = umd.prelude(opts.standalone).trim()
       stream.push(Buffer.from(pre + 'return ', 'utf8'))
     } else if (first && stream.hasExports) {
-      var pre = opts.externalRequireName || 'require'
+      const pre = opts.externalRequireName || 'require'
       stream.push(Buffer.from(pre + '=', 'utf8'))
     }
     if (first) stream.push(Buffer.from(prelude + '({', 'utf8'))
