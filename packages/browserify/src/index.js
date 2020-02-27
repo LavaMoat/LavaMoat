@@ -240,9 +240,6 @@ function validateConfig(configOverride) {
   }
 
   Object.entries(configOverride['resources']).forEach(([packageName, packageOpts], index) => {
-    if (index === 0 && packageName !== '<root>') {
-      throw new Error("LavaMoat - Expected package '<root>' as first resource")
-    }
     const packageOptions = Object.keys(packageOpts)
     const packageEntries = Object.values(packageOpts)
     if (!packageOptions.every(packageOpt => packageOpt === 'globals' || packageOpt === 'packages')) {
