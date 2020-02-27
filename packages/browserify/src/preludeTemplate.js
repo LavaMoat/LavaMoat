@@ -15,7 +15,7 @@
 
   // this performs an unsafeEval in the context of the provided endowments
   function unsafeEvalWithEndowments(code, endowments) {
-    with (endowments) {
+    with (endowments) { 
       return eval(code)
     }
   }

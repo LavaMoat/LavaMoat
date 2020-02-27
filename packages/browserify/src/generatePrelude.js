@@ -5,11 +5,12 @@
 // such as the upgradeable SES and app specific config.
 
 const fs = require('fs')
+const path = require('path')
 const jsonStringify = require('json-stable-stringify')
-const preludeTemplate = fs.readFileSync(__dirname + '/preludeTemplate.js', 'utf8')
-const sesSrc = fs.readFileSync(__dirname + '/../lib/ses.umd.js', 'utf8')
-const makeGetEndowmentsForConfigSrc = fs.readFileSync(__dirname + '/makeGetEndowmentsForConfig.js', 'utf8')
-const makePrepareRealmGlobalFromConfigSrc = fs.readFileSync(__dirname + '/makePrepareRealmGlobalFromConfig.js', 'utf8')
+const preludeTemplate = fs.readFileSync(path.join(__dirname, '/preludeTemplate.js', 'utf8'))
+const sesSrc = fs.readFileSync(path.join(__dirname, '/../lib/ses.umd.js', 'utf8'))
+const makeGetEndowmentsForConfigSrc = fs.readFileSync(path.join(__dirname, '/makeGetEndowmentsForConfig.js', 'utf8'))
+const makePrepareRealmGlobalFromConfigSrc = fs.readFileSync(path.join(__dirname, '/makePrepareRealmGlobalFromConfig.js', 'utf8'))
 
 module.exports = generatePrelude
 
@@ -56,23 +57,28 @@ ${src}
 
 function parseConfig (config) {
   switch (typeof config) {
-    case 'string':
+    case 'string': {
       // parse as json if possible, otherwise interpret as js
       if (isJsonString(config)) {
         return `return ${config}`
       } else {
         return config
       }
+    }
     // allow lavamoatConfig to be specified as a function for loading fresh result under watchify
-    case 'function':
+    case 'function': {
       return parseConfig(config())
-    case 'object':
+    }
+    case 'object': {
       const configJson = jsonStringify(config, { space: 2 })
       return `return ${configJson}`
-    case 'undefined':
+    }
+    case 'undefined': {
       return 'return {}'
-    default:
+    }
+    default: {
       throw new Error('LavaMoat - unrecognized endowments config option')
+    }
   }
 }
 

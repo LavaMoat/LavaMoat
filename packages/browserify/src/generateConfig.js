@@ -45,7 +45,7 @@ function createConfigSpy ({ onResult }) {
   }
 
   function inspectForGlobals (moduleData, packageName) {
-    const { source, file } = moduleData
+    const { source } = moduleData
     const foundGlobals = inspectSource(source, {
       // browserify commonjs scope
       ignoredRefs: ['require', 'module', 'exports', 'arguments'],
