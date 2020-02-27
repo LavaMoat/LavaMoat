@@ -7,10 +7,10 @@
 const fs = require('fs')
 const path = require('path')
 const jsonStringify = require('json-stable-stringify')
-const preludeTemplate = fs.readFileSync(path.join(__dirname, '/preludeTemplate.js', 'utf8'))
-const sesSrc = fs.readFileSync(path.join(__dirname, '/../lib/ses.umd.js', 'utf8'))
-const makeGetEndowmentsForConfigSrc = fs.readFileSync(path.join(__dirname, '/makeGetEndowmentsForConfig.js', 'utf8'))
-const makePrepareRealmGlobalFromConfigSrc = fs.readFileSync(path.join(__dirname, '/makePrepareRealmGlobalFromConfig.js', 'utf8'))
+const preludeTemplate = fs.readFileSync(path.join(__dirname, '/preludeTemplate.js'))
+const sesSrc = fs.readFileSync(path.join(__dirname, '/../lib/ses.umd.js'))
+const makeGetEndowmentsForConfigSrc = fs.readFileSync(path.join(__dirname, '/makeGetEndowmentsForConfig.js'))
+const makePrepareRealmGlobalFromConfigSrc = fs.readFileSync(path.join(__dirname, '/makePrepareRealmGlobalFromConfig.js'))
 
 module.exports = generatePrelude
 
