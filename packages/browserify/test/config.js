@@ -490,7 +490,7 @@ async function testConfigValidator(configOverride, config, shouldBeValid, t) {
   try {
     await createBundleFromRequiresArray([], {
       config,
-      configOverride: configOverride
+      configOverride
     })
     if (shouldBeValid) {
       t.pass('Does not throw')
