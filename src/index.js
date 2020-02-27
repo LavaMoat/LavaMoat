@@ -243,14 +243,15 @@ function validateConfig(configOverride) {
     const packageOptions = Object.keys(packageOpts)
     const packageEntries = Object.values(packageOpts)
     const optionsWhitelist = ['globals', 'packages']
-    
+    const valuesWhitelist = [true, 'write']
+
     if (!packageOptions.every(packageOpt => optionsWhitelist.includes(packageOpt))) {
       throw new Error("LavaMoat - Unrecognized package options. Expected 'globals' or 'packages'")
     }
 
     packageEntries.forEach((entry) => {
       Object.values(entry).forEach((value) => {
-        if (value !== true) {
+        if (!valuesWhitelist.includes(value)) {
           throw new Error("LavaMoat - Globals or packages endowments must be equal to 'true'")
         }
       })

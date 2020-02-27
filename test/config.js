@@ -475,7 +475,7 @@ test('Bundle passes with fifth configOverride', async (t) => {
           'three': true
         },
         globals: {
-          console: true
+          console: 'write'
         }
       }
     }
