@@ -299,7 +299,7 @@ test('Config edits trigger re-bundle if using watchify', async (t) => {
   t.ok(updatedConfigFileString.includes('"three": 12345678'))
 })
 
-test('Bundle fails with first configOverride', async (t) => {
+test("Config validation fails - invalid 'resources' key", async (t) => {
   const config = {
     resources: {
       '<root>': {
@@ -336,7 +336,7 @@ test('Bundle fails with first configOverride', async (t) => {
   testConfigValidator(configOverride, config, false, t)
 })
 
-test('Bundle fails with second configOverride', async (t) => {
+test("Config validation fails - invalid 'packages' key", async (t) => {
   const config = {
     resources: {
       '<root>': {
@@ -373,7 +373,7 @@ test('Bundle fails with second configOverride', async (t) => {
   testConfigValidator(configOverride, config, false, t)
 })
 
-test('Bundle fails with third configOverride', async (t) => {
+test("Config validation fails - invalid 'globals' key", async (t) => {
   const config = {
     resources: {
       '<root>': {
@@ -410,7 +410,7 @@ test('Bundle fails with third configOverride', async (t) => {
   testConfigValidator(configOverride, config, false, t)
 })
 
-test('Bundle fails with fourth configOverride', async (t) => {
+test("Config validation fails - invalid global value", async (t) => {
   const config = {
     resources: {
       '<root>': {
@@ -447,7 +447,7 @@ test('Bundle fails with fourth configOverride', async (t) => {
   testConfigValidator(configOverride, config, false, t)
 })
 
-test('Bundle passes with fifth configOverride', async (t) => {
+test("Config validation passes - everything valid", async (t) => {
   const config = {
     resources: {
       '<root>': {
@@ -493,15 +493,15 @@ async function testConfigValidator(configOverride, config, shouldBeValid, t) {
       configOverride: configOverride
     })
     if (shouldBeValid) {
-      t.pass('Does not throw an error with configOverride')
+      t.pass('Does not throw')
     } else {
-      t.fail('Bundle should throw an error')
+      t.fail('Should throw')
     }
   } catch (error) {
     if (shouldBeValid) {
-      t.fail('Bundle should not throw an error')
+      t.fail('Should not throw')
     } else {
-      t.pass('Throws an error with configOverride')
+      t.pass('Throws')
     }
   }
 }
