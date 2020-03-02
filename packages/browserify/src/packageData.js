@@ -8,9 +8,8 @@ module.exports = {
   createPackageDataStream,
   decorateWithPackageData,
   packageDataForModule,
-  packageVersionFromPath,
+  packageVersionFromPath
 }
-
 
 function createPackageDataStream () {
   return through((data, _, cb) => {

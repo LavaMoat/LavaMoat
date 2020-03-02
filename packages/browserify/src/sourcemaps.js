@@ -34,7 +34,7 @@ function transformToWrapped (sourceMeta) {
 
 `(${function () {
   // source: ${filename}
-  return function (require,module,exports) {
+  return function (require, module, exports) {
 __MODULE_CONTENT__
   }
 }}).call(this)`
