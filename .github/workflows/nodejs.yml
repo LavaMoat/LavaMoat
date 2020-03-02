@@ -10,6 +10,10 @@ jobs:
       - uses: borales/actions-yarn@v2.0.2
         with:
           cmd: install
+      # will run `yarn lint` command
+      - uses: borales/actions-yarn@v2.0.2
+        with:
+          cmd: lint
       # will run `yarn test` command
       - uses: borales/actions-yarn@v2.0.2
         with:
