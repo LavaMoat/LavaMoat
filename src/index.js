@@ -111,6 +111,8 @@ function getConfigurationFromPluginOpts (pluginOpts) {
         } else if (typeof configOverride !== 'object') {
           throw new Error('LavaMoat - Config Override must be a function, string or object')
         }
+        //Ensure override config was written correctly
+        validateConfig(configOverride)
         const mergedConfig = mergeDeep(primaryConfig, configOverride)
         return mergedConfig
       } else {
@@ -228,3 +230,33 @@ function applySesTransforms (browserify) {
   browserify.transform(removeHtmlComment, { global: true })
   browserify.transform(changeImportString, { global: true })
 }
+
+function validateConfig(configOverride) {
+  if (typeof configOverride !== 'object') {
+    throw new Error("LavaMoat - Expected config override to be an object")
+  }
+  
+  if (!Object.keys(configOverride).includes('resources')) {
+    throw new Error("LavaMoat - Expected label 'resources' for configuration key")
+  }
+
+  Object.entries(configOverride['resources']).forEach(([packageName, packageOpts], index) => {
+    const packageOptions = Object.keys(packageOpts)
+    const packageEntries = Object.values(packageOpts)
+    const optionsWhitelist = ['globals', 'packages']
+    const valuesWhitelist = [true, 'write']
+
+    if (!packageOptions.every(packageOpt => optionsWhitelist.includes(packageOpt))) {
+      throw new Error("LavaMoat - Unrecognized package options. Expected 'globals' or 'packages'")
+    }
+
+    packageEntries.forEach((entry) => {
+      Object.values(entry).forEach((value) => {
+        if (!valuesWhitelist.includes(value)) {
+          throw new Error("LavaMoat - Globals or packages endowments must be equal to 'true'")
+        }
+      })
+    })
+  })
+}
+
