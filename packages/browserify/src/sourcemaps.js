@@ -26,11 +26,15 @@ function transformToWrapped (sourceMeta) {
   // 2. copy properties from actual endowments and global
   // see https://github.com/Agoric/SES/issues/123
   // 3. return a moduleInitializer fn
+  const filename = String(sourceMeta.file)
+  if (filename.includes('\n')) {
+    throw new Error('LavaMoat - encountered a filename containing a newline')
+  }
   const moduleWrapperSource =
 
 `(${function () {
-  /* source: ${sourceMeta.file} */
-  return function (require,module,exports) {
+  // source: ${filename}
+  return function (require, module, exports) {
 __MODULE_CONTENT__
   }
 }}).call(this)`

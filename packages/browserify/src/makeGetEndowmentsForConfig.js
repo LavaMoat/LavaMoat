@@ -8,12 +8,11 @@ module.exports = makeGetEndowmentsForConfig
 // These utilities help create an object populated with only the deep properties specified in the config
 
 function makeGetEndowmentsForConfig () {
-
   return {
     getEndowmentsForConfig,
     deepGetAndBind,
     deepGet,
-    deepDefine,
+    deepDefine
   }
 
   function getEndowmentsForConfig (globalRef, config) {
@@ -38,17 +37,17 @@ function makeGetEndowmentsForConfig () {
         value,
         configurable: true,
         writable: true,
-        enumerable: true,
+        enumerable: true
       }
       deepDefine(endowments, globalPath, propDesc)
     })
     return endowments
   }
 
-  function deepGetAndBind(globalRef, pathName) {
+  function deepGetAndBind (globalRef, pathName) {
     const pathParts = pathName.split('.')
-    const parentPath = pathParts.slice(0,-1).join('.')
-    const childKey = pathParts[pathParts.length-1]
+    const parentPath = pathParts.slice(0, -1).join('.')
+    const childKey = pathParts[pathParts.length - 1]
     const parent = parentPath ? deepGet(globalRef, parentPath) : globalRef
     if (!parent) return parent
     const value = parent[childKey]
@@ -81,13 +80,13 @@ function makeGetEndowmentsForConfig () {
   function deepDefine (obj, pathName, propDesc) {
     let parent = obj
     const pathParts = pathName.split('.')
-    const lastPathPart = pathParts[pathParts.length-1]
-    const allButLastPart = pathParts.slice(0,-1)
+    const lastPathPart = pathParts[pathParts.length - 1]
+    const allButLastPart = pathParts.slice(0, -1)
     allButLastPart.forEach(pathPart => {
       const prevParent = parent
       parent = parent[pathPart]
       if (parent === null) {
-        throw new Error('DeepSet - unable to set "'+pathName+'" on null')
+        throw new Error('DeepSet - unable to set "' + pathName + '" on null')
       }
       if (parent === undefined) {
         parent = {}
@@ -96,5 +95,4 @@ function makeGetEndowmentsForConfig () {
     })
     Object.defineProperty(parent, lastPathPart, propDesc)
   }
-
 }
