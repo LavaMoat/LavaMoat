@@ -8,11 +8,10 @@ module.exports = makePrepareRealmGlobalFromConfig
 // These utilities help modify the container global to expose the allowed globals from the globalStore OR the platform global
 
 function makePrepareRealmGlobalFromConfig () {
-
   return {
     prepareRealmGlobalFromConfig,
     getTopLevelReadAccessFromPackageConfig,
-    getTopLevelWriteAccessFromPackageConfig,
+    getTopLevelWriteAccessFromPackageConfig
   }
 
   function getTopLevelReadAccessFromPackageConfig (globalsConfig) {
@@ -70,7 +69,7 @@ function makePrepareRealmGlobalFromConfig () {
           globalStore.set(key, value)
         },
         enumerable: true,
-        configurable: true,
+        configurable: true
       })
     })
 
@@ -90,5 +89,4 @@ function makePrepareRealmGlobalFromConfig () {
     Object.defineProperties(newFunction, Object.getOwnPropertyDescriptors(origFunction))
     moduleRealmGlobal.Function = newFunction
   }
-
 }

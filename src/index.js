@@ -8,7 +8,7 @@ const createCustomPack = require('./createCustomPack')
 const { createConfigSpy } = require('./generateConfig')
 const { createPackageDataStream } = require('./packageData')
 const { wrapIntoModuleInitializer } = require('./sourcemaps')
-const { makeStringTransform } = require('browserify-transform-tools');
+const { makeStringTransform } = require('browserify-transform-tools')
 
 /*  export a Browserify plugin  */
 module.exports = plugin
@@ -17,27 +17,26 @@ module.exports = plugin
 module.exports.args = {
   // this option helps with parsing global usage
   insertGlobalVars: {
-    global: false,
+    global: false
   }
 }
 
 function plugin (browserify, pluginOpts) {
-  //pluginOpts.config is config path
+  // pluginOpts.config is config path
   const configuration = getConfigurationFromPluginOpts(pluginOpts)
   // setup the plugin in a re-bundle friendly way
   browserify.on('reset', setupPlugin)
   setupPlugin()
   // override browserify/browser-pack prelude
   function setupPlugin () {
-    
     applySesTransforms(browserify)
 
     const customPack = createLavamoatPacker(configuration)
-    //Pipeline.splice does not re-label inserted streams
+    // Pipeline.splice does not re-label inserted streams
     customPack.label = 'pack'
     // replace the standard browser-pack with our custom packer
     browserify.pipeline.splice('pack', 1, customPack)
-    
+
     // inject package name into module data
     browserify.pipeline.splice('emit-deps', 0, createPackageDataStream())
 
@@ -47,38 +46,36 @@ function plugin (browserify, pluginOpts) {
         onResult: configuration.writeAutoConfig
       }))
     }
-    
   }
 }
 
 module.exports.generatePrelude = generatePrelude
 module.exports.createLavamoatPacker = createLavamoatPacker
 
-function getConfigurationFromPluginOpts(pluginOpts) {
+function getConfigurationFromPluginOpts (pluginOpts) {
   const allowedKeys = new Set([
-    "writeAutoConfig",
-    "config",
-    "configOverride",
-    "_"  //Browserify adds this as the first option when running from the command line
+    'writeAutoConfig',
+    'config',
+    'configOverride',
+    '_' // Browserify adds this as the first option when running from the command line
   ])
   const invalidKeys = Reflect.ownKeys(pluginOpts).filter(key => !allowedKeys.has(key))
-  if (invalidKeys.length) throw new Error(`Lavamoat - Unrecognized options provided '${invalidKeys}'`) 
+  if (invalidKeys.length) throw new Error(`Lavamoat - Unrecognized options provided '${invalidKeys}'`)
 
   const configuration = {
     writeAutoConfig: undefined,
     getConfig: undefined,
     configPath: getConfigPath(pluginOpts)
   }
-  
+
   const defaultOverrideConfig = '/lavamoat-config-override.json'
-  
+
   if (typeof pluginOpts.config === 'function') {
     configuration.getConfig = pluginOpts.config
   } else {
     const tolerateMissingConfig = ('writeAutoConfig' in pluginOpts)
     configuration.getConfig = () => {
-      
-      let configSource 
+      let configSource
       let primaryConfig
 
       if (typeof pluginOpts.config === 'string') {
@@ -92,7 +89,7 @@ function getConfigurationFromPluginOpts(pluginOpts) {
             return {}
           }
           throw new Error(`Lavamoat - Configuration file not found at path: '${configPath}', use writeAutoConfig option to generate one`)
-        } 
+        }
         configSource = fs.readFileSync(configPath, 'utf8')
         primaryConfig = JSON.parse(configSource)
       } else if (typeof pluginOpts.config === 'object') {
@@ -106,17 +103,16 @@ function getConfigurationFromPluginOpts(pluginOpts) {
           if (typeof configOverride !== 'string' && typeof configOverride !== 'object') {
             throw new Error('LavaMoat - Config override function must return an object or a string.')
           }
-        } 
+        }
 
         if (typeof configOverride === 'string') {
           const configOverrideSource = fs.readFileSync(configOverride, 'utf-8')
           configOverride = JSON.parse(configOverrideSource)
-        } else if (typeof configOverride !== 'object'){
+        } else if (typeof configOverride !== 'object') {
           throw new Error('LavaMoat - Config Override must be a function, string or object')
         }
         const mergedConfig = mergeDeep(primaryConfig, configOverride)
         return mergedConfig
-
       } else {
         // Otherwise, still merge but only if it already exists
         const configOverridePath = path.join('./lavamoat', defaultOverrideConfig)
@@ -125,7 +121,7 @@ function getConfigurationFromPluginOpts(pluginOpts) {
           const configOverrideSource = fs.readFileSync(resolvedPath, 'utf-8')
           const configOverride = JSON.parse(configOverrideSource)
           const mergedConfig = mergeDeep(primaryConfig, configOverride)
-          //Overwrite source config file 
+          // Overwrite source config file
           const configPath = configuration.configPath
           fs.writeFileSync(configPath, JSON.stringify(mergedConfig, null, 2))
           return mergedConfig
@@ -135,31 +131,29 @@ function getConfigurationFromPluginOpts(pluginOpts) {
     }
   }
 
-  
-
   if (!pluginOpts.writeAutoConfig) {
     // do not trigger parsing of the code for config generation
     configuration.writeAutoConfig = null
   } else if (pluginOpts.writeAutoConfig === true) {
-    //output config to a file, path configuration.configPath
+    // output config to a file, path configuration.configPath
     if (!configuration.configPath) {
       throw new Error('LavaMoat - If writeAutoConfig is specified, config must be a string')
     }
     configuration.writeAutoConfig = (configString) => {
-      const configPath = path.resolve(configuration.configPath) 
-      //Ensure parent dir exists
+      const configPath = path.resolve(configuration.configPath)
+      // Ensure parent dir exists
       const configDirectory = path.dirname(configPath)
       mkdirp.sync(configDirectory)
-      //Declare override config file path
+      // Declare override config file path
       const overrideConfigPath = configDirectory + defaultOverrideConfig
-      //Write config to file
+      // Write config to file
       fs.writeFileSync(configPath, configString)
-      //Write default override config to file if it doesn't already exist
+      // Write default override config to file if it doesn't already exist
       if (!fs.existsSync(overrideConfigPath)) {
         const basicConfig = {
-          "resources": {
-            "<root>": {
-              "packages": {
+          resources: {
+            '<root>': {
+              packages: {
               }
             }
           }
@@ -170,7 +164,7 @@ function getConfigurationFromPluginOpts(pluginOpts) {
       console.warn(`LavaMoat Config - wrote to "${configPath}"`)
     }
   } else if (typeof pluginOpts.writeAutoConfig === 'function') {
-    //to be called with configuration object
+    // to be called with configuration object
     configuration.writeAutoConfig = pluginOpts.writeAutoConfig
   } else {
     // invalid setting, throw an error
@@ -180,14 +174,14 @@ function getConfigurationFromPluginOpts(pluginOpts) {
   return configuration
 }
 
-function getConfigPath(pluginOpts) {
+function getConfigPath (pluginOpts) {
   const defaultConfig = './lavamoat/lavamoat-config.json'
   if (!pluginOpts.config) {
     return defaultConfig
   }
   if (typeof pluginOpts.config === 'string') {
     return pluginOpts.config
-  } 
+  }
   return defaultConfig
 }
 
@@ -216,7 +210,7 @@ function createLavamoatPacker (opts) {
   return customPack
 }
 
-function applySesTransforms(browserify) {
+function applySesTransforms (browserify) {
   const removeHtmlComment = makeStringTransform('remove-html-comment', { excludeExtension: ['.json'] }, (content, _, cb) => {
     const hideComments = content.split('-->').join('-- >')
     // bluebird uses eval, sorta
