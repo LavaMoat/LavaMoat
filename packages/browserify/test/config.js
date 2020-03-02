@@ -174,7 +174,7 @@ test('Config - Applies config override', async (t) => {
       },
       'two': {
         packages: {
-          'three': 12345678
+          'three': true
         }
       },
       'three': {
@@ -210,10 +210,10 @@ test('Config - Applies config override', async (t) => {
     configOverride: () => configOverride
   })
 
-  t.assert(bundle.includes('"three": 12345678'), "Applies override, provided as object")
-  t.assert(stringBundle.includes('"three": 12345678'), "Applies override, provided as string")
-  t.assert(functionBundle.includes('"three": 12345678'), "Applies override, provided as function")
-  t.assert(configObjectBundle.includes('"three": 12345678'), "Applies override, primary config provided as object")
+  t.assert(bundle.includes('"three": true'), "Applies override, provided as object")
+  t.assert(stringBundle.includes('"three": true'), "Applies override, provided as string")
+  t.assert(functionBundle.includes('"three": true'), "Applies override, provided as function")
+  t.assert(configObjectBundle.includes('"three": true'), "Applies override, primary config provided as object")
 })
 
 test('Config override is applied if not specified and already exists at default path', async (t) => {
@@ -298,3 +298,210 @@ test('Config edits trigger re-bundle if using watchify', async (t) => {
   t.notOk(configFileString.includes('"three": 12345678'))
   t.ok(updatedConfigFileString.includes('"three": 12345678'))
 })
+
+test("Config validation fails - invalid 'resources' key", async (t) => {
+  const config = {
+    resources: {
+      '<root>': {
+        packages: {
+          'two': true
+        }
+      },
+      'two': {
+        packages: {
+          'three': true
+        }
+      }
+    }
+  }
+
+  const configOverride = {
+    resourceeees: {
+      '<root>': {
+        packages: {
+          'two': true
+        }
+      },
+      'two': {
+        packages: {
+          'three': true
+        },
+        globals: {
+          console: true
+        }
+      }
+    }
+  }
+
+  testConfigValidator(configOverride, config, false, t)
+})
+
+test("Config validation fails - invalid 'packages' key", async (t) => {
+  const config = {
+    resources: {
+      '<root>': {
+        packages: {
+          'two': true
+        }
+      },
+      'two': {
+        packages: {
+          'three': true
+        }
+      }
+    }
+  }
+
+  const configOverride = {
+    resources: {
+      '<root>': {
+        packaaaaages: {
+          'two': true
+        }
+      },
+      'two': {
+        packages: {
+          'three': true
+        },
+        globals: {
+          console: true
+        }
+      }
+    }
+  }
+
+  testConfigValidator(configOverride, config, false, t)
+})
+
+test("Config validation fails - invalid 'globals' key", async (t) => {
+  const config = {
+    resources: {
+      '<root>': {
+        packages: {
+          'two': true
+        }
+      },
+      'two': {
+        packages: {
+          'three': true
+        }
+      }
+    }
+  }
+
+  const configOverride = {
+    resources: {
+      '<root>': {
+        packages: {
+          'two': true
+        }
+      },
+      'two': {
+        packages: {
+          'three': true
+        },
+        globalsssssss: {
+          console: true
+        }
+      }
+    }
+  }
+
+  testConfigValidator(configOverride, config, false, t)
+})
+
+test("Config validation fails - invalid global value", async (t) => {
+  const config = {
+    resources: {
+      '<root>': {
+        packages: {
+          'two': true
+        }
+      },
+      'two': {
+        packages: {
+          'three': true
+        }
+      }
+    }
+  }
+
+  const configOverride = {
+    resources: {
+      '<root>': {
+        packages: {
+          'two': true
+        }
+      },
+      'two': {
+        packages: {
+          'three': true
+        },
+        globals: {
+          console: false
+        }
+      }
+    }
+  }
+
+  testConfigValidator(configOverride, config, false, t)
+})
+
+test("Config validation passes - everything valid", async (t) => {
+  const config = {
+    resources: {
+      '<root>': {
+        packages: {
+          'two': true
+        }
+      },
+      'two': {
+        packages: {
+          'three': true
+        }
+      }
+    }
+  }
+
+  const configOverride = {
+    resources: {
+      '<root>': {
+        packages: {
+          'two': true
+        }
+      },
+      'two': {
+        packages: {
+          'three': true
+        },
+        globals: {
+          console: 'write'
+        }
+      }
+    }
+  }
+
+  testConfigValidator(configOverride, config, true, t)
+})
+
+
+
+async function testConfigValidator(configOverride, config, shouldBeValid, t) {
+  try {
+    await createBundleFromRequiresArray([], {
+      config,
+      configOverride
+    })
+    if (shouldBeValid) {
+      t.pass('Does not throw')
+    } else {
+      t.fail('Should throw')
+    }
+  } catch (error) {
+    if (shouldBeValid) {
+      t.fail('Should not throw')
+    } else {
+      t.pass('Throws')
+    }
+  }
+}
