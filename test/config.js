@@ -6,7 +6,7 @@ const tmp = require('tmp')
 const mkdirp = require('mkdirp')
 const rimraf = require('rimraf')
 
-const { 
+const {
   createBundleFromRequiresArray,
   generateConfigFromFiles,
   createWatchifyBundle,
@@ -106,7 +106,7 @@ test('config - default config path is generated with autoconfig if path is not s
   const tmpObj = tmp.dirSync();
   const defaults = {
     cwd: tmpObj.name,
-    stdio: 'inherit' 
+    stdio: 'inherit'
   };
 
   const expectedPath = path.join(tmpObj.name, 'lavamoat/lavamoat-config.json')
@@ -192,7 +192,7 @@ test('Config - Applies config override', async (t) => {
   mkdirp.sync(configDir)
   fs.writeFileSync(configFilePath, JSON.stringify(config))
   fs.writeFileSync(overrideFilePath, JSON.stringify(configOverride))
-  
+
   const bundle = await createBundleFromRequiresArray([], {
     config: configFilePath,
     configOverride
@@ -210,10 +210,10 @@ test('Config - Applies config override', async (t) => {
     configOverride: () => configOverride
   })
 
-  t.assert(bundle.includes('"three": true'), "Applies override, provided as object")
-  t.assert(stringBundle.includes('"three": true'), "Applies override, provided as string")
-  t.assert(functionBundle.includes('"three": true'), "Applies override, provided as function")
-  t.assert(configObjectBundle.includes('"three": true'), "Applies override, primary config provided as object")
+  t.assert(bundle.includes('"three":true'), "Applies override, provided as object")
+  t.assert(stringBundle.includes('"three":true'), "Applies override, provided as string")
+  t.assert(functionBundle.includes('"three":true'), "Applies override, provided as function")
+  t.assert(configObjectBundle.includes('"three":true'), "Applies override, primary config provided as object")
 })
 
 test('Config override is applied if not specified and already exists at default path', async (t) => {
@@ -252,7 +252,7 @@ test('Config override is applied if not specified and already exists at default 
   const buildProcess = execSync(`node ${scriptPath}`, defaults)
   const outputString = buildProcess.toString()
 
-  t.assert(outputString.includes('"three": 12345678'), "Applies override if exists but not specified")
+  t.assert(outputString.includes('"three":12345678'), "Applies override if exists but not specified")
 })
 
 test('Config edits trigger re-bundle if using watchify', async (t) => {
@@ -276,14 +276,14 @@ test('Config edits trigger re-bundle if using watchify', async (t) => {
 
   const overridePath = './lavamoat/lavamoat-config-override.json'
   const configPath = './lavamoat/lavamoat-config.json'
-  
+
   bundler.emit('file', './lavamoat/lavamoat-config-override.json')
-  
+
   await new Promise(resolve => setTimeout(resolve, 1000))
 
   const configFile = fs.readFileSync(configPath)
   const configFileString = configFile.toString()
-  
+
   await new Promise((resolve) => {
     bundler.once('update', () => resolve())
     const overrideString = JSON.stringify(configDefault)

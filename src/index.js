@@ -94,6 +94,9 @@ function getConfigurationFromPluginOpts (pluginOpts) {
         primaryConfig = JSON.parse(configSource)
       } else if (typeof pluginOpts.config === 'object') {
         primaryConfig = pluginOpts.config
+      } else if (pluginOpts.config === undefined) {
+        // set primaryConfig as an empty config
+        primaryConfig = { resources: {} }
       }
       // if override specified, merge
       if (pluginOpts.configOverride) {
@@ -111,7 +114,7 @@ function getConfigurationFromPluginOpts (pluginOpts) {
         } else if (typeof configOverride !== 'object') {
           throw new Error('LavaMoat - Config Override must be a function, string or object')
         }
-        //Ensure override config was written correctly
+        // Ensure override config was written correctly
         validateConfig(configOverride)
         const mergedConfig = mergeDeep(primaryConfig, configOverride)
         return mergedConfig
@@ -187,11 +190,12 @@ function getConfigPath (pluginOpts) {
   return defaultConfig
 }
 
-function createLavamoatPacker (opts) {
-  const onSourcemap = opts.onSourcemap || (row => row.sourceFile)
+function createLavamoatPacker (configuration) {
+  const onSourcemap = configuration.onSourcemap || (row => row.sourceFile)
   const defaults = {
     raw: true,
-    prelude: generatePrelude(opts),
+    config: configuration.getConfig(),
+    prelude: generatePrelude(configuration),
     bundleEntryForModule: (entry) => {
       const { package: packageName, source, deps } = entry
       const wrappedBundle = wrapIntoModuleInitializer(source)
@@ -207,7 +211,7 @@ function createLavamoatPacker (opts) {
     }
   }
 
-  const packOpts = Object.assign({}, defaults, opts)
+  const packOpts = Object.assign({}, defaults, configuration)
   const customPack = createCustomPack(packOpts)
   return customPack
 }
@@ -231,16 +235,16 @@ function applySesTransforms (browserify) {
   browserify.transform(changeImportString, { global: true })
 }
 
-function validateConfig(configOverride) {
+function validateConfig (configOverride) {
   if (typeof configOverride !== 'object') {
-    throw new Error("LavaMoat - Expected config override to be an object")
+    throw new Error('LavaMoat - Expected config override to be an object')
   }
-  
+
   if (!Object.keys(configOverride).includes('resources')) {
     throw new Error("LavaMoat - Expected label 'resources' for configuration key")
   }
 
-  Object.entries(configOverride['resources']).forEach(([packageName, packageOpts], index) => {
+  Object.entries(configOverride.resources).forEach(([packageName, packageOpts], index) => {
     const packageOptions = Object.keys(packageOpts)
     const packageEntries = Object.values(packageOpts)
     const optionsWhitelist = ['globals', 'packages']
@@ -259,4 +263,3 @@ function validateConfig(configOverride) {
     })
   })
 }
-

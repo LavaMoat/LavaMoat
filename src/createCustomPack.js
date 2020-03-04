@@ -1,7 +1,10 @@
 // modified from browser-pack
 // changes:
-// - break out generateModuleInitializer
-// - break out bundleEntryForModule
+// - breakout generateModuleInitializer
+// - breakout bundleEntryForModule
+// - breakout generateFirstLine
+// - lavamoat: call loadBundle with correct args
+// - lavamoat: expect config as an argument
 
 const assert = require('assert')
 var JSONStream = require('JSONStream')
@@ -14,7 +17,6 @@ var path = require('path')
 var combineSourceMap = require('combine-source-map')
 
 var defaultPreludePath = path.join(__dirname, '_prelude.js')
-// var defaultPrelude = fs.readFileSync(defaultPreludePath, 'utf8');
 
 function newlinesIn (src) {
   if (!src) return 0
@@ -39,6 +41,8 @@ module.exports = function (opts) {
   var basedir = defined(opts.basedir, process.cwd())
   var prelude = opts.prelude
   assert(prelude, 'must specify a prelude')
+  const config = opts.config
+  assert(config, 'must specify a config')
   var preludePath = opts.preludePath ||
         path.relative(basedir, defaultPreludePath).replace(/\\/g, '/')
 
@@ -83,7 +87,9 @@ module.exports = function (opts) {
       const pre = opts.externalRequireName || 'require'
       stream.push(Buffer.from(pre + '=', 'utf8'))
     }
-    if (first) stream.push(Buffer.from(prelude + '({', 'utf8'))
+
+    // start of modules
+    if (first) stream.push(genereateFirstLine())
 
     if (row.sourceFile && !row.nomap) {
       if (!sourcemap) {
@@ -117,11 +123,12 @@ module.exports = function (opts) {
   }
 
   function end () {
-    if (first) stream.push(Buffer.from(prelude + '({', 'utf8'))
+    if (first) stream.push(genereateFirstLine())
     entries = entries.filter(function (x) { return x !== undefined })
 
+    // close the loadBundle request
     stream.push(
-      Buffer.from('},{},' + JSON.stringify(entries) + ')', 'utf8')
+      Buffer.from(`},${JSON.stringify(entries)},${JSON.stringify(config)})`, 'utf8')
     )
 
     if (opts.standalone && !first) {
@@ -146,5 +153,9 @@ module.exports = function (opts) {
     }
 
     stream.push(null)
+  }
+
+  function genereateFirstLine () {
+    return Buffer.from(prelude + '\n;LavaMoat.loadBundle({', 'utf8')
   }
 }
