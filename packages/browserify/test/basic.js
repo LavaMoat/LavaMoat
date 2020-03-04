@@ -93,3 +93,37 @@ test('basic - lavamoat config and bundle', async (t) => {
   }
   t.equal(global.testResult, testHref, 'test result matches expected')
 })
+
+
+test('basic - lavamoat bundle without prelude', async (t) => {
+  const files = [{
+    // id must be full path
+    id: './apple.js',
+    file: './apple.js',
+    deps: {
+      'banana': './node_modules/banana/index.js',
+    },
+    source: 'global.testResult = require("banana")()',
+    entry: true
+  }, {
+    // non-entry
+    id: './node_modules/banana/index.js',
+    file: './node_modules/banana/index.js',
+    deps: {},
+    source: 'module.exports = () => location.href'
+  }]
+  const config = await generateConfigFromFiles({ files: clone(files) })
+  const prelude = generatePrelude()
+  const bundle = await createBundleFromRequiresArray(clone(files), { config, includePrelude: false })
+
+  t.assert(!bundle.includes(prelude), 'bundle DOES NOT include prelude')
+
+  let didCallLoadBundle = false
+  global.LavaMoat = { loadBundle: () => { didCallLoadBundle = true } }
+  try {
+    eval(bundle)
+  } catch (err) {
+    t.fail(`eval of bundle failed:\n${err.stack || err}`)
+  }
+  t.assert(didCallLoadBundle, 'test result matches expected')
+})
