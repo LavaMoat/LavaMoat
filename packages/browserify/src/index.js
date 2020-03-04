@@ -111,7 +111,7 @@ function getConfigurationFromPluginOpts (pluginOpts) {
         } else if (typeof configOverride !== 'object') {
           throw new Error('LavaMoat - Config Override must be a function, string or object')
         }
-        //Ensure override config was written correctly
+        // Ensure override config was written correctly
         validateConfig(configOverride)
         const mergedConfig = mergeDeep(primaryConfig, configOverride)
         return mergedConfig
@@ -231,16 +231,16 @@ function applySesTransforms (browserify) {
   browserify.transform(changeImportString, { global: true })
 }
 
-function validateConfig(configOverride) {
+function validateConfig (configOverride) {
   if (typeof configOverride !== 'object') {
-    throw new Error("LavaMoat - Expected config override to be an object")
+    throw new Error('LavaMoat - Expected config override to be an object')
   }
-  
+
   if (!Object.keys(configOverride).includes('resources')) {
     throw new Error("LavaMoat - Expected label 'resources' for configuration key")
   }
 
-  Object.entries(configOverride['resources']).forEach(([packageName, packageOpts], index) => {
+  Object.entries(configOverride.resources).forEach(([packageName, packageOpts], index) => {
     const packageOptions = Object.keys(packageOpts)
     const packageEntries = Object.values(packageOpts)
     const optionsWhitelist = ['globals', 'packages']
@@ -259,4 +259,3 @@ function validateConfig(configOverride) {
     })
   })
 }
-
