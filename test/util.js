@@ -5,7 +5,7 @@ const through2 = require('through2').obj
 const mergeDeep = require('merge-deep')
 const watchify = require('watchify')
 
-const sesifyPlugin = require('../src/index')
+const lavamoatPlugin = require('../src/index')
 
 
 module.exports = {
@@ -23,9 +23,9 @@ module.exports = {
 
 async function createBundleFromEntry (path, pluginOpts = {}) {
   pluginOpts.config = pluginOpts.config || {}
-  const bundler = browserify([], sesifyPlugin.args)
+  const bundler = browserify([], lavamoatPlugin.args)
   bundler.add(path)
-  bundler.plugin(sesifyPlugin, pluginOpts)
+  bundler.plugin(lavamoatPlugin, pluginOpts)
   return bundleAsync(bundler)
 }
 
@@ -41,9 +41,9 @@ async function createBundleFromRequiresArray (files, pluginOpts) {
 
 function createBrowserifyFromRequiresArray ({ files, pluginOpts = {} }) {
   // empty bundle but inject modules at bundle time
-  const bifyOpts = Object.assign({}, sesifyPlugin.args)
+  const bifyOpts = Object.assign({}, lavamoatPlugin.args)
   const bundler = browserify([], bifyOpts)
-  bundler.plugin(sesifyPlugin, pluginOpts)
+  bundler.plugin(lavamoatPlugin, pluginOpts)
 
   // override browserify's module resolution
   const mdeps = bundler.pipeline.get('deps').get(0)
@@ -106,8 +106,8 @@ async function createWatchifyBundle (pluginOpts) {
     cache: {},
     packageCache: {},
     plugin: [
-      [sesifyPlugin, pluginOpts],
-      //poll option is needed to ensure the 'update' event is properly fired after the config override file changes. Without it, the firing behavior is unpredictable due to filesystem watch not always detecting the change. 
+      [lavamoatPlugin, pluginOpts],
+      //poll option is needed to ensure the 'update' event is properly fired after the config override file changes. Without it, the firing behavior is unpredictable due to filesystem watch not always detecting the change.
       [watchify, {poll: true}]
     ]
   })
