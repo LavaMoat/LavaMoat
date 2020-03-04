@@ -6,7 +6,6 @@
 
 const fs = require('fs')
 const path = require('path')
-const jsonStringify = require('json-stable-stringify')
 const preludeTemplate = fs.readFileSync(path.join(__dirname, '/preludeTemplate.js'), 'utf-8')
 const sesSrc = fs.readFileSync(path.join(__dirname, '/../lib/ses.umd.js'), 'utf-8')
 const makeGetEndowmentsForConfigSrc = fs.readFileSync(path.join(__dirname, '/makeGetEndowmentsForConfig.js'), 'utf-8')
@@ -15,12 +14,8 @@ const makePrepareRealmGlobalFromConfigSrc = fs.readFileSync(path.join(__dirname,
 module.exports = generatePrelude
 
 // takes the preludeTemplate and populates it with the config + libraries
-function generatePrelude (opts = {}) {
-  const lavamoatConfig = parseConfig(opts.getConfig)
-
+function generatePrelude () {
   let output = preludeTemplate
-  output = output.replace('__lavamoatConfig__', lavamoatConfig)
-
   replaceTemplateRequire('ses', sesSrc)
   replaceTemplateRequire('cytoplasm', fs.readFileSync(require.resolve('cytoplasm'), 'utf8'))
   replaceTemplateRequire('cytoplasm/distortions/readOnly', fs.readFileSync(require.resolve('cytoplasm/src/distortions/readOnly'), 'utf8'))
@@ -53,40 +48,4 @@ ${src}
   return module.exports
 })()`
   )
-}
-
-function parseConfig (config) {
-  switch (typeof config) {
-    case 'string': {
-      // parse as json if possible, otherwise interpret as js
-      if (isJsonString(config)) {
-        return `return ${config}`
-      } else {
-        return config
-      }
-    }
-    // allow lavamoatConfig to be specified as a function for loading fresh result under watchify
-    case 'function': {
-      return parseConfig(config())
-    }
-    case 'object': {
-      const configJson = jsonStringify(config, { space: 2 })
-      return `return ${configJson}`
-    }
-    case 'undefined': {
-      return 'return {}'
-    }
-    default: {
-      throw new Error('LavaMoat - unrecognized endowments config option')
-    }
-  }
-}
-
-function isJsonString (input) {
-  try {
-    JSON.parse(input)
-    return true
-  } catch (err) {
-    return false
-  }
 }

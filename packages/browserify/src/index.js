@@ -57,6 +57,7 @@ function getConfigurationFromPluginOpts (pluginOpts) {
     'writeAutoConfig',
     'config',
     'configOverride',
+    'includePrelude',
     '_' // Browserify adds this as the first option when running from the command line
   ])
   const invalidKeys = Reflect.ownKeys(pluginOpts).filter(key => !allowedKeys.has(key))
@@ -65,7 +66,8 @@ function getConfigurationFromPluginOpts (pluginOpts) {
   const configuration = {
     writeAutoConfig: undefined,
     getConfig: undefined,
-    configPath: getConfigPath(pluginOpts)
+    configPath: getConfigPath(pluginOpts),
+    includePrelude: pluginOpts.includePrelude
   }
 
   const defaultOverrideConfig = '/lavamoat-config-override.json'
@@ -94,6 +96,9 @@ function getConfigurationFromPluginOpts (pluginOpts) {
         primaryConfig = JSON.parse(configSource)
       } else if (typeof pluginOpts.config === 'object') {
         primaryConfig = pluginOpts.config
+      } else if (pluginOpts.config === undefined) {
+        // set primaryConfig as an empty config
+        primaryConfig = { resources: {} }
       }
       // if override specified, merge
       if (pluginOpts.configOverride) {
@@ -187,11 +192,12 @@ function getConfigPath (pluginOpts) {
   return defaultConfig
 }
 
-function createLavamoatPacker (opts) {
-  const onSourcemap = opts.onSourcemap || (row => row.sourceFile)
+function createLavamoatPacker (configuration) {
+  const onSourcemap = configuration.onSourcemap || (row => row.sourceFile)
   const defaults = {
     raw: true,
-    prelude: generatePrelude(opts),
+    config: configuration.getConfig(),
+    prelude: generatePrelude(configuration),
     bundleEntryForModule: (entry) => {
       const { package: packageName, source, deps } = entry
       const wrappedBundle = wrapIntoModuleInitializer(source)
@@ -207,7 +213,7 @@ function createLavamoatPacker (opts) {
     }
   }
 
-  const packOpts = Object.assign({}, defaults, opts)
+  const packOpts = Object.assign({}, defaults, configuration)
   const customPack = createCustomPack(packOpts)
   return customPack
 }

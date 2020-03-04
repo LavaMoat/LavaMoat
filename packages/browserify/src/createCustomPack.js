@@ -1,49 +1,59 @@
 // modified from browser-pack
 // changes:
-// - break out generateModuleInitializer
-// - break out bundleEntryForModule
+// - breakout generateModuleInitializer
+// - breakout bundleEntryForModule
+// - breakout generateBundleLoaderInitial
+// - lavamoat: init bundle with loadBundle call
+// - lavamoat: expect config as an argument
+// - lavamoat: make prelude optional
+// - cleanup: var -> const/let
 
 const assert = require('assert')
-var JSONStream = require('JSONStream')
-var defined = require('defined')
-var through = require('through2')
-var umd = require('umd')
-var Buffer = require('safe-buffer').Buffer
-var path = require('path')
+const JSONStream = require('JSONStream')
+const defined = require('defined')
+const through = require('through2')
+const umd = require('umd')
+const Buffer = require('safe-buffer').Buffer
+const path = require('path')
 
-var combineSourceMap = require('combine-source-map')
+const combineSourceMap = require('combine-source-map')
 
-var defaultPreludePath = path.join(__dirname, '_prelude.js')
-// var defaultPrelude = fs.readFileSync(defaultPreludePath, 'utf8');
+const defaultPreludePath = path.join(__dirname, '_prelude.js')
 
 function newlinesIn (src) {
   if (!src) return 0
-  var newlines = src.match(/\n/g)
-
+  const newlines = src.match(/\n/g)
   return newlines ? newlines.length : 0
 }
 
 module.exports = function (opts) {
   if (!opts) opts = {}
-  var parser = opts.raw ? through.obj() : JSONStream.parse([true])
-  var stream = through.obj(
-    function (buf, enc, next) { parser.write(buf); next() },
+  const parser = opts.raw ? through.obj() : JSONStream.parse([true])
+  const stream = through.obj(
+    function (buf, _, next) { parser.write(buf); next() },
     function () { parser.end() }
   )
   parser.pipe(through.obj(write, end))
   stream.standaloneModule = opts.standaloneModule
   stream.hasExports = opts.hasExports
 
-  var first = true
-  var entries = []
-  var basedir = defined(opts.basedir, process.cwd())
-  var prelude = opts.prelude
-  assert(prelude, 'must specify a prelude')
-  var preludePath = opts.preludePath ||
+  let first = true
+  let entries = []
+  const basedir = defined(opts.basedir, process.cwd())
+
+  const includePrelude = opts.includePrelude !== undefined ? opts.includePrelude : true
+  const prelude = opts.prelude
+  if (includePrelude) {
+    assert(prelude, 'LavaMoat CustomPack: must specify a prelude if "includePrelude" is true (default: true)')
+  }
+  const preludePath = opts.preludePath ||
         path.relative(basedir, defaultPreludePath).replace(/\\/g, '/')
 
-  var lineno = 1 + newlinesIn(prelude)
-  var sourcemap
+  const config = opts.config
+  assert(config, 'must specify a config')
+
+  let lineno = 1 + newlinesIn(prelude)
+  let sourcemap
 
   if (opts.generateModuleInitializer && opts.bundleEntryForModule) {
     throw new Error('LavaMoat CustomPack: conflicting options for "generateModuleInitializer" and "bundleEntryForModule". Can only set one.')
@@ -83,7 +93,9 @@ module.exports = function (opts) {
       const pre = opts.externalRequireName || 'require'
       stream.push(Buffer.from(pre + '=', 'utf8'))
     }
-    if (first) stream.push(Buffer.from(prelude + '({', 'utf8'))
+
+    // start of modules
+    if (first) stream.push(generateBundleLoaderInitial())
 
     if (row.sourceFile && !row.nomap) {
       if (!sourcemap) {
@@ -99,7 +111,7 @@ module.exports = function (opts) {
       )
     }
 
-    var wrappedSource = [
+    const wrappedSource = [
       (first ? '' : ','),
       JSON.stringify(row.id),
       ':',
@@ -117,11 +129,12 @@ module.exports = function (opts) {
   }
 
   function end () {
-    if (first) stream.push(Buffer.from(prelude + '({', 'utf8'))
+    if (first) stream.push(generateBundleLoaderInitial())
     entries = entries.filter(function (x) { return x !== undefined })
 
+    // close the loadBundle request
     stream.push(
-      Buffer.from('},{},' + JSON.stringify(entries) + ')', 'utf8')
+      Buffer.from(`},${JSON.stringify(entries)},${JSON.stringify(config)})`, 'utf8')
     )
 
     if (opts.standalone && !first) {
@@ -133,7 +146,7 @@ module.exports = function (opts) {
     }
 
     if (sourcemap) {
-      var comment = sourcemap.comment()
+      let comment = sourcemap.comment()
       if (opts.sourceMapPrefix) {
         comment = comment.replace(
           /^\/\/#/, function () { return opts.sourceMapPrefix }
@@ -146,5 +159,16 @@ module.exports = function (opts) {
     }
 
     stream.push(null)
+  }
+
+  function generateBundleLoaderInitial () {
+    let output = ''
+    // append prelude if requested
+    if (includePrelude) {
+      output += `${prelude};\n`
+    }
+    // append start of loadBundle call
+    output += 'LavaMoat.loadBundle({'
+    return Buffer.from(output, 'utf8')
   }
 }
