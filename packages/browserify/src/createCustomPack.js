@@ -5,49 +5,49 @@
 // - breakout generateFirstLine
 // - lavamoat: call loadBundle with correct args
 // - lavamoat: expect config as an argument
+// - cleanup: var -> const/let
 
 const assert = require('assert')
-var JSONStream = require('JSONStream')
-var defined = require('defined')
-var through = require('through2')
-var umd = require('umd')
-var Buffer = require('safe-buffer').Buffer
-var path = require('path')
+const JSONStream = require('JSONStream')
+const defined = require('defined')
+const through = require('through2')
+const umd = require('umd')
+const Buffer = require('safe-buffer').Buffer
+const path = require('path')
 
-var combineSourceMap = require('combine-source-map')
+const combineSourceMap = require('combine-source-map')
 
-var defaultPreludePath = path.join(__dirname, '_prelude.js')
+const defaultPreludePath = path.join(__dirname, '_prelude.js')
 
 function newlinesIn (src) {
   if (!src) return 0
-  var newlines = src.match(/\n/g)
-
+  const newlines = src.match(/\n/g)
   return newlines ? newlines.length : 0
 }
 
 module.exports = function (opts) {
   if (!opts) opts = {}
-  var parser = opts.raw ? through.obj() : JSONStream.parse([true])
-  var stream = through.obj(
-    function (buf, enc, next) { parser.write(buf); next() },
+  const parser = opts.raw ? through.obj() : JSONStream.parse([true])
+  const stream = through.obj(
+    function (buf, _, next) { parser.write(buf); next() },
     function () { parser.end() }
   )
   parser.pipe(through.obj(write, end))
   stream.standaloneModule = opts.standaloneModule
   stream.hasExports = opts.hasExports
 
-  var first = true
-  var entries = []
-  var basedir = defined(opts.basedir, process.cwd())
-  var prelude = opts.prelude
+  let first = true
+  let entries = []
+  const basedir = defined(opts.basedir, process.cwd())
+  const prelude = opts.prelude
   assert(prelude, 'must specify a prelude')
   const config = opts.config
   assert(config, 'must specify a config')
-  var preludePath = opts.preludePath ||
+  const preludePath = opts.preludePath ||
         path.relative(basedir, defaultPreludePath).replace(/\\/g, '/')
 
-  var lineno = 1 + newlinesIn(prelude)
-  var sourcemap
+  let lineno = 1 + newlinesIn(prelude)
+  let sourcemap
 
   if (opts.generateModuleInitializer && opts.bundleEntryForModule) {
     throw new Error('LavaMoat CustomPack: conflicting options for "generateModuleInitializer" and "bundleEntryForModule". Can only set one.')
@@ -105,7 +105,7 @@ module.exports = function (opts) {
       )
     }
 
-    var wrappedSource = [
+    const wrappedSource = [
       (first ? '' : ','),
       JSON.stringify(row.id),
       ':',
@@ -140,7 +140,7 @@ module.exports = function (opts) {
     }
 
     if (sourcemap) {
-      var comment = sourcemap.comment()
+      let comment = sourcemap.comment()
       if (opts.sourceMapPrefix) {
         comment = comment.replace(
           /^\/\/#/, function () { return opts.sourceMapPrefix }
