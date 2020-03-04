@@ -7,6 +7,8 @@ module.exports = {
     concatenateModules: false,
   },
   plugins: [
-    new LavaMoatPlugin()
+    new LavaMoatPlugin({
+      writeAutoConfig: true
+    })
   ]
 }
