@@ -29,7 +29,7 @@ class LavaMoat {
     const { mainTemplate } = compilation
 
 
-    const doThing = (bootstrapSource, chunk, hash, moduleTemplate, dependencyTemplates) => {
+    const performRender = (bootstrapSource, chunk, hash, moduleTemplate, dependencyTemplates) => {
       const result = new ConcatSource()
       result.add(generatePrelude(this.configuration))
       const modules = mainTemplate.hooks.modules.call(
