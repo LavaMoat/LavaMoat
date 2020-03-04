@@ -7,19 +7,33 @@ const { inspectEnvironment, environmentTypes, environmentTypeStrings } = require
 const defaultEnvironment = environmentTypes.frozen
 const rootSlug = '<root>'
 
-module.exports = { rootSlug, createConfigSpy }
+module.exports = { rootSlug, createConfigSpy, createModuleInspector }
 
 // createConfigSpy creates a pass-through object stream for the Browserify pipeline.
 // it analyses modules for global namespace usages, and generates a config for LavaMoat.
 // it calls `onResult` with the config when the stream ends.
 
 function createConfigSpy ({ onResult }) {
+  const inspector = createModuleInspector()
+  const configSpy = createSpy(
+    // inspect each module
+    inspector.inspectModule,
+    // after all modules, submit config
+    () => onResult(inspector.generateConfig())
+  )
+  return configSpy
+}
+
+function createModuleInspector () {
   const packageToEnvironments = {}
   const packageToGlobals = {}
   const packageToModules = {}
   const moduleIdToPackageName = {}
-  const configSpy = createSpy(inspectModule, onBuildEnd)
-  return configSpy
+
+  return {
+    inspectModule,
+    generateConfig
+  }
 
   function inspectModule (moduleData) {
     const packageName = moduleData.package
@@ -99,13 +113,6 @@ function createConfigSpy ({ onResult }) {
     })
 
     return jsonStringify(config, { space: 2 })
-  }
-
-  function onBuildEnd () {
-    // generate the final config
-    const config = generateConfig()
-    // report result
-    onResult(config)
   }
 }
 
