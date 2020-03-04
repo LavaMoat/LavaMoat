@@ -2,9 +2,10 @@
 // changes:
 // - breakout generateModuleInitializer
 // - breakout bundleEntryForModule
-// - breakout generateFirstLine
-// - lavamoat: call loadBundle with correct args
+// - breakout generateBundleLoaderInitial
+// - lavamoat: init bundle with loadBundle call
 // - lavamoat: expect config as an argument
+// - lavamoat: make prelude optional
 // - cleanup: var -> const/let
 
 const assert = require('assert')
@@ -39,12 +40,17 @@ module.exports = function (opts) {
   let first = true
   let entries = []
   const basedir = defined(opts.basedir, process.cwd())
+
+  const includePrelude = opts.includePrelude !== undefined ? opts.includePrelude : true
   const prelude = opts.prelude
-  assert(prelude, 'must specify a prelude')
-  const config = opts.config
-  assert(config, 'must specify a config')
+  if (includePrelude) {
+    assert(prelude, 'LavaMoat CustomPack: must specify a prelude if "includePrelude" is true (default: true)')
+  }
   const preludePath = opts.preludePath ||
         path.relative(basedir, defaultPreludePath).replace(/\\/g, '/')
+
+  const config = opts.config
+  assert(config, 'must specify a config')
 
   let lineno = 1 + newlinesIn(prelude)
   let sourcemap
@@ -89,7 +95,7 @@ module.exports = function (opts) {
     }
 
     // start of modules
-    if (first) stream.push(genereateFirstLine())
+    if (first) stream.push(generateBundleLoaderInitial())
 
     if (row.sourceFile && !row.nomap) {
       if (!sourcemap) {
@@ -123,7 +129,7 @@ module.exports = function (opts) {
   }
 
   function end () {
-    if (first) stream.push(genereateFirstLine())
+    if (first) stream.push(generateBundleLoaderInitial())
     entries = entries.filter(function (x) { return x !== undefined })
 
     // close the loadBundle request
@@ -155,7 +161,14 @@ module.exports = function (opts) {
     stream.push(null)
   }
 
-  function genereateFirstLine () {
-    return Buffer.from(prelude + '\n;LavaMoat.loadBundle({', 'utf8')
+  function generateBundleLoaderInitial () {
+    let output = ''
+    // append prelude if requested
+    if (includePrelude) {
+      output += `${prelude};\n`
+    }
+    // append start of loadBundle call
+    output += 'LavaMoat.loadBundle({'
+    return Buffer.from(output, 'utf8')
   }
 }
