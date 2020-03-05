@@ -38,6 +38,7 @@
     "convert-source-map": "^1.6.0",
     "depcheck": "^0.8.3",
     "mkdirp": "^1.0.3",
+    "pump": "^3.0.0",
     "rimraf": "^3.0.2",
     "ses": "git+https://git@github.com/agoric/ses#ee242a5f50de27b75f9a130760ff95277ee0bb0b",
     "source-map": "^0.7.3",
