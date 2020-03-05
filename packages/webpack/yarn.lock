@@ -1728,9 +1728,10 @@ kind-of@^6.0.0, kind-of@^6.0.2:
   resolved "https://registry.yarnpkg.com/kind-of/-/kind-of-6.0.2.tgz#01146b36a6218e64e58f3a8d66de5d7fc6f6d051"
   integrity sha512-s5kLOcnH0XqDO+FvuaLX8DDjZ18CGFk7VygH40QoKPUQhW4e2rvM0rwUq0t8IQDOwYSeLK01U90OjzBTme2QqA==
 
-"lavamoat-browserify@git://github.com/LavaMoat/lavamoat-browserify.git#6e9d08081a44f7ec727f43cb4e9acb348a0f51c7":
-  version "5.0.0"
-  resolved "git://github.com/LavaMoat/lavamoat-browserify.git#6e9d08081a44f7ec727f43cb4e9acb348a0f51c7"
+lavamoat-browserify@6.0.0:
+  version "6.0.0"
+  resolved "https://registry.yarnpkg.com/lavamoat-browserify/-/lavamoat-browserify-6.0.0.tgz#5941d3e0d5ee4f26cf05ec8bf9efa03dd683211b"
+  integrity sha512-Lrj2O2EuWlEOKtbW9OC5v/NCxOA/MHGnm5Qr4yMV/N+UgV7QHRRiAzCk2NBihmsAKEsw+uQlbPXUsGGBeM0bFA==
   dependencies:
     JSONStream "^1.3.5"
     acorn-globals "^4.3.3"

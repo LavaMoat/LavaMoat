@@ -8,7 +8,7 @@
     "test": "(cd test/project1/ && webpack entry.js && node dist/main.js)"
   },
   "dependencies": {
-    "lavamoat-browserify": "git://github.com/LavaMoat/lavamoat-browserify.git#6e9d08081a44f7ec727f43cb4e9acb348a0f51c7",
+    "lavamoat-browserify": "6.0.0",
     "module-name-from-path": "git+https://git@github.com/kumavis/module-name-from-path.git",
     "merge-deep": "^3.0.2",
     "mkdirp": "^1.0.3",
