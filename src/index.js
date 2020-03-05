@@ -27,25 +27,25 @@ function plugin (browserify, pluginOpts) {
   // setup the plugin in a re-bundle friendly way
   browserify.on('reset', setupPlugin)
   setupPlugin()
-  // override browserify/browser-pack prelude
+
   function setupPlugin () {
+    // some workarounds for SES strict parsing
     applySesTransforms(browserify)
 
-    const customPack = createLavamoatPacker(configuration)
-    // Pipeline.splice does not re-label inserted streams
-    customPack.label = 'pack'
-    // replace the standard browser-pack with our custom packer
-    browserify.pipeline.splice('pack', 1, customPack)
-
     // inject package name into module data
-    browserify.pipeline.splice('emit-deps', 0, createPackageDataStream())
+    browserify.pipeline.get('emit-deps').unshift(createPackageDataStream())
 
     // if autoconfig activated, insert hook
     if (configuration.writeAutoConfig) {
-      browserify.pipeline.splice('emit-deps', 0, createConfigSpy({
+      browserify.pipeline.get('emit-deps').push(createConfigSpy({
         onResult: configuration.writeAutoConfig
       }))
     }
+
+    // replace the standard browser-pack with our custom packer
+    browserify.pipeline.get('pack').splice(0, 1,
+      createLavamoatPacker(configuration)
+    )
   }
 }
 

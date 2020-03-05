@@ -4,8 +4,10 @@ const clone = require('clone')
 const through2 = require('through2').obj
 const mergeDeep = require('merge-deep')
 const watchify = require('watchify')
-
+const through = require('through2').obj
+const pump = require('pump')
 const lavamoatPlugin = require('../src/index')
+const noop = () => {}
 
 
 module.exports = {
@@ -19,6 +21,9 @@ module.exports = {
   testEntryAttackerVictim,
   runSimpleOneTwo,
   runSimpleOneTwoSamePackage,
+  createBrowserifyFromRequiresArray,
+  createSpy,
+  getStreamResults,
 }
 
 async function createBundleFromEntry (path, pluginOpts = {}) {
@@ -69,7 +74,8 @@ function createBrowserifyFromRequiresArray ({ files, pluginOpts = {} }) {
     })
     cb()
   })
-  bundler.pipeline.splice('record', 0, fileInjectionStream)
+
+  bundler.pipeline.get('record').unshift(fileInjectionStream)
 
   return bundler
 }
@@ -279,4 +285,24 @@ async function runSimpleOneTwoSamePackage({ defineOne, defineTwo, config = {} })
   eval(result)
 
   return global.testResult
+}
+
+function createSpy ({ onEach = noop, onEnd = noop }) {
+  return through(
+    (entry, _, cb) => { onEach(entry); cb() },
+    (cb) => { onEnd(); cb() },
+  )
+}
+
+async function getStreamResults (stream) {
+  // get bundle results
+  const results = []
+  await pify(cb => {
+    pump(
+      stream,
+      createSpy({ onEach: (entry) => { results.push(entry) } }),
+      cb
+    )
+  })()
+  return results
 }
