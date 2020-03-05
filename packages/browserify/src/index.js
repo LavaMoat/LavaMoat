@@ -2,12 +2,10 @@ const fs = require('fs')
 const path = require('path')
 const mkdirp = require('mkdirp')
 const mergeDeep = require('merge-deep')
-const jsonStringify = require('json-stable-stringify')
 const generatePrelude = require('./generatePrelude')
 const createCustomPack = require('./createCustomPack')
 const { createConfigSpy } = require('./generateConfig')
 const { createPackageDataStream } = require('./packageData')
-const { wrapIntoModuleInitializer } = require('./sourcemaps')
 const { makeStringTransform } = require('browserify-transform-tools')
 
 /*  export a Browserify plugin  */
@@ -193,24 +191,10 @@ function getConfigPath (pluginOpts) {
 }
 
 function createLavamoatPacker (configuration) {
-  const onSourcemap = configuration.onSourcemap || (row => row.sourceFile)
   const defaults = {
     raw: true,
     config: configuration.getConfig(),
-    prelude: generatePrelude(configuration),
-    bundleEntryForModule: (entry) => {
-      const { package: packageName, source, deps } = entry
-      const wrappedBundle = wrapIntoModuleInitializer(source)
-      const sourceMappingURL = onSourcemap(entry, wrappedBundle)
-      // for now, ignore new sourcemap and just append original filename
-      let moduleInitSrc = wrappedBundle.code
-      if (sourceMappingURL) moduleInitSrc += `\n//# sourceMappingURL=${sourceMappingURL}`
-      // serialize final module entry
-      const serializedDeps = jsonStringify(deps)
-      // TODO: re-add "file" for better debugging
-      const serializedEntry = `{ package: "${packageName}", deps: ${serializedDeps}, source: ${moduleInitSrc}\n}`
-      return serializedEntry
-    }
+    prelude: generatePrelude(configuration)
   }
 
   const packOpts = Object.assign({}, defaults, configuration)
