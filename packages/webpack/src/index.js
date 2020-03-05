@@ -90,11 +90,10 @@ class LavaMoat {
       result.add(modules)
       result.add('),')
 
-      // empty argument (browserify cruft)
-      result.add('null,')
-
       const entryPoints = [0]
       result.add(JSON.stringify(entryPoints, null, 2))
+      result.add(',')
+      result.add(JSON.stringify(config, null, 2))
 
       result.add(')')
 
@@ -107,7 +106,7 @@ class LavaMoat {
     // and then improve it as needed
     mainTemplate.hooks.render.tap('LavaMoat', (...args) => {
       try {
-        return doThing(...args)
+        return performRender(...args)
       }catch(err){
         console.error(err)
         throw err
