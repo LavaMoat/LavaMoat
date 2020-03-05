@@ -55,7 +55,7 @@ function createBrowserifyFromRequiresArray ({ files, pluginOpts = {} }) {
   mdeps.resolve = (id, parent, cb) => {
     const parentModule = files.find(f => f.id === parent.id)
     const moduleId = parentModule ? parentModule.deps[id] : id
-    const moduleData = files.find(f => f.id === moduleId)
+    const moduleData = files.find(f => f.id === moduleId || f.file === moduleId)
     if (!moduleData) {
       throw new Error(`could not find "${moduleId}" in files:\n${files.map(f => f.id).join('\n')}`)
     }
