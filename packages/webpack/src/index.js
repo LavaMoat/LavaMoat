@@ -17,6 +17,9 @@ class LavaMoat {
   }
 
   apply(compiler) {
+    if (compiler.options.optimization.concatenateModules) {
+      throw new Error('LavaMoat - webpack optimizations.concatenateModules must be set to false')
+    }
     compiler.hooks.compilation.tap(
       this.constructor.name,
       (compilation) => this.handleEmit(compilation).catch(
