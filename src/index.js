@@ -16,7 +16,12 @@ module.exports.args = {
   // this option helps with parsing global usage
   insertGlobalVars: {
     global: false
-  }
+  },
+  // this option prevents creating unnecesary psuedo-dependencies
+  // where packages appear to rely on other packages because they
+  // are using each other for code deduplication
+  // this also breaks bify-package-factor and related tools
+  dedupe: false
 }
 
 function plugin (browserify, pluginOpts) {

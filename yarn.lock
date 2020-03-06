@@ -285,10 +285,10 @@ base@^0.11.1:
     mixin-deep "^1.2.0"
     pascalcase "^0.1.1"
 
-bify-package-factor@^1.0.3:
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/bify-package-factor/-/bify-package-factor-1.0.3.tgz#d3485692d6871b4ac552866b97bdfb893c61b623"
-  integrity sha512-5lFsQedX7t5+8I2cyEi0/qlA5CYlki8/EL6FVcnaEXUk/ueojvfU0INetNpMLbvRxIwPdGSyfrMTKVTdm6ZHCQ==
+bify-package-factor@^1.0.6:
+  version "1.0.6"
+  resolved "https://registry.yarnpkg.com/bify-package-factor/-/bify-package-factor-1.0.6.tgz#45cbd9e85a15a8e11370c6a7ec1d1dbcdc63456f"
+  integrity sha512-Ut9umHfdBFd7XOc6bE6STTsW3/u/NzDuDHSU0DO/xhd+HX0ab8aXfdraAc2GC46dF4jtXwBb83UEgfU3HF6Mtw==
   dependencies:
     bify-packagedata-stream "1.0.0"
     pump "^3.0.0"

@@ -32,7 +32,7 @@
     "umd": "^3.0.3"
   },
   "devDependencies": {
-    "bify-package-factor": "^1.0.3",
+    "bify-package-factor": "^1.0.6",
     "browserify": "^16.2.3",
     "clone": "^2.1.2",
     "convert-source-map": "^1.6.0",
