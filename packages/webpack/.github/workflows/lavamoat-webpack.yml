@@ -20,4 +20,4 @@ jobs:
       - name: Install Dependencies
         run: yarn 
       - name: Build 
-        run: yarn test
+        run: yarn lavamoat
