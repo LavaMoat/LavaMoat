@@ -2,6 +2,8 @@
 
 **NOTE: under rapid develop, not ready for production use, has not been audited, etc**
 
+[*Quick Start Example*](https://github.com/LavaMoat/lavamoat-webpack/blob/master/test/project1/README.md)
+
 `lavamoat-webpack` is a [WebPack][Webpack] plugin for generating app bundles protected by [LavaMoat](https://github.com/LavaMoat/overview) where modules are defined in [SES][SesGithub] containers. It aims to reduce the risk of "software supplychain attacks", malicious code in the app dependency graph.
 
 It attempts to reduce this risk in three ways:
