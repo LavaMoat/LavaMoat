@@ -31,7 +31,7 @@ class LavaMoat {
 
     const performRender = (bootstrapSource, chunk, hash, moduleTemplate, dependencyTemplates) => {
       const result = new ConcatSource()
-      result.add(generatePrelude(this.configuration))
+      result.add(generatePrelude())
       const modules = mainTemplate.hooks.modules.call(
         new RawSource(""),
         chunk,
@@ -50,13 +50,17 @@ class LavaMoat {
         if (moduleData.constructor.name === 'RawModule') {
           packageName = moduleData.readableIdentifierStr.split(' ')[0]
           source = moduleData.sourceStr
-        } else {
+        } else if (moduleData.constructor.name === 'NormalModule') {
           file = moduleData.userRequest
           const packageData = packageDataForModule({ file })
           packageName = packageData.packageName || '<root>'
           packageVersion = packageData.version
-          source = moduleData._source._value
-        }
+          if (moduleData.parser.constructor.name === 'JsonParser') {
+            source = moduleData._cachedSources.get('javascript').source._source.children[0]
+          } else {
+            source = moduleData._source._value
+          }
+        } 
 
         const moduleDataForConfig = {
           id: moduleData.id,
@@ -64,6 +68,14 @@ class LavaMoat {
           package: packageName,
           deps: {}
         }
+
+        for (let dep of moduleData.dependencies) {
+          if (!dep.module) {
+            continue
+          }
+          moduleDataForConfig.deps[dep.module.id] = dep.module.id
+        }
+
         inspector.inspectModule(moduleDataForConfig)
 
         // json serializeable module metadata
@@ -77,7 +89,9 @@ class LavaMoat {
       }
 
       const config = inspector.generateConfig()
-      this.configuration.writeAutoConfig(config)
+      if (this.configuration.writeAutoConfig) {
+        this.configuration.writeAutoConfig(config)
+      }
 
       // module shape adapter with inject module metadata
       result.add('(')
@@ -93,7 +107,7 @@ class LavaMoat {
       const entryPoints = [0]
       result.add(JSON.stringify(entryPoints, null, 2))
       result.add(',')
-      result.add(JSON.stringify(config, null, 2))
+      result.add(config)
 
       result.add(')')
 

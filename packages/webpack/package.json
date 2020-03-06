@@ -1,16 +1,18 @@
 {
   "main": "./index.js",
   "devDependencies": {
+    "serve": "^11.3.0",
     "webpack": "^4.41.0",
     "webpack-cli": "^3.3.9"
   },
   "scripts": {
-    "test": "(cd test/project1/ && webpack entry.js && node dist/main.js)"
+    "lavamoat": "(cd test/project1/ && webpack entry.js)",
+    "start": "(cd test/project1/ && serve dist)"
   },
   "dependencies": {
-    "lavamoat-browserify": "6.0.0",
-    "module-name-from-path": "git+https://git@github.com/kumavis/module-name-from-path.git",
+    "lavamoat-browserify": "7.0.0",
     "merge-deep": "^3.0.2",
+    "metamask-logo": "^2.2.1",
     "mkdirp": "^1.0.3",
     "webpack-sources": "^1.4.3"
   }
