@@ -266,8 +266,9 @@
       // disallow requiring packages that are not in the parent's whitelist
       const isSamePackage = packageName === parentModulePackageName
       const isInParentWhitelist = packageName in parentPackagesWhitelist
+      const parentIsEntryModule = parentModulePackageName === '<root>'
 
-      if (!isSamePackage && !isInParentWhitelist) {
+      if (!parentIsEntryModule && !isSamePackage && !isInParentWhitelist) {
         throw new Error(`LavaMoat - required package not in whitelist: package "${parentModulePackageName}" requested "${packageName}" as "${requestedName}"`)
       }
 

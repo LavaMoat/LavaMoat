@@ -15,8 +15,9 @@ const through = require('through2')
 const umd = require('umd')
 const Buffer = require('safe-buffer').Buffer
 const path = require('path')
-
 const combineSourceMap = require('combine-source-map')
+const jsonStringify = require('json-stable-stringify')
+const { wrapIntoModuleInitializer } = require('./sourcemaps')
 
 const defaultPreludePath = path.join(__dirname, '_prelude.js')
 
@@ -26,8 +27,9 @@ function newlinesIn (src) {
   return newlines ? newlines.length : 0
 }
 
-module.exports = function (opts) {
-  if (!opts) opts = {}
+module.exports = function (opts = {}) {
+  const onSourcemap = opts.onSourcemap || (row => row.sourceFile)
+
   const parser = opts.raw ? through.obj() : JSONStream.parse([true])
   const stream = through.obj(
     function (buf, _, next) { parser.write(buf); next() },
@@ -60,7 +62,6 @@ module.exports = function (opts) {
   }
 
   opts.generateModuleInitializer = opts.generateModuleInitializer || generateModuleInitializer
-  opts.bundleEntryForModule = opts.bundleEntryForModule || bundleEntryForModule
 
   return stream
 
@@ -69,19 +70,6 @@ module.exports = function (opts) {
       'function moduleInitializer (require,module,exports) {\n',
       combineSourceMap.removeComments(row.source),
       '\n}'
-    ].join('')
-  }
-
-  function bundleEntryForModule (row) {
-    return [
-      '[',
-      opts.generateModuleInitializer(row),
-      ',',
-      '{' + Object.keys(row.deps || {}).sort().map(function (key) {
-        return JSON.stringify(key) + ':' +
-                JSON.stringify(row.deps[key])
-      }).join(',') + '}',
-      ']'
     ].join('')
   }
 
@@ -115,7 +103,7 @@ module.exports = function (opts) {
       (first ? '' : ','),
       JSON.stringify(row.id),
       ':',
-      opts.bundleEntryForModule(row)
+      bundleEntryForModule(row)
     ].join('')
 
     stream.push(Buffer.from(wrappedSource, 'utf8'))
@@ -170,5 +158,19 @@ module.exports = function (opts) {
     // append start of loadBundle call
     output += 'LavaMoat.loadBundle({'
     return Buffer.from(output, 'utf8')
+  }
+
+  function bundleEntryForModule (entry) {
+    const { package: packageName, source, deps } = entry
+    const wrappedBundle = wrapIntoModuleInitializer(source)
+    const sourceMappingURL = onSourcemap(entry, wrappedBundle)
+    // for now, ignore new sourcemap and just append original filename
+    let moduleInitSrc = wrappedBundle.code
+    if (sourceMappingURL) moduleInitSrc += `\n//# sourceMappingURL=${sourceMappingURL}`
+    // serialize final module entry
+    const serializedDeps = jsonStringify(deps)
+    // TODO: re-add "file" for better debugging
+    const serializedEntry = `{ package: "${packageName}", deps: ${serializedDeps}, source: ${moduleInitSrc}\n}`
+    return serializedEntry
   }
 }
