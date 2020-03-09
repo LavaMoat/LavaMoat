@@ -2,7 +2,7 @@
   "name": "sesify-viz",
   "description": "This is a graph visualization generator exploring a sesify bundle's dependency graph and permissions.",
   "main": "index.js",
-  "version": "3.0.9",
+  "version": "3.0.10",
   "dependencies": {
     "@babel/preset-env": "^7.8.7",
     "@babel/preset-react": "^7.8.3",
