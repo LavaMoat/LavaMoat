@@ -207,13 +207,13 @@ function createLavamoatPacker (configuration) {
   return customPack
 }
 
-function applySesTransforms(browserify) {
+function applySesTransforms (browserify) {
   const fixSesProblemsTransform = makeStringTransform('remove-html-comment', { excludeExtension: ['.json'] }, (content, _, cb) => {
     const fix = content.split('-->').join('-- >')
     // bluebird uses eval, sorta
-    .split('import').join('_import')
+      .split('import').join('_import')
     // bluebird uses eval, sorta
-    .split(' eval(').join(' (eval)(')
+      .split(' eval(').join(' (eval)(')
     cb(null, fix)
   })
 
