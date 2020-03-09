@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const fs = require('fs')
+const { promises: fs } = require('fs')
 const path = require('path')
 const argv = require('yargs').argv
 const { ncp } = require('ncp')
@@ -14,18 +14,20 @@ if (!config) throw new Error('missing cli argument "--config')
 
 const source = path.join(__dirname, '/../dist/')
 
-main()
+main().catch(err => console.error(err))
 
 async function main () {
+  console.log(`"${source}", "${dest}"`)
   // copy app dir
+  await fs.mkdir(dest, { recursive: true })
   await pify(cb => ncp(source, dest, cb))()
   // add data-injection file
-  const configContent = fs.readFileSync(config, 'utf8')
-  const depsContent = fs.readFileSync(deps, 'utf8')
+  const configContent = await fs.readFile(config, 'utf8')
+  const depsContent = await fs.readFile(deps, 'utf8')
   const dataInjectionContent = `
   self.CONFIG = ${configContent};
   self.DEPS = ${depsContent};
   `
-  fs.writeFileSync(dest + '/data-injection.js', dataInjectionContent)
+  await fs.writeFile(dest + '/data-injection.js', dataInjectionContent)
   console.log(`generated viz in ${dest}`)
 }
