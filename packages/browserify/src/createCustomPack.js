@@ -86,13 +86,17 @@ module.exports = function (opts = {}) {
     if (first) stream.push(generateBundleLoaderInitial())
 
     if (row.sourceFile && !row.nomap) {
+      // initialize sourcemap
       if (!sourcemap) {
         sourcemap = combineSourceMap.create(null, opts.sourceRoot)
-        sourcemap.addFile(
-          { sourceFile: preludePath, source: prelude },
-          { line: 0 }
-        )
+        if (includePrelude) {
+          sourcemap.addFile(
+            { sourceFile: preludePath, source: prelude },
+            { line: 0 }
+          )
+        }
       }
+      // add current file to the sourcemap
       sourcemap.addFile(
         { sourceFile: row.sourceFile, source: row.source },
         { line: lineno }
