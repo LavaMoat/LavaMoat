@@ -1,7 +1,8 @@
-import { ForceGraph2D, ForceGraph3D, ForceGraphVR } from 'react-force-graph'
+// fix for silencing aframe errors
+navigator.xr.requestDevice = () => { return new Promise(() => { }) }
+const { ForceGraph2D } = require('react-force-graph')
 
 const React = require('react')
-const ObservableStore = require('obs-store')
 const exampleConfig = require('../example-config.json')
 const d3 = require('d3')
 
@@ -74,30 +75,30 @@ class DepGraph extends React.Component {
     const selectedNodeLabel = selectedNode ? `${selectedNode.label}\n${selectedNode.configLabel}` : 'select a node'
 
     return (
-      <>
-        <pre style={{
-          position: 'absolute',
-          background: 'rgba(232, 232, 232, 0.78)',
-          padding: '12px',
-          // draw on top of graph
-          zIndex: 1,
-        }}>
-          {selectedNodeLabel}
-        </pre>
-        <ForceGraph2D
-          ref={el => this.forceGraph = el}
-          graphData={data}
-          linkDirectionalArrowLength={4}
-          linkDirectionalArrowRelPos={1}
-          nodeLabel={'label'}
-          onNodeHover={(node) => {
-            if (!node) return
-            actions.selectNode(node)
-          }}
-          linkWidth={(link) => link.width}
-          linkColor={(link) => link.color}
-        />
-      </>
+    <div>
+      <pre style={{
+        position: 'absolute',
+        background: 'rgba(232, 232, 232, 0.78)',
+        padding: '12px',
+        // draw on top of graph
+        zIndex: 1,
+      }}>
+        {selectedNodeLabel}
+      </pre>
+      <ForceGraph2D
+        ref={el => this.forceGraph = el}
+        graphData={data}
+        linkDirectionalArrowLength={4}
+        linkDirectionalArrowRelPos={1}
+        nodeLabel={'label'}
+        onNodeHover={(node) => {
+          if (!node) return
+          actions.selectNode(node)
+        }}
+        linkWidth={(link) => link.width}
+        linkColor={(link) => link.color}
+      />
+    </div>
     )
   }
 }
