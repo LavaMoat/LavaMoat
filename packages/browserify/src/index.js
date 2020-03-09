@@ -212,8 +212,6 @@ function applySesTransforms (browserify) {
     const result = content
     // html comment
       .split('-->').join('-- >')
-    // reject import 
-      .split('import').join('_import')
     // bluebird uses eval, sorta
       .split(' eval(').join(' (eval)(')
     cb(null, result)
