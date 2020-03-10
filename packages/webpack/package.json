@@ -1,4 +1,7 @@
-{
+{ 
+  "name": "lavamoat-webpack",
+  "version": "0.1.0",
+  "description": "webpack plugin for sandboxing dependencies with LavaMoat",
   "main": "./index.js",
   "devDependencies": {
     "metamask-logo": "^2.2.1",
