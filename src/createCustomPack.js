@@ -1,16 +1,16 @@
 // modified from browser-pack
 // changes:
 // - breakout generateModuleInitializer
-// - breakout bundleEntryForModule
+// - breakout serializeModule
 // - breakout generateBundleLoaderInitial
 // - lavamoat: init bundle with loadBundle call
 // - lavamoat: expect config as an argument
 // - lavamoat: make prelude optional
 // - cleanup: var -> const/let
+// - cleanup/refactor
 
 const assert = require('assert')
 const JSONStream = require('JSONStream')
-const defined = require('defined')
 const through = require('through2')
 const umd = require('umd')
 const Buffer = require('safe-buffer').Buffer
@@ -27,100 +27,107 @@ function newlinesIn (src) {
   return newlines ? newlines.length : 0
 }
 
-module.exports = function (opts = {}) {
-  const onSourcemap = opts.onSourcemap || (row => row.sourceFile)
+module.exports = function ({
+  // hook for applying sourcemaps
+  onSourcemap = (row => row.sourceFile),
+  // input is (true:) objects (false:) json strings
+  raw = false,
+  standalone = false,
+  standaloneModule = false,
+  hasExports = false,
+  basedir = process.cwd(),
+  // include prelude in bundle
+  includePrelude = true,
+  // must be specified
+  prelude,
+  // prelude path for sourcemaps
+  preludePath = path.relative(basedir, defaultPreludePath).replace(/\\/g, '/'),
+  // capabilities config enforced by prelude
+  config,
+  externalRequireName,
+  sourceRoot,
+  sourceMapPrefix,
+} = {}) {
 
-  const parser = opts.raw ? through.obj() : JSONStream.parse([true])
+  // stream/parser wrapping incase raw: false
+  const parser = raw ? through.obj() : JSONStream.parse([true])
   const stream = through.obj(
     function (buf, _, next) { parser.write(buf); next() },
     function () { parser.end() }
   )
-  parser.pipe(through.obj(write, end))
-  stream.standaloneModule = opts.standaloneModule
-  stream.hasExports = opts.hasExports
+
+  // these are decorated for some reason
+  stream.standaloneModule = standaloneModule
+  stream.hasExports = hasExports
 
   let first = true
   let entries = []
-  const basedir = defined(opts.basedir, process.cwd())
 
-  const includePrelude = opts.includePrelude !== undefined ? opts.includePrelude : true
-  const prelude = opts.prelude
   if (includePrelude) {
     assert(prelude, 'LavaMoat CustomPack: must specify a prelude if "includePrelude" is true (default: true)')
   }
-  const preludePath = opts.preludePath ||
-        path.relative(basedir, defaultPreludePath).replace(/\\/g, '/')
-
-  const config = opts.config
   assert(config, 'must specify a config')
 
   let lineno = 1 + newlinesIn(prelude)
   let sourcemap
 
-  if (opts.generateModuleInitializer && opts.bundleEntryForModule) {
-    throw new Error('LavaMoat CustomPack: conflicting options for "generateModuleInitializer" and "bundleEntryForModule". Can only set one.')
-  }
+  // note: pack stream cant started emitting data until its received its first module
+  // this is likely because the pipeline is still being setup
+  parser.pipe(through.obj(onModule, onDone))
 
-  opts.generateModuleInitializer = opts.generateModuleInitializer || generateModuleInitializer
 
   return stream
 
-  function generateModuleInitializer (row) {
-    return [
-      'function moduleInitializer (require,module,exports) {\n',
-      combineSourceMap.removeComments(row.source),
-      '\n}'
-    ].join('')
-  }
 
-  function write (row, enc, next) {
-    if (first && opts.standalone) {
-      const pre = umd.prelude(opts.standalone).trim()
+  function onModule (moduleData, _, next) {
+    if (first && standalone) {
+      const pre = umd.prelude(standalone).trim()
       stream.push(Buffer.from(pre + 'return ', 'utf8'))
-    } else if (first && stream.hasExports) {
-      const pre = opts.externalRequireName || 'require'
+    } else if (first && hasExports) {
+      const pre = externalRequireName || 'require'
       stream.push(Buffer.from(pre + '=', 'utf8'))
     }
 
     // start of modules
     if (first) stream.push(generateBundleLoaderInitial())
 
-    if (row.sourceFile && !row.nomap) {
-      // initialize sourcemap
-      if (!sourcemap) {
-        sourcemap = combineSourceMap.create(null, opts.sourceRoot)
-        if (includePrelude) {
-          sourcemap.addFile(
-            { sourceFile: preludePath, source: prelude },
-            { line: 0 }
-          )
-        }
+    // initialize sourcemap
+    if (!sourcemap) {
+      sourcemap = combineSourceMap.create(null, sourceRoot)
+      if (includePrelude) {
+        sourcemap.addFile(
+          { sourceFile: preludePath, source: prelude },
+          { line: 0 }
+        )
       }
+    }
+
+    if (moduleData.sourceFile && !moduleData.nomap) {
       // add current file to the sourcemap
       sourcemap.addFile(
-        { sourceFile: row.sourceFile, source: row.source },
+        { sourceFile: moduleData.sourceFile, source: moduleData.source },
         { line: lineno }
       )
     }
 
     const wrappedSource = [
       (first ? '' : ','),
-      JSON.stringify(row.id),
+      JSON.stringify(moduleData.id),
       ':',
-      bundleEntryForModule(row)
+      serializeModule(moduleData)
     ].join('')
 
     stream.push(Buffer.from(wrappedSource, 'utf8'))
     lineno += newlinesIn(wrappedSource)
 
     first = false
-    if (row.entry && row.order !== undefined) {
-      entries[row.order] = row.id
-    } else if (row.entry) entries.push(row.id)
+    if (moduleData.entry && moduleData.order !== undefined) {
+      entries[moduleData.order] = moduleData.id
+    } else if (moduleData.entry) entries.push(moduleData.id)
     next()
   }
 
-  function end () {
+  function onDone () {
     if (first) stream.push(generateBundleLoaderInitial())
     entries = entries.filter(function (x) { return x !== undefined })
 
@@ -129,24 +136,24 @@ module.exports = function (opts = {}) {
       Buffer.from(`},${JSON.stringify(entries)},${JSON.stringify(config)})`, 'utf8')
     )
 
-    if (opts.standalone && !first) {
+    if (standalone && !first) {
       stream.push(Buffer.from(
         '(' + JSON.stringify(stream.standaloneModule) + ')' +
-                    umd.postlude(opts.standalone),
+                    umd.postlude(standalone),
         'utf8'
       ))
     }
 
     if (sourcemap) {
       let comment = sourcemap.comment()
-      if (opts.sourceMapPrefix) {
+      if (sourceMapPrefix) {
         comment = comment.replace(
-          /^\/\/#/, function () { return opts.sourceMapPrefix }
+          /^\/\/#/, function () { return sourceMapPrefix }
         )
       }
       stream.push(Buffer.from('\n' + comment + '\n', 'utf8'))
     }
-    if (!sourcemap && !opts.standalone) {
+    if (!sourcemap && !standalone) {
       stream.push(Buffer.from(';\n', 'utf8'))
     }
 
@@ -164,10 +171,10 @@ module.exports = function (opts = {}) {
     return Buffer.from(output, 'utf8')
   }
 
-  function bundleEntryForModule (entry) {
-    const { package: packageName, source, deps } = entry
+  function serializeModule (moduleData) {
+    const { package: packageName, source, deps } = moduleData
     const wrappedBundle = wrapIntoModuleInitializer(source)
-    const sourceMappingURL = onSourcemap(entry, wrappedBundle)
+    const sourceMappingURL = onSourcemap(moduleData, wrappedBundle)
     // for now, ignore new sourcemap and just append original filename
     let moduleInitSrc = wrappedBundle.code
     if (sourceMappingURL) moduleInitSrc += `\n//# sourceMappingURL=${sourceMappingURL}`
