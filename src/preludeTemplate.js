@@ -93,10 +93,12 @@
         // add the module
         modules[moduleId] = moduleData
       }
-      // run each of entryPoints (ignores any exports of entryPoints)
-      for (const entryId of entryPoints) {
-        internalRequire(entryId)
-      }
+      // run each of entryPoints
+      const entryExports = Array.prototype.map.call(entryPoints, (entryId) => {
+        return internalRequire(entryId)
+      })
+      // webpack compat: return the first module's exports
+      return entryExports[0]
     }
 
     // this function instantiaties a module from a moduleId.
