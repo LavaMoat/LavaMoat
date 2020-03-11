@@ -1,5 +1,5 @@
 // LavaMoat Prelude
-;(function() {
+(function() {
 
   // define SES
   // "templateRequire" calls are inlined in "generatePrelude"
