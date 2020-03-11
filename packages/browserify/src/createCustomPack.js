@@ -44,6 +44,8 @@ module.exports = function ({
   preludePath = path.relative(basedir, defaultPreludePath).replace(/\\/g, '/'),
   // capabilities config enforced by prelude
   config,
+  // prune config to only include packages used in the bundle
+  pruneConfig = false,
   externalRequireName,
   sourceRoot,
   sourceMapPrefix,
@@ -62,6 +64,7 @@ module.exports = function ({
 
   let first = true
   let entries = []
+  const packages = new Set()
 
   if (includePrelude) {
     assert(prelude, 'LavaMoat CustomPack: must specify a prelude if "includePrelude" is true (default: true)')
@@ -110,6 +113,11 @@ module.exports = function ({
       )
     }
 
+    if (pruneConfig) {
+      const { packageName } = moduleData
+      packages.add(packageName)
+    }
+
     const wrappedSource = [
       (first ? '' : ','),
       JSON.stringify(moduleData.id),
@@ -131,9 +139,21 @@ module.exports = function ({
     if (first) stream.push(generateBundleLoaderInitial())
     entries = entries.filter(function (x) { return x !== undefined })
 
+    // filter the config removing packages that arent included
+    let minimalConfig = {}
+    if (pruneConfig) {
+      Object.entries(config)
+      .filter(([packageName]) => packages.includes(packageName))
+      .forEach(([packageName, packageConfig]) => {
+        minimalConfig[packageName] = packageConfig
+      })
+    } else {
+      minimalConfig = config
+    }
+
     // close the loadBundle request
     stream.push(
-      Buffer.from(`},${JSON.stringify(entries)},${JSON.stringify(config)})`, 'utf8')
+      Buffer.from(`},${JSON.stringify(entries)},${JSON.stringify(minimalConfig)})`, 'utf8')
     )
 
     if (standalone && !first) {
