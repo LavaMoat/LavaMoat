@@ -7,19 +7,33 @@ const { inspectEnvironment, environmentTypes, environmentTypeStrings } = require
 const defaultEnvironment = environmentTypes.frozen
 const rootSlug = '<root>'
 
-module.exports = { rootSlug, createConfigSpy }
+module.exports = { rootSlug, createConfigSpy, createModuleInspector }
 
 // createConfigSpy creates a pass-through object stream for the Browserify pipeline.
 // it analyses modules for global namespace usages, and generates a config for LavaMoat.
 // it calls `onResult` with the config when the stream ends.
 
 function createConfigSpy ({ onResult }) {
+  const inspector = createModuleInspector()
+  const configSpy = createSpy(
+    // inspect each module
+    inspector.inspectModule,
+    // after all modules, submit config
+    () => onResult(inspector.generateConfig())
+  )
+  return configSpy
+}
+
+function createModuleInspector () {
   const packageToEnvironments = {}
   const packageToGlobals = {}
   const packageToModules = {}
   const moduleIdToPackageName = {}
-  const configSpy = createSpy(inspectModule, onBuildEnd)
-  return configSpy
+
+  return {
+    inspectModule,
+    generateConfig
+  }
 
   function inspectModule (moduleData) {
     const packageName = moduleData.package
@@ -42,15 +56,15 @@ function createConfigSpy ({ onResult }) {
     // initialize results for package
     const environments = packageToEnvironments[packageName] = packageToEnvironments[packageName] || []
     environments.push(result)
-   }
+  }
 
   function inspectForGlobals (moduleData, packageName) {
-    const { source, file } = moduleData
+    const { source } = moduleData
     const foundGlobals = inspectSource(source, {
       // browserify commonjs scope
       ignoredRefs: ['require', 'module', 'exports', 'arguments'],
       // browser global refs + browserify global
-      globalRefs: ['globalThis', 'self', 'window', 'global'],
+      globalRefs: ['globalThis', 'self', 'window', 'global']
     })
     // add globalUsage info
     moduleData.globalUsage = mapToObj(foundGlobals)
@@ -88,7 +102,7 @@ function createConfigSpy ({ onResult }) {
       // get environment
       const environments = packageToEnvironments[packageName]
       if (environments) {
-        const bestEnvironment = environments.sort()[environments.length-1]
+        const bestEnvironment = environments.sort()[environments.length - 1]
         const isDefault = bestEnvironment === defaultEnvironment
         environment = isDefault ? undefined : environmentTypeStrings[bestEnvironment]
       }
@@ -99,13 +113,6 @@ function createConfigSpy ({ onResult }) {
     })
 
     return jsonStringify(config, { space: 2 })
-  }
-
-  function onBuildEnd () {
-    // generate the final config
-    const config = generateConfig()
-    // report result
-    onResult(config)
   }
 }
 
