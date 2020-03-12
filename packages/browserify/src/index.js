@@ -72,7 +72,7 @@ function getConfigurationFromPluginOpts (pluginOpts) {
     getConfig: undefined,
     configPath: getConfigPath(pluginOpts),
     includePrelude: pluginOpts.includePrelude,
-    pruneConfig: pluginOpts.pruneConfig,
+    pruneConfig: pluginOpts.pruneConfig
   }
 
   const defaultOverrideConfig = '/lavamoat-config-override.json'
