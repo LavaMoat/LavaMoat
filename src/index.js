@@ -62,6 +62,7 @@ function getConfigurationFromPluginOpts (pluginOpts) {
     'configOverride',
     'includePrelude',
     'pruneConfig',
+    'debugMode',
     '_' // Browserify adds this as the first option when running from the command line
   ])
   const invalidKeys = Reflect.ownKeys(pluginOpts).filter(key => !allowedKeys.has(key))
@@ -73,6 +74,7 @@ function getConfigurationFromPluginOpts (pluginOpts) {
     configPath: getConfigPath(pluginOpts),
     includePrelude: pluginOpts.includePrelude,
     pruneConfig: pluginOpts.pruneConfig,
+    debugMode: pluginOpts.debugMode
   }
 
   const defaultOverrideConfig = '/lavamoat-config-override.json'
