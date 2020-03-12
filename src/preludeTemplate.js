@@ -1,5 +1,5 @@
 // LavaMoat Prelude
-;(function() {
+(function() {
 
   const LavamoatDebugMode = __lavamoatDebugMode__
 
@@ -19,6 +19,23 @@
 
   const realm = SES.makeSESRootRealm(sesOptions)
 
+  // identify the globalRef
+  const globalRef = (typeof self !== 'undefined') ? self : global
+
+  // create SES-wrapped internalRequire
+  const makeKernel = realm.evaluate(`(${unsafeMakeKernel})`, { console })
+  const { loadBundle } = makeKernel({
+    realm,
+    unsafeEvalWithEndowments,
+    globalRef,
+  })
+
+  // create a lavamoat pulic API for loading modules over multiple files
+  const lavamoatPublicApi = Object.freeze({
+    loadBundle: Object.freeze(loadBundle),
+  })
+  globalRef.LavaMoat = lavamoatPublicApi
+
   return loadBundle
 
 
@@ -29,28 +46,9 @@
     }
   }
 
-  // this function is returned from the top level closure
-  // it is called by the modules collection that will be appended to this file
-  function loadBundle (modules, _, entryPoints) {
-    const globalRef = (typeof self !== 'undefined') ? self : global
-    // create SES-wrapped internalRequire
-    const makeInternalRequire = realm.evaluate(`(${unsafeMakeInternalRequire})`, { console })
-    const internalRequire = makeInternalRequire({
-      modules,
-      realm,
-      unsafeEvalWithEndowments,
-      globalRef,
-    })
-    // run each of entryPoints (ignores any exports of entryPoints)
-    for (let entryId of entryPoints) {
-      internalRequire(entryId)
-    }
-  }
-
   // this is serialized and run in SES
-  // mostly just exists to expose variables to internalRequire
-  function unsafeMakeInternalRequire ({
-    modules,
+  // mostly just exists to expose variables to internalRequire and loadBundle
+  function unsafeMakeKernel ({
     realm,
     unsafeEvalWithEndowments,
     globalRef,
@@ -61,31 +59,56 @@
     const { Membrane } = templateRequire('cytoplasm')
     const createReadOnlyDistortion = templateRequire('cytoplasm/distortions/readOnly')
 
-    const lavamoatConfig = (function(){
-  // START of injected code from lavamoatConfig
-  __lavamoatConfig__
-  // END of injected code from lavamoatConfig
-    })()
+    // manifest
+    const lavamoatConfig = { resources: {} }
 
-    // convert all module source to string
-    // this could happen at build time,
-    // but shipping it as code makes it easier to debug, maybe
-    for (let moduleData of Object.values(modules)) {
-      let moduleSource = `(${moduleData.source})`
-      if (moduleData.file) {
-        const moduleSourceLabel = `// moduleSource: ${moduleData.file}`
-        moduleSource += `\n\n${moduleSourceLabel}`
-      }
-      moduleData.sourceString = moduleSource
-    }
-
+    const modules = {}
     const moduleCache = new Map()
     const globalStore = new Map()
     const membraneSpaceForPackage = new Map()
     const membrane = new Membrane()
 
-    return internalRequire
+    return {
+      loadBundle,
+      internalRequire,
+    }
 
+    // it is called by the modules collection that will be appended to this file
+    function loadBundle (newModules, entryPoints, newConfig) {
+      // verify + load config
+      Object.entries(newConfig.resources || {}).forEach(([packageName, packageConfig]) => {
+        if (packageName in lavamoatConfig) {
+          throw new Error(`LavaMoat - loadBundle encountered redundant config definition for package "${packageName}"`)
+        }
+        lavamoatConfig.resources[packageName] = packageConfig
+      })
+      // verify + load in each module
+      for (const [moduleId, moduleData] of Object.entries(newModules)) {
+        // verify that module is new
+        if (moduleId in modules) {
+          throw new Error(`LavaMoat - loadBundle encountered redundant module definition for id "${moduleId}"`)
+        }
+        // convert all module source to string
+        // this could happen at build time,
+        // but shipping it as code makes it easier to debug, maybe
+        for (let moduleData of Object.values(newModules)) {
+          let moduleSource = `(${moduleData.source})`
+          if (moduleData.file) {
+            const moduleSourceLabel = `// moduleSource: ${moduleData.file}`
+            moduleSource += `\n\n${moduleSourceLabel}`
+          }
+          moduleData.sourceString = moduleSource
+        }
+        // add the module
+        modules[moduleId] = moduleData
+      }
+      // run each of entryPoints
+      const entryExports = Array.prototype.map.call(entryPoints, (entryId) => {
+        return internalRequire(entryId)
+      })
+      // webpack compat: return the first module's exports
+      return entryExports[0]
+    }
 
     // this function instantiaties a module from a moduleId.
     // 1. loads the config for the module
@@ -113,7 +136,7 @@
       const isEntryModule = moduleData.package === '<root>'
 
       // create the initial moduleObj
-      let moduleObj = { exports: {} }
+      const moduleObj = { exports: {} }
       // cache moduleObj here
       moduleCache.set(moduleId, moduleObj)
       // this is important for multi-module circles in the dep graph
@@ -134,7 +157,7 @@
       const environment = configForModule.environment || (isEntryModule ? 'unfrozen' : 'frozen')
       const runInSes = environment !== 'unfrozen'
 
-      let moduleInitializer = {}
+      let moduleInitializer
       // determine if its a SES-wrapped or naked module initialization
       if (runInSes) {
         // set the module initializer as the SES-wrapped version
@@ -156,7 +179,7 @@
         moduleInitializer = unsafeEvalWithEndowments(`${moduleSource}`, endowments)
       }
       if (typeof moduleInitializer !== 'function') {
-        throw new Error('LavaMoat - moduleInitializer is not defined correctly')
+        throw new Error(`LavaMoat - moduleInitializer is not defined correctly. got "${typeof moduleInitializer}" ses:${runInSes}\n${moduleSource}`)
       }
 
       // browserify goop:
@@ -254,7 +277,9 @@
       // disallow requiring packages that are not in the parent's whitelist
       const isSamePackage = packageName === parentModulePackageName
       const isInParentWhitelist = packageName in parentPackagesWhitelist
-      if (!isSamePackage && !isInParentWhitelist) {
+      const parentIsEntryModule = parentModulePackageName === '<root>'
+
+      if (!parentIsEntryModule && !isSamePackage && !isInParentWhitelist) {
         throw new Error(`LavaMoat - required package not in whitelist: package "${parentModulePackageName}" requested "${packageName}" as "${requestedName}"`)
       }
 
@@ -294,12 +319,19 @@
     function deepWalk (value, visitor) {
       // the value itself
       visitor(value)
+      // lookup children
+      let proto, props = []
+      try {
+        proto = Object.getPrototypeOf(value)
+        props = Object.values(Object.getOwnPropertyDescriptors(value))
+      } catch (_) {
+        // ignore error if we can't get proto/props (value is undefined, null, etc)
+      }
       // the own properties
-      Object.values(Object.getOwnPropertyDescriptors(value)).map(entry => {
+      props.map(entry => {
         if ('value' in entry) visitor(entry.value)
       })
       // the prototype
-      const proto = Object.getPrototypeOf(value)
       if (proto) visitor(proto)
     }
 

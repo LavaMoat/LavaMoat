@@ -10,7 +10,7 @@ test("transforms - Ses transforms work", async (t) => {
     }
     function defineTwo() {
         const comment = '-->'
-        const importString = 'import()'
+        const importString = 'import x from "y"'
         module.exports = {comment, importString}
     }
 

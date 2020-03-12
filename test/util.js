@@ -4,8 +4,10 @@ const clone = require('clone')
 const through2 = require('through2').obj
 const mergeDeep = require('merge-deep')
 const watchify = require('watchify')
-
-const sesifyPlugin = require('../src/index')
+const through = require('through2').obj
+const pump = require('pump')
+const lavamoatPlugin = require('../src/index')
+const noop = () => {}
 
 
 module.exports = {
@@ -19,13 +21,16 @@ module.exports = {
   testEntryAttackerVictim,
   runSimpleOneTwo,
   runSimpleOneTwoSamePackage,
+  createBrowserifyFromRequiresArray,
+  createSpy,
+  getStreamResults,
 }
 
 async function createBundleFromEntry (path, pluginOpts = {}) {
   pluginOpts.config = pluginOpts.config || {}
-  const bundler = browserify([], sesifyPlugin.args)
+  const bundler = browserify([], lavamoatPlugin.args)
   bundler.add(path)
-  bundler.plugin(sesifyPlugin, pluginOpts)
+  bundler.plugin(lavamoatPlugin, pluginOpts)
   return bundleAsync(bundler)
 }
 
@@ -41,16 +46,16 @@ async function createBundleFromRequiresArray (files, pluginOpts) {
 
 function createBrowserifyFromRequiresArray ({ files, pluginOpts = {} }) {
   // empty bundle but inject modules at bundle time
-  const bifyOpts = Object.assign({}, sesifyPlugin.args)
+  const bifyOpts = Object.assign({}, lavamoatPlugin.args)
   const bundler = browserify([], bifyOpts)
-  bundler.plugin(sesifyPlugin, pluginOpts)
+  bundler.plugin(lavamoatPlugin, pluginOpts)
 
   // override browserify's module resolution
   const mdeps = bundler.pipeline.get('deps').get(0)
   mdeps.resolve = (id, parent, cb) => {
     const parentModule = files.find(f => f.id === parent.id)
     const moduleId = parentModule ? parentModule.deps[id] : id
-    const moduleData = files.find(f => f.id === moduleId)
+    const moduleData = files.find(f => f.id === moduleId || f.file === moduleId)
     if (!moduleData) {
       throw new Error(`could not find "${moduleId}" in files:\n${files.map(f => f.id).join('\n')}`)
     }
@@ -69,7 +74,8 @@ function createBrowserifyFromRequiresArray ({ files, pluginOpts = {} }) {
     })
     cb()
   })
-  bundler.pipeline.splice('record', 0, fileInjectionStream)
+
+  bundler.pipeline.get('record').unshift(fileInjectionStream)
 
   return bundler
 }
@@ -106,8 +112,8 @@ async function createWatchifyBundle (pluginOpts) {
     cache: {},
     packageCache: {},
     plugin: [
-      [sesifyPlugin, pluginOpts],
-      //poll option is needed to ensure the 'update' event is properly fired after the config override file changes. Without it, the firing behavior is unpredictable due to filesystem watch not always detecting the change. 
+      [lavamoatPlugin, pluginOpts],
+      //poll option is needed to ensure the 'update' event is properly fired after the config override file changes. Without it, the firing behavior is unpredictable due to filesystem watch not always detecting the change.
       [watchify, {poll: true}]
     ]
   })
@@ -279,4 +285,24 @@ async function runSimpleOneTwoSamePackage({ defineOne, defineTwo, config = {} })
   eval(result)
 
   return global.testResult
+}
+
+function createSpy ({ onEach = noop, onEnd = noop }) {
+  return through(
+    (entry, _, cb) => { onEach(entry); cb() },
+    (cb) => { onEnd(); cb() },
+  )
+}
+
+async function getStreamResults (stream) {
+  // get bundle results
+  const results = []
+  await pify(cb => {
+    pump(
+      stream,
+      createSpy({ onEach: (entry) => { results.push(entry) } }),
+      cb
+    )
+  })()
+  return results
 }
