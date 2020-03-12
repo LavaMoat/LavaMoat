@@ -14,7 +14,7 @@
     "start": "(cd test/project1/ && serve dist)"
   },
   "dependencies": {
-    "lavamoat-browserify": "7.0.0",
+    "lavamoat-browserify": "git://github.com/LavaMoat/lavamoat-browserify.git#10eeb7e8ba59a2cc5666bfd32c6fc4e5c9adeba9",
     "merge-deep": "^3.0.2",
     "mkdirp": "^1.0.3",
     "webpack-sources": "^1.4.3"
