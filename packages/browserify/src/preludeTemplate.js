@@ -310,12 +310,19 @@
     function deepWalk (value, visitor) {
       // the value itself
       visitor(value)
+      // lookup children
+      let proto, props = []
+      try {
+        proto = Object.getPrototypeOf(value)
+        props = Object.values(Object.getOwnPropertyDescriptors(value))
+      } catch (_) {
+        // ignore error if we can't get proto/props (value is undefined, null, etc)
+      }
       // the own properties
-      Object.values(Object.getOwnPropertyDescriptors(value)).map(entry => {
+      props.map(entry => {
         if ('value' in entry) visitor(entry.value)
       })
       // the prototype
-      const proto = Object.getPrototypeOf(value)
       if (proto) visitor(proto)
     }
 

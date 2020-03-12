@@ -22,6 +22,18 @@ test('exportsDefense - readOnly restrictions have override workaround fix', asyn
   t.equal(Object.getPrototypeOf(one).xyz, 1, 'should not update the prototype')
 })
 
+test('exportsDefense - doesnt explode on null/undefined exports', async (t) => {
+  function defineOne () {
+    module.exports = null
+  }
+  function defineTwo () {
+    module.exports = undefined
+  }
+  const one = await runSimpleOneTwo({ defineOne, defineTwo })
+
+  t.equal(one, null, 'should get the correct module.exports value')
+})
+
 test('exportsDefense - indirectly imported package should be readOnly', async (t) => {
   function defineOne () {
     const Thing = require('two')
