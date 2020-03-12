@@ -1,7 +1,6 @@
 "use strict"
 
 const test = require('tape-promise').default(require('tape'))
-const clone = require('clone')
 const {
   runSimpleOneTwo,
   runSimpleOneTwoSamePackage,

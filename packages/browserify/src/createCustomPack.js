@@ -140,12 +140,12 @@ module.exports = function ({
     entries = entries.filter(function (x) { return x !== undefined })
 
     // filter the config removing packages that arent included
-    let minimalConfig = {}
+    let minimalConfig = { resources: {} }
     if (pruneConfig) {
-      Object.entries(config)
-      .filter(([packageName]) => packages.includes(packageName))
+      Object.entries(config.resources || {})
+      .filter(([packageName]) => packages.has(packageName))
       .forEach(([packageName, packageConfig]) => {
-        minimalConfig[packageName] = packageConfig
+        minimalConfig.resources[packageName] = packageConfig
       })
     } else {
       minimalConfig = config
