@@ -203,18 +203,12 @@
       })
 
       // initialize the module with the correct context
-      try {
-        moduleInitializer.call(moduleObj.exports, requireRelativeWithContext, moduleObj, moduleObj.exports, null, directModuleInstantiationInterface)
-      } catch (err) {
-        console.warn(`LavaMoat - Error instantiating module "${moduleId}" from package "${packageName}"`)
-        throw err
-      }
-
-      const moduleExports = moduleObj.exports
+      moduleInitializer.call(moduleObj.exports, requireRelativeWithContext, moduleObj, moduleObj.exports, null, directModuleInstantiationInterface)
 
       // configure membrane defense
       // defense is configured here but applied elsewhere
       // set moduleExports graph to read-only
+      const moduleExports = moduleObj.exports
       deepWalk(moduleExports, (value) => {
         // skip plain values
         if (membrane.shouldSkipBridge(value)) return
