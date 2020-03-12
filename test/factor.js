@@ -1,7 +1,10 @@
 const test = require('tape-promise').default(require('tape'))
 const createCustomPack = require('../src/createCustomPack')
-
-const { createBrowserifyFromRequiresArray, getStreamResults } = require('./util')
+const {
+  generateConfigFromFiles,
+  createBrowserifyFromRequiresArray,
+  getStreamResults,
+} = require('./util')
 
 test('package factor bundle', async (t) => {
   const files = [{
@@ -10,7 +13,7 @@ test('package factor bundle', async (t) => {
       packageName: 'b',
       file: './node_modules/b/index.js',
       deps: {},
-      source: `module.exports = 3`,
+      source: `module.exports = global.three`,
     }, {
       id: '12',
       packageName: '<root>',
@@ -36,7 +39,7 @@ test('package factor bundle', async (t) => {
       packageName: 'a',
       file: './node_modules/a/index.js',
       deps: {},
-      source: `module.exports = 2`,
+      source: `module.exports = global.two`,
     }, {
     // src/2.js
       id: 'entry2',
@@ -56,18 +59,23 @@ test('package factor bundle', async (t) => {
       packageName: 'c',
       file: './node_modules/c/index.js',
       deps: {},
-      source: `module.exports = 4`,
+      source: `module.exports = global.four`,
     }]
 
-  const bundler = createBrowserifyFromRequiresArray({ files })
+  const config = await generateConfigFromFiles({ files })
+
+  const bundler = createBrowserifyFromRequiresArray({ files, pluginOpts: { config, pruneConfig: true } })
     .plugin('bify-package-factor', { createPacker })
-    // .plugin('../bify-package-factor/src/index.js', { createPacker })
 
   function createPacker () {
     return createCustomPack({
       raw: true,
-      config: {},
+      // omit prelude (still included in common bundle)
       includePrelude: false,
+      // provide full bundle config
+      config,
+      // tell packer to automatically prune config
+      pruneConfig: true,
     })
   }
 
@@ -88,6 +96,10 @@ test('package factor bundle', async (t) => {
     const content = contentBuffers.map(buffer => buffer.toString('utf8')).join('')
     bundles[relative] = content
   }))
+
+  global.two = 2
+  global.three = 3
+  global.four = 4
 
   delete global.testResult
   eval(bundles['common.js'])
