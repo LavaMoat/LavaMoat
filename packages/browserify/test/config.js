@@ -217,10 +217,10 @@ test('Config - Applies config override', async (t) => {
 })
 
 test('Config override is applied if not specified and already exists at default path', async (t) => {
-  const tmpObj = tmp.dirSync();
-  const defaults = {
-    cwd: tmpObj.name,
-  };
+
+  const config = {
+    resources: {}
+  }
 
   const configOverride = {
     resources: {
@@ -242,14 +242,18 @@ test('Config override is applied if not specified and already exists at default 
     }
   }
 
+  const tmpObj = tmp.dirSync()
+  const configDir = path.join(tmpObj.name, './lavamoat')
+  mkdirp.sync(configDir)
+
+  const configPath = path.join(tmpObj.name, './lavamoat/lavamoat-config.json')
+  fs.writeFileSync(configPath, JSON.stringify(config))
   const configOverridePath = path.join(tmpObj.name, './lavamoat/lavamoat-config-override.json')
-  const configOverrideDir = path.dirname(configOverridePath)
-  mkdirp.sync(configOverrideDir)
   fs.writeFileSync(configOverridePath, JSON.stringify(configOverride))
 
   const scriptPath = require.resolve('./fixtures/runBrowserifyNoOpts')
 
-  const buildProcess = execSync(`node ${scriptPath}`, defaults)
+  const buildProcess = execSync(`node ${scriptPath}`, { cwd: tmpObj.name })
   const outputString = buildProcess.toString()
 
   t.assert(outputString.includes('"three":12345678'), "Applies override if exists but not specified")
