@@ -34,6 +34,7 @@ module.exports = function ({
   raw = false,
   standalone = false,
   standaloneModule = false,
+  // since we always define a global loadModule fn, we ignore this legacy bify option
   hasExports = false,
   basedir = process.cwd(),
   // include prelude in bundle
@@ -83,12 +84,9 @@ module.exports = function ({
 
 
   function onModule (moduleData, _, next) {
-    if (first && standalone) {
+      if (first && standalone) {
       const pre = umd.prelude(standalone).trim()
       stream.push(Buffer.from(pre + 'return ', 'utf8'))
-    } else if (first && hasExports) {
-      const pre = externalRequireName || 'require'
-      stream.push(Buffer.from(pre + '=', 'utf8'))
     }
 
     // start of modules

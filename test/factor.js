@@ -67,9 +67,9 @@ test('package factor bundle', async (t) => {
   const bundler = createBrowserifyFromRequiresArray({ files, pluginOpts: { config, pruneConfig: true } })
     .plugin('bify-package-factor', { createPacker })
 
-  function createPacker () {
+  function createPacker (opts) {
     return createCustomPack({
-      raw: true,
+      ...opts,
       // omit prelude (still included in common bundle)
       includePrelude: false,
       // provide full bundle config
