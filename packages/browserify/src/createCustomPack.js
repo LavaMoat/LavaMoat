@@ -29,7 +29,7 @@ function newlinesIn (src) {
 
 module.exports = function ({
   // hook for applying sourcemaps
-  onSourcemap = (row => row.sourceFile),
+  onSourcemap = row => row.sourceFile,
   // input is (true:) objects (false:) json strings
   raw = false,
   standalone = false,
@@ -49,9 +49,8 @@ module.exports = function ({
   pruneConfig = false,
   externalRequireName,
   sourceRoot,
-  sourceMapPrefix,
+  sourceMapPrefix
 } = {}) {
-
   // stream/parser wrapping incase raw: false
   const parser = raw ? through.obj() : JSONStream.parse([true])
   const stream = through.obj(
@@ -79,9 +78,7 @@ module.exports = function ({
   // this is likely because the pipeline is still being setup
   parser.pipe(through.obj(onModule, onDone))
 
-
   return stream
-
 
   function onModule (moduleData, _, next) {
       if (first && standalone) {
@@ -141,10 +138,10 @@ module.exports = function ({
     let minimalConfig = { resources: {} }
     if (pruneConfig) {
       Object.entries(config.resources || {})
-      .filter(([packageName]) => packages.has(packageName))
-      .forEach(([packageName, packageConfig]) => {
-        minimalConfig.resources[packageName] = packageConfig
-      })
+        .filter(([packageName]) => packages.has(packageName))
+        .forEach(([packageName, packageConfig]) => {
+          minimalConfig.resources[packageName] = packageConfig
+        })
     } else {
       minimalConfig = config
     }
