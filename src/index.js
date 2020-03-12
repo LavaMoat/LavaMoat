@@ -89,7 +89,7 @@ function getConfigurationFromPluginOpts (pluginOpts) {
   if (typeof pluginOpts.config === 'function') {
     configuration.getConfig = pluginOpts.config
   } else {
-    const tolerateMissingConfig = ('writeAutoConfig' in pluginOpts)
+    const tolerateMissingConfig = pluginOpts.writeAutoConfig
     configuration.getConfig = () => {
       let configSource
       let primaryConfig
@@ -142,9 +142,6 @@ function getConfigurationFromPluginOpts (pluginOpts) {
           const configOverrideSource = fs.readFileSync(resolvedPath, 'utf-8')
           const configOverride = JSON.parse(configOverrideSource)
           const mergedConfig = mergeDeep(primaryConfig, configOverride)
-          // Overwrite source config file
-          const configPath = configuration.configPath
-          fs.writeFileSync(configPath, JSON.stringify(mergedConfig, null, 2))
           return mergedConfig
         }
         return primaryConfig
