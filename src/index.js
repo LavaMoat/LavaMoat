@@ -8,11 +8,8 @@ const { createConfigSpy } = require('./generateConfig')
 const { createPackageDataStream } = require('./packageData')
 const { makeStringTransform } = require('browserify-transform-tools')
 
-/*  export a Browserify plugin  */
-module.exports = plugin
-
 // these are the reccomended arguments for lavaMoat to work well with browserify
-module.exports.args = {
+const reccomendedArgs = {
   // this option helps with parsing global usage
   insertGlobalVars: {
     global: false
@@ -23,6 +20,13 @@ module.exports.args = {
   // this also breaks bify-package-factor and related tools
   dedupe: false
 }
+
+// primary export is the Browserify plugin
+module.exports = plugin
+module.exports.generatePrelude = generatePrelude
+module.exports.createLavamoatPacker = createLavamoatPacker
+module.exports.loadConfig = loadConfig
+module.exports.args = reccomendedArgs
 
 function plugin (browserify, pluginOpts) {
   // pluginOpts.config is config path
@@ -52,8 +56,10 @@ function plugin (browserify, pluginOpts) {
   }
 }
 
-module.exports.generatePrelude = generatePrelude
-module.exports.createLavamoatPacker = createLavamoatPacker
+function loadConfig (pluginOpts) {
+  const configuration = getConfigurationFromPluginOpts(pluginOpts)
+  return configuration.getConfig()
+}
 
 function getConfigurationFromPluginOpts (pluginOpts) {
   const allowedKeys = new Set([
