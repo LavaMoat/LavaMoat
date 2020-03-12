@@ -56,7 +56,7 @@ function plugin (browserify, pluginOpts) {
   }
 }
 
-function loadConfig (pluginOpts) {
+function loadConfig (pluginOpts = {}) {
   const configuration = getConfigurationFromPluginOpts(pluginOpts)
   return configuration.getConfig()
 }
@@ -94,13 +94,13 @@ function getConfigurationFromPluginOpts (pluginOpts) {
       let configSource
       let primaryConfig
 
-      if (typeof pluginOpts.config === 'string') {
+      if (pluginOpts.config === undefined || typeof pluginOpts.config === 'string') {
         const configPath = path.resolve(configuration.configPath)
-        const isMissing = !fs.existsSync(configPath)
+        const configExists = fs.existsSync(configPath)
         if (!configuration.configPath) {
           throw new Error('LavaMoat - No configuration path')
         }
-        if (isMissing) {
+        if (!configExists) {
           if (tolerateMissingConfig) {
             return {}
           }
@@ -110,9 +110,6 @@ function getConfigurationFromPluginOpts (pluginOpts) {
         primaryConfig = JSON.parse(configSource)
       } else if (typeof pluginOpts.config === 'object') {
         primaryConfig = pluginOpts.config
-      } else if (pluginOpts.config === undefined) {
-        // set primaryConfig as an empty config
-        primaryConfig = { resources: {} }
       }
       // if override specified, merge
       if (pluginOpts.configOverride) {
@@ -166,6 +163,7 @@ function getConfigurationFromPluginOpts (pluginOpts) {
       const overrideConfigPath = configDirectory + defaultOverrideConfig
       // Write config to file
       fs.writeFileSync(configPath, configString)
+      console.warn(`LavaMoat Config - wrote to "${configPath}"`)
       // Write default override config to file if it doesn't already exist
       if (!fs.existsSync(overrideConfigPath)) {
         const basicConfig = {
@@ -179,7 +177,6 @@ function getConfigurationFromPluginOpts (pluginOpts) {
         fs.writeFileSync(overrideConfigPath, JSON.stringify(basicConfig, null, 2))
         console.warn(`LavaMoat Override Config - wrote to "${overrideConfigPath}"`)
       }
-      console.warn(`LavaMoat Config - wrote to "${configPath}"`)
     }
   } else if (typeof pluginOpts.writeAutoConfig === 'function') {
     // to be called with configuration object
@@ -193,14 +190,14 @@ function getConfigurationFromPluginOpts (pluginOpts) {
 }
 
 function getConfigPath (pluginOpts) {
-  const defaultConfig = './lavamoat/lavamoat-config.json'
+  const defaultPath = './lavamoat/lavamoat-config.json'
   if (!pluginOpts.config) {
-    return defaultConfig
+    return defaultPath
   }
   if (typeof pluginOpts.config === 'string') {
     return pluginOpts.config
   }
-  return defaultConfig
+  return defaultPath
 }
 
 function createLavamoatPacker (configuration = {}) {
