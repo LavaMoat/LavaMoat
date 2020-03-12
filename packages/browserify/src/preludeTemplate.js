@@ -1,14 +1,23 @@
 // LavaMoat Prelude
 (function() {
 
+  const LavamoatDebugMode = __lavamoatDebugMode__
+
   // define SES
   // "templateRequire" calls are inlined in "generatePrelude"
   const SES = templateRequire('ses')
 
-  const realm = SES.makeSESRootRealm({
+  const sesOptions = {
+    // this is introduces non-determinism, but is otherwise safe
     mathRandomMode: 'allow',
-    errorStackMode: 'allow',
-  })
+  }
+
+  // only reveal error stacks in debug mode
+  if (LavamoatDebugMode === true) {
+    sesOptions.errorStackMode = 'allow'
+  }
+
+  const realm = SES.makeSESRootRealm(sesOptions)
 
   // identify the globalRef
   const globalRef = (typeof self !== 'undefined') ? self : global

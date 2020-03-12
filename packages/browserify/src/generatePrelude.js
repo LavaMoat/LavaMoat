@@ -14,8 +14,12 @@ const makePrepareRealmGlobalFromConfigSrc = fs.readFileSync(path.join(__dirname,
 module.exports = generatePrelude
 
 // takes the preludeTemplate and populates it with the config + libraries
-function generatePrelude () {
+function generatePrelude (opts = {}) {
+  const debugMode = Boolean(opts.debugMode)
+
   let output = preludeTemplate
+  output = output.replace('__lavamoatDebugMode__', debugMode ? 'true' : 'false')
+
   replaceTemplateRequire('ses', sesSrc)
   replaceTemplateRequire('cytoplasm', fs.readFileSync(require.resolve('cytoplasm'), 'utf8'))
   replaceTemplateRequire('cytoplasm/distortions/readOnly', fs.readFileSync(require.resolve('cytoplasm/src/distortions/readOnly'), 'utf8'))
