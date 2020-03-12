@@ -78,7 +78,8 @@ function getConfigurationFromPluginOpts (pluginOpts) {
     writeAutoConfig: undefined,
     getConfig: undefined,
     configPath: getConfigPath(pluginOpts),
-    includePrelude: pluginOpts.includePrelude,
+    // default true
+    includePrelude: 'includePrelude' in pluginOpts ? pluginOpts.includePrelude : true,
     pruneConfig: pluginOpts.pruneConfig,
     debugMode: pluginOpts.debugMode
   }
@@ -205,11 +206,12 @@ function getConfigPath (pluginOpts) {
   return defaultConfig
 }
 
-function createLavamoatPacker (configuration) {
+function createLavamoatPacker (configuration = {}) {
+  const { config, getConfig, includePrelude } = configuration
   const defaults = {
     raw: true,
-    config: configuration.getConfig(),
-    prelude: generatePrelude(configuration)
+    config: config || (getConfig && getConfig()),
+    prelude: includePrelude && generatePrelude(configuration)
   }
 
   const packOpts = Object.assign({}, defaults, configuration)
