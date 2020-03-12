@@ -81,7 +81,7 @@ module.exports = function ({
   return stream
 
   function onModule (moduleData, _, next) {
-      if (first && standalone) {
+    if (first && standalone) {
       const pre = umd.prelude(standalone).trim()
       stream.push(Buffer.from(pre + 'return ', 'utf8'))
     }
