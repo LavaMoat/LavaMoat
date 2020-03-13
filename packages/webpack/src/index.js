@@ -17,8 +17,8 @@ class LavaMoat {
   }
 
   apply(compiler) {
-    if (compiler.options.optimization.concatenateModules) {
-      throw new Error('LavaMoat - webpack optimizations.concatenateModules must be set to false')
+    if (!compiler.options.optimization || compiler.options.optimization.concatenateModules !== false) {
+      throw new Error('LavaMoat - Webpack config: optimization.concatenateModules must be set to false')
     }
     compiler.hooks.compilation.tap(
       this.constructor.name,
@@ -42,6 +42,8 @@ class LavaMoat {
         moduleTemplate,
         dependencyTemplates
       )
+
+      console.log(modules)
 
       // webpack moduleId -> moduleData
       const modulesMetadata = {}
@@ -272,7 +274,7 @@ module.exports = LavaMoat;
 // this source is injected into the build
 function moduleShapeAdapter(modules) {
   const moduleData = __module_data__
-
+  console.log(modules)
   modules.forEach((moduleFn, moduleId) => {
     // wrap the sourceFn as provided by webpack to match the lavamoat-browserify kernel (temporary)
     // bify: scopedRequire, module, module.exports, null, modulesProxy
