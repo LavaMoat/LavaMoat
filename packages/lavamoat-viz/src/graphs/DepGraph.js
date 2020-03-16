@@ -1,4 +1,5 @@
 // fix for silencing aframe errors
+import './DepGraph.css'
 
 const { ForceGraph2D } = require('react-force-graph')
 
@@ -78,10 +79,8 @@ class DepGraph extends React.Component {
     let globalUsagePackages = []
     let packageListComponent
     if (mode === 'packages') {
-      globalUsagePackages = data.nodes
-      .filter(node => JSON.parse(node.configLabel).hasOwnProperty('globals'))
-      .map(node => node.label)
-      
+      globalUsagePackages = data.nodes.filter(node => JSON.parse(node.configLabel).hasOwnProperty('globals'))
+
       packageListComponent = 
       <pre style={{
         position: 'absolute',
@@ -94,7 +93,13 @@ class DepGraph extends React.Component {
       }}>
         {"Packages containing globals\n\n"}
         <ol>
-          {globalUsagePackages.map(module => <li key={globalUsagePackages.indexOf(module)}>{module}</li>)}
+          {globalUsagePackages.map(node => 
+            <li 
+              className='package'
+              key={globalUsagePackages.indexOf(node)}
+              onClick={() => actions.selectNode(node)}>
+              {node.label}
+            </li>)}
         </ol>
       </pre>
     }
