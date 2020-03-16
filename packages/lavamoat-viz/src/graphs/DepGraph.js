@@ -1,10 +1,11 @@
 // fix for silencing aframe errors
-navigator.xr.requestDevice = () => { return new Promise(() => { }) }
+
 const { ForceGraph2D } = require('react-force-graph')
 
 const React = require('react')
 const exampleConfig = require('../example-config.json')
 const d3 = require('d3')
+const moduleNameFromPath = require('module-name-from-path')
 
 // const configData = require('../data/config.json')
 const configData = self.CONFIG || exampleConfig
@@ -72,19 +73,47 @@ class DepGraph extends React.Component {
     }
 
     const { data, selectedNode } = this.state
+    const { mode } = this.props
     const selectedNodeLabel = selectedNode ? `${selectedNode.label}\n${selectedNode.configLabel}` : 'select a node'
-
-    return (
-    <div>
+    let globalUsagePackages = []
+    let packageListComponent
+    if (mode === 'packages') {
+      globalUsagePackages = data.nodes
+      .filter(node => JSON.parse(node.configLabel).hasOwnProperty('globals'))
+      .map(node => node.label)
+      
+      packageListComponent = 
       <pre style={{
         position: 'absolute',
+        left: '0px',
+        overflow: 'scroll',
         background: 'rgba(232, 232, 232, 0.78)',
         padding: '12px',
         // draw on top of graph
         zIndex: 1,
       }}>
-        {selectedNodeLabel}
+        {"Packages containing globals\n\n"}
+        <ol>
+          {globalUsagePackages.map(module => <li key={globalUsagePackages.indexOf(module)}>{module}</li>)}
+        </ol>
       </pre>
+    }
+
+    return (
+    <div>
+      <div>
+        {packageListComponent}
+        <pre style={{
+          position: 'absolute',
+          right: 0,
+          background: 'rgba(232, 232, 232, 0.78)',
+          padding: '12px',
+          // draw on top of graph
+          zIndex: 1,
+        }}>
+          {selectedNodeLabel}
+        </pre>
+      </div>
       <ForceGraph2D
         ref={el => this.forceGraph = el}
         graphData={data}

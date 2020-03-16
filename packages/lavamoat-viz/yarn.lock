@@ -4366,6 +4366,11 @@ mkdirp@^0.5.0, mkdirp@^0.5.1, mkdirp@~0.5.0:
   dependencies:
     minimist "0.0.8"
 
+module-name-from-path@^1.0.4:
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/module-name-from-path/-/module-name-from-path-1.0.4.tgz#b42f022efadf0c3f938c2425e17d74d92a3e01f6"
+  integrity sha1-tC8CLvrfDD+TjCQl4X102So+AfY=
+
 move-concurrently@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/move-concurrently/-/move-concurrently-1.0.1.tgz#be2c005fda32e0b29af1f05d7c4b33214c701f92"
