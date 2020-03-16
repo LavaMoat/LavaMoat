@@ -6,7 +6,7 @@ const generatePrelude = require('./generatePrelude')
 const createCustomPack = require('./createCustomPack')
 const { createConfigSpy } = require('./generateConfig')
 const { createPackageDataStream } = require('./packageData')
-const { makeStringTransform } = require('browserify-transform-tools')
+const { createSesWorkaroundsTransform } = require('./sesTransforms')
 
 // these are the reccomended arguments for lavaMoat to work well with browserify
 const reccomendedArgs = {
@@ -36,8 +36,8 @@ function plugin (browserify, pluginOpts) {
   setupPlugin()
 
   function setupPlugin () {
-    // some workarounds for SES strict parsing
-    applySesTransforms(browserify)
+    // some workarounds for SES strict parsing and evaluation
+    browserify.transform(createSesWorkaroundsTransform(), { global: true })
 
     // inject package name into module data
     browserify.pipeline.get('emit-deps').unshift(createPackageDataStream())
@@ -211,19 +211,6 @@ function createLavamoatPacker (configuration = {}) {
   const packOpts = Object.assign({}, defaults, configuration)
   const customPack = createCustomPack(packOpts)
   return customPack
-}
-
-function applySesTransforms (browserify) {
-  const fixSesProblemsTransform = makeStringTransform('remove-html-comment', { excludeExtension: ['.json'] }, (content, _, cb) => {
-    const result = content
-    // html comment
-      .split('-->').join('-- >')
-    // bluebird uses eval, sorta
-      .split(' eval(').join(' (eval)(')
-    cb(null, result)
-  })
-
-  browserify.transform(fixSesProblemsTransform, { global: true })
 }
 
 function validateConfig (configOverride) {
