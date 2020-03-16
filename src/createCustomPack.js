@@ -187,16 +187,25 @@ module.exports = function ({
   }
 
   function serializeModule (moduleData) {
-    const { package: packageName, source, deps } = moduleData
+    const { packageName, packageVersion, source, deps, file } = moduleData
     const wrappedBundle = wrapIntoModuleInitializer(source)
     const sourceMappingURL = onSourcemap(moduleData, wrappedBundle)
     // for now, ignore new sourcemap and just append original filename
     let moduleInitSrc = wrappedBundle.code
     if (sourceMappingURL) moduleInitSrc += `\n//# sourceMappingURL=${sourceMappingURL}`
     // serialize final module entry
-    const serializedDeps = jsonStringify(deps)
-    // TODO: re-add "file" for better debugging
-    const serializedEntry = `{ package: "${packageName}", deps: ${serializedDeps}, source: ${moduleInitSrc}\n}`
+    const jsonSerializeableData = {
+      package: packageName,
+      packageVersion,
+      file,
+      deps,
+    }
+    let serializedEntry = `{`
+    Object.entries(jsonSerializeableData).forEach(([key, value]) => {
+      serializedEntry += ` ${key}: ${jsonStringify(value)},`
+    })
+    serializedEntry += ` source: ${moduleInitSrc}\n}`
+
     return serializedEntry
   }
 }
