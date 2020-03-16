@@ -38,7 +38,7 @@
     "mkdirp": "^1.0.3",
     "pump": "^3.0.0",
     "rimraf": "^3.0.2",
-    "ses": "git+https://git@github.com/agoric/ses#ee242a5f50de27b75f9a130760ff95277ee0bb0b",
+    "ses": "git+https://git@github.com/agoric/ses#fdb393f817f6124c4d055bff26b68e4cbe17618e",
     "source-map": "^0.7.3",
     "standard": "14.3.1",
     "tape": "^4.9.1",
