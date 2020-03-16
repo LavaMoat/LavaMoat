@@ -26,7 +26,6 @@
     "resolve-package-path": "^1.2.7",
     "safe-buffer": "^5.1.2",
     "sesify-tofu": "^2.0.4",
-    "tape": "^4.9.1",
     "through2": "^3.0.0",
     "umd": "^3.0.3"
   },
@@ -42,6 +41,7 @@
     "ses": "git+https://git@github.com/agoric/ses#ee242a5f50de27b75f9a130760ff95277ee0bb0b",
     "source-map": "^0.7.3",
     "standard": "14.3.1",
+    "tape": "^4.9.1",
     "tape-promise": "^4.0.0",
     "tmp": "^0.1.0",
     "uglify-js": "^3.4.9",
