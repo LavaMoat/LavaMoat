@@ -19,7 +19,10 @@ class DepGraph extends React.Component {
     const graph = { nodes: [], links: [], container: { width: 0, height: 0 } }
 
     this.state = {
-      data: graph,
+      packageData: graph,
+      moduleData: null,
+      packageModulesMode: false,
+      packageModules: {}
     };
   }
 
@@ -35,26 +38,36 @@ class DepGraph extends React.Component {
   }
 
   componentWillReceiveProps (nextProps) {
-    // recalculate graph if `mode` or `bundleData` change
-    if (this.props.mode !== nextProps.mode
-      || this.props.bundleData !== nextProps.bundleData
+    // recalculate graph if `bundleData` changes
+    if (this.props.bundleData !== nextProps.bundleData
       || this.props.sesifyMode !== nextProps.sesifyMode) {
-      this.triggerGraphUpdate(nextProps)
+      this.triggerGraphUpdate(this.state, nextProps)
     }
   }
 
-  triggerGraphUpdate (newProps = this.props) {
-    const { state } = this
+  triggerGraphUpdate (state = this.state, newProps = this.props) {
     const { bundleData } = newProps
     this.updateGraph(bundleData, newProps, state)
   }
 
   updateGraph (bundleData, props, state) {
-    const newGraph = createGraphByMode(bundleData, props, state)
+    const {
+      packageData,
+      packageModules,
+      packageModulesMode
+    } = state
+
+    let newGraph
+    if (packageModulesMode) {
+      newGraph = createModuleGraph(packageModules, props, state)
+    } else {
+      newGraph = createPackageGraph(bundleData, props, state)
+    }
     // create a map for faster lookups by id
     const nodeLookup = new Map(newGraph.nodes.map(node => [node.id, node]))
     // copy simulation data from old graph
-    const oldGraph = this.state.data
+
+    const oldGraph = packageData
     oldGraph.nodes.forEach((oldNode) => {
       const newNode = nodeLookup.get(oldNode.id)
       if (!newNode) return
@@ -62,47 +75,96 @@ class DepGraph extends React.Component {
       Object.assign(newNode, { x, y, vx, vy })
     })
     // commit new graph
-    this.setState(() => ({ data: newGraph }))
+    if (packageModulesMode) {
+      this.setState(() => ({ moduleData: newGraph }))
+    } else {
+      this.setState(() => ({ packageData: newGraph }))
+    }
+  }
+
+  getModulesForPackage (node) {
+    const { bundleData } = this.props
+    const { label } = node
+    let packageModules = {}
+
+    Object.entries(bundleData).forEach(([moduleId, moduleData]) => {
+      if (getPackageVersionName(moduleData) === label) {
+        packageModules[moduleId] = moduleData
+      }
+    })
+    return packageModules
   }
 
   render () {
+    const { 
+      packageData,
+      moduleData,
+      selectedNode,
+      packageModulesMode,
+      packageModules
+    } = this.state
+
     const actions = {
       selectNode: (node) => {
-        this.setState(() => ({ selectedNode: node }))
-        this.triggerGraphUpdate()
-      }
+        const newState = { selectedNode: node }
+        this.setState(newState)
+        this.triggerGraphUpdate(Object.assign(this.state, newState))
+      },
+      togglePackageModules: (node) => {
+        if (packageModulesMode) {
+          this.setState({packageModulesMode: false})
+          return
+        }
+        const modules = this.getModulesForPackage(node)
+        const newState = {
+          packageModulesMode: true,
+          packageModules: modules
+        }
+        this.setState(newState)
+        this.triggerGraphUpdate(Object.assign(this.state, newState))
+      },
     }
 
-    const { data, selectedNode } = this.state
-    const { mode } = this.props
+    const data = packageModulesMode ? moduleData : packageData
     const selectedNodeLabel = selectedNode ? `${selectedNode.label}\n${selectedNode.configLabel}` : 'select a node'
     let globalUsagePackages = []
-    let packageListComponent
-    if (mode === 'packages') {
-      globalUsagePackages = data.nodes.filter(node => JSON.parse(node.configLabel).hasOwnProperty('globals'))
+    globalUsagePackages = packageData.nodes.filter(node => JSON.parse(node.configLabel).hasOwnProperty('globals'))
 
-      packageListComponent = 
-      <pre style={{
-        position: 'absolute',
-        left: '0px',
-        overflow: 'scroll',
-        background: 'rgba(232, 232, 232, 0.78)',
-        padding: '12px',
-        // draw on top of graph
-        zIndex: 1,
-      }}>
-        {"Packages containing globals\n\n"}
-        <ol>
-          {globalUsagePackages.map(node => 
-            <li 
-              className='package'
-              key={globalUsagePackages.indexOf(node)}
-              onClick={() => actions.selectNode(node)}>
-              {node.label}
-            </li>)}
-        </ol>
-      </pre>
-    }
+    const packageListComponent = 
+    <pre style={{
+      position: 'absolute',
+      left: '0px',
+      height: '100%',
+      overflowY: 'scroll',
+      background: 'rgba(232, 232, 232, 0.78)',
+      padding: '12px',
+      // draw on top of graph
+      zIndex: 1,
+    }}>
+      {"Packages containing globals\n\n"}
+      <ol>
+        {globalUsagePackages.map(node => 
+          <li 
+            className='package'
+            key={globalUsagePackages.indexOf(node)}
+            onMouseEnter={() => actions.selectNode(node)}
+            onClick={() => actions.togglePackageModules(node)}>
+            {node.label}
+            {packageModulesMode && getPackageVersionName(Object.values(packageModules)[0]) === node.label ?
+              <ol>
+                {Object.entries(packageModules).map(([id, value]) => 
+                <li
+                  className='package'
+                  key={id}>
+                    {fullModuleNameFromPath(value.file)}
+                </li>
+                )}
+              </ol> :
+              <ol/>
+            }
+          </li>)}
+      </ol>
+    </pre>
 
     return (
     <div>
@@ -119,19 +181,21 @@ class DepGraph extends React.Component {
           {selectedNodeLabel}
         </pre>
       </div>
-      <ForceGraph2D
-        ref={el => this.forceGraph = el}
-        graphData={data}
-        linkDirectionalArrowLength={4}
-        linkDirectionalArrowRelPos={1}
-        nodeLabel={'label'}
-        onNodeHover={(node) => {
-          if (!node) return
-          actions.selectNode(node)
-        }}
-        linkWidth={(link) => link.width}
-        linkColor={(link) => link.color}
-      />
+        <ForceGraph2D
+          ref={el => this.forceGraph = el}
+          graphData={data}
+          linkDirectionalArrowLength={4}
+          linkDirectionalArrowRelPos={1}
+          nodeLabel={'label'}
+          onNodeHover={(node) => {
+            if (!node) return
+            actions.selectNode(node)
+          }}
+          onNodeClick={(node) => actions.togglePackageModules(node)}
+          linkWidth={(link) => link.width}
+          linkColor={(link) => link.color}
+        />
+      }
     </div>
     )
   }
@@ -139,19 +203,8 @@ class DepGraph extends React.Component {
 
 export { DepGraph }
 
-
-function createGraphByMode (bundleData, { mode, sesifyMode }, { selectedNode }) {
-  // create graph for mode
-  if (mode === 'modules') {
-    return createModuleGraph(bundleData, { sesifyMode }, { selectedNode })
-  } else {
-    return createPackageGraph(bundleData, { sesifyMode }, { selectedNode })
-  }
-}
-
 function createPackageGraph (bundleData, { sesifyMode }, { selectedNode }) {
   const packageData = {}
-  
   // create a fake `bundleData` using the packages
   Object.entries(bundleData).forEach(([parentId, moduleData]) => {
     const packageName = getPackageVersionName(moduleData)
@@ -181,8 +234,7 @@ function createPackageGraph (bundleData, { sesifyMode }, { selectedNode }) {
 }
 
 function createModuleGraph (bundleData, { sesifyMode }, { selectedNode }) {
-  const nodes = [], links = []
-
+  const nodes = [], links = []  
   // for each module, create node and links 
   Object.entries(bundleData).forEach(([parentId, parentData]) => {
     const { file, deps, size, entry, packageName } = parentData
@@ -223,7 +275,6 @@ function createModuleGraph (bundleData, { sesifyMode }, { selectedNode }) {
       )
     })
   })
-
   // handle missing nodes (e.g. external deps)
   links.forEach(link => {
     if (!bundleData[link.target]) {
@@ -294,4 +345,13 @@ function createNode(params) {
     radius: 5,
   }, params)
   return node
+}
+
+function fullModuleNameFromPath(file) {
+  const path = require('path')
+  const segments = file.split(path.sep)
+  const index = segments.lastIndexOf('node_modules')
+  if (index === -1) return
+  let moduleName = segments.filter(segment => segments.indexOf(segment) > index).join('/')
+  return moduleName
 }

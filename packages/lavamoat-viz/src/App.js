@@ -10,9 +10,7 @@ const exampleDeps = require('./example-deps.json')
 
 /* eslint-disable no-restricted-globals */
 const bundles = { background: self.DEPS || exampleDeps }
-const bundleNames = Object.keys(bundles)
 
-const routes = ['packages', 'modules']
 const sesifyModes = ['sesify', 'without']
 
 class App extends Component {
@@ -20,14 +18,9 @@ class App extends Component {
   constructor() {
     super()
     this.state = {
-      mode: routes[0],
       bundle: 'background',
       sesifyMode: sesifyModes[0],
     }
-  }
-
-  selectMode (target) {
-    this.setState(state => ({ mode: target }))
   }
 
   selectSesifyMode (target) {
@@ -47,14 +40,8 @@ class App extends Component {
           activeRoute={this.state.sesifyMode}
           onNavigate={(target) => this.selectSesifyMode(target)}
           />
-        <Nav
-          routes={routes}
-          activeRoute={this.state.mode}
-          onNavigate={(target) => this.selectMode(target)}
-          />
         <DepGraph
           bundleData={bundleData}
-          mode={this.state.mode}
           sesifyMode={this.state.sesifyMode}
           /> 
       </div>
