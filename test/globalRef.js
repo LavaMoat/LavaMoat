@@ -2,7 +2,7 @@ const test = require('tape-promise').default(require('tape'))
 const clone = require('clone')
 
 const {
-  createBundleFromRequiresArray,
+  createBundleFromRequiresArray
 } = require('./util')
 
 // const wrapModuleContent
@@ -35,7 +35,7 @@ test('globalRef - check default containment', async (t) => {
     isUndefined: {
       global: false,
       self: false,
-      window: false,
+      window: false
     }
   }, 'test result matches expected')
 
@@ -56,7 +56,6 @@ test('globalRef - check default containment', async (t) => {
   // }, 'test result matches expected')
 })
 
-
 // test('globalRef - ensure apis on window are not shadowed', async (t) => {
 test('globalRef - ensure endowments are accessible on globals', async (t) => {
   const moduleContent = `
@@ -72,15 +71,15 @@ test('globalRef - ensure endowments are accessible on globals', async (t) => {
   module.exports = { checkThis, checkSelf, checkWindow, checkGlobal, contextHasPostMessage, selfHasPostMessage }
   `
   const config = {
-    "resources": {
-      "<root>": {
-        "packages": {
-          "test": true,
+    resources: {
+      '<root>': {
+        packages: {
+          test: true
         }
       },
-      'test': {
-        "globals": {
-          "postMessage": true,
+      test: {
+        globals: {
+          postMessage: true
         }
       }
     }
@@ -98,9 +97,8 @@ test('globalRef - ensure endowments are accessible on globals', async (t) => {
     checkWindow: true,
     checkGlobal: true,
     contextHasPostMessage: true,
-    selfHasPostMessage: true,
+    selfHasPostMessage: true
   }, 'test result matches expected')
-
 })
 
 async function testCodeInNonEntryBundle (t, code, providedConfig) {
@@ -109,7 +107,7 @@ async function testCodeInNonEntryBundle (t, code, providedConfig) {
     id: './apple.js',
     file: './apple.js',
     deps: {
-      'test': './node_modules/test/index.js'
+      test: './node_modules/test/index.js'
     },
     source: 'global.testResult = require("test")',
     entry: true
@@ -118,14 +116,14 @@ async function testCodeInNonEntryBundle (t, code, providedConfig) {
     id: './node_modules/test/index.js',
     file: './node_modules/test/index.js',
     deps: {},
-    source: code,
+    source: code
   }]
 
   const config = providedConfig || {
-    "resources": {
-      "<root>": {
-        "packages": {
-          "test": true,
+    resources: {
+      '<root>': {
+        packages: {
+          test: true
         }
       }
     }

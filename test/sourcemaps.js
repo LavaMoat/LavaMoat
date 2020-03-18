@@ -30,7 +30,7 @@ test('sourcemaps - adjust maps for wrapper', async (t) => {
   // wrap into bundle with external sourcemaps
   const wrappedSourceMeta = wrapIntoModuleInitializer(result.code)
   await validateSourcemaps(t, wrappedSourceMeta)
-  
+
   t.end()
 })
 
@@ -73,5 +73,5 @@ async function validateSourcemaps (t, sourceMeta) {
 }
 
 function contentForPosition (sourceLines, position) {
-  return sourceLines[position.line-1].slice(position.column)
+  return sourceLines[position.line - 1].slice(position.column)
 }

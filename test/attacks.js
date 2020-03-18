@@ -8,25 +8,25 @@ const {
 test('attack - prevent primitive modification', async (t) => {
   const depsArray = [
     {
-      'id': '/1.js',
-      'file': '/1.js',
-      'source': "require('foo'); global.testResult = !!Object.xyz",
-      'deps': { 'foo': '/node_modules/2/index.js' },
-      'entry': true
+      id: '/1.js',
+      file: '/1.js',
+      source: "require('foo'); global.testResult = !!Object.xyz",
+      deps: { foo: '/node_modules/2/index.js' },
+      entry: true
     },
     {
-      'id': '/node_modules/2/index.js',
-      'file': '/node_modules/2/index.js',
-      'source': 'try { Object.xyz = 123 } catch (_) { }',
-      'deps': {}
+      id: '/node_modules/2/index.js',
+      file: '/node_modules/2/index.js',
+      source: 'try { Object.xyz = 123 } catch (_) { }',
+      deps: {}
     }
   ]
 
   const config = {
-    "resources": {
-      "<root>": {
-        "packages": {
-          "2": true,
+    resources: {
+      '<root>': {
+        packages: {
+          2: true
         }
       }
     }
@@ -40,25 +40,25 @@ test('attack - prevent primitive modification', async (t) => {
 test('attack - limit platform api', async (t) => {
   const depsArray = [
     {
-      'id': '/1.js',
-      'file': '/1.js',
-      'source': "global.testResult = typeof require('foo') === 'function'",
-      'deps': { 'foo': '/node_modules/2/index.js' },
-      'entry': true
+      id: '/1.js',
+      file: '/1.js',
+      source: "global.testResult = typeof require('foo') === 'function'",
+      deps: { foo: '/node_modules/2/index.js' },
+      entry: true
     },
     {
-      'id': '/node_modules/2/index.js',
-      'file': '/node_modules/2/index.js',
-      'source': 'try { module.exports = setTimeout } catch (_) {}',
-      'deps': {}
+      id: '/node_modules/2/index.js',
+      file: '/node_modules/2/index.js',
+      source: 'try { module.exports = setTimeout } catch (_) {}',
+      deps: {}
     }
   ]
 
   const config = {
-    "resources": {
-      "<root>": {
-        "packages": {
-          "2": true,
+    resources: {
+      '<root>': {
+        packages: {
+          2: true
         }
       }
     }
@@ -70,7 +70,6 @@ test('attack - limit platform api', async (t) => {
 })
 
 test('attack - prevent module cache attack', async (t) => {
-
   function defineAttacker () {
     try {
       require('victim').action = () => true
@@ -85,7 +84,6 @@ test('attack - prevent module cache attack', async (t) => {
 })
 
 test('attack - prevent module cache attack in proto chain', async (t) => {
-
   function defineAttacker () {
     try {
       const victim = require('victim')

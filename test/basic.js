@@ -12,12 +12,12 @@ const {
 test('basic - bundle works', async (t) => {
   const path = __dirname + '/fixtures/basic-deps.json'
   const config = {
-    "resources": {
-      "<root>": {
+    resources: {
+      '<root>': {
         packages: {
-          "2": true,
+          2: true
         }
-      },
+      }
     }
   }
   const result = await createBundleFromRequiresArrayPath(path, { config })
@@ -31,7 +31,7 @@ test('basic - bundle works', async (t) => {
 
 test('basic - browserify bundle doesnt inject global', async (t) => {
   const bundle = await createBundleFromEntry(__dirname + '/fixtures/global.js')
-  const browserifyGlobalPolyfill = `typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {}`
+  const browserifyGlobalPolyfill = 'typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {}'
   const hasGlobalInjection = bundle.includes(browserifyGlobalPolyfill)
   t.notOk(hasGlobalInjection, 'did not inject "global" ref')
 })
@@ -42,7 +42,7 @@ test('basic - browserify bundle doesnt inject global in deps', async (t) => {
     id: './apple.js',
     file: './apple.js',
     deps: {
-      'banana': './node_modules/banana/index.js',
+      banana: './node_modules/banana/index.js'
     },
     source: 'require("banana")',
     entry: true
@@ -65,7 +65,7 @@ test('basic - lavamoat config and bundle', async (t) => {
     id: './apple.js',
     file: './apple.js',
     deps: {
-      'banana': './node_modules/banana/index.js',
+      banana: './node_modules/banana/index.js'
     },
     source: 'global.testResult = require("banana")()',
     entry: true
@@ -95,14 +95,13 @@ test('basic - lavamoat config and bundle', async (t) => {
   t.equal(global.testResult, testHref, 'test result matches expected')
 })
 
-
 test('basic - lavamoat bundle without prelude', async (t) => {
   const files = [{
     // id must be full path
     id: './apple.js',
     file: './apple.js',
     deps: {
-      'banana': './node_modules/banana/index.js',
+      banana: './node_modules/banana/index.js'
     },
     source: 'global.testResult = require("banana")()',
     entry: true

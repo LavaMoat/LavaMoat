@@ -2,9 +2,8 @@ const { makeStringTransform } = require('browserify-transform-tools')
 
 module.exports = {
   createSesWorkaroundsTransform,
-  applyInheritsLooseWorkaround,
+  applyInheritsLooseWorkaround
 }
-
 
 function createSesWorkaroundsTransform () {
   return makeStringTransform('ses-workarounds', { excludeExtension: ['.json'] }, (content, _, cb) => {
@@ -19,11 +18,10 @@ function createSesWorkaroundsTransform () {
   })
 }
 
-
 function applyInheritsLooseWorkaround (sourceString) {
   // a pattern used by many modules but incompatible with SES due to setting constructor
   // this horrible regex should catch minified code too
-  const inheritsPattern = new RegExp(`function _inheritsLoose\\((\\w+),\\s?(\\w+)\\)\\s?{\\s*?\\1.prototype\\s?=\\s?Object.create\\(\\2.prototype\\)[a-zA-z.=;,\\s\\(\\)]*}`, 'g')
+  const inheritsPattern = new RegExp('function _inheritsLoose\\((\\w+),\\s?(\\w+)\\)\\s?{\\s*?\\1.prototype\\s?=\\s?Object.create\\(\\2.prototype\\)[a-zA-z.=;,\\s\\(\\)]*}', 'g')
   // gather results
   let patternResult
   const searchResults = []

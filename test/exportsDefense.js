@@ -1,9 +1,9 @@
-"use strict"
+'use strict'
 
 const test = require('tape-promise').default(require('tape'))
 const {
   runSimpleOneTwo,
-  runSimpleOneTwoSamePackage,
+  runSimpleOneTwoSamePackage
 } = require('./util')
 
 test('exportsDefense - readOnly restrictions have override workaround fix', async (t) => {
