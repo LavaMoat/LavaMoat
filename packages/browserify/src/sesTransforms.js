@@ -23,12 +23,13 @@ function applyInheritsLooseWorkaround (sourceString) {
   // this horrible regex should catch minified code too
   const inheritsPattern = new RegExp('function _inheritsLoose\\((\\w+),\\s?(\\w+)\\)\\s?{\\s*?\\1.prototype\\s?=\\s?Object.create\\(\\2.prototype\\)[a-zA-z.=;,\\s\\(\\)]*}', 'g')
   // gather results
-  let patternResult
   const searchResults = []
-  while (patternResult = inheritsPattern.exec(sourceString)) {
+  let patternResult = inheritsPattern.exec(sourceString)
+  while (patternResult) {
     const start = patternResult.index
     const end = start + patternResult[0].length
     searchResults.push([start, end])
+    patternResult = inheritsPattern.exec(sourceString)
   }
   // replace results
   const replacementString = 'function _inheritsLoose(subClass, superClass) { subClass.prototype = Object.create(superClass.prototype, { constructor: { value: subClass } }); subClass.__proto__ = superClass; }'
