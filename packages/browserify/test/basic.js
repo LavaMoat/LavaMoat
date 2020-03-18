@@ -31,7 +31,8 @@ test('basic - bundle works', async (t) => {
 
 test('basic - browserify bundle doesnt inject global', async (t) => {
   const bundle = await createBundleFromEntry(__dirname + '/fixtures/global.js')
-  const hasGlobalInjection = bundle.includes('typeof global !== \"undefined\" ? global :')
+  const browserifyGlobalPolyfill = `typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {}`
+  const hasGlobalInjection = bundle.includes(browserifyGlobalPolyfill)
   t.notOk(hasGlobalInjection, 'did not inject "global" ref')
 })
 
