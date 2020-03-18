@@ -806,10 +806,10 @@ crypto-browserify@^3.0.0:
     randombytes "^2.0.0"
     randomfill "^1.0.3"
 
-cytoplasm@^2.0.2:
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/cytoplasm/-/cytoplasm-2.0.2.tgz#a38ba79615d1f9b77ba87f0d3b6593fed48090a4"
-  integrity sha512-qFtyafEbWFREuiGiUQcHUHAOUoSqLWd7q8Khu6R0gyV2G7G3EJEILRzC8dVunnWwS4mwUNqO+8KvgPZPezkpUA==
+cytoplasm@^3.0.3:
+  version "3.0.3"
+  resolved "https://registry.yarnpkg.com/cytoplasm/-/cytoplasm-3.0.3.tgz#451cd2785b760daee6bc0ea0d99e857dc073b832"
+  integrity sha512-3GyMf8ZKg3Eh8YBbo/sUNyI4WleTAMiH9YC8Y6G7JhnZpp5YwNYVCQGnLfTSaK5gestVCr/FGy5d8F/JQIwjYA==
 
 dash-ast@^1.0.0:
   version "1.0.0"

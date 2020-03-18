@@ -16,7 +16,7 @@
     "acorn-walk": "^6.1.1",
     "browserify-transform-tools": "^1.7.0",
     "combine-source-map": "^0.8.0",
-    "cytoplasm": "^2.0.2",
+    "cytoplasm": "^3.0.3",
     "fromentries": "^1.1.0",
     "json-stable-stringify": "^1.0.1",
     "merge-deep": "^3.0.2",
