@@ -6,28 +6,28 @@ const { createBundleFromRequiresArray } = require('./util')
 test('globalWrites - deep endow', async (t) => {
   const entries = [
     {
-      'id': '/one.js',
-      'file': '/one.js',
-      'source': "global.testResult = require('two');",
-      'deps': { 'two': '/node_modules/two/index.js' },
-      'entry': true
+      id: '/one.js',
+      file: '/one.js',
+      source: "global.testResult = require('two');",
+      deps: { two: '/node_modules/two/index.js' },
+      entry: true
     },
     {
-      'id': '/node_modules/two/index.js',
-      'file': '/node_modules/two/index.js',
-      'source': `
+      id: '/node_modules/two/index.js',
+      file: '/node_modules/two/index.js',
+      source: `
         xyz = true
         module.exports = require('three')
       `,
-      'deps': { 'three': '/node_modules/three/index.js', }
+      deps: { three: '/node_modules/three/index.js' }
     },
     {
-      'id': '/node_modules/three/index.js',
-      'file': '/node_modules/three/index.js',
-      'source': `
+      id: '/node_modules/three/index.js',
+      file: '/node_modules/three/index.js',
+      source: `
         module.exports = xyz
       `,
-      'deps': {}
+      deps: {}
     }
   ]
 
@@ -35,20 +35,20 @@ test('globalWrites - deep endow', async (t) => {
     resources: {
       '<root>': {
         packages: {
-          'two': true
+          two: true
         }
       },
-      'two': {
+      two: {
         globals: {
-          'xyz': 'write',
+          xyz: 'write'
         },
         packages: {
-          'three': true
-        },
+          three: true
+        }
       },
-      'three': {
+      three: {
         globals: {
-          'xyz': true
+          xyz: true
         }
       }
     }
