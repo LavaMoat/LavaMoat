@@ -9,30 +9,30 @@ const rimraf = require('rimraf')
 const {
   createBundleFromRequiresArray,
   generateConfigFromFiles,
-  createWatchifyBundle,
- } = require('./util')
+  createWatchifyBundle
+} = require('./util')
 
 // here we are providing an endowments only to a module deep in a dep graph
 test('config - deep endow', async (t) => {
   const entries = [
     {
-      'id': '/one.js',
-      'file': '/one.js',
-      'source': "require('two');",
-      'deps': { 'two': '/node_modules/two/index.js' },
-      'entry': true,
+      id: '/one.js',
+      file: '/one.js',
+      source: "require('two');",
+      deps: { two: '/node_modules/two/index.js' },
+      entry: true
     },
     {
-      'id': '/node_modules/two/index.js',
-      'file': '/node_modules/two/index.js',
-      'source': "require('three')",
-      'deps': { 'three': '/node_modules/three/index.js', },
+      id: '/node_modules/two/index.js',
+      file: '/node_modules/two/index.js',
+      source: "require('three')",
+      deps: { three: '/node_modules/three/index.js' }
     },
     {
-      'id': '/node_modules/three/index.js',
-      'file': '/node_modules/three/index.js',
-      'source': "window.postMessage('12345', '*')",
-      'deps': {},
+      id: '/node_modules/three/index.js',
+      file: '/node_modules/three/index.js',
+      source: "window.postMessage('12345', '*')",
+      deps: {}
     }
   ]
 
@@ -40,17 +40,17 @@ test('config - deep endow', async (t) => {
     resources: {
       '<root>': {
         packages: {
-          'two': true
+          two: true
         }
       },
-      'two': {
+      two: {
         packages: {
-          'three': true
+          three: true
         }
       },
-      'three': {
+      three: {
         globals: {
-          'postMessage': true
+          postMessage: true
         }
       }
     }
@@ -72,21 +72,21 @@ test('config - deep endow', async (t) => {
 test('config - dunder proto not allowed in globals path', async (t) => {
   const entries = [
     {
-      'id': '/one.js',
-      'file': '/one.js',
-      'source': "/* empty */",
-      'deps': {},
-      'entry': true,
-    },
+      id: '/one.js',
+      file: '/one.js',
+      source: '/* empty */',
+      deps: {},
+      entry: true
+    }
   ]
 
   const config = {
     resources: {
       '<root>': {
         globals: {
-          'window.__proto__': true,
-        },
-      },
+          'window.__proto__': true
+        }
+      }
     }
   }
 
@@ -103,11 +103,11 @@ test('config - dunder proto not allowed in globals path', async (t) => {
 })
 
 test('config - default config path is generated with autoconfig if path is not specified', async (t) => {
-  const tmpObj = tmp.dirSync();
+  const tmpObj = tmp.dirSync()
   const defaults = {
     cwd: tmpObj.name,
     stdio: 'inherit'
-  };
+  }
 
   const expectedPath = path.join(tmpObj.name, 'lavamoat/lavamoat-config.json')
   const scriptPath = require.resolve('./fixtures/runBrowserifyAutoConfig')
@@ -121,26 +121,26 @@ test('config - default config path is generated with autoconfig if path is not s
   t.end()
 })
 
-test("config - writes a proper config to a temp dir", async (t) => {
+test('config - writes a proper config to a temp dir', async (t) => {
   const entries = [
     {
-      'id': '/one.js',
-      'file': '/one.js',
-      'source': "require('two');",
-      'deps': { 'two': '/node_modules/two/index.js' },
-      'entry': true,
+      id: '/one.js',
+      file: '/one.js',
+      source: "require('two');",
+      deps: { two: '/node_modules/two/index.js' },
+      entry: true
     },
     {
-      'id': '/node_modules/two/index.js',
-      'file': '/node_modules/two/index.js',
-      'source': "require('three')",
-      'deps': { 'three': '/node_modules/three/index.js', },
+      id: '/node_modules/two/index.js',
+      file: '/node_modules/two/index.js',
+      source: "require('three')",
+      deps: { three: '/node_modules/three/index.js' }
     },
     {
-      'id': '/node_modules/three/index.js',
-      'file': '/node_modules/three/index.js',
-      'source': "window.postMessage('12345', '*')",
-      'deps': {},
+      id: '/node_modules/three/index.js',
+      file: '/node_modules/three/index.js',
+      source: "window.postMessage('12345', '*')",
+      deps: {}
     }
   ]
 
@@ -160,26 +160,26 @@ test('Config - Applies config override', async (t) => {
     resources: {
       '<root>': {
         packages: {
-          'two': true
+          two: true
         }
-      },
+      }
     }
   }
   const configOverride = {
     resources: {
       '<root>': {
         packages: {
-          'two': true
+          two: true
         }
       },
-      'two': {
+      two: {
         packages: {
-          'three': true
+          three: true
         }
       },
-      'three': {
+      three: {
         globals: {
-          'postMessage': true
+          postMessage: true
         }
       }
     }
@@ -210,14 +210,13 @@ test('Config - Applies config override', async (t) => {
     configOverride: () => configOverride
   })
 
-  t.assert(bundle.includes('"three":true'), "Applies override, provided as object")
-  t.assert(stringBundle.includes('"three":true'), "Applies override, provided as string")
-  t.assert(functionBundle.includes('"three":true'), "Applies override, provided as function")
-  t.assert(configObjectBundle.includes('"three":true'), "Applies override, primary config provided as object")
+  t.assert(bundle.includes('"three":true'), 'Applies override, provided as object')
+  t.assert(stringBundle.includes('"three":true'), 'Applies override, provided as string')
+  t.assert(functionBundle.includes('"three":true'), 'Applies override, provided as function')
+  t.assert(configObjectBundle.includes('"three":true'), 'Applies override, primary config provided as object')
 })
 
 test('Config override is applied if not specified and already exists at default path', async (t) => {
-
   const config = {
     resources: {}
   }
@@ -226,17 +225,17 @@ test('Config override is applied if not specified and already exists at default 
     resources: {
       '<root>': {
         packages: {
-          'two': true
+          two: true
         }
       },
-      'two': {
+      two: {
         packages: {
-          'three': 12345678
+          three: 12345678
         }
       },
-      'three': {
+      three: {
         globals: {
-          'postMessage': true
+          postMessage: true
         }
       }
     }
@@ -256,7 +255,7 @@ test('Config override is applied if not specified and already exists at default 
   const buildProcess = execSync(`node ${scriptPath}`, { cwd: tmpObj.name })
   const outputString = buildProcess.toString()
 
-  t.assert(outputString.includes('"three":12345678'), "Applies override if exists but not specified")
+  t.assert(outputString.includes('"three":12345678'), 'Applies override if exists but not specified')
 })
 
 // this test is not written correctly, im disabling it for now
@@ -307,12 +306,12 @@ test("Config validation fails - invalid 'resources' key", async (t) => {
     resources: {
       '<root>': {
         packages: {
-          'two': true
+          two: true
         }
       },
-      'two': {
+      two: {
         packages: {
-          'three': true
+          three: true
         }
       }
     }
@@ -322,12 +321,12 @@ test("Config validation fails - invalid 'resources' key", async (t) => {
     resourceeees: {
       '<root>': {
         packages: {
-          'two': true
+          two: true
         }
       },
-      'two': {
+      two: {
         packages: {
-          'three': true
+          three: true
         },
         globals: {
           console: true
@@ -344,12 +343,12 @@ test("Config validation fails - invalid 'packages' key", async (t) => {
     resources: {
       '<root>': {
         packages: {
-          'two': true
+          two: true
         }
       },
-      'two': {
+      two: {
         packages: {
-          'three': true
+          three: true
         }
       }
     }
@@ -359,12 +358,12 @@ test("Config validation fails - invalid 'packages' key", async (t) => {
     resources: {
       '<root>': {
         packaaaaages: {
-          'two': true
+          two: true
         }
       },
-      'two': {
+      two: {
         packages: {
-          'three': true
+          three: true
         },
         globals: {
           console: true
@@ -381,12 +380,12 @@ test("Config validation fails - invalid 'globals' key", async (t) => {
     resources: {
       '<root>': {
         packages: {
-          'two': true
+          two: true
         }
       },
-      'two': {
+      two: {
         packages: {
-          'three': true
+          three: true
         }
       }
     }
@@ -396,12 +395,12 @@ test("Config validation fails - invalid 'globals' key", async (t) => {
     resources: {
       '<root>': {
         packages: {
-          'two': true
+          two: true
         }
       },
-      'two': {
+      two: {
         packages: {
-          'three': true
+          three: true
         },
         globalsssssss: {
           console: true
@@ -413,17 +412,17 @@ test("Config validation fails - invalid 'globals' key", async (t) => {
   testConfigValidator(configOverride, config, false, t)
 })
 
-test("Config validation fails - invalid global value", async (t) => {
+test('Config validation fails - invalid global value', async (t) => {
   const config = {
     resources: {
       '<root>': {
         packages: {
-          'two': true
+          two: true
         }
       },
-      'two': {
+      two: {
         packages: {
-          'three': true
+          three: true
         }
       }
     }
@@ -433,12 +432,12 @@ test("Config validation fails - invalid global value", async (t) => {
     resources: {
       '<root>': {
         packages: {
-          'two': true
+          two: true
         }
       },
-      'two': {
+      two: {
         packages: {
-          'three': true
+          three: true
         },
         globals: {
           console: false
@@ -450,17 +449,17 @@ test("Config validation fails - invalid global value", async (t) => {
   testConfigValidator(configOverride, config, false, t)
 })
 
-test("Config validation passes - everything valid", async (t) => {
+test('Config validation passes - everything valid', async (t) => {
   const config = {
     resources: {
       '<root>': {
         packages: {
-          'two': true
+          two: true
         }
       },
-      'two': {
+      two: {
         packages: {
-          'three': true
+          three: true
         }
       }
     }
@@ -470,12 +469,12 @@ test("Config validation passes - everything valid", async (t) => {
     resources: {
       '<root>': {
         packages: {
-          'two': true
+          two: true
         }
       },
-      'two': {
+      two: {
         packages: {
-          'three': true
+          three: true
         },
         globals: {
           console: 'write'
@@ -487,9 +486,7 @@ test("Config validation passes - everything valid", async (t) => {
   testConfigValidator(configOverride, config, true, t)
 })
 
-
-
-async function testConfigValidator(configOverride, config, shouldBeValid, t) {
+async function testConfigValidator (configOverride, config, shouldBeValid, t) {
   try {
     await createBundleFromRequiresArray([], {
       config,

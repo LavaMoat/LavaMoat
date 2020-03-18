@@ -806,10 +806,10 @@ crypto-browserify@^3.0.0:
     randombytes "^2.0.0"
     randomfill "^1.0.3"
 
-cytoplasm@^2.0.2:
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/cytoplasm/-/cytoplasm-2.0.2.tgz#a38ba79615d1f9b77ba87f0d3b6593fed48090a4"
-  integrity sha512-qFtyafEbWFREuiGiUQcHUHAOUoSqLWd7q8Khu6R0gyV2G7G3EJEILRzC8dVunnWwS4mwUNqO+8KvgPZPezkpUA==
+cytoplasm@^3.0.3:
+  version "3.0.3"
+  resolved "https://registry.yarnpkg.com/cytoplasm/-/cytoplasm-3.0.3.tgz#451cd2785b760daee6bc0ea0d99e857dc073b832"
+  integrity sha512-3GyMf8ZKg3Eh8YBbo/sUNyI4WleTAMiH9YC8Y6G7JhnZpp5YwNYVCQGnLfTSaK5gestVCr/FGy5d8F/JQIwjYA==
 
 dash-ast@^1.0.0:
   version "1.0.0"
@@ -2836,10 +2836,10 @@ readdirp@^2.2.1:
     micromatch "^3.1.10"
     readable-stream "^2.0.2"
 
-realms-shim@^1.2.1:
-  version "1.2.1"
-  resolved "https://registry.yarnpkg.com/realms-shim/-/realms-shim-1.2.1.tgz#7d6afb2ad4007296b527a0b731fefd7b6620652d"
-  integrity sha512-IS1OrGSFt3k1Sv4Re2NxNrul5XCnc7XRGpaLiBKPU97RKcxVg2NbcZm2YoG5kLo9Emk5YG1gGv9zlNtplQSrMA==
+realms-shim@^1.2.2:
+  version "1.2.2"
+  resolved "https://registry.yarnpkg.com/realms-shim/-/realms-shim-1.2.2.tgz#bdf828ee316afa4c9ea2aab364d55b8ad7eb5904"
+  integrity sha512-NOskQ7IJEnHN4Dhu462Pf0Kl8YHSPjt6V+fVvrGSCs/SfAa433CLTyJ632DFsZC2ENBQ9p6tEZ3w+1Vkycuwyg==
 
 regex-not@^1.0.0, regex-not@^1.0.2:
   version "1.0.2"
@@ -3044,13 +3044,13 @@ semver@^6.1.0, semver@^6.1.2:
   resolved "https://registry.yarnpkg.com/semver/-/semver-6.3.0.tgz#ee0a64c8af5e8ceea67687b133761e1becbd1d3d"
   integrity sha512-b39TBaTSfV6yBrapU89p5fKekE2m/NwnDocOVruQFS1/veMgdzuPcnOM34M6CwxW8jH/lxEa5rBoDeUwu5HHTw==
 
-"ses@git+https://git@github.com/agoric/ses#ee242a5f50de27b75f9a130760ff95277ee0bb0b":
-  version "0.6.5-dev.0"
-  resolved "git+https://git@github.com/agoric/ses#ee242a5f50de27b75f9a130760ff95277ee0bb0b"
+"ses@git+https://git@github.com/agoric/ses#fdb393f817f6124c4d055bff26b68e4cbe17618e":
+  version "0.6.5"
+  resolved "git+https://git@github.com/agoric/ses#fdb393f817f6124c4d055bff26b68e4cbe17618e"
   dependencies:
     "@agoric/make-hardener" "^0.0.6"
     esm "^3.2.25"
-    realms-shim "^1.2.1"
+    realms-shim "^1.2.2"
 
 sesify-tofu@^2.0.4:
   version "2.0.4"

@@ -3,6 +3,9 @@
 
   const LavamoatDebugMode = __lavamoatDebugMode__
 
+  // identify the globalRef
+  const globalRef = (typeof self !== 'undefined') ? self : global
+
   // define SES
   // "templateRequire" calls are inlined in "generatePrelude"
   const SES = templateRequire('ses')
@@ -18,9 +21,6 @@
   }
 
   const realm = SES.makeSESRootRealm(sesOptions)
-
-  // identify the globalRef
-  const globalRef = (typeof self !== 'undefined') ? self : global
 
   // create SES-wrapped internalRequire
   const makeKernel = realm.evaluate(`(${unsafeMakeKernel})`, { console })
@@ -132,7 +132,7 @@
       const packageName = moduleData.package
       const moduleSource = moduleData.sourceString
       const configForModule = getConfigForPackage(lavamoatConfig, packageName)
-      const packageMembraneSpace = getMembraneGraphForPackage(packageName)
+      const packageMembraneSpace = getMembraneSpaceForPackage(packageName)
       const isEntryModule = moduleData.package === '<root>'
 
       // create the initial moduleObj
@@ -163,7 +163,7 @@
         // set the module initializer as the SES-wrapped version
         const moduleRealm = realm.global.Realm.makeCompartment()
         const globalsConfig = configForModule.globals
-        const endowmentsMembraneSpace = getMembraneGraphForPackage('<endowments>')
+        const endowmentsMembraneSpace = getMembraneSpaceForPackage('<endowments>')
         const membraneEndowments = membrane.bridge(endowments, endowmentsMembraneSpace, packageMembraneSpace)
         prepareRealmGlobalFromConfig(moduleRealm.global, globalsConfig, membraneEndowments, globalStore)
         // execute in module realm with modified realm global
@@ -283,25 +283,25 @@
         return moduleExports
       } else {
         // apply membrane protections
-        const inGraph = getMembraneGraphForPackage(packageName)
+        const inGraph = getMembraneSpaceForPackage(packageName)
         let outGraph
         // set <root>'s membrane space to <endowments> so it receives unwrapped refs
         if (parentModulePackageName === '<root>') {
-          outGraph = getMembraneGraphForPackage('<endowments>')
+          outGraph = getMembraneSpaceForPackage('<endowments>')
         } else {
-          outGraph = getMembraneGraphForPackage(parentModulePackageName)
+          outGraph = getMembraneSpaceForPackage(parentModulePackageName)
         }
         const protectedExports = membrane.bridge(moduleExports, inGraph, outGraph)
         return protectedExports
       }
     }
 
-    function getMembraneGraphForPackage (packageName) {
+    function getMembraneSpaceForPackage (packageName) {
       if (membraneSpaceForPackage.has(packageName)) {
         return membraneSpaceForPackage.get(packageName)
       }
 
-      const membraneSpace = membrane.makeObjectGraph({
+      const membraneSpace = membrane.makeMembraneSpace({
         label: packageName,
         // default is a transparent membrane handler
         createHandler: () => Reflect,
