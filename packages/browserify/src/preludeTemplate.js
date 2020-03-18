@@ -1,7 +1,7 @@
 // LavaMoat Prelude
 (function() {
 
-  const LavamoatDebugMode = __lavamoatDebugMode__
+  const debugMode = __lavamoatDebugMode__
 
   // identify the globalRef
   const globalRef = (typeof self !== 'undefined') ? self : global
@@ -16,7 +16,7 @@
   }
 
   // only reveal error stacks in debug mode
-  if (LavamoatDebugMode === true) {
+  if (debugMode === true) {
     sesOptions.errorStackMode = 'allow'
   }
 
@@ -28,6 +28,7 @@
     realm,
     unsafeEvalWithEndowments,
     globalRef,
+    debugMode,
   })
 
   // create a lavamoat pulic API for loading modules over multiple files
@@ -52,6 +53,7 @@
     realm,
     unsafeEvalWithEndowments,
     globalRef,
+    debugMode,
   }) {
     // "templateRequire" calls are inlined in "generatePrelude"
     const { getEndowmentsForConfig } = templateRequire('makeGetEndowmentsForConfig')()
@@ -66,7 +68,7 @@
     const moduleCache = new Map()
     const globalStore = new Map()
     const membraneSpaceForPackage = new Map()
-    const membrane = new Membrane()
+    const membrane = new Membrane({ debugMode })
 
     return {
       loadBundle,
