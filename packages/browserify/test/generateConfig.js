@@ -9,7 +9,7 @@ test('generateConfig - empty config', async (t) => {
 })
 
 test('generateConfig - basic config', async (t) => {
-  const config = await createConfigForTest(function(){
+  const config = await createConfigForTest(function () {
     location.href
   })
 
@@ -17,10 +17,10 @@ test('generateConfig - basic config', async (t) => {
     resources: {
       '<root>': {
         packages: {
-          'test': true
+          test: true
         }
       },
-      'test': {
+      test: {
         globals: {
           'location.href': true
         }
@@ -30,7 +30,7 @@ test('generateConfig - basic config', async (t) => {
 })
 
 test('generateConfig - ignore various refs', async (t) => {
-  const config = await createConfigForTest(function(){
+  const config = await createConfigForTest(function () {
     const js = [this]
     const ignored = [global, require, module, exports, arguments]
     const globalRefs = [typeof globalThis, typeof self, typeof window]
@@ -40,9 +40,9 @@ test('generateConfig - ignore various refs', async (t) => {
     resources: {
       '<root>': {
         packages: {
-          'test': true
+          test: true
         }
-      },
+      }
     }
   }, 'config matched expected')
 })
@@ -53,8 +53,8 @@ test('generateConfig - config with skipped deps', async (t) => {
     id: './apple.js',
     file: './apple.js',
     deps: {
-      'banana': './node_modules/banana/index.js',
-      'snakefruit': false
+      banana: './node_modules/banana/index.js',
+      snakefruit: false
     },
     source: 'require("banana")'
   }, {
@@ -70,10 +70,10 @@ test('generateConfig - config with skipped deps', async (t) => {
     resources: {
       '<root>': {
         packages: {
-          'banana': true
+          banana: true
         }
       },
-      'banana': {
+      banana: {
         globals: {
           'location.href': true
         }
@@ -82,24 +82,23 @@ test('generateConfig - config with skipped deps', async (t) => {
   }, 'config matches expected')
 })
 
-
 test('generateConfig - config ignores global refs', async (t) => {
-  const config = await createConfigForTest(function(){
-    const href = window.location.href;
-    const xhr = new window.XMLHttpRequest;
+  const config = await createConfigForTest(function () {
+    const href = window.location.href
+    const xhr = new window.XMLHttpRequest()
   })
 
   t.deepEqual(config, {
     resources: {
       '<root>': {
         packages: {
-          'test': true
+          test: true
         }
       },
-      'test': {
+      test: {
         globals: {
           'location.href': true,
-          'XMLHttpRequest': true,
+          XMLHttpRequest: true
         }
       }
     }
@@ -107,7 +106,7 @@ test('generateConfig - config ignores global refs', async (t) => {
 })
 
 test('generateConfig - config ignores global refs when properties are not accessed', async (t) => {
-  const config = await createConfigForTest(function(){
+  const config = await createConfigForTest(function () {
     typeof window !== undefined
   })
 
@@ -115,15 +114,15 @@ test('generateConfig - config ignores global refs when properties are not access
     resources: {
       '<root>': {
         packages: {
-          'test': true
+          test: true
         }
-      },
+      }
     }
   }, 'config matches expected')
 })
 
 test('generateConfig - config ignores global refs accessed with whitelist items', async (t) => {
-  const config = await createConfigForTest(function(){
+  const config = await createConfigForTest(function () {
     window.Object === Object
   })
 
@@ -131,29 +130,29 @@ test('generateConfig - config ignores global refs accessed with whitelist items'
     resources: {
       '<root>': {
         packages: {
-          'test': true
+          test: true
         }
-      },
+      }
     }
   }, 'config matches expected')
 })
 
 test('generateConfig - unfrozen environment - primordial modification', async (t) => {
-  const config = await createConfigForTest(function(){
-    const href = window.location.href;
-    Array.prototype.bogosort = () => 'yolo';
+  const config = await createConfigForTest(function () {
+    const href = window.location.href
+    Array.prototype.bogosort = () => 'yolo'
   })
 
   t.deepEqual(config, {
     resources: {
       '<root>': {
         packages: {
-          'test': true
+          test: true
         }
       },
-      'test': {
+      test: {
         globals: {
-          'location.href': true,
+          'location.href': true
         },
         environment: 'unfrozen'
       }
@@ -167,7 +166,7 @@ async function createConfigForTest (testFn) {
     id: './entry.js',
     file: './entry.js',
     deps: {
-      'test': './node_modules/test/index.js'
+      test: './node_modules/test/index.js'
     },
     source: 'require("test")'
   }, {

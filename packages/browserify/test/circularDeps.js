@@ -2,9 +2,8 @@ const test = require('tape-promise').default(require('tape'))
 const clone = require('clone')
 const {
   createBundleFromRequiresArray,
-  fnToCodeBlock,
+  fnToCodeBlock
 } = require('./util')
-
 
 test('circularDeps - multi-module circular deps dont inf loop', async (t) => {
   const files = [{
@@ -12,7 +11,7 @@ test('circularDeps - multi-module circular deps dont inf loop', async (t) => {
     id: './apple.js',
     file: './apple.js',
     deps: {
-      'banana': './node_modules/banana/a.js',
+      banana: './node_modules/banana/a.js'
     },
     source: fnToCodeBlock(function () {
       global.testResult = require('banana')
@@ -42,11 +41,11 @@ test('circularDeps - multi-module circular deps dont inf loop', async (t) => {
   }]
   const config = {
     resources: {
-      "<root>": {
-        "packages": {
-          "banana": true,
+      '<root>': {
+        packages: {
+          banana: true
         }
-      },
+      }
     }
   }
   const bundle = await createBundleFromRequiresArray(clone(files), { config })

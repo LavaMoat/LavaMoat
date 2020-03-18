@@ -21,7 +21,7 @@ function generatePrelude (opts = {}) {
   output = output.replace('__lavamoatDebugMode__', debugMode ? 'true' : 'false')
 
   replaceTemplateRequire('ses', sesSrc)
-  replaceTemplateRequire('cytoplasm', fs.readFileSync(require.resolve('cytoplasm'), 'utf8'))
+  replaceTemplateRequire('cytoplasm', fs.readFileSync(require.resolve('cytoplasm/dist/index'), 'utf8'))
   replaceTemplateRequire('cytoplasm/distortions/readOnly', fs.readFileSync(require.resolve('cytoplasm/src/distortions/readOnly'), 'utf8'))
   replaceTemplateRequire('makeGetEndowmentsForConfig', makeGetEndowmentsForConfigSrc)
   replaceTemplateRequire('makePrepareRealmGlobalFromConfig', makePrepareRealmGlobalFromConfigSrc)
@@ -42,6 +42,7 @@ function wrapWithReturnCjsExports (label, src) {
   return (
 `// define ${label}
 (function(){
+  const global = globalRef
   const exports = {}
   const module = { exports }
   ;(function(){

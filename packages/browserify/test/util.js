@@ -9,7 +9,6 @@ const pump = require('pump')
 const lavamoatPlugin = require('../src/index')
 const noop = () => {}
 
-
 module.exports = {
   createBundleFromEntry,
   createBundleFromRequiresArray,
@@ -23,7 +22,7 @@ module.exports = {
   runSimpleOneTwoSamePackage,
   createBrowserifyFromRequiresArray,
   createSpy,
-  getStreamResults,
+  getStreamResults
 }
 
 async function createBundleFromEntry (path, pluginOpts = {}) {
@@ -104,7 +103,7 @@ async function bundleAsync (bundler) {
 }
 
 function fnToCodeBlock (fn) {
-  return fn.toString().split('\n').slice(1,-1).join('\n')
+  return fn.toString().split('\n').slice(1, -1).join('\n')
 }
 
 async function createWatchifyBundle (pluginOpts) {
@@ -113,17 +112,15 @@ async function createWatchifyBundle (pluginOpts) {
     packageCache: {},
     plugin: [
       [lavamoatPlugin, pluginOpts],
-      //poll option is needed to ensure the 'update' event is properly fired after the config override file changes. Without it, the firing behavior is unpredictable due to filesystem watch not always detecting the change.
-      [watchify, {poll: true}]
+      // poll option is needed to ensure the 'update' event is properly fired after the config override file changes. Without it, the firing behavior is unpredictable due to filesystem watch not always detecting the change.
+      [watchify, { poll: true }]
     ]
   })
   bundleAsync(bundler)
   return bundler
 }
 
-
 async function testEntryAttackerVictim (t, { defineAttacker, defineVictim }) {
-
   function defineEntry () {
     require('attacker')
     const result = require('victim').action()
@@ -132,44 +129,44 @@ async function testEntryAttackerVictim (t, { defineAttacker, defineVictim }) {
 
   const depsArray = [
     {
-      'id': '/entry.js',
-      'file': '/entry.js',
-      'source': `(${defineEntry})()`,
-      'deps': {
-        'attacker': '/node_modules/attacker/index.js',
-        'victim': '/node_modules/victim/index.js'
+      id: '/entry.js',
+      file: '/entry.js',
+      source: `(${defineEntry})()`,
+      deps: {
+        attacker: '/node_modules/attacker/index.js',
+        victim: '/node_modules/victim/index.js'
       },
-      'entry': true
+      entry: true
     },
     {
-      'id': '/node_modules/attacker/index.js',
-      'file': '/node_modules/attacker/index.js',
-      'source': `(${defineAttacker})()`,
-      'deps': {
-        'victim': '/node_modules/victim/index.js'
+      id: '/node_modules/attacker/index.js',
+      file: '/node_modules/attacker/index.js',
+      source: `(${defineAttacker})()`,
+      deps: {
+        victim: '/node_modules/victim/index.js'
       }
     },
     {
-      'id': '/node_modules/victim/index.js',
-      'file': '/node_modules/victim/index.js',
-      'source': `(${defineVictim})()`,
-      'deps': {}
+      id: '/node_modules/victim/index.js',
+      file: '/node_modules/victim/index.js',
+      source: `(${defineVictim})()`,
+      deps: {}
     }
   ]
 
   const config = {
-    "resources": {
-      "<root>": {
-        "packages": {
-          "attacker": true,
-          "victim": true,
+    resources: {
+      '<root>': {
+        packages: {
+          attacker: true,
+          victim: true
         }
       },
-      "attacker": {
-        "packages": {
-          "victim": true,
+      attacker: {
+        packages: {
+          victim: true
         }
-      },
+      }
     }
   }
   const result = await createBundleFromRequiresArray(depsArray, { config })
@@ -178,50 +175,49 @@ async function testEntryAttackerVictim (t, { defineAttacker, defineVictim }) {
 }
 
 async function runSimpleOneTwo ({ defineOne, defineTwo, config = {} }) {
-
   function defineEntry () {
     global.testResult = require('one')
   }
 
   const depsArray = [
     {
-      'id': '/entry.js',
-      'file': '/entry.js',
-      'source': `(${defineEntry})()`,
-      'deps': {
-        'one': '/node_modules/one/index.js',
-        'two': '/node_modules/two/index.js'
+      id: '/entry.js',
+      file: '/entry.js',
+      source: `(${defineEntry})()`,
+      deps: {
+        one: '/node_modules/one/index.js',
+        two: '/node_modules/two/index.js'
       },
-      'entry': true
+      entry: true
     },
     {
-      'id': '/node_modules/one/index.js',
-      'file': '/node_modules/one/index.js',
-      'source': `(${defineOne})()`,
-      'deps': {
-        'two': '/node_modules/two/index.js'
+      id: '/node_modules/one/index.js',
+      file: '/node_modules/one/index.js',
+      source: `(${defineOne})()`,
+      deps: {
+        two: '/node_modules/two/index.js'
       }
     },
     {
-      'id': '/node_modules/two/index.js',
-      'file': '/node_modules/two/index.js',
-      'source': `(${defineTwo})()`,
-      'deps': {}
+      id: '/node_modules/two/index.js',
+      file: '/node_modules/two/index.js',
+      source: `(${defineTwo})()`,
+      deps: {}
     }
   ]
 
   const _config = mergeDeep({
-    "resources": {
-      "<root>": {
-        "packages": {
-          "one": true,
+    resources: {
+      '<root>': {
+        packages: {
+          one: true
         }
       },
-      "one": {
-        "packages": {
-          "two": true,
+      one: {
+        packages: {
+          two: true
         }
-      },
+      }
     }
   }, config)
 
@@ -232,51 +228,50 @@ async function runSimpleOneTwo ({ defineOne, defineTwo, config = {} }) {
   return global.testResult
 }
 
-async function runSimpleOneTwoSamePackage({ defineOne, defineTwo, config = {} }) {
-
-  function defineEntry() {
+async function runSimpleOneTwoSamePackage ({ defineOne, defineTwo, config = {} }) {
+  function defineEntry () {
     global.testResult = require('one')
   }
 
   const depsArray = [
     {
-      'id': '/entry.js',
-      'file': '/entry.js',
-      'source': `(${defineEntry})()`,
-      'deps': {
-        'one': '/node_modules/one/index.js',
-        'two': '/node_modules/one/main.js'
+      id: '/entry.js',
+      file: '/entry.js',
+      source: `(${defineEntry})()`,
+      deps: {
+        one: '/node_modules/one/index.js',
+        two: '/node_modules/one/main.js'
       },
-      'entry': true
+      entry: true
     },
     {
-      'id': '/node_modules/one/index.js',
-      'file': '/node_modules/one/index.js',
-      'source': `(${defineOne})()`,
-      'deps': {
-        'two': '/node_modules/one/main.js'
+      id: '/node_modules/one/index.js',
+      file: '/node_modules/one/index.js',
+      source: `(${defineOne})()`,
+      deps: {
+        two: '/node_modules/one/main.js'
       }
     },
     {
-      'id': '/node_modules/one/main.js',
-      'file': '/node_modules/one/main.js',
-      'source': `(${defineTwo})()`,
-      'deps': {}
+      id: '/node_modules/one/main.js',
+      file: '/node_modules/one/main.js',
+      source: `(${defineTwo})()`,
+      deps: {}
     }
   ]
 
   const _config = mergeDeep({
-    "resources": {
-      "<root>": {
-        "packages": {
-          "one": true,
+    resources: {
+      '<root>': {
+        packages: {
+          one: true
         }
       },
-      "one": {
-        "packages": {
-          "two": true,
+      one: {
+        packages: {
+          two: true
         }
-      },
+      }
     }
   }, config)
 
@@ -290,7 +285,7 @@ async function runSimpleOneTwoSamePackage({ defineOne, defineTwo, config = {} })
 function createSpy ({ onEach = noop, onEnd = noop }) {
   return through(
     (entry, _, cb) => { onEach(entry); cb() },
-    (cb) => { onEnd(); cb() },
+    (cb) => { onEnd(); cb() }
   )
 }
 
