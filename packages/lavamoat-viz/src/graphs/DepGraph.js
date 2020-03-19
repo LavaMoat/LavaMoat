@@ -130,6 +130,7 @@ class DepGraph extends React.Component {
     let globalUsagePackages = []
     globalUsagePackages = packageData.nodes.filter(node => JSON.parse(node.configLabel).hasOwnProperty('globals'))
 
+
     const packageListComponent = 
     <pre style={{
       position: 'absolute',
@@ -145,18 +146,28 @@ class DepGraph extends React.Component {
       <ol>
         {globalUsagePackages.map(node => 
           <li 
+            key={globalUsagePackages.indexOf(node)}>
+            <div 
             className='package'
-            key={globalUsagePackages.indexOf(node)}
-            onMouseEnter={() => actions.selectNode(node)}
+            onMouseEnter={() => {
+              if (packageModulesMode) return
+              actions.selectNode(node)
+            }}
             onClick={() => actions.togglePackageModules(node)}>
-            {node.label}
+              {node.label}
+            </div>
             {packageModulesMode && getPackageVersionName(Object.values(packageModules)[0]) === node.label ?
               <ol>
-                {Object.entries(packageModules).map(([id, value]) => 
+                {Object.entries(packageModules).map(([id, value], index) => 
                 <li
-                  className='package'
                   key={id}>
+                  <div 
+                    className='package'
+                    onMouseEnter={() => {
+                      actions.selectNode(moduleData.nodes[index])
+                    }}>
                     {fullModuleNameFromPath(value.file)}
+                  </div>
                 </li>
                 )}
               </ol> :
@@ -178,7 +189,7 @@ class DepGraph extends React.Component {
           // draw on top of graph
           zIndex: 1,
         }}>
-          {selectedNodeLabel}
+            {packageModulesMode ? fullModuleNameFromPath(selectedNodeLabel) : selectedNodeLabel}
         </pre>
       </div>
         <ForceGraph2D
@@ -350,7 +361,7 @@ function createNode(params) {
 function fullModuleNameFromPath(file) {
   const path = require('path')
   const segments = file.split(path.sep)
-  const index = segments.lastIndexOf('node_modules')
+  const index = segments.indexOf('node_modules')
   if (index === -1) return
   let moduleName = segments.filter(segment => segments.indexOf(segment) > index).join('/')
   return moduleName
