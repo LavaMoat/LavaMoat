@@ -138,7 +138,7 @@ function createSpy (onData, depsDump, onEnd) {
   return through.obj((data, _, cb) => {
     // give data to observer fn
     onData(data)
-    // map module data to their IDs
+    // format data obj with ID as key
     if (depsDump) {
       const metaData = clone(data)
       allDeps[metaData.id] = metaData
@@ -148,12 +148,13 @@ function createSpy (onData, depsDump, onEnd) {
   }, (cb) => {
     // call flush observer
     onEnd()
-    // write module data to disk
+    // if depsDump option enabled, dump allDeps to a file
     if (depsDump) {
       const filename = 'deps-dump.json'
       const serialized = jsonStringify(allDeps, { space: 2 })
       console.warn(`deps-dump - writing to ${filename}`)
-      fs.writeFile(filename, serialized, cb)
+      fs.writeFileSync(filename, serialized)
     }
+    cb()
   })
 }
