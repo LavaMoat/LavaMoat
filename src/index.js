@@ -46,7 +46,7 @@ function plugin (browserify, pluginOpts) {
     if (configuration.writeAutoConfig) {
       browserify.pipeline.get('emit-deps').push(createConfigSpy({
         onResult: configuration.writeAutoConfig,
-        depsDump: configuration.depsDump
+        writeAutoConfigDebug: configuration.writeAutoConfigDebug
       }))
     }
 
@@ -70,7 +70,7 @@ function getConfigurationFromPluginOpts (pluginOpts) {
     'includePrelude',
     'pruneConfig',
     'debugMode',
-    'depsDump',
+    'writeAutoConfigDebug',
     '_' // Browserify adds this as the first option when running from the command line
   ])
   const invalidKeys = Reflect.ownKeys(pluginOpts).filter(key => !allowedKeys.has(key))
@@ -84,9 +84,10 @@ function getConfigurationFromPluginOpts (pluginOpts) {
     includePrelude: 'includePrelude' in pluginOpts ? pluginOpts.includePrelude : true,
     pruneConfig: pluginOpts.pruneConfig,
     debugMode: pluginOpts.debugMode,
-    depsDump: pluginOpts.depsDump
+    writeAutoConfigDebug: undefined 
   }
 
+  const defaultWriteAutoConfigDebug = './module-data.json'
   const defaultOverrideConfig = '/lavamoat-config-override.json'
 
   if (typeof pluginOpts.config === 'function') {
@@ -187,6 +188,12 @@ function getConfigurationFromPluginOpts (pluginOpts) {
   } else {
     // invalid setting, throw an error
     throw new Error('LavaMoat - Unrecognized value for writeAutoConfig')
+  }
+
+  if (typeof pluginOpts.writeAutoConfigDebug === 'string') {
+    configuration.writeAutoConfigDebug = pluginOpts.writeAutoConfigDebug
+  } else if (pluginOpts.writeAutoConfigDebug !== false) {
+    configuration.writeAutoConfigDebug = defaultWriteAutoConfigDebug
   }
 
   return configuration

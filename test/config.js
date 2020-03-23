@@ -506,7 +506,7 @@ async function testConfigValidator (configOverride, config, shouldBeValid, t) {
   }
 }
 
-test('Config - Applies depsDump plugin option and dumps module object to disk', async (t) => {
+test('Config - Applies writeAutoConfigDebug plugin option and dumps module object to disk', async (t) => {
   const tmpObj = tmp.dirSync()
 
   const defaults = {
@@ -514,12 +514,12 @@ test('Config - Applies depsDump plugin option and dumps module object to disk', 
     stdio: 'inherit'
   }
 
-  const expectedPath = path.join(tmpObj.name, './deps-dump.json')
+  const expectedPath = path.join(tmpObj.name, './module-data.json')
   const scriptPath = require.resolve('./fixtures/runBrowserifyAutoConfig')
 
-  t.notOk(fs.existsSync(expectedPath), 'Deps Dump does not yet exist')
+  t.notOk(fs.existsSync(expectedPath), 'Module data does not yet exist')
 
   execSync(`node ${scriptPath}`, defaults)
 
-  t.ok(fs.existsSync(expectedPath), 'Deps Dump exists')
+  t.ok(fs.existsSync(expectedPath), 'Module data exists')
 })

@@ -5,7 +5,7 @@ browserify([], {
   plugin: [
     [lavamoatPlugin, { 
       writeAutoConfig: true,
-      depsDump: true
+      writeAutoConfigDebug: true
     }]
   ]
 }).bundle()

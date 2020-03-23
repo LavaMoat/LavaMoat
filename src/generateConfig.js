@@ -15,12 +15,12 @@ module.exports = { rootSlug, createConfigSpy, createModuleInspector }
 // it analyses modules for global namespace usages, and generates a config for LavaMoat.
 // it calls `onResult` with the config when the stream ends.
 
-function createConfigSpy ({ onResult, depsDump }) {
+function createConfigSpy ({ onResult, writeAutoConfigDebug }) {
   const inspector = createModuleInspector()
   const configSpy = createSpy(
     // inspect each module
     inspector.inspectModule,
-    depsDump,
+    writeAutoConfigDebug,
     // after all modules, submit config
     () => onResult(inspector.generateConfig())
   )
@@ -133,13 +133,13 @@ function aggregateDeps ({ packageModules, moduleIdToPackageName }) {
   return depsArray
 }
 
-function createSpy (onData, depsDump, onEnd) {
+function createSpy (onData, writeAutoConfigDebug, onEnd) {
   const allDeps = {}
   return through.obj((data, _, cb) => {
     // give data to observer fn
     onData(data)
     // format data obj with ID as key
-    if (depsDump) {
+    if (writeAutoConfigDebug) {
       const metaData = clone(data)
       allDeps[metaData.id] = metaData
     }
@@ -148,12 +148,11 @@ function createSpy (onData, depsDump, onEnd) {
   }, (cb) => {
     // call flush observer
     onEnd()
-    // if depsDump option enabled, dump allDeps to a file
-    if (depsDump) {
-      const filename = 'deps-dump.json'
+    // if writeAutoConfigDebug option enabled, dump allDeps to a file
+    if (writeAutoConfigDebug) {
       const serialized = jsonStringify(allDeps, { space: 2 })
-      console.warn(`deps-dump - writing to ${filename}`)
-      fs.writeFileSync(filename, serialized)
+      console.warn(`deps-dump - writing to ${writeAutoConfigDebug}`)
+      fs.writeFileSync(writeAutoConfigDebug, serialized)
     }
     cb()
   })
