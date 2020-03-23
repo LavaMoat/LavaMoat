@@ -45,7 +45,8 @@ function plugin (browserify, pluginOpts) {
     // if autoconfig activated, insert hook
     if (configuration.writeAutoConfig) {
       browserify.pipeline.get('emit-deps').push(createConfigSpy({
-        onResult: configuration.writeAutoConfig
+        onResult: configuration.writeAutoConfig,
+        depsDump: configuration.depsDump
       }))
     }
 
@@ -69,6 +70,7 @@ function getConfigurationFromPluginOpts (pluginOpts) {
     'includePrelude',
     'pruneConfig',
     'debugMode',
+    'depsDump',
     '_' // Browserify adds this as the first option when running from the command line
   ])
   const invalidKeys = Reflect.ownKeys(pluginOpts).filter(key => !allowedKeys.has(key))
@@ -81,7 +83,8 @@ function getConfigurationFromPluginOpts (pluginOpts) {
     // default true
     includePrelude: 'includePrelude' in pluginOpts ? pluginOpts.includePrelude : true,
     pruneConfig: pluginOpts.pruneConfig,
-    debugMode: pluginOpts.debugMode
+    debugMode: pluginOpts.debugMode,
+    depsDump: pluginOpts.depsDump
   }
 
   const defaultOverrideConfig = '/lavamoat-config-override.json'
