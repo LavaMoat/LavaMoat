@@ -1,4 +1,6 @@
 const through = require('through2')
+const clone = require('clone')
+const fs = require('fs')
 const fromEntries = require('fromentries')
 const jsonStringify = require('json-stable-stringify')
 const acornGlobals = require('acorn-globals')
@@ -13,11 +15,12 @@ module.exports = { rootSlug, createConfigSpy, createModuleInspector }
 // it analyses modules for global namespace usages, and generates a config for LavaMoat.
 // it calls `onResult` with the config when the stream ends.
 
-function createConfigSpy ({ onResult }) {
+function createConfigSpy ({ onResult, depsDump }) {
   const inspector = createModuleInspector()
   const configSpy = createSpy(
     // inspect each module
     inspector.inspectModule,
+    depsDump,
     // after all modules, submit config
     () => onResult(inspector.generateConfig())
   )
@@ -130,16 +133,27 @@ function aggregateDeps ({ packageModules, moduleIdToPackageName }) {
   return depsArray
 }
 
-function createSpy (onData, onEnd) {
+function createSpy (onData, depsDump, onEnd) {
+  const allDeps = {}
   return through.obj((data, _, cb) => {
     // give data to observer fn
     onData(data)
+    // map module data to their IDs
+    if (depsDump) {
+      const metaData = clone(data)
+      allDeps[metaData.id] = metaData
+    }
     // pass the data through normally
     cb(null, data)
   }, (cb) => {
     // call flush observer
     onEnd()
-    // end normally
-    cb()
+    // write module data to disk
+    if (depsDump) {
+      const filename = 'deps-dump.json'
+      const serialized = jsonStringify(allDeps, { space: 2 })
+      console.warn(`deps-dump - writing to ${filename}`)
+      fs.writeFile(filename, serialized, cb)
+    }
   })
 }
