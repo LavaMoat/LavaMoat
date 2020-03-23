@@ -84,7 +84,7 @@ function getConfigurationFromPluginOpts (pluginOpts) {
     includePrelude: 'includePrelude' in pluginOpts ? pluginOpts.includePrelude : true,
     pruneConfig: pluginOpts.pruneConfig,
     debugMode: pluginOpts.debugMode,
-    writeAutoConfigDebug: undefined 
+    writeAutoConfigDebug: undefined
   }
 
   const defaultWriteAutoConfigDebug = './module-data.json'
