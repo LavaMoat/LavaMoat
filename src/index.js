@@ -1,8 +1,11 @@
 const fs = require('fs')
 const path = require('path')
+const clone = require('clone')
 const mkdirp = require('mkdirp')
+const through = require('through2')
 const mergeDeep = require('merge-deep')
 const generatePrelude = require('./generatePrelude')
+const jsonStringify = require('json-stable-stringify')
 const createCustomPack = require('./createCustomPack')
 const { createConfigSpy } = require('./generateConfig')
 const { createPackageDataStream } = require('./packageData')
@@ -45,8 +48,7 @@ function plugin (browserify, pluginOpts) {
     // if autoconfig activated, insert hook
     if (configuration.writeAutoConfig) {
       browserify.pipeline.get('emit-deps').push(createConfigSpy({
-        onResult: configuration.writeAutoConfig,
-        writeAutoConfigDebug: configuration.writeAutoConfigDebug
+        onResult: configuration.writeAutoConfig
       }))
     }
 
@@ -54,6 +56,19 @@ function plugin (browserify, pluginOpts) {
     browserify.pipeline.get('pack').splice(0, 1,
       createLavamoatPacker(configuration)
     )
+
+    if (configuration.writeAutoConfigDebug) {
+      const allDeps = {}
+      browserify.pipeline.splice('debug', 0, through((dep, _, cb) => {
+        const metaData = clone(dep)
+        allDeps[metaData.id] = metaData
+        cb(null, dep)
+      }, (cb) => {
+        const serialized = jsonStringify(allDeps, { space: 2 })
+        console.warn(`writeAutoConfigDebug - writing to ${configuration.writeAutoConfigDebug}`)
+        fs.writeFile(configuration.writeAutoConfigDebug, serialized, cb)
+      }))
+    }
   }
 }
 
