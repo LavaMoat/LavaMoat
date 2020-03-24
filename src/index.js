@@ -192,7 +192,7 @@ function getConfigurationFromPluginOpts (pluginOpts) {
 
   if (typeof pluginOpts.writeAutoConfigDebug === 'string') {
     configuration.writeAutoConfigDebug = pluginOpts.writeAutoConfigDebug
-  } else if (pluginOpts.writeAutoConfigDebug !== false) {
+  } else if (pluginOpts.writeAutoConfigDebug) {
     configuration.writeAutoConfigDebug = defaultWriteAutoConfigDebug
   }
 
