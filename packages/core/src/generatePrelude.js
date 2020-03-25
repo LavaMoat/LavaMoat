@@ -7,31 +7,59 @@
 const fs = require('fs')
 const path = require('path')
 const preludeTemplate = fs.readFileSync(path.join(__dirname, '/preludeTemplate.js'), 'utf-8')
+const kernelTemplate = fs.readFileSync(path.join(__dirname, '/kernelTemplate.js'), 'utf-8')
+const kernelCoreTemplate = fs.readFileSync(path.join(__dirname, '/kernelCoreTemplate.js'), 'utf-8')
 const sesSrc = fs.readFileSync(path.join(__dirname, '/../lib/ses.umd.js'), 'utf-8')
 const makeGetEndowmentsForConfigSrc = fs.readFileSync(path.join(__dirname, '/makeGetEndowmentsForConfig.js'), 'utf-8')
 const makePrepareRealmGlobalFromConfigSrc = fs.readFileSync(path.join(__dirname, '/makePrepareRealmGlobalFromConfig.js'), 'utf-8')
 
-module.exports = generatePrelude
+module.exports = {
+  generateKernel,
+  generateKernelCore,
+  generatePrelude,
+}
 
-// takes the preludeTemplate and populates it with the config + libraries
+// takes the preludeTemplate and populates it with the kernel
 function generatePrelude (opts = {}) {
   const debugMode = Boolean(opts.debugMode)
+  const kernelCode = generateKernelCore(opts)
 
   let output = preludeTemplate
+  output = replaceTemplateRequire(output, 'ses', sesSrc)
   output = output.replace('__lavamoatDebugMode__', debugMode ? 'true' : 'false')
-
-  replaceTemplateRequire('ses', sesSrc)
-  replaceTemplateRequire('cytoplasm', fs.readFileSync(require.resolve('cytoplasm/dist/index'), 'utf8'))
-  replaceTemplateRequire('cytoplasm/distortions/readOnly', fs.readFileSync(require.resolve('cytoplasm/src/distortions/readOnly'), 'utf8'))
-  replaceTemplateRequire('makeGetEndowmentsForConfig', makeGetEndowmentsForConfigSrc)
-  replaceTemplateRequire('makePrepareRealmGlobalFromConfig', makePrepareRealmGlobalFromConfigSrc)
-
-  function replaceTemplateRequire (moduleName, src) {
-    const wrappedSrc = wrapWithReturnCjsExports(moduleName, src)
-    output = output.replace(`templateRequire('${moduleName}')`, wrappedSrc)
-  }
+  output = output.replace('__createKernel__', kernelCode)
 
   return output
+}
+
+// takes the kernelTemplate and populates it with the libraries
+function generateKernel (opts = {}) {
+  const debugMode = Boolean(opts.debugMode)
+  const kernelCode = generateKernelCore(opts)
+
+  let output = kernelTemplate
+  output = replaceTemplateRequire(output, 'ses', sesSrc)
+  output = output.replace('__lavamoatDebugMode__', debugMode ? 'true' : 'false')
+  output = output.replace('__createKernel__', kernelCode)
+
+  return output
+}
+
+// takes the kernelCoreTemplate and populates it with the libraries
+function generateKernelCore (opts = {}) {
+
+  let output = kernelCoreTemplate
+  output = replaceTemplateRequire(output, 'cytoplasm', fs.readFileSync(require.resolve('cytoplasm/dist/index'), 'utf8'))
+  output = replaceTemplateRequire(output, 'cytoplasm/distortions/readOnly', fs.readFileSync(require.resolve('cytoplasm/src/distortions/readOnly'), 'utf8'))
+  output = replaceTemplateRequire(output, 'makeGetEndowmentsForConfig', makeGetEndowmentsForConfigSrc)
+  output = replaceTemplateRequire(output, 'makePrepareRealmGlobalFromConfig', makePrepareRealmGlobalFromConfigSrc)
+  return output
+}
+
+function replaceTemplateRequire (code, moduleName, src) {
+  const wrappedSrc = wrapWithReturnCjsExports(moduleName, src)
+  code = code.replace(`templateRequire('${moduleName}')`, wrappedSrc)
+  return code
 }
 
 // this wraps the content of a commonjs module with an IIFE that returns the module.exports

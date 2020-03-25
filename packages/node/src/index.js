@@ -2,34 +2,49 @@
 
 const path = require('path')
 const fs = require('fs')
+const { generateKernel } = require('lavamoat-core')
+const { packageDataForModule } = require('lavamoat-browserify/src/packageData')
+
 
 runLava().catch(console.error)
+
+function createKernel () {
+  const lavamoatConfig = {}
+  const createKernel = eval(generateKernel())
+  const kernel = createKernel({
+    lavamoatConfig,
+    loadModuleData,
+    getRelativeModuleId,
+  })
+  return kernel
+}
+
+function loadModuleData (absolutePath) {
+  console.log('loadModuleData', absolutePath)
+  const moduleContent = fs.readFileSync(absolutePath)
+  const wrappedContent = `(function(require,module,exports){${moduleContent}})`
+  const packageData = packageDataForModule({ file: absolutePath })
+  const packageName = packageData.packageName || '<root>'
+
+  return {
+    file: absolutePath,
+    package: packageName,
+    source: wrappedContent,
+    sourceString: wrappedContent,
+  }
+}
+
+function getRelativeModuleId (parentAbsolutePath, relativePath) {
+  const parentDir = path.parse(parentAbsolutePath).dir
+  const fullPath = path.resolve(parentDir, relativePath)
+  const resolved = require.resolve(fullPath)
+  return resolved
+}
 
 async function runLava () {
   const [,,entryPath] = process.argv
   const entryDir = process.cwd()
-  const relativeRequire = createRelativeRequire(entryDir)
-  relativeRequire(entryPath)
-}
-
-function createRelativeRequire (dir) {
-  return function relativeRequire (id) {
-    console.log(`requireRelative: ${dir} -> ${id}`)
-    const fullPath = path.resolve(dir, id)
-    const resolved = require.resolve(fullPath)
-    return absoluteRequire(resolved)
-  }
-}
-
-function absoluteRequire (modulePath) {
-  const moduleDir = path.parse(modulePath).dir
-  const moduleContent = fs.readFileSync(modulePath)
-  const wrappedContent = `(function(module,exports,require){${moduleContent}})`
-  const moduleInitializer = eval(wrappedContent)
-
-  const moduleObj = { exports: {} }
-  const relativeRequire = createRelativeRequire(moduleDir)
-  moduleInitializer(moduleObj, moduleObj.exports, relativeRequire)
-  const moduleExports = moduleObj.exports
-  return moduleExports
+  const kernel = createKernel()
+  const entryId = path.resolve(entryDir, entryPath)
+  kernel.internalRequire(entryId)
 }
