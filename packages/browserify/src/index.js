@@ -1,8 +1,11 @@
 const fs = require('fs')
 const path = require('path')
+const clone = require('clone')
 const mkdirp = require('mkdirp')
+const through = require('through2').obj
 const mergeDeep = require('merge-deep')
 const generatePrelude = require('./generatePrelude')
+const jsonStringify = require('json-stable-stringify')
 const createCustomPack = require('./createCustomPack')
 const { createConfigSpy } = require('./generateConfig')
 const { createPackageDataStream } = require('./packageData')
@@ -53,6 +56,19 @@ function plugin (browserify, pluginOpts) {
     browserify.pipeline.get('pack').splice(0, 1,
       createLavamoatPacker(configuration)
     )
+
+    if (configuration.writeAutoConfigDebug) {
+      const allDeps = {}
+      browserify.pipeline.splice('debug', 0, through((dep, _, cb) => {
+        const metaData = clone(dep)
+        allDeps[metaData.id] = metaData
+        cb(null, dep)
+      }, (cb) => {
+        const serialized = jsonStringify(allDeps, { space: 2 })
+        console.warn(`writeAutoConfigDebug - writing to ${configuration.writeAutoConfigDebug}`)
+        fs.writeFile(configuration.writeAutoConfigDebug, serialized, cb)
+      }))
+    }
   }
 }
 
@@ -69,6 +85,7 @@ function getConfigurationFromPluginOpts (pluginOpts) {
     'includePrelude',
     'pruneConfig',
     'debugMode',
+    'writeAutoConfigDebug',
     '_' // Browserify adds this as the first option when running from the command line
   ])
   const invalidKeys = Reflect.ownKeys(pluginOpts).filter(key => !allowedKeys.has(key))
@@ -81,9 +98,11 @@ function getConfigurationFromPluginOpts (pluginOpts) {
     // default true
     includePrelude: 'includePrelude' in pluginOpts ? pluginOpts.includePrelude : true,
     pruneConfig: pluginOpts.pruneConfig,
-    debugMode: pluginOpts.debugMode
+    debugMode: pluginOpts.debugMode,
+    writeAutoConfigDebug: undefined
   }
 
+  const defaultWriteAutoConfigDebug = './module-data.json'
   const defaultOverrideConfig = '/lavamoat-config-override.json'
 
   if (typeof pluginOpts.config === 'function') {
@@ -184,6 +203,12 @@ function getConfigurationFromPluginOpts (pluginOpts) {
   } else {
     // invalid setting, throw an error
     throw new Error('LavaMoat - Unrecognized value for writeAutoConfig')
+  }
+
+  if (typeof pluginOpts.writeAutoConfigDebug === 'string') {
+    configuration.writeAutoConfigDebug = pluginOpts.writeAutoConfigDebug
+  } else if (pluginOpts.writeAutoConfigDebug) {
+    configuration.writeAutoConfigDebug = defaultWriteAutoConfigDebug
   }
 
   return configuration

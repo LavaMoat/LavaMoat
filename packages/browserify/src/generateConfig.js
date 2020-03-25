@@ -139,7 +139,7 @@ function createSpy (onData, onEnd) {
   }, (cb) => {
     // call flush observer
     onEnd()
-    // end normally
+    // End as normal
     cb()
   })
 }
