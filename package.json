@@ -6,7 +6,8 @@
   },
   "scripts": {
     "test": "lerna run test",
-    "lint": "lerna run lint"
+    "lint": "lerna run lint",
+    "publish": "lerna publish from-package --no-push --no-git-tag-version --yes"
   },
   "workspaces": [
     "packages/*"
