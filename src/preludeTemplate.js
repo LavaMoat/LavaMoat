@@ -69,6 +69,13 @@
     const globalStore = new Map()
     const membraneSpaceForPackage = new Map()
     const membrane = new Membrane({ debugMode })
+    const endowmentsMembraneSpace = membrane.makeMembraneSpace({
+      label: '<endowments>',
+      // // default is a transparent membrane handler
+      // createHandler: () => Reflect,
+      dangerouslyAlwaysUnwrap: true,
+    })
+    membraneSpaceForPackage.set(endowmentsMembraneSpace.label, endowmentsMembraneSpace)
 
     return {
       loadBundle,
@@ -289,7 +296,7 @@
         let outGraph
         // set <root>'s membrane space to <endowments> so it receives unwrapped refs
         if (parentModulePackageName === '<root>') {
-          outGraph = getMembraneSpaceForPackage('<endowments>')
+          outGraph = getMembraneSpaceForPackage('<root>')
         } else {
           outGraph = getMembraneSpaceForPackage(parentModulePackageName)
         }

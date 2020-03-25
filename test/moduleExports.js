@@ -133,16 +133,15 @@ test('moduleExports - object returned from exported function should be mutable',
   t.equal(one.abc, 123, 'Object should be mutable')
 })
 
-test('moduleExports - <root> package should have <endowments> membrane space and receive unwrapped child refs', async (t) => {
+test('moduleExports - <endowments> membrane space should round-trip correctly', async (t) => {
   const testObj = {}
   global.get = () => testObj
   global.check = (target) => target === testObj
 
   function defineOne () {
-    const obj = {
+    module.exports = {
       get: () => global.get()
     }
-    module.exports = obj
   }
 
   function defineEntry () {
