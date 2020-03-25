@@ -5,7 +5,8 @@
     "lerna": "^3.20.2"
   },
   "scripts": {
-    "test": "lerna run test"
+    "test": "lerna run test",
+    "lint": "lerna run lint"
   },
   "workspaces": [
     "packages/*"

@@ -1,0 +1,43 @@
+{
+  "name": "lavamoat-core",
+  "version": "8.2.1",
+  "description": "LavaMoat kernel and utils",
+  "main": "src/index.js",
+  "directories": {
+    "lib": "lib",
+    "test": "test"
+  },
+  "engines": {
+    "node": ">10.15.1"
+  },
+  "dependencies": {
+    "cytoplasm": "^3.0.3"
+  },
+  "devDependencies": {
+    "ses": "git+https://git@github.com/agoric/ses#fdb393f817f6124c4d055bff26b68e4cbe17618e"
+  },
+  "scripts": {
+    "lint": "npm run lint:standard && npm run lint:deps",
+    "lint:standard": "standard src/**/*.js test/**/*.js",
+    "lint:fix": "standard src/**/*.js test/**/*.js --fix",
+    "lint:deps": "depcheck --ignore-dirs=lib --ignores='ses,depcheck,standard'",
+    "build:ses": "(cd ./node_modules/ses && npm i && npm run build && cp ./dist/ses.umd.js ../../lib/)"
+  },
+  "author": "",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MetaMask/lavamoat-browserify.git"
+  },
+  "bugs": {
+    "url": "https://github.com/MetaMask/lavamoat-browserify/issues"
+  },
+  "homepage": "https://github.com/MetaMask/lavamoat-browserify#readme",
+  "standard": {
+    "ignore": [
+      "/src/sourcemaps.js",
+      "/test/fixtures",
+      "/src/preludeTemplate.js"
+    ]
+  }
+}
