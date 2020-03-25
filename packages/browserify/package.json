@@ -20,6 +20,7 @@
     "cytoplasm": "^3.0.3",
     "fromentries": "^1.1.0",
     "json-stable-stringify": "^1.0.1",
+    "lavamoat-core": "^1.0.0",
     "merge-deep": "^3.0.2",
     "mkdirp": "^1.0.3",
     "module-name-from-path": "git+https://git@github.com/kumavis/module-name-from-path.git",
