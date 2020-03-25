@@ -6,15 +6,16 @@ const fs = require('fs')
 runLava().catch(console.error)
 
 async function runLava () {
-  const [,,target] = process.argv
-  const relativeRequire = createRelativeRequire(process.cwd())
-  relativeRequire(target)
+  const [,,entryPath] = process.argv
+  const entryDir = process.cwd()
+  const relativeRequire = createRelativeRequire(entryDir)
+  relativeRequire(entryPath)
 }
 
-function createRelativeRequire (cwd) {
+function createRelativeRequire (dir) {
   return function relativeRequire (id) {
-    console.log(`requireRelative: ${cwd} -> ${id}`)
-    const fullPath = path.resolve(cwd, id)
+    console.log(`requireRelative: ${dir} -> ${id}`)
+    const fullPath = path.resolve(dir, id)
     const resolved = require.resolve(fullPath)
     return absoluteRequire(resolved)
   }
