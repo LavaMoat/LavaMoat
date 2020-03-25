@@ -11,7 +11,8 @@
   },
   "scripts": {
     "lavamoat": "(cd test/project1/ && webpack entry.js)",
-    "start": "(cd test/project1/ && serve dist)"
+    "start": "(cd test/project1/ && serve dist)",
+    "test": "yarn lavamoat"
   },
   "dependencies": {
     "lavamoat-browserify": "git://github.com/LavaMoat/lavamoat-browserify.git#10eeb7e8ba59a2cc5666bfd32c6fc4e5c9adeba9",
