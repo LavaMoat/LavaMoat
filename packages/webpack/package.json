@@ -1,0 +1,22 @@
+{ 
+  "name": "lavamoat-webpack",
+  "version": "0.1.0",
+  "description": "webpack plugin for sandboxing dependencies with LavaMoat",
+  "main": "./src/index.js",
+  "devDependencies": {
+    "metamask-logo": "^2.2.1",
+    "serve": "^11.3.0",
+    "webpack": "^4.41.0",
+    "webpack-cli": "^3.3.9"
+  },
+  "scripts": {
+    "lavamoat": "(cd test/project1/ && webpack entry.js)",
+    "start": "(cd test/project1/ && serve dist)"
+  },
+  "dependencies": {
+    "lavamoat-browserify": "git://github.com/LavaMoat/lavamoat-browserify.git#10eeb7e8ba59a2cc5666bfd32c6fc4e5c9adeba9",
+    "merge-deep": "^3.0.2",
+    "mkdirp": "^1.0.3",
+    "webpack-sources": "^1.4.3"
+  }
+}
