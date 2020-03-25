@@ -505,3 +505,21 @@ async function testConfigValidator (configOverride, config, shouldBeValid, t) {
     }
   }
 }
+
+test('Config - Applies writeAutoConfigDebug plugin option and dumps module object to disk', async (t) => {
+  const tmpObj = tmp.dirSync()
+
+  const defaults = {
+    cwd: tmpObj.name,
+    stdio: 'inherit'
+  }
+
+  const expectedPath = path.join(tmpObj.name, './module-data.json')
+  const scriptPath = require.resolve('./fixtures/runBrowserifyAutoConfig')
+
+  t.notOk(fs.existsSync(expectedPath), 'Module data does not yet exist')
+
+  execSync(`node ${scriptPath}`, defaults)
+
+  t.ok(fs.existsSync(expectedPath), 'Module data exists')
+})
