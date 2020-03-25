@@ -1,6 +1,6 @@
-### sesify-tofu
+### lavamoat-tofu
 
-This is the TOFU (trust-on-first-use) static analysis tool used by sesify to automatically generate useable config
+This is the TOFU (trust-on-first-use) static analysis tool used by LavaMoat to automatically generate useable config
 
 ### security note
 
