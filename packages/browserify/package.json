@@ -28,7 +28,7 @@
     "pify": "^4.0.1",
     "resolve-package-path": "^1.2.7",
     "safe-buffer": "^5.1.2",
-    "sesify-tofu": "^2.0.4",
+    "lavamoat-tofu": "^2.0.4",
     "through2": "^3.0.0",
     "umd": "^3.0.3"
   },

@@ -1,0 +1,15 @@
+{
+  "name": "lavamoat-tofu",
+  "version": "2.0.5",
+  "main": "src/index.js",
+  "license": "MIT",
+  "dependencies": {
+    "acorn-globals": "^4.3.3"
+  },
+  "devDependencies": {
+    "tape": "^4.11.0"
+  },
+  "scripts": {
+    "test": "node test/"
+  }
+}
