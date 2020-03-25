@@ -2447,11 +2447,6 @@ cyclist@^1.0.1:
   resolved "https://registry.yarnpkg.com/cyclist/-/cyclist-1.0.1.tgz#596e9698fd0c80e12038c2b82d6eb1b35b6224d9"
   integrity sha1-WW6WmP0MgOEgOMK4LW6xs1tiJNk=
 
-cytoplasm@^2.0.2:
-  version "2.0.5"
-  resolved "https://registry.yarnpkg.com/cytoplasm/-/cytoplasm-2.0.5.tgz#926ea93cbf0fa5cf4c5d86a2b642bb89add96776"
-  integrity sha512-0x4QINKrEE12n02iTdmCO7TtpZkNvGMrJWxTyOVwE1xQvXG6my5809Vm5N+KJHa2l4OxlJ4s+cTtCkdNpyTsMA==
-
 cytoplasm@^3.0.3:
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/cytoplasm/-/cytoplasm-3.1.0.tgz#dddd1430dff64dc1f2e1d85726aa36a5daa6e869"
@@ -4541,29 +4536,6 @@ labeled-stream-splicer@^2.0.0:
     inherits "^2.0.1"
     stream-splicer "^2.0.0"
 
-"lavamoat-browserify@git://github.com/LavaMoat/lavamoat-browserify.git#10eeb7e8ba59a2cc5666bfd32c6fc4e5c9adeba9":
-  version "8.1.1"
-  resolved "git://github.com/LavaMoat/lavamoat-browserify.git#10eeb7e8ba59a2cc5666bfd32c6fc4e5c9adeba9"
-  dependencies:
-    JSONStream "^1.3.5"
-    acorn-globals "^4.3.3"
-    acorn-walk "^6.1.1"
-    browserify-transform-tools "^1.7.0"
-    combine-source-map "^0.8.0"
-    cytoplasm "^2.0.2"
-    fromentries "^1.1.0"
-    json-stable-stringify "^1.0.1"
-    merge-deep "^3.0.2"
-    module-name-from-path "git+https://git@github.com/kumavis/module-name-from-path.git"
-    offset-sourcemap-lines "^1.0.1"
-    pify "^4.0.1"
-    resolve-package-path "^1.2.7"
-    safe-buffer "^5.1.2"
-    sesify-tofu "^2.0.4"
-    tape "^4.9.1"
-    through2 "^3.0.0"
-    umd "^3.0.3"
-
 lazy-cache@^0.2.3:
   version "0.2.7"
   resolved "https://registry.yarnpkg.com/lazy-cache/-/lazy-cache-0.2.7.tgz#7feddf2dcb6edb77d11ef1d117ab5ffdf0ab1b65"
@@ -6634,13 +6606,6 @@ serve@^11.3.0:
     esm "^3.2.25"
     realms-shim "^1.2.2"
 
-sesify-tofu@^2.0.4:
-  version "2.0.4"
-  resolved "https://registry.yarnpkg.com/sesify-tofu/-/sesify-tofu-2.0.4.tgz#b31d4c8d67ea2d61e9c5be4948f085a849f3e632"
-  integrity sha512-8mWENwqoWauYrtUVww4/QE5mFjj+2JjvVdMWqjcfOZkt3SjOACy+S0ZnxOn06NYpW6epRaPYIqoIF8SdhvXjdA==
-  dependencies:
-    acorn-globals "^4.3.3"
-
 set-blocking@^2.0.0, set-blocking@~2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/set-blocking/-/set-blocking-2.0.0.tgz#045f9782d011ae9a6803ddd382b24392b3d890f7"
@@ -7199,7 +7164,7 @@ tape-promise@^4.0.0:
     is-promise "^2.1.0"
     onetime "^2.0.0"
 
-tape@^4.11.0, tape@^4.13.2, tape@^4.9.1:
+tape@^4.11.0, tape@^4.13.2:
   version "4.13.2"
   resolved "https://registry.yarnpkg.com/tape/-/tape-4.13.2.tgz#eb419b9d9bc004025b1a81a5b63093e07f425629"
   integrity sha512-waWwC/OqYVE9TS6r1IynlP2sEdk4Lfo6jazlgkuNkPTHIbuG2BTABIaKdlQWwPeB6Oo4ksZ1j33Yt0NTOAlYMQ==

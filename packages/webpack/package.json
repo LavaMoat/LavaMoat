@@ -15,7 +15,7 @@
     "test": "yarn lavamoat"
   },
   "dependencies": {
-    "lavamoat-browserify": "git://github.com/LavaMoat/lavamoat-browserify.git#10eeb7e8ba59a2cc5666bfd32c6fc4e5c9adeba9",
+    "lavamoat-browserify": "^8.2.2",
     "merge-deep": "^3.0.2",
     "mkdirp": "^1.0.3",
     "webpack-sources": "^1.4.3"
