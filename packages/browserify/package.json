@@ -27,7 +27,8 @@
     "safe-buffer": "^5.1.2",
     "sesify-tofu": "^2.0.4",
     "through2": "^3.0.0",
-    "umd": "^3.0.3"
+    "umd": "^3.0.3",
+    "mkdirp": "^1.0.3"
   },
   "devDependencies": {
     "bify-package-factor": "^1.0.7",
@@ -35,7 +36,6 @@
     "clone": "^2.1.2",
     "convert-source-map": "^1.6.0",
     "depcheck": "^0.8.3",
-    "mkdirp": "^1.0.3",
     "pump": "^3.0.0",
     "rimraf": "^3.0.2",
     "ses": "git+https://git@github.com/agoric/ses#fdb393f817f6124c4d055bff26b68e4cbe17618e",
