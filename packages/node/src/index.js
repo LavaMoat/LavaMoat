@@ -2,18 +2,26 @@
 
 const path = require('path')
 const fs = require('fs')
-const { generateKernel } = require('lavamoat-core')
-const { packageDataForModule } = require('lavamoat-browserify/src/packageData')
 const yargs = require('yargs')
+const { generateKernel } = require('lavamoat-core')
+const { parseForConfig } = require('./parseForConfig')
 
 runLava().catch(console.error)
 
 async function runLava () {
-  const { entryPath } = parseArgs()
+  const { entryPath, writeAutoConfig } = parseArgs()
   const entryDir = process.cwd()
-  const kernel = createKernel()
   const entryId = path.resolve(entryDir, entryPath)
-  kernel.internalRequire(entryId)
+  if (writeAutoConfig) {
+    // parse mode
+    console.log(`LavaMoat generating config for "${entryId}"...`)
+    const parseResult = await parseForConfig({ entryId })
+    console.log('done parsing', parseResult)
+  } else {
+    // execution mode
+    const kernel = createKernel()
+    kernel.internalRequire(entryId)
+  }
 }
 
 function parseArgs () {
