@@ -3,13 +3,21 @@
 const path = require('path')
 const fs = require('fs')
 const yargs = require('yargs')
+const mergeDeep = require('merge-deep')
 const { generateKernel } = require('lavamoat-core')
+const { packageDataForModule } = require('lavamoat-browserify/src/packageData')
 const { parseForConfig } = require('./parseForConfig')
 
 runLava().catch(console.error)
 
 async function runLava () {
-  const { entryPath, writeAutoConfig, configPath } = parseArgs()
+  const {
+    entryPath,
+    writeAutoConfig,
+    configPath,
+    configOverridePath,
+    debugMode,
+  } = parseArgs()
   const entryDir = process.cwd()
   const entryId = path.resolve(entryDir, entryPath)
   if (writeAutoConfig) {
@@ -20,7 +28,8 @@ async function runLava () {
     console.log(`LavaMoat wrote config to "${configPath}"`)
   } else {
     // execution mode
-    const kernel = createKernel()
+    const lavamoatConfig = await loadConfig({ configPath, configOverridePath })
+    const kernel = createKernel({ lavamoatConfig, debugMode })
     kernel.internalRequire(entryId)
   }
 }
@@ -105,4 +114,20 @@ function getRelativeModuleId (parentAbsolutePath, relativePath) {
   const fullPath = path.resolve(parentDir, relativePath)
   const resolved = require.resolve(fullPath)
   return resolved
+}
+
+async function loadConfig ({ configPath, configOverridePath }) {
+  let config = { resources: {} }
+  // try config
+  if (fs.existsSync(configPath)) {
+    const configSource = fs.readFileSync(configPath, 'utf8')
+    config = JSON.parse(configSource)
+  }
+  // try config override
+  if (fs.existsSync(configOverridePath)) {
+    const configSource = fs.readFileSync(configOverridePath, 'utf8')
+    const overrideConfig = JSON.parse(configSource)
+    config = mergeDeep(config, overrideConfig)
+  }
+  return config
 }
