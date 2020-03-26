@@ -37,7 +37,9 @@
     "ignore": [
       "/src/sourcemaps.js",
       "/test/fixtures",
-      "/src/preludeTemplate.js"
+      "/src/preludeTemplate.js",
+      "/src/kernelTemplate.js",
+      "/src/kernelCoreTemplate.js"
     ]
   }
 }

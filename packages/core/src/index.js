@@ -1,9 +1,9 @@
 const {
   generatePrelude,
-  generateKernel,
+  generateKernel
 } = require('./generatePrelude')
 
 module.exports = {
   generatePrelude,
-  generateKernel,
+  generateKernel
 }
