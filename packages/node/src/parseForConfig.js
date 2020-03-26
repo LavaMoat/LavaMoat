@@ -5,7 +5,6 @@ const resolve = require('resolve')
 
 module.exports = { parseForConfig }
 
-
 async function parseForConfig ({ entryId }) {
   const md = mdeps({
     resolve,
@@ -20,7 +19,7 @@ async function parseForConfig ({ entryId }) {
     },
     // during parse, ignore missing modules
     // let this be handled during runtime
-    ignoreMissing: true,
+    ignoreMissing: true
   })
   md.end({ file: entryId })
 
@@ -29,12 +28,12 @@ async function parseForConfig ({ entryId }) {
 
   md
   // annotate with package name
-  .pipe(createPackageDataStream())
+    .pipe(createPackageDataStream())
   // inspect
-  .pipe(createConfigSpy({
-    onResult: resolvePromise
-  }))
-  .resume()
+    .pipe(createConfigSpy({
+      onResult: resolvePromise
+    }))
+    .resume()
 
   const serializedConfig = await parsePromise
   return serializedConfig

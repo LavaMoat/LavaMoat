@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* eslint-disable no-eval */
 
 const path = require('path')
 const fs = require('fs')
@@ -16,7 +17,7 @@ async function runLava () {
     writeAutoConfig,
     configPath,
     configOverridePath,
-    debugMode,
+    debugMode
   } = parseArgs()
   const entryDir = process.cwd()
   const entryId = path.resolve(entryDir, entryPath)
@@ -47,35 +48,34 @@ function parseArgs () {
         alias: 'configPath',
         describe: 'the path for the config file',
         type: 'string',
-        default: './lavamoat-config.json',
+        default: './lavamoat-config.json'
       })
       // the path for the config override file
       yargs.option('configOverride', {
         alias: 'configOverridePath',
         describe: 'the path for the config override file',
         type: 'string',
-        default: './lavamoat-config-override.json',
+        default: './lavamoat-config-override.json'
       })
       // debugMode, disable some protections for easier debugging
       yargs.option('debugMode', {
         describe: 'debugMode, disable some protections for easier debugging',
         type: 'boolean',
-        default: false,
+        default: false
       })
       // parsing mode, write config to config path
       yargs.option('writeAutoConfig', {
         describe: 'parse the application from the entry file and generate a LavaMoat config file.',
         type: 'boolean',
-        default: false,
+        default: false
       })
       // parsing mode, write config debug info to specified or default path
       yargs.option('writeAutoConfigDebug', {
         describe: 'when writeAutoConfig is enabled, write config debug info to specified or default path',
         type: 'string',
         // default: './lavamoat-config-debug.json',
-        default: undefined,
+        default: undefined
       })
-
     })
     .help()
 
@@ -89,7 +89,7 @@ function createKernel () {
   const kernel = createKernel({
     lavamoatConfig,
     loadModuleData,
-    getRelativeModuleId,
+    getRelativeModuleId
   })
   return kernel
 }
@@ -105,7 +105,7 @@ function loadModuleData (absolutePath) {
     file: absolutePath,
     package: packageName,
     source: wrappedContent,
-    sourceString: wrappedContent,
+    sourceString: wrappedContent
   }
 }
 
