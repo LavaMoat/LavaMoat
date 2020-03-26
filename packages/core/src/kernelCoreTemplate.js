@@ -91,26 +91,30 @@
       const environment = configForModule.environment || (isEntryModule ? 'unfrozen' : 'frozen')
       const runInSes = environment !== 'unfrozen'
 
-      let moduleInitializer
-      // determine if its a SES-wrapped or naked module initialization
-      if (runInSes) {
-        // set the module initializer as the SES-wrapped version
-        const moduleRealm = realm.global.Realm.makeCompartment()
-        const globalsConfig = configForModule.globals
-        const endowmentsMembraneSpace = getMembraneSpaceForPackage('<endowments>')
-        const membraneEndowments = membrane.bridge(endowments, endowmentsMembraneSpace, packageMembraneSpace)
-        prepareRealmGlobalFromConfig(moduleRealm.global, globalsConfig, membraneEndowments, globalStore)
-        // execute in module realm with modified realm global
-        try {
-          moduleInitializer = moduleRealm.evaluate(`${moduleSource}`)
-        } catch (err) {
-          console.warn(`LavaMoat - Error evaluating module "${moduleId}" from package "${packageName}"`)
-          throw err
+      // allow moduleInitializer to be set by loadModuleData
+      let moduleInitializer = moduleData.moduleInitializer
+      // otherwise setup initializer from moduleSource
+      if (!moduleInitializer) {
+        // determine if its a SES-wrapped or naked module initialization
+        if (runInSes) {
+          // set the module initializer as the SES-wrapped version
+          const moduleRealm = realm.global.Realm.makeCompartment()
+          const globalsConfig = configForModule.globals
+          const endowmentsMembraneSpace = getMembraneSpaceForPackage('<endowments>')
+          const membraneEndowments = membrane.bridge(endowments, endowmentsMembraneSpace, packageMembraneSpace)
+          prepareRealmGlobalFromConfig(moduleRealm.global, globalsConfig, membraneEndowments, globalStore)
+          // execute in module realm with modified realm global
+          try {
+            moduleInitializer = moduleRealm.evaluate(`${moduleSource}`)
+          } catch (err) {
+            console.warn(`LavaMoat - Error evaluating module "${moduleId}" from package "${packageName}"`)
+            throw err
+          }
+        } else {
+          endowments.global = globalRef
+          // set the module initializer as the unwrapped version
+          moduleInitializer = unsafeEvalWithEndowments(`${moduleSource}`, endowments)
         }
-      } else {
-        endowments.global = globalRef
-        // set the module initializer as the unwrapped version
-        moduleInitializer = unsafeEvalWithEndowments(`${moduleSource}`, endowments)
       }
       if (typeof moduleInitializer !== 'function') {
         throw new Error(`LavaMoat - moduleInitializer is not defined correctly. got "${typeof moduleInitializer}" ses:${runInSes}\n${moduleSource}`)
@@ -171,13 +175,9 @@
     // the exports are processed via "protectExportsRequireTime" per the module's configuration
     function requireRelative ({ requestedName, parentModuleExports, parentModuleData, parentPackageConfig, parentModuleId }) {
       const parentModulePackageName = parentModuleData.package
-      const parentModuleDepsMap = parentModuleData.deps
       const parentPackagesWhitelist = parentPackageConfig.packages
 
       // resolve the moduleId from the requestedName
-      // this is just a warning if the entry is missing in the deps map (local requestedName -> global moduleId)
-      // if it is missing we try to fetch it anyways using the requestedName as the moduleId
-      // The dependency whitelist should still be enforced elsewhere
       const moduleId = getRelativeModuleId(parentModuleId, requestedName)
 
       // browserify goop:

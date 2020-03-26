@@ -5,6 +5,7 @@ const path = require('path')
 const fs = require('fs')
 const yargs = require('yargs')
 const mergeDeep = require('merge-deep')
+const resolve = require('resolve')
 const { generateKernel } = require('lavamoat-core')
 const { packageDataForModule } = require('lavamoat-browserify/src/packageData')
 const { parseForConfig } = require('./parseForConfig')
@@ -95,24 +96,34 @@ function createKernel () {
 }
 
 function loadModuleData (absolutePath) {
-  console.log('loadModuleData', absolutePath)
-  const moduleContent = fs.readFileSync(absolutePath)
-  const wrappedContent = `(function(require,module,exports){${moduleContent}})`
-  const packageData = packageDataForModule({ file: absolutePath })
-  const packageName = packageData.packageName || '<root>'
-
-  return {
-    file: absolutePath,
-    package: packageName,
-    source: wrappedContent,
-    sourceString: wrappedContent
+  if (resolve.isCore(absolutePath)) {
+    // for core modules (eg "fs")
+    return {
+      file: absolutePath,
+      package: absolutePath,
+      // wrapper around unprotected "require"
+      moduleInitializer: (_, module) => {
+        module.exports = require(absolutePath)
+      }
+    }
+  } else {
+    // load normal user-space module
+    const moduleContent = fs.readFileSync(absolutePath)
+    const wrappedContent = `(function(require,module,exports){${moduleContent}})`
+    const packageData = packageDataForModule({ file: absolutePath })
+    const packageName = packageData.packageName || '<root>'
+    return {
+      file: absolutePath,
+      package: packageName,
+      source: wrappedContent,
+      sourceString: wrappedContent
+    }
   }
 }
 
 function getRelativeModuleId (parentAbsolutePath, relativePath) {
   const parentDir = path.parse(parentAbsolutePath).dir
-  const fullPath = path.resolve(parentDir, relativePath)
-  const resolved = require.resolve(fullPath)
+  const resolved = resolve.sync(relativePath, { basedir: parentDir })
   return resolved
 }
 
