@@ -36,6 +36,6 @@ async function parseForConfig ({ entryId }) {
   }))
   .resume()
 
-  const parseResult = await parsePromise
-  return parseResult
+  const serializedConfig = await parsePromise
+  return serializedConfig
 }

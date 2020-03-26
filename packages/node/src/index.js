@@ -9,14 +9,15 @@ const { parseForConfig } = require('./parseForConfig')
 runLava().catch(console.error)
 
 async function runLava () {
-  const { entryPath, writeAutoConfig } = parseArgs()
+  const { entryPath, writeAutoConfig, configPath } = parseArgs()
   const entryDir = process.cwd()
   const entryId = path.resolve(entryDir, entryPath)
   if (writeAutoConfig) {
     // parse mode
     console.log(`LavaMoat generating config for "${entryId}"...`)
-    const parseResult = await parseForConfig({ entryId })
-    console.log('done parsing', parseResult)
+    const serializedConfig = await parseForConfig({ entryId })
+    fs.writeFileSync(configPath, serializedConfig)
+    console.log(`LavaMoat wrote config to "${configPath}"`)
   } else {
     // execution mode
     const kernel = createKernel()
@@ -34,19 +35,21 @@ function parseArgs () {
       })
       // the path for the config file
       yargs.option('config', {
-        describe: 'config',
+        alias: 'configPath',
+        describe: 'the path for the config file',
         type: 'string',
         default: './lavamoat-config.json',
       })
       // the path for the config override file
       yargs.option('configOverride', {
-        describe: 'configOverride',
+        alias: 'configOverridePath',
+        describe: 'the path for the config override file',
         type: 'string',
         default: './lavamoat-config-override.json',
       })
       // debugMode, disable some protections for easier debugging
       yargs.option('debugMode', {
-        describe: 'debugMode',
+        describe: 'debugMode, disable some protections for easier debugging',
         type: 'boolean',
         default: false,
       })
@@ -58,7 +61,7 @@ function parseArgs () {
       })
       // parsing mode, write config debug info to specified or default path
       yargs.option('writeAutoConfigDebug', {
-        describe: 'writeAutoConfigDebug',
+        describe: 'when writeAutoConfig is enabled, write config debug info to specified or default path',
         type: 'string',
         // default: './lavamoat-config-debug.json',
         default: undefined,
