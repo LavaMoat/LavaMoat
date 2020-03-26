@@ -1,6 +1,7 @@
 {
   "name": "lavamoat-node",
   "bin": {
+    "lavamoat-node": "src/index.js",
     "lava": "src/index.js"
   },
   "version": "1.0.4",
