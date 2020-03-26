@@ -8,5 +8,8 @@
   "license": "MIT",
   "scripts": {
     "test": "node test/index.js"
+  },
+  "dependencies": {
+    "yargs": "^15.3.1"
   }
 }

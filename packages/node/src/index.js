@@ -4,9 +4,64 @@ const path = require('path')
 const fs = require('fs')
 const { generateKernel } = require('lavamoat-core')
 const { packageDataForModule } = require('lavamoat-browserify/src/packageData')
-
+const yargs = require('yargs')
 
 runLava().catch(console.error)
+
+async function runLava () {
+  const { entryPath } = parseArgs()
+  const entryDir = process.cwd()
+  const kernel = createKernel()
+  const entryId = path.resolve(entryDir, entryPath)
+  kernel.internalRequire(entryId)
+}
+
+function parseArgs () {
+  const argsParser = yargs
+    .usage('$0 <entryPath>', 'start the application', (yargs) => {
+      // the entry file to run (or parse)
+      yargs.positional('entryPath', {
+        describe: 'the path to the entry file for your application. same as node.js',
+        type: 'string'
+      })
+      // the path for the config file
+      yargs.option('config', {
+        describe: 'config',
+        type: 'string',
+        default: './lavamoat-config.json',
+      })
+      // the path for the config override file
+      yargs.option('configOverride', {
+        describe: 'configOverride',
+        type: 'string',
+        default: './lavamoat-config-override.json',
+      })
+      // debugMode, disable some protections for easier debugging
+      yargs.option('debugMode', {
+        describe: 'debugMode',
+        type: 'boolean',
+        default: false,
+      })
+      // parsing mode, write config to config path
+      yargs.option('writeAutoConfig', {
+        describe: 'parse the application from the entry file and generate a LavaMoat config file.',
+        type: 'boolean',
+        default: false,
+      })
+      // parsing mode, write config debug info to specified or default path
+      yargs.option('writeAutoConfigDebug', {
+        describe: 'writeAutoConfigDebug',
+        type: 'string',
+        // default: './lavamoat-config-debug.json',
+        default: undefined,
+      })
+
+    })
+    .help()
+
+  const parsedArgs = argsParser.parse()
+  return parsedArgs
+}
 
 function createKernel () {
   const lavamoatConfig = {}
@@ -39,12 +94,4 @@ function getRelativeModuleId (parentAbsolutePath, relativePath) {
   const fullPath = path.resolve(parentDir, relativePath)
   const resolved = require.resolve(fullPath)
   return resolved
-}
-
-async function runLava () {
-  const [,,entryPath] = process.argv
-  const entryDir = process.cwd()
-  const kernel = createKernel()
-  const entryId = path.resolve(entryDir, entryPath)
-  kernel.internalRequire(entryId)
 }
