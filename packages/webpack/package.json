@@ -1,6 +1,6 @@
 {
   "name": "lavamoat-webpack",
-  "version": "1.0.2",
+  "version": "1.0.4",
   "description": "webpack plugin for sandboxing dependencies with LavaMoat",
   "main": "./src/index.js",
   "devDependencies": {
@@ -19,5 +19,15 @@
     "merge-deep": "^3.0.2",
     "mkdirp": "^1.0.3",
     "webpack-sources": "^1.4.3"
-  }
+  },
+  "directories": {
+    "test": "test"
+  },
+  "repository": "git+https://github.com/LavaMoat/lavamoat.git",
+  "bugs": {
+    "url": "https://github.com/LavaMoat/lavamoat/issues"
+  },
+  "homepage": "https://github.com/LavaMoat/lavamoat#readme",
+  "author": "kumavis",
+  "license": "MIT"
 }

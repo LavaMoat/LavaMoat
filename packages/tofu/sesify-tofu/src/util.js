@@ -9,10 +9,10 @@ module.exports = {
   addGlobalUsage,
   mergeConfig,
   objToMap,
-  mapToObj
+  mapToObj,
 }
 
-function getMemberExpressionNesting (identifierNode) {
+function getMemberExpressionNesting(identifierNode) {
   // remove the identifier node itself
   const parents = identifierNode.parents.slice(0, -1)
   // find unbroken membership chain closest to identifier
@@ -20,7 +20,7 @@ function getMemberExpressionNesting (identifierNode) {
   return memberExpressions
 }
 
-function getKeysForMemberExpressionChain (memberExpressions) {
+function getKeysForMemberExpressionChain(memberExpressions) {
   const keys = memberExpressions.map(member => getNameFromNode(member.property))
   const rootMemberExpression = memberExpressions[0]
   const rootName = getNameFromNode(rootMemberExpression.object)
@@ -38,17 +38,17 @@ function getNameFromNode (node) {
   }
 }
 
-function isDirectMemberExpression (node) {
+function isDirectMemberExpression(node) {
   return node.type === 'MemberExpression' && !node.computed
 }
 
-function isUndefinedCheck (identifierNode) {
+function isUndefinedCheck(identifierNode) {
   const parentExpression = identifierNode.parents[identifierNode.parents.length - 2]
   const isTypeof = (parentExpression.type === 'UnaryExpression' || parentExpression.operator === 'typeof')
   return isTypeof
 }
 
-function getTailmostMatchingChain (items, matcher) {
+function getTailmostMatchingChain(items, matcher) {
   const onlyMatched = items.map(item => matcher(item) ? item : null)
   const lastIndex = onlyMatched.lastIndexOf(null)
   if (lastIndex === -1) return onlyMatched.slice()
@@ -56,7 +56,7 @@ function getTailmostMatchingChain (items, matcher) {
 }
 
 // if array contains 'x' and 'x.y' just keep 'x'
-function reduceToTopmostApiCalls (globalsConfig) {
+function reduceToTopmostApiCalls(globalsConfig) {
   const allPaths = Array.from(globalsConfig.keys()).sort()
   return allPaths.forEach((path) => {
     const parts = path.split('.')
@@ -71,6 +71,7 @@ function reduceToTopmostApiCalls (globalsConfig) {
     const parentsAlreadyInArray = parents.some(parent => allPaths.includes(parent))
     if (parentsAlreadyInArray) {
       globalsConfig.delete(path)
+      return
     }
     // if no parents found, ok to include
   })
@@ -98,6 +99,6 @@ function objToMap (obj) {
 // Object.fromEntries not available in node v10
 function mapToObj (map) {
   const obj = {}
-  map.forEach((value, key) => { obj[key] = value })
+  map.forEach((value, key) => obj[key] = value)
   return obj
 }

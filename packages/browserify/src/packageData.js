@@ -2,6 +2,7 @@ const through = require('through2').obj
 const packageNameFromPath = require('module-name-from-path')
 const resolvePackagePath = require('resolve-package-path')
 const pathSeperator = require('path').sep
+const { isCore } = require('resolve')
 const { rootSlug } = require('./generateConfig')
 
 module.exports = {
@@ -28,6 +29,11 @@ function decorateWithPackageData (moduleData) {
 }
 
 function packageDataForModule (moduleData) {
+  // handle core packages
+  if (isCore(moduleData.id)) {
+    return { packageName: moduleData.id, packageVersion: undefined }
+  }
+  // parse package name from file path
   const path = moduleData.file
   let packageName = packageNameFromPath(path)
   let packageVersion
@@ -36,9 +42,9 @@ function packageDataForModule (moduleData) {
   } else {
     // detect if files are part of the entry and not from dependencies
     const filePathFirstPart = path.split(pathSeperator)[0]
-    const isAppLevel = ['.', '..', ''].includes(filePathFirstPart)
+    const isRootLevel = ['.', '..', ''].includes(filePathFirstPart)
     // otherwise fail
-    if (!isAppLevel) {
+    if (!isRootLevel) {
       throw new Error(`LavaMoat - Config Autogen - Failed to parse module name. first part: "${filePathFirstPart}" full path: "${path}"`)
     }
     packageName = rootSlug

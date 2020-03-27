@@ -1,11 +1,10 @@
 {
   "name": "lavamoat-core",
-  "version": "1.0.2",
+  "version": "1.0.4",
   "description": "LavaMoat kernel and utils",
   "main": "src/index.js",
   "directories": {
-    "lib": "lib",
-    "test": "test"
+    "lib": "lib"
   },
   "engines": {
     "node": ">10.15.1"
@@ -14,7 +13,7 @@
     "cytoplasm": "^3.0.3"
   },
   "devDependencies": {
-    "ses": "git+https://git@github.com/agoric/ses#fdb393f817f6124c4d055bff26b68e4cbe17618e"
+    "ses": "git+https://git@github.com/agoric/ses.git#fdb393f817f6124c4d055bff26b68e4cbe17618e"
   },
   "scripts": {
     "lint": "npm run lint:standard && npm run lint:deps",
@@ -23,16 +22,13 @@
     "lint:deps": "depcheck --ignore-dirs=lib --ignores='ses,depcheck,standard'",
     "build:ses": "(cd ./node_modules/ses && npm i && npm run build && cp ./dist/ses.umd.js ../../lib/)"
   },
-  "author": "",
-  "license": "ISC",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/MetaMask/lavamoat-browserify.git"
-  },
+  "author": "kumavis",
+  "license": "MIT",
+  "repository": "git+https://github.com/LavaMoat/lavamoat.git",
   "bugs": {
-    "url": "https://github.com/MetaMask/lavamoat-browserify/issues"
+    "url": "https://github.com/LavaMoat/lavamoat/issues"
   },
-  "homepage": "https://github.com/MetaMask/lavamoat-browserify#readme",
+  "homepage": "https://github.com/LavaMoat/lavamoat#readme",
   "standard": {
     "ignore": [
       "/src/sourcemaps.js",

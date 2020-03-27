@@ -10,7 +10,8 @@
         "console.log": true
       },
       "packages": {
-        "concat-stream": true
+        "concat-stream": true,
+        "http": true
       }
     },
     "buffer-from": {
@@ -30,6 +31,11 @@
         "typedarray": true
       }
     },
+    "inherits": {
+      "packages": {
+        "util": true
+      }
+    },
     "readable-stream": {
       "globals": {
         "process.env.READABLE_STREAM": true,
@@ -38,14 +44,28 @@
         "process.stdout": true
       },
       "packages": {
+        "buffer": true,
+        "events": true,
         "inherits": true,
+        "stream": true,
         "string_decoder": true,
+        "util": true,
         "util-deprecate": true
+      }
+    },
+    "safe-buffer": {
+      "packages": {
+        "buffer": true
       }
     },
     "string_decoder": {
       "packages": {
         "safe-buffer": true
+      }
+    },
+    "util-deprecate": {
+      "packages": {
+        "util": true
       }
     }
   }

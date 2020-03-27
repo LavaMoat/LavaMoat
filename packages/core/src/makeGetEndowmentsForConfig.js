@@ -31,7 +31,6 @@ function makeGetEndowmentsForConfig () {
         throw new Error('LavaMoat - unknown value for config globals')
       }
       const value = deepGetAndBind(globalRef, globalPath)
-      if (value === undefined) return
       // TODO: actually match prop descriptor
       const propDesc = {
         value,

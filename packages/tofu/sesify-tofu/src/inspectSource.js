@@ -4,16 +4,18 @@ const standardJsGlobals = require('./standardGlobals.js')
 const {
   getMemberExpressionNesting,
   getKeysForMemberExpressionChain,
+  isUndefinedCheck,
   reduceToTopmostApiCalls,
-  addGlobalUsage
+  addGlobalUsage,
 } = require('./util')
+
 
 module.exports = inspectSource
 
 function inspectSource (source, {
-  ignoredRefs = [],
-  globalRefs = [],
-  languageRefs = standardJsGlobals
+  ignoredRefs=[],
+  globalRefs=[],
+  languageRefs=standardJsGlobals,
 } = {}) {
   const ast = acornGlobals.parse(source)
   const detectedGlobals = acornGlobals(ast)
@@ -88,4 +90,5 @@ function inspectSource (source, {
     if (ignoredRefs.includes(topmostRef)) return
     addGlobalUsage(globalsConfig, identifierPath, identifierUse)
   }
+
 }

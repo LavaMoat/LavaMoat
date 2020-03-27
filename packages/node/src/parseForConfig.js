@@ -7,12 +7,24 @@ module.exports = { parseForConfig }
 
 async function parseForConfig ({ entryId }) {
   const md = mdeps({
+    // resolve via node-resolve,
     resolve,
-    // filter: (id) => !resolve.isCore(id),
+    persistentCache: (file, id, pkg, fallback, cb) => {
+      // intercept core packages and return dummy result
+      if (resolve.isCore(id)) {
+        const result = {
+          package: pkg,
+          source: '',
+          deps: {}
+        }
+        cb(null, result)
+        return
+      }
+      // otherwise fallback
+      fallback(null, cb)
+    },
     filter: (id) => {
-      // skip builtin modules
-      if (resolve.isCore(id)) return false
-      // skip json
+      // skip json so we dont encounter a parse failure
       if (id.indexOf('.json') > 0) return false
       // otherwise ok
       return true

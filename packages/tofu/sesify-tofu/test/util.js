@@ -2,32 +2,34 @@ const test = require('tape')
 const { utils: { mergeConfig, objToMap, mapToObj } } = require('../src/index')
 
 testMerge('upgrades reads to writes', {
-  abc: 'write',
-  xyz: 'read'
+  'abc': 'write',
+  'xyz': 'read',
 }, {
-  abc: 'read',
-  xyz: 'write'
+  'abc': 'read',
+  'xyz': 'write'
 }, {
-  abc: 'write',
-  xyz: 'write'
+  'abc': 'write',
+  'xyz': 'write',
 })
 
 testMerge('dedupe overlapping', {
-  'abc.xyz': 'read'
+  'abc.xyz': 'read',
 }, {
-  abc: 'read'
+  'abc': 'read',
 }, {
-  abc: 'read'
+  'abc': 'read',
 })
 
+
 testMerge('non-overlapping', {
-  abc: 'read'
+  'abc': 'read',
 }, {
-  'xyz.jkl': 'write'
+  'xyz.jkl': 'write',
 }, {
-  abc: 'read',
-  'xyz.jkl': 'write'
+  'abc': 'read',
+  'xyz.jkl': 'write',
 })
+
 
 function testMerge (label, configA, configB, expectedResultObj) {
   test(label, (t) => {
