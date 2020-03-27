@@ -1,6 +1,6 @@
 {
   "name": "lavamoat-webpack",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "webpack plugin for sandboxing dependencies with LavaMoat",
   "main": "./src/index.js",
   "devDependencies": {
