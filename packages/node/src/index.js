@@ -84,13 +84,13 @@ function parseArgs () {
   return parsedArgs
 }
 
-function createKernel () {
-  const lavamoatConfig = {}
+function createKernel ({ lavamoatConfig, debugMode }) {
   const createKernel = eval(generateKernel())
   const kernel = createKernel({
     lavamoatConfig,
     loadModuleData,
-    getRelativeModuleId
+    getRelativeModuleId,
+    debugMode
   })
   return kernel
 }
@@ -108,8 +108,15 @@ function loadModuleData (absolutePath) {
     }
   } else {
     // load normal user-space module
-    const moduleContent = fs.readFileSync(absolutePath)
-    const wrappedContent = `(function(require,module,exports){${moduleContent}})`
+    const moduleContent = fs.readFileSync(absolutePath, 'utf8')
+    // apply source transforms
+    const transformedContent = moduleContent
+      // html comment
+      .split('-->').join('-- >')
+      // use indirect eval
+      .split(' eval(').join(' (eval)(')
+    // wrap in moduleInitializer
+    const wrappedContent = `(function(require,module,exports){${transformedContent}})`
     const packageData = packageDataForModule({ file: absolutePath })
     const packageName = packageData.packageName || '<root>'
     return {
