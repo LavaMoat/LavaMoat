@@ -1,9 +1,3 @@
 {
-  "resources": {
-    "readable-stream": {
-      "globals": {
-        "process": true
-      }
-    }
-  }
+  "resources": {}
 }
