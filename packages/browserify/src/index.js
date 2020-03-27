@@ -4,11 +4,9 @@ const clone = require('clone')
 const mkdirp = require('mkdirp')
 const through = require('through2').obj
 const mergeDeep = require('merge-deep')
-const { generatePrelude } = require('lavamoat-core')
+const { generatePrelude, createConfigSpy, createPackageDataStream } = require('lavamoat-core')
 const jsonStringify = require('json-stable-stringify')
 const createCustomPack = require('./createCustomPack')
-const { createConfigSpy } = require('./generateConfig')
-const { createPackageDataStream } = require('./packageData')
 const { createSesWorkaroundsTransform } = require('./sesTransforms')
 
 // these are the reccomended arguments for lavaMoat to work well with browserify
