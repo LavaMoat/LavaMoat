@@ -3,5 +3,5 @@ const utils = require('./util')
 
 module.exports = {
   inspectSource,
-  utils,
+  utils
 }
