@@ -1,7 +1,6 @@
 require('./basic')
 require('./config')
 require('./attacks')
-require('./inspectEnvironment')
 require('./generateConfig')
 require('./sourcemaps')
 require('./globalRef')

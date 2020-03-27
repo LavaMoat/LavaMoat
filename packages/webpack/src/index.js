@@ -2,9 +2,7 @@ const {
   ConcatSource,
   RawSource
 } = require('webpack-sources')
-const generatePrelude = require('lavamoat-browserify/src/generatePrelude')
-const { packageDataForModule } = require('lavamoat-browserify/src/packageData')
-const { createModuleInspector } = require('lavamoat-browserify/src/generateConfig')
+const { generatePrelude, packageDataForModule, createModuleInspector } = require('lavamoat-core')
 const path = require('path')
 const mkdirp = require('mkdirp')
 const fs = require('fs')
@@ -65,7 +63,7 @@ class LavaMoat {
           } else {
             source = moduleData._source._value
           }
-        } 
+        }
 
         const moduleDataForConfig = {
           id: moduleData.id,
@@ -131,7 +129,7 @@ class LavaMoat {
         throw err
       }
     })
-    
+
   }
 
   getConfigurationFromPluginOpts(pluginOpts) {
@@ -202,7 +200,7 @@ class LavaMoat {
             const configOverrideSource = fs.readFileSync(resolvedPath, 'utf-8')
             const configOverride = JSON.parse(configOverrideSource)
             const mergedConfig = mergeDeep(primaryConfig, configOverride)
-            //Overwrite source config file 
+            //Overwrite source config file
             const configPath = configuration.configPath
             fs.writeFileSync(configPath, JSON.stringify(mergedConfig, null, 2))
             return mergedConfig
@@ -282,7 +280,7 @@ function moduleShapeAdapter(modules) {
     // coerce requested name into a string for kernel bug workaround
     const wrappedSource = `(function(require, module, exports){\n(${moduleFn})(module, exports, (id) => require(String(id)))\n})`
     // moduleId is just index, but it works
-    
+
     moduleData[moduleId].source = wrappedSource
     // mapper from requested moduleId -> fetched moduleId
     // (a noop for webpack which already rewrites this)

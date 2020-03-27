@@ -1,7 +1,6 @@
-const { createConfigSpy } = require('lavamoat-browserify/src/generateConfig')
-const { createPackageDataStream } = require('lavamoat-browserify/src/packageData')
 const mdeps = require('module-deps')
 const resolve = require('resolve')
+const { createConfigSpy, createPackageDataStream } = require('lavamoat-core')
 
 module.exports = { parseForConfig }
 
