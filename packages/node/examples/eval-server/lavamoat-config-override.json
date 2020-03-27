@@ -1,0 +1,25 @@
+{
+  "resources": {
+    "readable-stream": {
+      "packages": {
+        "stream": true,
+        "events": true,
+        "buffer": true,
+        "util": true
+      },
+      "globals": {
+        "process": true
+      }
+    },
+    "util-deprecate": {
+      "packages": {
+        "util": true
+      }
+    },
+    "bad-example-eval-server": {
+      "packages": {
+        "http": true
+      }
+    }
+  }
+}

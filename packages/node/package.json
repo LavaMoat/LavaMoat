@@ -1,9 +1,9 @@
 {
-  "name": "lavamoat-node",
+  "name": "lavamoat",
   "bin": {
-    "lava": "src/index.js"
+    "lavamoat": "src/index.js"
   },
-  "version": "1.0.4",
+  "version": "1.0.6",
   "main": "index.js",
   "license": "MIT",
   "scripts": {

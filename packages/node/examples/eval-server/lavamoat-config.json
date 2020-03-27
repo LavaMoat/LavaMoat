@@ -1,0 +1,52 @@
+{
+  "resources": {
+    "<root>": {
+      "packages": {
+        "bad-example-eval-server": true
+      }
+    },
+    "bad-example-eval-server": {
+      "globals": {
+        "console.log": true
+      },
+      "packages": {
+        "concat-stream": true
+      }
+    },
+    "buffer-from": {
+      "globals": {
+        "Buffer": true
+      }
+    },
+    "concat-stream": {
+      "globals": {
+        "Buffer.concat": true,
+        "Buffer.isBuffer": true
+      },
+      "packages": {
+        "buffer-from": true,
+        "inherits": true,
+        "readable-stream": true,
+        "typedarray": true
+      }
+    },
+    "readable-stream": {
+      "globals": {
+        "process.env.READABLE_STREAM": true,
+        "process.nextTick": true,
+        "process.stderr": true,
+        "process.stdout": true
+      },
+      "packages": {
+        "inherits": true,
+        "string_decoder": true,
+        "util-deprecate": true
+      }
+    },
+    "string_decoder": {
+      "packages": {
+        "safe-buffer": true
+      }
+    }
+  }
+}
