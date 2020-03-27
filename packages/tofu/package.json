@@ -17,5 +17,15 @@
     "lint:standard": "standard src/**/*.js",
     "lint:fix": "standard src/**/*.js --fix",
     "lint:deps": "depcheck --ignore-dirs=lib --ignores='ses,depcheck,standard'"
-  }
+  },
+  "description": "This is the TOFU (trust-on-first-use) static analysis tool used by LavaMoat to automatically generate useable config",
+  "directories": {
+    "test": "test"
+  },
+  "author": "kumavis",
+  "repository": "git+https://github.com/LavaMoat/lavamoat.git",
+  "bugs": {
+    "url": "https://github.com/LavaMoat/lavamoat/issues"
+  },
+  "homepage": "https://github.com/LavaMoat/lavamoat#readme"
 }

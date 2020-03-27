@@ -6815,9 +6815,9 @@ serve@^11.3.0:
     serve-handler "6.1.2"
     update-check "1.5.2"
 
-"ses@git+https://git@github.com/agoric/ses#fdb393f817f6124c4d055bff26b68e4cbe17618e":
+"ses@git+https://git@github.com/agoric/ses.git#fdb393f817f6124c4d055bff26b68e4cbe17618e":
   version "0.6.5"
-  resolved "git+https://git@github.com/agoric/ses#fdb393f817f6124c4d055bff26b68e4cbe17618e"
+  resolved "git+https://git@github.com/agoric/ses.git#fdb393f817f6124c4d055bff26b68e4cbe17618e"
   dependencies:
     "@agoric/make-hardener" "^0.0.6"
     esm "^3.2.25"

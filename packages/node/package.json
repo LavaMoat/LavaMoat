@@ -23,5 +23,16 @@
   },
   "devDependencies": {
     "tape": "^4.13.2"
-  }
+  },
+  "directories": {
+    "example": "examples",
+    "test": "test"
+  },
+  "author": "kumavis",
+  "repository": "git+https://github.com/LavaMoat/lavamoat.git",
+  "bugs": {
+    "url": "https://github.com/LavaMoat/lavamoat/issues"
+  },
+  "homepage": "https://github.com/LavaMoat/lavamoat#readme",
+  "description": ""
 }
