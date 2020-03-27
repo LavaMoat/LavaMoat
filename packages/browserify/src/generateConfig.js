@@ -118,13 +118,13 @@ function createModuleInspector () {
 
 function aggregateDeps ({ packageModules, moduleIdToPackageName }) {
   const deps = new Set()
-  Object.values(packageModules).forEach((module) => {
-    const newDeps = Object.values(module.deps)
+  Object.values(packageModules).forEach((moduleData) => {
+    const newDeps = Object.values(moduleData.deps)
       .filter(Boolean)
       .map(id => moduleIdToPackageName[id])
     newDeps.forEach(dep => deps.add(dep))
     // ensure the package is not listed as its own dependency
-    deps.delete(module.package)
+    deps.delete(moduleData.package)
   })
   const depsArray = Array.from(deps.values())
   return depsArray
