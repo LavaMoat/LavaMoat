@@ -169,6 +169,12 @@ testInspect('raise globals to highest used', {}, function () {
   'document.body.children': 'read'
 })
 
+testInspect('correctly finds deep "process.env" reference', {}, function () {
+  process.env.READABLE_STREAM === 'disable'
+}, {
+  'process.env.READABLE_STREAM': 'read',
+})
+
 testInspect('read access to object implies write access to properties', {}, function () {
   const x = location
   location.href = 'website'
