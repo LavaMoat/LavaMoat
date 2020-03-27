@@ -11,7 +11,6 @@ function createSesWorkaroundsTransform () {
       .split('-->').join('-- >')
       // use indirect eval
       .split(' eval(').join(' (eval)(')
-    // "inheritsLoose" workaround
     cb(null, moduleContent)
   })
 }
