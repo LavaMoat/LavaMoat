@@ -10,17 +10,28 @@
     "node": ">10.15.1"
   },
   "dependencies": {
-    "cytoplasm": "^3.0.3"
+    "acorn-globals": "^6.0.0",
+    "acorn-walk": "^7.1.1",
+    "cytoplasm": "^3.0.3",
+    "fromentries": "^1.2.0",
+    "json-stable-stringify": "^1.0.1",
+    "lavamoat-tofu": "^2.0.9",
+    "module-name-from-path": "^1.0.4",
+    "resolve": "^1.15.1",
+    "resolve-package-path": "^2.0.0",
+    "through2": "^3.0.1"
   },
   "devDependencies": {
-    "ses": "git+https://git@github.com/agoric/ses.git#fdb393f817f6124c4d055bff26b68e4cbe17618e"
+    "ses": "git+https://git@github.com/agoric/ses.git#fdb393f817f6124c4d055bff26b68e4cbe17618e",
+    "tape": "^4.13.2"
   },
   "scripts": {
     "lint": "npm run lint:standard && npm run lint:deps",
     "lint:standard": "standard src/**/*.js test/**/*.js",
     "lint:fix": "standard src/**/*.js test/**/*.js --fix",
     "lint:deps": "depcheck --ignore-dirs=lib --ignores='ses,depcheck,standard'",
-    "build:ses": "(cd ./node_modules/ses && npm i && npm run build && cp ./dist/ses.umd.js ../../lib/)"
+    "build:ses": "(cd ./node_modules/ses && npm i && npm run build && cp ./dist/ses.umd.js ../../lib/)",
+    "test": "node test/index.js"
   },
   "author": "kumavis",
   "license": "MIT",
