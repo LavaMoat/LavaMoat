@@ -1,0 +1,14 @@
+{
+  "name": "server",
+  "private": true,
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "bad-example-eval-server": "^1.0.0",
+    "lavamoat": "^1.0.5"
+  },
+  "scripts": {
+    "start": "lavamoat index.js --writeAutoConfig && lavamoat index.js"
+  }
+}
