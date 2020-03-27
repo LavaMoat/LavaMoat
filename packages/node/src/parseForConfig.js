@@ -15,7 +15,7 @@ async function parseForConfig ({ entryId }) {
         const result = {
           package: pkg,
           source: '',
-          deps: {},
+          deps: {}
         }
         cb(null, result)
         return
