@@ -1,8 +1,8 @@
 {
   "devDependencies": {
     "browserify": "^16.5.0",
-    "lavamoat-browserify": "^3.0.0",
-    "serve": "^11.2.0"
+    "lavamoat-browserify": "^9.0.1",
+    "serve": "^11.3.0"
   },
   "scripts": {
     "lavamoat": "browserify index.js --plugin [ lavamoat-browserify --writeAutoConfig --config ./lavamoat-config.json ] > /dev/null",
