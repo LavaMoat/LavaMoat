@@ -35,6 +35,7 @@
     const { Membrane } = templateRequire('cytoplasm')
     const createReadOnlyDistortion = templateRequire('cytoplasm/distortions/readOnly')
 
+    const corePackages = new Set(lavamoatConfig.corePackages)
     const moduleCache = new Map()
     const globalStore = new Map()
     const membraneSpaceForPackage = new Map()
@@ -237,10 +238,17 @@
     }
 
     function getMembraneSpaceForPackage (packageName) {
+      // core modules use the endowments MembraneSpace
+      if (corePackages.has(packageName)) {
+        return membraneSpaceForPackage.get('<endowments>')
+      }
+
+      // if exists, return it
       if (membraneSpaceForPackage.has(packageName)) {
         return membraneSpaceForPackage.get(packageName)
       }
 
+      // create the membrane space for this package
       const membraneSpace = membrane.makeMembraneSpace({
         label: packageName,
         // default is a transparent membrane handler
