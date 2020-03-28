@@ -6,6 +6,7 @@ const fs = require('fs')
 const yargs = require('yargs')
 const mergeDeep = require('merge-deep')
 const resolve = require('resolve')
+const { sanitize } = require('htmlescape')
 const { generateKernel, packageDataForModule } = require('lavamoat-core')
 const { parseForConfig } = require('./parseForConfig')
 
@@ -109,11 +110,23 @@ function loadModuleData (absolutePath) {
     // load normal user-space module
     const moduleContent = fs.readFileSync(absolutePath, 'utf8')
     // apply source transforms
-    const transformedContent = moduleContent
+    let transformedContent = moduleContent
       // html comment
       .split('-->').join('-- >')
       // use indirect eval
       .split(' eval(').join(' (eval)(')
+    // wrap json modules (borrowed from browserify)
+    if (/\.json$/.test(absolutePath)) {
+      const sanitizedString = sanitize(transformedContent)
+      try {
+        // check json validity
+        JSON.parse(sanitizedString)
+        transformedContent = 'module.exports=' + sanitizedString
+      } catch (err) {
+        err.message = `While parsing ${absolutePath}: ${err.message}`
+        throw err
+      }
+    }
     // wrap in moduleInitializer
     const wrappedContent = `(function(require,module,exports){${transformedContent}})`
     const packageData = packageDataForModule({ file: absolutePath })
