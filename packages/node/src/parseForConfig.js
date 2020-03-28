@@ -46,6 +46,16 @@ async function parseForConfig ({ entryId }) {
     }))
     .resume()
 
-  const serializedConfig = await parsePromise
+  // get initial config from configSpy
+  const initialSerializedConfig = await parsePromise
+  const config = JSON.parse(initialSerializedConfig)
+  // identify core packages and add to config
+  const corePackages = Object.entries(resolve.core)
+    .filter(([_,included]) => included)
+    .map(([packageName]) => packageName)
+  config.corePackages = corePackages
+  // serialize config
+  const serializedConfig = JSON.stringify(config, null, 2)
+
   return serializedConfig
 }

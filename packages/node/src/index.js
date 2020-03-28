@@ -16,19 +16,25 @@ async function runLava () {
   const {
     entryPath,
     writeAutoConfig,
+    writeAutoConfigAndRun,
     configPath,
     configOverridePath,
     debugMode
   } = parseArgs()
   const entryDir = process.cwd()
   const entryId = path.resolve(entryDir, entryPath)
-  if (writeAutoConfig) {
+
+  const shouldParseApplication = writeAutoConfig || writeAutoConfigAndRun
+  const shouldRunApplication = !writeAutoConfig || writeAutoConfigAndRun
+
+  if (shouldParseApplication) {
     // parse mode
     console.log(`LavaMoat generating config for "${entryId}"...`)
     const serializedConfig = await parseForConfig({ entryId })
     fs.writeFileSync(configPath, serializedConfig)
     console.log(`LavaMoat wrote config to "${configPath}"`)
-  } else {
+  }
+  if (shouldRunApplication) {
     // execution mode
     const lavamoatConfig = await loadConfig({ configPath, configOverridePath })
     const kernel = createKernel({ lavamoatConfig, debugMode })
@@ -67,6 +73,12 @@ function parseArgs () {
       // parsing mode, write config to config path
       yargs.option('writeAutoConfig', {
         describe: 'parse the application from the entry file and generate a LavaMoat config file.',
+        type: 'boolean',
+        default: false
+      })
+      // parsing + run mode, write config to config path then execute with new config
+      yargs.option('writeAutoConfigAndRun', {
+        describe: 'parse + generate a LavaMoat config file then execute with the new config.',
         type: 'boolean',
         default: false
       })
