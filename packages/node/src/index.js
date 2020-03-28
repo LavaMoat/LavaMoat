@@ -85,12 +85,11 @@ function parseArgs () {
 }
 
 function createKernel ({ lavamoatConfig, debugMode }) {
-  const createKernel = eval(generateKernel())
+  const createKernel = eval(generateKernel({ debugMode }))
   const kernel = createKernel({
     lavamoatConfig,
     loadModuleData,
     getRelativeModuleId,
-    debugMode
   })
   return kernel
 }
