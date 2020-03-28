@@ -53,7 +53,7 @@ function createBrowserifyFromRequiresArray ({ files, pluginOpts = {} }) {
   const mdeps = bundler.pipeline.get('deps').get(0)
   mdeps.resolve = (id, parent, cb) => {
     const parentModule = files.find(f => f.id === parent.id)
-    const moduleId = parentModule ? parentModule.deps[id] : id
+    const moduleId = parentModule ? parentModule.deps[id] || id : id
     const moduleData = files.find(f => f.id === moduleId || f.file === moduleId)
     if (!moduleData) {
       throw new Error(`could not find "${moduleId}" in files:\n${files.map(f => f.id).join('\n')}`)
@@ -174,8 +174,9 @@ async function testEntryAttackerVictim (t, { defineAttacker, defineVictim }) {
   t.equal(global.testResult, false)
 }
 
-async function runSimpleOneTwo ({ defineOne, defineTwo, config = {} }) {
-  function defineEntry () {
+async function runSimpleOneTwo ({ defineRoot, defineOne, defineTwo, config = {} }) {
+
+  function _defineRoot () {
     global.testResult = require('one')
   }
 
@@ -183,7 +184,7 @@ async function runSimpleOneTwo ({ defineOne, defineTwo, config = {} }) {
     {
       id: '/entry.js',
       file: '/entry.js',
-      source: `(${defineEntry})()`,
+      source: `(${defineRoot || _defineRoot})()`,
       deps: {
         one: '/node_modules/one/index.js',
         two: '/node_modules/two/index.js'
@@ -221,15 +222,15 @@ async function runSimpleOneTwo ({ defineOne, defineTwo, config = {} }) {
     }
   }, config)
 
-  const result = await createBundleFromRequiresArray(depsArray, { config: _config })
+  const bundle = await createBundleFromRequiresArray(depsArray, { config: _config })
   delete global.testResult
-  eval(result)
+  eval(bundle)
 
   return global.testResult
 }
 
-async function runSimpleOneTwoSamePackage ({ defineOne, defineTwo, config = {} }) {
-  function defineEntry () {
+async function runSimpleOneTwoSamePackage ({ defineRoot, defineOne, defineTwo, config = {} }) {
+  function _defineRoot () {
     global.testResult = require('one')
   }
 
@@ -237,24 +238,24 @@ async function runSimpleOneTwoSamePackage ({ defineOne, defineTwo, config = {} }
     {
       id: '/entry.js',
       file: '/entry.js',
-      source: `(${defineEntry})()`,
+      source: `(${defineRoot || _defineRoot})()`,
       deps: {
-        one: '/node_modules/one/index.js',
-        two: '/node_modules/one/main.js'
+        one: '/node_modules/dep/one.js',
+        two: '/node_modules/dep/two.js'
       },
       entry: true
     },
     {
-      id: '/node_modules/one/index.js',
-      file: '/node_modules/one/index.js',
+      id: '/node_modules/dep/one.js',
+      file: '/node_modules/dep/one.js',
       source: `(${defineOne})()`,
       deps: {
-        two: '/node_modules/one/main.js'
+        two: '/node_modules/dep/two.js'
       }
     },
     {
-      id: '/node_modules/one/main.js',
-      file: '/node_modules/one/main.js',
+      id: '/node_modules/dep/two.js',
+      file: '/node_modules/dep/two.js',
       source: `(${defineTwo})()`,
       deps: {}
     }

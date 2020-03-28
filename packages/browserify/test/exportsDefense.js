@@ -35,30 +35,32 @@ test('exportsDefense - doesnt explode on null/undefined exports', async (t) => {
 })
 
 test('exportsDefense - indirectly imported package should be readOnly', async (t) => {
+  function defineRoot () {
+    const one = require('one')
+    const thing = one.create()
+    const thingProto = Reflect.getPrototypeOf(thing)
+    // attempt to corrupt prototype
+    try {
+      thingProto.action = () => false
+    } catch (_) {}
+    global.testResult = thing.action()
+  }
+
   function defineOne () {
     const Thing = require('two')
     module.exports = {
       create: () => new Thing()
     }
   }
+
   function defineTwo () {
     class Thing {}
     Thing.prototype.action = () => true
     module.exports = Thing
   }
 
-  const one = await runSimpleOneTwoSamePackage({ defineOne, defineTwo })
-  const thing = one.create()
-
-  // corrupt prototype
-  const thingProto = Reflect.getPrototypeOf(thing)
-  try {
-    thingProto.action = () => false
-  } catch (err) {
-    t.ok(err, 'encountered an expected error overriding the prototype')
-  }
-
-  t.equal(thing.action(), true, 'Thing.prototype.action was not corrupted')
+  const testResult = await runSimpleOneTwoSamePackage({ defineRoot, defineOne, defineTwo })
+  t.equal(testResult, true, 'Thing.prototype.action was not corrupted')
 })
 
 // I'm not sure this is a problem we should solve

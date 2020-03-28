@@ -133,45 +133,25 @@ test('moduleExports - object returned from exported function should be mutable',
   t.equal(one.abc, 123, 'Object should be mutable')
 })
 
-test('moduleExports - <root> package should have <endowments> membrane space and receive unwrapped child refs', async (t) => {
+test('moduleExports - <endowments> membrane space should round-trip correctly in packages', async (t) => {
   const testObj = {}
   global.get = () => testObj
   global.check = (target) => target === testObj
 
   function defineOne () {
-    const obj = {
+    const two = require('two')
+    const getResult = two.get()
+    const checkResult = global.check(getResult)
+    module.exports = checkResult
+  }
+
+  function defineTwo () {
+    module.exports = {
       get: () => global.get()
     }
-    module.exports = obj
   }
 
-  function defineEntry () {
-    const one = require('one')
-    const getResult = one.get()
-    const checkResult = global.check(getResult)
-    global.testResult = checkResult
-  }
-
-  const depsArray = [
-    {
-      id: '/entry.js',
-      file: '/entry.js',
-      source: `(${defineEntry})()`,
-      deps: {
-        one: '/node_modules/one/index.js'
-      },
-      entry: true
-    },
-    {
-      id: '/node_modules/one/index.js',
-      file: '/node_modules/one/index.js',
-      source: `(${defineOne})()`,
-      deps: {
-      }
-    }
-  ]
-
-  const _config = {
+  const config = {
     resources: {
       '<root>': {
         packages: {
@@ -179,8 +159,11 @@ test('moduleExports - <root> package should have <endowments> membrane space and
         }
       },
       one: {
-        packages: {
-        },
+        globals: {
+          check: true
+        }
+      },
+      two: {
         globals: {
           get: true
         }
@@ -188,24 +171,51 @@ test('moduleExports - <root> package should have <endowments> membrane space and
     }
   }
 
-  const result = await createBundleFromRequiresArray(depsArray, { config: _config })
-  delete global.testResult
-  eval(result)
+  const result = await runSimpleOneTwo({ defineOne, defineTwo, config })
 
-  t.assert(global.testResult)
+  t.equal(result, true, 'endowments round tripped correctly')
   t.end()
 })
 
-async function evalModulesArray (t, { files, pluginOpts = {} }) {
-  const bundle = await createBundleFromRequiresArray(files, pluginOpts)
 
-  global.testResult = undefined
+test('moduleExports - <endowments> membrane space should round-trip correctly in <root>', async (t) => {
+  const testObj = {}
+  global.get = () => testObj
+  global.check = (target) => target === testObj
 
-  try {
-    eval(bundle)
-  } catch (err) {
-    t.fail(`eval of bundle failed:\n${err.stack || err}`)
+  function defineRoot () {
+    const one = require('one')
+    const getResult = one.get()
+    const checkResult = global.check(getResult)
+    global.testResult = checkResult
   }
 
-  return global.testResult
-}
+  function defineOne () {
+    module.exports = {
+      get: () => global.get()
+    }
+  }
+
+  const config = {
+    resources: {
+      '<root>': {
+        packages: {
+          one: true
+        },
+        globals: {
+          check: true
+        }
+      },
+      one: {
+        globals: {
+          get: true
+        }
+      }
+    }
+  }
+
+  const result = await runSimpleOneTwo({ defineRoot, defineOne, config })
+
+  t.equal(result, true, 'endowments round tripped correctly')
+  t.end()
+})
