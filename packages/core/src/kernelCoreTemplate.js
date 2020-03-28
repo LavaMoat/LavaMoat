@@ -39,6 +39,14 @@
     const globalStore = new Map()
     const membraneSpaceForPackage = new Map()
     const membrane = new Membrane({ debugMode })
+    const endowmentsMembraneSpace = membrane.makeMembraneSpace({
+      label: '<endowments>',
+      // this ensures all arguments passed to the endowments membrane are unwrapped
+      // the danger is if the endowments space calls functions or sets values on those
+      // unwrapped values, it also exposes its own refs unwrapped
+      dangerouslyAlwaysUnwrap: true,
+    })
+    membraneSpaceForPackage.set(endowmentsMembraneSpace.label, endowmentsMembraneSpace)
 
     return {
       internalRequire,
@@ -95,14 +103,18 @@
       let moduleInitializer = moduleData.moduleInitializer
       // otherwise setup initializer from moduleSource
       if (!moduleInitializer) {
+
+        // prepare the membrane-wrapped endowments
+        const endowmentsMembraneSpace = getMembraneSpaceForPackage('<endowments>')
+        const membraneWrappedEndowments = membrane.bridge(endowments, endowmentsMembraneSpace, packageMembraneSpace)
+
         // determine if its a SES-wrapped or naked module initialization
         if (runInSes) {
+
           // set the module initializer as the SES-wrapped version
           const moduleRealm = realm.global.Realm.makeCompartment()
           const globalsConfig = configForModule.globals
-          const endowmentsMembraneSpace = getMembraneSpaceForPackage('<endowments>')
-          const membraneEndowments = membrane.bridge(endowments, endowmentsMembraneSpace, packageMembraneSpace)
-          prepareRealmGlobalFromConfig(moduleRealm.global, globalsConfig, membraneEndowments, globalStore)
+          prepareRealmGlobalFromConfig(moduleRealm.global, globalsConfig, membraneWrappedEndowments, globalStore)
           // execute in module realm with modified realm global
           try {
             moduleInitializer = moduleRealm.evaluate(`${moduleSource}`)
@@ -110,10 +122,14 @@
             console.warn(`LavaMoat - Error evaluating module "${moduleId}" from package "${packageName}"`)
             throw err
           }
+
         } else {
+
+          // expose the raw global on the endowments (?)
           endowments.global = globalRef
           // set the module initializer as the unwrapped version
-          moduleInitializer = unsafeEvalWithEndowments(`${moduleSource}`, endowments)
+          moduleInitializer = unsafeEvalWithEndowments(`${moduleSource}`, membraneWrappedEndowments)
+
         }
       }
       if (typeof moduleInitializer !== 'function') {
@@ -214,13 +230,7 @@
       } else {
         // apply membrane protections
         const inGraph = getMembraneSpaceForPackage(packageName)
-        let outGraph
-        // set <root>'s membrane space to <endowments> so it receives unwrapped refs
-        if (parentModulePackageName === '<root>') {
-          outGraph = getMembraneSpaceForPackage('<endowments>')
-        } else {
-          outGraph = getMembraneSpaceForPackage(parentModulePackageName)
-        }
+        const outGraph = getMembraneSpaceForPackage(parentModulePackageName)
         const protectedExports = membrane.bridge(moduleExports, inGraph, outGraph)
         return protectedExports
       }
