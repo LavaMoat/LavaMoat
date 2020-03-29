@@ -2,6 +2,7 @@
   "resources": {
     "<root>": {
       "packages": {
+        "bad-idea-express-backdoor": true,
         "express": true
       }
     },
