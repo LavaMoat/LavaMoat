@@ -51,7 +51,7 @@ async function parseForConfig ({ entryId }) {
   const config = JSON.parse(initialSerializedConfig)
   // identify core packages and add to config
   const corePackages = Object.entries(resolve.core)
-    .filter(([_,included]) => included)
+    .filter(([_, included]) => included)
     .map(([packageName]) => packageName)
   config.corePackages = corePackages
   // serialize config

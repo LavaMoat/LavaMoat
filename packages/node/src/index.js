@@ -101,7 +101,7 @@ function createKernel ({ lavamoatConfig, debugMode }) {
   const kernel = createKernel({
     lavamoatConfig,
     loadModuleData,
-    getRelativeModuleId,
+    getRelativeModuleId
   })
   return kernel
 }
