@@ -180,6 +180,14 @@ async function runSimpleOneTwo ({ defineRoot, defineOne, defineTwo, config = {} 
     global.testResult = require('one')
   }
 
+  function _defineOne () {
+    module.exports = require('two')
+  }
+
+  function _defineTwo () {
+    module.exports = undefined
+  }
+
   const depsArray = [
     {
       id: '/entry.js',
@@ -194,7 +202,7 @@ async function runSimpleOneTwo ({ defineRoot, defineOne, defineTwo, config = {} 
     {
       id: '/node_modules/one/index.js',
       file: '/node_modules/one/index.js',
-      source: `(${defineOne})()`,
+      source: `(${defineOne || _defineOne})()`,
       deps: {
         two: '/node_modules/two/index.js'
       }
@@ -202,7 +210,7 @@ async function runSimpleOneTwo ({ defineRoot, defineOne, defineTwo, config = {} 
     {
       id: '/node_modules/two/index.js',
       file: '/node_modules/two/index.js',
-      source: `(${defineTwo})()`,
+      source: `(${defineTwo || _defineTwo})()`,
       deps: {}
     }
   ]
