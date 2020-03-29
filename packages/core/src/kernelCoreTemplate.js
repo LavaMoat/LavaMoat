@@ -217,7 +217,7 @@
 
       // disallow requiring packages that are not in the parent's whitelist
       const isSamePackage = packageName === parentModulePackageName
-      const isInParentWhitelist = packageName in parentPackagesWhitelist
+      const isInParentWhitelist = parentPackagesWhitelist[packageName] === true
       const parentIsEntryModule = parentModulePackageName === '<root>'
 
       if (!parentIsEntryModule && !isSamePackage && !isInParentWhitelist) {
