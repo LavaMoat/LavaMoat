@@ -1,3 +1,3 @@
-const createServer = require('bad-example-eval-server')
+const createServer = require('bad-idea-eval-server')
 
 createServer()

@@ -5,7 +5,7 @@ this example showcases how `lavamoat` can help reduce the danger of using certai
 ### unsafe: running in vanilla node
 
 running the example normally can be dangerous.
-this runs the `bad-example-eval-server` package that will eval code passed to it, and return the result.
+this runs the `bad-idea-eval-server` package that will eval code passed to it, and return the result.
 Since this is run under normal node.js, anything is exposed to the eval-server.
 
 start the server
@@ -29,7 +29,7 @@ curl -d "typeof require('fs').readFileSync" localhost:8080
 
 ### safer: running in lavamoat
 
-this example runs the `bad-example-eval-server` inside of the lavamoat kernel.
+this example runs the `bad-idea-eval-server` inside of the lavamoat kernel.
 While it can still perform an eval, the eval behaves as an indirect eval and the execution environment is constrained as SES.
 
 
