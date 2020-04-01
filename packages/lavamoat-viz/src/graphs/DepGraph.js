@@ -1,18 +1,19 @@
 // fix for silencing aframe errors
 import './DepGraph.css'
-
-const { ForceGraph2D } = require('react-force-graph')
-
-const React = require('react')
-const exampleConfig = require('../example-config.json')
+import {
+  createPackageGraph,
+  createModuleGraph,
+  getPackageVersionName,
+} from './utils/utils'
+import Nav from '../views/nav'
+import { DepList } from '../views/DepList'
+import { ForceGraph2D } from 'react-force-graph'
+import React from 'react'
 const d3 = require('d3')
-const moduleNameFromPath = require('module-name-from-path')
 
-// const configData = require('../data/config.json')
-const configData = self.CONFIG || exampleConfig
+const sesifyModes = ['sesify', 'without']
 
 class DepGraph extends React.Component {
-
   constructor () {
     super()
     // prepare empty graph
@@ -22,7 +23,9 @@ class DepGraph extends React.Component {
       packageData: graph,
       moduleData: null,
       packageModulesMode: false,
-      packageModules: {}
+      packageModules: {},
+      viewSource: false,
+      sesifyMode: sesifyModes[0]
     };
   }
 
@@ -39,18 +42,17 @@ class DepGraph extends React.Component {
 
   componentWillReceiveProps (nextProps) {
     // recalculate graph if `bundleData` changes
-    if (this.props.bundleData !== nextProps.bundleData
-      || this.props.sesifyMode !== nextProps.sesifyMode) {
+    if (this.props.bundleData !== nextProps.bundleData) {
       this.triggerGraphUpdate(this.state, nextProps)
     }
   }
 
   triggerGraphUpdate (state = this.state, newProps = this.props) {
     const { bundleData } = newProps
-    this.updateGraph(bundleData, newProps, state)
+    this.updateGraph(bundleData, state)
   }
 
-  updateGraph (bundleData, props, state) {
+  updateGraph (bundleData, state) {
     const {
       packageData,
       packageModules,
@@ -59,9 +61,9 @@ class DepGraph extends React.Component {
 
     let newGraph
     if (packageModulesMode) {
-      newGraph = createModuleGraph(packageModules, props, state)
+      newGraph = createModuleGraph(packageModules, state)
     } else {
-      newGraph = createPackageGraph(bundleData, props, state)
+      newGraph = createPackageGraph(bundleData, state)
     }
     // create a map for faster lookups by id
     const nodeLookup = new Map(newGraph.nodes.map(node => [node.id, node]))
@@ -101,7 +103,9 @@ class DepGraph extends React.Component {
       moduleData,
       selectedNode,
       packageModulesMode,
-      packageModules
+      packageModules,
+      viewSource,
+      sesifyMode
     } = this.state
 
     const actions = {
@@ -123,246 +127,92 @@ class DepGraph extends React.Component {
         this.setState(newState)
         this.triggerGraphUpdate(Object.assign(this.state, newState))
       },
+      toggleSource: () => {
+        this.setState({viewSource: !viewSource})
+      },
+      selectSesifyMode: (target) => {
+        this.setState({ sesifyMode: target })
+      }
     }
-
-    const data = packageModulesMode ? moduleData : packageData
-    const selectedNodeLabel = selectedNode ? `${selectedNode.label}\n${selectedNode.configLabel}` : 'select a node'
+    const graphData = packageData
+    let selectedNodeLabel
+    let selectedNodeData
     let globalUsagePackages = []
+    let sourceButtonStyle
+    let helpMessage
+
+    if (selectedNode) {
+      selectedNodeLabel = selectedNode.label
+      if (packageModulesMode && !isNaN(selectedNode.id) && selectedNode.id in packageModules) {
+
+        selectedNodeData = JSON.stringify(packageModules[selectedNode.id].globalUsage, null, 2) || null
+      } else {
+        selectedNodeData = selectedNode.configLabel
+      }
+    } else {
+      selectedNodeLabel = 'select a node'
+      selectedNodeData = ''
+    }
+    if (!packageModulesMode ||
+      !selectedNode.label === 'External Dependency' ||
+      isNaN(selectedNode.id)) {
+      sourceButtonStyle = { pointerEvents: 'none', color: 'gray' }
+    }
+    if (viewSource) {
+      helpMessage = "Press ENTER to navigate between globals"
+    }
     globalUsagePackages = packageData.nodes.filter(node => JSON.parse(node.configLabel).hasOwnProperty('globals'))
-
-
-    const packageListComponent = 
-    <pre style={{
-      position: 'absolute',
-      left: '0px',
-      height: '100%',
-      overflowY: 'scroll',
-      background: 'rgba(232, 232, 232, 0.78)',
-      padding: '12px',
-      // draw on top of graph
-      zIndex: 1,
-    }}>
-      {"Packages containing globals\n\n"}
-      <ol>
-        {globalUsagePackages.map(node => 
-          <li 
-            key={globalUsagePackages.indexOf(node)}>
-            <div 
-            className='package'
-            onMouseEnter={() => {
-              if (packageModulesMode) return
-              actions.selectNode(node)
-            }}
-            onClick={() => actions.togglePackageModules(node)}>
-              {node.label}
-            </div>
-            {packageModulesMode && getPackageVersionName(Object.values(packageModules)[0]) === node.label ?
-              <ol>
-                {Object.entries(packageModules).map(([id, value], index) => 
-                <li
-                  key={id}>
-                  <div 
-                    className='package'
-                    onMouseEnter={() => {
-                      actions.selectNode(moduleData.nodes[index])
-                    }}>
-                    {fullModuleNameFromPath(value.file)}
-                  </div>
-                </li>
-                )}
-              </ol> :
-              <ol/>
-            }
-          </li>)}
-      </ol>
-    </pre>
 
     return (
     <div>
-      <div>
-        {packageListComponent}
-        <pre style={{
-          position: 'absolute',
-          right: 0,
-          background: 'rgba(232, 232, 232, 0.78)',
-          padding: '12px',
-          // draw on top of graph
-          zIndex: 1,
-        }}>
-            {packageModulesMode ? fullModuleNameFromPath(selectedNodeLabel) : selectedNodeLabel}
-        </pre>
-      </div>
-        <ForceGraph2D
-          ref={el => this.forceGraph = el}
-          graphData={data}
-          linkDirectionalArrowLength={4}
-          linkDirectionalArrowRelPos={1}
-          nodeLabel={'label'}
-          onNodeHover={(node) => {
-            if (!node) return
-            actions.selectNode(node)
-          }}
-          onNodeClick={(node) => actions.togglePackageModules(node)}
-          linkWidth={(link) => link.width}
-          linkColor={(link) => link.color}
+      <div className="navWrapper">
+        <Nav
+          routes={sesifyModes}
+          activeRoute={sesifyMode}
+          onNavigate={(target) => actions.selectSesifyMode(target)}
         />
-      }
+        <div className="buttonWrapper">
+          <div className="helpMessage">
+            {helpMessage}
+          </div>
+          <button
+            className="sourceButton"
+            style={sourceButtonStyle}
+            onClick={() => actions.toggleSource()}
+          >
+            View Source
+          </button>
+        </div>
+      </div>
+      <DepList
+        actions={actions}
+        globalUsagePackages={globalUsagePackages}
+        packageModulesMode={packageModulesMode}
+        selectedNode={selectedNode}
+        packageModules={packageModules}
+        selectedNodeLabel={selectedNodeLabel}
+        selectedNodeData={selectedNodeData}
+        moduleData={moduleData}
+        viewSource={viewSource}
+      />
+      <ForceGraph2D
+        ref={el => this.forceGraph = el}
+        graphData={graphData}
+        linkDirectionalArrowLength={4}
+        linkDirectionalArrowRelPos={1}
+        nodeLabel={'label'}
+        onNodeHover={(node) => {
+          if (!node) return
+          if (packageModulesMode && !packageModules[node.id]) return
+          actions.selectNode(node)
+        }}
+        onNodeClick={(node) => actions.togglePackageModules(node)}
+        linkWidth={(link) => link.width}
+        linkColor={(link) => link.color}
+      />
     </div>
     )
   }
 }
 
 export { DepGraph }
-
-function createPackageGraph (bundleData, { sesifyMode }, { selectedNode }) {
-  const packageData = {}
-  // create a fake `bundleData` using the packages
-  Object.entries(bundleData).forEach(([parentId, moduleData]) => {
-    const packageName = getPackageVersionName(moduleData)
-    let pack = packageData[packageName]
-    // if first moduleData in package, initialize with moduleData
-    if (!pack) {
-      pack = Object.assign({}, moduleData)
-      pack.file = packageName
-      pack.entry = (packageName === '<root>')
-      pack.deps = {}
-      packageData[packageName] = pack
-    } else {
-      // package already exists, just need add size (deps added later)
-      const { size } = moduleData
-      pack.size += size
-    }
-    // add deps
-    Object.values(moduleData.deps).forEach(childId => {
-      // use `id` so that there are not redundant links. the actual key is not important.
-      const childModuleData = bundleData[childId]
-      if (!childModuleData) return console.warn(`dep is external module ${childId}`)
-      pack.deps[childId] = getPackageVersionName(childModuleData)
-    })
-  })
-
-  return createModuleGraph(packageData, { sesifyMode }, { selectedNode })
-}
-
-function createModuleGraph (bundleData, { sesifyMode }, { selectedNode }) {
-  const nodes = [], links = []  
-  // for each module, create node and links 
-  Object.entries(bundleData).forEach(([parentId, parentData]) => {
-    const { file, deps, size, entry, packageName } = parentData
-    const packageVersionName = getPackageVersionName(parentData)
-    const radius = 5
-    const configForPackage = configData.resources[packageName] || {}
-    const configLabel = JSON.stringify(configForPackage, null, 2)
-    const label = `${file}`
-    const isEntryPackage = packageVersionName === '<root>'
-    const isSesify = sesifyMode === 'sesify'
-    const sesifyColor = isEntryPackage ? 'purple' : getColorForConfig(configForPackage)
-    const color = isSesify ? sesifyColor : 'red'
-    // create node for modules
-    nodes.push(
-      createNode({ id: parentId, radius, label, configLabel, color })
-    )
-    const selectedNodeId = selectedNode && selectedNode.id
-
-    // create links for deps
-    Object.keys(deps).forEach(depName => {
-      const childId = String(deps[depName])
-
-      let width = undefined
-      let color = undefined
-
-      if (parentId === selectedNodeId) {
-        width = 3
-        color = 'green'
-      }
-
-      if (childId === selectedNodeId) {
-        width = 3
-        color = 'blue'
-      }
-
-      links.push(
-        createLink({ color, width, source: parentId, target: childId })
-      )
-    })
-  })
-  // handle missing nodes (e.g. external deps)
-  links.forEach(link => {
-    if (!bundleData[link.target]) {
-      nodes.push(
-        createNode({ id: link.target, radius: 0 })
-      )
-    }
-  })
-
-  return { nodes, links }
-}
-
-const redAlertGlobals = [
-  'chrome',
-  'window',
-  'document',
-  'document.body',
-  'document.body.appendChild',
-  'location',
-  'XMLHttpRequest',
-  'fetch',
-  'WebSocket',
-  'crypto',
-]
-
-const orangeAlertGlobals = [
-  'localStorage',
-  'prompt',
-]
-
-function getColorForConfig (packageConfig) {
-  // no globals - should be safe
-  if (!packageConfig.globals) return 'green'
-  const globals = Object.keys(packageConfig.globals)
-  if (globals.some(glob => redAlertGlobals.includes(glob))) {
-    return 'red'
-  }
-  if (globals.some(glob => orangeAlertGlobals.includes(glob))) {
-    return 'brown'
-  }
-  // has globals but nothing scary
-  return 'orange'
-}
-
-function getPackageVersionName ({ packageName, packageVersion }) {
-  if (packageVersion) {
-    return `${packageName}@${packageVersion}`
-  } else {
-    return packageName
-  }
-}
-
-function createLink(params) {
-  const { source, target } = params
-  const link = Object.assign({
-    id: `${source}-${target}`,
-    source,
-    target,
-    // value: 1,
-    // distance: 30,
-  }, params)
-  return link
-}
-
-function createNode(params) {
-  const node = Object.assign({
-    // color: 'green',
-    radius: 5,
-  }, params)
-  return node
-}
-
-function fullModuleNameFromPath(file) {
-  const path = require('path')
-  const segments = file.split(path.sep)
-  const index = segments.indexOf('node_modules')
-  if (index === -1) return
-  let moduleName = segments.filter(segment => segments.indexOf(segment) > index).join('/')
-  return moduleName
-}

@@ -6,9 +6,11 @@
   "dependencies": {
     "@babel/preset-env": "^7.8.7",
     "@babel/preset-react": "^7.8.3",
+    "codemirror": "^5.52.2",
     "module-name-from-path": "^1.0.4",
     "ncp": "^2.0.0",
     "pify": "^4.0.1",
+    "react-codemirror2": "^7.1.0",
     "yargs": "^14.0.0"
   },
   "devDependencies": {
