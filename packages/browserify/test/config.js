@@ -122,7 +122,7 @@ test('config - disable access to package', async (t) => {
   } catch (err) {
     t.ok(
       err.message.includes('LavaMoat - required package not in whitelist'),
-      'git expected error'
+      'got expected error'
     )
   }
 
