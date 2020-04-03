@@ -6,6 +6,7 @@ const mergeDeep = require('merge-deep')
 const watchify = require('watchify')
 const through = require('through2').obj
 const pump = require('pump')
+const dataToStream = require('from')
 const lavamoatPlugin = require('../src/index')
 const noop = () => {}
 
@@ -43,30 +44,67 @@ async function createBundleFromRequiresArray (files, pluginOpts) {
   return bundleAsync(bundler)
 }
 
-function createBrowserifyFromRequiresArray ({ files, pluginOpts = {} }) {
-  // empty bundle but inject modules at bundle time
-  const bifyOpts = Object.assign({}, lavamoatPlugin.args)
-  const bundler = browserify([], bifyOpts)
-  bundler.plugin(lavamoatPlugin, pluginOpts)
-
-  // override browserify's module resolution
+// override browserify's module resolution to use the ( loadModuleData, resolveRelative ) handles
+function overrideResolverHooks ({ bundler, loadModuleData, resolveRelative }) {
   const mdeps = bundler.pipeline.get('deps').get(0)
-  mdeps.resolve = (id, parent, cb) => {
-    const parentModule = files.find(f => f.id === parent.id)
-    const moduleId = parentModule ? parentModule.deps[id] || id : id
-    const moduleData = files.find(f => f.id === moduleId || f.file === moduleId)
-    if (!moduleData) {
-      throw new Error(`could not find "${moduleId}" in files:\n${files.map(f => f.id).join('\n')}`)
-    }
+  mdeps.resolver = (id, parent, cb) => {
+    const moduleId = resolveRelative(parent.id, id)
+    const moduleData = loadModuleData(moduleId)
     const file = moduleData.file
     const pkg = null
     const fakePath = moduleData.file
     cb(null, file, pkg, fakePath)
   }
+  mdeps.readFile = (path, id, pkg) => {
+    const matchingFile = loadModuleData(path)
+    // if found return stream
+    if (matchingFile) return dataToStream([matchingFile.source])
+    throw new Error(`LavaMoat test util - could not find file "${path}"`)
+  }
+}
 
-  // inject files into browserify pipeline
+function createResolverHooksFromFilesArray ({ files }) {
+  return {
+    loadModuleData,
+    resolveRelative,
+  }
+
+  function loadModuleData (moduleId) {
+    const moduleData = files.find(f => f.id === moduleId || f.file === moduleId)
+    if (!moduleData) {
+      throw new Error(`could not find "${moduleId}" in files:\n${files.map(f => f.id).join('\n')}`)
+    }
+    return moduleData
+  }
+
+  function resolveRelative (parentModuleId, requestedName) {
+    let parentFileEntry
+    try {
+      parentFileEntry = loadModuleData(parentModuleId)
+    } catch (_) {}
+    const moduleId = parentFileEntry ? (parentFileEntry.deps[requestedName] || requestedName) : requestedName
+    return moduleId
+  }
+}
+
+function createBrowserifyFromRequiresArray ({ files: _files, pluginOpts = {} }) {
+  const files = clone(_files)
+
+  // empty bundle but inject modules at bundle time
+  const bifyOpts = Object.assign({}, lavamoatPlugin.args)
+  const bundler = browserify([], bifyOpts)
+  bundler.plugin(lavamoatPlugin, pluginOpts)
+
+  // instrument bundler to use custom resolver hooks
+  const { loadModuleData, resolveRelative } = createResolverHooksFromFilesArray({ files })
+  overrideResolverHooks({ bundler, loadModuleData, resolveRelative })
+
+  // inject entry files into browserify pipeline
   const fileInjectionStream = through2(null, null, function (cb) {
-    clone(files).reverse().forEach(file => {
+  files
+    .filter(file   => file.entry)
+    .reverse()
+    .forEach(file => {
       // must explicitly specify entry field
       file.entry = file.entry || false
       this.push(file)
@@ -174,7 +212,7 @@ async function testEntryAttackerVictim (t, { defineAttacker, defineVictim }) {
   t.equal(global.testResult, false)
 }
 
-async function runSimpleOneTwo ({ defineRoot, defineOne, defineTwo, config = {} }) {
+async function runSimpleOneTwo ({ defineRoot, defineOne, defineTwo, defineThree, config = {} }) {
 
   function _defineRoot () {
     global.testResult = require('one')
@@ -185,7 +223,15 @@ async function runSimpleOneTwo ({ defineRoot, defineOne, defineTwo, config = {} 
   }
 
   function _defineTwo () {
-    module.exports = undefined
+    module.exports = {
+      value: 'this is module two'
+    }
+  }
+
+  function _defineThree () {
+    module.exports = {
+      value: 'this is module three'
+    }
   }
 
   const depsArray = [
@@ -211,6 +257,12 @@ async function runSimpleOneTwo ({ defineRoot, defineOne, defineTwo, config = {} 
       id: '/node_modules/two/index.js',
       file: '/node_modules/two/index.js',
       source: `(${defineTwo || _defineTwo})()`,
+      deps: {}
+    },
+    {
+      id: '/node_modules/three/index.js',
+      file: '/node_modules/three/index.js',
+      source: `(${defineThree || _defineThree})()`,
       deps: {}
     }
   ]

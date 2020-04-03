@@ -1,6 +1,6 @@
 const test = require('tape-promise').default(require('tape'))
 
-const { generateConfigFromFiles, fnToCodeBlock } = require('./util')
+const { generateConfigFromFiles } = require('./util')
 
 test('generateConfig - empty config', async (t) => {
   const files = []
@@ -56,7 +56,8 @@ test('generateConfig - config with skipped deps', async (t) => {
       banana: './node_modules/banana/index.js',
       snakefruit: false
     },
-    source: 'require("banana")'
+    source: 'require("banana")',
+    entry: true
   }, {
     // non-entry
     id: './node_modules/banana/index.js',
@@ -168,13 +169,14 @@ async function createConfigForTest (testFn) {
     deps: {
       test: './node_modules/test/index.js'
     },
-    source: 'require("test")'
+    source: 'require("test")',
+    entry: true,
   }, {
     // non-entry
     id: './node_modules/test/index.js',
     file: './node_modules/test/index.js',
     deps: {},
-    source: fnToCodeBlock(testFn)
+    source: `(${testFn})()`
   }]
   const config = await generateConfigFromFiles({ files })
   return config
