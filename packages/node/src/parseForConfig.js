@@ -1,13 +1,30 @@
+const path = require('path')
 const mdeps = require('module-deps')
 const resolve = require('resolve')
 const { createConfigSpy, createPackageDataStream } = require('lavamoat-core')
+const { checkForResolutionOverride } = require('./resolutions')
 
 module.exports = { parseForConfig }
 
-async function parseForConfig ({ entryId }) {
+async function parseForConfig ({ cwd, entryId, resolutions }) {
   const md = mdeps({
-    // resolve via node-resolve,
-    resolve,
+    // module resolution
+    resolve: (requestedName, parent, cb) => {
+      // handle resolution overrides
+      const parentPackageName = (parent.package && parent.package.name) || '<root>'
+      const result = checkForResolutionOverride(resolutions, parentPackageName, requestedName)
+      if (result) {
+        // if path is a relative path, it should be relative to the cwd
+        if (path.isAbsolute(result)) {
+          requestedName = result
+        } else {
+          requestedName = path.resolve(cwd, result)
+        }
+      }
+      // resovle via node-resolve
+      resolve(requestedName, parent, cb)
+    },
+
     persistentCache: (file, id, pkg, fallback, cb) => {
       // intercept core packages and return dummy result
       if (resolve.isCore(id)) {
@@ -54,8 +71,6 @@ async function parseForConfig ({ entryId }) {
     .filter(([_, included]) => included)
     .map(([packageName]) => packageName)
   config.corePackages = corePackages
-  // serialize config
-  const serializedConfig = JSON.stringify(config, null, 2)
 
-  return serializedConfig
+  return config
 }

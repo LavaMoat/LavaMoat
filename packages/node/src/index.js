@@ -9,6 +9,7 @@ const resolve = require('resolve')
 const { sanitize } = require('htmlescape')
 const { generateKernel, packageDataForModule } = require('lavamoat-core')
 const { parseForConfig } = require('./parseForConfig')
+const { checkForResolutionOverride } = require('./resolutions')
 
 runLava().catch(console.error)
 
@@ -21,23 +22,25 @@ async function runLava () {
     configOverridePath,
     debugMode
   } = parseArgs()
-  const entryDir = process.cwd()
-  const entryId = path.resolve(entryDir, entryPath)
+  const cwd = process.cwd()
+  const entryId = path.resolve(cwd, entryPath)
 
   const shouldParseApplication = writeAutoConfig || writeAutoConfigAndRun
   const shouldRunApplication = !writeAutoConfig || writeAutoConfigAndRun
 
   if (shouldParseApplication) {
     // parse mode
+    const { resolutions } = await loadConfig({ configPath, configOverridePath })
     console.log(`LavaMoat generating config for "${entryId}"...`)
-    const serializedConfig = await parseForConfig({ entryId })
+    const config = await parseForConfig({ cwd, entryId, resolutions })
+    const serializedConfig = JSON.stringify(config, null, 2)
     fs.writeFileSync(configPath, serializedConfig)
     console.log(`LavaMoat wrote config to "${configPath}"`)
   }
   if (shouldRunApplication) {
     // execution mode
     const lavamoatConfig = await loadConfig({ configPath, configOverridePath })
-    const kernel = createKernel({ lavamoatConfig, debugMode })
+    const kernel = createKernel({ cwd, lavamoatConfig, debugMode })
     kernel.internalRequire(entryId)
   }
 }
@@ -96,7 +99,9 @@ function parseArgs () {
   return parsedArgs
 }
 
-function createKernel ({ lavamoatConfig, debugMode }) {
+function createKernel ({ cwd, lavamoatConfig, debugMode }) {
+  const { resolutions } = lavamoatConfig
+  const getRelativeModuleId = createModuleResolver({ cwd, resolutions })
   const createKernel = eval(generateKernel({ debugMode }))
   const kernel = createKernel({
     lavamoatConfig,
@@ -151,10 +156,23 @@ function loadModuleData (absolutePath) {
   }
 }
 
-function getRelativeModuleId (parentAbsolutePath, relativePath) {
-  const parentDir = path.parse(parentAbsolutePath).dir
-  const resolved = resolve.sync(relativePath, { basedir: parentDir })
-  return resolved
+function createModuleResolver ({ cwd, resolutions }) {
+  return function getRelativeModuleId (parentAbsolutePath, requestedName) {
+    // handle resolution overrides
+    let parentDir = path.parse(parentAbsolutePath).dir
+    const { packageName: parentPackageName } = packageDataForModule({ id: parentAbsolutePath, file: parentAbsolutePath })
+    const result = checkForResolutionOverride(resolutions, parentPackageName, requestedName)
+    if (result) {
+      requestedName = result
+      // if path is a relative path, it should be relative to the cwd
+      if (!path.isAbsolute(result)) {
+        parentDir = cwd
+      }
+    }
+    // resolve normally
+    const resolved = resolve.sync(requestedName, { basedir: parentDir })
+    return resolved
+  }
 }
 
 async function loadConfig ({ configPath, configOverridePath }) {
