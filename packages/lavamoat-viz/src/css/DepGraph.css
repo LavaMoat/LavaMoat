@@ -1,0 +1,93 @@
+.packageWrapper:hover {
+    cursor: pointer;
+    background: #dcdcdc;
+}
+.moduleWrapper:hover {
+  cursor: pointer;
+  background: #dcdcdc;
+}
+.navWrapper {
+  display: flex;
+  justify-content: space-between;
+}
+.leftButtonsWrapper {
+  display: flex;
+}
+.viewSourceWrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.helpMessage {
+  margin-right: 10px;
+  color: #808080;
+}
+.sourceButton {
+  height: 100%;
+}
+.sizeModeButton {
+  height: 100%;
+}
+.CodeMirror {
+  width: 100%
+}
+.listStyle {
+  border-bottom: 1px solid rgba(48, 48, 48, 0.15);
+}
+.packagesStyle {
+  height: calc(100vh - 42px);
+  position: absolute;
+  left: 0px;
+  overflow: scroll;
+  background: rgba(232, 232, 232, 0.78);
+  padding: 12px;
+  z-index: 1;
+}
+.packageInfoStyle {
+  position: absolute;
+  right: 0;
+  background: rgba(232, 232, 232, 0.78);
+  padding: 12px;
+  z-index: 1;
+}
+.packageWrapper, .moduleWrapper {
+  display: flex;
+  justify-content: start;
+  align-items: center;
+}
+.packageIcon, .moduleIcon {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+.red {
+  background-color: red;
+}
+.brown {
+  background-color: brown;
+}
+.orange {
+  background-color: orange;
+}
+.green {
+  background-color: green;
+}
+.moduleList {
+  margin-left: 30px;
+}
+.react-codemirror2 {
+  height: calc(100vh - 42px);
+  position: absolute;
+  width: 40%;
+  right: 0;
+  background: rgba(232, 232, 232, 0.78);
+  padding: 12px;
+  z-index: 1;
+}
+.CodeMirror {
+  height: 100%;
+}
+.highlight {
+  background-color: #FFFF00 !important
+}

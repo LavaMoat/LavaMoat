@@ -1,7 +1,12 @@
-import exampleConfig from '../../example-config.json'
+import exampleConfig from '../../lavamoat/example-config.json'
 const configData = self.CONFIG || exampleConfig
 
-function createPackageGraph(bundleData, { sesifyMode, selectedNode, packageModulesMode }) {
+function createPackageGraph(bundleData, {
+  lavamoatMode,
+  selectedNode,
+  packageModulesMode,
+  showPackageSize
+}) {
   const packageData = {}
   // create a fake `bundleData` using the packages
   Object.entries(bundleData).forEach(([parentId, moduleData]) => {
@@ -27,10 +32,20 @@ function createPackageGraph(bundleData, { sesifyMode, selectedNode, packageModul
     })
   })
 
-  return createModuleGraph(packageData, { sesifyMode, selectedNode, packageModulesMode })
+  return createModuleGraph(packageData, {
+    lavamoatMode,
+    selectedNode,
+    packageModulesMode,
+    showPackageSize
+  })
 }
 
-function createModuleGraph(bundleData, { sesifyMode, selectedNode, packageModulesMode }) {
+function createModuleGraph(bundleData, {
+  lavamoatMode,
+  selectedNode,
+  packageModulesMode,
+  showPackageSize
+}) {
   const nodes = [], links = []
   // for each module, create node and links 
   Object.entries(bundleData).forEach(([parentId, parentData]) => {
@@ -40,16 +55,15 @@ function createModuleGraph(bundleData, { sesifyMode, selectedNode, packageModule
       source,
       packageName
     } = parentData
+    const size = showPackageSize ? getNodeSize(source) : 2
     const packageVersionName = getPackageVersionName(parentData)
-    //work here
-    const size = getNodeSize(source)
     const configForPackage = configData.resources[packageName] || {}
     const configLabel = JSON.stringify(configForPackage, null, 2)
     const label = `${file}`
     const isEntryPackage = packageVersionName === '<root>'
-    const isSesify = sesifyMode === 'sesify'
-    const sesifyColor = isEntryPackage ? 'purple' : getColorForConfig(configForPackage, parentData, packageModulesMode)
-    const color = isSesify ? sesifyColor : 'red'
+    const islavamoat = lavamoatMode === 'lavamoat'
+    const lavamoatColor = isEntryPackage ? 'purple' : getColorForPackage(configForPackage)
+    const color = islavamoat ? lavamoatColor : 'red'
     // create node for modules
     nodes.push(
       createNode({ id: parentId, val: size, label, configLabel, color })
@@ -108,17 +122,21 @@ const orangeAlertGlobals = [
   'prompt',
 ]
 
-function getColorForConfig(packageConfig, parentData, packageModulesMode) {
-  let globals
-  if (packageModulesMode) {
-    // no globals - should be safe
-    if (Object.keys(parentData.globalUsage).length === 0) return 'green'
-    globals = Object.keys(parentData.globalUsage)
-  } else {
-    // no globals - should be safe
-    if (!packageConfig.globals) return 'green'
-    globals = Object.keys(packageConfig.globals)
-  }
+function getColorForPackage(packageConfig) {
+  // no globals - should be safe
+  if (!packageConfig.globals) return 'green'
+  const globals = Object.keys(packageConfig.globals)
+  return getColor(globals)
+  
+}
+
+function getColorForModule (parentData) {
+  if (!parentData.globalUsage || Object.keys(parentData.globalUsage).length === 0) return 'green'
+  const globals = Object.keys(parentData.globalUsage)
+  return getColor(globals)
+}
+
+function getColor(globals) {
   if (globals.some(glob => redAlertGlobals.includes(glob))) {
     return 'red'
   }
@@ -127,6 +145,16 @@ function getColorForConfig(packageConfig, parentData, packageModulesMode) {
   }
   // has globals but nothing scary
   return 'orange'
+}
+
+function sortByColor(data) {
+  const colors = ['red', 'brown', 'orange', 'green']
+  let sorted = []
+  colors.forEach(color => {
+    const filtered = data.filter(item => item.color === color)
+    sorted = sorted.concat(filtered)
+  })
+  return sorted
 }
 
 function getPackageVersionName({ packageName, packageVersion }) {
@@ -180,7 +208,7 @@ function getNodeSize(source) {
 function fullModuleNameFromPath(file) {
   const path = require('path')
   const segments = file.split(path.sep)
-  const index = segments.indexOf('node_modules')
+  const index = segments.lastIndexOf('node_modules')
   if (index === -1) return
   let moduleName = segments.filter(segment => segments.indexOf(segment) > index).join('/')
   return moduleName
@@ -207,7 +235,9 @@ function getLineNumbersForGlobals(source, globals) {
 export {
   createPackageGraph,
   createModuleGraph,
+  getColorForModule,
   getPackageVersionName,
   fullModuleNameFromPath,
-  getLineNumbersForGlobals
+  getLineNumbersForGlobals,
+  sortByColor
 }

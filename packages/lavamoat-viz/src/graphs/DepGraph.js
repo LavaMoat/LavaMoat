@@ -1,9 +1,11 @@
 // fix for silencing aframe errors
-import './DepGraph.css'
+import '../css/DepGraph.css'
 import {
   createPackageGraph,
   createModuleGraph,
   getPackageVersionName,
+  getColorForModule,
+  sortByColor
 } from './utils/utils'
 import Nav from '../views/nav'
 import { DepList } from '../views/DepList'
@@ -11,7 +13,7 @@ import { ForceGraph2D } from 'react-force-graph'
 import React from 'react'
 const d3 = require('d3')
 
-const sesifyModes = ['sesify', 'without']
+const lavamoatModes = ['lavamoat', 'without']
 
 class DepGraph extends React.Component {
   constructor () {
@@ -24,8 +26,11 @@ class DepGraph extends React.Component {
       moduleData: null,
       packageModulesMode: false,
       packageModules: {},
+      selectedModule: null,
       viewSource: false,
-      sesifyMode: sesifyModes[0]
+      lavamoatMode: lavamoatModes[0],
+      showPackageSize: false,
+      selectionLocked: false
     };
   }
 
@@ -47,6 +52,11 @@ class DepGraph extends React.Component {
     }
   }
 
+  setStateAndUpdateGraph (newState) {
+    this.setState(newState)
+    this.triggerGraphUpdate(Object.assign(this.state, newState))
+  }
+
   triggerGraphUpdate (state = this.state, newProps = this.props) {
     const { bundleData } = newProps
     this.updateGraph(bundleData, state)
@@ -59,12 +69,15 @@ class DepGraph extends React.Component {
       packageModulesMode
     } = state
 
-    let newGraph
-    if (packageModulesMode) {
-      newGraph = createModuleGraph(packageModules, state)
-    } else {
-      newGraph = createPackageGraph(bundleData, state)
-    }
+    // Uncomment for module nodes
+    // let newGraph
+    // if (packageModulesMode) {
+    //   newGraph = createModuleGraph(packageModules, state)
+    // } else {
+    //   newGraph = createPackageGraph(bundleData, state)
+    // }
+
+    const newGraph = createPackageGraph(bundleData, state)
     // create a map for faster lookups by id
     const nodeLookup = new Map(newGraph.nodes.map(node => [node.id, node]))
     // copy simulation data from old graph
@@ -77,21 +90,28 @@ class DepGraph extends React.Component {
       Object.assign(newNode, { x, y, vx, vy })
     })
     // commit new graph
-    if (packageModulesMode) {
-      this.setState(() => ({ moduleData: newGraph }))
-    } else {
-      this.setState(() => ({ packageData: newGraph }))
-    }
+    // Uncomment for module nodes
+    // if (packageModulesMode) {
+    //   this.setState(() => ({ moduleData: newGraph }))
+    // } else {
+    //   this.setState(() => ({ packageData: newGraph }))
+    // }
+    this.setState(() => ({ packageData: newGraph }))
   }
 
   getModulesForPackage (node) {
     const { bundleData } = this.props
     const { label } = node
     let packageModules = {}
-
+    let moduleSources = []
     Object.entries(bundleData).forEach(([moduleId, moduleData]) => {
+      const color = getColorForModule(moduleData)
       if (getPackageVersionName(moduleData) === label) {
-        packageModules[moduleId] = moduleData
+        if (!moduleSources.includes(moduleData.source)) {
+          moduleSources.push(moduleData.source)
+          packageModules[moduleId] = moduleData
+          packageModules[moduleId].color = color
+        }
       }
     })
     return packageModules
@@ -105,18 +125,26 @@ class DepGraph extends React.Component {
       packageModulesMode,
       packageModules,
       viewSource,
-      sesifyMode
+      lavamoatMode,
+      showPackageSize,
+      selectedModule,
+      selectionLocked
     } = this.state
 
     const actions = {
       selectNode: (node) => {
         const newState = { selectedNode: node }
-        this.setState(newState)
-        this.triggerGraphUpdate(Object.assign(this.state, newState))
+        this.setStateAndUpdateGraph(newState)
+      },
+      selectModule: (name) => {
+        this.setState({ selectedModule: name })
       },
       togglePackageModules: (node) => {
         if (packageModulesMode) {
-          this.setState({packageModulesMode: false})
+          this.setState({
+            packageModulesMode: false,
+            selectedModule: null
+          })
           return
         }
         const modules = this.getModulesForPackage(node)
@@ -124,20 +152,28 @@ class DepGraph extends React.Component {
           packageModulesMode: true,
           packageModules: modules
         }
-        this.setState(newState)
-        this.triggerGraphUpdate(Object.assign(this.state, newState))
+        this.setStateAndUpdateGraph(newState)
       },
       toggleSource: () => {
-        this.setState({viewSource: !viewSource})
+        this.setState({ viewSource: !viewSource })
       },
-      selectSesifyMode: (target) => {
-        this.setState({ sesifyMode: target })
+      togglePackageSize: () => {
+        const newState = { showPackageSize: !showPackageSize }
+        this.setStateAndUpdateGraph(newState)
+      },
+      toggleLockSelection: () => {
+        this.setState({ selectionLocked: !selectionLocked })
+      },
+      selectlavamoatMode: (target) => {
+        const newState = { lavamoatMode: target }
+        this.setStateAndUpdateGraph(newState)
       }
     }
     const graphData = packageData
+    let sortedPackages = []
+    let sortedModules = []
     let selectedNodeLabel
     let selectedNodeData
-    let globalUsagePackages = []
     let sourceButtonStyle
     let helpMessage
 
@@ -155,23 +191,39 @@ class DepGraph extends React.Component {
     }
     if (!packageModulesMode ||
       !selectedNode.label === 'External Dependency' ||
-      isNaN(selectedNode.id)) {
-      sourceButtonStyle = { pointerEvents: 'none', color: 'gray' }
+      (!selectedModule && selectedModule !== 0)) {
+      sourceButtonStyle = { display: 'none' }
     }
     if (viewSource) {
       helpMessage = "Press ENTER to navigate between globals"
     }
-    globalUsagePackages = packageData.nodes.filter(node => JSON.parse(node.configLabel).hasOwnProperty('globals'))
+    
+    sortedPackages = sortByColor(packageData.nodes)
+    if (packageModules) {
+      const packageModulesList = Object.values(packageModules)
+      sortedModules = sortByColor(packageModulesList)
+    }
 
     return (
     <div>
       <div className="navWrapper">
-        <Nav
-          routes={sesifyModes}
-          activeRoute={sesifyMode}
-          onNavigate={(target) => actions.selectSesifyMode(target)}
-        />
-        <div className="buttonWrapper">
+        <div className="leftButtonsWrapper">
+          <Nav
+            routes={lavamoatModes}
+            activeRoute={lavamoatMode}
+            onNavigate={(target) => actions.selectlavamoatMode(target)}
+          />
+          <div className="sizeModeWrapper">
+            <button
+              className="sizeModeButton"
+              onClick={() => {actions.togglePackageSize()}}
+            >
+              View Package Size
+            </button>
+          </div>
+        </div>
+
+        <div className="viewSourceWrapper">
           <div className="helpMessage">
             {helpMessage}
           </div>
@@ -186,14 +238,17 @@ class DepGraph extends React.Component {
       </div>
       <DepList
         actions={actions}
-        globalUsagePackages={globalUsagePackages}
+        sortedPackages={sortedPackages}
+        sortedModules={sortedModules}
         packageModulesMode={packageModulesMode}
         selectedNode={selectedNode}
         packageModules={packageModules}
         selectedNodeLabel={selectedNodeLabel}
         selectedNodeData={selectedNodeData}
+        selectedModule={selectedModule}
         moduleData={moduleData}
         viewSource={viewSource}
+        selectionLocked={selectionLocked}
       />
       <ForceGraph2D
         ref={el => this.forceGraph = el}

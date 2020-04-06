@@ -1,9 +1,9 @@
 import React, { Component } from 'react'
-import './App.css'
-import './graphs/DepGraph.css'
+import './css/App.css'
+import './css/DepGraph.css'
 
 const { DepGraph } = require('./graphs/DepGraph')
-const exampleDeps = require('./lavamoat-config-debug.json')
+const exampleDeps = require('./lavamoat/lavamoat-config-debug.json')
 // const bundles = {
 //   'background': require('./data/deps.json'),
 // }

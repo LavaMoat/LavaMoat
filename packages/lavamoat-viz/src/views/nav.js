@@ -1,4 +1,4 @@
-import './bootstrap.css';
+import '../css/bootstrap.css';
 const React = require('react')
 const Tab = require('react-bootstrap/Tab')
 const Tabs = require('react-bootstrap/Tabs')
