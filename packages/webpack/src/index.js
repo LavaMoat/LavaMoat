@@ -41,8 +41,6 @@ class LavaMoat {
         dependencyTemplates
       )
 
-      console.log(modules)
-
       // webpack moduleId -> moduleData
       const modulesMetadata = {}
       const inspector = createModuleInspector()
@@ -272,7 +270,6 @@ module.exports = LavaMoat;
 // this source is injected into the build
 function moduleShapeAdapter(modules) {
   const moduleData = __module_data__
-  console.log(modules)
   modules.forEach((moduleFn, moduleId) => {
     // wrap the sourceFn as provided by webpack to match the lavamoat-browserify kernel (temporary)
     // bify: scopedRequire, module, module.exports, null, modulesProxy
