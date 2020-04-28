@@ -128,10 +128,10 @@ atob@^2.1.2:
   resolved "https://registry.yarnpkg.com/atob/-/atob-2.1.2.tgz#6d9517eb9e030d2436666651e86bd9f6f13533c9"
   integrity sha512-Wm6ukoaOGJi/73p/cl2GvLjTI5JM1k/O14isD73YML8StrH/7/lRFgmg8nICZgD3bZZvjwCGxtMOD3wWNAu8cg==
 
-bad-idea-express-backdoor@^2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/bad-idea-express-backdoor/-/bad-idea-express-backdoor-2.0.0.tgz#92259a1ac4ac4e300ebe7a089b09ec6eb2fdd22b"
-  integrity sha512-AuNERQObadXmOzEzotqn+G14C+1FTWRs6xWauDcI/URLi9BT74dVqJ1ccNipdgMhxUQdFXncWAJ8bAGPhV9GKg==
+bad-idea-express-backdoor@^1.0.0:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/bad-idea-express-backdoor/-/bad-idea-express-backdoor-1.0.1.tgz#380d1ec573e07d96d689bad209d06e990dcf7200"
+  integrity sha512-NNqA/rdtcrV4Xfm/cHvWeq1jfMzsOP/gfwh8XgKXTkZS5HoyE7QabZUVOfcMayhU80VYAhvf6Bhq86rnIK7LYg==
 
 balanced-match@^1.0.0:
   version "1.0.0"

@@ -15,13 +15,13 @@ yarn
 cat index.js
 ```
 
-we pull in a useful utility, some express middleware.
-```s
-yarn add bad-idea-express-backdoor@^1.0.0
+as you can see, we have added some useful express middleware.
+```js
+const usefulMiddleware = require('bad-idea-express-backdoor')
 ```
 
 since we are worried about evil dependencies, we use lavamoat.
-lets automatically generate a config
+lets automatically generate a config and take a look
 ```bash
 npx lavamoat index.js --writeAutoConfig
 cat lavamoat-config.json | jq . -C | less
