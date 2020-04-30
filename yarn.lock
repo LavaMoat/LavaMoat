@@ -2521,6 +2521,11 @@ cytoplasm@^3.0.3:
   resolved "https://registry.yarnpkg.com/cytoplasm/-/cytoplasm-3.1.0.tgz#dddd1430dff64dc1f2e1d85726aa36a5daa6e869"
   integrity sha512-WIHoxo8pGtTupgve4ujZcjzn/6NpWrsbHQJvMVeWZ3KGkFKLcHQcKY5Rvy+7sNypVP2qj+0YkDrAy3ETraOJfw==
 
+cytoplasm@^3.1.1:
+  version "3.1.1"
+  resolved "https://registry.yarnpkg.com/cytoplasm/-/cytoplasm-3.1.1.tgz#4ec1d01c869ba44a4b0933319506086d0a696f50"
+  integrity sha512-dac6BNKl4WZZtvfhX6wbNDokXzh2gYQVDsz3RbE4uY8deCiOyoUssaByZGn2qowRuIxfxi68LsvYBKtZjIBVFw==
+
 dargs@^4.0.1:
   version "4.1.0"
   resolved "https://registry.yarnpkg.com/dargs/-/dargs-4.1.0.tgz#03a9dbb4b5c2f139bf14ae53f0b8a2a6a86f4e17"
@@ -3650,6 +3655,11 @@ from2@^2.1.0:
     inherits "^2.0.1"
     readable-stream "^2.0.0"
 
+from@^0.1.7:
+  version "0.1.7"
+  resolved "https://registry.yarnpkg.com/from/-/from-0.1.7.tgz#83c60afc58b9c56997007ed1a768b3ab303a44fe"
+  integrity sha1-g8YK/Fi5xWmXAH7Rp2izqzA6RP4=
+
 fromentries@^1.2.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/fromentries/-/fromentries-1.2.0.tgz#e6aa06f240d6267f913cea422075ef88b63e7897"
@@ -4065,7 +4075,7 @@ hosted-git-info@^2.1.4, hosted-git-info@^2.7.1:
   resolved "https://registry.yarnpkg.com/hosted-git-info/-/hosted-git-info-2.8.8.tgz#7539bd4bc1e0e0a895815a2e0262420b12858488"
   integrity sha512-f/wzC2QaWBs7t9IYqB4T3sR1xviIViXJRJTWBlx2Gf3g0Xi5vI7Yy4koXQ1c9OYDGHN9sBy1DQ2AB8fqZBWhUg==
 
-htmlescape@^1.1.0:
+htmlescape@^1.1.0, htmlescape@^1.1.1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/htmlescape/-/htmlescape-1.1.1.tgz#3a03edc2214bca3b66424a3e7959349509cb0351"
   integrity sha1-OgPtwiFLyjtmQko+eVk0lQnLA1E=

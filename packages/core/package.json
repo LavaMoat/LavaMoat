@@ -1,6 +1,6 @@
 {
   "name": "lavamoat-core",
-  "version": "1.1.0",
+  "version": "1.1.2",
   "description": "LavaMoat kernel and utils",
   "main": "src/index.js",
   "directories": {
@@ -12,7 +12,7 @@
   "dependencies": {
     "acorn-globals": "^6.0.0",
     "acorn-walk": "^7.1.1",
-    "cytoplasm": "^3.0.3",
+    "cytoplasm": "^3.1.1",
     "fromentries": "^1.2.0",
     "json-stable-stringify": "^1.0.1",
     "lavamoat-tofu": "^2.0.9",

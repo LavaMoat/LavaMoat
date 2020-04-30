@@ -9,7 +9,7 @@ const rimraf = require('rimraf')
 const {
   createBundleFromRequiresArray,
   generateConfigFromFiles,
-  createWatchifyBundle
+  runSimpleOneTwo
 } = require('./util')
 
 // here we are providing an endowments only to a module deep in a dep graph
@@ -100,6 +100,33 @@ test('config - dunder proto not allowed in globals path', async (t) => {
   } catch (err) {
     t.ok(err.message.includes('"__proto__"'))
   }
+})
+
+test('config - disable access to package', async (t) => {
+  t.plan(1)
+
+  // disable one's access to two
+  const config = {
+    resources: {
+      one: {
+        packages: {
+          two: false
+        }
+      }
+    }
+  }
+
+  try {
+    await runSimpleOneTwo({ config })
+    t.fail('should have encountered a fatal error')
+  } catch (err) {
+    t.ok(
+      err.message.includes('LavaMoat - required package not in whitelist'),
+      'got expected error'
+    )
+  }
+
+  t.end()
 })
 
 test('config - default config path is generated with autoconfig if path is not specified', async (t) => {

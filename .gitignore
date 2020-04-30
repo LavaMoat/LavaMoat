@@ -1,3 +1,6 @@
+# allow packages to configure their own git ignore
+node_modules/*
+
 
 # Created by https://www.gitignore.io/api/node
 # Edit at https://www.gitignore.io/?templates=node

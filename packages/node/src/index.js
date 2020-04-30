@@ -6,8 +6,10 @@ const fs = require('fs')
 const yargs = require('yargs')
 const mergeDeep = require('merge-deep')
 const resolve = require('resolve')
+const { sanitize } = require('htmlescape')
 const { generateKernel, packageDataForModule } = require('lavamoat-core')
 const { parseForConfig } = require('./parseForConfig')
+const { checkForResolutionOverride } = require('./resolutions')
 
 runLava().catch(console.error)
 
@@ -15,22 +17,30 @@ async function runLava () {
   const {
     entryPath,
     writeAutoConfig,
+    writeAutoConfigAndRun,
     configPath,
     configOverridePath,
     debugMode
   } = parseArgs()
-  const entryDir = process.cwd()
-  const entryId = path.resolve(entryDir, entryPath)
-  if (writeAutoConfig) {
+  const cwd = process.cwd()
+  const entryId = path.resolve(cwd, entryPath)
+
+  const shouldParseApplication = writeAutoConfig || writeAutoConfigAndRun
+  const shouldRunApplication = !writeAutoConfig || writeAutoConfigAndRun
+
+  if (shouldParseApplication) {
     // parse mode
+    const { resolutions } = await loadConfig({ configPath, configOverridePath })
     console.log(`LavaMoat generating config for "${entryId}"...`)
-    const serializedConfig = await parseForConfig({ entryId })
+    const config = await parseForConfig({ cwd, entryId, resolutions })
+    const serializedConfig = JSON.stringify(config, null, 2)
     fs.writeFileSync(configPath, serializedConfig)
     console.log(`LavaMoat wrote config to "${configPath}"`)
-  } else {
+  }
+  if (shouldRunApplication) {
     // execution mode
     const lavamoatConfig = await loadConfig({ configPath, configOverridePath })
-    const kernel = createKernel({ lavamoatConfig, debugMode })
+    const kernel = createKernel({ cwd, lavamoatConfig, debugMode })
     kernel.internalRequire(entryId)
   }
 }
@@ -69,6 +79,12 @@ function parseArgs () {
         type: 'boolean',
         default: false
       })
+      // parsing + run mode, write config to config path then execute with new config
+      yargs.option('writeAutoConfigAndRun', {
+        describe: 'parse + generate a LavaMoat config file then execute with the new config.',
+        type: 'boolean',
+        default: false
+      })
       // parsing mode, write config debug info to specified or default path
       yargs.option('writeAutoConfigDebug', {
         describe: 'when writeAutoConfig is enabled, write config debug info to specified or default path',
@@ -83,13 +99,14 @@ function parseArgs () {
   return parsedArgs
 }
 
-function createKernel ({ lavamoatConfig, debugMode }) {
-  const createKernel = eval(generateKernel())
+function createKernel ({ cwd, lavamoatConfig, debugMode }) {
+  const { resolutions } = lavamoatConfig
+  const getRelativeModuleId = createModuleResolver({ cwd, resolutions })
+  const createKernel = eval(generateKernel({ debugMode }))
   const kernel = createKernel({
     lavamoatConfig,
     loadModuleData,
-    getRelativeModuleId,
-    debugMode
+    getRelativeModuleId
   })
   return kernel
 }
@@ -109,11 +126,23 @@ function loadModuleData (absolutePath) {
     // load normal user-space module
     const moduleContent = fs.readFileSync(absolutePath, 'utf8')
     // apply source transforms
-    const transformedContent = moduleContent
+    let transformedContent = moduleContent
       // html comment
       .split('-->').join('-- >')
       // use indirect eval
       .split(' eval(').join(' (eval)(')
+    // wrap json modules (borrowed from browserify)
+    if (/\.json$/.test(absolutePath)) {
+      const sanitizedString = sanitize(transformedContent)
+      try {
+        // check json validity
+        JSON.parse(sanitizedString)
+        transformedContent = 'module.exports=' + sanitizedString
+      } catch (err) {
+        err.message = `While parsing ${absolutePath}: ${err.message}`
+        throw err
+      }
+    }
     // wrap in moduleInitializer
     const wrappedContent = `(function(require,module,exports){${transformedContent}})`
     const packageData = packageDataForModule({ file: absolutePath })
@@ -127,10 +156,23 @@ function loadModuleData (absolutePath) {
   }
 }
 
-function getRelativeModuleId (parentAbsolutePath, relativePath) {
-  const parentDir = path.parse(parentAbsolutePath).dir
-  const resolved = resolve.sync(relativePath, { basedir: parentDir })
-  return resolved
+function createModuleResolver ({ cwd, resolutions }) {
+  return function getRelativeModuleId (parentAbsolutePath, requestedName) {
+    // handle resolution overrides
+    let parentDir = path.parse(parentAbsolutePath).dir
+    const { packageName: parentPackageName } = packageDataForModule({ id: parentAbsolutePath, file: parentAbsolutePath })
+    const result = checkForResolutionOverride(resolutions, parentPackageName, requestedName)
+    if (result) {
+      requestedName = result
+      // if path is a relative path, it should be relative to the cwd
+      if (!path.isAbsolute(result)) {
+        parentDir = cwd
+      }
+    }
+    // resolve normally
+    const resolved = resolve.sync(requestedName, { basedir: parentDir })
+    return resolved
+  }
 }
 
 async function loadConfig ({ configPath, configOverridePath }) {

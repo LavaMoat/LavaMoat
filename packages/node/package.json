@@ -3,7 +3,7 @@
   "bin": {
     "lavamoat": "src/index.js"
   },
-  "version": "1.0.9",
+  "version": "1.1.0",
   "main": "index.js",
   "license": "MIT",
   "scripts": {
@@ -11,9 +11,10 @@
     "lint": "npm run lint:standard && npm run lint:deps",
     "lint:standard": "standard src/**/*.js test/**/*.js",
     "lint:fix": "standard src/**/*.js test/**/*.js --fix",
-    "lint:deps": "depcheck --ignores='standard,depcheck'"
+    "lint:deps": "depcheck --ignores='standard,depcheck' --ignore-dirs examples"
   },
   "dependencies": {
+    "htmlescape": "^1.1.1",
     "lavamoat-core": "^1.1.0",
     "merge-deep": "^3.0.2",
     "module-deps": "^6.2.2",

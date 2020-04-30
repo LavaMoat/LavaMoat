@@ -2,10 +2,10 @@
   "resources": {
     "<root>": {
       "packages": {
-        "bad-example-eval-server": true
+        "bad-idea-eval-server": true
       }
     },
-    "bad-example-eval-server": {
+    "bad-idea-eval-server": {
       "globals": {
         "console.log": true
       },

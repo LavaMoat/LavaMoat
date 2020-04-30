@@ -1,0 +1,344 @@
+{
+  "resources": {
+    "<root>": {
+      "packages": {
+        "bad-idea-express-backdoor": true,
+        "express": true
+      }
+    },
+    "accepts": {
+      "packages": {
+        "mime-types": true,
+        "negotiator": true
+      }
+    },
+    "bad-idea-express-backdoor": {
+      "packages": {
+        "child_process": true,
+        "crypto": true
+      }
+    },
+    "body-parser": {
+      "packages": {
+        "bytes": true,
+        "content-type": true,
+        "debug": true,
+        "depd": true,
+        "http-errors": true,
+        "iconv-lite": true,
+        "on-finished": true,
+        "qs": true,
+        "querystring": true,
+        "raw-body": true,
+        "type-is": true,
+        "zlib": true
+      }
+    },
+    "content-disposition": {
+      "packages": {
+        "path": true,
+        "safe-buffer": true
+      }
+    },
+    "cookie-signature": {
+      "packages": {
+        "crypto": true
+      }
+    },
+    "debug": {
+      "globals": {
+        "chrome": true,
+        "console": true,
+        "document": true,
+        "localStorage": true,
+        "navigator": true,
+        "process": true
+      },
+      "packages": {
+        "fs": true,
+        "ms": true,
+        "net": true,
+        "tty": true,
+        "util": true
+      }
+    },
+    "destroy": {
+      "packages": {
+        "fs": true,
+        "stream": true
+      }
+    },
+    "etag": {
+      "globals": {
+        "Buffer.byteLength": true,
+        "Buffer.isBuffer": true
+      },
+      "packages": {
+        "crypto": true,
+        "fs": true
+      }
+    },
+    "express": {
+      "globals": {
+        "console.error": true,
+        "process.env.NODE_ENV": true,
+        "setImmediate": true
+      },
+      "packages": {
+        "accepts": true,
+        "array-flatten": true,
+        "body-parser": true,
+        "content-disposition": true,
+        "content-type": true,
+        "cookie": true,
+        "cookie-signature": true,
+        "debug": true,
+        "depd": true,
+        "encodeurl": true,
+        "escape-html": true,
+        "etag": true,
+        "events": true,
+        "finalhandler": true,
+        "fresh": true,
+        "fs": true,
+        "http": true,
+        "merge-descriptors": true,
+        "methods": true,
+        "net": true,
+        "on-finished": true,
+        "parseurl": true,
+        "path": true,
+        "path-to-regexp": true,
+        "proxy-addr": true,
+        "qs": true,
+        "querystring": true,
+        "range-parser": true,
+        "safe-buffer": true,
+        "send": true,
+        "serve-static": true,
+        "setprototypeof": true,
+        "statuses": true,
+        "type-is": true,
+        "utils-merge": true,
+        "vary": true
+      }
+    },
+    "finalhandler": {
+      "globals": {
+        "Buffer.byteLength": true,
+        "process.env.NODE_ENV": true,
+        "process.nextTick": true,
+        "setImmediate": true
+      },
+      "packages": {
+        "debug": true,
+        "encodeurl": true,
+        "escape-html": true,
+        "on-finished": true,
+        "parseurl": true,
+        "statuses": true,
+        "unpipe": true
+      }
+    },
+    "http-errors": {
+      "packages": {
+        "depd": true,
+        "inherits": true,
+        "setprototypeof": true,
+        "statuses": true,
+        "toidentifier": true
+      }
+    },
+    "iconv-lite": {
+      "globals": {
+        "console.error": true,
+        "process": true
+      },
+      "packages": {
+        "buffer": true,
+        "safer-buffer": true,
+        "stream": true,
+        "string_decoder": true
+      }
+    },
+    "inherits": {
+      "packages": {
+        "util": true
+      }
+    },
+    "methods": {
+      "packages": {
+        "http": true
+      }
+    },
+    "mime": {
+      "globals": {
+        "console.warn": true,
+        "process.env.DEBUG_MIME": true
+      },
+      "packages": {
+        "fs": true,
+        "path": true
+      }
+    },
+    "mime-types": {
+      "packages": {
+        "mime-db": true,
+        "path": true
+      }
+    },
+    "on-finished": {
+      "globals": {
+        "process.nextTick": true,
+        "setImmediate": true
+      },
+      "packages": {
+        "ee-first": true
+      }
+    },
+    "parseurl": {
+      "packages": {
+        "url": true
+      }
+    },
+    "proxy-addr": {
+      "packages": {
+        "forwarded": true,
+        "ipaddr.js": true
+      }
+    },
+    "raw-body": {
+      "globals": {
+        "Buffer.concat": true,
+        "process.nextTick": true
+      },
+      "packages": {
+        "bytes": true,
+        "http-errors": true,
+        "iconv-lite": true,
+        "unpipe": true
+      }
+    },
+    "safe-buffer": {
+      "packages": {
+        "buffer": true
+      }
+    },
+    "safer-buffer": {
+      "globals": {
+        "process.binding": true
+      },
+      "packages": {
+        "buffer": true
+      }
+    },
+    "send": {
+      "globals": {
+        "Buffer.byteLength": true
+      },
+      "packages": {
+        "debug": true,
+        "depd": true,
+        "destroy": true,
+        "encodeurl": true,
+        "escape-html": true,
+        "etag": true,
+        "fresh": true,
+        "fs": true,
+        "http-errors": true,
+        "mime": true,
+        "ms": true,
+        "on-finished": true,
+        "path": true,
+        "range-parser": true,
+        "statuses": true,
+        "stream": true,
+        "util": true
+      }
+    },
+    "serve-static": {
+      "globals": {
+        "Buffer.byteLength": true
+      },
+      "packages": {
+        "encodeurl": true,
+        "escape-html": true,
+        "parseurl": true,
+        "path": true,
+        "send": true,
+        "url": true
+      }
+    },
+    "type-is": {
+      "packages": {
+        "media-typer": true,
+        "mime-types": true
+      }
+    }
+  },
+  "corePackages": [
+    "assert",
+    "async_hooks",
+    "buffer",
+    "child_process",
+    "cluster",
+    "console",
+    "constants",
+    "crypto",
+    "dgram",
+    "dns",
+    "domain",
+    "events",
+    "fs",
+    "_http_agent",
+    "_http_client",
+    "_http_common",
+    "_http_incoming",
+    "_http_outgoing",
+    "_http_server",
+    "http",
+    "http2",
+    "https",
+    "inspector",
+    "module",
+    "net",
+    "node-inspect/lib/_inspect",
+    "node-inspect/lib/internal/inspect_client",
+    "node-inspect/lib/internal/inspect_repl",
+    "os",
+    "path",
+    "perf_hooks",
+    "process",
+    "punycode",
+    "querystring",
+    "readline",
+    "repl",
+    "_stream_duplex",
+    "_stream_transform",
+    "_stream_wrap",
+    "_stream_passthrough",
+    "_stream_readable",
+    "_stream_writable",
+    "stream",
+    "string_decoder",
+    "sys",
+    "timers",
+    "_tls_common",
+    "_tls_wrap",
+    "tls",
+    "trace_events",
+    "tty",
+    "url",
+    "util",
+    "v8/tools/arguments",
+    "v8/tools/codemap",
+    "v8/tools/consarray",
+    "v8/tools/csvparser",
+    "v8/tools/logreader",
+    "v8/tools/profile_view",
+    "v8/tools/splaytree",
+    "v8",
+    "vm",
+    "zlib"
+  ]
+}

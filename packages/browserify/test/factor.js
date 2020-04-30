@@ -25,14 +25,20 @@ test('package factor bundle', async (t) => {
     id: 'entry1',
     packageName: '<root>',
     file: './src/1.js',
-    deps: { 2: 2, 3: 3, 10: 10 },
+    deps: {
+      2: './node_modules/a/index.js',
+      3: './node_modules/b/index.js',
+      10: './src/10.js'
+    },
     source: 'global.testResult = require(\'2\') * require(\'3\') * require(\'10\')',
     entry: true
   }, {
     id: '10',
     packageName: '<root>',
     file: './src/10.js',
-    deps: { 12: 12 },
+    deps: {
+      12: './src/12.js'
+    },
     source: 'module.exports = require(\'12\')'
   }, {
     id: '2',
@@ -45,14 +51,20 @@ test('package factor bundle', async (t) => {
     id: 'entry2',
     packageName: '<root>',
     file: './src/2.js',
-    deps: { 3: 3, 4: 4, 11: 11 },
+    deps: {
+      3: './node_modules/b/index.js',
+      4: './node_modules/c/index.js',
+      11: './src/11.js',
+    },
     source: 'global.testResult = require(\'3\') * require(\'4\') * require(\'11\')',
     entry: true
   }, {
     id: '11',
     packageName: '<root>',
     file: './src/11.js',
-    deps: { 12: 12 },
+    deps: {
+      12: './src/12.js'
+    },
     source: 'module.exports = require(\'12\')'
   }, {
     id: '4',
@@ -81,6 +93,7 @@ test('package factor bundle', async (t) => {
 
   const vinylBundles = await getStreamResults(bundler.bundle())
   t.equal(vinylBundles.length, 3)
+
 
   const relativeNames = vinylBundles.map(bundleFile => bundleFile.relative).sort()
   t.deepEqual(relativeNames, [
