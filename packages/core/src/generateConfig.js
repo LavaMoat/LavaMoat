@@ -44,6 +44,10 @@ function createModuleInspector () {
     // skip for project files (files not from deps)
     const isDependency = packageName === rootSlug
     if (isDependency) return
+    // skip json files
+    const filename = moduleData.file || 'unknown'
+    const fileExtension = filename.split('.').pop()
+    if (fileExtension === 'json') return
     // get eval environment
     const ast = acornGlobals.parse(moduleData.source)
     inspectForEnvironment(ast, packageName)
