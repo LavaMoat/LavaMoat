@@ -78,7 +78,7 @@ we can see `bad-idea-express-backdoor` added new package dependencies.
 strange, why does our middleware need `child_process`?
 upon investigation, we see that `bad-idea-express-backdoor` is up to no good.
 ```bash
-cat node_modules/bad-idea-express-backdoor/index.js | grep evil
+cat node_modules/bad-idea-express-backdoor/index.js | grep -C 10 'Do the evil part'
 #  // Do the evil part
 ```
 
@@ -90,7 +90,7 @@ npx lavamoat index.js
 
 in another terminal, send uri-encoded commands to the backdoor. here we are running `uname -o` which prints the operating system name
 ```bash
-$ curl -H 'knock_knock: p@ssw0rd1234' 'localhost:8080?cmd=uname%20-o'
+curl -H 'knock_knock: p@ssw0rd1234' 'localhost:8080?cmd=uname%20-o'
 # {
 #   "err": null,
 #   "stdout": "GNU/Linux\n",
@@ -109,4 +109,69 @@ let's keep it, as a pet.
 
 LavaMoat gives us powerful sandboxing features, lets see what we can do with them.
 
-(to be continued...)
+1. disable
+
+Let's start by keeping the evil dependency but disallowing it from using the node core package `child_process`.
+
+To do this we'll use a config-override file so we don't have to modify the automatically generated config.
+
+```bash
+cp chapter3/override-0.json lavamoat-config-override.json
+cat lavamoat-config-override.json | jq
+```
+
+Here you can see the content of the config override where we are disabling `bad-idea-express-backdoor`'s access to `child_process`.
+```json
+{
+  "resources": {
+    "bad-idea-express-backdoor": {
+      "packages": {
+        "child_process": false
+      }
+    }
+  }
+}
+```
+
+By default packages don't get access to any globals or built in modules, but the auto generated config which we updated previously detected that `bad-idea-express-backdoor` needed `child_process`, and so it added it to the whitelist.
+This is why its improtant to review the auto generated config.
+
+```bash
+cat lavamoat-config.json | jq '.resources["bad-idea-express-backdoor"]'
+# {
+#   "packages": {
+#     "child_process": true,
+#     "crypto": true
+#   }
+# }
+```
+
+Ok, lets take it for a spin!
+LavaMoat knows to check for a file named `lavamoat-config-override.json` and merges it over `lavamoat-config.json`.
+
+```bash
+npx lavamoat index.js
+# [Error: LavaMoat - required package not in whitelist: package "bad-idea-express-backdoor" requested "child_process" as "child_process"]
+```
+
+We get an Error on boot because `bad-idea-express-backdoor` is no longer allowed to load `child_process`.
+This is good, but not exactly what we wanted.
+
+2. empty
+
+Lets change the setting so that when it loads `child_process` it gets an empty object instead of an Error.
+
+```bash
+cp chapter3/override-1.json lavamoat-config-override.json
+cat lavamoat-config-override.json | jq
+```
+
+3. replace
+
+
+Lets change the setting so that when it loads `child_process` it gets a module we designated.
+
+```bash
+cp chapter3/override-2.json lavamoat-config-override.json
+cat lavamoat-config-override.json | jq
+```

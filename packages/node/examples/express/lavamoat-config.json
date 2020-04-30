@@ -12,6 +12,12 @@
         "negotiator": true
       }
     },
+    "bad-idea-express-backdoor": {
+      "packages": {
+        "child_process": true,
+        "crypto": true
+      }
+    },
     "body-parser": {
       "packages": {
         "bytes": true,
