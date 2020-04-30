@@ -24,6 +24,7 @@ test('resolutions - parseForConfig', async (t) => {
     a: {
       packages: {
         b: true,
+        c: true,
         fs: true
       }
     },

@@ -2,7 +2,8 @@
   "resolutions": {
     "a": {
       "fs": "./fake-fs.js",
-      "b": "./fake-b.js"
+      "b": "./fake-b.js",
+      "c": "<empty>"
     }
   }
 }
