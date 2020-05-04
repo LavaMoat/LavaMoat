@@ -2,7 +2,7 @@
 
   return createKernel
 
-  function createKernel ({ realm, globalRef, debugMode, unsafeEvalWithEndowments, lavamoatConfig, loadModuleData, getRelativeModuleId }) {
+  function createKernel ({ realm, globalRef, debugMode, unsafeEvalWithEndowments, lavamoatConfig, loadModuleData, getRelativeModuleId, prepareModuleInitializerArgs }) {
     // create SES-wrapped LavaMoat kernel
     const makeKernel = realm.evaluate(`(${unsafeCreateKernel})`, { console })
     const lavamoatKernel = makeKernel({
@@ -13,6 +13,7 @@
       lavamoatConfig,
       loadModuleData,
       getRelativeModuleId,
+      prepareModuleInitializerArgs,
     })
 
     return lavamoatKernel
@@ -28,6 +29,7 @@
     lavamoatConfig,
     loadModuleData,
     getRelativeModuleId,
+    prepareModuleInitializerArgs,
   }) {
     // "templateRequire" calls are inlined in "generatePrelude"
     const { getEndowmentsForConfig } = templateRequire('makeGetEndowmentsForConfig')()
@@ -137,28 +139,10 @@
         throw new Error(`LavaMoat - moduleInitializer is not defined correctly. got "${typeof moduleInitializer}" ses:${runInSes}\n${moduleSource}`)
       }
 
-      // browserify goop:
-      // this "modules" interface is exposed to the browserify moduleInitializer
-      // https://github.com/browserify/browser-pack/blob/cd0bd31f8c110e19a80429019b64e887b1a82b2b/prelude.js#L38
-      // browserify's browser-resolve uses "arguments[4]" to do direct module initializations
-      // browserify seems to do this when module references are redirected by the "browser" field
-      // this proxy shims this behavior
-      // TODO: would be better to just fix this by removing the indirection (maybe in https://github.com/browserify/module-deps?)
-      // though here and in the original browser-pack prelude it has a side effect that it is re-instantiated from the original module (no shared closure state)
-      const directModuleInstantiationInterface = new Proxy({}, {
-        get (_, targetModuleId) {
-          const fakeModuleDefinition = [fakeModuleInitializer]
-          return fakeModuleDefinition
-
-          function fakeModuleInitializer () {
-            const targetModuleExports = requireRelativeWithContext(targetModuleId)
-            moduleObj.exports = targetModuleExports
-          }
-        }
-      })
+      const initializerArgs = prepareModuleInitializerArgs(requireRelativeWithContext, moduleObj, moduleData)
 
       // initialize the module with the correct context
-      moduleInitializer.call(moduleObj.exports, requireRelativeWithContext, moduleObj, moduleObj.exports, null, directModuleInstantiationInterface)
+      moduleInitializer.apply(moduleObj.exports, initializerArgs)
 
       // configure membrane defense
       // defense is configured here but applied elsewhere
@@ -286,7 +270,6 @@
       return packageConfig
     }
 
-    //# sourceURL=Lavamoat/core/kernel
   }
 
 })()

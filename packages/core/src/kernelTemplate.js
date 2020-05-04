@@ -4,7 +4,7 @@
   return createKernel
 
 
-  function createKernel ({ lavamoatConfig, loadModuleData, getRelativeModuleId }) {
+  function createKernel ({ lavamoatConfig, loadModuleData, getRelativeModuleId, prepareModuleInitializerArgs }) {
     const debugMode = __lavamoatDebugMode__
 
     // identify the globalRef
@@ -30,6 +30,7 @@
       lavamoatConfig,
       loadModuleData,
       getRelativeModuleId,
+      prepareModuleInitializerArgs,
       realm,
       unsafeEvalWithEndowments,
       globalRef,

@@ -11,13 +11,23 @@ module.exports = { createKernel }
 function createKernel ({ cwd, lavamoatConfig, debugMode }) {
   const { resolutions } = lavamoatConfig
   const getRelativeModuleId = createModuleResolver({ cwd, resolutions })
-  const createKernel = eval(generateKernel({ debugMode }))
+  const kernelSrc = generateKernel({ debugMode })
+  const createKernel = eval(kernelSrc)
   const kernel = createKernel({
     lavamoatConfig,
     loadModuleData,
     getRelativeModuleId,
+    prepareModuleInitializerArgs,
   })
   return kernel
+}
+
+function prepareModuleInitializerArgs (requireRelativeWithContext, moduleObj, moduleData) {
+  const require = requireRelativeWithContext
+  const module = moduleObj
+  const __filename = moduleData.file
+  const __dirname = path.dirname(__filename)
+  return [require, module, __filename, __dirname]
 }
 
 function createModuleResolver ({ cwd, resolutions }) {
