@@ -144,7 +144,7 @@ function loadModuleData (absolutePath) {
       }
     }
     // wrap in moduleInitializer
-    const wrappedContent = `(function(require,module,exports){${transformedContent}})`
+    const wrappedContent = `(function(require,module,exports){\n${transformedContent}\n})`
     const packageData = packageDataForModule({ file: absolutePath })
     const packageName = packageData.packageName || '<root>'
     return {
