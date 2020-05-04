@@ -21,7 +21,7 @@ async function parseForConfig ({ cwd, entryId, resolutions }) {
           requestedName = path.resolve(cwd, result)
         }
       }
-      // resovle via node-resolve
+      // resolve via node-resolve
       resolve(requestedName, parent, cb)
     },
 
