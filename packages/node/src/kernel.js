@@ -25,9 +25,10 @@ function createKernel ({ cwd, lavamoatConfig, debugMode }) {
 function prepareModuleInitializerArgs (requireRelativeWithContext, moduleObj, moduleData) {
   const require = requireRelativeWithContext
   const module = moduleObj
+  const exports = moduleObj.exports
   const __filename = moduleData.file
   const __dirname = path.dirname(__filename)
-  return [require, module, __filename, __dirname]
+  return [exports, require, module, __filename, __dirname]
 }
 
 function createModuleResolver ({ cwd, resolutions }) {
@@ -82,7 +83,7 @@ function loadModuleData (absolutePath) {
       }
     }
     // wrap in moduleInitializer
-    const wrappedContent = `(function(require,module,exports){\n${transformedContent}\n})`
+    const wrappedContent = `(function(exports, require, module, __filename, __dirname){\n${transformedContent}\n})`
     const packageData = packageDataForModule({ file: absolutePath })
     const packageName = packageData.packageName || '<root>'
     return {
