@@ -57,7 +57,7 @@ function loadModuleData (absolutePath) {
       file: absolutePath,
       package: absolutePath,
       // wrapper around unprotected "require"
-      moduleInitializer: (_, module) => {
+      moduleInitializer: (exports, require, module) => {
         module.exports = require(absolutePath)
       }
     }
