@@ -5,6 +5,8 @@ const { sanitize } = require('htmlescape')
 const { generateKernel, packageDataForModule } = require('lavamoat-core')
 const { checkForResolutionOverride } = require('./resolutions')
 
+const nativeRequire = require
+
 module.exports = { createKernel }
 
 
@@ -58,7 +60,7 @@ function loadModuleData (absolutePath) {
       package: absolutePath,
       // wrapper around unprotected "require"
       moduleInitializer: (exports, require, module) => {
-        module.exports = require(absolutePath)
+        module.exports = nativeRequire(absolutePath)
       }
     }
   } else {
