@@ -1,6 +1,6 @@
 {
   "name": "lavamoat-core",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "LavaMoat kernel and utils",
   "main": "src/index.js",
   "directories": {
