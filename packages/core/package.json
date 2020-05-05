@@ -16,7 +16,6 @@
     "fromentries": "^1.2.0",
     "json-stable-stringify": "^1.0.1",
     "lavamoat-tofu": "^2.0.9",
-    "module-name-from-path": "^1.0.4",
     "resolve": "^1.15.1",
     "resolve-package-path": "^2.0.0",
     "through2": "^3.0.1"

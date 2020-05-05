@@ -1,5 +1,6 @@
+'use strict'
+const path = require('path')
 const through = require('through2').obj
-const packageNameFromPath = require('module-name-from-path')
 const resolvePackagePath = require('resolve-package-path')
 const pathSeperator = require('path').sep
 const { isCore } = require('resolve')
@@ -58,4 +59,16 @@ function packageVersionFromPath (packageName, path) {
   if (!packagePath) return
   const { version: packageVersion } = require(packagePath)
   return packageVersion
+}
+
+function packageNameFromPath (file) {
+  const segments = file.split(path.sep)
+  const index = segments.lastIndexOf('node_modules')
+  if (index === -1) return
+  let moduleName = segments[index + 1]
+  // check for scoped modules
+  if (moduleName[0] === '@') {
+    moduleName = segments[index + 1] + path.sep + segments[index + 2]
+  }
+  return moduleName
 }
