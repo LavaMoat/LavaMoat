@@ -4737,6 +4737,22 @@ labeled-stream-splicer@^2.0.0:
     inherits "^2.0.1"
     stream-splicer "^2.0.0"
 
+lavamoat-core@^1.1.0:
+  version "1.1.3"
+  resolved "https://registry.yarnpkg.com/lavamoat-core/-/lavamoat-core-1.1.3.tgz#49bf529227216be13fd77e3b80041c6f59d99044"
+  integrity sha512-8c/WQxY7C8VNUTVjW+fWZxWZK/saCOOwpzZ0mEs2PPr4pQplpEv0CsZRQznJit7eWR9RXUIudLR/PpMZfJpzww==
+  dependencies:
+    acorn-globals "^6.0.0"
+    acorn-walk "^7.1.1"
+    cytoplasm "^3.1.1"
+    fromentries "^1.2.0"
+    json-stable-stringify "^1.0.1"
+    lavamoat-tofu "^2.0.9"
+    module-name-from-path "^1.0.4"
+    resolve "^1.15.1"
+    resolve-package-path "^2.0.0"
+    through2 "^3.0.1"
+
 lazy-cache@^0.2.3:
   version "0.2.7"
   resolved "https://registry.yarnpkg.com/lazy-cache/-/lazy-cache-0.2.7.tgz#7feddf2dcb6edb77d11ef1d117ab5ffdf0ab1b65"
