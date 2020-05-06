@@ -27,7 +27,7 @@ async function runLava () {
 
   if (shouldParseApplication) {
     // parse mode
-    const { resolutions } = await loadConfig({ configPath, configOverridePath })
+    const { resolutions } = await loadConfig({ debugMode, configPath, configOverridePath })
     console.log(`LavaMoat generating config for "${entryId}"...`)
     const config = await parseForConfig({ cwd, entryId, resolutions })
     const serializedConfig = JSON.stringify(config, null, 2)
@@ -36,7 +36,7 @@ async function runLava () {
   }
   if (shouldRunApplication) {
     // execution mode
-    const lavamoatConfig = await loadConfig({ configPath, configOverridePath })
+    const lavamoatConfig = await loadConfig({ debugMode, configPath, configOverridePath })
     const kernel = createKernel({ cwd, lavamoatConfig, debugMode })
     kernel.internalRequire(entryId)
   }
@@ -93,21 +93,31 @@ function parseArgs () {
     .help()
 
   const parsedArgs = argsParser.parse()
+  // resolve paths
+  parsedArgs.configPath = path.resolve(parsedArgs.configPath)
+  parsedArgs.configOverridePath = path.resolve(parsedArgs.configOverridePath)
+
   return parsedArgs
 }
 
-async function loadConfig ({ configPath, configOverridePath }) {
+async function loadConfig ({ debugMode, configPath, configOverridePath }) {
   let config = { resources: {} }
   // try config
   if (fs.existsSync(configPath)) {
+    if (debugMode) console.warn(`Lavamoat looking for config at ${configPath}`)
     const configSource = fs.readFileSync(configPath, 'utf8')
     config = JSON.parse(configSource)
+  } else {
+    if (debugMode) console.warn(`Lavamoat could not find config`)
   }
   // try config override
   if (fs.existsSync(configOverridePath)) {
+    if (debugMode) console.warn(`Lavamoat looking for override config at ${configOverridePath}`)
     const configSource = fs.readFileSync(configOverridePath, 'utf8')
     const overrideConfig = JSON.parse(configSource)
     config = mergeDeep(config, overrideConfig)
+  } else {
+    if (debugMode) console.warn(`Lavamoat could not find config override`)
   }
   return config
 }
