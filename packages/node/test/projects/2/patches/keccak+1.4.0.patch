@@ -1,0 +1,24 @@
+diff --git a/node_modules/keccak/bindings.js b/node_modules/keccak/bindings.js
+index 74b6ecb..f6a9975 100644
+--- a/node_modules/keccak/bindings.js
++++ b/node_modules/keccak/bindings.js
+@@ -1,2 +1,2 @@
+ 'use strict'
+-module.exports = require('./lib/api')(require('bindings')('keccak'))
++module.exports = require('./lib/api')(require(require('bindings')({ module_root: __dirname, bindings: 'keccak', path: true })))
+diff --git a/node_modules/keccak/index.js b/node_modules/keccak/index.js
+index 7446e03..e3d0459 100644
+--- a/node_modules/keccak/index.js
++++ b/node_modules/keccak/index.js
+@@ -1,10 +1,2 @@
+ 'use strict'
+-try {
+-  module.exports = require('./bindings')
+-} catch (err) {
+-  if (process.env.DEBUG) {
+-    console.error('Keccak bindings are not compiled. Pure JS implementation will be used.')
+-  }
+-
+-  module.exports = require('./js')
+-}
++module.exports = require('./bindings')

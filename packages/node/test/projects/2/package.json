@@ -1,0 +1,12 @@
+{
+  "name": "test-2",
+  "dependencies": {
+    "keccak": "1.4"
+  },
+  "scripts": {
+    "install": "patch-package"
+  },
+  "devDependencies": {
+    "patch-package": "^6.2.2"
+  }
+}

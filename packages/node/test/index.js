@@ -54,18 +54,32 @@ test('resolutions - parseForConfig', async (t) => {
 })
 
 // run lavamoat-node
-test('resolutions - execute', async (t) => {
+test('execute - resolutions', async (t) => {
   const projectRoot = `${__dirname}/projects/1`
   const entryId = './index.js'
   const { output } = await runLavamoat({
     cwd: projectRoot,
     args: [entryId]
   })
-  console.log(output.stdout)
   t.equal(output.stderr, '', 'should not have any error output')
   t.deepEqual(output.stdout.split('\n'), [
     'fake-fs called',
     'value: 42',
+    ''
+  ], 'should not have any standard output')
+  t.end()
+})
+
+test('execute - native modules', async (t) => {
+  const projectRoot = `${__dirname}/projects/2`
+  const entryId = './index.js'
+  const { output } = await runLavamoat({
+    cwd: projectRoot,
+    args: [entryId]
+  })
+  t.equal(output.stderr, '', 'should not have any error output')
+  t.deepEqual(output.stdout.split('\n'), [
+    'keccak256: 5cad7cf49f610ec53189e06d3c8668789441235613408f8fabcb4ad8dad94db5',
     ''
   ], 'should not have any standard output')
   t.end()

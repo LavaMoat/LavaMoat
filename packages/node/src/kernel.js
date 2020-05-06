@@ -30,6 +30,9 @@ function prepareModuleInitializerArgs (requireRelativeWithContext, moduleObj, mo
   const exports = moduleObj.exports
   const __filename = moduleData.file
   const __dirname = path.dirname(__filename)
+  require.resolve = (requestedName) => {
+    return resolve.sync(requestedName, { basedir: __dirname })
+  }
   return [exports, require, module, __filename, __dirname]
 }
 
@@ -53,9 +56,10 @@ function createModuleResolver ({ cwd, resolutions }) {
 }
 
 function loadModuleData (absolutePath) {
+  // load core modules (eg "fs")
   if (resolve.isCore(absolutePath)) {
-    // for core modules (eg "fs")
     return {
+      type: 'core',
       file: absolutePath,
       package: absolutePath,
       // wrapper around unprotected "require"
@@ -63,8 +67,21 @@ function loadModuleData (absolutePath) {
         module.exports = nativeRequire(absolutePath)
       }
     }
+  // load compiled native module
+  } else if (isNativeModule(absolutePath)) {
+    const packageData = packageDataForModule({ file: absolutePath })
+    const packageName = packageData.packageName || '<root>'
+    return {
+      type: 'native',
+      file: absolutePath,
+      package: packageName,
+      // wrapper around unprotected "require"
+      moduleInitializer: (exports, require, module) => {
+        module.exports = nativeRequire(absolutePath)
+      }
+    }
+  // load normal user-space module
   } else {
-    // load normal user-space module
     const moduleContent = fs.readFileSync(absolutePath, 'utf8')
     // apply source transforms
     let transformedContent = moduleContent
@@ -91,10 +108,16 @@ function loadModuleData (absolutePath) {
     const packageData = packageDataForModule({ file: absolutePath })
     const packageName = packageData.packageName || '<root>'
     return {
+      type: 'js',
       file: absolutePath,
       package: packageName,
       source: wrappedContent,
       sourceString: wrappedContent
     }
   }
+}
+
+function isNativeModule (filename) {
+  const fileExtension = filename.split('.').pop()
+  return fileExtension === 'node'
 }

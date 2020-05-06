@@ -1,0 +1,120 @@
+{
+  "resources": {
+    "<root>": {
+      "packages": {
+        "keccak": true
+      }
+    },
+    "bindings": {
+      "globals": {
+        "__filename": true,
+        "__non_webpack_require__": true,
+        "__webpack_require__": true,
+        "process.arch": true,
+        "process.cwd": true,
+        "process.env.NODE_BINDINGS_ARROW": true,
+        "process.env.NODE_BINDINGS_COMPILED_DIR": true,
+        "process.platform": true,
+        "process.versions.modules": true,
+        "process.versions.node": true
+      },
+      "packages": {
+        "file-uri-to-path": true,
+        "fs": true,
+        "path": true
+      }
+    },
+    "file-uri-to-path": {
+      "packages": {
+        "path": true
+      }
+    },
+    "inherits": {
+      "packages": {
+        "util": true
+      }
+    },
+    "keccak": {
+      "globals": {
+        "console.error": true,
+        "process.env.DEBUG": true
+      },
+      "packages": {
+        "bindings": true,
+        "inherits": true,
+        "safe-buffer": true,
+        "stream": true
+      }
+    },
+    "safe-buffer": {
+      "packages": {
+        "buffer": true
+      }
+    }
+  },
+  "corePackages": [
+    "assert",
+    "async_hooks",
+    "buffer",
+    "child_process",
+    "cluster",
+    "console",
+    "constants",
+    "crypto",
+    "dgram",
+    "dns",
+    "domain",
+    "events",
+    "fs",
+    "_http_agent",
+    "_http_client",
+    "_http_common",
+    "_http_incoming",
+    "_http_outgoing",
+    "_http_server",
+    "http",
+    "http2",
+    "https",
+    "inspector",
+    "module",
+    "net",
+    "node-inspect/lib/_inspect",
+    "node-inspect/lib/internal/inspect_client",
+    "node-inspect/lib/internal/inspect_repl",
+    "os",
+    "path",
+    "perf_hooks",
+    "process",
+    "punycode",
+    "querystring",
+    "readline",
+    "repl",
+    "_stream_duplex",
+    "_stream_transform",
+    "_stream_wrap",
+    "_stream_passthrough",
+    "_stream_readable",
+    "_stream_writable",
+    "stream",
+    "string_decoder",
+    "sys",
+    "timers",
+    "_tls_common",
+    "_tls_wrap",
+    "tls",
+    "trace_events",
+    "tty",
+    "url",
+    "util",
+    "v8/tools/arguments",
+    "v8/tools/codemap",
+    "v8/tools/consarray",
+    "v8/tools/csvparser",
+    "v8/tools/logreader",
+    "v8/tools/profile_view",
+    "v8/tools/splaytree",
+    "v8",
+    "vm",
+    "zlib"
+  ]
+}

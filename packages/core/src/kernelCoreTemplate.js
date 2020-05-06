@@ -77,7 +77,7 @@
       const packageName = moduleData.package
       const moduleSource = moduleData.sourceString
       const configForModule = getConfigForPackage(lavamoatConfig, packageName)
-      const packageMembraneSpace = getMembraneSpaceForPackage(packageName)
+      const packageMembraneSpace = getMembraneSpaceForModule(moduleData)
       const isEntryModule = moduleData.package === '<root>'
 
       // create the initial moduleObj
@@ -108,7 +108,7 @@
       if (!moduleInitializer) {
 
         // prepare the membrane-wrapped endowments
-        const endowmentsMembraneSpace = getMembraneSpaceForPackage('<endowments>')
+        const endowmentsMembraneSpace = getMembraneSpaceByName('<endowments>')
         const membraneWrappedEndowments = membrane.bridge(endowments, endowmentsMembraneSpace, packageMembraneSpace)
 
         // determine if its a SES-wrapped or naked module initialization
@@ -208,20 +208,34 @@
         throw new Error(`LavaMoat - required package not in whitelist: package "${parentModulePackageName}" requested "${packageName}" as "${requestedName}"`)
       }
 
-      // moduleExports require-time protection
-      if (parentModulePackageName && isSamePackage) {
-        // return raw if same package
-        return moduleExports
-      } else {
+      // apply moduleExports require-time protection
+      const isSameMembraneSpace = parentModulePackageName && getMembraneSpaceNameForModule(moduleData) === getMembraneSpaceNameForModule(parentModuleData)
+      const needsMembraneProtection = !isSameMembraneSpace
+      if (needsMembraneProtection) {
         // apply membrane protections
-        const inGraph = getMembraneSpaceForPackage(packageName)
-        const outGraph = getMembraneSpaceForPackage(parentModulePackageName)
+        const inGraph = getMembraneSpaceForModule(moduleData)
+        const outGraph = getMembraneSpaceForModule(parentModuleData)
         const protectedExports = membrane.bridge(moduleExports, inGraph, outGraph)
         return protectedExports
+      } else {
+        // return raw if same package
+        return moduleExports
       }
     }
 
-    function getMembraneSpaceForPackage (packageName) {
+    function getMembraneSpaceForModule (moduleData) {
+      const name = getMembraneSpaceNameForModule(moduleData)
+      return getMembraneSpaceByName(name)
+    }
+
+    function getMembraneSpaceNameForModule (moduleData) {
+      const { package: packageName, type } = moduleData
+      // give native modules the endowments membrane for always-unwrap
+      const name = type === 'native' ? '<endowments>' : packageName
+      return name
+    }
+
+    function getMembraneSpaceByName (packageName) {
       // core modules use the endowments MembraneSpace
       if (corePackages.has(packageName)) {
         return membraneSpaceForPackage.get('<endowments>')
