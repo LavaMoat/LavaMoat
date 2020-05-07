@@ -8,7 +8,8 @@
     "test": "lerna run test",
     "lint": "lerna run lint",
     "lint:fix": "lerna run lint:fix",
-    "publish": "lerna publish from-package --no-push --no-git-tag-version --yes"
+    "publish": "lerna publish from-package --no-push --no-git-tag-version --yes",
+    "install": "lerna bootstrap"
   },
   "workspaces": [
     "packages/*"
