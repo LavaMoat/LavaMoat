@@ -2,11 +2,11 @@
 
   return createKernel
 
-  function createKernel ({ realm, globalRef, debugMode, unsafeEvalWithEndowments, lavamoatConfig, loadModuleData, getRelativeModuleId, prepareModuleInitializerArgs }) {
+  function createKernel ({ globalRef, debugMode, unsafeEvalWithEndowments, lavamoatConfig, loadModuleData, getRelativeModuleId, prepareModuleInitializerArgs }) {
     // create SES-wrapped LavaMoat kernel
-    const makeKernel = realm.evaluate(`(${unsafeCreateKernel})`, { console })
+    const kernelCompartment = new Compartment({ console })
+    const makeKernel = kernelCompartment.evaluate(`(${unsafeCreateKernel})`)
     const lavamoatKernel = makeKernel({
-      realm,
       unsafeEvalWithEndowments,
       globalRef,
       debugMode,
@@ -22,7 +22,6 @@
   // this is serialized and run in SES
   // mostly just exists to expose variables to internalRequire and loadBundle
   function unsafeCreateKernel ({
-    realm,
     unsafeEvalWithEndowments,
     globalRef,
     debugMode,
@@ -33,7 +32,7 @@
   }) {
     // "templateRequire" calls are inlined in "generatePrelude"
     const { getEndowmentsForConfig } = templateRequire('makeGetEndowmentsForConfig')()
-    const { prepareRealmGlobalFromConfig } = templateRequire('makePrepareRealmGlobalFromConfig')()
+    const { prepareCompartmentGlobalFromConfig } = templateRequire('makePrepareRealmGlobalFromConfig')()
     const { Membrane } = templateRequire('cytoplasm')
     const createReadOnlyDistortion = templateRequire('cytoplasm/distortions/readOnly')
 
@@ -117,16 +116,16 @@
         if (runInSes) {
 
           // set the module initializer as the SES-wrapped version
-          const moduleRealm = realm.global.Realm.makeCompartment()
+          const moduleCompartment = new Compartment()
           const globalsConfig = configForModule.globals
-          prepareRealmGlobalFromConfig(moduleRealm.global, globalsConfig, membraneWrappedEndowments, globalStore)
+          prepareCompartmentGlobalFromConfig(moduleCompartment.global, globalsConfig, membraneWrappedEndowments, globalStore)
           // expose membrane for debugging
           if (debugMode) {
-            moduleRealm.global.membrane = membrane
+            moduleCompartment.global.membrane = membrane
           }
-          // execute in module realm with modified realm global
+          // execute in module compartment with modified compartment global
           try {
-            moduleInitializer = moduleRealm.evaluate(`${moduleSource}`)
+            moduleInitializer = moduleCompartment.evaluate(`${moduleSource}`)
           } catch (err) {
             console.warn(`LavaMoat - Error evaluating module "${moduleId}" from package "${packageName}"`)
             throw err

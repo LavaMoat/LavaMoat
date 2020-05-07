@@ -9,7 +9,7 @@ const path = require('path')
 const preludeTemplate = fs.readFileSync(path.join(__dirname, '/preludeTemplate.js'), 'utf-8')
 const kernelTemplate = fs.readFileSync(path.join(__dirname, '/kernelTemplate.js'), 'utf-8')
 const kernelCoreTemplate = fs.readFileSync(path.join(__dirname, '/kernelCoreTemplate.js'), 'utf-8')
-const sesSrc = fs.readFileSync(path.join(__dirname, '/../lib/ses.umd.js'), 'utf-8')
+const sesSrc = fs.readFileSync(require.resolve('ses'), 'utf-8')
 const makeGetEndowmentsForConfigSrc = fs.readFileSync(path.join(__dirname, '/makeGetEndowmentsForConfig.js'), 'utf-8')
 const makePrepareRealmGlobalFromConfigSrc = fs.readFileSync(path.join(__dirname, '/makePrepareRealmGlobalFromConfig.js'), 'utf-8')
 
@@ -21,12 +21,9 @@ module.exports = {
 
 // takes the preludeTemplate and populates it with the kernel
 function generatePrelude (opts = {}) {
-  const debugMode = Boolean(opts.debugMode)
   const kernelCode = generateKernel(opts)
 
   let output = preludeTemplate
-  output = replaceTemplateRequire(output, 'ses', sesSrc)
-  output = output.replace('__lavamoatDebugMode__', debugMode ? 'true' : 'false')
   output = output.replace('__createKernel__', kernelCode)
 
   return output
@@ -40,7 +37,7 @@ function generateKernel (opts = {}) {
   let output = kernelTemplate
   output = replaceTemplateRequire(output, 'ses', sesSrc)
   output = output.replace('__lavamoatDebugMode__', debugMode ? 'true' : 'false')
-  output = output.replace('__createKernel__', kernelCode)
+  output = output.replace('__createKernelCore__', kernelCode)
 
   return output
 }

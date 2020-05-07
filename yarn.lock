@@ -2,6 +2,11 @@
 # yarn lockfile v1
 
 
+"@agoric/make-hardener@0.0.8":
+  version "0.0.8"
+  resolved "https://registry.yarnpkg.com/@agoric/make-hardener/-/make-hardener-0.0.8.tgz#7f9e9d6874600b2e1b0543ce9456fbf62463be2d"
+  integrity sha512-bd83IYEMQbzpprwyA10RjHIGWmWeUMdsd5EzaHwke+zLH0HyqP6UKxFLv5mqkmrMeQyOMhNgKN1hCagjRyjlxQ==
+
 "@agoric/make-hardener@^0.0.6":
   version "0.0.6"
   resolved "https://registry.yarnpkg.com/@agoric/make-hardener/-/make-hardener-0.0.6.tgz#5903748a71381bc37e23d571390aaff9973c37b2"
@@ -6909,6 +6914,13 @@ serve@^11.3.0:
     compression "1.7.3"
     serve-handler "6.1.2"
     update-check "1.5.2"
+
+ses@^0.7.7:
+  version "0.7.7"
+  resolved "https://registry.yarnpkg.com/ses/-/ses-0.7.7.tgz#d608378aa0ed7363e4f3ddadc3bc24b00439a062"
+  integrity sha512-rN+z8Auz+XX/SXUMPHePZhHP0mLeDdihq8Au8UZzxlyOK+SdUeVxDJOjUdrtxebtQYNk8LMqFE0Qst5ea/SN6Q==
+  dependencies:
+    "@agoric/make-hardener" "0.0.8"
 
 "ses@git+https://git@github.com/agoric/ses.git#fdb393f817f6124c4d055bff26b68e4cbe17618e":
   version "0.6.5"

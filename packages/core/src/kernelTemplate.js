@@ -12,26 +12,26 @@
 
     // create the SES rootRealm
     // "templateRequire" calls are inlined in "generatePrelude"
-    const SES = templateRequire('ses')
-    const sesOptions = {
+    const { lockdown } = templateRequire('ses')
+    const lockdownOptions = {
       // this is introduces non-determinism, but is otherwise safe
-      mathRandomMode: 'allow',
+      noTameMath: true,
     }
 
     // only reveal error stacks in debug mode
     if (debugMode === true) {
-      sesOptions.errorStackMode = 'allow'
+      lockdownOptions.noTameError = true
     }
-    const realm = SES.makeSESRootRealm(sesOptions)
+
+    lockdown(lockdownOptions)
 
     // initialize the kernel
-    const createKernelCore = __createKernel__
+    const createKernelCore = __createKernelCore__
     const kernel = createKernelCore({
       lavamoatConfig,
       loadModuleData,
       getRelativeModuleId,
       prepareModuleInitializerArgs,
-      realm,
       unsafeEvalWithEndowments,
       globalRef,
       debugMode,
