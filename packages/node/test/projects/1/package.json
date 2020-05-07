@@ -1,3 +1,6 @@
 {
-  "name": "test-1"
+  "name": "test-1",
+  "scripts": {
+    "postinstall": "cp -R fake_node_modules/* ./node_modules/"
+  }
 }
