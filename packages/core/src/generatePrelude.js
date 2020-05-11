@@ -22,7 +22,7 @@ module.exports = {
 // takes the preludeTemplate and populates it with the kernel
 function generatePrelude (opts = {}) {
   const debugMode = Boolean(opts.debugMode)
-  const kernelCode = generateKernelCore(opts)
+  const kernelCode = generateKernel(opts)
 
   let output = preludeTemplate
   output = replaceTemplateRequire(output, 'ses', sesSrc)
