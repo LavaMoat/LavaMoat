@@ -2536,6 +2536,11 @@ cytoplasm@^3.1.1:
   resolved "https://registry.yarnpkg.com/cytoplasm/-/cytoplasm-3.1.1.tgz#4ec1d01c869ba44a4b0933319506086d0a696f50"
   integrity sha512-dac6BNKl4WZZtvfhX6wbNDokXzh2gYQVDsz3RbE4uY8deCiOyoUssaByZGn2qowRuIxfxi68LsvYBKtZjIBVFw==
 
+cytoplasm@^3.3.0:
+  version "3.3.0"
+  resolved "https://registry.yarnpkg.com/cytoplasm/-/cytoplasm-3.3.0.tgz#dec707ac3d5dd1da50e387d633a6293fe4da80cb"
+  integrity sha512-T3cG25Xc95obKPwi7nZg+lV7zQW2QtFBDCicM26ILY21zHKfgJmv8PtK9g+QuKHHnLj3g6IkcGQKPMx5Q1zcpg==
+
 dargs@^4.0.1:
   version "4.1.0"
   resolved "https://registry.yarnpkg.com/dargs/-/dargs-4.1.0.tgz#03a9dbb4b5c2f139bf14ae53f0b8a2a6a86f4e17"

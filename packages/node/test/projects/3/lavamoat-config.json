@@ -2,30 +2,23 @@
   "resources": {
     "<root>": {
       "packages": {
-        "keccak": true
+        "a": true
       }
     },
-    "keccak": {
+    "a": {
       "globals": {
-        "Buffer.from": true,
-        "Buffer.isBuffer": true,
-        "__dirname": true
+        "Buffer.from": true
       },
       "packages": {
-        "node-gyp-build": true,
-        "stream": true
+        "b": true
       }
     },
-    "node-gyp-build": {
+    "b": {
       "globals": {
-        "__non_webpack_require__": true,
-        "__webpack_require__": true,
-        "process": true
+        "Buffer.isBuffer": true
       },
       "packages": {
-        "fs": true,
-        "os": true,
-        "path": true
+        "crypto": true
       }
     }
   },
@@ -55,9 +48,6 @@
     "inspector",
     "module",
     "net",
-    "node-inspect/lib/_inspect",
-    "node-inspect/lib/internal/inspect_client",
-    "node-inspect/lib/internal/inspect_repl",
     "os",
     "path",
     "perf_hooks",
@@ -83,15 +73,9 @@
     "tty",
     "url",
     "util",
-    "v8/tools/arguments",
-    "v8/tools/codemap",
-    "v8/tools/consarray",
-    "v8/tools/csvparser",
-    "v8/tools/logreader",
-    "v8/tools/profile_view",
-    "v8/tools/splaytree",
     "v8",
     "vm",
+    "worker_threads",
     "zlib"
   ]
 }

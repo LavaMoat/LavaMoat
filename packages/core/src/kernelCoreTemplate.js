@@ -37,22 +37,24 @@
     const { Membrane } = templateRequire('cytoplasm')
     const createReadOnlyDistortion = templateRequire('cytoplasm/distortions/readOnly')
 
-    const corePackages = new Set(lavamoatConfig.corePackages)
     const moduleCache = new Map()
     const globalStore = new Map()
     const membraneSpaceForPackage = new Map()
     const membrane = new Membrane({ debugMode })
+    const allowTypedArrays = (() => {
+      const TypedArray = Object.getPrototypeOf(Uint8Array)
+      return (value) => value instanceof TypedArray
+    })()
     const endowmentsMembraneSpace = membrane.makeMembraneSpace({
       label: '<endowments>',
-      // this ensures all arguments passed to the endowments membrane are unwrapped
-      // the danger is if the endowments space calls functions or sets values on those
-      // unwrapped values, it also exposes its own refs unwrapped
-      dangerouslyAlwaysUnwrap: true,
+      // this ensures all typedarrays that are passed to the endowments membrane are unwrapped
+      passthroughFilter: allowTypedArrays,
     })
     membraneSpaceForPackage.set(endowmentsMembraneSpace.label, endowmentsMembraneSpace)
 
     return {
       internalRequire,
+      membrane,
     }
 
     // this function instantiaties a module from a moduleId.
@@ -77,7 +79,7 @@
       const packageName = moduleData.package
       const moduleSource = moduleData.sourceString
       const configForModule = getConfigForPackage(lavamoatConfig, packageName)
-      const packageMembraneSpace = getMembraneSpaceForModule(moduleData)
+      const moduleMembraneSpace = getMembraneSpaceForModule(moduleData)
       const isEntryModule = moduleData.package === '<root>'
 
       // create the initial moduleObj
@@ -89,7 +91,7 @@
 
       // prepare endowments
       const endowmentsFromConfig = getEndowmentsForConfig(globalRef, configForModule)
-      let endowments = Object.assign({}, lavamoatConfig.defaultGlobals, endowmentsFromConfig)
+      let endowments = Object.assign({}, endowmentsFromConfig)
       // special case for exposing window
       if (endowments.window) {
         endowments = Object.assign({}, endowments.window, endowments)
@@ -109,7 +111,7 @@
 
         // prepare the membrane-wrapped endowments
         const endowmentsMembraneSpace = getMembraneSpaceByName('<endowments>')
-        const membraneWrappedEndowments = membrane.bridge(endowments, endowmentsMembraneSpace, packageMembraneSpace)
+        const membraneWrappedEndowments = membrane.bridge(endowments, endowmentsMembraneSpace, moduleMembraneSpace)
 
         // determine if its a SES-wrapped or naked module initialization
         if (runInSes) {
@@ -118,6 +120,10 @@
           const moduleRealm = realm.global.Realm.makeCompartment()
           const globalsConfig = configForModule.globals
           prepareRealmGlobalFromConfig(moduleRealm.global, globalsConfig, membraneWrappedEndowments, globalStore)
+          // expose membrane for debugging
+          if (debugMode) {
+            moduleRealm.global.membrane = membrane
+          }
           // execute in module realm with modified realm global
           try {
             moduleInitializer = moduleRealm.evaluate(`${moduleSource}`)
@@ -127,9 +133,12 @@
           }
 
         } else {
-
           // expose the raw global on the endowments (?)
           endowments.global = globalRef
+          // expose membrane for debugging
+          if (debugMode) {
+            endowments.membrane = membrane
+          }
           // set the module initializer as the unwrapped version
           moduleInitializer = unsafeEvalWithEndowments(`${moduleSource}`, membraneWrappedEndowments)
 
@@ -152,8 +161,8 @@
         // skip plain values
         if (membrane.shouldSkipBridge(value)) return
         // set this ref to read-only
-        packageMembraneSpace.handlerForRef.set(value, createReadOnlyDistortion({
-          setHandlerForRef: (ref, newHandler) => packageMembraneSpace.handlerForRef.set(ref, newHandler)
+        moduleMembraneSpace.handlerForRef.set(value, createReadOnlyDistortion({
+          setHandlerForRef: (ref, newHandler) => moduleMembraneSpace.handlerForRef.set(ref, newHandler)
         }))
       })
 
@@ -224,35 +233,37 @@
     }
 
     function getMembraneSpaceForModule (moduleData) {
-      const name = getMembraneSpaceNameForModule(moduleData)
-      return getMembraneSpaceByName(name)
+      const spaceName = getMembraneSpaceNameForModule(moduleData)
+      return getMembraneSpaceByName(spaceName)
     }
 
     function getMembraneSpaceNameForModule (moduleData) {
       const { package: packageName, type } = moduleData
-      // give native modules the endowments membrane for always-unwrap
-      const name = type === 'native' ? '<endowments>' : packageName
-      return name
+      // native modules use the endowments MembraneSpace for TypedArray passthrough
+      if (type === 'native') {
+        return '<endowments>'
+      }
+      // core modules use the endowments MembraneSpace for TypedArray passthrough
+      if (type === 'core') {
+        return '<endowments>'
+      }
+      // otherwise use package name
+      return packageName
     }
 
-    function getMembraneSpaceByName (packageName) {
-      // core modules use the endowments MembraneSpace
-      if (corePackages.has(packageName)) {
-        return membraneSpaceForPackage.get('<endowments>')
-      }
-
+    function getMembraneSpaceByName (spaceName) {
       // if exists, return it
-      if (membraneSpaceForPackage.has(packageName)) {
-        return membraneSpaceForPackage.get(packageName)
+      if (membraneSpaceForPackage.has(spaceName)) {
+        return membraneSpaceForPackage.get(spaceName)
       }
 
       // create the membrane space for this package
       const membraneSpace = membrane.makeMembraneSpace({
-        label: packageName,
+        label: spaceName,
         // default is a transparent membrane handler
         createHandler: () => Reflect,
       })
-      membraneSpaceForPackage.set(packageName, membraneSpace)
+      membraneSpaceForPackage.set(spaceName, membraneSpace)
       return membraneSpace
     }
 
