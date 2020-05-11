@@ -70,7 +70,7 @@ test('execute - resolutions', async (t) => {
   t.end()
 })
 
-test('execute - native modules', async (t) => {
+test('execute - keccak with native modules', async (t) => {
   const projectRoot = `${__dirname}/projects/2`
   const entryId = './index.js'
   const { output } = await runLavamoat({
@@ -80,6 +80,21 @@ test('execute - native modules', async (t) => {
   t.equal(output.stderr, '', 'should not have any error output')
   t.deepEqual(output.stdout.split('\n'), [
     'keccak256: 5cad7cf49f610ec53189e06d3c8668789441235613408f8fabcb4ad8dad94db5',
+    ''
+  ], 'should not have any standard output')
+  t.end()
+})
+
+test('execute - core modules and buffers', async (t) => {
+  const projectRoot = `${__dirname}/projects/3`
+  const entryId = './index.js'
+  const { output } = await runLavamoat({
+    cwd: projectRoot,
+    args: [entryId]
+  })
+  t.equal(output.stderr, '', 'should not have any error output')
+  t.deepEqual(output.stdout.split('\n'), [
+    'sha256: fb1520a08f1bc43831d0000dc76f6b0f027bafd36c55b1f43fc54c60c2f831da',
     ''
   ], 'should not have any standard output')
   t.end()
