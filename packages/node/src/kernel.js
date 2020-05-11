@@ -1,3 +1,4 @@
+/* eslint no-eval: 0 */
 const fs = require('fs')
 const path = require('path')
 const resolve = require('resolve')
