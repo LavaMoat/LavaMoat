@@ -5,50 +5,27 @@
         "keccak": true
       }
     },
-    "bindings": {
-      "globals": {
-        "__filename": true,
-        "__non_webpack_require__": true,
-        "__webpack_require__": true,
-        "process.arch": true,
-        "process.cwd": true,
-        "process.env.NODE_BINDINGS_ARROW": true,
-        "process.env.NODE_BINDINGS_COMPILED_DIR": true,
-        "process.platform": true,
-        "process.versions.modules": true,
-        "process.versions.node": true
-      },
-      "packages": {
-        "file-uri-to-path": true,
-        "fs": true,
-        "path": true
-      }
-    },
-    "file-uri-to-path": {
-      "packages": {
-        "path": true
-      }
-    },
-    "inherits": {
-      "packages": {
-        "util": true
-      }
-    },
     "keccak": {
       "globals": {
-        "console.error": true,
-        "process.env.DEBUG": true
+        "Buffer.from": true,
+        "Buffer.isBuffer": true,
+        "__dirname": true
       },
       "packages": {
-        "bindings": true,
-        "inherits": true,
-        "safe-buffer": true,
+        "node-gyp-build": true,
         "stream": true
       }
     },
-    "safe-buffer": {
+    "node-gyp-build": {
+      "globals": {
+        "__non_webpack_require__": true,
+        "__webpack_require__": true,
+        "process": true
+      },
       "packages": {
-        "buffer": true
+        "fs": true,
+        "os": true,
+        "path": true
       }
     }
   },
