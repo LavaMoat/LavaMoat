@@ -111,7 +111,7 @@ async function loadConfig ({ debugMode, configPath, configOverridePath }) {
     const configSource = fs.readFileSync(configPath, 'utf8')
     config = JSON.parse(configSource)
   } else {
-    if (debugMode) console.warn(`Lavamoat could not find config`)
+    if (debugMode) console.warn('Lavamoat could not find config')
   }
   // try config override
   if (fs.existsSync(configOverridePath)) {
@@ -120,7 +120,7 @@ async function loadConfig ({ debugMode, configPath, configOverridePath }) {
     const overrideConfig = JSON.parse(configSource)
     config = mergeDeep(config, overrideConfig)
   } else {
-    if (debugMode) console.warn(`Lavamoat could not find config override`)
+    if (debugMode) console.warn('Lavamoat could not find config override')
   }
   return config
 }

@@ -11,8 +11,8 @@
     "test:prep": "for d in ./test/projects/*/ ; do (cd \"$d\" && yarn install); done",
     "test:run": "node test/index.js",
     "lint": "npm run lint:standard && npm run lint:deps",
-    "lint:standard": "standard src/**/*.js test/**/*.js",
-    "lint:fix": "standard src/**/*.js test/**/*.js --fix",
+    "lint:standard": "standard src/**/*.js test/*.js",
+    "lint:fix": "standard src/**/*.js test/*.js --fix",
     "lint:deps": "depcheck --ignores='standard,depcheck' --ignore-dirs examples"
   },
   "dependencies": {

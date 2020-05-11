@@ -9,7 +9,6 @@ const nativeRequire = require
 
 module.exports = { createKernel }
 
-
 function createKernel ({ cwd, lavamoatConfig, debugMode }) {
   const { resolutions } = lavamoatConfig
   const getRelativeModuleId = createModuleResolver({ cwd, resolutions })
@@ -19,7 +18,7 @@ function createKernel ({ cwd, lavamoatConfig, debugMode }) {
     lavamoatConfig,
     loadModuleData,
     getRelativeModuleId,
-    prepareModuleInitializerArgs,
+    prepareModuleInitializerArgs
   })
   return kernel
 }
