@@ -8,7 +8,10 @@ const mergeDeep = require('merge-deep')
 const { parseForConfig } = require('./parseForConfig')
 const { createKernel } = require('./kernel')
 
-runLava().catch(console.error)
+runLava().catch(err => {
+  console.error(err)
+  process.exit(1)
+})
 
 async function runLava () {
   const {
