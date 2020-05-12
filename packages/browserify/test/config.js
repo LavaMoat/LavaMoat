@@ -9,7 +9,8 @@ const rimraf = require('rimraf')
 const {
   createBundleFromRequiresArray,
   generateConfigFromFiles,
-  runSimpleOneTwo
+  runSimpleOneTwo,
+  evalBundle,
 } = require('./util')
 
 // here we are providing an endowments only to a module deep in a dep graph
@@ -58,14 +59,11 @@ test('config - deep endow', async (t) => {
 
   const bundle = await createBundleFromRequiresArray(entries, { config })
 
-  let testResult
-  global.postMessage = (message) => { testResult = message }
-  try {
-    eval(bundle)
-  } catch (err) {
-    t.fail(`eval of bundle failed:\n${err.stack || err}`)
-  }
-  t.deepEqual(testResult, '12345')
+  let messageSentByTest
+  const testGlobal = { postMessage: (message) => { messageSentByTest = message } }
+
+  evalBundle(bundle, testGlobal)
+  t.deepEqual(messageSentByTest, '12345')
 })
 
 // here we provide an illegal config value
@@ -92,10 +90,8 @@ test('config - dunder proto not allowed in globals path', async (t) => {
 
   const bundle = await createBundleFromRequiresArray(entries, { config })
 
-  let testResult
-  global.postMessage = (message) => { testResult = message }
   try {
-    eval(bundle)
+    evalBundle(bundle)
     t.fail('did not throw as expected')
   } catch (err) {
     t.ok(err.message.includes('"__proto__"'))
@@ -130,18 +126,18 @@ test('config - disable access to package', async (t) => {
 })
 
 test('config - default config path is generated with autoconfig if path is not specified', async (t) => {
-  const tmpObj = tmp.dirSync()
-  const defaults = {
-    cwd: tmpObj.name,
+  const { name: tempDir } = tmp.dirSync()
+  const execOpts = {
+    cwd: tempDir,
     stdio: 'inherit'
   }
 
-  const expectedPath = path.join(tmpObj.name, 'lavamoat/lavamoat-config.json')
+  const expectedPath = path.join(tempDir, 'lavamoat/lavamoat-config.json')
   const scriptPath = require.resolve('./fixtures/runBrowserifyAutoConfig')
 
   t.notOk(fs.existsSync(expectedPath), 'Config file does not yet exist')
 
-  const buildProcess = execSync(`node ${scriptPath}`, defaults)
+  execSync(`node ${scriptPath}`, execOpts)
 
   t.ok(fs.existsSync(expectedPath), 'Config file exists')
 
@@ -179,7 +175,7 @@ test('config - writes a proper config to a temp dir', async (t) => {
   mkdirp.sync(configDir)
   fs.writeFileSync(filePath, JSON.stringify(config))
   const bundle = await createBundleFromRequiresArray([], { config: filePath })
-  t.doesNotThrow(() => eval(bundle))
+  t.doesNotThrow(() => evalBundle(bundle))
 })
 
 test('Config - Applies config override', async (t) => {

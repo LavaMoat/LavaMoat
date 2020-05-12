@@ -3,7 +3,8 @@ const createCustomPack = require('../src/createCustomPack')
 const {
   generateConfigFromFiles,
   createBrowserifyFromRequiresArray,
-  getStreamResults
+  getStreamResults,
+  evalBundle,
 } = require('./util')
 
 test('package factor bundle', async (t) => {
@@ -110,17 +111,17 @@ test('package factor bundle', async (t) => {
     bundles[relative] = content
   }))
 
-  global.two = 2
-  global.three = 3
-  global.four = 4
+  const testGlobal = {
+    two: 2,
+    three: 3,
+    four: 4,
+  }
 
-  delete global.testResult
-  eval(bundles['common.js'])
-  eval(bundles['src/1.js'])
-  t.equal(global.testResult, 60)
+  let result
 
-  delete global.testResult
-  eval(bundles['common.js'])
-  eval(bundles['src/2.js'])
-  t.equal(global.testResult, 120)
+  result = evalBundle(bundles['common.js'] + bundles['src/1.js'], testGlobal)
+  t.equal(result, 60)
+
+  result = evalBundle(bundles['common.js'] + bundles['src/2.js'], testGlobal)
+  t.equal(result, 120)
 })

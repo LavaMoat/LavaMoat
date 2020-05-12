@@ -1,5 +1,4 @@
 const test = require('tape-promise').default(require('tape'))
-const { createBundleFromRequiresArray } = require('./util')
 const {
   runSimpleOneTwo,
   runSimpleOneTwoSamePackage
@@ -135,8 +134,10 @@ test('moduleExports - object returned from exported function should be mutable',
 
 test('moduleExports - <endowments> membrane space should round-trip correctly in packages', async (t) => {
   const testObj = {}
-  global.get = () => testObj
-  global.check = (target) => target === testObj
+  const testGlobal = {
+    get: () => testObj,
+    check: (target) => target === testObj,
+  }
 
   function defineOne () {
     const two = require('two')
@@ -171,7 +172,7 @@ test('moduleExports - <endowments> membrane space should round-trip correctly in
     }
   }
 
-  const result = await runSimpleOneTwo({ defineOne, defineTwo, config })
+  const result = await runSimpleOneTwo({ defineOne, defineTwo, config, testGlobal })
 
   t.equal(result, true, 'endowments round tripped correctly')
   t.end()
@@ -180,8 +181,10 @@ test('moduleExports - <endowments> membrane space should round-trip correctly in
 
 test('moduleExports - <endowments> membrane space should round-trip correctly in <root>', async (t) => {
   const testObj = {}
-  global.get = () => testObj
-  global.check = (target) => target === testObj
+  const testGlobal = {
+    get: () => testObj,
+    check: (target) => target === testObj,
+  }
 
   function defineRoot () {
     const one = require('one')
@@ -214,7 +217,7 @@ test('moduleExports - <endowments> membrane space should round-trip correctly in
     }
   }
 
-  const result = await runSimpleOneTwo({ defineRoot, defineOne, config })
+  const result = await runSimpleOneTwo({ defineRoot, defineOne, config, testGlobal })
 
   t.equal(result, true, 'endowments round tripped correctly')
   t.end()
