@@ -9,7 +9,7 @@ module.exports = makePrepareRealmGlobalFromConfig
 
 function makePrepareRealmGlobalFromConfig () {
   return {
-    prepareRealmGlobalFromConfig,
+    prepareCompartmentGlobalFromConfig,
     getTopLevelReadAccessFromPackageConfig,
     getTopLevelWriteAccessFromPackageConfig
   }
@@ -29,7 +29,7 @@ function makePrepareRealmGlobalFromConfig () {
     return result
   }
 
-  function prepareRealmGlobalFromConfig (moduleRealmGlobal, globalsConfig, endowments, globalStore) {
+  function prepareCompartmentGlobalFromConfig (moduleRealmGlobal, globalsConfig, endowments, globalStore) {
     // lookup top level read + write access keys
     const topLevelWriteAccessKeys = getTopLevelWriteAccessFromPackageConfig(globalsConfig)
     const topLevelReadAccessKeys = getTopLevelReadAccessFromPackageConfig(globalsConfig)

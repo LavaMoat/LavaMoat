@@ -1,3 +1,4 @@
+const { runInNewContext } = require('vm')
 const browserify = require('browserify')
 const pify = require('pify')
 const clone = require('clone')
@@ -21,6 +22,7 @@ module.exports = {
   testEntryAttackerVictim,
   runSimpleOneTwo,
   runSimpleOneTwoSamePackage,
+  evalBundle,
   createBrowserifyFromRequiresArray,
   createSpy,
   getStreamResults
@@ -169,7 +171,7 @@ async function testEntryAttackerVictim (t, { defineAttacker, defineVictim }) {
     {
       id: '/entry.js',
       file: '/entry.js',
-      source: `(${defineEntry})()`,
+      source: `(${defineEntry}).call(this)`,
       deps: {
         attacker: '/node_modules/attacker/index.js',
         victim: '/node_modules/victim/index.js'
@@ -179,7 +181,7 @@ async function testEntryAttackerVictim (t, { defineAttacker, defineVictim }) {
     {
       id: '/node_modules/attacker/index.js',
       file: '/node_modules/attacker/index.js',
-      source: `(${defineAttacker})()`,
+      source: `(${defineAttacker}).call(this)`,
       deps: {
         victim: '/node_modules/victim/index.js'
       }
@@ -187,7 +189,7 @@ async function testEntryAttackerVictim (t, { defineAttacker, defineVictim }) {
     {
       id: '/node_modules/victim/index.js',
       file: '/node_modules/victim/index.js',
-      source: `(${defineVictim})()`,
+      source: `(${defineVictim}).call(this)`,
       deps: {}
     }
   ]
@@ -207,12 +209,12 @@ async function testEntryAttackerVictim (t, { defineAttacker, defineVictim }) {
       }
     }
   }
-  const result = await createBundleFromRequiresArray(depsArray, { config })
-  eval(result)
-  t.equal(global.testResult, false)
+  const bundle = await createBundleFromRequiresArray(depsArray, { config })
+  const result = evalBundle(bundle)
+  t.equal(result, false)
 }
 
-async function runSimpleOneTwo ({ defineRoot, defineOne, defineTwo, defineThree, config = {} }) {
+async function runSimpleOneTwo ({ defineRoot, defineOne, defineTwo, defineThree, config = {}, testGlobal }) {
 
   function _defineRoot () {
     global.testResult = require('one')
@@ -238,7 +240,7 @@ async function runSimpleOneTwo ({ defineRoot, defineOne, defineTwo, defineThree,
     {
       id: '/entry.js',
       file: '/entry.js',
-      source: `(${defineRoot || _defineRoot})()`,
+      source: `(${defineRoot || _defineRoot}).call(this)`,
       deps: {
         one: '/node_modules/one/index.js',
         two: '/node_modules/two/index.js'
@@ -248,7 +250,7 @@ async function runSimpleOneTwo ({ defineRoot, defineOne, defineTwo, defineThree,
     {
       id: '/node_modules/one/index.js',
       file: '/node_modules/one/index.js',
-      source: `(${defineOne || _defineOne})()`,
+      source: `(${defineOne || _defineOne}).call(this)`,
       deps: {
         two: '/node_modules/two/index.js'
       }
@@ -256,13 +258,13 @@ async function runSimpleOneTwo ({ defineRoot, defineOne, defineTwo, defineThree,
     {
       id: '/node_modules/two/index.js',
       file: '/node_modules/two/index.js',
-      source: `(${defineTwo || _defineTwo})()`,
+      source: `(${defineTwo || _defineTwo}).call(this)`,
       deps: {}
     },
     {
       id: '/node_modules/three/index.js',
       file: '/node_modules/three/index.js',
-      source: `(${defineThree || _defineThree})()`,
+      source: `(${defineThree || _defineThree}).call(this)`,
       deps: {}
     }
   ]
@@ -283,13 +285,12 @@ async function runSimpleOneTwo ({ defineRoot, defineOne, defineTwo, defineThree,
   }, config)
 
   const bundle = await createBundleFromRequiresArray(depsArray, { config: _config })
-  delete global.testResult
-  eval(bundle)
+  const result = evalBundle(bundle, testGlobal)
 
-  return global.testResult
+  return result
 }
 
-async function runSimpleOneTwoSamePackage ({ defineRoot, defineOne, defineTwo, config = {} }) {
+async function runSimpleOneTwoSamePackage ({ defineRoot, defineOne, defineTwo, config = {}, testGlobal }) {
   function _defineRoot () {
     global.testResult = require('one')
   }
@@ -298,7 +299,7 @@ async function runSimpleOneTwoSamePackage ({ defineRoot, defineOne, defineTwo, c
     {
       id: '/entry.js',
       file: '/entry.js',
-      source: `(${defineRoot || _defineRoot})()`,
+      source: `(${defineRoot || _defineRoot}).call(this)`,
       deps: {
         one: '/node_modules/dep/one.js',
         two: '/node_modules/dep/two.js'
@@ -308,7 +309,7 @@ async function runSimpleOneTwoSamePackage ({ defineRoot, defineOne, defineTwo, c
     {
       id: '/node_modules/dep/one.js',
       file: '/node_modules/dep/one.js',
-      source: `(${defineOne})()`,
+      source: `(${defineOne}).call(this)`,
       deps: {
         two: '/node_modules/dep/two.js'
       }
@@ -316,7 +317,7 @@ async function runSimpleOneTwoSamePackage ({ defineRoot, defineOne, defineTwo, c
     {
       id: '/node_modules/dep/two.js',
       file: '/node_modules/dep/two.js',
-      source: `(${defineTwo})()`,
+      source: `(${defineTwo}).call(this)`,
       deps: {}
     }
   ]
@@ -336,11 +337,20 @@ async function runSimpleOneTwoSamePackage ({ defineRoot, defineOne, defineTwo, c
     }
   }, config)
 
-  const result = await createBundleFromRequiresArray(depsArray, { config: _config })
-  delete global.testResult
-  eval(result)
+  const bundle = await createBundleFromRequiresArray(depsArray, { config: _config })
+  const result = evalBundle(bundle, testGlobal)
 
-  return global.testResult
+  return result
+}
+
+function evalBundle (bundle, context) {
+  const newContext = Object.assign({}, context)
+  // circular ref (used by SES)
+  newContext.global = newContext
+  // perform eval
+  runInNewContext(bundle, newContext)
+  // pull out test result value from context (not always used)
+  return newContext.testResult
 }
 
 function createSpy ({ onEach = noop, onEnd = noop }) {

@@ -1,6 +1,9 @@
 const test = require('tape-promise').default(require('tape'))
 
-const { createBundleFromRequiresArray } = require('./util')
+const {
+  createBundleFromRequiresArray,
+  evalBundle,
+} = require('./util')
 
 // here we are providing an endowments only to a module deep in a dep graph
 test('globalWrites - deep endow', async (t) => {
@@ -55,13 +58,7 @@ test('globalWrites - deep endow', async (t) => {
   }
 
   const bundle = await createBundleFromRequiresArray(entries, { config })
+  const result = evalBundle(bundle)
 
-  let testResult
-  try {
-    eval(bundle)
-    testResult = global.testResult
-  } catch (err) {
-    t.fail(`eval of bundle failed:\n${err.stack || err}`)
-  }
-  t.deepEqual(testResult, true)
+  t.deepEqual(result, true)
 })

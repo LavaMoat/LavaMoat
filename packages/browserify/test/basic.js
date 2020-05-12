@@ -6,7 +6,8 @@ const {
   createBundleFromRequiresArray,
   createBundleFromRequiresArrayPath,
   createBundleFromEntry,
-  generateConfigFromFiles
+  generateConfigFromFiles,
+  evalBundle,
 } = require('./util')
 
 test('basic - bundle works', async (t) => {
@@ -20,13 +21,10 @@ test('basic - bundle works', async (t) => {
       }
     }
   }
-  const result = await createBundleFromRequiresArrayPath(path, { config })
-  try {
-    eval(result)
-    t.equal(global.testResult, 555)
-  } catch (err) {
-    t.fail(err)
-  }
+  const bundle = await createBundleFromRequiresArrayPath(path, { config })
+  const result = evalBundle(bundle)
+
+  t.equal(result, 555)
 })
 
 test('basic - browserify bundle doesnt inject global', async (t) => {
@@ -85,14 +83,10 @@ test('basic - lavamoat config and bundle', async (t) => {
   t.assert(bundle.includes(prelude), 'bundle includes expected prelude')
 
   const testHref = 'https://funky.town.gov/yolo?snake=yes'
-  global.location = { href: testHref }
-  eval(bundle)
-  try {
-    eval(bundle)
-  } catch (err) {
-    t.fail(`eval of bundle failed:\n${err.stack || err}`)
-  }
-  t.equal(global.testResult, testHref, 'test result matches expected')
+  const testGlobal = { location: { href: testHref } }
+  const result = evalBundle(bundle, testGlobal)
+
+  t.equal(result, testHref, 'test result matches expected')
 })
 
 test('basic - lavamoat bundle without prelude', async (t) => {
@@ -119,9 +113,12 @@ test('basic - lavamoat bundle without prelude', async (t) => {
   t.assert(!bundle.includes(prelude), 'bundle DOES NOT include prelude')
 
   let didCallLoadBundle = false
-  global.LavaMoat = { loadBundle: () => { didCallLoadBundle = true } }
+  const testGlobal = {
+    LavaMoat: { loadBundle: () => { didCallLoadBundle = true } }
+  }
+
   try {
-    eval(bundle)
+    evalBundle(bundle, testGlobal)
   } catch (err) {
     t.fail(`eval of bundle failed:\n${err.stack || err}`)
   }

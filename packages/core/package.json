@@ -18,6 +18,7 @@
     "lavamoat-tofu": "^2.0.9",
     "resolve": "^1.15.1",
     "resolve-package-path": "^2.0.0",
+    "ses": "^0.7.7",
     "through2": "^3.0.1"
   },
   "devDependencies": {

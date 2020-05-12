@@ -12,13 +12,15 @@ test('endowments - bridged endowments matches original endowments object', async
     module.exports = global.testGet()
   }
   const testObj = {}
-  global.testGet = () => {
-    console.log(`Test Get: ${testObj}`)
-    return testObj
-  }
-  global.testCheck = (target) => {
-    console.log(`Test Check: target: ${target} testObj: ${testObj}`)
-    return target === testObj
+  const testGlobal = {
+    testGet: () => {
+      console.log(`Test Get: ${testObj}`)
+      return testObj
+    },
+    testCheck: (target) => {
+      console.log(`Test Check: target: ${target} testObj: ${testObj}`)
+      return target === testObj
+    }
   }
 
   const config = {
@@ -36,7 +38,7 @@ test('endowments - bridged endowments matches original endowments object', async
     }
   }
 
-  const one = await runSimpleOneTwo({ defineOne, defineTwo, config })
+  const one = await runSimpleOneTwo({ defineOne, defineTwo, config, testGlobal })
 
   t.equal(one, true)
 })

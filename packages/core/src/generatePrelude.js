@@ -9,7 +9,7 @@ const path = require('path')
 const preludeTemplate = fs.readFileSync(path.join(__dirname, '/preludeTemplate.js'), 'utf-8')
 const kernelTemplate = fs.readFileSync(path.join(__dirname, '/kernelTemplate.js'), 'utf-8')
 const kernelCoreTemplate = fs.readFileSync(path.join(__dirname, '/kernelCoreTemplate.js'), 'utf-8')
-const sesSrc = fs.readFileSync(path.join(__dirname, '/../lib/ses.umd.js'), 'utf-8')
+const sesSrc = fs.readFileSync(require.resolve('ses'), 'utf-8')
 const makeGetEndowmentsForConfigSrc = fs.readFileSync(path.join(__dirname, '/makeGetEndowmentsForConfig.js'), 'utf-8')
 const makePrepareRealmGlobalFromConfigSrc = fs.readFileSync(path.join(__dirname, '/makePrepareRealmGlobalFromConfig.js'), 'utf-8')
 
@@ -21,13 +21,10 @@ module.exports = {
 
 // takes the preludeTemplate and populates it with the kernel
 function generatePrelude (opts = {}) {
-  const debugMode = Boolean(opts.debugMode)
   const kernelCode = generateKernel(opts)
 
   let output = preludeTemplate
-  output = replaceTemplateRequire(output, 'ses', sesSrc)
-  output = output.replace('__lavamoatDebugMode__', debugMode ? 'true' : 'false')
-  output = output.replace('__createKernel__', kernelCode)
+  output = stringReplace(output, '__createKernel__', kernelCode)
 
   return output
 }
@@ -39,8 +36,8 @@ function generateKernel (opts = {}) {
 
   let output = kernelTemplate
   output = replaceTemplateRequire(output, 'ses', sesSrc)
-  output = output.replace('__lavamoatDebugMode__', debugMode ? 'true' : 'false')
-  output = output.replace('__createKernel__', kernelCode)
+  output = stringReplace(output, '__lavamoatDebugMode__', debugMode ? 'true' : 'false')
+  output = stringReplace(output, '__createKernelCore__', kernelCode)
 
   return output
 }
@@ -57,7 +54,7 @@ function generateKernelCore (opts = {}) {
 
 function replaceTemplateRequire (code, moduleName, src) {
   const wrappedSrc = wrapWithReturnCjsExports(moduleName, src)
-  code = code.replace(`templateRequire('${moduleName}')`, wrappedSrc)
+  code = stringReplace(code, `templateRequire('${moduleName}')`, wrappedSrc)
   return code
 }
 
@@ -80,4 +77,10 @@ ${src}
   return module.exports
 })()`
   )
+}
+
+// String.prototype.replace has special behavior for some characters, so we use split join instead
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/replace#Specifying_a_string_as_a_parameter
+function stringReplace (src, target, replacement) {
+  return src.split(target).join(replacement)
 }
