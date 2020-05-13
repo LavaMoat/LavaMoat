@@ -68,19 +68,10 @@ test('config - deep endow', async (t) => {
 
 // here we provide an illegal config value
 test('config - dunder proto not allowed in globals path', async (t) => {
-  const entries = [
-    {
-      id: '/one.js',
-      file: '/one.js',
-      source: '/* empty */',
-      deps: {},
-      entry: true
-    }
-  ]
 
   const config = {
     resources: {
-      '<root>': {
+      'one': {
         globals: {
           'window.__proto__': true
         }
@@ -88,10 +79,8 @@ test('config - dunder proto not allowed in globals path', async (t) => {
     }
   }
 
-  const bundle = await createBundleFromRequiresArray(entries, { config })
-
   try {
-    evalBundle(bundle)
+    await runSimpleOneTwo({ config })
     t.fail('did not throw as expected')
   } catch (err) {
     t.ok(err.message.includes('"__proto__"'))

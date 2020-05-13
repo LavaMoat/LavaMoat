@@ -79,77 +79,70 @@
       const moduleSource = moduleData.sourceString
       const configForModule = getConfigForPackage(lavamoatConfig, packageName)
       const moduleMembraneSpace = getMembraneSpaceForModule(moduleData)
-      const isEntryModule = moduleData.package === '<root>'
+      const isRootModule = moduleData.package === '<root>'
 
       // create the initial moduleObj
       const moduleObj = { exports: {} }
       // cache moduleObj here
-      moduleCache.set(moduleId, moduleObj)
-      // this is important for multi-module circles in the dep graph
+      // this is important for cycles in the dep graph
       // if you dont cache before running the moduleInitializer
-
-      // prepare endowments
-      const endowmentsFromConfig = getEndowmentsForConfig(globalRef, configForModule)
-      let endowments = Object.assign({}, endowmentsFromConfig)
-      // special case for exposing window
-      if (endowments.window) {
-        endowments = Object.assign({}, endowments.window, endowments)
-      }
-
-      // the default environment is "unfrozen" for the app root modules, "frozen" for dependencies
-      // this may be a bad default, but was meant to ease app development
-      // "frozen" means in a SES container
-      // "unfrozen" means via unsafeEvalWithEndowments
-      const environment = configForModule.environment || (isEntryModule ? 'unfrozen' : 'frozen')
-      const runInSes = environment !== 'unfrozen'
+      moduleCache.set(moduleId, moduleObj)
 
       // allow moduleInitializer to be set by loadModuleData
       let moduleInitializer = moduleData.moduleInitializer
       // otherwise setup initializer from moduleSource
       if (!moduleInitializer) {
-
+        // prepare endowments
+        let endowments
+        if (isRootModule) {
+          endowments = globalRef
+        } else {
+          const endowmentsFromConfig = getEndowmentsForConfig(globalRef, configForModule)
+          endowments = Object.assign({}, endowmentsFromConfig)
+          // special case for exposing window
+          if (endowments.window) {
+            endowments = Object.assign({}, endowments.window, endowments)
+          }
+        }
         // prepare the membrane-wrapped endowments
         const endowmentsMembraneSpace = getMembraneSpaceByName('<endowments>')
         const membraneWrappedEndowments = membrane.bridge(endowments, endowmentsMembraneSpace, moduleMembraneSpace)
-
-        // determine if its a SES-wrapped or naked module initialization
-        if (runInSes) {
-
-          // set the module initializer as the SES-wrapped version
-          const moduleCompartment = new Compartment()
+        // prepare the module's SES compartment
+        const moduleCompartment = new Compartment()
+        if (isRootModule) {
+          // expose all of globalRef, though currently does not support global writes
+          // copy every property on globalRef to compartment global without overriding
+          // take every property on globalRef
+          Object.entries(Object.getOwnPropertyDescriptors(membraneWrappedEndowments))
+            // ignore properties already defined on compartment global
+            .filter(([key]) => !(key in moduleCompartment.global))
+            // define property on compartment global
+            .forEach(([key, desc]) => Reflect.defineProperty(moduleCompartment.global, key, desc))
+        } else {
+          // sets up read/write access as configured
           const globalsConfig = configForModule.globals
           prepareCompartmentGlobalFromConfig(moduleCompartment.global, globalsConfig, membraneWrappedEndowments, globalStore)
-          // expose membrane for debugging
-          if (debugMode) {
-            moduleCompartment.global.membrane = membrane
-          }
-          // execute in module compartment with modified compartment global
-          try {
-            moduleInitializer = moduleCompartment.evaluate(`${moduleSource}`)
-          } catch (err) {
-            console.warn(`LavaMoat - Error evaluating module "${moduleId}" from package "${packageName}"`)
-            throw err
-          }
-
-        } else {
-          // expose the raw global on the endowments (?)
-          endowments.global = globalRef
-          // expose membrane for debugging
-          if (debugMode) {
-            endowments.membrane = membrane
-          }
-          // set the module initializer as the unwrapped version
-          moduleInitializer = unsafeEvalWithEndowments(`${moduleSource}`, membraneWrappedEndowments)
-
+        }
+        // expose membrane for debugging
+        if (debugMode) {
+          moduleCompartment.global.membrane = membrane
+        }
+        // execute in module compartment with modified compartment global
+        try {
+          moduleInitializer = moduleCompartment.evaluate(`${moduleSource}`)
+        } catch (err) {
+          console.warn(`LavaMoat - Error evaluating module "${moduleId}" from package "${packageName}"`)
+          throw err
         }
       }
+
+      // validate moduleInitializer
       if (typeof moduleInitializer !== 'function') {
         throw new Error(`LavaMoat - moduleInitializer is not defined correctly. got "${typeof moduleInitializer}" ses:${runInSes}\n${moduleSource}`)
       }
 
-      const initializerArgs = prepareModuleInitializerArgs(requireRelativeWithContext, moduleObj, moduleData)
-
       // initialize the module with the correct context
+      const initializerArgs = prepareModuleInitializerArgs(requireRelativeWithContext, moduleObj, moduleData)
       moduleInitializer.apply(moduleObj.exports, initializerArgs)
 
       // configure membrane defense
