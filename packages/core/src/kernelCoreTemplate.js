@@ -2,12 +2,11 @@
 
   return createKernel
 
-  function createKernel ({ globalRef, debugMode, unsafeEvalWithEndowments, lavamoatConfig, loadModuleData, getRelativeModuleId, prepareModuleInitializerArgs }) {
+  function createKernel ({ globalRef, debugMode, lavamoatConfig, loadModuleData, getRelativeModuleId, prepareModuleInitializerArgs }) {
     // create SES-wrapped LavaMoat kernel
     const kernelCompartment = new Compartment({ console })
     const makeKernel = kernelCompartment.evaluate(`(${unsafeCreateKernel})`)
     const lavamoatKernel = makeKernel({
-      unsafeEvalWithEndowments,
       globalRef,
       debugMode,
       lavamoatConfig,
@@ -22,7 +21,6 @@
   // this is serialized and run in SES
   // mostly just exists to expose variables to internalRequire and loadBundle
   function unsafeCreateKernel ({
-    unsafeEvalWithEndowments,
     globalRef,
     debugMode,
     lavamoatConfig,

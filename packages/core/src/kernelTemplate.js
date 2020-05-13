@@ -8,7 +8,7 @@
     const debugMode = __lavamoatDebugMode__
 
     // identify the globalRef
-    const globalRef = (typeof self !== 'undefined') ? self : global
+    const globalRef = (typeof globalThis !== 'undefined') ? globalThis : (typeof self !== 'undefined') ? self : global
 
     // create the SES rootRealm
     // "templateRequire" calls are inlined in "generatePrelude"
@@ -32,18 +32,10 @@
       loadModuleData,
       getRelativeModuleId,
       prepareModuleInitializerArgs,
-      unsafeEvalWithEndowments,
       globalRef,
       debugMode,
     })
     return kernel
-  }
-
-  // this performs an unsafeEval in the context of the provided endowments
-  function unsafeEvalWithEndowments(code, endowments) {
-    with (endowments) {
-      return eval(code)
-    }
   }
 
 })()
