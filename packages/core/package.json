@@ -7,7 +7,7 @@
     "lib": "lib"
   },
   "engines": {
-    "node": ">10.15.1"
+    "node": ">12.0.0"
   },
   "dependencies": {
     "acorn-globals": "^6.0.0",
