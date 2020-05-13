@@ -16,5 +16,8 @@
     "lavamoat-core": "^2.1.0",
     "merge-deep": "^3.0.2",
     "ses": "^0.7.7"
+  },
+  "devDependencies": {
+    "tape": "^5.0.0"
   }
 }
