@@ -1,0 +1,97 @@
+{
+  "resources": {
+    "<root>": {
+      "packages": {
+        "keccak": true
+      }
+    },
+    "keccak": {
+      "globals": {
+        "Buffer.from": true,
+        "Buffer.isBuffer": true,
+        "__dirname": true
+      },
+      "packages": {
+        "node-gyp-build": true,
+        "stream": true
+      }
+    },
+    "node-gyp-build": {
+      "globals": {
+        "__non_webpack_require__": true,
+        "__webpack_require__": true,
+        "process": true
+      },
+      "packages": {
+        "fs": true,
+        "os": true,
+        "path": true
+      }
+    }
+  },
+  "corePackages": [
+    "assert",
+    "async_hooks",
+    "buffer",
+    "child_process",
+    "cluster",
+    "console",
+    "constants",
+    "crypto",
+    "dgram",
+    "dns",
+    "domain",
+    "events",
+    "fs",
+    "_http_agent",
+    "_http_client",
+    "_http_common",
+    "_http_incoming",
+    "_http_outgoing",
+    "_http_server",
+    "http",
+    "http2",
+    "https",
+    "inspector",
+    "module",
+    "net",
+    "node-inspect/lib/_inspect",
+    "node-inspect/lib/internal/inspect_client",
+    "node-inspect/lib/internal/inspect_repl",
+    "os",
+    "path",
+    "perf_hooks",
+    "process",
+    "punycode",
+    "querystring",
+    "readline",
+    "repl",
+    "_stream_duplex",
+    "_stream_transform",
+    "_stream_wrap",
+    "_stream_passthrough",
+    "_stream_readable",
+    "_stream_writable",
+    "stream",
+    "string_decoder",
+    "sys",
+    "timers",
+    "_tls_common",
+    "_tls_wrap",
+    "tls",
+    "trace_events",
+    "tty",
+    "url",
+    "util",
+    "v8/tools/arguments",
+    "v8/tools/codemap",
+    "v8/tools/consarray",
+    "v8/tools/csvparser",
+    "v8/tools/logreader",
+    "v8/tools/profile_view",
+    "v8/tools/splaytree",
+    "v8",
+    "vm",
+    "zlib"
+  ]
+}

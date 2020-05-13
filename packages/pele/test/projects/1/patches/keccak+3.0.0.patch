@@ -1,0 +1,19 @@
+diff --git a/node_modules/keccak/bindings.js b/node_modules/keccak/bindings.js
+index 5c0eec6..c55ebef 100644
+--- a/node_modules/keccak/bindings.js
++++ b/node_modules/keccak/bindings.js
+@@ -1 +1 @@
+-module.exports = require('./lib/api')(require('node-gyp-build')(__dirname))
++module.exports = require('./lib/api')(require(require('node-gyp-build').path(__dirname)))
+diff --git a/node_modules/keccak/index.js b/node_modules/keccak/index.js
+index 24fb71a..d23b331 100644
+--- a/node_modules/keccak/index.js
++++ b/node_modules/keccak/index.js
+@@ -1,5 +1 @@
+-try {
+-  module.exports = require('./bindings')
+-} catch (err) {
+-  module.exports = require('./js')
+-}
++module.exports = require('./bindings')
+\ No newline at end of file
