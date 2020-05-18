@@ -1,5 +1,7 @@
 # lavamoat-node express example
 
+This tutorial is based on https://snyk.io/blog/what-is-a-backdoor/
+
 ### compatibility note
 
 This currently requires a workaround via `patch-package`. The workaround is applied automatically.
