@@ -15,21 +15,23 @@ test('resolutions - parseForConfig', async (t) => {
   const config1 = await parseForConfig({ entryId })
 
   // comparing resources only, to skip core-modules
-  t.deepEqual(config1.resources, {
-    '<root>': {
-      packages: {
-        a: true
-      }
-    },
-    a: {
-      packages: {
-        b: true,
-        fs: true
-      }
-    },
-    b: {
-      packages: {
-        http: true
+  t.deepEqual(config1, {
+    resources: {
+      '<root>': {
+        packages: {
+          a: true
+        }
+      },
+      a: {
+        packages: {
+          b: true,
+          fs: true
+        }
+      },
+      b: {
+        packages: {
+          http: true
+        }
       }
     }
   })
@@ -37,15 +39,17 @@ test('resolutions - parseForConfig', async (t) => {
   const config2 = await parseForConfig({ entryId, resolutions })
 
   // comparing resources only, to skip core-modules
-  t.deepEqual(config2.resources, {
-    '<root>': {
-      packages: {
-        a: true
-      }
-    },
-    a: {
-      packages: {
-        '<root>': true
+  t.deepEqual(config2, {
+    resources: {
+      '<root>': {
+        packages: {
+          a: true
+        }
+      },
+      a: {
+        packages: {
+          '<root>': true
+        }
       }
     }
   }, 'config resources do not include data on packages not parsed due to resolutions')
