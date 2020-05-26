@@ -4915,7 +4915,7 @@ lavamoat-core@^1.1.0:
     resolve-package-path "^2.0.0"
     through2 "^3.0.1"
 
-lavamoat-core@^2.0.0, lavamoat-core@^2.1.0:
+lavamoat-core@^2.1.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/lavamoat-core/-/lavamoat-core-2.1.0.tgz#faa4285aa2b498620a28c863403bbc6888ec3515"
   integrity sha512-/Z0ZxsH3BWE7x3+6MNe9wiHZEENDz3dGYoWqrR7mC+9NBWwjCn0JzVZFGW3QXRM0VA8mgUuR+Fn6xXuUv7y6KQ==
