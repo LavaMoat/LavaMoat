@@ -1,6 +1,7 @@
 /* eslint no-eval: 0 */
 const fs = require('fs')
 const path = require('path')
+const Module = require('module')
 const resolve = require('resolve')
 const { sanitize } = require('htmlescape')
 const { generateKernel, packageDataForModule } = require('lavamoat-core')
@@ -10,11 +11,12 @@ const nativeRequire = require
 
 module.exports = { createKernel }
 
+
 function createKernel ({ cwd, lavamoatConfig, debugMode }) {
   const { resolutions } = lavamoatConfig
   const getRelativeModuleId = createModuleResolver({ cwd, resolutions })
   const kernelSrc = generateKernel({ debugMode })
-  const createKernel = eval(kernelSrc)
+  const createKernel = moduleEvaluator('LavaMoat/kernel', 'LavaMoat/kernel', kernelSrc)
   const kernel = createKernel({
     lavamoatConfig,
     loadModuleData,
@@ -120,4 +122,10 @@ function loadModuleData (absolutePath) {
 function isNativeModule (filename) {
   const fileExtension = filename.split('.').pop()
   return fileExtension === 'node'
+}
+
+function moduleEvaluator (id, filename, content) {
+  const mod = new Module(id)
+  mod._compile(`module.exports = ${content}`, filename)
+  return mod.exports
 }
