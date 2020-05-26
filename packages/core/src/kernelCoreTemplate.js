@@ -5,7 +5,7 @@
   function createKernel ({ globalRef, debugMode, lavamoatConfig, loadModuleData, getRelativeModuleId, prepareModuleInitializerArgs }) {
     // create SES-wrapped LavaMoat kernel
     const kernelCompartment = new Compartment({ console })
-    const makeKernel = kernelCompartment.evaluate(`(${unsafeCreateKernel})`)
+    const makeKernel = kernelCompartment.evaluate(`(${unsafeCreateKernel})\n//# sourceURL=LavaMoat/core/kernel`)
     const lavamoatKernel = makeKernel({
       globalRef,
       debugMode,
@@ -127,7 +127,11 @@
         }
         // execute in module compartment with modified compartment global
         try {
-          moduleInitializer = moduleCompartment.evaluate(`${moduleSource}`)
+          const sourceURL = moduleData.file || `modules/${moduleId}`
+          if (sourceURL.includes('\n')) {
+            throw new Error(`LavaMoat - Newlines not allowed in filenames: ${JSON.stringify(sourceURL)}`)
+          }
+          moduleInitializer = moduleCompartment.evaluate(`${moduleSource}\n//# sourceURL=${sourceURL}`)
         } catch (err) {
           console.warn(`LavaMoat - Error evaluating module "${moduleId}" from package "${packageName}"`)
           throw err
