@@ -2,33 +2,33 @@ const test = require('tape')
 const { inspectSource } = require('../src/index')
 
 test('fnToCodeBlock utility works', (t) => {
-  const src = fnToCodeBlock(function () {
-    var x = 1
+  const src = fnToCodeBlock(() => {
+    1 + 2 + 3
   })
 
-  t.equal(src, '    var x = 1')
+  t.equal(src, '(() => {\n    1 + 2 + 3\n  })()')
   t.end()
 })
 
-testInspect('detects global reads', {}, function () {
-  var x = xyz
+testInspect('detects global reads', {}, () => {
+  const x = xyz
   (function (a) { return a })(abc)
 }, {
   xyz: 'read',
   abc: 'read'
 })
 
-testInspect('doesnt detect "this"', {}, function () {
+testInspect('doesnt detect "this"', {}, () => {
   const x = this
 }, {})
 
-testInspect('doesnt detect properties on "this"', {}, function () {
+testInspect('doesnt detect properties on "this"', {}, () => {
   this.xyz
 }, {})
 
 testInspect('detects reads on globalRefs', {
   globalRefs: ['zzz']
-}, function () {
+}, () => {
   const x = zzz.abc
 }, {
   abc: 'read'
@@ -36,7 +36,7 @@ testInspect('detects reads on globalRefs', {
 
 testInspect('detects reads on multiple globalRefs', {
   globalRefs: ['a', 'b', 'c']
-}, function () {
+}, () => {
   const x = a.x + b.y * c.z
 }, {
   x: 'read',
@@ -44,13 +44,13 @@ testInspect('detects reads on multiple globalRefs', {
   z: 'read'
 })
 
-testInspect('detects implicit global writes', {}, function () {
+testInspect('detects implicit global writes', {}, () => {
   xyz = true
 }, {
   xyz: 'write'
 })
 
-testInspect('detects implicit global writes with mixed usage', {}, function () {
+testInspect('detects implicit global writes with mixed usage', {}, () => {
   z = xyz
   xyz = (function (a) { return a })(abc)
 }, {
@@ -61,7 +61,7 @@ testInspect('detects implicit global writes with mixed usage', {}, function () {
 
 testInspect('detects assignment to property on globalRefs', {
   globalRefs: ['zzz']
-}, function () {
+}, () => {
   zzz.abc = true
 }, {
   abc: 'write'
@@ -69,13 +69,13 @@ testInspect('detects assignment to property on globalRefs', {
 
 testInspect('never suggest access to full globalRef', {
   globalRefs: ['zzz']
-}, function () {
+}, () => {
   const x = zzz
 }, {})
 
 testInspect('detects assignment to property on globalRefs', {
   globalRefs: ['zzz']
-}, function () {
+}, () => {
   zzz.abc = xyz.abc
 }, {
   abc: 'write',
@@ -84,14 +84,14 @@ testInspect('detects assignment to property on globalRefs', {
 
 testInspect('not picking up assignments to non-global matching globalRef name', {
   globalRefs: ['xyz']
-}, function () {
+}, () => {
   const xyz = {}
   xyz.abc
 }, {})
 
 testInspect('elevating computed property lookups to globalRef', {
   globalRefs: ['abc']
-}, function () {
+}, () => {
   const key = 'hello'
   abc.xyz[key]
 }, {
@@ -100,7 +100,7 @@ testInspect('elevating computed property lookups to globalRef', {
 
 testInspect('elevating computed property lookups to globalRef', {
   globalRefs: ['abc']
-}, function () {
+}, () => {
   const key = 'hello'
   abc.xyz.ijk[key]
 }, {
@@ -109,7 +109,7 @@ testInspect('elevating computed property lookups to globalRef', {
 
 testInspect('picking up mixed explicit and computed property lookups', {
   globalRefs: ['window']
-}, function () {
+}, () => {
   const key = 'hello'
   window.location[key]
   window.location.href
@@ -119,18 +119,18 @@ testInspect('picking up mixed explicit and computed property lookups', {
 
 testInspect('not picking up js language features', {
   globalRefs: ['window']
-}, function () {
+}, () => {
   Object
   window.Object
 }, {})
 
 testInspect('ignore globalRef without property lookup', {
   globalRefs: ['window']
-}, function () {
+}, () => {
   typeof window === undefined
 }, {})
 
-testInspect('get granular platform api', {}, function () {
+testInspect('get granular platform api', {}, () => {
   document.createElement('blink')
   location.href
   navigator.userAgent
@@ -142,7 +142,7 @@ testInspect('get granular platform api', {}, function () {
 
 testInspect('get granular platform api when nested under global', {
   globalRefs: ['window']
-}, function () {
+}, () => {
   window.location.href
 }, {
   'location.href': 'read'
@@ -150,7 +150,7 @@ testInspect('get granular platform api when nested under global', {
 
 testInspect('take platform api, up to computed', {
   globalRefs: ['window']
-}, function () {
+}, () => {
   const key = 'hello'
   document.body.children[key]
   window.location.href[key]
@@ -159,7 +159,7 @@ testInspect('take platform api, up to computed', {
   'location.href': 'read'
 })
 
-testInspect('raise globals to highest used', {}, function () {
+testInspect('raise globals to highest used', {}, () => {
   location.href
   location
   document.body.children
@@ -169,13 +169,13 @@ testInspect('raise globals to highest used', {}, function () {
   'document.body.children': 'read'
 })
 
-testInspect('correctly finds deep "process.env" reference', {}, function () {
+testInspect('correctly finds deep "process.env" reference', {}, () => {
   process.env.READABLE_STREAM === 'disable'
 }, {
   'process.env.READABLE_STREAM': 'read',
 })
 
-testInspect('read access to object implies write access to properties', {}, function () {
+testInspect('read access to object implies write access to properties', {}, () => {
   const x = location
   location.href = 'website'
 }, {
@@ -203,5 +203,5 @@ function sortBy (key) {
 }
 
 function fnToCodeBlock (fn) {
-  return fn.toString().split('\n').slice(1, -1).join('\n')
+  return `(${fn})()`
 }
