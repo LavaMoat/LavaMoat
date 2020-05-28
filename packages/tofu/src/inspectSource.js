@@ -16,7 +16,7 @@ function inspectGlobals (source, {
   globalRefs = [],
   languageRefs = standardJsGlobals
 } = {}) {
-  const ast = acornGlobals.parse(source)
+  const ast = (typeof source === 'object') ? source : acornGlobals.parse(source)
   const detectedGlobals = acornGlobals(ast)
 
   const globalsConfig = new Map()
@@ -89,7 +89,8 @@ function inspectGlobals (source, {
   }
 }
 
-function inspectImports (ast) {
+function inspectImports (source) {
+  const ast = (typeof source === 'object') ? source : acornGlobals.parse(source)
   let cjsImports = []
   walk.ancestor(ast, {
     CallExpression: function (node, parents) {

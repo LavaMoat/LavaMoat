@@ -6,5 +6,5 @@ module.exports = {
   inspectGlobals,
   inspectImports,
   utils,
-  parse,
+  parse
 }
