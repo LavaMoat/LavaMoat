@@ -1,0 +1,35 @@
+{
+  "resources": {
+    "ansi-styles": {
+      "packages": {
+        "color-convert": true
+      }
+    },
+    "chalk": {
+      "packages": {
+        "ansi-styles": true,
+        "supports-color": true
+      }
+    },
+    "color-convert": {
+      "packages": {
+        "color-name": true
+      }
+    },
+    "has-flag": {
+      "globals": {
+        "process.argv": true
+      }
+    },
+    "supports-color": {
+      "globals": {
+        "process": true
+      },
+      "packages": {
+        "has-flag": true,
+        "os": true,
+        "tty": true
+      }
+    }
+  }
+}
