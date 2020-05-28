@@ -22,7 +22,6 @@
     "through2": "^3.0.1"
   },
   "devDependencies": {
-    "ses": "git+https://git@github.com/agoric/ses.git#fdb393f817f6124c4d055bff26b68e4cbe17618e",
     "tape": "^4.13.2"
   },
   "scripts": {
@@ -30,7 +29,6 @@
     "lint:standard": "standard src/**/*.js test/**/*.js",
     "lint:fix": "standard src/**/*.js test/**/*.js --fix",
     "lint:deps": "depcheck --ignore-dirs=lib --ignores='ses,depcheck,standard'",
-    "build:ses": "(cd ./node_modules/ses && npm i && npm run build && cp ./dist/ses.umd.js ../../lib/)",
     "test": "node test/index.js"
   },
   "author": "kumavis",
