@@ -1,6 +1,6 @@
 {
   "name": "lavamoat-tofu",
-  "version": "2.0.10",
+  "version": "3.0.0",
   "main": "src/index.js",
   "license": "MIT",
   "dependencies": {
