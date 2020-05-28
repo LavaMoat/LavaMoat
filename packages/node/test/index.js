@@ -17,11 +17,6 @@ test('resolutions - parseForConfig', async (t) => {
   // comparing resources only, to skip core-modules
   t.deepEqual(config1, {
     resources: {
-      '<root>': {
-        packages: {
-          a: true
-        }
-      },
       a: {
         packages: {
           b: true,
@@ -41,11 +36,6 @@ test('resolutions - parseForConfig', async (t) => {
   // comparing resources only, to skip core-modules
   t.deepEqual(config2, {
     resources: {
-      '<root>': {
-        packages: {
-          a: true
-        }
-      },
       a: {
         packages: {
           '<root>': true
