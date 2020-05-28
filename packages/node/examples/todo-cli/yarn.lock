@@ -310,9 +310,9 @@ kind-of@^3.0.2:
     is-buffer "^1.1.5"
 
 lavamoat-core@^3.0.1:
-  version "3.0.1"
-  resolved "https://registry.yarnpkg.com/lavamoat-core/-/lavamoat-core-3.0.1.tgz#a26bbe5ae0571efe86bf7d3655d75026f72722fa"
-  integrity sha512-97BIKyv6wwGoV8eQrLCE8JMEOG7qBATBZ3zkVuQ+8dLX0dM/39hIFKhyGzv/BFL8iQa/boOH0mqi75nVM9sWpQ==
+  version "3.0.2"
+  resolved "https://registry.yarnpkg.com/lavamoat-core/-/lavamoat-core-3.0.2.tgz#b81e8dd768c941561cdbdb5812fcd7d63b13e621"
+  integrity sha512-nZkXgzb6IO7orI01I17TBqIU4NYhtYKj2/afP0eRUGJ67CcVs1zTuInFSv6tqdUl9YgxjIfsDsXxRBU+2MjOMw==
   dependencies:
     acorn-globals "^6.0.0"
     acorn-walk "^7.1.1"
@@ -326,16 +326,16 @@ lavamoat-core@^3.0.1:
     through2 "^3.0.1"
 
 lavamoat-tofu@^2.0.9:
-  version "2.0.9"
-  resolved "https://registry.yarnpkg.com/lavamoat-tofu/-/lavamoat-tofu-2.0.9.tgz#dc5e5c067e6141fbe57a3eab1750a6666d1a3093"
-  integrity sha512-X+v0RGMIG/NjgCanHsY0IcQk4k6/xdQfTX4yDO9pA+T+Y0giI+r0wMMzp01kOH00hPImjGXzDEZ7p+XaHZ7CsA==
+  version "2.0.10"
+  resolved "https://registry.yarnpkg.com/lavamoat-tofu/-/lavamoat-tofu-2.0.10.tgz#9cf71853e8357bee4751c81a5f3ac7d4459fbd8c"
+  integrity sha512-tYp8lubbOAfIBxRWj7rwj+L7QakgOE5i6OLmauIWpeWdzBEcvRqb5Yzm/T+R8/989ZvG9c8t68TXX+fk8bHpqA==
   dependencies:
     acorn-globals "^4.3.3"
 
 lavamoat@^2.0.1:
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/lavamoat/-/lavamoat-2.0.1.tgz#4190da41b2a92916cbe7a483d9bbe02140e90fb6"
-  integrity sha512-5gIF3WzqYLqsMONI4DM/ZWbkUnZFWe1217OYZEiHuibQP40MUTycy1F0QGcf9tzEGCZc5+cMpLj+vh5KXMblNA==
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/lavamoat/-/lavamoat-2.0.2.tgz#18e08169271a1df24f88994d938690c9a4a37968"
+  integrity sha512-hrztcrvHpCN2calokBWG0LdjWgmRY0MDROfpkD1LgIz1L+vKnfgvQfLu0xi946AH/EUI3Y0mgiGTwJgXKVi24g==
   dependencies:
     htmlescape "^1.1.1"
     lavamoat-core "^3.0.1"

@@ -23,7 +23,8 @@
     },
     "supports-color": {
       "globals": {
-        "process": true
+        "process.env": true,
+        "process.platform": true
       },
       "packages": {
         "has-flag": true,
