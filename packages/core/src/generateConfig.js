@@ -2,7 +2,7 @@ const through = require('through2')
 const fromEntries = require('fromentries')
 const jsonStringify = require('json-stable-stringify')
 const acornGlobals = require('acorn-globals')
-const { inspectSource, utils: { mergeConfig, mapToObj } } = require('lavamoat-tofu')
+const { inspectGlobals, utils: { mergeConfig, mapToObj } } = require('lavamoat-tofu')
 const { inspectEnvironment, environmentTypes, environmentTypeStrings } = require('./inspectEnvironment')
 const defaultEnvironment = environmentTypes.frozen
 const rootSlug = '<root>'
@@ -64,7 +64,7 @@ function createModuleInspector () {
 
   function inspectForGlobals (moduleData, packageName) {
     const { source } = moduleData
-    const foundGlobals = inspectSource(source, {
+    const foundGlobals = inspectGlobals(source, {
       // browserify commonjs scope
       ignoredRefs: ['require', 'module', 'exports', 'arguments'],
       // browser global refs + browserify global
