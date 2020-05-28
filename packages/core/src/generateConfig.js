@@ -41,9 +41,9 @@ function createModuleInspector () {
     // initialize mapping from package to module
     const packageModules = packageToModules[packageName] = packageToModules[packageName] || {}
     packageModules[moduleData.id] = moduleData
-    // skip for project files (files not from deps)
-    const isDependency = packageName === rootSlug
-    if (isDependency) return
+    // skip for root modules (modules not from deps)
+    const isRootModule = packageName === rootSlug
+    if (isRootModule) return
     // skip json files
     const filename = moduleData.file || 'unknown'
     const fileExtension = filename.split('.').pop()
@@ -89,6 +89,9 @@ function createModuleInspector () {
     const config = { resources }
     Object.entries(packageToModules).forEach(([packageName, packageModules]) => {
       let globals, packages, environment
+      // skip for root modules (modules not from deps)
+      const isRootModule = packageName === rootSlug
+      if (isRootModule) return
       // get dependencies
       const packageDeps = aggregateDeps({ packageModules, moduleIdToPackageName })
       if (packageDeps.length) {
