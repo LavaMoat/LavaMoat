@@ -41,6 +41,12 @@ async function runLava () {
     // execution mode
     const lavamoatConfig = await loadConfig({ debugMode, configPath, configOverridePath })
     const kernel = createKernel({ cwd, lavamoatConfig, debugMode })
+    // patch process.argv so it matches the normal pattern
+    // e.g. [runtime path, entrypoint, ...args]
+    // we'll use the LavaMoat path as the runtime
+    // so we just remove the node path
+    process.argv.shift()
+    // run entrypoint
     kernel.internalRequire(entryId)
   }
 }
