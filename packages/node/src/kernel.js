@@ -104,7 +104,7 @@ function loadModuleData (absolutePath) {
     // wrap in moduleInitializer
     // security: ensure module path does not inject code
     if (absolutePath.includes('\n')) throw new Error('invalid newline in module source path')
-    const wrappedContent = `(function(exports, require, module, __filename, __dirname){\n${transformedContent}\n//# sourceMappingURL=${absolutePath}\n})`
+    const wrappedContent = `(function(exports, require, module, __filename, __dirname){\n${transformedContent}\n})`
     const packageData = packageDataForModule({ file: absolutePath })
     const packageName = packageData.packageName || '<root>'
     return {
