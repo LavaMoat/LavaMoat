@@ -2,7 +2,8 @@
   "name": "lavamoat",
   "private": true,
   "devDependencies": {
-    "lerna": "^3.20.2"
+    "lerna": "^3.20.2",
+    "tap-spec": "^5.0.0"
   },
   "scripts": {
     "test": "lerna run test",
