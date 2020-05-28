@@ -1,6 +1,6 @@
 const test = require('tape')
 const deepEqual = require('deep-equal')
-const { inspectSource } = require('../src/index')
+const { inspectGlobals } = require('../src/index')
 
 
 test('fnToCodeBlock utility works', (t) => {
@@ -241,7 +241,7 @@ testInspect('paths stop at computed props', {
 function testInspect (label, opts, fn, expectedResultObj) {
   test(label, (t) => {
     const src = fnToCodeBlock(fn)
-    const result = inspectSource(src, opts)
+    const result = inspectGlobals(src, opts)
     const resultSorted = [...result.entries()].sort(sortBy(0))
     const expectedSorted = Object.entries(expectedResultObj).sort(sortBy(0))
 

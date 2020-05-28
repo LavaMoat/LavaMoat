@@ -1,7 +1,8 @@
-const inspectSource = require('./inspectSource')
+const { inspectGlobals, inspectImports } = require('./inspectSource')
 const utils = require('./util')
 
 module.exports = {
-  inspectSource,
+  inspectGlobals,
+  inspectImports,
   utils
 }

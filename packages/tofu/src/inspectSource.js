@@ -1,16 +1,17 @@
 const acornGlobals = require('acorn-globals')
+const walk = require('acorn-walk')
 const standardJsGlobals = require('./standardGlobals.js')
 
 const {
   getMemberExpressionNesting,
-  getKeysForMemberExpressionChain,
+  getPathFromMemberExpressionChain,
   reduceToTopmostApiCalls,
   addGlobalUsage
 } = require('./util')
 
-module.exports = inspectSource
+module.exports = { inspectGlobals, inspectImports }
 
-function inspectSource (source, {
+function inspectGlobals (source, {
   ignoredRefs = [],
   globalRefs = [],
   languageRefs = standardJsGlobals
@@ -60,65 +61,10 @@ function inspectSource (source, {
     })
   }
 
-  function inspectPatternElementForPaths (child) {
-    if (child.type === 'ObjectPattern') {
-      return inspectObjectPatternForPaths(child)
-    } else if (child.type === 'ArrayPattern') {
-      return inspectArrayPatternForPaths(child)
-    } else if (child.type === 'Identifier') {
-      // return a single empty element, meaning "one result, the whole thing"
-      return [[]]
-    } else {
-      throw new Error(`LavaMoat/tofu - inspectPatternElementForPaths - unable to parse element "${child.type}"`)
-    }
-  }
-
-  function inspectObjectPatternForPaths (node) {
-    // if it has computed props or a RestElement, we cant meaningfully pursue any deeper
-    // so return a single empty path, meaning "one result, the whole thing"
-    const expansionForbidden = node.properties.some(prop => prop.computed || prop.type === 'RestElement')
-    if (expansionForbidden) return [[]]
-    // expand each property into a path, recursively
-    let paths = []
-    node.properties.forEach(prop => {
-      const propName = prop.key.name
-      const child = prop.value
-      paths = paths.concat(
-        inspectPatternElementForPaths(child)
-          .map(partial => [propName, ...partial])
-      )
-    })
-    return paths
-  }
-
-  function inspectArrayPatternForPaths (node) {
-    // if it has a RestElement, we cant meaningfully pursue any deeper
-    // so return a single empty path, meaning "one result, the whole thing"
-    const expansionForbidden = node.elements.some(el => el.type === 'RestElement')
-    if (expansionForbidden) return [[]]
-    // expand each property into a path, recursively
-    let paths = []
-    node.elements.forEach((child, propName) => {
-      paths = paths.concat(
-        inspectPatternElementForPaths(child)
-          .map(partial => [propName, ...partial])
-      )
-    })
-    return paths
-  }
-
   function inspectIdentifierForDirectMembershipChain (variableName, identifierNode) {
     let identifierUse = 'read'
-    const memberExpressions = getMemberExpressionNesting(identifierNode)
-    const hasMembershipChain = Boolean(memberExpressions.length)
+    const { memberExpressions, parentOfMembershipChain, topmostMember } = getMemberExpressionNesting(identifierNode)
     // determine if used in an assignment expression
-    const topmostMember = hasMembershipChain ? memberExpressions[0] : identifierNode
-    const topmostMemberIndex = identifierNode.parents.indexOf(topmostMember)
-    if (topmostMemberIndex < 1) {
-      throw Error('unnexpected value for memberTopIndex')
-    }
-    const topmostMemberParentIndex = topmostMemberIndex - 1
-    const parentOfMembershipChain = identifierNode.parents[topmostMemberParentIndex]
     const isAssignment = parentOfMembershipChain.type === 'AssignmentExpression'
     const isAssignmentTarget = parentOfMembershipChain.left === topmostMember
     if (isAssignment && isAssignmentTarget) {
@@ -126,11 +72,11 @@ function inspectSource (source, {
       identifierUse = 'write'
     }
     // if not used in any member expressions AND is not a global ref, expose as is
-    if (!hasMembershipChain) {
+    if (!memberExpressions.length) {
       return { identifierUse, path: [variableName], parent: parentOfMembershipChain }
     }
-    const memberKeys = getKeysForMemberExpressionChain(memberExpressions)
-    return { identifierUse, path: memberKeys, parent: parentOfMembershipChain }
+    const path = [variableName, ...getPathFromMemberExpressionChain(memberExpressions)]
+    return { identifierUse, path, parent: parentOfMembershipChain }
   }
 
   function maybeAddGlobalUsage (identifierPath, identifierUse) {
@@ -141,4 +87,81 @@ function inspectSource (source, {
     if (ignoredRefs.includes(topmostRef)) return
     addGlobalUsage(globalsConfig, identifierPath, identifierUse)
   }
+}
+
+function inspectImports (ast) {
+  let cjsImports = []
+  walk.ancestor(ast, {
+    CallExpression: function (node, parents) {
+      const { callee, arguments: [moduleNameNode] } = node
+      if (callee.type !== 'Identifier') return
+      if (callee.name !== 'require') return
+      if (moduleNameNode.type !== 'Literal') return
+      const moduleName = moduleNameNode.value
+      // inspect for members
+      node.parents = parents
+      const { memberExpressions, parentOfMembershipChain } = getMemberExpressionNesting(node)
+      const initialPath = [moduleName, ...getPathFromMemberExpressionChain(memberExpressions)]
+      // exit early if unrecognized parent
+      if (parentOfMembershipChain.type !== 'VariableDeclarator') {
+        // not sure when this is would be hit?
+        cjsImports.push(initialPath)
+        return
+      }
+      // inspect for destructuring
+      cjsImports = cjsImports.concat(
+        inspectPatternElementForPaths(parentOfMembershipChain.id)
+          .map(partial => [...initialPath, ...partial])
+      )
+    }
+  })
+  const cjsImportStrings = cjsImports.map(item => item.join('.'))
+  return { cjsImports: cjsImportStrings }
+}
+
+function inspectPatternElementForPaths (child) {
+  if (child.type === 'ObjectPattern') {
+    return inspectObjectPatternForPaths(child)
+  } else if (child.type === 'ArrayPattern') {
+    return inspectArrayPatternForPaths(child)
+  } else if (child.type === 'Identifier') {
+    // return a single empty element, meaning "one result, the whole thing"
+    return [[]]
+  } else {
+    throw new Error(`LavaMoat/tofu - inspectPatternElementForPaths - unable to parse element "${child.type}"`)
+  }
+}
+
+function inspectObjectPatternForPaths (node) {
+  // if it has computed props or a RestElement, we cant meaningfully pursue any deeper
+  // so return a single empty path, meaning "one result, the whole thing"
+  const expansionForbidden = node.properties.some(prop => prop.computed || prop.type === 'RestElement')
+  if (expansionForbidden) return [[]]
+  // expand each property into a path, recursively
+  let paths = []
+  node.properties.forEach(prop => {
+    const propName = prop.key.name
+    const child = prop.value
+    paths = paths.concat(
+      inspectPatternElementForPaths(child)
+        .map(partial => [propName, ...partial])
+    )
+  })
+  return paths
+}
+
+function inspectArrayPatternForPaths (node) {
+  // if it has a RestElement, we cant meaningfully pursue any deeper
+  // so return a single empty path, meaning "one result, the whole thing"
+  const expansionForbidden = node.elements.some(el => el.type === 'RestElement')
+  if (expansionForbidden) return [[]]
+  // expand each property into a path, recursively
+  let paths = []
+  node.elements.forEach((child, propName) => {
+    paths = paths.concat(
+      inspectPatternElementForPaths(child)
+        .map(partial => [propName, ...partial])
+    )
+  })
+  return paths
 }

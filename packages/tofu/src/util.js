@@ -1,7 +1,7 @@
 
 module.exports = {
   getMemberExpressionNesting,
-  getKeysForMemberExpressionChain,
+  getPathFromMemberExpressionChain,
   isDirectMemberExpression,
   isUndefinedCheck,
   getTailmostMatchingChain,
@@ -17,14 +17,20 @@ function getMemberExpressionNesting (identifierNode) {
   const parents = identifierNode.parents.slice(0, -1)
   // find unbroken membership chain closest to identifier
   const memberExpressions = getTailmostMatchingChain(parents, isDirectMemberExpression).reverse()
-  return memberExpressions
+  // find parent of membership chain
+  const hasMembershipChain = Boolean(memberExpressions.length)
+  const topmostMember = hasMembershipChain ? memberExpressions[0] : identifierNode
+  const topmostMemberIndex = identifierNode.parents.indexOf(topmostMember)
+  if (topmostMemberIndex < 1) {
+    throw Error('unnexpected value for memberTopIndex')
+  }
+  const topmostMemberParentIndex = topmostMemberIndex - 1
+  const parentOfMembershipChain = identifierNode.parents[topmostMemberParentIndex]
+  return { memberExpressions, parentOfMembershipChain, topmostMember }
 }
 
-function getKeysForMemberExpressionChain (memberExpressions) {
+function getPathFromMemberExpressionChain (memberExpressions) {
   const keys = memberExpressions.map(member => getNameFromNode(member.property))
-  const rootMemberExpression = memberExpressions[0]
-  const rootName = getNameFromNode(rootMemberExpression.object)
-  keys.unshift(rootName)
   return keys
 }
 
