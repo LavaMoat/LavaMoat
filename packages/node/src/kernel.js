@@ -89,6 +89,8 @@ function loadModuleData (absolutePath) {
       .split('-->').join('-- >')
       // use indirect eval
       .split(' eval(').join(' (eval)(')
+      // replace import statements in comments
+      .split(' import(').join(' __import__(')
     // wrap json modules (borrowed from browserify)
     if (/\.json$/.test(absolutePath)) {
       const sanitizedString = sanitize(transformedContent)
