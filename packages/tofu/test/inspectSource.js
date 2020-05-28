@@ -1,5 +1,7 @@
 const test = require('tape')
+const deepEqual = require('deep-equal')
 const { inspectSource } = require('../src/index')
+
 
 test('fnToCodeBlock utility works', (t) => {
   const src = fnToCodeBlock(() => {
@@ -182,12 +184,72 @@ testInspect('read access to object implies write access to properties', {}, () =
   location: 'read'
 })
 
+testInspect('object destructuring', {
+  globalRefs: ['globalThis']
+}, () => {
+  const { abc } = globalThis
+  const xyz = globalThis.xyz
+}, {
+  'abc': 'read',
+  'xyz': 'read',
+})
+
+testInspect('object destructuring with branching', {
+  globalRefs: ['globalThis']
+}, () => {
+  const { y: { z }, w } = globalThis.x
+}, {
+  'x.y.z': 'read',
+  'x.w': 'read',
+})
+
+testInspect('array destructuring', {
+  globalRefs: ['globalThis']
+}, () => {
+  const [one, two, three] = globalThis.snakes
+}, {
+  'snakes.0': 'read',
+  'snakes.1': 'read',
+  'snakes.2': 'read',
+})
+
+testInspect('complex mixed destructuring', {
+  globalRefs: ['globalThis']
+}, () => {
+  const [
+    { name: primaryThingName },
+    { name: secondaryThingName, ...secondaryThingProps },
+    { name: [ ...tertiaryThingName ] },
+  ] = globalThis.things
+}, {
+  'things.0.name': 'read',
+  'things.1': 'read',
+  'things.2.name': 'read',
+})
+
+testInspect('paths stop at computed props', {
+  globalRefs: ['globalThis']
+}, () => {
+  const key = Math.random()
+  const { b, c } = globalThis[key].a
+  const { [key]: y, z } = globalThis.x
+}, {
+  'x': 'read',
+})
+
+
 function testInspect (label, opts, fn, expectedResultObj) {
   test(label, (t) => {
     const src = fnToCodeBlock(fn)
     const result = inspectSource(src, opts)
     const resultSorted = [...result.entries()].sort(sortBy(0))
     const expectedSorted = Object.entries(expectedResultObj).sort(sortBy(0))
+
+    // for debugging
+    if (!deepEqual(resultSorted, expectedSorted)) {
+      label, opts
+      debugger
+    }
 
     t.deepEqual(resultSorted, expectedSorted)
     t.end()
