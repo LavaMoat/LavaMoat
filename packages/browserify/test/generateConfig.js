@@ -15,11 +15,6 @@ test('generateConfig - basic config', async (t) => {
 
   t.deepEqual(config, {
     resources: {
-      '<root>': {
-        packages: {
-          test: true
-        }
-      },
       test: {
         globals: {
           'location.href': true
@@ -34,13 +29,14 @@ test('generateConfig - ignore various refs', async (t) => {
     const js = [this]
     const ignored = [global, require, module, exports, arguments]
     const globalRefs = [typeof globalThis, typeof self, typeof window]
+    const xyz = nonIgnoredGlobal
   })
 
   t.deepEqual(config, {
     resources: {
-      '<root>': {
-        packages: {
-          test: true
+      test: {
+        globals: {
+          nonIgnoredGlobal: true
         }
       }
     }
@@ -69,11 +65,6 @@ test('generateConfig - config with skipped deps', async (t) => {
 
   t.deepEqual(config, {
     resources: {
-      '<root>': {
-        packages: {
-          banana: true
-        }
-      },
       banana: {
         globals: {
           'location.href': true
@@ -91,11 +82,6 @@ test('generateConfig - config ignores global refs', async (t) => {
 
   t.deepEqual(config, {
     resources: {
-      '<root>': {
-        packages: {
-          test: true
-        }
-      },
       test: {
         globals: {
           'location.href': true,
@@ -112,13 +98,7 @@ test('generateConfig - config ignores global refs when properties are not access
   })
 
   t.deepEqual(config, {
-    resources: {
-      '<root>': {
-        packages: {
-          test: true
-        }
-      }
-    }
+    resources: {}
   }, 'config matches expected')
 })
 
@@ -128,13 +108,7 @@ test('generateConfig - config ignores global refs accessed with whitelist items'
   })
 
   t.deepEqual(config, {
-    resources: {
-      '<root>': {
-        packages: {
-          test: true
-        }
-      }
-    }
+    resources: {}
   }, 'config matches expected')
 })
 
@@ -146,11 +120,6 @@ test('generateConfig - unfrozen environment - primordial modification', async (t
 
   t.deepEqual(config, {
     resources: {
-      '<root>': {
-        packages: {
-          test: true
-        }
-      },
       test: {
         globals: {
           'location.href': true

@@ -74,12 +74,11 @@ test('basic - lavamoat config and bundle', async (t) => {
     deps: {},
     source: 'module.exports = () => location.href'
   }]
-  const getConfig = await generateConfigFromFiles({ files: clone(files) })
+  const config = await generateConfigFromFiles({ files: clone(files) })
   const prelude = generatePrelude()
-  const config = getConfig
   const bundle = await createBundleFromRequiresArray(clone(files), { config })
 
-  t.assert(bundle.includes('"banana":true'), 'prelude includes banana config')
+  t.assert(bundle.includes('"location.href":true'), 'prelude includes banana config')
   t.assert(bundle.includes(prelude), 'bundle includes expected prelude')
 
   const testHref = 'https://funky.town.gov/yolo?snake=yes'
