@@ -89,7 +89,7 @@ function inspectGlobals (source, {
   }
 }
 
-function inspectImports (source) {
+function inspectImports (source, packagesToInspect) {
   const ast = (typeof source === 'object') ? source : acornGlobals.parse(source)
   let cjsImports = []
   walk.ancestor(ast, {
@@ -99,6 +99,8 @@ function inspectImports (source) {
       if (callee.name !== 'require') return
       if (moduleNameNode.type !== 'Literal') return
       const moduleName = moduleNameNode.value
+      // skip if not specified in "packagesToInspect"
+      if (packagesToInspect && !packagesToInspect.includes(moduleName)) return
       // inspect for members
       node.parents = parents
       const { memberExpressions, parentOfMembershipChain } = getMemberExpressionNesting(node)
