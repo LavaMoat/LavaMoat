@@ -1,8 +1,8 @@
+const { builtinModules } = require('module')
 const through = require('through2')
 const fromEntries = require('fromentries')
 const jsonStringify = require('json-stable-stringify')
-const acornGlobals = require('acorn-globals')
-const { inspectGlobals, utils: { mergeConfig, mapToObj } } = require('lavamoat-tofu')
+const { parse, inspectGlobals, inspectImports, utils: { mergeConfig, mapToObj } } = require('lavamoat-tofu')
 const { inspectEnvironment, environmentTypes, environmentTypeStrings } = require('./inspectEnvironment')
 const defaultEnvironment = environmentTypes.frozen
 const rootSlug = '<root>'
@@ -27,6 +27,7 @@ function createConfigSpy ({ onResult }) {
 function createModuleInspector () {
   const packageToEnvironments = {}
   const packageToGlobals = {}
+  const packageToCoreImports = {}
   const packageToModules = {}
   const moduleIdToPackageName = {}
 
@@ -49,10 +50,12 @@ function createModuleInspector () {
     const fileExtension = filename.split('.').pop()
     if (fileExtension === 'json') return
     // get eval environment
-    const ast = acornGlobals.parse(moduleData.source)
+    const ast = parse(moduleData.source)
     inspectForEnvironment(ast, packageName)
     // get global usage
-    inspectForGlobals(moduleData, packageName)
+    inspectForGlobals(ast, moduleData, packageName)
+    // get core package usage
+    inspectForImports(ast, moduleData, packageName)
   }
 
   function inspectForEnvironment (ast, packageName) {
@@ -62,9 +65,8 @@ function createModuleInspector () {
     environments.push(result)
   }
 
-  function inspectForGlobals (moduleData, packageName) {
-    const { source } = moduleData
-    const foundGlobals = inspectGlobals(source, {
+  function inspectForGlobals (ast, moduleData, packageName) {
+    const foundGlobals = inspectGlobals(ast, {
       // browserify commonjs scope
       ignoredRefs: ['require', 'module', 'exports', 'arguments'],
       // browser global refs + browserify global
@@ -84,11 +86,23 @@ function createModuleInspector () {
     }
   }
 
+  function inspectForImports (ast, moduleData, packageName, corePackages = builtinModules) {
+    const { cjsImports } = inspectImports(ast, corePackages)
+    const coreImports = packageToCoreImports[packageName]
+    if (coreImports) {
+      // merge maps
+      packageToCoreImports[packageName] = [...coreImports, ...cjsImports]
+    } else {
+      // new map
+      packageToCoreImports[packageName] = cjsImports
+    }
+  }
+
   function generateConfig () {
     const resources = {}
     const config = { resources }
     Object.entries(packageToModules).forEach(([packageName, packageModules]) => {
-      let globals, packages, environment
+      let globals, core, packages, environment
       // skip for root modules (modules not from deps)
       const isRootModule = packageName === rootSlug
       if (isRootModule) return
@@ -113,10 +127,18 @@ function createModuleInspector () {
         const isDefault = bestEnvironment === defaultEnvironment
         environment = isDefault ? undefined : environmentTypeStrings[bestEnvironment]
       }
+      // get core imports
+      const coreImports = packageToCoreImports[packageName]
+      if (coreImports && coreImports.length) {
+        core = {}
+        coreImports.forEach(path => {
+          core[path] = true
+        })
+      }
       // skip package config if there are no settings needed
-      if (!packages && !globals && !environment) return
+      if (!packages && !globals && !environment && !core) return
       // set config for package
-      resources[packageName] = { packages, globals, environment }
+      resources[packageName] = { packages, globals, environment, core }
     })
 
     return jsonStringify(config, { space: 2 })
