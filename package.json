@@ -10,9 +10,13 @@
     "lint": "lerna run lint",
     "lint:fix": "lerna run lint:fix",
     "publish": "lerna publish from-package --no-push --no-git-tag-version --yes",
-    "install": "lerna bootstrap"
+    "install": "lerna bootstrap",
+    "postinstall": "patch-package"
   },
   "workspaces": [
     "packages/*"
-  ]
+  ],
+  "dependencies": {
+    "patch-package": "^6.2.2"
+  }
 }
