@@ -12,20 +12,20 @@ module.exports = {
   mapToObj
 }
 
-function getMemberExpressionNesting (identifierNode) {
+function getMemberExpressionNesting (identifierNode, parents) {
   // remove the identifier node itself
-  const parents = identifierNode.parents.slice(0, -1)
+  const parentsOnly = parents.slice(0, -1)
   // find unbroken membership chain closest to identifier
-  const memberExpressions = getTailmostMatchingChain(parents, isDirectMemberExpression).reverse()
+  const memberExpressions = getTailmostMatchingChain(parentsOnly, isDirectMemberExpression).reverse()
   // find parent of membership chain
   const hasMembershipChain = Boolean(memberExpressions.length)
   const topmostMember = hasMembershipChain ? memberExpressions[0] : identifierNode
-  const topmostMemberIndex = identifierNode.parents.indexOf(topmostMember)
+  const topmostMemberIndex = parents.indexOf(topmostMember)
   if (topmostMemberIndex < 1) {
     throw Error('unnexpected value for memberTopIndex')
   }
   const topmostMemberParentIndex = topmostMemberIndex - 1
-  const parentOfMembershipChain = identifierNode.parents[topmostMemberParentIndex]
+  const parentOfMembershipChain = parents[topmostMemberParentIndex]
   return { memberExpressions, parentOfMembershipChain, topmostMember }
 }
 
@@ -48,8 +48,8 @@ function isDirectMemberExpression (node) {
   return node.type === 'MemberExpression' && !node.computed
 }
 
-function isUndefinedCheck (identifierNode) {
-  const parentExpression = identifierNode.parents[identifierNode.parents.length - 2]
+function isUndefinedCheck (identifierNode, parents) {
+  const parentExpression = parents[parents.length - 2]
   const isTypeof = (parentExpression.type === 'UnaryExpression' || parentExpression.operator === 'typeof')
   return isTypeof
 }

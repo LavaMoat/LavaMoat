@@ -1,7 +1,6 @@
 const test = require('tape')
 const deepEqual = require('deep-equal')
-const acornGlobals = require('acorn-globals')
-const { inspectImports } = require('../src/index')
+const { parse, inspectImports } = require('../src/index')
 
 
 testInspect('cjs - basic', {}, () => {
@@ -34,7 +33,7 @@ testInspect('cjs - mixed destructuring and member', {}, () => {
 function testInspect (label, opts, fn, expectedResultObj) {
   test(label, (t) => {
     const source = fnToCodeBlock(fn)
-    const ast = acornGlobals.parse(source)
+    const ast = parse(source)
     const result = inspectImports(ast)
     const resultSorted = [...Object.entries(result)].sort(sortBy(0))
     const expectedSorted = Object.entries(expectedResultObj).sort(sortBy(0))

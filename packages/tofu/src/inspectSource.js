@@ -1,5 +1,7 @@
 const acornGlobals = require('acorn-globals')
-const walk = require('acorn-walk')
+// const walk = require('acorn-walk')
+const { parse } = require('@babel/parser')
+const { default: traverse } = require('@babel/traverse')
 const standardJsGlobals = require('./standardGlobals.js')
 
 const {
@@ -63,7 +65,8 @@ function inspectGlobals (source, {
 
   function inspectIdentifierForDirectMembershipChain (variableName, identifierNode) {
     let identifierUse = 'read'
-    const { memberExpressions, parentOfMembershipChain, topmostMember } = getMemberExpressionNesting(identifierNode)
+    const { parents } = identifierNode
+    const { memberExpressions, parentOfMembershipChain, topmostMember } = getMemberExpressionNesting(identifierNode, parents)
     // determine if used in an assignment expression
     const isAssignment = parentOfMembershipChain.type === 'AssignmentExpression'
     const isAssignmentTarget = parentOfMembershipChain.left === topmostMember
@@ -92,18 +95,19 @@ function inspectGlobals (source, {
 function inspectImports (source, packagesToInspect) {
   const ast = (typeof source === 'object') ? source : acornGlobals.parse(source)
   let cjsImports = []
-  walk.ancestor(ast, {
-    CallExpression: function (node, parents) {
+  traverse(ast, {
+    CallExpression: function (nodePath) {
+      const { node } = nodePath
       const { callee, arguments: [moduleNameNode] } = node
       if (callee.type !== 'Identifier') return
       if (callee.name !== 'require') return
-      if (moduleNameNode.type !== 'Literal') return
+      if (moduleNameNode.type !== 'StringLiteral') return
       const moduleName = moduleNameNode.value
       // skip if not specified in "packagesToInspect"
       if (packagesToInspect && !packagesToInspect.includes(moduleName)) return
       // inspect for members
-      node.parents = parents
-      const { memberExpressions, parentOfMembershipChain } = getMemberExpressionNesting(node)
+      const parents = getParents(nodePath)
+      const { memberExpressions, parentOfMembershipChain } = getMemberExpressionNesting(node, parents)
       const initialPath = [moduleName, ...getPathFromMemberExpressionChain(memberExpressions)]
       // exit early if unrecognized parent
       if (parentOfMembershipChain.type !== 'VariableDeclarator') {
@@ -167,4 +171,15 @@ function inspectArrayPatternForPaths (node) {
     )
   })
   return paths
+}
+
+function getParents (nodePath) {
+  const parents = []
+  let target = nodePath
+  while (target) {
+    parents.push(target.node)
+    target = target.parentPath
+  }
+  parents.reverse()
+  return parents
 }

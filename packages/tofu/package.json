@@ -4,6 +4,8 @@
   "main": "src/index.js",
   "license": "MIT",
   "dependencies": {
+    "@babel/parser": "^7.10.1",
+    "@babel/traverse": "^7.10.1",
     "acorn-globals": "^6.0.0",
     "acorn-walk": "^7.1.1"
   },
