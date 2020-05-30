@@ -35,7 +35,7 @@ function testInspect (label, opts, fn, expectedResultObj) {
   test(label, (t) => {
     const source = fnToCodeBlock(fn)
     const ast = acornGlobals.parse(source)
-    const result = inspectImports(ast, opts)
+    const result = inspectImports(ast)
     const resultSorted = [...Object.entries(result)].sort(sortBy(0))
     const expectedSorted = Object.entries(expectedResultObj).sort(sortBy(0))
 
