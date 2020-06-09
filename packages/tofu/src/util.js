@@ -6,10 +6,12 @@ module.exports = {
   isUndefinedCheck,
   getTailmostMatchingChain,
   reduceToTopmostApiCalls,
+  reduceToTopmostApiCallsFromStrings,
   addGlobalUsage,
   mergeConfig,
   objToMap,
-  mapToObj
+  mapToObj,
+  getParents
 }
 
 function getMemberExpressionNesting (identifierNode, parents) {
@@ -82,6 +84,29 @@ function reduceToTopmostApiCalls (globalsConfig) {
   })
 }
 
+// if array contains 'x' and 'x.y' just keep 'x'
+function reduceToTopmostApiCallsFromStrings (keyPathStrings) {
+  // because we sort first, we never have to back track
+  const allPaths = keyPathStrings.sort()
+  return allPaths.filter((path) => {
+    const parts = path.split('.')
+    // only one part, safe to keep
+    if (parts.length === 1) {
+      return true
+    }
+    // 'x.y.z' has parents 'x' and 'x.y'
+    const parentParts = parts.slice(0, -1)
+    const parents = parentParts.map((_, index) => parentParts.slice(0, index + 1).join('.'))
+    // dont include this if a parent appears in the array
+    const parentsAlreadyInArray = parents.some(parent => allPaths.includes(parent))
+    if (parentsAlreadyInArray) {
+      return false
+    }
+    // if no parents found, ok to include
+    return true
+  })
+}
+
 function addGlobalUsage (globalsConfig, identifierPath, identifierUse) {
   // add variable to results, if not already set
   if (globalsConfig.has(identifierPath) && identifierUse !== 'write') return
@@ -106,4 +131,15 @@ function mapToObj (map) {
   const obj = {}
   map.forEach((value, key) => { obj[key] = value })
   return obj
+}
+
+function getParents (nodePath) {
+  const parents = []
+  let target = nodePath
+  while (target) {
+    parents.push(target.node)
+    target = target.parentPath
+  }
+  parents.reverse()
+  return parents
 }
