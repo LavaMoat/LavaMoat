@@ -233,12 +233,12 @@
 
     function getMembraneSpaceNameForModule (moduleData) {
       const { package: packageName, type } = moduleData
-      // native modules use the endowments MembraneSpace for TypedArray passthrough
-      if (type === 'native') {
+      // builtin modules use the endowments MembraneSpace for TypedArray passthrough
+      if (type === 'builtin') {
         return '<endowments>'
       }
-      // core modules use the endowments MembraneSpace for TypedArray passthrough
-      if (type === 'core') {
+      // native modules use the endowments MembraneSpace for TypedArray passthrough
+      if (type === 'native') {
         return '<endowments>'
       }
       // otherwise use package name

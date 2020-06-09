@@ -14,7 +14,7 @@
     "cytoplasm": "^3.3.0",
     "fromentries": "^1.2.0",
     "json-stable-stringify": "^1.0.1",
-    "lavamoat-tofu": "^3.1.0",
+    "lavamoat-tofu": "^4.0.0",
     "resolve": "^1.15.1",
     "resolve-package-path": "^2.0.0",
     "ses": "^0.7.7",
