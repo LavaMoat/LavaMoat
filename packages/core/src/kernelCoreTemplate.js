@@ -29,7 +29,7 @@
     prepareModuleInitializerArgs,
   }) {
     // "templateRequire" calls are inlined in "generatePrelude"
-    const { getEndowmentsForConfig } = templateRequire('makeGetEndowmentsForConfig')()
+    const { getEndowmentsForConfig, makeMinimalViewOfRef } = templateRequire('makeGetEndowmentsForConfig')()
     const { prepareCompartmentGlobalFromConfig } = templateRequire('makePrepareRealmGlobalFromConfig')()
     const { Membrane } = templateRequire('cytoplasm')
     const createReadOnlyDistortion = templateRequire('cytoplasm/distortions/readOnly')
@@ -74,7 +74,7 @@
 
       // prepare the module to be initialized
       const packageName = moduleData.package
-      const moduleSource = moduleData.sourceString
+      const moduleSource = moduleData.source
       const configForModule = getConfigForPackage(lavamoatConfig, packageName)
       const moduleMembraneSpace = getMembraneSpaceForModule(moduleData)
       const isRootModule = moduleData.package === '<root>'
@@ -140,7 +140,7 @@
 
       // validate moduleInitializer
       if (typeof moduleInitializer !== 'function') {
-        throw new Error(`LavaMoat - moduleInitializer is not defined correctly. got "${typeof moduleInitializer}" ses:${runInSes}\n${moduleSource}`)
+        throw new Error(`LavaMoat - moduleInitializer is not defined correctly. got "${typeof moduleInitializer}"\n${moduleSource}`)
       }
 
       // initialize the module with the correct context
@@ -180,6 +180,9 @@
     function requireRelative ({ requestedName, parentModuleExports, parentModuleData, parentPackageConfig, parentModuleId }) {
       const parentModulePackageName = parentModuleData.package
       const parentPackagesWhitelist = parentPackageConfig.packages
+      const parentBuiltinsWhitelist = Object.entries(parentPackageConfig.builtin || {})
+      .filter(([_, allowed]) => allowed === true)
+      .map(([packagePath, allowed]) => packagePath.split('.')[0])
 
       // resolve the moduleId from the requestedName
       const moduleId = getRelativeModuleId(parentModuleId, requestedName)
@@ -204,8 +207,13 @@
 
       // disallow requiring packages that are not in the parent's whitelist
       const isSamePackage = packageName === parentModulePackageName
-      const isInParentWhitelist = parentPackagesWhitelist[packageName] === true
       const parentIsEntryModule = parentModulePackageName === '<root>'
+      let isInParentWhitelist = false
+      if (moduleData.type === 'builtin') {
+        isInParentWhitelist = parentBuiltinsWhitelist.includes(packageName)
+      } else {
+        isInParentWhitelist = (parentPackagesWhitelist[packageName] === true)
+      }
 
       if (!parentIsEntryModule && !isSamePackage && !isInParentWhitelist) {
         throw new Error(`LavaMoat - required package not in whitelist: package "${parentModulePackageName}" requested "${packageName}" as "${requestedName}"`)
@@ -214,16 +222,31 @@
       // apply moduleExports require-time protection
       const isSameMembraneSpace = parentModulePackageName && getMembraneSpaceNameForModule(moduleData) === getMembraneSpaceNameForModule(parentModuleData)
       const needsMembraneProtection = !isSameMembraneSpace
+      let finalExports
       if (needsMembraneProtection) {
         // apply membrane protections
         const inGraph = getMembraneSpaceForModule(moduleData)
         const outGraph = getMembraneSpaceForModule(parentModuleData)
-        const protectedExports = membrane.bridge(moduleExports, inGraph, outGraph)
-        return protectedExports
+        finalExports = membrane.bridge(moduleExports, inGraph, outGraph)
       } else {
         // return raw if same package
-        return moduleExports
+        finalExports = moduleExports
       }
+
+      // create minimal selection if its a builtin and the whole path is not selected for
+      if (moduleData.type === 'builtin' && !parentPackageConfig.builtin[moduleId]) {
+        const builtinPaths = (
+          Object.entries(parentPackageConfig.builtin)
+          // grab all allowed builtin paths that match this package
+          .filter(([packagePath, allowed]) => allowed === true && moduleId === packagePath.split('.')[0])
+          // only include the paths after the packageName
+          .map(([packagePath, allowed]) => packagePath.split('.').slice(1).join('.'))
+          .sort()
+        )
+        finalExports = makeMinimalViewOfRef(finalExports, builtinPaths)
+      }
+
+      return finalExports
     }
 
     function getMembraneSpaceForModule (moduleData) {

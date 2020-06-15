@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "acorn-walk": "^7.1.1",
-    "cytoplasm": "^3.3.0",
+    "cytoplasm": "^3.3.1",
     "fromentries": "^1.2.0",
     "json-stable-stringify": "^1.0.1",
     "lavamoat-tofu": "^4.0.0",
