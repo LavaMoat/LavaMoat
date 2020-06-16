@@ -5,7 +5,7 @@ const mergeDeep = require('merge-deep')
 const { generateKernel, packageDataForModule } = require('../src/index.js')
 
 
-test('builtin access', async (t) => {
+test('builtin - basic access', async (t) => {
   const scenario = createScenarioFromScaffold({
     defineOne: () => {
       let abc = null, xyz = null
@@ -34,7 +34,7 @@ test('builtin access', async (t) => {
   t.end()
 })
 
-test('builtin paths', async (t) => {
+test('builtin - access via paths', async (t) => {
   const scenario = createScenarioFromScaffold({
     defineOne: () => {
       module.exports = require('abc')
@@ -61,7 +61,7 @@ test('builtin paths', async (t) => {
   t.end()
 })
 
-test('builtin paths soft-bindings preserve "this" but allow override', async (t) => {
+test('builtin - paths soft-bindings preserve "this" but allow override', async (t) => {
   const scenario = createScenarioFromScaffold({
     defineOne: () => {
       const { Buffer } = require('buffer')
