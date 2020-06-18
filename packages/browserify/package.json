@@ -15,7 +15,6 @@
     "browserify-transform-tools": "^1.7.0",
     "clone": "^2.1.2",
     "combine-source-map": "^0.8.0",
-    "cytoplasm": "^3.0.3",
     "json-stable-stringify": "^1.0.1",
     "lavamoat-core": "^4.0.0",
     "merge-deep": "^3.0.2",
