@@ -2,23 +2,27 @@
 
 ![LavaMoat](./assets/lavamoat-logo.png "Introduction to LavaMoat")
 
-**NOTE: under rapid develop, not ready for production use, has not been audited, etc**
+**LavaMoat** is a set of tools for securing JavaScript projects against a category of attacks called **software supply chain attacks.**
 
-  **LavaMoat** is a set of tools for securing JavaScript projects against a category of hacks called **software supply chain attacks.**
+This genre of attack occurs when a malicious dependency makes it way into a developer's application. An attacker could use the vulerable dependency to then steal important secrets like credit card numbers, private keys, or personal data.
 
-  This genre of attack occurs when a malicious dependency makes it way into a developer's application. An attacker could use the vulerable dependency to then steal important secrets like credit card numbers, private keys, or personal data.
+These attacks have already hit the cryptocurrency ecosystem and present a significant risk for the developers and users of wallets and apps.
 
-  These attacks have already hit the cryptocurrency ecosystem and present a significant risk for the developers and users of wallets and apps.
+In order to help mitigate the risk of such an attack we are building a suite of tools that range from a node-based runtime, to plugins for common app bundlers (eg webpack, browserify), to dependecy analysis and visualization tools.
 
-  In order to help mitigate the risk of such an attack we are building a suite of tools that range from plugins for common app bundlers (eg webpack, browserify) to dependecy analysis and visualization tools.
-
-  **The goal of LavaMoat** is to bring added protections to modern JavaScript apps without having to rewrite them from scratch and automate a good first-start security configuration.
+**The goal of LavaMoat** is to bring added protections to modern JavaScript apps without having to rewrite them from scratch and automate a good first-start security configuration.
 
 
 ## [Watch the introduction video](https://www.youtube.com/watch?v=pOTEJy_FqIA)
 
 
-### How it works
+### How to secure your app against supplychain attacks
+
+1. disable/whitelist npm install scripts via tools like [allow-scripts](https://github.com/dominykas/allow-scripts)
+2. run your server or build process in [lavamoat-node][LavamoatNode]
+3. build your ui with LavaMoat for [Webpack][LavamoatWebpack] or [Browserify][LavamoatBrowserify]
+
+### How LavaMoat works
 
 The LavaMoat runtime reduces the supplychain risk in **three** primary ways:
   1. Prevent modifying JavaScript's primordials (Object, String, Number, Array, ...)
@@ -27,11 +31,17 @@ The LavaMoat runtime reduces the supplychain risk in **three** primary ways:
 
 1 and 2 are provided by [SES][SesGithub] containers. Platform API access is passed in via a LavaMoat configuration file.
 
-3 is achieved by providing a unique mutable copy of the imported module's exports. Mutating the module's copy of the exports does not affect other modules.
+3 is achieved by providing a read-only view of the imported module's exports. This read-only view is accomplished via [Cytoplasm][CytoplasmGithub], a membrane implementation.
 
 ### SecureEcmaScript (SES)
 
-[SES][SesGithub] is the sandbox used in LavaMoat. See SES's [secure computing guide](https://github.com/Agoric/SES/blob/master/docs/secure-coding-guide.md) to learn more about the risks of untrusted javascript.
+[SES][SesGithub] is the sandbox used in LavaMoat. See SES's [secure computing guide][SesComputingGuide] to learn more about the risks of untrusted javascript.
+
+
+### LavaMoat in Node.js
+
+Run your server or app building code with protections via [LavaMoat Node][LavamoatNode]
+
 
 ### LavaMoat in the browser
 
@@ -49,20 +59,15 @@ LavaMoat modifies the bundle's runtime to enforce the configured constraints.
 
 
 ### Bundler Plugins:
-  - [LavaMoat Webpack](./packages/webpack)
-  - [LavaMoat Browserify](./packages/browserify)
-
-
-### LavaMoat in Node.js
-
-Coming soon!
+  - [LavaMoat Webpack][LavamoatWebpack]
+  - [LavaMoat Browserify][LavamoatBrowserify]
 
 
 ### Additional tools
 
 In addition to the LavaMoat runtime bundler plugins, there are some tools to help analyze your dependecy graph and configuration.
 
-See [lavamoat-viz](https://github.com/LavaMoat/sesify-viz) for a demo of the tool.
+See [lavamoat-viz][LavamoatViz] for a demo of the tool.
 
 ### Further reading on software supplychain security
 
@@ -87,4 +92,12 @@ Funded by [ConsenSys](https://github.com/consensys)
 Runs on [Agoric](https://github.com/agoric/)
 
 
-[SesGithub]: https://github.com/agoric/SES
+[SesGithub]: https://github.com/Agoric/ses-shim
+[SesComputingGuide]: https://github.com/Agoric/SES-shim/blob/master/packages/ses/docs/secure-coding-guide.md
+
+[CytoplasmGithub]: https://github.com/lavamoat/cytoplasm
+[LavamoatViz]: https://github.com/lavamoat/lavamoat-viz
+
+[LavamoatNode]: ./packages/node
+[LavamoatWebpack]: ./packages/webpack
+[LavamoatBrowserify]: ./packages/browserify
