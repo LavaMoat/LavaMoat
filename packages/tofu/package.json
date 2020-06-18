@@ -5,7 +5,8 @@
   "license": "MIT",
   "dependencies": {
     "@babel/parser": "^7.10.1",
-    "@babel/traverse": "^7.10.1"
+    "@babel/traverse": "^7.10.1",
+    "snyk": "^1.342.2"
   },
   "devDependencies": {
     "deep-equal": "^2.0.3",
@@ -18,7 +19,9 @@
     "lint": "npm run lint:standard && npm run lint:deps",
     "lint:standard": "standard src/**/*.js",
     "lint:fix": "standard src/**/*.js --fix",
-    "lint:deps": "depcheck --ignore-dirs=lib --ignores='bar,bing'"
+    "lint:deps": "depcheck --ignore-dirs=lib --ignores='bar,bing'",
+    "snyk-protect": "snyk protect",
+    "prepublish": "npm run snyk-protect"
   },
   "description": "This is the TOFU (trust-on-first-use) static analysis tool used by LavaMoat to automatically generate useable config",
   "directories": {
@@ -29,5 +32,6 @@
   "bugs": {
     "url": "https://github.com/LavaMoat/lavamoat/issues"
   },
-  "homepage": "https://github.com/LavaMoat/lavamoat#readme"
+  "homepage": "https://github.com/LavaMoat/lavamoat#readme",
+  "snyk": true
 }
