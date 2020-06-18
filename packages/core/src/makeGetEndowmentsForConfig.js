@@ -38,7 +38,7 @@ function makeGetEndowmentsForConfig () {
       if (configValue !== true) {
         throw new Error(`LavaMoat - unknown value for config (${typeof value})`)
       }
-      const value = deepGetAndBind(ref, path)
+      const value = deepGetAndBind(ref, path, newRef)
       // TODO: actually match prop descriptor
       const propDesc = {
         value,
@@ -51,7 +51,7 @@ function makeGetEndowmentsForConfig () {
     return newRef
   }
 
-  function deepGetAndBind (ref, pathName) {
+  function deepGetAndBind (ref, pathName, fakeParent) {
     const pathParts = pathName.split('.')
     const parentPath = pathParts.slice(0, -1).join('.')
     const childKey = pathParts[pathParts.length - 1]
