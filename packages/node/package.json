@@ -3,7 +3,7 @@
   "bin": {
     "lavamoat": "src/index.js"
   },
-  "version": "2.0.2",
+  "version": "3.0.0",
   "main": "index.js",
   "license": "MIT",
   "scripts": {
