@@ -180,7 +180,7 @@
     function requireRelative ({ requestedName, parentModuleExports, parentModuleData, parentPackageConfig, parentModuleId }) {
       const parentModulePackageName = parentModuleData.package
       const parentPackagesWhitelist = parentPackageConfig.packages
-      const parentBuiltinsWhitelist = Object.entries(parentPackageConfig.builtin || {})
+      const parentBuiltinsWhitelist = Object.entries(parentPackageConfig.builtin)
       .filter(([_, allowed]) => allowed === true)
       .map(([packagePath, allowed]) => packagePath.split('.')[0])
 
@@ -234,7 +234,7 @@
       }
 
       // create minimal selection if its a builtin and the whole path is not selected for
-      if (moduleData.type === 'builtin' && !parentPackageConfig.builtin[moduleId]) {
+      if (!parentIsEntryModule && moduleData.type === 'builtin' && !parentPackageConfig.builtin[moduleId]) {
         const builtinPaths = (
           Object.entries(parentPackageConfig.builtin)
           // grab all allowed builtin paths that match this package
@@ -309,6 +309,7 @@
       const packageConfig = (config.resources || {})[packageName] || {}
       packageConfig.globals = packageConfig.globals || {}
       packageConfig.packages = packageConfig.packages || {}
+      packageConfig.builtin = packageConfig.builtin || {}
       return packageConfig
     }
 
