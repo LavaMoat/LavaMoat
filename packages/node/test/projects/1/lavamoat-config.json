@@ -1,10 +1,5 @@
 {
   "resources": {
-    "<root>": {
-      "packages": {
-        "a": true
-      }
-    },
     "a": {
       "packages": {
         "<root>": true

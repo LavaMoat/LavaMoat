@@ -1,11 +1,5 @@
 {
   "resources": {
-    "<root>": {
-      "packages": {
-        "bad-idea-express-backdoor": true,
-        "express": true
-      }
-    },
     "accepts": {
       "packages": {
         "mime-types": true,
@@ -13,12 +7,17 @@
       }
     },
     "bad-idea-express-backdoor": {
-      "packages": {
-        "child_process": true,
-        "crypto": true
+      "builtin": {
+        "child_process.exec": true,
+        "crypto.createHash": true
       }
     },
     "body-parser": {
+      "builtin": {
+        "querystring": true,
+        "zlib.createGunzip": true,
+        "zlib.createInflate": true
+      },
       "packages": {
         "bytes": true,
         "content-type": true,
@@ -28,24 +27,32 @@
         "iconv-lite": true,
         "on-finished": true,
         "qs": true,
-        "querystring": true,
         "raw-body": true,
-        "type-is": true,
-        "zlib": true
+        "type-is": true
       }
     },
     "content-disposition": {
+      "builtin": {
+        "path.basename": true
+      },
       "packages": {
-        "path": true,
         "safe-buffer": true
       }
     },
     "cookie-signature": {
-      "packages": {
-        "crypto": true
+      "builtin": {
+        "crypto.createHash": true,
+        "crypto.createHmac": true
       }
     },
     "debug": {
+      "builtin": {
+        "fs.SyncWriteStream": true,
+        "net.Socket": true,
+        "tty.WriteStream": true,
+        "tty.isatty": true,
+        "util": true
+      },
       "globals": {
         "chrome": true,
         "console": true,
@@ -55,30 +62,40 @@
         "process": true
       },
       "packages": {
-        "fs": true,
-        "ms": true,
-        "net": true,
-        "tty": true,
-        "util": true
+        "ms": true
       }
     },
     "destroy": {
-      "packages": {
-        "fs": true,
+      "builtin": {
+        "fs.ReadStream": true,
         "stream": true
       }
     },
     "etag": {
+      "builtin": {
+        "crypto.createHash": true,
+        "fs.Stats": true
+      },
       "globals": {
         "Buffer.byteLength": true,
         "Buffer.isBuffer": true
-      },
-      "packages": {
-        "crypto": true,
-        "fs": true
       }
     },
     "express": {
+      "builtin": {
+        "events.EventEmitter.prototype": true,
+        "fs.statSync": true,
+        "http.IncomingMessage.prototype": true,
+        "http.ServerResponse.prototype": true,
+        "http.createServer": true,
+        "net.isIP": true,
+        "path.basename": true,
+        "path.dirname": true,
+        "path.extname": true,
+        "path.join": true,
+        "path.resolve": true,
+        "querystring.parse": true
+      },
       "globals": {
         "console.error": true,
         "process.env.NODE_ENV": true,
@@ -97,21 +114,15 @@
         "encodeurl": true,
         "escape-html": true,
         "etag": true,
-        "events": true,
         "finalhandler": true,
         "fresh": true,
-        "fs": true,
-        "http": true,
         "merge-descriptors": true,
         "methods": true,
-        "net": true,
         "on-finished": true,
         "parseurl": true,
-        "path": true,
         "path-to-regexp": true,
         "proxy-addr": true,
         "qs": true,
-        "querystring": true,
         "range-parser": true,
         "safe-buffer": true,
         "send": true,
@@ -150,41 +161,51 @@
       }
     },
     "iconv-lite": {
+      "builtin": {
+        "buffer.Buffer": true,
+        "buffer.SlowBuffer.byteLength": true,
+        "buffer.SlowBuffer.prototype.toString": true,
+        "buffer.SlowBuffer.prototype.write": true,
+        "stream.Readable.prototype.collect": true,
+        "stream.Readable.prototype.setEncoding": true,
+        "stream.Transform.call": true,
+        "stream.Transform.prototype": true,
+        "string_decoder.StringDecoder.call": true,
+        "string_decoder.StringDecoder.prototype": true
+      },
       "globals": {
         "console.error": true,
         "process": true
       },
       "packages": {
-        "buffer": true,
-        "safer-buffer": true,
-        "stream": true,
-        "string_decoder": true
+        "safer-buffer": true
       }
     },
     "inherits": {
-      "packages": {
-        "util": true
+      "builtin": {
+        "util.inherits": true
       }
     },
     "methods": {
-      "packages": {
-        "http": true
+      "builtin": {
+        "http.METHODS": true
       }
     },
     "mime": {
+      "builtin": {
+        "fs.readFileSync": true
+      },
       "globals": {
         "console.warn": true,
         "process.env.DEBUG_MIME": true
-      },
-      "packages": {
-        "fs": true,
-        "path": true
       }
     },
     "mime-types": {
+      "builtin": {
+        "path.extname": true
+      },
       "packages": {
-        "mime-db": true,
-        "path": true
+        "mime-db": true
       }
     },
     "on-finished": {
@@ -197,8 +218,9 @@
       }
     },
     "parseurl": {
-      "packages": {
-        "url": true
+      "builtin": {
+        "url.Url": true,
+        "url.parse": true
       }
     },
     "proxy-addr": {
@@ -220,19 +242,30 @@
       }
     },
     "safe-buffer": {
-      "packages": {
+      "builtin": {
         "buffer": true
       }
     },
     "safer-buffer": {
+      "builtin": {
+        "buffer": true
+      },
       "globals": {
         "process.binding": true
-      },
-      "packages": {
-        "buffer": true
       }
     },
     "send": {
+      "builtin": {
+        "fs.createReadStream": true,
+        "fs.stat": true,
+        "path.extname": true,
+        "path.join": true,
+        "path.normalize": true,
+        "path.resolve": true,
+        "path.sep": true,
+        "stream": true,
+        "util.inherits": true
+      },
       "globals": {
         "Buffer.byteLength": true
       },
@@ -244,19 +277,19 @@
         "escape-html": true,
         "etag": true,
         "fresh": true,
-        "fs": true,
         "http-errors": true,
         "mime": true,
         "ms": true,
         "on-finished": true,
-        "path": true,
         "range-parser": true,
-        "statuses": true,
-        "stream": true,
-        "util": true
+        "statuses": true
       }
     },
     "serve-static": {
+      "builtin": {
+        "path.resolve": true,
+        "url.format": true
+      },
       "globals": {
         "Buffer.byteLength": true
       },
@@ -264,9 +297,7 @@
         "encodeurl": true,
         "escape-html": true,
         "parseurl": true,
-        "path": true,
-        "send": true,
-        "url": true
+        "send": true
       }
     },
     "type-is": {

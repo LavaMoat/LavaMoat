@@ -6,6 +6,10 @@
       }
     },
     "chalk": {
+      "globals": {
+        "get": true,
+        "set": true
+      },
       "packages": {
         "ansi-styles": true,
         "supports-color": true
@@ -22,14 +26,16 @@
       }
     },
     "supports-color": {
+      "builtin": {
+        "os.release": true,
+        "tty.isatty": true
+      },
       "globals": {
         "process.env": true,
         "process.platform": true
       },
       "packages": {
-        "has-flag": true,
-        "os": true,
-        "tty": true
+        "has-flag": true
       }
     }
   }

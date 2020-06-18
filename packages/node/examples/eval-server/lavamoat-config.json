@@ -1,17 +1,14 @@
 {
   "resources": {
-    "<root>": {
-      "packages": {
-        "bad-idea-eval-server": true
-      }
-    },
     "bad-idea-eval-server": {
+      "builtin": {
+        "http.createServer": true
+      },
       "globals": {
         "console.log": true
       },
       "packages": {
-        "concat-stream": true,
-        "http": true
+        "concat-stream": true
       }
     },
     "buffer-from": {
@@ -32,29 +29,30 @@
       }
     },
     "inherits": {
-      "packages": {
-        "util": true
+      "builtin": {
+        "util.inherits": true
       }
     },
     "readable-stream": {
+      "builtin": {
+        "buffer.Buffer": true,
+        "stream": true,
+        "util": true
+      },
       "globals": {
         "process.env.READABLE_STREAM": true,
         "process.nextTick": true,
         "process.stderr": true,
-        "process.stdout": true
+        "process.stdout": true,
+        "stream": true
       },
       "packages": {
-        "buffer": true,
-        "events": true,
         "inherits": true,
-        "stream": true,
-        "string_decoder": true,
-        "util": true,
         "util-deprecate": true
       }
     },
     "safe-buffer": {
-      "packages": {
+      "builtin": {
         "buffer": true
       }
     },
@@ -64,8 +62,8 @@
       }
     },
     "util-deprecate": {
-      "packages": {
-        "util": true
+      "builtin": {
+        "util.deprecate": true
       }
     }
   }

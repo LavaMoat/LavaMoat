@@ -1,4 +1,5 @@
 const path = require('path')
+const { builtinModules: builtinPackages } = require('module')
 const mdeps = require('module-deps')
 const resolve = require('resolve')
 const { createConfigSpy, createPackageDataStream } = require('lavamoat-core')
@@ -59,6 +60,7 @@ async function parseForConfig ({ cwd, entryId, resolutions }) {
     .pipe(createPackageDataStream())
   // inspect
     .pipe(createConfigSpy({
+      builtinPackages,
       onResult: resolvePromise
     }))
     .resume()
