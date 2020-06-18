@@ -17,7 +17,8 @@
     "resolve": "^1.15.1",
     "resolve-package-path": "^2.0.0",
     "ses": "^0.7.7",
-    "through2": "^3.0.1"
+    "through2": "^3.0.1",
+    "snyk": "^1.342.2"
   },
   "devDependencies": {
     "tape": "^4.13.2",
@@ -28,7 +29,9 @@
     "lint:standard": "standard src/**/*.js test/**/*.js",
     "lint:fix": "standard src/**/*.js test/**/*.js --fix",
     "lint:deps": "depcheck --ignore-dirs=lib --ignores='abc,xyz,two,thisChecker,someClass,one'",
-    "test": "node test/index.js"
+    "test": "node test/index.js",
+    "snyk-protect": "snyk protect",
+    "prepublish": "npm run snyk-protect"
   },
   "author": "kumavis",
   "license": "MIT",
@@ -45,5 +48,6 @@
       "/src/kernelTemplate.js",
       "/src/kernelCoreTemplate.js"
     ]
-  }
+  },
+  "snyk": true
 }
