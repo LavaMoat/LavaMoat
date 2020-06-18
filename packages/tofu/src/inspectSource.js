@@ -1,12 +1,14 @@
-const acornGlobals = require('acorn-globals')
-const walk = require('acorn-walk')
+const { parse } = require('@babel/parser')
+const { default: traverse } = require('@babel/traverse')
+const { findGlobals } = require('./findGlobals')
 const standardJsGlobals = require('./standardGlobals.js')
 
 const {
   getMemberExpressionNesting,
   getPathFromMemberExpressionChain,
   reduceToTopmostApiCalls,
-  addGlobalUsage
+  addGlobalUsage,
+  getParents
 } = require('./util')
 
 module.exports = { inspectGlobals, inspectImports }
@@ -16,39 +18,38 @@ function inspectGlobals (source, {
   globalRefs = [],
   languageRefs = standardJsGlobals
 } = {}) {
-  const ast = (typeof source === 'object') ? source : acornGlobals.parse(source)
-  const detectedGlobals = acornGlobals(ast)
+  const ast = (typeof source === 'object') ? source : parse(source)
+  const detectedGlobals = findGlobals(ast)
 
   const globalsConfig = new Map()
   // check for global refs with member expressions
-  detectedGlobals.forEach(inspectDetectedGlobalVariables)
+  ;[...detectedGlobals.entries()].forEach(([name, paths]) => inspectDetectedGlobalVariables(name, paths))
   // reduce to remove more deep results that overlap with broader results
   // e.g. [`x.y.z`, `x.y`] can be reduced to just [`x.y`]
   reduceToTopmostApiCalls(globalsConfig)
 
   return globalsConfig
 
-  function inspectDetectedGlobalVariables (variable) {
-    const variableName = variable.name
+  function inspectDetectedGlobalVariables (name, paths) {
     // skip if module global
-    if (ignoredRefs.includes(variableName)) return
+    if (ignoredRefs.includes(name)) return
     // expose API as granularly as possible
-    variable.nodes.forEach(identifierNode => {
-      const { path, identifierUse, parent } = inspectIdentifierForDirectMembershipChain(variableName, identifierNode)
+    paths.forEach(path => {
+      const parents = getParents(path)
+      const { path: keyPath, identifierUse, parent } = inspectIdentifierForDirectMembershipChain(name, path.node, parents)
       // if nested API lookup begins with a globalRef, drop it
-      if (globalRefs.includes(path[0])) {
-        path.shift()
+      if (globalRefs.includes(keyPath[0])) {
+        keyPath.shift()
       }
-
       // inspect for destructuring
       let destructuredPaths
       if (parent.type === 'VariableDeclarator' && ['ObjectPattern', 'ArrayPattern'].includes(parent.id.type)) {
         destructuredPaths = (
-          inspectPatternElementForPaths(parent.id)
-            .map(partial => [...path, ...partial])
+          inspectPatternElementForKeys(parent.id)
+            .map(partial => [...keyPath, ...partial])
         )
       } else {
-        destructuredPaths = [path]
+        destructuredPaths = [keyPath]
       }
 
       destructuredPaths.forEach(path => {
@@ -61,9 +62,9 @@ function inspectGlobals (source, {
     })
   }
 
-  function inspectIdentifierForDirectMembershipChain (variableName, identifierNode) {
+  function inspectIdentifierForDirectMembershipChain (variableName, identifierNode, parents) {
     let identifierUse = 'read'
-    const { memberExpressions, parentOfMembershipChain, topmostMember } = getMemberExpressionNesting(identifierNode)
+    const { memberExpressions, parentOfMembershipChain, topmostMember } = getMemberExpressionNesting(identifierNode, parents)
     // determine if used in an assignment expression
     const isAssignment = parentOfMembershipChain.type === 'AssignmentExpression'
     const isAssignmentTarget = parentOfMembershipChain.left === topmostMember
@@ -89,80 +90,139 @@ function inspectGlobals (source, {
   }
 }
 
-function inspectImports (source) {
-  const ast = (typeof source === 'object') ? source : acornGlobals.parse(source)
-  let cjsImports = []
-  walk.ancestor(ast, {
-    CallExpression: function (node, parents) {
+function inspectImports (ast, packagesToInspect) {
+  const cjsImports = []
+  traverse(ast, {
+    CallExpression: function (path) {
+      const { node } = path
       const { callee, arguments: [moduleNameNode] } = node
       if (callee.type !== 'Identifier') return
       if (callee.name !== 'require') return
-      if (moduleNameNode.type !== 'Literal') return
+      if (moduleNameNode.type !== 'StringLiteral') return
       const moduleName = moduleNameNode.value
-      // inspect for members
-      node.parents = parents
-      const { memberExpressions, parentOfMembershipChain } = getMemberExpressionNesting(node)
-      const initialPath = [moduleName, ...getPathFromMemberExpressionChain(memberExpressions)]
-      // exit early if unrecognized parent
+      // skip if not specified in "packagesToInspect"
+      if (packagesToInspect && !packagesToInspect.includes(moduleName)) return
+      // inspect for member chain
+      const parents = getParents(path)
+      const { memberExpressions, parentOfMembershipChain } = getMemberExpressionNesting(node, parents)
+      const initialKeyPath = [moduleName, ...getPathFromMemberExpressionChain(memberExpressions)]
+      // if import not used in a var declaration, exit early
       if (parentOfMembershipChain.type !== 'VariableDeclarator') {
-        // not sure when this is would be hit?
-        cjsImports.push(initialPath)
+        // result of require has not been assigned, it has been consumed
+        cjsImports.push(initialKeyPath)
         return
       }
-      // inspect for destructuring
-      cjsImports = cjsImports.concat(
-        inspectPatternElementForPaths(parentOfMembershipChain.id)
-          .map(partial => [...initialPath, ...partial])
-      )
+      // get all declared vars (destructuring)
+      // for each declared var, detect usage keyPath
+      const identifierOrPattern = parentOfMembershipChain.id
+      const declaredVars = inspectPatternElementForDeclarations(identifierOrPattern, initialKeyPath)
+      declaredVars.forEach(({ node, keyPath }) => {
+        const varName = node.name
+        const refs = path.scope.getBinding(varName).referencePaths
+        // for each reference of the var, detect usage keyPath
+        refs.forEach((refPath) => {
+          const parents = getParents(refPath)
+          const { memberExpressions } = getMemberExpressionNesting(refPath.node, parents)
+          const subPath = getPathFromMemberExpressionChain(memberExpressions)
+          const usageKeyPath = [...keyPath, ...subPath]
+          // add to results
+          cjsImports.push(usageKeyPath)
+        })
+      })
     }
   })
   const cjsImportStrings = cjsImports.map(item => item.join('.'))
   return { cjsImports: cjsImportStrings }
 }
 
-function inspectPatternElementForPaths (child) {
+function inspectPatternElementForDeclarations (node, keyPath = []) {
+  if (node.type === 'ObjectPattern') {
+    return inspectObjectPatternForDeclarations(node, keyPath)
+  } else if (node.type === 'ArrayPattern') {
+    return inspectArrayPatternForDeclarations(node, keyPath)
+  } else if (node.type === 'Identifier') {
+    // return the node with the current path
+    return [{ node, keyPath }]
+  } else {
+    throw new Error(`LavaMoat/tofu - inspectPatternElementForDeclarations - unable to parse element "${node.type}"`)
+  }
+}
+
+function inspectObjectPatternForDeclarations (node, keyPath) {
+  // if it has computed props or a RestElement, we cant meaningfully pursue any deeper
+  // return the node with the current path
+  const expansionForbidden = node.properties.some(prop => prop.computed || prop.type === 'RestElement')
+  if (expansionForbidden) return [{ node, keyPath }]
+  // expand each property into a path, recursively
+  let results = []
+  node.properties.forEach(prop => {
+    const propName = prop.key.name
+    const child = prop.value
+    results = results.concat(
+      inspectPatternElementForDeclarations(child, [...keyPath, propName])
+    )
+  })
+  return results
+}
+
+function inspectArrayPatternForDeclarations (node, keyPath) {
+  // if it has a RestElement, we cant meaningfully pursue any deeper
+  // return the node with the current path
+  const expansionForbidden = node.elements.some(el => el.type === 'RestElement')
+  if (expansionForbidden) return [{ node, keyPath }]
+  // expand each property into a path, recursively
+  let results = []
+  node.elements.forEach((child, propName) => {
+    results = results.concat(
+      inspectPatternElementForDeclarations(child, [...keyPath, propName])
+    )
+  })
+  return results
+}
+
+function inspectPatternElementForKeys (child) {
   if (child.type === 'ObjectPattern') {
-    return inspectObjectPatternForPaths(child)
+    return inspectObjectPatternForKeys(child)
   } else if (child.type === 'ArrayPattern') {
-    return inspectArrayPatternForPaths(child)
+    return inspectArrayPatternForKeys(child)
   } else if (child.type === 'Identifier') {
     // return a single empty element, meaning "one result, the whole thing"
     return [[]]
   } else {
-    throw new Error(`LavaMoat/tofu - inspectPatternElementForPaths - unable to parse element "${child.type}"`)
+    throw new Error(`LavaMoat/tofu - inspectPatternElementForKeys - unable to parse element "${child.type}"`)
   }
 }
 
-function inspectObjectPatternForPaths (node) {
+function inspectObjectPatternForKeys (node) {
   // if it has computed props or a RestElement, we cant meaningfully pursue any deeper
   // so return a single empty path, meaning "one result, the whole thing"
   const expansionForbidden = node.properties.some(prop => prop.computed || prop.type === 'RestElement')
   if (expansionForbidden) return [[]]
   // expand each property into a path, recursively
-  let paths = []
+  let keys = []
   node.properties.forEach(prop => {
     const propName = prop.key.name
     const child = prop.value
-    paths = paths.concat(
-      inspectPatternElementForPaths(child)
+    keys = keys.concat(
+      inspectPatternElementForKeys(child)
         .map(partial => [propName, ...partial])
     )
   })
-  return paths
+  return keys
 }
 
-function inspectArrayPatternForPaths (node) {
+function inspectArrayPatternForKeys (node) {
   // if it has a RestElement, we cant meaningfully pursue any deeper
   // so return a single empty path, meaning "one result, the whole thing"
   const expansionForbidden = node.elements.some(el => el.type === 'RestElement')
   if (expansionForbidden) return [[]]
   // expand each property into a path, recursively
-  let paths = []
+  let keys = []
   node.elements.forEach((child, propName) => {
-    paths = paths.concat(
-      inspectPatternElementForPaths(child)
+    keys = keys.concat(
+      inspectPatternElementForKeys(child)
         .map(partial => [propName, ...partial])
     )
   })
-  return paths
+  return keys
 }

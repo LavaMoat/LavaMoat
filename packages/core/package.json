@@ -1,6 +1,6 @@
 {
   "name": "lavamoat-core",
-  "version": "3.0.2",
+  "version": "4.0.0",
   "description": "LavaMoat kernel and utils",
   "main": "src/index.js",
   "directories": {
@@ -10,25 +10,24 @@
     "node": ">12.0.0"
   },
   "dependencies": {
-    "acorn-globals": "^6.0.0",
-    "acorn-walk": "^7.1.1",
-    "cytoplasm": "^3.3.0",
+    "cytoplasm": "^3.3.1",
     "fromentries": "^1.2.0",
     "json-stable-stringify": "^1.0.1",
-    "lavamoat-tofu": "^3.0.1",
+    "lavamoat-tofu": "^4.0.0",
     "resolve": "^1.15.1",
     "resolve-package-path": "^2.0.0",
     "ses": "^0.7.7",
     "through2": "^3.0.1"
   },
   "devDependencies": {
-    "tape": "^4.13.2"
+    "tape": "^4.13.2",
+    "merge-deep": "^3.0.2"
   },
   "scripts": {
     "lint": "npm run lint:standard && npm run lint:deps",
     "lint:standard": "standard src/**/*.js test/**/*.js",
     "lint:fix": "standard src/**/*.js test/**/*.js --fix",
-    "lint:deps": "depcheck --ignore-dirs=lib --ignores='ses,depcheck,standard'",
+    "lint:deps": "depcheck --ignore-dirs=lib --ignores='abc,xyz,two,thisChecker,someClass,one'",
     "test": "node test/index.js"
   },
   "author": "kumavis",

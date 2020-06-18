@@ -41,17 +41,6 @@
       if (moduleId in modules) {
         throw new Error(`LavaMoat - loadBundle encountered redundant module definition for id "${moduleId}"`)
       }
-      // convert all module source to string
-      // this could happen at build time,
-      // but shipping it as code makes it easier to debug, maybe
-      for (let moduleData of Object.values(newModules)) {
-        let moduleSource = `(${moduleData.source})`
-        if (moduleData.file) {
-          const moduleSourceLabel = `// moduleSource: ${moduleData.file}`
-          moduleSource += `\n\n${moduleSourceLabel}`
-        }
-        moduleData.sourceString = moduleSource
-      }
       // add the module
       modules[moduleId] = moduleData
     }

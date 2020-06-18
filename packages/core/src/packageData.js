@@ -43,7 +43,7 @@ function packageDataForModule (moduleData) {
   } else {
     // detect if files are part of the entry and not from dependencies
     const filePathFirstPart = path.split(pathSeperator)[0]
-    const isRootLevel = ['.', '..', ''].includes(filePathFirstPart)
+    const isRootLevel = filePathFirstPart !== 'node_modules'
     // otherwise fail
     if (!isRootLevel) {
       throw new Error(`LavaMoat - Config Autogen - Failed to parse module name. first part: "${filePathFirstPart}" full path: "${path}"`)

@@ -1,4 +1,4 @@
-const walk = require('acorn-walk')
+const { default: traverse } = require('@babel/traverse')
 
 // higher number is less secure, more flexible
 const environmentTypes = {
@@ -29,8 +29,9 @@ function inspectEnvironment (ast) {
 }
 
 function walkForProtectedAssignment (ast, results) {
-  walk.ancestor(ast, {
-    AssignmentExpression: function (node, parents) {
+  traverse(ast, {
+    AssignmentExpression: function (path) {
+      const { node } = path
       const { left } = node
       // select for assignment to a property
       if (left.type !== 'MemberExpression') return

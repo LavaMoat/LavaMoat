@@ -1,3 +1,5 @@
-require('./inspectSource')
+require('./findGlobals')
+require('./inspectGlobals')
 require('./inspectImports')
+require('./inspectEnvironment')
 require('./util')

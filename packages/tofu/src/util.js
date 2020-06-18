@@ -6,26 +6,28 @@ module.exports = {
   isUndefinedCheck,
   getTailmostMatchingChain,
   reduceToTopmostApiCalls,
+  reduceToTopmostApiCallsFromStrings,
   addGlobalUsage,
   mergeConfig,
   objToMap,
-  mapToObj
+  mapToObj,
+  getParents
 }
 
-function getMemberExpressionNesting (identifierNode) {
+function getMemberExpressionNesting (identifierNode, parents) {
   // remove the identifier node itself
-  const parents = identifierNode.parents.slice(0, -1)
+  const parentsOnly = parents.slice(0, -1)
   // find unbroken membership chain closest to identifier
-  const memberExpressions = getTailmostMatchingChain(parents, isDirectMemberExpression).reverse()
+  const memberExpressions = getTailmostMatchingChain(parentsOnly, isDirectMemberExpression).reverse()
   // find parent of membership chain
   const hasMembershipChain = Boolean(memberExpressions.length)
   const topmostMember = hasMembershipChain ? memberExpressions[0] : identifierNode
-  const topmostMemberIndex = identifierNode.parents.indexOf(topmostMember)
+  const topmostMemberIndex = parents.indexOf(topmostMember)
   if (topmostMemberIndex < 1) {
     throw Error('unnexpected value for memberTopIndex')
   }
   const topmostMemberParentIndex = topmostMemberIndex - 1
-  const parentOfMembershipChain = identifierNode.parents[topmostMemberParentIndex]
+  const parentOfMembershipChain = parents[topmostMemberParentIndex]
   return { memberExpressions, parentOfMembershipChain, topmostMember }
 }
 
@@ -48,8 +50,8 @@ function isDirectMemberExpression (node) {
   return node.type === 'MemberExpression' && !node.computed
 }
 
-function isUndefinedCheck (identifierNode) {
-  const parentExpression = identifierNode.parents[identifierNode.parents.length - 2]
+function isUndefinedCheck (identifierNode, parents) {
+  const parentExpression = parents[parents.length - 2]
   const isTypeof = (parentExpression.type === 'UnaryExpression' || parentExpression.operator === 'typeof')
   return isTypeof
 }
@@ -82,6 +84,29 @@ function reduceToTopmostApiCalls (globalsConfig) {
   })
 }
 
+// if array contains 'x' and 'x.y' just keep 'x'
+function reduceToTopmostApiCallsFromStrings (keyPathStrings) {
+  // because we sort first, we never have to back track
+  const allPaths = keyPathStrings.sort()
+  return allPaths.filter((path) => {
+    const parts = path.split('.')
+    // only one part, safe to keep
+    if (parts.length === 1) {
+      return true
+    }
+    // 'x.y.z' has parents 'x' and 'x.y'
+    const parentParts = parts.slice(0, -1)
+    const parents = parentParts.map((_, index) => parentParts.slice(0, index + 1).join('.'))
+    // dont include this if a parent appears in the array
+    const parentsAlreadyInArray = parents.some(parent => allPaths.includes(parent))
+    if (parentsAlreadyInArray) {
+      return false
+    }
+    // if no parents found, ok to include
+    return true
+  })
+}
+
 function addGlobalUsage (globalsConfig, identifierPath, identifierUse) {
   // add variable to results, if not already set
   if (globalsConfig.has(identifierPath) && identifierUse !== 'write') return
@@ -106,4 +131,15 @@ function mapToObj (map) {
   const obj = {}
   map.forEach((value, key) => { obj[key] = value })
   return obj
+}
+
+function getParents (nodePath) {
+  const parents = []
+  let target = nodePath
+  while (target) {
+    parents.push(target.node)
+    target = target.parentPath
+  }
+  parents.reverse()
+  return parents
 }

@@ -1,6 +1,5 @@
 const test = require('tape')
-const acornGlobals = require('acorn-globals')
-const { inspectEnvironment, environmentTypes } = require('../src/inspectEnvironment')
+const { parse, inspectEnvironment, environmentTypes } = require('../src/index')
 
 test('inspectEnvironment - basic', (t) => {
   const environment = inspectEnvironmentTest(`
@@ -59,5 +58,5 @@ test('inspectEnvironment - primordial modify property', (t) => {
 })
 
 function inspectEnvironmentTest (code) {
-  return inspectEnvironment(acornGlobals.parse(code))
+  return inspectEnvironment(parse(code))
 }

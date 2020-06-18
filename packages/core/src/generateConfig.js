@@ -1,9 +1,16 @@
 const through = require('through2')
 const fromEntries = require('fromentries')
 const jsonStringify = require('json-stable-stringify')
-const acornGlobals = require('acorn-globals')
-const { inspectGlobals, utils: { mergeConfig, mapToObj } } = require('lavamoat-tofu')
-const { inspectEnvironment, environmentTypes, environmentTypeStrings } = require('./inspectEnvironment')
+const {
+  parse,
+  inspectGlobals,
+  inspectImports,
+  inspectEnvironment,
+  environmentTypes,
+  environmentTypeStrings,
+  utils: { mergeConfig, mapToObj, reduceToTopmostApiCallsFromStrings }
+} = require('lavamoat-tofu')
+
 const defaultEnvironment = environmentTypes.frozen
 const rootSlug = '<root>'
 
@@ -13,8 +20,8 @@ module.exports = { rootSlug, createConfigSpy, createModuleInspector }
 // it analyses modules for global namespace usages, and generates a config for LavaMoat.
 // it calls `onResult` with the config when the stream ends.
 
-function createConfigSpy ({ onResult }) {
-  const inspector = createModuleInspector()
+function createConfigSpy ({ onResult, builtinPackages }) {
+  const inspector = createModuleInspector({ builtinPackages })
   const configSpy = createSpy(
     // inspect each module
     inspector.inspectModule,
@@ -24,18 +31,19 @@ function createConfigSpy ({ onResult }) {
   return configSpy
 }
 
-function createModuleInspector () {
+function createModuleInspector (opts = {}) {
   const packageToEnvironments = {}
   const packageToGlobals = {}
+  const packageToBuiltinImports = {}
   const packageToModules = {}
   const moduleIdToPackageName = {}
 
   return {
-    inspectModule,
-    generateConfig
+    inspectModule: (moduleData, opts2 = {}) => inspectModule(moduleData, { ...opts, ...opts2 }),
+    generateConfig: (opts2 = {}) => generateConfig({ ...opts, ...opts2 })
   }
 
-  function inspectModule (moduleData) {
+  function inspectModule (moduleData, { builtinPackages = [] } = {}) {
     const packageName = moduleData.package
     moduleIdToPackageName[moduleData.id] = packageName
     // initialize mapping from package to module
@@ -44,15 +52,21 @@ function createModuleInspector () {
     // skip for root modules (modules not from deps)
     const isRootModule = packageName === rootSlug
     if (isRootModule) return
+    // skip builtin modules
+    if (moduleData.type === 'builtin') return
+    // skip native modules (cant parse)
+    if (moduleData.type === 'native') return
     // skip json files
     const filename = moduleData.file || 'unknown'
     const fileExtension = filename.split('.').pop()
     if (fileExtension === 'json') return
     // get eval environment
-    const ast = acornGlobals.parse(moduleData.source)
+    const ast = parse(moduleData.source, { allowReturnOutsideFunction: true })
     inspectForEnvironment(ast, packageName)
     // get global usage
-    inspectForGlobals(moduleData, packageName)
+    inspectForGlobals(ast, moduleData, packageName)
+    // get builtin package usage
+    inspectForImports(ast, moduleData, packageName, builtinPackages)
   }
 
   function inspectForEnvironment (ast, packageName) {
@@ -62,9 +76,8 @@ function createModuleInspector () {
     environments.push(result)
   }
 
-  function inspectForGlobals (moduleData, packageName) {
-    const { source } = moduleData
-    const foundGlobals = inspectGlobals(source, {
+  function inspectForGlobals (ast, moduleData, packageName) {
+    const foundGlobals = inspectGlobals(ast, {
       // browserify commonjs scope
       ignoredRefs: ['require', 'module', 'exports', 'arguments'],
       // browser global refs + browserify global
@@ -84,18 +97,35 @@ function createModuleInspector () {
     }
   }
 
-  function generateConfig () {
+  function inspectForImports (ast, moduleData, packageName, builtinPackages) {
+    // get all requested names that resolve to builtinPackages
+    const namesForBuiltins = Object.entries(moduleData.deps)
+      .filter(([_, resolvedName]) => builtinPackages.includes(resolvedName))
+      .map(([requestedName]) => requestedName)
+    const { cjsImports } = inspectImports(ast, namesForBuiltins)
+    const builtinImports = packageToBuiltinImports[packageName]
+    if (builtinImports) {
+      // merge maps
+      packageToBuiltinImports[packageName] = [...builtinImports, ...cjsImports]
+    } else {
+      // new map
+      packageToBuiltinImports[packageName] = cjsImports
+    }
+  }
+
+  function generateConfig ({ builtinPackages = [] } = {}) {
     const resources = {}
     const config = { resources }
     Object.entries(packageToModules).forEach(([packageName, packageModules]) => {
-      let globals, packages, environment
+      let globals, builtin, packages, environment
       // skip for root modules (modules not from deps)
       const isRootModule = packageName === rootSlug
       if (isRootModule) return
-      // get dependencies
+      // get dependencies, ignoring builtins
       const packageDeps = aggregateDeps({ packageModules, moduleIdToPackageName })
+        .filter(depPackageName => !builtinPackages.includes(depPackageName))
       if (packageDeps.length) {
-        packages = fromEntries(packageDeps.map(dep => [dep, true]))
+        packages = fromEntries(packageDeps.map(depPackageName => [depPackageName, true]))
       }
       // get globals
       if (packageToGlobals[packageName]) {
@@ -113,10 +143,18 @@ function createModuleInspector () {
         const isDefault = bestEnvironment === defaultEnvironment
         environment = isDefault ? undefined : environmentTypeStrings[bestEnvironment]
       }
+      // get core imports
+      const builtinImports = packageToBuiltinImports[packageName]
+      if (builtinImports && builtinImports.length) {
+        builtin = {}
+        reduceToTopmostApiCallsFromStrings(builtinImports).forEach(path => {
+          builtin[path] = true
+        })
+      }
       // skip package config if there are no settings needed
-      if (!packages && !globals && !environment) return
+      if (!packages && !globals && !environment && !builtin) return
       // set config for package
-      resources[packageName] = { packages, globals, environment }
+      resources[packageName] = { packages, globals, environment, builtin }
     })
 
     return jsonStringify(config, { space: 2 })

@@ -1,31 +1,32 @@
 {
   "resources": {
-    "<root>": {
-      "packages": {
-        "keccak": true
-      }
-    },
     "keccak": {
+      "builtin": {
+        "stream.Transform": true
+      },
       "globals": {
         "Buffer.from": true,
         "Buffer.isBuffer": true,
         "__dirname": true
       },
       "packages": {
-        "node-gyp-build": true,
-        "stream": true
+        "node-gyp-build": true
       }
     },
     "node-gyp-build": {
+      "builtin": {
+        "fs.existsSync": true,
+        "fs.readdirSync": true,
+        "os.arch": true,
+        "os.platform": true,
+        "path.dirname": true,
+        "path.join": true,
+        "path.resolve": true
+      },
       "globals": {
         "__non_webpack_require__": true,
         "__webpack_require__": true,
         "process": true
-      },
-      "packages": {
-        "fs": true,
-        "os": true,
-        "path": true
       }
     }
   }

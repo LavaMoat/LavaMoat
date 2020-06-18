@@ -56,10 +56,10 @@ function createModuleResolver ({ cwd, resolutions }) {
 }
 
 function loadModuleData (absolutePath) {
-  // load core modules (eg "fs")
+  // load builtin modules (eg "fs")
   if (resolve.isCore(absolutePath)) {
     return {
-      type: 'core',
+      type: 'builtin',
       file: absolutePath,
       package: absolutePath,
       // wrapper around unprotected "require"
@@ -113,8 +113,7 @@ function loadModuleData (absolutePath) {
       type: 'js',
       file: absolutePath,
       package: packageName,
-      source: wrappedContent,
-      sourceString: wrappedContent
+      source: wrappedContent
     }
   }
 }

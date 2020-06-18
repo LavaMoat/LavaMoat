@@ -18,13 +18,15 @@ test('resolutions - parseForConfig', async (t) => {
   t.deepEqual(config1, {
     resources: {
       a: {
+        builtin: {
+          'fs.deleteEntireHardDrive': true
+        },
         packages: {
-          b: true,
-          fs: true
+          b: true
         }
       },
       b: {
-        packages: {
+        builtin: {
           http: true
         }
       }
