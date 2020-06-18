@@ -4,11 +4,10 @@ const test = require('tape')
 const mergeDeep = require('merge-deep')
 const { generateKernel, packageDataForModule } = require('../src/index.js')
 
-
 test('builtin - basic access', async (t) => {
   const scenario = createScenarioFromScaffold({
     defineOne: () => {
-      let abc = null, xyz = null
+      let abc = null; let xyz = null
       try { abc = require('abc') } catch (_) {}
       try { xyz = require('xyz') } catch (_) {}
 
@@ -21,8 +20,8 @@ test('builtin - basic access', async (t) => {
       resources: {
         one: {
           builtin: {
-            'abc': true,
-            'xyz': false
+            abc: true,
+            xyz: false
           }
         }
       }
@@ -42,7 +41,7 @@ test('builtin - access via paths', async (t) => {
     builtin: {
       abc: {
         xyz: 123,
-        ijk: 456,
+        ijk: 456
       }
     },
     config: {
@@ -67,9 +66,9 @@ test('builtin - paths soft-bindings preserve "this" but allow override', async (
       const { Buffer } = require('buffer')
       const two = require('two')
       module.exports = {
-        overrideCheck: two.overrideCheck(Buffer.from([1,2,3])),
+        overrideCheck: two.overrideCheck(Buffer.from([1, 2, 3])),
         thisCheck: two.thisCheck(),
-        classCheck: two.classCheck(),
+        classCheck: two.classCheck()
       }
     },
 
@@ -78,12 +77,13 @@ test('builtin - paths soft-bindings preserve "this" but allow override', async (
       const thisChecker = require('thisChecker')
       const { SomeClass } = require('someClass')
       // this test ensures "Buffer.prototype.slice" is copied in a way that allows "this" to be overridden
-      module.exports.overrideCheck = (buf) => Buffer.prototype.slice.call(buf,1,2)[0] === buf[1]
+      module.exports.overrideCheck = (buf) => Buffer.prototype.slice.call(buf, 1, 2)[0] === buf[1]
       // this test ensures "Buffer.prototype.slice" is copied in a way that allows "this" to be overridden
       module.exports.thisCheck = () => thisChecker.check()
       // this test ensures class syntax works, with its required use of the "new" keyword
       module.exports.classCheck = () => {
         try {
+          // eslint-disable-next-line no-new
           new SomeClass()
         } catch (err) {
           return false
@@ -94,7 +94,7 @@ test('builtin - paths soft-bindings preserve "this" but allow override', async (
     builtin: {
       buffer: require('buffer'),
       thisChecker: (() => { const parent = {}; parent.check = function () { return this === parent }; return parent })(),
-      someClass: { SomeClass: class SomeClass {} },
+      someClass: { SomeClass: class SomeClass {} }
     },
     config: {
       resources: {
@@ -108,7 +108,7 @@ test('builtin - paths soft-bindings preserve "this" but allow override', async (
             // these paths are carefully constructed to try and split the fn from its parent
             'buffer.Buffer.prototype.slice': true,
             'thisChecker.check': true,
-            'someClass.SomeClass': true,
+            'someClass.SomeClass': true
           }
         }
       }
@@ -119,7 +119,7 @@ test('builtin - paths soft-bindings preserve "this" but allow override', async (
   t.deepEqual(result, {
     overrideCheck: true,
     thisCheck: true,
-    classCheck: true,
+    classCheck: true
   })
   t.end()
 })
@@ -131,9 +131,8 @@ function createScenarioFromScaffold ({
   defineEntry,
   defineOne,
   defineTwo,
-  defineThree,
+  defineThree
 } = {}) {
-
   function _defineEntry () {
     global.testResult = require('one')
   }
@@ -160,7 +159,7 @@ function createScenarioFromScaffold ({
       deps: {
         one: 'node_modules/one/index.js',
         two: 'node_modules/two/index.js'
-      },
+      }
     },
     'node_modules/one/index.js': {
       source: `(${defineOne || _defineOne}).call(this)`,
@@ -177,7 +176,7 @@ function createScenarioFromScaffold ({
       deps: {}
     },
     ...filesFromBuiltin(builtin),
-    ...files,
+    ...files
   })
 
   const _config = mergeDeep({
@@ -193,7 +192,7 @@ function createScenarioFromScaffold ({
   return {
     entries: ['entry.js'],
     files: _files,
-    config: _config,
+    config: _config
   }
 }
 
@@ -201,7 +200,7 @@ function fillInFileDetails (files) {
   Object.entries(files).forEach(([file, moduleData]) => {
     moduleData.file = moduleData.file || file
     moduleData.package = moduleData.package || packageDataForModule({ file }).packageName || '<root>'
-    moduleData.source =  `(function(exports, require, module, __filename, __dirname){\n${moduleData.source}\n})`
+    moduleData.source = `(function(exports, require, module, __filename, __dirname){\n${moduleData.source}\n})`
     // moduleData.type = moduleData.type || 'js'
   })
   return files
@@ -210,14 +209,14 @@ function fillInFileDetails (files) {
 function filesFromBuiltin (builtinObj) {
   return Object.fromEntries(
     Object.entries(builtinObj)
-    .map(([key, value]) => {
-      return [key, {
-        file: key,
-        package: key,
-        type: 'builtin',
-        moduleInitializer: (_, _2, module) => { module.exports = value },
-      }]
-    })
+      .map(([key, value]) => {
+        return [key, {
+          file: key,
+          package: key,
+          type: 'builtin',
+          moduleInitializer: (_, _2, module) => { module.exports = value }
+        }]
+      })
   )
 }
 
@@ -232,7 +231,7 @@ async function runScenario ({ entries, files, config: lavamoatConfig }) {
     getRelativeModuleId: (id, relative) => {
       return files[id].deps[relative] || relative
     },
-    prepareModuleInitializerArgs,
+    prepareModuleInitializerArgs
   })
 
   entries.forEach(id => kernel.internalRequire(id))
@@ -250,7 +249,7 @@ function prepareModuleInitializerArgs (requireRelativeWithContext, moduleObj, mo
   const __filename = moduleData.file
   const __dirname = path.dirname(__filename)
   require.resolve = (requestedName) => {
-    return resolve.sync(requestedName, { basedir: __dirname })
+    throw new Error('require.resolve not implemented in lavamoat-core test harness')
   }
   return [exports, require, module, __filename, __dirname]
 }

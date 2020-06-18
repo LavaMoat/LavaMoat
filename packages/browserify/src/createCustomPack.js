@@ -199,13 +199,13 @@ module.exports = function ({
       packageVersion,
       file,
       deps,
-      source: moduleInitSrc,
+      source: moduleInitSrc
     }
     let serializedEntry = '{'
     Object.entries(jsonSerializeableData).forEach(([key, value]) => {
       serializedEntry += ` ${key}: ${jsonStringify(value)},`
     })
-    serializedEntry += `}`
+    serializedEntry += '}'
 
     return serializedEntry
   }

@@ -15,7 +15,7 @@ function makeGetEndowmentsForConfig () {
     deepGet,
     deepDefine,
     makeMinimalViewOfRef,
-    copyValueAtPath,
+    copyValueAtPath
   }
 
   // for backwards compat only
@@ -36,7 +36,7 @@ function makeGetEndowmentsForConfig () {
       // write access handled elsewhere
       if (configValue === 'write') return
       if (configValue !== true) {
-        throw new Error(`LavaMoat - unknown value for config (${typeof value})`)
+        throw new Error(`LavaMoat - unknown value for config (${typeof configValue})`)
       }
       const value = deepGetAndBind(ref, path, newRef)
       // TODO: actually match prop descriptor
@@ -113,7 +113,7 @@ function makeGetEndowmentsForConfig () {
 
   function copyValueAtPath (pathParts, originRef, targetRef) {
     if (pathParts.length === 0) {
-      throw new Error(`unable to copy, must have pathParts, was empty`)
+      throw new Error('unable to copy, must have pathParts, was empty')
     }
     const nextPart = pathParts[0]
     const remainingParts = pathParts.slice(1)
@@ -150,7 +150,7 @@ function makeGetEndowmentsForConfig () {
         value: newValue,
         enumerable: originPropDesc.enumerable,
         writable: originPropDesc.writable,
-        configutable: originPropDesc.configutable,
+        configutable: originPropDesc.configutable
       }
       Reflect.defineProperty(targetRef, nextPart, newPropDesc)
       // continue
@@ -187,7 +187,7 @@ function makeGetEndowmentsForConfig () {
       value: newValue,
       enumerable: originPropDesc.enumerable,
       writable: originPropDesc.writable,
-      configutable: originPropDesc.configutable,
+      configutable: originPropDesc.configutable
     }
     Reflect.defineProperty(targetRef, nextPart, newPropDesc)
   }

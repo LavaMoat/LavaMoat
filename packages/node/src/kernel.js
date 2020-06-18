@@ -113,7 +113,7 @@ function loadModuleData (absolutePath) {
       type: 'js',
       file: absolutePath,
       package: packageName,
-      source: wrappedContent,
+      source: wrappedContent
     }
   }
 }
