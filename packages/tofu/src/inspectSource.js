@@ -11,7 +11,7 @@ const {
   getParents
 } = require('./util')
 
-module.exports = { inspectGlobals, inspectImports }
+module.exports = { inspectGlobals, inspectImports, inspectEsmImports }
 
 function inspectGlobals (source, {
   ignoredRefs = [],
@@ -90,7 +90,11 @@ function inspectGlobals (source, {
   }
 }
 
-function inspectImports (ast, packagesToInspect) {
+function inspectEsmImports (ast, packagesToInspect) {
+  return {}
+}
+
+function inspectImports (ast, packagesToInspect, deep = true) {
   const cjsImports = []
   traverse(ast, {
     CallExpression: function (path) {
@@ -102,6 +106,11 @@ function inspectImports (ast, packagesToInspect) {
       const moduleName = moduleNameNode.value
       // skip if not specified in "packagesToInspect"
       if (packagesToInspect && !packagesToInspect.includes(moduleName)) return
+      // if not deep, done
+      if (!deep) {
+        cjsImports.push([moduleName])
+        return
+      }
       // inspect for member chain
       const parents = getParents(path)
       const { memberExpressions, parentOfMembershipChain } = getMemberExpressionNesting(node, parents)
@@ -141,8 +150,11 @@ function inspectPatternElementForDeclarations (node, keyPath = []) {
   } else if (node.type === 'ArrayPattern') {
     return inspectArrayPatternForDeclarations(node, keyPath)
   } else if (node.type === 'Identifier') {
-    // return the node with the current path
+    // done, return the node with the current path
     return [{ node, keyPath }]
+  } else if (node.type === 'AssignmentPattern') {
+    // AssignmentPattern is for provided a fallback value in a destructuring pattern
+    return [{ node: node.left, keyPath }]
   } else {
     throw new Error(`LavaMoat/tofu - inspectPatternElementForDeclarations - unable to parse element "${node.type}"`)
   }
@@ -187,6 +199,9 @@ function inspectPatternElementForKeys (child) {
     return inspectArrayPatternForKeys(child)
   } else if (child.type === 'Identifier') {
     // return a single empty element, meaning "one result, the whole thing"
+    return [[]]
+  } else if (child.type === 'AssignmentPattern') {
+    // equivalent to hitting an Identifier
     return [[]]
   } else {
     throw new Error(`LavaMoat/tofu - inspectPatternElementForKeys - unable to parse element "${child.type}"`)
