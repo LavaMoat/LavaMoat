@@ -91,7 +91,42 @@ function inspectGlobals (source, {
 }
 
 function inspectEsmImports (ast, packagesToInspect) {
-  return {}
+  const esmImports = []
+  traverse(ast, {
+    ImportDeclaration: (path) => {
+      const { node } = path
+      const { specifiers, source } = node
+      // not sure if this is ever not a StringLiteral, but just in case
+      if (source.type !== 'StringLiteral') return
+      const importSource = source.value
+      specifiers.forEach(spec => {
+        switch (spec.type) {
+          case 'ImportDefaultSpecifier': {
+            const localName = spec.local.name
+            const importName = importSource
+            esmImports.push(importName)
+            return
+          }
+          case 'ImportNamespaceSpecifier': {
+            const localName = spec.local.name
+            const importName = importSource
+            esmImports.push(importName)
+            return
+          }
+          case 'ImportSpecifier': {
+            const localName = spec.local.name
+            const importName = `${importSource}.${spec.imported.name}`
+            esmImports.push(importName)
+            return 
+          }
+          default: {
+            throw new Error(`inspectEsmImports - unknown import specifier type "${spec.type}"`)
+          }
+        }
+      })
+    }
+  })
+  return { esmImports }
 }
 
 function inspectImports (ast, packagesToInspect, deep = true) {

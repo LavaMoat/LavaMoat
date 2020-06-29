@@ -1,5 +1,6 @@
 require('./findGlobals')
 require('./inspectGlobals')
 require('./inspectImports')
+require('./inspectEsmImports')
 require('./inspectEnvironment')
 require('./util')

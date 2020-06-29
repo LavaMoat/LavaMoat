@@ -10,6 +10,20 @@ testInspect('cjs - basic', {}, () => {
   cjsImports: ['fs'],
 })
 
+// testInspect('cjs - shadowed require', {}, () => {
+//   const require = () => {}
+//   require('fs')
+// }, {
+//   cjsImports: [],
+// })
+
+// testInspect('cjs - require rename', {}, () => {
+//   const require2 = require
+//   require2('fs')
+// }, {
+//   cjsImports: ['fs'],
+// })
+
 testInspect('cjs - basic destructure', {}, () => {
   const { readFileSync, createReadStream } = require('fs')
   readFileSync()
