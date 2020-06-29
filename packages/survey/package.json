@@ -1,0 +1,16 @@
+{
+  "name": "survey",
+  "version": "1.0.0",
+  "private": true,
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "cheerio": "^0.22.0",
+    "lavamoat-tofu": "^4.0.0",
+    "node-fetch": "^2.6.0",
+    "p-limit": "^3.0.1"
+  },
+  "scripts": {
+    "start": "node src/index.js"
+  }
+}
