@@ -11,10 +11,30 @@ const environmentTypeStrings = {
   2: 'unfrozen'
 }
 
-const primordialPaths = [
-  ['Object'],
-  ['Array']
+// derrived from ses's whitelist
+// const { default: whitelist } = await import('ses/src/whitelist.js')
+// Reflect.ownKeys(whitelist)
+//   .filter(k => k in global && typeof whitelist[k] === 'object')
+const namedIntrinsics = [
+  'eval',               'isFinite',          'isNaN',
+  'parseFloat',         'parseInt',          'decodeURI',
+  'decodeURIComponent', 'encodeURI',         'encodeURIComponent',
+  'Object',             'Function',          'Boolean',
+  'Symbol',             'Error',             'EvalError',
+  'RangeError',         'ReferenceError',    'SyntaxError',
+  'TypeError',          'URIError',          'Number',
+  'BigInt',             'Math',              'Date',
+  'String',             'RegExp',            'Array',
+  'BigInt64Array',      'BigUint64Array',    'Float32Array',
+  'Float64Array',       'Int16Array',        'Int32Array',
+  'Int8Array',          'Uint16Array',       'Uint32Array',
+  'Uint8Array',         'Uint8ClampedArray', 'Map',
+  'Set',                'WeakMap',           'WeakSet',
+  'ArrayBuffer',        'DataView',          'JSON',
+  'Promise',            'Reflect',           'Proxy',
+  'escape',             'unescape'
 ]
+
 
 module.exports = { inspectEnvironment, environmentTypes, environmentTypeStrings }
 
@@ -41,8 +61,8 @@ function walkForProtectedAssignment (ast, results) {
       if (property.type !== 'Identifier') return
       // check for assignment to primordial
       const memberPath = memberExpressionChainToPath(left)
-      const match = primordialPaths.some(
-        primordial => partialArrayMatch(primordial, memberPath)
+      const match = namedIntrinsics.some(
+        name => partialArrayMatch([name], memberPath)
       )
       if (match) {
         results.push(node)

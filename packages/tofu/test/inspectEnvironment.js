@@ -60,3 +60,11 @@ test('inspectEnvironment - primordial modify property', (t) => {
 function inspectEnvironmentTest (code) {
   return inspectEnvironment(parse(code))
 }
+
+test('inspectEnvironment - primordial Error modify property', (t) => {
+  const environment = inspectEnvironmentTest(`
+    Error.prepareStackTrace = () => {}
+  `)
+  t.deepEqual(environment, environmentTypes.unfrozen)
+  t.end()
+})
