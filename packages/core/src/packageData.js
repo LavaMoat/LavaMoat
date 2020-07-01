@@ -1,5 +1,6 @@
 'use strict'
 const path = require('path')
+const { callbackify } = require('util')
 const through = require('through2').obj
 const resolvePackagePath = require('resolve-package-path')
 const pathSeperator = require('path').sep
@@ -10,18 +11,19 @@ module.exports = {
   createPackageDataStream,
   decorateWithPackageData,
   packageDataForModule,
-  packageVersionFromPath
+  packageVersionFromPath,
+  packageNameFromPath,
 }
 
-function createPackageDataStream () {
-  return through((data, _, cb) => {
-    decorateWithPackageData(data)
-    cb(null, data)
-  })
+function createPackageDataStream ({ rootPackageName } = {}) {
+  return through(callbackify(async (data) => {
+    decorateWithPackageData(data, rootPackageName)
+    return data
+  }))
 }
 
-function decorateWithPackageData (moduleData) {
-  const { packageName, packageVersion } = packageDataForModule(moduleData)
+function decorateWithPackageData (moduleData, rootPackageName) {
+  const { packageName, packageVersion } = packageDataForModule(moduleData, rootPackageName)
   // legacy key
   moduleData.package = packageName
   // new keys
@@ -29,14 +31,14 @@ function decorateWithPackageData (moduleData) {
   moduleData.packageVersion = packageVersion
 }
 
-function packageDataForModule (moduleData) {
+function packageDataForModule (moduleData, rootPackageName) {
   // handle core packages
   if (isCore(moduleData.id)) {
     return { packageName: moduleData.id, packageVersion: undefined }
   }
   // parse package name from file path
   const path = moduleData.file
-  let packageName = packageNameFromPath(path)
+  let packageName = packageNameFromPath(path) || rootPackageName
   let packageVersion
   if (packageName) {
     packageVersion = packageVersionFromPath(packageName, path)

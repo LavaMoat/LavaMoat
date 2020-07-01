@@ -20,8 +20,9 @@ module.exports = { rootSlug, createConfigSpy, createModuleInspector }
 // it analyses modules for global namespace usages, and generates a config for LavaMoat.
 // it calls `onResult` with the config when the stream ends.
 
-function createConfigSpy ({ onResult, builtinPackages }) {
-  const inspector = createModuleInspector({ builtinPackages })
+function createConfigSpy ({ onResult, isBuiltin }) {
+  if (!isBuiltin) throw new Error(`createConfigSpy - must specify "isBuiltin"`)
+  const inspector = createModuleInspector({ isBuiltin })
   const configSpy = createSpy(
     // inspect each module
     inspector.inspectModule,
@@ -43,7 +44,7 @@ function createModuleInspector (opts = {}) {
     generateConfig: (opts2 = {}) => generateConfig({ ...opts, ...opts2 })
   }
 
-  function inspectModule (moduleData, { builtinPackages = [] } = {}) {
+  function inspectModule (moduleData, { isBuiltin } = {}) {
     const packageName = moduleData.package
     moduleIdToPackageName[moduleData.id] = packageName
     // initialize mapping from package to module
@@ -61,12 +62,18 @@ function createModuleInspector (opts = {}) {
     const fileExtension = filename.split('.').pop()
     if (fileExtension === 'json') return
     // get eval environment
-    const ast = parse(moduleData.source, { allowReturnOutsideFunction: true })
+    const ast = parse(moduleData.source, {
+      // esm support
+      sourceType: 'module',
+      // someone must have been doing this
+      allowReturnOutsideFunction: true,
+      errorRecovery: true,
+    })
     inspectForEnvironment(ast, packageName)
     // get global usage
     inspectForGlobals(ast, moduleData, packageName)
     // get builtin package usage
-    inspectForImports(ast, moduleData, packageName, builtinPackages)
+    inspectForImports(ast, moduleData, packageName, isBuiltin)
   }
 
   function inspectForEnvironment (ast, packageName) {
@@ -97,10 +104,10 @@ function createModuleInspector (opts = {}) {
     }
   }
 
-  function inspectForImports (ast, moduleData, packageName, builtinPackages) {
-    // get all requested names that resolve to builtinPackages
+  function inspectForImports (ast, moduleData, packageName, isBuiltin) {
+    // get all requested names that resolve to isBuiltin
     const namesForBuiltins = Object.entries(moduleData.deps)
-      .filter(([_, resolvedName]) => builtinPackages.includes(resolvedName))
+      .filter(([_, resolvedName]) => isBuiltin(resolvedName))
       .map(([requestedName]) => requestedName)
     const { cjsImports } = inspectImports(ast, namesForBuiltins)
     const builtinImports = packageToBuiltinImports[packageName]
@@ -113,7 +120,7 @@ function createModuleInspector (opts = {}) {
     }
   }
 
-  function generateConfig ({ builtinPackages = [] } = {}) {
+  function generateConfig ({ isBuiltin } = {}) {
     const resources = {}
     const config = { resources }
     Object.entries(packageToModules).forEach(([packageName, packageModules]) => {
@@ -123,7 +130,7 @@ function createModuleInspector (opts = {}) {
       if (isRootModule) return
       // get dependencies, ignoring builtins
       const packageDeps = aggregateDeps({ packageModules, moduleIdToPackageName })
-        .filter(depPackageName => !builtinPackages.includes(depPackageName))
+        .filter(depPackageName => !isBuiltin(depPackageName))
       if (packageDeps.length) {
         packages = fromEntries(packageDeps.map(depPackageName => [depPackageName, true]))
       }
