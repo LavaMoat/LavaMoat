@@ -5,6 +5,7 @@ const {
 const { packageDataForModule, createPackageDataStream, packageNameFromPath } = require('./packageData')
 const { createConfigSpy, createModuleInspector } = require('./generateConfig')
 const { parseForConfig } = require('./parseForConfig')
+const { LavamoatModuleRecord } = require('./moduleRecord')
 
 module.exports = {
   // generating the kernel
@@ -18,4 +19,6 @@ module.exports = {
   createConfigSpy,
   createModuleInspector,
   parseForConfig,
+  // module record class
+  LavamoatModuleRecord,
 }
