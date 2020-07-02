@@ -62,7 +62,7 @@ function createModuleInspector (opts = {}) {
     const fileExtension = filename.split('.').pop()
     if (fileExtension === 'json') return
     // get eval environment
-    const ast = parse(moduleData.source, {
+    const ast = moduleData.ast || parse(moduleData.source, {
       // esm support
       sourceType: 'module',
       // someone must have been doing this
@@ -160,26 +160,44 @@ function createModuleInspector (opts = {}) {
       }
       // skip package config if there are no settings needed
       if (!packages && !globals && !environment && !builtin) return
+      // create minimal config object
+      const config = {}
+      if (packages) config.packages = packages
+      if (globals) config.globals = globals
+      if (environment) config.environment = environment
+      if (builtin) config.builtin = builtin
       // set config for package
-      resources[packageName] = { packages, globals, environment, builtin }
+      resources[packageName] = config
     })
 
-    return jsonStringify(config, { space: 2 })
+    return config
   }
 }
 
 function aggregateDeps ({ packageModules, moduleIdToPackageName }) {
   const deps = new Set()
   Object.values(packageModules).forEach((moduleData) => {
-    const newDeps = Object.values(moduleData.deps)
-      .filter(Boolean)
-      .map(id => moduleIdToPackageName[id])
+    const newDeps = Object.entries(moduleData.deps)
+      .filter(([_, specifier]) => Boolean(specifier))
+      .map(([requestedName, specifier]) => moduleIdToPackageName[specifier] || guessPackageName(requestedName))
     newDeps.forEach(dep => deps.add(dep))
     // ensure the package is not listed as its own dependency
     deps.delete(moduleData.package)
   })
   const depsArray = Array.from(deps.values())
   return depsArray
+}
+
+// for when you encounter a requestedName that was not inspected, likely because resolution was skipped for that module
+function guessPackageName (requestedName) {
+  const isNotPackageName = requestedName.startsWith('/') || requestedName.startsWith('.')
+  if (isNotPackageName) return `<unknown:${requestedName}>`
+  // resolving is skipped so guess package name
+  const pathParts = requestedName.split('/')
+  const nameSpaced = requestedName.startsWith('@')
+  const packagePartCount = nameSpaced ? 2 : 1
+  const packageName = pathParts.slice(0, packagePartCount).join('/')
+  return packageName
 }
 
 function createSpy (onData, onEnd) {
