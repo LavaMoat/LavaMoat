@@ -120,8 +120,7 @@ function createBrowserifyFromRequiresArray ({ files: _files, pluginOpts = {} }) 
 }
 
 async function generateConfigFromFiles ({ files }) {
-  const configSource = await filesToConfigSource({ files })
-  const config = JSON.parse(configSource)
+  const config = await filesToConfigSource({ files })
   return config
 }
 
@@ -133,8 +132,8 @@ async function filesToConfigSource ({ files }) {
 
   const bundler = createBrowserifyFromRequiresArray({ files, pluginOpts })
   await bundleAsync(bundler)
-  const configSource = await promise
-  return configSource
+  const config = await promise
+  return config
 }
 
 async function bundleAsync (bundler) {
