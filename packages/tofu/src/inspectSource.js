@@ -138,6 +138,8 @@ function inspectImports (ast, packagesToInspect, deep = true) {
       if (callee.type !== 'Identifier') return
       if (callee.name !== 'require') return
       if (moduleNameNode.type !== 'StringLiteral') return
+      // ensure the "require" method is not shadowed
+      if (path.scope.hasBinding(callee.name, true)) return
       const moduleName = moduleNameNode.value
       // skip if not specified in "packagesToInspect"
       if (packagesToInspect && !packagesToInspect.includes(moduleName)) return
