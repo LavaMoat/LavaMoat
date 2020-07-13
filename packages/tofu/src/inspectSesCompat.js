@@ -3,10 +3,30 @@ const { whitelist: sesAllowlist, FunctionInstance } = require('./ses-whitelist.j
 
 module.exports = { inspectSesCompat }
 
+const strictModeViolationErrorCues = [
+  'Unexpected reserved word',
+  'Legacy octal literals are not allowed in strict mode',
+  'Expecting Unicode escape sequence',
+  '\'with\' in strict mode',
+  'Deleting local variable in strict mode',
+] 
+
 function inspectSesCompat (ast) {
   const results = {
-    intrinsicMutations: []
+    intrinsicMutations: [],
+    strictModeViolations: [],
   }
+  // check for strict mode violations
+  ;(ast.errors || []).forEach(error => {
+    if (strictModeViolationErrorCues.some(msg => error.message.includes(msg))) {
+      const { loc, pos } = error
+      results.strictModeViolations.push({ error, loc, pos })
+    } else {
+      console.log('no match', error.message)
+      // encountered unknown error - throw
+      throw error
+    }
+  })
   // check for mutations to named intrinsics
   const sesNamedIntrinsics = Reflect.ownKeys(sesAllowlist)
     .filter(k => k in global && typeof sesAllowlist[k] === 'object')
