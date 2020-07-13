@@ -72,7 +72,7 @@ test('inspectPrimordialAssignments - primordial Error modify property', (t) => {
 test('inspectPrimordialAssignments - ensure shadowed references not counted - simple', (t) => {
   const results = inspectPrimordialAssignmentsTest(`
     function Promise () {}
-    Promise.all = () => {} 
+    Promise.all = () => {}
   `)
   t.deepEqual(results.length, 0)
   t.end()
