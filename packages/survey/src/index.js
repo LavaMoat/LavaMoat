@@ -11,8 +11,13 @@ const concurrencyLimit = pLimit(8)
 
 
 const parseBlacklist = [
-  // i suck at parsing and this triggers an error
-  'nyc',
+  // some resolution error?
+  // 'nyc',
+  // 'istanbul',
+  // 'babel-runtime',
+  // '@babel/runtime',
+  // 'react-scripts',
+  // 'jsdoc',
   // typescript
   'react-native',
   'ast-types-flow',
@@ -38,7 +43,10 @@ const parseBlacklist = [
   'husky',
 ]
 
-start().catch(console.error)
+start().catch(err => {
+  console.error(err)
+  process.exit(1)
+})
 
 async function start () {
   const packages = await getTopPackages()
@@ -51,6 +59,8 @@ async function start () {
       console.warn(`config for "${packageName}" is broken`)
       return
     }
+    // skip if empty
+    if (!config.resources[packageName]) return
     allConfigs.resources[packageName] = config.resources[packageName]
   }))
   await writeConfig('_all', allConfigs)
@@ -62,7 +72,14 @@ async function loadConfig (packageName) {
   if (await fileExists(policyPath)) {
     return require(policyPath)
   }
-  return await generateConfig(packageName)
+  return await generateConfigFile(packageName)
+}
+
+async function generateConfigFile (packageName) {
+  const config = await generateConfig(packageName)
+  await writeConfig(packageName, config)
+  console.log(`completed "${packageName}"`)
+  return config
 }
 
 async function generateConfig (packageName) {
@@ -75,11 +92,15 @@ async function generateConfig (packageName) {
   // normalize the id as a relative path
   const entryId = './' + path.relative('./', package.main || 'index.js')
   const resolveHook = makeResolveHook({ cwd: packageDir })
-  const entryFull = resolveHook(entryId, `${packageDir}/package.json`)
-  const entryExists = await fileExists(entryFull)
-  if (!entryExists) {
-    console.warn(`skipped "${packageName}" - no entry`)
-    return  { resources: {} }
+  let entryFull
+  try {
+    entryFull = resolveHook(entryId, `${packageDir}/package.json`)
+  } catch (err) {
+    if (err.code === 'MODULE_NOT_FOUND') {
+      console.warn(`skipped "${packageName}" - no entry`)
+      return  { resources: {} }
+    }
+    throw err
   }
   console.log(`generating config for "${packageName}"`)
   let config
@@ -90,12 +111,10 @@ async function generateConfig (packageName) {
       entryId,
       resolutions: {},
     })
+    return config
   } catch (err) {
     throw new Error(`Failed to parse package "${packageName}": ${err.stack}`)
   }
-  await writeConfig(packageName, config)
-  console.log(`completed "${packageName}"`)
-  return config
 }
 
 async function writeConfig (packageName, config) {
