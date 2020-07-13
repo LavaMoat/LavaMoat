@@ -17,23 +17,23 @@ async function parseForConfig ({ cwd, entryId, resolutions, rootPackageName, sho
 }
 
 function makeResolveHook ({ cwd, resolutions = {}, rootPackageName = '<root>' }) {
-  return (specifier, referrer) => {
+  return (requestedName, referrer) => {
     const parentPackageName = packageNameFromPath(referrer) || rootPackageName
     // handle resolution overrides
-    const result = checkForResolutionOverride(resolutions, parentPackageName, specifier)
+    const result = checkForResolutionOverride(resolutions, parentPackageName, requestedName)
     if (result) {
       // if path is a relative path, it should be relative to the cwd
       if (path.isAbsolute(result)) {
-        specifier = result
+        requestedName = result
       } else {
-        specifier = path.resolve(cwd, result)
+        requestedName = path.resolve(cwd, result)
       }
     }
     // utilize node's internal resolution algo
     const { resolve } = createRequire(new URL(`file://${referrer}`))
     let resolved
     try {
-      resolved = resolve(specifier)
+      resolved = resolve(requestedName)
     } catch (err) {
       // re-through error so its not in ndb's blackboxed scripts
       throw err
@@ -62,7 +62,7 @@ function makeImportHook ({ isBuiltin, rootPackageName = '<root>' }) {
         const { cjsImports } = inspectImports(ast, null, false)
         imports = Array.from(new Set(cjsImports))
       } else {
-        if (!['.json'].includes(extension)) {
+        if (!['.css','.sass','.coffee','.json','.node'].includes(extension)) {
           console.warn(`node importHook - ignored unknown extension "${extension}"`)
         }
       }
