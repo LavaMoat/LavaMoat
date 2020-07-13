@@ -18,9 +18,9 @@ async function walk ({
 
   // walk children
   await Promise.all(moduleRecord.imports.map(async (requestedName) => {
-    if (!shouldResolve(requestedName)) return
+    if (!shouldResolve(requestedName, moduleSpecifier)) return
     const childSpecifier = resolveHook(requestedName, moduleSpecifier)
-    if (!shouldImport(childSpecifier)) return
+    if (!shouldImport(childSpecifier, moduleSpecifier)) return
     // dont revisit specifiers
     if (visitedSpecifiers.has(childSpecifier)) return
     visitedSpecifiers.add(childSpecifier)

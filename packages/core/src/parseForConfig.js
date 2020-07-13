@@ -42,7 +42,7 @@ function moduleRecordToModuleData ({
     ast: moduleRecord.ast,
     deps: Object.fromEntries(moduleRecord.imports.map(requestedName => {
       let depValue
-      if (shouldResolve(requestedName)) {
+      if (shouldResolve(requestedName, moduleRecord.specifier)) {
         try {
           depValue = resolveHook(requestedName, moduleRecord.specifier)
         } catch (err) {

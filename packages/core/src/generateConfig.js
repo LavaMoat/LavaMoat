@@ -1,3 +1,4 @@
+const path = require('path')
 const through = require('through2')
 const fromEntries = require('fromentries')
 const jsonStringify = require('json-stable-stringify')
@@ -5,11 +6,20 @@ const {
   parse,
   inspectGlobals,
   inspectImports,
-  inspectEnvironment,
-  environmentTypes,
-  environmentTypeStrings,
+  inspectSesCompat,
   utils: { mergeConfig, mapToObj, reduceToTopmostApiCallsFromStrings }
 } = require('lavamoat-tofu')
+
+// higher number is less secure, more flexible
+const environmentTypes = {
+  frozen: 1,
+  unfrozen: 2
+}
+
+const environmentTypeStrings = {
+  1: 'frozen',
+  2: 'unfrozen'
+}
 
 const defaultEnvironment = environmentTypes.frozen
 const rootSlug = '<root>'
@@ -59,8 +69,8 @@ function createModuleInspector (opts = {}) {
     if (moduleData.type === 'native') return
     // skip json files
     const filename = moduleData.file || 'unknown'
-    const fileExtension = filename.split('.').pop()
-    if (fileExtension === 'json') return
+    const fileExtension = path.extname(filename)
+    if (fileExtension !== '.js') return
     // get eval environment
     const ast = moduleData.ast || parse(moduleData.source, {
       // esm support
@@ -77,10 +87,11 @@ function createModuleInspector (opts = {}) {
   }
 
   function inspectForEnvironment (ast, packageName) {
-    const result = inspectEnvironment(ast, packageName)
+    const { intrinsicMutations: results } = inspectSesCompat(ast, packageName)
+    const environment = results.length > 0 ? environmentTypes.unfrozen : environmentTypes.frozen
     // initialize results for package
     const environments = packageToEnvironments[packageName] = packageToEnvironments[packageName] || []
-    environments.push(result)
+    environments.push(environment)
   }
 
   function inspectForGlobals (ast, moduleData, packageName) {
