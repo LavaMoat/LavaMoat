@@ -1,21 +1,7 @@
 const { default: traverse } = require('@babel/traverse')
 
-// higher number is less secure, more flexible
-const environmentTypes = {
-  frozen: 1,
-  unfrozen: 2
-}
-
-const environmentTypeStrings = {
-  1: 'frozen',
-  2: 'unfrozen'
-}
-
 // derrived from ses's whitelist
-// const { default: whitelist } = await import('ses/src/whitelist.js')
-// Reflect.ownKeys(whitelist)
-//   .filter(k => k in global && typeof whitelist[k] === 'object')
-const namedIntrinsics = [
+const defaultNamedIntrinsics = [
   'eval',               'isFinite',          'isNaN',
   'parseFloat',         'parseInt',          'decodeURI',
   'decodeURIComponent', 'encodeURI',         'encodeURIComponent',
@@ -32,23 +18,14 @@ const namedIntrinsics = [
   'Set',                'WeakMap',           'WeakSet',
   'ArrayBuffer',        'DataView',          'JSON',
   'Promise',            'Reflect',           'Proxy',
-  'escape',             'unescape'
+  'escape',             'unescape',
 ]
 
+module.exports = { inspectPrimordialAssignments }
 
-module.exports = { inspectEnvironment, environmentTypes, environmentTypeStrings }
 
-function inspectEnvironment (ast) {
+function inspectPrimordialAssignments (ast, namedIntrinsics = defaultNamedIntrinsics) {
   const results = []
-  walkForProtectedAssignment(ast, results)
-  if (results.length) {
-    return environmentTypes.unfrozen
-  } else {
-    return environmentTypes.frozen
-  }
-}
-
-function walkForProtectedAssignment (ast, results) {
   traverse(ast, {
     AssignmentExpression: function (path) {
       const { node } = path
@@ -59,24 +36,20 @@ function walkForProtectedAssignment (ast, results) {
       // skip if property name is a variable
       if (computed) return
       if (property.type !== 'Identifier') return
-      // check for assignment to primordial
+      // check for assignment to intrinsic
       const memberPath = memberExpressionChainToPath(left)
-      const match = namedIntrinsics.some(
-        name => partialArrayMatch([name], memberPath)
-      )
-      if (match) {
-        results.push(node)
-      }
+      const rootIdentifierName = memberPath[0]
+      // check if it looks like we're assigning to an intrinsic
+      const looksLikeIntrinsic = namedIntrinsics.includes(rootIdentifierName)
+      if (!looksLikeIntrinsic) return
+      // check if this shadowed reference and not the intrinsic
+      const binding = path.scope.getBinding(rootIdentifierName)
+      if (binding) return
+      // its a match!
+      results.push({ node, path, memberPath })
     }
   })
-}
-
-function partialArrayMatch (a, b) {
-  for (const index in a) {
-    const match = a[index] === b[index]
-    if (!match) return false
-  }
-  return true
+  return results
 }
 
 function memberExpressionChainToPath (node) {
