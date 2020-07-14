@@ -49,7 +49,7 @@ function plugin (browserify, pluginOpts) {
         // no builtins in the browser (yet!)
         isBuiltin: () => false,
         // write to disk on completion
-        onResult: configuration.writeAutoConfig,
+        onResult: configuration.writeAutoConfig
       }))
     }
 
