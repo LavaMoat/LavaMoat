@@ -1,7 +1,7 @@
 import '../css/bootstrap.css';
+import Tab from 'react-bootstrap/Tab'
+import Tabs from 'react-bootstrap/Tabs'
 const React = require('react')
-const Tab = require('react-bootstrap/Tab')
-const Tabs = require('react-bootstrap/Tabs')
 
 class NavTabs extends React.Component {
   render() {
