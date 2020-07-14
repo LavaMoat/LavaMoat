@@ -1,93 +1,77 @@
-const path = require('path')
-const { createRequire, builtinModules: builtinPackages } = require('module')
-const mdeps = require('module-deps')
-const resolve = require('resolve')
-const { createConfigSpy } = require('lavamoat-core')
-const { parse, inspectImports } = require('lavamoat-tofu')
-const through = require('through2').obj
-
+const { parseForConfig: nodeParseForConfig, makeResolveHook, makeImportHook } = require('lavamoat/src/parseForConfig')
+const { builtinModules: builtinPackages } = require('module')
+const { inspectSesCompat, codeSampleFromAstNode } = require('lavamoat-tofu')
+const { walk } = require('lavamoat-core/src/walk')
 
 module.exports = { parseForConfig }
 
-async function parseForConfig ({ cwd, entryId, packageName }) {
-  // mdeps doesnt run "filter" on the entry
-  if (!shouldParse(entryId)) return { resources: {} }
+// async function parseForConfig ({ packageDir, entryId, rootPackageName }) {
+//   const resolveHook = makeResolveHook({ cwd: packageDir, rootPackageName })
+//   // for the survey, we want to skip resolving dependencies (other packages)
+//   // we also want to gracefully handle resolution failures
+//   const shouldResolve = (requestedName, parentSpecifier) => {
+//     const looksLikePackage = !(requestedName.startsWith('.') || requestedName.startsWith('/'))
+//     if (looksLikePackage) return false
+//     // ignore modules that cant be resolved
+//     try {
+//       resolveHook(requestedName, parentSpecifier)
+//       return true
+//     } catch (err) {
+//       if (err.code === 'MODULE_NOT_FOUND') return false
+//       throw err
+//     }
+//   }
+//   return nodeParseForConfig({ cwd: packageDir, entryId, rootPackageName, shouldResolve })
+// }
 
-  const md = mdeps({
-    // module resolution
-    resolve: (requestedName, parent, cb) => {
-      const isAbsolute = path.isAbsolute(requestedName)
-      const inThisPackage = isAbsolute || requestedName.startsWith('.')
-      if (!inThisPackage) {
-        return cb(new Error(`Ignoring module from different package "${requestedName}"`))
-      }
-      // resolve via node-resolve
-      // resolve(requestedName, parent, cb)
-      const { resolve } = createRequire(new URL(`file://${parent.filename}`))
-      let resolved
-      try {
-        resolved = resolve(requestedName)
-      } catch (err) {
-        return cb(err)
-      }
-      cb(null, resolved)
-    },
-    // override module-deps internal parsing to support more modern js features
-    detect: (moduleSrc) => {
-      const ast = parse(moduleSrc, {
-        // esm support
-        sourceType: 'module',
-        // someone must have been doing this
-        allowReturnOutsideFunction: true,
-      })
-      const { cjsImports } = inspectImports(ast, null, false)
-      const moduleIds = Array.from(new Set(cjsImports))
-      return moduleIds
-    },
-    postFilter: shouldParse,
-    // during parse, ignore missing modules
-    ignoreMissing: true
-  })
-  md.end({ file: path.resolve(cwd, entryId) })
-
-  let resolvePromise
-  const parsePromise = new Promise(resolve => { resolvePromise = resolve })
-
-  md
-  // annotate with package name
-    .pipe(through((moduleData, _, cb) => {
-      moduleData.package = packageName
-      moduleData.packageName = packageName
-      cb(null, moduleData)
-    }))
-  // inspect
-    .pipe(createConfigSpy({
-      builtinPackages,
-      onResult: resolvePromise
-    }))
-    .resume()
-
-  // get initial config from configSpy
-  const initialSerializedConfig = await parsePromise
-  const config = JSON.parse(initialSerializedConfig)
-
-  return config
-
-
-  function shouldParse (moduleId, file, pkg) {
-    // non-relative files are fine
-    if (!moduleId.startsWith('.')) return true
-    const resolved = file || moduleId
-    const extension = path.extname(resolved)
-    // only supported extensions
-    if (!['.js', '.cjs', '.mjs'].includes(extension)) {
-      // log unfamiliar skips
-      if (!['.json','.css', '.sass', '.coffee', '.node'].includes(extension)) {
-        console.log('skip parse', packageName, resolved, extension)
-      }
-      return false
+async function parseForConfig ({ packageDir, entryId, rootPackageName }) {
+  const isBuiltin = (id) => builtinPackages.includes(id)
+  const resolveHook = makeResolveHook({ cwd: packageDir, rootPackageName })
+  const importHook = makeImportHook({ rootPackageName, isBuiltin })
+  const moduleSpecifier = resolveHook(entryId, `${packageDir}/package.json`)
+  // for the survey, we want to skip resolving dependencies (other packages)
+  // we also want to gracefully handle resolution failures
+  const shouldResolve = (requestedName, parentSpecifier) => {
+    const looksLikePackage = !(requestedName.startsWith('.') || requestedName.startsWith('/'))
+    if (looksLikePackage) return false
+    // ignore modules that cant be resolved
+    try {
+      resolveHook(requestedName, parentSpecifier)
+      return true
+    } catch (err) {
+      if (err.code === 'MODULE_NOT_FOUND') return false
+      throw err
     }
-    // otherwise ok
-    return true
   }
+
+  const environment = {}
+  
+  await walk({ moduleSpecifier, resolveHook, importHook, visitorFn, shouldResolve })
+
+  // dont include empty config
+  if (Object.keys(environment).length === 0) return { resources: {} }
+  
+  return {
+    resources: {
+      [rootPackageName]: {
+        environment
+      }
+    }
+  }
+  
+  function visitorFn (moduleRecord) {
+    if (!moduleRecord.ast) return
+    const results = inspectSesCompat(moduleRecord.ast)
+    if (results.primordialMutations.length === 0) return
+    const hits = results.primordialMutations.map(({ node }) => {
+      const sampleData = codeSampleFromAstNode(node, moduleRecord)
+      return sampleData
+    })
+    environment[moduleRecord.specifier] = hits
+    // inspect each module
+    // const moduleData = moduleRecordToModuleData({ moduleRecord, shouldResolve, resolveHook })
+    // inspector.inspectModule(moduleData)
+
+  }
+  
 }

@@ -1,0 +1,6 @@
+{
+  "files.exclude": {
+    "downloads/": true,
+    "results/": true
+  }
+}

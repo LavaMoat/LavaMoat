@@ -11,17 +11,25 @@ const {
 } = require('./util')
 
 test('basic - bundle works', async (t) => {
-  const path = __dirname + '/fixtures/basic-deps.json'
-  const config = {
-    resources: {
-      '<root>': {
-        packages: {
-          2: true
-        }
-      }
+  const files = [
+    {
+      "id": "./1.js",
+      "file": "./1.js",
+      "source": "global.testResult = require('foo')(5)",
+      "deps": { "foo": "./node_modules/2/index.js" },
+      "entry": true
+    },
+    {
+      "id": "./node_modules/2/index.js",
+      "file": "./node_modules/2/index.js",
+      "source": "module.exports = function (n) { return n * 111 }",
+      "deps": {}
     }
+  ]
+  const config = {
+    resources: {}
   }
-  const bundle = await createBundleFromRequiresArrayPath(path, { config })
+  const bundle = await createBundleFromRequiresArray(files, { config })
   const result = evalBundle(bundle)
 
   t.equal(result, 555)

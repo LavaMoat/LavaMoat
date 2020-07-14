@@ -8,6 +8,7 @@ const watchify = require('watchify')
 const through = require('through2').obj
 const pump = require('pump')
 const dataToStream = require('from')
+const { packageNameFromPath } = require('lavamoat-core')
 const lavamoatPlugin = require('../src/index')
 const noop = () => {}
 
@@ -17,7 +18,6 @@ module.exports = {
   createBundleFromRequiresArrayPath,
   createWatchifyBundle,
   generateConfigFromFiles,
-  filesToConfigSource,
   fnToCodeBlock,
   testEntryAttackerVictim,
   runSimpleOneTwo,
@@ -103,29 +103,36 @@ function createBrowserifyFromRequiresArray ({ files: _files, pluginOpts = {} }) 
 
   // inject entry files into browserify pipeline
   const fileInjectionStream = through2(null, null, function (cb) {
-  files
-    .filter(file   => file.entry)
-    .reverse()
-    .forEach(file => {
-      // must explicitly specify entry field
-      file.entry = file.entry || false
-      this.push(file)
-    })
+    files
+      .filter(file => file.entry)
+      .reverse()
+      .forEach(file => {
+        // must explicitly specify entry field
+        file.entry = file.entry || false
+        this.push(file)
+      })
     cb()
   })
 
+  // add our file injector
   bundler.pipeline.get('record').unshift(fileInjectionStream)
+  // replace lavamoat-browserify's packageData stream which normally reads from disk
+  bundler.pipeline.get('emit-deps').shift()
+  bundler.pipeline.get('emit-deps').unshift(through2(function (moduleData, _, cb) {
+    try {
+      const packageName = moduleData.package || packageNameFromPath(moduleData.file || moduleData.id) || '<root>'
+      moduleData.packageName = packageName
+      moduleData.package = packageName
+    } catch (err) {
+      return cb(err)
+    }
+    cb(null, moduleData)
+  }))
 
   return bundler
 }
 
 async function generateConfigFromFiles ({ files }) {
-  const configSource = await filesToConfigSource({ files })
-  const config = JSON.parse(configSource)
-  return config
-}
-
-async function filesToConfigSource ({ files }) {
   let pluginOpts
   const promise = new Promise((resolve) => {
     pluginOpts = { writeAutoConfig: resolve }
@@ -133,8 +140,8 @@ async function filesToConfigSource ({ files }) {
 
   const bundler = createBrowserifyFromRequiresArray({ files, pluginOpts })
   await bundleAsync(bundler)
-  const configSource = await promise
-  return configSource
+  const config = await promise
+  return config
 }
 
 async function bundleAsync (bundler) {

@@ -102,22 +102,19 @@ function inspectEsmImports (ast, packagesToInspect) {
       specifiers.forEach(spec => {
         switch (spec.type) {
           case 'ImportDefaultSpecifier': {
-            const localName = spec.local.name
             const importName = importSource
             esmImports.push(importName)
             return
           }
           case 'ImportNamespaceSpecifier': {
-            const localName = spec.local.name
             const importName = importSource
             esmImports.push(importName)
             return
           }
           case 'ImportSpecifier': {
-            const localName = spec.local.name
             const importName = `${importSource}.${spec.imported.name}`
             esmImports.push(importName)
-            return 
+            return
           }
           default: {
             throw new Error(`inspectEsmImports - unknown import specifier type "${spec.type}"`)
@@ -138,6 +135,8 @@ function inspectImports (ast, packagesToInspect, deep = true) {
       if (callee.type !== 'Identifier') return
       if (callee.name !== 'require') return
       if (moduleNameNode.type !== 'StringLiteral') return
+      // ensure the "require" method is not shadowed
+      if (path.scope.hasBinding(callee.name, true)) return
       const moduleName = moduleNameNode.value
       // skip if not specified in "packagesToInspect"
       if (packagesToInspect && !packagesToInspect.includes(moduleName)) return

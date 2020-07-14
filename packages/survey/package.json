@@ -6,7 +6,8 @@
   "license": "MIT",
   "dependencies": {
     "cheerio": "^0.22.0",
-    "lavamoat-tofu": "^4.0.0",
+    "lavamoat-tofu": "^5.0.0",
+    "lavamoat": "^3.0.0",
     "node-fetch": "^2.6.0",
     "p-limit": "^3.0.1"
   },

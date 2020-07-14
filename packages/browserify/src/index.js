@@ -46,6 +46,9 @@ function plugin (browserify, pluginOpts) {
     // if autoconfig activated, insert hook
     if (configuration.writeAutoConfig) {
       browserify.pipeline.get('emit-deps').push(createConfigSpy({
+        // no builtins in the browser (yet!)
+        isBuiltin: () => false,
+        // write to disk on completion
         onResult: configuration.writeAutoConfig
       }))
     }
@@ -171,7 +174,8 @@ function getConfigurationFromPluginOpts (pluginOpts) {
     if (!configuration.configPath) {
       throw new Error('LavaMoat - If writeAutoConfig is specified, config must be a string')
     }
-    configuration.writeAutoConfig = (configString) => {
+    configuration.writeAutoConfig = (config) => {
+      const configString = jsonStringify(config, { space: 2 })
       const configPath = path.resolve(configuration.configPath)
       // Ensure parent dir exists
       const configDirectory = path.dirname(configPath)

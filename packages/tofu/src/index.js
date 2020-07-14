@@ -1,7 +1,9 @@
 const { parse } = require('@babel/parser')
 const { default: traverse } = require('@babel/traverse')
 const { inspectGlobals, inspectImports, inspectEsmImports } = require('./inspectSource')
-const { inspectEnvironment, environmentTypes, environmentTypeStrings } = require('./inspectEnvironment')
+const { inspectPrimordialAssignments } = require('./inspectPrimordialAssignments')
+const { inspectSesCompat } = require('./inspectSesCompat.js')
+const { codeSampleFromAstNode } = require('./codeSampleFromAstNode.js')
 const utils = require('./util')
 
 module.exports = {
@@ -11,7 +13,7 @@ module.exports = {
   utils,
   parse,
   traverse,
-  inspectEnvironment,
-  environmentTypes,
-  environmentTypeStrings
+  inspectPrimordialAssignments,
+  inspectSesCompat,
+  codeSampleFromAstNode
 }

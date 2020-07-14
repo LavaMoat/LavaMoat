@@ -1,6 +1,7 @@
 const { promises: fs } = require('fs')
 const path = require('path')
 const pLimit = require('p-limit')
+const { makeResolveHook } = require('lavamoat/src/parseForConfig')
 const { loadPackage } = require('./load.js')
 const { getTopPackages } = require('./getTopPackages.js')
 const { parseForConfig } = require('./parseForConfig.js')
@@ -16,29 +17,43 @@ const parseBlacklist = [
   // jsx
   'expo',
   // ses non-compliant (Legacy octal literals in strict mode)
-  'vows',
-  'keypress',
-  'xunit-file',
-  'spec-xunit-file',
-  'blessed',
-  'commoner',
-  'istanbul-harmony',
+  // @babel/plugin-transform-literals
+  // 'vows',
+  // 'keypress',
+  // 'xunit-file',
+  // 'spec-xunit-file',
+  // 'blessed',
+  // 'commoner',
+  // 'istanbul-harmony',
   // reserved word "package"
+  // @babel/plugin-transform-reserved-words
   'main-bower-files',
   'pm2',
   // TODO class properties ( node v12 supports )
+  // @babel/plugin-proposal-class-properties
   '@hapi/hapi',
+  // no main/index
+  'husky',
 ]
 
-start()
+start().catch(err => {
+  console.error(err)
+  process.exit(1)
+})
 
 async function start () {
   const packages = await getTopPackages()
-  // const packages = ['happypack']
+  // const packages = ['relay-compiler']
   const allConfigs = { resources: {} }
   await Promise.all(packages.map(async (packageName) => {
     if (parseBlacklist.includes(packageName)) return
     const config = await concurrencyLimit(() => loadConfig(packageName))
+    if (!config || !config.resources) {
+      console.warn(`config for "${packageName}" is broken`)
+      return
+    }
+    // skip if empty
+    if (!config.resources[packageName]) return
     allConfigs.resources[packageName] = config.resources[packageName]
   }))
   await writeConfig('_all', allConfigs)
@@ -50,23 +65,49 @@ async function loadConfig (packageName) {
   if (await fileExists(policyPath)) {
     return require(policyPath)
   }
-  console.log(`generating config for "${packageName}"`)
-  return await generateConfig(packageName)
+  return await generateConfigFile(packageName)
+}
+
+async function generateConfigFile (packageName) {
+  const config = await generateConfig(packageName)
+  await writeConfig(packageName, config)
+  console.log(`completed "${packageName}"`)
+  return config
 }
 
 async function generateConfig (packageName) {
   const { package, packageDir } = await loadPackage(packageName)
+  // if main is explicitly empty, skip (@types/node, etc)
+  if (package.main === '') {
+    console.warn(`skipped "${packageName}" - explicitly no entry`)
+    return { resources: {} }
+  }
   // normalize the id as a relative path
   const entryId = './' + path.relative('./', package.main || 'index.js')
-  const config = await parseForConfig({
-    packageName,
-    cwd: packageDir,
-    entryId,
-    resolutions: {},
-  })
-  await writeConfig(packageName, config)
-  console.log(`completed ${packageName}`)
-  return config
+  const resolveHook = makeResolveHook({ cwd: packageDir })
+  let entryFull
+  try {
+    entryFull = resolveHook(entryId, `${packageDir}/package.json`)
+  } catch (err) {
+    if (err.code === 'MODULE_NOT_FOUND') {
+      console.warn(`skipped "${packageName}" - no entry`)
+      return  { resources: {} }
+    }
+    throw err
+  }
+  console.log(`generating config for "${packageName}"`)
+  let config
+  try {
+    config = await parseForConfig({
+      rootPackageName: packageName,
+      packageDir,
+      entryId,
+      resolutions: {},
+    })
+    return config
+  } catch (err) {
+    throw new Error(`Failed to parse package "${packageName}": ${err.stack}`)
+  }
 }
 
 async function writeConfig (packageName, config) {

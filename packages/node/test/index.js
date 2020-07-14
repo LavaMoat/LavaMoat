@@ -12,7 +12,7 @@ test('resolutions - parseForConfig', async (t) => {
     }
   }
 
-  const config1 = await parseForConfig({ entryId })
+  const config1 = await parseForConfig({ entryId, cwd: projectRoot })
 
   // comparing resources only, to skip core-modules
   t.deepEqual(config1, {
@@ -33,7 +33,7 @@ test('resolutions - parseForConfig', async (t) => {
     }
   })
 
-  const config2 = await parseForConfig({ entryId, resolutions })
+  const config2 = await parseForConfig({ entryId, cwd: projectRoot, resolutions })
 
   // comparing resources only, to skip core-modules
   t.deepEqual(config2, {

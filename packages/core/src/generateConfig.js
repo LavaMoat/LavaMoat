@@ -1,3 +1,4 @@
+const path = require('path')
 const through = require('through2')
 const fromEntries = require('fromentries')
 const jsonStringify = require('json-stable-stringify')
@@ -5,13 +6,11 @@ const {
   parse,
   inspectGlobals,
   inspectImports,
-  inspectEnvironment,
-  environmentTypes,
-  environmentTypeStrings,
+  inspectSesCompat,
+  codeSampleFromAstNode,
   utils: { mergeConfig, mapToObj, reduceToTopmostApiCallsFromStrings }
 } = require('lavamoat-tofu')
 
-const defaultEnvironment = environmentTypes.frozen
 const rootSlug = '<root>'
 
 module.exports = { rootSlug, createConfigSpy, createModuleInspector }
@@ -20,8 +19,9 @@ module.exports = { rootSlug, createConfigSpy, createModuleInspector }
 // it analyses modules for global namespace usages, and generates a config for LavaMoat.
 // it calls `onResult` with the config when the stream ends.
 
-function createConfigSpy ({ onResult, builtinPackages }) {
-  const inspector = createModuleInspector({ builtinPackages })
+function createConfigSpy ({ onResult, isBuiltin }) {
+  if (!isBuiltin) throw new Error('createConfigSpy - must specify "isBuiltin"')
+  const inspector = createModuleInspector({ isBuiltin })
   const configSpy = createSpy(
     // inspect each module
     inspector.inspectModule,
@@ -32,7 +32,6 @@ function createConfigSpy ({ onResult, builtinPackages }) {
 }
 
 function createModuleInspector (opts = {}) {
-  const packageToEnvironments = {}
   const packageToGlobals = {}
   const packageToBuiltinImports = {}
   const packageToModules = {}
@@ -43,8 +42,8 @@ function createModuleInspector (opts = {}) {
     generateConfig: (opts2 = {}) => generateConfig({ ...opts, ...opts2 })
   }
 
-  function inspectModule (moduleData, { builtinPackages = [] } = {}) {
-    const packageName = moduleData.package
+  function inspectModule (moduleData, { isBuiltin } = {}) {
+    const packageName = moduleData.packageName || moduleData.package
     moduleIdToPackageName[moduleData.id] = packageName
     // initialize mapping from package to module
     const packageModules = packageToModules[packageName] = packageToModules[packageName] || {}
@@ -58,22 +57,42 @@ function createModuleInspector (opts = {}) {
     if (moduleData.type === 'native') return
     // skip json files
     const filename = moduleData.file || 'unknown'
-    const fileExtension = filename.split('.').pop()
-    if (fileExtension === 'json') return
-    // get eval environment
-    const ast = parse(moduleData.source, { allowReturnOutsideFunction: true })
-    inspectForEnvironment(ast, packageName)
+    const fileExtension = path.extname(filename)
+    if (fileExtension !== '.js') return
+    // get ast (parse or use cached)
+    const ast = moduleData.ast || parse(moduleData.source, {
+      // esm support
+      sourceType: 'module',
+      // someone must have been doing this
+      allowReturnOutsideFunction: true,
+      errorRecovery: true
+    })
+    // ensure ses compatibility
+    inspectForEnvironment(ast, moduleData)
     // get global usage
     inspectForGlobals(ast, moduleData, packageName)
     // get builtin package usage
-    inspectForImports(ast, moduleData, packageName, builtinPackages)
+    inspectForImports(ast, moduleData, packageName, isBuiltin)
   }
 
-  function inspectForEnvironment (ast, packageName) {
-    const result = inspectEnvironment(ast, packageName)
-    // initialize results for package
-    const environments = packageToEnvironments[packageName] = packageToEnvironments[packageName] || []
-    environments.push(result)
+  function inspectForEnvironment (ast, moduleData) {
+    const { package: packageName } = moduleData
+    const { primordialMutations, strictModeViolations } = inspectSesCompat(ast, packageName)
+    if (primordialMutations.length > 0 || strictModeViolations.length > 0) {
+      // adapt moduleData to moduleRecord format
+      const moduleRecord = {
+        specifier: moduleData.id,
+        content: moduleData.source,
+        packageName: moduleData.packageName || moduleData.package,
+        packageVersion: moduleData.packageVersion
+      }
+      const samples = jsonStringify({
+        primordialMutations: primordialMutations.map(({ node }) => codeSampleFromAstNode(node, moduleRecord)),
+        strictModeViolations: strictModeViolations.map(({ node }) => codeSampleFromAstNode(node, moduleRecord))
+      })
+      const errMsg = `Incomptabile code detected in package "${packageName}" file "${moduleData.file}". Violations:\n${samples}`
+      throw new Error(errMsg)
+    }
   }
 
   function inspectForGlobals (ast, moduleData, packageName) {
@@ -97,10 +116,10 @@ function createModuleInspector (opts = {}) {
     }
   }
 
-  function inspectForImports (ast, moduleData, packageName, builtinPackages) {
-    // get all requested names that resolve to builtinPackages
+  function inspectForImports (ast, moduleData, packageName, isBuiltin) {
+    // get all requested names that resolve to isBuiltin
     const namesForBuiltins = Object.entries(moduleData.deps)
-      .filter(([_, resolvedName]) => builtinPackages.includes(resolvedName))
+      .filter(([_, resolvedName]) => isBuiltin(resolvedName))
       .map(([requestedName]) => requestedName)
     const { cjsImports } = inspectImports(ast, namesForBuiltins)
     const builtinImports = packageToBuiltinImports[packageName]
@@ -113,17 +132,17 @@ function createModuleInspector (opts = {}) {
     }
   }
 
-  function generateConfig ({ builtinPackages = [] } = {}) {
+  function generateConfig ({ isBuiltin } = {}) {
     const resources = {}
     const config = { resources }
     Object.entries(packageToModules).forEach(([packageName, packageModules]) => {
-      let globals, builtin, packages, environment
+      let globals, builtin, packages
       // skip for root modules (modules not from deps)
       const isRootModule = packageName === rootSlug
       if (isRootModule) return
       // get dependencies, ignoring builtins
       const packageDeps = aggregateDeps({ packageModules, moduleIdToPackageName })
-        .filter(depPackageName => !builtinPackages.includes(depPackageName))
+        .filter(depPackageName => !isBuiltin(depPackageName))
       if (packageDeps.length) {
         packages = fromEntries(packageDeps.map(depPackageName => [depPackageName, true]))
       }
@@ -136,13 +155,6 @@ function createModuleInspector (opts = {}) {
           if (globals[key] === 'read') globals[key] = true
         })
       }
-      // get environment
-      const environments = packageToEnvironments[packageName]
-      if (environments) {
-        const bestEnvironment = environments.sort()[environments.length - 1]
-        const isDefault = bestEnvironment === defaultEnvironment
-        environment = isDefault ? undefined : environmentTypeStrings[bestEnvironment]
-      }
       // get core imports
       const builtinImports = packageToBuiltinImports[packageName]
       if (builtinImports && builtinImports.length) {
@@ -152,21 +164,26 @@ function createModuleInspector (opts = {}) {
         })
       }
       // skip package config if there are no settings needed
-      if (!packages && !globals && !environment && !builtin) return
+      if (!packages && !globals && !builtin) return
+      // create minimal config object
+      const config = {}
+      if (packages) config.packages = packages
+      if (globals) config.globals = globals
+      if (builtin) config.builtin = builtin
       // set config for package
-      resources[packageName] = { packages, globals, environment, builtin }
+      resources[packageName] = config
     })
 
-    return jsonStringify(config, { space: 2 })
+    return config
   }
 }
 
 function aggregateDeps ({ packageModules, moduleIdToPackageName }) {
   const deps = new Set()
   Object.values(packageModules).forEach((moduleData) => {
-    const newDeps = Object.values(moduleData.deps)
-      .filter(Boolean)
-      .map(id => moduleIdToPackageName[id])
+    const newDeps = Object.entries(moduleData.deps)
+      .filter(([_, specifier]) => Boolean(specifier))
+      .map(([requestedName, specifier]) => moduleIdToPackageName[specifier] || guessPackageName(requestedName))
     newDeps.forEach(dep => deps.add(dep))
     // ensure the package is not listed as its own dependency
     deps.delete(moduleData.package)
@@ -175,15 +192,35 @@ function aggregateDeps ({ packageModules, moduleIdToPackageName }) {
   return depsArray
 }
 
+// for when you encounter a requestedName that was not inspected, likely because resolution was skipped for that module
+function guessPackageName (requestedName) {
+  const isNotPackageName = requestedName.startsWith('/') || requestedName.startsWith('.')
+  if (isNotPackageName) return `<unknown:${requestedName}>`
+  // resolving is skipped so guess package name
+  const pathParts = requestedName.split('/')
+  const nameSpaced = requestedName.startsWith('@')
+  const packagePartCount = nameSpaced ? 2 : 1
+  const packageName = pathParts.slice(0, packagePartCount).join('/')
+  return packageName
+}
+
 function createSpy (onData, onEnd) {
   return through.obj((data, _, cb) => {
     // give data to observer fn
-    onData(data)
+    try {
+      onData(data)
+    } catch (err) {
+      return cb(err)
+    }
     // pass the data through normally
     cb(null, data)
   }, (cb) => {
     // call flush observer
-    onEnd()
+    try {
+      onEnd()
+    } catch (err) {
+      return cb(err)
+    }
     // End as normal
     cb()
   })

@@ -2,7 +2,7 @@ const { runInNewContext } = require('vm')
 const path = require('path')
 const test = require('tape')
 const mergeDeep = require('merge-deep')
-const { generateKernel, packageDataForModule } = require('../src/index.js')
+const { generateKernel, packageNameFromPath } = require('../src/index.js')
 
 test('builtin - basic access', async (t) => {
   const scenario = createScenarioFromScaffold({
@@ -156,22 +156,26 @@ function createScenarioFromScaffold ({
   const _files = fillInFileDetails({
     'entry.js': {
       source: `(${defineEntry || _defineEntry}).call(this)`,
+      package: '<root>',
       deps: {
         one: 'node_modules/one/index.js',
         two: 'node_modules/two/index.js'
       }
     },
     'node_modules/one/index.js': {
+      package: 'one',
       source: `(${defineOne || _defineOne}).call(this)`,
       deps: {
         two: 'node_modules/two/index.js'
       }
     },
     'node_modules/two/index.js': {
+      package: 'two',
       source: `(${defineTwo || _defineTwo}).call(this)`,
       deps: {}
     },
     'node_modules/three/index.js': {
+      package: 'three',
       source: `(${defineThree || _defineThree}).call(this)`,
       deps: {}
     },
@@ -199,7 +203,7 @@ function createScenarioFromScaffold ({
 function fillInFileDetails (files) {
   Object.entries(files).forEach(([file, moduleData]) => {
     moduleData.file = moduleData.file || file
-    moduleData.package = moduleData.package || packageDataForModule({ file }).packageName || '<root>'
+    moduleData.package = moduleData.package || packageNameFromPath(file) || '<root>'
     moduleData.source = `(function(exports, require, module, __filename, __dirname){\n${moduleData.source}\n})`
     // moduleData.type = moduleData.type || 'js'
   })
