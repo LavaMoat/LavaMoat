@@ -14,7 +14,7 @@ function codeSampleFromAstNode (node, moduleRecord) {
   // add npmfs link if possible
   if (packageName && packageVersion && specifier) {
     // https://npmfs.com/package/moment/2.24.0/locale/ca.js#L81
-    const [_, relativeFile] = specifier.split(`${packageName}/`)
+    const relativeFile = specifier.split(`${packageName}/`)[1]
     const url = `https://npmfs.com/package/${packageName}/${packageVersion}/${relativeFile}#L${start.line}`
     result.npmfs = url
   }

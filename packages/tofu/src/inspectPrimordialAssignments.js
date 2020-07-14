@@ -2,27 +2,26 @@ const { default: traverse } = require('@babel/traverse')
 
 // derrived from ses's whitelist
 const defaultNamedIntrinsics = [
-  'eval',               'isFinite',          'isNaN',
-  'parseFloat',         'parseInt',          'decodeURI',
-  'decodeURIComponent', 'encodeURI',         'encodeURIComponent',
-  'Object',             'Function',          'Boolean',
-  'Symbol',             'Error',             'EvalError',
-  'RangeError',         'ReferenceError',    'SyntaxError',
-  'TypeError',          'URIError',          'Number',
-  'BigInt',             'Math',              'Date',
-  'String',             'RegExp',            'Array',
-  'BigInt64Array',      'BigUint64Array',    'Float32Array',
-  'Float64Array',       'Int16Array',        'Int32Array',
-  'Int8Array',          'Uint16Array',       'Uint32Array',
-  'Uint8Array',         'Uint8ClampedArray', 'Map',
-  'Set',                'WeakMap',           'WeakSet',
-  'ArrayBuffer',        'DataView',          'JSON',
-  'Promise',            'Reflect',           'Proxy',
-  'escape',             'unescape',
+  'eval', 'isFinite', 'isNaN',
+  'parseFloat', 'parseInt', 'decodeURI',
+  'decodeURIComponent', 'encodeURI', 'encodeURIComponent',
+  'Object', 'Function', 'Boolean',
+  'Symbol', 'Error', 'EvalError',
+  'RangeError', 'ReferenceError', 'SyntaxError',
+  'TypeError', 'URIError', 'Number',
+  'BigInt', 'Math', 'Date',
+  'String', 'RegExp', 'Array',
+  'BigInt64Array', 'BigUint64Array', 'Float32Array',
+  'Float64Array', 'Int16Array', 'Int32Array',
+  'Int8Array', 'Uint16Array', 'Uint32Array',
+  'Uint8Array', 'Uint8ClampedArray', 'Map',
+  'Set', 'WeakMap', 'WeakSet',
+  'ArrayBuffer', 'DataView', 'JSON',
+  'Promise', 'Reflect', 'Proxy',
+  'escape', 'unescape'
 ]
 
 module.exports = { inspectPrimordialAssignments }
-
 
 function inspectPrimordialAssignments (ast, namedIntrinsics = defaultNamedIntrinsics) {
   const results = []

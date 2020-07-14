@@ -15,5 +15,5 @@ module.exports = {
   traverse,
   inspectPrimordialAssignments,
   inspectSesCompat,
-  codeSampleFromAstNode,
+  codeSampleFromAstNode
 }

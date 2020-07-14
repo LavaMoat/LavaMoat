@@ -53,12 +53,12 @@ const FunctionInstance = {
   // 19.2.4.1 length
   length: 'number',
   // 19.2.4.2 name
-  name: 'string',
+  name: 'string'
   // 19.2.4.3 prototype
   // Do not specify "prototype" here, since only Function instances that can
   // be used as a constructor have a prototype property. For constructors,
   // since prototype properties are instance-specific, we define it there.
-};
+}
 
 // 25.7.4 AsyncFunction Instances
 const AsyncFunctionInstance = {
@@ -68,17 +68,17 @@ const AsyncFunctionInstance = {
   // 25.7.4.1 length
   length: 'number',
   // 25.7.4.2 name
-  name: 'string',
-};
+  name: 'string'
+}
 
 // Aliases
-const fn = FunctionInstance;
-const asyncFn = AsyncFunctionInstance;
+const fn = FunctionInstance
+const asyncFn = AsyncFunctionInstance
 
 const getter = {
   get: fn,
-  set: 'undefined',
-};
+  set: 'undefined'
+}
 
 // Possible but not encountered in the specs
 // const setter = {
@@ -88,11 +88,11 @@ const getter = {
 
 const accessor = {
   get: fn,
-  set: fn,
-};
+  set: fn
+}
 
 // 19.5.6 NativeError Object Structure
-function NativeError(prototype) {
+function NativeError (prototype) {
   return {
     // 19.5.6.2 Properties of the NativeError Constructors
     '**proto**': 'Error',
@@ -104,11 +104,11 @@ function NativeError(prototype) {
     // 19.2.4.1 length
     length: 'number',
     // 19.2.4.2 name
-    name: 'string',
-  };
+    name: 'string'
+  }
 }
 
-function NativeErrorPrototype(constructor) {
+function NativeErrorPrototype (constructor) {
   return {
     // 19.5.6.3 Properties of the NativeError Prototype Objects
     '**proto**': 'ErrorPrototype',
@@ -119,12 +119,12 @@ function NativeErrorPrototype(constructor) {
     // 19.5.6.3.3 NativeError.prototype.name
     name: 'string',
     // Redundantly present only on v8. Safe to remove.
-    toString: false,
-  };
+    toString: false
+  }
 }
 
 // 22.2.4 The TypedArray Constructors
-function TypedArray(prototype) {
+function TypedArray (prototype) {
   return {
     // 22.2.5 Properties of the TypedArray Constructors
     '**proto**': 'TypedArray',
@@ -138,19 +138,19 @@ function TypedArray(prototype) {
     // 22.2.5.1 TypedArray.BYTES_PER_ELEMENT
     BYTES_PER_ELEMENT: 'number',
     // 22.2.5.2 TypedArray.prototype
-    prototype,
-  };
+    prototype
+  }
 }
 
-function TypedArrayPrototype(constructor) {
+function TypedArrayPrototype (constructor) {
   return {
     // 22.2.6 Properties of the TypedArray Prototype Objects
     '**proto**': 'TypedArrayPrototype',
     // 22.2.6.1 TypedArray.prototype.BYTES_PER_ELEMENT
     BYTES_PER_ELEMENT: 'number',
     // 22.2.6.2TypedArray.prototype.constructor
-    constructor,
-  };
+    constructor
+  }
 }
 
 const whitelist = {
@@ -242,7 +242,7 @@ const whitelist = {
     // 19.1.2.21 Object.setPrototypeOf
     setPrototypeOf: fn,
     // 19.1.2.22 Object.values
-    values: fn,
+    values: fn
   },
 
   ObjectPrototype: {
@@ -274,7 +274,7 @@ const whitelist = {
     // B.2.2.4 Object.prototype.__lookupGetter__
     __lookupGetter__: fn,
     // B.2.2.5 Object.prototype.__lookupSetter__
-    __lookupSetter__: fn,
+    __lookupSetter__: fn
   },
 
   Function: {
@@ -283,7 +283,7 @@ const whitelist = {
     // 19.2.2.1 Function.length
     length: 'number',
     // 19.2.2.2 Function.prototype
-    prototype: 'FunctionPrototype',
+    prototype: 'FunctionPrototype'
   },
 
   FunctionPrototype: {
@@ -301,14 +301,14 @@ const whitelist = {
     // 19.2.3.5 Function.prototype.toString
     toString: fn,
     // 19.2.3.6 Function.prototype [ @@hasInstance ]
-    '@@hasInstance': fn,
+    '@@hasInstance': fn
   },
 
   Boolean: {
     // 19.3.2 Properties of the Boolean Constructor
     '**proto**': 'FunctionPrototype',
     // 19.3.2.1 Boolean.prototype
-    prototype: 'BooleanPrototype',
+    prototype: 'BooleanPrototype'
   },
 
   BooleanPrototype: {
@@ -317,7 +317,7 @@ const whitelist = {
     // 19.3.3.2 Boolean.prototype.toString
     toString: fn,
     // 19.3.3.3 Boolean.prototype.valueOf
-    valueOf: fn,
+    valueOf: fn
   },
 
   Symbol: {
@@ -354,7 +354,7 @@ const whitelist = {
     // 19.4.2.15 Symbol.toStringTag
     toStringTag: 'symbol',
     // 19.4.2.16 Symbol.unscopables
-    unscopables: 'symbol',
+    unscopables: 'symbol'
   },
 
   SymbolPrototype: {
@@ -371,7 +371,7 @@ const whitelist = {
     // 19.4.3.5 Symbol.prototype [ @@toPrimitive ]
     '@@toPrimitive': fn,
     // 19.4.3.6 Symbol.prototype [ @@toStringTag ]
-    '@@toStringTag': 'string',
+    '@@toStringTag': 'string'
   },
 
   Error: {
@@ -384,7 +384,7 @@ const whitelist = {
     // Non standard, v8 only, used by tap, tamed to accessor
     stackTraceLimit: accessor,
     // Non standard, v8 only, used by several, tamed to accessor
-    prepareStackTrace: accessor,
+    prepareStackTrace: accessor
   },
 
   ErrorPrototype: {
@@ -395,7 +395,7 @@ const whitelist = {
     // 19.5.3.3 Error.prototype.name
     name: 'string',
     // 19.5.3.4 Error.prototype.toString
-    toString: fn,
+    toString: fn
     // proposed de-facto, assumed TODO
     // stack: accessor,
   },
@@ -450,7 +450,7 @@ const whitelist = {
     // 20.1.2.14 Number.POSITIVE_INFINITY
     POSITIVE_INFINITY: 'number',
     // 20.1.2.15 Number.prototype
-    prototype: 'NumberPrototype',
+    prototype: 'NumberPrototype'
   },
 
   NumberPrototype: {
@@ -469,7 +469,7 @@ const whitelist = {
     // 20.1.3.6 Number.prototype.toString
     toString: fn,
     // 20.1.3.7 Number.prototype.valueOf
-    valueOf: fn,
+    valueOf: fn
   },
 
   BigInt: {
@@ -480,7 +480,7 @@ const whitelist = {
     // 20.2.2.2 BigInt.asUintN
     asUintN: fn,
     // 20.2.2.3 BigInt.prototype
-    prototype: 'BigIntPrototype',
+    prototype: 'BigIntPrototype'
   },
 
   BigIntPrototype: {
@@ -493,7 +493,7 @@ const whitelist = {
     // 20.2.3.4 BigInt.prototype.valueOf
     valueOf: fn,
     // 20.2.3.5 BigInt.prototype [ @@toStringTag ]
-    '@@toStringTag': 'string',
+    '@@toStringTag': 'string'
   },
 
   Math: {
@@ -584,7 +584,7 @@ const whitelist = {
     // 20.3.2.34 Math.tanh
     tanh: fn,
     // 20.3.2.35 Math.trunc
-    trunc: fn,
+    trunc: fn
     // 20.3.2.35Math.trunc
   },
 
@@ -598,7 +598,7 @@ const whitelist = {
     // 20.4.3.3 Date.prototype
     prototype: 'DatePrototype',
     // 20.4.3.4 Date.UTC
-    UTC: fn,
+    UTC: fn
   },
 
   DatePrototype: {
@@ -700,7 +700,7 @@ const whitelist = {
     // B.2.4.2 Date.prototype.setYear
     setYear: fn,
     // B.2.4.3 Date.prototype.toGMTString
-    toGMTString: fn,
+    toGMTString: fn
   },
 
   // 21 Text Processing
@@ -715,7 +715,7 @@ const whitelist = {
     // 21.1.2.3 String.prototype
     prototype: 'StringPrototype',
     // 21.1.2.4 String.raw
-    raw: fn,
+    raw: fn
   },
 
   StringPrototype: {
@@ -819,7 +819,7 @@ const whitelist = {
     // B.2.3.15 String.prototype.trimLeft
     trimLeft: fn,
     // B.2.3.15 String.prototype.trimRight
-    trimRight: fn,
+    trimRight: fn
   },
 
   StringIteratorPrototype: {
@@ -828,7 +828,7 @@ const whitelist = {
     // 21.1.5.2.1 %StringIteratorPrototype%.next ( )
     next: fn,
     // 21.1.5.2.2 %StringIteratorPrototype% [ @@toStringTag ]
-    '@@toStringTag': 'string',
+    '@@toStringTag': 'string'
   },
 
   RegExp: {
@@ -837,7 +837,7 @@ const whitelist = {
     // 21.2.4.1 RegExp.prototype
     prototype: 'RegExpPrototype',
     // 21.2.4.2 get RegExp [ @@species ]
-    '@@species': getter,
+    '@@species': getter
   },
 
   RegExpPrototype: {
@@ -880,7 +880,7 @@ const whitelist = {
     // B.2.5 Additional Properties of the RegExp.prototype Object
 
     // B.2.5.1 RegExp.prototype.compile
-    compile: false, // UNSAFE and suppressed.
+    compile: false // UNSAFE and suppressed.
   },
 
   RegExpStringIteratorPrototype: {
@@ -889,7 +889,7 @@ const whitelist = {
     // 21.2.7.1.1 %RegExpStringIteratorPrototype%.next
     next: fn,
     // 21.2.7.1.2 %RegExpStringIteratorPrototype% [ @@toStringTag ]
-    '@@toStringTag': 'string',
+    '@@toStringTag': 'string'
   },
 
   // 22 Indexed Collections
@@ -906,7 +906,7 @@ const whitelist = {
     // 22.1.2.4 Array.prototype
     prototype: 'ArrayPrototype',
     // 22.1.2.5 get Array [ @@species ]
-    '@@species': getter,
+    '@@species': getter
   },
 
   ArrayPrototype: {
@@ -991,8 +991,8 @@ const whitelist = {
       flatMap: 'boolean',
       includes: 'boolean',
       keys: 'boolean',
-      values: 'boolean',
-    },
+      values: 'boolean'
+    }
   },
 
   ArrayIteratorPrototype: {
@@ -1001,7 +1001,7 @@ const whitelist = {
     // 22.1.5.2.1 %ArrayIteratorPrototype%.next
     next: fn,
     // 22.1.5.2.2 %ArrayIteratorPrototype% [ @@toStringTag ]
-    '@@toStringTag': 'string',
+    '@@toStringTag': 'string'
   },
 
   // *** 22.2 TypedArray Objects
@@ -1016,7 +1016,7 @@ const whitelist = {
     // 22.2.2.3 %TypedArray%.prototype
     prototype: 'TypedArrayPrototype',
     // 22.2.2.4 get %TypedArray% [ @@species ]
-    '@@species': getter,
+    '@@species': getter
   },
 
   TypedArrayPrototype: {
@@ -1083,7 +1083,7 @@ const whitelist = {
     // 22.2.3.31 %TypedArray%.prototype [ @@iterator ]
     '@@iterator': fn,
     // 22.2.3.32 get %TypedArray%.prototype [ @@toStringTag ]
-    '@@toStringTag': getter,
+    '@@toStringTag': getter
   },
 
   // 22.2.4 The TypedArray Constructors
@@ -1119,7 +1119,7 @@ const whitelist = {
     '**proto**': 'FunctionPrototype',
     // 23.2.2.2 get Set [ @@species ]
     '@@species': getter,
-    prototype: 'MapPrototype',
+    prototype: 'MapPrototype'
   },
 
   MapPrototype: {
@@ -1148,7 +1148,7 @@ const whitelist = {
     // 23.1.3.12Map.prototype [ @@iterator ]
     '@@iterator': fn,
     // 23.1.3.13Map.prototype [ @@toStringTag ]
-    '@@toStringTag': 'string',
+    '@@toStringTag': 'string'
   },
 
   MapIteratorPrototype: {
@@ -1157,7 +1157,7 @@ const whitelist = {
     // 23.1.5.2.1 %MapIteratorPrototype%.next
     next: fn,
     // 23.1.5.2.2 %MapIteratorPrototype% [ @@toStringTag ]
-    '@@toStringTag': 'string',
+    '@@toStringTag': 'string'
   },
 
   Set: {
@@ -1166,7 +1166,7 @@ const whitelist = {
     // 23.2.2.1 Set.prototype
     prototype: 'SetPrototype',
     // 23.2.2.2 get Set [ @@species ]
-    '@@species': getter,
+    '@@species': getter
   },
 
   SetPrototype: {
@@ -1193,7 +1193,7 @@ const whitelist = {
     // 3.2.3.11 Set.prototype [ @@iterator ]
     '@@iterator': fn,
     // 23.2.3.12 Set.prototype [ @@toStringTag ]
-    '@@toStringTag': 'string',
+    '@@toStringTag': 'string'
   },
 
   SetIteratorPrototype: {
@@ -1202,14 +1202,14 @@ const whitelist = {
     // 23.2.5.2.1 %SetIteratorPrototype%.next
     next: fn,
     // 23.2.5.2.2 %SetIteratorPrototype% [ @@toStringTag ]
-    '@@toStringTag': 'string',
+    '@@toStringTag': 'string'
   },
 
   WeakMap: {
     // 23.3.2 Properties of the WeakMap Constructor
     '**proto**': 'FunctionPrototype',
     // 23.3.2.1 WeakMap.prototype
-    prototype: 'WeakMapPrototype',
+    prototype: 'WeakMapPrototype'
   },
 
   WeakMapPrototype: {
@@ -1224,14 +1224,14 @@ const whitelist = {
     // 23.3.3.5 WeakMap.prototype.set
     set: fn,
     // 23.3.3.6 WeakMap.prototype [ @@toStringTag ]
-    '@@toStringTag': 'string',
+    '@@toStringTag': 'string'
   },
 
   WeakSet: {
     // 23.4.2Properties of the WeakSet Constructor
     '**proto**': 'FunctionPrototype',
     // 23.4.2.1 WeakSet.prototype
-    prototype: 'WeakSetPrototype',
+    prototype: 'WeakSetPrototype'
   },
 
   WeakSetPrototype: {
@@ -1244,7 +1244,7 @@ const whitelist = {
     // 23.4.3.4 WeakSet.prototype.has
     has: fn,
     // 23.4.3.5 WeakSet.prototype [ @@toStringTag ]
-    '@@toStringTag': 'string',
+    '@@toStringTag': 'string'
   },
 
   // *** 24 Structured Data
@@ -1257,7 +1257,7 @@ const whitelist = {
     // 24.1.3.2 ArrayBuffer.prototype
     prototype: 'ArrayBufferPrototype',
     // 24.1.3.3 get ArrayBuffer [ @@species ]
-    '@@species': getter,
+    '@@species': getter
   },
 
   ArrayBufferPrototype: {
@@ -1268,7 +1268,7 @@ const whitelist = {
     // 24.1.4.3 ArrayBuffer.prototype.slice
     slice: fn,
     // 24.1.4.4 ArrayBuffer.prototype [ @@toStringTag ]
-    '@@toStringTag': 'string',
+    '@@toStringTag': 'string'
   },
 
   // 24.2 SharedArrayBuffer Objects
@@ -1278,7 +1278,7 @@ const whitelist = {
     // 24.3.3 Properties of the DataView Constructor
     '**proto**': 'FunctionPrototype',
     // 24.3.3.1 DataView.prototype
-    prototype: 'DataViewPrototype',
+    prototype: 'DataViewPrototype'
   },
 
   DataViewPrototype: {
@@ -1331,7 +1331,7 @@ const whitelist = {
     // 24.3.4.24 DataView.prototype.setUint32
     setUint32: fn,
     // 24.3.4.25 DataView.prototype [ @@toStringTag ]
-    '@@toStringTag': 'string',
+    '@@toStringTag': 'string'
   },
 
   // 24.4 Atomics
@@ -1343,7 +1343,7 @@ const whitelist = {
     // 24.5.2 JSON.stringify
     stringify: fn,
     // 24.5.3 JSON [ @@toStringTag ]
-    '@@toStringTag': 'string',
+    '@@toStringTag': 'string'
   },
 
   // *** 25 Control Abstraction Objects
@@ -1351,13 +1351,13 @@ const whitelist = {
   IteratorPrototype: {
     // 25.1.2 The %IteratorPrototype% Object
     // 25.1.2.1 %IteratorPrototype% [ @@iterator ]
-    '@@iterator': fn,
+    '@@iterator': fn
   },
 
   AsyncIteratorPrototype: {
     // 25.1.3 The %AsyncIteratorPrototype% Object
     // 25.1.3.1 %AsyncIteratorPrototype% [ @@asyncIterator ]
-    '@@asyncIterator': fn,
+    '@@asyncIterator': fn
   },
 
   GeneratorFunction: {
@@ -1367,7 +1367,7 @@ const whitelist = {
     // 25.2.2.1 GeneratorFunction.length
     length: 'number',
     // 25.2.2.2 GeneratorFunction.prototype
-    prototype: 'Generator',
+    prototype: 'Generator'
   },
 
   Generator: {
@@ -1376,7 +1376,7 @@ const whitelist = {
     // 25.2.3.1 GeneratorFunction.prototype.constructor
     constructor: 'GeneratorFunction',
     // 25.2.3.2 GeneratorFunction.prototype.prototype
-    prototype: 'GeneratorPrototype',
+    prototype: 'GeneratorPrototype'
   },
 
   AsyncGeneratorFunction: {
@@ -1386,7 +1386,7 @@ const whitelist = {
     // 25.3.2.1 AsyncGeneratorFunction.length
     length: 'number',
     // 25.3.2.2 AsyncGeneratorFunction.prototype
-    prototype: 'AsyncGenerator',
+    prototype: 'AsyncGenerator'
   },
 
   AsyncGenerator: {
@@ -1397,7 +1397,7 @@ const whitelist = {
     // 25.3.3.2 AsyncGeneratorFunction.prototype.prototype
     prototype: 'AsyncGeneratorPrototype',
     // 25.3.3.3 AsyncGeneratorFunction.prototype [ @@toStringTag ]
-    '@@toStringTag': 'string',
+    '@@toStringTag': 'string'
   },
 
   GeneratorPrototype: {
@@ -1412,7 +1412,7 @@ const whitelist = {
     // 25.4.1.4 Generator.prototype.throw
     throw: fn,
     // 25.4.1.5 Generator.prototype [ @@toStringTag ]
-    '@@toStringTag': 'string',
+    '@@toStringTag': 'string'
   },
 
   AsyncGeneratorPrototype: {
@@ -1427,7 +1427,7 @@ const whitelist = {
     // 25.5.1.4 AsyncGenerator.prototype.throw
     throw: fn,
     // 25.5.1.5 AsyncGenerator.prototype [ @@toStringTag ]
-    '@@toStringTag': 'string',
+    '@@toStringTag': 'string'
   },
 
   Promise: {
@@ -1446,7 +1446,7 @@ const whitelist = {
     // 25.6.4.6 Promise.resolve
     resolve: fn,
     // 25.6.4.7 get Promise [ @@species ]
-    '@@species': getter,
+    '@@species': getter
   },
 
   PromisePrototype: {
@@ -1460,7 +1460,7 @@ const whitelist = {
     // 25.6.5.4 Promise.prototype.then
     then: fn,
     // 25.6.5.5 Promise.prototype [ @@toStringTag ]
-    '@@toStringTag': 'string',
+    '@@toStringTag': 'string'
   },
 
   AsyncFunction: {
@@ -1470,7 +1470,7 @@ const whitelist = {
     // 25.7.2.1 AsyncFunction.length
     length: 'number',
     // 25.7.2.2 AsyncFunction.prototype
-    prototype: 'AsyncFunctionPrototype',
+    prototype: 'AsyncFunctionPrototype'
   },
 
   AsyncFunctionPrototype: {
@@ -1479,7 +1479,7 @@ const whitelist = {
     // 25.7.3.1 AsyncFunction.prototype.constructor
     constructor: 'AsyncFunction',
     // 25.7.3.2 AsyncFunction.prototype [ @@toStringTag ]
-    '@@toStringTag': 'string',
+    '@@toStringTag': 'string'
   },
 
   // 26 Reflection
@@ -1512,14 +1512,14 @@ const whitelist = {
     // 26.1.12 Reflect.set
     set: fn,
     // 26.1.13 Reflect.setPrototypeOf
-    setPrototypeOf: fn,
+    setPrototypeOf: fn
   },
 
   Proxy: {
     // 26.2.2 Properties of the Proxy Constructor
     '**proto**': 'FunctionPrototype',
     // 26.2.2.1 Proxy.revocable
-    revocable: fn,
+    revocable: fn
   },
 
   // Appendix B
@@ -1537,12 +1537,12 @@ const whitelist = {
   FunctionPrototypeConstructor: {
     '**proto**': 'FunctionPrototype',
     length: 'number',
-    prototype: 'FunctionPrototype',
+    prototype: 'FunctionPrototype'
   },
 
   Compartment: {
     '**proto**': 'FunctionPrototype',
-    prototype: 'CompartmentPrototype',
+    prototype: 'CompartmentPrototype'
   },
 
   CompartmentPrototype: {
@@ -1551,20 +1551,20 @@ const whitelist = {
     globalThis: getter,
     import: asyncFn,
     importNow: fn,
-    module: fn,
+    module: fn
   },
 
   StaticModuleRecord: {
     '**proto**': 'FunctionPrototype',
-    prototype: 'StaticModuleRecordPrototype',
+    prototype: 'StaticModuleRecordPrototype'
   },
 
   StaticModuleRecordPrototype: {
-    constructor: 'StaticModuleRecord',
+    constructor: 'StaticModuleRecord'
   },
 
-  harden: fn,
-};
+  harden: fn
+}
 
 module.exports = {
   whitelist,
@@ -1573,6 +1573,5 @@ module.exports = {
   fn,
   asyncFn,
   getter,
-  accessor,
-  whitelist,
+  accessor
 }

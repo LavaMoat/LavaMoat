@@ -102,22 +102,19 @@ function inspectEsmImports (ast, packagesToInspect) {
       specifiers.forEach(spec => {
         switch (spec.type) {
           case 'ImportDefaultSpecifier': {
-            const localName = spec.local.name
             const importName = importSource
             esmImports.push(importName)
             return
           }
           case 'ImportNamespaceSpecifier': {
-            const localName = spec.local.name
             const importName = importSource
             esmImports.push(importName)
             return
           }
           case 'ImportSpecifier': {
-            const localName = spec.local.name
             const importName = `${importSource}.${spec.imported.name}`
             esmImports.push(importName)
-            return 
+            return
           }
           default: {
             throw new Error(`inspectEsmImports - unknown import specifier type "${spec.type}"`)

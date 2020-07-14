@@ -8,13 +8,13 @@ const strictModeViolationErrorCues = [
   'Legacy octal literals are not allowed in strict mode',
   'Expecting Unicode escape sequence',
   '\'with\' in strict mode',
-  'Deleting local variable in strict mode',
-] 
+  'Deleting local variable in strict mode'
+]
 
 function inspectSesCompat (ast) {
   const results = {
     primordialMutations: [],
-    strictModeViolations: [],
+    strictModeViolations: []
   }
   // check for strict mode violations
   ;(ast.errors || []).forEach(error => {
@@ -43,7 +43,7 @@ function inspectSesCompat (ast) {
 function hasSetterInWhitelist (memberPath) {
   let allowListTarget = sesAllowlist
   // ensure member path in whitelist
-  for (const [index, pathPart] of Object.entries(memberPath)) {
+  for (const pathPart of memberPath) {
     if (!(pathPart in allowListTarget)) return false
     allowListTarget = allowListTarget[pathPart]
     // new target must be an object for further lookup
