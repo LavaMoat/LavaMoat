@@ -19,7 +19,7 @@ main().catch(err => console.error(err))
 
 function parseArgs() {
   const argsParser = yargs
-    .command('sesify-viz [config] [debug config] [dest]', 'generate topological visualization for dep graph', (yargs) => {
+    .command('lavamoat-viz [config] [debug config] [dest]', 'generate topological visualization for dep graph', (yargs) => {
       // the path for the config file
       yargs.option('config', {
         alias: 'configPath',
