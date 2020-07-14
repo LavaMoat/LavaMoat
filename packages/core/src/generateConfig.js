@@ -7,21 +7,10 @@ const {
   inspectGlobals,
   inspectImports,
   inspectSesCompat,
+  codeSampleFromAstNode,
   utils: { mergeConfig, mapToObj, reduceToTopmostApiCallsFromStrings }
 } = require('lavamoat-tofu')
 
-// higher number is less secure, more flexible
-const environmentTypes = {
-  frozen: 1,
-  unfrozen: 2
-}
-
-const environmentTypeStrings = {
-  1: 'frozen',
-  2: 'unfrozen'
-}
-
-const defaultEnvironment = environmentTypes.frozen
 const rootSlug = '<root>'
 
 module.exports = { rootSlug, createConfigSpy, createModuleInspector }
@@ -55,7 +44,7 @@ function createModuleInspector (opts = {}) {
   }
 
   function inspectModule (moduleData, { isBuiltin } = {}) {
-    const packageName = moduleData.package
+    const packageName = moduleData.packageName || moduleData.package
     moduleIdToPackageName[moduleData.id] = packageName
     // initialize mapping from package to module
     const packageModules = packageToModules[packageName] = packageToModules[packageName] || {}
@@ -71,7 +60,7 @@ function createModuleInspector (opts = {}) {
     const filename = moduleData.file || 'unknown'
     const fileExtension = path.extname(filename)
     if (fileExtension !== '.js') return
-    // get eval environment
+    // get ast (parse or use cached)
     const ast = moduleData.ast || parse(moduleData.source, {
       // esm support
       sourceType: 'module',
@@ -79,19 +68,32 @@ function createModuleInspector (opts = {}) {
       allowReturnOutsideFunction: true,
       errorRecovery: true,
     })
-    inspectForEnvironment(ast, packageName)
+    // ensure ses compatibility
+    inspectForEnvironment(ast, moduleData)
     // get global usage
     inspectForGlobals(ast, moduleData, packageName)
     // get builtin package usage
     inspectForImports(ast, moduleData, packageName, isBuiltin)
   }
 
-  function inspectForEnvironment (ast, packageName) {
-    const { intrinsicMutations: results } = inspectSesCompat(ast, packageName)
-    const environment = results.length > 0 ? environmentTypes.unfrozen : environmentTypes.frozen
-    // initialize results for package
-    const environments = packageToEnvironments[packageName] = packageToEnvironments[packageName] || []
-    environments.push(environment)
+  function inspectForEnvironment (ast, moduleData) {
+    const { package: packageName } = moduleData
+    const { primordialMutations, strictModeViolations } = inspectSesCompat(ast, packageName)
+    if (primordialMutations.length > 0 || strictModeViolations.length > 0) {
+      // adapt moduleData to moduleRecord format
+      const moduleRecord = {
+        specifier: moduleData.id,
+        content: moduleData.source,
+        packageName: moduleData.packageName || moduleData.package,
+        packageVersion: moduleData.packageVersion,
+      }
+      const samples = jsonStringify({
+        primordialMutations: primordialMutations.map(({ node }) => codeSampleFromAstNode(node, moduleRecord)),
+        strictModeViolations: strictModeViolations.map(({ node }) => codeSampleFromAstNode(node, moduleRecord)),
+      })
+      const errMsg = `Incomptabile code detected in package "${packageName}" file "${moduleData.file}". Violations:\n${samples}`
+      throw new Error(errMsg)
+    }
   }
 
   function inspectForGlobals (ast, moduleData, packageName) {
@@ -135,7 +137,7 @@ function createModuleInspector (opts = {}) {
     const resources = {}
     const config = { resources }
     Object.entries(packageToModules).forEach(([packageName, packageModules]) => {
-      let globals, builtin, packages, environment
+      let globals, builtin, packages
       // skip for root modules (modules not from deps)
       const isRootModule = packageName === rootSlug
       if (isRootModule) return
@@ -154,13 +156,6 @@ function createModuleInspector (opts = {}) {
           if (globals[key] === 'read') globals[key] = true
         })
       }
-      // get environment
-      const environments = packageToEnvironments[packageName]
-      if (environments) {
-        const bestEnvironment = environments.sort()[environments.length - 1]
-        const isDefault = bestEnvironment === defaultEnvironment
-        environment = isDefault ? undefined : environmentTypeStrings[bestEnvironment]
-      }
       // get core imports
       const builtinImports = packageToBuiltinImports[packageName]
       if (builtinImports && builtinImports.length) {
@@ -170,12 +165,11 @@ function createModuleInspector (opts = {}) {
         })
       }
       // skip package config if there are no settings needed
-      if (!packages && !globals && !environment && !builtin) return
+      if (!packages && !globals && !builtin) return
       // create minimal config object
       const config = {}
       if (packages) config.packages = packages
       if (globals) config.globals = globals
-      if (environment) config.environment = environment
       if (builtin) config.builtin = builtin
       // set config for package
       resources[packageName] = config
@@ -214,12 +208,20 @@ function guessPackageName (requestedName) {
 function createSpy (onData, onEnd) {
   return through.obj((data, _, cb) => {
     // give data to observer fn
-    onData(data)
+    try {
+      onData(data)
+    } catch (err) {
+      return cb(err)
+    }
     // pass the data through normally
     cb(null, data)
   }, (cb) => {
     // call flush observer
-    onEnd()
+    try {
+      onEnd()
+    } catch (err) {
+      return cb(err)
+    }
     // End as normal
     cb()
   })
