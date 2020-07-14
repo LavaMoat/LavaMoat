@@ -11,13 +11,6 @@ const concurrencyLimit = pLimit(8)
 
 
 const parseBlacklist = [
-  // some resolution error?
-  // 'nyc',
-  // 'istanbul',
-  // 'babel-runtime',
-  // '@babel/runtime',
-  // 'react-scripts',
-  // 'jsdoc',
   // typescript
   'react-native',
   'ast-types-flow',
@@ -25,13 +18,13 @@ const parseBlacklist = [
   'expo',
   // ses non-compliant (Legacy octal literals in strict mode)
   // @babel/plugin-transform-literals
-  'vows',
-  'keypress',
-  'xunit-file',
-  'spec-xunit-file',
-  'blessed',
-  'commoner',
-  'istanbul-harmony',
+  // 'vows',
+  // 'keypress',
+  // 'xunit-file',
+  // 'spec-xunit-file',
+  // 'blessed',
+  // 'commoner',
+  // 'istanbul-harmony',
   // reserved word "package"
   // @babel/plugin-transform-reserved-words
   'main-bower-files',

@@ -1,6 +1,6 @@
 const { parseForConfig: nodeParseForConfig, makeResolveHook, makeImportHook } = require('lavamoat/src/parseForConfig')
 const { builtinModules: builtinPackages } = require('module')
-const { inspectSesCompat } = require('lavamoat-tofu')
+const { inspectSesCompat, codeSampleFromAstNode } = require('lavamoat-tofu')
 const { walk } = require('lavamoat-core/src/walk')
 
 module.exports = { parseForConfig }
@@ -62,18 +62,10 @@ async function parseForConfig ({ packageDir, entryId, rootPackageName }) {
   function visitorFn (moduleRecord) {
     if (!moduleRecord.ast) return
     const results = inspectSesCompat(moduleRecord.ast)
-    if (results.intrinsicMutations.length === 0) return
-    const hits = results.intrinsicMutations.map(({ node }) => {
-      const { content } = moduleRecord
-      const { start, end } = node.loc
-      const lines = content.split('\n')
-      const startLine = lines[start.line - 1]
-      const sample = startLine.slice(start.column, start.column + 80)
-      return {
-        start,
-        end,
-        sample,
-      }
+    if (results.primordialMutations.length === 0) return
+    const hits = results.primordialMutations.map(({ node }) => {
+      const sampleData = codeSampleFromAstNode(node, moduleRecord)
+      return sampleData
     })
     environment[moduleRecord.specifier] = hits
     // inspect each module
