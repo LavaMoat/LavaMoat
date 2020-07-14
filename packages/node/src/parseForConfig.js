@@ -1,7 +1,7 @@
 const path = require('path')
 const { promises: fs } = require('fs')
 const { createRequire, builtinModules: builtinPackages } = require('module')
-const { packageNameFromPath, parseForConfig: coreParseForConfig, LavamoatModuleRecord } = require('lavamoat-core')
+const { packageNameFromPath, packageDataForModule, parseForConfig: coreParseForConfig, LavamoatModuleRecord } = require('lavamoat-core')
 const { parse, inspectImports } = require('lavamoat-tofu')
 const { checkForResolutionOverride } = require('./resolutions')
 
@@ -44,14 +44,16 @@ function makeResolveHook ({ cwd, resolutions = {}, rootPackageName = '<root>' })
 
 function makeImportHook ({ isBuiltin, rootPackageName = '<root>' }) {
   return async (specifier) => {
-    let type, packageName, content, imports = [], ast
+    let type, packageName, packageVersion, content, imports = [], ast
     // get package name
     if (isBuiltin(specifier)) {
       type = 'builtin'
       packageName = specifier
     } else {
       type = 'js'
-      packageName = packageNameFromPath(specifier) || rootPackageName
+      const packageData = packageDataForModule({ id: specifier, file: specifier }, rootPackageName)
+      packageName = packageData.packageName
+      packageVersion = packageData.packageVersion
       // load src
       content = await fs.readFile(specifier, 'utf8')
       // parse
@@ -67,7 +69,7 @@ function makeImportHook ({ isBuiltin, rootPackageName = '<root>' }) {
         }
       }
     }
-    return new LavamoatModuleRecord({ specifier, packageName, content, type, imports, ast })
+    return new LavamoatModuleRecord({ specifier, packageName, packageVersion, content, type, imports, ast })
   }
 }
 
