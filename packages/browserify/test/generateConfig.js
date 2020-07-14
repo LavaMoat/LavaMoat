@@ -113,21 +113,15 @@ test('generateConfig - config ignores global refs accessed with whitelist items'
 })
 
 test('generateConfig - unfrozen environment - primordial modification', async (t) => {
-  const config = await createConfigForTest(function () {
-    const href = window.location.href
-    Array.prototype.bogosort = () => 'yolo'
-  })
-
-  t.deepEqual(config, {
-    resources: {
-      test: {
-        globals: {
-          'location.href': true
-        },
-        environment: 'unfrozen'
-      }
-    }
-  }, 'config matches expected')
+  try {
+    const config = await createConfigForTest(function () {
+      const href = window.location.href
+      Array.prototype.bogosort = () => 'yolo'
+    })
+    t.fail('expected to throw an error')
+  } catch (err) {
+    t.pass()
+  }
 })
 
 async function createConfigForTest (testFn) {
