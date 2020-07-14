@@ -57,7 +57,7 @@ function makeImportHook ({ isBuiltin, rootPackageName = '<root>' }) {
       // parse
       const extension = path.extname(specifier)
       if (extension === '.js') {
-        ast = parseModule(content)
+        ast = parseModule(content, specifier)
         // get imports
         const { cjsImports } = inspectImports(ast, null, false)
         imports = Array.from(new Set(cjsImports))
@@ -71,19 +71,27 @@ function makeImportHook ({ isBuiltin, rootPackageName = '<root>' }) {
   }
 }
 
-function parseModule (moduleSrc) {
-  // transformFromAstAsync
-  const ast = parse(moduleSrc, {
-    // esm support
-    sourceType: 'module',
-    // someone must have been doing this
-    allowReturnOutsideFunction: true,
-    // plugins: [
-    //   '@babel/plugin-transform-literals',
-    //   // '@babel/plugin-transform-reserved-words',
-    //   // '@babel/plugin-proposal-class-properties',
-    // ]
-    errorRecovery: true,
-  })
+function parseModule (moduleSrc, filename = '<unknown file>') {
+  let ast
+  try {
+    // transformFromAstAsync
+    ast = parse(moduleSrc, {
+      // esm support
+      sourceType: 'module',
+      // someone must have been doing this
+      allowReturnOutsideFunction: true,
+      // plugins: [
+      //   '@babel/plugin-transform-literals',
+      //   // '@babel/plugin-transform-reserved-words',
+      //   // '@babel/plugin-proposal-class-properties',
+      // ]
+      errorRecovery: true,
+    })
+  } catch (err) {
+    const newErr = new Error(`Failed to parse file "${filename}": ${err.stack}`)
+    newErr.file = filename
+    newErr.prevErr = err
+    throw newErr
+  }
   return ast
 }
