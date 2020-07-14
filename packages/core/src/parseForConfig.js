@@ -1,15 +1,7 @@
-const path = require('path')
-const { callbackify } = require('util')
-const mdeps = require('module-deps')
-const resolve = require('resolve')
-const { parse, inspectImports } = require('lavamoat-tofu')
-const through = require('through2').obj
 const { createModuleInspector } = require('./generateConfig')
-const { createPackageDataStream } = require('./packageData')
 const { walk } = require('./walk')
 
 module.exports = { parseForConfig }
-
 
 async function parseForConfig ({ moduleSpecifier, resolveHook, importHook, isBuiltin, shouldResolve, shouldImport }) {
   const inspector = createModuleInspector({ isBuiltin })
@@ -31,7 +23,7 @@ async function parseForConfig ({ moduleSpecifier, resolveHook, importHook, isBui
 function moduleRecordToModuleData ({
   moduleRecord,
   resolveHook,
-  shouldResolve = () => true,
+  shouldResolve = () => true
 }) {
   return {
     package: moduleRecord.packageName,
@@ -55,6 +47,6 @@ function moduleRecordToModuleData ({
         depValue = requestedName
       }
       return [requestedName, depValue]
-    })),
+    }))
   }
 }

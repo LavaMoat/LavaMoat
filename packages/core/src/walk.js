@@ -32,7 +32,7 @@ async function walk ({
       visitorFn,
       shouldResolve,
       shouldImport,
-      visitedSpecifiers,
+      visitedSpecifiers
     })
   }))
 }

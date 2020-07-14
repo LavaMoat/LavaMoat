@@ -20,7 +20,7 @@ module.exports = { rootSlug, createConfigSpy, createModuleInspector }
 // it calls `onResult` with the config when the stream ends.
 
 function createConfigSpy ({ onResult, isBuiltin }) {
-  if (!isBuiltin) throw new Error(`createConfigSpy - must specify "isBuiltin"`)
+  if (!isBuiltin) throw new Error('createConfigSpy - must specify "isBuiltin"')
   const inspector = createModuleInspector({ isBuiltin })
   const configSpy = createSpy(
     // inspect each module
@@ -32,7 +32,6 @@ function createConfigSpy ({ onResult, isBuiltin }) {
 }
 
 function createModuleInspector (opts = {}) {
-  const packageToEnvironments = {}
   const packageToGlobals = {}
   const packageToBuiltinImports = {}
   const packageToModules = {}
@@ -66,7 +65,7 @@ function createModuleInspector (opts = {}) {
       sourceType: 'module',
       // someone must have been doing this
       allowReturnOutsideFunction: true,
-      errorRecovery: true,
+      errorRecovery: true
     })
     // ensure ses compatibility
     inspectForEnvironment(ast, moduleData)
@@ -85,11 +84,11 @@ function createModuleInspector (opts = {}) {
         specifier: moduleData.id,
         content: moduleData.source,
         packageName: moduleData.packageName || moduleData.package,
-        packageVersion: moduleData.packageVersion,
+        packageVersion: moduleData.packageVersion
       }
       const samples = jsonStringify({
         primordialMutations: primordialMutations.map(({ node }) => codeSampleFromAstNode(node, moduleRecord)),
-        strictModeViolations: strictModeViolations.map(({ node }) => codeSampleFromAstNode(node, moduleRecord)),
+        strictModeViolations: strictModeViolations.map(({ node }) => codeSampleFromAstNode(node, moduleRecord))
       })
       const errMsg = `Incomptabile code detected in package "${packageName}" file "${moduleData.file}". Violations:\n${samples}`
       throw new Error(errMsg)

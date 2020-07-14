@@ -10,7 +10,7 @@ module.exports = {
   decorateWithPackageData,
   packageDataForModule,
   packageVersionFromPath,
-  packageNameFromPath,
+  packageNameFromPath
 }
 
 function createPackageDataStream ({ rootPackageName } = {}) {
@@ -51,7 +51,6 @@ function packageVersionFromPath (packageName, filepath) {
   const [packageParentPath] = filepath.split(`/${packageName}/`)
   const packagePath = path.join(packageParentPath, packageName, 'package.json')
   if (!packagePath) return
-  if (packagePath === '/node_modules/one/package.json') debugger
   const { version: packageVersion } = require(packagePath)
   return packageVersion
 }

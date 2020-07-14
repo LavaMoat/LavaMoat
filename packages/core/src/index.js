@@ -20,5 +20,5 @@ module.exports = {
   createModuleInspector,
   parseForConfig,
   // module record class
-  LavamoatModuleRecord,
+  LavamoatModuleRecord
 }
