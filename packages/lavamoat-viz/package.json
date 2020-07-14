@@ -1,6 +1,6 @@
 {
-  "name": "sesify-viz",
-  "description": "This is a graph visualization generator exploring a sesify bundle's dependency graph and permissions.",
+  "name": "lavamoat-viz",
+  "description": "This is a dashboard for exploring a dependency graph and LavaMoat policy file",
   "main": "index.js",
   "version": "3.0.10",
   "dependencies": {
@@ -45,14 +45,14 @@
     ]
   },
   "servedPath": "./",
-  "repository": "git+https://github.com/kumavis/sesify-viz.git",
+  "repository": "git+https://github.com/lavamoat/lavamoat-viz.git",
   "author": "kumavis <aaron@kumavis.me>",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/kumavis/sesify-viz/issues"
+    "url": "https://github.com/lavamoat/lavamoat-viz/issues"
   },
-  "homepage": "https://kumavis.github.io/sesify-viz",
+  "homepage": "https://lavamoat.github.io/lavamoat-viz",
   "bin": {
-    "sesify-viz": "./bin/index.js"
+    "lavamoat-viz": "./bin/index.js"
   }
 }
