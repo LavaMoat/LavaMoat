@@ -15,7 +15,7 @@ test('inspectSesCompat - allowed primordial assignment', (t) => {
   const results = inspectSesCompatTest(`
     Error.stackTraceLimit = 42
   `)
-  t.deepEqual(results.intrinsicMutations, [])
+  t.deepEqual(results.primordialMutations, [])
   t.end()
 })
 
@@ -23,7 +23,7 @@ test('inspectSesCompat - disallowed primordial assignment', (t) => {
   const results = inspectSesCompatTest(`
     Error.xyz = 42
   `)
-  t.deepEqual(results.intrinsicMutations.length, 1)
+  t.deepEqual(results.primordialMutations.length, 1)
   t.end()
 })
 

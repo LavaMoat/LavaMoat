@@ -13,7 +13,7 @@ const strictModeViolationErrorCues = [
 
 function inspectSesCompat (ast) {
   const results = {
-    intrinsicMutations: [],
+    primordialMutations: [],
     strictModeViolations: [],
   }
   // check for strict mode violations
@@ -35,7 +35,7 @@ function inspectSesCompat (ast) {
   possibleHits.forEach((intrinsicMutation) => {
     const { memberPath } = intrinsicMutation
     if (hasSetterInWhitelist(memberPath)) return
-    results.intrinsicMutations.push(intrinsicMutation)
+    results.primordialMutations.push(intrinsicMutation)
   })
   return results
 }

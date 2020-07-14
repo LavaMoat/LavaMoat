@@ -3,6 +3,7 @@ const { default: traverse } = require('@babel/traverse')
 const { inspectGlobals, inspectImports, inspectEsmImports } = require('./inspectSource')
 const { inspectPrimordialAssignments } = require('./inspectPrimordialAssignments')
 const { inspectSesCompat } = require('./inspectSesCompat.js')
+const { codeSampleFromAstNode } = require('./codeSampleFromAstNode.js')
 const utils = require('./util')
 
 module.exports = {
@@ -14,4 +15,5 @@ module.exports = {
   traverse,
   inspectPrimordialAssignments,
   inspectSesCompat,
+  codeSampleFromAstNode,
 }
