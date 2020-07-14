@@ -7,7 +7,6 @@ const { checkForResolutionOverride } = require('./resolutions')
 
 module.exports = { parseForConfig, makeResolveHook, makeImportHook }
 
-
 async function parseForConfig ({ cwd, entryId, resolutions, rootPackageName, shouldResolve, shouldImport }) {
   const isBuiltin = (id) => builtinPackages.includes(id)
   const resolveHook = makeResolveHook({ cwd, resolutions, rootPackageName })
@@ -31,6 +30,7 @@ function makeResolveHook ({ cwd, resolutions = {}, rootPackageName = '<root>' })
     }
     // utilize node's internal resolution algo
     const { resolve } = createRequire(new URL(`file://${referrer}`))
+    /* eslint-disable no-useless-catch */
     let resolved
     try {
       resolved = resolve(requestedName)
@@ -44,7 +44,7 @@ function makeResolveHook ({ cwd, resolutions = {}, rootPackageName = '<root>' })
 
 function makeImportHook ({ isBuiltin, rootPackageName = '<root>' }) {
   return async (specifier) => {
-    let type, packageName, packageVersion, content, imports = [], ast
+    let type; let packageName; let packageVersion; let content; let imports = []; let ast
     // get package name
     if (isBuiltin(specifier)) {
       type = 'builtin'
@@ -64,7 +64,7 @@ function makeImportHook ({ isBuiltin, rootPackageName = '<root>' }) {
         const { cjsImports } = inspectImports(ast, null, false)
         imports = Array.from(new Set(cjsImports))
       } else {
-        if (!['.css','.sass','.coffee','.json','.node'].includes(extension)) {
+        if (!['.css', '.sass', '.coffee', '.json', '.node'].includes(extension)) {
           console.warn(`node importHook - ignored unknown extension "${extension}"`)
         }
       }
@@ -87,7 +87,7 @@ function parseModule (moduleSrc, filename = '<unknown file>') {
       //   // '@babel/plugin-transform-reserved-words',
       //   // '@babel/plugin-proposal-class-properties',
       // ]
-      errorRecovery: true,
+      errorRecovery: true
     })
   } catch (err) {
     const newErr = new Error(`Failed to parse file "${filename}": ${err.stack}`)
