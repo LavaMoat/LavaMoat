@@ -1,4 +1,5 @@
-// fix for silencing aframe errors
+import { ForceGraph2D } from 'react-force-graph'
+import React from 'react'
 import '../css/DepGraph.css'
 import {
   createPackageGraph,
@@ -6,12 +7,12 @@ import {
   getPackageVersionName,
   getColorForModule,
   sortByColor
-} from './utils/utils'
-import Nav from '../views/nav'
-import { DepList } from '../views/DepList'
-import { ForceGraph2D } from 'react-force-graph'
-import React from 'react'
+} from './utils/utils.js'
+import Nav from '../views/nav.js'
+import { DepList } from '../views/DepList.js'
+
 const d3 = require('d3')
+
 
 const lavamoatModes = ['lavamoat', 'without']
 

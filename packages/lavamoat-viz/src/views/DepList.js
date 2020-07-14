@@ -1,13 +1,14 @@
+import { UnControlled as CodeMirror } from 'react-codemirror2'
+import 'codemirror/lib/codemirror.css';
+import 'codemirror/theme/material.css';
 import {
   getPackageVersionName,
   fullModuleNameFromPath,
   getLineNumbersForGlobals
-} from '../graphs/utils/utils'
+} from '../graphs/utils/utils.js'
 import React from 'react'
 import '../css/DepGraph.css'
-import { UnControlled as CodeMirror } from 'react-codemirror2'
-import 'codemirror/lib/codemirror.css';
-import 'codemirror/theme/material.css';
+
 require('codemirror/mode/javascript/javascript');
 
 class DepList extends React.Component {

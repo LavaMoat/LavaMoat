@@ -3,8 +3,8 @@ import ReactDOM from 'react-dom';
 import 'codemirror'
 import 'codemirror/lib/codemirror.css'
 import './css/index.css';
-import App from './App';
-import * as serviceWorker from './serviceWorker';
+import App from './App.js';
+import * as serviceWorker from './serviceWorker.js';
 
 ReactDOM.render(<App />, document.getElementById('root'));
 
