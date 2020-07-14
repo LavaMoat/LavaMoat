@@ -2,10 +2,8 @@
 const path = require('path')
 const { callbackify } = require('util')
 const through = require('through2').obj
-const resolvePackagePath = require('resolve-package-path')
 const pathSeperator = require('path').sep
 const { isCore } = require('resolve')
-const { rootSlug } = require('./generateConfig')
 
 module.exports = {
   createPackageDataStream,
@@ -37,40 +35,35 @@ function packageDataForModule (moduleData, rootPackageName) {
     return { packageName: moduleData.id, packageVersion: undefined }
   }
   // parse package name from file path
-  const path = moduleData.file
-  let packageName = packageNameFromPath(path) || rootPackageName
+  const filepath = moduleData.file
+  let packageName = packageNameFromPath(filepath)
   let packageVersion
   if (packageName) {
-    packageVersion = packageVersionFromPath(packageName, path)
+    packageVersion = packageVersionFromPath(packageName, filepath)
   } else {
-    // detect if files are part of the entry and not from dependencies
-    const filePathFirstPart = path.split(pathSeperator)[0]
-    const isRootLevel = filePathFirstPart !== 'node_modules'
-    // otherwise fail
-    if (!isRootLevel) {
-      throw new Error(`LavaMoat - Config Autogen - Failed to parse module name. first part: "${filePathFirstPart}" full path: "${path}"`)
-    }
-    packageName = rootSlug
+    packageName = rootPackageName
   }
   return { packageName, packageVersion }
 }
 
-function packageVersionFromPath (packageName, path) {
-  if (!packageName || !path) return
-  const packagePath = resolvePackagePath(packageName, path)
+function packageVersionFromPath (packageName, filepath) {
+  if (!packageName || !filepath) return
+  const [packageParentPath] = filepath.split(`/${packageName}/`)
+  const packagePath = path.join(packageParentPath, packageName, 'package.json')
   if (!packagePath) return
+  if (packagePath === '/node_modules/one/package.json') debugger
   const { version: packageVersion } = require(packagePath)
   return packageVersion
 }
 
 function packageNameFromPath (file) {
-  const segments = file.split(path.sep)
+  const segments = file.split(pathSeperator)
   const index = segments.lastIndexOf('node_modules')
   if (index === -1) return
   let moduleName = segments[index + 1]
   // check for scoped modules
   if (moduleName[0] === '@') {
-    moduleName = segments[index + 1] + path.sep + segments[index + 2]
+    moduleName = segments[index + 1] + pathSeperator + segments[index + 2]
   }
   return moduleName
 }
