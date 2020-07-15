@@ -4,13 +4,16 @@
   "main": "index.js",
   "version": "3.0.11",
   "dependencies": {
-    "@babel/preset-env": "^7.8.7",
+    "@babel/preset-env": "^7.10.4",
     "@babel/preset-react": "^7.8.3",
     "codemirror": "^5.52.2",
     "module-name-from-path": "^1.0.4",
     "ncp": "^2.0.0",
     "open": "^7.0.3",
     "pify": "^4.0.1",
+    "three": "^0.118.3",
+    "three-forcegraph": "^1.36.1",
+    "three-spritetext": "^1.5.1",
     "yargs": "^14.0.0"
   },
   "devDependencies": {
@@ -22,9 +25,9 @@
     "html-webpack-plugin": "4.0.0-alpha.2",
     "react": "^16.8.6",
     "react-bootstrap": "^1.0.0-beta.8",
+    "react-codemirror2": "^7.1.0",
     "react-dom": "^16.8.6",
     "react-force-graph-2d": "^1.17.3",
-    "react-codemirror2": "^7.1.0",
     "react-hyperscript": "^3.2.0",
     "style-loader": "0.23.1",
     "webpack": "4.28.3",
@@ -41,7 +44,12 @@
   "babel": {
     "presets": [
       "@babel/preset-react",
-      "@babel/preset-env"
+      [
+        "@babel/preset-env",
+        {
+          "debug": true
+        }
+      ]
     ]
   },
   "servedPath": "./",

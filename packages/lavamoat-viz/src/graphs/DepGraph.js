@@ -1,4 +1,7 @@
 import ForceGraph2D from 'react-force-graph-2d'
+import ThreeForceGraph from 'three-forcegraph'
+// import SpriteText from 'three-spritetext';
+// import * as THREE from 'three';
 import React from 'react'
 import '../css/DepGraph.css'
 import {
@@ -10,6 +13,10 @@ import {
 } from './utils/utils.js'
 import Nav from '../views/nav.js'
 import { DepList } from '../views/DepList.js'
+import XrButton from './xr-button.js'
+import setupScene from './vr-viz/setupScene.js'
+import setupSelections from './vr-viz/setupSelections.js'
+import setupGraph from './vr-viz/setupGraph.js'
 
 const d3 = require('d3')
 
@@ -31,7 +38,7 @@ class DepGraph extends React.Component {
       viewSource: false,
       lavamoatMode: lavamoatModes[0],
       showPackageSize: false,
-      selectionLocked: false
+      selectionLocked: false,
     };
   }
 
@@ -118,6 +125,22 @@ class DepGraph extends React.Component {
     return packageModules
   }
 
+  onVrSessionStart (session) {
+    const { packageData } = this.state
+    const { scene, renderer, subscribeTick } = setupScene()
+    const graph = new ThreeForceGraph()
+      .graphData(packageData)
+      // .nodeThreeObject((node) => {
+      //   return new SpriteText(node.label || node.id || 'hello', 10, node.color);
+      // })
+    setupGraph({ scene, graph, subscribeTick })
+    renderer.xr.setSession(session)
+  }
+
+  onVrSessionEnd () {
+    console.log('vr session end')
+  }
+
   render () {
     const { 
       packageData,
@@ -129,7 +152,7 @@ class DepGraph extends React.Component {
       lavamoatMode,
       showPackageSize,
       selectedModule,
-      selectionLocked
+      selectionLocked,
     } = this.state
 
     const actions = {
@@ -222,6 +245,10 @@ class DepGraph extends React.Component {
               View Package Size
             </button>
           </div>
+          <XrButton
+            onSessionStarted={(session) => this.onVrSessionStart(session)}
+            onSessionEnded={(session) => this.onVrSessionEnd(session)}
+          />
         </div>
 
         <div className="viewSourceWrapper">
