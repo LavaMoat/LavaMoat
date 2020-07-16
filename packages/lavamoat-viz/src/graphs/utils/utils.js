@@ -61,9 +61,9 @@ function createModuleGraph(bundleData, {
     const configLabel = JSON.stringify(configForPackage, null, 2)
     const label = `${file}`
     const isEntryPackage = packageVersionName === '<root>'
-    const islavamoat = lavamoatMode === 'lavamoat'
+    const isLavamoat = lavamoatMode === 'lavamoat'
     const lavamoatColor = isEntryPackage ? 'purple' : getColorForPackage(configForPackage)
-    const color = islavamoat ? lavamoatColor : 'red'
+    const color = isLavamoat ? lavamoatColor : 'red'
     // create node for modules
     nodes.push(
       createNode({ id: parentId, val: size, label, configLabel, color })
@@ -136,6 +136,7 @@ function getColorForModule (parentData) {
   return getColor(globals)
 }
 
+// this is a denylist, it should be an allowlist
 function getColor(globals) {
   if (globals.some(glob => redAlertGlobals.includes(glob))) {
     return 'red'
