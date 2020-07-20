@@ -1,21 +1,23 @@
+/* eslint-disable react/no-deprecated */
 import ForceGraph2D from 'react-force-graph-2d'
 import ThreeForceGraph from 'three-forcegraph'
 // import SpriteText from 'three-spritetext';
 // import * as THREE from 'three';
 import React from 'react'
 import '../css/DepGraph.css'
-import {
-  createPackageGraph,
-  createModuleGraph,
-  getPackageVersionName,
-  getColorForModule,
-  sortByColor
-} from './utils/utils.js'
 import Nav from '../views/nav.js'
 import { DepList } from '../views/DepList.js'
+import {
+  parseConfigDebugForPackages,
+  createGraph,
+  getPackageVersionName,
+  getDangerRankForModule,
+  sortByDangerRank,
+  getColorForRank,
+} from './utils/utils.js'
 import XrButton from './xr-button.js'
 import setupScene from './vr-viz/setupScene.js'
-import setupSelections from './vr-viz/setupSelections.js'
+// import setupSelections from './vr-viz/setupSelections.js'
 import setupGraph from './vr-viz/setupGraph.js'
 
 const d3 = require('d3')
@@ -30,6 +32,7 @@ class DepGraph extends React.Component {
     const graph = { nodes: [], links: [], container: { width: 0, height: 0 } }
 
     this.state = {
+      packages: {},
       packageData: graph,
       moduleData: null,
       packageModulesMode: false,
@@ -39,7 +42,7 @@ class DepGraph extends React.Component {
       lavamoatMode: lavamoatModes[0],
       showPackageSize: false,
       selectionLocked: false,
-    };
+    }
   }
 
   componentDidMount () {
@@ -73,8 +76,8 @@ class DepGraph extends React.Component {
   updateGraph (bundleData, state) {
     const {
       packageData,
-      packageModules,
-      packageModulesMode
+      // packageModules,
+      // packageModulesMode,
     } = state
 
     // Uncomment for module nodes
@@ -85,15 +88,20 @@ class DepGraph extends React.Component {
     //   newGraph = createPackageGraph(bundleData, state)
     // }
 
-    const newGraph = createPackageGraph(bundleData, state)
+    // const newGraph = createPackageGraph(bundleData, state)
+    const packages = parseConfigDebugForPackages(bundleData)
+    const newGraph = createGraph(packages, bundleData, state)
+
     // create a map for faster lookups by id
-    const nodeLookup = new Map(newGraph.nodes.map(node => [node.id, node]))
+    const nodeLookup = new Map(newGraph.nodes.map((node) => [node.id, node]))
     // copy simulation data from old graph
 
     const oldGraph = packageData
     oldGraph.nodes.forEach((oldNode) => {
       const newNode = nodeLookup.get(oldNode.id)
-      if (!newNode) return
+      if (!newNode) {
+        return
+      }
       const { x, y, vx, vy } = oldNode
       Object.assign(newNode, { x, y, vx, vy })
     })
@@ -104,17 +112,18 @@ class DepGraph extends React.Component {
     // } else {
     //   this.setState(() => ({ packageData: newGraph }))
     // }
-    this.setState(() => ({ packageData: newGraph }))
+    this.setState(() => ({ packages, packageData: newGraph }))
   }
 
   getModulesForPackage (packageId) {
     const { bundleData } = this.props
     const { debugInfo } = bundleData
-    let packageModules = {}
-    let moduleSources = []
+    const packageModules = {}
+    const moduleSources = []
     Object.entries(debugInfo).forEach(([moduleId, moduleDebugInfo]) => {
       const { moduleData } = moduleDebugInfo
-      const color = getColorForModule(moduleDebugInfo)
+      const rank = getDangerRankForModule(moduleDebugInfo)
+      const color = getColorForRank(rank)
       if (getPackageVersionName(moduleData) === packageId) {
         if (!moduleSources.includes(moduleData.source)) {
           moduleSources.push(moduleData.source)
@@ -143,7 +152,8 @@ class DepGraph extends React.Component {
   }
 
   render () {
-    const { 
+    const {
+      packages,
       packageData,
       moduleData,
       selectedNode,
@@ -183,9 +193,9 @@ class DepGraph extends React.Component {
           const modules = this.getModulesForPackage(packageId)
           const newState = {
             selectedPackage: packageId,
-  
+
             packageModulesMode: true,
-            packageModules: modules
+            packageModules: modules,
           }
           this.setStateAndUpdateGraph(newState)
         }
@@ -203,15 +213,15 @@ class DepGraph extends React.Component {
       selectlavamoatMode: (target) => {
         const newState = { lavamoatMode: target }
         this.setStateAndUpdateGraph(newState)
-      }
+      },
     }
     const graphData = packageData
     let sortedPackages = []
     let sortedModules = []
     let selectedNodeLabel
     let selectedNodeData
-    let sourceButtonStyle
-    let helpMessage
+    // let sourceButtonStyle
+    // let helpMessage
 
     if (selectedNode) {
       selectedNodeLabel = selectedNode.label
@@ -225,43 +235,45 @@ class DepGraph extends React.Component {
       selectedNodeLabel = 'select a node'
       selectedNodeData = ''
     }
-    if (!packageModulesMode) {
-      sourceButtonStyle = { display: 'none' }
-    }
-    if (viewSource) {
-      helpMessage = "Press ENTER to navigate between globals"
-    }
-    
-    sortedPackages = sortByColor(packageData.nodes)
+    // if (!packageModulesMode) {
+    //   sourceButtonStyle = { display: 'none' }
+    // }
+    // if (viewSource) {
+    //   helpMessage = 'Press ENTER to navigate between globals'
+    // }
+
+    sortedPackages = sortByDangerRank(packages)
     if (packageModules) {
       const packageModulesList = Object.values(packageModules)
-      sortedModules = sortByColor(packageModulesList)
+      sortedModules = sortByDangerRank(packageModulesList)
     }
 
     return (
-    <div>
-      <div className="navWrapper">
-        <div className="leftButtonsWrapper">
-          <Nav
-            routes={lavamoatModes}
-            activeRoute={lavamoatMode}
-            onNavigate={(target) => actions.selectlavamoatMode(target)}
-          />
-          <div className="sizeModeWrapper">
-            <button
-              className="sizeModeButton"
-              onClick={() => {actions.togglePackageSize()}}
-            >
+      <div>
+        <div className="navWrapper">
+          <div className="leftButtonsWrapper">
+            <Nav
+              routes={lavamoatModes}
+              activeRoute={lavamoatMode}
+              onNavigate={(target) => actions.selectlavamoatMode(target)}
+            />
+            <div className="sizeModeWrapper">
+              <button
+                className="sizeModeButton"
+                onClick={() => {
+                  actions.togglePackageSize()
+                }}
+              >
               View Package Size
-            </button>
+              </button>
+            </div>
+            <XrButton
+              onSessionStarted={(session) => this.onVrSessionStart(session)}
+              onSessionEnded={(session) => this.onVrSessionEnd(session)}
+            />
           </div>
-          <XrButton
-            onSessionStarted={(session) => this.onVrSessionStart(session)}
-            onSessionEnded={(session) => this.onVrSessionEnd(session)}
-          />
-        </div>
 
-        {/* <div className="viewSourceWrapper">
+          {/* <div className="viewSourceWrapper">
           <div className="helpMessage">
             {helpMessage}
           </div>
@@ -273,39 +285,41 @@ class DepGraph extends React.Component {
             View Source
           </button>
         </div> */}
-      </div>
-      <DepList
-        actions={actions}
-        selectedPackage={selectedPackage}
+        </div>
+        <DepList
+          actions={actions}
+          selectedPackage={selectedPackage}
 
-        sortedPackages={sortedPackages}
-        sortedModules={sortedModules}
-        packageModulesMode={packageModulesMode}
-        selectedNode={selectedNode}
-        packageModules={packageModules}
-        selectedNodeLabel={selectedNodeLabel}
-        selectedNodeData={selectedNodeData}
-        selectedModule={selectedModule}
-        moduleData={moduleData}
-        viewSource={viewSource}
-        selectionLocked={selectionLocked}
-      />
-      <ForceGraph2D
-        ref={el => this.forceGraph = el}
-        graphData={graphData}
-        linkDirectionalArrowLength={4}
-        linkDirectionalArrowRelPos={1}
-        nodeLabel={'label'}
-        // onNodeHover={(node) => {
-        //   if (!node) return
-        //   if (packageModulesMode && !packageModules[node.id]) return
-        //   actions.selectNode(node)
-        // }}
-        onNodeClick={({ id }) => actions.selectPackage(id)}
-        linkWidth={(link) => link.width}
-        linkColor={(link) => link.color}
-      />
-    </div>
+          sortedPackages={sortedPackages}
+          sortedModules={sortedModules}
+          packageModulesMode={packageModulesMode}
+          selectedNode={selectedNode}
+          packageModules={packageModules}
+          selectedNodeLabel={selectedNodeLabel}
+          selectedNodeData={selectedNodeData}
+          selectedModule={selectedModule}
+          moduleData={moduleData}
+          viewSource={viewSource}
+          selectionLocked={selectionLocked}
+        />
+        <ForceGraph2D
+          ref={(el) => {
+            this.forceGraph = el
+          }}
+          graphData={graphData}
+          linkDirectionalArrowLength={4}
+          linkDirectionalArrowRelPos={1}
+          nodeLabel={'label'}
+          // onNodeHover={(node) => {
+          //   if (!node) return
+          //   if (packageModulesMode && !packageModules[node.id]) return
+          //   actions.selectNode(node)
+          // }}
+          onNodeClick={({ id }) => actions.selectPackage(id)}
+          linkWidth={(link) => link.width}
+          linkColor={(link) => link.color}
+        />
+      </div>
     )
   }
 }
