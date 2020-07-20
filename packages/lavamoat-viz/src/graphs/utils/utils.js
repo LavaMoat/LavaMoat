@@ -223,26 +223,26 @@ function createNode (params) {
   return node
 }
 
-function getNodeSize (source) {
-  const { length } = source.split(/\r\n|\r|\n/u)
-  let size
-  if (length < 50) {
-    size = 2
-  } else if (length > 50 && length < 100) {
-    size = 3
-  } else if (length > 100 && length < 250) {
-    size = 5
-  } else if (length > 250 && length < 500) {
-    size = 7
-  } else if (length > 500 && length < 1000) {
-    size = 10
-  } else if (length > 1000 && length < 2500) {
-    size = 13
-  } else {
-    size = 16
-  }
-  return size
-}
+// function getNodeSize (source) {
+//   const { length } = source.split(/\r\n|\r|\n/u)
+//   let size
+//   if (length < 50) {
+//     size = 2
+//   } else if (length > 50 && length < 100) {
+//     size = 3
+//   } else if (length > 100 && length < 250) {
+//     size = 5
+//   } else if (length > 250 && length < 500) {
+//     size = 7
+//   } else if (length > 500 && length < 1000) {
+//     size = 10
+//   } else if (length > 1000 && length < 2500) {
+//     size = 13
+//   } else {
+//     size = 16
+//   }
+//   return size
+// }
 
 function fullModuleNameFromPath (file) {
   const segments = file.split(path.sep)

@@ -262,7 +262,7 @@ class DepGraph extends React.Component {
               activeRoute={lavamoatMode}
               onNavigate={(target) => actions.selectlavamoatMode(target)}
             />
-            <div className="sizeModeWrapper">
+            {/* <div className="sizeModeWrapper">
               <button
                 className="sizeModeButton"
                 onClick={() => {
@@ -271,7 +271,7 @@ class DepGraph extends React.Component {
               >
               View Package Size
               </button>
-            </div>
+            </div> */}
             <XrButton
               onSessionStarted={(session) => this.onVrSessionStart(session)}
               onSessionEnded={(session) => this.onVrSessionEnd(session)}
