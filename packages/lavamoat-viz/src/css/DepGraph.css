@@ -43,7 +43,7 @@
   padding: 12px;
   z-index: 1;
 }
-.packageInfoStyle {
+.packageInfo {
   position: absolute;
   right: 0;
   background: rgba(232, 232, 232, 0.78);

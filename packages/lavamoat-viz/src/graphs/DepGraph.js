@@ -152,12 +152,13 @@ class DepGraph extends React.Component {
   }
 
   render () {
+    const { bundleData } = this.props
     const {
       packages,
       packageData,
-      moduleData,
-      selectedNode,
-      packageModulesMode,
+      // moduleData,
+      // selectedNode,
+      // packageModulesMode,
       packageModules,
       viewSource,
       lavamoatMode,
@@ -174,15 +175,17 @@ class DepGraph extends React.Component {
       },
       selectModule: (moduleId) => {
         let newSelection
-        if (selectedModule === moduleId) {
+        if (selectedModule && selectedModule === moduleId) {
           newSelection = null
         } else {
-          newSelection = moduleId
+          newSelection = bundleData.debugInfo[moduleId].moduleData
         }
-        this.setState({ selectedModule: newSelection })
+        this.setState({
+          selectedModule: newSelection,
+        })
       },
       selectPackage: (packageId) => {
-        if (packageId === selectedPackage) {
+        if (selectedPackage && packageId === selectedPackage.id) {
           this.setState({
             selectedPackage: null,
             selectedModule: null,
@@ -190,10 +193,11 @@ class DepGraph extends React.Component {
             packageModulesMode: false,
           })
         } else {
+          const newSelection = packages[packageId]
           const modules = this.getModulesForPackage(packageId)
           const newState = {
-            selectedPackage: packageId,
-
+            selectedPackage: newSelection,
+            selectedModule: null,
             packageModulesMode: true,
             packageModules: modules,
           }
@@ -218,23 +222,24 @@ class DepGraph extends React.Component {
     const graphData = packageData
     let sortedPackages = []
     let sortedModules = []
-    let selectedNodeLabel
-    let selectedNodeData
+    // let selectedNodeLabel
+    // let selectedNodeData
     // let sourceButtonStyle
     // let helpMessage
 
-    if (selectedNode) {
-      selectedNodeLabel = selectedNode.label
-      if (packageModulesMode && !isNaN(selectedNode.id) && selectedNode.id in packageModules) {
+    // if (selectedPackage) {
+    //   selectedNodeLabel = selectedPackage.id
+    //   selectedNodeData = 'funky town'
+    //   // if (packageModulesMode && !isNaN(selectedNode.id) && selectedNode.id in packageModules) {
 
-        selectedNodeData = JSON.stringify(packageModules[selectedNode.id].globalUsage, null, 2) || null
-      } else {
-        selectedNodeData = selectedNode.configLabel
-      }
-    } else {
-      selectedNodeLabel = 'select a node'
-      selectedNodeData = ''
-    }
+    //   //   selectedNodeData = JSON.stringify(packageModules[selectedNode.id].globalUsage, null, 2) || null
+    //   // } else {
+    //   //   selectedNodeData = selectedNode.configLabel
+    //   // }
+    // } else {
+    //   selectedNodeLabel = 'select a node'
+    //   selectedNodeData = ''
+    // }
     // if (!packageModulesMode) {
     //   sourceButtonStyle = { display: 'none' }
     // }
@@ -288,20 +293,13 @@ class DepGraph extends React.Component {
         </div>
         <DepList
           actions={actions}
-          selectedPackage={selectedPackage}
-
+          packages={packages}
           sortedPackages={sortedPackages}
           sortedModules={sortedModules}
-          packageModulesMode={packageModulesMode}
-          selectedNode={selectedNode}
-          packageModules={packageModules}
-          selectedNodeLabel={selectedNodeLabel}
-          selectedNodeData={selectedNodeData}
+          selectedPackage={selectedPackage}
           selectedModule={selectedModule}
-          moduleData={moduleData}
-          viewSource={viewSource}
-          selectionLocked={selectionLocked}
         />
+        {this.renderSelectedNodeView()}
         <ForceGraph2D
           ref={(el) => {
             this.forceGraph = el
@@ -321,6 +319,108 @@ class DepGraph extends React.Component {
         />
       </div>
     )
+  }
+
+  renderSelectedNodeView () {
+    const { selectedPackage, selectedModule } = this.state
+    if (selectedModule) {
+      return this.renderSelectedModule(selectedModule)
+    } else if (selectedPackage) {
+      return this.renderSelectedPackage(selectedPackage)
+    }
+    return (
+      <pre className="packageInfo">
+        please select a package
+      </pre>
+    )
+  }
+
+  renderSelectedPackage (selectedPackage) {
+    const { bundleData: { resources } } = this.props
+    const config = resources[selectedPackage.name] || {}
+    return (
+      <div className="packageInfo">
+        <pre>{selectedPackage.id}</pre>
+        policy for this package:
+        <pre>
+          {JSON.stringify(config, null, 2)}
+        </pre>
+      </div>
+    )
+  }
+
+  renderSelectedModule (selectedModule) {
+    const { bundleData: { debugInfo } } = this.props
+    const moduleDebugInfo = debugInfo[selectedModule.id]
+    const moduleDisplayInfo = { ...moduleDebugInfo, moduleData: undefined }
+    const { packageData } = moduleDebugInfo.moduleData
+    return (
+      <div className="packageInfo">
+        <pre>{packageData.id}</pre>
+        <pre>{selectedModule.fileSimple}</pre>
+        policies generated from this file:
+        <pre>
+          {JSON.stringify(moduleDisplayInfo, null, 2)}
+        </pre>
+      </div>
+    )
+  }
+
+  renderSelectedNodeCode () {
+  // import { UnControlled as CodeMirror } from 'react-codemirror2'
+  // import 'codemirror/lib/codemirror.css'
+  // import 'codemirror/theme/material.css'
+  // require('codemirror/mode/javascript/javascript')
+
+    // const { codeMirror } = this.state
+    // let source
+    // if (codeMirror && viewSource) {
+    //   // uncomment for module nodes
+    //   // source = packageModules[selectedNode.id].source
+    //   // globals = packageModules[selectedNode.id].globalUsage || null
+    //   codeMirror.refresh()
+    //   // source = sortedModules[selectedModule].source
+    //   // const globals = sortedModules[selectedModule].globalUsage || null
+    //   source = 'add later'
+    //   const globals = null
+    //   const lineNumbersForGlobals = getLineNumbersForGlobals(source, globals)
+    //   let selectedLineIndex = 0
+    //   let line
+    //   let lineClassActive = false
+    //   codeMirror.focus()
+    //   codeMirror.setOption('extraKeys', {
+    //     Enter (cm) {
+    //       if (lineNumbersForGlobals.length === 0) {
+    //         return
+    //       }
+    //       const doc = cm.getDoc()
+    //       if (lineClassActive) {
+    //         doc.removeLineClass(line, 'text', 'highlight')
+    //       }
+    //       line = lineNumbersForGlobals[selectedLineIndex]
+    //       const position = codeMirror.charCoords({ line, ch: 0 }, 'local').top
+    //       codeMirror.scrollTo(null, position)
+    //       doc.addLineClass(line, 'text', 'highlight')
+    //       lineClassActive = true
+    //       if (lineNumbersForGlobals.length - 1 === selectedLineIndex) {
+    //         selectedLineIndex = 0
+    //       } else {
+    //         selectedLineIndex += 1
+    //       }
+    //     },
+    //   })
+    // }
+    // const dataComponent = viewSource ?
+    //   <CodeMirror
+    //     value={source}
+    //     options={{
+    //       mode: 'javascript',
+    //       readOnly: true,
+    //     }}
+    //     editorDidMount={(editor) => {
+    //       this.setState({ codeMirror: editor })
+    //     }}
+    //   />
   }
 }
 

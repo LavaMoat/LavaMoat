@@ -1,101 +1,22 @@
 /* eslint-disable import/no-unassigned-import */
-import { UnControlled as CodeMirror } from 'react-codemirror2'
-import 'codemirror/lib/codemirror.css'
-import 'codemirror/theme/material.css'
 import React from 'react'
 import {
-  fullModuleNameFromPath,
-  getLineNumbersForGlobals,
   getColorForRank,
 } from '../graphs/utils/utils.js'
 import '../css/DepGraph.css'
-
-require('codemirror/mode/javascript/javascript')
 
 class DepList extends React.Component {
   constructor () {
     super()
     this.state = {
-      codeMirror: null,
+      // codeMirror: null,
     }
   }
 
   render () {
     const {
-      // actions,
       sortedPackages,
-      // sortedModules,
-      packageModulesMode,
-      // packageModules,
-      // moduleData,
-      selectedNodeLabel,
-      selectedNodeData,
-      // selectedModule,
-      // selectedNode,
-      viewSource,
-      // selectionLocked,
     } = this.props
-    const { codeMirror } = this.state
-    let source
-    if (codeMirror && viewSource) {
-      // uncomment for module nodes
-      // source = packageModules[selectedNode.id].source
-      // globals = packageModules[selectedNode.id].globalUsage || null
-      codeMirror.refresh()
-      // source = sortedModules[selectedModule].source
-      // const globals = sortedModules[selectedModule].globalUsage || null
-      source = 'add later'
-      const globals = null
-      const lineNumbersForGlobals = getLineNumbersForGlobals(source, globals)
-      let selectedLineIndex = 0
-      let line
-      let lineClassActive = false
-      codeMirror.focus()
-      codeMirror.setOption('extraKeys', {
-        Enter (cm) {
-          if (lineNumbersForGlobals.length === 0) {
-            return
-          }
-          const doc = cm.getDoc()
-          if (lineClassActive) {
-            doc.removeLineClass(line, 'text', 'highlight')
-          }
-          line = lineNumbersForGlobals[selectedLineIndex]
-          const position = codeMirror.charCoords({ line, ch: 0 }, 'local').top
-          codeMirror.scrollTo(null, position)
-          doc.addLineClass(line, 'text', 'highlight')
-          lineClassActive = true
-          if (lineNumbersForGlobals.length - 1 === selectedLineIndex) {
-            selectedLineIndex = 0
-          } else {
-            selectedLineIndex += 1
-          }
-        },
-      })
-    }
-
-    let displayedData
-    if (selectedNodeLabel === 'External Dependency' || !packageModulesMode) {
-      displayedData = `${selectedNodeLabel}\n${selectedNodeData}`
-    } else {
-      displayedData = `${fullModuleNameFromPath(selectedNodeLabel) || selectedNodeLabel}\n${selectedNodeData}`
-    }
-
-    const dataComponent = viewSource ?
-      <CodeMirror
-        value={source}
-        options={{
-          mode: 'javascript',
-          readOnly: true,
-        }}
-        editorDidMount={(editor) => {
-          this.setState({ codeMirror: editor })
-        }}
-      />
-      :
-      <pre className="packageInfoStyle">
-        {displayedData}
-      </pre>
 
     return (
       <div>
@@ -105,15 +26,14 @@ class DepList extends React.Component {
             {sortedPackages.map((packageData, index) => this.renderPackage(packageData, index))}
           </div>
         </div>
-        {dataComponent}
       </div>
     )
   }
 
   renderPackage (packageData, index) {
-    const { actions } = this.props
-    // packageModulesMode && getPackageVersionName(Object.values(packageModules)[0]) === packageData.label ? */
-    const packageIsExpanded = packageData.id === this.props.selectedPackage
+    const { actions, selectedPackage, selectedModule } = this.props
+    const isExpanded = selectedPackage && packageData.id === selectedPackage.id
+    const isSelected = isExpanded && !selectedModule
     return (
       <div
         key={index}
@@ -125,21 +45,30 @@ class DepList extends React.Component {
           //   if (packageModulesMode) return
           //   actions.selectNode(packageData)
           // }}
+          style={{
+            background: isSelected ? '#FFFF00' : undefined,
+          }}
           onClick={() => {
             // if (viewSource) actions.toggleSource()
             actions.selectPackage(packageData.id)
           }}
         >
           <div className={`packageIcon ${getColorForRank(packageData.dangerRank)}`}/>
-          {packageData.name}
+          {packageData.id}
         </div>
-        {packageIsExpanded && this.renderPackageModuleList()}
+        {isExpanded && this.renderPackageModuleList(packageData)}
       </div>
     )
   }
 
-  renderPackageModuleList () {
+  renderPackageModuleList (packageData) {
     const { sortedModules } = this.props
+    if (packageData.type === 'builtin') {
+      return null
+    }
+    if (packageData.isRoot) {
+      return null
+    }
     return (
       <div className="moduleList">
         {sortedModules.map((module, index) => this.renderPackageModule(module, index))}
@@ -148,25 +77,24 @@ class DepList extends React.Component {
   }
 
   renderPackageModule (module, index) {
-    const { actions, sortedModules, selectedModule } = this.props
-    const isLastItem = index === sortedModules.length - 1
-    const isSelected = selectedModule === module.id
+    const { actions, selectedModule } = this.props
+    const isSelected = selectedModule && selectedModule.id === module.id
     return (
       <div
         key={index}
-        className={isLastItem ? null : 'listStyle'}
+        className={'listStyle'}
       >
         <div
           className="moduleWrapper"
           id={`${index}`}
           style={{
-            background: isSelected ? undefined : '#FFFF00',
+            background: isSelected ? '#FFFF00' : undefined,
           }}
           onClick={() => {
-            actions.selectModule(module)
+            actions.selectModule(module.id)
           }}>
           <div className={`moduleIcon ${module.color}`} />
-          {fullModuleNameFromPath(module.file)}
+          {module.fileSimple}
         </div>
       </div>
     )

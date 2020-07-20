@@ -19,6 +19,7 @@ function parseConfigDebugForPackages (configDebugData) {
       packageData.id = packageNameAndVersion
       packageData.deps = {}
       packageData.modules = []
+      packageData.type = moduleData.type
       packageData.size = 0
       const isRootPackage = packageNameAndVersion === '<root>'
       packageData.isRoot = isRootPackage
@@ -26,7 +27,8 @@ function parseConfigDebugForPackages (configDebugData) {
     // add total code size from module
     const { size } = moduleData
     packageData.size += size
-
+    // add package-relative file path
+    moduleData.fileSimple = fullModuleNameFromPath(moduleData.file)
     // add module / package refs
     packageData.modules.push(moduleDebugInfo)
     moduleData.packageData = packageData
@@ -149,7 +151,7 @@ function getDangerRankForPackage (packageData) {
 }
 
 function getDangerRankForModule (moduleDebugInfo) {
-  const configRank = getRankForConfig(moduleDebugInfo)
+  const configRank = getRankForGlobals(moduleDebugInfo.globals)
   const typeRank = getRankForType(moduleDebugInfo.moduleData.type)
   const rank = Math.max(configRank, typeRank)
   return rank
@@ -160,13 +162,6 @@ function getColorForRank (rank) {
     return 'purple'
   }
   return rankColors[rank]
-}
-
-function getRankForConfig (config) {
-  const rankGlobals = getRankForGlobals(config.globals)
-  const rankBuiltins = getRankForBuiltins(config.builtin)
-  const rank = Math.max(rankGlobals, rankBuiltins)
-  return rank
 }
 
 // this is a denylist, it should be an allowlist
@@ -183,14 +178,6 @@ function getRankForGlobals (globalsConfig) {
   }
   // has globals but nothing scary
   return 1
-}
-
-function getRankForBuiltins (builtinsConfig = []) {
-  if (builtinsConfig.length > 0) {
-    return 3
-  }
-  return 0
-
 }
 
 function getRankForType (type = 'js') {
