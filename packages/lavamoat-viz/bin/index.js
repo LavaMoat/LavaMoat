@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+/* eslint-env node */
+/* eslint-disable import/unambiguous */
 
 const { promises: fs } = require('fs')
 const path = require('path')
@@ -7,22 +9,22 @@ const { ncp } = require('ncp')
 const pify = require('pify')
 const openUrl = require('open')
 
-main().catch(err => console.error(err))
+main().catch((err) => console.error(err))
 
-function parseArgs() {
+function parseArgs () {
   const argsParser = yargs
-    .usage('$0', 'generate topological visualization for dep graph', (yargs) => {
+    .usage('$0', 'generate topological visualization for dep graph', () => {
       // path to write viz output
       yargs.option('dest', {
         describe: 'path to write viz output',
         type: 'string',
-        default: './viz/'
+        default: './viz/',
       })
       // the path for the debug-config file
       yargs.option('debugConfig', {
         describe: 'the path for the debug-config file',
         type: 'string',
-        default: './lavamoat-config-debug.json'
+        default: './lavamoat-config-debug.json',
       })
       // open the output dir
       yargs.option('open', {
@@ -43,11 +45,11 @@ async function main () {
   const source = path.join(__dirname, '/../dist/')
   // copy app dir
   await fs.mkdir(fullDest, { recursive: true })
-  await pify(cb => ncp(source, fullDest, cb))()
+  await pify((cb) => ncp(source, fullDest, cb))()
   // add data-injection file
   const configContent = await fs.readFile(debugConfig, 'utf8')
   const dataInjectionContent = `globalThis.CONFIG_DEBUG = ${configContent};`
-  await fs.writeFile(fullDest + '/injectConfigDebugData.js', dataInjectionContent)
+  await fs.writeFile(`${fullDest}/injectConfigDebugData.js`, dataInjectionContent)
   if (open) {
     openUrl(`file:///${fullDest}/index.html`)
   }
