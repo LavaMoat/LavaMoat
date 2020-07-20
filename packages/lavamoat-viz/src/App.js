@@ -3,13 +3,12 @@ import './css/App.css'
 import './css/DepGraph.css'
 
 const { DepGraph } = require('./graphs/DepGraph')
-const exampleDeps = require('./lavamoat/lavamoat-config-debug.json')
 // const bundles = {
 //   'background': require('./data/deps.json'),
 // }
 
 /* eslint-disable no-restricted-globals */
-const bundles = { background: self.DEPS || exampleDeps }
+const bundles = { background: self.CONFIG_DEBUG }
 
 class App extends Component {
 

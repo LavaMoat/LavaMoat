@@ -107,14 +107,15 @@ class DepGraph extends React.Component {
     this.setState(() => ({ packageData: newGraph }))
   }
 
-  getModulesForPackage (node) {
+  getModulesForPackage (packageId) {
     const { bundleData } = this.props
-    const { label } = node
+    const { debugInfo } = bundleData
     let packageModules = {}
     let moduleSources = []
-    Object.entries(bundleData).forEach(([moduleId, moduleData]) => {
-      const color = getColorForModule(moduleData)
-      if (getPackageVersionName(moduleData) === label) {
+    Object.entries(debugInfo).forEach(([moduleId, moduleDebugInfo]) => {
+      const { moduleData } = moduleDebugInfo
+      const color = getColorForModule(moduleDebugInfo)
+      if (getPackageVersionName(moduleData) === packageId) {
         if (!moduleSources.includes(moduleData.source)) {
           moduleSources.push(moduleData.source)
           packageModules[moduleId] = moduleData
@@ -151,6 +152,7 @@ class DepGraph extends React.Component {
       viewSource,
       lavamoatMode,
       showPackageSize,
+      selectedPackage,
       selectedModule,
       selectionLocked,
     } = this.state
@@ -160,23 +162,33 @@ class DepGraph extends React.Component {
         const newState = { selectedNode: node }
         this.setStateAndUpdateGraph(newState)
       },
-      selectModule: (name) => {
-        this.setState({ selectedModule: name })
+      selectModule: (moduleId) => {
+        let newSelection
+        if (selectedModule === moduleId) {
+          newSelection = null
+        } else {
+          newSelection = moduleId
+        }
+        this.setState({ selectedModule: newSelection })
       },
-      togglePackageModules: (node) => {
-        if (packageModulesMode) {
+      selectPackage: (packageId) => {
+        if (packageId === selectedPackage) {
           this.setState({
+            selectedPackage: null,
+            selectedModule: null,
+
             packageModulesMode: false,
-            selectedModule: null
           })
-          return
+        } else {
+          const modules = this.getModulesForPackage(packageId)
+          const newState = {
+            selectedPackage: packageId,
+  
+            packageModulesMode: true,
+            packageModules: modules
+          }
+          this.setStateAndUpdateGraph(newState)
         }
-        const modules = this.getModulesForPackage(node)
-        const newState = {
-          packageModulesMode: true,
-          packageModules: modules
-        }
-        this.setStateAndUpdateGraph(newState)
       },
       toggleSource: () => {
         this.setState({ viewSource: !viewSource })
@@ -213,9 +225,7 @@ class DepGraph extends React.Component {
       selectedNodeLabel = 'select a node'
       selectedNodeData = ''
     }
-    if (!packageModulesMode ||
-      !selectedNode.label === 'External Dependency' ||
-      (!selectedModule && selectedModule !== 0)) {
+    if (!packageModulesMode) {
       sourceButtonStyle = { display: 'none' }
     }
     if (viewSource) {
@@ -251,7 +261,7 @@ class DepGraph extends React.Component {
           />
         </div>
 
-        <div className="viewSourceWrapper">
+        {/* <div className="viewSourceWrapper">
           <div className="helpMessage">
             {helpMessage}
           </div>
@@ -262,10 +272,12 @@ class DepGraph extends React.Component {
           >
             View Source
           </button>
-        </div>
+        </div> */}
       </div>
       <DepList
         actions={actions}
+        selectedPackage={selectedPackage}
+
         sortedPackages={sortedPackages}
         sortedModules={sortedModules}
         packageModulesMode={packageModulesMode}
@@ -284,12 +296,12 @@ class DepGraph extends React.Component {
         linkDirectionalArrowLength={4}
         linkDirectionalArrowRelPos={1}
         nodeLabel={'label'}
-        onNodeHover={(node) => {
-          if (!node) return
-          if (packageModulesMode && !packageModules[node.id]) return
-          actions.selectNode(node)
-        }}
-        onNodeClick={(node) => actions.togglePackageModules(node)}
+        // onNodeHover={(node) => {
+        //   if (!node) return
+        //   if (packageModulesMode && !packageModules[node.id]) return
+        //   actions.selectNode(node)
+        // }}
+        onNodeClick={({ id }) => actions.selectPackage(id)}
         linkWidth={(link) => link.width}
         linkColor={(link) => link.color}
       />

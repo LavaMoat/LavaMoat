@@ -1,63 +1,88 @@
-import exampleConfig from '../../lavamoat/example-config.json'
-const configData = self.CONFIG || exampleConfig
-
-function createPackageGraph(bundleData, {
+function createPackageGraph(configDebugData, {
   lavamoatMode,
   selectedNode,
   packageModulesMode,
   showPackageSize
 }) {
+  // const { resources } = configDebugData
+  // const nodes = [], links = []
   const packageData = {}
-  // create a fake `bundleData` using the packages
-  Object.entries(bundleData).forEach(([parentId, moduleData]) => {
-    const packageName = getPackageVersionName(moduleData)
-    let pack = packageData[packageName]
+
+  const { debugInfo } = configDebugData
+  // aggregate info under package name
+  Object.entries(debugInfo).forEach(([parentId, { moduleData }]) => {
+    const packageNameAndVersion = getPackageVersionName(moduleData)
+    let pack = packageData[packageNameAndVersion]
     // if first moduleData in package, initialize with moduleData
     if (!pack) {
       pack = Object.assign({}, moduleData)
-      pack.file = packageName
+      pack.file = packageNameAndVersion
       pack.deps = {}
-      packageData[packageName] = pack
+      packageData[packageNameAndVersion] = pack
     } else {
       // package already exists, just need add size (deps added later)
       const { size } = moduleData
       pack.size += size
     }
     // add deps
-    Object.values(moduleData.deps).forEach(childId => {
+    Object.values(moduleData.deps || {}).forEach(childId => {
       // use `id` so that there are not redundant links. the actual key is not important.
-      const childModuleData = bundleData[childId]
+      const { moduleData: childModuleData } = debugInfo[childId] || {}
       if (!childModuleData) return console.warn(`dep is external module ${childId}`)
       pack.deps[childId] = getPackageVersionName(childModuleData)
     })
   })
 
-  return createModuleGraph(packageData, {
+  
+  // Object.entries(resources).map(([packageName, packageConfig]) => {
+  //   // create node for modules
+  //   const packageNameAndVersion
+  //   nodes.push(
+  //     createNode({ id: packageName, val: size, label, configLabel, color })
+  //   )
+  // })
+
+  // return { nodes, links }
+
+  // return createGraph(packageData, configDebugData, {
+  const graph = createGraph(packageData, configDebugData, {
     lavamoatMode,
     selectedNode,
     packageModulesMode,
     showPackageSize
   })
+  
+  return graph
 }
 
-function createModuleGraph(bundleData, {
+function createModuleGraph(configDebugData, {
   lavamoatMode,
   selectedNode,
   packageModulesMode,
   showPackageSize
 }) {
+
+}
+
+function createGraph(graphInput, configDebugData, {
+  lavamoatMode,
+  selectedNode,
+  packageModulesMode,
+  showPackageSize
+}) {
+  const { resources } = configDebugData
   const nodes = [], links = []
   // for each module, create node and links 
-  Object.entries(bundleData).forEach(([parentId, parentData]) => {
+  Object.entries(graphInput).forEach(([parentId, parentData]) => {
     const {
       file,
       deps,
       source,
-      packageName
     } = parentData
+    const packageName = parentData.packageName || parentData.package || parentId
     const size = showPackageSize ? getNodeSize(source) : 2
     const packageVersionName = getPackageVersionName(parentData)
-    const configForPackage = configData.resources[packageName] || {}
+    const configForPackage = resources[packageName] || {}
     const configLabel = JSON.stringify(configForPackage, null, 2)
     const label = `${file}`
     const isEntryPackage = packageVersionName === '<root>'
@@ -94,9 +119,9 @@ function createModuleGraph(bundleData, {
   })
   // handle missing nodes (e.g. external deps)
   links.forEach(link => {
-    if (!bundleData[link.target]) {
+    if (!graphInput[link.target]) {
       nodes.push(
-        createNode({ id: link.target, label: 'External Dependency', size: 2 })
+        createNode({ id: link.target, label: `${link.target} (external)`, size: 2 })
       )
     }
   })
@@ -122,47 +147,80 @@ const orangeAlertGlobals = [
   'prompt',
 ]
 
+const rankColors = [
+  'green', 'orange', 'brown', 'red'
+]
+
 function getColorForPackage(packageConfig) {
-  // no globals - should be safe
-  if (!packageConfig.globals) return 'green'
-  const globals = Object.keys(packageConfig.globals)
-  return getColor(globals)
-  
+  const rank = getRankForConfig(packageConfig)
+  return getColorForRank(rank)
 }
 
-function getColorForModule (parentData) {
-  if (!parentData.globalUsage || Object.keys(parentData.globalUsage).length === 0) return 'green'
-  const globals = Object.keys(parentData.globalUsage)
-  return getColor(globals)
+function getColorForModule (moduleDebugInfo) {
+  const configRank = getRankForConfig(moduleDebugInfo)
+  const typeRank = getRankForType(moduleDebugInfo.moduleData.type)
+  const rank = Math.max(configRank, typeRank)
+  return getColorForRank(rank)
 }
+
+function getColorForRank (rank) {
+  return rankColors[rank]
+}
+
+function getRankForConfig (config) {
+  const rankGlobals = getRankForGlobals(config.globals)
+  const rankBuiltins = getRankForBuiltins(config.builtin)
+  const rank = Math.max(rankGlobals, rankBuiltins)
+  return rank
+}
+
+
 
 // this is a denylist, it should be an allowlist
-function getColor(globals) {
+function getRankForGlobals(globalsConfig) {
+  const globals = Object.keys(globalsConfig || {})
+  if (globals.length === 0) return 0
   if (globals.some(glob => redAlertGlobals.includes(glob))) {
-    return 'red'
+    return 3
   }
   if (globals.some(glob => orangeAlertGlobals.includes(glob))) {
-    return 'brown'
+    return 2
   }
   // has globals but nothing scary
-  return 'orange'
+  return 1
+}
+
+function getRankForBuiltins (builtinsConfig = []) {
+  if (builtinsConfig.length > 0) {
+    return 3
+  } else {
+    return 0
+  }
+}
+
+function getRankForType (type = 'js') {
+  if (type === 'js') return 0
+  // if (type === 'builtin') return 3
+  // if (type === 'native') return 3
+  return 3
 }
 
 function sortByColor(data) {
-  const colors = ['red', 'brown', 'orange', 'green']
   let sorted = []
-  colors.forEach(color => {
+  rankColors.slice().reverse().forEach(color => {
     const filtered = data.filter(item => item.color === color)
     sorted = sorted.concat(filtered)
   })
   return sorted
 }
 
-function getPackageVersionName({ packageName, packageVersion }) {
+function getPackageVersionName(moduleData) {
+  const { id, packageName, packageVersion } = moduleData
+  const name = moduleData.package || packageName || id
   if (packageVersion) {
-    return `${packageName}@${packageVersion}`
+    return `${name}@${packageVersion}`
   } else {
-    return packageName
+    return name
   }
 }
 

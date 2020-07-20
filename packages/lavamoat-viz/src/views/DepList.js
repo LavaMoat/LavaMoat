@@ -41,8 +41,10 @@ class DepList extends React.Component {
       // source = packageModules[selectedNode.id].source
       // globals = packageModules[selectedNode.id].globalUsage || null
       codeMirror.refresh()
-      source = sortedModules[selectedModule].source
-      const globals = sortedModules[selectedModule].globalUsage || null
+      // source = sortedModules[selectedModule].source
+      // const globals = sortedModules[selectedModule].globalUsage || null
+      source = 'add later'
+      const globals = null
       const lineNumbersForGlobals = getLineNumbersForGlobals(source, globals)
       let selectedLineIndex = 0
       let line
@@ -65,8 +67,8 @@ class DepList extends React.Component {
           }
         }
       });
-      
     }
+
     let displayedData
     if (selectedNodeLabel === 'External Dependency' || !packageModulesMode) {
       displayedData = `${selectedNodeLabel}\n${selectedNodeData}`
@@ -87,71 +89,97 @@ class DepList extends React.Component {
     />
     :
     <pre className='packageInfoStyle'>
-        {displayedData}
+      {displayedData}
     </pre>
 
-    return(
+    return (
       <div>
         <div className='packagesStyle'>
           <div style={{marginBottom: '10px'}}>Packages containing globals</div>
           <div>
-            {sortedPackages.map((node, index) =>
-              <div
-                key={index}
-                className='listStyle'
-              >
-                <div 
-                  className='packageWrapper'
-                  onMouseEnter={() => {
-                    if (packageModulesMode) return
-                    actions.selectNode(node)
-                  }}
-                  onClick={() => {
-                    if (viewSource) actions.toggleSource()
-                    actions.togglePackageModules(node)
-                  }}
-                >
-                  <div className={`packageIcon ${node.color}`}/>
-                  {node.label}
-                </div>
-                {packageModulesMode && getPackageVersionName(Object.values(packageModules)[0]) === node.label ?
-                  <div className='moduleList'>
-                    {sortedModules.map((module, index, array) =>
-                      <div
-                        key={index}
-                        className={index === array.length - 1 ? null : 'listStyle'}>
-                        <div
-                          className='moduleWrapper'
-                          id={`${index}`}
-                          onClick={(e) => {
-                            const element = e.target
-                            const attribute = ["style", "background: #FFFF00;"]
-                            if (!selectedModule && selectedModule !== 0) {
-                              actions.selectModule(index)
-                              element.setAttribute(...attribute)
-                            } else {
-                              if (e.target.id == selectedModule) {
-                                element.removeAttribute(...attribute)
-                                actions.selectModule(null)
-                              } else {
-                                element.setAttribute(...attribute)
-                                document.getElementById(selectedModule).removeAttribute(...attribute)
-                                actions.selectModule(index)
-                              }
-                            }
-                          }}>
-                          <div className={`moduleIcon ${module.color}`} />
-                          {fullModuleNameFromPath(module.file)}
-                        </div>
-                      </div>
-                    )}
-                  </div> :
-                  <div />
-                }
-              </div>)}
+            {sortedPackages.map((node, index) => this.renderPackage(node, index))}
           </div>
         </div>
         {dataComponent}
+      </div>
+    )
+  }
+
+  renderPackage (node, index) {
+    const { actions } = this.props
+    // packageModulesMode && getPackageVersionName(Object.values(packageModules)[0]) === node.label ? */
+    const packageIsExpanded = node.id === this.props.selectedPackage
+    return (
+      <div
+        key={index}
+        className='listStyle'
+      >
+        <div 
+          className='packageWrapper'
+          // onMouseEnter={() => {
+          //   if (packageModulesMode) return
+          //   actions.selectNode(node)
+          // }}
+          onClick={() => {
+            // if (viewSource) actions.toggleSource()
+            actions.selectPackage(node.id)
+          }}
+        >
+          <div className={`packageIcon ${node.color}`}/>
+          {node.label}
+        </div>
+        {packageIsExpanded && this.renderPackageModuleList()}
+      </div>
+    )
+  }
+
+  renderPackageModuleList () {
+    const { sortedModules } = this.props
+    return (
+      <div className='moduleList'>
+        {sortedModules.map((module, index) =>
+          this.renderPackageModule(module, index)
+        )}
+    </div>
+    )
+  }
+
+  renderPackageModule (module, index) {
+    const { actions, sortedModules, selectedModule } = this.props
+    const isLastItem = index === sortedModules.length - 1
+    const isSelected = selectedModule === module.id
+    return (
+      <div
+        key={index}
+        className={isLastItem ? null : 'listStyle'}
+      >
+        <div
+          className='moduleWrapper'
+          id={`${index}`}
+          style={{
+            background: isSelected ? undefined : '#FFFF00'
+          }}
+          onClick={(e) => {
+            // const element = e.target
+            // const attribute = ["style", "background: #FFFF00;"]
+            // if (!selectedModule && selectedModule !== 0) {
+            //   actions.selectModule(index)
+            //   element.setAttribute(...attribute)
+            // } else {
+            //   if (e.target.id == selectedModule) {
+            //     element.removeAttribute(...attribute)
+            //     actions.selectModule(null)
+            //   } else {
+            //     element.setAttribute(...attribute)
+            //     document.getElementById(selectedModule).removeAttribute(...attribute)
+            //     actions.selectModule(index)
+            //   }
+            // }
+            actions.selectModule(module)
+          }}>
+          <div className={`moduleIcon ${module.color}`} />
+          {fullModuleNameFromPath(module.file)}
+        </div>
       </div>
     )
   }

@@ -5,68 +5,51 @@ const path = require('path')
 const yargs = require('yargs')
 const { ncp } = require('ncp')
 const pify = require('pify')
-const open = require('open')
-
-const { config, deps, dest, serve } = parseArgs()
-
-if (!dest) dest = 'viz/'
-if (!deps) deps = './lavamoat/lavamoat-config-debug.json'
-if (!config) config = './lavamoat/lavamoat-config.json'
-
-const source = path.join(__dirname, '/../dist/')
+const openUrl = require('open')
 
 main().catch(err => console.error(err))
 
 function parseArgs() {
   const argsParser = yargs
-    .command('lavamoat-viz [config] [debug config] [dest]', 'generate topological visualization for dep graph', (yargs) => {
-      // the path for the config file
-      yargs.option('config', {
-        alias: 'configPath',
-        describe: 'the path for the config file',
-        type: 'string',
-        default: './lavamoat/lavamoat-config.json'
-      })
-      // the path for the debug-config file
-      yargs.option('deps', {
-        describe: 'the path for the debug-config file',
-        type: 'string',
-        default: './lavamoat/lavamoat-config-debug.json'
-      })
+    .usage('$0', 'generate topological visualization for dep graph', (yargs) => {
       // path to write viz output
       yargs.option('dest', {
         describe: 'path to write viz output',
         type: 'string',
-        default: 'viz/'
+        default: './viz/'
       })
-      //serve the output dir
-      yargs.option('serve', {
-        describe: 'serve the visualization',
-        type: 'boolean'
+      // the path for the debug-config file
+      yargs.option('debugConfig', {
+        describe: 'the path for the debug-config file',
+        type: 'string',
+        default: './lavamoat-config-debug.json'
+      })
+      // open the output dir
+      yargs.option('open', {
+        describe: 'open the visualization',
+        type: 'boolean',
+        default: false,
       })
     })
     .help()
 
   const parsedArgs = argsParser.parse()
-  console.log(parsedArgs)
   return parsedArgs
 }
 
 async function main () {
-  console.log(`"${source}", "${dest}"`)
+  const { debugConfig, dest, open } = parseArgs()
+  const fullDest = path.resolve(dest)
+  const source = path.join(__dirname, '/../dist/')
   // copy app dir
-  await fs.mkdir(dest, { recursive: true })
-  await pify(cb => ncp(source, dest, cb))()
+  await fs.mkdir(fullDest, { recursive: true })
+  await pify(cb => ncp(source, fullDest, cb))()
   // add data-injection file
-  const configContent = await fs.readFile(config, 'utf8')
-  const depsContent = await fs.readFile(deps, 'utf8')
-  const dataInjectionContent = `
-  self.CONFIG = ${configContent};
-  self.DEPS = ${depsContent};
-  `
-  await fs.writeFile(dest + '/data-injection.js', dataInjectionContent)
-  if (serve) {
-    open(`file:///${path.dirname(require.main.path)}/viz/index.html`)
+  const configContent = await fs.readFile(debugConfig, 'utf8')
+  const dataInjectionContent = `globalThis.CONFIG_DEBUG = ${configContent};`
+  await fs.writeFile(fullDest + '/injectConfigDebugData.js', dataInjectionContent)
+  if (open) {
+    openUrl(`file:///${fullDest}/index.html`)
   }
-  console.log(`generated viz in ${dest}`)
+  console.log(`generated viz in "${dest}"`)
 }

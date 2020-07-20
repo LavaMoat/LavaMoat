@@ -6,6 +6,9 @@ Try out a [demo](https://lavamoat.github.io/lavamoat-viz/dist/index.html)
 
 ### example
 
+
+
 ```bash
-lavamoat-viz --config ./lavamoat-config.json --deps ./deps.json --dest viz/
+npx lavamoat index.js --writeAutoConfigDebug
+npx lavamoat-viz --open
 ```
