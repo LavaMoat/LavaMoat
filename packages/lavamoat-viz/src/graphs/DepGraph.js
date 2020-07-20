@@ -20,7 +20,7 @@ import setupScene from './vr-viz/setupScene.js'
 // import setupSelections from './vr-viz/setupSelections.js'
 import setupGraph from './vr-viz/setupGraph.js'
 
-const d3 = require('d3')
+// const d3 = require('d3')
 
 
 const lavamoatModes = ['lavamoat', 'without']
@@ -51,9 +51,9 @@ class DepGraph extends React.Component {
 
     window.xyz = forceGraph
 
-    forceGraph.d3Force('charge').strength(-50)
-    forceGraph.d3Force('x', d3.forceX(0, 1))
-    forceGraph.d3Force('y', d3.forceY(0, 1))
+    // forceGraph.d3Force('charge').strength(-50)
+    // forceGraph.d3Force('x', d3.forceX(0, 1))
+    // forceGraph.d3Force('y', d3.forceY(0, 1))
   }
 
   componentWillReceiveProps (nextProps) {

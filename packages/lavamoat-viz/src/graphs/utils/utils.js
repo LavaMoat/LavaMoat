@@ -15,7 +15,7 @@ function parseConfigDebugForPackages (configDebugData) {
     if (!packageData) {
       packageData = {}
       packages[packageNameAndVersion] = packageData
-      packageData.name = packageNameAndVersion
+      packageData.name = moduleData.package || moduleData.packageName
       packageData.id = packageNameAndVersion
       packageData.deps = {}
       packageData.modules = []
@@ -55,30 +55,26 @@ function createGraph (packages, configDebugData, {
   lavamoatMode,
   selectedNode,
   // packageModulesMode,
-  showPackageSize,
+  // showPackageSize,
 }) {
   const { resources } = configDebugData
   const nodes = []
   const links = []
   // for each module, create node and links
   Object.entries(packages).forEach(([_, packageData]) => {
-    const {
-      file,
-      deps,
-      source,
-    } = packageData
+    const { deps } = packageData
     const parentId = packageData.id
     const packageName = packageData.name
-    const size = showPackageSize ? getNodeSize(source) : 2
+    // const size = showPackageSize ? getNodeSize(source) : 2
     const configForPackage = resources[packageName] || {}
     const configLabel = JSON.stringify(configForPackage, null, 2)
-    const label = `${file}`
     const isLavamoat = lavamoatMode === 'lavamoat'
-    const lavamoatColor = packageData.isRootPackage ? 'purple' : getColorForRank(packageData.dangerRank)
+    const label = packageData.isRoot ? '(root)' : parentId
+    const lavamoatColor = packageData.isRoot ? 'purple' : getColorForRank(packageData.dangerRank)
     const color = isLavamoat ? lavamoatColor : 'red'
     // create node for modules
     nodes.push(
-      createNode({ id: parentId, val: size, label, configLabel, color }),
+      createNode({ id: parentId, val: 2, label, configLabel, color }),
     )
     const selectedNodeId = selectedNode && selectedNode.id
 
@@ -139,6 +135,12 @@ const rankColors = [
 ]
 
 function getDangerRankForPackage (packageData) {
+  if (packageData.dangerRank) {
+    return packageData.dangerRank
+  }
+  if (packageData.isRoot) {
+    return -1
+  }
   const moduleRanks = packageData.modules.map(
     (moduleDebugInfo) => getDangerRankForModule(moduleDebugInfo),
   )
@@ -154,6 +156,9 @@ function getDangerRankForModule (moduleDebugInfo) {
 }
 
 function getColorForRank (rank) {
+  if (rank === -1) {
+    return 'purple'
+  }
   return rankColors[rank]
 }
 
