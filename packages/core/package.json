@@ -19,8 +19,9 @@
     "through2": "^3.0.1"
   },
   "devDependencies": {
+    "merge-deep": "^3.0.2",
     "tape": "^4.13.2",
-    "merge-deep": "^3.0.2"
+    "tape-promise": "^4.0.0"
   },
   "scripts": {
     "lint": "npm run lint:standard && npm run lint:deps",
