@@ -18,5 +18,6 @@ async function generateConfigFromFiles ({ files, ...opts }) {
     isBuiltin: () => false,
     includeDebugInfo: false,
   }, opts))
+
   return config
 }

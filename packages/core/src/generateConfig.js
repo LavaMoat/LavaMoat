@@ -53,7 +53,9 @@ function createModuleInspector (opts = {}) {
     if (includeDebugInfo) {
       const moduleDebug = debugInfo[moduleData.id] = {}
       // append moduleData, ensure ast is not copied
-      moduleDebug.moduleData = { ...moduleData, ast: undefined }
+      const debugData = { ...moduleData }
+      delete debugData.ast
+      moduleDebug.moduleData = debugData
     }
     // skip for root modules (modules not from deps)
     const isRootModule = packageName === rootSlug

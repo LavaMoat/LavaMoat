@@ -23,13 +23,23 @@ test('generateConfig - config with debugInfo', async (t) => {
     location.href
   }, { includeDebugInfo: true })
 
-  t.deepEqual(config.debugInfo, {
-    './node_modules/test/index.js': {
+  const testModuleFile = './node_modules/test/index.js'
+  const testPackageConfigDebugInfo = config.debugInfo[testModuleFile]
+
+  t.deepEqual(testPackageConfigDebugInfo, {
+    moduleData: {
+      id: testModuleFile,
+      file: testModuleFile,
+      type: 'js',
       source: '(function () {\n    location.href\n  })()',
-      globals: {
-        'location.href': 'read'
-      }
-    }
+      deps: {},
+      package: 'test',
+      packageName: 'test',
+      packageVersion: '1.2.3',
+    },
+    globals: {
+      'location.href': 'read'
+    },
   }, 'config matched expected')
 })
 
@@ -104,9 +114,11 @@ test('generateConfig - unfrozen environment - primordial modification', async (t
 
 async function createConfigForTest (testFn, opts = {}) {
   const files = [{
+    type: 'js',
     specifier: './entry.js',
     file: './entry.js',
     packageName: '<root>',
+    packageVersion: '0.0.0',
     importMap: {
       test: './node_modules/test/index.js'
     },
@@ -114,9 +126,11 @@ async function createConfigForTest (testFn, opts = {}) {
     entry: true,
   }, {
     // non-entry
+    type: 'js',
     specifier: './node_modules/test/index.js',
     file: './node_modules/test/index.js',
     packageName: 'test',
+    packageVersion: '1.2.3',
     importMap: {},
     content: `(${testFn})()`
   }]
