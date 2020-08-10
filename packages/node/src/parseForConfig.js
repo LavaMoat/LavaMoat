@@ -7,12 +7,12 @@ const { checkForResolutionOverride } = require('./resolutions')
 
 module.exports = { parseForConfig, makeResolveHook, makeImportHook }
 
-async function parseForConfig ({ cwd, entryId, resolutions, rootPackageName, shouldResolve, shouldImport }) {
+async function parseForConfig ({ cwd, entryId, resolutions, rootPackageName, shouldResolve, ...args }) {
   const isBuiltin = (id) => builtinPackages.includes(id)
   const resolveHook = makeResolveHook({ cwd, resolutions, rootPackageName })
-  const importHook = makeImportHook({ rootPackageName, isBuiltin })
+  const importHook = makeImportHook({ rootPackageName, shouldResolve, isBuiltin, resolveHook })
   const moduleSpecifier = resolveHook(entryId, `${cwd}/package.json`)
-  return coreParseForConfig({ moduleSpecifier, resolveHook, importHook, isBuiltin, shouldResolve, shouldImport })
+  return coreParseForConfig({ moduleSpecifier, resolveHook, importHook, isBuiltin, shouldResolve, ...args })
 }
 
 function makeResolveHook ({ cwd, resolutions = {}, rootPackageName = '<root>' }) {
@@ -42,34 +42,65 @@ function makeResolveHook ({ cwd, resolutions = {}, rootPackageName = '<root>' })
   }
 }
 
-function makeImportHook ({ isBuiltin, rootPackageName = '<root>' }) {
+function makeImportHook ({
+  isBuiltin,
+  resolveHook,
+  shouldResolve = () => true,
+  rootPackageName = '<root>'
+}) {
   return async (specifier) => {
-    let type; let packageName; let packageVersion; let content; let imports = []; let ast
+    let file; let type; let packageName; let packageVersion; let content; let importMap = {}; let ast
     // get package name
     if (isBuiltin(specifier)) {
       type = 'builtin'
       packageName = specifier
     } else {
       type = 'js'
-      const packageData = packageDataForModule({ id: specifier, file: specifier }, rootPackageName)
+      file = specifier
+      const packageData = packageDataForModule({ id: specifier, file }, rootPackageName)
       packageName = packageData.packageName
       packageVersion = packageData.packageVersion
       // load src
-      content = await fs.readFile(specifier, 'utf8')
+      content = await fs.readFile(file, 'utf8')
       // parse
-      const extension = path.extname(specifier)
+      const extension = path.extname(file)
       if (extension === '.js') {
         ast = parseModule(content, specifier)
         // get imports
         const { cjsImports } = inspectImports(ast, null, false)
-        imports = Array.from(new Set(cjsImports))
+        // build import map
+        importMap = Object.fromEntries(cjsImports.map(requestedName => {
+          let depValue
+          if (shouldResolve(requestedName, specifier)) {
+            // try {
+            depValue = resolveHook(requestedName, specifier)
+            // } catch (err) {
+            //   // graceful failure
+            //   console.warn(`lavamoat-node/makeImportHandler - could not resolve "${requestedName}" from "${specifier}"`)
+            //   depValue = requestedName
+            // }
+          } else {
+            // resolving is skipped so put in a dummy value
+            depValue = requestedName
+          }
+          return [requestedName, depValue]
+        }))
       } else {
         if (!['.css', '.sass', '.coffee', '.json', '.node'].includes(extension)) {
           console.warn(`node importHook - ignored unknown extension "${extension}"`)
         }
       }
     }
-    return new LavamoatModuleRecord({ specifier, packageName, packageVersion, content, type, imports, ast })
+    return new LavamoatModuleRecord({
+      specifier,
+      file,
+      packageName,
+      packageVersion,
+      content,
+      type,
+      importMap,
+      ast
+    })
   }
 }
 
