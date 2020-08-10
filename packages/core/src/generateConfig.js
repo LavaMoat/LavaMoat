@@ -19,9 +19,9 @@ module.exports = { rootSlug, createConfigSpy, createModuleInspector }
 // it analyses modules for global namespace usages, and generates a config for LavaMoat.
 // it calls `onResult` with the config when the stream ends.
 
-function createConfigSpy ({ onResult, isBuiltin }) {
+function createConfigSpy ({ onResult, isBuiltin, includeDebugInfo }) {
   if (!isBuiltin) throw new Error('createConfigSpy - must specify "isBuiltin"')
-  const inspector = createModuleInspector({ isBuiltin })
+  const inspector = createModuleInspector({ isBuiltin, includeDebugInfo })
   const configSpy = createSpy(
     // inspect each module
     inspector.inspectModule,
@@ -36,18 +36,25 @@ function createModuleInspector (opts = {}) {
   const packageToBuiltinImports = {}
   const packageToModules = {}
   const moduleIdToPackageName = {}
+  const debugInfo = {}
 
   return {
     inspectModule: (moduleData, opts2 = {}) => inspectModule(moduleData, { ...opts, ...opts2 }),
     generateConfig: (opts2 = {}) => generateConfig({ ...opts, ...opts2 })
   }
 
-  function inspectModule (moduleData, { isBuiltin } = {}) {
+  function inspectModule (moduleData, { isBuiltin, includeDebugInfo = false } = {}) {
     const packageName = moduleData.packageName || moduleData.package
     moduleIdToPackageName[moduleData.id] = packageName
     // initialize mapping from package to module
     const packageModules = packageToModules[packageName] = packageToModules[packageName] || {}
     packageModules[moduleData.id] = moduleData
+    // initialize module debug info
+    if (includeDebugInfo) {
+      const moduleDebug = debugInfo[moduleData.id] = {}
+      // append moduleData, ensure ast is not copied
+      moduleDebug.moduleData = { ...moduleData, ast: undefined }
+    }
     // skip for root modules (modules not from deps)
     const isRootModule = packageName === rootSlug
     if (isRootModule) return
@@ -67,19 +74,33 @@ function createModuleInspector (opts = {}) {
       allowReturnOutsideFunction: true,
       errorRecovery: true
     })
+    if (includeDebugInfo && ast.errors && ast.errors.length) {
+      moduleDebug.parseErrors = ast.errors
+    }
     // ensure ses compatibility
-    inspectForEnvironment(ast, moduleData)
+    inspectForEnvironment(ast, moduleData, includeDebugInfo)
     // get global usage
-    inspectForGlobals(ast, moduleData, packageName)
+    inspectForGlobals(ast, moduleData, packageName, includeDebugInfo)
     // get builtin package usage
-    inspectForImports(ast, moduleData, packageName, isBuiltin)
+    inspectForImports(ast, moduleData, packageName, isBuiltin, includeDebugInfo)
   }
 
-  function inspectForEnvironment (ast, moduleData) {
+  function inspectForEnvironment (ast, moduleData, includeDebugInfo) {
     const { package: packageName } = moduleData
-    const { primordialMutations, strictModeViolations } = inspectSesCompat(ast, packageName)
-    if (primordialMutations.length > 0 || strictModeViolations.length > 0) {
-      // adapt moduleData to moduleRecord format
+    const sesCompat = inspectSesCompat(ast, packageName)
+    const { primordialMutations, strictModeViolations } = sesCompat
+    const hasResults = primordialMutations.length > 0 || strictModeViolations.length > 0
+    if (!hasResults) return
+    if (includeDebugInfo) {
+      const moduleDebug = debugInfo[moduleData.id]
+      moduleDebug.sesCompat = {
+        ...sesCompat,
+        // fix serialization
+        primordialMutations: primordialMutations.map(({ node: { loc } }) => ({ node: { loc } })),
+        strictModeViolations: strictModeViolations.map(({ node: { loc } }) => ({ node: { loc } })),
+      }
+    } else {
+      // adapt moduleData to moduleRecord format for sample generation
       const moduleRecord = {
         specifier: moduleData.id,
         content: moduleData.source,
@@ -95,44 +116,45 @@ function createModuleInspector (opts = {}) {
     }
   }
 
-  function inspectForGlobals (ast, moduleData, packageName) {
+  function inspectForGlobals (ast, moduleData, packageName, includeDebugInfo) {
     const foundGlobals = inspectGlobals(ast, {
       // browserify commonjs scope
       ignoredRefs: ['require', 'module', 'exports', 'arguments'],
       // browser global refs + browserify global
       globalRefs: ['globalThis', 'self', 'window', 'global']
     })
-    // add globalUsage info
-    moduleData.globalUsage = mapToObj(foundGlobals)
     // skip if no results
     if (!foundGlobals.size) return
-    const packageGlobals = packageToGlobals[packageName]
-    if (packageGlobals) {
-      // merge maps
-      packageToGlobals[packageName] = mergeConfig(packageGlobals, foundGlobals)
-    } else {
-      // new map
-      packageToGlobals[packageName] = foundGlobals
+    // add debug info
+    if (includeDebugInfo) {
+      const moduleDebug = debugInfo[moduleData.id]
+      moduleDebug.globals = mapToObj(foundGlobals)
     }
+    // agregate globals
+    let packageGlobals = packageToGlobals[packageName] || []
+    packageGlobals = mergeConfig(packageGlobals, foundGlobals)
+    packageToGlobals[packageName] = packageGlobals
   }
 
-  function inspectForImports (ast, moduleData, packageName, isBuiltin) {
+  function inspectForImports (ast, moduleData, packageName, isBuiltin, includeDebugInfo) {
     // get all requested names that resolve to isBuiltin
     const namesForBuiltins = Object.entries(moduleData.deps)
       .filter(([_, resolvedName]) => isBuiltin(resolvedName))
       .map(([requestedName]) => requestedName)
-    const { cjsImports } = inspectImports(ast, namesForBuiltins)
-    const builtinImports = packageToBuiltinImports[packageName]
-    if (builtinImports) {
-      // merge maps
-      packageToBuiltinImports[packageName] = [...builtinImports, ...cjsImports]
-    } else {
-      // new map
-      packageToBuiltinImports[packageName] = cjsImports
+    const { cjsImports: moduleBuiltins } = inspectImports(ast, namesForBuiltins)
+    if (!moduleBuiltins.length) return
+    // add debug info
+    if (includeDebugInfo) {
+      const moduleDebug = debugInfo[moduleData.id]
+      moduleDebug.builtin = moduleBuiltins
     }
+    // agregate package builtins
+    let packageBuiltins = packageToBuiltinImports[packageName] || []
+    packageBuiltins = [...packageBuiltins, ...moduleBuiltins]
+    packageToBuiltinImports[packageName] = packageBuiltins
   }
 
-  function generateConfig ({ isBuiltin } = {}) {
+  function generateConfig ({ isBuiltin, includeDebugInfo } = {}) {
     const resources = {}
     const config = { resources }
     Object.entries(packageToModules).forEach(([packageName, packageModules]) => {
@@ -173,6 +195,11 @@ function createModuleInspector (opts = {}) {
       // set config for package
       resources[packageName] = config
     })
+
+    // append serializeable debug info
+    if (includeDebugInfo) {
+      config.debugInfo = debugInfo
+    }
 
     return config
   }

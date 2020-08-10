@@ -3,8 +3,16 @@ const { walk } = require('./walk')
 
 module.exports = { parseForConfig }
 
-async function parseForConfig ({ moduleSpecifier, resolveHook, importHook, isBuiltin, shouldResolve, shouldImport }) {
-  const inspector = createModuleInspector({ isBuiltin })
+async function parseForConfig ({
+  moduleSpecifier,
+  resolveHook,
+  importHook,
+  isBuiltin,
+  shouldResolve,
+  shouldImport,
+  includeDebugInfo,
+}) {
+  const inspector = createModuleInspector({ isBuiltin, includeDebugInfo })
   await walk({ moduleSpecifier, resolveHook, importHook, visitorFn, shouldResolve, shouldImport })
   // after all modules, submit config
   const config = inspector.generateConfig()
@@ -26,27 +34,14 @@ function moduleRecordToModuleData ({
   shouldResolve = () => true
 }) {
   return {
-    package: moduleRecord.packageName,
     id: moduleRecord.specifier,
-    type: moduleRecord.type,
     file: moduleRecord.specifier,
+    type: moduleRecord.type,
     source: moduleRecord.content,
     ast: moduleRecord.ast,
-    deps: Object.fromEntries(moduleRecord.imports.map(requestedName => {
-      let depValue
-      if (shouldResolve(requestedName, moduleRecord.specifier)) {
-        try {
-          depValue = resolveHook(requestedName, moduleRecord.specifier)
-        } catch (err) {
-          // graceful failure
-          console.warn(`moduleRecordToModuleData - could not resolve "${requestedName}" from "${moduleRecord.specifier}"`)
-          depValue = requestedName
-        }
-      } else {
-        // resolving is skipped so put in a dummy value
-        depValue = requestedName
-      }
-      return [requestedName, depValue]
-    }))
+    deps: moduleRecord.importMap,
+    package: moduleRecord.packageName,
+    packageName: moduleRecord.packageName,
+    packageVersion: moduleRecord.packageVersion,
   }
 }

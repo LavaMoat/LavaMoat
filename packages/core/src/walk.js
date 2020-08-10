@@ -8,7 +8,6 @@ async function walk ({
   resolveHook,
   importHook,
   visitorFn,
-  shouldResolve = () => true,
   shouldImport = () => true,
   visitedSpecifiers = new Set()
 }) {
@@ -17,9 +16,7 @@ async function walk ({
   visitorFn(moduleRecord)
 
   // walk children
-  await Promise.all(moduleRecord.imports.map(async (requestedName) => {
-    if (!shouldResolve(requestedName, moduleSpecifier)) return
-    const childSpecifier = resolveHook(requestedName, moduleSpecifier)
+  await Promise.all(Object.values(moduleRecord.importMap).map(async (childSpecifier) => {
     if (!shouldImport(childSpecifier, moduleSpecifier)) return
     // dont revisit specifiers
     if (visitedSpecifiers.has(childSpecifier)) return
@@ -30,7 +27,6 @@ async function walk ({
       resolveHook,
       importHook,
       visitorFn,
-      shouldResolve,
       shouldImport,
       visitedSpecifiers
     })
