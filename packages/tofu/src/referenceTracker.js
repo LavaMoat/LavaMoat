@@ -2,10 +2,9 @@ const noop = () => {}
 // node -> path lookup
 const pathLookup = new WeakMap()
 
-
 module.exports = {
   expandUsage,
-  pathLookup,
+  pathLookup
 }
 
 // // -> where do the inputs to function "b" come from?
@@ -19,11 +18,11 @@ module.exports = {
 // }
 
 function expandUsage (targetPath) {
-  let nodes = []
-  let leaves = []
+  const nodes = []
+  const leaves = []
 
   walkUsage(targetPath, { onNode, onLeaf })
-  
+
   return { nodes, leaves }
 
   function onNode (refLink) {
@@ -62,7 +61,7 @@ class ReferenceLinkage {
 }
 
 function makeReferenceLinkagesFromBinding (targetBinding) {
-  let results = []
+  const results = []
   targetBinding.referencePaths.forEach((ref) => {
     results.push(makeReferenceLinkageForIdentifier(ref))
   })
@@ -97,12 +96,12 @@ const usageDetectors = {
             const fnArgPath = fnArgBinding.path
 
             return [
-              new ReferenceLinkage({ path: fnArgPath, label: `arg in fn dec` })
+              new ReferenceLinkage({ path: fnArgPath, label: 'arg in fn dec' })
             ]
           }
           const fnCalleePath = pathLookup.get(fnCallee)
           return [
-            new ReferenceLinkage({ path: fnCalleePath, label: `arg in fn dec (unknown)` })
+            new ReferenceLinkage({ path: fnCalleePath, label: 'arg in fn dec (unknown)' })
           ]
         }
         if (targetPath.parentKey === 'callee') {
@@ -149,14 +148,14 @@ const usageDetectors = {
     if (leftSide.type === 'Identifier') {
       const binding = targetPath.scope.getBinding(leftSide.name)
       if (binding) {
-        return new ReferenceLinkage({ path: binding.path, label: `parent of member` })
+        return new ReferenceLinkage({ path: binding.path, label: 'parent of member' })
       } else {
         throw new RefOutOfScopeError()
       }
     }
     const leftSidePath = pathLookup.get(leftSide)
-    return new ReferenceLinkage({ path: leftSidePath, label: `parent of member (unknown)` })
-  },
+    return new ReferenceLinkage({ path: leftSidePath, label: 'parent of member (unknown)' })
+  }
 }
 
 function tracePathToUsages (targetPath) {
@@ -177,16 +176,16 @@ function makeReferenceLinkageForIdentifier (targetPath) {
     case 'CallExpression': {
       if (targetPath.parentKey === 'arguments') {
         // value is being used directly, add to results
-        return new ReferenceLinkage({ path: targetPath, label: `args to fn` }) 
+        return new ReferenceLinkage({ path: targetPath, label: 'args to fn' })
       }
       if (targetPath.parentKey === 'callee') {
         // value is being used directly, add to results
-        return new ReferenceLinkage({ path: targetPath, label: `called as fn` }) 
+        return new ReferenceLinkage({ path: targetPath, label: 'called as fn' })
       }
-      throw new Error(`makeReferenceLinkageForIdentifier/CallExpression - unknown parent key "${targetPath.parentKey}"`)   
+      throw new Error(`makeReferenceLinkageForIdentifier/CallExpression - unknown parent key "${targetPath.parentKey}"`)
     }
     case 'ReturnStatement': {
-      return new ReferenceLinkage({ path: targetPath, label: `return value of fn` }) 
+      return new ReferenceLinkage({ path: targetPath, label: 'return value of fn' })
     }
     default: {
       throw new Error(`makeReferenceLinkageForIdentifier - unknown parent type "${targetPath.parent.type}"`)

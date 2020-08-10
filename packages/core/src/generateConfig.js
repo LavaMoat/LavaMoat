@@ -44,6 +44,7 @@ function createModuleInspector (opts = {}) {
   }
 
   function inspectModule (moduleData, { isBuiltin, includeDebugInfo = false } = {}) {
+    let moduleDebug
     const packageName = moduleData.packageName || moduleData.package
     moduleIdToPackageName[moduleData.id] = packageName
     // initialize mapping from package to module
@@ -51,7 +52,7 @@ function createModuleInspector (opts = {}) {
     packageModules[moduleData.id] = moduleData
     // initialize module debug info
     if (includeDebugInfo) {
-      const moduleDebug = debugInfo[moduleData.id] = {}
+      moduleDebug = debugInfo[moduleData.id] = {}
       // append moduleData, ensure ast is not copied
       const debugData = { ...moduleData }
       delete debugData.ast
@@ -99,7 +100,7 @@ function createModuleInspector (opts = {}) {
         ...sesCompat,
         // fix serialization
         primordialMutations: primordialMutations.map(({ node: { loc } }) => ({ node: { loc } })),
-        strictModeViolations: strictModeViolations.map(({ node: { loc } }) => ({ node: { loc } })),
+        strictModeViolations: strictModeViolations.map(({ node: { loc } }) => ({ node: { loc } }))
       }
     } else {
       // adapt moduleData to moduleRecord format for sample generation

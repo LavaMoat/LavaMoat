@@ -10,7 +10,7 @@ async function parseForConfig ({
   isBuiltin,
   shouldResolve,
   shouldImport,
-  includeDebugInfo,
+  includeDebugInfo
 }) {
   const inspector = createModuleInspector({ isBuiltin, includeDebugInfo })
   await walk({ moduleSpecifier, resolveHook, importHook, visitorFn, shouldResolve, shouldImport })
@@ -42,6 +42,6 @@ function moduleRecordToModuleData ({
     deps: moduleRecord.importMap,
     package: moduleRecord.packageName,
     packageName: moduleRecord.packageName,
-    packageVersion: moduleRecord.packageVersion,
+    packageVersion: moduleRecord.packageVersion
   }
 }

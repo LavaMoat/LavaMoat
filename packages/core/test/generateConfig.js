@@ -1,3 +1,4 @@
+/* eslint-disable no-undef, no-unused-vars, no-unused-expressions, no-extend-native */
 const test = require('tape-promise').default(require('tape'))
 
 const { generateConfigFromFiles } = require('./util')
@@ -35,11 +36,11 @@ test('generateConfig - config with debugInfo', async (t) => {
       deps: {},
       package: 'test',
       packageName: 'test',
-      packageVersion: '1.2.3',
+      packageVersion: '1.2.3'
     },
     globals: {
       'location.href': 'read'
-    },
+    }
   }, 'config matched expected')
 })
 
@@ -82,7 +83,7 @@ test('generateConfig - config ignores global refs', async (t) => {
 
 test('generateConfig - config ignores global refs when properties are not accessed', async (t) => {
   const config = await createConfigForTest(function () {
-    typeof window !== undefined
+    typeof window !== 'undefined'
   })
 
   t.deepEqual(config, {
@@ -123,7 +124,7 @@ async function createConfigForTest (testFn, opts = {}) {
       test: './node_modules/test/index.js'
     },
     content: 'require("test")',
-    entry: true,
+    entry: true
   }, {
     // non-entry
     type: 'js',
