@@ -1,18 +1,31 @@
 {
   "resources": {
+    "chalk": {
+      "packages": {
+        "ansi-styles": true,
+        "supports-color": true
+      },
+      "globals": {
+        "get": true,
+        "set": true
+      }
+    },
     "ansi-styles": {
       "packages": {
         "color-convert": true
       }
     },
-    "chalk": {
-      "globals": {
-        "get": true,
-        "set": true
-      },
+    "supports-color": {
       "packages": {
-        "ansi-styles": true,
-        "supports-color": true
+        "has-flag": true
+      },
+      "globals": {
+        "process.env": true,
+        "process.platform": true
+      },
+      "builtin": {
+        "os.release": true,
+        "tty.isatty": true
       }
     },
     "color-convert": {
@@ -23,19 +36,6 @@
     "has-flag": {
       "globals": {
         "process.argv": true
-      }
-    },
-    "supports-color": {
-      "builtin": {
-        "os.release": true,
-        "tty.isatty": true
-      },
-      "globals": {
-        "process.env": true,
-        "process.platform": true
-      },
-      "packages": {
-        "has-flag": true
       }
     }
   }
