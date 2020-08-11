@@ -3,7 +3,7 @@ const {
   generateKernel
 } = require('./generatePrelude')
 const { packageDataForModule, createPackageDataStream, packageNameFromPath } = require('./packageData')
-const { createConfigSpy, createModuleInspector } = require('./generateConfig')
+const { createModuleInspector } = require('./generateConfig')
 const { parseForConfig } = require('./parseForConfig')
 const { LavamoatModuleRecord } = require('./moduleRecord')
 
@@ -16,7 +16,6 @@ module.exports = {
   packageDataForModule,
   createPackageDataStream,
   // generating lavamoat config
-  createConfigSpy,
   createModuleInspector,
   parseForConfig,
   // module record class

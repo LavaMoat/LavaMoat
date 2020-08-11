@@ -4,8 +4,9 @@ const clone = require('clone')
 const mkdirp = require('mkdirp')
 const through = require('through2').obj
 const mergeDeep = require('merge-deep')
-const { generatePrelude, createConfigSpy, createPackageDataStream } = require('lavamoat-core')
+const { generatePrelude, createPackageDataStream } = require('lavamoat-core')
 const jsonStringify = require('json-stable-stringify')
+const { createModuleInspectorSpy } = require('./createModuleInspectorSpy.js')
 const createCustomPack = require('./createCustomPack')
 const { createSesWorkaroundsTransform } = require('./sesTransforms')
 
@@ -45,7 +46,7 @@ function plugin (browserify, pluginOpts) {
 
     // if autoconfig activated, insert hook
     if (configuration.writeAutoConfig) {
-      browserify.pipeline.get('emit-deps').push(createConfigSpy({
+      browserify.pipeline.get('emit-deps').push(createModuleInspectorSpy({
         // no builtins in the browser (yet!)
         isBuiltin: () => false,
         // write to disk on completion

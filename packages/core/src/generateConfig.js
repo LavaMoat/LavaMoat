@@ -1,5 +1,4 @@
 const path = require('path')
-const through = require('through2')
 const fromEntries = require('fromentries')
 const jsonStringify = require('json-stable-stringify')
 const {
@@ -13,23 +12,7 @@ const {
 
 const rootSlug = '<root>'
 
-module.exports = { rootSlug, createConfigSpy, createModuleInspector }
-
-// createConfigSpy creates a pass-through object stream for the Browserify pipeline.
-// it analyses modules for global namespace usages, and generates a config for LavaMoat.
-// it calls `onResult` with the config when the stream ends.
-
-function createConfigSpy ({ onResult, isBuiltin, includeDebugInfo }) {
-  if (!isBuiltin) throw new Error('createConfigSpy - must specify "isBuiltin"')
-  const inspector = createModuleInspector({ isBuiltin, includeDebugInfo })
-  const configSpy = createSpy(
-    // inspect each module
-    inspector.inspectModule,
-    // after all modules, submit config
-    () => onResult(inspector.generateConfig())
-  )
-  return configSpy
-}
+module.exports = { rootSlug, createModuleInspector }
 
 function createModuleInspector (opts = {}) {
   const packageToGlobals = {}
@@ -232,26 +215,4 @@ function guessPackageName (requestedName) {
   const packagePartCount = nameSpaced ? 2 : 1
   const packageName = pathParts.slice(0, packagePartCount).join('/')
   return packageName
-}
-
-function createSpy (onData, onEnd) {
-  return through.obj((data, _, cb) => {
-    // give data to observer fn
-    try {
-      onData(data)
-    } catch (err) {
-      return cb(err)
-    }
-    // pass the data through normally
-    cb(null, data)
-  }, (cb) => {
-    // call flush observer
-    try {
-      onEnd()
-    } catch (err) {
-      return cb(err)
-    }
-    // End as normal
-    cb()
-  })
 }
