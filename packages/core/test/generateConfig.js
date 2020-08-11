@@ -28,13 +28,12 @@ test('generateConfig - config with debugInfo', async (t) => {
   const testPackageConfigDebugInfo = config.debugInfo[testModuleFile]
 
   t.deepEqual(testPackageConfigDebugInfo, {
-    moduleData: {
-      id: testModuleFile,
+    moduleRecord: {
+      specifier: testModuleFile,
       file: testModuleFile,
       type: 'js',
-      source: '(function () {\n    location.href\n  })()',
-      deps: {},
-      package: 'test',
+      content: '(function () {\n    location.href\n  })()',
+      importMap: {},
       packageName: 'test',
       packageVersion: '1.2.3'
     },

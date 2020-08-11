@@ -21,27 +21,6 @@ async function parseForConfig ({
 
   function visitorFn (moduleRecord) {
     // inspect each module
-    const moduleData = moduleRecordToModuleData({ moduleRecord, shouldResolve, resolveHook })
-    inspector.inspectModule(moduleData)
-  }
-}
-
-// convert the LavamoatModuleRecord to the moduleData format derrived from browserify/module-deps
-// primary differences is that `deps` includes resolved specifiers
-function moduleRecordToModuleData ({
-  moduleRecord,
-  resolveHook,
-  shouldResolve = () => true
-}) {
-  return {
-    id: moduleRecord.specifier,
-    file: moduleRecord.specifier,
-    type: moduleRecord.type,
-    source: moduleRecord.content,
-    ast: moduleRecord.ast,
-    deps: moduleRecord.importMap,
-    package: moduleRecord.packageName,
-    packageName: moduleRecord.packageName,
-    packageVersion: moduleRecord.packageVersion
+    inspector.inspectModule(moduleRecord)
   }
 }

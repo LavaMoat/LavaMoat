@@ -1,5 +1,5 @@
 const through = require('through2')
-const { createModuleInspector } = require('lavamoat-core')
+const { createModuleInspector, LavamoatModuleRecord } = require('lavamoat-core')
 
 module.exports = { createModuleInspectorSpy }
 
@@ -12,11 +12,28 @@ function createModuleInspectorSpy ({ onResult, isBuiltin, includeDebugInfo }) {
   const inspector = createModuleInspector({ isBuiltin, includeDebugInfo })
   const configSpy = createSpy(
     // inspect each module
-    inspector.inspectModule,
+    (moduleData) => inspectBrowserifyModuleData(moduleData, inspector),
     // after all modules, submit config
     () => onResult(inspector.generateConfig())
   )
   return configSpy
+}
+
+// convert browserify/module-deps's internal ModuleData schema to LavamoatModuleRecord
+function inspectBrowserifyModuleData (moduleData, inspector) {
+  const moduleRecord = new LavamoatModuleRecord({
+    specifier: moduleData.id,
+    file: moduleData.file,
+    packageName: moduleData.packageName,
+    packageVersion: moduleData.packageVersion,
+    content: moduleData.source,
+    // browserify only deals with commonjs modules
+    type: 'js',
+    importMap: moduleData.deps,
+    // likely undefined
+    ast: moduleData.ast
+  })
+  inspector.inspectModule(moduleRecord)
 }
 
 // a passthrough stream with handlers for observing the data
