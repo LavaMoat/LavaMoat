@@ -5,7 +5,6 @@ module.exports = { walk }
 
 async function walk ({
   moduleSpecifier,
-  resolveHook,
   importHook,
   visitorFn,
   shouldImport = () => true,
@@ -24,7 +23,6 @@ async function walk ({
     // continue walking child
     await walk({
       moduleSpecifier: childSpecifier,
-      resolveHook,
       importHook,
       visitorFn,
       shouldImport,

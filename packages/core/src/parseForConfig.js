@@ -5,15 +5,13 @@ module.exports = { parseForConfig }
 
 async function parseForConfig ({
   moduleSpecifier,
-  resolveHook,
   importHook,
   isBuiltin,
-  shouldResolve,
   shouldImport,
   includeDebugInfo
 }) {
   const inspector = createModuleInspector({ isBuiltin, includeDebugInfo })
-  await walk({ moduleSpecifier, resolveHook, importHook, visitorFn, shouldResolve, shouldImport })
+  await walk({ moduleSpecifier, importHook, visitorFn, shouldImport })
   // after all modules, submit config
   const config = inspector.generateConfig()
   // console.log(JSON.stringify(config, null, 2))
