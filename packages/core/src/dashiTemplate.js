@@ -1,22 +1,17 @@
-(function(){
-
+/* global globalThis, templateRequire */
+(function () {
   // templateRequire needs a `globalRef` handle, for now
+  // eslint-disable-next-line no-unused-vars
   const globalRef = globalThis
   const { lockdown } = templateRequire('ses')
-    
+
   const lockdownOptions = {
     // this is introduces non-determinism, but is otherwise safe
     noTameMath: true,
+    // reveal error stacks
+    noTameError: true
   }
-
-  // only reveal error stacks in debug mode
-  // if (debugMode === true) {
-  if (true) {
-    lockdownOptions.noTameError = true
-  }
-
   lockdown(lockdownOptions)
-
 
   return createKernel
 
@@ -38,7 +33,7 @@
     const endowmentsMembraneSpace = membrane.makeMembraneSpace({
       label: '<endowments>',
       // this ensures all typedarrays that are passed to the endowments membrane are unwrapped
-      passthroughFilter: allowTypedArrays,
+      passthroughFilter: allowTypedArrays
     })
     membraneSpaceForPackage.set(endowmentsMembraneSpace.label, endowmentsMembraneSpace)
 
@@ -52,7 +47,7 @@
       // allows overriding of imports when relative (e.g. subset or wrapper)
       importRelativeHook,
       // called after moduleInitialization completes
-      postExecutionHook,
+      postExecutionHook
     })
 
     // return lavamoatKernel
@@ -62,7 +57,7 @@
         lavamoatKernel.entryModules = [moduleId]
         lavamoatKernel.execute()
       },
-      membrane,
+      membrane
     }
 
     function configureCompartmentHook (moduleRecord, moduleCompartment) {
@@ -70,7 +65,7 @@
       const isRootModule = packageName === '<root>'
       const configForModule = getConfigForPackage(lavamoatConfig, packageName)
 
-      // add module's lavamoat config to module record 
+      // add module's lavamoat config to module record
       moduleRecord.config = configForModule
 
       // prepare endowments
@@ -129,8 +124,8 @@
       const parentPackageConfig = parentModuleRecord.config
       const parentPackagesWhitelist = parentPackageConfig.packages
       const parentBuiltinsWhitelist = Object.entries(parentPackageConfig.builtin)
-      .filter(([_, allowed]) => allowed === true)
-      .map(([packagePath, allowed]) => packagePath.split('.')[0])
+        .filter(([_, allowed]) => allowed === true)
+        .map(([packagePath, allowed]) => packagePath.split('.')[0])
 
       // look up config for module
       const { packageName } = childModuleRecord
@@ -149,7 +144,7 @@
 
       // TODO: this is applied after potential side effects
       if (!parentIsRootModule && !isSamePackage && !isInParentWhitelist) {
-        throw new Error(`LavaMoat - required package not in whitelist: package "${parentModulePackageName}" requested "${packageName}" as "${requestedName}"`)
+        throw new Error(`LavaMoat - required package not in whitelist: package "${parentModulePackageName}" requested "${packageName}"`)
       }
 
       // apply moduleExports require-time protection
@@ -170,10 +165,10 @@
         const builtinPaths = (
           Object.entries(parentPackageConfig.builtin)
           // grab all allowed builtin paths that match this package
-          .filter(([packagePath, allowed]) => allowed === true && moduleId === packagePath.split('.')[0])
+            .filter(([packagePath, allowed]) => allowed === true && moduleId === packagePath.split('.')[0])
           // only include the paths after the packageName
-          .map(([packagePath, allowed]) => packagePath.split('.').slice(1).join('.'))
-          .sort()
+            .map(([packagePath, allowed]) => packagePath.split('.').slice(1).join('.'))
+            .sort()
         )
         moduleExports = makeMinimalViewOfRef(moduleExports, builtinPaths)
       }
@@ -201,7 +196,7 @@
       const membraneSpace = membrane.makeMembraneSpace({
         label: spaceName,
         // default is a transparent membrane handler
-        createHandler: () => Reflect,
+        createHandler: () => Reflect
       })
       membraneSpaceForPackage.set(spaceName, membraneSpace)
       return membraneSpace
@@ -230,7 +225,7 @@
       // the value itself
       visitor(value)
       // lookup children
-      let proto, props = []
+      let proto; let props = []
       try {
         proto = Object.getPrototypeOf(value)
         props = Object.values(Object.getOwnPropertyDescriptors(value))
@@ -244,7 +239,5 @@
       // the prototype
       if (proto) visitor(proto)
     }
-
   }
-
 })()

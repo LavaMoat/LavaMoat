@@ -1,3 +1,5 @@
+/* global Compartment */
+
 // oden kernel
 
 // handles
@@ -9,7 +11,6 @@
 
 // does NOT handle
 // - module loader/resolve logic
-
 
 class OdenKernel {
   constructor ({
@@ -27,7 +28,7 @@ class OdenKernel {
     // allows overriding of imports when relative (e.g. subset or wrapper)
     importRelativeHook = (_, childModuleRecord) => childModuleRecord.exports,
     // called after module intialization has completed
-    postExecutionHook = () => {},
+    postExecutionHook = () => {}
   } = {}) {
     this.dependencyGraphLoaded = dependencyGraphLoaded
     this.moduleCache = moduleCache
@@ -140,7 +141,7 @@ class OdenKernel {
         const commonjsEndowments = {
           module: moduleExportsWrapper,
           exports: moduleExportsWrapper.exports,
-          require: (requestedName) => this.importRelative(moduleRecord, requestedName),
+          require: (requestedName) => this.importRelative(moduleRecord, requestedName)
         }
         moduleCompartment.evaluate(`${moduleSource}\n//# sourceURL=${sourceURL}`, { endowments: commonjsEndowments })
       }
@@ -169,7 +170,6 @@ class OdenKernel {
     const moduleExports = this.importRelativeHook(parentModuleRecord, childModuleRecord)
     return moduleExports
   }
-
 }
 
 module.exports = { OdenKernel }
