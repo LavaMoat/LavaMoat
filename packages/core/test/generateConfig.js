@@ -37,7 +37,7 @@ test('generateConfig - config with debugInfo', async (t) => {
       packageName: 'test',
       packageVersion: '1.2.3',
       // this is for the oden/dashi kernel
-      moduleInitializer: undefined,
+      moduleInitializer: undefined
     },
     globals: {
       'location.href': 'read'
