@@ -17,22 +17,33 @@ async function runLava () {
   const {
     entryPath,
     writeAutoConfig,
+    writeAutoConfigDebug,
     writeAutoConfigAndRun,
     configPath,
+    configDebugPath,
     configOverridePath,
     debugMode
   } = parseArgs()
   const cwd = process.cwd()
   const entryId = path.resolve(cwd, entryPath)
 
-  const shouldParseApplication = writeAutoConfig || writeAutoConfigAndRun
-  const shouldRunApplication = !writeAutoConfig || writeAutoConfigAndRun
+  const shouldParseApplication = writeAutoConfig || writeAutoConfigDebug || writeAutoConfigAndRun
+  const shouldRunApplication = (!writeAutoConfig && !writeAutoConfigDebug) || writeAutoConfigAndRun
 
   if (shouldParseApplication) {
     // parse mode
+    const includeDebugInfo = Boolean(writeAutoConfigDebug)
     const { resolutions } = await loadConfig({ debugMode, configPath, configOverridePath })
     console.log(`LavaMoat generating config for "${entryId}"...`)
-    const config = await parseForConfig({ cwd, entryId, resolutions })
+    const config = await parseForConfig({ cwd, entryId, resolutions, includeDebugInfo })
+    // write config debug file
+    if (includeDebugInfo) {
+      const serializedConfig = JSON.stringify(config, null, 2)
+      fs.writeFileSync(configDebugPath, serializedConfig)
+      console.log(`LavaMoat wrote config debug to "${configDebugPath}"`)
+    }
+    // write config file
+    delete config.debugInfo
     const serializedConfig = JSON.stringify(config, null, 2)
     fs.writeFileSync(configPath, serializedConfig)
     console.log(`LavaMoat wrote config to "${configPath}"`)
@@ -73,6 +84,13 @@ function parseArgs () {
         type: 'string',
         default: './lavamoat-config-override.json'
       })
+      // the path for the config debug file
+      yargs.option('configDebug', {
+        alias: 'configDebugPath',
+        describe: 'the path for the config override file',
+        type: 'string',
+        default: './lavamoat-config-debug.json'
+      })
       // debugMode, disable some protections for easier debugging
       yargs.option('debugMode', {
         describe: 'debugMode, disable some protections for easier debugging',
@@ -94,9 +112,8 @@ function parseArgs () {
       // parsing mode, write config debug info to specified or default path
       yargs.option('writeAutoConfigDebug', {
         describe: 'when writeAutoConfig is enabled, write config debug info to specified or default path',
-        type: 'string',
-        // default: './lavamoat-config-debug.json',
-        default: undefined
+        type: 'boolean',
+        default: false
       })
     })
     .help()
@@ -105,6 +122,7 @@ function parseArgs () {
   // resolve paths
   parsedArgs.configPath = path.resolve(parsedArgs.configPath)
   parsedArgs.configOverridePath = path.resolve(parsedArgs.configOverridePath)
+  parsedArgs.configDebugPath = path.resolve(parsedArgs.configDebugPath)
 
   return parsedArgs
 }

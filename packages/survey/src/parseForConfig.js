@@ -69,8 +69,7 @@ async function parseForConfig ({ packageDir, entryId, rootPackageName }) {
     })
     environment[moduleRecord.specifier] = hits
     // inspect each module
-    // const moduleData = moduleRecordToModuleData({ moduleRecord, shouldResolve, resolveHook })
-    // inspector.inspectModule(moduleData)
+    // inspector.inspectModule(moduleRecord)
 
   }
   

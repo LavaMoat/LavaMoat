@@ -174,7 +174,10 @@ function inspectImports (ast, packagesToInspect, deep = true) {
       })
     }
   })
-  const cjsImportStrings = cjsImports.map(item => item.join('.'))
+  // stringify paths
+  let cjsImportStrings = cjsImports.map(item => item.join('.'))
+  // get unique results
+  cjsImportStrings = Array.from(new Set(cjsImportStrings))
   return { cjsImports: cjsImportStrings }
 }
 
