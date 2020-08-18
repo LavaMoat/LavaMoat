@@ -1,6 +1,16 @@
 
 class LavamoatModuleRecord {
-  constructor ({ specifier, file, type, packageName, packageVersion, content, importMap, ast }) {
+  constructor ({
+    specifier,
+    file,
+    type,
+    packageName,
+    packageVersion,
+    content,
+    importMap = {},
+    ast,
+    moduleInitializer
+  }) {
     this.specifier = specifier
     this.file = file
     this.type = type
@@ -9,6 +19,7 @@ class LavamoatModuleRecord {
     this.content = content
     this.importMap = importMap
     this.ast = ast
+    this.moduleInitializer = moduleInitializer
   }
 }
 
