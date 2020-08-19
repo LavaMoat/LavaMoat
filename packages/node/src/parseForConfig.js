@@ -65,6 +65,9 @@ function makeImportHook ({
     if (extension === '.js') {
       return makeJsModuleRecord(specifier, filename, packageData)
     }
+    if (extension === '.json') {
+      return makeJsonModuleRecord(specifier, filename, packageData)
+    }
     // warn if not known to be skippable
     if (!['.css', '.sass'].includes(extension)) {
       console.warn(`node importHook - ignored unknown extension "${extension}"`)
@@ -135,6 +138,24 @@ function makeImportHook ({
       content,
       importMap,
       ast
+    })
+  }
+
+  async function makeJsonModuleRecord (specifier, filename, packageData) {
+    const { packageName, packageVersion } = packageData
+    // load src
+    const rawContent = await fs.readFile(filename, 'utf8')
+    // validate json
+    JSON.serialize(rawContent)
+    // wrap as commonjs module
+    const cjsContent = `module.exports=${rawContent}`
+    return new LavamoatModuleRecord({
+      type: 'js',
+      specifier,
+      file: filename,
+      packageName,
+      packageVersion,
+      content: cjsContent,
     })
   }
 }
