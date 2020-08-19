@@ -151,7 +151,7 @@ function makeImportHook ({
       file: filename,
       packageName,
       packageVersion,
-      content: cjsContent,
+      content: cjsContent
     })
   }
 }
