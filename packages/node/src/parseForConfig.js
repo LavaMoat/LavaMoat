@@ -68,11 +68,7 @@ function makeImportHook ({
     if (extension === '.json') {
       return makeJsonModuleRecord(specifier, filename, packageData)
     }
-    // warn if not known to be skippable
-    if (!['.css', '.sass'].includes(extension)) {
-      console.warn(`node importHook - ignored unknown extension "${extension}"`)
-    }
-    // TODO: throw an error here, if ignore flag is not set
+    throw new Error(`lavamoat-node/makeImportHook - unknown module file extension "${extension}" in filename "${filename}"`)
   }
 
   function makeBuiltinModuleRecord (specifier) {
