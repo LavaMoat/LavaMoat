@@ -146,7 +146,7 @@ function makeImportHook ({
     // load src
     const rawContent = await fs.readFile(filename, 'utf8')
     // validate json
-    JSON.serialize(rawContent)
+    JSON.parse(rawContent)
     // wrap as commonjs module
     const cjsContent = `module.exports=${rawContent}`
     return new LavamoatModuleRecord({
