@@ -16,6 +16,9 @@ async function walk ({
 
   // walk children
   await Promise.all(Object.values(moduleRecord.importMap).map(async (childSpecifier) => {
+    // skip children that are set to null (resolution was skipped)
+    if (childSpecifier === null) return
+    // skip modules we're told not to import
     if (!shouldImport(childSpecifier, moduleSpecifier)) return
     // dont revisit specifiers
     if (visitedSpecifiers.has(childSpecifier)) return
