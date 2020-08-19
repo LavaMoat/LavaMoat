@@ -102,17 +102,18 @@ test('generateConfig - config ignores global refs accessed with whitelist items'
   }, 'config matches expected')
 })
 
-test('generateConfig - unfrozen environment - primordial modification', async (t) => {
-  try {
-    const config = await createConfigForTest(function () {
-      const href = window.location.href
-      Array.prototype.bogosort = () => 'yolo'
-    })
-    t.fail('expected to throw an error')
-  } catch (err) {
-    t.pass()
-  }
-})
+// we no longer throw an error, we log a warning
+// test('generateConfig - primordial modification', async (t) => {
+//   try {
+//     const config = await createConfigForTest(function () {
+//       const href = window.location.href
+//       Array.prototype.bogosort = () => 'yolo'
+//     })
+//     t.fail('expected to throw an error')
+//   } catch (err) {
+//     t.pass()
+//   }
+// })
 
 async function createConfigForTest (testFn, opts = {}) {
   const files = [{
