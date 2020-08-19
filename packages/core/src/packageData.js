@@ -16,13 +16,8 @@ function packageDataForModule (moduleData, rootPackageName) {
   }
   // parse package name from file path
   const filepath = moduleData.file
-  let packageName = packageNameFromPath(filepath)
-  let packageVersion
-  if (packageName) {
-    packageVersion = packageVersionFromPath(packageName, filepath)
-  } else {
-    packageName = rootPackageName
-  }
+  const packageName = packageNameFromPath(filepath) || rootPackageName
+  const packageVersion = packageVersionFromPath(packageName, filepath)
   return { packageName, packageVersion }
 }
 
