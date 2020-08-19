@@ -11,7 +11,12 @@ const {
   getParents
 } = require('./util')
 
-module.exports = { inspectGlobals, inspectImports, inspectEsmImports }
+module.exports = {
+  inspectGlobals,
+  inspectImports,
+  inspectEsmImports,
+  inspectDynamicRequires
+}
 
 function inspectGlobals (source, {
   ignoredRefs = [],
@@ -126,53 +131,82 @@ function inspectEsmImports (ast, packagesToInspect) {
   return { esmImports }
 }
 
-function inspectImports (ast, packagesToInspect, deep = true) {
-  const cjsImports = []
+function findAllCallsToRequire (ast) {
+  const matches = []
   traverse(ast, {
     CallExpression: function (path) {
       const { node } = path
-      const { callee, arguments: [moduleNameNode] } = node
+      const { callee } = node
       if (callee.type !== 'Identifier') return
       if (callee.name !== 'require') return
-      if (moduleNameNode.type !== 'StringLiteral') return
-      // ensure the "require" method is not shadowed
-      if (path.scope.hasBinding(callee.name, true)) return
-      const moduleName = moduleNameNode.value
-      // skip if not specified in "packagesToInspect"
-      if (packagesToInspect && !packagesToInspect.includes(moduleName)) return
-      // if not deep, done
-      if (!deep) {
-        cjsImports.push([moduleName])
-        return
-      }
-      // inspect for member chain
-      const parents = getParents(path)
-      const { memberExpressions, parentOfMembershipChain } = getMemberExpressionNesting(node, parents)
-      const initialKeyPath = [moduleName, ...getPathFromMemberExpressionChain(memberExpressions)]
-      // if import not used in a var declaration, exit early
-      if (parentOfMembershipChain.type !== 'VariableDeclarator') {
-        // result of require has not been assigned, it has been consumed
-        cjsImports.push(initialKeyPath)
-        return
-      }
-      // get all declared vars (destructuring)
-      // for each declared var, detect usage keyPath
-      const identifierOrPattern = parentOfMembershipChain.id
-      const declaredVars = inspectPatternElementForDeclarations(identifierOrPattern, initialKeyPath)
-      declaredVars.forEach(({ node, keyPath }) => {
-        const varName = node.name
-        const refs = path.scope.getBinding(varName).referencePaths
-        // for each reference of the var, detect usage keyPath
-        refs.forEach((refPath) => {
-          const parents = getParents(refPath)
-          const { memberExpressions } = getMemberExpressionNesting(refPath.node, parents)
-          const subPath = getPathFromMemberExpressionChain(memberExpressions)
-          const usageKeyPath = [...keyPath, ...subPath]
-          // add to results
-          cjsImports.push(usageKeyPath)
-        })
-      })
+      // ensure this is the global "require" method
+      if (path.scope.hasBinding('require', true)) return
+      matches.push(path)
     }
+  })
+  return matches
+}
+
+function inspectDynamicRequires (ast) {
+  const requireCalls = findAllCallsToRequire(ast)
+  const dynamicRequireCalls = requireCalls.filter(path => {
+    const { node } = path
+    const { callee, arguments: [moduleNameNode] } = node
+    // keep invalid no-argument require calls
+    if (!moduleNameNode) return true
+    // skip normal require(string) calls
+    if (moduleNameNode.type === 'StringLiteral') return false
+    // keep any other type
+    return true
+  })
+  return dynamicRequireCalls
+}
+
+function inspectImports (ast, packagesToInspect, deep = true) {
+  const cjsImports = []
+  const requireCalls = findAllCallsToRequire(ast)
+  requireCalls.forEach(path => {
+    const { node } = path
+    const { callee, arguments: [moduleNameNode] } = node
+    // skip invalid or dynamic require calls
+    if (!moduleNameNode || moduleNameNode.type !== 'StringLiteral') return
+    // skip if not specified in "packagesToInspect"
+    const moduleName = moduleNameNode.value
+    if (packagesToInspect && !packagesToInspect.includes(moduleName)) return
+    // if not deep, done
+    if (!deep) {
+      cjsImports.push([moduleName])
+      return
+    }
+    // inspect for member chain
+    // eg:  require("abc").xyz
+    const parents = getParents(path)
+    const { memberExpressions, parentOfMembershipChain } = getMemberExpressionNesting(node, parents)
+    const initialKeyPath = [moduleName, ...getPathFromMemberExpressionChain(memberExpressions)]
+    // if import not used in a var declaration, exit early
+    if (parentOfMembershipChain.type !== 'VariableDeclarator') {
+      // result of require has not been assigned, it has been consumed
+      cjsImports.push(initialKeyPath)
+      return
+    }
+    // get all declared vars (destructuring)
+    // for each declared var, detect usage keyPath
+    // eg:  const { ijk } = require("abc").xyz
+    const identifierOrPattern = parentOfMembershipChain.id
+    const declaredVars = inspectPatternElementForDeclarations(identifierOrPattern, initialKeyPath)
+    declaredVars.forEach(({ node, keyPath }) => {
+      const varName = node.name
+      const refs = path.scope.getBinding(varName).referencePaths
+      // for each reference of the var, detect usage keyPath
+      refs.forEach((refPath) => {
+        const parents = getParents(refPath)
+        const { memberExpressions } = getMemberExpressionNesting(refPath.node, parents)
+        const subPath = getPathFromMemberExpressionChain(memberExpressions)
+        const usageKeyPath = [...keyPath, ...subPath]
+        // add to results
+        cjsImports.push(usageKeyPath)
+      })
+    })
   })
   // stringify paths
   let cjsImportStrings = cjsImports.map(item => item.join('.'))

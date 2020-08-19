@@ -1,6 +1,6 @@
 const { parse } = require('@babel/parser')
 const { default: traverse } = require('@babel/traverse')
-const { inspectGlobals, inspectImports, inspectEsmImports } = require('./inspectSource')
+const { inspectGlobals, inspectImports, inspectEsmImports, inspectDynamicRequires } = require('./inspectSource')
 const { inspectPrimordialAssignments } = require('./inspectPrimordialAssignments')
 const { inspectSesCompat } = require('./inspectSesCompat.js')
 const { codeSampleFromAstNode } = require('./codeSampleFromAstNode.js')
@@ -10,6 +10,7 @@ module.exports = {
   inspectGlobals,
   inspectImports,
   inspectEsmImports,
+  inspectDynamicRequires,
   utils,
   parse,
   traverse,
