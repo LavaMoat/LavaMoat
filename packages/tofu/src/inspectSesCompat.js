@@ -1,5 +1,6 @@
 const { inspectPrimordialAssignments } = require('./inspectPrimordialAssignments.js')
 const { whitelist: sesAllowlist, FunctionInstance } = require('./ses-whitelist.js')
+const { inspectDynamicRequires } = require('./inspectSource.js')
 
 module.exports = { inspectSesCompat }
 
@@ -14,7 +15,8 @@ const strictModeViolationErrorCues = [
 function inspectSesCompat (ast) {
   const results = {
     primordialMutations: [],
-    strictModeViolations: []
+    strictModeViolations: [],
+    dynamicRequires: []
   }
   // check for strict mode violations
   ;(ast.errors || []).forEach(error => {
@@ -37,6 +39,8 @@ function inspectSesCompat (ast) {
     if (hasSetterInWhitelist(memberPath)) return
     results.primordialMutations.push(intrinsicMutation)
   })
+  // check for dynamic (non-string literal) requires
+  results.dynamicRequires = inspectDynamicRequires(ast)
   return results
 }
 

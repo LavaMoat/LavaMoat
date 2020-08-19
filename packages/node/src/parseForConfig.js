@@ -62,14 +62,13 @@ function makeImportHook ({
     if (extension === '.node') {
       return makeNativeModuleRecord(specifier, filename, packageData)
     }
-    if (extension === '.js') {
+    if (['.js', '.cjs'].includes(extension)) {
       return makeJsModuleRecord(specifier, filename, packageData)
     }
-    // warn if not known to be skippable
-    if (!['.css', '.sass'].includes(extension)) {
-      console.warn(`node importHook - ignored unknown extension "${extension}"`)
+    if (extension === '.json') {
+      return makeJsonModuleRecord(specifier, filename, packageData)
     }
-    // TODO: throw an error here, if ignore flag is not set
+    throw new Error(`lavamoat-node/makeImportHook - unknown module file extension "${extension}" in filename "${filename}"`)
   }
 
   function makeBuiltinModuleRecord (specifier) {
@@ -122,7 +121,7 @@ function makeImportHook ({
         // }
       } else {
         // resolving is skipped so put in a dummy value
-        depValue = requestedName
+        depValue = null
       }
       return [requestedName, depValue]
     }))
@@ -135,6 +134,24 @@ function makeImportHook ({
       content,
       importMap,
       ast
+    })
+  }
+
+  async function makeJsonModuleRecord (specifier, filename, packageData) {
+    const { packageName, packageVersion } = packageData
+    // load src
+    const rawContent = await fs.readFile(filename, 'utf8')
+    // validate json
+    JSON.parse(rawContent)
+    // wrap as commonjs module
+    const cjsContent = `module.exports=${rawContent}`
+    return new LavamoatModuleRecord({
+      type: 'js',
+      specifier,
+      file: filename,
+      packageName,
+      packageVersion,
+      content: cjsContent
     })
   }
 }

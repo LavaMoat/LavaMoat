@@ -16,13 +16,8 @@ function packageDataForModule (moduleData, rootPackageName) {
   }
   // parse package name from file path
   const filepath = moduleData.file
-  let packageName = packageNameFromPath(filepath)
-  let packageVersion
-  if (packageName) {
-    packageVersion = packageVersionFromPath(packageName, filepath)
-  } else {
-    packageName = rootPackageName
-  }
+  const packageName = packageNameFromPath(filepath) || rootPackageName
+  const packageVersion = packageVersionFromPath(packageName, filepath)
   return { packageName, packageVersion }
 }
 
@@ -31,7 +26,16 @@ function packageVersionFromPath (packageName, filepath) {
   const [packageParentPath] = filepath.split(`/${packageName}/`)
   const packagePath = path.join(packageParentPath, packageName, 'package.json')
   if (!packagePath) return
-  const { version: packageVersion } = require(packagePath)
+  // attempt to load package path
+  let packageVersion
+  try {
+    const packageJson = require(packagePath)
+    packageVersion = packageJson.version
+  } catch (err) {
+    if (err.code !== 'MODULE_NOT_FOUND') {
+      throw err
+    }
+  }
   return packageVersion
 }
 

@@ -74,8 +74,8 @@ function createModuleInspector (opts = {}) {
   function inspectForEnvironment (ast, moduleRecord, includeDebugInfo) {
     const { packageName } = moduleRecord
     const sesCompat = inspectSesCompat(ast, packageName)
-    const { primordialMutations, strictModeViolations } = sesCompat
-    const hasResults = primordialMutations.length > 0 || strictModeViolations.length > 0
+    const { primordialMutations, strictModeViolations, dynamicRequires } = sesCompat
+    const hasResults = primordialMutations.length > 0 || strictModeViolations.length > 0 || dynamicRequires.length > 0
     if (!hasResults) return
     if (includeDebugInfo) {
       const moduleDebug = debugInfo[moduleRecord.specifier]
@@ -83,15 +83,18 @@ function createModuleInspector (opts = {}) {
         ...sesCompat,
         // fix serialization
         primordialMutations: primordialMutations.map(({ node: { loc } }) => ({ node: { loc } })),
-        strictModeViolations: strictModeViolations.map(({ node: { loc } }) => ({ node: { loc } }))
+        strictModeViolations: strictModeViolations.map(({ node: { loc } }) => ({ node: { loc } })),
+        dynamicRequires: dynamicRequires.map(({ node: { loc } }) => ({ node: { loc } }))
       }
     } else {
+      // warn if non-compatible code found
       const samples = jsonStringify({
         primordialMutations: primordialMutations.map(({ node }) => codeSampleFromAstNode(node, moduleRecord)),
-        strictModeViolations: strictModeViolations.map(({ node }) => codeSampleFromAstNode(node, moduleRecord))
+        strictModeViolations: strictModeViolations.map(({ node }) => codeSampleFromAstNode(node, moduleRecord)),
+        dynamicRequires: dynamicRequires.map(({ node }) => codeSampleFromAstNode(node, moduleRecord))
       })
       const errMsg = `Incomptabile code detected in package "${packageName}" file "${moduleRecord.file}". Violations:\n${samples}`
-      throw new Error(errMsg)
+      console.warn(errMsg)
     }
   }
 

@@ -1,6 +1,6 @@
 {
   "name": "lavamoat-core",
-  "version": "5.0.0",
+  "version": "5.0.1",
   "description": "LavaMoat kernel and utils",
   "main": "src/index.js",
   "directories": {
@@ -13,7 +13,7 @@
     "cytoplasm": "^3.3.1",
     "fromentries": "^1.2.0",
     "json-stable-stringify": "^1.0.1",
-    "lavamoat-tofu": "^5.0.0",
+    "lavamoat-tofu": "^5.1.0",
     "resolve": "^1.15.1",
     "ses": "^0.7.7"
   },

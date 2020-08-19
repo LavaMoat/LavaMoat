@@ -13,9 +13,10 @@ function codeSampleFromAstNode (node, moduleRecord) {
   result.sample = sample
   // add npmfs link if possible
   if (packageName && packageVersion && specifier) {
-    // https://npmfs.com/package/moment/2.24.0/locale/ca.js#L81
+    // https://npmfs.com/package/bluebird/3.5.5/js/browser/bluebird.core.js#L2714:22-L27:2414
     const relativeFile = specifier.split(`${packageName}/`)[1]
-    const url = `https://npmfs.com/package/${packageName}/${packageVersion}/${relativeFile}#L${start.line}`
+    const rangePart = `L${start.line}:${start.column}-L${end.line}:${end.column}`
+    const url = `https://npmfs.com/package/${packageName}/${packageVersion}/${relativeFile}#${rangePart}`
     result.npmfs = url
   }
   return result
