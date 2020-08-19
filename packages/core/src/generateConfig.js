@@ -84,7 +84,7 @@ function createModuleInspector (opts = {}) {
         // fix serialization
         primordialMutations: primordialMutations.map(({ node: { loc } }) => ({ node: { loc } })),
         strictModeViolations: strictModeViolations.map(({ node: { loc } }) => ({ node: { loc } })),
-        dynamicRequires: dynamicRequires.map(({ node: { loc } }) => ({ node: { loc }}))
+        dynamicRequires: dynamicRequires.map(({ node: { loc } }) => ({ node: { loc } }))
       }
     } else {
       // warn if non-compatible code found

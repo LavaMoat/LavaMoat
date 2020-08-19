@@ -151,7 +151,7 @@ function inspectDynamicRequires (ast) {
   const requireCalls = findAllCallsToRequire(ast)
   const dynamicRequireCalls = requireCalls.filter(path => {
     const { node } = path
-    const { callee, arguments: [moduleNameNode] } = node
+    const { arguments: [moduleNameNode] } = node
     // keep invalid no-argument require calls
     if (!moduleNameNode) return true
     // skip normal require(string) calls
@@ -167,7 +167,7 @@ function inspectImports (ast, packagesToInspect, deep = true) {
   const requireCalls = findAllCallsToRequire(ast)
   requireCalls.forEach(path => {
     const { node } = path
-    const { callee, arguments: [moduleNameNode] } = node
+    const { arguments: [moduleNameNode] } = node
     // skip invalid or dynamic require calls
     if (!moduleNameNode || moduleNameNode.type !== 'StringLiteral') return
     // skip if not specified in "packagesToInspect"
