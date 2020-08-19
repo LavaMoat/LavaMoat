@@ -62,7 +62,7 @@ function makeImportHook ({
     if (extension === '.node') {
       return makeNativeModuleRecord(specifier, filename, packageData)
     }
-    if (extension === '.js') {
+    if (['.js', '.cjs'].includes(extension)) {
       return makeJsModuleRecord(specifier, filename, packageData)
     }
     if (extension === '.json') {
@@ -121,7 +121,7 @@ function makeImportHook ({
         // }
       } else {
         // resolving is skipped so put in a dummy value
-        depValue = requestedName
+        depValue = null
       }
       return [requestedName, depValue]
     }))
