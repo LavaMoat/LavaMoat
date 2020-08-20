@@ -118,9 +118,10 @@ function makeGetEndowmentsForConfig () {
     const nextPart = pathParts[0]
     const remainingParts = pathParts.slice(1)
     const originPropDesc = Reflect.getOwnPropertyDescriptor(originRef, nextPart)
-    // origin must have a value to copy
+    // origin missing the value to copy
     if (!originPropDesc) {
-      throw new Error(`unable to copy on to targetRef, originRef doesn't have property at "${nextPart}"`)
+      // just skip it
+      return
     }
     const originValue = originPropDesc.value
     // if target already has a value, it must be extensible
