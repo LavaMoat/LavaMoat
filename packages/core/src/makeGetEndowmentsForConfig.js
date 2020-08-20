@@ -118,7 +118,7 @@ function makeGetEndowmentsForConfig () {
     const nextPart = pathParts[0]
     const remainingParts = pathParts.slice(1)
     // get the property from any depth in the property chain
-    const { prop: originPropDesc, receiver: originReceiver } = getPropertyDescriptorDeep(originRef, nextPart)
+    const { prop: originPropDesc } = getPropertyDescriptorDeep(originRef, nextPart)
     // origin missing the value to copy
     if (!originPropDesc) {
       // just skip it

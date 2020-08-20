@@ -5,7 +5,7 @@ module.exports = {
 }
 
 async function generateConfigFromFiles ({ files, ...opts }) {
-  const config = await parseForConfig(Object.assign({
+  const config = await parseForConfig({
     moduleSpecifier: files.find(file => file.entry).specifier,
     resolveHook: (requestedName, parentAddress) => {
       return files.find(file => file.specifier === parentAddress).importMap[requestedName]
@@ -14,8 +14,9 @@ async function generateConfigFromFiles ({ files, ...opts }) {
       return new LavamoatModuleRecord(files.find(file => file.specifier === address))
     },
     isBuiltin: () => false,
-    includeDebugInfo: false
-  }, opts))
+    includeDebugInfo: false,
+    ...opts
+  })
 
   return config
 }
