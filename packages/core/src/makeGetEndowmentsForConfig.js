@@ -117,7 +117,8 @@ function makeGetEndowmentsForConfig () {
     }
     const nextPart = pathParts[0]
     const remainingParts = pathParts.slice(1)
-    const originPropDesc = Reflect.getOwnPropertyDescriptor(originRef, nextPart)
+    // get the property from any depth in the property chain
+    const { prop: originPropDesc, receiver: originReceiver } = getPropertyDescriptorDeep(originRef, nextPart)
     // origin missing the value to copy
     if (!originPropDesc) {
       // just skip it
@@ -163,7 +164,21 @@ function makeGetEndowmentsForConfig () {
     // this is the last part of the path, the value we're trying to actually copy
     // if has getter/setter - copy as is
     if (!('value' in originPropDesc)) {
-      Reflect.defineProperty(targetRef, nextPart, originPropDesc)
+      // wrapper setter/getter with correct receiver
+      const get = originPropDesc.get && function () {
+        const receiver = this
+        // replace the "receiver" value if it points to fake parent
+        const receiverRef = receiver === targetRef ? originRef : receiver
+        return Reflect.get(originRef, nextPart, receiverRef)
+      }
+      const set = originPropDesc.set && function (value) {
+        // replace the "receiver" value if it points to fake parent
+        const receiver = this
+        const receiverRef = receiver === targetRef ? originRef : receiver
+        return Reflect.set(originRef, nextPart, value, receiverRef)
+      }
+      const wrapperPropDesc = { ...originPropDesc, get, set }
+      Reflect.defineProperty(targetRef, nextPart, wrapperPropDesc)
       return
     }
     // not a function - copy as is
@@ -191,5 +206,19 @@ function makeGetEndowmentsForConfig () {
       configutable: originPropDesc.configutable
     }
     Reflect.defineProperty(targetRef, nextPart, newPropDesc)
+  }
+}
+
+function getPropertyDescriptorDeep (target, key) {
+  let receiver = target
+  while (true) {
+    const prop = Reflect.getOwnPropertyDescriptor(receiver, key)
+    if (prop) {
+      return { receiver, prop }
+    }
+    // try next in the prototype chain
+    receiver = Reflect.getPrototypeOf(receiver)
+    // abort if this is the end of the prototype chain.
+    if (!receiver) return { prop: null, receiver: null }
   }
 }
