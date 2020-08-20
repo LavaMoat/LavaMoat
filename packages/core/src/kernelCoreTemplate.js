@@ -199,7 +199,7 @@
       }
 
       // load module
-      const moduleExports = internalRequire(moduleId)
+      let moduleExports = internalRequire(moduleId)
 
       // look up config for module
       const moduleData = loadModuleData(moduleId)
@@ -219,20 +219,6 @@
         throw new Error(`LavaMoat - required package not in whitelist: package "${parentModulePackageName}" requested "${packageName}" as "${requestedName}"`)
       }
 
-      // apply moduleExports require-time protection
-      const isSameMembraneSpace = parentModulePackageName && getMembraneSpaceNameForModule(moduleData) === getMembraneSpaceNameForModule(parentModuleData)
-      const needsMembraneProtection = !isSameMembraneSpace
-      let finalExports
-      if (needsMembraneProtection) {
-        // apply membrane protections
-        const inGraph = getMembraneSpaceForModule(moduleData)
-        const outGraph = getMembraneSpaceForModule(parentModuleData)
-        finalExports = membrane.bridge(moduleExports, inGraph, outGraph)
-      } else {
-        // return raw if same package
-        finalExports = moduleExports
-      }
-
       // create minimal selection if its a builtin and the whole path is not selected for
       if (!parentIsEntryModule && moduleData.type === 'builtin' && !parentPackageConfig.builtin[moduleId]) {
         const builtinPaths = (
@@ -243,10 +229,20 @@
           .map(([packagePath, allowed]) => packagePath.split('.').slice(1).join('.'))
           .sort()
         )
-        finalExports = makeMinimalViewOfRef(finalExports, builtinPaths)
+        moduleExports = makeMinimalViewOfRef(moduleExports, builtinPaths)
       }
 
-      return finalExports
+      // apply moduleExports require-time protection
+      const isSameMembraneSpace = parentModulePackageName && getMembraneSpaceNameForModule(moduleData) === getMembraneSpaceNameForModule(parentModuleData)
+      const needsMembraneProtection = !isSameMembraneSpace
+      if (needsMembraneProtection) {
+        // apply membrane protections
+        const inGraph = getMembraneSpaceForModule(moduleData)
+        const outGraph = getMembraneSpaceForModule(parentModuleData)
+        moduleExports = membrane.bridge(moduleExports, inGraph, outGraph)
+      }
+
+      return moduleExports
     }
 
     function getMembraneSpaceForModule (moduleData) {

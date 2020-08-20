@@ -1,0 +1,9 @@
+{
+  "resources": {
+    "events": {
+      "globals": {
+        "console": true
+      }
+    }
+  }
+}

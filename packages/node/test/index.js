@@ -2,7 +2,7 @@ const test = require('tape')
 const { parseForConfig } = require('../src/parseForConfig')
 const { runLavamoat } = require('./util')
 
-test('resolutions - parseForConfig', async (t) => {
+test('parseForConfig - resolutions', async (t) => {
   const projectRoot = `${__dirname}/projects/1`
   const entryId = `${projectRoot}/index.js`
   const resolutions = {
@@ -14,7 +14,7 @@ test('resolutions - parseForConfig', async (t) => {
 
   const config1 = await parseForConfig({ entryId, cwd: projectRoot })
 
-  // comparing resources only, to skip core-modules
+  // comparing resources only, to skip builtin packages
   t.deepEqual(config1, {
     resources: {
       a: {
@@ -35,7 +35,7 @@ test('resolutions - parseForConfig', async (t) => {
 
   const config2 = await parseForConfig({ entryId, cwd: projectRoot, resolutions })
 
-  // comparing resources only, to skip core-modules
+  // comparing resources only, to skip builtin packages
   t.deepEqual(config2, {
     resources: {
       a: {
@@ -45,6 +45,36 @@ test('resolutions - parseForConfig', async (t) => {
       }
     }
   }, 'config resources do not include data on packages not parsed due to resolutions')
+
+  t.end()
+})
+
+test('parseForConfig - require a userspace package with a builtin name', async (t) => {
+  const projectRoot = `${__dirname}/projects/4`
+  const entryId = `${projectRoot}/index.js`
+
+  const config = await parseForConfig({ entryId, cwd: projectRoot })
+
+  // comparing resources only, to skip builtin packages
+  t.deepEqual(config, {
+    resources: {
+      a: {
+        packages: {
+          events: true
+        }
+      },
+      b: {
+        builtin: {
+          'events.EventEmitter': true
+        }
+      },
+      events: {
+        globals: {
+          console: true
+        }
+      }
+    }
+  })
 
   t.end()
 })
