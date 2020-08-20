@@ -18,7 +18,7 @@ function createModuleInspector (opts = {}) {
   const packageToGlobals = {}
   const packageToBuiltinImports = {}
   const packageToModules = {}
-  const moduleIdToPackageName = {}
+  const moduleIdToModuleRecord = {}
   const debugInfo = {}
 
   return {
@@ -27,15 +27,16 @@ function createModuleInspector (opts = {}) {
   }
 
   function inspectModule (moduleRecord, { isBuiltin, includeDebugInfo = false } = {}) {
+    const { packageName, specifier } = moduleRecord
     let moduleDebug
-    const packageName = moduleRecord.packageName
-    moduleIdToPackageName[moduleRecord.specifier] = packageName
+    // record the module
+    moduleIdToModuleRecord[specifier] = moduleRecord
     // initialize mapping from package to module
     const packageModules = packageToModules[packageName] = packageToModules[packageName] || {}
-    packageModules[moduleRecord.specifier] = moduleRecord
+    packageModules[specifier] = moduleRecord
     // initialize module debug info
     if (includeDebugInfo) {
-      moduleDebug = debugInfo[moduleRecord.specifier] = {}
+      moduleDebug = debugInfo[specifier] = {}
       // append moduleRecord, ensure ast is not copied
       const debugData = { ...moduleRecord }
       delete debugData.ast
@@ -130,7 +131,7 @@ function createModuleInspector (opts = {}) {
       const moduleDebug = debugInfo[moduleRecord.specifier]
       moduleDebug.builtin = moduleBuiltins
     }
-    // agregate package builtins
+    // aggregate package builtins
     let packageBuiltins = packageToBuiltinImports[packageName] || []
     packageBuiltins = [...packageBuiltins, ...moduleBuiltins]
     packageToBuiltinImports[packageName] = packageBuiltins
@@ -145,8 +146,7 @@ function createModuleInspector (opts = {}) {
       const isRootModule = packageName === rootSlug
       if (isRootModule) return
       // get dependencies, ignoring builtins
-      const packageDeps = aggregateDeps({ packageModules, moduleIdToPackageName })
-        .filter(depPackageName => !isBuiltin(depPackageName))
+      const packageDeps = aggregateDeps({ packageModules, moduleIdToModuleRecord })
       if (packageDeps.length) {
         packages = fromEntries(packageDeps.map(depPackageName => [depPackageName, true]))
       }
@@ -187,16 +187,29 @@ function createModuleInspector (opts = {}) {
   }
 }
 
-function aggregateDeps ({ packageModules, moduleIdToPackageName }) {
+function aggregateDeps ({ packageModules, moduleIdToModuleRecord }) {
   const deps = new Set()
+  // get all dep package from the "packageModules" collection of modules
   Object.values(packageModules).forEach((moduleRecord) => {
-    const newDeps = Object.entries(moduleRecord.importMap)
-      .filter(([_, specifier]) => Boolean(specifier))
-      .map(([requestedName, specifier]) => moduleIdToPackageName[specifier] || guessPackageName(requestedName))
-    newDeps.forEach(dep => deps.add(dep))
+    Object.entries(moduleRecord.importMap).forEach(([requestedName, specifier]) => {
+      // skip entries where resolution was skipped
+      if (!specifier) return
+      // get packageName from module record, or guess
+      const moduleRecord = moduleIdToModuleRecord[specifier]
+      if (moduleRecord) {
+        // builtin modules are ignored here, handled elsewhere
+        if (moduleRecord.type === 'builtin') return
+        deps.add(moduleRecord.packageName)
+        return
+      }
+      // moduleRecord missing, guess package name
+      const packageName = guessPackageName(requestedName)
+      deps.add(packageName)
+    })
     // ensure the package is not listed as its own dependency
     deps.delete(moduleRecord.packageName)
   })
+  // return as array
   const depsArray = Array.from(deps.values())
   return depsArray
 }

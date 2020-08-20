@@ -1,0 +1,9 @@
+{
+  "name": "test-4",
+  "scripts": {
+    "postinstall": "cp -R fake_node_modules/* ./node_modules/"
+  },
+  "dependencies": {
+    "events": "^3.2.0"
+  }
+}
