@@ -17,6 +17,18 @@ testInspect('cjs - shadowed require', {}, () => {
   cjsImports: [],
 })
 
+testInspect('cjs - include even if require result not stored in variable', {}, () => {
+  require('fs').readFileSync
+}, {
+  cjsImports: ['fs.readFileSync'],
+})
+
+testInspect('cjs - include even if declared var is unused', {}, () => {
+  const rfs = require('fs').readFileSync
+}, {
+  cjsImports: ['fs.readFileSync'],
+})
+
 // testInspect('cjs - require rename', {}, () => {
 //   const require2 = require
 //   require2('fs')

@@ -197,6 +197,12 @@ function inspectImports (ast, packagesToInspect, deep = true) {
     declaredVars.forEach(({ node, keyPath }) => {
       const varName = node.name
       const refs = path.scope.getBinding(varName).referencePaths
+      // if the var is not used anywhere, still whitelist it so the require call doesnt fail
+      if (!refs.length) {
+        // add to results
+        cjsImports.push(keyPath)
+        return
+      }
       // for each reference of the var, detect usage keyPath
       refs.forEach((refPath) => {
         const parents = getParents(refPath)
