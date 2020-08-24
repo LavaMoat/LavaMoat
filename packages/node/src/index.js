@@ -5,6 +5,7 @@ const path = require('path')
 const fs = require('fs')
 const yargs = require('yargs')
 const mergeDeep = require('merge-deep')
+const jsonStringify = require('json-stable-stringify')
 const { parseForConfig } = require('./parseForConfig')
 const { createKernel } = require('./kernel')
 
@@ -38,13 +39,13 @@ async function runLava () {
     const config = await parseForConfig({ cwd, entryId, resolutions, includeDebugInfo })
     // write config debug file
     if (includeDebugInfo) {
-      const serializedConfig = JSON.stringify(config, null, 2)
+      const serializedConfig = jsonStringify(config, { space: 2 })
       fs.writeFileSync(configDebugPath, serializedConfig)
       console.log(`LavaMoat wrote config debug to "${configDebugPath}"`)
     }
     // write config file
     delete config.debugInfo
-    const serializedConfig = JSON.stringify(config, null, 2)
+    const serializedConfig = jsonStringify(config, { space: 2 })
     fs.writeFileSync(configPath, serializedConfig)
     console.log(`LavaMoat wrote config to "${configPath}"`)
   }
