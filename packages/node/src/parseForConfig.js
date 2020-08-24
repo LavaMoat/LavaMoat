@@ -128,19 +128,33 @@ function makeImportHook ({
       return [requestedName, depValue]
     }))
 
-    // heuristic for detecting common dynamically imported native modules
+    // heuristics for detecting common dynamically imported native modules
     // important for generating a working config for apps with native modules
     if (importMap.bindings) {
-      // detect native modules using bindings
-      const packageDir = bindings.getRoot(filename)
-      const nativeModulePath = bindings({ path: true, module_root: packageDir })
-      importMap[nativeModulePath] = nativeModulePath
+      // detect native modules using "bindings" package
+      try {
+        const packageDir = bindings.getRoot(filename)
+        const nativeModulePath = bindings({ path: true, module_root: packageDir })
+        importMap[nativeModulePath] = nativeModulePath
+      } catch (err) {
+        // ignore resolution failures
+        if (!err.message.includes('No native build was found')) {
+          throw err
+        }
+      }
     }
     if (importMap['node-gyp-build']) {
-      // detect native modules using node-gyp-build
-      const packageDir = bindings.getRoot(filename)
-      const nativeModulePath = gypBuild.path(packageDir)
-      importMap[nativeModulePath] = nativeModulePath
+      // detect native modules using "node-gyp-build" package
+      try {
+        const packageDir = bindings.getRoot(filename)
+        const nativeModulePath = gypBuild.path(packageDir)
+        importMap[nativeModulePath] = nativeModulePath
+      } catch (err) {
+        // ignore resolution failures
+        if (!err.message.includes('Could not locate the bindings file')) {
+          throw err
+        }
+      }
     }
 
     return new LavamoatModuleRecord({
