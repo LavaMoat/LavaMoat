@@ -88,8 +88,21 @@
 
       // allow moduleInitializer to be set by loadModuleData
       let moduleInitializer = moduleData.moduleInitializer
-      // otherwise setup initializer from moduleSource
-      if (!moduleInitializer) {
+      if (moduleInitializer) {
+        // if an external moduleInitializer is set, ensure it is allowed
+        if (moduleData.type === 'native') {
+          // ensure package is allowed to have native modules
+          if (configForModule.native !== true) {
+            throw new Error(`LavaMoat - "native" module type not permitted for package "${moduleData.package}", module "${moduleId}"`)
+          }
+        } else if (moduleData.type !== 'builtin') {
+          // builtin module types dont have policy configurations
+          // but the packages that can import them are constrained elsewhere
+          // here we just ensure that the module type is the only other type with a external moduleInitializer
+          throw new Error(`LavaMoat - invalid external moduleInitializer for module type "${moduleData.type}" in package "${moduleData.package}", module "${moduleId}"`)
+        }
+      } else {
+        // otherwise setup initializer from moduleSource
         // prepare endowments
         let endowments
         if (isRootModule) {
