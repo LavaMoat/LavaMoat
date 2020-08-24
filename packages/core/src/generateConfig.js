@@ -15,10 +15,12 @@ const rootSlug = '<root>'
 module.exports = { rootSlug, createModuleInspector }
 
 function createModuleInspector (opts = {}) {
+  const moduleIdToModuleRecord = {}
+  // "packageToModules" does not include builtin modules
+  const packageToModules = {}
   const packageToGlobals = {}
   const packageToBuiltinImports = {}
-  const packageToModules = {}
-  const moduleIdToModuleRecord = {}
+  const packageToNativeModules = {}
   const debugInfo = {}
 
   return {
@@ -27,6 +29,44 @@ function createModuleInspector (opts = {}) {
   }
 
   function inspectModule (moduleRecord, { isBuiltin, includeDebugInfo = false } = {}) {
+    const { packageName, specifier, type } = moduleRecord
+    // record the module
+    moduleIdToModuleRecord[specifier] = moduleRecord
+    // call the correct analyzer for the module type
+    switch (type) {
+      case 'builtin': {
+        inspectBuiltinModule(moduleRecord, { includeDebugInfo })
+        return
+      }
+      case 'native': {
+        inspectNativeModule(moduleRecord, { includeDebugInfo })
+        return
+      }
+      case 'js': {
+        inspectJsModule(moduleRecord, { isBuiltin, includeDebugInfo })
+        return
+      }
+      default: {
+        const errMsg = `LavaMoat - unknown module type "${type}" for package "${packageName}" module "${specifier}"`
+        throw new Error(errMsg)
+      }
+    }
+  }
+
+  function inspectBuiltinModule (moduleRecord) {
+    // builtins themselves do not require any configuration
+    // packages that import builtins need to add that to their configuration
+  }
+
+  function inspectNativeModule (moduleRecord) {
+    // LavaMoat does attempt to sandbox native modules
+    // packages with native modules need to specify that in the policy file
+    const { packageName } = moduleRecord
+    const packageNativeModules = packageToNativeModules[packageName] = packageToNativeModules[packageName] || []
+    packageNativeModules.push(moduleRecord)
+  }
+
+  function inspectJsModule (moduleRecord, { isBuiltin, includeDebugInfo = false }) {
     const { packageName, specifier } = moduleRecord
     let moduleDebug
     // record the module
@@ -45,10 +85,6 @@ function createModuleInspector (opts = {}) {
     // skip for root modules (modules not from deps)
     const isRootModule = packageName === rootSlug
     if (isRootModule) return
-    // skip builtin modules
-    if (moduleRecord.type === 'builtin') return
-    // skip native modules (cant parse)
-    if (moduleRecord.type === 'native') return
     // skip json files
     const filename = moduleRecord.file || 'unknown'
     const fileExtension = path.extname(filename)
@@ -141,7 +177,8 @@ function createModuleInspector (opts = {}) {
     const resources = {}
     const config = { resources }
     Object.entries(packageToModules).forEach(([packageName, packageModules]) => {
-      let globals, builtin, packages
+      // the config/policy fields for each package
+      let globals, builtin, packages, native
       // skip for root modules (modules not from deps)
       const isRootModule = packageName === rootSlug
       if (isRootModule) return
@@ -159,13 +196,18 @@ function createModuleInspector (opts = {}) {
           if (globals[key] === 'read') globals[key] = true
         })
       }
-      // get core imports
+      // get builtin imports
       const builtinImports = packageToBuiltinImports[packageName]
       if (builtinImports && builtinImports.length) {
         builtin = {}
         reduceToTopmostApiCallsFromStrings(builtinImports).forEach(path => {
           builtin[path] = true
         })
+      }
+      // get native modules
+      const packageNativeModules = packageToNativeModules[packageName]
+      if (packageNativeModules) {
+        native = true
       }
       // skip package config if there are no settings needed
       if (!packages && !globals && !builtin) return
@@ -174,6 +216,7 @@ function createModuleInspector (opts = {}) {
       if (packages) config.packages = packages
       if (globals) config.globals = globals
       if (builtin) config.builtin = builtin
+      if (native) config.native = native
       // set config for package
       resources[packageName] = config
     })
