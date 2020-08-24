@@ -1,6 +1,8 @@
 const path = require('path')
 const { promises: fs } = require('fs')
 const { createRequire, builtinModules: builtinPackages } = require('module')
+const bindings = require('bindings')
+const gypBuild = require('node-gyp-build')
 const { packageNameFromPath, packageDataForModule, parseForConfig: coreParseForConfig, LavamoatModuleRecord } = require('lavamoat-core')
 const { parse, inspectImports } = require('lavamoat-tofu')
 const { checkForResolutionOverride } = require('./resolutions')
@@ -125,6 +127,22 @@ function makeImportHook ({
       }
       return [requestedName, depValue]
     }))
+
+    // heuristic for detecting common dynamically imported native modules
+    // important for generating a working config for apps with native modules
+    if (importMap.bindings) {
+      // detect native modules using bindings
+      const packageDir = bindings.getRoot(filename)
+      const nativeModulePath = bindings({ path: true, module_root: packageDir })
+      importMap[nativeModulePath] = nativeModulePath
+    }
+    if (importMap['node-gyp-build']) {
+      // detect native modules using node-gyp-build
+      const packageDir = bindings.getRoot(filename)
+      const nativeModulePath = gypBuild.path(packageDir)
+      importMap[nativeModulePath] = nativeModulePath
+    }
+
     return new LavamoatModuleRecord({
       type: 'js',
       specifier,
