@@ -35,7 +35,7 @@ async function runLava () {
     // parse mode
     const includeDebugInfo = Boolean(writeAutoConfigDebug)
     const { resolutions } = await loadConfig({ debugMode, configPath, configOverridePath })
-    console.log(`LavaMoat generating config for "${entryId}"...`)
+    console.log(`LavaMoat generating config from entry "${entryId}"...`)
     const config = await parseForConfig({ cwd, entryId, resolutions, includeDebugInfo })
     // write config debug file
     if (includeDebugInfo) {

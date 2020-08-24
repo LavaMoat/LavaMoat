@@ -3,18 +3,28 @@ const { promises: fs } = require('fs')
 const { createRequire, builtinModules: builtinPackages } = require('module')
 const bindings = require('bindings')
 const gypBuild = require('node-gyp-build')
-const { packageNameFromPath, packageDataForModule, parseForConfig: coreParseForConfig, LavamoatModuleRecord } = require('lavamoat-core')
-const { parse, inspectImports } = require('lavamoat-tofu')
+const { codeFrameColumns } = require('@babel/code-frame')
+const {
+  packageNameFromPath,
+  packageDataForModule,
+  parseForConfig: coreParseForConfig,
+  createModuleInspector,
+  LavamoatModuleRecord
+} = require('lavamoat-core')
+const { parse, inspectImports, codeSampleFromAstNode } = require('lavamoat-tofu')
 const { checkForResolutionOverride } = require('./resolutions')
 
 module.exports = { parseForConfig, makeResolveHook, makeImportHook }
 
-async function parseForConfig ({ cwd, entryId, resolutions, rootPackageName, shouldResolve, ...args }) {
+async function parseForConfig ({ cwd, entryId, resolutions, rootPackageName, shouldResolve, includeDebugInfo, ...args }) {
   const isBuiltin = (id) => builtinPackages.includes(id)
   const resolveHook = makeResolveHook({ cwd, resolutions, rootPackageName })
   const importHook = makeImportHook({ rootPackageName, shouldResolve, isBuiltin, resolveHook })
   const moduleSpecifier = resolveHook(entryId, `${cwd}/package.json`)
-  return coreParseForConfig({ moduleSpecifier, importHook, isBuiltin, ...args })
+  const inspector = createModuleInspector({ isBuiltin, includeDebugInfo })
+  // rich warning output
+  inspector.on('compat-warning', displayRichCompatWarning)
+  return coreParseForConfig({ moduleSpecifier, importHook, isBuiltin, inspector, ...args })
 }
 
 function makeResolveHook ({ cwd, resolutions = {}, rootPackageName = '<root>' }) {
@@ -23,7 +33,7 @@ function makeResolveHook ({ cwd, resolutions = {}, rootPackageName = '<root>' })
     // handle resolution overrides
     const result = checkForResolutionOverride(resolutions, parentPackageName, requestedName)
     if (result) {
-      // if path is a relative path, it should be relative to the cwd
+      // if path is a relative path, it should be relative to displayRichCompatWarningthe cwd
       if (path.isAbsolute(result)) {
         requestedName = result
       } else {
@@ -211,4 +221,22 @@ function parseModule (moduleSrc, filename = '<unknown file>') {
     throw newErr
   }
   return ast
+}
+
+function displayRichCompatWarning ({ moduleRecord, compatWarnings }) {
+  const { packageName, file } = moduleRecord
+  const { primordialMutations, strictModeViolations, dynamicRequires } = compatWarnings
+  console.warn(`⚠️  Potentially incomptabile code detected in package "${packageName}" file "${file}":`)
+  logWarnings('primordial mutation', primordialMutations)
+  logWarnings('strict mode violation', strictModeViolations)
+  logWarnings('dynamic require', dynamicRequires)
+
+  function logWarnings (message, sites) {
+    sites.forEach(({ node }) => {
+      const { npmfs } = codeSampleFromAstNode(node, moduleRecord)
+      if (npmfs) console.warn(`  link: ${npmfs}`)
+      const output = codeFrameColumns(moduleRecord.content, node.loc, { message, highlightCode: true })
+      console.warn(output)
+    })
+  }
 }

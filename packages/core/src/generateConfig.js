@@ -1,3 +1,4 @@
+const EventEmitter = require('events')
 const path = require('path')
 const fromEntries = require('fromentries')
 const jsonStringify = require('json-stable-stringify')
@@ -23,10 +24,15 @@ function createModuleInspector (opts = {}) {
   const packageToNativeModules = {}
   const debugInfo = {}
 
-  return {
-    inspectModule: (moduleRecord, opts2 = {}) => inspectModule(moduleRecord, { ...opts, ...opts2 }),
-    generateConfig: (opts2 = {}) => generateConfig({ ...opts, ...opts2 })
+  const inspector = new EventEmitter()
+  inspector.inspectModule = (moduleRecord, opts2 = {}) => {
+    inspectModule(moduleRecord, { ...opts, ...opts2 })
   }
+  inspector.generateConfig = (opts2 = {}) => {
+    return generateConfig({ ...opts, ...opts2 })
+  }
+
+  return inspector
 
   function inspectModule (moduleRecord, { isBuiltin, includeDebugInfo = false } = {}) {
     const { packageName, specifier, type } = moduleRecord
@@ -110,14 +116,14 @@ function createModuleInspector (opts = {}) {
 
   function inspectForEnvironment (ast, moduleRecord, includeDebugInfo) {
     const { packageName } = moduleRecord
-    const sesCompat = inspectSesCompat(ast, packageName)
-    const { primordialMutations, strictModeViolations, dynamicRequires } = sesCompat
+    const compatWarnings = inspectSesCompat(ast, packageName)
+    const { primordialMutations, strictModeViolations, dynamicRequires } = compatWarnings
     const hasResults = primordialMutations.length > 0 || strictModeViolations.length > 0 || dynamicRequires.length > 0
     if (!hasResults) return
     if (includeDebugInfo) {
       const moduleDebug = debugInfo[moduleRecord.specifier]
       moduleDebug.sesCompat = {
-        ...sesCompat,
+        ...compatWarnings,
         // fix serialization
         primordialMutations: primordialMutations.map(({ node: { loc } }) => ({ node: { loc } })),
         strictModeViolations: strictModeViolations.map(({ node: { loc } }) => ({ node: { loc } })),
@@ -125,13 +131,17 @@ function createModuleInspector (opts = {}) {
       }
     } else {
       // warn if non-compatible code found
-      const samples = jsonStringify({
-        primordialMutations: primordialMutations.map(({ node }) => codeSampleFromAstNode(node, moduleRecord)),
-        strictModeViolations: strictModeViolations.map(({ node }) => codeSampleFromAstNode(node, moduleRecord)),
-        dynamicRequires: dynamicRequires.map(({ node }) => codeSampleFromAstNode(node, moduleRecord))
-      })
-      const errMsg = `Incomptabile code detected in package "${packageName}" file "${moduleRecord.file}". Violations:\n${samples}`
-      console.warn(errMsg)
+      if (inspector.listenerCount('compat-warning') > 0) {
+        inspector.emit('compat-warning', { moduleRecord, compatWarnings })
+      } else {
+        const samples = jsonStringify({
+          primordialMutations: primordialMutations.map(({ node }) => codeSampleFromAstNode(node, moduleRecord)),
+          strictModeViolations: strictModeViolations.map(({ node }) => codeSampleFromAstNode(node, moduleRecord)),
+          dynamicRequires: dynamicRequires.map(({ node }) => codeSampleFromAstNode(node, moduleRecord))
+        })
+        const errMsg = `Incomptabile code detected in package "${packageName}" file "${moduleRecord.file}". Violations:\n${samples}`
+        console.warn(errMsg)
+      }
     }
   }
 
