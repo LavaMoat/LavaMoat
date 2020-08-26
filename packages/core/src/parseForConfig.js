@@ -8,9 +8,9 @@ async function parseForConfig ({
   importHook,
   isBuiltin,
   shouldImport,
-  includeDebugInfo
+  includeDebugInfo,
+  inspector = createModuleInspector({ isBuiltin, includeDebugInfo })
 }) {
-  const inspector = createModuleInspector({ isBuiltin, includeDebugInfo })
   await walk({ moduleSpecifier, importHook, visitorFn, shouldImport })
   // after all modules, submit config
   const config = inspector.generateConfig()

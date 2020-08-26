@@ -1,19 +1,25 @@
 {
   "resources": {
     "keccak": {
+      "packages": {
+        "node-gyp-build": true
+      },
+      "globals": {
+        "__dirname": true,
+        "Buffer.isBuffer": true,
+        "Buffer.from": true
+      },
       "builtin": {
         "stream.Transform": true
       },
-      "globals": {
-        "Buffer.from": true,
-        "Buffer.isBuffer": true,
-        "__dirname": true
-      },
-      "packages": {
-        "node-gyp-build": true
-      }
+      "native": true
     },
     "node-gyp-build": {
+      "globals": {
+        "__webpack_require__": true,
+        "__non_webpack_require__": true,
+        "process": true
+      },
       "builtin": {
         "fs.existsSync": true,
         "fs.readdirSync": true,
@@ -22,11 +28,6 @@
         "path.dirname": true,
         "path.join": true,
         "path.resolve": true
-      },
-      "globals": {
-        "__non_webpack_require__": true,
-        "__webpack_require__": true,
-        "process": true
       }
     }
   }
