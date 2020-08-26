@@ -11,7 +11,8 @@
       },
       "builtin": {
         "stream.Transform": true
-      }
+      },
+      "native": true
     },
     "node-gyp-build": {
       "globals": {
