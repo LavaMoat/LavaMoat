@@ -6,12 +6,15 @@
   "license": "MIT",
   "dependencies": {
     "cheerio": "^0.22.0",
-    "lavamoat-tofu": "^5.1.0",
     "lavamoat": "^3.0.0",
+    "lavamoat-tofu": "^5.1.0",
     "node-fetch": "^2.6.0",
     "p-limit": "^3.0.1"
   },
   "scripts": {
-    "start": "node src/index.js"
-  }
+    "start": "node src/index.js",
+    "postinstall": "node src/prepareHook.js",
+    "zzz": "node zzz.js"
+  },
+  "devDependencies": {}
 }
