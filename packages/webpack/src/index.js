@@ -192,7 +192,7 @@ class LavaMoat {
 
         } else {
           // Otherwise, still merge but only if it already exists
-          const configOverridePath = path.join('./lavamoat', defaultOverrideConfig)
+          const configOverridePath = path.join('./', defaultOverrideConfig)
           const resolvedPath = path.resolve(configOverridePath)
           if (fs.existsSync(resolvedPath)) {
             const configOverrideSource = fs.readFileSync(resolvedPath, 'utf-8')
@@ -224,7 +224,7 @@ class LavaMoat {
         const configDirectory = path.dirname(configPath)
         mkdirp.sync(configDirectory)
         //Declare override config file path
-        const overrideConfigPath = configDirectory + defaultOverrideConfig
+        const overrideConfigPath = path.join(configDirectory, defaultOverrideConfig)
         //Write config to file
         fs.writeFileSync(configPath, configString)
         //Write default override config to file if it doesn't already exist
@@ -254,7 +254,7 @@ class LavaMoat {
   }
 
   getConfigPath(pluginOpts) {
-    const defaultConfig = './lavamoat/lavamoat-config.json'
+    const defaultConfig = './lavamoat-config.json'
     if (!pluginOpts.config) {
       return defaultConfig
     }

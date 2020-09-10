@@ -155,7 +155,7 @@ function getConfigurationFromPluginOpts (pluginOpts) {
         return mergedConfig
       } else {
         // Otherwise, still merge but only if it already exists
-        const configOverridePath = path.join('./lavamoat', defaultOverrideConfig)
+        const configOverridePath = path.join('./', defaultOverrideConfig)
         const resolvedPath = path.resolve(configOverridePath)
         if (fs.existsSync(resolvedPath)) {
           const configOverrideSource = fs.readFileSync(resolvedPath, 'utf-8')
@@ -219,7 +219,7 @@ function getConfigurationFromPluginOpts (pluginOpts) {
 }
 
 function getConfigPath (pluginOpts) {
-  const defaultPath = './lavamoat/lavamoat-config.json'
+  const defaultPath = './lavamoat-config.json'
   if (!pluginOpts.config) {
     return defaultPath
   }
