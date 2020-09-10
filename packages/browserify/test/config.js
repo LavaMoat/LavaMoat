@@ -121,7 +121,7 @@ test('config - default config path is generated with autoconfig if path is not s
     stdio: 'inherit'
   }
 
-  const expectedPath = path.join(tempDir, 'lavamoat/lavamoat-config.json')
+  const expectedPath = path.join(tempDir, 'lavamoat-config.json')
   const scriptPath = require.resolve('./fixtures/runBrowserifyAutoConfig')
 
   t.notOk(fs.existsSync(expectedPath), 'Config file does not yet exist')
@@ -158,7 +158,7 @@ test('config - writes a proper config to a temp dir', async (t) => {
 
   const tmpObj = tmp.dirSync()
   const config = await generateConfigFromFiles({ files: entries })
-  const filePath = path.join(tmpObj.name, 'lavamoat/lavamoat-config.json')
+  const filePath = path.join(tmpObj.name, 'lavamoat-config.json')
   const configDir = path.dirname(filePath)
 
   mkdirp.sync(configDir)
@@ -197,8 +197,8 @@ test('Config - Applies config override', async (t) => {
     }
   }
   const tmpObj = tmp.dirSync()
-  const configFilePath = path.join(tmpObj.name, 'lavamoat/lavamoat-config.json')
-  const overrideFilePath = path.join(tmpObj.name, 'lavamoat/lavamoat-override.json')
+  const configFilePath = path.join(tmpObj.name, 'lavamoat-config.json')
+  const overrideFilePath = path.join(tmpObj.name, 'lavamoat-config-override.json')
   const configDir = path.dirname(configFilePath)
 
   mkdirp.sync(configDir)
@@ -254,12 +254,9 @@ test('Config override is applied if not specified and already exists at default 
   }
 
   const tmpObj = tmp.dirSync()
-  const configDir = path.join(tmpObj.name, './lavamoat')
-  mkdirp.sync(configDir)
-
-  const configPath = path.join(tmpObj.name, './lavamoat/lavamoat-config.json')
+  const configPath = path.join(tmpObj.name, './lavamoat-config.json')
   fs.writeFileSync(configPath, JSON.stringify(config))
-  const configOverridePath = path.join(tmpObj.name, './lavamoat/lavamoat-config-override.json')
+  const configOverridePath = path.join(tmpObj.name, './lavamoat-config-override.json')
   fs.writeFileSync(configOverridePath, JSON.stringify(configOverride))
 
   const scriptPath = require.resolve('./fixtures/runBrowserifyNoOpts')
