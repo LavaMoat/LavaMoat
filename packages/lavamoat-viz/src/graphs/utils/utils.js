@@ -5,7 +5,7 @@ function parseConfigDebugForPackages (configDebugData) {
   // const nodes = [], links = []
   const packages = {}
 
-  const { debugInfo } = configDebugData
+  const { debugInfo, resources: packagesConfig } = configDebugData
   // aggregate info under package name
   Object.entries(debugInfo).forEach(([_, moduleDebugInfo]) => {
     const { moduleRecord } = moduleDebugInfo
@@ -23,6 +23,7 @@ function parseConfigDebugForPackages (configDebugData) {
       packageData.size = 0
       const isRootPackage = packageNameAndVersion === '<root>'
       packageData.isRoot = isRootPackage
+      packageData.config = packagesConfig[packageData.name] || {}
     }
     // add total code size from module
     const { size } = moduleRecord
@@ -137,6 +138,7 @@ const rankColors = [
 ]
 
 function getDangerRankForPackage (packageData) {
+  if (packageData.config.native) return 3
   if (packageData.dangerRank) {
     return packageData.dangerRank
   }
