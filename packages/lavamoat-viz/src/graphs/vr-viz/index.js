@@ -6,6 +6,7 @@ import setupGraph from './setupGraph.js'
 const { scene, controller1, controller2, subscribeTick } = setupScene()
 
 // this reality is virtual, so it might not work
+// no guarantees meat popsicle
 const { graph } = setupGraph({ scene, subscribeTick })
 setupSelections({ getIntersectables, controller1, controller2, subscribeTick })
 
