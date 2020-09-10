@@ -34,7 +34,7 @@ class DepGraph extends React.Component {
     this.state = {
       packages: {},
       packageData: graph,
-      moduleData: null,
+      moduleRecord: null,
       packageModulesMode: false,
       packageModules: {},
       selectedModule: null,
@@ -108,7 +108,7 @@ class DepGraph extends React.Component {
     // commit new graph
     // Uncomment for module nodes
     // if (packageModulesMode) {
-    //   this.setState(() => ({ moduleData: newGraph }))
+    //   this.setState(() => ({ moduleRecord: newGraph }))
     // } else {
     //   this.setState(() => ({ packageData: newGraph }))
     // }
@@ -121,13 +121,13 @@ class DepGraph extends React.Component {
     const packageModules = {}
     const moduleSources = []
     Object.entries(debugInfo).forEach(([moduleId, moduleDebugInfo]) => {
-      const { moduleData } = moduleDebugInfo
+      const { moduleRecord } = moduleDebugInfo
       const rank = getDangerRankForModule(moduleDebugInfo)
       const color = getColorForRank(rank)
-      if (getPackageVersionName(moduleData) === packageId) {
-        if (!moduleSources.includes(moduleData.source)) {
-          moduleSources.push(moduleData.source)
-          packageModules[moduleId] = moduleData
+      if (getPackageVersionName(moduleRecord) === packageId) {
+        if (!moduleSources.includes(moduleRecord.content)) {
+          moduleSources.push(moduleRecord.content)
+          packageModules[moduleId] = moduleRecord
           packageModules[moduleId].color = color
         }
       }
@@ -156,7 +156,7 @@ class DepGraph extends React.Component {
     const {
       packages,
       packageData,
-      // moduleData,
+      // moduleRecord,
       // selectedNode,
       // packageModulesMode,
       packageModules,
@@ -178,7 +178,7 @@ class DepGraph extends React.Component {
         if (selectedModule && selectedModule === moduleId) {
           newSelection = null
         } else {
-          newSelection = bundleData.debugInfo[moduleId].moduleData
+          newSelection = bundleData.debugInfo[moduleId].moduleRecord
         }
         this.setState({
           selectedModule: newSelection,
@@ -352,8 +352,8 @@ class DepGraph extends React.Component {
   renderSelectedModule (selectedModule) {
     const { bundleData: { debugInfo } } = this.props
     const moduleDebugInfo = debugInfo[selectedModule.id]
-    const moduleDisplayInfo = { ...moduleDebugInfo, moduleData: undefined }
-    const { packageData } = moduleDebugInfo.moduleData
+    const moduleDisplayInfo = { ...moduleDebugInfo, moduleRecord: undefined }
+    const { packageData } = moduleDebugInfo.moduleRecord
     return (
       <div className="packageInfo">
         <pre>{packageData.id}</pre>

@@ -8,39 +8,39 @@ function parseConfigDebugForPackages (configDebugData) {
   const { debugInfo } = configDebugData
   // aggregate info under package name
   Object.entries(debugInfo).forEach(([_, moduleDebugInfo]) => {
-    const { moduleData } = moduleDebugInfo
-    const packageNameAndVersion = getPackageVersionName(moduleData)
+    const { moduleRecord } = moduleDebugInfo
+    const packageNameAndVersion = getPackageVersionName(moduleRecord)
     let packageData = packages[packageNameAndVersion]
-    // if first moduleData in package, initialize with moduleData
+    // if first moduleRecord in package, initialize with moduleRecord
     if (!packageData) {
       packageData = {}
       packages[packageNameAndVersion] = packageData
-      packageData.name = moduleData.package || moduleData.packageName
+      packageData.name = moduleRecord.packageName
       packageData.id = packageNameAndVersion
-      packageData.deps = {}
+      packageData.importMap = {}
       packageData.modules = []
-      packageData.type = moduleData.type
+      packageData.type = moduleRecord.type
       packageData.size = 0
       const isRootPackage = packageNameAndVersion === '<root>'
       packageData.isRoot = isRootPackage
     }
     // add total code size from module
-    const { size } = moduleData
+    const { size } = moduleRecord
     packageData.size += size
     // add package-relative file path
-    moduleData.fileSimple = fullModuleNameFromPath(moduleData.file)
+    moduleRecord.fileSimple = fullModuleNameFromPath(moduleRecord.file)
     // add module / package refs
     packageData.modules.push(moduleDebugInfo)
-    moduleData.packageData = packageData
+    moduleRecord.packageData = packageData
     // add deps
-    Object.values(moduleData.deps || {}).forEach((childId) => {
+    Object.values(moduleRecord.importMap || {}).forEach((childId) => {
       // use `id` so that there are not redundant links. the actual key is not important.
-      const { moduleData: childModuleData } = debugInfo[childId] || {}
+      const { moduleRecord: childModuleData } = debugInfo[childId] || {}
       if (!childModuleData) {
         console.warn(`dep is external module ${childId}`)
         return
       }
-      packageData.deps[childId] = getPackageVersionName(childModuleData)
+      packageData.importMap[childId] = getPackageVersionName(childModuleData)
     })
   })
 
@@ -64,7 +64,7 @@ function createGraph (packages, configDebugData, {
   const links = []
   // for each module, create node and links
   Object.entries(packages).forEach(([_, packageData]) => {
-    const { deps } = packageData
+    const { importMap } = packageData
     const parentId = packageData.id
     const packageName = packageData.name
     // const size = showPackageSize ? getNodeSize(source) : 2
@@ -81,8 +81,8 @@ function createGraph (packages, configDebugData, {
     const selectedNodeId = selectedNode && selectedNode.id
 
     // create links for deps
-    Object.keys(deps).forEach((depName) => {
-      const childId = String(deps[depName])
+    Object.keys(importMap).forEach((depName) => {
+      const childId = String(importMap[depName])
 
       let width
       let linkColor
@@ -152,7 +152,7 @@ function getDangerRankForPackage (packageData) {
 
 function getDangerRankForModule (moduleDebugInfo) {
   const configRank = getRankForGlobals(moduleDebugInfo.globals)
-  const typeRank = getRankForType(moduleDebugInfo.moduleData.type)
+  const typeRank = getRankForType(moduleDebugInfo.moduleRecord.type)
   const rank = Math.max(configRank, typeRank)
   return rank
 }
@@ -193,13 +193,12 @@ function sortByDangerRank (data) {
   return Object.values(data).sort((a, b) => b.dangerRank - a.dangerRank)
 }
 
-function getPackageVersionName (moduleData) {
-  const { id, packageName, packageVersion } = moduleData
-  const name = moduleData.package || packageName || id
+function getPackageVersionName (moduleRecord) {
+  const { packageName, packageVersion } = moduleRecord
   if (packageVersion) {
-    return `${name}@${packageVersion}`
+    return `${packageName}@${packageVersion}`
   }
-  return name
+  return packageName
 
 }
 
