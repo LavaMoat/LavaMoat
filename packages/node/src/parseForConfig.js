@@ -148,7 +148,7 @@ function makeImportHook ({
         importMap[nativeModulePath] = nativeModulePath
       } catch (err) {
         // ignore resolution failures
-        if (!err.message.includes('No native build was found')) {
+        if (!err.message.includes('Could not locate the bindings file')) {
           throw err
         }
       }
@@ -161,7 +161,7 @@ function makeImportHook ({
         importMap[nativeModulePath] = nativeModulePath
       } catch (err) {
         // ignore resolution failures
-        if (!err.message.includes('Could not locate the bindings file')) {
+        if (!err.message.includes('No native build was found')) {
           throw err
         }
       }
