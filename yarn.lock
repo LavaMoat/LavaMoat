@@ -5106,36 +5106,12 @@ lavamoat-core@^2.1.0:
     resolve-package-path "^2.0.0"
     through2 "^3.0.1"
 
-lavamoat-core@^5.0.2:
-  version "5.0.2"
-  resolved "https://registry.yarnpkg.com/lavamoat-core/-/lavamoat-core-5.0.2.tgz#dbab560ce7e4cccc483f134065925988ad8b8d46"
-  integrity sha512-cPDO1QpRp0Rq9XqHuPOmWKYV9LJwXLPRqyKNt9mdbznDMRyJdddstBWKWUCMVpVIZDJPCEQ8SOKrqW3VhmidVg==
-  dependencies:
-    cytoplasm "^3.3.1"
-    fromentries "^1.2.0"
-    json-stable-stringify "^1.0.1"
-    lavamoat-tofu "^5.1.0"
-    resolve "^1.15.1"
-    ses "^0.7.7"
-
 lavamoat-tofu@^2.0.9:
   version "2.0.10"
   resolved "https://registry.yarnpkg.com/lavamoat-tofu/-/lavamoat-tofu-2.0.10.tgz#9cf71853e8357bee4751c81a5f3ac7d4459fbd8c"
   integrity sha512-tYp8lubbOAfIBxRWj7rwj+L7QakgOE5i6OLmauIWpeWdzBEcvRqb5Yzm/T+R8/989ZvG9c8t68TXX+fk8bHpqA==
   dependencies:
     acorn-globals "^4.3.3"
-
-lavamoat@^3.0.0:
-  version "3.1.2"
-  resolved "https://registry.yarnpkg.com/lavamoat/-/lavamoat-3.1.2.tgz#174f20e595a4ef4f345b639bef79418d2ba4da1d"
-  integrity sha512-I0VWMqkLuhzEImh6fDelvAfks1WDF2xZKtlaH8jGi+dlmhUFVltE9F8Tk9VK+7zXVC2QX8gJq+WaidS3omI0OQ==
-  dependencies:
-    htmlescape "^1.1.1"
-    lavamoat-core "^5.0.2"
-    lavamoat-tofu "^5.0.0"
-    merge-deep "^3.0.2"
-    resolve "^1.15.1"
-    yargs "^15.3.1"
 
 lazy-cache@^0.2.3:
   version "0.2.7"
