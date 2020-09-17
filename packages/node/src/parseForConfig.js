@@ -47,7 +47,12 @@ function makeResolveHook ({ cwd, resolutions = {}, rootPackageName = '<root>' })
     try {
       resolved = resolve(requestedName)
     } catch (err) {
-      // re-through error so its not in ndb's blackboxed scripts
+      if (err.code === 'MODULE_NOT_FOUND') {
+        console.warn(`lavamoat - unable to resolve "${requestedName}" from "${referrer}"`)
+      }
+      // return "null" to mean failed to resolve
+      return null
+      // throw unknown error
       throw err
     }
     return resolved
