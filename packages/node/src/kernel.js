@@ -85,6 +85,8 @@ function loadModuleData (absolutePath) {
     const moduleContent = fs.readFileSync(absolutePath, 'utf8')
     // apply source transforms
     let transformedContent = moduleContent
+      // hash bang
+      .split('#!/').join('// #!/')
       // html comment
       .split('-->').join('-- >')
       // use indirect eval
