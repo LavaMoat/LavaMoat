@@ -78,7 +78,7 @@ class DepList extends React.Component {
 
   renderPackageModule (module, index) {
     const { actions, selectedModule } = this.props
-    const isSelected = selectedModule && selectedModule.id === module.id
+    const isSelected = selectedModule && selectedModule.specifier === module.specifier
     return (
       <div
         key={index}
@@ -91,7 +91,7 @@ class DepList extends React.Component {
             background: isSelected ? '#FFFF00' : undefined,
           }}
           onClick={() => {
-            actions.selectModule(module.id)
+            actions.selectModule(module.specifier)
           }}>
           <div className={`moduleIcon ${module.color}`} />
           "{module.fileSimple}"

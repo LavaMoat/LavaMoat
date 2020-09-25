@@ -1,11 +1,23 @@
 const path = require('path')
 
+export const envConfig = {
+  globals: {
+    orangeGlobals: [
+      'localStorage',
+      'prompt',
+    ],
+    greenGlobals: [
+
+    ]
+  }
+}
+
 function parseConfigDebugForPackages (configDebugData) {
   // const { resources } = configDebugData
   // const nodes = [], links = []
   const packages = {}
 
-  const { debugInfo, resources: packagesConfig } = configDebugData
+  const { debugInfo, resources: packagesConfig, env } = configDebugData
   // aggregate info under package name
   Object.entries(debugInfo).forEach(([_, moduleDebugInfo]) => {
     const { moduleRecord } = moduleDebugInfo
@@ -44,10 +56,9 @@ function parseConfigDebugForPackages (configDebugData) {
       packageData.importMap[childId] = getPackageVersionName(childModuleData)
     })
   })
-
-  // add dangerRank to packages
+  // modify danger rank 
   Object.entries(packages).forEach(([_, packageData]) => {
-    const dangerRank = getDangerRankForPackage(packageData)
+    const dangerRank = getDangerRankForPackage(packageData, envConfig)
     packageData.dangerRank = dangerRank
   })
 
@@ -115,29 +126,11 @@ function createGraph (packages, configDebugData, {
   return { nodes, links }
 }
 
-const redAlertGlobals = [
-  'chrome',
-  'window',
-  'document',
-  'document.body',
-  'document.body.appendChild',
-  'location',
-  'XMLHttpRequest',
-  'fetch',
-  'WebSocket',
-  'crypto',
-]
-
-const orangeAlertGlobals = [
-  'localStorage',
-  'prompt',
-]
-
 const rankColors = [
   'green', 'orange', 'brown', 'red',
 ]
 
-function getDangerRankForPackage (packageData) {
+function getDangerRankForPackage (packageData, envConfig) {
   if (packageData.config.native) return 3
   if (packageData.dangerRank) {
     return packageData.dangerRank
@@ -146,14 +139,14 @@ function getDangerRankForPackage (packageData) {
     return -1
   }
   const moduleRanks = packageData.modules.map(
-    (moduleDebugInfo) => getDangerRankForModule(moduleDebugInfo),
+    (moduleDebugInfo) => getDangerRankForModule(moduleDebugInfo, envConfig),
   )
   const rank = Math.max(...moduleRanks)
   return rank
 }
 
-function getDangerRankForModule (moduleDebugInfo) {
-  const configRank = getRankForGlobals(moduleDebugInfo.globals)
+function getDangerRankForModule(moduleDebugInfo, envConfig) {
+  const configRank = getRankForGlobals(moduleDebugInfo.globals, envConfig)
   const typeRank = getRankForType(moduleDebugInfo.moduleRecord.type)
   const rank = Math.max(configRank, typeRank)
   return rank
@@ -167,19 +160,20 @@ function getColorForRank (rank) {
 }
 
 // this is a denylist, it should be an allowlist
-function getRankForGlobals (globalsConfig) {
+//default to dangerous here
+function getRankForGlobals(globalsConfig, envConfig) {
   const globals = Object.keys(globalsConfig || {})
   if (globals.length === 0) {
     return 0
   }
-  if (globals.some((glob) => redAlertGlobals.includes(glob))) {
-    return 3
+  if (globals.some((glob) => envConfig.globals.greenGlobals.includes(glob))) {
+    return 1
   }
-  if (globals.some((glob) => orangeAlertGlobals.includes(glob))) {
+  if (globals.some((glob) => envConfig.globals.orangeGlobals.includes(glob))) {
     return 2
   }
-  // has globals but nothing scary
-  return 1
+  // Has globals and scary by default
+  return 3
 }
 
 function getRankForType (type = 'js') {
@@ -282,5 +276,5 @@ export {
   getPackageVersionName,
   fullModuleNameFromPath,
   getLineNumbersForGlobals,
-  sortByDangerRank,
+  sortByDangerRank
 }

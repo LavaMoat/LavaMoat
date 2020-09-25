@@ -1,4 +1,5 @@
 globalThis.CONFIG_DEBUG = {
+  "env" : 'node',
   "debugInfo": {
     "/Users/Etienne/Desktop/lavamoat-stuff/nodeProject/index.js": {
       "moduleRecord": {
