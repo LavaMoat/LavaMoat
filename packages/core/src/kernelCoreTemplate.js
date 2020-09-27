@@ -126,17 +126,17 @@
           // take every property on globalRef
           Object.entries(Object.getOwnPropertyDescriptors(membraneWrappedEndowments))
             // ignore properties already defined on compartment global
-            .filter(([key]) => !(key in moduleCompartment.global))
+            .filter(([key]) => !(key in moduleCompartment.globalThis))
             // define property on compartment global
-            .forEach(([key, desc]) => Reflect.defineProperty(moduleCompartment.global, key, desc))
+            .forEach(([key, desc]) => Reflect.defineProperty(moduleCompartment.globalThis, key, desc))
         } else {
           // sets up read/write access as configured
           const globalsConfig = configForModule.globals
-          prepareCompartmentGlobalFromConfig(moduleCompartment.global, globalsConfig, membraneWrappedEndowments, globalStore)
+          prepareCompartmentGlobalFromConfig(moduleCompartment.globalThis, globalsConfig, membraneWrappedEndowments, globalStore)
         }
         // expose membrane for debugging
         if (debugMode) {
-          moduleCompartment.global.membrane = membrane
+          moduleCompartment.globalThis.membrane = membrane
         }
         // execute in module compartment with modified compartment global
         try {

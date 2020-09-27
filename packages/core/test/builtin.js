@@ -262,6 +262,7 @@ function evaluateWithSourceUrl (filename, content, baseContext) {
   const context = Object.assign({}, baseContext)
   // circular ref (used by SES)
   context.global = context
+  context.console = console
   // perform eval
   const result = runInNewContext(`${content}\n//# sourceURL=${filename}`, context)
   // pull out test result value from context (not always used)

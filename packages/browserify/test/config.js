@@ -261,7 +261,7 @@ test('Config override is applied if not specified and already exists at default 
 
   const scriptPath = require.resolve('./fixtures/runBrowserifyNoOpts')
 
-  const buildProcess = execSync(`node ${scriptPath}`, { cwd: tmpObj.name })
+  const buildProcess = execSync(`node ${scriptPath}`, { cwd: tmpObj.name, maxBuffer: 5 * 1024 * 1024 })
   const outputString = buildProcess.toString()
 
   t.assert(outputString.includes('"three":12345678'), 'Applies override if exists but not specified')

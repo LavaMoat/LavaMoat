@@ -12,15 +12,18 @@
 
     // create the SES rootRealm
     // "templateRequire" calls are inlined in "generatePrelude"
-    const { lockdown } = templateRequire('ses')
-    const lockdownOptions = {
-      // this is introduces non-determinism, but is otherwise safe
-      noTameMath: true,
-    }
+    // load-bearing semi-colon, do not remove
+    ;templateRequire('ses')
 
-    // only reveal error stacks in debug mode
-    if (debugMode === true) {
-      lockdownOptions.noTameError = true
+    const lockdownOptions = {
+      // gives a semi-high resolution timer
+      dateTaming: 'unsafe',
+      // gives code excessive introspection, but meh
+      errorTaming: 'unsafe',
+      // this is introduces non-determinism, but is otherwise safe
+      mathTaming: 'unsafe',
+      // ?
+      // regExpTaming: 'unsafe',
     }
 
     lockdown(lockdownOptions)
