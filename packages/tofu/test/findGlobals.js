@@ -35,6 +35,10 @@ function read(file) {
 //   return namePath.join('.');
 // }
 
+test('object method', (t) => {
+  t.deepEqual(detect('const x = { xyz () {} }'), []);
+  t.end()
+});
 test('argument.js - parameters from inline arguments', (t) => {
   t.deepEqual(detect(read('argument.js')), []);
   t.end()

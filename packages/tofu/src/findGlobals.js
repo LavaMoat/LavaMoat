@@ -30,6 +30,7 @@ function findGlobals (ast) {
       if (parentType === 'MemberExpression' && path.parent.property === path.node) return
       // skip if this is the key side of an object pattern
       if (parentType === 'ObjectProperty' && path.parent.key === path.node) return
+      if (parentType === 'ObjectMethod' && path.parent.key === path.node) return
 
       // skip if it refers to an existing variable
       const name = path.node.name
