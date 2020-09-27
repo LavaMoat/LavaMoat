@@ -64,5 +64,5 @@ function findGlobals (ast) {
 }
 
 function isInFunctionDeclaration (path) {
-  return getParents(path.parentPath).some(parent => parent.type === 'FunctionDeclaration')
+  return getParents(path.parentPath).some(parent => parent.type === 'FunctionDeclaration' || parent.type === 'FunctionExpression')
 }

@@ -39,6 +39,27 @@ test('object method', (t) => {
   t.deepEqual(detect('const x = { xyz () {} }'), []);
   t.end()
 });
+test('arguments keyword', (t) => {
+  t.deepEqual(detect('function a () { arguments }'), []);
+  t.end()
+});
+test('arguments keyword 2', (t) => {
+  t.deepEqual(detect('function a () { x(arguments) }'), ['x']);
+  t.end()
+});
+test('arguments keyword 3', (t) => {
+  t.deepEqual(detect(`const x = function () { arguments }`), []);
+  t.end()
+});
+test('arguments keyword 4', (t) => {
+  t.deepEqual(detect(`async function a () { arguments }`), []);
+  t.end()
+});
+test('arguments keyword 5', (t) => {
+  t.deepEqual(detect(`const x = async function () { arguments }`), []);
+  t.end()
+});
+
 test('argument.js - parameters from inline arguments', (t) => {
   t.deepEqual(detect(read('argument.js')), []);
   t.end()
