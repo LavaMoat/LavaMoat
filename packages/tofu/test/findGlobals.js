@@ -1,21 +1,21 @@
-'use strict';
+'use strict'
 
-const fs = require('fs');
-const path = require('path');
-const assert = require('assert');
-const test = require('tape');
-const { parse } = require('../src/index');
-const { findGlobals } = require('../src/findGlobals');
+const fs = require('fs')
+const path = require('path')
+const assert = require('assert')
+const test = require('tape')
+const { parse } = require('../src/index')
+const { findGlobals } = require('../src/findGlobals')
 
-function detect(code) {
+function detect (code) {
   const ast = parse(code)
   const globals = findGlobals(ast)
   const globalNames = [...globals.keys()].sort()
   return globalNames
 }
 
-function read(file) {
-  return fs.readFileSync(path.resolve(__dirname + '/fixtures/', file), 'utf8');
+function read (file) {
+  return fs.readFileSync(path.resolve(__dirname + '/fixtures/', file), 'utf8')
 }
 
 // function buildQualifiedVariableName(node) {
@@ -36,73 +36,73 @@ function read(file) {
 // }
 
 test('object method', (t) => {
-  t.deepEqual(detect('const x = { xyz () {} }'), []);
+  t.deepEqual(detect('const x = { xyz () {} }'), [])
   t.end()
-});
+})
 test('arguments keyword', (t) => {
-  t.deepEqual(detect('function a () { arguments }'), []);
+  t.deepEqual(detect('function a () { arguments }'), [])
   t.end()
-});
+})
 test('arguments keyword 2', (t) => {
-  t.deepEqual(detect('function a () { x(arguments) }'), ['x']);
+  t.deepEqual(detect('function a () { x(arguments) }'), ['x'])
   t.end()
-});
+})
 test('arguments keyword 3', (t) => {
-  t.deepEqual(detect(`const x = function () { arguments }`), []);
+  t.deepEqual(detect('const x = function () { arguments }'), [])
   t.end()
-});
+})
 test('arguments keyword 4', (t) => {
-  t.deepEqual(detect(`async function a () { arguments }`), []);
+  t.deepEqual(detect('async function a () { arguments }'), [])
   t.end()
-});
+})
 test('arguments keyword 5', (t) => {
-  t.deepEqual(detect(`const x = async function () { arguments }`), []);
+  t.deepEqual(detect('const x = async function () { arguments }'), [])
   t.end()
-});
+})
 
 test('argument.js - parameters from inline arguments', (t) => {
-  t.deepEqual(detect(read('argument.js')), []);
+  t.deepEqual(detect(read('argument.js')), [])
   t.end()
-});
+})
 test('arrow_functions.js - arguments of arrow functions are not globals', (t) => {
-  t.deepEqual(detect(read('arrow_functions.js')), ['z', 'b', 'c', 'arguments'].sort());
+  t.deepEqual(detect(read('arrow_functions.js')), ['z', 'b', 'c', 'arguments'].sort())
   t.end()
-});
+})
 test('assign_implicit.js - assign from an implicit global', (t) => {
-  t.deepEqual(detect(read('assign_implicit.js')), ['bar']);
+  t.deepEqual(detect(read('assign_implicit.js')), ['bar'])
   t.end()
-});
+})
 test('catch-pattern.js - pattern in catch', (t) => {
-  t.deepEqual(detect(read('catch-pattern.js')), []);
+  t.deepEqual(detect(read('catch-pattern.js')), [])
   t.end()
-});
+})
 test('class.js - ES2015 classes', (t) => {
-  t.deepEqual(detect(read('class.js')), ['G', 'OtherClass_', 'SuperClass', 'this'].sort());
+  t.deepEqual(detect(read('class.js')), ['G', 'OtherClass_', 'SuperClass', 'this'].sort())
   t.end()
-});
+})
 test('class-expression.js - class as expression', (t) => {
-  t.deepEqual(detect(read('class-expression.js')), []);
+  t.deepEqual(detect(read('class-expression.js')), [])
   t.end()
-});
+})
 test('default-argument.js - ES2015 default argument', (t) => {
-  t.deepEqual(detect(read('default-argument.js')), ['c', 'h', 'j', 'k']);
+  t.deepEqual(detect(read('default-argument.js')), ['c', 'h', 'j', 'k'])
   t.end()
-});
+})
 test('destructuring-rest.js - ES2015 destructuring rest', (t) => {
-  t.deepEqual(detect(read('destructuring-rest.js')), []);
+  t.deepEqual(detect(read('destructuring-rest.js')), [])
   t.end()
-});
+})
 test('destructuring.js - ES2015 variable destructuring', (t) => {
-  t.deepEqual(detect(read('destructuring.js')), ['g']);
+  t.deepEqual(detect(read('destructuring.js')), ['g'])
   t.end()
-});
+})
 test('detect.js - check locals and globals', (t) => {
   t.deepEqual(
     detect(read('detect.js')),
     ['w', 'foo', 'process', 'console', 'AAA', 'BBB', 'CCC', 'xyz', 'ZZZ', 'BLARG', 'RAWR'].sort()
-  );
-    t.end()
-});
+  )
+  t.end()
+})
 // test('detect.js - check variable names', (t) => {
 //   t.deepEqual(
 //     detect(read('detect.js')).map(function (node) { return '[' + node.nodes.map(buildQualifiedVariableName) + ']'; }),
@@ -139,25 +139,25 @@ test('detect.js - check locals and globals', (t) => {
 //   t.end()
 // });
 test('labels.js - labels for while loops are not globals', (t) => {
-  t.deepEqual(detect(read('labels.js')), []);
+  t.deepEqual(detect(read('labels.js')), [])
   t.end()
-});
+})
 // test('multiple-exports.js - multiple-exports', (t) => {
 //   t.deepEqual(detect(read('multiple-exports.js')), ['bar', 'exports']);
 //   t.end()
 // });
 test('named_arg.js - named argument / parameter', (t) => {
-  t.deepEqual(detect(read('named_arg.js')), []);
+  t.deepEqual(detect(read('named_arg.js')), [])
   t.end()
-});
+})
 test('names-in-object-prototype.js - check names in object prototype', (t) => {
-  t.deepEqual(detect(read('names-in-object-prototype.js')).sort(), ['__proto__', 'constructor', 'hasOwnProperty']);
+  t.deepEqual(detect(read('names-in-object-prototype.js')).sort(), ['__proto__', 'constructor', 'hasOwnProperty'])
   t.end()
-});
+})
 test('obj.js - globals on the right-hand of a colon in an object literal', (t) => {
-  t.deepEqual(detect(read('obj.js')), ['bar', 'module']);
+  t.deepEqual(detect(read('obj.js')), ['bar', 'module'])
   t.end()
-});
+})
 // test('properties.js - check variable names', (t) => {
 //   t.deepEqual(
 //     detect(read('properties.js')).map(function (node) { return '[' + node.nodes.map(buildQualifiedVariableName) + ']'; }),
@@ -171,25 +171,25 @@ test('obj.js - globals on the right-hand of a colon in an object literal', (t) =
 //     t.end()
 // });
 test('reserved-words.js - check we do not force into strict mode', (t) => {
-  t.deepEqual(detect(read('reserved-words.js')), ['console']);
+  t.deepEqual(detect(read('reserved-words.js')), ['console'])
   t.end()
-});
+})
 test('rest-argument.js - ES2015 rest argument', (t) => {
-  t.deepEqual(detect(read('rest-argument.js')), []);
+  t.deepEqual(detect(read('rest-argument.js')), [])
   t.end()
-});
+})
 test('return_hash.js - named argument / parameter', (t) => {
-  t.deepEqual(detect(read('return_hash.js')), []);
+  t.deepEqual(detect(read('return_hash.js')), [])
   t.end()
-});
+})
 test('right_hand.js - globals on the right-hand of assignment', (t) => {
-  t.deepEqual(detect(read('right_hand.js')), [ 'exports', '__dirname', '__filename' ].sort());
+  t.deepEqual(detect(read('right_hand.js')), ['exports', '__dirname', '__filename'].sort())
   t.end()
-});
+})
 test('try_catch.js - the exception in a try catch block is a local', (t) => {
-  t.deepEqual(detect(read('try_catch.js')), []);
+  t.deepEqual(detect(read('try_catch.js')), [])
   t.end()
-});
+})
 // test('this.js - `this` is considered a global', (t) => {
 //   t.deepEqual(detect(read('this.js')), ['this']);
 // });

@@ -4,7 +4,8 @@ const pathLookup = new WeakMap()
 
 module.exports = {
   expandUsage,
-  pathLookup
+  pathLookup,
+  getGraph
 }
 
 // // -> where do the inputs to function "b" come from?
@@ -16,6 +17,27 @@ module.exports = {
 //   const firstUsageOfBLabel = `${firstUsageOfBScopeBlock.type} ("${firstUsageOfBScopeBlock.id.name}") ${lineRef}`
 //   console.log(`function "b" used at ${firstUsageOfBLabel}`)
 // }
+
+function getGraph (targetPath) {
+  const nodes = new Set(); const links = []
+  walkUsage(targetPath, {
+    // onNode (refLink) {
+    //   nodes.push()
+    // },
+    onLink (targetPath, refLink) {
+      const originNode = targetPath.node
+      const destNode = refLink.path.node
+      const linkLabel = refLink.label
+
+      // originNode._id = originNode._id || Math.random()
+      // destNode._id = destNode._id || Math.random()
+      nodes.add(originNode)
+      nodes.add(destNode)
+      links.push({ from: originNode, to: destNode, label: linkLabel })
+    }
+  })
+  return { links, nodes: Array.from(nodes) }
+}
 
 function expandUsage (targetPath) {
   const nodes = []
@@ -36,7 +58,7 @@ function expandUsage (targetPath) {
   }
 }
 
-function walkUsage (targetPath, { onNode = noop, onLeaf = noop }) {
+function walkUsage (targetPath, { onNode = noop, onLeaf = noop, onLink = noop }) {
   let children
   try {
     children = tracePathToUsages(targetPath)
@@ -49,6 +71,7 @@ function walkUsage (targetPath, { onNode = noop, onLeaf = noop }) {
   }
   children.forEach(refLink => {
     onNode(refLink)
+    onLink(targetPath, refLink)
     walkUsage(refLink.path, { onNode, onLeaf })
   })
 }

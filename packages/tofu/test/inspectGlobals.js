@@ -2,7 +2,6 @@ const test = require('tape')
 const deepEqual = require('deep-equal')
 const { inspectGlobals } = require('../src/index')
 
-
 test('fnToCodeBlock utility works', (t) => {
   const src = fnToCodeBlock(() => {
     1 + 2 + 3
@@ -174,7 +173,7 @@ testInspect('raise globals to highest used', {}, () => {
 testInspect('correctly finds deep "process.env" reference', {}, () => {
   process.env.READABLE_STREAM === 'disable'
 }, {
-  'process.env.READABLE_STREAM': 'read',
+  'process.env.READABLE_STREAM': 'read'
 })
 
 testInspect('read access to object implies write access to properties', {}, () => {
@@ -190,8 +189,8 @@ testInspect('object destructuring', {
   const { abc } = globalThis
   const xyz = globalThis.xyz
 }, {
-  'abc': 'read',
-  'xyz': 'read',
+  abc: 'read',
+  xyz: 'read'
 })
 
 testInspect('object destructuring with branching', {
@@ -200,7 +199,7 @@ testInspect('object destructuring with branching', {
   const { y: { z }, w } = globalThis.x
 }, {
   'x.y.z': 'read',
-  'x.w': 'read',
+  'x.w': 'read'
 })
 
 testInspect('array destructuring', {
@@ -210,7 +209,7 @@ testInspect('array destructuring', {
 }, {
   'snakes.0': 'read',
   'snakes.1': 'read',
-  'snakes.2': 'read',
+  'snakes.2': 'read'
 })
 
 testInspect('complex mixed destructuring', {
@@ -219,12 +218,12 @@ testInspect('complex mixed destructuring', {
   const [
     { name: primaryThingName },
     { name: secondaryThingName, ...secondaryThingProps },
-    { name: [ ...tertiaryThingName ] },
+    { name: [...tertiaryThingName] }
   ] = globalThis.things
 }, {
   'things.0.name': 'read',
   'things.1': 'read',
-  'things.2.name': 'read',
+  'things.2.name': 'read'
 })
 
 testInspect('paths stop at computed props', {
@@ -234,9 +233,8 @@ testInspect('paths stop at computed props', {
   const { b, c } = globalThis[key].a
   const { [key]: y, z } = globalThis.x
 }, {
-  'x': 'read',
+  x: 'read'
 })
-
 
 function testInspect (label, opts, fn, expectedResultObj) {
   test(label, (t) => {
