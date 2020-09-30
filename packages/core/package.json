@@ -14,8 +14,7 @@
     "fromentries": "^1.2.0",
     "json-stable-stringify": "^1.0.1",
     "lavamoat-tofu": "^5.1.0",
-    "resolve": "^1.15.1",
-    "ses": "^0.10.3"
+    "resolve": "^1.15.1"
   },
   "devDependencies": {
     "merge-deep": "^3.0.2",
