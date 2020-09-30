@@ -9,7 +9,7 @@ const path = require('path')
 const preludeTemplate = fs.readFileSync(path.join(__dirname, '/preludeTemplate.js'), 'utf-8')
 const kernelTemplate = fs.readFileSync(path.join(__dirname, '/kernelTemplate.js'), 'utf-8')
 const kernelCoreTemplate = fs.readFileSync(path.join(__dirname, '/kernelCoreTemplate.js'), 'utf-8')
-const sesSrc = fs.readFileSync(require.resolve('ses'), 'utf-8')
+const sesSrc = fs.readFileSync(require.resolve('../lib/ses.umd.js'), 'utf-8')
 const makeGetEndowmentsForConfigSrc = fs.readFileSync(path.join(__dirname, '/makeGetEndowmentsForConfig.js'), 'utf-8')
 const makePrepareRealmGlobalFromConfigSrc = fs.readFileSync(path.join(__dirname, '/makePrepareRealmGlobalFromConfig.js'), 'utf-8')
 
