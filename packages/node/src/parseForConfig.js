@@ -4,6 +4,7 @@ const { builtinModules: builtinPackages } = require('module')
 const resolve = require('resolve')
 const bindings = require('bindings')
 const gypBuild = require('node-gyp-build')
+const fromEntries = require('object.fromentries')
 const { codeFrameColumns } = require('@babel/code-frame')
 const {
   packageNameFromPath,
@@ -134,7 +135,7 @@ function makeImportHook ({
     // get imports
     const { cjsImports } = inspectImports(ast, null, false)
     // build import map
-    const importMap = Object.fromEntries(cjsImports.map(requestedName => {
+    const importMap = fromEntries(cjsImports.map(requestedName => {
       let depValue
       if (shouldResolve(requestedName, specifier)) {
         // try {
