@@ -1,6 +1,7 @@
 const path = require('path')
 const { promises: fs } = require('fs')
-const { createRequire, builtinModules: builtinPackages } = require('module')
+const { builtinModules: builtinPackages } = require('module')
+const resolve = require('resolve')
 const bindings = require('bindings')
 const gypBuild = require('node-gyp-build')
 const { codeFrameColumns } = require('@babel/code-frame')
@@ -13,6 +14,15 @@ const {
 } = require('lavamoat-core')
 const { parse, inspectImports, codeSampleFromAstNode } = require('lavamoat-tofu')
 const { checkForResolutionOverride } = require('./resolutions')
+
+// approximate polyfill for node builtin
+const createRequire = (url) => {
+  return {
+    resolve: (requestedName) => {
+      return resolve.sync(requestedName, { basedir: url.pathname })
+    }
+  }
+}
 
 module.exports = { parseForConfig, makeResolveHook, makeImportHook }
 
