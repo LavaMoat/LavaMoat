@@ -2,6 +2,7 @@ const { runInNewContext } = require('vm')
 const path = require('path')
 const test = require('tape')
 const mergeDeep = require('merge-deep')
+const fromEntries = require('object.fromentries')
 const { generateKernel, packageNameFromPath } = require('../src/index.js')
 
 test('builtin - basic access', async (t) => {
@@ -211,7 +212,7 @@ function fillInFileDetails (files) {
 }
 
 function filesFromBuiltin (builtinObj) {
-  return Object.fromEntries(
+  return fromEntries(
     Object.entries(builtinObj)
       .map(([key, value]) => {
         return [key, {

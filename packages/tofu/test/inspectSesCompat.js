@@ -6,7 +6,7 @@ const { parse, inspectSesCompat } = require('../src/index')
 function inspectSesCompatTest (code) {
   const ast = parse(code, {
     sourceType: 'module',
-    errorRecovery: true,
+    errorRecovery: true
   })
   return inspectSesCompat(ast)
 }
@@ -51,7 +51,6 @@ test('inspectSesCompat - strict mode - octal literals', (t) => {
   t.end()
 })
 
-
 test('inspectSesCompat - strict mode - escaped octal literals', (t) => {
   const results = inspectSesCompatTest(`
     let x = \\010
@@ -60,7 +59,6 @@ test('inspectSesCompat - strict mode - escaped octal literals', (t) => {
   t.end()
 })
 
-
 test('inspectSesCompat - strict mode - "with" keyword', (t) => {
   const results = inspectSesCompatTest(`
     with (Math) { x = cos(2) }
@@ -68,10 +66,6 @@ test('inspectSesCompat - strict mode - "with" keyword', (t) => {
   t.deepEqual(results.strictModeViolations.length, 1)
   t.end()
 })
-
-
-
-
 
 // test('inspectSesCompat - assignment to undeclared globals', (t) => {
 //   const results = inspectSesCompatTest(`

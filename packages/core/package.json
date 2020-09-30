@@ -7,18 +7,18 @@
     "lib": "lib"
   },
   "engines": {
-    "node": ">12.0.0"
+    "node": ">10.0.0"
   },
   "dependencies": {
     "cytoplasm": "^3.3.1",
     "fromentries": "^1.2.0",
     "json-stable-stringify": "^1.0.1",
     "lavamoat-tofu": "^5.1.0",
-    "resolve": "^1.15.1",
-    "ses": "^0.10.3"
+    "resolve": "^1.15.1"
   },
   "devDependencies": {
     "merge-deep": "^3.0.2",
+    "object.fromentries": "^2.0.2",
     "tape": "^4.13.2",
     "tape-promise": "^4.0.0"
   },

@@ -2,11 +2,10 @@ const test = require('tape')
 const deepEqual = require('deep-equal')
 const { parse, inspectEsmImports } = require('../src/index')
 
-
 testInspect('esm - basic', {}, `
   import fs from 'fs'
 `, {
-  esmImports: ['fs'],
+  esmImports: ['fs']
 })
 
 // from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import
@@ -24,23 +23,21 @@ testInspect('esm - full set', {}, `
   var promise = import("package11");
 `, {
   esmImports: [
-    "package01",
-    "package02",
-    "package03.export1",
-    "package04.export2",
-    "package05.export3",
-    "package05.export4",
-    "package06/path/to/specific/un-exported/file.export5",
-    "package06/path/to/specific/un-exported/file.export6",
-    "package07.export7",
-    "package07.export8",
-    "package08",
-    "package09",
-    "package09",
-  ],
+    'package01',
+    'package02',
+    'package03.export1',
+    'package04.export2',
+    'package05.export3',
+    'package05.export4',
+    'package06/path/to/specific/un-exported/file.export5',
+    'package06/path/to/specific/un-exported/file.export6',
+    'package07.export7',
+    'package07.export8',
+    'package08',
+    'package09',
+    'package09'
+  ]
 })
-
-
 
 function testInspect (label, opts, fn, expectedResultObj) {
   test(label, (t) => {

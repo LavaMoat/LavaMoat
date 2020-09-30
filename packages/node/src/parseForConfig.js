@@ -1,8 +1,10 @@
 const path = require('path')
 const { promises: fs } = require('fs')
-const { createRequire, builtinModules: builtinPackages } = require('module')
+const { builtinModules: builtinPackages } = require('module')
+const resolve = require('resolve')
 const bindings = require('bindings')
 const gypBuild = require('node-gyp-build')
+const fromEntries = require('object.fromentries')
 const { codeFrameColumns } = require('@babel/code-frame')
 const {
   packageNameFromPath,
@@ -13,6 +15,15 @@ const {
 } = require('lavamoat-core')
 const { parse, inspectImports, codeSampleFromAstNode } = require('lavamoat-tofu')
 const { checkForResolutionOverride } = require('./resolutions')
+
+// approximate polyfill for node builtin
+const createRequire = (url) => {
+  return {
+    resolve: (requestedName) => {
+      return resolve.sync(requestedName, { basedir: url.pathname })
+    }
+  }
+}
 
 module.exports = { parseForConfig, makeResolveHook, makeImportHook }
 
@@ -124,7 +135,7 @@ function makeImportHook ({
     // get imports
     const { cjsImports } = inspectImports(ast, null, false)
     // build import map
-    const importMap = Object.fromEntries(cjsImports.map(requestedName => {
+    const importMap = fromEntries(cjsImports.map(requestedName => {
       let depValue
       if (shouldResolve(requestedName, specifier)) {
         // try {

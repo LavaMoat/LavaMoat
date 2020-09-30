@@ -9,6 +9,10 @@
 
     // identify the globalRef
     const globalRef = (typeof globalThis !== 'undefined') ? globalThis : (typeof self !== 'undefined') ? self : global
+    // polyfill globalThis
+    if (globalRef && !globalRef.globalThis) {
+      globalRef.globalThis = globalRef
+    }
 
     // create the SES rootRealm
     // "templateRequire" calls are inlined in "generatePrelude"
