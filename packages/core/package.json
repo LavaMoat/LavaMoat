@@ -19,6 +19,7 @@
   },
   "devDependencies": {
     "merge-deep": "^3.0.2",
+    "object.fromentries": "^2.0.2",
     "tape": "^4.13.2",
     "tape-promise": "^4.0.0"
   },
