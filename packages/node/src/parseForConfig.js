@@ -52,8 +52,6 @@ function makeResolveHook ({ cwd, resolutions = {}, rootPackageName = '<root>' })
       }
       // return "null" to mean failed to resolve
       return null
-      // throw unknown error
-      throw err
     }
     return resolved
   }
