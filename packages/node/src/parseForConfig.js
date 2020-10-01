@@ -243,14 +243,25 @@ function displayRichCompatWarning ({ moduleRecord, compatWarnings }) {
   const { primordialMutations, strictModeViolations, dynamicRequires } = compatWarnings
   console.warn(`⚠️  Potentially incomptabile code detected in package "${packageName}" file "${file}":`)
   logWarnings('primordial mutation', primordialMutations)
-  logWarnings('strict mode violation', strictModeViolations)
   logWarnings('dynamic require', dynamicRequires)
+  logErrors('strict mode violation', strictModeViolations)
 
   function logWarnings (message, sites) {
     sites.forEach(({ node }) => {
       const { npmfs } = codeSampleFromAstNode(node, moduleRecord)
       if (npmfs) console.warn(`  link: ${npmfs}`)
       const output = codeFrameColumns(moduleRecord.content, node.loc, { message, highlightCode: true })
+      console.warn(output)
+    })
+  }
+
+  function logErrors (category, sites) {
+    sites.forEach(({ loc, error }) => {
+      const range = { start: loc }
+      const { npmfs } = codeSampleFromAstNode({ loc: range }, moduleRecord)
+      if (npmfs) console.warn(`  link: ${npmfs}`)
+      const message = `${category}: ${error.message}`
+      const output = codeFrameColumns(moduleRecord.content, range, { message, highlightCode: true })
       console.warn(output)
     })
   }
