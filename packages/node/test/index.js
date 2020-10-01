@@ -78,7 +78,7 @@ test('parseForConfig - require a userspace package with a builtin name', async (
   t.end()
 })
 
-// Test indirectly used (passed to FN) imported packages being added to the config 
+// Test indirectly used (passed to FN) imported packages being added to the config
 test("parseForConfig - indirectly used packages are included in parent's whitelist", async (t) => {
   const projectRoot = `${__dirname}/projects/5`
   const entryId = './index.js'
