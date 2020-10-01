@@ -20,7 +20,8 @@ const { checkForResolutionOverride } = require('./resolutions')
 const createRequire = (url) => {
   return {
     resolve: (requestedName) => {
-      return resolve.sync(requestedName, { basedir: url.pathname })
+      const basedir = path.dirname(url.pathname)
+      return resolve.sync(requestedName, { basedir })
     }
   }
 }
