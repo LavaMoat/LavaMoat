@@ -54,7 +54,6 @@ test('parseForConfig - require a userspace package with a builtin name', async (
   const entryId = `${projectRoot}/index.js`
 
   const config = await parseForConfig({ entryId, cwd: projectRoot })
-
   // comparing resources only, to skip builtin packages
   t.deepEqual(config, {
     resources: {
@@ -76,6 +75,17 @@ test('parseForConfig - require a userspace package with a builtin name', async (
     }
   })
 
+  t.end()
+})
+
+// Test indirectly used (passed to FN) imported packages being added to the config
+test("parseForConfig - indirectly used packages are included in parent's whitelist", async (t) => {
+  const projectRoot = `${__dirname}/projects/5`
+  const entryId = `${projectRoot}/index.js`
+  const config = await parseForConfig({ entryId, cwd: projectRoot })
+  t.deepEqual(config, {
+    resources: { a: { builtin: { crypto: true } } }
+  })
   t.end()
 })
 
