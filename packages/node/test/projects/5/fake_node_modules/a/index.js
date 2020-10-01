@@ -1,0 +1,5 @@
+const crypto = require('crypto')
+const someFunction = (sample) => {
+  return
+}
+someFunction(crypto)
