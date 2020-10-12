@@ -21,7 +21,22 @@ const createRequire = (url) => {
   return {
     resolve: (requestedName) => {
       const basedir = path.dirname(url.pathname)
-      return resolve.sync(requestedName, { basedir })
+      const result = resolve.sync(requestedName, { basedir })
+      // check for missing builtin modules (e.g. 'worker_threads' in node v10)
+      // the "resolve" package resolves as "worker_threads" even if missing
+      const resultMatchesRequest = requestedName === result
+      if (resultMatchesRequest) {
+        const isBuiltinModule = builtinPackages.includes(result)
+        const looksLikeAPath = requestedName.includes('/')
+        if (!looksLikeAPath && !isBuiltinModule) {
+          const errMsg = `Cannot find module '${requestedName}' from '${basedir}'`
+          const err = new Error(errMsg)
+          err.code = 'MODULE_NOT_FOUND'
+          throw err
+        }
+      }
+      // return resolved path
+      return result
     }
   }
 }
@@ -86,11 +101,11 @@ function makeImportHook ({
     const extension = path.extname(filename)
     const packageData = packageDataForModule({ id: specifier, file: filename }, rootPackageName)
 
-    if (extension === '.node') {
-      return makeNativeModuleRecord(specifier, filename, packageData)
-    }
     if (['.js', '.cjs'].includes(extension)) {
       return makeJsModuleRecord(specifier, filename, packageData)
+    }
+    if (extension === '.node') {
+      return makeNativeModuleRecord(specifier, filename, packageData)
     }
     if (extension === '.json') {
       return makeJsonModuleRecord(specifier, filename, packageData)
@@ -139,13 +154,13 @@ function makeImportHook ({
     const importMap = fromEntries(cjsImports.map(requestedName => {
       let depValue
       if (shouldResolve(requestedName, specifier)) {
-        // try {
-        depValue = resolveHook(requestedName, specifier)
-        // } catch (err) {
-        //   // graceful failure
-        //   console.warn(`lavamoat-node/makeImportHandler - could not resolve "${requestedName}" from "${specifier}"`)
-        //   depValue = requestedName
-        // }
+        try {
+          depValue = resolveHook(requestedName, specifier)
+        } catch (err) {
+          // graceful failure
+          console.warn(`lavamoat-node/makeImportHandler - could not resolve "${requestedName}" from "${specifier}"`)
+          depValue = null
+        }
       } else {
         // resolving is skipped so put in a dummy value
         depValue = null
