@@ -85,14 +85,20 @@ function loadModuleData (absolutePath) {
     const moduleContent = fs.readFileSync(absolutePath, 'utf8')
     // apply source transforms
     let transformedContent = moduleContent
-      // hash bang
-      .split('#!/').join('// #!/')
+    // hash bang
+    const contentLines = transformedContent.split('\n')
+    if (contentLines[0].startsWith('#!')) {
+      transformedContent = contentLines.slice(1).join('\n')
+    }
+    transformedContent = transformedContent
       // html comment
       .split('-->').join('-- >')
+      .split('<!--').join('<! --')
       // use indirect eval
       .split(' eval(').join(' (eval)(')
       // replace import statements in comments
       .split(' import(').join(' __import__(')
+      .split('"import(').join('"__import__(')
     // wrap json modules (borrowed from browserify)
     if (/\.json$/.test(absolutePath)) {
       const sanitizedString = sanitize(transformedContent)
