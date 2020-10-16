@@ -24,11 +24,30 @@
     getOwnPropertyDescriptors,
     getOwnPropertyNames,
     getPrototypeOf,
+    is,
+    isExtensible,
     keys,
     prototype: objectPrototype,
+    seal,
     setPrototypeOf,
     values,
   } = Object;
+
+  // At time of this writing, we still support Node 10 which doesn't have
+  // `Object.fromEntries`. If it is absent, this should be an adequate
+  // replacement.
+  // By the terminology of https://ponyfoo.com/articles/polyfills-or-ponyfills
+  // it is a ponyfill rather than a polyfill or shim because we do not
+  // install it on `Object`.
+  const objectFromEntries = entryPairs => {
+    const result = {};
+    for (const [prop, val] of entryPairs) {
+      result[prop] = val;
+    }
+    return result;
+  };
+
+  const fromEntries = Object.fromEntries || objectFromEntries;
 
   const defineProperty = (object, prop, descriptor) => {
     // Object.defineProperty is allowed to fail silently so we use
@@ -86,26 +105,39 @@
 
   const nativeSuffix = ') { [native code] }';
 
+  // Note: Top level mutable state. Does not make anything worse, since the
+  // patching of `Function.prototype.toString` is also globally stateful. We
+  // use this top level state so that multiple calls to `tameFunctionToString` are
+  // idempotent, rather than creating redundant indirections.
+  let nativeBrander;
+
+  /**
+   * Replace `Function.prototype.toString` with one that recognizes
+   * shimmed functions as honorary native functions.
+   */
   function tameFunctionToString() {
-    const nativeBrand = new WeakSet();
+    if (nativeBrander === undefined) {
+      const nativeBrand = new WeakSet();
 
-    const originalFunctionToString = Function.prototype.toString;
+      const originalFunctionToString = Function.prototype.toString;
 
-    const tamingMethods = {
-      toString() {
-        const str = apply(originalFunctionToString, this, []);
-        if (str.endsWith(nativeSuffix) || !nativeBrand.has(this)) {
-          return str;
-        }
-        return `function ${this.name}() { [native code] }`;
-      },
-    };
+      const tamingMethods = {
+        toString() {
+          const str = apply(originalFunctionToString, this, []);
+          if (str.endsWith(nativeSuffix) || !nativeBrand.has(this)) {
+            return str;
+          }
+          return `function ${this.name}() { [native code] }`;
+        },
+      };
 
-    defineProperty(Function.prototype, 'toString', {
-      value: tamingMethods.toString,
-    });
+      defineProperty(Function.prototype, 'toString', {
+        value: tamingMethods.toString,
+      });
 
-    return func => nativeBrand.add(func);
+      nativeBrander = freeze(func => nativeBrand.add(func));
+    }
+    return nativeBrander;
   }
 
   /**
@@ -2362,12 +2394,6 @@
     return harden;
   }
 
-  function assert(condition, errorMessage) {
-    if (!condition) {
-      throw new TypeError(errorMessage);
-    }
-  }
-
   // Copyright (C) 2011 Google Inc.
 
   const { apply: apply$1, ownKeys: ownKeys$1 } = Reflect;
@@ -2892,268 +2918,6 @@
     };
   }
 
-  // Whitelist names from https://v8.dev/docs/stack-trace-api
-  // Whitelisting only the names used by error-stack-shim/src/v8StackFrames
-  // callSiteToFrame to shim the error stack proposal.
-  const safeV8CallSiteMethodNames = [
-    // suppress 'getThis' definitely
-    'getTypeName',
-    // suppress 'getFunction' definitely
-    'getFunctionName',
-    'getMethodName',
-    'getFileName',
-    'getLineNumber',
-    'getColumnNumber',
-    'getEvalOrigin',
-    'isToplevel',
-    'isEval',
-    'isNative',
-    'isConstructor',
-    'isAsync',
-    // suppress 'isPromiseAll' for now
-    // suppress 'getPromiseIndex' for now
-
-    // Additional names found by experiment, absent from
-    // https://v8.dev/docs/stack-trace-api
-    'getPosition',
-    'getScriptNameOrSourceURL',
-
-    'toString', // TODO replace to use only whitelisted info
-  ];
-
-  // TODO this is a ridiculously expensive way to attenuate callsites.
-  // Before that matters, we should switch to a reasonable representation.
-  const safeV8CallSiteFacet = callSite => {
-    const methodEntry = name => [name, () => callSite[name]()];
-    const o = Object.fromEntries(safeV8CallSiteMethodNames.map(methodEntry));
-    return Object.create(o, {});
-  };
-
-  const safeV8SST = sst => sst.map(safeV8CallSiteFacet);
-
-  const stackStringFromSST = (error, sst) =>
-    [`${error}`, ...sst.map(callSite => `\n  at ${callSite}`)].join('');
-
-  function tameV8ErrorConstructor(
-    OriginalError,
-    InitialError,
-    errorTaming,
-  ) {
-    // Mapping from error instance to the structured stack trace capturing the
-    // stack for that instance.
-    const ssts = new WeakMap();
-
-    // Use concise methods to obtain named functions without constructors.
-    const tamedMethods = {
-      // The optional `optFn` argument is for cutting off the bottom of
-      // the stack --- for capturing the stack only above the topmost
-      // call to that function. Since this isn't the "real" captureStackTrace
-      // but instead calls the real one, if no other cutoff is provided,
-      // we cut this one off.
-      captureStackTrace(error, optFn = tamedMethods.captureStackTrace) {
-        if (typeof OriginalError.captureStackTrace === 'function') {
-          // OriginalError.captureStackTrace is only on v8
-          OriginalError.captureStackTrace(error, optFn);
-          return;
-        }
-        Reflect.set(error, 'stack', '');
-      },
-      // Shim of proposed special power, to reside by default only
-      // in the start compartment, for getting the stack traceback
-      // string associated with an error.
-      // See https://tc39.es/proposal-error-stacks/
-      getStackString(error) {
-        if (!ssts.has(error)) {
-          // eslint-disable-next-line no-void
-          void error.stack;
-        }
-        const sst = ssts.get(error);
-        if (!sst) {
-          return '';
-        }
-        return stackStringFromSST(error, sst);
-      },
-      prepareStackTrace(error, sst) {
-        ssts.set(error, sst);
-        if (errorTaming === 'unsafe') {
-          return stackStringFromSST(error, sst);
-        }
-        return '';
-      },
-    };
-
-    // A prepareFn is a prepareStackTrace function.
-    // An sst is a `structuredStackTrace`, which is an array of
-    // callsites.
-    // A user prepareFn is a prepareFn defined by a client of this API,
-    // and provided by assigning to `Error.prepareStackTrace`.
-    // A user prepareFn should only receive an attenuated sst, which
-    // is an array of attenuated callsites.
-    // A system prepareFn is the prepareFn created by this module to
-    // be installed on the real `Error` constructor, to receive
-    // an original sst, i.e., an array of unattenuated callsites.
-    // An input prepareFn is a function the user assigns to
-    // `Error.prepareStackTrace`, which might be a user prepareFn or
-    // a system prepareFn previously obtained by reading
-    // `Error.prepareStackTrace`.
-
-    const defaultPrepareFn = tamedMethods.prepareStackTrace;
-
-    OriginalError.prepareStackTrace = defaultPrepareFn;
-
-    // A weakset branding some functions as system prepareFns, all of which
-    // must be defined by this module, since they can receive an
-    // unattenuated sst.
-    const systemPrepareFnSet = new WeakSet([defaultPrepareFn]);
-
-    const systemPrepareFnFor = inputPrepareFn => {
-      if (systemPrepareFnSet.has(inputPrepareFn)) {
-        return inputPrepareFn;
-      }
-      // Use concise methods to obtain named functions without constructors.
-      const systemMethods = {
-        prepareStackTrace(error, sst) {
-          ssts.set(error, sst);
-          return inputPrepareFn(error, safeV8SST(sst));
-        },
-      };
-      systemPrepareFnSet.add(systemMethods.prepareStackTrace);
-      return systemMethods.prepareStackTrace;
-    };
-
-    defineProperties(InitialError, {
-      captureStackTrace: {
-        value: tamedMethods.captureStackTrace,
-        writable: true,
-        enumerable: false,
-        configurable: true,
-      },
-      stackTraceLimit: {
-        get() {
-          if (typeof OriginalError.stackTraceLimit === 'number') {
-            // OriginalError.stackTraceLimit is only on v8
-            return OriginalError.stackTraceLimit;
-          }
-          return undefined;
-        },
-        // https://v8.dev/docs/stack-trace-api#compatibility advises that
-        // programmers can "always" set `Error.stackTraceLimit` and
-        // `Error.prepareStackTrace` even on non-v8 platforms. On non-v8
-        // it will have no effect, but this advise only makes sense
-        // if the assignment itself does not fail, which it would
-        // if `Error` were naively frozen. Hence, we add setters that
-        // accept but ignore the assignment on non-v8 platforms.
-        set(newLimit) {
-          if (typeof OriginalError.stackTraceLimit === 'number') {
-            // OriginalError.stackTraceLimit is only on v8
-            OriginalError.stackTraceLimit = newLimit;
-            // We place the useless return on the next line to ensure
-            // that anything we place after the if in the future only
-            // happens if the then-case does not.
-            // eslint-disable-next-line no-useless-return
-            return;
-          }
-        },
-        // WTF on v8 stackTraceLimit is enumerable
-        enumerable: false,
-        configurable: true,
-      },
-      prepareStackTrace: {
-        get() {
-          return OriginalError.prepareStackTrace;
-        },
-        set(inputPrepareStackTraceFn) {
-          if (typeof inputPrepareStackTraceFn === 'function') {
-            const systemPrepareFn = systemPrepareFnFor(inputPrepareStackTraceFn);
-            OriginalError.prepareStackTrace = systemPrepareFn;
-          } else {
-            OriginalError.prepareStackTrace = defaultPrepareFn;
-          }
-        },
-        enumerable: false,
-        configurable: true,
-      },
-    });
-
-    return tamedMethods.getStackString;
-  }
-
-  // Use concise methods to obtain named functions without constructors.
-  const tamedMethods = {
-    getStackString(_error) {
-      return '';
-    },
-  };
-
-  function tameErrorConstructor(errorTaming = 'safe') {
-    if (errorTaming !== 'safe' && errorTaming !== 'unsafe') {
-      throw new Error(`unrecognized errorTaming ${errorTaming}`);
-    }
-    const OriginalError = Error;
-    const ErrorPrototype = OriginalError.prototype;
-
-    const platform =
-      typeof OriginalError.captureStackTrace === 'function' ? 'v8' : 'unknown';
-
-    const makeErrorConstructor = (_ = {}) => {
-      const ResultError = function Error(...rest) {
-        let error;
-        if (new.target === undefined) {
-          error = apply(OriginalError, this, rest);
-        } else {
-          error = construct(OriginalError, rest, new.target);
-        }
-        if (platform === 'v8') {
-          OriginalError.captureStackTrace(error, ResultError);
-        }
-        return error;
-      };
-      defineProperties(ResultError, {
-        length: { value: 1 },
-        prototype: {
-          value: ErrorPrototype,
-          writable: false,
-          enumerable: false,
-          configurable: false,
-        },
-      });
-      return ResultError;
-    };
-    const InitialError = makeErrorConstructor({ powers: 'original' });
-    const SharedError = makeErrorConstructor({ powers: 'none' });
-    defineProperties(ErrorPrototype, {
-      constructor: { value: SharedError },
-      /* TODO
-      stack: {
-        get() {
-          return '';
-        },
-        set(_) {
-          // ignore
-        },
-      },
-      */
-    });
-
-    for (const NativeError of NativeErrors) {
-      setPrototypeOf(NativeError, SharedError);
-    }
-
-    let initialGetStackString = tamedMethods.getStackString;
-    if (platform === 'v8') {
-      initialGetStackString = tameV8ErrorConstructor(
-        OriginalError,
-        InitialError,
-        errorTaming,
-      );
-    }
-    return {
-      '%InitialGetStackString%': initialGetStackString,
-      '%InitialError%': InitialError,
-      '%SharedError%': SharedError,
-    };
-  }
-
   function tameMathObject(mathTaming = 'safe') {
     if (mathTaming !== 'safe' && mathTaming !== 'unsafe') {
       throw new Error(`unrecognized mathTaming ${mathTaming}`);
@@ -3487,11 +3251,418 @@
     enableProperties('root', intrinsics, enablements);
   }
 
+  // @ts-check
+
+  /**
+   * Prepend the correct indefinite article onto a noun, typically a typeof
+   * result, e.g., "an object" vs. "a number"
+   *
+   * @param {string} str The noun to prepend
+   * @returns {string} The noun prepended with a/an
+   */
+  const an = str => {
+    str = `${str}`;
+    if (str.length >= 1 && 'aeiouAEIOU'.includes(str[0])) {
+      return `an ${str}`;
+    }
+    return `a ${str}`;
+  };
+  freeze(an);
+
+  /**
+   * Like `JSON.stringify` but does not blow up if given a cycle. This is not
+   * intended to be a serialization to support any useful unserialization,
+   * or any programmatic use of the resulting string. The string is intended
+   * only for showing a human, in order to be informative enough for some
+   * logging purposes. As such, this `cycleTolerantStringify` has an
+   * imprecise specification and may change over time.
+   *
+   * The current `cycleTolerantStringify` possibly emits too many "seen"
+   * markings: Not only for cycles, but also for repeated subtrees by
+   * object identity.
+   * @param {any} payload
+   * @returns {string}
+   */
+  const cycleTolerantStringify = payload => {
+    const seenSet = new Set();
+    const replacer = (_, val) => {
+      if (typeof val === 'object' && val !== null) {
+        if (seenSet.has(val)) {
+          return '<**seen**>';
+        }
+        seenSet.add(val);
+      }
+      return val;
+    };
+    return JSON.stringify(payload, replacer);
+  };
+  freeze(cycleTolerantStringify);
+
+  // Copyright (C) 2019 Agoric, under Apache License 2.0
+
+  // For our internal debugging purposes, uncomment
+  // const internalDebugConsole = console;
+
+  // /////////////////////////////////////////////////////////////////////////////
+
+  /** @type {WeakMap<StringablePayload, any>} */
+  const declassifiers = new WeakMap();
+
+  /** @type {AssertQuote} */
+  const quote = payload => {
+    const result = freeze({
+      toString: freeze(() => cycleTolerantStringify(payload)),
+    });
+    declassifiers.set(result, payload);
+    return result;
+  };
+  freeze(quote);
+
+  // /////////////////////////////////////////////////////////////////////////////
+
+  /**
+   * @typedef {Object} HiddenDetails
+   *
+   * Captures the arguments passed to the `details` template string tag.
+   *
+   * @property {TemplateStringsArray | string[]} template
+   * @property {any[]} args
+   */
+
+  /**
+   * @type {WeakMap<DetailsToken, HiddenDetails>}
+   *
+   * Maps from a details token which a `details` template literal returned
+   * to a record of the contents of that template literal expression.
+   */
+  const hiddenDetailsMap = new WeakMap();
+
+  // TODO Move this type declaration to types.js as a separate @callback type,
+  // without breaking the meaning of the type. As currently written, if it is
+  // moved into a separate @callback type, it no longer understands that `args`
+  // is a rest parameter. I have not yet figured out how to declare that it is,
+  // except by having it here directly annotating the `details` function.
+  /**
+   * Use the `details` function as a template literal tag to create
+   * informative error messages. The assertion functions take such messages
+   * as optional arguments:
+   * ```js
+   * assert(sky.isBlue(), details`${sky.color} should be "blue"`);
+   * ```
+   * The details template tag returns an object that can print itself with the
+   * formatted message in two ways. It will report the real details to
+   * the console but include only the typeof information in the thrown error
+   * to prevent revealing secrets up the exceptional path. In the example
+   * above, the thrown error may reveal only that `sky.color` is a string,
+   * whereas the same diagnostic printed to the console reveals that the
+   * sky was green.
+   *
+   * @param {TemplateStringsArray | string[]} template The template to format.
+   * The `raw` member of a `TemplateStringsArray` is ignored, so a simple
+   * `string[]` can also be used as a template.
+   * @param {any[]} args Arguments to the template
+   * @returns {DetailsToken} The token associated with for these details
+   */
+  const details = (template, ...args) => {
+    // Keep in mind that the vast majority of calls to `details` creates
+    // a details token that is never used, so this path much remain as fast as
+    // possible. Hence we store what we've got with little processing, postponing
+    // all the work to happen only if needed, for example, if an assertion fails.
+    const detailsToken = freeze({ __proto__: null });
+    hiddenDetailsMap.set(detailsToken, { template, args });
+    return detailsToken;
+  };
+  freeze(details);
+
+  /**
+   * @param {HiddenDetails} hiddenDetails
+   * @returns {string}
+   */
+  const getMessageString = ({ template, args }) => {
+    const parts = [template[0]];
+    for (let i = 0; i < args.length; i += 1) {
+      const arg = args[i];
+      let argStr;
+      if (declassifiers.has(arg)) {
+        argStr = `${arg}`;
+      } else if (arg instanceof Error) {
+        argStr = `(${an(arg.name)})`;
+      } else {
+        argStr = `(${an(typeof arg)})`;
+      }
+      parts.push(argStr, template[i + 1]);
+    }
+    return parts.join('');
+  };
+
+  /**
+   * @param {HiddenDetails} hiddenDetails
+   * @return {LogArgs}
+   */
+  const getLogArgs = ({ template, args }) => {
+    const logArgs = [template[0]];
+    for (let i = 0; i < args.length; i += 1) {
+      let arg = args[i];
+      if (declassifiers.has(arg)) {
+        arg = declassifiers.get(arg);
+      }
+      // Remove the extra spaces (since console.error puts them
+      // between each cause).
+      const priorWithoutSpace = (logArgs.pop() || '').replace(/ $/, '');
+      if (priorWithoutSpace !== '') {
+        logArgs.push(priorWithoutSpace);
+      }
+      const nextWithoutSpace = template[i + 1].replace(/^ /, '');
+      logArgs.push(arg, nextWithoutSpace);
+    }
+    if (logArgs[logArgs.length - 1] === '') {
+      logArgs.pop();
+    }
+    return logArgs;
+  };
+
+  /**
+   * @type {WeakMap<Error, LogArgs>}
+   *
+   * Maps from an error object to the log args that are a more informative
+   * alternative message for that error. When logging the error, these
+   * log args should be preferred to `error.message`.
+   */
+  const hiddenMessageLogArgs = new WeakMap();
+
+  /**
+   * @param {HiddenDetails} hiddenDetails
+   * @param {ErrorConstructor} ErrorConstructor
+   * @return {Error}
+   */
+  const makeDetailedError = (hiddenDetails, ErrorConstructor) => {
+    const messageString = getMessageString(hiddenDetails);
+    const error = new ErrorConstructor(messageString);
+    hiddenMessageLogArgs.set(error, getLogArgs(hiddenDetails));
+    // TODO Having a `debugger` statement in production code is
+    // controversial
+    // eslint-disable-next-line no-debugger
+    debugger;
+    // If we get rid of the `debugger` statement above, the next line is a
+    // particularly fruitful place to put a breakpoint.
+    return error;
+  };
+
+  // /////////////////////////////////////////////////////////////////////////////
+
+  /**
+   * @type {WeakMap<Error, LogArgs[]>}
+   *
+   * Maps from an error to an array of log args, where each log args is
+   * remembered as an annotation on that error. This can be used, for example,
+   * to keep track of additional causes of the error. The elements of any
+   * log args may include errors which are associated with further annotations.
+   * An augmented console, like the causal console of `console.js`, could
+   * then retrieve the graph of such annotations.
+   */
+  const hiddenNoteLogArgsArrays = new WeakMap();
+
+  /**
+   * @type {WeakMap<Error, NoteCallback[]>}
+   *
+   * An augmented console will normally only take the hidden noteArgs array once,
+   * when it logs the error being annotated. Once that happens, further
+   * annotations of that error should go to the console immediately. We arrange
+   * that by accepting a note-callback function from the console as an optional
+   * part of that taking operation. Normally there will only be at most one
+   * callback per error, but that depends on console behavior which we should not
+   * assume. We make this an array of callbacks so multiple registrations
+   * are independent.
+   */
+  const hiddenNoteCallbackArrays = new WeakMap();
+
+  /** @type {AssertNote} */
+  const note = (error, detailsNote) => {
+    if (typeof detailsNote === 'string') {
+      // If it is a string, use it as the literal part of the template so
+      // it doesn't get quoted.
+      detailsNote = details([detailsNote]);
+    }
+    const hiddenDetails = hiddenDetailsMap.get(detailsNote);
+    if (hiddenDetails === undefined) {
+      throw new Error(`unrecognized details ${detailsNote}`);
+    }
+    const logArgs = getLogArgs(hiddenDetails);
+    const callbacks = hiddenNoteCallbackArrays.get(error);
+    if (callbacks !== undefined) {
+      for (const callback of callbacks) {
+        callback(error, logArgs);
+      }
+    } else {
+      const logArgsArray = hiddenNoteLogArgsArrays.get(error);
+      if (logArgsArray !== undefined) {
+        logArgsArray.push(logArgs);
+      } else {
+        hiddenNoteLogArgsArrays.set(error, [logArgs]);
+      }
+    }
+  };
+  freeze(note);
+
+  /**
+   * The unprivileged form that just uses the de facto `error.stack` property.
+   * The start compartment normally has a privileged `globalThis.getStackString`
+   * which should be preferred if present.
+   *
+   * @param {Error} error
+   * @returns {string}
+   */
+  const defaultGetStackString = error => {
+    if (!('stack' in error)) {
+      return '';
+    }
+    const stackString = `${error.stack}`;
+    const pos = stackString.indexOf('\n');
+    if (stackString.startsWith(' ') || pos === -1) {
+      return stackString;
+    }
+    return stackString.slice(pos + 1); // exclude the initial newline
+  };
+
+  /** @type {LoggedErrorHandler} */
+  const loggedErrorHandler = {
+    getStackString: globalThis.getStackString || defaultGetStackString,
+    takeMessageLogArgs: error => {
+      const result = hiddenMessageLogArgs.get(error);
+      hiddenMessageLogArgs.delete(error);
+      return result;
+    },
+    takeNoteLogArgsArray: (error, callback) => {
+      const result = hiddenNoteLogArgsArrays.get(error);
+      hiddenNoteLogArgsArrays.delete(error);
+      if (callback !== undefined) {
+        const callbacks = hiddenNoteCallbackArrays.get(error);
+        if (callbacks) {
+          callbacks.push(callback);
+        } else {
+          hiddenNoteCallbackArrays.set(error, [callback]);
+        }
+      }
+      return result || [];
+    },
+  };
+  freeze(loggedErrorHandler);
+
+  // /////////////////////////////////////////////////////////////////////////////
+
+  /**
+   * Makes and returns an `assert` function object that shares the bookkeeping
+   * state defined by this module with other `assert` function objects make by
+   * `makeAssert`. This state is per-module-instance and is exposed by the
+   * `loggedErrorHandler` above. We refer to `assert` as a "function object"
+   * because it can be called directly as a function, but also has methods that
+   * can be called.
+   *
+   * If `optRaise` is provided, the returned `assert` function object will call
+   * `optRaise(error)` before throwing the error. This enables `optRaise` to
+   * engage in even more violent termination behavior, like terminating the vat,
+   * that prevents execution from reaching the following throw. However, if
+   * `optRaise` returns normally, which would be unusual, the throw following
+   * `optRaise(error)` would still happen.
+   * @param {((error: Error) => void)=} optRaise
+   * @returns {Assert}
+   */
+  const makeAssert = (optRaise = undefined) => {
+    /** @type {AssertFail} */
+    const fail = (
+      optDetails = details`Assert failed`,
+      ErrorConstructor = Error,
+    ) => {
+      if (typeof optDetails === 'string') {
+        // If it is a string, use it as the literal part of the template so
+        // it doesn't get quoted.
+        optDetails = details([optDetails]);
+      }
+      const hiddenDetails = hiddenDetailsMap.get(optDetails);
+      if (hiddenDetails === undefined) {
+        throw new Error(`unrecognized details ${optDetails}`);
+      }
+      const error = makeDetailedError(hiddenDetails, ErrorConstructor);
+      if (optRaise !== undefined) {
+        optRaise(error);
+      }
+      throw error;
+    };
+    freeze(fail);
+
+    // Don't freeze or export `baseAssert` until we add methods.
+    // TODO If I change this from a `function` function to an arrow
+    // function, I seem to get type errors from TypeScript. Why?
+    /** @type {BaseAssert} */
+    function baseAssert(
+      flag,
+      optDetails = details`Check failed`,
+      ErrorConstructor = Error,
+    ) {
+      if (!flag) {
+        throw fail(optDetails, ErrorConstructor);
+      }
+    }
+
+    /** @type {AssertEqual} */
+    const equal = (
+      actual,
+      expected,
+      optDetails = details`Expected ${actual} is same as ${expected}`,
+      ErrorConstructor = RangeError,
+    ) => {
+      baseAssert(is(actual, expected), optDetails, ErrorConstructor);
+    };
+    freeze(equal);
+
+    /** @type {AssertTypeof} */
+    const assertTypeof = (specimen, typename, optDetails) => {
+      baseAssert(
+        typeof typename === 'string',
+        details`${quote(typename)} must be a string`,
+      );
+      if (optDetails === undefined) {
+        // Like
+        // ```js
+        // optDetails = details`${specimen} must be ${quote(an(typename))}`;
+        // ```
+        // except it puts the typename into the literal part of the template
+        // so it doesn't get quoted.
+        optDetails = details(['', ` must be ${an(typename)}`], specimen);
+      }
+      equal(typeof specimen, typename, optDetails, TypeError);
+    };
+    freeze(assertTypeof);
+
+    /** @type {AssertString} */
+    const assertString = (specimen, optDetails) =>
+      assertTypeof(specimen, 'string', optDetails);
+
+    // Note that "assert === baseAssert"
+    /** @type {Assert} */
+    const assert = assign(baseAssert, {
+      fail,
+      equal,
+      typeof: assertTypeof,
+      string: assertString,
+      note,
+      details,
+      quote,
+    });
+    return freeze(assert);
+  };
+  freeze(makeAssert);
+
+  /** @type {Assert} */
+  const assert = makeAssert();
+
+  const { details: d, quote: q } = assert;
+
   const localePattern = /^(\w*[a-z])Locale([A-Z]\w*)$/;
 
   // Use concise methods to obtain named functions without constructor
   // behavior or `.prototype` property.
-  const tamedMethods$1 = {
+  const tamedMethods = {
     // See https://tc39.es/ecma262/#sec-string.prototype.localecompare
     localeCompare(that) {
       if (this === null || this === undefined) {
@@ -3507,12 +3678,12 @@
       if (s > that) {
         return 1;
       }
-      assert(s === that, `expected ${s} and ${that} to compare`);
+      assert(s === that, d`expected ${q(s)} and ${q(that)} to compare`);
       return 0;
     },
   };
 
-  const nonLocaleCompare = tamedMethods$1.localeCompare;
+  const nonLocaleCompare = tamedMethods.localeCompare;
 
   function tameLocaleMethods(intrinsics, localeTaming = 'safe') {
     if (localeTaming !== 'safe' && localeTaming !== 'unsafe') {
@@ -3534,49 +3705,18 @@
           if (match) {
             assert(
               typeof intrinsic[methodName] === 'function',
-              `expected ${methodName} to be a function`,
+              d`expected ${q(methodName)} to be a function`,
             );
             const nonLocaleMethodName = `${match[1]}${match[2]}`;
             const method = intrinsic[nonLocaleMethodName];
             assert(
               typeof method === 'function',
-              `function ${nonLocaleMethodName} not found`,
+              d`function ${q(nonLocaleMethodName)} not found`,
             );
             defineProperty(intrinsic, methodName, { value: method });
           }
         }
       }
-    }
-  }
-
-  /**
-   * throwTantrum()
-   * We'd like to abandon, but we can't, so just scream and break a lot of
-   * stuff. However, since we aren't really aborting the process, be careful to
-   * not throw an Error object which could be captured by child-Realm code and
-   * used to access the (too-powerful) primal-realm Error object.
-   */
-  function throwTantrum(message, err = undefined) {
-    const msg = `please report internal shim error: ${message}`;
-
-    // we want to log these 'should never happen' things.
-    console.error(msg);
-    if (err) {
-      console.error(`${err}`);
-      console.error(`${err.stack}`);
-    }
-
-    // eslint-disable-next-line no-debugger
-    debugger;
-    throw TypeError(msg);
-  }
-
-  /**
-   * assert()
-   */
-  function assert$1(condition, message) {
-    if (!condition) {
-      throwTantrum(message);
     }
   }
 
@@ -3741,6 +3881,8 @@
     return [...globalConstants, ...localConstants];
   }
 
+  const { details: d$1, quote: q$1 } = assert;
+
   // The original unsafe untamed eval function, which must not escape.
   // Sample at module initialization time, which is before lockdown can
   // repair it.  Use it only to build powerless abstractions.
@@ -3756,7 +3898,9 @@
    */
   const alwaysThrowHandler = new Proxy(immutableObject, {
     get(_shadow, prop) {
-      throwTantrum(`unexpected scope handler trap called: ${String(prop)}`);
+      assert.fail(
+        d$1`Please report unexpected scope handler trap: ${q$1(String(prop))}`,
+      );
     },
   });
 
@@ -4089,6 +4233,8 @@
 
   // Portions adapted from V8 - Copyright 2016 the V8 project authors.
 
+  const { details: d$2 } = assert;
+
   /**
    * performEval()
    * The low-level operation used by all evaluators:
@@ -4134,11 +4280,17 @@
     } finally {
       if (scopeHandler.useUnsafeEvaluator === true) {
         // The proxy switches off useUnsafeEvaluator immediately after
-        // the first access, but if that's not the case we abort.
-        throwTantrum('handler did not revoke useUnsafeEvaluator', err);
-        // If we were not able to abort, at least prevent further
-        // variable resolution via the scopeHandler.
+        // the first access, but if that's not the case we should abort.
+        // This condition is one where this vat is now hopelessly confused,
+        // and the vat as a whole should be aborted. All immediately reachable
+        // state should be abandoned. However, that is not yet possible,
+        // so we at least prevent further variable resolution via the
+        // scopeHandler, and throw an error with diagnostic info including
+        // the thrown error if any from evaluating the source code.
         scopeProxyRevocable.revoke();
+        // TODO A GOOD PLACE TO PANIC(), i.e., kill the vat incarnation.
+        // See https://github.com/Agoric/SES-shim/issues/490
+        assert.fail(d$2`handler did not revoke useUnsafeEvaluator ${err}`);
       }
     }
   }
@@ -4181,8 +4333,7 @@
    */
   function makeFunctionConstructor(globaObject, options = {}) {
     // Define an unused parameter to ensure Function.length === 1
-    // eslint-disable-next-line no-unused-vars
-    const newFunction = function Function(body) {
+    const newFunction = function Function(_body) {
       // Sanitize all parameters at the entry point.
       // eslint-disable-next-line prefer-rest-params
       const bodyText = `${arrayPop(arguments) || ''}`;
@@ -4216,11 +4367,11 @@
     });
 
     // Assert identity of Function.__proto__ accross all compartments
-    assert$1(
+    assert(
       getPrototypeOf(Function) === Function.prototype,
       'Function prototype is the same accross compartments',
     );
-    assert$1(
+    assert(
       getPrototypeOf(newFunction) === Function.prototype,
       'Function constructor prototype is the same accross compartments',
     );
@@ -4305,7 +4456,637 @@
     }
   }
 
+  // @ts-check
+
+  // For our internal debugging purposes, uncomment
+  // const internalDebugConsole = console;
+
+  // The whitelists of console methods, from:
+  // Whatwg "living standard" https://console.spec.whatwg.org/
+  // Node https://nodejs.org/dist/latest-v14.x/docs/api/console.html
+  // MDN https://developer.mozilla.org/en-US/docs/Web/API/Console_API
+  // TypeScript https://openstapps.gitlab.io/projectmanagement/interfaces/_node_modules__types_node_globals_d_.console.html
+  // Chrome https://developers.google.com/web/tools/chrome-devtools/console/api
+
+  // All console level methods have parameters (fmt?, ...args)
+  // where the argument sequence `fmt?, ...args` formats args according to
+  // fmt if fmt is a format string. Otherwise, it just renders them all as values
+  // separated by spaces.
+  // https://console.spec.whatwg.org/#formatter
+  // https://nodejs.org/docs/latest/api/util.html#util_util_format_format_args
+
+  // For the causal console, all occurrences of `fmt, ...args` or `...args` by
+  // itself must check for the presence of an error to ask the
+  // `loggedErrorHandler` to handle.
+  // In theory we should do a deep inspection to detect for example an array
+  // containing an error. We currently do not detect these and may never.
+
+  /** @type {readonly [keyof VirtualConsole, LogSeverity | undefined][]} */
+  const consoleLevelMethods = freeze([
+    ['debug', 'debug'], // (fmt?, ...args) verbose level on Chrome
+    ['log', 'log'], // (fmt?, ...args) info level on Chrome
+    ['info', 'info'], // (fmt?, ...args)
+    ['warn', 'warn'], // (fmt?, ...args)
+    ['error', 'error'], // (fmt?, ...args)
+
+    ['trace', 'log'], // (fmt?, ...args)
+    ['dirxml', 'log'], // (fmt?, ...args)
+    ['group', 'log'], // (fmt?, ...args)
+    ['groupCollapsed', 'log'], // (fmt?, ...args)
+  ]);
+
+  /** @type {readonly [keyof VirtualConsole, LogSeverity | undefined][]} */
+  const consoleOtherMethods = freeze([
+    ['assert', 'error'], // (value, fmt?, ...args)
+    ['timeLog', 'log'], // (label?, ...args) no fmt string
+
+    // Insensitive to whether any argument is an error. All arguments can pass
+    // thru to baseConsole as is.
+    ['clear', undefined], // ()
+    ['count', 'info'], // (label?)
+    ['countReset', undefined], // (label?)
+    ['dir', 'log'], // (item, options?)
+    ['groupEnd', 'log'], // ()
+    // In theory tabular data may be or contain an error. However, we currently
+    // do not detect these and may never.
+    ['table', 'log'], // (tabularData, properties?)
+    ['time', 'info'], // (label?)
+    ['timeEnd', 'info'], // (label?)
+
+    // Node Inspector only, MDN, and TypeScript, but not whatwg
+    ['profile', undefined], // (label?)
+    ['profileEnd', undefined], // (label?)
+    ['timeStamp', undefined], // (label?)
+  ]);
+
+  /** @type {readonly [keyof VirtualConsole, LogSeverity | undefined][]} */
+  const consoleWhitelist = freeze([
+    ...consoleLevelMethods,
+    ...consoleOtherMethods,
+  ]);
+
+  /**
+   * consoleOmittedProperties is currently unused. I record and maintain it here
+   * with the intention that it be treated like the `false` entries in the main
+   * SES whitelist: that seeing these on the original console is expected, but
+   * seeing anything else that's outside the whitelist is surprising and should
+   * provide a diagnostic.
+   *
+  const consoleOmittedProperties = freeze([
+    'memory', // Chrome
+    'exception', // FF, MDN
+    '_ignoreErrors', // Node
+    '_stderr', // Node
+    '_stderrErrorHandler', // Node
+    '_stdout', // Node
+    '_stdoutErrorHandler', // Node
+    '_times', // Node
+    'context', // Chrome, Node
+    'record', // Safari
+    'recordEnd', // Safari
+
+    'screenshot', // Safari
+    // Symbols
+    '@@toStringTag', // Chrome: "Object", Safari: "Console"
+    // A variety of other symbols also seen on Node
+  ]);
+  */
+
+  // /////////////////////////////////////////////////////////////////////////////
+
+  /** @type {MakeLoggingConsoleKit} */
+  const makeLoggingConsoleKit = () => {
+    // Not frozen!
+    let logArray = [];
+
+    const loggingConsole = fromEntries(
+      consoleWhitelist.map(([name, _]) => {
+        // Use an arrow function so that it doesn't come with its own name in
+        // its printed form. Instead, we're hoping that tooling uses only
+        // the `.name` property set below.
+        const method = (...args) => {
+          logArray.push([name, ...args]);
+        };
+        defineProperty(method, 'name', { value: name });
+        return [name, freeze(method)];
+      }),
+    );
+    freeze(loggingConsole);
+
+    const takeLog = () => {
+      const result = freeze(logArray);
+      logArray = [];
+      return result;
+    };
+    freeze(takeLog);
+
+    const typedLoggingConsole = /** @type {VirtualConsole} */ (loggingConsole);
+
+    return freeze({ loggingConsole: typedLoggingConsole, takeLog });
+  };
+  freeze(makeLoggingConsoleKit);
+
+  // /////////////////////////////////////////////////////////////////////////////
+
+  /** @type {ErrorInfo} */
+  const ErrorInfo = {
+    NOTE: 'ERROR_NOTE:',
+    MESSAGE: 'ERROR_MESSAGE:',
+  };
+  freeze(ErrorInfo);
+
+  /**
+   * The error annotations are sent to the baseConsole by calling some level
+   * method. The 'debug' level seems best, because the Chrome console classifies
+   * `debug` as verbose and does not show it by default. But we keep it symbolic
+   * so we can change our mind. (On Node, `debug`, `log`, and `info` are aliases
+   * for the same function and so will behave the same there.)
+   */
+  const BASE_CONSOLE_LEVEL = 'debug';
+
+  /** @type {MakeCausalConsole} */
+  const makeCausalConsole = (baseConsole, loggedErrorHandler) => {
+    const {
+      getStackString,
+      takeMessageLogArgs,
+      takeNoteLogArgsArray,
+    } = loggedErrorHandler;
+
+    // by "tagged", we mean first sent to the baseConsole as an argument in a
+    // console level method call, in which it is shown with an identifying tag
+    // number. We number the errors according to the order in
+    // which they were first logged to the baseConsole, starting at 1.
+    let numErrorsTagged = 0;
+    /** @type WeakMap<Error, number> */
+    const errorTagOrder = new WeakMap();
+
+    /**
+     * @param {Error} err
+     * @returns {string}
+     */
+    const tagError = err => {
+      let errNum;
+      if (errorTagOrder.has(err)) {
+        errNum = errorTagOrder.get(err);
+      } else {
+        numErrorsTagged += 1;
+        errorTagOrder.set(err, numErrorsTagged);
+        errNum = numErrorsTagged;
+      }
+      return `${err.name}#${errNum}`;
+    };
+
+    const extractErrorArgs = (logArgs, subErrorsSink) => {
+      const argTags = logArgs.map(arg => {
+        if (arg instanceof Error) {
+          subErrorsSink.push(arg);
+          return `(${tagError(arg)})`;
+        }
+        return arg;
+      });
+      return argTags;
+    };
+
+    /**
+     * @param {Error} error
+     * @param {ErrorInfoKind} kind
+     * @param {readonly any[]} logArgs
+     */
+    const logErrorInfo = (error, kind, logArgs, subErrorsSink) => {
+      const errorTag = tagError(error);
+      const errorName =
+        kind === ErrorInfo.MESSAGE ? `${errorTag}:` : `${errorTag} ${kind}`;
+      const argTags = extractErrorArgs(logArgs, subErrorsSink);
+      baseConsole[BASE_CONSOLE_LEVEL](errorName, ...argTags);
+    };
+
+    /**
+     * Logs the `subErrors` within a group named `label`.
+     *
+     * @param {string} label
+     * @param {Error[]} subErrors
+     * @returns {void}
+     */
+    const logSubErrors = (label, subErrors) => {
+      if (subErrors.length >= 1) {
+        baseConsole.groupCollapsed(label);
+        try {
+          for (const subError of subErrors) {
+            // eslint-disable-next-line no-use-before-define
+            logError(subError);
+          }
+        } finally {
+          baseConsole.groupEnd();
+        }
+      }
+    };
+
+    const errorsLogged = new WeakSet();
+
+    /** @type {NoteCallback} */
+    const noteCallback = (error, noteLogArgs) => {
+      const subErrors = [];
+      // Annotation arrived after the error has already been logged,
+      // so just log the annotation immediately, rather than remembering it.
+      logErrorInfo(error, ErrorInfo.NOTE, noteLogArgs, subErrors);
+      logSubErrors(tagError(error), subErrors);
+    };
+
+    const logError = error => {
+      if (errorsLogged.has(error)) {
+        return;
+      }
+      const errorTag = tagError(error);
+      errorsLogged.add(error);
+      const subErrors = [];
+      const messageLogArgs = takeMessageLogArgs(error);
+      const noteLogArgsArray = takeNoteLogArgsArray(error, noteCallback);
+      // Show the error's most informative error message
+      if (messageLogArgs === undefined) {
+        // If there is no message log args, then just show the message that
+        // the error itself carries.
+        baseConsole[BASE_CONSOLE_LEVEL](`${errorTag}:`, error.message);
+      } else {
+        // If there is one, we take it to be strictly more informative than the
+        // message string carried by the error, so show it *instead*.
+        logErrorInfo(error, ErrorInfo.MESSAGE, messageLogArgs, subErrors);
+      }
+      // After the message but before any other annotations, show the stack.
+      let stackString = getStackString(error);
+      if (
+        typeof stackString === 'string' &&
+        stackString.length >= 1 &&
+        !stackString.endsWith('\n')
+      ) {
+        stackString += '\n';
+      }
+      baseConsole[BASE_CONSOLE_LEVEL]('', stackString);
+      // Show the other annotations on error
+      for (const noteLogArgs of noteLogArgsArray) {
+        logErrorInfo(error, ErrorInfo.NOTE, noteLogArgs, subErrors);
+      }
+      // explain all the errors seen in the messages already emitted.
+      logSubErrors(errorTag, subErrors);
+    };
+
+    const levelMethods = consoleLevelMethods.map(([level, _]) => {
+      const levelMethod = (...logArgs) => {
+        const subErrors = [];
+        const argTags = extractErrorArgs(logArgs, subErrors);
+        // @ts-ignore
+        baseConsole[level](...argTags);
+        logSubErrors('', subErrors);
+      };
+      defineProperty(levelMethod, 'name', { value: level });
+      return [level, freeze(levelMethod)];
+    });
+    const otherMethodNames = consoleOtherMethods.filter(
+      ([name, _]) => name in baseConsole,
+    );
+    const otherMethods = otherMethodNames.map(([name, _]) => {
+      const otherMethod = (...args) => {
+        // @ts-ignore
+        baseConsole[name](...args);
+        return undefined;
+      };
+      defineProperty(otherMethod, 'name', { value: name });
+      return [name, freeze(otherMethod)];
+    });
+
+    const causalConsole = fromEntries([...levelMethods, ...otherMethods]);
+    return freeze(causalConsole);
+  };
+  freeze(makeCausalConsole);
+
+  // /////////////////////////////////////////////////////////////////////////////
+
+  /** @type {FilterConsole} */
+  const filterConsole = (baseConsole, filter, _topic = undefined) => {
+    // TODO do something with optional topic string
+    const whilelist = consoleWhitelist.filter(([name, _]) => name in baseConsole);
+    const methods = whilelist.map(([name, severity]) => {
+      const method = (...args) => {
+        if (severity === undefined || filter.canLog(severity)) {
+          // @ts-ignore
+          baseConsole[name](...args);
+        }
+      };
+      return [name, freeze(method)];
+    });
+    const filteringConsole = fromEntries(methods);
+    return freeze(filteringConsole);
+  };
+  freeze(filterConsole);
+
+  // @ts-check
+
+  const originalConsole = console;
+
+  /**
+   * Wrap console unless suppressed.
+   * At the moment, the console is considered a host power in the start
+   * compartment, and not a primordial. Hence it is absent from the whilelist
+   * and bypasses the intrinsicsCollector.
+   *
+   * @param {string} consoleTaming,
+   * @param {GetStackString=} optGetStackString
+   */
+  const tameConsole = (
+    consoleTaming = 'safe',
+    optGetStackString = undefined,
+  ) => {
+    if (consoleTaming !== 'safe' && consoleTaming !== 'unsafe') {
+      throw new Error(`unrecognized consoleTaming ${consoleTaming}`);
+    }
+
+    if (consoleTaming === 'unsafe') {
+      return { console: originalConsole };
+    }
+    let loggedErrorHandler$1;
+    if (optGetStackString === undefined) {
+      loggedErrorHandler$1 = loggedErrorHandler;
+    } else {
+      loggedErrorHandler$1 = {
+        ...loggedErrorHandler,
+        getStackString: optGetStackString,
+      };
+    }
+    const causalConsole = makeCausalConsole(originalConsole, loggedErrorHandler$1);
+    return { console: causalConsole };
+  };
+
+  // Whitelist names from https://v8.dev/docs/stack-trace-api
+  // Whitelisting only the names used by error-stack-shim/src/v8StackFrames
+  // callSiteToFrame to shim the error stack proposal.
+  const safeV8CallSiteMethodNames = [
+    // suppress 'getThis' definitely
+    'getTypeName',
+    // suppress 'getFunction' definitely
+    'getFunctionName',
+    'getMethodName',
+    'getFileName',
+    'getLineNumber',
+    'getColumnNumber',
+    'getEvalOrigin',
+    'isToplevel',
+    'isEval',
+    'isNative',
+    'isConstructor',
+    'isAsync',
+    // suppress 'isPromiseAll' for now
+    // suppress 'getPromiseIndex' for now
+
+    // Additional names found by experiment, absent from
+    // https://v8.dev/docs/stack-trace-api
+    'getPosition',
+    'getScriptNameOrSourceURL',
+
+    'toString', // TODO replace to use only whitelisted info
+  ];
+
+  // TODO this is a ridiculously expensive way to attenuate callsites.
+  // Before that matters, we should switch to a reasonable representation.
+  const safeV8CallSiteFacet = callSite => {
+    const methodEntry = name => [name, () => callSite[name]()];
+    const o = fromEntries(safeV8CallSiteMethodNames.map(methodEntry));
+    return Object.create(o, {});
+  };
+
+  const safeV8SST = sst => sst.map(safeV8CallSiteFacet);
+
+  const callSiteFilter = _callSite => true;
+  // const callSiteFilter = callSite =>
+  //   !callSite.getFileName().includes('/node_modules/');
+
+  const callSiteStringifier = callSite => `\n  at ${callSite}`;
+
+  const stackStringFromSST = (error, sst) =>
+    [...sst.filter(callSiteFilter).map(callSiteStringifier)].join('');
+
+  function tameV8ErrorConstructor(
+    OriginalError,
+    InitialError,
+    errorTaming,
+  ) {
+    // Mapping from error instance to the structured stack trace capturing the
+    // stack for that instance.
+    const ssts = new WeakMap();
+
+    // Use concise methods to obtain named functions without constructors.
+    const tamedMethods = {
+      // The optional `optFn` argument is for cutting off the bottom of
+      // the stack --- for capturing the stack only above the topmost
+      // call to that function. Since this isn't the "real" captureStackTrace
+      // but instead calls the real one, if no other cutoff is provided,
+      // we cut this one off.
+      captureStackTrace(error, optFn = tamedMethods.captureStackTrace) {
+        if (typeof OriginalError.captureStackTrace === 'function') {
+          // OriginalError.captureStackTrace is only on v8
+          OriginalError.captureStackTrace(error, optFn);
+          return;
+        }
+        Reflect.set(error, 'stack', '');
+      },
+      // Shim of proposed special power, to reside by default only
+      // in the start compartment, for getting the stack traceback
+      // string associated with an error.
+      // See https://tc39.es/proposal-error-stacks/
+      getStackString(error) {
+        if (!ssts.has(error)) {
+          // eslint-disable-next-line no-void
+          void error.stack;
+        }
+        const sst = ssts.get(error);
+        if (!sst) {
+          return '';
+        }
+        return stackStringFromSST(error, sst);
+      },
+      prepareStackTrace(error, sst) {
+        ssts.set(error, sst);
+        if (errorTaming === 'unsafe') {
+          const stackString = stackStringFromSST(error, sst);
+          return `${error}${stackString}`;
+        }
+        return '';
+      },
+    };
+
+    // A prepareFn is a prepareStackTrace function.
+    // An sst is a `structuredStackTrace`, which is an array of
+    // callsites.
+    // A user prepareFn is a prepareFn defined by a client of this API,
+    // and provided by assigning to `Error.prepareStackTrace`.
+    // A user prepareFn should only receive an attenuated sst, which
+    // is an array of attenuated callsites.
+    // A system prepareFn is the prepareFn created by this module to
+    // be installed on the real `Error` constructor, to receive
+    // an original sst, i.e., an array of unattenuated callsites.
+    // An input prepareFn is a function the user assigns to
+    // `Error.prepareStackTrace`, which might be a user prepareFn or
+    // a system prepareFn previously obtained by reading
+    // `Error.prepareStackTrace`.
+
+    const defaultPrepareFn = tamedMethods.prepareStackTrace;
+
+    OriginalError.prepareStackTrace = defaultPrepareFn;
+
+    // A weakset branding some functions as system prepareFns, all of which
+    // must be defined by this module, since they can receive an
+    // unattenuated sst.
+    const systemPrepareFnSet = new WeakSet([defaultPrepareFn]);
+
+    const systemPrepareFnFor = inputPrepareFn => {
+      if (systemPrepareFnSet.has(inputPrepareFn)) {
+        return inputPrepareFn;
+      }
+      // Use concise methods to obtain named functions without constructors.
+      const systemMethods = {
+        prepareStackTrace(error, sst) {
+          ssts.set(error, sst);
+          return inputPrepareFn(error, safeV8SST(sst));
+        },
+      };
+      systemPrepareFnSet.add(systemMethods.prepareStackTrace);
+      return systemMethods.prepareStackTrace;
+    };
+
+    defineProperties(InitialError, {
+      captureStackTrace: {
+        value: tamedMethods.captureStackTrace,
+        writable: true,
+        enumerable: false,
+        configurable: true,
+      },
+      stackTraceLimit: {
+        get() {
+          if (typeof OriginalError.stackTraceLimit === 'number') {
+            // OriginalError.stackTraceLimit is only on v8
+            return OriginalError.stackTraceLimit;
+          }
+          return undefined;
+        },
+        // https://v8.dev/docs/stack-trace-api#compatibility advises that
+        // programmers can "always" set `Error.stackTraceLimit` and
+        // `Error.prepareStackTrace` even on non-v8 platforms. On non-v8
+        // it will have no effect, but this advise only makes sense
+        // if the assignment itself does not fail, which it would
+        // if `Error` were naively frozen. Hence, we add setters that
+        // accept but ignore the assignment on non-v8 platforms.
+        set(newLimit) {
+          if (typeof OriginalError.stackTraceLimit === 'number') {
+            // OriginalError.stackTraceLimit is only on v8
+            OriginalError.stackTraceLimit = newLimit;
+            // We place the useless return on the next line to ensure
+            // that anything we place after the if in the future only
+            // happens if the then-case does not.
+            // eslint-disable-next-line no-useless-return
+            return;
+          }
+        },
+        // WTF on v8 stackTraceLimit is enumerable
+        enumerable: false,
+        configurable: true,
+      },
+      prepareStackTrace: {
+        get() {
+          return OriginalError.prepareStackTrace;
+        },
+        set(inputPrepareStackTraceFn) {
+          if (typeof inputPrepareStackTraceFn === 'function') {
+            const systemPrepareFn = systemPrepareFnFor(inputPrepareStackTraceFn);
+            OriginalError.prepareStackTrace = systemPrepareFn;
+          } else {
+            OriginalError.prepareStackTrace = defaultPrepareFn;
+          }
+        },
+        enumerable: false,
+        configurable: true,
+      },
+    });
+
+    return tamedMethods.getStackString;
+  }
+
+  // Use concise methods to obtain named functions without constructors.
+  const tamedMethods$1 = {
+    getStackString(_error) {
+      return '';
+    },
+  };
+
+  function tameErrorConstructor(errorTaming = 'safe') {
+    if (errorTaming !== 'safe' && errorTaming !== 'unsafe') {
+      throw new Error(`unrecognized errorTaming ${errorTaming}`);
+    }
+    const OriginalError = Error;
+    const ErrorPrototype = OriginalError.prototype;
+
+    const platform =
+      typeof OriginalError.captureStackTrace === 'function' ? 'v8' : 'unknown';
+
+    const makeErrorConstructor = (_ = {}) => {
+      const ResultError = function Error(...rest) {
+        let error;
+        if (new.target === undefined) {
+          error = apply(OriginalError, this, rest);
+        } else {
+          error = construct(OriginalError, rest, new.target);
+        }
+        if (platform === 'v8') {
+          OriginalError.captureStackTrace(error, ResultError);
+        }
+        return error;
+      };
+      defineProperties(ResultError, {
+        length: { value: 1 },
+        prototype: {
+          value: ErrorPrototype,
+          writable: false,
+          enumerable: false,
+          configurable: false,
+        },
+      });
+      return ResultError;
+    };
+    const InitialError = makeErrorConstructor({ powers: 'original' });
+    const SharedError = makeErrorConstructor({ powers: 'none' });
+    defineProperties(ErrorPrototype, {
+      constructor: { value: SharedError },
+      /* TODO
+      stack: {
+        get() {
+          return '';
+        },
+        set(_) {
+          // ignore
+        },
+      },
+      */
+    });
+
+    for (const NativeError of NativeErrors) {
+      setPrototypeOf(NativeError, SharedError);
+    }
+
+    let initialGetStackString = tamedMethods$1.getStackString;
+    if (platform === 'v8') {
+      initialGetStackString = tameV8ErrorConstructor(
+        OriginalError,
+        InitialError,
+        errorTaming,
+      );
+    }
+    return {
+      '%InitialGetStackString%': initialGetStackString,
+      '%InitialError%': InitialError,
+      '%SharedError%': SharedError,
+    };
+  }
+
   // Copyright (C) 2018 Agoric
+
+  const { details: d$3, quote: q$2 } = assert;
 
   let firstOptions;
 
@@ -4318,7 +5099,7 @@
   const lockdownHarden = makeHardener();
 
   const harden = ref => {
-    assert(lockedDown, `Cannot harden before lockdown`);
+    assert(lockedDown, 'Cannot harden before lockdown');
     return lockdownHarden(ref);
   };
 
@@ -4342,6 +5123,7 @@
       mathTaming = 'safe',
       regExpTaming = 'safe',
       localeTaming = 'safe',
+      consoleTaming = 'safe',
 
       ...extraOptions
     } = options;
@@ -4351,7 +5133,7 @@
     const extraOptionsNames = Reflect.ownKeys(extraOptions);
     assert(
       extraOptionsNames.length === 0,
-      `lockdown(): non supported option ${extraOptionsNames.join(', ')}`,
+      d$3`lockdown(): non supported option ${q$2(extraOptionsNames)}`,
     );
 
     // Asserts for multiple invocation of lockdown().
@@ -4359,7 +5141,7 @@
       for (const name of keys(firstOptions)) {
         assert(
           options[name] === firstOptions[name],
-          `lockdown(): cannot re-invoke with different option ${name}`,
+          d$3`lockdown(): cannot re-invoke with different option ${q$2(name)}`,
         );
       }
       return alreadyHardenedIntrinsics;
@@ -4371,6 +5153,7 @@
       mathTaming,
       regExpTaming,
       localeTaming,
+      consoleTaming,
     };
 
     /**
@@ -4390,6 +5173,17 @@
     intrinsicsCollector.completePrototypes();
 
     const intrinsics = intrinsicsCollector.finalIntrinsics();
+
+    // Wrap console unless suppressed.
+    // At the moment, the console is considered a host power in the start
+    // compartment, and not a primordial. Hence it is absent from the whilelist
+    // and bypasses the intrinsicsCollector.
+    let optGetStackString;
+    if (errorTaming !== 'unsafe') {
+      optGetStackString = intrinsics['%InitialGetStackString%'];
+    }
+    const consoleRecord = tameConsole(consoleTaming, optGetStackString);
+    globalThis.console = consoleRecord.console;
 
     // Replace *Locale* methods with their non-locale equivalents
     tameLocaleMethods(intrinsics, localeTaming);
@@ -105777,8 +106571,7 @@
 
   // For brevity, in this file, as in module-link.js, the term "moduleRecord"
 
-  // q, for quoting strings.
-  const q = JSON.stringify;
+  const { details: d$4, quote: q$3 } = assert;
 
   // `makeAlias` constructs compartment specifier tuples for the `aliases`
   // private field of compartments.
@@ -105861,18 +106654,20 @@
       aliasNamespace = moduleMapHook(moduleSpecifier);
     }
     if (typeof aliasNamespace === 'string') {
-      throw new TypeError(
-        `Cannot map module ${q(moduleSpecifier)} to ${q(
+      assert.fail(
+        d$4`Cannot map module ${q$3(moduleSpecifier)} to ${q$3(
         aliasNamespace,
       )} in parent compartment, not yet implemented`,
+        TypeError,
       );
     } else if (aliasNamespace !== undefined) {
       const alias = moduleAliases.get(aliasNamespace);
       if (alias === undefined) {
-        throw new ReferenceError(
-          `Cannot map module ${q(
+        assert.fail(
+          d$4`Cannot map module ${q$3(
           moduleSpecifier,
         )} because the key is not a module exports namespace, or is from another realm`,
+          ReferenceError,
         );
       }
       // Behold: recursion.
@@ -105941,21 +106736,20 @@
       moduleSpecifier,
     ).catch(error => {
       const { name } = compartmentPrivateFields.get(compartment);
-      // TODO The following drops the causes' stacks.
-      // In the future, we should capture the causal chain.
-      // https://github.com/Agoric/SES-shim/issues/440
-      throw new error.constructor(
-        `${error.message}, loading ${q(moduleSpecifier)} in compartment ${q(
+      assert.note(
+        error,
+        d$4`${error.message}, loading ${q$3(moduleSpecifier)} in compartment ${q$3(
         name,
       )}`,
       );
+      throw error;
     });
   };
 
   // Compartments need a mechanism to link a module from one compartment
 
   // q, as in quote, for error messages.
-  const q$1 = JSON.stringify;
+  const q$4 = JSON.stringify;
 
   // `deferExports` creates a module's exports proxy, proxied exports, and
   // activator.
@@ -105987,7 +106781,7 @@
         get(_target, name, receiver) {
           if (!active) {
             throw new TypeError(
-              `Cannot get property ${q$1(
+              `Cannot get property ${q$4(
               name,
             )} of module exports namespace, the module has not yet begun to execute`,
             );
@@ -105996,13 +106790,13 @@
         },
         set(_target, name, _value) {
           throw new TypeError(
-            `Cannot set property ${q$1(name)} of module exports namespace`,
+            `Cannot set property ${q$4(name)} of module exports namespace`,
           );
         },
         has(_target, name) {
           if (!active) {
             throw new TypeError(
-              `Cannot check property ${q$1(
+              `Cannot check property ${q$4(
               name,
             )}, the module has not yet begun to execute`,
             );
@@ -106011,7 +106805,7 @@
         },
         deleteProperty(_target, name) {
           throw new TypeError(
-            `Cannot delete property ${q$1(name)}s of module exports namespace`,
+            `Cannot delete property ${q$4(name)}s of module exports namespace`,
           );
         },
         ownKeys(_target) {
@@ -106026,7 +106820,7 @@
         getOwnPropertyDescriptor(_target, name) {
           if (!active) {
             throw new TypeError(
-              `Cannot get own property descriptor ${q$1(
+              `Cannot get own property descriptor ${q$4(
               name,
             )}, the module has not yet begun to execute`,
             );
@@ -106057,7 +106851,7 @@
         },
         defineProperty(_target, name, _descriptor) {
           throw new TypeError(
-            `Cannot define property ${q$1(name)} of module exports namespace`,
+            `Cannot define property ${q$4(name)} of module exports namespace`,
           );
         },
         apply(_target, _thisArg, _args) {
@@ -106095,7 +106889,7 @@
   };
 
   // q, for enquoting strings in error messages.
-  const q$2 = JSON.stringify;
+  const q$5 = JSON.stringify;
 
   // `makeModuleInstance` takes a module's compartment record, the live import
   // namespace, and a global object; and produces a module instance.
@@ -106166,7 +106960,7 @@
         const get = () => {
           if (tdz) {
             throw new ReferenceError(
-              `binding ${q$2(localName)} not yet initialized`,
+              `binding ${q$5(localName)} not yet initialized`,
             );
           }
           return value;
@@ -106178,7 +106972,7 @@
           // it.
           if (!tdz) {
             throw new Error(
-              `Internal: binding ${q$2(localName)} already initialized`,
+              `Internal: binding ${q$5(localName)} already initialized`,
             );
           }
           value = initValue;
@@ -106237,7 +107031,7 @@
           const get = () => {
             if (tdz) {
               throw new ReferenceError(
-                `binding ${q$2(liveExportName)} not yet initialized`,
+                `binding ${q$5(liveExportName)} not yet initialized`,
               );
             }
             return value;
@@ -106264,7 +107058,7 @@
           const set = newValue => {
             if (tdz) {
               throw new ReferenceError(
-                `binding ${q$2(localName)} not yet initialized`,
+                `binding ${q$5(localName)} not yet initialized`,
               );
             }
             value = newValue;
@@ -106450,7 +107244,7 @@
   // For brevity, in this file, as in module-load.js, the term "moduleRecord"
 
   // q, as in quote, for quoting strings in error messages.
-  const q$3 = JSON.stringify;
+  const q$6 = JSON.stringify;
 
   // `link` creates `ModuleInstances` and `ModuleNamespaces` for a module and its
   // transitive dependencies and connects their imports and exports.
@@ -106469,7 +107263,7 @@
 
     const moduleRecord = moduleRecords.get(moduleSpecifier);
     if (moduleRecord === undefined) {
-      throw new ReferenceError(`Missing link to module ${q$3(moduleSpecifier)}`);
+      throw new ReferenceError(`Missing link to module ${q$6(moduleSpecifier)}`);
     }
 
     // Mutual recursion so there's no confusion about which
@@ -106738,7 +107532,7 @@
   // This module exports both Compartment and StaticModuleRecord because they
 
   // q, for quoting strings.
-  const q$4 = JSON.stringify;
+  const q$7 = JSON.stringify;
 
   const analyzeModule = makeModuleAnalyzer(babel$1);
 
@@ -106932,7 +107726,7 @@
         if (typeof aliasNamespace === 'string') {
           // TODO implement parent module record retrieval.
           throw new TypeError(
-            `Cannot map module ${q$4(specifier)} to ${q$4(
+            `Cannot map module ${q$7(specifier)} to ${q$7(
             aliasNamespace,
           )} in parent compartment`,
           );
@@ -106940,7 +107734,7 @@
           // TODO create and link a synthetic module instance from the given
           // namespace object.
           throw ReferenceError(
-            `Cannot map module ${q$4(
+            `Cannot map module ${q$7(
             specifier,
           )} because it has no known compartment in this realm`,
           );
@@ -106969,14 +107763,12 @@
 
   assign(whitelist, modulesWhitelist);
 
-  // TODO wasteful to do it twice, once before lockdown and again during
-  // lockdown. The second is doubly indirect. We should at least flatten that.
-  const nativeBrander = tameFunctionToString();
+  const nativeBrander$1 = tameFunctionToString();
 
   const ModularCompartment = makeModularCompartmentConstructor(
     makeModularCompartmentConstructor,
     getGlobalIntrinsics(globalThis),
-    nativeBrander,
+    nativeBrander$1,
   );
 
   assign(globalThis, {
@@ -106988,6 +107780,7 @@
     ),
     Compartment: ModularCompartment,
     StaticModuleRecord,
+    assert,
   });
 
 })));
