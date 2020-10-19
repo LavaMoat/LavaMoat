@@ -119,6 +119,7 @@
         const endowmentsMembraneSpace = getMembraneSpaceByName('<endowments>')
         const membraneWrappedEndowments = membrane.bridge(endowments, endowmentsMembraneSpace, moduleMembraneSpace)
         // prepare the module's SES compartment
+        // Endow Math to ensure compartment has Math.random
         const moduleCompartment = new Compartment({ Math })
         if (isRootModule) {
           // expose all of globalRef, though currently does not support global writes
