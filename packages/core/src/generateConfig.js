@@ -112,6 +112,8 @@ function createModuleInspector (opts = {}) {
     inspectForGlobals(ast, moduleRecord, packageName, includeDebugInfo)
     // get builtin package usage
     inspectForImports(ast, moduleRecord, packageName, isBuiltin, includeDebugInfo)
+    // ensure module ast is cleaned up
+    delete moduleRecord.ast
   }
 
   function inspectForEnvironment (ast, moduleRecord, includeDebugInfo) {
