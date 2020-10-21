@@ -5,6 +5,7 @@ const resolve = require('resolve')
 const { sanitize } = require('htmlescape')
 const { generateKernel, packageDataForModule } = require('lavamoat-core')
 const { checkForResolutionOverride } = require('./resolutions')
+const { resolutionOmittedExtensions } = require('./parseForConfig')
 
 const nativeRequire = require
 
@@ -52,7 +53,7 @@ function createModuleResolver ({ cwd, resolutions }) {
     // resolve normally
     const resolved = resolve.sync(requestedName, {
       basedir: parentDir,
-      extensions: ['.js', '.cjs', '.node', '.json']
+      extensions: resolutionOmittedExtensions
     })
     return resolved
   }
