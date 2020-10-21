@@ -1,0 +1,252 @@
+{
+  "resources": {
+    "aes-js": {
+      "globals": {
+        "define": true
+      }
+    },
+    "base-x": {
+      "packages": {
+        "safe-buffer": true
+      }
+    },
+    "bindings": {
+      "builtin": {
+        "fs.accessSync": true,
+        "fs.existsSync": true,
+        "path.dirname": true,
+        "path.existsSync": true,
+        "path.extname": true,
+        "path.join": true
+      },
+      "globals": {
+        "__filename": true,
+        "__non_webpack_require__": true,
+        "__webpack_require__": true,
+        "process.arch": true,
+        "process.cwd": true,
+        "process.env.NODE_BINDINGS_ARROW": true,
+        "process.env.NODE_BINDINGS_COMPILED_DIR": true,
+        "process.platform": true,
+        "process.versions.modules": true,
+        "process.versions.node": true
+      },
+      "packages": {
+        "file-uri-to-path": true
+      }
+    },
+    "bip66": {
+      "packages": {
+        "safe-buffer": true
+      }
+    },
+    "bn.js": {
+      "builtin": {
+        "buffer.Buffer": true
+      }
+    },
+    "brorand": {
+      "builtin": {
+        "crypto.randomBytes": true
+      },
+      "globals": {
+        "crypto": true,
+        "msCrypto": true
+      }
+    },
+    "bs58": {
+      "packages": {
+        "base-x": true
+      }
+    },
+    "bs58check": {
+      "packages": {
+        "bs58": true,
+        "create-hash": true,
+        "safe-buffer": true
+      }
+    },
+    "create-hash": {
+      "builtin": {
+        "crypto.createHash": true
+      }
+    },
+    "create-hmac": {
+      "builtin": {
+        "crypto.createHmac": true
+      }
+    },
+    "elliptic": {
+      "packages": {
+        "bn.js": true,
+        "brorand": true,
+        "hash.js": true,
+        "hmac-drbg": true,
+        "inherits": true,
+        "minimalistic-assert": true,
+        "minimalistic-crypto-utils": true
+      }
+    },
+    "ethereumjs-util": {
+      "builtin": {
+        "assert": true
+      },
+      "packages": {
+        "bn.js": true,
+        "create-hash": true,
+        "ethjs-util": true,
+        "keccak": true,
+        "rlp": true,
+        "safe-buffer": true,
+        "secp256k1": true
+      }
+    },
+    "ethereumjs-wallet": {
+      "builtin": {
+        "crypto.createCipheriv": true,
+        "crypto.createDecipheriv": true,
+        "crypto.createHash": true,
+        "crypto.pbkdf2Sync": true
+      },
+      "packages": {
+        "aes-js": true,
+        "bs58check": true,
+        "ethereumjs-util": true,
+        "randombytes": true,
+        "safe-buffer": true,
+        "scrypt.js": true,
+        "utf8": true,
+        "uuid": true
+      }
+    },
+    "ethjs-util": {
+      "globals": {
+        "Buffer": true
+      },
+      "packages": {
+        "is-hex-prefixed": true,
+        "strip-hex-prefix": true
+      }
+    },
+    "file-uri-to-path": {
+      "builtin": {
+        "path.sep": true
+      }
+    },
+    "hash.js": {
+      "packages": {
+        "inherits": true,
+        "minimalistic-assert": true
+      }
+    },
+    "hmac-drbg": {
+      "packages": {
+        "hash.js": true,
+        "minimalistic-assert": true,
+        "minimalistic-crypto-utils": true
+      }
+    },
+    "inherits": {
+      "builtin": {
+        "util.inherits": true
+      }
+    },
+    "keccak": {
+      "builtin": {
+        "stream.Transform": true
+      },
+      "globals": {
+        "console.error": true,
+        "process.env.DEBUG": true
+      },
+      "packages": {
+        "bindings": true,
+        "inherits": true,
+        "safe-buffer": true
+      }
+    },
+    "pbkdf2": {
+      "builtin": {
+        "crypto.pbkdf2": true,
+        "crypto.pbkdf2Sync": true
+      },
+      "globals": {
+        "Buffer.isBuffer": true,
+        "crypto": true,
+        "process": true
+      },
+      "packages": {
+        "create-hmac": true,
+        "safe-buffer": true
+      }
+    },
+    "randombytes": {
+      "builtin": {
+        "crypto.randomBytes": true
+      }
+    },
+    "rlp": {
+      "globals": {
+        "Buffer.concat": true,
+        "Buffer.from": true,
+        "Buffer.isBuffer": true
+      },
+      "packages": {
+        "bn.js": true
+      }
+    },
+    "safe-buffer": {
+      "builtin": {
+        "buffer": true
+      }
+    },
+    "scrypt": {
+      "builtin": {
+        "crypto.randomBytes": true,
+        "os.totalmem": true
+      },
+      "globals": {
+        "Buffer": true
+      }
+    },
+    "scrypt.js": {
+      "packages": {
+        "scrypt": true,
+        "scryptsy": true
+      }
+    },
+    "scryptsy": {
+      "globals": {
+        "Buffer": true
+      },
+      "packages": {
+        "pbkdf2": true
+      }
+    },
+    "secp256k1": {
+      "globals": {
+        "Buffer.isBuffer": true,
+        "console.error": true,
+        "process.env.DEBUG": true
+      },
+      "packages": {
+        "bindings": true,
+        "bip66": true,
+        "bn.js": true,
+        "create-hash": true,
+        "elliptic": true,
+        "safe-buffer": true
+      }
+    },
+    "strip-hex-prefix": {
+      "packages": {
+        "is-hex-prefixed": true
+      }
+    },
+    "uuid": {
+      "builtin": {
+        "crypto.randomBytes": true
+      }
+    }
+  }
+}

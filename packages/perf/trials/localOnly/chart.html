@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>chart-csv</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/c3/0.4.10/c3.css" rel="stylesheet" type="text/css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.15/d3.min.js" charset="utf-8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/c3/0.4.10/c3.min.js"></script>
+</head>
+<body onload="run()">
+
+<div id="graph"></div>
+
+<script>
+
+function parseCSV (csv) {
+  return csv.split('\n')
+    .filter(function (row) {
+      return !!row.trim()
+    })
+    .map(function (row) {
+      return row.split(',')
+    })
+}
+
+function haveHead (csv) {
+  return !/^\d+$/.test(csv[0][0])
+}
+
+function chart (id, csv) {
+  csv = parseCSV(csv)
+
+  var columns = []
+  var showLegend = haveHead(csv)
+
+  if (showLegend) {
+    csv.shift().forEach(function (head) {
+      columns.push([head])
+    })
+  } else {
+    for (var n = 0; n < csv[0].length; n++) {
+      columns.push([n])
+    }
+  }
+
+  csv.forEach(function (r) {
+    r.forEach(function (c, i) {
+      columns[i].push(parseFloat(c, 10))
+    })
+  })
+
+  var opts = {
+    bindto: '#' + id,
+    data: {
+      // use first column as x value
+      x: columns[0][0],
+      columns: columns,
+      type: 'line'
+    },
+    point: { show: false },
+    axis: { x: { show: true } },
+    legend: { show: showLegend }
+  }
+
+  c3.generate(opts)
+}
+
+function run () {
+  chart('graph', csv)
+}
+
+var csv = `
+n, node,bify,bify+ses,bify+lavamoat
+1,0.065756377,0.111202583,0.255674879,0.340646232
+5000000,0.216034142,0.288294559,0.724381128,0.459809889
+10000000,0.390152693,0.458038695,1.30759264,0.634165928
+25000000,0.888562816,0.994924583,3.141791887,1.142555293
+50000000,2.781831847,2.975594073,6.928239222,2.975167398
+75000000,4.965086955,4.974937611,10.417220951,4.865321591
+100000000,5.846759341,5.969419135,12.647604921,5.700152471
+`
+
+</script>
+</body>
+</html>

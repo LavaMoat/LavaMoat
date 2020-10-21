@@ -1,0 +1,28 @@
+{
+  "resources": {
+    "<root>": {
+      "packages": {
+        "secp256k1": true
+      }
+    },
+    "buffer": {
+      "globals": {
+        "console": true
+      },
+      "packages": {
+        "base64-js": true,
+        "ieee754": true
+      }
+    },
+    "safe-buffer": {
+      "packages": {
+        "buffer": true
+      }
+    },
+    "secp256k1": {
+      "packages": {
+        "safe-buffer": true
+      }
+    }
+  }
+}
