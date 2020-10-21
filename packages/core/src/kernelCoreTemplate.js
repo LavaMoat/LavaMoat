@@ -2,7 +2,15 @@
 
   return createKernel
 
-  function createKernel ({ globalRef, debugMode, lavamoatConfig, loadModuleData, getRelativeModuleId, prepareModuleInitializerArgs }) {
+  function createKernel ({
+    globalRef,
+    debugMode,
+    lavamoatConfig,
+    loadModuleData,
+    getRelativeModuleId,
+    prepareModuleInitializerArgs,
+    applyExportsDefense = true,
+  }) {
     // create SES-wrapped LavaMoat kernel
     const kernelCompartment = new Compartment({ console, Math })
     const makeKernel = kernelCompartment.evaluate(`(${unsafeCreateKernel})\n//# sourceURL=LavaMoat/core/kernel`)
@@ -13,6 +21,7 @@
       loadModuleData,
       getRelativeModuleId,
       prepareModuleInitializerArgs,
+      applyExportsDefense,
     })
 
     return lavamoatKernel
@@ -27,6 +36,7 @@
     loadModuleData,
     getRelativeModuleId,
     prepareModuleInitializerArgs,
+    applyExportsDefense,
   }) {
     // "templateRequire" calls are inlined in "generatePrelude"
     const { getEndowmentsForConfig, makeMinimalViewOfRef } = templateRequire('makeGetEndowmentsForConfig')()
@@ -115,9 +125,15 @@
             endowments = Object.assign({}, endowments.window, endowments)
           }
         }
-        // prepare the membrane-wrapped endowments
-        const endowmentsMembraneSpace = getMembraneSpaceByName('<endowments>')
-        const membraneWrappedEndowments = membrane.bridge(endowments, endowmentsMembraneSpace, moduleMembraneSpace)
+        // maybe membrane-wrap endowments
+        let preparedEndowments
+        if (applyExportsDefense) {
+          // prepare the membrane-wrapped endowments
+          const endowmentsMembraneSpace = getMembraneSpaceByName('<endowments>')
+          preparedEndowments = membrane.bridge(endowments, endowmentsMembraneSpace, moduleMembraneSpace)
+        } else {
+          preparedEndowments = endowments
+        }
         // prepare the module's SES compartment
         // Endow Math to ensure compartment has Math.random
         const moduleCompartment = new Compartment({ Math })
@@ -125,7 +141,7 @@
           // expose all of globalRef, though currently does not support global writes
           // copy every property on globalRef to compartment global without overriding
           // take every property on globalRef
-          Object.entries(Object.getOwnPropertyDescriptors(membraneWrappedEndowments))
+          Object.entries(Object.getOwnPropertyDescriptors(preparedEndowments))
             // ignore properties already defined on compartment global
             .filter(([key]) => !(key in moduleCompartment.globalThis))
             // define property on compartment global
@@ -133,7 +149,7 @@
         } else {
           // sets up read/write access as configured
           const globalsConfig = configForModule.globals
-          prepareCompartmentGlobalFromConfig(moduleCompartment.globalThis, globalsConfig, membraneWrappedEndowments, globalStore)
+          prepareCompartmentGlobalFromConfig(moduleCompartment.globalThis, globalsConfig, preparedEndowments, globalStore)
         }
         // expose membrane for debugging
         if (debugMode) {
@@ -160,19 +176,21 @@
       // initialize the module with the correct context
       const initializerArgs = prepareModuleInitializerArgs(requireRelativeWithContext, moduleObj, moduleData)
       moduleInitializer.apply(moduleObj.exports, initializerArgs)
-
-      // configure membrane defense
-      // defense is configured here but applied elsewhere
-      // set moduleExports graph to read-only
       const moduleExports = moduleObj.exports
-      deepWalk(moduleExports, (value) => {
-        // skip plain values
-        if (membrane.shouldSkipBridge(value)) return
-        // set this ref to read-only
-        moduleMembraneSpace.handlerForRef.set(value, createReadOnlyDistortion({
-          setHandlerForRef: (ref, newHandler) => moduleMembraneSpace.handlerForRef.set(ref, newHandler)
-        }))
-      })
+
+      if (applyExportsDefense) {
+        // configure membrane defense
+        // defense is configured here but applied elsewhere
+        // set moduleExports graph to read-only
+        deepWalk(moduleExports, (value) => {
+          // skip plain values
+          if (membrane.shouldSkipBridge(value)) return
+          // set this ref to read-only
+          moduleMembraneSpace.handlerForRef.set(value, createReadOnlyDistortion({
+            setHandlerForRef: (ref, newHandler) => moduleMembraneSpace.handlerForRef.set(ref, newHandler)
+          }))
+        })
+      }
 
       return moduleExports
 
@@ -248,14 +266,16 @@
         moduleExports = makeMinimalViewOfRef(moduleExports, builtinPaths)
       }
 
-      // apply moduleExports require-time protection
-      const isSameMembraneSpace = parentModulePackageName && getMembraneSpaceNameForModule(moduleData) === getMembraneSpaceNameForModule(parentModuleData)
-      const needsMembraneProtection = !isSameMembraneSpace
-      if (needsMembraneProtection) {
-        // apply membrane protections
-        const inGraph = getMembraneSpaceForModule(moduleData)
-        const outGraph = getMembraneSpaceForModule(parentModuleData)
-        moduleExports = membrane.bridge(moduleExports, inGraph, outGraph)
+      if (applyExportsDefense) {
+        // apply moduleExports require-time protection
+        const isSameMembraneSpace = parentModulePackageName && getMembraneSpaceNameForModule(moduleData) === getMembraneSpaceNameForModule(parentModuleData)
+        const needsMembraneProtection = !isSameMembraneSpace
+        if (needsMembraneProtection) {
+          // apply membrane protections
+          const inGraph = getMembraneSpaceForModule(moduleData)
+          const outGraph = getMembraneSpaceForModule(parentModuleData)
+          moduleExports = membrane.bridge(moduleExports, inGraph, outGraph)
+        }
       }
 
       return moduleExports

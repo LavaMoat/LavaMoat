@@ -4,7 +4,13 @@
   return createKernel
 
 
-  function createKernel ({ lavamoatConfig, loadModuleData, getRelativeModuleId, prepareModuleInitializerArgs }) {
+  function createKernel ({
+    lavamoatConfig,
+    loadModuleData,
+    getRelativeModuleId,
+    prepareModuleInitializerArgs,
+    applyExportsDefense = true,
+  }) {
     const debugMode = __lavamoatDebugMode__
 
     // identify the globalRef
@@ -41,6 +47,7 @@
       prepareModuleInitializerArgs,
       globalRef,
       debugMode,
+      applyExportsDefense,
     })
     return kernel
   }

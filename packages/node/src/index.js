@@ -23,7 +23,8 @@ async function runLava () {
     configPath,
     configDebugPath,
     configOverridePath,
-    debugMode
+    debugMode,
+    applyExportsDefense
   } = parseArgs()
   const cwd = process.cwd()
   const entryId = path.resolve(cwd, entryPath)
@@ -52,7 +53,7 @@ async function runLava () {
   if (shouldRunApplication) {
     // execution mode
     const lavamoatConfig = await loadConfig({ debugMode, configPath, configOverridePath })
-    const kernel = createKernel({ cwd, lavamoatConfig, debugMode })
+    const kernel = createKernel({ cwd, lavamoatConfig, debugMode, applyExportsDefense })
     // patch process.argv so it matches the normal pattern
     // e.g. [runtime path, entrypoint, ...args]
     // we'll use the LavaMoat path as the runtime
@@ -97,6 +98,12 @@ function parseArgs () {
         describe: 'debugMode, disable some protections for easier debugging',
         type: 'boolean',
         default: false
+      })
+      // applyExportsDefense, disable potentially incompatible module export protections
+      yargs.option('applyExportsDefense', {
+        describe: 'applyExportsDefense, disable potentially incompatible module export protections',
+        type: 'boolean',
+        default: true
       })
       // parsing mode, write config to config path
       yargs.option('writeAutoConfig', {
