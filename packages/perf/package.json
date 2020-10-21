@@ -1,4 +1,5 @@
 {
+  "name": "lavamoat-perf",
   "scripts": {
     "serve": "serve .",
     "start": "yarn run start:wallet && yarn run start:localOnly && yarn run start:requireLoop && yarn run start:secp256k1 && yarn run start:newBN",
