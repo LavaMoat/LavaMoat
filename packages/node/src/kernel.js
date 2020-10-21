@@ -50,7 +50,10 @@ function createModuleResolver ({ cwd, resolutions }) {
       }
     }
     // resolve normally
-    const resolved = resolve.sync(requestedName, { basedir: parentDir })
+    const resolved = resolve.sync(requestedName, {
+      basedir: parentDir,
+      extensions: ['.js', '.cjs', '.node', '.json']
+    })
     return resolved
   }
 }
@@ -96,9 +99,11 @@ function loadModuleData (absolutePath) {
       .split('<!--').join('<! --')
       // use indirect eval
       .split(' eval(').join(' (eval)(')
+      .split('\'eval(').join('\'(eval)(')
       // replace import statements in comments
       .split(' import(').join(' __import__(')
       .split('"import(').join('"__import__(')
+      .split('\'import(').join('\'__import__(')
       .split('{import(').join('{__import__(')
       .split('<import(').join('<__import__(')
     // wrap json modules (borrowed from browserify)

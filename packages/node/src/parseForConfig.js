@@ -16,12 +16,18 @@ const {
 const { parse, inspectImports, codeSampleFromAstNode } = require('lavamoat-tofu')
 const { checkForResolutionOverride } = require('./resolutions')
 
+const commonjSEXtensions = ['.js', '.cjs', '.node']
+
 // approximate polyfill for node builtin
 const createRequire = (url) => {
   return {
     resolve: (requestedName) => {
       const basedir = path.dirname(url.pathname)
-      const result = resolve.sync(requestedName, { basedir })
+      console.log(requestedName)
+      const result = resolve.sync(requestedName, {
+        basedir,
+        extensions: ['.json', ...commonjSEXtensions]
+      })
       // check for missing builtin modules (e.g. 'worker_threads' in node v10)
       // the "resolve" package resolves as "worker_threads" even if missing
       const resultMatchesRequest = requestedName === result
@@ -101,7 +107,7 @@ function makeImportHook ({
     const extension = path.extname(filename)
     const packageData = packageDataForModule({ id: specifier, file: filename }, rootPackageName)
 
-    if (['.js', '.cjs'].includes(extension)) {
+    if (commonjSEXtensions.includes(extension)) {
       return makeJsModuleRecord(specifier, filename, packageData)
     }
     if (extension === '.node') {
