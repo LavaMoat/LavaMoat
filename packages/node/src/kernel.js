@@ -5,6 +5,7 @@ const resolve = require('resolve')
 const { sanitize } = require('htmlescape')
 const { generateKernel, packageDataForModule } = require('lavamoat-core')
 const { checkForResolutionOverride } = require('./resolutions')
+const { resolutionOmittedExtensions } = require('./parseForConfig')
 
 const nativeRequire = require
 
@@ -51,7 +52,10 @@ function createModuleResolver ({ cwd, resolutions }) {
       }
     }
     // resolve normally
-    const resolved = resolve.sync(requestedName, { basedir: parentDir })
+    const resolved = resolve.sync(requestedName, {
+      basedir: parentDir,
+      extensions: resolutionOmittedExtensions
+    })
     return resolved
   }
 }
@@ -97,9 +101,11 @@ function loadModuleData (absolutePath) {
       .split('<!--').join('<! --')
       // use indirect eval
       .split(' eval(').join(' (eval)(')
+      .split('\'eval(').join('\'(eval)(')
       // replace import statements in comments
       .split(' import(').join(' __import__(')
       .split('"import(').join('"__import__(')
+      .split('\'import(').join('\'__import__(')
       .split('{import(').join('{__import__(')
       .split('<import(').join('<__import__(')
     // wrap json modules (borrowed from browserify)
