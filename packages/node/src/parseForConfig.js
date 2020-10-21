@@ -24,7 +24,6 @@ const createRequire = (url) => {
   return {
     resolve: (requestedName) => {
       const basedir = path.dirname(url.pathname)
-      console.log(requestedName)
       const result = resolve.sync(requestedName, {
         basedir,
         extensions: resolutionOmittedExtensions
