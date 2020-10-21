@@ -1,5 +1,6 @@
 {
   "name": "lavamoat-perf",
+  "version": "0.0.0",
   "scripts": {
     "serve": "serve .",
     "start": "yarn run start:wallet && yarn run start:localOnly && yarn run start:requireLoop && yarn run start:secp256k1 && yarn run start:newBN",
@@ -12,7 +13,7 @@
   "dependencies": {
     "browserify": "^16.5.0",
     "lavamoat-browserify": "4.0.0",
-    "readable-stream-patch": "kumavis/readable-stream#v2-no-util-mut",
+    "readable-stream": "^3.6.0",
     "ses": "^0.6.4"
   },
   "devDependencies": {
