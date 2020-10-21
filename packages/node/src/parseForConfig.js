@@ -16,7 +16,7 @@ const {
 const { parse, inspectImports, codeSampleFromAstNode } = require('lavamoat-tofu')
 const { checkForResolutionOverride } = require('./resolutions')
 
-const commonjSEXtensions = ['.js', '.cjs', '.node']
+const commonjSEXtensions = ['.js', '.cjs']
 
 // approximate polyfill for node builtin
 const createRequire = (url) => {
