@@ -1,6 +1,12 @@
+const lineColumn = require('line-column')
 const { inspectPrimordialAssignments } = require('./inspectPrimordialAssignments.js')
 const { whitelist: sesAllowlist, FunctionInstance } = require('./ses-whitelist.js')
 const { inspectDynamicRequires } = require('./inspectSource.js')
+
+// from https://github.com/Agoric/SES-shim/blob/86a373e008e97b2a30c25ee53df86ab120a7804b/packages/ses/src/transforms.js#L75
+// with added global flag
+const importPattern = new RegExp('\\bimport\\s*(?:\\(|/[/*])', 'gm');
+
 
 module.exports = { inspectSesCompat }
 
@@ -12,11 +18,13 @@ const strictModeViolationErrorCues = [
   'Deleting local variable in strict mode'
 ]
 
-function inspectSesCompat (ast) {
+function inspectSesCompat (moduleRecord) {
+  const { content, ast } = moduleRecord
   const results = {
     primordialMutations: [],
     strictModeViolations: [],
-    dynamicRequires: []
+    dynamicRequires: [],
+    importStatementMatches: []
   }
   // check for strict mode violations
   ;(ast.errors || []).forEach(error => {
@@ -41,7 +49,39 @@ function inspectSesCompat (ast) {
   })
   // check for dynamic (non-string literal) requires
   results.dynamicRequires = inspectDynamicRequires(ast)
+  // check for import statement matches
+  results.importStatementMatches = getImportStatementMatches(content)
+
   return results
+}
+
+function getImportStatementMatches (src) {
+  return getAllMatches(src, importPattern)
+}
+
+function getAllMatches (str, regexp) {
+  const matches = []
+  let match
+  while (match = regexp.exec(str)) {
+    matches.push(getPosition(str, match.index, regexp.lastIndex));
+  }
+  return matches
+}
+
+function getPosition(string, startIndex, endIndex) {
+  const finder = lineColumn(string)
+  const { line: startLine, col: startColumn } = finder.fromIndex(startIndex)
+  const { line: endLine, col: endColumn } = finder.fromIndex(endIndex)
+  return {
+    start: {
+      line: startLine,
+      column: startColumn - 1,
+    },
+    end: {
+      line: endLine,
+      column: endColumn - 1,
+    }
+  }
 }
 
 function hasSetterInWhitelist (memberPath) {

@@ -42,9 +42,10 @@ async function parseForConfig ({ packageDir, entryId, rootPackageName }) {
       if (err.code === 'MODULE_NOT_FOUND') return false
       throw err
     }
-    const extension = path.extname(resolved).slice(1)
+    if (resolved === null) return
+    const extension = path.extname(resolved)
     // allow allow whitelisted extensions
-    return ['js','json','cjs','node'].includes(extension)
+    return ['.js','.json','.cjs','.node'].includes(extension)
   }
 
   const environment = {}
@@ -52,6 +53,10 @@ async function parseForConfig ({ packageDir, entryId, rootPackageName }) {
   if (shouldResolve(entryId, `${packageDir}/package.json`)) {
     const importHook = makeImportHook({ rootPackageName, resolveHook, shouldResolve, isBuiltin })
     const moduleSpecifier = resolveHook(entryId, `${packageDir}/package.json`)
+    if (moduleSpecifier === null) {
+      console.warn(`survey - could not resolve ${entryId} from ${packageDir}`)
+      return
+    }
     await walk({ moduleSpecifier, resolveHook, importHook, visitorFn })
   } else {
     environment.skipped = `package main cant be resolved: "${entryId}"`
@@ -70,7 +75,7 @@ async function parseForConfig ({ packageDir, entryId, rootPackageName }) {
   
   function visitorFn (moduleRecord) {
     if (!moduleRecord.ast) return
-    const { primordialMutations, strictModeViolations, dynamicRequires } = inspectSesCompat(moduleRecord.ast)
+    const { primordialMutations, strictModeViolations, dynamicRequires, importStatementMatches } = inspectSesCompat(moduleRecord)
     const serializableResults = {}
     if (primordialMutations.length) {
       serializableResults.primordialMutations = primordialMutations.map(({ node }) => {
@@ -91,6 +96,14 @@ async function parseForConfig ({ packageDir, entryId, rootPackageName }) {
         const data = codeSampleFromAstNode(fakeNode, moduleRecord)
         // append error message
         data.error = error.message
+        return data
+      })
+    }
+    if (importStatementMatches.length) {
+      serializableResults.importStatementMatches = importStatementMatches.map(({ start, end }) => {
+        const fakeNode = { loc: { start, end } }
+        // get code sample and link
+        const data = codeSampleFromAstNode(fakeNode, moduleRecord)
         return data
       })
     }

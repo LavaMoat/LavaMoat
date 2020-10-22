@@ -119,7 +119,7 @@ function createModuleInspector (opts = {}) {
   function inspectForEnvironment (ast, moduleRecord, includeDebugInfo) {
     const { packageName } = moduleRecord
     const compatWarnings = inspectSesCompat(ast, packageName)
-    const { primordialMutations, strictModeViolations, dynamicRequires } = compatWarnings
+    const { primordialMutations, strictModeViolations, dynamicRequires, importStatementMatches } = compatWarnings
     const hasResults = primordialMutations.length > 0 || strictModeViolations.length > 0 || dynamicRequires.length > 0
     if (!hasResults) return
     if (includeDebugInfo) {
@@ -129,7 +129,8 @@ function createModuleInspector (opts = {}) {
         // fix serialization
         primordialMutations: primordialMutations.map(({ node: { loc } }) => ({ node: { loc } })),
         strictModeViolations: strictModeViolations.map(({ node: { loc } }) => ({ node: { loc } })),
-        dynamicRequires: dynamicRequires.map(({ node: { loc } }) => ({ node: { loc } }))
+        dynamicRequires: dynamicRequires.map(({ node: { loc } }) => ({ node: { loc } })),
+        importStatementMatches: importStatementMatches.map(({ node: { loc } }) => ({ node: { loc } })),
       }
     } else {
       // warn if non-compatible code found
@@ -139,7 +140,8 @@ function createModuleInspector (opts = {}) {
         const samples = jsonStringify({
           primordialMutations: primordialMutations.map(({ node }) => codeSampleFromAstNode(node, moduleRecord)),
           strictModeViolations: strictModeViolations.map(({ node }) => codeSampleFromAstNode(node, moduleRecord)),
-          dynamicRequires: dynamicRequires.map(({ node }) => codeSampleFromAstNode(node, moduleRecord))
+          dynamicRequires: dynamicRequires.map(({ node }) => codeSampleFromAstNode(node, moduleRecord)),
+          importStatementMatches: importStatementMatches.map(({ node }) => codeSampleFromAstNode(node, moduleRecord)),
         })
         const errMsg = `Incomptabile code detected in package "${packageName}" file "${moduleRecord.file}". Violations:\n${samples}`
         console.warn(errMsg)
