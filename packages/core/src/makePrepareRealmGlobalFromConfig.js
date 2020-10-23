@@ -82,11 +82,11 @@ function makePrepareRealmGlobalFromConfig () {
       moduleRealmGlobal[key] = moduleRealmGlobal
     })
     // support certain globalThis getters
-    const origFunction = moduleRealmGlobal.Function
-    const newFunction = function (...src) {
-      return origFunction(...src).bind(moduleRealmGlobal)
-    }
-    Object.defineProperties(newFunction, Object.getOwnPropertyDescriptors(origFunction))
-    moduleRealmGlobal.Function = newFunction
+    // const origFunction = moduleRealmGlobal.Function
+    // const newFunction = function (...src) {
+    //   return origFunction(...src).bind(moduleRealmGlobal)
+    // }
+    // Object.defineProperties(newFunction, Object.getOwnPropertyDescriptors(origFunction))
+    // moduleRealmGlobal.Function = newFunction
   }
 }
