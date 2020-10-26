@@ -131,7 +131,6 @@ function loadModuleData (absolutePath) {
         .split('// Re-export lib/utils, so that consumers can import').join('// Re-export lib/utils, so that consumers can imp_ort')
         .split('// babel-plugin-dynamic-import').join('// babel-plugin-dynamic-imp ort')
         .split('// eslint-disable-next-line import/no-unresolved').join('// eslint-disable-next-line imp_ort/no-unresolved')
-        
     }
     // wrap in moduleInitializer
     // security: ensure module path does not inject code

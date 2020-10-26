@@ -4,7 +4,7 @@
 
   function createKernel ({ globalRef, debugMode, lavamoatConfig, loadModuleData, getRelativeModuleId, prepareModuleInitializerArgs }) {
     // create SES-wrapped LavaMoat kernel
-    const kernelCompartment = new Compartment({ console, Math })
+    const kernelCompartment = new Compartment({ console, Math, Date })
     const makeKernel = kernelCompartment.evaluate(`(${unsafeCreateKernel})\n//# sourceURL=LavaMoat/core/kernel`)
     const lavamoatKernel = makeKernel({
       globalRef,
@@ -120,7 +120,7 @@
         const membraneWrappedEndowments = membrane.bridge(endowments, endowmentsMembraneSpace, moduleMembraneSpace)
         // prepare the module's SES compartment
         // Endow Math to ensure compartment has Math.random
-        const moduleCompartment = new Compartment({ Math })
+        const moduleCompartment = new Compartment({ Math, Date })
         if (isRootModule) {
           // expose all of globalRef, though currently does not support global writes
           // copy every property on globalRef to compartment global without overriding
@@ -147,7 +147,7 @@
           }
           moduleInitializer = moduleCompartment.evaluate(`${moduleSource}\n//# sourceURL=${sourceURL}`)
         } catch (err) {
-          console.warn(`LavaMoat - Error evaluating module "${moduleId}" from package "${packageName}"`)
+          console.warn(`LavaMoat - Error evaluating module "${moduleId}" from package "${packageName}" \n${err.stack}`)
           throw err
         }
       }
