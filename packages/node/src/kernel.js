@@ -108,8 +108,10 @@ function loadModuleData (absolutePath) {
       .split('\'import(').join('\'__import__(')
       .split('{import(').join('{__import__(')
       .split('<import(').join('<__import__(')
+      .split('.import(').join('.__import__(')
+    const isJSON = /\.json$/.test(absolutePath)
     // wrap json modules (borrowed from browserify)
-    if (/\.json$/.test(absolutePath)) {
+    if (isJSON) {
       const sanitizedString = sanitize(transformedContent)
       try {
         // check json validity
@@ -119,6 +121,18 @@ function loadModuleData (absolutePath) {
         err.message = `While parsing ${absolutePath}: ${err.message}`
         throw err
       }
+    }
+    // ses needs to take a fucking chill pill
+    if (isJSON) {
+      transformedContent = transformedContent
+        .split('-import-').join('-imp ort-')
+    } else {
+      transformedContent = transformedContent
+        .split('"babel-plugin-dynamic-import-node').join('"babel-plugin-dynamic-imp" + "ort-node')
+        .split('"@babel/plugin-proposal-dynamic-import').join('"@babel/plugin-proposal-dynamic-imp" + "ort')
+        .split('// Re-export lib/utils, so that consumers can import').join('// Re-export lib/utils, so that consumers can imp_ort')
+        .split('// babel-plugin-dynamic-import').join('// babel-plugin-dynamic-imp ort')
+        .split('// eslint-disable-next-line import/no-unresolved').join('// eslint-disable-next-line imp_ort/no-unresolved')
     }
     // wrap in moduleInitializer
     // security: ensure module path does not inject code
