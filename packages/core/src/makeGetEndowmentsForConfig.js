@@ -10,10 +10,6 @@ module.exports = makeGetEndowmentsForConfig
 function makeGetEndowmentsForConfig () {
   return {
     getEndowmentsForConfig,
-    getMinimalViewOfRef,
-    deepGetAndBind,
-    deepGet,
-    deepDefine,
     makeMinimalViewOfRef,
     copyValueAtPath
   }
@@ -21,12 +17,9 @@ function makeGetEndowmentsForConfig () {
   // for backwards compat only
   function getEndowmentsForConfig (globalRef, config) {
     if (!config.globals) return {}
-    return getMinimalViewOfRef(globalRef, config.globals)
-  }
-
-  function getMinimalViewOfRef (ref, config) {
-    const newRef = {}
-    Object.entries(config).forEach(([path, configValue]) => {
+    // validate read access from config
+    const whitelistedReads = []
+    Object.entries(config.globals).forEach(([path, configValue]) => {
       const pathParts = path.split('.')
       // disallow dunder proto in path
       const pathContainsDunderProto = pathParts.some(pathPart => pathPart === '__proto__')
@@ -38,69 +31,9 @@ function makeGetEndowmentsForConfig () {
       if (configValue !== true) {
         throw new Error(`LavaMoat - unknown value for config (${typeof configValue})`)
       }
-      const value = deepGetAndBind(ref, path, newRef)
-      // TODO: actually match prop descriptor
-      const propDesc = {
-        value,
-        configurable: true,
-        writable: true,
-        enumerable: true
-      }
-      deepDefine(newRef, path, propDesc)
+      whitelistedReads.push(path)
     })
-    return newRef
-  }
-
-  function deepGetAndBind (ref, pathName, fakeParent) {
-    const pathParts = pathName.split('.')
-    const parentPath = pathParts.slice(0, -1).join('.')
-    const childKey = pathParts[pathParts.length - 1]
-    const parent = parentPath ? deepGet(ref, parentPath) : ref
-    if (!parent) return parent
-    const value = parent[childKey]
-    if (typeof value === 'function') {
-      // pseudo-binding to parent, but allowing the this value to be overwritten
-      const newValue = function () { return value.apply(this === fakeParent ? parent : this, arguments) }
-      Object.defineProperties(newValue, Object.getOwnPropertyDescriptors(value))
-      return newValue
-    } else {
-      // return as is
-      return value
-    }
-  }
-
-  function deepGet (obj, pathName) {
-    let result = obj
-    pathName.split('.').forEach(pathPart => {
-      if (result === null) {
-        result = undefined
-        return
-      }
-      if (result === undefined) {
-        return
-      }
-      result = result[pathPart]
-    })
-    return result
-  }
-
-  function deepDefine (obj, pathName, propDesc) {
-    let parent = obj
-    const pathParts = pathName.split('.')
-    const lastPathPart = pathParts[pathParts.length - 1]
-    const allButLastPart = pathParts.slice(0, -1)
-    allButLastPart.forEach(pathPart => {
-      const prevParent = parent
-      parent = parent[pathPart]
-      if (parent === null) {
-        throw new Error('DeepSet - unable to set "' + pathName + '" on null')
-      }
-      if (parent === undefined) {
-        parent = {}
-        prevParent[pathPart] = parent
-      }
-    })
-    Object.defineProperty(parent, lastPathPart, propDesc)
+    return makeMinimalViewOfRef(globalRef, whitelistedReads)
   }
 
   function makeMinimalViewOfRef (originRef, paths) {
@@ -212,12 +145,19 @@ function makeGetEndowmentsForConfig () {
 function getPropertyDescriptorDeep (target, key) {
   let receiver = target
   while (true) {
-    const prop = Reflect.getOwnPropertyDescriptor(receiver, key)
-    if (prop) {
-      return { receiver, prop }
+    // support lookup on objects and primitives
+    const typeofReceiver = typeof receiver
+    if (typeofReceiver === 'object' || typeofReceiver === 'function') {
+      const prop = Reflect.getOwnPropertyDescriptor(receiver, key)
+      if (prop) {
+        return { receiver, prop }
+      }
+      // try next in the prototype chain
+      receiver = Reflect.getPrototypeOf(receiver)
+    } else {
+      // prototype lookup for primitives
+      receiver = receiver.__proto__
     }
-    // try next in the prototype chain
-    receiver = Reflect.getPrototypeOf(receiver)
     // abort if this is the end of the prototype chain.
     if (!receiver) return { prop: null, receiver: null }
   }
