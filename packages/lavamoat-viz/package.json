@@ -15,7 +15,7 @@
     "@babel/preset-react": "^7.8.3",
     "@metamask/eslint-config": "2",
     "babel-loader": "8.0.5",
-    "codemirror": "^5.52.2",
+    "codemirror": "^5.54.0",
     "copy-webpack-plugin": "^6.0.3",
     "css-loader": "1.0.0",
     "d3": "^5.12.0",
