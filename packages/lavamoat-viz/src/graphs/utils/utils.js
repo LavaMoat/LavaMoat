@@ -180,8 +180,8 @@ function getRankForType (type = 'js') {
   if (type === 'js') {
     return 0
   }
-  // if (type === 'builtin') return 3
-  // if (type === 'native') return 3
+  if (type === 'builtin') return 3
+  if (type === 'native') return 3
   return 3
 }
 
