@@ -43,7 +43,8 @@
     "analyze": "source-map-explorer 'build/static/js/*.js'",
     "start": "webpack-dev-server --config ./src/webpack.config.js",
     "build": "webpack --config ./src/webpack.config.js",
-    "deploy": "npm run build && gh-pages -d dist"
+    "deploy": "yarn run build && gh-pages -d dist",
+    "prepublishOnly": "yarn run deploy"
   },
   "babel": {
     "presets": [
