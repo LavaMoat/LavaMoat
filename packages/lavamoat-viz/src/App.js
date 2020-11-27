@@ -8,26 +8,25 @@ const { DepGraph } = require('./graphs/DepGraph')
 // }
 
 /* eslint-disable no-restricted-globals */
-const bundles = { background: self.CONFIG_DEBUG }
+const configDebug = self.CONFIG_DEBUG
+const config = self.CONFIG
+const configOverride = self.CONFIG_OVERRIDE
+const configFinal = self.CONFIG_FINAL
+
 
 class App extends Component {
-
-  constructor() {
-    super()
-    this.state = {
-      bundle: 'background',
-    }
-  }
   // selectBundle (target) {
   //   this.setState(state => ({ bundle: target }))
   // }
 
   render () {
-    const bundleData = bundles[this.state.bundle]
     return (
       <div className="App">
         <DepGraph
-          bundleData={bundleData}
+          bundleData={configDebug}
+          config={config}
+          configOverride={configOverride}
+          configFinal={configFinal}
           /> 
       </div>
     )

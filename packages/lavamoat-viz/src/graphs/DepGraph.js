@@ -83,6 +83,9 @@ class DepGraph extends React.Component {
       // packageModules,
       // packageModulesMode,
     } = state
+    const {
+      configFinal
+    } = this.props
 
     // Uncomment for module nodes
     // let newGraph
@@ -93,8 +96,8 @@ class DepGraph extends React.Component {
     // }
 
     // const newGraph = createPackageGraph(bundleData, state)
-    const packages = parseConfigDebugForPackages(bundleData)
-    const newGraph = createGraph(packages, bundleData, state)
+    const packages = parseConfigDebugForPackages(bundleData, configFinal)
+    const newGraph = createGraph(packages, configFinal, state)
 
     // create a map for faster lookups by id
     const nodeLookup = new Map(newGraph.nodes.map((node) => [node.id, node]))
@@ -245,7 +248,7 @@ class DepGraph extends React.Component {
       selectedNodeLabel = 'select a node'
       selectedNodeData = ''
     }
-    if (!packageModulesMode) {
+    if (!packageModulesMode || !selectedModule) {
       sourceButtonStyle = { display: 'none' }
     }
     if (viewSource) {
@@ -256,7 +259,6 @@ class DepGraph extends React.Component {
     if (packageModules) {
       const packageModulesList = Object.values(packageModules)
       sortedModules = sortByDangerRank(packageModulesList)
-      console.log("SORTEDMOULES", sortedModules)
     }
 
     return (
@@ -342,7 +344,7 @@ class DepGraph extends React.Component {
   }
 
   renderSelectedPackage (selectedPackage) {
-    const { bundleData: { resources } } = this.props
+    const { configFinal: { resources } } = this.props
     const config = resources[selectedPackage.name] || {}
     return (
       <div className="packageInfo">
@@ -386,7 +388,7 @@ class DepGraph extends React.Component {
       codeMirror.refresh()
       source = selectedModule.content
       const globals = debugInfo[selectedModule.specifier].globals || null
-      const lineNumbersForGlobals = getLineNumbersForGlobals(source, globals)
+      const lineNumbersForGlobals = globals === null ? [] : getLineNumbersForGlobals(source, globals)
       let selectedLineIndex = 0
       let line
       let lineClassActive = false

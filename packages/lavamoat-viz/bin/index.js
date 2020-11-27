@@ -8,6 +8,7 @@ const yargs = require('yargs')
 const { ncp } = require('ncp')
 const pify = require('pify')
 const openUrl = require('open')
+const { utils: { mergeConfig } } = require('lavamoat-tofu')
 
 main().catch((err) => console.error(err))
 
@@ -26,6 +27,20 @@ function parseArgs () {
         type: 'string',
         default: './lavamoat-config-debug.json',
       })
+      // the path for the config file
+      yargs.option('config', {
+        alias: 'configPath',
+        describe: 'the path for the config file',
+        type: 'string',
+        default: './lavamoat-config.json'
+      })
+      // the path for the config override file
+      yargs.option('configOverride', {
+        alias: 'configOverridePath',
+        describe: 'the path for the config override file',
+        type: 'string',
+        default: './lavamoat-config-override.json'
+      })
       // open the output dir
       yargs.option('open', {
         describe: 'open the visualization',
@@ -40,15 +55,18 @@ function parseArgs () {
 }
 
 async function main () {
-  const { debugConfig, dest, open } = parseArgs()
+  const { debugConfig, config, configOverride, dest, open } = parseArgs()
   const fullDest = path.resolve(dest)
   const source = path.join(__dirname, '/../dist/')
   // copy app dir
   await fs.mkdir(fullDest, { recursive: true })
   await pify((cb) => ncp(source, fullDest, cb))()
   // add data-injection file
-  const configContent = await fs.readFile(debugConfig, 'utf8')
-  const dataInjectionContent = `globalThis.CONFIG_DEBUG = ${configContent};`
+  const debugConfigContent = await fs.readFile(debugConfig, 'utf8')
+  const configContent = await fs.readFile(config, 'utf8')
+  const configOverrideContent = await fs.readFile(configOverride, 'utf8')
+  const finalConfig = mergeConfig(configContent, configOverrideContent)
+  const dataInjectionContent = `globalThis.CONFIG_DEBUG = ${debugConfigContent}; globalThis.CONFIG = ${configContent}; globalThis.CONFIG_OVERRIDE = ${configOverrideContent}; globalThis.CONFIG_FINAL = ${finalConfig};`
   await fs.writeFile(`${fullDest}/injectConfigDebugData.js`, dataInjectionContent)
   if (open) {
     openUrl(`file:///${fullDest}/index.html`)

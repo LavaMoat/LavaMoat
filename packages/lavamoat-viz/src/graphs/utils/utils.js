@@ -12,12 +12,13 @@ export const envConfig = {
   }
 }
 
-function parseConfigDebugForPackages (configDebugData) {
+function parseConfigDebugForPackages (configDebugData, configFinal) {
   // const { resources } = configDebugData
   // const nodes = [], links = []
   const packages = {}
 
-  const { debugInfo, resources: packagesConfig, env } = configDebugData
+  const { debugInfo, env } = configDebugData
+  const { resources } = configFinal
   // aggregate info under package name
   Object.entries(debugInfo).forEach(([_, moduleDebugInfo]) => {
     const { moduleRecord } = moduleDebugInfo
@@ -35,7 +36,7 @@ function parseConfigDebugForPackages (configDebugData) {
       packageData.size = 0
       const isRootPackage = packageNameAndVersion === '<root>'
       packageData.isRoot = isRootPackage
-      packageData.config = packagesConfig[packageData.name] || {}
+      packageData.config = resources[packageData.name] || {}
     }
     // add total code size from module
     const { size } = moduleRecord
@@ -65,13 +66,13 @@ function parseConfigDebugForPackages (configDebugData) {
   return packages
 }
 
-function createGraph (packages, configDebugData, {
+function createGraph (packages, configFinal, {
   lavamoatMode,
   selectedNode,
   // packageModulesMode,
   // showPackageSize,
 }) {
-  const { resources } = configDebugData
+  const { resources } = configFinal
   const nodes = []
   const links = []
   // for each module, create node and links
@@ -131,7 +132,8 @@ const rankColors = [
 ]
 
 function getDangerRankForPackage (packageData, envConfig) {
-  if (packageData.config.native) return 3
+  // strict red if any builtins or globals for now
+  if (packageData.config.native || packageData.config.builtin || packageData.config.globals) return 3
   if (packageData.dangerRank) {
     return packageData.dangerRank
   }

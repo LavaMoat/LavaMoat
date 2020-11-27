@@ -4,6 +4,7 @@
   "main": "index.js",
   "version": "4.1.3",
   "dependencies": {
+    "lavamoat-tofu": "^5.1.1",
     "ncp": "^2.0.0",
     "open": "^7.0.3",
     "pify": "^4.0.1",

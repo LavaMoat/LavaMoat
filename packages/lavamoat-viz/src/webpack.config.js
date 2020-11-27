@@ -37,7 +37,7 @@ module.exports = {
     }),
     new CopyPlugin({
       patterns: [
-        { from: './src/example-config-debug.js', to: `${distPath}/injectConfigDebugData.js` },
+        { from: './src/example-config-all.js', to: `${distPath}/injectConfigDebugData.js` },
       ],
     }),
   ],
