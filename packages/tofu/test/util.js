@@ -1,4 +1,4 @@
-const test = require('tape')
+const test = require('ava')
 const { utils: { mergeConfig, objToMap, mapToObj } } = require('../src/index')
 
 testMerge('upgrades reads to writes', {
@@ -34,6 +34,5 @@ function testMerge (label, configA, configB, expectedResultObj) {
     const result = mergeConfig(objToMap(configA), objToMap(configB))
     const resultObj = mapToObj(result)
     t.deepEqual(resultObj, expectedResultObj)
-    t.end()
-  })
+      })
 }

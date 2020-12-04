@@ -26,6 +26,7 @@
     "umd": "^3.0.3"
   },
   "devDependencies": {
+    "ava": "^3.13.0",
     "bify-package-factor": "^1.0.7",
     "browserify": "^16.2.3",
     "convert-source-map": "^1.6.0",
@@ -36,14 +37,12 @@
     "ses": "git+https://git@github.com/agoric/ses.git#fdb393f817f6124c4d055bff26b68e4cbe17618e",
     "source-map": "^0.7.3",
     "standard": "14.3.1",
-    "tape": "^4.13.2",
-    "tape-promise": "^4.0.0",
     "tmp": "^0.1.0",
     "uglify-js": "^3.4.9",
     "watchify": "^3.11.1"
   },
   "scripts": {
-    "test": "node test",
+    "test": "ava test/index.js",
     "lint": "npm run lint:standard && npm run lint:deps",
     "lint:standard": "standard src/**/*.js test/**/*.js",
     "lint:fix": "standard src/**/*.js test/**/*.js --fix",

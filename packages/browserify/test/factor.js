@@ -1,4 +1,4 @@
-const test = require('tape-promise').default(require('tape'))
+const test = require('ava')
 const createCustomPack = require('../src/createCustomPack')
 const {
   generateConfigFromFiles,
@@ -93,7 +93,7 @@ test('package factor bundle', async (t) => {
   }
 
   const vinylBundles = await getStreamResults(bundler.bundle())
-  t.equal(vinylBundles.length, 3)
+  t.is(vinylBundles.length, 3)
 
 
   const relativeNames = vinylBundles.map(bundleFile => bundleFile.relative).sort()
@@ -120,8 +120,8 @@ test('package factor bundle', async (t) => {
   let result
 
   result = evalBundle(bundles['common.js'] + bundles['src/1.js'], testGlobal)
-  t.equal(result, 60)
+  t.is(result, 60)
 
   result = evalBundle(bundles['common.js'] + bundles['src/2.js'], testGlobal)
-  t.equal(result, 120)
+  t.is(result, 120)
 })

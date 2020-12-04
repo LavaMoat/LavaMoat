@@ -218,7 +218,7 @@ async function testEntryAttackerVictim (t, { defineAttacker, defineVictim }) {
   }
   const bundle = await createBundleFromRequiresArray(depsArray, { config })
   const result = evalBundle(bundle)
-  t.equal(result, false)
+  t.is(result, false)
 }
 
 async function runSimpleOneTwo ({ defineRoot, defineOne, defineTwo, defineThree, config = {}, testGlobal }) {

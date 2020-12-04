@@ -1,4 +1,4 @@
-const test = require('tape')
+const test = require('ava')
 const makeGetEndowmentsForConfig = require('../src/makeGetEndowmentsForConfig.js')
 
 test('getEndowmentsForConfig', (t) => {
@@ -14,7 +14,6 @@ test('getEndowmentsForConfig', (t) => {
     }
   }
   const resultGlobal = getEndowmentsForConfig(sourceGlobal, config)
-  t.equal(sourceGlobal.namespace.stringValue.includes('dab'), true)
-  t.equal(resultGlobal.namespace.stringValue.includes('dab'), true)
-  t.end()
-})
+  t.is(sourceGlobal.namespace.stringValue.includes('dab'), true)
+  t.is(resultGlobal.namespace.stringValue.includes('dab'), true)
+  })

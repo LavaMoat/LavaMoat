@@ -1,4 +1,4 @@
-const test = require('tape-promise').default(require('tape'))
+const test = require('ava')
 const {
   runSimpleOneTwo
 } = require('./util')
@@ -40,5 +40,5 @@ test('endowments - bridged endowments matches original endowments object', async
 
   const one = await runSimpleOneTwo({ defineOne, defineTwo, config, testGlobal })
 
-  t.equal(one, true)
+  t.is(one, true)
 })

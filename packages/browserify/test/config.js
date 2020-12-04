@@ -1,4 +1,4 @@
-const test = require('tape-promise').default(require('tape'))
+const test = require('ava')
 const fs = require('fs')
 const path = require('path')
 const { execSync } = require('child_process')
@@ -111,8 +111,7 @@ test('config - disable access to package', async (t) => {
     )
   }
 
-  t.end()
-})
+  })
 
 test('config - default config path is generated with autoconfig if path is not specified', async (t) => {
   const { name: tempDir } = tmp.dirSync()
@@ -130,8 +129,7 @@ test('config - default config path is generated with autoconfig if path is not s
 
   t.ok(fs.existsSync(expectedPath), 'Config file exists')
 
-  t.end()
-})
+  })
 
 test('config - writes a proper config to a temp dir', async (t) => {
   const entries = [

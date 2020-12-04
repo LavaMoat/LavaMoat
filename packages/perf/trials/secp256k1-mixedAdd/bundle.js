@@ -5140,7 +5140,7 @@ assert.fail = fail;
 // 4. Pure assertion tests whether a value is truthy, as determined
 // by !!guard.
 // assert.ok(guard, message_opt);
-// This statement is equivalent to assert.equal(true, !!guard,
+// This statement is equivalent to assert.is(true, !!guard,
 // message_opt);. To test strictly for the value true, use
 // assert.strictEqual(true, guard, message_opt);.
 
@@ -5151,7 +5151,7 @@ assert.ok = ok;
 
 // 5. The equality assertion tests shallow, coercive equality with
 // ==.
-// assert.equal(actual, expected, message_opt);
+// assert.is(actual, expected, message_opt);
 
 assert.equal = function equal(actual, expected, message) {
   if (actual != expected) fail(actual, expected, message, '==', assert.equal);

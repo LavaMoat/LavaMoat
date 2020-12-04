@@ -1,4 +1,4 @@
-const test = require('tape')
+const test = require('ava')
 const UglifyJS = require('uglify-js')
 const { SourceMapConsumer } = require('source-map')
 const { wrapIntoModuleInitializer } = require('../src/sourcemaps')
@@ -25,14 +25,13 @@ test('sourcemaps - adjust maps for wrapper', async (t) => {
 
   // ensure minification worked
   t.ok(indicesOf('\n', fooSource).length > 1)
-  t.equal(indicesOf('\n', result.code).length, 1)
+  t.is(indicesOf('\n', result.code).length, 1)
 
   // wrap into bundle with external sourcemaps
   const wrappedSourceMeta = wrapIntoModuleInitializer(result.code)
   await validateSourcemaps(t, wrappedSourceMeta)
 
-  t.end()
-})
+  })
 
 function indicesOf (substring, string) {
   const result = []

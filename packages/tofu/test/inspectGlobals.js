@@ -1,4 +1,4 @@
-const test = require('tape')
+const test = require('ava')
 const deepEqual = require('deep-equal')
 const { inspectGlobals } = require('../src/index')
 
@@ -7,9 +7,8 @@ test('fnToCodeBlock utility works', (t) => {
     1 + 2 + 3
   })
 
-  t.equal(src, '(() => {\n    1 + 2 + 3\n  })()')
-  t.end()
-})
+  t.is(src, '(() => {\n    1 + 2 + 3\n  })()')
+  })
 
 testInspect('detects global reads', {}, () => {
   const x = xyz
@@ -74,7 +73,7 @@ testInspect('never suggest access to full globalRef', {
   const x = zzz
 }, {})
 
-testInspect('detects assignment to property on globalRefs', {
+testInspect('detects combined globalRef assignment and reads', {
   globalRefs: ['zzz']
 }, () => {
   zzz.abc = xyz.abc
@@ -90,7 +89,7 @@ testInspect('not picking up assignments to non-global matching globalRef name', 
   xyz.abc
 }, {})
 
-testInspect('elevating computed property lookups to globalRef', {
+testInspect('elevating computed property lookups to globalRef 1', {
   globalRefs: ['abc']
 }, () => {
   const key = 'hello'
@@ -99,7 +98,7 @@ testInspect('elevating computed property lookups to globalRef', {
   xyz: 'read'
 })
 
-testInspect('elevating computed property lookups to globalRef', {
+testInspect('elevating computed property lookups to globalRef 2', {
   globalRefs: ['abc']
 }, () => {
   const key = 'hello'
@@ -250,8 +249,7 @@ function testInspect (label, opts, fn, expectedResultObj) {
     }
 
     t.deepEqual(resultSorted, expectedSorted)
-    t.end()
-  })
+      })
 }
 
 function sortBy (key) {

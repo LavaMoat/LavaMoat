@@ -1,4 +1,4 @@
-const test = require('tape-promise').default(require('tape'))
+const test = require('ava')
 
 const {
   testEntryAttackerVictim,
@@ -35,7 +35,7 @@ test('attack - prevent primitive modification', async (t) => {
   const bundle = await createBundleFromRequiresArray(depsArray, { config })
   const result = evalBundle(bundle)
 
-  t.equal(result, false)
+  t.is(result, false)
 })
 
 test('attack - limit platform api', async (t) => {
@@ -67,7 +67,7 @@ test('attack - limit platform api', async (t) => {
   const bundle = await createBundleFromRequiresArray(depsArray, { config })
   const result = evalBundle(bundle)
 
-  t.equal(result, false)
+  t.is(result, false)
 })
 
 test('attack - prevent module cache attack', async (t) => {

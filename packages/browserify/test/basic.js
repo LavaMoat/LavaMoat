@@ -1,4 +1,4 @@
-const test = require('tape-promise').default(require('tape'))
+const test = require('ava')
 const clone = require('clone')
 
 const { generatePrelude } = require('../src/index')
@@ -32,7 +32,7 @@ test('basic - bundle works', async (t) => {
   const bundle = await createBundleFromRequiresArray(files, { config })
   const result = evalBundle(bundle)
 
-  t.equal(result, 555)
+  t.is(result, 555)
 })
 
 test('basic - browserify bundle doesnt inject global', async (t) => {
@@ -93,7 +93,7 @@ test('basic - lavamoat config and bundle', async (t) => {
   const testGlobal = { location: { href: testHref } }
   const result = evalBundle(bundle, testGlobal)
 
-  t.equal(result, testHref, 'test result matches expected')
+  t.is(result, testHref, 'test result matches expected')
 })
 
 test('basic - lavamoat bundle without prelude', async (t) => {
