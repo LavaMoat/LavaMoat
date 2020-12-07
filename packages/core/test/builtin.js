@@ -31,7 +31,7 @@ test('builtin - basic access', async (t) => {
 
   const result = await runScenario(scenario)
   t.deepEqual(result, { abc: 123, xyz: null })
-  })
+})
 
 test('builtin - access via paths', async (t) => {
   const scenario = createScenarioFromScaffold({
@@ -57,7 +57,7 @@ test('builtin - access via paths', async (t) => {
 
   const result = await runScenario(scenario)
   t.deepEqual(result, { xyz: 123 })
-  })
+})
 
 test('builtin - paths soft-bindings preserve "this" but allow override', async (t) => {
   const scenario = createScenarioFromScaffold({
@@ -120,7 +120,7 @@ test('builtin - paths soft-bindings preserve "this" but allow override', async (
     thisCheck: true,
     classCheck: true
   })
-  })
+})
 
 function createScenarioFromScaffold ({
   files = [],

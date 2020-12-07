@@ -24,7 +24,7 @@ test('getEndowmentsForConfig - siblings', (t) => {
   const config = {
     globals: {
       'Buffer.from': true,
-      'Buffer.isBuffer': true,
+      'Buffer.isBuffer': true
     }
   }
   const resultGlobal = getEndowmentsForConfig(sourceGlobal, config)
@@ -34,7 +34,7 @@ test('getEndowmentsForConfig - siblings', (t) => {
     t.is(typeof resultProp.value, 'function')
     t.deepEqual(resultProp, {
       ...sourceProp,
-      value: resultProp.value,
+      value: resultProp.value
     }, 'prop descriptor matches (except value)')
   }
   {
@@ -43,17 +43,17 @@ test('getEndowmentsForConfig - siblings', (t) => {
     t.is(typeof resultProp.value, 'function')
     t.deepEqual(resultProp, {
       ...sourceProp,
-      value: resultProp.value,
+      value: resultProp.value
     }, 'prop descriptor matches (except value)')
   }
 })
 
 test('getEndowmentsForConfig - getter', (t) => {
   const { getEndowmentsForConfig } = makeGetEndowmentsForConfig()
-  const sourceGlobal = { get abc () { return { xyz: 42 } }}
+  const sourceGlobal = { get abc () { return { xyz: 42 } } }
   const config = {
     globals: {
-      'abc.xyz': true,
+      'abc.xyz': true
     }
   }
   const resultGlobal = getEndowmentsForConfig(sourceGlobal, config)
@@ -66,7 +66,7 @@ test('getEndowmentsForConfig - getter', (t) => {
       enumerable,
       configurable,
       value: resultProp.value,
-      writable: true,
+      writable: true
     }, 'prop descriptor matches (except value)')
   }
 })

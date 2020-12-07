@@ -168,6 +168,7 @@ function getPropertyDescriptorDeep (target, key) {
       receiver = Reflect.getPrototypeOf(receiver)
     } else {
       // prototype lookup for primitives
+      // eslint-disable-next-line no-proto
       receiver = receiver.__proto__
     }
     // abort if this is the end of the prototype chain.
