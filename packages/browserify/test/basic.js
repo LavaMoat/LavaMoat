@@ -39,7 +39,7 @@ test('basic - browserify bundle doesnt inject global', async (t) => {
   const bundle = await createBundleFromEntry(__dirname + '/fixtures/global.js')
   const browserifyGlobalPolyfill = 'typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {}'
   const hasGlobalInjection = bundle.includes(browserifyGlobalPolyfill)
-  t.notOk(hasGlobalInjection, 'did not inject "global" ref')
+  t.falsy(hasGlobalInjection, 'did not inject "global" ref')
 })
 
 test('basic - browserify bundle doesnt inject global in deps', async (t) => {
@@ -62,7 +62,7 @@ test('basic - browserify bundle doesnt inject global in deps', async (t) => {
   const config = await generateConfigFromFiles({ files: clone(files) })
   const bundle = await createBundleFromRequiresArray(clone(files), { config })
   const hasGlobalInjection = bundle.includes('typeof global !== \\"undefined\\" ? global :')
-  t.notOk(hasGlobalInjection, 'did not inject "global" ref')
+  t.falsy(hasGlobalInjection, 'did not inject "global" ref')
 })
 
 test('basic - lavamoat config and bundle', async (t) => {

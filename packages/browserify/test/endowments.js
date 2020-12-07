@@ -14,11 +14,11 @@ test('endowments - bridged endowments matches original endowments object', async
   const testObj = {}
   const testGlobal = {
     testGet: () => {
-      console.log(`Test Get: ${testObj}`)
+      // console.log(`Test Get: ${testObj}`)
       return testObj
     },
     testCheck: (target) => {
-      console.log(`Test Check: target: ${target} testObj: ${testObj}`)
+      // console.log(`Test Check: target: ${target} testObj: ${testObj}`)
       return target === testObj
     }
   }

@@ -14,7 +14,7 @@ test('transforms - Ses transforms work', async (t) => {
   }
 
   const one = await runSimpleOneTwo({ defineOne, defineTwo })
-  t.ok(one)
+  t.truthy(one)
   })
 
 // this originally required a transform but does not any more
@@ -31,7 +31,7 @@ test('transforms - common pattern "_inheritsLoose" works with TypeError', async 
   }
 
   const one = await runSimpleOneTwo({ defineOne, defineTwo })
-  t.ok(one)
+  t.truthy(one)
   })
 
 test('transforms - common pattern "_inheritsLoose" works across package boundaries', async (t) => {
@@ -48,5 +48,5 @@ test('transforms - common pattern "_inheritsLoose" works across package boundari
   }
 
   const one = await runSimpleOneTwo({ defineOne, defineTwo })
-  t.ok(one)
+  t.truthy(one)
   })
