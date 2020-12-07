@@ -57,7 +57,19 @@ function makeGetEndowmentsForConfig () {
       // just skip it
       return
     }
-    const originValue = originPropDesc.value
+    // determine the origin value, this coerces getters to values
+    // im deeply sorry, respecting getters was complicated and
+    // my brain is not very good
+    let originValue, originWritable
+    if ('value' in originPropDesc) {
+      originValue = originPropDesc.value
+      originWritable = originPropDesc.writable
+    } else if ('get' in originPropDesc) {
+      originValue = originPropDesc.get.call(originRef)
+      originWritable = 'set' in originPropDesc
+    } else {
+      throw new Error('getEndowmentsForConfig - property descriptor missing a getter')
+    }
     // if target already has a value, it must be extensible
     const targetPropDesc = Reflect.getOwnPropertyDescriptor(targetRef, nextPart)
     if (targetPropDesc) {
@@ -83,13 +95,13 @@ function makeGetEndowmentsForConfig () {
       const newValue = {}
       const newPropDesc = {
         value: newValue,
+        writable: originWritable,
         enumerable: originPropDesc.enumerable,
-        writable: originPropDesc.writable,
-        configutable: originPropDesc.configutable
+        configurable: originPropDesc.configurable
       }
       Reflect.defineProperty(targetRef, nextPart, newPropDesc)
       // continue
-      const nextOriginRef = originPropDesc.value
+      const nextOriginRef = originValue
       const nextTargetRef = newValue
       copyValueAtPath(remainingParts, nextOriginRef, nextTargetRef)
       return
@@ -134,9 +146,9 @@ function makeGetEndowmentsForConfig () {
     Object.defineProperties(newValue, Object.getOwnPropertyDescriptors(originValue))
     const newPropDesc = {
       value: newValue,
+      writable: originWritable,
       enumerable: originPropDesc.enumerable,
-      writable: originPropDesc.writable,
-      configutable: originPropDesc.configutable
+      configurable: originPropDesc.configurable
     }
     Reflect.defineProperty(targetRef, nextPart, newPropDesc)
   }

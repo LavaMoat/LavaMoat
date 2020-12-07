@@ -118,11 +118,10 @@
         if (isRootModule) {
           endowments = globalRef
         } else {
-          const endowmentsFromConfig = getEndowmentsForConfig(globalRef, configForModule)
-          endowments = Object.assign({}, endowmentsFromConfig)
+          endowments = getEndowmentsForConfig(globalRef, configForModule)
           // special case for exposing window
           if (endowments.window) {
-            endowments = Object.assign({}, endowments.window, endowments)
+            endowments = Object.assign(endowments.window, endowments)
           }
         }
         // maybe membrane-wrap endowments
