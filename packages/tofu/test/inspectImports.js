@@ -1,4 +1,4 @@
-const test = require('tape')
+const test = require('ava')
 const deepEqual = require('deep-equal')
 const { parse, inspectImports } = require('../src/index')
 
@@ -97,8 +97,7 @@ function testInspect (label, opts, fn, expectedResultObj) {
     }
 
     t.deepEqual(resultSorted, expectedSorted)
-    t.end()
-  })
+      })
 }
 
 function sortBy (key) {

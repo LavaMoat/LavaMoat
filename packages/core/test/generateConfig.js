@@ -1,5 +1,5 @@
 /* eslint-disable no-undef, no-unused-vars, no-unused-expressions, no-extend-native */
-const test = require('tape-promise').default(require('tape'))
+const test = require('ava')
 
 const { generateConfigFromFiles } = require('./util')
 

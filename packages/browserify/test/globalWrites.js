@@ -1,4 +1,4 @@
-const test = require('tape-promise').default(require('tape'))
+const test = require('ava')
 
 const {
   createBundleFromRequiresArray,

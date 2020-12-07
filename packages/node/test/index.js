@@ -1,4 +1,4 @@
-const test = require('tape')
+const test = require('ava')
 const { parseForConfig } = require('../src/parseForConfig')
 const { runLavamoat } = require('./util')
 
@@ -45,8 +45,6 @@ test('parseForConfig - resolutions', async (t) => {
       }
     }
   }, 'config resources do not include data on packages not parsed due to resolutions')
-
-  t.end()
 })
 
 test('parseForConfig - require a userspace package with a builtin name', async (t) => {
@@ -74,19 +72,16 @@ test('parseForConfig - require a userspace package with a builtin name', async (
       }
     }
   })
-
-  t.end()
 })
 
-// Test indirectly used (passed to FN) imported packages being added to the config
-test("parseForConfig - indirectly used packages are included in parent's whitelist", async (t) => {
+// cjs package exports are fully auto-configured when passed to a fn
+test('parseForConfig - indirectly used packages are included in parent\'s whitelist', async (t) => {
   const projectRoot = `${__dirname}/projects/5`
   const entryId = `${projectRoot}/index.js`
   const config = await parseForConfig({ entryId, cwd: projectRoot })
   t.deepEqual(config, {
     resources: { a: { builtin: { crypto: true } } }
   })
-  t.end()
 })
 
 // run lavamoat-node
@@ -97,13 +92,12 @@ test('execute - resolutions', async (t) => {
     cwd: projectRoot,
     args: [entryId]
   })
-  t.equal(output.stderr, '', 'should not have any error output')
+  t.is(output.stderr, '', 'should not have any error output')
   t.deepEqual(output.stdout.split('\n'), [
     'fake-fs called',
     'value: 42',
     ''
   ], 'should not have any standard output')
-  t.end()
 })
 
 test('execute - keccak with native modules', async (t) => {
@@ -113,12 +107,11 @@ test('execute - keccak with native modules', async (t) => {
     cwd: projectRoot,
     args: [entryId]
   })
-  t.equal(output.stderr, '', 'should not have any error output')
+  t.is(output.stderr, '', 'should not have any error output')
   t.deepEqual(output.stdout.split('\n'), [
     'keccak256: 5cad7cf49f610ec53189e06d3c8668789441235613408f8fabcb4ad8dad94db5',
     ''
   ], 'should not have any standard output')
-  t.end()
 })
 
 test('execute - core modules and buffers', async (t) => {
@@ -128,10 +121,9 @@ test('execute - core modules and buffers', async (t) => {
     cwd: projectRoot,
     args: [entryId]
   })
-  t.equal(output.stderr, '', 'should not have any error output')
+  t.is(output.stderr, '', 'should not have any error output')
   t.deepEqual(output.stdout.split('\n'), [
     'sha256: fb1520a08f1bc43831d0000dc76f6b0f027bafd36c55b1f43fc54c60c2f831da',
     ''
   ], 'should not have any standard output')
-  t.end()
 })

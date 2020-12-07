@@ -1,4 +1,4 @@
-const test = require('tape-promise').default(require('tape'))
+const test = require('ava')
 const {
   runSimpleOneTwo,
   runSimpleOneTwoSamePackage
@@ -16,7 +16,7 @@ test('moduleExports - decorate an import - object', async (t) => {
 
   const one = await runSimpleOneTwoSamePackage({ defineOne, defineTwo })
 
-  t.equal(one.xyz, 42)
+  t.is(one.xyz, 42)
 })
 
 test('moduleExports - decorate an import - function', async (t) => {
@@ -129,7 +129,7 @@ test('moduleExports - object returned from exported function should be mutable',
   }
   const one = await runSimpleOneTwo({ defineOne, defineTwo })
 
-  t.equal(one.abc, 123, 'Object should be mutable')
+  t.is(one.abc, 123, 'Object should be mutable')
 })
 
 test('moduleExports - <endowments> membrane space should round-trip correctly in packages', async (t) => {
@@ -174,9 +174,8 @@ test('moduleExports - <endowments> membrane space should round-trip correctly in
 
   const result = await runSimpleOneTwo({ defineOne, defineTwo, config, testGlobal })
 
-  t.equal(result, true, 'endowments round tripped correctly')
-  t.end()
-})
+  t.is(result, true, 'endowments round tripped correctly')
+  })
 
 
 test('moduleExports - <endowments> membrane space should round-trip correctly in <root>', async (t) => {
@@ -219,6 +218,5 @@ test('moduleExports - <endowments> membrane space should round-trip correctly in
 
   const result = await runSimpleOneTwo({ defineRoot, defineOne, config, testGlobal })
 
-  t.equal(result, true, 'endowments round tripped correctly')
-  t.end()
-})
+  t.is(result, true, 'endowments round tripped correctly')
+  })

@@ -9,7 +9,7 @@
   "scripts": {
     "test": "yarn test:prep && yarn test:run",
     "test:prep": "for d in ./test/projects/*/ ; do (cd \"$d\" && yarn install); done",
-    "test:run": "node test/index.js",
+    "test:run": "ava test/index.js",
     "lint": "npm run lint:standard && npm run lint:deps",
     "lint:standard": "standard src/**/*.js test/*.js",
     "lint:fix": "standard src/**/*.js test/*.js --fix",
@@ -29,7 +29,7 @@
     "yargs": "^16.0.0"
   },
   "devDependencies": {
-    "tape": "^4.13.2"
+    "ava": "^3.13.0"
   },
   "directories": {
     "example": "examples",

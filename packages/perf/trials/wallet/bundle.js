@@ -5457,7 +5457,7 @@ Node.prototype._init = function init(body) {
   state.children = state.children.filter(function(child) {
     return child._baseState.parent === this;
   }, this);
-  assert.equal(state.children.length, 1, 'Root node can have only one child');
+  assert.is(state.children.length, 1, 'Root node can have only one child');
 };
 
 Node.prototype._useArgs = function useArgs(args) {
@@ -7144,7 +7144,7 @@ assert.fail = fail;
 // 4. Pure assertion tests whether a value is truthy, as determined
 // by !!guard.
 // assert.ok(guard, message_opt);
-// This statement is equivalent to assert.equal(true, !!guard,
+// This statement is equivalent to assert.is(true, !!guard,
 // message_opt);. To test strictly for the value true, use
 // assert.strictEqual(true, guard, message_opt);.
 
@@ -7155,7 +7155,7 @@ assert.ok = ok;
 
 // 5. The equality assertion tests shallow, coercive equality with
 // ==.
-// assert.equal(actual, expected, message_opt);
+// assert.is(actual, expected, message_opt);
 
 assert.equal = function equal(actual, expected, message) {
   if (actual != expected) fail(actual, expected, message, '==', assert.equal);
@@ -16454,7 +16454,7 @@ var inherits = require('inherits');
 var proto = {};
 
 function CBCState(iv) {
-  assert.equal(iv.length, 8, 'Invalid IV length');
+  assert.is(iv.length, 8, 'Invalid IV length');
 
   this.iv = new Array(8);
   for (var i = 0; i < this.iv.length; i++)
@@ -16652,7 +16652,7 @@ Cipher.prototype._unpad = function _unpad(buffer) {
 };
 
 Cipher.prototype._finalDecrypt = function _finalDecrypt() {
-  assert.equal(this.bufferOff, this.blockSize, 'Not enough data to decrypt');
+  assert.is(this.bufferOff, this.blockSize, 'Not enough data to decrypt');
   var out = new Array(this.blockSize);
   this._flushBuffer(out, 0);
 
@@ -16700,7 +16700,7 @@ var shiftTable = [
 DES.prototype.deriveKeys = function deriveKeys(state, key) {
   state.keys = new Array(16 * 2);
 
-  assert.equal(key.length, this.blockSize, 'Invalid key length');
+  assert.is(key.length, this.blockSize, 'Invalid key length');
 
   var kL = utils.readUInt32BE(key, 0);
   var kR = utils.readUInt32BE(key, 4);
@@ -16750,7 +16750,7 @@ DES.prototype._pad = function _pad(buffer, off) {
 DES.prototype._unpad = function _unpad(buffer) {
   var pad = buffer[buffer.length - 1];
   for (var i = buffer.length - pad; i < buffer.length; i++)
-    assert.equal(buffer[i], pad);
+    assert.is(buffer[i], pad);
 
   return buffer.slice(0, buffer.length - pad);
 };
@@ -16821,7 +16821,7 @@ var Cipher = require('./cipher');
 var DES = require('./des');
 
 function EDEState(type, key) {
-  assert.equal(key.length, 24, 'Invalid key length');
+  assert.is(key.length, 24, 'Invalid key length');
 
   var k1 = key.slice(0, 8);
   var k2 = key.slice(8, 16);

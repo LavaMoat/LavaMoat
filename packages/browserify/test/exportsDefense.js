@@ -1,6 +1,6 @@
 'use strict'
 
-const test = require('tape-promise').default(require('tape'))
+const test = require('ava')
 const {
   runSimpleOneTwo,
   runSimpleOneTwoSamePackage
@@ -18,8 +18,8 @@ test('exportsDefense - readOnly restrictions have override workaround fix', asyn
   }
   const one = await runSimpleOneTwo({ defineOne, defineTwo })
 
-  t.equal(one.xyz, 2, 'should update the property correctly')
-  t.equal(Object.getPrototypeOf(one).xyz, 1, 'should not update the prototype')
+  t.is(one.xyz, 2, 'should update the property correctly')
+  t.is(Object.getPrototypeOf(one).xyz, 1, 'should not update the prototype')
 })
 
 test('exportsDefense - doesnt explode on null/undefined exports', async (t) => {
@@ -31,7 +31,7 @@ test('exportsDefense - doesnt explode on null/undefined exports', async (t) => {
   }
   const one = await runSimpleOneTwo({ defineOne, defineTwo })
 
-  t.equal(one, null, 'should get the correct module.exports value')
+  t.is(one, null, 'should get the correct module.exports value')
 })
 
 test('exportsDefense - indirectly imported package should be readOnly', async (t) => {
@@ -60,7 +60,7 @@ test('exportsDefense - indirectly imported package should be readOnly', async (t
   }
 
   const testResult = await runSimpleOneTwoSamePackage({ defineRoot, defineOne, defineTwo })
-  t.equal(testResult, true, 'Thing.prototype.action was not corrupted')
+  t.is(testResult, true, 'Thing.prototype.action was not corrupted')
 })
 
 // I'm not sure this is a problem we should solve
@@ -84,5 +84,5 @@ test('exportsDefense - indirectly imported package should be readOnly', async (t
 //   const Thing = await runSimpleOneTwo({ defineOne, defineTwo })
 //   const thing = new Thing()
 
-//   t.equal(thing.action(), true, 'Thing.prototype.action was not corrupted')
+//   t.is(thing.action(), true, 'Thing.prototype.action was not corrupted')
 // })

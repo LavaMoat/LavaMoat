@@ -1,4 +1,4 @@
-const test = require('tape-promise').default(require('tape'))
+const test = require('ava')
 const clone = require('clone')
 
 const { generatePrelude } = require('../src/index')
@@ -32,14 +32,14 @@ test('basic - bundle works', async (t) => {
   const bundle = await createBundleFromRequiresArray(files, { config })
   const result = evalBundle(bundle)
 
-  t.equal(result, 555)
+  t.is(result, 555)
 })
 
 test('basic - browserify bundle doesnt inject global', async (t) => {
   const bundle = await createBundleFromEntry(__dirname + '/fixtures/global.js')
   const browserifyGlobalPolyfill = 'typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {}'
   const hasGlobalInjection = bundle.includes(browserifyGlobalPolyfill)
-  t.notOk(hasGlobalInjection, 'did not inject "global" ref')
+  t.falsy(hasGlobalInjection, 'did not inject "global" ref')
 })
 
 test('basic - browserify bundle doesnt inject global in deps', async (t) => {
@@ -62,7 +62,7 @@ test('basic - browserify bundle doesnt inject global in deps', async (t) => {
   const config = await generateConfigFromFiles({ files: clone(files) })
   const bundle = await createBundleFromRequiresArray(clone(files), { config })
   const hasGlobalInjection = bundle.includes('typeof global !== \\"undefined\\" ? global :')
-  t.notOk(hasGlobalInjection, 'did not inject "global" ref')
+  t.falsy(hasGlobalInjection, 'did not inject "global" ref')
 })
 
 test('basic - lavamoat config and bundle', async (t) => {
@@ -93,7 +93,7 @@ test('basic - lavamoat config and bundle', async (t) => {
   const testGlobal = { location: { href: testHref } }
   const result = evalBundle(bundle, testGlobal)
 
-  t.equal(result, testHref, 'test result matches expected')
+  t.is(result, testHref, 'test result matches expected')
 })
 
 test('basic - lavamoat bundle without prelude', async (t) => {

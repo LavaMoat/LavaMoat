@@ -1,4 +1,4 @@
-const test = require('tape-promise').default(require('tape'))
+const test = require('ava')
 const fs = require('fs')
 const path = require('path')
 const { execSync } = require('child_process')
@@ -83,7 +83,7 @@ test('config - dunder proto not allowed in globals path', async (t) => {
     await runSimpleOneTwo({ config })
     t.fail('did not throw as expected')
   } catch (err) {
-    t.ok(err.message.includes('"__proto__"'))
+    t.truthy(err.message.includes('"__proto__"'))
   }
 })
 
@@ -105,14 +105,13 @@ test('config - disable access to package', async (t) => {
     await runSimpleOneTwo({ config })
     t.fail('should have encountered a fatal error')
   } catch (err) {
-    t.ok(
+    t.truthy(
       err.message.includes('LavaMoat - required package not in whitelist'),
       'got expected error'
     )
   }
 
-  t.end()
-})
+  })
 
 test('config - default config path is generated with autoconfig if path is not specified', async (t) => {
   const { name: tempDir } = tmp.dirSync()
@@ -124,14 +123,13 @@ test('config - default config path is generated with autoconfig if path is not s
   const expectedPath = path.join(tempDir, 'lavamoat-config.json')
   const scriptPath = require.resolve('./fixtures/runBrowserifyAutoConfig')
 
-  t.notOk(fs.existsSync(expectedPath), 'Config file does not yet exist')
+  t.falsy(fs.existsSync(expectedPath), 'Config file does not yet exist')
 
   execSync(`node ${scriptPath}`, execOpts)
 
-  t.ok(fs.existsSync(expectedPath), 'Config file exists')
+  t.truthy(fs.existsSync(expectedPath), 'Config file exists')
 
-  t.end()
-})
+  })
 
 test('config - writes a proper config to a temp dir', async (t) => {
   const entries = [
@@ -164,7 +162,7 @@ test('config - writes a proper config to a temp dir', async (t) => {
   mkdirp.sync(configDir)
   fs.writeFileSync(filePath, JSON.stringify(config))
   const bundle = await createBundleFromRequiresArray([], { config: filePath })
-  t.doesNotThrow(() => evalBundle(bundle))
+  t.notThrows(() => evalBundle(bundle))
 })
 
 test('Config - Applies config override', async (t) => {
@@ -306,8 +304,8 @@ test('Config override is applied if not specified and already exists at default 
 //   const updatedConfigFileString = fs.readFileSync(configPath, 'utf8')
 //   rimraf.sync('./lavamoat')
 
-//   t.notOk(configFileString.includes('"three": 12345678'), 'original config should not have updated content')
-//   t.ok(updatedConfigFileString.includes('"three": 12345678'), 'config should be updated')
+//   t.falsy(configFileString.includes('"three": 12345678'), 'original config should not have updated content')
+//   t.truthy(updatedConfigFileString.includes('"three": 12345678'), 'config should be updated')
 // })
 
 test("Config validation fails - invalid 'resources' key", async (t) => {
@@ -344,7 +342,7 @@ test("Config validation fails - invalid 'resources' key", async (t) => {
     }
   }
 
-  testConfigValidator(configOverride, config, false, t)
+  await testConfigValidator(configOverride, config, false, t)
 })
 
 test("Config validation fails - invalid 'packages' key", async (t) => {
@@ -381,7 +379,7 @@ test("Config validation fails - invalid 'packages' key", async (t) => {
     }
   }
 
-  testConfigValidator(configOverride, config, false, t)
+  await testConfigValidator(configOverride, config, false, t)
 })
 
 test("Config validation fails - invalid 'globals' key", async (t) => {
@@ -418,7 +416,7 @@ test("Config validation fails - invalid 'globals' key", async (t) => {
     }
   }
 
-  testConfigValidator(configOverride, config, false, t)
+  await testConfigValidator(configOverride, config, false, t)
 })
 
 test('Config validation fails - invalid global value', async (t) => {
@@ -455,7 +453,7 @@ test('Config validation fails - invalid global value', async (t) => {
     }
   }
 
-  testConfigValidator(configOverride, config, false, t)
+  await testConfigValidator(configOverride, config, false, t)
 })
 
 test('Config validation passes - everything valid', async (t) => {
@@ -492,7 +490,7 @@ test('Config validation passes - everything valid', async (t) => {
     }
   }
 
-  testConfigValidator(configOverride, config, true, t)
+  await testConfigValidator(configOverride, config, true, t)
 })
 
 async function testConfigValidator (configOverride, config, shouldBeValid, t) {
@@ -526,9 +524,9 @@ test('Config - Applies writeAutoConfigDebug plugin option and dumps module objec
   const expectedPath = path.join(tmpObj.name, './module-data.json')
   const scriptPath = require.resolve('./fixtures/runBrowserifyAutoConfig')
 
-  t.notOk(fs.existsSync(expectedPath), 'Module data does not yet exist')
+  t.falsy(fs.existsSync(expectedPath), 'Module data does not yet exist')
 
   execSync(`node ${scriptPath}`, defaults)
 
-  t.ok(fs.existsSync(expectedPath), 'Module data exists')
+  t.truthy(fs.existsSync(expectedPath), 'Module data exists')
 })

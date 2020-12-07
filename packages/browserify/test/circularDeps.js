@@ -1,4 +1,4 @@
-const test = require('tape-promise').default(require('tape'))
+const test = require('ava')
 const clone = require('clone')
 const {
   createBundleFromRequiresArray,
@@ -52,5 +52,5 @@ test('circularDeps - multi-module circular deps dont inf loop', async (t) => {
   const bundle = await createBundleFromRequiresArray(clone(files), { config })
   const result = evalBundle(bundle)
 
-  t.equal(result, 42, 'expected result, did not error')
+  t.is(result, 42, 'expected result, did not error')
 })

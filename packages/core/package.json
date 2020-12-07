@@ -17,17 +17,16 @@
     "resolve": "^1.15.1"
   },
   "devDependencies": {
+    "ava": "^3.13.0",
     "merge-deep": "^3.0.2",
-    "object.fromentries": "^2.0.2",
-    "tape": "^4.13.2",
-    "tape-promise": "^4.0.0"
+    "object.fromentries": "^2.0.2"
   },
   "scripts": {
     "lint": "npm run lint:standard && npm run lint:deps",
     "lint:standard": "standard src/**/*.js test/**/*.js",
     "lint:fix": "standard src/**/*.js test/**/*.js --fix",
     "lint:deps": "depcheck --ignore-dirs=lib --ignores='abc,xyz,two,thisChecker,someClass,one'",
-    "test": "node test/index.js"
+    "test": "ava test/index.js"
   },
   "author": "kumavis",
   "license": "MIT",
