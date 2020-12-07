@@ -45,7 +45,6 @@ test('parseForConfig - resolutions', async (t) => {
       }
     }
   }, 'config resources do not include data on packages not parsed due to resolutions')
-
 })
 
 test('parseForConfig - require a userspace package with a builtin name', async (t) => {
@@ -73,7 +72,6 @@ test('parseForConfig - require a userspace package with a builtin name', async (
       }
     }
   })
-
 })
 
 // cjs package exports are fully auto-configured when passed to a fn
