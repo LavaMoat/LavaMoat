@@ -20,7 +20,7 @@
     "bindings": "^1.5.0",
     "htmlescape": "^1.1.1",
     "json-stable-stringify": "^1.0.1",
-    "lavamoat-core": "^6.3.0",
+    "lavamoat-core": "^6.3.1",
     "lavamoat-tofu": "^5.1.1",
     "merge-deep": "^3.0.2",
     "node-gyp-build": "^4.2.3",
