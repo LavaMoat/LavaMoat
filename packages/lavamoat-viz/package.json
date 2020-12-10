@@ -2,7 +2,7 @@
   "name": "lavamoat-viz",
   "description": "This is a dashboard for exploring a dependency graph and LavaMoat policy file",
   "main": "index.js",
-  "version": "5.0.0",
+  "version": "5.0.1",
   "dependencies": {
     "lavamoat-tofu": "^5.1.1",
     "ncp": "^2.0.0",
