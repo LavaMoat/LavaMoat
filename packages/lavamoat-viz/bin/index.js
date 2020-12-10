@@ -8,7 +8,7 @@ const yargs = require('yargs')
 const { ncp } = require('ncp')
 const pify = require('pify')
 const openUrl = require('open')
-const { utils: { mergeConfig } } = require('lavamoat-tofu')
+const { utils: { mergeConfig, objToMap, mapToObj } } = require('lavamoat-tofu')
 
 main().catch((err) => console.error(err))
 
@@ -65,8 +65,12 @@ async function main () {
   const debugConfigContent = await fs.readFile(debugConfig, 'utf8')
   const configContent = await fs.readFile(config, 'utf8')
   const configOverrideContent = await fs.readFile(configOverride, 'utf8')
-  const finalConfig = mergeConfig(configContent, configOverrideContent)
-  const dataInjectionContent = `globalThis.CONFIG_DEBUG = ${debugConfigContent}; globalThis.CONFIG = ${configContent}; globalThis.CONFIG_OVERRIDE = ${configOverrideContent}; globalThis.CONFIG_FINAL = ${finalConfig};`
+  const configContentMap = objToMap(JSON.parse(configContent).resources)
+  const configOverrideContentMap = objToMap(JSON.parse(configContent).resources)
+  const finalConfig = mergeConfig(configContentMap, configOverrideContentMap)
+  const finalConfigString = JSON.stringify(mapToObj(finalConfig))
+  const dataInjectionContent = `globalThis.CONFIG_DEBUG = ${debugConfigContent}; globalThis.CONFIG = ${configContent}; globalThis.CONFIG_OVERRIDE = ${configOverrideContent}; globalThis.CONFIG_FINAL = ${finalConfigString};`
+  
   await fs.writeFile(`${fullDest}/injectConfigDebugData.js`, dataInjectionContent)
   if (open) {
     openUrl(`file:///${fullDest}/index.html`)
