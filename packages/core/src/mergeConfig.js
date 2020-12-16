@@ -6,8 +6,12 @@ module.exports = { mergeConfig }
 function mergeConfig (configA, configB) {
   const mergedConfig = mergeDeep(configA, configB)
   Object.values(mergedConfig.resources).forEach((packageConfig) => {
-    packageConfig.globals = dedupeConfigPaths(packageConfig.globals)
-    packageConfig.builtin = dedupeConfigPaths(packageConfig.builtin)
+    if ('globals' in packageConfig) {
+      packageConfig.globals = dedupeConfigPaths(packageConfig.globals)
+    }
+    if ('builtin' in packageConfig) {
+      packageConfig.builtin = dedupeConfigPaths(packageConfig.builtin)
+    }
   })
   return mergedConfig
 }
