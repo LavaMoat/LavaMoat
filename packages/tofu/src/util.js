@@ -126,8 +126,7 @@ function mergeConfig (configA, configB) {
 
 function mergeConfigEntire (configA, configB) {
   deepExtend(configA, configB)
-  const finalConfigString = JSON.stringify(configA)
-  return finalConfigString
+  return configA
 }
 
 function objToMap (obj) {

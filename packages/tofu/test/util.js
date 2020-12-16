@@ -84,6 +84,6 @@ function testMergePartial (label, configA, configB, expectedResultObj) {
 function testMerge (label, configA, configB, expectedResultObj) {
   test(label, (t) => {
     const result = mergeConfigEntire(configA, configB)
-    t.deepEqual(result, JSON.stringify(expectedResultObj))
+    t.deepEqual(result, expectedResultObj)
   })
 }
