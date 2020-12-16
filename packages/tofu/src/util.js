@@ -125,8 +125,6 @@ function mergeConfigPartial (configA, configB) {
 }
 
 function mergeConfig (configA, configB) {
-  configA = JSON.parse(configA)
-  configB = JSON.parse(configB)
   deepExtend(configA, configB)
   const finalConfigString = JSON.stringify(configA)
   return finalConfigString
