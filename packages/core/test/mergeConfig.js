@@ -3,49 +3,49 @@ const test = require('ava')
 const { mergeConfig } = require('../src/mergeConfig')
 
 testMerge('merge with resources', {
-  'resources': {
-    'babel': {
-      'globals': {
-        'abc': true,
-        'xyz': false,
+  resources: {
+    babel: {
+      globals: {
+        abc: true,
+        xyz: false,
         'a.b.c': true
       },
-      'builtin': {
-        'derp': true,
-        'qwerty': false
+      builtin: {
+        derp: true,
+        qwerty: false
       }
     }
-  },
+  }
 }, {
-  'resources': {
-    'babel': {
-      'globals': {
-        'def': true,
-        'ghi': false,
+  resources: {
+    babel: {
+      globals: {
+        def: true,
+        ghi: false,
         'a.b': true
       },
-      'builtin': {
-        'derp': true,
-        'qwerty': false
+      builtin: {
+        derp: true,
+        qwerty: false
       }
     }
-  },
+  }
 }, {
-  'resources': {
-    'babel': {
-      'globals': {
-        'abc': true,
-        'xyz': false,
-        'def': true,
-        'ghi': false,
+  resources: {
+    babel: {
+      globals: {
+        abc: true,
+        xyz: false,
+        def: true,
+        ghi: false,
         'a.b': true
       },
-      'builtin': {
-        'derp': true,
-        'qwerty': false
+      builtin: {
+        derp: true,
+        qwerty: false
       }
     }
-  },
+  }
 })
 
 function testMerge (label, configA, configB, expectedResultObj) {
