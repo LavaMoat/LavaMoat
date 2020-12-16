@@ -6,6 +6,7 @@ const fs = require('fs')
 const yargs = require('yargs')
 const mergeDeep = require('merge-deep')
 const jsonStringify = require('json-stable-stringify')
+const { mergeConfig } = require('lavamoat-core')
 const { parseForConfig } = require('./parseForConfig')
 const { createKernel } = require('./kernel')
 
@@ -150,7 +151,7 @@ async function loadConfig ({ debugMode, configPath, configOverridePath }) {
     if (debugMode) console.warn(`Lavamoat looking for override config at ${configOverridePath}`)
     const configSource = fs.readFileSync(configOverridePath, 'utf8')
     const overrideConfig = JSON.parse(configSource)
-    config = mergeDeep(config, overrideConfig)
+    config = mergeConfig(config, overrideConfig)
   } else {
     if (debugMode) console.warn('Lavamoat could not find config override')
   }
