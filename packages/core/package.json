@@ -14,11 +14,11 @@
     "fromentries": "^1.2.0",
     "json-stable-stringify": "^1.0.1",
     "lavamoat-tofu": "^5.1.1",
-    "resolve": "^1.15.1"
+    "resolve": "^1.15.1",
+    "merge-deep": "^3.0.2"
   },
   "devDependencies": {
     "ava": "^3.13.0",
-    "merge-deep": "^3.0.2",
     "object.fromentries": "^2.0.2"
   },
   "scripts": {

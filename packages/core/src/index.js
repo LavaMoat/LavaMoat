@@ -6,6 +6,7 @@ const { packageDataForModule, createPackageDataStream, packageNameFromPath } = r
 const { createModuleInspector } = require('./generateConfig')
 const { parseForConfig } = require('./parseForConfig')
 const { LavamoatModuleRecord } = require('./moduleRecord')
+const { mergeConfig } = require('./mergeConfig')
 
 module.exports = {
   // generating the kernel
@@ -18,6 +19,7 @@ module.exports = {
   // generating lavamoat config
   createModuleInspector,
   parseForConfig,
+  mergeConfig,
   // module record class
   LavamoatModuleRecord
 }
