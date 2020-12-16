@@ -1,3 +1,4 @@
+const deepExtend = require('deep-extend')
 
 module.exports = {
   getMemberExpressionNesting,
@@ -124,9 +125,11 @@ function mergeConfigPartial (configA, configB) {
 }
 
 function mergeConfig (configA, configB) {
-  configA = objToMap(JSON.parse(configA).resources)
-  configB = objToMap(JSON.parse(configB).resources)
-  return { resources: mergeConfigPartial(configA, configB) }
+  configA = JSON.parse(configA)
+  configB = JSON.parse(configB)
+  deepExtend(configA, configB)
+  const finalConfigString = JSON.stringify(configA)
+  return finalConfigString
 }
 
 function objToMap (obj) {

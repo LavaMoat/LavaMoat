@@ -1,7 +1,7 @@
 const test = require('ava')
-const { utils: { mergeConfigPartial, objToMap, mapToObj } } = require('../src/index')
+const { utils: { mergeConfigPartial, mergeConfig, objToMap, mapToObj } } = require('../src/index')
 
-testMerge('upgrades reads to writes', {
+testMergePartial('upgrades reads to writes', {
   abc: 'write',
   xyz: 'read'
 }, {
@@ -12,7 +12,20 @@ testMerge('upgrades reads to writes', {
   xyz: 'write'
 })
 
-testMerge('dedupe overlapping', {
+testMergePartial('adds new packages', {
+  abc: 'write',
+  xyz: 'read'
+}, {
+  def: 'read',
+  ghi: 'write'
+}, {
+  abc: 'write',
+  xyz: 'read',
+  def: 'read',
+  ghi: 'write'
+})
+
+testMergePartial('dedupe overlapping', {
   'abc.xyz': 'read'
 }, {
   abc: 'read'
@@ -20,7 +33,7 @@ testMerge('dedupe overlapping', {
   abc: 'read'
 })
 
-testMerge('non-overlapping', {
+testMergePartial('non-overlapping', {
   abc: 'read'
 }, {
   'xyz.jkl': 'write'
@@ -29,10 +42,48 @@ testMerge('non-overlapping', {
   'xyz.jkl': 'write'
 })
 
-function testMerge (label, configA, configB, expectedResultObj) {
+testMerge('merge with resources', {
+  'resources': {
+    'babel': {
+      'globals': {
+        'abc': true,
+        'xyz': false
+      }
+    }
+  },
+}, {
+  'resources': {
+    'babel': {
+      'globals': {
+        'def': true,
+        'ghi': false
+      }
+    }
+  },
+}, {
+  'resources': {
+    'babel': {
+      'globals': {
+        'abc': true,
+        'xyz': false,
+        'def': true,
+        'ghi': false
+      }
+    }
+  },
+})
+
+function testMergePartial (label, configA, configB, expectedResultObj) {
   test(label, (t) => {
     const result = mergeConfigPartial(objToMap(configA), objToMap(configB))
     const resultObj = mapToObj(result)
     t.deepEqual(resultObj, expectedResultObj)
-      })
+  })
+}
+
+function testMerge (label, configA, configB, expectedResultObj) {
+  test(label, (t) => {
+    const result = mergeConfig(JSON.stringify(configA), JSON.stringify(configB))
+    t.deepEqual(result, JSON.stringify(expectedResultObj))
+  })
 }
