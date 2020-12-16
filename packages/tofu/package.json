@@ -5,8 +5,7 @@
   "license": "MIT",
   "dependencies": {
     "@babel/parser": "^7.10.1",
-    "@babel/traverse": "^7.10.1",
-    "deep-extend": "^0.6.0"
+    "@babel/traverse": "^7.10.1"
   },
   "devDependencies": {
     "ava": "^3.13.0",

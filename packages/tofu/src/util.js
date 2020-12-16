@@ -1,5 +1,3 @@
-const deepExtend = require('deep-extend')
-
 module.exports = {
   getMemberExpressionNesting,
   getPathFromMemberExpressionChain,
@@ -10,7 +8,6 @@ module.exports = {
   reduceToTopmostApiCallsFromStrings,
   addGlobalUsage,
   mergeConfig,
-  mergeConfigEntire,
   objToMap,
   mapToObj,
   getParents
@@ -122,11 +119,6 @@ function mergeConfig (configA, configB) {
   })
   reduceToTopmostApiCalls(newConfig)
   return newConfig
-}
-
-function mergeConfigEntire (configA, configB) {
-  deepExtend(configA, configB)
-  return configA
 }
 
 function objToMap (obj) {
