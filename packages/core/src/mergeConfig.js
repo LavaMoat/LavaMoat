@@ -1,9 +1,9 @@
 const { reduceToTopmostApiCalls, objToMap, mapToObj } = require('../../tofu/src/util')
 const mergeDeep = require('merge-deep')
 
-module.exports = { mergeConfigDeep }
+module.exports = { mergeConfig }
 
-function mergeConfigDeep (configA, configB) {
+function mergeConfig (configA, configB) {
   const mergedConfig = mergeDeep(configA, configB)
   Object.values(mergedConfig.resources).forEach((packageConfig) => {
     packageConfig.globals = dedupeConfigPaths(packageConfig.globals)

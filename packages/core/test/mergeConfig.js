@@ -1,6 +1,6 @@
 /* eslint-disable no-undef, no-unused-vars, no-unused-expressions, no-extend-native */
 const test = require('ava')
-const { mergeConfigDeep } = require('../src/mergeConfig')
+const { mergeConfig } = require('../src/mergeConfig')
 
 testMerge('merge with resources', {
   'resources': {
@@ -50,7 +50,7 @@ testMerge('merge with resources', {
 
 function testMerge (label, configA, configB, expectedResultObj) {
   test(label, (t) => {
-    const result = mergeConfigDeep(configA, configB)
+    const result = mergeConfig(configA, configB)
     t.deepEqual(result, expectedResultObj)
   })
 }
