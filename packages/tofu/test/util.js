@@ -1,7 +1,7 @@
 const test = require('ava')
-const { utils: { mergeConfig, objToMap, mapToObj } } = require('../src/index')
+const { utils: { mergeConfig, mergeConfigEntire, objToMap, mapToObj } } = require('../src/index')
 
-testMerge('upgrades reads to writes', {
+testMergePartial('upgrades reads to writes', {
   abc: 'write',
   xyz: 'read'
 }, {
@@ -12,7 +12,20 @@ testMerge('upgrades reads to writes', {
   xyz: 'write'
 })
 
-testMerge('dedupe overlapping', {
+testMergePartial('adds new packages', {
+  abc: 'write',
+  xyz: 'read'
+}, {
+  def: 'read',
+  ghi: 'write'
+}, {
+  abc: 'write',
+  xyz: 'read',
+  def: 'read',
+  ghi: 'write'
+})
+
+testMergePartial('dedupe overlapping', {
   'abc.xyz': 'read'
 }, {
   abc: 'read'
@@ -20,7 +33,7 @@ testMerge('dedupe overlapping', {
   abc: 'read'
 })
 
-testMerge('non-overlapping', {
+testMergePartial('non-overlapping', {
   abc: 'read'
 }, {
   'xyz.jkl': 'write'
@@ -29,10 +42,10 @@ testMerge('non-overlapping', {
   'xyz.jkl': 'write'
 })
 
-function testMerge (label, configA, configB, expectedResultObj) {
+function testMergePartial (label, configA, configB, expectedResultObj) {
   test(label, (t) => {
     const result = mergeConfig(objToMap(configA), objToMap(configB))
     const resultObj = mapToObj(result)
     t.deepEqual(resultObj, expectedResultObj)
-      })
+  })
 }
