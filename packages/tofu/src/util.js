@@ -9,8 +9,8 @@ module.exports = {
   reduceToTopmostApiCalls,
   reduceToTopmostApiCallsFromStrings,
   addGlobalUsage,
-  mergeConfigPartial,
   mergeConfig,
+  mergeConfigEntire,
   objToMap,
   mapToObj,
   getParents
@@ -115,7 +115,7 @@ function addGlobalUsage (globalsConfig, identifierPath, identifierUse) {
   globalsConfig.set(identifierPath, identifierUse)
 }
 
-function mergeConfigPartial (configA, configB) {
+function mergeConfig (configA, configB) {
   const newConfig = new Map(configA)
   Array.from(configB.entries()).forEach(([path, value]) => {
     addGlobalUsage(newConfig, path, value)
@@ -124,7 +124,7 @@ function mergeConfigPartial (configA, configB) {
   return newConfig
 }
 
-function mergeConfig (configA, configB) {
+function mergeConfigEntire (configA, configB) {
   deepExtend(configA, configB)
   const finalConfigString = JSON.stringify(configA)
   return finalConfigString

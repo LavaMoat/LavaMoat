@@ -1,5 +1,5 @@
 const test = require('ava')
-const { utils: { mergeConfigPartial, mergeConfig, objToMap, mapToObj } } = require('../src/index')
+const { utils: { mergeConfig, mergeConfigEntire, objToMap, mapToObj } } = require('../src/index')
 
 testMergePartial('upgrades reads to writes', {
   abc: 'write',
@@ -75,7 +75,7 @@ testMerge('merge with resources', {
 
 function testMergePartial (label, configA, configB, expectedResultObj) {
   test(label, (t) => {
-    const result = mergeConfigPartial(objToMap(configA), objToMap(configB))
+    const result = mergeConfig(objToMap(configA), objToMap(configB))
     const resultObj = mapToObj(result)
     t.deepEqual(resultObj, expectedResultObj)
   })
@@ -83,7 +83,7 @@ function testMergePartial (label, configA, configB, expectedResultObj) {
 
 function testMerge (label, configA, configB, expectedResultObj) {
   test(label, (t) => {
-    const result = mergeConfig(configA, configB)
+    const result = mergeConfigEntire(configA, configB)
     t.deepEqual(result, JSON.stringify(expectedResultObj))
   })
 }

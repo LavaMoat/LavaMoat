@@ -8,7 +8,7 @@ const {
   inspectImports,
   inspectSesCompat,
   codeSampleFromAstNode,
-  utils: { mergeConfigPartial, mapToObj, reduceToTopmostApiCallsFromStrings }
+  utils: { mergeConfig, mapToObj, reduceToTopmostApiCallsFromStrings }
 } = require('lavamoat-tofu')
 
 const rootSlug = '<root>'
@@ -163,7 +163,7 @@ function createModuleInspector (opts = {}) {
     }
     // agregate globals
     let packageGlobals = packageToGlobals[packageName] || []
-    packageGlobals = mergeConfigPartial(packageGlobals, foundGlobals)
+    packageGlobals = mergeConfig(packageGlobals, foundGlobals)
     packageToGlobals[packageName] = packageGlobals
   }
 
