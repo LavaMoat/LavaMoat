@@ -118,10 +118,15 @@
         if (isRootModule) {
           endowments = globalRef
         } else {
-          endowments = getEndowmentsForConfig(globalRef, configForModule)
-          // special case for exposing window
-          if (endowments.window) {
-            endowments = Object.assign(endowments.window, endowments)
+          try {
+            endowments = getEndowmentsForConfig(globalRef, configForModule)
+            // special case for exposing window
+            if (endowments.window) {
+              endowments = Object.assign(endowments.window, endowments)
+            }
+          } catch (err) {
+            const errMsg = `Lavamoat - failed to prepare endowments for module "${moduleId}":\n${err.stack}`
+            throw new Error(errMsg)
           }
         }
         // maybe membrane-wrap endowments
