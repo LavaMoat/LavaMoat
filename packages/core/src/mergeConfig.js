@@ -1,4 +1,4 @@
-const { reduceToTopmostApiCalls, objToMap, mapToObj } = require('../../tofu/src/util')
+const { reduceToTopmostApiCalls, objToMap, mapToObj } = require('lavamoat-tofu/src/util')
 const mergeDeep = require('merge-deep')
 
 module.exports = { mergeConfig }
