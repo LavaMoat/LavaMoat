@@ -4,7 +4,6 @@
 const path = require('path')
 const fs = require('fs')
 const yargs = require('yargs')
-const mergeDeep = require('merge-deep')
 const jsonStringify = require('json-stable-stringify')
 const { mergeConfig } = require('lavamoat-core')
 const { parseForConfig } = require('./parseForConfig')
