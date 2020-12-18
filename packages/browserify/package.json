@@ -16,7 +16,7 @@
     "clone": "^2.1.2",
     "combine-source-map": "^0.8.0",
     "json-stable-stringify": "^1.0.1",
-    "lavamoat-core": "^6.1.0",
+    "lavamoat-core": "^6.4.4",
     "merge-deep": "^3.0.2",
     "mkdirp": "^1.0.3",
     "offset-sourcemap-lines": "^1.0.1",
