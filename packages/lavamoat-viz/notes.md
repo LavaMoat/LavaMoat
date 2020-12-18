@@ -1,0 +1,12 @@
+- be sure we're stripping all sourcemaps (i think browserify does this, but lets verify)
+- currently measuring size with inline sourcemaps 
+- async dist is large
+- sentry dist is large
+- other views / tools
+  - [x] modules by size
+  - [x] view as packages
+  - [x] measure size without sourcemaps
+  - [ ] view all bundles as one
+  - [ ] differentiate between package versions
+  - [ ] highlight redundant packages of different versions
+  - [ ] highlight redundant packages across bundles
