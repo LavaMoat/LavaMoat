@@ -4,7 +4,7 @@
   "main": "index.js",
   "version": "5.0.2",
   "dependencies": {
-    "lavamoat-core": "^6.4.2",
+    "lavamoat-core": "^6.4.4",
     "ncp": "^2.0.0",
     "open": "^7.0.3",
     "pify": "^4.0.1",
