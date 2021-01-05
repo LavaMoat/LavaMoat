@@ -28,13 +28,13 @@ function packageVersionFromPath (packageName, filepath) {
   // attempt to load package path
   let packageVersion
   try {
-    const NODE_MAJOR_VERSION = process.version.split('.')[0].split('v')[1]; 
-    console.log(typeof NODE_MAJOR_VERSION)
     let requireFn
-    if (NODE_MAJOR_VERSION < 12) {
+    if (createRequire) {
+      requireFn = createRequire(path.join(packageParentPath, packageName))
+    } else if (createRequireFromPath) {
       requireFn = createRequireFromPath(path.join(packageParentPath, packageName))
     } else {
-      requireFn = createRequire(path.join(packageParentPath, packageName))
+    throw new Error('createRequire or createRequireFromPath are not supported in this version of NodeJS')
     }
     const packageJson = requireFn('package.json')
     packageVersion = packageJson.version
