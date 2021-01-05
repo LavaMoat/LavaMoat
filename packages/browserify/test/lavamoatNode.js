@@ -5,7 +5,7 @@ const path = require('path')
 test('basic - bundle works under lavamoat node', async (t) => {
   const bundle = execSync("lavamoat ../../../test/fixtures/runBrowserifyWithEntry.js --applyExportsDefense false",
   {
-    cwd: path.resolve(__dirname, '../examples/01-simple-js/lavamoat-build'),
+    cwd: path.resolve(__dirname, '../examples/02-secure-runtime'),
     maxBuffer: 8192 * 10000
   })
   t.assert(bundle, "Bundle exists")
