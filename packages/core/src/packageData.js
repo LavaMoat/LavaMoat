@@ -2,7 +2,7 @@
 const path = require('path')
 const pathSeperator = require('path').sep
 const { isCore } = require('resolve')
-const { createRequire } = require('module')
+const { createRequire, createRequireFromPath } = require('module')
 
 module.exports = {
   packageDataForModule,
@@ -28,7 +28,13 @@ function packageVersionFromPath (packageName, filepath) {
   // attempt to load package path
   let packageVersion
   try {
-    const requireFn = createRequire(path.join(packageParentPath, packageName))
+    const NODE_MAJOR_VERSION = process.version.split('.')[0];
+    let requireFn
+    if (NODE_MAJOR_VERSION < 12) {
+      requireFn = createRequireFromPath(path.join(packageParentPath, packageName))
+    } else {
+      requireFn = createRequire(path.join(packageParentPath, packageName))
+    }
     const packageJson = requireFn('package.json')
     packageVersion = packageJson.version
   } catch (err) {
