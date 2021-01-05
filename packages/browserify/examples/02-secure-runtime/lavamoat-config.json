@@ -435,6 +435,7 @@
         "events": true,
         "fs.readFileSync": true,
         "module.createRequire": true,
+        "module.createRequireFromPath": true,
         "path.extname": true,
         "path.join": true,
         "path.sep": true
@@ -679,7 +680,8 @@
     },
     "supports-color": {
       "builtin": {
-        "os.release": true
+        "os.release": true,
+        "tty.isatty": true
       },
       "globals": {
         "process.env": true,
