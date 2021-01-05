@@ -32,7 +32,6 @@
     "convert-source-map": "^1.6.0",
     "depcheck": "^0.9.2",
     "from": "^0.1.7",
-    "lavamoat": "^4.3.4",
     "pump": "^3.0.0",
     "rimraf": "^3.0.2",
     "ses": "git+https://git@github.com/agoric/ses.git#fdb393f817f6124c4d055bff26b68e4cbe17618e",

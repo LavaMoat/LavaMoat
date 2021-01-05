@@ -2,6 +2,7 @@
 const path = require('path')
 const pathSeperator = require('path').sep
 const { isCore } = require('resolve')
+// eslint-disable-next-line
 const { createRequire, createRequireFromPath } = require('module')
 
 module.exports = {
@@ -34,7 +35,7 @@ function packageVersionFromPath (packageName, filepath) {
     } else if (createRequireFromPath) {
       requireFn = createRequireFromPath(path.join(packageParentPath, packageName))
     } else {
-    throw new Error('createRequire or createRequireFromPath are not supported in this version of NodeJS')
+      throw new Error('createRequire or createRequireFromPath are not supported in this version of NodeJS')
     }
     const packageJson = requireFn('package.json')
     packageVersion = packageJson.version
