@@ -42,7 +42,7 @@
     "watchify": "^3.11.1"
   },
   "scripts": {
-    "test": "ava test/index.js",
+    "test": "ava test/index.js --timeout=2m",
     "lint": "npm run lint:standard && npm run lint:deps",
     "lint:standard": "standard src/**/*.js test/**/*.js",
     "lint:fix": "standard src/**/*.js test/**/*.js --fix",
