@@ -2,7 +2,7 @@
 const path = require('path')
 const pathSeperator = require('path').sep
 const { isCore } = require('resolve')
-// Importing depracated API for use with old node versions
+// importing deprecated API for use with old node versions
 // eslint-disable-next-line
 const { createRequire, createRequireFromPath } = require('module')
 
