@@ -15,7 +15,7 @@ test('basic - bundle works', async (t) => {
     {
       "id": "./1.js",
       "file": "./1.js",
-      "source": "global.testResult = require('foo')(5)",
+      "source": "global.testResult.value = require('foo')(5)",
       "deps": { "foo": "./node_modules/2/index.js" },
       "entry": true
     },
@@ -30,9 +30,9 @@ test('basic - bundle works', async (t) => {
     resources: {}
   }
   const bundle = await createBundleFromRequiresArray(files, { config })
-  const result = evalBundle(bundle)
+  const testResult = evalBundle(bundle)
 
-  t.is(result, 555)
+  t.is(testResult.value, 555)
 })
 
 test('basic - browserify bundle doesnt inject global', async (t) => {
@@ -73,7 +73,7 @@ test('basic - lavamoat config and bundle', async (t) => {
     deps: {
       banana: './node_modules/banana/index.js'
     },
-    source: 'global.testResult = require("banana")()',
+    source: 'global.testResult.value = require("banana")()',
     entry: true
   }, {
     // non-entry
@@ -91,9 +91,9 @@ test('basic - lavamoat config and bundle', async (t) => {
 
   const testHref = 'https://funky.town.gov/yolo?snake=yes'
   const testGlobal = { location: { href: testHref } }
-  const result = evalBundle(bundle, testGlobal)
+  const testResult = evalBundle(bundle, testGlobal)
 
-  t.is(result, testHref, 'test result matches expected')
+  t.is(testResult.value, testHref, 'test result matches expected')
 })
 
 test('basic - lavamoat bundle without prelude', async (t) => {
@@ -104,7 +104,7 @@ test('basic - lavamoat bundle without prelude', async (t) => {
     deps: {
       banana: './node_modules/banana/index.js'
     },
-    source: 'global.testResult = require("banana")()',
+    source: 'global.testResult.value = require("banana")()',
     entry: true
   }, {
     // non-entry

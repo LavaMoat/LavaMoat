@@ -2,6 +2,9 @@
 const path = require('path')
 const pathSeperator = require('path').sep
 const { isCore } = require('resolve')
+// importing deprecated API for use with old node versions
+// eslint-disable-next-line
+const { createRequire, createRequireFromPath } = require('module')
 
 module.exports = {
   packageDataForModule,
@@ -24,12 +27,18 @@ function packageDataForModule (moduleData, rootPackageName) {
 function packageVersionFromPath (packageName, filepath) {
   if (!packageName || !filepath) return
   const [packageParentPath] = filepath.split(`/${packageName}/`)
-  const packagePath = path.join(packageParentPath, packageName, 'package.json')
-  if (!packagePath) return
   // attempt to load package path
   let packageVersion
   try {
-    const packageJson = require(packagePath)
+    let requireFn
+    if (createRequire) {
+      requireFn = createRequire(path.join(packageParentPath, packageName))
+    } else if (createRequireFromPath) {
+      requireFn = createRequireFromPath(path.join(packageParentPath, packageName))
+    } else {
+      throw new Error('createRequire or createRequireFromPath are not supported in this version of NodeJS')
+    }
+    const packageJson = requireFn('package.json')
     packageVersion = packageJson.version
   } catch (err) {
     if (err.code !== 'MODULE_NOT_FOUND') {

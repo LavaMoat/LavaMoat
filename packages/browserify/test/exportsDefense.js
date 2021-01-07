@@ -43,7 +43,7 @@ test('exportsDefense - indirectly imported package should be readOnly', async (t
     try {
       thingProto.action = () => false
     } catch (_) {}
-    global.testResult = thing.action()
+    global.testResult.value = thing.action()
   }
 
   function defineOne () {

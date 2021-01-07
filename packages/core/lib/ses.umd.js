@@ -75,6 +75,8 @@
    * http://wiki.ecmascript.org/doku.php?id=conventions:safe_meta_programming
    * which only lives at
    * http://web.archive.org/web/20160805225710/http://wiki.ecmascript.org/doku.php?id=conventions:safe_meta_programming
+   *
+   * @param {(thisArg: Object, ...args: any[]) => any} fn
    */
   const uncurryThis = fn => (thisArg, ...args) => apply(fn, thisArg, args);
 
@@ -141,11 +143,12 @@
   }
 
   /**
-   * @fileoverview Exports {@code whitelist}, a recursively defined
+   * @file Exports {@code whitelist}, a recursively defined
    * JSON record enumerating all intrinsics and their properties
    * according to ECMA specs.
    *
    * @author JF Paradis
+   * @author Mark S. Miller
    */
 
   /* eslint max-lines: 0 */
@@ -157,7 +160,7 @@
    * Maps from property name to the actual value
    */
   const constantProperties = {
-    // *** 18.1 Value Properties of the Global Object
+    // *** Value Properties of the Global Object
 
     Infinity,
     NaN,
@@ -171,7 +174,7 @@
    * Maps from property name to the intrinsic name in the whitelist.
    */
   const universalPropertyNames = {
-    // *** 18.2 Function Properties of the Global Object
+    // *** Function Properties of the Global Object
 
     isFinite: 'isFinite',
     isNaN: 'isNaN',
@@ -183,7 +186,7 @@
     encodeURI: 'encodeURI',
     encodeURIComponent: 'encodeURIComponent',
 
-    // *** 18.3 Constructor Properties of the Global Object
+    // *** Constructor Properties of the Global Object
 
     Array: 'Array',
     ArrayBuffer: 'ArrayBuffer',
@@ -218,7 +221,7 @@
     WeakMap: 'WeakMap',
     WeakSet: 'WeakSet',
 
-    // *** 18.4 Other Properties of the Global Object
+    // *** Other Properties of the Global Object
 
     JSON: 'JSON',
     Reflect: 'Reflect',
@@ -244,13 +247,13 @@
    * Maps from property name to the intrinsic name in the whitelist.
    */
   const initialGlobalPropertyNames = {
-    // *** 18.3 Constructor Properties of the Global Object
+    // *** Constructor Properties of the Global Object
 
     Date: '%InitialDate%',
     Error: '%InitialError%',
     RegExp: '%InitialRegExp%',
 
-    // *** 18.4 Other Properties of the Global Object
+    // *** Other Properties of the Global Object
 
     Math: '%InitialMath%',
 
@@ -260,6 +263,10 @@
     // Only on initial global. No corresponding
     // powerless form for other globals.
     getStackString: '%InitialGetStackString%',
+
+    // TODO https://github.com/Agoric/SES-shim/issues/551
+    // Need initial WeakRef and FinalizationGroup in
+    // start compartment only.
   };
 
   /**
@@ -269,19 +276,20 @@
    * Maps from property name to the intrinsic name in the whitelist.
    */
   const sharedGlobalPropertyNames = {
-    // *** 18.3 Constructor Properties of the Global Object
+    // *** Constructor Properties of the Global Object
 
     Date: '%SharedDate%',
     Error: '%SharedError%',
     RegExp: '%SharedRegExp%',
 
-    // *** 18.4 Other Properties of the Global Object
+    // *** Other Properties of the Global Object
 
     Math: '%SharedMath%',
   };
 
   // All the "subclasses" of Error. These are collectively represented in the
   // EcmaScript spec by the meta variable NativeError.
+  // TODO Add AggregateError https://github.com/Agoric/SES-shim/issues/550
   const NativeErrors = [
     EvalError,
     RangeError,
@@ -334,21 +342,17 @@
    * <li>Symbol properties are listed using the "@@name" form.
    */
 
-  // 19.2.4 Function Instances
+  // Function Instances
   const FunctionInstance = {
-    // Mentioned in "19.2.4.3 prototype"
     '[[Proto]]': '%FunctionPrototype%',
-    // 19.2.4.1 length
     length: 'number',
-    // 19.2.4.2 name
     name: 'string',
-    // 19.2.4.3 prototype
     // Do not specify "prototype" here, since only Function instances that can
     // be used as a constructor have a prototype property. For constructors,
     // since prototype properties are instance-specific, we define it there.
   };
 
-  // 25.7.4 AsyncFunction Instances
+  // AsyncFunction Instances
   const AsyncFunctionInstance = {
     // This property is not mentioned in ECMA 262, but is present in V8 and
     // necessary for lockdown to succeed.
@@ -379,145 +383,105 @@
     return permit === getter || permit === accessor;
   }
 
-  // 19.5.6 NativeError Object Structure
+  // NativeError Object Structure
   function NativeError(prototype) {
     return {
-      // 19.5.6.2 Properties of the NativeError Constructors
+      // Properties of the NativeError Constructors
       '[[Proto]]': '%SharedError%',
 
-      // 19.5.6.2.1 NativeError.prototype
+      // NativeError.prototype
       prototype,
     };
   }
 
   function NativeErrorPrototype(constructor) {
     return {
-      // 19.5.6.3 Properties of the NativeError Prototype Objects
+      // Properties of the NativeError Prototype Objects
       '[[Proto]]': '%ErrorPrototype%',
-      // 19.5.6.3.1 NativeError.prototype.constructor
       constructor,
-      // 19.5.6.3.2 NativeError.prototype.message
       message: 'string',
-      // 19.5.6.3.3 NativeError.prototype.name
       name: 'string',
       // Redundantly present only on v8. Safe to remove.
       toString: false,
     };
   }
 
-  // 22.2.4 The TypedArray Constructors
+  // The TypedArray Constructors
   function TypedArray(prototype) {
     return {
-      // 22.2.5 Properties of the TypedArray Constructors
+      // Properties of the TypedArray Constructors
       '[[Proto]]': '%TypedArray%',
-
-      // 22.2.5.1 TypedArray.BYTES_PER_ELEMENT
       BYTES_PER_ELEMENT: 'number',
-      // 22.2.5.2 TypedArray.prototype
       prototype,
     };
   }
 
   function TypedArrayPrototype(constructor) {
     return {
-      // 22.2.6 Properties of the TypedArray Prototype Objects
+      // Properties of the TypedArray Prototype Objects
       '[[Proto]]': '%TypedArrayPrototype%',
-      // 22.2.6.1 TypedArray.prototype.BYTES_PER_ELEMENT
       BYTES_PER_ELEMENT: 'number',
-      // 22.2.6.2TypedArray.prototype.constructor
       constructor,
     };
   }
 
   // Without Math.random
   const SharedMath = {
-    // 20.3.1.1 Math.E
     E: 'number',
-    // 20.3.1.2 Math.LN10
     LN10: 'number',
-    // 20.3.1.3 Math.LN2
     LN2: 'number',
-    // 20.3.1.4 Math.LOG10E
     LOG10E: 'number',
-    // 20.3.1.5 Math.LOG2E
     LOG2E: 'number',
-    // 20.3.1.6 Math.PI
     PI: 'number',
-    // 20.3.1.7 Math.SQRT1_2
     SQRT1_2: 'number',
-    // 20.3.1.8 Math.SQRT2
     SQRT2: 'number',
-    // 20.3.1.9 Math [ @@toStringTag ]
     '@@toStringTag': 'string',
-    // 20.3.2.1 Math.abs
     abs: fn,
-    // 20.3.2.2 Math.acos
     acos: fn,
-    // 20.3.2.3 Math.acosh
     acosh: fn,
-    // 20.3.2.4 Math.asin
     asin: fn,
-    // 20.3.2.5 Math.asinh
     asinh: fn,
-    // 20.3.2.6 Math.atan
     atan: fn,
-    // 20.3.2.7 Math.atanh
     atanh: fn,
-    // 20.3.2.8 Math.atan2
     atan2: fn,
-    // 20.3.2.9 Math.cbrt
     cbrt: fn,
-    // 20.3.2.10 Math.ceil
     ceil: fn,
-    // 20.3.2.11 Math.clz32
     clz32: fn,
-    // 20.3.2.12 Math.cos
     cos: fn,
-    // 20.3.2.13 Math.cosh
     cosh: fn,
-    // 20.3.2.14 Math.exp
     exp: fn,
-    // 20.3.2.15 Math.expm1
     expm1: fn,
-    // 20.3.2.16 Math.floor
     floor: fn,
-    // 20.3.2.17 Math.fround
     fround: fn,
-    // 20.3.2.18 Math.hypot
     hypot: fn,
-    // 20.3.2.19 Math.imul
     imul: fn,
-    // 20.3.2.20 Math.log
     log: fn,
-    // 20.3.2.21 Math.log1p
     log1p: fn,
-    // 20.3.2.22 Math.log10
     log10: fn,
-    // 20.3.2.23 Math.log2
     log2: fn,
-    // 20.3.2.24 Math.max
     max: fn,
-    // 20.3.2.25 Math.min
     min: fn,
-    // 20.3.2.26Math.pow
     pow: fn,
-    // 20.3.2.28 Math.round
     round: fn,
-    // 20.3.2.29 Math.sign
     sign: fn,
-    // 20.3.2.30 Math.sin
     sin: fn,
-    // 20.3.2.31 Math.sinh
     sinh: fn,
-    // 20.3.2.32 Math.sqrt
     sqrt: fn,
-    // 20.3.2.33 Math.tan
     tan: fn,
-    // 20.3.2.34 Math.tanh
     tanh: fn,
-    // 20.3.2.35 Math.trunc
     trunc: fn,
-    // 20.3.2.35Math.trunc
+    // See https://github.com/Moddable-OpenSource/moddable/issues/523
+    idiv: false,
+    // See https://github.com/Moddable-OpenSource/moddable/issues/523
+    idivmod: false,
+    // See https://github.com/Moddable-OpenSource/moddable/issues/523
+    imod: false,
+    // See https://github.com/Moddable-OpenSource/moddable/issues/523
+    imuldiv: false,
+    // See https://github.com/Moddable-OpenSource/moddable/issues/523
+    irem: false,
+    // See https://github.com/Moddable-OpenSource/moddable/issues/523
+    mod: false,
   };
 
   const whitelist = {
@@ -526,128 +490,81 @@
     // The intrinsics object has no prototype to avoid conflicts.
     '[[Proto]]': null,
 
-    // 9.2.4.1 %ThrowTypeError%
+    // %ThrowTypeError%
     '%ThrowTypeError%': fn,
 
-    // *** 18 The Global Object
+    // *** The Global Object
 
-    // *** 18.1 Value Properties of the Global Object
-
-    // 18.1.1 Infinity
+    // *** Value Properties of the Global Object
     Infinity: 'number',
-    // 18.1.2 NaN
     NaN: 'number',
-    // 18.1.3 undefined
     undefined: 'undefined',
 
-    // *** 18.2 Function Properties of the Global Object
+    // *** Function Properties of the Global Object
 
-    // 18.2.1 eval
+    // eval
     '%UniqueEval%': fn,
-    // 18.2.2 isFinite
     isFinite: fn,
-    // 18.2.3 isNaN
     isNaN: fn,
-    // 18.2.4 parseFloat
     parseFloat: fn,
-    // 18.2.5 parseInt
     parseInt: fn,
-    // 18.2.6.2 decodeURI
     decodeURI: fn,
-    // 18.2.6.3 decodeURIComponent
     decodeURIComponent: fn,
-    // 18.2.6.4 encodeURI
     encodeURI: fn,
-    // 18.2.6.5 encodeURIComponent
     encodeURIComponent: fn,
 
-    // *** 19 Fundamental Objects
+    // *** Fundamental Objects
 
     Object: {
-      // 19.1.2 Properties of the Object Constructor
+      // Properties of the Object Constructor
       '[[Proto]]': '%FunctionPrototype%',
-      // 19.1.2.1 Object.assign
       assign: fn,
-      // 19.1.2.2 Object.create
       create: fn,
-      // 19.1.2.3 Object.defineProperties
       defineProperties: fn,
-      // 19.1.2.4 Object.defineProperty
       defineProperty: fn,
-      // 19.1.2.5 Object.entries
       entries: fn,
-      // 19.1.2.6 Object.freeze
       freeze: fn,
-      // 19.1.2.7 Object.fromEntries
       fromEntries: fn,
-      // 19.1.2.8 Object.getOwnPropertyDescriptor
       getOwnPropertyDescriptor: fn,
-      // 19.1.2.9 Object.getOwnPropertyDescriptors
       getOwnPropertyDescriptors: fn,
-      // 19.1.2.10 Object.getOwnPropertyNames
       getOwnPropertyNames: fn,
-      // 19.1.2.11 Object.getOwnPropertySymbols
       getOwnPropertySymbols: fn,
-      // 19.1.2.12 Object.getPrototypeOf
       getPrototypeOf: fn,
-      // 19.1.2.13 Object.is
       is: fn,
-      // 19.1.2.14 Object.isExtensible
       isExtensible: fn,
-      // 19.1.2.15 Object.isFrozen
       isFrozen: fn,
-      // 19.1.2.16 Object.isSealed
       isSealed: fn,
-      // 19.1.2.17 Object.keys
       keys: fn,
-      // 19.1.2.18 Object.preventExtensions
       preventExtensions: fn,
-      // 19.1.2.19 Object.prototype
       prototype: '%ObjectPrototype%',
-      // 19.1.2.20 Object.seal
       seal: fn,
-      // 19.1.2.21 Object.setPrototypeOf
       setPrototypeOf: fn,
-      // 19.1.2.22 Object.values
       values: fn,
     },
 
     '%ObjectPrototype%': {
-      // 19.1.3 Properties of the Object Prototype Object
+      // Properties of the Object Prototype Object
       '[[Proto]]': null,
-      // 19.1.3.1 Object.prototype.constructor
       constructor: 'Object',
-      // 19.1.3.2 Object.prototype.hasOwnProperty
       hasOwnProperty: fn,
-      // 19.1.3.3 Object.prototype.isPrototypeOf
       isPrototypeOf: fn,
-      // 19.1.3.4 Object.prototype.propertyIsEnumerable
       propertyIsEnumerable: fn,
-      // 19.1.3.5 Object.prototype.toLocaleString
       toLocaleString: fn,
-      // 19.1.3.6 Object.prototype.toString
       toString: fn,
-      // 19.1.3.7 Object.prototype.valueOf
       valueOf: fn,
 
-      // B.2.2 Additional Properties of the Object.prototype Object
+      // Annex B: Additional Properties of the Object.prototype Object
 
-      // B.2.2.1 Object.prototype.__proto__
       '--proto--': accessor,
-      // B.2.2.2 Object.prototype.__defineGetter__
       __defineGetter__: fn,
-      // B.2.2.3 Object.prototype.__defineSetter__
       __defineSetter__: fn,
-      // B.2.2.4 Object.prototype.__lookupGetter__
       __lookupGetter__: fn,
-      // B.2.2.5 Object.prototype.__lookupSetter__
       __lookupSetter__: fn,
     },
 
     '%UniqueFunction%': {
-      // 19.2.2 Properties of the Function Constructor
+      // Properties of the Function Constructor
       '[[Proto]]': '%FunctionPrototype%',
-      // 19.2.2.2 Function.prototype
       prototype: '%FunctionPrototype%',
     },
 
@@ -657,97 +574,64 @@
     },
 
     '%FunctionPrototype%': {
-      // 19.2.3.1 Function.prototype.apply
       apply: fn,
-      // 19.2.3.2 Function.prototype.bind
       bind: fn,
-      // 19.2.3.3 Function.prototype.call
       call: fn,
-      // 19.2.3.4 Function.prototype.constructor
       constructor: '%InertFunction%', // TODO test
-      // 19.2.3.5 Function.prototype.toString
       toString: fn,
-      // 19.2.3.6 Function.prototype [ @@hasInstance ]
       '@@hasInstance': fn,
-      // non-std yet but proposed. To be removed if there
+      // proposed but not yet std yet. To be removed if there
       caller: false,
+      // proposed but not yet std yet. To be removed if there
       arguments: false,
     },
 
     Boolean: {
-      // 19.3.2 Properties of the Boolean Constructor
+      // Properties of the Boolean Constructor
       '[[Proto]]': '%FunctionPrototype%',
-      // 19.3.2.1 Boolean.prototype
       prototype: '%BooleanPrototype%',
     },
 
     '%BooleanPrototype%': {
-      // 19.3.3.1 Boolean.prototype.constructor
       constructor: 'Boolean',
-      // 19.3.3.2 Boolean.prototype.toString
       toString: fn,
-      // 19.3.3.3 Boolean.prototype.valueOf
       valueOf: fn,
     },
 
     Symbol: {
-      // 19.4.2 Properties of the Symbol Constructor
+      // Properties of the Symbol Constructor
       '[[Proto]]': '%FunctionPrototype%',
-      // 19.4.2.1 Symbol.asyncIterator
       asyncIterator: 'symbol',
-      // 19.4.2.2 Symbol.for
       for: fn,
-      // 19.4.2.3 Symbol.hasInstance
       hasInstance: 'symbol',
-      // 19.4.2.4 Symbol.isConcatSpreadable
       isConcatSpreadable: 'symbol',
-      // 19.4.2.5 Symbol.iterator
       iterator: 'symbol',
-      // 19.4.2.6 Symbol.keyFor
       keyFor: fn,
-      // 19.4.2.7 Symbol.match
       match: 'symbol',
-      // 19.4.2.8 Symbol.matchAll
       matchAll: 'symbol',
-      // 19.4.2.9 Symbol.prototype
       prototype: '%SymbolPrototype%',
-      // 19.4.2.10 Symbol.replace
       replace: 'symbol',
-      // 19.4.2.11 Symbol.search
       search: 'symbol',
-      // 19.4.2.12 Symbol.species
       species: 'symbol',
-      // 19.4.2.13 Symbol.split
       split: 'symbol',
-      // 19.4.2.14 Symbol.toPrimitive
       toPrimitive: 'symbol',
-      // 19.4.2.15 Symbol.toStringTag
       toStringTag: 'symbol',
-      // 19.4.2.16 Symbol.unscopables
       unscopables: 'symbol',
     },
 
     '%SymbolPrototype%': {
-      // 19.4.3 Properties of the Symbol Prototype Object
-
-      // 19.4.3.1 Symbol.prototype.constructor
+      // Properties of the Symbol Prototype Object
       constructor: 'Symbol',
-      // 19.4.3.2 get Symbol.prototype.description
       description: getter,
-      // 19.4.3.3 Symbol.prototype.toString
       toString: fn,
-      // 19.4.3.4 Symbol.prototype.valueOf
       valueOf: fn,
-      // 19.4.3.5 Symbol.prototype [ @@toPrimitive ]
       '@@toPrimitive': fn,
-      // 19.4.3.6 Symbol.prototype [ @@toStringTag ]
       '@@toStringTag': 'string',
     },
 
     '%InitialError%': {
-      // 19.5.2 Properties of the Error Constructor
+      // Properties of the Error Constructor
       '[[Proto]]': '%FunctionPrototype%',
-      // 19.5.2.1 Error.prototype
       prototype: '%ErrorPrototype%',
       // Non standard, v8 only, used by tap
       captureStackTrace: fn,
@@ -758,9 +642,8 @@
     },
 
     '%SharedError%': {
-      // 19.5.2 Properties of the Error Constructor
+      // Properties of the Error Constructor
       '[[Proto]]': '%FunctionPrototype%',
-      // 19.5.2.1 Error.prototype
       prototype: '%ErrorPrototype%',
       // Non standard, v8 only, used by tap
       captureStackTrace: fn,
@@ -771,19 +654,15 @@
     },
 
     '%ErrorPrototype%': {
-      // 19.5.3.1 Error.prototype.constructor
       constructor: '%SharedError%',
-      // 19.5.3.2 Error.prototype.message
       message: 'string',
-      // 19.5.3.3 Error.prototype.name
       name: 'string',
-      // 19.5.3.4 Error.prototype.toString
       toString: fn,
       // proposed de-facto, assumed TODO
       // stack: accessor,
     },
 
-    // 19.5.6.1.1 NativeError
+    // NativeError
 
     EvalError: NativeError('%EvalErrorPrototype%'),
     RangeError: NativeError('%RangeErrorPrototype%'),
@@ -799,356 +678,219 @@
     '%TypeErrorPrototype%': NativeErrorPrototype('TypeError'),
     '%URIErrorPrototype%': NativeErrorPrototype('URIError'),
 
-    // *** 20 Numbers and Dates
+    // *** Numbers and Dates
 
     Number: {
-      // 20.1.2 Properties of the Number Constructor
+      // Properties of the Number Constructor
       '[[Proto]]': '%FunctionPrototype%',
-      // 20.1.2.1 Number.EPSILON
       EPSILON: 'number',
-      // 20.1.2.2 Number.isFinite
       isFinite: fn,
-      // 20.1.2.3 Number.isInteger
       isInteger: fn,
-      // 20.1.2.4 Number.isNaN
       isNaN: fn,
-      // 20.1.2.5 Number.isSafeInteger
       isSafeInteger: fn,
-      // 20.1.2.6 Number.MAX_SAFE_INTEGER
       MAX_SAFE_INTEGER: 'number',
-      // 20.1.2.7 Number.MAX_VALUE
       MAX_VALUE: 'number',
-      // 20.1.2.8 Number.MIN_SAFE_INTEGER
       MIN_SAFE_INTEGER: 'number',
-      // 20.1.2.9 Number.MIN_VALUE
       MIN_VALUE: 'number',
-      // 20.1.2.10 Number.NaN
       NaN: 'number',
-      // 20.1.2.11 Number.NEGATIVE_INFINITY
       NEGATIVE_INFINITY: 'number',
-      // 20.1.2.12 Number.parseFloat
       parseFloat: fn,
-      // 20.1.2.13 Number.parseInt
       parseInt: fn,
-      // 20.1.2.14 Number.POSITIVE_INFINITY
       POSITIVE_INFINITY: 'number',
-      // 20.1.2.15 Number.prototype
       prototype: '%NumberPrototype%',
     },
 
     '%NumberPrototype%': {
-      // 20.1.3 Properties of the Number Prototype Object
-
-      // 20.1.3.1 Number.prototype.constructor
+      // Properties of the Number Prototype Object
       constructor: 'Number',
-      // 20.1.3.2 Number.prototype.toExponential
       toExponential: fn,
-      // 20.1.3.3 Number.prototype.toFixed
       toFixed: fn,
-      // 20.1.3.4 Number.prototype.toLocaleString
       toLocaleString: fn,
-      // 20.1.3.5 Number.prototype.toPrecision
       toPrecision: fn,
-      // 20.1.3.6 Number.prototype.toString
       toString: fn,
-      // 20.1.3.7 Number.prototype.valueOf
       valueOf: fn,
     },
 
     BigInt: {
-      // 20.2.2Properties of the BigInt Constructor
+      // Properties of the BigInt Constructor
       '[[Proto]]': '%FunctionPrototype%',
-      // 20.2.2.1 BigInt.asIntN
       asIntN: fn,
-      // 20.2.2.2 BigInt.asUintN
       asUintN: fn,
-      // 20.2.2.3 BigInt.prototype
       prototype: '%BigIntPrototype%',
+      // See https://github.com/Moddable-OpenSource/moddable/issues/523
+      bitLength: false,
+      // See https://github.com/Moddable-OpenSource/moddable/issues/523
+      fromArrayBuffer: false,
     },
 
     '%BigIntPrototype%': {
-      // 20.2.3.1 BigInt.prototype.constructor
       constructor: 'BigInt',
-      // 20.2.3.2 BigInt.prototype.toLocaleString
       toLocaleString: fn,
-      // 20.2.3.3 BigInt.prototype.toString
       toString: fn,
-      // 20.2.3.4 BigInt.prototype.valueOf
       valueOf: fn,
-      // 20.2.3.5 BigInt.prototype [ @@toStringTag ]
       '@@toStringTag': 'string',
     },
 
     '%InitialMath%': {
       ...SharedMath,
-      // 20.3.2.27Math.random
+      // random is standard but omitted from SharedMath
       random: fn,
     },
 
     '%SharedMath%': SharedMath,
 
     '%InitialDate%': {
-      // 20.4.3 Properties of the Date Constructor
+      // Properties of the Date Constructor
       '[[Proto]]': '%FunctionPrototype%',
-      // 20.4.3.1 Date.now
       now: fn,
-      // 20.4.3.2 Date.parse
       parse: fn,
-      // 20.4.3.3 Date.prototype
       prototype: '%DatePrototype%',
-      // 20.4.3.4 Date.UTC
       UTC: fn,
     },
 
     '%SharedDate%': {
-      // 20.4.3 Properties of the Date Constructor
+      // Properties of the Date Constructor
       '[[Proto]]': '%FunctionPrototype%',
-      // 20.4.3.1 Date.now
       now: fn,
-      // 20.4.3.2 Date.parse
       parse: fn,
-      // 20.4.3.3 Date.prototype
       prototype: '%DatePrototype%',
-      // 20.4.3.4 Date.UTC
       UTC: fn,
     },
 
     '%DatePrototype%': {
-      // 20.4.4.1 Date.prototype.constructor
       constructor: '%SharedDate%',
-      // 20.4.4.2 Date.prototype.getDate
       getDate: fn,
-      // 20.4.4.3 Date.prototype.getDay
       getDay: fn,
-      // 20.4.4.4 Date.prototype.getFullYear
       getFullYear: fn,
-      // 20.4.4.5 Date.prototype.getHours
       getHours: fn,
-      // 20.4.4.6 Date.prototype.getMilliseconds
       getMilliseconds: fn,
-      // 20.4.4.7 Date.prototype.getMinutes
       getMinutes: fn,
-      // 20.4.4.8 Date.prototype.getMonth
       getMonth: fn,
-      // 20.4.4.9 Date.prototype.getSeconds
       getSeconds: fn,
-      // 20.4.4.10 Date.prototype.getTime
       getTime: fn,
-      // 20.4.4.11 Date.prototype.getTimezoneOffset
       getTimezoneOffset: fn,
-      // 20.4.4.12 Date.prototype.getUTCDate
       getUTCDate: fn,
-      // 20.4.4.13 Date.prototype.getUTCDay
       getUTCDay: fn,
-      // 20.4.4.14 Date.prototype.getUTCFullYear
       getUTCFullYear: fn,
-      // 20.4.4.15 Date.prototype.getUTCHours
       getUTCHours: fn,
-      // 20.4.4.16 Date.prototype.getUTCMilliseconds
       getUTCMilliseconds: fn,
-      // 20.4.4.17 Date.prototype.getUTCMinutes
       getUTCMinutes: fn,
-      // 20.4.4.18 Date.prototype.getUTCMonth
       getUTCMonth: fn,
-      // 20.4.4.19 Date.prototype.getUTCSeconds
       getUTCSeconds: fn,
-      // 20.4.4.20 Date.prototype.setDate
       setDate: fn,
-      // 20.4.4.21 Date.prototype.setFullYear
       setFullYear: fn,
-      // 20.4.4.22 Date.prototype.setHours
       setHours: fn,
-      // 20.4.4.23 Date.prototype.setMilliseconds
       setMilliseconds: fn,
-      // 20.4.4.24 Date.prototype.setMinutes
       setMinutes: fn,
-      // 20.4.4.25 Date.prototype.setMonth
       setMonth: fn,
-      // 20.4.4.26 Date.prototype.setSeconds
       setSeconds: fn,
-      // 20.4.4.27 Date.prototype.setTime
       setTime: fn,
-      // 20.4.4.28 Date.prototype.setUTCDate
       setUTCDate: fn,
-      // 20.4.4.29 Date.prototype.setUTCFullYear
       setUTCFullYear: fn,
-      // 20.4.4.30 Date.prototype.setUTCHours
       setUTCHours: fn,
-      // 20.4.4.31 Date.prototype.setUTCMilliseconds
       setUTCMilliseconds: fn,
-      // 20.4.4.32 Date.prototype.setUTCMinutes
       setUTCMinutes: fn,
-      // 20.4.4.33 Date.prototype.setUTCMonth
       setUTCMonth: fn,
-      // 20.4.4.34 Date.prototype.setUTCSeconds
       setUTCSeconds: fn,
-      // 20.4.4.35 Date.prototype.toDateString
       toDateString: fn,
-      // 20.4.4.36 Date.prototype.toISOString
       toISOString: fn,
-      // 20.4.4.37 Date.prototype.toJSON
       toJSON: fn,
-      // 20.4.4.38 Date.prototype.toLocaleDateString
       toLocaleDateString: fn,
-      // 20.4.4.39 Date.prototype.toLocaleString
       toLocaleString: fn,
-      // 20.4.4.40 Date.prototype.toLocaleTimeString
       toLocaleTimeString: fn,
-      // 20.4.4.41 Date.prototype.toString
       toString: fn,
-      // 20.4.4.42 Date.prototype.toTimeString
       toTimeString: fn,
-      // 20.4.4.43 Date.prototype.toUTCString
       toUTCString: fn,
-      // 20.4.4.44 Date.prototype.valueOf
       valueOf: fn,
-      // 20.4.4.45 Date.prototype [ @@toPrimitive ]
       '@@toPrimitive': fn,
 
-      // B.2.4 Additional Properties of the Date.prototype Object
-
-      // B.2.4.1 Date.prototype.getYear
+      // Annex B: Additional Properties of the Date.prototype Object
       getYear: fn,
-      // B.2.4.2 Date.prototype.setYear
       setYear: fn,
-      // B.2.4.3 Date.prototype.toGMTString
       toGMTString: fn,
     },
 
-    // 21 Text Processing
+    // Text Processing
 
     String: {
-      // 21.1.2 Properties of the String Constructor
+      // Properties of the String Constructor
       '[[Proto]]': '%FunctionPrototype%',
-      // 21.1.2.1 String.fromCharCode
       fromCharCode: fn,
-      // 21.1.2.2 String.fromCodePoint
       fromCodePoint: fn,
-      // 21.1.2.3 String.prototype
       prototype: '%StringPrototype%',
-      // 21.1.2.4 String.raw
       raw: fn,
+      // See https://github.com/Moddable-OpenSource/moddable/issues/523
+      fromArrayBuffer: false,
     },
 
     '%StringPrototype%': {
-      // 21.1.3 Properties of the String Prototype Object
+      // Properties of the String Prototype Object
       length: 'number',
-      // 21.1.3.1 String.prototype.charAt
       charAt: fn,
-      // 21.1.3.2 String.prototype.charCodeAt
       charCodeAt: fn,
-      // 21.1.3.3 String.prototype.codePointAt
       codePointAt: fn,
-      // 21.1.3.4 String.prototype.concat
       concat: fn,
-      // 21.1.3.5 String.prototype.constructor
       constructor: 'String',
-      // 21.1.3.6 String.prototype.endsWith
       endsWith: fn,
-      // 21.1.3.7 String.prototype.includes
       includes: fn,
-      // 21.1.3.8 String.prototype.indexOf
       indexOf: fn,
-      // 21.1.3.9 String.prototype.lastIndexOf
       lastIndexOf: fn,
-      // 21.1.3.10 String.prototype.localeCompare
       localeCompare: fn,
-      // 21.1.3.11 String.prototype.match
       match: fn,
-      // 21.1.3.12 String.prototype.matchAll
       matchAll: fn,
-      // 21.1.3.13 String.prototype.normalize
       normalize: fn,
-      // 21.1.3.14 String.prototype.padEnd
       padEnd: fn,
-      // 21.1.3.15 String.prototype.padStart
       padStart: fn,
-      // 21.1.3.16 String.prototype.repeat
       repeat: fn,
-      // 21.1.3.17 String.prototype.replace
       replace: fn,
-      // 21.1.3.18 String.prototype.search
+      replaceAll: fn, // ES2021
       search: fn,
-      // 21.1.3.19 String.prototype.slice
       slice: fn,
-      // 21.1.3.20 String.prototype.split
       split: fn,
-      // 21.1.3.21 String.prototype.startsWith
       startsWith: fn,
-      // 21.1.3.22 String.prototype.substring
       substring: fn,
-      // 21.1.3.23 String.prototype.toLocaleLowerCase
       toLocaleLowerCase: fn,
-      // 21.1.3.24 String.prototype.toLocaleUpperCase
       toLocaleUpperCase: fn,
-      // 21.1.3.25 String.prototype.toLowerCase
       toLowerCase: fn,
-      // 21.1.3.26 String.prototype.
       toString: fn,
-      // 21.1.3.27 String.prototype.toUpperCase
       toUpperCase: fn,
-      // 21.1.3.28 String.prototype.trim
       trim: fn,
-      // 21.1.3.29 String.prototype.trimEnd
       trimEnd: fn,
-      // 21.1.3.30 String.prototype.trimStart
       trimStart: fn,
-      // 21.1.3.31 String.prototype.valueOf
       valueOf: fn,
-      // 21.1.3.32 String.prototype [ @@iterator ]
       '@@iterator': fn,
 
-      // B.2.3 Additional Properties of the String.prototype Object
-
-      // B.2.3.1 String.prototype.substr
+      // Annex B: Additional Properties of the String.prototype Object
       substr: fn,
-      // B.2.3.2 String.prototype.anchor
       anchor: fn,
-      // B.2.3.3 String.prototype.big
       big: fn,
-      // B.2.3.4 String.prototype.blink
       blink: fn,
-      // B.2.3.5 String.prototype.bold
       bold: fn,
-      // B.2.3.6 String.prototype.fixed
       fixed: fn,
-      // B.2.3.7 String.prototype.fontcolor
       fontcolor: fn,
-      // B.2.3.8 String.prototype.fontsize
       fontsize: fn,
-      // B.2.3.9 String.prototype.italics
       italics: fn,
-      // B.2.3.10 String.prototype.link
       link: fn,
-      // B.2.3.11 String.prototype.small
       small: fn,
-      // B.2.3.12 String.prototype.strike
       strike: fn,
-      // B.2.3.13 String.prototype.sub
       sub: fn,
-      // B.2.3.14 String.prototype.sup
       sup: fn,
-      // B.2.3.15 String.prototype.trimLeft
       trimLeft: fn,
-      // B.2.3.15 String.prototype.trimRight
       trimRight: fn,
+      // See https://github.com/Moddable-OpenSource/moddable/issues/523
+      compare: false,
     },
 
     '%StringIteratorPrototype%': {
-      // 21.1.5.2 he %StringIteratorPrototype% Object
       '[[Proto]]': '%IteratorPrototype%',
-      // 21.1.5.2.1 %StringIteratorPrototype%.next ( )
       next: fn,
-      // 21.1.5.2.2 %StringIteratorPrototype% [ @@toStringTag ]
       '@@toStringTag': 'string',
     },
 
     '%InitialRegExp%': {
-      // 21.2.4 Properties of the RegExp Constructor
+      // Properties of the RegExp Constructor
       '[[Proto]]': '%FunctionPrototype%',
-      // 21.2.4.1 RegExp.prototype
       prototype: '%RegExpPrototype%',
-      // 21.2.4.2 get RegExp [ @@species ]
       '@@species': getter,
 
       // The https://github.com/tc39/proposal-regexp-legacy-features
@@ -1175,153 +917,91 @@
     },
 
     '%SharedRegExp%': {
-      // 21.2.4 Properties of the RegExp Constructor
+      // Properties of the RegExp Constructor
       '[[Proto]]': '%FunctionPrototype%',
-      // 21.2.4.1 RegExp.prototype
       prototype: '%RegExpPrototype%',
-      // 21.2.4.2 get RegExp [ @@species ]
       '@@species': getter,
     },
 
     '%RegExpPrototype%': {
-      // 21.2.5 Properties of the RegExp Prototype Object
-      // 21.2.5.1 RegExp.prototype.constructor
+      // Properties of the RegExp Prototype Object
       constructor: '%SharedRegExp%',
-      // 21.2.5.2 RegExp.prototype.exec
       exec: fn,
-      // 21.2.5.3 get RegExp.prototype.dotAll
       dotAll: getter,
-      // 21.2.5.4 get RegExp.prototype.flags
       flags: getter,
-      // 21.2.5.5 get RegExp.prototype.global
       global: getter,
-      // 21.2.5.6 get RegExp.prototype.ignoreCase
       ignoreCase: getter,
-      // 21.2.5.7 RegExp.prototype [ @@match ]
       '@@match': fn,
-      // 21.2.5.8 RegExp.prototype [ @@matchAll ]
       '@@matchAll': fn,
-      // 21.2.5.9 get RegExp.prototype.multiline
       multiline: getter,
-      // 21.2.5.10 RegExp.prototype [ @@replace ]
       '@@replace': fn,
-      // 21.2.5.11 RegExp.prototype [ @@search ]
       '@@search': fn,
-      // 21.2.5.12 get RegExp.prototype.source
       source: getter,
-      // 21.2.5.13 RegExp.prototype [ @@split ]
       '@@split': fn,
-      // 21.2.5.14 get RegExp.prototype.sticky
       sticky: getter,
-      // 21.2.5.15 RegExp.prototype.test
       test: fn,
-      // 21.2.5.16 RegExp.prototype.toString
       toString: fn,
-      // 21.2.5.17 get RegExp.prototype.unicode
       unicode: getter,
 
-      // B.2.5 Additional Properties of the RegExp.prototype Object
-
-      // B.2.5.1 RegExp.prototype.compile
+      // Annex B: Additional Properties of the RegExp.prototype Object
       compile: false, // UNSAFE and suppressed.
     },
 
     '%RegExpStringIteratorPrototype%': {
-      // 21.2.7.1 The %RegExpStringIteratorPrototype% Object
+      // The %RegExpStringIteratorPrototype% Object
       '[[Proto]]': '%IteratorPrototype%',
-      // 21.2.7.1.1 %RegExpStringIteratorPrototype%.next
       next: fn,
-      // 21.2.7.1.2 %RegExpStringIteratorPrototype% [ @@toStringTag ]
       '@@toStringTag': 'string',
     },
 
-    // 22 Indexed Collections
+    // Indexed Collections
 
     Array: {
-      // 22.1.2 Properties of the Array Constructor
+      // Properties of the Array Constructor
       '[[Proto]]': '%FunctionPrototype%',
-      // 22.1.2.1 Array.from
       from: fn,
-      // 22.1.2.2 Array.isArray
       isArray: fn,
-      // 22.1.2.3 Array.of
       of: fn,
-      // 22.1.2.4 Array.prototype
       prototype: '%ArrayPrototype%',
-      // 22.1.2.5 get Array [ @@species ]
       '@@species': getter,
     },
 
     '%ArrayPrototype%': {
-      // 22.1.3 Properties of the Array Prototype Object
+      // Properties of the Array Prototype Object
       length: 'number',
-      // 22.1.3.1 Array.prototype.concat
       concat: fn,
-      // 22.1.3.2 Array.prototype.constructor
       constructor: 'Array',
-      // 22.1.3.3 Array.prototype.copyWithin
       copyWithin: fn,
-      // 22.1.3.4 Array.prototype.entries
       entries: fn,
-      // 22.1.3.5 Array.prototype.every
       every: fn,
-      // 22.1.3.6 Array.prototype.fill
       fill: fn,
-      // 22.1.3.7 Array.prototype.filter
       filter: fn,
-      // 22.1.3.8 Array.prototype.find
       find: fn,
-      // 22.1.3.9 Array.prototype.findIndex
       findIndex: fn,
-      // 22.1.3.10 Array.prototype.flat
       flat: fn,
-      // 22.1.3.11 Array.prototype.flatMap
       flatMap: fn,
-      // 22.1.3.12 Array.prototype.forEach
       forEach: fn,
-      // 22.1.3.13 Array.prototype.includes
       includes: fn,
-      // 22.1.3.14 Array.prototype.indexOf
       indexOf: fn,
-      // 22.1.3.15 Array.prototype.join
       join: fn,
-      // 22.1.3.16 Array.prototype.keys
       keys: fn,
-      // 22.1.3.17 Array.prototype.lastIndexOf
       lastIndexOf: fn,
-      // 22.1.3.18 Array.prototype.map
       map: fn,
-      // 22.1.3.19 Array.prototype.pop
       pop: fn,
-      // 22.1.3.20 Array.prototype.push
       push: fn,
-      // 22.1.3.21 Array.prototype.reduce
       reduce: fn,
-      // 22.1.3.22 Array.prototype.reduceRight
       reduceRight: fn,
-      // 22.1.3.23 Array.prototype.reverse
       reverse: fn,
-      // 22.1.3.24 Array.prototype.shift
       shift: fn,
-      // 22.1.3.25 Array.prototype.slice
       slice: fn,
-      // 22.1.3.26 Array.prototype.some
       some: fn,
-      // 22.1.3.27 Array.prototype.sort
       sort: fn,
-      // 22.1.3.28 Array.prototype.splice
       splice: fn,
-      // 22.1.3.29 Array.prototype.toLocaleString
       toLocaleString: fn,
-      // 22.1.3.30 Array.prototype.toString
       toString: fn,
-      // 22.1.3.31 Array.prototype.unshift
       unshift: fn,
-      // 22.1.3.32 Array.prototype.values
       values: fn,
-      // 22.1.3.33 Array.prototype [ @@iterator ]
       '@@iterator': fn,
-      // 22.1.3.34 Array.prototype [ @@unscopables ]
       '@@unscopables': {
         '[[Proto]]': null,
         copyWithin: 'boolean',
@@ -1338,97 +1018,59 @@
     },
 
     '%ArrayIteratorPrototype%': {
-      // 22.1.5.2 The %ArrayIteratorPrototype% Object
+      // The %ArrayIteratorPrototype% Object
       '[[Proto]]': '%IteratorPrototype%',
-      // 22.1.5.2.1 %ArrayIteratorPrototype%.next
       next: fn,
-      // 22.1.5.2.2 %ArrayIteratorPrototype% [ @@toStringTag ]
       '@@toStringTag': 'string',
     },
 
-    // *** 22.2 TypedArray Objects
+    // *** TypedArray Objects
 
     '%TypedArray%': {
-      // 22.2.2 Properties of the %TypedArray% Intrinsic Object
+      // Properties of the %TypedArray% Intrinsic Object
       '[[Proto]]': '%FunctionPrototype%',
-      // 22.2.2.1 %TypedArray%.from
       from: fn,
-      // 22.2.2.2 %TypedArray%.of
       of: fn,
-      // 22.2.2.3 %TypedArray%.prototype
       prototype: '%TypedArrayPrototype%',
-      // 22.2.2.4 get %TypedArray% [ @@species ]
       '@@species': getter,
     },
 
     '%TypedArrayPrototype%': {
-      // 22.2.3.1 get %TypedArray%.prototype.buffer
       buffer: getter,
-      // 22.2.3.2 get %TypedArray%.prototype.byteLength
       byteLength: getter,
-      // 22.2.3.3 get %TypedArray%.prototype.byteOffset
       byteOffset: getter,
-      // 22.2.3.4 %TypedArray%.prototype.constructor
       constructor: '%TypedArray%',
-      // 22.2.3.5 %TypedArray%.prototype.copyWithin
       copyWithin: fn,
-      // 22.2.3.6 %TypedArray%.prototype.entries
       entries: fn,
-      // 22.2.3.7 %TypedArray%.prototype.every
       every: fn,
-      // 22.2.3.8 %TypedArray%.prototype.fill
       fill: fn,
-      // 22.2.3.9 %TypedArray%.prototype.filter
       filter: fn,
-      // 22.2.3.10 %TypedArray%.prototype.find
       find: fn,
-      // 22.2.3.11 %TypedArray%.prototype.findIndex
       findIndex: fn,
-      // 22.2.3.12 %TypedArray%.prototype.forEach
       forEach: fn,
-      // 22.2.3.13 %TypedArray%.prototype.includes
       includes: fn,
-      // 22.2.3.14 %TypedArray%.prototype.indexOf
       indexOf: fn,
-      // 22.2.3.15 %TypedArray%.prototype.join
       join: fn,
-      // 22.2.3.16 %TypedArray%.prototype.keys
       keys: fn,
-      // 22.2.3.17 %TypedArray%.prototype.lastIndexOf
       lastIndexOf: fn,
-      // 22.2.3.18 get %TypedArray%.prototype.length
       length: getter,
-      // 22.2.3.19 %TypedArray%.prototype.map
       map: fn,
-      // 22.2.3.20 %TypedArray%.prototype.reduce
       reduce: fn,
-      // 22.2.3.21 %TypedArray%.prototype.reduceRight
       reduceRight: fn,
-      // 22.2.3.22 %TypedArray%.prototype.reverse
       reverse: fn,
-      // 22.2.3.23 %TypedArray%.prototype.set
       set: fn,
-      // 22.2.3.24 %TypedArray%.prototype.slice
       slice: fn,
-      // 22.2.3.25 %TypedArray%.prototype.some
       some: fn,
-      // 22.2.3.26 %TypedArray%.prototype.sort
       sort: fn,
-      // 22.2.3.27 %TypedArray%.prototype.subarray
       subarray: fn,
-      // 22.2.3.28 %TypedArray%.prototype.toLocaleString
       toLocaleString: fn,
-      // 22.2.3.29 %TypedArray%.prototype.toString
       toString: fn,
-      // 22.2.3.30 %TypedArray%.prototype.values
       values: fn,
-      // 22.2.3.31 %TypedArray%.prototype [ @@iterator ]
       '@@iterator': fn,
-      // 22.2.3.32 get %TypedArray%.prototype [ @@toStringTag ]
       '@@toStringTag': getter,
     },
 
-    // 22.2.4 The TypedArray Constructors
+    // The TypedArray Constructors
 
     BigInt64Array: TypedArray('%BigInt64ArrayPrototype%'),
     BigUint64Array: TypedArray('%BigUint64ArrayPrototype%'),
@@ -1454,318 +1096,223 @@
     '%Uint8ArrayPrototype%': TypedArrayPrototype('Uint8Array'),
     '%Uint8ClampedArrayPrototype%': TypedArrayPrototype('Uint8ClampedArray'),
 
-    // *** 23 Keyed Collections
+    // *** Keyed Collections
 
     Map: {
-      // 23.1.2 Properties of the Map Constructor
+      // Properties of the Map Constructor
       '[[Proto]]': '%FunctionPrototype%',
-      // 23.2.2.2 get Set [ @@species ]
       '@@species': getter,
       prototype: '%MapPrototype%',
     },
 
     '%MapPrototype%': {
-      // 23.1.3.1 Map.prototype.clear
       clear: fn,
-      // 23.1.3.2 Map.prototype.constructor
       constructor: 'Map',
-      // 23.1.3.3 Map.prototype.delete
       delete: fn,
-      // 23.1.3.4 Map.prototype.entries
       entries: fn,
-      // 23.1.3.5 Map.prototype.forEach
       forEach: fn,
-      // 23.1.3.6 Map.prototype.get
       get: fn,
-      // 23.1.3.7 Map.prototype.has
       has: fn,
-      // 23.1.3.8 Map.prototype.keys
       keys: fn,
-      // 23.1.3.9 Map.prototype.set
       set: fn,
-      // 23.1.3.10 get Map.prototype.size
       size: getter,
-      // 23.1.3.11 Map.prototype.values
       values: fn,
-      // 23.1.3.12Map.prototype [ @@iterator ]
       '@@iterator': fn,
-      // 23.1.3.13Map.prototype [ @@toStringTag ]
       '@@toStringTag': 'string',
     },
 
     '%MapIteratorPrototype%': {
-      // 23.1.5.2 The %MapIteratorPrototype% Object
+      // The %MapIteratorPrototype% Object
       '[[Proto]]': '%IteratorPrototype%',
-      // 23.1.5.2.1 %MapIteratorPrototype%.next
       next: fn,
-      // 23.1.5.2.2 %MapIteratorPrototype% [ @@toStringTag ]
       '@@toStringTag': 'string',
     },
 
     Set: {
-      // 23.2.2 Properties of the Set Constructor
+      // Properties of the Set Constructor
       '[[Proto]]': '%FunctionPrototype%',
-      // 23.2.2.1 Set.prototype
       prototype: '%SetPrototype%',
-      // 23.2.2.2 get Set [ @@species ]
       '@@species': getter,
     },
 
     '%SetPrototype%': {
-      // 23.2.3.1 Set.prototype.add
       add: fn,
-      // 23.2.3.2 Set.prototype.clear
       clear: fn,
-      // 23.2.3.3 Set.prototype.constructor
       constructor: 'Set',
-      // 23.2.3.4 Set.prototype.delete
       delete: fn,
-      // 23.2.3.5 Set.prototype.entries
       entries: fn,
-      // 23.2.3.6Set.prototype.forEach
       forEach: fn,
-      // 23.2.3.7 Set.prototype.has
       has: fn,
-      // 23.2.3.8 Set.prototype.keys
       keys: fn,
-      // 23.2.3.9 get Set.prototype.size
       size: getter,
-      // 23.2.3.10 Set.prototype.values
       values: fn,
-      // 3.2.3.11 Set.prototype [ @@iterator ]
       '@@iterator': fn,
-      // 23.2.3.12 Set.prototype [ @@toStringTag ]
       '@@toStringTag': 'string',
     },
 
     '%SetIteratorPrototype%': {
-      // 23.2.5.2 The %SetIteratorPrototype% Object
+      // The %SetIteratorPrototype% Object
       '[[Proto]]': '%IteratorPrototype%',
-      // 23.2.5.2.1 %SetIteratorPrototype%.next
       next: fn,
-      // 23.2.5.2.2 %SetIteratorPrototype% [ @@toStringTag ]
       '@@toStringTag': 'string',
     },
 
     WeakMap: {
-      // 23.3.2 Properties of the WeakMap Constructor
+      // Properties of the WeakMap Constructor
       '[[Proto]]': '%FunctionPrototype%',
-      // 23.3.2.1 WeakMap.prototype
       prototype: '%WeakMapPrototype%',
     },
 
     '%WeakMapPrototype%': {
-      // 23.3.3.1 WeakMap.prototype.constructor
       constructor: 'WeakMap',
-      // 23.3.3.2 WeakMap.prototype.delete
       delete: fn,
-      // 23.3.3.3 WeakMap.prototype.get
       get: fn,
-      // 23.3.3.4 WeakMap.prototype.has
       has: fn,
-      // 23.3.3.5 WeakMap.prototype.set
       set: fn,
-      // 23.3.3.6 WeakMap.prototype [ @@toStringTag ]
       '@@toStringTag': 'string',
     },
 
     WeakSet: {
-      // 23.4.2Properties of the WeakSet Constructor
+      // Properties of the WeakSet Constructor
       '[[Proto]]': '%FunctionPrototype%',
-      // 23.4.2.1 WeakSet.prototype
       prototype: '%WeakSetPrototype%',
     },
 
     '%WeakSetPrototype%': {
-      // 23.4.3.1 WeakSet.prototype.add
       add: fn,
-      // 23.4.3.2 WeakSet.prototype.constructor
       constructor: 'WeakSet',
-      // 23.4.3.3 WeakSet.prototype.delete
       delete: fn,
-      // 23.4.3.4 WeakSet.prototype.has
       has: fn,
-      // 23.4.3.5 WeakSet.prototype [ @@toStringTag ]
       '@@toStringTag': 'string',
     },
 
-    // *** 24 Structured Data
+    // *** Structured Data
 
     ArrayBuffer: {
-      // 24.1.3 Properties of the ArrayBuffer Constructor
+      // Properties of the ArrayBuffer Constructor
       '[[Proto]]': '%FunctionPrototype%',
-      // 24.1.3.1 ArrayBuffer.isView
       isView: fn,
-      // 24.1.3.2 ArrayBuffer.prototype
       prototype: '%ArrayBufferPrototype%',
-      // 24.1.3.3 get ArrayBuffer [ @@species ]
       '@@species': getter,
+      // See https://github.com/Moddable-OpenSource/moddable/issues/523
+      fromString: false,
+      // See https://github.com/Moddable-OpenSource/moddable/issues/523
+      fromBigInt: false,
     },
 
     '%ArrayBufferPrototype%': {
-      // 24.1.4.1 get ArrayBuffer.prototype.byteLength
       byteLength: getter,
-      // 24.1.4.2 ArrayBuffer.prototype.constructor
       constructor: 'ArrayBuffer',
-      // 24.1.4.3 ArrayBuffer.prototype.slice
       slice: fn,
-      // 24.1.4.4 ArrayBuffer.prototype [ @@toStringTag ]
       '@@toStringTag': 'string',
+      // See https://github.com/Moddable-OpenSource/moddable/issues/523
+      concat: false,
     },
 
-    // 24.2 SharedArrayBuffer Objects
+    // SharedArrayBuffer Objects
     SharedArrayBuffer: false, // UNSAFE and purposely suppressed.
     '%SharedArrayBufferPrototype%': false, // UNSAFE and purposely suppressed.
 
     DataView: {
-      // 24.3.3 Properties of the DataView Constructor
+      // Properties of the DataView Constructor
       '[[Proto]]': '%FunctionPrototype%',
-      // 24.3.3.1 DataView.prototype
       prototype: '%DataViewPrototype%',
     },
 
     '%DataViewPrototype%': {
-      // 24.3.4.1 get DataView.prototype.buffer
       buffer: getter,
-      // 24.3.4.2 get DataView.prototype.byteLength
       byteLength: getter,
-      // 24.3.4.3 get DataView.prototype.byteOffset
       byteOffset: getter,
-      // 24.3.4.4 DataView.prototype.constructor
       constructor: 'DataView',
-      // 24.3.4.5 DataView.prototype.getBigInt64
       getBigInt64: fn,
-      // 24.3.4.6 DataView.prototype.getBigUint64
       getBigUint64: fn,
-      // 24.3.4.7 DataView.prototype.getFloat32
       getFloat32: fn,
-      // 24.3.4.8 DataView.prototype.getFloat64
       getFloat64: fn,
-      // 24.3.4.9 DataView.prototype.getInt8
       getInt8: fn,
-      // 24.3.4.10 DataView.prototype.getInt16
       getInt16: fn,
-      // 24.3.4.11 DataView.prototype.getInt32
       getInt32: fn,
-      // 24.3.4.12 DataView.prototype.getUint8
       getUint8: fn,
-      // 24.3.4.13 DataView.prototype.getUint16
       getUint16: fn,
-      // 24.3.4.14 DataView.prototype.getUint32
       getUint32: fn,
-      // 24.3.4.15 DataView.prototype.setBigInt64
       setBigInt64: fn,
-      // 24.3.4.16 DataView.prototype.setBigUint64
       setBigUint64: fn,
-      // 24.3.4.17 DataView.prototype.setFloat32
       setFloat32: fn,
-      // 24.3.4.18 DataView.prototype.setFloat64
       setFloat64: fn,
-      // 24.3.4.19 DataView.prototype.setInt8
       setInt8: fn,
-      // 24.3.4.20 DataView.prototype.setInt16
       setInt16: fn,
-      // 24.3.4.21 DataView.prototype.setInt32
       setInt32: fn,
-      // 24.3.4.22 DataView.prototype.setUint8
       setUint8: fn,
-      // 24.3.4.23 DataView.prototype.setUint16
       setUint16: fn,
-      // 24.3.4.24 DataView.prototype.setUint32
       setUint32: fn,
-      // 24.3.4.25 DataView.prototype [ @@toStringTag ]
       '@@toStringTag': 'string',
     },
 
-    // 24.4 Atomics
+    // Atomics
     Atomics: false, // UNSAFE and suppressed.
 
     JSON: {
-      // 24.5.1 JSON.parse
       parse: fn,
-      // 24.5.2 JSON.stringify
       stringify: fn,
-      // 24.5.3 JSON [ @@toStringTag ]
       '@@toStringTag': 'string',
     },
 
-    // *** 25 Control Abstraction Objects
+    // *** Control Abstraction Objects
 
     '%IteratorPrototype%': {
-      // 25.1.2 The %IteratorPrototype% Object
-      // 25.1.2.1 %IteratorPrototype% [ @@iterator ]
+      // The %IteratorPrototype% Object
       '@@iterator': fn,
     },
 
     '%AsyncIteratorPrototype%': {
-      // 25.1.3 The %AsyncIteratorPrototype% Object
-      // 25.1.3.1 %AsyncIteratorPrototype% [ @@asyncIterator ]
+      // The %AsyncIteratorPrototype% Object
       '@@asyncIterator': fn,
     },
 
     '%InertGeneratorFunction%': {
-      // 25.2.2 Properties of the GeneratorFunction Constructor
+      // Properties of the GeneratorFunction Constructor
       '[[Proto]]': '%InertFunction%',
-      // 25.2.2.2 GeneratorFunction.prototype
       prototype: '%Generator%',
     },
 
     '%Generator%': {
-      // 25.2.3 Properties of the GeneratorFunction Prototype Object
+      // Properties of the GeneratorFunction Prototype Object
       '[[Proto]]': '%FunctionPrototype%',
-      // 25.2.3.1 GeneratorFunction.prototype.constructor
       constructor: '%InertGeneratorFunction%',
-      // 25.2.3.2 GeneratorFunction.prototype.prototype
       prototype: '%GeneratorPrototype%',
-      // 25.2.3.3 GeneratorFunction.prototype [ @@toStringTag ]
       '@@toStringTag': 'string',
     },
 
     '%InertAsyncGeneratorFunction%': {
-      // 25.3.2 Properties of the AsyncGeneratorFunction Constructor
+      // Properties of the AsyncGeneratorFunction Constructor
       '[[Proto]]': '%InertFunction%',
-      // 25.3.2.2 AsyncGeneratorFunction.prototype
       prototype: '%AsyncGenerator%',
     },
 
     '%AsyncGenerator%': {
-      // 25.3.3 Properties of the AsyncGeneratorFunction Prototype Object
+      // Properties of the AsyncGeneratorFunction Prototype Object
       '[[Proto]]': '%FunctionPrototype%',
-      // 25.3.3.1 AsyncGeneratorFunction.prototype.constructor
       constructor: '%InertAsyncGeneratorFunction%',
-      // 25.3.3.2 AsyncGeneratorFunction.prototype.prototype
       prototype: '%AsyncGeneratorPrototype%',
-      // 25.3.3.3 AsyncGeneratorFunction.prototype [ @@toStringTag ]
       '@@toStringTag': 'string',
     },
 
     '%GeneratorPrototype%': {
-      // 25.4.1 Properties of the Generator Prototype Object
+      // Properties of the Generator Prototype Object
       '[[Proto]]': '%IteratorPrototype%',
-      // 25.4.1.1 Generator.prototype.constructor
       constructor: '%Generator%',
-      // 25.4.1.2 Generator.prototype.next
       next: fn,
-      // 25.4.1.3 Generator.prototype.return
       return: fn,
-      // 25.4.1.4 Generator.prototype.throw
       throw: fn,
-      // 25.4.1.5 Generator.prototype [ @@toStringTag ]
       '@@toStringTag': 'string',
     },
 
     '%AsyncGeneratorPrototype%': {
-      // 25.5.1 Properties of the AsyncGenerator Prototype Object
+      // Properties of the AsyncGenerator Prototype Object
       '[[Proto]]': '%AsyncIteratorPrototype%',
-      // 25.5.1.1 AsyncGenerator.prototype.constructor
       constructor: '%AsyncGenerator%',
-      // 25.5.1.2 AsyncGenerator.prototype.next
       next: fn,
-      // 25.5.1.3 AsyncGenerator.prototype.return
       return: fn,
-      // 25.5.1.4 AsyncGenerator.prototype.throw
       throw: fn,
-      // 25.5.1.5 AsyncGenerator.prototype [ @@toStringTag ]
       '@@toStringTag': 'string',
     },
 
@@ -1791,104 +1338,77 @@
     },
 
     Promise: {
-      // 25.6.4 Properties of the Promise Constructor
+      // Properties of the Promise Constructor
       '[[Proto]]': '%FunctionPrototype%',
-      // 25.6.4.1 Promise.all
       all: fn,
-      // 25.6.4.2 Promise.allSettled
       allSettled: fn,
-      // 25.6.4.3Promise.prototype
+      // To transition from `false` to `fn` once we also have `AggregateError`
+      // TODO https://github.com/Agoric/SES-shim/issues/550
+      any: false, // ES2021
       prototype: '%PromisePrototype%',
-      // 25.6.4.4 Promise.race
       race: fn,
-      // 25.6.4.5 Promise.reject
       reject: fn,
-      // 25.6.4.6 Promise.resolve
       resolve: fn,
-      // 25.6.4.7 get Promise [ @@species ]
       '@@species': getter,
     },
 
     '%PromisePrototype%': {
-      // 25.6.5 Properties of the Promise Prototype Object
-      // 25.6.5.1 Promise.prototype.catch
+      // Properties of the Promise Prototype Object
       catch: fn,
-      // 25.6.5.2 Promise.prototype.constructor
       constructor: 'Promise',
-      // 25.6.5.3 Promise.prototype.finally
       finally: fn,
-      // 25.6.5.4 Promise.prototype.then
       then: fn,
-      // 25.6.5.5 Promise.prototype [ @@toStringTag ]
       '@@toStringTag': 'string',
     },
 
     '%InertAsyncFunction%': {
-      // 25.7.2 Properties of the AsyncFunction Constructor
+      // Properties of the AsyncFunction Constructor
       '[[Proto]]': '%InertFunction%',
-      // 25.7.2.2 AsyncFunction.prototype
       prototype: '%AsyncFunctionPrototype%',
     },
 
     '%AsyncFunctionPrototype%': {
-      // 25.7.3 Properties of the AsyncFunction Prototype Object
+      // Properties of the AsyncFunction Prototype Object
       '[[Proto]]': '%FunctionPrototype%',
-      // 25.7.3.1 AsyncFunction.prototype.constructor
       constructor: '%InertAsyncFunction%',
-      // 25.7.3.2 AsyncFunction.prototype [ @@toStringTag ]
       '@@toStringTag': 'string',
     },
 
-    // 26 Reflection
+    // Reflection
 
     Reflect: {
-      // 26.1 The Reflect Object
+      // The Reflect Object
       // Not a function object.
-      // 26.1.1 Reflect.apply
       apply: fn,
-      // 26.1.2 Reflect.construct
       construct: fn,
-      // 26.1.3 Reflect.defineProperty
       defineProperty: fn,
-      // 26.1.4 Reflect.deleteProperty
       deleteProperty: fn,
-      // 26.1.5 Reflect.get
       get: fn,
-      // 26.1.6 Reflect.getOwnPropertyDescriptor
       getOwnPropertyDescriptor: fn,
-      // 26.1.7 Reflect.getPrototypeOf
       getPrototypeOf: fn,
-      // 26.1.8 Reflect.has
       has: fn,
-      // 26.1.9 Reflect.isExtensible
       isExtensible: fn,
-      // 26.1.10 Reflect.ownKeys
       ownKeys: fn,
-      // 26.1.11 Reflect.preventExtensions
       preventExtensions: fn,
-      // 26.1.12 Reflect.set
       set: fn,
-      // 26.1.13 Reflect.setPrototypeOf
       setPrototypeOf: fn,
+      '@@toStringTag': 'string',
     },
 
     Proxy: {
-      // 26.2.2 Properties of the Proxy Constructor
+      // Properties of the Proxy Constructor
       '[[Proto]]': '%FunctionPrototype%',
-      // 26.2.2.1 Proxy.revocable
       revocable: fn,
     },
 
     // Appendix B
 
-    // B.2.1 Additional Properties of the Global Object
+    // Annex B: Additional Properties of the Global Object
 
-    // B.2.1.1 escape
     escape: fn,
-    // B.2.1.2 unescape (
     unescape: fn,
 
-    // ESNext
+    // Proposed
 
     '%UniqueCompartment%': {
       '[[Proto]]': '%FunctionPrototype%',
@@ -2047,7 +1567,7 @@
       isPseudoNative(obj) {
         if (!pseudoNatives) {
           throw new Error(
-            `isPseudoNative can only be called after finalIntrinsics`,
+            'isPseudoNative can only be called after finalIntrinsics',
           );
         }
         return pseudoNatives.has(obj);
@@ -2072,6 +1592,8 @@
    * WARNING:
    * If run before lockdown, the returned intrinsics record will carry the
    * *original* unsafe (feral, untamed) bindings of these global variables.
+   *
+   * @param {Object} globalObject
    */
   function getGlobalIntrinsics(globalObject) {
     const intrinsicsCollector = makeIntrinsicsCollector();
@@ -2115,6 +1637,8 @@
   /**
    * Object.getConstructorOf()
    * Helper function to improve readability, similar to Object.getPrototypeOf().
+   *
+   * @param {Object} obj
    */
   function getConstructorOf(obj) {
     return getPrototypeOf(obj).constructor;
@@ -2124,6 +1648,8 @@
    * getAnonymousIntrinsics()
    * Get the intrinsics not otherwise reachable by named own property
    * traversal from the global object.
+   *
+   * @returns {Object}
    */
   function getAnonymousIntrinsics() {
     const InertFunction = Function.prototype.constructor;
@@ -2260,20 +1786,11 @@
    * Create a `harden` function.
    */
   function makeHardener() {
-    if (arguments.length >= 1) {
-      // TODO Just a transitional test. Remove when safe to do so.
-      throw new TypeError('makeHardener no longer takes any options');
-    }
-
-    // Objects that we won't freeze, either because we've frozen them already,
-    // or they were one of the initial roots (terminals). These objects form
-    // the "fringe" of the hardened object graph.
-    const fringeSet = new WeakSet();
+    const hardened = new WeakSet();
 
     const { harden } = {
       harden(root) {
         const toFreeze = new Set();
-        const prototypes = new Map();
         const paths = new WeakMap();
 
         // If val is something we should be freezing but aren't yet,
@@ -2288,7 +1805,7 @@
             // future proof: break until someone figures out what it should do
             throw new TypeError(`Unexpected typeof: ${type}`);
           }
-          if (fringeSet.has(val) || toFreeze.has(val)) {
+          if (hardened.has(val) || toFreeze.has(val)) {
             // Ignore if this is an exit, or we've already visited it
             return;
           }
@@ -2311,15 +1828,10 @@
 
           // get stable/immutable outbound links before a Proxy has a chance to do
           // something sneaky.
-          const proto = getPrototypeOf$1(obj);
-          const descs = getOwnPropertyDescriptors$1(obj);
           const path = paths.get(obj) || 'unknown';
-
-          // console.log(`adding ${proto} to prototypes under ${path}`);
-          if (proto !== null && !prototypes.has(proto)) {
-            prototypes.set(proto, path);
-            paths.set(proto, `${path}.__proto__`);
-          }
+          const descs = getOwnPropertyDescriptors$1(obj);
+          const proto = getPrototypeOf$1(obj);
+          enqueue(proto, `${path}.__proto__`);
 
           ownKeys(descs).forEach(name => {
             const pathname = `${path}.${String(name)}`;
@@ -2347,44 +1859,17 @@
           toFreeze.forEach(freezeAndTraverse); // todo curried forEach
         }
 
-        function checkPrototypes() {
-          prototypes.forEach((path, p) => {
-            if (!(toFreeze.has(p) || fringeSet.has(p))) {
-              // all reachable properties have already been frozen by this point
-              let msg;
-              try {
-                msg = `prototype ${p} of ${path} is not already in the fringeSet`;
-              } catch (e) {
-                // `${(async _=>_).__proto__}` fails in most engines
-                msg =
-                  'a prototype of something is not already in the fringeset (and .toString failed)';
-                try {
-                  console.log(msg);
-                  console.log('the prototype:', p);
-                  console.log('of something:', path);
-                } catch (_e) {
-                  // console.log might be missing in restrictive SES realms
-                }
-              }
-              throw new TypeError(msg);
-            }
-          });
-        }
-
         function commit() {
           // todo curried forEach
           // we capture the real WeakSet.prototype.add above, in case someone
           // changes it. The two-argument form of forEach passes the second
           // argument as the 'this' binding, so we add to the correct set.
-          toFreeze.forEach(fringeSet.add, fringeSet);
+          toFreeze.forEach(hardened.add, hardened);
         }
 
         enqueue(root);
         dequeue();
-        // console.log("fringeSet", fringeSet);
-        // console.log("prototype set:", prototypes);
         // console.log("toFreeze set:", toFreeze);
-        checkPrototypes();
         commit();
 
         return root;
@@ -2402,6 +1887,9 @@
 
   /**
    * asStringPropertyName()
+   *
+   * @param {string} path
+   * @param {string | symbol} prop
    */
   function asStringPropertyName(path, prop) {
     if (typeof prop === 'string') {
@@ -2419,12 +1907,15 @@
    * whitelistIntrinsics()
    * Removes all non-whitelisted properties found by recursively and
    * reflectively walking own property chains.
+   *
+   * @param {Object} intrinsics
+   * @param {(Object) => void} nativeBrander
    */
   function whitelistIntrinsics(intrinsics, nativeBrander) {
     // These primities are allowed allowed for permits.
     const primitives = ['undefined', 'boolean', 'number', 'string', 'symbol'];
 
-    /**
+    /*
      * whitelistPrototype()
      * Validate the object's [[prototype]] against a permit.
      */
@@ -2453,7 +1944,7 @@
       throw new Error(`Unexpected intrinsic ${path}.__proto__ at ${protoName}`);
     }
 
-    /**
+    /*
      * isWhitelistPropertyValue()
      * Whitelist a single property value against a permit.
      */
@@ -2508,7 +1999,7 @@
       throw new TypeError(`Unexpected whitelist permit ${permit} at ${path}`);
     }
 
-    /**
+    /*
      * isWhitelistProperty()
      * Whitelist a single property against a permit.
      */
@@ -2531,7 +2022,7 @@
       );
     }
 
-    /**
+    /*
      * getSubPermit()
      */
     function getSubPermit(obj, permit, prop) {
@@ -2550,7 +2041,7 @@
       return undefined;
     }
 
-    /**
+    /*
      * whitelistProperties()
      * Whitelist all properties against a permit.
      */
@@ -2624,7 +2115,7 @@
 
     function toObject(obj) {
       if (obj === undefined || obj === null) {
-        throw new TypeError(`can't convert undefined or null to object`);
+        throw new TypeError("can't convert undefined or null to object");
       }
       return Object(obj);
     }
@@ -2737,7 +2228,7 @@
 
     const newIntrinsics = {};
 
-    /**
+    /*
      * The process to repair constructors:
      * 1. Create an instance of the function by evaluating syntax
      * 2. Obtain the prototype from the instance
@@ -2986,7 +2477,7 @@
   }
 
   /**
-   * @fileoverview Exports {@code enablements}, a recursively defined
+   * @file Exports {@code enablements}, a recursively defined
    * JSON record defining the optimum set of intrinsics properties
    * that need to be "repaired" before hardening is applied on
    * enviromments subject to the override mistake.
@@ -3181,7 +2672,9 @@
         function setter(newValue) {
           if (obj === this) {
             throw new TypeError(
-              `Cannot assign to read only property '${prop}' of '${path}'`,
+              `Cannot assign to read only property '${String(
+              prop,
+            )}' of '${path}'`,
             );
           }
           if (objectHasOwnProperty(this, prop)) {
@@ -3218,6 +2711,9 @@
       if (!descs) {
         return;
       }
+      // TypeScript does not allow symbols to be used as indexes because it
+      // cannot recokon types of symbolized properties.
+      // @ts-ignore
       ownKeys$2(descs).forEach(prop => enable(path, obj, prop, descs[prop]));
     }
 
@@ -3231,8 +2727,10 @@
         }
 
         // Plan has no symbol keys and we use getOwnPropertyNames()
-        // to avoid issues with stringification of property name.
-        const subPath = `${path}.${prop}`;
+        // so `prop` cannot only be a string, not a symbol. We coerce it in place
+        // with `String(..)` anyway just as good hygiene, since these paths are just
+        // for diagnostic purposes.
+        const subPath = `${path}.${String(prop)}`;
         const subPlan = plan[prop];
 
         if (subPlan === true) {
@@ -3280,6 +2778,7 @@
    * The current `cycleTolerantStringify` possibly emits too many "seen"
    * markings: Not only for cycles, but also for repeated subtrees by
    * object identity.
+   *
    * @param {any} payload
    * @returns {string}
    */
@@ -3365,7 +2864,7 @@
    */
   const details = (template, ...args) => {
     // Keep in mind that the vast majority of calls to `details` creates
-    // a details token that is never used, so this path much remain as fast as
+    // a details token that is never used, so this path must remain as fast as
     // possible. Hence we store what we've got with little processing, postponing
     // all the work to happen only if needed, for example, if an assertion fails.
     const detailsToken = freeze({ __proto__: null });
@@ -3397,7 +2896,7 @@
 
   /**
    * @param {HiddenDetails} hiddenDetails
-   * @return {LogArgs}
+   * @returns {LogArgs}
    */
   const getLogArgs = ({ template, args }) => {
     const logArgs = [template[0]];
@@ -3431,11 +2930,21 @@
   const hiddenMessageLogArgs = new WeakMap();
 
   /**
-   * @param {HiddenDetails} hiddenDetails
-   * @param {ErrorConstructor} ErrorConstructor
-   * @return {Error}
+   * @type {AssertMakeError}
    */
-  const makeDetailedError = (hiddenDetails, ErrorConstructor) => {
+  const makeError = (
+    optDetails = details`Assert failed`,
+    ErrorConstructor = Error,
+  ) => {
+    if (typeof optDetails === 'string') {
+      // If it is a string, use it as the literal part of the template so
+      // it doesn't get quoted.
+      optDetails = details([optDetails]);
+    }
+    const hiddenDetails = hiddenDetailsMap.get(optDetails);
+    if (hiddenDetails === undefined) {
+      throw new Error(`unrecognized details ${optDetails}`);
+    }
     const messageString = getMessageString(hiddenDetails);
     const error = new ErrorConstructor(messageString);
     hiddenMessageLogArgs.set(error, getLogArgs(hiddenDetails));
@@ -3447,6 +2956,7 @@
     // particularly fruitful place to put a breakpoint.
     return error;
   };
+  freeze(makeError);
 
   // /////////////////////////////////////////////////////////////////////////////
 
@@ -3564,6 +3074,7 @@
    * that prevents execution from reaching the following throw. However, if
    * `optRaise` returns normally, which would be unusual, the throw following
    * `optRaise(error)` would still happen.
+   *
    * @param {((error: Error) => void)=} optRaise
    * @returns {Assert}
    */
@@ -3573,16 +3084,7 @@
       optDetails = details`Assert failed`,
       ErrorConstructor = Error,
     ) => {
-      if (typeof optDetails === 'string') {
-        // If it is a string, use it as the literal part of the template so
-        // it doesn't get quoted.
-        optDetails = details([optDetails]);
-      }
-      const hiddenDetails = hiddenDetailsMap.get(optDetails);
-      if (hiddenDetails === undefined) {
-        throw new Error(`unrecognized details ${optDetails}`);
-      }
-      const error = makeDetailedError(hiddenDetails, ErrorConstructor);
+      const error = makeError(optDetails, ErrorConstructor);
       if (optRaise !== undefined) {
         optRaise(error);
       }
@@ -3641,6 +3143,7 @@
     // Note that "assert === baseAssert"
     /** @type {Assert} */
     const assert = assign(baseAssert, {
+      error: makeError,
       fail,
       equal,
       typeof: assertTypeof,
@@ -3667,7 +3170,7 @@
     localeCompare(that) {
       if (this === null || this === undefined) {
         throw new TypeError(
-          `Cannot localeCompare with null or undefined "this" value`,
+          'Cannot localeCompare with null or undefined "this" value',
         );
       }
       const s = `${this}`;
@@ -3808,6 +3311,8 @@
    * keywords. We drop symbols safely. Currently, this shim refuses
    * service if any of the names are keywords or keyword-like. This is
    * safe and only prevent performance optimization.
+   *
+   * @param {string} name
    */
   function isValidIdentifierName(name) {
     // Ensure we have a valid identifier. We use regexpTest rather than
@@ -3819,9 +3324,8 @@
     );
   }
 
-  /**
+  /*
    * isImmutableDataProperty
-   *
    */
 
   function isImmutableDataProperty(obj, name) {
@@ -3854,6 +3358,9 @@
    * keywords. We drop symbols safely. Currently, this shim refuses
    * service if any of the names are keywords or keyword-like. This is
    * safe and only prevent performance optimization.
+   *
+   * @param {Object} globalObject
+   * @param {Object} localObject
    */
   function getScopeConstants(globalObject, localObject = {}) {
     // getOwnPropertyNames() does ignore Symbols so we don't need to
@@ -3904,17 +3411,17 @@
     },
   });
 
-  /**
+  /*
    * createScopeHandler()
    * ScopeHandler manages a Proxy which serves as the global scope for the
    * performEval operation (the Proxy is the argument of a 'with' binding).
    * As described in createSafeEvaluator(), it has several functions:
    * - allow the very first (and only the very first) use of 'eval' to map to
-   *   the real (unsafe) eval function, so it acts as a 'direct eval' and can
-   *   access its lexical scope (which maps to the 'with' binding, which the
-   *   ScopeHandler also controls).
+   * the real (unsafe) eval function, so it acts as a 'direct eval' and can
+   * access its lexical scope (which maps to the 'with' binding, which the
+   * ScopeHandler also controls).
    * - ensure that all subsequent uses of 'eval' map to the safeEvaluator,
-   *   which lives as the 'eval' property of the safeGlobal.
+   * which lives as the 'eval' property of the safeGlobal.
    * - route all other property lookups at the safeGlobal.
    * - hide the unsafeGlobal which lives on the scope chain above the 'with'.
    * - ensure the Proxy invariants despite some global properties being frozen.
@@ -4049,9 +3556,62 @@
     };
   }
 
-  // Find the first occurence of the given pattern and return
-  // the location as the approximate line number.
+  // Captures a key and value of the form #key=value or @key=value
+  const sourceMetaEntryRegExp =
+    '\\s*[@#]\\s*([a-zA-Z][a-zA-Z0-9]*)\\s*=\\s*([^\\s\\*]*)';
+  // Captures either a one-line or multi-line comment containing
+  // one #key=value or @key=value.
+  // Produces two pairs of capture groups, but the initial two may be undefined.
+  // On account of the mechanics of regular expressions, scanning from the end
+  // does not allow us to capture every pair, so getSourceURL must capture and
+  // trim until there are no matching comments.
+  const sourceMetaEntriesRegExp = new RegExp(
+    `(?:\\s*//${sourceMetaEntryRegExp}|/\\*${sourceMetaEntryRegExp}\\s*\\*/)\\s*$`,
+  );
 
+  function getSourceURL(src) {
+    let sourceURL = '<unknown>';
+
+    // Our regular expression matches the last one or two comments with key value
+    // pairs at the end of the source, avoiding a scan over the entire length of
+    // the string, but at the expense of being able to capture all the (key,
+    // value) pair meta comments at the end of the source, which may include
+    // sourceMapURL in addition to sourceURL.
+    // So, we sublimate the comments out of the source until no source or no
+    // comments remain.
+    while (src.length > 0) {
+      const match = sourceMetaEntriesRegExp.exec(src);
+      if (match === null) {
+        break;
+      }
+      src = src.slice(0, src.length - match[0].length);
+
+      // We skip $0 since it contains the entire match.
+      // The match contains four capture groups,
+      // two (key, value) pairs, the first of which
+      // may be undefined.
+      // On the off-chance someone put two sourceURL comments in their code with
+      // different commenting conventions, the latter has precedence.
+      if (match[3] === 'sourceURL') {
+        sourceURL = match[4];
+      } else if (match[1] === 'sourceURL') {
+        sourceURL = match[2];
+      }
+    }
+
+    return sourceURL;
+  }
+
+  // @ts-check
+
+  /**
+   * Find the first occurence of the given pattern and return
+   * the location as the approximate line number.
+   *
+   * @param {string} src
+   * @param {RegExp} pattern
+   * @returns {number}
+   */
   function getLineNumber(src, pattern) {
     const index = stringSearch(src, pattern);
     if (index < 0) {
@@ -4060,108 +3620,215 @@
     return stringSplit(stringSlice(src, 0, index), '\n').length;
   }
 
-  // https://www.ecma-international.org/ecma-262/9.0/index.html#sec-html-like-comments
-  // explains that JavaScript parsers may or may not recognize html
-  // comment tokens "<" immediately followed by "!--" and "--"
-  // immediately followed by ">" in non-module source text, and treat
-  // them as a kind of line comment. Since otherwise both of these can
-  // appear in normal JavaScript source code as a sequence of operators,
-  // we have the terrifying possibility of the same source code parsing
-  // one way on one correct JavaScript implementation, and another way
-  // on another.
-  //
-  // This shim takes the conservative strategy of just rejecting source
-  // text that contains these strings anywhere. Note that this very
-  // source file is written strangely to avoid mentioning these
-  // character strings explicitly.
+  // /////////////////////////////////////////////////////////////////////////////
 
-  // We do not write the regexp in a straightforward way, so that an
-  // apparennt html comment does not appear in this file. Thus, we avoid
-  // rejection by the overly eager rejectDangerousSources.
+  const htmlCommentPattern = new RegExp(`(?:${'<'}!--|--${'>'})`, 'g');
 
-  const htmlCommentPattern = new RegExp(`(?:${'<'}!--|--${'>'})`);
-
+  /**
+   * Conservatively reject the source text if it may contain text that some
+   * JavaScript parsers may treat as an html-like comment. To reject without
+   * parsing, `rejectHtmlComments` will also reject some other text as well.
+   *
+   * https://www.ecma-international.org/ecma-262/9.0/index.html#sec-html-like-comments
+   * explains that JavaScript parsers may or may not recognize html
+   * comment tokens "<" immediately followed by "!--" and "--"
+   * immediately followed by ">" in non-module source text, and treat
+   * them as a kind of line comment. Since otherwise both of these can
+   * appear in normal JavaScript source code as a sequence of operators,
+   * we have the terrifying possibility of the same source code parsing
+   * one way on one correct JavaScript implementation, and another way
+   * on another.
+   *
+   * This shim takes the conservative strategy of just rejecting source
+   * text that contains these strings anywhere. Note that this very
+   * source file is written strangely to avoid mentioning these
+   * character strings explicitly.
+   *
+   * We do not write the regexp in a straightforward way, so that an
+   * apparennt html comment does not appear in this file. Thus, we avoid
+   * rejection by the overly eager rejectDangerousSources.
+   *
+   * @param {string} src
+   * @returns {string}
+   */
   function rejectHtmlComments(src) {
-    const linenum = getLineNumber(src, htmlCommentPattern);
-    if (linenum < 0) {
+    const lineNumber = getLineNumber(src, htmlCommentPattern);
+    if (lineNumber < 0) {
       return src;
     }
+    const name = getSourceURL(src);
     throw new SyntaxError(
-      `possible html comment syntax rejected around line ${linenum}`,
+      `Possible HTML comment rejected at ${name}:${lineNumber}. (SES_HTML_COMMENT_REJECTED)`,
     );
   }
 
-  // The proposed dynamic import expression is the only syntax currently
-  // proposed, that can appear in non-module JavaScript code, that
-  // enables direct access to the outside world that cannot be
-  // surpressed or intercepted without parsing and rewriting. Instead,
-  // this shim conservatively rejects any source text that seems to
-  // contain such an expression. To do this safely without parsing, we
-  // must also reject some valid programs, i.e., those containing
-  // apparent import expressions in literal strings or comments.
+  /**
+   * An optional transform to place ahead of `rejectHtmlComments` to evade *that*
+   * rejection. However, it may change the meaning of the program.
+   *
+   * This evasion replaces each alleged html comment with the space-separated
+   * JavaScript operator sequence that it may mean, assuming that it appears
+   * outside of a comment or literal string, in source code where the JS
+   * parser makes no special case for html comments (like module source code).
+   * In that case, this evasion preserves the meaning of the program, though it
+   * does change the souce column numbers on each effected line.
+   *
+   * If the html comment appeared in a literal (a string literal, regexp literal,
+   * or a template literal), then this evasion will change the meaning of the
+   * program by changing the text of that literal.
+   *
+   * If the html comment appeared in a JavaScript comment, then this evasion does
+   * not change the meaning of the program because it only changes the contents of
+   * those comments.
+   *
+   * @param { string } src
+   * @returns { string }
+   */
+  function evadeHtmlCommentTest(src) {
+    const replaceFn = match => (match[0] === '<' ? '< ! --' : '-- >');
+    return src.replace(htmlCommentPattern, replaceFn);
+  }
 
-  // The current conservative rule looks for the identifier "import"
-  // followed by either an open paren or something that looks like the
-  // beginning of a comment. We assume that we do not need to worry
-  // about html comment syntax because that was already rejected by
-  // rejectHtmlComments.
+  // /////////////////////////////////////////////////////////////////////////////
 
-  // this \s *must* match all kinds of syntax-defined whitespace. If e.g.
-  // U+2028 (LINE SEPARATOR) or U+2029 (PARAGRAPH SEPARATOR) is treated as
-  // whitespace by the parser, but not matched by /\s/, then this would admit
-  // an attack like: import\u2028('power.js') . We're trying to distinguish
-  // something like that from something like importnotreally('power.js') which
-  // is perfectly safe.
+  const importPattern = new RegExp('\\bimport(\\s*(?:\\(|/[/*]))', 'g');
 
-  const importPattern = new RegExp('\\bimport\\s*(?:\\(|/[/*])');
-
+  /**
+   * Conservatively reject the source text if it may contain a dynamic
+   * import expression. To reject without parsing, `rejectImportExpressions` will
+   * also reject some other text as well.
+   *
+   * The proposed dynamic import expression is the only syntax currently
+   * proposed, that can appear in non-module JavaScript code, that
+   * enables direct access to the outside world that cannot be
+   * surpressed or intercepted without parsing and rewriting. Instead,
+   * this shim conservatively rejects any source text that seems to
+   * contain such an expression. To do this safely without parsing, we
+   * must also reject some valid programs, i.e., those containing
+   * apparent import expressions in literal strings or comments.
+   *
+   * The current conservative rule looks for the identifier "import"
+   * followed by either an open paren or something that looks like the
+   * beginning of a comment. We assume that we do not need to worry
+   * about html comment syntax because that was already rejected by
+   * rejectHtmlComments.
+   *
+   * this \s *must* match all kinds of syntax-defined whitespace. If e.g.
+   * U+2028 (LINE SEPARATOR) or U+2029 (PARAGRAPH SEPARATOR) is treated as
+   * whitespace by the parser, but not matched by /\s/, then this would admit
+   * an attack like: import\u2028('power.js') . We're trying to distinguish
+   * something like that from something like importnotreally('power.js') which
+   * is perfectly safe.
+   *
+   * @param { string } src
+   * @returns { string }
+   */
   function rejectImportExpressions(src) {
-    const linenum = getLineNumber(src, importPattern);
-    if (linenum < 0) {
+    const lineNumber = getLineNumber(src, importPattern);
+    if (lineNumber < 0) {
       return src;
     }
+    const name = getSourceURL(src);
     throw new SyntaxError(
-      `possible import expression rejected around line ${linenum}`,
+      `Possible import expression rejected at ${name}:${lineNumber}. (SES_IMPORT_REJECTED)`,
     );
   }
 
-  // The shim cannot correctly emulate a direct eval as explained at
-  // https://github.com/Agoric/realms-shim/issues/12
-  // Without rejecting apparent direct eval syntax, we would
-  // accidentally evaluate these with an emulation of indirect eval. To
-  // prevent future compatibility problems, in shifting from use of the
-  // shim to genuine platform support for the proposal, we should
-  // instead statically reject code that seems to contain a direct eval
-  // expression.
-  //
-  // As with the dynamic import expression, to avoid a full parse, we do
-  // this approximately with a regexp, that will also reject strings
-  // that appear safely in comments or strings. Unlike dynamic import,
-  // if we miss some, this only creates future compat problems, not
-  // security problems. Thus, we are only trying to catch innocent
-  // occurrences, not malicious one. In particular, `(eval)(...)` is
-  // direct eval syntax that would not be caught by the following regexp.
+  /**
+   * An optional transform to place ahead of `rejectImportExpressions` to evade
+   * *that* rejection. However, it may change the meaning of the program.
+   *
+   * This evasion replaces each suspicious `import` identifier with `__import__`.
+   * If the alleged import expression appears in a JavaScript comment, this
+   * evasion will not change the meaning of the program. If it appears in a
+   * literal (string literal, regexp literal, or a template literal), then this
+   * evasion will change the contents of that literal. If it appears as code
+   * where it would be parsed as an expression, then it might or might not change
+   * the meaning of the program, depending on the binding, if any, of the lexical
+   * variable `__import__`.
+   *
+   * Finally, if the original appears in code where it is not parsed as an
+   * expression, for example `foo.import(path)`, then this evasion would rewrite
+   * to `foo.__import__(path)` which has a surprisingly different meaning.
+   *
+   * @param { string } src
+   * @returns { string }
+   */
+  function evadeImportExpressionTest(src) {
+    const replaceFn = (_, p1) => `__import__${p1}`;
+    return src.replace(importPattern, replaceFn);
+  }
 
-  const someDirectEvalPattern = new RegExp('\\beval\\s*(?:\\(|/[/*])');
+  // /////////////////////////////////////////////////////////////////////////////
 
-  // Exported for unit tests.
+  const someDirectEvalPattern = new RegExp('\\beval(\\s*\\()', 'g');
+
+  /**
+   * Heuristically reject some text that seems to contain a direct eval
+   * expression, with both false positives and false negavives. To reject without
+   * parsing, `rejectSomeDirectEvalExpressions` may will also reject some other
+   * text as well. It may also accept source text that contains a direct eval
+   * written oddly, such as `(eval)(src)`. This false negative is not a security
+   * vulnerability. Rather it is a compat hazard because it will execute as
+   * an indirect eval under the SES-shim but as a direct eval on platforms that
+   * support SES directly (like XS).
+   *
+   * The shim cannot correctly emulate a direct eval as explained at
+   * https://github.com/Agoric/realms-shim/issues/12
+   * If we did not reject direct eval syntax, we would
+   * accidentally evaluate these with an emulation of indirect eval. To
+   * prevent future compatibility problems, in shifting from use of the
+   * shim to genuine platform support for the proposal, we should
+   * instead statically reject code that seems to contain a direct eval
+   * expression.
+   *
+   * As with the dynamic import expression, to avoid a full parse, we do
+   * this approximately with a regexp, that will also reject strings
+   * that appear safely in comments or strings. Unlike dynamic import,
+   * if we miss some, this only creates future compat problems, not
+   * security problems. Thus, we are only trying to catch innocent
+   * occurrences, not malicious one. In particular, `(eval)(...)` is
+   * direct eval syntax that would not be caught by the following regexp.
+   *
+   * Exported for unit tests.
+   *
+   * @param { string } src
+   * @returns { string }
+   */
   function rejectSomeDirectEvalExpressions(src) {
-    const linenum = getLineNumber(src, someDirectEvalPattern);
-    if (linenum < 0) {
+    const lineNumber = getLineNumber(src, someDirectEvalPattern);
+    if (lineNumber < 0) {
       return src;
     }
+    const name = getSourceURL(src);
     throw new SyntaxError(
-      `possible direct eval expression rejected around line ${linenum}`,
+      `Possible direct eval expression rejected at ${name}:${lineNumber}. (SES_EVAL_REJECTED)`,
     );
   }
 
+  // /////////////////////////////////////////////////////////////////////////////
+
+  /**
+   * A transform that bundles together the transforms that must unconditionally
+   * happen last in order to ensure safe evaluation without parsing.
+   *
+   * @param {string} source
+   * @returns {string}
+   */
   function mandatoryTransforms(source) {
     source = rejectHtmlComments(source);
     source = rejectImportExpressions(source);
-    source = rejectSomeDirectEvalExpressions(source);
     return source;
   }
 
+  /**
+   * Starting with `source`, apply each transform to the result of the
+   * previous one, returning the result of the last transformation.
+   *
+   * @param {string} source
+   * @param {((str: string) => string)[]} transforms
+   * @returns {string}
+   */
   function applyTransforms(source, transforms) {
     for (const transform of transforms) {
       source = transform(source);
@@ -4178,6 +3845,8 @@
    * buildOptimizer()
    * Given an array of indentifier, the optimizer return a `const` declaration
    * destructring `this`.
+   *
+   * @param {Array<string>} constants
    */
   function buildOptimizer(constants) {
     // No need to build an oprimizer when there are no constants.
@@ -4191,6 +3860,8 @@
    * makeEvaluateFactory()
    * The factory create 'evaluate' functions with the correct optimizer
    * inserted.
+   *
+   * @param {Array<string>} [constants]
    */
   function makeEvaluateFactory(constants = []) {
     const optimizer = buildOptimizer(constants);
@@ -4239,6 +3910,14 @@
    * performEval()
    * The low-level operation used by all evaluators:
    * eval(), Function(), Evalutator.prototype.evaluate().
+   *
+   * @param {string} source
+   * @param {Object} globalObject
+   * @param {Objeect} localObject
+   * @param {Object} [options]
+   * @param {Array<Transform>} [options.localTransforms]
+   * @param {Array<Transform>} [options.globalTransforms]
+   * @param {bool} [options.sloppyGlobalsMode]
    */
   function performEval(
     source,
@@ -4295,7 +3974,7 @@
     }
   }
 
-  /**
+  /*
    * makeEvalFunction()
    * A safe version of the native eval function which relies on
    * the safety of performEval for confinement.
@@ -4326,7 +4005,7 @@
   // repair it.  Use it only to build powerless abstractions.
   const FERAL_FUNCTION$1 = Function;
 
-  /**
+  /*
    * makeFunctionConstructor()
    * A safe version of the native Function which relies on
    * the safety of performEval for confinement.
@@ -4385,6 +4064,15 @@
    * (portions of SetRealmGlobalObject and SetDefaultGlobalBindings).
    * `newGlobalPropertyNames` should be either `initialGlobalPropertyNames` or
    * `sharedGlobalPropertyNames`.
+   *
+   * @param {Object} globalObject
+   * @param {Object} intrinsics
+   * @param {Object} newGlobalPropertyNames
+   * @param {Function} makeCompartmentConstructor
+   * @param {Object} compartmentPrototype
+   * @param {Object} [options]
+   * @param {Array<Transform>} [options.globalTransforms]
+   * @param {(Object) => void} [options.nativeBrander]
    */
   function initGlobalObject(
     globalObject,
@@ -4532,25 +4220,25 @@
    * seeing anything else that's outside the whitelist is surprising and should
    * provide a diagnostic.
    *
-  const consoleOmittedProperties = freeze([
-    'memory', // Chrome
-    'exception', // FF, MDN
-    '_ignoreErrors', // Node
-    '_stderr', // Node
-    '_stderrErrorHandler', // Node
-    '_stdout', // Node
-    '_stdoutErrorHandler', // Node
-    '_times', // Node
-    'context', // Chrome, Node
-    'record', // Safari
-    'recordEnd', // Safari
-
-    'screenshot', // Safari
-    // Symbols
-    '@@toStringTag', // Chrome: "Object", Safari: "Console"
-    // A variety of other symbols also seen on Node
-  ]);
-  */
+   * const consoleOmittedProperties = freeze([
+   *   'memory', // Chrome
+   *   'exception', // FF, MDN
+   *   '_ignoreErrors', // Node
+   *   '_stderr', // Node
+   *   '_stderrErrorHandler', // Node
+   *   '_stdout', // Node
+   *   '_stdoutErrorHandler', // Node
+   *   '_times', // Node
+   *   'context', // Chrome, Node
+   *   'record', // Safari
+   *   'recordEnd', // Safari
+   *
+   *   'screenshot', // Safari
+   *   // Symbols
+   *   '@@toStringTag', // Chrome: "Object", Safari: "Console"
+   *   // A variety of other symbols also seen on Node
+   * ]);
+   */
 
   // /////////////////////////////////////////////////////////////////////////////
 
@@ -4651,6 +4339,7 @@
      * @param {Error} error
      * @param {ErrorInfoKind} kind
      * @param {readonly any[]} logArgs
+     * @param {Array<Error>} subErrorsSink
      */
     const logErrorInfo = (error, kind, logArgs, subErrorsSink) => {
       const errorTag = tagError(error);
@@ -4788,7 +4477,7 @@
    * compartment, and not a primordial. Hence it is absent from the whilelist
    * and bypasses the intrinsicsCollector.
    *
-   * @param {string} consoleTaming,
+   * @param {"safe" | "unsafe"} consoleTaming
    * @param {GetStackString=} optGetStackString
    */
   const tameConsole = (
@@ -106811,7 +106500,7 @@
         ownKeys(_target) {
           if (!active) {
             throw new TypeError(
-              `Cannot enumerate keys, the module has not yet begun to execute`,
+              'Cannot enumerate keys, the module has not yet begun to execute',
             );
           }
           // return Object.keys(proxiedExports);
@@ -106830,7 +106519,7 @@
         preventExtensions(_target) {
           if (!active) {
             throw new TypeError(
-              `Cannot prevent extensions of module exports namespace, the module has not yet begun to execute`,
+              'Cannot prevent extensions of module exports namespace, the module has not yet begun to execute',
             );
           }
           return Reflect.preventExtensions(proxiedExports);
@@ -106838,7 +106527,7 @@
         isExtensible() {
           if (!active) {
             throw new TypeError(
-              `Cannot check extensibility of module exports namespace, the module has not yet begun to execute`,
+              'Cannot check extensibility of module exports namespace, the module has not yet begun to execute',
             );
           }
           return Reflect.isExtensible(proxiedExports);
@@ -106847,7 +106536,7 @@
           return null;
         },
         setPrototypeOf(_target, _proto) {
-          throw new TypeError(`Cannot set prototype of module exports namespace`);
+          throw new TypeError('Cannot set prototype of module exports namespace');
         },
         defineProperty(_target, name, _descriptor) {
           throw new TypeError(
@@ -106856,12 +106545,12 @@
         },
         apply(_target, _thisArg, _args) {
           throw new TypeError(
-            `Cannot call module exports namespace, it is not a function`,
+            'Cannot call module exports namespace, it is not a function',
           );
         },
         construct(_target, _args) {
           throw new TypeError(
-            `Cannot construct module exports namespace, it is not a constructor`,
+            'Cannot construct module exports namespace, it is not a constructor',
           );
         },
       }),
@@ -106915,6 +106604,8 @@
     const { compartment, moduleSpecifier } = moduleRecord;
 
     const compartmentFields = privateFields.get(compartment);
+
+    const { __shimTransforms__ } = compartmentFields;
 
     const { exportsProxy, proxiedExports, activate } = getDeferredExports(
       compartment,
@@ -107205,6 +106896,7 @@
 
     let optFunctor = compartment.evaluate(functorSource, {
       globalObject,
+      transforms: __shimTransforms__,
       __moduleShimLexicals__: localLexicals,
     });
     let didThrow = false;
@@ -107297,7 +106989,7 @@
         // This could either be a partially implemented custom static module
         // record or created by `StaticModuleRecord` in another realm.
         throw new TypeError(
-          `importHook must return a StaticModuleRecord constructed within the same Realm, or a custom record with both imports and an execute method`,
+          'importHook must return a StaticModuleRecord constructed within the same Realm, or a custom record with both imports and an execute method',
         );
       } else {
         // In this case, the static module record has no `imports` or `execute`
@@ -107306,7 +106998,7 @@
         // From this we infer the intent was to produce a valid custom static
         // module record and clue accordingly.
         throw new TypeError(
-          `importHook must return a StaticModuleRecord with both imports and an execute method`,
+          'importHook must return a StaticModuleRecord with both imports and an execute method',
         );
       }
     }
@@ -107405,10 +107097,9 @@
 
     /**
      * @param {string} source is a JavaScript program grammar construction.
-     * @param {{
-     *   transforms: Array<Transform>,
-     *   sloppyGlobalsMode: bool,
-     * }} options.
+     * @param {Object} [options]
+     * @param {Array<Transform>} [options.transforms]
+     * @param {bool} [options.sloppyGlobalsMode]
      */
     evaluate(source, options = {}) {
       // Perform this check first to avoid unecessary sanitizing.
@@ -107423,17 +107114,37 @@
         transforms = [],
         sloppyGlobalsMode = false,
         __moduleShimLexicals__ = undefined,
+        __evadeHtmlCommentTest__ = false,
+        __evadeImportExpressionTest__ = false,
+        __rejectSomeDirectEvalExpressions__ = true, // Note default on
       } = options;
       const localTransforms = [...transforms];
+      if (__evadeHtmlCommentTest__ === true) {
+        localTransforms.push(evadeHtmlCommentTest);
+      }
+      if (__evadeImportExpressionTest__ === true) {
+        localTransforms.push(evadeImportExpressionTest);
+      }
+      if (__rejectSomeDirectEvalExpressions__ === true) {
+        localTransforms.push(rejectSomeDirectEvalExpressions);
+      }
 
-      const {
-        globalTransforms,
-        globalObject,
-        globalLexicals,
-      } = privateFields.get(this);
+      const compartmentFields = privateFields.get(this);
+      let { globalTransforms } = compartmentFields;
+      const { globalObject, globalLexicals } = compartmentFields;
 
       let localObject = globalLexicals;
       if (__moduleShimLexicals__ !== undefined) {
+        // When using `evaluate` for ESM modules, as should only occur from the
+        // module-shim's module-instance.js, we do not reveal the SES-shim's
+        // module-to-program translation, as this is not standardizable behavior.
+        // However, the `localTransforms` will come from the `__shimTransforms__`
+        // Compartment option in this case, which is a non-standardizable escape
+        // hatch so programs designed specifically for the SES-shim
+        // implementation may opt-in to use the same transforms for `evaluate`
+        // and `import`, at the expense of being tightly coupled to SES-shim.
+        globalTransforms = undefined;
+
         localObject = create(null, getOwnPropertyDescriptors(globalLexicals));
         defineProperties(
           localObject,
@@ -107466,11 +107177,19 @@
      * Compartment()
      * Each Compartment constructor is a global. A host that wants to execute
      * code in a context bound to a new global creates a new compartment.
+     *
+     * @param {Object} endowments
+     * @param {Object} _moduleMap
+     * @param {Object} [options]
+     * @param {string} [options.name]
+     * @param {Array<Transform>} [options.transforms]
+     * @param {Array<Transform>} [options.__shimTransforms__]
+     * @param {Object} [options.globalLexicals]
      */
     function Compartment(endowments = {}, _moduleMap = {}, options = {}) {
       if (new.target === undefined) {
         throw new TypeError(
-          `Class constructor Compartment cannot be invoked without 'new'`,
+          "Class constructor Compartment cannot be invoked without 'new'",
         );
       }
 
@@ -107478,9 +107197,10 @@
       const {
         name = '<unknown>',
         transforms = [],
+        __shimTransforms__ = [],
         globalLexicals = {},
       } = options;
-      const globalTransforms = [...transforms];
+      const globalTransforms = [...transforms, ...__shimTransforms__];
 
       const globalObject = {};
       initGlobalObject(
@@ -107542,7 +107262,7 @@
   // importHook.
   const moduleAnalyses = new WeakMap();
 
-  /**
+  /*
    * StaticModuleRecord captures the effort of parsing and analyzing module text
    * so a cache of StaticModuleRecords may be shared by multiple Compartments.
    */
@@ -107605,7 +107325,7 @@
     const { importHook, resolveHook } = privateFields$1.get(compartment);
     if (typeof importHook !== 'function' || typeof resolveHook !== 'function') {
       throw new TypeError(
-        `Compartment must be constructed with an importHook and a resolveHook for it to be able to load modules`,
+        'Compartment must be constructed with an importHook and a resolveHook for it to be able to load modules',
       );
     }
   };
@@ -107698,7 +107418,7 @@
     ) {
       if (new.target === undefined) {
         throw new TypeError(
-          `Class constructor Compartment cannot be invoked without 'new'`,
+          "Class constructor Compartment cannot be invoked without 'new'",
         );
       }
 
@@ -107708,7 +107428,12 @@
         new.target,
       );
 
-      const { resolveHook, importHook, moduleMapHook } = options;
+      const {
+        resolveHook,
+        importHook,
+        moduleMapHook,
+        __shimTransforms__,
+      } = options;
 
       // Map<FullSpecifier, ModuleCompartmentRecord>
       const moduleRecords = new Map();
@@ -107747,6 +107472,7 @@
         moduleMap,
         moduleMapHook,
         moduleRecords,
+        __shimTransforms__,
         deferredExports,
         instances,
       });

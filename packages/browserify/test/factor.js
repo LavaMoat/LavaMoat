@@ -31,7 +31,7 @@ test('package factor bundle', async (t) => {
       3: './node_modules/b/index.js',
       10: './src/10.js'
     },
-    source: 'global.testResult = require(\'2\') * require(\'3\') * require(\'10\')',
+    source: 'global.testResult.value = require(\'2\') * require(\'3\') * require(\'10\')',
     entry: true
   }, {
     id: '10',
@@ -57,7 +57,7 @@ test('package factor bundle', async (t) => {
       4: './node_modules/c/index.js',
       11: './src/11.js',
     },
-    source: 'global.testResult = require(\'3\') * require(\'4\') * require(\'11\')',
+    source: 'global.testResult.value = require(\'3\') * require(\'4\') * require(\'11\')',
     entry: true
   }, {
     id: '11',
@@ -120,8 +120,8 @@ test('package factor bundle', async (t) => {
   let result
 
   result = evalBundle(bundles['common.js'] + bundles['src/1.js'], testGlobal)
-  t.is(result, 60)
+  t.is(result.value, 60)
 
   result = evalBundle(bundles['common.js'] + bundles['src/2.js'], testGlobal)
-  t.is(result, 120)
+  t.is(result.value, 120)
 })

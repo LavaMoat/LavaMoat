@@ -15,3 +15,5 @@ require('./sourcemaps')
 require('./circularDeps')
 require('./transforms')
 require('./factor')
+
+require('./lavamoatNode')

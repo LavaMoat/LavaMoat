@@ -84,6 +84,7 @@
 
       // prepare the module to be initialized
       const packageName = moduleData.package
+      if (!packageName) throw new Error(`LavaMoat - invalid packageName for module "${moduleId}"`)
       const moduleSource = moduleData.source
       const configForModule = getConfigForPackage(lavamoatConfig, packageName)
       const moduleMembraneSpace = getMembraneSpaceForModule(moduleData)
@@ -150,6 +151,8 @@
             .filter(([key]) => !(key in moduleCompartment.globalThis))
             // define property on compartment global
             .forEach(([key, desc]) => Reflect.defineProperty(moduleCompartment.globalThis, key, desc))
+          // global circular references otherwise added by prepareCompartmentGlobalFromConfig
+          moduleCompartment.globalThis.global = moduleCompartment.globalThis
         } else {
           // sets up read/write access as configured
           const globalsConfig = configForModule.globals
