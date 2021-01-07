@@ -1,9 +1,4 @@
 {
   "resources": {
-    "browserify-transform-tools": {
-      "packages": {
-        "<root>": true
-      }
-    }
   }
 }

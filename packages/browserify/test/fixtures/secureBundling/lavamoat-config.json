@@ -190,20 +190,6 @@
         "xtend": true
       }
     },
-    "browserify-transform-tools": {
-      "builtin": {
-        "fs": true,
-        "path": true
-      },
-      "globals": {
-        "process.cwd": true,
-        "process.nextTick": true
-      },
-      "packages": {
-        "falafel": true,
-        "through": true
-      }
-    },
     "buffer-from": {
       "globals": {
         "Buffer": true
@@ -332,15 +318,24 @@
         "readable-stream": true
       }
     },
-    "falafel": {
-      "builtin": {
-        "util.inspect.custom": true
+    "duplexify": {
+      "globals": {
+        "Buffer": true,
+        "process.nextTick": true
       },
       "packages": {
-        "acorn": true,
-        "foreach": true,
-        "isarray": true,
-        "object-keys": true
+        "end-of-stream": true,
+        "inherits": true,
+        "readable-stream": true,
+        "stream-shift": true
+      }
+    },
+    "end-of-stream": {
+      "globals": {
+        "process.nextTick": true
+      },
+      "packages": {
+        "once": true
       }
     },
     "for-own": {
@@ -536,6 +531,11 @@
     "offset-sourcemap-lines": {
       "packages": {
         "source-map": true
+      }
+    },
+    "once": {
+      "packages": {
+        "wrappy": true
       }
     },
     "parents": {
