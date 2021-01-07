@@ -1,4 +1,3 @@
-const through = require('through2').obj
 const path = require('path')
 const { PassThrough } = require('readable-stream')
 const duplexify = require('duplexify')
