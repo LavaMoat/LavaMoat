@@ -17,7 +17,7 @@
     "concat-stream": "^2.0.0",
     "duplexify": "^4.1.1",
     "json-stable-stringify": "^1.0.1",
-    "lavamoat-core": "^6.4.4",
+    "lavamoat-core": "^7.0.0",
     "merge-deep": "^3.0.2",
     "mkdirp": "^1.0.3",
     "offset-sourcemap-lines": "^1.0.1",
