@@ -28,8 +28,8 @@ test('builtin - basic access', async (t) => {
       }
     }
   })
-
   const result = await runScenario(scenario)
+  console.log(result)
   t.deepEqual(result, { abc: 123, xyz: null })
 })
 
@@ -132,7 +132,7 @@ function createScenarioFromScaffold ({
   defineThree
 } = {}) {
   function _defineEntry () {
-    global.testResult = require('one')
+    global.testResult.value = require('one')
   }
 
   function _defineOne () {
@@ -241,7 +241,7 @@ async function runScenario ({ entries, files, config: lavamoatConfig }) {
   // run result through serialization boundary. this ensures these tests:
   // - work across a serialization boundary
   // - return simple objects non wrapped by membranes
-  return JSON.parse(JSON.stringify(context.testResult))
+  return JSON.parse(JSON.stringify(context.testResult.value))
 }
 
 function prepareModuleInitializerArgs (requireRelativeWithContext, moduleObj, moduleData) {
@@ -258,9 +258,11 @@ function prepareModuleInitializerArgs (requireRelativeWithContext, moduleObj, mo
 
 function evaluateWithSourceUrl (filename, content, baseContext) {
   const context = Object.assign({}, baseContext)
-  // circular ref (used by SES)
+  // circular ref (used when globalThis is not present)
   context.global = context
   context.console = console
+  // apply testResult object
+  context.testResult = {}
   // perform eval
   const result = runInNewContext(`${content}\n//# sourceURL=${filename}`, context)
   // pull out test result value from context (not always used)
