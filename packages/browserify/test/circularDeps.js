@@ -15,7 +15,7 @@ test('circularDeps - multi-module circular deps dont inf loop', async (t) => {
       banana: './node_modules/banana/a.js'
     },
     source: fnToCodeBlock(function () {
-      global.testResult = require('banana')
+      global.testResult.value = require('banana')
     }),
     entry: true
   }, {
@@ -50,7 +50,7 @@ test('circularDeps - multi-module circular deps dont inf loop', async (t) => {
     }
   }
   const bundle = await createBundleFromRequiresArray(clone(files), { config })
-  const result = evalBundle(bundle)
+  const testResult = evalBundle(bundle)
 
-  t.is(result, 42, 'expected result, did not error')
+  t.is(testResult.value, 42, 'expected result, did not error')
 })

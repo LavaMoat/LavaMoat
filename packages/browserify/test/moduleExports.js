@@ -189,7 +189,7 @@ test('moduleExports - <endowments> membrane space should round-trip correctly in
     const one = require('one')
     const getResult = one.get()
     const checkResult = global.check(getResult)
-    global.testResult = checkResult
+    global.testResult.value = checkResult
   }
 
   function defineOne () {

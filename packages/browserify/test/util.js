@@ -171,7 +171,7 @@ async function testEntryAttackerVictim (t, { defineAttacker, defineVictim }) {
   function defineEntry () {
     require('attacker')
     const result = require('victim').action()
-    global.testResult = result
+    global.testResult.value = result
   }
 
   const depsArray = [
@@ -217,14 +217,14 @@ async function testEntryAttackerVictim (t, { defineAttacker, defineVictim }) {
     }
   }
   const bundle = await createBundleFromRequiresArray(depsArray, { config })
-  const result = evalBundle(bundle)
-  t.is(result, false)
+  const testResult = evalBundle(bundle)
+  t.is(testResult.value, false)
 }
 
 async function runSimpleOneTwo ({ defineRoot, defineOne, defineTwo, defineThree, config = {}, testGlobal }) {
 
   function _defineRoot () {
-    global.testResult = require('one')
+    global.testResult.value = require('one')
   }
 
   function _defineOne () {
@@ -292,14 +292,14 @@ async function runSimpleOneTwo ({ defineRoot, defineOne, defineTwo, defineThree,
   }, config)
 
   const bundle = await createBundleFromRequiresArray(depsArray, { config: _config })
-  const result = evalBundle(bundle, testGlobal)
+  const testResult = evalBundle(bundle, testGlobal)
 
-  return result
+  return testResult.value
 }
 
 async function runSimpleOneTwoSamePackage ({ defineRoot, defineOne, defineTwo, config = {}, testGlobal }) {
   function _defineRoot () {
-    global.testResult = require('one')
+    global.testResult.value = require('one')
   }
 
   const depsArray = [
@@ -345,15 +345,18 @@ async function runSimpleOneTwoSamePackage ({ defineRoot, defineOne, defineTwo, c
   }, config)
 
   const bundle = await createBundleFromRequiresArray(depsArray, { config: _config })
-  const result = evalBundle(bundle, testGlobal)
+  const testResult = evalBundle(bundle, testGlobal)
 
-  return result
+  return testResult.value
 }
 
 function evalBundle (bundle, context) {
   const newContext = Object.assign({}, context)
-  // circular ref (used by SES)
+  // ensure the context has a reference to the global (for node versions without globalThis)
   newContext.global = newContext
+  // since you cant currently mutate the true globalThis from inside a compartment,
+  // we provide a testResult object to be decorated by the test bundle
+  newContext.testResult = {}
   // perform eval
   runInNewContext(bundle, newContext)
   // pull out test result value from context (not always used)

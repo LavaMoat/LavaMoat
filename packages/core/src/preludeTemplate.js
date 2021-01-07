@@ -2,7 +2,10 @@
 (function() {
 
   // identify the globalRef
-  const globalRef = (typeof self !== 'undefined') ? self : global
+  const globalRef = (typeof globalThis !== 'undefined') ? globalThis : (typeof self !== 'undefined') ? self : (typeof global !== 'undefined') ? global : undefined
+  if (!globalRef) {
+    throw new Error('Lavamoat - unable to identify globalRef')
+  }
 
   // config and bundle module store
   const lavamoatConfig = { resources: {} }

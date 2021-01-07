@@ -11,7 +11,7 @@ test('attack - prevent primitive modification', async (t) => {
     {
       id: '/1.js',
       file: '/1.js',
-      source: "require('foo'); global.testResult = !!Object.xyz",
+      source: "require('foo'); global.testResult.value = !!Object.xyz",
       deps: { foo: '/node_modules/2/index.js' },
       entry: true
     },
@@ -33,9 +33,9 @@ test('attack - prevent primitive modification', async (t) => {
     }
   }
   const bundle = await createBundleFromRequiresArray(depsArray, { config })
-  const result = evalBundle(bundle)
+  const testResult = evalBundle(bundle)
 
-  t.is(result, false)
+  t.is(testResult.value, false)
 })
 
 test('attack - limit platform api', async (t) => {
@@ -43,7 +43,7 @@ test('attack - limit platform api', async (t) => {
     {
       id: '/1.js',
       file: '/1.js',
-      source: "global.testResult = typeof require('foo') === 'function'",
+      source: "global.testResult.value = typeof require('foo') === 'function'",
       deps: { foo: '/node_modules/2/index.js' },
       entry: true
     },
@@ -65,9 +65,9 @@ test('attack - limit platform api', async (t) => {
     }
   }
   const bundle = await createBundleFromRequiresArray(depsArray, { config })
-  const result = evalBundle(bundle)
+  const testResult = evalBundle(bundle)
 
-  t.is(result, false)
+  t.is(testResult.value, false)
 })
 
 test('attack - prevent module cache attack', async (t) => {

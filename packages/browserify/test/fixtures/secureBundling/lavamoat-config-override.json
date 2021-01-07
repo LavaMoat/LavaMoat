@@ -2,8 +2,7 @@
   "resources": {
     "browserify-transform-tools": {
       "packages": {
-        "<root>": true,
-        "through": true
+        "<root>": true
       }
     }
   }
