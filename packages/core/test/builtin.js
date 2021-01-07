@@ -29,7 +29,6 @@ test('builtin - basic access', async (t) => {
     }
   })
   const result = await runScenario(scenario)
-  console.log(result)
   t.deepEqual(result, { abc: 123, xyz: null })
 })
 
