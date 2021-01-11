@@ -7,7 +7,9 @@ const fromEntries = require('object.fromentries')
 module.exports = {
   generateConfigFromFiles,
   createScenarioFromScaffold,
-  runScenario
+  runScenario,
+  createConfigForTest,
+  autoConfigForScenario
 }
 
 async function generateConfigFromFiles ({ files, ...opts }) {
@@ -58,29 +60,30 @@ function createScenarioFromScaffold ({
 
   const _files = fillInFileDetails({
     'entry.js': {
-      source: `(${defineEntry || _defineEntry}).call(this)`,
-      package: '<root>',
-      deps: {
+      content: `(${defineEntry || _defineEntry}).call(this)`,
+      packageName: '<root>',
+      importMap: {
         one: 'node_modules/one/index.js',
         two: 'node_modules/two/index.js'
-      }
+      },
+      entry: true
     },
     'node_modules/one/index.js': {
-      package: 'one',
-      source: `(${defineOne || _defineOne}).call(this)`,
-      deps: {
+      packageName: 'one',
+      content: `(${defineOne || _defineOne}).call(this)`,
+      importMap: {
         two: 'node_modules/two/index.js'
       }
     },
     'node_modules/two/index.js': {
-      package: 'two',
-      source: `(${defineTwo || _defineTwo}).call(this)`,
-      deps: {}
+      packageName: 'two',
+      content: `(${defineTwo || _defineTwo}).call(this)`,
+      importMap: {}
     },
     'node_modules/three/index.js': {
-      package: 'three',
-      source: `(${defineThree || _defineThree}).call(this)`,
-      deps: {}
+      packageName: 'three',
+      content: `(${defineThree || _defineThree}).call(this)`,
+      importMap: {}
     },
     ...filesFromBuiltin(builtin),
     ...files
@@ -109,10 +112,19 @@ async function runScenario ({ entries, files, config: lavamoatConfig }) {
   const kernel = createKernel({
     lavamoatConfig,
     loadModuleData: (id) => {
-      return files[id]
+      const moduleRecord = files[id]
+      return {
+        id: moduleRecord.specifier,
+        package: moduleRecord.packageName,
+        source: moduleRecord.content,
+        type: moduleRecord.type,
+        file: moduleRecord.file,
+        deps: moduleRecord.importMap,
+        moduleInitializer: moduleRecord.moduleInitializer
+      }
     },
     getRelativeModuleId: (id, relative) => {
-      return files[id].deps[relative] || relative
+      return files[id].importMap[relative] || relative
     },
     prepareModuleInitializerArgs
   })
@@ -128,9 +140,11 @@ async function runScenario ({ entries, files, config: lavamoatConfig }) {
 function fillInFileDetails (files) {
   Object.entries(files).forEach(([file, moduleData]) => {
     moduleData.file = moduleData.file || file
-    moduleData.package = moduleData.package || packageNameFromPath(file) || '<root>'
-    moduleData.source = `(function(exports, require, module, __filename, __dirname){\n${moduleData.source}\n})`
-    // moduleData.type = moduleData.type || 'js'
+    moduleData.specifier = moduleData.file || file
+    moduleData.packageName = moduleData.packageName || packageNameFromPath(file) || '<root>'
+    moduleData.content = `(function(exports, require, module, __filename, __dirname){\n${moduleData.content}\n})`
+    moduleData.type = moduleData.type || 'js'
+    moduleData.entry = Boolean(moduleData.entry)
   })
   return files
 }
@@ -141,7 +155,7 @@ function filesFromBuiltin (builtinObj) {
       .map(([key, value]) => {
         return [key, {
           file: key,
-          package: key,
+          packageName: key,
           type: 'builtin',
           moduleInitializer: (_, _2, module) => { module.exports = value }
         }]
@@ -172,4 +186,36 @@ function evaluateWithSourceUrl (filename, content, baseContext) {
   const result = runInNewContext(`${content}\n//# sourceURL=${filename}`, context)
   // pull out test result value from context (not always used)
   return { result, context }
+}
+
+async function createConfigForTest (testFn, opts = {}) {
+  const files = [{
+    type: 'js',
+    specifier: './entry.js',
+    file: './entry.js',
+    packageName: '<root>',
+    packageVersion: '0.0.0',
+    importMap: {
+      test: './node_modules/test/index.js'
+    },
+    content: 'require("test")',
+    entry: true
+  }, {
+    // non-entry
+    type: 'js',
+    specifier: './node_modules/test/index.js',
+    file: './node_modules/test/index.js',
+    packageName: 'test',
+    packageVersion: '1.2.3',
+    importMap: {},
+    content: `(${testFn})()`
+  }]
+  const config = await generateConfigFromFiles({ files, ...opts })
+  return config
+}
+
+async function autoConfigForScenario(scenario, opts = {}) {
+  const files = Object.values(scenario.files)
+  const config = await generateConfigFromFiles({ files, ...opts })
+  scenario.config = config
 }
