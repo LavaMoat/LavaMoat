@@ -1,5 +1,5 @@
 const test = require('ava')
-const { createScenarioFromScaffold, runScenario } = require('./utils.js')
+const { createScenarioFromScaffold, runScenario } = require('./util.js')
 
 test('builtin - basic access', async (t) => {
   const scenario = createScenarioFromScaffold({
