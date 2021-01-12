@@ -9,12 +9,12 @@ test('autogen - react-devtools-core hasOwnProperty', async (t) => {
       globalThis.hasOwnProperty.call
       module.exports = two.check(globalThis)
     },
-
     defineTwo: () => {
       module.exports.check = (target) => target.hasOwnProperty('Number')
     }
   })
-  autoConfigForScenario(scenario)
+  await autoConfigForScenario(scenario)
+  console.log(scenario.config.resources.one.globals)
   const result = await runScenario(scenario)
   t.is(result, true)
 })
