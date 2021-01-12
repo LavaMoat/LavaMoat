@@ -10,11 +10,11 @@ test('autogen - react-devtools-core hasOwnProperty', async (t) => {
       module.exports = two.check(globalThis)
     },
     defineTwo: () => {
+      // eslint-disable-next-line
       module.exports.check = (target) => target.hasOwnProperty('Number')
     }
   })
   await autoConfigForScenario(scenario)
-  console.log(scenario.config.resources.one.globals)
   const result = await runScenario(scenario)
   t.is(result, true)
 })

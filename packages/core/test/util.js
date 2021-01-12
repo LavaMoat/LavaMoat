@@ -214,7 +214,7 @@ async function createConfigForTest (testFn, opts = {}) {
   return config
 }
 
-async function autoConfigForScenario(scenario, opts = {}) {
+async function autoConfigForScenario (scenario, opts = {}) {
   const files = Object.values(scenario.files)
   const config = await generateConfigFromFiles({ files, ...opts })
   scenario.config = config
