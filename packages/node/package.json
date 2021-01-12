@@ -25,6 +25,7 @@
     "node-gyp-build": "^4.2.3",
     "object.fromentries": "^2.0.2",
     "resolve": "^1.17.0",
+    "tmp-promise": "^3.0.2",
     "yargs": "^16.0.0"
   },
   "devDependencies": {

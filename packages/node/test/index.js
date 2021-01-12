@@ -1,6 +1,7 @@
 const test = require('ava')
 const { parseForConfig } = require('../src/parseForConfig')
-const { runLavamoat } = require('./util')
+const { runLavamoat, runScenario } = require('./util')
+const { loadScenarios } = require('lavamoat-core/test/scenarios/index')
 
 test('parseForConfig - resolutions', async (t) => {
   const projectRoot = `${__dirname}/projects/1`
@@ -126,4 +127,11 @@ test('execute - core modules and buffers', async (t) => {
     'sha256: fb1520a08f1bc43831d0000dc76f6b0f027bafd36c55b1f43fc54c60c2f831da',
     ''
   ], 'should not have any standard output')
+})
+
+test('Run scenarios', async (t) => {
+  for await (const scenario of loadScenarios()) {
+    const result = await runScenario({ scenario })
+    t.is(result, scenario.expectedResult, `Scenario gives expected result ${scenario.name}`)
+  }
 })

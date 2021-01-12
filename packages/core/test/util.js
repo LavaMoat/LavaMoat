@@ -39,7 +39,8 @@ function createScenarioFromScaffold ({
   defineThree
 } = {}) {
   function _defineEntry () {
-    global.testResult.value = require('one')
+    const testResult = require('one')
+    console.log(JSON.stringify(testResult, null, 2))
   }
 
   function _defineOne () {
@@ -106,9 +107,33 @@ function createScenarioFromScaffold ({
   }
 }
 
-async function runScenario ({ entries, files, config: lavamoatConfig }) {
+function createHookedConsole () {
+  let hasResolved = false
+  let resolve
+  const firstLogEventPromise = new Promise(_resolve => { resolve = _resolve })
+  const hookedLog = (message) => {
+    if (hasResolved) {
+      throw new Error('console.log called multiple times')
+    }
+    hasResolved = true
+    // run result through serialization boundary. this ensures these tests:
+    // - work across a serialization boundary
+    // - return simple objects non wrapped by membranes
+    const result = JSON.parse(message)
+    resolve(result)
+  }
+  const hookedConsole = { ...console, log: hookedLog }
+  return {
+    firstLogEventPromise,
+    hookedConsole,
+  }
+} 
+
+async function runScenario ({ scenario }) {
+  const { entries, files, config: lavamoatConfig } = scenario
   const kernelSrc = generateKernel({ debugMode: true })
-  const { result: createKernel, context } = evaluateWithSourceUrl('LavaMoat/core-test/kernel', kernelSrc)
+  const { hookedConsole, firstLogEventPromise } = createHookedConsole()
+  const { result: createKernel, context } = evaluateWithSourceUrl('LavaMoat/core-test/kernel', kernelSrc, { console: hookedConsole })
   const kernel = createKernel({
     lavamoatConfig,
     loadModuleData: (id) => {
@@ -116,7 +141,7 @@ async function runScenario ({ entries, files, config: lavamoatConfig }) {
       return {
         id: moduleRecord.specifier,
         package: moduleRecord.packageName,
-        source: moduleRecord.content,
+        source: `(function(exports, require, module, __filename, __dirname){\n${moduleRecord.content}\n})`,
         type: moduleRecord.type,
         file: moduleRecord.file,
         deps: moduleRecord.importMap,
@@ -130,11 +155,8 @@ async function runScenario ({ entries, files, config: lavamoatConfig }) {
   })
 
   entries.forEach(id => kernel.internalRequire(id))
-
-  // run result through serialization boundary. this ensures these tests:
-  // - work across a serialization boundary
-  // - return simple objects non wrapped by membranes
-  return JSON.parse(JSON.stringify(context.testResult.value))
+  const testResult = await firstLogEventPromise
+  return testResult
 }
 
 function fillInFileDetails (files) {
@@ -142,7 +164,6 @@ function fillInFileDetails (files) {
     moduleData.file = moduleData.file || file
     moduleData.specifier = moduleData.file || file
     moduleData.packageName = moduleData.packageName || packageNameFromPath(file) || '<root>'
-    moduleData.content = `(function(exports, require, module, __filename, __dirname){\n${moduleData.content}\n})`
     moduleData.type = moduleData.type || 'js'
     moduleData.entry = Boolean(moduleData.entry)
   })
@@ -178,10 +199,9 @@ function prepareModuleInitializerArgs (requireRelativeWithContext, moduleObj, mo
 function evaluateWithSourceUrl (filename, content, baseContext) {
   const context = Object.assign({}, baseContext)
   // circular ref (used when globalThis is not present)
-  context.global = context
-  context.console = console
-  // apply testResult object
-  context.testResult = {}
+  if (!global.globalThis) {
+    context.globalThis = context
+  }
   // perform eval
   const result = runInNewContext(`${content}\n//# sourceURL=${filename}`, context)
   // pull out test result value from context (not always used)
