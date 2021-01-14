@@ -10,6 +10,9 @@ const pump = require('pump')
 const dataToStream = require('from')
 const { packageNameFromPath } = require('lavamoat-core')
 const lavamoatPlugin = require('../src/index')
+const { prepareScenarioOnDisk, evaluateWithSourceUrl, createHookedConsole } = require('lavamoat-core/test/util.js')
+const util = require('util')
+const execFile = util.promisify(require('child_process').execFile)
 const noop = () => {}
 
 module.exports = {
@@ -25,7 +28,8 @@ module.exports = {
   evalBundle,
   createBrowserifyFromRequiresArray,
   createSpy,
-  getStreamResults
+  getStreamResults,
+  runScenario
 }
 
 async function createBundleFromEntry (path, pluginOpts = {}) {
@@ -96,11 +100,10 @@ function createBrowserifyFromRequiresArray ({ files: _files, pluginOpts = {} }) 
   const bifyOpts = Object.assign({}, lavamoatPlugin.args)
   const bundler = browserify([], bifyOpts)
   bundler.plugin(lavamoatPlugin, pluginOpts)
-
   // instrument bundler to use custom resolver hooks
   const { loadModuleData, resolveRelative } = createResolverHooksFromFilesArray({ files })
   overrideResolverHooks({ bundler, loadModuleData, resolveRelative })
-
+  
   // inject entry files into browserify pipeline
   const fileInjectionStream = through2(null, null, function (cb) {
     files
@@ -113,7 +116,6 @@ function createBrowserifyFromRequiresArray ({ files: _files, pluginOpts = {} }) 
       })
     cb()
   })
-
   // add our file injector
   bundler.pipeline.get('record').unshift(fileInjectionStream)
   // replace lavamoat-browserify's packageData stream which normally reads from disk
@@ -128,7 +130,6 @@ function createBrowserifyFromRequiresArray ({ files: _files, pluginOpts = {} }) 
     }
     cb(null, moduleData)
   }))
-
   return bundler
 }
 
@@ -381,4 +382,20 @@ async function getStreamResults (stream) {
     )
   })()
   return results
+}
+
+async function runBrowserify ({ projectDir, args }) {
+  const browserifyPath = `${__dirname}/fixtures/runBrowserifyNoOpts.js`
+  const output = await execFile(browserifyPath, args, { cwd: projectDir, maxBuffer: 8192 * 10000 })
+  return { output }
+}
+
+async function runScenario ({ scenario, opts }) {
+  const args = scenario.entries
+  const { hookedConsole, firstLogEventPromise } = createHookedConsole()
+  const { projectDir } = await prepareScenarioOnDisk({ scenario })
+  const { output: { stdout: bundle } } = await runBrowserify({ projectDir, args })
+  evaluateWithSourceUrl('testBundlejs', bundle, { console: hookedConsole })
+  const testResult = await firstLogEventPromise
+  return testResult
 }

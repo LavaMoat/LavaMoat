@@ -3,13 +3,20 @@ const mergeDeep = require('merge-deep')
 const { runInNewContext } = require('vm')
 const path = require('path')
 const fromEntries = require('object.fromentries')
+const { promises: fs } = require('fs')
+var tmp = require('tmp-promise')
+const stringify = require('json-stable-stringify')
 
 module.exports = {
   generateConfigFromFiles,
   createScenarioFromScaffold,
   runScenario,
   createConfigForTest,
-  autoConfigForScenario
+  autoConfigForScenario,
+  prepareScenarioOnDisk,
+  convertOptsToArgs,
+  evaluateWithSourceUrl,
+  createHookedConsole
 }
 
 async function generateConfigFromFiles ({ files, ...opts }) {
@@ -159,6 +166,19 @@ async function runScenario ({ scenario }) {
   return testResult
 }
 
+async function prepareScenarioOnDisk ({ scenario }) {
+  const { path: projectDir } = await tmp.dir()
+  const filesToWrite = Object.values(scenario.files)
+  filesToWrite.push({ file: 'lavamoat-config.json', content: stringify(scenario.config) })
+  await Promise.all(filesToWrite.map(async (file) => {
+    const fullPath = path.join(projectDir, file.file)
+    const dirname = path.dirname(fullPath)
+    await fs.mkdir(dirname, { recursive: true })
+    await fs.writeFile(fullPath, file.content)
+  }))
+  return { projectDir }
+}
+
 function fillInFileDetails (files) {
   Object.entries(files).forEach(([file, moduleData]) => {
     moduleData.file = moduleData.file || file
@@ -238,4 +258,11 @@ async function autoConfigForScenario (scenario, opts = {}) {
   const files = Object.values(scenario.files)
   const config = await generateConfigFromFiles({ files, ...opts })
   scenario.config = config
+}
+
+function convertOptsToArgs ({ scenario, opts }) {
+  const { entries } = scenario
+  if (entries.length !== 1) throw new Error('LavaMoat - invalid entries')
+  const firstEntry = entries[0]
+  return [firstEntry]
 }

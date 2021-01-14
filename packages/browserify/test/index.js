@@ -17,3 +17,4 @@ require('./transforms')
 require('./factor')
 
 require('./lavamoatNode')
+require('./runScenarios')
