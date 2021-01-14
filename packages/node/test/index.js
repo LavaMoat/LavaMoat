@@ -1,7 +1,6 @@
 const test = require('ava')
 const { parseForConfig } = require('../src/parseForConfig')
-const { runLavamoat, runScenario } = require('./util')
-const { loadScenarios } = require('lavamoat-core/test/scenarios/index')
+const { runLavamoat } = require('./util')
 require('./runScenarios')
 
 test('parseForConfig - resolutions', async (t) => {
