@@ -18,7 +18,7 @@ module.exports = [
     })
     await autoConfigForScenario(scenario)
     scenario.expectedResult = true
-    scenario.name = 'react-devtools-core hasOwnProperty'
+    scenario.name = 'autogen - react-devtools-core hasOwnProperty'
     return scenario
   }
 ]

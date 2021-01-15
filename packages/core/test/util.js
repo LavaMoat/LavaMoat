@@ -146,11 +146,11 @@ function createHookedConsole () {
   }
 } 
 
-async function runScenario ({ scenario }) {
+async function runScenario ({ scenario, context }) {
   const { entries, files, config: lavamoatConfig } = scenario
   const kernelSrc = generateKernel({ debugMode: true })
   const { hookedConsole, firstLogEventPromise } = createHookedConsole()
-  const { result: createKernel, context } = evaluateWithSourceUrl('LavaMoat/core-test/kernel', kernelSrc, { console: hookedConsole })
+  const { result: createKernel } = evaluateWithSourceUrl('LavaMoat/core-test/kernel', kernelSrc, mergeDeep({ console: hookedConsole }, context))
   const kernel = createKernel({
     lavamoatConfig,
     loadModuleData: (id) => {

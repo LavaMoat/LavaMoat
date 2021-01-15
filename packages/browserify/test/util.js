@@ -29,7 +29,8 @@ module.exports = {
   createBrowserifyFromRequiresArray,
   createSpy,
   getStreamResults,
-  runScenario
+  runScenario,
+  createBundleForScenario
 }
 
 async function createBundleFromEntry (path, pluginOpts = {}) {
@@ -384,18 +385,26 @@ async function getStreamResults (stream) {
   return results
 }
 
-async function runBrowserify ({ projectDir, args }) {
-  const browserifyPath = `${__dirname}/fixtures/runBrowserifyNoOpts.js`
+async function runBrowserify ({ projectDir, opts, scenario }) {
+  const args = [JSON.stringify({
+    entries: scenario.entries,
+    opts
+  })]
+  const browserifyPath = `${__dirname}/fixtures/runBrowserify.js`
   const output = await execFile(browserifyPath, args, { cwd: projectDir, maxBuffer: 8192 * 10000 })
   return { output }
 }
 
-async function runScenario ({ scenario, opts }) {
-  const args = scenario.entries
-  const { hookedConsole, firstLogEventPromise } = createHookedConsole()
+async function createBundleForScenario ({ scenario, opts }) {
   const { projectDir } = await prepareScenarioOnDisk({ scenario })
-  const { output: { stdout: bundle } } = await runBrowserify({ projectDir, args })
-  evaluateWithSourceUrl('testBundlejs', bundle, { console: hookedConsole })
+  const { output: { stdout: bundle } } = await runBrowserify({ projectDir, opts, scenario})
+  return bundle
+}
+
+async function runScenario ({ scenario, opts, context, bundle }) {
+  if (!bundle) bundle = await createBundleForScenario({ scenario, opts })
+  const { hookedConsole, firstLogEventPromise } = createHookedConsole()
+  evaluateWithSourceUrl('testBundlejs', bundle, mergeDeep({ console: hookedConsole }, context))
   const testResult = await firstLogEventPromise
   return testResult
 }

@@ -257,7 +257,7 @@ test('Config override is applied if not specified and already exists at default 
   const configOverridePath = path.join(tmpObj.name, './lavamoat-config-override.json')
   fs.writeFileSync(configOverridePath, JSON.stringify(configOverride))
 
-  const scriptPath = require.resolve('./fixtures/runBrowserifyNoOpts')
+  const scriptPath = require.resolve('./fixtures/runBrowserify')
 
   const buildProcess = execSync(`node ${scriptPath}`, { cwd: tmpObj.name, maxBuffer: 5 * 1024 * 1024 })
   const outputString = buildProcess.toString()

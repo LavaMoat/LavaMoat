@@ -14,7 +14,7 @@ module.exports = [
       }
     })
     scenario.expectedResult = { objectXyz: false, protoXyz: false }
-    scenario.name = 'prevent intrinsic modification'
+    scenario.name = 'security - prevent intrinsic modification'
     return scenario
   },
   async () => {
@@ -49,7 +49,7 @@ module.exports = [
       }
     })
     scenario.expectedResult = false
-    scenario.name = 'prevent module exports mutation'
+    scenario.name = 'security - prevent module exports mutation'
     return scenario
   },
   async () => {
@@ -75,7 +75,7 @@ module.exports = [
       }
     })
     scenario.expectedResult = false
-    scenario.name = 'prevent module exports prototype mutation'
+    scenario.name = 'security - prevent module exports prototype mutation'
     return scenario
   }
 ]
