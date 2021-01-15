@@ -388,7 +388,9 @@ async function getStreamResults (stream) {
 async function runBrowserify ({ projectDir, opts, scenario }) {
   const args = [JSON.stringify({
     entries: scenario.entries,
-    opts
+    opts,
+    config: scenario.config,
+    configOverride: scenario.configOverride
   })]
   const browserifyPath = `${__dirname}/fixtures/runBrowserify.js`
   const output = await execFile(browserifyPath, args, { cwd: projectDir, maxBuffer: 8192 * 10000 })

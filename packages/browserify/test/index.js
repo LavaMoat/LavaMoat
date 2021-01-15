@@ -11,7 +11,6 @@ require('./exportsDefense')
 require('./moduleExports')
 
 require('./sourcemaps')
-require('./circularDeps')
 require('./transforms')
 require('./factor')
 

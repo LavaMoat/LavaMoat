@@ -5,12 +5,14 @@ const { execSync } = require('child_process')
 const tmp = require('tmp')
 const mkdirp = require('mkdirp')
 const rimraf = require('rimraf')
+const { createScenarioFromScaffold } = require('lavamoat-core/test/util')
 
 const {
   createBundleFromRequiresArray,
   generateConfigFromFiles,
   runSimpleOneTwo,
   evalBundle,
+  runScenario
 } = require('./util')
 
 // here we are providing an endowments only to a module deep in a dep graph
@@ -227,42 +229,29 @@ test('Config - Applies config override', async (t) => {
 })
 
 test('Config override is applied if not specified and already exists at default path', async (t) => {
-  const config = {
-    resources: {}
-  }
-
-  const configOverride = {
+  const scenario = createScenarioFromScaffold({
+    defineThree: () => {
+      module.exports = require('two')
+    },
+    defineTwo: () => {
+      module.exports = 30
+    },
+    defineOne: () => {
+      module.exports = require('three')
+    }
+  })
+  scenario.configOverride = {
     resources: {
-      '<root>': {
+      three: {
         packages: {
           two: true
-        }
-      },
-      two: {
-        packages: {
-          three: 12345678
-        }
-      },
-      three: {
-        globals: {
-          postMessage: true
         }
       }
     }
   }
+  const testResult = await runScenario({ scenario })
+  t.is(testResult, 30)
 
-  const tmpObj = tmp.dirSync()
-  const configPath = path.join(tmpObj.name, './lavamoat-config.json')
-  fs.writeFileSync(configPath, JSON.stringify(config))
-  const configOverridePath = path.join(tmpObj.name, './lavamoat-config-override.json')
-  fs.writeFileSync(configOverridePath, JSON.stringify(configOverride))
-
-  const scriptPath = require.resolve('./fixtures/runBrowserify')
-
-  const buildProcess = execSync(`node ${scriptPath}`, { cwd: tmpObj.name, maxBuffer: 5 * 1024 * 1024 })
-  const outputString = buildProcess.toString()
-
-  t.assert(outputString.includes('"three":12345678'), 'Applies override if exists but not specified')
 })
 
 // this test is not written correctly, im disabling it for now

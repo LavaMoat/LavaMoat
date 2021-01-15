@@ -40,6 +40,7 @@ function createScenarioFromScaffold ({
   files = [],
   builtin = [],
   config,
+  configOverride,
   defineEntry,
   defineOne,
   defineTwo,
@@ -95,7 +96,9 @@ function createScenarioFromScaffold ({
     'node_modules/three/index.js': {
       packageName: 'three',
       content: `(${defineThree || _defineThree}).call(this)`,
-      importMap: {}
+      importMap: {
+        one: 'node_modules/one/index.js'
+      }
     },
     ...filesFromBuiltin(builtin),
     ...files
@@ -117,10 +120,21 @@ function createScenarioFromScaffold ({
     }
   }, config)
 
+  const _configOverride = mergeDeep({
+    resources: {
+      one: {
+        packages: {
+          five: true
+        }
+      }
+    }
+  }, configOverride)
+
   return {
     entries: ['entry.js'],
     files: _files,
-    config: _config
+    config: _config,
+    configOverride: _configOverride
   }
 }
 
@@ -180,6 +194,7 @@ async function prepareScenarioOnDisk ({ scenario }) {
   const { path: projectDir } = await tmp.dir()
   const filesToWrite = Object.values(scenario.files)
   filesToWrite.push({ file: 'lavamoat-config.json', content: stringify(scenario.config) })
+  filesToWrite.push({ file: 'lavamoat-config-override.json', content: stringify(scenario.configOverride) })
   await Promise.all(filesToWrite.map(async (file) => {
     const fullPath = path.join(projectDir, file.file)
     const dirname = path.dirname(fullPath)
