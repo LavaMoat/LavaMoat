@@ -1,5 +1,3 @@
-/* eslint-disable no-undef, no-unused-vars, no-unused-expressions, no-extend-native */
-const test = require('ava')
 const { createScenarioFromScaffold, autoConfigForScenario } = require('../util.js')
 
 module.exports = [
@@ -8,7 +6,9 @@ module.exports = [
     const scenario = createScenarioFromScaffold({
       defineOne: () => {
         const two = require('two')
+        // eslint-disable-next-line
         globalThis.hasOwnProperty.call
+        // eslint-disable-next-line
         module.exports = two.check(globalThis)
       },
       defineTwo: () => {

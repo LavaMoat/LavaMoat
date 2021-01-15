@@ -72,7 +72,8 @@ function createScenarioFromScaffold ({
       packageName: '<root>',
       importMap: {
         one: 'node_modules/one/index.js',
-        two: 'node_modules/two/index.js'
+        two: 'node_modules/two/index.js',
+        three: 'node_modules/three/index.js'
       },
       entry: true
     },
@@ -80,13 +81,16 @@ function createScenarioFromScaffold ({
       packageName: 'one',
       content: `(${defineOne || _defineOne}).call(this)`,
       importMap: {
-        two: 'node_modules/two/index.js'
+        two: 'node_modules/two/index.js',
+        three: 'node_modules/three/index.js'
       }
     },
     'node_modules/two/index.js': {
       packageName: 'two',
       content: `(${defineTwo || _defineTwo}).call(this)`,
-      importMap: {}
+      importMap: {
+        three: 'node_modules/three/index.js'
+      }
     },
     'node_modules/three/index.js': {
       packageName: 'three',
@@ -101,7 +105,13 @@ function createScenarioFromScaffold ({
     resources: {
       one: {
         packages: {
-          two: true
+          two: true,
+          three: true
+        }
+      },
+      two: {
+        packages: {
+          three: true
         }
       }
     }

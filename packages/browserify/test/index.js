@@ -1,5 +1,4 @@
 require('./basic')
-require('./attacks')
 
 require('./config')
 require('./generateConfig')
