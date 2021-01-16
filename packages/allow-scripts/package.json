@@ -12,5 +12,8 @@
     "semver": "^7.3.4",
     "yargs": "^16.2.0",
     "yarn-logical-tree": "^1.0.2"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
