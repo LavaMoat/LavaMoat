@@ -52,8 +52,8 @@ test('basic - lavamoat config and bundle', async (t) => {
   t.assert(bundle.includes(prelude), 'bundle includes expected prelude')
 
   const testHref = 'https://funky.town.gov/yolo?snake=yes'
-  const context = { location: { href: testHref } }
-  const testResult = await runScenario({ scenario, context })
+  scenario.context = { location: { href: testHref } }
+  const testResult = await runScenario({ scenario })
 
   t.is(testResult, testHref, 'test result matches expected')
 })

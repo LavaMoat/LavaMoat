@@ -403,10 +403,10 @@ async function createBundleForScenario ({ scenario, opts }) {
   return bundle
 }
 
-async function runScenario ({ scenario, opts, context, bundle }) {
+async function runScenario ({ scenario, opts, bundle }) {
   if (!bundle) bundle = await createBundleForScenario({ scenario, opts })
   const { hookedConsole, firstLogEventPromise } = createHookedConsole()
-  evaluateWithSourceUrl('testBundlejs', bundle, mergeDeep({ console: hookedConsole }, context))
+  evaluateWithSourceUrl('testBundlejs', bundle, mergeDeep({ console: hookedConsole }, scenario.context))
   const testResult = await firstLogEventPromise
   return testResult
 }

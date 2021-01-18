@@ -4,7 +4,6 @@ const path = require('path')
 const { execSync } = require('child_process')
 const tmp = require('tmp')
 const mkdirp = require('mkdirp')
-const rimraf = require('rimraf')
 const { createScenarioFromScaffold } = require('lavamoat-core/test/util')
 
 const {
@@ -230,17 +229,16 @@ test('Config - Applies config override', async (t) => {
 
 test('Config override is applied if not specified and already exists at default path', async (t) => {
   const scenario = createScenarioFromScaffold({
-    defineThree: () => {
-      module.exports = require('two')
+    defineOne: () => {
+      module.exports = require('three')
     },
     defineTwo: () => {
       module.exports = 30
     },
-    defineOne: () => {
-      module.exports = require('three')
-    }
-  })
-  scenario.configOverride = {
+    defineThree: () => {
+      module.exports = require('two')
+    },
+    configOverride: {
     resources: {
       three: {
         packages: {
@@ -249,9 +247,9 @@ test('Config override is applied if not specified and already exists at default 
       }
     }
   }
+  })
   const testResult = await runScenario({ scenario })
   t.is(testResult, 30)
-
 })
 
 // this test is not written correctly, im disabling it for now

@@ -134,7 +134,8 @@ function createScenarioFromScaffold ({
     entries: ['entry.js'],
     files: _files,
     config: _config,
-    configOverride: _configOverride
+    configOverride: _configOverride,
+    context: {}
   }
 }
 
@@ -160,11 +161,11 @@ function createHookedConsole () {
   }
 } 
 
-async function runScenario ({ scenario, context }) {
+async function runScenario ({ scenario }) {
   const { entries, files, config: lavamoatConfig } = scenario
   const kernelSrc = generateKernel({ debugMode: true })
   const { hookedConsole, firstLogEventPromise } = createHookedConsole()
-  const { result: createKernel } = evaluateWithSourceUrl('LavaMoat/core-test/kernel', kernelSrc, mergeDeep({ console: hookedConsole }, context))
+  const { result: createKernel } = evaluateWithSourceUrl('LavaMoat/core-test/kernel', kernelSrc, mergeDeep({ console: hookedConsole }, scenario.context))
   const kernel = createKernel({
     lavamoatConfig,
     loadModuleData: (id) => {
