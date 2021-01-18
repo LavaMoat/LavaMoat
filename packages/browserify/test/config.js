@@ -14,59 +14,6 @@ const {
   runScenario
 } = require('./util')
 
-// here we are providing an endowments only to a module deep in a dep graph
-test('config - deep endow', async (t) => {
-  const entries = [
-    {
-      id: '/one.js',
-      file: '/one.js',
-      source: "require('two');",
-      deps: { two: '/node_modules/two/index.js' },
-      entry: true
-    },
-    {
-      id: '/node_modules/two/index.js',
-      file: '/node_modules/two/index.js',
-      source: "require('three')",
-      deps: { three: '/node_modules/three/index.js' }
-    },
-    {
-      id: '/node_modules/three/index.js',
-      file: '/node_modules/three/index.js',
-      source: "window.postMessage('12345', '*')",
-      deps: {}
-    }
-  ]
-
-  const config = {
-    resources: {
-      '<root>': {
-        packages: {
-          two: true
-        }
-      },
-      two: {
-        packages: {
-          three: true
-        }
-      },
-      three: {
-        globals: {
-          postMessage: true
-        }
-      }
-    }
-  }
-
-  const bundle = await createBundleFromRequiresArray(entries, { config })
-
-  let messageSentByTest
-  const testGlobal = { postMessage: (message) => { messageSentByTest = message } }
-
-  evalBundle(bundle, testGlobal)
-  t.deepEqual(messageSentByTest, '12345')
-})
-
 // here we provide an illegal config value
 test('config - dunder proto not allowed in globals path', async (t) => {
 

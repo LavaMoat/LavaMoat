@@ -249,7 +249,13 @@ function evaluateWithSourceUrl (filename, content, baseContext) {
     context.globalThis = context
   }
   // perform eval
-  const result = runInNewContext(`${content}\n//# sourceURL=${filename}`, context)
+  let result
+  try {
+    result = runInNewContext(`${content}\n//# sourceURL=${filename}`, context)
+  } catch (e) {
+    console.log(e.stack)
+    throw e
+  }
   // pull out test result value from context (not always used)
   return { result, context }
 }
