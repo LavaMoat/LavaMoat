@@ -2,8 +2,8 @@ const { createScenarioFromScaffold, autoConfigForScenario } = require('../util.j
 
 module.exports = [
   async () => {
-    // from"react-devtools-core" hasOwnProperty
     const scenario = createScenarioFromScaffold({
+      name: 'autogen - react-devtools-core hasOwnProperty',
       defineOne: () => {
         const two = require('two')
         // eslint-disable-next-line
@@ -18,7 +18,6 @@ module.exports = [
     })
     await autoConfigForScenario(scenario)
     scenario.expectedResult = true
-    scenario.name = 'autogen - react-devtools-core hasOwnProperty'
     return scenario
   }
 ]

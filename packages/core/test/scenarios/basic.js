@@ -3,7 +3,7 @@ const { createScenarioFromScaffold } = require('../util.js')
 module.exports = [
   async () => {
     const scenario = createScenarioFromScaffold({
-      // bundle works
+      name: 'basic - bundle works',
       defineOne: () => {
         module.exports = require('two')(5)
       },
@@ -12,7 +12,6 @@ module.exports = [
       }
     })
     scenario.expectedResult = 555
-    scenario.name = 'basic - bundle works'
     return scenario
   }
 ]

@@ -37,6 +37,8 @@ async function generateConfigFromFiles ({ files, ...opts }) {
 }
 
 function createScenarioFromScaffold ({
+  name = 'template scenario',
+  expectedFailure = false,
   files = [],
   builtin = [],
   config,
@@ -131,6 +133,8 @@ function createScenarioFromScaffold ({
   }, configOverride)
 
   return {
+    name: name,
+    expectedFailure,
     entries: ['entry.js'],
     files: _files,
     config: _config,

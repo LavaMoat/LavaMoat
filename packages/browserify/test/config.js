@@ -14,53 +14,6 @@ const {
   runScenario
 } = require('./util')
 
-// here we provide an illegal config value
-test('config - dunder proto not allowed in globals path', async (t) => {
-
-  const config = {
-    resources: {
-      'one': {
-        globals: {
-          'window.__proto__': true
-        }
-      }
-    }
-  }
-
-  try {
-    await runSimpleOneTwo({ config })
-    t.fail('did not throw as expected')
-  } catch (err) {
-    t.truthy(err.message.includes('"__proto__"'))
-  }
-})
-
-test('config - disable access to package', async (t) => {
-  t.plan(1)
-
-  // disable one's access to two
-  const config = {
-    resources: {
-      one: {
-        packages: {
-          two: false
-        }
-      }
-    }
-  }
-
-  try {
-    await runSimpleOneTwo({ config })
-    t.fail('should have encountered a fatal error')
-  } catch (err) {
-    t.truthy(
-      err.message.includes('LavaMoat - required package not in whitelist'),
-      'got expected error'
-    )
-  }
-
-  })
-
 test('config - default config path is generated with autoconfig if path is not specified', async (t) => {
   const { name: tempDir } = tmp.dirSync()
   const execOpts = {

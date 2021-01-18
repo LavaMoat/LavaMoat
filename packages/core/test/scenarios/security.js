@@ -3,7 +3,7 @@ const { createScenarioFromScaffold } = require('../util.js')
 module.exports = [
   async () => {
     const scenario = createScenarioFromScaffold({
-      // prevent intrinsic modifications
+      name: 'security - prevent intrinsic modification',
       defineOne: () => {
         require('two')
         module.exports = { objectXyz: 'xyz' in Object, protoXyz: 'xyz' in Object.prototype }
@@ -14,12 +14,11 @@ module.exports = [
       }
     })
     scenario.expectedResult = { objectXyz: false, protoXyz: false }
-    scenario.name = 'security - prevent intrinsic modification'
     return scenario
   },
   async () => {
     const scenario = createScenarioFromScaffold({
-      // limit platform API
+      name: 'security - limit platform API',
       defineOne: () => {
         module.exports = typeof require('two') === 'function'
       },
@@ -28,12 +27,11 @@ module.exports = [
       }
     })
     scenario.expectedResult = false
-    scenario.name = 'limit platform API'
     return scenario
   },
   async () => {
     const scenario = createScenarioFromScaffold({
-      // prevent module exports mutation
+      name: 'security - prevent module exports mutation',
       defineOne: () => {
         // trigger attack
         require('two')
@@ -49,12 +47,11 @@ module.exports = [
       }
     })
     scenario.expectedResult = false
-    scenario.name = 'security - prevent module exports mutation'
     return scenario
   },
   async () => {
     const scenario = createScenarioFromScaffold({
-      // prevent module exports prototype mutation
+      name: 'security - prevent module exports prototype mutation',
       defineOne: () => {
         // trigger attack
         require('two')
@@ -75,7 +72,6 @@ module.exports = [
       }
     })
     scenario.expectedResult = false
-    scenario.name = 'security - prevent module exports prototype mutation'
     return scenario
   }
 ]

@@ -19,15 +19,13 @@ test('basic - browserify bundle doesnt inject global', async (t) => {
 
 test('basic - browserify bundle doesnt inject global in deps', async (t) => {
   const scenario = createScenarioFromScaffold({
-    // bundle works
     defineOne: () => {
       module.exports = require('two')
     },
     defineTwo: () => {
       module.exports = global
-    }
+    },
   })
-  scenario.name = 'basic - browserify bundle doesnt inject global in deps'
   await autoConfigForScenario(scenario)
   const bundle = await createBundleForScenario({ scenario })
   const hasGlobalInjection = bundle.includes('typeof global !== \\"undefined\\" ? global :')

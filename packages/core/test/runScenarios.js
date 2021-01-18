@@ -4,7 +4,19 @@ const { runScenario } = require('./util')
 
 test('Run scenarios', async (t) => {
   for await (const scenario of loadScenarios()) {
-    const result = await runScenario({ scenario })
-    t.deepEqual(result, scenario.expectedResult, `Scenario gives expected result ${scenario.name}`)
+    let result, err
+    try {
+      result = await runScenario({ scenario })
+    } catch (e) {
+      err = e
+    }
+    if (scenario.expectedFailure) {
+      t.truthy(err, `Scenario fails as expected: ${err}`)
+    } else {
+      if (err) {
+        throw (err)
+      }
+      t.deepEqual(result, scenario.expectedResult, `Scenario gives expected result ${scenario.name}`)
+    }
   }
 })

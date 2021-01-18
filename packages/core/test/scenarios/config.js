@@ -1,4 +1,4 @@
-// const { createScenarioFromScaffold } = require('../util.js')
+const { createScenarioFromScaffold } = require('../util.js')
 
 module.exports = [
   // async () => {
@@ -35,5 +35,39 @@ module.exports = [
   //   }
   //   scenario.name = 'config - deep endowments'
   //   return scenario
-  // }
+  // },
+  async () => {
+    // dunder proto not allowed in globals path
+    const scenario = createScenarioFromScaffold({
+      name: 'config - dunder proto not allowed in globals path',
+      config: {
+        resources: {
+          'one': {
+            globals: {
+              'globalThis.__proto__': true
+            }
+          }
+        }
+      },
+      expectedFailure: true
+    })
+    return scenario
+  },
+  async () => {
+    // dunder proto not allowed in globals path
+    const scenario = createScenarioFromScaffold({
+      name: 'disable access to package',
+      config: {
+        resources: {
+          one: {
+            packages: {
+              two: false
+            }
+          }
+        }
+      },
+      expectedFailure: true
+    })
+    return scenario
+  },
 ]
