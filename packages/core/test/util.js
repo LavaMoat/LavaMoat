@@ -41,6 +41,7 @@ function createScenarioFromScaffold ({
   expectedFailure = false,
   files = [],
   builtin = [],
+  context = {},
   config,
   configOverride,
   defineEntry,
@@ -139,7 +140,7 @@ function createScenarioFromScaffold ({
     files: _files,
     config: _config,
     configOverride: _configOverride,
-    context: {}
+    context
   }
 }
 
@@ -195,11 +196,13 @@ async function runScenario ({ scenario }) {
   return testResult
 }
 
-async function prepareScenarioOnDisk ({ scenario }) {
+async function prepareScenarioOnDisk ({ scenario, opts = {} }) {
   const { path: projectDir } = await tmp.dir()
   const filesToWrite = Object.values(scenario.files)
-  filesToWrite.push({ file: 'lavamoat-config.json', content: stringify(scenario.config) })
-  filesToWrite.push({ file: 'lavamoat-config-override.json', content: stringify(scenario.configOverride) })
+  if (!opts.writeAutoConfig) {
+    filesToWrite.push({ file: 'lavamoat-config.json', content: stringify(scenario.config) })
+    filesToWrite.push({ file: 'lavamoat-config-override.json', content: stringify(scenario.configOverride) })
+  }
   await Promise.all(filesToWrite.map(async (file) => {
     const fullPath = path.join(projectDir, file.file)
     const dirname = path.dirname(fullPath)

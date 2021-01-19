@@ -27,8 +27,8 @@ test('basic - browserify bundle doesnt inject global in deps', async (t) => {
     },
   })
   await autoConfigForScenario(scenario)
-  const bundle = await createBundleForScenario({ scenario })
-  const hasGlobalInjection = bundle.includes('typeof global !== \\"undefined\\" ? global :')
+  const { bundleForScenario } = await createBundleForScenario({ scenario })
+  const hasGlobalInjection = bundleForScenario.includes('typeof global !== \\"undefined\\" ? global :')
   t.falsy(hasGlobalInjection, 'did not inject "global" ref')
 })
 
@@ -43,11 +43,11 @@ test('basic - lavamoat config and bundle', async (t) => {
     }
   })
   await autoConfigForScenario(scenario)
-  const bundle = await createBundleForScenario({ scenario })
+  const { bundleForScenario } = await createBundleForScenario({ scenario })
   const prelude = generatePrelude()
 
-  t.assert(bundle.includes('"location.href":true'), 'prelude includes banana config')
-  t.assert(bundle.includes(prelude), 'bundle includes expected prelude')
+  t.assert(bundbundleForScenariole.includes('"location.href":true'), 'prelude includes banana config')
+  t.assert(bundleForScenario.includes(prelude), 'bundle includes expected prelude')
 
   const testHref = 'https://funky.town.gov/yolo?snake=yes'
   scenario.context = { location: { href: testHref } }
@@ -68,15 +68,15 @@ test('basic - lavamoat bundle without prelude', async (t) => {
   })
 
   await autoConfigForScenario(scenario)
-  const bundle = await createBundleForScenario({ scenario, opts: { includePrelude: false } })
+  const { bundleForScenario } = await createBundleForScenario({ scenario, opts: { includePrelude: false } })
   const prelude = generatePrelude()
 
-  t.assert(!bundle.includes(prelude), 'bundle DOES NOT include prelude')
+  t.assert(!bundleForScenario.includes(prelude), 'bundle DOES NOT include prelude')
 
   let didCallLoadBundle = false
   const testGlobal = {
     LavaMoat: { loadBundle: () => { didCallLoadBundle = true } }
   }
-  evalBundle(bundle, testGlobal)
+  evalBundle(bundleForScenario, testGlobal)
   t.assert(didCallLoadBundle, 'test result matches expected')
 })

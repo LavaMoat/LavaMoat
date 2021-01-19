@@ -4,66 +4,50 @@ const path = require('path')
 const { execSync } = require('child_process')
 const tmp = require('tmp')
 const mkdirp = require('mkdirp')
-const { createScenarioFromScaffold } = require('lavamoat-core/test/util')
+const { createScenarioFromScaffold, prepareScenarioOnDisk } = require('lavamoat-core/test/util')
 
 const {
   createBundleFromRequiresArray,
-  generateConfigFromFiles,
-  runSimpleOneTwo,
+  createBundleForScenario,
   evalBundle,
-  runScenario
+  runScenario,
+  runBrowserify
 } = require('./util')
 
 test('config - default config path is generated with autoconfig if path is not specified', async (t) => {
-  const { name: tempDir } = tmp.dirSync()
-  const execOpts = {
-    cwd: tempDir,
-    stdio: 'inherit'
+  const scenario = createScenarioFromScaffold({})
+  const opts = {
+    writeAutoConfig: true
   }
-
-  const expectedPath = path.join(tempDir, 'lavamoat-config.json')
-  const scriptPath = require.resolve('./fixtures/runBrowserifyAutoConfig')
+  const { projectDir } = await prepareScenarioOnDisk({ scenario, opts })
+  const expectedPath = path.join(projectDir, 'lavamoat-config.json')
 
   t.falsy(fs.existsSync(expectedPath), 'Config file does not yet exist')
 
-  execSync(`node ${scriptPath}`, execOpts)
+  await runBrowserify({ projectDir, opts, scenario})
 
   t.truthy(fs.existsSync(expectedPath), 'Config file exists')
-
   })
 
 test('config - writes a proper config to a temp dir', async (t) => {
-  const entries = [
-    {
-      id: '/one.js',
-      file: '/one.js',
-      source: "require('two');",
-      deps: { two: '/node_modules/two/index.js' },
-      entry: true
+  const scenario = createScenarioFromScaffold({
+    defineOne: () => {
+      module.exports = require('three')
     },
-    {
-      id: '/node_modules/two/index.js',
-      file: '/node_modules/two/index.js',
-      source: "require('three')",
-      deps: { three: '/node_modules/three/index.js' }
+    defineTwo: () => {
+      module.exports = 555
     },
-    {
-      id: '/node_modules/three/index.js',
-      file: '/node_modules/three/index.js',
-      source: "window.postMessage('12345', '*')",
-      deps: {}
+    defineThree: () => {
+      module.exports = require('two')
     }
-  ]
-
-  const tmpObj = tmp.dirSync()
-  const config = await generateConfigFromFiles({ files: entries })
-  const filePath = path.join(tmpObj.name, 'lavamoat-config.json')
-  const configDir = path.dirname(filePath)
-
-  mkdirp.sync(configDir)
-  fs.writeFileSync(filePath, JSON.stringify(config))
-  const bundle = await createBundleFromRequiresArray([], { config: filePath })
-  t.notThrows(() => evalBundle(bundle))
+  })
+  const opts = {
+    writeAutoConfig: true
+  }
+  const { projectDir } = await prepareScenarioOnDisk({ scenario, opts })
+  await runBrowserify({ projectDir, opts, scenario})
+  const testResult = await runScenario({ scenario, dir: projectDir })
+  t.deepEqual(testResult, 555)
 })
 
 test('Config - Applies config override', async (t) => {

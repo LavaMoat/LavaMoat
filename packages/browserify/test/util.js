@@ -1,6 +1,7 @@
 const { runInNewContext } = require('vm')
 const browserify = require('browserify')
 const pify = require('pify')
+const fs = require('fs')
 const clone = require('clone')
 const through2 = require('through2').obj
 const mergeDeep = require('merge-deep')
@@ -30,7 +31,8 @@ module.exports = {
   createSpy,
   getStreamResults,
   runScenario,
-  createBundleForScenario
+  createBundleForScenario,
+  runBrowserify
 }
 
 async function createBundleFromEntry (path, pluginOpts = {}) {
@@ -397,14 +399,22 @@ async function runBrowserify ({ projectDir, opts, scenario }) {
   return { output }
 }
 
-async function createBundleForScenario ({ scenario, opts }) {
-  const { projectDir } = await prepareScenarioOnDisk({ scenario })
-  const { output: { stdout: bundle } } = await runBrowserify({ projectDir, opts, scenario})
-  return bundle
+async function createBundleForScenario ({ scenario, opts, dir }) {
+  if (!dir) {
+      const { projectDir } = await prepareScenarioOnDisk({ scenario, opts })
+      dir = projectDir
+  }
+  
+  const { output: { stdout: bundle } } = await runBrowserify({ projectDir: dir, opts, scenario})
+  fs.writeFileSync(`${dir}/bundle.js`, bundle)
+  return { bundleForScenario: bundle }
 }
 
-async function runScenario ({ scenario, opts, bundle }) {
-  if (!bundle) bundle = await createBundleForScenario({ scenario, opts })
+async function runScenario ({ scenario, opts, bundle, dir }) {
+  if (!bundle) {
+    const { bundleForScenario } = await createBundleForScenario({ scenario, opts, dir })
+    bundle = bundleForScenario
+  }
   const { hookedConsole, firstLogEventPromise } = createHookedConsole()
   evaluateWithSourceUrl('testBundlejs', bundle, mergeDeep({ console: hookedConsole }, scenario.context))
   const testResult = await firstLogEventPromise
