@@ -118,43 +118,6 @@ test('Config override is applied if not specified and already exists at default 
 //   t.truthy(updatedConfigFileString.includes('"three": 12345678'), 'config should be updated')
 // })
 
-test('Config validation fails - invalid global value', async (t) => {
-  const config = {
-    resources: {
-      '<root>': {
-        packages: {
-          two: true
-        }
-      },
-      two: {
-        packages: {
-          three: true
-        }
-      }
-    }
-  }
-
-  const configOverride = {
-    resources: {
-      '<root>': {
-        packages: {
-          two: true
-        }
-      },
-      two: {
-        packages: {
-          three: true
-        },
-        globals: {
-          console: false
-        }
-      }
-    }
-  }
-
-  await testConfigValidator(configOverride, config, false, t)
-})
-
 test('Config validation passes - everything valid', async (t) => {
   const config = {
     resources: {

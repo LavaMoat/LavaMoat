@@ -197,4 +197,25 @@ module.exports = [
     })
     return scenario
   },
+  async () => {
+    const scenario = createScenarioFromScaffold({
+      name: 'config - config validation fails: invalid "globals" value',
+      opts: {
+        config: {
+          resources: {
+            three: {
+              packages: {
+                two: true
+              },
+              globals: {
+                console: false
+              }
+            }
+          }
+        }
+      },
+      expectedFailure: true
+    })
+    return scenario
+  },
 ]
