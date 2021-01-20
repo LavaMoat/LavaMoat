@@ -3,7 +3,6 @@ const fs = require('fs')
 const path = require('path')
 const { execSync } = require('child_process')
 const tmp = require('tmp')
-const mkdirp = require('mkdirp')
 const { createScenarioFromScaffold, prepareScenarioOnDisk } = require('lavamoat-core/test/util')
 
 const {
@@ -117,63 +116,6 @@ test('Config override is applied if not specified and already exists at default 
 //   t.falsy(configFileString.includes('"three": 12345678'), 'original config should not have updated content')
 //   t.truthy(updatedConfigFileString.includes('"three": 12345678'), 'config should be updated')
 // })
-
-test('Config validation passes - everything valid', async (t) => {
-  const config = {
-    resources: {
-      '<root>': {
-        packages: {
-          two: true
-        }
-      },
-      two: {
-        packages: {
-          three: true
-        }
-      }
-    }
-  }
-
-  const configOverride = {
-    resources: {
-      '<root>': {
-        packages: {
-          two: true
-        }
-      },
-      two: {
-        packages: {
-          three: true
-        },
-        globals: {
-          console: 'write'
-        }
-      }
-    }
-  }
-
-  await testConfigValidator(configOverride, config, true, t)
-})
-
-async function testConfigValidator (configOverride, config, shouldBeValid, t) {
-  try {
-    await createBundleFromRequiresArray([], {
-      config,
-      configOverride
-    })
-    if (shouldBeValid) {
-      t.pass('Does not throw')
-    } else {
-      t.fail('Should throw')
-    }
-  } catch (error) {
-    if (shouldBeValid) {
-      t.fail('Should not throw')
-    } else {
-      t.pass('Throws')
-    }
-  }
-}
 
 test('Config - Applies writeAutoConfigDebug plugin option and dumps module object to disk', async (t) => {
   const tmpObj = tmp.dirSync()

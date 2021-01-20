@@ -38,7 +38,9 @@ async function generateConfigFromFiles ({ files, ...opts }) {
 
 function createScenarioFromScaffold ({
   name = 'template scenario',
-  expectedResult,
+  expectedResult = {
+    value: 'this is module two'
+  },
   expectedFailure = false,
   files = [],
   builtin = [],

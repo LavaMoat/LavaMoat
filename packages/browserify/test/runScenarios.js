@@ -15,7 +15,7 @@ test('Run scenarios', async (t) => {
       t.truthy(err, `Scenario fails as expected: ${err}`)
     } else {
       if (err) {    
-        t.fail(`Unexpected error in scenario: ${scenario.name}`, err)
+        t.fail(`Unexpected error in scenario: ${scenario.name} - ${err}`)
         throw (err)
       }
       t.deepEqual(result, scenario.expectedResult, `Scenario gives expected result ${scenario.name}`)

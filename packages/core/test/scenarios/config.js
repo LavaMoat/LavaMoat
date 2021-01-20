@@ -218,4 +218,48 @@ module.exports = [
     })
     return scenario
   },
+  async () => {
+    const scenario = createScenarioFromScaffold({
+      name: 'config - config validation passes - everything valid',
+      opts: {
+        config: {
+          resources: {
+            '<root>': {
+              packages: {
+                two: true
+              }
+            },
+            one: {
+              packages: {
+                two: true
+              }
+            },
+            two: {
+              packages: {
+                three: true
+              }
+            }
+          }
+        },
+        configOverride: {
+          resources: {
+            '<root>': {
+              packages: {
+                two: true
+              }
+            },
+            two: {
+              packages: {
+                three: true
+              },
+              globals: {
+                console: 'write'
+              }
+            }
+          }
+        }
+      }
+    })
+    return scenario
+  },
 ]
