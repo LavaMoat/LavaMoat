@@ -9,7 +9,6 @@ const { createScenarioFromScaffold, prepareScenarioOnDisk } = require('lavamoat-
 const {
   createBundleFromRequiresArray,
   createBundleForScenario,
-  evalBundle,
   runScenario,
   runBrowserify
 } = require('./util')
@@ -51,64 +50,41 @@ test('config - writes a proper config to a temp dir', async (t) => {
 })
 
 test('Config - Applies config override', async (t) => {
-  const config = {
-    resources: {
-      '<root>': {
-        packages: {
-          two: true
-        }
-      }
-    }
-  }
   const configOverride = {
     resources: {
-      '<root>': {
+      three: {
         packages: {
           two: true
-        }
-      },
-      two: {
-        packages: {
-          three: true
-        }
-      },
-      three: {
-        globals: {
-          postMessage: true
         }
       }
     }
   }
-  const tmpObj = tmp.dirSync()
-  const configFilePath = path.join(tmpObj.name, 'lavamoat-config.json')
-  const overrideFilePath = path.join(tmpObj.name, 'lavamoat-config-override.json')
-  const configDir = path.dirname(configFilePath)
-
-  mkdirp.sync(configDir)
-  fs.writeFileSync(configFilePath, JSON.stringify(config))
-  fs.writeFileSync(overrideFilePath, JSON.stringify(configOverride))
-
-  const bundle = await createBundleFromRequiresArray([], {
-    config: configFilePath,
+  const scenario = createScenarioFromScaffold({
+    defineOne: () => {
+      module.exports = require('three')
+    },
+    defineTwo: () => {
+      module.exports = 555
+    },
+    defineThree: () => {
+      module.exports = require('two')
+    },
     configOverride
   })
-  const stringBundle = await createBundleFromRequiresArray([], {
-    config: configFilePath,
-    configOverride: overrideFilePath
-  })
-  const functionBundle = await createBundleFromRequiresArray([], {
-    config: configFilePath,
-    configOverride: () => configOverride
-  })
-  const configObjectBundle = await createBundleFromRequiresArray([], {
-    config,
-    configOverride: () => configOverride
-  })
+  const testResult1 = await runScenario({ scenario, opts: {
+    configOverride
+  }})
+  t.deepEqual(testResult1, 555, 'Applies override, provided as object')
 
-  t.assert(bundle.includes('"three":true'), 'Applies override, provided as object')
-  t.assert(stringBundle.includes('"three":true'), 'Applies override, provided as string')
-  t.assert(functionBundle.includes('"three":true'), 'Applies override, provided as function')
-  t.assert(configObjectBundle.includes('"three":true'), 'Applies override, primary config provided as object')
+  const testResult2 = await runScenario({ scenario, opts: {
+    configOverride: 'lavamoat-config-override.json'
+  }})
+  t.deepEqual(testResult2, 555, 'Applies override, provided as filepath')
+
+  const testResult3 = await runScenario({ scenario, opts: {
+    configOverride: () => configOverride
+  }})
+  t.deepEqual(testResult3, 555, 'Applies override, provided as function')
 })
 
 test('Config override is applied if not specified and already exists at default path', async (t) => {
