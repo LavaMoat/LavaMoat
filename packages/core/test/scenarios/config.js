@@ -158,4 +158,22 @@ module.exports = [
     })
     return scenario
   },
+  async () => {
+    const scenario = createScenarioFromScaffold({
+      name: 'config - config validation fails: invalid "packages" key',
+      opts: {
+        config: {
+          resources: {
+            three: {
+              packagesssss: {
+                two: true
+              }
+            }
+          }
+        }
+      },
+      expectedFailure: true
+    })
+    return scenario
+  },
 ]
