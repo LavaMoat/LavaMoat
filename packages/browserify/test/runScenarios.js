@@ -3,7 +3,6 @@ const { runScenario } = require('./util.js')
 const { loadScenarios } = require('lavamoat-core/test/scenarios/index')
 
 test('Run scenarios', async (t) => {
-  //comment
   for await (const scenario of loadScenarios()) {
     let result, err
     try {
