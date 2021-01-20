@@ -46,7 +46,7 @@ test('basic - lavamoat config and bundle', async (t) => {
   const { bundleForScenario } = await createBundleForScenario({ scenario })
   const prelude = generatePrelude()
 
-  t.assert(bundbundleForScenariole.includes('"location.href":true'), 'prelude includes banana config')
+  t.assert(bundleForScenario.includes('"location.href":true'), 'prelude includes banana config')
   t.assert(bundleForScenario.includes(prelude), 'bundle includes expected prelude')
 
   const testHref = 'https://funky.town.gov/yolo?snake=yes'
