@@ -64,11 +64,12 @@ test('basic - lavamoat bundle without prelude', async (t) => {
     },
     defineTwo: () => {
       module.exports = () => location.href
-    }
+    },
+    opts: { includePrelude: false }
   })
 
   await autoConfigForScenario(scenario)
-  const { bundleForScenario } = await createBundleForScenario({ scenario, opts: { includePrelude: false } })
+  const { bundleForScenario } = await createBundleForScenario({ scenario })
   const prelude = generatePrelude()
 
   t.assert(!bundleForScenario.includes(prelude), 'bundle DOES NOT include prelude')

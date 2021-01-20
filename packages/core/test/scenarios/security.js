@@ -11,9 +11,9 @@ module.exports = [
       defineTwo: () => {
         try { Object.xyz = 123 } catch (_) { }
         try { Object.protoype.xyz = 123 } catch (_) { }
-      }
+      },
+      expectedResult: { objectXyz: false, protoXyz: false }
     })
-    scenario.expectedResult = { objectXyz: false, protoXyz: false }
     return scenario
   },
   async () => {
@@ -24,9 +24,9 @@ module.exports = [
       },
       defineTwo: () => {
         try { module.exports = setTimeout } catch (_) {}
-      }
+      },
+      expectedResult: false
     })
-    scenario.expectedResult = false
     return scenario
   },
   async () => {
@@ -44,9 +44,9 @@ module.exports = [
       },
       defineThree: () => {
         module.exports.action = () => false
-      }
+      },
+      expectedResult: false
     })
-    scenario.expectedResult = false
     return scenario
   },
   async () => {
@@ -69,9 +69,9 @@ module.exports = [
         }
         const child = Object.create(parent)
         module.exports = child
-      }
+      },
+      expectedResult: false
     })
-    scenario.expectedResult = false
     return scenario
   }
 ]

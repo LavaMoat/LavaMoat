@@ -9,9 +9,9 @@ module.exports = [
       },
       defineTwo: () => {
         module.exports = function (n) { return n * 111 }
-      }
+      },
+      expectedResult: 555
     })
-    scenario.expectedResult = 555
     return scenario
   }
 ]

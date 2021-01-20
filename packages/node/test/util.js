@@ -12,9 +12,9 @@ async function runLavamoat ({ args = [], cwd = process.cwd() } = {}) {
   return { output }
 }
 
-async function runScenario ({ scenario, opts }) {
+async function runScenario ({ scenario }) {
   const { projectDir } = await prepareScenarioOnDisk({ scenario })
-  const args = convertOptsToArgs({ scenario, opts })
+  const args = convertOptsToArgs({ scenario })
   const { output: { stdout, stderr } } = await runLavamoat({ args, cwd: projectDir })
   if (stderr.length) {
     throw new Error(stderr)

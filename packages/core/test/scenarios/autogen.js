@@ -14,10 +14,10 @@ module.exports = [
       defineTwo: () => {
         // eslint-disable-next-line
         module.exports.check = (target) => target.hasOwnProperty('Number')
-      }
+      },
+      expectedResult: true
     })
     await autoConfigForScenario(scenario)
-    scenario.expectedResult = true
     return scenario
   }
 ]

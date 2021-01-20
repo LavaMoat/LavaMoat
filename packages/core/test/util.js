@@ -38,16 +38,19 @@ async function generateConfigFromFiles ({ files, ...opts }) {
 
 function createScenarioFromScaffold ({
   name = 'template scenario',
+  expectedResult,
   expectedFailure = false,
   files = [],
   builtin = [],
   context = {},
+  opts = {},
   config,
   configOverride,
   defineEntry,
   defineOne,
   defineTwo,
-  defineThree
+  defineThree,
+  shouldRunInCore = true
 } = {}) {
   function _defineEntry () {
     const testResult = require('one')
@@ -135,12 +138,15 @@ function createScenarioFromScaffold ({
 
   return {
     name: name,
+    expectedResult,
     expectedFailure,
     entries: ['entry.js'],
     files: _files,
     config: _config,
     configOverride: _configOverride,
-    context
+    context,
+    opts,
+    shouldRunInCore
   }
 }
 
@@ -196,10 +202,10 @@ async function runScenario ({ scenario }) {
   return testResult
 }
 
-async function prepareScenarioOnDisk ({ scenario, opts = {} }) {
+async function prepareScenarioOnDisk ({ scenario }) {
   const { path: projectDir } = await tmp.dir()
   const filesToWrite = Object.values(scenario.files)
-  if (!opts.writeAutoConfig) {
+  if (!scenario.opts.writeAutoConfig) {
     filesToWrite.push({ file: 'lavamoat-config.json', content: stringify(scenario.config) })
     filesToWrite.push({ file: 'lavamoat-config-override.json', content: stringify(scenario.configOverride) })
   }
@@ -299,7 +305,7 @@ async function autoConfigForScenario (scenario, opts = {}) {
   scenario.config = config
 }
 
-function convertOptsToArgs ({ scenario, opts }) {
+function convertOptsToArgs ({ scenario }) {
   const { entries } = scenario
   if (entries.length !== 1) throw new Error('LavaMoat - invalid entries')
   const firstEntry = entries[0]

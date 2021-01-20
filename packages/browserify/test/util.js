@@ -387,10 +387,10 @@ async function getStreamResults (stream) {
   return results
 }
 
-async function runBrowserify ({ projectDir, opts, scenario }) {
+async function runBrowserify ({ projectDir, scenario }) {
   const args = [JSON.stringify({
     entries: scenario.entries,
-    opts,
+    opts: scenario.opts,
     config: scenario.config,
     configOverride: scenario.configOverride
   })]
@@ -399,20 +399,20 @@ async function runBrowserify ({ projectDir, opts, scenario }) {
   return { output }
 }
 
-async function createBundleForScenario ({ scenario, opts, dir }) {
+async function createBundleForScenario ({ scenario, dir }) {
   if (!dir) {
-      const { projectDir } = await prepareScenarioOnDisk({ scenario, opts })
+      const { projectDir } = await prepareScenarioOnDisk({ scenario })
       dir = projectDir
   }
   
-  const { output: { stdout: bundle } } = await runBrowserify({ projectDir: dir, opts, scenario})
+  const { output: { stdout: bundle } } = await runBrowserify({ projectDir: dir, scenario})
   fs.writeFileSync(`${dir}/bundle.js`, bundle)
   return { bundleForScenario: bundle }
 }
 
-async function runScenario ({ scenario, opts, bundle, dir }) {
+async function runScenario ({ scenario, bundle, dir }) {
   if (!bundle) {
-    const { bundleForScenario } = await createBundleForScenario({ scenario, opts, dir })
+    const { bundleForScenario } = await createBundleForScenario({ scenario, dir })
     bundle = bundleForScenario
   }
   const { hookedConsole, firstLogEventPromise } = createHookedConsole()

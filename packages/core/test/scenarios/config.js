@@ -1,5 +1,15 @@
 const { createScenarioFromScaffold } = require('../util.js')
 
+const configOverride = {
+  resources: {
+    three: {
+      packages: {
+        two: true
+      }
+    }
+  }
+}
+
 module.exports = [
   // async () => {
   //   const scenario = createScenarioFromScaffold({
@@ -26,13 +36,13 @@ module.exports = [
   //           }
   //         }
   //       }
-  //     }
+  //     },
+  //     expectedResult: {
+    //     one: 'undefined',
+    //     two: 'undefined',
+    //     three: 'number'
+    //   }
   //   })
-  //   scenario.expectedResult = {
-  //     one: 'undefined',
-  //     two: 'undefined',
-  //     three: 'number'
-  //   }
   //   return scenario
   // },
   async () => {
@@ -66,5 +76,68 @@ module.exports = [
       expectedFailure: true
     })
     return scenario
-  }
+  },
+  async () => {
+    const scenario = createScenarioFromScaffold({
+      name: 'Applies override, provided as object',
+      defineOne: () => {
+        module.exports = require('three')
+      },
+      defineTwo: () => {
+        module.exports = 555
+      },
+      defineThree: () => {
+        module.exports = require('two')
+      },
+      configOverride,
+      opts: {
+        configOverride
+      },
+      expectedResult: 555,
+      shouldRunInCore: false
+    })
+    return scenario
+  },
+  async () => {
+    const scenario = createScenarioFromScaffold({
+      name: 'Applies override, provided as file path string',
+      defineOne: () => {
+        module.exports = require('three')
+      },
+      defineTwo: () => {
+        module.exports = 555
+      },
+      defineThree: () => {
+        module.exports = require('two')
+      },
+      configOverride,
+      opts: {
+        configOverride: 'lavamoat-config-override.json'
+      },
+      expectedResult: 555,
+      shouldRunInCore: false
+    })
+    return scenario
+  },
+  async () => {
+    const scenario = createScenarioFromScaffold({
+      name: 'Applies override, provided as function returning config object',
+      defineOne: () => {
+        module.exports = require('three')
+      },
+      defineTwo: () => {
+        module.exports = 555
+      },
+      defineThree: () => {
+        module.exports = require('two')
+      },
+      configOverride,
+      opts: {
+        configOverride: () => configOverride
+      },
+      expectedResult: 555,
+      shouldRunInCore: false
+    })
+    return scenario
+  },
 ]
