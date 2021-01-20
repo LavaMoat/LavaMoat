@@ -40,7 +40,7 @@ module.exports = [
       name: 'config - dunder proto not allowed in globals path',
       config: {
         resources: {
-          'one': {
+          one: {
             globals: {
               'globalThis.__proto__': true
             }
