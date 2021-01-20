@@ -26,7 +26,7 @@ test('config - default config path is generated with autoconfig if path is not s
   await runBrowserify({ projectDir, scenario})
 
   t.truthy(fs.existsSync(expectedPath), 'Config file exists')
-  })
+})
 
 test('config - writes a proper config to a temp dir', async (t) => {
   const scenario = createScenarioFromScaffold({
@@ -118,19 +118,18 @@ test('Config override is applied if not specified and already exists at default 
 // })
 
 test('Config - Applies writeAutoConfigDebug plugin option and dumps module object to disk', async (t) => {
-  const tmpObj = tmp.dirSync()
-
-  const defaults = {
-    cwd: tmpObj.name,
-    stdio: 'inherit'
-  }
-
-  const expectedPath = path.join(tmpObj.name, './module-data.json')
-  const scriptPath = require.resolve('./fixtures/runBrowserifyAutoConfig')
+  const scenario = createScenarioFromScaffold({
+    opts: {
+      writeAutoConfig: true,
+      writeAutoConfigDebug: true
+    }
+  })
+  const { projectDir } = await prepareScenarioOnDisk({ scenario })
+  const expectedPath = path.join(projectDir, './module-data.json')
 
   t.falsy(fs.existsSync(expectedPath), 'Module data does not yet exist')
 
-  execSync(`node ${scriptPath}`, defaults)
+  await runBrowserify({ projectDir, scenario})
 
   t.truthy(fs.existsSync(expectedPath), 'Module data exists')
 })
