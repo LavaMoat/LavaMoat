@@ -63,7 +63,7 @@ module.exports = [
   },
   async () => {
     const scenario = createScenarioFromScaffold({
-      name: 'disable access to package',
+      name: 'config - disable access to package',
       config: {
         resources: {
           one: {
@@ -79,7 +79,7 @@ module.exports = [
   },
   async () => {
     const scenario = createScenarioFromScaffold({
-      name: 'Applies override, provided as object',
+      name: 'config - applies override, provided as object',
       defineOne: () => {
         module.exports = require('three')
       },
@@ -100,7 +100,7 @@ module.exports = [
   },
   async () => {
     const scenario = createScenarioFromScaffold({
-      name: 'Applies override, provided as file path string',
+      name: 'config - applies override, provided as file path string',
       defineOne: () => {
         module.exports = require('three')
       },
@@ -121,7 +121,7 @@ module.exports = [
   },
   async () => {
     const scenario = createScenarioFromScaffold({
-      name: 'Applies override, provided as function returning config object',
+      name: 'config - applies override, provided as function returning config object',
       defineOne: () => {
         module.exports = require('three')
       },
@@ -137,6 +137,24 @@ module.exports = [
       },
       expectedResult: 555,
       shouldRunInCore: false
+    })
+    return scenario
+  },
+  async () => {
+    const scenario = createScenarioFromScaffold({
+      name: 'config - config validation fails: invalid "resources" key',
+      opts: {
+        config: {
+          resourcessssss: {
+            three: {
+              packages: {
+                two: true
+              }
+            }
+          }
+        }
+      },
+      expectedFailure: true
     })
     return scenario
   },
