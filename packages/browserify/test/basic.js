@@ -26,7 +26,7 @@ test('basic - browserify bundle doesnt inject global in deps', async (t) => {
       module.exports = global
     },
   })
-  await autoConfigForScenario(scenario)
+  await autoConfigForScenario({ scenario })
   const { bundleForScenario } = await createBundleForScenario({ scenario })
   const hasGlobalInjection = bundleForScenario.includes('typeof global !== \\"undefined\\" ? global :')
   t.falsy(hasGlobalInjection, 'did not inject "global" ref')
@@ -42,7 +42,7 @@ test('basic - lavamoat config and bundle', async (t) => {
       module.exports = () => location.href
     }
   })
-  await autoConfigForScenario(scenario)
+  await autoConfigForScenario({ scenario })
   const { bundleForScenario } = await createBundleForScenario({ scenario })
   const prelude = generatePrelude()
 
@@ -68,7 +68,7 @@ test('basic - lavamoat bundle without prelude', async (t) => {
     opts: { includePrelude: false }
   })
 
-  await autoConfigForScenario(scenario)
+  await autoConfigForScenario({ scenario })
   const { bundleForScenario } = await createBundleForScenario({ scenario })
   const prelude = generatePrelude()
 

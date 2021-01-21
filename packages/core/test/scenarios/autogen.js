@@ -17,7 +17,7 @@ module.exports = [
       },
       expectedResult: true
     })
-    await autoConfigForScenario(scenario)
+    await autoConfigForScenario({ scenario })
     return scenario
   }
 ]

@@ -1,85 +1,93 @@
 const test = require('ava')
 const createCustomPack = require('../src/createCustomPack')
 const {
-  generateConfigFromFiles,
   createBrowserifyFromRequiresArray,
+  createBundleForScenario,
+  runBrowserify,
   getStreamResults,
   evalBundle,
+  runScenario
 } = require('./util')
 
+const {
+  fillInFileDetails,
+  autoConfigForScenario
+} = require('lavamoat-core/test/util')
+
 test('package factor bundle', async (t) => {
-  const files = [{
-    // common.js
-    id: '3',
-    packageName: 'b',
-    file: './node_modules/b/index.js',
-    deps: {},
-    source: 'module.exports = global.three'
-  }, {
-    id: '12',
-    packageName: '<root>',
-    file: './src/12.js',
-    deps: {},
-    source: 'module.exports = 10'
-  }, {
-    // src/1.js
-    id: 'entry1',
-    packageName: '<root>',
-    file: './src/1.js',
-    deps: {
-      2: './node_modules/a/index.js',
-      3: './node_modules/b/index.js',
-      10: './src/10.js'
+  const scenario = {
+    files: fillInFileDetails({
+      './node_modules/b/index.js': {
+        // common.js
+        packageName: 'b',
+        file: './node_modules/b/index.js',
+        importMap: {},
+        content: 'module.exports = global.three'
+      },
+      './src/12.js': {
+        packageName: '<root>',
+        imortMap: {},
+        content: 'module.exports = 10'
+      },
+      './src/1.js': {
+        // src/1.js
+        packageName: '<root>',
+        importMap: {
+          2: './node_modules/a/index.js',
+          3: './node_modules/b/index.js',
+          10: './src/10.js'
+        },
+        content: 'const testResult = require(\'2\') * require(\'3\') * require(\'10\'); console.log(JSON.stringify(testResult, null, 2))',
+        entry: true
+      },
+      './src/10.js': {
+        packageName: '<root>',
+        importMap: {
+          12: './src/12.js'
+        },
+        content: 'module.exports = require(\'12\')'
+      },
+      './node_modules/a/index.js': {
+        packageName: 'a',
+        importMap: {},
+        content: 'module.exports = global.two'
+      },
+      './src/2.js': {
+        // src/2.js
+        packageName: '<root>',
+        importMap: {
+          3: './node_modules/b/index.js',
+          4: './node_modules/c/index.js',
+          11: './src/11.js',
+        },
+        content: 'const testResult = require(\'3\') * require(\'4\') * require(\'11\'); console.log(JSON.stringify(testResult, null, 2))',
+        entry: true
+      },
+      './src/11.js': {
+        packageName: '<root>',
+        importMap: {
+          12: './src/12.js'
+        },
+        content: 'module.exports = require(\'12\')'
+      },
+      './node_modules/c/index.js': {
+        packageName: 'c',
+        importMap: {},
+        content: 'module.exports = global.four'
+      }
+    }),
+    entries: ['./src/1.js', './src/2.js'],
+    opts: {
+      pruneConfig: true
     },
-    source: 'global.testResult.value = require(\'2\') * require(\'3\') * require(\'10\')',
-    entry: true
-  }, {
-    id: '10',
-    packageName: '<root>',
-    file: './src/10.js',
-    deps: {
-      12: './src/12.js'
+    context: {
+      two: 2,
+      three: 3,
+      four: 4,
     },
-    source: 'module.exports = require(\'12\')'
-  }, {
-    id: '2',
-    packageName: 'a',
-    file: './node_modules/a/index.js',
-    deps: {},
-    source: 'module.exports = global.two'
-  }, {
-    // src/2.js
-    id: 'entry2',
-    packageName: '<root>',
-    file: './src/2.js',
-    deps: {
-      3: './node_modules/b/index.js',
-      4: './node_modules/c/index.js',
-      11: './src/11.js',
-    },
-    source: 'global.testResult.value = require(\'3\') * require(\'4\') * require(\'11\')',
-    entry: true
-  }, {
-    id: '11',
-    packageName: '<root>',
-    file: './src/11.js',
-    deps: {
-      12: './src/12.js'
-    },
-    source: 'module.exports = require(\'12\')'
-  }, {
-    id: '4',
-    packageName: 'c',
-    file: './node_modules/c/index.js',
-    deps: {},
-    source: 'module.exports = global.four'
-  }]
-
-  const config = await generateConfigFromFiles({ files })
-
-  const bundler = createBrowserifyFromRequiresArray({ files, pluginOpts: { config, pruneConfig: true } })
-    .plugin('bify-package-factor', { createPacker })
-
+    createPacker
+  }
+  await autoConfigForScenario({ scenario })
   function createPacker (opts) {
     return createCustomPack({
       ...opts,
@@ -91,10 +99,9 @@ test('package factor bundle', async (t) => {
       pruneConfig: true
     })
   }
-
-  const vinylBundles = await getStreamResults(bundler.bundle())
+  const bundle = createBundleForScenario({ scenario })
+  const vinylBundles = await getStreamResults(bundle)
   t.is(vinylBundles.length, 3)
-
 
   const relativeNames = vinylBundles.map(bundleFile => bundleFile.relative).sort()
   t.deepEqual(relativeNames, [
@@ -111,17 +118,9 @@ test('package factor bundle', async (t) => {
     bundles[relative] = content
   }))
 
-  const testGlobal = {
-    two: 2,
-    three: 3,
-    four: 4,
-  }
+  const testResult1 = runScenario({ scenario, bundle: bundles['common.js'] + bundles['src/1.js'] })
+  const testResult2 = runScenario({ scenario, bundle: bundles['common.js'] + bundles['src/2.js'] })
 
-  let result
-
-  result = evalBundle(bundles['common.js'] + bundles['src/1.js'], testGlobal)
-  t.is(result.value, 60)
-
-  result = evalBundle(bundles['common.js'] + bundles['src/2.js'], testGlobal)
-  t.is(result.value, 120)
+  t.is(testResult1, 60)
+  t.is(testResult2, 120)
 })
