@@ -1,13 +1,9 @@
 const test = require('ava')
 const fs = require('fs')
 const path = require('path')
-const { execSync } = require('child_process')
-const tmp = require('tmp')
 const { createScenarioFromScaffold, prepareScenarioOnDisk } = require('lavamoat-core/test/util')
 
 const {
-  createBundleFromRequiresArray,
-  createBundleForScenario,
   runScenario,
   runBrowserify
 } = require('./util')
@@ -74,6 +70,23 @@ test('Config override is applied if not specified and already exists at default 
   t.is(testResult, 30)
 })
 
+test('Config - Applies writeAutoConfigDebug plugin option and dumps module object to disk', async (t) => {
+  const scenario = createScenarioFromScaffold({
+    opts: {
+      writeAutoConfig: true,
+      writeAutoConfigDebug: true
+    }
+  })
+  const { projectDir } = await prepareScenarioOnDisk({ scenario })
+  const expectedPath = path.join(projectDir, './module-data.json')
+
+  t.falsy(fs.existsSync(expectedPath), 'Module data does not yet exist')
+
+  await runBrowserify({ projectDir, scenario})
+
+  t.truthy(fs.existsSync(expectedPath), 'Module data exists')
+})
+
 // this test is not written correctly, im disabling it for now
 // it tests features we dont support:
 // - automatic watchify writeAutoConfig rebuilds when config override is modified
@@ -116,20 +129,3 @@ test('Config override is applied if not specified and already exists at default 
 //   t.falsy(configFileString.includes('"three": 12345678'), 'original config should not have updated content')
 //   t.truthy(updatedConfigFileString.includes('"three": 12345678'), 'config should be updated')
 // })
-
-test('Config - Applies writeAutoConfigDebug plugin option and dumps module object to disk', async (t) => {
-  const scenario = createScenarioFromScaffold({
-    opts: {
-      writeAutoConfig: true,
-      writeAutoConfigDebug: true
-    }
-  })
-  const { projectDir } = await prepareScenarioOnDisk({ scenario })
-  const expectedPath = path.join(projectDir, './module-data.json')
-
-  t.falsy(fs.existsSync(expectedPath), 'Module data does not yet exist')
-
-  await runBrowserify({ projectDir, scenario})
-
-  t.truthy(fs.existsSync(expectedPath), 'Module data exists')
-})

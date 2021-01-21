@@ -4,7 +4,6 @@ require('./config')
 require('./generateConfig')
 require('./configReplacements')
 
-require('./endowments')
 require('./globalRef')
 require('./globalWrites')
 require('./exportsDefense')
