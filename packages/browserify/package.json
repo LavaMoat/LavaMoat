@@ -36,12 +36,11 @@
     "from": "^0.1.7",
     "keccak": "^3.0.1",
     "pump": "^3.0.0",
-    "rimraf": "^3.0.2",
     "ses": "git+https://git@github.com/agoric/ses.git#fdb393f817f6124c4d055bff26b68e4cbe17618e",
     "source-map": "^0.7.3",
     "standard": "14.3.1",
-    "tmp": "^0.1.0",
     "uglify-js": "^3.4.9",
+    "vinyl-buffer": "^1.0.1",
     "watchify": "^3.11.1"
   },
   "scripts": {
@@ -49,7 +48,7 @@
     "lint": "npm run lint:standard && npm run lint:deps",
     "lint:standard": "standard src/**/*.js test/**/*.js",
     "lint:fix": "standard src/**/*.js test/**/*.js --fix",
-    "lint:deps": "depcheck --ignore-dirs=lib --ignores='standard,depcheck,bify-package-factor,ses,banana,two,one,victim,attacker'",
+    "lint:deps": "depcheck --ignore-dirs=lib --ignores='standard,depcheck,bify-package-factor,ses,banana,two,one,victim,attacker,three,a,b,c'",
     "build:ses": "(cd ./node_modules/ses && npm i && npm run build && cp ./dist/ses.umd.js ../../lib/)"
   },
   "author": "kumavis",
