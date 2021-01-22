@@ -2,6 +2,7 @@ const { runInNewContext } = require('vm')
 const browserify = require('browserify')
 const pify = require('pify')
 const fs = require('fs')
+const path = require('path')
 const clone = require('clone')
 const through2 = require('through2').obj
 const mergeDeep = require('merge-deep')
@@ -32,6 +33,7 @@ module.exports = {
   getStreamResults,
   runScenario,
   createBundleForScenario,
+  readConfigFromScenario,
   runBrowserify
 }
 
@@ -146,6 +148,13 @@ async function generateConfigFromFiles ({ files }) {
   await bundleAsync(bundler)
   const config = await promise
   return config
+}
+
+async function readConfigFromScenario ({ scenario }) {
+  const { dir } = await createBundleForScenario({ scenario })
+  const fullPath = path.join(dir, 'lavamoat-config.json')
+  const config = fs.readFileSync(fullPath)
+  return JSON.parse(config.toString())
 }
 
 async function bundleAsync (bundler) {
@@ -388,6 +397,7 @@ async function getStreamResults (stream) {
 }
 
 async function runBrowserify ({ projectDir, scenario }) {
+  console.log(scenario.opts)
   const args = [JSON.stringify({
     entries: scenario.entries,
     opts: scenario.opts,
@@ -410,8 +420,7 @@ async function createBundleForScenario ({ scenario, dir }) {
   }
   
   const { output: { stdout: bundle } } = await runBrowserify({ projectDir: dir, scenario})
-  fs.writeFileSync(`${dir}/bundle.js`, bundle)
-  return { bundleForScenario: bundle }
+  return { bundleForScenario: bundle, dir }
 }
 
 async function runScenario ({ scenario, bundle, dir }) {

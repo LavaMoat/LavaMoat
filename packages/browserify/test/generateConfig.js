@@ -1,10 +1,24 @@
 const test = require('ava')
 
-const { generateConfigFromFiles } = require('./util')
+const { generateConfigFromFiles,
+  readConfigFromScenario
+} = require('./util')
+const {
+  createScenarioFromScaffold
+} = require('lavamoat-core/test/util')
 
 test('generateConfig - empty config', async (t) => {
-  const files = []
-  const config = await generateConfigFromFiles({ files })
+  const scenario = createScenarioFromScaffold({
+    defineEntry: () => {},
+    defineOne: () => {},
+    defineTwo: () => {},
+    defineThree: () => {},
+    mergeConfig: false,
+    opts: {
+      writeAutoConfig: true
+    }
+  })
+  const config = await readConfigFromScenario({ scenario })
   t.deepEqual(config, { resources: {} }, 'config matches expected')
 })
 
