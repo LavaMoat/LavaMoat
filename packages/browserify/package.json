@@ -51,7 +51,7 @@
     "lint": "npm run lint:standard && npm run lint:deps",
     "lint:standard": "standard src/**/*.js test/**/*.js",
     "lint:fix": "standard src/**/*.js test/**/*.js --fix",
-    "lint:deps": "depcheck --ignore-dirs=lib --ignores='standard,depcheck,bify-package-factor,ses,banana,two,one,victim,attacker'",
+    "lint:deps": "depcheck --ignore-dirs=lib --ignores='standard,depcheck,bify-package-factor,ses,banana,two,one,victim,attacker,three'",
     "build:ses": "(cd ./node_modules/ses && npm i && npm run build && cp ./dist/ses.umd.js ../../lib/)"
   },
   "author": "kumavis",
