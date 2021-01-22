@@ -38,10 +38,10 @@ module.exports = [
   //       }
   //     },
   //     expectedResult: {
-    //     one: 'undefined',
-    //     two: 'undefined',
-    //     three: 'number'
-    //   }
+  //       one: 'undefined',
+  //       two: 'undefined',
+  //       three: 'number'
+  //     }
   //   })
   //   return scenario
   // },
@@ -257,5 +257,5 @@ module.exports = [
       }
     })
     return scenario
-  },
+  }
 ]
