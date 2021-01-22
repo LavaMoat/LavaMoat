@@ -12,7 +12,7 @@ test('Run scenarios', async (t) => {
       err = e
     }
     if (scenario.expectedFailure) {
-      t.truthy(err, `Scenario fails as expected: ${err}`)
+      t.truthy(err, `Scenario fails as expected: ${scenario.name} - ${err}`)
     } else {
       if (err) {    
         t.fail(`Unexpected error in scenario: ${scenario.name} - ${err}`)

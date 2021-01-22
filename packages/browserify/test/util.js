@@ -394,7 +394,11 @@ async function runBrowserify ({ projectDir, scenario }) {
     config: scenario.config,
     configOverride: scenario.configOverride
   })]
-  const browserifyPath = `${__dirname}/fixtures/runBrowserify.js`
+  const paths = {
+    normal: `${__dirname}/fixtures/runBrowserify.js`,
+    factor: `${__dirname}/fixtures/runBrowserifyBundleFactor.js`
+  }
+  const browserifyPath = paths[scenario.type || 'normal']
   const output = await execFile(browserifyPath, args, { cwd: projectDir, maxBuffer: 8192 * 10000 })
   return { output }
 }

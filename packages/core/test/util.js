@@ -17,7 +17,8 @@ module.exports = {
   convertOptsToArgs,
   evaluateWithSourceUrl,
   createHookedConsole,
-  fillInFileDetails
+  fillInFileDetails,
+  functionToString
 }
 
 async function generateConfigFromFiles ({ files, ...opts }) {
@@ -53,7 +54,8 @@ function createScenarioFromScaffold ({
   defineOne,
   defineTwo,
   defineThree,
-  shouldRunInCore = true
+  shouldRunInCore = true,
+  mergeConfig = true
 } = {}) {
   function _defineEntry () {
     const testResult = require('one')
@@ -113,21 +115,26 @@ function createScenarioFromScaffold ({
     ...files
   })
 
-  const _config = mergeDeep({
-    resources: {
-      one: {
-        packages: {
-          two: true,
-          three: true
-        }
-      },
-      two: {
-        packages: {
-          three: true
+  let _config
+  if (mergeConfig) {
+    _config = mergeDeep({
+      resources: {
+        one: {
+          packages: {
+            two: true,
+            three: true
+          }
+        },
+        two: {
+          packages: {
+            three: true
+          }
         }
       }
-    }
-  }, config)
+    }, config)
+  } else {
+    _config = config
+  }
 
   const _configOverride = mergeDeep({
     resources: {
@@ -210,7 +217,9 @@ async function prepareScenarioOnDisk ({ scenario }) {
   const filesToWrite = Object.values(scenario.files)
   if (!scenario.opts.writeAutoConfig) {
     filesToWrite.push({ file: 'lavamoat-config.json', content: stringify(scenario.config) })
-    filesToWrite.push({ file: 'lavamoat-config-override.json', content: stringify(scenario.configOverride) })
+    if (scenario.configOverride) {
+      filesToWrite.push({ file: 'lavamoat-config-override.json', content: stringify(scenario.configOverride) })
+    }
   }
   await Promise.all(filesToWrite.map(async (file) => {
     const fullPath = path.join(projectDir, file.file)
@@ -222,12 +231,12 @@ async function prepareScenarioOnDisk ({ scenario }) {
 }
 
 function fillInFileDetails (files) {
-  Object.entries(files).forEach(([file, moduleData]) => {
-    moduleData.file = moduleData.file || file
-    moduleData.specifier = moduleData.file || file
-    moduleData.packageName = moduleData.packageName || packageNameFromPath(file) || '<root>'
-    moduleData.type = moduleData.type || 'js'
-    moduleData.entry = Boolean(moduleData.entry)
+  Object.entries(files).forEach(([file, moduleRecord]) => {
+    moduleRecord.file = moduleRecord.file || file
+    moduleRecord.specifier = moduleRecord.file || file
+    moduleRecord.packageName = moduleRecord.packageName || packageNameFromPath(file) || '<root>'
+    moduleRecord.type = moduleRecord.type || 'js'
+    moduleRecord.entry = Boolean(moduleRecord.entry)
   })
   return files
 }
@@ -313,4 +322,8 @@ function convertOptsToArgs ({ scenario }) {
   if (entries.length !== 1) throw new Error('LavaMoat - invalid entries')
   const firstEntry = entries[0]
   return [firstEntry]
+}
+
+function functionToString(func) {
+  return `(${func}).call(this)`
 }

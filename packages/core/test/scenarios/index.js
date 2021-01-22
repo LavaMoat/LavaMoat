@@ -6,7 +6,7 @@ const endowments = require('./endowments')
 const exportsDefense = require('./exportsDefense')
 
 module.exports = { loadScenarios }
-const scenarios = [...exportsDefense]
+const scenarios = [...autogen, ...security, ...basic, ...config, ...endowments, ...exportsDefense]
 
 async function * loadScenarios () {
   for (const scenarioCreator of scenarios) {

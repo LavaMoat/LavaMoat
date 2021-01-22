@@ -42,6 +42,8 @@
     "standard": "14.3.1",
     "tmp": "^0.1.0",
     "uglify-js": "^3.4.9",
+    "vinyl-buffer": "^1.0.1",
+    "vinyl-fs": "^3.0.3",
     "watchify": "^3.11.1"
   },
   "scripts": {

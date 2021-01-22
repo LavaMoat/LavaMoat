@@ -143,78 +143,74 @@ module.exports = [
   async () => {
     const scenario = createScenarioFromScaffold({
       name: 'config - config validation fails: invalid "resources" key',
-      opts: {
-        config: {
-          resourcessssss: {
-            three: {
-              packages: {
-                two: true
-              }
+      config: {
+        resourcessssss: {
+          three: {
+            packages: {
+              two: true
             }
           }
         }
       },
-      expectedFailure: true
+      expectedFailure: true,
+      mergeConfig: false
     })
     return scenario
   },
   async () => {
     const scenario = createScenarioFromScaffold({
       name: 'config - config validation fails: invalid "packages" key',
-      opts: {
-        config: {
-          resources: {
-            three: {
-              packagesssss: {
-                two: true
-              }
+      config: {
+        resources: {
+          three: {
+            packagesssss: {
+              two: true
             }
           }
         }
       },
-      expectedFailure: true
+      expectedFailure: true,
+      mergeConfig: false
     })
     return scenario
   },
   async () => {
     const scenario = createScenarioFromScaffold({
       name: 'config - config validation fails: invalid "globals" key',
-      opts: {
-        config: {
-          resources: {
-            three: {
-              packages: {
-                two: true
-              },
-              globalsss: {
-                console: true
-              }
+      config: {
+        resources: {
+          three: {
+            packages: {
+              two: true
+            },
+            globalsss: {
+              console: true
             }
           }
         }
       },
-      expectedFailure: true
+      expectedFailure: true,
+      mergeConfig: false
     })
     return scenario
   },
   async () => {
     const scenario = createScenarioFromScaffold({
       name: 'config - config validation fails: invalid "globals" value',
-      opts: {
-        config: {
-          resources: {
-            three: {
-              packages: {
-                two: true
-              },
-              globals: {
-                console: false
-              }
+      config: {
+        resources: {
+          three: {
+            packages: {
+              two: true
+            },
+            globals: {
+              console: false
             }
           }
         }
       },
-      expectedFailure: true
+      expectedFailure: true,
+      mergeConfig: false
     })
     return scenario
   },

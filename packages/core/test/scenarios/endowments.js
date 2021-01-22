@@ -8,9 +8,11 @@ module.exports = [
       name: 'endowments - bridged endowments matches original endowments object',
       defineOne: () => {
         const two = require('two')
+        // eslint-disable-next-line
         module.exports = globalThis.testCheck(two)
       },
       defineTwo: () => {
+        // eslint-disable-next-line
         module.exports = globalThis.testGet()
       },
       context: {
@@ -40,5 +42,5 @@ module.exports = [
       expectedResult: true
     })
     return scenario
-  },
+  }
 ]

@@ -74,5 +74,5 @@ module.exports = [
       expectedResult: true
     })
     return scenario
-  },
+  }
 ]

@@ -7,7 +7,6 @@ const params = JSON.parse(process.argv[2])
 browserify(params.entries, {
   ...lavamoatPlugin.args,
   plugin: [
-    [lavamoatPlugin, params.opts],
-    params.createPacker && ['bify-package-factor', params.createPacker]
+    [lavamoatPlugin, params.opts]
   ]
 }).bundle().pipe(process.stdout)
