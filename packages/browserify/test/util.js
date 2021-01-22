@@ -33,7 +33,7 @@ module.exports = {
   getStreamResults,
   runScenario,
   createBundleForScenario,
-  readConfigFromScenario,
+  autoConfigForScenario,
   runBrowserify
 }
 
@@ -150,8 +150,9 @@ async function generateConfigFromFiles ({ files }) {
   return config
 }
 
-async function readConfigFromScenario ({ scenario }) {
-  const { dir } = await createBundleForScenario({ scenario })
+async function autoConfigForScenario ({ scenario }) {
+  const copiedScenario = {...scenario, opts: {...scenario.opts, writeAutoConfig: true }}
+  const { dir } = await createBundleForScenario({ scenario: copiedScenario})
   const fullPath = path.join(dir, 'lavamoat-config.json')
   const config = fs.readFileSync(fullPath)
   return JSON.parse(config.toString())
@@ -397,7 +398,6 @@ async function getStreamResults (stream) {
 }
 
 async function runBrowserify ({ projectDir, scenario }) {
-  console.log(scenario.opts)
   const args = [JSON.stringify({
     entries: scenario.entries,
     opts: scenario.opts,

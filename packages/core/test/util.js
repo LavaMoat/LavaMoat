@@ -55,7 +55,7 @@ function createScenarioFromScaffold ({
   defineTwo,
   defineThree,
   shouldRunInCore = true,
-  mergeConfig = true
+  defaultConfig = true
 } = {}) {
   function _defineEntry () {
     const testResult = require('one')
@@ -116,7 +116,7 @@ function createScenarioFromScaffold ({
   })
 
   let _config
-  if (mergeConfig) {
+  if (defaultConfig) {
     _config = mergeDeep({
       resources: {
         one: {
