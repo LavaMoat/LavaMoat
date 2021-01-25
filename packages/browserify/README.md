@@ -43,10 +43,10 @@ elem.textContent = x;
 Now use the browserify command with lavamoat as a plugin to build a lavamoat-protected bundle starting at `index.js`:
 
 ```
-$ browserify index.js --plugin [ lavamoat-browserify --writeAutoConfig ]
+$ browserify index.js --plugin [ lavamoat-browserify --autoconfig ]
 ```
 
-All of the modules that `index.js` needs are included in the `bundle.js` as strings to be evaluated inside SES containers. A lavamoat configuration object is generated from a recursive walk of the require() graph and injected into the bundle (via --writeAutoConfig), which is also written to disk.
+All of the modules that `index.js` needs are included in the `bundle.js` as strings to be evaluated inside SES containers. A lavamoat configuration object is generated from a recursive walk of the require() graph and injected into the bundle (via --autoconfig), which is also written to disk.
 
 To use this bundle, just toss a <script src="bundle.js"></script> into your html, as per the official [browserify][BrowserifyGithub] documentation.
 
