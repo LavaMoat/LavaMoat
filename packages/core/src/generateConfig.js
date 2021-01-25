@@ -148,9 +148,11 @@ function createModuleInspector (opts = {}) {
   }
 
   function inspectForGlobals (ast, moduleRecord, packageName, includeDebugInfo) {
+    const commonJsRefs = ['require', 'module', 'exports', 'arguments']
+    const globalObjPrototypeRefs = Object.getOwnPropertyNames(Object.prototype)
     const foundGlobals = inspectGlobals(ast, {
       // browserify commonjs scope
-      ignoredRefs: ['require', 'module', 'exports', 'arguments'],
+      ignoredRefs: [...commonJsRefs, ...globalObjPrototypeRefs],
       // browser global refs + browserify global
       globalRefs: ['globalThis', 'self', 'window', 'global']
     })

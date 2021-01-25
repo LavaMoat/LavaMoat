@@ -1,6 +1,8 @@
 const { runInNewContext } = require('vm')
 const browserify = require('browserify')
 const pify = require('pify')
+const fs = require('fs')
+const path = require('path')
 const clone = require('clone')
 const through2 = require('through2').obj
 const mergeDeep = require('merge-deep')
@@ -10,6 +12,9 @@ const pump = require('pump')
 const dataToStream = require('from')
 const { packageNameFromPath } = require('lavamoat-core')
 const lavamoatPlugin = require('../src/index')
+const { prepareScenarioOnDisk, evaluateWithSourceUrl, createHookedConsole } = require('lavamoat-core/test/util.js')
+const util = require('util')
+const execFile = util.promisify(require('child_process').execFile)
 const noop = () => {}
 
 module.exports = {
@@ -25,7 +30,11 @@ module.exports = {
   evalBundle,
   createBrowserifyFromRequiresArray,
   createSpy,
-  getStreamResults
+  getStreamResults,
+  runScenario,
+  createBundleForScenario,
+  autoConfigForScenario,
+  runBrowserify
 }
 
 async function createBundleFromEntry (path, pluginOpts = {}) {
@@ -96,11 +105,10 @@ function createBrowserifyFromRequiresArray ({ files: _files, pluginOpts = {} }) 
   const bifyOpts = Object.assign({}, lavamoatPlugin.args)
   const bundler = browserify([], bifyOpts)
   bundler.plugin(lavamoatPlugin, pluginOpts)
-
   // instrument bundler to use custom resolver hooks
   const { loadModuleData, resolveRelative } = createResolverHooksFromFilesArray({ files })
   overrideResolverHooks({ bundler, loadModuleData, resolveRelative })
-
+  
   // inject entry files into browserify pipeline
   const fileInjectionStream = through2(null, null, function (cb) {
     files
@@ -113,7 +121,6 @@ function createBrowserifyFromRequiresArray ({ files: _files, pluginOpts = {} }) 
       })
     cb()
   })
-
   // add our file injector
   bundler.pipeline.get('record').unshift(fileInjectionStream)
   // replace lavamoat-browserify's packageData stream which normally reads from disk
@@ -128,7 +135,6 @@ function createBrowserifyFromRequiresArray ({ files: _files, pluginOpts = {} }) 
     }
     cb(null, moduleData)
   }))
-
   return bundler
 }
 
@@ -142,6 +148,14 @@ async function generateConfigFromFiles ({ files }) {
   await bundleAsync(bundler)
   const config = await promise
   return config
+}
+
+async function autoConfigForScenario ({ scenario }) {
+  const copiedScenario = {...scenario, opts: {...scenario.opts, writeAutoConfig: true }}
+  const { dir } = await createBundleForScenario({ scenario: copiedScenario})
+  const fullPath = path.join(dir, 'lavamoat-config.json')
+  const config = fs.readFileSync(fullPath)
+  return JSON.parse(config.toString())
 }
 
 async function bundleAsync (bundler) {
@@ -381,4 +395,41 @@ async function getStreamResults (stream) {
     )
   })()
   return results
+}
+
+async function runBrowserify ({ projectDir, scenario }) {
+  const args = [JSON.stringify({
+    entries: scenario.entries,
+    opts: scenario.opts,
+    config: scenario.config,
+    configOverride: scenario.configOverride
+  })]
+  const paths = {
+    normal: `${__dirname}/fixtures/runBrowserify.js`,
+    factor: `${__dirname}/fixtures/runBrowserifyBundleFactor.js`
+  }
+  const browserifyPath = paths[scenario.type || 'normal']
+  const output = await execFile(browserifyPath, args, { cwd: projectDir, maxBuffer: 8192 * 10000 })
+  return { output }
+}
+
+async function createBundleForScenario ({ scenario, dir }) {
+  if (!dir) {
+      const { projectDir } = await prepareScenarioOnDisk({ scenario })
+      dir = projectDir
+  }
+  
+  const { output: { stdout: bundle } } = await runBrowserify({ projectDir: dir, scenario})
+  return { bundleForScenario: bundle, dir }
+}
+
+async function runScenario ({ scenario, bundle, dir }) {
+  if (!bundle) {
+    const { bundleForScenario } = await createBundleForScenario({ scenario, dir })
+    bundle = bundleForScenario
+  }
+  const { hookedConsole, firstLogEventPromise } = createHookedConsole()
+  evaluateWithSourceUrl('testBundlejs', bundle, mergeDeep({ console: hookedConsole }, scenario.context))
+  const testResult = await firstLogEventPromise
+  return testResult
 }
