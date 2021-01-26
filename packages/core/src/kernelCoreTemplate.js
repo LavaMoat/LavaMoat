@@ -47,6 +47,7 @@
     const { prepareCompartmentGlobalFromConfig } = templateRequire('makePrepareRealmGlobalFromConfig')()
 
     const moduleCache = new Map()
+    const packageCompartmentCache = new Map()
     const globalStore = new Map()
 
     return {
@@ -132,18 +133,39 @@
         return moduleInitializer
       }
 
-      // otherwise setup initializer from moduleSource
-      const isRootModule = packageName === '<root>'
+      // setup initializer from moduleSource and compartment.
+      // execute in package compartment with globalThis populated per package policy
+      const packageCompartment = getCompartmentForPackage(packageName, packagePolicy, globalRef)
+      // TODO: move all source mutations elsewhere
+      try {
+        const sourceURL = moduleData.file || `modules/${moduleId}`
+        if (sourceURL.includes('\n')) {
+          throw new Error(`LavaMoat - Newlines not allowed in filenames: ${JSON.stringify(sourceURL)}`)
+        }
+        return packageCompartment.evaluate(`${moduleSource}\n//# sourceURL=${sourceURL}`)
+      } catch (err) {
+        console.warn(`LavaMoat - Error evaluating module "${moduleId}" from package "${packageName}" \n${err.stack}`)
+        throw err
+      }
+    }
+
+    function getCompartmentForPackage (packageName, packagePolicy, globalRef) {
+      // compartment may have already been created
+      let packageCompartment = packageCompartmentCache.get(packageName)
+      if (packageCompartment) {
+        return packageCompartment
+      }
 
       // prepare endowments
       let endowments
+      const isRootModule = packageName === '<root>'
       if (isRootModule) {
         endowments = globalRef
       } else {
         try {
           endowments = getEndowmentsForConfig(globalRef, packagePolicy)
         } catch (err) {
-          const errMsg = `Lavamoat - failed to prepare endowments for module "${moduleId}":\n${err.stack}`
+          const errMsg = `Lavamoat - failed to prepare endowments for package "${packageName}":\n${err.stack}`
           throw new Error(errMsg)
         }
       }
@@ -152,35 +174,28 @@
       // endowments:
       // - Math is for untamed Math.random
       // - Date is for untamed Date.now
-      const moduleCompartment = new Compartment({ Math, Date })
+      packageCompartment = new Compartment({ Math, Date })
       if (isRootModule) {
         // TODO: root module compartment globalThis does not support global write
         // expose all own properties of globalRef, including non-enumerable
         Object.entries(Object.getOwnPropertyDescriptors(endowments))
           // ignore properties already defined on compartment global
-          .filter(([key]) => !(key in moduleCompartment.globalThis))
+          .filter(([key]) => !(key in packageCompartment.globalThis))
           // define property on compartment global
-          .forEach(([key, desc]) => Reflect.defineProperty(moduleCompartment.globalThis, key, desc))
+          .forEach(([key, desc]) => Reflect.defineProperty(packageCompartment.globalThis, key, desc))
         // global circular references otherwise added by prepareCompartmentGlobalFromConfig
         // TODO: should be a platform specific circular ref
-        moduleCompartment.globalThis.global = moduleCompartment.globalThis
+        packageCompartment.globalThis.global = packageCompartment.globalThis
       } else {
         // sets up read/write access as configured
         const globalsConfig = packagePolicy.globals
-        prepareCompartmentGlobalFromConfig(moduleCompartment.globalThis, globalsConfig, endowments, globalStore)
+        prepareCompartmentGlobalFromConfig(packageCompartment.globalThis, globalsConfig, endowments, globalStore)
       }
-      // execute in module compartment with modified compartment global
-      // TODO: move all source mutations elsewhere
-      try {
-        const sourceURL = moduleData.file || `modules/${moduleId}`
-        if (sourceURL.includes('\n')) {
-          throw new Error(`LavaMoat - Newlines not allowed in filenames: ${JSON.stringify(sourceURL)}`)
-        }
-        return moduleCompartment.evaluate(`${moduleSource}\n//# sourceURL=${sourceURL}`)
-      } catch (err) {
-        console.warn(`LavaMoat - Error evaluating module "${moduleId}" from package "${packageName}" \n${err.stack}`)
-        throw err
-      }
+
+      // save the compartment for use by other modules in the package
+      packageCompartmentCache.set(packageName, packageCompartment)
+
+      return packageCompartment
     }
 
     // this resolves a module given a requestedName (eg relative path to parent) and a parentModule context
