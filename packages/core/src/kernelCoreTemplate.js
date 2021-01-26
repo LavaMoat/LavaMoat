@@ -90,7 +90,7 @@
       // if you dont cache before running the moduleInitializer
       moduleCache.set(moduleId, moduleObj)
 
-      const moduleInitializer = prepareModuleInitializer(moduleData, packagePolicy, globalRef)
+      const moduleInitializer = prepareModuleInitializer(moduleData, packagePolicy)
 
       // validate moduleInitializer
       if (typeof moduleInitializer !== 'function') {
@@ -179,7 +179,7 @@
       return moduleExports
     }
 
-    function prepareModuleInitializer (moduleData, packagePolicy, globalRef) {
+    function prepareModuleInitializer (moduleData, packagePolicy) {
       const { moduleInitializer, package: packageName, id: moduleId, source: moduleSource } = moduleData
 
       // moduleInitializer may be set by loadModuleData (e.g. builtin + native modules)
@@ -201,7 +201,7 @@
 
       // setup initializer from moduleSource and compartment.
       // execute in package compartment with globalThis populated per package policy
-      const packageCompartment = getCompartmentForPackage(packageName, packagePolicy, globalRef)
+      const packageCompartment = getCompartmentForPackage(packageName, packagePolicy)
       // TODO: move all source mutations elsewhere
       try {
         const sourceURL = moduleData.file || `modules/${moduleId}`
@@ -237,7 +237,7 @@
       return packageCompartment
     }
 
-    function getCompartmentForPackage (packageName, packagePolicy, globalRef) {
+    function getCompartmentForPackage (packageName, packagePolicy) {
       // compartment may have already been created
       let packageCompartment = packageCompartmentCache.get(packageName)
       if (packageCompartment) {
@@ -247,7 +247,7 @@
       // prepare endowments
       let endowments
       try {
-        endowments = getEndowmentsForConfig(globalRef, packagePolicy)
+        endowments = getEndowmentsForConfig(rootPackageCompartment.globalThis, packagePolicy)
       } catch (err) {
         const errMsg = `Lavamoat - failed to prepare endowments for package "${packageName}":\n${err.stack}`
         throw new Error(errMsg)
