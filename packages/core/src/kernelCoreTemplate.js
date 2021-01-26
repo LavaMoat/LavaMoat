@@ -92,9 +92,10 @@
         err.code = 'MODULE_NOT_FOUND'
         throw err
       }
-      const packageName = moduleData.package
+
+      // parse and validate module data
+      const { package: packageName, source: moduleSource } = moduleData
       if (!packageName) throw new Error(`LavaMoat - invalid packageName for module "${moduleId}"`)
-      const moduleSource = moduleData.source
       const packagePolicy = getPolicyForPackage(lavamoatConfig, packageName)
       const moduleMembraneSpace = getMembraneSpaceForModule(moduleData)
       const isRootModule = packageName === '<root>'
@@ -140,9 +141,9 @@
       function requireRelativeWithContext (requestedName) {
         const parentModuleExports = moduleObj.exports
         const parentModuleData = moduleData
-        const parentPackageConfig = packagePolicy
+        const parentPackagePolicy = packagePolicy
         const parentModuleId = moduleId
-        return requireRelative({ requestedName, parentModuleExports, parentModuleData, parentPackageConfig, parentModuleId })
+        return requireRelative({ requestedName, parentModuleExports, parentModuleData, parentPackagePolicy, parentModuleId })
       }
 
     }
@@ -233,10 +234,10 @@
 
     // this resolves a module given a requestedName (eg relative path to parent) and a parentModule context
     // the exports are processed via "protectExportsRequireTime" per the module's configuration
-    function requireRelative ({ requestedName, parentModuleExports, parentModuleData, parentPackageConfig, parentModuleId }) {
+    function requireRelative ({ requestedName, parentModuleExports, parentModuleData, parentPackagePolicy, parentModuleId }) {
       const parentModulePackageName = parentModuleData.package
-      const parentPackagesWhitelist = parentPackageConfig.packages
-      const parentBuiltinsWhitelist = Object.entries(parentPackageConfig.builtin)
+      const parentPackagesWhitelist = parentPackagePolicy.packages
+      const parentBuiltinsWhitelist = Object.entries(parentPackagePolicy.builtin)
       .filter(([_, allowed]) => allowed === true)
       .map(([packagePath, allowed]) => packagePath.split('.')[0])
 
@@ -278,9 +279,9 @@
       }
 
       // create minimal selection if its a builtin and the whole path is not selected for
-      if (!parentIsEntryModule && moduleData.type === 'builtin' && !parentPackageConfig.builtin[moduleId]) {
+      if (!parentIsEntryModule && moduleData.type === 'builtin' && !parentPackagePolicy.builtin[moduleId]) {
         const builtinPaths = (
-          Object.entries(parentPackageConfig.builtin)
+          Object.entries(parentPackagePolicy.builtin)
           // grab all allowed builtin paths that match this package
           .filter(([packagePath, allowed]) => allowed === true && moduleId === packagePath.split('.')[0])
           // only include the paths after the packageName
