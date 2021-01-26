@@ -1,23 +1,32 @@
 const test = require('ava')
 
-const { generateConfigFromFiles } = require('./util')
+const {
+  autoConfigForScenario
+} = require('./util')
+const {
+  createScenarioFromScaffold
+} = require('lavamoat-core/test/util')
 
 test('generateConfig - empty config', async (t) => {
-  const files = []
-  const config = await generateConfigFromFiles({ files })
+  const scenario = createScenarioFromScaffold({
+    defineEntry: () => {},
+    defaultConfig: false,
+  })
+  const config = await autoConfigForScenario({ scenario })
   t.deepEqual(config, { resources: {} }, 'config matches expected')
 })
 
 test('generateConfig - basic config', async (t) => {
-  const config = await createConfigForTest(function () {
-    location.href
+  const scenario = createScenarioFromScaffold({
+    defineOne: () => { module.exports = global.two },
+    defaultConfig: false
   })
-
+  const config = await autoConfigForScenario({ scenario })
   t.deepEqual(config, {
     resources: {
-      test: {
+      one: {
         globals: {
-          'location.href': true
+          two: true
         }
       }
     }
@@ -25,64 +34,40 @@ test('generateConfig - basic config', async (t) => {
 })
 
 test('generateConfig - ignore various refs', async (t) => {
-  const config = await createConfigForTest(function () {
-    const js = [this]
-    const ignored = [global, require, module, exports, arguments]
-    const globalRefs = [typeof globalThis, typeof self, typeof window]
-    const xyz = nonIgnoredGlobal
+  const scenario = createScenarioFromScaffold({
+    defineOne: () => {
+      const js = [this]
+      const ignored = [global, require, module, exports, arguments]
+      const globalRefs = [typeof globalThis, typeof self, typeof window]
+      global.xyz
+    },
+    defaultConfig: false,
   })
-
+  const config = await autoConfigForScenario({ scenario })
   t.deepEqual(config, {
     resources: {
-      test: {
+      one: {
         globals: {
-          nonIgnoredGlobal: true
+          xyz: true
         }
       }
     }
   }, 'config matched expected')
 })
 
-test('generateConfig - config with skipped deps', async (t) => {
-  const files = [{
-    // id must be full path
-    id: './apple.js',
-    file: './apple.js',
-    deps: {
-      banana: './node_modules/banana/index.js',
-      snakefruit: false
-    },
-    source: 'require("banana")',
-    entry: true
-  }, {
-    // non-entry
-    id: './node_modules/banana/index.js',
-    file: './node_modules/banana/index.js',
-    deps: {},
-    source: 'location.href'
-  }]
-  const config = await generateConfigFromFiles({ files })
-
-  t.deepEqual(config, {
-    resources: {
-      banana: {
-        globals: {
-          'location.href': true
-        }
-      }
-    }
-  }, 'config matches expected')
-})
 
 test('generateConfig - config ignores global refs', async (t) => {
-  const config = await createConfigForTest(function () {
-    const href = window.location.href
-    const xhr = new window.XMLHttpRequest()
+  const scenario = createScenarioFromScaffold({
+    defineOne: () => {
+      const href = window.location.href
+      const xhr = new window.XMLHttpRequest()
+    },
+    defaultConfig: false,
   })
-
+  const config = await autoConfigForScenario({ scenario })
   t.deepEqual(config, {
     resources: {
-      test: {
+      one: {
         globals: {
           'location.href': true,
           XMLHttpRequest: true
@@ -93,55 +78,27 @@ test('generateConfig - config ignores global refs', async (t) => {
 })
 
 test('generateConfig - config ignores global refs when properties are not accessed', async (t) => {
-  const config = await createConfigForTest(function () {
-    typeof window !== undefined
+  const scenario = createScenarioFromScaffold({
+    defineOne: () => {
+      typeof window !== undefined
+    },
+    defaultConfig: false,
   })
-
+  const config = await autoConfigForScenario({ scenario })
   t.deepEqual(config, {
     resources: {}
   }, 'config matches expected')
 })
 
 test('generateConfig - config ignores global refs accessed with whitelist items', async (t) => {
-  const config = await createConfigForTest(function () {
-    window.Object === Object
+  const scenario = createScenarioFromScaffold({
+    defineOne: () => {
+      window.Object === Object
+    },
+    defaultConfig: false,
   })
-
+  const config = await autoConfigForScenario({ scenario })
   t.deepEqual(config, {
     resources: {}
   }, 'config matches expected')
 })
-
-// this was changed to log a warning instead of throwing an error
-// test('generateConfig - primordial modification', async (t) => {
-//   try {
-//     const config = await createConfigForTest(function () {
-//       const href = window.location.href
-//       Array.prototype.bogosort = () => 'yolo'
-//     })
-//     t.fail('expected to throw an error')
-//   } catch (err) {
-//     t.pass()
-//   }
-// })
-
-async function createConfigForTest (testFn) {
-  const files = [{
-    // id must be full path
-    id: './entry.js',
-    file: './entry.js',
-    deps: {
-      test: './node_modules/test/index.js'
-    },
-    source: 'require("test")',
-    entry: true,
-  }, {
-    // non-entry
-    id: './node_modules/test/index.js',
-    file: './node_modules/test/index.js',
-    deps: {},
-    source: `(${testFn})()`
-  }]
-  const config = await generateConfigFromFiles({ files })
-  return config
-}

@@ -1,39 +1,14 @@
 const test = require('ava')
-const clone = require('clone')
 
 const { generatePrelude } = require('../src/index')
 const {
-  createBundleFromRequiresArray,
-  createBundleFromRequiresArrayPath,
   createBundleFromEntry,
-  generateConfigFromFiles,
   evalBundle,
+  createBundleForScenario,
+  runScenario
 } = require('./util')
 
-test('basic - bundle works', async (t) => {
-  const files = [
-    {
-      "id": "./1.js",
-      "file": "./1.js",
-      "source": "global.testResult.value = require('foo')(5)",
-      "deps": { "foo": "./node_modules/2/index.js" },
-      "entry": true
-    },
-    {
-      "id": "./node_modules/2/index.js",
-      "file": "./node_modules/2/index.js",
-      "source": "module.exports = function (n) { return n * 111 }",
-      "deps": {}
-    }
-  ]
-  const config = {
-    resources: {}
-  }
-  const bundle = await createBundleFromRequiresArray(files, { config })
-  const testResult = evalBundle(bundle)
-
-  t.is(testResult.value, 555)
-})
+const { createScenarioFromScaffold, autoConfigForScenario } = require('lavamoat-core/test/util')
 
 test('basic - browserify bundle doesnt inject global', async (t) => {
   const bundle = await createBundleFromEntry(__dirname + '/fixtures/global.js')
@@ -43,91 +18,66 @@ test('basic - browserify bundle doesnt inject global', async (t) => {
 })
 
 test('basic - browserify bundle doesnt inject global in deps', async (t) => {
-  const files = [{
-    // id must be full path
-    id: './apple.js',
-    file: './apple.js',
-    deps: {
-      banana: './node_modules/banana/index.js'
+  const scenario = createScenarioFromScaffold({
+    defineOne: () => {
+      module.exports = require('two')
     },
-    source: 'require("banana")',
-    entry: true
-  }, {
-    // non-entry
-    id: './node_modules/banana/index.js',
-    file: './node_modules/banana/index.js',
-    deps: {},
-    source: 'global'
-  }]
-  const config = await generateConfigFromFiles({ files: clone(files) })
-  const bundle = await createBundleFromRequiresArray(clone(files), { config })
-  const hasGlobalInjection = bundle.includes('typeof global !== \\"undefined\\" ? global :')
+    defineTwo: () => {
+      module.exports = global
+    },
+  })
+  await autoConfigForScenario({ scenario })
+  const { bundleForScenario } = await createBundleForScenario({ scenario })
+  const hasGlobalInjection = bundleForScenario.includes('typeof global !== \\"undefined\\" ? global :')
   t.falsy(hasGlobalInjection, 'did not inject "global" ref')
 })
 
 test('basic - lavamoat config and bundle', async (t) => {
-  const files = [{
-    // id must be full path
-    id: './apple.js',
-    file: './apple.js',
-    deps: {
-      banana: './node_modules/banana/index.js'
+  const scenario = createScenarioFromScaffold({
+    // bundle works
+    defineOne: () => {
+      module.exports = require('two')()
     },
-    source: 'global.testResult.value = require("banana")()',
-    entry: true
-  }, {
-    // non-entry
-    id: './node_modules/banana/index.js',
-    file: './node_modules/banana/index.js',
-    deps: {},
-    source: 'module.exports = () => location.href'
-  }]
-  const config = await generateConfigFromFiles({ files: clone(files) })
+    defineTwo: () => {
+      module.exports = () => location.href
+    }
+  })
+  await autoConfigForScenario({ scenario })
+  const { bundleForScenario } = await createBundleForScenario({ scenario })
   const prelude = generatePrelude()
-  const bundle = await createBundleFromRequiresArray(clone(files), { config })
 
-  t.assert(bundle.includes('"location.href":true'), 'prelude includes banana config')
-  t.assert(bundle.includes(prelude), 'bundle includes expected prelude')
+  t.assert(bundleForScenario.includes('"location.href":true'), 'prelude includes banana config')
+  t.assert(bundleForScenario.includes(prelude), 'bundle includes expected prelude')
 
   const testHref = 'https://funky.town.gov/yolo?snake=yes'
-  const testGlobal = { location: { href: testHref } }
-  const testResult = evalBundle(bundle, testGlobal)
+  scenario.context = { location: { href: testHref } }
+  const testResult = await runScenario({ scenario })
 
-  t.is(testResult.value, testHref, 'test result matches expected')
+  t.is(testResult, testHref, 'test result matches expected')
 })
 
 test('basic - lavamoat bundle without prelude', async (t) => {
-  const files = [{
-    // id must be full path
-    id: './apple.js',
-    file: './apple.js',
-    deps: {
-      banana: './node_modules/banana/index.js'
+  const scenario = createScenarioFromScaffold({
+    // bundle works
+    defineOne: () => {
+      module.exports = require('two')()
     },
-    source: 'global.testResult.value = require("banana")()',
-    entry: true
-  }, {
-    // non-entry
-    id: './node_modules/banana/index.js',
-    file: './node_modules/banana/index.js',
-    deps: {},
-    source: 'module.exports = () => location.href'
-  }]
-  const config = await generateConfigFromFiles({ files: clone(files) })
-  const prelude = generatePrelude()
-  const bundle = await createBundleFromRequiresArray(clone(files), { config, includePrelude: false })
+    defineTwo: () => {
+      module.exports = () => location.href
+    },
+    opts: { includePrelude: false }
+  })
 
-  t.assert(!bundle.includes(prelude), 'bundle DOES NOT include prelude')
+  await autoConfigForScenario({ scenario })
+  const { bundleForScenario } = await createBundleForScenario({ scenario })
+  const prelude = generatePrelude()
+
+  t.assert(!bundleForScenario.includes(prelude), 'bundle DOES NOT include prelude')
 
   let didCallLoadBundle = false
   const testGlobal = {
     LavaMoat: { loadBundle: () => { didCallLoadBundle = true } }
   }
-
-  try {
-    evalBundle(bundle, testGlobal)
-  } catch (err) {
-    t.fail(`eval of bundle failed:\n${err.stack || err}`)
-  }
+  evalBundle(bundleForScenario, testGlobal)
   t.assert(didCallLoadBundle, 'test result matches expected')
 })
