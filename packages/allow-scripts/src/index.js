@@ -410,7 +410,8 @@ async function findFilePathForTreeNode (branch, filePathCache) {
         throw err
       }
       // error if non-optional
-      if (!currentNode.optional) {
+      const branchIsOptional = branch.some(node => node.optional)
+      if (!branchIsOptional) {
         throw new Error(`@lavamoat/allow-scripts - could not resolve non-optional package "${currentNode.name}" from "${relativePath}"`)
       }
       // otherwise ignore error
@@ -458,7 +459,7 @@ async function loadAllPackageConfigurations ({ rootDir }) {
   const { tree, packageJson } = await loadTree({ rootDir })
 
   const packagesWithLifecycleScripts = new Map()
-  for (const { node } of eachNodeInTree(tree)) {
+  for (const { node, branch } of eachNodeInTree(tree)) {
     const { canonicalName, namespace } = getCanonicalNameInfoForTreeNode(node)
 
     const nodePath = node.path()
@@ -486,7 +487,8 @@ async function loadAllPackageConfigurations ({ rootDir }) {
     try {
       depPackageJson = JSON.parse(await fs.readFile(path.resolve(nodePath, 'package.json')))
     } catch (err) {
-      if (err.code === 'ENOENT' && node.optional) {
+      const branchIsOptional = branch.some(node => node.optional)
+      if (err.code === 'ENOENT' && branchIsOptional) {
         continue
       }
       throw err

@@ -14,9 +14,10 @@ async function start () {
   const rootDir = process.cwd()
 
   const parsedArgs = parseArgs()
-  switch (parsedArgs.command) {
+  const command = parsedArgs.command || 'run'
+  switch (command) {
     // (default) run scripts
-    case undefined: {
+    case 'run': {
       await runAllowedPackages({ rootDir })
       return
     }
