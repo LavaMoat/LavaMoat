@@ -82,26 +82,53 @@ function loadConfig (pluginOpts = {}) {
 
 function getConfigurationFromPluginOpts (pluginOpts) {
   const allowedKeys = new Set([
-    'writeAutoConfig',
+    'autoconfig',
+    'a',
     'config',
-    'configOverride',
-    'includePrelude',
-    'pruneConfig',
-    'debugMode',
-    'writeAutoConfigDebug',
+    'c',
+    'override',
+    'o',
+    'prelude',
+    'p',
+    'pruneconfig',
+    'pc',
+    'debug',
+    'd',
+    'debugconfig',
+    'dc',
+    'help',
+    'h',
     '_' // Browserify adds this as the first option when running from the command line
   ])
   const invalidKeys = Reflect.ownKeys(pluginOpts).filter(key => !allowedKeys.has(key))
   if (invalidKeys.length) throw new Error(`Lavamoat - Unrecognized options provided '${invalidKeys}'`)
+
+  const aliasMap = {
+    'a': 'autoconfig',
+    'c': 'config',
+    'o': 'override',
+    'p': 'prelude',
+    'pc': 'pruneconfig',
+    'd': 'debug',
+    'dc': 'debugconfig',
+    'h': 'help'
+  }
+  const aliasKeys = ['a', 'c', 'o', 'p', 'pc', 'd', 'dc', 'h']
+
+  Object.entries(pluginOpts).forEach(([key, value]) => {
+    if (aliasKeys.includes(key)) {
+      pluginOpts[aliasMap[key]] = value
+    }
+  })
 
   const configuration = {
     writeAutoConfig: undefined,
     getConfig: undefined,
     configPath: getConfigPath(pluginOpts),
     // default true
-    includePrelude: 'includePrelude' in pluginOpts ? pluginOpts.includePrelude : true,
-    pruneConfig: pluginOpts.pruneConfig,
-    debugMode: pluginOpts.debugMode,
+    includePrelude: 'includePrelude' in pluginOpts ? pluginOpts.prelude : true,
+    pruneConfig: pluginOpts.pruneconfig,
+    debugMode: pluginOpts.debug,
     writeAutoConfigDebug: undefined
   }
 
@@ -111,7 +138,7 @@ function getConfigurationFromPluginOpts (pluginOpts) {
   if (typeof pluginOpts.config === 'function') {
     configuration.getConfig = pluginOpts.config
   } else {
-    const tolerateMissingConfig = pluginOpts.writeAutoConfig
+    const tolerateMissingConfig = pluginOpts.autoconfig
     configuration.getConfig = () => {
       let configSource
       let primaryConfig
@@ -134,10 +161,10 @@ function getConfigurationFromPluginOpts (pluginOpts) {
         primaryConfig = pluginOpts.config
       }
       // if override specified, merge
-      if (pluginOpts.configOverride) {
-        let configOverride = pluginOpts.configOverride
+      if (pluginOpts.override) {
+        let configOverride = pluginOpts.override
         if (typeof configOverride === 'function') {
-          configOverride = pluginOpts.configOverride()
+          configOverride = pluginOpts.override()
           if (typeof configOverride !== 'string' && typeof configOverride !== 'object') {
             throw new Error('LavaMoat - Config override function must return an object or a string.')
           }
@@ -168,10 +195,10 @@ function getConfigurationFromPluginOpts (pluginOpts) {
     }
   }
 
-  if (!pluginOpts.writeAutoConfig) {
+  if (!pluginOpts.autoconfig) {
     // do not trigger parsing of the code for config generation
     configuration.writeAutoConfig = null
-  } else if (pluginOpts.writeAutoConfig === true) {
+  } else if (pluginOpts.autoconfig === true) {
     // output config to a file, path configuration.configPath
     if (!configuration.configPath) {
       throw new Error('LavaMoat - If writeAutoConfig is specified, config must be a string')
@@ -201,17 +228,17 @@ function getConfigurationFromPluginOpts (pluginOpts) {
         console.warn(`LavaMoat Override Config - wrote to "${overrideConfigPath}"`)
       }
     }
-  } else if (typeof pluginOpts.writeAutoConfig === 'function') {
+  } else if (typeof pluginOpts.autoconfig === 'function') {
     // to be called with configuration object
-    configuration.writeAutoConfig = pluginOpts.writeAutoConfig
+    configuration.writeAutoConfig = pluginOpts.autoconfig
   } else {
     // invalid setting, throw an error
     throw new Error('LavaMoat - Unrecognized value for writeAutoConfig')
   }
 
-  if (typeof pluginOpts.writeAutoConfigDebug === 'string') {
-    configuration.writeAutoConfigDebug = pluginOpts.writeAutoConfigDebug
-  } else if (pluginOpts.writeAutoConfigDebug) {
+  if (typeof pluginOpts.debugconfig === 'string') {
+    configuration.writeAutoConfigDebug = pluginOpts.debugconfig
+  } else if (pluginOpts.debugconfig) {
     configuration.writeAutoConfigDebug = defaultWriteAutoConfigDebug
   }
 
