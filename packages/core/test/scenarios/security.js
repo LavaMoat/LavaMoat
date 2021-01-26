@@ -29,49 +29,49 @@ module.exports = [
     })
     return scenario
   },
-  async () => {
-    const scenario = createScenarioFromScaffold({
-      name: 'security - prevent module exports mutation',
-      defineOne: () => {
-        // trigger attack
-        require('two')
-        module.exports = require('three').action()
-      },
-      defineTwo: () => {
-        try {
-          require('three').action = () => true
-        } catch (_) {}
-      },
-      defineThree: () => {
-        module.exports.action = () => false
-      },
-      expectedResult: false
-    })
-    return scenario
-  },
-  async () => {
-    const scenario = createScenarioFromScaffold({
-      name: 'security - prevent module exports prototype mutation',
-      defineOne: () => {
-        // trigger attack
-        require('two')
-        module.exports = require('three').action()
-      },
-      defineTwo: () => {
-        const victim = require('three')
-        try {
-          Object.getPrototypeOf(victim).action = () => true
-        } catch (_) {}
-      },
-      defineThree: () => {
-        const parent = {
-          action: () => false
-        }
-        const child = Object.create(parent)
-        module.exports = child
-      },
-      expectedResult: false
-    })
-    return scenario
-  }
+  // async () => {
+  //   const scenario = createScenarioFromScaffold({
+  //     name: 'security - prevent module exports shallow mutation',
+  //     defineOne: () => {
+  //       // trigger attack
+  //       require('two')
+  //       module.exports = require('three').action()
+  //     },
+  //     defineTwo: () => {
+  //       try {
+  //         require('three').action = () => true
+  //       } catch (_) {}
+  //     },
+  //     defineThree: () => {
+  //       module.exports.action = () => false
+  //     },
+  //     expectedResult: false
+  //   })
+  //   return scenario
+  // },
+  // async () => {
+  //   const scenario = createScenarioFromScaffold({
+  //     name: 'security - prevent module exports prototype mutation',
+  //     defineOne: () => {
+  //       // trigger attack
+  //       require('two')
+  //       module.exports = require('three').action()
+  //     },
+  //     defineTwo: () => {
+  //       const victim = require('three')
+  //       try {
+  //         Object.getPrototypeOf(victim).action = () => true
+  //       } catch (_) {}
+  //     },
+  //     defineThree: () => {
+  //       const parent = {
+  //         action: () => false
+  //       }
+  //       const child = Object.create(parent)
+  //       module.exports = child
+  //     },
+  //     expectedResult: false
+  //   })
+  //   return scenario
+  // }
 ]

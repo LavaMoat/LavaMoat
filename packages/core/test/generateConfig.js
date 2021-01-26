@@ -36,6 +36,7 @@ test('generateConfig - config with debugInfo', async (t) => {
       importMap: {},
       packageName: 'test',
       packageVersion: '1.2.3',
+      moduleInitializer: undefined
     },
     globals: {
       'location.href': 'read'

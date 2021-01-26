@@ -46,33 +46,33 @@ module.exports = [
     })
     return scenario
   },
-  async () => {
-    const scenario = createScenarioFromScaffold({
-      name: 'exportsDefense - indirectly imported package should be readOnly',
-      defineEntry: () => {
-        const one = require('one')
-        const thing = one.create()
-        const thingProto = Reflect.getPrototypeOf(thing)
-        // attempt to corrupt prototype
-        try {
-          thingProto.action = () => false
-        } catch (_) {}
-        const testResult = thing.action()
-        console.log(JSON.stringify(testResult, null, 2))
-      },
-      defineOne: () => {
-        const Thing = require('two')
-        module.exports = {
-          create: () => new Thing()
-        }
-      },
-      defineTwo: () => {
-        class Thing {}
-        Thing.prototype.action = () => true
-        module.exports = Thing
-      },
-      expectedResult: true
-    })
-    return scenario
-  }
+  // async () => {
+  //   const scenario = createScenarioFromScaffold({
+  //     name: 'exportsDefense - indirectly imported package should be readOnly',
+  //     defineEntry: () => {
+  //       const one = require('one')
+  //       const thing = one.create()
+  //       const thingProto = Reflect.getPrototypeOf(thing)
+  //       // attempt to corrupt prototype
+  //       try {
+  //         thingProto.action = () => false
+  //       } catch (_) {}
+  //       const testResult = thing.action()
+  //       console.log(JSON.stringify(testResult, null, 2))
+  //     },
+  //     defineOne: () => {
+  //       const Thing = require('two')
+  //       module.exports = {
+  //         create: () => new Thing()
+  //       }
+  //     },
+  //     defineTwo: () => {
+  //       class Thing {}
+  //       Thing.prototype.action = () => true
+  //       module.exports = Thing
+  //     },
+  //     expectedResult: true
+  //   })
+  //   return scenario
+  // }
 ]

@@ -13,7 +13,6 @@
     prepareModuleInitializerArgs,
     // security options
     debugMode,
-    applyExportsDefense = true,
   }) {
     // create SES-wrapped LavaMoat kernel
     // endowments:
@@ -29,7 +28,6 @@
       getRelativeModuleId,
       prepareModuleInitializerArgs,
       debugMode,
-      applyExportsDefense,
     })
 
     return lavamoatKernel
@@ -44,32 +42,16 @@
     loadModuleData,
     getRelativeModuleId,
     prepareModuleInitializerArgs,
-    applyExportsDefense,
   }) {
     // "templateRequire" calls are inlined in "generatePrelude"
     const { getEndowmentsForConfig, makeMinimalViewOfRef } = templateRequire('makeGetEndowmentsForConfig')()
     const { prepareCompartmentGlobalFromConfig } = templateRequire('makePrepareRealmGlobalFromConfig')()
-    const { Membrane } = templateRequire('cytoplasm')
-    const createReadOnlyDistortion = templateRequire('cytoplasm/distortions/readOnly')
 
     const moduleCache = new Map()
     const globalStore = new Map()
-    const membraneSpaceForPackage = new Map()
-    const membrane = new Membrane({ debugMode })
-    const allowTypedArrays = (() => {
-      const TypedArray = Object.getPrototypeOf(Uint8Array)
-      return (value) => value instanceof TypedArray
-    })()
-    const endowmentsMembraneSpace = membrane.makeMembraneSpace({
-      label: '<endowments>',
-      // this ensures all typedarrays that are passed to the endowments membrane are unwrapped
-      passthroughFilter: allowTypedArrays,
-    })
-    membraneSpaceForPackage.set(endowmentsMembraneSpace.label, endowmentsMembraneSpace)
 
     return {
       internalRequire,
-      membrane,
     }
 
     // this function instantiaties a module from a moduleId.
@@ -97,7 +79,6 @@
       const { package: packageName, source: moduleSource } = moduleData
       if (!packageName) throw new Error(`LavaMoat - invalid packageName for module "${moduleId}"`)
       const packagePolicy = getPolicyForPackage(lavamoatConfig, packageName)
-      const moduleMembraneSpace = getMembraneSpaceForModule(moduleData)
       const isRootModule = packageName === '<root>'
 
       // create the initial moduleObj
@@ -118,20 +99,6 @@
       const initializerArgs = prepareModuleInitializerArgs(requireRelativeWithContext, moduleObj, moduleData)
       moduleInitializer.apply(moduleObj.exports, initializerArgs)
       const moduleExports = moduleObj.exports
-
-      if (applyExportsDefense) {
-        // configure membrane defense
-        // defense is configured here but applied elsewhere
-        // set moduleExports graph to read-only
-        deepWalk(moduleExports, (value) => {
-          // skip plain values
-          if (membrane.shouldSkipBridge(value)) return
-          // set this ref to read-only
-          moduleMembraneSpace.handlerForRef.set(value, createReadOnlyDistortion({
-            setHandlerForRef: (ref, newHandler) => moduleMembraneSpace.handlerForRef.set(ref, newHandler)
-          }))
-        })
-      }
 
       return moduleExports
 
@@ -170,7 +137,6 @@
 
       // otherwise setup initializer from moduleSource
       const isRootModule = packageName === '<root>'
-      const moduleMembraneSpace = getMembraneSpaceForModule(moduleData)
 
       // prepare endowments
       let endowments
@@ -184,15 +150,7 @@
           throw new Error(errMsg)
         }
       }
-      // maybe membrane-wrap endowments
-      let preparedEndowments
-      if (applyExportsDefense) {
-        // prepare the membrane-wrapped endowments
-        const endowmentsMembraneSpace = getMembraneSpaceByName('<endowments>')
-        preparedEndowments = membrane.bridge(endowments, endowmentsMembraneSpace, moduleMembraneSpace)
-      } else {
-        preparedEndowments = endowments
-      }
+
       // prepare the module's SES Compartment
       // endowments:
       // - Math is for untamed Math.random
@@ -201,7 +159,7 @@
       if (isRootModule) {
         // TODO: root module compartment globalThis does not support global write
         // expose all own properties of globalRef, including non-enumerable
-        Object.entries(Object.getOwnPropertyDescriptors(preparedEndowments))
+        Object.entries(Object.getOwnPropertyDescriptors(endowments))
           // ignore properties already defined on compartment global
           .filter(([key]) => !(key in moduleCompartment.globalThis))
           // define property on compartment global
@@ -212,11 +170,7 @@
       } else {
         // sets up read/write access as configured
         const globalsConfig = packagePolicy.globals
-        prepareCompartmentGlobalFromConfig(moduleCompartment.globalThis, globalsConfig, preparedEndowments, globalStore)
-      }
-      // expose membrane for debugging
-      if (debugMode) {
-        moduleCompartment.globalThis.membrane = membrane
+        prepareCompartmentGlobalFromConfig(moduleCompartment.globalThis, globalsConfig, endowments, globalStore)
       }
       // execute in module compartment with modified compartment global
       // TODO: move all source mutations elsewhere
@@ -291,54 +245,7 @@
         moduleExports = makeMinimalViewOfRef(moduleExports, builtinPaths)
       }
 
-      if (applyExportsDefense) {
-        // apply moduleExports require-time protection
-        const isSameMembraneSpace = parentModulePackageName && getMembraneSpaceNameForModule(moduleData) === getMembraneSpaceNameForModule(parentModuleData)
-        const needsMembraneProtection = !isSameMembraneSpace
-        if (needsMembraneProtection) {
-          // apply membrane protections
-          const inGraph = getMembraneSpaceForModule(moduleData)
-          const outGraph = getMembraneSpaceForModule(parentModuleData)
-          moduleExports = membrane.bridge(moduleExports, inGraph, outGraph)
-        }
-      }
-
       return moduleExports
-    }
-
-    function getMembraneSpaceForModule (moduleData) {
-      const spaceName = getMembraneSpaceNameForModule(moduleData)
-      return getMembraneSpaceByName(spaceName)
-    }
-
-    function getMembraneSpaceNameForModule (moduleData) {
-      const { package: packageName, type } = moduleData
-      // builtin modules use the endowments MembraneSpace for TypedArray passthrough
-      if (type === 'builtin') {
-        return '<endowments>'
-      }
-      // native modules use the endowments MembraneSpace for TypedArray passthrough
-      if (type === 'native') {
-        return '<endowments>'
-      }
-      // otherwise use package name
-      return packageName
-    }
-
-    function getMembraneSpaceByName (spaceName) {
-      // if exists, return it
-      if (membraneSpaceForPackage.has(spaceName)) {
-        return membraneSpaceForPackage.get(spaceName)
-      }
-
-      // create the membrane space for this package
-      const membraneSpace = membrane.makeMembraneSpace({
-        label: spaceName,
-        // default is a transparent membrane handler
-        createHandler: () => Reflect,
-      })
-      membraneSpaceForPackage.set(spaceName, membraneSpace)
-      return membraneSpace
     }
 
     function deepWalk (value, visitor) {

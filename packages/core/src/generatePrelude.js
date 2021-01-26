@@ -45,8 +45,6 @@ function generateKernel (opts = {}) {
 // takes the kernelCoreTemplate and populates it with the libraries
 function generateKernelCore (opts = {}) {
   let output = kernelCoreTemplate
-  output = replaceTemplateRequire(output, 'cytoplasm', fs.readFileSync(require.resolve('cytoplasm/dist/index'), 'utf8'))
-  output = replaceTemplateRequire(output, 'cytoplasm/distortions/readOnly', fs.readFileSync(require.resolve('cytoplasm/src/distortions/readOnly'), 'utf8'))
   output = replaceTemplateRequire(output, 'makeGetEndowmentsForConfig', makeGetEndowmentsForConfigSrc)
   output = replaceTemplateRequire(output, 'makePrepareRealmGlobalFromConfig', makePrepareRealmGlobalFromConfigSrc)
   return output
