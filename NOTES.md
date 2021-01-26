@@ -1,3 +1,74 @@
+- [ ] pre-presen goals
+  - [x] fix missing license
+  - [x] kill cytoplasm (it took 8m to do a 5sec job)
+  - [ ] slides
+  - [ ] webtorrent demo
+    - [x] allow-scripts
+    - [ ] viz
+      - [ ] how to view both?
+    - [ ] node
+      - [x] basic
+      - [ ] minify?
+    - [ ] browserify
+    - [ ] config location conflict?
+
+  - [ ] review readmes
+    - [ ] module exports defense + cytoplasm
+  - [ ] viz for node is too red
+  - [ ] re-do intro video/s
+  - [ ] globals: BigInt, __dirname
+  - [ ] kernel refactor
+  - [ ] fix double browserify
+  - [ ] remove NOTES files (convert to issues?)
+
+
+big moat todos
+- [ ] allow-scripts bug patch in kernel
+- [ ] alternate exports defense
+- [ ] root package compartment global is primary global
+  - [ ] compartment per package
+  - [ ] globalRef is "primary global"
+
+
+allow-scripts
+- [ ] location -> lock entry
+  - [ ] verify: load tree, then check all directories to ensure they have an associated entry
+- [ ] npm: ensure we can map to file locations
+- [ ] yarn-logical
+  - [ ] address wrong lacking nesting
+    - [ ] info not present in lockfile, must check disk
+  - [ ] version wrong for non-canonical
+    - [ ] needs override in addChild
+
+- [ ] allow-scripts: map from canonical-name to locations
+  - [x] how does npm logical tree handle resolved/canonical?
+    - resolved -> version or git+https/github with hash
+  - [x] how does npm logical tree handle address? version?
+    - address -> package nesting for fs
+    - version -> version or git ref
+
+near term
+- [x] lavamoat-browserify's browserify-transform-tools requires an override (to load root's package.json)
+- [ ] lavamoat-browserify should defang setTimeout
+- [ ] in the browserify tests: too much custom configuration / resolution / emit-deps
+  - [ ] should unify test examples, have each platform dump to disk and read from there
+    - [ ] lavamoat-core test builtin duplicating basic test utils, eg evaluateWithSourceUrl
+- [ ] root vs non-root endowment code path differs a lot
+  - [x] non-root correctly sets up circular refs
+  - [x] root should correctly set up circular refs
+  - [ ] circular refs should be per-platform
+- [ ] string transforms in browserify are repeated from core/node ?
+
+major?
+- [ ] everything must be reworked to use the lockfile!
+  - [ ] namespacing non-canonical packages
+
+research
+- [ ] root package should run with globalThis being the true globalThis, thus it needs to be eval'd w/o SES
+  - [ ] requires us to eval root module
+  - [ ] or just call js fn as is?
+
+
 
 lavamoat/survey execTest trials
   - [ ] chalk@4
