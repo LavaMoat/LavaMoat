@@ -55,7 +55,8 @@ function createScenarioFromScaffold ({
   defineTwo,
   defineThree,
   shouldRunInCore = true,
-  defaultConfig = true
+  defaultConfig = true,
+  contextName = 'core'
 } = {}) {
   function _defineEntry () {
     const testResult = require('one')
@@ -156,7 +157,8 @@ function createScenarioFromScaffold ({
     configOverride: _configOverride,
     context,
     opts,
-    shouldRunInCore
+    shouldRunInCore,
+    contextName
   }
 }
 
@@ -222,12 +224,18 @@ async function prepareScenarioOnDisk ({ scenario }) {
     }
   }
   await Promise.all(filesToWrite.map(async (file) => {
-    const fullPath = path.join(projectDir, file.file)
+    let fullPath
+    if (file.file === 'lavamoat-config.json' ||
+    file.file === 'lavamoat-config-override.json') {
+      fullPath = path.join(projectDir, `/lavamoat/${scenario.contextName}/`, file.file)
+    } else {
+      fullPath = path.join(projectDir, file.file)
+    }
     const dirname = path.dirname(fullPath)
     await fs.mkdir(dirname, { recursive: true })
     await fs.writeFile(fullPath, file.content)
   }))
-  return { projectDir }
+  return { projectDir, configDir: path.join(projectDir, `/lavamoat/${scenario.contextName}/`) }
 }
 
 function fillInFileDetails (files) {

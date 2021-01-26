@@ -95,6 +95,8 @@ function getConfigurationFromPluginOpts (pluginOpts) {
     debug: 'debugMode',
     dc: 'writeAutoConfigDebug',
     debugconfig: 'writeAutoConfigDebug',
+    cn: 'contextName',
+    contextname: 'contextName',
     h: 'help'
   }
 
@@ -113,6 +115,10 @@ function getConfigurationFromPluginOpts (pluginOpts) {
     }
   })
 
+  if (!pluginOpts.contextName) {
+    pluginOpts.contextName = 'browserify'
+  }
+
   const configuration = {
     writeAutoConfig: undefined,
     getConfig: undefined,
@@ -124,8 +130,8 @@ function getConfigurationFromPluginOpts (pluginOpts) {
     writeAutoConfigDebug: undefined
   }
 
-  const defaultWriteAutoConfigDebug = './module-data.json'
-  const defaultOverrideConfig = '/lavamoat-config-override.json'
+  const defaultWriteAutoConfigDebug = `./lavamoat/${pluginOpts.contextName}/module-data.json`
+  const defaultOverrideConfig = `/lavamoat/${pluginOpts.contextName}/lavamoat-config-override.json`
 
   if (typeof pluginOpts.config === 'function') {
     configuration.getConfig = pluginOpts.config
@@ -202,7 +208,7 @@ function getConfigurationFromPluginOpts (pluginOpts) {
       const configDirectory = path.dirname(configPath)
       mkdirp.sync(configDirectory)
       // Declare override config file path
-      const overrideConfigPath = configDirectory + defaultOverrideConfig
+      const overrideConfigPath = path.join('./', defaultOverrideConfig)
       // Write config to file
       fs.writeFileSync(configPath, configString)
       console.warn(`LavaMoat Config - wrote to "${configPath}"`)
@@ -238,7 +244,7 @@ function getConfigurationFromPluginOpts (pluginOpts) {
 }
 
 function getConfigPath (pluginOpts) {
-  const defaultPath = './lavamoat-config.json'
+  const defaultPath = `./lavamoat/${pluginOpts.contextName}/lavamoat-config.json`
   if (!pluginOpts.config) {
     return defaultPath
   }
