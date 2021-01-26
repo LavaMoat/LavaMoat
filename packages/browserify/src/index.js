@@ -82,20 +82,20 @@ function loadConfig (pluginOpts = {}) {
 
 function getConfigurationFromPluginOpts (pluginOpts) {
   const aliasMap = {
-    'a': 'writeAutoConfig',
-    'autoconfig': 'writeAutoConfig',
-    'c': 'config',
-    'o': 'configOverride',
-    'override': 'configOverride',
-    'p': 'includePrelude',
-    'prelude': 'includePrelude',
-    'pc': 'pruneConfig',
-    'pruneconfig': 'pruneConfig',
-    'd': 'debugMode',
-    'debug': 'debugMode',
-    'dc': 'writeAutoConfigDebug',
-    'debugconfig': 'writeAutoConfigDebug',
-    'h': 'help'
+    a: 'writeAutoConfig',
+    autoconfig: 'writeAutoConfig',
+    c: 'config',
+    o: 'configOverride',
+    override: 'configOverride',
+    p: 'includePrelude',
+    prelude: 'includePrelude',
+    pc: 'pruneConfig',
+    pruneconfig: 'pruneConfig',
+    d: 'debugMode',
+    debug: 'debugMode',
+    dc: 'writeAutoConfigDebug',
+    debugconfig: 'writeAutoConfigDebug',
+    h: 'help'
   }
 
   const allowedKeys = new Set([
