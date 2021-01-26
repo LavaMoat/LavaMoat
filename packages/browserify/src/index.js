@@ -45,7 +45,7 @@ function plugin (browserify, pluginOpts) {
     // inject package name into module data
     browserify.pipeline.get('emit-deps').unshift(createPackageDataStream())
 
-    // if autoconfig activated, insert hook
+    // if writeAutoConfig activated, insert hook
     if (configuration.writeAutoConfig) {
       browserify.pipeline.get('emit-deps').push(createModuleInspectorSpy({
         // no builtins in the browser (yet!)
@@ -81,42 +81,33 @@ function loadConfig (pluginOpts = {}) {
 }
 
 function getConfigurationFromPluginOpts (pluginOpts) {
+  const aliasMap = {
+    'a': 'writeAutoConfig',
+    'autoconfig': 'writeAutoConfig',
+    'c': 'config',
+    'o': 'configOverride',
+    'override': 'configOverride',
+    'p': 'includePrelude',
+    'prelude': 'includePrelude',
+    'pc': 'pruneConfig',
+    'pruneconfig': 'pruneConfig',
+    'd': 'debugMode',
+    'debug': 'debugMode',
+    'dc': 'writeAutoConfigDebug',
+    'debugconfig': 'writeAutoConfigDebug',
+    'h': 'help'
+  }
+
   const allowedKeys = new Set([
-    'autoconfig',
-    'a',
-    'config',
-    'c',
-    'override',
-    'o',
-    'prelude',
-    'p',
-    'pruneconfig',
-    'pc',
-    'debug',
-    'd',
-    'debugconfig',
-    'dc',
-    'help',
-    'h',
+    ...Object.keys(aliasMap),
+    ...new Set(Object.values(aliasMap)),
     '_' // Browserify adds this as the first option when running from the command line
   ])
   const invalidKeys = Reflect.ownKeys(pluginOpts).filter(key => !allowedKeys.has(key))
   if (invalidKeys.length) throw new Error(`Lavamoat - Unrecognized options provided '${invalidKeys}'`)
 
-  const aliasMap = {
-    'a': 'autoconfig',
-    'c': 'config',
-    'o': 'override',
-    'p': 'prelude',
-    'pc': 'pruneconfig',
-    'd': 'debug',
-    'dc': 'debugconfig',
-    'h': 'help'
-  }
-  const aliasKeys = ['a', 'c', 'o', 'p', 'pc', 'd', 'dc', 'h']
-
   Object.entries(pluginOpts).forEach(([key, value]) => {
-    if (aliasKeys.includes(key)) {
+    if (Object.keys(aliasMap).includes(key)) {
       pluginOpts[aliasMap[key]] = value
     }
   })
@@ -126,9 +117,9 @@ function getConfigurationFromPluginOpts (pluginOpts) {
     getConfig: undefined,
     configPath: getConfigPath(pluginOpts),
     // default true
-    includePrelude: 'includePrelude' in pluginOpts ? pluginOpts.prelude : true,
-    pruneConfig: pluginOpts.pruneconfig,
-    debugMode: pluginOpts.debug,
+    includePrelude: 'includePrelude' in pluginOpts ? pluginOpts.includePrelude : true,
+    pruneConfig: pluginOpts.pruneConfig,
+    debugMode: pluginOpts.debugMode,
     writeAutoConfigDebug: undefined
   }
 
@@ -138,7 +129,7 @@ function getConfigurationFromPluginOpts (pluginOpts) {
   if (typeof pluginOpts.config === 'function') {
     configuration.getConfig = pluginOpts.config
   } else {
-    const tolerateMissingConfig = pluginOpts.autoconfig
+    const tolerateMissingConfig = pluginOpts.writeAutoConfig
     configuration.getConfig = () => {
       let configSource
       let primaryConfig
@@ -160,11 +151,11 @@ function getConfigurationFromPluginOpts (pluginOpts) {
       } else if (typeof pluginOpts.config === 'object') {
         primaryConfig = pluginOpts.config
       }
-      // if override specified, merge
-      if (pluginOpts.override) {
-        let configOverride = pluginOpts.override
+      // if configOverride specified, merge
+      if (pluginOpts.configOverride) {
+        let configOverride = pluginOpts.configOverride
         if (typeof configOverride === 'function') {
-          configOverride = pluginOpts.override()
+          configOverride = pluginOpts.configOverride()
           if (typeof configOverride !== 'string' && typeof configOverride !== 'object') {
             throw new Error('LavaMoat - Config override function must return an object or a string.')
           }
@@ -195,10 +186,10 @@ function getConfigurationFromPluginOpts (pluginOpts) {
     }
   }
 
-  if (!pluginOpts.autoconfig) {
+  if (!pluginOpts.writeAutoConfig) {
     // do not trigger parsing of the code for config generation
     configuration.writeAutoConfig = null
-  } else if (pluginOpts.autoconfig === true) {
+  } else if (pluginOpts.writeAutoConfig === true) {
     // output config to a file, path configuration.configPath
     if (!configuration.configPath) {
       throw new Error('LavaMoat - If writeAutoConfig is specified, config must be a string')
@@ -228,17 +219,17 @@ function getConfigurationFromPluginOpts (pluginOpts) {
         console.warn(`LavaMoat Override Config - wrote to "${overrideConfigPath}"`)
       }
     }
-  } else if (typeof pluginOpts.autoconfig === 'function') {
+  } else if (typeof pluginOpts.writeAutoConfig === 'function') {
     // to be called with configuration object
-    configuration.writeAutoConfig = pluginOpts.autoconfig
+    configuration.writeAutoConfig = pluginOpts.writeAutoConfig
   } else {
     // invalid setting, throw an error
     throw new Error('LavaMoat - Unrecognized value for writeAutoConfig')
   }
 
-  if (typeof pluginOpts.debugconfig === 'string') {
-    configuration.writeAutoConfigDebug = pluginOpts.debugconfig
-  } else if (pluginOpts.debugconfig) {
+  if (typeof pluginOpts.writeAutoConfigDebug === 'string') {
+    configuration.writeAutoConfigDebug = pluginOpts.writeAutoConfigDebug
+  } else if (pluginOpts.writeAutoConfigDebug) {
     configuration.writeAutoConfigDebug = defaultWriteAutoConfigDebug
   }
 
