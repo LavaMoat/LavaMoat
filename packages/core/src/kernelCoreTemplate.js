@@ -99,20 +99,6 @@
       const moduleMembraneSpace = getMembraneSpaceForModule(moduleData)
       const isRootModule = packageName === '<root>'
 
-      // TODO: i moved this validate code here
-      // if an external moduleInitializer is set, ensure it is allowed
-      if (moduleData.type === 'native') {
-        // ensure package is allowed to have native modules
-        if (packagePolicy.native !== true) {
-          throw new Error(`LavaMoat - "native" module type not permitted for package "${packageName}", module "${moduleId}"`)
-        }
-      } else if (moduleData.type !== 'builtin') {
-        // builtin module types dont have policy configurations
-        // but the packages that can import them are constrained elsewhere
-        // here we just ensure that the module type is the only other type with a external moduleInitializer
-        throw new Error(`LavaMoat - invalid external moduleInitializer for module type "${moduleData.type}" in package "${packageName}", module "${moduleId}"`)
-      }
-
       // create the initial moduleObj
       const moduleObj = { exports: {} }
       // cache moduleObj here
@@ -120,7 +106,7 @@
       // if you dont cache before running the moduleInitializer
       moduleCache.set(moduleId, moduleObj)
 
-      const moduleInitializer = prepareModuleInitializer(moduleData, globalRef)
+      const moduleInitializer = prepareModuleInitializer(moduleData, packagePolicy, globalRef)
 
       // validate moduleInitializer
       if (typeof moduleInitializer !== 'function') {
@@ -161,14 +147,30 @@
 
     }
 
-    function prepareModuleInitializer (moduleData, globalRef) {
-      const { moduleInitializer, package: packageName } = moduleData
-      // moduleInitializer may be set by loadModuleData (e.g. native modules)
+    function prepareModuleInitializer (moduleData, packagePolicy, globalRef) {
+      const { moduleInitializer, package: packageName, id: moduleId, source: moduleSource } = moduleData
+
+      // moduleInitializer may be set by loadModuleData (e.g. builtin + native modules)
       if (moduleInitializer) {
+        // if an external moduleInitializer is set, ensure it is allowed
+        if (moduleData.type === 'native') {
+          // ensure package is allowed to have native modules
+          if (packagePolicy.native !== true) {
+            throw new Error(`LavaMoat - "native" module type not permitted for package "${packageName}", module "${moduleId}"`)
+          }
+        } else if (moduleData.type !== 'builtin') {
+          // builtin module types dont have policy configurations
+          // but the packages that can import them are constrained elsewhere
+          // here we just ensure that the module type is the only other type with a external moduleInitializer
+          throw new Error(`LavaMoat - invalid external moduleInitializer for module type "${moduleData.type}" in package "${packageName}", module "${moduleId}"`)
+        }
         return moduleInitializer
       }
+
       // otherwise setup initializer from moduleSource
       const isRootModule = packageName === '<root>'
+      const moduleMembraneSpace = getMembraneSpaceForModule(moduleData)
+
       // prepare endowments
       let endowments
       if (isRootModule) {
@@ -194,7 +196,7 @@
       // endowments:
       // - Math is for untamed Math.random
       // - Date is for untamed Date.now
-      const moduleCompartment = new Compartment()
+      const moduleCompartment = new Compartment({ Math, Date })
       if (isRootModule) {
         // TODO: root module compartment globalThis does not support global write
         // expose all own properties of globalRef, including non-enumerable
