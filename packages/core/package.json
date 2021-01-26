@@ -19,7 +19,6 @@
   "devDependencies": {
     "ava": "^3.13.0",
     "object.fromentries": "^2.0.2",
-    "standard": "^16.0.3",
     "tmp-promise": "^3.0.2"
   },
   "scripts": {
