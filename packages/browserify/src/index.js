@@ -45,7 +45,7 @@ function plugin (browserify, pluginOpts) {
     // inject package name into module data
     browserify.pipeline.get('emit-deps').unshift(createPackageDataStream())
 
-    // if autoconfig activated, insert hook
+    // if writeAutoConfig activated, insert hook
     if (configuration.writeAutoConfig) {
       browserify.pipeline.get('emit-deps').push(createModuleInspectorSpy({
         // no builtins in the browser (yet!)
@@ -81,18 +81,37 @@ function loadConfig (pluginOpts = {}) {
 }
 
 function getConfigurationFromPluginOpts (pluginOpts) {
+  const aliasMap = {
+    a: 'writeAutoConfig',
+    autoconfig: 'writeAutoConfig',
+    c: 'config',
+    o: 'configOverride',
+    override: 'configOverride',
+    p: 'includePrelude',
+    prelude: 'includePrelude',
+    pc: 'pruneConfig',
+    pruneconfig: 'pruneConfig',
+    d: 'debugMode',
+    debug: 'debugMode',
+    dc: 'writeAutoConfigDebug',
+    debugconfig: 'writeAutoConfigDebug',
+    h: 'help'
+  }
+
   const allowedKeys = new Set([
-    'writeAutoConfig',
-    'config',
-    'configOverride',
-    'includePrelude',
-    'pruneConfig',
-    'debugMode',
-    'writeAutoConfigDebug',
+    ...Object.keys(aliasMap),
+    ...Object.values(aliasMap),
     '_' // Browserify adds this as the first option when running from the command line
   ])
   const invalidKeys = Reflect.ownKeys(pluginOpts).filter(key => !allowedKeys.has(key))
   if (invalidKeys.length) throw new Error(`Lavamoat - Unrecognized options provided '${invalidKeys}'`)
+
+  // applying alias to pluginOpts
+  Object.entries(pluginOpts).forEach(([key, value]) => {
+    if (Object.keys(aliasMap).includes(key)) {
+      pluginOpts[aliasMap[key]] = value
+    }
+  })
 
   const configuration = {
     writeAutoConfig: undefined,
@@ -133,7 +152,7 @@ function getConfigurationFromPluginOpts (pluginOpts) {
       } else if (typeof pluginOpts.config === 'object') {
         primaryConfig = pluginOpts.config
       }
-      // if override specified, merge
+      // if configOverride specified, merge
       if (pluginOpts.configOverride) {
         let configOverride = pluginOpts.configOverride
         if (typeof configOverride === 'function') {
