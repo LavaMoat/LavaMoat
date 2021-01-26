@@ -50,6 +50,9 @@
     const packageCompartmentCache = new Map()
     const globalStore = new Map()
 
+    const rootPackageName = '<root>'
+    const rootPackageCompartment = createRootPackageCompartment(globalRef)
+
     return {
       internalRequire
     }
@@ -145,7 +148,7 @@
 
       // disallow requiring packages that are not in the parent's whitelist
       const isSamePackage = packageName === parentModulePackageName
-      const parentIsEntryModule = parentModulePackageName === '<root>'
+      const parentIsEntryModule = parentModulePackageName === rootPackageName
       let isInParentWhitelist = false
       if (moduleData.type === 'builtin') {
         isInParentWhitelist = parentBuiltinsWhitelist.includes(packageName)
@@ -212,6 +215,28 @@
       }
     }
 
+    function createRootPackageCompartment (globalRef) {
+      if (packageCompartmentCache.has(rootPackageName)) {
+        throw new Error('LavaMoat - createRootPackageCompartment called more than once')
+      }
+      // prepare the root package's SES Compartment
+      const packageCompartment = new Compartment()
+      // expose all own properties of globalRef, including non-enumerable
+      Object.entries(Object.getOwnPropertyDescriptors(globalRef))
+        // ignore properties already defined on compartment global
+        .filter(([key]) => !(key in packageCompartment.globalThis))
+        // define property on compartment global
+        .forEach(([key, desc]) => Reflect.defineProperty(packageCompartment.globalThis, key, desc))
+        // global circular references otherwise added by prepareCompartmentGlobalFromConfig
+        // TODO: should be a platform specific circular ref
+      packageCompartment.globalThis.global = packageCompartment.globalThis
+
+      // save the compartment for use by other modules in the package
+      packageCompartmentCache.set(rootPackageName, packageCompartment)
+
+      return packageCompartment
+    }
+
     function getCompartmentForPackage (packageName, packagePolicy, globalRef) {
       // compartment may have already been created
       let packageCompartment = packageCompartmentCache.get(packageName)
@@ -221,16 +246,11 @@
 
       // prepare endowments
       let endowments
-      const isRootModule = packageName === '<root>'
-      if (isRootModule) {
-        endowments = globalRef
-      } else {
-        try {
-          endowments = getEndowmentsForConfig(globalRef, packagePolicy)
-        } catch (err) {
-          const errMsg = `Lavamoat - failed to prepare endowments for package "${packageName}":\n${err.stack}`
-          throw new Error(errMsg)
-        }
+      try {
+        endowments = getEndowmentsForConfig(globalRef, packagePolicy)
+      } catch (err) {
+        const errMsg = `Lavamoat - failed to prepare endowments for package "${packageName}":\n${err.stack}`
+        throw new Error(errMsg)
       }
 
       // prepare the module's SES Compartment
@@ -238,22 +258,9 @@
       // - Math is for untamed Math.random
       // - Date is for untamed Date.now
       packageCompartment = new Compartment({ Math, Date })
-      if (isRootModule) {
-        // TODO: root module compartment globalThis does not support global write
-        // expose all own properties of globalRef, including non-enumerable
-        Object.entries(Object.getOwnPropertyDescriptors(endowments))
-          // ignore properties already defined on compartment global
-          .filter(([key]) => !(key in packageCompartment.globalThis))
-          // define property on compartment global
-          .forEach(([key, desc]) => Reflect.defineProperty(packageCompartment.globalThis, key, desc))
-        // global circular references otherwise added by prepareCompartmentGlobalFromConfig
-        // TODO: should be a platform specific circular ref
-        packageCompartment.globalThis.global = packageCompartment.globalThis
-      } else {
-        // sets up read/write access as configured
-        const globalsConfig = packagePolicy.globals
-        prepareCompartmentGlobalFromConfig(packageCompartment.globalThis, globalsConfig, endowments, globalStore)
-      }
+      // sets up read/write access as configured
+      const globalsConfig = packagePolicy.globals
+      prepareCompartmentGlobalFromConfig(packageCompartment.globalThis, globalsConfig, endowments, globalStore)
 
       // save the compartment for use by other modules in the package
       packageCompartmentCache.set(packageName, packageCompartment)
