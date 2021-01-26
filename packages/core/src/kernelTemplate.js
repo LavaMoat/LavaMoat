@@ -32,7 +32,7 @@
     const lockdownOptions = {
       // gives a semi-high resolution timer
       dateTaming: 'unsafe',
-      // gives code excessive introspection, but meh
+      // lets code observe call stack, but easier debuggability
       errorTaming: 'unsafe',
       // this is introduces non-determinism, but is otherwise safe
       mathTaming: 'unsafe',
