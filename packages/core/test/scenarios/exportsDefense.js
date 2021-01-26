@@ -45,7 +45,7 @@ module.exports = [
       expectedResult: null
     })
     return scenario
-  },
+  }
   // async () => {
   //   const scenario = createScenarioFromScaffold({
   //     name: 'exportsDefense - indirectly imported package should be readOnly',

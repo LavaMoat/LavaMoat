@@ -16,7 +16,7 @@ const makePrepareRealmGlobalFromConfigSrc = fs.readFileSync(path.join(__dirname,
 module.exports = {
   generateKernel,
   generateKernelCore,
-  generatePrelude,
+  generatePrelude
 }
 
 // takes the preludeTemplate and populates it with the kernel

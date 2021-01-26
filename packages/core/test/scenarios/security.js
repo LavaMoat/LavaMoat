@@ -28,7 +28,7 @@ module.exports = [
       expectedResult: false
     })
     return scenario
-  },
+  }
   // async () => {
   //   const scenario = createScenarioFromScaffold({
   //     name: 'security - prevent module exports shallow mutation',
