@@ -100,12 +100,13 @@ function getConfigurationFromPluginOpts (pluginOpts) {
 
   const allowedKeys = new Set([
     ...Object.keys(aliasMap),
-    ...new Set(Object.values(aliasMap)),
+    ...Object.values(aliasMap),
     '_' // Browserify adds this as the first option when running from the command line
   ])
   const invalidKeys = Reflect.ownKeys(pluginOpts).filter(key => !allowedKeys.has(key))
   if (invalidKeys.length) throw new Error(`Lavamoat - Unrecognized options provided '${invalidKeys}'`)
 
+  // applying alias to pluginOpts
   Object.entries(pluginOpts).forEach(([key, value]) => {
     if (Object.keys(aliasMap).includes(key)) {
       pluginOpts[aliasMap[key]] = value
