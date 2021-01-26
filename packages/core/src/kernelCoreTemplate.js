@@ -1,5 +1,4 @@
-(function(){
-
+(function () {
   return createKernel
 
   function createKernel ({
@@ -12,7 +11,7 @@
     getRelativeModuleId,
     prepareModuleInitializerArgs,
     // security options
-    debugMode,
+    debugMode
   }) {
     // create SES-wrapped LavaMoat kernel
     // endowments:
@@ -27,7 +26,7 @@
       loadModuleData,
       getRelativeModuleId,
       prepareModuleInitializerArgs,
-      debugMode,
+      debugMode
     })
 
     return lavamoatKernel
@@ -41,7 +40,7 @@
     lavamoatConfig,
     loadModuleData,
     getRelativeModuleId,
-    prepareModuleInitializerArgs,
+    prepareModuleInitializerArgs
   }) {
     // "templateRequire" calls are inlined in "generatePrelude"
     const { getEndowmentsForConfig, makeMinimalViewOfRef } = templateRequire('makeGetEndowmentsForConfig')()
@@ -51,7 +50,7 @@
     const globalStore = new Map()
 
     return {
-      internalRequire,
+      internalRequire
     }
 
     // this function instantiaties a module from a moduleId.
@@ -79,7 +78,6 @@
       const { package: packageName, source: moduleSource } = moduleData
       if (!packageName) throw new Error(`LavaMoat - invalid packageName for module "${moduleId}"`)
       const packagePolicy = getPolicyForPackage(lavamoatConfig, packageName)
-      const isRootModule = packageName === '<root>'
 
       // create the initial moduleObj
       const moduleObj = { exports: {} }
@@ -112,7 +110,6 @@
         const parentModuleId = moduleId
         return requireRelative({ requestedName, parentModuleExports, parentModuleData, parentPackagePolicy, parentModuleId })
       }
-
     }
 
     function prepareModuleInitializer (moduleData, packagePolicy, globalRef) {
@@ -192,8 +189,8 @@
       const parentModulePackageName = parentModuleData.package
       const parentPackagesWhitelist = parentPackagePolicy.packages
       const parentBuiltinsWhitelist = Object.entries(parentPackagePolicy.builtin)
-      .filter(([_, allowed]) => allowed === true)
-      .map(([packagePath, allowed]) => packagePath.split('.')[0])
+        .filter(([_, allowed]) => allowed === true)
+        .map(([packagePath, allowed]) => packagePath.split('.')[0])
 
       // resolve the moduleId from the requestedName
       const moduleId = getRelativeModuleId(parentModuleId, requestedName)
@@ -237,34 +234,15 @@
         const builtinPaths = (
           Object.entries(parentPackagePolicy.builtin)
           // grab all allowed builtin paths that match this package
-          .filter(([packagePath, allowed]) => allowed === true && moduleId === packagePath.split('.')[0])
+            .filter(([packagePath, allowed]) => allowed === true && moduleId === packagePath.split('.')[0])
           // only include the paths after the packageName
-          .map(([packagePath, allowed]) => packagePath.split('.').slice(1).join('.'))
-          .sort()
+            .map(([packagePath, allowed]) => packagePath.split('.').slice(1).join('.'))
+            .sort()
         )
         moduleExports = makeMinimalViewOfRef(moduleExports, builtinPaths)
       }
 
       return moduleExports
-    }
-
-    function deepWalk (value, visitor) {
-      // the value itself
-      visitor(value)
-      // lookup children
-      let proto, props = []
-      try {
-        proto = Object.getPrototypeOf(value)
-        props = Object.values(Object.getOwnPropertyDescriptors(value))
-      } catch (_) {
-        // ignore error if we can't get proto/props (value is undefined, null, etc)
-      }
-      // the own properties
-      props.map(entry => {
-        if ('value' in entry) visitor(entry.value)
-      })
-      // the prototype
-      if (proto) visitor(proto)
     }
 
     // this gets the lavaMoat config for a module by packageName
@@ -276,7 +254,5 @@
       packageConfig.builtin = packageConfig.builtin || {}
       return packageConfig
     }
-
   }
-
 })()

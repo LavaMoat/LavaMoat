@@ -41,8 +41,11 @@
       "/src/sourcemaps.js",
       "/test/fixtures",
       "/src/preludeTemplate.js",
-      "/src/kernelTemplate.js",
-      "/src/kernelCoreTemplate.js"
+      "/src/kernelTemplate.js"
+    ],
+    "globals": [
+      "Compartment",
+      "templateRequire"
     ]
   }
 }

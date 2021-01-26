@@ -1,15 +1,13 @@
 // LavaMoat Prelude
-(function() {
-
+(function () {
   return createKernel
-
 
   function createKernel ({
     lavamoatConfig,
     loadModuleData,
     getRelativeModuleId,
     prepareModuleInitializerArgs,
-    applyExportsDefense = true,
+    applyExportsDefense = true
   }) {
     const debugMode = __lavamoatDebugMode__
 
@@ -35,7 +33,7 @@
       // lets code observe call stack, but easier debuggability
       errorTaming: 'unsafe',
       // this is introduces non-determinism, but is otherwise safe
-      mathTaming: 'unsafe',
+      mathTaming: 'unsafe'
       // ?
       // regExpTaming: 'unsafe',
     }
@@ -51,9 +49,8 @@
       prepareModuleInitializerArgs,
       globalRef,
       debugMode,
-      applyExportsDefense,
+      applyExportsDefense
     })
     return kernel
   }
-
 })()
