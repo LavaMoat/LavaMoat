@@ -113,6 +113,69 @@
       }
     }
 
+    // this resolves a module given a requestedName (eg relative path to parent) and a parentModule context
+    // the exports are processed via "protectExportsRequireTime" per the module's configuration
+    function requireRelative ({ requestedName, parentModuleExports, parentModuleData, parentPackagePolicy, parentModuleId }) {
+      const parentModulePackageName = parentModuleData.package
+      const parentPackagesWhitelist = parentPackagePolicy.packages
+      const parentBuiltinsWhitelist = Object.entries(parentPackagePolicy.builtin)
+        .filter(([_, allowed]) => allowed === true)
+        .map(([packagePath, allowed]) => packagePath.split('.')[0])
+
+      // resolve the moduleId from the requestedName
+      const moduleId = getRelativeModuleId(parentModuleId, requestedName)
+
+      // browserify goop:
+      // recursive requires dont hit cache so it inf loops, so we shortcircuit
+      // this only seems to happen with a few browserify builtins (nodejs builtin module polyfills)
+      // we could likely allow any requestedName since it can only refer to itself
+      if (moduleId === parentModuleId) {
+        if (['timers', 'buffer'].includes(requestedName) === false) {
+          throw new Error(`LavaMoat - recursive require detected: "${requestedName}"`)
+        }
+        return parentModuleExports
+      }
+
+      // load module
+      let moduleExports = internalRequire(moduleId)
+
+      // look up config for module
+      const moduleData = loadModuleData(moduleId)
+      const packageName = moduleData.package
+
+      // disallow requiring packages that are not in the parent's whitelist
+      const isSamePackage = packageName === parentModulePackageName
+      const parentIsEntryModule = parentModulePackageName === '<root>'
+      let isInParentWhitelist = false
+      if (moduleData.type === 'builtin') {
+        isInParentWhitelist = parentBuiltinsWhitelist.includes(packageName)
+      } else {
+        isInParentWhitelist = (parentPackagesWhitelist[packageName] === true)
+      }
+
+      // validate that the import is allowed
+      if (!parentIsEntryModule && !isSamePackage && !isInParentWhitelist) {
+        let typeText = ' '
+        if (moduleData.type === 'builtin') typeText = ' node builtin '
+        throw new Error(`LavaMoat - required${typeText}package not in whitelist: package "${parentModulePackageName}" requested "${packageName}" as "${requestedName}"`)
+      }
+
+      // create minimal selection if its a builtin and the whole path is not selected for
+      if (!parentIsEntryModule && moduleData.type === 'builtin' && !parentPackagePolicy.builtin[moduleId]) {
+        const builtinPaths = (
+          Object.entries(parentPackagePolicy.builtin)
+          // grab all allowed builtin paths that match this package
+            .filter(([packagePath, allowed]) => allowed === true && moduleId === packagePath.split('.')[0])
+          // only include the paths after the packageName
+            .map(([packagePath, allowed]) => packagePath.split('.').slice(1).join('.'))
+            .sort()
+        )
+        moduleExports = makeMinimalViewOfRef(moduleExports, builtinPaths)
+      }
+
+      return moduleExports
+    }
+
     function prepareModuleInitializer (moduleData, packagePolicy, globalRef) {
       const { moduleInitializer, package: packageName, id: moduleId, source: moduleSource } = moduleData
 
@@ -196,68 +259,6 @@
       packageCompartmentCache.set(packageName, packageCompartment)
 
       return packageCompartment
-    }
-
-    // this resolves a module given a requestedName (eg relative path to parent) and a parentModule context
-    // the exports are processed via "protectExportsRequireTime" per the module's configuration
-    function requireRelative ({ requestedName, parentModuleExports, parentModuleData, parentPackagePolicy, parentModuleId }) {
-      const parentModulePackageName = parentModuleData.package
-      const parentPackagesWhitelist = parentPackagePolicy.packages
-      const parentBuiltinsWhitelist = Object.entries(parentPackagePolicy.builtin)
-        .filter(([_, allowed]) => allowed === true)
-        .map(([packagePath, allowed]) => packagePath.split('.')[0])
-
-      // resolve the moduleId from the requestedName
-      const moduleId = getRelativeModuleId(parentModuleId, requestedName)
-
-      // browserify goop:
-      // recursive requires dont hit cache so it inf loops, so we shortcircuit
-      // this only seems to happen with a few browserify builtins (nodejs builtin module polyfills)
-      // we could likely allow any requestedName since it can only refer to itself
-      if (moduleId === parentModuleId) {
-        if (['timers', 'buffer'].includes(requestedName) === false) {
-          throw new Error(`LavaMoat - recursive require detected: "${requestedName}"`)
-        }
-        return parentModuleExports
-      }
-
-      // load module
-      let moduleExports = internalRequire(moduleId)
-
-      // look up config for module
-      const moduleData = loadModuleData(moduleId)
-      const packageName = moduleData.package
-
-      // disallow requiring packages that are not in the parent's whitelist
-      const isSamePackage = packageName === parentModulePackageName
-      const parentIsEntryModule = parentModulePackageName === '<root>'
-      let isInParentWhitelist = false
-      if (moduleData.type === 'builtin') {
-        isInParentWhitelist = parentBuiltinsWhitelist.includes(packageName)
-      } else {
-        isInParentWhitelist = (parentPackagesWhitelist[packageName] === true)
-      }
-
-      if (!parentIsEntryModule && !isSamePackage && !isInParentWhitelist) {
-        let typeText = ' '
-        if (moduleData.type === 'builtin') typeText = ' node builtin '
-        throw new Error(`LavaMoat - required${typeText}package not in whitelist: package "${parentModulePackageName}" requested "${packageName}" as "${requestedName}"`)
-      }
-
-      // create minimal selection if its a builtin and the whole path is not selected for
-      if (!parentIsEntryModule && moduleData.type === 'builtin' && !parentPackagePolicy.builtin[moduleId]) {
-        const builtinPaths = (
-          Object.entries(parentPackagePolicy.builtin)
-          // grab all allowed builtin paths that match this package
-            .filter(([packagePath, allowed]) => allowed === true && moduleId === packagePath.split('.')[0])
-          // only include the paths after the packageName
-            .map(([packagePath, allowed]) => packagePath.split('.').slice(1).join('.'))
-            .sort()
-        )
-        moduleExports = makeMinimalViewOfRef(moduleExports, builtinPaths)
-      }
-
-      return moduleExports
     }
 
     // this gets the lavaMoat config for a module by packageName
