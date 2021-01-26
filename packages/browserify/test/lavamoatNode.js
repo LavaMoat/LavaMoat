@@ -6,7 +6,7 @@ const {
 } = require('./util')
 
 test('basic - bundle works under lavamoat node', async (t) => {
-  const bundle = execSync("lavamoat build.js --applyExportsDefense false",
+  const bundle = execSync("lavamoat build.js",
   {
     cwd: path.resolve(__dirname, './fixtures/secureBundling'),
     maxBuffer: 8192 * 10000

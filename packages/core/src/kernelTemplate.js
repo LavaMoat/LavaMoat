@@ -7,7 +7,6 @@
     loadModuleData,
     getRelativeModuleId,
     prepareModuleInitializerArgs,
-    applyExportsDefense = true
   }) {
     const debugMode = __lavamoatDebugMode__
 
@@ -48,8 +47,7 @@
       getRelativeModuleId,
       prepareModuleInitializerArgs,
       globalRef,
-      debugMode,
-      applyExportsDefense
+      debugMode
     })
     return kernel
   }
