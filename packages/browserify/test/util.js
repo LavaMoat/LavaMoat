@@ -152,8 +152,8 @@ async function generateConfigFromFiles ({ files }) {
 
 async function autoConfigForScenario ({ scenario }) {
   const copiedScenario = {...scenario, opts: {...scenario.opts, writeAutoConfig: true }}
-  const { dir } = await createBundleForScenario({ scenario: copiedScenario})
-  const fullPath = path.join(dir, 'lavamoat-config.json')
+  const { policyDir } = await createBundleForScenario({ scenario: copiedScenario})
+  const fullPath = path.join(policyDir, 'policy.json')
   const config = fs.readFileSync(fullPath)
   return JSON.parse(config.toString())
 }
@@ -414,13 +414,17 @@ async function runBrowserify ({ projectDir, scenario }) {
 }
 
 async function createBundleForScenario ({ scenario, dir }) {
+  let policy
   if (!dir) {
-      const { projectDir } = await prepareScenarioOnDisk({ scenario })
-      dir = projectDir
+    const { projectDir, policyDir } = await prepareScenarioOnDisk({ scenario, policyName: 'browserify' })
+    dir = projectDir
+    policy = policyDir
+  } else {
+    policy = path.join(dir, `/lavamoat/browserify/`)
   }
   
   const { output: { stdout: bundle } } = await runBrowserify({ projectDir: dir, scenario})
-  return { bundleForScenario: bundle, dir }
+  return { bundleForScenario: bundle, dir, policyDir: policy }
 }
 
 async function runScenario ({ scenario, bundle, dir }) {

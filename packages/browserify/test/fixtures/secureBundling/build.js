@@ -4,8 +4,8 @@ const path = require('path')
 
 // configure LavaMoat
 const lavamoatOpts = {
-  config: path.resolve(__dirname, '../exampleApp/lavamoat-config.json'),
-  configOverride: path.resolve(__dirname, '../exampleApp/lavamoat-config-override.json')
+  config: path.resolve(__dirname, '../exampleApp/policy.json'),
+  configOverride: path.resolve(__dirname, '../exampleApp/policy-override.json')
 }
 
 // configure browserify

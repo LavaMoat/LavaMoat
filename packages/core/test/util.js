@@ -1,4 +1,4 @@
-const { parseForConfig, LavamoatModuleRecord, generateKernel, packageNameFromPath } = require('../src/index.js')
+const { parseForConfig, LavamoatModuleRecord, generateKernel, packageNameFromPath, getDefaultPaths } = require('../src/index.js')
 const mergeDeep = require('merge-deep')
 const { runInNewContext } = require('vm')
 const path = require('path')
@@ -183,8 +183,9 @@ function createHookedConsole () {
 } 
 
 async function runScenario ({ scenario }) {
-  const { entries, files, config: lavamoatConfig } = scenario
-  const kernelSrc = generateKernel({ debugMode: true })
+  const { entries, files, config, configOverride } = scenario
+  const lavamoatConfig = mergeDeep(config, configOverride)
+  const kernelSrc = generateKernel()
   const { hookedConsole, firstLogEventPromise } = createHookedConsole()
   const { result: createKernel } = evaluateWithSourceUrl('LavaMoat/core-test/kernel', kernelSrc, mergeDeep({ console: hookedConsole }, scenario.context))
   const kernel = createKernel({
@@ -212,13 +213,16 @@ async function runScenario ({ scenario }) {
   return testResult
 }
 
-async function prepareScenarioOnDisk ({ scenario }) {
+async function prepareScenarioOnDisk ({ scenario, policyName = 'policies' }) {
   const { path: projectDir } = await tmp.dir()
   const filesToWrite = Object.values(scenario.files)
   if (!scenario.opts.writeAutoConfig) {
-    filesToWrite.push({ file: 'lavamoat-config.json', content: stringify(scenario.config) })
+    const defaultPaths = getDefaultPaths(policyName)
+    const primaryPath = typeof scenario.opts.config === 'string' ? scenario.opts.config : defaultPaths.primary
+    filesToWrite.push({ file: primaryPath, content: stringify(scenario.config) })
     if (scenario.configOverride) {
-      filesToWrite.push({ file: 'lavamoat-config-override.json', content: stringify(scenario.configOverride) })
+      const overridePath = typeof scenario.opts.configOverride === 'string' ? scenario.opts.configOverride : defaultPaths.override
+      filesToWrite.push({ file: overridePath, content: stringify(scenario.configOverride) })
     }
   }
   await Promise.all(filesToWrite.map(async (file) => {
@@ -227,7 +231,7 @@ async function prepareScenarioOnDisk ({ scenario }) {
     await fs.mkdir(dirname, { recursive: true })
     await fs.writeFile(fullPath, file.content)
   }))
-  return { projectDir }
+  return { projectDir, policyDir: path.join(projectDir, `/lavamoat/${policyName}/`) }
 }
 
 function fillInFileDetails (files) {

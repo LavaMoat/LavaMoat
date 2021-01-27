@@ -3,7 +3,7 @@ const {
   generateKernel
 } = require('./generatePrelude')
 const { packageDataForModule, packageNameFromPath } = require('./packageData')
-const { createModuleInspector } = require('./generateConfig')
+const { createModuleInspector, getDefaultPaths } = require('./generateConfig')
 const { parseForConfig } = require('./parseForConfig')
 const { LavamoatModuleRecord } = require('./moduleRecord')
 const { mergeConfig } = require('./mergeConfig')
@@ -19,6 +19,7 @@ module.exports = {
   createModuleInspector,
   parseForConfig,
   mergeConfig,
+  getDefaultPaths,
   // module record class
   LavamoatModuleRecord
 }

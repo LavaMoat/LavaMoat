@@ -12,10 +12,11 @@ test('config - default config path is generated with autoconfig if path is not s
   const scenario = createScenarioFromScaffold({
     opts: {
       writeAutoConfig: true
-    }
+    },
+    contextName: 'browserify'
   })
-  const { projectDir } = await prepareScenarioOnDisk({ scenario })
-  const expectedPath = path.join(projectDir, 'lavamoat-config.json')
+  const { projectDir, policyDir } = await prepareScenarioOnDisk({ scenario, policyName: 'browserify' })
+  const expectedPath = path.join(policyDir, 'policy.json')
 
   t.falsy(fs.existsSync(expectedPath), 'Config file does not yet exist')
 
@@ -39,7 +40,7 @@ test('config - writes a proper config to a temp dir', async (t) => {
       writeAutoConfig: true
     }
   })
-  const { projectDir } = await prepareScenarioOnDisk({ scenario })
+  const { projectDir } = await prepareScenarioOnDisk({ scenario, policyName: 'browserify' })
   await runBrowserify({ projectDir, scenario})
   const testResult = await runScenario({ scenario, dir: projectDir })
   t.deepEqual(testResult, 555)
@@ -77,8 +78,8 @@ test('Config - Applies writeAutoConfigDebug plugin option and dumps module objec
       writeAutoConfigDebug: true
     }
   })
-  const { projectDir } = await prepareScenarioOnDisk({ scenario })
-  const expectedPath = path.join(projectDir, './module-data.json')
+  const { projectDir, policyDir } = await prepareScenarioOnDisk({ scenario, policyName: 'browserify' })
+  const expectedPath = path.join(policyDir, 'policy-debug.json')
 
   t.falsy(fs.existsSync(expectedPath), 'Module data does not yet exist')
 
@@ -111,8 +112,8 @@ test('Config - Applies writeAutoConfigDebug plugin option and dumps module objec
 //     writeAutoConfig: true,
 //   })
 
-//   const overridePath = './lavamoat/lavamoat-config-override.json'
-//   const configPath = './lavamoat/lavamoat-config.json'
+//   const overridePath = './lavamoat/policy-override.json'
+//   const configPath = './lavamoat/policy.json'
 
 //   await new Promise(resolve => setTimeout(resolve, 1000))
 

@@ -4,7 +4,7 @@ const clone = require('clone')
 const mkdirp = require('mkdirp')
 const through = require('through2').obj
 const mergeDeep = require('merge-deep')
-const { generatePrelude } = require('lavamoat-core')
+const { generatePrelude, getDefaultPaths } = require('lavamoat-core')
 const jsonStringify = require('json-stable-stringify')
 const { createModuleInspectorSpy } = require('./createModuleInspectorSpy.js')
 const { createPackageDataStream } = require('./createPackageDataStream.js')
@@ -95,6 +95,8 @@ function getConfigurationFromPluginOpts (pluginOpts) {
     debug: 'debugMode',
     dc: 'writeAutoConfigDebug',
     debugconfig: 'writeAutoConfigDebug',
+    pn: 'policyName',
+    policyname: 'policyName',
     h: 'help'
   }
 
@@ -113,6 +115,10 @@ function getConfigurationFromPluginOpts (pluginOpts) {
     }
   })
 
+  if (!pluginOpts.policyName) {
+    pluginOpts.policyName = 'browserify'
+  }
+
   const configuration = {
     writeAutoConfig: undefined,
     getConfig: undefined,
@@ -124,8 +130,8 @@ function getConfigurationFromPluginOpts (pluginOpts) {
     writeAutoConfigDebug: undefined
   }
 
-  const defaultWriteAutoConfigDebug = './module-data.json'
-  const defaultOverrideConfig = '/lavamoat-config-override.json'
+  const { debug } = getDefaultPaths(pluginOpts.policyName)
+  const { override } = getDefaultPaths(pluginOpts.policyName)
 
   if (typeof pluginOpts.config === 'function') {
     configuration.getConfig = pluginOpts.config
@@ -174,7 +180,7 @@ function getConfigurationFromPluginOpts (pluginOpts) {
         return mergedConfig
       } else {
         // Otherwise, still merge but only if it already exists
-        const configOverridePath = path.join('./', defaultOverrideConfig)
+        const configOverridePath = path.join('./', override)
         const resolvedPath = path.resolve(configOverridePath)
         if (fs.existsSync(resolvedPath)) {
           const configOverrideSource = fs.readFileSync(resolvedPath, 'utf-8')
@@ -202,7 +208,7 @@ function getConfigurationFromPluginOpts (pluginOpts) {
       const configDirectory = path.dirname(configPath)
       mkdirp.sync(configDirectory)
       // Declare override config file path
-      const overrideConfigPath = configDirectory + defaultOverrideConfig
+      const overrideConfigPath = path.join('./', override)
       // Write config to file
       fs.writeFileSync(configPath, configString)
       console.warn(`LavaMoat Config - wrote to "${configPath}"`)
@@ -231,21 +237,21 @@ function getConfigurationFromPluginOpts (pluginOpts) {
   if (typeof pluginOpts.writeAutoConfigDebug === 'string') {
     configuration.writeAutoConfigDebug = pluginOpts.writeAutoConfigDebug
   } else if (pluginOpts.writeAutoConfigDebug) {
-    configuration.writeAutoConfigDebug = defaultWriteAutoConfigDebug
+    configuration.writeAutoConfigDebug = debug
   }
 
   return configuration
 }
 
 function getConfigPath (pluginOpts) {
-  const defaultPath = './lavamoat-config.json'
+  const { primary } = getDefaultPaths(pluginOpts.policyName)
   if (!pluginOpts.config) {
-    return defaultPath
+    return primary
   }
   if (typeof pluginOpts.config === 'string') {
     return pluginOpts.config
   }
-  return defaultPath
+  return primary
 }
 
 function createLavamoatPacker (configuration = {}) {
