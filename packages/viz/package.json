@@ -43,6 +43,7 @@
   "scripts": {
     "analyze": "source-map-explorer 'build/static/js/*.js'",
     "start": "webpack-dev-server --config ./src/webpack.config.js",
+    "test": "yarn build",
     "build": "webpack --config ./src/webpack.config.js",
     "deploy": "yarn run build && gh-pages -d dist",
     "prepublishOnly": "yarn run deploy"
