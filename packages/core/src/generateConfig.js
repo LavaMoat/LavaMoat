@@ -284,9 +284,13 @@ function guessPackageName (requestedName) {
 }
 
 function getDefaultPaths (policyName) {
+  const policiesDir = 'lavamoat'
+  const policyDir = path.join(policiesDir, policyName)
   return {
-    primary: path.join('lavamoat', policyName, 'policy.json'),
-    override: path.join('lavamoat', policyName, 'policy-override.json'),
-    debug: path.join('lavamoat', policyName, 'policy-debug.json')
+    policiesDir,
+    policyDir,
+    primary: path.join(policyDir, 'policy.json'),
+    override: path.join(policyDir, 'policy-override.json'),
+    debug: path.join(policyDir, 'policy-debug.json')
   }
 }
