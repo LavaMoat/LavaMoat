@@ -4,52 +4,99 @@
 
 const { promises: fs } = require('fs')
 const path = require('path')
+const http = require('http')
 const yargs = require('yargs')
 const { ncp } = require('ncp')
 const pify = require('pify')
 const openUrl = require('open')
+const handler = require('serve-handler')
 const { mergeConfig, getDefaultPaths } = require('lavamoat-core')
 
 const defaultPaths = getDefaultPaths('node')
+const commandDefaults = {
+  dest: 'viz/',
+  policiesDir: defaultPaths.policiesDir,
+  policyNames: [],
+}
 
 main().catch((err) => console.error(err))
 
 function parseArgs () {
+  const defaultCommand = 'generate'
   const argsParser = yargs
-    .usage('$0', 'generate topological visualization for dep graph', () => {
+    .usage('Usage: $0 <command> [options]')
+    .command(['generate', '$0'], 'generate topological visualization for dep graph', (yargs) => {
       // path to write viz output
       yargs.option('dest', {
         describe: 'path to write viz output',
         type: 'string',
-        default: './viz/'
+        default: commandDefaults.dest,
       })
       // the directory containing the individual policy directories
       yargs.option('policiesDir', {
         describe: 'the directory containing the individual policy directories',
         type: 'string',
-        default: defaultPaths.policiesDir
+        default: commandDefaults.policiesDir,
       })
       // the name of the policies to include in the dashboard under the policies directory. default: all
       yargs.option('policyNames', {
         describe: 'the name of the policies to include in the dashboard under the policies directory. default: all',
         type: 'array',
-        default: []
+        default: commandDefaults.policyNames,
       })
       // open the output dir
       yargs.option('open', {
         describe: 'open the visualization',
         type: 'boolean',
-        default: false
+        default: false,
+      })
+      // open the output dir
+      yargs.option('serve', {
+        describe: 'serve the visualization via a static server',
+        type: 'boolean',
+        default: false,
+      })
+    })
+    .command('serve', 'serve the visualization via a static server', (yargs) => {
+      // path to serve viz output
+      yargs.option('dest', {
+        describe: 'path to serve the viz from',
+        type: 'string',
+        default: commandDefaults.dest,
       })
     })
     .help()
+    .strict()
 
   const parsedArgs = argsParser.parse()
+  parsedArgs.command = parsedArgs['_'][0] || defaultCommand
   return parsedArgs
 }
 
 async function main () {
-  let { dest, open, policiesDir, policyNames } = parseArgs()
+  const args = parseArgs()
+  const { command, dest } = args
+  switch (command) {
+    case 'generate':  {
+      // newline for clearer output
+      console.info('')
+      return await generateViz(args)
+    }
+    case 'serve':  {
+      console.info('serving a pre-built dashboard. to generate new dashboard and serve use "lavamoat-viz --serve"')
+      console.info('this is equivalent to "npx serve ./viz"')
+      console.info('\n')
+      const fullDest = path.resolve(dest)
+      return await serveViz(dest)
+    }
+    default: {
+      throw new Error(`Unknown command "${command}"`)
+    }
+  }
+}
+
+async function generateViz (args) {
+  let { dest, open, serve, policiesDir, policyNames } = args
   const fullDest = path.resolve(dest)
   const source = path.join(__dirname, '/../dist/')
   // copy app dir
@@ -70,12 +117,31 @@ async function main () {
     .map(relPath => `import "./${relPath}";`)
     .join('\n')
   await fs.writeFile(`${fullDest}/injectConfigDebugData.js`, dataInjectionContent)
-  // trigger opening of file
-  if (open) {
-    openUrl(`file:///${fullDest}/index.html`)
-  }
-  // report done
+  
+  // dashboard prepared! report done
   console.log(`generated viz in "${dest}"`)
+  let dashboardUrl
+  if (serve) {
+    dashboardUrl = await serveViz(fullDest)
+  }
+  
+  // trigger opening of dashboard
+  if (open) {
+    if (serve) {
+      openUrl(dashboardUrl)
+    } else {
+      openUrl(`file:///${fullDest}/index.html`)
+    }
+  }
+}
+
+async function serveViz (fullDest) {
+  const server = http.createServer((req, res) => handler(req, res, { public: fullDest }))
+  const port = 5000
+  const url = `http://localhost:${port}`
+  await new Promise(resolve => server.listen(port, resolve))
+  console.log(`Running at ${url}`)
+  return url
 }
 
 async function addPolicyComprehension ({ policyName, fullDest }) {
