@@ -40,12 +40,14 @@ async function runLava () {
     // write config debug file
     if (includeDebugInfo) {
       const serializedConfig = jsonStringify(config, { space: 2 })
+      fs.mkdirSync(path.dirname(configDebugPath), { recursive: true })
       fs.writeFileSync(configDebugPath, serializedConfig)
       console.log(`LavaMoat wrote config debug to "${configDebugPath}"`)
     }
     // write config file
     delete config.debugInfo
     const serializedConfig = jsonStringify(config, { space: 2 })
+    fs.mkdirSync(path.dirname(configPath), { recursive: true })
     fs.writeFileSync(configPath, serializedConfig)
     console.log(`LavaMoat wrote config to "${configPath}"`)
   }
