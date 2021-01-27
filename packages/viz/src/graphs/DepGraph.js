@@ -61,8 +61,8 @@ class DepGraph extends React.Component {
   }
 
   componentWillReceiveProps (nextProps) {
-    // recalculate graph if `bundleData` changes
-    if (this.props.bundleData !== nextProps.bundleData) {
+    // recalculate graph if `policyData` changes
+    if (this.props.policyData !== nextProps.policyData) {
       this.triggerGraphUpdate(this.state, nextProps)
     }
   }
@@ -73,31 +73,20 @@ class DepGraph extends React.Component {
   }
 
   triggerGraphUpdate (state = this.state, newProps = this.props) {
-    const { bundleData } = newProps
-    this.updateGraph(bundleData, state)
+    const { policyData } = newProps
+    this.updateGraph(policyData, state)
   }
 
-  updateGraph (bundleData, state) {
+  updateGraph (policyData, state) {
     const {
       packageData,
       // packageModules,
       // packageModulesMode,
     } = state
-    const {
-      configFinal,
-    } = this.props
-
-    // Uncomment for module nodes
-    // let newGraph
-    // if (packageModulesMode) {
-    //   newGraph = createModuleGraph(packageModules, state)
-    // } else {
-    //   newGraph = createPackageGraph(bundleData, state)
-    // }
 
     // const newGraph = createPackageGraph(bundleData, state)
-    const packages = parseConfigDebugForPackages(bundleData, configFinal)
-    const newGraph = createGraph(packages, configFinal, state)
+    const packages = parseConfigDebugForPackages(policyData.debug, policyData.final)
+    const newGraph = createGraph(packages, policyData.final, state)
 
     // create a map for faster lookups by id
     const nodeLookup = new Map(newGraph.nodes.map((node) => [node.id, node]))
@@ -123,8 +112,8 @@ class DepGraph extends React.Component {
   }
 
   getModulesForPackage (packageId) {
-    const { bundleData } = this.props
-    const { debugInfo } = bundleData
+    const { policyData } = this.props
+    const { debugInfo } = policyData.debug
     const packageModules = {}
     const moduleSources = []
     Object.entries(debugInfo).forEach(([moduleSpecifier, moduleDebugInfo]) => {
@@ -160,7 +149,7 @@ class DepGraph extends React.Component {
   }
 
   render () {
-    const { bundleData } = this.props
+    const { policyData } = this.props
     const {
       packages,
       packageData,
@@ -186,7 +175,7 @@ class DepGraph extends React.Component {
         if (selectedModule && selectedModule === moduleSpecifier) {
           newSelection = null
         } else {
-          newSelection = bundleData.debugInfo[moduleSpecifier].moduleRecord
+          newSelection = policyData.debug.debugInfo[moduleSpecifier].moduleRecord
         }
         this.setState({
           selectedModule: newSelection,
@@ -344,21 +333,21 @@ class DepGraph extends React.Component {
   }
 
   renderSelectedPackage (selectedPackage) {
-    const { configFinal: { resources } } = this.props
-    const config = resources[selectedPackage.name] || {}
+    const { policyData: { final: { resources: finalPolicyResources } } } = this.props
+    const packagePolicy = finalPolicyResources[selectedPackage.name] || {}
     return (
       <div className="packageInfo">
         <pre>{selectedPackage.id}</pre>
         policy for this package:
         <pre>
-          {JSON.stringify(config, null, 2)}
+          {JSON.stringify(packagePolicy, null, 2)}
         </pre>
       </div>
     )
   }
 
   renderSelectedModule (selectedModule) {
-    const { bundleData: { debugInfo } } = this.props
+    const { policyData: { debug: { debugInfo } } } = this.props
     const moduleDebugInfo = debugInfo[selectedModule.specifier]
     const moduleDisplayInfo = { ...moduleDebugInfo, moduleRecord: undefined }
     const { packageData } = moduleDebugInfo.moduleRecord
@@ -378,8 +367,8 @@ class DepGraph extends React.Component {
   renderSelectedNodeCode (selectedModule) {
     // eslint-disable-next-line global-require
     require('codemirror/mode/javascript/javascript')
-    const { bundleData } = this.props
-    const { debugInfo } = bundleData
+    const { policyData } = this.props
+    const { debug: { debugInfo } } = policyData
     const { codeMirror } = this.state
     let source
     if (codeMirror) {

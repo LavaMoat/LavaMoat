@@ -108,7 +108,7 @@ async function generateViz (args) {
   }
   // write each policy data injection
   const policyDataInjectionFilePath = await Promise.all(policyNames.map(async (policyName) => {
-    return await addPolicyComprehension({ policyName, fullDest })
+    return await createPolicyDataFile({ policyName, fullDest })
   }))
   // add data-injection file
   const dataInjectionContent = policyDataInjectionFilePath
@@ -144,28 +144,32 @@ async function serveViz (fullDest) {
   return url
 }
 
-async function addPolicyComprehension ({ policyName, fullDest }) {
-  const defaultPaths = getDefaultPaths(policyName)
-  const [
-    policyDebugContent,
-    policyPrimary,
-    policyOverride,
-  ] = await Promise.all([
-    fs.readFile(defaultPaths.debug, 'utf8'),
-    loadPolicyFile(defaultPaths.primary),
-    loadPolicyFile(defaultPaths.override),
-  ])
-  const mergedPolicy = mergeConfig(policyPrimary, policyOverride)
+async function createPolicyDataFile ({ policyName, fullDest }) {
+  const policyData = await loadPolicyData(policyName)
+  // json esm modules dont exist yet so we do this
   const policyDataInjectionContent = `
-  globalThis.CONFIG_DEBUG = ${policyDebugContent};
-  globalThis.CONFIG = ${JSON.stringify(policyPrimary)};
-  globalThis.CONFIG_OVERRIDE = ${JSON.stringify(policyOverride)};
-  globalThis.CONFIG_FINAL = ${JSON.stringify(mergedPolicy)};
+  const policies = globalThis.LavamoatPolicies = globalThis.LavamoatPolicies || {};
+  policies["${policyName}"] = ${JSON.stringify(policyData, null, 2)};
   `
   // write to disk
   const filepath = path.join(fullDest, `policy-${policyName}.js`)
   await fs.writeFile(filepath, policyDataInjectionContent)
   return filepath
+}
+
+async function loadPolicyData (policyName) {
+  const defaultPaths = getDefaultPaths(policyName)
+  const [
+    debug,
+    primary,
+    override,
+  ] = await Promise.all([
+    loadPolicyFile(defaultPaths.debug),
+    loadPolicyFile(defaultPaths.primary),
+    loadPolicyFile(defaultPaths.override),
+  ])
+  const policyData = { primary, override, debug }
+  return policyData
 }
 
 async function loadPolicyFile (filepath) {
