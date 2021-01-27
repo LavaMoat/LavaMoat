@@ -5,7 +5,7 @@ const path = require('path')
 const fs = require('fs')
 const yargs = require('yargs')
 const jsonStringify = require('json-stable-stringify')
-const { mergeConfig } = require('lavamoat-core')
+const { mergeConfig, getDefaultPaths } = require('lavamoat-core')
 const { parseForConfig } = require('./parseForConfig')
 const { createKernel } = require('./kernel')
 
@@ -65,6 +65,7 @@ async function runLava () {
 }
 
 function parseArgs () {
+  const defaultPaths = getDefaultPaths('node')
   const argsParser = yargs
     .usage('$0 <entryPath>', 'start the application', (yargs) => {
       // the entry file to run (or parse)
@@ -77,21 +78,21 @@ function parseArgs () {
         alias: 'configPath',
         describe: 'the path for the config file',
         type: 'string',
-        default: './lavamoat-config.json'
+        default: defaultPaths.primary
       })
       // the path for the config override file
       yargs.option('configOverride', {
         alias: 'configOverridePath',
         describe: 'the path for the config override file',
         type: 'string',
-        default: './lavamoat-config-override.json'
+        default: defaultPaths.override
       })
       // the path for the config debug file
       yargs.option('configDebug', {
         alias: 'configDebugPath',
         describe: 'the path for the config override file',
         type: 'string',
-        default: './lavamoat-config-debug.json'
+        default: defaultPaths.debug
       })
       // debugMode, disable some protections for easier debugging
       yargs.option('debugMode', {

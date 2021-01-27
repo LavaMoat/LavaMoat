@@ -13,7 +13,7 @@ const {
 
 const rootSlug = '<root>'
 
-module.exports = { rootSlug, createModuleInspector }
+module.exports = { rootSlug, createModuleInspector, getDefaultPaths }
 
 function createModuleInspector (opts = {}) {
   const moduleIdToModuleRecord = {}
@@ -281,4 +281,12 @@ function guessPackageName (requestedName) {
   const packagePartCount = nameSpaced ? 2 : 1
   const packageName = pathParts.slice(0, packagePartCount).join('/')
   return packageName
+}
+
+function getDefaultPaths (policyName) {
+  return {
+    primary: path.join('lavamoat', policyName, 'policy.json'),
+    override: path.join('lavamoat', policyName, 'policy-override.json'),
+    debug: path.join('lavamoat', policyName, 'policy-debug.json')
+  }
 }

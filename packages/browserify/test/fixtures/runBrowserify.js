@@ -9,4 +9,4 @@ browserify(params.entries, {
   plugin: [
     [lavamoatPlugin, params.opts]
   ]
-}).bundle()
+}).bundle().pipe(process.stdout)

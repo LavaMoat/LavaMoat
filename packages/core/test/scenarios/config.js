@@ -77,27 +77,25 @@ module.exports = [
     })
     return scenario
   },
-  async () => {
-    const scenario = createScenarioFromScaffold({
-      name: 'config - applies override, provided as object',
-      defineOne: () => {
-        module.exports = require('three')
-      },
-      defineTwo: () => {
-        module.exports = 555
-      },
-      defineThree: () => {
-        module.exports = require('two')
-      },
-      configOverride,
-      opts: {
-        configOverride
-      },
-      expectedResult: 555,
-      shouldRunInCore: false
-    })
-    return scenario
-  },
+  // intended to test passing into JS API and not over file system
+  // async () => {
+  //   const scenario = createScenarioFromScaffold({
+  //     name: 'config - applies override, provided as object',
+  //     defineOne: () => {
+  //       module.exports = require('three')
+  //     },
+  //     defineTwo: () => {
+  //       module.exports = 555
+  //     },
+  //     defineThree: () => {
+  //       module.exports = require('two')
+  //     },
+  //     configOverride,
+  //     expectedResult: 555,
+  //     shouldRunInCore: false
+  //   })
+  //   return scenario
+  // },
   async () => {
     const scenario = createScenarioFromScaffold({
       name: 'config - applies override, provided as file path string',
@@ -112,34 +110,35 @@ module.exports = [
       },
       configOverride,
       opts: {
-        configOverride: 'lavamoat-config-override.json'
+        configOverride: 'policy-override.json'
       },
       expectedResult: 555,
       shouldRunInCore: false
     })
     return scenario
   },
-  async () => {
-    const scenario = createScenarioFromScaffold({
-      name: 'config - applies override, provided as function returning config object',
-      defineOne: () => {
-        module.exports = require('three')
-      },
-      defineTwo: () => {
-        module.exports = 555
-      },
-      defineThree: () => {
-        module.exports = require('two')
-      },
-      configOverride,
-      opts: {
-        configOverride: () => configOverride
-      },
-      expectedResult: 555,
-      shouldRunInCore: false
-    })
-    return scenario
-  },
+  // intended to test passing into JS API and not over file system
+  // async () => {
+  //   const scenario = createScenarioFromScaffold({
+  //     name: 'config - applies override, provided as function returning config object',
+  //     defineOne: () => {
+  //       module.exports = require('three')
+  //     },
+  //     defineTwo: () => {
+  //       module.exports = 555
+  //     },
+  //     defineThree: () => {
+  //       module.exports = require('two')
+  //     },
+  //     configOverride,
+  //     opts: {
+  //       configOverride: () => configOverride
+  //     },
+  //     expectedResult: 555,
+  //     shouldRunInCore: false
+  //   })
+  //   return scenario
+  // },
   async () => {
     const scenario = createScenarioFromScaffold({
       name: 'config - config validation fails: invalid "resources" key',
@@ -217,40 +216,38 @@ module.exports = [
   async () => {
     const scenario = createScenarioFromScaffold({
       name: 'config - config validation passes - everything valid',
-      opts: {
-        config: {
-          resources: {
-            '<root>': {
-              packages: {
-                two: true
-              }
-            },
-            one: {
-              packages: {
-                two: true
-              }
-            },
-            two: {
-              packages: {
-                three: true
-              }
+      config: {
+        resources: {
+          '<root>': {
+            packages: {
+              two: true
+            }
+          },
+          one: {
+            packages: {
+              two: true
+            }
+          },
+          two: {
+            packages: {
+              three: true
             }
           }
-        },
-        configOverride: {
-          resources: {
-            '<root>': {
-              packages: {
-                two: true
-              }
+        }
+      },
+      configOverride: {
+        resources: {
+          '<root>': {
+            packages: {
+              two: true
+            }
+          },
+          two: {
+            packages: {
+              three: true
             },
-            two: {
-              packages: {
-                three: true
-              },
-              globals: {
-                console: 'write'
-              }
+            globals: {
+              console: 'write'
             }
           }
         }

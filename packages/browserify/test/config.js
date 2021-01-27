@@ -15,8 +15,8 @@ test('config - default config path is generated with autoconfig if path is not s
     },
     contextName: 'browserify'
   })
-  const { projectDir, configDir } = await prepareScenarioOnDisk({ scenario })
-  const expectedPath = path.join(configDir, 'lavamoat-config.json')
+  const { projectDir, policyDir } = await prepareScenarioOnDisk({ scenario, policyName: 'browserify' })
+  const expectedPath = path.join(policyDir, 'policy.json')
 
   t.falsy(fs.existsSync(expectedPath), 'Config file does not yet exist')
 
@@ -40,54 +40,53 @@ test('config - writes a proper config to a temp dir', async (t) => {
       writeAutoConfig: true
     }
   })
-  const { projectDir } = await prepareScenarioOnDisk({ scenario })
-  console.log(projectDir)
+  const { projectDir } = await prepareScenarioOnDisk({ scenario, policyName: 'browserify' })
   await runBrowserify({ projectDir, scenario})
   const testResult = await runScenario({ scenario, dir: projectDir })
   t.deepEqual(testResult, 555)
 })
 
-// test('Config override is applied if not specified and already exists at default path', async (t) => {
-//   const scenario = createScenarioFromScaffold({
-//     defineOne: () => {
-//       module.exports = require('three')
-//     },
-//     defineTwo: () => {
-//       module.exports = 30
-//     },
-//     defineThree: () => {
-//       module.exports = require('two')
-//     },
-//     configOverride: {
-//     resources: {
-//       three: {
-//         packages: {
-//           two: true
-//         }
-//       }
-//     }
-//   }
-//   })
-//   const testResult = await runScenario({ scenario })
-//   t.is(testResult, 30)
-// })
+test('Config override is applied if not specified and already exists at default path', async (t) => {
+  const scenario = createScenarioFromScaffold({
+    defineOne: () => {
+      module.exports = require('three')
+    },
+    defineTwo: () => {
+      module.exports = 30
+    },
+    defineThree: () => {
+      module.exports = require('two')
+    },
+    configOverride: {
+    resources: {
+      three: {
+        packages: {
+          two: true
+        }
+      }
+    }
+  }
+  })
+  const testResult = await runScenario({ scenario })
+  t.is(testResult, 30)
+})
 
-// test('Config - Applies writeAutoConfigDebug plugin option and dumps module object to disk', async (t) => {
-//   const scenario = createScenarioFromScaffold({
-//     opts: {
-//       writeAutoConfig: true,
-//       writeAutoConfigDebug: true
-//     }
-//   })
-//   const { projectDir } = await prepareScenarioOnDisk({ scenario })
-//   const expectedPath = path.join(projectDir, './module-data.json')
+test('Config - Applies writeAutoConfigDebug plugin option and dumps module object to disk', async (t) => {
+  const scenario = createScenarioFromScaffold({
+    opts: {
+      writeAutoConfig: true,
+      writeAutoConfigDebug: true
+    }
+  })
+  const { projectDir, policyDir } = await prepareScenarioOnDisk({ scenario, policyName: 'browserify' })
+  const expectedPath = path.join(policyDir, 'policy-debug.json')
 
-//   t.falsy(fs.existsSync(expectedPath), 'Module data does not yet exist')
+  t.falsy(fs.existsSync(expectedPath), 'Module data does not yet exist')
 
-//   await runBrowserify({ projectDir, scenario})
+  await runBrowserify({ projectDir, scenario})
 
-//   t.truthy(fs.existsSync(expectedPath), 'Module data exists')
-// })
+  t.truthy(fs.existsSync(expectedPath), 'Module data exists')
+})
 
 // this test is not written correctly, im disabling it for now
 // it tests features we dont support:
@@ -113,8 +112,8 @@ test('config - writes a proper config to a temp dir', async (t) => {
 //     writeAutoConfig: true,
 //   })
 
-//   const overridePath = './lavamoat/lavamoat-config-override.json'
-//   const configPath = './lavamoat/lavamoat-config.json'
+//   const overridePath = './lavamoat/policy-override.json'
+//   const configPath = './lavamoat/policy.json'
 
 //   await new Promise(resolve => setTimeout(resolve, 1000))
 
