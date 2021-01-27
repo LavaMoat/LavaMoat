@@ -44,6 +44,8 @@
     "analyze": "source-map-explorer 'build/static/js/*.js'",
     "start": "webpack-dev-server --config ./src/webpack.config.js",
     "test": "yarn build",
+    "lint": "eslint src/**/*.js",
+    "lint:fix": "yarn lint --fix",
     "build": "webpack --config ./src/webpack.config.js",
     "deploy": "yarn run build && gh-pages -d dist",
     "prepublishOnly": "yarn run deploy"

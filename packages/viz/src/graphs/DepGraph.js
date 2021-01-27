@@ -5,6 +5,7 @@ import ThreeForceGraph from 'three-forcegraph'
 // import * as THREE from 'three';
 import React from 'react'
 import '../css/DepGraph.css'
+import { UnControlled as CodeMirror } from 'react-codemirror2'
 import Nav from '../views/nav.js'
 import { DepList } from '../views/DepList.js'
 import {
@@ -15,17 +16,16 @@ import {
   sortByDangerRank,
   getColorForRank,
   getLineNumbersForGlobals
+  , envConfig,
 } from './utils/utils.js'
 import XrButton from './xr-button.js'
 import setupScene from './vr-viz/setupScene.js'
 // import setupSelections from './vr-viz/setupSelections.js'
 import setupGraph from './vr-viz/setupGraph.js'
-import { envConfig } from '../../src/graphs/utils/utils.js'
-import { UnControlled as CodeMirror } from 'react-codemirror2'
+
 import 'codemirror/theme/material.css'
 
 // const d3 = require('d3')
-
 
 const lavamoatModes = ['lavamoat', 'without']
 
@@ -84,7 +84,7 @@ class DepGraph extends React.Component {
       // packageModulesMode,
     } = state
     const {
-      configFinal
+      configFinal,
     } = this.props
 
     // Uncomment for module nodes
@@ -230,24 +230,24 @@ class DepGraph extends React.Component {
     const graphData = packageData
     let sortedPackages = []
     let sortedModules = []
-    let selectedNodeLabel
-    let selectedNodeData
+    // let selectedNodeLabel
+    // let selectedNodeData
     let sourceButtonStyle
     let helpMessage
 
-    if (selectedPackage) {
-      selectedNodeLabel = selectedPackage.id
-      selectedNodeData = 'funky town'
-      // if (packageModulesMode && !isNaN(selectedNode.id) && selectedNode.id in packageModules) {
+    // if (selectedPackage) {
+    //   selectedNodeLabel = selectedPackage.id
+    //   selectedNodeData = 'funky town'
+    //   // if (packageModulesMode && !isNaN(selectedNode.id) && selectedNode.id in packageModules) {
 
-      //   selectedNodeData = JSON.stringify(packageModules[selectedNode.id].globalUsage, null, 2) || null
-      // } else {
-      //   selectedNodeData = selectedNode.configLabel
-      // }
-    } else {
-      selectedNodeLabel = 'select a node'
-      selectedNodeData = ''
-    }
+    //   //   selectedNodeData = JSON.stringify(packageModules[selectedNode.id].globalUsage, null, 2) || null
+    //   // } else {
+    //   //   selectedNodeData = selectedNode.configLabel
+    //   // }
+    // } else {
+    //   selectedNodeLabel = 'select a node'
+    //   selectedNodeData = ''
+    // }
     if (!packageModulesMode || !selectedModule) {
       sourceButtonStyle = { display: 'none' }
     }
@@ -286,18 +286,18 @@ class DepGraph extends React.Component {
             />
           </div>
 
-        <div className="viewSourceWrapper">
-          <div className="helpMessage">
-            {helpMessage}
+          <div className="viewSourceWrapper">
+            <div className="helpMessage">
+              {helpMessage}
+            </div>
+            <button
+              className="sourceButton"
+              style={sourceButtonStyle}
+              onClick={() => actions.toggleSource()}
+            >
+              View Source
+            </button>
           </div>
-          <button
-            className="sourceButton"
-            style={sourceButtonStyle}
-            onClick={() => actions.toggleSource()}
-          >
-            View Source
-          </button>
-        </div>
         </div>
         <DepList
           actions={actions}
@@ -315,7 +315,7 @@ class DepGraph extends React.Component {
           graphData={graphData}
           linkDirectionalArrowLength={4}
           linkDirectionalArrowRelPos={1}
-          nodeLabel={'label'}
+          nodeLabel="label"
           // onNodeHover={(node) => {
           //   if (!node) return
           //   if (packageModulesMode && !packageModules[node.id]) return
@@ -329,7 +329,7 @@ class DepGraph extends React.Component {
     )
   }
 
-  renderSelectedNodeView() {
+  renderSelectedNodeView () {
     const { selectedPackage, selectedModule } = this.state
     if (selectedModule) {
       return this.renderSelectedModule(selectedModule)
@@ -357,7 +357,7 @@ class DepGraph extends React.Component {
     )
   }
 
-  renderSelectedModule(selectedModule) {
+  renderSelectedModule (selectedModule) {
     const { bundleData: { debugInfo } } = this.props
     const moduleDebugInfo = debugInfo[selectedModule.specifier]
     const moduleDisplayInfo = { ...moduleDebugInfo, moduleRecord: undefined }
@@ -375,8 +375,9 @@ class DepGraph extends React.Component {
     return component
   }
 
-  renderSelectedNodeCode(selectedModule) {
-  require('codemirror/mode/javascript/javascript')
+  renderSelectedNodeCode (selectedModule) {
+    // eslint-disable-next-line global-require
+    require('codemirror/mode/javascript/javascript')
     const { bundleData } = this.props
     const { debugInfo } = bundleData
     const { codeMirror } = this.state
@@ -415,7 +416,8 @@ class DepGraph extends React.Component {
         },
       })
     }
-    return(<CodeMirror
+    return (
+      <CodeMirror
         value={source}
         options={{
           mode: 'javascript',
@@ -424,8 +426,8 @@ class DepGraph extends React.Component {
         editorDidMount={(editor) => {
           this.setState({ codeMirror: editor })
         }}
-      />)
-      
+      />
+    )
   }
 }
 

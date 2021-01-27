@@ -1,3 +1,5 @@
+/* eslint-disable no-shadow */
+
 const path = require('path')
 
 export const envConfig = {
@@ -8,8 +10,8 @@ export const envConfig = {
     ],
     greenGlobals: [
 
-    ]
-  }
+    ],
+  },
 }
 
 function parseConfigDebugForPackages (configDebugData, configFinal) {
@@ -17,7 +19,7 @@ function parseConfigDebugForPackages (configDebugData, configFinal) {
   // const nodes = [], links = []
   const packages = {}
 
-  const { debugInfo, env } = configDebugData
+  const { debugInfo } = configDebugData
   const { resources } = configFinal
   // aggregate info under package name
   Object.entries(debugInfo).forEach(([_, moduleDebugInfo]) => {
@@ -57,7 +59,7 @@ function parseConfigDebugForPackages (configDebugData, configFinal) {
       packageData.importMap[childId] = getPackageVersionName(childModuleData)
     })
   })
-  // modify danger rank 
+  // modify danger rank
   Object.entries(packages).forEach(([_, packageData]) => {
     const dangerRank = getDangerRankForPackage(packageData, envConfig)
     packageData.dangerRank = dangerRank
@@ -133,7 +135,9 @@ const rankColors = [
 
 function getDangerRankForPackage (packageData, envConfig) {
   // strict red if any builtins or globals for now
-  if (packageData.config.native || packageData.config.builtin || packageData.config.globals) return 3
+  if (packageData.config.native || packageData.config.builtin || packageData.config.globals) {
+    return 3
+  }
   if (packageData.dangerRank) {
     return packageData.dangerRank
   }
@@ -147,7 +151,7 @@ function getDangerRankForPackage (packageData, envConfig) {
   return rank
 }
 
-function getDangerRankForModule(moduleDebugInfo, envConfig) {
+function getDangerRankForModule (moduleDebugInfo, envConfig) {
   const configRank = getRankForGlobals(moduleDebugInfo.globals, envConfig)
   const typeRank = getRankForType(moduleDebugInfo.moduleRecord.type)
   const rank = Math.max(configRank, typeRank)
@@ -162,8 +166,8 @@ function getColorForRank (rank) {
 }
 
 // this is a denylist, it should be an allowlist
-//default to dangerous here
-function getRankForGlobals(globalsConfig, envConfig) {
+// default to dangerous here
+function getRankForGlobals (globalsConfig, envConfig) {
   const globals = Object.keys(globalsConfig || {})
   if (globals.length === 0) {
     return 0
@@ -182,8 +186,12 @@ function getRankForType (type = 'js') {
   if (type === 'js') {
     return 0
   }
-  if (type === 'builtin') return 3
-  if (type === 'native') return 3
+  if (type === 'builtin') {
+    return 3
+  }
+  if (type === 'native') {
+    return 3
+  }
   return 3
 }
 
@@ -197,7 +205,6 @@ function getPackageVersionName (moduleRecord) {
     return `${packageName}@${packageVersion}`
   }
   return packageName
-
 }
 
 function createLink (params) {
@@ -278,5 +285,5 @@ export {
   getPackageVersionName,
   fullModuleNameFromPath,
   getLineNumbersForGlobals,
-  sortByDangerRank
+  sortByDangerRank,
 }

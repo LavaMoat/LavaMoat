@@ -6,22 +6,26 @@ import React from 'react'
 export default class XrButton extends React.Component {
   constructor () {
     super()
-    this.currentSession = null;
+    this.currentSession = null
     this.state = {
       supportsXr: 'xr' in navigator,
       supportsImmersiveVr: undefined,
-    };
+    }
   }
 
   async componentDidMount () {
-    if (!this.state.supportsXr) return
+    if (!this.state.supportsXr) {
+      return
+    }
     const supportsImmersiveVr = await navigator.xr.isSessionSupported('immersive-vr')
-    this.setState({ supportsImmersiveVr  })
+    this.setState({ supportsImmersiveVr })
   }
 
   async toggleSession () {
     const { supportsImmersiveVr } = this.state
-    if (!supportsImmersiveVr) return
+    if (!supportsImmersiveVr) {
+      return
+    }
     if (this.currentSession === null) {
       // WebXR's requestReferenceSpace only works if the corresponding feature
       // was requested at session creation time. For simplicity, just ask for
@@ -31,7 +35,7 @@ export default class XrButton extends React.Component {
       // be requested separately.)
 
       // activate session
-      const sessionInit = { optionalFeatures: [ 'local-floor', 'bounded-floor' ] }
+      const sessionInit = { optionalFeatures: ['local-floor', 'bounded-floor'] }
       const session = await navigator.xr.requestSession('immersive-vr', sessionInit)
       this.currentSession = session
       // setup start/end handlers
@@ -46,24 +50,24 @@ export default class XrButton extends React.Component {
   }
 
   render () {
-    const { 
+    const {
       supportsXr,
       supportsImmersiveVr,
     } = this.state
     const showButton = supportsXr && supportsImmersiveVr
 
     return (
-    <button
-      className="xrButton"
-      onClick={() => this.toggleSession()}
-      style={{
-        display: showButton ? 'block' : 'none',
-        cursor: 'pointer',
-        width: '100px',
-      }}
-    >
-      VR
-    </button>
+      <button
+        className="xrButton"
+        onClick={() => this.toggleSession()}
+        style={{
+          display: showButton ? 'block' : 'none',
+          cursor: 'pointer',
+          width: '100px',
+        }}
+      >
+        VR
+      </button>
     )
   }
 }

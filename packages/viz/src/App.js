@@ -8,11 +8,10 @@ const { DepGraph } = require('./graphs/DepGraph')
 // }
 
 /* eslint-disable no-restricted-globals */
-const configDebug = self.CONFIG_DEBUG
-const config = self.CONFIG
-const configOverride = self.CONFIG_OVERRIDE
-const configFinal = self.CONFIG_FINAL
-
+const configDebug = globalThis.CONFIG_DEBUG
+const config = globalThis.CONFIG
+const configOverride = globalThis.CONFIG_OVERRIDE
+const configFinal = globalThis.CONFIG_FINAL
 
 class App extends Component {
   // selectBundle (target) {
@@ -27,7 +26,7 @@ class App extends Component {
           config={config}
           configOverride={configOverride}
           configFinal={configFinal}
-          /> 
+        />
       </div>
     )
   }

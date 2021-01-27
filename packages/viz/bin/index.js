@@ -19,13 +19,13 @@ function parseArgs () {
       yargs.option('dest', {
         describe: 'path to write viz output',
         type: 'string',
-        default: './viz/',
+        default: './viz/'
       })
       // the path for the debug-config file
       yargs.option('debugConfig', {
         describe: 'the path for the debug-config file',
         type: 'string',
-        default: './lavamoat-config-debug.json',
+        default: './lavamoat-config-debug.json'
       })
       // the path for the config file
       yargs.option('config', {
@@ -45,7 +45,7 @@ function parseArgs () {
       yargs.option('open', {
         describe: 'open the visualization',
         type: 'boolean',
-        default: false,
+        default: false
       })
     })
     .help()
@@ -67,7 +67,7 @@ async function main () {
   const configOverrideContent = await fs.readFile(configOverride, 'utf8')
   const finalConfigString = JSON.stringify(mergeConfig(JSON.parse(configContent), JSON.parse(configOverrideContent)))
   const dataInjectionContent = `globalThis.CONFIG_DEBUG = ${debugConfigContent}; globalThis.CONFIG = ${configContent}; globalThis.CONFIG_OVERRIDE = ${configOverrideContent}; globalThis.CONFIG_FINAL = ${finalConfigString};`
-  
+
   await fs.writeFile(`${fullDest}/injectConfigDebugData.js`, dataInjectionContent)
   if (open) {
     openUrl(`file:///${fullDest}/index.html`)
