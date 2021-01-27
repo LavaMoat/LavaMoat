@@ -6,11 +6,8 @@ const tasks = {
   'node': {
     run: 'node entry.js',
   },
-  // 'lavamoat-node': {
-  //   run: 'lavamoat entry.js',
-  // },
   'lavamoat-no-defense': {
-    run: 'lavamoat entry.js --applyExportsDefense=false',
+    run: 'lavamoat entry.js',
   },
 }
 

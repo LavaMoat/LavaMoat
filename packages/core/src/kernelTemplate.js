@@ -1,15 +1,12 @@
 // LavaMoat Prelude
-(function() {
-
+(function () {
   return createKernel
-
 
   function createKernel ({
     lavamoatConfig,
     loadModuleData,
     getRelativeModuleId,
     prepareModuleInitializerArgs,
-    applyExportsDefense = true,
   }) {
     const debugMode = __lavamoatDebugMode__
 
@@ -32,10 +29,10 @@
     const lockdownOptions = {
       // gives a semi-high resolution timer
       dateTaming: 'unsafe',
-      // gives code excessive introspection, but meh
+      // lets code observe call stack, but easier debuggability
       errorTaming: 'unsafe',
       // this is introduces non-determinism, but is otherwise safe
-      mathTaming: 'unsafe',
+      mathTaming: 'unsafe'
       // ?
       // regExpTaming: 'unsafe',
     }
@@ -50,10 +47,8 @@
       getRelativeModuleId,
       prepareModuleInitializerArgs,
       globalRef,
-      debugMode,
-      applyExportsDefense,
+      debugMode
     })
     return kernel
   }
-
 })()

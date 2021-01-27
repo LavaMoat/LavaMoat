@@ -38,7 +38,6 @@
     "pump": "^3.0.0",
     "ses": "git+https://git@github.com/agoric/ses.git#fdb393f817f6124c4d055bff26b68e4cbe17618e",
     "source-map": "^0.7.3",
-    "standard": "14.3.1",
     "uglify-js": "^3.4.9",
     "vinyl-buffer": "^1.0.1",
     "watchify": "^3.11.1"

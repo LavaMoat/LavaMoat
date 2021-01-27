@@ -16,9 +16,7 @@ const makePrepareRealmGlobalFromConfigSrc = fs.readFileSync(path.join(__dirname,
 module.exports = {
   generateKernel,
   generateKernelCore,
-  generatePrelude,
-  generateDashiKernel,
-  generateOdenKernel
+  generatePrelude
 }
 
 // takes the preludeTemplate and populates it with the kernel
@@ -29,26 +27,6 @@ function generatePrelude (opts = {}) {
   output = stringReplace(output, '__createKernel__', kernelCode)
 
   return output
-}
-
-// lavamoat kernel, built on oden (soon endo)
-function generateDashiKernel (opts = {}) {
-  const dashiTemplate = fs.readFileSync(path.join(__dirname, '/dashiTemplate.js'), 'utf-8')
-
-  let output = dashiTemplate
-  output = replaceTemplateRequire(output, 'ses', sesSrc)
-  output = replaceTemplateRequire(output, 'cytoplasm', fs.readFileSync(require.resolve('cytoplasm/dist/index'), 'utf8'))
-  output = replaceTemplateRequire(output, 'cytoplasm/distortions/readOnly', fs.readFileSync(require.resolve('cytoplasm/src/distortions/readOnly'), 'utf8'))
-  output = replaceTemplateRequire(output, 'makeGetEndowmentsForConfig', makeGetEndowmentsForConfigSrc)
-  output = replaceTemplateRequire(output, 'makePrepareRealmGlobalFromConfig', makePrepareRealmGlobalFromConfigSrc)
-  output = replaceTemplateRequire(output, 'oden', generateOdenKernel(opts))
-
-  return output
-}
-
-// grabs the oden kernel
-function generateOdenKernel (opts = {}) {
-  return fs.readFileSync(path.join(__dirname, '/odenTemplate.js'), 'utf-8')
 }
 
 // takes the kernelTemplate and populates it with the libraries
@@ -67,8 +45,6 @@ function generateKernel (opts = {}) {
 // takes the kernelCoreTemplate and populates it with the libraries
 function generateKernelCore (opts = {}) {
   let output = kernelCoreTemplate
-  output = replaceTemplateRequire(output, 'cytoplasm', fs.readFileSync(require.resolve('cytoplasm/dist/index'), 'utf8'))
-  output = replaceTemplateRequire(output, 'cytoplasm/distortions/readOnly', fs.readFileSync(require.resolve('cytoplasm/src/distortions/readOnly'), 'utf8'))
   output = replaceTemplateRequire(output, 'makeGetEndowmentsForConfig', makeGetEndowmentsForConfigSrc)
   output = replaceTemplateRequire(output, 'makePrepareRealmGlobalFromConfig', makePrepareRealmGlobalFromConfigSrc)
   return output

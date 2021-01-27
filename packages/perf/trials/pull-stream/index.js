@@ -9,9 +9,6 @@ const tasks = {
   'lavamoat-node': {
     run: 'lavamoat entry.js',
   },
-  'lavamoat-no-defense': {
-    run: 'lavamoat entry.js --applyExportsDefense=false',
-  },
   'bify': {
     prep: 'browserify entry.js > bundle.js',
     run: 'node bundle.js',

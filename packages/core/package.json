@@ -10,7 +10,6 @@
     "node": ">10.0.0"
   },
   "dependencies": {
-    "cytoplasm": "^3.3.1",
     "fromentries": "^1.2.0",
     "json-stable-stringify": "^1.0.1",
     "lavamoat-tofu": "^5.1.1",
@@ -41,8 +40,11 @@
       "/src/sourcemaps.js",
       "/test/fixtures",
       "/src/preludeTemplate.js",
-      "/src/kernelTemplate.js",
-      "/src/kernelCoreTemplate.js"
+      "/src/kernelTemplate.js"
+    ],
+    "globals": [
+      "Compartment",
+      "templateRequire"
     ]
   }
 }

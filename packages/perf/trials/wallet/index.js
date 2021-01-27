@@ -9,9 +9,6 @@ const tasks = {
   'lavamoat': {
     run: 'lavamoat entry.js',
   },
-  'lavamoat-no-defense': {
-    run: 'lavamoat entry.js --applyExportsDefense=false',
-  },
   // 'bify': {
   //   prep: 'yarn build:unsafe',
   //   run: 'node bundle.js',
