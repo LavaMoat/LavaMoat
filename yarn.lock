@@ -4596,7 +4596,7 @@ cytoplasm@^2.0.2:
   resolved "https://registry.yarnpkg.com/cytoplasm/-/cytoplasm-2.0.5.tgz#926ea93cbf0fa5cf4c5d86a2b642bb89add96776"
   integrity sha512-0x4QINKrEE12n02iTdmCO7TtpZkNvGMrJWxTyOVwE1xQvXG6my5809Vm5N+KJHa2l4OxlJ4s+cTtCkdNpyTsMA==
 
-cytoplasm@^3.1.1, cytoplasm@^3.3.1:
+cytoplasm@^3.1.1:
   version "3.3.1"
   resolved "https://registry.yarnpkg.com/cytoplasm/-/cytoplasm-3.3.1.tgz#6d10099e536b12c642e8375b47cbffac66656a4b"
   integrity sha512-38swm2Lr7cmTh0KRYtiUOCT5PT2TPp31Lpp3wcAIm3iGT4KdGGewyTydkFhBEDrKik/umgmG2hVoG5A1fKQY+g==
@@ -8319,18 +8319,6 @@ lavamoat-core@^1.1.0:
     resolve "^1.15.1"
     resolve-package-path "^2.0.0"
     through2 "^3.0.1"
-
-lavamoat-core@^6.4.4:
-  version "6.4.4"
-  resolved "https://registry.yarnpkg.com/lavamoat-core/-/lavamoat-core-6.4.4.tgz#a3e88d8ef05ba4986071b0aacab49f0c3d2b2f9c"
-  integrity sha512-LxLpxHfoXQkbCfllNB2WjVesvFfBWkDsKWy9KUI3vep2GxjaZa1LtBbOFtTI1h2IS9fUZo/IDAIQdeMvOzUl5Q==
-  dependencies:
-    cytoplasm "^3.3.1"
-    fromentries "^1.2.0"
-    json-stable-stringify "^1.0.1"
-    lavamoat-tofu "^5.1.1"
-    merge-deep "^3.0.2"
-    resolve "^1.15.1"
 
 lavamoat-tofu@^2.0.9:
   version "2.0.10"
