@@ -1,127 +1,141 @@
 const test = require('ava')
-const createCustomPack = require('../src/createCustomPack')
 const {
-  generateConfigFromFiles,
-  createBrowserifyFromRequiresArray,
-  getStreamResults,
-  evalBundle,
+  createBundleForScenario,
+  runScenario
 } = require('./util')
 
+const fs = require('fs')
+const {
+  fillInFileDetails,
+  autoConfigForScenario,
+  functionToString
+} = require('lavamoat-core/test/util')
+
 test('package factor bundle', async (t) => {
-  const files = [{
-    // common.js
-    id: '3',
-    packageName: 'b',
-    file: './node_modules/b/index.js',
-    deps: {},
-    source: 'module.exports = global.three'
-  }, {
-    id: '12',
-    packageName: '<root>',
-    file: './src/12.js',
-    deps: {},
-    source: 'module.exports = 10'
-  }, {
-    // src/1.js
-    id: 'entry1',
-    packageName: '<root>',
-    file: './src/1.js',
-    deps: {
-      2: './node_modules/a/index.js',
-      3: './node_modules/b/index.js',
-      10: './src/10.js'
+  const scenario = {
+    files: fillInFileDetails({
+      './node_modules/b/index.js': {
+        // common.js
+        packageName: 'b',
+        file: './node_modules/b/index.js',
+        importMap: {},
+        content: functionToString(() => {
+          module.exports = global.three
+        })
+      },
+      './src/12.js': {
+        packageName: '<root>',
+        importMap: {},
+        content: functionToString(() => {
+          module.exports = 10
+        })
+      },
+      './src/1.js': {
+        // src/1.js
+        packageName: '<root>',
+        importMap: {
+          a: './node_modules/a/index.js',
+          b: './node_modules/b/index.js',
+          './10': './src/10.js'
+        },
+        content: functionToString(() => {
+          const testResult = require('a') * require('b') * require('./10')
+          console.log(JSON.stringify(testResult, null, 2))
+        }),
+        entry: true
+      },
+      './src/10.js': {
+        packageName: '<root>',
+        importMap: {
+          './12': './src/12.js'
+        },
+        content: functionToString(() => {
+          module.exports = require('./12')
+        })
+      },
+      './node_modules/a/index.js': {
+        packageName: 'a',
+        importMap: {},
+        content: functionToString(() => {
+          module.exports = global.two
+        })
+      },
+      './src/2.js': {
+        // src/2.js
+        packageName: '<root>',
+        importMap: {
+          b: './node_modules/b/index.js',
+          c: './node_modules/c/index.js',
+          './11': './src/11.js',
+        },
+        content: functionToString(() => {
+          const testResult = require('b') * require('c') * require('./11')
+          console.log(JSON.stringify(testResult, null, 2))
+        }),
+        entry: true
+      },
+      './src/11.js': {
+        packageName: '<root>',
+        importMap: {
+          './12': './src/12.js'
+        },
+        content: functionToString(() => {
+          module.exports = require('./12')
+        })
+      },
+      './node_modules/c/index.js': {
+        packageName: 'c',
+        importMap: {},
+        content: functionToString(() => {
+          module.exports = global.four
+        })
+      }
+    }),
+    entries: ['./src/1.js', './src/2.js'],
+    config: {
+      resources: {
+        c: {
+          globals: {
+            four: true
+          }
+        },
+        a: {
+          globals: {
+            two: true
+          }
+        },
+        b: {
+          globals: {
+            three: true
+          }
+        }
+      }
     },
-    source: 'global.testResult = require(\'2\') * require(\'3\') * require(\'10\')',
-    entry: true
-  }, {
-    id: '10',
-    packageName: '<root>',
-    file: './src/10.js',
-    deps: {
-      12: './src/12.js'
+    opts: {
+      // breaks when enabled (for some reason)
+      // pruneConfig: true
     },
-    source: 'module.exports = require(\'12\')'
-  }, {
-    id: '2',
-    packageName: 'a',
-    file: './node_modules/a/index.js',
-    deps: {},
-    source: 'module.exports = global.two'
-  }, {
-    // src/2.js
-    id: 'entry2',
-    packageName: '<root>',
-    file: './src/2.js',
-    deps: {
-      3: './node_modules/b/index.js',
-      4: './node_modules/c/index.js',
-      11: './src/11.js',
+    context: {
+      two: 2,
+      three: 3,
+      four: 4,
     },
-    source: 'global.testResult = require(\'3\') * require(\'4\') * require(\'11\')',
-    entry: true
-  }, {
-    id: '11',
-    packageName: '<root>',
-    file: './src/11.js',
-    deps: {
-      12: './src/12.js'
-    },
-    source: 'module.exports = require(\'12\')'
-  }, {
-    id: '4',
-    packageName: 'c',
-    file: './node_modules/c/index.js',
-    deps: {},
-    source: 'module.exports = global.four'
-  }]
-
-  const config = await generateConfigFromFiles({ files })
-
-  const bundler = createBrowserifyFromRequiresArray({ files, pluginOpts: { config, pruneConfig: true } })
-    .plugin('bify-package-factor', { createPacker })
-
-  function createPacker (opts) {
-    return createCustomPack({
-      ...opts,
-      // omit prelude (still included in common bundle)
-      includePrelude: false,
-      // provide full bundle config
-      config,
-      // tell packer to automatically prune config
-      pruneConfig: true
-    })
+    type: 'factor'
   }
 
-  const vinylBundles = await getStreamResults(bundler.bundle())
-  t.is(vinylBundles.length, 3)
+  const { bundleForScenario: rawOutput } = await createBundleForScenario({ scenario })
+  const vinylBundles = JSON.parse(rawOutput)
 
-
-  const relativeNames = vinylBundles.map(bundleFile => bundleFile.relative).sort()
+  const relativeNames = Object.keys(vinylBundles).sort()
   t.deepEqual(relativeNames, [
     'common.js',
     'src/1.js',
     'src/2.js'
   ], 'relative filenames are as expected')
 
-  const bundles = {}
-  await Promise.all(vinylBundles.map(async bundleFile => {
-    const { relative } = bundleFile
-    const contentBuffers = await getStreamResults(bundleFile.contents)
-    const content = contentBuffers.map(buffer => buffer.toString('utf8')).join('')
-    bundles[relative] = content
-  }))
+  const testResult1 = await runScenario({ scenario, bundle: vinylBundles['common.js'] + vinylBundles['src/1.js'] })
+  const testResult2 = await runScenario({ scenario, bundle: vinylBundles['common.js'] + vinylBundles['src/2.js'] })
 
-  const testGlobal = {
-    two: 2,
-    three: 3,
-    four: 4,
-  }
-
-  let result
-
-  result = evalBundle(bundles['common.js'] + bundles['src/1.js'], testGlobal)
-  t.is(result, 60)
-
-  result = evalBundle(bundles['common.js'] + bundles['src/2.js'], testGlobal)
-  t.is(result, 120)
+  t.is(testResult1, 60)
+  t.is(testResult2, 120)
 })

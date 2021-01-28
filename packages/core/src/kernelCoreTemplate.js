@@ -1,27 +1,32 @@
-(function(){
-
+(function () {
   return createKernel
 
   function createKernel ({
+    // the platform api global
     globalRef,
-    debugMode,
+    // package policy object
     lavamoatConfig,
+    // kernel configuration
     loadModuleData,
     getRelativeModuleId,
     prepareModuleInitializerArgs,
-    applyExportsDefense = true,
+    // security options
+    debugMode
   }) {
     // create SES-wrapped LavaMoat kernel
+    // endowments:
+    // - console is included for convenience
+    // - Math is for untamed Math.random
+    // - Date is for untamed Date.now
     const kernelCompartment = new Compartment({ console, Math, Date })
     const makeKernel = kernelCompartment.evaluate(`(${unsafeCreateKernel})\n//# sourceURL=LavaMoat/core/kernel`)
     const lavamoatKernel = makeKernel({
       globalRef,
-      debugMode,
       lavamoatConfig,
       loadModuleData,
       getRelativeModuleId,
       prepareModuleInitializerArgs,
-      applyExportsDefense,
+      debugMode
     })
 
     return lavamoatKernel
@@ -35,59 +40,48 @@
     lavamoatConfig,
     loadModuleData,
     getRelativeModuleId,
-    prepareModuleInitializerArgs,
-    applyExportsDefense,
+    prepareModuleInitializerArgs
   }) {
     // "templateRequire" calls are inlined in "generatePrelude"
     const { getEndowmentsForConfig, makeMinimalViewOfRef } = templateRequire('makeGetEndowmentsForConfig')()
     const { prepareCompartmentGlobalFromConfig } = templateRequire('makePrepareRealmGlobalFromConfig')()
-    const { Membrane } = templateRequire('cytoplasm')
-    const createReadOnlyDistortion = templateRequire('cytoplasm/distortions/readOnly')
 
     const moduleCache = new Map()
+    const packageCompartmentCache = new Map()
     const globalStore = new Map()
-    const membraneSpaceForPackage = new Map()
-    const membrane = new Membrane({ debugMode })
-    const allowTypedArrays = (() => {
-      const TypedArray = Object.getPrototypeOf(Uint8Array)
-      return (value) => value instanceof TypedArray
-    })()
-    const endowmentsMembraneSpace = membrane.makeMembraneSpace({
-      label: '<endowments>',
-      // this ensures all typedarrays that are passed to the endowments membrane are unwrapped
-      passthroughFilter: allowTypedArrays,
-    })
-    membraneSpaceForPackage.set(endowmentsMembraneSpace.label, endowmentsMembraneSpace)
+
+    const rootPackageName = '<root>'
+    const rootPackageCompartment = createRootPackageCompartment(globalRef)
 
     return {
-      internalRequire,
-      membrane,
+      internalRequire
     }
 
     // this function instantiaties a module from a moduleId.
-    // 1. loads the config for the module
-    // 2. instantiates in the config specified environment
-    // 3. calls config specified strategy for "protectExportsInstantiationTime"
+    // 1. loads the module metadata and policy
+    // 2. prepares the execution environment
+    // 3. instantiates the module, recursively instantiating dependencies
+    // 4. returns the module exports
     function internalRequire (moduleId) {
+      // use cached module.exports if module is already instantiated
       if (moduleCache.has(moduleId)) {
         const moduleExports = moduleCache.get(moduleId).exports
         return moduleExports
       }
-      const moduleData = loadModuleData(moduleId)
 
-      // if we dont have it, throw an error
+      // load and validate module metadata
+      // if module metadata is missing, throw an error
+      const moduleData = loadModuleData(moduleId)
       if (!moduleData) {
         const err = new Error('Cannot find module \'' + moduleId + '\'')
         err.code = 'MODULE_NOT_FOUND'
         throw err
       }
 
-      // prepare the module to be initialized
-      const packageName = moduleData.package
-      const moduleSource = moduleData.source
-      const configForModule = getConfigForPackage(lavamoatConfig, packageName)
-      const moduleMembraneSpace = getMembraneSpaceForModule(moduleData)
-      const isRootModule = moduleData.package === '<root>'
+      // parse and validate module data
+      const { package: packageName, source: moduleSource } = moduleData
+      if (!packageName) throw new Error(`LavaMoat - invalid packageName for module "${moduleId}"`)
+      const packagePolicy = getPolicyForPackage(lavamoatConfig, packageName)
 
       // create the initial moduleObj
       const moduleObj = { exports: {} }
@@ -96,81 +90,7 @@
       // if you dont cache before running the moduleInitializer
       moduleCache.set(moduleId, moduleObj)
 
-      // allow moduleInitializer to be set by loadModuleData
-      let moduleInitializer = moduleData.moduleInitializer
-      if (moduleInitializer) {
-        // if an external moduleInitializer is set, ensure it is allowed
-        if (moduleData.type === 'native') {
-          // ensure package is allowed to have native modules
-          if (configForModule.native !== true) {
-            throw new Error(`LavaMoat - "native" module type not permitted for package "${moduleData.package}", module "${moduleId}"`)
-          }
-        } else if (moduleData.type !== 'builtin') {
-          // builtin module types dont have policy configurations
-          // but the packages that can import them are constrained elsewhere
-          // here we just ensure that the module type is the only other type with a external moduleInitializer
-          throw new Error(`LavaMoat - invalid external moduleInitializer for module type "${moduleData.type}" in package "${moduleData.package}", module "${moduleId}"`)
-        }
-      } else {
-        // otherwise setup initializer from moduleSource
-        // prepare endowments
-        let endowments
-        if (isRootModule) {
-          endowments = globalRef
-        } else {
-          try {
-            endowments = getEndowmentsForConfig(globalRef, configForModule)
-            // special case for exposing window
-            if (endowments.window) {
-              endowments = Object.assign(endowments.window, endowments)
-            }
-          } catch (err) {
-            const errMsg = `Lavamoat - failed to prepare endowments for module "${moduleId}":\n${err.stack}`
-            throw new Error(errMsg)
-          }
-        }
-        // maybe membrane-wrap endowments
-        let preparedEndowments
-        if (applyExportsDefense) {
-          // prepare the membrane-wrapped endowments
-          const endowmentsMembraneSpace = getMembraneSpaceByName('<endowments>')
-          preparedEndowments = membrane.bridge(endowments, endowmentsMembraneSpace, moduleMembraneSpace)
-        } else {
-          preparedEndowments = endowments
-        }
-        // prepare the module's SES compartment
-        // Endow Math to ensure compartment has Math.random
-        const moduleCompartment = new Compartment({ Math, Date })
-        if (isRootModule) {
-          // expose all of globalRef, though currently does not support global writes
-          // copy every property on globalRef to compartment global without overriding
-          // take every property on globalRef
-          Object.entries(Object.getOwnPropertyDescriptors(preparedEndowments))
-            // ignore properties already defined on compartment global
-            .filter(([key]) => !(key in moduleCompartment.globalThis))
-            // define property on compartment global
-            .forEach(([key, desc]) => Reflect.defineProperty(moduleCompartment.globalThis, key, desc))
-        } else {
-          // sets up read/write access as configured
-          const globalsConfig = configForModule.globals
-          prepareCompartmentGlobalFromConfig(moduleCompartment.globalThis, globalsConfig, preparedEndowments, globalStore)
-        }
-        // expose membrane for debugging
-        if (debugMode) {
-          moduleCompartment.globalThis.membrane = membrane
-        }
-        // execute in module compartment with modified compartment global
-        try {
-          const sourceURL = moduleData.file || `modules/${moduleId}`
-          if (sourceURL.includes('\n')) {
-            throw new Error(`LavaMoat - Newlines not allowed in filenames: ${JSON.stringify(sourceURL)}`)
-          }
-          moduleInitializer = moduleCompartment.evaluate(`${moduleSource}\n//# sourceURL=${sourceURL}`)
-        } catch (err) {
-          console.warn(`LavaMoat - Error evaluating module "${moduleId}" from package "${packageName}" \n${err.stack}`)
-          throw err
-        }
-      }
+      const moduleInitializer = prepareModuleInitializer(moduleData, packagePolicy)
 
       // validate moduleInitializer
       if (typeof moduleInitializer !== 'function') {
@@ -182,20 +102,6 @@
       moduleInitializer.apply(moduleObj.exports, initializerArgs)
       const moduleExports = moduleObj.exports
 
-      if (applyExportsDefense) {
-        // configure membrane defense
-        // defense is configured here but applied elsewhere
-        // set moduleExports graph to read-only
-        deepWalk(moduleExports, (value) => {
-          // skip plain values
-          if (membrane.shouldSkipBridge(value)) return
-          // set this ref to read-only
-          moduleMembraneSpace.handlerForRef.set(value, createReadOnlyDistortion({
-            setHandlerForRef: (ref, newHandler) => moduleMembraneSpace.handlerForRef.set(ref, newHandler)
-          }))
-        })
-      }
-
       return moduleExports
 
       // this is passed to the module initializer
@@ -204,21 +110,20 @@
       function requireRelativeWithContext (requestedName) {
         const parentModuleExports = moduleObj.exports
         const parentModuleData = moduleData
-        const parentPackageConfig = configForModule
+        const parentPackagePolicy = packagePolicy
         const parentModuleId = moduleId
-        return requireRelative({ requestedName, parentModuleExports, parentModuleData, parentPackageConfig, parentModuleId })
+        return requireRelative({ requestedName, parentModuleExports, parentModuleData, parentPackagePolicy, parentModuleId })
       }
-
     }
 
     // this resolves a module given a requestedName (eg relative path to parent) and a parentModule context
     // the exports are processed via "protectExportsRequireTime" per the module's configuration
-    function requireRelative ({ requestedName, parentModuleExports, parentModuleData, parentPackageConfig, parentModuleId }) {
+    function requireRelative ({ requestedName, parentModuleExports, parentModuleData, parentPackagePolicy, parentModuleId }) {
       const parentModulePackageName = parentModuleData.package
-      const parentPackagesWhitelist = parentPackageConfig.packages
-      const parentBuiltinsWhitelist = Object.entries(parentPackageConfig.builtin)
-      .filter(([_, allowed]) => allowed === true)
-      .map(([packagePath, allowed]) => packagePath.split('.')[0])
+      const parentPackagesWhitelist = parentPackagePolicy.packages
+      const parentBuiltinsWhitelist = Object.entries(parentPackagePolicy.builtin)
+        .filter(([_, allowed]) => allowed === true)
+        .map(([packagePath, allowed]) => packagePath.split('.')[0])
 
       // resolve the moduleId from the requestedName
       const moduleId = getRelativeModuleId(parentModuleId, requestedName)
@@ -243,7 +148,7 @@
 
       // disallow requiring packages that are not in the parent's whitelist
       const isSamePackage = packageName === parentModulePackageName
-      const parentIsEntryModule = parentModulePackageName === '<root>'
+      const parentIsEntryModule = parentModulePackageName === rootPackageName
       let isInParentWhitelist = false
       if (moduleData.type === 'builtin') {
         isInParentWhitelist = parentBuiltinsWhitelist.includes(packageName)
@@ -251,6 +156,7 @@
         isInParentWhitelist = (parentPackagesWhitelist[packageName] === true)
       }
 
+      // validate that the import is allowed
       if (!parentIsEntryModule && !isSamePackage && !isInParentWhitelist) {
         let typeText = ' '
         if (moduleData.type === 'builtin') typeText = ' node builtin '
@@ -258,97 +164,118 @@
       }
 
       // create minimal selection if its a builtin and the whole path is not selected for
-      if (!parentIsEntryModule && moduleData.type === 'builtin' && !parentPackageConfig.builtin[moduleId]) {
+      if (!parentIsEntryModule && moduleData.type === 'builtin' && !parentPackagePolicy.builtin[moduleId]) {
         const builtinPaths = (
-          Object.entries(parentPackageConfig.builtin)
+          Object.entries(parentPackagePolicy.builtin)
           // grab all allowed builtin paths that match this package
-          .filter(([packagePath, allowed]) => allowed === true && moduleId === packagePath.split('.')[0])
+            .filter(([packagePath, allowed]) => allowed === true && moduleId === packagePath.split('.')[0])
           // only include the paths after the packageName
-          .map(([packagePath, allowed]) => packagePath.split('.').slice(1).join('.'))
-          .sort()
+            .map(([packagePath, allowed]) => packagePath.split('.').slice(1).join('.'))
+            .sort()
         )
         moduleExports = makeMinimalViewOfRef(moduleExports, builtinPaths)
-      }
-
-      if (applyExportsDefense) {
-        // apply moduleExports require-time protection
-        const isSameMembraneSpace = parentModulePackageName && getMembraneSpaceNameForModule(moduleData) === getMembraneSpaceNameForModule(parentModuleData)
-        const needsMembraneProtection = !isSameMembraneSpace
-        if (needsMembraneProtection) {
-          // apply membrane protections
-          const inGraph = getMembraneSpaceForModule(moduleData)
-          const outGraph = getMembraneSpaceForModule(parentModuleData)
-          moduleExports = membrane.bridge(moduleExports, inGraph, outGraph)
-        }
       }
 
       return moduleExports
     }
 
-    function getMembraneSpaceForModule (moduleData) {
-      const spaceName = getMembraneSpaceNameForModule(moduleData)
-      return getMembraneSpaceByName(spaceName)
-    }
+    function prepareModuleInitializer (moduleData, packagePolicy) {
+      const { moduleInitializer, package: packageName, id: moduleId, source: moduleSource } = moduleData
 
-    function getMembraneSpaceNameForModule (moduleData) {
-      const { package: packageName, type } = moduleData
-      // builtin modules use the endowments MembraneSpace for TypedArray passthrough
-      if (type === 'builtin') {
-        return '<endowments>'
-      }
-      // native modules use the endowments MembraneSpace for TypedArray passthrough
-      if (type === 'native') {
-        return '<endowments>'
-      }
-      // otherwise use package name
-      return packageName
-    }
-
-    function getMembraneSpaceByName (spaceName) {
-      // if exists, return it
-      if (membraneSpaceForPackage.has(spaceName)) {
-        return membraneSpaceForPackage.get(spaceName)
+      // moduleInitializer may be set by loadModuleData (e.g. builtin + native modules)
+      if (moduleInitializer) {
+        // if an external moduleInitializer is set, ensure it is allowed
+        if (moduleData.type === 'native') {
+          // ensure package is allowed to have native modules
+          if (packagePolicy.native !== true) {
+            throw new Error(`LavaMoat - "native" module type not permitted for package "${packageName}", module "${moduleId}"`)
+          }
+        } else if (moduleData.type !== 'builtin') {
+          // builtin module types dont have policy configurations
+          // but the packages that can import them are constrained elsewhere
+          // here we just ensure that the module type is the only other type with a external moduleInitializer
+          throw new Error(`LavaMoat - invalid external moduleInitializer for module type "${moduleData.type}" in package "${packageName}", module "${moduleId}"`)
+        }
+        return moduleInitializer
       }
 
-      // create the membrane space for this package
-      const membraneSpace = membrane.makeMembraneSpace({
-        label: spaceName,
-        // default is a transparent membrane handler
-        createHandler: () => Reflect,
-      })
-      membraneSpaceForPackage.set(spaceName, membraneSpace)
-      return membraneSpace
-    }
-
-    function deepWalk (value, visitor) {
-      // the value itself
-      visitor(value)
-      // lookup children
-      let proto, props = []
+      // setup initializer from moduleSource and compartment.
+      // execute in package compartment with globalThis populated per package policy
+      const packageCompartment = getCompartmentForPackage(packageName, packagePolicy)
+      // TODO: move all source mutations elsewhere
       try {
-        proto = Object.getPrototypeOf(value)
-        props = Object.values(Object.getOwnPropertyDescriptors(value))
-      } catch (_) {
-        // ignore error if we can't get proto/props (value is undefined, null, etc)
+        const sourceURL = moduleData.file || `modules/${moduleId}`
+        if (sourceURL.includes('\n')) {
+          throw new Error(`LavaMoat - Newlines not allowed in filenames: ${JSON.stringify(sourceURL)}`)
+        }
+        return packageCompartment.evaluate(`${moduleSource}\n//# sourceURL=${sourceURL}`)
+      } catch (err) {
+        console.warn(`LavaMoat - Error evaluating module "${moduleId}" from package "${packageName}" \n${err.stack}`)
+        throw err
       }
-      // the own properties
-      props.map(entry => {
-        if ('value' in entry) visitor(entry.value)
-      })
-      // the prototype
-      if (proto) visitor(proto)
+    }
+
+    function createRootPackageCompartment (globalRef) {
+      if (packageCompartmentCache.has(rootPackageName)) {
+        throw new Error('LavaMoat - createRootPackageCompartment called more than once')
+      }
+      // prepare the root package's SES Compartment
+      const packageCompartment = new Compartment()
+      // expose all own properties of globalRef, including non-enumerable
+      Object.entries(Object.getOwnPropertyDescriptors(globalRef))
+        // ignore properties already defined on compartment global
+        .filter(([key]) => !(key in packageCompartment.globalThis))
+        // define property on compartment global
+        .forEach(([key, desc]) => Reflect.defineProperty(packageCompartment.globalThis, key, desc))
+        // global circular references otherwise added by prepareCompartmentGlobalFromConfig
+        // TODO: should be a platform specific circular ref
+      packageCompartment.globalThis.global = packageCompartment.globalThis
+
+      // save the compartment for use by other modules in the package
+      packageCompartmentCache.set(rootPackageName, packageCompartment)
+
+      return packageCompartment
+    }
+
+    function getCompartmentForPackage (packageName, packagePolicy) {
+      // compartment may have already been created
+      let packageCompartment = packageCompartmentCache.get(packageName)
+      if (packageCompartment) {
+        return packageCompartment
+      }
+
+      // prepare endowments
+      let endowments
+      try {
+        endowments = getEndowmentsForConfig(rootPackageCompartment.globalThis, packagePolicy)
+      } catch (err) {
+        const errMsg = `Lavamoat - failed to prepare endowments for package "${packageName}":\n${err.stack}`
+        throw new Error(errMsg)
+      }
+
+      // prepare the module's SES Compartment
+      // endowments:
+      // - Math is for untamed Math.random
+      // - Date is for untamed Date.now
+      packageCompartment = new Compartment({ Math, Date })
+      // sets up read/write access as configured
+      const globalsConfig = packagePolicy.globals
+      prepareCompartmentGlobalFromConfig(packageCompartment.globalThis, globalsConfig, endowments, globalStore)
+
+      // save the compartment for use by other modules in the package
+      packageCompartmentCache.set(packageName, packageCompartment)
+
+      return packageCompartment
     }
 
     // this gets the lavaMoat config for a module by packageName
     // if there were global defaults (e.g. everything gets "console") they could be applied here
-    function getConfigForPackage (config, packageName) {
+    function getPolicyForPackage (config, packageName) {
       const packageConfig = (config.resources || {})[packageName] || {}
       packageConfig.globals = packageConfig.globals || {}
       packageConfig.packages = packageConfig.packages || {}
       packageConfig.builtin = packageConfig.builtin || {}
       return packageConfig
     }
-
   }
-
 })()

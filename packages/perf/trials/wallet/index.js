@@ -1,13 +1,12 @@
 const { performTest } = require('../../performTask')
 
-const nRange = [1, 50, 100]
-// const nRange = [1, 50]
+const nRange = [1, 10, 25]
 
 const tasks = {
   'node': {
     run: 'node entry.js',
   },
-  'lavamoat-node': {
+  'lavamoat': {
     run: 'lavamoat entry.js',
   },
   // 'bify': {

@@ -5,7 +5,7 @@ const path = require('path')
 const fs = require('fs')
 const yargs = require('yargs')
 const jsonStringify = require('json-stable-stringify')
-const { mergeConfig } = require('lavamoat-core')
+const { mergeConfig, getDefaultPaths } = require('lavamoat-core')
 const { parseForConfig } = require('./parseForConfig')
 const { createKernel } = require('./kernel')
 
@@ -23,8 +23,7 @@ async function runLava () {
     configPath,
     configDebugPath,
     configOverridePath,
-    debugMode,
-    applyExportsDefense
+    debugMode
   } = parseArgs()
   const cwd = process.cwd()
   const entryId = path.resolve(cwd, entryPath)
@@ -53,7 +52,7 @@ async function runLava () {
   if (shouldRunApplication) {
     // execution mode
     const lavamoatConfig = await loadConfig({ debugMode, configPath, configOverridePath })
-    const kernel = createKernel({ cwd, lavamoatConfig, debugMode, applyExportsDefense })
+    const kernel = createKernel({ cwd, lavamoatConfig, debugMode })
     // patch process.argv so it matches the normal pattern
     // e.g. [runtime path, entrypoint, ...args]
     // we'll use the LavaMoat path as the runtime
@@ -65,6 +64,7 @@ async function runLava () {
 }
 
 function parseArgs () {
+  const defaultPaths = getDefaultPaths('node')
   const argsParser = yargs
     .usage('$0 <entryPath>', 'start the application', (yargs) => {
       // the entry file to run (or parse)
@@ -77,33 +77,27 @@ function parseArgs () {
         alias: 'configPath',
         describe: 'the path for the config file',
         type: 'string',
-        default: './lavamoat-config.json'
+        default: defaultPaths.primary
       })
       // the path for the config override file
       yargs.option('configOverride', {
         alias: 'configOverridePath',
         describe: 'the path for the config override file',
         type: 'string',
-        default: './lavamoat-config-override.json'
+        default: defaultPaths.override
       })
       // the path for the config debug file
       yargs.option('configDebug', {
         alias: 'configDebugPath',
         describe: 'the path for the config override file',
         type: 'string',
-        default: './lavamoat-config-debug.json'
+        default: defaultPaths.debug
       })
       // debugMode, disable some protections for easier debugging
       yargs.option('debugMode', {
         describe: 'debugMode, disable some protections for easier debugging',
         type: 'boolean',
         default: false
-      })
-      // applyExportsDefense, disable potentially incompatible module export protections
-      yargs.option('applyExportsDefense', {
-        describe: 'applyExportsDefense, disable potentially incompatible module export protections',
-        type: 'boolean',
-        default: true
       })
       // parsing mode, write config to config path
       yargs.option('writeAutoConfig', {

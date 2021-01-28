@@ -1,4 +1,4 @@
-const { fromEtherCamp: brainwallet } = require('ethereumjs-wallet/thirdparty')
+const { thirdparty: { fromEtherCamp: brainwallet } } = require('ethereumjs-wallet')
 
 // use `global.process` so it works correctly under node
 const nTimes = Number.parseInt(global.process.env.PERF_N || 5, 10)

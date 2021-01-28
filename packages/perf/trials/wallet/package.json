@@ -14,8 +14,6 @@
   },
   "dependencies": {
     "chart-csv": "kumavis/chart-csv#master",
-    "deps-dump": "^1.1.0",
-    "eth-sig-util": "^2.5.0",
-    "ethereumjs-wallet": "^0.6.3"
+    "ethereumjs-wallet": "^1.0.1"
   }
 }

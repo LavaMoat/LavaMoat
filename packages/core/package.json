@@ -1,6 +1,6 @@
 {
   "name": "lavamoat-core",
-  "version": "6.4.4",
+  "version": "7.0.0",
   "description": "LavaMoat kernel and utils",
   "main": "src/index.js",
   "directories": {
@@ -10,22 +10,22 @@
     "node": ">10.0.0"
   },
   "dependencies": {
-    "cytoplasm": "^3.3.1",
     "fromentries": "^1.2.0",
     "json-stable-stringify": "^1.0.1",
     "lavamoat-tofu": "^5.1.1",
-    "resolve": "^1.15.1",
-    "merge-deep": "^3.0.2"
+    "merge-deep": "^3.0.2",
+    "resolve": "^1.15.1"
   },
   "devDependencies": {
     "ava": "^3.13.0",
-    "object.fromentries": "^2.0.2"
+    "object.fromentries": "^2.0.2",
+    "tmp-promise": "^3.0.2"
   },
   "scripts": {
     "lint": "npm run lint:standard && npm run lint:deps",
     "lint:standard": "standard src/**/*.js test/**/*.js",
     "lint:fix": "standard src/**/*.js test/**/*.js --fix",
-    "lint:deps": "depcheck --ignore-dirs=lib --ignores='abc,xyz,two,thisChecker,someClass,one'",
+    "lint:deps": "depcheck --ignore-dirs=lib --ignores='abc,xyz,two,three,thisChecker,someClass,one'",
     "test": "ava test/index.js"
   },
   "author": "kumavis",
@@ -40,8 +40,11 @@
       "/src/sourcemaps.js",
       "/test/fixtures",
       "/src/preludeTemplate.js",
-      "/src/kernelTemplate.js",
-      "/src/kernelCoreTemplate.js"
+      "/src/kernelTemplate.js"
+    ],
+    "globals": [
+      "Compartment",
+      "templateRequire"
     ]
   }
 }

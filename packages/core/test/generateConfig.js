@@ -1,7 +1,7 @@
 /* eslint-disable no-undef, no-unused-vars, no-unused-expressions, no-extend-native */
 const test = require('ava')
 
-const { generateConfigFromFiles } = require('./util')
+const { createConfigForTest } = require('./util')
 
 test('generateConfig - basic config', async (t) => {
   const config = await createConfigForTest(function () {
@@ -36,7 +36,6 @@ test('generateConfig - config with debugInfo', async (t) => {
       importMap: {},
       packageName: 'test',
       packageVersion: '1.2.3',
-      // this is for the oden/dashi kernel
       moduleInitializer: undefined
     },
     globals: {
@@ -114,29 +113,3 @@ test('generateConfig - config ignores global refs accessed with whitelist items'
 //     t.pass()
 //   }
 // })
-
-async function createConfigForTest (testFn, opts = {}) {
-  const files = [{
-    type: 'js',
-    specifier: './entry.js',
-    file: './entry.js',
-    packageName: '<root>',
-    packageVersion: '0.0.0',
-    importMap: {
-      test: './node_modules/test/index.js'
-    },
-    content: 'require("test")',
-    entry: true
-  }, {
-    // non-entry
-    type: 'js',
-    specifier: './node_modules/test/index.js',
-    file: './node_modules/test/index.js',
-    packageName: 'test',
-    packageVersion: '1.2.3',
-    importMap: {},
-    content: `(${testFn})()`
-  }]
-  const config = await generateConfigFromFiles({ files, ...opts })
-  return config
-}

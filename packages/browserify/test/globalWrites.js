@@ -11,7 +11,7 @@ test('globalWrites - deep endow', async (t) => {
     {
       id: '/one.js',
       file: '/one.js',
-      source: "global.testResult = require('two');",
+      source: "global.testResult.value = require('two');",
       deps: { two: '/node_modules/two/index.js' },
       entry: true
     },
@@ -58,7 +58,7 @@ test('globalWrites - deep endow', async (t) => {
   }
 
   const bundle = await createBundleFromRequiresArray(entries, { config })
-  const result = evalBundle(bundle)
+  const testResult = evalBundle(bundle)
 
-  t.deepEqual(result, true)
+  t.deepEqual(testResult.value, true)
 })

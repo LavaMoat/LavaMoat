@@ -1,6 +1,8 @@
+/* eslint-disable node/no-path-concat */
 const test = require('ava')
 const { parseForConfig } = require('../src/parseForConfig')
 const { runLavamoat } = require('./util')
+require('./runScenarios')
 
 test('parseForConfig - resolutions', async (t) => {
   const projectRoot = `${__dirname}/projects/1`

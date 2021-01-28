@@ -1,20 +1,21 @@
 // LavaMoat Prelude
-(function() {
-
+(function () {
   return createKernel
-
 
   function createKernel ({
     lavamoatConfig,
     loadModuleData,
     getRelativeModuleId,
     prepareModuleInitializerArgs,
-    applyExportsDefense = true,
   }) {
     const debugMode = __lavamoatDebugMode__
 
     // identify the globalRef
-    const globalRef = (typeof globalThis !== 'undefined') ? globalThis : (typeof self !== 'undefined') ? self : global
+    const globalRef = (typeof globalThis !== 'undefined') ? globalThis : (typeof self !== 'undefined') ? self : (typeof global !== 'undefined') ? global : undefined
+    if (!globalRef) {
+      throw new Error('Lavamoat - unable to identify globalRef')
+    }
+
     // polyfill globalThis
     if (globalRef && !globalRef.globalThis) {
       globalRef.globalThis = globalRef
@@ -28,10 +29,10 @@
     const lockdownOptions = {
       // gives a semi-high resolution timer
       dateTaming: 'unsafe',
-      // gives code excessive introspection, but meh
+      // lets code observe call stack, but easier debuggability
       errorTaming: 'unsafe',
       // this is introduces non-determinism, but is otherwise safe
-      mathTaming: 'unsafe',
+      mathTaming: 'unsafe'
       // ?
       // regExpTaming: 'unsafe',
     }
@@ -46,10 +47,8 @@
       getRelativeModuleId,
       prepareModuleInitializerArgs,
       globalRef,
-      debugMode,
-      applyExportsDefense,
+      debugMode
     })
     return kernel
   }
-
 })()
