@@ -16,7 +16,7 @@ import {
   sortByDangerRank,
   getColorForRank,
   getLineNumbersForGlobals,
-  getEnvConfigForPolicyName
+  getEnvConfigForPolicyName,
 
 } from './utils/utils.js'
 import XrButton from './xr-button.js'

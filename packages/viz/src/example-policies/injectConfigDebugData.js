@@ -1,2 +1,2 @@
-import "./policy-browserify.js";
-import "./policy-node.js";
+import './policy-browserify.js'
+import './policy-node.js'
