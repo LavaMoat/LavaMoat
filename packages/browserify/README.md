@@ -2,7 +2,12 @@
 
 **NOTE: under rapid develop, not ready for production use, has not been audited, etc**
 
-`lavamoat-browserify` is a [browserify][BrowserifyGithub] plugin for generating app bundles protected by [LavaMoat](https://github.com/LavaMoat/overview), where modules are defined in [SES][SesGithub] containers. It aims to reduce the risk of malicious code in the app dependency graph, known as "software supplychain attacks".
+`lavamoat-browserify` is a [browserify][BrowserifyGithub]
+plugin for generating app bundles protected by
+[LavaMoat](https://github.com/LavaMoat/overview), where modules
+are defined in [SES][SesGithub] containers. It aims to reduce
+the risk of malicious code in the app dependency graph, known
+as "software supplychain attacks".
 
 [BrowserifyGithub]: https://github.com/browserify/browserify
 [SesGithub]: https://github.com/agoric/SES
