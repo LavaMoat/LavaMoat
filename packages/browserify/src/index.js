@@ -1,7 +1,6 @@
 const fs = require('fs')
 const path = require('path')
 const clone = require('clone')
-const mkdirp = require('mkdirp')
 const through = require('through2').obj
 const mergeDeep = require('merge-deep')
 const { generatePrelude, getDefaultPaths } = require('lavamoat-core')
@@ -204,24 +203,16 @@ function getConfigurationFromPluginOpts (pluginOpts) {
     configuration.writeAutoConfig = (config) => {
       const configString = jsonStringify(config, { space: 2 })
       const configPath = path.resolve(configuration.configPath)
-      // Ensure parent dir exists
-      const configDirectory = path.dirname(configPath)
-      mkdirp.sync(configDirectory)
       // Declare override config file path
       const overrideConfigPath = path.join('./', override)
       // Write config to file
+      fs.mkdirSync(path.dirname(configPath), { recursive: true })
       fs.writeFileSync(configPath, configString)
       console.warn(`LavaMoat Config - wrote to "${configPath}"`)
       // Write default override config to file if it doesn't already exist
       if (!fs.existsSync(overrideConfigPath)) {
-        const basicConfig = {
-          resources: {
-            '<root>': {
-              packages: {
-              }
-            }
-          }
-        }
+        const basicConfig = { resources: {} }
+        fs.mkdirSync(path.dirname(overrideConfigPath), { recursive: true })
         fs.writeFileSync(overrideConfigPath, JSON.stringify(basicConfig, null, 2))
         console.warn(`LavaMoat Override Config - wrote to "${overrideConfigPath}"`)
       }
