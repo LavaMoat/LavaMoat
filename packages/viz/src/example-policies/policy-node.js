@@ -3,6 +3,89 @@
   policies["node"] = {
   "primary": {
     "resources": {
+      "@babel/code-frame": {
+        "globals": {
+          "console.warn": true,
+          "process.emitWarning": true
+        },
+        "packages": {
+          "@babel/highlight": true
+        }
+      },
+      "@babel/generator": {
+        "globals": {
+          "console.error": true
+        },
+        "packages": {
+          "@babel/types": true,
+          "jsesc": true,
+          "source-map": true
+        }
+      },
+      "@babel/helper-function-name": {
+        "packages": {
+          "@babel/helper-get-function-arity": true,
+          "@babel/template": true,
+          "@babel/types": true
+        }
+      },
+      "@babel/helper-get-function-arity": {
+        "packages": {
+          "@babel/types": true
+        }
+      },
+      "@babel/helper-split-export-declaration": {
+        "packages": {
+          "@babel/types": true
+        }
+      },
+      "@babel/highlight": {
+        "packages": {
+          "@babel/helper-validator-identifier": true,
+          "chalk": true,
+          "js-tokens": true
+        }
+      },
+      "@babel/parser": {
+        "globals": {
+          "BigInt": true
+        }
+      },
+      "@babel/template": {
+        "packages": {
+          "@babel/code-frame": true,
+          "@babel/parser": true,
+          "@babel/types": true
+        }
+      },
+      "@babel/traverse": {
+        "globals": {
+          "console.log": true,
+          "console.trace": true,
+          "process.env.NODE_ENV": true
+        },
+        "packages": {
+          "@babel/code-frame": true,
+          "@babel/generator": true,
+          "@babel/helper-function-name": true,
+          "@babel/helper-split-export-declaration": true,
+          "@babel/parser": true,
+          "@babel/types": true,
+          "debug": true,
+          "globals": true
+        }
+      },
+      "@babel/types": {
+        "globals": {
+          "console.trace": true,
+          "process.env.BABEL_TYPES_8_BREAKING": true
+        },
+        "packages": {
+          "@babel/helper-validator-identifier": true,
+          "lodash": true,
+          "to-fast-properties": true
+        }
+      },
       "JSONStream": {
         "globals": {
           "Buffer": true
@@ -31,6 +114,11 @@
       "acorn-walk": {
         "globals": {
           "define": true
+        }
+      },
+      "ansi-styles": {
+        "packages": {
+          "color-convert": true
         }
       },
       "browser-pack": {
@@ -122,6 +210,36 @@
           "process.cwd": true
         }
       },
+      "chalk": {
+        "globals": {
+          "process.env.TERM": true,
+          "process.platform": true
+        },
+        "packages": {
+          "ansi-styles": true,
+          "escape-string-regexp": true,
+          "supports-color": true
+        }
+      },
+      "clone": {
+        "globals": {
+          "Buffer": true
+        }
+      },
+      "clone-deep": {
+        "packages": {
+          "for-own": true,
+          "is-plain-object": true,
+          "kind-of": true,
+          "lazy-cache": true,
+          "shallow-clone": true
+        }
+      },
+      "color-convert": {
+        "packages": {
+          "color-name": true
+        }
+      },
       "combine-source-map": {
         "builtin": {
           "path.dirname": true,
@@ -152,10 +270,14 @@
       "convert-source-map": {
         "builtin": {
           "fs.readFileSync": true,
-          "path.join": true
+          "path.join": true,
+          "path.resolve": true
         },
         "globals": {
           "Buffer": true
+        },
+        "packages": {
+          "safe-buffer": true
         }
       },
       "core-util-is": {
@@ -166,6 +288,25 @@
       "dash-ast": {
         "builtin": {
           "assert": true
+        }
+      },
+      "debug": {
+        "builtin": {
+          "tty.isatty": true,
+          "util.deprecate": true,
+          "util.format": true,
+          "util.inspect": true
+        },
+        "globals": {
+          "console": true,
+          "document": true,
+          "localStorage": true,
+          "navigator": true,
+          "process": true
+        },
+        "packages": {
+          "ms": true,
+          "supports-color": true
         }
       },
       "deps-sort": {
@@ -185,6 +326,28 @@
           "readable-stream": true
         }
       },
+      "duplexify": {
+        "globals": {
+          "Buffer": true,
+          "process.nextTick": true
+        },
+        "packages": {
+          "end-of-stream": true,
+          "inherits": true,
+          "readable-stream": true,
+          "stream-shift": true
+        }
+      },
+      "end-of-stream": {
+        "packages": {
+          "once": true
+        }
+      },
+      "for-own": {
+        "packages": {
+          "for-in": true
+        }
+      },
       "get-assigned-identifiers": {
         "builtin": {
           "assert.equal": true
@@ -193,6 +356,11 @@
       "has": {
         "packages": {
           "function-bind": true
+        }
+      },
+      "has-flag": {
+        "globals": {
+          "process.argv": true
         }
       },
       "inherits": {
@@ -236,15 +404,127 @@
           "has": true
         }
       },
+      "is-plain-object": {
+        "packages": {
+          "isobject": true
+        }
+      },
+      "jsesc": {
+        "globals": {
+          "Buffer.isBuffer": true
+        }
+      },
+      "json-stable-stringify": {
+        "packages": {
+          "jsonify": true
+        }
+      },
       "jsonparse": {
         "globals": {
           "Buffer": true
+        }
+      },
+      "kind-of": {
+        "globals": {
+          "Buffer": true
+        },
+        "packages": {
+          "is-buffer": true
         }
       },
       "labeled-stream-splicer": {
         "packages": {
           "inherits": true,
           "stream-splicer": true
+        }
+      },
+      "lavamoat-browserify": {
+        "builtin": {
+          "assert": true,
+          "fs.existsSync": true,
+          "fs.mkdirSync": true,
+          "fs.readFileSync": true,
+          "fs.writeFile": true,
+          "fs.writeFileSync": true,
+          "path.dirname": true,
+          "path.extname": true,
+          "path.join": true,
+          "path.relative": true,
+          "path.resolve": true,
+          "util.callbackify": true
+        },
+        "globals": {
+          "__MODULE_CONTENT__": true,
+          "__dirname": true,
+          "console.log": true,
+          "console.warn": true,
+          "process.cwd": true
+        },
+        "packages": {
+          "JSONStream": true,
+          "clone": true,
+          "combine-source-map": true,
+          "concat-stream": true,
+          "convert-source-map": true,
+          "duplexify": true,
+          "json-stable-stringify": true,
+          "lavamoat-core": true,
+          "merge-deep": true,
+          "offset-sourcemap-lines": true,
+          "readable-stream": true,
+          "safe-buffer": true,
+          "through2": true,
+          "umd": true
+        }
+      },
+      "lavamoat-core": {
+        "builtin": {
+          "events": true,
+          "fs.readFileSync": true,
+          "module.createRequire": true,
+          "module.createRequireFromPath": true,
+          "path.extname": true,
+          "path.join": true,
+          "path.sep": true
+        },
+        "globals": {
+          "__dirname": true,
+          "console.warn": true
+        },
+        "packages": {
+          "fromentries": true,
+          "json-stable-stringify": true,
+          "lavamoat-tofu": true,
+          "merge-deep": true,
+          "resolve": true
+        }
+      },
+      "lavamoat-tofu": {
+        "globals": {
+          "console.log": true
+        },
+        "packages": {
+          "@babel/parser": true,
+          "@babel/traverse": true
+        }
+      },
+      "lazy-cache": {
+        "globals": {
+          "process.env.TRAVIS": true,
+          "process.env.UNLAZY": true
+        }
+      },
+      "merge-deep": {
+        "packages": {
+          "arr-union": true,
+          "clone-deep": true,
+          "kind-of": true
+        }
+      },
+      "mixin-object": {
+        "packages": {
+          "for-in": true,
+          "is-extendable": true
         }
       },
       "module-deps": {
@@ -278,6 +558,16 @@
           "stream-combiner2": true,
           "through2": true,
           "xtend": true
+        }
+      },
+      "offset-sourcemap-lines": {
+        "packages": {
+          "source-map": true
+        }
+      },
+      "once": {
+        "packages": {
+          "wrappy": true
         }
       },
       "package-json-versionify": {
@@ -328,6 +618,7 @@
       },
       "readable-stream": {
         "builtin": {
+          "buffer.Buffer": true,
           "events.EventEmitter": true,
           "stream": true,
           "util": true
@@ -335,6 +626,7 @@
         "globals": {
           "process.browser": true,
           "process.env.READABLE_STREAM": true,
+          "process.nextTick": true,
           "process.stderr": true,
           "process.stdout": true,
           "process.version.slice": true,
@@ -379,6 +671,14 @@
           "buffer": true
         }
       },
+      "shallow-clone": {
+        "packages": {
+          "is-extendable": true,
+          "kind-of": true,
+          "lazy-cache": true,
+          "mixin-object": true
+        }
+      },
       "shasum-object": {
         "builtin": {
           "crypto.createHash": true
@@ -411,6 +711,22 @@
           "safe-buffer": true
         }
       },
+      "supports-color": {
+        "builtin": {
+          "os.release": true,
+          "tty.isatty": true
+        },
+        "globals": {
+          "process.env": true,
+          "process.platform": true,
+          "process.stderr": true,
+          "process.stdout": true,
+          "process.versions.node.split": true
+        },
+        "packages": {
+          "has-flag": true
+        }
+      },
       "syntax-error": {
         "packages": {
           "acorn-node": true
@@ -432,6 +748,7 @@
           "process.nextTick": true
         },
         "packages": {
+          "inherits": true,
           "readable-stream": true,
           "xtend": true
         }
@@ -452,7 +769,13 @@
     }
   },
   "override": {
-    "resources": {}
+    "resources": {
+      "module-deps": {
+        "packages": {
+          "package-json-versionify": true
+        }
+      }
+    }
   },
   "debug": {
     "debugInfo": {
