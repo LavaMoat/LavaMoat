@@ -83,7 +83,7 @@ test('Config - Applies writeAutoConfigDebug plugin option and dumps module objec
 
   t.falsy(fs.existsSync(expectedPath), 'Module data does not yet exist')
 
-  await runBrowserify({ projectDir, scenario})
+  await runBrowserify({ projectDir, scenario })
 
   t.truthy(fs.existsSync(expectedPath), 'Module data exists')
 })
