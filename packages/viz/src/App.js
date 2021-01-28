@@ -14,9 +14,9 @@ const { LavamoatPolicies } = globalThis
 for (const [policyName, policyData] of Object.entries(LavamoatPolicies)) {
   if (!policyData.final) {
     if (policyData.override) {
-      policyData.final = mergeConfig(policyData.config, policyData.override)
+      policyData.final = mergeConfig(policyData.primary, policyData.override)
     } else {
-      policyData.final = policyData.config
+      policyData.final = policyData.primary
     }
   }
 }
