@@ -2,23 +2,44 @@
 
 const path = require('path')
 
-export const envConfig = {
+export const nodeEnvConfig = {
+  builtins: {
+    orangeBuiltins: [
+      'buffer',
+      'console',
+      //deprecated
+      // 'domain',
+      'events',
+    ]
+  },
   globals: {
     orangeGlobals: [
-      'localStorage',
-      'prompt',
-    ],
-    greenGlobals: [
+      'Buffer',
+      'buffer',
+      //deprecated
+      // 'domain',
+      'events',
+      'console'
+    ]
+  }
+}
 
-    ],
+export const bifyEnvConfig = {
+  globals: {
+    orangeGlobals: [
+    ]
+  },
+  builtins: {
+    orangeBuiltins: [
+    ]
   },
 }
 
-function parseConfigDebugForPackages (configDebugData, configFinal) {
+function parseConfigDebugForPackages (policyName, configDebugData, configFinal) {
   // const { resources } = configDebugData
   // const nodes = [], links = []
   const packages = {}
-
+  const envConfig = getEnvConfigForPolicyName(policyName)
   const { debugInfo } = configDebugData
   const { resources } = configFinal
   // aggregate info under package name
@@ -53,7 +74,7 @@ function parseConfigDebugForPackages (configDebugData, configFinal) {
       // use `id` so that there are not redundant links. the actual key is not important.
       const { moduleRecord: childModuleData } = debugInfo[childId] || {}
       if (!childModuleData) {
-        console.warn(`dep is external module ${childId}`)
+        // console.warn(`dep is external module ${childId}`)
         return
       }
       packageData.importMap[childId] = getPackageVersionName(childModuleData)
@@ -134,27 +155,37 @@ const rankColors = [
 ]
 
 function getDangerRankForPackage (packageData, envConfig) {
-  // strict red if any builtins or globals for now
-  if (packageData.config.native || packageData.config.builtin || packageData.config.globals) {
-    return 3
-  }
   if (packageData.dangerRank) {
     return packageData.dangerRank
   }
-  if (packageData.isRoot) {
-    return -1
+  // strict red if any native
+  if (packageData.config.native) {
+    return 3
   }
-  const moduleRanks = packageData.modules.map(
-    (moduleDebugInfo) => getDangerRankForModule(moduleDebugInfo, envConfig),
-  )
-  const rank = Math.max(...moduleRanks)
+  // if (packageData.isRoot) {
+  //   return -1
+  // }
+  // console.log(packageData)
+  // const moduleRanks = packageData.modules.map(
+  //   (moduleDebugInfo) => getDangerRankForModule(moduleDebugInfo, envConfig),
+  // )
+  // const rank = Math.max(...moduleRanks)
+  // return rank
+  const configRank = getRankForGlobals(packageData.config.globals, envConfig)
+  const builtinRank = getRankForBuiltins(packageData.config.builtin, envConfig)
+  const rank = Math.max(configRank, builtinRank)
   return rank
 }
 
 function getDangerRankForModule (moduleDebugInfo, envConfig) {
   const configRank = getRankForGlobals(moduleDebugInfo.globals, envConfig)
+  const builtinRank = getRankForBuiltins(moduleDebugInfo.builtin, envConfig)
   const typeRank = getRankForType(moduleDebugInfo.moduleRecord.type)
-  const rank = Math.max(configRank, typeRank)
+  if (moduleDebugInfo.moduleRecord.packageName === 'JSONStream') {
+    console.log({ id: moduleDebugInfo.moduleRecord.file, configRank, builtinRank, typeRank, envConfig })
+
+  }
+  const rank = Math.max(configRank, typeRank, builtinRank)
   return rank
 }
 
@@ -165,22 +196,33 @@ function getColorForRank (rank) {
   return rankColors[rank]
 }
 
-// this is a denylist, it should be an allowlist
-// default to dangerous here
 function getRankForGlobals (globalsConfig, envConfig) {
   const globals = Object.keys(globalsConfig || {})
   if (globals.length === 0) {
     return 0
   }
-  if (globals.some((glob) => envConfig.globals.greenGlobals.includes(glob))) {
-    return 1
-  }
-  if (globals.some((glob) => envConfig.globals.orangeGlobals.includes(glob))) {
-    return 2
-  }
-  // Has globals and scary by default
+  return Math.max(...globals.map((glob) => getRankForGlobal(glob, envConfig)))
+}
+
+function getRankForGlobal(glob, envConfig) {
+  if (envConfig.globals.orangeGlobals.includes(glob)) return 1
   return 3
 }
+
+function getRankForBuiltins (builtinsConfig, envConfig) {
+  const builtins = Object.keys(builtinsConfig || {})
+  if (builtins.length === 0) {
+    return 0
+  }
+  return Math.max(...builtins.map((builtin) => getRankForBuiltin(builtin, envConfig)))
+}
+
+function getRankForBuiltin(builtin, envConfig) {
+  if (envConfig.builtins.orangeBuiltins.includes(builtin)) return 1
+  return 3
+}
+
+
 
 function getRankForType (type = 'js') {
   if (type === 'js') {
@@ -276,6 +318,11 @@ function getLineNumbersForGlobals (source, globals) {
   return sourceGlobalLines
 }
 
+function getEnvConfigForPolicyName (policyName) {
+  const envConfig = policyName === 'browserify' ? bifyEnvConfig : nodeEnvConfig
+  return envConfig
+}
+
 export {
   parseConfigDebugForPackages,
   createGraph,
@@ -286,4 +333,5 @@ export {
   fullModuleNameFromPath,
   getLineNumbersForGlobals,
   sortByDangerRank,
+  getEnvConfigForPolicyName
 }

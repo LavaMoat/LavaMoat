@@ -15,8 +15,9 @@ import {
   getDangerRankForModule,
   sortByDangerRank,
   getColorForRank,
-  getLineNumbersForGlobals
-  , envConfig,
+  getLineNumbersForGlobals,
+  getEnvConfigForPolicyName
+
 } from './utils/utils.js'
 import XrButton from './xr-button.js'
 import setupScene from './vr-viz/setupScene.js'
@@ -74,18 +75,20 @@ class DepGraph extends React.Component {
 
   triggerGraphUpdate (state = this.state, newProps = this.props) {
     const { policyData } = newProps
-    this.updateGraph(policyData, state)
+    this.updateGraph(policyData, state, newProps)
   }
 
-  updateGraph (policyData, state) {
+  updateGraph (policyData, state, newProps) {
     const {
       packageData,
       // packageModules,
       // packageModulesMode,
     } = state
 
+    const { policyName } = newProps
+
     // const newGraph = createPackageGraph(bundleData, state)
-    const packages = parseConfigDebugForPackages(policyData.debug, policyData.final)
+    const packages = parseConfigDebugForPackages(policyName, policyData.debug, policyData.final)
     const newGraph = createGraph(packages, policyData.final, state)
 
     // create a map for faster lookups by id
@@ -112,10 +115,11 @@ class DepGraph extends React.Component {
   }
 
   getModulesForPackage (packageId) {
-    const { policyData } = this.props
+    const { policyData, policyName } = this.props
     const { debugInfo } = policyData.debug
     const packageModules = {}
     const moduleSources = []
+    const envConfig = getEnvConfigForPolicyName(policyName)
     Object.entries(debugInfo).forEach(([moduleSpecifier, moduleDebugInfo]) => {
       const { moduleRecord } = moduleDebugInfo
       const rank = getDangerRankForModule(moduleDebugInfo, envConfig)
