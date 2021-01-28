@@ -233,13 +233,10 @@ function getConfigurationFromPluginOpts (pluginOpts) {
 }
 
 function getConfigPath (pluginOpts) {
-  const { primary } = getDefaultPaths(pluginOpts.policyName)
-  if (!pluginOpts.config) {
-    return primary
-  }
   if (typeof pluginOpts.config === 'string') {
     return pluginOpts.config
   }
+  const { primary } = getDefaultPaths(pluginOpts.policyName)
   return primary
 }
 
