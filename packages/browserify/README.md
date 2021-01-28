@@ -1,4 +1,4 @@
-# LavaMoat - a Browserify Plugin for creating LavaMoat-protected builds
+# LavaMoat Browserify - a Browserify Plugin for creating LavaMoat-protected builds
 
 **NOTE: under rapid develop, not ready for production use, has not been audited, etc**
 
@@ -9,21 +9,21 @@
 
 ## Anatomy of a LavaMoat bundle
 
-The `lavamoat-browserify` plugin replaces the last internal build step of the browserify [compiler pipeline](https://github.com/browserify/browserify-handbook#compiler-pipeline). This step takes all the modules and their metadata and outputs the final bundle content, including the kernel and LavaMoat configuration file.
+The `lavamoat-browserify` plugin replaces the last internal build step of the browserify [compiler pipeline](https://github.com/browserify/browserify-handbook#compiler-pipeline). This step takes all the modules and their metadata and outputs the final bundle content, including the kernel and LavaMoat policy file.
 
 LavaMoat builds differ from standard browserify builds in that they:
 
-1. Include the app-specified LavaMoat configuration
+1. Include the app-specified LavaMoat policy
 
 This tells the kernel what execution environment each module should be instantiated with, and what other modules may be brought in as dependencies.
 
 2. Use a custom LavaMoat kernel
 
-This kernel enforces the LavaMoat config. When requested, a module is initialized, usually by evaluation inside a SES container.
+This kernel enforces the LavaMoat policy. When requested, a module is initialized, usually by evaluation inside a SES container.
 
 3. Bundle the module sources as strings
 
-Modules are SES eval'd with access only to the platform APIs specificied in the config.
+Modules are SES eval'd with access only to the platform APIs specificied in the policy.
 
 The result is a bundle that should work just as before, but provides some protection against supplychain attacks.
 
@@ -46,7 +46,7 @@ Now use the browserify command with lavamoat as a plugin to build a lavamoat-pro
 $ browserify index.js --plugin [ lavamoat-browserify --autoconfig ]
 ```
 
-All of the modules that `index.js` needs are included in the `bundle.js` as strings to be evaluated inside SES containers. A lavamoat configuration object is generated from a recursive walk of the require() graph and injected into the bundle (via --autoconfig), which is also written to disk.
+All of the modules that `index.js` needs are included in the `bundle.js` as strings to be evaluated inside SES containers. A lavamoat policy object is generated from a recursive walk of the require() graph and injected into the bundle (via --autoconfig), which is also written to disk.
 
 To use this bundle, just toss a <script src="bundle.js"></script> into your html, as per the official [browserify][BrowserifyGithub] documentation.
 
@@ -67,22 +67,22 @@ Usage: browserify [entry files] {BROWSERIFY OPTIONS} --plugin [ lavamoat-browser
 
 Options:
 
- --autoconfig, -a  Generate a `lavamoat-config.json` and `lavamoat-config-override.json` in the current
-                   working directory. Overwrites any existing config files. The override config is for making manual config changes and always takes precedence over the automatically generated config.
+ --autoconfig, -a  Generate a `policy.json` and `policy-override.json` in the current
+                   working directory. Overwrites any existing policy files. The override policy is for making manual policy changes and always takes precedence over the automatically generated policy.
 
-     --config, -c  Pass in configuration. Accepts a config object {} or a filepath string to the existing
-                   config. When used in conjunction with --autoconfig, specifies where to write the config. Default: ./lavamoat-config.json
+     --config, -c  Pass in policy. Accepts a policy object {} or a filepath string to the existing
+                   policy. When used in conjunction with --autoconfig, specifies where to write the policy. Default: ./policy.json
 
-   --override, -o  Pass in override config. Accepts a config object {} or a filepath string to the existing
-                   override config. Default: ./lavamoat-config-override.json
+   --override, -o  Pass in override policy. Accepts a policy object {} or a filepath string to the existing
+                   override policy. Default: ./policy-override.json
 
 Advanced Options:
 
     --prelude, -p  Omit the lavamoat prelude from the bundle.
 
---pruneconfig, -pc Factor out extra package entries from the config.
+--pruneconfig, -pc Remove redundant package entries from the policy.
 
---debugconfig, -dc Generate a `lavamoat-config-debug.json` in the current working directory. Used for the
+--debugconfig, -dc Generate a `policy-debug.json` in the current working directory. Used for the
                    lavamoat visualisation tool.
 
       --debug, -d  Turn on extra logging for debugging.
@@ -92,13 +92,13 @@ Advanced Options:
 
 ## More Examples
 
-### Config Override
+### Policy Override
 
-You may wish to modify the config for finer control over package permissions.
+You may wish to modify the policy for finer control over package permissions.
 
-**WARNING: Do not edit the autogenerated config `lavamoat-config.json` directly. It will be overwritten if a new bundle is created using LavaMoat. Instead, edit the `lavamoat-config-override.json`.
+**WARNING: Do not edit the autogenerated `policy.json` directly. It will be overwritten if a new bundle is created using LavaMoat. Instead, edit the `policy-override.json`.
 
-Run the command with the updated config to generate a new bundle. Automatically Searches for `lavamoat-config-override.json` inside the current working directory. Alternatively, pass it a relative path.
+Run the command with the updated policy to generate a new bundle. Automatically Searches for `policy-override.json` inside the current working directory. Alternatively, pass it a relative path.
 
 ```
 $ browserify index.js --plugin [ lavamoat-browserify --override ]
@@ -113,8 +113,8 @@ const browserify = require('browserify')
 const fs = require('fs')
 
 const lavamoatOpts = {
-  config: '../../lavamoat-config.json',
-  override: '../../lavamoat-config-override.json',
+  config: '../../policy.json',
+  override: '../../policy-override.json',
   debugconfig: true,
   pruneconfig: true
 }
@@ -128,9 +128,9 @@ const bundler = browserify(['./index.js'], {
 bundler.bundle().pipe(fs.createWriteStream('./bundle.js'))
 ```
 
-### Config Formats
+### Policy Formats
 
-Config as an `object`
+Policy as an `object`
 
 ```javascript
 const lavamoatOpts = {
@@ -146,11 +146,11 @@ const lavamoatOpts = {
 }
 ```
 
-Config as a `function`, must return a filepath or an `object`:
+Policy as a `function`, must return a filepath or an `object`:
 
 ```javascript
 const lavamoatOpts = {
-    config: () => "./lavamoat/lavamoat-config.json"
+    config: () => "./lavamoat/policy.json"
 }
 ```
 
@@ -171,21 +171,11 @@ const lavamoatOpts = {
 }
 ```
 
-## Next Steps
-
-### Add the generated bundle to your HTML
-
-```html
-<script src=bundle.js> </script>
-```
-
-And voila! Spin up a server and start using your LavaMoat protected Browserify build.
-
 See [lavamoat-browserify examples](./examples/) for more usage examples.
 
-### Config file explained
+## Policy file explained
 
-Here is an example of the config file with each field explained:
+Here is an example of the policy file with each field explained:
 
 ```
 {
