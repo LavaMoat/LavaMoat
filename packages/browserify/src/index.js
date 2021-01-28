@@ -129,8 +129,7 @@ function getConfigurationFromPluginOpts (pluginOpts) {
     writeAutoConfigDebug: undefined
   }
 
-  const { debug } = getDefaultPaths(pluginOpts.policyName)
-  const { override } = getDefaultPaths(pluginOpts.policyName)
+  const defaultPolicyPaths = getDefaultPaths(pluginOpts.policyName)
 
   if (typeof pluginOpts.config === 'function') {
     configuration.getConfig = pluginOpts.config
@@ -179,7 +178,7 @@ function getConfigurationFromPluginOpts (pluginOpts) {
         return mergedConfig
       } else {
         // Otherwise, still merge but only if it already exists
-        const configOverridePath = path.join('./', override)
+        const configOverridePath = path.join('./', defaultPolicyPaths.override)
         const resolvedPath = path.resolve(configOverridePath)
         if (fs.existsSync(resolvedPath)) {
           const configOverrideSource = fs.readFileSync(resolvedPath, 'utf-8')
@@ -201,19 +200,18 @@ function getConfigurationFromPluginOpts (pluginOpts) {
       throw new Error('LavaMoat - If writeAutoConfig is specified, config must be a string')
     }
     configuration.writeAutoConfig = (config) => {
-      const configString = jsonStringify(config, { space: 2 })
       const configPath = path.resolve(configuration.configPath)
       // Declare override config file path
-      const overrideConfigPath = path.join('./', override)
+      const overrideConfigPath = path.join('./', defaultPolicyPaths.override)
       // Write config to file
       fs.mkdirSync(path.dirname(configPath), { recursive: true })
-      fs.writeFileSync(configPath, configString)
+      fs.writeFileSync(configPath, jsonStringify(config, { space: 2 }))
       console.warn(`LavaMoat Config - wrote to "${configPath}"`)
       // Write default override config to file if it doesn't already exist
       if (!fs.existsSync(overrideConfigPath)) {
         const basicConfig = { resources: {} }
         fs.mkdirSync(path.dirname(overrideConfigPath), { recursive: true })
-        fs.writeFileSync(overrideConfigPath, JSON.stringify(basicConfig, null, 2))
+        fs.writeFileSync(overrideConfigPath, jsonStringify(basicConfig, { space: 2 }))
         console.warn(`LavaMoat Override Config - wrote to "${overrideConfigPath}"`)
       }
     }
@@ -228,7 +226,7 @@ function getConfigurationFromPluginOpts (pluginOpts) {
   if (typeof pluginOpts.writeAutoConfigDebug === 'string') {
     configuration.writeAutoConfigDebug = pluginOpts.writeAutoConfigDebug
   } else if (pluginOpts.writeAutoConfigDebug) {
-    configuration.writeAutoConfigDebug = debug
+    configuration.writeAutoConfigDebug = defaultPolicyPaths.debug
   }
 
   return configuration
