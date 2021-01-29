@@ -40,15 +40,15 @@ async function runLava () {
     // write policy debug file
     if (includeDebugInfo) {
       fs.mkdirSync(path.dirname(policyDebugPath), { recursive: true })
-      fs.writeFileSync(policyDebugPath, jsonStringify(config, { space: 2 }))
-      console.log(`LavaMoat wrote config debug to "${policyDebugPath}"`)
+      fs.writeFileSync(policyDebugPath, jsonStringify(policy, { space: 2 }))
+      console.log(`LavaMoat wrote policy debug to "${policyDebugPath}"`)
     }
     // cleanup debug info
     delete policy.debugInfo
-    // write config file
+    // write policy file
     fs.mkdirSync(path.dirname(policyPath), { recursive: true })
-    fs.writeFileSync(policyPath, jsonStringify(config, { space: 2 }))
-    console.log(`LavaMoat wrote config to "${policyPath}"`)
+    fs.writeFileSync(policyPath, jsonStringify(policy, { space: 2 }))
+    console.log(`LavaMoat wrote policy to "${policyPath}"`)
   }
   if (shouldRunApplication) {
     // execution mode
@@ -135,23 +135,23 @@ function parseArgs () {
 }
 
 async function loadPolicy ({ debugMode, policyPath, policyOverridePath }) {
-  let config = { resources: {} }
-  // try config
+  let policy = { resources: {} }
+  // try policy
   if (fs.existsSync(policyPath)) {
-    if (debugMode) console.warn(`Lavamoat looking for config at ${policyPath}`)
+    if (debugMode) console.warn(`Lavamoat looking for policy at ${policyPath}`)
     const configSource = fs.readFileSync(policyPath, 'utf8')
-    config = JSON.parse(configSource)
+    policy = JSON.parse(configSource)
   } else {
-    if (debugMode) console.warn('Lavamoat could not find config')
+    if (debugMode) console.warn('Lavamoat could not find policy')
   }
-  // try config override
+  // try policy override
   if (fs.existsSync(policyOverridePath)) {
-    if (debugMode) console.warn(`Lavamoat looking for override config at ${policyOverridePath}`)
+    if (debugMode) console.warn(`Lavamoat looking for override policy at ${policyOverridePath}`)
     const configSource = fs.readFileSync(policyOverridePath, 'utf8')
     const overrideConfig = JSON.parse(configSource)
-    config = mergeConfig(config, overrideConfig)
+    policy = mergeConfig(policy, overrideConfig)
   } else {
-    if (debugMode) console.warn('Lavamoat could not find config override')
+    if (debugMode) console.warn('Lavamoat could not find policy override')
   }
-  return config
+  return policy
 }

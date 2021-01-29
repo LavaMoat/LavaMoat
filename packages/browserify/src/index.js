@@ -24,7 +24,7 @@ const reccomendedArgs = {
 module.exports = plugin
 module.exports.generatePrelude = generatePrelude
 module.exports.createLavamoatPacker = createLavamoatPacker
-module.exports.loadPolicy = loadPolicy
+module.exports.loadPolicy = loadPolicyFromPluginOpts
 module.exports.args = reccomendedArgs
 
 function plugin (browserify, pluginOpts) {
@@ -58,7 +58,7 @@ function plugin (browserify, pluginOpts) {
   }
 }
 
-function loadPolicy (pluginOpts = {}) {
+function loadPolicyFromPluginOpts (pluginOpts = {}) {
   const configuration = getConfigurationFromPluginOpts(pluginOpts)
   return loadPolicy(configuration)
 }
