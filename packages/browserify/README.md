@@ -215,8 +215,8 @@ Here is an example of the policy file with each field explained:
 
 ### Lavamoat Viz
 
-The [lavamoat viz][lavamoatViz] is a tool to visualize an application's dependency graph and assess package dangerousness.
 [lavamoatViz]: https://lavamoat.github.io/LavaMoat/
+The [lavamoat viz][lavamoatViz] is a tool to visualize an application's dependency graph and assess package dangerousness.
 
 ### Introduction to LavaMoat Video
 
