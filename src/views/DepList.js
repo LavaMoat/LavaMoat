@@ -53,7 +53,7 @@ class DepList extends React.Component {
             actions.selectPackage(packageData.id)
           }}
         >
-          <div className={`packageIcon ${getColorForRank(packageData.dangerRank)}`}/>
+          <div className={`packageIcon ${getColorForRank(packageData.dangerRank)}`} />
           {packageData.id}
         </div>
         {isExpanded && this.renderPackageModuleList(packageData)}
@@ -82,7 +82,7 @@ class DepList extends React.Component {
     return (
       <div
         key={index}
-        className={'listStyle'}
+        className="listStyle"
       >
         <div
           className="moduleWrapper"
@@ -92,9 +92,10 @@ class DepList extends React.Component {
           }}
           onClick={() => {
             actions.selectModule(module.specifier)
-          }}>
+          }}
+        >
           <div className={`moduleIcon ${module.color}`} />
-          "{module.fileSimple}"
+          &quot;{module.fileSimple}&quot;
         </div>
       </div>
     )

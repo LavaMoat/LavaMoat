@@ -7,11 +7,11 @@ const htmlPath = path.resolve(__dirname, '../dist/index.html')
 let indexContent = fs.readFileSync(htmlPath, 'utf8')
 // fix relative urls
 indexContent = indexContent
-  .split(`"/lavamoat-viz/`)
-  .join(`"./`)
+  .split('"/lavamoat-viz/')
+  .join('"./')
 // insert data script
 indexContent = indexContent
-  .split(`<body>`)
-  .join(`<body><script src="./data-injection.js"></script>`)
+  .split('<body>')
+  .join('<body><script src="./data-injection.js"></script>')
 // write file
 fs.writeFileSync(htmlPath, indexContent)
