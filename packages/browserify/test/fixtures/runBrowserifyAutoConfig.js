@@ -4,8 +4,8 @@ const lavamoatPlugin = require('../../src/index')
 browserify([], {
   plugin: [
     [lavamoatPlugin, { 
-      writeAutoConfig: true,
-      writeAutoConfigDebug: true
+      writeAutoPolicy: true,
+      writeAutoPolicyDebug: true
     }]
   ]
 }).bundle()

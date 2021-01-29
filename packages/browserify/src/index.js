@@ -28,11 +28,11 @@ const reccomendedArgs = {
 module.exports = plugin
 module.exports.generatePrelude = generatePrelude
 module.exports.createLavamoatPacker = createLavamoatPacker
-module.exports.loadConfig = loadConfig
+module.exports.loadPolicy = loadPolicy
 module.exports.args = reccomendedArgs
 
 function plugin (browserify, pluginOpts) {
-  // pluginOpts.config is config path
+  // pluginOpts.policy is policy path
   const configuration = getConfigurationFromPluginOpts(pluginOpts)
   // setup the plugin in a re-bundle friendly way
   browserify.on('reset', setupPlugin)
@@ -45,13 +45,13 @@ function plugin (browserify, pluginOpts) {
     // inject package name into module data
     browserify.pipeline.get('emit-deps').unshift(createPackageDataStream())
 
-    // if writeAutoConfig activated, insert hook
-    if (configuration.writeAutoConfig) {
+    // if writeAutoPolicy activated, insert hook
+    if (configuration.writeAutoPolicy) {
       browserify.pipeline.get('emit-deps').push(createModuleInspectorSpy({
         // no builtins in the browser (yet!)
         isBuiltin: () => false,
         // write to disk on completion
-        onResult: configuration.writeAutoConfig
+        onResult: configuration.writeAutoPolicy
       }))
     }
 
@@ -60,7 +60,7 @@ function plugin (browserify, pluginOpts) {
       createLavamoatPacker(configuration)
     )
 
-    if (configuration.writeAutoConfigDebug) {
+    if (configuration.writeAutoPolicyDebug) {
       const allDeps = {}
       browserify.pipeline.splice('debug', 0, through((dep, _, cb) => {
         const metaData = clone(dep)
@@ -68,36 +68,34 @@ function plugin (browserify, pluginOpts) {
         cb(null, dep)
       }, (cb) => {
         const serialized = jsonStringify(allDeps, { space: 2 })
-        console.warn(`writeAutoConfigDebug - writing to ${configuration.writeAutoConfigDebug}`)
-        fs.writeFile(configuration.writeAutoConfigDebug, serialized, cb)
+        console.warn(`writeAutoPolicyDebug - writing to ${configuration.writeAutoPolicyDebug}`)
+        fs.writeFile(configuration.writeAutoPolicyDebug, serialized, cb)
       }))
     }
   }
 }
 
-function loadConfig (pluginOpts = {}) {
+function loadPolicy (pluginOpts = {}) {
   const configuration = getConfigurationFromPluginOpts(pluginOpts)
-  return configuration.getConfig()
+  return configuration.getPolicy()
 }
 
 function getConfigurationFromPluginOpts (pluginOpts) {
   const aliasMap = {
-    a: 'writeAutoConfig',
-    autoconfig: 'writeAutoConfig',
-    c: 'config',
-    o: 'configOverride',
-    override: 'configOverride',
-    p: 'includePrelude',
+    a: 'writeAutoPolicy',
+    autopolicy: 'writeAutoPolicy',
+    p: 'policy',
+    o: 'policyOverride',
+    override: 'policyOverride',
+    dp: 'writeAutoPolicyDebug',
+    debugpolicy: 'writeAutoPolicyDebug',
+    pr: 'includePrelude',
     prelude: 'includePrelude',
-    pc: 'pruneConfig',
-    pruneconfig: 'pruneConfig',
+    pp: 'prunePolicy',
+    prunepolicy: 'prunePolicy',
     d: 'debugMode',
     debug: 'debugMode',
-    dc: 'writeAutoConfigDebug',
-    debugconfig: 'writeAutoConfigDebug',
     pn: 'policyName',
-    policyname: 'policyName',
-    h: 'help'
   }
 
   const allowedKeys = new Set([
@@ -120,43 +118,43 @@ function getConfigurationFromPluginOpts (pluginOpts) {
   }
 
   const configuration = {
-    writeAutoConfig: undefined,
-    getConfig: undefined,
-    configPath: getConfigPath(pluginOpts),
+    writeAutoPolicy: undefined,
+    getPolicy: undefined,
+    policyPath: getPolicyPath(pluginOpts),
     // default true
     includePrelude: 'includePrelude' in pluginOpts ? pluginOpts.includePrelude : true,
-    pruneConfig: pluginOpts.pruneConfig,
+    pruneConfig: pluginOpts.prunePolicy,
     debugMode: pluginOpts.debugMode,
-    writeAutoConfigDebug: undefined
+    writeAutoPolicyDebug: undefined
   }
 
   const { debug } = getDefaultPaths(pluginOpts.policyName)
   const { override } = getDefaultPaths(pluginOpts.policyName)
 
-  if (typeof pluginOpts.config === 'function') {
-    configuration.getConfig = pluginOpts.config
+  if (typeof pluginOpts.policy === 'function') {
+    configuration.getPolicy = pluginOpts.policy
   } else {
-    const tolerateMissingConfig = pluginOpts.writeAutoConfig
-    configuration.getConfig = () => {
+    const tolerateMissingConfig = pluginOpts.writeAutoPolicy
+    configuration.getPolicy = () => {
       let configSource
       let primaryConfig
 
-      if (pluginOpts.config === undefined || typeof pluginOpts.config === 'string') {
-        const configPath = path.resolve(configuration.configPath)
-        const configExists = fs.existsSync(configPath)
-        if (!configuration.configPath) {
+      if (pluginOpts.policy === undefined || typeof pluginOpts.policy === 'string') {
+        const policyPath = path.resolve(configuration.policyPath)
+        const configExists = fs.existsSync(policyPath)
+        if (!configuration.policyPath) {
           throw new Error('LavaMoat - No configuration path')
         }
         if (!configExists) {
           if (tolerateMissingConfig) {
             return {}
           }
-          throw new Error(`Lavamoat - Configuration file not found at path: '${configPath}', use writeAutoConfig option to generate one`)
+          throw new Error(`Lavamoat - Configuration file not found at path: '${policyPath}', use writeAutoPolicy option to generate one`)
         }
-        configSource = fs.readFileSync(configPath, 'utf8')
+        configSource = fs.readFileSync(policyPath, 'utf8')
         primaryConfig = JSON.parse(configSource)
-      } else if (typeof pluginOpts.config === 'object') {
-        primaryConfig = pluginOpts.config
+      } else if (typeof pluginOpts.policy === 'object') {
+        primaryConfig = pluginOpts.policy
       }
       // if configOverride specified, merge
       if (pluginOpts.configOverride) {
@@ -164,7 +162,7 @@ function getConfigurationFromPluginOpts (pluginOpts) {
         if (typeof configOverride === 'function') {
           configOverride = pluginOpts.configOverride()
           if (typeof configOverride !== 'string' && typeof configOverride !== 'object') {
-            throw new Error('LavaMoat - Config override function must return an object or a string.')
+            throw new Error('LavaMoat - Policy override function must return an object or a string.')
           }
         }
 
@@ -172,9 +170,9 @@ function getConfigurationFromPluginOpts (pluginOpts) {
           const configOverrideSource = fs.readFileSync(configOverride, 'utf-8')
           configOverride = JSON.parse(configOverrideSource)
         } else if (typeof configOverride !== 'object') {
-          throw new Error('LavaMoat - Config Override must be a function, string or object')
+          throw new Error('LavaMoat - Policy Override must be a function, string or object')
         }
-        // Ensure override config was written correctly
+        // Ensure override policy was written correctly
         validateConfig(configOverride)
         const mergedConfig = mergeDeep(primaryConfig, configOverride)
         return mergedConfig
@@ -193,26 +191,26 @@ function getConfigurationFromPluginOpts (pluginOpts) {
     }
   }
 
-  if (!pluginOpts.writeAutoConfig) {
-    // do not trigger parsing of the code for config generation
-    configuration.writeAutoConfig = null
-  } else if (pluginOpts.writeAutoConfig === true) {
-    // output config to a file, path configuration.configPath
-    if (!configuration.configPath) {
-      throw new Error('LavaMoat - If writeAutoConfig is specified, config must be a string')
+  if (!pluginOpts.writeAutoPolicy) {
+    // do not trigger parsing of the code for policy generation
+    configuration.writeAutoPolicy = null
+  } else if (pluginOpts.writeAutoPolicy === true) {
+    // output policy to a file, path configuration.policyPath
+    if (!configuration.policyPath) {
+      throw new Error('LavaMoat - If writeAutoPolicy is specified, policy must be a string')
     }
-    configuration.writeAutoConfig = (config) => {
-      const configString = jsonStringify(config, { space: 2 })
-      const configPath = path.resolve(configuration.configPath)
+    configuration.writeAutoPolicy = (policy) => {
+      const configString = jsonStringify(policy, { space: 2 })
+      const policyPath = path.resolve(configuration.policyPath)
       // Ensure parent dir exists
-      const configDirectory = path.dirname(configPath)
+      const configDirectory = path.dirname(policyPath)
       mkdirp.sync(configDirectory)
-      // Declare override config file path
+      // Declare override policy file path
       const overrideConfigPath = path.join('./', override)
-      // Write config to file
-      fs.writeFileSync(configPath, configString)
-      console.warn(`LavaMoat Config - wrote to "${configPath}"`)
-      // Write default override config to file if it doesn't already exist
+      // Write policy to file
+      fs.writeFileSync(policyPath, configString)
+      console.warn(`LavaMoat Policy - wrote to "${policyPath}"`)
+      // Write default override colicy to file if it doesn't already exist
       if (!fs.existsSync(overrideConfigPath)) {
         const basicConfig = {
           resources: {
@@ -223,42 +221,42 @@ function getConfigurationFromPluginOpts (pluginOpts) {
           }
         }
         fs.writeFileSync(overrideConfigPath, JSON.stringify(basicConfig, null, 2))
-        console.warn(`LavaMoat Override Config - wrote to "${overrideConfigPath}"`)
+        console.warn(`LavaMoat Override Policy - wrote to "${overrideConfigPath}"`)
       }
     }
-  } else if (typeof pluginOpts.writeAutoConfig === 'function') {
+  } else if (typeof pluginOpts.writeAutoPolicy === 'function') {
     // to be called with configuration object
-    configuration.writeAutoConfig = pluginOpts.writeAutoConfig
+    configuration.writeAutoPolicy = pluginOpts.writeAutoPolicy
   } else {
     // invalid setting, throw an error
-    throw new Error('LavaMoat - Unrecognized value for writeAutoConfig')
+    throw new Error('LavaMoat - Unrecognized value for writeAutoPolicy')
   }
 
-  if (typeof pluginOpts.writeAutoConfigDebug === 'string') {
-    configuration.writeAutoConfigDebug = pluginOpts.writeAutoConfigDebug
-  } else if (pluginOpts.writeAutoConfigDebug) {
-    configuration.writeAutoConfigDebug = debug
+  if (typeof pluginOpts.writeAutoPolicyDebug === 'string') {
+    configuration.writeAutoPolicyDebug = pluginOpts.writeAutoPolicyDebug
+  } else if (pluginOpts.writeAutoPolicyDebug) {
+    configuration.writeAutoPolicyDebug = debug
   }
 
   return configuration
 }
 
-function getConfigPath (pluginOpts) {
+function getPolicyPath (pluginOpts) {
   const { primary } = getDefaultPaths(pluginOpts.policyName)
-  if (!pluginOpts.config) {
+  if (!pluginOpts.policy) {
     return primary
   }
-  if (typeof pluginOpts.config === 'string') {
-    return pluginOpts.config
+  if (typeof pluginOpts.policy === 'string') {
+    return pluginOpts.policy
   }
   return primary
 }
 
 function createLavamoatPacker (configuration = {}) {
-  const { config, getConfig, includePrelude } = configuration
+  const { policy, getPolicy, includePrelude } = configuration
   const defaults = {
     raw: true,
-    config: config || (getConfig && getConfig()),
+    config: policy || (getPolicy && getPolicy()),
     prelude: includePrelude && generatePrelude(configuration)
   }
 
@@ -269,7 +267,7 @@ function createLavamoatPacker (configuration = {}) {
 
 function validateConfig (configOverride) {
   if (typeof configOverride !== 'object') {
-    throw new Error('LavaMoat - Expected config override to be an object')
+    throw new Error('LavaMoat - Expected policy override to be an object')
   }
 
   if (!Object.keys(configOverride).includes('resources')) {

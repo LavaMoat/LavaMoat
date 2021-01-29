@@ -7,22 +7,22 @@ const {
   createScenarioFromScaffold
 } = require('lavamoat-core/test/util')
 
-test('generateConfig - empty config', async (t) => {
+test('generateConfig - empty policy', async (t) => {
   const scenario = createScenarioFromScaffold({
     defineEntry: () => {},
     defaultConfig: false,
   })
-  const config = await autoConfigForScenario({ scenario })
-  t.deepEqual(config, { resources: {} }, 'config matches expected')
+  const policy = await autoConfigForScenario({ scenario })
+  t.deepEqual(policy, { resources: {} }, 'policy matches expected')
 })
 
-test('generateConfig - basic config', async (t) => {
+test('generateConfig - basic policy', async (t) => {
   const scenario = createScenarioFromScaffold({
     defineOne: () => { module.exports = global.two },
     defaultConfig: false
   })
-  const config = await autoConfigForScenario({ scenario })
-  t.deepEqual(config, {
+  const policy = await autoConfigForScenario({ scenario })
+  t.deepEqual(policy, {
     resources: {
       one: {
         globals: {
@@ -30,7 +30,7 @@ test('generateConfig - basic config', async (t) => {
         }
       }
     }
-  }, 'config matched expected')
+  }, 'policy matched expected')
 })
 
 test('generateConfig - ignore various refs', async (t) => {
@@ -43,8 +43,8 @@ test('generateConfig - ignore various refs', async (t) => {
     },
     defaultConfig: false,
   })
-  const config = await autoConfigForScenario({ scenario })
-  t.deepEqual(config, {
+  const policy = await autoConfigForScenario({ scenario })
+  t.deepEqual(policy, {
     resources: {
       one: {
         globals: {
@@ -52,11 +52,11 @@ test('generateConfig - ignore various refs', async (t) => {
         }
       }
     }
-  }, 'config matched expected')
+  }, 'policy matched expected')
 })
 
 
-test('generateConfig - config ignores global refs', async (t) => {
+test('generateConfig - policy ignores global refs', async (t) => {
   const scenario = createScenarioFromScaffold({
     defineOne: () => {
       const href = window.location.href
@@ -64,8 +64,8 @@ test('generateConfig - config ignores global refs', async (t) => {
     },
     defaultConfig: false,
   })
-  const config = await autoConfigForScenario({ scenario })
-  t.deepEqual(config, {
+  const policy = await autoConfigForScenario({ scenario })
+  t.deepEqual(policy, {
     resources: {
       one: {
         globals: {
@@ -74,31 +74,31 @@ test('generateConfig - config ignores global refs', async (t) => {
         }
       }
     }
-  }, 'config matches expected')
+  }, 'policy matches expected')
 })
 
-test('generateConfig - config ignores global refs when properties are not accessed', async (t) => {
+test('generateConfig - policy ignores global refs when properties are not accessed', async (t) => {
   const scenario = createScenarioFromScaffold({
     defineOne: () => {
       typeof window !== undefined
     },
     defaultConfig: false,
   })
-  const config = await autoConfigForScenario({ scenario })
-  t.deepEqual(config, {
+  const policy = await autoConfigForScenario({ scenario })
+  t.deepEqual(policy, {
     resources: {}
-  }, 'config matches expected')
+  }, 'policy matches expected')
 })
 
-test('generateConfig - config ignores global refs accessed with whitelist items', async (t) => {
+test('generateConfig - policy ignores global refs accessed with whitelist items', async (t) => {
   const scenario = createScenarioFromScaffold({
     defineOne: () => {
       window.Object === Object
     },
     defaultConfig: false,
   })
-  const config = await autoConfigForScenario({ scenario })
-  t.deepEqual(config, {
+  const policy = await autoConfigForScenario({ scenario })
+  t.deepEqual(policy, {
     resources: {}
-  }, 'config matches expected')
+  }, 'policy matches expected')
 })

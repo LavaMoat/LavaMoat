@@ -216,12 +216,12 @@ async function runScenario ({ scenario }) {
 async function prepareScenarioOnDisk ({ scenario, policyName = 'policies' }) {
   const { path: projectDir } = await tmp.dir()
   const filesToWrite = Object.values(scenario.files)
-  if (!scenario.opts.writeAutoConfig) {
+  if (!scenario.opts.writeAutoPolicy) {
     const defaultPaths = getDefaultPaths(policyName)
-    const primaryPath = typeof scenario.opts.config === 'string' ? scenario.opts.config : defaultPaths.primary
+    const primaryPath = typeof scenario.opts.policy === 'string' ? scenario.opts.policy : defaultPaths.primary
     filesToWrite.push({ file: primaryPath, content: stringify(scenario.config) })
     if (scenario.configOverride) {
-      const overridePath = typeof scenario.opts.configOverride === 'string' ? scenario.opts.configOverride : defaultPaths.override
+      const overridePath = typeof scenario.opts.policyOverride === 'string' ? scenario.opts.policyOverride : defaultPaths.override
       filesToWrite.push({ file: overridePath, content: stringify(scenario.configOverride) })
     }
   }

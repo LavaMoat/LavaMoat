@@ -47,7 +47,7 @@ async function start () {
   const allConfigs = { resources: {} }
   await Promise.all(packages.map(async (packageName) => {
     if (parseBlacklist.includes(packageName)) return
-    const config = await concurrencyLimit(() => loadConfig(packageName))
+    const config = await concurrencyLimit(() => loadPolicy(packageName))
     if (!config || !config.resources) {
       console.warn(`config for "${packageName}" is broken`)
       return
@@ -60,7 +60,7 @@ async function start () {
   console.log('done!')
 }
 
-async function loadConfig (packageName) {
+async function loadPolicy (packageName) {
   const policyPath = getPolicyPath(packageName)
   if (await fileExists(policyPath)) {
     return require(policyPath)

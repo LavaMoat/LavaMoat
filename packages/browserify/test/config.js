@@ -8,10 +8,10 @@ const {
   runBrowserify
 } = require('./util')
 
-test('config - default config path is generated with autoconfig if path is not specified', async (t) => {
+test('policy - default policy path is generated with autoconfig if path is not specified', async (t) => {
   const scenario = createScenarioFromScaffold({
     opts: {
-      writeAutoConfig: true
+      writeAutoPolicy: true
     },
     contextName: 'browserify'
   })
@@ -25,7 +25,7 @@ test('config - default config path is generated with autoconfig if path is not s
   t.truthy(fs.existsSync(expectedPath), 'Config file exists')
 })
 
-test('config - writes a proper config to a temp dir', async (t) => {
+test('policy - writes a proper policy to a temp dir', async (t) => {
   const scenario = createScenarioFromScaffold({
     defineOne: () => {
       module.exports = require('three')
@@ -37,7 +37,7 @@ test('config - writes a proper config to a temp dir', async (t) => {
       module.exports = require('two')
     },
     opts: {
-      writeAutoConfig: true
+      writeAutoPolicy: true
     }
   })
   const { projectDir } = await prepareScenarioOnDisk({ scenario, policyName: 'browserify' })
@@ -71,11 +71,11 @@ test('Config override is applied if not specified and already exists at default 
   t.is(testResult, 30)
 })
 
-test('Config - Applies writeAutoConfigDebug plugin option and dumps module object to disk', async (t) => {
+test('Config - Applies writeAutoPolicyDebug plugin option and dumps module object to disk', async (t) => {
   const scenario = createScenarioFromScaffold({
     opts: {
-      writeAutoConfig: true,
-      writeAutoConfigDebug: true
+      writeAutoPolicy: true,
+      writeAutoPolicyDebug: true
     }
   })
   const { projectDir, policyDir } = await prepareScenarioOnDisk({ scenario, policyName: 'browserify' })
@@ -90,9 +90,9 @@ test('Config - Applies writeAutoConfigDebug plugin option and dumps module objec
 
 // this test is not written correctly, im disabling it for now
 // it tests features we dont support:
-// - automatic watchify writeAutoConfig rebuilds when config override is modified
-// - it uses invalid config values
-// - it expects config-override to be merged into the config and then written to disk
+// - automatic watchify writeAutoPolicy rebuilds when policy override is modified
+// - it uses invalid policy values
+// - it expects policy-override to be merged into the policy and then written to disk
 // test('Config edits trigger re-bundle if using watchify', async (t) => {
 //   const configDefault = {
 //     resources: {
@@ -109,7 +109,7 @@ test('Config - Applies writeAutoConfigDebug plugin option and dumps module objec
 //     }
 //   }
 //   const bundler = await createWatchifyBundle({
-//     writeAutoConfig: true,
+//     writeAutoPolicy: true,
 //   })
 
 //   const overridePath = './lavamoat/policy-override.json'
@@ -127,6 +127,6 @@ test('Config - Applies writeAutoConfigDebug plugin option and dumps module objec
 //   const updatedConfigFileString = fs.readFileSync(configPath, 'utf8')
 //   rimraf.sync('./lavamoat')
 
-//   t.falsy(configFileString.includes('"three": 12345678'), 'original config should not have updated content')
-//   t.truthy(updatedConfigFileString.includes('"three": 12345678'), 'config should be updated')
+//   t.falsy(configFileString.includes('"three": 12345678'), 'original policy should not have updated content')
+//   t.truthy(updatedConfigFileString.includes('"three": 12345678'), 'policy should be updated')
 // })

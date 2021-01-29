@@ -3,12 +3,12 @@ const browserify = require('browserify')
 
 // configure LavaMoat
 const lavamoatOpts = {
-  config: './lavamoat-config.json'
+  policy: './policy.json'
 }
 
-// enable config autogen if specified
+// enable policy autogen if specified
 if (process.env.AUTOCONFIG) {
-  lavamoatOpts.writeAutoConfig = true
+  lavamoatOpts.writeAutoPolicy = true
 }
 
 // configure browserify

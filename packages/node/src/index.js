@@ -34,7 +34,7 @@ async function runLava () {
   if (shouldParseApplication) {
     // parse mode
     const includeDebugInfo = Boolean(writeAutoConfigDebug)
-    const { resolutions } = await loadConfig({ debugMode, configPath, configOverridePath })
+    const { resolutions } = await loadPolicy({ debugMode, configPath, configOverridePath })
     console.log(`LavaMoat generating config from entry "${entryId}"...`)
     const config = await parseForConfig({ cwd, entryId, resolutions, includeDebugInfo })
     // write config debug file
@@ -51,7 +51,7 @@ async function runLava () {
   }
   if (shouldRunApplication) {
     // execution mode
-    const lavamoatConfig = await loadConfig({ debugMode, configPath, configOverridePath })
+    const lavamoatConfig = await loadPolicy({ debugMode, configPath, configOverridePath })
     const kernel = createKernel({ cwd, lavamoatConfig, debugMode })
     // patch process.argv so it matches the normal pattern
     // e.g. [runtime path, entrypoint, ...args]
@@ -129,7 +129,7 @@ function parseArgs () {
   return parsedArgs
 }
 
-async function loadConfig ({ debugMode, configPath, configOverridePath }) {
+async function loadPolicy ({ debugMode, configPath, configOverridePath }) {
   let config = { resources: {} }
   // try config
   if (fs.existsSync(configPath)) {

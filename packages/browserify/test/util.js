@@ -38,7 +38,7 @@ module.exports = {
 }
 
 async function createBundleFromEntry (path, pluginOpts = {}) {
-  pluginOpts.config = pluginOpts.config || {}
+  pluginOpts.policy = pluginOpts.policy || {}
   const bundler = browserify([], lavamoatPlugin.args)
   bundler.add(path)
   bundler.plugin(lavamoatPlugin, pluginOpts)
@@ -141,7 +141,7 @@ function createBrowserifyFromRequiresArray ({ files: _files, pluginOpts = {} }) 
 async function generateConfigFromFiles ({ files }) {
   let pluginOpts
   const promise = new Promise((resolve) => {
-    pluginOpts = { writeAutoConfig: resolve }
+    pluginOpts = { writeAutoPolicy: resolve }
   })
 
   const bundler = createBrowserifyFromRequiresArray({ files, pluginOpts })
@@ -151,7 +151,7 @@ async function generateConfigFromFiles ({ files }) {
 }
 
 async function autoConfigForScenario ({ scenario }) {
-  const copiedScenario = {...scenario, opts: {...scenario.opts, writeAutoConfig: true }}
+  const copiedScenario = {...scenario, opts: {...scenario.opts, writeAutoPolicy: true }}
   const { policyDir } = await createBundleForScenario({ scenario: copiedScenario})
   const fullPath = path.join(policyDir, 'policy.json')
   const config = fs.readFileSync(fullPath)
@@ -215,7 +215,7 @@ async function testEntryAttackerVictim (t, { defineAttacker, defineVictim }) {
     }
   ]
 
-  const config = {
+  const policy = {
     resources: {
       '<root>': {
         packages: {
@@ -230,7 +230,7 @@ async function testEntryAttackerVictim (t, { defineAttacker, defineVictim }) {
       }
     }
   }
-  const bundle = await createBundleFromRequiresArray(depsArray, { config })
+  const bundle = await createBundleFromRequiresArray(depsArray, { policy })
   const testResult = evalBundle(bundle)
   t.is(testResult.value, false)
 }
@@ -305,7 +305,7 @@ async function runSimpleOneTwo ({ defineRoot, defineOne, defineTwo, defineThree,
     }
   }, config)
 
-  const bundle = await createBundleFromRequiresArray(depsArray, { config: _config })
+  const bundle = await createBundleFromRequiresArray(depsArray, { policy: _config })
   const testResult = evalBundle(bundle, testGlobal)
 
   return testResult.value
@@ -358,7 +358,7 @@ async function runSimpleOneTwoSamePackage ({ defineRoot, defineOne, defineTwo, c
     }
   }, config)
 
-  const bundle = await createBundleFromRequiresArray(depsArray, { config: _config })
+  const bundle = await createBundleFromRequiresArray(depsArray, { policy: _config })
   const testResult = evalBundle(bundle, testGlobal)
 
   return testResult.value
@@ -401,8 +401,8 @@ async function runBrowserify ({ projectDir, scenario }) {
   const args = [JSON.stringify({
     entries: scenario.entries,
     opts: scenario.opts,
-    config: scenario.config,
-    configOverride: scenario.configOverride
+    policy: scenario.config,
+    policyOverride: scenario.configOverride
   })]
   const paths = {
     normal: `${__dirname}/fixtures/runBrowserify.js`,

@@ -28,9 +28,9 @@ module.exports = [
       expectedResult: 5,
       opts: {
         p: true,
-        pc: true,
+        pp: true,
         d: true,
-        dc: true
+        dp: true
       },
       shouldRunInCore: false,
       // prevent from running in lavamoat node for now
