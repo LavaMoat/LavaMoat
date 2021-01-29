@@ -38,7 +38,7 @@ module.exports = {
 }
 
 async function createBundleFromEntry (path, pluginOpts = {}) {
-  pluginOpts.policy = pluginOpts.policy || {}
+  pluginOpts.policy = pluginOpts.policy || { resources: {} }
   const bundler = browserify([], lavamoatPlugin.args)
   bundler.add(path)
   bundler.plugin(lavamoatPlugin, pluginOpts)

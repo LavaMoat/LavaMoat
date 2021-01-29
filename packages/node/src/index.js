@@ -39,15 +39,16 @@ async function runLava () {
     const policy = await parseForConfig({ cwd, entryId, resolutions, includeDebugInfo })
     // write policy debug file
     if (includeDebugInfo) {
-      const serializedConfig = jsonStringify(policy, { space: 2 })
-      fs.writeFileSync(policyDebugPath, serializedConfig)
-      console.log(`LavaMoat wrote policy debug to "${policyDebugPath}"`)
+      fs.mkdirSync(path.dirname(policyDebugPath), { recursive: true })
+      fs.writeFileSync(policyDebugPath, jsonStringify(config, { space: 2 }))
+      console.log(`LavaMoat wrote config debug to "${policyDebugPath}"`)
     }
-    // write policy file
+    // cleanup debug info
     delete policy.debugInfo
-    const serializedConfig = jsonStringify(policy, { space: 2 })
-    fs.writeFileSync(policyPath, serializedConfig)
-    console.log(`LavaMoat wrote policy to "${policyPath}"`)
+    // write config file
+    fs.mkdirSync(path.dirname(policyPath), { recursive: true })
+    fs.writeFileSync(policyPath, jsonStringify(config, { space: 2 }))
+    console.log(`LavaMoat wrote config to "${policyPath}"`)
   }
   if (shouldRunApplication) {
     // execution mode

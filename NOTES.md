@@ -4,16 +4,17 @@
   - [ ] slides
   - [ ] webtorrent demo
     - [x] allow-scripts
-    - [ ] viz
-      - [ ] how to view both?
+    - [x] viz
+      - [x] how to view both?
     - [ ] node
       - [x] basic
       - [ ] minify?
     - [ ] browserify
-    - [ ] config location conflict?
+    - [x] config location conflict?
 
+  - [ ] yarn/npm ignore scripts rc
   - [ ] review readmes
-    - [ ] module exports defense + cytoplasm
+    - [ ] update module exports defense + cytoplasm
   - [ ] viz for node is too red
   - [ ] re-do intro video/s
   - [ ] globals: BigInt, __dirname

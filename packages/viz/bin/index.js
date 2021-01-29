@@ -4,42 +4,45 @@
 
 const { promises: fs } = require('fs')
 const path = require('path')
+const http = require('http')
 const yargs = require('yargs')
 const { ncp } = require('ncp')
 const pify = require('pify')
 const openUrl = require('open')
-const { mergeConfig } = require('lavamoat-core')
+const handler = require('serve-handler')
+const { mergeConfig, getDefaultPaths } = require('lavamoat-core')
+
+const defaultPaths = getDefaultPaths('node')
+const commandDefaults = {
+  dest: 'viz/',
+  policiesDir: defaultPaths.policiesDir,
+  policyNames: [],
+}
 
 main().catch((err) => console.error(err))
 
 function parseArgs () {
+  const defaultCommand = 'generate'
   const argsParser = yargs
-    .usage('$0', 'generate topological visualization for dep graph', () => {
+    .usage('Usage: $0 <command> [options]')
+    .command(['generate', '$0'], 'generate topological visualization for dep graph', (yargs) => {
       // path to write viz output
       yargs.option('dest', {
         describe: 'path to write viz output',
         type: 'string',
-        default: './viz/',
+        default: commandDefaults.dest,
       })
-      // the path for the debug-config file
-      yargs.option('debugConfig', {
-        describe: 'the path for the debug-config file',
+      // the directory containing the individual policy directories
+      yargs.option('policiesDir', {
+        describe: 'the directory containing the individual policy directories',
         type: 'string',
-        default: './lavamoat-config-debug.json',
+        default: commandDefaults.policiesDir,
       })
-      // the path for the config file
-      yargs.option('config', {
-        alias: 'configPath',
-        describe: 'the path for the config file',
-        type: 'string',
-        default: './lavamoat-config.json'
-      })
-      // the path for the config override file
-      yargs.option('configOverride', {
-        alias: 'configOverridePath',
-        describe: 'the path for the config override file',
-        type: 'string',
-        default: './lavamoat-config-override.json'
+      // the name of the policies to include in the dashboard under the policies directory. default: all
+      yargs.option('policyNames', {
+        describe: 'the name of the policies to include in the dashboard under the policies directory. default: all',
+        type: 'array',
+        default: commandDefaults.policyNames,
       })
       // open the output dir
       yargs.option('open', {
@@ -47,30 +50,137 @@ function parseArgs () {
         type: 'boolean',
         default: false,
       })
+      // open the output dir
+      yargs.option('serve', {
+        describe: 'serve the visualization via a static server',
+        type: 'boolean',
+        default: false,
+      })
+    })
+    .command('serve', 'serve the visualization via a static server', (yargs) => {
+      // path to serve viz output
+      yargs.option('dest', {
+        describe: 'path to serve the viz from',
+        type: 'string',
+        default: commandDefaults.dest,
+      })
     })
     .help()
+    .strict()
 
   const parsedArgs = argsParser.parse()
+  parsedArgs.command = parsedArgs['_'][0] || defaultCommand
   return parsedArgs
 }
 
 async function main () {
-  const { debugConfig, config, configOverride, dest, open } = parseArgs()
+  const args = parseArgs()
+  const { command, dest } = args
+  switch (command) {
+    case 'generate':  {
+      // newline for clearer output
+      console.info('')
+      return await generateViz(args)
+    }
+    case 'serve':  {
+      console.info('serving a pre-built dashboard. to generate new dashboard and serve use "lavamoat-viz --serve"')
+      console.info('this is equivalent to "npx serve ./viz"')
+      console.info('\n')
+      const fullDest = path.resolve(dest)
+      return await serveViz(dest)
+    }
+    default: {
+      throw new Error(`Unknown command "${command}"`)
+    }
+  }
+}
+
+async function generateViz (args) {
+  let { dest, open, serve, policiesDir, policyNames } = args
   const fullDest = path.resolve(dest)
   const source = path.join(__dirname, '/../dist/')
   // copy app dir
   await fs.mkdir(fullDest, { recursive: true })
   await pify((cb) => ncp(source, fullDest, cb))()
-  // add data-injection file
-  const debugConfigContent = await fs.readFile(debugConfig, 'utf8')
-  const configContent = await fs.readFile(config, 'utf8')
-  const configOverrideContent = await fs.readFile(configOverride, 'utf8')
-  const finalConfigString = JSON.stringify(mergeConfig(JSON.parse(configContent), JSON.parse(configOverrideContent)))
-  const dataInjectionContent = `globalThis.CONFIG_DEBUG = ${debugConfigContent}; globalThis.CONFIG = ${configContent}; globalThis.CONFIG_OVERRIDE = ${configOverrideContent}; globalThis.CONFIG_FINAL = ${finalConfigString};`
-  
-  await fs.writeFile(`${fullDest}/injectConfigDebugData.js`, dataInjectionContent)
-  if (open) {
-    openUrl(`file:///${fullDest}/index.html`)
+  // load policy names if not specified
+  if (!policyNames.length) {
+    policyNames = await getDirectories(policiesDir)
   }
+  // write each policy data injection
+  const policyDataInjectionFilePath = await Promise.all(policyNames.map(async (policyName) => {
+    return await createPolicyDataFile({ policyName, fullDest })
+  }))
+  // add data-injection file
+  const dataInjectionContent = policyDataInjectionFilePath
+    // .map(filepath => { console.log(filepath, fullDest, path.relative(fullDest, filepath)); return filepath;})
+    .map(filepath => path.relative(fullDest, filepath))
+    .map(relPath => `import "./${relPath}";`)
+    .join('\n')
+  await fs.writeFile(`${fullDest}/injectConfigDebugData.js`, dataInjectionContent)
+
+  // dashboard prepared! report done
   console.log(`generated viz in "${dest}"`)
+  let dashboardUrl
+  if (serve) {
+    dashboardUrl = await serveViz(fullDest)
+  }
+
+  // trigger opening of dashboard
+  if (open) {
+    if (serve) {
+      openUrl(dashboardUrl)
+    } else {
+      openUrl(`file:///${fullDest}/index.html`)
+    }
+  }
+}
+
+async function serveViz (fullDest) {
+  const server = http.createServer((req, res) => handler(req, res, { public: fullDest }))
+  const port = 5000
+  const url = `http://localhost:${port}`
+  await new Promise(resolve => server.listen(port, resolve))
+  console.log(`Running at ${url}`)
+  return url
+}
+
+async function createPolicyDataFile ({ policyName, fullDest }) {
+  const policyData = await loadPolicyData(policyName)
+  // json esm modules dont exist yet so we do this
+  const policyDataInjectionContent = `
+  const policies = globalThis.LavamoatPolicies = globalThis.LavamoatPolicies || {};
+  policies["${policyName}"] = ${JSON.stringify(policyData, null, 2)};
+  `
+  // write to disk
+  const filepath = path.join(fullDest, `policy-${policyName}.js`)
+  await fs.writeFile(filepath, policyDataInjectionContent)
+  return filepath
+}
+
+async function loadPolicyData (policyName) {
+  const defaultPaths = getDefaultPaths(policyName)
+  const [
+    debug,
+    primary,
+    override,
+  ] = await Promise.all([
+    loadPolicyFile(defaultPaths.debug),
+    loadPolicyFile(defaultPaths.primary),
+    loadPolicyFile(defaultPaths.override),
+  ])
+  const policyData = { primary, override, debug }
+  return policyData
+}
+
+async function loadPolicyFile (filepath) {
+  const content = await fs.readFile(filepath, 'utf8')
+  const policy = JSON.parse(content)
+  return policy
+}
+
+async function getDirectories (filepath) {
+  const dirEntries = await fs.readdir(filepath, { withFileTypes: true })
+  return dirEntries
+    .filter(entry => entry.isDirectory())
+    .map(dir => dir.name)
 }
