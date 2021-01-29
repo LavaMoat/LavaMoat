@@ -23,7 +23,7 @@ module.exports = [
       },
       expectedResult: 5,
       opts: {
-        p: true,
+        p: '',
         pp: true,
         d: true,
         dp: true
