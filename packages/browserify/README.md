@@ -213,6 +213,11 @@ Here is an example of the policy file with each field explained:
 * `"packages"`: All packages accessible by the parent resource. In this example, `"<root>"` has access to `"react"`.This means that `"<root>"` can `require('react')`.
 * `"globals"`: All platform APIs and global variables accessible by parent resource. In this example,`"react"` has access to `console`. Global access is read-only, unless defined by the `write` value. React can therefore read from AND mutate `window.postMessage`(!!).
 
+### Lavamoat Viz
+
+The [lavamoat viz][lavamoatViz] is a tool to visualize an application's dependency graph and assess package dangerousness.
+[lavamoatViz]: https://lavamoat.github.io/LavaMoat/
+
 ### Introduction to LavaMoat Video
 
 [![introduction to LavaMoat](https://img.youtube.com/vi/pOTEJy_FqIA/0.jpg)](https://www.youtube.com/watch?v=pOTEJy_FqIA)
