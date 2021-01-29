@@ -2,12 +2,13 @@
   "name": "lavamoat-viz",
   "description": "This is a dashboard for exploring a dependency graph and LavaMoat policy file",
   "main": "index.js",
-  "version": "5.0.2",
+  "version": "6.0.0-pre1",
   "dependencies": {
-    "lavamoat-core": "^6.4.4",
+    "lavamoat-core": "8.0.0-pre1",
     "ncp": "^2.0.0",
     "open": "^7.0.3",
     "pify": "^4.0.1",
+    "serve-handler": "^6.1.3",
     "yargs": "^16.0.0"
   },
   "devDependencies": {
@@ -15,7 +16,9 @@
     "@babel/preset-env": "^7.10.4",
     "@babel/preset-react": "^7.8.3",
     "@metamask/eslint-config": "2",
+    "arr-union": "^3.1.0",
     "babel-loader": "8.0.5",
+    "clone-deep": "^4.0.1",
     "codemirror": "^5.54.0",
     "copy-webpack-plugin": "^6.0.3",
     "css-loader": "1.0.0",
@@ -26,6 +29,7 @@
     "esm": "^3.2.25",
     "gh-pages": "^2.2.0",
     "html-webpack-plugin": "4.0.0-alpha.2",
+    "kind-of": "^6.0.3",
     "react": "^16.8.6",
     "react-bootstrap": "^1.0.0-beta.8",
     "react-codemirror2": "^7.1.0",
@@ -43,6 +47,9 @@
   "scripts": {
     "analyze": "source-map-explorer 'build/static/js/*.js'",
     "start": "webpack-dev-server --config ./src/webpack.config.js",
+    "test": "yarn build",
+    "lint": "eslint src/**/*.js",
+    "lint:fix": "yarn lint --fix",
     "build": "webpack --config ./src/webpack.config.js",
     "deploy": "yarn run build && gh-pages -d dist",
     "prepublishOnly": "yarn run deploy"

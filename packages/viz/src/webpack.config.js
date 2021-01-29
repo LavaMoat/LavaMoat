@@ -34,10 +34,11 @@ module.exports = {
   plugins: [
     new HtmlWebPackPlugin({
       template: path.join(__dirname, '../src/index.html'),
+      inject: false,
     }),
     new CopyPlugin({
       patterns: [
-        { from: './src/example-config-all.js', to: `${distPath}/injectConfigDebugData.js` },
+        { from: './src/example-policies/', to: `${distPath}/` },
       ],
     }),
   ],

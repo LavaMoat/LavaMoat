@@ -1,12 +1,11 @@
 // const h = require('virtual-dom/h')
 // const s = require('virtual-dom/virtual-hyperscript/svg')
-const h = require('react-hyperscript')
+// const h = require('react-hyperscript')
 const s = require('react-hyperscript')
-
 
 module.exports = renderGraph
 
-function renderGraph(state, actions, { renderNode, renderLink }) {
+function renderGraph (state, actions, { renderNode, renderLink }) {
   const { graph } = state
   const { nodes, links } = graph
 
