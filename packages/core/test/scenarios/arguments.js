@@ -11,7 +11,7 @@ module.exports = [
       opts: {
         a: true
       },
-      shouldRunInCore: false,
+      shouldRunInCore: false
     })
     return scenario
   },
@@ -28,7 +28,7 @@ module.exports = [
         d: true,
         dp: true
       },
-      shouldRunInCore: false,
+      shouldRunInCore: false
     })
     return scenario
   },

@@ -75,40 +75,41 @@ function parseArgs () {
       // the path for the policy file
       yargs.option('policy', {
         alias: ['p', 'policyPath'],
-        describe: 'the path for the policy file',
+        describe: 'Pass in policy. Accepts a filepath string to the existing policy. When used in conjunction with --autopolicy, specifies where to write the policy. Default: ./lavamoat/node/policy.json',
         type: 'string',
         default: defaultPaths.primary
       })
       // the path for the policy override file
       yargs.option('policyOverride', {
         alias: ['o', 'override', 'policyOverridePath'],
-        describe: 'the path for the policy override file',
+        describe: 'Pass in override policy. Accepts a filepath string to the existing override policy. Default: ./lavamoat/node/policy-override.json',
         type: 'string',
         default: defaultPaths.override
       })
       // the path for the policy debug file
       yargs.option('policyDebug', {
-        alias: ['policyDebugPath'],
-        describe: 'the path for the policy debug file',
+        alias: ['pd', 'policydebug', 'policyDebugPath'],
+        describe: 'Pass in debug policy. Accepts a filepath string to the existing debug policy. Default: ./lavamoat/node/policy-debug.json',
         type: 'string',
         default: defaultPaths.debug
       })
       // debugMode, disable some protections for easier debugging
       yargs.option('debugMode', {
-        alias: ['d', 'debugmode'],
-        describe: 'debugMode, disable some protections for easier debugging',
+        alias: ['d', 'debug'],
+        describe: 'Disable some protections and extra logging for easier debugging.',
         type: 'boolean',
         default: false
       })
       // parsing mode, write policy to policy path
       yargs.option('writeAutoPolicy', {
         alias: ['a', 'autopolicy'],
-        describe: 'parse the application from the entry file and generate a LavaMoat policy file.',
+        describe: 'Generate a "policy.json" and "policy-override.json" in the current working         directory. Overwrites any existing policy files. The override policy is for making manual policy changes and always takes precedence over the automatically generated policy.',
         type: 'boolean',
         default: false
       })
       // parsing + run mode, write policy to policy path then execute with new policy
       yargs.option('writeAutoPolicyAndRun', {
+        alias: ['ar', 'autorun'],
         describe: 'parse + generate a LavaMoat policy file then execute with the new policy.',
         type: 'boolean',
         default: false

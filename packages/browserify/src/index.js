@@ -95,7 +95,7 @@ function getConfigurationFromPluginOpts (pluginOpts) {
     prunepolicy: 'prunePolicy',
     d: 'debugMode',
     debug: 'debugMode',
-    pn: 'policyName',
+    pn: 'policyName'
   }
 
   const allowedKeys = new Set([
