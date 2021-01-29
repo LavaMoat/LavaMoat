@@ -1,6 +1,6 @@
 
-/* eslint-disable no-template-curly-in-string */
-const policies = globalThis.LavamoatPolicies || {}
+/* eslint-disable no-template-curly-in-string, no-multi-assign */
+const policies = globalThis.LavamoatPolicies = globalThis.LavamoatPolicies || {}
 policies.node = {
   'primary': {
     'resources': {
