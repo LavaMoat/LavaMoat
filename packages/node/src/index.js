@@ -17,42 +17,42 @@ runLava().catch(err => {
 async function runLava () {
   const {
     entryPath,
-    writeAutoConfig,
-    writeAutoConfigDebug,
-    writeAutoConfigAndRun,
-    configPath,
-    configDebugPath,
-    configOverridePath,
+    writeAutoPolicy,
+    writeAutoPolicyDebug,
+    writeAutoPolicyAndRun,
+    policyPath,
+    policyDebugPath,
+    policyOverridePath,
     debugMode
   } = parseArgs()
   const cwd = process.cwd()
   const entryId = path.resolve(cwd, entryPath)
 
-  const shouldParseApplication = writeAutoConfig || writeAutoConfigDebug || writeAutoConfigAndRun
-  const shouldRunApplication = (!writeAutoConfig && !writeAutoConfigDebug) || writeAutoConfigAndRun
+  const shouldParseApplication = writeAutoPolicy || writeAutoPolicyDebug || writeAutoPolicyAndRun
+  const shouldRunApplication = (!writeAutoPolicy && !writeAutoPolicyDebug) || writeAutoPolicyAndRun
 
   if (shouldParseApplication) {
     // parse mode
-    const includeDebugInfo = Boolean(writeAutoConfigDebug)
-    const { resolutions } = await loadConfig({ debugMode, configPath, configOverridePath })
-    console.log(`LavaMoat generating config from entry "${entryId}"...`)
-    const config = await parseForConfig({ cwd, entryId, resolutions, includeDebugInfo })
-    // write config debug file
+    const includeDebugInfo = Boolean(writeAutoPolicyDebug)
+    const { resolutions } = await loadPolicy({ debugMode, policyPath, policyOverridePath })
+    console.log(`LavaMoat generating policy from entry "${entryId}"...`)
+    const policy = await parseForConfig({ cwd, entryId, resolutions, includeDebugInfo })
+    // write policy debug file
     if (includeDebugInfo) {
-      fs.mkdirSync(path.dirname(configDebugPath), { recursive: true })
-      fs.writeFileSync(configDebugPath, jsonStringify(config, { space: 2 }))
-      console.log(`LavaMoat wrote config debug to "${configDebugPath}"`)
+      fs.mkdirSync(path.dirname(policyDebugPath), { recursive: true })
+      fs.writeFileSync(policyDebugPath, jsonStringify(policy, { space: 2 }))
+      console.log(`LavaMoat wrote policy debug to "${policyDebugPath}"`)
     }
     // cleanup debug info
-    delete config.debugInfo
-    // write config file
-    fs.mkdirSync(path.dirname(configPath), { recursive: true })
-    fs.writeFileSync(configPath, jsonStringify(config, { space: 2 }))
-    console.log(`LavaMoat wrote config to "${configPath}"`)
+    delete policy.debugInfo
+    // write policy file
+    fs.mkdirSync(path.dirname(policyPath), { recursive: true })
+    fs.writeFileSync(policyPath, jsonStringify(policy, { space: 2 }))
+    console.log(`LavaMoat wrote policy to "${policyPath}"`)
   }
   if (shouldRunApplication) {
     // execution mode
-    const lavamoatConfig = await loadConfig({ debugMode, configPath, configOverridePath })
+    const lavamoatConfig = await loadPolicy({ debugMode, policyPath, policyOverridePath })
     const kernel = createKernel({ cwd, lavamoatConfig, debugMode })
     // patch process.argv so it matches the normal pattern
     // e.g. [runtime path, entrypoint, ...args]
@@ -73,48 +73,52 @@ function parseArgs () {
         describe: 'the path to the entry file for your application. same as node.js',
         type: 'string'
       })
-      // the path for the config file
-      yargs.option('config', {
-        alias: 'configPath',
-        describe: 'the path for the config file',
+      // the path for the policy file
+      yargs.option('policy', {
+        alias: ['p', 'policyPath'],
+        describe: 'Pass in policy. Accepts a filepath string to the existing policy. When used in conjunction with --autopolicy, specifies where to write the policy. Default: ./lavamoat/node/policy.json',
         type: 'string',
         default: defaultPaths.primary
       })
-      // the path for the config override file
-      yargs.option('configOverride', {
-        alias: 'configOverridePath',
-        describe: 'the path for the config override file',
+      // the path for the policy override file
+      yargs.option('policyOverride', {
+        alias: ['o', 'override', 'policyOverridePath'],
+        describe: 'Pass in override policy. Accepts a filepath string to the existing override policy. Default: ./lavamoat/node/policy-override.json',
         type: 'string',
         default: defaultPaths.override
       })
-      // the path for the config debug file
-      yargs.option('configDebug', {
-        alias: 'configDebugPath',
-        describe: 'the path for the config override file',
+      // the path for the policy debug file
+      yargs.option('policyDebug', {
+        alias: ['pd', 'policydebug', 'policyDebugPath'],
+        describe: 'Pass in debug policy. Accepts a filepath string to the existing debug policy. Default: ./lavamoat/node/policy-debug.json',
         type: 'string',
         default: defaultPaths.debug
       })
       // debugMode, disable some protections for easier debugging
       yargs.option('debugMode', {
-        describe: 'debugMode, disable some protections for easier debugging',
+        alias: ['d', 'debug'],
+        describe: 'Disable some protections and extra logging for easier debugging.',
         type: 'boolean',
         default: false
       })
-      // parsing mode, write config to config path
-      yargs.option('writeAutoConfig', {
-        describe: 'parse the application from the entry file and generate a LavaMoat config file.',
+      // parsing mode, write policy to policy path
+      yargs.option('writeAutoPolicy', {
+        alias: ['a', 'autopolicy'],
+        describe: 'Generate a "policy.json" and "policy-override.json" in the current working         directory. Overwrites any existing policy files. The override policy is for making manual policy changes and always takes precedence over the automatically generated policy.',
         type: 'boolean',
         default: false
       })
-      // parsing + run mode, write config to config path then execute with new config
-      yargs.option('writeAutoConfigAndRun', {
-        describe: 'parse + generate a LavaMoat config file then execute with the new config.',
+      // parsing + run mode, write policy to policy path then execute with new policy
+      yargs.option('writeAutoPolicyAndRun', {
+        alias: ['ar', 'autorun'],
+        describe: 'parse + generate a LavaMoat policy file then execute with the new policy.',
         type: 'boolean',
         default: false
       })
-      // parsing mode, write config debug info to specified or default path
-      yargs.option('writeAutoConfigDebug', {
-        describe: 'when writeAutoConfig is enabled, write config debug info to specified or default path',
+      // parsing mode, write policy debug info to specified or default path
+      yargs.option('writeAutoPolicyDebug', {
+        alias: ['dp', 'debugpolicy'],
+        describe: 'when writeAutoPolicy is enabled, write policy debug info to specified or default path',
         type: 'boolean',
         default: false
       })
@@ -123,31 +127,31 @@ function parseArgs () {
 
   const parsedArgs = argsParser.parse()
   // resolve paths
-  parsedArgs.configPath = path.resolve(parsedArgs.configPath)
-  parsedArgs.configOverridePath = path.resolve(parsedArgs.configOverridePath)
-  parsedArgs.configDebugPath = path.resolve(parsedArgs.configDebugPath)
+  parsedArgs.policyPath = path.resolve(parsedArgs.policyPath)
+  parsedArgs.policyOverridePath = path.resolve(parsedArgs.policyOverridePath)
+  parsedArgs.policyDebugPath = path.resolve(parsedArgs.policyDebugPath)
 
   return parsedArgs
 }
 
-async function loadConfig ({ debugMode, configPath, configOverridePath }) {
-  let config = { resources: {} }
-  // try config
-  if (fs.existsSync(configPath)) {
-    if (debugMode) console.warn(`Lavamoat looking for config at ${configPath}`)
-    const configSource = fs.readFileSync(configPath, 'utf8')
-    config = JSON.parse(configSource)
+async function loadPolicy ({ debugMode, policyPath, policyOverridePath }) {
+  let policy = { resources: {} }
+  // try policy
+  if (fs.existsSync(policyPath)) {
+    if (debugMode) console.warn(`Lavamoat looking for policy at ${policyPath}`)
+    const configSource = fs.readFileSync(policyPath, 'utf8')
+    policy = JSON.parse(configSource)
   } else {
-    if (debugMode) console.warn('Lavamoat could not find config')
+    if (debugMode) console.warn('Lavamoat could not find policy')
   }
-  // try config override
-  if (fs.existsSync(configOverridePath)) {
-    if (debugMode) console.warn(`Lavamoat looking for override config at ${configOverridePath}`)
-    const configSource = fs.readFileSync(configOverridePath, 'utf8')
+  // try policy override
+  if (fs.existsSync(policyOverridePath)) {
+    if (debugMode) console.warn(`Lavamoat looking for override policy at ${policyOverridePath}`)
+    const configSource = fs.readFileSync(policyOverridePath, 'utf8')
     const overrideConfig = JSON.parse(configSource)
-    config = mergeConfig(config, overrideConfig)
+    policy = mergeConfig(policy, overrideConfig)
   } else {
-    if (debugMode) console.warn('Lavamoat could not find config override')
+    if (debugMode) console.warn('Lavamoat could not find policy override')
   }
-  return config
+  return policy
 }

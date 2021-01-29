@@ -34,7 +34,7 @@ test('globalWrites - deep endow', async (t) => {
     }
   ]
 
-  const config = {
+  const policy = {
     resources: {
       '<root>': {
         packages: {
@@ -57,7 +57,7 @@ test('globalWrites - deep endow', async (t) => {
     }
   }
 
-  const bundle = await createBundleFromRequiresArray(entries, { config })
+  const bundle = await createBundleFromRequiresArray(entries, { policy })
   const testResult = evalBundle(bundle)
 
   t.deepEqual(testResult.value, true)

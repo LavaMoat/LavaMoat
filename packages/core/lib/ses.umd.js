@@ -60601,7 +60601,7 @@
         _marked2 = regenerator.mark(findPackageData),
         _marked3 = regenerator.mark(findRelativeConfig),
         _marked4 = regenerator.mark(findRootConfig),
-        _marked5 = regenerator.mark(loadConfig);
+        _marked5 = regenerator.mark(loadPolicy);
 
     function findConfigUpwards(rootDir) {
       return regenerator.wrap(function findConfigUpwards$(_context) {
@@ -60668,8 +60668,8 @@
         }
       }, _marked4);
     }
-    function loadConfig(name, dirname, envName, caller) {
-      return regenerator.wrap(function loadConfig$(_context5) {
+    function loadPolicy(name, dirname, envName, caller) {
+      return regenerator.wrap(function loadPolicy$(_context5) {
         while (1) {
           switch (_context5.prev = _context5.next) {
             case 0:
@@ -63009,7 +63009,7 @@
                 break;
               }
 
-              return _context2.delegateYield(loadConfig(opts.configFile, context.cwd, context.envName, context.caller), "t1", 6);
+              return _context2.delegateYield(loadPolicy(opts.configFile, context.cwd, context.envName, context.caller), "t1", 6);
 
             case 6:
               configFile = _context2.t1;
@@ -63381,7 +63381,7 @@
               return _context4.abrupt("return", true);
 
             case 2:
-              return _context4.delegateYield(loadConfig(opts["extends"], dirname, context.envName, context.caller), "t0", 3);
+              return _context4.delegateYield(loadPolicy(opts["extends"], dirname, context.envName, context.caller), "t0", 3);
 
             case 3:
               file = _context4.t0;
@@ -63888,7 +63888,7 @@
 
     var _marked$4 = regenerator.mark(loadPluginDescriptor),
         _marked2$4 = regenerator.mark(loadPresetDescriptor);
-    var loadConfig$1 = gensync(regenerator.mark(function loadFullConfig(inputOpts) {
+    var loadPolicy$1 = gensync(regenerator.mark(function loadFullConfig(inputOpts) {
       var result, options, context, optionDefaults, passes, plugins, presets, ignored, opts;
       return regenerator.wrap(function loadFullConfig$(_context2) {
         while (1) {
@@ -64396,7 +64396,7 @@
         while (1) {
           switch (_context.prev = _context.next) {
             case 0:
-              return _context.delegateYield(loadConfig$1(opts), "t0", 1);
+              return _context.delegateYield(loadPolicy$1(opts), "t0", 1);
 
             case 1:
               config = _context.t0;
@@ -65297,7 +65297,7 @@
     var LOADED_PLUGIN;
     function loadBlockHoistPlugin() {
       if (!LOADED_PLUGIN) {
-        var config = loadConfig$1.sync({
+        var config = loadPolicy$1.sync({
           babelrc: false,
           configFile: false,
           plugins: [blockHoistPlugin]
@@ -66607,7 +66607,7 @@
         while (1) {
           switch (_context.prev = _context.next) {
             case 0:
-              return _context.delegateYield(loadConfig$1(opts), "t0", 1);
+              return _context.delegateYield(loadPolicy$1(opts), "t0", 1);
 
             case 1:
               config = _context.t0;
@@ -66664,7 +66664,7 @@
         while (1) {
           switch (_context.prev = _context.next) {
             case 0:
-              return _context.delegateYield(loadConfig$1(opts), "t0", 1);
+              return _context.delegateYield(loadPolicy$1(opts), "t0", 1);
 
             case 1:
               config = _context.t0;
@@ -66718,7 +66718,7 @@
         while (1) {
           switch (_context.prev = _context.next) {
             case 0:
-              return _context.delegateYield(loadConfig$1(opts), "t0", 1);
+              return _context.delegateYield(loadPolicy$1(opts), "t0", 1);
 
             case 1:
               config = _context.t0;
@@ -86383,7 +86383,7 @@
       getStat: function getStat(opts) {
         return opts.stats;
       },
-      loadConfig: function loadConfig(opts) {
+      loadPolicy: function loadPolicy(opts) {
         if (opts.config) {
           throw new error('Browserslist config are not supported in client-side build');
         }
@@ -86798,7 +86798,7 @@
       }
 
       if (typeof queries === 'undefined' || queries === null) {
-        var config = browserslist.loadConfig(opts);
+        var config = browserslist.loadPolicy(opts);
 
         if (config) {
           queries = config;
@@ -86939,7 +86939,7 @@
     browserslist.parseConfig = browser$6.parseConfig;
     browserslist.readConfig = browser$6.readConfig;
     browserslist.findConfig = browser$6.findConfig;
-    browserslist.loadConfig = browser$6.loadConfig;
+    browserslist.loadPolicy = browser$6.loadPolicy;
 
     browserslist.coverage = function (browsers, stats) {
       var data;

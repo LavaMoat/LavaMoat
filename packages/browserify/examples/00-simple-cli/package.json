@@ -4,8 +4,8 @@
     "serve": "^11.3.0"
   },
   "scripts": {
-    "lavamoat": "browserify index.js --plugin [ lavamoat-browserify --writeAutoConfig --config ./lavamoat-config.json ] > /dev/null",
-    "start": "browserify index.js --plugin [ lavamoat-browserify --config ./lavamoat-config.json ] > bundle.js && serve ."
+    "lavamoat": "browserify index.js --plugin [ lavamoat-browserify --writeAutoPolicy --policy ./policy.json ] > /dev/null",
+    "start": "browserify index.js --plugin [ lavamoat-browserify --policy ./policy.json ] > bundle.js && serve ."
   },
   "dependencies": {
     "metamask-logo": "^2.2.1"

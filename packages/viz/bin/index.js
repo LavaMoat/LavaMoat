@@ -117,14 +117,14 @@ async function generateViz (args) {
     .map(relPath => `import "./${relPath}";`)
     .join('\n')
   await fs.writeFile(`${fullDest}/injectConfigDebugData.js`, dataInjectionContent)
-  
+
   // dashboard prepared! report done
   console.log(`generated viz in "${dest}"`)
   let dashboardUrl
   if (serve) {
     dashboardUrl = await serveViz(fullDest)
   }
-  
+
   // trigger opening of dashboard
   if (open) {
     if (serve) {

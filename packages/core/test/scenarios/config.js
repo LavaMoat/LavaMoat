@@ -1,14 +1,14 @@
 const { createScenarioFromScaffold } = require('../util.js')
 
-const configOverride = {
-  resources: {
-    three: {
-      packages: {
-        two: true
-      }
-    }
-  }
-}
+// const configOverride = {
+//   resources: {
+//     three: {
+//       packages: {
+//         two: true
+//       }
+//     }
+//   }
+// }
 
 module.exports = [
   // async () => {
@@ -96,27 +96,30 @@ module.exports = [
   //   })
   //   return scenario
   // },
-  async () => {
-    const scenario = createScenarioFromScaffold({
-      name: 'config - applies override, provided as file path string',
-      defineOne: () => {
-        module.exports = require('three')
-      },
-      defineTwo: () => {
-        module.exports = 555
-      },
-      defineThree: () => {
-        module.exports = require('two')
-      },
-      configOverride,
-      opts: {
-        configOverride: 'policy-override.json'
-      },
-      expectedResult: 555,
-      shouldRunInCore: false
-    })
-    return scenario
-  },
+  // intended to test passing into JS API and not over file system
+  // async () => {
+  //   const scenario = createScenarioFromScaffold({
+  //     name: 'config - applies override, provided as file path string',
+  //     defineOne: () => {
+  //       module.exports = require('three')
+  //     },
+  //     defineTwo: () => {
+  //       module.exports = 555
+  //     },
+  //     defineThree: () => {
+  //       module.exports = require('two')
+  //     },
+  //     // what's being written to disk
+  //     configOverride,
+  //     // what's being passed into run lavamoat
+  //     opts: {
+  //       policyOverride: 'policy-override.json'
+  //     },
+  //     expectedResult: 555,
+  //     shouldRunInCore: false
+  //   })
+  //   return scenario
+  // },
   // intended to test passing into JS API and not over file system
   // async () => {
   //   const scenario = createScenarioFromScaffold({
@@ -132,7 +135,7 @@ module.exports = [
   //     },
   //     configOverride,
   //     opts: {
-  //       configOverride: () => configOverride
+  //       policyOverride: () => configOverride
   //     },
   //     expectedResult: 555,
   //     shouldRunInCore: false

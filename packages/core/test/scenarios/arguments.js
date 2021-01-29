@@ -11,11 +11,7 @@ module.exports = [
       opts: {
         a: true
       },
-      shouldRunInCore: false,
-      // prevent from running in lavamoat node for now
-      context: {
-        bleep: 'bloop'
-      }
+      shouldRunInCore: false
     })
     return scenario
   },
@@ -27,16 +23,12 @@ module.exports = [
       },
       expectedResult: 5,
       opts: {
-        p: true,
-        pc: true,
+        p: '',
+        pp: true,
         d: true,
-        dc: true
+        dp: true
       },
-      shouldRunInCore: false,
-      // prevent from running in lavamoat node for now
-      context: {
-        bleep: 'bloop'
-      }
+      shouldRunInCore: false
     })
     return scenario
   },
@@ -52,7 +44,7 @@ module.exports = [
       },
       shouldRunInCore: false,
       expectedFailure: true,
-      // prevent from running in lavamoat node for now
+      // prevent from running in lavamoat node for now. Current setup does not allow testing this
       context: {
         bleep: 'bloop'
       }
