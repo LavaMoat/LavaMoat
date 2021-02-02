@@ -1,22 +1,13 @@
-const logicalTree = require('npm-logical-tree')
-const yarnLockfileParser = require('@yarnpkg/lockfile')
 const { promises: fs } = require('fs')
 const path = require('path')
 const { promisify } = require('util')
 const resolve = promisify(require('resolve'))
 const semver = require('semver')
+const logicalTree = require('npm-logical-tree')
+const yarnLockfileParser = require('@yarnpkg/lockfile')
+const npmRunScript = require('@npmcli/run-script')
 const yarnLogicalTree = require('./yarnLogicalTree')
 
-
-/*
-
-- list
-- map to package
-- filter for scripts
-- filter for allowlist
-- run all toplevel and child scripts
-
-*/
 
 module.exports = {
   // primary
@@ -91,10 +82,8 @@ async function runAllScriptsForEvent ({ event, packages }) {
   }
 }
 
-async function runScript ({ path, event }) {
-  const runScript = require('@npmcli/run-script')
- 
-  const { code, signal, stdout, stderr, pkgid, script } = await runScript({
+async function runScript ({ path, event }) { 
+  const { code, signal, stdout, stderr, pkgid, script } = await npmRunScript({
     // required, the script to run
     // event: 'install',
     event,
