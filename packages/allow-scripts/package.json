@@ -15,5 +15,15 @@
   },
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "description": "a tool for only running dependency lifecycle hooks specified in an allowlist",
+  "directories": {
+    "test": "test"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "homepage": "https://github.com/LavaMoat/LavaMoat/tree/main/packages/allow-scripts"
 }
