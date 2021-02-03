@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "echo \"Error: no test specified\"",
     "preinstall": "echo \"Don't run npm lifecycle scripts by default, whitelist them with @lavamoat/allow-scripts\" && exit 1"
   },
   "publishConfig": {
@@ -12,5 +12,5 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "MIT"
 }
