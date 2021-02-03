@@ -22,7 +22,7 @@
   },
   "devDependencies": {},
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\""
   },
   "author": "",
   "homepage": "https://github.com/LavaMoat/LavaMoat/tree/main/packages/allow-scripts"
