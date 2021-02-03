@@ -33,12 +33,12 @@ ignore-scripts true
 
 run all lifecycle scripts for packages specified in `package.json`
 ```sh
-allow-scripts
+npx allow-scripts
 ```
 
 ### debug
 
 prints comprehension of configuration and dependencies with lifecycle scripts
 ```sh
-allow-scripts list
+npx allow-scripts list
 ```
