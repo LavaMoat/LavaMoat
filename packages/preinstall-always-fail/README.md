@@ -5,7 +5,7 @@ Worried about accidentally running `yarn` or `npm` with script hooks enabled suc
 ## Install
 
 ```
-npm i @lavamoat/pre-install-always-fail
+npm i @lavamoat/preinstall-always-fail
 ```
 
 ## Usage

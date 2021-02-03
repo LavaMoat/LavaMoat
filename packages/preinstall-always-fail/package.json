@@ -1,5 +1,5 @@
 {
-  "name": "pre-install-always-fail",
+  "name": "@lavamoat/preinstall-always-fail",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
