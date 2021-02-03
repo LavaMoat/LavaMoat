@@ -7,6 +7,7 @@
     loadModuleData,
     getRelativeModuleId,
     prepareModuleInitializerArgs,
+    getExternalCompartment,
   }) {
     const debugMode = __lavamoatDebugMode__
 
@@ -46,6 +47,7 @@
       loadModuleData,
       getRelativeModuleId,
       prepareModuleInitializerArgs,
+      getExternalCompartment,
       globalRef,
       debugMode
     })
