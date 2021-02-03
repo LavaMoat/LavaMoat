@@ -1,0 +1,16 @@
+{
+  "name": "pre-install-always-fail",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "preinstall": "echo \"Don't run npm lifecycle scripts by default, whitelist them with @lavamoat/allow-scripts\" && exit 1"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
