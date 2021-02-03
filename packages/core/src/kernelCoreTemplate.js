@@ -43,7 +43,7 @@
     loadModuleData,
     getRelativeModuleId,
     prepareModuleInitializerArgs,
-    getExternalCompartment,
+    getExternalCompartment
   }) {
     // "templateRequire" calls are inlined in "generatePrelude"
     const { getEndowmentsForConfig, makeMinimalViewOfRef } = templateRequire('makeGetEndowmentsForConfig')()
@@ -204,7 +204,7 @@
 
       // setup initializer from moduleSource and compartment.
       // execute in package compartment with globalThis populated per package policy
-      let packageCompartment = getCompartmentForPackage(packageName, packagePolicy)
+      const packageCompartment = getCompartmentForPackage(packageName, packagePolicy)
       // TODO: move all source mutations elsewhere
       try {
         const sourceURL = moduleData.file || `modules/${moduleId}`

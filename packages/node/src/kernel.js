@@ -22,7 +22,7 @@ function createKernel ({ cwd, lavamoatConfig, debugMode }) {
     loadModuleData,
     getRelativeModuleId,
     prepareModuleInitializerArgs,
-    getExternalCompartment,
+    getExternalCompartment
   })
   return kernel
 }
