@@ -22,6 +22,13 @@ automatically generate a configuration (that skips all lifecycle scripts) and wr
 allow-scripts auto
 ```
 
+### disable scripts
+
+disable all scripts by default inside `.yarnrc` or `.npmrc`
+```
+ignore-scripts true
+```
+
 ### run
 
 run all lifecycle scripts for packages specified in `package.json`
