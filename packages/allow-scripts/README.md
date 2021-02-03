@@ -19,7 +19,7 @@ configuration goes in `package.json`
 
 automatically generate a configuration (that skips all lifecycle scripts) and write into `package.json`. edit as necesary.
 ```sh
-allow-scripts auto
+npx allow-scripts auto
 ```
 
 ### disable scripts
