@@ -1,5 +1,6 @@
 {
   "name": "lavamoat-perf",
+  "private": true,
   "version": "0.0.0",
   "scripts": {
     "serve": "serve .",
@@ -18,5 +19,6 @@
   },
   "devDependencies": {
     "serve": "^11.2.0"
-  }
+  },
+  "gitHead": "b5908eb5b2eda4a49fb7abd4d1b6e69fb9a98d0a"
 }
