@@ -10,8 +10,12 @@ function createFreshRealmCompartment () {
   if (!sesCompartmentSrc) {
     sesCompartmentSrc = readFileSync(require.resolve('lavamoat-core/lib/ses.umd.js'), 'utf8')
   }
-  // create a seperate realm for running code in
+  // create a seperate realm for running code
   const context = vm.createContext()
+  // circular ref (used when globalThis is not present)
+  if (!global.globalThis) {
+    context.globalThis = context
+  }
   // run the ses compartment shim, but dont call lockdown
   vm.runInContext(sesCompartmentSrc, context)
   // create the compartment in the other realm
