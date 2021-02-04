@@ -28,7 +28,11 @@ function createKernel ({ cwd, lavamoatConfig, debugMode }) {
 }
 
 function getExternalCompartment (packageName, packagePolicy) {
-  return createFreshRealmCompartment()
+  const envPolicy = packagePolicy.env
+  if (packagePolicy.env === 'unfrozen') {
+    return createFreshRealmCompartment()
+  }
+  throw new Error(`LavaMoat/node - unrecognized "env" policy setting for package "${packageName}", "${envPolicy}"`)
 }
 
 function prepareModuleInitializerArgs (requireRelativeWithContext, moduleObj, moduleData) {
