@@ -37,12 +37,17 @@ test('envConfig - module.exports from the same Realm as its Compartment', async 
       const two = require('two')
       module.exports = {
         one: module.exports instanceof Object,
-        two,
-        cross: two instanceof Object
+        two: two.isSameRealm,
+        cross: two.defaultExportsObj instanceof Object
       }
     },
     defineTwo: () => {
-      module.exports = module.exports instanceof Object
+      const defaultExportsObj = module.exports
+      const isSameRealm = defaultExportsObj instanceof Object
+      module.exports = {
+        defaultExportsObj,
+        isSameRealm
+      }
     },
     expectedResult: {
       one: true,
