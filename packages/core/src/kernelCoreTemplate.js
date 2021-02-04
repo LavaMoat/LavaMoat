@@ -86,14 +86,13 @@
       if (!packageName) throw new Error(`LavaMoat - invalid packageName for module "${moduleId}"`)
       const packagePolicy = getPolicyForPackage(lavamoatConfig, packageName)
 
-      // create the initial moduleObj
-      const moduleObj = { exports: {} }
-      // cache moduleObj here
-      // this is important for cycles in the dep graph
-      // if you dont cache before running the moduleInitializer
-      moduleCache.set(moduleId, moduleObj)
+      // create the moduleObj and initializer
+      const { moduleInitializer, moduleObj } = prepareModuleInitializer(moduleData, packagePolicy)
 
-      const moduleInitializer = prepareModuleInitializer(moduleData, packagePolicy)
+      // cache moduleObj here
+      // this is important to inf loops when hitting cycles in the dep graph
+      // must cache before running the moduleInitializer
+      moduleCache.set(moduleId, moduleObj)
 
       // validate moduleInitializer
       if (typeof moduleInitializer !== 'function') {
@@ -199,7 +198,10 @@
           // here we just ensure that the module type is the only other type with a external moduleInitializer
           throw new Error(`LavaMoat - invalid external moduleInitializer for module type "${moduleData.type}" in package "${packageName}", module "${moduleId}"`)
         }
-        return moduleInitializer
+        // moduleObj must be from the same Realm as the moduleInitializer
+        // here we are assuming the provided moduleInitializer is from the same Realm as this kernel
+        const moduleObj = { exports: {} }
+        return { moduleInitializer, moduleObj }
       }
 
       // setup initializer from moduleSource and compartment.
@@ -211,7 +213,11 @@
         if (sourceURL.includes('\n')) {
           throw new Error(`LavaMoat - Newlines not allowed in filenames: ${JSON.stringify(sourceURL)}`)
         }
-        return packageCompartment.evaluate(`${moduleSource}\n//# sourceURL=${sourceURL}`)
+        // moduleObj must be from the same Realm as the moduleInitializer
+        // the dart2js runtime relies on this for some reason
+        const moduleObj = packageCompartment.evaluate('({ exports: {} })')
+        const moduleInitializer = packageCompartment.evaluate(`${moduleSource}\n//# sourceURL=${sourceURL}`)
+        return { moduleInitializer, moduleObj }
       } catch (err) {
         console.warn(`LavaMoat - Error evaluating module "${moduleId}" from package "${packageName}" \n${err.stack}`)
         throw err
@@ -230,8 +236,9 @@
         .filter(([key]) => !(key in packageCompartment.globalThis))
         // define property on compartment global
         .forEach(([key, desc]) => Reflect.defineProperty(packageCompartment.globalThis, key, desc))
-        // global circular references otherwise added by prepareCompartmentGlobalFromConfig
-        // TODO: should be a platform specific circular ref
+
+      // global circular references otherwise added by prepareCompartmentGlobalFromConfig
+      // TODO: should be a platform specific circular ref
       packageCompartment.globalThis.global = packageCompartment.globalThis
 
       // save the compartment for use by other modules in the package
