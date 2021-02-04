@@ -1,6 +1,6 @@
 {
   "name": "lavamoat-core",
-  "version": "8.0.0",
+  "version": "8.1.0",
   "description": "LavaMoat kernel and utils",
   "main": "src/index.js",
   "directories": {
