@@ -13,7 +13,7 @@
     "lint": "npm run lint:standard && npm run lint:deps",
     "lint:standard": "standard src/**/*.js test/*.js",
     "lint:fix": "standard src/**/*.js test/*.js --fix",
-    "lint:deps": "depcheck --ignores='standard,depcheck' --ignore-dirs examples"
+    "lint:deps": "depcheck --ignores='standard,depcheck,two' --ignore-dirs examples"
   },
   "dependencies": {
     "@babel/code-frame": "^7.10.4",
