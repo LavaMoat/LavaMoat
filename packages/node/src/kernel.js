@@ -6,6 +6,7 @@ const { sanitize } = require('htmlescape')
 const { generateKernel, packageDataForModule } = require('lavamoat-core')
 const { checkForResolutionOverride } = require('./resolutions')
 const { resolutionOmittedExtensions } = require('./parseForConfig')
+const { createFreshRealmCompartment } = require('./freshRealmCompartment')
 
 const nativeRequire = require
 
@@ -20,9 +21,14 @@ function createKernel ({ cwd, lavamoatConfig, debugMode }) {
     lavamoatConfig,
     loadModuleData,
     getRelativeModuleId,
-    prepareModuleInitializerArgs
+    prepareModuleInitializerArgs,
+    getExternalCompartment
   })
   return kernel
+}
+
+function getExternalCompartment (packageName, packagePolicy) {
+  return createFreshRealmCompartment()
 }
 
 function prepareModuleInitializerArgs (requireRelativeWithContext, moduleObj, moduleData) {
