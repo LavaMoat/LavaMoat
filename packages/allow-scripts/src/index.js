@@ -175,7 +175,7 @@ async function setDefaultConfiguration ({ rootDir }) {
 
   if (excessPolicies.length) {
     console.log('\nremoving unneeded configuration for packages:')
-    missingPolicies.forEach(pattern => {
+    excessPolicies.forEach(pattern => {
       console.log(`- ${pattern}`)
       delete allowScriptsConfig[pattern]
     })
