@@ -3,7 +3,7 @@
   "bin": {
     "lavamoat": "src/index.js"
   },
-  "version": "5.1.0",
+  "version": "5.1.1",
   "main": "index.js",
   "license": "MIT",
   "scripts": {
@@ -20,7 +20,7 @@
     "bindings": "^1.5.0",
     "htmlescape": "^1.1.1",
     "json-stable-stringify": "^1.0.1",
-    "lavamoat-core": "^8.1.0",
+    "lavamoat-core": "^8.1.1",
     "lavamoat-tofu": "^5.1.1",
     "node-gyp-build": "^4.2.3",
     "object.fromentries": "^2.0.2",
