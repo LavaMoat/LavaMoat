@@ -29,6 +29,5 @@ test('envConfig - intrinsic protoytype mutating package running in unfrozen real
       }
     })
   const testResult = await runScenario({ scenario })
-  console.log(testResult)
   t.deepEqual(testResult, scenario.expectedResult)
 })

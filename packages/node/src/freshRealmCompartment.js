@@ -13,7 +13,8 @@ function createFreshRealmCompartment () {
   // create a seperate realm for running code
   const context = vm.createContext()
   // circular ref (used when globalThis is not present)
-  if (!global.globalThis) {
+  const needsGlobalThisPath = vm.runInContext('typeof globalThis === "undefined"', context)
+  if (needsGlobalThisPath) {
     context.globalThis = context
   }
   // run the ses compartment shim, but dont call lockdown
