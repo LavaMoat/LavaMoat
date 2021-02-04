@@ -215,7 +215,7 @@
         }
         // moduleObj must be from the same Realm as the moduleInitializer
         // the dart2js runtime relies on this for some reason
-        const moduleObj = packageCompartment.evaluate('{ exports: {} }')
+        const moduleObj = packageCompartment.evaluate('({ exports: {} })')
         const moduleInitializer = packageCompartment.evaluate(`${moduleSource}\n//# sourceURL=${sourceURL}`)
         return { moduleInitializer, moduleObj }
       } catch (err) {
