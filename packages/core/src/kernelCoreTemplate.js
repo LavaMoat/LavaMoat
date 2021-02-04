@@ -10,6 +10,7 @@
     loadModuleData,
     getRelativeModuleId,
     prepareModuleInitializerArgs,
+    getExternalCompartment,
     // security options
     debugMode
   }) {
@@ -26,6 +27,7 @@
       loadModuleData,
       getRelativeModuleId,
       prepareModuleInitializerArgs,
+      getExternalCompartment,
       debugMode
     })
 
@@ -40,7 +42,8 @@
     lavamoatConfig,
     loadModuleData,
     getRelativeModuleId,
-    prepareModuleInitializerArgs
+    prepareModuleInitializerArgs,
+    getExternalCompartment
   }) {
     // "templateRequire" calls are inlined in "generatePrelude"
     const { getEndowmentsForConfig, makeMinimalViewOfRef } = templateRequire('makeGetEndowmentsForConfig')()
@@ -253,11 +256,17 @@
         throw new Error(errMsg)
       }
 
-      // prepare the module's SES Compartment
-      // endowments:
-      // - Math is for untamed Math.random
-      // - Date is for untamed Date.now
-      packageCompartment = new Compartment({ Math, Date })
+      // prepare Compartment
+      if (getExternalCompartment && packagePolicy.env) {
+        // external compartment can be provided by the platform (eg lavamoat-node)
+        packageCompartment = getExternalCompartment(packageName, packagePolicy)
+      } else {
+        // prepare the module's SES Compartment
+        // endowments:
+        // - Math is for untamed Math.random
+        // - Date is for untamed Date.now
+        packageCompartment = new Compartment({ Math, Date })
+      }
       // sets up read/write access as configured
       const globalsConfig = packagePolicy.globals
       prepareCompartmentGlobalFromConfig(packageCompartment.globalThis, globalsConfig, endowments, globalStore)
