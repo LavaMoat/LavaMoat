@@ -156,7 +156,7 @@ function loadModuleData (absolutePath) {
       file: absolutePath,
       package: packageName,
       source: wrappedContent,
-      id: absolutePath,
+      id: absolutePath
     }
   }
 }
