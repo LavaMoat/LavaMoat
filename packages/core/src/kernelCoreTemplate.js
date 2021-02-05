@@ -80,6 +80,9 @@
         err.code = 'MODULE_NOT_FOUND'
         throw err
       }
+      if (moduleData.id === undefined) {
+        throw new Error('LavaMoat - moduleId is not defined correctly.')
+      }
 
       // parse and validate module data
       const { package: packageName, source: moduleSource } = moduleData

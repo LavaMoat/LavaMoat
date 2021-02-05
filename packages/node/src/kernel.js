@@ -76,6 +76,7 @@ function loadModuleData (absolutePath) {
       type: 'builtin',
       file: absolutePath,
       package: absolutePath,
+      id: absolutePath,
       // wrapper around unprotected "require"
       moduleInitializer: (exports, require, module) => {
         module.exports = nativeRequire(absolutePath)
@@ -89,6 +90,7 @@ function loadModuleData (absolutePath) {
       type: 'native',
       file: absolutePath,
       package: packageName,
+      id: absolutePath,
       // wrapper around unprotected "require"
       moduleInitializer: (exports, require, module) => {
         module.exports = nativeRequire(absolutePath)
@@ -153,7 +155,8 @@ function loadModuleData (absolutePath) {
       type: 'js',
       file: absolutePath,
       package: packageName,
-      source: wrappedContent
+      source: wrappedContent,
+      id: absolutePath
     }
   }
 }
