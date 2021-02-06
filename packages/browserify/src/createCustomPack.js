@@ -187,7 +187,7 @@ module.exports = function ({
   }
 
   function serializeModule (moduleData) {
-    const { packageName, packageVersion, source, deps, file } = moduleData
+    const { id, packageName, packageVersion, source, deps, file } = moduleData
     const wrappedBundle = wrapIntoModuleInitializer(source)
     const sourceMappingURL = onSourcemap(moduleData, wrappedBundle)
     // for now, ignore new sourcemap and just append original filename
@@ -195,6 +195,7 @@ module.exports = function ({
     if (sourceMappingURL) moduleInitSrc += `\n//# sourceMappingURL=${sourceMappingURL}`
     // serialize final module entry
     const jsonSerializeableData = {
+      id,
       package: packageName,
       packageVersion,
       file,
