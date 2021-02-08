@@ -11,6 +11,7 @@
     getRelativeModuleId,
     prepareModuleInitializerArgs,
     getExternalCompartment,
+    globalThisRefs,
     // security options
     debugMode
   }) {
@@ -28,6 +29,7 @@
       getRelativeModuleId,
       prepareModuleInitializerArgs,
       getExternalCompartment,
+      globalThisRefs,
       debugMode
     })
 
@@ -43,7 +45,8 @@
     loadModuleData,
     getRelativeModuleId,
     prepareModuleInitializerArgs,
-    getExternalCompartment
+    getExternalCompartment,
+    globalThisRefs = ['globalThis']
   }) {
     // "templateRequire" calls are inlined in "generatePrelude"
     const { getEndowmentsForConfig, makeMinimalViewOfRef } = templateRequire('makeGetEndowmentsForConfig')()
@@ -279,7 +282,7 @@
       }
       // sets up read/write access as configured
       const globalsConfig = packagePolicy.globals
-      prepareCompartmentGlobalFromConfig(packageCompartment.globalThis, globalsConfig, endowments, globalStore)
+      prepareCompartmentGlobalFromConfig(packageCompartment.globalThis, globalsConfig, endowments, globalStore, globalThisRefs)
 
       // save the compartment for use by other modules in the package
       packageCompartmentCache.set(packageName, packageCompartment)

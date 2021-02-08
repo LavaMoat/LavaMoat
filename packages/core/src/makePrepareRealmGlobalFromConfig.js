@@ -29,11 +29,10 @@ function makePrepareRealmGlobalFromConfig () {
     return result
   }
 
-  function prepareCompartmentGlobalFromConfig (moduleRealmGlobal, globalsConfig, endowments, globalStore) {
+  function prepareCompartmentGlobalFromConfig (moduleRealmGlobal, globalsConfig, endowments, globalStore, globalThisRefs) {
     // lookup top level read + write access keys
     const topLevelWriteAccessKeys = getTopLevelWriteAccessFromPackageConfig(globalsConfig)
     const topLevelReadAccessKeys = getTopLevelReadAccessFromPackageConfig(globalsConfig)
-    const globalThisRefs = ['self', 'window', 'globalThis', 'global']
 
     // define accessors
 
