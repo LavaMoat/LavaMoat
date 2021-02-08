@@ -15,7 +15,7 @@ test('globals - has only the expected global circular refs', async (t) => {
     expectedResult: [
       'global',
       'globalThis'
-    ],
+    ]
   })
   const testResult = await runScenario({ scenario })
   t.is(Array.isArray(testResult), true)
