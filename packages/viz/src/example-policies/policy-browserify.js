@@ -1,6 +1,6 @@
 
 /* eslint-disable no-template-curly-in-string, no-multi-assign */
-const policies = globalThis.LavamoatPolicies = globalThis.LavamoatPolicies || {}
+{const policies = globalThis.LavamoatPolicies = globalThis.LavamoatPolicies || {}
 policies.browserify = {
   'primary': {
     'resources': {
@@ -2855,4 +2855,4 @@ policies.browserify = {
       },
     },
   },
-}
+}}

@@ -148,8 +148,10 @@ async function createPolicyDataFile ({ policyName, fullDest }) {
   const policyData = await loadPolicyData(policyName)
   // json esm modules dont exist yet so we do this
   const policyDataInjectionContent = `
-  const policies = globalThis.LavamoatPolicies = globalThis.LavamoatPolicies || {};
-  policies["${policyName}"] = ${JSON.stringify(policyData, null, 2)};
+  {
+    const policies = globalThis.LavamoatPolicies = globalThis.LavamoatPolicies || {};
+    policies["${policyName}"] = ${JSON.stringify(policyData, null, 2)};
+  }
   `
   // write to disk
   const filepath = path.join(fullDest, `policy-${policyName}.js`)
