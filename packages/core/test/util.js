@@ -43,6 +43,26 @@ function createScenarioFromScaffold ({
   expectedResult = {
     value: 'this is module two'
   },
+  checkPostRun = async (t, result, err, scenario) => {
+    if (err) {
+      await scenario.checkError(t, err, scenario)
+    } else {
+      await scenario.checkResult(t, result, scenario)
+    }
+  },
+  checkError = async (t, err, scenario) => {
+    if (scenario.expectedFailure) {
+      t.truthy(err, `Scenario fails as expected: ${scenario.name} - ${err}`)
+    } else {
+      if (err) {
+        t.fail(`Unexpected error in scenario: ${scenario.name} - ${err}`)
+        throw (err)
+      }
+    }
+  },
+  checkResult = async (t, result, scenario) => {
+    t.deepEqual(result, scenario.expectedResult, `${scenario.name} - scenario gives expected result`)
+  },
   expectedFailure = false,
   files = [],
   builtin = [],
@@ -148,6 +168,9 @@ function createScenarioFromScaffold ({
 
   return {
     name: name,
+    checkPostRun,
+    checkResult,
+    checkError,
     expectedResult,
     expectedFailure,
     entries: ['entry.js'],
