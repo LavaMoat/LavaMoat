@@ -107,16 +107,16 @@ async function generateViz (args) {
     policyNames = await getDirectories(policiesDir)
   }
   // write each policy data injection
-  const policyDataInjectionFilePath = await Promise.all(policyNames.map(async (policyName) => {
-    return await createPolicyDataFile({ policyName, fullDest })
-  }))
-  // add data-injection file
-  const dataInjectionContent = policyDataInjectionFilePath
-    // .map(filepath => { console.log(filepath, fullDest, path.relative(fullDest, filepath)); return filepath;})
-    .map(filepath => path.relative(fullDest, filepath))
-    .map(relPath => `import "./${relPath}";`)
-    .join('\n')
-  await fs.writeFile(`${fullDest}/injectConfigDebugData.js`, dataInjectionContent)
+  // const policyDataInjectionFilePath = await Promise.all(policyNames.map(async (policyName) => {
+  //   return await createPolicyDataFile({ policyName, fullDest })
+  // }))
+  // // add data-injection file
+  // const dataInjectionContent = policyDataInjectionFilePath
+  //   // .map(filepath => { console.log(filepath, fullDest, path.relative(fullDest, filepath)); return filepath;})
+  //   .map(filepath => path.relative(fullDest, filepath))
+  //   .map(relPath => `import "./${relPath}";`)
+  //   .join('\n')
+  // await fs.writeFile(`${fullDest}/injectConfigDebugData.js`, dataInjectionContent)
 
   // dashboard prepared! report done
   console.log(`generated viz in "${dest}"`)
@@ -148,8 +148,10 @@ async function createPolicyDataFile ({ policyName, fullDest }) {
   const policyData = await loadPolicyData(policyName)
   // json esm modules dont exist yet so we do this
   const policyDataInjectionContent = `
-  const policies = globalThis.LavamoatPolicies = globalThis.LavamoatPolicies || {};
-  policies["${policyName}"] = ${JSON.stringify(policyData, null, 2)};
+  {
+    const policies = globalThis.LavamoatPolicies = globalThis.LavamoatPolicies || {};
+    policies["${policyName}"] = ${JSON.stringify(policyData, null, 2)};
+  }
   `
   // write to disk
   const filepath = path.join(fullDest, `policy-${policyName}.js`)
