@@ -107,10 +107,11 @@ async function generateViz (args) {
     policyNames = await getDirectories(policiesDir)
   }
   // write each policy data injection
-  // const policyDataInjectionFilePath = await Promise.all(policyNames.map(async (policyName) => {
-  //   return await createPolicyDataFile({ policyName, fullDest })
-  // }))
-  // // add data-injection file
+  // const policyDataInjectionFilePath =
+  await Promise.all(policyNames.map(async (policyName) => {
+    return await createPolicyDataFile({ policyName, fullDest })
+  }))
+  // add data-injection file
   // const dataInjectionContent = policyDataInjectionFilePath
   //   // .map(filepath => { console.log(filepath, fullDest, path.relative(fullDest, filepath)); return filepath;})
   //   .map(filepath => path.relative(fullDest, filepath))
