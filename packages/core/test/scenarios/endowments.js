@@ -42,5 +42,33 @@ module.exports = [
       expectedResult: true
     })
     return scenario
+  },
+  async () => {
+    const scenario = createScenarioFromScaffold({
+      name: 'endowments - Date.now works in root and non-root',
+      defineEntry: () => {
+        const testResult = {
+          root: Date.now(),
+          non: require('one')
+        }
+        // standard test result serialization
+        console.log(JSON.stringify(testResult, null, 2))
+      },
+      defineOne: () => {
+        module.exports = Date.now()
+      },
+      checkResult: async (t, result, scenario) => {
+        t.is(typeof result, 'object')
+        t.is(typeof result.root, 'number')
+        t.is(typeof result.non, 'number')
+        t.is(isRecent(result.root), true)
+        t.is(isRecent(result.non), true)
+        function isRecent (time) {
+          // more recent than 2020-01-01T00:00:00.000Z
+          return time > 1577836800000
+        }
+      }
+    })
+    return scenario
   }
 ]

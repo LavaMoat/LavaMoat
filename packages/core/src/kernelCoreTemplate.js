@@ -235,7 +235,10 @@
         throw new Error('LavaMoat - createRootPackageCompartment called more than once')
       }
       // prepare the root package's SES Compartment
-      const packageCompartment = new Compartment()
+      // endowments:
+      // - Math is for untamed Math.random
+      // - Date is for untamed Date.now
+      const packageCompartment = new Compartment({ Math, Date })
       // expose all own properties of globalRef, including non-enumerable
       Object.entries(Object.getOwnPropertyDescriptors(globalRef))
         // ignore properties already defined on compartment global
