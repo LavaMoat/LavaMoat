@@ -60,8 +60,14 @@ function createScenarioFromScaffold ({
       }
     }
   },
-  checkResult = async (t, result, scenario) => {
-    t.deepEqual(result, scenario.expectedResult, `${scenario.name} - scenario gives expected result`)
+  checkResult = async (t, result, scenario, type) => {
+    if (type === 'truthy') {
+      t.assert(result, `${scenario.name} - scenario gives expected truthy result`)
+    } else if (type === 'falsy') {
+      t.falsy(result, `${scenario.name} - scenario gives expected falsy result`)
+    } else {
+      t.deepEqual(result, scenario.expectedResult, `${scenario.name} - scenario gives expected result`)
+    }
   },
   expectedFailure = false,
   files = [],

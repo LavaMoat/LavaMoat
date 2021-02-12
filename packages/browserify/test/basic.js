@@ -29,7 +29,7 @@ test('basic - browserify bundle doesnt inject global in deps', async (t) => {
   await autoConfigForScenario({ scenario })
   const { bundleForScenario } = await createBundleForScenario({ scenario })
   const hasGlobalInjection = bundleForScenario.includes('typeof global !== \\"undefined\\" ? global :')
-  t.falsy(hasGlobalInjection, 'did not inject "global" ref')
+  scenario.checkResult(t, hasGlobalInjection, scenario, 'falsy')
 })
 
 test('basic - lavamoat policy and bundle', async (t) => {
@@ -46,14 +46,15 @@ test('basic - lavamoat policy and bundle', async (t) => {
   const { bundleForScenario } = await createBundleForScenario({ scenario })
   const prelude = generatePrelude()
 
-  t.assert(bundleForScenario.includes('"location.href":true'), 'prelude includes banana policy')
-  t.assert(bundleForScenario.includes(prelude), 'bundle includes expected prelude')
+  scenario.checkResult(t, bundleForScenario.includes('"location.href":true'), scenario, 'truthy')
+  scenario.checkResult(t, bundleForScenario.includes(prelude), scenario, 'truthy')
 
   const testHref = 'https://funky.town.gov/yolo?snake=yes'
   scenario.context = { location: { href: testHref } }
   const testResult = await runScenario({ scenario })
+  scenario.expectedResult = testHref
 
-  t.is(testResult, testHref, 'test result matches expected')
+  scenario.checkResult(t, testResult, scenario)
 })
 
 test('basic - lavamoat bundle without prelude', async (t) => {
@@ -72,12 +73,13 @@ test('basic - lavamoat bundle without prelude', async (t) => {
   const { bundleForScenario } = await createBundleForScenario({ scenario })
   const prelude = generatePrelude()
 
-  t.assert(!bundleForScenario.includes(prelude), 'bundle DOES NOT include prelude')
+  scenario.checkResult(t, !bundleForScenario.includes(prelude), scenario, 'truthy')
 
   let didCallLoadBundle = false
   const testGlobal = {
     LavaMoat: { loadBundle: () => { didCallLoadBundle = true } }
   }
   evalBundle(bundleForScenario, testGlobal)
-  t.assert(didCallLoadBundle, 'test result matches expected')
+
+  scenario.checkResult(t, didCallLoadBundle, scenario, 'truthy')
 })
