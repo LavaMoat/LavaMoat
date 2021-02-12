@@ -18,11 +18,11 @@ test('policy - default policy path is generated with autoconfig if path is not s
   const { projectDir, policyDir } = await prepareScenarioOnDisk({ scenario, policyName: 'browserify' })
   const expectedPath = path.join(policyDir, 'policy.json')
 
-  t.falsy(fs.existsSync(expectedPath), 'Config file does not yet exist')
+  scenario.checkResult(t, fs.existsSync(expectedPath), scenario, 'falsy')
 
   await runBrowserify({ projectDir, scenario})
 
-  t.truthy(fs.existsSync(expectedPath), 'Config file exists')
+  scenario.checkResult(t, fs.existsSync(expectedPath), scenario, 'truthy')
 })
 
 test('policy - writes a proper policy to a temp dir', async (t) => {
@@ -38,12 +38,13 @@ test('policy - writes a proper policy to a temp dir', async (t) => {
     },
     opts: {
       writeAutoPolicy: true
-    }
+    },
+    expectedResult: 555
   })
   const { projectDir } = await prepareScenarioOnDisk({ scenario, policyName: 'browserify' })
   await runBrowserify({ projectDir, scenario})
   const testResult = await runScenario({ scenario, dir: projectDir })
-  t.deepEqual(testResult, 555)
+  scenario.checkResult(t, testResult, scenario)
 })
 
 test('Config override is applied if not specified and already exists at default path', async (t) => {
@@ -58,17 +59,18 @@ test('Config override is applied if not specified and already exists at default 
       module.exports = require('two')
     },
     configOverride: {
-    resources: {
-      three: {
-        packages: {
-          two: true
+      resources: {
+        three: {
+          packages: {
+            two: true
+          }
         }
       }
-    }
-  }
+    },
+    expectedResult: 30
   })
   const testResult = await runScenario({ scenario })
-  t.is(testResult, 30)
+  scenario.checkResult(t, testResult, scenario)
 })
 
 test('Config - Applies writeAutoPolicyDebug plugin option and dumps module object to disk', async (t) => {
@@ -81,11 +83,11 @@ test('Config - Applies writeAutoPolicyDebug plugin option and dumps module objec
   const { projectDir, policyDir } = await prepareScenarioOnDisk({ scenario, policyName: 'browserify' })
   const expectedPath = path.join(policyDir, 'policy-debug.json')
 
-  t.falsy(fs.existsSync(expectedPath), 'Module data does not yet exist')
+  scenario.checkResult(t, fs.existsSync(expectedPath), scenario, 'falsy')
 
   await runBrowserify({ projectDir, scenario })
 
-  t.truthy(fs.existsSync(expectedPath), 'Module data exists')
+  scenario.checkResult(t, fs.existsSync(expectedPath), scenario, 'truthy')
 })
 
 // this test is not written correctly, im disabling it for now
