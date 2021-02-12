@@ -29,7 +29,6 @@ test('globalRef - globalRef - check default containment', async (t) => {
     defineOne: () => {
       const testResults = {}
       try { testResults.objCheckThis = this.Object === Object } catch (_) { }
-      try { testResults.objCheckSelf = self.Object === Object } catch (_) { }
       try { testResults.objCheckGlobal = global.Object === Object } catch (_) { }
       try { testResults.thisIsExports = exports === this } catch (_) { }
       module.exports = testResults
@@ -37,7 +36,7 @@ test('globalRef - globalRef - check default containment', async (t) => {
     expectedResult: {
       objCheckThis: false,
       objCheckGlobal: true,
-      thisIsExports: true,
+      thisIsExports: true
     }
   })
   const testResult = await runScenario({ scenario })
