@@ -5,14 +5,14 @@ module.exports = [
     const scenario = createScenarioFromScaffold({
       name: 'globalWrites - deep endow',
       defineOne: () => {
-      module.exports = require('two')
+        module.exports = require('two')
       },
       defineTwo: () => {
-        xyz = true
+        global.xyz = true
         module.exports = require('three')
       },
       defineThree: () => {
-        module.exports = xyz
+        module.exports = global.xyz
       },
       config: {
         resources: {
@@ -36,7 +36,8 @@ module.exports = [
           }
         }
       },
-      expectedResult: true
+      expectedResult: true,
+      shouldRunInCore: false
     })
     return scenario
   }

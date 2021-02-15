@@ -30,10 +30,11 @@ module.exports = [
       defineTwo: () => {
         function SubError () {}
         _inheritsLoose(SubError, TypeError)
+        /* eslint-disable */
         function _inheritsLoose (t, e) { t.prototype = Object.create(e.prototype), (t.prototype.constructor = t).__proto__ = e }
         module.exports = SubError
       },
-      testType: 'truthy',
+      testType: 'truthy'
     })
     return scenario
   },
@@ -46,12 +47,13 @@ module.exports = [
         _inheritsLoose(SubClass, SuperClass)
         module.exports = { SubClass }
         function _inheritsLoose (t, e) { t.prototype = Object.create(e.prototype), (t.prototype.constructor = t).__proto__ = e }
+        /* eslint-enable */
       },
       defineTwo: () => {
         function SuperClass () {}
         module.exports = SuperClass
       },
-      testType: 'truthy',
+      testType: 'truthy'
     })
     return scenario
   }

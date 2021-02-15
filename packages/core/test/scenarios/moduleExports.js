@@ -43,12 +43,12 @@ module.exports = [
     const scenario = createScenarioFromScaffold({
       name: 'moduleExports - decorate an import - class syntax',
       defineOne: () => {
-        const modernClass = require('two')
-        modernClass.xyz = 42
+        const ModernClass = require('two')
+        ModernClass.xyz = 42
         module.exports = {
-          abc: new modernClass().abc,
-          jkl: modernClass.jkl,
-          xyz: modernClass.xyz
+          abc: new ModernClass().abc,
+          jkl: ModernClass.jkl,
+          xyz: ModernClass.xyz
         }
       },
       defineTwo: () => {
@@ -161,7 +161,7 @@ module.exports = [
       },
       context: {
         get: () => testObj,
-        check: (target) => target === testObj,
+        check: (target) => target === testObj
       },
       expectedResult: true,
       shouldRunInCore: false
@@ -202,11 +202,11 @@ module.exports = [
       },
       context: {
         get: () => testObj,
-        check: (target) => target === testObj,
+        check: (target) => target === testObj
       },
       expectedResult: true,
       shouldRunInCore: false
     })
     return scenario
-  },
+  }
 ]
