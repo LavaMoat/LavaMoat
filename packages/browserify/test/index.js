@@ -5,7 +5,6 @@ require('./generateConfig')
 require('./configReplacements')
 
 require('./globalRef')
-require('./globalWrites')
 require('./exportsDefense')
 require('./moduleExports')
 
