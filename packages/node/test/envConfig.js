@@ -28,7 +28,7 @@ test('envConfig - intrinsic prototype mutating package running in unfrozen realm
     }
   })
   const testResult = await runScenario({ scenario })
-  t.deepEqual(testResult, scenario.expectedResult)
+  scenario.checkResult(t, testResult, scenario)
 })
 
 test('envConfig - module.exports from the same Realm as its Compartment', async (t) => {
@@ -63,5 +63,5 @@ test('envConfig - module.exports from the same Realm as its Compartment', async 
     }
   })
   const testResult = await runScenario({ scenario })
-  t.deepEqual(testResult, scenario.expectedResult)
+  scenario.checkResult(t, testResult, scenario)
 })
