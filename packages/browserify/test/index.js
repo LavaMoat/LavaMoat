@@ -8,7 +8,6 @@ require('./globalRef')
 require('./exportsDefense')
 
 require('./sourcemaps')
-require('./transforms')
 require('./factor')
 
 require('./lavamoatNode')

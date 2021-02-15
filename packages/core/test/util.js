@@ -43,6 +43,7 @@ function createScenarioFromScaffold ({
   expectedResult = {
     value: 'this is module two'
   },
+  testType = 'deepEqual',
   checkPostRun = async (t, result, err, scenario) => {
     if (err) {
       await scenario.checkError(t, err, scenario)
@@ -60,7 +61,7 @@ function createScenarioFromScaffold ({
       }
     }
   },
-  checkResult = async (t, result, scenario, type) => {
+  checkResult = async (t, result, scenario, type = testType) => {
     if (type === 'truthy') {
       t.assert(result, `${scenario.name} - scenario gives expected truthy result`)
     } else if (type === 'falsy') {
