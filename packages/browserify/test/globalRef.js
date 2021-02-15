@@ -23,7 +23,7 @@ test('globalRef - has only the expected global circular refs', async (t) => {
     ],
   })
   const testResult = await runScenario({ scenario })
-  t.is(Array.isArray(testResult), true)
+  scenario.checkResult(t, Array.isArray(testResult), scenario, 'truthy')
   scenario.expectedResult.sort()
   scenario.checkResult(t, testResult.sort(), scenario)
 })
