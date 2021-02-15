@@ -6,7 +6,6 @@ require('./configReplacements')
 
 require('./globalRef')
 require('./exportsDefense')
-require('./moduleExports')
 
 require('./sourcemaps')
 require('./transforms')
