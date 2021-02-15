@@ -11,26 +11,28 @@ test('generateConfig - empty policy', async (t) => {
   const scenario = createScenarioFromScaffold({
     defineEntry: () => {},
     defaultConfig: false,
+    expectedResult: { resources: {} }
   })
   const policy = await autoConfigForScenario({ scenario })
-  t.deepEqual(policy, { resources: {} }, 'policy matches expected')
+  scenario.checkResult(t, policy, scenario)
 })
 
 test('generateConfig - basic policy', async (t) => {
   const scenario = createScenarioFromScaffold({
     defineOne: () => { module.exports = global.two },
-    defaultConfig: false
-  })
-  const policy = await autoConfigForScenario({ scenario })
-  t.deepEqual(policy, {
-    resources: {
-      one: {
-        globals: {
-          two: true
+    defaultConfig: false,
+    expectedResult: {
+      resources: {
+        one: {
+          globals: {
+            two: true
+          }
         }
       }
     }
-  }, 'policy matched expected')
+  })
+  const policy = await autoConfigForScenario({ scenario })
+  scenario.checkResult(t, policy, scenario)
 })
 
 test('generateConfig - ignore various refs', async (t) => {
@@ -42,17 +44,18 @@ test('generateConfig - ignore various refs', async (t) => {
       global.xyz
     },
     defaultConfig: false,
-  })
-  const policy = await autoConfigForScenario({ scenario })
-  t.deepEqual(policy, {
-    resources: {
-      one: {
-        globals: {
-          xyz: true
+    expectedResult: {
+      resources: {
+        one: {
+          globals: {
+            xyz: true
+          }
         }
       }
     }
-  }, 'policy matched expected')
+  })
+  const policy = await autoConfigForScenario({ scenario })
+  scenario.checkResult(t, policy, scenario)
 })
 
 
@@ -63,18 +66,19 @@ test('generateConfig - policy ignores global refs', async (t) => {
       const xhr = new window.XMLHttpRequest()
     },
     defaultConfig: false,
-  })
-  const policy = await autoConfigForScenario({ scenario })
-  t.deepEqual(policy, {
-    resources: {
-      one: {
-        globals: {
-          'location.href': true,
-          XMLHttpRequest: true
+    expectedResult: {
+      resources: {
+        one: {
+          globals: {
+            'location.href': true,
+            XMLHttpRequest: true
+          }
         }
       }
     }
-  }, 'policy matches expected')
+  })
+  const policy = await autoConfigForScenario({ scenario })
+  scenario.checkResult(t, policy, scenario)
 })
 
 test('generateConfig - policy ignores global refs when properties are not accessed', async (t) => {
@@ -83,11 +87,12 @@ test('generateConfig - policy ignores global refs when properties are not access
       typeof window !== undefined
     },
     defaultConfig: false,
+    expectedResult: {
+      resources: {}
+    }
   })
   const policy = await autoConfigForScenario({ scenario })
-  t.deepEqual(policy, {
-    resources: {}
-  }, 'policy matches expected')
+  scenario.checkResult(t, policy, scenario)
 })
 
 test('generateConfig - policy ignores global refs accessed with whitelist items', async (t) => {
@@ -96,9 +101,10 @@ test('generateConfig - policy ignores global refs accessed with whitelist items'
       window.Object === Object
     },
     defaultConfig: false,
+    expectedResult: {
+      resources: {}
+    }
   })
   const policy = await autoConfigForScenario({ scenario })
-  t.deepEqual(policy, {
-    resources: {}
-  }, 'policy matches expected')
+  scenario.checkResult(t, policy, scenario)
 })
