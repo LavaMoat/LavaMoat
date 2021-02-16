@@ -352,8 +352,10 @@ async function loadTree ({ rootDir }) {
     const { object: parsedLockFile } = yarnLockfileParser.parse(yarnLockfileContent)
     tree = yarnLogicalTree.loadTree(packageJson, parsedLockFile)
     // fix path (via address field) for yarn tree
+    // TOOO: make parallel
     for await (const { node, filePath } of findAllFilePathsForTree(tree)) {
       // skip unresolved paths
+      // TODO: document when/why this would be falsy
       if (!filePath) continue
       const relativePath = path.relative(rootDir, filePath)
       const address = relativePath.slice('node_modules/'.length).split('/node_modules/').join(':')
@@ -365,6 +367,7 @@ async function loadTree ({ rootDir }) {
   } else {
     throw new Error(`@lavamoat/allow-scripts - unable to find lock file (yarn or npm)`)
   }
+  //TODO: validate tree (ensure nodes have addresses)
 
   return { tree, packageJson }
 }
@@ -449,8 +452,9 @@ async function loadAllPackageConfigurations ({ rootDir }) {
 
   const packagesWithLifecycleScripts = new Map()
   for (const { node, branch } of eachNodeInTree(tree)) {
+    // Skip root package
+    if (branch.length === 1) continue
     const { canonicalName, namespace } = getCanonicalNameInfoForTreeNode(node)
-
     const nodePath = node.path()
 
     // TODO: follow symbolic links? I couldnt find any in my test repo,
@@ -495,14 +499,11 @@ async function loadAllPackageConfigurations ({ rootDir }) {
       packagesWithLifecycleScripts.set(canonicalName, collection)
     }
   }
-  // return
 
   const allowScriptsConfig = getAllowedScriptsConfig(packageJson)
-  // const packages = await parseYarnLockForPackages()
 
   // packages with config
   const configuredPatterns = Object.keys(allowScriptsConfig)
-  // const packagesWithMatchingPatterns = packages filter for configuredPatterns
 
   // select allowed + disallowed
   const allowedPatterns = Object.entries(allowScriptsConfig).filter(([pattern, packageData]) => packageData === true).map(([pattern]) => pattern)
@@ -511,10 +512,6 @@ async function loadAllPackageConfigurations ({ rootDir }) {
     .filter(pattern => packagesWithLifecycleScripts.has(pattern))
     .filter(pattern => !configuredPatterns.includes(pattern))
   const excessPolicies = Object.keys(allowScriptsConfig).filter(pattern => !packagesWithLifecycleScripts.has(pattern))
-
-
-  // const nonCanonicalPackages = packages.filter(packageData => packageData.namespace !== 'npm')
-  // console.log(nonCanonicalPackages.map(packageData => packageData.canonicalName).join('\n'))
 
   return {
     tree,
