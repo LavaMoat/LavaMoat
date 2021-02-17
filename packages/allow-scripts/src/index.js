@@ -4,9 +4,9 @@ const { promisify } = require('util')
 const resolve = promisify(require('resolve'))
 const semver = require('semver')
 const logicalTree = require('npm-logical-tree')
+const yarnLogicalTree = require('yarn-logical-tree')
 const yarnLockfileParser = require('@yarnpkg/lockfile')
 const npmRunScript = require('@npmcli/run-script')
-const yarnLogicalTree = require('./yarnLogicalTree')
 
 module.exports = {
   // primary
