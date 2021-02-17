@@ -17,7 +17,6 @@
     "resolve": "^1.15.1"
   },
   "devDependencies": {
-    "ava": "^3.13.0",
     "object.fromentries": "^2.0.2",
     "tmp-promise": "^3.0.2"
   },
@@ -25,7 +24,7 @@
     "lint": "npm run lint:standard && npm run lint:deps",
     "lint:standard": "standard src/**/*.js test/**/*.js",
     "lint:fix": "standard src/**/*.js test/**/*.js --fix",
-    "lint:deps": "depcheck --ignore-dirs=lib --ignores='abc,xyz,two,three,thisChecker,someClass,one'",
+    "lint:deps": "depcheck",
     "test": "ava test/index.js"
   },
   "author": "kumavis",
