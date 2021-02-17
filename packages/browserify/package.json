@@ -27,15 +27,12 @@
     "umd": "^3.0.3"
   },
   "devDependencies": {
-    "ava": "^3.13.0",
     "bify-package-factor": "^1.0.7",
     "browserify": "^16.2.3",
     "convert-source-map": "^1.6.0",
-    "depcheck": "^0.9.2",
     "from": "^0.1.7",
     "keccak": "^3.0.1",
     "pump": "^3.0.0",
-    "ses": "git+https://git@github.com/agoric/ses.git#fdb393f817f6124c4d055bff26b68e4cbe17618e",
     "source-map": "^0.7.3",
     "uglify-js": "^3.4.9",
     "vinyl-buffer": "^1.0.1",
@@ -46,7 +43,7 @@
     "lint": "npm run lint:standard && npm run lint:deps",
     "lint:standard": "standard src/**/*.js test/**/*.js",
     "lint:fix": "standard src/**/*.js test/**/*.js --fix",
-    "lint:deps": "depcheck --ignore-dirs=lib --ignores='standard,depcheck,bify-package-factor,ses,banana,two,one,victim,attacker,three,a,b,c'",
+    "lint:deps": "depcheck",
     "build:ses": "(cd ./node_modules/ses && npm i && npm run build && cp ./dist/ses.umd.js ../../lib/)"
   },
   "author": "kumavis",

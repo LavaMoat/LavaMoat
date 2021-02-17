@@ -8,7 +8,6 @@
     "@babel/traverse": "^7.10.1"
   },
   "devDependencies": {
-    "ava": "^3.13.0",
     "deep-equal": "^2.0.3"
   },
   "scripts": {
@@ -16,7 +15,7 @@
     "lint": "npm run lint:standard && npm run lint:deps",
     "lint:standard": "standard src/**/*.js",
     "lint:fix": "standard src/**/*.js --fix",
-    "lint:deps": "depcheck --ignore-dirs=lib --ignores='bar,bing'"
+    "lint:deps": "depcheck"
   },
   "description": "This is the TOFU (trust-on-first-use) static analysis tool used by LavaMoat to automatically generate useable config",
   "directories": {
