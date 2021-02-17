@@ -10,7 +10,7 @@ function makeNode (name, address, opts) {
 }
 
 /*
-- 
+-
 */
 
 // function loadTree (pkg, yarnLock, opts) {
