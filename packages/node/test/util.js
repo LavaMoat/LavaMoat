@@ -12,7 +12,7 @@ function convertOptsToArgs ({ scenario }) {
   if (entries.length !== 1) throw new Error('LavaMoat - invalid entries')
   const firstEntry = entries[0]
   const args = [firstEntry]
-  Object.entries(scenario.opts).forEach(([key, value]) => {
+  Object.entries(opts).forEach(([key, value]) => {
     if (value === true) {
       args.push(`--${key}`)
     } else if (typeof value === 'string') {
@@ -33,11 +33,11 @@ async function runLavamoat ({ args = [], cwd = process.cwd() } = {}) {
 async function runScenario ({ scenario }) {
   const { projectDir } = await prepareScenarioOnDisk({ scenario, policyName: 'node' })
   const args = convertOptsToArgs({ scenario })
-  const { output: { stdout, stderr } } = await runLavamoat({ args, cwd: projectDir })
+  const { output: { stdout } } = await runLavamoat({ args, cwd: projectDir })
   let result
   try {
     result = JSON.parse(stdout)
-  } catch(e) {
+  } catch (e) {
     throw new Error(`Unexpected output in standard out: \n${stdout}`)
   }
   return result
