@@ -137,12 +137,12 @@ module.exports = [
       defineOne: () => {
         const two = require('two')
         const getResult = two.get()
-        const checkResult = global.check(getResult)
+        const checkResult = globalThis.check(getResult)
         module.exports = checkResult
       },
       defineTwo: () => {
         module.exports = {
-          get: () => global.get()
+          get: () => globalThis.get()
         }
       },
       config: {
@@ -163,8 +163,7 @@ module.exports = [
         get: () => testObj,
         check: (target) => target === testObj
       },
-      expectedResult: true,
-      shouldRunInCore: false
+      expectedResult: true
     })
     return scenario
   },
@@ -175,12 +174,12 @@ module.exports = [
       defineEntry: () => {
         const one = require('one')
         const getResult = one.get()
-        const checkResult = global.check(getResult)
+        const checkResult = globalThis.check(getResult)
         console.log(JSON.stringify(checkResult, null, 2))
       },
       defineOne: () => {
         module.exports = {
-          get: () => global.get()
+          get: () => globalThis.get()
         }
       },
       config: {
@@ -204,8 +203,7 @@ module.exports = [
         get: () => testObj,
         check: (target) => target === testObj
       },
-      expectedResult: true,
-      shouldRunInCore: false
+      expectedResult: true
     })
     return scenario
   }

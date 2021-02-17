@@ -8,11 +8,11 @@ module.exports = [
         module.exports = require('two')
       },
       defineTwo: () => {
-        global.xyz = true
+        globalThis.xyz = true
         module.exports = require('three')
       },
       defineThree: () => {
-        module.exports = global.xyz
+        module.exports = globalThis.xyz
       },
       config: {
         resources: {
@@ -36,8 +36,7 @@ module.exports = [
           }
         }
       },
-      expectedResult: true,
-      shouldRunInCore: false
+      expectedResult: true
     })
     return scenario
   }

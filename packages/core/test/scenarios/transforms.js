@@ -13,8 +13,7 @@ module.exports = [
         const importString = 'import x from "y"'
         module.exports = { comment, importString }
       },
-      testType: 'truthy',
-      shouldRunInCore: false
+      testType: 'truthy'
     })
     return scenario
   },

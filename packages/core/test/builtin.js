@@ -10,9 +10,6 @@ test('builtin - basic access', async (t) => {
 
       module.exports = { abc, xyz }
     },
-    builtin: {
-      abc: 123
-    },
     config: {
       resources: {
         one: {
@@ -24,7 +21,10 @@ test('builtin - basic access', async (t) => {
       }
     }
   })
-  const result = await runScenario({ scenario })
+  const builtin = {
+    abc: 123
+  }
+  const result = await runScenario({ scenario, builtin })
   t.deepEqual(result, { abc: 123, xyz: null })
 })
 
@@ -32,12 +32,6 @@ test('builtin - access via paths', async (t) => {
   const scenario = createScenarioFromScaffold({
     defineOne: () => {
       module.exports = require('abc')
-    },
-    builtin: {
-      abc: {
-        xyz: 123,
-        ijk: 456
-      }
     },
     config: {
       resources: {
@@ -49,8 +43,13 @@ test('builtin - access via paths', async (t) => {
       }
     }
   })
-
-  const result = await runScenario({ scenario })
+  const builtin = {
+    abc: {
+      xyz: 123,
+      ijk: 456
+    }
+  }
+  const result = await runScenario({ scenario, builtin })
   t.deepEqual(result, { xyz: 123 })
 })
 
@@ -85,11 +84,6 @@ test('builtin - paths soft-bindings preserve "this" but allow override', async (
         return true
       }
     },
-    builtin: {
-      buffer: require('buffer'),
-      thisChecker: (() => { const parent = {}; parent.check = function () { return this === parent }; return parent })(),
-      someClass: { SomeClass: class SomeClass {} }
-    },
     config: {
       resources: {
         one: {
@@ -108,8 +102,13 @@ test('builtin - paths soft-bindings preserve "this" but allow override', async (
       }
     }
   })
+  const builtin = {
+    buffer: require('buffer'),
+    thisChecker: (() => { const parent = {}; parent.check = function () { return this === parent }; return parent })(),
+    someClass: { SomeClass: class SomeClass {} }
+  }
 
-  const result = await runScenario({ scenario })
+  const result = await runScenario({ scenario, builtin })
   t.deepEqual(result, {
     overrideCheck: true,
     thisCheck: true,

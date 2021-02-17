@@ -33,7 +33,6 @@ async function runLavamoat ({ args = [], cwd = process.cwd() } = {}) {
 async function runScenario ({ scenario }) {
   const { projectDir } = await prepareScenarioOnDisk({ scenario, policyName: 'node' })
   const args = convertOptsToArgs({ scenario })
-  console.log(args)
   const { output: { stdout, stderr } } = await runLavamoat({ args, cwd: projectDir })
   let result
   try {

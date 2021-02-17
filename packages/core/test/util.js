@@ -138,7 +138,6 @@ function createScenarioFromScaffold ({
         one: 'node_modules/one/index.js'
       }
     },
-    ...filesFromBuiltin(builtin),
     ...files
   })
 
@@ -211,7 +210,7 @@ function createHookedConsole () {
   }
 } 
 
-async function runScenario ({ scenario }) {
+async function runScenario ({ scenario, builtin = {} }) {
   const { entries, files, config, configOverride } = scenario
   const lavamoatConfig = mergeDeep(config, configOverride)
   const kernelSrc = generateKernel()
@@ -220,11 +219,14 @@ async function runScenario ({ scenario }) {
   const kernel = createKernel({
     lavamoatConfig,
     loadModuleData: (id) => {
+      if (id in builtin) {
+        return moduleDataForBuiltin(builtin, id)
+      }
       const moduleRecord = files[id]
       return {
         id: moduleRecord.specifier,
         package: moduleRecord.packageName,
-        source: `(function(exports, require, module, __filename, __dirname){\n${moduleRecord.content}\n})`,
+        source: `(function(exports, require, module, __filename, __dirname){\n${transformSource(moduleRecord.content)}\n})`,
         type: moduleRecord.type,
         file: moduleRecord.file,
         deps: moduleRecord.importMap,
@@ -236,6 +238,23 @@ async function runScenario ({ scenario }) {
     },
     prepareModuleInitializerArgs
   })
+
+  function transformSource(content) {
+    return content
+      // html comment
+      .split('-->').join('-- >')
+      .split('<!--').join('<! --')
+      // use indirect eval
+      .split(' eval(').join(' (eval)(')
+      .split('\'eval(').join('\'(eval)(')
+      // replace import statements in comments
+      .split(' import(').join(' __import__(')
+      .split('"import(').join('"__import__(')
+      .split('\'import(').join('\'__import__(')
+      .split('{import(').join('{__import__(')
+      .split('<import(').join('<__import__(')
+      .split('.import(').join('.__import__(')
+  }
 
   entries.forEach(id => kernel.internalRequire(id))
   const testResult = await firstLogEventPromise
@@ -274,18 +293,14 @@ function fillInFileDetails (files) {
   return files
 }
 
-function filesFromBuiltin (builtinObj) {
-  return fromEntries(
-    Object.entries(builtinObj)
-      .map(([key, value]) => {
-        return [key, {
-          file: key,
-          packageName: key,
-          type: 'builtin',
-          moduleInitializer: (_, _2, module) => { module.exports = value }
-        }]
-      })
-  )
+function moduleDataForBuiltin (builtinObj, name) {
+  return {
+    id: name,
+    file: name,
+    package: name,
+    type: 'builtin',
+    moduleInitializer: (_, _2, module) => { module.exports = builtinObj[name] }
+  }
 }
 
 function prepareModuleInitializerArgs (requireRelativeWithContext, moduleObj, moduleData) {
