@@ -1,4 +1,5 @@
 require('./basic')
+require('./arguments')
 
 require('./config')
 require('./generateConfig')

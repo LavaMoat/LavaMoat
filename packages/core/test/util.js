@@ -18,7 +18,8 @@ module.exports = {
   evaluateWithSourceUrl,
   createHookedConsole,
   fillInFileDetails,
-  functionToString
+  functionToString,
+  runAndTestScenario
 }
 
 async function generateConfigFromFiles ({ files, ...opts }) {
@@ -81,7 +82,6 @@ function createScenarioFromScaffold ({
   defineOne,
   defineTwo,
   defineThree,
-  shouldRunInCore = true,
   defaultConfig = true
 } = {}) {
   function _defineEntry () {
@@ -185,8 +185,7 @@ function createScenarioFromScaffold ({
     config: _config,
     configOverride: _configOverride,
     context,
-    opts,
-    shouldRunInCore
+    opts
   }
 }
 
@@ -360,4 +359,15 @@ function convertOptsToArgs ({ scenario }) {
 
 function functionToString(func) {
   return `(${func}).call(this)`
+}
+
+async function runAndTestScenario(t, scenario, platformRunScenario) {
+  let result, err
+  try {
+    result = await platformRunScenario({ scenario })
+  } catch (e) {
+    err = e
+  }
+  await scenario.checkPostRun(t, result, err, scenario)
+  return result
 }

@@ -35,20 +35,20 @@ async function runLava () {
     // parse mode
     const includeDebugInfo = Boolean(writeAutoPolicyDebug)
     const { resolutions } = await loadPolicy({ debugMode, policyPath, policyOverridePath })
-    console.log(`LavaMoat generating policy from entry "${entryId}"...`)
+    console.warn(`LavaMoat generating policy from entry "${entryId}"...`)
     const policy = await parseForConfig({ cwd, entryId, resolutions, includeDebugInfo })
     // write policy debug file
     if (includeDebugInfo) {
       fs.mkdirSync(path.dirname(policyDebugPath), { recursive: true })
       fs.writeFileSync(policyDebugPath, jsonStringify(policy, { space: 2 }))
-      console.log(`LavaMoat wrote policy debug to "${policyDebugPath}"`)
+      console.warn(`LavaMoat wrote policy debug to "${policyDebugPath}"`)
     }
     // cleanup debug info
     delete policy.debugInfo
     // write policy file
     fs.mkdirSync(path.dirname(policyPath), { recursive: true })
     fs.writeFileSync(policyPath, jsonStringify(policy, { space: 2 }))
-    console.log(`LavaMoat wrote policy to "${policyPath}"`)
+    console.warn(`LavaMoat wrote policy to "${policyPath}"`)
   }
   if (shouldRunApplication) {
     // execution mode
@@ -67,6 +67,7 @@ async function runLava () {
 function parseArgs () {
   const defaultPaths = getDefaultPaths('node')
   const argsParser = yargs
+    .strict()
     .usage('$0 <entryPath>', 'start the application', (yargs) => {
       // the entry file to run (or parse)
       yargs.positional('entryPath', {

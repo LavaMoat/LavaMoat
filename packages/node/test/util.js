@@ -12,14 +12,15 @@ function convertOptsToArgs ({ scenario }) {
   if (entries.length !== 1) throw new Error('LavaMoat - invalid entries')
   const firstEntry = entries[0]
   const args = [firstEntry]
-  if (opts.config) args.push(`--config=${opts.config}`)
-  if (opts.configOverride) args.push(`--configOverride=${opts.configOverride}`)
-  if (opts.configDebug) args.push(`--configDebug=${opts.configDebug}`)
-  if (opts.debugMode) args.push('--debugMode')
-  if (opts.applyExportsDefense) args.push('--applyExportsDefense')
-  if (opts.writeAutoConfig) args.push('--writeAutoConfig')
-  if (opts.writeAutoConfigAndRun) args.push('--writeAutoConfigAndRun')
-  if (opts.writeAutoConfigDebug) args.push('--writeAutoConfigDebug')
+  Object.entries(scenario.opts).forEach(([key, value]) => {
+    if (value === true) {
+      args.push(`--${key}`)
+    } else if (typeof value === 'string') {
+      args.push(`--${key}='${value}'`)
+    } else {
+      args.push(`--${key}=${value}`)
+    }
+  })
   return args
 }
 
@@ -32,10 +33,13 @@ async function runLavamoat ({ args = [], cwd = process.cwd() } = {}) {
 async function runScenario ({ scenario }) {
   const { projectDir } = await prepareScenarioOnDisk({ scenario, policyName: 'node' })
   const args = convertOptsToArgs({ scenario })
+  console.log(args)
   const { output: { stdout, stderr } } = await runLavamoat({ args, cwd: projectDir })
-  if (stderr.length) {
-    throw new Error(`Run lavamoat failed:\n ${projectDir}\n ${args}\n ${stderr}`)
+  let result
+  try {
+    result = JSON.parse(stdout)
+  } catch(e) {
+    throw new Error(`Unexpected output in standard out: \n${stdout}`)
   }
-  const result = JSON.parse(stdout)
   return result
 }
