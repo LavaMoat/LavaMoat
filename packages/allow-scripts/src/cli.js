@@ -1,7 +1,5 @@
 #!/usr/bin/env node
 
-const path = require('path')
-const fs = require('fs')
 const yargs = require('yargs')
 const { runAllowedPackages, setDefaultConfiguration, printPackagesList } = require('./index.js')
 
@@ -46,7 +44,7 @@ function parseArgs () {
     .help()
 
   const parsedArgs = argsParser.parse()
-  parsedArgs.command = parsedArgs['_'][0]
+  parsedArgs.command = parsedArgs._[0]
   // resolve paths
   // parsedArgs.configPath = path.resolve(parsedArgs.configPath)
   // parsedArgs.configOverridePath = path.resolve(parsedArgs.configOverridePath)

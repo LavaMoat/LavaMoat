@@ -2,7 +2,8 @@
   "name": "lavamoat",
   "private": true,
   "devDependencies": {
-    "dep-check": "^1.0.2",
+    "ava": "^3.15.0",
+    "depcheck": "^1.4.0",
     "lerna": "^3.22.1",
     "standard": "^16.0.3",
     "tap-spec": "^5.0.0"
