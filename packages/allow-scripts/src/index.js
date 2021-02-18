@@ -293,7 +293,7 @@ async function loadTree ({ rootDir }) {
   } else {
     throw new Error('@lavamoat/allow-scripts - unable to find lock file (yarn or npm)')
   }
-  //TODO: validate tree (ensure nodes have addresses)
+  // TODO: validate tree (ensure nodes have addresses)
 
   return { tree, packageJson }
 }
