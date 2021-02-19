@@ -21,10 +21,12 @@ test('globalRef - has only the expected global circular refs', async (t) => {
       'global',
       'globalThis'
     ],
+    testType: 'truthy'
   })
   const testResult = await runScenario({ scenario })
-  scenario.checkResult(t, Array.isArray(testResult), scenario, 'truthy')
+  scenario.checkResult(t, Array.isArray(testResult), scenario)
   scenario.expectedResult.sort()
+  scenario.testType = 'deepEqual'
   scenario.checkResult(t, testResult.sort(), scenario)
 })
 

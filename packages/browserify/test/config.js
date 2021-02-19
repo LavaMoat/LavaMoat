@@ -13,16 +13,19 @@ test('policy - default policy path is generated with autoconfig if path is not s
     opts: {
       writeAutoPolicy: true
     },
-    contextName: 'browserify'
+    contextName: 'browserify',
+    testType: 'falsy'
   })
   const { projectDir, policyDir } = await prepareScenarioOnDisk({ scenario, policyName: 'browserify' })
   const expectedPath = path.join(policyDir, 'policy.json')
 
-  scenario.checkResult(t, fs.existsSync(expectedPath), scenario, 'falsy')
+  scenario.checkResult(t, fs.existsSync(expectedPath), scenario)
 
   await runBrowserify({ projectDir, scenario})
 
-  scenario.checkResult(t, fs.existsSync(expectedPath), scenario, 'truthy')
+  scenario.testType = 'truthy'
+
+  scenario.checkResult(t, fs.existsSync(expectedPath), scenario)
 })
 
 test('policy - writes a proper policy to a temp dir', async (t) => {
@@ -78,16 +81,19 @@ test('Config - Applies writeAutoPolicyDebug plugin option and dumps module objec
     opts: {
       writeAutoPolicy: true,
       writeAutoPolicyDebug: true
-    }
+    },
+    testType: 'falsy'
   })
   const { projectDir, policyDir } = await prepareScenarioOnDisk({ scenario, policyName: 'browserify' })
   const expectedPath = path.join(policyDir, 'policy-debug.json')
 
-  scenario.checkResult(t, fs.existsSync(expectedPath), scenario, 'falsy')
+  scenario.checkResult(t, fs.existsSync(expectedPath), scenario)
 
   await runBrowserify({ projectDir, scenario })
 
-  scenario.checkResult(t, fs.existsSync(expectedPath), scenario, 'truthy')
+  scenario.testType = 'truthy'
+
+  scenario.checkResult(t, fs.existsSync(expectedPath), scenario)
 })
 
 // this test is not written correctly, im disabling it for now
