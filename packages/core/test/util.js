@@ -62,10 +62,10 @@ function createScenarioFromScaffold ({
       }
     }
   },
-  checkResult = async (t, result, scenario, type = testType) => {
-    if (type === 'truthy') {
+  checkResult = async (t, result, scenario) => {
+    if (scenario.testType === 'truthy') {
       t.assert(result, `${scenario.name} - scenario gives expected truthy result`)
-    } else if (type === 'falsy') {
+    } else if (scenario.testType === 'falsy') {
       t.falsy(result, `${scenario.name} - scenario gives expected falsy result`)
     } else {
       t.deepEqual(result, scenario.expectedResult, `${scenario.name} - scenario gives expected result`)
@@ -177,6 +177,8 @@ function createScenarioFromScaffold ({
     checkPostRun,
     checkResult,
     checkError,
+    testType,
+    builtin,
     expectedResult,
     expectedFailure,
     entries: ['entry.js'],

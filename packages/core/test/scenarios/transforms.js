@@ -32,6 +32,7 @@ module.exports = [
         /* eslint-disable */
         function _inheritsLoose (t, e) { t.prototype = Object.create(e.prototype), (t.prototype.constructor = t).__proto__ = e }
         module.exports = SubError
+        /* eslint-enable */
       },
       testType: 'truthy'
     })
@@ -41,6 +42,7 @@ module.exports = [
     const scenario = createScenarioFromScaffold({
       name: 'transforms - common pattern "_inheritsLoose" works across package boundaries',
       defineOne: () => {
+        /* eslint-disable */
         const SuperClass = require('two')
         function SubClass () {}
         _inheritsLoose(SubClass, SuperClass)
