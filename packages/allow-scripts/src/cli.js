@@ -9,24 +9,24 @@ start().catch((err) => {
 })
 
 async function start () {
-  const rootDir = process.cwd()
+  const projectDir = process.cwd()
 
   const parsedArgs = parseArgs()
   const command = parsedArgs.command || 'run'
   switch (command) {
     // (default) run scripts
     case 'run': {
-      await runAllowedPackages({ rootDir })
+      await runAllowedPackages({ projectDir })
       return
     }
     // automatically set configuration
     case 'auto': {
-      await setDefaultConfiguration({ rootDir })
+      await setDefaultConfiguration({ projectDir })
       return
     }
     // list packages
     case 'list': {
-      await printPackagesList({ rootDir })
+      await printPackagesList({ projectDir })
       return
     }
     // (error) unrecognized

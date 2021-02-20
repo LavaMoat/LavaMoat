@@ -181,13 +181,16 @@ function getAllowedScriptsConfig (packageJson) {
 }
 
 async function loadAllPackageConfigurations ({ projectDir }) {
-  const { tree, packageJson } = await loadTree({ projectDir })
+  const packageJson = JSON.parse(await fs.readFile(path.join(projectDir, 'package.json')))
+  const tree = await loadTree({ projectDir })
 
   const packagesWithLifecycleScripts = new Map()
-  for (const { node, branch } of eachNodeInTree(tree)) {
-    const { qualifiedName } = getQualifiedNameDataForTreeNode(node)
+  for (const { node, branch, isRoot } of eachNodeInTree(tree)) {
+    // skip root, it doesn't need to be added to the allowlist
+    if (isRoot) continue
 
-    const nodePath = node.path()
+    const { qualifiedName } = getQualifiedNameDataForTreeNode(node)
+    const nodePath = node.realpath
 
     // TODO: follow symbolic links? I couldnt find any in my test repo,
     let depPackageJson
