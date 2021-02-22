@@ -13,7 +13,7 @@ In order to help mitigate the risk of such an attack we are building a suite of 
 **The goal of LavaMoat** is to bring added protections to modern JavaScript apps without having to rewrite them from scratch and automate a good first-start security configuration.
 
 
-## [Watch the introduction video](https://www.youtube.com/watch?v=pOTEJy_FqIA)
+## [Watch the introduction video](https://www.youtube.com/watch?v=iaqe6F4S2tA&feature=emb_title&ab_channel=Feross)
 
 
 ### How to secure your app against supplychain attacks
