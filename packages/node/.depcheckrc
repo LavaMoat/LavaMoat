@@ -1,0 +1,5 @@
+ignores:
+  # monorepo deps
+  - "ava"
+  # tests - fake packages
+  - "two"

@@ -1,17 +1,19 @@
 {
   "name": "@lavamoat/allow-scripts",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "main": "src/index.js",
   "bin": {
     "allow-scripts": "src/cli.js"
   },
   "license": "MIT",
   "dependencies": {
+    "@lavamoat/preinstall-always-fail": "^1.0.0",
     "@npmcli/run-script": "^1.8.1",
     "@yarnpkg/lockfile": "^1.1.0",
+    "npm-logical-tree": "^1.2.1",
+    "resolve": "^1.20.0",
     "semver": "^7.3.4",
-    "yargs": "^16.2.0",
-    "yarn-logical-tree": "^1.0.2"
+    "yargs": "^16.2.0"
   },
   "publishConfig": {
     "access": "public"
@@ -22,7 +24,11 @@
   },
   "devDependencies": {},
   "scripts": {
-    "test": "echo \"Error: no test specified\""
+    "test": "echo \"Error: no test specified\"",
+    "lint": "npm run lint:standard && npm run lint:deps",
+    "lint:standard": "standard src/**/*.js",
+    "lint:fix": "standard src/**/*.js --fix",
+    "lint:deps": "depcheck"
   },
   "author": "",
   "homepage": "https://github.com/LavaMoat/LavaMoat/tree/main/packages/allow-scripts"

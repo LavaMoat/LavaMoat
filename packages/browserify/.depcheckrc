@@ -1,0 +1,13 @@
+ignores:
+  # monorepo deps
+  - "ava"
+  # tests - fake packages
+  - "banana"
+  - "two"
+  - "one"
+  - "victim"
+  - "attacker"
+  - "three"
+  - "a"
+  - "b"
+  - "c"
