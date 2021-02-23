@@ -30,7 +30,7 @@ test('builtin - basic access', async (t) => {
     }
   })
 
-  runAndTestScenario(t, scenario, runScenario)
+  await runAndTestScenario(t, scenario, runScenario)
 })
 
 test('builtin - access via paths', async (t) => {
@@ -56,7 +56,7 @@ test('builtin - access via paths', async (t) => {
     }
   })
 
-  runAndTestScenario(t, scenario, runScenario)
+  await runAndTestScenario(t, scenario, runScenario)
 })
 
 test('builtin - paths soft-bindings preserve "this" but allow override', async (t) => {
@@ -118,5 +118,6 @@ test('builtin - paths soft-bindings preserve "this" but allow override', async (
       someClass: { SomeClass: class SomeClass {} }
     }
   })
-  runAndTestScenario(t, scenario, runScenario)
+
+  await runAndTestScenario(t, scenario, runScenario)
 })
