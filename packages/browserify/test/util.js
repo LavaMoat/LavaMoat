@@ -397,7 +397,7 @@ async function getStreamResults (stream) {
   return results
 }
 
-async function runBrowserify ({ projectDir, scenario }) {
+async function runBrowserify ({ scenario }) {
   const args = [JSON.stringify({
     entries: scenario.entries,
     opts: scenario.opts,
@@ -409,27 +409,27 @@ async function runBrowserify ({ projectDir, scenario }) {
     factor: `${__dirname}/fixtures/runBrowserifyBundleFactor.js`
   }
   const browserifyPath = paths[scenario.type || 'normal']
-  const output = await execFile(browserifyPath, args, { cwd: projectDir, maxBuffer: 8192 * 10000 })
+  const output = await execFile(browserifyPath, args, { cwd: scenario.dir, maxBuffer: 8192 * 10000 })
   return { output }
 }
 
-async function createBundleForScenario ({ scenario, dir }) {
+async function createBundleForScenario ({ scenario }) {
   let policy
-  if (!dir) {
+  if (!scenario.dir) {
     const { projectDir, policyDir } = await prepareScenarioOnDisk({ scenario, policyName: 'browserify' })
-    dir = projectDir
+    scenario.dir = projectDir
     policy = policyDir
   } else {
-    policy = path.join(dir, `/lavamoat/browserify/`)
+    policy = path.join(scenario.dir, `/lavamoat/browserify/`)
   }
   
-  const { output: { stdout: bundle } } = await runBrowserify({ projectDir: dir, scenario})
-  return { bundleForScenario: bundle, dir, policyDir: policy }
+  const { output: { stdout: bundle } } = await runBrowserify({ scenario })
+  return { bundleForScenario: bundle, policyDir: policy }
 }
 
-async function runScenario ({ scenario, bundle, dir }) {
+async function runScenario ({ scenario, bundle }) {
   if (!bundle) {
-    const { bundleForScenario } = await createBundleForScenario({ scenario, dir })
+    const { bundleForScenario } = await createBundleForScenario({ scenario })
     bundle = bundleForScenario
   }
   const { hookedConsole, firstLogEventPromise } = createHookedConsole()

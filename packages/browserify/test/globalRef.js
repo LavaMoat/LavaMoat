@@ -2,7 +2,10 @@ const test = require('ava')
 const {
   runScenario
 } = require('./util')
-const { createScenarioFromScaffold } = require('lavamoat-core/test/util')
+const {
+  createScenarioFromScaffold,
+  runAndTestScenario
+} = require('lavamoat-core/test/util')
 
 test('globalRef - has only the expected global circular refs', async (t) => {
   const scenario = createScenarioFromScaffold({
@@ -20,14 +23,23 @@ test('globalRef - has only the expected global circular refs', async (t) => {
       'self',
       'global',
       'globalThis'
-    ],
+    ].sort(),
     testType: 'truthy'
   })
-  const testResult = await runScenario({ scenario })
-  scenario.checkResult(t, Array.isArray(testResult), scenario)
-  scenario.expectedResult.sort()
-  scenario.testType = 'deepEqual'
-  scenario.checkResult(t, testResult.sort(), scenario)
+
+  scenario.checkResult = async (t, result, scenario) => {
+    result.sort()
+    if (scenario.testType === 'truthy') {
+      t.assert(Array.isArray(result), `${scenario.name} - scenario gives expected truthy result`)
+    } else if (scenario.testType === 'falsy') {
+      t.falsy(result, `${scenario.name} - scenario gives expected falsy result`)
+    } else {
+      t.deepEqual(result, scenario.expectedResult, `${scenario.name} - scenario gives expected result`)
+    }
+  }
+  await runAndTestScenario(t, scenario, runScenario)
+  scenario.testType = 'truthy'
+  await runAndTestScenario(t, scenario, runScenario)
 })
 
 test('globalRef - globalRef - check default containment', async (t) => {
@@ -48,8 +60,7 @@ test('globalRef - globalRef - check default containment', async (t) => {
       thisIsExports: true,
     }
   })
-  const testResult = await runScenario({ scenario })
-  scenario.checkResult(t, testResult, scenario)
+  await runAndTestScenario(t, scenario, runScenario)
 })
 test('globalRef - ensure endowments are accessible on globals', async (t) => {
   const scenario = createScenarioFromScaffold({
@@ -91,6 +102,5 @@ test('globalRef - ensure endowments are accessible on globals', async (t) => {
       postMessage: () => { throw new Error('this should never be called') }
     }
   })
-  const testResult = await runScenario({ scenario })
-  scenario.checkResult(t, testResult, scenario)
+  await runAndTestScenario(t, scenario, runScenario)
 })

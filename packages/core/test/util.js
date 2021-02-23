@@ -73,7 +73,7 @@ function createScenarioFromScaffold ({
   },
   expectedFailure = false,
   files = [],
-  builtin = [],
+  builtin = {},
   context = {},
   opts = {},
   config,
@@ -82,7 +82,8 @@ function createScenarioFromScaffold ({
   defineOne,
   defineTwo,
   defineThree,
-  defaultConfig = true
+  defaultConfig = true,
+  dir = ''
 } = {}) {
   function _defineEntry () {
     const testResult = require('one')
@@ -186,7 +187,8 @@ function createScenarioFromScaffold ({
     config: _config,
     configOverride: _configOverride,
     context,
-    opts
+    opts,
+    dir
   }
 }
 
@@ -212,7 +214,7 @@ function createHookedConsole () {
   }
 } 
 
-async function runScenario ({ scenario, builtin = {} }) {
+async function runScenario ({ scenario, scenario: { builtin } }) {
   const { entries, files, config, configOverride } = scenario
   const lavamoatConfig = mergeDeep(config, configOverride)
   const kernelSrc = generateKernel()

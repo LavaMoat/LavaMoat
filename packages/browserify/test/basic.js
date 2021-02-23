@@ -8,7 +8,11 @@ const {
   runScenario
 } = require('./util')
 
-const { createScenarioFromScaffold, autoConfigForScenario } = require('lavamoat-core/test/util')
+const {
+  createScenarioFromScaffold,
+  autoConfigForScenario,
+  runAndTestScenario
+} = require('lavamoat-core/test/util')
 
 test('basic - browserify bundle doesnt inject global', async (t) => {
   const bundle = await createBundleFromEntry(__dirname + '/fixtures/global.js')
@@ -52,9 +56,7 @@ test('basic - lavamoat policy and bundle', async (t) => {
   const testHref = 'https://funky.town.gov/yolo?snake=yes'
   scenario.context = { location: { href: testHref } }
   scenario.expectedResult = testHref
-  const testResult = await runScenario({ scenario })
-
-  scenario.checkResult(t, testResult, scenario)
+  await runAndTestScenario(t, scenario, runScenario)
 })
 
 test('basic - lavamoat bundle without prelude', async (t) => {
@@ -73,7 +75,7 @@ test('basic - lavamoat bundle without prelude', async (t) => {
   const { bundleForScenario } = await createBundleForScenario({ scenario })
   const prelude = generatePrelude()
 
-  t.truthy(!bundleForScenario.includes(prelude))
+  t.truthy(!bundleForScenario.includes(prelude), 'bundle DOES NOT include prelude')
 
   let didCallLoadBundle = false
   const testGlobal = {
