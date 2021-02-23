@@ -13,7 +13,7 @@
     "lint": "npm run lint:standard && npm run lint:deps",
     "lint:standard": "standard src/**/*.js test/*.js",
     "lint:fix": "standard src/**/*.js test/*.js --fix",
-    "lint:deps": "depcheck --ignores='standard,depcheck,two' --ignore-dirs examples"
+    "lint:deps": "depcheck"
   },
   "dependencies": {
     "@babel/code-frame": "^7.10.4",
@@ -26,9 +26,6 @@
     "object.fromentries": "^2.0.2",
     "resolve": "^1.17.0",
     "yargs": "^16.0.0"
-  },
-  "devDependencies": {
-    "ava": "^3.13.0"
   },
   "directories": {
     "example": "examples",

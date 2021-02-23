@@ -9,63 +9,6 @@ function makeNode (name, address, opts) {
   return logicalTree.node(name, address, opts)
 }
 
-/*
-- 
-*/
-
-// function loadTree (pkg, yarnLock, opts) {
-//   const tree = makeNode(pkg.name, null, pkg)
-//   const allDeps = new Map()
-//   const pkgDeps = Array.from(
-//     new Set(Object.keys(pkg.devDependencies || {})
-//     .concat(Object.keys(pkg.optionalDependencies || {}))
-//     .concat(Object.keys(pkg.dependencies || {})))
-//   )
-//   pkgDeps.forEach(name => {
-//     let dep = allDeps.get(name)
-//     if (!dep) {
-//       const semverString = pkgDeps[name]
-//       const packageSelector = `${name}@${semverString}`
-//       const lockNode = yarnLock[packageSelector]
-//       // bundled?
-//       let { version, bundled, resolved, integrity } = lockNode
-//       // set version if non-canonical
-//       if (!semver.validRange(semverString)) {
-//         // eg. file, url, etc.
-//         version = semverString
-//       }
-//       // top-level optional?
-//       const optional = false
-//       const opts = { version, optional, bundled, resolved, integrity }
-//       dep = makeNode(name, name, opts)
-//     }
-//     addChild(dep, tree, allDeps, yarnLock)
-//   })
-//   return tree
-// }
-
-// module.exports.node = makeNode
-// function makeNode (name, address, opts) {
-//   return new LogicalTree(name, address, opts || {})
-// }
-
-// function addChild (dep, tree, allDeps, yarnLock) {
-//   tree.addDep(dep)
-//   allDeps.set(dep.address, dep)
-//   const addr = dep.address
-//   const lockNode = atAddr(yarnLock, addr)
-//   Object.keys(lockNode.requires || {}).forEach(name => {
-//     const tdepAddr = _reqAddr(yarnLock, name, addr)
-//     let tdep = allDeps.get(tdepAddr)
-//     if (!tdep) {
-//       tdep = makeNode(name, tdepAddr, atAddr(yarnLock, tdepAddr))
-//       addChild(tdep, dep, allDeps, yarnLock)
-//     } else {
-//       dep.addDep(tdep)
-//     }
-//   })
-// }
-
 function loadTree (pkg, yarnLock) {
   const allDeps = new Map()
   // create a node for the root package
@@ -132,37 +75,3 @@ function addChild (treeDep, parentTreeEntry, allDeps, yarnLock) {
     }
   })
 }
-
-// function reqAddr (yarnLock, name, fromAddr) {
-//   const lockNode = atAddr(yarnLock, fromAddr)
-//   const child = (lockNode.dependencies || {})[name]
-//   if (child) {
-//     return `${fromAddr}:${name}`
-//   } else {
-//     const parts = fromAddr.split(':')
-//     while (parts.length) {
-//       parts.pop()
-//       const joined = parts.join(':')
-//       const parent = atAddr(yarnLock, joined)
-//       if (parent) {
-//         const child = (parent.dependencies || {})[name]
-//         if (child) {
-//           return `${joined}${parts.length ? ':' : ''}${name}`
-//         }
-//       }
-//     }
-//     const err = new Error(`${name} not accessible from ${fromAddr}`)
-//     err.yarnLock = yarnLock
-//     err.target = name
-//     err.from = fromAddr
-//     throw err
-//   }
-// }
-
-// function atAddr (yarnLock, addr) {
-//   if (!addr.length) { return yarnLock }
-//   const parts = addr.split(':')
-//   return parts.reduce((acc, next) => {
-//     return acc && (acc.dependencies || {})[next]
-//   }, yarnLock)
-// }

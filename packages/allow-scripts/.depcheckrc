@@ -1,0 +1,2 @@
+ignores:
+  - "@lavamoat/preinstall-always-fail"
