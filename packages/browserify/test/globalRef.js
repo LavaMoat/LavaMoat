@@ -16,7 +16,7 @@ test('globalRef - has only the expected global circular refs', async (t) => {
           const value = globalThis[key]
           return value === globalThis
         })
-      module.exports = circularKeys
+      module.exports = circularKeys.sort()
     },
     expectedResult: [
       'window',
@@ -28,7 +28,6 @@ test('globalRef - has only the expected global circular refs', async (t) => {
   })
 
   scenario.checkResult = async (t, result, scenario) => {
-    result.sort()
     if (scenario.testType === 'truthy') {
       t.assert(Array.isArray(result), `${scenario.name} - scenario gives expected truthy result`)
     } else if (scenario.testType === 'falsy') {

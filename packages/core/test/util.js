@@ -214,8 +214,8 @@ function createHookedConsole () {
   }
 } 
 
-async function runScenario ({ scenario, scenario: { builtin } }) {
-  const { entries, files, config, configOverride } = scenario
+async function runScenario ({ scenario }) {
+  const { entries, files, config, configOverride, builtin } = scenario
   const lavamoatConfig = mergeDeep(config, configOverride)
   const kernelSrc = generateKernel()
   const { hookedConsole, firstLogEventPromise } = createHookedConsole()

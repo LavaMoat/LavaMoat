@@ -27,30 +27,7 @@ test('policy - default policy path is generated with autoconfig if path is not s
 
   await runBrowserify({ scenario })
 
-  t.truthy(fs.existsSync(expectedPath), 'Config file does not yet exist')
-})
-
-test('policy - writes a proper policy to a temp dir', async (t) => {
-  const scenario = createScenarioFromScaffold({
-    defineOne: () => {
-      module.exports = require('three')
-    },
-    defineTwo: () => {
-      module.exports = 555
-    },
-    defineThree: () => {
-      module.exports = require('two')
-    },
-    opts: {
-      writeAutoPolicy: true
-    },
-    expectedResult: 555
-  })
-  const { projectDir } = await prepareScenarioOnDisk({ scenario, policyName: 'browserify' })
-  scenario.dir = projectDir
-  await runBrowserify({ scenario })
-
-  await runAndTestScenario(t, scenario, runScenario)
+  t.truthy(fs.existsSync(expectedPath), 'Config file exists')
 })
 
 test('Config override is applied if not specified and already exists at default path', async (t) => {
