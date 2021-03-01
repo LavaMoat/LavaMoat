@@ -1,5 +1,4 @@
-const { existsSync, writeFileSync, readFile, createWriteStream } = require('fs')
-const { promisify } = require('util')
+const { existsSync, writeFileSync, createWriteStream, promises: { readFile } } = require('fs')
 
 const RCENTRY = 'ignore-scripts true'
 const isYarn = existsSync('./yarn.lock')
@@ -7,7 +6,6 @@ const isNpm = existsSync('./package-lock.json')
 const yarnRcExists = existsSync('./.yarnrc')
 const npmRcExists = existsSync('./.npmrc')
 
-const readFilePromise = promisify(readFile)
 let rcFile
 if (isYarn) {
   rcFile = './.yarnrc'
@@ -21,10 +19,10 @@ if (isYarn) {
 async function writeRcFile () {
   if (!yarnRcExists && !npmRcExists) {
     writeFileSync(rcFile, RCENTRY)
-    console.log('@lavamoat/allow-scripts: created .yarnrc file with entry: ignore-scripts true. Run \'yarn add @lavamoat/preinstall-always-fail\' to make sure this configuration is correct.')
+    console.log(`@lavamoat/allow-scripts: created ${rcFile.split('/')[1]} file with entry: ignore-scripts true. Run \'yarn add -D @lavamoat/preinstall-always-fail\' to make sure this configuration is correct.`)
     return
   } else {
-    const rcFileContents = await readFilePromise(rcFile, 'utf8')
+    const rcFileContents = await readFile(rcFile, 'utf8')
     if (rcFileContents.includes(RCENTRY)) {
       return
     }
@@ -34,7 +32,7 @@ async function writeRcFile () {
     } else {
       rcStream.write(RCENTRY)
     }
-    console.log('@lavamoat/allow-scripts: added entry to .yarnrc: ignore-scripts true. Run \'yarn add @lavamoat/preinstall-always-fail\' to make sure this configuration is correct.')
+    console.log(`@lavamoat/allow-scripts: added entry to ${rcFile.split('/')[1]}: ignore-scripts true. Run \'yarn add -D @lavamoat/preinstall-always-fail\' to make sure this configuration is correct.`)
   }
 }
 
