@@ -152,7 +152,7 @@ module.exports = [
         }
       },
       expectedFailure: true,
-      defaultConfig: false
+      defaultPolicy: false
     })
     return scenario
   },
@@ -169,7 +169,7 @@ module.exports = [
         }
       },
       expectedFailure: true,
-      defaultConfig: false
+      defaultPolicy: false
     })
     return scenario
   },
@@ -189,7 +189,7 @@ module.exports = [
         }
       },
       expectedFailure: true,
-      defaultConfig: false
+      defaultPolicy: false
     })
     return scenario
   },
@@ -209,7 +209,7 @@ module.exports = [
         }
       },
       expectedFailure: true,
-      defaultConfig: false
+      defaultPolicy: false
     })
     return scenario
   },

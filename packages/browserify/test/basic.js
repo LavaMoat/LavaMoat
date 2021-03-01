@@ -33,7 +33,7 @@ test('basic - browserify bundle doesnt inject global in deps', async (t) => {
   await autoConfigForScenario({ scenario })
   const { bundleForScenario } = await createBundleForScenario({ scenario })
   const hasGlobalInjection = bundleForScenario.includes('typeof global !== \\"undefined\\" ? global :')
-  t.falsy(hasGlobalInjection)
+  t.falsy(hasGlobalInjection, 'did not inject "global" ref')
 })
 
 test('basic - lavamoat policy and bundle', async (t) => {
@@ -50,8 +50,8 @@ test('basic - lavamoat policy and bundle', async (t) => {
   const { bundleForScenario } = await createBundleForScenario({ scenario })
   const prelude = generatePrelude()
 
-  t.truthy(bundleForScenario.includes('"location.href":true'))
-  t.truthy(bundleForScenario.includes(prelude))
+  t.truthy(bundleForScenario.includes('"location.href":true'), 'prelude includes href policy')
+  t.truthy(bundleForScenario.includes(prelude), 'bundle includes expected prelude')
 
   const testHref = 'https://funky.town.gov/yolo?snake=yes'
   scenario.context = { location: { href: testHref } }

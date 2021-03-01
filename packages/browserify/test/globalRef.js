@@ -23,21 +23,8 @@ test('globalRef - has only the expected global circular refs', async (t) => {
       'self',
       'global',
       'globalThis'
-    ].sort(),
-    testType: 'truthy'
+    ].sort()
   })
-
-  scenario.checkResult = async (t, result, scenario) => {
-    if (scenario.testType === 'truthy') {
-      t.assert(Array.isArray(result), `${scenario.name} - scenario gives expected truthy result`)
-    } else if (scenario.testType === 'falsy') {
-      t.falsy(result, `${scenario.name} - scenario gives expected falsy result`)
-    } else {
-      t.deepEqual(result, scenario.expectedResult, `${scenario.name} - scenario gives expected result`)
-    }
-  }
-  await runAndTestScenario(t, scenario, runScenario)
-  scenario.testType = 'truthy'
   await runAndTestScenario(t, scenario, runScenario)
 })
 
