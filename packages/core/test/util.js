@@ -210,7 +210,9 @@ async function runScenario ({ scenario }) {
   const lavamoatConfig = mergeDeep(config, configOverride)
   const kernelSrc = generateKernel()
   const { hookedConsole, firstLogEventPromise } = createHookedConsole()
-  const { result: createKernel } = evaluateWithSourceUrl('LavaMoat/core-test/kernel', kernelSrc, mergeDeep({ console: hookedConsole }, scenario.context))
+  const { result: createKernel, context: scenarioGlobalThis } = evaluateWithSourceUrl('LavaMoat/core-test/kernel', kernelSrc, mergeDeep({ console: hookedConsole }, scenario.context))
+  //root global for test realm
+  scenario.globalThis = scenarioGlobalThis
   const kernel = createKernel({
     lavamoatConfig,
     loadModuleData: (id) => {

@@ -13,7 +13,7 @@ test('getEndowmentsForConfig', (t) => {
       'namespace.stringValue.includes': true
     }
   }
-  const resultGlobal = getEndowmentsForConfig(sourceGlobal, config)
+  const resultGlobal = getEndowmentsForConfig(sourceGlobal, {}, config)
   t.is(sourceGlobal.namespace.stringValue.includes('dab'), true)
   t.is(resultGlobal.namespace.stringValue.includes('dab'), true)
 })
@@ -27,7 +27,7 @@ test('getEndowmentsForConfig - siblings', (t) => {
       'Buffer.isBuffer': true
     }
   }
-  const resultGlobal = getEndowmentsForConfig(sourceGlobal, config)
+  const resultGlobal = getEndowmentsForConfig(sourceGlobal, {}, config)
   {
     const sourceProp = Object.getOwnPropertyDescriptor(sourceGlobal.Buffer, 'from')
     const resultProp = Object.getOwnPropertyDescriptor(resultGlobal.Buffer, 'from')
@@ -56,7 +56,7 @@ test('getEndowmentsForConfig - getter', (t) => {
       'abc.xyz': true
     }
   }
-  const resultGlobal = getEndowmentsForConfig(sourceGlobal, config)
+  const resultGlobal = getEndowmentsForConfig(sourceGlobal, {}, config)
   {
     const sourceProp = Object.getOwnPropertyDescriptor(sourceGlobal, 'abc')
     const resultProp = Object.getOwnPropertyDescriptor(resultGlobal, 'abc')
@@ -69,4 +69,27 @@ test('getEndowmentsForConfig - getter', (t) => {
       writable: true
     }, 'prop descriptor matches (except value)')
   }
+})
+
+test('globals - ensure window.document getter behavior support', async (t) => {
+  // compartment.globalThis.document would error because 'this' value is not window
+  const { getEndowmentsForConfig } = makeGetEndowmentsForConfig()
+  const sourceGlobal = {
+    get xyz() {
+      return (this === sourceGlobal)
+    }
+  }
+  const config = {
+    globals: {
+      xyz: true
+    }
+  }
+  const resultGlobal = getEndowmentsForConfig(sourceGlobal, {}, config)
+  const sourceValue = sourceGlobal.xyz
+  const resultGlobalValue = resultGlobal.xyz
+  const resultValue = Reflect.getOwnPropertyDescriptor(resultGlobal, 'xyz').get()
+
+  t.deepEqual(sourceValue, true)
+  t.deepEqual(resultGlobalValue, true)
+  t.deepEqual(resultValue, false)
 })

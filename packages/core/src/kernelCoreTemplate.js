@@ -263,15 +263,6 @@
         return packageCompartment
       }
 
-      // prepare endowments
-      let endowments
-      try {
-        endowments = getEndowmentsForConfig(rootPackageCompartment.globalThis, packagePolicy)
-      } catch (err) {
-        const errMsg = `Lavamoat - failed to prepare endowments for package "${packageName}":\n${err.stack}`
-        throw new Error(errMsg)
-      }
-
       // prepare Compartment
       if (getExternalCompartment && packagePolicy.env) {
         // external compartment can be provided by the platform (eg lavamoat-node)
@@ -283,6 +274,16 @@
         // - Date is for untamed Date.now
         packageCompartment = new Compartment({ Math, Date })
       }
+
+      // prepare endowments
+      let endowments
+      try {
+        endowments = getEndowmentsForConfig(rootPackageCompartment.globalThis, packageCompartment.globalThis, packagePolicy)
+      } catch (err) {
+        const errMsg = `Lavamoat - failed to prepare endowments for package "${packageName}":\n${err.stack}`
+        throw new Error(errMsg)
+      }
+
       // sets up read/write access as configured
       const globalsConfig = packagePolicy.globals
       prepareCompartmentGlobalFromConfig(packageCompartment.globalThis, globalsConfig, endowments, globalStore, globalThisRefs)

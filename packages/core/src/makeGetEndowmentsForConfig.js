@@ -15,7 +15,7 @@ function makeGetEndowmentsForConfig () {
   }
 
   // for backwards compat only
-  function getEndowmentsForConfig (globalRef, config) {
+  function getEndowmentsForConfig (globalRef, compartmentGlobalRef, config) {
     if (!config.globals) return {}
     // validate read access from config
     const whitelistedReads = []
@@ -33,15 +33,14 @@ function makeGetEndowmentsForConfig () {
       }
       whitelistedReads.push(path)
     })
-    return makeMinimalViewOfRef(globalRef, whitelistedReads)
+    return makeMinimalViewOfRef(globalRef, compartmentGlobalRef, whitelistedReads)
   }
 
-  function makeMinimalViewOfRef (originRef, paths) {
-    const newRef = {}
+  function makeMinimalViewOfRef (originRef, targetRef, paths) {
     paths.forEach(path => {
-      copyValueAtPath(path.split('.'), originRef, newRef)
+      copyValueAtPath(path.split('.'), originRef, targetRef)
     })
-    return newRef
+    return targetRef
   }
 
   function copyValueAtPath (pathParts, originRef, targetRef) {
