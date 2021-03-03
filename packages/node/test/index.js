@@ -2,6 +2,7 @@
 const test = require('ava')
 const { parseForConfig } = require('../src/parseForConfig')
 const { runLavamoat } = require('./util')
+require('./arguments')
 require('./envConfig')
 require('./globals')
 require('./runScenarios')

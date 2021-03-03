@@ -1,5 +1,9 @@
 const test = require('ava')
-const { createScenarioFromScaffold, runScenario } = require('./util.js')
+const {
+  createScenarioFromScaffold,
+  runScenario,
+  runAndTestScenario
+} = require('./util.js')
 
 test('builtin - basic access', async (t) => {
   const scenario = createScenarioFromScaffold({
@@ -10,9 +14,6 @@ test('builtin - basic access', async (t) => {
 
       module.exports = { abc, xyz }
     },
-    builtin: {
-      abc: 123
-    },
     config: {
       resources: {
         one: {
@@ -22,22 +23,20 @@ test('builtin - basic access', async (t) => {
           }
         }
       }
+    },
+    expectedResult: { abc: 123, xyz: null },
+    builtin: {
+      abc: 123
     }
   })
-  const result = await runScenario({ scenario })
-  t.deepEqual(result, { abc: 123, xyz: null })
+
+  await runAndTestScenario(t, scenario, runScenario)
 })
 
 test('builtin - access via paths', async (t) => {
   const scenario = createScenarioFromScaffold({
     defineOne: () => {
       module.exports = require('abc')
-    },
-    builtin: {
-      abc: {
-        xyz: 123,
-        ijk: 456
-      }
     },
     config: {
       resources: {
@@ -47,11 +46,17 @@ test('builtin - access via paths', async (t) => {
           }
         }
       }
+    },
+    expectedResult: { xyz: 123 },
+    builtin: {
+      abc: {
+        xyz: 123,
+        ijk: 456
+      }
     }
   })
 
-  const result = await runScenario({ scenario })
-  t.deepEqual(result, { xyz: 123 })
+  await runAndTestScenario(t, scenario, runScenario)
 })
 
 test('builtin - paths soft-bindings preserve "this" but allow override', async (t) => {
@@ -85,11 +90,6 @@ test('builtin - paths soft-bindings preserve "this" but allow override', async (
         return true
       }
     },
-    builtin: {
-      buffer: require('buffer'),
-      thisChecker: (() => { const parent = {}; parent.check = function () { return this === parent }; return parent })(),
-      someClass: { SomeClass: class SomeClass {} }
-    },
     config: {
       resources: {
         one: {
@@ -106,13 +106,18 @@ test('builtin - paths soft-bindings preserve "this" but allow override', async (
           }
         }
       }
+    },
+    expectedResult: {
+      overrideCheck: true,
+      thisCheck: true,
+      classCheck: true
+    },
+    builtin: {
+      buffer: require('buffer'),
+      thisChecker: (() => { const parent = {}; parent.check = function () { return this === parent }; return parent })(),
+      someClass: { SomeClass: class SomeClass {} }
     }
   })
 
-  const result = await runScenario({ scenario })
-  t.deepEqual(result, {
-    overrideCheck: true,
-    thisCheck: true,
-    classCheck: true
-  })
+  await runAndTestScenario(t, scenario, runScenario)
 })

@@ -8,7 +8,11 @@ const {
   runScenario
 } = require('./util')
 
-const { createScenarioFromScaffold, autoConfigForScenario } = require('lavamoat-core/test/util')
+const {
+  createScenarioFromScaffold,
+  autoConfigForScenario,
+  runAndTestScenario
+} = require('lavamoat-core/test/util')
 
 test('basic - browserify bundle doesnt inject global', async (t) => {
   const bundle = await createBundleFromEntry(__dirname + '/fixtures/global.js')
@@ -46,14 +50,13 @@ test('basic - lavamoat policy and bundle', async (t) => {
   const { bundleForScenario } = await createBundleForScenario({ scenario })
   const prelude = generatePrelude()
 
-  t.assert(bundleForScenario.includes('"location.href":true'), 'prelude includes banana policy')
-  t.assert(bundleForScenario.includes(prelude), 'bundle includes expected prelude')
+  t.truthy(bundleForScenario.includes('"location.href":true'), 'prelude includes href policy')
+  t.truthy(bundleForScenario.includes(prelude), 'bundle includes expected prelude')
 
   const testHref = 'https://funky.town.gov/yolo?snake=yes'
   scenario.context = { location: { href: testHref } }
-  const testResult = await runScenario({ scenario })
-
-  t.is(testResult, testHref, 'test result matches expected')
+  scenario.expectedResult = testHref
+  await runAndTestScenario(t, scenario, runScenario)
 })
 
 test('basic - lavamoat bundle without prelude', async (t) => {
@@ -72,12 +75,13 @@ test('basic - lavamoat bundle without prelude', async (t) => {
   const { bundleForScenario } = await createBundleForScenario({ scenario })
   const prelude = generatePrelude()
 
-  t.assert(!bundleForScenario.includes(prelude), 'bundle DOES NOT include prelude')
+  t.truthy(!bundleForScenario.includes(prelude), 'bundle DOES NOT include prelude')
 
   let didCallLoadBundle = false
   const testGlobal = {
     LavaMoat: { loadBundle: () => { didCallLoadBundle = true } }
   }
   evalBundle(bundleForScenario, testGlobal)
-  t.assert(didCallLoadBundle, 'test result matches expected')
+
+  t.truthy(didCallLoadBundle)
 })

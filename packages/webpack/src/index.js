@@ -254,14 +254,14 @@ class LavaMoat {
   }
 
   getConfigPath(pluginOpts) {
-    const defaultConfig = './lavamoat-config.json'
+    const defaultPolicy = './lavamoat-config.json'
     if (!pluginOpts.config) {
-      return defaultConfig
+      return defaultPolicy
     }
     if (typeof pluginOpts.config === 'string') {
       return pluginOpts.config
     }
-    return defaultConfig
+    return defaultPolicy
   }
 }
 

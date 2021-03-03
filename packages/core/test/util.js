@@ -18,7 +18,8 @@ module.exports = {
   evaluateWithSourceUrl,
   createHookedConsole,
   fillInFileDetails,
-  functionToString
+  functionToString,
+  runAndTestScenario
 }
 
 async function generateConfigFromFiles ({ files, ...opts }) {
@@ -43,6 +44,7 @@ function createScenarioFromScaffold ({
   expectedResult = {
     value: 'this is module two'
   },
+  testType = 'deepEqual',
   checkPostRun = async (t, result, err, scenario) => {
     if (err) {
       await scenario.checkError(t, err, scenario)
@@ -61,11 +63,17 @@ function createScenarioFromScaffold ({
     }
   },
   checkResult = async (t, result, scenario) => {
-    t.deepEqual(result, scenario.expectedResult, `${scenario.name} - scenario gives expected result`)
+    if (scenario.testType === 'truthy') {
+      t.assert(result, `${scenario.name} - scenario gives expected truthy result`)
+    } else if (scenario.testType === 'falsy') {
+      t.falsy(result, `${scenario.name} - scenario gives expected falsy result`)
+    } else {
+      t.deepEqual(result, scenario.expectedResult, `${scenario.name} - scenario gives expected result`)
+    }
   },
   expectedFailure = false,
   files = [],
-  builtin = [],
+  builtin = {},
   context = {},
   opts = {},
   config,
@@ -74,8 +82,8 @@ function createScenarioFromScaffold ({
   defineOne,
   defineTwo,
   defineThree,
-  shouldRunInCore = true,
-  defaultConfig = true
+  defaultPolicy = true,
+  dir
 } = {}) {
   function _defineEntry () {
     const testResult = require('one')
@@ -131,12 +139,11 @@ function createScenarioFromScaffold ({
         one: 'node_modules/one/index.js'
       }
     },
-    ...filesFromBuiltin(builtin),
     ...files
   })
 
   let _config
-  if (defaultConfig) {
+  if (defaultPolicy) {
     _config = mergeDeep({
       resources: {
         one: {
@@ -171,6 +178,8 @@ function createScenarioFromScaffold ({
     checkPostRun,
     checkResult,
     checkError,
+    testType,
+    builtin,
     expectedResult,
     expectedFailure,
     entries: ['entry.js'],
@@ -179,7 +188,7 @@ function createScenarioFromScaffold ({
     configOverride: _configOverride,
     context,
     opts,
-    shouldRunInCore
+    dir
   }
 }
 
@@ -206,7 +215,7 @@ function createHookedConsole () {
 } 
 
 async function runScenario ({ scenario }) {
-  const { entries, files, config, configOverride } = scenario
+  const { entries, files, config, configOverride, builtin } = scenario
   const lavamoatConfig = mergeDeep(config, configOverride)
   const kernelSrc = generateKernel()
   const { hookedConsole, firstLogEventPromise } = createHookedConsole()
@@ -214,11 +223,14 @@ async function runScenario ({ scenario }) {
   const kernel = createKernel({
     lavamoatConfig,
     loadModuleData: (id) => {
+      if (id in builtin) {
+        return moduleDataForBuiltin(builtin, id)
+      }
       const moduleRecord = files[id]
       return {
         id: moduleRecord.specifier,
         package: moduleRecord.packageName,
-        source: `(function(exports, require, module, __filename, __dirname){\n${moduleRecord.content}\n})`,
+        source: `(function(exports, require, module, __filename, __dirname){\n${transformSource(moduleRecord.content)}\n})`,
         type: moduleRecord.type,
         file: moduleRecord.file,
         deps: moduleRecord.importMap,
@@ -230,6 +242,23 @@ async function runScenario ({ scenario }) {
     },
     prepareModuleInitializerArgs
   })
+
+  function transformSource(content) {
+    return content
+      // html comment
+      .split('-->').join('-- >')
+      .split('<!--').join('<! --')
+      // use indirect eval
+      .split(' eval(').join(' (eval)(')
+      .split('\'eval(').join('\'(eval)(')
+      // replace import statements in comments
+      .split(' import(').join(' __import__(')
+      .split('"import(').join('"__import__(')
+      .split('\'import(').join('\'__import__(')
+      .split('{import(').join('{__import__(')
+      .split('<import(').join('<__import__(')
+      .split('.import(').join('.__import__(')
+  }
 
   entries.forEach(id => kernel.internalRequire(id))
   const testResult = await firstLogEventPromise
@@ -268,18 +297,14 @@ function fillInFileDetails (files) {
   return files
 }
 
-function filesFromBuiltin (builtinObj) {
-  return fromEntries(
-    Object.entries(builtinObj)
-      .map(([key, value]) => {
-        return [key, {
-          file: key,
-          packageName: key,
-          type: 'builtin',
-          moduleInitializer: (_, _2, module) => { module.exports = value }
-        }]
-      })
-  )
+function moduleDataForBuiltin (builtinObj, name) {
+  return {
+    id: name,
+    file: name,
+    package: name,
+    type: 'builtin',
+    moduleInitializer: (_, _2, module) => { module.exports = builtinObj[name] }
+  }
 }
 
 function prepareModuleInitializerArgs (requireRelativeWithContext, moduleObj, moduleData) {
@@ -353,4 +378,15 @@ function convertOptsToArgs ({ scenario }) {
 
 function functionToString(func) {
   return `(${func}).call(this)`
+}
+
+async function runAndTestScenario(t, scenario, platformRunScenario) {
+  let result, err
+  try {
+    result = await platformRunScenario({ scenario })
+  } catch (e) {
+    err = e
+  }
+  await scenario.checkPostRun(t, result, err, scenario)
+  return result
 }
