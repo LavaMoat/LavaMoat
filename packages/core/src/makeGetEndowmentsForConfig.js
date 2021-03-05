@@ -53,7 +53,6 @@ function makeGetEndowmentsForConfig () {
   }
 
   function copyValueAtPath (pathParts, originRef, targetRef, unwrapRef) {
-    console.warn(pathParts)
     if (pathParts.length === 0) {
       throw new Error('unable to copy, must have pathParts, was empty')
     }
@@ -61,24 +60,12 @@ function makeGetEndowmentsForConfig () {
     const remainingParts = pathParts.slice(1)
     // get the property from any depth in the property chain
     const { prop: originPropDesc } = getPropertyDescriptorDeep(originRef, nextPart)
-    // origin missing the value to copy
+
+    // if origin missing the value to copy, just skip it
     if (!originPropDesc) {
-      // just skip it
       return
     }
-    // determine the origin value, this coerces getters to values
-    // im deeply sorry, respecting getters was complicated and
-    // my brain is not very good
-    let originValue, originWritable
-    if ('value' in originPropDesc) {
-      originValue = originPropDesc.value
-      originWritable = originPropDesc.writable
-    } else if ('get' in originPropDesc) {
-      originValue = originPropDesc.get.call(originRef)
-      originWritable = 'set' in originPropDesc
-    } else {
-      throw new Error('getEndowmentsForConfig - property descriptor missing a getter')
-    }
+
     // if target already has a value, it must be extensible
     const targetPropDesc = Reflect.getOwnPropertyDescriptor(targetRef, nextPart)
     if (targetPropDesc) {
@@ -92,29 +79,35 @@ function makeGetEndowmentsForConfig () {
       if (valueType !== 'object' && valueType !== 'function') {
         throw new Error(`unable to copy on to targetRef, targetRef value is not an obj or func "${nextPart}"`)
       }
-      // continue
-      const nextOriginRef = originValue
-      const nextTargetRef = targetValue
-      copyValueAtPath(remainingParts, nextOriginRef, nextTargetRef, nextOriginRef)
-      return
     }
-    // its not populated so lets write to it
-    // if this is not the last path in the assignment, put an object to serve as a container
+
+    // if this is not the last path in the assignment, walk into the containing reference
     if (remainingParts.length > 0) {
-      const newValue = {}
-      const newPropDesc = {
-        value: newValue,
-        writable: originWritable,
-        enumerable: originPropDesc.enumerable,
-        configurable: originPropDesc.configurable
-      }
-      Reflect.defineProperty(targetRef, nextPart, newPropDesc)
-      // continue
+      const { originValue, originWritable } = getOriginValue()
       const nextOriginRef = originValue
-      const nextTargetRef = newValue
+      let nextTargetRef
+      // check if value exists on target
+      if (targetPropDesc) {
+        // a value already exists, we should walk into it
+        nextTargetRef = targetPropDesc.value
+      } else {
+        // its not populated so lets write to it
+        // put an object to serve as a container
+        const containerRef = {}
+        const newPropDesc = {
+          value: containerRef,
+          writable: originWritable,
+          enumerable: originPropDesc.enumerable,
+          configurable: originPropDesc.configurable
+        }
+        Reflect.defineProperty(targetRef, nextPart, newPropDesc)
+        // the newly created container will be the next target
+        nextTargetRef = containerRef
+      }
       copyValueAtPath(remainingParts, nextOriginRef, nextTargetRef, nextOriginRef)
       return
     }
+
     // this is the last part of the path, the value we're trying to actually copy
     // if has getter/setter - copy as is
     if (!('value' in originPropDesc)) {
@@ -135,6 +128,11 @@ function makeGetEndowmentsForConfig () {
       Reflect.defineProperty(targetRef, nextPart, wrapperPropDesc)
       return
     }
+
+    // need to determine the value type in order to copy it with
+    // this-value unwrapping support
+    const { originValue } = getOriginValue()
+
     // not a function - copy as is
     if (typeof originValue !== 'function') {
       Reflect.defineProperty(targetRef, nextPart, originPropDesc)
@@ -160,6 +158,23 @@ function makeGetEndowmentsForConfig () {
       configurable: originPropDesc.configurable
     }
     Reflect.defineProperty(targetRef, nextPart, newPropDesc)
+
+    function getOriginValue () {
+      // determine the origin value, this coerces getters to values
+      // im deeply sorry, respecting getters was complicated and
+      // my brain is not very good
+      let originValue, originWritable
+      if ('value' in originPropDesc) {
+        originValue = originPropDesc.value
+        originWritable = originPropDesc.writable
+      } else if ('get' in originPropDesc) {
+        originValue = originPropDesc.get.call(unwrapRef)
+        originWritable = 'set' in originPropDesc
+      } else {
+        throw new Error('getEndowmentsForConfig - property descriptor missing a getter')
+      }
+      return { originValue, originWritable }
+    }
   }
 }
 
