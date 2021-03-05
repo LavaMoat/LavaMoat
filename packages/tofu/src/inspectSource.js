@@ -22,7 +22,7 @@ function inspectGlobals (source, {
   ignoredRefs = [],
   globalRefs = [],
   globalPropertyNames = defaultGlobalPropertyNames,
-  languageRefs = defaultLanguageRefs,
+  languageRefs = defaultLanguageRefs
 } = {}) {
   const ast = (typeof source === 'object') ? source : parse(source)
   const detectedGlobals = findGlobals(ast)

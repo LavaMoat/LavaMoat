@@ -69,8 +69,8 @@ module.exports.globalPropertyNames = [
   // found to be missing from this list
   'BigInt',
   'BigInt64Array',
-  'BigUint64Array',
+  'BigUint64Array'
 ]
 
-// js language keywords that are not global properties 
+// js language keywords that are not global properties
 module.exports.languageRefs = ['this', 'arguments', 'undefined']
