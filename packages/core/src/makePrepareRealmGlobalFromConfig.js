@@ -29,34 +29,34 @@ function makePrepareRealmGlobalFromConfig () {
     return result
   }
 
-  function prepareCompartmentGlobalFromConfig (moduleRealmGlobal, globalsConfig, endowments, globalStore, globalThisRefs) {
+  function prepareCompartmentGlobalFromConfig (packageCompartmentGlobal, globalsConfig, endowments, globalStore, globalThisRefs) {
     // lookup top level read + write access keys
     const topLevelWriteAccessKeys = getTopLevelWriteAccessFromPackageConfig(globalsConfig)
     const topLevelReadAccessKeys = getTopLevelReadAccessFromPackageConfig(globalsConfig)
 
     // define accessors
 
-    // allow read access via globalStore or moduleRealmGlobal
-    topLevelReadAccessKeys.forEach(key => {
-      Object.defineProperty(moduleRealmGlobal, key, {
-        get () {
-          if (globalStore.has(key)) {
-            return globalStore.get(key)
-          } else {
-            return endowments[key]
-          }
-        },
-        set () {
-          // TODO: there should be a config to throw vs silently ignore
-          console.warn(`LavaMoat: ignoring write attempt to read-access global "${key}"`)
-        }
-      })
-    })
+    // allow read access via globalStore or packageCompartmentGlobal
+    // topLevelReadAccessKeys.forEach(key => {
+    //   Object.defineProperty(packageCompartmentGlobal, key, {
+    //     get () {
+    //       if (globalStore.has(key)) {
+    //         return globalStore.get(key)
+    //       } else {
+    //         return endowments[key]
+    //       }
+    //     },
+    //     set () {
+    //       // TODO: there should be a config to throw vs silently ignore
+    //       console.warn(`LavaMoat: ignoring write attempt to read-access global "${key}"`)
+    //     }
+    //   })
+    // })
 
     // allow write access to globalStore
-    // read access via globalStore or moduleRealmGlobal
+    // read access via globalStore or packageCompartmentGlobal
     topLevelWriteAccessKeys.forEach(key => {
-      Object.defineProperty(moduleRealmGlobal, key, {
+      Object.defineProperty(packageCompartmentGlobal, key, {
         get () {
           if (globalStore.has(key)) {
             return globalStore.get(key)
@@ -78,7 +78,7 @@ function makePrepareRealmGlobalFromConfig () {
       if (topLevelReadAccessKeys.includes(key)) return
       if (topLevelWriteAccessKeys.includes(key)) return
       // set circular ref to global
-      moduleRealmGlobal[key] = moduleRealmGlobal
+      packageCompartmentGlobal[key] = packageCompartmentGlobal
     })
   }
 }

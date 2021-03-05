@@ -14,8 +14,17 @@ function makeGetEndowmentsForConfig () {
     copyValueAtPath
   }
 
-  // for backwards compat only
-  function getEndowmentsForConfig (globalRef, compartmentGlobalRef, config) {
+  /**
+   *
+   * @function getEndowmentsForConfig
+   * @param {object} sourceRef - Object from which to copy properties
+   * @param {object} targetRef - Object to which to copy properties
+   * @param {object} unwrapRef - For getters and setters, replaces targetRef as the 'this' value
+   * @param {object} config - LavaMoat package config
+   * @return {object} - The targetRef
+   *
+   */
+  function getEndowmentsForConfig (sourceRef, targetRef, unwrapRef, config) {
     if (!config.globals) return {}
     // validate read access from config
     const whitelistedReads = []
@@ -33,17 +42,18 @@ function makeGetEndowmentsForConfig () {
       }
       whitelistedReads.push(path)
     })
-    return makeMinimalViewOfRef(globalRef, compartmentGlobalRef, whitelistedReads)
+    return makeMinimalViewOfRef(sourceRef, targetRef, unwrapRef, whitelistedReads)
   }
 
-  function makeMinimalViewOfRef (originRef, targetRef, paths) {
+  function makeMinimalViewOfRef (originRef, targetRef, unwrapRef, paths) {
     paths.forEach(path => {
-      copyValueAtPath(path.split('.'), originRef, targetRef)
+      copyValueAtPath(path.split('.'), originRef, targetRef, unwrapRef)
     })
     return targetRef
   }
 
-  function copyValueAtPath (pathParts, originRef, targetRef) {
+  function copyValueAtPath (pathParts, originRef, targetRef, unwrapRef) {
+    console.warn(pathParts)
     if (pathParts.length === 0) {
       throw new Error('unable to copy, must have pathParts, was empty')
     }
@@ -85,7 +95,7 @@ function makeGetEndowmentsForConfig () {
       // continue
       const nextOriginRef = originValue
       const nextTargetRef = targetValue
-      copyValueAtPath(remainingParts, nextOriginRef, nextTargetRef)
+      copyValueAtPath(remainingParts, nextOriginRef, nextTargetRef, nextOriginRef)
       return
     }
     // its not populated so lets write to it
@@ -102,7 +112,7 @@ function makeGetEndowmentsForConfig () {
       // continue
       const nextOriginRef = originValue
       const nextTargetRef = newValue
-      copyValueAtPath(remainingParts, nextOriginRef, nextTargetRef)
+      copyValueAtPath(remainingParts, nextOriginRef, nextTargetRef, nextOriginRef)
       return
     }
     // this is the last part of the path, the value we're trying to actually copy
@@ -112,13 +122,13 @@ function makeGetEndowmentsForConfig () {
       const get = originPropDesc.get && function () {
         const receiver = this
         // replace the "receiver" value if it points to fake parent
-        const receiverRef = receiver === targetRef ? originRef : receiver
+        const receiverRef = receiver === targetRef ? unwrapRef : receiver
         return Reflect.get(originRef, nextPart, receiverRef)
       }
       const set = originPropDesc.set && function (value) {
         // replace the "receiver" value if it points to fake parent
         const receiver = this
-        const receiverRef = receiver === targetRef ? originRef : receiver
+        const receiverRef = receiver === targetRef ? unwrapRef : receiver
         return Reflect.set(originRef, nextPart, value, receiverRef)
       }
       const wrapperPropDesc = { ...originPropDesc, get, set }
@@ -138,7 +148,7 @@ function makeGetEndowmentsForConfig () {
       } else {
         // handle function calls
         // replace the "this" value if it points to fake parent
-        const thisRef = this === targetRef ? originRef : this
+        const thisRef = this === targetRef ? unwrapRef : this
         return Reflect.apply(originValue, thisRef, args)
       }
     }

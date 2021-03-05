@@ -39,7 +39,7 @@
       // regExpTaming: 'unsafe',
     }
 
-    lockdown(lockdownOptions)
+    // lockdown(lockdownOptions)
 
     // initialize the kernel
     const createKernelCore = __createKernelCore__

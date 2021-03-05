@@ -181,7 +181,7 @@
             .map(([packagePath, allowed]) => packagePath.split('.').slice(1).join('.'))
             .sort()
         )
-        moduleExports = makeMinimalViewOfRef(moduleExports, builtinPaths)
+        moduleExports = makeMinimalViewOfRef(moduleExports, {}, moduleExports, builtinPaths)
       }
 
       return moduleExports
@@ -239,6 +239,7 @@
       // - Math is for untamed Math.random
       // - Date is for untamed Date.now
       const packageCompartment = new Compartment({ Math, Date })
+      packageCompartment.globalThis.packageName = 'root'
       // expose all own properties of globalRef, including non-enumerable
       Object.entries(Object.getOwnPropertyDescriptors(globalRef))
         // ignore properties already defined on compartment global
@@ -278,7 +279,7 @@
       // prepare endowments
       let endowments
       try {
-        endowments = getEndowmentsForConfig(rootPackageCompartment.globalThis, packageCompartment.globalThis, packagePolicy)
+        endowments = getEndowmentsForConfig(rootPackageCompartment.globalThis, packageCompartment.globalThis, globalRef, packagePolicy)
       } catch (err) {
         const errMsg = `Lavamoat - failed to prepare endowments for package "${packageName}":\n${err.stack}`
         throw new Error(errMsg)
@@ -290,6 +291,7 @@
 
       // save the compartment for use by other modules in the package
       packageCompartmentCache.set(packageName, packageCompartment)
+      packageCompartment.globalThis.packageName = packageName
 
       return packageCompartment
     }
