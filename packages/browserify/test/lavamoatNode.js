@@ -12,6 +12,5 @@ test('basic - bundle works under lavamoat node', async (t) => {
     maxBuffer: 8192 * 10000
   })
   const testResult = evalBundle(bundle.toString(), { console })
-  console.log(testResult)
   t.is(testResult.value, "c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470")
 })
