@@ -131,7 +131,7 @@ function makeGetEndowmentsForConfig () {
 
     // need to determine the value type in order to copy it with
     // this-value unwrapping support
-    const { originValue } = getOriginValue()
+    const { originValue, originWritable } = getOriginValue()
 
     // not a function - copy as is
     if (typeof originValue !== 'function') {
