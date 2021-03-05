@@ -37,21 +37,21 @@ function makePrepareRealmGlobalFromConfig () {
     // define accessors
 
     // allow read access via globalStore or packageCompartmentGlobal
-    // topLevelReadAccessKeys.forEach(key => {
-    //   Object.defineProperty(packageCompartmentGlobal, key, {
-    //     get () {
-    //       if (globalStore.has(key)) {
-    //         return globalStore.get(key)
-    //       } else {
-    //         return endowments[key]
-    //       }
-    //     },
-    //     set () {
-    //       // TODO: there should be a config to throw vs silently ignore
-    //       console.warn(`LavaMoat: ignoring write attempt to read-access global "${key}"`)
-    //     }
-    //   })
-    // })
+    topLevelReadAccessKeys.forEach(key => {
+      Object.defineProperty(packageCompartmentGlobal, key, {
+        get () {
+          if (globalStore.has(key)) {
+            return globalStore.get(key)
+          } else {
+            return endowments[key]
+          }
+        },
+        set () {
+          // TODO: there should be a config to throw vs silently ignore
+          console.warn(`LavaMoat: ignoring write attempt to read-access global "${key}"`)
+        }
+      })
+    })
 
     // allow write access to globalStore
     // read access via globalStore or packageCompartmentGlobal

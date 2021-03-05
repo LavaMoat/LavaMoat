@@ -6,7 +6,7 @@ const {
 } = require('./util')
 
 // here we are providing an endowments only to a module deep in a dep graph
-test('globalWrites - deep endow', async (t) => {
+test('globalWrites - two deps should be able to read each others globals', async (t) => {
   const entries = [
     {
       id: '/one.js',
