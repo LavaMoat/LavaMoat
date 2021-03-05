@@ -101,6 +101,16 @@ test('generateConfig - config ignores global refs accessed with whitelist items'
   }, 'config matches expected')
 })
 
+test('generateConfig - config ignores newer intrinsics', async (t) => {
+  const config = await createConfigForTest(function () {
+    BigInt(123)
+  })
+
+  t.deepEqual(config, {
+    resources: {}
+  }, 'config matches expected')
+})
+
 // we no longer throw an error, we log a warning
 // test('generateConfig - primordial modification', async (t) => {
 //   try {
