@@ -1,7 +1,7 @@
 const { parse } = require('@babel/parser')
 const { default: traverse } = require('@babel/traverse')
 const { findGlobals } = require('./findGlobals')
-const standardJsGlobals = require('./standardGlobals.js')
+const { globalPropertyNames: defaultGlobalPropertyNames, languageRefs: defaultLanguageRefs } = require('./primordials.js')
 
 const {
   getMemberExpressionNesting,
@@ -21,7 +21,8 @@ module.exports = {
 function inspectGlobals (source, {
   ignoredRefs = [],
   globalRefs = [],
-  languageRefs = standardJsGlobals
+  globalPropertyNames = defaultGlobalPropertyNames,
+  languageRefs = defaultLanguageRefs,
 } = {}) {
   const ast = (typeof source === 'object') ? source : parse(source)
   const detectedGlobals = findGlobals(ast)
@@ -87,7 +88,8 @@ function inspectGlobals (source, {
 
   function maybeAddGlobalUsage (identifierPath, identifierUse) {
     const topmostRef = identifierPath.split('.')[0]
-    // skip language features
+    // skip intrinsics and other language features
+    if (globalPropertyNames.includes(topmostRef)) return
     if (languageRefs.includes(topmostRef)) return
     // skip ignored globals
     if (ignoredRefs.includes(topmostRef)) return
