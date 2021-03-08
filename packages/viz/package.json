@@ -66,13 +66,13 @@
     ]
   },
   "servedPath": "./",
-  "repository": "git+https://github.com/lavamoat/lavamoat-viz.git",
+  "repository": "git+https://github.com/LavaMoat/lavamoat.git",
   "author": "kumavis <aaron@kumavis.me>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/lavamoat/lavamoat-viz/issues"
+    "url": "https://github.com/LavaMoat/lavamoat/issues"
   },
-  "homepage": "https://lavamoat.github.io/lavamoat-viz",
+  "homepage": "https://github.com/LavaMoat/lavamoat#readme",
   "bin": {
     "lavamoat-viz": "./bin/index.js"
   }

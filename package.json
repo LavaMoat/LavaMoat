@@ -5,6 +5,8 @@
     "ava": "^3.15.0",
     "depcheck": "^1.4.0",
     "lerna": "^3.22.1",
+    "semantic-release": "^17.4.1",
+    "semantic-release-monorepo": "^7.0.4",
     "standard": "^16.0.3",
     "tap-spec": "^5.0.0"
   },
@@ -13,9 +15,22 @@
     "lint": "lerna run lint",
     "lint:fix": "lerna run lint:fix",
     "publish": "lerna publish from-package --no-push --no-git-tag-version --yes",
-    "install": "lerna bootstrap"
+    "install": "lerna bootstrap",
+    "semantic-publish": "lerna exec --concurrency 1 -- semantic-release -e semantic-release-monorepo"
   },
   "workspaces": [
     "packages/*"
-  ]
+  ],
+  "release": {
+    "branches": ["main"],
+    "repositoryUrl": "git+https://github.com/LavaMoat/lavamoat.git",
+    "ci": false,
+    "plugins": [
+      "@semantic-release/commit-analyzer",
+      "@semantic-release/release-notes-generator",
+      "@semantic-release/npm",
+      "@semantic-release/git"
+    ],
+    "preset": "angular"
+  }
 }
