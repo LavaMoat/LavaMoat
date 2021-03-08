@@ -25,7 +25,7 @@
     "lint:standard": "standard src/**/*.js test/**/*.js",
     "lint:fix": "standard src/**/*.js test/**/*.js --fix",
     "lint:deps": "depcheck",
-    "test": "ava test/index.js"
+    "test": "ava test/index.js --timeout=2m"
   },
   "author": "kumavis",
   "license": "MIT",

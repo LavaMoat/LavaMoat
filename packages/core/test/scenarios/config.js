@@ -91,8 +91,7 @@ module.exports = [
   //       module.exports = require('two')
   //     },
   //     configOverride,
-  //     expectedResult: 555,
-  //     shouldRunInCore: false
+  //     expectedResult: 555
   //   })
   //   return scenario
   // },
@@ -115,8 +114,7 @@ module.exports = [
   //     opts: {
   //       policyOverride: 'policy-override.json'
   //     },
-  //     expectedResult: 555,
-  //     shouldRunInCore: false
+  //     expectedResult: 555
   //   })
   //   return scenario
   // },
@@ -137,8 +135,7 @@ module.exports = [
   //     opts: {
   //       policyOverride: () => configOverride
   //     },
-  //     expectedResult: 555,
-  //     shouldRunInCore: false
+  //     expectedResult: 555
   //   })
   //   return scenario
   // },
@@ -155,7 +152,7 @@ module.exports = [
         }
       },
       expectedFailure: true,
-      defaultConfig: false
+      defaultPolicy: false
     })
     return scenario
   },
@@ -172,7 +169,7 @@ module.exports = [
         }
       },
       expectedFailure: true,
-      defaultConfig: false
+      defaultPolicy: false
     })
     return scenario
   },
@@ -192,7 +189,7 @@ module.exports = [
         }
       },
       expectedFailure: true,
-      defaultConfig: false
+      defaultPolicy: false
     })
     return scenario
   },
@@ -212,7 +209,7 @@ module.exports = [
         }
       },
       expectedFailure: true,
-      defaultConfig: false
+      defaultPolicy: false
     })
     return scenario
   },
