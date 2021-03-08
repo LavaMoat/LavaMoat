@@ -181,7 +181,7 @@
             .map(([packagePath, allowed]) => packagePath.split('.').slice(1).join('.'))
             .sort()
         )
-        moduleExports = makeMinimalViewOfRef(moduleExports, {}, moduleExports, builtinPaths)
+        moduleExports = makeMinimalViewOfRef(moduleExports, moduleExports, builtinPaths)
       }
 
       return moduleExports

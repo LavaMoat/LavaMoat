@@ -25,7 +25,6 @@ function makeGetEndowmentsForConfig () {
    *
    */
   function getEndowmentsForConfig (sourceRef, unwrapRef, config) {
-    const targetRef = {}
     if (!config.globals) return {}
     // validate read access from config
     const whitelistedReads = []
@@ -43,10 +42,11 @@ function makeGetEndowmentsForConfig () {
       }
       whitelistedReads.push(path)
     })
-    makeMinimalViewOfRef(sourceRef, targetRef, unwrapRef, whitelistedReads)
+    return makeMinimalViewOfRef(sourceRef, unwrapRef, whitelistedReads)
   }
 
-  function makeMinimalViewOfRef (originRef, targetRef, unwrapRef, paths) {
+  function makeMinimalViewOfRef (originRef, unwrapRef, paths) {
+    const targetRef = {}
     paths.forEach(path => {
       copyValueAtPath(path.split('.'), originRef, targetRef, unwrapRef)
     })
