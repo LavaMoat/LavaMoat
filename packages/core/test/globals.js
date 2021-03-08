@@ -5,7 +5,7 @@ const {
   runScenario
 } = require('./util')
 
-test('globals - ensure window.document getter behavior support', async (t) => {
+test('globals - ensure global property this-value unwrapped', async (t) => {
   // compartment.globalThis.document would error because 'this' value is not window
   const scenario = createScenarioFromScaffold({
     defineOne: () => {
@@ -23,8 +23,7 @@ test('globals - ensure window.document getter behavior support', async (t) => {
       resources: {
         one: {
           globals: {
-            xyz: true,
-            console: true
+            xyz: true
           }
         }
       }
@@ -35,4 +34,47 @@ test('globals - ensure window.document getter behavior support', async (t) => {
     direct: true,
     indirect: false
   }, 'expected result, did not error')
+})
+
+test('globals - ensure window.document getter behavior support', async (t) => {
+  // compartment.globalThis.document would error because 'this' value is not window
+  const scenario = createScenarioFromScaffold({
+    defineOne: () => {
+      const two = require('two')
+      const xyz = document
+      module.exports = two
+    },
+    defineTwo: () => {
+      module.exports = document.location.href
+    },
+    context: {
+      get document() {
+        if (this !== scenario.globalThis) {
+          // chrome: Uncaught TypeError: Illegal invocation
+          throw new TypeError("'get document' called on an object that does not implement interface Window")
+        }
+        return {
+          location: {
+            href: 'beepboop.bong'
+          }
+        }
+      }
+    },
+    config: {
+      resources: {
+        one: {
+          globals: {
+            document: true
+          }
+        },
+        two: {
+          globals: {
+            'document.location.href': true
+          }
+        }
+      }
+    },
+  })
+  const testResult = await runScenario({ scenario })
+  t.deepEqual(testResult, 'beepboop.bong', 'expected result, did not error')
 })
