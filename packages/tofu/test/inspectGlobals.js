@@ -235,6 +235,12 @@ testInspect('paths stop at computed props', {
   x: 'read'
 })
 
+testInspect('new intrinsics like BigInt are ignored', {
+  globalRefs: ['globalThis']
+}, () => {
+  BigInt(123)
+}, {})
+
 function testInspect (label, opts, fn, expectedResultObj) {
   test(label, (t) => {
     const src = fnToCodeBlock(fn)

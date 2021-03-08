@@ -219,7 +219,10 @@ async function runScenario ({ scenario }) {
   const lavamoatConfig = mergeDeep(config, configOverride)
   const kernelSrc = generateKernel()
   const { hookedConsole, firstLogEventPromise } = createHookedConsole()
-  const { result: createKernel } = evaluateWithSourceUrl('LavaMoat/core-test/kernel', kernelSrc, mergeDeep({ console: hookedConsole }, scenario.context))
+  Object.assign(scenario.context, { console: hookedConsole })
+  const { result: createKernel, vmGlobalThis } = evaluateWithSourceUrl('LavaMoat/core-test/kernel', kernelSrc, scenario.context)
+  //root global for test realm
+  scenario.globalThis = vmGlobalThis
   const kernel = createKernel({
     lavamoatConfig,
     loadModuleData: (id) => {
@@ -319,11 +322,13 @@ function prepareModuleInitializerArgs (requireRelativeWithContext, moduleObj, mo
   return [exports, require, module, __filename, __dirname]
 }
 
-function evaluateWithSourceUrl (filename, content, baseContext) {
-  const context = Object.assign({}, baseContext)
+function evaluateWithSourceUrl (filename, content, context) {
+
+  const vmGlobalThis = runInNewContext('this', context)
+
   // circular ref (used when globalThis is not present)
-  if (!global.globalThis) {
-    context.globalThis = context
+  if (!vmGlobalThis.globalThis) {
+    context.globalThis = vmGlobalThis
   }
   // perform eval
   let result
@@ -334,7 +339,7 @@ function evaluateWithSourceUrl (filename, content, baseContext) {
     throw e
   }
   // pull out test result value from context (not always used)
-  return { result, context }
+  return { result, vmGlobalThis }
 }
 
 async function createConfigForTest (testFn, opts = {}) {
