@@ -18,13 +18,13 @@ function makeGetEndowmentsForConfig () {
    *
    * @function getEndowmentsForConfig
    * @param {object} sourceRef - Object from which to copy properties
-   * @param {object} targetRef - Object to which to copy properties
-   * @param {object} unwrapTarget - For getters and setters, replaces targetRef as the 'this' value
    * @param {object} config - LavaMoat package config
+   * @param {object} unwrapTo - For getters and setters, when the this-value is unwrapFrom, is replaced as unwrapTo
+   * @param {object} unwrapFrom - For getters and setters, the this-value to replace (default: targetRef)
    * @return {object} - The targetRef
    *
    */
-  function getEndowmentsForConfig (sourceRef, unwrapSource, unwrapTarget, config) {
+  function getEndowmentsForConfig (sourceRef, config, unwrapTo, unwrapFrom) {
     if (!config.globals) return {}
     // validate read access from config
     const whitelistedReads = []
@@ -42,18 +42,18 @@ function makeGetEndowmentsForConfig () {
       }
       whitelistedReads.push(path)
     })
-    return makeMinimalViewOfRef(sourceRef, whitelistedReads, unwrapSource, unwrapTarget)
+    return makeMinimalViewOfRef(sourceRef, whitelistedReads, unwrapTo, unwrapFrom)
   }
 
-  function makeMinimalViewOfRef (sourceRef, paths, unwrapSource, unwrapTarget) {
+  function makeMinimalViewOfRef (sourceRef, paths, unwrapTo, unwrapFrom) {
     const targetRef = {}
     paths.forEach(path => {
-      copyValueAtPath(path.split('.'), sourceRef, targetRef, unwrapSource, unwrapTarget)
+      copyValueAtPath(path.split('.'), sourceRef, targetRef, unwrapTo, unwrapFrom)
     })
     return targetRef
   }
 
-  function copyValueAtPath (pathParts, sourceRef, targetRef, unwrapSource = sourceRef, unwrapTarget = targetRef) {
+  function copyValueAtPath (pathParts, sourceRef, targetRef, unwrapTo = sourceRef, unwrapFrom = targetRef) {
     if (pathParts.length === 0) {
       throw new Error('unable to copy, must have pathParts, was empty')
     }
@@ -116,14 +116,14 @@ function makeGetEndowmentsForConfig () {
       const get = sourcePropDesc.get && function () {
         const receiver = this
         // replace the "receiver" value if it points to fake parent
-        console.warn(receiver === unwrapSource ? 'UNWRAP' : 'YOU SUCK')
-        const receiverRef = receiver === unwrapSource ? unwrapTarget : receiver
+        console.warn(receiver === unwrapFrom ? 'UNWRAP' : 'YOU SUCK')
+        const receiverRef = receiver === unwrapFrom ? unwrapTo : receiver
         return Reflect.get(sourceRef, nextPart, receiverRef)
       }
       const set = sourcePropDesc.set && function (value) {
         // replace the "receiver" value if it points to fake parent
         const receiver = this
-        const receiverRef = receiver === unwrapSource ? unwrapTarget : receiver
+        const receiverRef = receiver === unwrapFrom ? unwrapTo : receiver
         return Reflect.set(sourceRef, nextPart, value, receiverRef)
       }
       const wrapperPropDesc = { ...sourcePropDesc, get, set }
@@ -148,7 +148,7 @@ function makeGetEndowmentsForConfig () {
       } else {
         // handle function calls
         // replace the "this" value if it points to fake parent
-        const thisRef = this === unwrapSource ? unwrapTarget : this
+        const thisRef = this === unwrapFrom ? unwrapTo : this
         return Reflect.apply(sourceValue, thisRef, args)
       }
     }
@@ -170,7 +170,7 @@ function makeGetEndowmentsForConfig () {
         sourceValue = sourcePropDesc.value
         sourceWritable = sourcePropDesc.writable
       } else if ('get' in sourcePropDesc) {
-        sourceValue = sourcePropDesc.get.call(unwrapTarget)
+        sourceValue = sourcePropDesc.get.call(unwrapTo)
         sourceWritable = 'set' in sourcePropDesc
       } else {
         throw new Error('getEndowmentsForConfig - property descriptor missing a getter')
