@@ -181,7 +181,7 @@
             .map(([packagePath, allowed]) => packagePath.split('.').slice(1).join('.'))
             .sort()
         )
-        moduleExports = makeMinimalViewOfRef(moduleExports, moduleExports, builtinPaths)
+        moduleExports = makeMinimalViewOfRef(moduleExports, builtinPaths)
       }
 
       return moduleExports
@@ -278,7 +278,7 @@
       // prepare endowments
       let endowments
       try {
-        endowments = getEndowmentsForConfig(rootPackageCompartment.globalThis, globalRef, packagePolicy)
+        endowments = getEndowmentsForConfig(rootPackageCompartment.globalThis, packageCompartment.globalThis, globalRef, packagePolicy)
       } catch (err) {
         const errMsg = `Lavamoat - failed to prepare endowments for package "${packageName}":\n${err.stack}`
         throw new Error(errMsg)
