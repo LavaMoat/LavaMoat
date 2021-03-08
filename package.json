@@ -22,14 +22,14 @@
     "packages/*"
   ],
   "release": {
-    "branches": ["main"],
+    "branches": ["main", "semantic"],
     "repositoryUrl": "git+https://github.com/LavaMoat/lavamoat.git",
     "ci": false,
     "plugins": [
       "@semantic-release/commit-analyzer",
       "@semantic-release/release-notes-generator",
       "@semantic-release/npm",
-      "@semantic-release/git"
+      "@semantic-release/github"
     ],
     "preset": "angular"
   }
