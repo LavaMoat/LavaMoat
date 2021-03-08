@@ -116,7 +116,6 @@ function makeGetEndowmentsForConfig () {
       const get = sourcePropDesc.get && function () {
         const receiver = this
         // replace the "receiver" value if it points to fake parent
-        console.warn(receiver === unwrapFrom ? 'UNWRAP' : 'YOU SUCK')
         const receiverRef = receiver === unwrapFrom ? unwrapTo : receiver
         return Reflect.get(sourceRef, nextPart, receiverRef)
       }
