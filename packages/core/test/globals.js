@@ -16,9 +16,6 @@ test('globals - ensure window.document getter behavior support', async (t) => {
     },
     context: {
       get xyz() {
-        debugger
-        console.warn('PACKAGENAME:', this.packageName)
-        console.warn('DEEQUAL', this === scenario.globalThis)
         return (this === scenario.globalThis)
       }
     },

@@ -13,7 +13,7 @@ test('getEndowmentsForConfig', (t) => {
       'namespace.stringValue.includes': true
     }
   }
-  const resultGlobal = getEndowmentsForConfig(sourceGlobal, {}, {}, config)
+  const resultGlobal = getEndowmentsForConfig(sourceGlobal, {}, config)
   t.is(sourceGlobal.namespace.stringValue.includes('dab'), true)
   t.is(resultGlobal.namespace.stringValue.includes('dab'), true)
 })
@@ -27,7 +27,7 @@ test('getEndowmentsForConfig - siblings', (t) => {
       'Buffer.isBuffer': true
     }
   }
-  const resultGlobal = getEndowmentsForConfig(sourceGlobal, {}, {}, config)
+  const resultGlobal = getEndowmentsForConfig(sourceGlobal, {}, config)
   {
     const sourceProp = Object.getOwnPropertyDescriptor(sourceGlobal.Buffer, 'from')
     const resultProp = Object.getOwnPropertyDescriptor(resultGlobal.Buffer, 'from')
@@ -56,7 +56,7 @@ test('getEndowmentsForConfig - getter', (t) => {
       'abc.xyz': true
     }
   }
-  const resultGlobal = getEndowmentsForConfig(sourceGlobal, {}, {}, config)
+  const resultGlobal = getEndowmentsForConfig(sourceGlobal, {}, config)
   {
     const sourceProp = Object.getOwnPropertyDescriptor(sourceGlobal, 'abc')
     const resultProp = Object.getOwnPropertyDescriptor(resultGlobal, 'abc')
@@ -84,7 +84,7 @@ test('globals - ensure window.document getter behavior support', async (t) => {
       xyz: true
     }
   }
-  const resultGlobal = getEndowmentsForConfig(sourceGlobal, {}, sourceGlobal, config)
+  const resultGlobal = getEndowmentsForConfig(sourceGlobal, sourceGlobal, config)
   const sourceValue = sourceGlobal.xyz
   const resultGlobalValue = resultGlobal.xyz
   const resultValue = Reflect.getOwnPropertyDescriptor(resultGlobal, 'xyz').get()
