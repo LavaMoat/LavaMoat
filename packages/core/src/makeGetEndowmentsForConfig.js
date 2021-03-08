@@ -50,6 +50,7 @@ function makeGetEndowmentsForConfig () {
     paths.forEach(path => {
       copyValueAtPath(path.split('.'), originRef, targetRef, unwrapRef)
     })
+    return targetRef
   }
 
   function copyValueAtPath (pathParts, originRef, targetRef, unwrapRef) {
