@@ -49,7 +49,8 @@ test('globals - ensure window.document getter behavior support', async (t) => {
     },
     context: {
       get document() {
-        if (this !== scenario.globalThis) {
+        // node vm weird, sometimes calls with vm context instead of vm global this
+        if (this !== scenario.globalThis && this !== scenario.vmContext) {
           // chrome: Uncaught TypeError: Illegal invocation
           throw new TypeError("'get document' called on an object that does not implement interface Window")
         }

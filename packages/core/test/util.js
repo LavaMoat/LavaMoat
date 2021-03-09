@@ -1,6 +1,6 @@
 const { parseForConfig, LavamoatModuleRecord, generateKernel, packageNameFromPath, getDefaultPaths } = require('../src/index.js')
 const mergeDeep = require('merge-deep')
-const { runInNewContext } = require('vm')
+const { runInContext, createContext } = require('vm')
 const path = require('path')
 const fromEntries = require('object.fromentries')
 const { promises: fs } = require('fs')
@@ -220,9 +220,10 @@ async function runScenario ({ scenario }) {
   const kernelSrc = generateKernel()
   const { hookedConsole, firstLogEventPromise } = createHookedConsole()
   Object.assign(scenario.context, { console: hookedConsole })
-  const { result: createKernel, vmGlobalThis } = evaluateWithSourceUrl('LavaMoat/core-test/kernel', kernelSrc, scenario.context)
+  const { result: createKernel, vmGlobalThis, vmContext } = evaluateWithSourceUrl('LavaMoat/core-test/kernel', kernelSrc, scenario.context)
   //root global for test realm
   scenario.globalThis = vmGlobalThis
+  scenario.vmContext = vmContext
   const kernel = createKernel({
     lavamoatConfig,
     loadModuleData: (id) => {
@@ -262,7 +263,6 @@ async function runScenario ({ scenario }) {
       .split('<import(').join('<__import__(')
       .split('.import(').join('.__import__(')
   }
-
   entries.forEach(id => kernel.internalRequire(id))
   const testResult = await firstLogEventPromise
   return testResult
@@ -324,22 +324,25 @@ function prepareModuleInitializerArgs (requireRelativeWithContext, moduleObj, mo
 
 function evaluateWithSourceUrl (filename, content, context) {
 
-  const vmGlobalThis = runInNewContext('this', context)
+  const vmContext = createContext()
+  const vmGlobalThis = runInContext('this', vmContext)
+
+  Object.defineProperties(vmGlobalThis, Object.getOwnPropertyDescriptors(context))
 
   // circular ref (used when globalThis is not present)
   if (!vmGlobalThis.globalThis) {
-    context.globalThis = vmGlobalThis
+    vmGlobalThis.globalThis = vmGlobalThis
   }
   // perform eval
   let result
   try {
-    result = runInNewContext(`${content}\n//# sourceURL=${filename}`, context)
+    result = runInContext(`${content}\n//# sourceURL=${filename}`, vmContext)
   } catch (e) {
     console.log(e.stack)
     throw e
   }
   // pull out test result value from context (not always used)
-  return { result, vmGlobalThis }
+  return { result, vmGlobalThis, vmContext }
 }
 
 async function createConfigForTest (testFn, opts = {}) {

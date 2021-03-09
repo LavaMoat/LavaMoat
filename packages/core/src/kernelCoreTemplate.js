@@ -278,7 +278,16 @@
       // prepare endowments
       let endowments
       try {
-        endowments = getEndowmentsForConfig(rootPackageCompartment.globalThis, packagePolicy, packageCompartment.globalThis, globalRef)
+        endowments = getEndowmentsForConfig(
+          // source reference
+          rootPackageCompartment.globalThis,
+          // policy
+          packagePolicy,
+          // unwrap to
+          globalRef,
+          // unwrap from
+          packageCompartment.globalThis
+        )
       } catch (err) {
         const errMsg = `Lavamoat - failed to prepare endowments for package "${packageName}":\n${err.stack}`
         throw new Error(errMsg)
