@@ -1,6 +1,7 @@
 Semantic Release Workflow:
 
 1) Ensure commit message follow the following format:
+
 | Commit message                                                                                                                                                                                   | Release type               |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------- |
 | `fix(pencil): stop graphite breaking when too much pressure applied`                                                                                                                             | Patch Release              |
