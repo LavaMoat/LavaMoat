@@ -67,7 +67,6 @@ async function runLava () {
 function parseArgs () {
   const defaultPaths = getDefaultPaths('node')
   const argsParser = yargs
-    .strict()
     .usage('$0 <entryPath>', 'start the application', (yargs) => {
       // the entry file to run (or parse)
       yargs.positional('entryPath', {
