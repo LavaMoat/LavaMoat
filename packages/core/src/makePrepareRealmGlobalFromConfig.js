@@ -43,7 +43,7 @@ function makePrepareRealmGlobalFromConfig () {
           if (globalStore.has(key)) {
             return globalStore.get(key)
           } else {
-            return endowments[key]
+            return Reflect.get(endowments, key, this)
           }
         },
         set () {
