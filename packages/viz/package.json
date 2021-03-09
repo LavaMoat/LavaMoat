@@ -72,7 +72,7 @@
   "bugs": {
     "url": "https://github.com/LavaMoat/lavamoat/issues"
   },
-  "homepage": "https://github.com/LavaMoat/lavamoat#readme",
+  "homepage": "https://github.com/LavaMoat/LavaMoat/blob/main/packages/viz/README.md",
   "bin": {
     "lavamoat-viz": "./bin/index.js"
   }
