@@ -60,8 +60,6 @@ module.exports.globalPropertyNames = [
   'JSON',
   'Math',
   'Reflect',
-  'NaN',
-  'Infinity',
 
   // *** Annex B
 
@@ -72,6 +70,8 @@ module.exports.globalPropertyNames = [
   'BigInt',
   'BigInt64Array',
   'BigUint64Array',
+  'NaN',
+  'Infinity'
 ]
 
 // js language keywords that are not global properties
