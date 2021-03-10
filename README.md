@@ -27,11 +27,8 @@ In order to help mitigate the risk of such an attack we are building a suite of 
 The LavaMoat runtime reduces the supplychain risk in **three** primary ways:
   1. Prevent modifying JavaScript's primordials (Object, String, Number, Array, ...)
   2. Limit access to the platform API (window, document, XHR, etc) per-package
-  3. Prevent packages from corrupting other packages
 
-1 and 2 are provided by [SES][SesGithub] containers. Platform API access is passed in via a LavaMoat configuration file.
-
-3 is achieved by providing a read-only view of the imported module's exports. This read-only view is accomplished via [Cytoplasm][CytoplasmGithub], a membrane implementation.
+Both are provided by [SES][SesGithub] containers. Platform API access is passed in via a LavaMoat configuration file.
 
 ### SecureEcmaScript (SES)
 
