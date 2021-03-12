@@ -1,6 +1,7 @@
 {
   "name": "test-1",
   "scripts": {
-    "postinstall": "cp -R fake_node_modules/* ./node_modules/"
+    "setup": "yarn install && yarn setup:fake-deps",
+    "setup:fake-deps": "cp -R fake_node_modules/* ./node_modules/"
   }
 }
