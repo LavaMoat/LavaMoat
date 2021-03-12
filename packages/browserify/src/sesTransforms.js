@@ -2,6 +2,7 @@ const path = require('path')
 const { PassThrough } = require('readable-stream')
 const duplexify = require('duplexify')
 const concatStream = require('concat-stream')
+const { applySourceTransforms } = require('lavamoat-core')
 
 module.exports = {
   createSesWorkaroundsTransform
@@ -9,12 +10,7 @@ module.exports = {
 
 function createSesWorkaroundsTransform () {
   return makeStringTransform('ses-workarounds', { excludeExtension: ['.json'] }, (content) => {
-    const moduleContent = content
-      // html comment
-      .split('-->').join('-- >')
-      // use indirect eval
-      .split(' eval(').join(' (eval)(')
-    return moduleContent
+    return applySourceTransforms(content)
   })
 }
 
