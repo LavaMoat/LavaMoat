@@ -7,6 +7,7 @@ const { generateKernel, packageDataForModule } = require('lavamoat-core')
 const { checkForResolutionOverride } = require('./resolutions')
 const { resolutionOmittedExtensions } = require('./parseForConfig')
 const { createFreshRealmCompartment } = require('./freshRealmCompartment')
+const { applySourceTransforms } = require('lavamoat-core')
 
 const nativeRequire = require
 
@@ -107,20 +108,9 @@ function loadModuleData (absolutePath) {
     if (contentLines[0].startsWith('#!')) {
       transformedContent = contentLines.slice(1).join('\n')
     }
-    transformedContent = transformedContent
-      // html comment
-      .split('-->').join('-- >')
-      .split('<!--').join('<! --')
-      // use indirect eval
-      .split(' eval(').join(' (eval)(')
-      .split('\'eval(').join('\'(eval)(')
-      // replace import statements in comments
-      .split(' import(').join(' __import__(')
-      .split('"import(').join('"__import__(')
-      .split('\'import(').join('\'__import__(')
-      .split('{import(').join('{__import__(')
-      .split('<import(').join('<__import__(')
-      .split('.import(').join('.__import__(')
+
+    transformedContent = applySourceTransforms(transformedContent)
+
     const isJSON = /\.json$/.test(absolutePath)
     // wrap json modules (borrowed from browserify)
     if (isJSON) {
