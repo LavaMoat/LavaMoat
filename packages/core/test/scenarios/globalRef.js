@@ -45,5 +45,15 @@ module.exports = [
       expectedResult: true
     })
     return scenario
+  },
+  async () => {
+    const scenario = createScenarioFromScaffold({
+      name: 'globalRef - globalRef workaround doesnt break instanceof Function',
+      defineOne: () => {
+        module.exports = (function(){}) instanceof globalThis.Function
+      },
+      expectedResult: true
+    })
+    return scenario
   }
 ]
