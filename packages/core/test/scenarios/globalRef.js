@@ -18,5 +18,32 @@ module.exports = [
       }
     })
     return scenario
+  },
+  async () => {
+    const scenario = createScenarioFromScaffold({
+      name: 'globalRef - Webpack code in the wild works',
+      // Taken directly from Webpack
+      defineOne: () => {
+        var g;
+
+        // This works in non-strict mode
+        // otherwise undefined
+        g = (function() {
+          return this;
+        })();
+
+        try {
+          // This works if eval is allowed (see CSP)
+          g = g || new Function("return this")();
+        } catch (e) {
+          // This works if the window reference is available
+          if (typeof window === "object") g = window;
+        }
+        // test webpack result against globalThis
+        module.exports = g === globalThis
+      },
+      expectedResult: true
+    })
+    return scenario
   }
 ]

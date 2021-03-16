@@ -80,5 +80,14 @@ function makePrepareRealmGlobalFromConfig () {
       // set circular ref to global
       packageCompartmentGlobal[key] = packageCompartmentGlobal
     })
+
+    // bind Function constructor this value to globalThis
+    // legacy globalThis shim
+    const origFunction = packageCompartmentGlobal.Function
+    const newFunction = function (...args) {
+      return origFunction(...args).bind(packageCompartmentGlobal)
+    }
+    Object.defineProperties(newFunction, Object.getOwnPropertyDescriptors(origFunction))
+    packageCompartmentGlobal.Function = newFunction
   }
 }

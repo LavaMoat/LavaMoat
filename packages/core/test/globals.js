@@ -91,10 +91,8 @@ test.only('globals - ensure circular refs on package compartment global', async 
         throw new TypeError('xyz getter should not be accessed')
       }
     },
-    extraArgs: {
-      kernelArgs: {
-        globalThisRefs: ['xyz', 'globalThis']
-      }
+    kernelArgs: {
+      globalThisRefs: ['xyz', 'globalThis']
     }
   })
   const testResult = await runScenario({ scenario })
