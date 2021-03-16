@@ -11,7 +11,8 @@ function makeGetEndowmentsForConfig () {
   return {
     getEndowmentsForConfig,
     makeMinimalViewOfRef,
-    copyValueAtPath
+    copyValueAtPath,
+    createWrappedPropDesc
   }
 
   /**
@@ -110,24 +111,11 @@ function makeGetEndowmentsForConfig () {
     }
 
     // this is the last part of the path, the value we're trying to actually copy
-    // if has getter/setter - copy as is
+    // if has getter/setter - apply this-value unwrapping
     if (!('value' in sourcePropDesc)) {
       // wrapper setter/getter with correct receiver
-      const get = sourcePropDesc.get && function () {
-        const receiver = this
-        // replace the "receiver" value if it points to fake parent
-        const receiverRef = receiver === unwrapFrom ? unwrapTo : receiver
-        return Reflect.get(sourceRef, nextPart, receiverRef)
-      }
-      const set = sourcePropDesc.set && function (value) {
-        // replace the "receiver" value if it points to fake parent
-        const receiver = this
-        const receiverRef = receiver === unwrapFrom ? unwrapTo : receiver
-        return Reflect.set(sourceRef, nextPart, value, receiverRef)
-      }
-      const wrapperPropDesc = { ...sourcePropDesc, get, set }
+      const wrapperPropDesc = createWrappedPropDesc(sourcePropDesc, unwrapFrom, unwrapTo)
       Reflect.defineProperty(targetRef, nextPart, wrapperPropDesc)
-      return
     }
 
     // need to determine the value type in order to copy it with
@@ -176,6 +164,27 @@ function makeGetEndowmentsForConfig () {
       }
       return { sourceValue, sourceWritable }
     }
+  }
+
+  function createWrappedPropDesc(sourcePropDesc, unwrapFrom, unwrapTo) {
+    const wrappedPropDesc = {...sourcePropDesc}
+    if (sourcePropDesc.get) {
+      wrappedPropDesc.get = function () {
+        const receiver = this
+        // replace the "receiver" value if it points to fake parent
+        const receiverRef = receiver === unwrapFrom ? unwrapTo : receiver
+        return Reflect.apply(sourcePropDesc.get, receiverRef, [])
+      }
+    }
+    if (sourcePropDesc.set) {
+      wrappedPropDesc.set = function (value) {
+        // replace the "receiver" value if it points to fake parent
+        const receiver = this
+        const receiverRef = receiver === unwrapFrom ? unwrapTo : receiver
+        return Reflect.apply(sourcePropDesc.set, receiverRef, [value])
+      }
+    }
+    return wrappedPropDesc
   }
 }
 

@@ -36,9 +36,14 @@ test('globals - ensure global property this-value unwrapped', async (t) => {
   }, 'expected result, did not error')
 })
 
-test('globals - ensure window.document getter behavior support', async (t) => {
+test.only('globals - ensure window.document getter behavior support', async (t) => {
   // compartment.globalThis.document would error because 'this' value is not window
   const scenario = createScenarioFromScaffold({
+    defineEntry: () => {
+      const one = require('one')
+      const zyx = document
+      console.log(JSON.stringify(one, null, 2))
+    },
     defineOne: () => {
       const two = require('two')
       const xyz = document

@@ -49,7 +49,7 @@
     globalThisRefs = ['globalThis']
   }) {
     // "templateRequire" calls are inlined in "generatePrelude"
-    const { getEndowmentsForConfig, makeMinimalViewOfRef } = templateRequire('makeGetEndowmentsForConfig')()
+    const { getEndowmentsForConfig, makeMinimalViewOfRef, createWrappedPropDesc } = templateRequire('makeGetEndowmentsForConfig')()
     const { prepareCompartmentGlobalFromConfig } = templateRequire('makePrepareRealmGlobalFromConfig')()
 
     const moduleCache = new Map()
@@ -246,7 +246,11 @@
         // ignore circular globalThis refs
         .filter(([key]) => !(globalThisRefs.includes(key)))
         // define property on compartment global
-        .forEach(([key, desc]) => Reflect.defineProperty(packageCompartment.globalThis, key, desc))
+        .forEach(([key, desc]) => {
+          // unwrap setter/getter
+          const wrappedPropDesc = createWrappedPropDesc(desc, packageCompartment.globalThis, globalRef)
+          Reflect.defineProperty(packageCompartment.globalThis, key, wrappedPropDesc)
+        })
 
       // global circular references otherwise added by prepareCompartmentGlobalFromConfig
       // Add all circular refs to root package compartment globalThis
