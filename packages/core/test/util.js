@@ -6,6 +6,7 @@ const fromEntries = require('object.fromentries')
 const { promises: fs } = require('fs')
 var tmp = require('tmp-promise')
 const stringify = require('json-stable-stringify')
+const { applySourceTransforms } = require('../src/sourceTransforms.js')
 
 module.exports = {
   generateConfigFromFiles,
@@ -234,7 +235,7 @@ async function runScenario ({ scenario }) {
       return {
         id: moduleRecord.specifier,
         package: moduleRecord.packageName,
-        source: `(function(exports, require, module, __filename, __dirname){\n${transformSource(moduleRecord.content)}\n})`,
+        source: `(function(exports, require, module, __filename, __dirname){\n${applySourceTransforms(moduleRecord.content)}\n})`,
         type: moduleRecord.type,
         file: moduleRecord.file,
         deps: moduleRecord.importMap,
@@ -247,22 +248,6 @@ async function runScenario ({ scenario }) {
     prepareModuleInitializerArgs
   })
 
-  function transformSource(content) {
-    return content
-      // html comment
-      .split('-->').join('-- >')
-      .split('<!--').join('<! --')
-      // use indirect eval
-      .split(' eval(').join(' (eval)(')
-      .split('\'eval(').join('\'(eval)(')
-      // replace import statements in comments
-      .split(' import(').join(' __import__(')
-      .split('"import(').join('"__import__(')
-      .split('\'import(').join('\'__import__(')
-      .split('{import(').join('{__import__(')
-      .split('<import(').join('<__import__(')
-      .split('.import(').join('.__import__(')
-  }
   entries.forEach(id => kernel.internalRequire(id))
   const testResult = await firstLogEventPromise
   return testResult

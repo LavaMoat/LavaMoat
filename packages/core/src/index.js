@@ -7,6 +7,7 @@ const { createModuleInspector, getDefaultPaths } = require('./generateConfig')
 const { parseForConfig } = require('./parseForConfig')
 const { LavamoatModuleRecord } = require('./moduleRecord')
 const { mergeConfig } = require('./mergeConfig')
+const { applySourceTransforms } = require('./sourceTransforms')
 
 module.exports = {
   // generating the kernel
@@ -20,6 +21,7 @@ module.exports = {
   parseForConfig,
   mergeConfig,
   getDefaultPaths,
+  applySourceTransforms,
   // module record class
   LavamoatModuleRecord
 }
