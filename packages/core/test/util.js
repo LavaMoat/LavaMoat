@@ -84,7 +84,8 @@ function createScenarioFromScaffold ({
   defineTwo,
   defineThree,
   defaultPolicy = true,
-  dir
+  dir,
+  ...extraArgs
 } = {}) {
   function _defineEntry () {
     const testResult = require('one')
@@ -175,6 +176,7 @@ function createScenarioFromScaffold ({
   }, configOverride)
 
   return {
+    ...extraArgs,
     name: name,
     checkPostRun,
     checkResult,
@@ -189,7 +191,7 @@ function createScenarioFromScaffold ({
     configOverride: _configOverride,
     context,
     opts,
-    dir
+    dir,
   }
 }
 
@@ -216,7 +218,7 @@ function createHookedConsole () {
 } 
 
 async function runScenario ({ scenario }) {
-  const { entries, files, config, configOverride, builtin } = scenario
+  const { entries, files, config, configOverride, builtin, extraArgs: { kernelArgs = {} } } = scenario
   const lavamoatConfig = mergeDeep(config, configOverride)
   const kernelSrc = generateKernel()
   const { hookedConsole, firstLogEventPromise } = createHookedConsole()
@@ -245,7 +247,8 @@ async function runScenario ({ scenario }) {
     getRelativeModuleId: (id, relative) => {
       return files[id].importMap[relative] || relative
     },
-    prepareModuleInitializerArgs
+    prepareModuleInitializerArgs,
+    ...kernelArgs,
   })
 
   entries.forEach(id => kernel.internalRequire(id))

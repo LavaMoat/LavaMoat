@@ -243,12 +243,19 @@
       Object.entries(Object.getOwnPropertyDescriptors(globalRef))
         // ignore properties already defined on compartment global
         .filter(([key]) => !(key in packageCompartment.globalThis))
+        // ignore circular globalThis refs
+        .filter(([key]) => !(globalThisRefs.includes(key)))
         // define property on compartment global
         .forEach(([key, desc]) => Reflect.defineProperty(packageCompartment.globalThis, key, desc))
 
       // global circular references otherwise added by prepareCompartmentGlobalFromConfig
-      // TODO: should be a platform specific circular ref
-      packageCompartment.globalThis.global = packageCompartment.globalThis
+      // Add all circular refs to root package compartment globalThis
+      for (const ref of globalThisRefs) {
+        if (ref in packageCompartment.globalThis) {
+          continue
+        }
+        packageCompartment.globalThis[ref] = packageCompartment.globalThis
+      }
 
       // save the compartment for use by other modules in the package
       packageCompartmentCache.set(rootPackageName, packageCompartment)

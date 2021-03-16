@@ -79,3 +79,24 @@ test('globals - ensure window.document getter behavior support', async (t) => {
   const testResult = await runScenario({ scenario })
   t.deepEqual(testResult, 'beepboop.bong', 'expected result, did not error')
 })
+
+test.only('globals - ensure circular refs on package compartment global', async (t) => {
+  const scenario = createScenarioFromScaffold({
+    defineEntry: () => {
+      const testResult = xyz === globalThis
+      console.log(JSON.stringify(testResult, null, 2))
+    },
+    context: {
+      get xyz() {
+        throw new TypeError('xyz getter should not be accessed')
+      }
+    },
+    extraArgs: {
+      kernelArgs: {
+        globalThisRefs: ['xyz', 'globalThis']
+      }
+    }
+  })
+  const testResult = await runScenario({ scenario })
+  t.is(testResult, true, 'xyz references globalThis')
+})
