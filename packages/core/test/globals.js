@@ -80,7 +80,7 @@ test('globals - ensure window.document getter behavior support', async (t) => {
   t.deepEqual(testResult, 'beepboop.bong', 'expected result, did not error')
 })
 
-test.only('globals - ensure circular refs on package compartment global', async (t) => {
+test('globals - ensure circular refs on package compartment global', async (t) => {
   const scenario = createScenarioFromScaffold({
     defineEntry: () => {
       const testResult = xyz === globalThis
