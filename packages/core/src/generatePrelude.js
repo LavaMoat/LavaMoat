@@ -14,9 +14,14 @@ const makeGetEndowmentsForConfigSrc = fs.readFileSync(path.join(__dirname, '/mak
 const makePrepareRealmGlobalFromConfigSrc = fs.readFileSync(path.join(__dirname, '/makePrepareRealmGlobalFromConfig.js'), 'utf-8')
 
 module.exports = {
+  getSesShimSrc,
   generateKernel,
   generateKernelCore,
   generatePrelude
+}
+
+function getSesShimSrc () {
+  return sesSrc
 }
 
 // takes the preludeTemplate and populates it with the kernel
