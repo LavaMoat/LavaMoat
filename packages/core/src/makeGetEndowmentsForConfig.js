@@ -116,6 +116,7 @@ function makeGetEndowmentsForConfig () {
       // wrapper setter/getter with correct receiver
       const wrapperPropDesc = createWrappedPropDesc(sourcePropDesc, unwrapFrom, unwrapTo)
       Reflect.defineProperty(targetRef, nextPart, wrapperPropDesc)
+      return
     }
 
     // need to determine the value type in order to copy it with
@@ -173,6 +174,7 @@ function makeGetEndowmentsForConfig () {
         const receiver = this
         // replace the "receiver" value if it points to fake parent
         const receiverRef = receiver === unwrapFrom ? unwrapTo : receiver
+        debugger
         return Reflect.apply(sourcePropDesc.get, receiverRef, [])
       }
     }

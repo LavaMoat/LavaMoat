@@ -238,33 +238,33 @@
       // endowments:
       // - Math is for untamed Math.random
       // - Date is for untamed Date.now
-      const packageCompartment = new Compartment({ Math, Date })
+      const rootPackageCompartment = new Compartment({ Math, Date })
       // expose all own properties of globalRef, including non-enumerable
       Object.entries(Object.getOwnPropertyDescriptors(globalRef))
         // ignore properties already defined on compartment global
-        .filter(([key]) => !(key in packageCompartment.globalThis))
+        .filter(([key]) => !(key in rootPackageCompartment.globalThis))
         // ignore circular globalThis refs
         .filter(([key]) => !(globalThisRefs.includes(key)))
         // define property on compartment global
         .forEach(([key, desc]) => {
           // unwrap setter/getter
-          const wrappedPropDesc = createWrappedPropDesc(desc, packageCompartment.globalThis, globalRef)
-          Reflect.defineProperty(packageCompartment.globalThis, key, wrappedPropDesc)
+          const wrappedPropDesc = createWrappedPropDesc(desc, rootPackageCompartment.globalThis, globalRef)
+          Reflect.defineProperty(rootPackageCompartment.globalThis, key, wrappedPropDesc)
         })
 
       // global circular references otherwise added by prepareCompartmentGlobalFromConfig
       // Add all circular refs to root package compartment globalThis
       for (const ref of globalThisRefs) {
-        if (ref in packageCompartment.globalThis) {
+        if (ref in rootPackageCompartment.globalThis) {
           continue
         }
-        packageCompartment.globalThis[ref] = packageCompartment.globalThis
+        rootPackageCompartment.globalThis[ref] = rootPackageCompartment.globalThis
       }
 
       // save the compartment for use by other modules in the package
-      packageCompartmentCache.set(rootPackageName, packageCompartment)
+      packageCompartmentCache.set(rootPackageName, rootPackageCompartment)
 
-      return packageCompartment
+      return rootPackageCompartment
     }
 
     function getCompartmentForPackage (packageName, packagePolicy) {
