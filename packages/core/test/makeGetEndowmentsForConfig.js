@@ -149,3 +149,19 @@ test('getEndowmentsForConfig - specify unwrap from, unwrap to', async (t) => {
   // ava seems to be forcing sloppy mode
   t.deepEqual(getter.call(), globalThis)
 })
+
+test.only('getEndowmentsForConfig - ensure setTimeout calls dont trigger illegal invocation', async (t) => {
+  'use strict'
+  // compartment.globalThis.document would error because 'this' value is not window
+  const { getEndowmentsForConfig } = makeGetEndowmentsForConfig()
+  const sourceGlobal = {
+    setTimeout () { return this }
+  }
+  const config = {
+    globals: {
+      setTimeout: true
+    }
+  }
+  const resultGlobal = getEndowmentsForConfig(sourceGlobal, config)
+  t.is(resultGlobal.setTimeout(), sourceGlobal)
+})

@@ -29,7 +29,8 @@ function makePrepareRealmGlobalFromConfig () {
     return result
   }
 
-  function prepareCompartmentGlobalFromConfig (packageCompartmentGlobal, globalsConfig, endowments, globalStore, globalThisRefs) {
+  function prepareCompartmentGlobalFromConfig (packageCompartment, globalsConfig, endowments, globalStore, globalThisRefs) {
+    const packageCompartmentGlobal = packageCompartment.globalThis
     // lookup top level read + write access keys
     const topLevelWriteAccessKeys = getTopLevelWriteAccessFromPackageConfig(globalsConfig)
     const topLevelReadAccessKeys = getTopLevelReadAccessFromPackageConfig(globalsConfig)

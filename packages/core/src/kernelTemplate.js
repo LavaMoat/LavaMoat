@@ -34,7 +34,9 @@
       // lets code observe call stack, but easier debuggability
       errorTaming: 'unsafe',
       // this is introduces non-determinism, but is otherwise safe
-      mathTaming: 'unsafe'
+      mathTaming: 'unsafe',
+      // allows the use of console, useful for error stacks
+      consoleTaming: 'unsafe'
       // ?
       // regExpTaming: 'unsafe',
     }

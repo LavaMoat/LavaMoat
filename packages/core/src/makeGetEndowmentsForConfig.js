@@ -12,7 +12,8 @@ function makeGetEndowmentsForConfig () {
     getEndowmentsForConfig,
     makeMinimalViewOfRef,
     copyValueAtPath,
-    createWrappedPropDesc
+    createWrappedPropDesc,
+    applyScopeProxyLeakWorkaround
   }
 
   /**
@@ -129,18 +130,7 @@ function makeGetEndowmentsForConfig () {
       return
     }
     // otherwise add workaround for functions to swap back to the sourceal "this" reference
-    const newValue = function (...args) {
-      if (new.target) {
-        // handle constructor calls
-        return Reflect.construct(sourceValue, args, new.target)
-      } else {
-        // handle function calls
-        // replace the "this" value if it points to fake parent
-        const thisRef = this === unwrapFrom ? unwrapTo : this
-        return Reflect.apply(sourceValue, thisRef, args)
-      }
-    }
-    Object.defineProperties(newValue, Object.getOwnPropertyDescriptors(sourceValue))
+    const newValue = createFunctionWrapper(sourceValue, unwrapFrom, unwrapTo)
     const newPropDesc = {
       value: newValue,
       writable: sourceWritable,
@@ -186,6 +176,32 @@ function makeGetEndowmentsForConfig () {
       }
     }
     return wrappedPropDesc
+  }
+
+  function applyScopeProxyLeakWorkaround (endowments, unwrapFrom, unwrapTo) {
+    Object.entries(Object.getOwnPropertyDescriptors(endowments))
+    .filter(([key, propDesc]) => 'value' in propDesc && typeof propDesc.value === 'function' && propDesc.configurable)
+    .forEach(([key, propDesc]) => {
+      const newFn = createFunctionWrapper(propDesc.value, unwrapFrom, unwrapTo)
+      const newPropDesc = { ...propDesc, value: newFn }
+      Reflect.defineProperty(endowments, key, newPropDesc)
+    })
+  }
+
+  function createFunctionWrapper(sourceValue, unwrapFrom, unwrapTo) {
+    const newValue = function (...args) {
+      if (new.target) {
+        // handle constructor calls
+        return Reflect.construct(sourceValue, args, new.target)
+      } else {
+        // handle function calls
+        // replace the "this" value if it points to fake parent
+        const thisRef = this === unwrapFrom ? unwrapTo : this
+        return Reflect.apply(sourceValue, thisRef, args)
+      }
+    }
+    Object.defineProperties(newValue, Object.getOwnPropertyDescriptors(sourceValue))
+    return newValue
   }
 }
 

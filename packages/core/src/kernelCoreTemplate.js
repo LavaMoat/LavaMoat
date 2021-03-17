@@ -49,7 +49,7 @@
     globalThisRefs = ['globalThis']
   }) {
     // "templateRequire" calls are inlined in "generatePrelude"
-    const { getEndowmentsForConfig, makeMinimalViewOfRef, createWrappedPropDesc } = templateRequire('makeGetEndowmentsForConfig')()
+    const { getEndowmentsForConfig, makeMinimalViewOfRef, createWrappedPropDesc, applyScopeProxyLeakWorkaround } = templateRequire('makeGetEndowmentsForConfig')()
     const { prepareCompartmentGlobalFromConfig } = templateRequire('makePrepareRealmGlobalFromConfig')()
 
     const moduleCache = new Map()
@@ -286,6 +286,11 @@
         packageCompartment = new Compartment({ Math, Date })
       }
 
+      // Used for SES scope proxy leak workaround endojs/endo/issues/31
+      packageCompartment.globalThis.__getThisValue__ = function() { return this }
+      packageCompartment.scopeProxy = packageCompartment.evaluate('__getThisValue__()')
+      delete packageCompartment.globalThis.__getThisValue__
+
       // prepare endowments
       let endowments
       try {
@@ -304,9 +309,12 @@
         throw new Error(errMsg)
       }
 
+      // Used for SES scope proxy leak workaround endojs/endo/issues/31
+      applyScopeProxyLeakWorkaround(endowments, packageCompartment.scopeProxy, packageCompartment.globalThis)
+
       // sets up read/write access as configured
       const globalsConfig = packagePolicy.globals
-      prepareCompartmentGlobalFromConfig(packageCompartment.globalThis, globalsConfig, endowments, globalStore, globalThisRefs)
+      prepareCompartmentGlobalFromConfig(packageCompartment, globalsConfig, endowments, globalStore, globalThisRefs)
 
       // save the compartment for use by other modules in the package
       packageCompartmentCache.set(packageName, packageCompartment)

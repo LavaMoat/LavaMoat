@@ -103,3 +103,32 @@ test('globals - ensure circular refs on package compartment global', async (t) =
   const testResult = await runScenario({ scenario })
   t.is(testResult, true, 'xyz references globalThis')
 })
+
+test.only('globals - ensure setTimeout calls dont trigger illegal invocation', async (t) => {
+  const scenario = createScenarioFromScaffold({
+    defineOne: () => {
+      const x = setTimeout(() => {}, 300)
+      module.exports = 123
+    },
+    config: {
+      resources: {
+        one: {
+          globals: {
+            setTimeout: true
+          }
+        }
+      }
+    },
+    context: {
+      setTimeout () {
+        if (this !== scenario.globalThis && this !== scenario.vmContext) {
+          // chrome: Uncaught TypeError: Illegal invocation
+          debugger
+          throw new TypeError("'setTimeout' called on an object that does not implement interface Window")
+        }
+      }
+    },
+  })
+  const testResult = await runScenario({ scenario })
+  t.is(testResult, 123, 'this value for setTimeout is correct')
+})
