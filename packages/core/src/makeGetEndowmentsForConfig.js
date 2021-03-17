@@ -174,7 +174,6 @@ function makeGetEndowmentsForConfig () {
         const receiver = this
         // replace the "receiver" value if it points to fake parent
         const receiverRef = receiver === unwrapFrom ? unwrapTo : receiver
-        debugger
         return Reflect.apply(sourcePropDesc.get, receiverRef, [])
       }
     }
