@@ -128,7 +128,6 @@ test('globals - ensure setTimeout calls dont trigger illegal invocation', async 
       setTimeout () {
         if (this !== scenario.globalThis && this !== scenario.vmContext) {
           // chrome: Uncaught TypeError: Illegal invocation
-          debugger
           throw new TypeError("'setTimeout' called on an object that does not implement interface Window")
         }
       }

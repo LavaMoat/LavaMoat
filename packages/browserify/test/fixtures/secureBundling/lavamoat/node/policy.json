@@ -237,7 +237,6 @@
     "concat-stream": {
       "globals": {
         "Buffer.concat": true,
-        "Buffer.from": true,
         "Buffer.isBuffer": true
       },
       "packages": {
@@ -376,14 +375,6 @@
         "through2": true,
         "undeclared-identifiers": true,
         "xtend": true
-      }
-    },
-    "is-core-module": {
-      "globals": {
-        "process.versions": true
-      },
-      "packages": {
-        "has": true
       }
     },
     "is-plain-object": {
@@ -602,7 +593,6 @@
         "process.versions": true
       },
       "packages": {
-        "is-core-module": true,
         "path-parse": true
       }
     },
@@ -696,6 +686,7 @@
         "process.nextTick": true
       },
       "packages": {
+        "inherits": true,
         "readable-stream": true,
         "xtend": true
       }
