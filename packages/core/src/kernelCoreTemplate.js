@@ -49,7 +49,7 @@
     globalThisRefs = ['globalThis']
   }) {
     // "templateRequire" calls are inlined in "generatePrelude"
-    const { getEndowmentsForConfig, makeMinimalViewOfRef } = templateRequire('makeGetEndowmentsForConfig')()
+    const { getEndowmentsForConfig, makeMinimalViewOfRef, applyEndowmentPropDescTransforms } = templateRequire('makeGetEndowmentsForConfig')()
     const { prepareCompartmentGlobalFromConfig } = templateRequire('makePrepareRealmGlobalFromConfig')()
 
     const moduleCache = new Map()
@@ -238,22 +238,33 @@
       // endowments:
       // - Math is for untamed Math.random
       // - Date is for untamed Date.now
-      const packageCompartment = new Compartment({ Math, Date })
+      const rootPackageCompartment = new Compartment({ Math, Date })
       // expose all own properties of globalRef, including non-enumerable
       Object.entries(Object.getOwnPropertyDescriptors(globalRef))
         // ignore properties already defined on compartment global
-        .filter(([key]) => !(key in packageCompartment.globalThis))
+        .filter(([key]) => !(key in rootPackageCompartment.globalThis))
+        // ignore circular globalThis refs
+        .filter(([key]) => !(globalThisRefs.includes(key)))
         // define property on compartment global
-        .forEach(([key, desc]) => Reflect.defineProperty(packageCompartment.globalThis, key, desc))
+        .forEach(([key, desc]) => {
+          // unwrap functions, setters/getters & apply scope proxy workaround
+          const wrappedPropDesc = applyEndowmentPropDescTransforms(desc, rootPackageCompartment, globalRef)
+          Reflect.defineProperty(rootPackageCompartment.globalThis, key, wrappedPropDesc)
+        })
 
       // global circular references otherwise added by prepareCompartmentGlobalFromConfig
-      // TODO: should be a platform specific circular ref
-      packageCompartment.globalThis.global = packageCompartment.globalThis
+      // Add all circular refs to root package compartment globalThis
+      for (const ref of globalThisRefs) {
+        if (ref in rootPackageCompartment.globalThis) {
+          continue
+        }
+        rootPackageCompartment.globalThis[ref] = rootPackageCompartment.globalThis
+      }
 
       // save the compartment for use by other modules in the package
-      packageCompartmentCache.set(rootPackageName, packageCompartment)
+      packageCompartmentCache.set(rootPackageName, rootPackageCompartment)
 
-      return packageCompartment
+      return rootPackageCompartment
     }
 
     function getCompartmentForPackage (packageName, packagePolicy) {
@@ -293,9 +304,18 @@
         throw new Error(errMsg)
       }
 
+      // transform functions, getters & setters on prop descs. Solves SES scope proxy bug
+      Object.entries(Object.getOwnPropertyDescriptors(endowments))
+        // ignore non-configurable properties because we are modifying endowments in place
+        .filter(([key, propDesc]) => propDesc.configurable)
+        .forEach(([key, propDesc]) => {
+          const wrappedPropDesc = applyEndowmentPropDescTransforms(propDesc, packageCompartment, rootPackageCompartment.globalThis)
+          Reflect.defineProperty(endowments, key, wrappedPropDesc)
+        })
+
       // sets up read/write access as configured
       const globalsConfig = packagePolicy.globals
-      prepareCompartmentGlobalFromConfig(packageCompartment.globalThis, globalsConfig, endowments, globalStore, globalThisRefs)
+      prepareCompartmentGlobalFromConfig(packageCompartment, globalsConfig, endowments, globalStore, globalThisRefs)
 
       // save the compartment for use by other modules in the package
       packageCompartmentCache.set(packageName, packageCompartment)

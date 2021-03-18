@@ -29,7 +29,8 @@ function makePrepareRealmGlobalFromConfig () {
     return result
   }
 
-  function prepareCompartmentGlobalFromConfig (packageCompartmentGlobal, globalsConfig, endowments, globalStore, globalThisRefs) {
+  function prepareCompartmentGlobalFromConfig (packageCompartment, globalsConfig, endowments, globalStore, globalThisRefs) {
+    const packageCompartmentGlobal = packageCompartment.globalThis
     // lookup top level read + write access keys
     const topLevelWriteAccessKeys = getTopLevelWriteAccessFromPackageConfig(globalsConfig)
     const topLevelReadAccessKeys = getTopLevelReadAccessFromPackageConfig(globalsConfig)
@@ -80,5 +81,14 @@ function makePrepareRealmGlobalFromConfig () {
       // set circular ref to global
       packageCompartmentGlobal[key] = packageCompartmentGlobal
     })
+
+    // bind Function constructor this value to globalThis
+    // legacy globalThis shim
+    const origFunction = packageCompartmentGlobal.Function
+    const newFunction = function (...args) {
+      return origFunction(...args).bind(packageCompartmentGlobal)
+    }
+    Object.defineProperties(newFunction, Object.getOwnPropertyDescriptors(origFunction))
+    packageCompartmentGlobal.Function = newFunction
   }
 }

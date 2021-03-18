@@ -11,7 +11,9 @@ function makeGetEndowmentsForConfig () {
   return {
     getEndowmentsForConfig,
     makeMinimalViewOfRef,
-    copyValueAtPath
+    copyValueAtPath,
+    applyGetSetPropDescTransforms,
+    applyEndowmentPropDescTransforms
   }
 
   /**
@@ -110,22 +112,10 @@ function makeGetEndowmentsForConfig () {
     }
 
     // this is the last part of the path, the value we're trying to actually copy
-    // if has getter/setter - copy as is
+    // if has getter/setter - apply this-value unwrapping
     if (!('value' in sourcePropDesc)) {
       // wrapper setter/getter with correct receiver
-      const get = sourcePropDesc.get && function () {
-        const receiver = this
-        // replace the "receiver" value if it points to fake parent
-        const receiverRef = receiver === unwrapFrom ? unwrapTo : receiver
-        return Reflect.get(sourceRef, nextPart, receiverRef)
-      }
-      const set = sourcePropDesc.set && function (value) {
-        // replace the "receiver" value if it points to fake parent
-        const receiver = this
-        const receiverRef = receiver === unwrapFrom ? unwrapTo : receiver
-        return Reflect.set(sourceRef, nextPart, value, receiverRef)
-      }
-      const wrapperPropDesc = { ...sourcePropDesc, get, set }
+      const wrapperPropDesc = applyGetSetPropDescTransforms(sourcePropDesc, unwrapFrom, unwrapTo)
       Reflect.defineProperty(targetRef, nextPart, wrapperPropDesc)
       return
     }
@@ -140,18 +130,8 @@ function makeGetEndowmentsForConfig () {
       return
     }
     // otherwise add workaround for functions to swap back to the sourceal "this" reference
-    const newValue = function (...args) {
-      if (new.target) {
-        // handle constructor calls
-        return Reflect.construct(sourceValue, args, new.target)
-      } else {
-        // handle function calls
-        // replace the "this" value if it points to fake parent
-        const thisRef = this === unwrapFrom ? unwrapTo : this
-        return Reflect.apply(sourceValue, thisRef, args)
-      }
-    }
-    Object.defineProperties(newValue, Object.getOwnPropertyDescriptors(sourceValue))
+    const unwrapTest = thisValue => thisValue === unwrapFrom
+    const newValue = createFunctionWrapper(sourceValue, unwrapTest, unwrapTo)
     const newPropDesc = {
       value: newValue,
       writable: sourceWritable,
@@ -176,6 +156,64 @@ function makeGetEndowmentsForConfig () {
       }
       return { sourceValue, sourceWritable }
     }
+  }
+
+  function applyGetSetPropDescTransforms (sourcePropDesc, sourceCompartmentGlobal, targetGlobal) {
+    const wrappedPropDesc = { ...sourcePropDesc }
+    if (sourcePropDesc.get) {
+      wrappedPropDesc.get = function () {
+        const receiver = this
+        // replace the "receiver" value if it points to fake parent
+        const receiverRef = receiver === sourceCompartmentGlobal ? targetGlobal : receiver
+        return Reflect.apply(sourcePropDesc.get, receiverRef, [])
+      }
+    }
+    if (sourcePropDesc.set) {
+      wrappedPropDesc.set = function (value) {
+        // replace the "receiver" value if it points to fake parent
+        const receiver = this
+        const receiverRef = receiver === sourceCompartmentGlobal ? targetGlobal : receiver
+        return Reflect.apply(sourcePropDesc.set, receiverRef, [value])
+      }
+    }
+    return wrappedPropDesc
+  }
+
+  function applyEndowmentPropDescTransforms (propDesc, sourceCompartment, targetGlobalThis) {
+    let newPropDesc = propDesc
+    newPropDesc = applyFunctionPropDescTransform(newPropDesc, sourceCompartment, targetGlobalThis)
+    newPropDesc = applyGetSetPropDescTransforms(newPropDesc, sourceCompartment.globalThis, targetGlobalThis)
+    return newPropDesc
+  }
+
+  function applyFunctionPropDescTransform (propDesc, sourceCompartment, targetGlobalThis) {
+    if (!('value' in propDesc && typeof propDesc.value === 'function')) {
+      return propDesc
+    }
+    const unwrapTest = (thisValue) => {
+      // unwrap function calls this-value to targetGlobalThis when:
+      // this value is globalThis ex. globalThis.abc()
+      // scope proxy leak workaround ex. abc()
+      return thisValue === sourceCompartment.globalThis || sourceCompartment.__isKnownScopeProxy__(thisValue)
+    }
+    const newFn = createFunctionWrapper(propDesc.value, unwrapTest, targetGlobalThis)
+    return { ...propDesc, value: newFn }
+  }
+
+  function createFunctionWrapper (sourceValue, unwrapTest, unwrapTo) {
+    const newValue = function (...args) {
+      if (new.target) {
+        // handle constructor calls
+        return Reflect.construct(sourceValue, args, new.target)
+      } else {
+        // handle function calls
+        // unwrap to target value if this value is the source package compartment's globalThis, or if there are any known scope proxies on the source package compartment
+        const thisRef = unwrapTest(this) ? unwrapTo : this
+        return Reflect.apply(sourceValue, thisRef, args)
+      }
+    }
+    Object.defineProperties(newValue, Object.getOwnPropertyDescriptors(sourceValue))
+    return newValue
   }
 }
 
