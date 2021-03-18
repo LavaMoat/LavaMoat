@@ -38,7 +38,7 @@
       // allows the use of console, useful for error stacks
       consoleTaming: 'unsafe',
       // shows the full call stack
-      stackTaming: 'verbose',
+      stackFiltering: 'verbose',
     }
 
     lockdown(lockdownOptions)
