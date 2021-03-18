@@ -104,8 +104,13 @@ test('globals - ensure circular refs on package compartment global', async (t) =
   t.is(testResult, true, 'xyz references globalThis')
 })
 
-test.only('globals - ensure setTimeout calls dont trigger illegal invocation', async (t) => {
+test('globals - ensure setTimeout calls dont trigger illegal invocation', async (t) => {
   const scenario = createScenarioFromScaffold({
+    defineEntry: () => {
+      const one = require('one')
+      const y = setTimeout(() => {}, 300)
+      console.log(one)
+    },
     defineOne: () => {
       const x = setTimeout(() => {}, 300)
       module.exports = 123

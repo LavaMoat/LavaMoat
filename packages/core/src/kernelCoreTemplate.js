@@ -49,7 +49,7 @@
     globalThisRefs = ['globalThis']
   }) {
     // "templateRequire" calls are inlined in "generatePrelude"
-    const { getEndowmentsForConfig, makeMinimalViewOfRef, createWrappedPropDesc, applyScopeProxyLeakWorkaround } = templateRequire('makeGetEndowmentsForConfig')()
+    const { getEndowmentsForConfig, makeMinimalViewOfRef, applyEndowmentPropDescTransforms } = templateRequire('makeGetEndowmentsForConfig')()
     const { prepareCompartmentGlobalFromConfig } = templateRequire('makePrepareRealmGlobalFromConfig')()
 
     const moduleCache = new Map()
@@ -247,8 +247,8 @@
         .filter(([key]) => !(globalThisRefs.includes(key)))
         // define property on compartment global
         .forEach(([key, desc]) => {
-          // unwrap setter/getter
-          const wrappedPropDesc = createWrappedPropDesc(desc, rootPackageCompartment.globalThis, globalRef)
+          // unwrap functions, setters/getters & apply scope proxy workaround
+          const wrappedPropDesc = applyEndowmentPropDescTransforms(desc, rootPackageCompartment, globalRef)
           Reflect.defineProperty(rootPackageCompartment.globalThis, key, wrappedPropDesc)
         })
 
@@ -286,11 +286,6 @@
         packageCompartment = new Compartment({ Math, Date })
       }
 
-      // Used for SES scope proxy leak workaround endojs/endo/issues/31
-      packageCompartment.globalThis.__getThisValue__ = function() { return this }
-      packageCompartment.scopeProxy = packageCompartment.evaluate('__getThisValue__()')
-      delete packageCompartment.globalThis.__getThisValue__
-
       // prepare endowments
       let endowments
       try {
@@ -309,8 +304,14 @@
         throw new Error(errMsg)
       }
 
-      // Used for SES scope proxy leak workaround endojs/endo/issues/31
-      applyScopeProxyLeakWorkaround(endowments, packageCompartment.scopeProxy, packageCompartment.globalThis)
+      // transform functions, getters & setters on prop descs. Solves SES scope proxy bug
+      Object.entries(Object.getOwnPropertyDescriptors(endowments))
+        // ignore non-configurable properties because we are modifying endowments in place
+        .filter(([key, propDesc]) => propDesc.configurable)
+        .forEach(([key, propDesc]) => {
+          const wrappedPropDesc = applyEndowmentPropDescTransforms(propDesc, packageCompartment, rootPackageCompartment.globalThis)
+          Reflect.defineProperty(endowments, key, wrappedPropDesc)
+        })
 
       // sets up read/write access as configured
       const globalsConfig = packagePolicy.globals
