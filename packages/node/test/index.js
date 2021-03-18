@@ -1,4 +1,3 @@
-/* eslint-disable node/no-path-concat */
 const test = require('ava')
 const { parseForConfig } = require('../src/parseForConfig')
 const { runLavamoat } = require('./util')

@@ -4,10 +4,12 @@
   "devDependencies": {
     "ava": "^3.15.0",
     "depcheck": "^1.4.0",
+    "eslint": "^7.22.0",
+    "eslint-plugin-ava": "^11.0.0",
+    "eslint-plugin-standard": "^5.0.0",
     "lerna": "^3.22.1",
     "semantic-release": "^17.4.1",
     "semantic-release-monorepo": "^7.0.4",
-    "standard": "^16.0.3",
     "tap-spec": "^5.0.0"
   },
   "scripts": {
@@ -18,11 +20,27 @@
     "setup": "lerna bootstrap && yarn patch-package && yarn allow-scripts",
     "semantic-publish": "lerna exec --concurrency 1 -- semantic-release -e semantic-release-monorepo"
   },
+  "eslintConfig": {
+    "env": {
+        "es6": true
+    },
+    "parserOptions": {
+			"ecmaVersion": 2021,
+			"sourceType": "module"
+		},
+    "plugins": [
+      "ava",
+      "standard"
+    ]
+  },
   "workspaces": [
     "packages/*"
   ],
   "release": {
-    "branches": ["main", "semantic"],
+    "branches": [
+      "main",
+      "semantic"
+    ],
     "repositoryUrl": "git+https://github.com/LavaMoat/lavamoat.git",
     "ci": false,
     "plugins": [

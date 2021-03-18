@@ -12,9 +12,9 @@
   },
   "scripts": {
     "test": "ava test/index.js",
-    "lint": "npm run lint:standard && npm run lint:deps",
-    "lint:standard": "standard src/**/*.js",
-    "lint:fix": "standard src/**/*.js --fix",
+    "lint": "npm run lint:eslint && npm run lint:deps",
+    "lint:eslint": "eslint src/**/*.js",
+    "lint:fix": "eslint src/**/*.js --fix",
     "lint:deps": "depcheck"
   },
   "description": "This is the TOFU (trust-on-first-use) static analysis tool used by LavaMoat to automatically generate useable config",
