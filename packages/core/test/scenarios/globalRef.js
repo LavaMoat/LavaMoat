@@ -24,20 +24,21 @@ module.exports = [
       name: 'globalRef - Webpack code in the wild works',
       // Taken directly from Webpack
       defineOne: () => {
-        var g;
+        let g
 
         // This works in non-strict mode
         // otherwise undefined
-        g = (function() {
-          return this;
-        })();
+        g = (function () {
+          return this
+        })()
 
         try {
           // This works if eval is allowed (see CSP)
-          g = g || new Function("return this")();
+          /* eslint-disable no-new-func */
+          g = g || new Function('return this')()
         } catch (e) {
           // This works if the window reference is available
-          if (typeof window === "object") g = window;
+          if (typeof window === 'object') g = window
         }
         // test webpack result against globalThis
         module.exports = g === globalThis
@@ -50,7 +51,7 @@ module.exports = [
     const scenario = createScenarioFromScaffold({
       name: 'globalRef - globalRef workaround doesnt break instanceof Function',
       defineOne: () => {
-        module.exports = (function(){}) instanceof globalThis.Function
+        module.exports = function () {} instanceof globalThis.Function
       },
       expectedResult: true
     })

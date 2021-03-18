@@ -158,8 +158,8 @@ function makeGetEndowmentsForConfig () {
     }
   }
 
-  function applyGetSetPropDescTransforms(sourcePropDesc, sourceCompartmentGlobal, targetGlobal) {
-    const wrappedPropDesc = {...sourcePropDesc}
+  function applyGetSetPropDescTransforms (sourcePropDesc, sourceCompartmentGlobal, targetGlobal) {
+    const wrappedPropDesc = { ...sourcePropDesc }
     if (sourcePropDesc.get) {
       wrappedPropDesc.get = function () {
         const receiver = this
@@ -179,14 +179,14 @@ function makeGetEndowmentsForConfig () {
     return wrappedPropDesc
   }
 
-  function applyEndowmentPropDescTransforms(propDesc, sourceCompartment, targetGlobalThis) {
+  function applyEndowmentPropDescTransforms (propDesc, sourceCompartment, targetGlobalThis) {
     let newPropDesc = propDesc
     newPropDesc = applyFunctionPropDescTransform(newPropDesc, sourceCompartment, targetGlobalThis)
     newPropDesc = applyGetSetPropDescTransforms(newPropDesc, sourceCompartment.globalThis, targetGlobalThis)
     return newPropDesc
   }
 
-  function applyFunctionPropDescTransform(propDesc, sourceCompartment, targetGlobalThis) {
+  function applyFunctionPropDescTransform (propDesc, sourceCompartment, targetGlobalThis) {
     if (!('value' in propDesc && typeof propDesc.value === 'function')) {
       return propDesc
     }
@@ -200,7 +200,7 @@ function makeGetEndowmentsForConfig () {
     return { ...propDesc, value: newFn }
   }
 
-  function createFunctionWrapper(sourceValue, unwrapTest, unwrapTo) {
+  function createFunctionWrapper (sourceValue, unwrapTest, unwrapTo) {
     const newValue = function (...args) {
       if (new.target) {
         // handle constructor calls
