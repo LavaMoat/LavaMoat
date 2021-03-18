@@ -1,4 +1,3 @@
-/* eslint-disable node/no-path-concat */
 const util = require('util')
 const execFile = util.promisify(require('child_process').execFile)
 const { prepareScenarioOnDisk } = require('lavamoat-core/test/util.js')
