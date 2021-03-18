@@ -31,12 +31,14 @@
     const lockdownOptions = {
       // gives a semi-high resolution timer
       dateTaming: 'unsafe',
+      // this is introduces non-determinism, but is otherwise safe
+      mathTaming: 'unsafe',
       // lets code observe call stack, but easier debuggability
       errorTaming: 'unsafe',
-      // this is introduces non-determinism, but is otherwise safe
-      mathTaming: 'unsafe'
-      // ?
-      // regExpTaming: 'unsafe',
+      // allows the use of console, useful for error stacks
+      consoleTaming: 'unsafe',
+      // shows the full call stack
+      stackFiltering: 'verbose',
     }
 
     lockdown(lockdownOptions)

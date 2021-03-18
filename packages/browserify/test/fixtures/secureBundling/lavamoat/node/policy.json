@@ -44,11 +44,6 @@
         "js-tokens": true
       }
     },
-    "@babel/parser": {
-      "globals": {
-        "BigInt": true
-      }
-    },
     "@babel/template": {
       "packages": {
         "@babel/code-frame": true,
@@ -96,14 +91,10 @@
     },
     "acorn": {
       "globals": {
-        "BigInt": true,
         "define": true
       }
     },
     "acorn-node": {
-      "globals": {
-        "BigInt": true
-      },
       "packages": {
         "acorn": true,
         "acorn-walk": true,
@@ -212,11 +203,6 @@
         "ansi-styles": true,
         "escape-string-regexp": true,
         "supports-color": true
-      }
-    },
-    "clone": {
-      "globals": {
-        "Buffer": true
       }
     },
     "clone-deep": {
@@ -437,7 +423,8 @@
       },
       "globals": {
         "__dirname": true,
-        "console.warn": true
+        "console.warn": true,
+        "define": true
       },
       "packages": {
         "fromentries": true,
@@ -478,21 +465,6 @@
       "packages": {
         "for-in": true,
         "is-extendable": true
-      }
-    },
-    "mkdirp": {
-      "builtin": {
-        "fs": true,
-        "path.dirname": true,
-        "path.parse": true,
-        "path.resolve": true,
-        "util.promisify": true
-      },
-      "globals": {
-        "process.env.__TESTING_MKDIRP_NODE_VERSION__": true,
-        "process.env.__TESTING_MKDIRP_PLATFORM__": true,
-        "process.platform": true,
-        "process.version": true
       }
     },
     "module-deps": {
@@ -680,8 +652,7 @@
     },
     "supports-color": {
       "builtin": {
-        "os.release": true,
-        "tty.isatty": true
+        "os.release": true
       },
       "globals": {
         "process.env": true,
