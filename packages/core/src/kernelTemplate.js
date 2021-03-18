@@ -36,7 +36,7 @@
       // lets code observe call stack, but easier debuggability
       errorTaming: 'unsafe',
       // allows the use of console, useful for error stacks
-      consoleTaming: 'unsafe'
+      consoleTaming: 'unsafe',
       // shows the full call stack
       stackTaming: 'verbose',
     }
