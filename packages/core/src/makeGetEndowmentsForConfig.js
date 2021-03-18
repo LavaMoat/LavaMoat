@@ -59,8 +59,7 @@ function makeGetEndowmentsForConfig () {
     if (pathParts.length === 0) {
       throw new Error('unable to copy, must have pathParts, was empty')
     }
-    const nextPart = pathParts[0]
-    const remainingParts = pathParts.slice(1)
+    const [nextPart, ...remainingParts] = pathParts
     // get the property from any depth in the property chain
     const { prop: sourcePropDesc } = getPropertyDescriptorDeep(sourceRef, nextPart)
 
@@ -158,32 +157,43 @@ function makeGetEndowmentsForConfig () {
     }
   }
 
-  function applyGetSetPropDescTransforms (sourcePropDesc, sourceCompartmentGlobal, targetGlobal) {
+  function applyEndowmentPropDescTransforms (propDesc, sourceCompartment, targetGlobalThis) {
+    let newPropDesc = propDesc
+    newPropDesc = applyFunctionPropDescTransform(newPropDesc, sourceCompartment, targetGlobalThis)
+    newPropDesc = applyGetSetPropDescTransforms(newPropDesc, sourceCompartment.globalThis, targetGlobalThis)
+    return newPropDesc
+  }
+
+  function applyGetSetPropDescTransforms (sourcePropDesc, sourceGlobal, targetGlobal) {
     const wrappedPropDesc = { ...sourcePropDesc }
     if (sourcePropDesc.get) {
       wrappedPropDesc.get = function () {
         const receiver = this
         // replace the "receiver" value if it points to fake parent
-        const receiverRef = receiver === sourceCompartmentGlobal ? targetGlobal : receiver
-        return Reflect.apply(sourcePropDesc.get, receiverRef, [])
+        const receiverRef = receiver === sourceGlobal ? targetGlobal : receiver
+        const result = Reflect.apply(sourcePropDesc.get, receiverRef, [])
+        if (typeof result === 'function') {
+          // functions must be wrapped to ensure a good this-value.
+          // lockdown causes some propDescs to go to value -> getter,
+          // eg "Function.prototype.bind". we need to wrap getter results
+          // as well in order to ensure they have their this-value wrapped correctly
+          // if this ends up being problematic we can maybe take advantage of lockdown's
+          // "getter.originalValue" property being available
+          return createFunctionWrapper(result, (thisValue) => thisValue === sourceGlobal, targetGlobal)
+        } else {
+          return result
+        }
       }
     }
     if (sourcePropDesc.set) {
       wrappedPropDesc.set = function (value) {
         // replace the "receiver" value if it points to fake parent
         const receiver = this
-        const receiverRef = receiver === sourceCompartmentGlobal ? targetGlobal : receiver
+        const receiverRef = receiver === sourceGlobal ? targetGlobal : receiver
         return Reflect.apply(sourcePropDesc.set, receiverRef, [value])
       }
     }
     return wrappedPropDesc
-  }
-
-  function applyEndowmentPropDescTransforms (propDesc, sourceCompartment, targetGlobalThis) {
-    let newPropDesc = propDesc
-    newPropDesc = applyFunctionPropDescTransform(newPropDesc, sourceCompartment, targetGlobalThis)
-    newPropDesc = applyGetSetPropDescTransforms(newPropDesc, sourceCompartment.globalThis, targetGlobalThis)
-    return newPropDesc
   }
 
   function applyFunctionPropDescTransform (propDesc, sourceCompartment, targetGlobalThis) {
