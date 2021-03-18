@@ -145,7 +145,7 @@ test('globals - endowing bind on a function', async (t) => {
   // because our this-value unwrapping was not applied
   // to getters that resulted in functions, and
   // "Function.prototype.bind" was a getter as a result
-  // of lockdown's override mistake workaround 
+  // of lockdown's override mistake workaround
   const scenario = createScenarioFromScaffold({
     defineOne: () => {
       const xyz = {}

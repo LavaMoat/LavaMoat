@@ -59,7 +59,7 @@ function makeGetEndowmentsForConfig () {
     if (pathParts.length === 0) {
       throw new Error('unable to copy, must have pathParts, was empty')
     }
-    const [nextPart, ...remainingParts] = pathParts[0]
+    const [nextPart, ...remainingParts] = pathParts
     // get the property from any depth in the property chain
     const { prop: sourcePropDesc } = getPropertyDescriptorDeep(sourceRef, nextPart)
 
