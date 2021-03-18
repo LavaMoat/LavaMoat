@@ -140,7 +140,12 @@ test('globals - ensure setTimeout calls dont trigger illegal invocation', async 
 
 test('globals - endowing bind on a function', async (t) => {
   'use strict'
-  // compartment.globalThis.document would error because 'this' value is not window
+  // bind requires this-value to be the function
+  // this test was originally failing after lockdown
+  // because our this-value unwrapping was not applied
+  // to getters that resulted in functions, and
+  // "Function.prototype.bind" was a getter as a result
+  // of lockdown's override mistake workaround 
   const scenario = createScenarioFromScaffold({
     defineOne: () => {
       const xyz = {}
