@@ -82,7 +82,7 @@ test('globals - ensure window.document getter behavior support', async (t) => {
     },
   })
   const testResult = await runScenario({ scenario })
-  t.deepEqual(testResult, 'beepboop.bong', 'expected result, did not error')
+  t.is(testResult, 'beepboop.bong', 'expected result, did not error')
 })
 
 
