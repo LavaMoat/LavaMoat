@@ -1,5 +1,5 @@
 const vm = require('vm')
-const { readFileSync } = require('fs')
+const { getSesShimSrc } = require('lavamoat-core/src/generatePrelude')
 
 module.exports = { createFreshRealmCompartment }
 
@@ -8,7 +8,7 @@ let sesCompartmentSrc
 function createFreshRealmCompartment () {
   // lazily load the Compartment source
   if (!sesCompartmentSrc) {
-    sesCompartmentSrc = readFileSync(require.resolve('lavamoat-core/lib/ses.umd.js'), 'utf8')
+    sesCompartmentSrc = getSesShimSrc()
   }
   // create a seperate realm for running code
   const context = vm.createContext()
