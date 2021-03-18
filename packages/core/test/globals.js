@@ -85,6 +85,7 @@ test('globals - ensure window.document getter behavior support', async (t) => {
   t.deepEqual(testResult, 'beepboop.bong', 'expected result, did not error')
 })
 
+
 test('globals - ensure circular refs on package compartment global', async (t) => {
   const scenario = createScenarioFromScaffold({
     defineEntry: () => {
@@ -135,4 +136,43 @@ test('globals - ensure setTimeout calls dont trigger illegal invocation', async 
   })
   const testResult = await runScenario({ scenario })
   t.is(testResult, 123, 'this value for setTimeout is correct')
+})
+
+test('globals - endowing bind on a function', async (t) => {
+  'use strict'
+  // compartment.globalThis.document would error because 'this' value is not window
+  const scenario = createScenarioFromScaffold({
+    defineOne: () => {
+      const xyz = {}
+      module.exports = {
+        // the intermediate should actually be an object
+        typeof: typeof abc === 'object',
+        // bind should work normally
+        isXyz: abc.bind(xyz)() === xyz,
+        isUndefined: abc.bind()() === undefined,
+        isTrue: abc.bind(true)() === true,
+        is42: abc.bind(42)() === 42,
+      }
+    },
+    context: {
+      abc: function () { return this }
+    },
+    config: {
+      resources: {
+        one: {
+          globals: {
+            'abc.bind': true
+          }
+        },
+      }
+    },
+  })
+  const testResult = await runScenario({ scenario })
+  t.deepEqual(testResult, {
+    typeof: true,
+    isUndefined: true,
+    isTrue: true,
+    is42: true,
+    isXyz: true,
+  }, 'expected result, did not error')
 })

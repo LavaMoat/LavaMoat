@@ -18,7 +18,8 @@
   },
   "devDependencies": {
     "object.fromentries": "^2.0.2",
-    "tmp-promise": "^3.0.2"
+    "tmp-promise": "^3.0.2",
+    "ses": "^0.12.3"
   },
   "scripts": {
     "lint": "npm run lint:standard && npm run lint:deps",
