@@ -8,6 +8,7 @@ module.exports = [
         const two = require('two')
         // eslint-disable-next-line
         globalThis.hasOwnProperty.call
+        globalThis.hasOwnProperty = 'x'
         // eslint-disable-next-line
         module.exports = two.check(globalThis)
       },

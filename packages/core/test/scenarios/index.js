@@ -10,7 +10,7 @@ const transforms = require('./transforms')
 const globalRef = require('./globalRef')
 
 module.exports = { loadScenarios }
-const scenarios = [...autogen, ...security, ...basic, ...config, ...endowments, ...exportsDefense, ...globalWrites, ...moduleExports, ...transforms, ...globalRef]
+const scenarios = [...autogen]
 
 async function * loadScenarios () {
   for (const scenarioCreator of scenarios) {
