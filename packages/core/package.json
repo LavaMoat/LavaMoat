@@ -38,7 +38,8 @@
   "eslintConfig": {
     "globals": {
       "Compartment": "readonly",
-      "templateRequire": "readonly"
+      "templateRequire": "readonly",
+      "lockdown": "readonly"
     }
   },
   "eslintIgnore": [
