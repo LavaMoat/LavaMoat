@@ -36,14 +36,16 @@
     "source-map": "^0.7.3",
     "uglify-js": "^3.4.9",
     "vinyl-buffer": "^1.0.1",
-    "watchify": "^3.11.1"
+    "watchify": "^3.11.1",
+    "eslint-plugin-ava": "^11.0.0",
+    "eslint-plugin-standard": "^5.0.0"
   },
   "scripts": {
     "test": "ava test/index.js --timeout=2m",
     "test:prep": "(cd './test/fixtures/secureBundling' && lavamoat build.js --writeAutoPolicy)",
-    "lint": "npm run lint:standard && npm run lint:deps",
-    "lint:standard": "standard src/**/*.js test/**/*.js",
-    "lint:fix": "standard src/**/*.js test/**/*.js --fix",
+    "lint": "npm run lint:eslint && npm run lint:deps",
+    "lint:eslint": "eslint \"src/**/*.js\" \"test/**/*.js\"",
+    "lint:fix": "eslint src/**/*.js test/**/*.js --fix",
     "lint:deps": "depcheck",
     "build:ses": "(cd ./node_modules/ses && npm i && npm run build && cp ./dist/ses.umd.js ../../lib/)"
   },
@@ -54,10 +56,5 @@
     "url": "https://github.com/LavaMoat/lavamoat/issues"
   },
   "homepage": "https://github.com/LavaMoat/lavamoat#readme",
-  "standard": {
-    "ignore": [
-      "/src/sourcemaps.js",
-      "/test/fixtures"
-    ]
-  }
+  "eslintIgnore": ["/src/sourcemaps.js", "/test/fixtures"]
 }

@@ -60,5 +60,5 @@ test('globalWrites - two deps should be able to read each others globals', async
   const bundle = await createBundleFromRequiresArray(entries, { policy })
   const testResult = evalBundle(bundle)
 
-  t.deepEqual(testResult.value, true)
+  t.is(testResult.value, true)
 })

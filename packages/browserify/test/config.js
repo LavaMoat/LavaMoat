@@ -23,11 +23,11 @@ test('policy - default policy path is generated with autoconfig if path is not s
   const expectedPath = path.join(policyDir, 'policy.json')
   scenario.dir = projectDir
 
-  t.falsy(fs.existsSync(expectedPath), 'Config file does not yet exist')
+  t.false(fs.existsSync(expectedPath), 'Config file does not yet exist')
 
   await runBrowserify({ scenario })
 
-  t.truthy(fs.existsSync(expectedPath), 'Config file exists')
+  t.true(fs.existsSync(expectedPath), 'Config file exists')
 })
 
 test('Config override is applied if not specified and already exists at default path', async (t) => {
@@ -66,11 +66,11 @@ test('Config - Applies writeAutoPolicyDebug plugin option and dumps module objec
   const expectedPath = path.join(policyDir, 'policy-debug.json')
   scenario.dir = projectDir
 
-  t.falsy(fs.existsSync(expectedPath), 'Module data does not yet exist')
+  t.false(fs.existsSync(expectedPath), 'Module data does not yet exist')
 
   await runBrowserify({ scenario })
 
-  t.truthy(fs.existsSync(expectedPath), 'Module data does not yet exist')
+  t.true(fs.existsSync(expectedPath), 'Module data does not yet exist')
 })
 
 // this test is not written correctly, im disabling it for now
@@ -112,6 +112,6 @@ test('Config - Applies writeAutoPolicyDebug plugin option and dumps module objec
 //   const updatedConfigFileString = fs.readFileSync(configPath, 'utf8')
 //   rimraf.sync('./lavamoat')
 
-//   t.falsy(configFileString.includes('"three": 12345678'), 'original policy should not have updated content')
-//   t.truthy(updatedConfigFileString.includes('"three": 12345678'), 'policy should be updated')
+//   t.false(configFileString.includes('"three": 12345678'), 'original policy should not have updated content')
+//   t.true(updatedConfigFileString.includes('"three": 12345678'), 'policy should be updated')
 // })

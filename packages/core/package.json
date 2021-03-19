@@ -19,12 +19,14 @@
   "devDependencies": {
     "object.fromentries": "^2.0.2",
     "tmp-promise": "^3.0.2",
-    "ses": "^0.12.3"
+    "ses": "^0.12.3",
+    "eslint-plugin-ava": "^11.0.0",
+    "eslint-plugin-standard": "^5.0.0"
   },
   "scripts": {
-    "lint": "npm run lint:standard && npm run lint:deps",
-    "lint:standard": "standard src/**/*.js test/**/*.js",
-    "lint:fix": "standard src/**/*.js test/**/*.js --fix",
+    "lint": "npm run lint:eslint && npm run lint:deps",
+    "lint:eslint": "eslint \"src/**/*.js\" \"test/**/*.js\"",
+    "lint:fix": "eslint src/**/*.js test/**/*.js --fix",
     "lint:deps": "depcheck",
     "test": "ava test/index.js --timeout=2m"
   },
@@ -35,16 +37,17 @@
     "url": "https://github.com/LavaMoat/lavamoat/issues"
   },
   "homepage": "https://github.com/LavaMoat/lavamoat#readme",
-  "standard": {
-    "ignore": [
-      "/src/sourcemaps.js",
-      "/test/fixtures",
-      "/src/preludeTemplate.js",
-      "/src/kernelTemplate.js"
-    ],
-    "globals": [
-      "Compartment",
-      "templateRequire"
-    ]
-  }
+  "eslintConfig": {
+    "globals": {
+      "Compartment": "readonly",
+      "templateRequire": "readonly",
+      "lockdown": "readonly"
+    }
+  },
+  "eslintIgnore": [
+    "/src/sourcemaps.js",
+    "/test/fixtures",
+    "/src/preludeTemplate.js",
+    "/src/kernelTemplate.js"
+  ]
 }

@@ -71,7 +71,7 @@ test('getEndowmentsForConfig - getter', (t) => {
   }
 })
 
-test('getEndowmentsForConfig - ensure window.document getter behavior support', async (t) => {
+test('getEndowmentsForConfig - ensure window.document getter behavior support', (t) => {
   'use strict'
   // compartment.globalThis.document would error because 'this' value is not window
   const { getEndowmentsForConfig } = makeGetEndowmentsForConfig()
@@ -96,7 +96,7 @@ test('getEndowmentsForConfig - ensure window.document getter behavior support', 
   t.is(getter.call(), globalThis)
 })
 
-test('getEndowmentsForConfig - specify unwrap to', async (t) => {
+test('getEndowmentsForConfig - specify unwrap to', (t) => {
   'use strict'
   // compartment.globalThis.document would error because 'this' value is not window
   const unwrapTo = {}
@@ -122,7 +122,7 @@ test('getEndowmentsForConfig - specify unwrap to', async (t) => {
   t.is(getter.call(), globalThis)
 })
 
-test('getEndowmentsForConfig - specify unwrap from, unwrap to', async (t) => {
+test('getEndowmentsForConfig - specify unwrap from, unwrap to', (t) => {
   'use strict'
   // compartment.globalThis.document would error because 'this' value is not window
   const unwrapTo = {}
@@ -173,7 +173,7 @@ test('getEndowmentsForConfig - endowing bind of a function', async (t) => {
   t.is(resultGlobal.abc.bind(xyz)(), xyz)
 })
 
-test('getEndowmentsForConfig - ensure setTimeout calls dont trigger illegal invocation', async (t) => {
+test('getEndowmentsForConfig - ensure setTimeout calls dont trigger illegal invocation', (t) => {
   'use strict'
   // compartment.globalThis.document would error because 'this' value is not window
   const { getEndowmentsForConfig } = makeGetEndowmentsForConfig()
