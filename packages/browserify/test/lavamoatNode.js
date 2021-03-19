@@ -5,7 +5,7 @@ const {
   evalBundle,
 } = require('./util')
 
-test('basic - bundle works under lavamoat node', async (t) => {
+test('basic - bundle works under lavamoat node', (t) => {
   const bundle = execSync("lavamoat build.js",
   {
     cwd: path.resolve(__dirname, './fixtures/secureBundling'),

@@ -24,7 +24,7 @@ test('sourcemaps - adjust maps for wrapper', async (t) => {
   if (result.error) t.ifError(result.error)
 
   // ensure minification worked
-  t.truthy(indicesOf('\n', fooSource).length > 1)
+  t.true(indicesOf('\n', fooSource).length > 1)
   t.is(indicesOf('\n', result.code).length, 1)
 
   // wrap into bundle with external sourcemaps
@@ -44,7 +44,7 @@ function indicesOf (substring, string) {
 async function validateSourcemaps (t, sourceMeta) {
   const targetSlug = 'new Error'
   const consumer = await new SourceMapConsumer(sourceMeta.maps)
-  t.truthy(consumer.hasContentsOfAllSources(), 'has the contents of all sources')
+  t.true(consumer.hasContentsOfAllSources(), 'has the contents of all sources')
 
   const sourceLines = sourceMeta.code.split('\n')
 
@@ -68,7 +68,7 @@ async function validateSourcemaps (t, sourceMeta) {
         if (!line.includes(targetSlug)) t.fail(`could not find target "${targetSlug}" in source`)
       })
     })
-  t.truthy(true, 'sourcemaps look ok')
+  t.true(true, 'sourcemaps look ok')
 }
 
 function contentForPosition (sourceLines, position) {

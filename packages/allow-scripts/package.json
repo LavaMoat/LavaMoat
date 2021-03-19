@@ -22,11 +22,14 @@
   "directories": {
     "test": "test"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "eslint-plugin-ava": "^11.0.0",
+    "eslint-plugin-standard": "^5.0.0"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\"",
     "lint": "npm run lint:eslint && npm run lint:deps",
-    "lint:eslint": "eslint src/**/*.js",
+    "lint:eslint": "eslint \"src/**/*.js\"",
     "lint:fix": "eslint src/**/*.js --fix",
     "lint:deps": "depcheck"
   },

@@ -11,7 +11,7 @@
     "test:prep": "for d in ./test/projects/*/ ; do (cd \"$d\" && yarn setup); done",
     "test:run": "ava test/index.js --timeout=2m",
     "lint": "npm run lint:eslint && npm run lint:deps",
-    "lint:eslint": "eslint src/**/*.js test/*.js",
+    "lint:eslint": "eslint \"src/**/*.js\" \"test/**/*.js\"",
     "lint:fix": "eslint src/**/*.js test/*.js --fix",
     "lint:deps": "depcheck"
   },
@@ -26,6 +26,10 @@
     "object.fromentries": "^2.0.2",
     "resolve": "^1.17.0",
     "yargs": "^16.0.0"
+  },
+  "devDependencies": {
+    "eslint-plugin-ava": "^11.0.0",
+    "eslint-plugin-standard": "^5.0.0"
   },
   "directories": {
     "example": "examples",

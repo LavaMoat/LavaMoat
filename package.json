@@ -20,19 +20,6 @@
     "setup": "lerna bootstrap && yarn patch-package && yarn allow-scripts",
     "semantic-publish": "lerna exec --concurrency 1 -- semantic-release -e semantic-release-monorepo"
   },
-  "eslintConfig": {
-    "env": {
-        "es6": true
-    },
-    "parserOptions": {
-			"ecmaVersion": 2021,
-			"sourceType": "module"
-		},
-    "plugins": [
-      "ava",
-      "standard"
-    ]
-  },
   "workspaces": [
     "packages/*"
   ],
