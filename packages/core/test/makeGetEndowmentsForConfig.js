@@ -89,11 +89,11 @@ test('getEndowmentsForConfig - ensure window.document getter behavior support', 
 
   const getter = Reflect.getOwnPropertyDescriptor(resultGlobal, 'xyz').get
 
-  t.deepEqual(resultGlobal.xyz, sourceGlobal)
-  t.deepEqual(getter.call(resultGlobal), sourceGlobal)
-  t.deepEqual(getter.call(sourceGlobal), sourceGlobal)
+  t.is(resultGlobal.xyz, sourceGlobal)
+  t.is(getter.call(resultGlobal), sourceGlobal)
+  t.is(getter.call(sourceGlobal), sourceGlobal)
   // ava seems to be forcing sloppy mode
-  t.deepEqual(getter.call(), globalThis)
+  t.is(getter.call(), globalThis)
 })
 
 test('getEndowmentsForConfig - specify unwrap to', async (t) => {
@@ -114,12 +114,12 @@ test('getEndowmentsForConfig - specify unwrap to', async (t) => {
   const resultGlobal = getEndowmentsForConfig(sourceGlobal, config, unwrapTo)
   const getter = Reflect.getOwnPropertyDescriptor(resultGlobal, 'xyz').get
 
-  t.deepEqual(resultGlobal.xyz, unwrapTo)
-  t.deepEqual(getter.call(resultGlobal), unwrapTo)
-  t.deepEqual(getter.call(sourceGlobal), sourceGlobal)
-  t.deepEqual(getter.call(unwrapTo), unwrapTo)
+  t.is(resultGlobal.xyz, unwrapTo)
+  t.is(getter.call(resultGlobal), unwrapTo)
+  t.is(getter.call(sourceGlobal), sourceGlobal)
+  t.is(getter.call(unwrapTo), unwrapTo)
   // ava seems to be forcing sloppy mode
-  t.deepEqual(getter.call(), globalThis)
+  t.is(getter.call(), globalThis)
 })
 
 test('getEndowmentsForConfig - specify unwrap from, unwrap to', async (t) => {
@@ -141,13 +141,36 @@ test('getEndowmentsForConfig - specify unwrap from, unwrap to', async (t) => {
   const resultGlobal = getEndowmentsForConfig(sourceGlobal, config, unwrapTo, unwrapFrom)
   const getter = Reflect.getOwnPropertyDescriptor(resultGlobal, 'xyz').get
 
-  t.deepEqual(resultGlobal.xyz, resultGlobal)
-  t.deepEqual(getter.call(resultGlobal), resultGlobal)
-  t.deepEqual(getter.call(sourceGlobal), sourceGlobal)
-  t.deepEqual(getter.call(unwrapTo), unwrapTo)
-  t.deepEqual(getter.call(unwrapFrom), unwrapTo)
+  t.is(resultGlobal.xyz, resultGlobal)
+  t.is(getter.call(resultGlobal), resultGlobal)
+  t.is(getter.call(sourceGlobal), sourceGlobal)
+  t.is(getter.call(unwrapTo), unwrapTo)
+  t.is(getter.call(unwrapFrom), unwrapTo)
   // ava seems to be forcing sloppy mode
-  t.deepEqual(getter.call(), globalThis)
+  t.is(getter.call(), globalThis)
+})
+
+test('getEndowmentsForConfig - endowing bind of a function', async (t) => {
+  'use strict'
+  const { getEndowmentsForConfig } = makeGetEndowmentsForConfig()
+  const sourceGlobal = {
+    abc: function () { return this }
+  }
+  const config = {
+    globals: {
+      'abc.bind': true
+    }
+  }
+  const resultGlobal = getEndowmentsForConfig(sourceGlobal, config)
+
+  // the intermediate should actually be an object
+  t.is(typeof resultGlobal.abc, 'object')
+  // bind should work normally
+  t.is(resultGlobal.abc.bind()(), undefined)
+  t.is(resultGlobal.abc.bind(true)(), true)
+  t.is(resultGlobal.abc.bind(42)(), 42)
+  const xyz = {}
+  t.is(resultGlobal.abc.bind(xyz)(), xyz)
 })
 
 test('getEndowmentsForConfig - ensure setTimeout calls dont trigger illegal invocation', async (t) => {
