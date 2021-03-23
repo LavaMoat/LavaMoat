@@ -181,3 +181,29 @@ test('globals - endowing bind on a function', async (t) => {
     isXyz: true,
   }, 'expected result, did not error')
 })
+
+test('globals - endowing properties on the globalThis prototype chain', async (t) => {
+  'use strict'
+  // window.addEventListener is defined deep in the protoype chain
+  const scenario = createScenarioFromScaffold({
+    defineOne: () => {
+      module.exports = globalThis.abc()
+    },
+    // modify the node GlobalPrototype
+    beforeCreateKernel: ({ globalThis }) => {
+      const globalProto = Reflect.getPrototypeOf(globalThis)
+      globalProto.abc = () => 123
+    },
+    config: {
+      resources: {
+        one: {
+          globals: {
+            'abc': true
+          }
+        },
+      }
+    },
+  })
+  const testResult = await runScenario({ scenario })
+  t.is(testResult, 123, 'expected result, did not error')
+})

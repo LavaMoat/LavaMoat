@@ -239,8 +239,18 @@
       // - Math is for untamed Math.random
       // - Date is for untamed Date.now
       const rootPackageCompartment = new Compartment({ Math, Date })
+      // find the relevant endowment sources
+      const globalProtoChain = getPrototypeChain(globalRef)
+      // this is usually just the index for Object.prototype
+      const commonPrototypeIndex = globalProtoChain.findIndex(globalProtoChainEntry => globalProtoChainEntry.constructor && rootPackageCompartment instanceof globalProtoChainEntry.constructor)
+      if (commonPrototypeIndex === -1) throw new Error('Lavamoat - unable to find common prototype between Compartment and globalRef')
+      // everything up to but not including the common prototypal ancestor (likely Object.prototype)
+      const endowmentSources = globalProtoChain.slice(0, commonPrototypeIndex)
+      const endowmentSourceDescriptors = endowmentSources.map(globalProtoChainEntry => Object.getOwnPropertyDescriptors(globalProtoChainEntry))
+      // flatten propDesc collections with precedence for globalThis-end of the prototype chain
+      const endowmentDescriptorsFlat = Object.assign(Object.create(null), ...endowmentSourceDescriptors.reverse())
       // expose all own properties of globalRef, including non-enumerable
-      Object.entries(Object.getOwnPropertyDescriptors(globalRef))
+      Object.entries(endowmentDescriptorsFlat)
         // ignore properties already defined on compartment global
         .filter(([key]) => !(key in rootPackageCompartment.globalThis))
         // ignore circular globalThis refs
@@ -331,6 +341,18 @@
       packageConfig.packages = packageConfig.packages || {}
       packageConfig.builtin = packageConfig.builtin || {}
       return packageConfig
+    }
+
+    // util for getting the prototype chain as an array
+    // includes the provided value in the result
+    function getPrototypeChain (value) {
+      const protoChain = []
+      let current = value
+      while (current && (typeof current === 'object' || typeof current === 'function')) {
+        protoChain.push(current)
+        current = Reflect.getPrototypeOf(current)
+      }
+      return protoChain
     }
   }
 })()
