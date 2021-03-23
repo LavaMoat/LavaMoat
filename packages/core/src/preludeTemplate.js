@@ -63,7 +63,7 @@
   function getRelativeModuleId (parentModuleId, requestedName) {
     const parentModuleData = modules[parentModuleId]
     if (!(requestedName in parentModuleData.deps)) {
-      console.warn(`missing dep: ${parentModuleData.packageName} requested ${requestedName}`)
+      console.warn(`missing dep: ${parentModuleData.package} requested ${requestedName}`)
     }
     return parentModuleData.deps[requestedName] || requestedName
   }
