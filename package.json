@@ -17,7 +17,7 @@
     "lint": "lerna run lint",
     "lint:fix": "lerna run lint:fix",
     "publish": "lerna publish from-package --no-push --no-git-tag-version --yes",
-    "setup": "lerna bootstrap && yarn patch-package && yarn allow-scripts",
+    "setup": "lerna bootstrap && yarn allow-scripts",
     "semantic-publish": "lerna exec --concurrency 1 -- semantic-release -e semantic-release-monorepo"
   },
   "workspaces": [
