@@ -14,8 +14,8 @@ test('basic - bundle works under lavamoat node', (t) => {
       maxBuffer: 8192 * 10000
     })
   } catch (err) {
-    console.error(`stdout:\N${err.stdout.toString()}`)
-    console.error(`stderr:\N${err.stderr.toString()}`)
+    console.error(`stdout:\n${err.stdout.toString()}`)
+    console.error(`stderr:\n${err.stderr.toString()}`)
     throw err
   }
   const testResult = evalBundle(bundle.toString(), { console })
