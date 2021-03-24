@@ -12,6 +12,7 @@ const kernelCoreTemplate = fs.readFileSync(path.join(__dirname, '/kernelCoreTemp
 const sesSrc = fs.readFileSync(path.join(__dirname, '/../lib/lockdown.umd.js'), 'utf-8')
 const makeGetEndowmentsForConfigSrc = fs.readFileSync(path.join(__dirname, '/makeGetEndowmentsForConfig.js'), 'utf-8')
 const makePrepareRealmGlobalFromConfigSrc = fs.readFileSync(path.join(__dirname, '/makePrepareRealmGlobalFromConfig.js'), 'utf-8')
+const makeGeneralUtilsSrc = fs.readFileSync(path.join(__dirname, '/makeGeneralUtils.js'), 'utf-8')
 
 module.exports = {
   getSesShimSrc,
@@ -52,6 +53,7 @@ function generateKernelCore (opts = {}) {
   let output = kernelCoreTemplate
   output = replaceTemplateRequire(output, 'makeGetEndowmentsForConfig', makeGetEndowmentsForConfigSrc)
   output = replaceTemplateRequire(output, 'makePrepareRealmGlobalFromConfig', makePrepareRealmGlobalFromConfigSrc)
+  output = replaceTemplateRequire(output, 'makeGeneralUtils', makeGeneralUtilsSrc)
   return output
 }
 

@@ -30,5 +30,18 @@ module.exports = [
       expectedResult: 123
     })
     return scenario
+  },
+  async () => {
+    const scenario = createScenarioFromScaffold({
+      name: 'basic - Function constructor for constructing constructor functions',
+      defineOne: () => {
+        const abc = new Function("this.value = this.derp()")
+        abc.prototype.derp = function() { return 123 }
+        const xyz = new abc()
+        module.exports = xyz.value
+      },
+      expectedResult: 123
+    })
+    return scenario
   }
 ]

@@ -49,8 +49,9 @@
     globalThisRefs = ['globalThis']
   }) {
     // "templateRequire" calls are inlined in "generatePrelude"
-    const { getEndowmentsForConfig, makeMinimalViewOfRef, applyEndowmentPropDescTransforms } = templateRequire('makeGetEndowmentsForConfig')()
-    const { prepareCompartmentGlobalFromConfig } = templateRequire('makePrepareRealmGlobalFromConfig')()
+    const generalUtils = templateRequire('makeGeneralUtils')()
+    const { getEndowmentsForConfig, makeMinimalViewOfRef, applyEndowmentPropDescTransforms } = templateRequire('makeGetEndowmentsForConfig')(generalUtils)
+    const { prepareCompartmentGlobalFromConfig } = templateRequire('makePrepareRealmGlobalFromConfig')(generalUtils)
 
     const moduleCache = new Map()
     const packageCompartmentCache = new Map()
