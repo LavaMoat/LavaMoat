@@ -1,8 +1,14 @@
 const test = require('ava')
 const makeGetEndowmentsForConfig = require('../src/makeGetEndowmentsForConfig.js')
+const makeGeneralUtils = require('../src/makeGeneralUtils.js')
+
+function prepareTest() {
+  const { getEndowmentsForConfig } = makeGetEndowmentsForConfig(makeGeneralUtils())
+  return getEndowmentsForConfig
+}
 
 test('getEndowmentsForConfig', (t) => {
-  const { getEndowmentsForConfig } = makeGetEndowmentsForConfig()
+  const getEndowmentsForConfig = prepareTest()
   const sourceGlobal = {
     namespace: {
       stringValue: 'yabbadabbadoo'
@@ -19,7 +25,7 @@ test('getEndowmentsForConfig', (t) => {
 })
 
 test('getEndowmentsForConfig - siblings', (t) => {
-  const { getEndowmentsForConfig } = makeGetEndowmentsForConfig()
+  const getEndowmentsForConfig = prepareTest()
   const sourceGlobal = { Buffer }
   const config = {
     globals: {
@@ -49,7 +55,7 @@ test('getEndowmentsForConfig - siblings', (t) => {
 })
 
 test('getEndowmentsForConfig - getter', (t) => {
-  const { getEndowmentsForConfig } = makeGetEndowmentsForConfig()
+  const getEndowmentsForConfig = prepareTest()
   const sourceGlobal = { get abc () { return { xyz: 42 } } }
   const config = {
     globals: {
@@ -74,7 +80,7 @@ test('getEndowmentsForConfig - getter', (t) => {
 test('getEndowmentsForConfig - ensure window.document getter behavior support', (t) => {
   'use strict'
   // compartment.globalThis.document would error because 'this' value is not window
-  const { getEndowmentsForConfig } = makeGetEndowmentsForConfig()
+  const getEndowmentsForConfig = prepareTest()
   const sourceGlobal = {
     get xyz() {
       return this
@@ -100,7 +106,7 @@ test('getEndowmentsForConfig - specify unwrap to', (t) => {
   'use strict'
   // compartment.globalThis.document would error because 'this' value is not window
   const unwrapTo = {}
-  const { getEndowmentsForConfig } = makeGetEndowmentsForConfig()
+  const getEndowmentsForConfig = prepareTest()
   const sourceGlobal = {
     get xyz() {
       return this
@@ -127,7 +133,7 @@ test('getEndowmentsForConfig - specify unwrap from, unwrap to', (t) => {
   // compartment.globalThis.document would error because 'this' value is not window
   const unwrapTo = {}
   const unwrapFrom = {}
-  const { getEndowmentsForConfig } = makeGetEndowmentsForConfig()
+  const getEndowmentsForConfig = prepareTest()
   const sourceGlobal = {
     get xyz() {
       return this
@@ -152,7 +158,7 @@ test('getEndowmentsForConfig - specify unwrap from, unwrap to', (t) => {
 
 test('getEndowmentsForConfig - endowing bind of a function', async (t) => {
   'use strict'
-  const { getEndowmentsForConfig } = makeGetEndowmentsForConfig()
+  const getEndowmentsForConfig = prepareTest()
   const sourceGlobal = {
     abc: function () { return this }
   }
@@ -176,7 +182,7 @@ test('getEndowmentsForConfig - endowing bind of a function', async (t) => {
 test('getEndowmentsForConfig - ensure setTimeout calls dont trigger illegal invocation', (t) => {
   'use strict'
   // compartment.globalThis.document would error because 'this' value is not window
-  const { getEndowmentsForConfig } = makeGetEndowmentsForConfig()
+  const getEndowmentsForConfig = prepareTest()
   const sourceGlobal = {
     setTimeout () { return this }
   }

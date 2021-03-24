@@ -1,5 +1,4 @@
 const test = require('ava')
-const makeGetEndowmentsForConfig = require('../src/makeGetEndowmentsForConfig.js')
 const {
   createScenarioFromScaffold,
   runScenario
