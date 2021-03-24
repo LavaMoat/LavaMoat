@@ -377,6 +377,14 @@
         "xtend": true
       }
     },
+    "is-core-module": {
+      "globals": {
+        "process.versions": true
+      },
+      "packages": {
+        "has": true
+      }
+    },
     "is-plain-object": {
       "packages": {
         "isobject": true
@@ -593,6 +601,7 @@
         "process.versions": true
       },
       "packages": {
+        "is-core-module": true,
         "path-parse": true
       }
     },

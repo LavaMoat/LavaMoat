@@ -218,7 +218,15 @@ function createHookedConsole () {
 } 
 
 async function runScenario ({ scenario }) {
-  const { entries, files, config, configOverride, builtin, kernelArgs = {} } = scenario
+  const {
+    entries,
+    files,
+    config,
+    configOverride,
+    builtin,
+    kernelArgs = {},
+    beforeCreateKernel = () => {}
+} = scenario
   const lavamoatConfig = mergeDeep(config, configOverride)
   const kernelSrc = generateKernel()
   const { hookedConsole, firstLogEventPromise } = createHookedConsole()
@@ -227,6 +235,9 @@ async function runScenario ({ scenario }) {
   //root global for test realm
   scenario.globalThis = vmGlobalThis
   scenario.vmContext = vmContext
+  // call hook before kernel is created
+  beforeCreateKernel(scenario)
+  // create kernel
   const kernel = createKernel({
     lavamoatConfig,
     loadModuleData: (id) => {
