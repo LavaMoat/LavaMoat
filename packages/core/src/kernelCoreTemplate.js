@@ -242,10 +242,11 @@
       const rootPackageCompartment = new Compartment({ Math, Date })
       // find the relevant endowment sources
       const globalProtoChain = getPrototypeChain(globalRef)
-      // this is usually just the index for Object.prototype
-      const commonPrototypeIndex = globalProtoChain.findIndex(globalProtoChainEntry => globalProtoChainEntry.constructor && rootPackageCompartment instanceof globalProtoChainEntry.constructor)
+      // the index for the common prototypal ancestor, Object.prototype
+      // this should always be the last index, but we check just in case
+      const commonPrototypeIndex = globalProtoChain.findIndex(globalProtoChainEntry => globalProtoChainEntry === Object.prototype)
       if (commonPrototypeIndex === -1) throw new Error('Lavamoat - unable to find common prototype between Compartment and globalRef')
-      // everything up to but not including the common prototypal ancestor (likely Object.prototype)
+      // we will copy endowments from all entries in the prototype chain, excluding Object.prototype
       const endowmentSources = globalProtoChain.slice(0, commonPrototypeIndex)
       const endowmentSourceDescriptors = endowmentSources.map(globalProtoChainEntry => Object.getOwnPropertyDescriptors(globalProtoChainEntry))
       // flatten propDesc collections with precedence for globalThis-end of the prototype chain
