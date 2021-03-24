@@ -7,7 +7,7 @@ module.exports = makeGetEndowmentsForConfig
 // The config uses a period-deliminated path notation to pull out deep values from objects
 // These utilities help create an object populated with only the deep properties specified in the config
 
-function makeGetEndowmentsForConfig () {
+function makeGetEndowmentsForConfig ({ createFunctionWrapper }) {
   return {
     getEndowmentsForConfig,
     makeMinimalViewOfRef,
@@ -208,22 +208,6 @@ function makeGetEndowmentsForConfig () {
     }
     const newFn = createFunctionWrapper(propDesc.value, unwrapTest, targetGlobalThis)
     return { ...propDesc, value: newFn }
-  }
-
-  function createFunctionWrapper (sourceValue, unwrapTest, unwrapTo) {
-    const newValue = function (...args) {
-      if (new.target) {
-        // handle constructor calls
-        return Reflect.construct(sourceValue, args, new.target)
-      } else {
-        // handle function calls
-        // unwrap to target value if this value is the source package compartment's globalThis, or if there are any known scope proxies on the source package compartment
-        const thisRef = unwrapTest(this) ? unwrapTo : this
-        return Reflect.apply(sourceValue, thisRef, args)
-      }
-    }
-    Object.defineProperties(newValue, Object.getOwnPropertyDescriptors(sourceValue))
-    return newValue
   }
 }
 

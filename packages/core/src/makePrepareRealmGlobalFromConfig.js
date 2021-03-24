@@ -7,7 +7,7 @@ module.exports = makePrepareRealmGlobalFromConfig
 // The config uses a period-deliminated path notation to pull out deep values from objects
 // These utilities help modify the container global to expose the allowed globals from the globalStore OR the platform global
 
-function makePrepareRealmGlobalFromConfig () {
+function makePrepareRealmGlobalFromConfig ({ createFunctionWrapper }) {
   return {
     prepareCompartmentGlobalFromConfig,
     getTopLevelReadAccessFromPackageConfig,
@@ -86,7 +86,9 @@ function makePrepareRealmGlobalFromConfig () {
     // legacy globalThis shim
     const origFunction = packageCompartmentGlobal.Function
     const newFunction = function (...args) {
-      return origFunction(...args).bind(packageCompartmentGlobal)
+      const fn = origFunction(...args)
+      const unwrapTest = thisValue => thisValue === undefined
+      return createFunctionWrapper(fn, unwrapTest, packageCompartmentGlobal)
     }
     Object.defineProperties(newFunction, Object.getOwnPropertyDescriptors(origFunction))
     packageCompartmentGlobal.Function = newFunction
