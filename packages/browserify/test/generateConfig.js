@@ -106,3 +106,28 @@ test('generateConfig - policy ignores global refs accessed with whitelist items'
     resources: {}
   })
 })
+
+test.only('generateConfig - policy endows "process" properly', async (t) => {
+  const scenario = createScenarioFromScaffold({
+    defineOne: () => {
+      const x = process.nextTick
+    },
+    defaultPolicy: false
+  })
+  const policy = await autoConfigForScenario({ scenario })
+  t.deepEqual(policy, {
+    resources: {
+      one: {
+        packages: {
+          process: true
+        }
+      },
+      process: {
+        globals: {
+          clearTimeout: true,
+          setTimeout: true
+        }
+      }
+    }
+  })
+})

@@ -198,7 +198,7 @@ problems:
 - [x] native module policy
 - [x] native module auto config
 - [x] deterministic policy file (node?)
-- [x] cleanup violations warning "Incomptabile code detected in package "browserify"
+- [x] cleanup violations warning "Incompatible code detected in package "browserify"
 - [ ] update all example and test repo configs
 
 

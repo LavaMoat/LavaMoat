@@ -141,7 +141,7 @@ function createModuleInspector (opts = {}) {
           strictModeViolations: strictModeViolations.map(({ node }) => codeSampleFromAstNode(node, moduleRecord)),
           dynamicRequires: dynamicRequires.map(({ node }) => codeSampleFromAstNode(node, moduleRecord))
         })
-        const errMsg = `Incomptabile code detected in package "${packageName}" file "${moduleRecord.file}". Violations:\n${samples}`
+        const errMsg = `Incompatible code detected in package "${packageName}" file "${moduleRecord.file}". Violations:\n${samples}`
         console.warn(errMsg)
       }
     }
