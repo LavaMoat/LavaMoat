@@ -2,9 +2,9 @@
   "name": "lavamoat-viz",
   "description": "This is a dashboard for exploring a dependency graph and LavaMoat policy file",
   "main": "index.js",
-  "version": "6.0.7",
+  "version": "6.0.8",
   "dependencies": {
-    "lavamoat-core": "^9.1.3",
+    "lavamoat-core": "^10.0.0",
     "ncp": "^2.0.0",
     "open": "^7.0.3",
     "pify": "^4.0.1",
