@@ -107,7 +107,7 @@ test('generateConfig - policy ignores global refs accessed with whitelist items'
   })
 })
 
-test.only('generateConfig - policy endows "process" properly', async (t) => {
+test('generateConfig - policy endows "process" properly', async (t) => {
   const scenario = createScenarioFromScaffold({
     defineOne: () => {
       const x = process.nextTick
