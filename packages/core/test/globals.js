@@ -206,3 +206,65 @@ test('globals - endowing properties on the globalThis prototype chain', async (t
   const testResult = await runScenario({ scenario })
   t.is(testResult, 123, 'expected result, did not error')
 })
+
+test('globals - firefox code works in the wild', async (t) => {
+  'use strict'
+  const scenario = createScenarioFromScaffold({
+    defineOne: () => {
+      let testResult = chrome
+      testResult = chrome
+      module.exports = testResult
+    },
+    // define lazy getter on chrome
+    beforeCreateKernel: ({ globalThis }) => {
+      function exportLazyGetter(object, prop, getter) {
+        let redefine = value => {
+          if (value === undefined) {
+            delete object[prop];
+          } else {
+            Object.defineProperty(object, prop, {
+              enumerable: true,
+              configurable: true,
+              writable: true,
+              value,
+            });
+          }
+
+          getter = null;
+
+          return value;
+        };
+
+        Object.defineProperty(object, prop, {
+          enumerable: true,
+          configurable: true,
+
+          get: function() {
+            return redefine(getter.call(this));
+          },
+
+          set: function(value) {
+            redefine(value);
+          }
+        });
+      }
+      exportLazyGetter(globalThis, 'chrome', () => 'xyz')
+    },
+    config: {
+      resources: {
+        one: {
+          globals: {
+            'chrome': true
+          }
+        },
+      }
+    },
+    context: {
+      chrome: {
+        runtime: 'xyz'
+      }
+    }
+  })
+  const testResult = await runScenario({ scenario })
+  t.is(testResult, 'xyz', 'expected result, did not error')
+})
