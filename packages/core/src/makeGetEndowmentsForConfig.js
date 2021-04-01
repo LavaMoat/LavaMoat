@@ -157,43 +157,26 @@ function makeGetEndowmentsForConfig ({ createFunctionWrapper }) {
     }
   }
 
-  function applyEndowmentPropDescTransforms (propDesc, sourceCompartment, targetGlobalThis, key, propDescCache) {
+  function applyEndowmentPropDescTransforms (propDesc, sourceCompartment, targetGlobalThis, key, propDescCache, isRoot) {
     let newPropDesc = propDesc
     newPropDesc = applyFunctionPropDescTransform(newPropDesc, sourceCompartment, targetGlobalThis)
-    newPropDesc = applyGetSetPropDescTransforms(newPropDesc, sourceCompartment.globalThis, targetGlobalThis, key, propDescCache)
+    newPropDesc = applyGetSetPropDescTransforms(newPropDesc, sourceCompartment.globalThis, targetGlobalThis, key, propDescCache, isRoot)
     return newPropDesc
   }
 
-  function applyGetSetPropDescTransforms (sourcePropDesc, sourceGlobal, targetGlobal, key, propDescCache) {
+  function applyGetSetPropDescTransforms (sourcePropDesc, sourceGlobal, targetGlobal, key, propDescCache, isRoot) {
     const wrappedPropDesc = { ...sourcePropDesc }
     if (sourcePropDesc.get) {
-      // const oldPropDesc = Reflect.getOwnPropertyDescriptor(targetGlobal, key)
-      // console.warn(sourcePropDesc)
-      // let res = Reflect.apply(sourcePropDesc.get, this, [])
-      // const newPropDesc = Reflect.getOwnPropertyDescriptor(targetGlobal, key)
-      // console.warn(sourcePropDesc)
       wrappedPropDesc.get = function () {
         const receiver = this
         // replace the "receiver" value if it points to fake parent
         const receiverRef = receiver === sourceGlobal ? targetGlobal : receiver
-        const oldPropDesc = Reflect.getOwnPropertyDescriptor(targetGlobal, key)
-        let newPropDesc
-        if (propDescCache && !propDescCache.has('newPropDesc')) {
-          newPropDesc = oldPropDesc
-        } else if (propDescCache) {
-          newPropDesc = propDescCache.get('newPropDesc')
-        }
+        const desc = Reflect.getOwnPropertyDescriptor(targetGlobal, 'chrome')
         let result
-        if (oldPropDesc === newPropDesc) {
+        if ('get' in desc) {
           result = Reflect.apply(sourcePropDesc.get, receiverRef, [])
-          propDescCache.set('newPropDesc', Reflect.getOwnPropertyDescriptor(targetGlobal, key))
         } else {
-          const propDesc = Reflect.getOwnPropertyDescriptor(targetGlobal, key)
-          if ('get' in propDesc) {
-            result = Reflect.apply(propDesc.get, receiverRef, [])
-          } else {
-            result = propDesc.value
-          }
+          result = Reflect.getOwnPropertyDescriptor(targetGlobal, 'chrome').value
         }
         if (typeof result === 'function') {
           // functions must be wrapped to ensure a good this-value.

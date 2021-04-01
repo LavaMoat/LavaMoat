@@ -56,7 +56,6 @@
     const moduleCache = new Map()
     const packageCompartmentCache = new Map()
     const globalStore = new Map()
-    const propDescCache = new Map()
 
     const rootPackageName = '<root>'
     const rootPackageCompartment = createRootPackageCompartment(globalRef)
@@ -261,7 +260,7 @@
         // define property on compartment global
         .forEach(([key, desc]) => {
           // unwrap functions, setters/getters & apply scope proxy workaround
-          const wrappedPropDesc = applyEndowmentPropDescTransforms(desc, rootPackageCompartment, globalRef, key, propDescCache)
+          const wrappedPropDesc = applyEndowmentPropDescTransforms(desc, rootPackageCompartment, globalRef)
           Reflect.defineProperty(rootPackageCompartment.globalThis, key, wrappedPropDesc)
         })
       // global circular references otherwise added by prepareCompartmentGlobalFromConfig
@@ -320,7 +319,7 @@
         // ignore non-configurable properties because we are modifying endowments in place
         .filter(([key, propDesc]) => propDesc.configurable)
         .forEach(([key, propDesc]) => {
-          const wrappedPropDesc = applyEndowmentPropDescTransforms(propDesc, packageCompartment, rootPackageCompartment.globalThis, key, propDescCache)
+          const wrappedPropDesc = applyEndowmentPropDescTransforms(propDesc, packageCompartment, rootPackageCompartment.globalThis)
           Reflect.defineProperty(endowments, key, wrappedPropDesc)
         })
 
