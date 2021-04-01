@@ -207,11 +207,11 @@ test('globals - endowing properties on the globalThis prototype chain', async (t
   t.is(testResult, 123, 'expected result, did not error')
 })
 
-test('globals - firefox code works in the wild', async (t) => {
+test.only('globals - firefox code works in the wild', async (t) => {
   'use strict'
   const scenario = createScenarioFromScaffold({
     defineOne: () => {
-      let testResult = chrome
+      let testResult = typeof chrome !== 'undefined'
       testResult = chrome
       module.exports = testResult
     },
