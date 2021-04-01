@@ -207,7 +207,7 @@ test('globals - endowing properties on the globalThis prototype chain', async (t
   t.is(testResult, 123, 'expected result, did not error')
 })
 
-test.only('globals - firefox code works in the wild', async (t) => {
+test('globals - firefox code works in the wild', async (t) => {
   'use strict'
   const scenario = createScenarioFromScaffold({
     defineOne: () => {

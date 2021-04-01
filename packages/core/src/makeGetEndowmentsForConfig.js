@@ -114,7 +114,7 @@ function makeGetEndowmentsForConfig ({ createFunctionWrapper }) {
     // if has getter/setter - apply this-value unwrapping
     if (!('value' in sourcePropDesc)) {
       // wrapper setter/getter with correct receiver
-      const wrapperPropDesc = applyGetSetPropDescTransforms(sourcePropDesc, unwrapFrom, unwrapTo)
+      const wrapperPropDesc = applyGetSetPropDescTransforms(sourcePropDesc, nextPart, unwrapFrom, unwrapTo)
       Reflect.defineProperty(targetRef, nextPart, wrapperPropDesc)
       return
     }
@@ -157,27 +157,32 @@ function makeGetEndowmentsForConfig ({ createFunctionWrapper }) {
     }
   }
 
-  function applyEndowmentPropDescTransforms (propDesc, sourceCompartment, targetGlobalThis) {
+  function applyEndowmentPropDescTransforms (propDesc, key, sourceCompartment, targetGlobalThis) {
     let newPropDesc = propDesc
     newPropDesc = applyFunctionPropDescTransform(newPropDesc, sourceCompartment, targetGlobalThis)
-    newPropDesc = applyGetSetPropDescTransforms(newPropDesc, sourceCompartment.globalThis, targetGlobalThis)
+    newPropDesc = applyGetSetPropDescTransforms(newPropDesc, key, sourceCompartment.globalThis, targetGlobalThis)
     return newPropDesc
   }
 
-  function applyGetSetPropDescTransforms (sourcePropDesc, sourceGlobal, targetGlobal) {
+  function applyGetSetPropDescTransforms (sourcePropDesc, key, sourceGlobal, targetGlobal) {
     const wrappedPropDesc = { ...sourcePropDesc }
     if (sourcePropDesc.get) {
       wrappedPropDesc.get = function () {
         const receiver = this
         // replace the "receiver" value if it points to fake parent
         const receiverRef = receiver === sourceGlobal ? targetGlobal : receiver
-        const desc = Reflect.getOwnPropertyDescriptor(targetGlobal, 'chrome')
+        // sometimes getters replace themselves with static properties, as seen wih the FireFox runtime
+        let desc = Reflect.getOwnPropertyDescriptor(targetGlobal, key)
+        if (desc === undefined) {
+          desc = Reflect.getOwnPropertyDescriptor(sourceGlobal, key)
+        }
         let result
         if ('get' in desc) {
           result = Reflect.apply(sourcePropDesc.get, receiverRef, [])
         } else {
-          result = Reflect.getOwnPropertyDescriptor(targetGlobal, 'chrome').value
+          result = Reflect.getOwnPropertyDescriptor(targetGlobal, key).value
         }
+        // let result = Reflect.get(sourceGlobal, key, receiverRef)
         if (typeof result === 'function') {
           // functions must be wrapped to ensure a good this-value.
           // lockdown causes some propDescs to go to value -> getter,
