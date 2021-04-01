@@ -157,14 +157,14 @@ function makeGetEndowmentsForConfig ({ createFunctionWrapper }) {
     }
   }
 
-  function applyEndowmentPropDescTransforms (propDesc, sourceCompartment, targetGlobalThis, key, propDescCache, isRoot) {
+  function applyEndowmentPropDescTransforms (propDesc, sourceCompartment, targetGlobalThis) {
     let newPropDesc = propDesc
     newPropDesc = applyFunctionPropDescTransform(newPropDesc, sourceCompartment, targetGlobalThis)
-    newPropDesc = applyGetSetPropDescTransforms(newPropDesc, sourceCompartment.globalThis, targetGlobalThis, key, propDescCache, isRoot)
+    newPropDesc = applyGetSetPropDescTransforms(newPropDesc, sourceCompartment.globalThis, targetGlobalThis)
     return newPropDesc
   }
 
-  function applyGetSetPropDescTransforms (sourcePropDesc, sourceGlobal, targetGlobal, key, propDescCache, isRoot) {
+  function applyGetSetPropDescTransforms (sourcePropDesc, sourceGlobal, targetGlobal) {
     const wrappedPropDesc = { ...sourcePropDesc }
     if (sourcePropDesc.get) {
       wrappedPropDesc.get = function () {
