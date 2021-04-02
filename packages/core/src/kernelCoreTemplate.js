@@ -307,7 +307,7 @@
           // policy
           packagePolicy,
           // unwrap to
-          globalRef,
+          rootPackageCompartment.globalThis,
           // unwrap from
           packageCompartment.globalThis
         )
