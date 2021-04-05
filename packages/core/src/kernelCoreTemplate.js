@@ -272,7 +272,7 @@
         // define property on compartment global
         .forEach(([key, desc]) => {
           // unwrap functions, setters/getters & apply scope proxy workaround
-          const wrappedPropDesc = applyEndowmentPropDescTransforms(desc, key, rootPackageCompartment, globalRef)
+          const wrappedPropDesc = applyEndowmentPropDescTransforms(desc, rootPackageCompartment, globalRef)
           Reflect.defineProperty(rootPackageCompartment.globalThis, key, wrappedPropDesc)
         })
       // global circular references otherwise added by prepareCompartmentGlobalFromConfig
@@ -331,7 +331,7 @@
         // ignore non-configurable properties because we are modifying endowments in place
         .filter(([key, propDesc]) => propDesc.configurable)
         .forEach(([key, propDesc]) => {
-          const wrappedPropDesc = applyEndowmentPropDescTransforms(propDesc, key, packageCompartment, rootPackageCompartment.globalThis)
+          const wrappedPropDesc = applyEndowmentPropDescTransforms(propDesc, packageCompartment, rootPackageCompartment.globalThis)
           Reflect.defineProperty(endowments, key, wrappedPropDesc)
         })
 

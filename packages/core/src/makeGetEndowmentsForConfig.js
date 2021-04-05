@@ -114,7 +114,7 @@ function makeGetEndowmentsForConfig ({ createFunctionWrapper }) {
     // if has getter/setter - apply this-value unwrapping
     if (!('value' in sourcePropDesc)) {
       // wrapper setter/getter with correct receiver
-      const wrapperPropDesc = applyGetSetPropDescTransforms(sourcePropDesc, nextPart, unwrapFrom, unwrapTo)
+      const wrapperPropDesc = applyGetSetPropDescTransforms(sourcePropDesc, unwrapFrom, unwrapTo)
       Reflect.defineProperty(targetRef, nextPart, wrapperPropDesc)
       return
     }
@@ -157,14 +157,14 @@ function makeGetEndowmentsForConfig ({ createFunctionWrapper }) {
     }
   }
 
-  function applyEndowmentPropDescTransforms (propDesc, key, unwrapFromCompartment, unwrapToGlobalThis) {
+  function applyEndowmentPropDescTransforms (propDesc, unwrapFromCompartment, unwrapToGlobalThis) {
     let newPropDesc = propDesc
     newPropDesc = applyFunctionPropDescTransform(newPropDesc, unwrapFromCompartment, unwrapToGlobalThis)
-    newPropDesc = applyGetSetPropDescTransforms(newPropDesc, key, unwrapFromCompartment.globalThis, unwrapToGlobalThis)
+    newPropDesc = applyGetSetPropDescTransforms(newPropDesc, unwrapFromCompartment.globalThis, unwrapToGlobalThis)
     return newPropDesc
   }
 
-  function applyGetSetPropDescTransforms (sourcePropDesc, key, unwrapFromGlobalThis, unwrapToGlobalThis) {
+  function applyGetSetPropDescTransforms (sourcePropDesc, unwrapFromGlobalThis, unwrapToGlobalThis) {
     const wrappedPropDesc = { ...sourcePropDesc }
     if (sourcePropDesc.get) {
       wrappedPropDesc.get = function () {
