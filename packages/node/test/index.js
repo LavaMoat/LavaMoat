@@ -96,7 +96,6 @@ test('execute - resolutions', async (t) => {
     cwd: projectRoot,
     args: [entryId]
   })
-  t.is(output.stderr, '', 'should not have any error output')
   t.deepEqual(output.stdout.split('\n'), [
     'fake-fs called',
     'value: 42',
@@ -111,7 +110,6 @@ test('execute - keccak with native modules', async (t) => {
     cwd: projectRoot,
     args: [entryId]
   })
-  t.is(output.stderr, '', 'should not have any error output')
   t.deepEqual(output.stdout.split('\n'), [
     'keccak256: 5cad7cf49f610ec53189e06d3c8668789441235613408f8fabcb4ad8dad94db5',
     ''
@@ -125,7 +123,6 @@ test('execute - core modules and buffers', async (t) => {
     cwd: projectRoot,
     args: [entryId]
   })
-  t.is(output.stderr, '', 'should not have any error output')
   t.deepEqual(output.stdout.split('\n'), [
     'sha256: fb1520a08f1bc43831d0000dc76f6b0f027bafd36c55b1f43fc54c60c2f831da',
     ''
