@@ -249,12 +249,12 @@
       // we will copy endowments from all entries in the prototype chain, excluding Object.prototype
       const endowmentSources = globalProtoChain.slice(0, commonPrototypeIndex)
 
+      // call all getters, in case of behavior change (such as with FireFox lazy getters)
+      // call on contents of endowmentsSources directly instead of in new array instances. If there is a lazy getter it only changes the original prop desc.
       endowmentSources.forEach(source => {
         const descriptors = Object.getOwnPropertyDescriptors(source)
         Object.values(descriptors).forEach(desc => {
           if ('get' in desc) {
-            // call all getters, in case of behavior change (such as with FireFox lazy getters)
-            // call on contents of endowmentsSources directly instead of in new array instances. If there is a lazy getter it only changes the original prop desc.
             Reflect.apply(desc.get, globalRef, [])
           }
         })
