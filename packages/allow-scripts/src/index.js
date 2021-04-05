@@ -118,14 +118,6 @@ async function setDefaultConfiguration ({ rootDir }) {
     })
   }
 
-  if (excessPolicies.length) {
-    console.log('\nremoving unneeded configuration for packages:')
-    excessPolicies.forEach(pattern => {
-      console.log(`- ${pattern}`)
-      delete allowScriptsConfig[pattern]
-    })
-  }
-
   // update package json
   if (!packageJson.lavamoat) packageJson.lavamoat = {}
   packageJson.lavamoat.allowScripts = allowScriptsConfig
