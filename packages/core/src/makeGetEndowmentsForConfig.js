@@ -157,32 +157,22 @@ function makeGetEndowmentsForConfig ({ createFunctionWrapper }) {
     }
   }
 
-  function applyEndowmentPropDescTransforms (propDesc, key, sourceCompartment, targetGlobalThis) {
+  function applyEndowmentPropDescTransforms (propDesc, key, unwrapFromCompartment, unwrapToGlobalThis) {
     let newPropDesc = propDesc
-    newPropDesc = applyFunctionPropDescTransform(newPropDesc, sourceCompartment, targetGlobalThis)
-    newPropDesc = applyGetSetPropDescTransforms(newPropDesc, key, sourceCompartment.globalThis, targetGlobalThis)
+    newPropDesc = applyFunctionPropDescTransform(newPropDesc, unwrapFromCompartment, unwrapToGlobalThis)
+    newPropDesc = applyGetSetPropDescTransforms(newPropDesc, key, unwrapFromCompartment.globalThis, unwrapToGlobalThis)
     return newPropDesc
   }
 
-  function applyGetSetPropDescTransforms (sourcePropDesc, key, sourceGlobal, targetGlobal) {
+  function applyGetSetPropDescTransforms (sourcePropDesc, key, unwrapFromGlobalThis, unwrapToGlobalThis) {
     const wrappedPropDesc = { ...sourcePropDesc }
     if (sourcePropDesc.get) {
       wrappedPropDesc.get = function () {
         const receiver = this
         // replace the "receiver" value if it points to fake parent
-        const receiverRef = receiver === sourceGlobal ? targetGlobal : receiver
+        const receiverRef = receiver === unwrapFromGlobalThis ? unwrapToGlobalThis : receiver
         // sometimes getters replace themselves with static properties, as seen wih the FireFox runtime
-        let desc = Reflect.getOwnPropertyDescriptor(targetGlobal, key)
-        if (desc === undefined) {
-          desc = Reflect.getOwnPropertyDescriptor(sourceGlobal, key)
-        }
-        let result
-        if ('get' in desc) {
-          result = Reflect.apply(sourcePropDesc.get, receiverRef, [])
-        } else {
-          result = Reflect.getOwnPropertyDescriptor(targetGlobal, key).value
-        }
-        // let result = Reflect.get(sourceGlobal, key, receiverRef)
+        const result = Reflect.apply(sourcePropDesc.get, receiverRef, [])
         if (typeof result === 'function') {
           // functions must be wrapped to ensure a good this-value.
           // lockdown causes some propDescs to go to value -> getter,
@@ -190,7 +180,7 @@ function makeGetEndowmentsForConfig ({ createFunctionWrapper }) {
           // as well in order to ensure they have their this-value wrapped correctly
           // if this ends up being problematic we can maybe take advantage of lockdown's
           // "getter.originalValue" property being available
-          return createFunctionWrapper(result, (thisValue) => thisValue === sourceGlobal, targetGlobal)
+          return createFunctionWrapper(result, (thisValue) => thisValue === unwrapFromGlobalThis, unwrapToGlobalThis)
         } else {
           return result
         }
@@ -200,24 +190,24 @@ function makeGetEndowmentsForConfig ({ createFunctionWrapper }) {
       wrappedPropDesc.set = function (value) {
         // replace the "receiver" value if it points to fake parent
         const receiver = this
-        const receiverRef = receiver === sourceGlobal ? targetGlobal : receiver
+        const receiverRef = receiver === unwrapFromGlobalThis ? unwrapToGlobalThis : receiver
         return Reflect.apply(sourcePropDesc.set, receiverRef, [value])
       }
     }
     return wrappedPropDesc
   }
 
-  function applyFunctionPropDescTransform (propDesc, sourceCompartment, targetGlobalThis) {
+  function applyFunctionPropDescTransform (propDesc, unwrapFromCompartment, unwrapToGlobalThis) {
     if (!('value' in propDesc && typeof propDesc.value === 'function')) {
       return propDesc
     }
     const unwrapTest = (thisValue) => {
-      // unwrap function calls this-value to targetGlobalThis when:
+      // unwrap function calls this-value to unwrapToGlobalThis when:
       // this value is globalThis ex. globalThis.abc()
       // scope proxy leak workaround ex. abc()
-      return thisValue === sourceCompartment.globalThis || sourceCompartment.__isKnownScopeProxy__(thisValue)
+      return thisValue === unwrapFromCompartment.globalThis || unwrapFromCompartment.__isKnownScopeProxy__(thisValue)
     }
-    const newFn = createFunctionWrapper(propDesc.value, unwrapTest, targetGlobalThis)
+    const newFn = createFunctionWrapper(propDesc.value, unwrapTest, unwrapToGlobalThis)
     return { ...propDesc, value: newFn }
   }
 }
