@@ -15,7 +15,10 @@ test('globals - ensure global property this-value unwrapped', async (t) => {
     },
     context: {
       get xyz() {
-        return (this === scenario.globalThis)
+        // node vm weird, sometimes calls with vm context instead of vm global this
+        // debugger
+
+        return (this === scenario.globalThis || this === scenario.vmContext)
       }
     },
     config: {
@@ -90,11 +93,6 @@ test('globals - ensure circular refs on package compartment global', async (t) =
     defineEntry: () => {
       const testResult = xyz === globalThis
       console.log(JSON.stringify(testResult, null, 2))
-    },
-    context: {
-      get xyz() {
-        throw new TypeError('xyz getter should not be accessed')
-      }
     },
     kernelArgs: {
       globalThisRefs: ['xyz', 'globalThis']
