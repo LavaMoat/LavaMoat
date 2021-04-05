@@ -205,7 +205,7 @@ test('globals - endowing properties on the globalThis prototype chain', async (t
   t.is(testResult, 123, 'expected result, did not error')
 })
 
-test('globals - firefox code works in the wild', async (t) => {
+test('globals - firefox addon chrome api lazy getter works', async (t) => {
   'use strict'
   const scenario = createScenarioFromScaffold({
     defineOne: () => {
