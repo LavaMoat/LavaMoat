@@ -15,7 +15,10 @@ test('globals - ensure global property this-value unwrapped', async (t) => {
     },
     context: {
       get xyz() {
-        return (this === scenario.globalThis)
+        // node vm weird, sometimes calls with vm context instead of vm global this
+        // debugger
+
+        return (this === scenario.globalThis || this === scenario.vmContext)
       }
     },
     config: {
@@ -90,11 +93,6 @@ test('globals - ensure circular refs on package compartment global', async (t) =
     defineEntry: () => {
       const testResult = xyz === globalThis
       console.log(JSON.stringify(testResult, null, 2))
-    },
-    context: {
-      get xyz() {
-        throw new TypeError('xyz getter should not be accessed')
-      }
     },
     kernelArgs: {
       globalThisRefs: ['xyz', 'globalThis']
@@ -205,4 +203,66 @@ test('globals - endowing properties on the globalThis prototype chain', async (t
   })
   const testResult = await runScenario({ scenario })
   t.is(testResult, 123, 'expected result, did not error')
+})
+
+test('globals - firefox addon chrome api lazy getter works', async (t) => {
+  'use strict'
+  const scenario = createScenarioFromScaffold({
+    defineOne: () => {
+      let testResult = typeof chrome !== 'undefined'
+      testResult = chrome
+      module.exports = testResult
+    },
+    // define lazy getter on chrome
+    beforeCreateKernel: ({ globalThis }) => {
+      function exportLazyGetter(object, prop, getter) {
+        let redefine = value => {
+          if (value === undefined) {
+            delete object[prop];
+          } else {
+            Object.defineProperty(object, prop, {
+              enumerable: true,
+              configurable: true,
+              writable: true,
+              value,
+            });
+          }
+
+          getter = null;
+
+          return value;
+        };
+
+        Object.defineProperty(object, prop, {
+          enumerable: true,
+          configurable: true,
+
+          get: function() {
+            return redefine(getter.call(this));
+          },
+
+          set: function(value) {
+            redefine(value);
+          }
+        });
+      }
+      exportLazyGetter(globalThis, 'chrome', () => 'xyz')
+    },
+    config: {
+      resources: {
+        one: {
+          globals: {
+            'chrome': true
+          }
+        },
+      }
+    },
+    context: {
+      chrome: {
+        runtime: 'xyz'
+      }
+    }
+  })
+  const testResult = await runScenario({ scenario })
+  t.is(testResult, 'xyz', 'expected result, did not error')
 })
