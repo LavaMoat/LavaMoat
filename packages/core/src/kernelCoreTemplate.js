@@ -248,6 +248,18 @@
       if (commonPrototypeIndex === -1) throw new Error('Lavamoat - unable to find common prototype between Compartment and globalRef')
       // we will copy endowments from all entries in the prototype chain, excluding Object.prototype
       const endowmentSources = globalProtoChain.slice(0, commonPrototypeIndex)
+
+      // call all getters, in case of behavior change (such as with FireFox lazy getters)
+      // call on contents of endowmentsSources directly instead of in new array instances. If there is a lazy getter it only changes the original prop desc.
+      endowmentSources.forEach(source => {
+        const descriptors = Object.getOwnPropertyDescriptors(source)
+        Object.values(descriptors).forEach(desc => {
+          if ('get' in desc) {
+            Reflect.apply(desc.get, globalRef, [])
+          }
+        })
+      })
+
       const endowmentSourceDescriptors = endowmentSources.map(globalProtoChainEntry => Object.getOwnPropertyDescriptors(globalProtoChainEntry))
       // flatten propDesc collections with precedence for globalThis-end of the prototype chain
       const endowmentDescriptorsFlat = Object.assign(Object.create(null), ...endowmentSourceDescriptors.reverse())
@@ -263,7 +275,6 @@
           const wrappedPropDesc = applyEndowmentPropDescTransforms(desc, rootPackageCompartment, globalRef)
           Reflect.defineProperty(rootPackageCompartment.globalThis, key, wrappedPropDesc)
         })
-
       // global circular references otherwise added by prepareCompartmentGlobalFromConfig
       // Add all circular refs to root package compartment globalThis
       for (const ref of globalThisRefs) {
@@ -297,7 +308,6 @@
         // - Date is for untamed Date.now
         packageCompartment = new Compartment({ Math, Date })
       }
-
       // prepare endowments
       let endowments
       try {
