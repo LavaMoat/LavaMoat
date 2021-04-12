@@ -262,7 +262,7 @@ function parseModule (moduleSrc, filename = '<unknown file>') {
 function displayRichCompatWarning ({ moduleRecord, compatWarnings }) {
   const { packageName, file } = moduleRecord
   const { primordialMutations, strictModeViolations, dynamicRequires } = compatWarnings
-  console.warn(`⚠️  Potentially incomptabile code detected in package "${packageName}" file "${file}":`)
+  console.warn(`⚠️  Potentially Incompatible code detected in package "${packageName}" file "${file}":`)
   logWarnings('primordial mutation', primordialMutations)
   logWarnings('dynamic require', dynamicRequires)
   logErrors('strict mode violation', strictModeViolations)
