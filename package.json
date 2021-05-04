@@ -13,7 +13,7 @@
     "tap-spec": "^5.0.0"
   },
   "scripts": {
-    "test": "lerna run test --ignore=webpack",
+    "test": "lerna run test --ignore=lavamoat-webpack",
     "lint": "lerna run lint",
     "lint:fix": "lerna run lint:fix",
     "publish": "lerna publish from-package --no-push --no-git-tag-version --yes",
