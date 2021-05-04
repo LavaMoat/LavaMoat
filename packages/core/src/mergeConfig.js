@@ -1,9 +1,9 @@
 const { reduceToTopmostApiCalls, objToMap, mapToObj } = require('lavamoat-tofu/src/util')
 const mergeDeep = require('merge-deep')
 
-module.exports = { mergeConfig }
+module.exports = { mergePolicy }
 
-function mergeConfig (configA, configB) {
+function mergePolicy (configA, configB) {
   const mergedConfig = mergeDeep(configA, configB)
   Object.values(mergedConfig.resources).forEach((packageConfig) => {
     if ('globals' in packageConfig) {

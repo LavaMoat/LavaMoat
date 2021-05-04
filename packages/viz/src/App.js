@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import './css/App.css'
 import './css/DepGraph.css'
-import * as mergeConfig from './merge-deep.js'
+import * as mergePolicy from './merge-deep.js'
 import Nav from './views/nav.js'
 
 
@@ -14,7 +14,7 @@ const { LavamoatPolicies } = globalThis
 for (const [policyName, policyData] of Object.entries(LavamoatPolicies)) {
   if (!policyData.final) {
     if (policyData.override) {
-      policyData.final = mergeConfig(policyData.primary, policyData.override)
+      policyData.final = mergePolicy(policyData.primary, policyData.override)
     } else {
       policyData.final = policyData.primary
     }

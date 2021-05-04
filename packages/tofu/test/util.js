@@ -1,5 +1,5 @@
 const test = require('ava')
-const { utils: { mergeConfig, mergeConfigEntire, objToMap, mapToObj } } = require('../src/index')
+const { utils: { mergePolicy, mergeConfigEntire, objToMap, mapToObj } } = require('../src/index')
 
 testMergePartial('upgrades reads to writes', {
   abc: 'write',
@@ -44,7 +44,7 @@ testMergePartial('non-overlapping', {
 
 function testMergePartial (label, configA, configB, expectedResultObj) {
   test(label, (t) => {
-    const result = mergeConfig(objToMap(configA), objToMap(configB))
+    const result = mergePolicy(objToMap(configA), objToMap(configB))
     const resultObj = mapToObj(result)
     t.deepEqual(resultObj, expectedResultObj)
   })

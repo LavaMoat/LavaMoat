@@ -1,6 +1,6 @@
 const fs = require('fs')
 const path = require('path')
-const { generatePrelude, getDefaultPaths, mergeConfig } = require('lavamoat-core')
+const { generatePrelude, getDefaultPaths, mergePolicy } = require('lavamoat-core')
 const jsonStringify = require('json-stable-stringify')
 const { createModuleInspectorSpy } = require('./createModuleInspectorSpy.js')
 const { createPackageDataStream } = require('./createPackageDataStream.js')
@@ -190,7 +190,7 @@ function loadPolicy (configuration) {
   // validate each policy
   validatePolicy(primaryPolicy)
   validatePolicy(overridePolicy)
-  const finalPolicy = mergeConfig(primaryPolicy, overridePolicy)
+  const finalPolicy = mergePolicy(primaryPolicy, overridePolicy)
   return finalPolicy
 }
 
