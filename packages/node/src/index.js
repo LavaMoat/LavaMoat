@@ -6,7 +6,7 @@ const fs = require('fs')
 const yargs = require('yargs')
 const jsonStringify = require('json-stable-stringify')
 const { mergePolicy, getDefaultPaths } = require('lavamoat-core')
-const { parseForConfig } = require('./parseForConfig')
+const { parseForPolicy } = require('./parseForPolicy')
 const { createKernel } = require('./kernel')
 
 runLava().catch(err => {
@@ -36,7 +36,7 @@ async function runLava () {
     const includeDebugInfo = Boolean(writeAutoPolicyDebug)
     const { resolutions } = await loadPolicy({ debugMode, policyPath, policyOverridePath })
     console.warn(`LavaMoat generating policy from entry "${entryId}"...`)
-    const policy = await parseForConfig({ cwd, entryId, resolutions, includeDebugInfo })
+    const policy = await parseForPolicy({ cwd, entryId, resolutions, includeDebugInfo })
     // write policy debug file
     if (includeDebugInfo) {
       fs.mkdirSync(path.dirname(policyDebugPath), { recursive: true })

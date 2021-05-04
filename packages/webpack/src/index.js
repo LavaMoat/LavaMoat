@@ -89,7 +89,7 @@ class LavaMoat {
         }
       }
 
-      const config = inspector.generateConfig()
+      const config = inspector.generatePolicy()
       if (this.configuration.writeAutoConfig) {
         this.configuration.writeAutoConfig(config)
       }

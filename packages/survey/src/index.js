@@ -1,10 +1,10 @@
 const { promises: fs } = require('fs')
 const path = require('path')
 const pLimit = require('p-limit')
-const { makeResolveHook } = require('lavamoat/src/parseForConfig')
+const { makeResolveHook } = require('lavamoat/src/parseForPolicy')
 const { loadPackage } = require('./load.js')
 const { getTopPackages } = require('./getTopPackages.js')
-const { parseForConfig } = require('./parseForConfig.js')
+const { parseForPolicy } = require('./parseForPolicy.js')
 const { fileExists } = require('./util.js')
 
 const concurrencyLimit = pLimit(8)
@@ -69,13 +69,13 @@ async function loadPolicy (packageName) {
 }
 
 async function generateConfigFile (packageName) {
-  const config = await generateConfig(packageName)
+  const config = await generatePolicy(packageName)
   await writeConfig(packageName, config)
   console.log(`completed "${packageName}"`)
   return config
 }
 
-async function generateConfig (packageName) {
+async function generatePolicy (packageName) {
   const { package, packageDir } = await loadPackage(packageName)
   // if main is explicitly empty, skip (@types/node, etc)
   if (package.main === '') {
@@ -98,7 +98,7 @@ async function generateConfig (packageName) {
   console.log(`generating config for "${packageName}"`)
   let config
   try {
-    config = await parseForConfig({
+    config = await parseForPolicy({
       rootPackageName: packageName,
       packageDir,
       entryId,

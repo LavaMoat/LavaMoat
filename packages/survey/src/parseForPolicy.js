@@ -1,12 +1,12 @@
 const path = require('path')
-const { parseForConfig: nodeParseForConfig, makeResolveHook, makeImportHook } = require('lavamoat/src/parseForConfig')
+const { parseForPolicy: nodeParseForConfig, makeResolveHook, makeImportHook } = require('lavamoat/src/parseForPolicy')
 const { builtinModules: builtinPackages } = require('module')
 const { inspectSesCompat, codeSampleFromAstNode } = require('lavamoat-tofu')
 const { walk } = require('lavamoat-core/src/walk')
 
-module.exports = { parseForConfig }
+module.exports = { parseForPolicy }
 
-// async function parseForConfig ({ packageDir, entryId, rootPackageName }) {
+// async function parseForPolicy ({ packageDir, entryId, rootPackageName }) {
 //   const resolveHook = makeResolveHook({ cwd: packageDir, rootPackageName })
 //   // for the survey, we want to skip resolving dependencies (other packages)
 //   // we also want to gracefully handle resolution failures
@@ -25,7 +25,7 @@ module.exports = { parseForConfig }
 //   return nodeParseForConfig({ cwd: packageDir, entryId, rootPackageName, shouldResolve })
 // }
 
-async function parseForConfig ({ packageDir, entryId, rootPackageName }) {
+async function parseForPolicy ({ packageDir, entryId, rootPackageName }) {
   const isBuiltin = (id) => builtinPackages.includes(id)
   const resolveHook = makeResolveHook({ cwd: packageDir, rootPackageName })
   // for the survey, we want to skip resolving dependencies (other packages)
@@ -48,7 +48,7 @@ async function parseForConfig ({ packageDir, entryId, rootPackageName }) {
   }
 
   const environment = {}
-  
+
   if (shouldResolve(entryId, `${packageDir}/package.json`)) {
     const importHook = makeImportHook({ rootPackageName, resolveHook, shouldResolve, isBuiltin })
     const moduleSpecifier = resolveHook(entryId, `${packageDir}/package.json`)
@@ -59,7 +59,7 @@ async function parseForConfig ({ packageDir, entryId, rootPackageName }) {
 
   // dont include empty config
   if (Object.keys(environment).length === 0) return { resources: {} }
-  
+
   return {
     resources: {
       [rootPackageName]: {
@@ -67,7 +67,7 @@ async function parseForConfig ({ packageDir, entryId, rootPackageName }) {
       }
     }
   }
-  
+
   function visitorFn (moduleRecord) {
     if (!moduleRecord.ast) return
     const { primordialMutations, strictModeViolations, dynamicRequires } = inspectSesCompat(moduleRecord.ast)
@@ -100,5 +100,5 @@ async function parseForConfig ({ packageDir, entryId, rootPackageName }) {
       environment[moduleRecord.specifier] = serializableResults
     }
   }
-  
+
 }

@@ -1,12 +1,12 @@
 const test = require('ava')
-const { parseForConfig } = require('../src/parseForConfig')
+const { parseForPolicy } = require('../src/parseForPolicy')
 const { runLavamoat } = require('./util')
 require('./arguments')
 require('./envConfig')
 require('./globals')
 require('./runScenarios')
 
-test('parseForConfig - resolutions', async (t) => {
+test('parseForPolicy - resolutions', async (t) => {
   const projectRoot = `${__dirname}/projects/1`
   const entryId = `${projectRoot}/index.js`
   const resolutions = {
@@ -16,7 +16,7 @@ test('parseForConfig - resolutions', async (t) => {
     }
   }
 
-  const config1 = await parseForConfig({ entryId, cwd: projectRoot })
+  const config1 = await parseForPolicy({ entryId, cwd: projectRoot })
 
   // comparing resources only, to skip builtin packages
   t.deepEqual(config1, {
@@ -37,7 +37,7 @@ test('parseForConfig - resolutions', async (t) => {
     }
   })
 
-  const config2 = await parseForConfig({ entryId, cwd: projectRoot, resolutions })
+  const config2 = await parseForPolicy({ entryId, cwd: projectRoot, resolutions })
 
   // comparing resources only, to skip builtin packages
   t.deepEqual(config2, {
@@ -51,11 +51,11 @@ test('parseForConfig - resolutions', async (t) => {
   }, 'config resources do not include data on packages not parsed due to resolutions')
 })
 
-test('parseForConfig - require a userspace package with a builtin name', async (t) => {
+test('parseForPolicy - require a userspace package with a builtin name', async (t) => {
   const projectRoot = `${__dirname}/projects/4`
   const entryId = `${projectRoot}/index.js`
 
-  const config = await parseForConfig({ entryId, cwd: projectRoot })
+  const config = await parseForPolicy({ entryId, cwd: projectRoot })
   // comparing resources only, to skip builtin packages
   t.deepEqual(config, {
     resources: {
@@ -79,10 +79,10 @@ test('parseForConfig - require a userspace package with a builtin name', async (
 })
 
 // cjs package exports are fully auto-configured when passed to a fn
-test('parseForConfig - indirectly used packages are included in parent\'s whitelist', async (t) => {
+test('parseForPolicy - indirectly used packages are included in parent\'s whitelist', async (t) => {
   const projectRoot = `${__dirname}/projects/5`
   const entryId = `${projectRoot}/index.js`
-  const config = await parseForConfig({ entryId, cwd: projectRoot })
+  const config = await parseForPolicy({ entryId, cwd: projectRoot })
   t.deepEqual(config, {
     resources: { a: { builtin: { crypto: true } } }
   })

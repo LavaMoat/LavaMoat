@@ -3,8 +3,8 @@ const {
   generateKernel
 } = require('./generatePrelude')
 const { packageDataForModule, packageNameFromPath } = require('./packageData')
-const { createModuleInspector, getDefaultPaths } = require('./generateConfig')
-const { parseForConfig } = require('./parseForConfig')
+const { createModuleInspector, getDefaultPaths } = require('./generatePolicy')
+const { parseForPolicy } = require('./parseForPolicy')
 const { LavamoatModuleRecord } = require('./moduleRecord')
 const { mergePolicy } = require('./mergePolicy')
 const { applySourceTransforms } = require('./sourceTransforms')
@@ -18,7 +18,7 @@ module.exports = {
   packageDataForModule,
   // generating lavamoat config
   createModuleInspector,
-  parseForConfig,
+  parseForPolicy,
   mergePolicy,
   getDefaultPaths,
   applySourceTransforms,

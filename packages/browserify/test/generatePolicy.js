@@ -7,7 +7,7 @@ const {
   createScenarioFromScaffold
 } = require('lavamoat-core/test/util')
 
-test('generateConfig - empty policy', async (t) => {
+test('generatePolicy - empty policy', async (t) => {
   const scenario = createScenarioFromScaffold({
     defineEntry: () => {},
     defaultPolicy: false
@@ -16,7 +16,7 @@ test('generateConfig - empty policy', async (t) => {
   t.deepEqual(policy, { resources: {} }, 'policy matches expected')
 })
 
-test('generateConfig - basic policy', async (t) => {
+test('generatePolicy - basic policy', async (t) => {
   const scenario = createScenarioFromScaffold({
     defineOne: () => { module.exports = global.two },
     defaultPolicy: false
@@ -34,7 +34,7 @@ test('generateConfig - basic policy', async (t) => {
   })
 })
 
-test('generateConfig - ignore various refs', async (t) => {
+test('generatePolicy - ignore various refs', async (t) => {
   const scenario = createScenarioFromScaffold({
     defineOne: () => {
       const js = [this]
@@ -57,7 +57,7 @@ test('generateConfig - ignore various refs', async (t) => {
 })
 
 
-test('generateConfig - policy ignores global refs', async (t) => {
+test('generatePolicy - policy ignores global refs', async (t) => {
   const scenario = createScenarioFromScaffold({
     defineOne: () => {
       const href = window.location.href
@@ -78,7 +78,7 @@ test('generateConfig - policy ignores global refs', async (t) => {
   })
 })
 
-test('generateConfig - policy ignores global refs when properties are not accessed', async (t) => {
+test('generatePolicy - policy ignores global refs when properties are not accessed', async (t) => {
   const scenario = createScenarioFromScaffold({
     defineOne: () => {
       typeof window !== undefined
@@ -91,7 +91,7 @@ test('generateConfig - policy ignores global refs when properties are not access
   })
 })
 
-test('generateConfig - policy ignores global refs accessed with whitelist items', async (t) => {
+test('generatePolicy - policy ignores global refs accessed with whitelist items', async (t) => {
   const scenario = createScenarioFromScaffold({
     defineOne: () => {
       window.Object === Object
@@ -107,7 +107,7 @@ test('generateConfig - policy ignores global refs accessed with whitelist items'
   })
 })
 
-test('generateConfig - policy endows "process" properly', async (t) => {
+test('generatePolicy - policy endows "process" properly', async (t) => {
   const scenario = createScenarioFromScaffold({
     defineOne: () => {
       const x = process.nextTick

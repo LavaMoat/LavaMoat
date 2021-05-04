@@ -5,7 +5,7 @@ const resolve = require('resolve')
 const { sanitize } = require('htmlescape')
 const { generateKernel, packageDataForModule } = require('lavamoat-core')
 const { checkForResolutionOverride } = require('./resolutions')
-const { resolutionOmittedExtensions } = require('./parseForConfig')
+const { resolutionOmittedExtensions } = require('./parseForPolicy')
 const { createFreshRealmCompartment } = require('./freshRealmCompartment')
 const { applySourceTransforms } = require('lavamoat-core')
 
