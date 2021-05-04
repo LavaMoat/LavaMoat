@@ -6,7 +6,7 @@ const { packageDataForModule, packageNameFromPath } = require('./packageData')
 const { createModuleInspector, getDefaultPaths } = require('./generateConfig')
 const { parseForConfig } = require('./parseForConfig')
 const { LavamoatModuleRecord } = require('./moduleRecord')
-const { mergeConfig } = require('./mergeConfig')
+const { mergePolicy } = require('./mergePolicy')
 const { applySourceTransforms } = require('./sourceTransforms')
 
 module.exports = {
@@ -19,7 +19,7 @@ module.exports = {
   // generating lavamoat config
   createModuleInspector,
   parseForConfig,
-  mergeConfig,
+  mergePolicy,
   getDefaultPaths,
   applySourceTransforms,
   // module record class

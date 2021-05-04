@@ -5,7 +5,7 @@ const path = require('path')
 const fs = require('fs')
 const yargs = require('yargs')
 const jsonStringify = require('json-stable-stringify')
-const { mergeConfig, getDefaultPaths } = require('lavamoat-core')
+const { mergePolicy, getDefaultPaths } = require('lavamoat-core')
 const { parseForConfig } = require('./parseForConfig')
 const { createKernel } = require('./kernel')
 
@@ -149,7 +149,7 @@ async function loadPolicy ({ debugMode, policyPath, policyOverridePath }) {
     if (debugMode) console.warn(`Lavamoat looking for override policy at ${policyOverridePath}`)
     const configSource = fs.readFileSync(policyOverridePath, 'utf8')
     const overrideConfig = JSON.parse(configSource)
-    policy = mergeConfig(policy, overrideConfig)
+    policy = mergePolicy(policy, overrideConfig)
   } else {
     if (debugMode) console.warn('Lavamoat could not find policy override')
   }
