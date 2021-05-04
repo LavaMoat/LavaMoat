@@ -8,7 +8,7 @@ const {
   inspectImports,
   inspectSesCompat,
   codeSampleFromAstNode,
-  utils: { mergeConfig, mapToObj, reduceToTopmostApiCallsFromStrings }
+  utils: { mergePolicy, mapToObj, reduceToTopmostApiCallsFromStrings }
 } = require('lavamoat-tofu')
 
 const rootSlug = '<root>'
@@ -28,8 +28,8 @@ function createModuleInspector (opts = {}) {
   inspector.inspectModule = (moduleRecord, opts2 = {}) => {
     inspectModule(moduleRecord, { ...opts, ...opts2 })
   }
-  inspector.generateConfig = (opts2 = {}) => {
-    return generateConfig({ ...opts, ...opts2 })
+  inspector.generatePolicy = (opts2 = {}) => {
+    return generatePolicy({ ...opts, ...opts2 })
   }
 
   return inspector
@@ -165,7 +165,7 @@ function createModuleInspector (opts = {}) {
     }
     // agregate globals
     let packageGlobals = packageToGlobals[packageName] || []
-    packageGlobals = mergeConfig(packageGlobals, foundGlobals)
+    packageGlobals = mergePolicy(packageGlobals, foundGlobals)
     packageToGlobals[packageName] = packageGlobals
   }
 
@@ -187,7 +187,7 @@ function createModuleInspector (opts = {}) {
     packageToBuiltinImports[packageName] = packageBuiltins
   }
 
-  function generateConfig ({ isBuiltin, includeDebugInfo } = {}) {
+  function generatePolicy ({ isBuiltin, includeDebugInfo } = {}) {
     const resources = {}
     const config = { resources }
     Object.entries(packageToModules).forEach(([packageName, packageModules]) => {

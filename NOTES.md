@@ -154,9 +154,9 @@ problems:
     - [ ] require native modules behind policy flag
       - [ ] refactor module inspector to use switch statement for type
     - [ ] use LavamoatModuleRecord everywhere
-      - [x] core/parseForConfig
-      - [x] node/parseForConfig
-      - [x] core/generateConfig
+      - [x] core/parseForPolicy
+      - [x] node/parseForPolicy
+      - [x] core/generatePolicy
         - [x] browserify still using this via createConfigSpy
         - [x] packageModules[ ] collecting moduleData (previously)
         - [x] debugData now contains moduleRecords
@@ -169,7 +169,7 @@ problems:
       - [ ] packageDataForModule
         - [ ] browserify/createPackageDataStream
         - [ ] node/kernel
-        - [ ] node/parseForConfig  
+        - [ ] node/parseForPolicy
     - [x] move core -> browserify?
       - [x] createPackageDataStream
       - [x] createConfigSpy
@@ -183,7 +183,7 @@ problems:
 - [ ] re-examine pluggable exportsDefense strat?
 
 
-- [x] importHook/resolveHook based parseForConfig
+- [x] importHook/resolveHook based parseForPolicy
 - [x] survey: report on primordial mutators
 - [x] tofu/inspectEnvironment: richer analysis results
 - [x] inspectImports: ensure `require` is the global `require`
@@ -392,4 +392,4 @@ esm/cjs endo/lavamoat sync/async
   loadModuleData -> makeImportHook
 
 - [x] markm wants to know what RegExp prop needs repair for node v10 (resolved?)
-- [x] kriskowal wants survey api usage link, core/parseForConfig createModuleInspector
+- [x] kriskowal wants survey api usage link, core/parseForPolicy createModuleInspector

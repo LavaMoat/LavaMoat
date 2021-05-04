@@ -3,7 +3,7 @@ const test = require('ava')
 
 const { createConfigForTest } = require('./util')
 
-test('generateConfig - basic config', async (t) => {
+test('generatePolicy - basic config', async (t) => {
   const config = await createConfigForTest(function () {
     location.href
   })
@@ -19,7 +19,7 @@ test('generateConfig - basic config', async (t) => {
   }, 'config matched expected')
 })
 
-test('generateConfig - config with debugInfo', async (t) => {
+test('generatePolicy - config with debugInfo', async (t) => {
   const config = await createConfigForTest(function () {
     location.href
   }, { includeDebugInfo: true })
@@ -44,7 +44,7 @@ test('generateConfig - config with debugInfo', async (t) => {
   }, 'config matched expected')
 })
 
-test('generateConfig - ignore various refs', async (t) => {
+test('generatePolicy - ignore various refs', async (t) => {
   const config = await createConfigForTest(function () {
     const js = [this]
     const ignored = [global, require, module, exports, arguments]
@@ -63,7 +63,7 @@ test('generateConfig - ignore various refs', async (t) => {
   }, 'config matched expected')
 })
 
-test('generateConfig - config ignores global refs', async (t) => {
+test('generatePolicy - config ignores global refs', async (t) => {
   const config = await createConfigForTest(function () {
     const href = window.location.href
     const xhr = new window.XMLHttpRequest()
@@ -81,7 +81,7 @@ test('generateConfig - config ignores global refs', async (t) => {
   }, 'config matches expected')
 })
 
-test('generateConfig - config ignores global refs when properties are not accessed', async (t) => {
+test('generatePolicy - config ignores global refs when properties are not accessed', async (t) => {
   const config = await createConfigForTest(function () {
     typeof window !== 'undefined'
   })
@@ -91,7 +91,7 @@ test('generateConfig - config ignores global refs when properties are not access
   }, 'config matches expected')
 })
 
-test('generateConfig - config ignores global refs accessed with whitelist items', async (t) => {
+test('generatePolicy - config ignores global refs accessed with whitelist items', async (t) => {
   const config = await createConfigForTest(function () {
     window.Object === Object
   })
@@ -101,7 +101,7 @@ test('generateConfig - config ignores global refs accessed with whitelist items'
   }, 'config matches expected')
 })
 
-test('generateConfig - config ignores newer intrinsics', async (t) => {
+test('generatePolicy - config ignores newer intrinsics', async (t) => {
   const config = await createConfigForTest(function () {
     BigInt(123)
   })
@@ -112,7 +112,7 @@ test('generateConfig - config ignores newer intrinsics', async (t) => {
 })
 
 // we no longer throw an error, we log a warning
-// test('generateConfig - primordial modification', async (t) => {
+// test('generatePolicy - primordial modification', async (t) => {
 //   try {
 //     const config = await createConfigForTest(function () {
 //       const href = window.location.href

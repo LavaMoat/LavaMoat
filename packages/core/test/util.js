@@ -1,4 +1,4 @@
-const { parseForConfig, LavamoatModuleRecord, generateKernel, packageNameFromPath, getDefaultPaths } = require('../src/index.js')
+const { parseForPolicy, LavamoatModuleRecord, generateKernel, packageNameFromPath, getDefaultPaths } = require('../src/index.js')
 const mergeDeep = require('merge-deep')
 const { runInContext, createContext } = require('vm')
 const path = require('path')
@@ -24,7 +24,7 @@ module.exports = {
 }
 
 async function generateConfigFromFiles ({ files, ...opts }) {
-  const config = await parseForConfig({
+  const config = await parseForPolicy({
     moduleSpecifier: files.find(file => file.entry).specifier,
     resolveHook: (requestedName, parentAddress) => {
       return files.find(file => file.specifier === parentAddress).importMap[requestedName]

@@ -14,7 +14,7 @@ function createModuleInspectorSpy ({ onResult, isBuiltin, includeDebugInfo }) {
     // inspect each module
     (moduleData) => inspectBrowserifyModuleData(moduleData, inspector),
     // after all modules, submit config
-    () => onResult(inspector.generateConfig())
+    () => onResult(inspector.generatePolicy())
   )
   return configSpy
 }

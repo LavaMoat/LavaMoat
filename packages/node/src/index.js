@@ -5,8 +5,8 @@ const path = require('path')
 const fs = require('fs')
 const yargs = require('yargs')
 const jsonStringify = require('json-stable-stringify')
-const { mergeConfig, getDefaultPaths } = require('lavamoat-core')
-const { parseForConfig } = require('./parseForConfig')
+const { mergePolicy, getDefaultPaths } = require('lavamoat-core')
+const { parseForPolicy } = require('./parseForPolicy')
 const { createKernel } = require('./kernel')
 
 runLava().catch(err => {
@@ -36,7 +36,7 @@ async function runLava () {
     const includeDebugInfo = Boolean(writeAutoPolicyDebug)
     const { resolutions } = await loadPolicy({ debugMode, policyPath, policyOverridePath })
     console.warn(`LavaMoat generating policy from entry "${entryId}"...`)
-    const policy = await parseForConfig({ cwd, entryId, resolutions, includeDebugInfo })
+    const policy = await parseForPolicy({ cwd, entryId, resolutions, includeDebugInfo })
     // write policy debug file
     if (includeDebugInfo) {
       fs.mkdirSync(path.dirname(policyDebugPath), { recursive: true })
@@ -149,7 +149,7 @@ async function loadPolicy ({ debugMode, policyPath, policyOverridePath }) {
     if (debugMode) console.warn(`Lavamoat looking for override policy at ${policyOverridePath}`)
     const configSource = fs.readFileSync(policyOverridePath, 'utf8')
     const overrideConfig = JSON.parse(configSource)
-    policy = mergeConfig(policy, overrideConfig)
+    policy = mergePolicy(policy, overrideConfig)
   } else {
     if (debugMode) console.warn('Lavamoat could not find policy override')
   }

@@ -9,7 +9,7 @@ const { codeFrameColumns } = require('@babel/code-frame')
 const {
   packageNameFromPath,
   packageDataForModule,
-  parseForConfig: coreParseForConfig,
+  parseForPolicy: coreParseForConfig,
   createModuleInspector,
   LavamoatModuleRecord
 } = require('lavamoat-core')
@@ -47,9 +47,9 @@ const createRequire = (url) => {
   }
 }
 
-module.exports = { parseForConfig, makeResolveHook, makeImportHook, resolutionOmittedExtensions }
+module.exports = { parseForPolicy, makeResolveHook, makeImportHook, resolutionOmittedExtensions }
 
-async function parseForConfig ({ cwd, entryId, resolutions, rootPackageName, shouldResolve, includeDebugInfo, ...args }) {
+async function parseForPolicy ({ cwd, entryId, resolutions, rootPackageName, shouldResolve, includeDebugInfo, ...args }) {
   const isBuiltin = (id) => builtinPackages.includes(id)
   const resolveHook = makeResolveHook({ cwd, resolutions, rootPackageName })
   const importHook = makeImportHook({ rootPackageName, shouldResolve, isBuiltin, resolveHook })

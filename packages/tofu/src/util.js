@@ -7,7 +7,7 @@ module.exports = {
   reduceToTopmostApiCalls,
   reduceToTopmostApiCallsFromStrings,
   addGlobalUsage,
-  mergeConfig,
+  mergePolicy,
   objToMap,
   mapToObj,
   getParents
@@ -112,7 +112,7 @@ function addGlobalUsage (globalsConfig, identifierPath, identifierUse) {
   globalsConfig.set(identifierPath, identifierUse)
 }
 
-function mergeConfig (configA, configB) {
+function mergePolicy (configA, configB) {
   const newConfig = new Map(configA)
   Array.from(configB.entries()).forEach(([path, value]) => {
     addGlobalUsage(newConfig, path, value)

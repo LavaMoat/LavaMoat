@@ -1,9 +1,9 @@
-const { createModuleInspector } = require('./generateConfig')
+const { createModuleInspector } = require('./generatePolicy')
 const { walk } = require('./walk')
 
-module.exports = { parseForConfig }
+module.exports = { parseForPolicy }
 
-async function parseForConfig ({
+async function parseForPolicy ({
   moduleSpecifier,
   importHook,
   isBuiltin,
@@ -13,7 +13,7 @@ async function parseForConfig ({
 }) {
   await walk({ moduleSpecifier, importHook, visitorFn, shouldImport })
   // after all modules, submit config
-  const config = inspector.generateConfig()
+  const config = inspector.generatePolicy()
   // console.log(JSON.stringify(config, null, 2))
   return config
 

@@ -2,7 +2,7 @@ require('./basic')
 require('./arguments')
 
 require('./config')
-require('./generateConfig')
+require('./generatePolicy')
 require('./configReplacements')
 
 require('./globalRef')

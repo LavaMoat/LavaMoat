@@ -15,7 +15,6 @@
     "test": "yarn lavamoat"
   },
   "dependencies": {
-    "lavamoat-core": "^1.1.0",
     "merge-deep": "^3.0.2",
     "mkdirp": "^1.0.3",
     "webpack-sources": "^1.4.3"
