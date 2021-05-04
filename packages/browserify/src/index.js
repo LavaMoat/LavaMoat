@@ -78,7 +78,9 @@ function getConfigurationFromPluginOpts (pluginOpts) {
     prunepolicy: 'prunePolicy',
     d: 'debugMode',
     debug: 'debugMode',
-    pn: 'policyName'
+    pn: 'policyName',
+    projectRoot: 'projectRoot',
+    r: 'projectRoot'
   }
 
   const allowedKeys = new Set([
@@ -98,6 +100,10 @@ function getConfigurationFromPluginOpts (pluginOpts) {
 
   if (!pluginOpts.policyName) {
     pluginOpts.policyName = 'browserify'
+  }
+
+  if (!pluginOpts.projectRoot) {
+    pluginOpts.projectRoot = process.cwd()
   }
 
   const configuration = {
@@ -140,18 +146,18 @@ function writeAutoPolicy (policy, configuration) {
     delete policy.debugInfo
   }
   // if missing, write empty policy-override file
-  const overrideConfigPath = configuration.policyPaths.override
-  if (!fs.existsSync(overrideConfigPath)) {
-    const basicConfig = { resources: {} }
-    fs.mkdirSync(path.dirname(overrideConfigPath), { recursive: true })
-    fs.writeFileSync(overrideConfigPath, jsonStringify(basicConfig, { space: 2 }))
-    console.warn(`LavaMoat Override Policy - wrote to "${overrideConfigPath}"`)
+  const policyOverridePath = configuration.policyPaths.override
+  if (!fs.existsSync(policyOverridePath)) {
+    const basicPolicy = { resources: {} }
+    fs.mkdirSync(path.dirname(policyOverridePath), { recursive: true })
+    fs.writeFileSync(policyOverridePath, jsonStringify(basicPolicy, { space: 2 }))
+    console.warn(`LavaMoat Override Policy - wrote to "${policyOverridePath}"`)
   }
   // write policy file
-  const configPath = configuration.policyPaths.primary
-  fs.mkdirSync(path.dirname(configPath), { recursive: true })
-  fs.writeFileSync(configPath, jsonStringify(policy, { space: 2 }))
-  console.warn(`LavaMoat Policy - wrote to "${configPath}"`)
+  const policyPath = configuration.policyPaths.primary
+  fs.mkdirSync(path.dirname(policyPath), { recursive: true })
+  fs.writeFileSync(policyPath, jsonStringify(policy, { space: 2 }))
+  console.warn(`LavaMoat Policy - wrote to "${policyPath}"`)
 }
 
 function loadPolicyFile ({ filepath, tolerateMissing }) {
@@ -160,7 +166,7 @@ function loadPolicyFile ({ filepath, tolerateMissing }) {
     if (tolerateMissing) {
       return { resources: {} }
     }
-    throw new Error(`Lavamoat - Configuration file not found at path: '${filepath}', use --writeAutoPolicy option to generate one`)
+    throw new Error(`Lavamoat - Policy file not found at path: '${filepath}', use --writeAutoPolicy option to generate one`)
   }
   const content = fs.readFileSync(filepath, 'utf8')
   const policyFile = JSON.parse(content)
@@ -189,11 +195,13 @@ function loadPolicy (configuration) {
 }
 
 function getPolicyPaths (pluginOpts) {
-  const defaultPaths = getDefaultPaths(pluginOpts.policyName)
+  const { projectRoot, policy, policyOverride, configDebug, policyName } = pluginOpts
+  const defaultPaths = getDefaultPaths(policyName)
+  const { primary, override, debug } = defaultPaths
   return {
-    primary: path.resolve(pluginOpts.policy || defaultPaths.primary),
-    override: path.resolve(pluginOpts.configOverride || defaultPaths.override),
-    debug: path.resolve(pluginOpts.configDebug || defaultPaths.debug)
+    primary: policy || path.resolve(projectRoot, primary),
+    override: policyOverride || path.resolve(projectRoot, override),
+    debug: configDebug || path.resolve(projectRoot, debug)
   }
 }
 
