@@ -10,7 +10,7 @@ const { ncp } = require('ncp')
 const pify = require('pify')
 const openUrl = require('open')
 const handler = require('serve-handler')
-const { mergeConfig, getDefaultPaths } = require('lavamoat-core')
+const { mergePolicy, getDefaultPaths } = require('lavamoat-core')
 
 const defaultPaths = getDefaultPaths('node')
 const commandDefaults = {
