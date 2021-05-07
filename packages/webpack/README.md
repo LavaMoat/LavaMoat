@@ -1,6 +1,10 @@
-# LavaMoat - a Webpack Plugin for creating LavaMoat-protected builds
+# LavaMoat - a Webpack Plugin for LavaMoat-protected builds
 
-**NOTE: under rapid develop, not ready for production use, has not been audited, etc**
+**NOTE: this is a proof of concept and does not work yet**
+
+this webpack plugin is a proof of concept and does not work yet
+
+---
 
 [**Quick Start Example**](https://github.com/LavaMoat/lavamoat-webpack/blob/master/test/project1/README.md)
 
