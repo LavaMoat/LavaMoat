@@ -20,7 +20,8 @@
   },
   "devDependencies": {
     "eslint-plugin-ava": "^11.0.0",
-    "eslint-plugin-standard": "^5.0.0"
+    "eslint-plugin-standard": "^5.0.0",
+    "mississippi": "^4.0.0"
   },
   "scripts": {
     "lint": "npm run lint:eslint && npm run lint:deps",

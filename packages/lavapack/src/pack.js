@@ -207,12 +207,12 @@ function createPacker({
       // deps,
       // source: moduleInitSrc
     }
-    let serializedEntry = `[${jsonStringify(id)}, ${jsonStringify(deps)}, ${moduleInitSrc}\n, {`
+    let serializedEntry = `[${jsonStringify(id)}, ${jsonStringify(deps)}, ${moduleInitSrc}, {`
     // add metadata
     Object.entries(jsonSerializeableData).forEach(([key, value]) => {
       // skip missing values
       if (value === undefined) return
-      serializedEntry += ` ${key}: ${jsonStringify(value)},`
+      serializedEntry += `${key}:${jsonStringify(value)},`
     })
     serializedEntry += '}]'
 
@@ -237,23 +237,7 @@ function extractSourceMaps (sourceCode) {
 }
 
 function transformToWrapped (sourceMeta) {
-  // create the wrapper around the module content
-  // 1. create new global obj
-  // 2. copy properties from actual endowments and global
-  // see https://github.com/Agoric/SES/issues/123
-  // 3. return a moduleInitializer fn
-  const filename = String(sourceMeta.file)
-  if (filename.includes('\n')) {
-    throw new Error('LavaMoat - encountered a filename containing a newline')
-  }
-  const moduleWrapperSource =
-
-`(${function () {
-  return function (require, module, exports) {
-__MODULE_CONTENT__
-  }
-}}).call(this)`
-
+  const moduleWrapperSource = `function (require, module, exports) {\n__MODULE_CONTENT__\n}`
   const [start, end] = moduleWrapperSource.split('__MODULE_CONTENT__')
   const offsetLinesCount = start.match(/\n/g).length
   const maps = sourceMeta.maps && offsetSourcemapLines(sourceMeta.maps, offsetLinesCount)
