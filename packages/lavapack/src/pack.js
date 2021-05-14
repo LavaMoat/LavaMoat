@@ -117,7 +117,7 @@ function createPacker({
     }
 
     const wrappedSource = [
-      (first ? '' : ','),
+      (first ? '' : ',\n'),
       // JSON.stringify(moduleData.id),
       // ':',
       serializeModule(moduleData)
@@ -187,17 +187,15 @@ function createPacker({
       output += `${prelude};\n`
     }
     // append start of loadBundle call
-    output += 'LavaPack.loadBundle(['
+    output += 'LavaPack.loadBundle([\n'
     return Buffer.from(output, 'utf8')
   }
 
   function serializeModule (moduleData) {
     const { id, packageName, packageVersion, source, deps, file } = moduleData
-    const wrappedBundle = wrapIntoModuleInitializer(source)
-    const sourceMappingURL = onSourcemap(moduleData, wrappedBundle)
+    const newSourceMeta = wrapIntoModuleInitializer(moduleData, onSourcemap)
     // for now, ignore new sourcemap and just append original filename
-    let moduleInitSrc = wrappedBundle.code
-    if (sourceMappingURL) moduleInitSrc += `\n//# sourceMappingURL=${sourceMappingURL}`
+    const moduleInitSrc = newSourceMeta.code
     // serialize final module entry
     const jsonSerializeableData = {
       // id,
@@ -220,11 +218,12 @@ function createPacker({
   }
 }
 
-function wrapIntoModuleInitializer (source) {
+function wrapIntoModuleInitializer (moduleData, onSourcemap) {
+  const { source } = moduleData
   // extract sourcemaps
   const sourceMeta = extractSourceMaps(source)
   // create wrapper + update sourcemaps
-  const newSourceMeta = transformToWrapped(sourceMeta)
+  const newSourceMeta = wrapInModuleInitializer(moduleData, sourceMeta, onSourcemap)
   return newSourceMeta
 }
 
@@ -236,12 +235,14 @@ function extractSourceMaps (sourceCode) {
   return { code, maps }
 }
 
-function transformToWrapped (sourceMeta) {
+function wrapInModuleInitializer (moduleData, sourceMeta, onSourcemap) {
   const moduleWrapperSource = `function (require, module, exports) {\n__MODULE_CONTENT__\n}`
   const [start, end] = moduleWrapperSource.split('__MODULE_CONTENT__')
   const offsetLinesCount = start.match(/\n/g).length
   const maps = sourceMeta.maps && offsetSourcemapLines(sourceMeta.maps, offsetLinesCount)
-  const code = `${start}${sourceMeta.code}${end}`
+  const sourceMappingURL = onSourcemap(moduleData)
+  const sourceMappingComment = sourceMappingURL ? `\n//# sourceMappingURL=${sourceMappingURL}` : ''
+  const code = `${start}${sourceMeta.code}${sourceMappingComment}${end}`
   const newSourceMeta = { code, maps }
   return newSourceMeta
 }

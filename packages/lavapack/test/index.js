@@ -27,14 +27,23 @@ test('sourcemap test', async (t) => {
   )
 
   // add modules
-  const moduleData = {
+  const modules = [{
     id: '1',
-    file: 'index.js',
+    sourceFile: 'index.js',
+    source: `require('./log.js');`,
+    deps: {
+      './log.js': '2'
+    },
+    entry: true
+  }, {
+    id: '2',
+    sourceFile: 'log.js',
     source: `console.log('hi');\nnew Error('danger');\nconsole.log('the end');`,
     deps: {},
-    entry: true
-  }
-  packStream.write(moduleData)
+  }]
+  modules.forEach(moduleData => {
+    packStream.write(moduleData)
+  })
   packStream.end()
 
   const bundleBuffer = await promise
