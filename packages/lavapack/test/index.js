@@ -1,3 +1,4 @@
+const fs = require('fs')
 const test = require('ava')
 const { pipe, from, concat } = require('mississippi')
 const { SourceMapConsumer } = require('source-map')
@@ -57,6 +58,7 @@ test('sourcemap test', async (t) => {
   const bundleBuffer = await promise
   const bundleString = bundleBuffer.toString()
   console.log(bundleString)
+  fs.writeFileSync('./bundle.js', bundleBuffer)
 
   const converter = convertSourceMap.fromSource(bundleString)
   const rawSourceMap = converter.toObject()
