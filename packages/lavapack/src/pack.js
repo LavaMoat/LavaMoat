@@ -90,7 +90,11 @@ function createPacker({
     }
 
     // start of modules
-    if (first) stream.push(generateBundleLoaderInitial())
+    if (first) {
+      const loaderInitial = generateBundleLoaderInitial()
+      lineno += newlinesIn(loaderInitial.toString())
+      stream.push(loaderInitial)
+    }
 
     // initialize sourcemap
     if (!sourcemap) {
@@ -102,6 +106,10 @@ function createPacker({
         )
       }
     }
+
+    const moduleEntryPrefix = (first ? '' : ',\n')
+    lineno += newlinesIn(moduleEntryPrefix)
+    stream.push(Buffer.from(moduleEntryPrefix, 'utf8'))
 
     if (moduleData.sourceFile && !moduleData.nomap) {
       // add current file to the sourcemap
@@ -116,12 +124,7 @@ function createPacker({
       packages.add(packageName)
     }
 
-    const wrappedSource = [
-      (first ? '' : ',\n'),
-      // JSON.stringify(moduleData.id),
-      // ':',
-      serializeModule(moduleData)
-    ].join('')
+    const wrappedSource = serializeModule(moduleData)
 
     stream.push(Buffer.from(wrappedSource, 'utf8'))
     lineno += newlinesIn(wrappedSource)
@@ -193,9 +196,9 @@ function createPacker({
 
   function serializeModule (moduleData) {
     const { id, packageName, packageVersion, source, deps, file } = moduleData
-    const newSourceMeta = wrapIntoModuleInitializer(moduleData, onSourcemap)
+    const sourceMeta = wrapIntoModuleInitializer(moduleData, onSourcemap)
     // for now, ignore new sourcemap and just append original filename
-    const moduleInitSrc = newSourceMeta.code
+    const moduleInitSrc = sourceMeta.code
     // serialize final module entry
     const jsonSerializeableData = {
       // id,
@@ -238,7 +241,8 @@ function extractSourceMaps (sourceCode) {
 function wrapInModuleInitializer (moduleData, sourceMeta, onSourcemap) {
   const moduleWrapperSource = `function (require, module, exports) {\n__MODULE_CONTENT__\n}`
   const [start, end] = moduleWrapperSource.split('__MODULE_CONTENT__')
-  const offsetLinesCount = start.match(/\n/g).length
+  const initializerNewlineCount = 1
+  const offsetLinesCount = initializerNewlineCount + start.match(/\n/g).length
   const maps = sourceMeta.maps && offsetSourcemapLines(sourceMeta.maps, offsetLinesCount)
   const sourceMappingURL = onSourcemap(moduleData)
   const sourceMappingComment = sourceMappingURL ? `\n//# sourceMappingURL=${sourceMappingURL}` : ''

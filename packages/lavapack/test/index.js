@@ -1,5 +1,7 @@
 const test = require('ava')
 const { pipe, from, concat } = require('mississippi')
+const { SourceMapConsumer } = require('source-map')
+const convertSourceMap = require('convert-source-map')
 const pack = require('../')
 
 
@@ -30,15 +32,21 @@ test('sourcemap test', async (t) => {
   const modules = [{
     id: '1',
     sourceFile: 'index.js',
-    source: `require('./log.js');`,
+    source: `require('./log.js'); require('./util.js')`,
     deps: {
-      './log.js': '2'
+      './log.js': '2',
+      './util.js': '3'
     },
     entry: true
   }, {
     id: '2',
     sourceFile: 'log.js',
     source: `console.log('hi');\nnew Error('danger');\nconsole.log('the end');`,
+    deps: {},
+  }, {
+    id: '3',
+    sourceFile: 'util.js',
+    source: `module.exports.add = (a,b) => a+b`,
     deps: {},
   }]
   modules.forEach(moduleData => {
@@ -47,8 +55,20 @@ test('sourcemap test', async (t) => {
   packStream.end()
 
   const bundleBuffer = await promise
-  // console.log(bundleBuffer.toString())
+  const bundleString = bundleBuffer.toString()
+  console.log(bundleString)
+
+  const converter = convertSourceMap.fromSource(bundleString)
+  const rawSourceMap = converter.toObject()
+
+  const consumer = await new SourceMapConsumer(rawSourceMap);
+  modules.forEach(({ sourceFile }) => {
+    const bundleStartPos = consumer.generatedPositionFor({ source: sourceFile, line: 1, column: 0 })
+    const bundleLine = bundleString.split('\n')[bundleStartPos.line - 1]
+    console.log(`${sourceFile}:\n${bundleLine}`)
+  })
   
+  consumer.destroy();
   t.pass('no error thrown')
 })
 
