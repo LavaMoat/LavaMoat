@@ -122,7 +122,7 @@ async function setDefaultConfiguration ({ rootDir }) {
   if (!packageJson.lavamoat) packageJson.lavamoat = {}
   packageJson.lavamoat.allowScripts = allowScriptsConfig
   const packageJsonPath = path.resolve(rootDir, 'package.json')
-  const packageJsonSerialized = JSON.stringify(packageJson, null, 2)
+  const packageJsonSerialized = JSON.stringify(packageJson, null, 2) + '\n'
   await fs.writeFile(packageJsonPath, packageJsonSerialized)
 }
 
