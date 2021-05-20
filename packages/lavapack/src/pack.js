@@ -17,7 +17,6 @@ const { Buffer } = require('buffer')
 const path = require('path')
 const combineSourceMap = require('combine-source-map')
 const convertSourceMap = require('convert-source-map')
-const offsetSourcemapLines = require('offset-sourcemap-lines')
 const jsonStringify = require('json-stable-stringify')
 
 const defaultPreludePath = path.join(__dirname, '_prelude.js')
@@ -32,7 +31,7 @@ module.exports = createPacker
 
 function createPacker({
   // hook for applying sourcemaps
-  onSourcemap = row => row.sourceFile,
+  sourcePathForModule = row => row.sourceFile,
   // input is (true:) objects (false:) json strings
   raw = false,
   standalone = false,
@@ -68,20 +67,24 @@ function createPacker({
   let first = true
   let entryFiles = []
   const packages = new Set()
+  let lineno = 1
+  let sourcemap
 
   if (includePrelude) {
     assert(prelude, 'LavaMoat CustomPack: must specify a prelude if "includePrelude" is true (default: true)')
   }
   assert(policy, 'must specify a policy')
 
-  let lineno = 1 + newlinesIn(prelude)
-  let sourcemap
+  if (includePrelude) {
+    lineno += newlinesIn(prelude)
+  }
 
   // note: pack stream cant started emitting data until its received its first module
-  // this is likely because the pipeline is still being setup
+  // this is because the browserify pipeline is leaky until its finished being setup
   parser.pipe(through.obj(onModule, onDone))
 
   return stream
+
 
   function onModule (moduleData, _, next) {
     if (first && standalone) {
@@ -124,7 +127,8 @@ function createPacker({
       packages.add(packageName)
     }
 
-    const wrappedSource = serializeModule(moduleData)
+    const sourceMeta = wrapIntoModuleInitializer(moduleData, sourcePathForModule)
+    const wrappedSource = serializeModule(moduleData, sourceMeta)
 
     stream.push(Buffer.from(wrappedSource, 'utf8'))
     lineno += newlinesIn(wrappedSource)
@@ -194,11 +198,9 @@ function createPacker({
     return Buffer.from(output, 'utf8')
   }
 
-  function serializeModule (moduleData) {
+  function serializeModule (moduleData, sourceMeta) {
     const { id, packageName, packageVersion, source, deps, file } = moduleData
-    const sourceMeta = wrapIntoModuleInitializer(moduleData, onSourcemap)
     // for now, ignore new sourcemap and just append original filename
-    const moduleInitSrc = sourceMeta.code
     // serialize final module entry
     const jsonSerializeableData = {
       // id,
@@ -206,9 +208,9 @@ function createPacker({
       packageVersion,
       file,
       // deps,
-      // source: moduleInitSrc
+      // source: sourceMeta.code
     }
-    let serializedEntry = `[${jsonStringify(id)}, ${jsonStringify(deps)}, ${moduleInitSrc}, {`
+    let serializedEntry = `[${jsonStringify(id)}, ${jsonStringify(deps)}, ${sourceMeta.code}, {`
     // add metadata
     Object.entries(jsonSerializeableData).forEach(([key, value]) => {
       // skip missing values
@@ -221,12 +223,12 @@ function createPacker({
   }
 }
 
-function wrapIntoModuleInitializer (moduleData, onSourcemap) {
-  const { source } = moduleData
+function wrapIntoModuleInitializer (moduleData, sourcePathForModule) {
+  const normalizedSource = moduleData.source.split('\r\n').join('\n')
   // extract sourcemaps
-  const sourceMeta = extractSourceMaps(source)
+  const sourceMeta = extractSourceMaps(normalizedSource)
   // create wrapper + update sourcemaps
-  const newSourceMeta = wrapInModuleInitializer(moduleData, sourceMeta, onSourcemap)
+  const newSourceMeta = wrapInModuleInitializer(moduleData, sourceMeta, sourcePathForModule)
   return newSourceMeta
 }
 
@@ -238,14 +240,13 @@ function extractSourceMaps (sourceCode) {
   return { code, maps }
 }
 
-function wrapInModuleInitializer (moduleData, sourceMeta, onSourcemap) {
+function wrapInModuleInitializer (moduleData, sourceMeta, sourcePathForModule) {
   const moduleWrapperSource = `function (require, module, exports) {\n__MODULE_CONTENT__\n}`
   const [start, end] = moduleWrapperSource.split('__MODULE_CONTENT__')
-  const initializerNewlineCount = 1
-  const offsetLinesCount = initializerNewlineCount + start.match(/\n/g).length
-  const maps = sourceMeta.maps && offsetSourcemapLines(sourceMeta.maps, offsetLinesCount)
-  const sourceMappingURL = onSourcemap(moduleData)
+  const maps = sourceMeta.maps
+  const sourceMappingURL = sourcePathForModule(moduleData)
   const sourceMappingComment = sourceMappingURL ? `\n//# sourceMappingURL=${sourceMappingURL}` : ''
+  // normalize line endings
   const code = `${start}${sourceMeta.code}${sourceMappingComment}${end}`
   const newSourceMeta = { code, maps }
   return newSourceMeta
