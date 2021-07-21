@@ -1,6 +1,6 @@
 {
   "name": "@lavamoat/lavapack",
-  "version": "1.0.4",
+  "version": "1.1.0",
   "description": "LavaMoat packer",
   "publishConfig": {
     "access": "public"
@@ -18,6 +18,7 @@
     "umd": "^3.0.3"
   },
   "devDependencies": {
+    "lavamoat-core": "^10.0.1",
     "eslint-plugin-ava": "^11.0.0",
     "eslint-plugin-standard": "^5.0.0",
     "mississippi": "^4.0.0",

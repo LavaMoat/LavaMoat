@@ -12,14 +12,8 @@
   globalThis.LavaPack = LavaPack
 
   // it is called by the modules collection that will be appended to this file
-  function loadBundle (newModules, entryPoints, lavamoatPolicy) {
-    // verify + load config
-    Object.entries(lavamoatPolicy.resources || {}).forEach(([packageName, packageConfig]) => {
-      if (packageName in lavamoatConfig) {
-        throw new Error(`LavaMoat - loadBundle encountered redundant config definition for package "${packageName}"`)
-      }
-      lavamoatConfig.resources[packageName] = packageConfig
-    })
+  function loadBundle (newModules, entryPoints, bundlePolicy) {
+    // ignore bundlePolicy as we wont be enforcing it
     // verify + load in each module
     for (const [moduleId, moduleDeps, initFn] of newModules) {
       // verify that module is new
