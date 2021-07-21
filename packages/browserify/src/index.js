@@ -2,10 +2,10 @@ const fs = require('fs')
 const path = require('path')
 const { generatePrelude, getDefaultPaths, mergePolicy } = require('lavamoat-core')
 const jsonStringify = require('json-stable-stringify')
-const { createModuleInspectorSpy } = require('./createModuleInspectorSpy.js')
-const { createPackageDataStream } = require('./createPackageDataStream.js')
 const createCustomPack = require('./createCustomPack')
 const { createSesWorkaroundsTransform } = require('./sesTransforms')
+const { applyModuleInspector } = require('./applyModuleInspector.js')
+const { applyPackageData } = require('./applyPackageData.js')
 
 // these are the reccomended arguments for lavaMoat to work well with browserify
 const reccomendedArgs = {
@@ -25,6 +25,8 @@ module.exports = plugin
 module.exports.generatePrelude = generatePrelude
 module.exports.createLavamoatPacker = createLavamoatPacker
 module.exports.loadPolicy = loadPolicyFromPluginOpts
+module.exports.applyModuleInspector = applyModuleInspector
+module.exports.applyPackageData = applyPackageData
 module.exports.args = reccomendedArgs
 
 function plugin (browserify, pluginOpts) {
@@ -39,18 +41,14 @@ function plugin (browserify, pluginOpts) {
     browserify.transform(createSesWorkaroundsTransform(), { global: true })
 
     // inject package name into module data
-    browserify.pipeline.get('emit-deps').unshift(createPackageDataStream())
+    applyPackageData(browserify)
 
     // if writeAutoPolicy activated, insert hook
     if (configuration.writeAutoPolicy) {
-      browserify.pipeline.get('emit-deps').push(createModuleInspectorSpy({
-        // no builtins in the browser (yet!)
-        isBuiltin: () => false,
-        // should prepare debug info
+      applyModuleInspector(browserify, {
         includeDebugInfo: configuration.writeAutoPolicyDebug,
-        // write policy files to disk
         onResult: (policy) => writeAutoPolicy(policy, configuration)
-      }))
+      })
     }
 
     // replace the standard browser-pack with our custom packer
