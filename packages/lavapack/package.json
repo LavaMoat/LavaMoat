@@ -18,7 +18,7 @@
     "umd": "^3.0.3"
   },
   "devDependencies": {
-    "lavamoat-core": "^10.0.1",
+    "lavamoat-core": "^10.1.0",
     "eslint-plugin-ava": "^11.0.0",
     "eslint-plugin-standard": "^5.0.0",
     "mississippi": "^4.0.0",
