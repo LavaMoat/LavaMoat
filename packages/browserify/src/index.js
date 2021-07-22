@@ -173,6 +173,7 @@ function loadPolicyFile ({ filepath, tolerateMissing }) {
   return policyFile
 }
 
+// lavamoat-core has a "loadPolicy" method but its async
 function loadPolicy (configuration) {
   let primaryPolicy
   if (configuration.actionOverrides.loadPrimaryPolicy) {
