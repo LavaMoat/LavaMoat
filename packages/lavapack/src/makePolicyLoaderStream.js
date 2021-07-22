@@ -16,7 +16,8 @@ function makePolicyLoaderStream (lavamoatOpts) {
   async function populatePolicyLoaderStream () {
     let policyLoaderContent
     try {
-      const policy = await loadPolicy(lavamoatOpts)
+      const { debugMode, policy: policyPath, policyOverride: policyOverridePath } = lavamoatOpts
+      const policy = await loadPolicy({ debugMode, policyPath, policyOverridePath })
       policyLoaderContent = `LavaPack.loadPolicy(${JSON.stringify(policy, null, 2)})`
     } catch (err) {
       // forward any error to stream
