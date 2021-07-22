@@ -24,6 +24,8 @@ function makePolicyLoaderStream (lavamoatOpts) {
       return
     }
     // forward result to stream
-    loaderStream.end(policyLoaderContent)
+    loaderStream.push(policyLoaderContent)
+    // end stream
+    loaderStream.push(null)
   }
 }
