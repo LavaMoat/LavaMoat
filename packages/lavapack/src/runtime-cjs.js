@@ -5,11 +5,16 @@
 
   // create a lavamoat pulic API for loading modules over multiple files
   const LavaPack = Object.freeze({
+    loadPolicy: Object.freeze(loadPolicy),
     loadBundle: Object.freeze(loadBundle),
     runModule: Object.freeze(runModule),
   })
 
   globalThis.LavaPack = LavaPack
+
+  function loadPolicy () {
+    throw new Error('runtime-cjs: unable to enforce policy')
+  }
 
   // it is called by the modules collection that will be appended to this file
   function loadBundle (newModules, entryPoints, bundlePolicy) {
