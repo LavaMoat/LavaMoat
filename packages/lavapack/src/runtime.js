@@ -6400,14 +6400,15 @@ function makePrepareRealmGlobalFromConfig ({ createFunctionWrapper }) {
 
   // create a lavamoat pulic API for loading modules over multiple files
   const LavaPack = Object.freeze({
+    loadPolicy: Object.freeze(loadPolicy),
     loadBundle: Object.freeze(loadBundle),
     runModule: Object.freeze(runModule),
   })
 
   globalThis.LavaPack = LavaPack
 
-  // it is called by the modules collection that will be appended to this file
-  function loadBundle (newModules, entryPoints, bundlePolicy) {
+  // it is called by the policy loader or modules collection
+  function loadPolicy (bundlePolicy) {
     // verify + load config
     Object.entries(bundlePolicy.resources || {}).forEach(([packageName, packageConfig]) => {
       if (packageName in lavamoatPolicy) {
@@ -6415,6 +6416,12 @@ function makePrepareRealmGlobalFromConfig ({ createFunctionWrapper }) {
       }
       lavamoatPolicy.resources[packageName] = packageConfig
     })
+  }
+
+  // it is called by the modules collection
+  function loadBundle (newModules, entryPoints, bundlePolicy) {
+    // verify + load config
+    if (bundlePolicy) loadPolicy(bundlePolicy)
     // verify + load in each module
     for (const [moduleId, moduleDeps, initFn] of newModules) {
       // verify that module is new
