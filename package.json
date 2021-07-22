@@ -12,6 +12,9 @@
     "semantic-release-monorepo": "^7.0.4",
     "tap-spec": "^5.0.0"
   },
+  "engines": {
+    "node": ">=12.16.1"
+  },
   "scripts": {
     "test": "lerna run test --ignore=lavamoat-webpack",
     "lint": "lerna run lint",
