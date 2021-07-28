@@ -1,5 +1,8 @@
 ;(function(){
 
+  // polyfill node/browserify's globalRef
+  globalThis.global = globalThis
+
   const moduleRegistry = new Map()
   const moduleCache = new Map()
 
