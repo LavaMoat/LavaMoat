@@ -39,14 +39,15 @@
 
   // create a lavamoat pulic API for loading modules over multiple files
   const LavaPack = Object.freeze({
+    loadPolicy: Object.freeze(loadPolicy),
     loadBundle: Object.freeze(loadBundle),
     runModule: Object.freeze(runModule),
   })
 
   globalThis.LavaPack = LavaPack
 
-  // it is called by the modules collection that will be appended to this file
-  function loadBundle (newModules, entryPoints, bundlePolicy) {
+  // it is called by the policy loader or modules collection
+  function loadPolicy (bundlePolicy) {
     // verify + load config
     Object.entries(bundlePolicy.resources || {}).forEach(([packageName, packageConfig]) => {
       if (packageName in lavamoatPolicy) {
@@ -54,14 +55,20 @@
       }
       lavamoatPolicy.resources[packageName] = packageConfig
     })
+  }
+
+  // it is called by the modules collection
+  function loadBundle (newModules, entryPoints, bundlePolicy) {
+    // verify + load config
+    if (bundlePolicy) loadPolicy(bundlePolicy)
     // verify + load in each module
-    for (const [moduleId, moduleDeps, initFn] of newModules) {
+    for (const [moduleId, moduleDeps, initFn, { package: packageName }] of newModules) {
       // verify that module is new
       if (moduleRegistry.has(moduleId)) {
         throw new Error(`LavaMoat - loadBundle encountered redundant module definition for id "${moduleId}"`)
       }
       // add the module
-      moduleRegistry.set(moduleId, { deps: moduleDeps, moduleInitializer: initFn })
+      moduleRegistry.set(moduleId, { type: 'js', id: moduleId, deps: moduleDeps, source: `(${initFn})`, package: packageName })
     }
     // run each of entryPoints
     const entryExports = Array.prototype.map.call(entryPoints, (entryId) => {
