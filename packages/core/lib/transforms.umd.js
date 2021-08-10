@@ -15,31 +15,7 @@
    * would be corrupted.
    */
 
-  const {
-    assign,
-    create,
-    defineProperties,
-    entries,
-    freeze,
-    getOwnPropertyDescriptor,
-    getOwnPropertyDescriptors,
-    getOwnPropertyNames,
-    getPrototypeOf,
-    is,
-    isExtensible,
-    keys,
-    prototype: objectPrototype,
-    seal,
-    setPrototypeOf,
-    values,
-  } = Object;
-
-  const { apply, construct, get: reflectGet, set: reflectSet } = Reflect;
-
-  const { isArray, prototype: arrayPrototype } = Array;
-  const { prototype: regexpPrototype } = RegExp;
   const { prototype: stringPrototype } = String;
-  const { prototype: weakmapPrototype } = WeakMap;
 
   /**
    * uncurryThis()
@@ -58,30 +34,10 @@
    */
   const uncurryThis = fn => (thisArg, ...args) => apply(fn, thisArg, args);
 
-  const objectHasOwnProperty = uncurryThis(objectPrototype.hasOwnProperty);
   //
-  const arrayFilter = uncurryThis(arrayPrototype.filter);
-  const arrayJoin = uncurryThis(arrayPrototype.join);
-  const arrayPush = uncurryThis(arrayPrototype.push);
-  const arrayPop = uncurryThis(arrayPrototype.pop);
-  const arrayIncludes = uncurryThis(arrayPrototype.includes);
-  //
-  const regexpTest = uncurryThis(regexpPrototype.test);
-  //
-  const stringMatch = uncurryThis(stringPrototype.match);
   const stringSearch = uncurryThis(stringPrototype.search);
   const stringSlice = uncurryThis(stringPrototype.slice);
   const stringSplit = uncurryThis(stringPrototype.split);
-  //
-  const weakmapGet = uncurryThis(weakmapPrototype.get);
-  const weakmapSet = uncurryThis(weakmapPrototype.set);
-  const weakmapHas = uncurryThis(weakmapPrototype.has);
-
-  /**
-   * immutableObject
-   * An immutable (frozen) exotic object and is safe to share.
-   */
-  const immutableObject = freeze({ __proto__: null });
 
   // Captures a key and value of the form #key=value or @key=value
   const sourceMetaEntryRegExp =
