@@ -67,10 +67,8 @@
     getOwnPropertyNames,
     getPrototypeOf,
     is,
-    isExtensible,
     keys,
     prototype: objectPrototype,
-    seal,
     setPrototypeOf,
     values,
   } = Object;
@@ -99,7 +97,7 @@
 
   const { apply, construct, get: reflectGet, set: reflectSet } = Reflect;
 
-  const { isArray, prototype: arrayPrototype } = Array;
+  const { prototype: arrayPrototype } = Array;
   const { revocable: proxyRevocable } = Proxy;
   const { prototype: regexpPrototype } = RegExp;
   const { prototype: stringPrototype } = String;
@@ -124,22 +122,15 @@
 
   const objectHasOwnProperty = uncurryThis(objectPrototype.hasOwnProperty);
   //
-  const arrayFilter = uncurryThis(arrayPrototype.filter);
   const arrayJoin = uncurryThis(arrayPrototype.join);
-  const arrayPush = uncurryThis(arrayPrototype.push);
   const arrayPop = uncurryThis(arrayPrototype.pop);
   const arrayIncludes = uncurryThis(arrayPrototype.includes);
   //
   const regexpTest = uncurryThis(regexpPrototype.test);
   //
-  const stringMatch = uncurryThis(stringPrototype.match);
   const stringSearch = uncurryThis(stringPrototype.search);
   const stringSlice = uncurryThis(stringPrototype.slice);
   const stringSplit = uncurryThis(stringPrototype.split);
-  //
-  const weakmapGet = uncurryThis(weakmapPrototype.get);
-  const weakmapSet = uncurryThis(weakmapPrototype.set);
-  const weakmapHas = uncurryThis(weakmapPrototype.has);
 
   /**
    * immutableObject
