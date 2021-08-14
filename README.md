@@ -4,11 +4,11 @@
 
 **LavaMoat** is a set of tools for securing JavaScript projects against a category of attacks called **software supply chain attacks.**
 
-This genre of attack occurs when a malicious dependency makes it way into a developer's application. An attacker could use the vulerable dependency to then steal important secrets like credit card numbers, private keys, or personal data.
+This genre of attack occurs when a malicious dependency makes it way into a developer's application. An attacker could use the vulnerable dependency to then steal important secrets like credit card numbers, private keys, or personal data.
 
 These attacks have already hit the cryptocurrency ecosystem and present a significant risk for the developers and users of wallets and apps.
 
-In order to help mitigate the risk of such an attack we are building a suite of tools that range from a node-based runtime, to plugins for common app bundlers (eg webpack, browserify), to dependecy analysis and visualization tools.
+In order to help mitigate the risk of such an attack we are building a suite of tools that range from a node-based runtime, to plugins for common app bundlers (eg webpack, browserify), to dependency analysis and visualization tools.
 
 **The goal of LavaMoat** is to bring added protections to modern JavaScript apps without having to rewrite them from scratch and automate a good first-start security configuration.
 
@@ -50,7 +50,7 @@ App bundles have **two** major components:
 This is the code that initializes and runs the bundle. For example, the implementation of the `require` function.
 
 2. Module sources
-This includes the js content of the module sources, and sometimes some config information like module name alaises.
+This includes the js content of the module sources, and sometimes some config information like module name aliases.
 
 LavaMoat modifies the bundle's runtime to enforce the configured constraints.
 
@@ -62,7 +62,7 @@ LavaMoat modifies the bundle's runtime to enforce the configured constraints.
 
 ### Additional tools
 
-In addition to the LavaMoat runtime bundler plugins, there are some tools to help analyze your dependecy graph and configuration.
+In addition to the LavaMoat runtime bundler plugins, there are some tools to help analyze your dependency graph and configuration.
 
 See [lavamoat-viz][LavamoatViz] for a demo of the tool.
 
