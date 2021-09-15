@@ -184,13 +184,12 @@ applyTransforms: cell("applyTransforms"),
       },{
         prepareEval: cell("prepareEval"),
 performEval: cell("performEval"),
-performApply: cell("performApply"),
 
         
       },{
         prepareCompartmentEvaluation: cell("prepareCompartmentEvaluation"),
 compartmentEvaluate: cell("compartmentEvaluate"),
-compartmentApply: cell("compartmentApply"),
+makeScopeProxy: cell("makeScopeProxy"),
 
         
       },{
@@ -764,7 +763,6 @@ makeLockdown: cell("makeLockdown"),
           onceVar: {
                               prepareEval: cells[10].prepareEval.set,
                                   performEval: cells[10].performEval.set,
-                                  performApply: cells[10].performApply.set,
                 
           },
         });
@@ -806,7 +804,7 @@ makeLockdown: cell("makeLockdown"),
           onceVar: {
                               prepareCompartmentEvaluation: cells[11].prepareCompartmentEvaluation.set,
                                   compartmentEvaluate: cells[11].compartmentEvaluate.set,
-                                  compartmentApply: cells[11].compartmentApply.set,
+                                  makeScopeProxy: cells[11].makeScopeProxy.set,
                 
           },
         });
@@ -4143,37 +4141,11 @@ localObject = {},
       assert.fail(d`handler did not reset allowNextEvalToBeUnsafe ${err}`);
     }
   }
-};
-
-/**
- * performApply()
- *
- * @param {Function} magicWrappedFunction
- * @param {Object} globalObject
- * @param {Objeect} localObject
- * @param {Object} [options]
- * @param {bool} [options.sloppyGlobalsMode]
- * @param {WeakSet} [options.knownScopeProxies]
- */$h‍_once.performEval(performEval);
-const performApply = (
-magicWrappedFunction,
-globalObject,
-localObject = {},
-{ sloppyGlobalsMode = false, knownScopeProxies = new WeakSet() } = {}) =>
-{
-  const { scopeProxy } = prepareEval(globalObject, localObject, {
-    sloppyGlobalsMode,
-    knownScopeProxies });
-
-
-  // "magicWrappedFunction" is equivalent to the "evaluateFactory"
-  const evaluate = apply(magicWrappedFunction, scopeProxy, []);
-  return apply(evaluate, globalObject, []);
-};$h‍_once.performApply(performApply);
+};$h‍_once.performEval(performEval);
 })
 
 ,
-(({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,  }) => {   let TypeError,arrayPush,create,defineProperties,getOwnPropertyDescriptors,evadeHtmlCommentTest,evadeImportExpressionTest,rejectSomeDirectEvalExpressions,performEval,performApply;$h‍_imports([["./commons.js", [["TypeError", [$h‍_a => (TypeError = $h‍_a)]],["arrayPush", [$h‍_a => (arrayPush = $h‍_a)]],["create", [$h‍_a => (create = $h‍_a)]],["defineProperties", [$h‍_a => (defineProperties = $h‍_a)]],["getOwnPropertyDescriptors", [$h‍_a => (getOwnPropertyDescriptors = $h‍_a)]]]],["./transforms.js", [["evadeHtmlCommentTest", [$h‍_a => (evadeHtmlCommentTest = $h‍_a)]],["evadeImportExpressionTest", [$h‍_a => (evadeImportExpressionTest = $h‍_a)]],["rejectSomeDirectEvalExpressions", [$h‍_a => (rejectSomeDirectEvalExpressions = $h‍_a)]]]],["./evaluate.js", [["performEval", [$h‍_a => (performEval = $h‍_a)]],["performApply", [$h‍_a => (performApply = $h‍_a)]]]]]);   
+(({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,  }) => {   let TypeError,arrayPush,create,defineProperties,getOwnPropertyDescriptors,evadeHtmlCommentTest,evadeImportExpressionTest,rejectSomeDirectEvalExpressions,prepareEval,performEval;$h‍_imports([["./commons.js", [["TypeError", [$h‍_a => (TypeError = $h‍_a)]],["arrayPush", [$h‍_a => (arrayPush = $h‍_a)]],["create", [$h‍_a => (create = $h‍_a)]],["defineProperties", [$h‍_a => (defineProperties = $h‍_a)]],["getOwnPropertyDescriptors", [$h‍_a => (getOwnPropertyDescriptors = $h‍_a)]]]],["./transforms.js", [["evadeHtmlCommentTest", [$h‍_a => (evadeHtmlCommentTest = $h‍_a)]],["evadeImportExpressionTest", [$h‍_a => (evadeImportExpressionTest = $h‍_a)]],["rejectSomeDirectEvalExpressions", [$h‍_a => (rejectSomeDirectEvalExpressions = $h‍_a)]]]],["./evaluate.js", [["prepareEval", [$h‍_a => (prepareEval = $h‍_a)]],["performEval", [$h‍_a => (performEval = $h‍_a)]]]]]);   
 
 
 
@@ -4208,10 +4180,8 @@ const prepareCompartmentEvaluation = (compartmentFields, options) => {
   if (__rejectSomeDirectEvalExpressions__ === true) {
     arrayPush(localTransforms, rejectSomeDirectEvalExpressions);
   }
-
   let { globalTransforms } = compartmentFields;
   const { globalObject, globalLexicals, knownScopeProxies } = compartmentFields;
-
   let localObject = globalLexicals;
   if (__moduleShimLexicals__ !== undefined) {
     // When using `evaluate` for ESM modules, as should only occur from the
@@ -4223,7 +4193,6 @@ const prepareCompartmentEvaluation = (compartmentFields, options) => {
     // implementation may opt-in to use the same transforms for `evaluate`
     // and `import`, at the expense of being tightly coupled to SES-shim.
     globalTransforms = undefined;
-
     localObject = create(null, getOwnPropertyDescriptors(globalLexicals));
     defineProperties(
     localObject,
@@ -4266,34 +4235,19 @@ const compartmentEvaluate = (compartmentFields, source, options) => {
 
 };$h‍_once.compartmentEvaluate(compartmentEvaluate);
 
-const compartmentApply = (
-compartmentFields,
-magicWrappedFunction,
-options) =>
-{
-  // Perform this check first to avoid unecessary sanitizing.
-  if (typeof magicWrappedFunction !== 'function') {
-    throw new TypeError(
-    'second argument of compartmentApply() must be a function');
-
-  }
-
+const makeScopeProxy = (compartmentFields, options) => {
   const {
     globalObject,
     localObject,
-    globalTransforms,
-    localTransforms,
     sloppyGlobalsMode,
     knownScopeProxies } =
   prepareCompartmentEvaluation(compartmentFields, options);
-
-  return performApply(magicWrappedFunction, globalObject, localObject, {
-    globalTransforms,
-    localTransforms,
+  const { scopeProxy } = prepareEval(globalObject, localObject, {
     sloppyGlobalsMode,
     knownScopeProxies });
 
-};$h‍_once.compartmentApply(compartmentApply);
+  return scopeProxy;
+};$h‍_once.makeScopeProxy(makeScopeProxy);
 })
 
 ,
@@ -5754,7 +5708,7 @@ const whitelist = {
     // Should this be proposed?
     toString: fn,
     __isKnownScopeProxy__: fn,
-    __applyPrecompiledModuleFunctor__: fn,
+    __makeScopeProxy__: fn,
     import: asyncFn,
     load: asyncFn,
     importNow: fn,
@@ -5861,7 +5815,12 @@ compartmentPrototype,
 })
 
 ,
-(({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,  }) => {   let ReferenceError,TypeError,arrayMap,create,freeze,mapGet,mapHas,mapSet,promiseAll,promiseCatch,values,weakmapGet,assert;$h‍_imports([["./commons.js", [["ReferenceError", [$h‍_a => (ReferenceError = $h‍_a)]],["TypeError", [$h‍_a => (TypeError = $h‍_a)]],["arrayMap", [$h‍_a => (arrayMap = $h‍_a)]],["create", [$h‍_a => (create = $h‍_a)]],["freeze", [$h‍_a => (freeze = $h‍_a)]],["mapGet", [$h‍_a => (mapGet = $h‍_a)]],["mapHas", [$h‍_a => (mapHas = $h‍_a)]],["mapSet", [$h‍_a => (mapSet = $h‍_a)]],["promiseAll", [$h‍_a => (promiseAll = $h‍_a)]],["promiseCatch", [$h‍_a => (promiseCatch = $h‍_a)]],["values", [$h‍_a => (values = $h‍_a)]],["weakmapGet", [$h‍_a => (weakmapGet = $h‍_a)]]]],["./error/assert.js", [["assert", [$h‍_a => (assert = $h‍_a)]]]]]);   
+(({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,  }) => {   let ReferenceError,TypeError,Map,Set,arrayJoin,arrayMap,arrayPush,create,freeze,mapGet,mapHas,mapSet,setAdd,promiseCatch,promiseThen,values,weakmapGet,assert;$h‍_imports([["./commons.js", [["ReferenceError", [$h‍_a => (ReferenceError = $h‍_a)]],["TypeError", [$h‍_a => (TypeError = $h‍_a)]],["Map", [$h‍_a => (Map = $h‍_a)]],["Set", [$h‍_a => (Set = $h‍_a)]],["arrayJoin", [$h‍_a => (arrayJoin = $h‍_a)]],["arrayMap", [$h‍_a => (arrayMap = $h‍_a)]],["arrayPush", [$h‍_a => (arrayPush = $h‍_a)]],["create", [$h‍_a => (create = $h‍_a)]],["freeze", [$h‍_a => (freeze = $h‍_a)]],["mapGet", [$h‍_a => (mapGet = $h‍_a)]],["mapHas", [$h‍_a => (mapHas = $h‍_a)]],["mapSet", [$h‍_a => (mapSet = $h‍_a)]],["setAdd", [$h‍_a => (setAdd = $h‍_a)]],["promiseCatch", [$h‍_a => (promiseCatch = $h‍_a)]],["promiseThen", [$h‍_a => (promiseThen = $h‍_a)]],["values", [$h‍_a => (values = $h‍_a)]],["weakmapGet", [$h‍_a => (weakmapGet = $h‍_a)]]]],["./error/assert.js", [["assert", [$h‍_a => (assert = $h‍_a)]]]]]);   
+
+
+
+
+
 
 
 
@@ -5886,6 +5845,8 @@ compartmentPrototype,
 
 
 const { details: d, quote: q } = assert;
+
+const noop = () => {};
 
 // `makeAlias` constructs compartment specifier tuples for the `aliases`
 // private field of compartments.
@@ -5915,7 +5876,10 @@ compartmentPrivateFields,
 moduleAliases,
 compartment,
 moduleSpecifier,
-staticModuleRecord) =>
+staticModuleRecord,
+pendingJobs,
+moduleLoads,
+errors) =>
 {
   const { resolveHook, moduleRecords } = weakmapGet(
   compartmentPrivateFields,
@@ -5935,18 +5899,29 @@ staticModuleRecord) =>
     resolvedImports });
 
 
+  // Enqueue jobs to load this module's shallow dependencies.
+  for (const fullSpecifier of values(resolvedImports)) {
+    // Behold: recursion.
+    // eslint-disable-next-line no-use-before-define
+    const dependencyLoaded = memoizedLoadWithErrorAnnotation(
+    compartmentPrivateFields,
+    moduleAliases,
+    compartment,
+    fullSpecifier,
+    pendingJobs,
+    moduleLoads,
+    errors);
+
+    setAdd(
+    pendingJobs,
+    promiseThen(dependencyLoaded, noop, (error) => {
+      arrayPush(errors, error);
+    }));
+
+  }
+
   // Memoize.
   mapSet(moduleRecords, moduleSpecifier, moduleRecord);
-
-  // Await all dependencies to load, recursively.
-  await promiseAll(
-  arrayMap(values(resolvedImports), (fullSpecifier) =>
-  // Behold: recursion.
-  // eslint-disable-next-line no-use-before-define
-  load(compartmentPrivateFields, moduleAliases, compartment, fullSpecifier)));
-
-
-
   return moduleRecord;
 };
 
@@ -5954,7 +5929,10 @@ const loadWithoutErrorAnnotation = async (
 compartmentPrivateFields,
 moduleAliases,
 compartment,
-moduleSpecifier) =>
+moduleSpecifier,
+pendingJobs,
+moduleLoads,
+errors) =>
 {
   const { importHook, moduleMap, moduleMapHook, moduleRecords } = weakmapGet(
   compartmentPrivateFields,
@@ -5987,18 +5965,19 @@ moduleSpecifier) =>
     }
     // Behold: recursion.
     // eslint-disable-next-line no-use-before-define
-    const aliasRecord = await load(
+    const aliasRecord = await memoizedLoadWithErrorAnnotation(
     compartmentPrivateFields,
     moduleAliases,
     alias.compartment,
-    alias.specifier);
+    alias.specifier,
+    pendingJobs,
+    moduleLoads,
+    errors);
 
-    // Memoize.
     mapSet(moduleRecords, moduleSpecifier, aliasRecord);
     return aliasRecord;
   }
 
-  // Memoize.
   if (mapHas(moduleRecords, moduleSpecifier)) {
     return mapGet(moduleRecords, moduleSpecifier);
   }
@@ -6026,9 +6005,11 @@ moduleSpecifier) =>
     moduleAliases,
     aliasCompartment,
     aliasSpecifier,
-    aliasModuleRecord);
+    aliasModuleRecord,
+    pendingJobs,
+    moduleLoads,
+    errors);
 
-    // Memoize by aliased specifier.
     mapSet(moduleRecords, moduleSpecifier, aliasRecord);
     return aliasRecord;
   }
@@ -6038,40 +6019,126 @@ moduleSpecifier) =>
   moduleAliases,
   compartment,
   moduleSpecifier,
-  staticModuleRecord);
+  staticModuleRecord,
+  pendingJobs,
+  moduleLoads,
+  errors);
 
 };
 
-// `load` asynchronously loads `StaticModuleRecords` and creates a complete
-// graph of `ModuleCompartmentRecords`.
-// The module records refer to each other by a reference to the dependency's
-// compartment and the specifier of the module within its own compartment.
-// This graph is then ready to be synchronously linked and executed.
+const memoizedLoadWithErrorAnnotation = async (
+compartmentPrivateFields,
+moduleAliases,
+compartment,
+moduleSpecifier,
+pendingJobs,
+moduleLoads,
+errors) =>
+{
+  const { name: compartmentName } = weakmapGet(
+  compartmentPrivateFields,
+  compartment);
+
+
+  // Prevent data-lock from recursion into branches visited in dependent loads.
+  let compartmentLoading = mapGet(moduleLoads, compartment);
+  if (compartmentLoading === undefined) {
+    compartmentLoading = new Map();
+    mapSet(moduleLoads, compartment, compartmentLoading);
+  }
+  let moduleLoading = mapGet(compartmentLoading, moduleSpecifier);
+  if (moduleLoading !== undefined) {
+    return moduleLoading;
+  }
+
+  moduleLoading = promiseCatch(
+  loadWithoutErrorAnnotation(
+  compartmentPrivateFields,
+  moduleAliases,
+  compartment,
+  moduleSpecifier,
+  pendingJobs,
+  moduleLoads,
+  errors),
+
+  (error) => {
+    // eslint-disable-next-line @endo/no-polymorphic-call
+    assert.note(
+    error,
+    d`${error.message}, loading ${q(moduleSpecifier)} in compartment ${q(
+    compartmentName)
+    }`);
+
+    throw error;
+  });
+
+
+  mapSet(compartmentLoading, moduleSpecifier, moduleLoading);
+
+  return moduleLoading;
+};
+
+/*
+ * `load` asynchronously gathers the `StaticModuleRecord`s for a module and its
+ * transitive dependencies.
+ * The module records refer to each other by a reference to the dependency's
+ * compartment and the specifier of the module within its own compartment.
+ * This graph is then ready to be synchronously linked and executed.
+ */
 const load = async (
 compartmentPrivateFields,
 moduleAliases,
 compartment,
 moduleSpecifier) =>
 {
-  return promiseCatch(
-  loadWithoutErrorAnnotation(
+  const { name: compartmentName } = weakmapGet(
+  compartmentPrivateFields,
+  compartment);
+
+
+  /** @type {Set<Promise<undefined>>} */
+  const pendingJobs = new Set();
+  /** @type {Map<Object, Map<string, Promise<Record>>} */
+  const moduleLoads = new Map();
+  /** @type {Array<Error>} */
+  const errors = [];
+
+  const dependencyLoaded = memoizedLoadWithErrorAnnotation(
   compartmentPrivateFields,
   moduleAliases,
   compartment,
-  moduleSpecifier),
+  moduleSpecifier,
+  pendingJobs,
+  moduleLoads,
+  errors);
 
-  (error) => {
-    const { name } = weakmapGet(compartmentPrivateFields, compartment);
-    // eslint-disable-next-line @endo/no-polymorphic-call
-    assert.note(
-    error,
-    d`${error.message}, loading ${q(moduleSpecifier)} in compartment ${q(
-    name)
+  setAdd(
+  pendingJobs,
+  promiseThen(dependencyLoaded, noop, (error) => {
+    arrayPush(errors, error);
+  }));
+
+
+  // Drain pending jobs queue.
+  // Each job is a promise for undefined, regardless of success or failure.
+  // Before we add a job to the queue, we catch any error and push it into the
+  // `errors` accumulator.
+  for (const job of pendingJobs) {
+    // eslint-disable-next-line no-await-in-loop
+    await job;
+  }
+
+  // Throw an aggregate error if there were any errors.
+  if (errors.length > 0) {
+    throw new TypeError(
+    `Failed to load module ${q(moduleSpecifier)} in package ${q(
+    compartmentName)
+    } (${errors.length} underlying failures: ${arrayJoin(
+    arrayMap(errors, (error) => error.message),
+    ', ')
     }`);
 
-    throw error;
-  });
-
+  }
 };$h‍_once.load(load);
 })
 
@@ -6740,11 +6807,18 @@ moduleAliases,
 compartment,
 moduleSpecifier) =>
 {
-  const { moduleRecords } = weakmapGet(compartmentPrivateFields, compartment);
+  const { name: compartmentName, moduleRecords } = weakmapGet(
+  compartmentPrivateFields,
+  compartment);
+
 
   const moduleRecord = mapGet(moduleRecords, moduleSpecifier);
   if (moduleRecord === undefined) {
-    throw new ReferenceError(`Missing link to module ${q(moduleSpecifier)}`);
+    throw new ReferenceError(
+    `Missing link to module ${q(moduleSpecifier)} from compartment ${q(
+    compartmentName)
+    }`);
+
   }
 
   // Mutual recursion so there's no confusion about which
@@ -6889,10 +6963,7 @@ moduleRecord) =>
 })
 
 ,
-(({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,  }) => {   let Map,ReferenceError,TypeError,WeakMap,WeakSet,arrayFilter,arrayJoin,assign,defineProperties,entries,freeze,getOwnPropertyNames,promiseThen,weakmapGet,weakmapSet,weaksetHas,initGlobalObject,isValidIdentifierName,sharedGlobalPropertyNames,load,link,getDeferredExports,assert,compartmentEvaluate,compartmentApply;$h‍_imports([["./commons.js", [["Map", [$h‍_a => (Map = $h‍_a)]],["ReferenceError", [$h‍_a => (ReferenceError = $h‍_a)]],["TypeError", [$h‍_a => (TypeError = $h‍_a)]],["WeakMap", [$h‍_a => (WeakMap = $h‍_a)]],["WeakSet", [$h‍_a => (WeakSet = $h‍_a)]],["arrayFilter", [$h‍_a => (arrayFilter = $h‍_a)]],["arrayJoin", [$h‍_a => (arrayJoin = $h‍_a)]],["assign", [$h‍_a => (assign = $h‍_a)]],["defineProperties", [$h‍_a => (defineProperties = $h‍_a)]],["entries", [$h‍_a => (entries = $h‍_a)]],["freeze", [$h‍_a => (freeze = $h‍_a)]],["getOwnPropertyNames", [$h‍_a => (getOwnPropertyNames = $h‍_a)]],["promiseThen", [$h‍_a => (promiseThen = $h‍_a)]],["weakmapGet", [$h‍_a => (weakmapGet = $h‍_a)]],["weakmapSet", [$h‍_a => (weakmapSet = $h‍_a)]],["weaksetHas", [$h‍_a => (weaksetHas = $h‍_a)]]]],["./global-object.js", [["initGlobalObject", [$h‍_a => (initGlobalObject = $h‍_a)]]]],["./scope-constants.js", [["isValidIdentifierName", [$h‍_a => (isValidIdentifierName = $h‍_a)]]]],["./whitelist.js", [["sharedGlobalPropertyNames", [$h‍_a => (sharedGlobalPropertyNames = $h‍_a)]]]],["./module-load.js", [["load", [$h‍_a => (load = $h‍_a)]]]],["./module-link.js", [["link", [$h‍_a => (link = $h‍_a)]]]],["./module-proxy.js", [["getDeferredExports", [$h‍_a => (getDeferredExports = $h‍_a)]]]],["./error/assert.js", [["assert", [$h‍_a => (assert = $h‍_a)]]]],["./compartment-evaluate.js", [["compartmentEvaluate", [$h‍_a => (compartmentEvaluate = $h‍_a)]],["compartmentApply", [$h‍_a => (compartmentApply = $h‍_a)]]]]]);   
-
-
-
+(({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,  }) => {   let Map,ReferenceError,TypeError,WeakMap,WeakSet,arrayFilter,arrayJoin,assign,defineProperties,entries,freeze,getOwnPropertyNames,promiseThen,weakmapGet,weakmapSet,weaksetHas,initGlobalObject,isValidIdentifierName,sharedGlobalPropertyNames,load,link,getDeferredExports,assert,compartmentEvaluate,makeScopeProxy;$h‍_imports([["./commons.js", [["Map", [$h‍_a => (Map = $h‍_a)]],["ReferenceError", [$h‍_a => (ReferenceError = $h‍_a)]],["TypeError", [$h‍_a => (TypeError = $h‍_a)]],["WeakMap", [$h‍_a => (WeakMap = $h‍_a)]],["WeakSet", [$h‍_a => (WeakSet = $h‍_a)]],["arrayFilter", [$h‍_a => (arrayFilter = $h‍_a)]],["arrayJoin", [$h‍_a => (arrayJoin = $h‍_a)]],["assign", [$h‍_a => (assign = $h‍_a)]],["defineProperties", [$h‍_a => (defineProperties = $h‍_a)]],["entries", [$h‍_a => (entries = $h‍_a)]],["freeze", [$h‍_a => (freeze = $h‍_a)]],["getOwnPropertyNames", [$h‍_a => (getOwnPropertyNames = $h‍_a)]],["promiseThen", [$h‍_a => (promiseThen = $h‍_a)]],["weakmapGet", [$h‍_a => (weakmapGet = $h‍_a)]],["weakmapSet", [$h‍_a => (weakmapSet = $h‍_a)]],["weaksetHas", [$h‍_a => (weaksetHas = $h‍_a)]]]],["./global-object.js", [["initGlobalObject", [$h‍_a => (initGlobalObject = $h‍_a)]]]],["./scope-constants.js", [["isValidIdentifierName", [$h‍_a => (isValidIdentifierName = $h‍_a)]]]],["./whitelist.js", [["sharedGlobalPropertyNames", [$h‍_a => (sharedGlobalPropertyNames = $h‍_a)]]]],["./module-load.js", [["load", [$h‍_a => (load = $h‍_a)]]]],["./module-link.js", [["link", [$h‍_a => (link = $h‍_a)]]]],["./module-proxy.js", [["getDeferredExports", [$h‍_a => (getDeferredExports = $h‍_a)]]]],["./error/assert.js", [["assert", [$h‍_a => (assert = $h‍_a)]]]],["./compartment-evaluate.js", [["compartmentEvaluate", [$h‍_a => (compartmentEvaluate = $h‍_a)]],["makeScopeProxy", [$h‍_a => (makeScopeProxy = $h‍_a)]]]]]);   
 
 
 
@@ -7004,22 +7075,6 @@ const CompartmentPrototype = {
     return compartmentEvaluate(compartmentFields, source, options);
   },
 
-  /**
-   * @param {Function} magicWrappedFunction is a JavaScript function wrapped in the magic lines of code.
-   * @param {Object} [options]
-   * @param {Array<Transform>} [options.transforms]
-   * @param {boolean} [options.sloppyGlobalsMode]
-   * @param {Object} [options.__moduleShimLexicals__]
-   * @param {boolean} [options.__evadeHtmlCommentTest__]
-   * @param {boolean} [options.__evadeImportExpressionTest__]
-   * @param {boolean} [options.__rejectSomeDirectEvalExpressions__]
-   */
-  /* eslint-disable-next-line no-underscore-dangle */
-  __applyPrecompiledModuleFunctor__(magicWrappedFunction, options = {}) {
-    const compartmentFields = weakmapGet(privateFields, this);
-    return compartmentApply(compartmentFields, magicWrappedFunction, options);
-  },
-
   toString() {
     return '[object Compartment]';
   },
@@ -7028,6 +7083,18 @@ const CompartmentPrototype = {
   __isKnownScopeProxy__(value) {
     const { knownScopeProxies } = weakmapGet(privateFields, this);
     return weaksetHas(knownScopeProxies, value);
+  },
+
+  /**
+   * @param {Object} [options]
+   * @param {boolean} [options.sloppyGlobalsMode]
+   * @param {Object} [options.__moduleShimLexicals__]
+   */
+  /* eslint-disable-next-line no-underscore-dangle */
+  __makeScopeProxy__(options = {}) {
+    const compartmentFields = weakmapGet(privateFields, this);
+    const scopeProxy = makeScopeProxy(compartmentFields, options);
+    return { scopeProxy };
   },
 
   module(specifier) {
