@@ -9,6 +9,7 @@
     prepareModuleInitializerArgs,
     getExternalCompartment,
     globalThisRefs,
+    runWithPrecompiledModules,
   }) {
     const debugMode = __lavamoatDebugMode__
 
@@ -51,7 +52,8 @@
       getExternalCompartment,
       globalRef,
       globalThisRefs,
-      debugMode
+      debugMode,
+      runWithPrecompiledModules
     })
     return kernel
   }

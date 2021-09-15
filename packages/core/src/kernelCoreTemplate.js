@@ -1,4 +1,5 @@
 (function () {
+  "use strict"
   return createKernel
 
   function createKernel ({
@@ -13,7 +14,8 @@
     getExternalCompartment,
     globalThisRefs,
     // security options
-    debugMode
+    debugMode,
+    runWithPrecompiledModules
   }) {
     // create SES-wrapped LavaMoat kernel
     // endowments:
@@ -21,7 +23,12 @@
     // - Math is for untamed Math.random
     // - Date is for untamed Date.now
     const kernelCompartment = new Compartment({ console, Math, Date })
-    const makeKernel = kernelCompartment.evaluate(`(${unsafeCreateKernel})\n//# sourceURL=LavaMoat/core/kernel`)
+    let makeKernel
+    if (runWithPrecompiledModules) {
+      makeKernel = unsafeMakeKernel
+    } else {
+      makeKernel = kernelCompartment.evaluate(`(${unsafeMakeKernel})\n//# sourceURL=LavaMoat/core/kernel`)
+    }
     const lavamoatKernel = makeKernel({
       globalRef,
       lavamoatConfig,
@@ -30,7 +37,8 @@
       prepareModuleInitializerArgs,
       getExternalCompartment,
       globalThisRefs,
-      debugMode
+      debugMode,
+      runWithPrecompiledModules
     })
 
     return lavamoatKernel
@@ -38,15 +46,16 @@
 
   // this is serialized and run in SES
   // mostly just exists to expose variables to internalRequire and loadBundle
-  function unsafeCreateKernel ({
+  function unsafeMakeKernel ({
     globalRef,
-    debugMode,
     lavamoatConfig,
     loadModuleData,
     getRelativeModuleId,
     prepareModuleInitializerArgs,
     getExternalCompartment,
-    globalThisRefs = ['globalThis']
+    globalThisRefs = ['globalThis'],
+    debugMode = false,
+    runWithPrecompiledModules = false
   }) {
     // "templateRequire" calls are inlined in "generatePrelude"
     const generalUtils = templateRequire('makeGeneralUtils')()
@@ -189,7 +198,7 @@
     }
 
     function prepareModuleInitializer (moduleData, packagePolicy) {
-      const { moduleInitializer, package: packageName, id: moduleId, source: moduleSource } = moduleData
+      const { moduleInitializer, precompiledInitializer, package: packageName, id: moduleId, source: moduleSource } = moduleData
 
       // moduleInitializer may be set by loadModuleData (e.g. builtin + native modules)
       if (moduleInitializer) {
@@ -205,7 +214,7 @@
           // here we just ensure that the module type is the only other type with a external moduleInitializer
           throw new Error(`LavaMoat - invalid external moduleInitializer for module type "${moduleData.type}" in package "${packageName}", module "${moduleId}"`)
         }
-        // moduleObj must be from the same Realm as the moduleInitializer
+        // moduleObj must be from the same Realm as the moduleInitializer (eg dart2js runtime requirement)
         // here we are assuming the provided moduleInitializer is from the same Realm as this kernel
         const moduleObj = { exports: {} }
         return { moduleInitializer, moduleObj }
@@ -214,16 +223,33 @@
       // setup initializer from moduleSource and compartment.
       // execute in package compartment with globalThis populated per package policy
       const packageCompartment = getCompartmentForPackage(packageName, packagePolicy)
-      // TODO: move all source mutations elsewhere
+
       try {
-        const sourceURL = moduleData.file || `modules/${moduleId}`
-        if (sourceURL.includes('\n')) {
-          throw new Error(`LavaMoat - Newlines not allowed in filenames: ${JSON.stringify(sourceURL)}`)
+        let moduleObj
+        let moduleInitializer
+        if (runWithPrecompiledModules) {
+          if (!precompiledInitializer) {
+            throw new Error(`LavaMoat - precompiledInitializer missing for "${moduleId}" from package "${packageName}"`)
+          }
+          // moduleObj must be from the same Realm as the moduleInitializer (eg dart2js runtime requirement)
+          // here we are assuming the provided moduleInitializer is from the same Realm as this kernel
+          moduleObj = { exports: {} }
+          const { scopeProxy } = packageCompartment.__makeScopeProxy__()
+          // this invokes the with-proxy wrapper
+          const moduleInitializerFactory = precompiledInitializer.call(scopeProxy)
+          // this ensures strict mode
+          moduleInitializer = moduleInitializerFactory()
+        } else {
+          const sourceURL = moduleData.file || `modules/${moduleId}`
+          if (sourceURL.includes('\n')) {
+            throw new Error(`LavaMoat - Newlines not allowed in filenames: ${JSON.stringify(sourceURL)}`)
+          }
+          // moduleObj must be from the same Realm as the moduleInitializer (eg dart2js runtime requirement)
+          // the dart2js runtime relies on this for some reason
+          moduleObj = packageCompartment.evaluate('({ exports: {} })')
+          // TODO: move all source mutations elsewhere
+          moduleInitializer = packageCompartment.evaluate(`${moduleSource}\n//# sourceURL=${sourceURL}`)
         }
-        // moduleObj must be from the same Realm as the moduleInitializer
-        // the dart2js runtime relies on this for some reason
-        const moduleObj = packageCompartment.evaluate('({ exports: {} })')
-        const moduleInitializer = packageCompartment.evaluate(`${moduleSource}\n//# sourceURL=${sourceURL}`)
         return { moduleInitializer, moduleObj }
       } catch (err) {
         console.warn(`LavaMoat - Error evaluating module "${moduleId}" from package "${packageName}" \n${err.stack}`)
