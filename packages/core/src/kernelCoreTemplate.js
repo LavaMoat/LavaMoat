@@ -245,7 +245,6 @@
             throw new Error(`LavaMoat - Newlines not allowed in filenames: ${JSON.stringify(sourceURL)}`)
           }
           // moduleObj must be from the same Realm as the moduleInitializer (eg dart2js runtime requirement)
-          // the dart2js runtime relies on this for some reason
           moduleObj = packageCompartment.evaluate('({ exports: {} })')
           // TODO: move all source mutations elsewhere
           moduleInitializer = packageCompartment.evaluate(`${moduleSource}\n//# sourceURL=${sourceURL}`)
