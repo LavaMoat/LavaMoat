@@ -397,12 +397,18 @@ async function getStreamResults (stream) {
   return results
 }
 
-async function runBrowserify ({ scenario }) {
+async function runBrowserify ({
+  scenario,
+  bundleWithPrecompiledModules = false,
+}) {
   const args = [JSON.stringify({
     entries: scenario.entries,
-    opts: scenario.opts,
+    opts: {
+      ...scenario.opts,
+      bundleWithPrecompiledModules
+    },
     policy: scenario.config,
-    policyOverride: scenario.configOverride
+    policyOverride: scenario.configOverride,
   })]
   const paths = {
     normal: `${__dirname}/fixtures/runBrowserify.js`,
@@ -413,7 +419,10 @@ async function runBrowserify ({ scenario }) {
   return { output }
 }
 
-async function createBundleForScenario ({ scenario }) {
+async function createBundleForScenario ({
+  scenario,
+  bundleWithPrecompiledModules = false,
+}) {
   let policy
   if (!scenario.dir) {
     const { projectDir, policyDir } = await prepareScenarioOnDisk({ scenario, policyName: 'browserify' })
@@ -423,13 +432,23 @@ async function createBundleForScenario ({ scenario }) {
     policy = path.join(scenario.dir, `/lavamoat/browserify/`)
   }
   
-  const { output: { stdout: bundle } } = await runBrowserify({ scenario })
+  const { output: { stdout: bundle, stderr } } = await runBrowserify({ scenario, bundleWithPrecompiledModules })
+  if (stderr.length) {
+    console.warn(stderr)
+  }
   return { bundleForScenario: bundle, policyDir: policy }
 }
 
-async function runScenario ({ scenario, bundle }) {
+async function runScenario ({
+  scenario,
+  bundle,
+  runWithPrecompiledModules = false,
+}) {
   if (!bundle) {
-    const { bundleForScenario } = await createBundleForScenario({ scenario })
+    const { bundleForScenario } = await createBundleForScenario({
+      scenario,
+      bundleWithPrecompiledModules: runWithPrecompiledModules,
+    })
     bundle = bundleForScenario
   }
   const { hookedConsole, firstLogEventPromise } = createHookedConsole()

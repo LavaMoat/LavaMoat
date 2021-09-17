@@ -49,7 +49,8 @@ module.exports = function ({
   pruneConfig = false,
   externalRequireName,
   sourceRoot,
-  sourceMapPrefix
+  sourceMapPrefix,
+  bundleWithPrecompiledModules = false,
 } = {}) {
   // stream/parser wrapping incase raw: false
   const parser = raw ? through.obj() : JSONStream.parse([true])
@@ -199,10 +200,26 @@ module.exports = function ({
       package: packageName,
       packageVersion,
       file,
-      deps,
-      source: moduleInitSrc
+      deps
     }
+    if (!bundleWithPrecompiledModules) {
+      jsonSerializeableData.source = moduleInitSrc
+    }
+
     let serializedEntry = '{'
+    if (bundleWithPrecompiledModules) {
+      const precompiledInitializer = (
+`function(){
+  with (this) {
+    return function() {
+      'use strict';
+      return ${moduleInitSrc}
+    };
+  }
+}`
+      )
+      serializedEntry += ` precompiledInitializer: ${precompiledInitializer},`
+    }
     Object.entries(jsonSerializeableData).forEach(([key, value]) => {
       serializedEntry += ` ${key}: ${jsonStringify(value)},`
     })

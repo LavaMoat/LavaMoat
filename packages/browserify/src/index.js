@@ -80,7 +80,8 @@ function getConfigurationFromPluginOpts (pluginOpts) {
     debug: 'debugMode',
     pn: 'policyName',
     projectRoot: 'projectRoot',
-    r: 'projectRoot'
+    r: 'projectRoot',
+    bundleWithPrecompiledModules: 'bundleWithPrecompiledModules',
   }
 
   const allowedKeys = new Set([
@@ -112,9 +113,10 @@ function getConfigurationFromPluginOpts (pluginOpts) {
     debugMode: Boolean(pluginOpts.debugMode),
     writeAutoPolicy: Boolean(pluginOpts.writeAutoPolicy || pluginOpts.writeAutoPolicyDebug),
     writeAutoPolicyDebug: Boolean(pluginOpts.writeAutoPolicyDebug),
+    bundleWithPrecompiledModules: Boolean(pluginOpts.bundleWithPrecompiledModules),
     actionOverrides: {}
   }
-
+  
   // check for action overrides
   if (typeof pluginOpts.writeAutoPolicy === 'function') {
     configuration.actionOverrides.writeAutoPolicy = pluginOpts.writeAutoPolicy
@@ -207,11 +209,12 @@ function getPolicyPaths (pluginOpts) {
 }
 
 function createLavamoatPacker (configuration = {}) {
-  const { includePrelude } = configuration
+  const { includePrelude, bundleWithPrecompiledModules } = configuration
   const defaults = {
     raw: true,
     config: loadPolicy(configuration),
-    prelude: includePrelude && generatePrelude(configuration)
+    prelude: includePrelude && generatePrelude(configuration),
+    bundleWithPrecompiledModules,
   }
   const packOpts = Object.assign({}, defaults, configuration)
   const customPack = createCustomPack(packOpts)

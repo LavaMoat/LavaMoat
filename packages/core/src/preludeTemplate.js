@@ -18,7 +18,8 @@
     loadModuleData,
     getRelativeModuleId,
     prepareModuleInitializerArgs,
-    globalThisRefs: ['window', 'self', 'global', 'globalThis']
+    globalThisRefs: ['window', 'self', 'global', 'globalThis'],
+    runWithPrecompiledModules: __runWithPrecompiledModules__,
   })
 
   // create a lavamoat pulic API for loading modules over multiple files

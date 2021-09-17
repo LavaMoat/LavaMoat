@@ -240,6 +240,9 @@
           // this ensures strict mode
           moduleInitializer = moduleInitializerFactory()
         } else {
+          if (typeof moduleSource !== 'string') {
+            throw new Error(`LavaMoat - moduleSource not a string for "${moduleId}" from package "${packageName}"`)
+          }
           const sourceURL = moduleData.file || `modules/${moduleId}`
           if (sourceURL.includes('\n')) {
             throw new Error(`LavaMoat - Newlines not allowed in filenames: ${JSON.stringify(sourceURL)}`)

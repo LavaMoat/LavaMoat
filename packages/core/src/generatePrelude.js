@@ -31,7 +31,8 @@ function generatePrelude (opts = {}) {
 
   let output = preludeTemplate
   output = stringReplace(output, '__createKernel__', kernelCode)
-
+  output = stringReplace(output, '__runWithPrecompiledModules__', String(opts.bundleWithPrecompiledModules || false))
+  
   return output
 }
 

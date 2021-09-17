@@ -262,8 +262,6 @@ async function runScenario ({
       if (runWithPrecompiledModules) {
         moduleData.precompiledInitializer = vmFeralFunction(`
           with (this) {
-            // optimizer goes here
-            // const { Function } = this;
             return function() {
               'use strict';
               return ${intializerSource}
