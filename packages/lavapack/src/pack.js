@@ -51,7 +51,8 @@ function createPacker({
   prunePolicy = false,
   externalRequireName,
   sourceRoot,
-  sourceMapPrefix
+  sourceMapPrefix,
+  bundleWithPrecompiledModules = false,
 } = {}) {
   // stream/parser wrapping incase raw: false
   const parser = raw ? through.obj() : JSONStream.parse([true])
@@ -210,7 +211,22 @@ function createPacker({
       // deps,
       // source: sourceMeta.code
     }
-    let serializedEntry = `[${jsonStringify(id)}, ${jsonStringify(deps)}, ${sourceMeta.code}, {`
+    let moduleInitializer
+    if (bundleWithPrecompiledModules) {
+      moduleInitializer = (
+`function(){
+  with (this) {
+    return function() {
+      'use strict';
+      return ${sourceMeta.code}
+    };
+  }
+}`
+      )
+    } else {
+      moduleInitializer = sourceMeta.code
+    }
+    let serializedEntry = `[${jsonStringify(id)}, ${jsonStringify(deps)}, ${moduleInitializer}, {`
     // add metadata
     Object.entries(jsonSerializeableData).forEach(([key, value]) => {
       // skip missing values
