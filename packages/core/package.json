@@ -1,6 +1,6 @@
 {
   "name": "lavamoat-core",
-  "version": "10.1.1",
+  "version": "10.1.2",
   "description": "LavaMoat kernel and utils",
   "main": "src/index.js",
   "directories": {
@@ -12,7 +12,7 @@
   "dependencies": {
     "fromentries": "^1.2.0",
     "json-stable-stringify": "^1.0.1",
-    "lavamoat-tofu": "^5.1.3",
+    "lavamoat-tofu": "^6.0.0",
     "merge-deep": "^3.0.2",
     "resolve": "^1.15.1"
   },
