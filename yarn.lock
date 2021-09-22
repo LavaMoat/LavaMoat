@@ -9263,6 +9263,17 @@ lavamoat-browserify@4.0.0:
     through2 "^3.0.0"
     umd "^3.0.3"
 
+lavamoat-core@^10.0.1:
+  version "10.1.2"
+  resolved "https://registry.yarnpkg.com/lavamoat-core/-/lavamoat-core-10.1.2.tgz#13ebef3cd42ed04f31c504b4046cc00299c595a9"
+  integrity sha512-VG95sqsowWrtbZthlOiznUhYnqNfhJxhiry26FEbDd8hQeZY5QY1vmT5mydyvJGDmoBPVKHbz5xMwjeBjC5xnw==
+  dependencies:
+    fromentries "^1.2.0"
+    json-stable-stringify "^1.0.1"
+    lavamoat-tofu "^6.0.0"
+    merge-deep "^3.0.2"
+    resolve "^1.15.1"
+
 lavamoat-core@^7.0.0:
   version "7.0.0"
   resolved "https://registry.yarnpkg.com/lavamoat-core/-/lavamoat-core-7.0.0.tgz#61231b1454d3978d9a9bc0cfbc7c827c1ccd3314"
