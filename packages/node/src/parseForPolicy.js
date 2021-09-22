@@ -6,6 +6,7 @@ const bindings = require('bindings')
 const gypBuild = require('node-gyp-build')
 const fromEntries = require('object.fromentries')
 const { codeFrameColumns } = require('@babel/code-frame')
+const { default: highlight } = require('@babel/highlight')
 const {
   packageNameFromPath,
   packageDataForModule,
@@ -263,6 +264,7 @@ function displayRichCompatWarning ({ moduleRecord, compatWarnings }) {
   const { packageName, file } = moduleRecord
   const { primordialMutations, strictModeViolations, dynamicRequires } = compatWarnings
   console.warn(`⚠️  Potentially Incompatible code detected in package "${packageName}" file "${file}":`)
+  const highlightedCode = highlight(moduleRecord.content)
   logWarnings('primordial mutation', primordialMutations)
   logWarnings('dynamic require', dynamicRequires)
   logErrors('strict mode violation', strictModeViolations)
@@ -271,7 +273,7 @@ function displayRichCompatWarning ({ moduleRecord, compatWarnings }) {
     sites.forEach(({ node }) => {
       const { npmfs } = codeSampleFromAstNode(node, moduleRecord)
       if (npmfs) console.warn(`  link: ${npmfs}`)
-      const output = codeFrameColumns(moduleRecord.content, node.loc, { message, highlightCode: true })
+      const output = codeFrameColumns(highlightedCode, node.loc, { message })
       console.warn(output)
     })
   }
@@ -282,7 +284,7 @@ function displayRichCompatWarning ({ moduleRecord, compatWarnings }) {
       const { npmfs } = codeSampleFromAstNode({ loc: range }, moduleRecord)
       if (npmfs) console.warn(`  link: ${npmfs}`)
       const message = `${category}: ${error.message}`
-      const output = codeFrameColumns(moduleRecord.content, range, { message, highlightCode: true })
+      const output = codeFrameColumns(highlightedCode, range, { message })
       console.warn(output)
     })
   }
