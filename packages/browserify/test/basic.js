@@ -1,6 +1,5 @@
 const test = require('ava')
 
-const { generatePrelude } = require('../src/index')
 const {
   createBundleFromEntry,
   evalBundle,
