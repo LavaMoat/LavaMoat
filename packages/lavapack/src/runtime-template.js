@@ -68,7 +68,7 @@
         throw new Error(`LavaMoat - loadBundle encountered redundant module definition for id "${moduleId}"`)
       }
       // add the module
-      moduleRegistry.set(moduleId, { type: type || 'cjs', id: moduleId, deps: moduleDeps, source: `(${initFn})`, package: packageName })
+      moduleRegistry.set(moduleId, { type: type || 'js', id: moduleId, deps: moduleDeps, source: `(${initFn})`, package: packageName })
     }
     // run each of entryPoints
     const entryExports = Array.prototype.map.call(entryPoints, (entryId) => {
