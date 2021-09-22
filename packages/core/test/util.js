@@ -207,7 +207,12 @@ function createHookedConsole () {
     // run result through serialization boundary. this ensures these tests:
     // - work across a serialization boundary
     // - return simple objects non wrapped by membranes
-    const result = JSON.parse(message)
+    let result
+    try {
+      result = JSON.parse(message)
+    } catch (err) {
+      throw new Error(`LavaMoat - failed to parse test output:\n${message}`)
+    }
     resolve(result)
   }
   const hookedConsole = { ...console, log: hookedLog }
