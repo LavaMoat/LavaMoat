@@ -9,6 +9,7 @@
 // - cleanup: var -> const/let
 // - cleanup/refactor
 
+const fs = require('fs')
 const assert = require('assert')
 const JSONStream = require('JSONStream')
 const through = require('through2')
@@ -42,7 +43,7 @@ function createPacker({
   // include prelude in bundle
   includePrelude = true,
   // must be specified
-  prelude,
+  prelude = fs.readFileSync(path.join(__dirname, 'runtime.js'), 'utf8'),
   // prelude path for sourcemaps
   preludePath = path.relative(basedir, defaultPreludePath).replace(/\\/g, '/'),
   // capabilities policy enforced by prelude
@@ -52,7 +53,7 @@ function createPacker({
   externalRequireName,
   sourceRoot,
   sourceMapPrefix,
-  bundleWithPrecompiledModules = false,
+  bundleWithPrecompiledModules = true,
 } = {}) {
   // stream/parser wrapping incase raw: false
   const parser = raw ? through.obj() : JSONStream.parse([true])

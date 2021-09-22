@@ -399,17 +399,18 @@ async function getStreamResults (stream) {
 
 async function runBrowserify ({
   scenario,
-  bundleWithPrecompiledModules = false,
+  bundleWithPrecompiledModules = true,
 }) {
   const args = [JSON.stringify({
     entries: scenario.entries,
     opts: {
+      bundleWithPrecompiledModules,
       ...scenario.opts,
-      bundleWithPrecompiledModules
     },
     policy: scenario.config,
     policyOverride: scenario.configOverride,
   })]
+
   const paths = {
     normal: `${__dirname}/fixtures/runBrowserify.js`,
     factor: `${__dirname}/fixtures/runBrowserifyBundleFactor.js`
@@ -421,7 +422,7 @@ async function runBrowserify ({
 
 async function createBundleForScenario ({
   scenario,
-  bundleWithPrecompiledModules = false,
+  bundleWithPrecompiledModules = true,
 }) {
   let policy
   if (!scenario.dir) {
@@ -442,7 +443,7 @@ async function createBundleForScenario ({
 async function runScenario ({
   scenario,
   bundle,
-  runWithPrecompiledModules = false,
+  runWithPrecompiledModules = true,
 }) {
   if (!bundle) {
     const { bundleForScenario } = await createBundleForScenario({

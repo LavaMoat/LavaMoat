@@ -80,6 +80,30 @@
         "to-fast-properties": true
       }
     },
+    "@lavamoat/lavapack": {
+      "builtin": {
+        "assert": true,
+        "buffer.Buffer.from": true,
+        "fs.readFileSync": true,
+        "path.join": true,
+        "path.relative": true
+      },
+      "globals": {
+        "__dirname": true,
+        "process.cwd": true,
+        "setTimeout": true
+      },
+      "packages": {
+        "JSONStream": true,
+        "combine-source-map": true,
+        "convert-source-map": true,
+        "json-stable-stringify": true,
+        "lavamoat-core": true,
+        "readable-stream": true,
+        "through2": true,
+        "umd": true
+      }
+    },
     "JSONStream": {
       "globals": {
         "Buffer": true
@@ -377,14 +401,6 @@
         "xtend": true
       }
     },
-    "is-core-module": {
-      "globals": {
-        "process.versions": true
-      },
-      "packages": {
-        "has": true
-      }
-    },
     "is-plain-object": {
       "packages": {
         "isobject": true
@@ -422,6 +438,7 @@
     "lavamoat-core": {
       "builtin": {
         "events": true,
+        "fs.existsSync": true,
         "fs.readFileSync": true,
         "module.createRequire": true,
         "module.createRequireFromPath": true,
@@ -506,11 +523,6 @@
         "stream-combiner2": true,
         "through2": true,
         "xtend": true
-      }
-    },
-    "offset-sourcemap-lines": {
-      "packages": {
-        "source-map": true
       }
     },
     "once": {
@@ -601,7 +613,6 @@
         "process.versions": true
       },
       "packages": {
-        "is-core-module": true,
         "path-parse": true
       }
     },

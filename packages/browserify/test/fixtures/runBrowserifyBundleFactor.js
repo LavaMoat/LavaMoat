@@ -3,7 +3,7 @@ const browserify = require('browserify')
 const lavamoatPlugin = require('../../src/index')
 const through = require('through2')
 const vinylBuffer = require('vinyl-buffer')
-const createCustomPack = require('../../src/createCustomPack')
+const createCustomPack = require('@lavamoat/lavapack')
 const bifyPkgFactor = require('bify-package-factor')
 
 const params = JSON.parse(process.argv[2])
@@ -15,7 +15,7 @@ function createPacker (opts) {
       // omit prelude (still included in common bundle)
       includePrelude: false,
       // provide full bundle config
-      config: {},
+      policy: {},
       // tell packer to automatically prune config
       pruneConfig: true
     })

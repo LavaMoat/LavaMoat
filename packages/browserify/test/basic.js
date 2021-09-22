@@ -48,10 +48,8 @@ test('basic - lavamoat policy and bundle', async (t) => {
   })
   await autoConfigForScenario({ scenario })
   const { bundleForScenario } = await createBundleForScenario({ scenario })
-  const prelude = generatePrelude()
-
+  
   t.true(bundleForScenario.includes('"location.href":true'), 'prelude includes href policy')
-  t.true(bundleForScenario.includes(prelude), 'bundle includes expected prelude')
 
   const testHref = 'https://funky.town.gov/yolo?snake=yes'
   scenario.context = { location: { href: testHref } }
@@ -73,13 +71,10 @@ test('basic - lavamoat bundle without prelude', async (t) => {
 
   await autoConfigForScenario({ scenario })
   const { bundleForScenario } = await createBundleForScenario({ scenario })
-  const prelude = generatePrelude()
-
-  t.true(!bundleForScenario.includes(prelude), 'bundle DOES NOT include prelude')
 
   let didCallLoadBundle = false
   const testGlobal = {
-    LavaMoat: { loadBundle: () => { didCallLoadBundle = true } }
+    LavaPack: { loadBundle: () => { didCallLoadBundle = true } }
   }
   evalBundle(bundleForScenario, testGlobal)
 
