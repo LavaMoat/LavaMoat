@@ -52,7 +52,7 @@
     const moduleData = moduleRegistry.get(moduleId)
     const localRequire = requireRelative.bind(null, moduleId, moduleData)
     const { precompiledInitializer } = moduleData
-    // this invokes the with-proxy wrapper
+    // this invokes the with-proxy wrapper (proxy replace by start compartment global)
     const moduleInitializerFactory = precompiledInitializer.call(globalThis)
     // this ensures strict mode
     const moduleInitializer = moduleInitializerFactory()
