@@ -32,7 +32,7 @@
     }
 
     // create the SES rootRealm
-    // "templateRequire" calls are inlined in "generatePrelude"
+    // "templateRequire" calls are inlined in "generateKernel"
     // load-bearing semi-colon, do not remove
     ;// define ses
 (function(){
@@ -10456,7 +10456,7 @@ assign(globalThis, {
     debugMode = false,
     runWithPrecompiledModules = false
   }) {
-    // "templateRequire" calls are inlined in "generatePrelude"
+    // "templateRequire" calls are inlined in "generateKernel"
     const generalUtils = // define makeGeneralUtils
 (function(){
   const global = globalRef

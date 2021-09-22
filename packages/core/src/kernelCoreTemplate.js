@@ -57,7 +57,7 @@
     debugMode = false,
     runWithPrecompiledModules = false
   }) {
-    // "templateRequire" calls are inlined in "generatePrelude"
+    // "templateRequire" calls are inlined in "generateKernel"
     const generalUtils = templateRequire('makeGeneralUtils')()
     const { getEndowmentsForConfig, makeMinimalViewOfRef, applyEndowmentPropDescTransforms } = templateRequire('makeGetEndowmentsForConfig')(generalUtils)
     const { prepareCompartmentGlobalFromConfig } = templateRequire('makePrepareRealmGlobalFromConfig')(generalUtils)
