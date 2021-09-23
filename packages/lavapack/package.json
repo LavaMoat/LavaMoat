@@ -1,6 +1,6 @@
 {
   "name": "@lavamoat/lavapack",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "LavaMoat packer",
   "publishConfig": {
     "access": "public"
