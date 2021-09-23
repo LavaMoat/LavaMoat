@@ -129,7 +129,7 @@ function createPacker({
       packages.add(packageName)
     }
 
-    const sourceMeta = wrapIntoModuleInitializer(moduleData, sourcePathForModule)
+    const sourceMeta = prepareModuleInitializer(moduleData, sourcePathForModule, bundleWithPrecompiledModules)
     const wrappedSource = serializeModule(moduleData, sourceMeta)
 
     stream.push(Buffer.from(wrappedSource, 'utf8'))
@@ -212,21 +212,7 @@ function createPacker({
       // deps,
       // source: sourceMeta.code
     }
-    let moduleInitializer
-    if (bundleWithPrecompiledModules) {
-      moduleInitializer = (
-`function(){
-  with (this) {
-    return function() {
-      'use strict';
-      return ${sourceMeta.code}
-    };
-  }
-}`
-      )
-    } else {
-      moduleInitializer = sourceMeta.code
-    }
+    const moduleInitializer = sourceMeta.code
     let serializedEntry = `[${jsonStringify(id)}, ${jsonStringify(deps)}, ${moduleInitializer}, {`
     // add metadata
     Object.entries(jsonSerializeableData).forEach(([key, value]) => {
@@ -240,12 +226,12 @@ function createPacker({
   }
 }
 
-function wrapIntoModuleInitializer (moduleData, sourcePathForModule) {
+function prepareModuleInitializer (moduleData, sourcePathForModule, bundleWithPrecompiledModules) {
   const normalizedSource = moduleData.source.split('\r\n').join('\n')
   // extract sourcemaps
   const sourceMeta = extractSourceMaps(normalizedSource)
   // create wrapper + update sourcemaps
-  const newSourceMeta = wrapInModuleInitializer(moduleData, sourceMeta, sourcePathForModule)
+  const newSourceMeta = wrapInModuleInitializer(moduleData, sourceMeta, sourcePathForModule, bundleWithPrecompiledModules)
   return newSourceMeta
 }
 
@@ -257,14 +243,31 @@ function extractSourceMaps (sourceCode) {
   return { code, maps }
 }
 
-function wrapInModuleInitializer (moduleData, sourceMeta, sourcePathForModule) {
-  const moduleWrapperSource = `function (require, module, exports) {\n__MODULE_CONTENT__\n}`
+function wrapInModuleInitializer (moduleData, sourceMeta, sourcePathForModule, bundleWithPrecompiledModules) {
+  const filename = String(sourceMeta.file)
+  if (filename.includes('\n')) {
+    throw new Error('LavaMoat - encountered a filename containing a newline')
+  }
+  let moduleWrapperSource
+  if (bundleWithPrecompiledModules) {
+    moduleWrapperSource = (
+`function(){
+  with (this) {
+    return function() {
+      'use strict';
+      // source: ${filename}
+      return function (require, module, exports) {
+__MODULE_CONTENT__
+      };
+    };
+  }
+}`
+    )
+  } else {
+    moduleWrapperSource = `// source: ${filename}\nfunction(require, module, exports){\n__MODULE_CONTENT__\n}`
+  }
   const [start, end] = moduleWrapperSource.split('__MODULE_CONTENT__')
-  const maps = sourceMeta.maps
-  const sourceMappingURL = sourcePathForModule(moduleData)
-  const sourceMappingComment = sourceMappingURL ? `\n//# sourceMappingURL=${sourceMappingURL}` : ''
-  // normalize line endings
-  const code = `${start}${sourceMeta.code}${sourceMappingComment}${end}`
-  const newSourceMeta = { code, maps }
+  const code = `${start}${sourceMeta.code}${end}`
+  const newSourceMeta = { code }
   return newSourceMeta
 }
