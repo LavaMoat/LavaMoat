@@ -1,6 +1,7 @@
 const { SourceMapConsumer } = require('source-map');
 const validate = require('sourcemap-validator')
 const { fromSource: extractSourceMap } = require('convert-source-map');
+const { explore } = require('source-map-explorer')
 const { codeFrameColumns } = require('@babel/code-frame');
 
 module.exports = { verifySourceMaps }
@@ -8,7 +9,29 @@ module.exports = { verifySourceMaps }
 async function verifySourceMaps({ bundle }) {
   // basic sanity checking
   validate(bundle);
+  // our custom sample checking
+  await verifySamples(bundle);
+  // generate a sourcemap explorer because its stricter than some other validations
+  await verifyWithSourceExplorer(bundle);
+}
 
+async function verifyWithSourceExplorer (bundle) {
+  let result
+  try {
+    result = await explore({ code: Buffer.from(bundle, 'utf8') });
+  } catch (resultWithError) {
+    if (resultWithError.errors) {
+      resultWithError.errors.forEach((exploreError) => {
+        // throw the first
+        throw exploreError.error
+      });
+    } else {
+      throw resultWithError;
+    }
+  }
+}
+
+async function verifySamples (bundle) {
   const sourcemap = extractSourceMap(bundle).toObject()
   const consumer = await new SourceMapConsumer(sourcemap);
 

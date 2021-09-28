@@ -16,7 +16,6 @@
       "packages": {
         "@babel/types": true,
         "jsesc": true,
-        "lodash": true,
         "source-map": true
       }
     },
@@ -65,8 +64,7 @@
         "@babel/parser": true,
         "@babel/types": true,
         "debug": true,
-        "globals": true,
-        "lodash": true
+        "globals": true
       }
     },
     "@babel/types": {
@@ -296,6 +294,7 @@
     "debug": {
       "builtin": {
         "tty.isatty": true,
+        "util.deprecate": true,
         "util.format": true,
         "util.inspect": true
       },
@@ -401,6 +400,14 @@
         "xtend": true
       }
     },
+    "is-core-module": {
+      "globals": {
+        "process.versions": true
+      },
+      "packages": {
+        "has": true
+      }
+    },
     "is-plain-object": {
       "packages": {
         "isobject": true
@@ -472,11 +479,6 @@
       "globals": {
         "process.env.TRAVIS": true,
         "process.env.UNLAZY": true
-      }
-    },
-    "lodash": {
-      "globals": {
-        "keysIn": true
       }
     },
     "merge-deep": {
@@ -605,7 +607,11 @@
         "fs.realpathSync": true,
         "fs.stat": true,
         "fs.statSync": true,
-        "path": true
+        "path.dirname": true,
+        "path.join": true,
+        "path.parse": true,
+        "path.relative": true,
+        "path.resolve": true
       },
       "globals": {
         "process.nextTick": true,
@@ -613,6 +619,7 @@
         "process.versions": true
       },
       "packages": {
+        "is-core-module": true,
         "path-parse": true
       }
     },
