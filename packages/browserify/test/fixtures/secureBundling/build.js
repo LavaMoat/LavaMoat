@@ -9,7 +9,9 @@ const lavamoatOpts = {
 }
 
 // configure browserify
-const bifyOpts = Object.assign({}, lavamoatPlugin.args)
+const bifyOpts = Object.assign({
+  debug: true,
+}, lavamoatPlugin.args)
 const bundler = browserify([path.resolve(__dirname, '../exampleApp/bundleEntry.js')], bifyOpts)
 bundler.plugin(lavamoatPlugin, lavamoatOpts)
 

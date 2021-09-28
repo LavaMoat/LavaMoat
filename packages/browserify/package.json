@@ -20,6 +20,8 @@
     "lavamoat-core": "^11.0.0",
     "merge-deep": "^3.0.2",
     "offset-sourcemap-lines": "^1.0.1",
+    "convert-source-map": "^1.8.0",
+    "sourcemap-validator": "^2.1.0",
     "pify": "^4.0.1",
     "readable-stream": "^3.6.0",
     "safe-buffer": "^5.1.2",

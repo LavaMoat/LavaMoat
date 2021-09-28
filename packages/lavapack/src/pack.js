@@ -77,10 +77,6 @@ function createPacker({
   }
   assert(policy, 'must specify a policy')
 
-  if (includePrelude) {
-    lineno += newlinesIn(prelude)
-  }
-
   // note: pack stream cant started emitting data until its received its first module
   // this is because the browserify pipeline is leaky until its finished being setup
   parser.pipe(through.obj(onModule, onDone))
@@ -116,14 +112,6 @@ function createPacker({
     lineno += newlinesIn(moduleEntryPrefix)
     stream.push(Buffer.from(moduleEntryPrefix, 'utf8'))
 
-    if (moduleData.sourceFile && !moduleData.nomap) {
-      // add current file to the sourcemap
-      sourcemap.addFile(
-        { sourceFile: moduleData.sourceFile, source: moduleData.source },
-        { line: lineno }
-      )
-    }
-
     if (prunePolicy) {
       const { packageName } = moduleData
       packages.add(packageName)
@@ -131,6 +119,14 @@ function createPacker({
 
     const sourceMeta = prepareModuleInitializer(moduleData, sourcePathForModule, bundleWithPrecompiledModules)
     const wrappedSource = serializeModule(moduleData, sourceMeta)
+
+    if (moduleData.sourceFile && !moduleData.nomap) {
+      // add current file to the sourcemap
+      sourcemap.addFile(
+        { sourceFile: moduleData.sourceFile, source: moduleData.source },
+        { line: lineno + sourceMeta.offset }
+      )
+    }
 
     stream.push(Buffer.from(wrappedSource, 'utf8'))
     lineno += newlinesIn(wrappedSource)
@@ -244,7 +240,7 @@ function extractSourceMaps (sourceCode) {
 }
 
 function wrapInModuleInitializer (moduleData, sourceMeta, sourcePathForModule, bundleWithPrecompiledModules) {
-  const filename = String(sourceMeta.file)
+  const filename = String(moduleData.file)
   if (filename.includes('\n')) {
     throw new Error('LavaMoat - encountered a filename containing a newline')
   }
@@ -267,7 +263,9 @@ __MODULE_CONTENT__
     moduleWrapperSource = `// source: ${filename}\nfunction(require, module, exports){\n__MODULE_CONTENT__\n}`
   }
   const [start, end] = moduleWrapperSource.split('__MODULE_CONTENT__')
+  // im not entirely sure why the offset is 2 and not 1
+  const offset = start.split('\n').length - 2
   const code = `${start}${sourceMeta.code}${end}`
-  const newSourceMeta = { code }
+  const newSourceMeta = { code, offset }
   return newSourceMeta
 }

@@ -22,6 +22,7 @@ function createPacker (opts) {
   }
 
 browserify(params.entries, {
+  debug: true,
   ...lavamoatPlugin.args,
   plugin: [
     [lavamoatPlugin, params.opts],
