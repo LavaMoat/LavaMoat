@@ -16,7 +16,6 @@
       "packages": {
         "@babel/types": true,
         "jsesc": true,
-        "lodash": true,
         "source-map": true
       }
     },
@@ -65,8 +64,7 @@
         "@babel/parser": true,
         "@babel/types": true,
         "debug": true,
-        "globals": true,
-        "lodash": true
+        "globals": true
       }
     },
     "@babel/types": {
@@ -78,6 +76,30 @@
         "@babel/helper-validator-identifier": true,
         "lodash": true,
         "to-fast-properties": true
+      }
+    },
+    "@lavamoat/lavapack": {
+      "builtin": {
+        "assert": true,
+        "buffer.Buffer.from": true,
+        "fs.readFileSync": true,
+        "path.join": true,
+        "path.relative": true
+      },
+      "globals": {
+        "__dirname": true,
+        "process.cwd": true,
+        "setTimeout": true
+      },
+      "packages": {
+        "JSONStream": true,
+        "combine-source-map": true,
+        "convert-source-map": true,
+        "json-stable-stringify": true,
+        "lavamoat-core": true,
+        "readable-stream": true,
+        "through2": true,
+        "umd": true
       }
     },
     "JSONStream": {
@@ -272,6 +294,7 @@
     "debug": {
       "builtin": {
         "tty.isatty": true,
+        "util.deprecate": true,
         "util.format": true,
         "util.inspect": true
       },
@@ -422,6 +445,7 @@
     "lavamoat-core": {
       "builtin": {
         "events": true,
+        "fs.existsSync": true,
         "fs.readFileSync": true,
         "module.createRequire": true,
         "module.createRequireFromPath": true,
@@ -455,11 +479,6 @@
       "globals": {
         "process.env.TRAVIS": true,
         "process.env.UNLAZY": true
-      }
-    },
-    "lodash": {
-      "globals": {
-        "keysIn": true
       }
     },
     "merge-deep": {
@@ -506,11 +525,6 @@
         "stream-combiner2": true,
         "through2": true,
         "xtend": true
-      }
-    },
-    "offset-sourcemap-lines": {
-      "packages": {
-        "source-map": true
       }
     },
     "once": {
@@ -593,7 +607,11 @@
         "fs.realpathSync": true,
         "fs.stat": true,
         "fs.statSync": true,
-        "path": true
+        "path.dirname": true,
+        "path.join": true,
+        "path.parse": true,
+        "path.relative": true,
+        "path.resolve": true
       },
       "globals": {
         "process.nextTick": true,

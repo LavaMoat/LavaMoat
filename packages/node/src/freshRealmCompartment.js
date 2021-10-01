@@ -1,5 +1,5 @@
 const vm = require('vm')
-const { getSesShimSrc } = require('lavamoat-core/src/generatePrelude')
+const { getSesShimSrc } = require('lavamoat-core/src/generateKernel')
 
 module.exports = { createFreshRealmCompartment }
 

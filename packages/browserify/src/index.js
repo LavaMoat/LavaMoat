@@ -1,10 +1,10 @@
 const fs = require('fs')
 const path = require('path')
-const { generatePrelude, getDefaultPaths, mergePolicy } = require('lavamoat-core')
+const { getDefaultPaths, mergePolicy } = require('lavamoat-core')
 const jsonStringify = require('json-stable-stringify')
 const { createModuleInspectorSpy } = require('./createModuleInspectorSpy.js')
 const { createPackageDataStream } = require('./createPackageDataStream.js')
-const createCustomPack = require('./createCustomPack')
+const createLavaPack = require('@lavamoat/lavapack')
 const { createSesWorkaroundsTransform } = require('./sesTransforms')
 
 // these are the reccomended arguments for lavaMoat to work well with browserify
@@ -22,7 +22,6 @@ const reccomendedArgs = {
 
 // primary export is the Browserify plugin
 module.exports = plugin
-module.exports.generatePrelude = generatePrelude
 module.exports.createLavamoatPacker = createLavamoatPacker
 module.exports.loadPolicy = loadPolicyFromPluginOpts
 module.exports.args = reccomendedArgs
@@ -80,7 +79,8 @@ function getConfigurationFromPluginOpts (pluginOpts) {
     debug: 'debugMode',
     pn: 'policyName',
     projectRoot: 'projectRoot',
-    r: 'projectRoot'
+    r: 'projectRoot',
+    bundleWithPrecompiledModules: 'bundleWithPrecompiledModules',
   }
 
   const allowedKeys = new Set([
@@ -112,9 +112,10 @@ function getConfigurationFromPluginOpts (pluginOpts) {
     debugMode: Boolean(pluginOpts.debugMode),
     writeAutoPolicy: Boolean(pluginOpts.writeAutoPolicy || pluginOpts.writeAutoPolicyDebug),
     writeAutoPolicyDebug: Boolean(pluginOpts.writeAutoPolicyDebug),
+    bundleWithPrecompiledModules: 'bundleWithPrecompiledModules' in pluginOpts ? Boolean(pluginOpts.bundleWithPrecompiledModules) : true,
     actionOverrides: {}
   }
-
+  
   // check for action overrides
   if (typeof pluginOpts.writeAutoPolicy === 'function') {
     configuration.actionOverrides.writeAutoPolicy = pluginOpts.writeAutoPolicy
@@ -207,14 +208,15 @@ function getPolicyPaths (pluginOpts) {
 }
 
 function createLavamoatPacker (configuration = {}) {
-  const { includePrelude } = configuration
+  const { includePrelude, bundleWithPrecompiledModules } = configuration
   const defaults = {
     raw: true,
-    config: loadPolicy(configuration),
-    prelude: includePrelude && generatePrelude(configuration)
+    policy: loadPolicy(configuration),
+    includePrelude,
+    bundleWithPrecompiledModules,
   }
   const packOpts = Object.assign({}, defaults, configuration)
-  const customPack = createCustomPack(packOpts)
+  const customPack = createLavaPack(packOpts)
   return customPack
 }
 

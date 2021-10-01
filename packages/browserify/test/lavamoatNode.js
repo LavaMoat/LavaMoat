@@ -5,7 +5,7 @@ const {
   evalBundle,
 } = require('./util')
 
-test('basic - bundle works under lavamoat node', (t) => {
+test('lavamoat-node compat - bundle works under lavamoat node', (t) => {
   let bundle
   try {
     bundle = execSync("lavamoat build.js",

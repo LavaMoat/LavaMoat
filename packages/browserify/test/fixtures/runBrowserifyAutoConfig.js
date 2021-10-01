@@ -7,5 +7,6 @@ browserify([], {
       writeAutoPolicy: true,
       writeAutoPolicyDebug: true
     }]
-  ]
+  ],
+  debug: true,
 }).bundle()

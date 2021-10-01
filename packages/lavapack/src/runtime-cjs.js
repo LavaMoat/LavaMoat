@@ -29,7 +29,7 @@
         throw new Error(`LavaMoat - loadBundle encountered redundant module definition for id "${moduleId}"`)
       }
       // add the module
-      moduleRegistry.set(moduleId, { deps: moduleDeps, moduleInitializer: initFn })
+      moduleRegistry.set(moduleId, { deps: moduleDeps, precompiledInitializer: initFn })
     }
     // run each of entryPoints
     const entryExports = Array.prototype.map.call(entryPoints, (entryId) => {
@@ -51,7 +51,12 @@
     moduleCache.set(moduleId, moduleObject)
     const moduleData = moduleRegistry.get(moduleId)
     const localRequire = requireRelative.bind(null, moduleId, moduleData)
-    moduleData.moduleInitializer.call(moduleObject.exports, localRequire, moduleObject, moduleObject.exports)
+    const { precompiledInitializer } = moduleData
+    // this invokes the with-proxy wrapper (proxy replace by start compartment global)
+    const moduleInitializerFactory = precompiledInitializer.call(globalThis)
+    // this ensures strict mode
+    const moduleInitializer = moduleInitializerFactory()
+    moduleInitializer.call(moduleObject.exports, localRequire, moduleObject, moduleObject.exports)
     return moduleObject.exports
   }
 

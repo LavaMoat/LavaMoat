@@ -19,6 +19,7 @@ test('sourcemap test', async (t) => {
     includePrelude: false,
     devMode: true,
     // hasExports: true,
+    bundleWithPrecompiledModules: true,
   })
 
   // concat pack into a buffer
