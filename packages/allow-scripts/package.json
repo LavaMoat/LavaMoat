@@ -18,7 +18,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "description": "a tool for only running dependency lifecycle hooks specified in an allowlist",
+  "description": "A tool for running only the dependency-lifecycle-hooks specified in an allowlist.",
   "directories": {
     "test": "test"
   },

@@ -1,18 +1,25 @@
 # @lavamoat/allow-scripts
 
-a tool for only running dependency lifecycle hooks specified in an allowlist
+A tool for running only the dependency-lifecycle-hooks specified in an _allowlist_.
 
+### Install
 
-### install
+Adds the package to start using it in your project. be sure to include the `@lavamoat/` namespace in the package name
 
-add the package to start using it in your project. be sure to include the `@lavamoat/` namespace in the package name
 ```sh
-yarn add -D @lavamoat/allow-scripts
+yarn add -D @lavamoat/allow-scripts [--ignore-scripts]
 ```
 
-### configure
+#### The `--ignore-scripts` flag
 
-automatically generate a configuration (that skips all lifecycle scripts) and write into `package.json`. edit as necesary.
+Without the `--ignore-scripts` flag, the installation of the dependency will fail, as it has the `@lavamoat/preinstall-always-fail` dependency, which in turn is a protection from unwanted `preinstall` scripts.
+
+Keep reading this documentation to understand why either you want to install this dependency before any other with the `--ignore-scripts` flag, or whether you want to add this dependency and set up a whitelist.
+
+### Configure
+
+Automatically generates a configuration (that skips all lifecycle scripts) and write into `package.json`. edit as necesary.
+
 ```sh
 yarn allow-scripts auto
 ```
