@@ -47,7 +47,7 @@ yarn allow-scripts
 
 This is a shorthand for `yarn allow-scripts run`.
 
-It will fail if it detects dependencies who haven't been set up during [configuration](#Configure) of the package. You will be prompted to run `yarn allow-scripts auto`.
+It will fail if it detects dependencies who haven't been set up during [configuration](#Configure) of the package. You will be advised to run `yarn allow-scripts auto`.
 
 ### Debug
 
