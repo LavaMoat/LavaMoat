@@ -7,7 +7,6 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@lavamoat/preinstall-always-fail": "^1.0.0",
     "@npmcli/run-script": "^1.8.1",
     "@yarnpkg/lockfile": "^1.1.0",
     "npm-logical-tree": "^1.2.1",
@@ -18,7 +17,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "description": "a tool for only running dependency lifecycle hooks specified in an allowlist",
+  "description": "A tool for running only the dependency lifecycle hooks specified in an allowlist.",
   "directories": {
     "test": "test"
   },
@@ -28,18 +27,11 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\"",
-<<<<<<< HEAD
     "lint": "npm run lint:eslint && npm run lint:deps",
     "lint:eslint": "eslint \"src/**/*.js\"",
     "lint:fix": "eslint src/**/*.js --fix",
-    "lint:deps": "depcheck"
-=======
-    "lint": "npm run lint:standard && npm run lint:deps",
-    "lint:standard": "standard src/**/*.js",
-    "lint:fix": "standard src/**/*.js --fix",
     "lint:deps": "depcheck",
-    "preinstall": "node ./writeRc.js"
->>>>>>> f7dc279d4 (add scripts to populate rc file, only works for yarn)
+    "preinstall": "./write-rc.js"
   },
   "author": "",
   "homepage": "https://github.com/LavaMoat/LavaMoat/tree/main/packages/allow-scripts"
