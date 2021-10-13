@@ -1,23 +1,25 @@
 # @lavamoat/allow-scripts
 
-a tool for only running dependency lifecycle hooks specified in an allowlist
+A tool for running only the dependency lifecycle hooks specified in an _allowlist_.
 
+### Install
 
-### install
+Adds the package to start using it in your project. be sure to include the `@lavamoat/` namespace in the package name
 
-add the package to start using it in your project. be sure to include the `@lavamoat/` namespace in the package name
 ```sh
 yarn add -D @lavamoat/allow-scripts
 ```
 
-### configure
+### Configure
 
-automatically generate a configuration (that skips all lifecycle scripts) and write into `package.json`. edit as necesary.
+Automatically generates and writes a configuration into `package.json`, setting new policies as `false` by default. Edit this file as necessary.
+
 ```sh
 yarn allow-scripts auto
 ```
 
-configuration goes in `package.json`
+Configuration goes in `package.json`
+
 ```json
 {
   "lavamoat": {
@@ -29,37 +31,33 @@ configuration goes in `package.json`
 }
 ```
 
-### disable scripts
+### Run
 
-disable all scripts by default inside `.yarnrc` or `.npmrc`
-```
-ignore-scripts true
-```
+Run **all** lifecycle scripts for the packages specified in `package.json`
 
-consider adding [`@lavamoat/preinstall-always-fail`](../preinstall-always-fail) to ensure you never accidently run install scripts
-```
-yarn add -D @lavamoat/preinstall-always-fail
-```
-
-### run
-
-run all lifecycle scripts for packages specified in `package.json`
 ```sh
 yarn allow-scripts
 ```
 
-### debug
+This is a shorthand for `yarn allow-scripts run`.
 
-prints comprehension of configuration and dependencies with lifecycle scripts
+It will fail if it detects dependencies who haven't been set up during [configuration](#Configure) of the package. You will be advised to run `yarn allow-scripts auto`.
+
+### Debug
+
+Prints comprehension of configuration and dependencies with lifecycle scripts, specifying _allowed_ and _disallowed_ packages.
+
 ```sh
 yarn allow-scripts list
 ```
 
-### workflow
+### Improving your Workflow
 
-consider adding a "setup" npm script for all your post-install steps. no magic here, this is just a regular script. but using this will ensure you run your allowed scripts. its also a good place to add other post-processing commands you use. In the future when you add additional post-processing scripts, e.g. [`patch-package`](https://github.com/ds300/patch-package), you can add them to this "setup" script.
+Consider adding a _setup_ npm script for all your post-install steps to ensure the running of your allowed scripts. This can be just a regular script (_no magic needed!_). Also, it is a good place to add other post-processing commands you want to use.
 
-you will need to make an effort to remember to run `yarn setup` instead of just `yarn` :lotus_position:
+In the future when you add additional post-processing scripts, e.g. [`patch-package`](https://github.com/ds300/patch-package), you can add them to this _setup_ script.
+
+:thought_balloon: You will need to make an effort to remember to run `yarn setup` instead of just `yarn` :lotus_position:
 
 ```json
 {
