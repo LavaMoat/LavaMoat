@@ -207,7 +207,12 @@ function createHookedConsole () {
     // run result through serialization boundary. this ensures these tests:
     // - work across a serialization boundary
     // - return simple objects non wrapped by membranes
-    const result = JSON.parse(message)
+    let result
+    try {
+      result = JSON.parse(message)
+    } catch (err) {
+      throw new Error(`LavaMoat - failed to parse test output:\n${message}`)
+    }
     resolve(result)
   }
   const hookedConsole = { ...console, log: hookedLog }
@@ -217,7 +222,10 @@ function createHookedConsole () {
   }
 } 
 
-async function runScenario ({ scenario }) {
+async function runScenario ({
+  scenario,
+  runWithPrecompiledModules = false,
+}) {
   const {
     entries,
     files,
@@ -231,29 +239,44 @@ async function runScenario ({ scenario }) {
   const kernelSrc = generateKernel()
   const { hookedConsole, firstLogEventPromise } = createHookedConsole()
   Object.assign(scenario.context, { console: hookedConsole })
-  const { result: createKernel, vmGlobalThis, vmContext } = evaluateWithSourceUrl('LavaMoat/core-test/kernel', kernelSrc, scenario.context)
-  //root global for test realm
+  const { result: createKernel, vmGlobalThis, vmContext, vmFeralFunction } = evaluateWithSourceUrl('LavaMoat/core-test/kernel', kernelSrc, scenario.context)
+  // root global for test realm
   scenario.globalThis = vmGlobalThis
   scenario.vmContext = vmContext
   // call hook before kernel is created
   beforeCreateKernel(scenario)
   // create kernel
   const kernel = createKernel({
+    runWithPrecompiledModules,
     lavamoatConfig,
     loadModuleData: (id) => {
       if (id in builtin) {
         return moduleDataForBuiltin(builtin, id)
       }
       const moduleRecord = files[id]
-      return {
+      const moduleData = {
         id: moduleRecord.specifier,
         package: moduleRecord.packageName,
-        source: `(function(exports, require, module, __filename, __dirname){\n${applySourceTransforms(moduleRecord.content)}\n})`,
         type: moduleRecord.type,
         file: moduleRecord.file,
         deps: moduleRecord.importMap,
         moduleInitializer: moduleRecord.moduleInitializer
       }
+      // append the source or prepare the precompiledInitializer
+      const intializerSource = `(function(exports, require, module, __filename, __dirname){\n${applySourceTransforms(moduleRecord.content)}\n})`
+      if (runWithPrecompiledModules) {
+        moduleData.precompiledInitializer = vmFeralFunction(`
+          with (this) {
+            return function() {
+              'use strict';
+              return ${intializerSource}
+            };
+          }
+        `)
+      } else {
+        moduleData.source = intializerSource
+      }
+      return moduleData
     },
     getRelativeModuleId: (id, relative) => {
       return files[id].importMap[relative] || relative
@@ -325,6 +348,7 @@ function evaluateWithSourceUrl (filename, content, context) {
 
   const vmContext = createContext()
   const vmGlobalThis = runInContext('this', vmContext)
+  const vmFeralFunction = vmGlobalThis.Function
 
   Object.defineProperties(vmGlobalThis, Object.getOwnPropertyDescriptors(context))
 
@@ -341,7 +365,7 @@ function evaluateWithSourceUrl (filename, content, context) {
     throw e
   }
   // pull out test result value from context (not always used)
-  return { result, vmGlobalThis, vmContext }
+  return { result, vmGlobalThis, vmContext, vmFeralFunction }
 }
 
 async function createConfigForTest (testFn, opts = {}) {

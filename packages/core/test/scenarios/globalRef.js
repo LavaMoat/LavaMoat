@@ -22,7 +22,7 @@ module.exports = [
   async () => {
     const scenario = createScenarioFromScaffold({
       name: 'globalRef - Webpack code in the wild works',
-      // Taken directly from Webpack
+      // modified from Webpack builds
       defineOne: () => {
         let g
 
@@ -32,18 +32,20 @@ module.exports = [
           return this
         })()
 
+        let error
         try {
           // This works if eval is allowed (see CSP)
           /* eslint-disable no-new-func */
           g = g || new Function('return this')()
         } catch (e) {
+          error = e
           // This works if the window reference is available
           if (typeof window === 'object') g = window
         }
         // test webpack result against globalThis
-        module.exports = g === globalThis
+        module.exports = { match: g === globalThis, type: typeof g, error: error && error.message }
       },
-      expectedResult: true
+      expectedResult: { match: true, type: 'object' }
     })
     return scenario
   },

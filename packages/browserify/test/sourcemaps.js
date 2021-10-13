@@ -1,76 +1,103 @@
-const test = require('ava')
-const UglifyJS = require('uglify-js')
-const { SourceMapConsumer } = require('source-map')
-const { wrapIntoModuleInitializer } = require('../src/sourcemaps')
+const { SourceMapConsumer } = require('source-map');
+const validate = require('sourcemap-validator')
+const { fromSource: extractSourceMap } = require('convert-source-map');
+const { explore } = require('source-map-explorer')
+const { codeFrameColumns } = require('@babel/code-frame');
 
-test('sourcemaps - adjust maps for wrapper', async (t) => {
-  const fooSource = (`
-  var two = 1 + 1
-  throw new Error('Boom')
-  var three = two + 1
-  `)
+module.exports = { verifySourceMaps }
 
-  const result = UglifyJS.minify({ './foo.js': fooSource }, {
-    // skip logical compression like removing unused stuff
-    compress: false,
-    sourceMap: {
-      filename: './foo.js',
-      // inline sourcemaps with sources included
-      url: 'inline',
-      includeSources: true
+async function verifySourceMaps({ bundle }) {
+  // basic sanity checking
+  validate(bundle);
+  // our custom sample checking
+  await verifySamples(bundle);
+  // generate a sourcemap explorer because its stricter than some other validations
+  await verifyWithSourceExplorer(bundle);
+}
+
+async function verifyWithSourceExplorer (bundle) {
+  let result
+  try {
+    result = await explore({ code: Buffer.from(bundle, 'utf8') });
+  } catch (resultWithError) {
+    if (resultWithError.errors) {
+      resultWithError.errors.forEach((exploreError) => {
+        // throw the first
+        throw exploreError.error
+      });
+    } else {
+      throw resultWithError;
     }
-  })
-
-  if (result.error) t.ifError(result.error)
-
-  // ensure minification worked
-  t.true(indicesOf('\n', fooSource).length > 1)
-  t.is(indicesOf('\n', result.code).length, 1)
-
-  // wrap into bundle with external sourcemaps
-  const wrappedSourceMeta = wrapIntoModuleInitializer(result.code)
-  await validateSourcemaps(t, wrappedSourceMeta)
-
-  })
-
-function indicesOf (substring, string) {
-  const result = []
-  let index = -1
-  while ((index = string.indexOf(substring, index + 1)) >= 0) result.push(index)
-  return result
+  }
 }
 
-// this is not perfecct - just a heuristic
-async function validateSourcemaps (t, sourceMeta) {
-  const targetSlug = 'new Error'
-  const consumer = await new SourceMapConsumer(sourceMeta.maps)
-  t.true(consumer.hasContentsOfAllSources(), 'has the contents of all sources')
+async function verifySamples (bundle) {
+  const sourcemap = extractSourceMap(bundle).toObject()
+  const consumer = await new SourceMapConsumer(sourcemap);
 
-  const sourceLines = sourceMeta.code.split('\n')
+  const hasContentsOfAllSources = consumer.hasContentsOfAllSources();
+  if (!hasContentsOfAllSources) {
+    console.warn('SourcemapValidator - missing content of some sources...');
+  }
 
-  sourceLines
-    .map(line => indicesOf(targetSlug, line))
-    .forEach((errorIndices, lineIndex) => {
-    // if (errorIndex === null) return console.log('line does not contain "new Error"')
-      errorIndices.forEach((errorIndex) => {
-        const position = { line: lineIndex + 1, column: errorIndex }
-        const result = consumer.originalPositionFor(position)
-        if (!result.source) {
-          t.fail(`missing source for position: ${JSON.stringify(position)}`)
-          console.warn('=======')
-          console.warn(contentForPosition(sourceLines, position))
-          console.warn('=======')
-          return
-        }
-        const sourceContent = consumer.sourceContentFor(result.source)
-        const sourceLines = sourceContent.split('\n')
-        const line = sourceLines[result.line - 1]
-        if (!line.includes(targetSlug)) t.fail(`could not find target "${targetSlug}" in source`)
-      })
-    })
-  t.true(true, 'sourcemaps look ok')
+  let sampleCount = 0;
+
+  const buildLines = bundle.split('\n');
+  const targetString = 'module.exports';
+  const matchesPerLine = buildLines.map((line) =>
+    indicesOf(targetString, line),
+  );
+  const errors = [];
+  matchesPerLine.forEach((matchIndices, lineIndex) => {
+    matchIndices.forEach((matchColumn) => {
+      sampleCount += 1;
+      const position = { line: lineIndex + 1, column: matchColumn };
+      const result = consumer.originalPositionFor(position);
+      // warn if source content is missing
+      if (!result.source) {
+        const location = {
+          start: { line: position.line, column: position.column + 1 },
+        };
+        const codeSample = codeFrameColumns(bundle, location, {
+          message: `missing source for position`,
+          highlightCode: true,
+        });
+        errors.push(
+          `missing source for position, in bundle\n${codeSample}`,
+        );
+        return;
+      }
+      const sourceContent = consumer.sourceContentFor(result.source);
+      const sourceLines = sourceContent.split('\n');
+      const sourceLine = sourceLines[result.line - 1];
+      // this sometimes includes the whole line though we tried to match somewhere in the middle
+      const portion = sourceLine.slice(result.column);
+      const foundValidSource = portion.includes(targetString);
+      if (!foundValidSource) {
+        const location = {
+          start: { line: result.line + 1, column: result.column + 1 },
+        };
+        const codeSample = codeFrameColumns(sourceContent, location, {
+          message: `expected to see ${JSON.stringify(targetString)}`,
+          highlightCode: true,
+        });
+        errors.push(
+          `Sourcemap seems invalid, ${result.source}\n${codeSample}`,
+        );
+      }
+    });
+  });
+  // error if any errors collected
+  if (errors.length) {
+    throw new Error(`Sourcemap validation encountered ${errors.length} errors:\n${errors.join('\n')}`);
+  }
 }
 
-function contentForPosition (sourceLines, position) {
-  return sourceLines[position.line - 1].slice(position.column)
+function indicesOf(substring, string) {
+  const a = [];
+  let i = -1;
+  while ((i = string.indexOf(substring, i + 1)) >= 0) {
+    a.push(i);
+  }
+  return a;
 }

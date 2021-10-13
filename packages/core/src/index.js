@@ -1,7 +1,6 @@
 const {
-  generatePrelude,
   generateKernel
-} = require('./generatePrelude')
+} = require('./generateKernel')
 const { packageDataForModule, packageNameFromPath } = require('./packageData')
 const { createModuleInspector, getDefaultPaths } = require('./generatePolicy')
 const { parseForPolicy } = require('./parseForPolicy')
@@ -12,7 +11,6 @@ const { applySourceTransforms } = require('./sourceTransforms')
 
 module.exports = {
   // generating the kernel
-  generatePrelude,
   generateKernel,
   // decorating moduleData with package data
   packageNameFromPath,

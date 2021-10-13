@@ -12,6 +12,7 @@ const pump = require('pump')
 const dataToStream = require('from')
 const { packageNameFromPath } = require('lavamoat-core')
 const lavamoatPlugin = require('../src/index')
+const { verifySourceMaps } = require('./sourcemaps')
 const { prepareScenarioOnDisk, evaluateWithSourceUrl, createHookedConsole } = require('lavamoat-core/test/util.js')
 const util = require('util')
 const execFile = util.promisify(require('child_process').execFile)
@@ -39,7 +40,11 @@ module.exports = {
 
 async function createBundleFromEntry (path, pluginOpts = {}) {
   pluginOpts.policy = pluginOpts.policy || { resources: {} }
-  const bundler = browserify([], lavamoatPlugin.args)
+  const bifyOpts = Object.assign({
+    // inline sourcemaps
+    debug: true,
+  }, lavamoatPlugin.args)
+  const bundler = browserify([], bifyOpts)
   bundler.add(path)
   bundler.plugin(lavamoatPlugin, pluginOpts)
   return bundleAsync(bundler)
@@ -102,7 +107,10 @@ function createBrowserifyFromRequiresArray ({ files: _files, pluginOpts = {} }) 
   const files = clone(_files)
 
   // empty bundle but inject modules at bundle time
-  const bifyOpts = Object.assign({}, lavamoatPlugin.args)
+  const bifyOpts = Object.assign({
+    // inline sourcemaps
+    debug: true,
+  }, lavamoatPlugin.args)
   const bundler = browserify([], bifyOpts)
   bundler.plugin(lavamoatPlugin, pluginOpts)
   // instrument bundler to use custom resolver hooks
@@ -169,6 +177,7 @@ function fnToCodeBlock (fn) {
 
 async function createWatchifyBundle (pluginOpts) {
   const bundler = browserify([], {
+    debug: true,
     cache: {},
     packageCache: {},
     plugin: [
@@ -397,13 +406,21 @@ async function getStreamResults (stream) {
   return results
 }
 
-async function runBrowserify ({ scenario }) {
-  const args = [JSON.stringify({
+async function runBrowserify ({
+  scenario,
+  bundleWithPrecompiledModules = true,
+}) {
+  const lavamoatParams = {
     entries: scenario.entries,
-    opts: scenario.opts,
+    opts: {
+      bundleWithPrecompiledModules,
+      ...scenario.opts,
+    },
     policy: scenario.config,
-    policyOverride: scenario.configOverride
-  })]
+    policyOverride: scenario.configOverride,
+  }
+  const args = [JSON.stringify(lavamoatParams)]
+
   const paths = {
     normal: `${__dirname}/fixtures/runBrowserify.js`,
     factor: `${__dirname}/fixtures/runBrowserifyBundleFactor.js`
@@ -413,7 +430,10 @@ async function runBrowserify ({ scenario }) {
   return { output }
 }
 
-async function createBundleForScenario ({ scenario }) {
+async function createBundleForScenario ({
+  scenario,
+  bundleWithPrecompiledModules = true,
+}) {
   let policy
   if (!scenario.dir) {
     const { projectDir, policyDir } = await prepareScenarioOnDisk({ scenario, policyName: 'browserify' })
@@ -423,14 +443,28 @@ async function createBundleForScenario ({ scenario }) {
     policy = path.join(scenario.dir, `/lavamoat/browserify/`)
   }
   
-  const { output: { stdout: bundle } } = await runBrowserify({ scenario })
+  const { output: { stdout: bundle, stderr } } = await runBrowserify({ scenario, bundleWithPrecompiledModules })
+  if (stderr.length) {
+    console.warn(stderr)
+  }
   return { bundleForScenario: bundle, policyDir: policy }
 }
 
-async function runScenario ({ scenario, bundle }) {
+async function runScenario ({
+  scenario,
+  bundle,
+  runWithPrecompiledModules = true,
+}) {
   if (!bundle) {
-    const { bundleForScenario } = await createBundleForScenario({ scenario })
+    const { bundleForScenario } = await createBundleForScenario({
+      scenario,
+      bundleWithPrecompiledModules: runWithPrecompiledModules,
+    })
     bundle = bundleForScenario
+  }
+  // dont validate factored bundles
+  if (scenario.type !== 'factor') {
+    await verifySourceMaps({ bundle })
   }
   const { hookedConsole, firstLogEventPromise } = createHookedConsole()
   evaluateWithSourceUrl('testBundlejs', bundle, mergeDeep({ console: hookedConsole }, scenario.context))

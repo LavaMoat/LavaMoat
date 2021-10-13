@@ -48,6 +48,7 @@ test('globalRef - globalRef - check default containment', async (t) => {
   })
   await runAndTestScenario(t, scenario, runScenario)
 })
+
 test('globalRef - ensure endowments are accessible on globals', async (t) => {
   const scenario = createScenarioFromScaffold({
     name: 'globalRef - ensure endowments are accessible on globals',

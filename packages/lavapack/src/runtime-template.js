@@ -7,11 +7,12 @@
   // initialize the kernel
   const createKernel = __createKernel__
   const { internalRequire } = createKernel({
+    runWithPrecompiledModules: true,
     lavamoatConfig: lavamoatPolicy,
     loadModuleData,
     getRelativeModuleId,
     prepareModuleInitializerArgs,
-    globalThisRefs: ['window', 'self', 'global', 'globalThis']
+    globalThisRefs: ['window', 'self', 'global', 'globalThis'],
   })
 
   function loadModuleData (moduleId) {
@@ -68,7 +69,14 @@
         throw new Error(`LavaMoat - loadBundle encountered redundant module definition for id "${moduleId}"`)
       }
       // add the module
-      moduleRegistry.set(moduleId, { type: type || 'js', id: moduleId, deps: moduleDeps, source: `(${initFn})`, package: packageName })
+      moduleRegistry.set(moduleId, {
+        type: type || 'js',
+        id: moduleId,
+        deps: moduleDeps,
+        // source: `(${initFn})`,
+        precompiledInitializer: initFn,
+        package: packageName,
+      })
     }
     // run each of entryPoints
     const entryExports = Array.prototype.map.call(entryPoints, (entryId) => {
