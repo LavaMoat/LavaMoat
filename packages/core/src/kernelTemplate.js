@@ -9,6 +9,7 @@
     prepareModuleInitializerArgs,
     getExternalCompartment,
     globalThisRefs,
+    runWithPrecompiledModules,
   }) {
     const debugMode = __lavamoatDebugMode__
 
@@ -24,7 +25,7 @@
     }
 
     // create the SES rootRealm
-    // "templateRequire" calls are inlined in "generatePrelude"
+    // "templateRequire" calls are inlined in "generateKernel"
     // load-bearing semi-colon, do not remove
     ;templateRequire('ses')
 
@@ -51,7 +52,8 @@
       getExternalCompartment,
       globalRef,
       globalThisRefs,
-      debugMode
+      debugMode,
+      runWithPrecompiledModules
     })
     return kernel
   }

@@ -9,6 +9,7 @@
 // - cleanup: var -> const/let
 // - cleanup/refactor
 
+const fs = require('fs')
 const assert = require('assert')
 const JSONStream = require('JSONStream')
 const through = require('through2')
@@ -42,7 +43,7 @@ function createPacker({
   // include prelude in bundle
   includePrelude = true,
   // must be specified
-  prelude,
+  prelude = fs.readFileSync(path.join(__dirname, 'runtime.js'), 'utf8'),
   // prelude path for sourcemaps
   preludePath = path.relative(basedir, defaultPreludePath).replace(/\\/g, '/'),
   // capabilities policy enforced by prelude
@@ -51,7 +52,8 @@ function createPacker({
   prunePolicy = false,
   externalRequireName,
   sourceRoot,
-  sourceMapPrefix
+  sourceMapPrefix,
+  bundleWithPrecompiledModules = true,
 } = {}) {
   // stream/parser wrapping incase raw: false
   const parser = raw ? through.obj() : JSONStream.parse([true])
@@ -74,10 +76,6 @@ function createPacker({
     assert(prelude, 'LavaMoat CustomPack: must specify a prelude if "includePrelude" is true (default: true)')
   }
   assert(policy, 'must specify a policy')
-
-  if (includePrelude) {
-    lineno += newlinesIn(prelude)
-  }
 
   // note: pack stream cant started emitting data until its received its first module
   // this is because the browserify pipeline is leaky until its finished being setup
@@ -114,21 +112,21 @@ function createPacker({
     lineno += newlinesIn(moduleEntryPrefix)
     stream.push(Buffer.from(moduleEntryPrefix, 'utf8'))
 
-    if (moduleData.sourceFile && !moduleData.nomap) {
-      // add current file to the sourcemap
-      sourcemap.addFile(
-        { sourceFile: moduleData.sourceFile, source: moduleData.source },
-        { line: lineno }
-      )
-    }
-
     if (prunePolicy) {
       const { packageName } = moduleData
       packages.add(packageName)
     }
 
-    const sourceMeta = wrapIntoModuleInitializer(moduleData, sourcePathForModule)
+    const sourceMeta = prepareModuleInitializer(moduleData, sourcePathForModule, bundleWithPrecompiledModules)
     const wrappedSource = serializeModule(moduleData, sourceMeta)
+
+    if (moduleData.sourceFile && !moduleData.nomap) {
+      // add current file to the sourcemap
+      sourcemap.addFile(
+        { sourceFile: moduleData.sourceFile, source: moduleData.source },
+        { line: lineno + sourceMeta.offset }
+      )
+    }
 
     stream.push(Buffer.from(wrappedSource, 'utf8'))
     lineno += newlinesIn(wrappedSource)
@@ -210,7 +208,8 @@ function createPacker({
       // deps,
       // source: sourceMeta.code
     }
-    let serializedEntry = `[${jsonStringify(id)}, ${jsonStringify(deps)}, ${sourceMeta.code}, {`
+    const moduleInitializer = sourceMeta.code
+    let serializedEntry = `[${jsonStringify(id)}, ${jsonStringify(deps)}, ${moduleInitializer}, {`
     // add metadata
     Object.entries(jsonSerializeableData).forEach(([key, value]) => {
       // skip missing values
@@ -223,12 +222,12 @@ function createPacker({
   }
 }
 
-function wrapIntoModuleInitializer (moduleData, sourcePathForModule) {
+function prepareModuleInitializer (moduleData, sourcePathForModule, bundleWithPrecompiledModules) {
   const normalizedSource = moduleData.source.split('\r\n').join('\n')
   // extract sourcemaps
   const sourceMeta = extractSourceMaps(normalizedSource)
   // create wrapper + update sourcemaps
-  const newSourceMeta = wrapInModuleInitializer(moduleData, sourceMeta, sourcePathForModule)
+  const newSourceMeta = wrapInModuleInitializer(moduleData, sourceMeta, sourcePathForModule, bundleWithPrecompiledModules)
   return newSourceMeta
 }
 
@@ -240,14 +239,33 @@ function extractSourceMaps (sourceCode) {
   return { code, maps }
 }
 
-function wrapInModuleInitializer (moduleData, sourceMeta, sourcePathForModule) {
-  const moduleWrapperSource = `function (require, module, exports) {\n__MODULE_CONTENT__\n}`
+function wrapInModuleInitializer (moduleData, sourceMeta, sourcePathForModule, bundleWithPrecompiledModules) {
+  const filename = String(moduleData.file)
+  if (filename.includes('\n')) {
+    throw new Error('LavaMoat - encountered a filename containing a newline')
+  }
+  let moduleWrapperSource
+  if (bundleWithPrecompiledModules) {
+    moduleWrapperSource = (
+`function(){
+  with (this) {
+    return function() {
+      'use strict';
+      // source: ${filename}
+      return function (require, module, exports) {
+__MODULE_CONTENT__
+      };
+    };
+  }
+}`
+    )
+  } else {
+    moduleWrapperSource = `// source: ${filename}\nfunction(require, module, exports){\n__MODULE_CONTENT__\n}`
+  }
   const [start, end] = moduleWrapperSource.split('__MODULE_CONTENT__')
-  const maps = sourceMeta.maps
-  const sourceMappingURL = sourcePathForModule(moduleData)
-  const sourceMappingComment = sourceMappingURL ? `\n//# sourceMappingURL=${sourceMappingURL}` : ''
-  // normalize line endings
-  const code = `${start}${sourceMeta.code}${sourceMappingComment}${end}`
-  const newSourceMeta = { code, maps }
+  // im not entirely sure why the offset is 2 and not 1
+  const offset = start.split('\n').length - 2
+  const code = `${start}${sourceMeta.code}${end}`
+  const newSourceMeta = { code, offset }
   return newSourceMeta
 }

@@ -6,7 +6,6 @@
 
 const fs = require('fs')
 const path = require('path')
-const preludeTemplate = fs.readFileSync(path.join(__dirname, '/preludeTemplate.js'), 'utf-8')
 const kernelTemplate = fs.readFileSync(path.join(__dirname, '/kernelTemplate.js'), 'utf-8')
 const kernelCoreTemplate = fs.readFileSync(path.join(__dirname, '/kernelCoreTemplate.js'), 'utf-8')
 const sesSrc = fs.readFileSync(path.join(__dirname, '/../lib/lockdown.umd.js'), 'utf-8')
@@ -18,21 +17,10 @@ module.exports = {
   getSesShimSrc,
   generateKernel,
   generateKernelCore,
-  generatePrelude
 }
 
 function getSesShimSrc () {
   return sesSrc
-}
-
-// takes the preludeTemplate and populates it with the kernel
-function generatePrelude (opts = {}) {
-  const kernelCode = generateKernel(opts)
-
-  let output = preludeTemplate
-  output = stringReplace(output, '__createKernel__', kernelCode)
-
-  return output
 }
 
 // takes the kernelTemplate and populates it with the libraries
