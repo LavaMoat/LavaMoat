@@ -34,11 +34,9 @@ Both are provided by [SES][SesGithub] containers. Platform API access is passed 
 
 [SES][SesGithub] is the sandbox used in LavaMoat. See SES's [secure computing guide][SesComputingGuide] to learn more about the risks of untrusted javascript.
 
-
 ### LavaMoat in Node.js
 
 Run your server or app building code with protections via [LavaMoat Node][LavamoatNode]
-
 
 ### LavaMoat in the browser
 
@@ -54,11 +52,9 @@ This includes the js content of the module sources, and sometimes some config in
 
 LavaMoat modifies the bundle's runtime to enforce the configured constraints.
 
-
 ### Bundler Plugins:
   - [LavaMoat Webpack][LavamoatWebpack]
   - [LavaMoat Browserify][LavamoatBrowserify]
-
 
 ### Additional tools
 
@@ -74,7 +70,6 @@ See [lavamoat-viz][LavamoatViz] for a demo of the tool.
 - [Snyk - Why npm lockfiles can be a security blindspot for injecting malicious modules](https://snyk.io/blog/why-npm-lockfiles-can-be-a-security-blindspot-for-injecting-malicious-modules/)
 - [Bytecode Alliance - Building a secure by default, composable future for WebAssembly](https://bytecodealliance.org/articles/announcing-the-bytecode-alliance)
 
-
 #### Videos:
 - [Making 'npm install' Safe - Kate Sills - QCon 2020 ~40min](https://www.infoq.com/presentations/npm-install/)
 - [JavaScript Supply Chain Security - Adam Baldwin - LocoMocoSec 2019 ~25min](https://www.youtube.com/watch?v=HDo2iOlkbyc)
@@ -87,7 +82,6 @@ Made with love by [MetaMask](https://github.com/metamask/)
 Funded by [ConsenSys](https://github.com/consensys)
 
 Runs on [Agoric](https://github.com/agoric/)
-
 
 [SesGithub]: https://github.com/Agoric/ses-shim
 [SesComputingGuide]: https://github.com/Agoric/SES-shim/blob/master/packages/ses/docs/secure-coding-guide.md
