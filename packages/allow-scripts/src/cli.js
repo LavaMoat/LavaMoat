@@ -2,6 +2,7 @@
 
 const yargs = require('yargs')
 const { runAllowedPackages, setDefaultConfiguration, printPackagesList } = require('./index.js')
+const { writeRcFile, addPreinstallAFDependency } = require('./setup.js')
 
 start().catch((err) => {
   console.error(err)
@@ -27,6 +28,11 @@ async function start () {
     // list packages
     case 'list': {
       await printPackagesList({ rootDir })
+      return
+    }
+    case 'setup': {
+      writeRcFile()
+      addPreinstallAFDependency()
       return
     }
     // (error) unrecognized

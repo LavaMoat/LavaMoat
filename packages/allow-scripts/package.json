@@ -30,8 +30,7 @@
     "lint": "npm run lint:eslint && npm run lint:deps",
     "lint:eslint": "eslint \"src/**/*.js\"",
     "lint:fix": "eslint src/**/*.js --fix",
-    "lint:deps": "depcheck",
-    "preinstall": "./write-rc.js"
+    "lint:deps": "depcheck"
   },
   "author": "",
   "homepage": "https://github.com/LavaMoat/LavaMoat/tree/main/packages/allow-scripts"
