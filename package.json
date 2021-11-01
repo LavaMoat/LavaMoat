@@ -40,5 +40,10 @@
       "@semantic-release/github"
     ],
     "preset": "angular"
+  },
+  "lavamoat": {
+    "allowScripts": {
+      "keccak": false
+    }
   }
 }

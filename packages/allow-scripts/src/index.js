@@ -371,21 +371,68 @@ function getCanonicalNameInfoForTreeNode (node) {
   }
 }
 
+// ;(async function () {
+//   const rootDir = `${process.cwd()}`
+//   for await (const entry of eachPackageDirOnDisk({ rootDir })) {
+//     console.log(getCanonicalNameForPath({ rootDir, filePath: entry }))
+//   }
+// })()
+
+function getCanonicalNameForPath ({ rootDir, filePath }) {
+  const relativePath = path.relative(rootDir, filePath)
+  // TODO: need to not remove paths like "xyz/src/node_modules/abc"
+  // so instead iteratively walk path segments
+  const canonicalPath = relativePath.split('node_modules/').join('')
+  return canonicalPath
+}
+
+async function fsExists (filepath) {
+  try {
+    await fs.access(filepath)
+    return true
+  } catch (err) {
+    if (err.code === 'ENOENT') {
+      return false
+    }
+    throw err
+  }
+}
+
+async function * eachPackageDirOnDisk ({ rootDir, depsParentPath: _depsParentPath }) {
+  const depsParentPath = _depsParentPath || path.join(rootDir, 'node_modules')
+  // console.log(depsParentPath)
+  
+  const depsParentPathExists = await fsExists(depsParentPath)
+  if (!depsParentPathExists) return
+  const depsParent = await fs.opendir(depsParentPath)
+  for await (const childDir of depsParent) {
+    // ignore all non-directories
+    if (!childDir.isDirectory()) continue
+    // ignore all dot-prefixed directories
+    if (childDir.name.startsWith('.')) continue
+    // handle org namespaced packages
+    if (childDir.name.startsWith('@')) {
+      const orgPath = path.join(depsParentPath, childDir.name)
+      yield * eachPackageDirOnDisk({ rootDir, depsParentPath: orgPath })
+      continue
+    }
+    const childPath = path.join(depsParentPath, childDir.name)
+    yield childPath
+    yield * eachPackageDirOnDisk({ rootDir: childPath })
+  }
+}
+
 async function loadAllPackageConfigurations ({ rootDir }) {
-  const { tree, packageJson } = await loadTree({ rootDir })
-
   const packagesWithLifecycleScripts = new Map()
-  for (const { node, branch } of eachNodeInTree(tree)) {
-    // Skip root package
-    if (branch.length === 1) continue
 
-    const { canonicalName } = getCanonicalNameInfoForTreeNode(node)
-    const nodePath = node.path()
-
+  const packageJson = JSON.parse(await fs.readFile(path.join(rootDir, 'package.json'), 'utf8'))
+  for await (const depPath of eachPackageDirOnDisk({ rootDir })) {
+    const canonicalName = getCanonicalNameForPath({ rootDir, filePath: depPath })
+    
     // TODO: follow symbolic links? I couldnt find any in my test repo,
     let depPackageJson
     try {
-      depPackageJson = JSON.parse(await fs.readFile(path.resolve(nodePath, 'package.json')))
+      depPackageJson = JSON.parse(await fs.readFile(path.join(depPath, 'package.json')))
     } catch (err) {
       const branchIsOptional = branch.some(node => node.optional)
       if (err.code === 'ENOENT' && branchIsOptional) {
@@ -400,7 +447,7 @@ async function loadAllPackageConfigurations ({ rootDir }) {
       const collection = packagesWithLifecycleScripts.get(canonicalName) || []
       collection.push({
         canonicalName,
-        path: nodePath,
+        path: depPath,
         scripts: depScripts
       })
       packagesWithLifecycleScripts.set(canonicalName, collection)
@@ -421,7 +468,6 @@ async function loadAllPackageConfigurations ({ rootDir }) {
   const excessPolicies = Object.keys(allowScriptsConfig).filter(pattern => !packagesWithLifecycleScripts.has(pattern))
 
   return {
-    tree,
     packageJson,
     allowScriptsConfig,
     packagesWithLifecycleScripts,
