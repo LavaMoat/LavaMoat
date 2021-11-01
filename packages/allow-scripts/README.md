@@ -10,6 +10,17 @@ Adds the package to start using it in your project. be sure to include the `@lav
 yarn add -D @lavamoat/allow-scripts
 ```
 
+### Setup
+
+```sh
+yarn allow-scripts setup
+```
+
+Adds a `.yarnrc` or `.npmrc` (the latter if `package-lock.json` is present) to the package, populates this file with the line `ignore-scripts true`. Inmediately after that, adds the dependency `@lavamoat/preinstall-always-fail`.
+
+Adding this package to a project **mitigates** the likelihood of accidently running any lifecycle scripts by throwing an error during the `preinstall` script execution.
+
+
 ### Configure
 
 Automatically generates and writes a configuration into `package.json`, setting new policies as `false` by default. Edit this file as necessary.
@@ -30,16 +41,6 @@ Configuration goes in `package.json`
   }
 }
 ```
-
-### Setup
-
-```sh
-yarn allow-scripts setup
-```
-
-Adds a `.yarnrc` or `.npmrc` (the latter if `package-lock.json` is present) to the package, populates this file with the line `ignore-scripts true`. Inmediately after that, adds the dependency `@lavamoat/preinstall-always-fail`.
-
-Adding this package to a project **mitigates** the likelihood of running any lifecycle scripts by throwing an error during the `preinstall` script execution.
 
 ### Run
 
