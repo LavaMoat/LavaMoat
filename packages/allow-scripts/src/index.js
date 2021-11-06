@@ -6,7 +6,6 @@ const semver = require('semver')
 const logicalTree = require('npm-logical-tree')
 const yarnLockfileParser = require('@yarnpkg/lockfile')
 const npmRunScript = require('@npmcli/run-script')
-const yarnLogicalTree = require('./yarnLogicalTree')
 
 module.exports = {
   // primary
@@ -14,11 +13,8 @@ module.exports = {
   setDefaultConfiguration,
   printPackagesList,
   // util
-  loadTree,
   findAllFilePathsForTree,
-  getAllowedScriptsConfig,
-  parseYarnLockForPackages,
-  getCanonicalNameInfo
+  getAllowedScriptsConfig
 }
 
 async function runAllowedPackages ({ rootDir }) {
@@ -177,129 +173,6 @@ function getAllowedScriptsConfig (packageJson) {
   return lavamoatConfig.allowScripts || {}
 }
 
-async function parseYarnLockForPackages () {
-  const yarnLockfileContent = await fs.readFile('./yarn.lock', 'utf8')
-  const { object: parsedLockFile } = yarnLockfileParser.parse(yarnLockfileContent)
-  // parsedLockFile contains an entry from each range to resolved package, so we dedupe
-  const uniquePackages = new Set(Object.values(parsedLockFile))
-  return Array.from(uniquePackages.values(), ({ resolved, version }) => {
-    const { namespace, canonicalName } = getCanonicalNameInfo(resolved)
-    return { resolved, version, namespace, canonicalName }
-  })
-}
-
-function getCanonicalNameInfo (resolvedUrl) {
-  let url
-
-  try {
-    url = new URL(resolvedUrl)
-  } catch (_) {
-    return {
-      namespace: 'local',
-      canonicalName: `local:${resolvedUrl}`
-    }
-  }
-
-  switch (url.host) {
-    case 'registry.npmjs.org': {
-      // eg: registry.npmjs.org:/@types/json5/-/json5-0.0.29.tgz
-      const pathParts = url.pathname.split('/').slice(1)
-      // support for namespaced packages
-      const packageName = pathParts.slice(0, pathParts.indexOf('-')).join('/')
-      return {
-        namespace: 'npm',
-        canonicalName: `${packageName}`
-      }
-    }
-    case 'registry.yarnpkg.com': {
-      const pathParts = url.pathname.split('/').slice(1)
-      // support for namespaced packages
-      const packageName = pathParts.slice(0, pathParts.indexOf('-')).join('/')
-      return {
-        namespace: 'npm',
-        canonicalName: `${packageName}`
-      }
-    }
-    case 'github.com': {
-      // note: protocol may be "git+https" "git+ssh" or something else
-      // eg: 'git+ssh://git@github.com/ethereumjs/ethereumjs-abi.git#1ce6a1d64235fabe2aaf827fd606def55693508f'
-      const [, ownerName, repoRaw] = url.pathname.split('/')
-      // remove final ".git"
-      const repoName = repoRaw.split('.git').slice(0, -1).join('.git')
-      return {
-        namespace: 'github',
-        canonicalName: `github:${ownerName}/${repoName}`
-      }
-    }
-    case 'codeload.github.com': {
-      // eg: https://codeload.github.com/LavaMoat/bad-idea-collection-non-canonical-keccak/tar.gz/d4718c405bd033928ebfedaca69f96c5d90ef4b0
-      const [, ownerName, repoName] = url.pathname.split('/')
-      return {
-        namespace: 'github',
-        canonicalName: `github:${ownerName}/${repoName}`
-      }
-    }
-    case '': {
-      // "github" as protocol
-      // 'eg: github:ipfs/webrtcsupport#0a7099ff04fd36227a32e16966dbb3cca7002378'
-      if (url.protocol !== 'github:') {
-        throw new Error(`failed to parse canonical name for url: "${url}"`)
-      }
-      const [ownerName, repoName] = url.pathname.split('/')
-      return {
-        namespace: 'github',
-        canonicalName: `github:${ownerName}/${repoName}`
-      }
-    }
-    default: {
-      return {
-        namespace: 'url',
-        canonicalName: `${url.host}:${url.pathname}`
-      }
-    }
-  }
-}
-
-async function loadTree ({ rootDir }) {
-  const packageJson = JSON.parse(await fs.readFile(path.join(rootDir, 'package.json'), 'utf8'))
-  // attempt to load lock files
-  let yarnLockfileContent
-  let packageLockfileContent
-  try {
-    yarnLockfileContent = await fs.readFile(path.join(rootDir, 'yarn.lock'), 'utf8')
-  } catch (err) { /* ignore error */ }
-  try {
-    packageLockfileContent = await fs.readFile(path.join(rootDir, 'package-lock.json'), 'utf8')
-  } catch (err) { /* ignore error */ }
-  if (yarnLockfileContent && packageLockfileContent) {
-    console.warn('@lavamoat/allow-scripts - both yarn and npm lock files detected -- using yarn')
-    packageLockfileContent = undefined
-  }
-  let tree
-  if (yarnLockfileContent) {
-    const { object: parsedLockFile } = yarnLockfileParser.parse(yarnLockfileContent)
-    tree = yarnLogicalTree.loadTree(packageJson, parsedLockFile)
-    // fix path (via address field) for yarn tree
-    // TOOO: make parallel
-    for await (const { node, filePath } of findAllFilePathsForTree(tree)) {
-      // skip unresolved paths
-      // TODO: document when/why this would be falsy
-      if (!filePath) continue
-      const relativePath = path.relative(rootDir, filePath)
-      const address = relativePath.slice('node_modules/'.length).split('/node_modules/').join(':')
-      node.address = address
-    }
-  } else if (packageLockfileContent) {
-    const packageLock = JSON.parse(packageLockfileContent)
-    tree = logicalTree(packageJson, packageLock)
-  } else {
-    throw new Error('@lavamoat/allow-scripts - unable to find lock file (yarn or npm)')
-  }
-  // TODO: validate tree (ensure nodes have addresses)
-
-  return { tree, packageJson }
-}
-
 async function * findAllFilePathsForTree (tree) {
   const filePathCache = new Map()
   for (const { node, branch } of eachNodeInTree(tree)) {
@@ -371,13 +244,6 @@ function getCanonicalNameInfoForTreeNode (node) {
   }
 }
 
-// ;(async function () {
-//   const rootDir = `${process.cwd()}`
-//   for await (const entry of eachPackageDirOnDisk({ rootDir })) {
-//     console.log(getCanonicalNameForPath({ rootDir, filePath: entry }))
-//   }
-// })()
-
 function getCanonicalNameForPath ({ rootDir, filePath }) {
   const relativePath = path.relative(rootDir, filePath)
   // TODO: need to not remove paths like "xyz/src/node_modules/abc"
@@ -417,6 +283,10 @@ async function * eachPackageDirOnDisk ({ rootDir, depsParentPath: _depsParentPat
       continue
     }
     const childPath = path.join(depsParentPath, childDir.name)
+
+    // DEBUGGING
+    // console.log(childPath)
+
     yield childPath
     yield * eachPackageDirOnDisk({ rootDir: childPath })
   }
