@@ -1,20 +1,12 @@
 const { promises: fs } = require('fs')
 const path = require('path')
 const { promisify } = require('util')
-const resolve = promisify(require('resolve'))
-const semver = require('semver')
-const logicalTree = require('npm-logical-tree')
-const yarnLockfileParser = require('@yarnpkg/lockfile')
 const npmRunScript = require('@npmcli/run-script')
 
 module.exports = {
-  // primary
   runAllowedPackages,
   setDefaultConfiguration,
   printPackagesList,
-  // util
-  findAllFilePathsForTree,
-  getAllowedScriptsConfig
 }
 
 async function runAllowedPackages ({ rootDir }) {
@@ -173,47 +165,6 @@ function getAllowedScriptsConfig (packageJson) {
   return lavamoatConfig.allowScripts || {}
 }
 
-async function * findAllFilePathsForTree (tree) {
-  const filePathCache = new Map()
-  for (const { node, branch } of eachNodeInTree(tree)) {
-    // my intention with yielding with a then is that it will be able to produce the
-    // next iteration without waiting for the promise to resolve
-    yield findFilePathForTreeNode(branch, filePathCache).then(filePath => {
-      return { node, filePath }
-    })
-  }
-}
-
-async function findFilePathForTreeNode (branch, filePathCache) {
-  const currentNode = branch[branch.length - 1]
-  let resolvedPath
-  if (branch.length === 1) {
-    // root package
-    resolvedPath = process.cwd()
-  } else {
-    // dependency
-    const parentNode = branch[branch.length - 2]
-    const relativePath = filePathCache.get(parentNode)
-    try {
-      const packagePath = await resolve(`${currentNode.name}/package.json`, { basedir: relativePath })
-      resolvedPath = path.dirname(packagePath)
-    } catch (err) {
-      // error if not a resolution error
-      if (err.code !== 'MODULE_NOT_FOUND') {
-        throw err
-      }
-      // error if non-optional
-      const branchIsOptional = branch.some(node => node.optional)
-      if (!branchIsOptional) {
-        throw new Error(`@lavamoat/allow-scripts - could not resolve non-optional package "${currentNode.name}" from "${relativePath}"`)
-      }
-      // otherwise ignore error
-    }
-  }
-  filePathCache.set(currentNode, resolvedPath)
-  return resolvedPath
-}
-
 function * eachNodeInTree (node, visited = new Set(), branch = []) {
   // visit each node only once
   if (visited.has(node)) return
@@ -225,22 +176,6 @@ function * eachNodeInTree (node, visited = new Set(), branch = []) {
   // recurse
   for (const [, child] of node.dependencies) {
     yield * eachNodeInTree(child, visited, [...branch])
-  }
-}
-
-function getCanonicalNameInfoForTreeNode (node) {
-  // node.resolved is only defined once in the tree for npm (?)
-  if (node.resolved) {
-    return getCanonicalNameInfo(node.resolved)
-  }
-  const validSemver = semver.validRange(node.version)
-  if (validSemver) {
-    return {
-      namespace: 'npm',
-      canonicalName: node.name
-    }
-  } else {
-    return getCanonicalNameInfo(node.version)
   }
 }
 
@@ -283,9 +218,6 @@ async function * eachPackageDirOnDisk ({ rootDir, depsParentPath: _depsParentPat
       continue
     }
     const childPath = path.join(depsParentPath, childDir.name)
-
-    // DEBUGGING
-    // console.log(childPath)
 
     yield childPath
     yield * eachPackageDirOnDisk({ rootDir: childPath })
