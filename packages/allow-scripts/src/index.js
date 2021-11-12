@@ -160,25 +160,6 @@ async function printPackagesList ({ rootDir }) {
   }
 }
 
-function getAllowedScriptsConfig (packageJson) {
-  const lavamoatConfig = packageJson.lavamoat || {}
-  return lavamoatConfig.allowScripts || {}
-}
-
-function * eachNodeInTree (node, visited = new Set(), branch = []) {
-  // visit each node only once
-  if (visited.has(node)) return
-  visited.add(node)
-  // add self to branch
-  branch.push(node)
-  // visit
-  yield { node, branch }
-  // recurse
-  for (const [, child] of node.dependencies) {
-    yield * eachNodeInTree(child, visited, [...branch])
-  }
-}
-
 function getCanonicalNameForPath ({ rootDir, filePath }) {
   const relativePath = path.relative(rootDir, filePath)
   // TODO: need to not remove paths like "xyz/src/node_modules/abc"
@@ -227,7 +208,6 @@ async function * eachPackageDirOnDisk ({ rootDir, depsParentPath: _depsParentPat
 async function loadAllPackageConfigurations ({ rootDir }) {
   const packagesWithLifecycleScripts = new Map()
 
-  const packageJson = JSON.parse(await fs.readFile(path.join(rootDir, 'package.json'), 'utf8'))
   for await (const depPath of eachPackageDirOnDisk({ rootDir })) {
     const canonicalName = getCanonicalNameForPath({ rootDir, filePath: depPath })
     
@@ -256,8 +236,9 @@ async function loadAllPackageConfigurations ({ rootDir }) {
     }
   }
 
-  const allowScriptsConfig = getAllowedScriptsConfig(packageJson)
-
+  const packageJson = JSON.parse(await fs.readFile(path.join(rootDir, 'package.json'), 'utf8'))
+  const lavamoatConfig = packageJson.lavamoat || {}
+  const allowScriptsConfig = lavamoatConfig.allowScripts || {}
   // packages with config
   const configuredPatterns = Object.keys(allowScriptsConfig)
 
