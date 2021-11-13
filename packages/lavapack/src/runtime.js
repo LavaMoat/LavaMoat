@@ -10857,7 +10857,7 @@ function makePrepareRealmGlobalFromConfig ({ createFunctionWrapper }) {
     const kernel = {
       internalRequire
     }
-    if (devMode) {
+    if (debugMode) {
       kernel._getPolicyForPackage = getPolicyForPackage
       kernel._getCompartmentForPackage = getCompartmentForPackage
     }
