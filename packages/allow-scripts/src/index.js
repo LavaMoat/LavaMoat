@@ -162,8 +162,6 @@ async function printPackagesList ({ rootDir }) {
 
 function getCanonicalNameForPath ({ rootDir, filePath }) {
   const relativePath = path.relative(rootDir, filePath)
-  // TODO: need to not remove paths like "xyz/src/node_modules/abc"
-  // so instead iteratively walk path segments
   const canonicalPath = relativePath.split('node_modules/').join('')
   return canonicalPath
 }
@@ -182,7 +180,6 @@ async function fsExists (filepath) {
 
 async function * eachPackageDirOnDisk ({ rootDir, depsParentPath: _depsParentPath }) {
   const depsParentPath = _depsParentPath || path.join(rootDir, 'node_modules')
-  // console.log(depsParentPath)
   
   const depsParentPathExists = await fsExists(depsParentPath)
   if (!depsParentPathExists) return
@@ -211,7 +208,6 @@ async function loadAllPackageConfigurations ({ rootDir }) {
   for await (const depPath of eachPackageDirOnDisk({ rootDir })) {
     const canonicalName = getCanonicalNameForPath({ rootDir, filePath: depPath })
     
-    // TODO: follow symbolic links? I couldnt find any in my test repo,
     let depPackageJson
     try {
       depPackageJson = JSON.parse(await fs.readFile(path.join(depPath, 'package.json')))
