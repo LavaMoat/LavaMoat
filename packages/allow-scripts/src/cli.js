@@ -51,10 +51,6 @@ function parseArgs () {
 
   const parsedArgs = argsParser.parse()
   parsedArgs.command = parsedArgs._[0]
-  // resolve paths
-  // parsedArgs.configPath = path.resolve(parsedArgs.configPath)
-  // parsedArgs.configOverridePath = path.resolve(parsedArgs.configOverridePath)
-  // parsedArgs.configDebugPath = path.resolve(parsedArgs.configDebugPath)
 
   return parsedArgs
 }
