@@ -6,7 +6,7 @@ const { spawnSync } = require('child_process')
 test('cli - auto command', async (t) => {
   // set up the directories
   let allowScriptsSrcRoot = path.join(__dirname, '..', 'src')
-  let projectRoot = `${__dirname}/projects/1`
+  let projectRoot = path.join(__dirname, 'projects', '1')
 
   // delete any existing package.json
   fs.unlink(path.join(projectRoot, 'package.json'), err => {
@@ -27,4 +27,17 @@ test('cli - auto command', async (t) => {
 
   // assert its contents
   t.deepEqual(packageJsonContents.lavamoat, {allowScripts: {'bbb/evil_dep': false}})
+})
+
+test('cli - run command', async (t) => {
+  // set up the directories
+  let allowScriptsSrcRoot = path.join(__dirname, '..', 'src')
+  let projectRoot = path.join(__dirname, 'projects', '2')
+
+  // run the "run" command
+  let cmd = path.join(allowScriptsSrcRoot, 'cli.js')
+  let result = spawnSync(cmd, ['run'], {cwd: projectRoot})
+
+  // PLACEHOLDER
+  t.deepEqual(true, true)
 })
