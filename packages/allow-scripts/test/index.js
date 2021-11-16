@@ -47,6 +47,12 @@ test('cli - run command - good dep at the root', async (t) => {
     'running lifecycle scripts for top level package',
     '',
   ])
+
+  // note
+  // we could also test whether the preinstall script is
+  // actually executing. we did it manually by replacing
+  // with
+  // "preinstall": "touch /tmp/$( date '+%Y-%m-%d_%H-%M-%S' )"
 })
 
 test('cli - run command - good dep as a sub dep', async (t) => {
