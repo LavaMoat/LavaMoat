@@ -29,7 +29,7 @@ test('cli - auto command', async (t) => {
   t.deepEqual(packageJsonContents.lavamoat, {allowScripts: {'bbb/evil_dep': false}})
 })
 
-test('cli - run command', async (t) => {
+test('cli - run command - good dep at the root', async (t) => {
   // set up the directories
   let allowScriptsSrcRoot = path.join(__dirname, '..', 'src')
   let projectRoot = path.join(__dirname, 'projects', '2')
@@ -42,6 +42,26 @@ test('cli - run command', async (t) => {
   t.deepEqual(result.stdout.toString().split('\n'), [
     'running lifecycle scripts for event \"preinstall\"',
     '- good_dep',
+    'running lifecycle scripts for event \"install\"',
+    'running lifecycle scripts for event \"postinstall\"',
+    'running lifecycle scripts for top level package',
+    '',
+  ])
+})
+
+test('cli - run command - good dep as a sub dep', async (t) => {
+  // set up the directories
+  let allowScriptsSrcRoot = path.join(__dirname, '..', 'src')
+  let projectRoot = path.join(__dirname, 'projects', '3')
+
+  // run the "run" command
+  let cmd = path.join(allowScriptsSrcRoot, 'cli.js')
+  let result = spawnSync(cmd, ['run'], {cwd: projectRoot})
+
+  // assert the output
+  t.deepEqual(result.stdout.toString().split('\n'), [
+    'running lifecycle scripts for event \"preinstall\"',
+    '- bbb/good_dep',
     'running lifecycle scripts for event \"install\"',
     'running lifecycle scripts for event \"postinstall\"',
     'running lifecycle scripts for top level package',
