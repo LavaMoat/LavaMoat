@@ -38,6 +38,13 @@ test('cli - run command', async (t) => {
   let cmd = path.join(allowScriptsSrcRoot, 'cli.js')
   let result = spawnSync(cmd, ['run'], {cwd: projectRoot})
 
-  // PLACEHOLDER
-  t.deepEqual(true, true)
+  // assert the output
+  t.deepEqual(result.stdout.toString().split('\n'), [
+    'running lifecycle scripts for event \"preinstall\"',
+    '- good_dep',
+    'running lifecycle scripts for event \"install\"',
+    'running lifecycle scripts for event \"postinstall\"',
+    'running lifecycle scripts for top level package',
+    '',
+  ])
 })
