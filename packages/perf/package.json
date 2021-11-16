@@ -11,6 +11,11 @@
     "start:secp256k1": "(cd trials/secp256k1-mixedAdd && yarn && yarn start)",
     "start:newBN": "(cd trials/secp256k1-newBN && yarn && yarn start)"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LavaMoat/LavaMoat.git",
+    "directory":"packages/perf"
+  },
   "dependencies": {
     "browserify": "^16.5.0",
     "lavamoat-browserify": "4.0.0",
