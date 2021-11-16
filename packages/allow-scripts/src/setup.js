@@ -7,20 +7,21 @@ const { existsSync,
 const { spawnSync } = require('child_process')
 const path = require('path')
 
-const yarnRcExists = existsSync(addInstallParentDir('.yarnrc'))
-const npmRcExists = existsSync(addInstallParentDir('.npmrc'))
-
 module.exports = {
   writeRcFile,
   addPreinstallAFDependency
 }
 
 function addInstallParentDir(filename) {
-  return path.join(process.env.INIT_CWD, filename)
+  const rootDir = process.env.INIT_CWD || process.cwd()
+  return path.join(rootDir, filename)
 }
 
 function writeRcFile () {
-  var rcFile, rcEntry
+  const yarnRcExists = existsSync(addInstallParentDir('.yarnrc'))
+  const npmRcExists = existsSync(addInstallParentDir('.npmrc'))
+
+  let rcFile, rcEntry
   if (npmRcExists) {
     rcFile = '.npmrc'
     rcEntry = 'ignore-scripts=true'
@@ -29,7 +30,7 @@ function writeRcFile () {
     rcEntry = 'ignore-scripts true'
   }
 
-  var rcPath = addInstallParentDir(rcFile)
+  let rcPath = addInstallParentDir(rcFile)
 
   if (!yarnRcExists && !npmRcExists) {
     writeFileSync(rcPath, rcEntry + '\n')
@@ -47,7 +48,7 @@ function writeRcFile () {
 }
 
 function addPreinstallAFDependency () {
-  var result, cmd, cmdArgs
+  let result, cmd, cmdArgs
 
   if (existsSync('./.npmrc')) {
     cmd = 'npm'
@@ -57,7 +58,7 @@ function addPreinstallAFDependency () {
     cmdArgs = ['add', '-D', '@lavamoat/preinstall-always-fail']
   }
 
-  var result = spawnSync(cmd, cmdArgs, {})
+  result = spawnSync(cmd, cmdArgs, {})
 
   if (result.status !== 0) {
     process.stderr.write(result.stderr);
