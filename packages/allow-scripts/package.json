@@ -22,7 +22,7 @@
     "eslint-plugin-standard": "^5.0.0"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\"",
+    "test": "yarn test:run",
     "test:run": "ava test/index.js --timeout=2m",
     "lint": "npm run lint:eslint && npm run lint:deps",
     "lint:eslint": "eslint \"src/**/*.js\"",
