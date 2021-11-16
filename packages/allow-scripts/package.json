@@ -10,6 +10,11 @@
     "@npmcli/run-script": "^1.8.1",
     "yargs": "^16.2.0"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LavaMoat/LavaMoat.git",
+    "directory":"packages/allow-scripts"
+  },
   "publishConfig": {
     "access": "public"
   },

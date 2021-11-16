@@ -7,7 +7,6 @@ const { existsSync,
 const { spawnSync } = require('child_process')
 const path = require('path')
 
-
 module.exports = {
   writeRcFile,
   addPreinstallAFDependency
