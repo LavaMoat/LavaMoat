@@ -189,7 +189,17 @@ async function parseYarnLockForPackages () {
 }
 
 function getCanonicalNameInfo (resolvedUrl) {
-  const url = new URL(resolvedUrl)
+  let url
+
+  try {
+    url = new URL(resolvedUrl)
+  } catch (_) {
+    return {
+      namespace: 'local',
+      canonicalName: `local:${resolvedUrl}`
+    }
+  }
+
   switch (url.host) {
     case 'registry.npmjs.org': {
       // eg: registry.npmjs.org:/@types/json5/-/json5-0.0.29.tgz
