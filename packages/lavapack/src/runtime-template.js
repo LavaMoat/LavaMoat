@@ -27,7 +27,7 @@
     if (!(requestedName in parentModuleData.deps)) {
       console.warn(`missing dep: ${parentModuleData.package} requested ${requestedName}`)
     }
-    return parentModuleData.deps[requestedName] || requestedName  
+    return parentModuleData.deps[requestedName] || requestedName
   }
 
   function prepareModuleInitializerArgs (requireRelativeWithContext, moduleObj, moduleData) {
@@ -63,14 +63,14 @@
     // verify + load config
     if (bundlePolicy) loadPolicy(bundlePolicy)
     // verify + load in each module
-    for (const [moduleId, moduleDeps, initFn, { package: packageName }] of newModules) {
+    for (const [moduleId, moduleDeps, initFn, { package: packageName, type }] of newModules) {
       // verify that module is new
       if (moduleRegistry.has(moduleId)) {
         throw new Error(`LavaMoat - loadBundle encountered redundant module definition for id "${moduleId}"`)
       }
       // add the module
       moduleRegistry.set(moduleId, {
-        type: 'js',
+        type: type || 'js',
         id: moduleId,
         deps: moduleDeps,
         // source: `(${initFn})`,
