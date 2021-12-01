@@ -10,7 +10,8 @@ const { parseForPolicy } = require('./parseForPolicy')
 const { createKernel } = require('./kernel')
 
 runLava().catch(err => {
-  console.error(err)
+  // explicity log stack to workaround https://github.com/endojs/endo/issues/944
+  console.error(err.stack || err)
   process.exit(1)
 })
 
