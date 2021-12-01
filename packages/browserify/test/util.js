@@ -22,7 +22,7 @@ module.exports = {
   createBundleFromEntry,
   createBundleFromRequiresArray,
   createBundleFromRequiresArrayPath,
-  createWatchifyBundle,
+  createWatchifyBundler,
   generateConfigFromFiles,
   fnToCodeBlock,
   testEntryAttackerVictim,
@@ -35,7 +35,8 @@ module.exports = {
   runScenario,
   createBundleForScenario,
   autoConfigForScenario,
-  runBrowserify
+  runBrowserify,
+  bundleAsync
 }
 
 async function createBundleFromEntry (path, pluginOpts = {}) {
@@ -175,18 +176,18 @@ function fnToCodeBlock (fn) {
   return fn.toString().split('\n').slice(1, -1).join('\n')
 }
 
-async function createWatchifyBundle (pluginOpts) {
+function createWatchifyBundler (pluginOpts) {
   const bundler = browserify([], {
     debug: true,
     cache: {},
     packageCache: {},
     plugin: [
-      [lavamoatPlugin, pluginOpts],
       // poll option is needed to ensure the 'update' event is properly fired after the config override file changes. Without it, the firing behavior is unpredictable due to filesystem watch not always detecting the change.
-      [watchify, { poll: true }]
+      [watchify, { poll: true }],
+      // add lavamoat after watchify
+      [lavamoatPlugin, pluginOpts],
     ]
   })
-  bundleAsync(bundler)
   return bundler
 }
 
