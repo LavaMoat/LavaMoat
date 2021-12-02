@@ -1,0 +1,20 @@
+{
+  "name": "@lavamoat/aa",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "test": "ava test/index.js"
+  },
+  "devDependencies": {
+    "ava": "^3.15.0"
+  },
+  "dependencies": {
+    "resolve": "^1.20.0"
+  },
+  "description": "LavaMoat's canonical package name convention.",
+  "directories": {
+    "test": "test"
+  },
+  "author": "kumavis"
+}
