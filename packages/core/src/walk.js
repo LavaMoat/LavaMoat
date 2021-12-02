@@ -37,7 +37,7 @@ async function walk ({
  * @param {function} options.importHook,
  * @param {bool} options.shouldImport,
  * @param {Set<string>} options.visitedSpecifiers
- * @returns {AsyncIterableIterator<ModuleRecord>}
+ * @returns {AsyncIterableIterator<LavamoatModuleRecord>}
  */
 async function * eachNodeInTree ({
   moduleSpecifier,
