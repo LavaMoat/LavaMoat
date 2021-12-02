@@ -1,7 +1,30 @@
 const { promises: fs } = require('fs')
 const path = require('path')
-const { promisify } = require('util')
 const npmRunScript = require('@npmcli/run-script')
+const { createRequire } = require('module')
+const resolve = require('resolve')
+const { promisify } = require('util')
+const resolveAsync = promisify(resolve)
+
+class SetMap {
+  constructor () {
+    this.map = new Map()
+  }
+  add (key, value) {
+    let set = this.map.get(key)
+    if (set === undefined) {
+      set = new Set()
+      this.map.set(key, set)
+    }
+    set.add(value)
+  }
+  get (key) {
+    return this.map.get(key)
+  }
+  entries() {
+    return this.map.entries()
+  }
+}
 
 module.exports = {
   runAllowedPackages,
@@ -160,57 +183,63 @@ async function printPackagesList ({ rootDir }) {
   }
 }
 
-function getCanonicalNameForPath ({ rootDir, filePath }) {
-  const relativePath = path.relative(rootDir, filePath)
-  const canonicalPath = relativePath.split('node_modules/').join('')
-  return canonicalPath
-}
-
-async function fsExists (filepath) {
-  try {
-    await fs.access(filepath)
-    return true
-  } catch (err) {
-    if (err.code === 'ENOENT') {
-      return false
-    }
-    throw err
+async function loadFilePathToShortestLogicalPath({ rootDir = process.cwd(), includeDevDeps } = {}) {
+  const filePathToLogicalPaths = new SetMap()
+  const filePathToShortestLogicalPath = new Map()
+  // walk tree
+  for await (const packageData of eachPackageInLogicalTree({ packageDir: rootDir, includeDevDeps })) {
+    const logicalPathString = packageData.logicalPath.join('>')
+    filePathToLogicalPaths.add(packageData.packageDir, logicalPathString)
   }
+  // find shortest logical path
+  for (const [packageDir, logicalPathSet] of filePathToLogicalPaths.entries()) {
+    const shortestLogicalPathString = Array.from(logicalPathSet.values()).reduce((a,b) => a.length > b.length ? b : a)
+    filePathToShortestLogicalPath.set(packageDir, shortestLogicalPathString)
+  }
+  return filePathToShortestLogicalPath
 }
 
-async function * eachPackageDirOnDisk ({ rootDir, depsParentPath: _depsParentPath }) {
-  const depsParentPath = _depsParentPath || path.join(rootDir, 'node_modules')
-  
-  const depsParentPathExists = await fsExists(depsParentPath)
-  if (!depsParentPathExists) return
-  const depsParent = await fs.opendir(depsParentPath)
-  for await (const childDir of depsParent) {
-    // ignore all non-directories
-    if (!childDir.isDirectory()) continue
-    // ignore all dot-prefixed directories
-    if (childDir.name.startsWith('.')) continue
-    // handle org namespaced packages
-    if (childDir.name.startsWith('@')) {
-      const orgPath = path.join(depsParentPath, childDir.name)
-      yield * eachPackageDirOnDisk({ rootDir, depsParentPath: orgPath })
+async function * eachPackageInLogicalTree ({ packageDir, logicalPath = [], includeDevDeps = false, visited = new Set() }) {
+  const packageJsonPath = path.join(packageDir, 'package.json')
+  const rawPackageJson = await fs.readFile(packageJsonPath, 'utf8')
+  const packageJson = JSON.parse(rawPackageJson)
+  const depsToWalk = [
+    ...Object.keys(packageJson.dependencies || {}),
+    ...Object.keys(includeDevDeps ? packageJson.devDependencies || {} : {}),
+  ]
+  for (const depName of depsToWalk) {
+    const depRelativePackageJsonPath = path.join(depName, 'package.json')
+    let depPackageJsonPath
+    try {
+      // sync seems slightly faster
+      // depPackageJsonPath = await resolveAsync(depRelativePackageJsonPath, { basedir: packageJsonPath })
+      depPackageJsonPath = resolve.sync(depRelativePackageJsonPath, { basedir: packageJsonPath })
+    } catch (err) {
+      console.error(err)
       continue
     }
-    const childPath = path.join(depsParentPath, childDir.name)
-
-    yield childPath
-    yield * eachPackageDirOnDisk({ rootDir: childPath })
+    const depPath = path.dirname(depPackageJsonPath)
+    // avoid cycles
+    if (visited.has(depPath)) {
+      continue
+    }
+    visited.add(depPath)
+    const childLogicalPath = [...logicalPath, depName]
+    yield { packageDir: depPath, logicalPath: childLogicalPath }
+    yield* eachPackageInLogicalTree({ packageDir: depPath, logicalPath: childLogicalPath, includeDevDeps: false, visited })
   }
 }
 
 async function loadAllPackageConfigurations ({ rootDir }) {
   const packagesWithLifecycleScripts = new Map()
 
-  for await (const depPath of eachPackageDirOnDisk({ rootDir })) {
-    const canonicalName = getCanonicalNameForPath({ rootDir, filePath: depPath })
-    
+  const dependencyMap = await loadFilePathToShortestLogicalPath({ rootDir, includeDevDeps: true })
+  const sortedDepEntries = Array.from(dependencyMap.entries()).sort(sortBy(([filePath, canonicalName]) => canonicalName))
+  for (const [filePath, canonicalName] of sortedDepEntries) {
+    // const canonicalName = getCanonicalNameForPath({ rootDir, filePath: filePath })
     let depPackageJson
     try {
-      depPackageJson = JSON.parse(await fs.readFile(path.join(depPath, 'package.json')))
+      depPackageJson = JSON.parse(await fs.readFile(path.join(filePath, 'package.json')))
     } catch (err) {
       const branchIsOptional = branch.some(node => node.optional)
       if (err.code === 'ENOENT' && branchIsOptional) {
@@ -225,7 +254,7 @@ async function loadAllPackageConfigurations ({ rootDir }) {
       const collection = packagesWithLifecycleScripts.get(canonicalName) || []
       collection.push({
         canonicalName,
-        path: depPath,
+        path: filePath,
         scripts: depScripts
       })
       packagesWithLifecycleScripts.set(canonicalName, collection)
@@ -254,5 +283,15 @@ async function loadAllPackageConfigurations ({ rootDir }) {
     disallowedPatterns,
     missingPolicies,
     excessPolicies
+  }
+}
+
+function sortBy(getterFn) {
+  return (a,b) => {
+    const aVal = getterFn(a)
+    const bVal = getterFn(b)
+    if (aVal > bVal) return 1
+    else if (aVal < bVal) return -1
+    else return 0
   }
 }
