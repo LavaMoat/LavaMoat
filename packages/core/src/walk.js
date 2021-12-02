@@ -6,10 +6,10 @@ module.exports = { walk, eachNodeInTree }
 /**
  * @function walk
  * @param {object} options
- * @param {string} options.moduleSpecifier,
- * @param {function} options.importHook,
- * @param {function} options.visitorFn,
- * @param {bool} options.shouldImport,
+ * @param {string} options.moduleSpecifier
+ * @param {function} options.importHook
+ * @param {function} options.visitorFn
+ * @param {function} options.shouldImport
  * @param {Set<string>} options.visitedSpecifiers
  */
 async function walk ({
