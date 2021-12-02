@@ -4,12 +4,13 @@ const path = require('path')
 const {
   createScenarioFromScaffold,
   prepareScenarioOnDisk,
-  runAndTestScenario
+  runAndTestScenario,
 } = require('lavamoat-core/test/util')
 
 const {
   runScenario,
-  runBrowserify
+  runBrowserify,
+  createWatchifyBundler
 } = require('./util')
 
 test('policy - default policy path is generated with autoconfig if path is not specified', async (t) => {
@@ -71,6 +72,30 @@ test('Config - Applies writeAutoPolicyDebug plugin option and dumps module objec
   await runBrowserify({ scenario })
 
   t.true(fs.existsSync(expectedPath), 'Module data does not yet exist')
+})
+
+test('Config - watchify listens for policy file changes', async (t) => {
+  const scenario = createScenarioFromScaffold({
+    opts: {
+      writeAutoPolicy: true,
+    }
+  })
+  const { projectDir, policyDir } = await prepareScenarioOnDisk({ scenario, policyName: 'browserify' })
+  scenario.dir = projectDir
+  await runBrowserify({ scenario })
+
+  const watchedFiles = []
+  const bundler = createWatchifyBundler({ projectRoot: projectDir, policyName: 'browserify' })
+  bundler.on('file', (file) => {
+    watchedFiles.push(file)
+  })
+  // need to wait a tick to get file events
+  await new Promise((resolve) => setTimeout(resolve))
+  const relativeFiles = watchedFiles.map(file => path.relative(policyDir, file)).sort()
+  t.deepEqual(relativeFiles, [
+    'policy-override.json',
+    'policy.json',
+  ])
 })
 
 // this test is not written correctly, im disabling it for now

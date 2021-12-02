@@ -29,6 +29,7 @@ module.exports.args = reccomendedArgs
 function plugin (browserify, pluginOpts) {
   // pluginOpts.policy is policy path
   const configuration = getConfigurationFromPluginOpts(pluginOpts)
+
   // setup the plugin in a re-bundle friendly way
   browserify.on('reset', setupPlugin)
   setupPlugin()
@@ -50,6 +51,16 @@ function plugin (browserify, pluginOpts) {
         // write policy files to disk
         onResult: (policy) => writeAutoPolicy(policy, configuration)
       }))
+    } else {
+      // when not generating policy files, announce policy files as build deps for watchify
+      // ref https://github.com/browserify/watchify#working-with-browserify-transforms
+      const primary = path.resolve(configuration.projectRoot, configuration.policyPaths.primary)
+      const override = path.resolve(configuration.projectRoot, configuration.policyPaths.override)
+      // wait until next tick to ensure file event subscribers have run
+      setTimeout(() => {
+        browserify.emit('file', primary)
+        browserify.emit('file', override)
+      })
     }
 
     // replace the standard browser-pack with our custom packer
@@ -107,6 +118,7 @@ function getConfigurationFromPluginOpts (pluginOpts) {
   }
 
   const configuration = {
+    projectRoot: pluginOpts.projectRoot,
     includePrelude: 'includePrelude' in pluginOpts ? Boolean(pluginOpts.includePrelude) : true,
     pruneConfig: Boolean(pluginOpts.prunePolicy),
     debugMode: Boolean(pluginOpts.debugMode),
