@@ -8,16 +8,13 @@
   "license": "MIT",
   "dependencies": {
     "@npmcli/run-script": "^1.8.1",
-    "@yarnpkg/lockfile": "^1.1.0",
-    "npm-logical-tree": "^1.2.1",
     "resolve": "^1.20.0",
-    "semver": "^7.3.4",
     "yargs": "^16.2.0"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/LavaMoat/LavaMoat.git",
-    "directory":"packages/allow-scripts"
+    "directory": "packages/allow-scripts"
   },
   "publishConfig": {
     "access": "public"
@@ -31,7 +28,8 @@
     "eslint-plugin-standard": "^5.0.0"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\"",
+    "test": "yarn test:run",
+    "test:run": "ava test/index.js --timeout=2m",
     "lint": "npm run lint:eslint && npm run lint:deps",
     "lint:eslint": "eslint \"src/**/*.js\"",
     "lint:fix": "eslint src/**/*.js --fix",

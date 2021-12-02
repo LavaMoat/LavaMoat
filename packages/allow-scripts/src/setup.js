@@ -48,7 +48,7 @@ function writeRcFile () {
 }
 
 function addPreinstallAFDependency () {
-  let result, cmd, cmdArgs
+  let cmd, cmdArgs
 
   if (existsSync('./.npmrc')) {
     cmd = 'npm'
@@ -58,7 +58,7 @@ function addPreinstallAFDependency () {
     cmdArgs = ['add', '-D', '@lavamoat/preinstall-always-fail']
   }
 
-  result = spawnSync(cmd, cmdArgs, {})
+  let result = spawnSync(cmd, cmdArgs, {})
 
   if (result.status !== 0) {
     process.stderr.write(result.stderr);

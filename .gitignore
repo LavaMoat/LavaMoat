@@ -108,3 +108,6 @@ tmp/
 temp/
 
 # End of https://www.gitignore.io/api/node
+
+# MacOS
+.DS_Store
