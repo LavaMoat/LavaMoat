@@ -78,6 +78,19 @@
         "to-fast-properties": true
       }
     },
+    "@lavamoat/aa": {
+      "builtin": {
+        "fs.promises.readFile": true,
+        "path.dirname": true,
+        "path.join": true
+      },
+      "globals": {
+        "console.error": true
+      },
+      "packages": {
+        "resolve": true
+      }
+    },
     "@lavamoat/lavapack": {
       "builtin": {
         "assert": true,

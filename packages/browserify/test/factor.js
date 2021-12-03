@@ -14,6 +14,30 @@ const {
 test('package factor bundle', async (t) => {
   const scenario = {
     files: fillInFileDetails({
+      './package.json': {
+        content: `${JSON.stringify({
+          dependencies: {
+            a: '1.0.0',
+            b: '1.0.0',
+            c: '1.0.0',
+          }
+        })}`,
+      },
+      './node_modules/a/package.json': {
+        content: `${JSON.stringify({
+          dependencies: {}
+        })}`,
+      },
+      './node_modules/b/package.json': {
+        content: `${JSON.stringify({
+          dependencies: {}
+        })}`,
+      },
+      './node_modules/c/package.json': {
+        content: `${JSON.stringify({
+          dependencies: {}
+        })}`,
+      },
       './node_modules/b/index.js': {
         // common.js
         packageName: 'b',

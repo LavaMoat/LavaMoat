@@ -1,10 +1,13 @@
 const { promises: fs } = require('fs')
 const path = require('path')
-const resolve = require('resolve')
+const { sync: nodeResolve } = require('resolve')
+const resolve = (from, to) => nodeResolve(to, { basedir: from })
 
 module.exports = {
   loadCanonicalNameMap,
   eachPackageInLogicalTree,
+  getPackageDirForModulePath,
+  getPackageNameForModulePath,
 }
 
 class SetMap {
@@ -33,7 +36,7 @@ class SetMap {
  */
 async function loadCanonicalNameMap ({ rootDir, includeDevDeps } = {}) {
   const filePathToLogicalPaths = new SetMap()
-  const filePathToShortestLogicalPath = new Map()
+  const canonicalNameMap = new Map()
   // walk tree
   for await (const packageData of eachPackageInLogicalTree({ packageDir: rootDir, includeDevDeps })) {
     const logicalPathString = packageData.logicalPathParts.join('>')
@@ -42,15 +45,19 @@ async function loadCanonicalNameMap ({ rootDir, includeDevDeps } = {}) {
   // find shortest logical path
   for (const [packageDir, logicalPathSet] of filePathToLogicalPaths.entries()) {
     const shortestLogicalPathString = Array.from(logicalPathSet.values()).reduce((a,b) => a.length > b.length ? b : a)
-    filePathToShortestLogicalPath.set(packageDir, shortestLogicalPathString)
+    canonicalNameMap.set(packageDir, shortestLogicalPathString)
   }
-  return filePathToShortestLogicalPath
+  // add root dir as "app"
+  canonicalNameMap.set(rootDir, '<root>')
+  Reflect.defineProperty(canonicalNameMap, 'rootDir', { value: rootDir })
+  return canonicalNameMap
 }
 
 /**
  * @param {object} options
  * @returns {AsyncIterableIterator<{packageDir: string, logicalPathParts: string[]}>}
  */
+// TODO: optimize this to not walk the entire tree, can skip if the best known logical path is already shorter
 async function * eachPackageInLogicalTree ({ packageDir, logicalPath = [], includeDevDeps = false, visited = new Set() }) {
   const packageJsonPath = path.join(packageDir, 'package.json')
   const rawPackageJson = await fs.readFile(packageJsonPath, 'utf8')
@@ -65,19 +72,45 @@ async function * eachPackageInLogicalTree ({ packageDir, logicalPath = [], inclu
     try {
       // sync seems slightly faster
       // depPackageJsonPath = await resolveAsync(depRelativePackageJsonPath, { basedir: packageJsonPath })
-      depPackageJsonPath = resolve.sync(depRelativePackageJsonPath, { basedir: packageJsonPath })
+      depPackageJsonPath = resolve(packageJsonPath, depRelativePackageJsonPath)
     } catch (err) {
       console.error(err)
       continue
     }
-    const depPath = path.dirname(depPackageJsonPath)
-    // avoid cycles
-    if (visited.has(depPath)) {
+    const childPackageDir = path.dirname(depPackageJsonPath)
+    // avoid cycles, but still visit the same package
+    // on disk multiple times through different logical paths
+    if (visited.has(childPackageDir)) {
       continue
     }
-    visited.add(depPath)
+    const childVisited = new Set([...visited, childPackageDir])
     const childLogicalPath = [...logicalPath, depName]
-    yield { packageDir: depPath, logicalPathParts: childLogicalPath }
-    yield* eachPackageInLogicalTree({ packageDir: depPath, logicalPath: childLogicalPath, includeDevDeps: false, visited })
+    yield { packageDir: childPackageDir, logicalPathParts: childLogicalPath }
+    yield* eachPackageInLogicalTree({ packageDir: childPackageDir, logicalPath: childLogicalPath, includeDevDeps: false, visited: childVisited })
   }
+}
+
+function getPackageNameForModulePath (canonicalNameMap, modulePath) {
+  const packageDir = getPackageDirForModulePath(canonicalNameMap, modulePath)
+  if (packageDir === undefined) {
+    const relativeToRoot = path.relative(canonicalNameMap.rootDir, modulePath)
+    return `external:${relativeToRoot}`
+  }
+  const packageName = canonicalNameMap.get(packageDir)
+  return packageName
+}
+
+function getPackageDirForModulePath (canonicalNameMap, modulePath) {
+  // find which of these directories the module is in
+  const matchingPackageDirs = Array.from(canonicalNameMap.keys())
+    .filter(packageDir => modulePath.startsWith(packageDir))
+  if (matchingPackageDirs.length === 0) {
+    return undefined
+    // throw new Error(`Could not find package for module path: "${modulePath}" out of these package dirs:\n${Array.from(canonicalNameMap.keys()).join('\n')}`)
+  }
+  return matchingPackageDirs.reduce(takeLongest)
+}
+
+function takeLongest (a, b) {
+  return a.length > b.length ? a : b
 }

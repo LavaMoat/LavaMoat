@@ -1,11 +1,13 @@
 const fs = require('fs')
 const path = require('path')
-const { getDefaultPaths, mergePolicy } = require('lavamoat-core')
+const { getDefaultPaths, mergePolicy, packageNameFromPath } = require('lavamoat-core')
 const jsonStringify = require('json-stable-stringify')
 const { createModuleInspectorSpy } = require('./createModuleInspectorSpy.js')
 const { createPackageDataStream } = require('./createPackageDataStream.js')
 const createLavaPack = require('@lavamoat/lavapack')
 const { createSesWorkaroundsTransform } = require('./sesTransforms')
+const { loadCanonicalNameMap } = require('@lavamoat/aa')
+
 
 // these are the reccomended arguments for lavaMoat to work well with browserify
 const reccomendedArgs = {
@@ -35,11 +37,29 @@ function plugin (browserify, pluginOpts) {
   setupPlugin()
 
   function setupPlugin () {
+
+    let canonicalNameMap
+    async function getCanonicalNameMap () {
+      if (canonicalNameMap === undefined) {
+        canonicalNameMap = await loadCanonicalNameMap({ rootDir: configuration.projectRoot })
+        // add browserify builtins
+        for (const [builtin, modulePath] of Object.entries(browserify._mdeps.options.modules)) {
+          // inaccurate path. additional problem is that builtins may share a package
+          const packagePath = path.dirname(modulePath)
+          const packageName = `browserify:${builtin}`
+          canonicalNameMap.set(packagePath, packageName)
+        }
+      }
+      return canonicalNameMap
+    }
+
     // some workarounds for SES strict parsing and evaluation
     browserify.transform(createSesWorkaroundsTransform(), { global: true })
 
     // inject package name into module data
-    browserify.pipeline.get('emit-deps').unshift(createPackageDataStream())
+    browserify.pipeline.get('emit-deps').unshift(createPackageDataStream({
+      getCanonicalNameMap,
+    }))
 
     // if writeAutoPolicy activated, insert hook
     if (configuration.writeAutoPolicy) {
