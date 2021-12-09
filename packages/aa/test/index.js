@@ -20,6 +20,10 @@ test('project 1', async t => {
       'projects/1/node_modules/bbb/node_modules/evil_dep',
       'bbb>evil_dep',
     ],
+    [
+      'projects/1',
+      '<root>',
+    ],
   ])
 })
 
@@ -44,7 +48,11 @@ test('project 2', async t => {
     [
       'projects/2/node_modules/good_dep',
       'good_dep',
-    ],    
+    ],
+    [
+      'projects/2',
+      '<root>',
+    ],
   ])
 })
 
@@ -69,6 +77,10 @@ test('project 3', async t => {
     [
       'projects/3/node_modules/evil_dep',
       'evil_dep',
+    ],
+    [
+      'projects/3',
+      '<root>',
     ],
   ])
 })
