@@ -1,6 +1,6 @@
 const fs = require('fs')
 const path = require('path')
-const { getDefaultPaths, mergePolicy, packageNameFromPath } = require('lavamoat-core')
+const { getDefaultPaths, mergePolicy } = require('lavamoat-core')
 const jsonStringify = require('json-stable-stringify')
 const { createModuleInspectorSpy } = require('./createModuleInspectorSpy.js')
 const { createPackageDataStream } = require('./createPackageDataStream.js')

@@ -54,7 +54,7 @@ async function runLava () {
   if (shouldRunApplication) {
     // execution mode
     const lavamoatConfig = await loadPolicy({ debugMode, policyPath, policyOverridePath })
-    const kernel = createKernel({ cwd, lavamoatConfig, debugMode })
+    const kernel = await createKernel({ cwd, lavamoatConfig, debugMode })
     // patch process.argv so it matches the normal pattern
     // e.g. [runtime path, entrypoint, ...args]
     // we'll use the LavaMoat path as the runtime

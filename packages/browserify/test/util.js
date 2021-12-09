@@ -10,7 +10,6 @@ const watchify = require('watchify')
 const through = require('through2').obj
 const pump = require('pump')
 const dataToStream = require('from')
-const { packageNameFromPath } = require('lavamoat-core')
 const lavamoatPlugin = require('../src/index')
 const { verifySourceMaps } = require('./sourcemaps')
 const { prepareScenarioOnDisk, evaluateWithSourceUrl, createHookedConsole } = require('lavamoat-core/test/util.js')
@@ -139,7 +138,7 @@ function createBrowserifyFromRequiresArray ({ files: _files, pluginOpts = {} }) 
   bundler.pipeline.get('emit-deps').shift()
   bundler.pipeline.get('emit-deps').unshift(through2(function (moduleData, _, cb) {
     try {
-      const packageName = moduleData.package || packageNameFromPath(moduleData.file || moduleData.id) || '<root>'
+      const packageName = moduleData.package
       moduleData.packageName = packageName
       moduleData.package = packageName
     } catch (err) {

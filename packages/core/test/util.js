@@ -1,4 +1,4 @@
-const { parseForPolicy, LavamoatModuleRecord, generateKernel, packageNameFromPath, getDefaultPaths } = require('../src/index.js')
+const { parseForPolicy, LavamoatModuleRecord, generateKernel, getDefaultPaths } = require('../src/index.js')
 const mergeDeep = require('merge-deep')
 const { runInContext, createContext } = require('vm')
 const path = require('path')
@@ -350,7 +350,7 @@ function fillInFileDetails (files) {
     if (path.extname(file) === '.js') {
       // parse as LavamoatModuleRecord
       fileObj.specifier = fileObj.file || file
-      fileObj.packageName = fileObj.packageName || packageNameFromPath(file) || '<root>'
+      fileObj.packageName = fileObj.packageName
       fileObj.type = fileObj.type || 'js'
       fileObj.entry = Boolean(fileObj.entry)
     }
