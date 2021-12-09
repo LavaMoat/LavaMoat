@@ -41,14 +41,12 @@ function plugin (browserify, pluginOpts) {
     let canonicalNameMap
     async function getCanonicalNameMap () {
       if (canonicalNameMap === undefined) {
-        canonicalNameMap = await loadCanonicalNameMap({ rootDir: configuration.projectRoot })
-        // add browserify builtins
-        for (const [builtin, modulePath] of Object.entries(browserify._mdeps.options.modules)) {
-          // inaccurate path. additional problem is that builtins may share a package
-          const packagePath = path.dirname(modulePath)
-          const packageName = `browserify:${builtin}`
-          canonicalNameMap.set(packagePath, packageName)
-        }
+        canonicalNameMap = await loadCanonicalNameMap({
+          rootDir: configuration.projectRoot,
+          // need this in order to walk browser builtin deps
+          // TODO: also need to resolve browser style
+          includeDevDeps: true,
+        })
       }
       return canonicalNameMap
     }

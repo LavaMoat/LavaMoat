@@ -11,7 +11,7 @@ const {
   functionToString
 } = require('lavamoat-core/test/util')
 
-test('package factor bundle', async (t) => {
+test.skip('package factor bundle', async (t) => {
   const scenario = {
     files: fillInFileDetails({
       './package.json': {

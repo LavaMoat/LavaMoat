@@ -10,7 +10,8 @@ const {
 const {
   runScenario,
   runBrowserify,
-  createWatchifyBundler
+  createWatchifyBundler,
+  prepareBrowserifyScenarioOnDisk,
 } = require('./util')
 
 test('policy - default policy path is generated with autoconfig if path is not specified', async (t) => {
@@ -20,9 +21,8 @@ test('policy - default policy path is generated with autoconfig if path is not s
     },
     contextName: 'browserify'
   })
-  const { projectDir, policyDir } = await prepareScenarioOnDisk({ scenario, policyName: 'browserify' })
+  const { policyDir } = await prepareBrowserifyScenarioOnDisk({ scenario })
   const expectedPath = path.join(policyDir, 'policy.json')
-  scenario.dir = projectDir
 
   t.false(fs.existsSync(expectedPath), 'Config file does not yet exist')
 
@@ -63,9 +63,8 @@ test('Config - Applies writeAutoPolicyDebug plugin option and dumps module objec
       writeAutoPolicyDebug: true
     }
   })
-  const { projectDir, policyDir } = await prepareScenarioOnDisk({ scenario, policyName: 'browserify' })
+  const { policyDir } = await prepareBrowserifyScenarioOnDisk({ scenario })
   const expectedPath = path.join(policyDir, 'policy-debug.json')
-  scenario.dir = projectDir
 
   t.false(fs.existsSync(expectedPath), 'Module data does not yet exist')
 
@@ -80,8 +79,7 @@ test('Config - watchify listens for policy file changes', async (t) => {
       writeAutoPolicy: true,
     }
   })
-  const { projectDir, policyDir } = await prepareScenarioOnDisk({ scenario, policyName: 'browserify' })
-  scenario.dir = projectDir
+  const { projectDir, policyDir } = await prepareBrowserifyScenarioOnDisk({ scenario })
   await runBrowserify({ scenario })
 
   const watchedFiles = []
@@ -101,6 +99,7 @@ test('Config - watchify listens for policy file changes', async (t) => {
 // this test is not written correctly, im disabling it for now
 // it tests features we dont support:
 // - automatic watchify writeAutoPolicy rebuilds when policy override is modified
+//   - hey, we support this now
 // - it uses invalid policy values
 // - it expects policy-override to be merged into the policy and then written to disk
 // test('Config edits trigger re-bundle if using watchify', async (t) => {

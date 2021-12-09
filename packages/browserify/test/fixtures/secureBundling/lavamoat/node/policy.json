@@ -82,7 +82,8 @@
       "builtin": {
         "fs.promises.readFile": true,
         "path.dirname": true,
-        "path.join": true
+        "path.join": true,
+        "path.relative": true
       },
       "globals": {
         "console.error": true

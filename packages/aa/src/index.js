@@ -69,14 +69,9 @@ async function * eachPackageInLogicalTree ({ packageDir, logicalPath = [], inclu
   for (const depName of depsToWalk) {
     const depRelativePackageJsonPath = path.join(depName, 'package.json')
     let depPackageJsonPath
-    try {
-      // sync seems slightly faster
-      // depPackageJsonPath = await resolveAsync(depRelativePackageJsonPath, { basedir: packageJsonPath })
-      depPackageJsonPath = resolve(packageJsonPath, depRelativePackageJsonPath)
-    } catch (err) {
-      console.error(err)
-      continue
-    }
+    // sync seems slightly faster
+    // depPackageJsonPath = await resolveAsync(depRelativePackageJsonPath, { basedir: packageJsonPath })
+    depPackageJsonPath = resolve(packageJsonPath, depRelativePackageJsonPath)
     const childPackageDir = path.dirname(depPackageJsonPath)
     // avoid cycles, but still visit the same package
     // on disk multiple times through different logical paths

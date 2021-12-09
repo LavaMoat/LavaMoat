@@ -1,7 +1,7 @@
 const { runInNewContext } = require('vm')
 const browserify = require('browserify')
 const pify = require('pify')
-const fs = require('fs')
+const { promises: fs } = require('fs')
 const path = require('path')
 const clone = require('clone')
 const through2 = require('through2').obj
@@ -15,6 +15,8 @@ const lavamoatPlugin = require('../src/index')
 const { verifySourceMaps } = require('./sourcemaps')
 const { prepareScenarioOnDisk, evaluateWithSourceUrl, createHookedConsole } = require('lavamoat-core/test/util.js')
 const util = require('util')
+const tmp = require('tmp-promise')
+const { spawnSync } = require('child_process')
 const execFile = util.promisify(require('child_process').execFile)
 const noop = () => {}
 
@@ -36,7 +38,8 @@ module.exports = {
   createBundleForScenario,
   autoConfigForScenario,
   runBrowserify,
-  bundleAsync
+  bundleAsync,
+  prepareBrowserifyScenarioOnDisk
 }
 
 async function createBundleFromEntry (path, pluginOpts = {}) {
@@ -163,8 +166,8 @@ async function autoConfigForScenario ({ scenario }) {
   const copiedScenario = {...scenario, opts: {...scenario.opts, writeAutoPolicy: true }}
   const { policyDir } = await createBundleForScenario({ scenario: copiedScenario})
   const fullPath = path.join(policyDir, 'policy.json')
-  const config = fs.readFileSync(fullPath)
-  return JSON.parse(config.toString())
+  const policy = await fs.readFile(fullPath, 'utf8')
+  return JSON.parse(policy)
 }
 
 async function bundleAsync (bundler) {
@@ -421,14 +424,36 @@ async function runBrowserify ({
     policyOverride: scenario.configOverride,
   }
   const args = [JSON.stringify(lavamoatParams)]
+  const browserifyPath = path.join(scenario.dir, 'runBrowserify.js')
+  const output = await execFile(browserifyPath, args, {
+    cwd: scenario.dir,
+    env: {
+      ...process.env,
+      PLUGIN_PATH: path.join(__dirname, '..', 'src', 'index.js'),
+    },
+    maxBuffer: 8192 * 10000,
+  })
+  return { output }
+}
 
+async function prepareBrowserifyScenarioOnDisk ({ scenario }) {
+  const { path: projectDir } = await tmp.dir()
+  scenario.dir = projectDir
+  // install browserify
+  const result = spawnSync('yarn', ['add','-D','browserify@16.2.3'], { cwd: projectDir })
+  if (result.status !== 0) {
+    throw new Error(result.stderr.toString())
+  }
+  // copy scenario files
+  const { policyDir } = await prepareScenarioOnDisk({ scenario, projectDir, policyName: 'browserify' })
+  // copy browserify build runner
   const paths = {
     normal: `${__dirname}/fixtures/runBrowserify.js`,
     factor: `${__dirname}/fixtures/runBrowserifyBundleFactor.js`
   }
-  const browserifyPath = paths[scenario.type || 'normal']
-  const output = await execFile(browserifyPath, args, { cwd: scenario.dir, maxBuffer: 8192 * 10000 })
-  return { output }
+  const runnerPath = paths[scenario.type || 'normal']
+  await fs.copyFile(runnerPath, path.join(projectDir, 'runBrowserify.js'))
+  return { projectDir, policyDir }
 }
 
 async function createBundleForScenario ({
@@ -437,7 +462,7 @@ async function createBundleForScenario ({
 }) {
   let policy
   if (!scenario.dir) {
-    const { projectDir, policyDir } = await prepareScenarioOnDisk({ scenario, policyName: 'browserify' })
+    const { projectDir, policyDir } = await prepareBrowserifyScenarioOnDisk({ scenario })
     scenario.dir = projectDir
     policy = policyDir
   } else {

@@ -42,7 +42,7 @@
   },
   "scripts": {
     "test": "ava test/index.js --timeout=2m",
-    "test:prep": "(cd './test/fixtures/secureBundling' && lavamoat build.js --writeAutoPolicy)",
+    "test:prep": "(cd './test/fixtures/secureBundling' && WRITE_AUTO_POLICY=1 lavamoat build.js --writeAutoPolicy)",
     "lint": "npm run lint:eslint && npm run lint:deps",
     "lint:eslint": "eslint \"src/**/*.js\" \"test/**/*.js\"",
     "lint:fix": "eslint src/**/*.js test/**/*.js --fix",

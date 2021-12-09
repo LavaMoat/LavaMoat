@@ -321,8 +321,10 @@ async function runScenario ({
   return testResult
 }
 
-async function prepareScenarioOnDisk ({ scenario, policyName = 'policies' }) {
-  const { path: projectDir } = await tmp.dir()
+async function prepareScenarioOnDisk ({ scenario, policyName = 'policies', projectDir }) {
+  if (projectDir === undefined) {
+    ({ path: projectDir } = await tmp.dir())
+  }
   const filesToWrite = Object.values(scenario.files)
   if (!scenario.opts.writeAutoPolicy) {
     const defaultPaths = getDefaultPaths(policyName)
