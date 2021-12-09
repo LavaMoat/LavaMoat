@@ -30,7 +30,7 @@
   "scripts": {
     "test": "yarn test:run",
     "test:run": "ava test/index.js --timeout=2m",
-    "lint": "npm run lint:eslint && npm run lint:deps",
+    "lint": "yarn lint:eslint && yarn lint:deps",
     "lint:eslint": "eslint \"src/**/*.js\"",
     "lint:fix": "eslint src/**/*.js --fix",
     "lint:deps": "depcheck"

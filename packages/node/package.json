@@ -10,7 +10,7 @@
     "test": "yarn test:prep && yarn test:run",
     "test:prep": "for d in ./test/projects/*/ ; do (cd \"$d\" && yarn setup); done",
     "test:run": "ava test/index.js --timeout=2m",
-    "lint": "npm run lint:eslint && npm run lint:deps",
+    "lint": "yarn lint:eslint && yarn lint:deps",
     "lint:eslint": "eslint \"src/**/*.js\" \"test/**/*.js\"",
     "lint:fix": "eslint src/**/*.js test/*.js --fix",
     "lint:deps": "depcheck"

@@ -43,11 +43,11 @@
   "scripts": {
     "test": "ava test/index.js --timeout=2m",
     "test:prep": "(cd './test/fixtures/secureBundling' && WRITE_AUTO_POLICY=1 lavamoat build.js --writeAutoPolicy)",
-    "lint": "npm run lint:eslint && npm run lint:deps",
+    "lint": "yarn lint:eslint && yarn lint:deps",
     "lint:eslint": "eslint \"src/**/*.js\" \"test/**/*.js\"",
     "lint:fix": "eslint src/**/*.js test/**/*.js --fix",
     "lint:deps": "depcheck",
-    "build:ses": "(cd ./node_modules/ses && npm i && npm run build && cp ./dist/ses.umd.js ../../lib/)"
+    "build:ses": "(cd ./node_modules/ses && npm i && yarn build && cp ./dist/ses.umd.js ../../lib/)"
   },
   "author": "kumavis",
   "license": "MIT",
