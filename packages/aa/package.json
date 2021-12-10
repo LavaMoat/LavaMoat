@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "main": "src/index.js",
   "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "test": "yarn test:run",
     "test:run": "ava test/index.js",
