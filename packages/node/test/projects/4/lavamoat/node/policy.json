@@ -2,7 +2,7 @@
   "resources": {
     "a": {
       "packages": {
-        "events": true
+        "browserify>events": true
       }
     },
     "b": {
@@ -10,7 +10,7 @@
         "events.EventEmitter": true
       }
     },
-    "events": {
+    "browserify>events": {
       "globals": {
         "console": true
       }

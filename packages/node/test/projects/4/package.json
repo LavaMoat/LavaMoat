@@ -1,10 +1,11 @@
 {
   "name": "test-4",
   "scripts": {
-    "setup": "yarn install && yarn setup:fake-deps",
-    "setup:fake-deps": "cp -R fake_node_modules/* ./node_modules/"
+    "setup": "yarn install"
   },
   "dependencies": {
+    "a": "file:./fake_node_modules/a",
+    "b": "file:./fake_node_modules/b",
     "events": "^3.2.0"
   }
 }
