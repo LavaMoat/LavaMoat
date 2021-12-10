@@ -17,7 +17,7 @@
   "dependencies": {
     "resolve": "^1.20.0"
   },
-  "description": "LavaMoat's canonical package name convention.",
+  "description": "LavaMoat's secure package naming convention",
   "directories": {
     "test": "test"
   },
