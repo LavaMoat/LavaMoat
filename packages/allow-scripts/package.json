@@ -8,7 +8,6 @@
   "license": "MIT",
   "dependencies": {
     "@npmcli/run-script": "^1.8.1",
-    "resolve": "^1.20.0",
     "yargs": "^16.2.0"
   },
   "repository": {
@@ -24,6 +23,7 @@
     "test": "test"
   },
   "devDependencies": {
+    "ava": "^3.15.0",
     "eslint-plugin-ava": "^11.0.0",
     "eslint-plugin-standard": "^5.0.0"
   },
