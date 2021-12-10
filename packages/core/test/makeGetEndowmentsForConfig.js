@@ -156,7 +156,7 @@ test('getEndowmentsForConfig - specify unwrap from, unwrap to', (t) => {
   t.is(getter.call(), globalThis)
 })
 
-test('getEndowmentsForConfig - endowing bind of a function', async (t) => {
+test('getEndowmentsForConfig - endowing bind of a function', (t) => {
   'use strict'
   const getEndowmentsForConfig = prepareTest()
   const sourceGlobal = {
