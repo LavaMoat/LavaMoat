@@ -7,6 +7,7 @@ const { createPackageDataStream } = require('./createPackageDataStream.js')
 const createLavaPack = require('@lavamoat/lavapack')
 const { createSesWorkaroundsTransform } = require('./sesTransforms')
 const { loadCanonicalNameMap } = require('@lavamoat/aa')
+const browserResolve = require('browser-resolve')
 
 
 // these are the reccomended arguments for lavaMoat to work well with browserify
@@ -46,6 +47,7 @@ function plugin (browserify, pluginOpts) {
           // need this in order to walk browser builtin deps
           // TODO: also need to resolve browser style
           includeDevDeps: true,
+          resolve: browserResolve,
         })
       }
       return canonicalNameMap

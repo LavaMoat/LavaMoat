@@ -1,7 +1,6 @@
 const { promises: fs } = require('fs')
 const path = require('path')
-const { sync: nodeResolve } = require('resolve')
-const resolve = (from, to) => nodeResolve(to, { basedir: from })
+const nodeResolve = require('resolve')
 
 module.exports = {
   loadCanonicalNameMap,
@@ -34,11 +33,11 @@ class SetMap {
  * @param {object} options
  * @returns {Promise<Map<string, string>>}
  */
-async function loadCanonicalNameMap ({ rootDir, includeDevDeps } = {}) {
+async function loadCanonicalNameMap ({ rootDir, includeDevDeps, resolve } = {}) {
   const filePathToLogicalPaths = new SetMap()
   const canonicalNameMap = new Map()
   // walk tree
-  for await (const packageData of eachPackageInLogicalTree({ packageDir: rootDir, includeDevDeps })) {
+  for await (const packageData of eachPackageInLogicalTree({ packageDir: rootDir, includeDevDeps, resolve })) {
     const logicalPathString = packageData.logicalPathParts.join('>')
     filePathToLogicalPaths.add(packageData.packageDir, logicalPathString)
   }
@@ -58,7 +57,7 @@ async function loadCanonicalNameMap ({ rootDir, includeDevDeps } = {}) {
  * @returns {AsyncIterableIterator<{packageDir: string, logicalPathParts: string[]}>}
  */
 // TODO: optimize this to not walk the entire tree, can skip if the best known logical path is already shorter
-async function * eachPackageInLogicalTree ({ packageDir, logicalPath = [], includeDevDeps = false, visited = new Set() }) {
+async function * eachPackageInLogicalTree ({ packageDir, logicalPath = [], includeDevDeps = false, visited = new Set(), resolve = nodeResolve }) {
   const packageJsonPath = path.join(packageDir, 'package.json')
   const rawPackageJson = await fs.readFile(packageJsonPath, 'utf8')
   const packageJson = JSON.parse(rawPackageJson)
@@ -70,8 +69,8 @@ async function * eachPackageInLogicalTree ({ packageDir, logicalPath = [], inclu
     const depRelativePackageJsonPath = path.join(depName, 'package.json')
     let depPackageJsonPath
     // sync seems slightly faster
-    // depPackageJsonPath = await resolveAsync(depRelativePackageJsonPath, { basedir: packageJsonPath })
-    depPackageJsonPath = resolve(packageJsonPath, depRelativePackageJsonPath)
+    // depPackageJsonPath = await resolveAsync(depRelativePackageJsonPath, { basedir: packageDir })
+    depPackageJsonPath = resolve.sync(depRelativePackageJsonPath, { basedir: packageDir })
     const childPackageDir = path.dirname(depPackageJsonPath)
     // avoid cycles, but still visit the same package
     // on disk multiple times through different logical paths

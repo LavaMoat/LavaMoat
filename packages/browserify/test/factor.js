@@ -11,6 +11,7 @@ const {
   functionToString
 } = require('lavamoat-core/test/util')
 
+// eslint-disable-next-line ava/no-skip-test
 test.skip('package factor bundle', async (t) => {
   const scenario = {
     files: fillInFileDetails({

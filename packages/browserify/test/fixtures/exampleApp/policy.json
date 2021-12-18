@@ -1,5 +1,10 @@
 {
   "resources": {
+    "browserify>browser-pack>safe-buffer": {
+      "packages": {
+        "browserify>buffer": true
+      }
+    },
     "browserify>buffer": {
       "globals": {
         "console": true
@@ -20,70 +25,33 @@
         "setTimeout": true
       }
     },
-    "browserify>readable-stream": {
+    "browserify>string_decoder": {
       "packages": {
-        "browserify>browser-resolve": true,
-        "browserify>events": true,
-        "browserify>inherits": true,
-        "browserify>process": true,
-        "browserify>readable-stream>core-util-is": true,
-        "browserify>readable-stream>isarray": true,
-        "browserify>readable-stream>process-nextick-args": true,
-        "browserify>readable-stream>safe-buffer": true,
-        "browserify>readable-stream>string_decoder": true,
-        "browserify>readable-stream>util-deprecate": true,
-        "browserify>timers-browserify": true
-      }
-    },
-    "browserify>readable-stream>core-util-is": {
-      "packages": {
-        "browserify>insert-module-globals>is-buffer": true
-      }
-    },
-    "browserify>readable-stream>process-nextick-args": {
-      "packages": {
-        "browserify>process": true
-      }
-    },
-    "browserify>readable-stream>safe-buffer": {
-      "packages": {
-        "browserify>buffer": true
-      }
-    },
-    "browserify>readable-stream>string_decoder": {
-      "packages": {
-        "browserify>readable-stream>safe-buffer": true
-      }
-    },
-    "browserify>readable-stream>util-deprecate": {
-      "globals": {
-        "console.trace": true,
-        "console.warn": true,
-        "localStorage": true
-      }
-    },
-    "browserify>stream-browserify": {
-      "packages": {
-        "browserify>events": true,
-        "browserify>inherits": true,
-        "browserify>readable-stream": true
-      }
-    },
-    "browserify>timers-browserify": {
-      "globals": {
-        "clearInterval": true,
-        "clearTimeout": true,
-        "setInterval": true,
-        "setTimeout": true
-      },
-      "packages": {
-        "browserify>process": true
+        "browserify>browser-pack>safe-buffer": true
       }
     },
     "keccak": {
       "packages": {
         "browserify>buffer": true,
-        "browserify>stream-browserify": true
+        "keccak>readable-stream": true
+      }
+    },
+    "keccak>readable-stream": {
+      "packages": {
+        "browserify>browser-resolve": true,
+        "browserify>buffer": true,
+        "browserify>events": true,
+        "browserify>inherits": true,
+        "browserify>process": true,
+        "browserify>string_decoder": true,
+        "keccak>readable-stream>util-deprecate": true
+      }
+    },
+    "keccak>readable-stream>util-deprecate": {
+      "globals": {
+        "console.trace": true,
+        "console.warn": true,
+        "localStorage": true
       }
     }
   }

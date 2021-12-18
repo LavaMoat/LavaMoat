@@ -1,185 +1,5 @@
 {
   "resources": {
-    "@babel/code-frame": {
-      "globals": {
-        "console.warn": true,
-        "process.emitWarning": true
-      },
-      "packages": {
-        "@babel/highlight": true
-      }
-    },
-    "@babel/generator": {
-      "globals": {
-        "console.error": true
-      },
-      "packages": {
-        "@babel/types": true,
-        "jsesc": true,
-        "source-map": true
-      }
-    },
-    "@babel/helper-function-name": {
-      "packages": {
-        "@babel/helper-get-function-arity": true,
-        "@babel/template": true,
-        "@babel/types": true
-      }
-    },
-    "@babel/helper-get-function-arity": {
-      "packages": {
-        "@babel/types": true
-      }
-    },
-    "@babel/helper-split-export-declaration": {
-      "packages": {
-        "@babel/types": true
-      }
-    },
-    "@babel/highlight": {
-      "packages": {
-        "@babel/helper-validator-identifier": true,
-        "chalk": true,
-        "js-tokens": true
-      }
-    },
-    "@babel/template": {
-      "packages": {
-        "@babel/code-frame": true,
-        "@babel/parser": true,
-        "@babel/types": true
-      }
-    },
-    "@babel/traverse": {
-      "globals": {
-        "console.log": true,
-        "console.trace": true,
-        "process.env.NODE_ENV": true
-      },
-      "packages": {
-        "@babel/code-frame": true,
-        "@babel/generator": true,
-        "@babel/helper-function-name": true,
-        "@babel/helper-split-export-declaration": true,
-        "@babel/parser": true,
-        "@babel/types": true,
-        "debug": true,
-        "globals": true
-      }
-    },
-    "@babel/types": {
-      "globals": {
-        "console.trace": true,
-        "process.env.BABEL_TYPES_8_BREAKING": true
-      },
-      "packages": {
-        "@babel/helper-validator-identifier": true,
-        "lodash": true,
-        "to-fast-properties": true
-      }
-    },
-    "@lavamoat/aa": {
-      "builtin": {
-        "fs.promises.readFile": true,
-        "path.dirname": true,
-        "path.join": true,
-        "path.relative": true
-      },
-      "globals": {
-        "console.error": true
-      },
-      "packages": {
-        "resolve": true
-      }
-    },
-    "@lavamoat/lavapack": {
-      "builtin": {
-        "assert": true,
-        "buffer.Buffer.from": true,
-        "fs.readFileSync": true,
-        "path.join": true,
-        "path.relative": true
-      },
-      "globals": {
-        "__dirname": true,
-        "process.cwd": true,
-        "setTimeout": true
-      },
-      "packages": {
-        "JSONStream": true,
-        "combine-source-map": true,
-        "convert-source-map": true,
-        "json-stable-stringify": true,
-        "lavamoat-core": true,
-        "readable-stream": true,
-        "through2": true,
-        "umd": true
-      }
-    },
-    "JSONStream": {
-      "globals": {
-        "Buffer": true
-      },
-      "packages": {
-        "jsonparse": true,
-        "through": true
-      }
-    },
-    "acorn": {
-      "globals": {
-        "define": true
-      }
-    },
-    "acorn-node": {
-      "packages": {
-        "acorn": true,
-        "acorn-walk": true,
-        "xtend": true
-      }
-    },
-    "acorn-walk": {
-      "globals": {
-        "define": true
-      }
-    },
-    "ansi-styles": {
-      "packages": {
-        "color-convert": true
-      }
-    },
-    "browser-pack": {
-      "builtin": {
-        "fs.readFileSync": true,
-        "path.join": true,
-        "path.relative": true
-      },
-      "globals": {
-        "__dirname": true,
-        "process.cwd": true
-      },
-      "packages": {
-        "JSONStream": true,
-        "combine-source-map": true,
-        "defined": true,
-        "safe-buffer": true,
-        "through2": true,
-        "umd": true
-      }
-    },
-    "browser-resolve": {
-      "builtin": {
-        "fs.readFile": true,
-        "fs.readFileSync": true,
-        "path": true
-      },
-      "globals": {
-        "__dirname": true,
-        "process.platform": true
-      },
-      "packages": {
-        "resolve": true
-      }
-    },
     "browserify": {
       "builtin": {
         "events.EventEmitter": true,
@@ -197,65 +17,68 @@
         "process.platform": true
       },
       "packages": {
-        "browser-pack": true,
-        "browser-resolve": true,
-        "cached-path-relative": true,
-        "concat-stream": true,
-        "defined": true,
-        "deps-sort": true,
-        "has": true,
-        "htmlescape": true,
-        "inherits": true,
-        "insert-module-globals": true,
-        "labeled-stream-splicer": true,
-        "module-deps": true,
-        "read-only-stream": true,
-        "resolve": true,
-        "shasum": true,
-        "syntax-error": true,
-        "through2": true,
-        "xtend": true
+        "browserify>browser-pack": true,
+        "browserify>browser-resolve": true,
+        "browserify>cached-path-relative": true,
+        "browserify>concat-stream": true,
+        "browserify>defined": true,
+        "browserify>deps-sort": true,
+        "browserify>has": true,
+        "browserify>htmlescape": true,
+        "browserify>inherits": true,
+        "browserify>insert-module-globals": true,
+        "browserify>labeled-stream-splicer": true,
+        "browserify>module-deps": true,
+        "browserify>read-only-stream": true,
+        "browserify>resolve": true,
+        "browserify>shasum": true,
+        "browserify>syntax-error": true,
+        "browserify>through2": true,
+        "browserify>xtend": true
       }
     },
-    "buffer-from": {
+    "browserify>JSONStream": {
+      "globals": {
+        "Buffer": true
+      },
+      "packages": {
+        "browserify>JSONStream>jsonparse": true,
+        "browserify>JSONStream>through": true
+      }
+    },
+    "browserify>JSONStream>jsonparse": {
       "globals": {
         "Buffer": true
       }
     },
-    "cached-path-relative": {
+    "browserify>JSONStream>through": {
       "builtin": {
-        "path": true
+        "stream": true
       },
       "globals": {
+        "process.nextTick": true
+      }
+    },
+    "browserify>browser-pack": {
+      "builtin": {
+        "fs.readFileSync": true,
+        "path.join": true,
+        "path.relative": true
+      },
+      "globals": {
+        "__dirname": true,
         "process.cwd": true
-      }
-    },
-    "chalk": {
-      "globals": {
-        "process.env.TERM": true,
-        "process.platform": true
       },
       "packages": {
-        "ansi-styles": true,
-        "escape-string-regexp": true,
-        "supports-color": true
+        "browserify>JSONStream": true,
+        "browserify>browser-pack>combine-source-map": true,
+        "browserify>browser-pack>safe-buffer": true,
+        "browserify>browser-pack>umd": true,
+        "browserify>defined": true,
+        "browserify>through2": true
       }
     },
-    "clone-deep": {
-      "packages": {
-        "for-own": true,
-        "is-plain-object": true,
-        "kind-of": true,
-        "lazy-cache": true,
-        "shallow-clone": true
-      }
-    },
-    "color-convert": {
-      "packages": {
-        "color-name": true
-      }
-    },
-    "combine-source-map": {
+    "browserify>browser-pack>combine-source-map": {
       "builtin": {
         "path.dirname": true,
         "path.join": true
@@ -264,137 +87,119 @@
         "process.platform": true
       },
       "packages": {
-        "convert-source-map": true,
-        "inline-source-map": true,
-        "lodash.memoize": true,
-        "source-map": true
+        "browserify>browser-pack>combine-source-map>convert-source-map": true,
+        "browserify>browser-pack>combine-source-map>inline-source-map": true,
+        "browserify>browser-pack>combine-source-map>lodash.memoize": true,
+        "browserify>browser-pack>combine-source-map>source-map": true
       }
     },
-    "concat-stream": {
+    "browserify>browser-pack>combine-source-map>convert-source-map": {
+      "builtin": {
+        "fs.readFileSync": true,
+        "path.join": true
+      },
+      "globals": {
+        "Buffer": true
+      }
+    },
+    "browserify>browser-pack>combine-source-map>inline-source-map": {
+      "globals": {
+        "Buffer": true
+      },
+      "packages": {
+        "browserify>browser-pack>combine-source-map>inline-source-map>source-map": true
+      }
+    },
+    "browserify>browser-pack>safe-buffer": {
+      "builtin": {
+        "buffer": true
+      }
+    },
+    "browserify>browser-resolve": {
+      "builtin": {
+        "fs.readFile": true,
+        "fs.readFileSync": true,
+        "path": true
+      },
+      "globals": {
+        "__dirname": true,
+        "process.platform": true
+      },
+      "packages": {
+        "browserify>resolve": true
+      }
+    },
+    "browserify>cached-path-relative": {
+      "builtin": {
+        "path": true
+      },
+      "globals": {
+        "process.cwd": true
+      }
+    },
+    "browserify>concat-stream": {
       "globals": {
         "Buffer.concat": true,
         "Buffer.isBuffer": true
       },
       "packages": {
-        "buffer-from": true,
-        "inherits": true,
-        "readable-stream": true,
-        "typedarray": true
+        "browserify>concat-stream>buffer-from": true,
+        "browserify>concat-stream>typedarray": true,
+        "browserify>inherits": true,
+        "browserify>readable-stream": true
       }
     },
-    "convert-source-map": {
-      "builtin": {
-        "fs.readFileSync": true,
-        "path.join": true,
-        "path.resolve": true
-      },
+    "browserify>concat-stream>buffer-from": {
       "globals": {
         "Buffer": true
-      },
-      "packages": {
-        "safe-buffer": true
       }
     },
-    "core-util-is": {
+    "browserify>deps-sort": {
+      "packages": {
+        "browserify>deps-sort>shasum-object": true,
+        "browserify>through2": true
+      }
+    },
+    "browserify>deps-sort>shasum-object": {
+      "builtin": {
+        "crypto.createHash": true
+      },
       "globals": {
         "Buffer.isBuffer": true
-      }
-    },
-    "dash-ast": {
-      "builtin": {
-        "assert": true
-      }
-    },
-    "debug": {
-      "builtin": {
-        "tty.isatty": true,
-        "util.deprecate": true,
-        "util.format": true,
-        "util.inspect": true
       },
+      "packages": {
+        "browserify>deps-sort>shasum-object>fast-safe-stringify": true
+      }
+    },
+    "browserify>duplexer2": {
+      "packages": {
+        "browserify>readable-stream": true
+      }
+    },
+    "browserify>glob>once": {
+      "packages": {
+        "browserify>glob>once>wrappy": true
+      }
+    },
+    "browserify>glob>path-is-absolute": {
       "globals": {
-        "console": true,
-        "document": true,
-        "localStorage": true,
-        "navigator": true,
-        "process": true
-      },
-      "packages": {
-        "ms": true,
-        "supports-color": true
+        "process.platform": true
       }
     },
-    "deps-sort": {
-      "packages": {
-        "shasum-object": true,
-        "through2": true
-      }
-    },
-    "detective": {
-      "packages": {
-        "acorn-node": true,
-        "defined": true
-      }
-    },
-    "duplexer2": {
-      "packages": {
-        "readable-stream": true
-      }
-    },
-    "duplexify": {
-      "globals": {
-        "Buffer": true,
-        "process.nextTick": true
-      },
-      "packages": {
-        "end-of-stream": true,
-        "inherits": true,
-        "readable-stream": true,
-        "stream-shift": true
-      }
-    },
-    "end-of-stream": {
-      "globals": {
-        "process.nextTick": true
-      },
-      "packages": {
-        "once": true
-      }
-    },
-    "for-own": {
-      "packages": {
-        "for-in": true
-      }
-    },
-    "get-assigned-identifiers": {
-      "builtin": {
-        "assert.equal": true
-      }
-    },
-    "has": {
-      "packages": {
-        "function-bind": true
-      }
-    },
-    "has-flag": {
+    "browserify>has": {
       "globals": {
         "process.argv": true
+      },
+      "packages": {
+        "browserify>has>function-bind": true
       }
     },
-    "inherits": {
+    "browserify>inherits": {
       "builtin": {
         "util.inherits": true
       }
     },
-    "inline-source-map": {
-      "globals": {
-        "Buffer": true
-      },
-      "packages": {
-        "source-map": true
-      }
-    },
-    "insert-module-globals": {
+    "browserify>insert-module-globals": {
       "builtin": {
         "path.dirname": true,
         "path.isAbsolute": true,
@@ -406,109 +211,49 @@
         "Buffer.isBuffer": true
       },
       "packages": {
-        "acorn-node": true,
-        "combine-source-map": true,
-        "path-is-absolute": true,
-        "through2": true,
-        "undeclared-identifiers": true,
-        "xtend": true
+        "browserify>browser-pack>combine-source-map": true,
+        "browserify>glob>path-is-absolute": true,
+        "browserify>insert-module-globals>undeclared-identifiers": true,
+        "browserify>syntax-error>acorn-node": true,
+        "browserify>through2": true,
+        "browserify>xtend": true
       }
     },
-    "is-core-module": {
-      "globals": {
-        "process.versions": true
-      },
+    "browserify>insert-module-globals>undeclared-identifiers": {
       "packages": {
-        "has": true
+        "browserify>insert-module-globals>undeclared-identifiers>dash-ast": true,
+        "browserify>insert-module-globals>undeclared-identifiers>get-assigned-identifiers": true,
+        "browserify>syntax-error>acorn-node": true,
+        "browserify>xtend": true
       }
     },
-    "is-plain-object": {
-      "packages": {
-        "isobject": true
-      }
-    },
-    "jsesc": {
-      "globals": {
-        "Buffer.isBuffer": true
-      }
-    },
-    "json-stable-stringify": {
-      "packages": {
-        "jsonify": true
-      }
-    },
-    "jsonparse": {
-      "globals": {
-        "Buffer": true
-      }
-    },
-    "kind-of": {
-      "globals": {
-        "Buffer": true
-      },
-      "packages": {
-        "is-buffer": true
-      }
-    },
-    "labeled-stream-splicer": {
-      "packages": {
-        "inherits": true,
-        "stream-splicer": true
-      }
-    },
-    "lavamoat-core": {
+    "browserify>insert-module-globals>undeclared-identifiers>dash-ast": {
       "builtin": {
-        "events": true,
-        "fs.existsSync": true,
-        "fs.readFileSync": true,
-        "module.createRequire": true,
-        "module.createRequireFromPath": true,
-        "path.extname": true,
-        "path.join": true,
-        "path.sep": true
-      },
-      "globals": {
-        "__dirname": true,
-        "console.warn": true,
-        "define": true
-      },
-      "packages": {
-        "fromentries": true,
-        "json-stable-stringify": true,
-        "lavamoat-tofu": true,
-        "merge-deep": true,
-        "resolve": true
+        "assert": true
       }
     },
-    "lavamoat-tofu": {
+    "browserify>insert-module-globals>undeclared-identifiers>get-assigned-identifiers": {
+      "builtin": {
+        "assert.equal": true
+      }
+    },
+    "browserify>labeled-stream-splicer": {
+      "packages": {
+        "browserify>inherits": true,
+        "browserify>labeled-stream-splicer>stream-splicer": true
+      }
+    },
+    "browserify>labeled-stream-splicer>stream-splicer": {
       "globals": {
-        "console.log": true
+        "process.nextTick": true,
+        "setImmediate": true
       },
       "packages": {
-        "@babel/parser": true,
-        "@babel/traverse": true
+        "browserify>inherits": true,
+        "browserify>readable-stream": true
       }
     },
-    "lazy-cache": {
-      "globals": {
-        "process.env.TRAVIS": true,
-        "process.env.UNLAZY": true
-      }
-    },
-    "merge-deep": {
-      "packages": {
-        "arr-union": true,
-        "clone-deep": true,
-        "kind-of": true
-      }
-    },
-    "mixin-object": {
-      "packages": {
-        "for-in": true,
-        "is-extendable": true
-      }
-    },
-    "module-deps": {
+    "browserify>module-deps": {
       "builtin": {
         "fs.createReadStream": true,
         "fs.readFile": true,
@@ -526,46 +271,43 @@
         "tr": true
       },
       "packages": {
-        "browser-resolve": true,
-        "cached-path-relative": true,
-        "concat-stream": true,
-        "defined": true,
-        "detective": true,
-        "duplexer2": true,
-        "inherits": true,
-        "parents": true,
-        "readable-stream": true,
-        "resolve": true,
-        "stream-combiner2": true,
-        "through2": true,
-        "xtend": true
+        "browserify>browser-resolve": true,
+        "browserify>cached-path-relative": true,
+        "browserify>concat-stream": true,
+        "browserify>defined": true,
+        "browserify>duplexer2": true,
+        "browserify>inherits": true,
+        "browserify>module-deps>detective": true,
+        "browserify>module-deps>stream-combiner2": true,
+        "browserify>parents": true,
+        "browserify>readable-stream": true,
+        "browserify>resolve": true,
+        "browserify>through2": true,
+        "browserify>xtend": true
       }
     },
-    "once": {
+    "browserify>module-deps>detective": {
       "packages": {
-        "wrappy": true
+        "browserify>defined": true,
+        "browserify>syntax-error>acorn-node": true
       }
     },
-    "parents": {
+    "browserify>module-deps>stream-combiner2": {
+      "packages": {
+        "browserify>duplexer2": true,
+        "browserify>readable-stream": true
+      }
+    },
+    "browserify>parents": {
       "globals": {
         "process.cwd": true,
         "process.platform": true
       },
       "packages": {
-        "path-platform": true
+        "browserify>parents>path-platform": true
       }
     },
-    "path-is-absolute": {
-      "globals": {
-        "process.platform": true
-      }
-    },
-    "path-parse": {
-      "globals": {
-        "process.platform": true
-      }
-    },
-    "path-platform": {
+    "browserify>parents>path-platform": {
       "builtin": {
         "path": true,
         "util.isObject": true,
@@ -577,19 +319,13 @@
         "process.platform": true
       }
     },
-    "process-nextick-args": {
-      "globals": {
-        "process": true
-      }
-    },
-    "read-only-stream": {
+    "browserify>read-only-stream": {
       "packages": {
-        "readable-stream": true
+        "browserify>readable-stream": true
       }
     },
-    "readable-stream": {
+    "browserify>readable-stream": {
       "builtin": {
-        "buffer.Buffer": true,
         "events.EventEmitter": true,
         "stream": true,
         "util": true
@@ -597,23 +333,47 @@
       "globals": {
         "process.browser": true,
         "process.env.READABLE_STREAM": true,
-        "process.nextTick": true,
         "process.stderr": true,
         "process.stdout": true,
         "process.version.slice": true,
         "setImmediate": true
       },
       "packages": {
-        "core-util-is": true,
-        "inherits": true,
-        "isarray": true,
-        "process-nextick-args": true,
-        "safe-buffer": true,
-        "string_decoder": true,
-        "util-deprecate": true
+        "browserify>inherits": true,
+        "browserify>readable-stream>core-util-is": true,
+        "browserify>readable-stream>isarray": true,
+        "browserify>readable-stream>process-nextick-args": true,
+        "browserify>readable-stream>safe-buffer": true,
+        "browserify>readable-stream>string_decoder": true,
+        "browserify>readable-stream>util-deprecate": true
       }
     },
-    "resolve": {
+    "browserify>readable-stream>core-util-is": {
+      "globals": {
+        "Buffer.isBuffer": true
+      }
+    },
+    "browserify>readable-stream>process-nextick-args": {
+      "globals": {
+        "process": true
+      }
+    },
+    "browserify>readable-stream>safe-buffer": {
+      "builtin": {
+        "buffer": true
+      }
+    },
+    "browserify>readable-stream>string_decoder": {
+      "packages": {
+        "browserify>readable-stream>safe-buffer": true
+      }
+    },
+    "browserify>readable-stream>util-deprecate": {
+      "builtin": {
+        "util.deprecate": true
+      }
+    },
+    "browserify>resolve": {
       "builtin": {
         "fs.readFile": true,
         "fs.readFileSync": true,
@@ -633,65 +393,1947 @@
         "process.versions": true
       },
       "packages": {
-        "is-core-module": true,
-        "path-parse": true
+        "browserify>resolve>is-core-module": true,
+        "browserify>resolve>path-parse": true
       }
     },
-    "safe-buffer": {
-      "builtin": {
-        "buffer": true
-      }
-    },
-    "shallow-clone": {
+    "browserify>resolve>is-core-module": {
+      "globals": {
+        "process.versions": true
+      },
       "packages": {
-        "is-extendable": true,
-        "kind-of": true,
-        "lazy-cache": true,
-        "mixin-object": true
+        "browserify>has": true
       }
     },
-    "shasum": {
+    "browserify>resolve>path-parse": {
+      "globals": {
+        "process.platform": true
+      }
+    },
+    "browserify>shasum": {
       "builtin": {
         "buffer.Buffer.isBuffer": true,
         "crypto.createHash": true
       },
       "packages": {
-        "json-stable-stringify": true
+        "browserify>shasum>json-stable-stringify": true
       }
     },
-    "shasum-object": {
+    "browserify>shasum>json-stable-stringify": {
+      "packages": {
+        "browserify>shasum>json-stable-stringify>jsonify": true
+      }
+    },
+    "browserify>string_decoder": {
+      "packages": {
+        "browserify>browser-pack>safe-buffer": true
+      }
+    },
+    "browserify>syntax-error": {
+      "packages": {
+        "browserify>syntax-error>acorn-node": true
+      }
+    },
+    "browserify>syntax-error>acorn-node": {
+      "packages": {
+        "browserify>syntax-error>acorn-node>acorn": true,
+        "browserify>syntax-error>acorn-node>acorn-walk": true,
+        "browserify>xtend": true
+      }
+    },
+    "browserify>syntax-error>acorn-node>acorn": {
+      "globals": {
+        "define": true
+      }
+    },
+    "browserify>syntax-error>acorn-node>acorn-walk": {
+      "globals": {
+        "define": true
+      }
+    },
+    "browserify>through2": {
       "builtin": {
-        "crypto.createHash": true
+        "util.inherits": true
       },
+      "globals": {
+        "process.nextTick": true
+      },
+      "packages": {
+        "browserify>readable-stream": true,
+        "browserify>xtend": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/code-frame/lib/index.js": {
+      "globals": {
+        "console.warn": true,
+        "process.emitWarning": true
+      },
+      "packages": {
+        "external:../../../../../node_modules/@babel/highlight/lib/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/generator/lib/generators/classes.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/generator/lib/generators/expressions.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/generator/lib/node/index.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/generator/lib/generators/flow.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/generator/lib/generators/modules.js": true,
+        "external:../../../../../node_modules/@babel/generator/lib/generators/types.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/generator/lib/generators/index.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/generator/lib/generators/base.js": true,
+        "external:../../../../../node_modules/@babel/generator/lib/generators/classes.js": true,
+        "external:../../../../../node_modules/@babel/generator/lib/generators/expressions.js": true,
+        "external:../../../../../node_modules/@babel/generator/lib/generators/flow.js": true,
+        "external:../../../../../node_modules/@babel/generator/lib/generators/jsx.js": true,
+        "external:../../../../../node_modules/@babel/generator/lib/generators/methods.js": true,
+        "external:../../../../../node_modules/@babel/generator/lib/generators/modules.js": true,
+        "external:../../../../../node_modules/@babel/generator/lib/generators/statements.js": true,
+        "external:../../../../../node_modules/@babel/generator/lib/generators/template-literals.js": true,
+        "external:../../../../../node_modules/@babel/generator/lib/generators/types.js": true,
+        "external:../../../../../node_modules/@babel/generator/lib/generators/typescript.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/generator/lib/generators/methods.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/generator/lib/generators/modules.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/generator/lib/generators/statements.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/generator/lib/generators/types.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/generator/node_modules/jsesc/jsesc.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/generator/lib/index.js": {
+      "globals": {
+        "console.error": true
+      },
+      "packages": {
+        "external:../../../../../node_modules/@babel/generator/lib/printer.js": true,
+        "external:../../../../../node_modules/@babel/generator/lib/source-map.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/generator/lib/node/index.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/generator/lib/node/parentheses.js": true,
+        "external:../../../../../node_modules/@babel/generator/lib/node/whitespace.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/generator/lib/node/parentheses.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/generator/lib/node/whitespace.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/generator/lib/printer.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/generator/lib/buffer.js": true,
+        "external:../../../../../node_modules/@babel/generator/lib/generators/index.js": true,
+        "external:../../../../../node_modules/@babel/generator/lib/node/index.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/generator/lib/source-map.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/generator/node_modules/source-map/source-map.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/generator/node_modules/jsesc/jsesc.js": {
       "globals": {
         "Buffer.isBuffer": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/generator/node_modules/source-map/lib/array-set.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/generator/node_modules/source-map/lib/util.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/generator/node_modules/source-map/lib/base64-vlq.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/generator/node_modules/source-map/lib/base64.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/generator/node_modules/source-map/lib/mapping-list.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/generator/node_modules/source-map/lib/util.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/generator/node_modules/source-map/lib/source-map-consumer.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/generator/node_modules/source-map/lib/array-set.js": true,
+        "external:../../../../../node_modules/@babel/generator/node_modules/source-map/lib/base64-vlq.js": true,
+        "external:../../../../../node_modules/@babel/generator/node_modules/source-map/lib/binary-search.js": true,
+        "external:../../../../../node_modules/@babel/generator/node_modules/source-map/lib/quick-sort.js": true,
+        "external:../../../../../node_modules/@babel/generator/node_modules/source-map/lib/util.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/generator/node_modules/source-map/lib/source-map-generator.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/generator/node_modules/source-map/lib/array-set.js": true,
+        "external:../../../../../node_modules/@babel/generator/node_modules/source-map/lib/base64-vlq.js": true,
+        "external:../../../../../node_modules/@babel/generator/node_modules/source-map/lib/mapping-list.js": true,
+        "external:../../../../../node_modules/@babel/generator/node_modules/source-map/lib/util.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/generator/node_modules/source-map/lib/source-node.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/generator/node_modules/source-map/lib/source-map-generator.js": true,
+        "external:../../../../../node_modules/@babel/generator/node_modules/source-map/lib/util.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/generator/node_modules/source-map/source-map.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/generator/node_modules/source-map/lib/source-map-consumer.js": true,
+        "external:../../../../../node_modules/@babel/generator/node_modules/source-map/lib/source-map-generator.js": true,
+        "external:../../../../../node_modules/@babel/generator/node_modules/source-map/lib/source-node.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/helper-function-name/lib/index.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/helper-get-function-arity/lib/index.js": true,
+        "external:../../../../../node_modules/@babel/template/lib/index.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/helper-get-function-arity/lib/index.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/helper-split-export-declaration/lib/index.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/helper-validator-identifier/lib/index.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/helper-validator-identifier/lib/identifier.js": true,
+        "external:../../../../../node_modules/@babel/helper-validator-identifier/lib/keyword.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/highlight/lib/index.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/helper-validator-identifier/lib/index.js": true,
+        "external:../../../../../node_modules/chalk/index.js": true,
+        "external:../../../../../node_modules/js-tokens/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/template/lib/builder.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/template/lib/literal.js": true,
+        "external:../../../../../node_modules/@babel/template/lib/options.js": true,
+        "external:../../../../../node_modules/@babel/template/lib/string.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/template/lib/formatters.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/template/lib/index.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/template/lib/builder.js": true,
+        "external:../../../../../node_modules/@babel/template/lib/formatters.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/template/lib/literal.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/template/lib/options.js": true,
+        "external:../../../../../node_modules/@babel/template/lib/parse.js": true,
+        "external:../../../../../node_modules/@babel/template/lib/populate.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/template/lib/parse.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/code-frame/lib/index.js": true,
+        "external:../../../../../node_modules/@babel/parser/lib/index.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/template/lib/populate.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/template/lib/string.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/template/lib/options.js": true,
+        "external:../../../../../node_modules/@babel/template/lib/parse.js": true,
+        "external:../../../../../node_modules/@babel/template/lib/populate.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/traverse/lib/context.js": {
+      "globals": {
+        "process.env.NODE_ENV": true
       },
       "packages": {
-        "fast-safe-stringify": true
+        "external:../../../../../node_modules/@babel/traverse/lib/path/index.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/index.js": true
       }
     },
-    "stream-combiner2": {
+    "external:../../../../../node_modules/@babel/traverse/lib/index.js": {
       "packages": {
-        "duplexer2": true,
-        "readable-stream": true
+        "external:../../../../../node_modules/@babel/traverse/lib/cache.js": true,
+        "external:../../../../../node_modules/@babel/traverse/lib/context.js": true,
+        "external:../../../../../node_modules/@babel/traverse/lib/hub.js": true,
+        "external:../../../../../node_modules/@babel/traverse/lib/path/index.js": true,
+        "external:../../../../../node_modules/@babel/traverse/lib/scope/index.js": true,
+        "external:../../../../../node_modules/@babel/traverse/lib/visitors.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/index.js": true
       }
     },
-    "stream-splicer": {
+    "external:../../../../../node_modules/@babel/traverse/lib/path/ancestry.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/traverse/lib/path/index.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/traverse/lib/path/comments.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/traverse/lib/path/context.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/traverse/lib/index.js": true,
+        "external:../../../../../node_modules/@babel/traverse/lib/path/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/traverse/lib/path/conversion.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/helper-function-name/lib/index.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/traverse/lib/path/family.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/traverse/lib/path/index.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/traverse/lib/path/index.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/generator/lib/index.js": true,
+        "external:../../../../../node_modules/@babel/traverse/lib/cache.js": true,
+        "external:../../../../../node_modules/@babel/traverse/lib/index.js": true,
+        "external:../../../../../node_modules/@babel/traverse/lib/path/ancestry.js": true,
+        "external:../../../../../node_modules/@babel/traverse/lib/path/comments.js": true,
+        "external:../../../../../node_modules/@babel/traverse/lib/path/context.js": true,
+        "external:../../../../../node_modules/@babel/traverse/lib/path/conversion.js": true,
+        "external:../../../../../node_modules/@babel/traverse/lib/path/evaluation.js": true,
+        "external:../../../../../node_modules/@babel/traverse/lib/path/family.js": true,
+        "external:../../../../../node_modules/@babel/traverse/lib/path/inference/index.js": true,
+        "external:../../../../../node_modules/@babel/traverse/lib/path/introspection.js": true,
+        "external:../../../../../node_modules/@babel/traverse/lib/path/lib/virtual-types.js": true,
+        "external:../../../../../node_modules/@babel/traverse/lib/path/modification.js": true,
+        "external:../../../../../node_modules/@babel/traverse/lib/path/removal.js": true,
+        "external:../../../../../node_modules/@babel/traverse/lib/path/replacement.js": true,
+        "external:../../../../../node_modules/@babel/traverse/lib/scope/index.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/index.js": true,
+        "external:../../../../../node_modules/debug/src/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/traverse/lib/path/inference/index.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/traverse/lib/path/inference/inferers.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/traverse/lib/path/inference/inferer-reference.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/traverse/lib/path/inference/inferers.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/traverse/lib/path/inference/inferer-reference.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/traverse/lib/path/introspection.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/traverse/lib/path/lib/hoister.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/traverse/lib/path/lib/virtual-types.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/traverse/lib/path/modification.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/traverse/lib/cache.js": true,
+        "external:../../../../../node_modules/@babel/traverse/lib/path/index.js": true,
+        "external:../../../../../node_modules/@babel/traverse/lib/path/lib/hoister.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/traverse/lib/path/removal.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/traverse/lib/cache.js": true,
+        "external:../../../../../node_modules/@babel/traverse/lib/path/index.js": true,
+        "external:../../../../../node_modules/@babel/traverse/lib/path/lib/removal-hooks.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/traverse/lib/path/replacement.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/code-frame/lib/index.js": true,
+        "external:../../../../../node_modules/@babel/parser/lib/index.js": true,
+        "external:../../../../../node_modules/@babel/traverse/lib/cache.js": true,
+        "external:../../../../../node_modules/@babel/traverse/lib/index.js": true,
+        "external:../../../../../node_modules/@babel/traverse/lib/path/index.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/traverse/lib/scope/index.js": {
+      "globals": {
+        "console.log": true
+      },
+      "packages": {
+        "browserify>glob": true,
+        "external:../../../../../node_modules/@babel/traverse/lib/cache.js": true,
+        "external:../../../../../node_modules/@babel/traverse/lib/index.js": true,
+        "external:../../../../../node_modules/@babel/traverse/lib/scope/binding.js": true,
+        "external:../../../../../node_modules/@babel/traverse/lib/scope/lib/renamer.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/traverse/lib/scope/lib/renamer.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/helper-split-export-declaration/lib/index.js": true,
+        "external:../../../../../node_modules/@babel/traverse/lib/scope/binding.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/traverse/lib/visitors.js": {
+      "globals": {
+        "console.trace": true
+      },
+      "packages": {
+        "external:../../../../../node_modules/@babel/traverse/lib/path/lib/virtual-types.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/types/lib/asserts/assertNode.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/validators/isNode.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/types/lib/asserts/generated/index.js": {
+      "globals": {
+        "console.trace": true
+      },
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/validators/is.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/types/lib/builders/builder.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/definitions/index.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/validators/validate.js": true,
+        "external:../../../../../node_modules/lodash/clone.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/types/lib/builders/flow/createFlowUnionType.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/builders/generated/index.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/modifications/flow/removeTypeDuplicates.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/types/lib/builders/flow/createTypeAnnotationBasedOnTypeof.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/builders/generated/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/types/lib/builders/generated/index.js": {
+      "globals": {
+        "console.trace": true
+      },
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/builders/builder.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/types/lib/builders/generated/uppercase.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/builders/generated/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/types/lib/builders/react/buildChildren.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/utils/react/cleanJSXElementLiteralChild.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/validators/generated/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/types/lib/builders/typescript/createTSUnionType.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/builders/generated/index.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/modifications/typescript/removeTypeDuplicates.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/types/lib/clone/clone.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/clone/cloneNode.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/types/lib/clone/cloneDeep.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/clone/cloneNode.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/types/lib/clone/cloneDeepWithoutLoc.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/clone/cloneNode.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/types/lib/clone/cloneNode.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/definitions/index.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/validators/generated/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/types/lib/clone/cloneWithoutLoc.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/clone/cloneNode.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/types/lib/comments/addComment.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/comments/addComments.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/types/lib/comments/inheritInnerComments.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/utils/inherit.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/types/lib/comments/inheritLeadingComments.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/utils/inherit.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/types/lib/comments/inheritTrailingComments.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/utils/inherit.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/types/lib/comments/inheritsComments.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/comments/inheritInnerComments.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/comments/inheritLeadingComments.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/comments/inheritTrailingComments.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/types/lib/comments/removeComments.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/constants/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/types/lib/constants/generated/index.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/definitions/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/types/lib/converters/ensureBlock.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/converters/toBlock.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/types/lib/converters/gatherSequenceExpressions.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/builders/generated/index.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/clone/cloneNode.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/retrievers/getBindingIdentifiers.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/validators/generated/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/types/lib/converters/toBindingIdentifierName.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/converters/toIdentifier.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/types/lib/converters/toBlock.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/builders/generated/index.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/validators/generated/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/types/lib/converters/toComputedKey.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/builders/generated/index.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/validators/generated/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/types/lib/converters/toExpression.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/validators/generated/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/types/lib/converters/toIdentifier.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/helper-validator-identifier/lib/index.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/validators/isValidIdentifier.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/types/lib/converters/toKeyAlias.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/clone/cloneNode.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/modifications/removePropertiesDeep.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/validators/generated/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/types/lib/converters/toSequenceExpression.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/converters/gatherSequenceExpressions.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/types/lib/converters/toStatement.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/builders/generated/index.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/validators/generated/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/types/lib/converters/valueToNode.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/builders/generated/index.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/validators/isValidIdentifier.js": true,
+        "external:../../../../../node_modules/lodash/isPlainObject.js": true,
+        "external:../../../../../node_modules/lodash/isRegExp.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/types/lib/definitions/core.js": {
+      "globals": {
+        "process.env.BABEL_TYPES_8_BREAKING": true
+      },
+      "packages": {
+        "external:../../../../../node_modules/@babel/helper-validator-identifier/lib/index.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/constants/index.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/definitions/utils.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/validators/is.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/validators/isValidIdentifier.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/types/lib/definitions/experimental.js": {
+      "globals": {
+        "process.env.BABEL_TYPES_8_BREAKING": true
+      },
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/definitions/core.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/definitions/utils.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/types/lib/definitions/flow.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/definitions/utils.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/types/lib/definitions/index.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/definitions/core.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/definitions/experimental.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/definitions/flow.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/definitions/jsx.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/definitions/misc.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/definitions/placeholders.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/definitions/typescript.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/definitions/utils.js": true,
+        "external:../../../../../node_modules/to-fast-properties/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/types/lib/definitions/jsx.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/definitions/utils.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/types/lib/definitions/misc.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/definitions/placeholders.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/definitions/utils.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/types/lib/definitions/placeholders.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/definitions/utils.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/types/lib/definitions/typescript.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/definitions/core.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/definitions/utils.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/types/lib/definitions/utils.js": {
+      "globals": {
+        "process.env.BABEL_TYPES_8_BREAKING": true
+      },
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/validators/is.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/validators/validate.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/types/lib/index.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/asserts/assertNode.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/asserts/generated/index.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/ast-types/generated/index.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/builders/flow/createFlowUnionType.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/builders/flow/createTypeAnnotationBasedOnTypeof.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/builders/generated/index.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/builders/generated/uppercase.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/builders/react/buildChildren.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/builders/typescript/createTSUnionType.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/clone/clone.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/clone/cloneDeep.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/clone/cloneDeepWithoutLoc.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/clone/cloneNode.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/clone/cloneWithoutLoc.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/comments/addComment.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/comments/addComments.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/comments/inheritInnerComments.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/comments/inheritLeadingComments.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/comments/inheritTrailingComments.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/comments/inheritsComments.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/comments/removeComments.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/constants/generated/index.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/constants/index.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/converters/ensureBlock.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/converters/toBindingIdentifierName.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/converters/toBlock.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/converters/toComputedKey.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/converters/toExpression.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/converters/toIdentifier.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/converters/toKeyAlias.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/converters/toSequenceExpression.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/converters/toStatement.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/converters/valueToNode.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/definitions/index.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/modifications/appendToMemberExpression.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/modifications/flow/removeTypeDuplicates.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/modifications/inherits.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/modifications/prependToMemberExpression.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/modifications/removeProperties.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/modifications/removePropertiesDeep.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/retrievers/getBindingIdentifiers.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/retrievers/getOuterBindingIdentifiers.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/traverse/traverse.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/traverse/traverseFast.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/utils/shallowEqual.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/validators/buildMatchMemberExpression.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/validators/generated/index.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/validators/is.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/validators/isBinding.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/validators/isBlockScoped.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/validators/isImmutable.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/validators/isLet.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/validators/isNode.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/validators/isNodesEquivalent.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/validators/isPlaceholderType.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/validators/isReferenced.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/validators/isScope.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/validators/isSpecifierDefault.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/validators/isType.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/validators/isValidES3Identifier.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/validators/isValidIdentifier.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/validators/isVar.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/validators/matchesPattern.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/validators/react/isCompatTag.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/validators/react/isReactComponent.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/validators/validate.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/types/lib/modifications/appendToMemberExpression.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/builders/generated/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/types/lib/modifications/flow/removeTypeDuplicates.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/validators/generated/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/types/lib/modifications/inherits.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/comments/inheritsComments.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/constants/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/types/lib/modifications/prependToMemberExpression.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/builders/generated/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/types/lib/modifications/removeProperties.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/constants/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/types/lib/modifications/removePropertiesDeep.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/modifications/removeProperties.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/traverse/traverseFast.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/types/lib/modifications/typescript/removeTypeDuplicates.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/validators/generated/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/types/lib/retrievers/getBindingIdentifiers.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/validators/generated/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/types/lib/retrievers/getOuterBindingIdentifiers.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/retrievers/getBindingIdentifiers.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/types/lib/traverse/traverse.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/definitions/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/types/lib/traverse/traverseFast.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/definitions/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/types/lib/utils/react/cleanJSXElementLiteralChild.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/builders/generated/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/types/lib/validators/buildMatchMemberExpression.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/validators/matchesPattern.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/types/lib/validators/generated/index.js": {
+      "globals": {
+        "console.trace": true
+      },
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/utils/shallowEqual.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/types/lib/validators/is.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/definitions/index.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/utils/shallowEqual.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/validators/isPlaceholderType.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/validators/isType.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/types/lib/validators/isBinding.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/retrievers/getBindingIdentifiers.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/types/lib/validators/isBlockScoped.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/validators/generated/index.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/validators/isLet.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/types/lib/validators/isImmutable.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/validators/generated/index.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/validators/isType.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/types/lib/validators/isLet.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/constants/index.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/validators/generated/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/types/lib/validators/isNode.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/definitions/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/types/lib/validators/isNodesEquivalent.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/definitions/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/types/lib/validators/isPlaceholderType.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/definitions/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/types/lib/validators/isScope.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/validators/generated/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/types/lib/validators/isSpecifierDefault.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/validators/generated/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/types/lib/validators/isType.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/definitions/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/types/lib/validators/isValidES3Identifier.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/validators/isValidIdentifier.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/types/lib/validators/isValidIdentifier.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/helper-validator-identifier/lib/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/types/lib/validators/isVar.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/constants/index.js": true,
+        "external:../../../../../node_modules/@babel/types/lib/validators/generated/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/types/lib/validators/matchesPattern.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/validators/generated/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/types/lib/validators/react/isReactComponent.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/validators/buildMatchMemberExpression.js": true
+      }
+    },
+    "external:../../../../../node_modules/@babel/types/lib/validators/validate.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/types/lib/definitions/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/@lavamoat/aa/src/index.js": {
+      "builtin": {
+        "fs.promises.readFile": true,
+        "path.dirname": true,
+        "path.join": true,
+        "path.relative": true
+      },
+      "packages": {
+        "browserify>resolve": true
+      }
+    },
+    "external:../../../../../node_modules/@lavamoat/lavapack/node_modules/readable-stream/lib/_stream_duplex.js": {
+      "globals": {
+        "process.nextTick": true
+      },
+      "packages": {
+        "browserify>inherits": true,
+        "external:../../../../../node_modules/@lavamoat/lavapack/node_modules/readable-stream/lib/_stream_readable.js": true,
+        "external:../../../../../node_modules/@lavamoat/lavapack/node_modules/readable-stream/lib/_stream_writable.js": true
+      }
+    },
+    "external:../../../../../node_modules/@lavamoat/lavapack/node_modules/readable-stream/lib/_stream_passthrough.js": {
+      "packages": {
+        "browserify>inherits": true,
+        "external:../../../../../node_modules/@lavamoat/lavapack/node_modules/readable-stream/lib/_stream_transform.js": true
+      }
+    },
+    "external:../../../../../node_modules/@lavamoat/lavapack/node_modules/readable-stream/lib/_stream_readable.js": {
+      "builtin": {
+        "buffer.Buffer.from": true,
+        "buffer.Buffer.isBuffer": true,
+        "buffer.Buffer.prototype": true,
+        "events.EventEmitter": true,
+        "util": true
+      },
       "globals": {
         "process.nextTick": true,
-        "setImmediate": true
+        "process.stderr": true,
+        "process.stdout": true
       },
       "packages": {
-        "inherits": true,
-        "readable-stream": true
+        "browserify>inherits": true,
+        "browserify>string_decoder": true,
+        "external:../../../../../node_modules/@lavamoat/lavapack/node_modules/readable-stream/errors.js": true,
+        "external:../../../../../node_modules/@lavamoat/lavapack/node_modules/readable-stream/lib/_stream_duplex.js": true,
+        "external:../../../../../node_modules/@lavamoat/lavapack/node_modules/readable-stream/lib/internal/streams/async_iterator.js": true,
+        "external:../../../../../node_modules/@lavamoat/lavapack/node_modules/readable-stream/lib/internal/streams/buffer_list.js": true,
+        "external:../../../../../node_modules/@lavamoat/lavapack/node_modules/readable-stream/lib/internal/streams/destroy.js": true,
+        "external:../../../../../node_modules/@lavamoat/lavapack/node_modules/readable-stream/lib/internal/streams/from.js": true,
+        "external:../../../../../node_modules/@lavamoat/lavapack/node_modules/readable-stream/lib/internal/streams/state.js": true,
+        "external:../../../../../node_modules/@lavamoat/lavapack/node_modules/readable-stream/lib/internal/streams/stream.js": true
       }
     },
-    "string_decoder": {
+    "external:../../../../../node_modules/@lavamoat/lavapack/node_modules/readable-stream/lib/_stream_transform.js": {
       "packages": {
-        "safe-buffer": true
+        "browserify>inherits": true,
+        "external:../../../../../node_modules/@lavamoat/lavapack/node_modules/readable-stream/errors.js": true,
+        "external:../../../../../node_modules/@lavamoat/lavapack/node_modules/readable-stream/lib/_stream_duplex.js": true
       }
     },
-    "supports-color": {
+    "external:../../../../../node_modules/@lavamoat/lavapack/node_modules/readable-stream/lib/_stream_writable.js": {
+      "builtin": {
+        "buffer.Buffer.from": true,
+        "buffer.Buffer.isBuffer": true
+      },
+      "globals": {
+        "process.nextTick": true
+      },
+      "packages": {
+        "browserify>inherits": true,
+        "browserify>readable-stream>util-deprecate": true,
+        "external:../../../../../node_modules/@lavamoat/lavapack/node_modules/readable-stream/errors.js": true,
+        "external:../../../../../node_modules/@lavamoat/lavapack/node_modules/readable-stream/lib/_stream_duplex.js": true,
+        "external:../../../../../node_modules/@lavamoat/lavapack/node_modules/readable-stream/lib/internal/streams/destroy.js": true,
+        "external:../../../../../node_modules/@lavamoat/lavapack/node_modules/readable-stream/lib/internal/streams/state.js": true,
+        "external:../../../../../node_modules/@lavamoat/lavapack/node_modules/readable-stream/lib/internal/streams/stream.js": true
+      }
+    },
+    "external:../../../../../node_modules/@lavamoat/lavapack/node_modules/readable-stream/lib/internal/streams/async_iterator.js": {
+      "globals": {
+        "process.nextTick": true
+      },
+      "packages": {
+        "external:../../../../../node_modules/@lavamoat/lavapack/node_modules/readable-stream/lib/internal/streams/end-of-stream.js": true
+      }
+    },
+    "external:../../../../../node_modules/@lavamoat/lavapack/node_modules/readable-stream/lib/internal/streams/buffer_list.js": {
+      "builtin": {
+        "buffer.Buffer": true,
+        "util.inspect": true
+      }
+    },
+    "external:../../../../../node_modules/@lavamoat/lavapack/node_modules/readable-stream/lib/internal/streams/destroy.js": {
+      "globals": {
+        "process.nextTick": true
+      }
+    },
+    "external:../../../../../node_modules/@lavamoat/lavapack/node_modules/readable-stream/lib/internal/streams/end-of-stream.js": {
+      "packages": {
+        "external:../../../../../node_modules/@lavamoat/lavapack/node_modules/readable-stream/errors.js": true
+      }
+    },
+    "external:../../../../../node_modules/@lavamoat/lavapack/node_modules/readable-stream/lib/internal/streams/from.js": {
+      "packages": {
+        "external:../../../../../node_modules/@lavamoat/lavapack/node_modules/readable-stream/errors.js": true
+      }
+    },
+    "external:../../../../../node_modules/@lavamoat/lavapack/node_modules/readable-stream/lib/internal/streams/pipeline.js": {
+      "packages": {
+        "external:../../../../../node_modules/@lavamoat/lavapack/node_modules/readable-stream/errors.js": true,
+        "external:../../../../../node_modules/@lavamoat/lavapack/node_modules/readable-stream/lib/internal/streams/end-of-stream.js": true
+      }
+    },
+    "external:../../../../../node_modules/@lavamoat/lavapack/node_modules/readable-stream/lib/internal/streams/state.js": {
+      "packages": {
+        "external:../../../../../node_modules/@lavamoat/lavapack/node_modules/readable-stream/errors.js": true
+      }
+    },
+    "external:../../../../../node_modules/@lavamoat/lavapack/node_modules/readable-stream/lib/internal/streams/stream.js": {
+      "builtin": {
+        "stream": true
+      }
+    },
+    "external:../../../../../node_modules/@lavamoat/lavapack/node_modules/readable-stream/readable.js": {
+      "builtin": {
+        "stream": true
+      },
+      "globals": {
+        "process.env.READABLE_STREAM": true
+      },
+      "packages": {
+        "external:../../../../../node_modules/@lavamoat/lavapack/node_modules/readable-stream/lib/_stream_duplex.js": true,
+        "external:../../../../../node_modules/@lavamoat/lavapack/node_modules/readable-stream/lib/_stream_passthrough.js": true,
+        "external:../../../../../node_modules/@lavamoat/lavapack/node_modules/readable-stream/lib/_stream_readable.js": true,
+        "external:../../../../../node_modules/@lavamoat/lavapack/node_modules/readable-stream/lib/_stream_transform.js": true,
+        "external:../../../../../node_modules/@lavamoat/lavapack/node_modules/readable-stream/lib/_stream_writable.js": true,
+        "external:../../../../../node_modules/@lavamoat/lavapack/node_modules/readable-stream/lib/internal/streams/end-of-stream.js": true,
+        "external:../../../../../node_modules/@lavamoat/lavapack/node_modules/readable-stream/lib/internal/streams/pipeline.js": true
+      }
+    },
+    "external:../../../../../node_modules/@lavamoat/lavapack/node_modules/through2/through2.js": {
+      "packages": {
+        "external:../../../../../node_modules/@lavamoat/lavapack/node_modules/readable-stream/readable.js": true
+      }
+    },
+    "external:../../../../../node_modules/@lavamoat/lavapack/src/index.js": {
+      "packages": {
+        "external:../../../../../node_modules/@lavamoat/lavapack/src/makePolicyLoaderStream.js": true,
+        "external:../../../../../node_modules/@lavamoat/lavapack/src/pack.js": true
+      }
+    },
+    "external:../../../../../node_modules/@lavamoat/lavapack/src/makePolicyLoaderStream.js": {
+      "globals": {
+        "setTimeout": true
+      },
+      "packages": {
+        "external:../../../../../node_modules/@lavamoat/lavapack/node_modules/readable-stream/readable.js": true,
+        "external:../../../../../node_modules/lavamoat-core/src/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/@lavamoat/lavapack/src/pack.js": {
+      "builtin": {
+        "assert": true,
+        "buffer.Buffer.from": true,
+        "fs.readFileSync": true,
+        "path.join": true,
+        "path.relative": true
+      },
+      "globals": {
+        "__dirname": true,
+        "process.cwd": true
+      },
+      "packages": {
+        "browserify>JSONStream": true,
+        "browserify>browser-pack>combine-source-map": true,
+        "browserify>browser-pack>umd": true,
+        "external:../../../../../node_modules/@lavamoat/lavapack/node_modules/through2/through2.js": true,
+        "external:../../../../../node_modules/convert-source-map/index.js": true,
+        "external:../../../../../node_modules/json-stable-stringify/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/chalk/index.js": {
+      "globals": {
+        "process.env.TERM": true,
+        "process.platform": true
+      },
+      "packages": {
+        "external:../../../../../node_modules/chalk/node_modules/ansi-styles/index.js": true,
+        "external:../../../../../node_modules/chalk/templates.js": true,
+        "external:../../../../../node_modules/escape-string-regexp/index.js": true,
+        "external:../../../../../node_modules/supports-color/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/chalk/node_modules/ansi-styles/index.js": {
+      "packages": {
+        "external:../../../../../node_modules/chalk/node_modules/color-convert/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/chalk/node_modules/color-convert/conversions.js": {
+      "packages": {
+        "external:../../../../../node_modules/chalk/node_modules/color-name/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/chalk/node_modules/color-convert/index.js": {
+      "packages": {
+        "external:../../../../../node_modules/chalk/node_modules/color-convert/conversions.js": true,
+        "external:../../../../../node_modules/chalk/node_modules/color-convert/route.js": true
+      }
+    },
+    "external:../../../../../node_modules/chalk/node_modules/color-convert/route.js": {
+      "packages": {
+        "external:../../../../../node_modules/chalk/node_modules/color-convert/conversions.js": true
+      }
+    },
+    "external:../../../../../node_modules/convert-source-map/index.js": {
+      "builtin": {
+        "fs.readFileSync": true,
+        "path.resolve": true
+      },
+      "packages": {
+        "external:../../../../../node_modules/convert-source-map/node_modules/safe-buffer/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/convert-source-map/node_modules/safe-buffer/index.js": {
+      "builtin": {
+        "buffer": true
+      }
+    },
+    "external:../../../../../node_modules/debug/src/browser.js": {
+      "globals": {
+        "console": true,
+        "document": true,
+        "localStorage": true,
+        "navigator": true,
+        "process": true
+      },
+      "packages": {
+        "external:../../../../../node_modules/debug/src/common.js": true
+      }
+    },
+    "external:../../../../../node_modules/debug/src/common.js": {
+      "globals": {
+        "console.warn": true
+      },
+      "packages": {
+        "external:../../../../../node_modules/debug/node_modules/ms/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/debug/src/index.js": {
+      "globals": {
+        "process": true
+      },
+      "packages": {
+        "external:../../../../../node_modules/debug/src/browser.js": true,
+        "external:../../../../../node_modules/debug/src/node.js": true
+      }
+    },
+    "external:../../../../../node_modules/debug/src/node.js": {
+      "builtin": {
+        "tty.isatty": true,
+        "util.deprecate": true,
+        "util.format": true,
+        "util.inspect": true
+      },
+      "globals": {
+        "process.env": true,
+        "process.stderr.fd": true,
+        "process.stderr.write": true
+      },
+      "packages": {
+        "external:../../../../../node_modules/debug/src/common.js": true,
+        "external:../../../../../node_modules/supports-color/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/end-of-stream/index.js": {
+      "globals": {
+        "process.nextTick": true
+      },
+      "packages": {
+        "browserify>glob>once": true
+      }
+    },
+    "external:../../../../../node_modules/for-own/index.js": {
+      "packages": {
+        "external:../../../../../node_modules/for-in/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/is-plain-object/index.js": {
+      "packages": {
+        "external:../../../../../node_modules/isobject/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/json-stable-stringify/index.js": {
+      "packages": {
+        "browserify>shasum>json-stable-stringify>jsonify": true
+      }
+    },
+    "external:../../../../../node_modules/lavamoat-core/lib/transforms.umd.js": {
+      "globals": {
+        "define": true
+      }
+    },
+    "external:../../../../../node_modules/lavamoat-core/src/generateKernel.js": {
+      "builtin": {
+        "fs.readFileSync": true,
+        "path.join": true
+      },
+      "globals": {
+        "__dirname": true
+      }
+    },
+    "external:../../../../../node_modules/lavamoat-core/src/generatePolicy.js": {
+      "builtin": {
+        "events": true,
+        "path.extname": true,
+        "path.join": true
+      },
+      "globals": {
+        "console.warn": true
+      },
+      "packages": {
+        "external:../../../../../node_modules/fromentries/index.js": true,
+        "external:../../../../../node_modules/json-stable-stringify/index.js": true,
+        "external:../../../../../node_modules/lavamoat-tofu/src/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/lavamoat-core/src/index.js": {
+      "packages": {
+        "external:../../../../../node_modules/lavamoat-core/src/generateKernel.js": true,
+        "external:../../../../../node_modules/lavamoat-core/src/generatePolicy.js": true,
+        "external:../../../../../node_modules/lavamoat-core/src/loadPolicy.js": true,
+        "external:../../../../../node_modules/lavamoat-core/src/mergePolicy.js": true,
+        "external:../../../../../node_modules/lavamoat-core/src/moduleRecord.js": true,
+        "external:../../../../../node_modules/lavamoat-core/src/parseForPolicy.js": true,
+        "external:../../../../../node_modules/lavamoat-core/src/sourceTransforms.js": true
+      }
+    },
+    "external:../../../../../node_modules/lavamoat-core/src/loadPolicy.js": {
+      "builtin": {
+        "fs.existsSync": true,
+        "fs.readFileSync": true
+      },
+      "globals": {
+        "console.warn": true
+      },
+      "packages": {
+        "external:../../../../../node_modules/lavamoat-core/src/mergePolicy.js": true
+      }
+    },
+    "external:../../../../../node_modules/lavamoat-core/src/mergePolicy.js": {
+      "packages": {
+        "external:../../../../../node_modules/lavamoat-tofu/src/util.js": true,
+        "external:../../../../../node_modules/merge-deep/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/lavamoat-core/src/parseForPolicy.js": {
+      "packages": {
+        "external:../../../../../node_modules/lavamoat-core/src/generatePolicy.js": true,
+        "external:../../../../../node_modules/lavamoat-core/src/walk.js": true
+      }
+    },
+    "external:../../../../../node_modules/lavamoat-core/src/sourceTransforms.js": {
+      "packages": {
+        "external:../../../../../node_modules/lavamoat-core/lib/transforms.umd.js": true
+      }
+    },
+    "external:../../../../../node_modules/lavamoat-tofu/src/findGlobals.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/traverse/lib/index.js": true,
+        "external:../../../../../node_modules/lavamoat-tofu/src/util.js": true
+      }
+    },
+    "external:../../../../../node_modules/lavamoat-tofu/src/index.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/parser/lib/index.js": true,
+        "external:../../../../../node_modules/@babel/traverse/lib/index.js": true,
+        "external:../../../../../node_modules/lavamoat-tofu/src/codeSampleFromAstNode.js": true,
+        "external:../../../../../node_modules/lavamoat-tofu/src/inspectPrimordialAssignments.js": true,
+        "external:../../../../../node_modules/lavamoat-tofu/src/inspectSesCompat.js": true,
+        "external:../../../../../node_modules/lavamoat-tofu/src/inspectSource.js": true,
+        "external:../../../../../node_modules/lavamoat-tofu/src/util.js": true
+      }
+    },
+    "external:../../../../../node_modules/lavamoat-tofu/src/inspectPrimordialAssignments.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/traverse/lib/index.js": true,
+        "external:../../../../../node_modules/lavamoat-tofu/src/primordials.js": true
+      }
+    },
+    "external:../../../../../node_modules/lavamoat-tofu/src/inspectSesCompat.js": {
+      "globals": {
+        "console.log": true
+      },
+      "packages": {
+        "external:../../../../../node_modules/lavamoat-tofu/src/inspectPrimordialAssignments.js": true,
+        "external:../../../../../node_modules/lavamoat-tofu/src/inspectSource.js": true,
+        "external:../../../../../node_modules/lavamoat-tofu/src/ses-whitelist.js": true
+      }
+    },
+    "external:../../../../../node_modules/lavamoat-tofu/src/inspectSource.js": {
+      "packages": {
+        "external:../../../../../node_modules/@babel/parser/lib/index.js": true,
+        "external:../../../../../node_modules/@babel/traverse/lib/index.js": true,
+        "external:../../../../../node_modules/lavamoat-tofu/src/findGlobals.js": true,
+        "external:../../../../../node_modules/lavamoat-tofu/src/primordials.js": true,
+        "external:../../../../../node_modules/lavamoat-tofu/src/util.js": true
+      }
+    },
+    "external:../../../../../node_modules/lazy-cache/index.js": {
+      "globals": {
+        "process.env.TRAVIS": true,
+        "process.env.UNLAZY": true
+      }
+    },
+    "external:../../../../../node_modules/lodash/_DataView.js": {
+      "packages": {
+        "external:../../../../../node_modules/lodash/_getNative.js": true,
+        "external:../../../../../node_modules/lodash/_root.js": true
+      }
+    },
+    "external:../../../../../node_modules/lodash/_Hash.js": {
+      "packages": {
+        "external:../../../../../node_modules/lodash/_hashClear.js": true,
+        "external:../../../../../node_modules/lodash/_hashDelete.js": true,
+        "external:../../../../../node_modules/lodash/_hashGet.js": true,
+        "external:../../../../../node_modules/lodash/_hashHas.js": true,
+        "external:../../../../../node_modules/lodash/_hashSet.js": true
+      }
+    },
+    "external:../../../../../node_modules/lodash/_ListCache.js": {
+      "packages": {
+        "external:../../../../../node_modules/lodash/_listCacheClear.js": true,
+        "external:../../../../../node_modules/lodash/_listCacheDelete.js": true,
+        "external:../../../../../node_modules/lodash/_listCacheGet.js": true,
+        "external:../../../../../node_modules/lodash/_listCacheHas.js": true,
+        "external:../../../../../node_modules/lodash/_listCacheSet.js": true
+      }
+    },
+    "external:../../../../../node_modules/lodash/_Map.js": {
+      "packages": {
+        "external:../../../../../node_modules/lodash/_getNative.js": true,
+        "external:../../../../../node_modules/lodash/_root.js": true
+      }
+    },
+    "external:../../../../../node_modules/lodash/_MapCache.js": {
+      "packages": {
+        "external:../../../../../node_modules/lodash/_mapCacheClear.js": true,
+        "external:../../../../../node_modules/lodash/_mapCacheDelete.js": true,
+        "external:../../../../../node_modules/lodash/_mapCacheGet.js": true,
+        "external:../../../../../node_modules/lodash/_mapCacheHas.js": true,
+        "external:../../../../../node_modules/lodash/_mapCacheSet.js": true
+      }
+    },
+    "external:../../../../../node_modules/lodash/_Promise.js": {
+      "packages": {
+        "external:../../../../../node_modules/lodash/_getNative.js": true,
+        "external:../../../../../node_modules/lodash/_root.js": true
+      }
+    },
+    "external:../../../../../node_modules/lodash/_Set.js": {
+      "packages": {
+        "external:../../../../../node_modules/lodash/_getNative.js": true,
+        "external:../../../../../node_modules/lodash/_root.js": true
+      }
+    },
+    "external:../../../../../node_modules/lodash/_Stack.js": {
+      "packages": {
+        "external:../../../../../node_modules/lodash/_ListCache.js": true,
+        "external:../../../../../node_modules/lodash/_stackClear.js": true,
+        "external:../../../../../node_modules/lodash/_stackDelete.js": true,
+        "external:../../../../../node_modules/lodash/_stackGet.js": true,
+        "external:../../../../../node_modules/lodash/_stackHas.js": true,
+        "external:../../../../../node_modules/lodash/_stackSet.js": true
+      }
+    },
+    "external:../../../../../node_modules/lodash/_Symbol.js": {
+      "packages": {
+        "external:../../../../../node_modules/lodash/_root.js": true
+      }
+    },
+    "external:../../../../../node_modules/lodash/_Uint8Array.js": {
+      "packages": {
+        "external:../../../../../node_modules/lodash/_root.js": true
+      }
+    },
+    "external:../../../../../node_modules/lodash/_WeakMap.js": {
+      "packages": {
+        "external:../../../../../node_modules/lodash/_getNative.js": true,
+        "external:../../../../../node_modules/lodash/_root.js": true
+      }
+    },
+    "external:../../../../../node_modules/lodash/_arrayLikeKeys.js": {
+      "packages": {
+        "external:../../../../../node_modules/lodash/_baseTimes.js": true,
+        "external:../../../../../node_modules/lodash/_isIndex.js": true,
+        "external:../../../../../node_modules/lodash/isArguments.js": true,
+        "external:../../../../../node_modules/lodash/isArray.js": true,
+        "external:../../../../../node_modules/lodash/isBuffer.js": true,
+        "external:../../../../../node_modules/lodash/isTypedArray.js": true
+      }
+    },
+    "external:../../../../../node_modules/lodash/_assignValue.js": {
+      "packages": {
+        "external:../../../../../node_modules/lodash/_baseAssignValue.js": true,
+        "external:../../../../../node_modules/lodash/eq.js": true
+      }
+    },
+    "external:../../../../../node_modules/lodash/_assocIndexOf.js": {
+      "packages": {
+        "external:../../../../../node_modules/lodash/eq.js": true
+      }
+    },
+    "external:../../../../../node_modules/lodash/_baseAssign.js": {
+      "packages": {
+        "external:../../../../../node_modules/lodash/_copyObject.js": true,
+        "external:../../../../../node_modules/lodash/keys.js": true
+      }
+    },
+    "external:../../../../../node_modules/lodash/_baseAssignIn.js": {
+      "packages": {
+        "external:../../../../../node_modules/lodash/_copyObject.js": true,
+        "external:../../../../../node_modules/lodash/keysIn.js": true
+      }
+    },
+    "external:../../../../../node_modules/lodash/_baseAssignValue.js": {
+      "packages": {
+        "external:../../../../../node_modules/lodash/_defineProperty.js": true
+      }
+    },
+    "external:../../../../../node_modules/lodash/_baseClone.js": {
+      "packages": {
+        "external:../../../../../node_modules/lodash/_Stack.js": true,
+        "external:../../../../../node_modules/lodash/_arrayEach.js": true,
+        "external:../../../../../node_modules/lodash/_assignValue.js": true,
+        "external:../../../../../node_modules/lodash/_baseAssign.js": true,
+        "external:../../../../../node_modules/lodash/_baseAssignIn.js": true,
+        "external:../../../../../node_modules/lodash/_cloneBuffer.js": true,
+        "external:../../../../../node_modules/lodash/_copyArray.js": true,
+        "external:../../../../../node_modules/lodash/_copySymbols.js": true,
+        "external:../../../../../node_modules/lodash/_copySymbolsIn.js": true,
+        "external:../../../../../node_modules/lodash/_getAllKeys.js": true,
+        "external:../../../../../node_modules/lodash/_getAllKeysIn.js": true,
+        "external:../../../../../node_modules/lodash/_getTag.js": true,
+        "external:../../../../../node_modules/lodash/_initCloneArray.js": true,
+        "external:../../../../../node_modules/lodash/_initCloneByTag.js": true,
+        "external:../../../../../node_modules/lodash/_initCloneObject.js": true,
+        "external:../../../../../node_modules/lodash/isArray.js": true,
+        "external:../../../../../node_modules/lodash/isBuffer.js": true,
+        "external:../../../../../node_modules/lodash/isMap.js": true,
+        "external:../../../../../node_modules/lodash/isObject.js": true,
+        "external:../../../../../node_modules/lodash/isSet.js": true,
+        "external:../../../../../node_modules/lodash/keys.js": true,
+        "external:../../../../../node_modules/lodash/keysIn.js": true
+      }
+    },
+    "external:../../../../../node_modules/lodash/_baseCreate.js": {
+      "packages": {
+        "external:../../../../../node_modules/lodash/isObject.js": true
+      }
+    },
+    "external:../../../../../node_modules/lodash/_baseGetAllKeys.js": {
+      "packages": {
+        "external:../../../../../node_modules/lodash/_arrayPush.js": true,
+        "external:../../../../../node_modules/lodash/isArray.js": true
+      }
+    },
+    "external:../../../../../node_modules/lodash/_baseGetTag.js": {
+      "packages": {
+        "external:../../../../../node_modules/lodash/_Symbol.js": true,
+        "external:../../../../../node_modules/lodash/_getRawTag.js": true,
+        "external:../../../../../node_modules/lodash/_objectToString.js": true
+      }
+    },
+    "external:../../../../../node_modules/lodash/_baseIsArguments.js": {
+      "packages": {
+        "external:../../../../../node_modules/lodash/_baseGetTag.js": true,
+        "external:../../../../../node_modules/lodash/isObjectLike.js": true
+      }
+    },
+    "external:../../../../../node_modules/lodash/_baseIsMap.js": {
+      "packages": {
+        "external:../../../../../node_modules/lodash/_getTag.js": true,
+        "external:../../../../../node_modules/lodash/isObjectLike.js": true
+      }
+    },
+    "external:../../../../../node_modules/lodash/_baseIsNative.js": {
+      "packages": {
+        "external:../../../../../node_modules/lodash/_isMasked.js": true,
+        "external:../../../../../node_modules/lodash/_toSource.js": true,
+        "external:../../../../../node_modules/lodash/isFunction.js": true,
+        "external:../../../../../node_modules/lodash/isObject.js": true
+      }
+    },
+    "external:../../../../../node_modules/lodash/_baseIsRegExp.js": {
+      "packages": {
+        "external:../../../../../node_modules/lodash/_baseGetTag.js": true,
+        "external:../../../../../node_modules/lodash/isObjectLike.js": true
+      }
+    },
+    "external:../../../../../node_modules/lodash/_baseIsSet.js": {
+      "packages": {
+        "external:../../../../../node_modules/lodash/_getTag.js": true,
+        "external:../../../../../node_modules/lodash/isObjectLike.js": true
+      }
+    },
+    "external:../../../../../node_modules/lodash/_baseIsTypedArray.js": {
+      "packages": {
+        "external:../../../../../node_modules/lodash/_baseGetTag.js": true,
+        "external:../../../../../node_modules/lodash/isLength.js": true,
+        "external:../../../../../node_modules/lodash/isObjectLike.js": true
+      }
+    },
+    "external:../../../../../node_modules/lodash/_baseKeys.js": {
+      "packages": {
+        "external:../../../../../node_modules/lodash/_isPrototype.js": true,
+        "external:../../../../../node_modules/lodash/_nativeKeys.js": true
+      }
+    },
+    "external:../../../../../node_modules/lodash/_baseKeysIn.js": {
+      "packages": {
+        "external:../../../../../node_modules/lodash/_isPrototype.js": true,
+        "external:../../../../../node_modules/lodash/_nativeKeysIn.js": true,
+        "external:../../../../../node_modules/lodash/isObject.js": true
+      }
+    },
+    "external:../../../../../node_modules/lodash/_cloneArrayBuffer.js": {
+      "packages": {
+        "external:../../../../../node_modules/lodash/_Uint8Array.js": true
+      }
+    },
+    "external:../../../../../node_modules/lodash/_cloneBuffer.js": {
+      "packages": {
+        "external:../../../../../node_modules/lodash/_root.js": true
+      }
+    },
+    "external:../../../../../node_modules/lodash/_cloneDataView.js": {
+      "packages": {
+        "external:../../../../../node_modules/lodash/_cloneArrayBuffer.js": true
+      }
+    },
+    "external:../../../../../node_modules/lodash/_cloneSymbol.js": {
+      "packages": {
+        "external:../../../../../node_modules/lodash/_Symbol.js": true
+      }
+    },
+    "external:../../../../../node_modules/lodash/_cloneTypedArray.js": {
+      "packages": {
+        "external:../../../../../node_modules/lodash/_cloneArrayBuffer.js": true
+      }
+    },
+    "external:../../../../../node_modules/lodash/_copyObject.js": {
+      "packages": {
+        "external:../../../../../node_modules/lodash/_assignValue.js": true,
+        "external:../../../../../node_modules/lodash/_baseAssignValue.js": true
+      }
+    },
+    "external:../../../../../node_modules/lodash/_copySymbols.js": {
+      "packages": {
+        "external:../../../../../node_modules/lodash/_copyObject.js": true,
+        "external:../../../../../node_modules/lodash/_getSymbols.js": true
+      }
+    },
+    "external:../../../../../node_modules/lodash/_copySymbolsIn.js": {
+      "packages": {
+        "external:../../../../../node_modules/lodash/_copyObject.js": true,
+        "external:../../../../../node_modules/lodash/_getSymbolsIn.js": true
+      }
+    },
+    "external:../../../../../node_modules/lodash/_coreJsData.js": {
+      "packages": {
+        "external:../../../../../node_modules/lodash/_root.js": true
+      }
+    },
+    "external:../../../../../node_modules/lodash/_defineProperty.js": {
+      "packages": {
+        "external:../../../../../node_modules/lodash/_getNative.js": true
+      }
+    },
+    "external:../../../../../node_modules/lodash/_getAllKeys.js": {
+      "packages": {
+        "external:../../../../../node_modules/lodash/_baseGetAllKeys.js": true,
+        "external:../../../../../node_modules/lodash/_getSymbols.js": true,
+        "external:../../../../../node_modules/lodash/keys.js": true
+      }
+    },
+    "external:../../../../../node_modules/lodash/_getAllKeysIn.js": {
+      "packages": {
+        "external:../../../../../node_modules/lodash/_baseGetAllKeys.js": true,
+        "external:../../../../../node_modules/lodash/_getSymbolsIn.js": true,
+        "external:../../../../../node_modules/lodash/keysIn.js": true
+      }
+    },
+    "external:../../../../../node_modules/lodash/_getMapData.js": {
+      "packages": {
+        "external:../../../../../node_modules/lodash/_isKeyable.js": true
+      }
+    },
+    "external:../../../../../node_modules/lodash/_getNative.js": {
+      "packages": {
+        "external:../../../../../node_modules/lodash/_baseIsNative.js": true,
+        "external:../../../../../node_modules/lodash/_getValue.js": true
+      }
+    },
+    "external:../../../../../node_modules/lodash/_getPrototype.js": {
+      "packages": {
+        "external:../../../../../node_modules/lodash/_overArg.js": true
+      }
+    },
+    "external:../../../../../node_modules/lodash/_getRawTag.js": {
+      "packages": {
+        "external:../../../../../node_modules/lodash/_Symbol.js": true
+      }
+    },
+    "external:../../../../../node_modules/lodash/_getSymbols.js": {
+      "packages": {
+        "external:../../../../../node_modules/lodash/_arrayFilter.js": true,
+        "external:../../../../../node_modules/lodash/stubArray.js": true
+      }
+    },
+    "external:../../../../../node_modules/lodash/_getSymbolsIn.js": {
+      "packages": {
+        "external:../../../../../node_modules/lodash/_arrayPush.js": true,
+        "external:../../../../../node_modules/lodash/_getPrototype.js": true,
+        "external:../../../../../node_modules/lodash/_getSymbols.js": true,
+        "external:../../../../../node_modules/lodash/stubArray.js": true
+      }
+    },
+    "external:../../../../../node_modules/lodash/_getTag.js": {
+      "packages": {
+        "external:../../../../../node_modules/lodash/_DataView.js": true,
+        "external:../../../../../node_modules/lodash/_Map.js": true,
+        "external:../../../../../node_modules/lodash/_Promise.js": true,
+        "external:../../../../../node_modules/lodash/_Set.js": true,
+        "external:../../../../../node_modules/lodash/_WeakMap.js": true,
+        "external:../../../../../node_modules/lodash/_baseGetTag.js": true,
+        "external:../../../../../node_modules/lodash/_toSource.js": true
+      }
+    },
+    "external:../../../../../node_modules/lodash/_hashClear.js": {
+      "packages": {
+        "external:../../../../../node_modules/lodash/_nativeCreate.js": true
+      }
+    },
+    "external:../../../../../node_modules/lodash/_hashGet.js": {
+      "packages": {
+        "external:../../../../../node_modules/lodash/_nativeCreate.js": true
+      }
+    },
+    "external:../../../../../node_modules/lodash/_hashHas.js": {
+      "packages": {
+        "external:../../../../../node_modules/lodash/_nativeCreate.js": true
+      }
+    },
+    "external:../../../../../node_modules/lodash/_hashSet.js": {
+      "packages": {
+        "external:../../../../../node_modules/lodash/_nativeCreate.js": true
+      }
+    },
+    "external:../../../../../node_modules/lodash/_initCloneByTag.js": {
+      "packages": {
+        "external:../../../../../node_modules/lodash/_cloneArrayBuffer.js": true,
+        "external:../../../../../node_modules/lodash/_cloneDataView.js": true,
+        "external:../../../../../node_modules/lodash/_cloneRegExp.js": true,
+        "external:../../../../../node_modules/lodash/_cloneSymbol.js": true,
+        "external:../../../../../node_modules/lodash/_cloneTypedArray.js": true
+      }
+    },
+    "external:../../../../../node_modules/lodash/_initCloneObject.js": {
+      "packages": {
+        "external:../../../../../node_modules/lodash/_baseCreate.js": true,
+        "external:../../../../../node_modules/lodash/_getPrototype.js": true,
+        "external:../../../../../node_modules/lodash/_isPrototype.js": true
+      }
+    },
+    "external:../../../../../node_modules/lodash/_isMasked.js": {
+      "packages": {
+        "external:../../../../../node_modules/lodash/_coreJsData.js": true
+      }
+    },
+    "external:../../../../../node_modules/lodash/_listCacheDelete.js": {
+      "packages": {
+        "external:../../../../../node_modules/lodash/_assocIndexOf.js": true
+      }
+    },
+    "external:../../../../../node_modules/lodash/_listCacheGet.js": {
+      "packages": {
+        "external:../../../../../node_modules/lodash/_assocIndexOf.js": true
+      }
+    },
+    "external:../../../../../node_modules/lodash/_listCacheHas.js": {
+      "packages": {
+        "external:../../../../../node_modules/lodash/_assocIndexOf.js": true
+      }
+    },
+    "external:../../../../../node_modules/lodash/_listCacheSet.js": {
+      "packages": {
+        "external:../../../../../node_modules/lodash/_assocIndexOf.js": true
+      }
+    },
+    "external:../../../../../node_modules/lodash/_mapCacheClear.js": {
+      "packages": {
+        "external:../../../../../node_modules/lodash/_Hash.js": true,
+        "external:../../../../../node_modules/lodash/_ListCache.js": true,
+        "external:../../../../../node_modules/lodash/_Map.js": true
+      }
+    },
+    "external:../../../../../node_modules/lodash/_mapCacheDelete.js": {
+      "packages": {
+        "external:../../../../../node_modules/lodash/_getMapData.js": true
+      }
+    },
+    "external:../../../../../node_modules/lodash/_mapCacheGet.js": {
+      "packages": {
+        "external:../../../../../node_modules/lodash/_getMapData.js": true
+      }
+    },
+    "external:../../../../../node_modules/lodash/_mapCacheHas.js": {
+      "packages": {
+        "external:../../../../../node_modules/lodash/_getMapData.js": true
+      }
+    },
+    "external:../../../../../node_modules/lodash/_mapCacheSet.js": {
+      "packages": {
+        "external:../../../../../node_modules/lodash/_getMapData.js": true
+      }
+    },
+    "external:../../../../../node_modules/lodash/_nativeCreate.js": {
+      "packages": {
+        "external:../../../../../node_modules/lodash/_getNative.js": true
+      }
+    },
+    "external:../../../../../node_modules/lodash/_nativeKeys.js": {
+      "packages": {
+        "external:../../../../../node_modules/lodash/_overArg.js": true
+      }
+    },
+    "external:../../../../../node_modules/lodash/_nodeUtil.js": {
+      "packages": {
+        "external:../../../../../node_modules/lodash/_freeGlobal.js": true
+      }
+    },
+    "external:../../../../../node_modules/lodash/_root.js": {
+      "packages": {
+        "external:../../../../../node_modules/lodash/_freeGlobal.js": true
+      }
+    },
+    "external:../../../../../node_modules/lodash/_stackClear.js": {
+      "packages": {
+        "external:../../../../../node_modules/lodash/_ListCache.js": true
+      }
+    },
+    "external:../../../../../node_modules/lodash/_stackSet.js": {
+      "packages": {
+        "external:../../../../../node_modules/lodash/_ListCache.js": true,
+        "external:../../../../../node_modules/lodash/_Map.js": true,
+        "external:../../../../../node_modules/lodash/_MapCache.js": true
+      }
+    },
+    "external:../../../../../node_modules/lodash/clone.js": {
+      "packages": {
+        "external:../../../../../node_modules/lodash/_baseClone.js": true
+      }
+    },
+    "external:../../../../../node_modules/lodash/isArguments.js": {
+      "packages": {
+        "external:../../../../../node_modules/lodash/_baseIsArguments.js": true,
+        "external:../../../../../node_modules/lodash/isObjectLike.js": true
+      }
+    },
+    "external:../../../../../node_modules/lodash/isArrayLike.js": {
+      "packages": {
+        "external:../../../../../node_modules/lodash/isFunction.js": true,
+        "external:../../../../../node_modules/lodash/isLength.js": true
+      }
+    },
+    "external:../../../../../node_modules/lodash/isBuffer.js": {
+      "packages": {
+        "external:../../../../../node_modules/lodash/_root.js": true,
+        "external:../../../../../node_modules/lodash/stubFalse.js": true
+      }
+    },
+    "external:../../../../../node_modules/lodash/isFunction.js": {
+      "packages": {
+        "external:../../../../../node_modules/lodash/_baseGetTag.js": true,
+        "external:../../../../../node_modules/lodash/isObject.js": true
+      }
+    },
+    "external:../../../../../node_modules/lodash/isMap.js": {
+      "packages": {
+        "external:../../../../../node_modules/lodash/_baseIsMap.js": true,
+        "external:../../../../../node_modules/lodash/_baseUnary.js": true,
+        "external:../../../../../node_modules/lodash/_nodeUtil.js": true
+      }
+    },
+    "external:../../../../../node_modules/lodash/isPlainObject.js": {
+      "packages": {
+        "external:../../../../../node_modules/lodash/_baseGetTag.js": true,
+        "external:../../../../../node_modules/lodash/_getPrototype.js": true,
+        "external:../../../../../node_modules/lodash/isObjectLike.js": true
+      }
+    },
+    "external:../../../../../node_modules/lodash/isRegExp.js": {
+      "packages": {
+        "external:../../../../../node_modules/lodash/_baseIsRegExp.js": true,
+        "external:../../../../../node_modules/lodash/_baseUnary.js": true,
+        "external:../../../../../node_modules/lodash/_nodeUtil.js": true
+      }
+    },
+    "external:../../../../../node_modules/lodash/isSet.js": {
+      "packages": {
+        "external:../../../../../node_modules/lodash/_baseIsSet.js": true,
+        "external:../../../../../node_modules/lodash/_baseUnary.js": true,
+        "external:../../../../../node_modules/lodash/_nodeUtil.js": true
+      }
+    },
+    "external:../../../../../node_modules/lodash/isTypedArray.js": {
+      "packages": {
+        "external:../../../../../node_modules/lodash/_baseIsTypedArray.js": true,
+        "external:../../../../../node_modules/lodash/_baseUnary.js": true,
+        "external:../../../../../node_modules/lodash/_nodeUtil.js": true
+      }
+    },
+    "external:../../../../../node_modules/lodash/keys.js": {
+      "packages": {
+        "external:../../../../../node_modules/lodash/_arrayLikeKeys.js": true,
+        "external:../../../../../node_modules/lodash/_baseKeys.js": true,
+        "external:../../../../../node_modules/lodash/isArrayLike.js": true
+      }
+    },
+    "external:../../../../../node_modules/lodash/keysIn.js": {
+      "packages": {
+        "external:../../../../../node_modules/lodash/_arrayLikeKeys.js": true,
+        "external:../../../../../node_modules/lodash/_baseKeysIn.js": true,
+        "external:../../../../../node_modules/lodash/isArrayLike.js": true
+      }
+    },
+    "external:../../../../../node_modules/merge-deep/index.js": {
+      "packages": {
+        "external:../../../../../node_modules/arr-union/index.js": true,
+        "external:../../../../../node_modules/merge-deep/node_modules/clone-deep/index.js": true,
+        "external:../../../../../node_modules/merge-deep/node_modules/kind-of/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/merge-deep/node_modules/clone-deep/index.js": {
+      "packages": {
+        "external:../../../../../node_modules/merge-deep/node_modules/clone-deep/utils.js": true
+      }
+    },
+    "external:../../../../../node_modules/merge-deep/node_modules/clone-deep/utils.js": {
+      "packages": {
+        "external:../../../../../node_modules/for-own/index.js": true,
+        "external:../../../../../node_modules/is-plain-object/index.js": true,
+        "external:../../../../../node_modules/lazy-cache/index.js": true,
+        "external:../../../../../node_modules/merge-deep/node_modules/kind-of/index.js": true,
+        "external:../../../../../node_modules/merge-deep/node_modules/shallow-clone/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/merge-deep/node_modules/kind-of/index.js": {
+      "packages": {
+        "browserify>insert-module-globals>is-buffer": true
+      }
+    },
+    "external:../../../../../node_modules/merge-deep/node_modules/shallow-clone/index.js": {
+      "packages": {
+        "external:../../../../../node_modules/merge-deep/node_modules/shallow-clone/utils.js": true
+      }
+    },
+    "external:../../../../../node_modules/merge-deep/node_modules/shallow-clone/node_modules/kind-of/index.js": {
+      "globals": {
+        "Buffer": true
+      },
+      "packages": {
+        "browserify>insert-module-globals>is-buffer": true
+      }
+    },
+    "external:../../../../../node_modules/merge-deep/node_modules/shallow-clone/node_modules/lazy-cache/index.js": {
+      "globals": {
+        "process.env.UNLAZY": true
+      }
+    },
+    "external:../../../../../node_modules/merge-deep/node_modules/shallow-clone/utils.js": {
+      "packages": {
+        "external:../../../../../node_modules/is-extendable/index.js": true,
+        "external:../../../../../node_modules/merge-deep/node_modules/shallow-clone/node_modules/kind-of/index.js": true,
+        "external:../../../../../node_modules/merge-deep/node_modules/shallow-clone/node_modules/lazy-cache/index.js": true,
+        "external:../../../../../node_modules/mixin-object/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/mixin-object/index.js": {
+      "packages": {
+        "external:../../../../../node_modules/is-extendable/index.js": true,
+        "external:../../../../../node_modules/mixin-object/node_modules/for-in/index.js": true
+      }
+    },
+    "external:../../../../../node_modules/supports-color/index.js": {
       "builtin": {
         "os.release": true
       },
@@ -703,46 +2345,220 @@
         "process.versions.node.split": true
       },
       "packages": {
-        "has-flag": true
+        "browserify>has": true
       }
     },
-    "syntax-error": {
+    "external:../../../node_modules/concat-stream/index.js": {
+      "globals": {
+        "Buffer.concat": true,
+        "Buffer.isBuffer": true
+      },
       "packages": {
-        "acorn-node": true
+        "browserify>concat-stream>buffer-from": true,
+        "browserify>concat-stream>typedarray": true,
+        "browserify>inherits": true,
+        "external:../../../node_modules/readable-stream/readable.js": true
       }
     },
-    "through": {
+    "external:../../../node_modules/duplexify/index.js": {
+      "globals": {
+        "Buffer": true,
+        "process.nextTick": true
+      },
+      "packages": {
+        "browserify>inherits": true,
+        "external:../../../../../node_modules/end-of-stream/index.js": true,
+        "external:../../../../../node_modules/stream-shift/index.js": true,
+        "external:../../../node_modules/readable-stream/readable.js": true
+      }
+    },
+    "external:../../../node_modules/readable-stream/lib/_stream_duplex.js": {
+      "globals": {
+        "process.nextTick": true
+      },
+      "packages": {
+        "browserify>inherits": true,
+        "external:../../../node_modules/readable-stream/lib/_stream_readable.js": true,
+        "external:../../../node_modules/readable-stream/lib/_stream_writable.js": true
+      }
+    },
+    "external:../../../node_modules/readable-stream/lib/_stream_passthrough.js": {
+      "packages": {
+        "browserify>inherits": true,
+        "external:../../../node_modules/readable-stream/lib/_stream_transform.js": true
+      }
+    },
+    "external:../../../node_modules/readable-stream/lib/_stream_readable.js": {
+      "builtin": {
+        "buffer.Buffer.from": true,
+        "buffer.Buffer.isBuffer": true,
+        "buffer.Buffer.prototype": true,
+        "events.EventEmitter": true,
+        "util": true
+      },
+      "globals": {
+        "process.nextTick": true,
+        "process.stderr": true,
+        "process.stdout": true
+      },
+      "packages": {
+        "browserify>inherits": true,
+        "browserify>string_decoder": true,
+        "external:../../../node_modules/readable-stream/errors.js": true,
+        "external:../../../node_modules/readable-stream/lib/_stream_duplex.js": true,
+        "external:../../../node_modules/readable-stream/lib/internal/streams/async_iterator.js": true,
+        "external:../../../node_modules/readable-stream/lib/internal/streams/buffer_list.js": true,
+        "external:../../../node_modules/readable-stream/lib/internal/streams/destroy.js": true,
+        "external:../../../node_modules/readable-stream/lib/internal/streams/from.js": true,
+        "external:../../../node_modules/readable-stream/lib/internal/streams/state.js": true,
+        "external:../../../node_modules/readable-stream/lib/internal/streams/stream.js": true
+      }
+    },
+    "external:../../../node_modules/readable-stream/lib/_stream_transform.js": {
+      "packages": {
+        "browserify>inherits": true,
+        "external:../../../node_modules/readable-stream/errors.js": true,
+        "external:../../../node_modules/readable-stream/lib/_stream_duplex.js": true
+      }
+    },
+    "external:../../../node_modules/readable-stream/lib/_stream_writable.js": {
+      "builtin": {
+        "buffer.Buffer.from": true,
+        "buffer.Buffer.isBuffer": true
+      },
+      "globals": {
+        "process.nextTick": true
+      },
+      "packages": {
+        "browserify>inherits": true,
+        "browserify>readable-stream>util-deprecate": true,
+        "external:../../../node_modules/readable-stream/errors.js": true,
+        "external:../../../node_modules/readable-stream/lib/_stream_duplex.js": true,
+        "external:../../../node_modules/readable-stream/lib/internal/streams/destroy.js": true,
+        "external:../../../node_modules/readable-stream/lib/internal/streams/state.js": true,
+        "external:../../../node_modules/readable-stream/lib/internal/streams/stream.js": true
+      }
+    },
+    "external:../../../node_modules/readable-stream/lib/internal/streams/async_iterator.js": {
+      "globals": {
+        "process.nextTick": true
+      },
+      "packages": {
+        "external:../../../node_modules/readable-stream/lib/internal/streams/end-of-stream.js": true
+      }
+    },
+    "external:../../../node_modules/readable-stream/lib/internal/streams/buffer_list.js": {
+      "builtin": {
+        "buffer.Buffer": true,
+        "util.inspect": true
+      }
+    },
+    "external:../../../node_modules/readable-stream/lib/internal/streams/destroy.js": {
+      "globals": {
+        "process.nextTick": true
+      }
+    },
+    "external:../../../node_modules/readable-stream/lib/internal/streams/end-of-stream.js": {
+      "packages": {
+        "external:../../../node_modules/readable-stream/errors.js": true
+      }
+    },
+    "external:../../../node_modules/readable-stream/lib/internal/streams/from.js": {
+      "packages": {
+        "external:../../../node_modules/readable-stream/errors.js": true
+      }
+    },
+    "external:../../../node_modules/readable-stream/lib/internal/streams/pipeline.js": {
+      "packages": {
+        "external:../../../node_modules/readable-stream/errors.js": true,
+        "external:../../../node_modules/readable-stream/lib/internal/streams/end-of-stream.js": true
+      }
+    },
+    "external:../../../node_modules/readable-stream/lib/internal/streams/state.js": {
+      "packages": {
+        "external:../../../node_modules/readable-stream/errors.js": true
+      }
+    },
+    "external:../../../node_modules/readable-stream/lib/internal/streams/stream.js": {
+      "builtin": {
+        "stream": true
+      }
+    },
+    "external:../../../node_modules/readable-stream/readable.js": {
       "builtin": {
         "stream": true
       },
       "globals": {
-        "process.nextTick": true
+        "process.env.READABLE_STREAM": true
+      },
+      "packages": {
+        "external:../../../node_modules/readable-stream/lib/_stream_duplex.js": true,
+        "external:../../../node_modules/readable-stream/lib/_stream_passthrough.js": true,
+        "external:../../../node_modules/readable-stream/lib/_stream_readable.js": true,
+        "external:../../../node_modules/readable-stream/lib/_stream_transform.js": true,
+        "external:../../../node_modules/readable-stream/lib/_stream_writable.js": true,
+        "external:../../../node_modules/readable-stream/lib/internal/streams/end-of-stream.js": true,
+        "external:../../../node_modules/readable-stream/lib/internal/streams/pipeline.js": true
       }
     },
-    "through2": {
-      "builtin": {
-        "util.inherits": true
-      },
+    "external:../../../node_modules/through2/through2.js": {
       "globals": {
         "process.nextTick": true
       },
       "packages": {
-        "inherits": true,
-        "readable-stream": true,
-        "xtend": true
+        "browserify>inherits": true,
+        "external:../../../node_modules/readable-stream/readable.js": true
       }
     },
-    "undeclared-identifiers": {
+    "external:../../../src/createModuleInspectorSpy.js": {
       "packages": {
-        "acorn-node": true,
-        "dash-ast": true,
-        "get-assigned-identifiers": true,
-        "xtend": true
+        "external:../../../../../node_modules/lavamoat-core/src/index.js": true,
+        "external:../../../node_modules/through2/through2.js": true
       }
     },
-    "util-deprecate": {
+    "external:../../../src/createPackageDataStream.js": {
       "builtin": {
-        "util.deprecate": true
+        "util.callbackify": true
+      },
+      "packages": {
+        "external:../../../../../node_modules/@lavamoat/aa/src/index.js": true,
+        "external:../../../node_modules/through2/through2.js": true
+      }
+    },
+    "external:../../../src/index.js": {
+      "builtin": {
+        "fs.existsSync": true,
+        "fs.mkdirSync": true,
+        "fs.readFileSync": true,
+        "fs.writeFileSync": true,
+        "path.dirname": true,
+        "path.resolve": true
+      },
+      "globals": {
+        "console.warn": true,
+        "process.cwd": true,
+        "setTimeout": true
+      },
+      "packages": {
+        "browserify>browser-resolve": true,
+        "external:../../../../../node_modules/@lavamoat/aa/src/index.js": true,
+        "external:../../../../../node_modules/@lavamoat/lavapack/src/index.js": true,
+        "external:../../../../../node_modules/json-stable-stringify/index.js": true,
+        "external:../../../../../node_modules/lavamoat-core/src/index.js": true,
+        "external:../../../src/createModuleInspectorSpy.js": true,
+        "external:../../../src/createPackageDataStream.js": true,
+        "external:../../../src/sesTransforms.js": true
+      }
+    },
+    "external:../../../src/sesTransforms.js": {
+      "builtin": {
+        "path.extname": true
+      },
+      "packages": {
+        "external:../../../../../node_modules/lavamoat-core/src/index.js": true,
+        "external:../../../node_modules/concat-stream/index.js": true,
+        "external:../../../node_modules/duplexify/index.js": true,
+        "external:../../../node_modules/readable-stream/readable.js": true
       }
     }
   }
