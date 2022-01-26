@@ -9,13 +9,13 @@ async function parseForPolicy ({
   isBuiltin,
   shouldImport,
   includeDebugInfo,
+  policyOverride,
   inspector = createModuleInspector({ isBuiltin, includeDebugInfo })
 }) {
   await walk({ moduleSpecifier, importHook, visitorFn, shouldImport })
-  // after all modules, submit config
-  const config = inspector.generatePolicy()
-  // console.log(JSON.stringify(config, null, 2))
-  return config
+  // after all modules, submit policy
+  const policy = inspector.generatePolicy({ policyOverride })
+  return policy
 
   function visitorFn (moduleRecord) {
     // inspect each module

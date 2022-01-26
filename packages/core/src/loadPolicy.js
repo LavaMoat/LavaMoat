@@ -1,10 +1,9 @@
 const fs = require('fs')
-const { mergePolicy } = require('./mergePolicy')
 
 module.exports = { loadPolicy }
 
 
-async function loadPolicy ({ debugMode, policyPath, policyOverridePath }) {
+async function loadPolicy ({ debugMode, policyPath }) {
   let policy = { resources: {} }
   // try policy
   if (fs.existsSync(policyPath)) {
@@ -13,15 +12,6 @@ async function loadPolicy ({ debugMode, policyPath, policyOverridePath }) {
     policy = JSON.parse(configSource)
   } else {
     if (debugMode) console.warn('Lavamoat could not find policy')
-  }
-  // try policy override
-  if (fs.existsSync(policyOverridePath)) {
-    if (debugMode) console.warn(`Lavamoat looking for override policy at ${policyOverridePath}`)
-    const configSource = fs.readFileSync(policyOverridePath, 'utf8')
-    const overrideConfig = JSON.parse(configSource)
-    policy = mergePolicy(policy, overrideConfig)
-  } else {
-    if (debugMode) console.warn('Lavamoat could not find policy override')
   }
   return policy
 }

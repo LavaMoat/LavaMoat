@@ -50,15 +50,16 @@ const createRequire = (url) => {
 
 module.exports = { parseForPolicy, makeResolveHook, makeImportHook, resolutionOmittedExtensions }
 
-async function parseForPolicy ({ cwd, entryId, resolutions, rootPackageName, shouldResolve, includeDebugInfo, ...args }) {
+async function parseForPolicy ({ cwd, entryId, policyOverride = {}, rootPackageName, shouldResolve, includeDebugInfo, ...args }) {
   const isBuiltin = (id) => builtinPackages.includes(id)
+  const { resolutions } = policyOverride
   const resolveHook = makeResolveHook({ cwd, resolutions, rootPackageName })
   const importHook = makeImportHook({ rootPackageName, shouldResolve, isBuiltin, resolveHook })
   const moduleSpecifier = resolveHook(entryId, `${cwd}/package.json`)
   const inspector = createModuleInspector({ isBuiltin, includeDebugInfo })
   // rich warning output
   inspector.on('compat-warning', displayRichCompatWarning)
-  return coreParseForConfig({ moduleSpecifier, importHook, isBuiltin, inspector, ...args })
+  return coreParseForConfig({ moduleSpecifier, importHook, isBuiltin, inspector, policyOverride, ...args })
 }
 
 function makeResolveHook ({ cwd, resolutions = {}, rootPackageName = '<root>' }) {

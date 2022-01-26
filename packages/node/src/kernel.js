@@ -13,13 +13,13 @@ const nativeRequire = require
 
 module.exports = { createKernel }
 
-function createKernel ({ cwd, lavamoatConfig, debugMode }) {
-  const { resolutions } = lavamoatConfig
+function createKernel ({ cwd, lavamoatPolicy, debugMode }) {
+  const { resolutions } = lavamoatPolicy
   const getRelativeModuleId = createModuleResolver({ cwd, resolutions })
   const kernelSrc = generateKernel({ debugMode })
   const createKernel = evaluateWithSourceUrl('LavaMoat/node/kernel', kernelSrc)
   const kernel = createKernel({
-    lavamoatConfig,
+    lavamoatConfig: lavamoatPolicy,
     loadModuleData,
     getRelativeModuleId,
     prepareModuleInitializerArgs,

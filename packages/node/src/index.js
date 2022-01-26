@@ -35,9 +35,9 @@ async function runLava () {
   if (shouldParseApplication) {
     // parse mode
     const includeDebugInfo = Boolean(writeAutoPolicyDebug)
-    const { resolutions } = await loadPolicy({ debugMode, policyPath, policyOverridePath })
+    const policyOverride= await loadPolicy({ debugMode, policyPath: policyOverridePath })
     console.warn(`LavaMoat generating policy from entry "${entryId}"...`)
-    const policy = await parseForPolicy({ cwd, entryId, resolutions, includeDebugInfo })
+    const policy = await parseForPolicy({ cwd, entryId, policyOverride, includeDebugInfo })
     // write policy debug file
     if (includeDebugInfo) {
       fs.mkdirSync(path.dirname(policyDebugPath), { recursive: true })
@@ -53,8 +53,8 @@ async function runLava () {
   }
   if (shouldRunApplication) {
     // execution mode
-    const lavamoatConfig = await loadPolicy({ debugMode, policyPath, policyOverridePath })
-    const kernel = createKernel({ cwd, lavamoatConfig, debugMode })
+    const lavamoatPolicy = await loadPolicy({ debugMode, policyPath })
+    const kernel = createKernel({ cwd, lavamoatPolicy, debugMode })
     // patch process.argv so it matches the normal pattern
     // e.g. [runtime path, entrypoint, ...args]
     // we'll use the LavaMoat path as the runtime

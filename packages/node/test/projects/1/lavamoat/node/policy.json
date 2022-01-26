@@ -1,4 +1,10 @@
 {
+  "resolutions": {
+    "a": {
+      "b": "./fake-b.js",
+      "fs": "./fake-fs.js"
+    }
+  },
   "resources": {
     "a": {
       "packages": {
