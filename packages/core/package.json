@@ -24,7 +24,7 @@
     "eslint-plugin-standard": "^5.0.0"
   },
   "scripts": {
-    "lint": "npm run lint:eslint && npm run lint:deps",
+    "lint": "yarn lint:eslint && yarn lint:deps",
     "lint:eslint": "eslint \"src/**/*.js\" \"test/**/*.js\"",
     "lint:fix": "eslint src/**/*.js test/**/*.js --fix",
     "lint:deps": "depcheck",
