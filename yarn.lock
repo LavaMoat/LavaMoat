@@ -13861,10 +13861,10 @@ three-spritetext@^1.5.1:
   resolved "https://registry.yarnpkg.com/three-spritetext/-/three-spritetext-1.5.3.tgz#c0b0576166fd0d485621ce8023157071a56bf604"
   integrity sha512-q4r6vLR0QgxrW5R6wfvZ49TV4VbsZ8ndXODa+3iHNwg5Ruz2m5hO85PjHvD7zvgUN129zV7maGrfP2M2Fi/+pA==
 
-three@^0.118.3:
-  version "0.118.3"
-  resolved "https://registry.yarnpkg.com/three/-/three-0.118.3.tgz#c0bf8c10a68155478f12f4ccac2ff979526a4a0a"
-  integrity sha512-ijECXrNzDkHieoeh2H69kgawTGH8DiamhR4uBN8jEM7VHSKvfTdEvOoHsA8Aq7dh7PHAxhlqBsN5arBI3KixSw==
+three@^0.137.0:
+  version "0.137.0"
+  resolved "https://registry.yarnpkg.com/three/-/three-0.137.0.tgz#0ebd6ba66637a332c31f234bcdd35aeec071a6e3"
+  integrity sha512-rzSDhia6cU35UCy6y+zEEws6vSgytfHqFMSaBvUcySgzwvDO6vETyswtSNi/+aVqJw8WLMwyT1mlQQ1T/dxxOA==
 
 through2@^2.0.0, through2@^2.0.2, through2@^2.0.3, through2@~2.0.0:
   version "2.0.5"
