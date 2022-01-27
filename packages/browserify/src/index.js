@@ -1,6 +1,6 @@
 const fs = require('fs')
 const path = require('path')
-const { getDefaultPaths, mergePolicy } = require('lavamoat-core')
+const { getDefaultPaths } = require('lavamoat-core')
 const jsonStringify = require('json-stable-stringify')
 const { createModuleInspectorSpy } = require('./createModuleInspectorSpy.js')
 const { createPackageDataStream } = require('./createPackageDataStream.js')
@@ -63,7 +63,13 @@ function plugin (browserify, pluginOpts) {
 
     // if writeAutoPolicy activated, insert hook
     if (configuration.writeAutoPolicy) {
+      const policyOverride = loadPolicyFile({
+        filepath: configuration.policyPaths.override,
+        tolerateMissing: true
+      })
+      validatePolicy(policyOverride)
       browserify.pipeline.get('emit-deps').push(createModuleInspectorSpy({
+        policyOverride,
         // no builtins in the browser (yet!)
         isBuiltin: () => false,
         // should prepare debug info
@@ -206,26 +212,19 @@ function loadPolicyFile ({ filepath, tolerateMissing }) {
   return policyFile
 }
 
-// lavamoat-core has a "loadPolicy" method but its async
+// TODO: dedupe. lavamoat-core has a "loadPolicy" method but its async
 function loadPolicy (configuration) {
-  let primaryPolicy
+  let policy
   if (configuration.actionOverrides.loadPrimaryPolicy) {
-    primaryPolicy = configuration.actionOverrides.loadPrimaryPolicy()
+    policy = configuration.actionOverrides.loadPrimaryPolicy()
   } else {
-    primaryPolicy = loadPolicyFile({
+    policy = loadPolicyFile({
       filepath: configuration.policyPaths.primary,
       tolerateMissing: configuration.writeAutoPolicy
     })
   }
-  const overridePolicy = loadPolicyFile({
-    filepath: configuration.policyPaths.override,
-    tolerateMissing: true
-  })
-  // validate each policy
-  validatePolicy(primaryPolicy)
-  validatePolicy(overridePolicy)
-  const finalPolicy = mergePolicy(primaryPolicy, overridePolicy)
-  return finalPolicy
+  validatePolicy(policy)
+  return policy
 }
 
 function getPolicyPaths (pluginOpts) {

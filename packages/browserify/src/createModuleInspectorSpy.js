@@ -7,14 +7,14 @@ module.exports = { createModuleInspectorSpy }
 // it analyses modules for global namespace usages, and generates a config for LavaMoat.
 // it calls `onResult` with the config when the stream ends.
 
-function createModuleInspectorSpy ({ onResult, isBuiltin, includeDebugInfo }) {
+function createModuleInspectorSpy ({ onResult, policyOverride, isBuiltin, includeDebugInfo }) {
   if (!isBuiltin) throw new Error('createModuleInspectorSpy - must specify "isBuiltin"')
   const inspector = createModuleInspector({ isBuiltin, includeDebugInfo })
   const configSpy = createSpy(
     // inspect each module
     (moduleData) => inspectBrowserifyModuleData(moduleData, inspector),
     // after all modules, submit config
-    () => onResult(inspector.generatePolicy())
+    () => onResult(inspector.generatePolicy({ policyOverride }))
   )
   return configSpy
 }

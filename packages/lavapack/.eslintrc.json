@@ -1,4 +1,6 @@
 {
   "extends": "../../.eslintrc.json",
-  "ignorePatterns": ["src/runtime.js"]
+  "ignorePatterns": [
+    "src/runtime.js"
+  ]
 }

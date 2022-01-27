@@ -19,6 +19,7 @@ async function parseForPolicy ({
   isBuiltin,
   shouldImport,
   includeDebugInfo,
+  policyOverride,
   inspector = createModuleInspector({ isBuiltin, includeDebugInfo })
 }) {
   for await (const moduleRecord of eachNodeInTree({ moduleSpecifier, importHook, shouldImport })) {
@@ -26,6 +27,6 @@ async function parseForPolicy ({
     inspector.inspectModule(moduleRecord)
   }
   // after all modules, submit policy
-  const policy = inspector.generatePolicy()
+  const policy = inspector.generatePolicy({ policyOverride })
   return policy
 }

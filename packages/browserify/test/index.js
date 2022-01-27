@@ -1,9 +1,8 @@
 require('./basic')
 require('./arguments')
 
-require('./config')
+require('./policy')
 require('./generatePolicy')
-require('./configReplacements')
 
 require('./globalRef')
 require('./exportsDefense')

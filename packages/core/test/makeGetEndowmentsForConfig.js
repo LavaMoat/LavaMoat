@@ -156,7 +156,8 @@ test('getEndowmentsForConfig - specify unwrap from, unwrap to', (t) => {
   t.is(getter.call(), globalThis)
 })
 
-test('getEndowmentsForConfig - endowing bind of a function', (t) => {
+// eslint-disable-next-line ava/no-async-fn-without-await
+test('getEndowmentsForConfig - endowing bind of a function', async (t) => {
   'use strict'
   const getEndowmentsForConfig = prepareTest()
   const sourceGlobal = {

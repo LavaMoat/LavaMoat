@@ -54,8 +54,9 @@ module.exports = {
   resolutionOmittedExtensions
 }
 
-async function parseForPolicy ({ cwd, entryId, resolutions, rootPackageName, shouldResolve, includeDebugInfo, ...args }) {
+async function parseForPolicy ({ cwd, entryId, policyOverride = {}, rootPackageName, shouldResolve, includeDebugInfo, ...args }) {
   const isBuiltin = (id) => builtinPackages.includes(id)
+  const { resolutions } = policyOverride  
   const canonicalNameMap = await loadCanonicalNameMap({ rootDir: cwd, includeDevDeps: true })
   const resolveHook = makeResolveHook({ cwd, resolutions, rootPackageName, canonicalNameMap })
   const importHook = makeImportHook({ rootPackageName, shouldResolve, isBuiltin, resolveHook, canonicalNameMap })
@@ -63,7 +64,7 @@ async function parseForPolicy ({ cwd, entryId, resolutions, rootPackageName, sho
   const inspector = createModuleInspector({ isBuiltin, includeDebugInfo })
   // rich warning output
   inspector.on('compat-warning', displayRichCompatWarning)
-  return coreParseForConfig({ moduleSpecifier, importHook, isBuiltin, inspector, ...args })
+  return coreParseForConfig({ moduleSpecifier, importHook, isBuiltin, inspector, policyOverride, ...args })
 }
 
 function makeResolveHook ({ cwd, resolutions = {}, canonicalNameMap }) {

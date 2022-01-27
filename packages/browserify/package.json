@@ -11,6 +11,7 @@
     "node": ">10.15.1"
   },
   "dependencies": {
+    "@babel/code-frame": "^7.16.7",    
     "@lavamoat/aa": "^1.0.0",
     "@lavamoat/lavapack": "^2.0.3",
     "browser-resolve": "^2.0.0",
@@ -23,10 +24,10 @@
     "merge-deep": "^3.0.2",
     "pify": "^4.0.1",
     "readable-stream": "^3.6.0",
+    "source-map": "^0.7.3",
     "through2": "^3.0.0"
   },
   "devDependencies": {
-    "@babel/code-frame": "^7.16.0",
     "bify-package-factor": "^1.0.7",
     "browserify": "^16.2.3",
     "eslint-plugin-ava": "^11.0.0",
@@ -42,13 +43,13 @@
     "watchify": "^3.11.1"
   },
   "scripts": {
-    "test": "ava test/index.js --timeout=2m",
+    "test": "ava test/index.js",
     "test:prep": "(cd './test/fixtures/secureBundling' && WRITE_AUTO_POLICY=1 ./run.sh)",
     "lint": "yarn lint:eslint && yarn lint:deps",
     "lint:eslint": "eslint \"src/**/*.js\" \"test/**/*.js\"",
     "lint:fix": "eslint src/**/*.js test/**/*.js --fix",
     "lint:deps": "depcheck",
-    "build:ses": "(cd ./node_modules/ses && npm i && yarn build && cp ./dist/ses.umd.js ../../lib/)"
+    "build:ses": "(cd ./node_modules/ses && npm install && npm run build && cp ./dist/ses.umd.js ../../lib/)"
   },
   "author": "kumavis",
   "license": "MIT",
@@ -56,9 +57,5 @@
   "bugs": {
     "url": "https://github.com/LavaMoat/lavamoat/issues"
   },
-  "homepage": "https://github.com/LavaMoat/lavamoat#readme",
-  "eslintIgnore": [
-    "/src/sourcemaps.js",
-    "/test/fixtures"
-  ]
+  "homepage": "https://github.com/LavaMoat/lavamoat#readme"
 }

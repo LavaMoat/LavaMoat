@@ -14,15 +14,15 @@ const nativeRequire = require
 
 module.exports = { createKernel }
 
-async function createKernel ({ cwd, lavamoatConfig, debugMode }) {
-  const { resolutions } = lavamoatConfig
+async function createKernel ({ cwd, lavamoatPolicy, debugMode }) {
+  const { resolutions } = lavamoatPolicy
   const canonicalNameMap = await loadCanonicalNameMap({ rootDir: cwd, includeDevDeps: true })
   const getRelativeModuleId = createModuleResolver({ cwd, resolutions, canonicalNameMap })
   const loadModuleData = createModuleLoader({ canonicalNameMap })
   const kernelSrc = generateKernel({ debugMode })
   const createKernel = evaluateWithSourceUrl('LavaMoat/node/kernel', kernelSrc)
   const kernel = createKernel({
-    lavamoatConfig,
+    lavamoatConfig: lavamoatPolicy,
     loadModuleData,
     getRelativeModuleId,
     prepareModuleInitializerArgs,

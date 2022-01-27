@@ -24,14 +24,14 @@ test('policy - default policy path is generated with autoconfig if path is not s
   const { policyDir } = await prepareBrowserifyScenarioOnDisk({ scenario })
   const expectedPath = path.join(policyDir, 'policy.json')
 
-  t.false(fs.existsSync(expectedPath), 'Config file does not yet exist')
+  t.false(fs.existsSync(expectedPath), 'Policy file does not yet exist')
 
   await runBrowserify({ scenario })
 
-  t.true(fs.existsSync(expectedPath), 'Config file exists')
+  t.true(fs.existsSync(expectedPath), 'Policy file exists')
 })
 
-test('Config override is applied if not specified and already exists at default path', async (t) => {
+test('Policy is applied if not specified and already exists at default path', async (t) => {
   const scenario = createScenarioFromScaffold({
     defineOne: () => {
       module.exports = require('three')
@@ -42,7 +42,7 @@ test('Config override is applied if not specified and already exists at default 
     defineThree: () => {
       module.exports = require('two')
     },
-    configOverride: {
+    config: {
       resources: {
         three: {
           packages: {
@@ -56,7 +56,7 @@ test('Config override is applied if not specified and already exists at default 
   await runAndTestScenario(t, scenario, runScenario)
 })
 
-test('Config - Applies writeAutoPolicyDebug plugin option and dumps module object to disk', async (t) => {
+test('Policy - Applies writeAutoPolicyDebug plugin option and dumps module object to disk', async (t) => {
   const scenario = createScenarioFromScaffold({
     opts: {
       writeAutoPolicy: true,
@@ -73,7 +73,7 @@ test('Config - Applies writeAutoPolicyDebug plugin option and dumps module objec
   t.true(fs.existsSync(expectedPath), 'Module data does not yet exist')
 })
 
-test('Config - watchify listens for policy file changes', async (t) => {
+test('Policy - watchify listens for policy file changes', async (t) => {
   const scenario = createScenarioFromScaffold({
     opts: {
       writeAutoPolicy: true,
@@ -102,7 +102,7 @@ test('Config - watchify listens for policy file changes', async (t) => {
 //   - hey, we support this now
 // - it uses invalid policy values
 // - it expects policy-override to be merged into the policy and then written to disk
-// test('Config edits trigger re-bundle if using watchify', async (t) => {
+// test('Policy edits trigger re-bundle if using watchify', async (t) => {
 //   const configDefault = {
 //     resources: {
 //       '<root>': {
@@ -133,9 +133,9 @@ test('Config - watchify listens for policy file changes', async (t) => {
 //   await new Promise(resolve => bundler.once('update', () => resolve()))
 
 //   await createBundleFromRequiresArray([], {})
-//   const updatedConfigFileString = fs.readFileSync(configPath, 'utf8')
+//   const updatedPolicyFileString = fs.readFileSync(configPath, 'utf8')
 //   rimraf.sync('./lavamoat')
 
 //   t.false(configFileString.includes('"three": 12345678'), 'original policy should not have updated content')
-//   t.true(updatedConfigFileString.includes('"three": 12345678'), 'policy should be updated')
+//   t.true(updatedPolicyFileString.includes('"three": 12345678'), 'policy should be updated')
 // })

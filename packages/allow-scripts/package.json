@@ -1,6 +1,6 @@
 {
   "name": "@lavamoat/allow-scripts",
-  "version": "1.0.6",
+  "version": "2.0.0",
   "main": "src/index.js",
   "bin": {
     "allow-scripts": "src/cli.js"
@@ -30,7 +30,7 @@
   },
   "scripts": {
     "test": "yarn test:run",
-    "test:run": "ava test/index.js --timeout=2m",
+    "test:run": "ava test/index.js",
     "lint": "yarn lint:eslint && yarn lint:deps",
     "lint:eslint": "eslint \"src/**/*.js\"",
     "lint:fix": "eslint src/**/*.js --fix",
