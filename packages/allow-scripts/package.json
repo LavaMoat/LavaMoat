@@ -24,7 +24,7 @@
     "test": "test"
   },
   "devDependencies": {
-    "ava": "^4.0.1",
+    "ava": "^3.15.0",
     "eslint-plugin-ava": "^11.0.0",
     "eslint-plugin-standard": "^5.0.0"
   },
