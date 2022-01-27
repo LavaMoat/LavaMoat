@@ -88,6 +88,7 @@ function getPackageNameForModulePath (canonicalNameMap, modulePath) {
   const packageDir = getPackageDirForModulePath(canonicalNameMap, modulePath)
   if (packageDir === undefined) {
     const relativeToRoot = path.relative(canonicalNameMap.rootDir, modulePath)
+    console.warn('external', modulePath)
     return `external:${relativeToRoot}`
   }
   const packageName = canonicalNameMap.get(packageDir)

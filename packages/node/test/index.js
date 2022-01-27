@@ -16,7 +16,7 @@ test('parseForPolicy - resolutions', async (t) => {
     }
   }
 
-  const policy1 = await parseForPolicy({ entryId, cwd: projectRoot })
+  const policy1 = await parseForPolicy({ entryId, projectRoot })
   t.deepEqual(policy1, {
     resources: {
       a: {
@@ -35,7 +35,7 @@ test('parseForPolicy - resolutions', async (t) => {
     }
   })
 
-  const policy2 = await parseForPolicy({ entryId, cwd: projectRoot, policyOverride: { resolutions } })
+  const policy2 = await parseForPolicy({ entryId, projectRoot, policyOverride: { resolutions } })
   t.deepEqual(policy2, {
     resolutions,
     resources: {
@@ -52,7 +52,7 @@ test('parseForPolicy - require a userspace package with a builtin name', async (
   const projectRoot = `${__dirname}/projects/4`
   const entryId = `${projectRoot}/index.js`
 
-  const policy = await parseForPolicy({ entryId, cwd: projectRoot })
+  const policy = await parseForPolicy({ entryId, projectRoot })
   t.deepEqual(policy, {
     resources: {
       a: {
@@ -77,7 +77,7 @@ test('parseForPolicy - require a userspace package with a builtin name', async (
 test('parseForPolicy - indirectly used packages are included in parent\'s allowlist', async (t) => {
   const projectRoot = `${__dirname}/projects/5`
   const entryId = `${projectRoot}/index.js`
-  const policy = await parseForPolicy({ entryId, cwd: projectRoot })
+  const policy = await parseForPolicy({ entryId, projectRoot })
   t.deepEqual(policy, {
     resources: { a: { builtin: { crypto: true } } }
   })

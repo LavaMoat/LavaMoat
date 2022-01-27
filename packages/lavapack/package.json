@@ -31,7 +31,7 @@
     "lint:eslint": "eslint \"src/**/*.js\" \"test/**/*.js\"",
     "lint:fix": "eslint src/**/*.js test/**/*.js --fix",
     "lint:deps": "depcheck",
-    "test": "ava test/index.js",
+    "test": "ava --timeout=30s test/index.js",
     "build": "node ./src/build-runtime.js"
   },
   "author": "kumavis",

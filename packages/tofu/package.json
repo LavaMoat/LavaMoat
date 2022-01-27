@@ -13,7 +13,7 @@
     "eslint-plugin-standard": "^5.0.0"
   },
   "scripts": {
-    "test": "ava test/index.js",
+    "test": "ava --timeout=30s test/index.js",
     "lint": "yarn lint:eslint && yarn lint:deps",
     "lint:eslint": "eslint \"src/**/*.js\"",
     "lint:fix": "eslint src/**/*.js --fix",

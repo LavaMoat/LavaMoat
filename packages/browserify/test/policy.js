@@ -3,7 +3,6 @@ const fs = require('fs')
 const path = require('path')
 const {
   createScenarioFromScaffold,
-  prepareScenarioOnDisk,
   runAndTestScenario,
 } = require('lavamoat-core/test/util')
 

@@ -43,7 +43,7 @@
     "watchify": "^3.11.1"
   },
   "scripts": {
-    "test": "ava test/index.js",
+    "test": "ava --timeout=30s test/index.js",
     "test:prep": "(cd './test/fixtures/secureBundling' && WRITE_AUTO_POLICY=1 ./run.sh)",
     "lint": "yarn lint:eslint && yarn lint:deps",
     "lint:eslint": "eslint \"src/**/*.js\" \"test/**/*.js\"",

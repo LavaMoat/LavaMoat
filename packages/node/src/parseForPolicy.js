@@ -54,30 +54,30 @@ module.exports = {
   resolutionOmittedExtensions
 }
 
-async function parseForPolicy ({ cwd, entryId, policyOverride = {}, rootPackageName, shouldResolve, includeDebugInfo, ...args }) {
+async function parseForPolicy ({ projectRoot, entryId, policyOverride = {}, rootPackageName, shouldResolve, includeDebugInfo, ...args }) {
   const isBuiltin = (id) => builtinPackages.includes(id)
   const { resolutions } = policyOverride  
-  const canonicalNameMap = await loadCanonicalNameMap({ rootDir: cwd, includeDevDeps: true })
-  const resolveHook = makeResolveHook({ cwd, resolutions, rootPackageName, canonicalNameMap })
+  const canonicalNameMap = await loadCanonicalNameMap({ rootDir: projectRoot, includeDevDeps: true })
+  const resolveHook = makeResolveHook({ projectRoot, resolutions, rootPackageName, canonicalNameMap })
   const importHook = makeImportHook({ rootPackageName, shouldResolve, isBuiltin, resolveHook, canonicalNameMap })
-  const moduleSpecifier = resolveHook(entryId, `${cwd}/package.json`)
+  const moduleSpecifier = resolveHook(entryId, path.join(projectRoot, `package.json`))
   const inspector = createModuleInspector({ isBuiltin, includeDebugInfo })
   // rich warning output
   inspector.on('compat-warning', displayRichCompatWarning)
   return coreParseForConfig({ moduleSpecifier, importHook, isBuiltin, inspector, policyOverride, ...args })
 }
 
-function makeResolveHook ({ cwd, resolutions = {}, canonicalNameMap }) {
+function makeResolveHook ({ projectRoot, resolutions = {}, canonicalNameMap }) {
   return (requestedName, referrer) => {
     const parentPackageName = getPackageNameForModulePath(canonicalNameMap, referrer)
     // handle resolution overrides
     const result = checkForResolutionOverride(resolutions, parentPackageName, requestedName)
     if (result) {
-      // if path is a relative path, it should be relative to displayRichCompatWarningthe cwd
+      // if path is a relative path, it should be relative to displayRichCompatWarningthe projectRoot
       if (path.isAbsolute(result)) {
         requestedName = result
       } else {
-        requestedName = path.resolve(cwd, result)
+        requestedName = path.resolve(projectRoot, result)
       }
     }
     // utilize node's internal resolution algo

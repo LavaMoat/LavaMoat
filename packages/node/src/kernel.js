@@ -4,7 +4,7 @@ const path = require('path')
 const resolve = require('resolve')
 const { sanitize } = require('htmlescape')
 const { generateKernel, applySourceTransforms } = require('lavamoat-core')
-const { loadCanonicalNameMap, getPackageNameForModulePath } = require('@lavamoat/aa')
+const { getPackageNameForModulePath } = require('@lavamoat/aa')
 const { checkForResolutionOverride } = require('./resolutions')
 const { resolutionOmittedExtensions } = require('./parseForPolicy')
 const { createFreshRealmCompartment } = require('./freshRealmCompartment')
@@ -14,10 +14,9 @@ const nativeRequire = require
 
 module.exports = { createKernel }
 
-async function createKernel ({ cwd, lavamoatPolicy, debugMode }) {
+function createKernel ({ projectRoot, lavamoatPolicy, canonicalNameMap, debugMode }) {
   const { resolutions } = lavamoatPolicy
-  const canonicalNameMap = await loadCanonicalNameMap({ rootDir: cwd, includeDevDeps: true })
-  const getRelativeModuleId = createModuleResolver({ cwd, resolutions, canonicalNameMap })
+  const getRelativeModuleId = createModuleResolver({ projectRoot, resolutions, canonicalNameMap })
   const loadModuleData = createModuleLoader({ canonicalNameMap })
   const kernelSrc = generateKernel({ debugMode })
   const createKernel = evaluateWithSourceUrl('LavaMoat/node/kernel', kernelSrc)
@@ -52,7 +51,7 @@ function prepareModuleInitializerArgs (requireRelativeWithContext, moduleObj, mo
   return [exports, require, module, __filename, __dirname]
 }
 
-function createModuleResolver ({ cwd, resolutions, canonicalNameMap }) {
+function createModuleResolver ({ projectRoot, resolutions, canonicalNameMap }) {
   return function getRelativeModuleId (parentAbsolutePath, requestedName) {
     // handle resolution overrides
     let parentDir = path.dirname(parentAbsolutePath)
@@ -60,9 +59,9 @@ function createModuleResolver ({ cwd, resolutions, canonicalNameMap }) {
     const result = checkForResolutionOverride(resolutions, parentPackageName, requestedName)
     if (result) {
       requestedName = result
-      // if path is a relative path, it should be relative to the cwd
+      // if path is a relative path, it should be relative to the projectRoot
       if (!path.isAbsolute(result)) {
-        parentDir = cwd
+        parentDir = projectRoot
       }
     }
     // resolve normally
