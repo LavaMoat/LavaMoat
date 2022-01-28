@@ -91,7 +91,7 @@ test('generatePolicy - policy ignores global refs when properties are not access
   })
 })
 
-test('generatePolicy - policy ignores global refs accessed with whitelist items', async (t) => {
+test('generatePolicy - policy ignores global refs accessed with allowlist items', async (t) => {
   const scenario = createScenarioFromScaffold({
     defineOne: () => {
       window.Object === Object

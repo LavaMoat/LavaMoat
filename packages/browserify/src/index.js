@@ -49,7 +49,6 @@ function plugin (browserify, pluginOpts) {
           includeDevDeps: true,
           resolve: browserResolve,
         })
-        console.warn(canonicalNameMap)
       }
       return canonicalNameMap
     }

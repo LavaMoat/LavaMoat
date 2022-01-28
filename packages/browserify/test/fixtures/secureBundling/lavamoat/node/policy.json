@@ -228,6 +228,11 @@
         "browserify>readable-stream": true
       }
     },
+    "browserify>glob>once": {
+      "packages": {
+        "browserify>glob>once>wrappy": true
+      }
+    },
     "browserify>glob>path-is-absolute": {
       "globals": {
         "process.platform": true
@@ -517,10 +522,18 @@
         "process.nextTick": true
       },
       "packages": {
+        "duplexify>end-of-stream": true,
         "duplexify>stream-shift": true,
-        "pump>end-of-stream": true,
         "readable-stream": true,
         "through2>inherits": true
+      }
+    },
+    "duplexify>end-of-stream": {
+      "globals": {
+        "process.nextTick": true
+      },
+      "packages": {
+        "browserify>glob>once": true
       }
     },
     "eslint-plugin-ava>espree>acorn": {
@@ -726,19 +739,6 @@
     "merge-deep>kind-of": {
       "packages": {
         "merge-deep>kind-of>is-buffer": true
-      }
-    },
-    "pump>end-of-stream": {
-      "globals": {
-        "process.nextTick": true
-      },
-      "packages": {
-        "pump>once": true
-      }
-    },
-    "pump>once": {
-      "packages": {
-        "pump>once>wrappy": true
       }
     },
     "readable-stream": {
