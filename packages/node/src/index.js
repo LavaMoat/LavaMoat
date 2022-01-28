@@ -54,7 +54,6 @@ async function runLava () {
     // execution mode
     const lavamoatPolicy = await loadPolicy({ debugMode, policyPath })
     const canonicalNameMap = await loadCanonicalNameMap({ rootDir: projectRoot, includeDevDeps: true })
-      console.warn('canonicalNameMap', canonicalNameMap)
       // process.exit(420)
     const kernel = createKernel({ projectRoot, lavamoatPolicy, canonicalNameMap, debugMode })
     // patch process.argv so it matches the normal pattern
