@@ -99,7 +99,7 @@
 
       // parse and validate module data
       const { package: packageName, source: moduleSource } = moduleData
-      if (!packageName) throw new Error(`LavaMoat - invalid packageName for module "${moduleId}"`)
+      if (!packageName) throw new Error(`LavaMoat - missing packageName for module "${moduleId}"`)
       const packagePolicy = getPolicyForPackage(lavamoatConfig, packageName)
 
       // create the moduleObj and initializer
