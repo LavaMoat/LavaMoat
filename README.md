@@ -86,10 +86,7 @@ Runs on [Agoric](https://github.com/agoric/)
 [SesGithub]: https://github.com/Agoric/ses-shim
 [SesComputingGuide]: https://github.com/Agoric/SES-shim/blob/master/packages/ses/docs/secure-coding-guide.md
 
-[CytoplasmGithub]: https://github.com/lavamoat/cytoplasm
-
 [LavamoatNode]: ./packages/node
-[LavamoatWebpack]: ./packages/webpack
 [LavamoatBrowserify]: ./packages/browserify
 [LavamoatViz]: ./packages//viz
 [LavamoatAllowScripts]: ./packages/allow-scripts
