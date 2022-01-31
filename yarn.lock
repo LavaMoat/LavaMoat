@@ -2937,10 +2937,10 @@ before-after-hook@^2.0.0:
   resolved "https://registry.yarnpkg.com/before-after-hook/-/before-after-hook-2.2.2.tgz#a6e8ca41028d90ee2c24222f201c90956091613e"
   integrity sha512-3pZEU3NT5BFUo/AD5ERPWOgQOCZITni6iavr5AUw5AUwQjMlI0kzu5btnyD39AF0gUEsDPwJT+oY1ORBJijPjQ==
 
-"bezier-js@3 - 4":
-  version "4.1.1"
-  resolved "https://registry.yarnpkg.com/bezier-js/-/bezier-js-4.1.1.tgz#414df656833104e86765c0fa5e31439fb3e83a34"
-  integrity sha512-oVOS6SSFFFlfnZdzC+lsfvhs/RRcbxJ47U04M4s5QIBaJmr3YWmTIL3qmrOK9uW+nUUcl9Jccmo/xpTrG+bBoQ==
+"bezier-js@3 - 5":
+  version "5.1.0"
+  resolved "https://registry.yarnpkg.com/bezier-js/-/bezier-js-5.1.0.tgz#49f5f3b2aba543a2be7987bd561b2a75c9b6a164"
+  integrity sha512-VHg016m6DarlJRAg6mcSUN/9czTLhenTyrlO6OqPH3TECq12R+XmBJQq9XQzKW6zGNF+VHV2vq4gTIWDXQXftA==
 
 bify-package-factor@^1.0.7:
   version "1.0.7"
@@ -3529,9 +3529,9 @@ camelcase@^6.2.0:
   integrity sha512-Gmy6FhYlCY7uOElZUSbxo2UCDH8owEk996gkbrpsgGtrJLM3J7jGxl9Ic7Qwwj4ivOE5AWZWRMecDdF7hqGjFA==
 
 caniuse-lite@^1.0.30001286:
-  version "1.0.30001303"
-  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001303.tgz#9b168e4f43ccfc372b86f4bc5a551d9b909c95c9"
-  integrity sha512-/Mqc1oESndUNszJP0kx0UaQU9kEv9nNtJ7Kn8AdA0mNnH8eR1cj0kG+NbNuC1Wq/b21eA8prhKRA3bbkjONegQ==
+  version "1.0.30001304"
+  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001304.tgz#38af55ed3fc8220cb13e35e6e7309c8c65a05559"
+  integrity sha512-bdsfZd6K6ap87AGqSHJP/s1V+U6Z5lyrcbBu3ovbCCf8cSYpwTtGrCBObMpJqwxfTbLW6YTIdbb1jEeTelcpYQ==
 
 canvas-color-tracker@1:
   version "1.1.4"
@@ -5401,9 +5401,9 @@ ejs@^3.1.5:
     jake "^10.6.1"
 
 electron-to-chromium@^1.4.17:
-  version "1.4.57"
-  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.4.57.tgz#2b2766df76ac8dbc0a1d41249bc5684a31849892"
-  integrity sha512-FNC+P5K1n6pF+M0zIK+gFCoXcJhhzDViL3DRIGy2Fv5PohuSES1JHR7T+GlwxSxlzx4yYbsuzCZvHxcBSRCIOw==
+  version "1.4.58"
+  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.4.58.tgz#cd980b08338210b591c25492857a518fe286b1d4"
+  integrity sha512-7LXwnKyqcEaMFVXOer+2JPfFs1D+ej7yRRrfZoIH1YlLQZ81OvBNwSCBBLtExVkoMQQgOWwO0FbZVge6U/8rhQ==
 
 elliptic@^6.5.3:
   version "6.5.4"
@@ -6329,13 +6329,13 @@ for-own@^0.1.3:
     for-in "^1.0.1"
 
 force-graph@^1.42:
-  version "1.42.4"
-  resolved "https://registry.yarnpkg.com/force-graph/-/force-graph-1.42.4.tgz#4be856f043922d455c1c1e04ffec20837b982a60"
-  integrity sha512-IIfgOjrK83BTb77vGmYf0xF/Pr6Bp5Xdtra6Ggk3uvhlTXVWcC+Gj2nR0dMj8N06lXmH/I53bMN1Vp5WQ8iv3A==
+  version "1.42.5"
+  resolved "https://registry.yarnpkg.com/force-graph/-/force-graph-1.42.5.tgz#8b7fbc4cc44d34f797732f8d41c89aa8d02ddd4e"
+  integrity sha512-9ztUPmugh2ZdnwMl9oVgG2tlvs0hmug+vTvwHF0/CH0eP6SfEZxeYAEqpiz7Bm0ynBJym5/fJDwritJadeRMCQ==
   dependencies:
     "@tweenjs/tween.js" "18"
     accessor-fn "1"
-    bezier-js "3 - 4"
+    bezier-js "3 - 5"
     canvas-color-tracker "1"
     d3-array "1 - 3"
     d3-drag "2 - 3"
@@ -9115,7 +9115,7 @@ ngraph.events@^1.0.0, ngraph.events@^1.2.1:
   resolved "https://registry.yarnpkg.com/ngraph.events/-/ngraph.events-1.2.1.tgz#6e40425ef9dec1e074bbef6da56c8d79b9188fd8"
   integrity sha512-D4C+nXH/RFxioGXQdHu8ELDtC6EaCiNsZtih0IvyGN81OZSUby4jXoJ5+RNWasfsd0FnKxxpAROyUMzw64QNsw==
 
-ngraph.forcelayout@^3.1:
+ngraph.forcelayout@^3.3:
   version "3.3.0"
   resolved "https://registry.yarnpkg.com/ngraph.forcelayout/-/ngraph.forcelayout-3.3.0.tgz#d268da24289b0704257121a2351b81292ef8e04e"
   integrity sha512-EWqG8oSEueByuisyFl/c77M0+ts8g+dpNseafXFO71f0PvvZgzQ1zac1yO9CJVK6e94kbkvztgjDX3oQZ/4lVA==
@@ -9124,10 +9124,10 @@ ngraph.forcelayout@^3.1:
     ngraph.merge "^1.0.0"
     ngraph.random "^1.0.0"
 
-ngraph.graph@^19.1:
-  version "19.1.0"
-  resolved "https://registry.yarnpkg.com/ngraph.graph/-/ngraph.graph-19.1.0.tgz#88910ed53f6b4bc374f1b67296f4f81aab814e24"
-  integrity sha512-9cws84qfPkrYa7BaBtT+KgZfLXrd6pNL9Gl5Do+MBO/0Hm6rOM7qK78MZaO1uEoIK6p2pgUs6lu29zn/6tP59w==
+ngraph.graph@^20.0:
+  version "20.0.0"
+  resolved "https://registry.yarnpkg.com/ngraph.graph/-/ngraph.graph-20.0.0.tgz#96dcce92c74405085d6c27a86218f336769b4472"
+  integrity sha512-tJqmik6U5geNDSbmTSwm4R6coTMDbkfFFHD8wdeSJtKU/cxIWFsKtXuwMva/wTk6tQQl1C2//lrzmwfPJXAXHw==
   dependencies:
     ngraph.events "^1.2.1"
 
@@ -10261,7 +10261,7 @@ prop-types-extra@^1.1.0:
     react-is "^16.3.2"
     warning "^4.0.0"
 
-prop-types@^15.6.2, prop-types@^15.7, prop-types@^15.7.2:
+prop-types@^15.6.2, prop-types@^15.7.2, prop-types@^15.8:
   version "15.8.1"
   resolved "https://registry.yarnpkg.com/prop-types/-/prop-types-15.8.1.tgz#67d87bf1a694f48435cf332c24af10214a3140b5"
   integrity sha512-oj87CgZICdulUohogVAR7AjlC0327U4el4L6eAvOqCeudMDVU0NThNaV+b9Df4dXgSP1gXMTnPdhfe/2qDH5cg==
@@ -10535,12 +10535,12 @@ react-dom@^16.8.6:
     scheduler "^0.19.1"
 
 react-force-graph-2d@^1.17.3:
-  version "1.23.8"
-  resolved "https://registry.yarnpkg.com/react-force-graph-2d/-/react-force-graph-2d-1.23.8.tgz#28a6e0d4221f1338f8af896eedd06b73fd23a6f8"
-  integrity sha512-ON0vYxZY1PNoEi5RqGtyl5nmUlln6tbTcWdoLbRd9AEC3wCsaDjOQymF77U6DLRuqhqrjaC0SbjH+rAn9np8Lg==
+  version "1.23.9"
+  resolved "https://registry.yarnpkg.com/react-force-graph-2d/-/react-force-graph-2d-1.23.9.tgz#b71c92d979e19eb3b91a2c8141c83bac8a40cdb7"
+  integrity sha512-DxXw5oiRhFPv2QRGv4P/O+imBZJ7c9pYp1xKJGqB/T1itivb/gII+eZYGClKm4/hbBDOet7SPddUBlI3M7eheg==
   dependencies:
     force-graph "^1.42"
-    prop-types "^15.7"
+    prop-types "^15.8"
     react-kapsule "^2.2"
 
 react-hyperscript@^3.2.0:
@@ -12340,9 +12340,9 @@ thenify-all@^1.0.0:
     any-promise "^1.0.0"
 
 three-forcegraph@^1.36.1:
-  version "1.39.1"
-  resolved "https://registry.yarnpkg.com/three-forcegraph/-/three-forcegraph-1.39.1.tgz#8e4b95d059a43d9c7c03305e0690eb138e6f5550"
-  integrity sha512-IRmp4nAkmuJ84igSRazz05wwgckyjHbrMHBmZlhPw3HbpZMv0V8WtQ5aRE4vuqBdJX2wNexR/RZJu9khg1OhXQ==
+  version "1.39.2"
+  resolved "https://registry.yarnpkg.com/three-forcegraph/-/three-forcegraph-1.39.2.tgz#ea219d5c59a555d2e2cb30b1ccfa88ffb6f6f3e7"
+  integrity sha512-Hm/n56XHaW+RsWnB4+bqBw7jgWVl8M5k9zJqDAZM68/a5AEyAQAAejnr5lqQ7tM4AlCkdUmCYjURBqb+PdW1FA==
   dependencies:
     accessor-fn "1"
     d3-array "1 - 3"
@@ -12351,8 +12351,8 @@ three-forcegraph@^1.36.1:
     d3-scale-chromatic "1 - 3"
     data-joint "^1.2"
     kapsule "^1.13"
-    ngraph.forcelayout "^3.1"
-    ngraph.graph "^19.1"
+    ngraph.forcelayout "^3.3"
+    ngraph.graph "^20.0"
     tinycolor2 "^1.4"
 
 three-spritetext@^1.5.1:
