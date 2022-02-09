@@ -109,7 +109,7 @@ async function prepareBrowserifyScenarioOnDisk ({ scenario }) {
   const { path: projectDir } = await tmp.dir()
   scenario.dir = projectDir
   // install browserify
-  const result = spawnSync('yarn', ['add','-D','browserify@16.2.3'], { cwd: projectDir })
+  const result = spawnSync('yarn', ['add','-D','browserify@17'], { cwd: projectDir })
   if (result.status !== 0) {
     throw new Error(result.stderr.toString())
   }
