@@ -152,12 +152,12 @@
         "browserify>labeled-stream-splicer": true,
         "browserify>module-deps": true,
         "browserify>read-only-stream": true,
-        "browserify>shasum": true,
+        "browserify>shasum-object": true,
         "browserify>syntax-error": true,
+        "browserify>through2": true,
         "depcheck>resolve": true,
         "through2>inherits": true,
         "watchify>defined": true,
-        "watchify>through2": true,
         "watchify>xtend": true
       }
     },
@@ -197,7 +197,7 @@
         "@lavamoat/lavapack>combine-source-map": true,
         "@lavamoat/lavapack>umd": true,
         "browserify>JSONStream": true,
-        "vinyl-buffer>bl>safe-buffer": true,
+        "browserify>util>safe-buffer": true,
         "watchify>defined": true,
         "watchify>through2": true
       }
@@ -224,24 +224,13 @@
     },
     "browserify>deps-sort": {
       "packages": {
-        "browserify>deps-sort>shasum-object": true,
+        "browserify>shasum-object": true,
         "watchify>through2": true
-      }
-    },
-    "browserify>deps-sort>shasum-object": {
-      "builtin": {
-        "crypto.createHash": true
-      },
-      "globals": {
-        "Buffer.isBuffer": true
-      },
-      "packages": {
-        "browserify>deps-sort>shasum-object>fast-safe-stringify": true
       }
     },
     "browserify>duplexer2": {
       "packages": {
-        "browserify>readable-stream": true
+        "vinyl-buffer>bl>readable-stream": true
       }
     },
     "browserify>glob>once": {
@@ -309,8 +298,8 @@
         "setImmediate": true
       },
       "packages": {
-        "browserify>readable-stream": true,
-        "through2>inherits": true
+        "through2>inherits": true,
+        "vinyl-buffer>bl>readable-stream": true
       }
     },
     "browserify>module-deps": {
@@ -333,14 +322,14 @@
       "packages": {
         "browser-resolve": true,
         "browserify>cached-path-relative": true,
-        "browserify>concat-stream": true,
         "browserify>duplexer2": true,
         "browserify>module-deps>detective": true,
         "browserify>module-deps>stream-combiner2": true,
         "browserify>parents": true,
-        "browserify>readable-stream": true,
         "depcheck>resolve": true,
         "through2>inherits": true,
+        "vinyl-buffer>bl>readable-stream": true,
+        "watchify>browserify>concat-stream": true,
         "watchify>defined": true,
         "watchify>through2": true,
         "watchify>xtend": true
@@ -355,7 +344,7 @@
     "browserify>module-deps>stream-combiner2": {
       "packages": {
         "browserify>duplexer2": true,
-        "browserify>readable-stream": true
+        "vinyl-buffer>bl>readable-stream": true
       }
     },
     "browserify>parents": {
@@ -381,7 +370,7 @@
     },
     "browserify>read-only-stream": {
       "packages": {
-        "browserify>readable-stream": true
+        "vinyl-buffer>bl>readable-stream": true
       }
     },
     "browserify>readable-stream": {
@@ -428,23 +417,20 @@
         "browserify>readable-stream>safe-buffer": true
       }
     },
-    "browserify>shasum": {
+    "browserify>shasum-object": {
       "builtin": {
-        "buffer.Buffer.isBuffer": true,
         "crypto.createHash": true
       },
+      "globals": {
+        "Buffer.isBuffer": true
+      },
       "packages": {
-        "browserify>shasum>json-stable-stringify": true
-      }
-    },
-    "browserify>shasum>json-stable-stringify": {
-      "packages": {
-        "json-stable-stringify>jsonify": true
+        "browserify>shasum-object>fast-safe-stringify": true
       }
     },
     "browserify>string_decoder": {
       "packages": {
-        "vinyl-buffer>bl>safe-buffer": true
+        "browserify>util>safe-buffer": true
       }
     },
     "browserify>syntax-error": {
@@ -462,6 +448,23 @@
     "browserify>syntax-error>acorn-node>acorn-walk": {
       "globals": {
         "define": true
+      }
+    },
+    "browserify>through2": {
+      "builtin": {
+        "util.inherits": true
+      },
+      "globals": {
+        "process.nextTick": true
+      },
+      "packages": {
+        "browserify>readable-stream": true,
+        "watchify>xtend": true
+      }
+    },
+    "browserify>util>safe-buffer": {
+      "builtin": {
+        "buffer": true
       }
     },
     "concat-stream": {
@@ -840,9 +843,50 @@
         "util.inherits": true
       }
     },
-    "vinyl-buffer>bl>safe-buffer": {
+    "vinyl-buffer>bl>readable-stream": {
+      "builtin": {
+        "events.EventEmitter": true,
+        "stream": true,
+        "util": true
+      },
+      "globals": {
+        "process.browser": true,
+        "process.env.READABLE_STREAM": true,
+        "process.stderr": true,
+        "process.stdout": true,
+        "process.version.slice": true,
+        "setImmediate": true
+      },
+      "packages": {
+        "browserify>readable-stream>core-util-is": true,
+        "browserify>readable-stream>isarray": true,
+        "browserify>readable-stream>process-nextick-args": true,
+        "readable-stream>util-deprecate": true,
+        "through2>inherits": true,
+        "vinyl-buffer>bl>readable-stream>safe-buffer": true,
+        "vinyl-buffer>bl>readable-stream>string_decoder": true
+      }
+    },
+    "vinyl-buffer>bl>readable-stream>safe-buffer": {
       "builtin": {
         "buffer": true
+      }
+    },
+    "vinyl-buffer>bl>readable-stream>string_decoder": {
+      "packages": {
+        "vinyl-buffer>bl>readable-stream>safe-buffer": true
+      }
+    },
+    "watchify>browserify>concat-stream": {
+      "globals": {
+        "Buffer.concat": true,
+        "Buffer.isBuffer": true
+      },
+      "packages": {
+        "concat-stream>buffer-from": true,
+        "concat-stream>typedarray": true,
+        "through2>inherits": true,
+        "vinyl-buffer>bl>readable-stream": true
       }
     },
     "watchify>through2": {
@@ -853,7 +897,7 @@
         "process.nextTick": true
       },
       "packages": {
-        "browserify>readable-stream": true,
+        "vinyl-buffer>bl>readable-stream": true,
         "watchify>xtend": true
       }
     }
