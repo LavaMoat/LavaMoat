@@ -3,21 +3,21 @@ const mergeDeep = require('merge-deep')
 
 module.exports = { mergePolicy }
 
-function mergePolicy (configA, configB) {
-  const mergedConfig = mergeDeep(configA, configB)
-  Object.values(mergedConfig.resources).forEach((packageConfig) => {
-    if ('globals' in packageConfig) {
-      packageConfig.globals = dedupeConfigPaths(packageConfig.globals)
+function mergePolicy (policyA, policyB) {
+  const mergedPolicy = mergeDeep(policyA, policyB)
+  Object.values(mergedPolicy.resources).forEach((packagePolicy) => {
+    if ('globals' in packagePolicy) {
+      packagePolicy.globals = dedupePolicyPaths(packagePolicy.globals)
     }
-    if ('builtin' in packageConfig) {
-      packageConfig.builtin = dedupeConfigPaths(packageConfig.builtin)
+    if ('builtin' in packagePolicy) {
+      packagePolicy.builtin = dedupePolicyPaths(packagePolicy.builtin)
     }
   })
-  return mergedConfig
+  return mergedPolicy
 }
 
-function dedupeConfigPaths (packageConfig) {
-  const itemMap = objToMap(packageConfig)
+function dedupePolicyPaths (packagePolicy) {
+  const itemMap = objToMap(packagePolicy)
   reduceToTopmostApiCalls(itemMap)
   return mapToObj(itemMap)
 }

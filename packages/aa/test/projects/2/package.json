@@ -1,0 +1,24 @@
+{
+  "name": "2",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "aaa": "^1.0.0",
+    "bbb": "^1.0.0",
+    "good_dep": "^1.0.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "lavamoat": {
+    "allowScripts": {
+      "good_dep": true,
+      "bbb>evil_dep": false
+    }
+  }
+}

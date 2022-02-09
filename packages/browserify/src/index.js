@@ -1,11 +1,14 @@
 const fs = require('fs')
 const path = require('path')
-const { getDefaultPaths, mergePolicy } = require('lavamoat-core')
+const { getDefaultPaths } = require('lavamoat-core')
 const jsonStringify = require('json-stable-stringify')
 const { createModuleInspectorSpy } = require('./createModuleInspectorSpy.js')
 const { createPackageDataStream } = require('./createPackageDataStream.js')
 const createLavaPack = require('@lavamoat/lavapack')
 const { createSesWorkaroundsTransform } = require('./sesTransforms')
+const { loadCanonicalNameMap } = require('@lavamoat/aa')
+const browserResolve = require('browser-resolve')
+
 
 // these are the reccomended arguments for lavaMoat to work well with browserify
 const reccomendedArgs = {
@@ -35,15 +38,38 @@ function plugin (browserify, pluginOpts) {
   setupPlugin()
 
   function setupPlugin () {
+
+    let canonicalNameMap
+    async function getCanonicalNameMap () {
+      if (canonicalNameMap === undefined) {
+        canonicalNameMap = await loadCanonicalNameMap({
+          rootDir: configuration.projectRoot,
+          // need this in order to walk browser builtin deps
+          // TODO: also need to resolve browser style
+          includeDevDeps: true,
+          resolve: browserResolve,
+        })
+      }
+      return canonicalNameMap
+    }
+
     // some workarounds for SES strict parsing and evaluation
     browserify.transform(createSesWorkaroundsTransform(), { global: true })
 
     // inject package name into module data
-    browserify.pipeline.get('emit-deps').unshift(createPackageDataStream())
+    browserify.pipeline.get('emit-deps').unshift(createPackageDataStream({
+      getCanonicalNameMap,
+    }))
 
     // if writeAutoPolicy activated, insert hook
     if (configuration.writeAutoPolicy) {
+      const policyOverride = loadPolicyFile({
+        filepath: configuration.policyPaths.override,
+        tolerateMissing: true
+      })
+      validatePolicy(policyOverride)
       browserify.pipeline.get('emit-deps').push(createModuleInspectorSpy({
+        policyOverride,
         // no builtins in the browser (yet!)
         isBuiltin: () => false,
         // should prepare debug info
@@ -186,26 +212,19 @@ function loadPolicyFile ({ filepath, tolerateMissing }) {
   return policyFile
 }
 
-// lavamoat-core has a "loadPolicy" method but its async
+// TODO: dedupe. lavamoat-core has a "loadPolicy" method but its async
 function loadPolicy (configuration) {
-  let primaryPolicy
+  let policy
   if (configuration.actionOverrides.loadPrimaryPolicy) {
-    primaryPolicy = configuration.actionOverrides.loadPrimaryPolicy()
+    policy = configuration.actionOverrides.loadPrimaryPolicy()
   } else {
-    primaryPolicy = loadPolicyFile({
+    policy = loadPolicyFile({
       filepath: configuration.policyPaths.primary,
       tolerateMissing: configuration.writeAutoPolicy
     })
   }
-  const overridePolicy = loadPolicyFile({
-    filepath: configuration.policyPaths.override,
-    tolerateMissing: true
-  })
-  // validate each policy
-  validatePolicy(primaryPolicy)
-  validatePolicy(overridePolicy)
-  const finalPolicy = mergePolicy(primaryPolicy, overridePolicy)
-  return finalPolicy
+  validatePolicy(policy)
+  return policy
 }
 
 function getPolicyPaths (pluginOpts) {

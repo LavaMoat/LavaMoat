@@ -1,24 +1,32 @@
 const { createModuleInspector } = require('./generatePolicy')
-const { walk } = require('./walk')
+const { eachNodeInTree } = require('./walk')
 
 module.exports = { parseForPolicy }
 
+/**
+ * @function parseForPolicy
+ * @param {object} options
+ * @param {string} options.moduleSpecifier
+ * @param {function} options.isBuiltin
+ * @param {function} options.shouldImport
+ * @param {bool} options.includeDebugInfo
+ * @param {ModuleInspector} options.inspector
+ * @returns {JSON} policy object
+ */
 async function parseForPolicy ({
   moduleSpecifier,
   importHook,
   isBuiltin,
   shouldImport,
   includeDebugInfo,
+  policyOverride,
   inspector = createModuleInspector({ isBuiltin, includeDebugInfo })
 }) {
-  await walk({ moduleSpecifier, importHook, visitorFn, shouldImport })
-  // after all modules, submit config
-  const config = inspector.generatePolicy()
-  // console.log(JSON.stringify(config, null, 2))
-  return config
-
-  function visitorFn (moduleRecord) {
+  for await (const moduleRecord of eachNodeInTree({ moduleSpecifier, importHook, shouldImport })) {
     // inspect each module
     inspector.inspectModule(moduleRecord)
   }
+  // after all modules, submit policy
+  const policy = inspector.generatePolicy({ policyOverride })
+  return policy
 }

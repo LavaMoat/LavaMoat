@@ -13,22 +13,20 @@
     "fromentries": "^1.2.0",
     "json-stable-stringify": "^1.0.1",
     "lavamoat-tofu": "^6.0.0",
-    "merge-deep": "^3.0.2",
-    "resolve": "^1.15.1"
+    "merge-deep": "^3.0.2"
   },
   "devDependencies": {
-    "object.fromentries": "^2.0.2",
-    "tmp-promise": "^3.0.2",
-    "ses": "^0.12.3",
     "eslint-plugin-ava": "^11.0.0",
-    "eslint-plugin-standard": "^5.0.0"
+    "eslint-plugin-standard": "^5.0.0",
+    "object.fromentries": "^2.0.2",
+    "tmp-promise": "^3.0.2"
   },
   "scripts": {
-    "lint": "npm run lint:eslint && npm run lint:deps",
+    "lint": "yarn lint:eslint && yarn lint:deps",
     "lint:eslint": "eslint \"src/**/*.js\" \"test/**/*.js\"",
     "lint:fix": "eslint src/**/*.js test/**/*.js --fix",
     "lint:deps": "depcheck",
-    "test": "ava test/index.js --timeout=2m"
+    "test": "ava --timeout=30s test/index.js"
   },
   "author": "kumavis",
   "license": "MIT",

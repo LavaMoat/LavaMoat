@@ -91,7 +91,7 @@ test('generatePolicy - policy ignores global refs when properties are not access
   })
 })
 
-test('generatePolicy - policy ignores global refs accessed with whitelist items', async (t) => {
+test('generatePolicy - policy ignores global refs accessed with allowlist items', async (t) => {
   const scenario = createScenarioFromScaffold({
     defineOne: () => {
       window.Object === Object
@@ -112,17 +112,32 @@ test('generatePolicy - policy endows "process" properly', async (t) => {
     defineOne: () => {
       const x = process.nextTick
     },
-    defaultPolicy: false
+    defaultPolicy: false,
+    files: {
+      'package.json': {
+        content: `${JSON.stringify({
+          dependencies: {
+            one: '1.0.0',
+            two: '1.0.0',
+            three: '1.0.0',
+          },
+          // must include browserify so we know to find the builtin deps
+          devDependencies: {
+            'browserify': '^16.2.3',
+          }
+        })}`,
+      }
+    }
   })
   const policy = await autoConfigForScenario({ scenario })
   t.deepEqual(policy, {
     resources: {
       one: {
         packages: {
-          process: true
+          'browserify>process': true
         }
       },
-      process: {
+      'browserify>process': {
         globals: {
           clearTimeout: true,
           setTimeout: true

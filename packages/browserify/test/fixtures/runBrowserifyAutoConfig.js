@@ -1,5 +1,5 @@
 const browserify = require('browserify')
-const lavamoatPlugin = require('../../src/index')
+const lavamoatPlugin = require(process.env.PLUGIN_PATH)
 
 browserify([], {
   plugin: [

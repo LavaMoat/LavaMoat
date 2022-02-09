@@ -7,9 +7,8 @@ const gypBuild = require('node-gyp-build')
 const fromEntries = require('object.fromentries')
 const { codeFrameColumns } = require('@babel/code-frame')
 const { default: highlight } = require('@babel/highlight')
+const { loadCanonicalNameMap, getPackageNameForModulePath } = require('@lavamoat/aa')
 const {
-  packageNameFromPath,
-  packageDataForModule,
   parseForPolicy: coreParseForConfig,
   createModuleInspector,
   LavamoatModuleRecord
@@ -48,30 +47,37 @@ const createRequire = (url) => {
   }
 }
 
-module.exports = { parseForPolicy, makeResolveHook, makeImportHook, resolutionOmittedExtensions }
+module.exports = {
+  parseForPolicy,
+  makeResolveHook,
+  makeImportHook,
+  resolutionOmittedExtensions
+}
 
-async function parseForPolicy ({ cwd, entryId, resolutions, rootPackageName, shouldResolve, includeDebugInfo, ...args }) {
+async function parseForPolicy ({ projectRoot, entryId, policyOverride = {}, rootPackageName, shouldResolve, includeDebugInfo, ...args }) {
   const isBuiltin = (id) => builtinPackages.includes(id)
-  const resolveHook = makeResolveHook({ cwd, resolutions, rootPackageName })
-  const importHook = makeImportHook({ rootPackageName, shouldResolve, isBuiltin, resolveHook })
-  const moduleSpecifier = resolveHook(entryId, `${cwd}/package.json`)
+  const { resolutions } = policyOverride  
+  const canonicalNameMap = await loadCanonicalNameMap({ rootDir: projectRoot, includeDevDeps: true })
+  const resolveHook = makeResolveHook({ projectRoot, resolutions, rootPackageName, canonicalNameMap })
+  const importHook = makeImportHook({ rootPackageName, shouldResolve, isBuiltin, resolveHook, canonicalNameMap })
+  const moduleSpecifier = resolveHook(entryId, path.join(projectRoot, `package.json`))
   const inspector = createModuleInspector({ isBuiltin, includeDebugInfo })
   // rich warning output
   inspector.on('compat-warning', displayRichCompatWarning)
-  return coreParseForConfig({ moduleSpecifier, importHook, isBuiltin, inspector, ...args })
+  return coreParseForConfig({ moduleSpecifier, importHook, isBuiltin, inspector, policyOverride, ...args })
 }
 
-function makeResolveHook ({ cwd, resolutions = {}, rootPackageName = '<root>' }) {
+function makeResolveHook ({ projectRoot, resolutions = {}, canonicalNameMap }) {
   return (requestedName, referrer) => {
-    const parentPackageName = packageNameFromPath(referrer) || rootPackageName
+    const parentPackageName = getPackageNameForModulePath(canonicalNameMap, referrer)
     // handle resolution overrides
     const result = checkForResolutionOverride(resolutions, parentPackageName, requestedName)
     if (result) {
-      // if path is a relative path, it should be relative to displayRichCompatWarningthe cwd
+      // if path is a relative path, it should be relative to displayRichCompatWarningthe projectRoot
       if (path.isAbsolute(result)) {
         requestedName = result
       } else {
-        requestedName = path.resolve(cwd, result)
+        requestedName = path.resolve(projectRoot, result)
       }
     }
     // utilize node's internal resolution algo
@@ -95,7 +101,7 @@ function makeImportHook ({
   isBuiltin,
   resolveHook,
   shouldResolve = () => true,
-  rootPackageName = '<root>'
+  canonicalNameMap,
 }) {
   return async (specifier) => {
     // see if its a builtin
@@ -106,16 +112,16 @@ function makeImportHook ({
     // assume specifier is filename
     const filename = specifier
     const extension = path.extname(filename)
-    const packageData = packageDataForModule({ id: specifier, file: filename }, rootPackageName)
+    const packageName = getPackageNameForModulePath(canonicalNameMap, filename)
 
     if (commonjsExtensions.includes(extension)) {
-      return makeJsModuleRecord(specifier, filename, packageData)
+      return makeJsModuleRecord(specifier, filename, packageName)
     }
     if (extension === '.node') {
-      return makeNativeModuleRecord(specifier, filename, packageData)
+      return makeNativeModuleRecord(specifier, filename, packageName)
     }
     if (extension === '.json') {
-      return makeJsonModuleRecord(specifier, filename, packageData)
+      return makeJsonModuleRecord(specifier, filename, packageName)
     }
     throw new Error(`lavamoat-node/makeImportHook - unknown module file extension "${extension}" in filename "${filename}"`)
   }
@@ -126,7 +132,6 @@ function makeImportHook ({
       specifier,
       file: `builtin/${specifier}`,
       packageName: specifier,
-      packageVersion: specifier,
       // special module initializer that directly accesses node's require
       moduleInitializer: (moduleExportsWrapper) => {
         moduleExportsWrapper.exports = require(specifier)
@@ -134,14 +139,12 @@ function makeImportHook ({
     })
   }
 
-  function makeNativeModuleRecord (specifier, filename, packageData) {
-    const { packageName, packageVersion } = packageData
+  function makeNativeModuleRecord (specifier, filename, packageName) {
     return new LavamoatModuleRecord({
       type: 'native',
       specifier,
       file: filename,
       packageName,
-      packageVersion,
       // special module initializer that directly accesses node's require
       moduleInitializer: (moduleExportsWrapper) => {
         moduleExportsWrapper.exports = require(specifier)
@@ -149,8 +152,7 @@ function makeImportHook ({
     })
   }
 
-  async function makeJsModuleRecord (specifier, filename, packageData) {
-    const { packageName, packageVersion } = packageData
+  async function makeJsModuleRecord (specifier, filename, packageName) {
     // load src
     const content = await fs.readFile(filename, 'utf8')
     // parse
@@ -209,15 +211,13 @@ function makeImportHook ({
       specifier,
       file: filename,
       packageName,
-      packageVersion,
       content,
       importMap,
       ast
     })
   }
 
-  async function makeJsonModuleRecord (specifier, filename, packageData) {
-    const { packageName, packageVersion } = packageData
+  async function makeJsonModuleRecord (specifier, filename, packageName) {
     // load src
     const rawContent = await fs.readFile(filename, 'utf8')
     // validate json
@@ -229,7 +229,6 @@ function makeImportHook ({
       specifier,
       file: filename,
       packageName,
-      packageVersion,
       content: cjsContent
     })
   }

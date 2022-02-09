@@ -1,0 +1,28 @@
+{
+  "name": "@lavamoat/aa",
+  "version": "1.0.0",
+  "main": "src/index.js",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "test": "yarn test:run",
+    "test:run": "ava --timeout=30s test/index.js",
+    "lint": "yarn lint:eslint && yarn lint:deps",
+    "lint:eslint": "eslint \"src/**/*.js\"",
+    "lint:fix": "eslint src/**/*.js --fix",
+    "lint:deps": "depcheck"
+  },
+  "devDependencies": {
+    "ava": "^3.15.0"
+  },
+  "dependencies": {
+    "resolve": "^1.20.0"
+  },
+  "description": "LavaMoat's secure package naming convention",
+  "directories": {
+    "test": "test"
+  },
+  "author": "kumavis"
+}

@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "keccak": "1.0.0"
+  },
+  "devDependencies": {
+    "browserify": "*"
+  }
+}

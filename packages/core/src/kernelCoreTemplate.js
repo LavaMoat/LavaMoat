@@ -99,7 +99,7 @@
 
       // parse and validate module data
       const { package: packageName, source: moduleSource } = moduleData
-      if (!packageName) throw new Error(`LavaMoat - invalid packageName for module "${moduleId}"`)
+      if (!packageName) throw new Error(`LavaMoat - missing packageName for module "${moduleId}"`)
       const packagePolicy = getPolicyForPackage(lavamoatConfig, packageName)
 
       // create the moduleObj and initializer
@@ -178,7 +178,7 @@
       if (!parentIsEntryModule && !isSamePackage && !isInParentWhitelist) {
         let typeText = ' '
         if (moduleData.type === 'builtin') typeText = ' node builtin '
-        throw new Error(`LavaMoat - required${typeText}package not in whitelist: package "${parentModulePackageName}" requested "${packageName}" as "${requestedName}"`)
+        throw new Error(`LavaMoat - required${typeText}package not in allowlist: package "${parentModulePackageName}" requested "${packageName}" as "${requestedName}"`)
       }
 
       // create minimal selection if its a builtin and the whole path is not selected for

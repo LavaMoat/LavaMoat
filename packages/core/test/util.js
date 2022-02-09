@@ -1,4 +1,4 @@
-const { parseForPolicy, LavamoatModuleRecord, generateKernel, packageNameFromPath, getDefaultPaths } = require('../src/index.js')
+const { parseForPolicy, LavamoatModuleRecord, generateKernel, getDefaultPaths } = require('../src/index.js')
 const mergeDeep = require('merge-deep')
 const { runInContext, createContext } = require('vm')
 const path = require('path')
@@ -9,7 +9,7 @@ const stringify = require('json-stable-stringify')
 const { applySourceTransforms } = require('../src/sourceTransforms.js')
 
 module.exports = {
-  generateConfigFromFiles,
+  generateConfigFromFiles: generatePolicyFromFiles,
   createScenarioFromScaffold,
   runScenario,
   createConfigForTest,
@@ -23,7 +23,7 @@ module.exports = {
   runAndTestScenario
 }
 
-async function generateConfigFromFiles ({ files, ...opts }) {
+async function generatePolicyFromFiles ({ files, ...opts }) {
   const config = await parseForPolicy({
     moduleSpecifier: files.find(file => file.entry).specifier,
     resolveHook: (requestedName, parentAddress) => {
@@ -119,6 +119,15 @@ function createScenarioFromScaffold ({
       },
       entry: true
     },
+    'package.json': {
+      content: `${JSON.stringify({
+        dependencies: {
+          one: '1.0.0',
+          two: '1.0.0',
+          three: '1.0.0',
+        }
+      })}`,
+    },
     'node_modules/one/index.js': {
       packageName: 'one',
       content: `(${defineOne || _defineOne}).call(this)`,
@@ -127,6 +136,14 @@ function createScenarioFromScaffold ({
         three: 'node_modules/three/index.js'
       }
     },
+    'node_modules/one/package.json': {
+      content: `${JSON.stringify({
+        dependencies: {
+          two: '1.0.0',
+          three: '1.0.0',
+        }
+      })}`,
+    },
     'node_modules/two/index.js': {
       packageName: 'two',
       content: `(${defineTwo || _defineTwo}).call(this)`,
@@ -134,12 +151,26 @@ function createScenarioFromScaffold ({
         three: 'node_modules/three/index.js'
       }
     },
+    'node_modules/two/package.json': {
+      content: `${JSON.stringify({
+        dependencies: {
+          three: '1.0.0',
+        }
+      })}`,
+    },
     'node_modules/three/index.js': {
       packageName: 'three',
       content: `(${defineThree || _defineThree}).call(this)`,
       importMap: {
         one: 'node_modules/one/index.js'
       }
+    },
+    'node_modules/three/package.json': {
+      content: `${JSON.stringify({
+        dependencies: {
+          one: '1.0.0',
+        }
+      })}`,
     },
     ...files
   })
@@ -290,8 +321,10 @@ async function runScenario ({
   return testResult
 }
 
-async function prepareScenarioOnDisk ({ scenario, policyName = 'policies' }) {
-  const { path: projectDir } = await tmp.dir()
+async function prepareScenarioOnDisk ({ scenario, policyName = 'policies', projectDir }) {
+  if (projectDir === undefined) {
+    ({ path: projectDir } = await tmp.dir())
+  }
   const filesToWrite = Object.values(scenario.files)
   if (!scenario.opts.writeAutoPolicy) {
     const defaultPaths = getDefaultPaths(policyName)
@@ -312,12 +345,15 @@ async function prepareScenarioOnDisk ({ scenario, policyName = 'policies' }) {
 }
 
 function fillInFileDetails (files) {
-  Object.entries(files).forEach(([file, moduleRecord]) => {
-    moduleRecord.file = moduleRecord.file || file
-    moduleRecord.specifier = moduleRecord.file || file
-    moduleRecord.packageName = moduleRecord.packageName || packageNameFromPath(file) || '<root>'
-    moduleRecord.type = moduleRecord.type || 'js'
-    moduleRecord.entry = Boolean(moduleRecord.entry)
+  Object.entries(files).forEach(([file, fileObj]) => {
+    fileObj.file = fileObj.file || file
+    if (path.extname(file) === '.js') {
+      // parse as LavamoatModuleRecord
+      fileObj.specifier = fileObj.file || file
+      fileObj.packageName = fileObj.packageName
+      fileObj.type = fileObj.type || 'js'
+      fileObj.entry = Boolean(fileObj.entry)
+    }
   })
   return files
 }
@@ -390,14 +426,14 @@ async function createConfigForTest (testFn, opts = {}) {
     importMap: {},
     content: `(${testFn})()`
   }]
-  const config = await generateConfigFromFiles({ files, ...opts })
-  return config
+  const policy = await generatePolicyFromFiles({ files, ...opts })
+  return policy
 }
 
 async function autoConfigForScenario ({ scenario, opts = {} }) {
   const files = Object.values(scenario.files)
-  const config = await generateConfigFromFiles({ files, ...opts })
-  scenario.config = config
+  const policy = await generatePolicyFromFiles({ files, ...opts })
+  scenario.config = policy
 }
 
 function convertOptsToArgs ({ scenario }) {

@@ -19,7 +19,7 @@ test('envConfig - intrinsic prototype mutating package running in unfrozen realm
     expectedResult: {
       two: 'Hello'
     },
-    configOverride: {
+    config: {
       resources: {
         two: {
           env: 'unfrozen'
@@ -54,7 +54,7 @@ test('envConfig - module.exports from the same Realm as its Compartment', async 
       two: true,
       cross: false
     },
-    configOverride: {
+    config: {
       resources: {
         two: {
           env: 'unfrozen'

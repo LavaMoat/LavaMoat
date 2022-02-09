@@ -1,6 +1,8 @@
 ignores:
   # monorepo deps
   - "ava"
+  # tests - used in tests
+  - "keccak"
   # tests - fake packages
   - "banana"
   - "two"

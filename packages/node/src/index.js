@@ -6,6 +6,7 @@ const fs = require('fs')
 const yargs = require('yargs')
 const jsonStringify = require('json-stable-stringify')
 const { loadPolicy, getDefaultPaths } = require('lavamoat-core')
+const { loadCanonicalNameMap } = require('@lavamoat/aa')
 const { parseForPolicy } = require('./parseForPolicy')
 const { createKernel } = require('./kernel')
 
@@ -17,27 +18,25 @@ runLava().catch(err => {
 
 async function runLava () {
   const {
-    entryPath,
+    entryPath: entryId,
     writeAutoPolicy,
     writeAutoPolicyDebug,
     writeAutoPolicyAndRun,
     policyPath,
     policyDebugPath,
     policyOverridePath,
+    projectRoot,
     debugMode
   } = parseArgs()
-  const cwd = process.cwd()
-  const entryId = path.resolve(cwd, entryPath)
-
   const shouldParseApplication = writeAutoPolicy || writeAutoPolicyDebug || writeAutoPolicyAndRun
   const shouldRunApplication = (!writeAutoPolicy && !writeAutoPolicyDebug) || writeAutoPolicyAndRun
 
   if (shouldParseApplication) {
     // parse mode
     const includeDebugInfo = Boolean(writeAutoPolicyDebug)
-    const { resolutions } = await loadPolicy({ debugMode, policyPath, policyOverridePath })
+    const policyOverride= await loadPolicy({ debugMode, policyPath: policyOverridePath })
     console.warn(`LavaMoat generating policy from entry "${entryId}"...`)
-    const policy = await parseForPolicy({ cwd, entryId, resolutions, includeDebugInfo })
+    const policy = await parseForPolicy({ projectRoot, entryId, policyOverride, includeDebugInfo })
     // write policy debug file
     if (includeDebugInfo) {
       fs.mkdirSync(path.dirname(policyDebugPath), { recursive: true })
@@ -53,8 +52,10 @@ async function runLava () {
   }
   if (shouldRunApplication) {
     // execution mode
-    const lavamoatConfig = await loadPolicy({ debugMode, policyPath, policyOverridePath })
-    const kernel = createKernel({ cwd, lavamoatConfig, debugMode })
+    const lavamoatPolicy = await loadPolicy({ debugMode, policyPath })
+    const canonicalNameMap = await loadCanonicalNameMap({ rootDir: projectRoot, includeDevDeps: true })
+      // process.exit(420)
+    const kernel = createKernel({ projectRoot, lavamoatPolicy, canonicalNameMap, debugMode })
     // patch process.argv so it matches the normal pattern
     // e.g. [runtime path, entrypoint, ...args]
     // we'll use the LavaMoat path as the runtime
@@ -123,14 +124,22 @@ function parseArgs () {
         type: 'boolean',
         default: false
       })
+      // parsing mode, write policy debug info to specified or default path
+      yargs.option('projectRoot', {
+        describe: 'specify the director from where packages should be resolved',
+        type: 'string',
+        default: process.cwd()
+      })
     })
     .help()
 
   const parsedArgs = argsParser.parse()
   // resolve paths
+  parsedArgs.entryPath = path.resolve(parsedArgs.entryPath)
   parsedArgs.policyPath = path.resolve(parsedArgs.policyPath)
   parsedArgs.policyOverridePath = path.resolve(parsedArgs.policyOverridePath)
   parsedArgs.policyDebugPath = path.resolve(parsedArgs.policyDebugPath)
+  parsedArgs.projectRoot = path.resolve(parsedArgs.projectRoot)
 
   return parsedArgs
 }

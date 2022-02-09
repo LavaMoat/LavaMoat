@@ -2,3 +2,5 @@
 # yarn lockfile v1
 
 
+"a@file:./fake_node_modules/a":
+  version "1.0.0"
