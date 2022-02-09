@@ -111,7 +111,8 @@ async function prepareBrowserifyScenarioOnDisk ({ scenario }) {
   // install browserify
   const result = spawnSync('yarn', ['add','-D','browserify@17'], { cwd: projectDir })
   if (result.status !== 0) {
-    throw new Error(result.stderr.toString())
+    const msg = `Error while installing browserify:\n${result.stderr.toString()}`
+    throw new Error(msg)
   }
   // copy scenario files
   const { policyDir } = await prepareScenarioOnDisk({ scenario, projectDir, policyName: 'browserify' })
