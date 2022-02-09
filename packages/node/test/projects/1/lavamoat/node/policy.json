@@ -8,7 +8,7 @@
   "resources": {
     "a": {
       "packages": {
-        "<root>": true
+        "$root$": true
       }
     }
   }

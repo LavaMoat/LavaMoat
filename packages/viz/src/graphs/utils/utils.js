@@ -57,7 +57,7 @@ function parseConfigDebugForPackages (policyName, configDebugData, configFinal) 
       packageData.modules = []
       packageData.type = moduleRecord.type
       packageData.size = 0
-      const isRootPackage = packageNameAndVersion === '<root>'
+      const isRootPackage = packageNameAndVersion === '$root$'
       packageData.isRoot = isRootPackage
       packageData.config = resources[packageData.name] || {}
     }

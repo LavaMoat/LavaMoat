@@ -47,7 +47,7 @@ async function loadCanonicalNameMap ({ rootDir, includeDevDeps, resolve } = {}) 
     canonicalNameMap.set(packageDir, shortestLogicalPathString)
   }
   // add root dir as "app"
-  canonicalNameMap.set(rootDir, '<root>')
+  canonicalNameMap.set(rootDir, '$root$')
   Reflect.defineProperty(canonicalNameMap, 'rootDir', { value: rootDir })
   return canonicalNameMap
 }

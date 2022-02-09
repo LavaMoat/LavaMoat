@@ -12,7 +12,7 @@ const {
 } = require('lavamoat-tofu')
 const { mergePolicy } = require('./mergePolicy')
 
-const rootSlug = '<root>'
+const rootSlug = '$root$'
 
 module.exports = { rootSlug, createModuleInspector, getDefaultPaths }
 

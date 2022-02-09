@@ -64,7 +64,7 @@ test('globalRef - ensure endowments are accessible on globals', async (t) => {
     },
     config: {
       resources: {
-        '<root>': {
+        '$root$': {
           packages: {
             one: true
           }

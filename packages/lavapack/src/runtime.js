@@ -10853,7 +10853,7 @@ function makePrepareRealmGlobalFromConfig ({ createFunctionWrapper }) {
     const packageCompartmentCache = new Map()
     const globalStore = new Map()
 
-    const rootPackageName = '<root>'
+    const rootPackageName = '$root$'
     const rootPackageCompartment = createRootPackageCompartment(globalRef)
 
     return {

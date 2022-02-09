@@ -22,7 +22,7 @@ test('project 1', async t => {
     ],
     [
       'projects/1',
-      '<root>',
+      '$root$',
     ],
   ])
 })
@@ -51,7 +51,7 @@ test('project 2', async t => {
     ],
     [
       'projects/2',
-      '<root>',
+      '$root$',
     ],
   ])
 })
@@ -80,7 +80,7 @@ test('project 3', async t => {
     ],
     [
       'projects/3',
-      '<root>',
+      '$root$',
     ],
   ])
 })

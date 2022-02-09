@@ -111,7 +111,7 @@ function createScenarioFromScaffold ({
   const _files = fillInFileDetails({
     'entry.js': {
       content: `(${defineEntry || _defineEntry}).call(this)`,
-      packageName: '<root>',
+      packageName: '$root$',
       importMap: {
         one: 'node_modules/one/index.js',
         two: 'node_modules/two/index.js',
@@ -409,7 +409,7 @@ async function createConfigForTest (testFn, opts = {}) {
     type: 'js',
     specifier: './entry.js',
     file: './entry.js',
-    packageName: '<root>',
+    packageName: '$root$',
     packageVersion: '0.0.0',
     importMap: {
       test: './node_modules/test/index.js'
