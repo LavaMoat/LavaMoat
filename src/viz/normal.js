@@ -3,7 +3,7 @@
 // const h = require('react-hyperscript')
 const s = require('react-hyperscript')
 
-const renderBaseGraph = require('./base')
+const renderBaseGraph = require('./base.js')
 
 module.exports = renderGraph
 

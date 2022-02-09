@@ -1,5 +1,5 @@
 const d3 = require('d3')
-const forceBoundry2 = require('./forceBoundry').default
+const forceBoundry2 = require('./forceBoundry.js').default
 
 module.exports = { setupSimulation, setupSimulationForces }
 
