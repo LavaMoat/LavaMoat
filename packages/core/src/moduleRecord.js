@@ -5,7 +5,6 @@ class LavamoatModuleRecord {
     file,
     type,
     packageName,
-    packageVersion,
     content,
     importMap = {},
     ast,
@@ -15,7 +14,6 @@ class LavamoatModuleRecord {
     this.file = file
     this.type = type
     this.packageName = packageName
-    this.packageVersion = packageVersion
     this.content = content
     this.importMap = importMap
     this.ast = ast

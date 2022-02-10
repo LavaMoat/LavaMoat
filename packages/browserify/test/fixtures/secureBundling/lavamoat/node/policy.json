@@ -23,9 +23,6 @@
         "path.join": true,
         "path.relative": true
       },
-      "globals": {
-        "console.warn": true
-      },
       "packages": {
         "depcheck>resolve": true
       }

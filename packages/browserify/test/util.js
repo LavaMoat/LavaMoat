@@ -7,7 +7,7 @@ const mergeDeep = require('merge-deep')
 const watchify = require('watchify')
 const lavamoatPlugin = require('../src/index')
 const { verifySourceMaps } = require('./sourcemaps')
-const { prepareScenarioOnDisk, evaluateWithSourceUrl, createHookedConsole } = require('lavamoat-core/test/util.js')
+const { createScenarioFromScaffold, prepareScenarioOnDisk, evaluateWithSourceUrl, createHookedConsole } = require('lavamoat-core/test/util.js')
 const util = require('util')
 const tmp = require('tmp-promise')
 const { spawnSync } = require('child_process')
@@ -23,7 +23,8 @@ module.exports = {
   autoConfigForScenario,
   runBrowserify,
   bundleAsync,
-  prepareBrowserifyScenarioOnDisk
+  prepareBrowserifyScenarioOnDisk,
+  createBrowserifyScenarioFromScaffold
 }
 
 async function createBundleFromEntry (path, pluginOpts = {}) {
@@ -143,6 +144,7 @@ async function createBundleForScenario ({
   if (stderr.length) {
     console.warn(stderr)
   }
+  console.warn(`wrote test project to "${scenario.dir}"`)
   return { bundleForScenario: bundle, policyDir: policy }
 }
 
@@ -157,6 +159,7 @@ async function runScenario ({
       bundleWithPrecompiledModules: runWithPrecompiledModules,
     })
     bundle = bundleForScenario
+    await fs.writeFile(path.join(scenario.dir, 'bundle.js'), bundle)
   }
   // dont validate factored bundles
   if (scenario.type !== 'factor') {
@@ -166,4 +169,16 @@ async function runScenario ({
   evaluateWithSourceUrl('testBundlejs', bundle, mergeDeep({ console: hookedConsole }, scenario.context))
   const testResult = await firstLogEventPromise
   return testResult
+}
+
+function createBrowserifyScenarioFromScaffold (...args) {
+  const scenario = createScenarioFromScaffold(...args)
+  // ammend scenario to list browserify as a dependency
+  const packageJsonFileObject = scenario.files['package.json']
+  const packageJsonFileContentObj = JSON.parse(packageJsonFileObject.content)
+  if (!packageJsonFileContentObj.devDependencies['browserify']) {
+    packageJsonFileContentObj.devDependencies['browserify'] = '*'
+  }
+  packageJsonFileObject.content = JSON.stringify(packageJsonFileContentObj, null, 2)
+  return scenario
 }

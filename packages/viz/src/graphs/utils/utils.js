@@ -45,19 +45,18 @@ function parseConfigDebugForPackages (policyName, configDebugData, configFinal) 
   // aggregate info under package name
   Object.entries(debugInfo).forEach(([_, moduleDebugInfo]) => {
     const { moduleRecord } = moduleDebugInfo
-    const packageNameAndVersion = getPackageVersionName(moduleRecord)
-    let packageData = packages[packageNameAndVersion]
+    const packageId = moduleRecord.packageName
+    let packageData = packages[packageId]
     // if first moduleRecord in package, initialize with moduleRecord
     if (!packageData) {
       packageData = {}
-      packages[packageNameAndVersion] = packageData
-      packageData.name = moduleRecord.packageName
-      packageData.id = packageNameAndVersion
+      packages[packageId] = packageData
+      packageData.id = packageId
       packageData.importMap = {}
       packageData.modules = []
       packageData.type = moduleRecord.type
       packageData.size = 0
-      const isRootPackage = packageNameAndVersion === '$root$'
+      const isRootPackage = packageId === '$root$'
       packageData.isRoot = isRootPackage
       packageData.config = resources[packageData.name] || {}
     }
@@ -77,7 +76,7 @@ function parseConfigDebugForPackages (policyName, configDebugData, configFinal) 
         // console.warn(`dep is external module ${childId}`)
         return
       }
-      packageData.importMap[childId] = getPackageVersionName(childModuleData)
+      packageData.importMap[childId] = childModuleData.packageName
     })
   })
   // modify danger rank
@@ -241,14 +240,6 @@ function sortByDangerRank (data) {
   return Object.values(data).sort((a, b) => b.dangerRank - a.dangerRank)
 }
 
-function getPackageVersionName (moduleRecord) {
-  const { packageName, packageVersion } = moduleRecord
-  if (packageVersion) {
-    return `${packageName}@${packageVersion}`
-  }
-  return packageName
-}
-
 function createLink (params) {
   const { source, target } = params
   const link = {
@@ -329,7 +320,6 @@ export {
   getDangerRankForModule,
   getDangerRankForPackage,
   getColorForRank,
-  getPackageVersionName,
   fullModuleNameFromPath,
   getLineNumbersForGlobals,
   sortByDangerRank,

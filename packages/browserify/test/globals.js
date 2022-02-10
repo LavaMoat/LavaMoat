@@ -1,16 +1,16 @@
 const test = require('ava')
 const {
-  runScenario
+  runScenario,
+  createBrowserifyScenarioFromScaffold
 } = require('./util')
 const {
-  createScenarioFromScaffold,
   runAndTestScenario
-} = require('lavamoat-core/test/util')
+} = require('lavamoat-core/test/util.js')
 
 // TODO: this should be resolving to a browserify dependency
 // eslint-disable-next-line ava/no-skip-test
-test.skip('globals - process is properly injected', async (t) => {
-  const scenario = createScenarioFromScaffold({
+test('globals - process is properly injected', async (t) => {
+  const scenario = createBrowserifyScenarioFromScaffold({
     defineOne: () => {
       module.exports = process.browser
     },
