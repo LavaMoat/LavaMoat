@@ -1,8 +1,8 @@
 ;(function(){
 
   const moduleRegistry = new Map()
-  const moduleCache = new Map()
   const lavamoatPolicy = { resources: {} }
+  const debugMode = false
 
   // initialize the kernel
   const createKernel = // LavaMoat Prelude
@@ -10856,9 +10856,15 @@ function makePrepareRealmGlobalFromConfig ({ createFunctionWrapper }) {
     const rootPackageName = '$root$'
     const rootPackageCompartment = createRootPackageCompartment(globalRef)
 
-    return {
+    const kernel = {
       internalRequire
     }
+    if (debugMode) {
+      kernel._getPolicyForPackage = getPolicyForPackage
+      kernel._getCompartmentForPackage = getCompartmentForPackage
+    }
+    Object.freeze(kernel)
+    return kernel
 
     // this function instantiaties a module from a moduleId.
     // 1. loads the module metadata and policy
@@ -11199,14 +11205,16 @@ function makePrepareRealmGlobalFromConfig ({ createFunctionWrapper }) {
   }
 })()
 
-  const { internalRequire } = createKernel({
+  const kernel = createKernel({
     runWithPrecompiledModules: true,
     lavamoatConfig: lavamoatPolicy,
     loadModuleData,
     getRelativeModuleId,
     prepareModuleInitializerArgs,
     globalThisRefs: ['window', 'self', 'global', 'globalThis'],
+    debugMode,
   })
+  const { internalRequire } = kernel
 
   function loadModuleData (moduleId) {
     if (!moduleRegistry.has(moduleId)) {
@@ -11232,13 +11240,17 @@ function makePrepareRealmGlobalFromConfig ({ createFunctionWrapper }) {
   }
 
   // create a lavamoat pulic API for loading modules over multiple files
-  const LavaPack = Object.freeze({
+  const LavaPack = {
     loadPolicy: Object.freeze(loadPolicy),
     loadBundle: Object.freeze(loadBundle),
     runModule: Object.freeze(runModule),
-  })
+  }
+  // in debug mode, expose the kernel on the LavaPack API
+  if (debugMode) {
+    LavaPack._kernel = kernel
+  }
 
-  globalThis.LavaPack = LavaPack
+  globalThis.LavaPack = Object.freeze(LavaPack)
 
   // it is called by the policy loader or modules collection
   function loadPolicy (bundlePolicy) {

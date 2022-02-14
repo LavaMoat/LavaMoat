@@ -69,9 +69,15 @@
     const rootPackageName = '$root$'
     const rootPackageCompartment = createRootPackageCompartment(globalRef)
 
-    return {
+    const kernel = {
       internalRequire
     }
+    if (debugMode) {
+      kernel._getPolicyForPackage = getPolicyForPackage
+      kernel._getCompartmentForPackage = getCompartmentForPackage
+    }
+    Object.freeze(kernel)
+    return kernel
 
     // this function instantiaties a module from a moduleId.
     // 1. loads the module metadata and policy
