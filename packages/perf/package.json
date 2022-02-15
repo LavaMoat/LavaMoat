@@ -4,12 +4,12 @@
   "version": "0.0.0",
   "scripts": {
     "serve": "serve .",
-    "start": "yarn run start:wallet && yarn run start:localOnly && yarn run start:requireLoop && yarn run start:secp256k1 && yarn run start:newBN",
-    "start:wallet": "(cd trials/wallet && yarn && yarn start)",
-    "start:localOnly": "(cd trials/localOnly && yarn && yarn start)",
-    "start:requireLoop": "(cd trials/requireLoop && yarn && yarn start)",
-    "start:secp256k1": "(cd trials/secp256k1-mixedAdd && yarn && yarn start)",
-    "start:newBN": "(cd trials/secp256k1-newBN && yarn && yarn start)"
+    "start": "npm run run start:wallet && npm run run start:localOnly && npm run run start:requireLoop && npm run run start:secp256k1 && npm run run start:newBN",
+    "start:wallet": "(cd trials/wallet && npm run && npm run start)",
+    "start:localOnly": "(cd trials/localOnly && npm run && npm run start)",
+    "start:requireLoop": "(cd trials/requireLoop && npm run && npm run start)",
+    "start:secp256k1": "(cd trials/secp256k1-mixedAdd && npm run && npm run start)",
+    "start:newBN": "(cd trials/secp256k1-newBN && npm run && npm run start)"
   },
   "repository": {
     "type": "git",

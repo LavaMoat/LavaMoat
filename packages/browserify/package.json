@@ -44,7 +44,7 @@
   "scripts": {
     "test": "ava --timeout 2m",
     "test:prep": "(cd './test/fixtures/secureBundling' && WRITE_AUTO_POLICY=1 ./run.sh)",
-    "lint": "yarn lint:eslint && yarn lint:deps",
+    "lint": "npm run lint:eslint && npm run lint:deps",
     "lint:eslint": "eslint \"src/**/*.js\" \"test/**/*.js\"",
     "lint:fix": "eslint src/**/*.js test/**/*.js --fix",
     "lint:deps": "depcheck",

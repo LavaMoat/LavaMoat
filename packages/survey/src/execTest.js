@@ -38,12 +38,12 @@ async function prepareRepo ({ projectDir, gitRepo, gitRef }) {
 }
 
 async function installDependencies ({ projectDir }) {
-  const { stdout, stderr } = await exec(`yarn install`, { cwd: projectDir })
+  const { stdout, stderr } = await exec(`npm install`, { cwd: projectDir })
   console.log(`deps installed`)
 }
 
 async function runPlainTests ({ projectDir }) {
-  const { stdout, stderr } = await exec(`yarn run test`, { cwd: projectDir })
+  const { stdout, stderr } = await exec(`npm run test`, { cwd: projectDir })
   console.log(`tests passed directly`)
 }
 

@@ -8,7 +8,7 @@ const tasks = {
     run: 'node entry.js',
   },
   'bify': {
-    prep: 'yarn build:unsafe',
+    prep: 'npm run build:unsafe',
     run: 'node bundle.js',
   },
   'bify+ses': {
@@ -16,11 +16,11 @@ const tasks = {
     run: `node -p "require('ses').makeSESRootRealm().evaluate(require('fs').readFileSync('./bundle.js','utf8'), { global })"`,
   },
   'bify+lavamoat': {
-    prep: 'yarn build',
+    prep: 'npm run build',
     run: 'node bundle.js',
   },
   // 'bify+lavamoat w/ harden': {
-  //   prep: 'yarn build:harden',
+  //   prep: 'npm run build:harden',
   //   run: 'node bundle.js',
   // },
 }

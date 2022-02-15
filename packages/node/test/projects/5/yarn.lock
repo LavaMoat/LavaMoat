@@ -3,4 +3,5 @@
 
 
 "a@file:./fake_node_modules/a":
-  version "1.0.0"
+  "resolved" "file:fake_node_modules/a"
+  "version" "1.0.0"

@@ -14,8 +14,8 @@
     "postinstall-postinstall": "^2.1.0"
   },
   "scripts": {
-    "setup": "yarn install && patch-package",
-    "start": "echo 'node: yarn start:node\nlavamoat: yarn start:lavamoat\ncustom: yarn start:lavamoat'",
+    "setup": "npm install && patch-package",
+    "start": "echo 'node: npm run start:node\nlavamoat: npm run start:lavamoat\ncustom: npm run start:lavamoat'",
     "start:node": "node index.js",
     "start:lavamoat": "lavamoat index.js",
     "start:lavamoat-override": "lavamoat index.js --overrideConfig manual-override.json"
