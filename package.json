@@ -3,24 +3,22 @@
   "private": true,
   "devDependencies": {
     "ava": "^4.0.1",
-    "depcheck": "^1.4.0",
-    "eslint": "^7.22.0",
+    "depcheck": "^1.4.3",
+    "eslint": "^7.32.0",
     "eslint-plugin-ava": "^11.0.0",
     "eslint-plugin-standard": "^5.0.0",
-    "lerna": "^3.22.1",
     "tap-spec": "^5.0.0"
   },
   "engines": {
     "node": ">=12.16.1"
   },
   "scripts": {
-    "test": "lerna run test",
-    "test:prep": "lerna run test:prep",
-    "lint": "lerna run lint",
-    "lint:fix": "lerna run lint:fix",
-    "build": "lerna run build",
-    "publish": "lerna publish from-package --no-push --no-git-tag-version --yes",
-    "setup": "lerna bootstrap && yarn allow-scripts"
+    "test": "pnpm run test --recursive --if-present",
+    "test:prep": "pnpm run test:prep --recursive --if-present",
+    "lint": "pnpm run lint --recursive --if-present",
+    "lint:fix": "pnpm run lint:fix --recursive --if-present",
+    "build": "pnpm run build --recursive --if-present",
+    "setup": "pnpm run allow-scripts --recursive --if-present"
   },
   "workspaces": [
     "packages/*"

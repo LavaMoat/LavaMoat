@@ -13,7 +13,7 @@
       "packages": {
         "@babel/code-frame>@babel/highlight>@babel/helper-validator-identifier": true,
         "@babel/code-frame>@babel/highlight>js-tokens": true,
-        "source-map-explorer>ejs>jake>chalk": true
+        "eslint>chalk": true
       }
     },
     "@lavamoat/aa": {
@@ -502,15 +502,15 @@
       },
       "packages": {
         "@babel/code-frame": true,
+        "depcheck>@babel/parser": true,
         "depcheck>@babel/traverse>@babel/generator": true,
         "depcheck>@babel/traverse>@babel/helper-environment-visitor": true,
         "depcheck>@babel/traverse>@babel/helper-function-name": true,
         "depcheck>@babel/traverse>@babel/helper-hoist-variables": true,
         "depcheck>@babel/traverse>@babel/helper-split-export-declaration": true,
-        "depcheck>@babel/traverse>@babel/parser": true,
         "depcheck>@babel/traverse>@babel/types": true,
-        "depcheck>@babel/traverse>globals": true,
-        "eslint>debug": true
+        "eslint>debug": true,
+        "eslint>globals": true
       }
     },
     "depcheck>@babel/traverse>@babel/generator": {
@@ -548,7 +548,7 @@
     "depcheck>@babel/traverse>@babel/helper-function-name>@babel/template": {
       "packages": {
         "@babel/code-frame": true,
-        "depcheck>@babel/traverse>@babel/parser": true,
+        "depcheck>@babel/parser": true,
         "depcheck>@babel/traverse>@babel/types": true
       }
     },
@@ -639,6 +639,47 @@
         "browserify>glob>once": true
       }
     },
+    "eslint>chalk": {
+      "globals": {
+        "process.env.TERM": true,
+        "process.platform": true
+      },
+      "packages": {
+        "eslint>chalk>ansi-styles": true,
+        "eslint>chalk>supports-color": true,
+        "eslint>escape-string-regexp": true
+      }
+    },
+    "eslint>chalk>ansi-styles": {
+      "packages": {
+        "eslint>chalk>ansi-styles>color-convert": true
+      }
+    },
+    "eslint>chalk>ansi-styles>color-convert": {
+      "packages": {
+        "eslint>chalk>ansi-styles>color-convert>color-name": true
+      }
+    },
+    "eslint>chalk>supports-color": {
+      "builtin": {
+        "os.release": true
+      },
+      "globals": {
+        "process.env": true,
+        "process.platform": true,
+        "process.stderr": true,
+        "process.stdout": true,
+        "process.versions.node.split": true
+      },
+      "packages": {
+        "eslint>chalk>supports-color>has-flag": true
+      }
+    },
+    "eslint>chalk>supports-color>has-flag": {
+      "globals": {
+        "process.argv": true
+      }
+    },
     "eslint>debug": {
       "builtin": {
         "tty.isatty": true,
@@ -654,8 +695,8 @@
         "process": true
       },
       "packages": {
-        "eslint>debug>ms": true,
-        "source-map-explorer>ejs>jake>chalk>supports-color": true
+        "eslint>chalk>supports-color": true,
+        "eslint>debug>ms": true
       }
     },
     "eslint>espree>acorn": {
@@ -693,8 +734,8 @@
         "console.log": true
       },
       "packages": {
-        "depcheck>@babel/traverse": true,
-        "depcheck>@babel/traverse>@babel/parser": true
+        "depcheck>@babel/parser": true,
+        "depcheck>@babel/traverse": true
       }
     },
     "merge-deep": {
@@ -783,47 +824,6 @@
     "readable-stream>util-deprecate": {
       "builtin": {
         "util.deprecate": true
-      }
-    },
-    "source-map-explorer>ejs>jake>chalk": {
-      "globals": {
-        "process.env.TERM": true,
-        "process.platform": true
-      },
-      "packages": {
-        "source-map-explorer>ejs>jake>chalk>ansi-styles": true,
-        "source-map-explorer>ejs>jake>chalk>escape-string-regexp": true,
-        "source-map-explorer>ejs>jake>chalk>supports-color": true
-      }
-    },
-    "source-map-explorer>ejs>jake>chalk>ansi-styles": {
-      "packages": {
-        "source-map-explorer>ejs>jake>chalk>ansi-styles>color-convert": true
-      }
-    },
-    "source-map-explorer>ejs>jake>chalk>ansi-styles>color-convert": {
-      "packages": {
-        "source-map-explorer>ejs>jake>chalk>ansi-styles>color-convert>color-name": true
-      }
-    },
-    "source-map-explorer>ejs>jake>chalk>supports-color": {
-      "builtin": {
-        "os.release": true
-      },
-      "globals": {
-        "process.env": true,
-        "process.platform": true,
-        "process.stderr": true,
-        "process.stdout": true,
-        "process.versions.node.split": true
-      },
-      "packages": {
-        "source-map-explorer>ejs>jake>chalk>supports-color>has-flag": true
-      }
-    },
-    "source-map-explorer>ejs>jake>chalk>supports-color>has-flag": {
-      "globals": {
-        "process.argv": true
       }
     },
     "through2": {

@@ -9,11 +9,7 @@ test('cli - auto command', async (t) => {
   let projectRoot = path.join(__dirname, 'projects', '1')
 
   // delete any existing package.json
-  fs.unlink(path.join(projectRoot, 'package.json'), err => {
-    if (err && err.code !== 'ENOENT') {
-      throw err
-    }
-  })
+  fs.rmSync(path.join(projectRoot, 'package.json'), { force: true })
 
   // npm init -y
   spawnSync('npm', ['init', '-y'], {cwd: projectRoot})
@@ -27,6 +23,8 @@ test('cli - auto command', async (t) => {
 
   // assert its contents
   t.deepEqual(packageJsonContents.lavamoat, {allowScripts: {'bbb>evil_dep': false}})
+
+  fs.rmSync(path.join(projectRoot, 'package.json'), { force: true })
 })
 
 test('cli - run command - good dep at the root', async (t) => {
