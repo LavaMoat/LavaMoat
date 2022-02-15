@@ -124,6 +124,7 @@ async function prepareBrowserifyScenarioOnDisk ({ scenario }) {
     )
     runBrowserifyPath = `${__dirname}/fixtures/runBrowserifyBundleFactor.js`
   }
+  spawnSync('yarn', ['cache','clean'], { cwd: projectDir })
   const installDevDepsResult = spawnSync('yarn', ['add','-D', ...depsToInstall], { cwd: projectDir })
   if (installDevDepsResult.status !== 0) {
     const msg = `Error while installing browserify:\n${installDevDepsResult.stderr.toString()}`
