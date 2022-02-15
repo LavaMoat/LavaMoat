@@ -7,20 +7,19 @@
     "eslint": "^7.22.0",
     "eslint-plugin-ava": "^11.0.0",
     "eslint-plugin-standard": "^5.0.0",
-    "lerna": "^3.22.1",
-    "tap-spec": "^5.0.0"
+    "tap-spec": "^5.0.0",
+    "turbo": "^1.1.2"
   },
   "engines": {
     "node": ">=12.16.1"
   },
   "scripts": {
-    "test": "lerna run test",
-    "test:prep": "lerna run test:prep",
-    "lint": "lerna run lint",
-    "lint:fix": "lerna run lint:fix",
-    "build": "lerna run build",
-    "publish": "lerna publish from-package --no-push --no-git-tag-version --yes",
-    "setup": "lerna bootstrap && yarn allow-scripts"
+    "test": "turbo run test",
+    "test:prep": "turbo run test:prep",
+    "lint": "turbo run lint",
+    "lint:fix": "turbo run lint:fix",
+    "build": "turbo run build",
+    "setup": "turbo run allow-scripts"
   },
   "workspaces": [
     "packages/*"
