@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 const browserify = require('browserify')
-const lavamoatPlugin = require(process.env.PLUGIN_PATH)
+const lavamoatPlugin = require('lavamoat-browserify')
 
 const params = JSON.parse(process.argv[2])
 

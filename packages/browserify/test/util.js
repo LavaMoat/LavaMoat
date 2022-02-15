@@ -41,7 +41,7 @@ async function createBundleFromEntry (path, pluginOpts = {}) {
 
 async function autoConfigForScenario ({ scenario }) {
   const copiedScenario = {...scenario, opts: {...scenario.opts, writeAutoPolicy: true }}
-  const { policyDir } = await createBundleForScenario({ scenario: copiedScenario})
+  const { policyDir } = await createBundleForScenario({ scenario: copiedScenario })
   const fullPath = path.join(policyDir, 'policy.json')
   const policy = await fs.readFile(fullPath, 'utf8')
   return JSON.parse(policy)
@@ -109,21 +109,36 @@ async function runBrowserify ({
 async function prepareBrowserifyScenarioOnDisk ({ scenario }) {
   const { path: projectDir } = await tmp.dir()
   scenario.dir = projectDir
-  // install browserify
-  const result = spawnSync('yarn', ['add','-D','browserify@17'], { cwd: projectDir })
-  if (result.status !== 0) {
-    const msg = `Error while installing browserify:\n${result.stderr.toString()}`
+  console.warn(`created test project directory at "${projectDir}"`)
+  // install browserify + lavamoat-plugin
+  // path to project root for the browserify plugin
+  const pluginPath = path.resolve(__dirname, '..')
+  let depsToInstall = ['browserify@^17', pluginPath]
+  let runBrowserifyPath = `${__dirname}/fixtures/runBrowserify.js`
+  if (scenario.type === 'factor') {
+    depsToInstall.push(
+      'through2@^3',
+      'vinyl-buffer@^1',
+      path.resolve(__dirname, '..', '..', 'lavapack'),
+      'bify-package-factor@^1',
+    )
+    runBrowserifyPath = `${__dirname}/fixtures/runBrowserifyBundleFactor.js`
+  }
+  const installDevDepsResult = spawnSync('yarn', ['add','-D', ...depsToInstall], { cwd: projectDir })
+  if (installDevDepsResult.status !== 0) {
+    const msg = `Error while installing browserify:\n${installDevDepsResult.stderr.toString()}`
     throw new Error(msg)
   }
+  console.warn('installed browserify + lavamoat plugin')
   // copy scenario files
+  // we copy files first so that we dont attempt to install the immaginary deps
   const { policyDir } = await prepareScenarioOnDisk({ scenario, projectDir, policyName: 'browserify' })
   // copy browserify build runner
   const paths = {
     normal: `${__dirname}/fixtures/runBrowserify.js`,
     factor: `${__dirname}/fixtures/runBrowserifyBundleFactor.js`
   }
-  const runnerPath = paths[scenario.type || 'normal']
-  await fs.copyFile(runnerPath, path.join(projectDir, 'runBrowserify.js'))
+  await fs.copyFile(runBrowserifyPath, path.join(projectDir, 'runBrowserify.js'))
   return { projectDir, policyDir }
 }
 
@@ -144,7 +159,6 @@ async function createBundleForScenario ({
   if (stderr.length) {
     console.warn(stderr)
   }
-  console.warn(`wrote test project to "${scenario.dir}"`)
   return { bundleForScenario: bundle, policyDir: policy }
 }
 

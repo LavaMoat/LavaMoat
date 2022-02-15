@@ -1,18 +1,15 @@
 const test = require('ava')
 const {
+  fillInFileDetails,
+  functionToString
+} = require('lavamoat-core/test/util')
+const {
   createBundleForScenario,
   runScenario
 } = require('./util')
 
-const fs = require('fs')
-const {
-  fillInFileDetails,
-  autoConfigForScenario,
-  functionToString
-} = require('lavamoat-core/test/util')
-
 // eslint-disable-next-line ava/no-skip-test
-test.skip('package factor bundle', async (t) => {
+test('package factor bundle', async (t) => {
   const scenario = {
     files: fillInFileDetails({
       './package.json': {
@@ -21,6 +18,14 @@ test.skip('package factor bundle', async (t) => {
             a: '1.0.0',
             b: '1.0.0',
             c: '1.0.0',
+          },
+          devDependencies: {
+            'browserify': '*',
+            'lavamoat-browserify': '*',
+            'bify-package-factor': '*',
+            '@lavamoat/lavapack': '*',
+            'through2': '*',
+            'vinyl-buffer': '*',
           }
         })}`,
       },
@@ -137,7 +142,7 @@ test.skip('package factor bundle', async (t) => {
       }
     },
     opts: {
-      // breaks when enabled (for some reason)
+      // TODO: this breaks when enabled (for some reason)
       // pruneConfig: true
     },
     context: {
