@@ -1,8 +1,6 @@
 {
   "name": "lavamoat",
-  "bin": {
-    "lavamoat": "src/index.js"
-  },
+  "bin": "src/index.js",
   "version": "6.0.0",
   "main": "index.js",
   "license": "MIT",

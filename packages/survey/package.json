@@ -15,6 +15,5 @@
     "start": "node src/index.js",
     "postinstall": "node src/prepareHook.js",
     "zzz": "node zzz.js"
-  },
-  "devDependencies": {}
+  }
 }

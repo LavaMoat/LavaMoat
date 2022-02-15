@@ -73,7 +73,5 @@
     "url": "https://github.com/LavaMoat/lavamoat/issues"
   },
   "homepage": "https://github.com/LavaMoat/LavaMoat/blob/main/packages/viz/README.md",
-  "bin": {
-    "lavamoat-viz": "./bin/index.js"
-  }
+  "bin": "./bin/index.js"
 }
