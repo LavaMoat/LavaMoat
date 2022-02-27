@@ -2,6 +2,7 @@ ignores:
   # monorepo deps
   - "ava"
   # tests - used in tests
+  - "lavamoat-browserify"
   - "keccak"
   # tests - fake packages
   - "banana"

@@ -41,7 +41,7 @@ test('parseForPolicy - resolutions', async (t) => {
     resources: {
       a: {
         packages: {
-          '<root>': true
+          '$root$': true
         }
       },
     }

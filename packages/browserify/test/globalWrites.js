@@ -23,7 +23,7 @@ test('globalWrites - two deps should be able to read each others globals', async
     },
     config: {
       resources: {
-        '<root>': {
+        '$root$': {
           packages: {
             two: true
           }

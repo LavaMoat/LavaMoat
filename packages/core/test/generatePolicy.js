@@ -35,7 +35,6 @@ test('generatePolicy - config with debugInfo', async (t) => {
       content: '(function () {\n    location.href\n  })()',
       importMap: {},
       packageName: 'test',
-      packageVersion: '1.2.3',
       moduleInitializer: undefined
     },
     globals: {

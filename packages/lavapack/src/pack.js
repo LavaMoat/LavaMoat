@@ -197,13 +197,12 @@ function createPacker({
   }
 
   function serializeModule (moduleData, sourceMeta) {
-    const { id, packageName, packageVersion, source, deps, file } = moduleData
+    const { id, packageName, source, deps, file } = moduleData
     // for now, ignore new sourcemap and just append original filename
     // serialize final module entry
     const jsonSerializeableData = {
       // id,
       package: packageName,
-      packageVersion,
       file,
       // deps,
       // source: sourceMeta.code

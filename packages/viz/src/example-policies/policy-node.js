@@ -789,7 +789,7 @@
               'fs': 'fs',
               'package-json-versionify': '/home/xyz/Development/webtorrent/node_modules/package-json-versionify/index.js',
             },
-            'packageName': '<root>',
+            'packageName': '$root$',
             'specifier': '/home/xyz/Development/webtorrent/build.js',
             'type': 'js',
           },

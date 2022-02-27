@@ -25,7 +25,6 @@ function inspectBrowserifyModuleData (moduleData, inspector) {
     specifier: moduleData.id,
     file: moduleData.file,
     packageName: moduleData.packageName,
-    packageVersion: moduleData.packageVersion,
     content: moduleData.source,
     // browserify only deals with commonjs modules
     type: 'js',

@@ -218,7 +218,7 @@ module.exports = [
       name: 'config - config validation passes - everything valid',
       config: {
         resources: {
-          '<root>': {
+          '$root$': {
             packages: {
               two: true
             }
@@ -237,7 +237,7 @@ module.exports = [
       },
       configOverride: {
         resources: {
-          '<root>': {
+          '$root$': {
             packages: {
               two: true
             }

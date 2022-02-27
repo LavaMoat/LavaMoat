@@ -7,11 +7,13 @@ const mergeDeep = require('merge-deep')
 const watchify = require('watchify')
 const lavamoatPlugin = require('../src/index')
 const { verifySourceMaps } = require('./sourcemaps')
-const { prepareScenarioOnDisk, evaluateWithSourceUrl, createHookedConsole } = require('lavamoat-core/test/util.js')
+const { createScenarioFromScaffold, prepareScenarioOnDisk, evaluateWithSourceUrl, createHookedConsole } = require('lavamoat-core/test/util.js')
 const util = require('util')
 const tmp = require('tmp-promise')
 const { spawnSync } = require('child_process')
 const execFile = util.promisify(require('child_process').execFile)
+const limitConcurrency = require('throat')(1)
+
 
 
 module.exports = {
@@ -23,7 +25,8 @@ module.exports = {
   autoConfigForScenario,
   runBrowserify,
   bundleAsync,
-  prepareBrowserifyScenarioOnDisk
+  prepareBrowserifyScenarioOnDisk,
+  createBrowserifyScenarioFromScaffold
 }
 
 async function createBundleFromEntry (path, pluginOpts = {}) {
@@ -40,7 +43,7 @@ async function createBundleFromEntry (path, pluginOpts = {}) {
 
 async function autoConfigForScenario ({ scenario }) {
   const copiedScenario = {...scenario, opts: {...scenario.opts, writeAutoPolicy: true }}
-  const { policyDir } = await createBundleForScenario({ scenario: copiedScenario})
+  const { policyDir } = await createBundleForScenario({ scenario: copiedScenario })
   const fullPath = path.join(policyDir, 'policy.json')
   const policy = await fs.readFile(fullPath, 'utf8')
   return JSON.parse(policy)
@@ -105,23 +108,44 @@ async function runBrowserify ({
   return { output }
 }
 
+// const limited = require('throat')(2)
+
 async function prepareBrowserifyScenarioOnDisk ({ scenario }) {
   const { path: projectDir } = await tmp.dir()
   scenario.dir = projectDir
-  // install browserify
-  const result = spawnSync('yarn', ['add','-D','browserify@17'], { cwd: projectDir })
-  if (result.status !== 0) {
-    throw new Error(result.stderr.toString())
+  console.warn(`created test project directory at "${projectDir}"`)
+  // install browserify + lavamoat-plugin
+  // path to project root for the browserify plugin
+  const pluginPath = path.resolve(__dirname, '..')
+  let depsToInstall = ['browserify@^17', pluginPath]
+  let runBrowserifyPath = `${__dirname}/fixtures/runBrowserify.js`
+  if (scenario.type === 'factor') {
+    depsToInstall.push(
+      'through2@^3',
+      'vinyl-buffer@^1',
+      path.resolve(__dirname, '..', '..', 'lavapack'),
+      'bify-package-factor@^1',
+    )
+    runBrowserifyPath = `${__dirname}/fixtures/runBrowserifyBundleFactor.js`
   }
+  // limit concurrency so that yarn v1 doesnt break its own cache
+  const installDevDepsResult = await limitConcurrency(async function () {
+    return spawnSync('yarn', ['add','--network-concurrency 1', '-D', ...depsToInstall], { cwd: projectDir })
+  })
+  if (installDevDepsResult.status !== 0) {
+    const msg = `Error while installing browserify:\n${installDevDepsResult.stderr.toString()}`
+    throw new Error(msg)
+  }
+  console.warn('installed browserify + lavamoat plugin')
   // copy scenario files
+  // we copy files first so that we dont attempt to install the immaginary deps
   const { policyDir } = await prepareScenarioOnDisk({ scenario, projectDir, policyName: 'browserify' })
   // copy browserify build runner
   const paths = {
     normal: `${__dirname}/fixtures/runBrowserify.js`,
     factor: `${__dirname}/fixtures/runBrowserifyBundleFactor.js`
   }
-  const runnerPath = paths[scenario.type || 'normal']
-  await fs.copyFile(runnerPath, path.join(projectDir, 'runBrowserify.js'))
+  await fs.copyFile(runBrowserifyPath, path.join(projectDir, 'runBrowserify.js'))
   return { projectDir, policyDir }
 }
 
@@ -156,6 +180,7 @@ async function runScenario ({
       bundleWithPrecompiledModules: runWithPrecompiledModules,
     })
     bundle = bundleForScenario
+    await fs.writeFile(path.join(scenario.dir, 'bundle.js'), bundle)
   }
   // dont validate factored bundles
   if (scenario.type !== 'factor') {
@@ -165,4 +190,16 @@ async function runScenario ({
   evaluateWithSourceUrl('testBundlejs', bundle, mergeDeep({ console: hookedConsole }, scenario.context))
   const testResult = await firstLogEventPromise
   return testResult
+}
+
+function createBrowserifyScenarioFromScaffold (...args) {
+  const scenario = createScenarioFromScaffold(...args)
+  // ammend scenario to list browserify as a dependency
+  const packageJsonFileObject = scenario.files['package.json']
+  const packageJsonFileContentObj = JSON.parse(packageJsonFileObject.content)
+  if (!packageJsonFileContentObj.devDependencies['browserify']) {
+    packageJsonFileContentObj.devDependencies['browserify'] = '*'
+  }
+  packageJsonFileObject.content = JSON.stringify(packageJsonFileContentObj, null, 2)
+  return scenario
 }

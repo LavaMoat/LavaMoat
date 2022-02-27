@@ -104,7 +104,7 @@ test('Policy - watchify listens for policy file changes', async (t) => {
 // test('Policy edits trigger re-bundle if using watchify', async (t) => {
 //   const configDefault = {
 //     resources: {
-//       '<root>': {
+//       '$root$': {
 //         packages: {
 //           'two': true
 //         }

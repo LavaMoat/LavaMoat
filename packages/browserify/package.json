@@ -30,7 +30,7 @@
     "depcheck": "^1.4.0",
     "eslint": "^7.22.0",
     "bify-package-factor": "^1.0.7",
-    "browserify": "^16.2.3",
+    "browserify": "^17.0.0",
     "eslint-plugin-ava": "^11.0.0",
     "eslint-plugin-standard": "^5.0.0",
     "keccak": "^3.0.2",
@@ -39,10 +39,11 @@
     "sourcemap-validator": "^2.1.0",
     "tmp-promise": "^3.0.3",
     "vinyl-buffer": "^1.0.1",
-    "watchify": "^3.11.1"
+    "watchify": "^3.11.1",
+    "throat": "^5.0.0"
   },
   "scripts": {
-    "test": "ava",
+    "test": "ava --timeout 2m --concurrency 1",
     "test:prep": "(cd './test/fixtures/secureBundling' && WRITE_AUTO_POLICY=1 ./run.sh)",
     "lint": "yarn lint:eslint && yarn lint:deps",
     "lint:eslint": "eslint \"src/**/*.js\" \"test/**/*.js\"",

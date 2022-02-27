@@ -41,11 +41,11 @@ function plugin (browserify, pluginOpts) {
 
     let canonicalNameMap
     async function getCanonicalNameMap () {
+      // load canonical name map on first request
       if (canonicalNameMap === undefined) {
         canonicalNameMap = await loadCanonicalNameMap({
           rootDir: configuration.projectRoot,
           // need this in order to walk browser builtin deps
-          // TODO: also need to resolve browser style
           includeDevDeps: true,
           resolve: browserResolve,
         })

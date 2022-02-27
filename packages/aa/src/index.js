@@ -47,7 +47,7 @@ async function loadCanonicalNameMap ({ rootDir, includeDevDeps, resolve } = {}) 
     canonicalNameMap.set(packageDir, shortestLogicalPathString)
   }
   // add root dir as "app"
-  canonicalNameMap.set(rootDir, '<root>')
+  canonicalNameMap.set(rootDir, '$root$')
   Reflect.defineProperty(canonicalNameMap, 'rootDir', { value: rootDir })
   return canonicalNameMap
 }
@@ -88,10 +88,14 @@ function getPackageNameForModulePath (canonicalNameMap, modulePath) {
   const packageDir = getPackageDirForModulePath(canonicalNameMap, modulePath)
   if (packageDir === undefined) {
     const relativeToRoot = path.relative(canonicalNameMap.rootDir, modulePath)
-    console.warn('external', modulePath)
     return `external:${relativeToRoot}`
   }
   const packageName = canonicalNameMap.get(packageDir)
+  const relativeToPackageDir = path.relative(packageDir, modulePath)
+  // files should never be associated with a package directory across a package boundary (as tested via the presense of "node_modules" in the path)
+  if (relativeToPackageDir.includes('node_modules')) {
+    throw new Error(`LavaMoat - Encountered unknown package directory for file "${modulePath}"`)
+  }
   return packageName
 }
 
@@ -103,7 +107,8 @@ function getPackageDirForModulePath (canonicalNameMap, modulePath) {
     return undefined
     // throw new Error(`Could not find package for module path: "${modulePath}" out of these package dirs:\n${Array.from(canonicalNameMap.keys()).join('\n')}`)
   }
-  return matchingPackageDirs.reduce(takeLongest)
+  const longestMatch = matchingPackageDirs.reduce(takeLongest)
+  return longestMatch
 }
 
 function takeLongest (a, b) {

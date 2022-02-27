@@ -111,7 +111,7 @@ function createScenarioFromScaffold ({
   const _files = fillInFileDetails({
     'entry.js': {
       content: `(${defineEntry || _defineEntry}).call(this)`,
-      packageName: '<root>',
+      packageName: '$root$',
       importMap: {
         one: 'node_modules/one/index.js',
         two: 'node_modules/two/index.js',
@@ -125,8 +125,10 @@ function createScenarioFromScaffold ({
           one: '1.0.0',
           two: '1.0.0',
           three: '1.0.0',
+        },
+        devDependencies: {
         }
-      })}`,
+      }, null, 2)}`,
     },
     'node_modules/one/index.js': {
       packageName: 'one',
@@ -142,7 +144,7 @@ function createScenarioFromScaffold ({
           two: '1.0.0',
           three: '1.0.0',
         }
-      })}`,
+      }, null, 2)}`,
     },
     'node_modules/two/index.js': {
       packageName: 'two',
@@ -156,7 +158,7 @@ function createScenarioFromScaffold ({
         dependencies: {
           three: '1.0.0',
         }
-      })}`,
+      }, null, 2)}`,
     },
     'node_modules/three/index.js': {
       packageName: 'three',
@@ -170,7 +172,7 @@ function createScenarioFromScaffold ({
         dependencies: {
           one: '1.0.0',
         }
-      })}`,
+      }, null, 2)}`,
     },
     ...files
   })
@@ -409,8 +411,7 @@ async function createConfigForTest (testFn, opts = {}) {
     type: 'js',
     specifier: './entry.js',
     file: './entry.js',
-    packageName: '<root>',
-    packageVersion: '0.0.0',
+    packageName: '$root$',
     importMap: {
       test: './node_modules/test/index.js'
     },
@@ -422,7 +423,6 @@ async function createConfigForTest (testFn, opts = {}) {
     specifier: './node_modules/test/index.js',
     file: './node_modules/test/index.js',
     packageName: 'test',
-    packageVersion: '1.2.3',
     importMap: {},
     content: `(${testFn})()`
   }]

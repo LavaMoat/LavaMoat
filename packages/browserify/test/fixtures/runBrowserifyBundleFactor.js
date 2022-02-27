@@ -1,6 +1,7 @@
 #!/usr/bin/env node
+// this deps must be specified in "prepareBrowserifyScenarioOnDisk" and "factor" test
 const browserify = require('browserify')
-const lavamoatPlugin = require('../../src/index')
+const lavamoatPlugin = require('lavamoat-browserify')
 const through = require('through2')
 const vinylBuffer = require('vinyl-buffer')
 const createCustomPack = require('@lavamoat/lavapack')
