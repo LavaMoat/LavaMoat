@@ -8,9 +8,8 @@ const {
   runScenario
 } = require('./util')
 
-// TODO: test passes locally but breaks on CI due to yarn cache (?)
 // eslint-disable-next-line ava/no-skip-test
-test.skip('package factor bundle', async (t) => {
+test('package factor bundle', async (t) => {
   const scenario = {
     files: fillInFileDetails({
       './package.json': {
