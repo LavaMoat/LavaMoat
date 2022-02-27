@@ -12,6 +12,8 @@ const util = require('util')
 const tmp = require('tmp-promise')
 const { spawnSync } = require('child_process')
 const execFile = util.promisify(require('child_process').execFile)
+const limitConcurrency = require('throat')(1)
+
 
 
 module.exports = {
@@ -106,6 +108,8 @@ async function runBrowserify ({
   return { output }
 }
 
+// const limited = require('throat')(2)
+
 async function prepareBrowserifyScenarioOnDisk ({ scenario }) {
   const { path: projectDir } = await tmp.dir()
   scenario.dir = projectDir
@@ -124,7 +128,10 @@ async function prepareBrowserifyScenarioOnDisk ({ scenario }) {
     )
     runBrowserifyPath = `${__dirname}/fixtures/runBrowserifyBundleFactor.js`
   }
-  const installDevDepsResult = spawnSync('yarn', ['add','--network-concurrency 1', '-D', ...depsToInstall], { cwd: projectDir })
+  // limit concurrency so that yarn v1 doesnt break its own cache
+  const installDevDepsResult = await limitConcurrency(async function () {
+    return spawnSync('yarn', ['add','--network-concurrency 1', '-D', ...depsToInstall], { cwd: projectDir })
+  })
   if (installDevDepsResult.status !== 0) {
     const msg = `Error while installing browserify:\n${installDevDepsResult.stderr.toString()}`
     throw new Error(msg)
