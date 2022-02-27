@@ -11,7 +11,6 @@ import { DepList } from '../views/DepList.js'
 import {
   parseConfigDebugForPackages,
   createGraph,
-  getPackageVersionName,
   getDangerRankForModule,
   sortByDangerRank,
   getColorForRank,
@@ -124,7 +123,7 @@ class DepGraph extends React.Component {
       const { moduleRecord } = moduleDebugInfo
       const rank = getDangerRankForModule(moduleDebugInfo, envConfig)
       const color = getColorForRank(rank)
-      if (getPackageVersionName(moduleRecord) === packageId) {
+      if (moduleRecord.packageName === packageId) {
         if (!moduleSources.includes(moduleRecord.content)) {
           moduleSources.push(moduleRecord.content)
           packageModules[moduleSpecifier] = moduleRecord
