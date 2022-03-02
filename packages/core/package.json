@@ -12,7 +12,7 @@
   "dependencies": {
     "fromentries": "^1.2.0",
     "json-stable-stringify": "^1.0.1",
-    "lavamoat-tofu": "^6.0.0",
+    "lavamoat-tofu": "^6.0.1",
     "merge-deep": "^3.0.2"
   },
   "devDependencies": {
