@@ -234,7 +234,7 @@ function createHookedConsole () {
   const firstLogEventPromise = new Promise(_resolve => { resolve = _resolve })
   const hookedLog = (message) => {
     if (hasResolved) {
-      throw new Error('console.log called multiple times')
+      throw new Error(`console.log called multiple times. got "${message}"`)
     }
     hasResolved = true
     // run result through serialization boundary. this ensures these tests:
