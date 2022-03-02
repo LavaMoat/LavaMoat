@@ -685,7 +685,7 @@
         "json-stable-stringify": true,
         "lavamoat-core>fromentries": true,
         "lavamoat-core>lavamoat-tofu": true,
-        "merge-deep": true
+        "lavamoat-core>merge-deep": true
       }
     },
     "lavamoat-core>lavamoat-tofu": {
@@ -697,68 +697,68 @@
         "depcheck>@babel/traverse>@babel/parser": true
       }
     },
-    "merge-deep": {
+    "lavamoat-core>merge-deep": {
       "packages": {
-        "merge-deep>arr-union": true,
-        "merge-deep>clone-deep": true,
-        "merge-deep>kind-of": true
+        "lavamoat-core>merge-deep>arr-union": true,
+        "lavamoat-core>merge-deep>clone-deep": true,
+        "lavamoat-core>merge-deep>kind-of": true
       }
     },
-    "merge-deep>clone-deep": {
+    "lavamoat-core>merge-deep>clone-deep": {
       "packages": {
-        "merge-deep>clone-deep>for-own": true,
-        "merge-deep>clone-deep>is-plain-object": true,
-        "merge-deep>clone-deep>lazy-cache": true,
-        "merge-deep>clone-deep>shallow-clone": true,
-        "merge-deep>kind-of": true
+        "lavamoat-core>merge-deep>clone-deep>for-own": true,
+        "lavamoat-core>merge-deep>clone-deep>is-plain-object": true,
+        "lavamoat-core>merge-deep>clone-deep>lazy-cache": true,
+        "lavamoat-core>merge-deep>clone-deep>shallow-clone": true,
+        "lavamoat-core>merge-deep>kind-of": true
       }
     },
-    "merge-deep>clone-deep>for-own": {
+    "lavamoat-core>merge-deep>clone-deep>for-own": {
       "packages": {
-        "merge-deep>clone-deep>for-own>for-in": true
+        "lavamoat-core>merge-deep>clone-deep>for-own>for-in": true
       }
     },
-    "merge-deep>clone-deep>is-plain-object": {
+    "lavamoat-core>merge-deep>clone-deep>is-plain-object": {
       "packages": {
         "watchify>chokidar>braces>isobject": true
       }
     },
-    "merge-deep>clone-deep>lazy-cache": {
+    "lavamoat-core>merge-deep>clone-deep>lazy-cache": {
       "globals": {
         "process.env.TRAVIS": true,
         "process.env.UNLAZY": true
       }
     },
-    "merge-deep>clone-deep>shallow-clone": {
+    "lavamoat-core>merge-deep>clone-deep>shallow-clone": {
       "packages": {
-        "merge-deep>clone-deep>shallow-clone>is-extendable": true,
-        "merge-deep>clone-deep>shallow-clone>kind-of": true,
-        "merge-deep>clone-deep>shallow-clone>lazy-cache": true,
-        "merge-deep>clone-deep>shallow-clone>mixin-object": true
+        "lavamoat-core>merge-deep>clone-deep>shallow-clone>kind-of": true,
+        "lavamoat-core>merge-deep>clone-deep>shallow-clone>lazy-cache": true,
+        "lavamoat-core>merge-deep>clone-deep>shallow-clone>mixin-object": true,
+        "watchify>chokidar>braces>extend-shallow>is-extendable": true
       }
     },
-    "merge-deep>clone-deep>shallow-clone>kind-of": {
+    "lavamoat-core>merge-deep>clone-deep>shallow-clone>kind-of": {
       "globals": {
         "Buffer": true
       },
       "packages": {
-        "merge-deep>kind-of>is-buffer": true
+        "lavamoat-core>merge-deep>kind-of>is-buffer": true
       }
     },
-    "merge-deep>clone-deep>shallow-clone>lazy-cache": {
+    "lavamoat-core>merge-deep>clone-deep>shallow-clone>lazy-cache": {
       "globals": {
         "process.env.UNLAZY": true
       }
     },
-    "merge-deep>clone-deep>shallow-clone>mixin-object": {
+    "lavamoat-core>merge-deep>clone-deep>shallow-clone>mixin-object": {
       "packages": {
-        "merge-deep>clone-deep>shallow-clone>is-extendable": true,
-        "merge-deep>clone-deep>shallow-clone>mixin-object>for-in": true
+        "lavamoat-core>merge-deep>clone-deep>shallow-clone>mixin-object>for-in": true,
+        "watchify>chokidar>braces>extend-shallow>is-extendable": true
       }
     },
-    "merge-deep>kind-of": {
+    "lavamoat-core>merge-deep>kind-of": {
       "packages": {
-        "merge-deep>kind-of>is-buffer": true
+        "lavamoat-core>merge-deep>kind-of>is-buffer": true
       }
     },
     "readable-stream": {
