@@ -12739,10 +12739,10 @@ three-spritetext@^1.5.1:
   resolved "https://registry.yarnpkg.com/three-spritetext/-/three-spritetext-1.6.4.tgz#81d6d6aef761dd805fcc0009a5e49d3366d938c5"
   integrity sha512-KngnmDnpRe5UdnhD1N+5GrhGC9aibs5/5nnBWFH23FDSYdLIk8NUwZFtEJpXXYKjUp/jjAw4dz0vRKroz8cILg==
 
-three@^0.118.3:
-  version "0.118.3"
-  resolved "https://registry.yarnpkg.com/three/-/three-0.118.3.tgz#c0bf8c10a68155478f12f4ccac2ff979526a4a0a"
-  integrity sha512-ijECXrNzDkHieoeh2H69kgawTGH8DiamhR4uBN8jEM7VHSKvfTdEvOoHsA8Aq7dh7PHAxhlqBsN5arBI3KixSw==
+three@^0.125.0:
+  version "0.125.0"
+  resolved "https://registry.yarnpkg.com/three/-/three-0.125.0.tgz#19e922b9dc51ad0b706893aeee888de68e99850a"
+  integrity sha512-qL36qUGsPQ/Ofo/RZdXwHwM7A8wzUSAIyawtjIebJSPvounUQeneSqxI0aBY2iwKpseGy+RUtj3C5f/z4poyXw==
 
 throat@^5.0.0:
   version "5.0.0"
