@@ -37,7 +37,7 @@
     "react-force-graph-2d": "^1.17.3",
     "react-hyperscript": "^3.2.0",
     "style-loader": "0.23.1",
-    "three": "^0.118.3",
+    "three": "^0.125.0",
     "three-forcegraph": "^1.36.1",
     "three-spritetext": "^1.5.1",
     "webpack": "4.37.0",
