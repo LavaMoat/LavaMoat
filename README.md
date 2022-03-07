@@ -53,7 +53,6 @@ This includes the js content of the module sources, and sometimes some config in
 LavaMoat modifies the bundle's runtime to enforce the configured constraints.
 
 ### Bundler Plugins:
-  - [LavaMoat Webpack][LavamoatWebpack]
   - [LavaMoat Browserify][LavamoatBrowserify]
 
 ### Additional tools
