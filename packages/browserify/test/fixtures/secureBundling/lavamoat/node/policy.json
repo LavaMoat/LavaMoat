@@ -18,7 +18,7 @@
     },
     "@lavamoat/aa": {
       "builtin": {
-        "fs.promises.readFile": true,
+        "fs.readFileSync": true,
         "path.dirname": true,
         "path.join": true,
         "path.relative": true
