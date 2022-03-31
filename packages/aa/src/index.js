@@ -1,4 +1,4 @@
-const { promises: fs } = require('fs')
+const { readFileSync } = require('fs')
 const path = require('path')
 const nodeResolve = require('resolve')
 
@@ -52,25 +52,53 @@ async function loadCanonicalNameMap ({ rootDir, includeDevDeps, resolve } = {}) 
   return canonicalNameMap
 }
 
+const depPackageJsonPathCache = new Map();
+function memoResolveSync (resolve, depName, packageDir) {
+  const key = depName + '!' + packageDir;
+  if (depPackageJsonPathCache.has(key)) {
+    return depPackageJsonPathCache.get(key)
+  } else {
+    const depRelativePackageJsonPath = path.join(depName, 'package.json')
+    let depPackageJsonPath
+    // If this function used async, it'd have to be awaited, which would mean cache lookup 
+    // would need to happen outside the function to save on performance of spawning a promise 
+    // for each cache lookup.
+    depPackageJsonPath = resolve.sync(depRelativePackageJsonPath, { basedir: packageDir })
+    depPackageJsonPathCache.set(key, depPackageJsonPath)
+    return depPackageJsonPath
+  }
+}
+const depsToWalkCache = new Map();
+function memoListDependencies (packageDir, includeDevDeps) {
+  const key = packageDir + (includeDevDeps ? '-D' : '')
+  if (depsToWalkCache.has(key)) {
+    return depsToWalkCache.get(key)
+  } else {
+    const packageJsonPath = path.join(packageDir, 'package.json')
+    // If this function used async, it'd have to be awaited, which would mean cache lookup 
+    // would need to happen outside the function to save on performance of spawning a promise 
+    // for each cache lookup.
+    const rawPackageJson = readFileSync(packageJsonPath, 'utf8')
+    const packageJson = JSON.parse(rawPackageJson)
+    const depsToWalk = [
+      ...Object.keys(packageJson.dependencies || {}),
+      ...Object.keys(includeDevDeps ? packageJson.devDependencies || {} : {}),
+    ]
+    depsToWalkCache.set(key, depsToWalk)
+    return depsToWalk
+  }
+}
+
 /**
  * @param {object} options
  * @returns {AsyncIterableIterator<{packageDir: string, logicalPathParts: string[]}>}
  */
 // TODO: optimize this to not walk the entire tree, can skip if the best known logical path is already shorter
 async function * eachPackageInLogicalTree ({ packageDir, logicalPath = [], includeDevDeps = false, visited = new Set(), resolve = nodeResolve }) {
-  const packageJsonPath = path.join(packageDir, 'package.json')
-  const rawPackageJson = await fs.readFile(packageJsonPath, 'utf8')
-  const packageJson = JSON.parse(rawPackageJson)
-  const depsToWalk = [
-    ...Object.keys(packageJson.dependencies || {}),
-    ...Object.keys(includeDevDeps ? packageJson.devDependencies || {} : {}),
-  ]
+  const depsToWalk = memoListDependencies(packageDir, includeDevDeps)
   for (const depName of depsToWalk) {
-    const depRelativePackageJsonPath = path.join(depName, 'package.json')
     let depPackageJsonPath
-    // sync seems slightly faster
-    // depPackageJsonPath = await resolveAsync(depRelativePackageJsonPath, { basedir: packageDir })
-    depPackageJsonPath = resolve.sync(depRelativePackageJsonPath, { basedir: packageDir })
+    depPackageJsonPath = memoResolveSync(resolve, depName, packageDir)
     const childPackageDir = path.dirname(depPackageJsonPath)
     // avoid cycles, but still visit the same package
     // on disk multiple times through different logical paths
