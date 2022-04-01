@@ -43,14 +43,18 @@ async function * eachNodeInTree ({
   moduleSpecifier,
   importHook,
   shouldImport = () => true,
-  visitedSpecifiers = new Set()
+  visitedSpecifiers = new Set(),
+  policyOverride,
 }) {
   // walk next record
   const moduleRecord = await importHook(moduleSpecifier)
   yield moduleRecord
 
-  // walk children
-  for (const childSpecifier of Object.values(moduleRecord.importMap)) {
+  // walk children specified in importMap and policyOverride
+  const importMapChildren = Object.values(moduleRecord.importMap)
+  const policyOverrideChildren = Object.keys(policyOverride?.resources?.[moduleRecord.packageName]?.packages || {})
+  const allChildren = new Set([...importMapChildren, ...policyOverrideChildren])
+  for (const childSpecifier of allChildren) {
     // skip children that are set to null (resolution was skipped)
     if (childSpecifier === null) continue
     // skip modules we're told not to import
