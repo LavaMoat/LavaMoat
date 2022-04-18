@@ -63,8 +63,15 @@ function memoResolveSync (resolve, depName, packageDir) {
     // If this function used async, it'd have to be awaited, which would mean cache lookup 
     // would need to happen outside the function to save on performance of spawning a promise 
     // for each cache lookup.
-    depPackageJsonPath = resolve.sync(depRelativePackageJsonPath, { basedir: packageDir })
-    depPackageJsonPathCache.set(key, depPackageJsonPath)
+    try {
+      depPackageJsonPath = resolve.sync(depRelativePackageJsonPath, { basedir: packageDir })
+      depPackageJsonPathCache.set(key, depPackageJsonPath)
+    } catch (err) {
+      if (!err.message.includes('Cannot find module')) {
+        throw err
+      }
+      depPackageJsonPath = null
+    }
     return depPackageJsonPath
   }
 }
@@ -82,6 +89,9 @@ function memoListDependencies (packageDir, includeDevDeps) {
     const packageJson = JSON.parse(rawPackageJson)
     const depsToWalk = [
       ...Object.keys(packageJson.dependencies || {}),
+      ...Object.keys(packageJson.optionalDependencies || {}),
+      ...Object.keys(packageJson.peerDependencies || {}),
+      ...Object.keys(packageJson.bundledDependencies || {}),
       ...Object.keys(includeDevDeps ? packageJson.devDependencies || {} : {}),
     ]
     depsToWalkCache.set(key, depsToWalk)
@@ -99,6 +109,10 @@ async function * eachPackageInLogicalTree ({ packageDir, logicalPath = [], inclu
   for (const depName of depsToWalk) {
     let depPackageJsonPath
     depPackageJsonPath = memoResolveSync(resolve, depName, packageDir)
+    // ignore unresolved deps
+    if (depPackageJsonPath === null) {
+      continue
+    }
     const childPackageDir = path.dirname(depPackageJsonPath)
     // avoid cycles, but still visit the same package
     // on disk multiple times through different logical paths
