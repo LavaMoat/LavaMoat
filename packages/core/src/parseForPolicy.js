@@ -23,7 +23,7 @@ async function parseForPolicy ({
   includeDebugInfo,
   inspector = createModuleInspector({ isBuiltin, includeDebugInfo })
 }) {
-  for await (const moduleRecord of eachNodeInTree({ moduleSpecifier, importHook, shouldImport, policyOverride })) {
+  for await (const moduleRecord of eachNodeInTree({ moduleSpecifier, importHook, shouldImport })) {
     // inspect each module
     inspector.inspectModule(moduleRecord)
   }
