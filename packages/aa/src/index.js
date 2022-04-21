@@ -1,4 +1,4 @@
-const { promises } = require('fs')
+const { readFileSync, promises } = require('fs')
 const path = require('path')
 const nodeResolve = require('resolve')
 
@@ -37,17 +37,14 @@ async function loadCanonicalNameMap({ rootDir, includeDevDeps, resolve } = {}) {
   const filePathToLogicalPaths = new SetMap()
   const canonicalNameMap = new Map()
   // walk tree
-  for await (const packageData of eachPackageInLogicalTree({ packageDir: rootDir, includeDevDeps, resolve })) {
+  for (const packageData of eachPackageInLogicalTree({ packageDir: rootDir, includeDevDeps, resolve })) {
     const logicalPathString = packageData.logicalPathParts.join('>')
     filePathToLogicalPaths.add(packageData.packageDir, logicalPathString)
   }
-  console.log('/walk tree', process.memoryUsage())
-  // find shortest logical path
   for (const [packageDir, logicalPathSet] of filePathToLogicalPaths.entries()) {
     const shortestLogicalPathString = Array.from(logicalPathSet.values()).reduce((a, b) => a.length > b.length ? b : a)
     canonicalNameMap.set(packageDir, shortestLogicalPathString)
   }
-  console.log('/logical path', process.memoryUsage())
   // add root dir as "app"
   canonicalNameMap.set(rootDir, '$root$')
   Reflect.defineProperty(canonicalNameMap, 'rootDir', { value: rootDir })
@@ -56,7 +53,7 @@ async function loadCanonicalNameMap({ rootDir, includeDevDeps, resolve } = {}) {
 let hit = 0; let miss = 0;
 
 
-const depPackageJsonPathCache = new Map();
+let depPackageJsonPathCache = new Map();
 function memoResolveSync(resolve, depName, packageDir) {
   const key = depName + '!' + packageDir;
   if (depPackageJsonPathCache.has(key)) {
@@ -81,17 +78,17 @@ function memoResolveSync(resolve, depName, packageDir) {
     return depPackageJsonPath
   }
 }
-const depsToWalkCache = new Map();
-async function memoListDependencies(packageDir, includeDevDeps) {
+let depsToWalkCache = new Set();
+function memoListDependencies(packageDir, includeDevDeps) {
   const key = packageDir + (includeDevDeps ? '-D' : '')
   if (depsToWalkCache.has(key)) {
-    return depsToWalkCache.get(key)
+    return [] //these dependencies were listed before, no need to revisit them
   } else {
     const packageJsonPath = path.join(packageDir, 'package.json')
     // If this function used async, it'd have to be awaited, which would mean cache lookup 
     // would need to happen outside the function to save on performance of spawning a promise 
     // for each cache lookup.
-    const rawPackageJson = await promises.readFile(packageJsonPath, 'utf8')
+    const rawPackageJson = readFileSync(packageJsonPath, 'utf8')
     const packageJson = JSON.parse(rawPackageJson)
     const depsToWalk = [
       ...Object.keys(packageJson.dependencies || {}),
@@ -100,31 +97,35 @@ async function memoListDependencies(packageDir, includeDevDeps) {
       ...Object.keys(packageJson.bundledDependencies || {}),
       ...Object.keys(includeDevDeps ? packageJson.devDependencies || {} : {}),
     ]
-    depsToWalkCache.set(key, depsToWalk)
+    depsToWalkCache.add(key)
     return depsToWalk
   }
 }
 
+function clearCaches() {
+  depsToWalkCache = new Set();
+  depPackageJsonPathCache = new Map();
+}
+
 const todos = [];
-setInterval(() => {
-  console.log({ hit, miss, todos: todos.length })
-}, 1000).unref()
 /**
  * @param {object} options
  * @returns {AsyncIterableIterator<{packageDir: string, logicalPathParts: string[]}>}
  */
 // TODO: optimize this to not walk the entire tree, can skip if the best known logical path is already shorter
-async function* eachPackageInLogicalTree({ packageDir, logicalPath = [], includeDevDeps = false, visited = new Set(), resolve = nodeResolve }) {
+function* eachPackageInLogicalTree({ packageDir, logicalPath = [], includeDevDeps = false, visited = new Set(), resolve = nodeResolve }) {
   todos.push({ packageDir, logicalPath, includeDevDeps, visited, resolve })
   do {
-    yield* await processOnePackageInLogicalTree()
+    yield* processOnePackageInLogicalTree()
   } while (todos.length > 0)
+
+  // console.error({ hit, miss })
 }
 
-async function processOnePackageInLogicalTree() {
-  // !!! important - this MUST be todos.pop()
+function processOnePackageInLogicalTree() {
+  // !!! important - this MUST be todos.pop() not todos.shift()
   const { packageDir, logicalPath = [], includeDevDeps = false, visited = new Set(), resolve = nodeResolve } = todos.pop();
-  const depsToWalk = await memoListDependencies(packageDir, includeDevDeps)
+  const depsToWalk = memoListDependencies(packageDir, includeDevDeps)
   const results = [];
   for (const depName of depsToWalk) {
     let depPackageJsonPath
