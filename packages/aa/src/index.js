@@ -41,6 +41,7 @@ async function loadCanonicalNameMap({ rootDir, includeDevDeps, resolve } = {}) {
     const logicalPathString = packageData.logicalPathParts.join('>')
     filePathToLogicalPaths.add(packageData.packageDir, logicalPathString)
   }
+  clearCaches();
   for (const [packageDir, logicalPathSet] of filePathToLogicalPaths.entries()) {
     const shortestLogicalPathString = Array.from(logicalPathSet.values()).reduce((a, b) => a.length > b.length ? b : a)
     canonicalNameMap.set(packageDir, shortestLogicalPathString)
