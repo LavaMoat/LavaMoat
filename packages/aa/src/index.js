@@ -1,4 +1,4 @@
-const { readFileSync, promises } = require('fs')
+const { readFileSync } = require('fs')
 const path = require('path')
 const nodeResolve = require('resolve')
 
@@ -8,31 +8,11 @@ let depPackageJsonPathCache = new Map();
 
 module.exports = {
   loadCanonicalNameMap,
-  eachPackageInLogicalTree,
+  walkDependencyTreeForBestLogicalPaths,
   getPackageDirForModulePath,
   getPackageNameForModulePath,
   depPackageJsonPathCache,
   depsToWalkCache
-}
-
-class SetMap {
-  constructor() {
-    this.map = new Map()
-  }
-  add(key, value) {
-    let set = this.map.get(key)
-    if (set === undefined) {
-      set = new Set()
-      this.map.set(key, set)
-    }
-    set.add(value)
-  }
-  get(key) {
-    return this.map.get(key)
-  }
-  entries() {
-    return this.map.entries()
-  }
 }
 
 /**
@@ -40,47 +20,39 @@ class SetMap {
  * @returns {Promise<Map<string, string>>}
  */
 async function loadCanonicalNameMap({ rootDir, includeDevDeps, resolve } = {}) {
-  const filePathToLogicalPaths = new SetMap()
   const canonicalNameMap = new Map()
   // walk tree
-  for (const packageData of eachPackageInLogicalTree({ packageDir: rootDir, includeDevDeps, resolve, canonicalNameMap })) {
-    // const logicalPathString = packageData.logicalPathParts.join('>')
-    // filePathToLogicalPaths.add(packageData.packageDir, logicalPathString)
+  const logicalPathMap = walkDependencyTreeForBestLogicalPaths({ packageDir: rootDir, includeDevDeps, resolve, canonicalNameMap })
+  clearCaches()
+  //convert dependency paths to canonical package names
+  for (const [packageDir, logicalPathParts] of logicalPathMap.entries()) {
+    const logicalPathString = logicalPathParts.join('>')
+    canonicalNameMap.set(packageDir, logicalPathString)
   }
-  clearCaches();
-  // for (const [packageDir, logicalPathSet] of filePathToLogicalPaths.entries()) {
-  //   const shortestLogicalPathString = Array.from(logicalPathSet.values()).reduce((a, b) => a.length > b.length ? b : a)
-  //   canonicalNameMap.set(packageDir, shortestLogicalPathString)
-  // }
   // add root dir as "app"
   canonicalNameMap.set(rootDir, '$root$')
   Reflect.defineProperty(canonicalNameMap, 'rootDir', { value: rootDir })
   return canonicalNameMap
 }
-let hit = 0; let miss = 0;
 
 function memoResolveSync(resolve, depName, packageDir) {
   const key = depName + '!' + packageDir;
   if (depPackageJsonPathCache.has(key)) {
-    hit++
     return depPackageJsonPathCache.get(key)
   } else {
-    miss++
     const depRelativePackageJsonPath = path.join(depName, 'package.json')
     let depPackageJsonPath
-    // If this function used async, it'd have to be awaited, which would mean cache lookup 
-    // would need to happen outside the function to save on performance of spawning a promise 
-    // for each cache lookup.
     try {
-      // TODO FIXME
+      // TODO: small perf issue:
       // resolve.sync is internally loading the package.json in order to resolve the package.json
-      // the internal loadpkg is not exposed
       depPackageJsonPath = resolve.sync(depRelativePackageJsonPath, { basedir: packageDir })
     } catch (err) {
       if (!err.message.includes('Cannot find module')) {
         throw err
       }
       depPackageJsonPath = null
+      // debug: log resolution failures
+      // console.log('resolve failed', depName, packageDir)
     }
     // cache result including misses
     depPackageJsonPathCache.set(key, depPackageJsonPath)
@@ -88,8 +60,8 @@ function memoResolveSync(resolve, depName, packageDir) {
   }
 }
 
-function memoListDependencies(packageDir, includeDevDeps) {
-  const key = packageDir + (includeDevDeps ? '-D' : '')
+function getDependencies(packageDir, includeDevDeps) {
+  const key = packageDir
   if (depsToWalkCache.has(key)) {
     return depsToWalkCache.get(key)
   } else {
@@ -103,7 +75,6 @@ function memoListDependencies(packageDir, includeDevDeps) {
       ...Object.keys(packageJson.dependencies || {}),
       ...Object.keys(packageJson.optionalDependencies || {}),
       ...Object.keys(packageJson.peerDependencies || {}),
-      ...Object.keys(packageJson.bundledDependencies || {}),
       ...Object.keys(includeDevDeps ? packageJson.devDependencies || {} : {}),
     ].sort(comparePreferredPackageName)
     depsToWalkCache.set(key, depsToWalk)
@@ -119,26 +90,22 @@ function clearCaches() {
 const todos = [];
 /**
  * @param {object} options
- * @returns {AsyncIterableIterator<{packageDir: string, logicalPathParts: string[]}>}
+ * @returns {Map<{packageDir: string, logicalPathParts: string[]}>}
  */
-function* eachPackageInLogicalTree({ packageDir, logicalPath = [], includeDevDeps = false, visited = new Set(), resolve = nodeResolve, canonicalNameMap }) {
-  const bestSoFar = new Map()
+function walkDependencyTreeForBestLogicalPaths({ packageDir, logicalPath = [], includeDevDeps = false, visited = new Set(), resolve = nodeResolve }) {
+  const preferredPackageLogicalPathMap = new Map()
+  // add the entry package as the first work unit
   todos.push({ packageDir, logicalPath, includeDevDeps, visited, resolve })
+  // drain work queue until empty
   do {
-    yield* processOnePackageInLogicalTree(bestSoFar)
+    processOnePackageInLogicalTree(preferredPackageLogicalPathMap)
   } while (todos.length > 0)
-
-  // console.error({ hit, miss })
+  return preferredPackageLogicalPathMap
 }
 
-function processOnePackageInLogicalTree(bestSoFar) {
-  // !!! important - this MUST be todos.pop() not todos.shift()
-  // TODO: breadfirst should be faster (less wasted branch walks)
-  // pop -> depth first
+function processOnePackageInLogicalTree(preferredPackageLogicalPathMap) {
   const { packageDir, logicalPath = [], includeDevDeps = false, visited = new Set(), resolve = nodeResolve } = todos.pop();
-  // shift -> breadth first BROKEN?
-  // const { packageDir, logicalPath = [], includeDevDeps = false, visited = new Set(), resolve = nodeResolve } = todos.shift();
-  const depsToWalk = memoListDependencies(packageDir, includeDevDeps)
+  const depsToWalk = getDependencies(packageDir, includeDevDeps)
   const results = [];
 
   // deps are already sorted by preference for paths
@@ -159,14 +126,19 @@ function processOnePackageInLogicalTree(bestSoFar) {
     const childLogicalPath = [...logicalPath, depName]
 
     // compare this path and current best path
-    const theCurrentBest = bestSoFar.get(childPackageDir)
+    const theCurrentBest = preferredPackageLogicalPathMap.get(childPackageDir)
     if (comparePackageLogicalPaths(childLogicalPath, theCurrentBest) < 0) {
+      // debug: log extraneous path traversals
+      // if (theCurrentBest !== undefined) {
+      //   console.log(`extraneous "${childPackageDir}"\n  current "${theCurrentBest}"\n  preferd "${childLogicalPath}"`)
+      // }
       // set as the new best so far
-      bestSoFar.set(childPackageDir, childLogicalPath)
-      // continue walking children
-      todos.push({ packageDir: childPackageDir, logicalPath: childLogicalPath, includeDevDeps: false, visited: childVisited })
+      preferredPackageLogicalPathMap.set(childPackageDir, childLogicalPath)
+      // continue walking children, adding them to the end of the queue
+      todos.unshift({ packageDir: childPackageDir, logicalPath: childLogicalPath, includeDevDeps: false, visited: childVisited })
     } else {
-      console.log(`skipping "${childPackageDir}"\n  preferred "${theCurrentBest}"\n  current "${childLogicalPath}"`)
+      // debug: log skipped path traversals
+      // console.log(`skipping "${childPackageDir}"\n  preferred "${theCurrentBest}"\n  current "${childLogicalPath}"`)
       // abort this walk, can't do better
       continue
     }
@@ -201,7 +173,7 @@ function getPackageDirForModulePath(canonicalNameMap, modulePath) {
   return longestMatch
 }
 
-// for file paths
+// for comparing string lengths
 function takeLongest(a, b) {
   return a.length > b.length ? a : b
 }
@@ -214,7 +186,7 @@ function comparePreferredPackageName(a, b) {
   } else if (a.length < b.length) {
     return -1
   }
-  // prefer alphabetical order
+  // as a tie breaker, prefer alphabetical order
   if (a > b) {
     return -1
   } else if (a > b) {
@@ -224,13 +196,12 @@ function comparePreferredPackageName(a, b) {
   }
 }
 
-// is aPath better than bPath?
-// iterate parts:
-//   if a is better than b -> yes
-//   if same -> continue
-//   if worse -> no
+// for comparing package logical path arrays (shorter is better)
 function comparePackageLogicalPaths(aPath, bPath) {
   // undefined is not preferred
+  if (aPath === undefined && bPath === undefined) {
+    return 0
+  }
   if (aPath === undefined) {
     return 1
   }
@@ -243,18 +214,19 @@ function comparePackageLogicalPaths(aPath, bPath) {
   } else if (aPath.length < bPath.length) {
     return -1
   }
-  // prefer path ordered by preferred package names
+  // as a tie breaker, prefer path ordered by preferred package names
+  // iterate parts:
+  //   if a is better than b -> yes
+  //   if worse -> no
+  //   if same -> continue
   for (const index in aPath) {
     const a = aPath[index]
     const b = bPath[index]
     const comparison = comparePreferredPackageName(a, b)
-    // console.log(`comparePreferredPackageName(${a}, ${b}) = ${comparison}`)
-    if (comparison < 0) {
-      return -1
-    } else if (comparison > 0) {
-      return 1
-    } else {
+    if (comparison === 0) {
       continue
+    } else {
+      return comparison
     }
   }
   return 0
