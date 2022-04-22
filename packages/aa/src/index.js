@@ -1,8 +1,7 @@
-const { readFileSync } = require('fs')
+const { readFileSync, statSync } = require('fs');
 const path = require('path')
 const nodeResolve = require('resolve')
 
-let depsToWalkCache = new Map();
 let depPackageJsonPathCache = new Map();
 
 
@@ -12,8 +11,47 @@ module.exports = {
   getPackageDirForModulePath,
   getPackageNameForModulePath,
   depPackageJsonPathCache,
-  depsToWalkCache
 }
+
+const createPerformantResolve = (root) => {
+  const rootNM = path.resolve(root, "node_modules");
+  const isDirectory = (dir) => {
+    // prevent errors resulting from going above ./node_modules
+    if (!dir || !dir.startsWith(rootNM)) {
+      return false;
+    }
+    // original isDirectory implementation from resolve internals:
+    try {
+      var stat = statSync(dir, { throwIfNoEntry: false });
+    } catch (e) {
+      console.error(dir);
+      if (e && (e.code === "ENOENT" || e.code === "ENOTDIR")) return false;
+      throw e;
+    }
+    return !!stat && stat.isDirectory();
+  };
+  const readPackageWithout = (self) => (readFileSync, pkgfile) => {
+    // avoid loading the package.json we're just trying to resolve
+    if (pkgfile.endsWith(self)) {
+      return {};
+    }
+    // original readPackageSync implementation from resolve internals:
+    var body = readFileSync(pkgfile);
+    try {
+      var pkg = JSON.parse(body);
+      return pkg;
+    } catch (jsonErr) {}
+  };
+
+  return {
+    sync: (path, { basedir }) =>
+      nodeResolve.sync(path, {
+        basedir,
+        isDirectory,
+        readPackageSync: readPackageWithout(path),
+      }),
+  };
+};
 
 /**
  * @param {object} options
@@ -21,9 +59,10 @@ module.exports = {
  */
 async function loadCanonicalNameMap({ rootDir, includeDevDeps, resolve } = {}) {
   const canonicalNameMap = new Map()
+  resolve = resolve || createPerformantResolve(rootDir);
   // walk tree
   const logicalPathMap = walkDependencyTreeForBestLogicalPaths({ packageDir: rootDir, includeDevDeps, resolve, canonicalNameMap })
-  clearCaches()
+  clearCache()
   //convert dependency paths to canonical package names
   for (const [packageDir, logicalPathParts] of logicalPathMap.entries()) {
     const logicalPathString = logicalPathParts.join('>')
@@ -43,8 +82,6 @@ function memoResolveSync(resolve, depName, packageDir) {
     const depRelativePackageJsonPath = path.join(depName, 'package.json')
     let depPackageJsonPath
     try {
-      // TODO: small perf issue:
-      // resolve.sync is internally loading the package.json in order to resolve the package.json
       depPackageJsonPath = resolve.sync(depRelativePackageJsonPath, { basedir: packageDir })
     } catch (err) {
       if (!err.message.includes('Cannot find module')) {
@@ -59,52 +96,48 @@ function memoResolveSync(resolve, depName, packageDir) {
     return depPackageJsonPath
   }
 }
-
 function getDependencies(packageDir, includeDevDeps) {
-  const key = packageDir
-  if (depsToWalkCache.has(key)) {
-    return depsToWalkCache.get(key)
-  } else {
-    const packageJsonPath = path.join(packageDir, 'package.json')
-    // If this function used async, it'd have to be awaited, which would mean cache lookup 
-    // would need to happen outside the function to save on performance of spawning a promise 
-    // for each cache lookup.
-    const rawPackageJson = readFileSync(packageJsonPath, 'utf8')
-    const packageJson = JSON.parse(rawPackageJson)
-    const depsToWalk = [
-      ...Object.keys(packageJson.dependencies || {}),
-      ...Object.keys(packageJson.optionalDependencies || {}),
-      ...Object.keys(packageJson.peerDependencies || {}),
-      ...Object.keys(includeDevDeps ? packageJson.devDependencies || {} : {}),
-    ].sort(comparePreferredPackageName)
-    depsToWalkCache.set(key, depsToWalk)
-    return depsToWalk
-  }
+  const packageJsonPath = path.join(packageDir, 'package.json')
+  const rawPackageJson = readFileSync(packageJsonPath, 'utf8')
+  const packageJson = JSON.parse(rawPackageJson)
+  const depsToWalk = [
+    ...Object.keys(packageJson.dependencies || {}),
+    ...Object.keys(packageJson.optionalDependencies || {}),
+    ...Object.keys(packageJson.peerDependencies || {}),
+    ...Object.keys(includeDevDeps ? packageJson.devDependencies || {} : {}),
+  ].sort(comparePreferredPackageName)
+  return depsToWalk
 }
 
-function clearCaches() {
-  depsToWalkCache = new Map();
+function clearCache() {
   depPackageJsonPathCache = new Map();
 }
 
-const todos = [];
+let currentLevelTodos;
+let nextLevelTodos;
 /**
  * @param {object} options
  * @returns {Map<{packageDir: string, logicalPathParts: string[]}>}
  */
-function walkDependencyTreeForBestLogicalPaths({ packageDir, logicalPath = [], includeDevDeps = false, visited = new Set(), resolve = nodeResolve }) {
+function walkDependencyTreeForBestLogicalPaths({ packageDir, logicalPath = [], includeDevDeps = false, visited = new Set(), resolve = performantResolve }) {
   const preferredPackageLogicalPathMap = new Map()
   // add the entry package as the first work unit
-  todos.push({ packageDir, logicalPath, includeDevDeps, visited, resolve })
-  // drain work queue until empty
+  currentLevelTodos = [{ packageDir, logicalPath, includeDevDeps, visited, resolve }];
+  nextLevelTodos = []
+  // drain work queue until empty, avoid going depth-first by prioritizing the current depth level
   do {
-    processOnePackageInLogicalTree(preferredPackageLogicalPathMap)
-  } while (todos.length > 0)
+    processOnePackageInLogicalTree(preferredPackageLogicalPathMap, resolve)
+    if (currentLevelTodos.length === 0){
+      currentLevelTodos = nextLevelTodos;
+      nextLevelTodos = [];
+    }
+  } while (currentLevelTodos.length > 0)
+
   return preferredPackageLogicalPathMap
 }
 
-function processOnePackageInLogicalTree(preferredPackageLogicalPathMap) {
-  const { packageDir, logicalPath = [], includeDevDeps = false, visited = new Set(), resolve = nodeResolve } = todos.pop();
+function processOnePackageInLogicalTree(preferredPackageLogicalPathMap, resolve) {
+  const { packageDir, logicalPath = [], includeDevDeps = false, visited = new Set() } = currentLevelTodos.pop();
   const depsToWalk = getDependencies(packageDir, includeDevDeps)
   const results = [];
 
@@ -135,7 +168,7 @@ function processOnePackageInLogicalTree(preferredPackageLogicalPathMap) {
       // set as the new best so far
       preferredPackageLogicalPathMap.set(childPackageDir, childLogicalPath)
       // continue walking children, adding them to the end of the queue
-      todos.unshift({ packageDir: childPackageDir, logicalPath: childLogicalPath, includeDevDeps: false, visited: childVisited })
+      nextLevelTodos.push({ packageDir: childPackageDir, logicalPath: childLogicalPath, includeDevDeps: false, visited: childVisited })
     } else {
       // debug: log skipped path traversals
       // console.log(`skipping "${childPackageDir}"\n  preferred "${theCurrentBest}"\n  current "${childLogicalPath}"`)
