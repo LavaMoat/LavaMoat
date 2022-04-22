@@ -2,15 +2,11 @@ const { readFileSync, statSync } = require('fs');
 const path = require('path')
 const nodeResolve = require('resolve')
 
-let depPackageJsonPathCache = new Map();
-
-
 module.exports = {
   loadCanonicalNameMap,
   walkDependencyTreeForBestLogicalPaths,
   getPackageDirForModulePath,
   getPackageNameForModulePath,
-  depPackageJsonPathCache,
 }
 
 const createPerformantResolve = (root) => {
@@ -62,7 +58,6 @@ async function loadCanonicalNameMap({ rootDir, includeDevDeps, resolve } = {}) {
   resolve = resolve || createPerformantResolve(rootDir);
   // walk tree
   const logicalPathMap = walkDependencyTreeForBestLogicalPaths({ packageDir: rootDir, includeDevDeps, resolve, canonicalNameMap })
-  clearCache()
   //convert dependency paths to canonical package names
   for (const [packageDir, logicalPathParts] of logicalPathMap.entries()) {
     const logicalPathString = logicalPathParts.join('>')
@@ -74,26 +69,16 @@ async function loadCanonicalNameMap({ rootDir, includeDevDeps, resolve } = {}) {
   return canonicalNameMap
 }
 
-function memoResolveSync(resolve, depName, packageDir) {
-  const key = depName + '!' + packageDir;
-  if (depPackageJsonPathCache.has(key)) {
-    return depPackageJsonPathCache.get(key)
-  } else {
-    const depRelativePackageJsonPath = path.join(depName, 'package.json')
-    let depPackageJsonPath
-    try {
-      depPackageJsonPath = resolve.sync(depRelativePackageJsonPath, { basedir: packageDir })
-    } catch (err) {
-      if (!err.message.includes('Cannot find module')) {
-        throw err
-      }
-      depPackageJsonPath = null
-      // debug: log resolution failures
-      // console.log('resolve failed', depName, packageDir)
+function wrappedResolveSync(resolve, depName, packageDir) {
+  const depRelativePackageJsonPath = path.join(depName, 'package.json')
+  try {
+    return resolve.sync(depRelativePackageJsonPath, { basedir: packageDir })
+  } catch (err) {
+    if (!err.message.includes('Cannot find module')) {
+      throw err
     }
-    // cache result including misses
-    depPackageJsonPathCache.set(key, depPackageJsonPath)
-    return depPackageJsonPath
+    // debug: log resolution failures
+    // console.log('resolve failed', depName, packageDir)
   }
 }
 function getDependencies(packageDir, includeDevDeps) {
@@ -107,10 +92,6 @@ function getDependencies(packageDir, includeDevDeps) {
     ...Object.keys(includeDevDeps ? packageJson.devDependencies || {} : {}),
   ].sort(comparePreferredPackageName)
   return depsToWalk
-}
-
-function clearCache() {
-  depPackageJsonPathCache = new Map();
 }
 
 let currentLevelTodos;
@@ -143,10 +124,9 @@ function processOnePackageInLogicalTree(preferredPackageLogicalPathMap, resolve)
 
   // deps are already sorted by preference for paths
   for (const depName of depsToWalk) {
-    let depPackageJsonPath
-    depPackageJsonPath = memoResolveSync(resolve, depName, packageDir)
+    let depPackageJsonPath = wrappedResolveSync(resolve, depName, packageDir)
     // ignore unresolved deps
-    if (depPackageJsonPath === null) {
+    if (!depPackageJsonPath) {
       continue
     }
     const childPackageDir = path.dirname(depPackageJsonPath)
