@@ -1,13 +1,13 @@
 {
   "name": "@lavamoat/allow-scripts",
-  "version": "2.0.0",
+  "version": "2.0.2",
   "main": "src/index.js",
   "bin": {
     "allow-scripts": "src/cli.js"
   },
   "license": "MIT",
   "dependencies": {
-    "@lavamoat/aa": "^1.0.0",
+    "@lavamoat/aa": "^2.0.1",
     "@npmcli/run-script": "^1.8.1",
     "yargs": "^16.2.0"
   },
