@@ -73,7 +73,7 @@ function makeResolveHook ({ projectRoot, resolutions = {}, canonicalNameMap }) {
     // handle resolution overrides
     const result = checkForResolutionOverride(resolutions, parentPackageName, requestedName)
     if (result) {
-      // if path is a relative path, it should be relative to displayRichCompatWarningthe projectRoot
+      // if path is a relative path, it should be relative to the projectRoot
       if (path.isAbsolute(result)) {
         requestedName = result
       } else {
@@ -102,6 +102,7 @@ function makeImportHook ({
   resolveHook,
   shouldResolve = () => true,
   canonicalNameMap,
+  policyOverride
 }) {
   return async (specifier) => {
     // see if its a builtin
@@ -175,6 +176,22 @@ function makeImportHook ({
         depValue = null
       }
       return [requestedName, depValue]
+    }))
+    // add policyOverride additions to import map (policy gen only)
+    const policyOverrideImports = Object.keys(policyOverride?.resources?.[packageName]?.packages ?? {})
+    await Promise.all(policyOverrideImports.map(async packageName => {
+      // skip if there is already an entry for the name
+      if (packageName in importMap[packageName]) return
+      // resolve and add package main in override
+      const packageRoot = getMapKeyForValue(canonicalNameMap, packageName)
+      const packageJson = JSON.parse(
+        await fs.readFile(
+          path.join(packageRoot, 'package.json'), 'utf8'
+        )
+      )
+      const main = packageJson.main ?? 'index.js'
+      const mainPath = path.resolve(packageRoot, main)
+      importMap[packageName] = mainPath
     }))
 
     // heuristics for detecting common dynamically imported native modules
@@ -286,5 +303,12 @@ function displayRichCompatWarning ({ moduleRecord, compatWarnings }) {
       const output = codeFrameColumns(highlightedCode, range, { message })
       console.warn(output)
     })
+  }
+}
+
+function getMapKeyForValue(map, searchValue) {
+  for (let [key, value] of map.entries()) {
+    if (value === searchValue)
+      return key;
   }
 }
