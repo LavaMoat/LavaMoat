@@ -7,9 +7,10 @@ module.exports = {
   walkDependencyTreeForBestLogicalPaths,
   getPackageDirForModulePath,
   getPackageNameForModulePath,
+  createPerformantResolve,
 }
 
-const createPerformantResolve = (root) => {
+function createPerformantResolve (root) {
   const rootNM = path.resolve(root, "node_modules");
   const isDirectory = (dir) => {
     // prevent errors resulting from going above ./node_modules
@@ -55,7 +56,11 @@ const createPerformantResolve = (root) => {
  */
 async function loadCanonicalNameMap({ rootDir, includeDevDeps, resolve } = {}) {
   const canonicalNameMap = new Map()
-  resolve = resolve || createPerformantResolve(rootDir);
+  // TODO: re-enable this performance optimization. it disallows lookups above the rootDir, offering a 2x speedup
+  // we currently rely on being able to do this for the browserify/test/lavamoatNode tests bc we dont parse workspaces
+  // "createPerformantResolve" has been exported so package consumers can opt in to using it
+  // resolve = resolve || createPerformantResolve(rootDir);
+  resolve = resolve || nodeResolve
   // walk tree
   const logicalPathMap = walkDependencyTreeForBestLogicalPaths({ packageDir: rootDir, includeDevDeps, resolve, canonicalNameMap })
   //convert dependency paths to canonical package names
