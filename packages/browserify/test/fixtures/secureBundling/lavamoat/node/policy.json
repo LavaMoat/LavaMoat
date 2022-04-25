@@ -12,16 +12,63 @@
     "@babel/code-frame>@babel/highlight": {
       "packages": {
         "@babel/code-frame>@babel/highlight>@babel/helper-validator-identifier": true,
-        "@babel/code-frame>@babel/highlight>js-tokens": true,
-        "source-map-explorer>ejs>jake>chalk": true
+        "@babel/code-frame>@babel/highlight>chalk": true,
+        "@babel/code-frame>@babel/highlight>js-tokens": true
+      }
+    },
+    "@babel/code-frame>@babel/highlight>chalk": {
+      "globals": {
+        "process.env.TERM": true,
+        "process.platform": true
+      },
+      "packages": {
+        "@babel/code-frame>@babel/highlight>chalk>ansi-styles": true,
+        "@babel/code-frame>@babel/highlight>chalk>escape-string-regexp": true,
+        "@babel/code-frame>@babel/highlight>chalk>supports-color": true
+      }
+    },
+    "@babel/code-frame>@babel/highlight>chalk>ansi-styles": {
+      "packages": {
+        "@babel/code-frame>@babel/highlight>chalk>ansi-styles>color-convert": true
+      }
+    },
+    "@babel/code-frame>@babel/highlight>chalk>ansi-styles>color-convert": {
+      "packages": {
+        "@babel/code-frame>@babel/highlight>chalk>ansi-styles>color-convert>color-name": true
+      }
+    },
+    "@babel/code-frame>@babel/highlight>chalk>supports-color": {
+      "builtin": {
+        "os.release": true
+      },
+      "globals": {
+        "process.env": true,
+        "process.platform": true,
+        "process.stderr": true,
+        "process.stdout": true,
+        "process.versions.node.split": true
+      },
+      "packages": {
+        "@babel/code-frame>@babel/highlight>chalk>supports-color>has-flag": true
+      }
+    },
+    "@babel/code-frame>@babel/highlight>chalk>supports-color>has-flag": {
+      "globals": {
+        "process.argv": true
       }
     },
     "@lavamoat/aa": {
       "builtin": {
         "fs.readFileSync": true,
+        "fs.statSync": true,
         "path.dirname": true,
         "path.join": true,
-        "path.relative": true
+        "path.relative": true,
+        "path.resolve": true
+      },
+      "globals": {
+        "console.error": true,
+        "performantResolve": true
       },
       "packages": {
         "depcheck>resolve": true
@@ -227,17 +274,7 @@
     },
     "browserify>duplexer2": {
       "packages": {
-        "vinyl-buffer>bl>readable-stream": true
-      }
-    },
-    "browserify>glob>once": {
-      "packages": {
-        "browserify>glob>once>wrappy": true
-      }
-    },
-    "browserify>glob>path-is-absolute": {
-      "globals": {
-        "process.platform": true
+        "watchify>through2>readable-stream": true
       }
     },
     "browserify>has": {
@@ -258,9 +295,9 @@
       },
       "packages": {
         "@lavamoat/lavapack>combine-source-map": true,
-        "browserify>glob>path-is-absolute": true,
         "browserify>insert-module-globals>undeclared-identifiers": true,
         "browserify>syntax-error>acorn-node": true,
+        "watchify>chokidar>path-is-absolute": true,
         "watchify>through2": true,
         "watchify>xtend": true
       }
@@ -296,7 +333,7 @@
       },
       "packages": {
         "through2>inherits": true,
-        "vinyl-buffer>bl>readable-stream": true
+        "watchify>through2>readable-stream": true
       }
     },
     "browserify>module-deps": {
@@ -325,10 +362,10 @@
         "browserify>parents": true,
         "depcheck>resolve": true,
         "through2>inherits": true,
-        "vinyl-buffer>bl>readable-stream": true,
         "watchify>browserify>concat-stream": true,
         "watchify>defined": true,
         "watchify>through2": true,
+        "watchify>through2>readable-stream": true,
         "watchify>xtend": true
       }
     },
@@ -341,7 +378,7 @@
     "browserify>module-deps>stream-combiner2": {
       "packages": {
         "browserify>duplexer2": true,
-        "vinyl-buffer>bl>readable-stream": true
+        "watchify>through2>readable-stream": true
       }
     },
     "browserify>parents": {
@@ -367,7 +404,7 @@
     },
     "browserify>read-only-stream": {
       "packages": {
-        "vinyl-buffer>bl>readable-stream": true
+        "watchify>through2>readable-stream": true
       }
     },
     "browserify>readable-stream": {
@@ -636,7 +673,12 @@
         "process.nextTick": true
       },
       "packages": {
-        "browserify>glob>once": true
+        "duplexify>end-of-stream>once": true
+      }
+    },
+    "duplexify>end-of-stream>once": {
+      "packages": {
+        "duplexify>end-of-stream>once>wrappy": true
       }
     },
     "eslint>debug": {
@@ -654,8 +696,8 @@
         "process": true
       },
       "packages": {
-        "eslint>debug>ms": true,
-        "source-map-explorer>ejs>jake>chalk>supports-color": true
+        "@babel/code-frame>@babel/highlight>chalk>supports-color": true,
+        "eslint>debug>ms": true
       }
     },
     "eslint>espree>acorn": {
@@ -742,7 +784,7 @@
         "Buffer": true
       },
       "packages": {
-        "lavamoat-core>merge-deep>kind-of>is-buffer": true
+        "browserify>insert-module-globals>is-buffer": true
       }
     },
     "lavamoat-core>merge-deep>clone-deep>shallow-clone>lazy-cache": {
@@ -758,7 +800,7 @@
     },
     "lavamoat-core>merge-deep>kind-of": {
       "packages": {
-        "lavamoat-core>merge-deep>kind-of>is-buffer": true
+        "browserify>insert-module-globals>is-buffer": true
       }
     },
     "readable-stream": {
@@ -785,47 +827,6 @@
         "util.deprecate": true
       }
     },
-    "source-map-explorer>ejs>jake>chalk": {
-      "globals": {
-        "process.env.TERM": true,
-        "process.platform": true
-      },
-      "packages": {
-        "source-map-explorer>ejs>jake>chalk>ansi-styles": true,
-        "source-map-explorer>ejs>jake>chalk>escape-string-regexp": true,
-        "source-map-explorer>ejs>jake>chalk>supports-color": true
-      }
-    },
-    "source-map-explorer>ejs>jake>chalk>ansi-styles": {
-      "packages": {
-        "source-map-explorer>ejs>jake>chalk>ansi-styles>color-convert": true
-      }
-    },
-    "source-map-explorer>ejs>jake>chalk>ansi-styles>color-convert": {
-      "packages": {
-        "source-map-explorer>ejs>jake>chalk>ansi-styles>color-convert>color-name": true
-      }
-    },
-    "source-map-explorer>ejs>jake>chalk>supports-color": {
-      "builtin": {
-        "os.release": true
-      },
-      "globals": {
-        "process.env": true,
-        "process.platform": true,
-        "process.stderr": true,
-        "process.stdout": true,
-        "process.versions.node.split": true
-      },
-      "packages": {
-        "source-map-explorer>ejs>jake>chalk>supports-color>has-flag": true
-      }
-    },
-    "source-map-explorer>ejs>jake>chalk>supports-color>has-flag": {
-      "globals": {
-        "process.argv": true
-      }
-    },
     "through2": {
       "globals": {
         "process.nextTick": true
@@ -840,7 +841,36 @@
         "util.inherits": true
       }
     },
-    "vinyl-buffer>bl>readable-stream": {
+    "watchify>browserify>concat-stream": {
+      "globals": {
+        "Buffer.concat": true,
+        "Buffer.isBuffer": true
+      },
+      "packages": {
+        "concat-stream>buffer-from": true,
+        "concat-stream>typedarray": true,
+        "through2>inherits": true,
+        "watchify>through2>readable-stream": true
+      }
+    },
+    "watchify>chokidar>path-is-absolute": {
+      "globals": {
+        "process.platform": true
+      }
+    },
+    "watchify>through2": {
+      "builtin": {
+        "util.inherits": true
+      },
+      "globals": {
+        "process.nextTick": true
+      },
+      "packages": {
+        "watchify>through2>readable-stream": true,
+        "watchify>xtend": true
+      }
+    },
+    "watchify>through2>readable-stream": {
       "builtin": {
         "events.EventEmitter": true,
         "stream": true,
@@ -860,42 +890,18 @@
         "browserify>readable-stream>process-nextick-args": true,
         "readable-stream>util-deprecate": true,
         "through2>inherits": true,
-        "vinyl-buffer>bl>readable-stream>safe-buffer": true,
-        "vinyl-buffer>bl>readable-stream>string_decoder": true
+        "watchify>through2>readable-stream>safe-buffer": true,
+        "watchify>through2>readable-stream>string_decoder": true
       }
     },
-    "vinyl-buffer>bl>readable-stream>safe-buffer": {
+    "watchify>through2>readable-stream>safe-buffer": {
       "builtin": {
         "buffer": true
       }
     },
-    "vinyl-buffer>bl>readable-stream>string_decoder": {
+    "watchify>through2>readable-stream>string_decoder": {
       "packages": {
-        "vinyl-buffer>bl>readable-stream>safe-buffer": true
-      }
-    },
-    "watchify>browserify>concat-stream": {
-      "globals": {
-        "Buffer.concat": true,
-        "Buffer.isBuffer": true
-      },
-      "packages": {
-        "concat-stream>buffer-from": true,
-        "concat-stream>typedarray": true,
-        "through2>inherits": true,
-        "vinyl-buffer>bl>readable-stream": true
-      }
-    },
-    "watchify>through2": {
-      "builtin": {
-        "util.inherits": true
-      },
-      "globals": {
-        "process.nextTick": true
-      },
-      "packages": {
-        "vinyl-buffer>bl>readable-stream": true,
-        "watchify>xtend": true
+        "watchify>through2>readable-stream>safe-buffer": true
       }
     }
   }
