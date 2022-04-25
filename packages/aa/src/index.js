@@ -10,23 +10,7 @@ module.exports = {
   createPerformantResolve,
 }
 
-function createPerformantResolve (root) {
-  const rootNM = path.resolve(root, "node_modules");
-  const isDirectory = (dir) => {
-    // prevent errors resulting from going above ./node_modules
-    if (!dir || !dir.startsWith(rootNM)) {
-      return false;
-    }
-    // original isDirectory implementation from resolve internals:
-    try {
-      var stat = statSync(dir, { throwIfNoEntry: false });
-    } catch (e) {
-      console.error(dir);
-      if (e && (e.code === "ENOENT" || e.code === "ENOTDIR")) return false;
-      throw e;
-    }
-    return !!stat && stat.isDirectory();
-  };
+function createPerformantResolve () {
   const readPackageWithout = (self) => (readFileSync, pkgfile) => {
     // avoid loading the package.json we're just trying to resolve
     if (pkgfile.endsWith(self)) {
@@ -37,14 +21,13 @@ function createPerformantResolve (root) {
     try {
       var pkg = JSON.parse(body);
       return pkg;
-    } catch (jsonErr) {}
+    } catch (jsonErr) { }
   };
 
   return {
     sync: (path, { basedir }) =>
       nodeResolve.sync(path, {
         basedir,
-        isDirectory,
         readPackageSync: readPackageWithout(path),
       }),
   };
@@ -56,11 +39,10 @@ function createPerformantResolve (root) {
  */
 async function loadCanonicalNameMap({ rootDir, includeDevDeps, resolve } = {}) {
   const canonicalNameMap = new Map()
-  // TODO: re-enable this performance optimization. it disallows lookups above the rootDir, offering a 2x speedup
-  // we currently rely on being able to do this for the browserify/test/lavamoatNode tests bc we dont parse workspaces
-  // "createPerformantResolve" has been exported so package consumers can opt in to using it
-  // resolve = resolve || createPerformantResolve(rootDir);
-  resolve = resolve || nodeResolve
+  // performant resolve avoids loading package.jsons if their path is what's being resolved, 
+  // offering 2x performance improvement compared to using original resolve
+  resolve = resolve || createPerformantResolve();
+  // resolve = resolve || nodeResolve
   // walk tree
   const logicalPathMap = walkDependencyTreeForBestLogicalPaths({ packageDir: rootDir, includeDevDeps, resolve, canonicalNameMap })
   //convert dependency paths to canonical package names
@@ -113,7 +95,7 @@ function walkDependencyTreeForBestLogicalPaths({ packageDir, logicalPath = [], i
   // drain work queue until empty, avoid going depth-first by prioritizing the current depth level
   do {
     processOnePackageInLogicalTree(preferredPackageLogicalPathMap, resolve)
-    if (currentLevelTodos.length === 0){
+    if (currentLevelTodos.length === 0) {
       currentLevelTodos = nextLevelTodos;
       nextLevelTodos = [];
     }
