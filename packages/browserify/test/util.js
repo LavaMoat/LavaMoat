@@ -3,7 +3,6 @@ const browserify = require('browserify')
 const pify = require('pify')
 const { promises: fs } = require('fs')
 const path = require('path')
-const mergeDeep = require('merge-deep')
 const watchify = require('watchify')
 const lavamoatPlugin = require('../src/index')
 const { verifySourceMaps } = require('./sourcemaps')
@@ -187,7 +186,8 @@ async function runScenario ({
     await verifySourceMaps({ bundle })
   }
   const { hookedConsole, firstLogEventPromise } = createHookedConsole()
-  evaluateWithSourceUrl('testBundlejs', bundle, mergeDeep({ console: hookedConsole }, scenario.context))
+  Object.assign(scenario.context, { console: hookedConsole })
+  evaluateWithSourceUrl('testBundle.js', bundle, scenario.context)
   const testResult = await firstLogEventPromise
   return testResult
 }

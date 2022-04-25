@@ -9,6 +9,7 @@ module.exports = { parseForPolicy }
  * @param {string} options.moduleSpecifier
  * @param {function} options.isBuiltin
  * @param {function} options.shouldImport
+ * @param {object} options.policyOverride
  * @param {bool} options.includeDebugInfo
  * @param {ModuleInspector} options.inspector
  * @returns {JSON} policy object
@@ -18,8 +19,8 @@ async function parseForPolicy ({
   importHook,
   isBuiltin,
   shouldImport,
-  includeDebugInfo,
   policyOverride,
+  includeDebugInfo,
   inspector = createModuleInspector({ isBuiltin, includeDebugInfo })
 }) {
   for await (const moduleRecord of eachNodeInTree({ moduleSpecifier, importHook, shouldImport })) {

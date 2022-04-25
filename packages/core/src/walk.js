@@ -39,18 +39,20 @@ async function walk ({
  * @param {Set<string>} options.visitedSpecifiers
  * @returns {AsyncIterableIterator<LavamoatModuleRecord>}
  */
+// NOTE: i think this is depth first in a way that doesnt take advantage of concurrency
 async function * eachNodeInTree ({
   moduleSpecifier,
   importHook,
   shouldImport = () => true,
-  visitedSpecifiers = new Set()
+  visitedSpecifiers = new Set(),
 }) {
   // walk next record
   const moduleRecord = await importHook(moduleSpecifier)
   yield moduleRecord
 
-  // walk children
-  for (const childSpecifier of Object.values(moduleRecord.importMap)) {
+  // walk children specified in importMap and policyOverride
+  const importMapChildren = Object.values(moduleRecord.importMap)
+  for (const childSpecifier of importMapChildren) {
     // skip children that are set to null (resolution was skipped)
     if (childSpecifier === null) continue
     // skip modules we're told not to import
@@ -63,7 +65,7 @@ async function * eachNodeInTree ({
       moduleSpecifier: childSpecifier,
       importHook,
       shouldImport,
-      visitedSpecifiers
+      visitedSpecifiers,
     })
   }
 }
