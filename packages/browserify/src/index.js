@@ -114,6 +114,7 @@ function getConfigurationFromPluginOpts (pluginOpts) {
     prunepolicy: 'prunePolicy',
     d: 'debugMode',
     debug: 'debugMode',
+    stats: 'statsMode',
     pn: 'policyName',
     projectRoot: 'projectRoot',
     r: 'projectRoot',
@@ -148,6 +149,7 @@ function getConfigurationFromPluginOpts (pluginOpts) {
     includePrelude: 'includePrelude' in pluginOpts ? Boolean(pluginOpts.includePrelude) : true,
     pruneConfig: Boolean(pluginOpts.prunePolicy),
     debugMode: Boolean(pluginOpts.debugMode),
+    statsMode: Boolean(pluginOpts.statsMode),
     writeAutoPolicy: Boolean(pluginOpts.writeAutoPolicy || pluginOpts.writeAutoPolicyDebug),
     writeAutoPolicyDebug: Boolean(pluginOpts.writeAutoPolicyDebug),
     bundleWithPrecompiledModules: 'bundleWithPrecompiledModules' in pluginOpts ? Boolean(pluginOpts.bundleWithPrecompiledModules) : true,
@@ -239,12 +241,9 @@ function getPolicyPaths (pluginOpts) {
 }
 
 function createLavamoatPacker (configuration = {}) {
-  const { includePrelude, bundleWithPrecompiledModules } = configuration
   const defaults = {
     raw: true,
     policy: loadPolicy(configuration),
-    includePrelude,
-    bundleWithPrecompiledModules,
   }
   const packOpts = Object.assign({}, defaults, configuration)
   const customPack = createLavaPack(packOpts)
