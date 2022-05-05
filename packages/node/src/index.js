@@ -27,7 +27,7 @@ async function runLava () {
     policyOverridePath,
     projectRoot,
     debugMode,
-    stats: enableStats,
+    statsMode,
   } = parseArgs()
   const shouldParseApplication = writeAutoPolicy || writeAutoPolicyDebug || writeAutoPolicyAndRun
   const shouldRunApplication = (!writeAutoPolicy && !writeAutoPolicyDebug) || writeAutoPolicyAndRun
@@ -56,7 +56,7 @@ async function runLava () {
     const lavamoatPolicy = await loadPolicy({ debugMode, policyPath })
     const canonicalNameMap = await loadCanonicalNameMap({ rootDir: projectRoot, includeDevDeps: true })
       // process.exit(420)
-    const kernel = createKernel({ projectRoot, lavamoatPolicy, canonicalNameMap, debugMode, enableStats })
+    const kernel = createKernel({ projectRoot, lavamoatPolicy, canonicalNameMap, debugMode, statsMode })
     // patch process.argv so it matches the normal pattern
     // e.g. [runtime path, entrypoint, ...args]
     // we'll use the LavaMoat path as the runtime
@@ -131,8 +131,9 @@ function parseArgs () {
         type: 'boolean',
         default: false
       })
-      // log stats
-      yargs.option('stats', {
+      // log initialization stats
+      yargs.option('statsMode', {
+        alias: ['stats'],
         describe: 'enable writing and logging of stats',
         type: 'boolean',
         default: false
