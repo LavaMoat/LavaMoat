@@ -26,7 +26,8 @@ async function runLava () {
     policyDebugPath,
     policyOverridePath,
     projectRoot,
-    debugMode
+    debugMode,
+    stats: enableStats,
   } = parseArgs()
   const shouldParseApplication = writeAutoPolicy || writeAutoPolicyDebug || writeAutoPolicyAndRun
   const shouldRunApplication = (!writeAutoPolicy && !writeAutoPolicyDebug) || writeAutoPolicyAndRun
@@ -55,7 +56,7 @@ async function runLava () {
     const lavamoatPolicy = await loadPolicy({ debugMode, policyPath })
     const canonicalNameMap = await loadCanonicalNameMap({ rootDir: projectRoot, includeDevDeps: true })
       // process.exit(420)
-    const kernel = createKernel({ projectRoot, lavamoatPolicy, canonicalNameMap, debugMode })
+    const kernel = createKernel({ projectRoot, lavamoatPolicy, canonicalNameMap, debugMode, enableStats })
     // patch process.argv so it matches the normal pattern
     // e.g. [runtime path, entrypoint, ...args]
     // we'll use the LavaMoat path as the runtime
@@ -96,13 +97,6 @@ function parseArgs () {
         type: 'string',
         default: defaultPaths.debug
       })
-      // debugMode, disable some protections for easier debugging
-      yargs.option('debugMode', {
-        alias: ['d', 'debug'],
-        describe: 'Disable some protections and extra logging for easier debugging.',
-        type: 'boolean',
-        default: false
-      })
       // parsing mode, write policy to policy path
       yargs.option('writeAutoPolicy', {
         alias: ['a', 'autopolicy'],
@@ -129,6 +123,19 @@ function parseArgs () {
         describe: 'specify the director from where packages should be resolved',
         type: 'string',
         default: process.cwd()
+      })
+      // debugMode, disable some protections for easier debugging
+      yargs.option('debugMode', {
+        alias: ['d', 'debug'],
+        describe: 'Disable some protections and extra logging for easier debugging.',
+        type: 'boolean',
+        default: false
+      })
+      // log stats
+      yargs.option('stats', {
+        describe: 'enable writing and logging of stats',
+        type: 'boolean',
+        default: false
       })
     })
     .help()

@@ -8,13 +8,13 @@ const { getPackageNameForModulePath } = require('@lavamoat/aa')
 const { checkForResolutionOverride } = require('./resolutions')
 const { resolutionOmittedExtensions } = require('./parseForPolicy')
 const { createFreshRealmCompartment } = require('./freshRealmCompartment')
-
+const noop = () => {}
 
 const nativeRequire = require
 
 module.exports = { createKernel }
 
-function createKernel ({ projectRoot, lavamoatPolicy, canonicalNameMap, debugMode }) {
+function createKernel ({ projectRoot, lavamoatPolicy, canonicalNameMap, debugMode, enableStats }) {
   const { resolutions } = lavamoatPolicy
   const getRelativeModuleId = createModuleResolver({ projectRoot, resolutions, canonicalNameMap })
   const loadModuleData = createModuleLoader({ canonicalNameMap })
@@ -26,7 +26,8 @@ function createKernel ({ projectRoot, lavamoatPolicy, canonicalNameMap, debugMod
     getRelativeModuleId,
     prepareModuleInitializerArgs,
     getExternalCompartment,
-    globalThisRefs: ['global', 'globalThis']
+    globalThisRefs: ['global', 'globalThis'],
+    reportStatsHook: enableStats ? reportStatsHook : noop,
   })
   return kernel
 }
@@ -162,4 +163,45 @@ function isNativeModule (filename) {
 
 function evaluateWithSourceUrl (filename, content) {
   return eval(`${content}\n//# sourceURL=${filename}`)
+}
+
+let statModuleStack = []
+function reportStatsHook (event, moduleId) {
+  if (event === 'start') {
+    // record start
+    const startTime = Date.now()
+    // console.log(`loaded module ${moduleId}`)
+    const statRecord = {
+      "name": moduleId,
+      "value": null,
+      "children": [],
+      "startTime": startTime,
+      "endTime": null
+    }
+    // add as child to current
+    if (statModuleStack.length > 0) {
+      const currentStat = statModuleStack[statModuleStack.length - 1]
+      currentStat.children.push(statRecord)
+    }
+    // set as current
+    statModuleStack.push(statRecord)
+  } else if (event === 'end') {
+    const endTime = Date.now()
+    const currentStat = statModuleStack[statModuleStack.length - 1]
+    if (currentStat.name !== moduleId) { console.error(`stats hook misaligned "${currentStat.name}", "${moduleId}" ${statModuleStack.map(e => e.name).join()}`) }
+    currentStat.endTime = endTime
+    const startTime = currentStat.startTime
+    const duration = endTime - startTime
+    currentStat.value = duration
+    // console.log(`loaded module ${moduleId} in ${duration}ms`)
+    // check if totally done
+    if (statModuleStack.length === 1) {
+      const graphId = Date.now()
+      console.warn(`completed module graph init "${graphId}" in ${currentStat.value}ms ("${moduleId}")`)
+      const statsFilePath = `./lavamoat-flame-${graphId}.json`
+      console.warn(`wrote stats file to "${statsFilePath}"`)
+      fs.writeFileSync(statsFilePath, JSON.stringify(currentStat, null, 2))
+    }
+    statModuleStack.pop()
+  }
 }
