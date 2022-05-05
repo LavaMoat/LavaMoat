@@ -2,6 +2,9 @@
   "name": "@lavamoat/aa",
   "version": "3.0.0",
   "main": "src/index.js",
+  "bin": {
+    "lavamoat-ls": "src/cli.js"
+  },
   "license": "MIT",
   "publishConfig": {
     "access": "public"
