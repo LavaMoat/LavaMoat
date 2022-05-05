@@ -16,7 +16,8 @@ const {
 const { parse, inspectImports, codeSampleFromAstNode } = require('lavamoat-tofu')
 const { checkForResolutionOverride } = require('./resolutions')
 
-const commonjsExtensions = ['.js', '.cjs']
+// file extension omitted can be omitted, eg https://npmfs.com/package/yargs/17.0.1/yargs
+const commonjsExtensions = ['', '.js', '.cjs']
 const resolutionOmittedExtensions = ['.js', '.json']
 
 // approximate polyfill for node builtin
