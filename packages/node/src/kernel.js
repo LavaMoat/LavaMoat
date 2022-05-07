@@ -3,30 +3,32 @@ const fs = require('fs')
 const path = require('path')
 const resolve = require('resolve')
 const { sanitize } = require('htmlescape')
-const { generateKernel, applySourceTransforms } = require('lavamoat-core')
+const { generateKernel, applySourceTransforms, makeInitStatsHook } = require('lavamoat-core')
 const { getPackageNameForModulePath } = require('@lavamoat/aa')
 const { checkForResolutionOverride } = require('./resolutions')
 const { resolutionOmittedExtensions } = require('./parseForPolicy')
 const { createFreshRealmCompartment } = require('./freshRealmCompartment')
-
+const noop = () => {}
 
 const nativeRequire = require
 
 module.exports = { createKernel }
 
-function createKernel ({ projectRoot, lavamoatPolicy, canonicalNameMap, debugMode }) {
+function createKernel ({ projectRoot, lavamoatPolicy, canonicalNameMap, debugMode, statsMode }) {
   const { resolutions } = lavamoatPolicy
   const getRelativeModuleId = createModuleResolver({ projectRoot, resolutions, canonicalNameMap })
   const loadModuleData = createModuleLoader({ canonicalNameMap })
   const kernelSrc = generateKernel({ debugMode })
   const createKernel = evaluateWithSourceUrl('LavaMoat/node/kernel', kernelSrc)
+  const reportStatsHook = statsMode ? makeInitStatsHook({ onStatsReady }) : noop
   const kernel = createKernel({
     lavamoatConfig: lavamoatPolicy,
     loadModuleData,
     getRelativeModuleId,
     prepareModuleInitializerArgs,
     getExternalCompartment,
-    globalThisRefs: ['global', 'globalThis']
+    globalThisRefs: ['global', 'globalThis'],
+    reportStatsHook,
   })
   return kernel
 }
@@ -162,4 +164,12 @@ function isNativeModule (filename) {
 
 function evaluateWithSourceUrl (filename, content) {
   return eval(`${content}\n//# sourceURL=${filename}`)
+}
+
+function onStatsReady (moduleGraphStatsObj) {
+  const graphId = Date.now()
+  console.warn(`completed module graph init "${graphId}" in ${moduleGraphStatsObj.value}ms ("${moduleGraphStatsObj.name}")`)
+  const statsFilePath = `./lavamoat-flame-${graphId}.json`
+  console.warn(`wrote stats file to "${statsFilePath}"`)
+  fs.writeFileSync(statsFilePath, JSON.stringify(moduleGraphStatsObj, null, 2))
 }

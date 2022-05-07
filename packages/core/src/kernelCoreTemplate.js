@@ -15,7 +15,8 @@
     globalThisRefs,
     // security options
     debugMode,
-    runWithPrecompiledModules
+    runWithPrecompiledModules,
+    reportStatsHook
   }) {
     // create SES-wrapped LavaMoat kernel
     // endowments:
@@ -38,7 +39,8 @@
       getExternalCompartment,
       globalThisRefs,
       debugMode,
-      runWithPrecompiledModules
+      runWithPrecompiledModules,
+      reportStatsHook
     })
 
     return lavamoatKernel
@@ -55,7 +57,8 @@
     getExternalCompartment,
     globalThisRefs = ['globalThis'],
     debugMode = false,
-    runWithPrecompiledModules = false
+    runWithPrecompiledModules = false,
+    reportStatsHook = () => {}
   }) {
     // "templateRequire" calls are inlined in "generateKernel"
     const generalUtils = templateRequire('makeGeneralUtils')()
@@ -91,52 +94,57 @@
         return moduleExports
       }
 
-      // load and validate module metadata
-      // if module metadata is missing, throw an error
-      const moduleData = loadModuleData(moduleId)
-      if (!moduleData) {
-        const err = new Error('Cannot find module \'' + moduleId + '\'')
-        err.code = 'MODULE_NOT_FOUND'
-        throw err
-      }
-      if (moduleData.id === undefined) {
-        throw new Error('LavaMoat - moduleId is not defined correctly.')
-      }
+      reportStatsHook('start', moduleId)
 
-      // parse and validate module data
-      const { package: packageName, source: moduleSource } = moduleData
-      if (!packageName) throw new Error(`LavaMoat - missing packageName for module "${moduleId}"`)
-      const packagePolicy = getPolicyForPackage(lavamoatConfig, packageName)
+      try {
+        // load and validate module metadata
+        // if module metadata is missing, throw an error
+        const moduleData = loadModuleData(moduleId)
+        if (!moduleData) {
+          const err = new Error('Cannot find module \'' + moduleId + '\'')
+          err.code = 'MODULE_NOT_FOUND'
+          throw err
+        }
+        if (moduleData.id === undefined) {
+          throw new Error('LavaMoat - moduleId is not defined correctly.')
+        }
 
-      // create the moduleObj and initializer
-      const { moduleInitializer, moduleObj } = prepareModuleInitializer(moduleData, packagePolicy)
+        // parse and validate module data
+        const { package: packageName, source: moduleSource } = moduleData
+        if (!packageName) throw new Error(`LavaMoat - missing packageName for module "${moduleId}"`)
+        const packagePolicy = getPolicyForPackage(lavamoatConfig, packageName)
 
-      // cache moduleObj here
-      // this is important to inf loops when hitting cycles in the dep graph
-      // must cache before running the moduleInitializer
-      moduleCache.set(moduleId, moduleObj)
+        // create the moduleObj and initializer
+        const { moduleInitializer, moduleObj } = prepareModuleInitializer(moduleData, packagePolicy)
 
-      // validate moduleInitializer
-      if (typeof moduleInitializer !== 'function') {
-        throw new Error(`LavaMoat - moduleInitializer is not defined correctly. got "${typeof moduleInitializer}"\n${moduleSource}`)
-      }
+        // cache moduleObj here
+        // this is important to inf loops when hitting cycles in the dep graph
+        // must cache before running the moduleInitializer
+        moduleCache.set(moduleId, moduleObj)
 
-      // initialize the module with the correct context
-      const initializerArgs = prepareModuleInitializerArgs(requireRelativeWithContext, moduleObj, moduleData)
-      moduleInitializer.apply(moduleObj.exports, initializerArgs)
-      const moduleExports = moduleObj.exports
+        // validate moduleInitializer
+        if (typeof moduleInitializer !== 'function') {
+          throw new Error(`LavaMoat - moduleInitializer is not defined correctly. got "${typeof moduleInitializer}"\n${moduleSource}`)
+        }
 
-      return moduleExports
+        // initialize the module with the correct context
+        const initializerArgs = prepareModuleInitializerArgs(requireRelativeWithContext, moduleObj, moduleData)
+        moduleInitializer.apply(moduleObj.exports, initializerArgs)
+        const moduleExports = moduleObj.exports
+        return moduleExports
 
-      // this is passed to the module initializer
-      // it adds the context of the parent module
-      // this could be replaced via "Function.prototype.bind" if its more performant
-      function requireRelativeWithContext (requestedName) {
-        const parentModuleExports = moduleObj.exports
-        const parentModuleData = moduleData
-        const parentPackagePolicy = packagePolicy
-        const parentModuleId = moduleId
-        return requireRelative({ requestedName, parentModuleExports, parentModuleData, parentPackagePolicy, parentModuleId })
+        // this is passed to the module initializer
+        // it adds the context of the parent module
+        // this could be replaced via "Function.prototype.bind" if its more performant
+        function requireRelativeWithContext (requestedName) {
+          const parentModuleExports = moduleObj.exports
+          const parentModuleData = moduleData
+          const parentPackagePolicy = packagePolicy
+          const parentModuleId = moduleId
+          return requireRelative({ requestedName, parentModuleExports, parentModuleData, parentPackagePolicy, parentModuleId })
+        }
+      } finally {
+        reportStatsHook('end', moduleId)
       }
     }
 

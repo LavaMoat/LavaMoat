@@ -3,8 +3,54 @@
   const moduleRegistry = new Map()
   const lavamoatPolicy = { resources: {} }
   const debugMode = false
+  const statsMode = false
 
   // initialize the kernel
+  const reportStatsHook = statsMode ? (function makeInitStatsHook ({ onStatsReady }) {
+  let statModuleStack = []
+  return reportStatsHook
+
+  function reportStatsHook (event, moduleId) {
+    if (event === 'start') {
+      // record start
+      const startTime = Date.now()
+      // console.log(`loaded module ${moduleId}`)
+      const statRecord = {
+        "name": moduleId,
+        "value": null,
+        "children": [],
+        "startTime": startTime,
+        "endTime": null
+      }
+      // add as child to current
+      if (statModuleStack.length > 0) {
+        const currentStat = statModuleStack[statModuleStack.length - 1]
+        currentStat.children.push(statRecord)
+      }
+      // set as current
+      statModuleStack.push(statRecord)
+    } else if (event === 'end') {
+      const endTime = Date.now()
+      const currentStat = statModuleStack[statModuleStack.length - 1]
+      // sanity check, should only get an end for the current top of stack
+      if (currentStat.name !== moduleId) {
+        console.error(`stats hook misaligned "${currentStat.name}", "${moduleId}" ${statModuleStack.map(e => e.name).join()}`)
+      }
+      currentStat.endTime = endTime
+      const startTime = currentStat.startTime
+      const duration = endTime - startTime
+      currentStat.value = duration
+      // console.log(`loaded module ${moduleId} in ${duration}ms`)
+      // check if totally done
+      if (statModuleStack.length === 1) {
+        currentStat.version = 1
+        onStatsReady(currentStat)
+      }
+      statModuleStack.pop()
+    }
+  }
+
+})({ onStatsReady }) : () => {}
   const createKernel = // LavaMoat Prelude
 (function () {
   return createKernel
@@ -17,6 +63,7 @@
     getExternalCompartment,
     globalThisRefs,
     runWithPrecompiledModules,
+    reportStatsHook,
   }) {
     const debugMode = false
 
@@ -10416,7 +10463,8 @@ assign(globalThis, {
     globalThisRefs,
     // security options
     debugMode,
-    runWithPrecompiledModules
+    runWithPrecompiledModules,
+    reportStatsHook
   }) {
     // create SES-wrapped LavaMoat kernel
     // endowments:
@@ -10439,7 +10487,8 @@ assign(globalThis, {
       getExternalCompartment,
       globalThisRefs,
       debugMode,
-      runWithPrecompiledModules
+      runWithPrecompiledModules,
+      reportStatsHook
     })
 
     return lavamoatKernel
@@ -10456,7 +10505,8 @@ assign(globalThis, {
     getExternalCompartment,
     globalThisRefs = ['globalThis'],
     debugMode = false,
-    runWithPrecompiledModules = false
+    runWithPrecompiledModules = false,
+    reportStatsHook = () => {}
   }) {
     // "templateRequire" calls are inlined in "generateKernel"
     const generalUtils = // define makeGeneralUtils
@@ -10878,52 +10928,57 @@ function makePrepareRealmGlobalFromConfig ({ createFunctionWrapper }) {
         return moduleExports
       }
 
-      // load and validate module metadata
-      // if module metadata is missing, throw an error
-      const moduleData = loadModuleData(moduleId)
-      if (!moduleData) {
-        const err = new Error('Cannot find module \'' + moduleId + '\'')
-        err.code = 'MODULE_NOT_FOUND'
-        throw err
-      }
-      if (moduleData.id === undefined) {
-        throw new Error('LavaMoat - moduleId is not defined correctly.')
-      }
+      reportStatsHook('start', moduleId)
 
-      // parse and validate module data
-      const { package: packageName, source: moduleSource } = moduleData
-      if (!packageName) throw new Error(`LavaMoat - missing packageName for module "${moduleId}"`)
-      const packagePolicy = getPolicyForPackage(lavamoatConfig, packageName)
+      try {
+        // load and validate module metadata
+        // if module metadata is missing, throw an error
+        const moduleData = loadModuleData(moduleId)
+        if (!moduleData) {
+          const err = new Error('Cannot find module \'' + moduleId + '\'')
+          err.code = 'MODULE_NOT_FOUND'
+          throw err
+        }
+        if (moduleData.id === undefined) {
+          throw new Error('LavaMoat - moduleId is not defined correctly.')
+        }
 
-      // create the moduleObj and initializer
-      const { moduleInitializer, moduleObj } = prepareModuleInitializer(moduleData, packagePolicy)
+        // parse and validate module data
+        const { package: packageName, source: moduleSource } = moduleData
+        if (!packageName) throw new Error(`LavaMoat - missing packageName for module "${moduleId}"`)
+        const packagePolicy = getPolicyForPackage(lavamoatConfig, packageName)
 
-      // cache moduleObj here
-      // this is important to inf loops when hitting cycles in the dep graph
-      // must cache before running the moduleInitializer
-      moduleCache.set(moduleId, moduleObj)
+        // create the moduleObj and initializer
+        const { moduleInitializer, moduleObj } = prepareModuleInitializer(moduleData, packagePolicy)
 
-      // validate moduleInitializer
-      if (typeof moduleInitializer !== 'function') {
-        throw new Error(`LavaMoat - moduleInitializer is not defined correctly. got "${typeof moduleInitializer}"\n${moduleSource}`)
-      }
+        // cache moduleObj here
+        // this is important to inf loops when hitting cycles in the dep graph
+        // must cache before running the moduleInitializer
+        moduleCache.set(moduleId, moduleObj)
 
-      // initialize the module with the correct context
-      const initializerArgs = prepareModuleInitializerArgs(requireRelativeWithContext, moduleObj, moduleData)
-      moduleInitializer.apply(moduleObj.exports, initializerArgs)
-      const moduleExports = moduleObj.exports
+        // validate moduleInitializer
+        if (typeof moduleInitializer !== 'function') {
+          throw new Error(`LavaMoat - moduleInitializer is not defined correctly. got "${typeof moduleInitializer}"\n${moduleSource}`)
+        }
 
-      return moduleExports
+        // initialize the module with the correct context
+        const initializerArgs = prepareModuleInitializerArgs(requireRelativeWithContext, moduleObj, moduleData)
+        moduleInitializer.apply(moduleObj.exports, initializerArgs)
+        const moduleExports = moduleObj.exports
+        return moduleExports
 
-      // this is passed to the module initializer
-      // it adds the context of the parent module
-      // this could be replaced via "Function.prototype.bind" if its more performant
-      function requireRelativeWithContext (requestedName) {
-        const parentModuleExports = moduleObj.exports
-        const parentModuleData = moduleData
-        const parentPackagePolicy = packagePolicy
-        const parentModuleId = moduleId
-        return requireRelative({ requestedName, parentModuleExports, parentModuleData, parentPackagePolicy, parentModuleId })
+        // this is passed to the module initializer
+        // it adds the context of the parent module
+        // this could be replaced via "Function.prototype.bind" if its more performant
+        function requireRelativeWithContext (requestedName) {
+          const parentModuleExports = moduleObj.exports
+          const parentModuleData = moduleData
+          const parentPackagePolicy = packagePolicy
+          const parentModuleId = moduleId
+          return requireRelative({ requestedName, parentModuleExports, parentModuleData, parentPackagePolicy, parentModuleId })
+        }
+      } finally {
+        reportStatsHook('end', moduleId)
       }
     }
 
@@ -11199,7 +11254,8 @@ function makePrepareRealmGlobalFromConfig ({ createFunctionWrapper }) {
       globalRef,
       globalThisRefs,
       debugMode,
-      runWithPrecompiledModules
+      runWithPrecompiledModules,
+      reportStatsHook
     })
     return kernel
   }
@@ -11213,8 +11269,24 @@ function makePrepareRealmGlobalFromConfig ({ createFunctionWrapper }) {
     prepareModuleInitializerArgs,
     globalThisRefs: ['window', 'self', 'global', 'globalThis'],
     debugMode,
+    reportStatsHook,
   })
   const { internalRequire } = kernel
+
+  // create a lavamoat pulic API for loading modules over multiple files
+  const LavaPack = {
+    loadPolicy: Object.freeze(loadPolicy),
+    loadBundle: Object.freeze(loadBundle),
+    runModule: Object.freeze(runModule),
+  }
+  // in debug mode, expose the kernel on the LavaPack API
+  if (debugMode) {
+    LavaPack._kernel = kernel
+  }
+
+  globalThis.LavaPack = Object.freeze(LavaPack)
+  return
+
 
   function loadModuleData (moduleId) {
     if (!moduleRegistry.has(moduleId)) {
@@ -11238,19 +11310,6 @@ function makePrepareRealmGlobalFromConfig ({ createFunctionWrapper }) {
     // bify direct module instantiation disabled ("arguments[4]")
     return [require, module, exports, null, null]
   }
-
-  // create a lavamoat pulic API for loading modules over multiple files
-  const LavaPack = {
-    loadPolicy: Object.freeze(loadPolicy),
-    loadBundle: Object.freeze(loadBundle),
-    runModule: Object.freeze(runModule),
-  }
-  // in debug mode, expose the kernel on the LavaPack API
-  if (debugMode) {
-    LavaPack._kernel = kernel
-  }
-
-  globalThis.LavaPack = Object.freeze(LavaPack)
 
   // it is called by the policy loader or modules collection
   function loadPolicy (bundlePolicy) {
@@ -11296,6 +11355,14 @@ function makePrepareRealmGlobalFromConfig ({ createFunctionWrapper }) {
       throw new Error(`no module registered for "${moduleId}" (${typeof moduleId})`)
     }
     return internalRequire(moduleId)
+  }
+
+  // called by reportStatsHook
+  function onStatsReady (moduleGraphStatsObj) {
+    const graphId = Date.now()
+    console.warn(`completed module graph init "${graphId}" in ${moduleGraphStatsObj.value}ms ("${moduleGraphStatsObj.name}")`)
+    console.warn(`logging module init stats object:`)
+    console.warn(JSON.stringify(moduleGraphStatsObj, null, 2))
   }
 
 })()

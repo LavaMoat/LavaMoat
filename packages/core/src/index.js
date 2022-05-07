@@ -7,6 +7,7 @@ const { LavamoatModuleRecord } = require('./moduleRecord')
 const { loadPolicy } = require('./loadPolicy')
 const { mergePolicy } = require('./mergePolicy')
 const { applySourceTransforms } = require('./sourceTransforms')
+const { makeInitStatsHook } = require('./makeInitStatsHook')
 
 module.exports = {
   // generating the kernel
@@ -19,5 +20,7 @@ module.exports = {
   getDefaultPaths,
   applySourceTransforms,
   // module record class
-  LavamoatModuleRecord
+  LavamoatModuleRecord,
+  // utils
+  makeInitStatsHook,
 }
