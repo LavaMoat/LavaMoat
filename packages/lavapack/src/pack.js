@@ -10,6 +10,7 @@
 // - cleanup/refactor
 
 const fs = require('fs')
+const path = require('path')
 const assert = require('assert')
 const JSONStream = require('JSONStream')
 const through = require('through2')
@@ -198,12 +199,13 @@ function createPacker({
 
   function serializeModule (moduleData, sourceMeta) {
     const { id, packageName, source, deps, file } = moduleData
+    const relativeFilePath = file && path.relative(basedir, file)
     // for now, ignore new sourcemap and just append original filename
     // serialize final module entry
     const jsonSerializeableData = {
       // id,
       package: packageName,
-      file,
+      file: relativeFilePath,
       // deps,
       // source: sourceMeta.code
     }
