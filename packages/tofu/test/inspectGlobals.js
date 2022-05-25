@@ -241,6 +241,24 @@ testInspect('new intrinsics like BigInt are ignored', {
   BigInt(123)
 }, {})
 
+testInspect('object destructuring 2', {
+  globalRefs: ['globalThis']
+}, () => {
+  const { source: { location: { npm: { filePath, iconPath }, }, }, } = manifest
+}, {
+  'manifest.source.location.npm.filePath': 'read',
+  'manifest.source.location.npm.iconPath': 'read',
+})
+
+testInspect('optional chaining', {
+  globalRefs: ['globalThis']
+}, () => {
+  manifest.source?.location?.npm?.filePath;
+}, {
+  'manifest.source.location.npm.filePath': 'read',
+})
+
+
 function testInspect (label, opts, fn, expectedResultObj) {
   test(label, (t) => {
     const src = fnToCodeBlock(fn)

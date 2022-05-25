@@ -1,7 +1,7 @@
 'use strict'
 
 const { default: traverse } = require('@babel/traverse')
-const { getParents } = require('./util')
+const { isInFunctionDeclaration, isMemberLikeExpression } = require('./util')
 
 const nonReferenceIdentifiers = [
   'FunctionDeclaration',
@@ -27,7 +27,7 @@ function findGlobals (ast) {
       if (nonReferenceIdentifiers.includes(parentType)) return
       if (parentType === 'VariableDeclarator' && path.parent.id === path.node) return
       // skip if this is the key side of a member expression
-      if (parentType === 'MemberExpression' && path.parent.property === path.node) return
+      if (isMemberLikeExpression(path.parent) && path.parent.property === path.node) return
       // skip if this is the key side of an object pattern
       if (parentType === 'ObjectProperty' && path.parent.key === path.node) return
       if (parentType === 'ObjectMethod' && path.parent.key === path.node) return
@@ -61,8 +61,4 @@ function findGlobals (ast) {
     const refsForName = globals.get(name)
     refsForName.push(path)
   }
-}
-
-function isInFunctionDeclaration (path) {
-  return getParents(path.parentPath).some(parent => parent.type === 'FunctionDeclaration' || parent.type === 'FunctionExpression')
 }
