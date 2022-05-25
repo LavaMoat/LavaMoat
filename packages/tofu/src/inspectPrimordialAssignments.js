@@ -1,5 +1,6 @@
 const { default: traverse } = require('@babel/traverse')
 const { globalPropertyNames: defaultNamedIntrinsics } = require('./primordials.js')
+const { isMemberLikeExpression } = require('./util.js')
 
 module.exports = { inspectPrimordialAssignments }
 
@@ -10,7 +11,7 @@ function inspectPrimordialAssignments (ast, namedIntrinsics = defaultNamedIntrin
       const { node } = path
       const { left } = node
       // select for assignment to a property
-      if (left.type !== 'MemberExpression') return
+      if (!isMemberLikeExpression(left)) return
       const { property, computed } = left
       // skip if property name is a variable
       if (computed) return
@@ -34,7 +35,7 @@ function inspectPrimordialAssignments (ast, namedIntrinsics = defaultNamedIntrin
 function memberExpressionChainToPath (node) {
   const path = []
   // walk down property chain
-  while ((node.object.type === 'MemberExpression')) {
+  while ((isMemberLikeExpression(node.object))) {
     path.push(node.property.name)
     node = node.object
   }
