@@ -12,7 +12,7 @@ import {
   parseConfigDebugForPackages,
   createGraph,
   getDangerRankForModule,
-  sortByDangerRank,
+  sortIntelligently,
   getColorForRank,
   getLineNumbersForGlobals,
   getEnvConfigForPolicyName,
@@ -264,10 +264,9 @@ class DepGraph extends React.Component {
       helpMessage = 'Press ENTER to navigate between globals'
     }
 
-    sortedPackages = sortByDangerRank(packages)
+    sortedPackages = Object.values(packages).sort(sortIntelligently())
     if (packageModules) {
-      const packageModulesList = Object.values(packageModules)
-      sortedModules = sortByDangerRank(packageModulesList)
+      sortedModules = Object.values(packageModules).sort(sortIntelligently())
     }
 
     return (
@@ -355,7 +354,7 @@ class DepGraph extends React.Component {
 
   renderSelectedPackage (selectedPackage) {
     const { policyData: { final: { resources: finalPolicyResources } } } = this.props
-    const packagePolicy = finalPolicyResources[selectedPackage.name] || {}
+    const packagePolicy = finalPolicyResources[selectedPackage.id] || {}
     return (
       <div className="packageInfo">
         <pre>{selectedPackage.id}</pre>

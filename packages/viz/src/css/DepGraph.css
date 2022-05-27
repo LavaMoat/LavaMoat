@@ -56,12 +56,19 @@
   justify-content: start;
   align-items: center;
 }
-.packageIcon, .moduleIcon {
+.packageIcon {
   /* width: 10px; */
   /* height: 10px; */
   /* border-radius: 50%; */
   margin-right: 10px;
 }
+.moduleIcon {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
 .color-red {
   color: red;
 }
@@ -77,6 +84,23 @@
 .color-purple {
   color: purple;
 }
+.background-red {
+  background-color: red;
+}
+.background-brown {
+  background-color: brown;
+}
+.background-orange {
+  background-color: orange;
+}
+.background-green {
+  background-color: green;
+}
+.background-purple {
+  background-color: purple;
+}
+
+
 .moduleList {
   margin-left: 30px;
 }
