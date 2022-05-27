@@ -36,6 +36,7 @@
 }
 .packagesStyle {
   height: calc(100vh - 42px);
+  max-width: 420px;
   position: absolute;
   left: 0px;
   overflow: scroll;
@@ -56,25 +57,25 @@
   align-items: center;
 }
 .packageIcon, .moduleIcon {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
+  /* width: 10px; */
+  /* height: 10px; */
+  /* border-radius: 50%; */
   margin-right: 10px;
 }
-.red {
-  background-color: red;
+.color-red {
+  color: red;
 }
-.brown {
-  background-color: brown;
+.color-brown {
+  color: brown;
 }
-.orange {
-  background-color: orange;
+.color-orange {
+  color: orange;
 }
-.green {
-  background-color: green;
+.color-green {
+  color: green;
 }
-.purple {
-  background-color: purple;
+.color-purple {
+  color: purple;
 }
 .moduleList {
   margin-left: 30px;
