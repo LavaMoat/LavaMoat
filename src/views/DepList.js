@@ -103,7 +103,7 @@ class DepList extends React.Component {
             actions.selectModule(module.specifier)
           }}
         >
-          <div className={`moduleIcon ${module.color}`} />
+          <div className={`moduleIcon background-${module.color}`} />
           &quot;{module.fileSimple}&quot;
         </div>
       </div>

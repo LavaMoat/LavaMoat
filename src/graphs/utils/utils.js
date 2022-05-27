@@ -58,7 +58,7 @@ function parseConfigDebugForPackages (policyName, configDebugData, configFinal) 
       packageData.size = 0
       const isRootPackage = packageId === '$root$'
       packageData.isRoot = isRootPackage
-      packageData.config = resources[packageData.name] || {}
+      packageData.config = resources[packageData.id] || {}
     }
     // add total code size from module
     const { size } = moduleRecord
@@ -158,6 +158,7 @@ const rankColors = [
 ]
 
 function getDangerRankForPackage (packageData, envConfig) {
+  // check for hard coded values (?)
   if (packageData.dangerRank) {
     return packageData.dangerRank
   }
@@ -165,15 +166,11 @@ function getDangerRankForPackage (packageData, envConfig) {
   if (packageData.config.native) {
     return 3
   }
-  // if (packageData.isRoot) {
-  //   return -1
-  // }
-  // console.log(packageData)
-  // const moduleRanks = packageData.modules.map(
-  //   (moduleDebugInfo) => getDangerRankForModule(moduleDebugInfo, envConfig),
-  // )
-  // const rank = Math.max(...moduleRanks)
-  // return rank
+  // purple if root
+  if (packageData.isRoot) {
+    return -1
+  }
+  // check for globals and builtins
   const configRank = getRankForGlobals(packageData.config.globals, envConfig)
   const builtinRank = getRankForBuiltins(packageData.config.builtin, envConfig)
   const rank = Math.max(configRank, builtinRank)
@@ -244,8 +241,41 @@ function getRankForType (type = 'js') {
   return 3
 }
 
-function sortByDangerRank (data) {
-  return Object.values(data).sort((a, b) => b.dangerRank - a.dangerRank)
+function sortIntelligently () {
+  return sortByStrategies([
+    sortByDangerRank(),
+    sortByPackageName(),
+  ])
+}
+
+function sortByStrategies (sorterFns) {
+  return function sort (a, b) {
+    for (let i = 0; i < sorterFns.length; i++) {
+      const sorter = sorterFns[i]
+      const result = sorter(a, b)
+      if (result !== 0) {
+        return result
+      }
+    }
+    return 0
+  }
+}
+
+function sortByDangerRank () {
+  return sortByKey('dangerRank', true)
+}
+
+function sortByPackageName () {
+  return sortByKey('id')
+}
+
+function sortByKey (key, reverse = false) {
+  const reverseVal = reverse ? -1 : 1
+  return (a, b) => {
+    const aVal = a[key], bVal = b[key]
+    if (aVal === bVal) return 0
+    return aVal > bVal ? reverseVal : -reverseVal
+  }
 }
 
 function createLink (params) {
@@ -330,6 +360,9 @@ export {
   getColorForRank,
   fullModuleNameFromPath,
   getLineNumbersForGlobals,
+  sortIntelligently,
+  sortByStrategies,
   sortByDangerRank,
+  sortByPackageName,
   getEnvConfigForPolicyName,
 }
