@@ -91,6 +91,7 @@ function parseConfigDebugForPackages (policyName, configDebugData, configFinal) 
 function createGraph (packages, configFinal, {
   lavamoatMode,
   selectedNode,
+  hiddenPackages,
   // packageModulesMode,
   // showPackageSize,
 }) {
@@ -101,6 +102,8 @@ function createGraph (packages, configFinal, {
   Object.entries(packages).forEach(([_, packageData]) => {
     const { importMap } = packageData
     const parentId = packageData.id
+    // skip hidden packages
+    if (hiddenPackages.includes(parentId)) return
     const packageName = packageData.name
     // const size = showPackageSize ? getNodeSize(source) : 2
     const configForPackage = resources[packageName] || {}
@@ -118,6 +121,7 @@ function createGraph (packages, configFinal, {
     // create links for deps
     Object.keys(importMap).forEach((depName) => {
       const childId = String(importMap[depName])
+      if (hiddenPackages.includes(childId)) return
 
       let width
       let linkColor

@@ -46,6 +46,7 @@ class DepGraph extends React.Component {
       lavamoatMode: lavamoatModes[0],
       showPackageSize: false,
       selectionLocked: false,
+      hiddenPackages: [],
     }
   }
 
@@ -138,7 +139,9 @@ class DepGraph extends React.Component {
   onVrSessionStart (session) {
     const { packageData } = this.state
     const { scene, renderer, subscribeTick } = setupScene()
-    const graph = new ThreeForceGraph()
+    const graph = new ThreeForceGraph({
+      // nodeVal: 'size',
+    })
       .graphData(packageData)
       // .nodeThreeObject((node) => {
       //   return new SpriteText(node.label || node.id || 'hello', 10, node.color);
@@ -166,6 +169,7 @@ class DepGraph extends React.Component {
       selectedPackage,
       selectedModule,
       selectionLocked,
+      hiddenPackages,
     } = this.state
 
     const actions = {
@@ -218,6 +222,19 @@ class DepGraph extends React.Component {
         const newState = { lavamoatMode: target }
         this.setStateAndUpdateGraph(newState)
       },
+      togglePackageVisibility: (packageId) => {
+        const { hiddenPackages } = this.state
+        const isHidden = hiddenPackages.includes(packageId)
+        if (isHidden) {
+          this.setStateAndUpdateGraph({
+            hiddenPackages: hiddenPackages.filter((id) => id !== packageId),
+          })
+        } else {
+          this.setStateAndUpdateGraph({
+            hiddenPackages: [...hiddenPackages, packageId],
+          })
+        }
+      }
     }
     const graphData = packageData
     let sortedPackages = []
@@ -298,6 +315,7 @@ class DepGraph extends React.Component {
           sortedModules={sortedModules}
           selectedPackage={selectedPackage}
           selectedModule={selectedModule}
+          hiddenPackages={hiddenPackages}
         />
         {this.renderSelectedNodeView()}
         <ForceGraph2D
