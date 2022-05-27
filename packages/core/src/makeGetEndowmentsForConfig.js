@@ -37,10 +37,12 @@ function makeGetEndowmentsForConfig ({ createFunctionWrapper }) {
       if (pathContainsDunderProto) {
         throw new Error(`Lavamoat - "__proto__" disallowed when creating minial view. saw "${path}"`)
       }
+      // false means no access. It's necessary so that overrides can also be used to tighten the policy
+      if (configValue === false) return
       // write access handled elsewhere
       if (configValue === 'write') return
       if (configValue !== true) {
-        throw new Error(`LavaMoat - unknown value for config (${typeof configValue})`)
+        throw new Error(`LavaMoat - unrecognizable config value (${typeof configValue}) for path "${path}"`)
       }
       whitelistedReads.push(path)
     })

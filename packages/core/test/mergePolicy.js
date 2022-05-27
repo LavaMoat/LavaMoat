@@ -48,6 +48,51 @@ testMerge('merge with resources', {
   }
 })
 
+testMerge('overrides to disallow', {
+  resources: {
+    babel: {
+      globals: {
+        abc: true,
+        xyz: false,
+        'a.b': true,
+        'q.w.e': true
+      },
+      builtin: {
+        derp: true,
+        qwerty: false
+      }
+    }
+  }
+}, {
+  resources: {
+    babel: {
+      globals: {
+        abc: false,
+        'a.b.c': false, // this is not supported
+        'q.w': false
+      },
+      builtin: {
+        derp: false,
+      }
+    }
+  }
+},  {
+  resources: {
+    babel: {
+      builtin: {
+        derp: false,
+        qwerty: false,
+      },
+      globals: {
+        'a.b': true,
+        abc: false,
+        'q.w': false,
+        xyz: false,
+      },
+    },
+  },
+})
+
 function testMerge (label, configA, configB, expectedResultObj) {
   test(label, (t) => {
     const result = mergePolicy(configA, configB)
