@@ -61,7 +61,7 @@ function parseConfigDebugForPackages (policyName, configDebugData, configFinal) 
       packageData.config = resources[packageData.id] || {}
     }
     // add total code size from module
-    const { size } = moduleRecord
+    const size = moduleRecord.content.length
     packageData.size += size
     // add package-relative file path
     moduleRecord.fileSimple = fullModuleNameFromPath(moduleRecord.file)
@@ -93,7 +93,7 @@ function createGraph (packages, configFinal, {
   selectedNode,
   hiddenPackages,
   // packageModulesMode,
-  // showPackageSize,
+  showPackageSize,
 }) {
   const { resources } = configFinal
   const nodes = []
@@ -105,7 +105,7 @@ function createGraph (packages, configFinal, {
     // skip hidden packages
     if (hiddenPackages.includes(parentId)) return
     const packageName = packageData.name
-    // const size = showPackageSize ? getNodeSize(source) : 2
+    const size = true ? getNodeSize(packageData.size) : 2
     const configForPackage = resources[packageName] || {}
     const configLabel = JSON.stringify(configForPackage, null, 2)
     const isLavamoat = lavamoatMode === 'lavamoat'
@@ -114,7 +114,7 @@ function createGraph (packages, configFinal, {
     const color = isLavamoat ? lavamoatColor : 'red'
     // create node for modules
     nodes.push(
-      createNode({ id: parentId, val: 2, label, configLabel, color }),
+      createNode({ id: parentId, val: 2, label, configLabel, color, size }),
     )
     const selectedNodeId = selectedNode && selectedNode.id
 
@@ -296,6 +296,10 @@ function createNode (params) {
     ...params,
   }
   return node
+}
+
+function getNodeSize (size) {
+  return Math.sqrt(size / Math.PI) / 100
 }
 
 // function getNodeSize (source) {

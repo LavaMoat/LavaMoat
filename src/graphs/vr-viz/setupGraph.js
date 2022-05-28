@@ -1,8 +1,13 @@
-export default function setupGraph ({ scene, graph, subscribeTick }) {
+import { Group } from 'three';
+
+export default function setupGraph ({ scene, graph, lineController, subscribeTick }) {
   const scale = 0.001
-  graph.scale.set(scale, scale, scale)
-  graph.position.set(0, 1.5, 0)
+  const group = new Group()
+  group.scale.set(scale, scale, scale)
+  group.position.set(0, 1.5, 0)
+  group.add(graph)
+  group.add(lineController.object)
+  scene.add(group)
   subscribeTick(() => graph.tickFrame())
-  scene.add(graph)
   return { graph }
 }
