@@ -1,8 +1,8 @@
 /* eslint-disable react/no-deprecated */
 import ForceGraph2D from 'react-force-graph-2d'
 import ThreeForceGraph from 'three-forcegraph'
-// import SpriteText from 'three-spritetext';
-// import * as THREE from 'three';
+import SpriteText from 'three-spritetext';
+import { Object3D } from 'three';
 import React from 'react'
 import '../css/DepGraph.css'
 import { UnControlled as CodeMirror } from 'react-codemirror2'
@@ -22,6 +22,7 @@ import XrButton from './xr-button.js'
 import setupScene from './vr-viz/setupScene.js'
 // import setupSelections from './vr-viz/setupSelections.js'
 import setupGraph from './vr-viz/setupGraph.js'
+import { LineSegmentsController } from './line-controller.js'
 
 import 'codemirror/theme/material.css'
 
@@ -47,14 +48,15 @@ class DepGraph extends React.Component {
       showPackageSize: false,
       selectionLocked: false,
       hiddenPackages: [],
+      vrActive: false,
     }
   }
 
   componentDidMount () {
-    const { forceGraph } = this
+    // const { forceGraph } = this
     this.triggerGraphUpdate()
 
-    window.xyz = forceGraph
+    // window.xyz = forceGraph
 
     // forceGraph.d3Force('charge').strength(-50)
     // forceGraph.d3Force('x', d3.forceX(0, 1))
@@ -136,24 +138,6 @@ class DepGraph extends React.Component {
     return packageModules
   }
 
-  onVrSessionStart (session) {
-    const { packageData } = this.state
-    const { scene, renderer, subscribeTick } = setupScene()
-    const graph = new ThreeForceGraph({
-      // nodeVal: 'size',
-    })
-      .graphData(packageData)
-      // .nodeThreeObject((node) => {
-      //   return new SpriteText(node.label || node.id || 'hello', 10, node.color);
-      // })
-    setupGraph({ scene, graph, subscribeTick })
-    renderer.xr.setSession(session)
-  }
-
-  onVrSessionEnd () {
-    console.log('vr session end')
-  }
-
   render () {
     const { policyData } = this.props
     const {
@@ -170,6 +154,7 @@ class DepGraph extends React.Component {
       selectedModule,
       selectionLocked,
       hiddenPackages,
+      vrActive,
     } = this.state
 
     const actions = {
@@ -317,25 +302,59 @@ class DepGraph extends React.Component {
           hiddenPackages={hiddenPackages}
         />
         {this.renderSelectedNodeView()}
-        <ForceGraph2D
-          ref={(el) => {
-            this.forceGraph = el
-          }}
-          graphData={graphData}
-          linkDirectionalArrowLength={4}
-          linkDirectionalArrowRelPos={1}
-          nodeLabel="label"
-          // onNodeHover={(node) => {
-          //   if (!node) return
-          //   if (packageModulesMode && !packageModules[node.id]) return
-          //   actions.selectNode(node)
-          // }}
-          onNodeClick={({ id }) => actions.selectPackage(id)}
-          linkWidth={(link) => link.width}
-          linkColor={(link) => link.color}
-        />
+        {vrActive === false && (
+          <ForceGraph2D
+            // ref={(el) => {
+            //   this.forceGraph = el
+            // }}
+            graphData={graphData}
+            linkDirectionalArrowLength={4}
+            linkDirectionalArrowRelPos={1}
+            nodeLabel="label"
+            nodeVal="size"
+            // onNodeHover={(node) => {
+            //   if (!node) return
+            //   if (packageModulesMode && !packageModules[node.id]) return
+            //   actions.selectNode(node)
+            // }}
+            onNodeClick={({ id }) => actions.selectPackage(id)}
+            linkWidth={(link) => link.width}
+            linkColor={(link) => link.color}
+          />
+        )}
       </div>
     )
+  }
+
+  onVrSessionStart (session) {
+    const { packageData } = this.state
+    const { scene, renderer, subscribeTick } = setupScene()
+    let lineController = new LineSegmentsController({ lineCapacity: 2000 })
+    const graph = new ThreeForceGraph()
+      .graphData(packageData)
+      // .nodeVal('size')
+      .nodeThreeObject((node) => {
+        // return new SpriteText(node.id, 6, node.color);
+        return new SpriteText('⬤', 12 * node.size, node.color);
+      })
+      .linkThreeObject((link) => {
+        // create dummy object
+        return new Object3D()
+      })
+      .linkPositionUpdate((linkObject, { start, end }, link) => {
+        lineController.setLine(link.id, [start.x, start.y, start.z], [end.x, end.y, end.z])
+        // override link position update
+        return true
+      })
+
+    setupGraph({ scene, graph, lineController, subscribeTick })
+
+    renderer.xr.setSession(session)
+    this.setState({ vrActive: true })
+  }
+
+  onVrSessionEnd () {
+    this.setState({ vrActive: false })
   }
 
   renderSelectedNodeView () {
