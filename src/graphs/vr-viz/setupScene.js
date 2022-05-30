@@ -1,10 +1,12 @@
 import * as THREE from 'three'
+import { Group } from 'three';
 import {
   OrbitControls,
 } from 'three/examples/jsm/controls/OrbitControls.js'
 import {
   XRControllerModelFactory,
 } from 'three/examples/jsm/webxr/XRControllerModelFactory.js'
+import StatsVR from "statsvr"
 
 let container
 let camera, scene, renderer
@@ -12,6 +14,7 @@ let controller1, controller2
 let controllerGrip1, controllerGrip2
 
 let controls
+let statsVR
 
 const animateListeners = []
 
@@ -19,8 +22,8 @@ function subscribeTick (newListener) {
   animateListeners.push(newListener)
 }
 
-export default function setupScene () {
-  init()
+export function setupScene ({ debug = false } = {}) {
+  init({ debug })
   animate()
   return {
     container,
@@ -36,7 +39,19 @@ export default function setupScene () {
   }
 }
 
-function init () {
+export function setupGraph ({ scene, graph, lineController, subscribeTick }) {
+  const scale = 0.001
+  const group = new Group()
+  group.scale.set(scale, scale, scale)
+  group.position.set(0, 1.5, 0)
+  group.add(graph)
+  group.add(lineController.object)
+  scene.add(group)
+  subscribeTick(() => graph.tickFrame())
+  return { graph }
+}
+
+function init ({ debug }) {
   let geometry
 
   container = document.createElement('div')
@@ -114,7 +129,11 @@ function init () {
   controller1.add(line.clone())
   controller2.add(line.clone())
 
-  //
+  // fps monitor
+  if (debug) {
+    statsVR = new StatsVR(scene, camera)
+    subscribeTick(() => statsVR.update())
+  }
 
   window.addEventListener('resize', onWindowResize, false)
 }
