@@ -7,7 +7,7 @@ export class LineSegmentsController {
       color,
       opacity,
       transparent: opacity < 1,
-      depthWrite: opacity >= 1
+      depthWrite: opacity >= 1,
     })
     this.geometry = new BufferGeometry()
     this.lineCapacity = 0

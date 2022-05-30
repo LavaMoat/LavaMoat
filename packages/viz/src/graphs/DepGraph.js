@@ -19,9 +19,8 @@ import {
 
 } from './utils/utils.js'
 import XrButton from './xr-button.js'
-import setupScene from './vr-viz/setupScene.js'
+import { setupScene, setupGraph } from './vr-viz/setupScene.js'
 // import setupSelections from './vr-viz/setupSelections.js'
-import setupGraph from './vr-viz/setupGraph.js'
 import { LineSegmentsController } from './line-controller.js'
 
 import 'codemirror/theme/material.css'
@@ -328,14 +327,15 @@ class DepGraph extends React.Component {
 
   onVrSessionStart (session) {
     const { packageData } = this.state
-    const { scene, renderer, subscribeTick } = setupScene()
+    const { scene, renderer, subscribeTick } = setupScene({ debug: true })
     let lineController = new LineSegmentsController({ lineCapacity: 2000 })
     const graph = new ThreeForceGraph()
       .graphData(packageData)
       // .nodeVal('size')
       .nodeThreeObject((node) => {
-        // return new SpriteText(node.id, 6, node.color);
-        return new SpriteText('⬤', 12 * node.size, node.color);
+        const sprite = new SpriteText('⬤', 12 * node.size, node.color);
+        sprite.material.depthTest = false;
+        return sprite
       })
       .linkThreeObject((link) => {
         // create dummy object
