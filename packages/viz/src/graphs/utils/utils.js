@@ -58,10 +58,10 @@ function parseConfigDebugForPackages (policyName, configDebugData, configFinal) 
       packageData.size = 0
       const isRootPackage = packageId === '$root$'
       packageData.isRoot = isRootPackage
-      packageData.config = resources[packageData.id] || {}
+      packageData.config = resources[packageData.name] || {}
     }
     // add total code size from module
-    const size = moduleRecord.content.length
+    const { size } = moduleRecord
     packageData.size += size
     // add package-relative file path
     moduleRecord.fileSimple = fullModuleNameFromPath(moduleRecord.file)
@@ -91,9 +91,8 @@ function parseConfigDebugForPackages (policyName, configDebugData, configFinal) 
 function createGraph (packages, configFinal, {
   lavamoatMode,
   selectedNode,
-  hiddenPackages,
   // packageModulesMode,
-  showPackageSize,
+  // showPackageSize,
 }) {
   const { resources } = configFinal
   const nodes = []
@@ -102,10 +101,8 @@ function createGraph (packages, configFinal, {
   Object.entries(packages).forEach(([_, packageData]) => {
     const { importMap } = packageData
     const parentId = packageData.id
-    // skip hidden packages
-    if (hiddenPackages.includes(parentId)) return
     const packageName = packageData.name
-    const size = true ? getNodeSize(packageData.size) : 2
+    // const size = showPackageSize ? getNodeSize(source) : 2
     const configForPackage = resources[packageName] || {}
     const configLabel = JSON.stringify(configForPackage, null, 2)
     const isLavamoat = lavamoatMode === 'lavamoat'
@@ -114,14 +111,13 @@ function createGraph (packages, configFinal, {
     const color = isLavamoat ? lavamoatColor : 'red'
     // create node for modules
     nodes.push(
-      createNode({ id: parentId, val: 2, label, configLabel, color, size }),
+      createNode({ id: parentId, val: 2, label, configLabel, color }),
     )
     const selectedNodeId = selectedNode && selectedNode.id
 
     // create links for deps
     Object.keys(importMap).forEach((depName) => {
       const childId = String(importMap[depName])
-      if (hiddenPackages.includes(childId)) return
 
       let width
       let linkColor
@@ -158,7 +154,6 @@ const rankColors = [
 ]
 
 function getDangerRankForPackage (packageData, envConfig) {
-  // check for hard coded values (?)
   if (packageData.dangerRank) {
     return packageData.dangerRank
   }
@@ -166,11 +161,15 @@ function getDangerRankForPackage (packageData, envConfig) {
   if (packageData.config.native) {
     return 3
   }
-  // purple if root
-  if (packageData.isRoot) {
-    return -1
-  }
-  // check for globals and builtins
+  // if (packageData.isRoot) {
+  //   return -1
+  // }
+  // console.log(packageData)
+  // const moduleRanks = packageData.modules.map(
+  //   (moduleDebugInfo) => getDangerRankForModule(moduleDebugInfo, envConfig),
+  // )
+  // const rank = Math.max(...moduleRanks)
+  // return rank
   const configRank = getRankForGlobals(packageData.config.globals, envConfig)
   const builtinRank = getRankForBuiltins(packageData.config.builtin, envConfig)
   const rank = Math.max(configRank, builtinRank)
@@ -241,41 +240,8 @@ function getRankForType (type = 'js') {
   return 3
 }
 
-function sortIntelligently () {
-  return sortByStrategies([
-    sortByDangerRank(),
-    sortByPackageName(),
-  ])
-}
-
-function sortByStrategies (sorterFns) {
-  return function sort (a, b) {
-    for (let i = 0; i < sorterFns.length; i++) {
-      const sorter = sorterFns[i]
-      const result = sorter(a, b)
-      if (result !== 0) {
-        return result
-      }
-    }
-    return 0
-  }
-}
-
-function sortByDangerRank () {
-  return sortByKey('dangerRank', true)
-}
-
-function sortByPackageName () {
-  return sortByKey('id')
-}
-
-function sortByKey (key, reverse = false) {
-  const reverseVal = reverse ? -1 : 1
-  return (a, b) => {
-    const aVal = a[key], bVal = b[key]
-    if (aVal === bVal) return 0
-    return aVal > bVal ? reverseVal : -reverseVal
-  }
+function sortByDangerRank (data) {
+  return Object.values(data).sort((a, b) => b.dangerRank - a.dangerRank)
 }
 
 function createLink (params) {
@@ -296,10 +262,6 @@ function createNode (params) {
     ...params,
   }
   return node
-}
-
-function getNodeSize (size) {
-  return Math.sqrt(size / Math.PI) / 100
 }
 
 // function getNodeSize (source) {
@@ -364,9 +326,6 @@ export {
   getColorForRank,
   fullModuleNameFromPath,
   getLineNumbersForGlobals,
-  sortIntelligently,
-  sortByStrategies,
   sortByDangerRank,
-  sortByPackageName,
   getEnvConfigForPolicyName,
 }

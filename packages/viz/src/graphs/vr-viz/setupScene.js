@@ -1,18 +1,21 @@
 import * as THREE from 'three'
-import { Group } from 'three';
+// import { Group } from 'three'
 import {
-  OrbitControls,
+  OrbitControls
 } from 'three/examples/jsm/controls/OrbitControls.js'
 import {
-  XRControllerModelFactory,
+  XRControllerModelFactory
 } from 'three/examples/jsm/webxr/XRControllerModelFactory.js'
-import StatsVR from "statsvr"
+import StatsVR from 'statsvr'
+import setupSelections from './setupSelections.js'
 
 let container
 let camera, scene, renderer
 let controller1, controller2
 let controllerGrip1, controllerGrip2
 
+const intersectables = []
+// let getIntersectables = () => intersectables
 let controls
 let statsVR
 
@@ -35,25 +38,25 @@ export function setupScene ({ debug = false } = {}) {
     controllerGrip1,
     controllerGrip2,
     controls,
-    subscribeTick,
+    subscribeTick
   }
 }
 
-export function setupGraph ({ scene, graph, lineController, subscribeTick }) {
-  const scale = 0.001
-  const group = new Group()
-  group.scale.set(scale, scale, scale)
-  group.position.set(0, 1.5, 0)
-  group.add(graph)
-  group.add(lineController.object)
-  scene.add(group)
-  subscribeTick(() => graph.tickFrame())
-  return { graph }
-}
+// export function setupGraph ({ scene, graph, linesController, pointsController, subscribeTick }) {
+//   const scale = 0.001
+//   const group = new Group()
+//   group.scale.set(scale, scale, scale)
+//   group.position.set(0, 1.5, 0)
+//   group.add(graph)
+//   group.add(linesController.object)
+//   group.add(pointsController.object)
+//   scene.add(group)
+//   subscribeTick(() => graph.tickFrame())
+//   intersectables = graph.children.filter(child => child.__graphObjType === 'node')
+//   return { graph }
+// }
 
 function init ({ debug }) {
-  let geometry
-
   container = document.createElement('div')
   document.body.appendChild(container)
 
@@ -66,17 +69,6 @@ function init ({ debug }) {
   controls = new OrbitControls(camera, container)
   controls.target.set(0, 1.6, 0)
   controls.update()
-
-  geometry = new THREE.PlaneBufferGeometry(4, 4)
-  // const material = new THREE.MeshStandardMaterial({
-  //   color: 0xeeeeee,
-  //   roughness: 1.0,
-  //   metalness: 0.0,
-  // })
-  // var floor = new THREE.Mesh(geometry, material);
-  // floor.rotation.x = -Math.PI / 2;
-  // floor.receiveShadow = true;
-  // scene.add(floor);
 
   scene.add(new THREE.HemisphereLight(0x808080, 0x606060))
 
@@ -93,7 +85,7 @@ function init ({ debug }) {
   //
 
   renderer = new THREE.WebGLRenderer({
-    antialias: true,
+    antialias: true
   })
   renderer.setPixelRatio(window.devicePixelRatio)
   renderer.setSize(window.innerWidth, window.innerHeight)
@@ -120,11 +112,20 @@ function init ({ debug }) {
 
   //
 
-  geometry = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, -1)])
+  const geometry = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, -1)])
 
   const line = new THREE.Line(geometry)
   line.name = 'line'
   line.scale.z = 5
+
+  setupSelections({
+    getIntersectables: () => intersectables,
+    // onSelectStart = noop,
+    // onSelectEnd = noop,
+    controller1,
+    controller2,
+    subscribeTick
+  })
 
   controller1.add(line.clone())
   controller2.add(line.clone())

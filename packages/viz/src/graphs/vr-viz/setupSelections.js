@@ -12,7 +12,7 @@ export default function setup ({
   onSelectEnd = noop,
   controller1,
   controller2,
-  subscribeTick,
+  subscribeTick
 }) {
   controller1.addEventListener('selectstart', testSelectStart)
   controller1.addEventListener('selectend', testSelectEnd)

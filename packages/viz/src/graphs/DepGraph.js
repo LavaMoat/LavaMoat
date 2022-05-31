@@ -1,8 +1,8 @@
 /* eslint-disable react/no-deprecated */
 import ForceGraph2D from 'react-force-graph-2d'
-import ThreeForceGraph from 'three-forcegraph'
-import SpriteText from 'three-spritetext';
-import { Object3D } from 'three';
+// import ThreeForceGraph from 'three-forcegraph'
+// import SpriteText from 'three-spritetext';
+// import { Object3D } from 'three';
 import React from 'react'
 import '../css/DepGraph.css'
 import { UnControlled as CodeMirror } from 'react-codemirror2'
@@ -15,13 +15,12 @@ import {
   sortIntelligently,
   getColorForRank,
   getLineNumbersForGlobals,
-  getEnvConfigForPolicyName,
+  getEnvConfigForPolicyName
 
 } from './utils/utils.js'
 import XrButton from './xr-button.js'
-import { setupScene, setupGraph } from './vr-viz/setupScene.js'
-// import setupSelections from './vr-viz/setupSelections.js'
-import { LineSegmentsController } from './line-controller.js'
+import { setupScene } from './vr-viz/setupScene.js'
+import { FastThreeForceGraph } from './vr-viz/forcegraph.js'
 
 import 'codemirror/theme/material.css'
 
@@ -47,7 +46,7 @@ class DepGraph extends React.Component {
       showPackageSize: false,
       selectionLocked: false,
       hiddenPackages: [],
-      vrActive: false,
+      vrActive: false
     }
   }
 
@@ -81,7 +80,7 @@ class DepGraph extends React.Component {
 
   updateGraph (policyData, state, newProps) {
     const {
-      packageData,
+      packageData
       // packageModules,
       // packageModulesMode,
     } = state
@@ -153,7 +152,7 @@ class DepGraph extends React.Component {
       selectedModule,
       selectionLocked,
       hiddenPackages,
-      vrActive,
+      vrActive
     } = this.state
 
     const actions = {
@@ -169,7 +168,7 @@ class DepGraph extends React.Component {
           newSelection = policyData.debug.debugInfo[moduleSpecifier].moduleRecord
         }
         this.setState({
-          selectedModule: newSelection,
+          selectedModule: newSelection
         })
       },
       selectPackage: (packageId) => {
@@ -178,7 +177,7 @@ class DepGraph extends React.Component {
             selectedPackage: null,
             selectedModule: null,
 
-            packageModulesMode: false,
+            packageModulesMode: false
           })
         } else {
           const newSelection = packages[packageId]
@@ -187,7 +186,7 @@ class DepGraph extends React.Component {
             selectedPackage: newSelection,
             selectedModule: null,
             packageModulesMode: true,
-            packageModules: modules,
+            packageModules: modules
           }
           this.setStateAndUpdateGraph(newState)
         }
@@ -211,16 +210,17 @@ class DepGraph extends React.Component {
         const isHidden = hiddenPackages.includes(packageId)
         if (isHidden) {
           this.setStateAndUpdateGraph({
-            hiddenPackages: hiddenPackages.filter((id) => id !== packageId),
+            hiddenPackages: hiddenPackages.filter((id) => id !== packageId)
           })
         } else {
           this.setStateAndUpdateGraph({
-            hiddenPackages: [...hiddenPackages, packageId],
+            hiddenPackages: [...hiddenPackages, packageId]
           })
         }
       }
     }
     const graphData = packageData
+
     let sortedPackages = []
     let sortedModules = []
     // let selectedNodeLabel
@@ -255,8 +255,8 @@ class DepGraph extends React.Component {
 
     return (
       <div>
-        <div className="navWrapper">
-          <div className="leftButtonsWrapper">
+        <div className='navWrapper'>
+          <div className='leftButtonsWrapper'>
             <Nav
               routes={lavamoatModes}
               activeRoute={lavamoatMode}
@@ -278,12 +278,12 @@ class DepGraph extends React.Component {
             />
           </div>
 
-          <div className="viewSourceWrapper">
-            <div className="helpMessage">
+          <div className='viewSourceWrapper'>
+            <div className='helpMessage'>
               {helpMessage}
             </div>
             <button
-              className="sourceButton"
+              className='sourceButton'
               style={sourceButtonStyle}
               onClick={() => actions.toggleSource()}
             >
@@ -309,8 +309,8 @@ class DepGraph extends React.Component {
             graphData={graphData}
             linkDirectionalArrowLength={4}
             linkDirectionalArrowRelPos={1}
-            nodeLabel="label"
-            nodeVal="size"
+            nodeLabel='label'
+            nodeVal='size'
             // onNodeHover={(node) => {
             //   if (!node) return
             //   if (packageModulesMode && !packageModules[node.id]) return
@@ -328,26 +328,15 @@ class DepGraph extends React.Component {
   onVrSessionStart (session) {
     const { packageData } = this.state
     const { scene, renderer, subscribeTick } = setupScene({ debug: true })
-    let lineController = new LineSegmentsController({ lineCapacity: 2000 })
-    const graph = new ThreeForceGraph()
-      .graphData(packageData)
-      // .nodeVal('size')
-      .nodeThreeObject((node) => {
-        const sprite = new SpriteText('⬤', 12 * node.size, node.color);
-        sprite.material.depthTest = false;
-        return sprite
-      })
-      .linkThreeObject((link) => {
-        // create dummy object
-        return new Object3D()
-      })
-      .linkPositionUpdate((linkObject, { start, end }, link) => {
-        lineController.setLine(link.id, [start.x, start.y, start.z], [end.x, end.y, end.z])
-        // override link position update
-        return true
-      })
-
-    setupGraph({ scene, graph, lineController, subscribeTick })
+    const scale = 0.001
+    const graph = new FastThreeForceGraph({
+      graphData: packageData,
+      nodeOpts: { size: 100 * scale }
+    })
+    graph.position.set(0, 1, -1)
+    graph.scale.set(scale, scale, scale)
+    scene.add(graph)
+    subscribeTick(() => graph.tickFrame())
 
     renderer.xr.setSession(session)
     this.setState({ vrActive: true })
@@ -365,7 +354,7 @@ class DepGraph extends React.Component {
       return this.renderSelectedPackage(selectedPackage)
     }
     return (
-      <pre className="packageInfo">
+      <pre className='packageInfo'>
         please select a package
       </pre>
     )
@@ -375,7 +364,7 @@ class DepGraph extends React.Component {
     const { policyData: { final: { resources: finalPolicyResources } } } = this.props
     const packagePolicy = finalPolicyResources[selectedPackage.id] || {}
     return (
-      <div className="packageInfo">
+      <div className='packageInfo'>
         <pre>{selectedPackage.id}</pre>
         policy for this package:
         <pre>
@@ -390,16 +379,18 @@ class DepGraph extends React.Component {
     const moduleDebugInfo = debugInfo[selectedModule.specifier]
     const moduleDisplayInfo = { ...moduleDebugInfo, moduleRecord: undefined }
     const { packageData } = moduleDebugInfo.moduleRecord
-    const component = this.state.viewSource ? this.renderSelectedNodeCode(selectedModule) : (
-      <div className="packageInfo">
-        <pre>{packageData.id}</pre>
-        <pre>{selectedModule.fileSimple}</pre>
-        policies generated from this file:
-        <pre>
-          {JSON.stringify(moduleDisplayInfo, null, 2)}
-        </pre>
-      </div>
-    )
+    const component = this.state.viewSource
+      ? this.renderSelectedNodeCode(selectedModule)
+      : (
+        <div className='packageInfo'>
+          <pre>{packageData.id}</pre>
+          <pre>{selectedModule.fileSimple}</pre>
+          policies generated from this file:
+          <pre>
+            {JSON.stringify(moduleDisplayInfo, null, 2)}
+          </pre>
+        </div>
+        )
     return component
   }
 
@@ -441,7 +432,7 @@ class DepGraph extends React.Component {
           } else {
             selectedLineIndex += 1
           }
-        },
+        }
       })
     }
     return (
@@ -449,7 +440,7 @@ class DepGraph extends React.Component {
         value={source}
         options={{
           mode: 'javascript',
-          readOnly: true,
+          readOnly: true
         }}
         editorDidMount={(editor) => {
           this.setState({ codeMirror: editor })
