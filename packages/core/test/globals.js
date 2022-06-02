@@ -227,6 +227,50 @@ test('globals - explicitly disallowing properties on the globalThis', async (t) 
   await t.throwsAsync(runScenario({ scenario }), { message: 'globalThis.abc is not a function' })
 })
 
+test.failing('globals - nested poperty allow/disallow', async (t) => {
+  'use strict'
+  const shared = {
+    context: {
+      a: { ok:()=>{}, b: { c: ()=>42, notOk:41 }}
+    },
+    config: {
+      resources: {
+        one: {
+          // there's 2 issues with subsets of this configuration. 
+            // 'a': true,
+            // 'a.b': false,
+            // doesn't seem to forbid access to b
+
+            // 'a.b': false,
+            // 'a.b.c':true
+            // doesn't give access to c
+          globals: {
+            'a': true,
+            'a.b': false,
+            'a.b.c':true
+          }
+        },
+      }
+    },
+  }
+  const givesAccess = createScenarioFromScaffold({
+    defineOne: () => {
+      globalThis.a.ok()
+      module.exports = globalThis.a.b.c()
+    },
+    ...shared
+  })
+  const deniesAccess = createScenarioFromScaffold({
+    defineOne: () => {
+      module.exports = globalThis.a.b.notOk
+    },
+    ...shared
+  })
+  const testResult = await runScenario({ scenario: givesAccess })
+  t.is(testResult, 42, 'expected result, did not error')
+  await t.throwsAsync(runScenario({ scenario: deniesAccess }))
+})
+
 test('globals - firefox addon chrome api lazy getter works', async (t) => {
   'use strict'
   const scenario = createScenarioFromScaffold({
