@@ -205,6 +205,28 @@ test('globals - endowing properties on the globalThis prototype chain', async (t
   t.is(testResult, 123, 'expected result, did not error')
 })
 
+test('globals - explicitly disallowing properties on the globalThis', async (t) => {
+  'use strict'
+  const scenario = createScenarioFromScaffold({
+    defineOne: () => {
+      module.exports = globalThis.abc()
+    },
+    context: {
+      abc: function () { return 42 }
+    },
+    config: {
+      resources: {
+        one: {
+          globals: {
+            'abc': false
+          }
+        },
+      }
+    },
+  })
+  await t.throwsAsync(runScenario({ scenario }), { message: 'globalThis.abc is not a function' })
+})
+
 test('globals - firefox addon chrome api lazy getter works', async (t) => {
   'use strict'
   const scenario = createScenarioFromScaffold({
