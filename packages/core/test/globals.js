@@ -227,6 +227,37 @@ test('globals - explicitly disallowing properties on the globalThis', async (t) 
   await t.throwsAsync(runScenario({ scenario }), { message: 'globalThis.abc is not a function' })
 })
 
+test('globals - explicitly disallowing properties on the globalThis via overrides', async (t) => {
+  'use strict'
+  const scenario = createScenarioFromScaffold({
+    defineOne: () => {
+      module.exports = globalThis.abc()
+    },
+    context: {
+      abc: function () { return 42 }
+    },
+    config: {
+      resources: {
+        one: {
+          globals: {
+            'abc': true
+          }
+        }
+      }
+    },
+    configOverride: {
+      resources: {
+        one: {
+          globals: {
+            'abc': false
+          }
+        }
+      }
+    }
+  })
+  await t.throwsAsync(runScenario({ scenario }), { message: 'globalThis.abc is not a function' })
+})
+
 test.failing('globals - nested poperty allow/disallow', async (t) => {
   'use strict'
   const shared = {
