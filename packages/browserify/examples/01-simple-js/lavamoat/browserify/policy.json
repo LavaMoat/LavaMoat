@@ -10,8 +10,8 @@
         "requestAnimationFrame": true
       },
       "packages": {
-        "gl-mat4": true,
-        "gl-vec3": true
+        "metamask-logo>gl-mat4": true,
+        "metamask-logo>gl-vec3": true
       }
     }
   }
