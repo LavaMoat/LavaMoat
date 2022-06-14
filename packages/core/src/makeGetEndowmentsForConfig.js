@@ -30,6 +30,7 @@ function makeGetEndowmentsForConfig ({ createFunctionWrapper }) {
     if (!config.globals) return {}
     // validate read access from config
     const whitelistedReads = []
+    const explicitlyBanned = []
     Object.entries(config.globals).forEach(([path, configValue]) => {
       const pathParts = path.split('.')
       // disallow dunder proto in path
@@ -38,7 +39,10 @@ function makeGetEndowmentsForConfig ({ createFunctionWrapper }) {
         throw new Error(`Lavamoat - "__proto__" disallowed when creating minial view. saw "${path}"`)
       }
       // false means no access. It's necessary so that overrides can also be used to tighten the policy
-      if (configValue === false) return
+      if (configValue === false) {
+        explicitlyBanned.push(path)
+        return 
+      }
       // write access handled elsewhere
       if (configValue === 'write') return
       if (configValue !== true) {
@@ -46,22 +50,28 @@ function makeGetEndowmentsForConfig ({ createFunctionWrapper }) {
       }
       whitelistedReads.push(path)
     })
-    return makeMinimalViewOfRef(sourceRef, whitelistedReads, unwrapTo, unwrapFrom)
+    return makeMinimalViewOfRef(sourceRef, whitelistedReads, unwrapTo, unwrapFrom, explicitlyBanned)
   }
 
-  function makeMinimalViewOfRef (sourceRef, paths, unwrapTo, unwrapFrom) {
+  function makeMinimalViewOfRef (sourceRef, paths, unwrapTo, unwrapFrom, explicitlyBanned = []){
     const targetRef = {}
     paths.forEach(path => {
-      copyValueAtPath(path.split('.'), sourceRef, targetRef, unwrapTo, unwrapFrom)
+      copyValueAtPath('', path.split('.'), explicitlyBanned, sourceRef, targetRef, unwrapTo, unwrapFrom)
     })
     return targetRef
   }
 
-  function copyValueAtPath (pathParts, sourceRef, targetRef, unwrapTo = sourceRef, unwrapFrom = targetRef) {
+  function extendPath(visited, next){
+    if(!visited || visited.length === 0) return next
+    return `${visited}.${next}`
+  }
+
+  function copyValueAtPath (visitedPath, pathParts, explicitlyBanned, sourceRef, targetRef, unwrapTo = sourceRef, unwrapFrom = targetRef) {
     if (pathParts.length === 0) {
       throw new Error('unable to copy, must have pathParts, was empty')
     }
     const [nextPart, ...remainingParts] = pathParts
+    const currentPath = extendPath(visitedPath,nextPart)
     // get the property from any depth in the property chain
     const { prop: sourcePropDesc } = getPropertyDescriptorDeep(sourceRef, nextPart)
 
@@ -90,8 +100,8 @@ function makeGetEndowmentsForConfig ({ createFunctionWrapper }) {
       const { sourceValue, sourceWritable } = getSourceValue()
       const nextSourceRef = sourceValue
       let nextTargetRef
-      // check if value exists on target
-      if (targetPropDesc) {
+      // check if value exists on target and does not need selective treatment
+      if (targetPropDesc && !explicitlyBanned.includes(currentPath)) {
         // a value already exists, we should walk into it
         nextTargetRef = targetPropDesc.value
       } else {
@@ -108,7 +118,13 @@ function makeGetEndowmentsForConfig ({ createFunctionWrapper }) {
         // the newly created container will be the next target
         nextTargetRef = containerRef
       }
-      copyValueAtPath(remainingParts, nextSourceRef, nextTargetRef)
+      copyValueAtPath(currentPath, remainingParts, explicitlyBanned, nextSourceRef, nextTargetRef)
+      return
+    }
+
+    // If conflicting rules exist, opt for the negative one. This should never happen
+    if(explicitlyBanned.includes(currentPath)) {
+      console.warn(`LavaMoat - conflicting rules exist for "${currentPath}"`)
       return
     }
 
