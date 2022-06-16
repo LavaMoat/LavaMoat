@@ -46,7 +46,7 @@ function makeGetEndowmentsForConfig ({ createFunctionWrapper }) {
       // write access handled elsewhere
       if (configValue === 'write') return
       if (configValue !== true) {
-        throw new Error(`LavaMoat - unrecognizable config value (${typeof configValue}) for path "${path}"`)
+        throw new Error(`LavaMoat - unrecognizable policy value (${typeof configValue}) for path "${path}"`)
       }
       whitelistedReads.push(path)
     })
@@ -61,8 +61,8 @@ function makeGetEndowmentsForConfig ({ createFunctionWrapper }) {
     return targetRef
   }
 
-  function extendPath(visited, next){
-    if(!visited || visited.length === 0) return next
+  function extendPath(visited, next) {
+    if (!visited || visited.length === 0) return next
     return `${visited}.${next}`
   }
 
@@ -71,7 +71,7 @@ function makeGetEndowmentsForConfig ({ createFunctionWrapper }) {
       throw new Error('unable to copy, must have pathParts, was empty')
     }
     const [nextPart, ...remainingParts] = pathParts
-    const currentPath = extendPath(visitedPath,nextPart)
+    const currentPath = extendPath(visitedPath, nextPart)
     // get the property from any depth in the property chain
     const { prop: sourcePropDesc } = getPropertyDescriptorDeep(sourceRef, nextPart)
 
@@ -123,7 +123,7 @@ function makeGetEndowmentsForConfig ({ createFunctionWrapper }) {
     }
 
     // If conflicting rules exist, opt for the negative one. This should never happen
-    if(explicitlyBanned.includes(currentPath)) {
+    if (explicitlyBanned.includes(currentPath)) {
       console.warn(`LavaMoat - conflicting rules exist for "${currentPath}"`)
       return
     }
