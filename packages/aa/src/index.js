@@ -187,7 +187,7 @@ function comparePreferredPackageName(a, b) {
     return -1
   }
   // as a tie breaker, prefer alphabetical order
-  if (a > b) {
+  if (a < b) {
     return -1
   } else if (a > b) {
     return 1
