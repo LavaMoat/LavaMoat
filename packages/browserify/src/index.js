@@ -1,11 +1,14 @@
 const fs = require('fs')
 const path = require('path')
-const { getDefaultPaths, mergePolicy } = require('lavamoat-core')
+const { getDefaultPaths } = require('lavamoat-core')
 const jsonStringify = require('json-stable-stringify')
 const { createModuleInspectorSpy } = require('./createModuleInspectorSpy.js')
 const { createPackageDataStream } = require('./createPackageDataStream.js')
 const createLavaPack = require('@lavamoat/lavapack')
 const { createSesWorkaroundsTransform } = require('./sesTransforms')
+const { loadCanonicalNameMap } = require('@lavamoat/aa')
+const browserResolve = require('browser-resolve')
+
 
 // these are the reccomended arguments for lavaMoat to work well with browserify
 const reccomendedArgs = {
@@ -29,20 +32,44 @@ module.exports.args = reccomendedArgs
 function plugin (browserify, pluginOpts) {
   // pluginOpts.policy is policy path
   const configuration = getConfigurationFromPluginOpts(pluginOpts)
+
   // setup the plugin in a re-bundle friendly way
   browserify.on('reset', setupPlugin)
   setupPlugin()
 
   function setupPlugin () {
+
+    let canonicalNameMap
+    async function getCanonicalNameMap () {
+      // load canonical name map on first request
+      if (canonicalNameMap === undefined) {
+        canonicalNameMap = await loadCanonicalNameMap({
+          rootDir: configuration.projectRoot,
+          // need this in order to walk browser builtin deps
+          includeDevDeps: true,
+          resolve: browserResolve,
+        })
+      }
+      return canonicalNameMap
+    }
+
     // some workarounds for SES strict parsing and evaluation
     browserify.transform(createSesWorkaroundsTransform(), { global: true })
 
     // inject package name into module data
-    browserify.pipeline.get('emit-deps').unshift(createPackageDataStream())
+    browserify.pipeline.get('emit-deps').unshift(createPackageDataStream({
+      getCanonicalNameMap,
+    }))
 
     // if writeAutoPolicy activated, insert hook
     if (configuration.writeAutoPolicy) {
+      const policyOverride = loadPolicyFile({
+        filepath: configuration.policyPaths.override,
+        tolerateMissing: true
+      })
+      validatePolicy(policyOverride)
       browserify.pipeline.get('emit-deps').push(createModuleInspectorSpy({
+        policyOverride,
         // no builtins in the browser (yet!)
         isBuiltin: () => false,
         // should prepare debug info
@@ -50,6 +77,16 @@ function plugin (browserify, pluginOpts) {
         // write policy files to disk
         onResult: (policy) => writeAutoPolicy(policy, configuration)
       }))
+    } else {
+      // when not generating policy files, announce policy files as build deps for watchify
+      // ref https://github.com/browserify/watchify#working-with-browserify-transforms
+      const primary = path.resolve(configuration.projectRoot, configuration.policyPaths.primary)
+      const override = path.resolve(configuration.projectRoot, configuration.policyPaths.override)
+      // wait until next tick to ensure file event subscribers have run
+      setTimeout(() => {
+        browserify.emit('file', primary)
+        browserify.emit('file', override)
+      })
     }
 
     // replace the standard browser-pack with our custom packer
@@ -77,6 +114,7 @@ function getConfigurationFromPluginOpts (pluginOpts) {
     prunepolicy: 'prunePolicy',
     d: 'debugMode',
     debug: 'debugMode',
+    stats: 'statsMode',
     pn: 'policyName',
     projectRoot: 'projectRoot',
     r: 'projectRoot',
@@ -107,9 +145,11 @@ function getConfigurationFromPluginOpts (pluginOpts) {
   }
 
   const configuration = {
+    projectRoot: pluginOpts.projectRoot,
     includePrelude: 'includePrelude' in pluginOpts ? Boolean(pluginOpts.includePrelude) : true,
     pruneConfig: Boolean(pluginOpts.prunePolicy),
     debugMode: Boolean(pluginOpts.debugMode),
+    statsMode: Boolean(pluginOpts.statsMode),
     writeAutoPolicy: Boolean(pluginOpts.writeAutoPolicy || pluginOpts.writeAutoPolicyDebug),
     writeAutoPolicyDebug: Boolean(pluginOpts.writeAutoPolicyDebug),
     bundleWithPrecompiledModules: 'bundleWithPrecompiledModules' in pluginOpts ? Boolean(pluginOpts.bundleWithPrecompiledModules) : true,
@@ -174,26 +214,19 @@ function loadPolicyFile ({ filepath, tolerateMissing }) {
   return policyFile
 }
 
-// lavamoat-core has a "loadPolicy" method but its async
+// TODO: dedupe. lavamoat-core has a "loadPolicy" method but its async
 function loadPolicy (configuration) {
-  let primaryPolicy
+  let policy
   if (configuration.actionOverrides.loadPrimaryPolicy) {
-    primaryPolicy = configuration.actionOverrides.loadPrimaryPolicy()
+    policy = configuration.actionOverrides.loadPrimaryPolicy()
   } else {
-    primaryPolicy = loadPolicyFile({
+    policy = loadPolicyFile({
       filepath: configuration.policyPaths.primary,
       tolerateMissing: configuration.writeAutoPolicy
     })
   }
-  const overridePolicy = loadPolicyFile({
-    filepath: configuration.policyPaths.override,
-    tolerateMissing: true
-  })
-  // validate each policy
-  validatePolicy(primaryPolicy)
-  validatePolicy(overridePolicy)
-  const finalPolicy = mergePolicy(primaryPolicy, overridePolicy)
-  return finalPolicy
+  validatePolicy(policy)
+  return policy
 }
 
 function getPolicyPaths (pluginOpts) {
@@ -208,12 +241,9 @@ function getPolicyPaths (pluginOpts) {
 }
 
 function createLavamoatPacker (configuration = {}) {
-  const { includePrelude, bundleWithPrecompiledModules } = configuration
   const defaults = {
     raw: true,
     policy: loadPolicy(configuration),
-    includePrelude,
-    bundleWithPrecompiledModules,
   }
   const packOpts = Object.assign({}, defaults, configuration)
   const customPack = createLavaPack(packOpts)

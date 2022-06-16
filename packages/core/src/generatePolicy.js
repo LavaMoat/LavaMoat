@@ -10,8 +10,9 @@ const {
   codeSampleFromAstNode,
   utils: { mergePolicy: mergeGlobalsPolicy, mapToObj, reduceToTopmostApiCallsFromStrings }
 } = require('lavamoat-tofu')
+const { mergePolicy } = require('./mergePolicy')
 
-const rootSlug = '<root>'
+const rootSlug = '$root$'
 
 module.exports = { rootSlug, createModuleInspector, getDefaultPaths }
 
@@ -187,11 +188,11 @@ function createModuleInspector (opts = {}) {
     packageToBuiltinImports[packageName] = packageBuiltins
   }
 
-  function generatePolicy ({ isBuiltin, includeDebugInfo } = {}) {
+  function generatePolicy ({ policyOverride, includeDebugInfo } = {}) {
     const resources = {}
-    const config = { resources }
+    const policy = { resources }
     Object.entries(packageToModules).forEach(([packageName, packageModules]) => {
-      // the config/policy fields for each package
+      // the policy fields for each package
       let globals, builtin, packages, native
       // skip for root modules (modules not from deps)
       const isRootModule = packageName === rootSlug
@@ -223,24 +224,26 @@ function createModuleInspector (opts = {}) {
       if (packageNativeModules) {
         native = true
       }
-      // skip package config if there are no settings needed
+      // skip package policy if there are no settings needed
       if (!packages && !globals && !builtin) return
-      // create minimal config object
-      const config = {}
-      if (packages) config.packages = packages
-      if (globals) config.globals = globals
-      if (builtin) config.builtin = builtin
-      if (native) config.native = native
-      // set config for package
-      resources[packageName] = config
+      // create minimal policy object
+      const packagePolicy = {}
+      if (packages) packagePolicy.packages = packages
+      if (globals) packagePolicy.globals = globals
+      if (builtin) packagePolicy.builtin = builtin
+      if (native) packagePolicy.native = native
+      // set policy for package
+      resources[packageName] = packagePolicy
     })
 
     // append serializeable debug info
     if (includeDebugInfo) {
-      config.debugInfo = debugInfo
+      policy.debugInfo = debugInfo
     }
 
-    return config
+    // merge override policy
+    const mergedPolicy = mergePolicy(policy, policyOverride)
+    return mergedPolicy
   }
 }
 

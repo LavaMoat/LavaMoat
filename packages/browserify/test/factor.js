@@ -1,19 +1,49 @@
 const test = require('ava')
 const {
+  fillInFileDetails,
+  functionToString
+} = require('lavamoat-core/test/util')
+const {
   createBundleForScenario,
   runScenario
 } = require('./util')
 
-const fs = require('fs')
-const {
-  fillInFileDetails,
-  autoConfigForScenario,
-  functionToString
-} = require('lavamoat-core/test/util')
-
-test('package factor bundle', async (t) => {
+// eslint-disable-next-line ava/no-skip-test
+test.skip('package factor bundle', async (t) => {
   const scenario = {
     files: fillInFileDetails({
+      './package.json': {
+        content: `${JSON.stringify({
+          dependencies: {
+            a: '1.0.0',
+            b: '1.0.0',
+            c: '1.0.0',
+          },
+          devDependencies: {
+            'browserify': '*',
+            'lavamoat-browserify': '*',
+            'bify-package-factor': '*',
+            '@lavamoat/lavapack': '*',
+            'through2': '*',
+            'vinyl-buffer': '*',
+          }
+        })}`,
+      },
+      './node_modules/a/package.json': {
+        content: `${JSON.stringify({
+          dependencies: {}
+        })}`,
+      },
+      './node_modules/b/package.json': {
+        content: `${JSON.stringify({
+          dependencies: {}
+        })}`,
+      },
+      './node_modules/c/package.json': {
+        content: `${JSON.stringify({
+          dependencies: {}
+        })}`,
+      },
       './node_modules/b/index.js': {
         // common.js
         packageName: 'b',
@@ -24,7 +54,7 @@ test('package factor bundle', async (t) => {
         })
       },
       './src/12.js': {
-        packageName: '<root>',
+        packageName: '$root$',
         importMap: {},
         content: functionToString(() => {
           module.exports = 10
@@ -32,7 +62,7 @@ test('package factor bundle', async (t) => {
       },
       './src/1.js': {
         // src/1.js
-        packageName: '<root>',
+        packageName: '$root$',
         importMap: {
           a: './node_modules/a/index.js',
           b: './node_modules/b/index.js',
@@ -45,7 +75,7 @@ test('package factor bundle', async (t) => {
         entry: true
       },
       './src/10.js': {
-        packageName: '<root>',
+        packageName: '$root$',
         importMap: {
           './12': './src/12.js'
         },
@@ -62,7 +92,7 @@ test('package factor bundle', async (t) => {
       },
       './src/2.js': {
         // src/2.js
-        packageName: '<root>',
+        packageName: '$root$',
         importMap: {
           b: './node_modules/b/index.js',
           c: './node_modules/c/index.js',
@@ -75,7 +105,7 @@ test('package factor bundle', async (t) => {
         entry: true
       },
       './src/11.js': {
-        packageName: '<root>',
+        packageName: '$root$',
         importMap: {
           './12': './src/12.js'
         },
@@ -112,7 +142,7 @@ test('package factor bundle', async (t) => {
       }
     },
     opts: {
-      // breaks when enabled (for some reason)
+      // TODO: this breaks when enabled (for some reason)
       // pruneConfig: true
     },
     context: {

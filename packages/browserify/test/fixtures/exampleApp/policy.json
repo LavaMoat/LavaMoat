@@ -1,96 +1,57 @@
 {
   "resources": {
-    "buffer": {
+    "browserify>browser-pack>safe-buffer": {
+      "packages": {
+        "browserify>buffer": true
+      }
+    },
+    "browserify>buffer": {
       "globals": {
         "console": true
       },
       "packages": {
-        "base64-js": true,
-        "ieee754": true
+        "browserify>buffer>base64-js": true,
+        "browserify>buffer>ieee754": true
       }
     },
-    "core-util-is": {
-      "packages": {
-        "is-buffer": true
-      }
-    },
-    "events": {
+    "browserify>events": {
       "globals": {
         "console": true
+      }
+    },
+    "browserify>process": {
+      "globals": {
+        "clearTimeout": true,
+        "setTimeout": true
+      }
+    },
+    "browserify>string_decoder": {
+      "packages": {
+        "browserify>browser-pack>safe-buffer": true
       }
     },
     "keccak": {
       "packages": {
-        "buffer": true,
-        "stream-browserify": true
+        "browserify>buffer": true,
+        "keccak>readable-stream": true
       }
     },
-    "process": {
-      "globals": {
-        "clearTimeout": true,
-        "setTimeout": true
-      }
-    },
-    "process-nextick-args": {
+    "keccak>readable-stream": {
       "packages": {
-        "process": true
+        "browserify>browser-resolve": true,
+        "browserify>buffer": true,
+        "browserify>events": true,
+        "browserify>inherits": true,
+        "browserify>process": true,
+        "browserify>string_decoder": true,
+        "keccak>readable-stream>util-deprecate": true
       }
     },
-    "readable-stream": {
-      "packages": {
-        "browser-resolve": true,
-        "core-util-is": true,
-        "events": true,
-        "inherits": true,
-        "isarray": true,
-        "process": true,
-        "process-nextick-args": true,
-        "safe-buffer": true,
-        "string_decoder": true,
-        "timers-browserify": true,
-        "util-deprecate": true
-      }
-    },
-    "safe-buffer": {
-      "packages": {
-        "buffer": true
-      }
-    },
-    "stream-browserify": {
-      "packages": {
-        "events": true,
-        "inherits": true,
-        "readable-stream": true
-      }
-    },
-    "string_decoder": {
-      "packages": {
-        "safe-buffer": true
-      }
-    },
-    "timers-browserify": {
-      "globals": {
-        "clearInterval": true,
-        "clearTimeout": true,
-        "setInterval": true,
-        "setTimeout": true
-      },
-      "packages": {
-        "process": true
-      }
-    },
-    "undefined": {
-      "globals": {
-        "console.log": true
-      },
-      "packages": {
-        "keccak": true
-      }
-    },
-    "util-deprecate": {
+    "keccak>readable-stream>util-deprecate": {
       "globals": {
         "console.trace": true,
-        "console.warn": true
+        "console.warn": true,
+        "localStorage": true
       }
     }
   }

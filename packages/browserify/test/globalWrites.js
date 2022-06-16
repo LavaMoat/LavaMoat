@@ -1,64 +1,49 @@
 const test = require('ava')
-
 const {
-  createBundleFromRequiresArray,
-  evalBundle,
+  createScenarioFromScaffold,
+  runAndTestScenario
+} = require('lavamoat-core/test/util')
+const {
+  runScenario
 } = require('./util')
 
 // here we are providing an endowments only to a module deep in a dep graph
 test('globalWrites - two deps should be able to read each others globals', async (t) => {
-  const entries = [
-    {
-      id: '/one.js',
-      file: '/one.js',
-      source: "global.testResult.value = require('two');",
-      deps: { two: '/node_modules/two/index.js' },
-      entry: true
+  const scenario = createScenarioFromScaffold({
+    name: 'globalWrites - two deps should be able to read each others globals',
+    defineOne: () => {
+      module.exports = require('two')
     },
-    {
-      id: '/node_modules/two/index.js',
-      file: '/node_modules/two/index.js',
-      source: `
-        xyz = true
-        module.exports = require('three')
-      `,
-      deps: { three: '/node_modules/three/index.js' }
+    defineTwo: () => {
+      xyz = true
+      module.exports = require('three')
     },
-    {
-      id: '/node_modules/three/index.js',
-      file: '/node_modules/three/index.js',
-      source: `
-        module.exports = xyz
-      `,
-      deps: {}
-    }
-  ]
-
-  const policy = {
-    resources: {
-      '<root>': {
-        packages: {
-          two: true
-        }
-      },
-      two: {
-        globals: {
-          xyz: 'write'
+    defineThree: () => {
+      module.exports = xyz
+    },
+    config: {
+      resources: {
+        '$root$': {
+          packages: {
+            two: true
+          }
         },
-        packages: {
-          three: true
-        }
-      },
-      three: {
-        globals: {
-          xyz: true
+        two: {
+          globals: {
+            xyz: 'write'
+          },
+          packages: {
+            three: true
+          }
+        },
+        three: {
+          globals: {
+            xyz: true
+          }
         }
       }
-    }
-  }
-
-  const bundle = await createBundleFromRequiresArray(entries, { policy })
-  const testResult = evalBundle(bundle)
-
-  t.is(testResult.value, true)
+    },
+    expectedResult: true
+  })
+  await runAndTestScenario(t, scenario, runScenario)
 })

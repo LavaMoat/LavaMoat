@@ -4943,7 +4943,7 @@ function createDistortion ({ setHandlerForRef }) {
       const packageName = moduleData.package
       const moduleSource = moduleData.sourceString
       const configForModule = getConfigForPackage(lavamoatConfig, packageName)
-      const isEntryModule = moduleData.package === '<root>'
+      const isEntryModule = moduleData.package === '$root$'
 
       // create the initial moduleObj
       let moduleObj = { exports: {} }

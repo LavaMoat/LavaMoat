@@ -11,10 +11,10 @@
       },
       "native": true,
       "packages": {
-        "node-gyp-build": true
+        "keccak>node-gyp-build": true
       }
     },
-    "node-gyp-build": {
+    "keccak>node-gyp-build": {
       "builtin": {
         "fs.existsSync": true,
         "fs.readdirSync": true,

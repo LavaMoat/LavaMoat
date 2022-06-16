@@ -1,18 +1,20 @@
 {
   "name": "@lavamoat/allow-scripts",
-  "version": "1.0.6",
+  "version": "2.0.3",
   "main": "src/index.js",
   "bin": {
     "allow-scripts": "src/cli.js"
   },
   "license": "MIT",
   "dependencies": {
+    "@lavamoat/aa": "^3.0.0",
     "@npmcli/run-script": "^1.8.1",
-    "@yarnpkg/lockfile": "^1.1.0",
-    "npm-logical-tree": "^1.2.1",
-    "resolve": "^1.20.0",
-    "semver": "^7.3.4",
     "yargs": "^16.2.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LavaMoat/LavaMoat.git",
+    "directory": "packages/allow-scripts"
   },
   "publishConfig": {
     "access": "public"
@@ -22,12 +24,14 @@
     "test": "test"
   },
   "devDependencies": {
+    "ava": "^3.15.0",
     "eslint-plugin-ava": "^11.0.0",
     "eslint-plugin-standard": "^5.0.0"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\"",
-    "lint": "npm run lint:eslint && npm run lint:deps",
+    "test": "yarn test:run",
+    "test:run": "ava --timeout=30s test/index.js",
+    "lint": "yarn lint:eslint && yarn lint:deps",
     "lint:eslint": "eslint \"src/**/*.js\"",
     "lint:fix": "eslint src/**/*.js --fix",
     "lint:deps": "depcheck"

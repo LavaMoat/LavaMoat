@@ -1,0 +1,10 @@
+{
+  "name": "1",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "aaa": "^1.0.0",
+    "bbb": "^1.0.0"
+  }
+}

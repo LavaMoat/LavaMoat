@@ -3,7 +3,7 @@ const browserify = require('browserify')
 
 // configure LavaMoat
 const lavamoatOpts = {
-  policy: './policy.json'
+  writeAutoPolicy: false,
 }
 
 // enable policy autogen if specified

@@ -1,10 +1,10 @@
 {
   "name": "test-2",
-  "dependencies": {
-    "keccak": "^3.0.0"
-  },
   "scripts": {
     "setup": "yarn install && patch-package"
+  },
+  "dependencies": {
+    "keccak": "^3.0.0"
   },
   "devDependencies": {
     "patch-package": "^6.2.2"

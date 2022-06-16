@@ -18,7 +18,7 @@ In order to help mitigate the risk of such an attack we are building a suite of 
 
 ### How to secure your app against supplychain attacks
 
-1. disable/whitelist dependency lifecycle scripts (eg. "postinstall") via [@lavamoat/allow-scripts][LavamoatAllowScripts]
+1. disable/allow dependency lifecycle scripts (eg. "postinstall") via [@lavamoat/allow-scripts][LavamoatAllowScripts]
 2. run your server or build process in [lavamoat-node][LavamoatNode]
 3. build your ui with LavaMoat for [Webpack][LavamoatWebpack] or [Browserify][LavamoatBrowserify]
 
@@ -53,7 +53,6 @@ This includes the js content of the module sources, and sometimes some config in
 LavaMoat modifies the bundle's runtime to enforce the configured constraints.
 
 ### Bundler Plugins:
-  - [LavaMoat Webpack][LavamoatWebpack]
   - [LavaMoat Browserify][LavamoatBrowserify]
 
 ### Additional tools
@@ -86,10 +85,7 @@ Runs on [Agoric](https://github.com/agoric/)
 [SesGithub]: https://github.com/Agoric/ses-shim
 [SesComputingGuide]: https://github.com/Agoric/SES-shim/blob/master/packages/ses/docs/secure-coding-guide.md
 
-[CytoplasmGithub]: https://github.com/lavamoat/cytoplasm
-
 [LavamoatNode]: ./packages/node
-[LavamoatWebpack]: ./packages/webpack
 [LavamoatBrowserify]: ./packages/browserify
 [LavamoatViz]: ./packages//viz
 [LavamoatAllowScripts]: ./packages/allow-scripts

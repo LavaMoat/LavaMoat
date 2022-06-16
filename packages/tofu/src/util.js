@@ -1,7 +1,7 @@
 module.exports = {
   getMemberExpressionNesting,
   getPathFromMemberExpressionChain,
-  isDirectMemberExpression,
+  isNonComputedMemberLikeExpression,
   isUndefinedCheck,
   getTailmostMatchingChain,
   reduceToTopmostApiCalls,
@@ -10,14 +10,16 @@ module.exports = {
   mergePolicy,
   objToMap,
   mapToObj,
-  getParents
+  getParents,
+  isInFunctionDeclaration,
+  isMemberLikeExpression,
 }
 
 function getMemberExpressionNesting (identifierNode, parents) {
   // remove the identifier node itself
   const parentsOnly = parents.slice(0, -1)
   // find unbroken membership chain closest to identifier
-  const memberExpressions = getTailmostMatchingChain(parentsOnly, isDirectMemberExpression).reverse()
+  const memberExpressions = getTailmostMatchingChain(parentsOnly, isNonComputedMemberLikeExpression).reverse()
   // find parent of membership chain
   const hasMembershipChain = Boolean(memberExpressions.length)
   const topmostMember = hasMembershipChain ? memberExpressions[0] : identifierNode
@@ -45,8 +47,12 @@ function getNameFromNode (node) {
   }
 }
 
-function isDirectMemberExpression (node) {
-  return node.type === 'MemberExpression' && !node.computed
+function isMemberLikeExpression (node) {
+  return node.type === 'MemberExpression' || node.type === 'OptionalMemberExpression'
+}
+
+function isNonComputedMemberLikeExpression (node) {
+  return !node.computed && isMemberLikeExpression(node)
 }
 
 function isUndefinedCheck (identifierNode, parents) {
@@ -141,4 +147,8 @@ function getParents (nodePath) {
   }
   parents.reverse()
   return parents
+}
+
+function isInFunctionDeclaration (path) {
+  return getParents(path.parentPath).some(parent => parent.type === 'FunctionDeclaration' || parent.type === 'FunctionExpression')
 }

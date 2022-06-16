@@ -9,7 +9,7 @@ yarn start
 
 ### explanation
 
-In this example the config autogeneration and build scripts use the browserify js api and live in `build.js`. For convenience, the npm scripts `"lavamoat"` and `"start"` call `build.js`, using an environment variable to specify when to automatically generate the config.
+In this example the policy autogeneration and build scripts use the browserify js api and live in `build.js`. For convenience, the npm scripts `"lavamoat"` and `"start"` call `build.js`, using an environment variable to specify when to automatically generate the policy.
 
 **note: the whitespace in the plugin field is important**
 
@@ -20,18 +20,18 @@ In this example the config autogeneration and build scripts use the browserify j
 },
 ```
 
-##### config autogeneration
+##### policy autogeneration
 
-When using the config autogeneration, `lavamoat-browserify` options are specified as
+When using the policy autogeneration, `lavamoat-browserify` options are specified as
 
 ```js
 const lavamoatOpts = {
-  config: './lavamoat-config.json',
-  writeAutoConfig: true,
+  policy: './lavamoat/browserify/policy.json',
+  writeAutoPolicy: true,
 }
 ```
 
-Here we are specifying the `lavamoat-browserify` plugin and providing it with the option `writeAutoConfig`. This tells the plugin to parse each module and generate a config file, writing it at `./lavamoat-config.json`. Ignore the bundle output.
+Here we are specifying the `lavamoat-browserify` plugin and providing it with the option `writeAutoPolicy`. This tells the plugin to parse each module and generate a policy file, writing it at `./lavamoat/browserify/policy.json`. Ignore the bundle output.
 
 ##### build
 
@@ -39,8 +39,8 @@ The scripts "start" performs our build with browserify, and starts a static asse
 
 ```js
 const lavamoatOpts = {
-  config: './lavamoat-config.json',
+  policy: './lavamoat/browserify/policy.json',
 }
 ```
 
-Here we are specifying the `lavamoat-browserify` plugin and providing it with the argument `--config`. This tells the plugin to build, using the config at `./lavamoat-config.json`. We save the bundle output in `bundle.js`. Since `writeAutoConfig` is not specified, it skips parsing the module content.
+Here we are specifying the `lavamoat-browserify` plugin and providing it with the argument `--policy`. This tells the plugin to build, using the policy at `./lavamoat/browserify/policy.json`. We save the bundle output in `bundle.js`. Since `writeAutoPolicy` is not specified, it skips parsing the module content.

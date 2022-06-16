@@ -1,6 +1,6 @@
 const { join: pathJoin } = require('path')
 const { promises: { readFile, writeFile } } = require('fs')
-const { generateKernel } = require('lavamoat-core')
+const { generateKernel, makeInitStatsHook } = require('lavamoat-core')
 
 start().catch(err => {
   console.error(err)
@@ -9,8 +9,13 @@ start().catch(err => {
 
 async function start () {
   const runtimeTemplate = await readFile(pathJoin(__dirname, 'runtime-template.js'), 'utf8')
+  let output = runtimeTemplate
+  // inline kernel
   const kernelCode = generateKernel()
-  const output = stringReplace(runtimeTemplate, '__createKernel__', kernelCode)
+  output = stringReplace(output, '__createKernel__', kernelCode)
+  // inline reportStatsHook
+  const statsCode = `(${makeInitStatsHook})({ onStatsReady })`
+  output = stringReplace(output, '__reportStatsHook__', statsCode)
   await writeFile(pathJoin(__dirname, 'runtime.js'), output)
 }
 

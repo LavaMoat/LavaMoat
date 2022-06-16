@@ -184,7 +184,7 @@ module.exports = [
       },
       config: {
         resources: {
-          '<root>': {
+          '$root$': {
             packages: {
               one: true
             },

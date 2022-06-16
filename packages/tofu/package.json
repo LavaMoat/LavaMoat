@@ -1,6 +1,6 @@
 {
   "name": "lavamoat-tofu",
-  "version": "6.0.0",
+  "version": "6.0.2",
   "main": "src/index.js",
   "license": "MIT",
   "dependencies": {
@@ -13,8 +13,8 @@
     "eslint-plugin-standard": "^5.0.0"
   },
   "scripts": {
-    "test": "ava test/index.js",
-    "lint": "npm run lint:eslint && npm run lint:deps",
+    "test": "ava --timeout=30s test/index.js",
+    "lint": "yarn lint:eslint && yarn lint:deps",
     "lint:eslint": "eslint \"src/**/*.js\"",
     "lint:fix": "eslint src/**/*.js --fix",
     "lint:deps": "depcheck"

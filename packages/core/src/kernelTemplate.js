@@ -10,6 +10,7 @@
     getExternalCompartment,
     globalThisRefs,
     runWithPrecompiledModules,
+    reportStatsHook,
   }) {
     const debugMode = __lavamoatDebugMode__
 
@@ -38,6 +39,8 @@
       errorTaming: 'unsafe',
       // shows the full call stack
       stackFiltering: 'verbose',
+      // deep stacks
+      consoleTaming: 'unsafe',
     }
 
     lockdown(lockdownOptions)
@@ -53,7 +56,8 @@
       globalRef,
       globalThisRefs,
       debugMode,
-      runWithPrecompiledModules
+      runWithPrecompiledModules,
+      reportStatsHook
     })
     return kernel
   }

@@ -2,6 +2,12 @@
 # yarn lockfile v1
 
 
+"a@file:./fake_node_modules/a":
+  version "1.0.0"
+
+"b@file:./fake_node_modules/b":
+  version "1.0.0"
+
 events@^3.2.0:
   version "3.2.0"
   resolved "https://registry.yarnpkg.com/events/-/events-3.2.0.tgz#93b87c18f8efcd4202a461aec4dfc0556b639379"

@@ -16,10 +16,8 @@ test('parseForPolicy - resolutions', async (t) => {
     }
   }
 
-  const config1 = await parseForPolicy({ entryId, cwd: projectRoot })
-
-  // comparing resources only, to skip builtin packages
-  t.deepEqual(config1, {
+  const policy1 = await parseForPolicy({ entryId, projectRoot })
+  t.deepEqual(policy1, {
     resources: {
       a: {
         builtin: {
@@ -30,34 +28,32 @@ test('parseForPolicy - resolutions', async (t) => {
         }
       },
       b: {
-        builtin: {
-          http: true
+        "builtin": {
+          "http": true
         }
       }
     }
   })
 
-  const config2 = await parseForPolicy({ entryId, cwd: projectRoot, resolutions })
-
-  // comparing resources only, to skip builtin packages
-  t.deepEqual(config2, {
+  const policy2 = await parseForPolicy({ entryId, projectRoot, policyOverride: { resolutions } })
+  t.deepEqual(policy2, {
+    resolutions,
     resources: {
       a: {
         packages: {
-          '<root>': true
+          '$root$': true
         }
-      }
+      },
     }
-  }, 'config resources do not include data on packages not parsed due to resolutions')
+  }, 'policy resources do not include data on packages not parsed due to resolutions')
 })
 
 test('parseForPolicy - require a userspace package with a builtin name', async (t) => {
   const projectRoot = `${__dirname}/projects/4`
   const entryId = `${projectRoot}/index.js`
 
-  const config = await parseForPolicy({ entryId, cwd: projectRoot })
-  // comparing resources only, to skip builtin packages
-  t.deepEqual(config, {
+  const policy = await parseForPolicy({ entryId, projectRoot })
+  t.deepEqual(policy, {
     resources: {
       a: {
         packages: {
@@ -78,12 +74,11 @@ test('parseForPolicy - require a userspace package with a builtin name', async (
   })
 })
 
-// cjs package exports are fully auto-configured when passed to a fn
-test('parseForPolicy - indirectly used packages are included in parent\'s whitelist', async (t) => {
+test('parseForPolicy - indirectly used packages are included in parent\'s allowlist', async (t) => {
   const projectRoot = `${__dirname}/projects/5`
   const entryId = `${projectRoot}/index.js`
-  const config = await parseForPolicy({ entryId, cwd: projectRoot })
-  t.deepEqual(config, {
+  const policy = await parseForPolicy({ entryId, projectRoot })
+  t.deepEqual(policy, {
     resources: { a: { builtin: { crypto: true } } }
   })
 })

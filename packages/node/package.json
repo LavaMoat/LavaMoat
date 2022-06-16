@@ -3,14 +3,14 @@
   "bin": {
     "lavamoat": "src/index.js"
   },
-  "version": "5.3.4",
+  "version": "6.2.0",
   "main": "index.js",
   "license": "MIT",
   "scripts": {
     "test": "yarn test:prep && yarn test:run",
-    "test:prep": "for d in ./test/projects/*/ ; do (cd \"$d\" && yarn setup); done",
-    "test:run": "ava test/index.js --timeout=2m",
-    "lint": "npm run lint:eslint && npm run lint:deps",
+    "test:prep": "for d in ./test/projects/*/ ; do (cd \"$d\" && yarn setup && ../../../src/index.js -a index.js); done",
+    "test:run": "ava --timeout=30s test/index.js",
+    "lint": "yarn lint:eslint && yarn lint:deps",
     "lint:eslint": "eslint \"src/**/*.js\" \"test/**/*.js\"",
     "lint:fix": "eslint src/**/*.js test/*.js --fix",
     "lint:deps": "depcheck"
@@ -18,11 +18,12 @@
   "dependencies": {
     "@babel/code-frame": "^7.10.4",
     "@babel/highlight": "^7.10.4",
+    "@lavamoat/aa": "^3.1.0",
     "bindings": "^1.5.0",
     "htmlescape": "^1.1.1",
     "json-stable-stringify": "^1.0.1",
-    "lavamoat-core": "^11.0.0",
-    "lavamoat-tofu": "^5.1.3",
+    "lavamoat-core": "^12.2.0",
+    "lavamoat-tofu": "^6.0.2",
     "node-gyp-build": "^4.2.3",
     "object.fromentries": "^2.0.2",
     "resolve": "^1.17.0",
