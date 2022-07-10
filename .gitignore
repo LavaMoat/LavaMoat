@@ -111,3 +111,6 @@ temp/
 
 # MacOS
 .DS_Store
+
+# JetBrains
+.idea
