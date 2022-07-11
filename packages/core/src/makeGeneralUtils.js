@@ -1,5 +1,13 @@
 module.exports = makeGeneralUtils
 
+function patchDocumentAccess(node, doc) {
+  // apply patch only to DOM nodes and only once
+  if (node instanceof Node && !node.hasOwnProperty('ownerDocument')) {
+    // when ownerDocument prop is being accessed return proxy document instead of real document
+    Object.defineProperty(node, 'ownerDocument', { get: () => doc });
+  }
+}
+
 function makeGeneralUtils () {
   return {
     createFunctionWrapper
@@ -14,7 +22,9 @@ function makeGeneralUtils () {
         // handle function calls
         // unwrap to target value if this value is the source package compartment's globalThis
         const thisRef = unwrapTest(this) ? unwrapTo : this
-        return Reflect.apply(sourceValue, thisRef, args)
+        const val = Reflect.apply(sourceValue, thisRef, args)
+        patchDocumentAccess(val, this);
+        return val
       }
     }
     Object.defineProperties(newValue, Object.getOwnPropertyDescriptors(sourceValue))
