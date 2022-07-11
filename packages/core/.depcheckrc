@@ -2,6 +2,7 @@ ignore-dirs: "lib"
 ignores:
   # monorepo deps
   - "ava"
+  - "jsdom"
   # tests - fake packages
   - "abc"
   - "xyz"
