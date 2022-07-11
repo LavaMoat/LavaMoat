@@ -1,12 +1,18 @@
 module.exports = makeGeneralUtils
 
 function patchDocumentAccess(doc, node) {
-  // apply patch only to DOM nodes and only once
-  const Node = globalThis.Node
-  if (Node && node instanceof Node && !node.hasOwnProperty('ownerDocument')) {
-    // when ownerDocument prop is being accessed return proxy document instead of real document
-    Object.defineProperty(node, 'ownerDocument', { get: () => doc })
+  // apply patch only to DOM nodes
+  const isInstanceOfNode = global?.window?.Node && node instanceof global?.window?.Node
+  if (!isInstanceOfNode) {
+    return
   }
+  // apply patch only once
+  const isAlreadyPatched = node.hasOwnProperty('ownerDocument')
+  if (isAlreadyPatched) {
+    return
+  }
+  // when ownerDocument prop is being accessed return proxy document instead of real document
+  Object.defineProperty(node, 'ownerDocument', { get: () => doc })
 }
 
 function makeGeneralUtils () {

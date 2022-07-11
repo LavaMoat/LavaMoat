@@ -1,8 +1,15 @@
 const test = require('ava')
+const { JSDOM } = require('jsdom')
+
 const {
   createScenarioFromScaffold,
   runScenario
 } = require('./util')
+
+test.beforeEach(() => {
+  globalThis.window = new JSDOM().window
+  globalThis.document = globalThis.window.document
+});
 
 test('globals - ensure global property this-value unwrapped', async (t) => {
   // compartment.globalThis.document would error because 'this' value is not window
@@ -258,6 +265,64 @@ test('globals - explicitly disallowing properties on the globalThis via override
   await t.throwsAsync(runScenario({ scenario }), { message: 'globalThis.abc is not a function' })
 })
 
+test('globals - check document access patch via dom nodes', async (t) => {
+  const scenario = createScenarioFromScaffold({
+    defineEntry: () => {
+      const one = require('one')
+      console.log(JSON.stringify(one, null, 2))
+    },
+    defineOne: () => {
+      module.exports = require('two')
+    },
+    defineTwo: () => {
+      module.exports = {
+        accessForbiddenDirect: document.ATTRIBUTE_NODE,
+        accessPermittedDirect: document.COMMENT_NODE,
+        accessForbiddenIndirect: document.createElement('a').ownerDocument.ATTRIBUTE_NODE,
+        accessPermittedIndirect: document.createElement('a').ownerDocument.COMMENT_NODE,
+      }
+    },
+    context: {
+      get document() {
+        // node vm weird, sometimes calls with vm context instead of vm global this
+        if (this !== scenario.globalThis && this !== scenario.vmContext) {
+          // chrome: Uncaught TypeError: Illegal invocation
+          throw new TypeError("'get document' called on an object that does not implement interface Window")
+        }
+        return globalThis.document
+      },
+      get window() {
+        // node vm weird, sometimes calls with vm context instead of vm global this
+        if (this !== scenario.globalThis && this !== scenario.vmContext) {
+          // chrome: Uncaught TypeError: Illegal invocation
+          throw new TypeError("'get window' called on an object that does not implement interface Window")
+        }
+        return globalThis.window
+      }
+    },
+    config: {
+      resources: {
+        one: {
+          globals: {
+            document: true
+          }
+        },
+        two: {
+          globals: {
+            'document.createElement': true,
+            'document.COMMENT_NODE': true,
+          }
+        }
+      }
+    },
+  })
+  const testResult = await runScenario({ scenario })
+  t.deepEqual(testResult, {
+    accessPermittedDirect: document.COMMENT_NODE,
+    accessPermittedIndirect: document.COMMENT_NODE,
+  }, 'expected result, did not error')
+})
+
 test('globals - nested property true.false.true', async (t) => {
   'use strict'
   const shared = {
@@ -287,13 +352,13 @@ test('globals - nested property true.false.true', async (t) => {
     },
     ...shared
   })
- 
+
   const testResult = await runScenario({ scenario: handlesAccess })
   t.is(testResult.a_b_c, 42)
   t.is(testResult.a, true)
   t.is(testResult.a_ok, true)
   t.is(testResult.a_b_notOk, false)
-  
+
 })
 
 test('globals - nested property false.true', async (t) => {
@@ -329,7 +394,7 @@ test('globals - nested property false.true', async (t) => {
     },
     ...shared
   })
-  
+
   const testResult = await runScenario({ scenario: handlesAccess })
   t.is(testResult.a_b_c, 42)
   t.is(testResult.x_y, 42)
@@ -364,7 +429,7 @@ test.failing('globals - nested property true.false', async (t) => {
     },
     ...shared
   })
- 
+
   const testResult = await runScenario({ scenario: handlesAccess })
   t.is(testResult.a, true)
   t.is(testResult.a_ok, true)
