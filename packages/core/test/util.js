@@ -7,6 +7,7 @@ const { promises: fs } = require('fs')
 var tmp = require('tmp-promise')
 const stringify = require('json-stable-stringify')
 const { applySourceTransforms } = require('../src/sourceTransforms.js')
+const {JSDOM} = require("jsdom");
 
 module.exports = {
   generateConfigFromFiles: generatePolicyFromFiles,
@@ -16,11 +17,22 @@ module.exports = {
   autoConfigForScenario,
   prepareScenarioOnDisk,
   convertOptsToArgs,
+  withJsDom,
   evaluateWithSourceUrl,
   createHookedConsole,
   fillInFileDetails,
   functionToString,
   runAndTestScenario
+}
+
+function withJsDom(cb) {
+  return async (t) => {
+    globalThis.window = new JSDOM().window
+    globalThis.document = globalThis.window.document
+    await cb(t)
+    delete globalThis.window
+    delete globalThis.document
+  }
 }
 
 async function generatePolicyFromFiles ({ files, ...opts }) {
@@ -253,7 +265,7 @@ function createHookedConsole () {
     firstLogEventPromise,
     hookedConsole,
   }
-} 
+}
 
 async function runScenario ({
   scenario,

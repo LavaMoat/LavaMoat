@@ -1,15 +1,10 @@
 const test = require('ava')
-const { JSDOM } = require('jsdom')
 
 const {
   createScenarioFromScaffold,
-  runScenario
+  runScenario,
+  withJsDom
 } = require('./util')
-
-test.beforeEach(() => {
-  globalThis.window = new JSDOM().window
-  globalThis.document = globalThis.window.document
-});
 
 test('globals - ensure global property this-value unwrapped', async (t) => {
   // compartment.globalThis.document would error because 'this' value is not window
@@ -265,7 +260,7 @@ test('globals - explicitly disallowing properties on the globalThis via override
   await t.throwsAsync(runScenario({ scenario }), { message: 'globalThis.abc is not a function' })
 })
 
-test('globals - check document access patch via dom nodes', async (t) => {
+test('globals - check document access patch via dom nodes', withJsDom(async (t) => {
   const scenario = createScenarioFromScaffold({
     defineEntry: () => {
       const one = require('one')
@@ -321,7 +316,7 @@ test('globals - check document access patch via dom nodes', async (t) => {
     accessPermittedDirect: document.COMMENT_NODE,
     accessPermittedIndirect: document.COMMENT_NODE,
   }, 'expected result, did not error')
-})
+}))
 
 test('globals - nested property true.false.true', async (t) => {
   'use strict'
