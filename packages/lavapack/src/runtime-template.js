@@ -115,7 +115,7 @@
     // avoid redefining attempts for non-writable properties
     const nonWritables = {
       document: [
-        'location'
+        'location',
       ],
       window: [
         'undefined', 'NaN', 'window', 'document', 'location', 'top', 'Infinity',
