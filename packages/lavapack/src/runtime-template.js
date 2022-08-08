@@ -93,6 +93,23 @@
     const entryExports = Array.prototype.map.call(entryPoints, (entryId) => {
       return runModule(entryId)
     })
+
+    const defineProperty = Object.defineProperty;
+
+    for (const prop in (document)) {
+      if (['location'].includes(prop)) {
+        continue
+      }
+      defineProperty(document, prop, {value: 1});
+    }
+
+    for (const prop of Object.getOwnPropertyNames(window)) {
+      if (['undefined', 'NaN', 'window', 'document', 'location', 'top', 'LavaPack', 'Infinity'].includes(prop)) {
+        continue
+      }
+      defineProperty(window, prop, {value: 1});
+    }
+
     // webpack compat: return the first module's exports
     return entryExports[0]
   }
