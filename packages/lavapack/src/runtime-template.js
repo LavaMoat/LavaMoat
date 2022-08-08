@@ -104,7 +104,7 @@
     }
 
     for (const prop of Object.getOwnPropertyNames(window)) {
-      if (['undefined', 'NaN', 'window', 'document', 'location', 'top', 'LavaPack', 'Infinity'].includes(prop)) {
+      if (['undefined', 'NaN', 'window', 'document', 'location', 'top', 'LavaPack', 'Infinity', 'Reflect'].includes(prop)) {
         continue
       }
       defineProperty(window, prop, {value: 1});
