@@ -94,21 +94,7 @@
       return runModule(entryId)
     })
 
-    const defineProperty = Object.defineProperty;
-
-    for (const prop in (document)) {
-      if (['location'].includes(prop)) {
-        continue
-      }
-      defineProperty(document, prop, {value: 1});
-    }
-
-    for (const prop of Object.getOwnPropertyNames(window)) {
-      if (['undefined', 'NaN', 'window', 'document', 'location', 'top', 'LavaPack', 'Infinity', 'Reflect'].includes(prop)) {
-        continue
-      }
-      defineProperty(window, prop, {value: 1});
-    }
+    scuttleGlobalThis()
 
     // webpack compat: return the first module's exports
     return entryExports[0]
@@ -119,6 +105,35 @@
       throw new Error(`no module registered for "${moduleId}" (${typeof moduleId})`)
     }
     return internalRequire(moduleId)
+  }
+
+  function scuttleGlobalThis() {
+    // keep a reference to APIs we're about to revoke access to
+    const defineProperty = Object.defineProperty
+    const includes = Array.prototype.includes
+
+    // avoid redefining attempts for non-writable properties
+    const nonWritables = {
+      document: [
+        'location'
+      ],
+      window: [
+        'undefined', 'NaN', 'window', 'document', 'location', 'top', 'Infinity',
+        'LavaPack', // LavaPack API should remain exposed for LavaMoat to work
+      ],
+    }
+
+    scuttle(document, Object.getOwnPropertyNames(Document.prototype), nonWritables.document)
+    scuttle(window, Object.getOwnPropertyNames(window), nonWritables.window)
+
+    function scuttle(object, props, avoid) {
+      for (const prop of props) {
+        if (includes.call(avoid, prop)) {
+          continue
+        }
+        defineProperty(object, prop, {value: undefined})
+      }
+    }
   }
 
   // called by reportStatsHook

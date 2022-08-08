@@ -30,6 +30,7 @@ function makePrepareRealmGlobalFromConfig ({ createFunctionWrapper }) {
   }
 
   function prepareCompartmentGlobalFromConfig (packageCompartment, globalsConfig, endowments, globalStore, globalThisRefs) {
+    const reflectGet = Reflect.get
     const packageCompartmentGlobal = packageCompartment.globalThis
     // lookup top level read + write access keys
     const topLevelWriteAccessKeys = getTopLevelWriteAccessFromPackageConfig(globalsConfig)
@@ -44,7 +45,7 @@ function makePrepareRealmGlobalFromConfig ({ createFunctionWrapper }) {
           if (globalStore.has(key)) {
             return globalStore.get(key)
           } else {
-            return Reflect.get(endowments, key, this)
+            return reflectGet(endowments, key, this)
           }
         },
         set () {
