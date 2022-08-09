@@ -89,12 +89,14 @@
         package: packageName,
       })
     }
+
+    // scuttle globalThis before running entryPoints
+    scuttleGlobalThis()
+
     // run each of entryPoints
     const entryExports = Array.prototype.map.call(entryPoints, (entryId) => {
       return runModule(entryId)
     })
-
-    scuttleGlobalThis()
 
     // webpack compat: return the first module's exports
     return entryExports[0]
@@ -108,30 +110,22 @@
   }
 
   function scuttleGlobalThis() {
-    // keep a reference to APIs we're about to revoke access to
-    const defineProperty = Object.defineProperty
-    const includes = Array.prototype.includes
+    const props = [
+      ...Object.getOwnPropertyNames(window),
+      ...Object.getOwnPropertyNames(Window.prototype),
+      ...Object.getOwnPropertyNames(EventTarget.prototype),
+    ]
 
-    // avoid redefining attempts for non-writable properties
-    const nonWritables = {
-      document: [
-        'location',
-      ],
-      window: [
-        'undefined', 'NaN', 'window', 'document', 'location', 'top', 'Infinity',
-        'LavaPack', // LavaPack API should remain exposed for LavaMoat to work
-      ],
-    }
+    const avoids = [
+      'undefined', 'NaN', 'window', 'document', 'location', 'top', 'Infinity',
+      'Object', 'Compartment', 'Reflect', 'Set', 'Array',
+      'Math', 'Date', // tamed APIs
+      'LavaPack', // LavaPack API should remain exposed for LavaMoat to work
+    ]
 
-    scuttle(document, Object.getOwnPropertyNames(Document.prototype), nonWritables.document)
-    scuttle(window, Object.getOwnPropertyNames(window), nonWritables.window)
-
-    function scuttle(object, props, avoid) {
-      for (const prop of props) {
-        if (includes.call(avoid, prop)) {
-          continue
-        }
-        defineProperty(object, prop, {value: undefined})
+    for (const prop of props) {
+      if (!Array.prototype.includes.call(avoids, prop)) {
+        Object.defineProperty(window, prop, {value: undefined})
       }
     }
   }
