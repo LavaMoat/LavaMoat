@@ -1,5 +1,7 @@
 ;(function(){
 
+  let scuttled = false;
+
   const moduleRegistry = new Map()
   const lavamoatPolicy = { resources: {} }
   const debugMode = false
@@ -110,17 +112,88 @@
   }
 
   function scuttleGlobalThis() {
-    const props = [
-      ...Object.getOwnPropertyNames(window),
-      ...Object.getOwnPropertyNames(Window.prototype),
-      ...Object.getOwnPropertyNames(EventTarget.prototype),
-    ]
+    if (scuttled) {
+      // scuttling globalThis is only necessary once
+      return
+    }
+
+    scuttled = true
+
+    let props = [...Object.getOwnPropertyNames(globalThis)]
+    if (globalThis?.Window?.prototype) {
+      props = [...props, ...Object.getOwnPropertyNames(Window.prototype)]
+    }
+    if (globalThis?.EventTarget?.prototype) {
+      props = [...props, ...Object.getOwnPropertyNames(EventTarget.prototype)]
+    }
 
     const avoids = [
-      'undefined', 'NaN', 'window', 'document', 'location', 'top', 'Infinity',
-      'Object', 'Compartment', 'Reflect', 'Set', 'Array',
-      'Math', 'Date', // tamed APIs
-      'LavaPack', // LavaPack API should remain exposed for LavaMoat to work
+      'getComputedStyle',
+      'setTimeout',
+      'clearTimeout',
+      'console',
+      'undefined',
+      'NaN',
+      'window',
+      'document',
+      'location',
+      'top',
+      'Infinity',
+      'Object',
+      'Compartment',
+      'Reflect',
+      'Set',
+      'Array',
+      'Function',
+      'Number',
+      'parseFloat',
+      'parseInt',
+      'Boolean',
+      'String',
+      'Symbol',
+      'Promise',
+      'RegExp',
+      'Error',
+      'EvalError',
+      'RangeError',
+      'ReferenceError',
+      'SyntaxError',
+      'TypeError',
+      'URIError',
+      'globalThis',
+      'JSON',
+      'ArrayBuffer',
+      'Uint8Array',
+      'Int8Array',
+      'Uint16Array',
+      'Int16Array',
+      'Uint32Array',
+      'Int32Array',
+      'Float32Array',
+      'Float64Array',
+      'Uint8ClampedArray',
+      'BigUint64Array',
+      'BigInt64Array',
+      'DataView',
+      'Map',
+      'BigInt',
+      'WeakMap',
+      'WeakSet',
+      'Proxy',
+      'decodeURI',
+      'decodeURIComponent',
+      'encodeURI',
+      'encodeURIComponent',
+      'escape',
+      'unescape',
+      'eval',
+      'isFinite',
+      'isNaN',
+      'lockdown',
+      'harden',
+      'Math',
+      'Date',
+      'LavaPack'
     ]
 
     for (const prop of props) {
