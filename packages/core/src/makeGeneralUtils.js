@@ -6,7 +6,6 @@ function makeGeneralUtils () {
   }
 
   function createFunctionWrapper (sourceValue, unwrapTest, unwrapTo) {
-    const reflectApply = Reflect.apply
     const newValue = function (...args) {
       if (new.target) {
         // handle constructor calls
@@ -15,7 +14,7 @@ function makeGeneralUtils () {
         // handle function calls
         // unwrap to target value if this value is the source package compartment's globalThis
         const thisRef = unwrapTest(this) ? unwrapTo : this
-        return reflectApply(sourceValue, thisRef, args)
+        return Reflect.apply(sourceValue, thisRef, args)
       }
     }
     Object.defineProperties(newValue, Object.getOwnPropertyDescriptors(sourceValue))
