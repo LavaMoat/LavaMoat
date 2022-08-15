@@ -1,6 +1,17 @@
 ;(function(){
-
-  let scuttled = false;
+  // this runtime template code is destined to wrap LavaMoat entirely,
+  // therefore this is our way of capturing access to basic APIs LavaMoat
+  // uses to still be accessible only to LavaMoat after scuttling occurs
+  const {
+    Reflect,
+    Object,
+    Error,
+    Array,
+    Set,
+    Math,
+    Date,
+    console,
+  } = globalThis
 
   const moduleRegistry = new Map()
   const lavamoatPolicy = { resources: {} }
@@ -92,9 +103,6 @@
       })
     }
 
-    // scuttle globalThis before running entryPoints
-    scuttleGlobalThis()
-
     // run each of entryPoints
     const entryExports = Array.prototype.map.call(entryPoints, (entryId) => {
       return runModule(entryId)
@@ -109,98 +117,6 @@
       throw new Error(`no module registered for "${moduleId}" (${typeof moduleId})`)
     }
     return internalRequire(moduleId)
-  }
-
-  function scuttleGlobalThis() {
-    if (scuttled) {
-      // scuttling globalThis is only necessary once
-      return
-    }
-
-    scuttled = true
-
-    let props = [...Object.getOwnPropertyNames(globalThis)]
-    if (globalThis?.Window?.prototype) {
-      props = [...props, ...Object.getOwnPropertyNames(Window.prototype)]
-    }
-    if (globalThis?.EventTarget?.prototype) {
-      props = [...props, ...Object.getOwnPropertyNames(EventTarget.prototype)]
-    }
-
-    const avoids = [
-      'getComputedStyle',
-      'setTimeout',
-      'clearTimeout',
-      'console',
-      'undefined',
-      'NaN',
-      'window',
-      'document',
-      'location',
-      'top',
-      'Infinity',
-      'Object',
-      'Compartment',
-      'Reflect',
-      'Set',
-      'Array',
-      'Function',
-      'Number',
-      'parseFloat',
-      'parseInt',
-      'Boolean',
-      'String',
-      'Symbol',
-      'Promise',
-      'RegExp',
-      'Error',
-      'EvalError',
-      'RangeError',
-      'ReferenceError',
-      'SyntaxError',
-      'TypeError',
-      'URIError',
-      'globalThis',
-      'JSON',
-      'ArrayBuffer',
-      'Uint8Array',
-      'Int8Array',
-      'Uint16Array',
-      'Int16Array',
-      'Uint32Array',
-      'Int32Array',
-      'Float32Array',
-      'Float64Array',
-      'Uint8ClampedArray',
-      'BigUint64Array',
-      'BigInt64Array',
-      'DataView',
-      'Map',
-      'BigInt',
-      'WeakMap',
-      'WeakSet',
-      'Proxy',
-      'decodeURI',
-      'decodeURIComponent',
-      'encodeURI',
-      'encodeURIComponent',
-      'escape',
-      'unescape',
-      'eval',
-      'isFinite',
-      'isNaN',
-      'lockdown',
-      'harden',
-      'Math',
-      'Date',
-      'LavaPack'
-    ]
-
-    for (const prop of props) {
-      if (!Array.prototype.includes.call(avoids, prop)) {
-        Object.defineProperty(window, prop, {value: undefined})
-      }
-    }
   }
 
   // called by reportStatsHook

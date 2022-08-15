@@ -72,6 +72,9 @@
     const rootPackageName = '$root$'
     const rootPackageCompartment = createRootPackageCompartment(globalRef)
 
+    // scuttle globalThis right after we used it to create the root package compartment
+    scuttleGlobalThis()
+
     const kernel = {
       internalRequire
     }
@@ -81,6 +84,31 @@
     }
     Object.freeze(kernel)
     return kernel
+
+    function scuttleGlobalThis() {
+      let props = [...Object.getOwnPropertyNames(globalThis)]
+      if (globalThis?.Window?.prototype) {
+        props = [...props, ...Object.getOwnPropertyNames(Window.prototype)]
+      }
+      if (globalThis?.EventTarget?.prototype) {
+        props = [...props, ...Object.getOwnPropertyNames(EventTarget.prototype)]
+      }
+
+      const avoids = [
+        // non configurables
+        'location', 'top', 'global', 'self', 'window', 'Infinity', 'NaN', 'document',
+        // support LM,SES exported APIs
+        'LavaPack', 'Compartment', 'LavaMoat',
+        // support polyfill
+        'globalThis',
+      ]
+
+      for (const prop of props) {
+        if (!avoids.includes(prop)) {
+          Object.defineProperty(window, prop, {value: undefined})
+        }
+      }
+    }
 
     // this function instantiaties a module from a moduleId.
     // 1. loads the module metadata and policy
