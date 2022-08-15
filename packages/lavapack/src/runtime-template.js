@@ -102,12 +102,10 @@
         package: packageName,
       })
     }
-
     // run each of entryPoints
     const entryExports = Array.prototype.map.call(entryPoints, (entryId) => {
       return runModule(entryId)
     })
-
     // webpack compat: return the first module's exports
     return entryExports[0]
   }
