@@ -4,8 +4,7 @@ This is a graph visualization generator exploring a lavamoat bundle's dependency
 
 Try out a [demo](https://lavamoat.github.io/LavaMoat/)
 
-### example
-
+### Usage
 
 
 ```bash
