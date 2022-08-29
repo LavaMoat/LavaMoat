@@ -23,15 +23,15 @@ In order to help mitigate the risk of such an attack we are building a suite of 
 2. run your server or build process in [lavamoat-node][LavamoatNode]
 3. build your ui with LavaMoat for [Browserify][LavamoatBrowserify]
 
-### How LavaMoat works
+## How LavaMoat works
 
-#### Install scripts
+### Install scripts
 
 Lavamoat's allow-scripts configures your project to disable running install scripts by default and
 gives you a configuration section in package.json where the allowed ones can be listed.  
 It also installs a package with an install script that fails installation as early as possible if the configuration is accidentally removed.
 
-#### Runtime protections
+### Runtime protections
 
 You can use lavamoat to prevent malicious code introduced into a package from running. 
 
@@ -41,7 +41,7 @@ The LavaMoat runtime reduces the supplychain risk by:
 
 Both are provided by [SES][SesGithub] containers. Platform API access is granted by a policy file that LavaMoat can generate and allow the project to selectively customize.
 
-##### SecureEcmaScript (SES)
+#### SecureEcmaScript (SES)
 
 [SES][SesGithub] is the sandbox used in LavaMoat. See SES's [secure computing guide][SesComputingGuide] to learn more about the risks of untrusted javascript.
 
@@ -63,14 +63,8 @@ This includes the js content of the module sources, and sometimes some config in
 
 LavaMoat modifies the bundle's runtime to enforce the configured constraints.
 
-#### Bundler Plugins:
-  - [LavaMoat Browserify][LavamoatBrowserify]
+- [LavaMoat Browserify][LavamoatBrowserify]
 
-### Additional tools
-
-In addition to the LavaMoat runtime bundler plugins, there are some tools to help analyze your dependency graph and configuration.
-
-See [lavamoat-viz][LavamoatViz] for a demo of the tool.
 
 ### Lavamoat Viz
 
@@ -78,21 +72,21 @@ See [lavamoat-viz][LavamoatViz] for a demo of the tool.
 The [lavamoat viz][lavamoatViz] is a tool to visualize an application's dependency graph and assess package dangerousness.
 
 
-### Further reading on software supplychain security
+## Further reading on software supplychain security
 
-#### Articles:
+### Articles:
 - [HackerNoon - I’m harvesting credit card numbers and passwords from your site. Here’s how](https://medium.com/hackernoon/im-harvesting-credit-card-numbers-and-passwords-from-your-site-here-s-how-9a8cb347c5b5)
 - [Agoric - POLA Would Have Prevented the Event-Stream Incident](https://medium.com/agoric/pola-would-have-prevented-the-event-stream-incident-45653ecbda99)
 - [Snyk - Why npm lockfiles can be a security blindspot for injecting malicious modules](https://snyk.io/blog/why-npm-lockfiles-can-be-a-security-blindspot-for-injecting-malicious-modules/)
 - [Bytecode Alliance - Building a secure by default, composable future for WebAssembly](https://bytecodealliance.org/articles/announcing-the-bytecode-alliance)
 
-#### Videos:
+### Videos:
 - [Making 'npm install' Safe - Kate Sills - QCon 2020 ~40min](https://www.infoq.com/presentations/npm-install/)
 - [JavaScript Supply Chain Security - Adam Baldwin - LocoMocoSec 2019 ~25min](https://www.youtube.com/watch?v=HDo2iOlkbyc)
 - [Analysis of an exploited npm package – Jarrod Overson - Amsterdam JSNation Conference 2019  ~25min](https://www.youtube.com/watch?v=cvtt8TexqbU)
 - [How Malicious NPM Packages Make Your Apps Vulnerable - SnykLive stream 2022 ~1h](https://youtu.be/STC_ubJNiMs?t=287)
 
-### Supporters
+## Supporters
 
 Made with love by [MetaMask](https://github.com/metamask/)
 

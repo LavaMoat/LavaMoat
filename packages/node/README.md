@@ -14,7 +14,7 @@ LavaMoat differs from the standard node runtime in that it:
 2. Uses SES Compartments to isolate each package's execution.
    Packages don't share references to anything unless explicitly passed in or allowed by policy. Custom `require` and linking implementation is provided for the purpose of loading allowed dependencies.
 3. Enforces the app-specified LavaMoat policy.
-   The policy specifies what execution environment (globals etc.) each package should run with, and what other packages or built-ins can be required/imported.
+   The policy specifies what execution environment each package should run with, which means: what global/builtin APIs should it be exposed to, and what other packages can it require/import.
 
 The result is a runtime that should work just as before, but provides some protection against supplychain attacks.
 

@@ -11,6 +11,9 @@ Adds the package to start using it in your project. be sure to include the `@lav
 
 ```sh
 yarn add -D @lavamoat/allow-scripts
+```
+or
+```sh
 npm i -D @lavamoat/allow-scripts
 ```
 
@@ -18,10 +21,13 @@ npm i -D @lavamoat/allow-scripts
 
 ```sh
 yarn allow-scripts setup
-npx allow-scripts setup
+```
+or
+```sh
+npx --no-install allow-scripts setup
 ```
 
-> **Warning** if @lavamoat/allow-scripts was not installed prior, npx will download and run allow-scripts (note no namespace prefix) which serves the same purpose but with different functionality and security gurantees.
+> **Warning** if @lavamoat/allow-scripts was not installed prior, npx will try to download and run allow-scripts (note no namespace prefix) which is a different package. We suggest adding --no-install to prevent accidents.
 
 Adds a `.yarnrc` or `.npmrc` (the latter if `package-lock.json` is present) to the package, populates this file with the line `ignore-scripts true`. Immediately after that, adds the dependency `@lavamoat/preinstall-always-fail`.
 
@@ -34,7 +40,10 @@ Automatically generates and writes a configuration into `package.json`, setting 
 
 ```sh
 yarn allow-scripts auto
-npx allow-scripts auto
+```
+or
+```sh
+npx --no-install allow-scripts auto
 ```
 
 Configuration goes in `package.json`
@@ -58,10 +67,13 @@ Run **all** lifecycle scripts for the packages specified in `package.json`
 
 ```sh
 yarn allow-scripts
-npx allow-scripts
+```
+or
+```sh
+npx --no-install allow-scripts
 ```
 
-This is a shorthand for `yarn allow-scripts run`.
+This is a shorthand for `yarn/npx allow-scripts run`.
 
 It will fail if it detects dependencies which haven't been set up during [configuration](#Configure) of the package. You will be advised to run `yarn allow-scripts auto`.
 
@@ -71,7 +83,10 @@ Prints comprehension of configuration and dependencies with lifecycle scripts, s
 
 ```sh
 yarn allow-scripts list
-npx allow-scripts list
+```
+or
+```sh
+npx --no-install allow-scripts list
 ```
 
 ### Improving your Workflow
