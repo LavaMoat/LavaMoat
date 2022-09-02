@@ -20,14 +20,16 @@ function addInstallParentDir(filename) {
 function writeRcFile () {
   const yarnRcExists = existsSync(addInstallParentDir('.yarnrc'))
   const npmRcExists = existsSync(addInstallParentDir('.npmrc'))
+  const yarnLockExists = existsSync(addInstallParentDir('yarn.lock'))
 
   let rcFile, rcEntry
-  if (npmRcExists) {
-    rcFile = '.npmrc'
-    rcEntry = 'ignore-scripts=true'
-  } else {
+  if (yarnRcExists || yarnLockExists) {
     rcFile = '.yarnrc'
     rcEntry = 'ignore-scripts true'
+  } else {
+    // if no lockfiles exixt, default to npm, because that's what everyone has anyway
+    rcFile = '.npmrc'
+    rcEntry = 'ignore-scripts=true'
   }
 
   let rcPath = addInstallParentDir(rcFile)
