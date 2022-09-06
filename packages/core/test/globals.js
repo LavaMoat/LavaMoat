@@ -260,6 +260,7 @@ test('globals - explicitly disallowing properties on the globalThis via override
 
 test('globals - nested property true.false.true', async (t) => {
   'use strict'
+  // When this behavior changes, update /docs/policy.md
   const shared = {
     context: {
       a: { ok: 42, b: { c: ()=>42, notOk:41 }},
@@ -339,6 +340,7 @@ test('globals - nested property false.true', async (t) => {
 
 test.failing('globals - nested property true.false', async (t) => {
   'use strict'
+  // When this behavior changes, update /docs/policy.md
   const shared = {
     context: {
       a: { ok: 42, b: { c: ()=>42, notOk:41 }},

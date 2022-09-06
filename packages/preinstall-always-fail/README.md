@@ -7,12 +7,13 @@ Adding this package to a project **mitigates** the likelihood of running any lif
 ## Install
 
 ```
+yarn add @lavamoat/preinstall-always-fail
 npm i @lavamoat/preinstall-always-fail
 ```
 
 ## Usage
 
-If the `--ignore-scripts` [[1](#1)] flag is disabled, running `yarn` or `npm` will fail.
+If the `--ignore-scripts` [[1](#1)] flag is missing, running `yarn` or `npm i` will fail.
 Enable the flag and use in conjunction with Lavamoat's [allow-scripts](https://github.com/LavaMoat/LavaMoat/tree/main/packages/allow-scripts) to manually whitelist packages running scripts.
 
 ## References
