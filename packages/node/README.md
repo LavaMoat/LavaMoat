@@ -3,7 +3,7 @@
 > **Warning**
 > experimental, has not been audited
 
-`lavamoat` is a NodeJS runtime where modules are defined in [SES][SesGithub] Compartments. It aims to reduce the risk of malicious code in the app dependency graph, known as "software supplychain attacks".
+`lavamoat` is a NodeJS runtime where modules are defined in [SES][SesGithub] Compartments. It aims to reduce the risk of malicious code in the app dependency graph, known as "software supply chain attacks".
 
 ## LavaMoat Runtime 
 
@@ -14,9 +14,9 @@ LavaMoat differs from the standard node runtime in that it:
 2. Uses SES Compartments to isolate each package's execution.
    Packages don't share references to anything unless explicitly passed in or allowed by policy. Custom `require` and linking implementation is provided for the purpose of loading allowed dependencies.
 3. Enforces the app-specified LavaMoat policy.
-   The policy specifies what execution environment each package should run with, which means: what global/builtin APIs should it be exposed to, and what other packages can it require/import.
+   The policy specifies what execution environment each package should run with, which means: what global/built-in APIs should it be exposed to, and what other packages can it require/import.
 
-The result is a runtime that should work just as before, but provides some protection against supplychain attacks.
+The result is a runtime that should work just as before, but provides some protection against supply chain attacks.
 
 > For an overview of LavaMoat tools see [the main README](https://github.com/LavaMoat/LavaMoat/tree/main/README.md)
 
@@ -106,7 +106,7 @@ Options:
 
 ### Run with Policy in default location
 
-This uses the existing policy and polict-override files to run your app.
+This uses the existing policy and policy-override files to run your app.
 
 ```bash
 lavamoat index.js

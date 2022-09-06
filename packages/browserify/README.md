@@ -164,7 +164,7 @@ const lavamoatOpts = {
 }
 ```
 
-Policy as a `function`, must return a filepath or an `object`:
+Policy as a `function`, must return a file path or an `object`:
 
 ```javascript
 const lavamoatOpts = {

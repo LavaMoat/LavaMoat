@@ -1,6 +1,6 @@
 # LavaMoat
 
-![LavaMoat](./assets/lavamoat-logo.png "Introduction to LavaMoat")
+![LavaMoat](./assets/lavamoat-logo.png "LavaMoat logo")
 
 **LavaMoat** is a set of tools for securing JavaScript projects against a category of attacks called **software supply chain attacks.**
 
@@ -23,6 +23,8 @@ In order to help mitigate the risk of such an attack we are building a suite of 
 2. run your server or build process in [lavamoat-node][LavamoatNode]
 3. build your ui with LavaMoat for [Browserify][LavamoatBrowserify]
 
+Even starting with adding just step 1 - the allow-scripts is a great improvement to your supply chain security.
+
 ## How LavaMoat works
 
 ### Install scripts
@@ -31,15 +33,17 @@ Lavamoat's allow-scripts configures your project to disable running install scri
 gives you a configuration section in package.json where the allowed ones can be listed.  
 It also installs a package with an install script that fails installation as early as possible if the configuration is accidentally removed.
 
+No new install scripts showing up in your dependencies will run unexpectedly. That way you eliminate the most popular attack vector of malicious packages in recent years.
+
 ### Runtime protections
 
 You can use lavamoat to prevent malicious code introduced into a package from running. 
 
-The LavaMoat runtime reduces the supplychain risk by:
+The LavaMoat runtime reduces the supply chain risk by:
   1. Prevent modifying JavaScript's primordials (Object, String, Number, Array, ...)
   2. Limit access to the platform API (window, document, XHR, etc) per-package
 
-Both are provided by [SES][SesGithub] containers. Platform API access is granted by a policy file that LavaMoat can generate and allow the project to selectively customize.
+Both are provided by [SES][SesGithub] containers. Platform API access is granted by a policy file that LavaMoat can generate and allow the project to selectively customize. All details of policy file structure are documented in the [Policy file explained][PolicyDoc] doc.
 
 #### SecureEcmaScript (SES)
 
@@ -97,7 +101,8 @@ Runs on [Agoric](https://github.com/agoric/)
 [SesGithub]: https://github.com/endojs/endo/tree/master/packages/ses
 [SesComputingGuide]: https://github.com/endojs/endo/blob/master/packages/ses/docs/secure-coding-guide.md
 
+[PolicyDoc]: ./docs/policy.md
 [LavamoatNode]: ./packages/node
 [LavamoatBrowserify]: ./packages/browserify
-[LavamoatViz]: ./packages//viz
+[LavamoatViz]: ./packages/viz
 [LavamoatAllowScripts]: ./packages/allow-scripts
