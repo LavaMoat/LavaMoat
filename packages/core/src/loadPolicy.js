@@ -11,7 +11,7 @@ async function loadPolicy ({ debugMode, policyPath }) {
     const configSource = fs.readFileSync(policyPath, 'utf8')
     policy = JSON.parse(configSource)
   } else {
-    if (debugMode) console.warn('Lavamoat could not find policy')
+    if (debugMode) console.warn(`Lavamoat could not find policy at ${policyPath}`)
   }
   return policy
 }

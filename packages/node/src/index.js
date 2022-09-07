@@ -5,7 +5,7 @@ const path = require('path')
 const fs = require('fs')
 const yargs = require('yargs')
 const jsonStringify = require('json-stable-stringify')
-const { loadPolicy, getDefaultPaths } = require('lavamoat-core')
+const { loadPolicy, mergePolicy, getDefaultPaths } = require('lavamoat-core')
 const { loadCanonicalNameMap } = require('@lavamoat/aa')
 const { parseForPolicy } = require('./parseForPolicy')
 const { createKernel } = require('./kernel')
@@ -35,7 +35,7 @@ async function runLava () {
   if (shouldParseApplication) {
     // parse mode
     const includeDebugInfo = Boolean(writeAutoPolicyDebug)
-    const policyOverride= await loadPolicy({ debugMode, policyPath: policyOverridePath })
+    const policyOverride = await loadPolicy({ debugMode, policyPath: policyOverridePath })
     console.warn(`LavaMoat generating policy from entry "${entryId}"...`)
     const policy = await parseForPolicy({ projectRoot, entryId, policyOverride, includeDebugInfo })
     // write policy debug file
@@ -53,9 +53,18 @@ async function runLava () {
   }
   if (shouldRunApplication) {
     // execution mode
-    const lavamoatPolicy = await loadPolicy({ debugMode, policyPath })
+    const policy = await loadPolicy({ debugMode, policyPath })
+    let lavamoatPolicy = policy
+    if (fs.existsSync(policyOverridePath)) {
+      if (debugMode) console.warn(`Merging policy-override.json into policy.json`)
+      const policyOverride = await loadPolicy({ debugMode, policyPath: policyOverridePath })
+      lavamoatPolicy = mergePolicy(policy, policyOverride)
+      // TODO: Only write if merge results in changes.
+      // Would have to make a deep equal check on whole policy, which is a waste of time.
+      // mergePolicy() should be able to do it in one pass.
+      fs.writeFileSync(policyPath, jsonStringify(lavamoatPolicy, { space: 2 }))
+    }
     const canonicalNameMap = await loadCanonicalNameMap({ rootDir: projectRoot, includeDevDeps: true })
-      // process.exit(420)
     const kernel = createKernel({ projectRoot, lavamoatPolicy, canonicalNameMap, debugMode, statsMode })
     // patch process.argv so it matches the normal pattern
     // e.g. [runtime path, entrypoint, ...args]
