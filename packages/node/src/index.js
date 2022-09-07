@@ -5,7 +5,7 @@ const path = require('path')
 const fs = require('fs')
 const yargs = require('yargs')
 const jsonStringify = require('json-stable-stringify')
-const { loadPolicy, mergePolicy, getDefaultPaths } = require('lavamoat-core')
+const { loadPolicy, loadPolicyAndApplyOverrides, getDefaultPaths } = require('lavamoat-core')
 const { loadCanonicalNameMap } = require('@lavamoat/aa')
 const { parseForPolicy } = require('./parseForPolicy')
 const { createKernel } = require('./kernel')
@@ -53,17 +53,7 @@ async function runLava () {
   }
   if (shouldRunApplication) {
     // execution mode
-    const policy = await loadPolicy({ debugMode, policyPath })
-    let lavamoatPolicy = policy
-    if (fs.existsSync(policyOverridePath)) {
-      if (debugMode) console.warn(`Merging policy-override.json into policy.json`)
-      const policyOverride = await loadPolicy({ debugMode, policyPath: policyOverridePath })
-      lavamoatPolicy = mergePolicy(policy, policyOverride)
-      // TODO: Only write if merge results in changes.
-      // Would have to make a deep equal check on whole policy, which is a waste of time.
-      // mergePolicy() should be able to do it in one pass.
-      fs.writeFileSync(policyPath, jsonStringify(lavamoatPolicy, { space: 2 }))
-    }
+    const lavamoatPolicy = await loadPolicyAndApplyOverrides({ debugMode, policyPath, policyOverridePath })
     const canonicalNameMap = await loadCanonicalNameMap({ rootDir: projectRoot, includeDevDeps: true })
     const kernel = createKernel({ projectRoot, lavamoatPolicy, canonicalNameMap, debugMode, statsMode })
     // patch process.argv so it matches the normal pattern
