@@ -11,6 +11,7 @@ const { parseForPolicy } = require('./parseForPolicy')
 const { createKernel } = require('./kernel')
 const yargsFlags = require('./yargsFlags')
 
+
 runLava().catch(err => {
   // explicity log stack to workaround https://github.com/endojs/endo/issues/944
   console.error(err.stack || err)
@@ -19,7 +20,7 @@ runLava().catch(err => {
 
 async function runLava () {
   const {
-    entryPath: entryId,
+    commandName,
     writeAutoPolicy,
     writeAutoPolicyDebug,
     writeAutoPolicyAndRun,
@@ -29,9 +30,26 @@ async function runLava () {
     projectRoot,
     debugMode,
     statsMode,
+    _: argv, // this is where yargs puts all arguments after --
   } = parseArgs()
   const shouldParseApplication = writeAutoPolicy || writeAutoPolicyDebug || writeAutoPolicyAndRun
   const shouldRunApplication = (!writeAutoPolicy && !writeAutoPolicyDebug) || writeAutoPolicyAndRun
+
+  const binEntry = path.resolve(process.cwd(), './node_modules/.bin/', commandName);
+  if (!fs.existsSync(binEntry)) {
+    console.error(`Error: '${commandName}' is not one of the locally installed commands. Missing: '${binEntry}'
+    Possible reasons for this error:
+    - node_modules not installed
+    - trying to run a globally installed script or command, 
+      which is not supported and not recommended`)
+    process.exit(4)
+  }
+
+  const entryId = path.resolve(
+    process.cwd(), 
+    'node_modules/.bin/',
+    fs.readlinkSync(binEntry)
+  )
 
   if (shouldParseApplication) {
     // parse mode
@@ -62,7 +80,8 @@ async function runLava () {
     // e.g. [runtime path, entrypoint, ...args]
     // we'll use the LavaMoat path as the runtime
     // so we just remove the node path
-    process.argv.shift()
+    process.argv = [process.argv[0], ...argv]
+
     // run entrypoint
     kernel.internalRequire(entryId)
   }
@@ -71,19 +90,12 @@ async function runLava () {
 function parseArgs () {
   const defaultPaths = getDefaultPaths('node')
   const argsParser = yargs
-    .usage('$0 <entryPath>', 'start the application', (yargs) => {
-      // the entry file to run (or parse)
-      yargs.positional('entryPath', {
-        describe: 'the path to the entry file for your application. same as node.js',
-        type: 'string'
-      })
-      yargsFlags(yargs, defaultPaths)
-    })
+    .usage('$0', 'lavamoat-run-command [flags for lavamoat] -- command [args for the command]', (yarn) => yargsFlags(yarn, defaultPaths))
     .help()
 
   const parsedArgs = argsParser.parse()
+  parsedArgs.commandName = parsedArgs._[0];
   // resolve paths
-  parsedArgs.entryPath = path.resolve(parsedArgs.entryPath)
   parsedArgs.policyPath = path.resolve(parsedArgs.policyPath)
   parsedArgs.policyOverridePath = path.resolve(parsedArgs.policyOverridePath)
   parsedArgs.policyDebugPath = path.resolve(parsedArgs.policyDebugPath)

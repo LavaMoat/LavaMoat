@@ -1,7 +1,8 @@
 {
   "name": "lavamoat",
   "bin": {
-    "lavamoat": "src/index.js"
+    "lavamoat": "src/index.js",
+    "lavamoat-run-command": "src/run-command.js"
   },
   "version": "6.2.0",
   "main": "index.js",
