@@ -228,11 +228,20 @@ function createScenarioFromScaffold ({
   }
 }
 
+function isSpam(message){
+  if(typeof message === 'string' && message.includes('Removing intrinsics.')){
+    return true
+  }
+}
+
 function createHookedConsole () {
   let hasResolved = false
   let resolve
   const firstLogEventPromise = new Promise(_resolve => { resolve = _resolve })
   const hookedLog = (message) => {
+    if (isSpam(message)) {
+      return
+    }
     if (hasResolved) {
       throw new Error(`console.log called multiple times. got "${message}"`)
     }
@@ -244,7 +253,7 @@ function createHookedConsole () {
     try {
       result = JSON.parse(message)
     } catch (err) {
-      throw new Error(`LavaMoat - failed to parse test output:\n${message}`)
+      throw new Error(`LavaMoat - failed to parse test output:\n${message}\n  ${err.message}`)
     }
     resolve(result)
   }

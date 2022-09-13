@@ -43,5 +43,40 @@ module.exports = [
       expectedResult: 123
     })
     return scenario
+  },
+  async () => {
+    const scenario = createScenarioFromScaffold({
+      name: 'basic - Node error stacktrace functionality allowed',
+      defineOne: () => {
+        // taken from depd package
+        function callSiteToString () {
+          var limit = Error.stackTraceLimit
+          var obj = {}
+          var prep = Error.prepareStackTrace
+        
+          function prepareObjectStackTrace (obj, stack) {
+            return stack
+          }
+        
+          Error.prepareStackTrace = prepareObjectStackTrace
+          Error.stackTraceLimit = 2
+        
+          // capture the stack
+          Error.captureStackTrace(obj)
+        
+          // slice the stack
+          var stack = obj.stack.slice()
+        
+          Error.prepareStackTrace = prep
+          Error.stackTraceLimit = limit
+        
+          return 123
+        }
+
+        module.exports = callSiteToString()
+      },
+      expectedResult: 123
+    })
+    return scenario
   }
 ]
