@@ -125,6 +125,4 @@
     console.warn(JSON.stringify(moduleGraphStatsObj, null, 2))
   }
 
-  const __lavamoatScuttle__ = false
-
 })()

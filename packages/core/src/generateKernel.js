@@ -26,12 +26,16 @@ function getSesShimSrc () {
 // takes the kernelTemplate and populates it with the libraries
 function generateKernel (opts = {}) {
   const debugMode = Boolean(opts.debugMode)
+  const scuttle = Boolean(opts.scuttle)
   const kernelCode = generateKernelCore(opts)
 
   let output = kernelTemplate
   output = replaceTemplateRequire(output, 'ses', sesSrc)
   output = stringReplace(output, '__lavamoatDebugMode__', debugMode ? 'true' : 'false')
   output = stringReplace(output, '__createKernelCore__', kernelCode)
+  if (opts.hasOwnProperty('scuttle')) {
+    output = stringReplace(output, '__lavamoatScuttle__', scuttle ? 'true' : 'false')
+  }
 
   return output
 }
