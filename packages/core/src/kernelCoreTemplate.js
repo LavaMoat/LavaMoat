@@ -15,6 +15,7 @@
     globalThisRefs,
     // security options
     debugMode,
+    scuttle,
     runWithPrecompiledModules,
     reportStatsHook
   }) {
@@ -39,6 +40,7 @@
       getExternalCompartment,
       globalThisRefs,
       debugMode,
+      scuttle,
       runWithPrecompiledModules,
       reportStatsHook
     })
@@ -57,6 +59,7 @@
     getExternalCompartment,
     globalThisRefs = ['globalThis'],
     debugMode = false,
+    scuttle = false,
     runWithPrecompiledModules = false,
     reportStatsHook = () => {}
   }) {
@@ -73,7 +76,9 @@
     const rootPackageCompartment = createRootPackageCompartment(globalRef)
 
     // scuttle globalThis right after we used it to create the root package compartment
-    scuttleGlobalThis()
+    if (scuttle) {
+      scuttleGlobalThis()
+    }
 
     const kernel = {
       internalRequire

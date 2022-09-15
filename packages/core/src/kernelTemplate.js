@@ -13,6 +13,7 @@
     reportStatsHook,
   }) {
     const debugMode = __lavamoatDebugMode__
+    const scuttle = __lavamoatScuttle__
 
     // identify the globalRef
     const globalRef = (typeof globalThis !== 'undefined') ? globalThis : (typeof self !== 'undefined') ? self : (typeof global !== 'undefined') ? global : undefined
@@ -56,6 +57,7 @@
       globalRef,
       globalThisRefs,
       debugMode,
+      scuttle,
       runWithPrecompiledModules,
       reportStatsHook
     })
