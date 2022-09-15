@@ -253,7 +253,7 @@ function createHookedConsole () {
     firstLogEventPromise,
     hookedConsole,
   }
-} 
+}
 
 async function runScenario ({
   scenario,
@@ -269,7 +269,7 @@ async function runScenario ({
     beforeCreateKernel = () => {}
 } = scenario
   const lavamoatConfig = mergeDeep(config, configOverride)
-  const kernelSrc = generateKernel()
+  const kernelSrc = generateKernel({scuttle: false})
   const { hookedConsole, firstLogEventPromise } = createHookedConsole()
   Object.assign(scenario.context, { console: hookedConsole })
   const { result: createKernel, vmGlobalThis, vmContext, vmFeralFunction } = evaluateWithSourceUrl('LavaMoat/core-test/kernel', kernelSrc, scenario.context)

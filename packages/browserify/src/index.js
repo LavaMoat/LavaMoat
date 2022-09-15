@@ -101,6 +101,8 @@ function loadPolicyFromPluginOpts (pluginOpts = {}) {
 
 function getConfigurationFromPluginOpts (pluginOpts) {
   const aliasMap = {
+    s: 'scuttleGlobalThis',
+    scuttle: 'scuttleGlobalThis',
     a: 'writeAutoPolicy',
     autopolicy: 'writeAutoPolicy',
     p: 'policy',
@@ -150,12 +152,13 @@ function getConfigurationFromPluginOpts (pluginOpts) {
     pruneConfig: Boolean(pluginOpts.prunePolicy),
     debugMode: Boolean(pluginOpts.debugMode),
     statsMode: Boolean(pluginOpts.statsMode),
+    scuttleGlobalThis: Boolean(pluginOpts.scuttleGlobalThis),
     writeAutoPolicy: Boolean(pluginOpts.writeAutoPolicy || pluginOpts.writeAutoPolicyDebug),
     writeAutoPolicyDebug: Boolean(pluginOpts.writeAutoPolicyDebug),
     bundleWithPrecompiledModules: 'bundleWithPrecompiledModules' in pluginOpts ? Boolean(pluginOpts.bundleWithPrecompiledModules) : true,
     actionOverrides: {}
   }
-  
+
   // check for action overrides
   if (typeof pluginOpts.writeAutoPolicy === 'function') {
     configuration.actionOverrides.writeAutoPolicy = pluginOpts.writeAutoPolicy

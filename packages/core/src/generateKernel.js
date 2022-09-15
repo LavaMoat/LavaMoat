@@ -26,12 +26,18 @@ function getSesShimSrc () {
 // takes the kernelTemplate and populates it with the libraries
 function generateKernel (opts = {}) {
   const debugMode = Boolean(opts.debugMode)
+  const scuttle = opts.scuttle
   const kernelCode = generateKernelCore(opts)
 
   let output = kernelTemplate
   output = replaceTemplateRequire(output, 'ses', sesSrc)
   output = stringReplace(output, '__lavamoatDebugMode__', debugMode ? 'true' : 'false')
   output = stringReplace(output, '__createKernelCore__', kernelCode)
+  if (typeof scuttle === 'boolean') {
+    // scuttling config placeholder should be set only if ordered so explicitly.
+    // if not, should be left as is to be replaced by a later processor (e.g. LavaPack).
+    output = stringReplace(output, '__lavamoatScuttle__', scuttle ? 'true' : 'false')
+  }
 
   return output
 }
