@@ -110,7 +110,7 @@
 
       for (const prop of props) {
         if (!avoids.includes(prop)) {
-          Object.defineProperty(window, prop, {value: undefined})
+          Object.defineProperty(globalThis, prop, {value: undefined})
         }
       }
     }
