@@ -1,17 +1,4 @@
 ;(function(){
-  // this runtime template code is destined to wrap LavaMoat entirely,
-  // therefore this is our way of capturing access to basic APIs LavaMoat
-  // uses to still be accessible only to LavaMoat after scuttling occurs
-  const {
-    Reflect,
-    Object,
-    Error,
-    Array,
-    Set,
-    Math,
-    Date,
-    console,
-  } = globalThis
 
   const moduleRegistry = new Map()
   const lavamoatPolicy = { resources: {} }
@@ -79,7 +66,6 @@
     reportStatsHook,
   }) {
     const debugMode = false
-    const scuttle = __lavamoatScuttle__
 
     // identify the globalRef
     const globalRef = (typeof globalThis !== 'undefined') ? globalThis : (typeof self !== 'undefined') ? self : (typeof global !== 'undefined') ? global : undefined
@@ -10477,7 +10463,6 @@ assign(globalThis, {
     globalThisRefs,
     // security options
     debugMode,
-    scuttle,
     runWithPrecompiledModules,
     reportStatsHook
   }) {
@@ -10502,7 +10487,6 @@ assign(globalThis, {
       getExternalCompartment,
       globalThisRefs,
       debugMode,
-      scuttle,
       runWithPrecompiledModules,
       reportStatsHook
     })
@@ -10521,7 +10505,6 @@ assign(globalThis, {
     getExternalCompartment,
     globalThisRefs = ['globalThis'],
     debugMode = false,
-    scuttle = false,
     runWithPrecompiledModules = false,
     reportStatsHook = () => {}
   }) {
@@ -10599,7 +10582,6 @@ function makeGetEndowmentsForConfig ({ createFunctionWrapper }) {
     if (!config.globals) return {}
     // validate read access from config
     const whitelistedReads = []
-    const explicitlyBanned = []
     Object.entries(config.globals).forEach(([path, configValue]) => {
       const pathParts = path.split('.')
       // disallow dunder proto in path
@@ -10607,40 +10589,29 @@ function makeGetEndowmentsForConfig ({ createFunctionWrapper }) {
       if (pathContainsDunderProto) {
         throw new Error(`Lavamoat - "__proto__" disallowed when creating minial view. saw "${path}"`)
       }
-      // false means no access. It's necessary so that overrides can also be used to tighten the policy
-      if (configValue === false) {
-        explicitlyBanned.push(path)
-        return 
-      }
       // write access handled elsewhere
       if (configValue === 'write') return
       if (configValue !== true) {
-        throw new Error(`LavaMoat - unrecognizable policy value (${typeof configValue}) for path "${path}"`)
+        throw new Error(`LavaMoat - unknown value for config (${typeof configValue})`)
       }
       whitelistedReads.push(path)
     })
-    return makeMinimalViewOfRef(sourceRef, whitelistedReads, unwrapTo, unwrapFrom, explicitlyBanned)
+    return makeMinimalViewOfRef(sourceRef, whitelistedReads, unwrapTo, unwrapFrom)
   }
 
-  function makeMinimalViewOfRef (sourceRef, paths, unwrapTo, unwrapFrom, explicitlyBanned = []){
+  function makeMinimalViewOfRef (sourceRef, paths, unwrapTo, unwrapFrom) {
     const targetRef = {}
     paths.forEach(path => {
-      copyValueAtPath('', path.split('.'), explicitlyBanned, sourceRef, targetRef, unwrapTo, unwrapFrom)
+      copyValueAtPath(path.split('.'), sourceRef, targetRef, unwrapTo, unwrapFrom)
     })
     return targetRef
   }
 
-  function extendPath(visited, next) {
-    if (!visited || visited.length === 0) return next
-    return `${visited}.${next}`
-  }
-
-  function copyValueAtPath (visitedPath, pathParts, explicitlyBanned, sourceRef, targetRef, unwrapTo = sourceRef, unwrapFrom = targetRef) {
+  function copyValueAtPath (pathParts, sourceRef, targetRef, unwrapTo = sourceRef, unwrapFrom = targetRef) {
     if (pathParts.length === 0) {
       throw new Error('unable to copy, must have pathParts, was empty')
     }
     const [nextPart, ...remainingParts] = pathParts
-    const currentPath = extendPath(visitedPath, nextPart)
     // get the property from any depth in the property chain
     const { prop: sourcePropDesc } = getPropertyDescriptorDeep(sourceRef, nextPart)
 
@@ -10669,8 +10640,8 @@ function makeGetEndowmentsForConfig ({ createFunctionWrapper }) {
       const { sourceValue, sourceWritable } = getSourceValue()
       const nextSourceRef = sourceValue
       let nextTargetRef
-      // check if value exists on target and does not need selective treatment
-      if (targetPropDesc && !explicitlyBanned.includes(currentPath)) {
+      // check if value exists on target
+      if (targetPropDesc) {
         // a value already exists, we should walk into it
         nextTargetRef = targetPropDesc.value
       } else {
@@ -10687,13 +10658,7 @@ function makeGetEndowmentsForConfig ({ createFunctionWrapper }) {
         // the newly created container will be the next target
         nextTargetRef = containerRef
       }
-      copyValueAtPath(currentPath, remainingParts, explicitlyBanned, nextSourceRef, nextTargetRef)
-      return
-    }
-
-    // If conflicting rules exist, opt for the negative one. This should never happen
-    if (explicitlyBanned.includes(currentPath)) {
-      console.warn(`LavaMoat - conflicting rules exist for "${currentPath}"`)
+      copyValueAtPath(remainingParts, nextSourceRef, nextTargetRef)
       return
     }
 
@@ -10941,11 +10906,6 @@ function makePrepareRealmGlobalFromConfig ({ createFunctionWrapper }) {
     const rootPackageName = '$root$'
     const rootPackageCompartment = createRootPackageCompartment(globalRef)
 
-    // scuttle globalThis right after we used it to create the root package compartment
-    if (scuttle) {
-      scuttleGlobalThis()
-    }
-
     const kernel = {
       internalRequire
     }
@@ -10955,31 +10915,6 @@ function makePrepareRealmGlobalFromConfig ({ createFunctionWrapper }) {
     }
     Object.freeze(kernel)
     return kernel
-
-    function scuttleGlobalThis() {
-      let props = [...Object.getOwnPropertyNames(globalThis)]
-      if (globalThis?.Window?.prototype) {
-        props = [...props, ...Object.getOwnPropertyNames(Window.prototype)]
-      }
-      if (globalThis?.EventTarget?.prototype) {
-        props = [...props, ...Object.getOwnPropertyNames(EventTarget.prototype)]
-      }
-
-      const avoids = [
-        // non configurables
-        'location', 'top', 'global', 'self', 'window', 'Infinity', 'NaN', 'document',
-        // support LM,SES exported APIs
-        'LavaPack', 'Compartment',
-        // support polyfill
-        'globalThis',
-      ]
-
-      for (const prop of props) {
-        if (!avoids.includes(prop)) {
-          Object.defineProperty(window, prop, {value: undefined})
-        }
-      }
-    }
 
     // this function instantiaties a module from a moduleId.
     // 1. loads the module metadata and policy
@@ -11319,7 +11254,6 @@ function makePrepareRealmGlobalFromConfig ({ createFunctionWrapper }) {
       globalRef,
       globalThisRefs,
       debugMode,
-      scuttle,
       runWithPrecompiledModules,
       reportStatsHook
     })
