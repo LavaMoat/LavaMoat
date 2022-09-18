@@ -110,7 +110,19 @@
 
       for (const prop of props) {
         if (!avoids.includes(prop)) {
-          Object.defineProperty(globalThis, prop, {value: undefined})
+          // these props can't have getters, use undefined value instead
+          const desc = ['undefined', 'chrome', 'constructor'].includes(prop) ?
+            { value: undefined } :
+            {
+              set: () => {},
+              get: () => {
+                throw new Error(
+                  `LavaMoat - property "${prop}" of globalThis is inaccessible under scuttling mode. ` +
+                  `To learn more visit https://github.com/LavaMoat/LavaMoat/pull/360.`)
+              },
+            }
+          Object.defineProperty(window, prop, desc)
+
         }
       }
     }
