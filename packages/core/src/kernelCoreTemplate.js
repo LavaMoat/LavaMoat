@@ -91,12 +91,12 @@
     return kernel
 
     function scuttleGlobalThis(extraAvoids = new Array()) {
-      let props = [...Object.getOwnPropertyNames(globalThis)]
+      let props = Object.getOwnPropertyNames(globalThis)
       if (globalThis?.Window?.prototype) {
-        props = [...props, ...Object.getOwnPropertyNames(Window.prototype)]
+        props = props.concat(Object.getOwnPropertyNames(Window.prototype))
       }
       if (globalThis?.EventTarget?.prototype) {
-        props = [...props, ...Object.getOwnPropertyNames(EventTarget.prototype)]
+        props = props.concat(Object.getOwnPropertyNames(EventTarget.prototype))
       }
 
       const avoids = [
