@@ -3027,7 +3027,7 @@ const tagError = (err, optErrorName = err.name) => {
  */
 const makeError = (
 optDetails = redactedDetails`Assert failed`,
-ErrorConstructor = Error,
+ErrorConstructor = globalThis.Error,
 { errorName = undefined } = {}) =>
 {
   if (typeof optDetails === 'string') {
@@ -3166,7 +3166,7 @@ const makeAssert = (optRaise = undefined, unredacted = false) => {
   /** @type {AssertFail} */
   const fail = (
   optDetails = details`Assert failed`,
-  ErrorConstructor = Error) =>
+  ErrorConstructor = globalThis.Error) =>
   {
     const reason = makeError(optDetails, ErrorConstructor);
     if (optRaise !== undefined) {
@@ -3183,7 +3183,7 @@ const makeAssert = (optRaise = undefined, unredacted = false) => {
   function baseAssert(
   flag,
   optDetails = details`Check failed`,
-  ErrorConstructor = Error)
+  ErrorConstructor = globalThis.Error)
   {
     if (!flag) {
       throw fail(optDetails, ErrorConstructor);
