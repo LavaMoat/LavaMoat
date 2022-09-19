@@ -121,6 +121,7 @@
                   `To learn more visit https://github.com/LavaMoat/LavaMoat/pull/360.`)
               },
             }
+          desc.configurable = false
           Object.defineProperty(window, prop, desc)
 
         }
