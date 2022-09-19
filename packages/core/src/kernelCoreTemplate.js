@@ -103,7 +103,7 @@
         // non configurables
         'location', 'top', 'global', 'self', 'window', 'Infinity', 'NaN', 'document',
         // support LM,SES exported APIs
-        'LavaPack', 'Compartment',
+        'LavaPack', 'Compartment', 'Error',
         // support polyfill
         'globalThis',
       ]
