@@ -15,6 +15,7 @@
     globalThisRefs,
     // security options
     debugMode,
+    scuttle,
     runWithPrecompiledModules,
     reportStatsHook
   }) {
@@ -39,6 +40,7 @@
       getExternalCompartment,
       globalThisRefs,
       debugMode,
+      scuttle,
       runWithPrecompiledModules,
       reportStatsHook
     })
@@ -57,6 +59,7 @@
     getExternalCompartment,
     globalThisRefs = ['globalThis'],
     debugMode = false,
+    scuttle = false,
     runWithPrecompiledModules = false,
     reportStatsHook = () => {}
   }) {
@@ -72,6 +75,11 @@
     const rootPackageName = '$root$'
     const rootPackageCompartment = createRootPackageCompartment(globalRef)
 
+    // scuttle globalThis right after we used it to create the root package compartment
+    if (scuttle) {
+      scuttleGlobalThis(scuttle)
+    }
+
     const kernel = {
       internalRequire
     }
@@ -81,6 +89,44 @@
     }
     Object.freeze(kernel)
     return kernel
+
+    function scuttleGlobalThis(extraAvoids = new Array()) {
+      let props = Object.getOwnPropertyNames(globalThis)
+      if (globalThis?.Window?.prototype) {
+        props = props.concat(Object.getOwnPropertyNames(Window.prototype))
+      }
+      if (globalThis?.EventTarget?.prototype) {
+        props = props.concat(Object.getOwnPropertyNames(EventTarget.prototype))
+      }
+
+      const avoids = [
+        // non configurables
+        'location', 'top', 'global', 'self', 'window', 'Infinity', 'NaN', 'document',
+        // support LM,SES exported APIs
+        'LavaPack', 'Compartment', 'Error',
+        // support polyfill
+        'globalThis',
+      ]
+
+      for (const prop of props) {
+        if (!avoids.includes(prop) && !extraAvoids.includes(prop)) {
+          // these props can't have getters, use undefined value instead
+          const desc = ['undefined', 'chrome', 'constructor'].includes(prop) ?
+            { value: undefined } :
+            {
+              set: () => {},
+              get: () => {
+                throw new Error(
+                  `LavaMoat - property "${prop}" of globalThis is inaccessible under scuttling mode. ` +
+                  `To learn more visit https://github.com/LavaMoat/LavaMoat/pull/360.`)
+              },
+            }
+          desc.configurable = false
+          Object.defineProperty(window, prop, desc)
+
+        }
+      }
+    }
 
     // this function instantiaties a module from a moduleId.
     // 1. loads the module metadata and policy

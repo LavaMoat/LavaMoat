@@ -32,6 +32,11 @@ function generateKernel (opts = {}) {
   output = replaceTemplateRequire(output, 'ses', sesSrc)
   output = stringReplace(output, '__lavamoatDebugMode__', debugMode ? 'true' : 'false')
   output = stringReplace(output, '__createKernelCore__', kernelCode)
+  if (opts.hasOwnProperty('scuttle')) {
+    // scuttling config placeholder should be set only if ordered so explicitly.
+    // if not, should be left as is to be replaced by a later processor (e.g. LavaPack).
+    output = stringReplace(output, '__lavamoatScuttle__', JSON.stringify(opts.scuttle))
+  }
 
   return output
 }

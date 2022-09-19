@@ -1,4 +1,17 @@
 ;(function(){
+  // this runtime template code is destined to wrap LavaMoat entirely,
+  // therefore this is our way of capturing access to basic APIs LavaMoat
+  // uses to still be accessible only to LavaMoat after scuttling occurs
+  const {
+    Reflect,
+    Object,
+    Error,
+    Array,
+    Set,
+    Math,
+    Date,
+    console,
+  } = globalThis
 
   const moduleRegistry = new Map()
   const lavamoatPolicy = { resources: {} }
