@@ -77,7 +77,7 @@
 
     // scuttle globalThis right after we used it to create the root package compartment
     if (scuttle) {
-      scuttleGlobalThis()
+      scuttleGlobalThis(scuttle)
     }
 
     const kernel = {
@@ -90,7 +90,7 @@
     Object.freeze(kernel)
     return kernel
 
-    function scuttleGlobalThis() {
+    function scuttleGlobalThis(extraAvoids = new Array()) {
       let props = [...Object.getOwnPropertyNames(globalThis)]
       if (globalThis?.Window?.prototype) {
         props = [...props, ...Object.getOwnPropertyNames(Window.prototype)]
@@ -109,7 +109,7 @@
       ]
 
       for (const prop of props) {
-        if (!avoids.includes(prop)) {
+        if (!avoids.includes(prop) && !extraAvoids.includes(prop)) {
           // these props can't have getters, use undefined value instead
           const desc = ['undefined', 'chrome', 'constructor'].includes(prop) ?
             { value: undefined } :

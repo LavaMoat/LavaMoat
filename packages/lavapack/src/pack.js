@@ -78,7 +78,7 @@ function createPacker({
   }
   assert(policy, 'must specify a policy')
 
-  prelude = prelude.replace('__lavamoatScuttle__', scuttleGlobalThis ? 'true' : 'false')
+  prelude = prelude.replace('__lavamoatScuttle__', JSON.stringify(scuttleGlobalThis))
 
   // note: pack stream cant started emitting data until its received its first module
   // this is because the browserify pipeline is leaky until its finished being setup
