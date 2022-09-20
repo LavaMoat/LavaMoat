@@ -32,7 +32,7 @@
     "lint:fix": "eslint src/**/*.js test/**/*.js --fix",
     "lint:deps": "depcheck",
     "test": "ava --timeout=30s test/index.js",
-    "build": "node ./src/build-runtime.js"
+    "build": "node ./src/build-runtime.js build"
   },
   "author": "kumavis",
   "license": "MIT",

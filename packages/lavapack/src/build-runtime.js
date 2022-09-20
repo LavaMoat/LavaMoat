@@ -4,7 +4,7 @@ const { generateKernel, makeInitStatsHook } = require('lavamoat-core')
 
 module.exports = start
 
-start().catch(err => {
+process.argv[2] === 'build' && start().catch(err => {
   console.error(err)
   process.exit(1)
 })
