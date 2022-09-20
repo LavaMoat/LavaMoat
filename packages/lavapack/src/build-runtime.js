@@ -2,22 +2,22 @@ const { join: pathJoin } = require('path')
 const { promises: { readFile, writeFile } } = require('fs')
 const { generateKernel, makeInitStatsHook } = require('lavamoat-core')
 
-module.exports = build
+module.exports = start
 
-async function build (opts = {}) {
+start().catch(err => {
+  console.error(err)
+  process.exit(1)
+})
+
+async function start (opts = {}) {
   const runtimeTemplate = await readFile(pathJoin(__dirname, 'runtime-template.js'), 'utf8')
   let output = runtimeTemplate
   // inline kernel
-  const kernelCode = generateKernel()
+  const kernelCode = generateKernel(opts)
   output = stringReplace(output, '__createKernel__', kernelCode)
   // inline reportStatsHook
   const statsCode = `(${makeInitStatsHook})({ onStatsReady })`
   output = stringReplace(output, '__reportStatsHook__', statsCode)
-  // inline scuttle config
-  if (opts.hasOwnProperty('scuttle')) {
-    const scuttleMode = JSON.stringify(opts.scuttle)
-    output = stringReplace(output, '__lavamoatScuttle__', scuttleMode)
-  }
   await writeFile(pathJoin(__dirname, 'runtime.js'), output)
 }
 
