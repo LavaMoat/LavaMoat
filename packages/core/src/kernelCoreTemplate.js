@@ -122,7 +122,7 @@
               },
             }
           desc.configurable = false
-          Object.defineProperty(window, prop, desc)
+          Object.defineProperty(globalThis, prop, desc)
 
         }
       }
