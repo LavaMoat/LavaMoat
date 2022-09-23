@@ -1,4 +1,17 @@
 ;(function(){
+  // this runtime template code is destined to wrap LavaMoat entirely,
+  // therefore this is our way of capturing access to basic APIs LavaMoat
+  // uses to still be accessible only to LavaMoat after scuttling occurs
+  const {
+    Reflect,
+    Object,
+    Error,
+    Array,
+    Set,
+    Math,
+    Date,
+    console,
+  } = globalThis
 
   const moduleRegistry = new Map()
   const lavamoatPolicy = { resources: {} }
@@ -65,7 +78,12 @@
     runWithPrecompiledModules,
     reportStatsHook,
   }) {
-    const debugMode = false
+    // security options are hard-coded at build time
+    const {
+      scuttleGlobalThis,
+      scuttleGlobalThisExceptions,
+      debugMode,
+    } = {"scuttleGlobalThis":false,"scuttleGlobalThisExceptions":[],"debugMode":false}
 
     // identify the globalRef
     const globalRef = (typeof globalThis !== 'undefined') ? globalThis : (typeof self !== 'undefined') ? self : (typeof global !== 'undefined') ? global : undefined
@@ -10448,9 +10466,9 @@ assign(globalThis, {
     // initialize the kernel
     const createKernelCore = (function () {
   "use strict"
-  return createKernel
+  return createKernelCore
 
-  function createKernel ({
+  function createKernelCore ({
     // the platform api global
     globalRef,
     // package policy object
@@ -10462,23 +10480,27 @@ assign(globalThis, {
     getExternalCompartment,
     globalThisRefs,
     // security options
+    scuttleGlobalThis,
+    scuttleGlobalThisExceptions,
     debugMode,
     runWithPrecompiledModules,
     reportStatsHook
   }) {
-    // create SES-wrapped LavaMoat kernel
-    // endowments:
-    // - console is included for convenience
-    // - Math is for untamed Math.random
-    // - Date is for untamed Date.now
-    const kernelCompartment = new Compartment({ console, Math, Date })
-    let makeKernel
+    // prepare the LavaMoat kernel-core factory
+    // factory is defined within a Compartment
+    // unless "runWithPrecompiledModules" is enabled
+    let makeKernelCore
     if (runWithPrecompiledModules) {
-      makeKernel = unsafeMakeKernel
+      makeKernelCore = unsafeMakeKernelCore
     } else {
-      makeKernel = kernelCompartment.evaluate(`(${unsafeMakeKernel})\n//# sourceURL=LavaMoat/core/kernel`)
+      // endowments:
+      // - console is included for convenience
+      // - Math is for untamed Math.random
+      // - Date is for untamed Date.now
+      const kernelCompartment = new Compartment({ console, Math, Date })
+      makeKernelCore = kernelCompartment.evaluate(`(${unsafeMakeKernelCore})\n//# sourceURL=LavaMoat/core/kernel`)
     }
-    const lavamoatKernel = makeKernel({
+    const lavamoatKernel = makeKernelCore({
       globalRef,
       lavamoatConfig,
       loadModuleData,
@@ -10486,6 +10508,8 @@ assign(globalThis, {
       prepareModuleInitializerArgs,
       getExternalCompartment,
       globalThisRefs,
+      scuttleGlobalThis,
+      scuttleGlobalThisExceptions,
       debugMode,
       runWithPrecompiledModules,
       reportStatsHook
@@ -10494,9 +10518,9 @@ assign(globalThis, {
     return lavamoatKernel
   }
 
-  // this is serialized and run in SES
+  // this is serialized and run in a SES Compartment when "runWithPrecompiledModules" is false
   // mostly just exists to expose variables to internalRequire and loadBundle
-  function unsafeMakeKernel ({
+  function unsafeMakeKernelCore ({
     globalRef,
     lavamoatConfig,
     loadModuleData,
@@ -10504,6 +10528,8 @@ assign(globalThis, {
     prepareModuleInitializerArgs,
     getExternalCompartment,
     globalThisRefs = ['globalThis'],
+    scuttleGlobalThis = false,
+    scuttleGlobalThisExceptions = [],
     debugMode = false,
     runWithPrecompiledModules = false,
     reportStatsHook = () => {}
@@ -10582,6 +10608,7 @@ function makeGetEndowmentsForConfig ({ createFunctionWrapper }) {
     if (!config.globals) return {}
     // validate read access from config
     const whitelistedReads = []
+    const explicitlyBanned = []
     Object.entries(config.globals).forEach(([path, configValue]) => {
       const pathParts = path.split('.')
       // disallow dunder proto in path
@@ -10589,29 +10616,40 @@ function makeGetEndowmentsForConfig ({ createFunctionWrapper }) {
       if (pathContainsDunderProto) {
         throw new Error(`Lavamoat - "__proto__" disallowed when creating minial view. saw "${path}"`)
       }
+      // false means no access. It's necessary so that overrides can also be used to tighten the policy
+      if (configValue === false) {
+        explicitlyBanned.push(path)
+        return 
+      }
       // write access handled elsewhere
       if (configValue === 'write') return
       if (configValue !== true) {
-        throw new Error(`LavaMoat - unknown value for config (${typeof configValue})`)
+        throw new Error(`LavaMoat - unrecognizable policy value (${typeof configValue}) for path "${path}"`)
       }
       whitelistedReads.push(path)
     })
-    return makeMinimalViewOfRef(sourceRef, whitelistedReads, unwrapTo, unwrapFrom)
+    return makeMinimalViewOfRef(sourceRef, whitelistedReads, unwrapTo, unwrapFrom, explicitlyBanned)
   }
 
-  function makeMinimalViewOfRef (sourceRef, paths, unwrapTo, unwrapFrom) {
+  function makeMinimalViewOfRef (sourceRef, paths, unwrapTo, unwrapFrom, explicitlyBanned = []){
     const targetRef = {}
     paths.forEach(path => {
-      copyValueAtPath(path.split('.'), sourceRef, targetRef, unwrapTo, unwrapFrom)
+      copyValueAtPath('', path.split('.'), explicitlyBanned, sourceRef, targetRef, unwrapTo, unwrapFrom)
     })
     return targetRef
   }
 
-  function copyValueAtPath (pathParts, sourceRef, targetRef, unwrapTo = sourceRef, unwrapFrom = targetRef) {
+  function extendPath(visited, next) {
+    if (!visited || visited.length === 0) return next
+    return `${visited}.${next}`
+  }
+
+  function copyValueAtPath (visitedPath, pathParts, explicitlyBanned, sourceRef, targetRef, unwrapTo = sourceRef, unwrapFrom = targetRef) {
     if (pathParts.length === 0) {
       throw new Error('unable to copy, must have pathParts, was empty')
     }
     const [nextPart, ...remainingParts] = pathParts
+    const currentPath = extendPath(visitedPath, nextPart)
     // get the property from any depth in the property chain
     const { prop: sourcePropDesc } = getPropertyDescriptorDeep(sourceRef, nextPart)
 
@@ -10640,8 +10678,8 @@ function makeGetEndowmentsForConfig ({ createFunctionWrapper }) {
       const { sourceValue, sourceWritable } = getSourceValue()
       const nextSourceRef = sourceValue
       let nextTargetRef
-      // check if value exists on target
-      if (targetPropDesc) {
+      // check if value exists on target and does not need selective treatment
+      if (targetPropDesc && !explicitlyBanned.includes(currentPath)) {
         // a value already exists, we should walk into it
         nextTargetRef = targetPropDesc.value
       } else {
@@ -10658,7 +10696,13 @@ function makeGetEndowmentsForConfig ({ createFunctionWrapper }) {
         // the newly created container will be the next target
         nextTargetRef = containerRef
       }
-      copyValueAtPath(remainingParts, nextSourceRef, nextTargetRef)
+      copyValueAtPath(currentPath, remainingParts, explicitlyBanned, nextSourceRef, nextTargetRef)
+      return
+    }
+
+    // If conflicting rules exist, opt for the negative one. This should never happen
+    if (explicitlyBanned.includes(currentPath)) {
+      console.warn(`LavaMoat - conflicting rules exist for "${currentPath}"`)
       return
     }
 
@@ -10906,6 +10950,14 @@ function makePrepareRealmGlobalFromConfig ({ createFunctionWrapper }) {
     const rootPackageName = '$root$'
     const rootPackageCompartment = createRootPackageCompartment(globalRef)
 
+    // scuttle globalThis right after we used it to create the root package compartment
+    if (scuttleGlobalThis) {
+      if (!Array.isArray(scuttleGlobalThisExceptions)) {
+        throw new Error(`LavaMoat - scuttleGlobalThisExceptions must be an array, got "${typeof scuttleGlobalThisExceptions}"`)
+      }
+      performScuttleGlobalThis(globalRef, scuttleGlobalThisExceptions)
+    }
+
     const kernel = {
       internalRequire
     }
@@ -10915,6 +10967,43 @@ function makePrepareRealmGlobalFromConfig ({ createFunctionWrapper }) {
     }
     Object.freeze(kernel)
     return kernel
+
+    function performScuttleGlobalThis (globalRef, extraPropsToAvoid = new Array()) {
+      const props = new Set(
+        getPrototypeChain(globalRef)
+        .map(obj => Object.getOwnPropertyNames(obj))
+      )
+
+      // support LM,SES exported APIs and polyfills
+      const avoidForLavaMoatCompatibility = ['LavaPack', 'Compartment', 'Error', 'globalThis']
+      const propsToAvoid = new Set([...avoidForLavaMoatCompatibility, ...extraPropsToAvoid])
+
+      for (const prop of props) {
+        if (propsToAvoid.has(prop)) {
+          continue
+        }
+        if (Object.getOwnPropertyDescriptor(globalRef, prop)?.configurable === false) {
+          continue
+        }
+        // these props can't have getters, use undefined value instead
+        const desc = {
+          set: () => {
+            console.warn(
+              `LavaMoat - property "${prop}" of globalThis cannot be set under scuttling mode. ` +
+              `To learn more visit https://github.com/LavaMoat/LavaMoat/pull/360.`
+            )
+          },
+          get: () => {
+            throw new Error(
+              `LavaMoat - property "${prop}" of globalThis is inaccessible under scuttling mode. ` +
+              `To learn more visit https://github.com/LavaMoat/LavaMoat/pull/360.`
+            )
+          },
+          configurable: false
+        }
+        Object.defineProperty(globalRef, prop, desc)
+      }
+    }
 
     // this function instantiaties a module from a moduleId.
     // 1. loads the module metadata and policy
@@ -11253,6 +11342,8 @@ function makePrepareRealmGlobalFromConfig ({ createFunctionWrapper }) {
       getExternalCompartment,
       globalRef,
       globalThisRefs,
+      scuttleGlobalThis,
+      scuttleGlobalThisExceptions,
       debugMode,
       runWithPrecompiledModules,
       reportStatsHook
