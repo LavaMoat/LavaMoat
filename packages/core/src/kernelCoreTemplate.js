@@ -82,6 +82,9 @@
 
     // scuttle globalThis right after we used it to create the root package compartment
     if (scuttleGlobalThis) {
+      if (!Array.isArray(scuttleGlobalThisExceptions)) {
+        throw new Error(`LavaMoat - scuttleGlobalThisExceptions must be an array, got "${typeof scuttleGlobalThisExceptions}"`)
+      }
       performScuttleGlobalThis(globalRef, scuttleGlobalThisExceptions)
     }
 
