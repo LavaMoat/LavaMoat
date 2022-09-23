@@ -84,12 +84,14 @@ function evalBundle (bundle, context) {
 async function runBrowserify ({
   scenario,
   bundleWithPrecompiledModules = true,
+  ...additionalOpts
 }) {
   const lavamoatParams = {
     entries: scenario.entries,
     opts: {
       bundleWithPrecompiledModules,
       ...scenario.opts,
+      ...additionalOpts,
     },
     policy: scenario.config,
     policyOverride: scenario.configOverride,
@@ -151,6 +153,7 @@ async function prepareBrowserifyScenarioOnDisk ({ scenario }) {
 async function createBundleForScenario ({
   scenario,
   bundleWithPrecompiledModules = true,
+  ...additonalOpts
 }) {
   let policy
   if (!scenario.dir) {
@@ -161,7 +164,7 @@ async function createBundleForScenario ({
     policy = path.join(scenario.dir, `/lavamoat/browserify/`)
   }
   
-  const { output: { stdout: bundle, stderr } } = await runBrowserify({ scenario, bundleWithPrecompiledModules })
+  const { output: { stdout: bundle, stderr } } = await runBrowserify({ scenario, bundleWithPrecompiledModules, ...additonalOpts })
   if (stderr.length) {
     console.warn(stderr)
   }
@@ -172,11 +175,13 @@ async function runScenario ({
   scenario,
   bundle,
   runWithPrecompiledModules = true,
+  ...additonalOpts
 }) {
   if (!bundle) {
     const { bundleForScenario } = await createBundleForScenario({
       scenario,
       bundleWithPrecompiledModules: runWithPrecompiledModules,
+      ...additonalOpts
     })
     bundle = bundleForScenario
     await fs.writeFile(path.join(scenario.dir, 'bundle.js'), bundle)
