@@ -109,7 +109,7 @@
         if (propsToAvoid.has(prop)) {
           continue
         }
-        if (Object.getOwnPropertyDescriptor(globalRef, prop).configurable === false) {
+        if (Object.getOwnPropertyDescriptor(globalRef, prop)?.configurable === false) {
           continue
         }
         // these props can't have getters, use undefined value instead
