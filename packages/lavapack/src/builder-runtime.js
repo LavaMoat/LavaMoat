@@ -1,11 +1,11 @@
 const { join: pathJoin } = require('path')
-const fs = require('fs')
+const { promises: { readFile, writeFile }} = require('fs')
 const { generateKernel, makeInitStatsHook } = require('lavamoat-core')
 
-module.exports = start
+module.exports = buildRuntime
 
-async function start (opts = {}) {
-  const runtimeTemplate = await fs.promises.readFile(pathJoin(__dirname, 'runtime-template.js'), 'utf8')
+async function buildRuntime (opts = {}) {
+  const runtimeTemplate = await readFile(pathJoin(__dirname, 'runtime-template.js'), 'utf8')
   let output = runtimeTemplate
   // inline kernel
   const kernelCode = generateKernel(opts)
@@ -13,7 +13,7 @@ async function start (opts = {}) {
   // inline reportStatsHook
   const statsCode = `(${makeInitStatsHook})({ onStatsReady })`
   output = stringReplace(output, '__reportStatsHook__', statsCode)
-  await fs.promises.writeFile(pathJoin(__dirname, 'runtime.js'), output)
+  await writeFile(pathJoin(__dirname, 'runtime.js'), output)
 }
 
 // String.prototype.replace has special behavior for some characters, so we use split join instead

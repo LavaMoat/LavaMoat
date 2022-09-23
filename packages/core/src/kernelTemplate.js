@@ -12,8 +12,12 @@
     runWithPrecompiledModules,
     reportStatsHook,
   }) {
-    const debugMode = __lavamoatDebugMode__
-    const scuttle = __lavamoatScuttle__
+    // security options are hard-coded at build time
+    const {
+      scuttleGlobalThis,
+      scuttleGlobalThisExceptions,
+      debugMode,
+    } = __lavamoatSecurityOptions__
 
     // identify the globalRef
     const globalRef = (typeof globalThis !== 'undefined') ? globalThis : (typeof self !== 'undefined') ? self : (typeof global !== 'undefined') ? global : undefined
@@ -56,8 +60,9 @@
       getExternalCompartment,
       globalRef,
       globalThisRefs,
+      scuttleGlobalThis,
+      scuttleGlobalThisExceptions,
       debugMode,
-      scuttle,
       runWithPrecompiledModules,
       reportStatsHook
     })

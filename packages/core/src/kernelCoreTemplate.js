@@ -1,8 +1,8 @@
 (function () {
   "use strict"
-  return createKernel
+  return createKernelCore
 
-  function createKernel ({
+  function createKernelCore ({
     // the platform api global
     globalRef,
     // package policy object
@@ -14,24 +14,27 @@
     getExternalCompartment,
     globalThisRefs,
     // security options
+    scuttleGlobalThis,
+    scuttleGlobalThisExceptions,
     debugMode,
-    scuttle,
     runWithPrecompiledModules,
     reportStatsHook
   }) {
-    // create SES-wrapped LavaMoat kernel
-    // endowments:
-    // - console is included for convenience
-    // - Math is for untamed Math.random
-    // - Date is for untamed Date.now
-    const kernelCompartment = new Compartment({ console, Math, Date })
-    let makeKernel
+    // prepare the LavaMoat kernel-core factory
+    // factory is defined within a Compartment
+    // unless "runWithPrecompiledModules" is enabled
+    let makeKernelCore
     if (runWithPrecompiledModules) {
-      makeKernel = unsafeMakeKernel
+      makeKernelCore = unsafeMakeKernelCore
     } else {
-      makeKernel = kernelCompartment.evaluate(`(${unsafeMakeKernel})\n//# sourceURL=LavaMoat/core/kernel`)
+      // endowments:
+      // - console is included for convenience
+      // - Math is for untamed Math.random
+      // - Date is for untamed Date.now
+      const kernelCompartment = new Compartment({ console, Math, Date })
+      makeKernelCore = kernelCompartment.evaluate(`(${unsafeMakeKernelCore})\n//# sourceURL=LavaMoat/core/kernel`)
     }
-    const lavamoatKernel = makeKernel({
+    const lavamoatKernel = makeKernelCore({
       globalRef,
       lavamoatConfig,
       loadModuleData,
@@ -39,8 +42,9 @@
       prepareModuleInitializerArgs,
       getExternalCompartment,
       globalThisRefs,
+      scuttleGlobalThis,
+      scuttleGlobalThisExceptions,
       debugMode,
-      scuttle,
       runWithPrecompiledModules,
       reportStatsHook
     })
@@ -48,9 +52,9 @@
     return lavamoatKernel
   }
 
-  // this is serialized and run in SES
+  // this is serialized and run in a SES Compartment when "runWithPrecompiledModules" is false
   // mostly just exists to expose variables to internalRequire and loadBundle
-  function unsafeMakeKernel ({
+  function unsafeMakeKernelCore ({
     globalRef,
     lavamoatConfig,
     loadModuleData,
@@ -58,8 +62,9 @@
     prepareModuleInitializerArgs,
     getExternalCompartment,
     globalThisRefs = ['globalThis'],
+    scuttleGlobalThis = false,
+    scuttleGlobalThisExceptions = [],
     debugMode = false,
-    scuttle = false,
     runWithPrecompiledModules = false,
     reportStatsHook = () => {}
   }) {
@@ -76,8 +81,11 @@
     const rootPackageCompartment = createRootPackageCompartment(globalRef)
 
     // scuttle globalThis right after we used it to create the root package compartment
-    if (scuttle) {
-      scuttleGlobalThis(scuttle)
+    if (scuttleGlobalThis) {
+      if (!Array.isArray(scuttleGlobalThisExceptions)) {
+        throw new Error(`LavaMoat - scuttleGlobalThisExceptions must be an array, got "${typeof scuttleGlobalThisExceptions}"`)
+      }
+      performScuttleGlobalThis(globalRef, scuttleGlobalThisExceptions)
     }
 
     const kernel = {
@@ -90,41 +98,40 @@
     Object.freeze(kernel)
     return kernel
 
-    function scuttleGlobalThis(extraAvoids = new Array()) {
-      let props = Object.getOwnPropertyNames(globalThis)
-      if (globalThis?.Window?.prototype) {
-        props = props.concat(Object.getOwnPropertyNames(Window.prototype))
-      }
-      if (globalThis?.EventTarget?.prototype) {
-        props = props.concat(Object.getOwnPropertyNames(EventTarget.prototype))
-      }
+    function performScuttleGlobalThis (globalRef, extraPropsToAvoid = new Array()) {
+      const props = new Set(
+        getPrototypeChain(globalRef)
+        .map(obj => Object.getOwnPropertyNames(obj))
+      )
 
-      const avoids = [
-        // non configurables
-        'location', 'top', 'global', 'self', 'window', 'Infinity', 'NaN', 'document',
-        // support LM,SES exported APIs
-        'LavaPack', 'Compartment', 'Error',
-        // support polyfill
-        'globalThis',
-      ]
+      // support LM,SES exported APIs and polyfills
+      const avoidForLavaMoatCompatibility = ['LavaPack', 'Compartment', 'Error', 'globalThis']
+      const propsToAvoid = new Set([...avoidForLavaMoatCompatibility, ...extraPropsToAvoid])
 
       for (const prop of props) {
-        if (!avoids.includes(prop) && !extraAvoids.includes(prop)) {
-          // these props can't have getters, use undefined value instead
-          const desc = ['undefined', 'chrome', 'constructor'].includes(prop) ?
-            { value: undefined } :
-            {
-              set: () => {},
-              get: () => {
-                throw new Error(
-                  `LavaMoat - property "${prop}" of globalThis is inaccessible under scuttling mode. ` +
-                  `To learn more visit https://github.com/LavaMoat/LavaMoat/pull/360.`)
-              },
-            }
-          desc.configurable = false
-          Object.defineProperty(globalThis, prop, desc)
-
+        if (propsToAvoid.has(prop)) {
+          continue
         }
+        if (Object.getOwnPropertyDescriptor(globalRef, prop)?.configurable === false) {
+          continue
+        }
+        // these props can't have getters, use undefined value instead
+        const desc = {
+          set: () => {
+            console.warn(
+              `LavaMoat - property "${prop}" of globalThis cannot be set under scuttling mode. ` +
+              `To learn more visit https://github.com/LavaMoat/LavaMoat/pull/360.`
+            )
+          },
+          get: () => {
+            throw new Error(
+              `LavaMoat - property "${prop}" of globalThis is inaccessible under scuttling mode. ` +
+              `To learn more visit https://github.com/LavaMoat/LavaMoat/pull/360.`
+            )
+          },
+          configurable: false
+        }
+        Object.defineProperty(globalRef, prop, desc)
       }
     }
 

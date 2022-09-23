@@ -24,25 +24,27 @@ function getSesShimSrc () {
 }
 
 // takes the kernelTemplate and populates it with the libraries
-function generateKernel (opts = {}) {
-  const debugMode = Boolean(opts.debugMode)
-  const kernelCode = generateKernelCore(opts)
+function generateKernel ({
+  scuttleGlobalThis = false,
+  scuttleGlobalThisExceptions = [],
+  debugMode = false,
+} = {}) {
+  const kernelCode = generateKernelCore()
 
   let output = kernelTemplate
   output = replaceTemplateRequire(output, 'ses', sesSrc)
-  output = stringReplace(output, '__lavamoatDebugMode__', debugMode ? 'true' : 'false')
   output = stringReplace(output, '__createKernelCore__', kernelCode)
-  if (opts.hasOwnProperty('scuttle')) {
-    // scuttling config placeholder should be set only if ordered so explicitly.
-    // if not, should be left as is to be replaced by a later processor (e.g. LavaPack).
-    output = stringReplace(output, '__lavamoatScuttle__', JSON.stringify(opts.scuttle))
-  }
+  output = stringReplace(output, '__lavamoatSecurityOptions__', JSON.stringify({
+    scuttleGlobalThis,
+    scuttleGlobalThisExceptions,
+    debugMode,
+  }))
 
   return output
 }
 
 // takes the kernelCoreTemplate and populates it with the libraries
-function generateKernelCore (opts = {}) {
+function generateKernelCore () {
   let output = kernelCoreTemplate
   output = replaceTemplateRequire(output, 'makeGetEndowmentsForConfig', makeGetEndowmentsForConfigSrc)
   output = replaceTemplateRequire(output, 'makePrepareRealmGlobalFromConfig', makePrepareRealmGlobalFromConfigSrc)

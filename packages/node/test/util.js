@@ -6,12 +6,12 @@ module.exports = {
   runScenario
 }
 
-function convertOptsToArgs ({ scenario }) {
+function convertOptsToArgs ({ scenario, additionalOpts = {} }) {
   const { entries, opts } = scenario
   if (entries.length !== 1) throw new Error('LavaMoat - invalid entries')
   const firstEntry = entries[0]
   const args = [firstEntry]
-  Object.entries(opts).forEach(([key, value]) => {
+  Object.entries({ ...opts, ...additionalOpts }).forEach(([key, value]) => {
     if (value === true) {
       args.push(`--${key}`)
     } else if (typeof value === 'string') {
@@ -29,9 +29,9 @@ async function runLavamoat ({ args = [], cwd = process.cwd() } = {}) {
   return { output }
 }
 
-async function runScenario ({ scenario }) {
+async function runScenario ({ scenario, additionalOpts }) {
   const { projectDir } = await prepareScenarioOnDisk({ scenario, policyName: 'node' })
-  const args = convertOptsToArgs({ scenario })
+  const args = convertOptsToArgs({ scenario, additionalOpts })
   const { output: { stdout } } = await runLavamoat({ args, cwd: projectDir })
   let result
   try {
