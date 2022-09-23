@@ -92,6 +92,7 @@
 
     function scuttleGlobalThis(extraAvoids = new Array()) {
       let props = Object.getOwnPropertyNames(globalThis)
+      props = props.concat(Object.getOwnPropertyNames(Object.prototype))
       if (globalThis?.Window?.prototype) {
         props = props.concat(Object.getOwnPropertyNames(Window.prototype))
       }
