@@ -101,8 +101,6 @@ function loadPolicyFromPluginOpts (pluginOpts = {}) {
 
 function getConfigurationFromPluginOpts (pluginOpts) {
   const aliasMap = {
-    s: 'scuttleGlobalThis',
-    scuttle: 'scuttleGlobalThis',
     a: 'writeAutoPolicy',
     autopolicy: 'writeAutoPolicy',
     p: 'policy',
@@ -120,10 +118,16 @@ function getConfigurationFromPluginOpts (pluginOpts) {
     pn: 'policyName',
     projectRoot: 'projectRoot',
     r: 'projectRoot',
-    bundleWithPrecompiledModules: 'bundleWithPrecompiledModules',
   }
 
+  const nonAliasedOptions = [
+    'scuttleGlobalThis',
+    'scuttleGlobalExceptions',
+    'bundleWithPrecompiledModules',
+  ]
+
   const allowedKeys = new Set([
+    ...nonAliasedOptions,
     ...Object.keys(aliasMap),
     ...Object.values(aliasMap),
     '_' // Browserify adds this as the first option when running from the command line
@@ -153,6 +157,7 @@ function getConfigurationFromPluginOpts (pluginOpts) {
     debugMode: Boolean(pluginOpts.debugMode),
     statsMode: Boolean(pluginOpts.statsMode),
     scuttleGlobalThis: pluginOpts.scuttleGlobalThis,
+    scuttleGlobalThisExceptions: pluginOpts.scuttleGlobalThisExceptions,
     writeAutoPolicy: Boolean(pluginOpts.writeAutoPolicy || pluginOpts.writeAutoPolicyDebug),
     writeAutoPolicyDebug: Boolean(pluginOpts.writeAutoPolicyDebug),
     bundleWithPrecompiledModules: 'bundleWithPrecompiledModules' in pluginOpts ? Boolean(pluginOpts.bundleWithPrecompiledModules) : true,

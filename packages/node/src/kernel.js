@@ -18,7 +18,7 @@ function createKernel ({ projectRoot, lavamoatPolicy, canonicalNameMap, debugMod
   const { resolutions } = lavamoatPolicy
   const getRelativeModuleId = createModuleResolver({ projectRoot, resolutions, canonicalNameMap })
   const loadModuleData = createModuleLoader({ canonicalNameMap })
-  const kernelSrc = generateKernel({ debugMode, scuttle: false })
+  const kernelSrc = generateKernel({ debugMode, scuttleGlobalThis: false })
   const createKernel = evaluateWithSourceUrl('LavaMoat/node/kernel', kernelSrc)
   const reportStatsHook = statsMode ? makeInitStatsHook({ onStatsReady }) : noop
   const kernel = createKernel({
