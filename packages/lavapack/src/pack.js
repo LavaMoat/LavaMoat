@@ -54,7 +54,6 @@ function createPacker({
   sourceRoot,
   sourceMapPrefix,
   bundleWithPrecompiledModules = true,
-  scuttleGlobalThis = false,
 } = {}) {
   // stream/parser wrapping incase raw: false
   const parser = raw ? through.obj() : JSONStream.parse([true])
@@ -77,8 +76,6 @@ function createPacker({
     assert(prelude, 'LavaMoat CustomPack: must specify a prelude if "includePrelude" is true (default: true)')
   }
   assert(policy, 'must specify a policy')
-
-  prelude = prelude.replace('__lavamoatScuttle__', JSON.stringify(scuttleGlobalThis))
 
   // note: pack stream cant started emitting data until its received its first module
   // this is because the browserify pipeline is leaky until its finished being setup
