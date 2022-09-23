@@ -63,11 +63,9 @@
         "fs.statSync": true,
         "path.dirname": true,
         "path.join": true,
-        "path.relative": true,
-        "path.resolve": true
+        "path.relative": true
       },
       "globals": {
-        "console.error": true,
         "performantResolve": true
       },
       "packages": {
@@ -78,6 +76,8 @@
       "builtin": {
         "assert": true,
         "buffer.Buffer.from": true,
+        "fs.promises.readFile": true,
+        "fs.promises.writeFile": true,
         "fs.readFileSync": true,
         "path.join": true,
         "path.relative": true
@@ -715,11 +715,13 @@
         "events": true,
         "fs.existsSync": true,
         "fs.readFileSync": true,
+        "fs.writeFileSync": true,
         "path.extname": true,
         "path.join": true
       },
       "globals": {
         "__dirname": true,
+        "console.error": true,
         "console.warn": true,
         "define": true
       },
