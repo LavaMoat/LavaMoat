@@ -90,38 +90,39 @@
     Object.freeze(kernel)
     return kernel
 
-    function scuttleGlobalThis(extraAvoids = new Array()) {
-      let props = Object.getOwnPropertyNames(globalThis)
-      props = props.concat(Object.getOwnPropertyNames(Object.prototype))
-      if (globalThis?.Window?.prototype) {
-        props = props.concat(Object.getOwnPropertyNames(Window.prototype))
-      }
-      if (globalThis?.EventTarget?.prototype) {
-        props = props.concat(Object.getOwnPropertyNames(EventTarget.prototype))
-      }
+    function scuttleGlobalThis (extraPropsToAvoid = new Array()) {
+      const props = new Set(
+        getPrototypeChain(globalRef)
+        .map(obj => Object.getOwnPropertyNames(obj))
+      )
 
       // support LM,SES exported APIs and polyfills
-      const avoids = ['LavaPack', 'Compartment', 'Error', 'globalThis'].concat(extraAvoids)
+      const avoidForLavaMoatCompatibility = ['LavaPack', 'Compartment', 'Error', 'globalThis']
+      const propsToAvoid = new Set([...avoidForLavaMoatCompatibility, ...extraPropsToAvoid])
 
       for (const prop of props) {
-        if (avoids.includes(prop)) {
+        if (propsToAvoid.has(prop)) {
           continue
         }
-        if (Object.getOwnPropertyDescriptor(globalThis, prop)?.configurable === false) {
+        if (Object.getOwnPropertyDescriptor(globalThis, prop).configurable === false) {
           continue
         }
         // these props can't have getters, use undefined value instead
-        const desc = ['undefined', 'chrome', 'constructor'].includes(prop) ?
-          { value: undefined } :
-          {
-            set: () => {},
-            get: () => {
-              throw new Error(
-                `LavaMoat - property "${prop}" of globalThis is inaccessible under scuttling mode. ` +
-                `To learn more visit https://github.com/LavaMoat/LavaMoat/pull/360.`)
-            },
-          }
-        desc.configurable = false
+        const desc = {
+          set: () => {
+            console.warn(
+              `LavaMoat - property "${prop}" of globalThis cannot be set under scuttling mode. ` +
+              `To learn more visit https://github.com/LavaMoat/LavaMoat/pull/360.`
+            )
+          },
+          get: () => {
+            throw new Error(
+              `LavaMoat - property "${prop}" of globalThis is inaccessible under scuttling mode. ` +
+              `To learn more visit https://github.com/LavaMoat/LavaMoat/pull/360.`
+            )
+          },
+          configurable: false
+        }
         Object.defineProperty(globalThis, prop, desc)
       }
     }
