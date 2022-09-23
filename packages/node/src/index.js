@@ -56,7 +56,13 @@ async function runLava () {
     // execution mode
     const lavamoatPolicy = await loadPolicyAndApplyOverrides({ debugMode, policyPath, policyOverridePath })
     const canonicalNameMap = await loadCanonicalNameMap({ rootDir: projectRoot, includeDevDeps: true })
-    const kernel = createKernel({ projectRoot, lavamoatPolicy, canonicalNameMap, debugMode, statsMode })
+    const kernel = createKernel({
+      projectRoot,
+      lavamoatPolicy,
+      canonicalNameMap,
+      debugMode,
+      statsMode,
+    })
     // patch process.argv so it matches the normal pattern
     // e.g. [runtime path, entrypoint, ...args]
     // we'll use the LavaMoat path as the runtime
