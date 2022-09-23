@@ -100,32 +100,29 @@
         props = props.concat(Object.getOwnPropertyNames(EventTarget.prototype))
       }
 
-      const avoids = [
-        // non configurables
-        'location', 'top', 'global', 'self', 'window', 'Infinity', 'NaN', 'document',
-        // support LM,SES exported APIs
-        'LavaPack', 'Compartment', 'Error',
-        // support polyfill
-        'globalThis',
-      ]
+      // support LM,SES exported APIs and polyfills
+      const avoids = ['LavaPack', 'Compartment', 'Error', 'globalThis'].concat(extraAvoids)
 
       for (const prop of props) {
-        if (!avoids.includes(prop) && !extraAvoids.includes(prop)) {
-          // these props can't have getters, use undefined value instead
-          const desc = ['undefined', 'chrome', 'constructor'].includes(prop) ?
-            { value: undefined } :
-            {
-              set: () => {},
-              get: () => {
-                throw new Error(
-                  `LavaMoat - property "${prop}" of globalThis is inaccessible under scuttling mode. ` +
-                  `To learn more visit https://github.com/LavaMoat/LavaMoat/pull/360.`)
-              },
-            }
-          desc.configurable = false
-          Object.defineProperty(window, prop, desc)
-
+        if (avoids.includes(prop)) {
+          continue
         }
+        if (Object.getOwnPropertyDescriptor(globalThis, prop)?.configurable === false) {
+          continue
+        }
+        // these props can't have getters, use undefined value instead
+        const desc = ['undefined', 'chrome', 'constructor'].includes(prop) ?
+          { value: undefined } :
+          {
+            set: () => {},
+            get: () => {
+              throw new Error(
+                `LavaMoat - property "${prop}" of globalThis is inaccessible under scuttling mode. ` +
+                `To learn more visit https://github.com/LavaMoat/LavaMoat/pull/360.`)
+            },
+          }
+        desc.configurable = false
+        Object.defineProperty(globalThis, prop, desc)
       }
     }
 
