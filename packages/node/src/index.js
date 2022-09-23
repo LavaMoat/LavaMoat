@@ -27,6 +27,8 @@ async function runLava () {
     policyDebugPath,
     policyOverridePath,
     projectRoot,
+    scuttleGlobalThis,
+    scuttleGlobalThisExceptions,
     debugMode,
     statsMode,
   } = parseArgs()
@@ -60,6 +62,8 @@ async function runLava () {
       projectRoot,
       lavamoatPolicy,
       canonicalNameMap,
+      scuttleGlobalThis,
+      scuttleGlobalThisExceptions,
       debugMode,
       statsMode,
     })
