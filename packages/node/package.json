@@ -4,7 +4,7 @@
     "lavamoat": "src/index.js",
     "lavamoat-run-command": "src/run-command.js"
   },
-  "version": "6.2.0",
+  "version": "6.3.0",
   "main": "index.js",
   "license": "MIT",
   "scripts": {
