@@ -15,11 +15,11 @@ async function runLava (options) {
 
   options = Object.assign({}, defaults, options)
 
-  options.entryPath = path.resolve(options.entryPath)
-  options.policyPath = path.resolve(options.policyPath)
-  options.policyOverridePath = path.resolve(options.policyOverridePath)
-  options.policyDebugPath = path.resolve(options.policyDebugPath)
   options.projectRoot = path.resolve(options.projectRoot)
+  options.entryPath = path.resolve(options.projectRoot, options.entryPath)
+  options.policyPath = path.resolve(options.projectRoot, options.policyPath)
+  options.policyOverridePath = path.resolve(options.projectRoot, options.policyOverridePath)
+  options.policyDebugPath = path.resolve(options.projectRoot, options.policyDebugPath)
 
   const {
     entryPath: entryId,
@@ -70,11 +70,7 @@ async function runLava (options) {
       debugMode,
       statsMode,
     })
-    // patch process.argv so it matches the normal pattern
-    // e.g. [runtime path, entrypoint, ...args]
-    // we'll use the LavaMoat path as the runtime
-    // so we just remove the node path
-    process.argv.shift()
+
     // run entrypoint
     kernel.internalRequire(entryId)
   }
