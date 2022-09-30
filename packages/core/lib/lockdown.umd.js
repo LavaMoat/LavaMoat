@@ -1936,7 +1936,7 @@ makeLockdown: cell("makeLockdown"),
       
 
 })([
-  (({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,  }) => {   $h‍_imports([]);   /* global globalThis */
+  (({   imports: $h_imports,   liveVar: $h_live,   onceVar: $h_once,  }) => {   $h_imports([]);   /* global globalThis */
 /* eslint-disable no-restricted-globals */
 
 /**
@@ -1952,7 +1952,7 @@ makeLockdown: cell("makeLockdown"),
 
 // We cannot use globalThis as the local name since it would capture the
 // lexical name.
-const universalThis = globalThis;$h‍_once.universalThis(universalThis);
+const universalThis = globalThis;$h_once.universalThis(universalThis);
 
 
 const {
@@ -1971,7 +1971,7 @@ const {
   String,
   WeakMap,
   WeakSet } =
-globalThis;$h‍_once.Array(Array);$h‍_once.Date(Date);$h‍_once.Float32Array(Float32Array);$h‍_once.JSON(JSON);$h‍_once.Map(Map);$h‍_once.Math(Math);$h‍_once.Object(Object);$h‍_once.Promise(Promise);$h‍_once.Proxy(Proxy);$h‍_once.Reflect(Reflect);$h‍_once.FERAL_REG_EXP(FERAL_REG_EXP);$h‍_once.Set(Set);$h‍_once.String(String);$h‍_once.WeakMap(WeakMap);$h‍_once.WeakSet(WeakSet);
+globalThis;$h_once.Array(Array);$h_once.Date(Date);$h_once.Float32Array(Float32Array);$h_once.JSON(JSON);$h_once.Map(Map);$h_once.Math(Math);$h_once.Object(Object);$h_once.Promise(Promise);$h_once.Proxy(Proxy);$h_once.Reflect(Reflect);$h_once.FERAL_REG_EXP(FERAL_REG_EXP);$h_once.Set(Set);$h_once.String(String);$h_once.WeakMap(WeakMap);$h_once.WeakSet(WeakSet);
 
 const {
   // The feral Error constructor is safe for internal use, but must not be
@@ -1982,7 +1982,7 @@ const {
   ReferenceError,
   SyntaxError,
   TypeError } =
-globalThis;$h‍_once.FERAL_ERROR(FERAL_ERROR);$h‍_once.RangeError(RangeError);$h‍_once.ReferenceError(ReferenceError);$h‍_once.SyntaxError(SyntaxError);$h‍_once.TypeError(TypeError);
+globalThis;$h_once.FERAL_ERROR(FERAL_ERROR);$h_once.RangeError(RangeError);$h_once.ReferenceError(ReferenceError);$h_once.SyntaxError(SyntaxError);$h_once.TypeError(TypeError);
 
 const {
   assign,
@@ -2001,14 +2001,14 @@ const {
   seal,
   setPrototypeOf,
   values } =
-Object;$h‍_once.assign(assign);$h‍_once.create(create);$h‍_once.defineProperties(defineProperties);$h‍_once.entries(entries);$h‍_once.freeze(freeze);$h‍_once.getOwnPropertyDescriptor(getOwnPropertyDescriptor);$h‍_once.getOwnPropertyDescriptors(getOwnPropertyDescriptors);$h‍_once.getOwnPropertyNames(getOwnPropertyNames);$h‍_once.getPrototypeOf(getPrototypeOf);$h‍_once.is(is);$h‍_once.isExtensible(isExtensible);$h‍_once.keys(keys);$h‍_once.objectPrototype(objectPrototype);$h‍_once.seal(seal);$h‍_once.setPrototypeOf(setPrototypeOf);$h‍_once.values(values);
+Object;$h_once.assign(assign);$h_once.create(create);$h_once.defineProperties(defineProperties);$h_once.entries(entries);$h_once.freeze(freeze);$h_once.getOwnPropertyDescriptor(getOwnPropertyDescriptor);$h_once.getOwnPropertyDescriptors(getOwnPropertyDescriptors);$h_once.getOwnPropertyNames(getOwnPropertyNames);$h_once.getPrototypeOf(getPrototypeOf);$h_once.is(is);$h_once.isExtensible(isExtensible);$h_once.keys(keys);$h_once.objectPrototype(objectPrototype);$h_once.seal(seal);$h_once.setPrototypeOf(setPrototypeOf);$h_once.values(values);
 
 const {
   species: speciesSymbol,
   toStringTag: toStringTagSymbol,
   iterator: iteratorSymbol,
   matchAll: matchAllSymbol } =
-Symbol;$h‍_once.speciesSymbol(speciesSymbol);$h‍_once.toStringTagSymbol(toStringTagSymbol);$h‍_once.iteratorSymbol(iteratorSymbol);$h‍_once.matchAllSymbol(matchAllSymbol);
+Symbol;$h_once.speciesSymbol(speciesSymbol);$h_once.toStringTagSymbol(toStringTagSymbol);$h_once.iteratorSymbol(iteratorSymbol);$h_once.matchAllSymbol(matchAllSymbol);
 
 const { stringify: stringifyJson } = JSON;
 
@@ -2018,7 +2018,7 @@ const { stringify: stringifyJson } = JSON;
 // By the terminology of https://ponyfoo.com/articles/polyfills-or-ponyfills
 // it is a ponyfill rather than a polyfill or shim because we do not
 // install it on `Object`.
-$h‍_once.stringifyJson(stringifyJson);const objectFromEntries = (entryPairs) => {
+$h_once.stringifyJson(stringifyJson);const objectFromEntries = (entryPairs) => {
   const result = {};
   for (const [prop, val] of entryPairs) {
     result[prop] = val;
@@ -2029,7 +2029,7 @@ $h‍_once.stringifyJson(stringifyJson);const objectFromEntries = (entryPairs) =
 const fromEntries = Object.fromEntries || objectFromEntries;
 
 // Needed only for the Safari bug workaround below
-$h‍_once.fromEntries(fromEntries);const { defineProperty: originalDefineProperty } = Object;
+$h_once.fromEntries(fromEntries);const { defineProperty: originalDefineProperty } = Object;
 
 const defineProperty = (object, prop, descriptor) => {
   // We used to do the following, until we had to reopen Safari bug
@@ -2049,7 +2049,7 @@ const defineProperty = (object, prop, descriptor) => {
 
   }
   return result;
-};$h‍_once.defineProperty(defineProperty);
+};$h_once.defineProperty(defineProperty);
 
 const {
   apply,
@@ -2061,17 +2061,17 @@ const {
   ownKeys,
   preventExtensions: reflectPreventExtensions,
   set: reflectSet } =
-Reflect;$h‍_once.apply(apply);$h‍_once.construct(construct);$h‍_once.reflectGet(reflectGet);$h‍_once.reflectGetOwnPropertyDescriptor(reflectGetOwnPropertyDescriptor);$h‍_once.reflectHas(reflectHas);$h‍_once.reflectIsExtensible(reflectIsExtensible);$h‍_once.ownKeys(ownKeys);$h‍_once.reflectPreventExtensions(reflectPreventExtensions);$h‍_once.reflectSet(reflectSet);
+Reflect;$h_once.apply(apply);$h_once.construct(construct);$h_once.reflectGet(reflectGet);$h_once.reflectGetOwnPropertyDescriptor(reflectGetOwnPropertyDescriptor);$h_once.reflectHas(reflectHas);$h_once.reflectIsExtensible(reflectIsExtensible);$h_once.ownKeys(ownKeys);$h_once.reflectPreventExtensions(reflectPreventExtensions);$h_once.reflectSet(reflectSet);
 
-const { isArray, prototype: arrayPrototype } = Array;$h‍_once.isArray(isArray);$h‍_once.arrayPrototype(arrayPrototype);
-const { prototype: mapPrototype } = Map;$h‍_once.mapPrototype(mapPrototype);
-const { revocable: proxyRevocable } = Proxy;$h‍_once.proxyRevocable(proxyRevocable);
-const { prototype: regexpPrototype } = RegExp;$h‍_once.regexpPrototype(regexpPrototype);
-const { prototype: setPrototype } = Set;$h‍_once.setPrototype(setPrototype);
-const { prototype: stringPrototype } = String;$h‍_once.stringPrototype(stringPrototype);
-const { prototype: weakmapPrototype } = WeakMap;$h‍_once.weakmapPrototype(weakmapPrototype);
-const { prototype: weaksetPrototype } = WeakSet;$h‍_once.weaksetPrototype(weaksetPrototype);
-const { prototype: functionPrototype } = Function;$h‍_once.functionPrototype(functionPrototype);
+const { isArray, prototype: arrayPrototype } = Array;$h_once.isArray(isArray);$h_once.arrayPrototype(arrayPrototype);
+const { prototype: mapPrototype } = Map;$h_once.mapPrototype(mapPrototype);
+const { revocable: proxyRevocable } = Proxy;$h_once.proxyRevocable(proxyRevocable);
+const { prototype: regexpPrototype } = RegExp;$h_once.regexpPrototype(regexpPrototype);
+const { prototype: setPrototype } = Set;$h_once.setPrototype(setPrototype);
+const { prototype: stringPrototype } = String;$h_once.stringPrototype(stringPrototype);
+const { prototype: weakmapPrototype } = WeakMap;$h_once.weakmapPrototype(weakmapPrototype);
+const { prototype: weaksetPrototype } = WeakSet;$h_once.weaksetPrototype(weaksetPrototype);
+const { prototype: functionPrototype } = Function;$h_once.functionPrototype(functionPrototype);
 const { prototype: promisePrototype } = Promise;
 
 /**
@@ -2088,62 +2088,62 @@ const { prototype: promisePrototype } = Promise;
  * http://web.archive.org/web/20160805225710/http://wiki.ecmascript.org/doku.php?id=conventions:safe_meta_programming
  *
  * @param {(thisArg: Object, ...args: any[]) => any} fn
- */$h‍_once.promisePrototype(promisePrototype);
-const uncurryThis = (fn) => (thisArg, ...args) => apply(fn, thisArg, args);$h‍_once.uncurryThis(uncurryThis);
+ */$h_once.promisePrototype(promisePrototype);
+const uncurryThis = (fn) => (thisArg, ...args) => apply(fn, thisArg, args);$h_once.uncurryThis(uncurryThis);
 
 const objectHasOwnProperty = uncurryThis(objectPrototype.hasOwnProperty);
 //
-$h‍_once.objectHasOwnProperty(objectHasOwnProperty);const arrayFilter = uncurryThis(arrayPrototype.filter);$h‍_once.arrayFilter(arrayFilter);
-const arrayForEach = uncurryThis(arrayPrototype.forEach);$h‍_once.arrayForEach(arrayForEach);
-const arrayIncludes = uncurryThis(arrayPrototype.includes);$h‍_once.arrayIncludes(arrayIncludes);
-const arrayJoin = uncurryThis(arrayPrototype.join);$h‍_once.arrayJoin(arrayJoin);
-const arrayMap = uncurryThis(arrayPrototype.map);$h‍_once.arrayMap(arrayMap);
-const arrayPop = uncurryThis(arrayPrototype.pop);$h‍_once.arrayPop(arrayPop);
-const arrayPush = uncurryThis(arrayPrototype.push);$h‍_once.arrayPush(arrayPush);
-const arraySlice = uncurryThis(arrayPrototype.slice);$h‍_once.arraySlice(arraySlice);
-const arraySome = uncurryThis(arrayPrototype.some);$h‍_once.arraySome(arraySome);
-const arraySort = uncurryThis(arrayPrototype.sort);$h‍_once.arraySort(arraySort);
+$h_once.objectHasOwnProperty(objectHasOwnProperty);const arrayFilter = uncurryThis(arrayPrototype.filter);$h_once.arrayFilter(arrayFilter);
+const arrayForEach = uncurryThis(arrayPrototype.forEach);$h_once.arrayForEach(arrayForEach);
+const arrayIncludes = uncurryThis(arrayPrototype.includes);$h_once.arrayIncludes(arrayIncludes);
+const arrayJoin = uncurryThis(arrayPrototype.join);$h_once.arrayJoin(arrayJoin);
+const arrayMap = uncurryThis(arrayPrototype.map);$h_once.arrayMap(arrayMap);
+const arrayPop = uncurryThis(arrayPrototype.pop);$h_once.arrayPop(arrayPop);
+const arrayPush = uncurryThis(arrayPrototype.push);$h_once.arrayPush(arrayPush);
+const arraySlice = uncurryThis(arrayPrototype.slice);$h_once.arraySlice(arraySlice);
+const arraySome = uncurryThis(arrayPrototype.some);$h_once.arraySome(arraySome);
+const arraySort = uncurryThis(arrayPrototype.sort);$h_once.arraySort(arraySort);
 const iterateArray = uncurryThis(arrayPrototype[iteratorSymbol]);
 //
-$h‍_once.iterateArray(iterateArray);const mapSet = uncurryThis(mapPrototype.set);$h‍_once.mapSet(mapSet);
-const mapGet = uncurryThis(mapPrototype.get);$h‍_once.mapGet(mapGet);
-const mapHas = uncurryThis(mapPrototype.has);$h‍_once.mapHas(mapHas);
+$h_once.iterateArray(iterateArray);const mapSet = uncurryThis(mapPrototype.set);$h_once.mapSet(mapSet);
+const mapGet = uncurryThis(mapPrototype.get);$h_once.mapGet(mapGet);
+const mapHas = uncurryThis(mapPrototype.has);$h_once.mapHas(mapHas);
 const iterateMap = uncurryThis(mapPrototype[iteratorSymbol]);
 //
-$h‍_once.iterateMap(iterateMap);const setAdd = uncurryThis(setPrototype.add);$h‍_once.setAdd(setAdd);
-const setForEach = uncurryThis(setPrototype.forEach);$h‍_once.setForEach(setForEach);
-const setHas = uncurryThis(setPrototype.has);$h‍_once.setHas(setHas);
+$h_once.iterateMap(iterateMap);const setAdd = uncurryThis(setPrototype.add);$h_once.setAdd(setAdd);
+const setForEach = uncurryThis(setPrototype.forEach);$h_once.setForEach(setForEach);
+const setHas = uncurryThis(setPrototype.has);$h_once.setHas(setHas);
 const iterateSet = uncurryThis(setPrototype[iteratorSymbol]);
 //
-$h‍_once.iterateSet(iterateSet);const regexpTest = uncurryThis(regexpPrototype.test);$h‍_once.regexpTest(regexpTest);
-const regexpExec = uncurryThis(regexpPrototype.exec);$h‍_once.regexpExec(regexpExec);
+$h_once.iterateSet(iterateSet);const regexpTest = uncurryThis(regexpPrototype.test);$h_once.regexpTest(regexpTest);
+const regexpExec = uncurryThis(regexpPrototype.exec);$h_once.regexpExec(regexpExec);
 const matchAllRegExp = uncurryThis(regexpPrototype[matchAllSymbol]);
 //
-$h‍_once.matchAllRegExp(matchAllRegExp);const stringEndsWith = uncurryThis(stringPrototype.endsWith);$h‍_once.stringEndsWith(stringEndsWith);
-const stringIncludes = uncurryThis(stringPrototype.includes);$h‍_once.stringIncludes(stringIncludes);
-const stringIndexOf = uncurryThis(stringPrototype.indexOf);$h‍_once.stringIndexOf(stringIndexOf);
-const stringMatch = uncurryThis(stringPrototype.match);$h‍_once.stringMatch(stringMatch);
-const stringReplace = uncurryThis(stringPrototype.replace);$h‍_once.stringReplace(stringReplace);
-const stringSearch = uncurryThis(stringPrototype.search);$h‍_once.stringSearch(stringSearch);
-const stringSlice = uncurryThis(stringPrototype.slice);$h‍_once.stringSlice(stringSlice);
-const stringSplit = uncurryThis(stringPrototype.split);$h‍_once.stringSplit(stringSplit);
-const stringStartsWith = uncurryThis(stringPrototype.startsWith);$h‍_once.stringStartsWith(stringStartsWith);
+$h_once.matchAllRegExp(matchAllRegExp);const stringEndsWith = uncurryThis(stringPrototype.endsWith);$h_once.stringEndsWith(stringEndsWith);
+const stringIncludes = uncurryThis(stringPrototype.includes);$h_once.stringIncludes(stringIncludes);
+const stringIndexOf = uncurryThis(stringPrototype.indexOf);$h_once.stringIndexOf(stringIndexOf);
+const stringMatch = uncurryThis(stringPrototype.match);$h_once.stringMatch(stringMatch);
+const stringReplace = uncurryThis(stringPrototype.replace);$h_once.stringReplace(stringReplace);
+const stringSearch = uncurryThis(stringPrototype.search);$h_once.stringSearch(stringSearch);
+const stringSlice = uncurryThis(stringPrototype.slice);$h_once.stringSlice(stringSlice);
+const stringSplit = uncurryThis(stringPrototype.split);$h_once.stringSplit(stringSplit);
+const stringStartsWith = uncurryThis(stringPrototype.startsWith);$h_once.stringStartsWith(stringStartsWith);
 const iterateString = uncurryThis(stringPrototype[iteratorSymbol]);
 //
-$h‍_once.iterateString(iterateString);const weakmapDelete = uncurryThis(weakmapPrototype.delete);$h‍_once.weakmapDelete(weakmapDelete);
-const weakmapGet = uncurryThis(weakmapPrototype.get);$h‍_once.weakmapGet(weakmapGet);
-const weakmapHas = uncurryThis(weakmapPrototype.has);$h‍_once.weakmapHas(weakmapHas);
+$h_once.iterateString(iterateString);const weakmapDelete = uncurryThis(weakmapPrototype.delete);$h_once.weakmapDelete(weakmapDelete);
+const weakmapGet = uncurryThis(weakmapPrototype.get);$h_once.weakmapGet(weakmapGet);
+const weakmapHas = uncurryThis(weakmapPrototype.has);$h_once.weakmapHas(weakmapHas);
 const weakmapSet = uncurryThis(weakmapPrototype.set);
 //
-$h‍_once.weakmapSet(weakmapSet);const weaksetAdd = uncurryThis(weaksetPrototype.add);$h‍_once.weaksetAdd(weaksetAdd);
-const weaksetGet = uncurryThis(weaksetPrototype.get);$h‍_once.weaksetGet(weaksetGet);
+$h_once.weakmapSet(weakmapSet);const weaksetAdd = uncurryThis(weaksetPrototype.add);$h_once.weaksetAdd(weaksetAdd);
+const weaksetGet = uncurryThis(weaksetPrototype.get);$h_once.weaksetGet(weaksetGet);
 const weaksetHas = uncurryThis(weaksetPrototype.has);
 //
-$h‍_once.weaksetHas(weaksetHas);const functionToString = uncurryThis(functionPrototype.toString);
+$h_once.weaksetHas(weaksetHas);const functionToString = uncurryThis(functionPrototype.toString);
 //
-$h‍_once.functionToString(functionToString);const { all } = Promise;
-const promiseAll = (promises) => apply(all, Promise, [promises]);$h‍_once.promiseAll(promiseAll);
-const promiseCatch = uncurryThis(promisePrototype.catch);$h‍_once.promiseCatch(promiseCatch);
+$h_once.functionToString(functionToString);const { all } = Promise;
+const promiseAll = (promises) => apply(all, Promise, [promises]);$h_once.promiseAll(promiseAll);
+const promiseCatch = uncurryThis(promisePrototype.catch);$h_once.promiseCatch(promiseCatch);
 const promiseThen = uncurryThis(promisePrototype.then);
 
 /**
@@ -2151,14 +2151,14 @@ const promiseThen = uncurryThis(promisePrototype.then);
  * Return the constructor from an instance.
  *
  * @param {Function} fn
- */$h‍_once.promiseThen(promiseThen);
+ */$h_once.promiseThen(promiseThen);
 const getConstructorOf = (fn) =>
 reflectGet(getPrototypeOf(fn), 'constructor');
 
 /**
  * immutableObject
  * An immutable (frozen) exotic object and is safe to share.
- */$h‍_once.getConstructorOf(getConstructorOf);
+ */$h_once.getConstructorOf(getConstructorOf);
 const immutableObject = freeze(create(null));
 
 /**
@@ -2177,7 +2177,7 @@ const immutableObject = freeze(create(null));
  * attempting to box a primitive.
  *
  * @param {any} value
- */$h‍_once.immutableObject(immutableObject);
+ */$h_once.immutableObject(immutableObject);
 const isObject = (value) => Object(value) === value;
 
 /**
@@ -2190,23 +2190,23 @@ const isObject = (value) => Object(value) === value;
  * for such a trivial case outside commons.js, we provide a utility function.
  *
  * @param {any} value
- */$h‍_once.isObject(isObject);
+ */$h_once.isObject(isObject);
 const isError = (value) => value instanceof FERAL_ERROR;
 
 // The original unsafe untamed eval function, which must not escape.
 // Sample at module initialization time, which is before lockdown can
 // repair it.  Use it only to build powerless abstractions.
 // eslint-disable-next-line no-eval
-$h‍_once.isError(isError);const FERAL_EVAL = eval;
+$h_once.isError(isError);const FERAL_EVAL = eval;
 
 // The original unsafe untamed Function constructor, which must not escape.
 // Sample at module initialization time, which is before lockdown can
 // repair it.  Use it only to build powerless abstractions.
-$h‍_once.FERAL_EVAL(FERAL_EVAL);const FERAL_FUNCTION = Function;$h‍_once.FERAL_FUNCTION(FERAL_FUNCTION);
+$h_once.FERAL_EVAL(FERAL_EVAL);const FERAL_FUNCTION = Function;$h_once.FERAL_FUNCTION(FERAL_FUNCTION);
 })
 
 ,
-(({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,  }) => {   $h‍_imports([]);   // @ts-check
+(({   imports: $h_imports,   liveVar: $h_live,   onceVar: $h_once,  }) => {   $h_imports([]);   // @ts-check
 
 /**
  * @typedef {readonly any[]} LogArgs
@@ -2298,7 +2298,7 @@ $h‍_once.FERAL_EVAL(FERAL_EVAL);const FERAL_FUNCTION = Function;$h‍_once.FER
 })
 
 ,
-(({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,  }) => {   let Set,String,freeze,is,isError,setAdd,setHas,stringStartsWith,stringIncludes,stringifyJson,toStringTagSymbol;$h‍_imports([["../commons.js", [["Set", [$h‍_a => (Set = $h‍_a)]],["String", [$h‍_a => (String = $h‍_a)]],["freeze", [$h‍_a => (freeze = $h‍_a)]],["is", [$h‍_a => (is = $h‍_a)]],["isError", [$h‍_a => (isError = $h‍_a)]],["setAdd", [$h‍_a => (setAdd = $h‍_a)]],["setHas", [$h‍_a => (setHas = $h‍_a)]],["stringStartsWith", [$h‍_a => (stringStartsWith = $h‍_a)]],["stringIncludes", [$h‍_a => (stringIncludes = $h‍_a)]],["stringifyJson", [$h‍_a => (stringifyJson = $h‍_a)]],["toStringTagSymbol", [$h‍_a => (toStringTagSymbol = $h‍_a)]]]]]);   
+(({   imports: $h_imports,   liveVar: $h_live,   onceVar: $h_once,  }) => {   let Set,String,freeze,is,isError,setAdd,setHas,stringStartsWith,stringIncludes,stringifyJson,toStringTagSymbol;$h_imports([["../commons.js", [["Set", [$h_a => (Set = $h_a)]],["String", [$h_a => (String = $h_a)]],["freeze", [$h_a => (freeze = $h_a)]],["is", [$h_a => (is = $h_a)]],["isError", [$h_a => (isError = $h_a)]],["setAdd", [$h_a => (setAdd = $h_a)]],["setHas", [$h_a => (setHas = $h_a)]],["stringStartsWith", [$h_a => (stringStartsWith = $h_a)]],["stringIncludes", [$h_a => (stringIncludes = $h_a)]],["stringifyJson", [$h_a => (stringifyJson = $h_a)]],["toStringTagSymbol", [$h_a => (toStringTagSymbol = $h_a)]]]]]);   
 
 
 
@@ -2327,7 +2327,7 @@ const an = (str) => {
     return `an ${str}`;
   }
   return `a ${str}`;
-};$h‍_once.an(an);
+};$h_once.an(an);
 freeze(an);
 
 
@@ -2441,12 +2441,12 @@ const bestEffortStringify = (payload, spaces = undefined) => {
     // whenever it is possible for it to.
     return '[Something that failed to stringify]';
   }
-};$h‍_once.bestEffortStringify(bestEffortStringify);
+};$h_once.bestEffortStringify(bestEffortStringify);
 freeze(bestEffortStringify);
 })
 
 ,
-(({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,  }) => {   $h‍_imports([]);   // @ts-check
+(({   imports: $h_imports,   liveVar: $h_live,   onceVar: $h_once,  }) => {   $h_imports([]);   // @ts-check
 
 /**
  * @callback BaseAssert
@@ -2799,7 +2799,7 @@ freeze(bestEffortStringify);
 })
 
 ,
-(({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,  }) => {   let RangeError,TypeError,WeakMap,arrayJoin,arrayMap,arrayPop,arrayPush,assign,freeze,globalThis,is,isError,stringIndexOf,stringReplace,stringSlice,stringStartsWith,weakmapDelete,weakmapGet,weakmapHas,weakmapSet,an,bestEffortStringify;$h‍_imports([["../commons.js", [["RangeError", [$h‍_a => (RangeError = $h‍_a)]],["TypeError", [$h‍_a => (TypeError = $h‍_a)]],["WeakMap", [$h‍_a => (WeakMap = $h‍_a)]],["arrayJoin", [$h‍_a => (arrayJoin = $h‍_a)]],["arrayMap", [$h‍_a => (arrayMap = $h‍_a)]],["arrayPop", [$h‍_a => (arrayPop = $h‍_a)]],["arrayPush", [$h‍_a => (arrayPush = $h‍_a)]],["assign", [$h‍_a => (assign = $h‍_a)]],["freeze", [$h‍_a => (freeze = $h‍_a)]],["globalThis", [$h‍_a => (globalThis = $h‍_a)]],["is", [$h‍_a => (is = $h‍_a)]],["isError", [$h‍_a => (isError = $h‍_a)]],["stringIndexOf", [$h‍_a => (stringIndexOf = $h‍_a)]],["stringReplace", [$h‍_a => (stringReplace = $h‍_a)]],["stringSlice", [$h‍_a => (stringSlice = $h‍_a)]],["stringStartsWith", [$h‍_a => (stringStartsWith = $h‍_a)]],["weakmapDelete", [$h‍_a => (weakmapDelete = $h‍_a)]],["weakmapGet", [$h‍_a => (weakmapGet = $h‍_a)]],["weakmapHas", [$h‍_a => (weakmapHas = $h‍_a)]],["weakmapSet", [$h‍_a => (weakmapSet = $h‍_a)]]]],["./stringify-utils.js", [["an", [$h‍_a => (an = $h‍_a)]],["bestEffortStringify", [$h‍_a => (bestEffortStringify = $h‍_a)]]]],["./types.js", []],["./internal-types.js", []]]);   
+(({   imports: $h_imports,   liveVar: $h_live,   onceVar: $h_once,  }) => {   let RangeError,TypeError,WeakMap,arrayJoin,arrayMap,arrayPop,arrayPush,assign,freeze,globalThis,is,isError,stringIndexOf,stringReplace,stringSlice,stringStartsWith,weakmapDelete,weakmapGet,weakmapHas,weakmapSet,an,bestEffortStringify;$h_imports([["../commons.js", [["RangeError", [$h_a => (RangeError = $h_a)]],["TypeError", [$h_a => (TypeError = $h_a)]],["WeakMap", [$h_a => (WeakMap = $h_a)]],["arrayJoin", [$h_a => (arrayJoin = $h_a)]],["arrayMap", [$h_a => (arrayMap = $h_a)]],["arrayPop", [$h_a => (arrayPop = $h_a)]],["arrayPush", [$h_a => (arrayPush = $h_a)]],["assign", [$h_a => (assign = $h_a)]],["freeze", [$h_a => (freeze = $h_a)]],["globalThis", [$h_a => (globalThis = $h_a)]],["is", [$h_a => (is = $h_a)]],["isError", [$h_a => (isError = $h_a)]],["stringIndexOf", [$h_a => (stringIndexOf = $h_a)]],["stringReplace", [$h_a => (stringReplace = $h_a)]],["stringSlice", [$h_a => (stringSlice = $h_a)]],["stringStartsWith", [$h_a => (stringStartsWith = $h_a)]],["weakmapDelete", [$h_a => (weakmapDelete = $h_a)]],["weakmapGet", [$h_a => (weakmapGet = $h_a)]],["weakmapHas", [$h_a => (weakmapHas = $h_a)]],["weakmapSet", [$h_a => (weakmapSet = $h_a)]]]],["./stringify-utils.js", [["an", [$h_a => (an = $h_a)]],["bestEffortStringify", [$h_a => (bestEffortStringify = $h_a)]]]],["./types.js", []],["./internal-types.js", []]]);   
 
 
 
@@ -2959,7 +2959,7 @@ const unredactedDetails = (template, ...args) => {
   weakmapHas(declassifiers, arg) ? arg : quote(arg));
 
   return redactedDetails(template, ...args);
-};$h‍_once.unredactedDetails(unredactedDetails);
+};$h_once.unredactedDetails(unredactedDetails);
 freeze(unredactedDetails);
 
 
@@ -3151,7 +3151,7 @@ const loggedErrorHandler = {
       }
     }
     return result || [];
-  } };$h‍_once.loggedErrorHandler(loggedErrorHandler);
+  } };$h_once.loggedErrorHandler(loggedErrorHandler);
 
 freeze(loggedErrorHandler);
 
@@ -3238,16 +3238,16 @@ const makeAssert = (optRaise = undefined, unredacted = false) => {
     makeAssert });
 
   return freeze(assert);
-};$h‍_once.makeAssert(makeAssert);
+};$h_once.makeAssert(makeAssert);
 freeze(makeAssert);
 
 
 /** @type {Assert} */
-const assert = makeAssert();$h‍_once.assert(assert);
+const assert = makeAssert();$h_once.assert(assert);
 })
 
 ,
-(({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,  }) => {   let FERAL_FUNCTION,arrayJoin;$h‍_imports([["./commons.js", [["FERAL_FUNCTION", [$h‍_a => (FERAL_FUNCTION = $h‍_a)]],["arrayJoin", [$h‍_a => (arrayJoin = $h‍_a)]]]]]);   
+(({   imports: $h_imports,   liveVar: $h_live,   onceVar: $h_once,  }) => {   let FERAL_FUNCTION,arrayJoin;$h_imports([["./commons.js", [["FERAL_FUNCTION", [$h_a => (FERAL_FUNCTION = $h_a)]],["arrayJoin", [$h_a => (arrayJoin = $h_a)]]]]]);   
 
 /**
  * buildOptimizer()
@@ -3317,11 +3317,11 @@ const makeEvaluateFactory = (constants = []) => {
       };
     }
   `);
-};$h‍_once.makeEvaluateFactory(makeEvaluateFactory);
+};$h_once.makeEvaluateFactory(makeEvaluateFactory);
 })
 
 ,
-(({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,  }) => {   let arrayFilter,arrayIncludes,getOwnPropertyDescriptor,getOwnPropertyNames,objectHasOwnProperty,regexpTest;$h‍_imports([["./commons.js", [["arrayFilter", [$h‍_a => (arrayFilter = $h‍_a)]],["arrayIncludes", [$h‍_a => (arrayIncludes = $h‍_a)]],["getOwnPropertyDescriptor", [$h‍_a => (getOwnPropertyDescriptor = $h‍_a)]],["getOwnPropertyNames", [$h‍_a => (getOwnPropertyNames = $h‍_a)]],["objectHasOwnProperty", [$h‍_a => (objectHasOwnProperty = $h‍_a)]],["regexpTest", [$h‍_a => (regexpTest = $h‍_a)]]]]]);   
+(({   imports: $h_imports,   liveVar: $h_live,   onceVar: $h_once,  }) => {   let arrayFilter,arrayIncludes,getOwnPropertyDescriptor,getOwnPropertyNames,objectHasOwnProperty,regexpTest;$h_imports([["./commons.js", [["arrayFilter", [$h_a => (arrayFilter = $h_a)]],["arrayIncludes", [$h_a => (arrayIncludes = $h_a)]],["getOwnPropertyDescriptor", [$h_a => (getOwnPropertyDescriptor = $h_a)]],["getOwnPropertyNames", [$h_a => (getOwnPropertyNames = $h_a)]],["objectHasOwnProperty", [$h_a => (objectHasOwnProperty = $h_a)]],["regexpTest", [$h_a => (regexpTest = $h_a)]]]]]);   
 
 
 
@@ -3433,7 +3433,7 @@ const isValidIdentifierName = (name) => {
 
 /*
  * isImmutableDataProperty
- */$h‍_once.isValidIdentifierName(isValidIdentifierName);
+ */$h_once.isValidIdentifierName(isValidIdentifierName);
 
 function isImmutableDataProperty(obj, name) {
   const desc = getOwnPropertyDescriptor(obj, name);
@@ -3495,11 +3495,11 @@ const getScopeConstants = (globalObject, localObject = {}) => {
 
 
   return [...globalConstants, ...localConstants];
-};$h‍_once.getScopeConstants(getScopeConstants);
+};$h_once.getScopeConstants(getScopeConstants);
 })
 
 ,
-(({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,  }) => {   let FERAL_EVAL,Proxy,String,TypeError,create,freeze,getOwnPropertyDescriptor,getOwnPropertyDescriptors,globalThis,immutableObject,objectHasOwnProperty,reflectGet,reflectSet,assert;$h‍_imports([["./commons.js", [["FERAL_EVAL", [$h‍_a => (FERAL_EVAL = $h‍_a)]],["Proxy", [$h‍_a => (Proxy = $h‍_a)]],["String", [$h‍_a => (String = $h‍_a)]],["TypeError", [$h‍_a => (TypeError = $h‍_a)]],["create", [$h‍_a => (create = $h‍_a)]],["freeze", [$h‍_a => (freeze = $h‍_a)]],["getOwnPropertyDescriptor", [$h‍_a => (getOwnPropertyDescriptor = $h‍_a)]],["getOwnPropertyDescriptors", [$h‍_a => (getOwnPropertyDescriptors = $h‍_a)]],["globalThis", [$h‍_a => (globalThis = $h‍_a)]],["immutableObject", [$h‍_a => (immutableObject = $h‍_a)]],["objectHasOwnProperty", [$h‍_a => (objectHasOwnProperty = $h‍_a)]],["reflectGet", [$h‍_a => (reflectGet = $h‍_a)]],["reflectSet", [$h‍_a => (reflectSet = $h‍_a)]]]],["./error/assert.js", [["assert", [$h‍_a => (assert = $h‍_a)]]]]]);   
+(({   imports: $h_imports,   liveVar: $h_live,   onceVar: $h_once,  }) => {   let FERAL_EVAL,Proxy,String,TypeError,create,freeze,getOwnPropertyDescriptor,getOwnPropertyDescriptors,globalThis,immutableObject,objectHasOwnProperty,reflectGet,reflectSet,assert;$h_imports([["./commons.js", [["FERAL_EVAL", [$h_a => (FERAL_EVAL = $h_a)]],["Proxy", [$h_a => (Proxy = $h_a)]],["String", [$h_a => (String = $h_a)]],["TypeError", [$h_a => (TypeError = $h_a)]],["create", [$h_a => (create = $h_a)]],["freeze", [$h_a => (freeze = $h_a)]],["getOwnPropertyDescriptor", [$h_a => (getOwnPropertyDescriptor = $h_a)]],["getOwnPropertyDescriptors", [$h_a => (getOwnPropertyDescriptors = $h_a)]],["globalThis", [$h_a => (globalThis = $h_a)]],["immutableObject", [$h_a => (immutableObject = $h_a)]],["objectHasOwnProperty", [$h_a => (objectHasOwnProperty = $h_a)]],["reflectGet", [$h_a => (reflectGet = $h_a)]],["reflectSet", [$h_a => (reflectSet = $h_a)]]]],["./error/assert.js", [["assert", [$h_a => (assert = $h_a)]]]]]);   
 
 
 
@@ -3700,11 +3700,11 @@ localObject = {},
     resetOneUnsafeEvalNext,
     scopeHandler };
 
-};$h‍_once.createScopeHandler(createScopeHandler);
+};$h_once.createScopeHandler(createScopeHandler);
 })
 
 ,
-(({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,  }) => {   let FERAL_REG_EXP,regexpExec,stringSlice;$h‍_imports([["./commons.js", [["FERAL_REG_EXP", [$h‍_a => (FERAL_REG_EXP = $h‍_a)]],["regexpExec", [$h‍_a => (regexpExec = $h‍_a)]],["stringSlice", [$h‍_a => (stringSlice = $h‍_a)]]]]]);   
+(({   imports: $h_imports,   liveVar: $h_live,   onceVar: $h_once,  }) => {   let FERAL_REG_EXP,regexpExec,stringSlice;$h_imports([["./commons.js", [["FERAL_REG_EXP", [$h_a => (FERAL_REG_EXP = $h_a)]],["regexpExec", [$h_a => (regexpExec = $h_a)]],["stringSlice", [$h_a => (stringSlice = $h_a)]]]]]);   
 
 // Captures a key and value of the form #key=value or @key=value
 const sourceMetaEntryRegExp =
@@ -3750,11 +3750,11 @@ const getSourceURL = (src) => {
   }
 
   return sourceURL;
-};$h‍_once.getSourceURL(getSourceURL);
+};$h_once.getSourceURL(getSourceURL);
 })
 
 ,
-(({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,  }) => {   let FERAL_REG_EXP,SyntaxError,stringReplace,stringSearch,stringSlice,stringSplit,getSourceURL;$h‍_imports([["./commons.js", [["FERAL_REG_EXP", [$h‍_a => (FERAL_REG_EXP = $h‍_a)]],["SyntaxError", [$h‍_a => (SyntaxError = $h‍_a)]],["stringReplace", [$h‍_a => (stringReplace = $h‍_a)]],["stringSearch", [$h‍_a => (stringSearch = $h‍_a)]],["stringSlice", [$h‍_a => (stringSlice = $h‍_a)]],["stringSplit", [$h‍_a => (stringSplit = $h‍_a)]]]],["./get-source-url.js", [["getSourceURL", [$h‍_a => (getSourceURL = $h‍_a)]]]]]);   
+(({   imports: $h_imports,   liveVar: $h_live,   onceVar: $h_once,  }) => {   let FERAL_REG_EXP,SyntaxError,stringReplace,stringSearch,stringSlice,stringSplit,getSourceURL;$h_imports([["./commons.js", [["FERAL_REG_EXP", [$h_a => (FERAL_REG_EXP = $h_a)]],["SyntaxError", [$h_a => (SyntaxError = $h_a)]],["stringReplace", [$h_a => (stringReplace = $h_a)]],["stringSearch", [$h_a => (stringSearch = $h_a)]],["stringSlice", [$h_a => (stringSlice = $h_a)]],["stringSplit", [$h_a => (stringSplit = $h_a)]]]],["./get-source-url.js", [["getSourceURL", [$h_a => (getSourceURL = $h_a)]]]]]);   
 
 
 
@@ -3851,14 +3851,14 @@ const rejectHtmlComments = (src) => {
  *
  * @param { string } src
  * @returns { string }
- */$h‍_once.rejectHtmlComments(rejectHtmlComments);
+ */$h_once.rejectHtmlComments(rejectHtmlComments);
 const evadeHtmlCommentTest = (src) => {
   const replaceFn = (match) => match[0] === '<' ? '< ! --' : '-- >';
   return stringReplace(src, htmlCommentPattern, replaceFn);
 };
 
 // /////////////////////////////////////////////////////////////////////////////
-$h‍_once.evadeHtmlCommentTest(evadeHtmlCommentTest);
+$h_once.evadeHtmlCommentTest(evadeHtmlCommentTest);
 const importPattern = new FERAL_REG_EXP(
 '(^|[^.])\\bimport(\\s*(?:\\(|/[/*]))',
 'g');
@@ -3920,14 +3920,14 @@ const rejectImportExpressions = (src) => {
  *
  * @param { string } src
  * @returns { string }
- */$h‍_once.rejectImportExpressions(rejectImportExpressions);
+ */$h_once.rejectImportExpressions(rejectImportExpressions);
 const evadeImportExpressionTest = (src) => {
   const replaceFn = (_, p1, p2) => `${p1}__import__${p2}`;
   return stringReplace(src, importPattern, replaceFn);
 };
 
 // /////////////////////////////////////////////////////////////////////////////
-$h‍_once.evadeImportExpressionTest(evadeImportExpressionTest);
+$h_once.evadeImportExpressionTest(evadeImportExpressionTest);
 const someDirectEvalPattern = new FERAL_REG_EXP(
 '(^|[^.])\\beval(\\s*\\()',
 'g');
@@ -3984,7 +3984,7 @@ const rejectSomeDirectEvalExpressions = (src) => {
  *
  * @param {string} source
  * @returns {string}
- */$h‍_once.rejectSomeDirectEvalExpressions(rejectSomeDirectEvalExpressions);
+ */$h_once.rejectSomeDirectEvalExpressions(rejectSomeDirectEvalExpressions);
 const mandatoryTransforms = (source) => {
   source = rejectHtmlComments(source);
   source = rejectImportExpressions(source);
@@ -3998,17 +3998,17 @@ const mandatoryTransforms = (source) => {
  * @param {string} source
  * @param {((str: string) => string)[]} transforms
  * @returns {string}
- */$h‍_once.mandatoryTransforms(mandatoryTransforms);
+ */$h_once.mandatoryTransforms(mandatoryTransforms);
 const applyTransforms = (source, transforms) => {
   for (const transform of transforms) {
     source = transform(source);
   }
   return source;
-};$h‍_once.applyTransforms(applyTransforms);
+};$h_once.applyTransforms(applyTransforms);
 })
 
 ,
-(({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,  }) => {   let WeakSet,apply,immutableObject,proxyRevocable,weaksetAdd,getScopeConstants,createScopeHandler,applyTransforms,mandatoryTransforms,makeEvaluateFactory,assert;$h‍_imports([["./commons.js", [["WeakSet", [$h‍_a => (WeakSet = $h‍_a)]],["apply", [$h‍_a => (apply = $h‍_a)]],["immutableObject", [$h‍_a => (immutableObject = $h‍_a)]],["proxyRevocable", [$h‍_a => (proxyRevocable = $h‍_a)]],["weaksetAdd", [$h‍_a => (weaksetAdd = $h‍_a)]]]],["./scope-constants.js", [["getScopeConstants", [$h‍_a => (getScopeConstants = $h‍_a)]]]],["./scope-handler.js", [["createScopeHandler", [$h‍_a => (createScopeHandler = $h‍_a)]]]],["./transforms.js", [["applyTransforms", [$h‍_a => (applyTransforms = $h‍_a)]],["mandatoryTransforms", [$h‍_a => (mandatoryTransforms = $h‍_a)]]]],["./make-evaluate-factory.js", [["makeEvaluateFactory", [$h‍_a => (makeEvaluateFactory = $h‍_a)]]]],["./error/assert.js", [["assert", [$h‍_a => (assert = $h‍_a)]]]]]);   
+(({   imports: $h_imports,   liveVar: $h_live,   onceVar: $h_once,  }) => {   let WeakSet,apply,immutableObject,proxyRevocable,weaksetAdd,getScopeConstants,createScopeHandler,applyTransforms,mandatoryTransforms,makeEvaluateFactory,assert;$h_imports([["./commons.js", [["WeakSet", [$h_a => (WeakSet = $h_a)]],["apply", [$h_a => (apply = $h_a)]],["immutableObject", [$h_a => (immutableObject = $h_a)]],["proxyRevocable", [$h_a => (proxyRevocable = $h_a)]],["weaksetAdd", [$h_a => (weaksetAdd = $h_a)]]]],["./scope-constants.js", [["getScopeConstants", [$h_a => (getScopeConstants = $h_a)]]]],["./scope-handler.js", [["createScopeHandler", [$h_a => (createScopeHandler = $h_a)]]]],["./transforms.js", [["applyTransforms", [$h_a => (applyTransforms = $h_a)]],["mandatoryTransforms", [$h_a => (mandatoryTransforms = $h_a)]]]],["./make-evaluate-factory.js", [["makeEvaluateFactory", [$h_a => (makeEvaluateFactory = $h_a)]]]],["./error/assert.js", [["assert", [$h_a => (assert = $h_a)]]]]]);   
 
 
 
@@ -4074,7 +4074,7 @@ localObject = {},
  * @param {Array<Transform>} [options.globalTransforms]
  * @param {bool} [options.sloppyGlobalsMode]
  * @param {WeakSet} [options.knownScopeProxies]
- */$h‍_once.prepareEval(prepareEval);
+ */$h_once.prepareEval(prepareEval);
 const performEval = (
 source,
 globalObject,
@@ -4141,11 +4141,11 @@ localObject = {},
       assert.fail(d`handler did not reset allowNextEvalToBeUnsafe ${err}`);
     }
   }
-};$h‍_once.performEval(performEval);
+};$h_once.performEval(performEval);
 })
 
 ,
-(({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,  }) => {   let TypeError,arrayPush,create,defineProperties,getOwnPropertyDescriptors,evadeHtmlCommentTest,evadeImportExpressionTest,rejectSomeDirectEvalExpressions,prepareEval,performEval;$h‍_imports([["./commons.js", [["TypeError", [$h‍_a => (TypeError = $h‍_a)]],["arrayPush", [$h‍_a => (arrayPush = $h‍_a)]],["create", [$h‍_a => (create = $h‍_a)]],["defineProperties", [$h‍_a => (defineProperties = $h‍_a)]],["getOwnPropertyDescriptors", [$h‍_a => (getOwnPropertyDescriptors = $h‍_a)]]]],["./transforms.js", [["evadeHtmlCommentTest", [$h‍_a => (evadeHtmlCommentTest = $h‍_a)]],["evadeImportExpressionTest", [$h‍_a => (evadeImportExpressionTest = $h‍_a)]],["rejectSomeDirectEvalExpressions", [$h‍_a => (rejectSomeDirectEvalExpressions = $h‍_a)]]]],["./evaluate.js", [["prepareEval", [$h‍_a => (prepareEval = $h‍_a)]],["performEval", [$h‍_a => (performEval = $h‍_a)]]]]]);   
+(({   imports: $h_imports,   liveVar: $h_live,   onceVar: $h_once,  }) => {   let TypeError,arrayPush,create,defineProperties,getOwnPropertyDescriptors,evadeHtmlCommentTest,evadeImportExpressionTest,rejectSomeDirectEvalExpressions,prepareEval,performEval;$h_imports([["./commons.js", [["TypeError", [$h_a => (TypeError = $h_a)]],["arrayPush", [$h_a => (arrayPush = $h_a)]],["create", [$h_a => (create = $h_a)]],["defineProperties", [$h_a => (defineProperties = $h_a)]],["getOwnPropertyDescriptors", [$h_a => (getOwnPropertyDescriptors = $h_a)]]]],["./transforms.js", [["evadeHtmlCommentTest", [$h_a => (evadeHtmlCommentTest = $h_a)]],["evadeImportExpressionTest", [$h_a => (evadeImportExpressionTest = $h_a)]],["rejectSomeDirectEvalExpressions", [$h_a => (rejectSomeDirectEvalExpressions = $h_a)]]]],["./evaluate.js", [["prepareEval", [$h_a => (prepareEval = $h_a)]],["performEval", [$h_a => (performEval = $h_a)]]]]]);   
 
 
 
@@ -4208,7 +4208,7 @@ const prepareCompartmentEvaluation = (compartmentFields, options) => {
     sloppyGlobalsMode,
     knownScopeProxies };
 
-};$h‍_once.prepareCompartmentEvaluation(prepareCompartmentEvaluation);
+};$h_once.prepareCompartmentEvaluation(prepareCompartmentEvaluation);
 
 const compartmentEvaluate = (compartmentFields, source, options) => {
   // Perform this check first to avoid unecessary sanitizing.
@@ -4233,7 +4233,7 @@ const compartmentEvaluate = (compartmentFields, source, options) => {
     sloppyGlobalsMode,
     knownScopeProxies });
 
-};$h‍_once.compartmentEvaluate(compartmentEvaluate);
+};$h_once.compartmentEvaluate(compartmentEvaluate);
 
 const makeScopeProxy = (compartmentFields, options) => {
   const {
@@ -4247,11 +4247,11 @@ const makeScopeProxy = (compartmentFields, options) => {
     knownScopeProxies });
 
   return scopeProxy;
-};$h‍_once.makeScopeProxy(makeScopeProxy);
+};$h_once.makeScopeProxy(makeScopeProxy);
 })
 
 ,
-(({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,  }) => {   let performEval;$h‍_imports([["./evaluate.js", [["performEval", [$h‍_a => (performEval = $h‍_a)]]]]]);   
+(({   imports: $h_imports,   liveVar: $h_live,   onceVar: $h_once,  }) => {   let performEval;$h_imports([["./evaluate.js", [["performEval", [$h_a => (performEval = $h_a)]]]]]);   
 
 /*
  * makeEvalFunction()
@@ -4277,11 +4277,11 @@ const makeEvalFunction = (globalObject, options = {}) => {
   eval;
 
   return newEval;
-};$h‍_once.makeEvalFunction(makeEvalFunction);
+};$h_once.makeEvalFunction(makeEvalFunction);
 })
 
 ,
-(({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,  }) => {   let FERAL_FUNCTION,arrayJoin,arrayPop,defineProperties,getPrototypeOf,performEval,assert;$h‍_imports([["./commons.js", [["FERAL_FUNCTION", [$h‍_a => (FERAL_FUNCTION = $h‍_a)]],["arrayJoin", [$h‍_a => (arrayJoin = $h‍_a)]],["arrayPop", [$h‍_a => (arrayPop = $h‍_a)]],["defineProperties", [$h‍_a => (defineProperties = $h‍_a)]],["getPrototypeOf", [$h‍_a => (getPrototypeOf = $h‍_a)]]]],["./evaluate.js", [["performEval", [$h‍_a => (performEval = $h‍_a)]]]],["./error/assert.js", [["assert", [$h‍_a => (assert = $h‍_a)]]]]]);   
+(({   imports: $h_imports,   liveVar: $h_live,   onceVar: $h_once,  }) => {   let FERAL_FUNCTION,arrayJoin,arrayPop,defineProperties,getPrototypeOf,performEval,assert;$h_imports([["./commons.js", [["FERAL_FUNCTION", [$h_a => (FERAL_FUNCTION = $h_a)]],["arrayJoin", [$h_a => (arrayJoin = $h_a)]],["arrayPop", [$h_a => (arrayPop = $h_a)]],["defineProperties", [$h_a => (defineProperties = $h_a)]],["getPrototypeOf", [$h_a => (getPrototypeOf = $h_a)]]]],["./evaluate.js", [["performEval", [$h_a => (performEval = $h_a)]]]],["./error/assert.js", [["assert", [$h_a => (assert = $h_a)]]]]]);   
 
 
 
@@ -4361,11 +4361,11 @@ const makeFunctionConstructor = (globaObject, options = {}) => {
 
 
   return newFunction;
-};$h‍_once.makeFunctionConstructor(makeFunctionConstructor);
+};$h_once.makeFunctionConstructor(makeFunctionConstructor);
 })
 
 ,
-(({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,  }) => {   $h‍_imports([]);   /* eslint-disable no-restricted-globals */
+(({   imports: $h_imports,   liveVar: $h_live,   onceVar: $h_once,  }) => {   $h_imports([]);   /* eslint-disable no-restricted-globals */
 /**
  * @file Exports {@code whitelist}, a recursively defined
  * JSON record enumerating all intrinsics and their properties
@@ -4396,7 +4396,7 @@ const constantProperties = {
  * Properties of all global objects.
  * Must be powerless.
  * Maps from property name to the intrinsic name in the whitelist.
- */$h‍_once.constantProperties(constantProperties);
+ */$h_once.constantProperties(constantProperties);
 const universalPropertyNames = {
   // *** Function Properties of the Global Object
 
@@ -4468,7 +4468,7 @@ const universalPropertyNames = {
  * start compartment, as well as any compartments created before lockdown.
  * These may provide much of the power provided by the original.
  * Maps from property name to the intrinsic name in the whitelist.
- */$h‍_once.universalPropertyNames(universalPropertyNames);
+ */$h_once.universalPropertyNames(universalPropertyNames);
 const initialGlobalPropertyNames = {
   // *** Constructor Properties of the Global Object
 
@@ -4497,7 +4497,7 @@ const initialGlobalPropertyNames = {
  * Those found only on the globals of new compartments created after lockdown,
  * which must therefore be powerless.
  * Maps from property name to the intrinsic name in the whitelist.
- */$h‍_once.initialGlobalPropertyNames(initialGlobalPropertyNames);
+ */$h_once.initialGlobalPropertyNames(initialGlobalPropertyNames);
 const sharedGlobalPropertyNames = {
   // *** Constructor Properties of the Global Object
 
@@ -4516,7 +4516,7 @@ const sharedGlobalPropertyNames = {
  * of the start compartment.
  * Maps from property name to the intrinsic name in the whitelist
  * (which is currently always the same).
- */$h‍_once.sharedGlobalPropertyNames(sharedGlobalPropertyNames);
+ */$h_once.sharedGlobalPropertyNames(sharedGlobalPropertyNames);
 const uniqueGlobalPropertyNames = {
   // *** Value Properties of the Global Object
 
@@ -4542,7 +4542,7 @@ const uniqueGlobalPropertyNames = {
 // All the "subclasses" of Error. These are collectively represented in the
 // ECMAScript spec by the meta variable NativeError.
 // TODO Add AggregateError https://github.com/Agoric/SES-shim/issues/550
-$h‍_once.uniqueGlobalPropertyNames(uniqueGlobalPropertyNames);const NativeErrors = [
+$h_once.uniqueGlobalPropertyNames(uniqueGlobalPropertyNames);const NativeErrors = [
 EvalError,
 RangeError,
 ReferenceError,
@@ -4595,7 +4595,7 @@ URIError];
  */
 
 // Function Instances
-$h‍_once.NativeErrors(NativeErrors);const FunctionInstance = {
+$h_once.NativeErrors(NativeErrors);const FunctionInstance = {
   '[[Proto]]': '%FunctionPrototype%',
   length: 'number',
   name: 'string'
@@ -4605,7 +4605,7 @@ $h‍_once.NativeErrors(NativeErrors);const FunctionInstance = {
 };
 
 // AsyncFunction Instances
-$h‍_once.FunctionInstance(FunctionInstance);const AsyncFunctionInstance = {
+$h_once.FunctionInstance(FunctionInstance);const AsyncFunctionInstance = {
   // This property is not mentioned in ECMA 262, but is present in V8 and
   // necessary for lockdown to succeed.
   '[[Proto]]': '%AsyncFunctionPrototype%' };
@@ -4636,7 +4636,7 @@ const isAccessorPermit = (permit) => {
 };
 
 // NativeError Object Structure
-$h‍_once.isAccessorPermit(isAccessorPermit);function NativeError(prototype) {
+$h_once.isAccessorPermit(isAccessorPermit);function NativeError(prototype) {
   return {
     // Properties of the NativeError Constructors
     '[[Proto]]': '%SharedError%',
@@ -5718,11 +5718,11 @@ const whitelist = {
   lockdown: fn,
   harden: fn,
 
-  '%InitialGetStackString%': fn };$h‍_once.whitelist(whitelist);
+  '%InitialGetStackString%': fn };$h_once.whitelist(whitelist);
 })
 
 ,
-(({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,  }) => {   let defineProperty,objectHasOwnProperty,entries,makeEvalFunction,makeFunctionConstructor,constantProperties,universalPropertyNames;$h‍_imports([["./commons.js", [["defineProperty", [$h‍_a => (defineProperty = $h‍_a)]],["objectHasOwnProperty", [$h‍_a => (objectHasOwnProperty = $h‍_a)]],["entries", [$h‍_a => (entries = $h‍_a)]]]],["./make-eval-function.js", [["makeEvalFunction", [$h‍_a => (makeEvalFunction = $h‍_a)]]]],["./make-function-constructor.js", [["makeFunctionConstructor", [$h‍_a => (makeFunctionConstructor = $h‍_a)]]]],["./whitelist.js", [["constantProperties", [$h‍_a => (constantProperties = $h‍_a)]],["universalPropertyNames", [$h‍_a => (universalPropertyNames = $h‍_a)]]]]]);   
+(({   imports: $h_imports,   liveVar: $h_live,   onceVar: $h_once,  }) => {   let defineProperty,objectHasOwnProperty,entries,makeEvalFunction,makeFunctionConstructor,constantProperties,universalPropertyNames;$h_imports([["./commons.js", [["defineProperty", [$h_a => (defineProperty = $h_a)]],["objectHasOwnProperty", [$h_a => (objectHasOwnProperty = $h_a)]],["entries", [$h_a => (entries = $h_a)]]]],["./make-eval-function.js", [["makeEvalFunction", [$h_a => (makeEvalFunction = $h_a)]]]],["./make-function-constructor.js", [["makeFunctionConstructor", [$h_a => (makeFunctionConstructor = $h_a)]]]],["./whitelist.js", [["constantProperties", [$h_a => (constantProperties = $h_a)]],["universalPropertyNames", [$h_a => (universalPropertyNames = $h_a)]]]]]);   
 
 
 
@@ -5811,11 +5811,11 @@ compartmentPrototype,
       markVirtualizedNativeFunction(value);
     }
   }
-};$h‍_once.initGlobalObject(initGlobalObject);
+};$h_once.initGlobalObject(initGlobalObject);
 })
 
 ,
-(({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,  }) => {   let ReferenceError,TypeError,Map,Set,arrayJoin,arrayMap,arrayPush,create,freeze,mapGet,mapHas,mapSet,setAdd,promiseCatch,promiseThen,values,weakmapGet,assert;$h‍_imports([["./commons.js", [["ReferenceError", [$h‍_a => (ReferenceError = $h‍_a)]],["TypeError", [$h‍_a => (TypeError = $h‍_a)]],["Map", [$h‍_a => (Map = $h‍_a)]],["Set", [$h‍_a => (Set = $h‍_a)]],["arrayJoin", [$h‍_a => (arrayJoin = $h‍_a)]],["arrayMap", [$h‍_a => (arrayMap = $h‍_a)]],["arrayPush", [$h‍_a => (arrayPush = $h‍_a)]],["create", [$h‍_a => (create = $h‍_a)]],["freeze", [$h‍_a => (freeze = $h‍_a)]],["mapGet", [$h‍_a => (mapGet = $h‍_a)]],["mapHas", [$h‍_a => (mapHas = $h‍_a)]],["mapSet", [$h‍_a => (mapSet = $h‍_a)]],["setAdd", [$h‍_a => (setAdd = $h‍_a)]],["promiseCatch", [$h‍_a => (promiseCatch = $h‍_a)]],["promiseThen", [$h‍_a => (promiseThen = $h‍_a)]],["values", [$h‍_a => (values = $h‍_a)]],["weakmapGet", [$h‍_a => (weakmapGet = $h‍_a)]]]],["./error/assert.js", [["assert", [$h‍_a => (assert = $h‍_a)]]]]]);   
+(({   imports: $h_imports,   liveVar: $h_live,   onceVar: $h_once,  }) => {   let ReferenceError,TypeError,Map,Set,arrayJoin,arrayMap,arrayPush,create,freeze,mapGet,mapHas,mapSet,setAdd,promiseCatch,promiseThen,values,weakmapGet,assert;$h_imports([["./commons.js", [["ReferenceError", [$h_a => (ReferenceError = $h_a)]],["TypeError", [$h_a => (TypeError = $h_a)]],["Map", [$h_a => (Map = $h_a)]],["Set", [$h_a => (Set = $h_a)]],["arrayJoin", [$h_a => (arrayJoin = $h_a)]],["arrayMap", [$h_a => (arrayMap = $h_a)]],["arrayPush", [$h_a => (arrayPush = $h_a)]],["create", [$h_a => (create = $h_a)]],["freeze", [$h_a => (freeze = $h_a)]],["mapGet", [$h_a => (mapGet = $h_a)]],["mapHas", [$h_a => (mapHas = $h_a)]],["mapSet", [$h_a => (mapSet = $h_a)]],["setAdd", [$h_a => (setAdd = $h_a)]],["promiseCatch", [$h_a => (promiseCatch = $h_a)]],["promiseThen", [$h_a => (promiseThen = $h_a)]],["values", [$h_a => (values = $h_a)]],["weakmapGet", [$h_a => (weakmapGet = $h_a)]]]],["./error/assert.js", [["assert", [$h_a => (assert = $h_a)]]]]]);   
 
 
 
@@ -5862,7 +5862,7 @@ freeze({
 
 // `resolveAll` pre-computes resolutions of all imports within the compartment
 // in which a module was loaded.
-$h‍_once.makeAlias(makeAlias);const resolveAll = (imports, resolveHook, fullReferrerSpecifier) => {
+$h_once.makeAlias(makeAlias);const resolveAll = (imports, resolveHook, fullReferrerSpecifier) => {
   const resolvedImports = create(null);
   for (const importSpecifier of imports) {
     const fullSpecifier = resolveHook(importSpecifier, fullReferrerSpecifier);
@@ -6139,11 +6139,11 @@ moduleSpecifier) =>
     }`);
 
   }
-};$h‍_once.load(load);
+};$h_once.load(load);
 })
 
 ,
-(({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,  }) => {   let makeAlias,Proxy,TypeError,create,freeze,mapGet,mapHas,mapSet,ownKeys,reflectGet,reflectGetOwnPropertyDescriptor,reflectHas,reflectIsExtensible,reflectPreventExtensions,weakmapSet,assert;$h‍_imports([["./module-load.js", [["makeAlias", [$h‍_a => (makeAlias = $h‍_a)]]]],["./commons.js", [["Proxy", [$h‍_a => (Proxy = $h‍_a)]],["TypeError", [$h‍_a => (TypeError = $h‍_a)]],["create", [$h‍_a => (create = $h‍_a)]],["freeze", [$h‍_a => (freeze = $h‍_a)]],["mapGet", [$h‍_a => (mapGet = $h‍_a)]],["mapHas", [$h‍_a => (mapHas = $h‍_a)]],["mapSet", [$h‍_a => (mapSet = $h‍_a)]],["ownKeys", [$h‍_a => (ownKeys = $h‍_a)]],["reflectGet", [$h‍_a => (reflectGet = $h‍_a)]],["reflectGetOwnPropertyDescriptor", [$h‍_a => (reflectGetOwnPropertyDescriptor = $h‍_a)]],["reflectHas", [$h‍_a => (reflectHas = $h‍_a)]],["reflectIsExtensible", [$h‍_a => (reflectIsExtensible = $h‍_a)]],["reflectPreventExtensions", [$h‍_a => (reflectPreventExtensions = $h‍_a)]],["weakmapSet", [$h‍_a => (weakmapSet = $h‍_a)]]]],["./error/assert.js", [["assert", [$h‍_a => (assert = $h‍_a)]]]]]);   
+(({   imports: $h_imports,   liveVar: $h_live,   onceVar: $h_once,  }) => {   let makeAlias,Proxy,TypeError,create,freeze,mapGet,mapHas,mapSet,ownKeys,reflectGet,reflectGetOwnPropertyDescriptor,reflectHas,reflectIsExtensible,reflectPreventExtensions,weakmapSet,assert;$h_imports([["./module-load.js", [["makeAlias", [$h_a => (makeAlias = $h_a)]]]],["./commons.js", [["Proxy", [$h_a => (Proxy = $h_a)]],["TypeError", [$h_a => (TypeError = $h_a)]],["create", [$h_a => (create = $h_a)]],["freeze", [$h_a => (freeze = $h_a)]],["mapGet", [$h_a => (mapGet = $h_a)]],["mapHas", [$h_a => (mapHas = $h_a)]],["mapSet", [$h_a => (mapSet = $h_a)]],["ownKeys", [$h_a => (ownKeys = $h_a)]],["reflectGet", [$h_a => (reflectGet = $h_a)]],["reflectGetOwnPropertyDescriptor", [$h_a => (reflectGetOwnPropertyDescriptor = $h_a)]],["reflectHas", [$h_a => (reflectHas = $h_a)]],["reflectIsExtensible", [$h_a => (reflectIsExtensible = $h_a)]],["reflectPreventExtensions", [$h_a => (reflectPreventExtensions = $h_a)]],["weakmapSet", [$h_a => (weakmapSet = $h_a)]]]],["./error/assert.js", [["assert", [$h_a => (assert = $h_a)]]]]]);   
 
 
 
@@ -6297,7 +6297,7 @@ const deferExports = () => {
 // It also records the compartment and specifier affiliated with that module
 // exports namespace proxy so it can be used as an alias into another
 // compartment when threaded through a compartment's `moduleMap` argument.
-$h‍_once.deferExports(deferExports);const getDeferredExports = (
+$h_once.deferExports(deferExports);const getDeferredExports = (
 compartment,
 compartmentPrivateFields,
 moduleAliases,
@@ -6314,11 +6314,11 @@ specifier) =>
     mapSet(deferredExports, specifier, deferred);
   }
   return mapGet(deferredExports, specifier);
-};$h‍_once.getDeferredExports(getDeferredExports);
+};$h_once.getDeferredExports(getDeferredExports);
 })
 
 ,
-(({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,  }) => {   let assert,getDeferredExports,ReferenceError,SyntaxError,TypeError,arrayForEach,arrayIncludes,arrayPush,arraySome,arraySort,create,defineProperty,entries,freeze,isArray,keys,mapGet,weakmapGet,compartmentEvaluate;$h‍_imports([["./error/assert.js", [["assert", [$h‍_a => (assert = $h‍_a)]]]],["./module-proxy.js", [["getDeferredExports", [$h‍_a => (getDeferredExports = $h‍_a)]]]],["./commons.js", [["ReferenceError", [$h‍_a => (ReferenceError = $h‍_a)]],["SyntaxError", [$h‍_a => (SyntaxError = $h‍_a)]],["TypeError", [$h‍_a => (TypeError = $h‍_a)]],["arrayForEach", [$h‍_a => (arrayForEach = $h‍_a)]],["arrayIncludes", [$h‍_a => (arrayIncludes = $h‍_a)]],["arrayPush", [$h‍_a => (arrayPush = $h‍_a)]],["arraySome", [$h‍_a => (arraySome = $h‍_a)]],["arraySort", [$h‍_a => (arraySort = $h‍_a)]],["create", [$h‍_a => (create = $h‍_a)]],["defineProperty", [$h‍_a => (defineProperty = $h‍_a)]],["entries", [$h‍_a => (entries = $h‍_a)]],["freeze", [$h‍_a => (freeze = $h‍_a)]],["isArray", [$h‍_a => (isArray = $h‍_a)]],["keys", [$h‍_a => (keys = $h‍_a)]],["mapGet", [$h‍_a => (mapGet = $h‍_a)]],["weakmapGet", [$h‍_a => (weakmapGet = $h‍_a)]]]],["./compartment-evaluate.js", [["compartmentEvaluate", [$h‍_a => (compartmentEvaluate = $h‍_a)]]]]]);   
+(({   imports: $h_imports,   liveVar: $h_live,   onceVar: $h_once,  }) => {   let assert,getDeferredExports,ReferenceError,SyntaxError,TypeError,arrayForEach,arrayIncludes,arrayPush,arraySome,arraySort,create,defineProperty,entries,freeze,isArray,keys,mapGet,weakmapGet,compartmentEvaluate;$h_imports([["./error/assert.js", [["assert", [$h_a => (assert = $h_a)]]]],["./module-proxy.js", [["getDeferredExports", [$h_a => (getDeferredExports = $h_a)]]]],["./commons.js", [["ReferenceError", [$h_a => (ReferenceError = $h_a)]],["SyntaxError", [$h_a => (SyntaxError = $h_a)]],["TypeError", [$h_a => (TypeError = $h_a)]],["arrayForEach", [$h_a => (arrayForEach = $h_a)]],["arrayIncludes", [$h_a => (arrayIncludes = $h_a)]],["arrayPush", [$h_a => (arrayPush = $h_a)]],["arraySome", [$h_a => (arraySome = $h_a)]],["arraySort", [$h_a => (arraySort = $h_a)]],["create", [$h_a => (create = $h_a)]],["defineProperty", [$h_a => (defineProperty = $h_a)]],["entries", [$h_a => (entries = $h_a)]],["freeze", [$h_a => (freeze = $h_a)]],["isArray", [$h_a => (isArray = $h_a)]],["keys", [$h_a => (keys = $h_a)]],["mapGet", [$h_a => (mapGet = $h_a)]],["weakmapGet", [$h_a => (weakmapGet = $h_a)]]]],["./compartment-evaluate.js", [["compartmentEvaluate", [$h_a => (compartmentEvaluate = $h_a)]]]]]);   
 
 
 
@@ -6421,7 +6421,7 @@ resolvedImports) =>
 // an idempotent execute function.
 // The module exports namespace is a proxy to the proxied exports namespace
 // that the execution of the module instance populates.
-$h‍_once.makeThirdPartyModuleInstance(makeThirdPartyModuleInstance);const makeModuleInstance = (
+$h_once.makeThirdPartyModuleInstance(makeThirdPartyModuleInstance);const makeModuleInstance = (
 privateFields,
 moduleAliases,
 moduleRecord,
@@ -6761,11 +6761,11 @@ importedInstances) =>
     exportsProxy,
     execute });
 
-};$h‍_once.makeModuleInstance(makeModuleInstance);
+};$h_once.makeModuleInstance(makeModuleInstance);
 })
 
 ,
-(({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,  }) => {   let assert,makeModuleInstance,makeThirdPartyModuleInstance,Map,ReferenceError,TypeError,entries,isArray,isObject,mapGet,mapHas,mapSet,weakmapGet;$h‍_imports([["./error/assert.js", [["assert", [$h‍_a => (assert = $h‍_a)]]]],["./module-instance.js", [["makeModuleInstance", [$h‍_a => (makeModuleInstance = $h‍_a)]],["makeThirdPartyModuleInstance", [$h‍_a => (makeThirdPartyModuleInstance = $h‍_a)]]]],["./commons.js", [["Map", [$h‍_a => (Map = $h‍_a)]],["ReferenceError", [$h‍_a => (ReferenceError = $h‍_a)]],["TypeError", [$h‍_a => (TypeError = $h‍_a)]],["entries", [$h‍_a => (entries = $h‍_a)]],["isArray", [$h‍_a => (isArray = $h‍_a)]],["isObject", [$h‍_a => (isObject = $h‍_a)]],["mapGet", [$h‍_a => (mapGet = $h‍_a)]],["mapHas", [$h‍_a => (mapHas = $h‍_a)]],["mapSet", [$h‍_a => (mapSet = $h‍_a)]],["weakmapGet", [$h‍_a => (weakmapGet = $h‍_a)]]]]]);   
+(({   imports: $h_imports,   liveVar: $h_live,   onceVar: $h_once,  }) => {   let assert,makeModuleInstance,makeThirdPartyModuleInstance,Map,ReferenceError,TypeError,entries,isArray,isObject,mapGet,mapHas,mapSet,weakmapGet;$h_imports([["./error/assert.js", [["assert", [$h_a => (assert = $h_a)]]]],["./module-instance.js", [["makeModuleInstance", [$h_a => (makeModuleInstance = $h_a)]],["makeThirdPartyModuleInstance", [$h_a => (makeThirdPartyModuleInstance = $h_a)]]]],["./commons.js", [["Map", [$h_a => (Map = $h_a)]],["ReferenceError", [$h_a => (ReferenceError = $h_a)]],["TypeError", [$h_a => (TypeError = $h_a)]],["entries", [$h_a => (entries = $h_a)]],["isArray", [$h_a => (isArray = $h_a)]],["isObject", [$h_a => (isObject = $h_a)]],["mapGet", [$h_a => (mapGet = $h_a)]],["mapHas", [$h_a => (mapHas = $h_a)]],["mapSet", [$h_a => (mapSet = $h_a)]],["weakmapGet", [$h_a => (weakmapGet = $h_a)]]]]]);   
 
 
 
@@ -6826,7 +6826,7 @@ moduleSpecifier) =>
   // compartment, denoted by moduleRecord.compartment.
   // eslint-disable-next-line no-use-before-define
   return instantiate(compartmentPrivateFields, moduleAliases, moduleRecord);
-};$h‍_once.link(link);
+};$h_once.link(link);
 
 function isPrecompiled(staticModuleRecord) {
   return typeof staticModuleRecord.__syncModuleProgram__ === 'string';
@@ -6959,11 +6959,11 @@ moduleRecord) =>
   }
 
   return moduleInstance;
-};$h‍_once.instantiate(instantiate);
+};$h_once.instantiate(instantiate);
 })
 
 ,
-(({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,  }) => {   let Map,ReferenceError,TypeError,WeakMap,WeakSet,arrayFilter,arrayJoin,assign,defineProperties,entries,freeze,getOwnPropertyNames,promiseThen,weakmapGet,weakmapSet,weaksetHas,initGlobalObject,isValidIdentifierName,sharedGlobalPropertyNames,load,link,getDeferredExports,assert,compartmentEvaluate,makeScopeProxy;$h‍_imports([["./commons.js", [["Map", [$h‍_a => (Map = $h‍_a)]],["ReferenceError", [$h‍_a => (ReferenceError = $h‍_a)]],["TypeError", [$h‍_a => (TypeError = $h‍_a)]],["WeakMap", [$h‍_a => (WeakMap = $h‍_a)]],["WeakSet", [$h‍_a => (WeakSet = $h‍_a)]],["arrayFilter", [$h‍_a => (arrayFilter = $h‍_a)]],["arrayJoin", [$h‍_a => (arrayJoin = $h‍_a)]],["assign", [$h‍_a => (assign = $h‍_a)]],["defineProperties", [$h‍_a => (defineProperties = $h‍_a)]],["entries", [$h‍_a => (entries = $h‍_a)]],["freeze", [$h‍_a => (freeze = $h‍_a)]],["getOwnPropertyNames", [$h‍_a => (getOwnPropertyNames = $h‍_a)]],["promiseThen", [$h‍_a => (promiseThen = $h‍_a)]],["weakmapGet", [$h‍_a => (weakmapGet = $h‍_a)]],["weakmapSet", [$h‍_a => (weakmapSet = $h‍_a)]],["weaksetHas", [$h‍_a => (weaksetHas = $h‍_a)]]]],["./global-object.js", [["initGlobalObject", [$h‍_a => (initGlobalObject = $h‍_a)]]]],["./scope-constants.js", [["isValidIdentifierName", [$h‍_a => (isValidIdentifierName = $h‍_a)]]]],["./whitelist.js", [["sharedGlobalPropertyNames", [$h‍_a => (sharedGlobalPropertyNames = $h‍_a)]]]],["./module-load.js", [["load", [$h‍_a => (load = $h‍_a)]]]],["./module-link.js", [["link", [$h‍_a => (link = $h‍_a)]]]],["./module-proxy.js", [["getDeferredExports", [$h‍_a => (getDeferredExports = $h‍_a)]]]],["./error/assert.js", [["assert", [$h‍_a => (assert = $h‍_a)]]]],["./compartment-evaluate.js", [["compartmentEvaluate", [$h‍_a => (compartmentEvaluate = $h‍_a)]],["makeScopeProxy", [$h‍_a => (makeScopeProxy = $h‍_a)]]]]]);   
+(({   imports: $h_imports,   liveVar: $h_live,   onceVar: $h_once,  }) => {   let Map,ReferenceError,TypeError,WeakMap,WeakSet,arrayFilter,arrayJoin,assign,defineProperties,entries,freeze,getOwnPropertyNames,promiseThen,weakmapGet,weakmapSet,weaksetHas,initGlobalObject,isValidIdentifierName,sharedGlobalPropertyNames,load,link,getDeferredExports,assert,compartmentEvaluate,makeScopeProxy;$h_imports([["./commons.js", [["Map", [$h_a => (Map = $h_a)]],["ReferenceError", [$h_a => (ReferenceError = $h_a)]],["TypeError", [$h_a => (TypeError = $h_a)]],["WeakMap", [$h_a => (WeakMap = $h_a)]],["WeakSet", [$h_a => (WeakSet = $h_a)]],["arrayFilter", [$h_a => (arrayFilter = $h_a)]],["arrayJoin", [$h_a => (arrayJoin = $h_a)]],["assign", [$h_a => (assign = $h_a)]],["defineProperties", [$h_a => (defineProperties = $h_a)]],["entries", [$h_a => (entries = $h_a)]],["freeze", [$h_a => (freeze = $h_a)]],["getOwnPropertyNames", [$h_a => (getOwnPropertyNames = $h_a)]],["promiseThen", [$h_a => (promiseThen = $h_a)]],["weakmapGet", [$h_a => (weakmapGet = $h_a)]],["weakmapSet", [$h_a => (weakmapSet = $h_a)]],["weaksetHas", [$h_a => (weaksetHas = $h_a)]]]],["./global-object.js", [["initGlobalObject", [$h_a => (initGlobalObject = $h_a)]]]],["./scope-constants.js", [["isValidIdentifierName", [$h_a => (isValidIdentifierName = $h_a)]]]],["./whitelist.js", [["sharedGlobalPropertyNames", [$h_a => (sharedGlobalPropertyNames = $h_a)]]]],["./module-load.js", [["load", [$h_a => (load = $h_a)]]]],["./module-link.js", [["link", [$h_a => (link = $h_a)]]]],["./module-proxy.js", [["getDeferredExports", [$h_a => (getDeferredExports = $h_a)]]]],["./error/assert.js", [["assert", [$h_a => (assert = $h_a)]]]],["./compartment-evaluate.js", [["compartmentEvaluate", [$h_a => (compartmentEvaluate = $h_a)]],["makeScopeProxy", [$h_a => (makeScopeProxy = $h_a)]]]]]);   
 
 
 
@@ -7037,7 +7037,7 @@ _options = {})
 /**
  * @param {Compartment} compartment
  * @param {string} specifier
- */$h‍_once.InertCompartment(InertCompartment);
+ */$h_once.InertCompartment(InertCompartment);
 const compartmentImportNow = (compartment, specifier) => {
   const { execute, exportsProxy } = link(
   privateFields,
@@ -7150,7 +7150,7 @@ const CompartmentPrototype = {
     assertModuleHooks(this);
 
     return compartmentImportNow(this, specifier);
-  } };$h‍_once.CompartmentPrototype(CompartmentPrototype);
+  } };$h_once.CompartmentPrototype(CompartmentPrototype);
 
 
 defineProperties(InertCompartment, {
@@ -7279,11 +7279,11 @@ markVirtualizedNativeFunction) =>
   Compartment.prototype = CompartmentPrototype;
 
   return Compartment;
-};$h‍_once.makeCompartmentConstructor(makeCompartmentConstructor);
+};$h_once.makeCompartmentConstructor(makeCompartmentConstructor);
 })
 
 ,
-(({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,  }) => {   let FERAL_FUNCTION,Float32Array,Map,Set,String,getOwnPropertyDescriptor,getPrototypeOf,iterateArray,iterateMap,iterateSet,iterateString,matchAllRegExp,matchAllSymbol,regexpPrototype,InertCompartment;$h‍_imports([["./commons.js", [["FERAL_FUNCTION", [$h‍_a => (FERAL_FUNCTION = $h‍_a)]],["Float32Array", [$h‍_a => (Float32Array = $h‍_a)]],["Map", [$h‍_a => (Map = $h‍_a)]],["Set", [$h‍_a => (Set = $h‍_a)]],["String", [$h‍_a => (String = $h‍_a)]],["getOwnPropertyDescriptor", [$h‍_a => (getOwnPropertyDescriptor = $h‍_a)]],["getPrototypeOf", [$h‍_a => (getPrototypeOf = $h‍_a)]],["iterateArray", [$h‍_a => (iterateArray = $h‍_a)]],["iterateMap", [$h‍_a => (iterateMap = $h‍_a)]],["iterateSet", [$h‍_a => (iterateSet = $h‍_a)]],["iterateString", [$h‍_a => (iterateString = $h‍_a)]],["matchAllRegExp", [$h‍_a => (matchAllRegExp = $h‍_a)]],["matchAllSymbol", [$h‍_a => (matchAllSymbol = $h‍_a)]],["regexpPrototype", [$h‍_a => (regexpPrototype = $h‍_a)]]]],["./compartment-shim.js", [["InertCompartment", [$h‍_a => (InertCompartment = $h‍_a)]]]]]);   
+(({   imports: $h_imports,   liveVar: $h_live,   onceVar: $h_once,  }) => {   let FERAL_FUNCTION,Float32Array,Map,Set,String,getOwnPropertyDescriptor,getPrototypeOf,iterateArray,iterateMap,iterateSet,iterateString,matchAllRegExp,matchAllSymbol,regexpPrototype,InertCompartment;$h_imports([["./commons.js", [["FERAL_FUNCTION", [$h_a => (FERAL_FUNCTION = $h_a)]],["Float32Array", [$h_a => (Float32Array = $h_a)]],["Map", [$h_a => (Map = $h_a)]],["Set", [$h_a => (Set = $h_a)]],["String", [$h_a => (String = $h_a)]],["getOwnPropertyDescriptor", [$h_a => (getOwnPropertyDescriptor = $h_a)]],["getPrototypeOf", [$h_a => (getPrototypeOf = $h_a)]],["iterateArray", [$h_a => (iterateArray = $h_a)]],["iterateMap", [$h_a => (iterateMap = $h_a)]],["iterateSet", [$h_a => (iterateSet = $h_a)]],["iterateString", [$h_a => (iterateString = $h_a)]],["matchAllRegExp", [$h_a => (matchAllRegExp = $h_a)]],["matchAllSymbol", [$h_a => (matchAllSymbol = $h_a)]],["regexpPrototype", [$h_a => (regexpPrototype = $h_a)]]]],["./compartment-shim.js", [["InertCompartment", [$h_a => (InertCompartment = $h_a)]]]]]);   
 
 
 
@@ -7420,11 +7420,11 @@ const getAnonymousIntrinsics = () => {
 
 
   return intrinsics;
-};$h‍_once.getAnonymousIntrinsics(getAnonymousIntrinsics);
+};$h_once.getAnonymousIntrinsics(getAnonymousIntrinsics);
 })
 
 ,
-(({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,  }) => {   let Object,TypeError,WeakSet,arrayFilter,defineProperty,entries,freeze,getOwnPropertyDescriptor,getOwnPropertyDescriptors,globalThis,is,objectHasOwnProperty,values,weaksetHas,constantProperties,sharedGlobalPropertyNames,universalPropertyNames,whitelist;$h‍_imports([["./commons.js", [["Object", [$h‍_a => (Object = $h‍_a)]],["TypeError", [$h‍_a => (TypeError = $h‍_a)]],["WeakSet", [$h‍_a => (WeakSet = $h‍_a)]],["arrayFilter", [$h‍_a => (arrayFilter = $h‍_a)]],["defineProperty", [$h‍_a => (defineProperty = $h‍_a)]],["entries", [$h‍_a => (entries = $h‍_a)]],["freeze", [$h‍_a => (freeze = $h‍_a)]],["getOwnPropertyDescriptor", [$h‍_a => (getOwnPropertyDescriptor = $h‍_a)]],["getOwnPropertyDescriptors", [$h‍_a => (getOwnPropertyDescriptors = $h‍_a)]],["globalThis", [$h‍_a => (globalThis = $h‍_a)]],["is", [$h‍_a => (is = $h‍_a)]],["objectHasOwnProperty", [$h‍_a => (objectHasOwnProperty = $h‍_a)]],["values", [$h‍_a => (values = $h‍_a)]],["weaksetHas", [$h‍_a => (weaksetHas = $h‍_a)]]]],["./whitelist.js", [["constantProperties", [$h‍_a => (constantProperties = $h‍_a)]],["sharedGlobalPropertyNames", [$h‍_a => (sharedGlobalPropertyNames = $h‍_a)]],["universalPropertyNames", [$h‍_a => (universalPropertyNames = $h‍_a)]],["whitelist", [$h‍_a => (whitelist = $h‍_a)]]]]]);   
+(({   imports: $h_imports,   liveVar: $h_live,   onceVar: $h_once,  }) => {   let Object,TypeError,WeakSet,arrayFilter,defineProperty,entries,freeze,getOwnPropertyDescriptor,getOwnPropertyDescriptors,globalThis,is,objectHasOwnProperty,values,weaksetHas,constantProperties,sharedGlobalPropertyNames,universalPropertyNames,whitelist;$h_imports([["./commons.js", [["Object", [$h_a => (Object = $h_a)]],["TypeError", [$h_a => (TypeError = $h_a)]],["WeakSet", [$h_a => (WeakSet = $h_a)]],["arrayFilter", [$h_a => (arrayFilter = $h_a)]],["defineProperty", [$h_a => (defineProperty = $h_a)]],["entries", [$h_a => (entries = $h_a)]],["freeze", [$h_a => (freeze = $h_a)]],["getOwnPropertyDescriptor", [$h_a => (getOwnPropertyDescriptor = $h_a)]],["getOwnPropertyDescriptors", [$h_a => (getOwnPropertyDescriptors = $h_a)]],["globalThis", [$h_a => (globalThis = $h_a)]],["is", [$h_a => (is = $h_a)]],["objectHasOwnProperty", [$h_a => (objectHasOwnProperty = $h_a)]],["values", [$h_a => (values = $h_a)]],["weaksetHas", [$h_a => (weaksetHas = $h_a)]]]],["./whitelist.js", [["constantProperties", [$h_a => (constantProperties = $h_a)]],["sharedGlobalPropertyNames", [$h_a => (sharedGlobalPropertyNames = $h_a)]],["universalPropertyNames", [$h_a => (universalPropertyNames = $h_a)]],["whitelist", [$h_a => (whitelist = $h_a)]]]]]);   
 
 
 
@@ -7587,18 +7587,18 @@ const makeIntrinsicsCollector = () => {
  * *original* unsafe (feral, untamed) bindings of these global variables.
  *
  * @param {Object} globalObject
- */$h‍_once.makeIntrinsicsCollector(makeIntrinsicsCollector);
+ */$h_once.makeIntrinsicsCollector(makeIntrinsicsCollector);
 const getGlobalIntrinsics = (globalObject) => {
   const { addIntrinsics, finalIntrinsics } = makeIntrinsicsCollector();
 
   addIntrinsics(sampleGlobals(globalObject, sharedGlobalPropertyNames));
 
   return finalIntrinsics();
-};$h‍_once.getGlobalIntrinsics(getGlobalIntrinsics);
+};$h_once.getGlobalIntrinsics(getGlobalIntrinsics);
 })
 
 ,
-(({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,  }) => {   $h‍_imports([]);   /**
+(({   imports: $h_imports,   liveVar: $h_live,   onceVar: $h_once,  }) => {   $h_imports([]);   /**
  * @file Exports {@code enablements}, a recursively defined
  * JSON record defining the optimum set of intrinsics properties
  * that need to be "repaired" before hardening is applied on
@@ -7678,7 +7678,7 @@ const minEnablements = {
 
 /**
  * Moderate enablements are usually good enough for legacy compat.
- */$h‍_once.minEnablements(minEnablements);
+ */$h_once.minEnablements(minEnablements);
 const moderateEnablements = {
   '%ObjectPrototype%': {
     toString: true,
@@ -7760,7 +7760,7 @@ const moderateEnablements = {
  * https://github.com/endojs/endo/issues/576
  *
  * They are like the `moderate` enablements except for the entries below.
- */$h‍_once.moderateEnablements(moderateEnablements);
+ */$h_once.moderateEnablements(moderateEnablements);
 const severeEnablements = {
   ...moderateEnablements,
 
@@ -7800,11 +7800,11 @@ const severeEnablements = {
    * include enough of the `TypeArray` methods that here, we just enable
    * them all.
    */
-  '%TypedArrayPrototype%': '*' };$h‍_once.severeEnablements(severeEnablements);
+  '%TypedArrayPrototype%': '*' };$h_once.severeEnablements(severeEnablements);
 })
 
 ,
-(({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,  }) => {   let Set,String,TypeError,arrayForEach,defineProperty,getOwnPropertyDescriptor,getOwnPropertyDescriptors,getOwnPropertyNames,isObject,objectHasOwnProperty,ownKeys,setHas,minEnablements,moderateEnablements,severeEnablements;$h‍_imports([["./commons.js", [["Set", [$h‍_a => (Set = $h‍_a)]],["String", [$h‍_a => (String = $h‍_a)]],["TypeError", [$h‍_a => (TypeError = $h‍_a)]],["arrayForEach", [$h‍_a => (arrayForEach = $h‍_a)]],["defineProperty", [$h‍_a => (defineProperty = $h‍_a)]],["getOwnPropertyDescriptor", [$h‍_a => (getOwnPropertyDescriptor = $h‍_a)]],["getOwnPropertyDescriptors", [$h‍_a => (getOwnPropertyDescriptors = $h‍_a)]],["getOwnPropertyNames", [$h‍_a => (getOwnPropertyNames = $h‍_a)]],["isObject", [$h‍_a => (isObject = $h‍_a)]],["objectHasOwnProperty", [$h‍_a => (objectHasOwnProperty = $h‍_a)]],["ownKeys", [$h‍_a => (ownKeys = $h‍_a)]],["setHas", [$h‍_a => (setHas = $h‍_a)]]]],["./enablements.js", [["minEnablements", [$h‍_a => (minEnablements = $h‍_a)]],["moderateEnablements", [$h‍_a => (moderateEnablements = $h‍_a)]],["severeEnablements", [$h‍_a => (severeEnablements = $h‍_a)]]]]]);   
+(({   imports: $h_imports,   liveVar: $h_live,   onceVar: $h_once,  }) => {   let Set,String,TypeError,arrayForEach,defineProperty,getOwnPropertyDescriptor,getOwnPropertyDescriptors,getOwnPropertyNames,isObject,objectHasOwnProperty,ownKeys,setHas,minEnablements,moderateEnablements,severeEnablements;$h_imports([["./commons.js", [["Set", [$h_a => (Set = $h_a)]],["String", [$h_a => (String = $h_a)]],["TypeError", [$h_a => (TypeError = $h_a)]],["arrayForEach", [$h_a => (arrayForEach = $h_a)]],["defineProperty", [$h_a => (defineProperty = $h_a)]],["getOwnPropertyDescriptor", [$h_a => (getOwnPropertyDescriptor = $h_a)]],["getOwnPropertyDescriptors", [$h_a => (getOwnPropertyDescriptors = $h_a)]],["getOwnPropertyNames", [$h_a => (getOwnPropertyNames = $h_a)]],["isObject", [$h_a => (isObject = $h_a)]],["objectHasOwnProperty", [$h_a => (objectHasOwnProperty = $h_a)]],["ownKeys", [$h_a => (ownKeys = $h_a)]],["setHas", [$h_a => (setHas = $h_a)]]]],["./enablements.js", [["minEnablements", [$h_a => (minEnablements = $h_a)]],["moderateEnablements", [$h_a => (moderateEnablements = $h_a)]],["severeEnablements", [$h_a => (severeEnablements = $h_a)]]]]]);   
 
 
 
@@ -8007,11 +8007,11 @@ overrideDebug = [])
 
   // Do the repair.
   enableProperties('root', intrinsics, plan);
-}$h‍_once.default(enablePropertyOverrides);
+}$h_once.default(enablePropertyOverrides);
 })
 
 ,
-(({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,  }) => {   let WeakSet,arrayFilter,arrayMap,arrayPush,defineProperty,freeze,fromEntries,isError,stringEndsWith,weaksetAdd,weaksetHas;$h‍_imports([["../commons.js", [["WeakSet", [$h‍_a => (WeakSet = $h‍_a)]],["arrayFilter", [$h‍_a => (arrayFilter = $h‍_a)]],["arrayMap", [$h‍_a => (arrayMap = $h‍_a)]],["arrayPush", [$h‍_a => (arrayPush = $h‍_a)]],["defineProperty", [$h‍_a => (defineProperty = $h‍_a)]],["freeze", [$h‍_a => (freeze = $h‍_a)]],["fromEntries", [$h‍_a => (fromEntries = $h‍_a)]],["isError", [$h‍_a => (isError = $h‍_a)]],["stringEndsWith", [$h‍_a => (stringEndsWith = $h‍_a)]],["weaksetAdd", [$h‍_a => (weaksetAdd = $h‍_a)]],["weaksetHas", [$h‍_a => (weaksetHas = $h‍_a)]]]],["./types.js", []],["./internal-types.js", []]]);   
+(({   imports: $h_imports,   liveVar: $h_live,   onceVar: $h_once,  }) => {   let WeakSet,arrayFilter,arrayMap,arrayPush,defineProperty,freeze,fromEntries,isError,stringEndsWith,weaksetAdd,weaksetHas;$h_imports([["../commons.js", [["WeakSet", [$h_a => (WeakSet = $h_a)]],["arrayFilter", [$h_a => (arrayFilter = $h_a)]],["arrayMap", [$h_a => (arrayMap = $h_a)]],["arrayPush", [$h_a => (arrayPush = $h_a)]],["defineProperty", [$h_a => (defineProperty = $h_a)]],["freeze", [$h_a => (freeze = $h_a)]],["fromEntries", [$h_a => (fromEntries = $h_a)]],["isError", [$h_a => (isError = $h_a)]],["stringEndsWith", [$h_a => (stringEndsWith = $h_a)]],["weaksetAdd", [$h_a => (weaksetAdd = $h_a)]],["weaksetHas", [$h_a => (weaksetHas = $h_a)]]]],["./types.js", []],["./internal-types.js", []]]);   
 
 
 
@@ -8132,7 +8132,7 @@ const consoleWhitelist = freeze([
 
 // /////////////////////////////////////////////////////////////////////////////
 
-/** @type {MakeLoggingConsoleKit} */$h‍_once.consoleWhitelist(consoleWhitelist);
+/** @type {MakeLoggingConsoleKit} */$h_once.consoleWhitelist(consoleWhitelist);
 const makeLoggingConsoleKit = (
 loggedErrorHandler,
 { shouldResetForDebugging = false } = {}) =>
@@ -8172,7 +8172,7 @@ loggedErrorHandler,
   const typedLoggingConsole = /** @type {VirtualConsole} */loggingConsole;
 
   return freeze({ loggingConsole: typedLoggingConsole, takeLog });
-};$h‍_once.makeLoggingConsoleKit(makeLoggingConsoleKit);
+};$h_once.makeLoggingConsoleKit(makeLoggingConsoleKit);
 freeze(makeLoggingConsoleKit);
 
 
@@ -8194,7 +8194,7 @@ freeze(ErrorInfo);
  */
 const BASE_CONSOLE_LEVEL = 'debug';
 
-/** @type {MakeCausalConsole} */$h‍_once.BASE_CONSOLE_LEVEL(BASE_CONSOLE_LEVEL);
+/** @type {MakeCausalConsole} */$h_once.BASE_CONSOLE_LEVEL(BASE_CONSOLE_LEVEL);
 const makeCausalConsole = (baseConsole, loggedErrorHandler) => {
   const {
     getStackString,
@@ -8360,7 +8360,7 @@ const makeCausalConsole = (baseConsole, loggedErrorHandler) => {
 
   const causalConsole = fromEntries([...levelMethods, ...otherMethods]);
   return (/** @type {VirtualConsole} */freeze(causalConsole));
-};$h‍_once.makeCausalConsole(makeCausalConsole);
+};$h_once.makeCausalConsole(makeCausalConsole);
 freeze(makeCausalConsole);
 
 
@@ -8389,12 +8389,12 @@ const filterConsole = (baseConsole, filter, _topic = undefined) => {
   });
   const filteringConsole = fromEntries(methods);
   return (/** @type {VirtualConsole} */freeze(filteringConsole));
-};$h‍_once.filterConsole(filterConsole);
+};$h_once.filterConsole(filterConsole);
 freeze(filterConsole);
 })
 
 ,
-(({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,  }) => {   let TypeError,globalThis,defaultHandler,makeCausalConsole;$h‍_imports([["../commons.js", [["TypeError", [$h‍_a => (TypeError = $h‍_a)]],["globalThis", [$h‍_a => (globalThis = $h‍_a)]]]],["./assert.js", [["loggedErrorHandler", [$h‍_a => (defaultHandler = $h‍_a)]]]],["./console.js", [["makeCausalConsole", [$h‍_a => (makeCausalConsole = $h‍_a)]]]],["./types.js", []],["./internal-types.js", []]]);   
+(({   imports: $h_imports,   liveVar: $h_live,   onceVar: $h_once,  }) => {   let TypeError,globalThis,defaultHandler,makeCausalConsole;$h_imports([["../commons.js", [["TypeError", [$h_a => (TypeError = $h_a)]],["globalThis", [$h_a => (globalThis = $h_a)]]]],["./assert.js", [["loggedErrorHandler", [$h_a => (defaultHandler = $h_a)]]]],["./console.js", [["makeCausalConsole", [$h_a => (makeCausalConsole = $h_a)]]]],["./types.js", []],["./internal-types.js", []]]);   
 
 
 
@@ -8483,11 +8483,11 @@ optGetStackString = undefined) =>
   }
 
   return { console: causalConsole };
-};$h‍_once.tameConsole(tameConsole);
+};$h_once.tameConsole(tameConsole);
 })
 
 ,
-(({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,  }) => {   let WeakMap,WeakSet,apply,arrayFilter,arrayJoin,arrayMap,arraySlice,create,defineProperties,fromEntries,reflectSet,regexpExec,regexpTest,weakmapGet,weakmapHas,weakmapSet,weaksetAdd,weaksetHas;$h‍_imports([["../commons.js", [["WeakMap", [$h‍_a => (WeakMap = $h‍_a)]],["WeakSet", [$h‍_a => (WeakSet = $h‍_a)]],["apply", [$h‍_a => (apply = $h‍_a)]],["arrayFilter", [$h‍_a => (arrayFilter = $h‍_a)]],["arrayJoin", [$h‍_a => (arrayJoin = $h‍_a)]],["arrayMap", [$h‍_a => (arrayMap = $h‍_a)]],["arraySlice", [$h‍_a => (arraySlice = $h‍_a)]],["create", [$h‍_a => (create = $h‍_a)]],["defineProperties", [$h‍_a => (defineProperties = $h‍_a)]],["fromEntries", [$h‍_a => (fromEntries = $h‍_a)]],["reflectSet", [$h‍_a => (reflectSet = $h‍_a)]],["regexpExec", [$h‍_a => (regexpExec = $h‍_a)]],["regexpTest", [$h‍_a => (regexpTest = $h‍_a)]],["weakmapGet", [$h‍_a => (weakmapGet = $h‍_a)]],["weakmapHas", [$h‍_a => (weakmapHas = $h‍_a)]],["weakmapSet", [$h‍_a => (weakmapSet = $h‍_a)]],["weaksetAdd", [$h‍_a => (weaksetAdd = $h‍_a)]],["weaksetHas", [$h‍_a => (weaksetHas = $h‍_a)]]]]]);   
+(({   imports: $h_imports,   liveVar: $h_live,   onceVar: $h_once,  }) => {   let WeakMap,WeakSet,apply,arrayFilter,arrayJoin,arrayMap,arraySlice,create,defineProperties,fromEntries,reflectSet,regexpExec,regexpTest,weakmapGet,weakmapHas,weakmapSet,weaksetAdd,weaksetHas;$h_imports([["../commons.js", [["WeakMap", [$h_a => (WeakMap = $h_a)]],["WeakSet", [$h_a => (WeakSet = $h_a)]],["apply", [$h_a => (apply = $h_a)]],["arrayFilter", [$h_a => (arrayFilter = $h_a)]],["arrayJoin", [$h_a => (arrayJoin = $h_a)]],["arrayMap", [$h_a => (arrayMap = $h_a)]],["arraySlice", [$h_a => (arraySlice = $h_a)]],["create", [$h_a => (create = $h_a)]],["defineProperties", [$h_a => (defineProperties = $h_a)]],["fromEntries", [$h_a => (fromEntries = $h_a)]],["reflectSet", [$h_a => (reflectSet = $h_a)]],["regexpExec", [$h_a => (regexpExec = $h_a)]],["regexpTest", [$h_a => (regexpTest = $h_a)]],["weakmapGet", [$h_a => (weakmapGet = $h_a)]],["weakmapHas", [$h_a => (weakmapHas = $h_a)]],["weakmapSet", [$h_a => (weakmapSet = $h_a)]],["weaksetAdd", [$h_a => (weaksetAdd = $h_a)]],["weaksetHas", [$h_a => (weaksetHas = $h_a)]]]]]);   
 
 
 
@@ -8609,7 +8609,7 @@ const filterFileName = (fileName) => {
 //
 // See thread starting at
 // https://github.com/Agoric/agoric-sdk/issues/2326#issuecomment-773020389
-$h‍_once.filterFileName(filterFileName);const CALLSITE_ELLIPSES_PATTERN = /^((?:.*[( ])?)[:/\w_-]*\/\.\.\.\/(.+)$/;
+$h_once.filterFileName(filterFileName);const CALLSITE_ELLIPSES_PATTERN = /^((?:.*[( ])?)[:/\w_-]*\/\.\.\.\/(.+)$/;
 
 // The ad-hoc rule of the current pattern is that any likely-file-path or
 // likely url-path prefix, ending in a `/` and prior to `package/` should get
@@ -8646,7 +8646,7 @@ const shortenCallSiteString = (callSiteString) => {
     }
   }
   return callSiteString;
-};$h‍_once.shortenCallSiteString(shortenCallSiteString);
+};$h_once.shortenCallSiteString(shortenCallSiteString);
 
 const tameV8ErrorConstructor = (
 OriginalError,
@@ -8789,11 +8789,11 @@ stackFiltering) =>
 
 
   return tamedMethods.getStackString;
-};$h‍_once.tameV8ErrorConstructor(tameV8ErrorConstructor);
+};$h_once.tameV8ErrorConstructor(tameV8ErrorConstructor);
 })
 
 ,
-(({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,  }) => {   let FERAL_ERROR,TypeError,apply,construct,defineProperties,setPrototypeOf,getOwnPropertyDescriptor,NativeErrors,tameV8ErrorConstructor;$h‍_imports([["../commons.js", [["FERAL_ERROR", [$h‍_a => (FERAL_ERROR = $h‍_a)]],["TypeError", [$h‍_a => (TypeError = $h‍_a)]],["apply", [$h‍_a => (apply = $h‍_a)]],["construct", [$h‍_a => (construct = $h‍_a)]],["defineProperties", [$h‍_a => (defineProperties = $h‍_a)]],["setPrototypeOf", [$h‍_a => (setPrototypeOf = $h‍_a)]],["getOwnPropertyDescriptor", [$h‍_a => (getOwnPropertyDescriptor = $h‍_a)]]]],["../whitelist.js", [["NativeErrors", [$h‍_a => (NativeErrors = $h‍_a)]]]],["./tame-v8-error-constructor.js", [["tameV8ErrorConstructor", [$h‍_a => (tameV8ErrorConstructor = $h‍_a)]]]]]);   
+(({   imports: $h_imports,   liveVar: $h_live,   onceVar: $h_once,  }) => {   let FERAL_ERROR,TypeError,apply,construct,defineProperties,setPrototypeOf,getOwnPropertyDescriptor,NativeErrors,tameV8ErrorConstructor;$h_imports([["../commons.js", [["FERAL_ERROR", [$h_a => (FERAL_ERROR = $h_a)]],["TypeError", [$h_a => (TypeError = $h_a)]],["apply", [$h_a => (apply = $h_a)]],["construct", [$h_a => (construct = $h_a)]],["defineProperties", [$h_a => (defineProperties = $h_a)]],["setPrototypeOf", [$h_a => (setPrototypeOf = $h_a)]],["getOwnPropertyDescriptor", [$h_a => (getOwnPropertyDescriptor = $h_a)]]]],["../whitelist.js", [["NativeErrors", [$h_a => (NativeErrors = $h_a)]]]],["./tame-v8-error-constructor.js", [["tameV8ErrorConstructor", [$h_a => (tameV8ErrorConstructor = $h_a)]]]]]);   
 
 
 
@@ -8955,11 +8955,11 @@ stackFiltering = 'concise')
     '%InitialError%': InitialError,
     '%SharedError%': SharedError };
 
-}$h‍_once.default(tameErrorConstructor);
+}$h_once.default(tameErrorConstructor);
 })
 
 ,
-(({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,  }) => {   let Set,String,TypeError,WeakMap,WeakSet,arrayForEach,freeze,getOwnPropertyDescriptors,getPrototypeOf,isObject,objectHasOwnProperty,ownKeys,setAdd,setForEach,setHas,weakmapGet,weakmapSet,weaksetAdd,weaksetHas;$h‍_imports([["./commons.js", [["Set", [$h‍_a => (Set = $h‍_a)]],["String", [$h‍_a => (String = $h‍_a)]],["TypeError", [$h‍_a => (TypeError = $h‍_a)]],["WeakMap", [$h‍_a => (WeakMap = $h‍_a)]],["WeakSet", [$h‍_a => (WeakSet = $h‍_a)]],["arrayForEach", [$h‍_a => (arrayForEach = $h‍_a)]],["freeze", [$h‍_a => (freeze = $h‍_a)]],["getOwnPropertyDescriptors", [$h‍_a => (getOwnPropertyDescriptors = $h‍_a)]],["getPrototypeOf", [$h‍_a => (getPrototypeOf = $h‍_a)]],["isObject", [$h‍_a => (isObject = $h‍_a)]],["objectHasOwnProperty", [$h‍_a => (objectHasOwnProperty = $h‍_a)]],["ownKeys", [$h‍_a => (ownKeys = $h‍_a)]],["setAdd", [$h‍_a => (setAdd = $h‍_a)]],["setForEach", [$h‍_a => (setForEach = $h‍_a)]],["setHas", [$h‍_a => (setHas = $h‍_a)]],["weakmapGet", [$h‍_a => (weakmapGet = $h‍_a)]],["weakmapSet", [$h‍_a => (weakmapSet = $h‍_a)]],["weaksetAdd", [$h‍_a => (weaksetAdd = $h‍_a)]],["weaksetHas", [$h‍_a => (weaksetHas = $h‍_a)]]]]]);   
+(({   imports: $h_imports,   liveVar: $h_live,   onceVar: $h_once,  }) => {   let Set,String,TypeError,WeakMap,WeakSet,arrayForEach,freeze,getOwnPropertyDescriptors,getPrototypeOf,isObject,objectHasOwnProperty,ownKeys,setAdd,setForEach,setHas,weakmapGet,weakmapSet,weaksetAdd,weaksetHas;$h_imports([["./commons.js", [["Set", [$h_a => (Set = $h_a)]],["String", [$h_a => (String = $h_a)]],["TypeError", [$h_a => (TypeError = $h_a)]],["WeakMap", [$h_a => (WeakMap = $h_a)]],["WeakSet", [$h_a => (WeakSet = $h_a)]],["arrayForEach", [$h_a => (arrayForEach = $h_a)]],["freeze", [$h_a => (freeze = $h_a)]],["getOwnPropertyDescriptors", [$h_a => (getOwnPropertyDescriptors = $h_a)]],["getPrototypeOf", [$h_a => (getPrototypeOf = $h_a)]],["isObject", [$h_a => (isObject = $h_a)]],["objectHasOwnProperty", [$h_a => (objectHasOwnProperty = $h_a)]],["ownKeys", [$h_a => (ownKeys = $h_a)]],["setAdd", [$h_a => (setAdd = $h_a)]],["setForEach", [$h_a => (setForEach = $h_a)]],["setHas", [$h_a => (setHas = $h_a)]],["weakmapGet", [$h_a => (weakmapGet = $h_a)]],["weakmapSet", [$h_a => (weakmapSet = $h_a)]],["weaksetAdd", [$h_a => (weaksetAdd = $h_a)]],["weaksetHas", [$h_a => (weaksetHas = $h_a)]]]]]);   
 
 
 
@@ -9119,11 +9119,11 @@ const makeHardener = () => {
 
 
   return harden;
-};$h‍_once.makeHardener(makeHardener);
+};$h_once.makeHardener(makeHardener);
 })
 
 ,
-(({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,  }) => {   let Date,TypeError,apply,construct,defineProperties;$h‍_imports([["./commons.js", [["Date", [$h‍_a => (Date = $h‍_a)]],["TypeError", [$h‍_a => (TypeError = $h‍_a)]],["apply", [$h‍_a => (apply = $h‍_a)]],["construct", [$h‍_a => (construct = $h‍_a)]],["defineProperties", [$h‍_a => (defineProperties = $h‍_a)]]]]]);   
+(({   imports: $h_imports,   liveVar: $h_live,   onceVar: $h_once,  }) => {   let Date,TypeError,apply,construct,defineProperties;$h_imports([["./commons.js", [["Date", [$h_a => (Date = $h_a)]],["TypeError", [$h_a => (TypeError = $h_a)]],["apply", [$h_a => (apply = $h_a)]],["construct", [$h_a => (construct = $h_a)]],["defineProperties", [$h_a => (defineProperties = $h_a)]]]]]);   
 
 
 
@@ -9236,11 +9236,11 @@ function tameDateConstructor(dateTaming = 'safe') {
     '%InitialDate%': InitialDate,
     '%SharedDate%': SharedDate };
 
-}$h‍_once.default(tameDateConstructor);
+}$h_once.default(tameDateConstructor);
 })
 
 ,
-(({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,  }) => {   let TypeError,globalThis,getOwnPropertyDescriptor,defineProperty;$h‍_imports([["./commons.js", [["TypeError", [$h‍_a => (TypeError = $h‍_a)]],["globalThis", [$h‍_a => (globalThis = $h‍_a)]],["getOwnPropertyDescriptor", [$h‍_a => (getOwnPropertyDescriptor = $h‍_a)]],["defineProperty", [$h‍_a => (defineProperty = $h‍_a)]]]]]);Object.defineProperty(tameDomains, 'name', {value: "tameDomains"});$h‍_once.tameDomains(tameDomains);   
+(({   imports: $h_imports,   liveVar: $h_live,   onceVar: $h_once,  }) => {   let TypeError,globalThis,getOwnPropertyDescriptor,defineProperty;$h_imports([["./commons.js", [["TypeError", [$h_a => (TypeError = $h_a)]],["globalThis", [$h_a => (globalThis = $h_a)]],["getOwnPropertyDescriptor", [$h_a => (getOwnPropertyDescriptor = $h_a)]],["defineProperty", [$h_a => (defineProperty = $h_a)]]]]]);Object.defineProperty(tameDomains, 'name', {value: "tameDomains"});$h_once.tameDomains(tameDomains);   
 
 
 
@@ -9289,7 +9289,7 @@ function tameDomains(domainTaming = 'safe') {
 })
 
 ,
-(({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,  }) => {   let FERAL_FUNCTION,SyntaxError,TypeError,defineProperties,getPrototypeOf,setPrototypeOf;$h‍_imports([["./commons.js", [["FERAL_FUNCTION", [$h‍_a => (FERAL_FUNCTION = $h‍_a)]],["SyntaxError", [$h‍_a => (SyntaxError = $h‍_a)]],["TypeError", [$h‍_a => (TypeError = $h‍_a)]],["defineProperties", [$h‍_a => (defineProperties = $h‍_a)]],["getPrototypeOf", [$h‍_a => (getPrototypeOf = $h‍_a)]],["setPrototypeOf", [$h‍_a => (setPrototypeOf = $h‍_a)]]]]]);   
+(({   imports: $h_imports,   liveVar: $h_live,   onceVar: $h_once,  }) => {   let FERAL_FUNCTION,SyntaxError,TypeError,defineProperties,getPrototypeOf,setPrototypeOf;$h_imports([["./commons.js", [["FERAL_FUNCTION", [$h_a => (FERAL_FUNCTION = $h_a)]],["SyntaxError", [$h_a => (SyntaxError = $h_a)]],["TypeError", [$h_a => (TypeError = $h_a)]],["defineProperties", [$h_a => (defineProperties = $h_a)]],["getPrototypeOf", [$h_a => (getPrototypeOf = $h_a)]],["setPrototypeOf", [$h_a => (setPrototypeOf = $h_a)]]]]]);   
 
 
 
@@ -9423,11 +9423,11 @@ function tameFunctionConstructors() {
 
 
   return newIntrinsics;
-}$h‍_once.default(tameFunctionConstructors);
+}$h_once.default(tameFunctionConstructors);
 })
 
 ,
-(({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,  }) => {   let WeakSet,defineProperty,freeze,functionPrototype,functionToString,stringEndsWith,weaksetAdd,weaksetHas;$h‍_imports([["./commons.js", [["WeakSet", [$h‍_a => (WeakSet = $h‍_a)]],["defineProperty", [$h‍_a => (defineProperty = $h‍_a)]],["freeze", [$h‍_a => (freeze = $h‍_a)]],["functionPrototype", [$h‍_a => (functionPrototype = $h‍_a)]],["functionToString", [$h‍_a => (functionToString = $h‍_a)]],["stringEndsWith", [$h‍_a => (stringEndsWith = $h‍_a)]],["weaksetAdd", [$h‍_a => (weaksetAdd = $h‍_a)]],["weaksetHas", [$h‍_a => (weaksetHas = $h‍_a)]]]]]);   
+(({   imports: $h_imports,   liveVar: $h_live,   onceVar: $h_once,  }) => {   let WeakSet,defineProperty,freeze,functionPrototype,functionToString,stringEndsWith,weaksetAdd,weaksetHas;$h_imports([["./commons.js", [["WeakSet", [$h_a => (WeakSet = $h_a)]],["defineProperty", [$h_a => (defineProperty = $h_a)]],["freeze", [$h_a => (freeze = $h_a)]],["functionPrototype", [$h_a => (functionPrototype = $h_a)]],["functionToString", [$h_a => (functionToString = $h_a)]],["stringEndsWith", [$h_a => (stringEndsWith = $h_a)]],["weaksetAdd", [$h_a => (weaksetAdd = $h_a)]],["weaksetHas", [$h_a => (weaksetHas = $h_a)]]]]]);   
 
 
 
@@ -9476,11 +9476,11 @@ const tameFunctionToString = () => {
 
   }
   return markVirtualizedNativeFunction;
-};$h‍_once.tameFunctionToString(tameFunctionToString);
+};$h_once.tameFunctionToString(tameFunctionToString);
 })
 
 ,
-(({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,  }) => {   let Object,String,TypeError,defineProperty,getOwnPropertyNames,regexpExec,assert;$h‍_imports([["./commons.js", [["Object", [$h‍_a => (Object = $h‍_a)]],["String", [$h‍_a => (String = $h‍_a)]],["TypeError", [$h‍_a => (TypeError = $h‍_a)]],["defineProperty", [$h‍_a => (defineProperty = $h‍_a)]],["getOwnPropertyNames", [$h‍_a => (getOwnPropertyNames = $h‍_a)]],["regexpExec", [$h‍_a => (regexpExec = $h‍_a)]]]],["./error/assert.js", [["assert", [$h‍_a => (assert = $h‍_a)]]]]]);   
+(({   imports: $h_imports,   liveVar: $h_live,   onceVar: $h_once,  }) => {   let Object,String,TypeError,defineProperty,getOwnPropertyNames,regexpExec,assert;$h_imports([["./commons.js", [["Object", [$h_a => (Object = $h_a)]],["String", [$h_a => (String = $h_a)]],["TypeError", [$h_a => (TypeError = $h_a)]],["defineProperty", [$h_a => (defineProperty = $h_a)]],["getOwnPropertyNames", [$h_a => (getOwnPropertyNames = $h_a)]],["regexpExec", [$h_a => (regexpExec = $h_a)]]]],["./error/assert.js", [["assert", [$h_a => (assert = $h_a)]]]]]);   
 
 
 
@@ -9552,11 +9552,11 @@ function tameLocaleMethods(intrinsics, localeTaming = 'safe') {
       }
     }
   }
-}$h‍_once.default(tameLocaleMethods);
+}$h_once.default(tameLocaleMethods);
 })
 
 ,
-(({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,  }) => {   let Math,TypeError,create,getOwnPropertyDescriptors,objectPrototype;$h‍_imports([["./commons.js", [["Math", [$h‍_a => (Math = $h‍_a)]],["TypeError", [$h‍_a => (TypeError = $h‍_a)]],["create", [$h‍_a => (create = $h‍_a)]],["getOwnPropertyDescriptors", [$h‍_a => (getOwnPropertyDescriptors = $h‍_a)]],["objectPrototype", [$h‍_a => (objectPrototype = $h‍_a)]]]]]);   
+(({   imports: $h_imports,   liveVar: $h_live,   onceVar: $h_once,  }) => {   let Math,TypeError,create,getOwnPropertyDescriptors,objectPrototype;$h_imports([["./commons.js", [["Math", [$h_a => (Math = $h_a)]],["TypeError", [$h_a => (TypeError = $h_a)]],["create", [$h_a => (create = $h_a)]],["getOwnPropertyDescriptors", [$h_a => (getOwnPropertyDescriptors = $h_a)]],["objectPrototype", [$h_a => (objectPrototype = $h_a)]]]]]);   
 
 
 
@@ -9581,11 +9581,11 @@ function tameMathObject(mathTaming = 'safe') {
     '%InitialMath%': initialMath,
     '%SharedMath%': sharedMath };
 
-}$h‍_once.default(tameMathObject);
+}$h_once.default(tameMathObject);
 })
 
 ,
-(({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,  }) => {   let FERAL_REG_EXP,TypeError,construct,defineProperties,getOwnPropertyDescriptor,speciesSymbol;$h‍_imports([["./commons.js", [["FERAL_REG_EXP", [$h‍_a => (FERAL_REG_EXP = $h‍_a)]],["TypeError", [$h‍_a => (TypeError = $h‍_a)]],["construct", [$h‍_a => (construct = $h‍_a)]],["defineProperties", [$h‍_a => (defineProperties = $h‍_a)]],["getOwnPropertyDescriptor", [$h‍_a => (getOwnPropertyDescriptor = $h‍_a)]],["speciesSymbol", [$h‍_a => (speciesSymbol = $h‍_a)]]]]]);   
+(({   imports: $h_imports,   liveVar: $h_live,   onceVar: $h_once,  }) => {   let FERAL_REG_EXP,TypeError,construct,defineProperties,getOwnPropertyDescriptor,speciesSymbol;$h_imports([["./commons.js", [["FERAL_REG_EXP", [$h_a => (FERAL_REG_EXP = $h_a)]],["TypeError", [$h_a => (TypeError = $h_a)]],["construct", [$h_a => (construct = $h_a)]],["defineProperties", [$h_a => (defineProperties = $h_a)]],["getOwnPropertyDescriptor", [$h_a => (getOwnPropertyDescriptor = $h_a)]],["speciesSymbol", [$h_a => (speciesSymbol = $h_a)]]]]]);   
 
 
 
@@ -9636,11 +9636,11 @@ function tameRegExpConstructor(regExpTaming = 'safe') {
     '%InitialRegExp%': InitialRegExp,
     '%SharedRegExp%': SharedRegExp };
 
-}$h‍_once.default(tameRegExpConstructor);
+}$h_once.default(tameRegExpConstructor);
 })
 
 ,
-(({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,  }) => {   let whitelist,FunctionInstance,isAccessorPermit,String,TypeError,arrayIncludes,getOwnPropertyDescriptor,getPrototypeOf,isObject,objectHasOwnProperty,ownKeys,stringSlice;$h‍_imports([["./whitelist.js", [["whitelist", [$h‍_a => (whitelist = $h‍_a)]],["FunctionInstance", [$h‍_a => (FunctionInstance = $h‍_a)]],["isAccessorPermit", [$h‍_a => (isAccessorPermit = $h‍_a)]]]],["./commons.js", [["String", [$h‍_a => (String = $h‍_a)]],["TypeError", [$h‍_a => (TypeError = $h‍_a)]],["arrayIncludes", [$h‍_a => (arrayIncludes = $h‍_a)]],["getOwnPropertyDescriptor", [$h‍_a => (getOwnPropertyDescriptor = $h‍_a)]],["getPrototypeOf", [$h‍_a => (getPrototypeOf = $h‍_a)]],["isObject", [$h‍_a => (isObject = $h‍_a)]],["objectHasOwnProperty", [$h‍_a => (objectHasOwnProperty = $h‍_a)]],["ownKeys", [$h‍_a => (ownKeys = $h‍_a)]],["stringSlice", [$h‍_a => (stringSlice = $h‍_a)]]]]]);   
+(({   imports: $h_imports,   liveVar: $h_live,   onceVar: $h_once,  }) => {   let whitelist,FunctionInstance,isAccessorPermit,String,TypeError,arrayIncludes,getOwnPropertyDescriptor,getPrototypeOf,isObject,objectHasOwnProperty,ownKeys,stringSlice;$h_imports([["./whitelist.js", [["whitelist", [$h_a => (whitelist = $h_a)]],["FunctionInstance", [$h_a => (FunctionInstance = $h_a)]],["isAccessorPermit", [$h_a => (isAccessorPermit = $h_a)]]]],["./commons.js", [["String", [$h_a => (String = $h_a)]],["TypeError", [$h_a => (TypeError = $h_a)]],["arrayIncludes", [$h_a => (arrayIncludes = $h_a)]],["getOwnPropertyDescriptor", [$h_a => (getOwnPropertyDescriptor = $h_a)]],["getPrototypeOf", [$h_a => (getPrototypeOf = $h_a)]],["isObject", [$h_a => (isObject = $h_a)]],["objectHasOwnProperty", [$h_a => (objectHasOwnProperty = $h_a)]],["ownKeys", [$h_a => (ownKeys = $h_a)]],["stringSlice", [$h_a => (stringSlice = $h_a)]]]]]);   
 
 
 
@@ -9911,11 +9911,11 @@ markVirtualizedNativeFunction)
   // Start path with 'intrinsics' to clarify that properties are not
   // removed from the global object by the whitelisting operation.
   visitProperties('intrinsics', intrinsics, whitelist);
-}$h‍_once.default(whitelistIntrinsics);
+}$h_once.default(whitelistIntrinsics);
 })
 
 ,
-(({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,  }) => {   let globalThis,is,keys,ownKeys,makeHardener,makeIntrinsicsCollector,whitelistIntrinsics,tameFunctionConstructors,tameDateConstructor,tameMathObject,tameRegExpConstructor,enablePropertyOverrides,tameLocaleMethods,initGlobalObject,initialGlobalPropertyNames,tameFunctionToString,tameDomains,tameConsole,tameErrorConstructor,assert,makeAssert;$h‍_imports([["./commons.js", [["globalThis", [$h‍_a => (globalThis = $h‍_a)]],["is", [$h‍_a => (is = $h‍_a)]],["keys", [$h‍_a => (keys = $h‍_a)]],["ownKeys", [$h‍_a => (ownKeys = $h‍_a)]]]],["./make-hardener.js", [["makeHardener", [$h‍_a => (makeHardener = $h‍_a)]]]],["./intrinsics.js", [["makeIntrinsicsCollector", [$h‍_a => (makeIntrinsicsCollector = $h‍_a)]]]],["./whitelist-intrinsics.js", [["default", [$h‍_a => (whitelistIntrinsics = $h‍_a)]]]],["./tame-function-constructors.js", [["default", [$h‍_a => (tameFunctionConstructors = $h‍_a)]]]],["./tame-date-constructor.js", [["default", [$h‍_a => (tameDateConstructor = $h‍_a)]]]],["./tame-math-object.js", [["default", [$h‍_a => (tameMathObject = $h‍_a)]]]],["./tame-regexp-constructor.js", [["default", [$h‍_a => (tameRegExpConstructor = $h‍_a)]]]],["./enable-property-overrides.js", [["default", [$h‍_a => (enablePropertyOverrides = $h‍_a)]]]],["./tame-locale-methods.js", [["default", [$h‍_a => (tameLocaleMethods = $h‍_a)]]]],["./global-object.js", [["initGlobalObject", [$h‍_a => (initGlobalObject = $h‍_a)]]]],["./whitelist.js", [["initialGlobalPropertyNames", [$h‍_a => (initialGlobalPropertyNames = $h‍_a)]]]],["./tame-function-tostring.js", [["tameFunctionToString", [$h‍_a => (tameFunctionToString = $h‍_a)]]]],["./tame-domains.js", [["tameDomains", [$h‍_a => (tameDomains = $h‍_a)]]]],["./error/tame-console.js", [["tameConsole", [$h‍_a => (tameConsole = $h‍_a)]]]],["./error/tame-error-constructor.js", [["default", [$h‍_a => (tameErrorConstructor = $h‍_a)]]]],["./error/assert.js", [["assert", [$h‍_a => (assert = $h‍_a)]],["makeAssert", [$h‍_a => (makeAssert = $h‍_a)]]]]]);   
+(({   imports: $h_imports,   liveVar: $h_live,   onceVar: $h_once,  }) => {   let globalThis,is,keys,ownKeys,makeHardener,makeIntrinsicsCollector,whitelistIntrinsics,tameFunctionConstructors,tameDateConstructor,tameMathObject,tameRegExpConstructor,enablePropertyOverrides,tameLocaleMethods,initGlobalObject,initialGlobalPropertyNames,tameFunctionToString,tameDomains,tameConsole,tameErrorConstructor,assert,makeAssert;$h_imports([["./commons.js", [["globalThis", [$h_a => (globalThis = $h_a)]],["is", [$h_a => (is = $h_a)]],["keys", [$h_a => (keys = $h_a)]],["ownKeys", [$h_a => (ownKeys = $h_a)]]]],["./make-hardener.js", [["makeHardener", [$h_a => (makeHardener = $h_a)]]]],["./intrinsics.js", [["makeIntrinsicsCollector", [$h_a => (makeIntrinsicsCollector = $h_a)]]]],["./whitelist-intrinsics.js", [["default", [$h_a => (whitelistIntrinsics = $h_a)]]]],["./tame-function-constructors.js", [["default", [$h_a => (tameFunctionConstructors = $h_a)]]]],["./tame-date-constructor.js", [["default", [$h_a => (tameDateConstructor = $h_a)]]]],["./tame-math-object.js", [["default", [$h_a => (tameMathObject = $h_a)]]]],["./tame-regexp-constructor.js", [["default", [$h_a => (tameRegExpConstructor = $h_a)]]]],["./enable-property-overrides.js", [["default", [$h_a => (enablePropertyOverrides = $h_a)]]]],["./tame-locale-methods.js", [["default", [$h_a => (tameLocaleMethods = $h_a)]]]],["./global-object.js", [["initGlobalObject", [$h_a => (initGlobalObject = $h_a)]]]],["./whitelist.js", [["initialGlobalPropertyNames", [$h_a => (initialGlobalPropertyNames = $h_a)]]]],["./tame-function-tostring.js", [["tameFunctionToString", [$h_a => (tameFunctionToString = $h_a)]]]],["./tame-domains.js", [["tameDomains", [$h_a => (tameDomains = $h_a)]]]],["./error/tame-console.js", [["tameConsole", [$h_a => (tameConsole = $h_a)]]]],["./error/tame-error-constructor.js", [["default", [$h_a => (tameErrorConstructor = $h_a)]]]],["./error/assert.js", [["assert", [$h_a => (assert = $h_a)]],["makeAssert", [$h_a => (makeAssert = $h_a)]]]]]);   
 
 
 
@@ -10255,7 +10255,7 @@ options = {}) =>
  * @param {Object} compartmentPrototype
  * @param {() => Object} getAnonymousIntrinsics
  * @returns {import('../index.js').Lockdown}
- */$h‍_once.repairIntrinsics(repairIntrinsics);
+ */$h_once.repairIntrinsics(repairIntrinsics);
 const makeLockdown = (
 makeCompartmentConstructor,
 compartmentPrototype,
@@ -10274,11 +10274,11 @@ getAnonymousIntrinsics) =>
     return maybeHardenIntrinsics();
   };
   return lockdown;
-};$h‍_once.makeLockdown(makeLockdown);
+};$h_once.makeLockdown(makeLockdown);
 })
 
 ,
-(({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,  }) => {   let globalThis,TypeError,assign,tameFunctionToString,getGlobalIntrinsics,getAnonymousIntrinsics,makeLockdown,makeCompartmentConstructor,CompartmentPrototype,assert;$h‍_imports([["./src/commons.js", [["globalThis", [$h‍_a => (globalThis = $h‍_a)]],["TypeError", [$h‍_a => (TypeError = $h‍_a)]],["assign", [$h‍_a => (assign = $h‍_a)]]]],["./src/tame-function-tostring.js", [["tameFunctionToString", [$h‍_a => (tameFunctionToString = $h‍_a)]]]],["./src/intrinsics.js", [["getGlobalIntrinsics", [$h‍_a => (getGlobalIntrinsics = $h‍_a)]]]],["./src/get-anonymous-intrinsics.js", [["getAnonymousIntrinsics", [$h‍_a => (getAnonymousIntrinsics = $h‍_a)]]]],["./src/lockdown-shim.js", [["makeLockdown", [$h‍_a => (makeLockdown = $h‍_a)]]]],["./src/compartment-shim.js", [["makeCompartmentConstructor", [$h‍_a => (makeCompartmentConstructor = $h‍_a)]],["CompartmentPrototype", [$h‍_a => (CompartmentPrototype = $h‍_a)]]]],["./src/error/assert.js", [["assert", [$h‍_a => (assert = $h‍_a)]]]]]);   
+(({   imports: $h_imports,   liveVar: $h_live,   onceVar: $h_once,  }) => {   let globalThis,TypeError,assign,tameFunctionToString,getGlobalIntrinsics,getAnonymousIntrinsics,makeLockdown,makeCompartmentConstructor,CompartmentPrototype,assert;$h_imports([["./src/commons.js", [["globalThis", [$h_a => (globalThis = $h_a)]],["TypeError", [$h_a => (TypeError = $h_a)]],["assign", [$h_a => (assign = $h_a)]]]],["./src/tame-function-tostring.js", [["tameFunctionToString", [$h_a => (tameFunctionToString = $h_a)]]]],["./src/intrinsics.js", [["getGlobalIntrinsics", [$h_a => (getGlobalIntrinsics = $h_a)]]]],["./src/get-anonymous-intrinsics.js", [["getAnonymousIntrinsics", [$h_a => (getAnonymousIntrinsics = $h_a)]]]],["./src/lockdown-shim.js", [["makeLockdown", [$h_a => (makeLockdown = $h_a)]]]],["./src/compartment-shim.js", [["makeCompartmentConstructor", [$h_a => (makeCompartmentConstructor = $h_a)]],["CompartmentPrototype", [$h_a => (CompartmentPrototype = $h_a)]]]],["./src/error/assert.js", [["assert", [$h_a => (assert = $h_a)]]]]]);   
 
 
 
