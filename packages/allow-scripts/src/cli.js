@@ -2,7 +2,7 @@
 
 const yargs = require('yargs')
 const { runAllowedPackages, setDefaultConfiguration, printPackagesList } = require('./index.js')
-const { writeRcFile, addPreinstallAFDependency } = require('./setup.js')
+const { configureProject } = require('./setup.js')
 
 start().catch((err) => {
   console.error(err)
@@ -14,25 +14,25 @@ async function start () {
 
   const parsedArgs = parseArgs()
   const command = parsedArgs.command || 'run'
+  const pkg = parsedArgs.pkg
   switch (command) {
     // (default) run scripts
     case 'run': {
-      await runAllowedPackages({ rootDir })
+      await runAllowedPackages({ pkg, rootDir })
       return
     }
     // automatically set configuration
     case 'auto': {
-      await setDefaultConfiguration({ rootDir })
+      await setDefaultConfiguration({ pkg, rootDir })
       return
     }
     // list packages
     case 'list': {
-      await printPackagesList({ rootDir })
+      await printPackagesList({ pkg, rootDir })
       return
     }
     case 'setup': {
-      writeRcFile()
-      addPreinstallAFDependency()
+      configureProject({ pkg, rootDir })
       return
     }
     // (error) unrecognized
@@ -45,8 +45,13 @@ async function start () {
 function parseArgs () {
   const argsParser = yargs
     .usage('Usage: $0 <command> [options]')
+    .alias('pkg', 'package-manager')
+    .describe('pkg', '(in setup) use given package manager, do not detect')
+    .choices('pkg', ['npm', 'yarn', 'pnpm'])
     .command('$0', 'run the allowed scripts')
     .command('list', 'list the packages and their allowlist status')
+    .command('setup', 'configure the current project to not run scripts by default')
+    .command('auto', 'pre-generate the allow list in package.json')
     .help()
 
   const parsedArgs = argsParser.parse()

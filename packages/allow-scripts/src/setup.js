@@ -8,8 +8,13 @@ const { spawnSync } = require('child_process')
 const path = require('path')
 
 module.exports = {
-  writeRcFile,
-  addPreinstallAFDependency
+  configureProject
+}
+
+function configureProject({ pkg }) {
+
+  writeRcFile(pkg)
+  addPreinstallAFDependency(pkg)
 }
 
 function addInstallParentDir(filename) {
@@ -35,29 +40,30 @@ function writeRcFileContent({file, exists, entry}){
   }
 }
 
-function writeRcFile () {
+function writeRcFile (pkg) {
   const yarnRcExists = existsSync(addInstallParentDir('.yarnrc'))
   const yarnYmlExists = existsSync(addInstallParentDir('.yarnrc.yml'))
   const npmRcExists = existsSync(addInstallParentDir('.npmrc'))
   const yarnLockExists = existsSync(addInstallParentDir('yarn.lock'))
 
   const configs = []
-  if (yarnRcExists || yarnLockExists) {
+  if (
+    pkg === "yarn" ||
+    (!pkg && (yarnRcExists || yarnYmlExists || yarnLockExists))
+  ) {
     configs.push({
       file: ".yarnrc",
       exists: yarnRcExists,
       entry: "ignore-scripts true",
-    })
-  }
-  if (yarnYmlExists || yarnLockExists) {
+    });
     configs.push({
       file: ".yarnrc.yml",
       exists: yarnYmlExists,
       entry: "enableScripts: false",
-    })
+    });
   }
   if (configs.length === 0) {
-    // default to npm, because that's what everyone has anyway
+    // default to npm, because that's what everyone other than yarn use
     configs.push({
       file: ".npmrc",
       exists: npmRcExists,
@@ -68,16 +74,37 @@ function writeRcFile () {
   configs.forEach(writeRcFileContent)
 }
 
-function addPreinstallAFDependency () {
+function addPreinstallAFDependency (pkg) {
   let cmd, cmdArgs
 
-  if (existsSync('./.npmrc')) {
-    cmd = 'npm'
-    cmdArgs = ['install', '-d', '@lavamoat/preinstall-always-fail']
-  } else {
-    cmd = 'yarn'
-    cmdArgs = ['add', '-D', '@lavamoat/preinstall-always-fail']
+  const yarnLockExists = existsSync(addInstallParentDir('yarn.lock'))
+
+  switch(pkg) {
+    case 'npm': 
+      cmd = 'npm'
+      cmdArgs = ['install', '-D']
+      break;
+    case 'yarn': 
+      cmd = 'yarn'
+      cmdArgs = ['add', '-D']
+      break;
+    case 'pnpm': 
+      cmd = 'pnpm'
+      cmdArgs = ['add', '-D']
+      break;
+    default: 
+      if(!yarnLockExists) {
+        cmd = 'npm'
+        cmdArgs = ['install', '-D']
+      } else {
+        cmd = 'yarn'
+        cmdArgs = ['add', '-D']
+      }
+
   }
+
+  cmdArgs.push('@lavamoat/preinstall-always-fail')
+  cmdArgs.push('@lavamoat/allow-scripts')
 
   let result = spawnSync(cmd, cmdArgs, {})
 
