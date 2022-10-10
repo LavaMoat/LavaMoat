@@ -17,36 +17,55 @@ function addInstallParentDir(filename) {
   return path.join(rootDir, filename)
 }
 
-function writeRcFile () {
-  const yarnRcExists = existsSync(addInstallParentDir('.yarnrc'))
-  const npmRcExists = existsSync(addInstallParentDir('.npmrc'))
-  const yarnLockExists = existsSync(addInstallParentDir('yarn.lock'))
+function writeRcFileContent({file, exists, entry}){
+  let rcPath = addInstallParentDir(file)
 
-  let rcFile, rcEntry
-  if (yarnRcExists || yarnLockExists) {
-    rcFile = '.yarnrc'
-    rcEntry = 'ignore-scripts true'
-  } else {
-    // if no lockfiles exixt, default to npm, because that's what everyone has anyway
-    rcFile = '.npmrc'
-    rcEntry = 'ignore-scripts=true'
-  }
-
-  let rcPath = addInstallParentDir(rcFile)
-
-  if (!yarnRcExists && !npmRcExists) {
-    writeFileSync(rcPath, rcEntry + '\n')
-    console.log(`@lavamoat/allow-scripts: created ${rcPath} file with entry: ${rcEntry}.`)
+  if (!exists) {
+    writeFileSync(rcPath, entry + '\n')
+    console.log(`@lavamoat/allow-scripts: created ${rcPath} file with entry: ${entry}.`)
     return
   }
 
   const rcFileContents = readFileSync(rcPath, 'utf8')
-  if (rcFileContents.includes(rcEntry)) {
-    console.log(`@lavamoat/allow-scripts: file ${rcPath} already exists with entry: ${rcEntry}.`)
+  if (rcFileContents.includes(entry)) {
+    console.log(`@lavamoat/allow-scripts: file ${rcPath} already exists with entry: ${entry}.`)
   } else {
-    appendFileSync(rcPath, rcEntry + '\n')
-    console.log(`@lavamoat/allow-scripts: added entry to ${rcPath}: ${rcEntry}.`)
+    appendFileSync(rcPath, entry + '\n')
+    console.log(`@lavamoat/allow-scripts: added entry to ${rcPath}: ${entry}.`)
   }
+}
+
+function writeRcFile () {
+  const yarnRcExists = existsSync(addInstallParentDir('.yarnrc'))
+  const yarnYmlExists = existsSync(addInstallParentDir('.yarnrc.yml'))
+  const npmRcExists = existsSync(addInstallParentDir('.npmrc'))
+  const yarnLockExists = existsSync(addInstallParentDir('yarn.lock'))
+
+  const configs = []
+  if (yarnRcExists || yarnLockExists) {
+    configs.push({
+      file: ".yarnrc",
+      exists: yarnRcExists,
+      entry: "ignore-scripts true",
+    })
+  }
+  if (yarnYmlExists || yarnLockExists) {
+    configs.push({
+      file: ".yarnrc.yml",
+      exists: yarnYmlExists,
+      entry: "enableScripts: false",
+    })
+  }
+  if (configs.length === 0) {
+    // default to npm, because that's what everyone has anyway
+    configs.push({
+      file: ".npmrc",
+      exists: npmRcExists,
+      entry: "ignore-scripts=true",
+    })
+  }
+
+  configs.forEach(writeRcFileContent)
 }
 
 function addPreinstallAFDependency () {
