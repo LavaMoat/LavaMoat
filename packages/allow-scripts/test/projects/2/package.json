@@ -19,6 +19,9 @@
     "allowScripts": {
       "good_dep": true,
       "bbb>evil_dep": false
+    },
+    "allowBins": {
+      "good_dep": ["good"]
     }
   }
 }

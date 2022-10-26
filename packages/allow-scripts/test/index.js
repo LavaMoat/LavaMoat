@@ -16,17 +16,33 @@ test('cli - auto command', async (t) => {
   })
 
   // npm init -y
-  spawnSync('npm', ['init', '-y'], {cwd: projectRoot})
+  spawnSync('npm', ['init', '-y'], { cwd: projectRoot })
 
   // run the auto command
   let cmd = path.join(allowScriptsSrcRoot, 'cli.js')
-  let result = spawnSync(cmd, ['auto'], {cwd: projectRoot})
+  let result = spawnSync(cmd, ['auto'], { cwd: projectRoot })
+
+  // forward error output for debugging
+  console.error(result.stderr.toString('utf-8'))
 
   // get the package.json
   const packageJsonContents = JSON.parse(fs.readFileSync(path.join(projectRoot, 'package.json'), 'utf8'))
 
   // assert its contents
-  t.deepEqual(packageJsonContents.lavamoat, {allowScripts: {'bbb>evil_dep': false}})
+  t.deepEqual(packageJsonContents.lavamoat, {
+    allowBins: {
+      aaa: [
+        'aaa',
+      ],
+      bbb: [
+        'karramba',
+      ],
+      'bbb>evil_dep': [], // it has a script, but it's not allowed
+    },
+    allowScripts: {
+      'bbb>evil_dep': false
+    }
+  })
 })
 
 test('cli - run command - good dep at the root', async (t) => {
@@ -36,7 +52,10 @@ test('cli - run command - good dep at the root', async (t) => {
 
   // run the "run" command
   let cmd = path.join(allowScriptsSrcRoot, 'cli.js')
-  let result = spawnSync(cmd, ['run'], {cwd: projectRoot})
+  let result = spawnSync(cmd, ['run'], { cwd: projectRoot })
+
+  // forward error output for debugging
+  console.error(result.stderr.toString('utf-8'))
 
   // assert the output
   t.deepEqual(result.stdout.toString().split('\n'), [
@@ -44,6 +63,8 @@ test('cli - run command - good dep at the root', async (t) => {
     '- good_dep',
     'running lifecycle scripts for event \"install\"',
     'running lifecycle scripts for event \"postinstall\"',
+    'installing bin scripts',
+    '- good_dep',
     'running lifecycle scripts for top level package',
     '',
   ])
@@ -63,7 +84,7 @@ test('cli - run command - good dep as a sub dep', async (t) => {
 
   // run the "run" command
   let cmd = path.join(allowScriptsSrcRoot, 'cli.js')
-  let result = spawnSync(cmd, ['run'], {cwd: projectRoot})
+  let result = spawnSync(cmd, ['run'], { cwd: projectRoot })
 
   // assert the output
   t.deepEqual(result.stdout.toString().split('\n'), [
@@ -71,6 +92,8 @@ test('cli - run command - good dep as a sub dep', async (t) => {
     '- bbb>good_dep',
     'running lifecycle scripts for event \"install\"',
     'running lifecycle scripts for event \"postinstall\"',
+    'installing bin scripts',
+    '- bbb>good_dep',
     'running lifecycle scripts for top level package',
     '',
   ])
