@@ -1,6 +1,6 @@
 {
   "name": "@lavamoat/allow-scripts",
-  "version": "2.0.3",
+  "version": "2.1.0",
   "main": "src/index.js",
   "bin": {
     "allow-scripts": "src/cli.js"
