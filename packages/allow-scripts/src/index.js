@@ -125,16 +125,18 @@ async function runAllScriptsForEvent({ event, packages }) {
 }
 async function installBinScripts({ packages }) {
   for (const { canonicalName, path, allowlist, scripts } of packages) {
+    const filteredBin = allowlist.reduce((all, key) => {
+      if (scripts[key]) {
+        all[key] = scripts[key]
+      }
+      return all
+    }, {})
+    console.error({filteredBin})
     console.log(`- ${canonicalName}`)
     await npmBinLinks({
       path: path,
       pkg: {
-        bin: allowlist.reduce((all, key) => {
-          if (scripts[key]) {
-            all[key] = scripts[key]
-          }
-          return all
-        }, {})
+        bin: filteredBin
       },
     })
   }
