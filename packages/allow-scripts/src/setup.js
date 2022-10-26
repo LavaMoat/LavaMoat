@@ -46,7 +46,7 @@ function writeRcFile () {
     configs.push({
       file: ".yarnrc",
       exists: yarnRcExists,
-      entry: "ignore-scripts true",
+      entry: "ignore-scripts true\n--*.no-bin-links true",
     })
   }
   if (yarnYmlExists || yarnLockExists) {
@@ -61,7 +61,7 @@ function writeRcFile () {
     configs.push({
       file: ".npmrc",
       exists: npmRcExists,
-      entry: "ignore-scripts=true",
+      entry: "ignore-scripts=true\nbin-links=false",
     })
   }
 
