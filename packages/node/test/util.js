@@ -24,7 +24,7 @@ function convertOptsToArgs ({ scenario, additionalOpts = {} }) {
 }
 
 async function runLavamoat ({ args = [], cwd = process.cwd() } = {}) {
-  const lavamoatPath = `${__dirname}/../src/index.js`
+  const lavamoatPath = `${__dirname}/../src/cli.js`
   const output = await execFile(lavamoatPath, args, { cwd })
   return { output }
 }

@@ -7,10 +7,10 @@ const {
 
 test('lavamoat-node compat - bundle works under lavamoat node', (t) => {
   let bundle
-  try {
-    bundle = execSync("./run.sh",
+  try {     
+    bundle = execSync("./test/fixtures/secureBundling/run.sh",
     {
-      cwd: path.resolve(__dirname, './fixtures/secureBundling'),
+      cwd: path.resolve(__dirname, '../'),
       maxBuffer: 8192 * 10000
     })
   } catch (err) {

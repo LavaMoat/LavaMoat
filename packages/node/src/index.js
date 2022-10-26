@@ -1,23 +1,26 @@
-#!/usr/bin/env node
 /* eslint-disable no-eval */
 
 const path = require('path')
 const fs = require('fs')
-const yargs = require('yargs')
 const jsonStringify = require('json-stable-stringify')
-const { loadPolicy, loadPolicyAndApplyOverrides, getDefaultPaths } = require('lavamoat-core')
+const { loadPolicy, loadPolicyAndApplyOverrides } = require('lavamoat-core')
 const { loadCanonicalNameMap } = require('@lavamoat/aa')
 const { parseForPolicy } = require('./parseForPolicy')
 const { createKernel } = require('./kernel')
-const yargsFlags = require('./yargsFlags')
 
-runLava().catch(err => {
-  // explicity log stack to workaround https://github.com/endojs/endo/issues/944
-  console.error(err.stack || err)
-  process.exit(1)
-})
+const defaults = require('./defaults')
 
-async function runLava () {
+
+async function runLava (options) {
+
+  options = Object.assign({}, defaults, options)
+
+  options.projectRoot = path.resolve(options.projectRoot)
+  options.entryPath = path.resolve(options.projectRoot, options.entryPath)
+  options.policyPath = path.resolve(options.projectRoot, options.policyPath)
+  options.policyOverridePath = path.resolve(options.projectRoot, options.policyOverridePath)
+  options.policyDebugPath = path.resolve(options.projectRoot, options.policyDebugPath)
+
   const {
     entryPath: entryId,
     writeAutoPolicy,
@@ -31,7 +34,7 @@ async function runLava () {
     scuttleGlobalThisExceptions,
     debugMode,
     statsMode,
-  } = parseArgs()
+  } = options
   const shouldParseApplication = writeAutoPolicy || writeAutoPolicyDebug || writeAutoPolicyAndRun
   const shouldRunApplication = (!writeAutoPolicy && !writeAutoPolicyDebug) || writeAutoPolicyAndRun
 
@@ -67,36 +70,10 @@ async function runLava () {
       debugMode,
       statsMode,
     })
-    // patch process.argv so it matches the normal pattern
-    // e.g. [runtime path, entrypoint, ...args]
-    // we'll use the LavaMoat path as the runtime
-    // so we just remove the node path
-    process.argv.shift()
+
     // run entrypoint
     kernel.internalRequire(entryId)
   }
 }
 
-function parseArgs () {
-  const defaultPaths = getDefaultPaths('node')
-  const argsParser = yargs
-    .usage('$0 <entryPath>', 'start the application', (yargs) => {
-      // the entry file to run (or parse)
-      yargs.positional('entryPath', {
-        describe: 'the path to the entry file for your application. same as node.js',
-        type: 'string'
-      })
-      yargsFlags(yargs, defaultPaths)
-    })
-    .help()
-
-  const parsedArgs = argsParser.parse()
-  // resolve paths
-  parsedArgs.entryPath = path.resolve(parsedArgs.entryPath)
-  parsedArgs.policyPath = path.resolve(parsedArgs.policyPath)
-  parsedArgs.policyOverridePath = path.resolve(parsedArgs.policyOverridePath)
-  parsedArgs.policyDebugPath = path.resolve(parsedArgs.policyDebugPath)
-  parsedArgs.projectRoot = path.resolve(parsedArgs.projectRoot)
-
-  return parsedArgs
-}
+module.exports = { runLava }
