@@ -35,6 +35,17 @@ test('basic - browserify bundle doesnt inject global in deps', async (t) => {
   t.false(hasGlobalInjection, 'did not inject "global" ref')
 })
 
+test.only('basic - omg mismatching curlies', async (t) => {
+  const scenario = createScenarioFromScaffold({
+    defineOne: `1) 
+  }}} process._rawDebug("ohnoes") {{{ 
+    (()=>{} `,
+  })
+  // await autoConfigForScenario({ scenario })
+  const { bundleForScenario } = await createBundleForScenario({ scenario })
+  eval(bundleForScenario)
+})
+
 test('basic - lavamoat policy and bundle', async (t) => {
   const scenario = createScenarioFromScaffold({
     // bundle works

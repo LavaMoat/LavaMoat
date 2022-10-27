@@ -244,11 +244,14 @@ function wrapInModuleInitializer (moduleData, sourceMeta, sourcePathForModule, b
   if (filename.includes('\n')) {
     throw new Error('LavaMoat - encountered a filename containing a newline')
   }
+
+  // (this) comes from https://github.com/LavaMoat/LavaMoat/blob/5977a7b2a6fa16c0d074063d1caa83963e5bc7f8/packages/core/src/kernelCoreTemplate.js#L306
   let moduleWrapperSource
   if (bundleWithPrecompiledModules) {
     moduleWrapperSource = (
 `function(){
-  with (this) {
+  with (this.scopeTerminator) {
+  with (this.globalThis) {
     return function() {
       'use strict';
       // source: ${filename}

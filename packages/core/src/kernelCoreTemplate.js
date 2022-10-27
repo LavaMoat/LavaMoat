@@ -1,5 +1,6 @@
 (function () {
   "use strict"
+
   return createKernelCore
 
   function createKernelCore ({
@@ -34,6 +35,7 @@
       const kernelCompartment = new Compartment({ console, Math, Date })
       makeKernelCore = kernelCompartment.evaluate(`(${unsafeMakeKernelCore})\n//# sourceURL=LavaMoat/core/kernel`)
     }
+    const scopeTerminator = SES.makeStrictScopeTerminator(); // FIXME: pseudocode
     const lavamoatKernel = makeKernelCore({
       globalRef,
       lavamoatConfig,
@@ -46,7 +48,8 @@
       scuttleGlobalThisExceptions,
       debugMode,
       runWithPrecompiledModules,
-      reportStatsHook
+      reportStatsHook,
+      scopeTerminator
     })
 
     return lavamoatKernel
@@ -66,7 +69,8 @@
     scuttleGlobalThisExceptions = [],
     debugMode = false,
     runWithPrecompiledModules = false,
-    reportStatsHook = () => {}
+    reportStatsHook = () => {},
+    scopeTerminator
   }) {
     // "templateRequire" calls are inlined in "generateKernel"
     const generalUtils = templateRequire('makeGeneralUtils')()
@@ -301,9 +305,12 @@
           // moduleObj must be from the same Realm as the moduleInitializer (eg dart2js runtime requirement)
           // here we are assuming the provided moduleInitializer is from the same Realm as this kernel
           moduleObj = { exports: {} }
-          const { scopeProxy } = packageCompartment.__makeScopeProxy__()
+          const compartmentKit = Object.create(null)
+          compartmentKit.globalThis = packageCompartment.globalThis // TODO: check the name
+          compartmentKit.scopeTerminator = scopeTerminator
+
           // this invokes the with-proxy wrapper
-          const moduleInitializerFactory = precompiledInitializer.call(scopeProxy)
+          const moduleInitializerFactory = precompiledInitializer.call(freeze(compartmentKit))
           // this ensures strict mode
           moduleInitializer = moduleInitializerFactory()
         } else {
