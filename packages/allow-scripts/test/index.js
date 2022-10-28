@@ -50,6 +50,11 @@ test('cli - run command - good dep at the root', async (t) => {
   let allowScriptsSrcRoot = path.join(__dirname, '..', 'src')
   let projectRoot = path.join(__dirname, 'projects', '2')
 
+  fs.rmSync(path.join(projectRoot,'./node_modules/.bin'), { 
+    recursive: true, 
+    force:true // force is only here to stop rm complaining if folder is missing 
+  })
+
   // run the "run" command
   let cmd = path.join(allowScriptsSrcRoot, 'cli.js')
   let result = spawnSync(cmd, ['run'], { cwd: projectRoot })
@@ -69,6 +74,8 @@ test('cli - run command - good dep at the root', async (t) => {
     '',
   ])
 
+  t.assert(fs.existsSync(path.join(projectRoot,'./node_modules/.bin/good')), 'Expected a bin script to be installed in top level node_modules')
+
   // note
   // we could also test whether the preinstall script is
   // actually executing. we did it manually by replacing
@@ -82,9 +89,17 @@ test('cli - run command - good dep as a sub dep', async (t) => {
   let allowScriptsSrcRoot = path.join(__dirname, '..', 'src')
   let projectRoot = path.join(__dirname, 'projects', '3')
 
+  fs.rmSync(path.join(projectRoot,'./node_modules/.bin'), { 
+    recursive: true, 
+    force:true // force is only here to stop rm complaining if folder is missing 
+  })
+
   // run the "run" command
   let cmd = path.join(allowScriptsSrcRoot, 'cli.js')
   let result = spawnSync(cmd, ['run'], { cwd: projectRoot })
+
+  // forward error output for debugging
+  console.error(result.stderr.toString('utf-8'))
 
   // assert the output
   t.deepEqual(result.stdout.toString().split('\n'), [
@@ -97,4 +112,7 @@ test('cli - run command - good dep as a sub dep', async (t) => {
     'running lifecycle scripts for top level package',
     '',
   ])
+
+  t.assert(fs.existsSync(path.join(projectRoot,'./node_modules/.bin/good')), 'Expected a bin script to be installed in top level node_modules')
+
 })
