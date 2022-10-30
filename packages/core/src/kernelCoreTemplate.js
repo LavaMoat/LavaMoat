@@ -99,10 +99,8 @@
     return kernel
 
     function performScuttleGlobalThis (globalRef, extraPropsToAvoid = new Array()) {
-      const props = new Set(
-        getPrototypeChain(globalRef)
-        .map(obj => Object.getOwnPropertyNames(obj))
-      )
+      const props = []
+      getPrototypeChain(globalRef).forEach(proto => props.push(...Object.getOwnPropertyNames(proto)))
 
       // support LM,SES exported APIs and polyfills
       const avoidForLavaMoatCompatibility = ['LavaPack', 'Compartment', 'Error', 'globalThis']
