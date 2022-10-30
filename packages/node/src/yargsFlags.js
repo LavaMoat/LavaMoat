@@ -61,4 +61,18 @@ module.exports = (yargs, defaults) => {
     type: 'boolean',
     default: defaults.statsMode
   })
+  // scuttle global this
+  yargs.option('scuttleGlobalThis', {
+    alias: ['scuttleGlobalThis'],
+    describe: 'scuttle global this',
+    type: 'boolean',
+    default: defaults.scuttleGlobalThis
+  })
+  // scuttle global this exceptions array
+  yargs.option('scuttleGlobalThisExceptions', {
+    alias: ['scuttleGlobalThisExceptions'],
+    describe: 'scuttle global this exceptions array',
+    type: 'array',
+    default: defaults.scuttleGlobalThisExceptions
+  })
 }
