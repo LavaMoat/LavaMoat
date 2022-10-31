@@ -6,20 +6,28 @@ module.exports = {
   runScenario
 }
 
+function set(args, key, value) {
+  if (Array.isArray(value)) {
+    value.forEach(v => set(args, key, v))
+    return
+  }
+  if (value === true) {
+    args.push(`--${key}`)
+  } else if (typeof value === 'string') {
+    args.push(`--${key}='${value}'`)
+  } else {
+    args.push(`--${key}=${value}`)
+  }
+}
+
 function convertOptsToArgs ({ scenario, additionalOpts = {} }) {
   const { entries, opts } = scenario
   if (entries.length !== 1) throw new Error('LavaMoat - invalid entries')
   const firstEntry = entries[0]
   const args = [firstEntry]
-  Object.entries({ ...opts, ...additionalOpts }).forEach(([key, value]) => {
-    if (value === true) {
-      args.push(`--${key}`)
-    } else if (typeof value === 'string') {
-      args.push(`--${key}='${value}'`)
-    } else {
-      args.push(`--${key}=${value}`)
-    }
-  })
+  Object
+    .entries({ ...opts, ...additionalOpts })
+    .forEach(([key, value]) => set(args, key, value))
   return args
 }
 
