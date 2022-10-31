@@ -6,9 +6,9 @@ module.exports = {
   runScenario
 }
 
-function set(args, key, value) {
+function setOptToArgs(args, key, value) {
   if (Array.isArray(value)) {
-    value.forEach(v => set(args, key, v))
+    value.forEach(v => setOptToArgs(args, key, v))
     return
   }
   if (value === true) {
@@ -27,7 +27,7 @@ function convertOptsToArgs ({ scenario, additionalOpts = {} }) {
   const args = [firstEntry]
   Object
     .entries({ ...opts, ...additionalOpts })
-    .forEach(([key, value]) => set(args, key, value))
+    .forEach(([key, value]) => setOptToArgs(args, key, value))
   return args
 }
 
