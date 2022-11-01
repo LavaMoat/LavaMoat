@@ -105,7 +105,7 @@
           props.push(...Object.getOwnPropertyNames(proto)))
 
       // support LM,SES exported APIs and polyfills
-      const avoidForLavaMoatCompatibility = ['LavaPack', 'Compartment', 'Error', 'globalThis']
+      const avoidForLavaMoatCompatibility = ['Compartment', 'Error', 'globalThis']
       const propsToAvoid = new Set([...avoidForLavaMoatCompatibility, ...extraPropsToAvoid])
 
       for (const prop of props) {

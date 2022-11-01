@@ -34,17 +34,17 @@
   const { internalRequire } = kernel
 
   // create a lavamoat pulic API for loading modules over multiple files
-  const LavaPack = {
+  const LavaPack = Object.freeze({
     loadPolicy: Object.freeze(loadPolicy),
     loadBundle: Object.freeze(loadBundle),
     runModule: Object.freeze(runModule),
-  }
+  })
   // in debug mode, expose the kernel on the LavaPack API
   if (debugMode) {
     LavaPack._kernel = kernel
   }
 
-  globalThis.LavaPack = Object.freeze(LavaPack)
+  Object.defineProperty(globalThis, 'LavaPack', {value: LavaPack})
   return
 
 
