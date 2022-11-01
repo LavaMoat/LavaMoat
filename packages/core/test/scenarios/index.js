@@ -12,7 +12,6 @@ const scuttle = require('./scuttle')
 
 module.exports = { loadScenarios }
 const scenarios = [
-  ...scuttle,
   ...autogen,
   ...security,
   ...basic,
@@ -25,8 +24,12 @@ const scenarios = [
   ...globalRef,
 ]
 
-async function * loadScenarios () {
-  for (const scenarioCreator of scenarios) {
+async function * loadScenarios (loadScuttleScenarios = false) {
+  const scenarioCreators = [...scenarios, ...(loadScuttleScenarios ? scuttle : [])]
+  for (const scenarioCreator of scenarioCreators) {
+    yield await scenarioCreator()
+  }
+  for (const scenarioCreator of scuttle) {
     yield await scenarioCreator()
   }
 }
