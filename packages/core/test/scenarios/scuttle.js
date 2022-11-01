@@ -10,7 +10,7 @@ module.exports = [
       scuttleGlobalThis: true,
       scuttleGlobalThisExceptions: ['process', /*'console', 'Array', 'RegExp', 'Date'*/],
       expectedFailure: true,
-      expectedFailureMessageRegex: /Error: LavaMoat - property "console" of globalThis is inaccessible under scuttling mode/,
+      expectedFailureMessageRegex: /LavaMoat - property "[A-Za-z]*" of globalThis is inaccessible under scuttling mode/,
     })
     await autoConfigForScenario({ scenario })
     return scenario
