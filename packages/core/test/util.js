@@ -56,6 +56,7 @@ function createScenarioFromScaffold ({
   checkError = async (t, err, scenario) => {
     if (scenario.expectedFailure) {
       t.truthy(err, `Scenario fails as expected: ${scenario.name} - ${err}`)
+      t.regex(err.message, scenario.expectedFailureMessageRegex, 'Error message expects to match regex')
     } else {
       if (err) {
         t.fail(`Unexpected error in scenario: ${scenario.name} - ${err}`)
@@ -73,6 +74,9 @@ function createScenarioFromScaffold ({
     }
   },
   expectedFailure = false,
+  expectedFailureMessageRegex = /[\s\S]*/,
+  scuttleGlobalThis = false,
+  scuttleGlobalThisExceptions = [],
   files = [],
   builtin = {},
   context = {},
@@ -218,6 +222,9 @@ function createScenarioFromScaffold ({
     builtin,
     expectedResult,
     expectedFailure,
+    expectedFailureMessageRegex,
+    scuttleGlobalThis,
+    scuttleGlobalThisExceptions,
     entries: ['entry.js'],
     files: _files,
     config: _config,

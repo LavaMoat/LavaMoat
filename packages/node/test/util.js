@@ -40,8 +40,11 @@ async function runLavamoat ({ args = [], cwd = process.cwd() } = {}) {
 async function runScenario ({ scenario, additionalOpts }) {
   const { projectDir } = await prepareScenarioOnDisk({ scenario, policyName: 'node' })
   const args = convertOptsToArgs({ scenario, additionalOpts })
-  const { output: { stdout } } = await runLavamoat({ args, cwd: projectDir })
+  const { output: { stdout, stderr } } = await runLavamoat({ args, cwd: projectDir })
   let result
+  if (stderr) {
+    throw new Error(`Unexpected output in standard err: \n${stderr}`)
+  }
   try {
     result = JSON.parse(stdout)
   } catch (e) {
