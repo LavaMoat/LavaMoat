@@ -29,7 +29,4 @@ async function * loadScenarios (loadScuttleScenarios = false) {
   for (const scenarioCreator of scenarioCreators) {
     yield await scenarioCreator()
   }
-  for (const scenarioCreator of scuttle) {
-    yield await scenarioCreator()
-  }
 }
