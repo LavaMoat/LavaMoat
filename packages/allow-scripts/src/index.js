@@ -363,7 +363,7 @@ async function loadAllPackageConfigurations({ rootDir }) {
   configs.lifecycle = indexConfiguration(configs.lifecycle)
   configs.bin = indexConfiguration(configs.bin)
 
-  const somePoliciesAreMissing = !!(configs.lifecycle.missingPolicies.length && configs.bin.missingPolicies.length)
+  const somePoliciesAreMissing = !!(configs.lifecycle.missingPolicies.length || configs.bin.missingPolicies.length)
 
   return {
     packageJson,
