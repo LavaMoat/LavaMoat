@@ -18,10 +18,13 @@
   "lavamoat": {
     "allowScripts": {
       "bbb>good_dep": true,
-      "evil_dep": false
+      "evil_dep": false,
+      "bbb": true
     },
     "allowBins": {
-      "bbb>good_dep": ["good"]
+      "bbb>good_dep": {
+        "good": true
+      }
     }
   }
 }

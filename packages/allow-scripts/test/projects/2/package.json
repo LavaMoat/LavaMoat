@@ -21,7 +21,9 @@
       "bbb>evil_dep": false
     },
     "allowBins": {
-      "good_dep": ["good"]
+      "good_dep": {
+        "good": true
+      }
     }
   }
 }
