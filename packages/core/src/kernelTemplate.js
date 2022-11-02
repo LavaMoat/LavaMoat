@@ -12,11 +12,14 @@
     runWithPrecompiledModules,
     reportStatsHook,
   }) {
+    // debug options are hard-coded at build time
+    const {
+      debugMode
+    } = __lavamoatDebugOptions__
     // security options are hard-coded at build time
     const {
       scuttleGlobalThis,
       scuttleGlobalThisExceptions,
-      debugMode,
     } = __lavamoatSecurityOptions__
 
     // identify the globalRef
