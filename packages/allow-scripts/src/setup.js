@@ -9,7 +9,7 @@ const path = require('path')
 
 module.exports = {
   writeRcFile,
-  addPreinstallAFDependency
+  editPackageJson
 }
 
 function addInstallParentDir(filename) {
@@ -68,7 +68,7 @@ function writeRcFile () {
   configs.forEach(writeRcFileContent)
 }
 
-function addPreinstallAFDependency () {
+function editPackageJson () {
   let cmd, cmdArgs
 
   if (existsSync('./.npmrc')) {
@@ -87,4 +87,12 @@ function addPreinstallAFDependency () {
   } else {
     console.log('@lavamoat/allow-scripts:: Added dependency @lavamoat/preinstall-always-fail.')
   }
+
+  const packageJson = require(addInstallParentDir('package.json'))
+  if(!packageJson.scripts){
+    packageJson.scripts = {};
+  }
+  packageJson.scripts['allow-scripts'] = "./node_modules/@lavamoat/allow-scripts/src/cli.js"
+  writeFileSync(addInstallParentDir('package.json'), JSON.stringify(packageJson, null, 2))
+
 }

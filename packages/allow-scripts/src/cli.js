@@ -2,7 +2,7 @@
 
 const yargs = require('yargs')
 const { runAllowedPackages, setDefaultConfiguration, printPackagesList } = require('./index.js')
-const { writeRcFile, addPreinstallAFDependency } = require('./setup.js')
+const { writeRcFile, editPackageJson } = require('./setup.js')
 
 start().catch((err) => {
   console.error(err)
@@ -32,7 +32,7 @@ async function start () {
     }
     case 'setup': {
       writeRcFile()
-      addPreinstallAFDependency()
+      editPackageJson()
       return
     }
     // (error) unrecognized

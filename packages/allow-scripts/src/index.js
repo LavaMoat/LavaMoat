@@ -2,11 +2,9 @@
 // @ts-ignore: Object is possibly 'undefined'.
 const { promises: fs } = require('fs')
 const path = require('path')
-const { spawnSync } = require('child_process')
 const npmRunScript = require('@npmcli/run-script')
 const npmBinLinks = require('bin-links')
 const { loadCanonicalNameMap } = require('@lavamoat/aa')
-const runScriptPkg = require('@npmcli/run-script/lib/run-script-pkg')
 
 module.exports = {
   runAllowedPackages,
