@@ -31,15 +31,8 @@ test('cli - auto command', async (t) => {
   // assert its contents
   t.deepEqual(packageJsonContents.lavamoat, {
     allowBins: {
-      aaa: {
-        'aaa': true,
-      },
-      bbb: {
-        'karramba': true,
-      },
-      'bbb>evil_dep': {
-        "npm": false
-      }
+      aaa: 'node_modules/aaa/index.js',
+      karramba: 'node_modules/bbb/index.js',
     },
     allowScripts: {
       'bbb>evil_dep': false

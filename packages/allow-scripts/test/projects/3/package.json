@@ -21,10 +21,6 @@
       "evil_dep": false,
       "bbb": true
     },
-    "allowBins": {
-      "bbb>good_dep": {
-        "good": true
-      }
-    }
+    "allowBins": {}
   }
 }
