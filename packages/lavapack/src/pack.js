@@ -245,7 +245,8 @@ function wrapInModuleInitializer (moduleData, sourceMeta, sourcePathForModule, b
   if (bundleWithPrecompiledModules) {
     moduleWrapperSource = (
 `function(){
-  with (this) {
+  with (this.scopeTerminator) {
+  with (this.globalThis) {
     return function() {
       'use strict';
       // source: ${filename}
@@ -253,6 +254,7 @@ function wrapInModuleInitializer (moduleData, sourceMeta, sourcePathForModule, b
 __MODULE_CONTENT__
       };
     };
+  }
   }
 }`
     )
