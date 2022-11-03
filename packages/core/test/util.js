@@ -403,6 +403,7 @@ function evaluateWithSourceUrl (filename, content, context) {
   if (!vmGlobalThis.globalThis) {
     vmGlobalThis.globalThis = vmGlobalThis
   }
+  vmGlobalThis.getTrueGlobalThisForTestsOnly = () => vmGlobalThis
   // perform eval
   let result
   try {
