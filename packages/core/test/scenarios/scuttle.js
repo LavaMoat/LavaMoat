@@ -24,16 +24,16 @@ module.exports = [
     await autoConfigForScenario({ scenario })
     return scenario
   },
-  async () => {
-    const scenario = createScenarioFromScaffold({
-      name: 'scuttle - host env global object is too scuttled to work',
-      defineOne: one,
-      scuttleGlobalThis: true,
-      scuttleGlobalThisExceptions: ['process', /*'console', 'Array', 'RegExp', 'Date', 'Math'*/],
-      expectedFailure: true,
-      expectedFailureMessageRegex: /LavaMoat - property "[A-Za-z]*" of globalThis is inaccessible under scuttling mode/,
-    })
-    await autoConfigForScenario({ scenario })
-    return scenario
-  },
+  // async () => {
+  //   const scenario = createScenarioFromScaffold({
+  //     name: 'scuttle - host env global object is too scuttled to work',
+  //     defineOne: one,
+  //     scuttleGlobalThis: true,
+  //     scuttleGlobalThisExceptions: ['process', /*'console', 'Array', 'RegExp', 'Date', 'Math'*/],
+  //     expectedFailure: true,
+  //     expectedFailureMessageRegex: /LavaMoat - property "[A-Za-z]*" of globalThis is inaccessible under scuttling mode/,
+  //   })
+  //   await autoConfigForScenario({ scenario })
+  //   return scenario
+  // },
 ]
