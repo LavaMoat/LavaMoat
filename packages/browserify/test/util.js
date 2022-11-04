@@ -154,6 +154,7 @@ async function prepareBrowserifyScenarioOnDisk ({ scenario }) {
   })
   // use local version of lavapack package rather than the remote one
   copyFolderSync(lavapackPath, `${projectDir}/node_modules/@lavamoat/lavapack/`, {skip: ['node_modules']})
+  console.warn(555, fs2.readFileSync(`${lavapackPath}/src/pack.js`).indexOf('scuttleGlobalThis'))
   if (installDevDepsResult.status !== 0) {
     const msg = `Error while installing browserify:\n${installDevDepsResult.stderr.toString()}`
     throw new Error(msg)
