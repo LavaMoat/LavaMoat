@@ -135,13 +135,12 @@ async function prepareBrowserifyScenarioOnDisk ({ scenario }) {
   // path to project root for the browserify plugin
   const lavapackPath = path.resolve(__dirname, '..', '..', 'lavapack')
   const pluginPath = path.resolve(__dirname, '..')
-  let depsToInstall = ['browserify@^17', pluginPath]
+  let depsToInstall = ['browserify@^17', pluginPath, lavapackPath]
   let runBrowserifyPath = `${__dirname}/fixtures/runBrowserify.js`
   if (scenario.type === 'factor') {
     depsToInstall.push(
       'through2@^3',
       'vinyl-buffer@^1',
-      lavapackPath,
       'bify-package-factor@^1',
     )
     runBrowserifyPath = `${__dirname}/fixtures/runBrowserifyBundleFactor.js`
@@ -150,8 +149,6 @@ async function prepareBrowserifyScenarioOnDisk ({ scenario }) {
   const installDevDepsResult = await limitConcurrency(async function () {
     return spawnSync('yarn', ['add','--network-concurrency 1', '-D', ...depsToInstall], { cwd: projectDir })
   })
-  // use local version of lavapack package rather than the remote one
-  copyFolderSync(lavapackPath, `${projectDir}/node_modules/@lavamoat/lavapack/`, {skip: ['node_modules']})
   if (installDevDepsResult.status !== 0) {
     const msg = `Error while installing browserify:\n${installDevDepsResult.stderr.toString()}`
     throw new Error(msg)
