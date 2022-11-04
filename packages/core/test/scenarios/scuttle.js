@@ -15,6 +15,17 @@ const one = () => {
 module.exports = [
   async () => {
     const scenario = createScenarioFromScaffold({
+      name: 'scuttle - host env global object is scuttled to work',
+      defineOne: one,
+      expectedResult: Math.SQRT2,
+      scuttleGlobalThis: true,
+      scuttleGlobalThisExceptions: ['process', 'console', 'Array', 'RegExp', 'Date', 'Math'],
+    })
+    await autoConfigForScenario({ scenario })
+    return scenario
+  },
+  async () => {
+    const scenario = createScenarioFromScaffold({
       name: 'scuttle - host env global object is too scuttled to work',
       defineOne: one,
       scuttleGlobalThis: true,
@@ -25,15 +36,4 @@ module.exports = [
     await autoConfigForScenario({ scenario })
     return scenario
   },
-  async () => {
-    const scenario = createScenarioFromScaffold({
-      name: 'scuttle - host env global object is scuttled to work',
-      defineOne: one,
-      expectedResult: Math.SQRT2,
-      scuttleGlobalThis: true,
-      scuttleGlobalThisExceptions: ['process', 'console', 'Array', 'RegExp', 'Date', 'Math'],
-    })
-    await autoConfigForScenario({ scenario })
-    return scenario
-  }
 ]
