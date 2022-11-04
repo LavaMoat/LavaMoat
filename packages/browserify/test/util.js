@@ -189,6 +189,7 @@ async function createBundleForScenario ({
   if (stderr.length) {
     console.warn(stderr)
   }
+  console.warn(444, bundle.indexOf(`["process"`))
   return { bundleForScenario: bundle, policyDir: policy }
 }
 
