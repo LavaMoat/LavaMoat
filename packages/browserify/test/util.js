@@ -113,7 +113,6 @@ async function runBrowserify ({
 // const limited = require('throat')(2)
 
 function copyFolderSync(from, to, opts = {skip: []}) {
-  console.warn('start', 23123123, from, 111, to)
   fs2.rmSync(to, { recursive: true, force: true })
   fs2.mkdirSync(to)
   fs2.readdirSync(from).forEach(element => {
@@ -123,10 +122,9 @@ function copyFolderSync(from, to, opts = {skip: []}) {
       for (const skip of opts.skip) {
         if (element.indexOf(skip) > -1) return
       }
-      copyFolderSync(path.join(from, element), path.join(to, element))
+      copyFolderSync(path.join(from, element), path.join(to, element), opts)
     }
   });
-  console.warn('end', 23123123, from, 111, to)
 }
 
 async function prepareBrowserifyScenarioOnDisk ({ scenario }) {
@@ -136,6 +134,9 @@ async function prepareBrowserifyScenarioOnDisk ({ scenario }) {
   // install browserify + lavamoat-plugin
   // path to project root for the browserify plugin
   const lavapackPath = path.resolve(__dirname, '..', '..', 'lavapack')
+  const browserifyPath = path.resolve(__dirname, '..', '..', 'browserify')
+  const corePath = path.resolve(__dirname, '..', '..', 'core')
+  const nodePath = path.resolve(__dirname, '..', '..', 'node')
   const pluginPath = path.resolve(__dirname, '..')
   let depsToInstall = ['browserify@^17', pluginPath]
   let runBrowserifyPath = `${__dirname}/fixtures/runBrowserify.js`
@@ -154,6 +155,9 @@ async function prepareBrowserifyScenarioOnDisk ({ scenario }) {
   })
   // use local version of lavapack package rather than the remote one
   copyFolderSync(lavapackPath, `${projectDir}/node_modules/@lavamoat/lavapack/`, {skip: ['node_modules']})
+  copyFolderSync(nodePath, `${projectDir}/node_modules/lavamoat/`, {skip: ['node_modules']})
+  copyFolderSync(corePath, `${projectDir}/node_modules/lavamoat-core/`, {skip: ['node_modules']})
+  copyFolderSync(browserifyPath, `${projectDir}/node_modules/lavamoat-browserify/`, {skip: ['node_modules']})
   console.warn(555, fs2.readFileSync(`${lavapackPath}/src/pack.js`).indexOf('scuttleGlobalThis'))
   if (installDevDepsResult.status !== 0) {
     const msg = `Error while installing browserify:\n${installDevDepsResult.stderr.toString()}`
