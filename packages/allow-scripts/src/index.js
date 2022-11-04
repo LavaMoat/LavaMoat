@@ -3,7 +3,8 @@
 const { promises: fs } = require('fs')
 const path = require('path')
 const npmRunScript = require('@npmcli/run-script')
-const npmBinLinks = require('bin-links')
+const normalizeBin = require('npm-normalize-package-bin')
+const { linkBinAbsolute, linkBinRelative } = require('./linker.js')
 const { loadCanonicalNameMap } = require('@lavamoat/aa')
 
 /**
@@ -208,14 +209,7 @@ async function runAllScriptsForEvent({ event, packages }) {
 async function installBinScripts(allowedBins) {
   for (const { bin, path, link, canonicalName } of allowedBins) {
     console.log(`- ${canonicalName}`)
-    await npmBinLinks({
-      path,
-      pkg: {
-        bin: {
-          [bin]: link,
-        }
-      }
-    })
+    await linkBinRelative({ path, bin, link, force: true })
   }
 }
 /**
@@ -228,7 +222,7 @@ async function installBinFirewall(firewalledBins, link) {
   // TODO: fix to actually take the path of the original module and putting the firewalled bin at the right level
   //   this will become important when we start seeing conflicts that wouldn't otherwise be conflicts because they're nested differently (different tsc versions - one on top and the other used by a postinstall of a dependency)
   for (const { bin, path: packagePath } of firewalledBins) {
-    await fs.symlink(link, path.join(path.dirname(packagePath),'./.bin/',bin))
+    await linkBinAbsolute({path: packagePath, bin, link, force: true } )
   }
 }
 
@@ -406,7 +400,7 @@ async function loadAllPackageConfigurations({ rootDir }) {
     }
 
     if (depPackageJson.bin) {
-      const binsList = Object.entries((typeof depPackageJson.bin === "string") ? { [depPackageJson.name]: depPackageJson.bin } : depPackageJson.bin)
+      const binsList = Object.entries(normalizeBin(depPackageJson).bin || {})
 
       binsList.forEach(([name, link]) => {
         const collection = binCandidates.get(name) || []
@@ -431,11 +425,11 @@ async function loadAllPackageConfigurations({ rootDir }) {
   const configs = {
     lifecycle: indexLifecycleConfiguration({
       packagesWithScripts: packagesWithScriptsLifecycle,
-      allowConfig: lavamoatConfig.allowScripts || {}
+      allowConfig: lavamoatConfig.allowScripts
     }),
     bin: indexBinsConfiguration({
       binCandidates,
-      allowConfig: lavamoatConfig.allowBins || {},
+      allowConfig: lavamoatConfig.allowBins
     })
   }
 
@@ -454,6 +448,7 @@ async function loadAllPackageConfigurations({ rootDir }) {
  * @return {ScriptsConfig}
  */
 function indexLifecycleConfiguration(config) {
+  config.allowConfig = config.allowConfig || {}
   // packages with config
   const configuredPatterns = Object.keys(config.allowConfig)
   // select allowed + disallowed
@@ -475,12 +470,14 @@ function indexLifecycleConfiguration(config) {
  * @return {BinsConfig}
  */
 function indexBinsConfiguration(config) {
+  // only autogenerate the initial config. A better heuristic would be to detect if any scripts from direct dependencies are missing
+  config.somePoliciesAreMissing = !config.allowConfig
 
+  config.allowConfig = config.allowConfig || {}
   config.excessPolicies = Object.keys(config.allowConfig).filter(b => !config.binCandidates.has(b))
   config.allowedBins = Object.entries(config.allowConfig).map(([bin, fullPath]) => config.binCandidates.get(bin)?.find((/** @type BinInfo */ candidate) => candidate.fullLinkPath === fullPath)).filter(a => a)
   const allowedBinNames = new Set(config.allowedBins.map(ab => ab.bin))
   config.firewalledBins = Array.from(config.binCandidates.entries()).filter(([bin]) => !allowedBinNames.has(bin)).flatMap(([bin, binInfos])=>binInfos)
-  config.somePoliciesAreMissing = config.binCandidates.size > 0 && Object.keys(config.allowedBins).length === 0
   return config
 }
 

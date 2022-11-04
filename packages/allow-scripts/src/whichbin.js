@@ -34,5 +34,7 @@ if (currentBinCandidates.length > 1) {
   
 console.error(`After you're done configuring, run allow-scripts again.
 ---------------------------------------------------------------------------`)
+
+process.exit(42)
   
 }

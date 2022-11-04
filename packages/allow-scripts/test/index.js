@@ -97,23 +97,21 @@ test('cli - run command - good dep as a sub dep', async (t) => {
   let cmd = path.join(allowScriptsSrcRoot, 'cli.js')
   let result = spawnSync(cmd, ['run'], { cwd: projectRoot })
 
-  // forward error output for debugging
-  console.error(result.stderr.toString('utf-8'))
+  // uncomment to forward error output for debugging
+  // console.error(result.stderr.toString('utf-8'))
 
   // assert the output
   t.deepEqual(result.stdout.toString().split('\n'), [
     'installing bin scripts',
-    '- bbb>good_dep',
     'running lifecycle scripts for event \"preinstall\"',
     '- bbb>good_dep',
     'running lifecycle scripts for event \"install\"',
     'running lifecycle scripts for event \"postinstall\"',
     '- bbb',
-    'running lifecycle scripts for top level package',
     '',
   ])
+  t.assert(result.stderr.toString().split('\n').some(line=>line.includes(`"good": "node_modules/good_dep/cli.sh"`)), 'Expected to see instructions on how to enable a bin script')
 
   t.assert(fs.existsSync(path.join(projectRoot, './node_modules/bbb/node_modules/.bin/good')), 'Expected a nested bin script to be installed in bbb/node_modules/.bin')
-  t.assert(fs.existsSync(path.join(projectRoot, './node_modules/bbb/.goodscriptworked')), 'Expected a bin script to be available from a postinstall script')
 
 })
