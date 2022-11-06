@@ -158,7 +158,6 @@ async function prepareBrowserifyScenarioOnDisk ({ scenario }) {
   copyFolderSync(nodePath, `${projectDir}/node_modules/lavamoat/`, {skip: ['node_modules']})
   copyFolderSync(corePath, `${projectDir}/node_modules/lavamoat-core/`, {skip: ['node_modules']})
   copyFolderSync(browserifyPath, `${projectDir}/node_modules/lavamoat-browserify/`, {skip: ['node_modules']})
-  console.warn(555, fs2.readFileSync(`${lavapackPath}/src/pack.js`).indexOf('GWGW2323'))
   if (installDevDepsResult.status !== 0) {
     const msg = `Error while installing browserify:\n${installDevDepsResult.stderr.toString()}`
     throw new Error(msg)
@@ -194,7 +193,6 @@ async function createBundleForScenario ({
   if (stderr.length) {
     console.warn(stderr)
   }
-  console.warn(444, bundle.indexOf(`["process"`))
   return { bundleForScenario: bundle, policyDir: policy }
 }
 
