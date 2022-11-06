@@ -2,7 +2,6 @@ const { runInNewContext } = require('vm')
 const browserify = require('browserify')
 const pify = require('pify')
 const { promises: fs } = require('fs')
-const fs2 = require('fs')
 const path = require('path')
 const watchify = require('watchify')
 const lavamoatPlugin = require('../src/index')
@@ -14,7 +13,12 @@ const { spawnSync } = require('child_process')
 const execFile = util.promisify(require('child_process').execFile)
 const limitConcurrency = require('throat')(1)
 
-
+const localLavaMoatDeps = {
+  lavapack: { src: 'lavapack/', dst: `@lavamoat/lavapack/` },
+  browserify: { src: 'browserify/', dst: `lavamoat-browserify/` },
+  node: { src: 'node/', dst: `lavamoat/` },
+  core: { src: 'core/', dst: `lavamoat-core/` },
+}
 
 module.exports = {
   createBundleFromEntry,
@@ -27,6 +31,33 @@ module.exports = {
   bundleAsync,
   prepareBrowserifyScenarioOnDisk,
   createBrowserifyScenarioFromScaffold
+}
+
+async function copyFolder(from, to, opts = {skip: []}) {
+  await fs.mkdir(to)
+  const elements = await fs.readdir(from)
+  for (const element of elements) {
+    if (opts.skip.includes(element)) {
+      continue
+    }
+    const f = path.join(from, element), t = path.join(to, element)
+    const stat = await fs.lstat(f)
+    if (stat.isFile()) {
+      await fs.copyFile(f, t)
+    } else {
+      await copyFolder(f, t, opts)
+    }
+  }
+}
+
+async function overrideDepsWithLocalPackages(projectDir) {
+  for (const name in localLavaMoatDeps) {
+    const dep = localLavaMoatDeps[name]
+    const src = path.resolve(__dirname, '..', '..', dep.src)
+    const dst = path.join(projectDir, 'node_modules', dep.dst)
+    await fs.rm(dst, { recursive: true, force: true })
+    await copyFolder(src, dst, {skip: ['node_modules']})
+  }
 }
 
 async function createBundleFromEntry (path, pluginOpts = {}) {
@@ -112,39 +143,18 @@ async function runBrowserify ({
 
 // const limited = require('throat')(2)
 
-function copyFolderSync(from, to, opts = {skip: []}) {
-  fs2.rmSync(to, { recursive: true, force: true })
-  fs2.mkdirSync(to)
-  fs2.readdirSync(from).forEach(element => {
-    if (fs2.lstatSync(path.join(from, element)).isFile()) {
-      fs2.copyFileSync(path.join(from, element), path.join(to, element))
-    } else {
-      for (const skip of opts.skip) {
-        if (element.indexOf(skip) > -1) return
-      }
-      copyFolderSync(path.join(from, element), path.join(to, element), opts)
-    }
-  });
-}
-
 async function prepareBrowserifyScenarioOnDisk ({ scenario }) {
   const { path: projectDir } = await tmp.dir()
   scenario.dir = projectDir
   console.warn(`created test project directory at "${projectDir}"`)
   // install browserify + lavamoat-plugin
   // path to project root for the browserify plugin
-  const lavapackPath = path.resolve(__dirname, '..', '..', 'lavapack')
-  const browserifyPath = path.resolve(__dirname, '..', '..', 'browserify')
-  const corePath = path.resolve(__dirname, '..', '..', 'core')
-  const nodePath = path.resolve(__dirname, '..', '..', 'node')
-  const pluginPath = path.resolve(__dirname, '..')
-  let depsToInstall = ['browserify@^17', pluginPath]
+  const depsToInstall = ['browserify@^17', path.resolve(__dirname, '..')]
   let runBrowserifyPath = `${__dirname}/fixtures/runBrowserify.js`
   if (scenario.type === 'factor') {
     depsToInstall.push(
       'through2@^3',
       'vinyl-buffer@^1',
-      lavapackPath,
       'bify-package-factor@^1',
     )
     runBrowserifyPath = `${__dirname}/fixtures/runBrowserifyBundleFactor.js`
@@ -153,11 +163,7 @@ async function prepareBrowserifyScenarioOnDisk ({ scenario }) {
   const installDevDepsResult = await limitConcurrency(async function () {
     return spawnSync('yarn', ['add','--network-concurrency 1', '-D', ...depsToInstall], { cwd: projectDir })
   })
-  // use local version of lavapack package rather than the remote one
-  copyFolderSync(lavapackPath, `${projectDir}/node_modules/@lavamoat/lavapack/`, {skip: ['node_modules']})
-  copyFolderSync(nodePath, `${projectDir}/node_modules/lavamoat/`, {skip: ['node_modules']})
-  copyFolderSync(corePath, `${projectDir}/node_modules/lavamoat-core/`, {skip: ['node_modules']})
-  copyFolderSync(browserifyPath, `${projectDir}/node_modules/lavamoat-browserify/`, {skip: ['node_modules']})
+  await overrideDepsWithLocalPackages(projectDir)
   if (installDevDepsResult.status !== 0) {
     const msg = `Error while installing browserify:\n${installDevDepsResult.stderr.toString()}`
     throw new Error(msg)
