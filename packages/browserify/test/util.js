@@ -33,15 +33,30 @@ module.exports = {
   createBrowserifyScenarioFromScaffold
 }
 
+async function copyFolder(from, to, opts = {skip: []}) {
+  await fs.mkdir(to)
+  const elements = await fs.readdir(from)
+  for (const element of elements) {
+    if (opts.skip.includes(element)) {
+      continue
+    }
+    const f = path.join(from, element), t = path.join(to, element)
+    const stat = await fs.lstat(f)
+    if (stat.isFile()) {
+      await fs.copyFile(f, t)
+    } else {
+      await copyFolder(f, t, opts)
+    }
+  }
+}
+
 async function overrideDepsWithLocalPackages(projectDir) {
-  const opts = { recursive: true, force: true }
-  const filter = (p) => p === 'node_modules'
   for (const name in localLavaMoatDeps) {
     const dep = localLavaMoatDeps[name]
     const src = path.resolve(__dirname, '..', '..', dep.src)
     const dst = path.join(projectDir, 'node_modules', dep.dst)
-    await fs.rm(dst, opts)
-    await fs.cp(src, dst, {...opts, filter})
+    await fs.rm(dst, { recursive: true, force: true })
+    await copyFolder(src, dst, {skip: ['node_modules']})
   }
 }
 
