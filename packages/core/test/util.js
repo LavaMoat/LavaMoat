@@ -403,6 +403,10 @@ function evaluateWithSourceUrl (filename, content, context) {
   if (!vmGlobalThis.globalThis) {
     vmGlobalThis.globalThis = vmGlobalThis
   }
+  // Since the browserify test uses this vm util as a browser env simulation,
+  // creating actual dom nodes that can leak the real global object is not possible,
+  // therefore there is no way to access the real global object otherwise, but since we
+  // have to (for the scuttling tests) - we intentionally export this util func to solve this:
   vmGlobalThis.getTrueGlobalThisForTestsOnly = () => vmGlobalThis
   // perform eval
   let result

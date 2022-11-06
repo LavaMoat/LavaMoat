@@ -3,7 +3,6 @@ const { createScenarioFromScaffold, autoConfigForScenario } = require('../util.j
 const one = () => {
   let globalObject = globalThis
   if (globalThis.getTrueGlobalThisForTestsOnly) {
-    // browserify env util for getting the true global object of the env
     globalObject = globalThis.getTrueGlobalThisForTestsOnly()
   }
   module.exports = globalObject.Math.SQRT2
