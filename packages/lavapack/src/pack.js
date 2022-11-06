@@ -80,7 +80,7 @@ function createPacker({
   assert(policy, 'must specify a policy')
 
   prelude = prelude.replace('__lavamoatSecurityOptions__', JSON.stringify({
-    scuttleGlobalThis,
+    scuttleGlobalThis, /*GWGW2323*/
     scuttleGlobalThisExceptions,
   }))
 
