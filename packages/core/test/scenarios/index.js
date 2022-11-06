@@ -22,11 +22,11 @@ const scenarios = [
   ...moduleExports,
   ...transforms,
   ...globalRef,
+  ...scuttle,
 ]
 
-async function * loadScenarios (loadScuttleScenarios = false) {
-  const scenarioCreators = [...scenarios, ...(loadScuttleScenarios ? scuttle : [])]
-  for (const scenarioCreator of scenarioCreators) {
+async function * loadScenarios () {
+  for (const scenarioCreator of scenarios) {
     yield await scenarioCreator()
   }
 }
