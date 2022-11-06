@@ -6,11 +6,6 @@ const one = () => {
     // browserify env util for getting the true global object of the env
     globalObject = globalThis.getTrueGlobalThisForTestsOnly()
   }
-  try {
-    // make sure scuttling is on in general
-    // this should fail when scuttling is on:
-    return globalObject.Promise
-  } catch (err) {}
   module.exports = globalObject.Math.SQRT2
 }
 
