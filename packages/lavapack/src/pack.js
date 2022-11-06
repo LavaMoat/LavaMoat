@@ -79,10 +79,13 @@ function createPacker({
   }
   assert(policy, 'must specify a policy')
 
-  prelude = prelude.replace('__lavamoatSecurityOptions__', JSON.stringify({
+  const xxx = JSON.stringify({
     scuttleGlobalThis, /*GWGW2323*/
     scuttleGlobalThisExceptions,
-  }))
+  })
+  console.warn('KOKOKOKO', prelude.indexOf('__lavamoatSecurityOptions__'), 234789897234, xxx)
+  prelude = prelude.replace('__lavamoatSecurityOptions__', xxx)
+  console.warn('KOKOKOKO', prelude.indexOf('__lavamoatSecurityOptions__'), 234789897234)
 
   // note: pack stream cant started emitting data until its received its first module
   // this is because the browserify pipeline is leaky until its finished being setup
