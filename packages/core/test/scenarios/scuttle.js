@@ -19,7 +19,7 @@ module.exports = [
       defineOne: one,
       expectedResult: Math.SQRT2,
       scuttleGlobalThis: true,
-      scuttleGlobalThisExceptions: ['process', 'console', 'Array', 'RegExp', 'Date', 'Math'],
+      scuttleGlobalThisExceptions: ['Set', 'Reflect', 'Object', 'process', 'console', 'Array', 'RegExp', 'Date', 'Math'],
     })
     await autoConfigForScenario({ scenario })
     return scenario
