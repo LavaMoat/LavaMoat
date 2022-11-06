@@ -1,15 +1,17 @@
 const { createScenarioFromScaffold, autoConfigForScenario } = require('../util.js')
 
 const one = () => {
-  let result
+  let globalObject = globalThis
   if (globalThis.getTrueGlobalThisForTestsOnly) {
-    // browserify env
-    result = globalThis.getTrueGlobalThisForTestsOnly().Math.SQRT2
-  } else {
-    // core/node env
-    result = Math.SQRT2
+    // browserify env util for getting the true global object of the env
+    globalObject = globalThis.getTrueGlobalThisForTestsOnly()
   }
-  module.exports = result
+  try {
+    // make sure scuttling is on in general
+    // this should fail when scuttling is on:
+    return globalObject.Promise
+  } catch (err) {}
+  module.exports = globalObject.Math.SQRT2
 }
 
 module.exports = [
@@ -19,7 +21,7 @@ module.exports = [
       defineOne: one,
       expectedResult: Math.SQRT2,
       scuttleGlobalThis: true,
-      scuttleGlobalThisExceptions: ['Set', 'Reflect', 'Object', 'process', 'console', 'Array', 'RegExp', 'Date', 'Math'],
+      scuttleGlobalThisExceptions: ['process', 'Set', 'Reflect', 'Object', 'console', 'Array', 'RegExp', 'Date', 'Math'],
     })
     await autoConfigForScenario({ scenario })
     return scenario
@@ -29,7 +31,7 @@ module.exports = [
       name: 'scuttle - host env global object is too scuttled to work',
       defineOne: one,
       scuttleGlobalThis: true,
-      scuttleGlobalThisExceptions: ['process', /*'console', 'Array', 'RegExp', 'Date', 'Math'*/],
+      scuttleGlobalThisExceptions: ['process', /*'Set', 'Reflect', 'Object', 'console', 'Array', 'RegExp', 'Date', 'Math'*/],
       expectedFailure: true,
       expectedFailureMessageRegex: /LavaMoat - property "[A-Za-z]*" of globalThis is inaccessible under scuttling mode/,
     })
