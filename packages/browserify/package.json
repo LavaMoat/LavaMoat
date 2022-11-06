@@ -1,6 +1,6 @@
 {
   "name": "lavamoat-browserify",
-  "version": "15.4.0",
+  "version": "15.4.1",
   "description": "browserify plugin for sandboxing dependencies with LavaMoat",
   "main": "src/index.js",
   "directories": {
@@ -13,7 +13,7 @@
   "dependencies": {
     "@babel/code-frame": "^7.16.7",
     "@lavamoat/aa": "^3.1.0",
-    "@lavamoat/lavapack": "^3.2.0",
+    "@lavamoat/lavapack": "^3.2.1",
     "browser-resolve": "^2.0.0",
     "concat-stream": "^2.0.0",
     "convert-source-map": "^1.8.0",
@@ -26,20 +26,20 @@
     "through2": "^3.0.0"
   },
   "devDependencies": {
-    "depcheck": "^1.4.0",
-    "eslint": "^7.22.0",
     "bify-package-factor": "^1.0.7",
     "browserify": "^17.0.0",
+    "depcheck": "^1.4.0",
+    "eslint": "^7.22.0",
     "eslint-plugin-ava": "^11.0.0",
     "eslint-plugin-standard": "^5.0.0",
     "keccak": "^3.0.2",
     "source-map": "^0.7.3",
     "source-map-explorer": "^2.5.2",
     "sourcemap-validator": "^2.1.0",
+    "throat": "^5.0.0",
     "tmp-promise": "^3.0.3",
     "vinyl-buffer": "^1.0.1",
-    "watchify": "^3.11.1",
-    "throat": "^5.0.0"
+    "watchify": "^3.11.1"
   },
   "scripts": {
     "test": "ava --timeout 2m --concurrency 1",
@@ -56,5 +56,6 @@
   "bugs": {
     "url": "https://github.com/LavaMoat/lavamoat/issues"
   },
-  "homepage": "https://github.com/LavaMoat/lavamoat#readme"
+  "homepage": "https://github.com/LavaMoat/lavamoat#readme",
+  "gitHead": "28a238fc4c3d55650bd2ba9a3603b1f275567286"
 }

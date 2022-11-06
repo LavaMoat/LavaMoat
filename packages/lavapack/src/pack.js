@@ -247,10 +247,7 @@ function extractSourceMaps (sourceCode) {
 }
 
 function wrapInModuleInitializer (moduleData, sourceMeta, sourcePathForModule, bundleWithPrecompiledModules) {
-  const filename = String(moduleData.file)
-  if (filename.includes('\n')) {
-    throw new Error('LavaMoat - encountered a filename containing a newline')
-  }
+  const filename = encodeURI(String(moduleData.file))
   let moduleWrapperSource
   if (bundleWithPrecompiledModules) {
     moduleWrapperSource = (
