@@ -9886,8 +9886,8 @@ markVirtualizedNativeFunction)
         // that we are removing it so we know to look into it, as happens when
         // the language evolves new features to existing intrinsics.
         if (subPermit !== false) {
-          // This call to `console.warn` is intentional. It is not a vestige of
-          // a debugging attempt. See the comment at top of file for an
+          // This call to `console.log` is intentional. It is not a vestige
+          // of a debugging attempt. See the comment at top of file for an
           // explanation.
           // eslint-disable-next-line @endo/no-polymorphic-call
           console.log(`Removing ${subPath}`);
