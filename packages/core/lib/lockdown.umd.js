@@ -9890,18 +9890,17 @@ markVirtualizedNativeFunction)
           // a debugging attempt. See the comment at top of file for an
           // explanation.
           // eslint-disable-next-line @endo/no-polymorphic-call
-          console.warn(`Removing ${subPath}`);
+          console.log(`Removing ${subPath}`);
         }
         try {
           delete obj[prop];
         } catch (err) {
           if (prop in obj) {
-            if (typeof obj === 'function' && (prop === 'prototype')) {
-              // debugger;
+            if (typeof obj === 'function' && prop === 'prototype') {
               obj.prototype = undefined;
               if (obj.prototype === undefined) {
                 // eslint-disable-next-line @endo/no-polymorphic-call
-                console.warn(`Tolerating undeletable ${subPath} === undefined`);
+                console.log(`Tolerating undeletable ${subPath} === undefined`);
                 // eslint-disable-next-line no-continue
                 continue;
               }
