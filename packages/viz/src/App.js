@@ -5,7 +5,7 @@ import * as mergePolicy from './merge-deep.js'
 import Nav from './views/nav.js'
 
 
-const { DepGraph } = require('./graphs/DepGraph')
+const { DepGraph } = require('./graphs/DepGraph.js')
 
 /* eslint-disable no-restricted-globals */
 const { LavamoatPolicies } = globalThis
