@@ -7,7 +7,7 @@
     "lib": "lib"
   },
   "engines": {
-    "node": ">10.0.0"
+    "node": ">=12.0.0"
   },
   "dependencies": {
     "fromentries": "^1.2.0",
