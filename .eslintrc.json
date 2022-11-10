@@ -1,16 +1,37 @@
 {
-  "parserOptions": {
-    "ecmaVersion": 2021,
-    "sourceType": "module"
-  },
-  "extends": "plugin:ava/recommended",
-  "plugins": [
-    "eslint-plugin-ava",
-    "eslint-plugin-standard"
+  "root": true,
+  "overrides": [
+    {
+      "parserOptions": {
+        "ecmaVersion": 2021,
+        "sourceType": "module"
+      },
+      "files": [
+        "src/**/*.js"
+      ],
+      "extends": [
+        "@metamask/eslint-config-nodejs"
+       ],
+        "rules": {
+          "jsdoc/require-jsdoc": 0,
+          "node/no-process-env": 0,
+          "node/no-process-exit": 0,
+          "node/no-sync": 0
+        }
+    },
+    {
+      "files": [
+        "test/**/*.js",
+        "src/**/*.test.js"
+      ],
+      "extends": [
+        "plugin:ava/recommended"
+      ],
+      "rules": {
+        "ava/no-import-test-files": "off"
+      }
+    }
   ],
-  "rules": {
-    "ava/no-import-test-files": "off"
-  },
   "env": {
     "es6": true
   }

@@ -41,11 +41,5 @@
       "templateRequire": "readonly",
       "lockdown": "readonly"
     }
-  },
-  "eslintIgnore": [
-    "/src/sourcemaps.js",
-    "/test/fixtures",
-    "/src/preludeTemplate.js",
-    "/src/kernelTemplate.js"
-  ]
+  }
 }
