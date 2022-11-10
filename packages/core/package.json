@@ -23,8 +23,8 @@
   },
   "scripts": {
     "lint": "yarn lint:eslint && yarn lint:deps",
-    "lint:eslint": "eslint \"src/**/*.js\" \"test/**/*.js\"",
-    "lint:fix": "eslint src/**/*.js test/**/*.js --fix",
+    "lint:eslint": "eslint .",
+    "lint:fix": "eslint --fix .",
     "lint:deps": "depcheck",
     "test": "ava --timeout=30s test/index.js"
   },

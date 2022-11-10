@@ -13,8 +13,8 @@
     "test": "yarn test:run",
     "test:run": "ava --timeout=30s test/index.js",
     "lint": "yarn lint:eslint && yarn lint:deps",
-    "lint:eslint": "eslint \"src/**/*.js\"",
-    "lint:fix": "eslint src/**/*.js --fix",
+    "lint:eslint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "lint:deps": "depcheck"
   },
   "devDependencies": {

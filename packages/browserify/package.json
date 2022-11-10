@@ -45,8 +45,8 @@
     "test": "ava --timeout 2m --concurrency 1",
     "test:prep": "WRITE_AUTO_POLICY=1 ./test/fixtures/secureBundling/run.sh",
     "lint": "yarn lint:eslint && yarn lint:deps",
-    "lint:eslint": "eslint \"src/**/*.js\" \"test/**/*.js\"",
-    "lint:fix": "eslint src/**/*.js test/**/*.js --fix",
+    "lint:eslint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "lint:deps": "depcheck",
     "build:ses": "(cd ./node_modules/ses && npm install && npm run build && cp ./dist/ses.umd.js ../../lib/)"
   },
