@@ -31,8 +31,9 @@
     "yargs": "^16.0.0"
   },
   "devDependencies": {
+    "@metamask/eslint-config-nodejs": "^10.0.0",
     "eslint-plugin-ava": "^11.0.0",
-    "eslint-plugin-standard": "^5.0.0"
+    "eslint-plugin-node": "^11.1.0"
   },
   "directories": {
     "example": "examples",

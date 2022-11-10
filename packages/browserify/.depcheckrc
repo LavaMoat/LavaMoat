@@ -1,6 +1,7 @@
 ignores:
   # monorepo deps
   - "ava"
+  - "eslint"
   # tests - used in tests
   - "lavamoat-browserify"
   - "keccak"

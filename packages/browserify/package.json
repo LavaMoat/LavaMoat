@@ -26,12 +26,12 @@
     "through2": "^3.0.0"
   },
   "devDependencies": {
+    "@metamask/eslint-config-nodejs": "^10.0.0",
     "bify-package-factor": "^1.0.7",
     "browserify": "^17.0.0",
     "depcheck": "^1.4.0",
-    "eslint": "^7.22.0",
     "eslint-plugin-ava": "^11.0.0",
-    "eslint-plugin-standard": "^5.0.0",
+    "eslint-plugin-node": "^11.1.0",
     "keccak": "^3.0.2",
     "source-map": "^0.7.3",
     "source-map-explorer": "^2.5.2",
