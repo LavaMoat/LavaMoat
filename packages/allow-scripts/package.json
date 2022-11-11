@@ -37,5 +37,8 @@
     "lint:deps": "depcheck"
   },
   "author": "",
-  "homepage": "https://github.com/LavaMoat/LavaMoat/tree/main/packages/allow-scripts"
+  "homepage": "https://github.com/LavaMoat/LavaMoat/tree/main/packages/allow-scripts",
+  "engines": {
+    "node": ">=14.0.0"
+  }
 }

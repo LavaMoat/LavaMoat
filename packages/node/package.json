@@ -44,5 +44,8 @@
     "url": "https://github.com/LavaMoat/lavamoat/issues"
   },
   "homepage": "https://github.com/LavaMoat/lavamoat#readme",
-  "description": ""
+  "description": "",
+  "engines": {
+    "node": ">=14.0.0"
+  }
 }
