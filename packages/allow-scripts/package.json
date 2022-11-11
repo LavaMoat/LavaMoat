@@ -10,6 +10,7 @@
     "@lavamoat/aa": "^3.0.0",
     "@npmcli/run-script": "^1.8.1",
     "bin-links": "4.0.1",
+    "npm-normalize-package-bin": "^3.0.0",
     "yargs": "^16.2.0"
   },
   "repository": {
