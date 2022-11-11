@@ -475,7 +475,7 @@
     "browserify>syntax-error>acorn-node": {
       "packages": {
         "browserify>syntax-error>acorn-node>acorn-walk": true,
-        "eslint>espree>acorn": true,
+        "eslint-plugin-ava>espree>acorn": true,
         "watchify>xtend": true
       }
     },
@@ -547,7 +547,7 @@
         "depcheck>@babel/traverse>@babel/parser": true,
         "depcheck>@babel/traverse>@babel/types": true,
         "depcheck>@babel/traverse>globals": true,
-        "eslint>debug": true
+        "depcheck>debug": true
       }
     },
     "depcheck>@babel/traverse>@babel/generator": {
@@ -607,6 +607,25 @@
       "packages": {
         "@babel/code-frame>@babel/highlight>@babel/helper-validator-identifier": true,
         "depcheck>@babel/traverse>@babel/types>to-fast-properties": true
+      }
+    },
+    "depcheck>debug": {
+      "builtin": {
+        "tty.isatty": true,
+        "util.deprecate": true,
+        "util.format": true,
+        "util.inspect": true
+      },
+      "globals": {
+        "console": true,
+        "document": true,
+        "localStorage": true,
+        "navigator": true,
+        "process": true
+      },
+      "packages": {
+        "@babel/code-frame>@babel/highlight>chalk>supports-color": true,
+        "depcheck>debug>ms": true
       }
     },
     "depcheck>is-core-module": {
@@ -681,26 +700,7 @@
         "duplexify>end-of-stream>once>wrappy": true
       }
     },
-    "eslint>debug": {
-      "builtin": {
-        "tty.isatty": true,
-        "util.deprecate": true,
-        "util.format": true,
-        "util.inspect": true
-      },
-      "globals": {
-        "console": true,
-        "document": true,
-        "localStorage": true,
-        "navigator": true,
-        "process": true
-      },
-      "packages": {
-        "@babel/code-frame>@babel/highlight>chalk>supports-color": true,
-        "eslint>debug>ms": true
-      }
-    },
-    "eslint>espree>acorn": {
+    "eslint-plugin-ava>espree>acorn": {
       "globals": {
         "define": true
       }
