@@ -1,7 +1,7 @@
 # LavaMoat Node - a runtime for running LavaMoat-protected NodeJS applications
 
 > **Warning**
-> experimental, has not been audited
+> experimental: LavaMoat Node is suitable for use in production with software that has been tested tested running under it, but the security it adds has not been audited
 
 `lavamoat` is a NodeJS runtime where modules are defined in [SES][SesGithub] Compartments. It aims to reduce the risk of malicious code in the app dependency graph, known as "software supply chain attacks".
 
