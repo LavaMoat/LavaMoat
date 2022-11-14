@@ -78,12 +78,15 @@
     runWithPrecompiledModules,
     reportStatsHook,
   }) {
+    // debug options are hard-coded at build time
+    const {
+      debugMode
+    } = {"debugMode":false}
     // security options are hard-coded at build time
     const {
       scuttleGlobalThis,
       scuttleGlobalThisExceptions,
-      debugMode,
-    } = {"scuttleGlobalThis":false,"scuttleGlobalThisExceptions":[],"debugMode":false}
+    } = __lavamoatSecurityOptions__
 
     // identify the globalRef
     const globalRef = (typeof globalThis !== 'undefined') ? globalThis : (typeof self !== 'undefined') ? self : (typeof global !== 'undefined') ? global : undefined
@@ -10969,13 +10972,13 @@ function makePrepareRealmGlobalFromConfig ({ createFunctionWrapper }) {
     return kernel
 
     function performScuttleGlobalThis (globalRef, extraPropsToAvoid = new Array()) {
-      const props = new Set(
-        getPrototypeChain(globalRef)
-        .map(obj => Object.getOwnPropertyNames(obj))
-      )
+      const props = new Array()
+      getPrototypeChain(globalRef)
+        .forEach(proto =>
+          props.push(...Object.getOwnPropertyNames(proto)))
 
       // support LM,SES exported APIs and polyfills
-      const avoidForLavaMoatCompatibility = ['LavaPack', 'Compartment', 'Error', 'globalThis']
+      const avoidForLavaMoatCompatibility = ['Compartment', 'Error', 'globalThis']
       const propsToAvoid = new Set([...avoidForLavaMoatCompatibility, ...extraPropsToAvoid])
 
       for (const prop of props) {
@@ -10985,7 +10988,6 @@ function makePrepareRealmGlobalFromConfig ({ createFunctionWrapper }) {
         if (Object.getOwnPropertyDescriptor(globalRef, prop)?.configurable === false) {
           continue
         }
-        // these props can't have getters, use undefined value instead
         const desc = {
           set: () => {
             console.warn(
@@ -11365,17 +11367,17 @@ function makePrepareRealmGlobalFromConfig ({ createFunctionWrapper }) {
   const { internalRequire } = kernel
 
   // create a lavamoat pulic API for loading modules over multiple files
-  const LavaPack = {
+  const LavaPack = Object.freeze({
     loadPolicy: Object.freeze(loadPolicy),
     loadBundle: Object.freeze(loadBundle),
     runModule: Object.freeze(runModule),
-  }
+  })
   // in debug mode, expose the kernel on the LavaPack API
   if (debugMode) {
     LavaPack._kernel = kernel
   }
 
-  globalThis.LavaPack = Object.freeze(LavaPack)
+  Object.defineProperty(globalThis, 'LavaPack', {value: LavaPack})
   return
 
 

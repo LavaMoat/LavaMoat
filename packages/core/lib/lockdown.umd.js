@@ -9896,6 +9896,15 @@ markVirtualizedNativeFunction)
           delete obj[prop];
         } catch (err) {
           if (prop in obj) {
+            if (typeof obj === 'function' && prop === 'prototype') {
+              obj.prototype = undefined;
+              if (obj.prototype === undefined) {
+                // eslint-disable-next-line @endo/no-polymorphic-call
+                console.log(`Tolerating undeletable ${subPath} === undefined`);
+                // eslint-disable-next-line no-continue
+                continue;
+              }
+            }
             // eslint-disable-next-line @endo/no-polymorphic-call
             console.error(`failed to delete ${subPath}`, err);
           } else {
