@@ -21,6 +21,8 @@
       "evil_dep": false,
       "bbb": true
     },
-    "allowBins": {}
+    "allowBins": {
+      "good": "node_modules/aaa/shouldntrun.sh"
+    }
   }
 }

@@ -80,8 +80,6 @@ async function runAllowedPackages({ rootDir }) {
     somePoliciesAreMissing
   } = await loadAllPackageConfigurations({ rootDir })
 
-  process._rawDebug({bin})
-
   if (somePoliciesAreMissing) {
     console.log('\n@lavamoat/allow-scripts has detected dependencies without configuration. explicit configuration required.')
     console.log('run "allow-scripts auto" to automatically populate the configuration.\n')
@@ -92,7 +90,7 @@ async function runAllowedPackages({ rootDir }) {
     process.exit(1)
   }
 
-  // Might as well delete entire .bin and recreate in case it was left there
+  // TODO: Might as well delete entire .bin and recreate in case it was left there
   // install bins
   if (bin.binCandidates.size > 0) {
     console.log('installing bin scripts')
@@ -152,7 +150,6 @@ async function setDefaultConfiguration({ rootDir }) {
     lifecycle.allowConfig[pattern] = false
   })
 
-  // TODO: generate default allows for obvious items
   if(bin.somePoliciesAreMissing) {
     bin.allowConfig = prepareBinScriptsPolicy(bin.binCandidates)
   }
@@ -218,9 +215,7 @@ async function installBinScripts(allowedBins) {
  * @param {string} link - absolute path to the whichbin.js script
  */
 async function installBinFirewall(firewalledBins, link) {
-  process._rawDebug({firewalledBins})
-  // TODO: fix to actually take the path of the original module and putting the firewalled bin at the right level
-  //   this will become important when we start seeing conflicts that wouldn't otherwise be conflicts because they're nested differently (different tsc versions - one on top and the other used by a postinstall of a dependency)
+  // Note how we take the path of the original package so that the bin is added at the appropriate level of node_modules nesting
   for (const { bin, path: packagePath } of firewalledBins) {
     await linkBinAbsolute({path: packagePath, bin, link, force: true } )
   }
@@ -476,8 +471,8 @@ function indexBinsConfiguration(config) {
   config.allowConfig = config.allowConfig || {}
   config.excessPolicies = Object.keys(config.allowConfig).filter(b => !config.binCandidates.has(b))
   config.allowedBins = Object.entries(config.allowConfig).map(([bin, fullPath]) => config.binCandidates.get(bin)?.find((/** @type BinInfo */ candidate) => candidate.fullLinkPath === fullPath)).filter(a => a)
-  const allowedBinNames = new Set(config.allowedBins.map(ab => ab.bin))
-  config.firewalledBins = Array.from(config.binCandidates.entries()).filter(([bin]) => !allowedBinNames.has(bin)).flatMap(([bin, binInfos])=>binInfos)
+
+  config.firewalledBins = Array.from(config.binCandidates.values()).flat().filter(binInfo => !config.allowedBins.includes(binInfo))
   return config
 }
 
