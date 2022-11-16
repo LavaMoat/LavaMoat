@@ -10993,7 +10993,9 @@ function makePrepareRealmGlobalFromConfig ({ createFunctionWrapper }) {
           continue
         }
         const parts = prop.split('/');
-        extraPropsToAvoid[i] = new RegExp(parts.slice(1, -1).join('/'), parts[parts.length - 1])
+        const pattern = parts.slice(1, -1).join('/')
+        const flags = parts[parts.length - 1]
+        extraPropsToAvoid[i] = new RegExp(pattern, flags)
       }
 
       // support LM,SES exported APIs and polyfills
