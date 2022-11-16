@@ -119,8 +119,9 @@ async function runBrowserify ({
   ...additionalOpts
 }) {
   if (additionalOpts?.scuttleGlobalThisExceptions) {
+    // toString regexps if there's any
     for (let i = 0; i < additionalOpts.scuttleGlobalThisExceptions.length; i++) {
-      additionalOpts.scuttleGlobalThisExceptions[i] += '' // toString regexps if there's any
+      additionalOpts.scuttleGlobalThisExceptions[i] = String(additionalOpts.scuttleGlobalThisExceptions[i])
     }
   }
   const lavamoatParams = {

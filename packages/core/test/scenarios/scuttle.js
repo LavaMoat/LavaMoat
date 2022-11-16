@@ -5,7 +5,10 @@ const one = () => {
   if (globalThis.getTrueGlobalThisForTestsOnly) {
     globalObject = globalThis.getTrueGlobalThisForTestsOnly()
   }
-  module.exports = (globalObject.Float32Array , globalObject.Math.PI)
+  // this will throw if regex scuttling fails
+  if (globalObject.Float32Array) {
+    module.exports = globalObject.Math.PI
+  }
 }
 
 module.exports = [

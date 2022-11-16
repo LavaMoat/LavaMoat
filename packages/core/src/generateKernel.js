@@ -36,8 +36,9 @@ function generateKernel (opts = {}) {
     // if not, should be left as is to be replaced by a later processor (e.g. LavaPack).
     const {scuttleGlobalThis, scuttleGlobalThisExceptions} = opts
     if (scuttleGlobalThisExceptions) {
+      // toString regexps if there's any
       for (let i = 0; i < scuttleGlobalThisExceptions.length; i++) {
-        scuttleGlobalThisExceptions[i] += '' // toString regexps if there's any
+        scuttleGlobalThisExceptions[i] = String(scuttleGlobalThisExceptions[i])
       }
     }
     output = stringReplace(output, '__lavamoatSecurityOptions__', JSON.stringify({

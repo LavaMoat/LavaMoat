@@ -79,8 +79,9 @@ function createPacker({
   }
   assert(policy, 'must specify a policy')
 
+  // toString regexps if there's any
   for (let i = 0; i < scuttleGlobalThisExceptions.length; i++) {
-    scuttleGlobalThisExceptions[i] += '' // toString regexps if there's any
+    scuttleGlobalThisExceptions[i] = String(scuttleGlobalThisExceptions[i])
   }
 
   prelude = prelude.replace('__lavamoatSecurityOptions__', JSON.stringify({
