@@ -3,6 +3,7 @@
   // therefore this is our way of capturing access to basic APIs LavaMoat
   // uses to still be accessible only to LavaMoat after scuttling occurs
   const {
+    RegExp,
     Reflect,
     Object,
     Error,

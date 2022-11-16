@@ -5,7 +5,7 @@ const browserify = require('browserify')
 const lavamoatOpts = {
   writeAutoPolicy: false,
   scuttleGlobalThis: true,
-  scuttleGlobalThisExceptions: ['print'],
+  scuttleGlobalThisExceptions: ['print', /HTML[a-zA-Z]*Element/, 'prompt'],
 }
 
 // enable policy autogen if specified

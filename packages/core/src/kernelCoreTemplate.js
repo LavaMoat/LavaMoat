@@ -104,12 +104,23 @@
         .forEach(proto =>
           props.push(...Object.getOwnPropertyNames(proto)))
 
+      for (let i = 0; i < extraPropsToAvoid.length; i++) {
+        const prop = extraPropsToAvoid[i]
+        if (!prop.startsWith('/')) {
+          continue
+        }
+        const parts = prop.split('/');
+        const pattern = parts.slice(1, -1).join('/')
+        const flags = parts[parts.length - 1]
+        extraPropsToAvoid[i] = new RegExp(pattern, flags)
+      }
+
       // support LM,SES exported APIs and polyfills
       const avoidForLavaMoatCompatibility = ['Compartment', 'Error', 'globalThis']
       const propsToAvoid = new Set([...avoidForLavaMoatCompatibility, ...extraPropsToAvoid])
 
       for (const prop of props) {
-        if (propsToAvoid.has(prop)) {
+        if (shouldAvoidProp(propsToAvoid, prop)) {
           continue
         }
         if (Object.getOwnPropertyDescriptor(globalRef, prop)?.configurable === false) {
@@ -459,6 +470,18 @@
         current = Reflect.getPrototypeOf(current)
       }
       return protoChain
+    }
+
+    function shouldAvoidProp(propsToAvoid, prop) {
+      for (const avoid of propsToAvoid) {
+        if (avoid instanceof RegExp && avoid.test(prop)) {
+          return true
+        }
+        if (propsToAvoid.has(prop)) {
+          return true
+        }
+      }
+      return false
     }
   }
 })()
