@@ -15,7 +15,7 @@ module.exports = [
       defineOne: one,
       expectedResult: Math.PI,
       scuttleGlobalThis: true,
-      scuttleGlobalThisExceptions: ['process', '/[0-9]+/', 'Set', 'Reflect', 'Object', 'console', 'Array', 'RegExp', 'Date', 'Math'],
+      scuttleGlobalThisExceptions: ['process', /[0-9]+/, 'Set', 'Reflect', 'Object', 'console', 'Array', 'RegExp', 'Date', 'Math'],
     })
     await autoConfigForScenario({ scenario })
     return scenario
