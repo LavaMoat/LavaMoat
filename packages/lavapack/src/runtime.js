@@ -3,6 +3,7 @@
   // therefore this is our way of capturing access to basic APIs LavaMoat
   // uses to still be accessible only to LavaMoat after scuttling occurs
   const {
+    RegExp,
     Reflect,
     Object,
     Error,
@@ -10007,6 +10008,15 @@ markVirtualizedNativeFunction)
           delete obj[prop];
         } catch (err) {
           if (prop in obj) {
+            if (typeof obj === 'function' && prop === 'prototype') {
+              obj.prototype = undefined;
+              if (obj.prototype === undefined) {
+                // eslint-disable-next-line @endo/no-polymorphic-call
+                console.log(`Tolerating undeletable ${subPath} === undefined`);
+                // eslint-disable-next-line no-continue
+                continue;
+              }
+            }
             // eslint-disable-next-line @endo/no-polymorphic-call
             console.error(`failed to delete ${subPath}`, err);
           } else {
@@ -10977,12 +10987,21 @@ function makePrepareRealmGlobalFromConfig ({ createFunctionWrapper }) {
         .forEach(proto =>
           props.push(...Object.getOwnPropertyNames(proto)))
 
+      for (let i = 0; i < extraPropsToAvoid.length; i++) {
+        const prop = extraPropsToAvoid[i]
+        if (!prop.startsWith('/')) {
+          continue
+        }
+        const parts = prop.split('/');
+        extraPropsToAvoid[i] = new RegExp(parts.slice(1, -1), parts[parts.length - 1])
+      }
+
       // support LM,SES exported APIs and polyfills
       const avoidForLavaMoatCompatibility = ['Compartment', 'Error', 'globalThis']
       const propsToAvoid = new Set([...avoidForLavaMoatCompatibility, ...extraPropsToAvoid])
 
       for (const prop of props) {
-        if (propsToAvoid.has(prop)) {
+        if (shouldAvoidProp(propsToAvoid, prop)) {
           continue
         }
         if (Object.getOwnPropertyDescriptor(globalRef, prop)?.configurable === false) {
@@ -11332,6 +11351,18 @@ function makePrepareRealmGlobalFromConfig ({ createFunctionWrapper }) {
         current = Reflect.getPrototypeOf(current)
       }
       return protoChain
+    }
+
+    function shouldAvoidProp(propsToAvoid, prop) {
+      for (const avoid of propsToAvoid) {
+        if (avoid instanceof RegExp && avoid.test(prop)) {
+          return true
+        }
+        if (propsToAvoid.has(prop)) {
+          return true
+        }
+      }
+      return false
     }
   }
 })()
