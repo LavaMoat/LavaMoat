@@ -35,21 +35,21 @@ function writeRcFileContent({file, exists, entry}){
   }
 }
 
-function writeRcFile () {
+function writeRcFile (pkgManagerDefault = 'npm') {
   const yarnRcExists = existsSync(addInstallParentDir('.yarnrc'))
   const yarnYmlExists = existsSync(addInstallParentDir('.yarnrc.yml'))
   const npmRcExists = existsSync(addInstallParentDir('.npmrc'))
   const yarnLockExists = existsSync(addInstallParentDir('yarn.lock'))
 
   const configs = []
-  if (yarnRcExists || yarnLockExists) {
+  if (yarnRcExists || yarnLockExists || pkgManagerDefault === 'yarn1') {
     configs.push({
       file: ".yarnrc",
       exists: yarnRcExists,
       entry: "ignore-scripts true",
     })
   }
-  if (yarnYmlExists || yarnLockExists) {
+  if (yarnYmlExists || yarnLockExists|| pkgManagerDefault === 'yarn3') {
     configs.push({
       file: ".yarnrc.yml",
       exists: yarnYmlExists,

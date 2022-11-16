@@ -5,6 +5,10 @@
   "bin": {
     "allow-scripts": "src/cli.js"
   },
+  "exports":{
+    ".": "./src/index.js",
+    "./setup": "./src/setup.js"
+  },
   "license": "MIT",
   "dependencies": {
     "@lavamoat/aa": "^3.1.0",

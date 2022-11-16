@@ -2,11 +2,13 @@ const { promises: fs } = require('fs')
 const path = require('path')
 const npmRunScript = require('@npmcli/run-script')
 const { loadCanonicalNameMap } = require('@lavamoat/aa')
+const setup = require('./setup')
 
 module.exports = {
   runAllowedPackages,
   setDefaultConfiguration,
   printPackagesList,
+  setup
 }
 
 async function runAllowedPackages ({ rootDir }) {
