@@ -10,11 +10,11 @@ function makeInitStatsHook ({ onStatsReady }) {
       const startTime = Date.now()
       // console.log(`loaded module ${moduleId}`)
       const statRecord = {
-        "name": moduleId,
-        "value": null,
-        "children": [],
-        "startTime": startTime,
-        "endTime": null
+        'name': moduleId,
+        'value': null,
+        'children': [],
+        'startTime': startTime,
+        'endTime': null
       }
       // add as child to current
       if (statModuleStack.length > 0) {

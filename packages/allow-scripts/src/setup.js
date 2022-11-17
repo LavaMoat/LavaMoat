@@ -44,24 +44,24 @@ function writeRcFile () {
   const configs = []
   if (yarnRcExists || yarnLockExists) {
     configs.push({
-      file: ".yarnrc",
+      file: '.yarnrc',
       exists: yarnRcExists,
-      entry: "ignore-scripts true",
+      entry: 'ignore-scripts true',
     })
   }
   if (yarnYmlExists || yarnLockExists) {
     configs.push({
-      file: ".yarnrc.yml",
+      file: '.yarnrc.yml',
       exists: yarnYmlExists,
-      entry: "enableScripts: false",
+      entry: 'enableScripts: false',
     })
   }
   if (configs.length === 0) {
     // default to npm, because that's what everyone has anyway
     configs.push({
-      file: ".npmrc",
+      file: '.npmrc',
       exists: npmRcExists,
-      entry: "ignore-scripts=true",
+      entry: 'ignore-scripts=true',
     })
   }
 

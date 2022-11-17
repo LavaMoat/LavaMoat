@@ -1,5 +1,5 @@
 (function () {
-  "use strict"
+  'use strict'
   return createKernelCore
 
   function createKernelCore ({
@@ -130,13 +130,13 @@
           set: () => {
             console.warn(
               `LavaMoat - property "${prop}" of globalThis cannot be set under scuttling mode. ` +
-              `To learn more visit https://github.com/LavaMoat/LavaMoat/pull/360.`
+              'To learn more visit https://github.com/LavaMoat/LavaMoat/pull/360.'
             )
           },
           get: () => {
             throw new Error(
               `LavaMoat - property "${prop}" of globalThis is inaccessible under scuttling mode. ` +
-              `To learn more visit https://github.com/LavaMoat/LavaMoat/pull/360.`
+              'To learn more visit https://github.com/LavaMoat/LavaMoat/pull/360.'
             )
           },
           configurable: false

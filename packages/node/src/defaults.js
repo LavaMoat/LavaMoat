@@ -1,6 +1,6 @@
-const { getDefaultPaths } = require("lavamoat-core")
+const { getDefaultPaths } = require('lavamoat-core')
 
-const defaultPaths = getDefaultPaths("node")
+const defaultPaths = getDefaultPaths('node')
 
 module.exports = {
   scuttleGlobalThis: false,

@@ -34,7 +34,7 @@ test('sourcemap test', async (t) => {
   const modules = [{
     id: '1',
     sourceFile: 'index.js',
-    source: `require('./log.js'); require('./util.js')`,
+    source: 'require(\'./log.js\'); require(\'./util.js\')',
     deps: {
       './log.js': '2',
       './util.js': '3'
@@ -43,12 +43,12 @@ test('sourcemap test', async (t) => {
   }, {
     id: '2',
     sourceFile: 'log.js',
-    source: `console.log('hi');\nnew Error('danger');\nconsole.log('the end');`,
+    source: 'console.log(\'hi\');\nnew Error(\'danger\');\nconsole.log(\'the end\');',
     deps: {},
   }, {
     id: '3',
     sourceFile: 'util.js',
-    source: `module.exports.add = (a,b) => a+b`,
+    source: 'module.exports.add = (a,b) => a+b',
     deps: {},
   }]
   modules.forEach(moduleData => {
