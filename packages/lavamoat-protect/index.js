@@ -21,25 +21,25 @@ module.exports = {
   async protectProject(){
     try {
       const pkgManagerDefault = detectPkgManager()
-      const pkgManagerChoice = await promptly.choose(`Which package manager are you using?`, SUPPORTED_PKG_MANAGERS, {
+      const pkgManagerChoice = await promptly.choose('Which package manager are you using?', SUPPORTED_PKG_MANAGERS, {
         default: pkgManagerDefault
       })
 
-      if(await promptly.confirm(`Would you like to install protection against malicious scripts?`)) {
+      if(await promptly.confirm('Would you like to install protection against malicious scripts?')) {
         await setupScripts(pkgManagerChoice)
       }
-      if(await promptly.confirm(`Would you like to install a linter for your lockfile?`)) {
+      if(await promptly.confirm('Would you like to install a linter for your lockfile?')) {
         await setupLockfileLint(pkgManagerChoice)
       }
       // TODO: ask the question in a way that it can protect CI and Node.js programs
-      if(await promptly.confirm(`Would you like to install lavamoat-node for runtime protections?`)) {
+      if(await promptly.confirm('Would you like to install lavamoat-node for runtime protections?')) {
         await installLavamoat(pkgManagerChoice)
       }
       // We could attempt to detect package.json->scripts->* and wrap that with lavamoat, but I don't know how effective that would be
 
 
     } catch (error) {
-      console.error(`Sorry, that didn't work out...`, error)
+      console.error('Sorry, that didn\'t work out...', error)
     }
   }
 }
