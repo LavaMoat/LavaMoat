@@ -8,7 +8,7 @@
     "lint:eslint": "eslint '*.js'",
     "lint:fix": "eslint --fix '*.js'",
     "lint:deps": "depcheck",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Warning: no test specified\""
   },
   "dependencies": {
     "@lavamoat/allow-scripts": "^2.1.0",
