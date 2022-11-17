@@ -17,8 +17,8 @@ module.exports = async function setupScripts(pkgManager) {
     }
   }
 
-  patchPackageJson(pkgManager)
-
   // Generate the RC files setup
   writeRcFile(pkgManager)
+
+  patchPackageJson()
 }
