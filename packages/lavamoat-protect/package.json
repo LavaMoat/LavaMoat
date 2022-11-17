@@ -4,14 +4,22 @@
   "description": "",
   "bin": "cli.js",
   "scripts": {
+    "lint": "yarn lint:eslint && yarn lint:deps",
+    "lint:eslint": "eslint '*.js'",
+    "lint:fix": "eslint --fix '*.js'",
+    "lint:deps": "depcheck",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
+    "@lavamoat/allow-scripts": "^2.1.0",
     "promptly": "^3.2.0",
-    "semver": "^7.3.8",
-    "@lavamoat/allow-scripts": "^2.1.0"
+    "semver": "^7.3.8"
   },
   "keywords": [],
   "author": "MetaMask security research team",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "eslint-plugin-ava": "^11.0.0",
+    "eslint-plugin-standard": "^5.0.0"
+  }
 }
