@@ -79,7 +79,7 @@ function updatePackageJson(input) {
   writeFileSync(p, JSON.stringify(mergedConf, undefined, 2), { encoding: 'utf-8' })
 }
 
-function patchPackageJson (runPkgManager) {
+function patchPackageJson () {
   updatePackageJson({
     scripts: {
       'lavamoat-postinstall': './node_modules/@lavamoat/allow-scripts/src/cli.js',
@@ -88,33 +88,5 @@ function patchPackageJson (runPkgManager) {
       '@lavamoat/preinstall-always-fail': 'latest',
     }
   })
-  if (runPkgManager) {
-    let cmd, cmdArgs
-
-    switch (runPkgManager) {
-      case 'npm':
-        cmd = 'npm'
-        cmdArgs = []
-        break
-      case 'yarn1':
-      case 'yarn3':
-        cmd = 'yarn'
-        cmdArgs = []
-        break
-      case 'pnpm':
-        cmd = 'pnpm'
-        cmdArgs = []
-        break
-      default:
-    }
-
-    const result = spawnSync(cmd, cmdArgs, {})
-
-    if (result.status !== 0) {
-      const err = new Error(`'${cmd}' failure: ${result.stderr}`)
-      err.status = result.status
-      throw err
-    }
-  }
-  console.log('@lavamoat/allow-scripts:: Added dependency @lavamoat/preinstall-always-fail.')
+  console.log('@lavamoat/allow-scripts:: Added dependency @lavamoat/preinstall-always-fail. You can now run your package manager to complete installation.')
 }

@@ -32,7 +32,7 @@ async function start () {
     }
     case 'setup': {
       writeRcFile()
-      patchPackageJson(existsSync('./.npmrc') ? 'npm' : 'yarn1')
+      patchPackageJson()
       return
     }
     // (error) unrecognized
