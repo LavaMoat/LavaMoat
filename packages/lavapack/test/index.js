@@ -64,14 +64,14 @@ test('sourcemap test', async (t) => {
   const converter = convertSourceMap.fromSource(bundleString)
   const rawSourceMap = converter.toObject()
 
-  const consumer = await new SourceMapConsumer(rawSourceMap);
+  const consumer = await new SourceMapConsumer(rawSourceMap)
   modules.forEach(({ sourceFile }) => {
     const bundleStartPos = consumer.generatedPositionFor({ source: sourceFile, line: 1, column: 0 })
     const bundleLine = bundleString.split('\n')[bundleStartPos.line - 1]
     console.log(`${sourceFile}:\n${bundleLine}`)
   })
   
-  consumer.destroy();
+  consumer.destroy()
   t.pass('no error thrown')
 })
 
