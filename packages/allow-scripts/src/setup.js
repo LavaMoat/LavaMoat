@@ -2,14 +2,13 @@ const { existsSync,
         appendFileSync,
         readFileSync,
         writeFileSync,
-        createWriteStream,
       } = require('fs')
 const { spawnSync } = require('child_process')
 const path = require('path')
 
 module.exports = {
   writeRcFile,
-  addPreinstallAFDependency
+  patchPackageJson
 }
 
 function addInstallParentDir(filename) {
@@ -68,23 +67,54 @@ function writeRcFile (pkgManagerDefault = 'npm') {
   configs.forEach(writeRcFileContent)
 }
 
-function addPreinstallAFDependency () {
-  let cmd, cmdArgs
-
-  if (existsSync('./.npmrc')) {
-    cmd = 'npm'
-    cmdArgs = ['install', '-d', '@lavamoat/preinstall-always-fail']
-  } else {
-    cmd = 'yarn'
-    cmdArgs = ['add', '-D', '@lavamoat/preinstall-always-fail']
+function updatePackageJson(input) {
+  const p = path.join(process.cwd(), 'package.json')
+  const oldConf = JSON.parse(readFileSync(p, { encoding: 'utf-8' }))
+  const mergedConf = { ...oldConf }
+  for (const [k, v] of Object.entries(input)) {
+    oldConf[k] = typeof v === 'object' && typeof oldConf[k] === 'object'
+      ? { ...oldConf[k], ...v }
+      : v
   }
+  writeFileSync(p, JSON.stringify(mergedConf, undefined, 2), { encoding: 'utf-8' })
+}
 
-  let result = spawnSync(cmd, cmdArgs, {})
+function patchPackageJson (runPkgManager) {
+  updatePackageJson({
+    scripts: {
+      'lavamoat-postinstall': './node_modules/@lavamoat/allow-scripts/src/cli.js',
+    },
+    devDependencies: {
+      '@lavamoat/preinstall-always-fail': 'latest',
+    }
+  })
+  if (runPkgManager) {
+    let cmd, cmdArgs
 
-  if (result.status !== 0) {
-    process.stderr.write(result.stderr);
-    process.exit(result.status);
-  } else {
-    console.log('@lavamoat/allow-scripts:: Added dependency @lavamoat/preinstall-always-fail.')
+    switch (runPkgManager) {
+      case 'npm':
+        cmd = 'npm'
+        cmdArgs = []
+        break
+      case 'yarn1':
+      case 'yarn3':
+        cmd = 'yarn'
+        cmdArgs = []
+        break
+      case 'pnpm':
+        cmd = 'pnpm'
+        cmdArgs = []
+        break
+      default:
+    }
+
+    const result = spawnSync(cmd, cmdArgs, {})
+
+    if (result.status !== 0) {
+      const err = new Error(`'${cmd}' failure: ${result.stderr}`)
+      err.status = result.status
+      throw err
+    }
   }
+  console.log('@lavamoat/allow-scripts:: Added dependency @lavamoat/preinstall-always-fail.')
 }
