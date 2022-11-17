@@ -70,7 +70,7 @@ function detectPkgManager(){
   }
 
   const pkgConf = getPackageJson()
-  ;;(['npm', 'yarn', 'pnpm']).map(engine => ([engine, pkgConf?.engines?.[engine]]))
+  ;(['npm', 'yarn', 'pnpm']).map(engine => ([engine, pkgConf?.engines?.[engine]]))
     .filter(([,version]) => !!version)
     .map(([e, v]) => {
       if (e === 'yarn') {

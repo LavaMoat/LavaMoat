@@ -10,12 +10,12 @@ switch (command) {
   case "project":
     protectProject()
 
-  break;
+  break
   case "env":
   case "devenv":
   case "dev":
 
-  break;
+  break
   default:
     console.log('Choose one of the subcommands: project devenv')
 }
