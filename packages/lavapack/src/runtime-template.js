@@ -122,7 +122,7 @@
   function onStatsReady (moduleGraphStatsObj) {
     const graphId = Date.now()
     console.warn(`completed module graph init "${graphId}" in ${moduleGraphStatsObj.value}ms ("${moduleGraphStatsObj.name}")`)
-    console.warn(`logging module init stats object:`)
+    console.warn('logging module init stats object:')
     console.warn(JSON.stringify(moduleGraphStatsObj, null, 2))
   }
 
