@@ -82,8 +82,8 @@ function addPreinstallAFDependency () {
   let result = spawnSync(cmd, cmdArgs, {})
 
   if (result.status !== 0) {
-    process.stderr.write(result.stderr);
-    process.exit(result.status);
+    process.stderr.write(result.stderr)
+    process.exit(result.status)
   } else {
     console.log('@lavamoat/allow-scripts:: Added dependency @lavamoat/preinstall-always-fail.')
   }

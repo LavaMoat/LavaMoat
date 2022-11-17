@@ -109,7 +109,7 @@
         if (!prop.startsWith('/')) {
           continue
         }
-        const parts = prop.split('/');
+        const parts = prop.split('/')
         const pattern = parts.slice(1, -1).join('/')
         const flags = parts[parts.length - 1]
         extraPropsToAvoid[i] = new RegExp(pattern, flags)

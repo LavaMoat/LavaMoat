@@ -310,6 +310,6 @@ function displayRichCompatWarning ({ moduleRecord, compatWarnings }) {
 function getMapKeyForValue(map, searchValue) {
   for (let [key, value] of map.entries()) {
     if (value === searchValue)
-      return key;
+      return key
   }
 }

@@ -32,5 +32,5 @@ async function loadPolicyAndApplyOverrides({ debugMode, policyPath, policyOverri
     // mergePolicy() should be able to do it in one pass.
     fs.writeFileSync(policyPath, jsonStringify(lavamoatPolicy, { space: 2 }))
   }
-  return lavamoatPolicy;
+  return lavamoatPolicy
 }

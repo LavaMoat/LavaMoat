@@ -21,9 +21,9 @@ function parseArgs () {
     .help()
 
   const parsedArgs = argsParser.parse()
-  const commandName = parsedArgs._[0];
+  const commandName = parsedArgs._[0]
 
-  const binEntry = path.resolve(process.cwd(), './node_modules/.bin/', commandName);
+  const binEntry = path.resolve(process.cwd(), './node_modules/.bin/', commandName)
   if (!fs.existsSync(binEntry)) {
     console.error(`Error: '${commandName}' is not one of the locally installed commands. Missing: '${binEntry}'
     Possible reasons for this error:
