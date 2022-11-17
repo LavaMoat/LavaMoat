@@ -16,7 +16,8 @@
           "jsdoc/require-jsdoc": 0,
           "node/no-process-env": 0,
           "node/no-process-exit": 0,
-          "node/no-sync": 0
+          "node/no-sync": 0,
+          "semi": ["error", "never"]
         }
     },
     {
