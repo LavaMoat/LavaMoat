@@ -36,7 +36,7 @@ module.exports = {
         await installLavamoat(pkgManagerChoice)
       }
       // We could attempt to detect package.json->scripts->* and wrap that with lavamoat, but I don't know how effective that would be
-      
+
 
     } catch (error) {
       console.error(`Sorry, that didn't work out...`, error)
@@ -48,7 +48,7 @@ module.exports = {
  * @typedef {'npm' | 'pnpm' | 'yarn1' | 'yarn3'} PkgM
  */
 /**
- * @return {PkgM} 
+ * @return {PkgM}
  */
 function detectPkgManager(){
   const pkgManagersFound = new Set()
@@ -68,13 +68,13 @@ function detectPkgManager(){
   if (cfg['.pnpmfile.cjs'] || cfg['pnpm-workspace.yml']) {
     pkgManagersFound.add('pnpm')
   }
-  
+
   const pkgConf = getPackageJson()
   ;;(['npm', 'yarn', 'pnpm']).map(engine => ([engine, pkgConf?.engines?.[engine]]))
     .filter(([,version]) => !!version)
     .map(([e, v]) => {
       if (e === 'yarn') {
-        switch (semver.major(v)) {      
+        switch (semver.major(v)) {
           case 1:
             return 'yarn1'
           case 3:
@@ -91,7 +91,7 @@ function detectPkgManager(){
     if (pkgManagersFound['yarn1'] || pkgManagersFound['yarn3']) {
       pkgManagersFound.delete('yarnUncertain')
     }
-  
+
   /*
    "engines": {
     "node": ">=4.4.7 <7.0.0",
@@ -109,7 +109,7 @@ function detectPkgManager(){
     pkgManagersFound.delete('yarnUncertain')
     pkgManagersFound.add('yarn1')
   }
-  
+
   return /** @type {PkgM} */  (Object.keys(pkgManagersFound).sort().reverse()[0] || 'npm')
 }
 
