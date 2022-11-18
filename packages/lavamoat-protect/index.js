@@ -118,7 +118,7 @@ function detectConfigFiles(){
     '.pnpmfile.cjs': existsSync(projectRelative('.pnpmfile.cjs')),
     'pnpm-workspace.yml': existsSync(projectRelative('pnpm-workspace.yaml')) || existsSync(projectRelative('pnpm-workspace.yml')),
     '.yarnrc': existsSync(projectRelative('.yarnrc')),
-    'yarnrc.yml': existsSync(projectRelative('.yarnrn.yaml')) || existsSync(projectRelative('.yarnrc.yml')),
+    'yarnrc.yml': existsSync(projectRelative('.yarnrc.yml')),
     'yarn.lock': existsSync(projectRelative('yarn.lock')),
     '.npmrc': existsSync(projectRelative('.npmrc')),
     'package-lock.json': existsSync(projectRelative('package-lock.json')),
