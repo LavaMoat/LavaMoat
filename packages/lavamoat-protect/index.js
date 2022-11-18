@@ -21,11 +21,11 @@ module.exports = {
   async protectProject(){
     try {
       const pkgManagerDefault = detectPkgManager()
-      const pkgManagerChoice = await promptly.choose('Which package manager are you using?', SUPPORTED_PKG_MANAGERS, {
+      const pkgManagerChoice = await promptly.choose(`Which package manager are you using? [${SUPPORTED_PKG_MANAGERS.map(p => p === pkgManagerDefault ? '*'+p : p)}]`, SUPPORTED_PKG_MANAGERS, {
         default: pkgManagerDefault
       })
 
-      if(await promptly.confirm('Would you like to install protection against malicious scripts?')) {
+      if(await promptly.confirm('Would you like to install protection against malicious scripts? [y/n]')) {
         await setupScripts(pkgManagerChoice)
       }
       if(await promptly.confirm('Would you like to install a linter for your lockfile?')) {
