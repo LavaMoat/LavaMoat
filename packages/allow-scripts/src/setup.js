@@ -1,15 +1,15 @@
+const colors = require('ansi-colors')
+const { diffJson } = require('diff')
 const { existsSync,
         appendFileSync,
         readFileSync,
         writeFileSync,
-        createWriteStream,
       } = require('fs')
-const { spawnSync } = require('child_process')
 const path = require('path')
 
 module.exports = {
   writeRcFile,
-  addPreinstallAFDependency
+  patchPackageJson
 }
 
 function addInstallParentDir(filename) {
@@ -68,23 +68,74 @@ function writeRcFile (pkgManagerDefault = 'npm') {
   configs.forEach(writeRcFileContent)
 }
 
-function addPreinstallAFDependency () {
-  let cmd, cmdArgs
-
-  if (existsSync('./.npmrc')) {
-    cmd = 'npm'
-    cmdArgs = ['install', '-d', '@lavamoat/preinstall-always-fail']
-  } else {
-    cmd = 'yarn'
-    cmdArgs = ['add', '-D', '@lavamoat/preinstall-always-fail']
+function updatePackageJson(input) {
+  const p = addInstallParentDir('package.json')
+  const oldConf = JSON.parse(readFileSync(p, { encoding: 'utf-8' }))
+  const mergedConf = {
+    ...oldConf,
+    ...Object.fromEntries(
+      Object.entries(input)
+      .map(([sectionName, section]) => [
+        sectionName,
+        {
+          ...oldConf[sectionName],
+          ...section
+        }
+      ]))
   }
 
-  let result = spawnSync(cmd, cmdArgs, {})
-
-  if (result.status !== 0) {
-    process.stderr.write(result.stderr);
-    process.exit(result.status);
+  const output = JSON.stringify(mergedConf, undefined, 2)
+  writeFileSync(p, output, { encoding: 'utf-8' })
+  const diff = prettyDiffJson(oldConf, mergedConf)
+  if (diff.length > 0) {
+    console.log(`@lavamoat/allow-scripts: Modified ${p}:`)
+    process.stdout.write(diff + '\n')
   } else {
-    console.log('@lavamoat/allow-scripts:: Added dependency @lavamoat/preinstall-always-fail.')
+    console.log(`@lavamoat/allow-scripts: No changes to ${p}.`)
   }
+}
+
+function prettyDiffJson(x, y, contextLines=2) {
+  const diff = diffJson(JSON.stringify(x, undefined, 2), JSON.stringify(y, undefined, 2))
+  if (diff.length === 1 && !diff[0].added && !diff[0].removed) {
+    return ''
+  }
+  return diff.map((hunk, i) => {
+    if (hunk.removed || hunk.added) {
+      return hunk
+    }
+    const lines = hunk.value.split('\n')
+    if (lines.length <= contextLines*2) {
+      return hunk
+    }
+    let ls = []
+    if (i !== 0) {
+      ls = ls.concat(lines.splice(0,contextLines))
+      if (i !== diff.length-1) {
+        ls.push('[...]')
+      }
+    }
+    if (i !== diff.length-1) {
+      ls = ls.concat(lines.splice(lines.length-contextLines))
+    }
+    return {
+      ...hunk,
+      value: ls.join('\n')
+    }
+  }).map(hunk =>
+    colors[hunk.added ? 'green' : (hunk.removed ? 'red' : 'gray')](
+      hunk.value
+    )
+  ).join('')
+}
+
+function patchPackageJson () {
+  updatePackageJson({
+    scripts: {
+      'lavamoat-postinstall': './node_modules/@lavamoat/allow-scripts/src/cli.js',
+    },
+    devDependencies: {
+      '@lavamoat/preinstall-always-fail': 'latest',
+    }
+  })
 }

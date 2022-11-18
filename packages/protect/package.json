@@ -1,0 +1,25 @@
+{
+  "name": "@lavamoat/protect",
+  "version": "1.0.0",
+  "description": "",
+  "bin": "src/cli.js",
+  "scripts": {
+    "lint": "yarn lint:eslint && yarn lint:deps",
+    "lint:eslint": "eslint \"src/**/*.js\"",
+    "lint:fix": "eslint --fix \"src/**/*.js\"",
+    "lint:deps": "depcheck",
+    "test": "echo \"Warning: no test specified\""
+  },
+  "dependencies": {
+    "@lavamoat/allow-scripts": "^2.1.0",
+    "promptly": "^3.2.0",
+    "semver": "^7.3.8"
+  },
+  "keywords": [],
+  "author": "MetaMask security research team",
+  "license": "MIT",
+  "devDependencies": {
+    "eslint-plugin-ava": "^11.0.0",
+    "eslint-plugin-standard": "^5.0.0"
+  }
+}

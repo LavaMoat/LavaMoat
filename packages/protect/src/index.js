@@ -21,25 +21,25 @@ module.exports = {
   async protectProject(){
     try {
       const pkgManagerDefault = detectPkgManager()
-      const pkgManagerChoice = await promptly.choose(`Which package manager are you using?`, SUPPORTED_PKG_MANAGERS, {
+      const pkgManagerChoice = await promptly.choose(`Which package manager are you using? [${SUPPORTED_PKG_MANAGERS.map(p => p === pkgManagerDefault ? '*'+p : p)}]`, SUPPORTED_PKG_MANAGERS, {
         default: pkgManagerDefault
       })
 
-      if(await promptly.confirm(`Would you like to install protection against malicious scripts?`)) {
+      if(await promptly.confirm('Would you like to install protection against malicious scripts? [y/n]')) {
         await setupScripts(pkgManagerChoice)
       }
-      if(await promptly.confirm(`Would you like to install a linter for your lockfile?`)) {
+      if(await promptly.confirm('Would you like to install a linter for your lockfile?')) {
         await setupLockfileLint(pkgManagerChoice)
       }
       // TODO: ask the question in a way that it can protect CI and Node.js programs
-      if(await promptly.confirm(`Would you like to install lavamoat-node for runtime protections?`)) {
+      if(await promptly.confirm('Would you like to install lavamoat-node for runtime protections?')) {
         await installLavamoat(pkgManagerChoice)
       }
       // We could attempt to detect package.json->scripts->* and wrap that with lavamoat, but I don't know how effective that would be
-      
+
 
     } catch (error) {
-      console.error(`Sorry, that didn't work out...`, error)
+      console.error('Sorry, that didn\'t work out...', error)
     }
   }
 }
@@ -48,7 +48,7 @@ module.exports = {
  * @typedef {'npm' | 'pnpm' | 'yarn1' | 'yarn3'} PkgM
  */
 /**
- * @return {PkgM} 
+ * @return {PkgM}
  */
 function detectPkgManager(){
   const pkgManagersFound = new Set()
@@ -68,13 +68,13 @@ function detectPkgManager(){
   if (cfg['.pnpmfile.cjs'] || cfg['pnpm-workspace.yml']) {
     pkgManagersFound.add('pnpm')
   }
-  
+
   const pkgConf = getPackageJson()
-  ;;(['npm', 'yarn', 'pnpm']).map(engine => ([engine, pkgConf?.engines?.[engine]]))
+  ;(['npm', 'yarn', 'pnpm']).map(engine => ([engine, pkgConf?.engines?.[engine]]))
     .filter(([,version]) => !!version)
     .map(([e, v]) => {
       if (e === 'yarn') {
-        switch (semver.major(v)) {      
+        switch (semver.major(v)) {
           case 1:
             return 'yarn1'
           case 3:
@@ -91,7 +91,7 @@ function detectPkgManager(){
     if (pkgManagersFound['yarn1'] || pkgManagersFound['yarn3']) {
       pkgManagersFound.delete('yarnUncertain')
     }
-  
+
   /*
    "engines": {
     "node": ">=4.4.7 <7.0.0",
@@ -109,7 +109,7 @@ function detectPkgManager(){
     pkgManagersFound.delete('yarnUncertain')
     pkgManagersFound.add('yarn1')
   }
-  
+
   return /** @type {PkgM} */  (Object.keys(pkgManagersFound).sort().reverse()[0] || 'npm')
 }
 
@@ -118,7 +118,7 @@ function detectConfigFiles(){
     '.pnpmfile.cjs': existsSync(projectRelative('.pnpmfile.cjs')),
     'pnpm-workspace.yml': existsSync(projectRelative('pnpm-workspace.yaml')) || existsSync(projectRelative('pnpm-workspace.yml')),
     '.yarnrc': existsSync(projectRelative('.yarnrc')),
-    'yarnrc.yml': existsSync(projectRelative('.yarnrn.yaml')) || existsSync(projectRelative('.yarnrc.yml')),
+    'yarnrc.yml': existsSync(projectRelative('.yarnrc.yml')),
     'yarn.lock': existsSync(projectRelative('yarn.lock')),
     '.npmrc': existsSync(projectRelative('.npmrc')),
     'package-lock.json': existsSync(projectRelative('package-lock.json')),

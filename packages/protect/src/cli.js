@@ -7,15 +7,15 @@ const { protectProject } = require('./index.js')
 const command = process.argv[2]
 
 switch (command) {
-  case "project":
+  case 'project':
     protectProject()
 
-  break;
-  case "env":
-  case "devenv":
-  case "dev":
+  break
+  case 'env':
+  case 'devenv':
+  case 'dev':
 
-  break;
+  break
   default:
     console.log('Choose one of the subcommands: project devenv')
 }
