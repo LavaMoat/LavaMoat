@@ -13,7 +13,7 @@ module.exports = async function setupScripts(pkgManager) {
     console.warn('Existing script `lavamoat-postinstall` detected. This is indicative of inconsistently configured LavaMoat')
 
     if(!(await promptly.confirm('Would you like to override the existing script?'))) {
-      throw new Error('User exit');
+      throw new Error('User exit')
     }
   }
 
