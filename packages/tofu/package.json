@@ -28,5 +28,8 @@
   "bugs": {
     "url": "https://github.com/LavaMoat/lavamoat/issues"
   },
-  "homepage": "https://github.com/LavaMoat/LavaMoat/blob/main/packages/tofu/README.md"
+  "homepage": "https://github.com/LavaMoat/LavaMoat/blob/main/packages/tofu/README.md",
+  "engines": {
+    "node": ">=14.0.0"
+  }
 }
