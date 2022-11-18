@@ -87,7 +87,7 @@ function updatePackageJson(input) {
   const output = JSON.stringify(mergedConf, undefined, 2)
   writeFileSync(p, output, { encoding: 'utf-8' })
   const diff = prettyDiffJson(oldConf, mergedConf)
-  if (diff.length > 1) {
+  if (diff.length > 0) {
     console.log(`@lavamoat/allow-scripts: Modified ${p}:`)
     process.stdout.write(diff + '\n')
   } else {
