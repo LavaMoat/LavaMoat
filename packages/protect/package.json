@@ -1,12 +1,12 @@
 {
-  "name": "lavamoat-protect",
+  "name": "@lavamoat/protect",
   "version": "1.0.0",
   "description": "",
-  "bin": "cli.js",
+  "bin": "src/cli.js",
   "scripts": {
     "lint": "yarn lint:eslint && yarn lint:deps",
-    "lint:eslint": "eslint '*.js'",
-    "lint:fix": "eslint --fix '*.js'",
+    "lint:eslint": "eslint \"src/**/*.js\"",
+    "lint:fix": "eslint --fix \"src/**/*.js\"",
     "lint:deps": "depcheck",
     "test": "echo \"Warning: no test specified\""
   },
