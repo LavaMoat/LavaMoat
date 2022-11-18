@@ -5,7 +5,6 @@ const { existsSync,
         readFileSync,
         writeFileSync,
       } = require('fs')
-const { spawnSync } = require('child_process')
 const path = require('path')
 
 module.exports = {
@@ -72,21 +71,6 @@ function writeRcFile (pkgManagerDefault = 'npm') {
 function updatePackageJson(input) {
   const p = addInstallParentDir('package.json')
   const oldConf = JSON.parse(readFileSync(p, { encoding: 'utf-8' }))
-  /*
-  const mergedConf = { ...oldConf }
-  for (const [sectionName, section] of Object.entries(input)) {
-    const s = {...mergedConf[sectionName] ?? {}}
-    for (const [k, v] of Object.entries(section)) {
-      if (s[k]) {
-        console.warn(`@lavamoat/allow-scripts: Overwriting existing package.json entry ${sectionName}["${k}"]`)
-      } else {
-        console.log(`@lavamoat/allow-scripts: Adding new package.json entry ${sectionName}["${k}"]`)
-      }
-      s[k] = v
-    }
-    mergedConf[sectionName] = s
-  }
-  */
   const mergedConf = {
     ...oldConf,
     ...Object.fromEntries(
