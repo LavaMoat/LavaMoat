@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 set -e
 
 if [ "$WRITE_AUTO_POLICY" == "1" ]; then
