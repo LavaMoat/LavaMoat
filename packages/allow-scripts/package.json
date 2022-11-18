@@ -5,7 +5,7 @@
   "bin": {
     "allow-scripts": "src/cli.js"
   },
-  "exports":{
+  "exports": {
     ".": "./src/index.js",
     "./setup": "./src/setup.js"
   },
@@ -28,6 +28,7 @@
     "test": "test"
   },
   "devDependencies": {
+    "@types/diff": "^5.0.2",
     "ava": "^3.15.0",
     "eslint-plugin-ava": "^11.0.0",
     "eslint-plugin-standard": "^5.0.0"
