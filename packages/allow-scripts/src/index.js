@@ -296,7 +296,7 @@ function printPackagesByScriptConfiguration({
   excessPolicies
 }) {
 
-  console.log(`\n# allowed packages with lifecycle scripts`)
+  console.log('\n# allowed packages with lifecycle scripts')
   if (allowedPatterns.length) {
     allowedPatterns.forEach(pattern => {
       const collection = packagesWithScripts.get(pattern) || []
