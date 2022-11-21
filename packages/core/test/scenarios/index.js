@@ -8,6 +8,7 @@ const globalWrites = require('./globalWrites')
 const moduleExports = require('./moduleExports')
 const transforms = require('./transforms')
 const globalRef = require('./globalRef')
+const scuttle = require('./scuttle')
 
 module.exports = { loadScenarios }
 const scenarios = [
@@ -21,6 +22,7 @@ const scenarios = [
   ...moduleExports,
   ...transforms,
   ...globalRef,
+  ...scuttle,
 ]
 
 async function * loadScenarios () {

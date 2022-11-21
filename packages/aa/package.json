@@ -27,5 +27,8 @@
   "directories": {
     "test": "test"
   },
-  "author": "kumavis"
+  "author": "kumavis",
+  "engines": {
+    "node": ">=14.0.0"
+  }
 }

@@ -13,7 +13,7 @@
     runModule: Object.freeze(runModule),
   })
 
-  globalThis.LavaPack = LavaPack
+  Object.defineProperty(globalThis, 'LavaPack', {value: LavaPack})
 
   function loadPolicy () {
     throw new Error('runtime-cjs: unable to enforce policy')

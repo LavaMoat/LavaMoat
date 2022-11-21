@@ -3,6 +3,7 @@
   // therefore this is our way of capturing access to basic APIs LavaMoat
   // uses to still be accessible only to LavaMoat after scuttling occurs
   const {
+    RegExp,
     Reflect,
     Object,
     Error,
@@ -78,12 +79,15 @@
     runWithPrecompiledModules,
     reportStatsHook,
   }) {
+    // debug options are hard-coded at build time
+    const {
+      debugMode
+    } = {"debugMode":false}
     // security options are hard-coded at build time
     const {
       scuttleGlobalThis,
       scuttleGlobalThisExceptions,
-      debugMode,
-    } = {"scuttleGlobalThis":false,"scuttleGlobalThisExceptions":[],"debugMode":false}
+    } = __lavamoatSecurityOptions__
 
     // identify the globalRef
     const globalRef = (typeof globalThis !== 'undefined') ? globalThis : (typeof self !== 'undefined') ? self : (typeof global !== 'undefined') ? global : undefined
@@ -11103,23 +11107,33 @@ module.exports = {
     return kernel
 
     function performScuttleGlobalThis (globalRef, extraPropsToAvoid = new Array()) {
-      const props = new Set(
-        getPrototypeChain(globalRef)
-        .map(obj => Object.getOwnPropertyNames(obj))
-      )
+      const props = new Array()
+      getPrototypeChain(globalRef)
+        .forEach(proto =>
+          props.push(...Object.getOwnPropertyNames(proto)))
+
+      for (let i = 0; i < extraPropsToAvoid.length; i++) {
+        const prop = extraPropsToAvoid[i]
+        if (!prop.startsWith('/')) {
+          continue
+        }
+        const parts = prop.split('/');
+        const pattern = parts.slice(1, -1).join('/')
+        const flags = parts[parts.length - 1]
+        extraPropsToAvoid[i] = new RegExp(pattern, flags)
+      }
 
       // support LM,SES exported APIs and polyfills
-      const avoidForLavaMoatCompatibility = ['LavaPack', 'Compartment', 'Error', 'globalThis']
+      const avoidForLavaMoatCompatibility = ['Compartment', 'Error', 'globalThis']
       const propsToAvoid = new Set([...avoidForLavaMoatCompatibility, ...extraPropsToAvoid])
 
       for (const prop of props) {
-        if (propsToAvoid.has(prop)) {
+        if (shouldAvoidProp(propsToAvoid, prop)) {
           continue
         }
         if (Object.getOwnPropertyDescriptor(globalRef, prop)?.configurable === false) {
           continue
         }
-        // these props can't have getters, use undefined value instead
         const desc = {
           set: () => {
             console.warn(
@@ -11468,6 +11482,18 @@ module.exports = {
       }
       return protoChain
     }
+
+    function shouldAvoidProp(propsToAvoid, prop) {
+      for (const avoid of propsToAvoid) {
+        if (avoid instanceof RegExp && avoid.test(prop)) {
+          return true
+        }
+        if (propsToAvoid.has(prop)) {
+          return true
+        }
+      }
+      return false
+    }
   }
 })()
 
@@ -11502,17 +11528,17 @@ module.exports = {
   const { internalRequire } = kernel
 
   // create a lavamoat pulic API for loading modules over multiple files
-  const LavaPack = {
+  const LavaPack = Object.freeze({
     loadPolicy: Object.freeze(loadPolicy),
     loadBundle: Object.freeze(loadBundle),
     runModule: Object.freeze(runModule),
-  }
+  })
   // in debug mode, expose the kernel on the LavaPack API
   if (debugMode) {
     LavaPack._kernel = kernel
   }
 
-  globalThis.LavaPack = Object.freeze(LavaPack)
+  Object.defineProperty(globalThis, 'LavaPack', {value: LavaPack})
   return
 
 

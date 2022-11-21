@@ -16,5 +16,8 @@
     "postinstall": "node src/prepareHook.js",
     "zzz": "node zzz.js"
   },
-  "devDependencies": {}
+  "devDependencies": {},
+  "engines": {
+    "node": ">=14.0.0"
+  }
 }

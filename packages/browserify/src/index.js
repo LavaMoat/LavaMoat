@@ -122,7 +122,7 @@ function getConfigurationFromPluginOpts (pluginOpts) {
 
   const nonAliasedOptions = [
     'scuttleGlobalThis',
-    'scuttleGlobalExceptions',
+    'scuttleGlobalThisExceptions',
     'bundleWithPrecompiledModules',
   ]
 

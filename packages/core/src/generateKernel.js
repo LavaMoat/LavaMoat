@@ -25,21 +25,28 @@ function getSesShimSrc () {
 }
 
 // takes the kernelTemplate and populates it with the libraries
-function generateKernel ({
-  scuttleGlobalThis = false,
-  scuttleGlobalThisExceptions = [],
-  debugMode = false,
-} = {}) {
+function generateKernel (opts = {}) {
   const kernelCode = generateKernelCore()
 
   let output = kernelTemplate
   output = replaceTemplateRequire(output, 'ses', sesSrc)
   output = stringReplace(output, '__createKernelCore__', kernelCode)
-  output = stringReplace(output, '__lavamoatSecurityOptions__', JSON.stringify({
-    scuttleGlobalThis,
-    scuttleGlobalThisExceptions,
-    debugMode,
-  }))
+  output = stringReplace(output, '__lavamoatDebugOptions__', JSON.stringify({debugMode: !!opts.debugMode}))
+  if (opts.hasOwnProperty('scuttleGlobalThis')) {
+    // scuttleGlobalThis config placeholder should be set only if ordered so explicitly.
+    // if not, should be left as is to be replaced by a later processor (e.g. LavaPack).
+    const {scuttleGlobalThis, scuttleGlobalThisExceptions} = opts
+    if (scuttleGlobalThisExceptions) {
+      // toString regexps if there's any
+      for (let i = 0; i < scuttleGlobalThisExceptions.length; i++) {
+        scuttleGlobalThisExceptions[i] = String(scuttleGlobalThisExceptions[i])
+      }
+    }
+    output = stringReplace(output, '__lavamoatSecurityOptions__', JSON.stringify({
+      scuttleGlobalThis,
+      scuttleGlobalThisExceptions,
+    }))
+  }
 
   return output
 }
