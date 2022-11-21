@@ -40,6 +40,7 @@ async function parseArgs () {
         alias: 'p',
         describe: 'package manager to configure',
         choices: SUPPORTED_PKG_MANAGERS,
+        nargs: 1,
         requiresArg: false,
       })
       .option('force', {
@@ -50,6 +51,11 @@ async function parseArgs () {
       })
       .coerce('package-manager', pm =>
         pm ?? detectPkgManager()
+      )
+      .check(argv =>
+        !argv.interactive && !argv.setupNode && !argv.setupScripts
+          ? new Error('No action specified')
+          : true
       )
     }, async (argv) => {
       await protectProject(argv)
@@ -63,7 +69,8 @@ async function parseArgs () {
       })
       .option('package-manager', {
         alias: 'p',
-        describe: 'package manager to configure',
+        type: 'array',
+        describe: 'package managers to configure',
         choices: SUPPORTED_PKG_MANAGERS,
         requiresArg: false,
       })

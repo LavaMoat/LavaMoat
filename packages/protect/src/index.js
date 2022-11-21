@@ -41,10 +41,7 @@ module.exports = {
   },
   async protectEnv({ dryRun, force, ...argv }) {
     try {
-      // TODO: move to cli
-      const pms = new Set(
-        typeof argv.packageManager  === 'string' ? [argv.packageManager] : argv.packageManager
-      )
+      const pms = new Set(argv.packageManager)
       pms.forEach(pm => {
         switch (pm) {
           case 'npm': {
