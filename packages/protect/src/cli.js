@@ -5,7 +5,7 @@
 const yargs = require('yargs')
 
 const { detectPkgManager } = require('./lib/utils.js')
-const { protectProject, SUPPORTED_PKG_MANAGERS } = require('./index.js')
+const { protectEnv, protectProject, SUPPORTED_PKG_MANAGERS } = require('./index.js')
 
 async function parseArgs () {
   const argsParser = yargs
@@ -35,6 +35,7 @@ async function parseArgs () {
         type: 'boolean',
         default: false,
       })
+      // TODO: enforce only single
       .option('package-manager', {
         alias: 'p',
         describe: 'package manager to configure',
@@ -52,6 +53,28 @@ async function parseArgs () {
       )
     }, async (argv) => {
       await protectProject(argv)
+    })
+    .command('env', 'set up host-level protections', (env_) => {
+      env_.option('dry-run', {
+        alias: 'n',
+        describe: 'output actions; don\'t actually perform changes',
+        type: 'boolean',
+        default: false,
+      })
+      .option('package-manager', {
+        alias: 'p',
+        describe: 'package manager to configure',
+        choices: SUPPORTED_PKG_MANAGERS,
+        requiresArg: false,
+      })
+      .option('force', {
+        alias: 'f',
+        describe: 'overwrite existing files without prompting',
+        type: 'boolean',
+        default: false,
+      })
+    }, async (argv) => {
+      await protectEnv(argv)
     })
     .demandCommand(1, 1)
     .help()

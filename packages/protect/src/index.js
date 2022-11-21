@@ -1,4 +1,5 @@
 //@ts-check
+const { spawnSync } = require('child_process')
 const promptly = require('promptly')
 const setupScripts = require('./lib/setup-scripts')
 const installLavamoat = require('./lib/install-lavamoat')
@@ -33,8 +34,43 @@ module.exports = {
       console.error('Sorry, that didn\'t work out...', error)
     }
   },
-  async protectEnv({ dryRun, force, interactive, ...argv }) {
+  async protectEnv({ dryRun, force, ...argv }) {
     try {
+      // TODO: move to cli
+      const pms = new Set(
+        typeof argv.packageManager  === 'string' ? [argv.packageManager] : argv.packageManager
+      )
+      pms.forEach(pm => {
+        switch (pm) {
+          case 'npm': {
+            const result = spawnSync('npm', ['config', '-g', 'get', 'ignore-scripts'])
+              .stdout.toString('utf-8').trim()
+            if (result === 'false') {
+              const cmdArgs = ['config', '-g', 'set', 'ignore-scripts', 'true']
+              console.info(`@lavamoat/protect env running \`npm ${cmdArgs.join(' ')}\``)
+              const { stderr, stdout } = spawnSync('npm', cmdArgs)
+              const [err, out] = [stderr, stdout].map(b => b.toString('utf-8').trim())
+              if (out) {
+                console.warn('@lavamoat/protect env npm-config INFO:', out)
+              }
+              if (err) {
+                console.error('@lavamoat/protect env npm-config ERROR:', err)
+              }
+            }
+            return
+          }
+          case 'pnpm': {
+            throw new Error('TODO')
+          }
+          case 'yarn1': {
+            throw new Error('TODO')
+          }
+          case 'yarn3': {
+            throw new Error('TODO')
+          }
+        }
+      })
+
     } catch (error) {
       console.error('Sorry, that didn\'t work out...', error)
     }
