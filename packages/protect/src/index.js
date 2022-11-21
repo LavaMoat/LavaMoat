@@ -1,10 +1,15 @@
 //@ts-check
 const { spawnSync } = require('child_process')
+const { mkdtempSync, rmdirSync } = require('fs')
+const path = require('path')
+const { tmpdir } = require('os')
 const promptly = require('promptly')
 const setupScripts = require('./lib/setup-scripts')
 const installLavamoat = require('./lib/install-lavamoat')
 
 const SUPPORTED_PKG_MANAGERS = ['npm','pnpm','yarn1','yarn3']
+
+const makeTmpDir = () => mkdtempSync(path.join(tmpdir(), 'lavamoat-protect-'))
 
 module.exports = {
   SUPPORTED_PKG_MANAGERS,
@@ -45,7 +50,7 @@ module.exports = {
           case 'npm': {
             const result = spawnSync('npm', ['config', '-g', 'get', 'ignore-scripts'])
               .stdout.toString('utf-8').trim()
-            if (result === 'false') {
+            if (result !== 'true') {
               const cmdArgs = ['config', '-g', 'set', 'ignore-scripts', 'true']
               console.info(`@lavamoat/protect env running \`npm ${cmdArgs.join(' ')}\``)
               const { stderr, stdout } = spawnSync('npm', cmdArgs)
@@ -63,7 +68,27 @@ module.exports = {
             throw new Error('TODO')
           }
           case 'yarn1': {
-            throw new Error('TODO')
+            // yarn1 has no interface to query global config explicitly
+            const cwd = makeTmpDir()
+            try {
+              const result = spawnSync('yarn', ['config', 'get', 'ignore-scripts'], { cwd })
+                .stdout.toString('utf-8').trim()
+              if (result !== 'true') {
+                const cmdArgs = ['config', 'set', 'ignore-scripts', 'true', '-g']
+                console.info(`@lavamoat/protect env running \`yarn ${cmdArgs.join(' ')}\``)
+                const { stderr, stdout } = spawnSync('yarn', cmdArgs)
+                const [err, out] = [stderr, stdout].map(b => b.toString('utf-8').trim())
+                if (!out.match(/success/)) {
+                  console.warn('@lavamoat/protect env npm-config INFO:', out)
+                }
+                if (err) {
+                  console.error('@lavamoat/protect env npm-config ERROR:', err)
+                }
+              }
+            } finally {
+              rmdirSync(cwd)
+            }
+            return
           }
           case 'yarn3': {
             throw new Error('TODO')
