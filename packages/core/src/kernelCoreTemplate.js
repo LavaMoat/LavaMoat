@@ -1,5 +1,5 @@
 (function () {
-  "use strict"
+  'use strict'
   return createKernelCore
 
   function createKernelCore ({
@@ -110,7 +110,7 @@
         if (!prop.startsWith('/')) {
           continue
         }
-        const parts = prop.split('/');
+        const parts = prop.split('/')
         const pattern = parts.slice(1, -1).join('/')
         const flags = parts[parts.length - 1]
         extraPropsToAvoid[i] = new RegExp(pattern, flags)
@@ -131,13 +131,13 @@
           set: () => {
             console.warn(
               `LavaMoat - property "${prop}" of globalThis cannot be set under scuttling mode. ` +
-              `To learn more visit https://github.com/LavaMoat/LavaMoat/pull/360.`
+              'To learn more visit https://github.com/LavaMoat/LavaMoat/pull/360.'
             )
           },
           get: () => {
             throw new Error(
               `LavaMoat - property "${prop}" of globalThis is inaccessible under scuttling mode. ` +
-              `To learn more visit https://github.com/LavaMoat/LavaMoat/pull/360.`
+              'To learn more visit https://github.com/LavaMoat/LavaMoat/pull/360.'
             )
           },
           configurable: false

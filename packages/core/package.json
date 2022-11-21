@@ -16,16 +16,17 @@
     "merge-deep": "^3.0.2"
   },
   "devDependencies": {
+    "@metamask/eslint-config-nodejs": "^10.0.0",
     "ses": "^0.17.0",
     "eslint-plugin-ava": "^11.0.0",
-    "eslint-plugin-standard": "^5.0.0",
+    "eslint-plugin-node": "^11.1.0",
     "object.fromentries": "^2.0.2",
     "tmp-promise": "^3.0.2"
   },
   "scripts": {
     "lint": "yarn lint:eslint && yarn lint:deps",
-    "lint:eslint": "eslint \"src/**/*.js\" \"test/**/*.js\"",
-    "lint:fix": "eslint src/**/*.js test/**/*.js --fix",
+    "lint:eslint": "eslint .",
+    "lint:fix": "eslint --fix .",
     "lint:deps": "depcheck",
     "test": "ava --timeout=30s test/index.js",
     "lib:ses": "cp ../../node_modules/ses/dist/lockdown.umd.js ./lib/lockdown.umd.js"
@@ -43,11 +44,5 @@
       "templateRequire": "readonly",
       "lockdown": "readonly"
     }
-  },
-  "eslintIgnore": [
-    "/src/sourcemaps.js",
-    "/test/fixtures",
-    "/src/preludeTemplate.js",
-    "/src/kernelTemplate.js"
-  ]
+  }
 }

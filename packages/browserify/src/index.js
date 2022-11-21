@@ -280,7 +280,7 @@ function validatePolicy (policy) {
     packageEntries.forEach((entry) => {
       Object.values(entry).forEach((value) => {
         if (!valuesWhitelist.includes(value)) {
-          throw new Error("LavaMoat - Globals or packages endowments must be equal to 'true'")
+          throw new Error('LavaMoat - Globals or packages endowments must be equal to \'true\'')
         }
       })
     })

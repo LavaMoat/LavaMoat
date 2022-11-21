@@ -24,17 +24,21 @@
     "test": "test"
   },
   "devDependencies": {
+    "@metamask/eslint-config-nodejs": "^10.0.0",
     "ava": "^3.15.0",
     "eslint-plugin-ava": "^11.0.0",
-    "eslint-plugin-standard": "^5.0.0"
+    "eslint-plugin-node": "^11.1.0"
   },
   "scripts": {
     "test": "yarn test:run",
     "test:run": "ava --timeout=30s test/index.js",
     "lint": "yarn lint:eslint && yarn lint:deps",
-    "lint:eslint": "eslint \"src/**/*.js\"",
-    "lint:fix": "eslint src/**/*.js --fix",
+    "lint:eslint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "lint:deps": "depcheck"
+  },
+  "engines": {
+    "node": ">=12.0.0"
   },
   "author": "",
   "homepage": "https://github.com/LavaMoat/LavaMoat/tree/main/packages/allow-scripts",

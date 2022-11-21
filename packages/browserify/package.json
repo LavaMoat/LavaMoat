@@ -26,12 +26,12 @@
     "through2": "^3.0.0"
   },
   "devDependencies": {
+    "@metamask/eslint-config-nodejs": "^10.0.0",
     "bify-package-factor": "^1.0.7",
     "browserify": "^17.0.0",
     "depcheck": "^1.4.0",
-    "eslint": "^7.22.0",
     "eslint-plugin-ava": "^11.0.0",
-    "eslint-plugin-standard": "^5.0.0",
+    "eslint-plugin-node": "^11.1.0",
     "keccak": "^3.0.2",
     "source-map": "^0.7.3",
     "source-map-explorer": "^2.5.2",
@@ -45,8 +45,8 @@
     "test": "ava --timeout 2m --concurrency 1",
     "test:prep": "WRITE_AUTO_POLICY=1 ./test/fixtures/secureBundling/run.sh",
     "lint": "yarn lint:eslint && yarn lint:deps",
-    "lint:eslint": "eslint \"src/**/*.js\" \"test/**/*.js\"",
-    "lint:fix": "eslint src/**/*.js test/**/*.js --fix",
+    "lint:eslint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "lint:deps": "depcheck",
     "build:ses": "(cd ./node_modules/ses && npm install && npm run build && cp ./dist/ses.umd.js ../../lib/)"
   },

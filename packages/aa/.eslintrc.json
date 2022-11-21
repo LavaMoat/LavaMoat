@@ -1,6 +1,6 @@
 {
   "extends": "../../.eslintrc.json",
   "rules": {
-    "node/global-require": 0
+    "node/no-process-exit": 0
   }
 }

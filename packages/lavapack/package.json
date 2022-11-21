@@ -20,16 +20,17 @@
     "umd": "^3.0.3"
   },
   "devDependencies": {
+    "@metamask/eslint-config-nodejs": "^10.0.0",
     "ava": "^3.15.0",
     "eslint-plugin-ava": "^11.0.0",
-    "eslint-plugin-standard": "^5.0.0",
+    "eslint-plugin-node": "^11.1.0",
     "mississippi": "^4.0.0",
     "source-map": "^0.7.3"
   },
   "scripts": {
     "lint": "yarn lint:eslint && yarn lint:deps",
-    "lint:eslint": "eslint \"src/**/*.js\" \"test/**/*.js\"",
-    "lint:fix": "eslint src/**/*.js test/**/*.js --fix",
+    "lint:eslint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "lint:deps": "depcheck",
     "test": "ava --timeout=30s test/index.js",
     "build": "node ./src/build-runtime.js"
