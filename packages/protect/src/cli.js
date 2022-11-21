@@ -4,6 +4,7 @@
 
 const yargs = require('yargs')
 
+const { detectPkgManager } = require('./lib/utils.js')
 const { protectProject, SUPPORTED_PKG_MANAGERS } = require('./index.js')
 
 async function parseArgs () {
@@ -15,37 +16,40 @@ async function parseArgs () {
         describe: 'prompt for protections and parameters',
         type: 'boolean',
         default: false,
-      }),
-      project_.option('dry-run', {
+      })
+      .option('dry-run', {
         alias: 'n',
         describe: 'output actions; don\'t actually perform changes',
         type: 'boolean',
         default: false,
       })
-      project_.option('setup-scripts', {
+      .option('setup-scripts', {
         // TODO: better description
         describe: 'set up preinstall lifecycle hook',
         type: 'boolean',
         default: false,
       })
-      project_.option('setup-node', {
+      .option('setup-node', {
         // TODO: better description
         describe: 'set up lavamoat-node for runtime protection',
         type: 'boolean',
         default: false,
       })
-      project_.option('package-manager', {
+      .option('package-manager', {
         alias: 'p',
         describe: 'package manager to configure',
         choices: SUPPORTED_PKG_MANAGERS,
         requiresArg: false,
       })
-      project_.option('force', {
+      .option('force', {
         alias: 'f',
         describe: 'overwrite existing files without prompting',
         type: 'boolean',
         default: false,
       })
+      .coerce('package-manager', pm =>
+        pm ?? detectPkgManager()
+      )
     }, async (argv) => {
       await protectProject(argv)
     })
