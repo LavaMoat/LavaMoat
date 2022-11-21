@@ -72,6 +72,7 @@
     const generalUtils = templateRequire('makeGeneralUtils')()
     const { getEndowmentsForConfig, makeMinimalViewOfRef, applyEndowmentPropDescTransforms } = templateRequire('makeGetEndowmentsForConfig')(generalUtils)
     const { prepareCompartmentGlobalFromConfig } = templateRequire('makePrepareRealmGlobalFromConfig')(generalUtils)
+    const { strictScopeTerminator } = templateRequire('strict-scope-terminator')
 
     const moduleCache = new Map()
     const packageCompartmentCache = new Map()
@@ -311,9 +312,12 @@
           // moduleObj must be from the same Realm as the moduleInitializer (eg dart2js runtime requirement)
           // here we are assuming the provided moduleInitializer is from the same Realm as this kernel
           moduleObj = { exports: {} }
-          const { scopeProxy } = packageCompartment.__makeScopeProxy__()
+          const evalKit = {
+            globalThis: packageCompartment.globalThis,
+            scopeTerminator: strictScopeTerminator,
+          }
           // this invokes the with-proxy wrapper
-          const moduleInitializerFactory = precompiledInitializer.call(scopeProxy)
+          const moduleInitializerFactory = precompiledInitializer.call(evalKit)
           // this ensures strict mode
           moduleInitializer = moduleInitializerFactory()
         } else {

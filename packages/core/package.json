@@ -17,6 +17,7 @@
   },
   "devDependencies": {
     "@metamask/eslint-config-nodejs": "^10.0.0",
+    "ses": "^0.17.0",
     "eslint-plugin-ava": "^11.0.0",
     "eslint-plugin-node": "^11.1.0",
     "object.fromentries": "^2.0.2",
@@ -27,7 +28,8 @@
     "lint:eslint": "eslint .",
     "lint:fix": "eslint --fix .",
     "lint:deps": "depcheck",
-    "test": "ava --timeout=30s test/index.js"
+    "test": "ava --timeout=30s test/index.js",
+    "lib:ses": "cp ../../node_modules/ses/dist/lockdown.umd.js ./lib/lockdown.umd.js"
   },
   "author": "kumavis",
   "license": "MIT",

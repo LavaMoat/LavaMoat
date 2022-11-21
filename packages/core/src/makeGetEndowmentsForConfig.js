@@ -223,7 +223,7 @@ function makeGetEndowmentsForConfig ({ createFunctionWrapper }) {
       // unwrap function calls this-value to unwrapToGlobalThis when:
       // this value is globalThis ex. globalThis.abc()
       // scope proxy leak workaround ex. abc()
-      return thisValue === unwrapFromCompartment.globalThis || unwrapFromCompartment.__isKnownScopeProxy__(thisValue)
+      return thisValue === unwrapFromCompartment.globalThis
     }
     const newFn = createFunctionWrapper(propDesc.value, unwrapTest, unwrapToGlobalThis)
     return { ...propDesc, value: newFn }

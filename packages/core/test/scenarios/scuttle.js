@@ -30,7 +30,7 @@ module.exports = [
       scuttleGlobalThis: true,
       scuttleGlobalThisExceptions: ['process', '/[0-9]+/', /*'Set', 'Reflect', 'Object', 'console', 'Array', 'RegExp', 'Date', 'Math'*/],
       expectedFailure: true,
-      expectedFailureMessageRegex: /LavaMoat - property "[A-Za-z0-9]*" of globalThis is inaccessible under scuttling mode/,
+      expectedFailureMessageRegex: /SES_UNHANDLED_REJECTION|inaccessible under scuttling mode./,
     })
     await autoConfigForScenario({ scenario })
     return scenario
