@@ -306,7 +306,7 @@ function printPackagesByScriptConfiguration({
     console.log('  (none)')
   }
 
-  console.log(`\n# disallowed packages with lifecycle scripts`)
+  console.log('\n# disallowed packages with lifecycle scripts')
   if (disallowedPatterns.length) {
     disallowedPatterns.forEach(pattern => {
       const collection = packagesWithScripts.get(pattern) || []
@@ -317,7 +317,7 @@ function printPackagesByScriptConfiguration({
   }
 
   if (missingPolicies.length) {
-    console.log(`\n# unconfigured packages with lifecycle scripts`)
+    console.log('\n# unconfigured packages with lifecycle scripts')
     missingPolicies.forEach(pattern => {
       const collection = packagesWithScripts.get(pattern) || []
       console.log(`- ${pattern} [${collection.length} location(s)]`)
@@ -325,7 +325,7 @@ function printPackagesByScriptConfiguration({
   }
 
   if (excessPolicies.length) {
-    console.log(`\n# packages with lifecycle scripts that no longer need configuration (package removed or scripts are no more)`)
+    console.log('\n# packages with lifecycle scripts that no longer need configuration due to package or scripts removal')
     excessPolicies.forEach(pattern => {
       const collection = packagesWithScripts.get(pattern) || []
       console.log(`- ${pattern} [${collection.length} location(s)]`)
@@ -395,7 +395,7 @@ async function loadAllPackageConfigurations({ rootDir }) {
     }
 
     if (depPackageJson.bin) {
-      const binsList = Object.entries(normalizeBin(depPackageJson).bin || {})
+      const binsList = Object.entries(normalizeBin(depPackageJson)?.bin || {})
 
       binsList.forEach(([name, link]) => {
         const collection = binCandidates.get(name) || []
