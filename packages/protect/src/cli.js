@@ -6,6 +6,7 @@ const yargs = require('yargs')
 
 const { detectPkgManager } = require('./lib/utils.js')
 const { protectEnv, protectProject, SUPPORTED_PKG_MANAGERS } = require('./index.js')
+const { setDryRun } = require('./lib/effect.js')
 
 async function parseArgs () {
   const argsParser = yargs
@@ -58,6 +59,7 @@ async function parseArgs () {
           : true
       )
     }, async (argv) => {
+      setDryRun(argv.n)
       await protectProject(argv)
     })
     .command('env', 'set up host-level protections', (env_) => {
@@ -81,6 +83,7 @@ async function parseArgs () {
         default: false,
       })
     }, async (argv) => {
+      setDryRun(argv.n)
       await protectEnv(argv)
     })
     .demandCommand(1, 1)

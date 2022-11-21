@@ -7,7 +7,9 @@ const {
   getPackageJson,
 } = require('./utils')
 
-module.exports = async function setupScripts({dryRun, interactive, force, packageManager}) {
+const { isDryRun } = require('./effect')
+
+module.exports = async function setupScripts({interactive, force, packageManager}) {
   const pkgConf = getPackageJson()
   if (pkgConf.scripts['lavamoat-postinstall']) {
     console.warn('Existing script `lavamoat-postinstall` detected. This is indicative of inconsistently configured LavaMoat')
@@ -19,7 +21,7 @@ module.exports = async function setupScripts({dryRun, interactive, force, packag
   }
 
   // Generate the RC files setup
-  writeRcFile(packageManager, dryRun)
+  writeRcFile(packageManager, isDryRun())
 
-  patchPackageJson(dryRun)
+  patchPackageJson(isDryRun())
 }
