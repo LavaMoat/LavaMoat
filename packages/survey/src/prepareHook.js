@@ -13,7 +13,7 @@ const lavamoat = require.resolve('lavamoat/src/index.js')
 const lockdown = new URL('../src/lockdown.cjs', `file://${__filename}`).pathname;
 const mitm = new URL('../mitm/node', `file://${__filename}`).pathname;
 
-const script = `#!/bin/bash
+const script = `#!/bin/sh
 set -xueo pipefail
 
 npxpath="${npxPath}"

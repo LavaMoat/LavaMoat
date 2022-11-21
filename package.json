@@ -12,7 +12,7 @@
     "tap-spec": "^5.0.0"
   },
   "engines": {
-    "node": ">=12.16.1"
+    "node": ">=14.0.0"
   },
   "scripts": {
     "test": "lerna run --concurrency 1 test",
