@@ -1,127 +1,120 @@
 //@ts-check
-const semver = require('semver')
-const promptly = require('promptly')
-const { existsSync,
-  appendFileSync,
-  readFileSync,
-  writeFileSync,
-} = require('fs')
+const { spawnSync } = require('child_process')
+const { mkdtempSync, rmdirSync } = require('fs')
 const path = require('path')
+const { tmpdir } = require('os')
+const promptly = require('promptly')
 const setupScripts = require('./lib/setup-scripts')
-const setupLockfileLint = require('./lib/setup-lint')
 const installLavamoat = require('./lib/install-lavamoat')
-const { getPackageJson,
-  projectRelative,
-} = require('./lib/utils')
-
 
 const SUPPORTED_PKG_MANAGERS = ['npm','pnpm','yarn1','yarn3']
 
-module.exports = {
-  async protectProject(){
-    try {
-      const pkgManagerDefault = detectPkgManager()
-      const pkgManagerChoice = await promptly.choose(`Which package manager are you using? [${SUPPORTED_PKG_MANAGERS.map(p => p === pkgManagerDefault ? '*'+p : p)}]`, SUPPORTED_PKG_MANAGERS, {
-        default: pkgManagerDefault
-      })
+const makeTmpDir = () => mkdtempSync(path.join(tmpdir(), 'lavamoat-protect-'))
 
-      if(await promptly.confirm('Would you like to install protection against malicious scripts? [y/n]')) {
-        await setupScripts(pkgManagerChoice)
-      }
-      if(await promptly.confirm('Would you like to install a linter for your lockfile?')) {
-        await setupLockfileLint(pkgManagerChoice)
+module.exports = {
+  SUPPORTED_PKG_MANAGERS,
+  async protectProject({ dryRun, force, interactive, ...argv }){
+    try {
+      const packageManager = interactive
+        ? await promptly.choose(
+          `Which package manager are you using? [${SUPPORTED_PKG_MANAGERS.map(p => p === argv.packageManager ? '*'+p : p)}]`,
+          SUPPORTED_PKG_MANAGERS, {
+            default: argv.packageManager
+          })
+        : argv.packageManager
+      const doSetupScripts = interactive
+        ? await promptly.confirm('Would you like to install protection against malicious scripts? [y/n]')
+        : argv.setupScripts
+      if (doSetupScripts) {
+        await setupScripts({packageManager, dryRun, interactive, force})
       }
       // TODO: ask the question in a way that it can protect CI and Node.js programs
-      if(await promptly.confirm('Would you like to install lavamoat-node for runtime protections?')) {
-        await installLavamoat(pkgManagerChoice)
+      const doInstallLavamoat = interactive
+        ? await promptly.confirm('Would you like to install lavamoat-node for runtime protections? [y/n]')
+        : argv.installLavamoat
+      if(doInstallLavamoat) {
+        await installLavamoat(packageManager)
       }
-      // We could attempt to detect package.json->scripts->* and wrap that with lavamoat, but I don't know how effective that would be
-
+    } catch (error) {
+      console.error('Sorry, that didn\'t work out...', error)
+    }
+  },
+  async protectEnv({ dryRun, force, ...argv }) {
+    try {
+      const pms = new Set(argv.packageManager)
+      pms.forEach(pm => {
+        switch (pm) {
+          case 'npm': {
+            const result = spawnSync('npm', ['config', '-g', 'get', 'ignore-scripts'])
+              .stdout.toString('utf-8').trim()
+            if (result !== 'true') {
+              const cmdArgs = ['config', '-g', 'set', 'ignore-scripts', 'true']
+              console.info(`@lavamoat/protect env running \`npm ${cmdArgs.join(' ')}\``)
+              const { stderr, stdout } = spawnSync('npm', cmdArgs)
+              const [err, out] = [stderr, stdout].map(b => b.toString('utf-8').trim())
+              if (out) {
+                console.warn('@lavamoat/protect env npm-config INFO:', out)
+              }
+              if (err) {
+                console.error('@lavamoat/protect env npm-config ERROR:', err)
+              }
+            }
+            return
+          }
+          case 'pnpm': {
+            throw new Error('TODO')
+          }
+          case 'yarn1': {
+            // yarn has no interface to query global config explicitly
+            const cwd = makeTmpDir()
+            try {
+              const result = spawnSync('yarn', ['config', 'get', 'ignore-scripts'], { cwd })
+                .stdout.toString('utf-8').trim()
+              if (result !== 'true') {
+                const cmdArgs = ['config', 'set', 'ignore-scripts', 'true', '-g']
+                console.info(`@lavamoat/protect env running \`yarn ${cmdArgs.join(' ')}\``)
+                const { stderr, stdout } = spawnSync('yarn', cmdArgs)
+                const [err, out] = [stderr, stdout].map(b => b.toString('utf-8').trim())
+                if (!out.match(/success/)) {
+                  console.warn('@lavamoat/protect env yarn-config INFO:', out)
+                }
+                if (err) {
+                  console.error('@lavamoat/protect env yarn-config ERROR:', err)
+                }
+              }
+            } finally {
+              rmdirSync(cwd)
+            }
+            return
+          }
+          case 'yarn3': {
+            const cwd = makeTmpDir()
+            try {
+              const result = spawnSync('yarn', ['config', 'get', 'enableScripts'], { cwd })
+                .stdout.toString('utf-8').trim()
+              if (result !== 'false') {
+                const cmdArgs = ['config', 'set', '-H', 'enableScripts', 'false']
+                console.info(`@lavamoat/protect env running \`yarn ${cmdArgs.join(' ')}\``)
+                const { stderr, stdout } = spawnSync('yarn', cmdArgs)
+                const [err, out] = [stderr, stdout].map(b => b.toString('utf-8').trim())
+                if (!out.match(/YN0000/)) {
+                  console.warn('@lavamoat/protect env yarn-config INFO:', out)
+                }
+                if (err) {
+                  console.error('@lavamoat/protect env yarn-config ERROR:', err)
+                }
+              }
+            } finally {
+              rmdirSync(cwd)
+            }
+            return
+          }
+        }
+      })
 
     } catch (error) {
       console.error('Sorry, that didn\'t work out...', error)
     }
-  }
-}
-
-/**
- * @typedef {'npm' | 'pnpm' | 'yarn1' | 'yarn3'} PkgM
- */
-/**
- * @return {PkgM}
- */
-function detectPkgManager(){
-  const pkgManagersFound = new Set()
-  const cfg = detectConfigFiles()
-  if (cfg['yarn.lock']) {
-    pkgManagersFound.add('yarnUncertain')
-  }
-  if (cfg['.yarnrc']) {
-    pkgManagersFound.add('yarn1')
-  }
-  if (cfg['yarnrc.yml']) {
-    pkgManagersFound.add('yarn3')
-  }
-  if (cfg['package-log.json'] || cfg['.npmrc']) {
-    pkgManagersFound.add('npm')
-  }
-  if (cfg['.pnpmfile.cjs'] || cfg['pnpm-workspace.yml']) {
-    pkgManagersFound.add('pnpm')
-  }
-
-  const pkgConf = getPackageJson()
-  ;(['npm', 'yarn', 'pnpm']).map(engine => ([engine, pkgConf?.engines?.[engine]]))
-    .filter(([,version]) => !!version)
-    .map(([e, v]) => {
-      if (e === 'yarn') {
-        switch (semver.major(v)) {
-          case 1:
-            return 'yarn1'
-          case 3:
-            return 'yarn3'
-          default:
-            return 'yarnUncertain'
-        }
-      }
-      return e
-    }).forEach(e => {
-      pkgManagersFound.add(e)
-    })
-
-    if (pkgManagersFound['yarn1'] || pkgManagersFound['yarn3']) {
-      pkgManagersFound.delete('yarnUncertain')
-    }
-
-  /*
-   "engines": {
-    "node": ">=4.4.7 <7.0.0",
-    "zlib": "^1.2.8",
-    "yarn": "^0.14.0"
-  }
-   "engines": {
-        "node": ">=10",
-        "pnpm": ">=3"
-    }
-     */
-
-  if (pkgManagersFound.has('yarnUncertain')) {
-    // ok, so which yarn could that be? more likely yarn1
-    pkgManagersFound.delete('yarnUncertain')
-    pkgManagersFound.add('yarn1')
-  }
-
-  return /** @type {PkgM} */  (Object.keys(pkgManagersFound).sort().reverse()[0] || 'npm')
-}
-
-function detectConfigFiles(){
-  return {
-    '.pnpmfile.cjs': existsSync(projectRelative('.pnpmfile.cjs')),
-    'pnpm-workspace.yml': existsSync(projectRelative('pnpm-workspace.yaml')) || existsSync(projectRelative('pnpm-workspace.yml')),
-    '.yarnrc': existsSync(projectRelative('.yarnrc')),
-    'yarnrc.yml': existsSync(projectRelative('.yarnrc.yml')),
-    'yarn.lock': existsSync(projectRelative('yarn.lock')),
-    '.npmrc': existsSync(projectRelative('.npmrc')),
-    'package-lock.json': existsSync(projectRelative('package-lock.json')),
   }
 }
 

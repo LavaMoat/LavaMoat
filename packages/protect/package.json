@@ -13,7 +13,8 @@
   "dependencies": {
     "@lavamoat/allow-scripts": "^2.1.0",
     "promptly": "^3.2.0",
-    "semver": "^7.3.8"
+    "semver": "^7.3.8",
+    "yargs": "^17.3.1"
   },
   "keywords": [],
   "author": "MetaMask security research team",
