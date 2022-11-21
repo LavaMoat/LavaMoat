@@ -12,6 +12,7 @@ const sesSrc = fs.readFileSync(path.join(__dirname, '/../lib/lockdown.umd.js'), 
 const makeGetEndowmentsForConfigSrc = fs.readFileSync(path.join(__dirname, '/makeGetEndowmentsForConfig.js'), 'utf-8')
 const makePrepareRealmGlobalFromConfigSrc = fs.readFileSync(path.join(__dirname, '/makePrepareRealmGlobalFromConfig.js'), 'utf-8')
 const makeGeneralUtilsSrc = fs.readFileSync(path.join(__dirname, '/makeGeneralUtils.js'), 'utf-8')
+const strictScopeTerminatorSrc = fs.readFileSync(path.join(__dirname, '/../lib/strict-scope-terminator.js'), 'utf-8')
 
 module.exports = {
   getSesShimSrc,
@@ -56,6 +57,7 @@ function generateKernelCore () {
   output = replaceTemplateRequire(output, 'makeGetEndowmentsForConfig', makeGetEndowmentsForConfigSrc)
   output = replaceTemplateRequire(output, 'makePrepareRealmGlobalFromConfig', makePrepareRealmGlobalFromConfigSrc)
   output = replaceTemplateRequire(output, 'makeGeneralUtils', makeGeneralUtilsSrc)
+  output = replaceTemplateRequire(output, 'strict-scope-terminator', strictScopeTerminatorSrc)
   return output
 }
 

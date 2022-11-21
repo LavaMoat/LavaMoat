@@ -1,8 +1,7 @@
 {
   "resources": {
-    "browserify>browser-pack>safe-buffer": {
+    "<root>": {
       "packages": {
-        "browserify>buffer": true
       }
     },
     "browserify>buffer": {
@@ -27,7 +26,12 @@
     },
     "browserify>string_decoder": {
       "packages": {
-        "browserify>browser-pack>safe-buffer": true
+        "browserify>util>safe-buffer": true
+      }
+    },
+    "browserify>util>safe-buffer": {
+      "packages": {
+        "browserify>buffer": true
       }
     },
     "keccak": {

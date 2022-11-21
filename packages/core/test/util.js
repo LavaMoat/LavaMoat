@@ -308,11 +308,13 @@ async function runScenario ({
       const intializerSource = `(function(exports, require, module, __filename, __dirname){\n${applySourceTransforms(moduleRecord.content)}\n})`
       if (runWithPrecompiledModules) {
         moduleData.precompiledInitializer = vmFeralFunction(`
-          with (this) {
+          with (this.scopeTerminator) {
+          with (this.globalThis) {
             return function() {
               'use strict';
               return ${intializerSource}
             };
+          }
           }
         `)
       } else {
