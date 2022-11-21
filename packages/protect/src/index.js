@@ -1,43 +1,42 @@
 //@ts-check
 const semver = require('semver')
 const promptly = require('promptly')
-const { existsSync,
-  appendFileSync,
-  readFileSync,
-  writeFileSync,
-} = require('fs')
-const path = require('path')
+const { existsSync } = require('fs')
 const setupScripts = require('./lib/setup-scripts')
-const setupLockfileLint = require('./lib/setup-lint')
 const installLavamoat = require('./lib/install-lavamoat')
 const { getPackageJson,
   projectRelative,
 } = require('./lib/utils')
 
-
 const SUPPORTED_PKG_MANAGERS = ['npm','pnpm','yarn1','yarn3']
 
 module.exports = {
-  async protectProject(){
+  SUPPORTED_PKG_MANAGERS,
+  async protectProject({ dryRun, force, interactive, ...argv }){
     try {
-      const pkgManagerDefault = detectPkgManager()
-      const pkgManagerChoice = await promptly.choose(`Which package manager are you using? [${SUPPORTED_PKG_MANAGERS.map(p => p === pkgManagerDefault ? '*'+p : p)}]`, SUPPORTED_PKG_MANAGERS, {
-        default: pkgManagerDefault
-      })
-
-      if(await promptly.confirm('Would you like to install protection against malicious scripts? [y/n]')) {
-        await setupScripts(pkgManagerChoice)
-      }
-      if(await promptly.confirm('Would you like to install a linter for your lockfile?')) {
-        await setupLockfileLint(pkgManagerChoice)
+      const packageManager = interactive
+        ? await (async () => {
+        const pkgManagerDefault = argv.packageManager ?? detectPkgManager()
+        return await promptly.choose(
+          `Which package manager are you using? [${SUPPORTED_PKG_MANAGERS.map(p => p === pkgManagerDefault ? '*'+p : p)}]`,
+          SUPPORTED_PKG_MANAGERS, {
+            default: pkgManagerDefault
+          })
+        })()
+        : argv.packageManager
+      const doSetupScripts = interactive
+        ? await promptly.confirm('Would you like to install protection against malicious scripts? [y/n]')
+        : argv.setupScripts
+      if (doSetupScripts) {
+        await setupScripts({packageManager, dryRun, interactive, force})
       }
       // TODO: ask the question in a way that it can protect CI and Node.js programs
-      if(await promptly.confirm('Would you like to install lavamoat-node for runtime protections?')) {
-        await installLavamoat(pkgManagerChoice)
+      const doInstallLavamoat = interactive
+        ? await promptly.confirm('Would you like to install lavamoat-node for runtime protections? [y/n]')
+        : argv.installLavamoat
+      if(doInstallLavamoat) {
+        await installLavamoat(packageManager)
       }
-      // We could attempt to detect package.json->scripts->* and wrap that with lavamoat, but I don't know how effective that would be
-
-
     } catch (error) {
       console.error('Sorry, that didn\'t work out...', error)
     }
