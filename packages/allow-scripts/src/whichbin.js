@@ -11,7 +11,7 @@ start().catch((err) => {
 
 async function start () {
   const binName = path.basename(process.argv[1])
-  const rootDir = process.cwd()
+  const rootDir = process.env.INIT_CWD || process.cwd()
   const currentBinCandidates = await getOptionsForBin({ rootDir, name: binName })
 
   if(!currentBinCandidates) {
