@@ -68,7 +68,7 @@ module.exports = {
             throw new Error('TODO')
           }
           case 'yarn1': {
-            // yarn1 has no interface to query global config explicitly
+            // yarn has no interface to query global config explicitly
             const cwd = makeTmpDir()
             try {
               const result = spawnSync('yarn', ['config', 'get', 'ignore-scripts'], { cwd })
@@ -79,10 +79,10 @@ module.exports = {
                 const { stderr, stdout } = spawnSync('yarn', cmdArgs)
                 const [err, out] = [stderr, stdout].map(b => b.toString('utf-8').trim())
                 if (!out.match(/success/)) {
-                  console.warn('@lavamoat/protect env npm-config INFO:', out)
+                  console.warn('@lavamoat/protect env yarn-config INFO:', out)
                 }
                 if (err) {
-                  console.error('@lavamoat/protect env npm-config ERROR:', err)
+                  console.error('@lavamoat/protect env yarn-config ERROR:', err)
                 }
               }
             } finally {
@@ -91,7 +91,26 @@ module.exports = {
             return
           }
           case 'yarn3': {
-            throw new Error('TODO')
+            const cwd = makeTmpDir()
+            try {
+              const result = spawnSync('yarn', ['config', 'get', 'enableScripts'], { cwd })
+                .stdout.toString('utf-8').trim()
+              if (result !== 'false') {
+                const cmdArgs = ['config', 'set', '-H', 'enableScripts', 'false']
+                console.info(`@lavamoat/protect env running \`yarn ${cmdArgs.join(' ')}\``)
+                const { stderr, stdout } = spawnSync('yarn', cmdArgs)
+                const [err, out] = [stderr, stdout].map(b => b.toString('utf-8').trim())
+                if (!out.match(/YN0000/)) {
+                  console.warn('@lavamoat/protect env yarn-config INFO:', out)
+                }
+                if (err) {
+                  console.error('@lavamoat/protect env yarn-config ERROR:', err)
+                }
+              }
+            } finally {
+              rmdirSync(cwd)
+            }
+            return
           }
         }
       })
