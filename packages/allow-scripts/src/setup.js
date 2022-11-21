@@ -17,11 +17,13 @@ function addInstallParentDir(filename) {
   return path.join(rootDir, filename)
 }
 
-function writeRcFileContent({file, exists, entry}){
+function writeRcFileContent({file, exists, entry}, dryRun = false){
   let rcPath = addInstallParentDir(file)
 
   if (!exists) {
-    writeFileSync(rcPath, entry + '\n')
+    if (!dryRun) {
+      writeFileSync(rcPath, entry + '\n')
+    }
     console.log(`@lavamoat/allow-scripts: created ${rcPath} file with entry: ${entry}.`)
     return
   }
@@ -30,12 +32,14 @@ function writeRcFileContent({file, exists, entry}){
   if (rcFileContents.includes(entry)) {
     console.log(`@lavamoat/allow-scripts: file ${rcPath} already exists with entry: ${entry}.`)
   } else {
-    appendFileSync(rcPath, entry + '\n')
+    if (!dryRun) {
+      appendFileSync(rcPath, entry + '\n')
+    }
     console.log(`@lavamoat/allow-scripts: added entry to ${rcPath}: ${entry}.`)
   }
 }
 
-function writeRcFile (pkgManagerDefault = 'npm') {
+function writeRcFile (pkgManagerDefault = 'npm', dryRun = false) {
   const yarnRcExists = existsSync(addInstallParentDir('.yarnrc'))
   const yarnYmlExists = existsSync(addInstallParentDir('.yarnrc.yml'))
   const npmRcExists = existsSync(addInstallParentDir('.npmrc'))
@@ -65,10 +69,10 @@ function writeRcFile (pkgManagerDefault = 'npm') {
     })
   }
 
-  configs.forEach(writeRcFileContent)
+  configs.forEach(c => writeRcFileContent(c, dryRun))
 }
 
-function updatePackageJson(input) {
+function updatePackageJson(input, dryRun = false) {
   const p = addInstallParentDir('package.json')
   const oldConf = JSON.parse(readFileSync(p, { encoding: 'utf-8' }))
   const mergedConf = {
@@ -85,13 +89,15 @@ function updatePackageJson(input) {
   }
 
   const output = JSON.stringify(mergedConf, undefined, 2)
-  writeFileSync(p, output, { encoding: 'utf-8' })
   const diff = prettyDiffJson(oldConf, mergedConf)
   if (diff.length > 0) {
     console.log(`@lavamoat/allow-scripts: Modified ${p}:`)
     process.stdout.write(diff + '\n')
   } else {
     console.log(`@lavamoat/allow-scripts: No changes to ${p}.`)
+  }
+  if (!dryRun) {
+    writeFileSync(p, output, { encoding: 'utf-8' })
   }
 }
 
@@ -129,7 +135,7 @@ function prettyDiffJson(x, y, contextLines=2) {
   ).join('')
 }
 
-function patchPackageJson () {
+function patchPackageJson (dryRun = false) {
   updatePackageJson({
     scripts: {
       'lavamoat-postinstall': './node_modules/@lavamoat/allow-scripts/src/cli.js',
@@ -137,5 +143,5 @@ function patchPackageJson () {
     devDependencies: {
       '@lavamoat/preinstall-always-fail': 'latest',
     }
-  })
+  }, dryRun)
 }
