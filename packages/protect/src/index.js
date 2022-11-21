@@ -40,81 +40,64 @@ module.exports = {
     }
   },
   async protectEnv({ dryRun, force, ...argv }) {
-    try {
-      const pms = new Set(argv.packageManager)
-      pms.forEach(pm => {
-        switch (pm) {
-          case 'npm': {
-            const result = spawnSync('npm', ['config', '-g', 'get', 'ignore-scripts'])
-              .stdout.toString('utf-8').trim()
-            if (result !== 'true') {
-              const cmdArgs = ['config', '-g', 'set', 'ignore-scripts', 'true']
-              console.info(`@lavamoat/protect env running \`npm ${cmdArgs.join(' ')}\``)
-              const { stderr, stdout } = spawnSync('npm', cmdArgs)
-              const [err, out] = [stderr, stdout].map(b => b.toString('utf-8').trim())
-              if (out) {
-                console.warn('@lavamoat/protect env npm-config INFO:', out)
-              }
-              if (err) {
-                console.error('@lavamoat/protect env npm-config ERROR:', err)
-              }
-            }
-            return
+    const pmCmds = {
+      npm: {
+        cmd: 'npm',
+        checkArgs: ['config', '-g', 'get', 'ignore-scripts'],
+        setArgs: ['config', '-g', 'set', 'ignore-scripts', 'true'],
+        intendedValue: 'true',
+        validateSetOut: out => !out,
+      },
+      yarn1: {
+        cmd: 'yarn',
+        checkArgs:  ['config', 'get', 'ignore-scripts'],
+        intendedValue: 'true',
+        setArgs: ['config', 'set', 'ignore-scripts', 'true', '-g'],
+        validateSetOut: out => out.match(/success/)
+      },
+      yarn3: {
+        cmd: 'yarn',
+        checkArgs: ['config', 'get', 'enableScripts'],
+        // just yarn we need to do this for for now? could do a proper version
+        // check if there is need for something proper or wider use
+        validateCheckOutVersion: out => ['false', 'true'].includes(out),
+        intendedValue: 'false',
+        setArgs: ['config', 'set', '-H', 'enableScripts', 'false'],
+        validateSetOut: out => out.match(/YN0000/)
+      }
+    }
+
+    const pms = new Set(argv.packageManager)
+    Array.from(pms).map(pm => ({pm, ...pmCmds[pm]})).forEach(({
+      cmd, checkArgs, validateCheckOutVersion, setArgs, intendedValue, validateSetOut
+    }) => {
+      if (!cmd) {
+        throw new Error('Unimplented package manager')
+      }
+      // yarn has no interface to query global config explicitly
+      const cwd = makeTmpDir()
+      try {
+        const result = spawnSync(cmd, checkArgs, { cwd })
+          .stdout.toString('utf-8').trim()
+        if (result !== intendedValue) {
+          if (validateCheckOutVersion && !validateCheckOutVersion(result)) {
+            console.log(`"""${result}"""`)
+            throw new Error(`Unsupported ${cmd} version`)
           }
-          case 'pnpm': {
-            throw new Error('TODO')
+          console.info(`@lavamoat/protect env running \`${[cmd, ...setArgs].join(' ')}\``)
+          const { stderr, stdout } = spawnSync(cmd, setArgs)
+          const [err, out] = [stderr, stdout].map(b => b.toString('utf-8').trim())
+          if (!validateSetOut(out)) {
+            console.warn(`@lavamoat/protect env ${cmd}-config INFO:`, out)
           }
-          case 'yarn1': {
-            // yarn has no interface to query global config explicitly
-            const cwd = makeTmpDir()
-            try {
-              const result = spawnSync('yarn', ['config', 'get', 'ignore-scripts'], { cwd })
-                .stdout.toString('utf-8').trim()
-              if (result !== 'true') {
-                const cmdArgs = ['config', 'set', 'ignore-scripts', 'true', '-g']
-                console.info(`@lavamoat/protect env running \`yarn ${cmdArgs.join(' ')}\``)
-                const { stderr, stdout } = spawnSync('yarn', cmdArgs)
-                const [err, out] = [stderr, stdout].map(b => b.toString('utf-8').trim())
-                if (!out.match(/success/)) {
-                  console.warn('@lavamoat/protect env yarn-config INFO:', out)
-                }
-                if (err) {
-                  console.error('@lavamoat/protect env yarn-config ERROR:', err)
-                }
-              }
-            } finally {
-              rmdirSync(cwd)
-            }
-            return
-          }
-          case 'yarn3': {
-            const cwd = makeTmpDir()
-            try {
-              const result = spawnSync('yarn', ['config', 'get', 'enableScripts'], { cwd })
-                .stdout.toString('utf-8').trim()
-              if (result !== 'false') {
-                const cmdArgs = ['config', 'set', '-H', 'enableScripts', 'false']
-                console.info(`@lavamoat/protect env running \`yarn ${cmdArgs.join(' ')}\``)
-                const { stderr, stdout } = spawnSync('yarn', cmdArgs)
-                const [err, out] = [stderr, stdout].map(b => b.toString('utf-8').trim())
-                if (!out.match(/YN0000/)) {
-                  console.warn('@lavamoat/protect env yarn-config INFO:', out)
-                }
-                if (err) {
-                  console.error('@lavamoat/protect env yarn-config ERROR:', err)
-                }
-              }
-            } finally {
-              rmdirSync(cwd)
-            }
-            return
+          if (err) {
+            console.error(`@lavamoat/protect env ${cmd}-config ERROR:`, err)
           }
         }
-      })
-
-    } catch (error) {
-      console.error('Sorry, that didn\'t work out...', error)
-    }
+      } finally {
+        rmdirSync(cwd)
+      }
+    })
   }
 }
 
