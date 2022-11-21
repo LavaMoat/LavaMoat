@@ -3,6 +3,7 @@
   // therefore this is our way of capturing access to basic APIs LavaMoat
   // uses to still be accessible only to LavaMoat after scuttling occurs
   const {
+    RegExp,
     Reflect,
     Object,
     Error,
@@ -34,17 +35,17 @@
   const { internalRequire } = kernel
 
   // create a lavamoat pulic API for loading modules over multiple files
-  const LavaPack = {
+  const LavaPack = Object.freeze({
     loadPolicy: Object.freeze(loadPolicy),
     loadBundle: Object.freeze(loadBundle),
     runModule: Object.freeze(runModule),
-  }
+  })
   // in debug mode, expose the kernel on the LavaPack API
   if (debugMode) {
     LavaPack._kernel = kernel
   }
 
-  globalThis.LavaPack = Object.freeze(LavaPack)
+  Object.defineProperty(globalThis, 'LavaPack', {value: LavaPack})
   return
 
 
@@ -121,7 +122,7 @@
   function onStatsReady (moduleGraphStatsObj) {
     const graphId = Date.now()
     console.warn(`completed module graph init "${graphId}" in ${moduleGraphStatsObj.value}ms ("${moduleGraphStatsObj.name}")`)
-    console.warn(`logging module init stats object:`)
+    console.warn('logging module init stats object:')
     console.warn(JSON.stringify(moduleGraphStatsObj, null, 2))
   }
 

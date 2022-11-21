@@ -6,7 +6,9 @@ const { runAndTestScenario } = require('lavamoat-core/test/util')
 test('Run scenarios with precompiled modules', async (t) => {
   for await (const scenario of loadScenarios()) {
     console.log(`Running Browserify Scenario: ${scenario.name}`)
-    await runAndTestScenario(t, scenario, ({ scenario }) => runScenario({ scenario }))
+    const {scuttleGlobalThis, scuttleGlobalThisExceptions} = scenario
+    const additionalOpts = {scuttleGlobalThis, scuttleGlobalThisExceptions}
+    await runAndTestScenario(t, scenario, ({ scenario }) => runScenario({ scenario, ...additionalOpts }))
   }
 })
 
@@ -17,10 +19,3 @@ test('Run scenarios with precompiled modules', async (t) => {
 //     await runAndTestScenario(t, scenario, ({ scenario }) => runScenario({ scenario, bundleWithPrecompiledModules: false }))
 //   }
 // })
-
-test('Run scenarios with scuttleGlobalThis', async (t) => {
-  for await (const scenario of loadScenarios()) {
-    console.log(`Running Browserify Scenario: ${scenario.name}`)
-    await runAndTestScenario(t, scenario, ({ scenario }) => runScenario({ scenario, scuttleGlobalThis: true }))
-  }
-})

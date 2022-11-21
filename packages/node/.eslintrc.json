@@ -1,3 +1,6 @@
 {
-  "extends": "../../.eslintrc.json"
+  "extends": "../../.eslintrc.json",
+  "rules": {
+    "node/global-require": 0
+  }
 }

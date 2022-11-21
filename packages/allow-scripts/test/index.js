@@ -3,7 +3,7 @@ const fs = require('fs')
 const path = require('path')
 const { spawnSync } = require('child_process')
 
-test('cli - auto command', async (t) => {
+test('cli - auto command', (t) => {
   // set up the directories
   let allowScriptsSrcRoot = path.join(__dirname, '..', 'src')
   let projectRoot = path.join(__dirname, 'projects', '1')
@@ -29,7 +29,7 @@ test('cli - auto command', async (t) => {
   t.deepEqual(packageJsonContents.lavamoat, {allowScripts: {'bbb>evil_dep': false}})
 })
 
-test('cli - run command - good dep at the root', async (t) => {
+test('cli - run command - good dep at the root', (t) => {
   // set up the directories
   let allowScriptsSrcRoot = path.join(__dirname, '..', 'src')
   let projectRoot = path.join(__dirname, 'projects', '2')
@@ -56,7 +56,7 @@ test('cli - run command - good dep at the root', async (t) => {
 })
 
 
-test('cli - run command - good dep as a sub dep', async (t) => {
+test('cli - run command - good dep as a sub dep', (t) => {
   // set up the directories
   let allowScriptsSrcRoot = path.join(__dirname, '..', 'src')
   let projectRoot = path.join(__dirname, 'projects', '3')

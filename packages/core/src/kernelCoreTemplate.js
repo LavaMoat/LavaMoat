@@ -1,5 +1,5 @@
 (function () {
-  "use strict"
+  'use strict'
   return createKernelCore
 
   function createKernelCore ({
@@ -72,6 +72,7 @@
     const generalUtils = templateRequire('makeGeneralUtils')()
     const { getEndowmentsForConfig, makeMinimalViewOfRef, applyEndowmentPropDescTransforms } = templateRequire('makeGetEndowmentsForConfig')(generalUtils)
     const { prepareCompartmentGlobalFromConfig } = templateRequire('makePrepareRealmGlobalFromConfig')(generalUtils)
+    const { strictScopeTerminator } = templateRequire('strict-scope-terminator')
 
     const moduleCache = new Map()
     const packageCompartmentCache = new Map()
@@ -99,34 +100,44 @@
     return kernel
 
     function performScuttleGlobalThis (globalRef, extraPropsToAvoid = new Array()) {
-      const props = new Set(
-        getPrototypeChain(globalRef)
-        .map(obj => Object.getOwnPropertyNames(obj))
-      )
+      const props = new Array()
+      getPrototypeChain(globalRef)
+        .forEach(proto =>
+          props.push(...Object.getOwnPropertyNames(proto)))
+
+      for (let i = 0; i < extraPropsToAvoid.length; i++) {
+        const prop = extraPropsToAvoid[i]
+        if (!prop.startsWith('/')) {
+          continue
+        }
+        const parts = prop.split('/')
+        const pattern = parts.slice(1, -1).join('/')
+        const flags = parts[parts.length - 1]
+        extraPropsToAvoid[i] = new RegExp(pattern, flags)
+      }
 
       // support LM,SES exported APIs and polyfills
-      const avoidForLavaMoatCompatibility = ['LavaPack', 'Compartment', 'Error', 'globalThis']
+      const avoidForLavaMoatCompatibility = ['Compartment', 'Error', 'globalThis']
       const propsToAvoid = new Set([...avoidForLavaMoatCompatibility, ...extraPropsToAvoid])
 
       for (const prop of props) {
-        if (propsToAvoid.has(prop)) {
+        if (shouldAvoidProp(propsToAvoid, prop)) {
           continue
         }
         if (Object.getOwnPropertyDescriptor(globalRef, prop)?.configurable === false) {
           continue
         }
-        // these props can't have getters, use undefined value instead
         const desc = {
           set: () => {
             console.warn(
               `LavaMoat - property "${prop}" of globalThis cannot be set under scuttling mode. ` +
-              `To learn more visit https://github.com/LavaMoat/LavaMoat/pull/360.`
+              'To learn more visit https://github.com/LavaMoat/LavaMoat/pull/360.'
             )
           },
           get: () => {
             throw new Error(
               `LavaMoat - property "${prop}" of globalThis is inaccessible under scuttling mode. ` +
-              `To learn more visit https://github.com/LavaMoat/LavaMoat/pull/360.`
+              'To learn more visit https://github.com/LavaMoat/LavaMoat/pull/360.'
             )
           },
           configurable: false
@@ -301,9 +312,12 @@
           // moduleObj must be from the same Realm as the moduleInitializer (eg dart2js runtime requirement)
           // here we are assuming the provided moduleInitializer is from the same Realm as this kernel
           moduleObj = { exports: {} }
-          const { scopeProxy } = packageCompartment.__makeScopeProxy__()
+          const evalKit = {
+            globalThis: packageCompartment.globalThis,
+            scopeTerminator: strictScopeTerminator,
+          }
           // this invokes the with-proxy wrapper
-          const moduleInitializerFactory = precompiledInitializer.call(scopeProxy)
+          const moduleInitializerFactory = precompiledInitializer.call(evalKit)
           // this ensures strict mode
           moduleInitializer = moduleInitializerFactory()
         } else {
@@ -460,6 +474,18 @@
         current = Reflect.getPrototypeOf(current)
       }
       return protoChain
+    }
+
+    function shouldAvoidProp(propsToAvoid, prop) {
+      for (const avoid of propsToAvoid) {
+        if (avoid instanceof RegExp && avoid.test(prop)) {
+          return true
+        }
+        if (propsToAvoid.has(prop)) {
+          return true
+        }
+      }
+      return false
     }
   }
 })()

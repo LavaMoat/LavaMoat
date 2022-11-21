@@ -44,24 +44,24 @@ function writeRcFile () {
   const configs = []
   if (yarnRcExists || yarnLockExists) {
     configs.push({
-      file: ".yarnrc",
+      file: '.yarnrc',
       exists: yarnRcExists,
-      entry: "ignore-scripts true",
+      entry: 'ignore-scripts true',
     })
   }
   if (yarnYmlExists || yarnLockExists) {
     configs.push({
-      file: ".yarnrc.yml",
+      file: '.yarnrc.yml',
       exists: yarnYmlExists,
-      entry: "enableScripts: false",
+      entry: 'enableScripts: false',
     })
   }
   if (configs.length === 0) {
     // default to npm, because that's what everyone has anyway
     configs.push({
-      file: ".npmrc",
+      file: '.npmrc',
       exists: npmRcExists,
-      entry: "ignore-scripts=true",
+      entry: 'ignore-scripts=true',
     })
   }
 
@@ -82,8 +82,8 @@ function addPreinstallAFDependency () {
   let result = spawnSync(cmd, cmdArgs, {})
 
   if (result.status !== 0) {
-    process.stderr.write(result.stderr);
-    process.exit(result.status);
+    process.stderr.write(result.stderr)
+    process.exit(result.status)
   } else {
     console.log('@lavamoat/allow-scripts:: Added dependency @lavamoat/preinstall-always-fail.')
   }

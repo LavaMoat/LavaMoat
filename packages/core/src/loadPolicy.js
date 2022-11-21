@@ -24,7 +24,7 @@ async function loadPolicyAndApplyOverrides({ debugMode, policyPath, policyOverri
   const policy = await loadPolicy({ debugMode, policyPath })
   let lavamoatPolicy = policy
   if (fs.existsSync(policyOverridePath)) {
-    if (debugMode) console.warn(`Merging policy-override.json into policy.json`)
+    if (debugMode) console.warn('Merging policy-override.json into policy.json')
     const policyOverride = await readPolicyFile({ debugMode, policyPath: policyOverridePath })
     lavamoatPolicy = mergePolicy(policy, policyOverride)
     // TODO: Only write if merge results in changes.
@@ -32,5 +32,5 @@ async function loadPolicyAndApplyOverrides({ debugMode, policyPath, policyOverri
     // mergePolicy() should be able to do it in one pass.
     fs.writeFileSync(policyPath, jsonStringify(lavamoatPolicy, { space: 2 }))
   }
-  return lavamoatPolicy;
+  return lavamoatPolicy
 }

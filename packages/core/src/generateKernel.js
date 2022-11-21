@@ -12,6 +12,7 @@ const sesSrc = fs.readFileSync(path.join(__dirname, '/../lib/lockdown.umd.js'), 
 const makeGetEndowmentsForConfigSrc = fs.readFileSync(path.join(__dirname, '/makeGetEndowmentsForConfig.js'), 'utf-8')
 const makePrepareRealmGlobalFromConfigSrc = fs.readFileSync(path.join(__dirname, '/makePrepareRealmGlobalFromConfig.js'), 'utf-8')
 const makeGeneralUtilsSrc = fs.readFileSync(path.join(__dirname, '/makeGeneralUtils.js'), 'utf-8')
+const strictScopeTerminatorSrc = fs.readFileSync(path.join(__dirname, '/../lib/strict-scope-terminator.js'), 'utf-8')
 
 module.exports = {
   getSesShimSrc,
@@ -24,21 +25,28 @@ function getSesShimSrc () {
 }
 
 // takes the kernelTemplate and populates it with the libraries
-function generateKernel ({
-  scuttleGlobalThis = false,
-  scuttleGlobalThisExceptions = [],
-  debugMode = false,
-} = {}) {
+function generateKernel (opts = {}) {
   const kernelCode = generateKernelCore()
 
   let output = kernelTemplate
   output = replaceTemplateRequire(output, 'ses', sesSrc)
   output = stringReplace(output, '__createKernelCore__', kernelCode)
-  output = stringReplace(output, '__lavamoatSecurityOptions__', JSON.stringify({
-    scuttleGlobalThis,
-    scuttleGlobalThisExceptions,
-    debugMode,
-  }))
+  output = stringReplace(output, '__lavamoatDebugOptions__', JSON.stringify({debugMode: !!opts.debugMode}))
+  if (opts.hasOwnProperty('scuttleGlobalThis')) {
+    // scuttleGlobalThis config placeholder should be set only if ordered so explicitly.
+    // if not, should be left as is to be replaced by a later processor (e.g. LavaPack).
+    const {scuttleGlobalThis, scuttleGlobalThisExceptions} = opts
+    if (scuttleGlobalThisExceptions) {
+      // toString regexps if there's any
+      for (let i = 0; i < scuttleGlobalThisExceptions.length; i++) {
+        scuttleGlobalThisExceptions[i] = String(scuttleGlobalThisExceptions[i])
+      }
+    }
+    output = stringReplace(output, '__lavamoatSecurityOptions__', JSON.stringify({
+      scuttleGlobalThis,
+      scuttleGlobalThisExceptions,
+    }))
+  }
 
   return output
 }
@@ -49,6 +57,7 @@ function generateKernelCore () {
   output = replaceTemplateRequire(output, 'makeGetEndowmentsForConfig', makeGetEndowmentsForConfigSrc)
   output = replaceTemplateRequire(output, 'makePrepareRealmGlobalFromConfig', makePrepareRealmGlobalFromConfigSrc)
   output = replaceTemplateRequire(output, 'makeGeneralUtils', makeGeneralUtilsSrc)
+  output = replaceTemplateRequire(output, 'strict-scope-terminator', strictScopeTerminatorSrc)
   return output
 }
 
