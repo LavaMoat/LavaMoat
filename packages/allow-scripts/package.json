@@ -43,9 +43,6 @@
     "lint:fix": "eslint . --fix",
     "lint:deps": "depcheck"
   },
-  "engines": {
-    "node": ">=12.0.0"
-  },
   "author": "",
   "homepage": "https://github.com/LavaMoat/LavaMoat/tree/main/packages/allow-scripts",
   "engines": {
