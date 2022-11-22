@@ -5,7 +5,10 @@ const one = () => {
   if (globalThis.getTrueGlobalThisForTestsOnly) {
     globalObject = globalThis.getTrueGlobalThisForTestsOnly()
   }
-  module.exports = globalObject.Math.SQRT2
+  // this will throw if regex scuttling fails
+  if (globalObject.Float32Array) {
+    module.exports = globalObject.Math.PI
+  }
 }
 
 module.exports = [
@@ -13,9 +16,9 @@ module.exports = [
     const scenario = createScenarioFromScaffold({
       name: 'scuttle - host env global object is scuttled to work',
       defineOne: one,
-      expectedResult: Math.SQRT2,
+      expectedResult: Math.PI,
       scuttleGlobalThis: true,
-      scuttleGlobalThisExceptions: ['process', 'Set', 'Reflect', 'Object', 'console', 'Array', 'RegExp', 'Date', 'Math'],
+      scuttleGlobalThisExceptions: ['process', /[0-9]+/, 'Set', 'Reflect', 'Object', 'console', 'Array', 'RegExp', 'Date', 'Math'],
     })
     await autoConfigForScenario({ scenario })
     return scenario
@@ -25,9 +28,9 @@ module.exports = [
       name: 'scuttle - host env global object is too scuttled to work',
       defineOne: one,
       scuttleGlobalThis: true,
-      scuttleGlobalThisExceptions: ['process', /*'Set', 'Reflect', 'Object', 'console', 'Array', 'RegExp', 'Date', 'Math'*/],
+      scuttleGlobalThisExceptions: ['process', '/[0-9]+/', /*'Set', 'Reflect', 'Object', 'console', 'Array', 'RegExp', 'Date', 'Math'*/],
       expectedFailure: true,
-      expectedFailureMessageRegex: /LavaMoat - property "[A-Za-z]*" of globalThis is inaccessible under scuttling mode/,
+      expectedFailureMessageRegex: /SES_UNHANDLED_REJECTION|inaccessible under scuttling mode./,
     })
     await autoConfigForScenario({ scenario })
     return scenario

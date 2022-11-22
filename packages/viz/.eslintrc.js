@@ -7,8 +7,8 @@ module.exports = {
     mocha: true
   },
   extends: [
-    '@metamask/eslint-config',
-    'plugin:react/recommended'
+    'plugin:react/recommended',
+    '../../.eslintrc.json'
   ],
   parserOptions: {
     ecmaFeatures: {
@@ -18,6 +18,7 @@ module.exports = {
     sourceType: 'module'
   },
   plugins: [
+    'import',
     'react'
   ],
   rules: {

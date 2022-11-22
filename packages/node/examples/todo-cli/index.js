@@ -11,14 +11,17 @@ const readline = require('readline')
 
 const TODO_FILE = 'todo.txt'
 
-start()
+start().catch((err) => {
+  console.error('Unhandled error', err)
+  process.exit(1)
+})
 
-async function start () {
+const start = async () => {
   const argsString = process.argv.slice(2)
   await runCommandFromArgs(argsString)
 }
 
-async function runCommandFromArgs (argsString) {
+const runCommandFromArgs = async (argsString) => {
   const args = parseArgs(argsString)
   const action = args._[0] || 'display'
   if (action === 'add') {
@@ -32,7 +35,7 @@ async function runCommandFromArgs (argsString) {
   }
 }
 
-async function addTodo (todoText, priority = 'Medium') {
+const addTodo = async (todoText, priority = 'Medium') => {
   await fs.appendFile(TODO_FILE, `${priority}: ${todoText} \n`)
   console.log(`Added todo "${todoText}" with priority "${priority}"`)
 }

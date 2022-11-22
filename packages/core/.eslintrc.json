@@ -1,4 +1,3 @@
 {
-  "extends": "../../.eslintrc.json",
-  "ignorePatterns": ["./lib/**/*.js"]
+  "extends": "../../.eslintrc.json"
 }

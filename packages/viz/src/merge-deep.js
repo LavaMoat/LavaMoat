@@ -7,59 +7,59 @@
  * Licensed under the MIT License.
  */
 
-'use strict';
+'use strict'
 
-var union = require('arr-union');
-var clone = require('clone-deep');
-var typeOf = require('kind-of');
+var union = require('arr-union')
+var clone = require('clone-deep')
+var typeOf = require('kind-of')
 
 module.exports = function mergeDeep(orig, objects) {
   if (!isObject(orig) && !Array.isArray(orig)) {
-    orig = {};
+    orig = {}
   }
 
-  var target = clone(orig);
-  var len = arguments.length;
-  var idx = 0;
+  var target = clone(orig)
+  var len = arguments.length
+  var idx = 0
 
   while (++idx < len) {
-    var val = arguments[idx];
+    var val = arguments[idx]
 
     if (isObject(val) || Array.isArray(val)) {
-      merge(target, val);
+      merge(target, val)
     }
   }
-  return target;
-};
+  return target
+}
 
 function merge(target, obj) {
   for (var key in obj) {
     if (!isValidKey(key) || !hasOwn(obj, key)) {
-      continue;
+      continue
     }
 
-    var oldVal = obj[key];
-    var newVal = target[key];
+    var oldVal = obj[key]
+    var newVal = target[key]
 
     if (isObject(newVal) && isObject(oldVal)) {
-      target[key] = merge(newVal, oldVal);
+      target[key] = merge(newVal, oldVal)
     } else if (Array.isArray(newVal)) {
-      target[key] = union([], newVal, oldVal);
+      target[key] = union([], newVal, oldVal)
     } else {
-      target[key] = clone(oldVal);
+      target[key] = clone(oldVal)
     }
   }
-  return target;
+  return target
 }
 
 function hasOwn(obj, key) {
-  return Object.prototype.hasOwnProperty.call(obj, key);
+  return Object.prototype.hasOwnProperty.call(obj, key)
 }
 
 function isObject(val) {
-  return typeOf(val) === 'object' || typeOf(val) === 'function';
+  return typeOf(val) === 'object' || typeOf(val) === 'function'
 }
 
 function isValidKey(key) {
-  return key !== '__proto__' && key !== 'constructor' && key !== 'prototype';
+  return key !== '__proto__' && key !== 'constructor' && key !== 'prototype'
 }

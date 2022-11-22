@@ -13,12 +13,15 @@
     "test": "yarn test:run",
     "test:run": "ava --timeout=30s test/index.js",
     "lint": "yarn lint:eslint && yarn lint:deps",
-    "lint:eslint": "eslint \"src/**/*.js\"",
-    "lint:fix": "eslint src/**/*.js --fix",
+    "lint:eslint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "lint:deps": "depcheck"
   },
   "devDependencies": {
-    "ava": "^3.15.0"
+    "@metamask/eslint-config-nodejs": "^10.0.0",
+    "ava": "^3.15.0",
+    "eslint-plugin-ava": "^11.0.0",
+    "eslint-plugin-node": "^11.1.0"
   },
   "dependencies": {
     "resolve": "^1.20.0"
@@ -27,5 +30,8 @@
   "directories": {
     "test": "test"
   },
-  "author": "kumavis"
+  "author": "kumavis",
+  "engines": {
+    "node": ">=14.0.0"
+  }
 }

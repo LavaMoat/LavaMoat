@@ -1,5 +1,6 @@
 ignore-dirs: "lib"
 ignores:
+  - "ses"
   # monorepo deps
   - "ava"
   # tests - fake packages

@@ -1,4 +1,4 @@
-const { readFileSync, statSync } = require('fs');
+const { readFileSync, statSync } = require('fs')
 const path = require('path')
 const nodeResolve = require('resolve')
 
@@ -14,15 +14,15 @@ function createPerformantResolve () {
   const readPackageWithout = (self) => (readFileSync, pkgfile) => {
     // avoid loading the package.json we're just trying to resolve
     if (pkgfile.endsWith(self)) {
-      return {};
+      return {}
     }
     // original readPackageSync implementation from resolve internals:
-    var body = readFileSync(pkgfile);
+    var body = readFileSync(pkgfile)
     try {
-      var pkg = JSON.parse(body);
-      return pkg;
+      var pkg = JSON.parse(body)
+      return pkg
     } catch (jsonErr) { }
-  };
+  }
 
   return {
     sync: (path, { basedir }) =>
@@ -30,7 +30,7 @@ function createPerformantResolve () {
         basedir,
         readPackageSync: readPackageWithout(path),
       }),
-  };
+  }
 };
 
 /**
@@ -41,7 +41,7 @@ async function loadCanonicalNameMap({ rootDir, includeDevDeps, resolve } = {}) {
   const canonicalNameMap = new Map()
   // performant resolve avoids loading package.jsons if their path is what's being resolved, 
   // offering 2x performance improvement compared to using original resolve
-  resolve = resolve || createPerformantResolve();
+  resolve = resolve || createPerformantResolve()
   // resolve = resolve || nodeResolve
   // walk tree
   const logicalPathMap = walkDependencyTreeForBestLogicalPaths({ packageDir: rootDir, includeDevDeps, resolve, canonicalNameMap })
@@ -81,8 +81,8 @@ function getDependencies(packageDir, includeDevDeps) {
   return depsToWalk
 }
 
-let currentLevelTodos;
-let nextLevelTodos;
+let currentLevelTodos
+let nextLevelTodos
 /**
  * @param {object} options
  * @returns {Map<{packageDir: string, logicalPathParts: string[]}>}
@@ -90,14 +90,14 @@ let nextLevelTodos;
 function walkDependencyTreeForBestLogicalPaths({ packageDir, logicalPath = [], includeDevDeps = false, visited = new Set(), resolve = performantResolve }) {
   const preferredPackageLogicalPathMap = new Map()
   // add the entry package as the first work unit
-  currentLevelTodos = [{ packageDir, logicalPath, includeDevDeps, visited, resolve }];
+  currentLevelTodos = [{ packageDir, logicalPath, includeDevDeps, visited, resolve }]
   nextLevelTodos = []
   // drain work queue until empty, avoid going depth-first by prioritizing the current depth level
   do {
     processOnePackageInLogicalTree(preferredPackageLogicalPathMap, resolve)
     if (currentLevelTodos.length === 0) {
-      currentLevelTodos = nextLevelTodos;
-      nextLevelTodos = [];
+      currentLevelTodos = nextLevelTodos
+      nextLevelTodos = []
     }
   } while (currentLevelTodos.length > 0)
 
@@ -105,9 +105,9 @@ function walkDependencyTreeForBestLogicalPaths({ packageDir, logicalPath = [], i
 }
 
 function processOnePackageInLogicalTree(preferredPackageLogicalPathMap, resolve) {
-  const { packageDir, logicalPath = [], includeDevDeps = false, visited = new Set() } = currentLevelTodos.pop();
+  const { packageDir, logicalPath = [], includeDevDeps = false, visited = new Set() } = currentLevelTodos.pop()
   const depsToWalk = getDependencies(packageDir, includeDevDeps)
-  const results = [];
+  const results = []
 
   // deps are already sorted by preference for paths
   for (const depName of depsToWalk) {
@@ -143,7 +143,7 @@ function processOnePackageInLogicalTree(preferredPackageLogicalPathMap, resolve)
       continue
     }
   }
-  return results;
+  return results
 }
 
 function getPackageNameForModulePath(canonicalNameMap, modulePath) {
