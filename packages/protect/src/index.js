@@ -100,6 +100,7 @@ module.exports = {
     })
   },
   async checkEnv(argv) {
+    // check for presence of global packages
     const GLOBAL_ROOT_PACKAGE_ALLOWLIST = new Set([
       'corepack', 'npm', 'pnpm', 'yarn'
     ])
@@ -121,6 +122,27 @@ module.exports = {
       withRootOwned.forEach(p => {
         console.warn(`@lavamoat/protect env: unexpected global package ${p} has files owned by root`)
       })
+    }
+
+    // check for node bins owned by root
+    const nodePaths = (process.env.PATH || '')
+      .split(':')
+      .filter(p => {
+        const { dir, name } = path.parse(p)
+        return name === '.bin'
+          && dir.endsWith(path.sep + 'node_modules')
+      })
+    for (const p of nodePaths) {
+      try {
+        const { uid } = await fsPromises.stat(p)
+        if (uid === 0) {
+          console.warn(`@lavamoat/protect env: environment PATH segment '${p}' owned by root`)
+        }
+      } catch (err) {
+        if (err.code === 'EACCES') {
+          console.warn(`@lavamoat/protect env: forbidden environment PATH segment '${p}'`)
+        }
+      }
     }
   }
 }
