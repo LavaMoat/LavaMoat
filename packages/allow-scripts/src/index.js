@@ -5,6 +5,7 @@ const path = require('path')
 const npmRunScript = require('@npmcli/run-script')
 const normalizeBin = require('npm-normalize-package-bin')
 const { linkBinAbsolute, linkBinRelative } = require('./linker.js')
+const { FT } = require('./toggles.js')
 const { loadCanonicalNameMap } = require('@lavamoat/aa')
 
 /**
@@ -90,14 +91,16 @@ async function runAllowedPackages({ rootDir }) {
     process.exit(1)
   }
 
-  // TODO: Might as well delete entire .bin and recreate in case it was left there
-  // install bins
-  if (bin.binCandidates.size > 0) {
-    console.log('installing bin scripts')
-    await installBinScripts(bin.allowedBins)
-    await installBinFirewall(bin.firewalledBins, path.join(__dirname, './whichbin.js'))
-  } else {
-    console.log('no bin scripts found in dependencies')
+  if (FT.bins && bin.allowConfig) {
+    // Consider: Might as well delete entire .bin and recreate in case it was left there
+    // install bins
+    if (bin.binCandidates.size > 0) {
+      console.log('installing bin scripts')
+      await installBinScripts(bin.allowedBins)
+      await installBinFirewall(bin.firewalledBins, path.join(__dirname, './whichbin.js'))
+    } else {
+      console.log('no bin scripts found in dependencies')
+    }
   }
 
   // run scripts in dependencies
@@ -139,19 +142,20 @@ async function setDefaultConfiguration({ rootDir }) {
   console.log('\n@lavamoat/allow-scripts automatically updating configuration')
 
   if (!somePoliciesAreMissing) {
-    console.log('\nconfiguration looks good as is, no changes necesary')
+    console.log('\nconfiguration looks good as is, no changes necessary')
     return
   }
 
-  console.log('\nadding configuration for missing packages:')
+  console.log('\nadding configuration:')
 
   lifecycle.missingPolicies.forEach(pattern => {
     console.log(`- lifecycle ${pattern}`)
     lifecycle.allowConfig[pattern] = false
   })
 
-  if(bin.somePoliciesAreMissing) {
+  if(FT.bins && bin.somePoliciesAreMissing) {
     bin.allowConfig = prepareBinScriptsPolicy(bin.binCandidates)
+    console.log(`- bin scripts linked: ${Object.keys(bin.allowConfig).join(',')}`)
   }
 
   // update package json
@@ -394,7 +398,7 @@ async function loadAllPackageConfigurations({ rootDir }) {
       packagesWithScriptsLifecycle.set(canonicalName, collection)
     }
 
-    if (depPackageJson.bin) {
+    if (FT.bins && depPackageJson.bin) {
       const binsList = Object.entries(normalizeBin(depPackageJson)?.bin || {})
 
       binsList.forEach(([name, link]) => {
@@ -466,11 +470,9 @@ function indexLifecycleConfiguration(config) {
  */
 function indexBinsConfiguration(config) {
   // only autogenerate the initial config. A better heuristic would be to detect if any scripts from direct dependencies are missing
-  config.somePoliciesAreMissing = !config.allowConfig
-
-  config.allowConfig = config.allowConfig || {}
-  config.excessPolicies = Object.keys(config.allowConfig).filter(b => !config.binCandidates.has(b))
-  config.allowedBins = Object.entries(config.allowConfig).map(([bin, fullPath]) => config.binCandidates.get(bin)?.find((/** @type BinInfo */ candidate) => candidate.fullLinkPath === fullPath)).filter(a => a)
+  config.somePoliciesAreMissing = !config.allowConfig && config.binCandidates.size > 0
+  config.excessPolicies = Object.keys(config.allowConfig || {}).filter(b => !config.binCandidates.has(b))
+  config.allowedBins = Object.entries(config.allowConfig || {}).map(([bin, fullPath]) => config.binCandidates.get(bin)?.find((/** @type BinInfo */ candidate) => candidate.fullLinkPath === fullPath)).filter(a => a)
 
   config.firewalledBins = Array.from(config.binCandidates.values()).flat().filter(binInfo => !config.allowedBins.includes(binInfo))
   return config

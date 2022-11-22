@@ -104,3 +104,17 @@ In the future when you add additional post-processing scripts, e.g. [`patch-pack
   }
 }
 ```
+
+# Experimental protection against bin script confusion
+
+Bin script confusion is a new attack where a dependency could get its script to run by declaring it as a commandline app instead of running as a lifecycle script. More details in [npm bin script confusion: Abusing ‘bin’ to hijack ‘node’ command](https://socket.dev/blog/npm-bin-script-confusion) by Socket.dev
+
+To enable the feature, run all of the above `allow-scripts` commands with a `--experimental-bins` flag.
+
+What does it do?
+
+- `setup` will add a new configuration option to your RC file to disable linking up bin scripts
+- `auto` will generate a whitelist of top level bin scripts that should be allowed
+- `run` will link up the allowed scripts and install a helpful warning instead of the rest of them
+
+When you attempt to run a bin script that was not allowed, you will get an error with instructions on how to enable it manually.

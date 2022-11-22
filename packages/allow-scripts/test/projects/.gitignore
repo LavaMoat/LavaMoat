@@ -2,3 +2,5 @@
 1/package.json
 .bin
 .goodscriptworked
+.npmrc
+.yarnrc

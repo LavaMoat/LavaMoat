@@ -3,6 +3,7 @@
 // @ts-check
 const path = require('path')
 const { getOptionsForBin } = require('./index.js')
+const { FT } = require('./toggles.js')
 
 start().catch((err) => {
   console.error(err)
@@ -10,6 +11,7 @@ start().catch((err) => {
 })
 
 async function start () {
+  FT.bins = true
   const binName = path.basename(process.argv[1])
   const rootDir = process.env.INIT_CWD || process.cwd()
   const currentBinCandidates = await getOptionsForBin({ rootDir, name: binName })
