@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "bin": "src/cli.js",
+  "engines": {
+    "node": ">=14.0.0"
+  },
   "scripts": {
     "lint": "yarn lint:eslint && yarn lint:deps",
     "lint:eslint": "eslint \"src/**/*.js\"",
