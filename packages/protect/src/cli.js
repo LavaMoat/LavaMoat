@@ -5,7 +5,7 @@
 const yargs = require('yargs')
 
 const { detectPkgManager } = require('./lib/utils.js')
-const { protectEnv, protectProject, SUPPORTED_PKG_MANAGERS } = require('./index.js')
+const { checkEnv, protectEnv, protectProject, SUPPORTED_PKG_MANAGERS } = require('./index.js')
 const { setDryRun } = require('./lib/effect.js')
 
 async function parseArgs () {
@@ -76,6 +76,11 @@ async function parseArgs () {
         choices: SUPPORTED_PKG_MANAGERS,
         requiresArg: false,
       })
+      .option('check', {
+        describe: 'detect and warn about common misconfiguration instead of doing any changes',
+        type: 'boolean',
+        default: false,
+      })
       .option('force', {
         alias: 'f',
         describe: 'overwrite existing files without prompting',
@@ -83,8 +88,11 @@ async function parseArgs () {
         default: false,
       })
     }, async (argv) => {
-      setDryRun(argv.n)
-      await protectEnv(argv)
+      if (argv.check) {
+        await checkEnv(argv)
+      } else {
+        await protectEnv(argv)
+      }
     })
     .demandCommand(1, 1)
     .help()

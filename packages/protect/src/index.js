@@ -1,6 +1,6 @@
 //@ts-check
 const { spawnSync } = require('child_process')
-const { mkdtempSync, rmdirSync } = require('fs')
+const { mkdtempSync, readdirSync, rmdirSync, statSync } = require('fs')
 const path = require('path')
 const { tmpdir } = require('os')
 const promptly = require('promptly')
@@ -98,6 +98,30 @@ module.exports = {
         rmdirSync(cwd)
       }
     })
+  },
+  async checkEnv(argv) {
+    const GLOBAL_ROOT_PACKAGE_ALLOWLIST = new Set([
+      'corepack', 'npm', 'pnpm', 'yarn'
+    ])
+    const pms = new Set(argv.packageManager)
+    if (pms.has('npm')) {
+      const globalPackages = JSON.parse(
+        spawnSync('npm', ['ls', '-g', '--depth=0', '-j', '-l']).stdout.toString('utf-8')
+      ).dependencies
+      const pkgPaths = Object.values(globalPackages)
+        .filter(({name}) => !GLOBAL_ROOT_PACKAGE_ALLOWLIST.has(name))
+        .map(p => [p.name, p.path])
+      const withRootOwned = pkgPaths.filter(([_, pkgPath]) =>
+        readdirSync(pkgPath)
+          .concat([''])
+          .map(p => path.join(pkgPath, p))
+          .filter(p => statSync(p).uid === 0)
+          .length
+      ).map(([p]) => p)
+      withRootOwned.forEach(p => {
+        console.warn(`@lavamoat/protect env: unexpected global package ${p} has files owned by root`)
+      })
+    }
   }
 }
 
