@@ -11,6 +11,7 @@ const { setDryRun } = require('./lib/effect.js')
 async function parseArgs () {
   const argsParser = yargs
     .usage('Usage: $0 <command> [options]')
+    .env('LMPROTECT')
     .command('project', 'set up project-level protections', (project_) => {
       project_.option('interactive', {
         alias: 'i',
