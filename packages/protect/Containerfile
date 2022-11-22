@@ -1,0 +1,11 @@
+FROM node:16-alpine
+USER root
+COPY . /app
+# can be removed when compatible allow-scripts has been released
+RUN yarn add @lavamoat/allow-scripts@https://gitpkg.now.sh/LavaMoat/Lavamoat/packages/allow-scripts?lava-cli \
+  && yarn global add file:///app \
+  && rm -r /app
+WORKDIR /home/node
+USER node
+ENTRYPOINT protect
+
