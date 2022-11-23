@@ -73,7 +73,7 @@ function wrapWithReturnCjsExports (label, src) {
     throw new Error('Lavamoat - "wrapWithReturnCjsExports" does not allow labels with newlines')
   }
   return (
-`// define ${label}
+    `// define ${label}
 (function(){
   const global = globalRef
   const exports = {}

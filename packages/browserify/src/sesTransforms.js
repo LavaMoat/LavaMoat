@@ -5,7 +5,7 @@ const concatStream = require('concat-stream')
 const { applySourceTransforms } = require('lavamoat-core')
 
 module.exports = {
-  createSesWorkaroundsTransform
+  createSesWorkaroundsTransform,
 }
 
 function createSesWorkaroundsTransform () {
@@ -38,6 +38,6 @@ function makeTransformStream (transformHandler) {
       }
       outStream.end(transformed)
     }),
-    outStream
+    outStream,
   )
 }

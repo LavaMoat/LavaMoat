@@ -5,7 +5,7 @@ const pathLookup = new WeakMap()
 module.exports = {
   expandUsage,
   pathLookup,
-  getGraph
+  getGraph,
 }
 
 // // -> where do the inputs to function "b" come from?
@@ -34,7 +34,7 @@ function getGraph (targetPath) {
       nodes.add(originNode)
       nodes.add(destNode)
       links.push({ from: originNode, to: destNode, label: linkLabel })
-    }
+    },
   })
   return { links, nodes: Array.from(nodes) }
 }
@@ -119,12 +119,12 @@ const usageDetectors = {
             const fnArgPath = fnArgBinding.path
 
             return [
-              new ReferenceLinkage({ path: fnArgPath, label: 'arg in fn dec' })
+              new ReferenceLinkage({ path: fnArgPath, label: 'arg in fn dec' }),
             ]
           }
           const fnCalleePath = pathLookup.get(fnCallee)
           return [
-            new ReferenceLinkage({ path: fnCalleePath, label: 'arg in fn dec (unknown)' })
+            new ReferenceLinkage({ path: fnCalleePath, label: 'arg in fn dec (unknown)' }),
           ]
         }
         if (targetPath.parentKey === 'callee') {
@@ -178,7 +178,7 @@ const usageDetectors = {
     }
     const leftSidePath = pathLookup.get(leftSide)
     return new ReferenceLinkage({ path: leftSidePath, label: 'parent of member (unknown)' })
-  }
+  },
 }
 
 function tracePathToUsages (targetPath) {

@@ -63,9 +63,9 @@ async function getOptionsForBin({ rootDir, name }) {
   const {
     configs: {
       bin: {
-        binCandidates
-      }
-    }
+        binCandidates,
+      },
+    },
   } = await loadAllPackageConfigurations({ rootDir })
 
   return binCandidates.get(name)
@@ -76,9 +76,9 @@ async function runAllowedPackages({ rootDir }) {
   const {
     configs: {
       lifecycle,
-      bin
+      bin,
     },
-    somePoliciesAreMissing
+    somePoliciesAreMissing,
   } = await loadAllPackageConfigurations({ rootDir })
 
   if (somePoliciesAreMissing) {
@@ -134,9 +134,9 @@ async function setDefaultConfiguration({ rootDir }) {
   const {
     configs: {
       lifecycle,
-      bin
+      bin,
     },
-    somePoliciesAreMissing
+    somePoliciesAreMissing,
   } = conf
 
   console.log('\n@lavamoat/allow-scripts automatically updating configuration')
@@ -161,7 +161,7 @@ async function setDefaultConfiguration({ rootDir }) {
   // update package json
   await savePackageConfigurations({
     rootDir,
-    conf
+    conf,
   })
 }
 
@@ -169,8 +169,8 @@ async function printPackagesList({ rootDir }) {
   const {
     configs: {
       bin,
-      lifecycle
-    }
+      lifecycle,
+    },
   } = await loadAllPackageConfigurations({ rootDir })
 
   printPackagesByBins(bin)
@@ -240,7 +240,7 @@ async function runScript({ path, event }) {
     // > somepackage@1.2.3 postinstall
     // > make all-the-things
     // Defaults true when stdio:'inherit', otherwise suppressed
-    banner: true
+    banner: true,
   })
 }
 
@@ -255,7 +255,7 @@ function prepareBinScriptsPolicy(binCandidates) {
   // pick direct dependencies without conflicts and enable them by default unless colliding with bannedBins
   for ( const [bin, infos] of binCandidates.entries()) {
     const binsFromDirectDependencies = infos.filter(i => i.isDirect)
-    if(binsFromDirectDependencies.length === 1 && !bannedBins.has(bin)){
+    if(binsFromDirectDependencies.length === 1 && !bannedBins.has(bin)) {
       // there's no conflicts, seems fairly obvious choice to put it up
       policy[bin] = binsFromDirectDependencies[0].fullLinkPath
     }
@@ -269,7 +269,7 @@ function prepareBinScriptsPolicy(binCandidates) {
  */
 function printPackagesByBins({
   allowedBins,
-  excessPolicies
+  excessPolicies,
 }) {
 
   console.log('\n# allowed packages with bin scripts')
@@ -297,7 +297,7 @@ function printPackagesByScriptConfiguration({
   allowedPatterns,
   disallowedPatterns,
   missingPolicies,
-  excessPolicies
+  excessPolicies,
 }) {
 
   console.log('\n# allowed packages with lifecycle scripts')
@@ -346,10 +346,12 @@ function printPackagesByScriptConfiguration({
  */
 async function savePackageConfigurations({ rootDir, conf: {
   packageJson,
-  configs: { lifecycle, bin }
+  configs: { lifecycle, bin },
 } }) {
   // update package json
-  if (!packageJson.lavamoat) packageJson.lavamoat = {}
+  if (!packageJson.lavamoat) {
+    packageJson.lavamoat = {}
+  }
   packageJson.lavamoat.allowScripts = lifecycle.allowConfig
   packageJson.lavamoat.allowBins = bin.allowConfig
   const packageJsonPath = path.resolve(rootDir, 'package.json')
@@ -393,7 +395,7 @@ async function loadAllPackageConfigurations({ rootDir }) {
       collection.push({
         canonicalName,
         path: filePath,
-        scripts: depScripts
+        scripts: depScripts,
       })
       packagesWithScriptsLifecycle.set(canonicalName, collection)
     }
@@ -413,7 +415,7 @@ async function loadAllPackageConfigurations({ rootDir }) {
           path: filePath,
           link,
           fullLinkPath: path.relative(rootDir,path.join(filePath, link)),
-          canonicalName
+          canonicalName,
         })
       })
     }
@@ -424,12 +426,12 @@ async function loadAllPackageConfigurations({ rootDir }) {
   const configs = {
     lifecycle: indexLifecycleConfiguration({
       packagesWithScripts: packagesWithScriptsLifecycle,
-      allowConfig: lavamoatConfig.allowScripts
+      allowConfig: lavamoatConfig.allowScripts,
     }),
     bin: indexBinsConfiguration({
       binCandidates,
-      allowConfig: lavamoatConfig.allowBins
-    })
+      allowConfig: lavamoatConfig.allowBins,
+    }),
   }
 
   const somePoliciesAreMissing = !!(configs.lifecycle.missingPolicies.length || configs.bin.somePoliciesAreMissing)
@@ -437,7 +439,7 @@ async function loadAllPackageConfigurations({ rootDir }) {
   return {
     packageJson,
     configs,
-    somePoliciesAreMissing
+    somePoliciesAreMissing,
   }
 }
 
@@ -482,8 +484,12 @@ function sortBy(getterFn) {
   return (a, b) => {
     const aVal = getterFn(a)
     const bVal = getterFn(b)
-    if (aVal > bVal) return 1
-    else if (aVal < bVal) return -1
-    else return 0
+    if (aVal > bVal) {
+      return 1
+    } else if (aVal < bVal) {
+      return -1
+    } else {
+      return 0
+    }
   }
 }

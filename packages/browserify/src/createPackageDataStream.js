@@ -18,6 +18,8 @@ function decorateWithPackageData (moduleData, canonicalNameMap) {
     throw new Error(`module "${moduleData.id}" did not have a file path defined (moduleData.file)`)
   }
   const packageName = getPackageNameForModulePath(canonicalNameMap, moduleFilePath)
-  if (!packageName) throw new Error(`LavaMoat - invalid packageName for moduleId "${moduleData.id}"`)
+  if (!packageName) {
+    throw new Error(`LavaMoat - invalid packageName for moduleId "${moduleData.id}"`)
+  }
   moduleData.packageName = packageName
 }

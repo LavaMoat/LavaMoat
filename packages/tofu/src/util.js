@@ -64,7 +64,9 @@ function isUndefinedCheck (identifierNode, parents) {
 function getTailmostMatchingChain (items, matcher) {
   const onlyMatched = items.map(item => matcher(item) ? item : null)
   const lastIndex = onlyMatched.lastIndexOf(null)
-  if (lastIndex === -1) return onlyMatched.slice()
+  if (lastIndex === -1) {
+    return onlyMatched.slice()
+  }
   return onlyMatched.slice(lastIndex + 1)
 }
 
@@ -114,7 +116,9 @@ function reduceToTopmostApiCallsFromStrings (keyPathStrings) {
 
 function addGlobalUsage (globalsConfig, identifierPath, identifierUse) {
   // add variable to results, if not already set
-  if (globalsConfig.has(identifierPath) && identifierUse !== 'write') return
+  if (globalsConfig.has(identifierPath) && identifierUse !== 'write') {
+    return
+  }
   globalsConfig.set(identifierPath, identifierUse)
 }
 
@@ -134,7 +138,9 @@ function objToMap (obj) {
 // Object.fromEntries not available in node v10
 function mapToObj (map) {
   const obj = {}
-  map.forEach((value, key) => { obj[key] = value })
+  map.forEach((value, key) => {
+    obj[key] = value 
+  })
   return obj
 }
 

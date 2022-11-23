@@ -8,21 +8,21 @@ const {
   getPathFromMemberExpressionChain,
   reduceToTopmostApiCalls,
   addGlobalUsage,
-  getParents
+  getParents,
 } = require('./util')
 
 module.exports = {
   inspectGlobals,
   inspectImports,
   inspectEsmImports,
-  inspectDynamicRequires
+  inspectDynamicRequires,
 }
 
 function inspectGlobals (source, {
   ignoredRefs = [],
   globalRefs = [],
   globalPropertyNames = defaultGlobalPropertyNames,
-  languageRefs = defaultLanguageRefs
+  languageRefs = defaultLanguageRefs,
 } = {}) {
   const ast = (typeof source === 'object') ? source : parse(source)
   const detectedGlobals = findGlobals(ast)
@@ -38,7 +38,9 @@ function inspectGlobals (source, {
 
   function inspectDetectedGlobalVariables (name, paths) {
     // skip if module global
-    if (ignoredRefs.includes(name)) return
+    if (ignoredRefs.includes(name)) {
+      return
+    }
     // expose API as granularly as possible
     paths.forEach(path => {
       const parents = getParents(path)
@@ -60,7 +62,9 @@ function inspectGlobals (source, {
 
       destructuredPaths.forEach(path => {
         // skip if global and only used for detecting presence
-        if (path.length === 0) return
+        if (path.length === 0) {
+          return
+        }
         // submit as a global usage
         const pathString = path.join('.')
         maybeAddGlobalUsage(pathString, identifierUse)
@@ -89,10 +93,16 @@ function inspectGlobals (source, {
   function maybeAddGlobalUsage (identifierPath, identifierUse) {
     const topmostRef = identifierPath.split('.')[0]
     // skip intrinsics and other language features
-    if (globalPropertyNames.includes(topmostRef)) return
-    if (languageRefs.includes(topmostRef)) return
+    if (globalPropertyNames.includes(topmostRef)) {
+      return
+    }
+    if (languageRefs.includes(topmostRef)) {
+      return
+    }
     // skip ignored globals
-    if (ignoredRefs.includes(topmostRef)) return
+    if (ignoredRefs.includes(topmostRef)) {
+      return
+    }
     addGlobalUsage(globalsConfig, identifierPath, identifierUse)
   }
 }
@@ -104,7 +114,9 @@ function inspectEsmImports (ast, packagesToInspect) {
       const { node } = path
       const { specifiers, source } = node
       // not sure if this is ever not a StringLiteral, but just in case
-      if (source.type !== 'StringLiteral') return
+      if (source.type !== 'StringLiteral') {
+        return
+      }
       const importSource = source.value
       specifiers.forEach(spec => {
         switch (spec.type) {
@@ -128,7 +140,7 @@ function inspectEsmImports (ast, packagesToInspect) {
           }
         }
       })
-    }
+    },
   })
   return { esmImports }
 }
@@ -139,12 +151,18 @@ function findAllCallsToRequire (ast) {
     CallExpression: function (path) {
       const { node } = path
       const { callee } = node
-      if (callee.type !== 'Identifier') return
-      if (callee.name !== 'require') return
+      if (callee.type !== 'Identifier') {
+        return
+      }
+      if (callee.name !== 'require') {
+        return
+      }
       // ensure this is the global "require" method
-      if (path.scope.hasBinding('require', true)) return
+      if (path.scope.hasBinding('require', true)) {
+        return
+      }
       matches.push(path)
-    }
+    },
   })
   return matches
 }
@@ -155,9 +173,13 @@ function inspectDynamicRequires (ast) {
     const { node } = path
     const { arguments: [moduleNameNode] } = node
     // keep invalid no-argument require calls
-    if (!moduleNameNode) return true
+    if (!moduleNameNode) {
+      return true
+    }
     // skip normal require(string) calls
-    if (moduleNameNode.type === 'StringLiteral') return false
+    if (moduleNameNode.type === 'StringLiteral') {
+      return false
+    }
     // keep any other type
     return true
   })
@@ -171,10 +193,14 @@ function inspectImports (ast, packagesToInspect, deep = true) {
     const { node } = path
     const { arguments: [moduleNameNode] } = node
     // skip invalid or dynamic require calls
-    if (!moduleNameNode || moduleNameNode.type !== 'StringLiteral') return
+    if (!moduleNameNode || moduleNameNode.type !== 'StringLiteral') {
+      return
+    }
     // skip if not specified in "packagesToInspect"
     const moduleName = moduleNameNode.value
-    if (packagesToInspect && !packagesToInspect.includes(moduleName)) return
+    if (packagesToInspect && !packagesToInspect.includes(moduleName)) {
+      return
+    }
     // if not deep, done
     if (!deep) {
       cjsImports.push([moduleName])
@@ -243,14 +269,16 @@ function inspectObjectPatternForDeclarations (node, keyPath) {
   // if it has computed props or a RestElement, we cant meaningfully pursue any deeper
   // return the node with the current path
   const expansionForbidden = node.properties.some(prop => prop.computed || prop.type === 'RestElement')
-  if (expansionForbidden) return [{ node, keyPath }]
+  if (expansionForbidden) {
+    return [{ node, keyPath }]
+  }
   // expand each property into a path, recursively
   let results = []
   node.properties.forEach(prop => {
     const propName = prop.key.name
     const child = prop.value
     results = results.concat(
-      inspectPatternElementForDeclarations(child, [...keyPath, propName])
+      inspectPatternElementForDeclarations(child, [...keyPath, propName]),
     )
   })
   return results
@@ -260,12 +288,14 @@ function inspectArrayPatternForDeclarations (node, keyPath) {
   // if it has a RestElement, we cant meaningfully pursue any deeper
   // return the node with the current path
   const expansionForbidden = node.elements.some(el => el.type === 'RestElement')
-  if (expansionForbidden) return [{ node, keyPath }]
+  if (expansionForbidden) {
+    return [{ node, keyPath }]
+  }
   // expand each property into a path, recursively
   let results = []
   node.elements.forEach((child, propName) => {
     results = results.concat(
-      inspectPatternElementForDeclarations(child, [...keyPath, propName])
+      inspectPatternElementForDeclarations(child, [...keyPath, propName]),
     )
   })
   return results
@@ -291,7 +321,9 @@ function inspectObjectPatternForKeys (node) {
   // if it has computed props or a RestElement, we cant meaningfully pursue any deeper
   // so return a single empty path, meaning "one result, the whole thing"
   const expansionForbidden = node.properties.some(prop => prop.computed || prop.type === 'RestElement')
-  if (expansionForbidden) return [[]]
+  if (expansionForbidden) {
+    return [[]]
+  }
   // expand each property into a path, recursively
   let keys = []
   node.properties.forEach(prop => {
@@ -299,7 +331,7 @@ function inspectObjectPatternForKeys (node) {
     const child = prop.value
     keys = keys.concat(
       inspectPatternElementForKeys(child)
-        .map(partial => [propName, ...partial])
+        .map(partial => [propName, ...partial]),
     )
   })
   return keys
@@ -309,13 +341,15 @@ function inspectArrayPatternForKeys (node) {
   // if it has a RestElement, we cant meaningfully pursue any deeper
   // so return a single empty path, meaning "one result, the whole thing"
   const expansionForbidden = node.elements.some(el => el.type === 'RestElement')
-  if (expansionForbidden) return [[]]
+  if (expansionForbidden) {
+    return [[]]
+  }
   // expand each property into a path, recursively
   let keys = []
   node.elements.forEach((child, propName) => {
     keys = keys.concat(
       inspectPatternElementForKeys(child)
-        .map(partial => [propName, ...partial])
+        .map(partial => [propName, ...partial]),
     )
   })
   return keys

@@ -14,7 +14,7 @@ function makeInitStatsHook ({ onStatsReady }) {
         'value': null,
         'children': [],
         'startTime': startTime,
-        'endTime': null
+        'endTime': null,
       }
       // add as child to current
       if (statModuleStack.length > 0) {

@@ -1,4 +1,4 @@
-;(function(){
+;(function() {
 
   // polyfill node/browserify's globalRef
   globalThis.global = globalThis

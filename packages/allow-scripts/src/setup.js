@@ -2,7 +2,7 @@ const { existsSync,
         appendFileSync,
         readFileSync,
         writeFileSync,
-      } = require('fs')
+} = require('fs')
 const { spawnSync } = require('child_process')
 const path = require('path')
 const { FEATURE } = require('./toggles')
@@ -11,14 +11,14 @@ const NPM = {
   RCFILE: '.npmrc',
   CONF: {
     SCRIPTS: 'ignore-scripts=true',
-    BINS: 'bin-links=false'
+    BINS: 'bin-links=false',
   },
 }
 const YARN1 = {
   RCFILE: '.yarnrc',
   CONF: {
     SCRIPTS: 'ignore-scripts true',
-    BINS: '--*.no-bin-links true'
+    BINS: '--*.no-bin-links true',
   },
 }
 const YARN3 = {
@@ -32,7 +32,7 @@ const YARN3 = {
 module.exports = {
   writeRcFile,
   areBinsBlocked,
-  editPackageJson
+  editPackageJson,
 }
 
 function addInstallParentDir(filename) {
@@ -49,7 +49,7 @@ function isEntryPresent(entry, file) {
   return rcFileContents.includes(entry)
 }
 
-function writeRcFileContent({file, entry}){
+function writeRcFileContent({file, entry}) {
   const rcPath = addInstallParentDir(file)
 
   if (isEntryPresent(entry, file)) {
@@ -68,7 +68,7 @@ let binsBlockedMemo
  * @returns {boolean}
  */
 function areBinsBlocked({ noMemoization = false } = {}) {
-  if(noMemoization || binsBlockedMemo === undefined){
+  if(noMemoization || binsBlockedMemo === undefined) {
     binsBlockedMemo = isEntryPresent(NPM.CONF.BINS, NPM.RCFILE) || isEntryPresent(YARN1.CONF.BINS, YARN1.RCFILE)
     // Once yarn3 support via plugin comes in, this function would need to detect that, or cease to exist.
   }
@@ -146,7 +146,7 @@ function editPackageJson () {
     // no motivation to fix lint here, there's a better implementation of this in a neighboring branch
     // eslint-disable-next-line node/global-require
     const packageJson = require(addInstallParentDir('package.json'))
-    if(!packageJson.scripts){
+    if(!packageJson.scripts) {
       packageJson.scripts = {}
     }
     // If you think `node ` is redundant below, be aware that `./cli.js` won't work on Windows, 

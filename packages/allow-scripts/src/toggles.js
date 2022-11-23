@@ -1,5 +1,5 @@
 module.exports = {
   FEATURE: Object.seal({
-    bins: false
-  })
+    bins: false,
+  }),
 }

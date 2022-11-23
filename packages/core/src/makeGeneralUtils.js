@@ -2,7 +2,7 @@ module.exports = makeGeneralUtils
 
 function makeGeneralUtils () {
   return {
-    createFunctionWrapper
+    createFunctionWrapper,
   }
 
   function createFunctionWrapper (sourceValue, unwrapTest, unwrapTo) {

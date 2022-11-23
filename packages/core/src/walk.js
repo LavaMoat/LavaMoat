@@ -17,13 +17,13 @@ async function walk ({
   importHook,
   visitorFn,
   shouldImport,
-  visitedSpecifiers
+  visitedSpecifiers,
 }) {
   for await (const moduleRecord of eachNodeInTree({
     moduleSpecifier,
     importHook,
     shouldImport,
-    visitedSpecifiers
+    visitedSpecifiers,
   })) {
     // walk next record
     visitorFn(moduleRecord)
@@ -54,11 +54,17 @@ async function * eachNodeInTree ({
   const importMapChildren = Object.values(moduleRecord.importMap)
   for (const childSpecifier of importMapChildren) {
     // skip children that are set to null (resolution was skipped)
-    if (childSpecifier === null) continue
+    if (childSpecifier === null) {
+      continue
+    }
     // skip modules we're told not to import
-    if (!shouldImport(childSpecifier, moduleSpecifier)) continue
+    if (!shouldImport(childSpecifier, moduleSpecifier)) {
+      continue
+    }
     // dont revisit specifiers
-    if (visitedSpecifiers.has(childSpecifier)) continue
+    if (visitedSpecifiers.has(childSpecifier)) {
+      continue
+    }
     visitedSpecifiers.add(childSpecifier)
     // continue walking child
     yield* eachNodeInTree({

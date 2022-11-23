@@ -11,7 +11,7 @@ function makePrepareRealmGlobalFromConfig ({ createFunctionWrapper }) {
   return {
     prepareCompartmentGlobalFromConfig,
     getTopLevelReadAccessFromPackageConfig,
-    getTopLevelWriteAccessFromPackageConfig
+    getTopLevelWriteAccessFromPackageConfig,
   }
 
   function getTopLevelReadAccessFromPackageConfig (globalsConfig) {
@@ -50,7 +50,7 @@ function makePrepareRealmGlobalFromConfig ({ createFunctionWrapper }) {
         set () {
           // TODO: there should be a config to throw vs silently ignore
           console.warn(`LavaMoat: ignoring write attempt to read-access global "${key}"`)
-        }
+        },
       })
     })
 
@@ -69,15 +69,19 @@ function makePrepareRealmGlobalFromConfig ({ createFunctionWrapper }) {
           globalStore.set(key, value)
         },
         enumerable: true,
-        configurable: true
+        configurable: true,
       })
     })
 
     // set circular globalRefs
     globalThisRefs.forEach(key => {
       // if globalRef is actually an endowment, ignore
-      if (topLevelReadAccessKeys.includes(key)) return
-      if (topLevelWriteAccessKeys.includes(key)) return
+      if (topLevelReadAccessKeys.includes(key)) {
+        return
+      }
+      if (topLevelWriteAccessKeys.includes(key)) {
+        return
+      }
       // set circular ref to global
       packageCompartmentGlobal[key] = packageCompartmentGlobal
     })
