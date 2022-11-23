@@ -61,7 +61,7 @@ async function parseForPolicy ({ projectRoot, entryId, policyOverride = {}, root
   const canonicalNameMap = await loadCanonicalNameMap({ rootDir: projectRoot, includeDevDeps: true })
   const resolveHook = makeResolveHook({ projectRoot, resolutions, rootPackageName, canonicalNameMap })
   const importHook = makeImportHook({ rootPackageName, shouldResolve, isBuiltin, resolveHook, canonicalNameMap })
-  const moduleSpecifier = resolveHook(entryId, path.join(projectRoot, `package.json`))
+  const moduleSpecifier = resolveHook(entryId, path.join(projectRoot, 'package.json'))
   const inspector = createModuleInspector({ isBuiltin, includeDebugInfo })
   // rich warning output
   inspector.on('compat-warning', displayRichCompatWarning)
@@ -310,6 +310,6 @@ function displayRichCompatWarning ({ moduleRecord, compatWarnings }) {
 function getMapKeyForValue(map, searchValue) {
   for (let [key, value] of map.entries()) {
     if (value === searchValue)
-      return key;
+      return key
   }
 }

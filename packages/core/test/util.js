@@ -56,6 +56,7 @@ function createScenarioFromScaffold ({
   checkError = async (t, err, scenario) => {
     if (scenario.expectedFailure) {
       t.truthy(err, `Scenario fails as expected: ${scenario.name} - ${err}`)
+      t.regex(err.message, scenario.expectedFailureMessageRegex, 'Error message expects to match regex')
     } else {
       if (err) {
         t.fail(`Unexpected error in scenario: ${scenario.name} - ${err}`)
@@ -73,6 +74,9 @@ function createScenarioFromScaffold ({
     }
   },
   expectedFailure = false,
+  expectedFailureMessageRegex = /[\s\S]*/,
+  scuttleGlobalThis = false,
+  scuttleGlobalThisExceptions = [],
   files = [],
   builtin = {},
   context = {},
@@ -218,6 +222,9 @@ function createScenarioFromScaffold ({
     builtin,
     expectedResult,
     expectedFailure,
+    expectedFailureMessageRegex,
+    scuttleGlobalThis,
+    scuttleGlobalThisExceptions,
     entries: ['entry.js'],
     files: _files,
     config: _config,
@@ -301,11 +308,13 @@ async function runScenario ({
       const intializerSource = `(function(exports, require, module, __filename, __dirname){\n${applySourceTransforms(moduleRecord.content)}\n})`
       if (runWithPrecompiledModules) {
         moduleData.precompiledInitializer = vmFeralFunction(`
-          with (this) {
+          with (this.scopeTerminator) {
+          with (this.globalThis) {
             return function() {
               'use strict';
               return ${intializerSource}
             };
+          }
           }
         `)
       } else {
@@ -396,6 +405,11 @@ function evaluateWithSourceUrl (filename, content, context) {
   if (!vmGlobalThis.globalThis) {
     vmGlobalThis.globalThis = vmGlobalThis
   }
+  // Since the browserify test uses this vm util as a browser env simulation,
+  // creating actual dom nodes that can leak the real global object is not possible,
+  // therefore there is no way to access the real global object otherwise, but since we
+  // have to (for the scuttling tests) - we intentionally export this util func to solve this:
+  vmGlobalThis.getTrueGlobalThisForTestsOnly = () => vmGlobalThis
   // perform eval
   let result
   try {

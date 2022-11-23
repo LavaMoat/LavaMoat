@@ -13,7 +13,12 @@ const { spawnSync } = require('child_process')
 const execFile = util.promisify(require('child_process').execFile)
 const limitConcurrency = require('throat')(1)
 
-
+const localLavaMoatDeps = {
+  lavapack: { src: 'lavapack/', dst: `@lavamoat/lavapack/` },
+  browserify: { src: 'browserify/', dst: `lavamoat-browserify/` },
+  node: { src: 'node/', dst: `lavamoat/` },
+  core: { src: 'core/', dst: `lavamoat-core/` },
+}
 
 module.exports = {
   createBundleFromEntry,
@@ -26,6 +31,33 @@ module.exports = {
   bundleAsync,
   prepareBrowserifyScenarioOnDisk,
   createBrowserifyScenarioFromScaffold
+}
+
+async function copyFolder(from, to, opts = {skip: []}) {
+  await fs.mkdir(to)
+  const elements = await fs.readdir(from)
+  for (const element of elements) {
+    if (opts.skip.includes(element)) {
+      continue
+    }
+    const f = path.join(from, element), t = path.join(to, element)
+    const stat = await fs.lstat(f)
+    if (stat.isFile()) {
+      await fs.copyFile(f, t)
+    } else {
+      await copyFolder(f, t, opts)
+    }
+  }
+}
+
+async function overrideDepsWithLocalPackages(projectDir) {
+  for (const name in localLavaMoatDeps) {
+    const dep = localLavaMoatDeps[name]
+    const src = path.resolve(__dirname, '..', '..', dep.src)
+    const dst = path.join(projectDir, 'node_modules', dep.dst)
+    await fs.rm(dst, { recursive: true, force: true })
+    await copyFolder(src, dst, {skip: ['node_modules']})
+  }
 }
 
 async function createBundleFromEntry (path, pluginOpts = {}) {
@@ -86,6 +118,12 @@ async function runBrowserify ({
   bundleWithPrecompiledModules = true,
   ...additionalOpts
 }) {
+  if (additionalOpts?.scuttleGlobalThisExceptions) {
+    // toString regexps if there's any
+    for (let i = 0; i < additionalOpts.scuttleGlobalThisExceptions.length; i++) {
+      additionalOpts.scuttleGlobalThisExceptions[i] = String(additionalOpts.scuttleGlobalThisExceptions[i])
+    }
+  }
   const lavamoatParams = {
     entries: scenario.entries,
     opts: {
@@ -117,14 +155,12 @@ async function prepareBrowserifyScenarioOnDisk ({ scenario }) {
   console.warn(`created test project directory at "${projectDir}"`)
   // install browserify + lavamoat-plugin
   // path to project root for the browserify plugin
-  const pluginPath = path.resolve(__dirname, '..')
-  let depsToInstall = ['browserify@^17', pluginPath]
+  const depsToInstall = ['browserify@^17', path.resolve(__dirname, '..')]
   let runBrowserifyPath = `${__dirname}/fixtures/runBrowserify.js`
   if (scenario.type === 'factor') {
     depsToInstall.push(
       'through2@^3',
       'vinyl-buffer@^1',
-      path.resolve(__dirname, '..', '..', 'lavapack'),
       'bify-package-factor@^1',
     )
     runBrowserifyPath = `${__dirname}/fixtures/runBrowserifyBundleFactor.js`
@@ -133,6 +169,7 @@ async function prepareBrowserifyScenarioOnDisk ({ scenario }) {
   const installDevDepsResult = await limitConcurrency(async function () {
     return spawnSync('yarn', ['add','--network-concurrency 1', '-D', ...depsToInstall], { cwd: projectDir })
   })
+  await overrideDepsWithLocalPackages(projectDir)
   if (installDevDepsResult.status !== 0) {
     const msg = `Error while installing browserify:\n${installDevDepsResult.stderr.toString()}`
     throw new Error(msg)
@@ -163,7 +200,7 @@ async function createBundleForScenario ({
   } else {
     policy = path.join(scenario.dir, `/lavamoat/browserify/`)
   }
-  
+
   const { output: { stdout: bundle, stderr } } = await runBrowserify({ scenario, bundleWithPrecompiledModules, ...additonalOpts })
   if (stderr.length) {
     console.warn(stderr)

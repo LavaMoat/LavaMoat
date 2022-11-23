@@ -1,19 +1,19 @@
 {
   "name": "lavamoat",
   "bin": {
-    "lavamoat": "src/index.js",
+    "lavamoat": "src/cli.js",
     "lavamoat-run-command": "src/run-command.js"
   },
-  "version": "6.3.0",
+  "version": "6.4.0",
   "main": "index.js",
   "license": "MIT",
   "scripts": {
     "test": "yarn test:prep && yarn test:run",
-    "test:prep": "for d in ./test/projects/*/ ; do (cd \"$d\" && yarn setup && ../../../src/index.js -a index.js); done",
+    "test:prep": "for d in ./test/projects/*/ ; do (cd \"$d\" && yarn setup && ../../../src/cli.js -a index.js); done",
     "test:run": "ava --timeout=30s test/index.js",
     "lint": "yarn lint:eslint && yarn lint:deps",
-    "lint:eslint": "eslint \"src/**/*.js\" \"test/**/*.js\"",
-    "lint:fix": "eslint src/**/*.js test/*.js --fix",
+    "lint:eslint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "lint:deps": "depcheck"
   },
   "dependencies": {
@@ -31,8 +31,9 @@
     "yargs": "^16.0.0"
   },
   "devDependencies": {
+    "@metamask/eslint-config-nodejs": "^10.0.0",
     "eslint-plugin-ava": "^11.0.0",
-    "eslint-plugin-standard": "^5.0.0"
+    "eslint-plugin-node": "^11.1.0"
   },
   "directories": {
     "example": "examples",
@@ -43,6 +44,12 @@
   "bugs": {
     "url": "https://github.com/LavaMoat/lavamoat/issues"
   },
+  "engines": {
+    "node": ">=12.0.0"
+  },
   "homepage": "https://github.com/LavaMoat/lavamoat#readme",
-  "description": ""
+  "description": "",
+  "engines": {
+    "node": ">=14.0.0"
+  }
 }

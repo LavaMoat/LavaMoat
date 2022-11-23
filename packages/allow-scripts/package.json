@@ -1,13 +1,13 @@
 {
   "name": "@lavamoat/allow-scripts",
-  "version": "2.0.3",
+  "version": "2.1.0",
   "main": "src/index.js",
   "bin": {
     "allow-scripts": "src/cli.js"
   },
   "license": "MIT",
   "dependencies": {
-    "@lavamoat/aa": "^3.0.0",
+    "@lavamoat/aa": "^3.1.0",
     "@npmcli/run-script": "^1.8.1",
     "bin-links": "4.0.1",
     "npm-normalize-package-bin": "^3.0.0",
@@ -26,19 +26,26 @@
     "test": "test"
   },
   "devDependencies": {
+    "@metamask/eslint-config-nodejs": "^10.0.0",
     "ava": "^3.15.0",
     "eslint-plugin-ava": "^11.0.0",
-    "eslint-plugin-standard": "^5.0.0"
+    "eslint-plugin-node": "^11.1.0"
   },
   "scripts": {
     "test": "yarn test:run",
     "test:run": "ava --timeout=30s test/index.js",
     "test:prep": "for d in ./test/projects/*/ ; do (cd \"$d\" && ../../../src/cli.js auto --experimental-bins); done",
     "lint": "yarn lint:eslint && yarn lint:deps",
-    "lint:eslint": "eslint \"src/**/*.js\"",
-    "lint:fix": "eslint src/**/*.js --fix",
+    "lint:eslint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "lint:deps": "depcheck"
   },
+  "engines": {
+    "node": ">=12.0.0"
+  },
   "author": "",
-  "homepage": "https://github.com/LavaMoat/LavaMoat/tree/main/packages/allow-scripts"
+  "homepage": "https://github.com/LavaMoat/LavaMoat/tree/main/packages/allow-scripts",
+  "engines": {
+    "node": ">=14.0.0"
+  }
 }

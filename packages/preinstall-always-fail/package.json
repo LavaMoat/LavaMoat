@@ -10,12 +10,15 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/LavaMoat/LavaMoat.git",
-    "directory":"packages/preinstall-always-fail"
+    "directory": "packages/preinstall-always-fail"
   },
   "publishConfig": {
     "access": "public"
   },
   "keywords": [],
   "author": "",
-  "license": "MIT"
+  "license": "MIT",
+  "engines": {
+    "node": ">=14.0.0"
+  }
 }

@@ -1,8 +1,5 @@
 # LavaMoat Node - a runtime for running LavaMoat-protected NodeJS applications
 
-> **Warning**
-> experimental, has not been audited
-
 `lavamoat` is a NodeJS runtime where modules are defined in [SES][SesGithub] Compartments. It aims to reduce the risk of malicious code in the app dependency graph, known as "software supply chain attacks".
 
 ## LavaMoat Runtime 
@@ -129,3 +126,27 @@ $ lavamoat index.js --override './policies/policy-override.json'
 - For more information on the lavamoat policy file, check [Policy file explained](https://github.com/LavaMoat/LavaMoat/tree/main/docs/policy.md) in documentation.
 
 - Got a dependency that wont quite work under LavaMoat? try [patch-package](https://www.npmjs.com/package/patch-package)
+
+
+## Programmatic usage
+
+Programmatic usage is almost identical to the commandline and its arguments.
+
+```js
+const { runLava } = require('lavamoat')
+
+runLava({
+   entryPath: './app.js',
+   // Optional:
+   writeAutoPolicy: false,
+   writeAutoPolicyDebug: false,
+   writeAutoPolicyAndRun: false,
+   policyPath: 'path to file',
+   policyDebugPath: 'path to file',
+   policyOverridePath: 'path to file',
+   projectRoot: process.cwd(),
+   debugMode: false,
+   statsMode: false,
+})
+```
+

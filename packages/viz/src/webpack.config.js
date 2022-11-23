@@ -1,6 +1,5 @@
 /* eslint-env node */
 /* eslint-disable require-unicode-regexp */
-/* eslint-disable import/unambiguous */
 const path = require('path')
 const HtmlWebPackPlugin = require('html-webpack-plugin')
 const CopyPlugin = require('copy-webpack-plugin')

@@ -30,7 +30,7 @@ test('inspectPrimordialAssignments - assignment to frozen primordial', (t) => {
   const results = inspectPrimordialAssignmentsTest(`
     Array.prototype.bogoSort = () => 'hello'
   `)
-  t.deepEqual(results.length, 1)
+  t.is(results.length, 1)
   })
 
 test('inspectPrimordialAssignments - primordial potential false positive - instrinsic', (t) => {
@@ -51,14 +51,14 @@ test('inspectPrimordialAssignments - primordial modify property', (t) => {
   const results = inspectPrimordialAssignmentsTest(`
     Object.keys.extra = 'hello'
   `)
-  t.deepEqual(results.length, 1)
+  t.is(results.length, 1)
   })
 
 test('inspectPrimordialAssignments - primordial Error modify property', (t) => {
   const results = inspectPrimordialAssignmentsTest(`
     Error.prepareStackTrace = () => {}
   `)
-  t.deepEqual(results.length, 1)
+  t.is(results.length, 1)
   })
 
 test('inspectPrimordialAssignments - ensure shadowed references not counted - simple', (t) => {
@@ -66,7 +66,7 @@ test('inspectPrimordialAssignments - ensure shadowed references not counted - si
     function Promise () {}
     Promise.all = () => {}
   `)
-  t.deepEqual(results.length, 0)
+  t.is(results.length, 0)
   })
 
 test('inspectPrimordialAssignments - ensure shadowed references not counted - complex', (t) => {
@@ -80,5 +80,5 @@ test('inspectPrimordialAssignments - ensure shadowed references not counted - co
     })()
   })()
   `)
-  t.deepEqual(results.length, 1)
+  t.is(results.length, 1)
   })

@@ -15,6 +15,7 @@ const assert = require('assert')
 const JSONStream = require('JSONStream')
 const through = require('through2')
 const umd = require('umd')
+// eslint-disable-next-line node/prefer-global/buffer
 const { Buffer } = require('buffer')
 const combineSourceMap = require('combine-source-map')
 const convertSourceMap = require('convert-source-map')
@@ -54,6 +55,8 @@ function createPacker({
   sourceRoot,
   sourceMapPrefix,
   bundleWithPrecompiledModules = true,
+  scuttleGlobalThis = false,
+  scuttleGlobalThisExceptions = [],
 } = {}) {
   // stream/parser wrapping incase raw: false
   const parser = raw ? through.obj() : JSONStream.parse([true])
@@ -76,6 +79,16 @@ function createPacker({
     assert(prelude, 'LavaMoat CustomPack: must specify a prelude if "includePrelude" is true (default: true)')
   }
   assert(policy, 'must specify a policy')
+
+  // toString regexps if there's any
+  for (let i = 0; i < scuttleGlobalThisExceptions.length; i++) {
+    scuttleGlobalThisExceptions[i] = String(scuttleGlobalThisExceptions[i])
+  }
+
+  prelude = prelude.replace('__lavamoatSecurityOptions__', JSON.stringify({
+    scuttleGlobalThis,
+    scuttleGlobalThisExceptions,
+  }))
 
   // note: pack stream cant started emitting data until its received its first module
   // this is because the browserify pipeline is leaky until its finished being setup
@@ -240,15 +253,13 @@ function extractSourceMaps (sourceCode) {
 }
 
 function wrapInModuleInitializer (moduleData, sourceMeta, sourcePathForModule, bundleWithPrecompiledModules) {
-  const filename = String(moduleData.file)
-  if (filename.includes('\n')) {
-    throw new Error('LavaMoat - encountered a filename containing a newline')
-  }
+  const filename = encodeURI(String(moduleData.file))
   let moduleWrapperSource
   if (bundleWithPrecompiledModules) {
     moduleWrapperSource = (
 `function(){
-  with (this) {
+  with (this.scopeTerminator) {
+  with (this.globalThis) {
     return function() {
       'use strict';
       // source: ${filename}
@@ -256,6 +267,7 @@ function wrapInModuleInitializer (moduleData, sourceMeta, sourcePathForModule, b
 __MODULE_CONTENT__
       };
     };
+  }
   }
 }`
     )

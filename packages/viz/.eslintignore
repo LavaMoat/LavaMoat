@@ -1,0 +1,5 @@
+!src
+!test
+**/*.js
+!src/**/*.js
+!test/**/*.js

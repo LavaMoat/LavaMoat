@@ -28,8 +28,8 @@ test('parseForPolicy - resolutions', async (t) => {
         }
       },
       b: {
-        "builtin": {
-          "http": true
+        'builtin': {
+          'http': true
         }
       }
     }
