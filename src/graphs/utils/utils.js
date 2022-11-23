@@ -10,7 +10,7 @@ export const nodeEnvConfig = {
       //deprecated
       // 'domain',
       'events',
-    ]
+    ],
   },
   globals: {
     orangeGlobals: [
@@ -19,19 +19,19 @@ export const nodeEnvConfig = {
       //deprecated
       // 'domain',
       'events',
-      'console'
-    ]
-  }
+      'console',
+    ],
+  },
 }
 
 export const bifyEnvConfig = {
   globals: {
     orangeGlobals: [
-    ]
+    ],
   },
   builtins: {
     orangeBuiltins: [
-    ]
+    ],
   },
 }
 
@@ -204,7 +204,9 @@ function getRankForGlobals (globalsConfig, envConfig) {
 }
 
 function getRankForGlobal(glob, envConfig) {
-  if (envConfig.globals.orangeGlobals.includes(glob)) return 1
+  if (envConfig.globals.orangeGlobals.includes(glob)) {
+    return 1
+  }
   return 3
 }
 
@@ -217,7 +219,9 @@ function getRankForBuiltins (builtinsConfig, envConfig) {
 }
 
 function getRankForBuiltin(builtin, envConfig) {
-  if (envConfig.builtins.orangeBuiltins.includes(builtin)) return 1
+  if (envConfig.builtins.orangeBuiltins.includes(builtin)) {
+    return 1
+  }
   return 3
 }
 
@@ -323,5 +327,5 @@ export {
   fullModuleNameFromPath,
   getLineNumbersForGlobals,
   sortByDangerRank,
-  getEnvConfigForPolicyName
+  getEnvConfigForPolicyName,
 }
