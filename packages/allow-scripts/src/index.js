@@ -209,7 +209,7 @@ async function runAllScriptsForEvent({ event, packages }) {
  */
 async function installBinScripts(allowedBins) {
   for (const { bin, path, link, canonicalName } of allowedBins) {
-    console.log(`- ${canonicalName}`)
+    console.log(`- ${bin} - from package: ${canonicalName}`)
     await linkBinRelative({ path, bin, link, force: true })
   }
 }

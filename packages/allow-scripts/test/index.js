@@ -129,7 +129,7 @@ test('cli - run command - good dep at the root with experimental bins', async (t
   // assert the output
   t.deepEqual(result.stdout.toString().split('\n'), [
     'installing bin scripts',
-    '- good_dep',
+    '- good - from package: good_dep',
     'running lifecycle scripts for event \"preinstall\"',
     '- good_dep',
     'running lifecycle scripts for event \"install\"',
@@ -210,7 +210,7 @@ test('cli - run command - good dep as a sub dep with experimental bins', async (
   // assert the output
   t.deepEqual(result.stdout.toString().split('\n'), [
     'installing bin scripts',
-    '- aaa',
+    '- good - from package: aaa',
     'running lifecycle scripts for event \"preinstall\"',
     '- bbb>good_dep',
     'running lifecycle scripts for event \"install\"',

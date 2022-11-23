@@ -42,16 +42,10 @@ function addInstallParentDir(filename) {
 
 function isEntryPresent(entry, file) {
   const rcPath = addInstallParentDir(file)
-  process._rawDebug({
-    cwd: process.cwd(),
-    rcPath,
-    ex: existsSync(rcPath)
-  })
   if (!existsSync(rcPath)) {
     return false
   }
   const rcFileContents = readFileSync(rcPath, 'utf8')
-  process._rawDebug({ isentry: rcFileContents.includes(entry)})
   return rcFileContents.includes(entry)
 }
 
@@ -145,7 +139,7 @@ function editPackageJson () {
     process.stderr.write(result.stderr);
     process.exit(result.status);
   } else {
-    console.log('@lavamoat/allow-scripts:: Added dependency @lavamoat/preinstall-always-fail.')
+    console.log('@lavamoat/allow-scripts: Added dependency @lavamoat/preinstall-always-fail.')
   }
 
   const packageJson = require(addInstallParentDir('package.json'))
