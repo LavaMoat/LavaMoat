@@ -14,13 +14,13 @@ const browserResolve = require('browser-resolve')
 const reccomendedArgs = {
   // this option helps with parsing global usage
   insertGlobalVars: {
-    global: false
+    global: false,
   },
   // this option prevents creating unnecesary psuedo-dependencies
   // where packages appear to rely on other packages because they
   // are using each other for code deduplication
   // this also breaks bify-package-factor and related tools
-  dedupe: false
+  dedupe: false,
 }
 
 // primary export is the Browserify plugin
@@ -65,7 +65,7 @@ function plugin (browserify, pluginOpts) {
     if (configuration.writeAutoPolicy) {
       const policyOverride = loadPolicyFile({
         filepath: configuration.policyPaths.override,
-        tolerateMissing: true
+        tolerateMissing: true,
       })
       validatePolicy(policyOverride)
       browserify.pipeline.get('emit-deps').push(createModuleInspectorSpy({
@@ -75,7 +75,7 @@ function plugin (browserify, pluginOpts) {
         // should prepare debug info
         includeDebugInfo: configuration.writeAutoPolicyDebug,
         // write policy files to disk
-        onResult: (policy) => writeAutoPolicy(policy, configuration)
+        onResult: (policy) => writeAutoPolicy(policy, configuration),
       }))
     } else {
       // when not generating policy files, announce policy files as build deps for watchify
@@ -130,10 +130,12 @@ function getConfigurationFromPluginOpts (pluginOpts) {
     ...nonAliasedOptions,
     ...Object.keys(aliasMap),
     ...Object.values(aliasMap),
-    '_' // Browserify adds this as the first option when running from the command line
+    '_', // Browserify adds this as the first option when running from the command line
   ])
   const invalidKeys = Reflect.ownKeys(pluginOpts).filter(key => !allowedKeys.has(key))
-  if (invalidKeys.length) throw new Error(`Lavamoat - Unrecognized options provided '${invalidKeys}'`)
+  if (invalidKeys.length) {
+    throw new Error(`Lavamoat - Unrecognized options provided '${invalidKeys}'`)
+  }
 
   // applying alias to pluginOpts
   Object.entries(pluginOpts).forEach(([key, value]) => {
@@ -161,7 +163,7 @@ function getConfigurationFromPluginOpts (pluginOpts) {
     writeAutoPolicy: Boolean(pluginOpts.writeAutoPolicy || pluginOpts.writeAutoPolicyDebug),
     writeAutoPolicyDebug: Boolean(pluginOpts.writeAutoPolicyDebug),
     bundleWithPrecompiledModules: 'bundleWithPrecompiledModules' in pluginOpts ? Boolean(pluginOpts.bundleWithPrecompiledModules) : true,
-    actionOverrides: {}
+    actionOverrides: {},
   }
 
   // check for action overrides
@@ -230,7 +232,7 @@ function loadPolicy (configuration) {
   } else {
     policy = loadPolicyFile({
       filepath: configuration.policyPaths.primary,
-      tolerateMissing: configuration.writeAutoPolicy
+      tolerateMissing: configuration.writeAutoPolicy,
     })
   }
   validatePolicy(policy)
@@ -244,7 +246,7 @@ function getPolicyPaths (pluginOpts) {
   return {
     primary: policy || path.resolve(projectRoot, primary),
     override: policyOverride || path.resolve(projectRoot, override),
-    debug: configDebug || path.resolve(projectRoot, debug)
+    debug: configDebug || path.resolve(projectRoot, debug),
   }
 }
 

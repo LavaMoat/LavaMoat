@@ -11,7 +11,7 @@ const { loadCanonicalNameMap, getPackageNameForModulePath } = require('@lavamoat
 const {
   parseForPolicy: coreParseForConfig,
   createModuleInspector,
-  LavamoatModuleRecord
+  LavamoatModuleRecord,
 } = require('lavamoat-core')
 const { parse, inspectImports, codeSampleFromAstNode } = require('lavamoat-tofu')
 const { checkForResolutionOverride } = require('./resolutions')
@@ -27,7 +27,7 @@ const createRequire = (url) => {
       const basedir = path.dirname(url.pathname)
       const result = resolve.sync(requestedName, {
         basedir,
-        extensions: resolutionOmittedExtensions
+        extensions: resolutionOmittedExtensions,
       })
       // check for missing builtin modules (e.g. 'worker_threads' in node v10)
       // the "resolve" package resolves as "worker_threads" even if missing
@@ -44,7 +44,7 @@ const createRequire = (url) => {
       }
       // return resolved path
       return result
-    }
+    },
   }
 }
 
@@ -52,7 +52,7 @@ module.exports = {
   parseForPolicy,
   makeResolveHook,
   makeImportHook,
-  resolutionOmittedExtensions
+  resolutionOmittedExtensions,
 }
 
 async function parseForPolicy ({ projectRoot, entryId, policyOverride = {}, rootPackageName, shouldResolve, includeDebugInfo, ...args }) {
@@ -103,7 +103,7 @@ function makeImportHook ({
   resolveHook,
   shouldResolve = () => true,
   canonicalNameMap,
-  policyOverride
+  policyOverride,
 }) {
   return async (specifier) => {
     // see if its a builtin
@@ -137,7 +137,7 @@ function makeImportHook ({
       // special module initializer that directly accesses node's require
       moduleInitializer: (moduleExportsWrapper) => {
         moduleExportsWrapper.exports = require(specifier)
-      }
+      },
     })
   }
 
@@ -150,7 +150,7 @@ function makeImportHook ({
       // special module initializer that directly accesses node's require
       moduleInitializer: (moduleExportsWrapper) => {
         moduleExportsWrapper.exports = require(specifier)
-      }
+      },
     })
   }
 
@@ -182,13 +182,15 @@ function makeImportHook ({
     const policyOverrideImports = Object.keys(policyOverride?.resources?.[packageName]?.packages ?? {})
     await Promise.all(policyOverrideImports.map(async packageName => {
       // skip if there is already an entry for the name
-      if (packageName in importMap[packageName]) return
+      if (packageName in importMap[packageName]) {
+        return
+      }
       // resolve and add package main in override
       const packageRoot = getMapKeyForValue(canonicalNameMap, packageName)
       const packageJson = JSON.parse(
         await fs.readFile(
-          path.join(packageRoot, 'package.json'), 'utf8'
-        )
+          path.join(packageRoot, 'package.json'), 'utf8',
+        ),
       )
       const main = packageJson.main ?? 'index.js'
       const mainPath = path.resolve(packageRoot, main)
@@ -231,7 +233,7 @@ function makeImportHook ({
       packageName,
       content,
       importMap,
-      ast
+      ast,
     })
   }
 
@@ -247,7 +249,7 @@ function makeImportHook ({
       specifier,
       file: filename,
       packageName,
-      content: cjsContent
+      content: cjsContent,
     })
   }
 }
@@ -266,7 +268,7 @@ function parseModule (moduleSrc, filename = '<unknown file>') {
       //   // '@babel/plugin-transform-reserved-words',
       //   // '@babel/plugin-proposal-class-properties',
       // ]
-      errorRecovery: true
+      errorRecovery: true,
     })
   } catch (err) {
     const newErr = new Error(`Failed to parse file "${filename}": ${err.stack}`)
@@ -289,7 +291,9 @@ function displayRichCompatWarning ({ moduleRecord, compatWarnings }) {
   function logWarnings (message, sites) {
     sites.forEach(({ node }) => {
       const { npmfs } = codeSampleFromAstNode(node, moduleRecord)
-      if (npmfs) console.warn(`  link: ${npmfs}`)
+      if (npmfs) {
+        console.warn(`  link: ${npmfs}`)
+      }
       const output = codeFrameColumns(highlightedCode, node.loc, { message })
       console.warn(output)
     })
@@ -299,7 +303,9 @@ function displayRichCompatWarning ({ moduleRecord, compatWarnings }) {
     sites.forEach(({ loc, error }) => {
       const range = { start: loc }
       const { npmfs } = codeSampleFromAstNode({ loc: range }, moduleRecord)
-      if (npmfs) console.warn(`  link: ${npmfs}`)
+      if (npmfs) {
+        console.warn(`  link: ${npmfs}`)
+      }
       const message = `${category}: ${error.message}`
       const output = codeFrameColumns(highlightedCode, range, { message })
       console.warn(output)
@@ -309,7 +315,8 @@ function displayRichCompatWarning ({ moduleRecord, compatWarnings }) {
 
 function getMapKeyForValue(map, searchValue) {
   for (let [key, value] of map.entries()) {
-    if (value === searchValue)
+    if (value === searchValue) {
       return key
+    }
   }
 }

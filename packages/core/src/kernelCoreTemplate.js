@@ -18,7 +18,7 @@
     scuttleGlobalThisExceptions,
     debugMode,
     runWithPrecompiledModules,
-    reportStatsHook
+    reportStatsHook,
   }) {
     // prepare the LavaMoat kernel-core factory
     // factory is defined within a Compartment
@@ -46,7 +46,7 @@
       scuttleGlobalThisExceptions,
       debugMode,
       runWithPrecompiledModules,
-      reportStatsHook
+      reportStatsHook,
     })
 
     return lavamoatKernel
@@ -66,7 +66,7 @@
     scuttleGlobalThisExceptions = [],
     debugMode = false,
     runWithPrecompiledModules = false,
-    reportStatsHook = () => {}
+    reportStatsHook = () => {},
   }) {
     // "templateRequire" calls are inlined in "generateKernel"
     const generalUtils = templateRequire('makeGeneralUtils')()
@@ -90,7 +90,7 @@
     }
 
     const kernel = {
-      internalRequire
+      internalRequire,
     }
     if (debugMode) {
       kernel._getPolicyForPackage = getPolicyForPackage
@@ -131,16 +131,16 @@
           set: () => {
             console.warn(
               `LavaMoat - property "${prop}" of globalThis cannot be set under scuttling mode. ` +
-              'To learn more visit https://github.com/LavaMoat/LavaMoat/pull/360.'
+              'To learn more visit https://github.com/LavaMoat/LavaMoat/pull/360.',
             )
           },
           get: () => {
             throw new Error(
               `LavaMoat - property "${prop}" of globalThis is inaccessible under scuttling mode. ` +
-              'To learn more visit https://github.com/LavaMoat/LavaMoat/pull/360.'
+              'To learn more visit https://github.com/LavaMoat/LavaMoat/pull/360.',
             )
           },
-          configurable: false
+          configurable: false,
         }
         Object.defineProperty(globalRef, prop, desc)
       }
@@ -175,7 +175,9 @@
 
         // parse and validate module data
         const { package: packageName, source: moduleSource } = moduleData
-        if (!packageName) throw new Error(`LavaMoat - missing packageName for module "${moduleId}"`)
+        if (!packageName) {
+          throw new Error(`LavaMoat - missing packageName for module "${moduleId}"`)
+        }
         const packagePolicy = getPolicyForPackage(lavamoatConfig, packageName)
 
         // create the moduleObj and initializer
@@ -255,7 +257,9 @@
       // validate that the import is allowed
       if (!parentIsEntryModule && !isSamePackage && !isInParentWhitelist) {
         let typeText = ' '
-        if (moduleData.type === 'builtin') typeText = ' node builtin '
+        if (moduleData.type === 'builtin') {
+          typeText = ' node builtin '
+        }
         throw new Error(`LavaMoat - required${typeText}package not in allowlist: package "${parentModulePackageName}" requested "${packageName}" as "${requestedName}"`)
       }
 
@@ -354,7 +358,9 @@
       // the index for the common prototypal ancestor, Object.prototype
       // this should always be the last index, but we check just in case
       const commonPrototypeIndex = globalProtoChain.findIndex(globalProtoChainEntry => globalProtoChainEntry === Object.prototype)
-      if (commonPrototypeIndex === -1) throw new Error('Lavamoat - unable to find common prototype between Compartment and globalRef')
+      if (commonPrototypeIndex === -1) {
+        throw new Error('Lavamoat - unable to find common prototype between Compartment and globalRef')
+      }
       // we will copy endowments from all entries in the prototype chain, excluding Object.prototype
       const endowmentSources = globalProtoChain.slice(0, commonPrototypeIndex)
 
@@ -428,7 +434,7 @@
           // unwrap to
           globalRef,
           // unwrap from
-          packageCompartment.globalThis
+          packageCompartment.globalThis,
         )
       } catch (err) {
         const errMsg = `Lavamoat - failed to prepare endowments for package "${packageName}":\n${err.stack}`

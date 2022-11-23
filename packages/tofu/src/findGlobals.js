@@ -12,7 +12,7 @@ const nonReferenceIdentifiers = [
   'ContinueStatement',
   'CatchClause',
   'ArrayPatten',
-  'RestElement'
+  'RestElement',
 ]
 
 module.exports = { findGlobals }
@@ -24,30 +24,46 @@ function findGlobals (ast) {
     Identifier: (path) => {
       // skip if not being used as reference
       const parentType = path.parent.type
-      if (nonReferenceIdentifiers.includes(parentType)) return
-      if (parentType === 'VariableDeclarator' && path.parent.id === path.node) return
+      if (nonReferenceIdentifiers.includes(parentType)) {
+        return
+      }
+      if (parentType === 'VariableDeclarator' && path.parent.id === path.node) {
+        return
+      }
       // skip if this is the key side of a member expression
-      if (isMemberLikeExpression(path.parent) && path.parent.property === path.node) return
+      if (isMemberLikeExpression(path.parent) && path.parent.property === path.node) {
+        return
+      }
       // skip if this is the key side of an object pattern
-      if (parentType === 'ObjectProperty' && path.parent.key === path.node) return
-      if (parentType === 'ObjectMethod' && path.parent.key === path.node) return
+      if (parentType === 'ObjectProperty' && path.parent.key === path.node) {
+        return
+      }
+      if (parentType === 'ObjectMethod' && path.parent.key === path.node) {
+        return
+      }
 
       // skip if it refers to an existing variable
       const name = path.node.name
-      if (path.scope.hasBinding(name, true)) return
+      if (path.scope.hasBinding(name, true)) {
+        return
+      }
 
       // check if arguments refers to a var, this shouldn't happen in strict mode
       if (name === 'arguments') {
-        if (isInFunctionDeclaration(path)) return
+        if (isInFunctionDeclaration(path)) {
+          return
+        }
       }
 
       // save global
       saveGlobal(path)
     },
     ThisExpression: (path) => {
-      if (isInFunctionDeclaration(path)) return
+      if (isInFunctionDeclaration(path)) {
+        return
+      }
       saveGlobal(path, 'this')
-    }
+    },
   })
 
   return globals

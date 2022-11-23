@@ -26,5 +26,5 @@ const linkBinAbsolute = ({ path, bin, link, top = undefined, force = true }) => 
 
 module.exports = {
   linkBinRelative,
-  linkBinAbsolute
+  linkBinAbsolute,
 }

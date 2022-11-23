@@ -21,7 +21,7 @@ async function parseForPolicy ({
   shouldImport,
   policyOverride,
   includeDebugInfo,
-  inspector = createModuleInspector({ isBuiltin, includeDebugInfo })
+  inspector = createModuleInspector({ isBuiltin, includeDebugInfo }),
 }) {
   for await (const moduleRecord of eachNodeInTree({ moduleSpecifier, importHook, shouldImport })) {
     // inspect each module

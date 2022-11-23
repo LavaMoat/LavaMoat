@@ -4,7 +4,7 @@ function applySourceTransforms (source) {
   return applyTransforms(source, [
     evadeHtmlCommentTest,
     evadeImportExpressionTest,
-    evadeDirectEvalExpressions
+    evadeDirectEvalExpressions,
   ])
 }
 
@@ -17,5 +17,5 @@ function evadeDirectEvalExpressions (source) {
 }
 
 module.exports = {
-  applySourceTransforms
+  applySourceTransforms,
 }

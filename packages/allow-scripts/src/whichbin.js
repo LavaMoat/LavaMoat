@@ -28,16 +28,16 @@ You can allow this script to run by adding it to lavamoat->allowBins in package.
 Add a line like this in allowBins:
   "${binName}": "${currentBinCandidates[0].fullLinkPath}"
 `)
-if (currentBinCandidates.length > 1) {
-  console.error(`Choose one of the following paths for the value:
+  if (currentBinCandidates.length > 1) {
+    console.error(`Choose one of the following paths for the value:
 
-  ${currentBinCandidates.map(c=>c.fullLinkPath).join('\n')}
+  ${currentBinCandidates.map(c => c.fullLinkPath).join('\n')}
 `)
-}
+  }
   
-console.error(`After you're done configuring, run allow-scripts again.
+  console.error(`After you're done configuring, run allow-scripts again.
 ---------------------------------------------------------------------------`)
 
-process.exit(42)
+  process.exit(42)
   
 }

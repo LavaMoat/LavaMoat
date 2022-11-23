@@ -1,5 +1,5 @@
 const {
-  generateKernel
+  generateKernel,
 } = require('./generateKernel')
 const { createModuleInspector, getDefaultPaths } = require('./generatePolicy')
 const { parseForPolicy } = require('./parseForPolicy')

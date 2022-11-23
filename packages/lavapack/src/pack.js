@@ -24,7 +24,9 @@ const jsonStringify = require('json-stable-stringify')
 const defaultPreludePath = path.join(__dirname, '_prelude.js')
 
 function newlinesIn (src) {
-  if (!src) return 0
+  if (!src) {
+    return 0
+  }
   const newlines = src.match(/\n/g)
   return newlines ? newlines.length : 0
 }
@@ -61,8 +63,12 @@ function createPacker({
   // stream/parser wrapping incase raw: false
   const parser = raw ? through.obj() : JSONStream.parse([true])
   const stream = through.obj(
-    function (buf, _, next) { parser.write(buf); next() },
-    function () { parser.end() }
+    function (buf, _, next) {
+      parser.write(buf); next() 
+    },
+    function () {
+      parser.end() 
+    },
   )
 
   // these are decorated for some reason
@@ -116,7 +122,7 @@ function createPacker({
       if (includePrelude) {
         sourcemap.addFile(
           { sourceFile: preludePath, source: prelude },
-          { line: 0 }
+          { line: 0 },
         )
       }
     }
@@ -137,7 +143,7 @@ function createPacker({
       // add current file to the sourcemap
       sourcemap.addFile(
         { sourceFile: moduleData.sourceFile, source: moduleData.source },
-        { line: lineno + sourceMeta.offset }
+        { line: lineno + sourceMeta.offset },
       )
     }
 
@@ -154,8 +160,12 @@ function createPacker({
   }
 
   function onDone () {
-    if (first) stream.push(generateBundleLoaderInitial())
-    entryFiles = entryFiles.filter(function (x) { return x !== undefined })
+    if (first) {
+      stream.push(generateBundleLoaderInitial())
+    }
+    entryFiles = entryFiles.filter(function (x) {
+      return x !== undefined 
+    })
 
     // filter the policy removing packages that arent included
     let minimalPolicy = { resources: {} }
@@ -171,14 +181,14 @@ function createPacker({
 
     // close the loadBundle request
     stream.push(
-      Buffer.from(`],${JSON.stringify(entryFiles)},${JSON.stringify(minimalPolicy)})`, 'utf8')
+      Buffer.from(`],${JSON.stringify(entryFiles)},${JSON.stringify(minimalPolicy)})`, 'utf8'),
     )
 
     if (standalone && !first) {
       stream.push(Buffer.from(
         '(' + JSON.stringify(stream.standaloneModule) + ')' +
                     umd.postlude(standalone),
-        'utf8'
+        'utf8',
       ))
     }
 
@@ -186,7 +196,9 @@ function createPacker({
       let comment = sourcemap.comment()
       if (sourceMapPrefix) {
         comment = comment.replace(
-          /^\/\/#/, function () { return sourceMapPrefix }
+          /^\/\/#/, function () {
+            return sourceMapPrefix 
+          },
         )
       }
       stream.push(Buffer.from('\n' + comment + '\n', 'utf8'))
@@ -226,7 +238,9 @@ function createPacker({
     // add metadata
     Object.entries(jsonSerializeableData).forEach(([key, value]) => {
       // skip missing values
-      if (value === undefined) return
+      if (value === undefined) {
+        return
+      }
       serializedEntry += `${key}:${jsonStringify(value)},`
     })
     serializedEntry += '}]'
@@ -257,7 +271,7 @@ function wrapInModuleInitializer (moduleData, sourceMeta, sourcePathForModule, b
   let moduleWrapperSource
   if (bundleWithPrecompiledModules) {
     moduleWrapperSource = (
-`function(){
+      `function(){
   with (this.scopeTerminator) {
   with (this.globalThis) {
     return function() {
