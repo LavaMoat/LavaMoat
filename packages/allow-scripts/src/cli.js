@@ -54,7 +54,7 @@ function parseArgs () {
     .command('setup', 'configure local repository to use allow-scripts')
     .option('experimental-bins', {
       alias: 'bin',
-      describe: 'temporary opt-in to set up protections against bin scripts confusion',
+      describe: 'opt-in to set up experimental protection against bin script confusion',
       type: 'boolean',
       default: false,
     })

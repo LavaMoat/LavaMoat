@@ -154,5 +154,4 @@ function editPackageJson () {
   }
   packageJson.scripts['allow-scripts'] = './node_modules/@lavamoat/allow-scripts/src/cli.js'
   writeFileSync(addInstallParentDir('package.json'), JSON.stringify(packageJson, null, 2))
-
 }
