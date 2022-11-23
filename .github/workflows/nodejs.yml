@@ -2,9 +2,28 @@ name: CI
 on: [push, pull_request]
 
 jobs:
-  test:
-    name: test
+  test-ubuntu:
+    name: ubuntu
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [14.x, 16.x]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Install Dependencies
+        run: yarn --frozen-lockfile --ignore-scripts
+      - name: Test
+        run: yarn test
+      - name: Lint
+        run: yarn lint
+  test-windows:
+    name: windows
+    runs-on: windows-latest
     strategy:
       matrix:
         node-version: [14.x, 16.x]
