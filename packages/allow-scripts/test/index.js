@@ -35,7 +35,7 @@ test('cli - auto command', (t) => {
     }
   })
 })
-test('cli - auto command with experimental bins', async (t) => {
+test('cli - auto command with experimental bins', (t) => {
   // set up the directories
   let allowScriptsSrcRoot = path.join(__dirname, '..', 'src')
   let projectRoot = path.join(__dirname, 'projects', '1')
@@ -107,7 +107,7 @@ test('cli - run command - good dep at the root', (t) => {
   // with
   // "preinstall": "touch /tmp/$( date '+%Y-%m-%d_%H-%M-%S' )"
 })
-test('cli - run command - good dep at the root with experimental bins', async (t) => {
+test('cli - run command - good dep at the root with experimental bins', (t) => {
   // set up the directories
   let allowScriptsSrcRoot = path.join(__dirname, '..', 'src')
   let projectRoot = path.join(__dirname, 'projects', '2')
@@ -180,7 +180,7 @@ test('cli - run command - good dep as a sub dep', (t) => {
 
 })
 
-test('cli - run command - good dep as a sub dep with experimental bins', async (t) => {
+test('cli - run command - good dep as a sub dep with experimental bins', (t) => {
   // set up the directories
   let allowScriptsSrcRoot = path.join(__dirname, '..', 'src')
   let projectRoot = path.join(__dirname, 'projects', '3')

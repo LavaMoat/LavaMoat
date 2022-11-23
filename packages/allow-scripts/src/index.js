@@ -245,7 +245,7 @@ async function runScript({ path, event }) {
 }
 
 
-const bannedBins = new Set(['node', 'npm', 'yarn', 'pnpm']);
+const bannedBins = new Set(['node', 'npm', 'yarn', 'pnpm'])
 
 /**
  * @param {BinCandidates} binCandidates 
@@ -260,7 +260,7 @@ function prepareBinScriptsPolicy(binCandidates) {
       policy[bin] = binsFromDirectDependencies[0].fullLinkPath
     }
   }
-  return policy;
+  return policy
 }
 
 
@@ -272,7 +272,7 @@ function printPackagesByBins({
   excessPolicies
 }) {
 
-  console.log(`\n# allowed packages with bin scripts`)
+  console.log('\n# allowed packages with bin scripts')
   if (allowedBins.length) {
     allowedBins.forEach(({ canonicalName, bin }) => {
       console.log(`- ${canonicalName} [${bin}]`)
@@ -282,7 +282,7 @@ function printPackagesByBins({
   }
 
   if (excessPolicies.length) {
-    console.log(`\n# packages with bin scripts that no longer need configuration (package or script removed or script path outdated)`)
+    console.log('\n# packages with bin scripts that no longer need configuration (package or script removed or script path outdated)')
     excessPolicies.forEach(bin => {
       console.log(`- ${bin}`)
     })

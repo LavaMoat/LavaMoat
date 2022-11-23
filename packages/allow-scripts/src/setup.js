@@ -60,7 +60,7 @@ function writeRcFileContent({file, entry}){
   }
 }
 
-let binsBlockedMemo;
+let binsBlockedMemo
 /**
  * 
  * @param {Object} args 
@@ -142,9 +142,11 @@ function editPackageJson () {
     console.log('@lavamoat/allow-scripts: Added dependency @lavamoat/preinstall-always-fail.')
   }
 
+  // no motivation to fix lint here, there's a better implementation of this in a neighboring branch
+  // eslint-disable-next-line node/global-require
   const packageJson = require(addInstallParentDir('package.json'))
   if(!packageJson.scripts){
-    packageJson.scripts = {};
+    packageJson.scripts = {}
   }
   packageJson.scripts['allow-scripts'] = './node_modules/@lavamoat/allow-scripts/src/cli.js'
   writeFileSync(addInstallParentDir('package.json'), JSON.stringify(packageJson, null, 2))
