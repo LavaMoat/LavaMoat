@@ -5,7 +5,7 @@ const { existsSync,
       } = require('fs')
 const { spawnSync } = require('child_process')
 const path = require('path')
-const { FT } = require('./toggles')
+const { FEATURE } = require('./toggles')
 
 const NPM = {
   RCFILE: '.npmrc',
@@ -88,7 +88,7 @@ function writeRcFile () {
       exists: yarnRcExists,
       entry: YARN1.CONF.SCRIPTS,
     })
-    if(FT.bins) {
+    if(FEATURE.bins) {
       configs.push({
         file: YARN1.RCFILE,
         exists: yarnRcExists,
@@ -110,7 +110,7 @@ function writeRcFile () {
       exists: npmRcExists,
       entry: NPM.CONF.SCRIPTS,
     })
-    if(FT.bins) {
+    if(FEATURE.bins) {
       configs.push({
         file: NPM.RCFILE,
         exists: npmRcExists,
@@ -142,12 +142,16 @@ function editPackageJson () {
     console.log('@lavamoat/allow-scripts: Added dependency @lavamoat/preinstall-always-fail.')
   }
 
-  // no motivation to fix lint here, there's a better implementation of this in a neighboring branch
-  // eslint-disable-next-line node/global-require
-  const packageJson = require(addInstallParentDir('package.json'))
-  if(!packageJson.scripts){
-    packageJson.scripts = {}
+  if(FEATURE.bins) {
+    // no motivation to fix lint here, there's a better implementation of this in a neighboring branch
+    // eslint-disable-next-line node/global-require
+    const packageJson = require(addInstallParentDir('package.json'))
+    if(!packageJson.scripts){
+      packageJson.scripts = {}
+    }
+    // If you think `node ` is redundant below, be aware that `./cli.js` won't work on Windows, 
+    // but passing a unix-style path to node on Windows works fine.
+    packageJson.scripts['allow-scripts'] = 'node ./node_modules/@lavamoat/allow-scripts/src/cli.js'
+    writeFileSync(addInstallParentDir('package.json'), JSON.stringify(packageJson, null, 2))
   }
-  packageJson.scripts['allow-scripts'] = './node_modules/@lavamoat/allow-scripts/src/cli.js'
-  writeFileSync(addInstallParentDir('package.json'), JSON.stringify(packageJson, null, 2))
 }

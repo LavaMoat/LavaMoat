@@ -5,7 +5,7 @@ const path = require('path')
 const npmRunScript = require('@npmcli/run-script')
 const normalizeBin = require('npm-normalize-package-bin')
 const { linkBinAbsolute, linkBinRelative } = require('./linker.js')
-const { FT } = require('./toggles.js')
+const { FEATURE } = require('./toggles.js')
 const { loadCanonicalNameMap } = require('@lavamoat/aa')
 
 /**
@@ -91,7 +91,7 @@ async function runAllowedPackages({ rootDir }) {
     process.exit(1)
   }
 
-  if (FT.bins && bin.allowConfig) {
+  if (FEATURE.bins && bin.allowConfig) {
     // Consider: Might as well delete entire .bin and recreate in case it was left there
     // install bins
     if (bin.binCandidates.size > 0) {
@@ -153,7 +153,7 @@ async function setDefaultConfiguration({ rootDir }) {
     lifecycle.allowConfig[pattern] = false
   })
 
-  if(FT.bins && bin.somePoliciesAreMissing) {
+  if(FEATURE.bins && bin.somePoliciesAreMissing) {
     bin.allowConfig = prepareBinScriptsPolicy(bin.binCandidates)
     console.log(`- bin scripts linked: ${Object.keys(bin.allowConfig).join(',')}`)
   }
@@ -398,7 +398,7 @@ async function loadAllPackageConfigurations({ rootDir }) {
       packagesWithScriptsLifecycle.set(canonicalName, collection)
     }
 
-    if (FT.bins && depPackageJson.bin) {
+    if (FEATURE.bins && depPackageJson.bin) {
       const binsList = Object.entries(normalizeBin(depPackageJson)?.bin || {})
 
       binsList.forEach(([name, link]) => {

@@ -3,7 +3,7 @@
 const yargs = require('yargs')
 const { runAllowedPackages, setDefaultConfiguration, printPackagesList } = require('./index.js')
 const { writeRcFile, editPackageJson } = require('./setup.js')
-const { FT } = require('./toggles') 
+const { FEATURE } = require('./toggles') 
 
 start().catch((err) => {
   console.error(err)
@@ -15,7 +15,7 @@ async function start () {
 
   const parsedArgs = parseArgs()
   const command = parsedArgs.command || 'run'
-  FT.bins = parsedArgs.experimentalBins
+  FEATURE.bins = parsedArgs.experimentalBins
 
   switch (command) {
     // (default) run scripts
