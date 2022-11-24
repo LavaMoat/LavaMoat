@@ -22,3 +22,29 @@ jobs:
         run: yarn test
       - name: Lint
         run: yarn lint
+  windows: 
+    name: test-windows
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        # 16.x fails atm due to strict stderr + ses lockdown removal messages
+        node-version: [14.x]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Install Dependencies
+        run: yarn --frozen-lockfile --ignore-scripts
+      - name: Script
+        run: |
+          cd packages/allow-scripts
+          yarn run test-path-windows
+          npm run test-path-windows
+      - name: Tests
+        run: |
+          cd packages/allow-scripts
+          yarn test
+     

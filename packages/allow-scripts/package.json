@@ -38,10 +38,8 @@
     "lint": "yarn lint:eslint && yarn lint:deps",
     "lint:eslint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "lint:deps": "depcheck"
-  },
-  "engines": {
-    "node": ">=12.0.0"
+    "lint:deps": "depcheck",
+    "test-path-windows": "./src/cli.js list"
   },
   "author": "",
   "homepage": "https://github.com/LavaMoat/LavaMoat/tree/main/packages/allow-scripts",
