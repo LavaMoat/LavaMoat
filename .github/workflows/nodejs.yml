@@ -2,47 +2,48 @@ name: CI
 on: [push, pull_request]
 
 jobs:
-  test:
-    name: test
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        # 16.x fails atm due to strict stderr + ses lockdown removal messages
-        node-version: [14.x]
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v1
-        with:
-          node-version: ${{ matrix.node-version }}
-      - name: Install Dependencies
-        run: yarn --frozen-lockfile --ignore-scripts
-      - name: Test
-        run: yarn test
-      - name: Lint
-        run: yarn lint
-  windows: 
-    name: test-windows
+  windows1: 
+    name: test-windows1
     runs-on: windows-latest
-    strategy:
-      matrix:
-        # 16.x fails atm due to strict stderr + ses lockdown removal messages
-        node-version: [14.x]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Use Node.js ${{ matrix.node-version }}
+      - name: Use Node.js
         uses: actions/setup-node@v1
         with:
-          node-version: ${{ matrix.node-version }}
-      - name: Install Dependencies
-        run: yarn --frozen-lockfile --ignore-scripts
+          node-version: 14
       - name: Script
         run: |
           cd packages/allow-scripts
-          yarn run test-path-windows
-          npm run test-path-windows
+          yarn run test-path-windows1
+          npm run test-path-windows1
+  windows2: 
+    name: test-windows2
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Use Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14
+      - name: Script
+        run: |
+          cd packages/allow-scripts
+          yarn run test-path-windows2
+          npm run test-path-windows2
+  windows-tests: 
+    name: test-windows-tests
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Use Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14
+      - name: Install Dependencies
+        run: yarn --frozen-lockfile --ignore-scripts
       - name: Tests
         run: |
           cd packages/allow-scripts

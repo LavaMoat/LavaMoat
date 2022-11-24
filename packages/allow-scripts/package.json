@@ -39,7 +39,8 @@
     "lint:eslint": "eslint .",
     "lint:fix": "eslint . --fix",
     "lint:deps": "depcheck",
-    "test-path-windows": "./src/cli.js list"
+    "test-path-windows1": "./src/hello.js",
+    "test-path-windows2": "node ./src/hello.js"
   },
   "author": "",
   "homepage": "https://github.com/LavaMoat/LavaMoat/tree/main/packages/allow-scripts",
