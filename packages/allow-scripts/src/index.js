@@ -7,6 +7,7 @@ const normalizeBin = require('npm-normalize-package-bin')
 const { linkBinAbsolute, linkBinRelative } = require('./linker.js')
 const { FEATURE } = require('./toggles.js')
 const { loadCanonicalNameMap } = require('@lavamoat/aa')
+const setup = require('./setup')
 
 /**
  * @typedef {Object} PkgConfs
@@ -57,6 +58,7 @@ module.exports = {
   runAllowedPackages,
   setDefaultConfiguration,
   printPackagesList,
+  setup,
 }
 
 async function getOptionsForBin({ rootDir, name }) {
