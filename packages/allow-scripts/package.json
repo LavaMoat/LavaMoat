@@ -9,6 +9,8 @@
   "dependencies": {
     "@lavamoat/aa": "^3.1.0",
     "@npmcli/run-script": "^1.8.1",
+    "bin-links": "4.0.1",
+    "npm-normalize-package-bin": "^3.0.0",
     "yargs": "^16.2.0"
   },
   "repository": {
@@ -32,6 +34,7 @@
   "scripts": {
     "test": "yarn test:run",
     "test:run": "ava --timeout=30s test/index.js",
+    "test:prep": "for d in ./test/projects/*/ ; do (cd \"$d\" && ../../../src/cli.js auto --experimental-bins); done",
     "lint": "yarn lint:eslint && yarn lint:deps",
     "lint:eslint": "eslint .",
     "lint:fix": "eslint . --fix",

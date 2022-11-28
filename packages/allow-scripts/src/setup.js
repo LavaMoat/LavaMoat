@@ -2,14 +2,37 @@ const { existsSync,
         appendFileSync,
         readFileSync,
         writeFileSync,
-        createWriteStream,
       } = require('fs')
 const { spawnSync } = require('child_process')
 const path = require('path')
+const { FEATURE } = require('./toggles')
+
+const NPM = {
+  RCFILE: '.npmrc',
+  CONF: {
+    SCRIPTS: 'ignore-scripts=true',
+    BINS: 'bin-links=false'
+  },
+}
+const YARN1 = {
+  RCFILE: '.yarnrc',
+  CONF: {
+    SCRIPTS: 'ignore-scripts true',
+    BINS: '--*.no-bin-links true'
+  },
+}
+const YARN3 = {
+  RCFILE: '.yarnrc.yml',
+  CONF: {
+    SCRIPTS: 'enableScripts: false',
+  },
+}
+
 
 module.exports = {
   writeRcFile,
-  addPreinstallAFDependency
+  areBinsBlocked,
+  editPackageJson
 }
 
 function addInstallParentDir(filename) {
@@ -17,17 +40,19 @@ function addInstallParentDir(filename) {
   return path.join(rootDir, filename)
 }
 
-function writeRcFileContent({file, exists, entry}){
-  let rcPath = addInstallParentDir(file)
-
-  if (!exists) {
-    writeFileSync(rcPath, entry + '\n')
-    console.log(`@lavamoat/allow-scripts: created ${rcPath} file with entry: ${entry}.`)
-    return
+function isEntryPresent(entry, file) {
+  const rcPath = addInstallParentDir(file)
+  if (!existsSync(rcPath)) {
+    return false
   }
-
   const rcFileContents = readFileSync(rcPath, 'utf8')
-  if (rcFileContents.includes(entry)) {
+  return rcFileContents.includes(entry)
+}
+
+function writeRcFileContent({file, entry}){
+  const rcPath = addInstallParentDir(file)
+
+  if (isEntryPresent(entry, file)) {
     console.log(`@lavamoat/allow-scripts: file ${rcPath} already exists with entry: ${entry}.`)
   } else {
     appendFileSync(rcPath, entry + '\n')
@@ -35,40 +60,69 @@ function writeRcFileContent({file, exists, entry}){
   }
 }
 
+let binsBlockedMemo
+/**
+ * 
+ * @param {Object} args 
+ * @param {boolean} noMemoization - turn off memoization, make a fresh lookup
+ * @returns {boolean}
+ */
+function areBinsBlocked({ noMemoization = false } = {}) {
+  if(noMemoization || binsBlockedMemo === undefined){
+    binsBlockedMemo = isEntryPresent(NPM.CONF.BINS, NPM.RCFILE) || isEntryPresent(YARN1.CONF.BINS, YARN1.RCFILE)
+    // Once yarn3 support via plugin comes in, this function would need to detect that, or cease to exist.
+  }
+  return binsBlockedMemo
+}
+
 function writeRcFile () {
-  const yarnRcExists = existsSync(addInstallParentDir('.yarnrc'))
-  const yarnYmlExists = existsSync(addInstallParentDir('.yarnrc.yml'))
-  const npmRcExists = existsSync(addInstallParentDir('.npmrc'))
+  const yarnRcExists = existsSync(addInstallParentDir(YARN1.RCFILE))
+  const yarnYmlExists = existsSync(addInstallParentDir(YARN3.RCFILE))
+  const npmRcExists = existsSync(addInstallParentDir(NPM.RCFILE))
   const yarnLockExists = existsSync(addInstallParentDir('yarn.lock'))
 
   const configs = []
   if (yarnRcExists || yarnLockExists) {
     configs.push({
-      file: '.yarnrc',
+      file: YARN1.RCFILE,
       exists: yarnRcExists,
-      entry: 'ignore-scripts true',
+      entry: YARN1.CONF.SCRIPTS,
     })
+    if(FEATURE.bins) {
+      configs.push({
+        file: YARN1.RCFILE,
+        exists: yarnRcExists,
+        entry: YARN1.CONF.BINS,
+      })
+    }
   }
   if (yarnYmlExists || yarnLockExists) {
     configs.push({
-      file: '.yarnrc.yml',
+      file: YARN3.RCFILE,
       exists: yarnYmlExists,
-      entry: 'enableScripts: false',
+      entry: YARN3.CONF.SCRIPTS,
     })
   }
   if (configs.length === 0) {
     // default to npm, because that's what everyone has anyway
     configs.push({
-      file: '.npmrc',
+      file: NPM.RCFILE,
       exists: npmRcExists,
-      entry: 'ignore-scripts=true',
+      entry: NPM.CONF.SCRIPTS,
     })
+    if(FEATURE.bins) {
+      configs.push({
+        file: NPM.RCFILE,
+        exists: npmRcExists,
+        entry: NPM.CONF.BINS,
+      })
+    }
   }
 
   configs.forEach(writeRcFileContent)
 }
 
-function addPreinstallAFDependency () {
+function editPackageJson () {
   let cmd, cmdArgs
 
   if (existsSync('./.npmrc')) {
@@ -85,6 +139,19 @@ function addPreinstallAFDependency () {
     process.stderr.write(result.stderr)
     process.exit(result.status)
   } else {
-    console.log('@lavamoat/allow-scripts:: Added dependency @lavamoat/preinstall-always-fail.')
+    console.log('@lavamoat/allow-scripts: Added dependency @lavamoat/preinstall-always-fail.')
+  }
+
+  if(FEATURE.bins) {
+    // no motivation to fix lint here, there's a better implementation of this in a neighboring branch
+    // eslint-disable-next-line node/global-require
+    const packageJson = require(addInstallParentDir('package.json'))
+    if(!packageJson.scripts){
+      packageJson.scripts = {}
+    }
+    // If you think `node ` is redundant below, be aware that `./cli.js` won't work on Windows, 
+    // but passing a unix-style path to node on Windows works fine.
+    packageJson.scripts['allow-scripts'] = 'node ./node_modules/@lavamoat/allow-scripts/src/cli.js'
+    writeFileSync(addInstallParentDir('package.json'), JSON.stringify(packageJson, null, 2))
   }
 }
