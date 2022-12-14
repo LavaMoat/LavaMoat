@@ -1,6 +1,6 @@
 // @ts-check
 // All of this is derived from the main functionality of bin-links that unfortunately would not allow for absolute path links
-const { promises: fs } = require('fs')
+const fs = require('fs')
 const binTarget = require('bin-links/lib/bin-target.js')
 const isWindows = require('bin-links/lib/is-windows.js')
 const linkBin = isWindows ? require('bin-links/lib/shim-bin.js') : require('bin-links/lib/link-bin.js')
@@ -24,7 +24,14 @@ const linkBinAbsolute = ({ path, bin, link, top = undefined, force = true }) => 
   return linkBin({ path, from, to, absFrom, force })
 }
 
+const clearBins = async ({ path }) => {
+  const target = resolve(path, './node_modules/.bin/')
+  const list = fs.readdirSync(target)
+  list.forEach(link => fs.unlinkSync(resolve(path, './node_modules/.bin/', link)))
+}
+
 module.exports = {
   linkBinRelative,
   linkBinAbsolute,
+  clearBins,
 }

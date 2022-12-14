@@ -4,7 +4,7 @@ const { promises: fs } = require('fs')
 const path = require('path')
 const npmRunScript = require('@npmcli/run-script')
 const normalizeBin = require('npm-normalize-package-bin')
-const { linkBinAbsolute, linkBinRelative } = require('./linker.js')
+const { linkBinAbsolute, linkBinRelative, clearBins } = require('./linker.js')
 const { FEATURE } = require('./toggles.js')
 const { loadCanonicalNameMap } = require('@lavamoat/aa')
 const setup = require('./setup')
@@ -94,7 +94,8 @@ async function runAllowedPackages({ rootDir }) {
   }
 
   if (FEATURE.bins && bin.allowConfig) {
-    // Consider: Might as well delete entire .bin and recreate in case it was left there
+    // If .bin exists, it's because the flag to not install any of it was not set or not supported (eg. yarn3)
+    clearBins({ path: rootDir })
     // install bins
     if (bin.binCandidates.size > 0) {
       console.log('installing bin scripts')
