@@ -1,6 +1,6 @@
 {
   "name": "lavamoat-browserify",
-  "version": "15.4.1",
+  "version": "15.5.0",
   "description": "browserify plugin for sandboxing dependencies with LavaMoat",
   "main": "src/index.js",
   "directories": {
