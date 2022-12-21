@@ -23,7 +23,7 @@
     "bindings": "^1.5.0",
     "htmlescape": "^1.1.1",
     "json-stable-stringify": "^1.0.1",
-    "lavamoat-core": "^12.3.0",
+    "lavamoat-core": "^13.0.0",
     "lavamoat-tofu": "^6.0.2",
     "node-gyp-build": "^4.2.3",
     "object.fromentries": "^2.0.2",
