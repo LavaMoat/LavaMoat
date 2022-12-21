@@ -19,7 +19,7 @@
     "convert-source-map": "^1.8.0",
     "duplexify": "^4.1.1",
     "json-stable-stringify": "^1.0.1",
-    "lavamoat-core": "^12.3.0",
+    "lavamoat-core": "^12.4.0",
     "pify": "^4.0.1",
     "readable-stream": "^3.6.0",
     "source-map": "^0.7.3",
