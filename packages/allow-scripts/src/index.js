@@ -392,6 +392,22 @@ async function loadAllPackageConfigurations({ rootDir }) {
     const depScripts = depPackageJson.scripts || {}
     const lifeCycleScripts = ['preinstall', 'install', 'postinstall'].filter(name => Object.prototype.hasOwnProperty.call(depScripts, name))
 
+    if (
+      !lifeCycleScripts.includes("preinstall") &&
+      !lifeCycleScripts.includes("install")
+    ) {
+      let bindingGypExists = false;
+      try {
+        await fs.stat(path.join(filePath, "binding.gyp"));
+        bindingGypExists = true;
+      } catch (err) {}
+
+      if (bindingGypExists) {
+        lifeCycleScripts.unshift("install");
+        depScripts.install = "node-gyp rebuild";
+      }
+    }
+
     if (lifeCycleScripts.length) {
       const collection = packagesWithScriptsLifecycle.get(canonicalName) || []
       collection.push({

@@ -1,0 +1,23 @@
+{
+  "name": "4",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "disabled_native_dep": "^1.0.0",
+    "native_dep": "^1.0.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "lavamoat": {
+    "allowScripts": {
+      "disabled_native_dep": false,
+      "native_dep": true
+    }
+  }
+}

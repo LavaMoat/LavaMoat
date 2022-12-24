@@ -2,6 +2,7 @@ const test = require('ava')
 const fs = require('fs')
 const path = require('path')
 const { spawnSync } = require('child_process')
+const rimraf = require('rimraf');
 
 test('cli - auto command', (t) => {
   // set up the directories
@@ -200,7 +201,7 @@ test('cli - run command - good dep as a sub dep with experimental bins', (t) => 
   // console.error(result.stdout.toString('utf-8'))
   // console.error(result.stderr.toString('utf-8'))
 
-  
+
   t.assert(fs.existsSync(path.join(projectRoot, './node_modules/bbb/node_modules/.bin/good')), 'Expected a nested bin script to be installed in bbb/node_modules/.bin')
   const errarr = result.stderr.toString().split('\n')
   t.assert(errarr.every(line=>!line.includes('you shall not pass')), 'Should not have run the parent script from the nested package postinstall')
@@ -219,6 +220,34 @@ test('cli - run command - good dep as a sub dep with experimental bins', (t) => 
     '',
   ])
 
+})
+
+test('cli - run command - implicit build scripts for dependencies with native addons', (t) => {
+  // set up the directories
+  const allowScriptsSrcRoot = path.join(__dirname, '..', 'src')
+  const projectRoot = path.join(__dirname, 'projects', '4')
+
+  const nativeDepAddonBuildDir = path.join(projectRoot, 'node_modules', 'native_dep', 'build')
+  const disabledNativeDepAddonBuildDir = path.join(projectRoot, 'node_modules', 'disabled_native_dep', 'build')
+
+  // cleanup old test run results
+  rimraf.sync(nativeDepAddonBuildDir)
+  rimraf.sync(disabledNativeDepAddonBuildDir)
+
+  // run the "run" command
+  const cmd = path.join(allowScriptsSrcRoot, 'cli.js')
+  const result = spawnSync(cmd, ['run'], realisticEnvOptions(projectRoot))
+
+  // assert the output
+  t.is(result.stdout.toString(), `\
+running lifecycle scripts for event "preinstall"
+running lifecycle scripts for event "install"
+- native_dep
+running lifecycle scripts for event "postinstall"
+running lifecycle scripts for top level package
+`)
+  t.is(fs.existsSync(path.join(nativeDepAddonBuildDir, 'Release', 'addon.node')), true)
+  t.is(fs.existsSync(path.join(disabledNativeDepAddonBuildDir, 'Release', 'addon.node')), false)
 })
 
 function realisticEnvOptions(projectRoot) {
