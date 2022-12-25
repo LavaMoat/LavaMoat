@@ -567,7 +567,7 @@ freeze(bestEffortStringify);
  */
 
 /**
- * @typedef {Object} AssertMakeErrorOptions
+ * @typedef {object} AssertMakeErrorOptions
  * @property {string=} errorName
  */
 
@@ -614,51 +614,65 @@ freeze(bestEffortStringify);
  */
 
 // Type all the overloads of the assertTypeof function.
-// There may eventually be a better way to do this, but they break with
-// Typescript 4.0.
+// There may eventually be a better way to do this, but
+// thems the breaks with Typescript 4.0.
 /**
  * @callback AssertTypeofBigint
  * @param {any} specimen
  * @param {'bigint'} typename
  * @param {Details=} optDetails
  * @returns {asserts specimen is bigint}
- *
+ */
+
+/**
  * @callback AssertTypeofBoolean
  * @param {any} specimen
  * @param {'boolean'} typename
  * @param {Details=} optDetails
  * @returns {asserts specimen is boolean}
- *
+ */
+
+/**
  * @callback AssertTypeofFunction
  * @param {any} specimen
  * @param {'function'} typename
  * @param {Details=} optDetails
  * @returns {asserts specimen is Function}
- *
+ */
+
+/**
  * @callback AssertTypeofNumber
  * @param {any} specimen
  * @param {'number'} typename
  * @param {Details=} optDetails
  * @returns {asserts specimen is number}
- *
+ */
+
+/**
  * @callback AssertTypeofObject
  * @param {any} specimen
  * @param {'object'} typename
  * @param {Details=} optDetails
  * @returns {asserts specimen is Record<any, any> | null}
- *
+ */
+
+/**
  * @callback AssertTypeofString
  * @param {any} specimen
  * @param {'string'} typename
  * @param {Details=} optDetails
  * @returns {asserts specimen is string}
- *
+ */
+
+/**
  * @callback AssertTypeofSymbol
  * @param {any} specimen
  * @param {'symbol'} typename
  * @param {Details=} optDetails
  * @returns {asserts specimen is symbol}
- *
+ */
+
+/**
  * @callback AssertTypeofUndefined
  * @param {any} specimen
  * @param {'undefined'} typename
@@ -712,7 +726,7 @@ freeze(bestEffortStringify);
  */
 
 /**
- * @typedef {Object} StringablePayload
+ * @typedef {object} StringablePayload
  * Holds the payload passed to quote so that its printed form is visible.
  * @property {() => string} toString How to print the payload
  */
@@ -2379,10 +2393,8 @@ const        makeSafeEvaluator=  ({
 
 
 const        provideCompartmentEvaluator=  (compartmentFields, options)=>  {
-  const {
-    sloppyGlobalsMode=  false,
-    __moduleShimLexicals__=  undefined}=
-      options;
+  const { sloppyGlobalsMode=  false, __moduleShimLexicals__=  undefined}=
+    options;
 
   let safeEvaluate;
 
@@ -4175,7 +4187,7 @@ $h‍_once.makeAlias(makeAlias);const resolveAll=(imports,resolveHook,fullReferr
   return freeze(resolvedImports);
  };
 
-const loadRecord=  async(
+const loadRecord=  (
   compartmentPrivateFields,
   moduleAliases,
   compartment,
@@ -4296,27 +4308,64 @@ const loadWithoutErrorAnnotation=  async(
       } in compartment ${q(compartment.name)}`;
    }
 
-  if( staticModuleRecord.record!==  undefined) {
-    const {
-      compartment: aliasCompartment=  compartment,
-      specifier: aliasSpecifier=  moduleSpecifier,
-      record: aliasModuleRecord,
-      importMeta}=
-        staticModuleRecord;
+  // check if record is a RedirectStaticModuleInterface
+  if( staticModuleRecord.specifier!==  undefined) {
+    // check if this redirect with an explicit record
+    if( staticModuleRecord.record!==  undefined) {
+      // ensure expected record shape
+      if( staticModuleRecord.compartment!==  undefined) {
+        throw new TypeError(
+          'Cannot redirect to an explicit record with a specified compartment');
 
-    const aliasRecord=  await loadRecord(
-      compartmentPrivateFields,
-      moduleAliases,
-      aliasCompartment,
-      aliasSpecifier,
-      aliasModuleRecord,
-      pendingJobs,
-      moduleLoads,
-      errors,
-      importMeta);
+       }
+      const {
+        compartment: aliasCompartment=  compartment,
+        specifier: aliasSpecifier=  moduleSpecifier,
+        record: aliasModuleRecord,
+        importMeta}=
+          staticModuleRecord;
 
-    mapSet(moduleRecords, moduleSpecifier, aliasRecord);
-    return aliasRecord;
+      const aliasRecord=  loadRecord(
+        compartmentPrivateFields,
+        moduleAliases,
+        aliasCompartment,
+        aliasSpecifier,
+        aliasModuleRecord,
+        pendingJobs,
+        moduleLoads,
+        errors,
+        importMeta);
+
+      mapSet(moduleRecords, moduleSpecifier, aliasRecord);
+      return aliasRecord;
+     }
+
+    // check if this redirect with an explicit compartment
+    if( staticModuleRecord.compartment!==  undefined) {
+      // ensure expected record shape
+      if( staticModuleRecord.importMeta!==  undefined) {
+        throw new TypeError(
+          'Cannot redirect to an implicit record with a specified importMeta');
+
+       }
+      // Behold: recursion.
+      // eslint-disable-next-line no-use-before-define
+      const aliasRecord=  await memoizedLoadWithErrorAnnotation(
+        compartmentPrivateFields,
+        moduleAliases,
+        staticModuleRecord.compartment,
+        staticModuleRecord.specifier,
+        pendingJobs,
+        moduleLoads,
+        errors);
+
+      mapSet(moduleRecords, moduleSpecifier, aliasRecord);
+      return aliasRecord;
+     }
+
+    throw new TypeError(
+      'Unnexpected RedirectStaticModuleInterface record shape');
+
    }
 
   return loadRecord(
@@ -4759,6 +4808,7 @@ $h‍_once.makeThirdPartyModuleInstance(makeThirdPartyModuleInstance);const make
     __syncModuleProgram__: functorSource,
     __fixedExportMap__: fixedExportMap=  {},
     __liveExportMap__: liveExportMap=  {},
+    __reexportMap__: reexportMap=  {},
     __needsImportMeta__: needsImportMeta=  false}=
       staticModuleRecord;
 
@@ -5012,26 +5062,35 @@ $h‍_once.makeThirdPartyModuleInstance(makeThirdPartyModuleInstance);const make
        }
       if( arrayIncludes(exportAlls, specifier)) {
         // Make all these imports candidates.
-        for( const [importName, importNotify]of  entries(importNotifiers)) {
-          if( candidateAll[importName]===  undefined) {
-            candidateAll[importName]=  importNotify;
+        // Note names don't change in reexporting all
+        for( const [importAndExportName, importNotify]of  entries(
+          importNotifiers))
+           {
+          if( candidateAll[importAndExportName]===  undefined) {
+            candidateAll[importAndExportName]=  importNotify;
            }else {
             // Already a candidate: remove ambiguity.
-            candidateAll[importName]=  false;
+            candidateAll[importAndExportName]=  false;
            }
+         }
+       }
+      if( reexportMap[specifier]) {
+        // Make named reexports candidates too.
+        for( const [localName, exportedName]of  reexportMap[specifier]) {
+          candidateAll[exportedName]=  importNotifiers[localName];
          }
        }
      }
 
-    for( const [importName, notify]of  entries(candidateAll)) {
-      if( !notifiers[importName]&&  notify!==  false) {
-        notifiers[importName]=  notify;
+    for( const [exportName, notify]of  entries(candidateAll)) {
+      if( !notifiers[exportName]&&  notify!==  false) {
+        notifiers[exportName]=  notify;
 
         // exported live binding state
         let value;
         const update=  (newValue)=> value=  newValue;
         notify(update);
-        exportsProps[importName]=  {
+        exportsProps[exportName]=  {
           get() {
             return value;
            },
@@ -5223,12 +5282,8 @@ const        instantiate=  (
   moduleAliases,
   moduleRecord)=>
      {
-  const {
-    compartment,
-    moduleSpecifier,
-    resolvedImports,
-    staticModuleRecord}=
-      moduleRecord;
+  const { compartment, moduleSpecifier, resolvedImports, staticModuleRecord}=
+    moduleRecord;
   const { instances}=   weakmapGet(compartmentPrivateFields, compartment);
 
   // Memoize.
@@ -6481,12 +6536,8 @@ freeze(ErrorInfo);
 
 /** @type {MakeCausalConsole} */
 const makeCausalConsole=  (baseConsole, loggedErrorHandler)=>  {
-  const {
-    getStackString,
-    tagError,
-    takeMessageLogArgs,
-    takeNoteLogArgsArray}=
-      loggedErrorHandler;
+  const { getStackString, tagError, takeMessageLogArgs, takeNoteLogArgsArray}=
+    loggedErrorHandler;
 
   /**
    * @param {ReadonlyArray<any>} logArgs
@@ -7600,8 +7651,10 @@ const        getAnonymousIntrinsics=  ()=>  {
 
   // 9.2.4.1 %ThrowTypeError%
 
-  const ThrowTypeError=  getOwnPropertyDescriptor(makeArguments(), 'callee').
-     get;
+  const ThrowTypeError=  getOwnPropertyDescriptor(
+    makeArguments(),
+    'callee').
+    get;
 
   // 21.1.5.2 The %StringIteratorPrototype% Object
 
@@ -8103,7 +8156,8 @@ function        tameDomains(domainTaming=  'safe') {
 })
 ,
 // === functors[36] ===
-(({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,   importMeta: $h‍____meta,  }) => {   let FERAL_FUNCTION,SyntaxError,TypeError,defineProperties,getPrototypeOf,setPrototypeOf;$h‍_imports([["./commons.js", [["FERAL_FUNCTION", [$h‍_a => (FERAL_FUNCTION = $h‍_a)]],["SyntaxError", [$h‍_a => (SyntaxError = $h‍_a)]],["TypeError", [$h‍_a => (TypeError = $h‍_a)]],["defineProperties", [$h‍_a => (defineProperties = $h‍_a)]],["getPrototypeOf", [$h‍_a => (getPrototypeOf = $h‍_a)]],["setPrototypeOf", [$h‍_a => (setPrototypeOf = $h‍_a)]]]]]);   
+(({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,   importMeta: $h‍____meta,  }) => {   let FERAL_FUNCTION,SyntaxError,TypeError,defineProperties,getPrototypeOf,setPrototypeOf,freeze;$h‍_imports([["./commons.js", [["FERAL_FUNCTION", [$h‍_a => (FERAL_FUNCTION = $h‍_a)]],["SyntaxError", [$h‍_a => (SyntaxError = $h‍_a)]],["TypeError", [$h‍_a => (TypeError = $h‍_a)]],["defineProperties", [$h‍_a => (defineProperties = $h‍_a)]],["getPrototypeOf", [$h‍_a => (getPrototypeOf = $h‍_a)]],["setPrototypeOf", [$h‍_a => (setPrototypeOf = $h‍_a)]],["freeze", [$h‍_a => (freeze = $h‍_a)]]]]]);   
+
 
 
 
@@ -8154,7 +8208,7 @@ function                tameFunctionConstructors() {
     FERAL_FUNCTION.prototype.constructor('return 1');
    }catch( ignore) {
     // Throws, no need to patch.
-    return harden({});
+    return freeze({});
    }
 
   const newIntrinsics=  {};
@@ -8187,7 +8241,7 @@ function                tameFunctionConstructors() {
     // Prevents the evaluation of source when calling constructor on the
     // prototype of functions.
     // eslint-disable-next-line func-names
-    const InertConstructor=  function() {
+    const InertConstructor=  function()  {
       throw new TypeError(
         'Function.prototype.constructor is not a valid constructor.');
 
@@ -8393,9 +8447,8 @@ function                tameMathObject(mathTaming=  'safe') {
   const originalMath=  Math;
   const initialMath=  originalMath; // to follow the naming pattern
 
-  const { random: _, ...otherDescriptors}=   getOwnPropertyDescriptors(
-    originalMath);
-
+  const { random: _, ...otherDescriptors}=
+    getOwnPropertyDescriptors(originalMath);
 
   const sharedMath=  create(objectPrototype, otherDescriptors);
 
@@ -8930,10 +8983,8 @@ const        repairIntrinsics=  (options=  {})=>  {
   // [`stackFiltering` options](https://github.com/Agoric/SES-shim/blob/master/packages/ses/lockdown-options.md#stackfiltering-options)
   // for an explanation.
 
-  const {
-    getEnvironmentOption: getenv,
-    getCapturedEnvironmentOptionNames}=
-      makeEnvironmentCaptor(globalThis);
+  const { getEnvironmentOption: getenv, getCapturedEnvironmentOptionNames}=
+    makeEnvironmentCaptor(globalThis);
 
   const {
     errorTaming=  getenv('LOCKDOWN_ERROR_TAMING', 'safe'),
@@ -9039,11 +9090,8 @@ const        repairIntrinsics=  (options=  {})=>  {
 
   tameDomains(domainTaming);
 
-  const {
-    addIntrinsics,
-    completePrototypes,
-    finalIntrinsics}=
-      makeIntrinsicsCollector();
+  const { addIntrinsics, completePrototypes, finalIntrinsics}=
+    makeIntrinsicsCollector();
 
   addIntrinsics({ harden});
 
@@ -9234,23 +9282,25 @@ assign(globalThis, {
 ,
 ]; // functors end
 
-  function cell(name, value = undefined) {
+  const cell = (name, value = undefined) => {
     const observers = [];
-    function set(newValue) {
-      value = newValue;
-      for (const observe of observers) {
+    return Object.freeze({
+      get: Object.freeze(() => {
+        return value;
+      }),
+      set: Object.freeze((newValue) => {
+        value = newValue;
+        for (const observe of observers) {
+          observe(value);
+        }
+      }),
+      observe: Object.freeze((observe) => {
+        observers.push(observe);
         observe(value);
-      }
-    }
-    function get() {
-      return value;
-    }
-    function observe(observe) {
-      observers.push(observe);
-      observe(value);
-    }
-    return { get, set, observe, enumerable: true };
-  }
+      }),
+      enumerable: true,
+    });
+  };
 
   const cells = [
     {
@@ -9555,23 +9605,24 @@ assign(globalThis, {
   ];
 
 
-  const namespaces = cells.map(cells => Object.create(null, cells));
+  const namespaces = cells.map(cells => Object.freeze(Object.create(null, cells)));
 
   for (let index = 0; index < namespaces.length; index += 1) {
     cells[index]['*'] = cell('*', namespaces[index]);
   }
 
-  function observeImports(map, importName, importIndex) {
-    for (const [name, observers] of map.get(importName)) {
-      const cell = cells[importIndex][name];
-      if (cell === undefined) {
-        throw new ReferenceError(`Cannot import name ${name}`);
-      }
-      for (const observer of observers) {
-        cell.observe(observer);
-      }
+function observeImports(map, importName, importIndex) {
+  for (const [name, observers] of map.get(importName)) {
+    const cell = cells[importIndex][name];
+    if (cell === undefined) {
+      throw new ReferenceError(`Cannot import name ${name}`);
+    }
+    for (const observer of observers) {
+      cell.observe(observer);
     }
   }
+}
+
 
   functors[0]({
     imports(entries) {
