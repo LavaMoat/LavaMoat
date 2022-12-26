@@ -393,18 +393,18 @@ async function loadAllPackageConfigurations({ rootDir }) {
     const lifeCycleScripts = ['preinstall', 'install', 'postinstall'].filter(name => Object.prototype.hasOwnProperty.call(depScripts, name))
 
     if (
-      !lifeCycleScripts.includes("preinstall") &&
-      !lifeCycleScripts.includes("install")
+      !lifeCycleScripts.includes('preinstall') &&
+      !lifeCycleScripts.includes('install')
     ) {
-      let bindingGypExists = false;
+      let bindingGypExists = false
       try {
-        await fs.stat(path.join(filePath, "binding.gyp"));
-        bindingGypExists = true;
+        await fs.stat(path.join(filePath, 'binding.gyp'))
+        bindingGypExists = true
       } catch (err) {}
 
       if (bindingGypExists) {
-        lifeCycleScripts.unshift("install");
-        depScripts.install = "node-gyp rebuild";
+        lifeCycleScripts.unshift('install')
+        depScripts.install = 'node-gyp rebuild'
       }
     }
 
