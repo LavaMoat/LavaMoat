@@ -1,10 +1,18 @@
 const { join: pathJoin } = require('path')
 const { promises: { readFile, writeFile }} = require('fs')
 const { generateKernel, makeInitStatsHook } = require('lavamoat-core')
+const { getStrictScopeTerminatorShimSrc, replaceTemplateRequire } = require('lavamoat-core/src/generateKernel')
 
 module.exports = buildRuntime
 
+async function buildRuntimeCjs() {
+  const runtimeCjsTemplate = await readFile(pathJoin(__dirname, 'runtime-cjs-template.js'), 'utf8')
+  const sst = replaceTemplateRequire(runtimeCjsTemplate, 'strict-scope-terminator', getStrictScopeTerminatorShimSrc())
+  await writeFile(pathJoin(__dirname, 'runtime-cjs.js'), sst)
+}
+
 async function buildRuntime (opts = {}) {
+  await buildRuntimeCjs()
   const runtimeTemplate = await readFile(pathJoin(__dirname, 'runtime-template.js'), 'utf8')
   let output = runtimeTemplate
   // inline kernel
