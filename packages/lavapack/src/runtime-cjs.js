@@ -1,5 +1,19 @@
 ;(function() {
 
+  // identify the globalRef
+  const globalRef = (typeof globalThis !== 'undefined') ? globalThis : (typeof self !== 'undefined') ? self : (typeof global !== 'undefined') ? global : undefined
+  if (!globalRef) {
+    throw new Error('Lavamoat - unable to identify globalRef')
+  }
+
+  // polyfill globalThis
+  if (globalRef && !globalRef.globalThis) {
+    globalRef.globalThis = globalRef
+  }
+
+  // polyfill node/browserify's globalRef
+  globalThis.global = globalThis
+
   const {strictScopeTerminator} = // define strict-scope-terminator
 (function(){
   const global = globalRef
@@ -119,9 +133,6 @@ module.exports = {
   })()
   return module.exports
 })()
-
-  // polyfill node/browserify's globalRef
-  globalThis.global = globalThis
 
   const moduleRegistry = new Map()
   const moduleCache = new Map()
