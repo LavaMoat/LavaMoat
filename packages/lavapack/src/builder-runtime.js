@@ -3,16 +3,15 @@ const { promises: { readFile, writeFile }} = require('fs')
 const { generateKernel, makeInitStatsHook } = require('lavamoat-core')
 const { getStrictScopeTerminatorShimSrc, replaceTemplateRequire } = require('lavamoat-core/src/generateKernel')
 
-module.exports = buildRuntime
+module.exports = buildRuntimeUMD
 
-async function buildRuntimeCjs() {
+async function buildRuntimeCJS () {
   const runtimeCjsTemplate = await readFile(pathJoin(__dirname, 'runtime-cjs-template.js'), 'utf8')
   const sst = replaceTemplateRequire(runtimeCjsTemplate, 'strict-scope-terminator', getStrictScopeTerminatorShimSrc())
   await writeFile(pathJoin(__dirname, 'runtime-cjs.js'), sst)
 }
 
-async function buildRuntime (opts = {}) {
-  await buildRuntimeCjs()
+async function buildRuntimeES (opts) {
   const runtimeTemplate = await readFile(pathJoin(__dirname, 'runtime-template.js'), 'utf8')
   let output = runtimeTemplate
   // inline kernel
@@ -22,6 +21,10 @@ async function buildRuntime (opts = {}) {
   const statsCode = `(${makeInitStatsHook})({ onStatsReady })`
   output = stringReplace(output, '__reportStatsHook__', statsCode)
   await writeFile(pathJoin(__dirname, 'runtime.js'), output)
+}
+
+async function buildRuntimeUMD (opts = {}) {
+  await Promise.all([buildRuntimeCJS(), buildRuntimeES(opts)])
 }
 
 // String.prototype.replace has special behavior for some characters, so we use split join instead
