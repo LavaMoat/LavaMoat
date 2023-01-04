@@ -5,10 +5,16 @@ const { getStrictScopeTerminatorShimSrc, replaceTemplateRequire } = require('lav
 
 module.exports = buildRuntimeUMD
 
+function markAsGenerated(output, file) {
+  const runner = __filename.slice(__dirname.length + 1)
+  return `// DO NOT EDIT! THIS FILE IS GENERATED FROM "${file}" BY RUNNING "${runner}"\n\n` + output
+}
+
 async function buildRuntimeCJS () {
   const runtimeCjsTemplate = await readFile(pathJoin(__dirname, 'runtime-cjs-template.js'), 'utf8')
-  const sst = replaceTemplateRequire(runtimeCjsTemplate, 'strict-scope-terminator', getStrictScopeTerminatorShimSrc())
-  await writeFile(pathJoin(__dirname, 'runtime-cjs.js'), sst)
+  let output = replaceTemplateRequire(runtimeCjsTemplate, 'strict-scope-terminator', getStrictScopeTerminatorShimSrc())
+  output = markAsGenerated(output, 'runtime-cjs-template.js')
+  await writeFile(pathJoin(__dirname, 'runtime-cjs.js'), output)
 }
 
 async function buildRuntimeES (opts) {
@@ -20,6 +26,7 @@ async function buildRuntimeES (opts) {
   // inline reportStatsHook
   const statsCode = `(${makeInitStatsHook})({ onStatsReady })`
   output = stringReplace(output, '__reportStatsHook__', statsCode)
+  output = markAsGenerated(output, 'runtime-template.js')
   await writeFile(pathJoin(__dirname, 'runtime.js'), output)
 }
 

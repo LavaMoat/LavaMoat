@@ -1,3 +1,5 @@
+// DO NOT EDIT! THIS FILE IS GENERATED FROM "runtime-cjs-template.js" BY RUNNING "builder-runtime.js"
+
 ;(function() {
 
   // identify the globalRef
