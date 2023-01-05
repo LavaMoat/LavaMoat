@@ -116,7 +116,6 @@ function getConfigurationFromPluginOpts (pluginOpts) {
     debug: 'debugMode',
     stats: 'statsMode',
     pn: 'policyName',
-    projectRoot: 'projectRoot',
     r: 'projectRoot',
   }
 
@@ -124,6 +123,8 @@ function getConfigurationFromPluginOpts (pluginOpts) {
     'scuttleGlobalThis',
     'scuttleGlobalThisExceptions',
     'bundleWithPrecompiledModules',
+    'policyDebug',
+    'projectRoot',
   ]
 
   const allowedKeys = new Set([
@@ -240,13 +241,13 @@ function loadPolicy (configuration) {
 }
 
 function getPolicyPaths (pluginOpts) {
-  const { projectRoot, policy, policyOverride, configDebug, policyName } = pluginOpts
+  const { projectRoot, policy, policyOverride, policyDebug, policyName } = pluginOpts
   const defaultPaths = getDefaultPaths(policyName)
   const { primary, override, debug } = defaultPaths
   return {
     primary: policy || path.resolve(projectRoot, primary),
     override: policyOverride || path.resolve(projectRoot, override),
-    debug: configDebug || path.resolve(projectRoot, debug),
+    debug: policyDebug || path.resolve(projectRoot, debug),
   }
 }
 
