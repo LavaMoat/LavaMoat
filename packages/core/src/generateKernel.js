@@ -15,6 +15,8 @@ const makeGeneralUtilsSrc = fs.readFileSync(path.join(__dirname, '/makeGeneralUt
 const strictScopeTerminatorSrc = fs.readFileSync(path.join(__dirname, '/../lib/strict-scope-terminator.js'), 'utf-8')
 
 module.exports = {
+  replaceTemplateRequire,
+  getStrictScopeTerminatorShimSrc,
   getSesShimSrc,
   generateKernel,
   generateKernelCore,
@@ -22,6 +24,10 @@ module.exports = {
 
 function getSesShimSrc () {
   return sesSrc
+}
+
+function getStrictScopeTerminatorShimSrc () {
+  return strictScopeTerminatorSrc
 }
 
 // takes the kernelTemplate and populates it with the libraries

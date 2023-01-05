@@ -1,3 +1,5 @@
+// DO NOT EDIT! THIS FILE IS GENERATED FROM "runtime-template.js" BY RUNNING "builder-runtime.js"
+
 ;(function() {
   // this runtime template code is destined to wrap LavaMoat entirely,
   // therefore this is our way of capturing access to basic APIs LavaMoat
