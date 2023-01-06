@@ -5,6 +5,7 @@ import ThreeComponent from './three-component';
 // import { LinesController } from './graphs/lines-controller';
 // import { setupScene, setupGraph } from './graphs/vr-viz/setupScene.js'
 import { FastThreeForceGraph } from './graphs/vr-viz/forcegraph.js'
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 
 export default class ScratchPad extends ThreeComponent {
   componentDidMount() {
@@ -39,11 +40,19 @@ export default class ScratchPad extends ThreeComponent {
     const packageData = {
       nodes: [], links: []
     }
+    const colors = [
+      'purple',
+      'green',
+      'orange',
+      'brown',
+      'red',
+    ]
 
-    for (let index = 0; index < 1000; index++) {
+    for (let index = 0; index < 200; index++) {
       const node = {
         id: `${index}`,
-        size: 10,
+        size: Math.random() * 20 + 5,
+        color: colors[Math.floor(Math.random() * colors.length)],
       }
       packageData.nodes.push(node)
 
@@ -80,13 +89,18 @@ export default class ScratchPad extends ThreeComponent {
       graph.tickFrame()
     })
 
+    const controls = new OrbitControls( this.camera, this.renderer.domElement );
+    subscribeTick(() => {
+      controls.update();
+    })
+
     this.camera.position.set(0, 100, 3)
     this.camera.lookAt(0, 0, 0);
   }
 
   animate () {
     this.animateListeners.forEach(listener => listener())
-    this.graph.scale.multiplyScalar(0.999)
+    // this.graph.scale.multiplyScalar(0.999)
     // for (let index = 0; index < 1000; index++) {
     //   const { color, position } = this.data.get(index)
     //   position[0] += (Math.random() * 2 - 1) * 0.5

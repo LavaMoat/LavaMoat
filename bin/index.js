@@ -107,17 +107,16 @@ async function generateViz (args) {
     policyNames = await getDirectories(policiesDir)
   }
   // write each policy data injection
-  // const policyDataInjectionFilePath =
-  await Promise.all(policyNames.map(async (policyName) => {
+  const policyDataInjectionFilePaths = await Promise.all(policyNames.map(async (policyName) => {
     return await createPolicyDataFile({ policyName, fullDest })
   }))
   // add data-injection file
-  // const dataInjectionContent = policyDataInjectionFilePath
-  //   // .map(filepath => { console.log(filepath, fullDest, path.relative(fullDest, filepath)); return filepath;})
-  //   .map(filepath => path.relative(fullDest, filepath))
-  //   .map(relPath => `import "./${relPath}";`)
-  //   .join('\n')
-  // await fs.writeFile(`${fullDest}/injectConfigDebugData.js`, dataInjectionContent)
+  const dataInjectionContent = policyDataInjectionFilePaths
+    // .map(filepath => { console.log(filepath, fullDest, path.relative(fullDest, filepath)); return filepath;})
+    .map(filepath => path.relative(fullDest, filepath))
+    .map(relPath => `import "./${relPath}";`)
+    .join('\n')
+  await fs.writeFile(`${fullDest}/injectConfigDebugData.js`, dataInjectionContent)
 
   // dashboard prepared! report done
   console.log(`generated viz in "${dest}"`)
@@ -169,8 +168,11 @@ async function loadPolicyData (policyName) {
   ] = await Promise.all([
     loadPolicyFile(defaultPaths.debug),
     loadPolicyFile(defaultPaths.primary),
-    loadPolicyFile(defaultPaths.override),
+    // loadPolicyFile(defaultPaths.override),
   ])
+  // const defaultPaths = getDefaultPaths('node')
+  // const policyOverride = await loadPolicy({ debugMode, policyPath: policyOverridePath })
+  // const lavamoatPolicy = await loadPolicy({ debugMode, policyPath })
   const policyData = { primary, override, debug }
   return policyData
 }

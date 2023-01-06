@@ -1,43 +1,41 @@
 import ThreeForceGraph from 'three-forcegraph'
 // import SpriteText from 'three-spritetext';
 import { Object3D, Group } from 'three'
-import { PointsController } from '../points-controller'
+import { PointsController } from '../points-controller.js'
 import { LinesController } from '../lines-controller.js'
 
 export class FastThreeForceGraph extends Group {
   constructor ({ graphData = { node: [], links: [] }, nodeOpts = {}, linkOpts = {} } = {}) {
     super()
 
-    const linesController = new LinesController({ capacity: graphData.links.length, ...linkOpts })
-    const pointsController = new PointsController({ capactiy: graphData.nodes.length, ...nodeOpts })
+    const colorPallete = {
+      purple: [0x80 / 255, 0, 0x80 / 255],
+      green: [0, 0x80 / 255, 0],
+      orange: [1, 0xa5 / 255, 0],
+      brown: [0xa5 / 255, 0x2a / 255, 0x2a / 255],
+      red: [1, 0, 0]
+    }
+    const linkCount = graphData.links.length
+    const nodeCount = graphData.nodes.length
+    this.linesController = new LinesController({ capacity: linkCount, ...linkOpts })
+    this.pointsController = new PointsController({ capactiy: nodeCount, ...nodeOpts })
+
+    const { linesController, pointsController } = this
     this.graph = new ThreeForceGraph()
       .graphData(graphData)
-    // .nodeVal('size')
       .nodeThreeObject((node) => {
-        const colorPallete = {
-          purple: [0x9b / 255, 0x59 / 255, 0xb6 / 255],
-          green: [0x2e / 255, 0xcc / 255, 0x71 / 255],
-          orange: [0xe6 / 255, 0x7e / 255, 0x22 / 255],
-          brown: [0x9b / 255, 0x59 / 255, 0xb6 / 255],
-          red: [0xe7 / 255, 0x4c / 255, 0x3c / 255]
-        }
         pointsController.update(node.id, 'color', colorPallete[node.color] || colorPallete.purple)
+        pointsController.update(node.id, 'size', [10 * node.size])
         // create dummy object
         return new Object3D()
-      // const sprite = new SpriteText('⬤', 12 * node.size, node.color);
-      // sprite.material.depthTest = false;
-      // return sprite
       })
-    // .nodePositionUpdate((node) => {
-    //   pointsController.update(node.id, 'position', [node.x, node.y, node.z])
-    // })
       .linkThreeObject((link) => {
-      // create dummy object
+        // create dummy object
         return new Object3D()
       })
       .linkPositionUpdate((linkObject, { start, end }, link) => {
-        pointsController.update(link.source.id, 'position', [link.source.x, link.source.y, link.source.z])
-        pointsController.update(link.target.id, 'position', [link.target.x, link.target.y, link.target.z])
+        pointsController.update(link.source.id, 'translate', [link.source.x, link.source.y, link.source.z])
+        pointsController.update(link.target.id, 'translate', [link.target.x, link.target.y, link.target.z])
         linesController.update(link.id, 'position', [start.x, start.y, start.z, end.x, end.y, end.z])
         // override link position update
         return true
