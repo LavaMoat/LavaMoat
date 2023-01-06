@@ -1,10 +1,11 @@
 import { LineSegments, LineBasicMaterial } from 'three'
-import BufferGeometryController from './buffer-geometry-controller.js'
+import { BufferGeometryController } from './buffer-geometry-controller.js'
 
 export class LinesController extends BufferGeometryController {
   constructor ({ ...args } = {}) {
     super({
       attributeSizes: {
+        // overwriting default for position
         position: [
           // number of values per vertex (3 for vec3)
           3,
@@ -16,8 +17,8 @@ export class LinesController extends BufferGeometryController {
     })
   }
 
-  createMaterial ({ color = '0xffffff', opacity = 0.2 }) {
-    this.material = new LineBasicMaterial({
+  createMaterial ({ color = 'white', opacity = 0.2 }) {
+    return new LineBasicMaterial({
       color,
       opacity,
       transparent: opacity < 1,
