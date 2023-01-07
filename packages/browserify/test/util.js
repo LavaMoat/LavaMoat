@@ -34,7 +34,7 @@ module.exports = {
 }
 
 async function copyFolder(from, to, opts = {skip: []}) {
-  await fs.mkdir(to)
+  await fs.mkdir(to, { recursive: true })
   const elements = await fs.readdir(from)
   for (const element of elements) {
     if (opts.skip.includes(element)) {
