@@ -1,6 +1,6 @@
 import ThreeForceGraph from 'three-forcegraph'
 // import SpriteText from 'three-spritetext';
-import { Object3D, Group } from 'three'
+import { Object3D, Group, SphereGeometry, Mesh } from 'three'
 import { PointsController } from '../points-controller.js'
 import { LinesController } from '../lines-controller.js'
 
@@ -26,12 +26,18 @@ export class FastThreeForceGraph extends Group {
       .nodeThreeObject((node) => {
         pointsController.update(node.id, 'color', colorPallete[node.color] || colorPallete.purple)
         pointsController.update(node.id, 'size', [10 * node.size])
-        // create dummy object
-        return new Object3D()
+        // create dummy object, only used for collision
+        const geometry = new SphereGeometry( 10 * node.size, 3, 2 );
+        const collisionObject = new Mesh( geometry );
+        collisionObject.name = node.id
+        collisionObject.visible = false
+        return collisionObject
       })
       .linkThreeObject((link) => {
-        // create dummy object
-        return new Object3D()
+        // create dummy object, only used to statisy ThreeForceGraph
+        const dummyObject = new Object3D()
+        dummyObject.visible = false
+        return dummyObject
       })
       .linkPositionUpdate((linkObject, { start, end }, link) => {
         pointsController.update(link.source.id, 'translate', [link.source.x, link.source.y, link.source.z])
@@ -40,6 +46,10 @@ export class FastThreeForceGraph extends Group {
         // override link position update
         return true
       })
+    
+    this.graph.visible = false
+    this.collisionObjects = this.graph.children
+
 
     this.add(this.graph)
     this.add(linesController.object)

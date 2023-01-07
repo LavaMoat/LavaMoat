@@ -51,7 +51,7 @@ export default class ScratchPad extends ThreeComponent {
     for (let index = 0; index < 200; index++) {
       const node = {
         id: `${index}`,
-        size: Math.random() * 20 + 5,
+        size: Math.random() * 2 + 0.5,
         color: colors[Math.floor(Math.random() * colors.length)],
       }
       packageData.nodes.push(node)
@@ -96,23 +96,11 @@ export default class ScratchPad extends ThreeComponent {
 
     this.camera.position.set(0, 100, 3)
     this.camera.lookAt(0, 0, 0);
+
   }
 
   animate () {
     this.animateListeners.forEach(listener => listener())
-    // this.graph.scale.multiplyScalar(0.999)
-    // for (let index = 0; index < 1000; index++) {
-    //   const { color, position } = this.data.get(index)
-    //   position[0] += (Math.random() * 2 - 1) * 0.5
-    //   position[1] += (Math.random() * 2 - 1) * 0.5
-    //   position[2] += (Math.random() * 2 - 1) * 0.5
-    //   this.points.update(index, 'position', position)
-    //   // this.points.update(index, 'color', [r, g, b])
-    //   if (index > 0) {
-    //     const prevPoint = this.data.get(index - 1)
-    //     this.lines.update(index, 'position', [...prevPoint.position, ...position])
-    //   }
-    // }
   }
 
 }
