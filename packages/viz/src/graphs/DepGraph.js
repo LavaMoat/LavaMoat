@@ -20,11 +20,11 @@ import {
 } from './utils/utils.js'
 import XrButton from './xr-button.js'
 import { setupScene } from './vr-viz/setupScene.js'
+import { setupSelections } from './vr-viz/setupSelections.js'
 import { FastThreeForceGraph } from './vr-viz/forcegraph.js'
 
 import 'codemirror/theme/material.css'
 
-// const d3 = require('d3')
 
 const lavamoatModes = ['lavamoat', 'without']
 
@@ -327,7 +327,7 @@ class DepGraph extends React.Component {
 
   onVrSessionStart (session) {
     const { packageData } = this.state
-    const { scene, renderer, subscribeTick } = setupScene({ debug: true })
+    const { scene, renderer, subscribeTick, controller1, controller2, setControllerText } = setupScene({ debug: true })
     const scale = 0.001
     const graph = new FastThreeForceGraph({
       graphData: packageData,
@@ -337,6 +337,19 @@ class DepGraph extends React.Component {
     graph.scale.set(scale, scale, scale)
     scene.add(graph)
     subscribeTick(() => graph.tickFrame())
+
+    setupSelections({
+      getIntersectables: () => graph.collisionObjects,
+      onHoverStart: ({ object: { name: nodeId } }, controller) => {
+        setControllerText(controller, `${nodeId}`)
+      },
+      onSelectStart: ({ object: { name: nodeId } }, controller) => {
+        actions.selectPackage(nodeId)
+      },
+      controller1,
+      controller2,
+      subscribeTick
+    })
 
     renderer.xr.setSession(session)
     this.setState({ vrActive: true })

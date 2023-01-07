@@ -1,15 +1,16 @@
-import * as THREE from 'three'
+import { Raycaster, Matrix4 } from "three"
 
-const raycaster = new THREE.Raycaster()
-const intersected = []
-const tempMatrix = new THREE.Matrix4()
+const raycaster = new Raycaster()
+const tempMatrix = new Matrix4()
 /* eslint-disable-next-line no-empty-function */
 const noop = () => {}
 
-export default function setup ({
+export function setupSelections ({
   getIntersectables = () => [],
   onSelectStart = noop,
   onSelectEnd = noop,
+  onHoverStart = noop,
+  onHoverEnd = noop,
   controller1,
   controller2,
   subscribeTick
@@ -21,9 +22,9 @@ export default function setup ({
   subscribeTick(tickHandler)
 
   function tickHandler () {
-    cleanIntersected()
-    intersectObjects(controller1)
-    intersectObjects(controller2)
+    if (onHoverStart === noop && onHoverEnd === noop) return
+    checkHover(controller1)
+    checkHover(controller2)
   }
 
   function testSelectStart (event) {
@@ -34,12 +35,7 @@ export default function setup ({
     }
     const [intersection] = intersections
     controller.userData.selected = intersection
-    onSelectStart(intersection)
-    // const object = intersection.object;
-    // object.material.emissive.b = 1;
-    // controller.userData.prevParent = object.parent
-    // controller.userData.selected = object;
-    // controller.attach(object);
+    onSelectStart(intersection, controller)
   }
 
   function testSelectEnd (event) {
@@ -50,14 +46,7 @@ export default function setup ({
     controller.userData.selected = undefined
     const intersections = getIntersections(controller)
     const [intersection] = intersections
-    onSelectEnd(intersection)
-
-    //   var object = controller.userData.selected;
-    //   object.material.emissive.b = 0;
-    //   controller.userData.prevParent.attach(object)
-    //   controller.userData.prevParent = undefined;
-    //   controller.userData.selected = undefined;
-    // }
+    onSelectEnd(intersection, controller)
   }
 
   function getIntersections (controller) {
@@ -67,28 +56,31 @@ export default function setup ({
     return raycaster.intersectObjects(getIntersectables())
   }
 
-  function intersectObjects (controller) {
-    // Do not highlight when already selected
-    if (controller.userData.selected !== undefined) {
-      return
-    }
+  function checkHover (controller) {
     const line = controller.getObjectByName('line')
     const intersections = getIntersections(controller)
+    const oldHover = controller.userData.hover
+    let newHover
     if (intersections.length > 0) {
+      // set new hover
       const [intersection] = intersections
-      const { object } = intersection
-      object.material.emissive.r = 1
-      intersected.push(object)
+      newHover = intersection
       line.scale.z = intersection.distance
+      controller.userData.hover = intersection
     } else {
+      controller.userData.hover = undefined
       line.scale.z = 5
+    }
+    // no change necesary
+    if (oldHover === newHover) return
+    // clear current hover
+    if (oldHover !== undefined) {
+      onHoverEnd(oldHover, controller)
+    }
+    // add new hover
+    if (newHover !== undefined) {
+      onHoverStart(newHover, controller)
     }
   }
 
-  function cleanIntersected () {
-    while (intersected.length) {
-      const object = intersected.pop()
-      object.material.emissive.r = 0
-    }
-  }
 }

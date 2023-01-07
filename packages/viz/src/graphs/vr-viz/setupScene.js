@@ -1,5 +1,4 @@
 import * as THREE from 'three'
-// import { Group } from 'three'
 import {
   OrbitControls
 } from 'three/examples/jsm/controls/OrbitControls.js'
@@ -7,15 +6,12 @@ import {
   XRControllerModelFactory
 } from 'three/examples/jsm/webxr/XRControllerModelFactory.js'
 import StatsVR from 'statsvr'
-import setupSelections from './setupSelections.js'
 
 let container
 let camera, scene, renderer
 let controller1, controller2
 let controllerGrip1, controllerGrip2
 
-const intersectables = []
-// let getIntersectables = () => intersectables
 let controls
 let statsVR
 
@@ -38,23 +34,10 @@ export function setupScene ({ debug = false } = {}) {
     controllerGrip1,
     controllerGrip2,
     controls,
-    subscribeTick
+    subscribeTick,
+    setControllerText,
   }
 }
-
-// export function setupGraph ({ scene, graph, linesController, pointsController, subscribeTick }) {
-//   const scale = 0.001
-//   const group = new Group()
-//   group.scale.set(scale, scale, scale)
-//   group.position.set(0, 1.5, 0)
-//   group.add(graph)
-//   group.add(linesController.object)
-//   group.add(pointsController.object)
-//   scene.add(group)
-//   subscribeTick(() => graph.tickFrame())
-//   intersectables = graph.children.filter(child => child.__graphObjType === 'node')
-//   return { graph }
-// }
 
 function init ({ debug }) {
   container = document.createElement('div')
@@ -110,25 +93,19 @@ function init ({ debug }) {
   controllerGrip2.add(controllerModelFactory.createControllerModel(controllerGrip2))
   scene.add(controllerGrip2)
 
-  //
-
   const geometry = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, -1)])
-
   const line = new THREE.Line(geometry)
   line.name = 'line'
   line.scale.z = 5
-
-  setupSelections({
-    getIntersectables: () => intersectables,
-    // onSelectStart = noop,
-    // onSelectEnd = noop,
-    controller1,
-    controller2,
-    subscribeTick
-  })
-
   controller1.add(line.clone())
   controller2.add(line.clone())
+
+  const textMesh1 = createTextMesh('', { width: 800, height: 80, geoScale: 1/800 })
+  controller1.add(textMesh1)
+  textMesh1.position.y -= 0.15
+  const textMesh2 = createTextMesh('', { width: 800, height: 80, geoScale: 1/800 })
+  controller2.add(textMesh2)
+  textMesh2.position.y -= 0.15
 
   // fps monitor
   if (debug) {
@@ -137,6 +114,42 @@ function init ({ debug }) {
   }
 
   window.addEventListener('resize', onWindowResize, false)
+}
+
+function setControllerText (controller, text) {
+  controller.getObjectByName('text').updateText(text)
+}
+
+function createTextMesh (text = '', opts = {}) {
+  const { width = 200, height = 40, geoScale = 1/400 } = opts
+  const textMesh = new THREE.Mesh(
+    new THREE.PlaneGeometry( width * geoScale, height * geoScale ),
+    new THREE.MeshBasicMaterial({
+      map: createTextTexture(text)
+    })
+  );
+  textMesh.name = 'text'
+
+  textMesh.updateText = (text) => {
+    textMesh.material.map = createTextTexture(text, opts)
+  }
+
+  return textMesh
+}        
+
+function createTextTexture (text = '', opts = {}) {
+  const { width = 200, height = 40 } = opts
+  const textCanvas = document.createElement( 'canvas' );
+  textCanvas.width = width;
+  textCanvas.height = height;
+  const textContext = textCanvas.getContext( '2d' );
+  textContext.fillStyle = '#000000';
+  textContext.fillRect( 0, 0, textCanvas.width, textCanvas.height );
+  textContext.fillStyle = '#FFFFFF';
+  textContext.font = '14px sans-serif';
+  textContext.fillText( text, 10, 30 );
+  const textTexture = new THREE.CanvasTexture( textCanvas )
+  return textTexture
 }
 
 function onWindowResize () {
