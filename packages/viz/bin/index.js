@@ -115,7 +115,6 @@ async function generateViz (args) {
   // write each policy data injection
   const policyDataInjectionFilePaths = await Promise.all(policyNames.map(async (policyName) => {
     const policyFilePathsForProject = policyFilePaths[policyName] || {}
-    console.log(policyName, policyFilePaths, policyFilePathsForProject)
     return await createPolicyDataInjectionFile({ policyName, fullDest, policyFilePathsForProject })
   }))
   // add data-injection file
