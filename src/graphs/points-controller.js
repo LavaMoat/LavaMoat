@@ -61,14 +61,14 @@ export class PointsController extends InstancedBufferGeometryController {
         color: [3, 1],
         size: [1, 1],
       },
-      ...args
+      ...args,
     })
-    const circleGeometry = new CircleGeometry( 1, 6 );
-    this.geometry.index = circleGeometry.index;
+    const circleGeometry = new CircleGeometry( 1, 6 )
+    this.geometry.index = circleGeometry.index
     // copy circle geometry attributes
-    this.geometry.setAttribute('position', circleGeometry.attributes.position);
-		this.geometry.setAttribute('normal', circleGeometry.attributes.normal);
-		this.geometry.setAttribute('uv', circleGeometry.attributes.uv);
+    this.geometry.setAttribute('position', circleGeometry.attributes.position)
+    this.geometry.setAttribute('normal', circleGeometry.attributes.normal)
+    this.geometry.setAttribute('uv', circleGeometry.attributes.uv)
   }
 
   createMaterial () {
@@ -80,11 +80,11 @@ export class PointsController extends InstancedBufferGeometryController {
       fragmentShader: fragmentShader2,
       depthTest: true,
       depthWrite: true,
-    });
+    })
   }
 
   createObject (geometry, material) {
-    const mesh = new Mesh( geometry, material );
+    const mesh = new Mesh( geometry, material )
     return mesh
   }
 }

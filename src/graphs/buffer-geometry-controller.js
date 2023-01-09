@@ -12,9 +12,9 @@ export class BufferGeometryController {
         // number of values per vertex
         3,
         // number of vertices per item
-        1
+        1,
       ],
-      ...attributeSizes
+      ...attributeSizes,
     }
     this.setCapacity(capacity)
   }
@@ -78,12 +78,12 @@ export class InstancedBufferGeometryController {
         // number of values per vertex
         3,
         // number of vertices per item
-        1
+        1,
       ],
-      ...attributeSizes
+      ...attributeSizes,
     }
     this.instancedAttributeSizes = {
-      ...instancedAttributeSizes
+      ...instancedAttributeSizes,
     }
     this.setCapacity(capacity)
   }

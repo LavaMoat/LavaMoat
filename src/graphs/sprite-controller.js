@@ -90,9 +90,9 @@ export class PointsController extends BufferGeometryController {
       attributeSizes: {
         color: [3, 1],
         // scale: [1, 1],
-        size: [1, 1]
+        size: [1, 1],
       },
-      ...args
+      ...args,
     })
   }
 
@@ -100,7 +100,7 @@ export class PointsController extends BufferGeometryController {
     const mat = new PointsMaterial({
       size,
       sizeAttenuation: true,
-      vertexColors: true
+      vertexColors: true,
     })
     mat.onBeforeCompile = ( shader, renderer ) => {
       debugger
