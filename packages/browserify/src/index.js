@@ -111,7 +111,6 @@ function getConfigurationFromPluginOpts (pluginOpts) {
     pr: 'includePrelude',
     prelude: 'includePrelude',
     pp: 'prunePolicy',
-    prunepolicy: 'prunePolicy',
     d: 'debugMode',
     debug: 'debugMode',
     stats: 'statsMode',
@@ -172,8 +171,8 @@ function getConfigurationFromPluginOpts (pluginOpts) {
     configuration.actionOverrides.writeAutoPolicy = pluginOpts.writeAutoPolicy
   }
   if (typeof pluginOpts.policy === 'object') {
-    const configFromPluginOpts = pluginOpts.policy
-    configuration.actionOverrides.loadPrimaryPolicy = () => configFromPluginOpts
+    const policyFromPluginOpts = pluginOpts.policy
+    configuration.actionOverrides.loadPrimaryPolicy = () => policyFromPluginOpts
     delete pluginOpts.policy
   }
 
