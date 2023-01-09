@@ -16,7 +16,6 @@ import {
   getColorForRank,
   getLineNumbersForGlobals,
   getEnvConfigForPolicyName,
-
 } from './utils/utils.js'
 import XrButton from './xr-button.js'
 import { setupScene } from './vr-viz/setupScene.js'
@@ -223,24 +222,9 @@ class DepGraph extends React.Component {
 
     let sortedPackages = []
     let sortedModules = []
-    // let selectedNodeLabel
-    // let selectedNodeData
     let sourceButtonStyle
     let helpMessage
 
-    // if (selectedPackage) {
-    //   selectedNodeLabel = selectedPackage.id
-    //   selectedNodeData = 'funky town'
-    //   // if (packageModulesMode && !isNaN(selectedNode.id) && selectedNode.id in packageModules) {
-
-    //   //   selectedNodeData = JSON.stringify(packageModules[selectedNode.id].globalUsage, null, 2) || null
-    //   // } else {
-    //   //   selectedNodeData = selectedNode.configLabel
-    //   // }
-    // } else {
-    //   selectedNodeLabel = 'select a node'
-    //   selectedNodeData = ''
-    // }
     if (!packageModulesMode || !selectedModule) {
       sourceButtonStyle = { display: 'none' }
     }
