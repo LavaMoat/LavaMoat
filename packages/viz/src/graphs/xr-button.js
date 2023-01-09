@@ -9,7 +9,7 @@ export default class XrButton extends React.Component {
     this.currentSession = null
     this.state = {
       supportsXr: 'xr' in navigator,
-      supportsImmersiveVr: undefined
+      supportsImmersiveVr: undefined,
     }
   }
 
@@ -52,7 +52,7 @@ export default class XrButton extends React.Component {
   render () {
     const {
       supportsXr,
-      supportsImmersiveVr
+      supportsImmersiveVr,
     } = this.state
     const showButton = supportsXr && supportsImmersiveVr
 
@@ -63,7 +63,7 @@ export default class XrButton extends React.Component {
         disabled={!showButton}
         style={{
           cursor: 'pointer',
-          width: '100px'
+          width: '100px',
         }}
       >
         VR

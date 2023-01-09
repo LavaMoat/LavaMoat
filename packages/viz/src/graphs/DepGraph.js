@@ -15,7 +15,7 @@ import {
   sortIntelligently,
   getColorForRank,
   getLineNumbersForGlobals,
-  getEnvConfigForPolicyName
+  getEnvConfigForPolicyName,
 
 } from './utils/utils.js'
 import XrButton from './xr-button.js'
@@ -46,7 +46,7 @@ class DepGraph extends React.Component {
       showPackageSize: false,
       selectionLocked: false,
       hiddenPackages: [],
-      vrActive: false
+      vrActive: false,
     }
   }
 
@@ -80,7 +80,7 @@ class DepGraph extends React.Component {
 
   updateGraph (policyData, state, newProps) {
     const {
-      packageData
+      packageData,
       // packageModules,
       // packageModulesMode,
     } = state
@@ -152,7 +152,7 @@ class DepGraph extends React.Component {
       selectedModule,
       selectionLocked,
       hiddenPackages,
-      vrActive
+      vrActive,
     } = this.state
 
     const actions = {
@@ -168,7 +168,7 @@ class DepGraph extends React.Component {
           newSelection = policyData.debug.debugInfo[moduleSpecifier].moduleRecord
         }
         this.setState({
-          selectedModule: newSelection
+          selectedModule: newSelection,
         })
       },
       selectPackage: (packageId) => {
@@ -177,7 +177,7 @@ class DepGraph extends React.Component {
             selectedPackage: null,
             selectedModule: null,
 
-            packageModulesMode: false
+            packageModulesMode: false,
           })
         } else {
           const newSelection = packages[packageId]
@@ -186,7 +186,7 @@ class DepGraph extends React.Component {
             selectedPackage: newSelection,
             selectedModule: null,
             packageModulesMode: true,
-            packageModules: modules
+            packageModules: modules,
           }
           this.setStateAndUpdateGraph(newState)
         }
@@ -210,14 +210,14 @@ class DepGraph extends React.Component {
         const isHidden = hiddenPackages.includes(packageId)
         if (isHidden) {
           this.setStateAndUpdateGraph({
-            hiddenPackages: hiddenPackages.filter((id) => id !== packageId)
+            hiddenPackages: hiddenPackages.filter((id) => id !== packageId),
           })
         } else {
           this.setStateAndUpdateGraph({
-            hiddenPackages: [...hiddenPackages, packageId]
+            hiddenPackages: [...hiddenPackages, packageId],
           })
         }
-      }
+      },
     }
     const graphData = packageData
 
@@ -331,7 +331,7 @@ class DepGraph extends React.Component {
     const scale = 0.001
     const graph = new FastThreeForceGraph({
       graphData: packageData,
-      nodeOpts: { size: 100 * scale }
+      nodeOpts: { size: 100 * scale },
     })
     graph.position.set(0, 1, -1)
     graph.scale.set(scale, scale, scale)
@@ -348,7 +348,7 @@ class DepGraph extends React.Component {
       },
       controller1,
       controller2,
-      subscribeTick
+      subscribeTick,
     })
 
     renderer.xr.setSession(session)
@@ -403,7 +403,7 @@ class DepGraph extends React.Component {
             {JSON.stringify(moduleDisplayInfo, null, 2)}
           </pre>
         </div>
-        )
+      )
     return component
   }
 
@@ -445,7 +445,7 @@ class DepGraph extends React.Component {
           } else {
             selectedLineIndex += 1
           }
-        }
+        },
       })
     }
     return (
@@ -453,7 +453,7 @@ class DepGraph extends React.Component {
         value={source}
         options={{
           mode: 'javascript',
-          readOnly: true
+          readOnly: true,
         }}
         editorDidMount={(editor) => {
           this.setState({ codeMirror: editor })

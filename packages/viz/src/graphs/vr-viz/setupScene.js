@@ -1,9 +1,9 @@
 import * as THREE from 'three'
 import {
-  OrbitControls
+  OrbitControls,
 } from 'three/examples/jsm/controls/OrbitControls.js'
 import {
-  XRControllerModelFactory
+  XRControllerModelFactory,
 } from 'three/examples/jsm/webxr/XRControllerModelFactory.js'
 import StatsVR from 'statsvr'
 
@@ -68,7 +68,7 @@ function init ({ debug }) {
   //
 
   renderer = new THREE.WebGLRenderer({
-    antialias: true
+    antialias: true,
   })
   renderer.setPixelRatio(window.devicePixelRatio)
   renderer.setSize(window.innerWidth, window.innerHeight)
@@ -125,9 +125,9 @@ function createTextMesh (text = '', opts = {}) {
   const textMesh = new THREE.Mesh(
     new THREE.PlaneGeometry( width * geoScale, height * geoScale ),
     new THREE.MeshBasicMaterial({
-      map: createTextTexture(text)
-    })
-  );
+      map: createTextTexture(text),
+    }),
+  )
   textMesh.name = 'text'
 
   textMesh.updateText = (text) => {
@@ -139,15 +139,15 @@ function createTextMesh (text = '', opts = {}) {
 
 function createTextTexture (text = '', opts = {}) {
   const { width = 200, height = 40 } = opts
-  const textCanvas = document.createElement( 'canvas' );
-  textCanvas.width = width;
-  textCanvas.height = height;
-  const textContext = textCanvas.getContext( '2d' );
-  textContext.fillStyle = '#000000';
-  textContext.fillRect( 0, 0, textCanvas.width, textCanvas.height );
-  textContext.fillStyle = '#FFFFFF';
-  textContext.font = '14px sans-serif';
-  textContext.fillText( text, 10, 30 );
+  const textCanvas = document.createElement( 'canvas' )
+  textCanvas.width = width
+  textCanvas.height = height
+  const textContext = textCanvas.getContext( '2d' )
+  textContext.fillStyle = '#000000'
+  textContext.fillRect( 0, 0, textCanvas.width, textCanvas.height )
+  textContext.fillStyle = '#FFFFFF'
+  textContext.font = '14px sans-serif'
+  textContext.fillText( text, 10, 30 )
   const textTexture = new THREE.CanvasTexture( textCanvas )
   return textTexture
 }

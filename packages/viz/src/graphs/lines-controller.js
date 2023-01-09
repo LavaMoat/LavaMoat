@@ -10,10 +10,10 @@ export class LinesController extends BufferGeometryController {
           // number of values per vertex (3 for vec3)
           3,
           // number of vertices per item (start and end = 2)
-          2
-        ]
+          2,
+        ],
       },
-      ...args
+      ...args,
     })
   }
 
@@ -22,7 +22,7 @@ export class LinesController extends BufferGeometryController {
       color,
       opacity,
       transparent: opacity < 1,
-      depthWrite: opacity >= 1
+      depthWrite: opacity >= 1,
     })
   }
 

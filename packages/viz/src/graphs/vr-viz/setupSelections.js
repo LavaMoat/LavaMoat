@@ -1,4 +1,4 @@
-import { Raycaster, Matrix4 } from "three"
+import { Raycaster, Matrix4 } from 'three'
 
 const raycaster = new Raycaster()
 const tempMatrix = new Matrix4()
@@ -13,7 +13,7 @@ export function setupSelections ({
   onHoverEnd = noop,
   controller1,
   controller2,
-  subscribeTick
+  subscribeTick,
 }) {
   controller1.addEventListener('selectstart', testSelectStart)
   controller1.addEventListener('selectend', testSelectEnd)
@@ -22,7 +22,9 @@ export function setupSelections ({
   subscribeTick(tickHandler)
 
   function tickHandler () {
-    if (onHoverStart === noop && onHoverEnd === noop) return
+    if (onHoverStart === noop && onHoverEnd === noop) {
+      return
+    }
     checkHover(controller1)
     checkHover(controller2)
   }
@@ -72,7 +74,9 @@ export function setupSelections ({
       line.scale.z = 5
     }
     // no change necesary
-    if (oldHover === newHover) return
+    if (oldHover === newHover) {
+      return
+    }
     // clear current hover
     if (oldHover !== undefined) {
       onHoverEnd(oldHover, controller)

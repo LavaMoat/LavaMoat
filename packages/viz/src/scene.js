@@ -1,6 +1,6 @@
 // import { Object3D } from 'three';
 // import ThreeForceGraph from 'three-forcegraph'
-import ThreeComponent from './three-component';
+import ThreeComponent from './three-component.js'
 // import { PointsController } from './graphs/points-controller';
 // import { LinesController } from './graphs/lines-controller';
 // import { setupScene, setupGraph } from './graphs/vr-viz/setupScene.js'
@@ -38,7 +38,7 @@ export default class ScratchPad extends ThreeComponent {
     // }
 
     const packageData = {
-      nodes: [], links: []
+      nodes: [], links: [],
     }
     const colors = [
       'purple',
@@ -59,10 +59,10 @@ export default class ScratchPad extends ThreeComponent {
       const offset = Math.floor(Math.random() * packageData.nodes.length)
       new Set(
         Array(3).fill()
-        .map((_, index) => {
-          return packageData.nodes[(offset + index) % packageData.nodes.length]
-        })
-        .filter(pair => pair.id !== node.id)
+          .map((_, index) => {
+            return packageData.nodes[(offset + index) % packageData.nodes.length]
+          })
+          .filter(pair => pair.id !== node.id),
       ).forEach(pair => {
         const link = {
           id: `${node.id}-${pair.id}`,
@@ -89,13 +89,13 @@ export default class ScratchPad extends ThreeComponent {
       graph.tickFrame()
     })
 
-    const controls = new OrbitControls( this.camera, this.renderer.domElement );
+    const controls = new OrbitControls( this.camera, this.renderer.domElement )
     subscribeTick(() => {
-      controls.update();
+      controls.update()
     })
 
     this.camera.position.set(0, 100, 3)
-    this.camera.lookAt(0, 0, 0);
+    this.camera.lookAt(0, 0, 0)
 
   }
 

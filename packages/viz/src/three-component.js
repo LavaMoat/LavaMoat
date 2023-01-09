@@ -1,13 +1,13 @@
-import React from 'react';
-import * as THREE from 'three';
+import React from 'react'
+import * as THREE from 'three'
 // import {
 //   OrbitControls
 // } from 'three/examples/jsm/controls/OrbitControls.js'
 
 export default class ThreeComponent extends React.Component {
   constructor(props) {
-    super(props);
-    this.canvasRef = React.createRef();
+    super(props)
+    this.canvasRef = React.createRef()
     // this.scene = new THREE.Scene();
 
     // const { innerWidth, innerHeight } = window;
@@ -42,52 +42,52 @@ export default class ThreeComponent extends React.Component {
 
   // ******************* COMPONENT LIFECYCLE ******************* //
   componentDidMount() {
-      // Get canvas, pass to custom class
-      this.canvas = this.canvasRef.current;
+    // Get canvas, pass to custom class
+    this.canvas = this.canvasRef.current
 
-      var scene = new THREE.Scene();
-      var camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
-      var renderer = new THREE.WebGLRenderer({
-        canvas: this.canvas,
-      });
-      renderer.setSize( window.innerWidth, window.innerHeight );
-      // var geometry = new THREE.BoxGeometry( 1, 1, 1 );
-      // var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
-      // var cube = new THREE.Mesh( geometry, material );
-      // scene.add( cube );
-      camera.position.z = -5;
-      camera.lookAt(0, 0, 0);
-      var animate = () => {
-        requestAnimationFrame( animate );
-        // cube.rotation.x += 0.01;
-        // cube.rotation.y += 0.01;
-        this.animate()
-        renderer.render( scene, camera );
-      };
-      requestAnimationFrame( animate );
+    var scene = new THREE.Scene()
+    var camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 )
+    var renderer = new THREE.WebGLRenderer({
+      canvas: this.canvas,
+    })
+    renderer.setSize( window.innerWidth, window.innerHeight )
+    // var geometry = new THREE.BoxGeometry( 1, 1, 1 );
+    // var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+    // var cube = new THREE.Mesh( geometry, material );
+    // scene.add( cube );
+    camera.position.z = -5
+    camera.lookAt(0, 0, 0)
+    var animate = () => {
+      requestAnimationFrame( animate )
+      // cube.rotation.x += 0.01;
+      // cube.rotation.y += 0.01;
+      this.animate()
+      renderer.render( scene, camera )
+    }
+    requestAnimationFrame( animate )
 
-      this.scene = scene
-      this.renderer = renderer
-      this.camera = camera
-      globalThis.scene = scene
+    this.scene = scene
+    this.renderer = renderer
+    this.camera = camera
+    globalThis.scene = scene
 
-      // Init any event listeners
-      this.onMouseMove = this.onMouseMove.bind(this);
-      window.addEventListener('mousemove', this.onMouseMove);
-      this.onWindowResize = this.onWindowResize.bind(this);
-      window.addEventListener('resize', this.onWindowResize);
+    // Init any event listeners
+    this.onMouseMove = this.onMouseMove.bind(this)
+    window.addEventListener('mousemove', this.onMouseMove)
+    this.onWindowResize = this.onWindowResize.bind(this)
+    window.addEventListener('resize', this.onWindowResize)
   }
 
   componentDidUpdate(prevProps, prevState) {
-      // Pass updated props to 
-      const newValue = this.props.whateverProperty;
-      this.updateValue(newValue);
+    // Pass updated props to 
+    const newValue = this.props.whateverProperty
+    this.updateValue(newValue)
   }
 
   componentWillUnmount() {
-      // Remove any event listeners
-      window.removeEventListener('mousemove', () => this.onMouseMove);
-      window.removeEventListener('resize', this.onWindowResize);
+    // Remove any event listeners
+    window.removeEventListener('mousemove', () => this.onMouseMove)
+    window.removeEventListener('resize', this.onWindowResize)
   }
 
   // ******************* EVENT LISTENERS ******************* //
@@ -96,8 +96,8 @@ export default class ThreeComponent extends React.Component {
   }
 
   onWindowResize () {
-    const { innerWidth, innerHeight } = window;
-    this.renderer.setSize(innerWidth, innerHeight);
+    const { innerWidth, innerHeight } = window
+    this.renderer.setSize(innerWidth, innerHeight)
   }
 
   updateValue (value) {
@@ -121,8 +121,8 @@ export default class ThreeComponent extends React.Component {
           left: 0,
           width: '100vw',
           height: '100vh',
-      }}/>
+        }}/>
       </div>
-    );
+    )
   }
 }

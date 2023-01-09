@@ -13,7 +13,7 @@ export class FastThreeForceGraph extends Group {
       green: [0, 0x80 / 255, 0],
       orange: [1, 0xa5 / 255, 0],
       brown: [0xa5 / 255, 0x2a / 255, 0x2a / 255],
-      red: [1, 0, 0]
+      red: [1, 0, 0],
     }
     const linkCount = graphData.links.length
     const nodeCount = graphData.nodes.length
@@ -27,8 +27,8 @@ export class FastThreeForceGraph extends Group {
         pointsController.update(node.id, 'color', colorPallete[node.color] || colorPallete.purple)
         pointsController.update(node.id, 'size', [10 * node.size])
         // create dummy object, only used for collision
-        const geometry = new SphereGeometry( 10 * node.size, 3, 2 );
-        const collisionObject = new Mesh( geometry );
+        const geometry = new SphereGeometry( 10 * node.size, 3, 2 )
+        const collisionObject = new Mesh( geometry )
         collisionObject.name = node.id
         collisionObject.visible = false
         return collisionObject
