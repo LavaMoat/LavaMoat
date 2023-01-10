@@ -61,8 +61,7 @@ function parseConfigDebugForPackages (policyName, policyDebugData, policyFinal) 
       packageData.policy = resources[packageData.id] || {}
     }
     // add total code size from module
-    const { size } = moduleRecord
-    packageData.size += size
+    packageData.size += moduleRecord.content.length
     // add package-relative file path
     moduleRecord.fileSimple = fullModuleNameFromPath(moduleRecord.file)
     // add module / package refs
@@ -93,36 +92,40 @@ function createGraph (packages, policyFinal, {
   selectedNode,
   hiddenPackages,
   // packageModulesMode,
-  // showPackageSize,
+  showPackageSize = true,
 }) {
   const nodes = []
   const links = []
   // for each module, create node and links
   Object.entries(packages).forEach(([_, packageData]) => {
     const { importMap } = packageData
-    const parentId = packageData.id
+    const packageId = packageData.id
     // skip hidden packages
-    if (hiddenPackages.includes(parentId)) return
-    // const size = showPackageSize ? getNodeSize(source) : 2
+    if (hiddenPackages.includes(packageId)) {
+      return
+    }
+    const size = showPackageSize ? radiusFromArea(packageData.size)/8 : 2
     const isLavamoat = lavamoatMode === 'lavamoat'
-    const label = packageData.isRoot ? '(root)' : parentId
+    const label = packageData.isRoot ? '(root)' : packageId
     const lavamoatColor = packageData.isRoot ? 'purple' : getColorForRank(packageData.dangerRank)
     const color = isLavamoat ? lavamoatColor : 'red'
     // create node for modules
     nodes.push(
-      createNode({ id: parentId, val: 2, label, color }),
+      createNode({ id: packageId, val: 2, label, color, size }),
     )
     const selectedNodeId = selectedNode && selectedNode.id
 
     // create links for deps
     Object.keys(importMap).forEach((depName) => {
       const childId = String(importMap[depName])
-      if (hiddenPackages.includes(childId)) return
+      if (hiddenPackages.includes(childId)) {
+        return
+      }
 
       let width
       let linkColor
 
-      if (parentId === selectedNodeId) {
+      if (packageId === selectedNodeId) {
         width = 3
         linkColor = 'green'
       }
@@ -133,7 +136,7 @@ function createGraph (packages, policyFinal, {
       }
 
       links.push(
-        createLink({ color: linkColor, width, source: parentId, target: childId }),
+        createLink({ color: linkColor, width, source: packageId, target: childId }),
       )
     })
   })
@@ -251,6 +254,10 @@ function createNode (params) {
     ...params,
   }
   return node
+}
+
+function radiusFromArea (area) {
+  return Math.sqrt(area / Math.PI)
 }
 
 function fullModuleNameFromPath (file) {
