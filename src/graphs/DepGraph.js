@@ -42,7 +42,7 @@ class DepGraph extends React.Component {
       selectedModule: null,
       viewSource: false,
       lavamoatMode: lavamoatModes[0],
-      showPackageSize: false,
+      showPackageSize: true,
       selectionLocked: false,
       hiddenPackages: [],
       vrActive: false,
@@ -311,7 +311,7 @@ class DepGraph extends React.Component {
 
   onVrSessionStart (session) {
     const { packageData } = this.state
-    const { scene, renderer, subscribeTick, controller1, controller2, setControllerText } = setupScene({ debug: true })
+    const { scene, renderer, subscribeTick, controller1, controller2, setControllerText } = setupScene({})
     const scale = 0.001
     const graph = new FastThreeForceGraph({
       graphData: packageData,
