@@ -26,6 +26,9 @@ async function buildRuntimeES (opts) {
   // inline reportStatsHook
   const statsCode = `(${makeInitStatsHook})({ onStatsReady })`
   output = stringReplace(output, '__reportStatsHook__', statsCode)
+  // inline snow
+  const snow = await readFile(pathJoin(__dirname, '../../../node_modules/@lavamoat/snow/snow.js'), 'utf8')
+  output = replaceTemplateRequire(output, 'snow', snow)
   output = markAsGenerated(output, 'runtime-template.js')
   await writeFile(pathJoin(__dirname, 'runtime.js'), output)
 }

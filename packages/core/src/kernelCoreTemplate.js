@@ -73,6 +73,7 @@
     const { getEndowmentsForConfig, makeMinimalViewOfRef, applyEndowmentPropDescTransforms } = templateRequire('makeGetEndowmentsForConfig')(generalUtils)
     const { prepareCompartmentGlobalFromConfig } = templateRequire('makePrepareRealmGlobalFromConfig')(generalUtils)
     const { strictScopeTerminator } = templateRequire('strict-scope-terminator')
+    const snow = templateRequire('snow')
 
     const moduleCache = new Map()
     const packageCompartmentCache = new Map()
@@ -97,7 +98,7 @@
         const flags = parts[parts.length - 1]
         scuttleGlobalThisExceptions[i] = new RegExp(pattern, flags)
       }
-      performScuttleGlobalThis(globalRef, scuttleGlobalThisExceptions)
+      snow(w => performScuttleGlobalThis(w, scuttleGlobalThisExceptions))
     }
 
     const kernel = {
