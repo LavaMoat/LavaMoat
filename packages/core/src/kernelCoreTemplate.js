@@ -86,6 +86,17 @@
       if (!Array.isArray(scuttleGlobalThisExceptions)) {
         throw new Error(`LavaMoat - scuttleGlobalThisExceptions must be an array, got "${typeof scuttleGlobalThisExceptions}"`)
       }
+      // turn scuttleGlobalThisExceptions regexes strings to actual regexes
+      for (let i = 0; i < scuttleGlobalThisExceptions.length; i++) {
+        const prop = scuttleGlobalThisExceptions[i]
+        if (!prop.startsWith('/')) {
+          continue
+        }
+        const parts = prop.split('/')
+        const pattern = parts.slice(1, -1).join('/')
+        const flags = parts[parts.length - 1]
+        scuttleGlobalThisExceptions[i] = new RegExp(pattern, flags)
+      }
       performScuttleGlobalThis(globalRef, scuttleGlobalThisExceptions)
     }
 
@@ -104,17 +115,6 @@
       getPrototypeChain(globalRef)
         .forEach(proto =>
           props.push(...Object.getOwnPropertyNames(proto)))
-
-      for (let i = 0; i < extraPropsToAvoid.length; i++) {
-        const prop = extraPropsToAvoid[i]
-        if (!prop.startsWith('/')) {
-          continue
-        }
-        const parts = prop.split('/')
-        const pattern = parts.slice(1, -1).join('/')
-        const flags = parts[parts.length - 1]
-        extraPropsToAvoid[i] = new RegExp(pattern, flags)
-      }
 
       // support LM,SES exported APIs and polyfills
       const avoidForLavaMoatCompatibility = ['Compartment', 'Error', 'globalThis']
