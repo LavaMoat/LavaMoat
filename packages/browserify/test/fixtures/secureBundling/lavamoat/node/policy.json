@@ -84,6 +84,7 @@
       },
       "globals": {
         "__dirname": true,
+        "__filename.slice": true,
         "process.cwd": true,
         "setTimeout": true
       },
@@ -546,8 +547,8 @@
         "depcheck>@babel/traverse>@babel/helper-split-export-declaration": true,
         "depcheck>@babel/traverse>@babel/parser": true,
         "depcheck>@babel/traverse>@babel/types": true,
-        "depcheck>@babel/traverse>globals": true,
-        "depcheck>debug": true
+        "depcheck>@babel/traverse>debug": true,
+        "depcheck>@babel/traverse>globals": true
       }
     },
     "depcheck>@babel/traverse>@babel/generator": {
@@ -609,7 +610,7 @@
         "depcheck>@babel/traverse>@babel/types>to-fast-properties": true
       }
     },
-    "depcheck>debug": {
+    "depcheck>@babel/traverse>debug": {
       "builtin": {
         "tty.isatty": true,
         "util.deprecate": true,
@@ -625,7 +626,7 @@
       },
       "packages": {
         "@babel/code-frame>@babel/highlight>chalk>supports-color": true,
-        "depcheck>debug>ms": true
+        "depcheck>@babel/traverse>debug>ms": true
       }
     },
     "depcheck>is-core-module": {

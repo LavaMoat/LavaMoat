@@ -111,10 +111,12 @@ function getConfigurationFromPluginOpts (pluginOpts) {
     pr: 'includePrelude',
     prelude: 'includePrelude',
     pp: 'prunePolicy',
+    prunepolicy: 'prunePolicy',
     d: 'debugMode',
     debug: 'debugMode',
     stats: 'statsMode',
     pn: 'policyName',
+    projectRoot: 'projectRoot',
     r: 'projectRoot',
   }
 
@@ -122,8 +124,6 @@ function getConfigurationFromPluginOpts (pluginOpts) {
     'scuttleGlobalThis',
     'scuttleGlobalThisExceptions',
     'bundleWithPrecompiledModules',
-    'policyDebug',
-    'projectRoot',
   ]
 
   const allowedKeys = new Set([
@@ -171,8 +171,8 @@ function getConfigurationFromPluginOpts (pluginOpts) {
     configuration.actionOverrides.writeAutoPolicy = pluginOpts.writeAutoPolicy
   }
   if (typeof pluginOpts.policy === 'object') {
-    const policyFromPluginOpts = pluginOpts.policy
-    configuration.actionOverrides.loadPrimaryPolicy = () => policyFromPluginOpts
+    const configFromPluginOpts = pluginOpts.policy
+    configuration.actionOverrides.loadPrimaryPolicy = () => configFromPluginOpts
     delete pluginOpts.policy
   }
 
@@ -240,13 +240,13 @@ function loadPolicy (configuration) {
 }
 
 function getPolicyPaths (pluginOpts) {
-  const { projectRoot, policy, policyOverride, policyDebug, policyName } = pluginOpts
+  const { projectRoot, policy, policyOverride, configDebug, policyName } = pluginOpts
   const defaultPaths = getDefaultPaths(policyName)
   const { primary, override, debug } = defaultPaths
   return {
     primary: policy || path.resolve(projectRoot, primary),
     override: policyOverride || path.resolve(projectRoot, override),
-    debug: policyDebug || path.resolve(projectRoot, debug),
+    debug: configDebug || path.resolve(projectRoot, debug),
   }
 }
 
