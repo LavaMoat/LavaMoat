@@ -8,6 +8,7 @@ export class FastThreeForceGraph extends Group {
   constructor ({ graphData = { node: [], links: [] }, nodeOpts = {}, linkOpts = {} } = {}) {
     super()
 
+    const sizeScaling = 1
     const colorPallete = {
       purple: [0x80 / 255, 0, 0x80 / 255],
       green: [0, 0x80 / 255, 0],
@@ -25,9 +26,9 @@ export class FastThreeForceGraph extends Group {
       .graphData(graphData)
       .nodeThreeObject((node) => {
         pointsController.update(node.id, 'color', colorPallete[node.color] || colorPallete.purple)
-        pointsController.update(node.id, 'size', [10 * node.size])
+        pointsController.update(node.id, 'size', [sizeScaling * node.size])
         // create dummy object, only used for collision
-        const geometry = new SphereGeometry( 10 * node.size, 3, 2 )
+        const geometry = new SphereGeometry( sizeScaling * node.size, 3, 2 )
         const collisionObject = new Mesh( geometry )
         collisionObject.name = node.id
         collisionObject.visible = false

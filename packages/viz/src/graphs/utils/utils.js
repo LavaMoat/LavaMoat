@@ -104,7 +104,8 @@ function createGraph (packages, policyFinal, {
     if (hiddenPackages.includes(packageId)) {
       return
     }
-    const size = showPackageSize ? radiusFromArea(packageData.size)/8 : 2
+    const sizeScaling = 1/16
+    const size = showPackageSize ? (sizeScaling * radiusFromArea(packageData.size)) : 2
     const isLavamoat = lavamoatMode === 'lavamoat'
     const label = packageData.isRoot ? '(root)' : packageId
     const lavamoatColor = packageData.isRoot ? 'purple' : getColorForRank(packageData.dangerRank)
