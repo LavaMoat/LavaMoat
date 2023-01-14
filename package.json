@@ -1,5 +1,5 @@
 {
-  "name": "lavamoat",
+  "name": "lavamoat-monorepo",
   "private": true,
   "devDependencies": {
     "@metamask/eslint-config-nodejs": "^10.0.0",

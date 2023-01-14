@@ -35,13 +35,13 @@ export const bifyEnvConfig = {
   },
 }
 
-function parseConfigDebugForPackages (policyName, configDebugData, configFinal) {
-  // const { resources } = configDebugData
+function parseConfigDebugForPackages (policyName, policyDebugData, policyFinal) {
+  // const { resources } = policyDebugData
   // const nodes = [], links = []
   const packages = {}
   const envConfig = getEnvConfigForPolicyName(policyName)
-  const { debugInfo } = configDebugData
-  const { resources } = configFinal
+  const { debugInfo } = policyDebugData
+  const { resources } = policyFinal
   // aggregate info under package name
   Object.entries(debugInfo).forEach(([_, moduleDebugInfo]) => {
     const { moduleRecord } = moduleDebugInfo
@@ -58,11 +58,10 @@ function parseConfigDebugForPackages (policyName, configDebugData, configFinal) 
       packageData.size = 0
       const isRootPackage = packageId === '$root$'
       packageData.isRoot = isRootPackage
-      packageData.config = resources[packageData.name] || {}
+      packageData.policy = resources[packageData.id] || {}
     }
     // add total code size from module
-    const { size } = moduleRecord
-    packageData.size += size
+    packageData.size += moduleRecord.content.length
     // add package-relative file path
     moduleRecord.fileSimple = fullModuleNameFromPath(moduleRecord.file)
     // add module / package refs
@@ -88,41 +87,46 @@ function parseConfigDebugForPackages (policyName, configDebugData, configFinal) 
   return packages
 }
 
-function createGraph (packages, configFinal, {
+function createGraph (packages, policyFinal, {
   lavamoatMode,
   selectedNode,
+  hiddenPackages,
   // packageModulesMode,
-  // showPackageSize,
+  showPackageSize = true,
 }) {
-  const { resources } = configFinal
   const nodes = []
   const links = []
   // for each module, create node and links
   Object.entries(packages).forEach(([_, packageData]) => {
     const { importMap } = packageData
-    const parentId = packageData.id
-    const packageName = packageData.name
-    // const size = showPackageSize ? getNodeSize(source) : 2
-    const configForPackage = resources[packageName] || {}
-    const configLabel = JSON.stringify(configForPackage, null, 2)
+    const packageId = packageData.id
+    // skip hidden packages
+    if (hiddenPackages.includes(packageId)) {
+      return
+    }
+    const sizeScaling = 1/16
+    const size = showPackageSize ? (sizeScaling * radiusFromArea(packageData.size)) : 2
     const isLavamoat = lavamoatMode === 'lavamoat'
-    const label = packageData.isRoot ? '(root)' : parentId
+    const label = packageData.isRoot ? '(root)' : packageId
     const lavamoatColor = packageData.isRoot ? 'purple' : getColorForRank(packageData.dangerRank)
     const color = isLavamoat ? lavamoatColor : 'red'
     // create node for modules
     nodes.push(
-      createNode({ id: parentId, val: 2, label, configLabel, color }),
+      createNode({ id: packageId, val: 2, label, color, size }),
     )
     const selectedNodeId = selectedNode && selectedNode.id
 
     // create links for deps
     Object.keys(importMap).forEach((depName) => {
       const childId = String(importMap[depName])
+      if (hiddenPackages.includes(childId)) {
+        return
+      }
 
       let width
       let linkColor
 
-      if (parentId === selectedNodeId) {
+      if (packageId === selectedNodeId) {
         width = 3
         linkColor = 'green'
       }
@@ -133,7 +137,7 @@ function createGraph (packages, configFinal, {
       }
 
       links.push(
-        createLink({ color: linkColor, width, source: parentId, target: childId }),
+        createLink({ color: linkColor, width, source: packageId, target: childId }),
       )
     })
   })
@@ -157,34 +161,29 @@ function getDangerRankForPackage (packageData, envConfig) {
   if (packageData.dangerRank) {
     return packageData.dangerRank
   }
+  // root is special case
+  if (packageData.isRoot) {
+    return -1
+  }
   // strict red if any native
-  if (packageData.config.native) {
+  if (packageData.policy.native) {
     return 3
   }
-  // if (packageData.isRoot) {
-  //   return -1
-  // }
-  // console.log(packageData)
-  // const moduleRanks = packageData.modules.map(
-  //   (moduleDebugInfo) => getDangerRankForModule(moduleDebugInfo, envConfig),
-  // )
-  // const rank = Math.max(...moduleRanks)
-  // return rank
-  const configRank = getRankForGlobals(packageData.config.globals, envConfig)
-  const builtinRank = getRankForBuiltins(packageData.config.builtin, envConfig)
-  const rank = Math.max(configRank, builtinRank)
+  const globalsRank = getRankForGlobals(packageData.policy.globals, envConfig)
+  const builtinRank = getRankForBuiltins(packageData.policy.builtin, envConfig)
+  const rank = Math.max(globalsRank, builtinRank)
   return rank
 }
 
 function getDangerRankForModule (moduleDebugInfo, envConfig) {
-  const configRank = getRankForGlobals(moduleDebugInfo.globals, envConfig)
+  const globalsRank = getRankForGlobals(moduleDebugInfo.globals, envConfig)
   const builtinRank = getRankForBuiltins(moduleDebugInfo.builtin, envConfig)
   const typeRank = getRankForType(moduleDebugInfo.moduleRecord.type)
   if (moduleDebugInfo.moduleRecord.packageName === 'JSONStream') {
-    console.log({ id: moduleDebugInfo.moduleRecord.file, configRank, builtinRank, typeRank, envConfig })
+    console.log({ id: moduleDebugInfo.moduleRecord.file, globalsRank, builtinRank, typeRank, envConfig })
 
   }
-  const rank = Math.max(configRank, typeRank, builtinRank)
+  const rank = Math.max(globalsRank, typeRank, builtinRank)
   return rank
 }
 
@@ -225,8 +224,6 @@ function getRankForBuiltin(builtin, envConfig) {
   return 3
 }
 
-
-
 function getRankForType (type = 'js') {
   if (type === 'js') {
     return 0
@@ -238,10 +235,6 @@ function getRankForType (type = 'js') {
     return 3
   }
   return 3
-}
-
-function sortByDangerRank (data) {
-  return Object.values(data).sort((a, b) => b.dangerRank - a.dangerRank)
 }
 
 function createLink (params) {
@@ -264,26 +257,9 @@ function createNode (params) {
   return node
 }
 
-// function getNodeSize (source) {
-//   const { length } = source.split(/\r\n|\r|\n/u)
-//   let size
-//   if (length < 50) {
-//     size = 2
-//   } else if (length > 50 && length < 100) {
-//     size = 3
-//   } else if (length > 100 && length < 250) {
-//     size = 5
-//   } else if (length > 250 && length < 500) {
-//     size = 7
-//   } else if (length > 500 && length < 1000) {
-//     size = 10
-//   } else if (length > 1000 && length < 2500) {
-//     size = 13
-//   } else {
-//     size = 16
-//   }
-//   return size
-// }
+function radiusFromArea (area) {
+  return Math.sqrt(area / Math.PI)
+}
 
 function fullModuleNameFromPath (file) {
   const segments = file.split(path.sep)
@@ -318,6 +294,46 @@ function getEnvConfigForPolicyName (policyName) {
   return envConfig
 }
 
+function sortIntelligently () {
+  return sortByStrategies([
+    sortByDangerRank(),
+    sortByPackageName(),
+  ])
+}
+
+function sortByStrategies (sorterFns) {
+  return function sort (a, b) {
+    for (let i = 0; i < sorterFns.length; i++) {
+      const sorter = sorterFns[i]
+      const result = sorter(a, b)
+      if (result !== 0) {
+        return result
+      }
+    }
+    return 0
+  }
+}
+
+function sortByDangerRank () {
+  return sortByKey('dangerRank', true)
+}
+
+function sortByPackageName () {
+  return sortByKey('id')
+}
+
+function sortByKey (key, reverse = false) {
+  const reverseVal = reverse ? -1 : 1
+  return (a, b) => {
+    const aVal = a[key], bVal = b[key]
+    if (aVal === bVal) {
+      return 0
+    }
+    return aVal > bVal ? reverseVal : -reverseVal
+  }
+}
+  
+
 export {
   parseConfigDebugForPackages,
   createGraph,
@@ -328,4 +344,5 @@ export {
   getLineNumbersForGlobals,
   sortByDangerRank,
   getEnvConfigForPolicyName,
+  sortIntelligently,
 }

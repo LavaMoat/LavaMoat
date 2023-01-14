@@ -31,9 +31,10 @@ class DepList extends React.Component {
   }
 
   renderPackage (packageData, index) {
-    const { actions, selectedPackage, selectedModule } = this.props
+    const { actions, selectedPackage, selectedModule, hiddenPackages } = this.props
     const isExpanded = selectedPackage && packageData.id === selectedPackage.id
     const isSelected = isExpanded && !selectedModule
+    const packageIsVisible = !hiddenPackages.includes(packageData.id)
     return (
       <div
         key={index}
@@ -53,7 +54,15 @@ class DepList extends React.Component {
             actions.selectPackage(packageData.id)
           }}
         >
-          <div className={`packageIcon ${getColorForRank(packageData.dangerRank)}`} />
+          <div
+            className={`packageIcon color-${getColorForRank(packageData.dangerRank)}`}
+            onClick={(event) => {
+              event.stopPropagation()
+              actions.togglePackageVisibility(packageData.id)
+            }}
+          >
+            {packageIsVisible ? '◉' : '◎'}
+          </div>
           {packageData.id}
         </div>
         {isExpanded && this.renderPackageModuleList(packageData)}
@@ -94,7 +103,7 @@ class DepList extends React.Component {
             actions.selectModule(module.specifier)
           }}
         >
-          <div className={`moduleIcon ${module.color}`} />
+          <div className={`moduleIcon background-${module.color}`} />
           &quot;{module.fileSimple}&quot;
         </div>
       </div>

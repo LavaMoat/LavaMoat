@@ -5,6 +5,7 @@ import {
 import {
   XRControllerModelFactory,
 } from 'three/examples/jsm/webxr/XRControllerModelFactory.js'
+import StatsVR from 'statsvr'
 
 let container
 let camera, scene, renderer
@@ -12,6 +13,7 @@ let controller1, controller2
 let controllerGrip1, controllerGrip2
 
 let controls
+let statsVR
 
 const animateListeners = []
 
@@ -19,8 +21,8 @@ function subscribeTick (newListener) {
   animateListeners.push(newListener)
 }
 
-export default function setupScene () {
-  init()
+export function setupScene ({ debug = false } = {}) {
+  init({ debug })
   animate()
   return {
     container,
@@ -33,12 +35,11 @@ export default function setupScene () {
     controllerGrip2,
     controls,
     subscribeTick,
+    setControllerText,
   }
 }
 
-function init () {
-  let geometry
-
+function init ({ debug }) {
   container = document.createElement('div')
   document.body.appendChild(container)
 
@@ -51,17 +52,6 @@ function init () {
   controls = new OrbitControls(camera, container)
   controls.target.set(0, 1.6, 0)
   controls.update()
-
-  geometry = new THREE.PlaneBufferGeometry(4, 4)
-  // const material = new THREE.MeshStandardMaterial({
-  //   color: 0xeeeeee,
-  //   roughness: 1.0,
-  //   metalness: 0.0,
-  // })
-  // var floor = new THREE.Mesh(geometry, material);
-  // floor.rotation.x = -Math.PI / 2;
-  // floor.receiveShadow = true;
-  // scene.add(floor);
 
   scene.add(new THREE.HemisphereLight(0x808080, 0x606060))
 
@@ -103,20 +93,63 @@ function init () {
   controllerGrip2.add(controllerModelFactory.createControllerModel(controllerGrip2))
   scene.add(controllerGrip2)
 
-  //
-
-  geometry = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, -1)])
-
+  const geometry = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, -1)])
   const line = new THREE.Line(geometry)
   line.name = 'line'
   line.scale.z = 5
-
   controller1.add(line.clone())
   controller2.add(line.clone())
 
-  //
+  const textMesh1 = createTextMesh('', { width: 800, height: 80, geoScale: 1/800 })
+  controller1.add(textMesh1)
+  textMesh1.position.y -= 0.15
+  const textMesh2 = createTextMesh('', { width: 800, height: 80, geoScale: 1/800 })
+  controller2.add(textMesh2)
+  textMesh2.position.y -= 0.15
+
+  // fps monitor
+  if (debug) {
+    statsVR = new StatsVR(scene, camera)
+    subscribeTick(() => statsVR.update())
+  }
 
   window.addEventListener('resize', onWindowResize, false)
+}
+
+function setControllerText (controller, text) {
+  controller.getObjectByName('text').updateText(text)
+}
+
+function createTextMesh (text = '', opts = {}) {
+  const { width = 200, height = 40, geoScale = 1/400 } = opts
+  const textMesh = new THREE.Mesh(
+    new THREE.PlaneGeometry( width * geoScale, height * geoScale ),
+    new THREE.MeshBasicMaterial({
+      map: createTextTexture(text),
+    }),
+  )
+  textMesh.name = 'text'
+
+  textMesh.updateText = (text) => {
+    textMesh.material.map = createTextTexture(text, opts)
+  }
+
+  return textMesh
+}        
+
+function createTextTexture (text = '', opts = {}) {
+  const { width = 200, height = 40 } = opts
+  const textCanvas = document.createElement( 'canvas' )
+  textCanvas.width = width
+  textCanvas.height = height
+  const textContext = textCanvas.getContext( '2d' )
+  textContext.fillStyle = '#000000'
+  textContext.fillRect( 0, 0, textCanvas.width, textCanvas.height )
+  textContext.fillStyle = '#FFFFFF'
+  textContext.font = '14px sans-serif'
+  textContext.fillText( text, 10, 30 )
+  const textTexture = new THREE.CanvasTexture( textCanvas )
+  return textTexture
 }
 
 function onWindowResize () {

@@ -10,7 +10,7 @@ const { ncp } = require('ncp')
 const pify = require('pify')
 const openUrl = require('open')
 const handler = require('serve-handler')
-const { mergePolicy, getDefaultPaths } = require('lavamoat-core')
+const { getDefaultPaths } = require('lavamoat-core')
 
 const defaultPaths = getDefaultPaths('node')
 const commandDefaults = {
@@ -43,6 +43,11 @@ function parseArgs () {
         describe: 'the name of the policies to include in the dashboard under the policies directory. default: all',
         type: 'array',
         default: commandDefaults.policyNames,
+      })
+      // JSON object containings paths to the specific policy files
+      yargs.option('policyFilePathsJson', {
+        describe: 'json string indicating the individual policy file locations',
+        type: 'string',
       })
       // open the output dir
       yargs.option('open', {
@@ -96,7 +101,7 @@ async function main () {
 }
 
 async function generateViz (args) {
-  let { dest, open, serve, policiesDir, policyNames } = args
+  let { dest, open, serve, policiesDir, policyNames, policyFilePathsJson } = args
   const fullDest = path.resolve(dest)
   const source = path.join(__dirname, '/../dist/')
   // copy app dir
@@ -106,18 +111,19 @@ async function generateViz (args) {
   if (!policyNames.length) {
     policyNames = await getDirectories(policiesDir)
   }
+  const policyFilePaths = policyFilePathsJson ? JSON.parse(policyFilePathsJson) : {}
   // write each policy data injection
-  // const policyDataInjectionFilePath =
-  await Promise.all(policyNames.map(async (policyName) => {
-    return await createPolicyDataFile({ policyName, fullDest })
+  const policyDataInjectionFilePaths = await Promise.all(policyNames.map(async (policyName) => {
+    const policyFilePathsForProject = policyFilePaths[policyName] || {}
+    return await createPolicyDataInjectionFile({ policyName, fullDest, policyFilePathsForProject })
   }))
   // add data-injection file
-  // const dataInjectionContent = policyDataInjectionFilePath
-  //   // .map(filepath => { console.log(filepath, fullDest, path.relative(fullDest, filepath)); return filepath;})
-  //   .map(filepath => path.relative(fullDest, filepath))
-  //   .map(relPath => `import "./${relPath}";`)
-  //   .join('\n')
-  // await fs.writeFile(`${fullDest}/injectConfigDebugData.js`, dataInjectionContent)
+  const dataInjectionContent = policyDataInjectionFilePaths
+    // .map(filepath => { console.log(filepath, fullDest, path.relative(fullDest, filepath)); return filepath;})
+    .map(filepath => path.relative(fullDest, filepath))
+    .map(relPath => `import "./${relPath}";`)
+    .join('\n')
+  await fs.writeFile(`${fullDest}/injectConfigDebugData.js`, dataInjectionContent)
 
   // dashboard prepared! report done
   console.log(`generated viz in "${dest}"`)
@@ -145,8 +151,8 @@ async function serveViz (fullDest) {
   return url
 }
 
-async function createPolicyDataFile ({ policyName, fullDest }) {
-  const policyData = await loadPolicyData(policyName)
+async function createPolicyDataInjectionFile ({ policyName, fullDest, policyFilePathsForProject }) {
+  const policyData = await loadPolicyData(policyName, policyFilePathsForProject)
   // json esm modules dont exist yet so we do this
   const policyDataInjectionContent = `
   {
@@ -160,16 +166,16 @@ async function createPolicyDataFile ({ policyName, fullDest }) {
   return filepath
 }
 
-async function loadPolicyData (policyName) {
+async function loadPolicyData (policyName, fileLocations) {
   const defaultPaths = getDefaultPaths(policyName)
   const [
     debug,
     primary,
     override,
   ] = await Promise.all([
-    loadPolicyFile(defaultPaths.debug),
-    loadPolicyFile(defaultPaths.primary),
-    loadPolicyFile(defaultPaths.override),
+    loadPolicyFile(fileLocations.debug || defaultPaths.debug),
+    loadPolicyFile(fileLocations.primary || defaultPaths.primary),
+    // loadPolicyFile(fileLocations.override || defaultPaths.override),
   ])
   const policyData = { primary, override, debug }
   return policyData
