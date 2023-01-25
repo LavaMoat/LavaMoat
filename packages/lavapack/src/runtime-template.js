@@ -5,6 +5,7 @@
   const {
     RegExp,
     Reflect,
+    Proxy,
     Object,
     Error,
     Array,
