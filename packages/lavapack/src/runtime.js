@@ -11142,7 +11142,7 @@ module.exports = {
   })()
   return module.exports
 })()
-    const snow = SNOW || ((cb, win) => cb(win));
+    const snow = globalRef.SNOW || ((cb, win) => cb(win));
 
     const moduleCache = new Map()
     const packageCompartmentCache = new Map()
