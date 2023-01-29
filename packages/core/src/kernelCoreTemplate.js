@@ -73,7 +73,7 @@
     const { getEndowmentsForConfig, makeMinimalViewOfRef, applyEndowmentPropDescTransforms } = templateRequire('makeGetEndowmentsForConfig')(generalUtils)
     const { prepareCompartmentGlobalFromConfig } = templateRequire('makePrepareRealmGlobalFromConfig')(generalUtils)
     const { strictScopeTerminator } = templateRequire('strict-scope-terminator')
-    const snow = globalRef.SNOW || ((cb, win) => cb(win));
+    const snow = globalRef.SNOW || ((cb, win) => cb(win))
 
     const moduleCache = new Map()
     const packageCompartmentCache = new Map()

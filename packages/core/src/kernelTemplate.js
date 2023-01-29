@@ -1,6 +1,18 @@
 // LavaMoat Prelude
 (function () {
-  const SNOW = globalThis.SNOW || ((cb, win) => cb(win));
+  // identify the globalRef
+  const globalRef = (typeof globalThis !== 'undefined') ? globalThis : (typeof self !== 'undefined') ? self : (typeof global !== 'undefined') ? global : undefined
+  if (!globalRef) {
+    throw new Error('Lavamoat - unable to identify globalRef')
+  }
+
+  // polyfill globalThis
+  if (globalRef && !globalRef.globalThis) {
+    globalRef.globalThis = globalRef
+  }
+
+  const SNOW = globalRef.SNOW || ((cb, win) => cb(win))
+
   return createKernel
 
   function createKernel ({
@@ -22,17 +34,6 @@
       scuttleGlobalThis,
       scuttleGlobalThisExceptions,
     } = __lavamoatSecurityOptions__
-
-    // identify the globalRef
-    const globalRef = (typeof globalThis !== 'undefined') ? globalThis : (typeof self !== 'undefined') ? self : (typeof global !== 'undefined') ? global : undefined
-    if (!globalRef) {
-      throw new Error('Lavamoat - unable to identify globalRef')
-    }
-
-    // polyfill globalThis
-    if (globalRef && !globalRef.globalThis) {
-      globalRef.globalThis = globalRef
-    }
 
     // create the SES rootRealm
     // "templateRequire" calls are inlined in "generateKernel"
