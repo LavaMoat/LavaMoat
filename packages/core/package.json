@@ -10,6 +10,7 @@
     "node": ">=14.0.0"
   },
   "dependencies": {
+    "@lavamoat/snow": "^1.4.1",
     "fromentries": "^1.2.0",
     "json-stable-stringify": "^1.0.1",
     "lavamoat-tofu": "^6.0.2",

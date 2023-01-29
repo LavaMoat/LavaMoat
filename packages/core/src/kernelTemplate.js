@@ -1,5 +1,6 @@
 // LavaMoat Prelude
 (function () {
+  const SNOW = globalThis.SNOW || ((cb, win) => cb(win));
   return createKernel
 
   function createKernel ({

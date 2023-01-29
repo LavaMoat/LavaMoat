@@ -13,11 +13,13 @@ const makeGetEndowmentsForConfigSrc = fs.readFileSync(path.join(__dirname, '/mak
 const makePrepareRealmGlobalFromConfigSrc = fs.readFileSync(path.join(__dirname, '/makePrepareRealmGlobalFromConfig.js'), 'utf-8')
 const makeGeneralUtilsSrc = fs.readFileSync(path.join(__dirname, '/makeGeneralUtils.js'), 'utf-8')
 const strictScopeTerminatorSrc = fs.readFileSync(path.join(__dirname, '/../lib/strict-scope-terminator.js'), 'utf-8')
+const snowSrc = fs.readFileSync(path.join(__dirname, '../../../node_modules/@lavamoat/snow/snow.prod.js'), 'utf-8')
 
 module.exports = {
   replaceTemplateRequire,
   getStrictScopeTerminatorShimSrc,
   getSesShimSrc,
+  getSnowSrc,
   generateKernel,
   generateKernelCore,
 }
@@ -28,6 +30,10 @@ function getSesShimSrc () {
 
 function getStrictScopeTerminatorShimSrc () {
   return strictScopeTerminatorSrc
+}
+
+function getSnowSrc() {
+  return snowSrc
 }
 
 // takes the kernelTemplate and populates it with the libraries

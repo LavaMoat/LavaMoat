@@ -97,7 +97,7 @@
         const flags = parts[parts.length - 1]
         scuttleGlobalThisExceptions[i] = new RegExp(pattern, flags)
       }
-      performScuttleGlobalThis(globalRef, scuttleGlobalThisExceptions)
+      SNOW(realm => performScuttleGlobalThis(realm, scuttleGlobalThisExceptions), globalRef)
     }
 
     const kernel = {

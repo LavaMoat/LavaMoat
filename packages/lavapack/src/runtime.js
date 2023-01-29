@@ -10532,6 +10532,8 @@ function observeImports(map, importName, importIndex) {
 
     // initialize the kernel
     const createKernelCore = (function () {
+  const SNOW = globalThis.SNOW || ((cb, win) => cb(win));
+
   'use strict'
   return createKernelCore
 
@@ -11165,7 +11167,7 @@ module.exports = {
         const flags = parts[parts.length - 1]
         scuttleGlobalThisExceptions[i] = new RegExp(pattern, flags)
       }
-      performScuttleGlobalThis(globalRef, scuttleGlobalThisExceptions)
+      SNOW(realm => performScuttleGlobalThis(realm, scuttleGlobalThisExceptions), globalRef)
     }
 
     const kernel = {

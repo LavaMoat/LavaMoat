@@ -1,7 +1,7 @@
 const { join: pathJoin } = require('path')
 const { promises: { readFile, writeFile }} = require('fs')
 const { generateKernel, makeInitStatsHook } = require('lavamoat-core')
-const { getStrictScopeTerminatorShimSrc, replaceTemplateRequire } = require('lavamoat-core/src/generateKernel')
+const { getSnowSrc, getStrictScopeTerminatorShimSrc, replaceTemplateRequire } = require('lavamoat-core/src/generateKernel')
 
 module.exports = buildRuntimeUMD
 
@@ -20,6 +20,9 @@ async function buildRuntimeCJS () {
 async function buildRuntimeES (opts) {
   const runtimeTemplate = await readFile(pathJoin(__dirname, 'runtime-template.js'), 'utf8')
   let output = runtimeTemplate
+  if (opts.includeSnow) {
+    output = getSnowSrc() + '\n\n' + output
+  }
   // inline kernel
   const kernelCode = generateKernel(opts)
   output = stringReplace(output, '__createKernel__', kernelCode)
