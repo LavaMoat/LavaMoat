@@ -108,7 +108,7 @@
     // create the SES rootRealm
     // "templateRequire" calls are inlined in "generateKernel"
     // load-bearing semi-colon, do not remove
-    ;// define ses
+    // define ses
 (function(){
   const global = globalRef
   const exports = {}
