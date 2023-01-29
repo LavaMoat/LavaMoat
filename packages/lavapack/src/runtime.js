@@ -70,6 +70,7 @@
 })({ onStatsReady }) : () => {}
   const createKernel = // LavaMoat Prelude
 (function () {
+  const SNOW = globalThis.SNOW || ((cb, win) => cb(win));
   return createKernel
 
   function createKernel ({
@@ -10532,8 +10533,6 @@ function observeImports(map, importName, importIndex) {
 
     // initialize the kernel
     const createKernelCore = (function () {
-  const SNOW = globalThis.SNOW || ((cb, win) => cb(win));
-
   'use strict'
   return createKernelCore
 
@@ -11143,6 +11142,7 @@ module.exports = {
   })()
   return module.exports
 })()
+    const snow = SNOW || ((cb, win) => cb(win));
 
     const moduleCache = new Map()
     const packageCompartmentCache = new Map()
@@ -11167,7 +11167,7 @@ module.exports = {
         const flags = parts[parts.length - 1]
         scuttleGlobalThisExceptions[i] = new RegExp(pattern, flags)
       }
-      SNOW(realm => performScuttleGlobalThis(realm, scuttleGlobalThisExceptions), globalRef)
+      snow(realm => performScuttleGlobalThis(realm, scuttleGlobalThisExceptions), globalRef)
     }
 
     const kernel = {
