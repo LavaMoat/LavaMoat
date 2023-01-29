@@ -10515,7 +10515,7 @@ function observeImports(map, importName, importIndex) {
 // END of injected code from ses
   })()
   return module.exports
-})()
+})() // eslint-disable-line
 
     const lockdownOptions = {
       // gives a semi-high resolution timer

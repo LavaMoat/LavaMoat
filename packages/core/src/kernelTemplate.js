@@ -38,7 +38,7 @@
     // create the SES rootRealm
     // "templateRequire" calls are inlined in "generateKernel"
     // load-bearing semi-colon, do not remove
-    ;templateRequire('ses')
+    ;templateRequire('ses') // eslint-disable-line
 
     const lockdownOptions = {
       // gives a semi-high resolution timer

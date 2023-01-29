@@ -1,5 +1,6 @@
 ignore-dirs: "lib"
 ignores:
+  - "@lavamoat/snow"
   - "ses"
   # monorepo deps
   - "ava"
