@@ -14,7 +14,7 @@
   }) {
     // debug options are hard-coded at build time
     const {
-      debugMode
+      debugMode,
     } = __lavamoatDebugOptions__
     // security options are hard-coded at build time
     const {
@@ -67,7 +67,7 @@
       scuttleGlobalThisExceptions,
       debugMode,
       runWithPrecompiledModules,
-      reportStatsHook
+      reportStatsHook,
     })
     return kernel
   }

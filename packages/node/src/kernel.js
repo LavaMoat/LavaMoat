@@ -69,7 +69,7 @@ function createModuleResolver ({ projectRoot, resolutions, canonicalNameMap }) {
     // resolve normally
     const resolved = resolve.sync(requestedName, {
       basedir: parentDir,
-      extensions: resolutionOmittedExtensions
+      extensions: resolutionOmittedExtensions,
     })
     return resolved
   }
@@ -87,7 +87,7 @@ function createModuleLoader ({ canonicalNameMap }) {
         // wrapper around unprotected "require"
         moduleInitializer: (exports, require, module) => {
           module.exports = nativeRequire(absolutePath)
-        }
+        },
       }
     // load compiled native module
     } else if (isNativeModule(absolutePath)) {
@@ -100,7 +100,7 @@ function createModuleLoader ({ canonicalNameMap }) {
         // wrapper around unprotected "require"
         moduleInitializer: (exports, require, module) => {
           module.exports = nativeRequire(absolutePath)
-        }
+        },
       }
     // load normal user-space module
     } else {
@@ -142,7 +142,9 @@ function createModuleLoader ({ canonicalNameMap }) {
       }
       // wrap in moducreateModuleResolverleInitializer
       // security: ensure module path does not inject code
-      if (absolutePath.includes('\n')) throw new Error('invalid newline in module source path')
+      if (absolutePath.includes('\n')) {
+        throw new Error('invalid newline in module source path')
+      }
       const wrappedContent = `(function(exports, require, module, __filename, __dirname){\n${transformedContent}\n})`
       const packageName = getPackageNameForModulePath(canonicalNameMap, absolutePath)
 
@@ -151,7 +153,7 @@ function createModuleLoader ({ canonicalNameMap }) {
         file: absolutePath,
         package: packageName,
         source: wrappedContent,
-        id: absolutePath
+        id: absolutePath,
       }
     }
   }

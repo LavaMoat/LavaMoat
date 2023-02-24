@@ -9,14 +9,14 @@ const strictModeViolationErrorCues = [
   'Legacy octal literals are not allowed in strict mode',
   'Expecting Unicode escape sequence',
   '\'with\' in strict mode',
-  'Deleting local variable in strict mode'
+  'Deleting local variable in strict mode',
 ]
 
 function inspectSesCompat (ast) {
   const results = {
     primordialMutations: [],
     strictModeViolations: [],
-    dynamicRequires: []
+    dynamicRequires: [],
   }
   // check for strict mode violations
   ;(ast.errors || []).forEach(error => {
@@ -36,7 +36,9 @@ function inspectSesCompat (ast) {
   // check mutations for ses compat
   possibleHits.forEach((intrinsicMutation) => {
     const { memberPath } = intrinsicMutation
-    if (hasSetterInWhitelist(memberPath)) return
+    if (hasSetterInWhitelist(memberPath)) {
+      return
+    }
     results.primordialMutations.push(intrinsicMutation)
   })
   // check for dynamic (non-string literal) requires
@@ -48,10 +50,14 @@ function hasSetterInWhitelist (memberPath) {
   let allowListTarget = sesAllowlist
   // ensure member path in whitelist
   for (const pathPart of memberPath) {
-    if (!(pathPart in allowListTarget)) return false
+    if (!(pathPart in allowListTarget)) {
+      return false
+    }
     allowListTarget = allowListTarget[pathPart]
     // new target must be an object for further lookup
-    if (typeof allowListTarget !== 'object') return false
+    if (typeof allowListTarget !== 'object') {
+      return false
+    }
   }
   // ensure setting for path is accessor
   const hasGetter = allowListTarget.get === FunctionInstance

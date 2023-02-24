@@ -5,7 +5,9 @@ const jsonStringify = require('json-stable-stringify')
 module.exports = { loadPolicy, loadPolicyAndApplyOverrides }
 
 async function readPolicyFile ({ debugMode, policyPath }) {
-  if (debugMode) console.warn(`Lavamoat looking for policy at'${policyPath}'`)
+  if (debugMode) {
+    console.warn(`Lavamoat looking for policy at'${policyPath}'`)
+  }
   const configSource = fs.readFileSync(policyPath, 'utf8')
   return JSON.parse(configSource)
 }
@@ -15,16 +17,20 @@ async function loadPolicy ({ debugMode, policyPath }) {
   if (fs.existsSync(policyPath)) {
     policy = readPolicyFile ({ debugMode, policyPath }) 
   } else {
-    if (debugMode) console.warn(`Lavamoat could not find policy at '${policyPath}'`)
+    if (debugMode) {
+      console.warn(`Lavamoat could not find policy at '${policyPath}'`)
+    }
   }
   return policy
 }
 
-async function loadPolicyAndApplyOverrides({ debugMode, policyPath, policyOverridePath }){
+async function loadPolicyAndApplyOverrides({ debugMode, policyPath, policyOverridePath }) {
   const policy = await loadPolicy({ debugMode, policyPath })
   let lavamoatPolicy = policy
   if (fs.existsSync(policyOverridePath)) {
-    if (debugMode) console.warn('Merging policy-override.json into policy.json')
+    if (debugMode) {
+      console.warn('Merging policy-override.json into policy.json')
+    }
     const policyOverride = await readPolicyFile({ debugMode, policyPath: policyOverridePath })
     lavamoatPolicy = mergePolicy(policy, policyOverride)
     // TODO: Only write if merge results in changes.

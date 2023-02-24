@@ -1,8 +1,8 @@
 /* eslint-disable react/no-deprecated */
 import ForceGraph2D from 'react-force-graph-2d'
-import ThreeForceGraph from 'three-forcegraph'
+// import ThreeForceGraph from 'three-forcegraph'
 // import SpriteText from 'three-spritetext';
-// import * as THREE from 'three';
+// import { Object3D } from 'three';
 import React from 'react'
 import '../css/DepGraph.css'
 import { UnControlled as CodeMirror } from 'react-codemirror2'
@@ -12,20 +12,18 @@ import {
   parseConfigDebugForPackages,
   createGraph,
   getDangerRankForModule,
-  sortByDangerRank,
+  sortIntelligently,
   getColorForRank,
   getLineNumbersForGlobals,
   getEnvConfigForPolicyName,
-
 } from './utils/utils.js'
 import XrButton from './xr-button.js'
-import setupScene from './vr-viz/setupScene.js'
-// import setupSelections from './vr-viz/setupSelections.js'
-import setupGraph from './vr-viz/setupGraph.js'
+import { setupScene } from './vr-viz/setupScene.js'
+import { setupSelections } from './vr-viz/setupSelections.js'
+import { FastThreeForceGraph } from './vr-viz/forcegraph.js'
 
 import 'codemirror/theme/material.css'
 
-// const d3 = require('d3')
 
 const lavamoatModes = ['lavamoat', 'without']
 
@@ -44,16 +42,18 @@ class DepGraph extends React.Component {
       selectedModule: null,
       viewSource: false,
       lavamoatMode: lavamoatModes[0],
-      showPackageSize: false,
+      showPackageSize: true,
       selectionLocked: false,
+      hiddenPackages: [],
+      vrActive: false,
     }
   }
 
   componentDidMount () {
-    const { forceGraph } = this
+    // const { forceGraph } = this
     this.triggerGraphUpdate()
 
-    window.xyz = forceGraph
+    // window.xyz = forceGraph
 
     // forceGraph.d3Force('charge').strength(-50)
     // forceGraph.d3Force('x', d3.forceX(0, 1))
@@ -135,22 +135,6 @@ class DepGraph extends React.Component {
     return packageModules
   }
 
-  onVrSessionStart (session) {
-    const { packageData } = this.state
-    const { scene, renderer, subscribeTick } = setupScene()
-    const graph = new ThreeForceGraph()
-      .graphData(packageData)
-      // .nodeThreeObject((node) => {
-      //   return new SpriteText(node.label || node.id || 'hello', 10, node.color);
-      // })
-    setupGraph({ scene, graph, subscribeTick })
-    renderer.xr.setSession(session)
-  }
-
-  onVrSessionEnd () {
-    console.log('vr session end')
-  }
-
   render () {
     const { policyData } = this.props
     const {
@@ -166,6 +150,8 @@ class DepGraph extends React.Component {
       selectedPackage,
       selectedModule,
       selectionLocked,
+      hiddenPackages,
+      vrActive,
     } = this.state
 
     const actions = {
@@ -218,28 +204,27 @@ class DepGraph extends React.Component {
         const newState = { lavamoatMode: target }
         this.setStateAndUpdateGraph(newState)
       },
+      togglePackageVisibility: (packageId) => {
+        const { hiddenPackages } = this.state
+        const isHidden = hiddenPackages.includes(packageId)
+        if (isHidden) {
+          this.setStateAndUpdateGraph({
+            hiddenPackages: hiddenPackages.filter((id) => id !== packageId),
+          })
+        } else {
+          this.setStateAndUpdateGraph({
+            hiddenPackages: [...hiddenPackages, packageId],
+          })
+        }
+      },
     }
     const graphData = packageData
+
     let sortedPackages = []
     let sortedModules = []
-    // let selectedNodeLabel
-    // let selectedNodeData
     let sourceButtonStyle
     let helpMessage
 
-    // if (selectedPackage) {
-    //   selectedNodeLabel = selectedPackage.id
-    //   selectedNodeData = 'funky town'
-    //   // if (packageModulesMode && !isNaN(selectedNode.id) && selectedNode.id in packageModules) {
-
-    //   //   selectedNodeData = JSON.stringify(packageModules[selectedNode.id].globalUsage, null, 2) || null
-    //   // } else {
-    //   //   selectedNodeData = selectedNode.configLabel
-    //   // }
-    // } else {
-    //   selectedNodeLabel = 'select a node'
-    //   selectedNodeData = ''
-    // }
     if (!packageModulesMode || !selectedModule) {
       sourceButtonStyle = { display: 'none' }
     }
@@ -247,16 +232,15 @@ class DepGraph extends React.Component {
       helpMessage = 'Press ENTER to navigate between globals'
     }
 
-    sortedPackages = sortByDangerRank(packages)
+    sortedPackages = Object.values(packages).sort(sortIntelligently())
     if (packageModules) {
-      const packageModulesList = Object.values(packageModules)
-      sortedModules = sortByDangerRank(packageModulesList)
+      sortedModules = Object.values(packageModules).sort(sortIntelligently())
     }
 
     return (
       <div>
-        <div className="navWrapper">
-          <div className="leftButtonsWrapper">
+        <div className='navWrapper'>
+          <div className='leftButtonsWrapper'>
             <Nav
               routes={lavamoatModes}
               activeRoute={lavamoatMode}
@@ -278,12 +262,12 @@ class DepGraph extends React.Component {
             />
           </div>
 
-          <div className="viewSourceWrapper">
-            <div className="helpMessage">
+          <div className='viewSourceWrapper'>
+            <div className='helpMessage'>
               {helpMessage}
             </div>
             <button
-              className="sourceButton"
+              className='sourceButton'
               style={sourceButtonStyle}
               onClick={() => actions.toggleSource()}
             >
@@ -298,27 +282,65 @@ class DepGraph extends React.Component {
           sortedModules={sortedModules}
           selectedPackage={selectedPackage}
           selectedModule={selectedModule}
+          hiddenPackages={hiddenPackages}
         />
         {this.renderSelectedNodeView()}
-        <ForceGraph2D
-          ref={(el) => {
-            this.forceGraph = el
-          }}
-          graphData={graphData}
-          linkDirectionalArrowLength={4}
-          linkDirectionalArrowRelPos={1}
-          nodeLabel="label"
-          // onNodeHover={(node) => {
-          //   if (!node) return
-          //   if (packageModulesMode && !packageModules[node.id]) return
-          //   actions.selectNode(node)
-          // }}
-          onNodeClick={({ id }) => actions.selectPackage(id)}
-          linkWidth={(link) => link.width}
-          linkColor={(link) => link.color}
-        />
+        {vrActive === false && (
+          <ForceGraph2D
+            // ref={(el) => {
+            //   this.forceGraph = el
+            // }}
+            graphData={graphData}
+            linkDirectionalArrowLength={4}
+            linkDirectionalArrowRelPos={1}
+            nodeLabel='label'
+            nodeVal='size'
+            // onNodeHover={(node) => {
+            //   if (!node) return
+            //   if (packageModulesMode && !packageModules[node.id]) return
+            //   actions.selectNode(node)
+            // }}
+            onNodeClick={({ id }) => actions.selectPackage(id)}
+            linkWidth={(link) => link.width}
+            linkColor={(link) => link.color}
+          />
+        )}
       </div>
     )
+  }
+
+  onVrSessionStart (session) {
+    const { packageData } = this.state
+    const { scene, renderer, subscribeTick, controller1, controller2, setControllerText } = setupScene({})
+    const scale = 0.001
+    const graph = new FastThreeForceGraph({
+      graphData: packageData,
+      nodeOpts: { size: 100 * scale },
+    })
+    graph.position.set(0, 1, -1)
+    graph.scale.set(scale, scale, scale)
+    scene.add(graph)
+    subscribeTick(() => graph.tickFrame())
+
+    setupSelections({
+      getIntersectables: () => graph.collisionObjects,
+      onHoverStart: ({ object: { name: nodeId } }, controller) => {
+        setControllerText(controller, `${nodeId}`)
+      },
+      onSelectStart: ({ object: { name: nodeId } }, controller) => {
+        actions.selectPackage(nodeId)
+      },
+      controller1,
+      controller2,
+      subscribeTick,
+    })
+
+    renderer.xr.setSession(session)
+    this.setState({ vrActive: true })
+  }
+
+  onVrSessionEnd () {
+    this.setState({ vrActive: false })
   }
 
   renderSelectedNodeView () {
@@ -329,7 +351,7 @@ class DepGraph extends React.Component {
       return this.renderSelectedPackage(selectedPackage)
     }
     return (
-      <pre className="packageInfo">
+      <pre className='packageInfo'>
         please select a package
       </pre>
     )
@@ -337,9 +359,9 @@ class DepGraph extends React.Component {
 
   renderSelectedPackage (selectedPackage) {
     const { policyData: { final: { resources: finalPolicyResources } } } = this.props
-    const packagePolicy = finalPolicyResources[selectedPackage.name] || {}
+    const packagePolicy = finalPolicyResources[selectedPackage.id] || {}
     return (
-      <div className="packageInfo">
+      <div className='packageInfo'>
         <pre>{selectedPackage.id}</pre>
         policy for this package:
         <pre>
@@ -354,16 +376,18 @@ class DepGraph extends React.Component {
     const moduleDebugInfo = debugInfo[selectedModule.specifier]
     const moduleDisplayInfo = { ...moduleDebugInfo, moduleRecord: undefined }
     const { packageData } = moduleDebugInfo.moduleRecord
-    const component = this.state.viewSource ? this.renderSelectedNodeCode(selectedModule) : (
-      <div className="packageInfo">
-        <pre>{packageData.id}</pre>
-        <pre>{selectedModule.fileSimple}</pre>
-        policies generated from this file:
-        <pre>
-          {JSON.stringify(moduleDisplayInfo, null, 2)}
-        </pre>
-      </div>
-    )
+    const component = this.state.viewSource
+      ? this.renderSelectedNodeCode(selectedModule)
+      : (
+        <div className='packageInfo'>
+          <pre>{packageData.id}</pre>
+          <pre>{selectedModule.fileSimple}</pre>
+          policies generated from this file:
+          <pre>
+            {JSON.stringify(moduleDisplayInfo, null, 2)}
+          </pre>
+        </div>
+      )
     return component
   }
 

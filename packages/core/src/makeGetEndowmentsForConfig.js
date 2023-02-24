@@ -13,7 +13,7 @@ function makeGetEndowmentsForConfig ({ createFunctionWrapper }) {
     makeMinimalViewOfRef,
     copyValueAtPath,
     applyGetSetPropDescTransforms,
-    applyEndowmentPropDescTransforms
+    applyEndowmentPropDescTransforms,
   }
 
   /**
@@ -27,7 +27,9 @@ function makeGetEndowmentsForConfig ({ createFunctionWrapper }) {
    *
    */
   function getEndowmentsForConfig (sourceRef, config, unwrapTo, unwrapFrom) {
-    if (!config.globals) return {}
+    if (!config.globals) {
+      return {}
+    }
     // validate read access from config
     const whitelistedReads = []
     const explicitlyBanned = []
@@ -44,7 +46,9 @@ function makeGetEndowmentsForConfig ({ createFunctionWrapper }) {
         return 
       }
       // write access handled elsewhere
-      if (configValue === 'write') return
+      if (configValue === 'write') {
+        return
+      }
       if (configValue !== true) {
         throw new Error(`LavaMoat - unrecognizable policy value (${typeof configValue}) for path "${path}"`)
       }
@@ -53,7 +57,7 @@ function makeGetEndowmentsForConfig ({ createFunctionWrapper }) {
     return makeMinimalViewOfRef(sourceRef, whitelistedReads, unwrapTo, unwrapFrom, explicitlyBanned)
   }
 
-  function makeMinimalViewOfRef (sourceRef, paths, unwrapTo, unwrapFrom, explicitlyBanned = []){
+  function makeMinimalViewOfRef (sourceRef, paths, unwrapTo, unwrapFrom, explicitlyBanned = []) {
     const targetRef = {}
     paths.forEach(path => {
       copyValueAtPath('', path.split('.'), explicitlyBanned, sourceRef, targetRef, unwrapTo, unwrapFrom)
@@ -62,7 +66,9 @@ function makeGetEndowmentsForConfig ({ createFunctionWrapper }) {
   }
 
   function extendPath(visited, next) {
-    if (!visited || visited.length === 0) return next
+    if (!visited || visited.length === 0) {
+      return next
+    }
     return `${visited}.${next}`
   }
 
@@ -112,7 +118,7 @@ function makeGetEndowmentsForConfig ({ createFunctionWrapper }) {
           value: containerRef,
           writable: sourceWritable,
           enumerable: sourcePropDesc.enumerable,
-          configurable: sourcePropDesc.configurable
+          configurable: sourcePropDesc.configurable,
         }
         Reflect.defineProperty(targetRef, nextPart, newPropDesc)
         // the newly created container will be the next target
@@ -153,7 +159,7 @@ function makeGetEndowmentsForConfig ({ createFunctionWrapper }) {
       value: newValue,
       writable: sourceWritable,
       enumerable: sourcePropDesc.enumerable,
-      configurable: sourcePropDesc.configurable
+      configurable: sourcePropDesc.configurable,
     }
     Reflect.defineProperty(targetRef, nextPart, newPropDesc)
 
@@ -248,6 +254,8 @@ function getPropertyDescriptorDeep (target, key) {
       receiver = receiver.__proto__
     }
     // abort if this is the end of the prototype chain.
-    if (!receiver) return { prop: null, receiver: null }
+    if (!receiver) {
+      return { prop: null, receiver: null }
+    }
   }
 }

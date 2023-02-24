@@ -20,7 +20,7 @@ function parseArgs () {
       // the entry file to run (or parse)
       yargs.positional('entryPath', {
         describe: 'the path to the entry file for your application. same as node.js',
-        type: 'string'
+        type: 'string',
       })
       yargsFlags(yargs, defaults)
     })

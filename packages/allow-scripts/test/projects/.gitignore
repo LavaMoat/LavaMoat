@@ -1,2 +1,6 @@
 !node_modules
 1/package.json
+.bin
+.goodscriptworked
+.npmrc
+.yarnrc

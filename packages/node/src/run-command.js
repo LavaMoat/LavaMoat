@@ -36,7 +36,7 @@ function parseArgs () {
   parsedArgs.entryPath = path.resolve(
     process.cwd(), 
     'node_modules/.bin/',
-    fs.readlinkSync(binEntry)
+    fs.readlinkSync(binEntry),
   )
 
   // patch process.argv so it matches the normal pattern

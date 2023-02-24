@@ -6,7 +6,9 @@ module.exports = makePolicyLoaderStream
 function makePolicyLoaderStream (lavamoatOpts) {
   const loaderStream = new Readable({
     // ignore eager reads
-    read () { return false },
+    read () {
+      return false 
+    },
   })
   // asynchronously handle read
   setTimeout(populatePolicyLoaderStream)

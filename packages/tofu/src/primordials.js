@@ -71,7 +71,7 @@ module.exports.globalPropertyNames = [
   'BigInt64Array',
   'BigUint64Array',
   'NaN',
-  'Infinity'
+  'Infinity',
 ]
 
 // js language keywords that are not global properties

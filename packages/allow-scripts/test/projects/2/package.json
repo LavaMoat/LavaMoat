@@ -19,6 +19,9 @@
     "allowScripts": {
       "good_dep": true,
       "bbb>evil_dep": false
+    },
+    "allowBins": {
+      "good": "node_modules/good_dep/index.js"
     }
   }
 }

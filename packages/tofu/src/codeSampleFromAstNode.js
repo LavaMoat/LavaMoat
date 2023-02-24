@@ -6,7 +6,9 @@ function codeSampleFromAstNode (node, moduleRecord) {
   const { content } = moduleRecord
   const { start, end } = node.loc
   result.range = `${start.line}:${start.column}`
-  if (end) result.range += `,${end.line}:${end.column}`
+  if (end) {
+    result.range += `,${end.line}:${end.column}`
+  }
   // prepare sample
   const lines = content.split('\n')
   const startLine = lines[start.line - 1]

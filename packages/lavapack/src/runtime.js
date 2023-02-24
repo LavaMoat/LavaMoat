@@ -1,10 +1,13 @@
-;(function(){
+// DO NOT EDIT! THIS FILE IS GENERATED FROM "runtime-template.js" BY RUNNING "builder-runtime.js"
+
+;(function() {
   // this runtime template code is destined to wrap LavaMoat entirely,
   // therefore this is our way of capturing access to basic APIs LavaMoat
   // uses to still be accessible only to LavaMoat after scuttling occurs
   const {
     RegExp,
     Reflect,
+    Proxy,
     Object,
     Error,
     Array,
@@ -30,11 +33,11 @@
       const startTime = Date.now()
       // console.log(`loaded module ${moduleId}`)
       const statRecord = {
-        "name": moduleId,
-        "value": null,
-        "children": [],
-        "startTime": startTime,
-        "endTime": null
+        'name': moduleId,
+        'value': null,
+        'children': [],
+        'startTime': startTime,
+        'endTime': null,
       }
       // add as child to current
       if (statModuleStack.length > 0) {
@@ -81,7 +84,7 @@
   }) {
     // debug options are hard-coded at build time
     const {
-      debugMode
+      debugMode,
     } = {"debugMode":false}
     // security options are hard-coded at build time
     const {
@@ -679,7 +682,7 @@ freeze(bestEffortStringify);
  */
 
 /**
- * @typedef {Object} AssertMakeErrorOptions
+ * @typedef {object} AssertMakeErrorOptions
  * @property {string=} errorName
  */
 
@@ -726,51 +729,65 @@ freeze(bestEffortStringify);
  */
 
 // Type all the overloads of the assertTypeof function.
-// There may eventually be a better way to do this, but they break with
-// Typescript 4.0.
+// There may eventually be a better way to do this, but
+// thems the breaks with Typescript 4.0.
 /**
  * @callback AssertTypeofBigint
  * @param {any} specimen
  * @param {'bigint'} typename
  * @param {Details=} optDetails
  * @returns {asserts specimen is bigint}
- *
+ */
+
+/**
  * @callback AssertTypeofBoolean
  * @param {any} specimen
  * @param {'boolean'} typename
  * @param {Details=} optDetails
  * @returns {asserts specimen is boolean}
- *
+ */
+
+/**
  * @callback AssertTypeofFunction
  * @param {any} specimen
  * @param {'function'} typename
  * @param {Details=} optDetails
  * @returns {asserts specimen is Function}
- *
+ */
+
+/**
  * @callback AssertTypeofNumber
  * @param {any} specimen
  * @param {'number'} typename
  * @param {Details=} optDetails
  * @returns {asserts specimen is number}
- *
+ */
+
+/**
  * @callback AssertTypeofObject
  * @param {any} specimen
  * @param {'object'} typename
  * @param {Details=} optDetails
  * @returns {asserts specimen is Record<any, any> | null}
- *
+ */
+
+/**
  * @callback AssertTypeofString
  * @param {any} specimen
  * @param {'string'} typename
  * @param {Details=} optDetails
  * @returns {asserts specimen is string}
- *
+ */
+
+/**
  * @callback AssertTypeofSymbol
  * @param {any} specimen
  * @param {'symbol'} typename
  * @param {Details=} optDetails
  * @returns {asserts specimen is symbol}
- *
+ */
+
+/**
  * @callback AssertTypeofUndefined
  * @param {any} specimen
  * @param {'undefined'} typename
@@ -824,7 +841,7 @@ freeze(bestEffortStringify);
  */
 
 /**
- * @typedef {Object} StringablePayload
+ * @typedef {object} StringablePayload
  * Holds the payload passed to quote so that its printed form is visible.
  * @property {() => string} toString How to print the payload
  */
@@ -928,6 +945,64 @@ freeze(bestEffortStringify);
  */
 
 /**
+ * @typedef {(template: TemplateStringsArray | string[], ...args: any) => never} FailTag
+ * The `Fail` tamplate tag supports replacing patterns like
+ * ```js
+ * assert(cond, X`...complaint...`);
+ * ```
+ * or
+ * ```js
+ * cond || assert.fail(X`...complaint...`);
+ * ```
+ * with patterns like
+ * ```js
+ * cond || Fail`...complaint...`;
+ * ```
+ *
+ * However, due to [weakness in current
+ * TypeScript](https://github.com/microsoft/TypeScript/issues/51426), the `||`
+ * patterns are not as powerful as the `assert(...)` call at enabling static
+ * reasoning. Of the `||`, again due to weaknesses in current TypeScript,
+ * the
+ * ```js
+ * cond || Fail`...complaint...`
+ * ```
+ * pattern is not as powerful as the
+ * ```js
+ * cond || assert.fail(X`...complaint...`);
+ * ```
+ * at enabling static resoning. Despite these problems, we do not want to
+ * return to the
+ * ```js
+ * assert(cond, X`...complaint...`)
+ * ```
+ * style because of the substantial overhead in
+ * evaluating the `X` template in the typical `true` case where it is not
+ * needed. And we do not want to return to the
+ * ```js
+ * assert.fail(X`...complaint...`)`
+ * ```
+ * because of the verbosity and loss of readability. Instead, until/unless
+ * https://github.com/microsoft/TypeScript/issues/51426 is fixed, for those
+ * new-style assertions where this loss of static reasoning is a problem,
+ * instead express the assertion as
+ * ```js
+ *   if (!cond) {
+ *     Fail`...complaint...`;
+ *   }
+ * ```
+ * or, if needed,
+ * ```js
+ *   if (!cond) {
+ *     // `throw` is noop since `Fail` throws. But linter confused
+ *     throw Fail`...complaint...`;
+ *   }
+ * ```
+ * This avoid the TypeScript bugs that cause the loss of static reasoning,
+ * but with no loss of efficiency and little loss of readability.
+ */
+
+/**
  * assert that expr is truthy, with an optional details to describe
  * the assertion. It is a tagged template literal like
  * ```js
@@ -953,6 +1028,7 @@ freeze(bestEffortStringify);
  *   string: AssertString,
  *   note: AssertNote,
  *   details: DetailsTag,
+ *   Fail: FailTag,
  *   quote: AssertQuote,
  *   makeAssert: MakeAssert,
  * } } Assert
@@ -1395,6 +1471,9 @@ const makeAssert=  (optRaise=  undefined, unredacted=  false)=>  {
    };
   freeze(fail);
 
+  /** @type {FailTag} */
+  const Fail=  (template, ...args)=>  fail(details(template, ...args));
+
   // Don't freeze or export `baseAssert` until we add methods.
   // TODO If I change this from a `function` function to an arrow
   // function, I seem to get type errors from TypeScript. Why?
@@ -1453,6 +1532,7 @@ const makeAssert=  (optRaise=  undefined, unredacted=  false)=>  {
     string: assertString,
     note,
     details,
+    Fail,
     quote,
     makeAssert});
 
@@ -1470,7 +1550,7 @@ const assert=  makeAssert();$h‍_once.assert(assert);
 
 
 
-const { details: d}=   assert;
+const { Fail}=   assert;
 
 // We attempt to frustrate stack bumping attacks on the safe evaluator
 // (`make-safe-evaluator.js`).
@@ -1541,10 +1621,7 @@ const        makeEvalScopeKit=  ()=>  {
     evalScope,
     allowNextEvalToBeUnsafe() {
       if( evalScopeKit.revoked!==  null) {
-        // eslint-disable-next-line @endo/no-polymorphic-call
-        assert.fail(
-          d `a handler did not reset allowNextEvalToBeUnsafe ${this.revoked.err}`);
-
+        Fail `a handler did not reset allowNextEvalToBeUnsafe ${this.revoked.err}`;
        }
       // Allow next reference to eval produce the unsafe FERAL_EVAL.
       // We avoid defineProperty because it consumes an extra stack frame taming
@@ -1705,20 +1782,20 @@ function isImmutableDataProperty(obj, name) {
  * safe and only prevent performance optimization.
  *
  * @param {Object} globalObject
- * @param {Object} globalLexicals
+ * @param {Object} moduleLexicals
  */
-const        getScopeConstants=  (globalObject, globalLexicals=  {})=>  {
+const        getScopeConstants=  (globalObject, moduleLexicals=  {})=>  {
   // getOwnPropertyNames() does ignore Symbols so we don't need to
   // filter them out.
   const globalObjectNames=  getOwnPropertyNames(globalObject);
-  const globalLexicalNames=  getOwnPropertyNames(globalLexicals);
+  const moduleLexicalNames=  getOwnPropertyNames(moduleLexicals);
 
   // Collect all valid & immutable identifiers from the endowments.
-  const globalLexicalConstants=  arrayFilter(
-    globalLexicalNames,
+  const moduleLexicalConstants=  arrayFilter(
+    moduleLexicalNames,
     (name)=>
       isValidIdentifierName(name)&&
-      isImmutableDataProperty(globalLexicals, name));
+      isImmutableDataProperty(moduleLexicals, name));
 
 
   // Collect all valid & immutable identifiers from the global that
@@ -1728,14 +1805,14 @@ const        getScopeConstants=  (globalObject, globalLexicals=  {})=>  {
     (name)=>
       // Can't define a constant: it would prevent a
       // lookup on the endowments.
-      !arrayIncludes(globalLexicalNames, name)&&
+      !arrayIncludes(moduleLexicalNames, name)&&
       isValidIdentifierName(name)&&
       isImmutableDataProperty(globalObject, name));
 
 
   return {
     globalObjectConstants,
-    globalLexicalConstants};
+    moduleLexicalConstants};
 
  };$h‍_once.getScopeConstants(getScopeConstants);
 })
@@ -1769,22 +1846,22 @@ function buildOptimizer(constants, name) {
  *
  * @param {object} context
  * @param {object} context.evalScope
- * @param {object} context.globalLexicals
+ * @param {object} context.moduleLexicals
  * @param {object} context.globalObject
  * @param {object} context.scopeTerminator
  */
 const        makeEvaluate=  (context)=>{
-  const { globalObjectConstants, globalLexicalConstants}=   getScopeConstants(
+  const { globalObjectConstants, moduleLexicalConstants}=   getScopeConstants(
     context.globalObject,
-    context.globalLexicals);
+    context.moduleLexicals);
 
   const globalObjectOptimizer=  buildOptimizer(
     globalObjectConstants,
     'globalObject');
 
-  const globalLexicalOptimizer=  buildOptimizer(
-    globalLexicalConstants,
-    'globalLexicals');
+  const moduleLexicalOptimizer=  buildOptimizer(
+    moduleLexicalConstants,
+    'moduleLexicals');
 
 
   // Create a function in sloppy mode, so that we can use 'with'. It returns
@@ -1800,7 +1877,7 @@ const        makeEvaluate=  (context)=>{
   //       trigger direct eval. The direct eval semantics is what allows the
   //       evaluated code to lookup free variable names on the other scope
   //       objects and not in global scope.
-  //    b) `globalLexicals` which provide a way to introduce free variables
+  //    b) `moduleLexicals` which provide a way to introduce free variables
   //       that are not available on the globalObject.
   //    c) `globalObject` is the global scope object of the evaluator, aka the
   //       Compartment's `globalThis`.
@@ -1814,7 +1891,7 @@ const        makeEvaluate=  (context)=>{
 
   // Notes:
   // - The `optimizer` strings only lookup values on the `globalObject` and
-  //   `globalLexicals` objects by construct. Keywords like 'function' are
+  //   `moduleLexicals` objects by construct. Keywords like 'function' are
   //   reserved and cannot be used as a variable, so they are excluded from the
   //   optimizer. Furthermore to prevent shadowing 'eval', while a valid
   //   identifier, that name is also explicitly excluded.
@@ -1835,10 +1912,10 @@ const        makeEvaluate=  (context)=>{
   const evaluateFactory=  FERAL_FUNCTION( `
     with (this.scopeTerminator) {
       with (this.globalObject) {
-        with (this.globalLexicals) {
+        with (this.moduleLexicals) {
           with (this.evalScope) {
             ${globalObjectOptimizer }
-            ${globalLexicalOptimizer }
+            ${moduleLexicalOptimizer }
             return function() {
               'use strict';
               return eval(arguments[0]);
@@ -1867,7 +1944,7 @@ const        makeEvaluate=  (context)=>{
 
 
 
-const { details: d, quote: q}=   assert;
+const { Fail, quote: q}=   assert;
 
 /**
  * alwaysThrowHandler
@@ -1880,10 +1957,7 @@ const        alwaysThrowHandler=  new Proxy(
   immutableObject,
   freeze({
     get(_shadow, prop) {
-      // eslint-disable-next-line @endo/no-polymorphic-call
-      assert.fail(
-        d `Please report unexpected scope handler trap: ${q(String(prop))}`);
-
+      Fail `Please report unexpected scope handler trap: ${q(String(prop))}`;
      }}));
 
 
@@ -2318,7 +2392,7 @@ const        applyTransforms=  (source, transforms)=>  {
 
 
 
-const { details: d}=   assert;
+const { Fail}=   assert;
 
 /**
  * makeSafeEvaluator()
@@ -2327,13 +2401,13 @@ const { details: d}=   assert;
  *
  * @param {Object} options
  * @param {Object} options.globalObject
- * @param {Object} [options.globalLexicals]
+ * @param {Object} [options.moduleLexicals]
  * @param {Array<Transform>} [options.globalTransforms]
  * @param {bool} [options.sloppyGlobalsMode]
  */
 const        makeSafeEvaluator=  ({
   globalObject,
-  globalLexicals=  {},
+  moduleLexicals=  {},
   globalTransforms=  [],
   sloppyGlobalsMode=  false}=
     {})=>  {
@@ -2345,7 +2419,7 @@ const        makeSafeEvaluator=  ({
 
   const evaluateContext=  freeze({
     evalScope,
-    globalLexicals,
+    moduleLexicals,
     globalObject,
     scopeTerminator});
 
@@ -2409,8 +2483,7 @@ const        makeSafeEvaluator=  ({
         evalScopeKit.revoked=  { err};
         // TODO A GOOD PLACE TO PANIC(), i.e., kill the vat incarnation.
         // See https://github.com/Agoric/SES-shim/issues/490
-        // eslint-disable-next-line @endo/no-polymorphic-call
-        assert.fail(d `handler did not reset allowNextEvalToBeUnsafe ${err}`);
+        Fail `handler did not reset allowNextEvalToBeUnsafe ${err}`;
        }
      }
    };
@@ -2420,8 +2493,7 @@ const        makeSafeEvaluator=  ({
 })
 ,
 // === functors[13] ===
-(({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,   importMeta: $h‍____meta,  }) => {   let TypeError,arrayPush,create,defineProperties,getOwnPropertyDescriptors,evadeHtmlCommentTest,evadeImportExpressionTest,rejectSomeDirectEvalExpressions,makeSafeEvaluator;$h‍_imports([["./commons.js", [["TypeError", [$h‍_a => (TypeError = $h‍_a)]],["arrayPush", [$h‍_a => (arrayPush = $h‍_a)]],["create", [$h‍_a => (create = $h‍_a)]],["defineProperties", [$h‍_a => (defineProperties = $h‍_a)]],["getOwnPropertyDescriptors", [$h‍_a => (getOwnPropertyDescriptors = $h‍_a)]]]],["./transforms.js", [["evadeHtmlCommentTest", [$h‍_a => (evadeHtmlCommentTest = $h‍_a)]],["evadeImportExpressionTest", [$h‍_a => (evadeImportExpressionTest = $h‍_a)]],["rejectSomeDirectEvalExpressions", [$h‍_a => (rejectSomeDirectEvalExpressions = $h‍_a)]]]],["./make-safe-evaluator.js", [["makeSafeEvaluator", [$h‍_a => (makeSafeEvaluator = $h‍_a)]]]]]);   
-
+(({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,   importMeta: $h‍____meta,  }) => {   let TypeError,arrayPush,create,getOwnPropertyDescriptors,evadeHtmlCommentTest,evadeImportExpressionTest,rejectSomeDirectEvalExpressions,makeSafeEvaluator;$h‍_imports([["./commons.js", [["TypeError", [$h‍_a => (TypeError = $h‍_a)]],["arrayPush", [$h‍_a => (arrayPush = $h‍_a)]],["create", [$h‍_a => (create = $h‍_a)]],["getOwnPropertyDescriptors", [$h‍_a => (getOwnPropertyDescriptors = $h‍_a)]]]],["./transforms.js", [["evadeHtmlCommentTest", [$h‍_a => (evadeHtmlCommentTest = $h‍_a)]],["evadeImportExpressionTest", [$h‍_a => (evadeImportExpressionTest = $h‍_a)]],["rejectSomeDirectEvalExpressions", [$h‍_a => (rejectSomeDirectEvalExpressions = $h‍_a)]]]],["./make-safe-evaluator.js", [["makeSafeEvaluator", [$h‍_a => (makeSafeEvaluator = $h‍_a)]]]]]);   
 
 
 
@@ -2436,10 +2508,8 @@ const        makeSafeEvaluator=  ({
 
 
 const        provideCompartmentEvaluator=  (compartmentFields, options)=>  {
-  const {
-    sloppyGlobalsMode=  false,
-    __moduleShimLexicals__=  undefined}=
-      options;
+  const { sloppyGlobalsMode=  false, __moduleShimLexicals__=  undefined}=
+    options;
 
   let safeEvaluate;
 
@@ -2450,9 +2520,9 @@ const        provideCompartmentEvaluator=  (compartmentFields, options)=>  {
     // shared evaluator so we need to build a new one
 
     let { globalTransforms}=   compartmentFields;
-    const { globalObject, globalLexicals}=   compartmentFields;
+    const { globalObject}=   compartmentFields;
 
-    let localObject=  globalLexicals;
+    let moduleLexicals;
     if( __moduleShimLexicals__!==  undefined) {
       // When using `evaluate` for ESM modules, as should only occur from the
       // module-shim's module-instance.js, we do not reveal the SES-shim's
@@ -2464,16 +2534,15 @@ const        provideCompartmentEvaluator=  (compartmentFields, options)=>  {
       // and `import`, at the expense of being tightly coupled to SES-shim.
       globalTransforms=  undefined;
 
-      localObject=  create(null, getOwnPropertyDescriptors(globalLexicals));
-      defineProperties(
-        localObject,
+      moduleLexicals=  create(
+        null,
         getOwnPropertyDescriptors(__moduleShimLexicals__));
 
      }
 
     ({ safeEvaluate}=   makeSafeEvaluator({
       globalObject,
-      globalLexicals: localObject,
+      moduleLexicals,
       globalTransforms,
       sloppyGlobalsMode}));
 
@@ -2559,6 +2628,8 @@ const        makeEvalFunction=  (safeEvaluate)=>{
 
 
 
+const { Fail}=   assert;
+
 /*
  * makeFunctionConstructor()
  * A safe version of the native Function which relies on
@@ -2619,14 +2690,10 @@ const        makeFunctionConstructor=  (safeEvaluate)=>{
 
 
   // Assert identity of Function.__proto__ accross all compartments
-  assert(
-    getPrototypeOf(FERAL_FUNCTION)===  FERAL_FUNCTION.prototype,
-    'Function prototype is the same accross compartments');
-
-  assert(
-    getPrototypeOf(newFunction)===  FERAL_FUNCTION.prototype,
-    'Function constructor prototype is the same accross compartments');
-
+  getPrototypeOf(FERAL_FUNCTION)===  FERAL_FUNCTION.prototype||
+    Fail `Function prototype is the same accross compartments`;
+  getPrototypeOf(newFunction)===  FERAL_FUNCTION.prototype||
+    Fail `Function constructor prototype is the same accross compartments`;
 
   return newFunction;
  };$h‍_once.makeFunctionConstructor(makeFunctionConstructor);
@@ -4208,7 +4275,7 @@ const        setGlobalObjectEvaluators=  (
 
 
 
-const { details: d, quote: q}=   assert;
+const { Fail, details: d, quote: q}=   assert;
 
 const noop=  ()=>  { };
 
@@ -4235,7 +4302,7 @@ $h‍_once.makeAlias(makeAlias);const resolveAll=(imports,resolveHook,fullReferr
   return freeze(resolvedImports);
  };
 
-const loadRecord=  async(
+const loadRecord=  (
   compartmentPrivateFields,
   moduleAliases,
   compartment,
@@ -4351,35 +4418,69 @@ const loadWithoutErrorAnnotation=  async(
   const staticModuleRecord=  await importHook(moduleSpecifier);
 
   if( staticModuleRecord===  null||  typeof staticModuleRecord!==  'object') {
-    // eslint-disable-next-line @endo/no-polymorphic-call
-    assert.fail(
-      d `importHook must return a promise for an object, for module ${q(
-        moduleSpecifier)
-        } in compartment ${q(compartment.name)}`);
-
+    Fail `importHook must return a promise for an object, for module ${q(
+      moduleSpecifier)
+      } in compartment ${q(compartment.name)}`;
    }
 
-  if( staticModuleRecord.record!==  undefined) {
-    const {
-      compartment: aliasCompartment=  compartment,
-      specifier: aliasSpecifier=  moduleSpecifier,
-      record: aliasModuleRecord,
-      importMeta}=
-        staticModuleRecord;
+  // check if record is a RedirectStaticModuleInterface
+  if( staticModuleRecord.specifier!==  undefined) {
+    // check if this redirect with an explicit record
+    if( staticModuleRecord.record!==  undefined) {
+      // ensure expected record shape
+      if( staticModuleRecord.compartment!==  undefined) {
+        throw new TypeError(
+          'Cannot redirect to an explicit record with a specified compartment');
 
-    const aliasRecord=  await loadRecord(
-      compartmentPrivateFields,
-      moduleAliases,
-      aliasCompartment,
-      aliasSpecifier,
-      aliasModuleRecord,
-      pendingJobs,
-      moduleLoads,
-      errors,
-      importMeta);
+       }
+      const {
+        compartment: aliasCompartment=  compartment,
+        specifier: aliasSpecifier=  moduleSpecifier,
+        record: aliasModuleRecord,
+        importMeta}=
+          staticModuleRecord;
 
-    mapSet(moduleRecords, moduleSpecifier, aliasRecord);
-    return aliasRecord;
+      const aliasRecord=  loadRecord(
+        compartmentPrivateFields,
+        moduleAliases,
+        aliasCompartment,
+        aliasSpecifier,
+        aliasModuleRecord,
+        pendingJobs,
+        moduleLoads,
+        errors,
+        importMeta);
+
+      mapSet(moduleRecords, moduleSpecifier, aliasRecord);
+      return aliasRecord;
+     }
+
+    // check if this redirect with an explicit compartment
+    if( staticModuleRecord.compartment!==  undefined) {
+      // ensure expected record shape
+      if( staticModuleRecord.importMeta!==  undefined) {
+        throw new TypeError(
+          'Cannot redirect to an implicit record with a specified importMeta');
+
+       }
+      // Behold: recursion.
+      // eslint-disable-next-line no-use-before-define
+      const aliasRecord=  await memoizedLoadWithErrorAnnotation(
+        compartmentPrivateFields,
+        moduleAliases,
+        staticModuleRecord.compartment,
+        staticModuleRecord.specifier,
+        pendingJobs,
+        moduleLoads,
+        errors);
+
+      mapSet(moduleRecords, moduleSpecifier, aliasRecord);
+      return aliasRecord;
+     }
+
+    throw new TypeError(
+      'Unnexpected RedirectStaticModuleInterface record shape');
+
    }
 
   return loadRecord(
@@ -4822,6 +4923,7 @@ $h‍_once.makeThirdPartyModuleInstance(makeThirdPartyModuleInstance);const make
     __syncModuleProgram__: functorSource,
     __fixedExportMap__: fixedExportMap=  {},
     __liveExportMap__: liveExportMap=  {},
+    __reexportMap__: reexportMap=  {},
     __needsImportMeta__: needsImportMeta=  false}=
       staticModuleRecord;
 
@@ -4840,10 +4942,10 @@ $h‍_once.makeThirdPartyModuleInstance(makeThirdPartyModuleInstance);const make
   // object (eventually proxied).
   const exportsProps=  create(null);
 
-  // {_localName_: accessor} proxy traps for globalLexicals and live bindings.
-  // The globalLexicals object is frozen and the corresponding properties of
-  // localLexicals must be immutable, so we copy the descriptors.
-  const localLexicals=  create(null);
+  // {_localName_: accessor} proxy traps for moduleLexicals and live bindings.
+  // The moduleLexicals object is frozen and the corresponding properties of
+  // moduleLexicals must be immutable, so we copy the descriptors.
+  const moduleLexicals=  create(null);
 
   // {_localName_: init(initValue) -> initValue} used by the
   // rewritten code to initialize exported fixed bindings.
@@ -5009,7 +5111,7 @@ $h‍_once.makeThirdPartyModuleInstance(makeThirdPartyModuleInstance);const make
 
         localGetNotify[localName]=  liveGetNotify;
         if( setProxyTrap) {
-          defineProperty(localLexicals, localName, {
+          defineProperty(moduleLexicals, localName, {
             get,
             set,
             enumerable: true,
@@ -5075,26 +5177,35 @@ $h‍_once.makeThirdPartyModuleInstance(makeThirdPartyModuleInstance);const make
        }
       if( arrayIncludes(exportAlls, specifier)) {
         // Make all these imports candidates.
-        for( const [importName, importNotify]of  entries(importNotifiers)) {
-          if( candidateAll[importName]===  undefined) {
-            candidateAll[importName]=  importNotify;
+        // Note names don't change in reexporting all
+        for( const [importAndExportName, importNotify]of  entries(
+          importNotifiers))
+           {
+          if( candidateAll[importAndExportName]===  undefined) {
+            candidateAll[importAndExportName]=  importNotify;
            }else {
             // Already a candidate: remove ambiguity.
-            candidateAll[importName]=  false;
+            candidateAll[importAndExportName]=  false;
            }
+         }
+       }
+      if( reexportMap[specifier]) {
+        // Make named reexports candidates too.
+        for( const [localName, exportedName]of  reexportMap[specifier]) {
+          candidateAll[exportedName]=  importNotifiers[localName];
          }
        }
      }
 
-    for( const [importName, notify]of  entries(candidateAll)) {
-      if( !notifiers[importName]&&  notify!==  false) {
-        notifiers[importName]=  notify;
+    for( const [exportName, notify]of  entries(candidateAll)) {
+      if( !notifiers[exportName]&&  notify!==  false) {
+        notifiers[exportName]=  notify;
 
         // exported live binding state
         let value;
         const update=  (newValue)=> value=  newValue;
         notify(update);
-        exportsProps[importName]=  {
+        exportsProps[exportName]=  {
           get() {
             return value;
            },
@@ -5125,7 +5236,7 @@ $h‍_once.makeThirdPartyModuleInstance(makeThirdPartyModuleInstance);const make
   let optFunctor=  compartmentEvaluate(compartmentFields, functorSource, {
     globalObject: compartment.globalThis,
     transforms: __shimTransforms__,
-    __moduleShimLexicals__: localLexicals});
+    __moduleShimLexicals__: moduleLexicals});
 
   let didThrow=  false;
   let thrownError;
@@ -5192,7 +5303,7 @@ $h‍_once.makeThirdPartyModuleInstance(makeThirdPartyModuleInstance);const make
 
 
 
-const { quote: q}=   assert;
+const { Fail, quote: q}=   assert;
 
 // `link` creates `ModuleInstances` and `ModuleNamespaces` for a module and its
 // transitive dependencies and connects their imports and exports.
@@ -5236,18 +5347,14 @@ function validatePrecompiledStaticModuleRecord(
   moduleSpecifier)
   {
   const { __fixedExportMap__, __liveExportMap__}=   staticModuleRecord;
-  assert(
-    isObject(__fixedExportMap__),
-     `Property '__fixedExportMap__' of a precompiled module record must be an object, got ${q(
+  isObject(__fixedExportMap__)||
+    Fail `Property '__fixedExportMap__' of a precompiled module record must be an object, got ${q(
       __fixedExportMap__)
-      }, for module ${q(moduleSpecifier)}`);
-
-  assert(
-    isObject(__liveExportMap__),
-     `Property '__liveExportMap__' of a precompiled module record must be an object, got ${q(
+      }, for module ${q(moduleSpecifier)}`;
+  isObject(__liveExportMap__)||
+    Fail `Property '__liveExportMap__' of a precompiled module record must be an object, got ${q(
       __liveExportMap__)
-      }, for module ${q(moduleSpecifier)}`);
-
+      }, for module ${q(moduleSpecifier)}`;
  }
 
 function isThirdParty(staticModuleRecord) {
@@ -5259,40 +5366,30 @@ function validateThirdPartyStaticModuleRecord(
   moduleSpecifier)
   {
   const { exports}=   staticModuleRecord;
-  assert(
-    isArray(exports),
-     `Property 'exports' of a third-party static module record must be an array, got ${q(
+  isArray(exports)||
+    Fail `Property 'exports' of a third-party static module record must be an array, got ${q(
       exports)
-      }, for module ${q(moduleSpecifier)}`);
-
+      }, for module ${q(moduleSpecifier)}`;
  }
 
 function validateStaticModuleRecord(staticModuleRecord, moduleSpecifier) {
-  assert(
-    isObject(staticModuleRecord),
-     `Static module records must be of type object, got ${q(
+  isObject(staticModuleRecord)||
+    Fail `Static module records must be of type object, got ${q(
       staticModuleRecord)
-      }, for module ${q(moduleSpecifier)}`);
-
+      }, for module ${q(moduleSpecifier)}`;
   const { imports, exports, reexports=  []}=   staticModuleRecord;
-  assert(
-    isArray(imports),
-     `Property 'imports' of a static module record must be an array, got ${q(
+  isArray(imports)||
+    Fail `Property 'imports' of a static module record must be an array, got ${q(
       imports)
-      }, for module ${q(moduleSpecifier)}`);
-
-  assert(
-    isArray(exports),
-     `Property 'exports' of a precompiled module record must be an array, got ${q(
+      }, for module ${q(moduleSpecifier)}`;
+  isArray(exports)||
+    Fail `Property 'exports' of a precompiled module record must be an array, got ${q(
       exports)
-      }, for module ${q(moduleSpecifier)}`);
-
-  assert(
-    isArray(reexports),
-     `Property 'reexports' of a precompiled module record must be an array if present, got ${q(
+      }, for module ${q(moduleSpecifier)}`;
+  isArray(reexports)||
+    Fail `Property 'reexports' of a precompiled module record must be an array if present, got ${q(
       reexports)
-      }, for module ${q(moduleSpecifier)}`);
-
+      }, for module ${q(moduleSpecifier)}`;
  }
 
 const        instantiate=  (
@@ -5300,12 +5397,8 @@ const        instantiate=  (
   moduleAliases,
   moduleRecord)=>
      {
-  const {
-    compartment,
-    moduleSpecifier,
-    resolvedImports,
-    staticModuleRecord}=
-      moduleRecord;
+  const { compartment, moduleSpecifier, resolvedImports, staticModuleRecord}=
+    moduleRecord;
   const { instances}=   weakmapGet(compartmentPrivateFields, compartment);
 
   // Memoize.
@@ -5362,12 +5455,7 @@ const        instantiate=  (
 })
 ,
 // === functors[22] ===
-(({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,   importMeta: $h‍____meta,  }) => {   let Map,ReferenceError,TypeError,WeakMap,arrayFilter,arrayJoin,assign,defineProperties,entries,freeze,getOwnPropertyNames,promiseThen,weakmapGet,weakmapSet,setGlobalObjectSymbolUnscopables,setGlobalObjectConstantProperties,setGlobalObjectMutableProperties,setGlobalObjectEvaluators,isValidIdentifierName,sharedGlobalPropertyNames,load,link,getDeferredExports,assert,compartmentEvaluate,makeSafeEvaluator;$h‍_imports([["./commons.js", [["Map", [$h‍_a => (Map = $h‍_a)]],["ReferenceError", [$h‍_a => (ReferenceError = $h‍_a)]],["TypeError", [$h‍_a => (TypeError = $h‍_a)]],["WeakMap", [$h‍_a => (WeakMap = $h‍_a)]],["arrayFilter", [$h‍_a => (arrayFilter = $h‍_a)]],["arrayJoin", [$h‍_a => (arrayJoin = $h‍_a)]],["assign", [$h‍_a => (assign = $h‍_a)]],["defineProperties", [$h‍_a => (defineProperties = $h‍_a)]],["entries", [$h‍_a => (entries = $h‍_a)]],["freeze", [$h‍_a => (freeze = $h‍_a)]],["getOwnPropertyNames", [$h‍_a => (getOwnPropertyNames = $h‍_a)]],["promiseThen", [$h‍_a => (promiseThen = $h‍_a)]],["weakmapGet", [$h‍_a => (weakmapGet = $h‍_a)]],["weakmapSet", [$h‍_a => (weakmapSet = $h‍_a)]]]],["./global-object.js", [["setGlobalObjectSymbolUnscopables", [$h‍_a => (setGlobalObjectSymbolUnscopables = $h‍_a)]],["setGlobalObjectConstantProperties", [$h‍_a => (setGlobalObjectConstantProperties = $h‍_a)]],["setGlobalObjectMutableProperties", [$h‍_a => (setGlobalObjectMutableProperties = $h‍_a)]],["setGlobalObjectEvaluators", [$h‍_a => (setGlobalObjectEvaluators = $h‍_a)]]]],["./scope-constants.js", [["isValidIdentifierName", [$h‍_a => (isValidIdentifierName = $h‍_a)]]]],["./whitelist.js", [["sharedGlobalPropertyNames", [$h‍_a => (sharedGlobalPropertyNames = $h‍_a)]]]],["./module-load.js", [["load", [$h‍_a => (load = $h‍_a)]]]],["./module-link.js", [["link", [$h‍_a => (link = $h‍_a)]]]],["./module-proxy.js", [["getDeferredExports", [$h‍_a => (getDeferredExports = $h‍_a)]]]],["./error/assert.js", [["assert", [$h‍_a => (assert = $h‍_a)]]]],["./compartment-evaluate.js", [["compartmentEvaluate", [$h‍_a => (compartmentEvaluate = $h‍_a)]]]],["./make-safe-evaluator.js", [["makeSafeEvaluator", [$h‍_a => (makeSafeEvaluator = $h‍_a)]]]]]);   
-
-
-
-
-
+(({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,   importMeta: $h‍____meta,  }) => {   let Map,ReferenceError,TypeError,WeakMap,assign,defineProperties,entries,promiseThen,weakmapGet,weakmapSet,setGlobalObjectSymbolUnscopables,setGlobalObjectConstantProperties,setGlobalObjectMutableProperties,setGlobalObjectEvaluators,sharedGlobalPropertyNames,load,link,getDeferredExports,assert,compartmentEvaluate,makeSafeEvaluator;$h‍_imports([["./commons.js", [["Map", [$h‍_a => (Map = $h‍_a)]],["ReferenceError", [$h‍_a => (ReferenceError = $h‍_a)]],["TypeError", [$h‍_a => (TypeError = $h‍_a)]],["WeakMap", [$h‍_a => (WeakMap = $h‍_a)]],["assign", [$h‍_a => (assign = $h‍_a)]],["defineProperties", [$h‍_a => (defineProperties = $h‍_a)]],["entries", [$h‍_a => (entries = $h‍_a)]],["promiseThen", [$h‍_a => (promiseThen = $h‍_a)]],["weakmapGet", [$h‍_a => (weakmapGet = $h‍_a)]],["weakmapSet", [$h‍_a => (weakmapSet = $h‍_a)]]]],["./global-object.js", [["setGlobalObjectSymbolUnscopables", [$h‍_a => (setGlobalObjectSymbolUnscopables = $h‍_a)]],["setGlobalObjectConstantProperties", [$h‍_a => (setGlobalObjectConstantProperties = $h‍_a)]],["setGlobalObjectMutableProperties", [$h‍_a => (setGlobalObjectMutableProperties = $h‍_a)]],["setGlobalObjectEvaluators", [$h‍_a => (setGlobalObjectEvaluators = $h‍_a)]]]],["./whitelist.js", [["sharedGlobalPropertyNames", [$h‍_a => (sharedGlobalPropertyNames = $h‍_a)]]]],["./module-load.js", [["load", [$h‍_a => (load = $h‍_a)]]]],["./module-link.js", [["link", [$h‍_a => (link = $h‍_a)]]]],["./module-proxy.js", [["getDeferredExports", [$h‍_a => (getDeferredExports = $h‍_a)]]]],["./error/assert.js", [["assert", [$h‍_a => (assert = $h‍_a)]]]],["./compartment-evaluate.js", [["compartmentEvaluate", [$h‍_a => (compartmentEvaluate = $h‍_a)]]]],["./make-safe-evaluator.js", [["makeSafeEvaluator", [$h‍_a => (makeSafeEvaluator = $h‍_a)]]]]]);   
 
 
 
@@ -5571,7 +5659,6 @@ const        makeCompartmentConstructor=  (
       name=  '<unknown>',
       transforms=  [],
       __shimTransforms__=  [],
-      globalLexicals: globalLexicalsOption=  {},
       resolveHook,
       importHook,
       moduleMapHook,
@@ -5610,28 +5697,6 @@ const        makeCompartmentConstructor=  (
        }
      }
 
-    const invalidNames=  arrayFilter(
-      getOwnPropertyNames(globalLexicalsOption),
-      (identifier)=>!isValidIdentifierName(identifier));
-
-    if( invalidNames.length) {
-      throw new TypeError(
-         `Cannot create compartment with invalid names for global lexicals: ${arrayJoin(
-          invalidNames,
-          ', ')
-          }; these names would not be lexically mentionable`);
-
-     }
-    // The caller continues to own the globalLexicals object they passed to
-    // the compartment constructor, but the compartment only respects the
-    // original values and they are constants in the scope of evaluated
-    // programs and executed modules.
-    // This shallow copy captures only the values of enumerable own
-    // properties, erasing accessors.
-    // The snapshot is frozen to ensure that the properties are immutable
-    // when transferred-by-property-descriptor onto local scope objects.
-    const globalLexicals=  freeze({ ...globalLexicalsOption});
-
     const globalObject=  {};
 
     setGlobalObjectSymbolUnscopables(globalObject);
@@ -5645,7 +5710,6 @@ const        makeCompartmentConstructor=  (
 
     const { safeEvaluate}=   makeSafeEvaluator({
       globalObject,
-      globalLexicals,
       globalTransforms,
       sloppyGlobalsMode: false});
 
@@ -5670,7 +5734,6 @@ const        makeCompartmentConstructor=  (
       name:  `${name}`,
       globalTransforms,
       globalObject,
-      globalLexicals,
       safeEvaluate,
       resolveHook,
       importHook,
@@ -6290,7 +6353,7 @@ function                enablePropertyOverrides(
 
 
 
-const { details: X, quote: q}=   assert;
+const { details: X, Fail, quote: q}=   assert;
 
 /**
  * JavaScript module semantics resists attempts to parameterize a module's
@@ -6394,12 +6457,9 @@ const        makeEnvironmentCaptor=  (aGlobal)=>{
      }
     setting===  undefined||
       typeof setting===  'string'||
-      // eslint-disable-next-line @endo/no-polymorphic-call
-      assert.fail(
-        X `Environment option value ${q(
-          setting)
-          }, if present, must be a string.`);
-
+      Fail `Environment option value ${q(
+        setting)
+        }, if present, must be a string.`;
     return setting;
    };
   freeze(getEnvironmentOption);
@@ -6591,12 +6651,8 @@ freeze(ErrorInfo);
 
 /** @type {MakeCausalConsole} */
 const makeCausalConsole=  (baseConsole, loggedErrorHandler)=>  {
-  const {
-    getStackString,
-    tagError,
-    takeMessageLogArgs,
-    takeNoteLogArgsArray}=
-      loggedErrorHandler;
+  const { getStackString, tagError, takeMessageLogArgs, takeNoteLogArgsArray}=
+    loggedErrorHandler;
 
   /**
    * @param {ReadonlyArray<any>} logArgs
@@ -7710,8 +7766,10 @@ const        getAnonymousIntrinsics=  ()=>  {
 
   // 9.2.4.1 %ThrowTypeError%
 
-  const ThrowTypeError=  getOwnPropertyDescriptor(makeArguments(), 'callee').
-     get;
+  const ThrowTypeError=  getOwnPropertyDescriptor(
+    makeArguments(),
+    'callee').
+    get;
 
   // 21.1.5.2 The %StringIteratorPrototype% Object
 
@@ -8213,7 +8271,8 @@ function        tameDomains(domainTaming=  'safe') {
 })
 ,
 // === functors[36] ===
-(({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,   importMeta: $h‍____meta,  }) => {   let FERAL_FUNCTION,SyntaxError,TypeError,defineProperties,getPrototypeOf,setPrototypeOf;$h‍_imports([["./commons.js", [["FERAL_FUNCTION", [$h‍_a => (FERAL_FUNCTION = $h‍_a)]],["SyntaxError", [$h‍_a => (SyntaxError = $h‍_a)]],["TypeError", [$h‍_a => (TypeError = $h‍_a)]],["defineProperties", [$h‍_a => (defineProperties = $h‍_a)]],["getPrototypeOf", [$h‍_a => (getPrototypeOf = $h‍_a)]],["setPrototypeOf", [$h‍_a => (setPrototypeOf = $h‍_a)]]]]]);   
+(({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,   importMeta: $h‍____meta,  }) => {   let FERAL_FUNCTION,SyntaxError,TypeError,defineProperties,getPrototypeOf,setPrototypeOf,freeze;$h‍_imports([["./commons.js", [["FERAL_FUNCTION", [$h‍_a => (FERAL_FUNCTION = $h‍_a)]],["SyntaxError", [$h‍_a => (SyntaxError = $h‍_a)]],["TypeError", [$h‍_a => (TypeError = $h‍_a)]],["defineProperties", [$h‍_a => (defineProperties = $h‍_a)]],["getPrototypeOf", [$h‍_a => (getPrototypeOf = $h‍_a)]],["setPrototypeOf", [$h‍_a => (setPrototypeOf = $h‍_a)]],["freeze", [$h‍_a => (freeze = $h‍_a)]]]]]);   
+
 
 
 
@@ -8264,7 +8323,7 @@ function                tameFunctionConstructors() {
     FERAL_FUNCTION.prototype.constructor('return 1');
    }catch( ignore) {
     // Throws, no need to patch.
-    return harden({});
+    return freeze({});
    }
 
   const newIntrinsics=  {};
@@ -8297,7 +8356,7 @@ function                tameFunctionConstructors() {
     // Prevents the evaluation of source when calling constructor on the
     // prototype of functions.
     // eslint-disable-next-line func-names
-    const InertConstructor=  function() {
+    const InertConstructor=  function()  {
       throw new TypeError(
         'Function.prototype.constructor is not a valid constructor.');
 
@@ -8415,7 +8474,7 @@ const        tameFunctionToString=  ()=>  {
 
 
 
-const { details: d, quote: q}=   assert;
+const { Fail, quote: q}=   assert;
 
 const localePattern=  /^(\w*[a-z])Locale([A-Z]\w*)$/;
 
@@ -8437,7 +8496,7 @@ const tamedMethods=  {
     if( s>  that) {
       return 1;
      }
-    assert(s===  that, d `expected ${q(s)} and ${q(that)} to compare`);
+    s===  that||  Fail `expected ${q(s)} and ${q(that)} to compare`;
     return 0;
    },
 
@@ -8467,16 +8526,12 @@ function                tameLocaleMethods(intrinsics, localeTaming=  'safe') {
       for( const methodName of getOwnPropertyNames(intrinsic)) {
         const match=  regexpExec(localePattern, methodName);
         if( match) {
-          assert(
-            typeof intrinsic[methodName]===  'function',
-            d `expected ${q(methodName)} to be a function`);
-
+          typeof intrinsic[methodName]===  'function'||
+            Fail `expected ${q(methodName)} to be a function`;
           const nonLocaleMethodName=   `${match[1]}${match[2]}`;
           const method=  intrinsic[nonLocaleMethodName];
-          assert(
-            typeof method===  'function',
-            d `function ${q(nonLocaleMethodName)} not found`);
-
+          typeof method===  'function'||
+            Fail `function ${q(nonLocaleMethodName)} not found`;
           defineProperty(intrinsic, methodName, { value: method});
          }
        }
@@ -8507,9 +8562,8 @@ function                tameMathObject(mathTaming=  'safe') {
   const originalMath=  Math;
   const initialMath=  originalMath; // to follow the naming pattern
 
-  const { random: _, ...otherDescriptors}=   getOwnPropertyDescriptors(
-    originalMath);
-
+  const { random: _, ...otherDescriptors}=
+    getOwnPropertyDescriptors(originalMath);
 
   const sharedMath=  create(objectPrototype, otherDescriptors);
 
@@ -8948,7 +9002,7 @@ function                whitelistIntrinsics(
 
 /** @typedef {import('../index.js').LockdownOptions} LockdownOptions */
 
-const { details: d, quote: q}=   assert;
+const { Fail, details: d, quote: q}=   assert;
 
 /** @type {Error=} */
 let priorLockdown;
@@ -8975,7 +9029,6 @@ const harden=  makeHardener();
  * @param {Object} [options]
  * @param {Array<Transform>} [options.transforms]
  * @param {Array<Transform>} [options.__shimTransforms__]
- * @param {Object} [options.globalLexicals]
  */
 
 // TODO https://github.com/endojs/endo/issues/814
@@ -9045,10 +9098,8 @@ const        repairIntrinsics=  (options=  {})=>  {
   // [`stackFiltering` options](https://github.com/Agoric/SES-shim/blob/master/packages/ses/lockdown-options.md#stackfiltering-options)
   // for an explanation.
 
-  const {
-    getEnvironmentOption: getenv,
-    getCapturedEnvironmentOptionNames}=
-      makeEnvironmentCaptor(globalThis);
+  const { getEnvironmentOption: getenv, getCapturedEnvironmentOptionNames}=
+    makeEnvironmentCaptor(globalThis);
 
   const {
     errorTaming=  getenv('LOCKDOWN_ERROR_TAMING', 'safe'),
@@ -9085,25 +9136,22 @@ const        repairIntrinsics=  (options=  {})=>  {
 
    }
 
-  assert(
-    evalTaming===  'unsafeEval'||
-      evalTaming===  'safeEval'||
-      evalTaming===  'noEval',
-    d `lockdown(): non supported option evalTaming: ${q(evalTaming)}`);
-
+  evalTaming===  'unsafeEval'||
+    evalTaming===  'safeEval'||
+    evalTaming===  'noEval'||
+    Fail `lockdown(): non supported option evalTaming: ${q(evalTaming)}`;
 
   // Assert that only supported options were passed.
   // Use Reflect.ownKeys to reject symbol-named properties as well.
   const extraOptionsNames=  ownKeys(extraOptions);
-  assert(
-    extraOptionsNames.length===  0,
-    d `lockdown(): non supported option ${q(extraOptionsNames)}`);
+  extraOptionsNames.length===  0||
+    Fail `lockdown(): non supported option ${q(extraOptionsNames)}`;
 
-
-  assert(
-    priorLockdown===  undefined,
-     `Already locked down at ${priorLockdown} (SES_ALREADY_LOCKED_DOWN)`,
-    TypeError);
+  priorLockdown===  undefined||
+    // eslint-disable-next-line @endo/no-polymorphic-call
+    assert.fail(
+      d `Already locked down at ${priorLockdown} (SES_ALREADY_LOCKED_DOWN)`,
+      TypeError);
 
   priorLockdown=  new TypeError('Prior lockdown (SES_ALREADY_LOCKED_DOWN)');
   // Tease V8 to generate the stack string and release the closures the stack
@@ -9146,7 +9194,6 @@ const        repairIntrinsics=  (options=  {})=>  {
    };
 
   if( seemsToBeLockedDown()) {
-    // eslint-disable-next-line @endo/no-polymorphic-call
     throw new TypeError(
        `Already locked down but not by this SES instance (SES_MULTIPLE_INSTANCES)`);
 
@@ -9158,11 +9205,8 @@ const        repairIntrinsics=  (options=  {})=>  {
 
   tameDomains(domainTaming);
 
-  const {
-    addIntrinsics,
-    completePrototypes,
-    finalIntrinsics}=
-      makeIntrinsicsCollector();
+  const { addIntrinsics, completePrototypes, finalIntrinsics}=
+    makeIntrinsicsCollector();
 
   addIntrinsics({ harden});
 
@@ -9353,23 +9397,25 @@ assign(globalThis, {
 ,
 ]; // functors end
 
-  function cell(name, value = undefined) {
+  const cell = (name, value = undefined) => {
     const observers = [];
-    function set(newValue) {
-      value = newValue;
-      for (const observe of observers) {
+    return Object.freeze({
+      get: Object.freeze(() => {
+        return value;
+      }),
+      set: Object.freeze((newValue) => {
+        value = newValue;
+        for (const observe of observers) {
+          observe(value);
+        }
+      }),
+      observe: Object.freeze((observe) => {
+        observers.push(observe);
         observe(value);
-      }
-    }
-    function get() {
-      return value;
-    }
-    function observe(observe) {
-      observers.push(observe);
-      observe(value);
-    }
-    return { get, set, observe, enumerable: true };
-  }
+      }),
+      enumerable: true,
+    });
+  };
 
   const cells = [
     {
@@ -9674,23 +9720,24 @@ assign(globalThis, {
   ];
 
 
-  const namespaces = cells.map(cells => Object.create(null, cells));
+  const namespaces = cells.map(cells => Object.freeze(Object.create(null, cells)));
 
   for (let index = 0; index < namespaces.length; index += 1) {
     cells[index]['*'] = cell('*', namespaces[index]);
   }
 
-  function observeImports(map, importName, importIndex) {
-    for (const [name, observers] of map.get(importName)) {
-      const cell = cells[importIndex][name];
-      if (cell === undefined) {
-        throw new ReferenceError(`Cannot import name ${name}`);
-      }
-      for (const observer of observers) {
-        cell.observe(observer);
-      }
+function observeImports(map, importName, importIndex) {
+  for (const [name, observers] of map.get(importName)) {
+    const cell = cells[importIndex][name];
+    if (cell === undefined) {
+      throw new ReferenceError(`Cannot import name ${name}`);
+    }
+    for (const observer of observers) {
+      cell.observe(observer);
     }
   }
+}
+
 
   functors[0]({
     imports(entries) {
@@ -10146,7 +10193,6 @@ assign(globalThis, {
       observeImports(map, "./module-link.js", 21);
       observeImports(map, "./module-load.js", 18);
       observeImports(map, "./module-proxy.js", 19);
-      observeImports(map, "./scope-constants.js", 6);
       observeImports(map, "./whitelist.js", 16);
     },
     liveVar: {
@@ -10460,6 +10506,8 @@ assign(globalThis, {
     },
     importMeta: {},
   });
+
+  return cells[cells.length - 1]['*'].get();
 })();
 
 // END of injected code from ses
@@ -10484,7 +10532,7 @@ assign(globalThis, {
 
     // initialize the kernel
     const createKernelCore = (function () {
-  "use strict"
+  'use strict'
   return createKernelCore
 
   function createKernelCore ({
@@ -10503,7 +10551,7 @@ assign(globalThis, {
     scuttleGlobalThisExceptions,
     debugMode,
     runWithPrecompiledModules,
-    reportStatsHook
+    reportStatsHook,
   }) {
     // prepare the LavaMoat kernel-core factory
     // factory is defined within a Compartment
@@ -10531,7 +10579,7 @@ assign(globalThis, {
       scuttleGlobalThisExceptions,
       debugMode,
       runWithPrecompiledModules,
-      reportStatsHook
+      reportStatsHook,
     })
 
     return lavamoatKernel
@@ -10551,7 +10599,7 @@ assign(globalThis, {
     scuttleGlobalThisExceptions = [],
     debugMode = false,
     runWithPrecompiledModules = false,
-    reportStatsHook = () => {}
+    reportStatsHook = () => {},
   }) {
     // "templateRequire" calls are inlined in "generateKernel"
     const generalUtils = // define makeGeneralUtils
@@ -10565,7 +10613,7 @@ module.exports = makeGeneralUtils
 
 function makeGeneralUtils () {
   return {
-    createFunctionWrapper
+    createFunctionWrapper,
   }
 
   function createFunctionWrapper (sourceValue, unwrapTest, unwrapTo) {
@@ -10584,6 +10632,7 @@ function makeGeneralUtils () {
     return newValue
   }
 }
+
 // END of injected code from makeGeneralUtils
   })()
   return module.exports
@@ -10610,7 +10659,7 @@ function makeGetEndowmentsForConfig ({ createFunctionWrapper }) {
     makeMinimalViewOfRef,
     copyValueAtPath,
     applyGetSetPropDescTransforms,
-    applyEndowmentPropDescTransforms
+    applyEndowmentPropDescTransforms,
   }
 
   /**
@@ -10624,7 +10673,9 @@ function makeGetEndowmentsForConfig ({ createFunctionWrapper }) {
    *
    */
   function getEndowmentsForConfig (sourceRef, config, unwrapTo, unwrapFrom) {
-    if (!config.globals) return {}
+    if (!config.globals) {
+      return {}
+    }
     // validate read access from config
     const whitelistedReads = []
     const explicitlyBanned = []
@@ -10641,7 +10692,9 @@ function makeGetEndowmentsForConfig ({ createFunctionWrapper }) {
         return 
       }
       // write access handled elsewhere
-      if (configValue === 'write') return
+      if (configValue === 'write') {
+        return
+      }
       if (configValue !== true) {
         throw new Error(`LavaMoat - unrecognizable policy value (${typeof configValue}) for path "${path}"`)
       }
@@ -10650,7 +10703,7 @@ function makeGetEndowmentsForConfig ({ createFunctionWrapper }) {
     return makeMinimalViewOfRef(sourceRef, whitelistedReads, unwrapTo, unwrapFrom, explicitlyBanned)
   }
 
-  function makeMinimalViewOfRef (sourceRef, paths, unwrapTo, unwrapFrom, explicitlyBanned = []){
+  function makeMinimalViewOfRef (sourceRef, paths, unwrapTo, unwrapFrom, explicitlyBanned = []) {
     const targetRef = {}
     paths.forEach(path => {
       copyValueAtPath('', path.split('.'), explicitlyBanned, sourceRef, targetRef, unwrapTo, unwrapFrom)
@@ -10659,7 +10712,9 @@ function makeGetEndowmentsForConfig ({ createFunctionWrapper }) {
   }
 
   function extendPath(visited, next) {
-    if (!visited || visited.length === 0) return next
+    if (!visited || visited.length === 0) {
+      return next
+    }
     return `${visited}.${next}`
   }
 
@@ -10709,7 +10764,7 @@ function makeGetEndowmentsForConfig ({ createFunctionWrapper }) {
           value: containerRef,
           writable: sourceWritable,
           enumerable: sourcePropDesc.enumerable,
-          configurable: sourcePropDesc.configurable
+          configurable: sourcePropDesc.configurable,
         }
         Reflect.defineProperty(targetRef, nextPart, newPropDesc)
         // the newly created container will be the next target
@@ -10750,7 +10805,7 @@ function makeGetEndowmentsForConfig ({ createFunctionWrapper }) {
       value: newValue,
       writable: sourceWritable,
       enumerable: sourcePropDesc.enumerable,
-      configurable: sourcePropDesc.configurable
+      configurable: sourcePropDesc.configurable,
     }
     Reflect.defineProperty(targetRef, nextPart, newPropDesc)
 
@@ -10845,7 +10900,9 @@ function getPropertyDescriptorDeep (target, key) {
       receiver = receiver.__proto__
     }
     // abort if this is the end of the prototype chain.
-    if (!receiver) return { prop: null, receiver: null }
+    if (!receiver) {
+      return { prop: null, receiver: null }
+    }
   }
 }
 
@@ -10873,7 +10930,7 @@ function makePrepareRealmGlobalFromConfig ({ createFunctionWrapper }) {
   return {
     prepareCompartmentGlobalFromConfig,
     getTopLevelReadAccessFromPackageConfig,
-    getTopLevelWriteAccessFromPackageConfig
+    getTopLevelWriteAccessFromPackageConfig,
   }
 
   function getTopLevelReadAccessFromPackageConfig (globalsConfig) {
@@ -10912,7 +10969,7 @@ function makePrepareRealmGlobalFromConfig ({ createFunctionWrapper }) {
         set () {
           // TODO: there should be a config to throw vs silently ignore
           console.warn(`LavaMoat: ignoring write attempt to read-access global "${key}"`)
-        }
+        },
       })
     })
 
@@ -10931,15 +10988,19 @@ function makePrepareRealmGlobalFromConfig ({ createFunctionWrapper }) {
           globalStore.set(key, value)
         },
         enumerable: true,
-        configurable: true
+        configurable: true,
       })
     })
 
     // set circular globalRefs
     globalThisRefs.forEach(key => {
       // if globalRef is actually an endowment, ignore
-      if (topLevelReadAccessKeys.includes(key)) return
-      if (topLevelWriteAccessKeys.includes(key)) return
+      if (topLevelReadAccessKeys.includes(key)) {
+        return
+      }
+      if (topLevelWriteAccessKeys.includes(key)) {
+        return
+      }
       // set circular ref to global
       packageCompartmentGlobal[key] = packageCompartmentGlobal
     })
@@ -11093,11 +11154,22 @@ module.exports = {
       if (!Array.isArray(scuttleGlobalThisExceptions)) {
         throw new Error(`LavaMoat - scuttleGlobalThisExceptions must be an array, got "${typeof scuttleGlobalThisExceptions}"`)
       }
+      // turn scuttleGlobalThisExceptions regexes strings to actual regexes
+      for (let i = 0; i < scuttleGlobalThisExceptions.length; i++) {
+        const prop = scuttleGlobalThisExceptions[i]
+        if (!prop.startsWith('/')) {
+          continue
+        }
+        const parts = prop.split('/')
+        const pattern = parts.slice(1, -1).join('/')
+        const flags = parts[parts.length - 1]
+        scuttleGlobalThisExceptions[i] = new RegExp(pattern, flags)
+      }
       performScuttleGlobalThis(globalRef, scuttleGlobalThisExceptions)
     }
 
     const kernel = {
-      internalRequire
+      internalRequire,
     }
     if (debugMode) {
       kernel._getPolicyForPackage = getPolicyForPackage
@@ -11112,42 +11184,35 @@ module.exports = {
         .forEach(proto =>
           props.push(...Object.getOwnPropertyNames(proto)))
 
-      for (let i = 0; i < extraPropsToAvoid.length; i++) {
-        const prop = extraPropsToAvoid[i]
-        if (!prop.startsWith('/')) {
-          continue
-        }
-        const parts = prop.split('/');
-        const pattern = parts.slice(1, -1).join('/')
-        const flags = parts[parts.length - 1]
-        extraPropsToAvoid[i] = new RegExp(pattern, flags)
-      }
-
       // support LM,SES exported APIs and polyfills
       const avoidForLavaMoatCompatibility = ['Compartment', 'Error', 'globalThis']
       const propsToAvoid = new Set([...avoidForLavaMoatCompatibility, ...extraPropsToAvoid])
 
+      const obj = Object.create(null)
       for (const prop of props) {
+        function set() {
+          console.warn(
+            `LavaMoat - property "${prop}" of globalThis cannot be set under scuttling mode. ` +
+            'To learn more visit https://github.com/LavaMoat/LavaMoat/pull/360.',
+          )
+        }
+        function get() {
+          throw new Error(
+            `LavaMoat - property "${prop}" of globalThis is inaccessible under scuttling mode. ` +
+            'To learn more visit https://github.com/LavaMoat/LavaMoat/pull/360.',
+          )
+        }
         if (shouldAvoidProp(propsToAvoid, prop)) {
           continue
         }
-        if (Object.getOwnPropertyDescriptor(globalRef, prop)?.configurable === false) {
+        let desc = Object.getOwnPropertyDescriptor(globalRef, prop)
+        if (desc?.configurable === true) {
+          desc = { configurable: false, set, get }
+        } else if (desc?.writable === true) {
+          const p = new Proxy(obj, { getPrototypeOf: get, get, set } )
+          desc = { configurable: false, writable: false, value: p }
+        } else {
           continue
-        }
-        const desc = {
-          set: () => {
-            console.warn(
-              `LavaMoat - property "${prop}" of globalThis cannot be set under scuttling mode. ` +
-              `To learn more visit https://github.com/LavaMoat/LavaMoat/pull/360.`
-            )
-          },
-          get: () => {
-            throw new Error(
-              `LavaMoat - property "${prop}" of globalThis is inaccessible under scuttling mode. ` +
-              `To learn more visit https://github.com/LavaMoat/LavaMoat/pull/360.`
-            )
-          },
-          configurable: false
         }
         Object.defineProperty(globalRef, prop, desc)
       }
@@ -11182,7 +11247,9 @@ module.exports = {
 
         // parse and validate module data
         const { package: packageName, source: moduleSource } = moduleData
-        if (!packageName) throw new Error(`LavaMoat - missing packageName for module "${moduleId}"`)
+        if (!packageName) {
+          throw new Error(`LavaMoat - missing packageName for module "${moduleId}"`)
+        }
         const packagePolicy = getPolicyForPackage(lavamoatConfig, packageName)
 
         // create the moduleObj and initializer
@@ -11262,7 +11329,9 @@ module.exports = {
       // validate that the import is allowed
       if (!parentIsEntryModule && !isSamePackage && !isInParentWhitelist) {
         let typeText = ' '
-        if (moduleData.type === 'builtin') typeText = ' node builtin '
+        if (moduleData.type === 'builtin') {
+          typeText = ' node builtin '
+        }
         throw new Error(`LavaMoat - required${typeText}package not in allowlist: package "${parentModulePackageName}" requested "${packageName}" as "${requestedName}"`)
       }
 
@@ -11361,7 +11430,9 @@ module.exports = {
       // the index for the common prototypal ancestor, Object.prototype
       // this should always be the last index, but we check just in case
       const commonPrototypeIndex = globalProtoChain.findIndex(globalProtoChainEntry => globalProtoChainEntry === Object.prototype)
-      if (commonPrototypeIndex === -1) throw new Error('Lavamoat - unable to find common prototype between Compartment and globalRef')
+      if (commonPrototypeIndex === -1) {
+        throw new Error('Lavamoat - unable to find common prototype between Compartment and globalRef')
+      }
       // we will copy endowments from all entries in the prototype chain, excluding Object.prototype
       const endowmentSources = globalProtoChain.slice(0, commonPrototypeIndex)
 
@@ -11435,7 +11506,7 @@ module.exports = {
           // unwrap to
           globalRef,
           // unwrap from
-          packageCompartment.globalThis
+          packageCompartment.globalThis,
         )
       } catch (err) {
         const errMsg = `Lavamoat - failed to prepare endowments for package "${packageName}":\n${err.stack}`
@@ -11509,7 +11580,7 @@ module.exports = {
       scuttleGlobalThisExceptions,
       debugMode,
       runWithPrecompiledModules,
-      reportStatsHook
+      reportStatsHook,
     })
     return kernel
   }
@@ -11579,7 +11650,9 @@ module.exports = {
   // it is called by the modules collection
   function loadBundle (newModules, entryPoints, bundlePolicy) {
     // verify + load config
-    if (bundlePolicy) loadPolicy(bundlePolicy)
+    if (bundlePolicy) {
+      loadPolicy(bundlePolicy)
+    }
     // verify + load in each module
     for (const [moduleId, moduleDeps, initFn, { package: packageName, type }] of newModules) {
       // verify that module is new
@@ -11615,7 +11688,7 @@ module.exports = {
   function onStatsReady (moduleGraphStatsObj) {
     const graphId = Date.now()
     console.warn(`completed module graph init "${graphId}" in ${moduleGraphStatsObj.value}ms ("${moduleGraphStatsObj.name}")`)
-    console.warn(`logging module init stats object:`)
+    console.warn('logging module init stats object:')
     console.warn(JSON.stringify(moduleGraphStatsObj, null, 2))
   }
 

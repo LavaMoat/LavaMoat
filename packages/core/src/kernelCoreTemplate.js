@@ -18,7 +18,7 @@
     scuttleGlobalThisExceptions,
     debugMode,
     runWithPrecompiledModules,
-    reportStatsHook
+    reportStatsHook,
   }) {
     // prepare the LavaMoat kernel-core factory
     // factory is defined within a Compartment
@@ -46,7 +46,7 @@
       scuttleGlobalThisExceptions,
       debugMode,
       runWithPrecompiledModules,
-      reportStatsHook
+      reportStatsHook,
     })
 
     return lavamoatKernel
@@ -66,7 +66,7 @@
     scuttleGlobalThisExceptions = [],
     debugMode = false,
     runWithPrecompiledModules = false,
-    reportStatsHook = () => {}
+    reportStatsHook = () => {},
   }) {
     // "templateRequire" calls are inlined in "generateKernel"
     const generalUtils = templateRequire('makeGeneralUtils')()
@@ -86,11 +86,22 @@
       if (!Array.isArray(scuttleGlobalThisExceptions)) {
         throw new Error(`LavaMoat - scuttleGlobalThisExceptions must be an array, got "${typeof scuttleGlobalThisExceptions}"`)
       }
+      // turn scuttleGlobalThisExceptions regexes strings to actual regexes
+      for (let i = 0; i < scuttleGlobalThisExceptions.length; i++) {
+        const prop = scuttleGlobalThisExceptions[i]
+        if (!prop.startsWith('/')) {
+          continue
+        }
+        const parts = prop.split('/')
+        const pattern = parts.slice(1, -1).join('/')
+        const flags = parts[parts.length - 1]
+        scuttleGlobalThisExceptions[i] = new RegExp(pattern, flags)
+      }
       performScuttleGlobalThis(globalRef, scuttleGlobalThisExceptions)
     }
 
     const kernel = {
-      internalRequire
+      internalRequire,
     }
     if (debugMode) {
       kernel._getPolicyForPackage = getPolicyForPackage
@@ -105,42 +116,35 @@
         .forEach(proto =>
           props.push(...Object.getOwnPropertyNames(proto)))
 
-      for (let i = 0; i < extraPropsToAvoid.length; i++) {
-        const prop = extraPropsToAvoid[i]
-        if (!prop.startsWith('/')) {
-          continue
-        }
-        const parts = prop.split('/')
-        const pattern = parts.slice(1, -1).join('/')
-        const flags = parts[parts.length - 1]
-        extraPropsToAvoid[i] = new RegExp(pattern, flags)
-      }
-
       // support LM,SES exported APIs and polyfills
       const avoidForLavaMoatCompatibility = ['Compartment', 'Error', 'globalThis']
       const propsToAvoid = new Set([...avoidForLavaMoatCompatibility, ...extraPropsToAvoid])
 
+      const obj = Object.create(null)
       for (const prop of props) {
+        function set() {
+          console.warn(
+            `LavaMoat - property "${prop}" of globalThis cannot be set under scuttling mode. ` +
+            'To learn more visit https://github.com/LavaMoat/LavaMoat/pull/360.',
+          )
+        }
+        function get() {
+          throw new Error(
+            `LavaMoat - property "${prop}" of globalThis is inaccessible under scuttling mode. ` +
+            'To learn more visit https://github.com/LavaMoat/LavaMoat/pull/360.',
+          )
+        }
         if (shouldAvoidProp(propsToAvoid, prop)) {
           continue
         }
-        if (Object.getOwnPropertyDescriptor(globalRef, prop)?.configurable === false) {
+        let desc = Object.getOwnPropertyDescriptor(globalRef, prop)
+        if (desc?.configurable === true) {
+          desc = { configurable: false, set, get }
+        } else if (desc?.writable === true) {
+          const p = new Proxy(obj, { getPrototypeOf: get, get, set } )
+          desc = { configurable: false, writable: false, value: p }
+        } else {
           continue
-        }
-        const desc = {
-          set: () => {
-            console.warn(
-              `LavaMoat - property "${prop}" of globalThis cannot be set under scuttling mode. ` +
-              'To learn more visit https://github.com/LavaMoat/LavaMoat/pull/360.'
-            )
-          },
-          get: () => {
-            throw new Error(
-              `LavaMoat - property "${prop}" of globalThis is inaccessible under scuttling mode. ` +
-              'To learn more visit https://github.com/LavaMoat/LavaMoat/pull/360.'
-            )
-          },
-          configurable: false
         }
         Object.defineProperty(globalRef, prop, desc)
       }
@@ -175,7 +179,9 @@
 
         // parse and validate module data
         const { package: packageName, source: moduleSource } = moduleData
-        if (!packageName) throw new Error(`LavaMoat - missing packageName for module "${moduleId}"`)
+        if (!packageName) {
+          throw new Error(`LavaMoat - missing packageName for module "${moduleId}"`)
+        }
         const packagePolicy = getPolicyForPackage(lavamoatConfig, packageName)
 
         // create the moduleObj and initializer
@@ -255,7 +261,9 @@
       // validate that the import is allowed
       if (!parentIsEntryModule && !isSamePackage && !isInParentWhitelist) {
         let typeText = ' '
-        if (moduleData.type === 'builtin') typeText = ' node builtin '
+        if (moduleData.type === 'builtin') {
+          typeText = ' node builtin '
+        }
         throw new Error(`LavaMoat - required${typeText}package not in allowlist: package "${parentModulePackageName}" requested "${packageName}" as "${requestedName}"`)
       }
 
@@ -354,7 +362,9 @@
       // the index for the common prototypal ancestor, Object.prototype
       // this should always be the last index, but we check just in case
       const commonPrototypeIndex = globalProtoChain.findIndex(globalProtoChainEntry => globalProtoChainEntry === Object.prototype)
-      if (commonPrototypeIndex === -1) throw new Error('Lavamoat - unable to find common prototype between Compartment and globalRef')
+      if (commonPrototypeIndex === -1) {
+        throw new Error('Lavamoat - unable to find common prototype between Compartment and globalRef')
+      }
       // we will copy endowments from all entries in the prototype chain, excluding Object.prototype
       const endowmentSources = globalProtoChain.slice(0, commonPrototypeIndex)
 
@@ -428,7 +438,7 @@
           // unwrap to
           globalRef,
           // unwrap from
-          packageCompartment.globalThis
+          packageCompartment.globalThis,
         )
       } catch (err) {
         const errMsg = `Lavamoat - failed to prepare endowments for package "${packageName}":\n${err.stack}`

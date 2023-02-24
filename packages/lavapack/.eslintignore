@@ -5,3 +5,4 @@
 !test/**/*.js
 
 src/runtime.js
+src/runtime-cjs.js

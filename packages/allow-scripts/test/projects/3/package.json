@@ -10,7 +10,7 @@
   },
   "devDependencies": {},
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "good"
   },
   "keywords": [],
   "author": "",
@@ -18,7 +18,11 @@
   "lavamoat": {
     "allowScripts": {
       "bbb>good_dep": true,
-      "evil_dep": false
+      "evil_dep": false,
+      "bbb": true
+    },
+    "allowBins": {
+      "good": "node_modules/aaa/shouldntrun.sh"
     }
   }
 }

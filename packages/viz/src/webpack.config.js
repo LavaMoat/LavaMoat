@@ -12,8 +12,9 @@ module.exports = {
     port: 9000,
     // make available over local network
     // with https access for webxr
-    host: '0.0.0.0',
-    https: true,
+    // host: '0.0.0.0',
+    allowedHosts: ['.ngrok.io', 'localhost'],
+    // https: true,
   },
   module: {
     rules: [
@@ -38,6 +39,7 @@ module.exports = {
     new CopyPlugin({
       patterns: [
         { from: './src/example-policies/', to: `${distPath}/` },
+        { from: './src/assets/', to: `${distPath}/assets/` },
       ],
     }),
   ],

@@ -8,7 +8,7 @@ class LavamoatModuleRecord {
     content,
     importMap = {},
     ast,
-    moduleInitializer
+    moduleInitializer,
   }) {
     this.specifier = specifier
     this.file = file

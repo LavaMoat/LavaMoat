@@ -1,6 +1,6 @@
 
 module.exports = {
-  checkForResolutionOverride
+  checkForResolutionOverride,
 }
 
 function checkForResolutionOverride (resolutions, parentPackageName, requestedName) {

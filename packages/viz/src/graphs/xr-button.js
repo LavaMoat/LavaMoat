@@ -58,10 +58,10 @@ export default class XrButton extends React.Component {
 
     return (
       <button
-        className="xrButton"
+        className='xrButton'
         onClick={() => this.toggleSession()}
+        disabled={!showButton}
         style={{
-          display: showButton ? 'block' : 'none',
           cursor: 'pointer',
           width: '100px',
         }}

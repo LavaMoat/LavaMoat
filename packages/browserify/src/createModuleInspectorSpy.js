@@ -8,13 +8,15 @@ module.exports = { createModuleInspectorSpy }
 // it calls `onResult` with the config when the stream ends.
 
 function createModuleInspectorSpy ({ onResult, policyOverride, isBuiltin, includeDebugInfo }) {
-  if (!isBuiltin) throw new Error('createModuleInspectorSpy - must specify "isBuiltin"')
+  if (!isBuiltin) {
+    throw new Error('createModuleInspectorSpy - must specify "isBuiltin"')
+  }
   const inspector = createModuleInspector({ isBuiltin, includeDebugInfo })
   const configSpy = createSpy(
     // inspect each module
     (moduleData) => inspectBrowserifyModuleData(moduleData, inspector),
     // after all modules, submit config
-    () => onResult(inspector.generatePolicy({ policyOverride }))
+    () => onResult(inspector.generatePolicy({ policyOverride })),
   )
   return configSpy
 }
@@ -30,7 +32,7 @@ function inspectBrowserifyModuleData (moduleData, inspector) {
     type: 'js',
     importMap: moduleData.deps,
     // likely undefined
-    ast: moduleData.ast
+    ast: moduleData.ast,
   })
   inspector.inspectModule(moduleRecord)
 }

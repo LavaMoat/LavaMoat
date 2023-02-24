@@ -1,10 +1,11 @@
-;(function(){
+;(function() {
   // this runtime template code is destined to wrap LavaMoat entirely,
   // therefore this is our way of capturing access to basic APIs LavaMoat
   // uses to still be accessible only to LavaMoat after scuttling occurs
   const {
     RegExp,
     Reflect,
+    Proxy,
     Object,
     Error,
     Array,
@@ -86,7 +87,9 @@
   // it is called by the modules collection
   function loadBundle (newModules, entryPoints, bundlePolicy) {
     // verify + load config
-    if (bundlePolicy) loadPolicy(bundlePolicy)
+    if (bundlePolicy) {
+      loadPolicy(bundlePolicy)
+    }
     // verify + load in each module
     for (const [moduleId, moduleDeps, initFn, { package: packageName, type }] of newModules) {
       // verify that module is new
