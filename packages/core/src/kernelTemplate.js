@@ -23,13 +23,19 @@
     } = __lavamoatSecurityOptions__
 
     // identify the globalRef
-    const globalRef = (typeof globalThis !== 'undefined') ? globalThis : (typeof self !== 'undefined') ? self : (typeof global !== 'undefined') ? global : undefined
+    let globalRef = globalThis
+
     if (!globalRef) {
-      throw new Error('Lavamoat - unable to identify globalRef')
+      globalRef = self || global
+      if (!globalRef) {
+        throw new Error('Lavamoat - globalThis not defined')
+      }
+
+      console.error('LavaMoat - Deprecation Warning: global reference is expected as `globalThis`')
     }
 
     // polyfill globalThis
-    if (globalRef && !globalRef.globalThis) {
+    if (!globalRef.globalThis) {
       globalRef.globalThis = globalRef
     }
 
