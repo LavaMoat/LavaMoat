@@ -70,16 +70,7 @@
 })({ onStatsReady }) : () => {}
   const createKernel = // LavaMoat Prelude
 (function () {
-  // identify the globalRef
-  const globalRef = (typeof globalThis !== 'undefined') ? globalThis : (typeof self !== 'undefined') ? self : (typeof global !== 'undefined') ? global : undefined
-  if (!globalRef) {
-    throw new Error('Lavamoat - unable to identify globalRef')
-  }
-
-  // polyfill globalThis
-  if (globalRef && !globalRef.globalThis) {
-    globalRef.globalThis = globalRef
-  }
+  const globalRef = globalThis;
 
   const SNOW = globalRef.SNOW || ((cb, win) => cb(win))
 
