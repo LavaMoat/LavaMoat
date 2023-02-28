@@ -2,7 +2,14 @@
 (function () {
   const globalRef = globalThis;
 
-  const SNOW = globalRef.SNOW || ((cb, win) => cb(win))
+  const {
+    includeSnow,
+  } = __lavamoatBuilderOptions__
+
+  const SNOW = globalRef.SNOW;
+  if (!SNOW && includeSnow) {
+    throw 'LavaMoat - Snow is expected to exist but it does not'
+  }
 
   return createKernel
 

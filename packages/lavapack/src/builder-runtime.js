@@ -18,9 +18,10 @@ async function buildRuntimeCJS () {
 }
 
 async function buildRuntimeES (opts) {
+  const includeSnow = Boolean(opts.includeSnow)
   const runtimeTemplate = await readFile(pathJoin(__dirname, 'runtime-template.js'), 'utf8')
   let output = runtimeTemplate
-  if (opts.includeSnow) {
+  if (includeSnow) {
     output = getSnowSrc() + '\n\n' + output
   }
   // inline kernel
@@ -30,6 +31,7 @@ async function buildRuntimeES (opts) {
   const statsCode = `(${makeInitStatsHook})({ onStatsReady })`
   output = stringReplace(output, '__reportStatsHook__', statsCode)
   output = markAsGenerated(output, 'runtime-template.js')
+  output = stringReplace(output, '__lavamoatBuilderOptions__', JSON.stringify({includeSnow}))
   await writeFile(pathJoin(__dirname, 'runtime.js'), output)
 }
 

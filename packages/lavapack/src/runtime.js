@@ -72,7 +72,14 @@
 (function () {
   const globalRef = globalThis;
 
-  const SNOW = globalRef.SNOW || ((cb, win) => cb(win))
+  const {
+    includeSnow,
+  } = {"includeSnow":false}
+
+  const SNOW = globalRef.SNOW;
+  if (!SNOW && includeSnow) {
+    throw 'LavaMoat - Snow is expected to exist but it does not'
+  }
 
   return createKernel
 
@@ -11134,7 +11141,15 @@ module.exports = {
   })()
   return module.exports
 })()
-    const SNOW = globalRef.SNOW || ((cb, win) => cb(win))
+
+    const {
+      includeSnow,
+    } = {"includeSnow":false}
+
+    const SNOW = globalRef.SNOW;
+    if (!SNOW && includeSnow) {
+      throw 'LavaMoat - Snow is expected to exist but it does not';
+    }
 
     const moduleCache = new Map()
     const packageCompartmentCache = new Map()
