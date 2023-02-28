@@ -11142,10 +11142,6 @@ module.exports = {
   return module.exports
 })()
 
-    const {
-      includeSnow,
-    } = {"includeSnow":false}
-
     const SNOW = globalRef.SNOW;
     if (!SNOW && includeSnow) {
       throw 'LavaMoat - Snow is expected to exist but it does not';

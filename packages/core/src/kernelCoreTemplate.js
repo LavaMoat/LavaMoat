@@ -74,10 +74,6 @@
     const { prepareCompartmentGlobalFromConfig } = templateRequire('makePrepareRealmGlobalFromConfig')(generalUtils)
     const { strictScopeTerminator } = templateRequire('strict-scope-terminator')
 
-    const {
-      includeSnow,
-    } = __lavamoatBuilderOptions__
-
     const SNOW = globalRef.SNOW;
     if (!SNOW && includeSnow) {
       throw 'LavaMoat - Snow is expected to exist but it does not';
