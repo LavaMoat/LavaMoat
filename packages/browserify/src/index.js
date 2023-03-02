@@ -119,6 +119,7 @@ function getConfigurationFromPluginOpts (pluginOpts) {
   }
 
   const nonAliasedOptions = [
+    'useSnow',
     'scuttleGlobalThis',
     'scuttleGlobalThisExceptions',
     'bundleWithPrecompiledModules',
@@ -158,6 +159,7 @@ function getConfigurationFromPluginOpts (pluginOpts) {
     pruneConfig: Boolean(pluginOpts.prunePolicy),
     debugMode: Boolean(pluginOpts.debugMode),
     statsMode: Boolean(pluginOpts.statsMode),
+    useSnow: Boolean(pluginOpts.useSnow),
     scuttleGlobalThis: pluginOpts.scuttleGlobalThis,
     scuttleGlobalThisExceptions: pluginOpts.scuttleGlobalThisExceptions,
     writeAutoPolicy: Boolean(pluginOpts.writeAutoPolicy || pluginOpts.writeAutoPolicyDebug),

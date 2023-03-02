@@ -88,18 +88,25 @@
     } = {"debugMode":false}
     // security options are hard-coded at build time
     const {
+      useSnow,
       scuttleGlobalThis,
       scuttleGlobalThisExceptions,
     } = __lavamoatSecurityOptions__
 
     // identify the globalRef
-    const globalRef = (typeof globalThis !== 'undefined') ? globalThis : (typeof self !== 'undefined') ? self : (typeof global !== 'undefined') ? global : undefined
+    let globalRef = globalThis
+
     if (!globalRef) {
-      throw new Error('Lavamoat - unable to identify globalRef')
+      globalRef = self || global
+      if (!globalRef) {
+        throw new Error('Lavamoat - globalThis not defined')
+      }
+
+      console.error('LavaMoat - Deprecation Warning: global reference is expected as `globalThis`')
     }
 
     // polyfill globalThis
-    if (globalRef && !globalRef.globalThis) {
+    if (!globalRef.globalThis) {
       globalRef.globalThis = globalRef
     }
 
@@ -10547,6 +10554,7 @@ function observeImports(map, importName, importIndex) {
     getExternalCompartment,
     globalThisRefs,
     // security options
+    useSnow,
     scuttleGlobalThis,
     scuttleGlobalThisExceptions,
     debugMode,
@@ -10575,6 +10583,7 @@ function observeImports(map, importName, importIndex) {
       prepareModuleInitializerArgs,
       getExternalCompartment,
       globalThisRefs,
+      useSnow,
       scuttleGlobalThis,
       scuttleGlobalThisExceptions,
       debugMode,
@@ -10595,6 +10604,7 @@ function observeImports(map, importName, importIndex) {
     prepareModuleInitializerArgs,
     getExternalCompartment,
     globalThisRefs = ['globalThis'],
+    useSnow = false,
     scuttleGlobalThis = false,
     scuttleGlobalThisExceptions = [],
     debugMode = false,
@@ -11142,6 +11152,14 @@ module.exports = {
   return module.exports
 })()
 
+    let snow = (cb, win) => cb(win)
+    if (useSnow) {
+      if (!globalRef.SNOW) {
+        throw new Error('LavaMoat - Snow is expected to exist but it does not');
+      }
+      snow = globalRef.SNOW
+    }
+
     const moduleCache = new Map()
     const packageCompartmentCache = new Map()
     const globalStore = new Map()
@@ -11165,7 +11183,7 @@ module.exports = {
         const flags = parts[parts.length - 1]
         scuttleGlobalThisExceptions[i] = new RegExp(pattern, flags)
       }
-      performScuttleGlobalThis(globalRef, scuttleGlobalThisExceptions)
+      snow(realm => performScuttleGlobalThis(realm, scuttleGlobalThisExceptions), globalRef)
     }
 
     const kernel = {
@@ -11576,6 +11594,7 @@ module.exports = {
       getExternalCompartment,
       globalRef,
       globalThisRefs,
+      useSnow,
       scuttleGlobalThis,
       scuttleGlobalThisExceptions,
       debugMode,

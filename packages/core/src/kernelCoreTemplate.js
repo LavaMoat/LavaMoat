@@ -14,6 +14,7 @@
     getExternalCompartment,
     globalThisRefs,
     // security options
+    useSnow,
     scuttleGlobalThis,
     scuttleGlobalThisExceptions,
     debugMode,
@@ -42,6 +43,7 @@
       prepareModuleInitializerArgs,
       getExternalCompartment,
       globalThisRefs,
+      useSnow,
       scuttleGlobalThis,
       scuttleGlobalThisExceptions,
       debugMode,
@@ -62,6 +64,7 @@
     prepareModuleInitializerArgs,
     getExternalCompartment,
     globalThisRefs = ['globalThis'],
+    useSnow = false,
     scuttleGlobalThis = false,
     scuttleGlobalThisExceptions = [],
     debugMode = false,
@@ -73,6 +76,14 @@
     const { getEndowmentsForConfig, makeMinimalViewOfRef, applyEndowmentPropDescTransforms } = templateRequire('makeGetEndowmentsForConfig')(generalUtils)
     const { prepareCompartmentGlobalFromConfig } = templateRequire('makePrepareRealmGlobalFromConfig')(generalUtils)
     const { strictScopeTerminator } = templateRequire('strict-scope-terminator')
+
+    let snow = (cb, win) => cb(win)
+    if (useSnow) {
+      if (!globalRef.SNOW) {
+        throw new Error('LavaMoat - Snow is expected to exist but it does not');
+      }
+      snow = globalRef.SNOW
+    }
 
     const moduleCache = new Map()
     const packageCompartmentCache = new Map()
@@ -97,7 +108,7 @@
         const flags = parts[parts.length - 1]
         scuttleGlobalThisExceptions[i] = new RegExp(pattern, flags)
       }
-      performScuttleGlobalThis(globalRef, scuttleGlobalThisExceptions)
+      snow(realm => performScuttleGlobalThis(realm, scuttleGlobalThisExceptions), globalRef)
     }
 
     const kernel = {
