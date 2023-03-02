@@ -14,11 +14,11 @@ const nativeRequire = require
 
 module.exports = { createKernel }
 
-function createKernel ({ projectRoot, lavamoatPolicy, canonicalNameMap, debugMode, statsMode, useSnow, scuttleGlobalThis, scuttleGlobalThisExceptions }) {
+function createKernel ({ projectRoot, lavamoatPolicy, canonicalNameMap, debugMode, statsMode, scuttleGlobalThis, scuttleGlobalThisExceptions }) {
   const { resolutions } = lavamoatPolicy
   const getRelativeModuleId = createModuleResolver({ projectRoot, resolutions, canonicalNameMap })
   const loadModuleData = createModuleLoader({ canonicalNameMap })
-  const kernelSrc = generateKernel({ debugMode, useSnow, scuttleGlobalThis, scuttleGlobalThisExceptions })
+  const kernelSrc = generateKernel({ debugMode, useSnow: false, scuttleGlobalThis, scuttleGlobalThisExceptions })
   const createKernel = evaluateWithSourceUrl('LavaMoat/node/kernel', kernelSrc)
   const reportStatsHook = statsMode ? makeInitStatsHook({ onStatsReady }) : noop
   const kernel = createKernel({
