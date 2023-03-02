@@ -80,7 +80,7 @@
     let snow = (cb, win) => cb(win)
     if (useSnow) {
       if (!globalRef.SNOW) {
-        throw new Error('LavaMoat - Snow is expected to exist but it does not');
+        throw new Error('LavaMoat - Snow is expected to exist but it does not')
       }
       snow = globalRef.SNOW
     }
