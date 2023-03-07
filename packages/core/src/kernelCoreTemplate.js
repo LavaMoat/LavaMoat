@@ -74,6 +74,8 @@
     const { prepareCompartmentGlobalFromConfig } = templateRequire('makePrepareRealmGlobalFromConfig')(generalUtils)
     const { strictScopeTerminator } = templateRequire('strict-scope-terminator')
 
+    const skipDescCallIgnoreList = ['localStorage', 'sessionStorage', 'caches', 'indexedDB']
+
     const moduleCache = new Map()
     const packageCompartmentCache = new Map()
     const globalStore = new Map()
@@ -369,10 +371,11 @@
       const endowmentSources = globalProtoChain.slice(0, commonPrototypeIndex)
 
       // call all getters, in case of behavior change (such as with FireFox lazy getters)
+      // except for some specific descriptors that crash inside sandboxed frames
       // call on contents of endowmentsSources directly instead of in new array instances. If there is a lazy getter it only changes the original prop desc.
       endowmentSources.forEach(source => {
         const descriptors = Object.getOwnPropertyDescriptors(source)
-        Object.values(descriptors).forEach(desc => {
+        Object.entries(descriptors).filter(([name]) => !skipDescCallIgnoreList.includes(name)).forEach(([_, desc]) => {
           if ('get' in desc) {
             Reflect.apply(desc.get, globalRef, [])
           }
