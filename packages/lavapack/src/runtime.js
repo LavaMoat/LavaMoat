@@ -93,13 +93,19 @@
     } = __lavamoatSecurityOptions__
 
     // identify the globalRef
-    const globalRef = (typeof globalThis !== 'undefined') ? globalThis : (typeof self !== 'undefined') ? self : (typeof global !== 'undefined') ? global : undefined
+    let globalRef = globalThis
+
     if (!globalRef) {
-      throw new Error('Lavamoat - unable to identify globalRef')
+      globalRef = self || global
+      if (!globalRef) {
+        throw new Error('Lavamoat - globalThis not defined')
+      }
+
+      console.error('LavaMoat - Deprecation Warning: global reference is expected as `globalThis`')
     }
 
     // polyfill globalThis
-    if (globalRef && !globalRef.globalThis) {
+    if (!globalRef.globalThis) {
       globalRef.globalThis = globalRef
     }
 
@@ -10885,6 +10891,10 @@ function makeGetEndowmentsForConfig ({ createFunctionWrapper }) {
 function getPropertyDescriptorDeep (target, key) {
   let receiver = target
   while (true) {
+    // abort if this is the end of the prototype chain.
+    if (!receiver) {
+      return { prop: null, receiver: null }
+    }
     // support lookup on objects and primitives
     const typeofReceiver = typeof receiver
     if (typeofReceiver === 'object' || typeofReceiver === 'function') {
@@ -10898,10 +10908,6 @@ function getPropertyDescriptorDeep (target, key) {
       // prototype lookup for primitives
       // eslint-disable-next-line no-proto
       receiver = receiver.__proto__
-    }
-    // abort if this is the end of the prototype chain.
-    if (!receiver) {
-      return { prop: null, receiver: null }
     }
   }
 }
