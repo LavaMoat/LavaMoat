@@ -378,9 +378,7 @@
       // call on contents of endowmentsSources directly instead of in new array instances. If there is a lazy getter it only changes the original prop desc.
       endowmentSources.forEach(source => {
         const descriptors = Object.getOwnPropertyDescriptors(source)
-        Object.entries(descriptors)
-          .filter(([name]) => !sandboxedIframeMode || !sandboxedIframeForbiddenDescs.includes(name))
-          .forEach(([_, desc]) => {
+        Object.entries(descriptors).filter(([name]) => !sandboxedIframeMode || !sandboxedIframeForbiddenDescs.includes(name)).forEach(([_, desc]) => {
           if ('get' in desc) {
             Reflect.apply(desc.get, globalRef, [])
           }
