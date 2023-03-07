@@ -88,6 +88,7 @@
     } = {"debugMode":false}
     // security options are hard-coded at build time
     const {
+      sandboxedIframeMode,
       scuttleGlobalThis,
       scuttleGlobalThisExceptions,
     } = __lavamoatSecurityOptions__
@@ -10553,6 +10554,7 @@ function observeImports(map, importName, importIndex) {
     getExternalCompartment,
     globalThisRefs,
     // security options
+    sandboxedIframeMode,
     scuttleGlobalThis,
     scuttleGlobalThisExceptions,
     debugMode,
@@ -10581,6 +10583,7 @@ function observeImports(map, importName, importIndex) {
       prepareModuleInitializerArgs,
       getExternalCompartment,
       globalThisRefs,
+      sandboxedIframeMode,
       scuttleGlobalThis,
       scuttleGlobalThisExceptions,
       debugMode,
@@ -10601,6 +10604,7 @@ function observeImports(map, importName, importIndex) {
     prepareModuleInitializerArgs,
     getExternalCompartment,
     globalThisRefs = ['globalThis'],
+    sandboxedIframeMode = false,
     scuttleGlobalThis = false,
     scuttleGlobalThisExceptions = [],
     debugMode = false,
@@ -11148,7 +11152,7 @@ module.exports = {
   return module.exports
 })()
 
-    const skipDescCallIgnoreList = ['localStorage', 'sessionStorage', 'caches', 'indexedDB']
+    const sandboxedIframeForbiddenDescs = ['localStorage', 'sessionStorage', 'caches', 'indexedDB']
 
     const moduleCache = new Map()
     const packageCompartmentCache = new Map()
@@ -11445,11 +11449,13 @@ module.exports = {
       const endowmentSources = globalProtoChain.slice(0, commonPrototypeIndex)
 
       // call all getters, in case of behavior change (such as with FireFox lazy getters)
-      // except for some specific descriptors that crash inside sandboxed frames
+      // except for some specific descriptors that crash inside sandboxed frames (if sandboxedIframeMode:true)
       // call on contents of endowmentsSources directly instead of in new array instances. If there is a lazy getter it only changes the original prop desc.
       endowmentSources.forEach(source => {
         const descriptors = Object.getOwnPropertyDescriptors(source)
-        Object.entries(descriptors).filter(([name]) => !skipDescCallIgnoreList.includes(name)).forEach(([_, desc]) => {
+        Object.entries(descriptors)
+          .filter(([name]) => !sandboxedIframeMode || !sandboxedIframeForbiddenDescs.includes(name))
+          .forEach(([_, desc]) => {
           if ('get' in desc) {
             Reflect.apply(desc.get, globalRef, [])
           }
@@ -11533,9 +11539,9 @@ module.exports = {
 
       // sets up read/write access as configured
       const globalsConfig = packagePolicy.globals
-      for (const desc in globalsConfig) {
-        if (skipDescCallIgnoreList.includes(desc)) {
-          if (globalsConfig.hasOwnProperty(desc)) {
+      if (sandboxedIframeMode) {
+        for (const desc in globalsConfig) {
+          if (sandboxedIframeForbiddenDescs.includes(desc)) {
             globalsConfig[desc] = false
           }
         }
@@ -11593,6 +11599,7 @@ module.exports = {
       getExternalCompartment,
       globalRef,
       globalThisRefs,
+      sandboxedIframeMode,
       scuttleGlobalThis,
       scuttleGlobalThisExceptions,
       debugMode,

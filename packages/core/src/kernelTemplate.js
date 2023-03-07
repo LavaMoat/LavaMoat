@@ -18,6 +18,7 @@
     } = __lavamoatDebugOptions__
     // security options are hard-coded at build time
     const {
+      sandboxedIframeMode,
       scuttleGlobalThis,
       scuttleGlobalThisExceptions,
     } = __lavamoatSecurityOptions__
@@ -69,6 +70,7 @@
       getExternalCompartment,
       globalRef,
       globalThisRefs,
+      sandboxedIframeMode,
       scuttleGlobalThis,
       scuttleGlobalThisExceptions,
       debugMode,

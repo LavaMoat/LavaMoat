@@ -57,6 +57,7 @@ function createPacker({
   sourceRoot,
   sourceMapPrefix,
   bundleWithPrecompiledModules = true,
+  sandboxedIframeMode = false,
   scuttleGlobalThis = false,
   scuttleGlobalThisExceptions = [],
 } = {}) {
@@ -64,10 +65,10 @@ function createPacker({
   const parser = raw ? through.obj() : JSONStream.parse([true])
   const stream = through.obj(
     function (buf, _, next) {
-      parser.write(buf); next() 
+      parser.write(buf); next()
     },
     function () {
-      parser.end() 
+      parser.end()
     },
   )
 
@@ -92,6 +93,7 @@ function createPacker({
   }
 
   prelude = prelude.replace('__lavamoatSecurityOptions__', JSON.stringify({
+    sandboxedIframeMode,
     scuttleGlobalThis,
     scuttleGlobalThisExceptions,
   }))
@@ -164,7 +166,7 @@ function createPacker({
       stream.push(generateBundleLoaderInitial())
     }
     entryFiles = entryFiles.filter(function (x) {
-      return x !== undefined 
+      return x !== undefined
     })
 
     // filter the policy removing packages that arent included
@@ -197,7 +199,7 @@ function createPacker({
       if (sourceMapPrefix) {
         comment = comment.replace(
           /^\/\/#/, function () {
-            return sourceMapPrefix 
+            return sourceMapPrefix
           },
         )
       }

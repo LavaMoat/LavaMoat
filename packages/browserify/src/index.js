@@ -119,6 +119,7 @@ function getConfigurationFromPluginOpts (pluginOpts) {
   }
 
   const nonAliasedOptions = [
+    'sandboxedIframeMode',
     'scuttleGlobalThis',
     'scuttleGlobalThisExceptions',
     'bundleWithPrecompiledModules',
@@ -158,6 +159,7 @@ function getConfigurationFromPluginOpts (pluginOpts) {
     pruneConfig: Boolean(pluginOpts.prunePolicy),
     debugMode: Boolean(pluginOpts.debugMode),
     statsMode: Boolean(pluginOpts.statsMode),
+    sandboxedIframeMode: Boolean(pluginOpts.sandboxedIframeMode),
     scuttleGlobalThis: pluginOpts.scuttleGlobalThis,
     scuttleGlobalThisExceptions: pluginOpts.scuttleGlobalThisExceptions,
     writeAutoPolicy: Boolean(pluginOpts.writeAutoPolicy || pluginOpts.writeAutoPolicyDebug),

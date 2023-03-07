@@ -4,6 +4,7 @@ const browserify = require('browserify')
 // configure LavaMoat
 const lavamoatOpts = {
   writeAutoPolicy: false,
+  sandboxedIframeMode: false,
   scuttleGlobalThis: true,
   scuttleGlobalThisExceptions: ['print', /HTML[a-zA-Z]*Element/, 'prompt'],
 }
