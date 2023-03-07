@@ -459,6 +459,14 @@
 
       // sets up read/write access as configured
       const globalsConfig = packagePolicy.globals
+      for (const desc in globalsConfig) {
+        if (skipDescCallIgnoreList.includes(desc)) {
+          if (globalsConfig.hasOwnProperty(desc)) {
+            globalsConfig[desc] = false
+          }
+        }
+      }
+
       prepareCompartmentGlobalFromConfig(packageCompartment, globalsConfig, endowments, globalStore, globalThisRefs)
 
       // save the compartment for use by other modules in the package
