@@ -24,6 +24,7 @@
     "ava": "^3.15.0",
     "eslint-plugin-ava": "^11.0.0",
     "eslint-plugin-node": "^11.1.0",
+    "espree": "^7.3.0",
     "mississippi": "^4.0.0",
     "source-map": "^0.7.3"
   },
@@ -32,7 +33,9 @@
     "lint:eslint": "eslint .",
     "lint:fix": "eslint . --fix",
     "lint:deps": "depcheck",
-    "test": "ava --timeout=30s test/index.js",
+    "test": "yarn test:ava && yarn test:ecma",
+    "test:ava": "ava --timeout=30s test/index.js",
+    "test:ecma": "node test/runtimeEcma.js",
     "build": "node ./src/build-runtime.js"
   },
   "author": "kumavis",
