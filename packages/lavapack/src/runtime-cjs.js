@@ -6,12 +6,14 @@
   let globalRef = globalThis
 
   if (!globalRef) {
-    globalRef = self || global
-    if (!globalRef) {
-      throw new Error('Lavamoat - globalThis not defined')
-    }
+    globalRef = typeof self !== 'undefined' ? self : global
 
-    console.error('LavaMoat - Deprecation Warning: global reference is expected as `globalThis`')
+    if (typeof globalRef !== 'undefined') {
+      console.error('LavaMoat - Deprecation Warning: global reference is expected as `globalThis`')
+    }
+  }
+  if (!globalRef) {
+    throw new Error('Lavamoat - globalThis not defined')
   }
 
   // polyfill globalThis
@@ -20,7 +22,9 @@
   }
 
   // polyfill node/browserify's globalRef
-  globalThis.global = globalThis
+  if (!globalRef.global) {
+    globalRef.global = globalRef
+  }
 
   const {strictScopeTerminator} = // define strict-scope-terminator
 (function(){
@@ -152,7 +156,7 @@ module.exports = {
     runModule: Object.freeze(runModule),
   })
 
-  Object.defineProperty(globalThis, 'LavaPack', {value: LavaPack})
+  Object.defineProperty(globalRef, 'LavaPack', {value: LavaPack})
 
   function loadPolicy () {
     throw new Error('runtime-cjs: unable to enforce policy')
@@ -189,7 +193,7 @@ module.exports = {
     const moduleObject = { exports: {} }
     const evalKit = {
       scopeTerminator: strictScopeTerminator,
-      globalThis,
+      globalRef,
     }
     moduleCache.set(moduleId, moduleObject)
     const moduleData = moduleRegistry.get(moduleId)
