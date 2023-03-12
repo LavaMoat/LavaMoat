@@ -11160,7 +11160,7 @@ module.exports = {
       MouseEvent: ['relatedTarget', 'fromElement', 'toElement'],
       TouchEvent: ['targetTouches', 'touches'],
       Event: ['target', 'currentTarget', 'srcElement', 'composedPath'],
-    });
+    })
 
     const rootPackageName = '$root$'
     const rootPackageCompartment = createRootPackageCompartment(globalRef)
@@ -11200,7 +11200,7 @@ module.exports = {
      */
     function executeLockdownEvents(globalRef) {
       Object.keys(targetEvents).forEach((event) => {
-        const properties = targetEvents[event];
+        const properties = targetEvents[event]
         for (const property of properties) {
           if (globalRef.hasOwnProperty(event)) {
             Object.defineProperty(
@@ -11211,10 +11211,10 @@ module.exports = {
                 configurable: false,
                 writable: false,
               },
-          );
+            )
           }
         }
-      });
+      })
     }
 
     function performScuttleGlobalThis (globalRef, extraPropsToAvoid = new Array()) {
