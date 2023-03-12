@@ -78,6 +78,16 @@
     const packageCompartmentCache = new Map()
     const globalStore = new Map()
 
+    const targetEvents = Object.freeze({
+      UIEvent: ['view'],
+      MutationEvent: ['relatedNode'],
+      MessageEvent: ['source'],
+      FocusEvent: ['relatedTarget'],
+      MouseEvent: ['relatedTarget', 'fromElement', 'toElement'],
+      TouchEvent: ['targetTouches', 'touches'],
+      Event: ['target', 'currentTarget', 'srcElement', 'composedPath'],
+    });
+
     const rootPackageName = '$root$'
     const rootPackageCompartment = createRootPackageCompartment(globalRef)
 
@@ -97,6 +107,7 @@
         const flags = parts[parts.length - 1]
         scuttleGlobalThisExceptions[i] = new RegExp(pattern, flags)
       }
+      executeLockdownEvents(globalRef)
       performScuttleGlobalThis(globalRef, scuttleGlobalThisExceptions)
     }
 
@@ -109,6 +120,28 @@
     }
     Object.freeze(kernel)
     return kernel
+
+    /**
+     * Attenuate Event objects by replacing its own properties.
+     */
+    function executeLockdownEvents(globalRef) {
+      Object.keys(targetEvents).forEach((event) => {
+        const properties = targetEvents[event];
+        for (const property of properties) {
+          if (globalRef.hasOwnProperty(event)) {
+            Object.defineProperty(
+              globalRef[event].prototype,
+              property,
+              {
+                value: undefined,
+                configurable: false,
+                writable: false,
+              },
+          );
+          }
+        }
+      });
+    }
 
     function performScuttleGlobalThis (globalRef, extraPropsToAvoid = new Array()) {
       const props = new Array()
