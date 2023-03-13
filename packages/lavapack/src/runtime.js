@@ -11628,6 +11628,17 @@ module.exports = {
 
 
   function loadModuleData (moduleId) {
+    if (typeof window === 'undefined' && require('resolve').isCore(moduleId)) {
+      return {
+        type: 'builtin',
+        package: moduleId,
+        id: moduleId,
+        // Using unprotected require
+        moduleInitializer: (_, module) => {
+          module.exports = require(moduleId);
+        },
+      }
+    }
     if (!moduleRegistry.has(moduleId)) {
       throw new Error(`no module registered for "${moduleId}" (${typeof moduleId})`)
     }
