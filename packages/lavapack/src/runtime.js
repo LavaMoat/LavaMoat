@@ -11628,6 +11628,7 @@ module.exports = {
 
 
   function loadModuleData (moduleId) {
+    // eslint-disable-next-line node/global-require
     if (typeof window === 'undefined' && require('resolve').isCore(moduleId)) {
       return {
         type: 'builtin',
@@ -11635,7 +11636,8 @@ module.exports = {
         id: moduleId,
         // Using unprotected require
         moduleInitializer: (_, module) => {
-          module.exports = require(moduleId);
+          // eslint-disable-next-line node/global-require
+          module.exports = require(moduleId)
         },
       }
     }
