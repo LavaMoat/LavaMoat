@@ -7,7 +7,10 @@ const one = () => {
   }
   // this will throw if regex scuttling fails
   if (globalObject.Float32Array) {
-    module.exports = globalObject.Math.PI
+    // this will throw if Boolean.prototype.toString is scuttled
+    if (true.toString()) {
+      module.exports = globalObject.Math.PI
+    }
   }
 }
 
@@ -19,6 +22,21 @@ module.exports = [
       expectedResult: Math.PI,
       scuttleGlobalThis: true,
       scuttleGlobalThisExceptions: ['process', /[0-9]+/, 'Set', 'Reflect', 'Object', 'console', 'Array', 'RegExp', 'Date', 'Math'],
+    })
+    await autoConfigForScenario({ scenario })
+    return scenario
+  },
+  async () => {
+    const scenario = createScenarioFromScaffold({
+      name: 'scuttle - host env Boolean object is too scuttled to work',
+      defineOne: one,
+      scuttleGlobalThis: true,
+      scuttleMore: {
+        Boolean: ['toString'],
+      },
+      scuttleGlobalThisExceptions: ['process', /[0-9]+/, 'Set', 'Reflect', 'Object', 'console', 'Array', 'RegExp', 'Date', 'Math'],
+      expectedFailure: true,
+      expectedFailureMessageRegex: /SES_UNHANDLED_REJECTION|inacce_______ssible under scuttling mode./,
     })
     await autoConfigForScenario({ scenario })
     return scenario
