@@ -28,7 +28,7 @@ module.exports = [
   },
   async () => {
     const scenario = createScenarioFromScaffold({
-      name: 'scuttle - host env Boolean object is too scuttled to work',
+      name: 'scuttle - host env console.info object is too scuttled to work',
       defineOne: one,
       scuttleGlobalThis: true,
       scuttleMore: {
