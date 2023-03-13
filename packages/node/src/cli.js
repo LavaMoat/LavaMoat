@@ -27,6 +27,8 @@ function parseArgs () {
     .help()
 
   const parsedArgs = argsParser.parse()
+  parsedArgs['scuttleMore'] = JSON.parse(parsedArgs['scuttleMore'])
+  parsedArgs['scuttle-more'] = JSON.parse(parsedArgs['scuttle-more'])
 
   // patch process.argv so it matches the normal pattern
   // e.g. [runtime path, entrypoint, ...args]

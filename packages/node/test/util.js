@@ -11,6 +11,9 @@ function setOptToArgs(args, key, value) {
     value.forEach(v => setOptToArgs(args, key, v))
     return
   }
+  if (typeof value === 'object') {
+    value = JSON.stringify(value)
+  }
   if (value === true) {
     args.push(`--${key}`)
   } else if (typeof value === 'string') {
