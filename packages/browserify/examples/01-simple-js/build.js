@@ -5,6 +5,9 @@ const browserify = require('browserify')
 const lavamoatOpts = {
   writeAutoPolicy: false,
   scuttleGlobalThis: true,
+  scuttleMore: {
+    UIEvent: ['view'],
+  },
   scuttleGlobalThisExceptions: ['print', /HTML[a-zA-Z]*Element/, 'prompt'],
 }
 

@@ -8,7 +8,7 @@ test('Run scenarios', async (t) => {
     if (!(Object.keys(scenario.context).length === 0 && scenario.context.constructor === Object)) continue
     console.log(`Running Node Scenario: ${scenario.name}`)
     const {scuttleGlobalThis, scuttleGlobalThisExceptions} = scenario
-    const additionalOpts = {scuttleGlobalThis, scuttleGlobalThisExceptions}
+    const additionalOpts = {scuttleGlobalThis, scuttleMore, scuttleGlobalThisExceptions}
     await runAndTestScenario(t, scenario, ({ scenario }) => runScenario({ scenario, additionalOpts }))
   }
 })

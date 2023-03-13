@@ -120,6 +120,7 @@ function getConfigurationFromPluginOpts (pluginOpts) {
 
   const nonAliasedOptions = [
     'scuttleGlobalThis',
+    'scuttleMore',
     'scuttleGlobalThisExceptions',
     'bundleWithPrecompiledModules',
     'policyDebug',
@@ -159,6 +160,7 @@ function getConfigurationFromPluginOpts (pluginOpts) {
     debugMode: Boolean(pluginOpts.debugMode),
     statsMode: Boolean(pluginOpts.statsMode),
     scuttleGlobalThis: pluginOpts.scuttleGlobalThis,
+    scuttleMore: pluginOpts.scuttleMore,
     scuttleGlobalThisExceptions: pluginOpts.scuttleGlobalThisExceptions,
     writeAutoPolicy: Boolean(pluginOpts.writeAutoPolicy || pluginOpts.writeAutoPolicyDebug),
     writeAutoPolicyDebug: Boolean(pluginOpts.writeAutoPolicyDebug),

@@ -19,6 +19,7 @@
     // security options are hard-coded at build time
     const {
       scuttleGlobalThis,
+      scuttleMore,
       scuttleGlobalThisExceptions,
     } = __lavamoatSecurityOptions__
 
@@ -70,6 +71,7 @@
       globalRef,
       globalThisRefs,
       scuttleGlobalThis,
+      scuttleMore,
       scuttleGlobalThisExceptions,
       debugMode,
       runWithPrecompiledModules,

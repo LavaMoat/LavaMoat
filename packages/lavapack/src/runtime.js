@@ -89,6 +89,7 @@
     // security options are hard-coded at build time
     const {
       scuttleGlobalThis,
+      scuttleMore,
       scuttleGlobalThisExceptions,
     } = __lavamoatSecurityOptions__
 
@@ -10554,6 +10555,7 @@ function observeImports(map, importName, importIndex) {
     globalThisRefs,
     // security options
     scuttleGlobalThis,
+    scuttleMore,
     scuttleGlobalThisExceptions,
     debugMode,
     runWithPrecompiledModules,
@@ -10582,6 +10584,7 @@ function observeImports(map, importName, importIndex) {
       getExternalCompartment,
       globalThisRefs,
       scuttleGlobalThis,
+      scuttleMore,
       scuttleGlobalThisExceptions,
       debugMode,
       runWithPrecompiledModules,
@@ -10602,6 +10605,7 @@ function observeImports(map, importName, importIndex) {
     getExternalCompartment,
     globalThisRefs = ['globalThis'],
     scuttleGlobalThis = false,
+    scuttleMore = {},
     scuttleGlobalThisExceptions = [],
     debugMode = false,
     runWithPrecompiledModules = false,
@@ -11152,16 +11156,6 @@ module.exports = {
     const packageCompartmentCache = new Map()
     const globalStore = new Map()
 
-    const targetEvents = Object.freeze({
-      UIEvent: ['view'],
-      MutationEvent: ['relatedNode'],
-      MessageEvent: ['source'],
-      FocusEvent: ['relatedTarget'],
-      MouseEvent: ['relatedTarget', 'fromElement', 'toElement'],
-      TouchEvent: ['targetTouches', 'touches'],
-      Event: ['target', 'currentTarget', 'srcElement', 'composedPath'],
-    })
-
     const rootPackageName = '$root$'
     const rootPackageCompartment = createRootPackageCompartment(globalRef)
 
@@ -11181,7 +11175,7 @@ module.exports = {
         const flags = parts[parts.length - 1]
         scuttleGlobalThisExceptions[i] = new RegExp(pattern, flags)
       }
-      executeLockdownEvents(globalRef)
+      performScuttleMore(globalRef, scuttleMore)
       performScuttleGlobalThis(globalRef, scuttleGlobalThisExceptions)
     }
 
@@ -11195,23 +11189,12 @@ module.exports = {
     Object.freeze(kernel)
     return kernel
 
-    /**
-     * Attenuate Event objects by replacing its own properties.
-     */
-    function executeLockdownEvents(globalRef) {
-      Object.keys(targetEvents).forEach((event) => {
-        const properties = targetEvents[event]
+    function performScuttleMore(globalRef, scuttleMore) {
+      Object.keys(scuttleMore).forEach((event) => {
+        const properties = scuttleMore[event]
         for (const property of properties) {
           if (globalRef.hasOwnProperty(event)) {
-            Object.defineProperty(
-              globalRef[event].prototype,
-              property,
-              {
-                value: undefined,
-                configurable: false,
-                writable: false,
-              },
-            )
+            scuttle(globalRef[event].prototype, property)
           }
         }
       })
@@ -11227,34 +11210,37 @@ module.exports = {
       const avoidForLavaMoatCompatibility = ['Compartment', 'Error', 'globalThis']
       const propsToAvoid = new Set([...avoidForLavaMoatCompatibility, ...extraPropsToAvoid])
 
-      const obj = Object.create(null)
       for (const prop of props) {
-        function set() {
-          console.warn(
-            `LavaMoat - property "${prop}" of globalThis cannot be set under scuttling mode. ` +
-            'To learn more visit https://github.com/LavaMoat/LavaMoat/pull/360.',
-          )
-        }
-        function get() {
-          throw new Error(
-            `LavaMoat - property "${prop}" of globalThis is inaccessible under scuttling mode. ` +
-            'To learn more visit https://github.com/LavaMoat/LavaMoat/pull/360.',
-          )
-        }
         if (shouldAvoidProp(propsToAvoid, prop)) {
           continue
         }
-        let desc = Object.getOwnPropertyDescriptor(globalRef, prop)
-        if (desc?.configurable === true) {
-          desc = { configurable: false, set, get }
-        } else if (desc?.writable === true) {
-          const p = new Proxy(obj, { getPrototypeOf: get, get, set } )
-          desc = { configurable: false, writable: false, value: p }
-        } else {
-          continue
-        }
-        Object.defineProperty(globalRef, prop, desc)
+        scuttle(globalRef, prop)
       }
+    }
+
+    function scuttle(obj, prop) {
+      function set() {
+        console.warn(
+          `LavaMoat - property "${prop}" of globalThis cannot be set under scuttling mode. ` +
+          'To learn more visit https://github.com/LavaMoat/LavaMoat/pull/360.',
+        )
+      }
+      function get() {
+        throw new Error(
+          `LavaMoat - property "${prop}" of globalThis is inaccessible under scuttling mode. ` +
+          'To learn more visit https://github.com/LavaMoat/LavaMoat/pull/360.',
+        )
+      }
+      let desc = Object.getOwnPropertyDescriptor(obj, prop)
+      if (desc?.configurable === true) {
+        desc = { configurable: false, set, get }
+      } else if (desc?.writable === true) {
+        const p = new Proxy(Object.create(null), { getPrototypeOf: get, get, set } )
+        desc = { configurable: false, writable: false, value: p }
+      } else {
+        return
+      }
+      Object.defineProperty(obj, prop, desc)
     }
 
     // this function instantiaties a module from a moduleId.
@@ -11616,6 +11602,7 @@ module.exports = {
       globalRef,
       globalThisRefs,
       scuttleGlobalThis,
+      scuttleMore,
       scuttleGlobalThisExceptions,
       debugMode,
       runWithPrecompiledModules,
