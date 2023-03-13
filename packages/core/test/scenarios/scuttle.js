@@ -8,7 +8,7 @@ const one = () => {
   // this will throw if regex scuttling fails
   if (globalObject.Float32Array) {
     // this will throw if Boolean.prototype.toString is scuttled
-    if (true.toString()) {
+    if (console.info) {
       module.exports = globalObject.Math.PI
     }
   }
@@ -32,7 +32,7 @@ module.exports = [
       defineOne: one,
       scuttleGlobalThis: true,
       scuttleMore: {
-        Boolean: ['toString'],
+        'console': ['info'],
       },
       scuttleGlobalThisExceptions: ['process', /[0-9]+/, 'Set', 'Reflect', 'Object', 'console', 'Array', 'RegExp', 'Date', 'Math'],
       expectedFailure: true,

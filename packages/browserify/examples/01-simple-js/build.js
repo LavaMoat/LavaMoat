@@ -6,7 +6,8 @@ const lavamoatOpts = {
   writeAutoPolicy: false,
   scuttleGlobalThis: true,
   scuttleMore: {
-    UIEvent: ['view'],
+    'UIEvent.prototype': ['view'],
+    'console': ['info'],
   },
   scuttleGlobalThisExceptions: ['print', /HTML[a-zA-Z]*Element/, 'prompt'],
 }

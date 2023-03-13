@@ -11190,12 +11190,15 @@ module.exports = {
     return kernel
 
     function performScuttleMore(globalRef, scuttleMore) {
-      Object.keys(scuttleMore).forEach((event) => {
-        const properties = scuttleMore[event]
+      Object.keys(scuttleMore).forEach((ref) => {
+        let obj = globalRef
+        let refs = ref.split('.')
+        while (refs.length) {
+          obj = obj[refs.shift()]
+        }
+        const properties = scuttleMore[ref]
         for (const property of properties) {
-          if (globalRef.hasOwnProperty(event)) {
-            scuttle(globalRef[event].prototype, property)
-          }
+          scuttle(obj, property)
         }
       })
     }
