@@ -36,7 +36,7 @@ module.exports = [
       },
       scuttleGlobalThisExceptions: ['process', /[0-9]+/, 'Set', 'Reflect', 'Object', 'console', 'Array', 'RegExp', 'Date', 'Math'],
       expectedFailure: true,
-      expectedFailureMessageRegex: /SES_UNHANDLED_REJECTION|inacce_______ssible under scuttling mode./,
+      expectedFailureMessageRegex: /SES_UNHANDLED_REJECTION|inaccessible under scuttling mode./,
     })
     await autoConfigForScenario({ scenario })
     return scenario
