@@ -146,13 +146,13 @@
     function scuttle(obj, prop) {
       function set() {
         console.warn(
-          `LavaMoat - property "${prop}" of globalThis cannot be set under scuttling mode. ` +
+          `LavaMoat - property "${prop}" of ${obj.toString()} cannot be set under scuttling mode. ` +
           'To learn more visit https://github.com/LavaMoat/LavaMoat/pull/360.',
         )
       }
       function get() {
         throw new Error(
-          `LavaMoat - property "${prop}" of globalThis is inaccessible under scuttling mode. ` +
+          `LavaMoat - property "${prop}" of ${obj.toString()} is inaccessible under scuttling mode. ` +
           'To learn more visit https://github.com/LavaMoat/LavaMoat/pull/360.',
         )
       }
