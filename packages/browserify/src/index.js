@@ -8,7 +8,7 @@ const createLavaPack = require('@lavamoat/lavapack')
 const { createSesWorkaroundsTransform } = require('./sesTransforms')
 const { loadCanonicalNameMap } = require('@lavamoat/aa')
 const browserResolve = require('browser-resolve')
-const resolve = require('resolve')
+const { isBuiltin } = require('node:module')
 
 
 // these are the reccomended arguments for lavaMoat to work well with browserify
@@ -72,7 +72,7 @@ function plugin (browserify, pluginOpts) {
       browserify.pipeline.get('emit-deps').push(createModuleInspectorSpy({
         policyOverride,
         // no builtins in the browser (yet!)
-        isBuiltin: (name) => browserify._options.node && resolve.isCore(name),
+        isBuiltin: (name) => browserify._options.node && isBuiltin(name),
         // should prepare debug info
         includeDebugInfo: configuration.writeAutoPolicyDebug,
         // write policy files to disk

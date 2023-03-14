@@ -11629,7 +11629,7 @@ module.exports = {
 
   function loadModuleData (moduleId) {
     // eslint-disable-next-line node/global-require
-    if (typeof window === 'undefined' && require('resolve').isCore(moduleId)) {
+    if (typeof window === 'undefined' && require('node:module').isBuiltin(moduleId)) {
       return {
         type: 'builtin',
         package: moduleId,
