@@ -11448,7 +11448,10 @@ module.exports = {
         const descriptors = Object.getOwnPropertyDescriptors(source)
         Object.values(descriptors).forEach(desc => {
           if ('get' in desc) {
-            Reflect.apply(desc.get, globalRef, [])
+            try {
+              // calling getters can potentially throw (e.g. localStorage inside a sandboxed iframe)
+              Reflect.apply(desc.get, globalRef, [])
+            } catch {}
           }
         })
       })
