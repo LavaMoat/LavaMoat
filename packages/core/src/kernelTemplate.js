@@ -18,9 +18,7 @@
     } = __lavamoatDebugOptions__
     // security options are hard-coded at build time
     const {
-      useSnow,
       scuttleGlobalThis,
-      scuttleGlobalThisExceptions,
     } = __lavamoatSecurityOptions__
 
     // identify the globalRef
@@ -70,9 +68,7 @@
       getExternalCompartment,
       globalRef,
       globalThisRefs,
-      useSnow,
       scuttleGlobalThis,
-      scuttleGlobalThisExceptions,
       debugMode,
       runWithPrecompiledModules,
       reportStatsHook,

@@ -57,9 +57,7 @@ function createPacker({
   sourceRoot,
   sourceMapPrefix,
   bundleWithPrecompiledModules = true,
-  useSnow = false,
-  scuttleGlobalThis = false,
-  scuttleGlobalThisExceptions = [],
+  scuttleGlobalThis = {},
 } = {}) {
   // stream/parser wrapping incase raw: false
   const parser = raw ? through.obj() : JSONStream.parse([true])
@@ -88,14 +86,14 @@ function createPacker({
   assert(policy, 'must specify a policy')
 
   // toString regexps if there's any
-  for (let i = 0; i < scuttleGlobalThisExceptions.length; i++) {
-    scuttleGlobalThisExceptions[i] = String(scuttleGlobalThisExceptions[i])
+  if (scuttleGlobalThis.exceptions) {
+    for (let i = 0; i < scuttleGlobalThis.exceptions.length; i++) {
+      scuttleGlobalThis.exceptions[i] = String(scuttleGlobalThis.exceptions[i])
+    }
   }
 
   prelude = prelude.replace('__lavamoatSecurityOptions__', JSON.stringify({
-    useSnow,
     scuttleGlobalThis,
-    scuttleGlobalThisExceptions,
   }))
 
   // note: pack stream cant started emitting data until its received its first module

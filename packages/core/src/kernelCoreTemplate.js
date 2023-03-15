@@ -14,9 +14,7 @@
     getExternalCompartment,
     globalThisRefs,
     // security options
-    useSnow,
     scuttleGlobalThis,
-    scuttleGlobalThisExceptions,
     debugMode,
     runWithPrecompiledModules,
     reportStatsHook,
@@ -43,9 +41,7 @@
       prepareModuleInitializerArgs,
       getExternalCompartment,
       globalThisRefs,
-      useSnow,
       scuttleGlobalThis,
-      scuttleGlobalThisExceptions,
       debugMode,
       runWithPrecompiledModules,
       reportStatsHook,
@@ -64,9 +60,7 @@
     prepareModuleInitializerArgs,
     getExternalCompartment,
     globalThisRefs = ['globalThis'],
-    useSnow = false,
-    scuttleGlobalThis = false,
-    scuttleGlobalThisExceptions = [],
+    scuttleGlobalThis = {},
     debugMode = false,
     runWithPrecompiledModules = false,
     reportStatsHook = () => {},
@@ -77,8 +71,19 @@
     const { prepareCompartmentGlobalFromConfig } = templateRequire('makePrepareRealmGlobalFromConfig')(generalUtils)
     const { strictScopeTerminator } = templateRequire('strict-scope-terminator')
 
+    const scuttleGlobalThisDefaults = {
+      enabled: true,
+      exceptions: [],
+      recursive: false,
+    }
+    const {
+      enabled: scuttleGlobalThisEnabled,
+      exceptions: scuttleGlobalThisExceptions,
+      recursive: scuttleGlobalThisRecursive,
+    } = scuttleGlobalThis === true ? scuttleGlobalThisDefaults : scuttleGlobalThis
+
     let snow = (cb, win) => cb(win)
-    if (useSnow) {
+    if (scuttleGlobalThisRecursive) {
       if (!globalRef.SNOW) {
         throw new Error('LavaMoat - Snow is expected to exist but it does not')
       }
@@ -93,11 +98,11 @@
     const rootPackageCompartment = createRootPackageCompartment(globalRef)
 
     // scuttle globalThis right after we used it to create the root package compartment
-    if (scuttleGlobalThis) {
+    if (scuttleGlobalThisEnabled) {
       if (!Array.isArray(scuttleGlobalThisExceptions)) {
-        throw new Error(`LavaMoat - scuttleGlobalThisExceptions must be an array, got "${typeof scuttleGlobalThisExceptions}"`)
+        throw new Error(`LavaMoat - scuttleGlobalThis.exceptions must be an array, got "${typeof scuttleGlobalThisExceptions}"`)
       }
-      // turn scuttleGlobalThisExceptions regexes strings to actual regexes
+      // turn scuttleGlobalThis.exceptions regexes strings to actual regexes
       for (let i = 0; i < scuttleGlobalThisExceptions.length; i++) {
         const prop = scuttleGlobalThisExceptions[i]
         if (!prop.startsWith('/')) {

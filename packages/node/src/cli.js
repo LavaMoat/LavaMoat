@@ -27,6 +27,10 @@ function parseArgs () {
     .help()
 
   const parsedArgs = argsParser.parse()
+  // scuttleGlobalThis is a stringified object specifically when loading core scenarios
+  if (typeof parsedArgs.scuttleGlobalThis === 'string') {
+    parsedArgs.scuttleGlobalThis = JSON.parse(parsedArgs.scuttleGlobalThis)
+  }
 
   // patch process.argv so it matches the normal pattern
   // e.g. [runtime path, entrypoint, ...args]

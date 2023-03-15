@@ -25,8 +25,10 @@ function convertOptsToArgs ({ scenario, additionalOpts = {} }) {
   if (entries.length !== 1) throw new Error('LavaMoat - invalid entries')
   const firstEntry = entries[0]
   const args = [firstEntry]
+  const options = { ...opts, ...additionalOpts, ...scenario }
+  options.scuttleGlobalThis = JSON.stringify(options.scuttleGlobalThis)
   Object
-    .entries({ ...opts, ...additionalOpts })
+    .entries(options)
     .forEach(([key, value]) => setOptToArgs(args, key, value))
   return args
 }

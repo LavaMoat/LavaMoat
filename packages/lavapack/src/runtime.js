@@ -88,9 +88,7 @@
     } = {"debugMode":false}
     // security options are hard-coded at build time
     const {
-      useSnow,
       scuttleGlobalThis,
-      scuttleGlobalThisExceptions,
     } = __lavamoatSecurityOptions__
 
     // identify the globalRef
@@ -10554,9 +10552,7 @@ function observeImports(map, importName, importIndex) {
     getExternalCompartment,
     globalThisRefs,
     // security options
-    useSnow,
     scuttleGlobalThis,
-    scuttleGlobalThisExceptions,
     debugMode,
     runWithPrecompiledModules,
     reportStatsHook,
@@ -10583,9 +10579,7 @@ function observeImports(map, importName, importIndex) {
       prepareModuleInitializerArgs,
       getExternalCompartment,
       globalThisRefs,
-      useSnow,
       scuttleGlobalThis,
-      scuttleGlobalThisExceptions,
       debugMode,
       runWithPrecompiledModules,
       reportStatsHook,
@@ -10604,9 +10598,7 @@ function observeImports(map, importName, importIndex) {
     prepareModuleInitializerArgs,
     getExternalCompartment,
     globalThisRefs = ['globalThis'],
-    useSnow = false,
-    scuttleGlobalThis = false,
-    scuttleGlobalThisExceptions = [],
+    scuttleGlobalThis = {},
     debugMode = false,
     runWithPrecompiledModules = false,
     reportStatsHook = () => {},
@@ -11152,10 +11144,21 @@ module.exports = {
   return module.exports
 })()
 
+    const scuttleGlobalThisDefaults = {
+      enabled: true,
+      exceptions: [],
+      recursive: false,
+    }
+    const {
+      enabled: scuttleGlobalThisEnabled,
+      exceptions: scuttleGlobalThisExceptions,
+      recursive: scuttleGlobalThisRecursive,
+    } = scuttleGlobalThis === true ? scuttleGlobalThisDefaults : scuttleGlobalThis
+
     let snow = (cb, win) => cb(win)
-    if (useSnow) {
+    if (scuttleGlobalThisRecursive) {
       if (!globalRef.SNOW) {
-        throw new Error('LavaMoat - Snow is expected to exist but it does not');
+        throw new Error('LavaMoat - Snow is expected to exist but it does not')
       }
       snow = globalRef.SNOW
     }
@@ -11168,7 +11171,7 @@ module.exports = {
     const rootPackageCompartment = createRootPackageCompartment(globalRef)
 
     // scuttle globalThis right after we used it to create the root package compartment
-    if (scuttleGlobalThis) {
+    if (scuttleGlobalThisEnabled) {
       if (!Array.isArray(scuttleGlobalThisExceptions)) {
         throw new Error(`LavaMoat - scuttleGlobalThisExceptions must be an array, got "${typeof scuttleGlobalThisExceptions}"`)
       }
@@ -11594,9 +11597,7 @@ module.exports = {
       getExternalCompartment,
       globalRef,
       globalThisRefs,
-      useSnow,
       scuttleGlobalThis,
-      scuttleGlobalThisExceptions,
       debugMode,
       runWithPrecompiledModules,
       reportStatsHook,

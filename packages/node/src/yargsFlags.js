@@ -65,14 +65,7 @@ module.exports = (yargs, defaults) => {
   yargs.option('scuttleGlobalThis', {
     alias: ['scuttleGlobalThis'],
     describe: 'whether to scuttle global this or not',
-    type: 'boolean',
+    type: 'object',
     default: defaults.scuttleGlobalThis,
-  })
-  // scuttle global this exceptions array
-  yargs.option('scuttleGlobalThisExceptions', {
-    alias: ['scuttleGlobalThisExceptions'],
-    describe: 'scuttle global this except for the properties provided in this array',
-    type: 'array',
-    default: defaults.scuttleGlobalThisExceptions,
   })
 }

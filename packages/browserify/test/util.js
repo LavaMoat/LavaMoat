@@ -137,10 +137,10 @@ async function runBrowserify ({
   bundleWithPrecompiledModules = true,
   ...additionalOpts
 }) {
-  if (additionalOpts?.scuttleGlobalThisExceptions) {
+  if (additionalOpts?.scuttleGlobalThis?.exceptions) {
     // toString regexps if there's any
-    for (let i = 0; i < additionalOpts.scuttleGlobalThisExceptions.length; i++) {
-      additionalOpts.scuttleGlobalThisExceptions[i] = String(additionalOpts.scuttleGlobalThisExceptions[i])
+    for (let i = 0; i < additionalOpts.scuttleGlobalThis.exceptions.length; i++) {
+      additionalOpts.scuttleGlobalThis.exceptions[i] = String(additionalOpts.scuttleGlobalThis.exceptions[i])
     }
   }
   const lavamoatParams = {
