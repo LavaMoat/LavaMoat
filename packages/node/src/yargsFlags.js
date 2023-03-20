@@ -68,4 +68,13 @@ module.exports = (yargs, defaults) => {
     type: 'object',
     default: defaults.scuttleGlobalThis,
   })
+  // format scuttle global this config value
+  yargs.coerce('scuttleGlobalThis', arg => {
+    try {
+      // node tests pass this as a stringified object
+      return JSON.parse(arg)
+    } catch {
+      return arg
+    }
+  })
 }
