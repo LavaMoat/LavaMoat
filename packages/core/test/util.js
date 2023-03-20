@@ -75,8 +75,6 @@ function createScenarioFromScaffold ({
   },
   expectedFailure = false,
   expectedFailureMessageRegex = /[\s\S]*/,
-  scuttleGlobalThis = false,
-  scuttleGlobalThisExceptions = [],
   files = [],
   builtin = {},
   context = {},
@@ -223,8 +221,6 @@ function createScenarioFromScaffold ({
     expectedResult,
     expectedFailure,
     expectedFailureMessageRegex,
-    scuttleGlobalThis,
-    scuttleGlobalThisExceptions,
     entries: ['entry.js'],
     files: _files,
     config: _config,
@@ -265,8 +261,6 @@ function createHookedConsole () {
 async function runScenario ({
   scenario,
   runWithPrecompiledModules = false,
-  scuttleGlobalThis = false,
-  scuttleGlobalThisExceptions = [],
 }) {
   const {
     entries,
@@ -275,9 +269,11 @@ async function runScenario ({
     configOverride,
     builtin,
     kernelArgs = {},
+    opts = {},
     beforeCreateKernel = () => {}
 } = scenario
   const lavamoatConfig = mergeDeep(config, configOverride)
+  const { scuttleGlobalThis, scuttleGlobalThisExceptions } = opts
   const kernelSrc = generateKernel({ scuttleGlobalThis, scuttleGlobalThisExceptions })
   const { hookedConsole, firstLogEventPromise } = createHookedConsole()
   Object.assign(scenario.context, { console: hookedConsole })
