@@ -17,10 +17,12 @@ module.exports = [
       name: 'scuttle - host env global object is scuttled to work',
       defineOne: one,
       expectedResult: Math.PI,
-      scuttleGlobalThis: {
-        enabled: true,
-        exceptions: ['process', /[0-9]+/, 'Set', 'Reflect', 'Object', 'console', 'Array', 'RegExp', 'Date', 'Math'],
-      },
+      opts: {
+        scuttleGlobalThis: {
+          enabled: true,
+          exceptions: ['process', /[0-9]+/, 'Set', 'Reflect', 'Object', 'console', 'Array', 'RegExp', 'Date', 'Math'],
+        }
+      }
     })
     await autoConfigForScenario({ scenario })
     return scenario
@@ -29,9 +31,11 @@ module.exports = [
     const scenario = createScenarioFromScaffold({
       name: 'scuttle - host env global object is too scuttled to work',
       defineOne: one,
-      scuttleGlobalThis: {
-        enabled: true,
-        exceptions: ['process', '/[0-9]+/', /*'Set', 'Reflect', 'Object', 'console', 'Array', 'RegExp', 'Date', 'Math'*/],
+      opts: {
+        scuttleGlobalThis: {
+          enabled: true,
+          exceptions: ['process', '/[0-9]+/', /*'Set', 'Reflect', 'Object', 'console', 'Array', 'RegExp', 'Date', 'Math'*/],
+        }
       },
       expectedFailure: true,
       expectedFailureMessageRegex: /SES_UNHANDLED_REJECTION|inaccessible under scuttling mode./,

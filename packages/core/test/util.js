@@ -75,7 +75,6 @@ function createScenarioFromScaffold ({
   },
   expectedFailure = false,
   expectedFailureMessageRegex = /[\s\S]*/,
-  scuttleGlobalThis = {},
   files = [],
   builtin = {},
   context = {},
@@ -222,7 +221,6 @@ function createScenarioFromScaffold ({
     expectedResult,
     expectedFailure,
     expectedFailureMessageRegex,
-    scuttleGlobalThis,
     entries: ['entry.js'],
     files: _files,
     config: _config,
@@ -263,7 +261,6 @@ function createHookedConsole () {
 async function runScenario ({
   scenario,
   runWithPrecompiledModules = false,
-  scuttleGlobalThis = {},
 }) {
   const {
     entries,
@@ -272,10 +269,11 @@ async function runScenario ({
     configOverride,
     builtin,
     kernelArgs = {},
+    opts = {},
     beforeCreateKernel = () => {}
 } = scenario
   const lavamoatConfig = mergeDeep(config, configOverride)
-  const kernelSrc = generateKernel({ scuttleGlobalThis })
+  const kernelSrc = generateKernel(opts)
   const { hookedConsole, firstLogEventPromise } = createHookedConsole()
   Object.assign(scenario.context, { console: hookedConsole })
   const { result: createKernel, vmGlobalThis, vmContext, vmFeralFunction } = evaluateWithSourceUrl('LavaMoat/core-test/kernel', kernelSrc, scenario.context)

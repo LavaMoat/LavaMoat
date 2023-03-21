@@ -135,12 +135,12 @@ function evalBundle (bundle, context) {
 async function runBrowserify ({
   scenario,
   bundleWithPrecompiledModules = true,
-  ...additionalOpts
 }) {
-  if (additionalOpts?.scuttleGlobalThis?.exceptions) {
+  const exceptions = scenario?.opts?.scuttleGlobalThis?.exceptions
+  if (exceptions) {
     // toString regexps if there's any
-    for (let i = 0; i < additionalOpts.scuttleGlobalThis.exceptions.length; i++) {
-      additionalOpts.scuttleGlobalThis.exceptions[i] = String(additionalOpts.scuttleGlobalThis.exceptions[i])
+    for (let i = 0; i < exceptions.length; i++) {
+      exceptions[i] = String(exceptions[i])
     }
   }
   const lavamoatParams = {
@@ -148,7 +148,6 @@ async function runBrowserify ({
     opts: {
       bundleWithPrecompiledModules,
       ...scenario.opts,
-      ...additionalOpts,
     },
     policy: scenario.config,
     policyOverride: scenario.configOverride,
@@ -208,7 +207,6 @@ async function prepareBrowserifyScenarioOnDisk ({ scenario }) {
 async function createBundleForScenario ({
   scenario,
   bundleWithPrecompiledModules = true,
-  ...additonalOpts
 }) {
   let policy
   if (!scenario.dir) {
@@ -219,7 +217,7 @@ async function createBundleForScenario ({
     policy = path.join(scenario.dir, `/lavamoat/browserify/`)
   }
 
-  const { output: { stdout: bundle, stderr } } = await runBrowserify({ scenario, bundleWithPrecompiledModules, ...additonalOpts })
+  const { output: { stdout: bundle, stderr } } = await runBrowserify({ scenario, bundleWithPrecompiledModules })
   if (stderr.length) {
     console.warn(stderr)
   }
@@ -230,13 +228,11 @@ async function runScenario ({
   scenario,
   bundle,
   runWithPrecompiledModules = true,
-  ...additonalOpts
 }) {
   if (!bundle) {
     const { bundleForScenario } = await createBundleForScenario({
       scenario,
       bundleWithPrecompiledModules: runWithPrecompiledModules,
-      ...additonalOpts
     })
     bundle = bundleForScenario
     await fs.writeFile(path.join(scenario.dir, 'bundle.js'), bundle)
