@@ -86,9 +86,10 @@ function createPacker({
   assert(policy, 'must specify a policy')
 
   // toString regexps if there's any
-  if (scuttleGlobalThis.exceptions) {
-    for (let i = 0; i < scuttleGlobalThis.exceptions.length; i++) {
-      scuttleGlobalThis.exceptions[i] = String(scuttleGlobalThis.exceptions[i])
+  const exceptions = scuttleGlobalThis?.exceptions
+  if (exceptions) {
+    for (let i = 0; i < exceptions.length; i++) {
+      exceptions[i] = String(exceptions[i])
     }
   }
 

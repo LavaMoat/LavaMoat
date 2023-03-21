@@ -288,13 +288,13 @@ test('globals - nested property true.false.true', async (t) => {
     },
     ...shared
   })
- 
+
   const testResult = await runScenario({ scenario: handlesAccess })
   t.is(testResult.a_b_c, 42)
   t.is(testResult.a, true)
   t.is(testResult.a_ok, true)
   t.is(testResult.a_b_notOk, false)
-  
+
 })
 
 test('globals - nested property false.true', async (t) => {
@@ -330,7 +330,7 @@ test('globals - nested property false.true', async (t) => {
     },
     ...shared
   })
-  
+
   const testResult = await runScenario({ scenario: handlesAccess })
   t.is(testResult.a_b_c, 42)
   t.is(testResult.x_y, 42)
@@ -366,7 +366,7 @@ test.failing('globals - nested property true.false', async (t) => {
     },
     ...shared
   })
- 
+
   const testResult = await runScenario({ scenario: handlesAccess })
   t.is(testResult.a, true)
   t.is(testResult.a_ok, true)

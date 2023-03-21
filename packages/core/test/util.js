@@ -78,7 +78,7 @@ function createScenarioFromScaffold ({
   files = [],
   builtin = {},
   context = {},
-  opts = {},
+  opts = {scuttleGlobalThis: {}},
   config,
   configOverride,
   defineEntry,
