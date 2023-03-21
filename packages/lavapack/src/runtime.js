@@ -11158,7 +11158,11 @@ module.exports = {
     let snow = (cb, win) => cb(win)
     if (scuttleGlobalThisRecursive) {
       if (!globalRef.SNOW) {
-        throw new Error('LavaMoat - Snow is expected to exist but it does not')
+        throw new Error(
+          'LavaMoat - scuttleGlobalThis is configured to be enabled recursively. ' +
+          'For that, Snow-JS must be included before LavaMoat executes. ' +
+          'To learn more visit https://github.com/LavaMoat/LavaMoat/pull/462.',
+        )
       }
       snow = globalRef.SNOW
     }
@@ -11173,9 +11177,9 @@ module.exports = {
     // scuttle globalThis right after we used it to create the root package compartment
     if (scuttleGlobalThisEnabled) {
       if (!Array.isArray(scuttleGlobalThisExceptions)) {
-        throw new Error(`LavaMoat - scuttleGlobalThisExceptions must be an array, got "${typeof scuttleGlobalThisExceptions}"`)
+        throw new Error(`LavaMoat - scuttleGlobalThis.exceptions must be an array, got "${typeof scuttleGlobalThisExceptions}"`)
       }
-      // turn scuttleGlobalThisExceptions regexes strings to actual regexes
+      // turn scuttleGlobalThis.exceptions regexes strings to actual regexes
       for (let i = 0; i < scuttleGlobalThisExceptions.length; i++) {
         const prop = scuttleGlobalThisExceptions[i]
         if (!prop.startsWith('/')) {
