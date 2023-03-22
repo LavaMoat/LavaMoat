@@ -22,23 +22,28 @@
       scuttleGlobalThisExceptions,
     } = __lavamoatSecurityOptions__
 
-    // identify the globalRef
-    let globalRef = globalThis
-
-    if (typeof globalRef === 'undefined') {
-      globalRef = typeof self !== 'undefined' ? self : (typeof global !== 'undefined' ? global : undefined) 
-
+    function getGlobalRef () {
+      if (typeof globalThis !== 'undefined') {
+        return globalThis
+      }
+      const globalRef = typeof self !== 'undefined' ? self : (typeof global !== 'undefined' ? global : undefined)
       if (typeof globalRef !== 'undefined') {
         console.error('LavaMoat - Deprecation Warning: global reference is expected as `globalThis`')
       }
     }
+
+    const globalRef = getGlobalRef()
+
     if (!globalRef) {
       throw new Error('Lavamoat - globalThis not defined')
     }
 
     // polyfill globalThis
-    if (!globalRef.globalThis) {
+    if (globalRef.globalThis !== globalRef) {
       globalRef.globalThis = globalRef
+    }
+    if (globalRef.global !== globalRef) {
+      globalRef.global = globalRef
     }
 
     // create the SES rootRealm
