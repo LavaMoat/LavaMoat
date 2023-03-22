@@ -2,14 +2,20 @@ const { applySourceTransforms } = require("lavamoat-core");
 const q = JSON.stringify;
 
 /**
- * 
+ *
  * @param {object} params
  * @param {string} params.source
  * @param {string} params.id
- * @param {string[]} params.runtimeKit 
- * @returns 
+ * @param {string[]} params.runtimeKit
+ * @param {boolean} [params.runChecks]
+ * @returns
  */
-module.exports = function wrapper({ source, id, runtimeKit }) {
+module.exports = function wrapper({
+  source,
+  id,
+  runtimeKit,
+  runChecks = true,
+}) {
   // validateSource(source);
 
   const sesCompatibleSource = applySourceTransforms(source);
@@ -26,9 +32,9 @@ module.exports = function wrapper({ source, id, runtimeKit }) {
 }).call(getLavaMoatEvalKitForCompartment(${q(id)}, { ${runtimeKit.join(
     ","
   )}}))()`;
-
-  validateSource(wrappedSrc);
-
+  if (runChecks) {
+    validateSource(wrappedSrc);
+  }
   return wrappedSrc;
 };
 
