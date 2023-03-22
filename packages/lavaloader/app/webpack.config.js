@@ -10,6 +10,7 @@ module.exports = {
 
   module: {
     rules: [
+      // this also works
       // {
       //   test: /\.tsx?$/,
       //   use: "ts-loader",
@@ -25,9 +26,12 @@ module.exports = {
         use: [
           {
             loader: path.resolve("../loader.js"),
-            options: { which: ">>standalone" },
+            options: { 
+              // feels like policies should be passed here 
+             },
           },
         ],
+        // important bit of magic - makes sure this runs after all other stuff
         enforce: "post",
       },
     ],

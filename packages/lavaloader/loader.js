@@ -23,12 +23,11 @@ module.exports = function (source) {
   //     Object.entries(this).filter(([k, v]) => typeof v === "string")
   //   )
   // );
-  console.log(options.which, source);
-
+  // console.log(source);
 
   return wrapper({
     source,
     id: fakeAA(this.resourcePath),
-    runtimeKit: ["module", "__webpack_require__"],
+    runtimeKit: ["module", "exports", "__webpack_require__"],
   });
 };

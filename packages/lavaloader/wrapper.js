@@ -1,3 +1,4 @@
+const { applySourceTransforms } = require("lavamoat-core");
 const q = JSON.stringify;
 
 /**
@@ -9,12 +10,15 @@ const q = JSON.stringify;
  * @returns 
  */
 module.exports = function wrapper({ source, id, runtimeKit }) {
+  // validateSource(source);
+
+  const sesCompatibleSource = applySourceTransforms(source);
   const wrappedSrc = `(function(){
     with (this.scopeTerminator) {
       with (this.runtimeHandler) {
       with (this.globalThis) {
         return function() { 'use strict';
-      ${source}
+      ${sesCompatibleSource}
         };
       }
     }
@@ -23,17 +27,21 @@ module.exports = function wrapper({ source, id, runtimeKit }) {
     ","
   )}}))()`;
 
+  validateSource(wrappedSrc);
+
+  return wrappedSrc;
+};
+
+function validateSource(source) {
   const validityFlag = "validityFlag" + Math.random().toFixed(10);
   // If the result is not valid javascript, instead of a parse error,
   // we'll get webpack complaining that `with` is used in strict mode.
   // To prevent that confusion, let's check that the result is valid javascript.
   try {
-    eval(`{throw "${validityFlag}"};;` + wrappedSrc);
+    eval(`{throw "${validityFlag}"};;` + source);
   } catch (e) {
     if (e !== validityFlag) {
       throw Error("wrapped module is not valid JS\n" + e);
     }
   }
-
-  return wrappedSrc;
-};
+}
