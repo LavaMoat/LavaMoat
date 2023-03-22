@@ -1,28 +1,28 @@
 // DO NOT EDIT! THIS FILE IS GENERATED FROM "runtime-cjs-template.js" BY RUNNING "builder-runtime.js"
 
 ;(function() {
-
-  // identify the globalRef
-  let globalRef = globalThis
-
-  if (!globalRef) {
-    globalRef = typeof self !== 'undefined' ? self : global
-
+  function getGlobalRef () {
+    if (typeof globalThis !== 'undefined') {
+      return globalThis
+    }
+    const globalRef = typeof self !== 'undefined' ? self : (typeof global !== 'undefined' ? global : undefined)
     if (typeof globalRef !== 'undefined') {
       console.error('LavaMoat - Deprecation Warning: global reference is expected as `globalThis`')
     }
   }
+
+  const globalRef = getGlobalRef()
+
   if (!globalRef) {
     throw new Error('Lavamoat - globalThis not defined')
   }
 
   // polyfill globalThis
-  if (!globalRef.globalThis) {
+  if (globalRef.globalThis !== globalRef) {
     globalRef.globalThis = globalRef
   }
-
   // polyfill node/browserify's globalRef
-  if (!globalRef.global) {
+  if (globalRef.global !== globalRef) {
     globalRef.global = globalRef
   }
 
@@ -193,7 +193,7 @@ module.exports = {
     const moduleObject = { exports: {} }
     const evalKit = {
       scopeTerminator: strictScopeTerminator,
-      globalRef,
+      globalThis: globalRef,
     }
     moduleCache.set(moduleId, moduleObject)
     const moduleData = moduleRegistry.get(moduleId)
