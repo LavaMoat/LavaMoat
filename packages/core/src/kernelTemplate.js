@@ -26,7 +26,7 @@
     let globalRef = globalThis
 
     if (typeof globalRef === 'undefined') {
-      globalRef = typeof self !== 'undefined' ? self : global
+      globalRef = typeof self !== 'undefined' ? self : (typeof global !== 'undefined' ? global : undefined) 
 
       if (typeof globalRef !== 'undefined') {
         console.error('LavaMoat - Deprecation Warning: global reference is expected as `globalThis`')
