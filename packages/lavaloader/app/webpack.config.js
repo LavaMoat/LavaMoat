@@ -28,6 +28,7 @@ module.exports = {
             loader: path.resolve("../loader.js"),
             options: { 
               // feels like policies should be passed here 
+              // or at least the path to policies so the loader can fetch them
              },
           },
         ],
