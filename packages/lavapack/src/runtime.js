@@ -11156,7 +11156,7 @@ module.exports = {
     } = scuttleGlobalThis === true ? scuttleGlobalThisDefaults : scuttleGlobalThis
 
     let onLoad = (cb, global) => cb(global)
-    if (onLoadHandle) {
+    if (onLoadHandle !== undefined) {
       if (typeof globalRef[onLoadHandle] !== 'function') {
         throw new Error(
           'LavaMoat - `onLoad` function "${onLoadHandle}" expected on globalRef.'
