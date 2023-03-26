@@ -69,12 +69,16 @@ module.exports = (yargs, defaults) => {
     default: defaults.scuttleGlobalThis,
   })
   // format scuttle global this config value
-  yargs.coerce('scuttleGlobalThis', arg => {
-    try {
-      // node tests pass this as a stringified object
-      return JSON.parse(arg)
-    } catch {
-      return arg
-    }
+  yargs.coerce('scuttleGlobalThis', arg => typeof arg === 'string'
+    ? JSON.parse(arg)
+    : arg,
+  )
+  // scuttle global this exceptions array
+  yargs.option('scuttleGlobalThisExceptions', {
+    deprecated: true,
+    alias: ['scuttleGlobalThisExceptions'],
+    describe: 'scuttle global this except for the properties provided in this array',
+    type: 'array',
+    default: defaults.scuttleGlobalThisExceptions,
   })
 }

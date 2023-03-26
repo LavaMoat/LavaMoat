@@ -120,6 +120,7 @@ function getConfigurationFromPluginOpts (pluginOpts) {
 
   const nonAliasedOptions = [
     'scuttleGlobalThis',
+    'scuttleGlobalThisExceptions',
     'bundleWithPrecompiledModules',
     'policyDebug',
     'projectRoot',
@@ -149,6 +150,13 @@ function getConfigurationFromPluginOpts (pluginOpts) {
 
   if (!pluginOpts.projectRoot) {
     pluginOpts.projectRoot = process.cwd()
+  }
+
+  if (pluginOpts.scuttleGlobalThisExceptions) {
+    console.warn('Lavamoat - "scuttleGlobalThisExceptions" is deprecated. Use "scuttleGlobalThis.exceptions" instead.')
+    if (!pluginOpts.scuttleGlobalThis?.exceptions?.length) {
+      pluginOpts.scuttleGlobalThis.exceptions = pluginOpts.scuttleGlobalThisExceptions
+    }
   }
 
   const configuration = {

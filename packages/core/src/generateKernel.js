@@ -41,8 +41,12 @@ function generateKernel (opts = {}) {
   if (opts.hasOwnProperty('scuttleGlobalThis')) {
     // scuttleGlobalThis config placeholder should be set only if ordered so explicitly.
     // if not, should be left as is to be replaced by a later processor (e.g. LavaPack).
-    const scuttleGlobalThis = opts?.scuttleGlobalThis
-    const exceptions = scuttleGlobalThis?.exceptions
+    const scuttleGlobalThis = opts.scuttleGlobalThis
+    if (opts.scuttleGlobalThisExceptions) {
+      console.warn('Lavamoat - "scuttleGlobalThisExceptions" is deprecated. Use "scuttleGlobalThis.exceptions" instead.')
+    }
+    const exceptions = scuttleGlobalThis?.exceptions || opts.scuttleGlobalThisExceptions
+    scuttleGlobalThis.exceptions = exceptions
     if (exceptions) {
       // toString regexps if there's any
       for (let i = 0; i < exceptions.length; i++) {

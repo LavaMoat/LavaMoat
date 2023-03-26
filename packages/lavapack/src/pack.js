@@ -58,6 +58,7 @@ function createPacker({
   sourceMapPrefix,
   bundleWithPrecompiledModules = true,
   scuttleGlobalThis = {},
+  scuttleGlobalThisExceptions,
 } = {}) {
   // stream/parser wrapping incase raw: false
   const parser = raw ? through.obj() : JSONStream.parse([true])
@@ -85,8 +86,13 @@ function createPacker({
   }
   assert(policy, 'must specify a policy')
 
+  if (scuttleGlobalThisExceptions) {
+    console.warn('Lavamoat - "scuttleGlobalThisExceptions" is deprecated. Use "scuttleGlobalThis.exceptions" instead.')
+  }
+  const exceptions = scuttleGlobalThis.exceptions || scuttleGlobalThisExceptions
+  scuttleGlobalThis.exceptions = exceptions
+
   // toString regexps if there's any
-  const exceptions = scuttleGlobalThis?.exceptions
   if (exceptions) {
     for (let i = 0; i < exceptions.length; i++) {
       exceptions[i] = String(exceptions[i])

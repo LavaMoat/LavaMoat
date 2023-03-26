@@ -4,6 +4,7 @@ const defaultPaths = getDefaultPaths('node')
 
 module.exports = {
   scuttleGlobalThis: {},
+  scuttleGlobalThisExceptions: [],
   writeAutoPolicy: false,
   writeAutoPolicyDebug: false,
   writeAutoPolicyAndRun: false,
