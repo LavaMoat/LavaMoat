@@ -89,7 +89,7 @@
     // security options are hard-coded at build time
     const {
       scuttleGlobalThis,
-    } = {"scuttleGlobalThis":{"enabled":true,"recursive":true,"_exceptions":["toString","getComputedStyle","addEventListener","removeEventListener","ShadowRoot","HTMLElement","Element","pageXOffset","pageYOffset","visualViewport","Reflect","Set","Object","navigator","harden","console",{},"performance","parseFloat","innerWidth","innerHeight","Symbol","Math","DOMRect","Number","Array","crypto","Function","Uint8Array","String","Promise","__SENTRY__","appState","extra","stateHooks","sentryHooks","sentry"],"exceptions":["a"]}}
+    } = __lavamoatSecurityOptions__
 
     // identify the globalRef
     let globalRef = globalThis
