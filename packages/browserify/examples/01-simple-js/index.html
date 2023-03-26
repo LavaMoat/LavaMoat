@@ -2,6 +2,11 @@
 <html lang="en">
 <head>
     <script src="https://cdn.jsdelivr.net/npm/@lavamoat/snow/snow.js"></script>
+    <script>
+      Object.defineProperty(window, 'SCUTTLER', {
+        value: (globalRef, opts = {scuttle}) => SNOW(opts?.scuttle, globalRef)
+      })
+    </script>
     <meta charset="UTF-8">
     <title>LavaMoat Examples</title>
 </head>

@@ -4,7 +4,11 @@ const browserify = require('browserify')
 // configure LavaMoat
 const lavamoatOpts = {
   writeAutoPolicy: false,
-  scuttleGlobalThis: true,
+  scuttleGlobalThis: {
+    enabled: true,
+    exceptions: ['prompt'],
+    scuttler: 'SCUTTLER',
+  },
 }
 
 // enable policy autogen if specified

@@ -74,24 +74,23 @@
     const scuttleGlobalThisDefaults = {
       enabled: true,
       exceptions: [],
-      recursive: false,
+      scuttler: '',
     }
     const {
       enabled: scuttleGlobalThisEnabled,
       exceptions: scuttleGlobalThisExceptions,
-      recursive: scuttleGlobalThisRecursive,
+      scuttler: scuttleGlobalThisScuttler,
     } = scuttleGlobalThis === true ? scuttleGlobalThisDefaults : scuttleGlobalThis
 
-    let snow = (cb, win) => cb(win)
-    if (scuttleGlobalThisRecursive) {
-      if (!globalRef.SNOW) {
+    let scuttler = (globalRef, opts = {scuttle}) => opts?.scuttle(globalRef)
+    if (scuttleGlobalThisScuttler) {
+      if (!globalRef[scuttleGlobalThisScuttler]) {
         throw new Error(
-          'LavaMoat - scuttleGlobalThis is configured to be enabled recursively. ' +
-          'For that, Snow-JS must be included before LavaMoat executes. ' +
+          `LavaMoat - 'scuttler' function "${scuttler}" expected on globalRef.` +
           'To learn more visit https://github.com/LavaMoat/LavaMoat/pull/462.',
         )
       }
-      snow = globalRef.SNOW
+      scuttler = globalRef[scuttleGlobalThisScuttler]
     }
 
     const moduleCache = new Map()
@@ -117,7 +116,9 @@
         const flags = parts[parts.length - 1]
         scuttleGlobalThisExceptions[i] = new RegExp(pattern, flags)
       }
-      snow(realm => performScuttleGlobalThis(realm, scuttleGlobalThisExceptions), globalRef)
+      scuttler(globalRef, {
+        scuttle: realm => performScuttleGlobalThis(realm, scuttleGlobalThisExceptions),
+      })
     }
 
     const kernel = {
