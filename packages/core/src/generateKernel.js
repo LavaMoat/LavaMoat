@@ -38,7 +38,7 @@ function generateKernel (opts = {}) {
   output = replaceTemplateRequire(output, 'ses', sesSrc)
   output = stringReplace(output, '__createKernelCore__', kernelCode)
   output = stringReplace(output, '__lavamoatDebugOptions__', JSON.stringify({debugMode: !!opts.debugMode}))
-  if (opts.hasOwnProperty('scuttleGlobalThis')) {
+  if (opts?.hasOwnProperty('scuttleGlobalThis')) {
     // scuttleGlobalThis config placeholder should be set only if ordered so explicitly.
     // if not, should be left as is to be replaced by a later processor (e.g. LavaPack).
     const scuttleGlobalThis = opts.scuttleGlobalThis
