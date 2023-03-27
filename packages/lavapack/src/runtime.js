@@ -11149,21 +11149,17 @@ module.exports = {
       exceptions: [],
       scuttler: '',
     }
-    const {
-      enabled: scuttleGlobalThisEnabled,
-      exceptions: scuttleGlobalThisExceptions,
-      scuttler: scuttleGlobalThisScuttler,
-    } = scuttleGlobalThis === true ? scuttleGlobalThisDefaults : scuttleGlobalThis
 
-    let scuttler = (globalRef, scuttle) => scuttle(globalRef)
-    if (scuttleGlobalThisScuttler) {
-      if (!globalRef[scuttleGlobalThisScuttler]) {
+    const scuttleOpts = scuttleGlobalThis === true ? scuttleGlobalThisDefaults : scuttleGlobalThis
+    scuttleOpts.scuttlerFunc = (globalRef, scuttle) => scuttle(globalRef)
+    if (scuttleOpts.scuttler) {
+      if (!globalRef[scuttleOpts.scuttler]) {
         throw new Error(
-          `LavaMoat - 'scuttler' function "${scuttler}" expected on globalRef.` +
+          `LavaMoat - 'scuttler' function "${scuttleOpts.scuttler}" expected on globalRef.` +
           'To learn more visit https://github.com/LavaMoat/LavaMoat/pull/462.',
         )
       }
-      scuttler = globalRef[scuttleGlobalThisScuttler]
+      scuttleOpts.scuttlerFunc = globalRef[scuttleOpts.scuttler]
     }
 
     const moduleCache = new Map()
@@ -11174,22 +11170,22 @@ module.exports = {
     const rootPackageCompartment = createRootPackageCompartment(globalRef)
 
     // scuttle globalThis right after we used it to create the root package compartment
-    if (scuttleGlobalThisEnabled) {
-      if (!Array.isArray(scuttleGlobalThisExceptions)) {
-        throw new Error(`LavaMoat - scuttleGlobalThis.exceptions must be an array, got "${typeof scuttleGlobalThisExceptions}"`)
+    if (scuttleOpts.enabled) {
+      if (!Array.isArray(scuttleOpts.exceptions)) {
+        throw new Error(`LavaMoat - scuttleGlobalThis.exceptions must be an array, got "${typeof scuttleOpts.exceptions}"`)
       }
       // turn scuttleGlobalThis.exceptions regexes strings to actual regexes
-      for (let i = 0; i < scuttleGlobalThisExceptions.length; i++) {
-        const prop = scuttleGlobalThisExceptions[i]
+      for (let i = 0; i < scuttleOpts.exceptions.length; i++) {
+        const prop = scuttleOpts.exceptions[i]
         if (!prop.startsWith('/')) {
           continue
         }
         const parts = prop.split('/')
         const pattern = parts.slice(1, -1).join('/')
         const flags = parts[parts.length - 1]
-        scuttleGlobalThisExceptions[i] = new RegExp(pattern, flags)
+        scuttleOpts.exceptions[i] = new RegExp(pattern, flags)
       }
-      scuttler(globalRef, realm => performScuttleGlobalThis(realm, scuttleGlobalThisExceptions))
+      scuttleOpts.scuttlerFunc(globalRef, realm => performScuttleGlobalThis(realm, scuttleOpts.exceptions))
     }
 
     const kernel = {
