@@ -2,7 +2,7 @@
 
 ```bash
 yarn
-yarn add lavamoat-browserify
+yarn add -D lavamoat-browserify
 yarn lavamoat
 yarn start
 ```

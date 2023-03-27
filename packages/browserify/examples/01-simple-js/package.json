@@ -1,6 +1,7 @@
 {
   "devDependencies": {
     "browserify": "^16.5.0",
+    "lavamoat-browserify": "^16.0.0",
     "serve": "^11.3.0"
   },
   "scripts": {
@@ -8,7 +9,6 @@
     "start": "node ./build.js && serve ."
   },
   "dependencies": {
-    "lavamoat-browserify": "^16.0.0",
     "metamask-logo": "^2.5.0"
   }
 }
