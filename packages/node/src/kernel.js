@@ -15,6 +15,9 @@ const nativeRequire = require
 module.exports = { createKernel }
 
 function createKernel ({ projectRoot, lavamoatPolicy, canonicalNameMap, debugMode, statsMode, scuttleGlobalThis, scuttleGlobalThisExceptions }) {
+  if (scuttleGlobalThis?.scuttler) {
+    throw new Error('Lavamoat - "scuttleGlobalThis.scuttler" option is not supported for node environment.')
+  }
   if (scuttleGlobalThisExceptions) {
     console.warn('Lavamoat - "scuttleGlobalThisExceptions" is deprecated. Use "scuttleGlobalThis.exceptions" instead.')
     if (!scuttleGlobalThis.exceptions || !scuttleGlobalThis.exceptions.length) {
