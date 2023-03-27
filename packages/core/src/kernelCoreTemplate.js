@@ -82,7 +82,7 @@
       scuttler: scuttleGlobalThisScuttler,
     } = scuttleGlobalThis === true ? scuttleGlobalThisDefaults : scuttleGlobalThis
 
-    let scuttler = (globalRef, opts = {scuttle}) => opts?.scuttle(globalRef)
+    let scuttler = (globalRef, scuttle) => scuttle(globalRef)
     if (scuttleGlobalThisScuttler) {
       if (!globalRef[scuttleGlobalThisScuttler]) {
         throw new Error(
@@ -116,9 +116,7 @@
         const flags = parts[parts.length - 1]
         scuttleGlobalThisExceptions[i] = new RegExp(pattern, flags)
       }
-      scuttler(globalRef, {
-        scuttle: realm => performScuttleGlobalThis(realm, scuttleGlobalThisExceptions),
-      })
+      scuttler(globalRef, realm => performScuttleGlobalThis(realm, scuttleGlobalThisExceptions))
     }
 
     const kernel = {
