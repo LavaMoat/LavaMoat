@@ -2,10 +2,10 @@
 
 ```bash
 yarn
+yarn add lavamoat-browserify
 yarn lavamoat
 yarn start
 ```
-
 
 ### explanation
 
@@ -35,7 +35,7 @@ Here we are specifying the `lavamoat-browserify` plugin and providing it with th
 
 ##### build
 
-The scripts "start" performs our build with browserify, and starts a static asset server.
+The `"start"` script performs our build with browserify and starts a static asset server.
 
 ```js
 const lavamoatOpts = {
