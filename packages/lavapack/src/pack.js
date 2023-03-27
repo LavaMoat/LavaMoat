@@ -88,8 +88,11 @@ function createPacker({
 
   if (scuttleGlobalThisExceptions) {
     console.warn('Lavamoat - "scuttleGlobalThisExceptions" is deprecated. Use "scuttleGlobalThis.exceptions" instead.')
+    if (scuttleGlobalThis === true) {
+      scuttleGlobalThis = {enabled: true}
+    }
   }
-  const exceptions = scuttleGlobalThis.exceptions || scuttleGlobalThisExceptions
+  const exceptions = scuttleGlobalThis?.exceptions || scuttleGlobalThisExceptions
   scuttleGlobalThis.exceptions = exceptions
 
   // toString regexps if there's any

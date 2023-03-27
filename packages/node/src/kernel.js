@@ -17,9 +17,10 @@ module.exports = { createKernel }
 function createKernel ({ projectRoot, lavamoatPolicy, canonicalNameMap, debugMode, statsMode, scuttleGlobalThis, scuttleGlobalThisExceptions }) {
   if (scuttleGlobalThisExceptions) {
     console.warn('Lavamoat - "scuttleGlobalThisExceptions" is deprecated. Use "scuttleGlobalThis.exceptions" instead.')
-    if (!scuttleGlobalThis.exceptions || !scuttleGlobalThis.exceptions.length) {
-      scuttleGlobalThis.exceptions = scuttleGlobalThisExceptions
+    if (scuttleGlobalThis === true) {
+      scuttleGlobalThis = {enabled: true}
     }
+    scuttleGlobalThis.exceptions = scuttleGlobalThis?.exceptions || scuttleGlobalThisExceptions
   }
 
   const { resolutions } = lavamoatPolicy
