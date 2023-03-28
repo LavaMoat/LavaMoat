@@ -69,6 +69,6 @@ That's what scuttling is for: when turning scuttling on, LavaMoat will remove al
 
 ## Issues
 
-If different parts of your application run outside of LavaMoat's protection and rely on APIs accessible directly by the global object, they might not be accessible anymore when truning scuttling on, thus breaking your application.
+If different parts of your application run outside of LavaMoat's protection and rely on APIs accessible directly by the global object, they might not be accessible anymore when turning scuttling on, thus breaking your application.
 
 In MetaMask, we had a similar issue when loading a third party service outside of LavaMoat protection, and therefore we had to wrap it with a destined sandboxed environment in order for it to work properly under a scuttled environment (see [here](https://github.com/MetaMask/metamask-extension/pull/17276/files))
