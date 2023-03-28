@@ -20,7 +20,7 @@ module.exports = [
       opts: {
         scuttleGlobalThis: {
           enabled: true,
-          exceptions: ['process', /[0-9]+/, 'Set', 'Reflect', 'Object', 'console', 'Array', 'RegExp', 'Date', 'Math'],
+          exceptions: ['process', '/[0-9]+/', 'Set', 'Reflect', 'Object', 'console', 'Array', 'RegExp', 'Date', 'Math'],
         }
       }
     })

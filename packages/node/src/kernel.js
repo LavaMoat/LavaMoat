@@ -20,6 +20,7 @@ function createKernel ({ projectRoot, lavamoatPolicy, canonicalNameMap, debugMod
     if (scuttleGlobalThis === true) {
       scuttleGlobalThis = {enabled: true}
     }
+    scuttleGlobalThis = Object.assign({}, scuttleGlobalThis)
     scuttleGlobalThis.exceptions = scuttleGlobalThis?.exceptions || scuttleGlobalThisExceptions
   }
 

@@ -31,7 +31,8 @@ function getStrictScopeTerminatorShimSrc () {
 }
 
 // takes the kernelTemplate and populates it with the libraries
-function generateKernel (opts = {}) {
+function generateKernel (_opts = {}) {
+  const opts = Object.assign({}, _opts)
   const kernelCode = generateKernelCore()
 
   let output = kernelTemplate
