@@ -15,9 +15,9 @@ When using LavaMoat (node/lavapack/browserify), it accepts the argument `scuttle
 
 ```javascript
 scuttleGlobalThis: {
-  enabled: <boolean>,     // default:false
+  enabled: <boolean>,     // default: false
   exceptions: []<string>, // default: []
-  scuttler: <string>,     // default:''
+  scuttler: <string>,     // default: ''
 }
 ```
 
