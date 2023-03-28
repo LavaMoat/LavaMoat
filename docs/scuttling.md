@@ -22,7 +22,7 @@ scuttleGlobalThis: {
 ```
 
 * `enabled` - whether to enable scuttling security feature or not
-* `exceptions` - if `enabled:true`, provide a list of properties to avoid from scuttling (which means, not to remove those from the global object)
+* `exceptions` - if `enabled:true`, provide a list of properties to avoid scuttling (which means, not to remove those from the global object)
 * `scuttler` - optionally, you can provide a string pointing to a reference on the global object, which should refer to a function with which you can hook into the scuttling process at runtime (when `scuttler` is left untouched, LavaMoat runtime won't try using an external scuttler):
 
 ```javascript
