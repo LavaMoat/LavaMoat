@@ -2,6 +2,7 @@
 
 ```bash
 yarn
+yarn add -D lavamoat-browserify
 yarn lavamoat
 yarn start
 ```
@@ -21,7 +22,7 @@ In this example the config autogeneration and build scripts use the browserify c
 
 ##### config autogeneration
 
-The scripts `"lavamoat"` performs our config autogeneration. This task should only be run after updating dependencies.
+The `"lavamoat"` script performs our config autogeneration. This task should only be run after updating dependencies.
 
 ```bash
 browserify index.js \
@@ -36,7 +37,7 @@ Here we are specifying the `lavamoat-browserify` plugin and providing it with th
 
 ##### build
 
-The scripts "start" performs our build with browserify, and starts a static asset server.
+The `"start"` script performs our build with browserify and starts a static asset server.
 
 ```bash
 browserify index.js \
