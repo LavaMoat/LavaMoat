@@ -7,6 +7,9 @@ const { spawnSync } = require('child_process')
 const path = require('path')
 const { FEATURE } = require('./toggles')
 
+const { mkdir, copyFile, constants } = require('node:fs/promises')
+const { join } = require('node:path')
+
 const NPM = {
   RCFILE: '.npmrc',
   CONF: {
@@ -21,11 +24,13 @@ const YARN1 = {
     BINS: '--*.no-bin-links true',
   },
 }
-const YARN3 = {
+const YARN_BERRY = {
   RCFILE: '.yarnrc.yml',
   CONF: {
     SCRIPTS: 'enableScripts: false',
+    PLUGIN: 'plugins:\n  - path: lavamoat/plugins/@yarnpkg/plugin-allow-scripts.cjs',
   },
+  PLUGIN_PATH: 'lavamoat/plugins/@yarnpkg/plugin-allow-scripts.cjs',
 }
 
 
@@ -62,8 +67,8 @@ function writeRcFileContent({file, entry}) {
 
 let binsBlockedMemo
 /**
- * 
- * @param {Object} args 
+ *
+ * @param {Object} args
  * @param {boolean} noMemoization - turn off memoization, make a fresh lookup
  * @returns {boolean}
  */
@@ -75,9 +80,9 @@ function areBinsBlocked({ noMemoization = false } = {}) {
   return binsBlockedMemo
 }
 
-function writeRcFile () {
+async function writeRcFile () {
   const yarnRcExists = existsSync(addInstallParentDir(YARN1.RCFILE))
-  const yarnYmlExists = existsSync(addInstallParentDir(YARN3.RCFILE))
+  const yarnYmlExists = existsSync(addInstallParentDir(YARN_BERRY.RCFILE))
   const npmRcExists = existsSync(addInstallParentDir(NPM.RCFILE))
   const yarnLockExists = existsSync(addInstallParentDir('yarn.lock'))
 
@@ -98,10 +103,28 @@ function writeRcFile () {
   }
   if (yarnYmlExists || yarnLockExists) {
     configs.push({
-      file: YARN3.RCFILE,
+      file: YARN_BERRY.RCFILE,
       exists: yarnYmlExists,
-      entry: YARN3.CONF.SCRIPTS,
+      entry: YARN_BERRY.CONF.SCRIPTS,
     })
+    configs.push({
+      file: YARN_BERRY.RCFILE,
+      exists: yarnYmlExists,
+      entry: YARN_BERRY.CONF.PLUGIN,
+    })
+    const filepath = path.join(__dirname, 'yarn-berry-plugin.cjs')
+
+    async function makeDirectory() {
+      const projectFolder = join(__dirname, 'test', 'project')
+      const dirCreation = await mkdir(projectFolder, { recursive: true })
+
+      console.log(dirCreation)
+      return dirCreation
+    }
+    // TODO: test fresh and dirty
+    await copyFile(filepath, YARN_BERRY.PLUGIN_PATH, constants.COPYFILE_EXCL)
+
+    makeDirectory().catch(console.error)
   }
   if (configs.length === 0) {
     // default to npm, because that's what everyone has anyway
@@ -141,7 +164,7 @@ function editPackageJson () {
   } else {
     console.log('@lavamoat/allow-scripts: Added dependency @lavamoat/preinstall-always-fail.')
   }
-  
+
   if(FEATURE.bins) {
     // no motivation to fix lint here, there's a better implementation of this in a neighboring branch
     // eslint-disable-next-line node/global-require
@@ -149,18 +172,9 @@ function editPackageJson () {
     if(!packageJson.scripts) {
       packageJson.scripts = {}
     }
-    // If you think `node ` is redundant below, be aware that `./cli.js` won't work on Windows, 
+    // If you think `node ` is redundant below, be aware that `./cli.js` won't work on Windows,
     // but passing a unix-style path to node on Windows works fine.
-
-    // why only do this for FEATURE.bins?
-    packageJson.scripts['allow-scripts'] = 'node ./node_modules/@lavamoat/allow-scripts/src/cli.js --experimental-bins' // why --experimental-bins being ignored?
-    // and not by default:
-    // packageJson.scripts['allow-scripts'] = 'node ./node_modules/@lavamoat/allow-scripts/src/cli.js'
-
-    // why not this?
-    // packageJson.scripts['allow-scripts'] = 'yarn allow-scripts --experimental-bins'
-    // in case yarn or allow-scripts is compromised?
-
+    packageJson.scripts['allow-scripts'] = 'node ./node_modules/@lavamoat/allow-scripts/src/cli.js --experimental-bins'
     console.log('@lavamoat/allow-scripts: Adding allow-scripts as a package.json script with direct path.')
     writeFileSync(addInstallParentDir('package.json'), JSON.stringify(packageJson, null, 2))
   }

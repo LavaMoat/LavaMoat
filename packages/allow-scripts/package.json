@@ -33,7 +33,9 @@
     "@metamask/eslint-config-nodejs": "^10.0.0",
     "ava": "^3.15.0",
     "eslint-plugin-ava": "^11.0.0",
-    "eslint-plugin-node": "^11.1.0"
+    "eslint-plugin-node": "^11.1.0",
+    "@yarnpkg/shell": "4.0.0-rc.2",
+    "@yarnpkg/core": "4.0.0-rc.2"
   },
   "scripts": {
     "test": "yarn test:run",
