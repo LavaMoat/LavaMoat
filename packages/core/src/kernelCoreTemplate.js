@@ -77,7 +77,7 @@
       scuttlerName: '',
     }
 
-    const scuttleOpts = scuttleGlobalThis === true ? scuttleGlobalThisDefaults : scuttleGlobalThis
+    const scuttleOpts = Object.assign({}, scuttleGlobalThis === true ? scuttleGlobalThisDefaults : scuttleGlobalThis)
     scuttleOpts.scuttlerFunc = (globalRef, scuttle) => scuttle(globalRef)
     if (scuttleOpts.scuttlerName) {
       if (!globalRef[scuttleOpts.scuttlerName]) {
