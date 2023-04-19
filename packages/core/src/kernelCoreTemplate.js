@@ -74,19 +74,19 @@
     const scuttleGlobalThisDefaults = {
       enabled: true,
       exceptions: [],
-      scuttler: '',
+      scuttlerName: '',
     }
 
     const scuttleOpts = scuttleGlobalThis === true ? scuttleGlobalThisDefaults : scuttleGlobalThis
     scuttleOpts.scuttlerFunc = (globalRef, scuttle) => scuttle(globalRef)
-    if (scuttleOpts.scuttler) {
-      if (!globalRef[scuttleOpts.scuttler]) {
+    if (scuttleOpts.scuttlerName) {
+      if (!globalRef[scuttleOpts.scuttlerName]) {
         throw new Error(
-          `LavaMoat - 'scuttler' function "${scuttleOpts.scuttler}" expected on globalRef.` +
+          `LavaMoat - 'scuttlerName' function "${scuttleOpts.scuttlerName}" expected on globalRef.` +
           'To learn more visit https://github.com/LavaMoat/LavaMoat/pull/462.',
         )
       }
-      scuttleOpts.scuttlerFunc = globalRef[scuttleOpts.scuttler]
+      scuttleOpts.scuttlerFunc = globalRef[scuttleOpts.scuttlerName]
     }
 
     const moduleCache = new Map()

@@ -7,7 +7,7 @@ const lavamoatOpts = {
   scuttleGlobalThis: {
     enabled: true,
     exceptions: ['prompt'],
-    scuttler: 'SCUTTLER',
+    scuttlerName: 'SCUTTLER',
   },
 }
 
