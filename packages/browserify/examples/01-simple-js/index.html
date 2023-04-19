@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <script>
-      Object.defineProperty(window, 'SCUTTLER', {
+      Object.defineProperty(globalThis, 'SCUTTLER', {
         value: (globalRef, scuttle) => {
           console.log('scuttler (start)');
           scuttle(globalRef);
