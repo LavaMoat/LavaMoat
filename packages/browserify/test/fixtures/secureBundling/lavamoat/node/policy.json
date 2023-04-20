@@ -582,8 +582,8 @@
         "depcheck>@babel/traverse>@babel/helper-split-export-declaration": true,
         "depcheck>@babel/traverse>@babel/parser": true,
         "depcheck>@babel/traverse>@babel/types": true,
-        "depcheck>@babel/traverse>debug": true,
-        "depcheck>@babel/traverse>globals": true
+        "depcheck>@babel/traverse>globals": true,
+        "depcheck>debug": true
       }
     },
     "depcheck>@babel/traverse>@babel/generator": {
@@ -672,7 +672,14 @@
         "depcheck>@babel/traverse>@babel/types>to-fast-properties": true
       }
     },
-    "depcheck>@babel/traverse>debug": {
+    "depcheck>@vue/compiler-sfc>magic-string>@jridgewell/sourcemap-codec": {
+      "globals": {
+        "Buffer": true,
+        "TextDecoder": true,
+        "define": true
+      }
+    },
+    "depcheck>debug": {
       "builtin": {
         "tty.isatty": true,
         "util.deprecate": true,
@@ -688,14 +695,7 @@
       },
       "packages": {
         "@babel/code-frame>@babel/highlight>chalk>supports-color": true,
-        "depcheck>@babel/traverse>debug>ms": true
-      }
-    },
-    "depcheck>@vue/compiler-sfc>magic-string>@jridgewell/sourcemap-codec": {
-      "globals": {
-        "Buffer": true,
-        "TextDecoder": true,
-        "define": true
+        "depcheck>debug>ms": true
       }
     },
     "depcheck>is-core-module": {
