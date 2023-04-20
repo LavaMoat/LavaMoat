@@ -8,9 +8,9 @@ const q = JSON.stringify;
  * @param {string} params.id
  * @param {string[]} params.runtimeKit
  * @param {boolean} [params.runChecks]
- * @returns
+ * @returns {string}
  */
-module.exports = function wrapper({
+exports.wrapper = function wrapper({
   source,
   id,
   runtimeKit,
@@ -20,7 +20,7 @@ module.exports = function wrapper({
 
   const sesCompatibleSource = applySourceTransforms(source);
   const wrappedSrc = `(function(){
-    with (this.scopeTerminator) {
+     with (this.scopeTerminator) {
       with (this.runtimeHandler) {
       with (this.globalThis) {
         return function() { 'use strict';
@@ -36,6 +36,46 @@ module.exports = function wrapper({
     validateSource(wrappedSrc);
   }
   return wrappedSrc;
+};
+
+/**
+ *
+ * @param {object} params
+ * @param {string} params.source
+ * @param {string} params.id
+ * @param {string[]} params.runtimeKit
+ * @param {boolean} [params.runChecks]
+ * @returns {[string, string, string]}
+ */
+exports.getWrapping = function getWrapping({
+  source,
+  id,
+  runtimeKit,
+  runChecks = true,
+}) {
+  // validateSource(source);
+
+  const sesCompatibleSource = source
+  // const sesCompatibleSource = applySourceTransforms(source);
+  const before = `(function(){
+     with (this.scopeTerminator) {
+      with (this.runtimeHandler) {
+      with (this.globalThis) {
+        return function() { 'use strict';
+`;
+
+  const after = `
+        };
+      }
+    }
+    }
+}).call(getLavaMoatEvalKitForCompartment(${q(id)}, { ${runtimeKit.join(
+    ","
+  )}}))()`;
+  if (runChecks) {
+    validateSource(before + sesCompatibleSource + after);
+  }
+  return [before, sesCompatibleSource, after];
 };
 
 function validateSource(source) {
