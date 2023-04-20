@@ -1,4 +1,4 @@
-const wrapper = require("./wrapper.js");
+const {wrapper} = require("./wrapper.js");
 
 const fakeAA = (path) => {
   // TODO: properly resolve what belongs to which compartment
@@ -29,5 +29,6 @@ module.exports = function (source) {
     source,
     id: fakeAA(this.resourcePath),
     runtimeKit: ["module", "exports", "__webpack_require__"],
+    runChecks: options.runChecks
   });
 };
