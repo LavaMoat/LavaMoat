@@ -31,3 +31,22 @@ Problems:
 1. esbuild processes module declarations and wires things up after the loader runs. Instead of just providing our loader, we'd have to provide our own esm->cjs transform. the demo works on cjs files and only supports cjs typescript if we turn off checking for valid javascript - since the source we're reading may not be valid javascript.
 2. esbuild generates unique names for functions returning the module namespace, so wrapping them with the `runtimeHandler` is not possible. We'd have to do additional post-processing on the bundle or find a way to trigger different behavior from esbuild.
 
+
+# Notes
+
+## features
+
+### modes
+
+- fast - skips JS validity check 
+- default 
+- paranoid - adds extra checks
+
+Things it could check:
+in paranoid more
+- use a plugin to check if the number of bundle entries equals the number of entries processed by the loader
+- add a local reference before the with blocks and a function within to look it up and alert if it can be found - should trigger if a transform or plugin action breaks the withproxies
+- 
+outside
+- run an AST on the final bundle to identify the scopes without the `with` blocks (after all minitication etc.)
+- allow optionally importing a canary package that tries to escape

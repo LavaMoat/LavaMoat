@@ -1,10 +1,10 @@
-lockdown({
-  errorTaming: "unsafe",
-  mathTaming: "unsafe",
-  dateTaming: "unsafe",
-  consoleTaming: "unsafe",
-  stackFiltering: "verbose",
-});
+// lockdown({
+//   errorTaming: "unsafe",
+//   mathTaming: "unsafe",
+//   dateTaming: "unsafe",
+//   consoleTaming: "unsafe",
+//   stackFiltering: "verbose",
+// });
 (function () {
   const { create, freeze, assign } = Object;
   // strictScopeTerminator from SES is not strict enough - `has` would only return true for globals and here we want to prevent reaching into the scope where local variables from bundle runtime are available.
@@ -26,6 +26,7 @@ lockdown({
     // I could return a subset of globals
     return {
       console,
+      WebAssembly
     };
   };
 

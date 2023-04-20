@@ -1,7 +1,7 @@
 // TODO: fill this in with loading the files and wrapping them
 import * as esbuild from "esbuild";
 import fs from "node:fs";
-import wrapper from "../wrapper.js";
+import wrapper from "../src/wrapper.js";
 
 const onLoadMaker = (loader) => async (args) => {
   const { path } = args;

@@ -1,15 +1,22 @@
 {
   "name": "lavaloader",
-  "version": "0.0.1",
+  "version": "0.0.1-0",
   "description": "",
+  "main": "src/loader.js",
   "scripts": {
     "lib:ses": "cp ../../node_modules/ses/dist/lockdown.umd.js ./lib/lockdown.umd.js"
   },
   "dependencies": {
-    "lavamoat-core": "^14.0.0",
+    "lavamoat-core": "^14.0.0"
+  },
+  "devDependencies": {
     "ses": "^0.18.2"
   },
   "keywords": [],
   "author": "",
-  "license": "Apache-2.0"
+  "license": "Apache-2.0",
+  "files": [
+    "src",
+    "lib"
+  ]
 }
