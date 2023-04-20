@@ -71,24 +71,7 @@
     const { prepareCompartmentGlobalFromConfig } = templateRequire('makePrepareRealmGlobalFromConfig')(generalUtils)
     const { strictScopeTerminator } = templateRequire('strict-scope-terminator')
 
-    const scuttleGlobalThisDefaults = {
-      enabled: true,
-      exceptions: [],
-      scuttlerName: '',
-    }
-
-    const scuttleOpts = Object.assign({}, scuttleGlobalThis === true ? scuttleGlobalThisDefaults : scuttleGlobalThis)
-    scuttleOpts.scuttlerFunc = (globalRef, scuttle) => scuttle(globalRef)
-    if (scuttleOpts.scuttlerName) {
-      if (!globalRef[scuttleOpts.scuttlerName]) {
-        throw new Error(
-          `LavaMoat - 'scuttlerName' function "${scuttleOpts.scuttlerName}" expected on globalRef.` +
-          'To learn more visit https://github.com/LavaMoat/LavaMoat/pull/462.',
-        )
-      }
-      scuttleOpts.scuttlerFunc = globalRef[scuttleOpts.scuttlerName]
-    }
-
+    const scuttleOpts = generateScuttleOpts(scuttleGlobalThis)
     const moduleCache = new Map()
     const packageCompartmentCache = new Map()
     const globalStore = new Map()
@@ -100,17 +83,6 @@
     if (scuttleOpts.enabled) {
       if (!Array.isArray(scuttleOpts.exceptions)) {
         throw new Error(`LavaMoat - scuttleGlobalThis.exceptions must be an array, got "${typeof scuttleOpts.exceptions}"`)
-      }
-      // turn scuttleGlobalThis.exceptions regexes strings to actual regexes
-      for (let i = 0; i < scuttleOpts.exceptions.length; i++) {
-        const prop = scuttleOpts.exceptions[i]
-        if (!prop.startsWith('/')) {
-          continue
-        }
-        const parts = prop.split('/')
-        const pattern = parts.slice(1, -1).join('/')
-        const flags = parts[parts.length - 1]
-        scuttleOpts.exceptions[i] = new RegExp(pattern, flags)
       }
       scuttleOpts.scuttlerFunc(globalRef, realm => performScuttleGlobalThis(realm, scuttleOpts.exceptions))
     }
@@ -124,6 +96,40 @@
     }
     Object.freeze(kernel)
     return kernel
+
+    function generateScuttleOpts(originalOpts) {
+      const defaultOpts = {
+        enabled: true,
+        exceptions: [],
+        scuttlerName: '',
+      }
+      const opts = Object.assign({},
+        originalOpts === true ? { ... defaultOpts } : { ...originalOpts },
+        { scuttlerFunc: (globalRef, scuttle) => scuttle(globalRef) },
+        { exceptions: (originalOpts.exceptions || defaultOpts.exceptions).map(e => toRE(e)) },
+      )
+      if (opts.scuttlerName) {
+        if (!globalRef[opts.scuttlerName]) {
+          throw new Error(
+            `LavaMoat - 'scuttlerName' function "${opts.scuttlerName}" expected on globalRef.` +
+            'To learn more visit https://github.com/LavaMoat/LavaMoat/pull/462.',
+          )
+        }
+        opts.scuttlerFunc = globalRef[opts.scuttlerName]
+      }
+      return opts
+
+      function toRE(except) {
+        // turn scuttleGlobalThis.exceptions regexes strings to actual regexes
+        if (!except.startsWith('/')) {
+          return except
+        }
+        const parts = except.split('/')
+        const pattern = parts.slice(1, -1).join('/')
+        const flags = parts[parts.length - 1]
+        return new RegExp(pattern, flags)
+      }
+    }
 
     function performScuttleGlobalThis (globalRef, extraPropsToAvoid = new Array()) {
       const props = new Array()
