@@ -2,7 +2,7 @@ import leftpad from "leftpad";
 import { thing } from "./other.mjs";
 import { what } from "./omg.ts";
 // import * as eth from "@ethereumjs/util";
-// import * as j from 'fast-json-patch';
+import * as j from 'fast-json-patch';
 
 function run() {
   const a = thing(127);
