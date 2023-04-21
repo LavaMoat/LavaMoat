@@ -1,4 +1,7 @@
-# LavaLoader PoC
+# ScorchWrap PoC
+
+
+All stuff below is outdated. This is a plugin now.
 
 ## webpack
 

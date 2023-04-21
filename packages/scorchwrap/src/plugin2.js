@@ -12,9 +12,9 @@ const { getWrapping } = require("./wrapper");
 
 const ConcatSource = require("webpack-sources").ConcatSource;
 
-const JAVASCRIPT_MODULE_TYPE_AUTO = 'javascript/auto';
-const JAVASCRIPT_MODULE_TYPE_DYNAMIC = 'javascript/dynamic';
-const JAVASCRIPT_MODULE_TYPE_ESM = 'javascript/esm';
+const JAVASCRIPT_MODULE_TYPE_AUTO = "javascript/auto";
+const JAVASCRIPT_MODULE_TYPE_DYNAMIC = "javascript/dynamic";
+const JAVASCRIPT_MODULE_TYPE_ESM = "javascript/esm";
 
 function hackascriptgenerator(g) {
   const a = g.generate;
@@ -23,14 +23,14 @@ function hackascriptgenerator(g) {
     // console.error(module)
     // console.error(options)
     const r = a.apply(this, arguments);
-    // console.error(">>>", r);
     const wrapping = getWrapping({
       source: r,
       id: module.rawRequest,
       runtimeKit: Array.from(options.runtimeRequirements),
       runChecks: false,
-    })
+    });
     // console.error({wrapping})
+    module.buildInfo.strict = false;
     return new ConcatSource(...wrapping);
   };
   return g;
@@ -40,7 +40,7 @@ const PLUGIN_NAME = "ReplaceJavascriptGeneratorPlugin";
 
 function generatorTap(g) {
   console.error({ g });
-  return g
+  return g;
 }
 
 class ReplaceJavascriptGeneratorPlugin {
@@ -50,10 +50,21 @@ class ReplaceJavascriptGeneratorPlugin {
    * @returns {void}
    */
   apply(compiler) {
+    // compiler.hooks.compilation.tap(PLUGIN_NAME, (compilation) => {
+    //   const JavascriptModulesPlugin = compiler.webpack.javascript.JavascriptModulesPlugin
+    //   const hooks = JavascriptModulesPlugin.getCompilationHooks(compilation);
+    //   hooks.renderModuleContent.tap(
+    //     PLUGIN_NAME,
+    //     (moduleSource, module, ctx) => {
+    //       console.error({ moduleSource, module, ctx });
+    //     }
+    //   );
+    // });
+    // return 
     compiler.hooks.compilation.tap(
       PLUGIN_NAME,
       (compilation, { normalModuleFactory }) => {
-      // compiler.hooks.normalModuleFactory.tap(PLUGIN_NAME, (normalModuleFactory) => {
+        // compiler.hooks.normalModuleFactory.tap(PLUGIN_NAME, (normalModuleFactory) => {
 
         normalModuleFactory.hooks.generator
           .for(JAVASCRIPT_MODULE_TYPE_AUTO)
@@ -67,9 +78,13 @@ class ReplaceJavascriptGeneratorPlugin {
       }
     );
     return;
-    compiler.hooks.compilation.tap('MyWebpackPlugin', (compilation) => {
-      compilation.hooks.optimizeChunkAssets.tap('MyWebpackPlugin', (chunks) => {
-      console.log((compilation.dependencyTemplates._map.forEach(a=>console.error('___',a))));
+    compiler.hooks.compilation.tap("MyWebpackPlugin", (compilation) => {
+      compilation.hooks.optimizeChunkAssets.tap("MyWebpackPlugin", (chunks) => {
+        console.log(
+          compilation.dependencyTemplates._map.forEach((a) =>
+            console.error("___", a)
+          )
+        );
         chunks.forEach((chunk) => {
           const modules = chunk.getModules();
 
@@ -79,30 +94,32 @@ class ReplaceJavascriptGeneratorPlugin {
 
             // loop through the dependencies and access the template context
             dependencies.forEach((dependency) => {
-              console.log({dependency })
-              const templateContext = compilation.dependencyTemplates.get(dependency.constructor);
+              console.log({ dependency });
+              const templateContext = compilation.dependencyTemplates.get(
+                dependency.constructor
+              );
 
-              console.error(templateContext.initFragments)
+              console.error(templateContext.initFragments);
             });
           });
         });
       });
     });
-    return 
-   
-    compiler.hooks.compilation.tap('MyPlugin', (compilation) => {
+    return;
+
+    compiler.hooks.compilation.tap("MyPlugin", (compilation) => {
       compilation.moduleTemplates.javascript.hooks.render.tap(
-        'MyPlugin',
+        "MyPlugin",
         (source, module) => {
           if (module.dependencyTemplates) {
             module.dependencyTemplates.forEach((template) => {
-              if (template && typeof template.hooks === 'object') {
+              if (template && typeof template.hooks === "object") {
                 template.hooks.render.tap(
-                  'MyPlugin',
+                  "MyPlugin",
                   (source, dependency, templateContext) => {
                     // access the initFragments array from templateContext
-                    console.error('zzz', templateContext.initFragments )
-                    templateContext.initFragments.push('/*ZZZ*/');
+                    console.error("zzz", templateContext.initFragments);
+                    templateContext.initFragments.push("/*ZZZ*/");
                     return source;
                   }
                 );

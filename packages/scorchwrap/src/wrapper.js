@@ -1,4 +1,5 @@
 const { applySourceTransforms } = require("lavamoat-core");
+const fs = require("fs");
 const q = JSON.stringify;
 
 /**
@@ -16,7 +17,6 @@ exports.wrapper = function wrapper({
   runtimeKit,
   runChecks = true,
 }) {
-  // validateSource(source);
 
   const sesCompatibleSource = applySourceTransforms(source);
   const wrappedSrc = `(function(){
@@ -43,7 +43,7 @@ exports.wrapper = function wrapper({
  * @param {object} params
  * @param {string} params.source
  * @param {string} params.id
- * @param {string[]} params.runtimeKit
+ * @param {string[] | Set<string>} params.runtimeKit
  * @param {boolean} [params.runChecks]
  * @returns {[string, string, string]}
  */
@@ -55,8 +55,7 @@ exports.getWrapping = function getWrapping({
 }) {
   // validateSource(source);
 
-  const sesCompatibleSource = source
-  // const sesCompatibleSource = applySourceTransforms(source);
+  const sesCompatibleSource = applySourceTransforms(source);
   const before = `(function(){
      with (this.scopeTerminator) {
       with (this.runtimeHandler) {
@@ -69,7 +68,7 @@ exports.getWrapping = function getWrapping({
       }
     }
     }
-}).call(getLavaMoatEvalKitForCompartment(${q(id)}, { ${runtimeKit.join(
+}).call(getLavaMoatEvalKitForCompartment(${q(id)}, { ${Array.from(runtimeKit).join(
     ","
   )}}))()`;
   if (runChecks) {
@@ -79,7 +78,7 @@ exports.getWrapping = function getWrapping({
 };
 
 function validateSource(source) {
-  const validityFlag = "validityFlag" + Math.random().toFixed(10);
+  const validityFlag = "VALIDATION" + Math.random().toFixed(10);
   // If the result is not valid javascript, instead of a parse error,
   // we'll get webpack complaining that `with` is used in strict mode.
   // To prevent that confusion, let's check that the result is valid javascript.
@@ -87,7 +86,8 @@ function validateSource(source) {
     eval(`{throw "${validityFlag}"};;` + source);
   } catch (e) {
     if (e !== validityFlag) {
-      throw Error("wrapped module is not valid JS\n" + e);
+      fs.writeFileSync(validityFlag+'.js', source);
+      throw Error(validityFlag + "wrapped module is not valid JS\n" + e);
     }
   }
 }

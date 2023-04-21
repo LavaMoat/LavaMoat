@@ -18,7 +18,7 @@
   );
 
   // Policy implementation
-  // This part would require bundling a subset of the core runtime 
+  // This part would require bundling a subset of the core runtime
   const enforcePolicy = (pkg, resourceId) => {
     // I could throw
   };
@@ -26,26 +26,35 @@
     // I could return a subset of globals
     return {
       console,
-      WebAssembly
+      WebAssembly,
     };
   };
 
   const compartment_ekhm_Map = new Map();
 
-  globalThis.getLavaMoatEvalKitForCompartment = (
-    resourceId,
-    runtimeKit
-  ) => {
+  const wrapRequireWithPolicy = (__webpack_require__, resourceId) =>
+    function (pkg) {
+      enforcePolicy(pkg, resourceId);
+      return __webpack_require__.apply(this, arguments);
+    };
+
+  globalThis.getLavaMoatEvalKitForCompartment = (resourceId, runtimeKit) => {
+    let overrides = create(null);
+
     const { __webpack_require__ } = runtimeKit;
-    // wrap webpack runtime for policy check and hardening
-    const runtimeHandler = freeze(
-      assign(create(null), runtimeKit, {
-        __webpack_require__: freeze(function (pkg) {
-          enforcePolicy(pkg, resourceId);
-          return __webpack_require__.apply(this, arguments);
-        }),
-      })
-    );
+
+    if (__webpack_require__) {
+      // wrap webpack runtime for policy check and hardening
+      const policyRequire = wrapRequireWithPolicy(
+        __webpack_require__,
+        resourceId
+      );
+      policyRequire.n = __webpack_require__.n; // TODO: figure out what to wrap if anything
+      policyRequire.r = __webpack_require__.r; // TODO: figure out what to wrap if anything
+      policyRequire.d = __webpack_require__.d; // TODO: figure out what to wrap if anything
+      overrides.__webpack_require__ = policyRequire;
+    }
+    const runtimeHandler = freeze(assign(create(null), runtimeKit, overrides));
 
     if (!compartment_ekhm_Map.has(resourceId)) {
       // Create a compartment with globals attenuated according to the policy
