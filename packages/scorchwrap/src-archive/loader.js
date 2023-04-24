@@ -1,4 +1,4 @@
-const {wrapper} = require("./wrapper.js");
+const { wrapSource } = require("./wrapper.js");
 
 const fakeAA = (path) => {
   // TODO: properly resolve what belongs to which compartment
@@ -17,18 +17,10 @@ const fakeAA = (path) => {
 
 module.exports = function (source) {
   const options = this.getOptions();
-
-  // console.log(
-  //   Object.fromEntries(
-  //     Object.entries(this).filter(([k, v]) => typeof v === "string")
-  //   )
-  // );
-  // console.log(source);
-
-  return wrapper({
+  return wrapSource({
     source,
     id: fakeAA(this.resourcePath),
-    runtimeKit: ["module", "exports", "__webpack_require__"],
-    runChecks: options.runChecks
+    runtimeKit: ["module", "exports", "__webpack_require__"], // looking at what we learned from the plugin, this list was extremely inadequate.
+    runChecks: options.runChecks,
   });
 };

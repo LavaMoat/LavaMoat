@@ -1,16 +1,22 @@
 {
-  "name": "lavaloader",
+  "name": "@lavamoat/scorchwrap",
   "version": "0.0.1-0",
   "description": "",
-  "main": "src/loader.js",
+  "main": "src/plugin.js",
   "scripts": {
     "lib:ses": "cp ../../node_modules/ses/dist/lockdown.umd.js ./lib/lockdown.umd.js"
   },
   "dependencies": {
-    "lavamoat-core": "^14.0.0"
+    "lavamoat-core": "^14.0.0",
+    "webpack-sources":"^3.2.3"
+  },
+  "peerDependencies": {
+    "webpack": "^5.80.0"
   },
   "devDependencies": {
-    "ses": "^0.18.2"
+    "ses": "^0.18.2",
+    "webpack": "^5.80.0",
+    "@types/webpack-sources":"^3.2.0"
   },
   "keywords": [],
   "author": "",
