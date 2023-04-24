@@ -1,15 +1,37 @@
 const { applySourceTransforms } = require("lavamoat-core");
+const diag = require("./diagnostics");
 const fs = require("fs");
 const q = JSON.stringify;
 
 /**
+ * @typedef {object} WrappingInput
+ * @property {string} source
+ * @property {string} id
+ * @property {string[] | Set<string>} runtimeKit
+ * @property {boolean} [runChecks]
  *
- * @param {object} params
- * @param {string} params.source
- * @param {string} params.id
- * @param {string[]} params.runtimeKit
- * @param {boolean} [params.runChecks]
+ */
+
+const NAME_globalThis = 'G';
+const NAME_scopeTerminator = 'ST';
+const NAME_runtimeHandler = 'RH';
+const NAME_getLavaMoatEvalKitForCompartment = '__LM__';
+
+
+/**
+ *
+ * @param {WrappingInput} params
  * @returns {string}
+ */
+exports.wrapSource = function wrapSource(options) {
+  const { before, after, source } = wrapper(options);
+  return `${before}${source}${after}`;
+};
+
+/**
+ *
+ * @param {WrappingInput} params
+ * @returns {{before: string, after: string, source: string, sourceChanged: boolean}}
  */
 exports.wrapper = function wrapper({
   source,
@@ -17,49 +39,17 @@ exports.wrapper = function wrapper({
   runtimeKit,
   runChecks = true,
 }) {
-
-  const sesCompatibleSource = applySourceTransforms(source);
-  const wrappedSrc = `(function(){
-     with (this.scopeTerminator) {
-      with (this.runtimeHandler) {
-      with (this.globalThis) {
-        return function() { 'use strict';
-      ${sesCompatibleSource}
-        };
-      }
-    }
-    }
-}).call(getLavaMoatEvalKitForCompartment(${q(id)}, { ${runtimeKit.join(
-    ","
-  )}}))()`;
-  if (runChecks) {
-    validateSource(wrappedSrc);
-  }
-  return wrappedSrc;
-};
-
-/**
- *
- * @param {object} params
- * @param {string} params.source
- * @param {string} params.id
- * @param {string[] | Set<string>} params.runtimeKit
- * @param {boolean} [params.runChecks]
- * @returns {[string, string, string]}
- */
-exports.getWrapping = function getWrapping({
-  source,
-  id,
-  runtimeKit,
-  runChecks = true,
-}) {
   // validateSource(source);
 
+  // No AST used in these transforms, so string cmparison should indicate if anything was changed.
   const sesCompatibleSource = applySourceTransforms(source);
+  const sourceChanged = source !== sesCompatibleSource;
+
+  // TODO: Consider: We could save some bytes by merging scopeTerminator and runtimeHandler, but then runtime calls would go through a proxy, which is slower. Merging runtimeKit with globalThis would also be problematic.
   const before = `(function(){
-     with (this.scopeTerminator) {
-      with (this.runtimeHandler) {
-      with (this.globalThis) {
+     with (this.${NAME_scopeTerminator}) {
+      with (this.${NAME_runtimeHandler}) {
+      with (this.${NAME_globalThis}) {
         return function() { 'use strict';
 `;
 
@@ -68,25 +58,31 @@ exports.getWrapping = function getWrapping({
       }
     }
     }
-}).call(getLavaMoatEvalKitForCompartment(${q(id)}, { ${Array.from(runtimeKit).join(
-    ","
-  )}}))()`;
+}).call(${NAME_getLavaMoatEvalKitForCompartment}(${q(id)}, { ${Array.from(
+    runtimeKit
+  ).join(",")}}))()`;
   if (runChecks) {
     validateSource(before + sesCompatibleSource + after);
   }
-  return [before, sesCompatibleSource, after];
+  return {
+    before,
+    after,
+    source: sesCompatibleSource,
+    sourceChanged,
+  };
 };
 
 function validateSource(source) {
-  const validityFlag = "VALIDATION" + Math.random().toFixed(10);
-  // If the result is not valid javascript, instead of a parse error,
-  // we'll get webpack complaining that `with` is used in strict mode.
-  // To prevent that confusion, let's check that the result is valid javascript.
+  const validityFlag = "E_VALIDATION" + Math.random().toFixed(10);
+  // If wrapping results with invalid JS, webpack may not report that at later stages
+  // or we might get an error complaoining about with in strict mode even if the issue is mismatching curlies
   try {
     eval(`{throw "${validityFlag}"};;` + source);
   } catch (e) {
     if (e !== validityFlag) {
-      fs.writeFileSync(validityFlag+'.js', source);
+      diag.run(1, () => {
+        fs.writeFileSync(validityFlag + ".js", source);
+      });
       throw Error(validityFlag + "wrapped module is not valid JS\n" + e);
     }
   }

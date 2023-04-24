@@ -1,20 +1,24 @@
-const path = require("path");
-const MYPLUGIN = require('../src/plugin.js');
+const ScorchWrap = require("../src/plugin.js");
 
 module.exports = {
   entry: "./app.js",
-  mode: "development",
+  // both modes work
+  mode: "production", 
+  // mode: "development",
   output: {
     filename: "app.bundle.js",
   },
-  devtool: false,
+  // sourcemaps remain correct and don't seem to contain artifacts from the wrapper
+  devtool: "source-map",
   plugins: [
-    new MYPLUGIN(),
+    new ScorchWrap({
+      runChecks: true,
+      diagnosticsVerbosity: 2,
+    }),
   ],
-
   module: {
     rules: [
-      // Warning - this loader produces errors if the bundle in dist is not valid JS. No idea why it looks there
+      // Warning - this loader reads all files in the project, not jsut the ones that are imported. I didn't want to dive further into fixing the config.
       // Other than that quirk it just works
       // {
       //   test: /\.ts$/,
@@ -28,16 +32,11 @@ module.exports = {
             loader: "esbuild-loader",
             options: {
               loader: "ts",
-              // format: "cjs",
-            }
-          }
+            },
+          },
         ],
         exclude: /node_modules/,
       },
-    
     ],
   },
-  // resolve: {
-  //   extensions: [".tsx", ".ts", ".js", ".mjs"],
-  // },
 };

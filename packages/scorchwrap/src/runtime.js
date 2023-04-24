@@ -5,8 +5,15 @@
 //   consoleTaming: "unsafe",
 //   stackFiltering: "verbose",
 // });
+
 (function () {
-  const { create, freeze, assign } = Object;
+  const { create, freeze, assign, defineProperty } = Object;
+
+  const NAME_globalThis = "G";
+  const NAME_scopeTerminator = "ST";
+  const NAME_runtimeHandler = "RH";
+  const NAME_getLavaMoatEvalKitForCompartment = "__LM__";
+
   // strictScopeTerminator from SES is not strict enough - `has` would only return true for globals and here we want to prevent reaching into the scope where local variables from bundle runtime are available.
   const stricterScopeTerminator = freeze(
     new Proxy(
@@ -38,10 +45,14 @@
       return __webpack_require__.apply(this, arguments);
     };
 
-  globalThis.getLavaMoatEvalKitForCompartment = (resourceId, runtimeKit) => {
+  globalThis[NAME_getLavaMoatEvalKitForCompartment] = (
+    resourceId,
+    runtimeKit
+  ) => {
     let overrides = create(null);
 
     const { __webpack_require__ } = runtimeKit;
+    let { module } = runtimeKit;
 
     if (__webpack_require__) {
       // wrap webpack runtime for policy check and hardening
@@ -49,12 +60,27 @@
         __webpack_require__,
         resourceId
       );
-      policyRequire.n = __webpack_require__.n; // TODO: figure out what to wrap if anything
-      policyRequire.r = __webpack_require__.r; // TODO: figure out what to wrap if anything
-      policyRequire.d = __webpack_require__.d; // TODO: figure out what to wrap if anything
+
+      // TODO: figure out what to wrap if anything
+      // Some of these may have to be limited, probably by configurationn
+      assign(policyRequire, __webpack_require__);
+
+      // override webpack_require functionalities
+      policyRequire.nmd = (moduleReference) => {
+        if (moduleReference === module) {
+          module = __webpack_require__.nmd(module);
+        }
+      };
       overrides.__webpack_require__ = policyRequire;
     }
-    const runtimeHandler = freeze(assign(create(null), runtimeKit, overrides));
+    const runtimeHandler = assign(create(null), runtimeKit, overrides);
+
+    // allow setting, but ignore value for /* module decorator */ module = __webpack_require__.nmd(module);
+    defineProperty(runtimeHandler, "module", {
+      get: () => module,
+      set: () => {},
+    });
+    freeze(runtimeHandler);
 
     if (!compartment_ekhm_Map.has(resourceId)) {
       // Create a compartment with globals attenuated according to the policy
@@ -65,9 +91,9 @@
     }
 
     return {
-      scopeTerminator: stricterScopeTerminator,
-      runtimeHandler,
-      globalThis: compartment_ekhm_Map.get(resourceId).globalThis,
+      [NAME_scopeTerminator]: stricterScopeTerminator,
+      [NAME_runtimeHandler]: runtimeHandler,
+      [NAME_globalThis]: compartment_ekhm_Map.get(resourceId).globalThis,
     };
   };
 })();
