@@ -1,6 +1,6 @@
 // @ts-check
 
-const { execute } = require( "@yarnpkg/shell");
+const { execute } = require('@yarnpkg/shell');
 
 /** @typedef {import('@yarnpkg/core').Plugin} Plugin */
 
