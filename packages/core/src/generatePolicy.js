@@ -97,7 +97,7 @@ function createModuleInspector (opts = {}) {
     // skip json files
     const filename = moduleRecord.file || 'unknown'
     const fileExtension = path.extname(filename)
-    if (fileExtension === '.json') {
+    if (!fileExtension.match(/^\.([cm]?js|ts)$/)) {
       return
     }
     // get ast (parse or use cached)
