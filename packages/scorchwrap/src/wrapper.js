@@ -77,11 +77,15 @@ function validateSource(source) {
   // If wrapping results with invalid JS, webpack may not report that at later stages
   // or we might get an error complaoining about with in strict mode even if the issue is mismatching curlies
   try {
-    eval(`{throw "${validityFlag}"};;` + source);
+    Function(`{throw "${validityFlag}"};;` + source)();
   } catch (e) {
     if (e !== validityFlag) {
       diag.run(1, () => {
-        fs.writeFileSync(validityFlag + ".js", source);
+        fs.writeFileSync(validityFlag + ".js", source+`
+/*
+${e}
+*/
+        `);
       });
       throw Error(validityFlag + "wrapped module is not valid JS\n" + e);
     }
