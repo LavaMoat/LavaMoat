@@ -1,4 +1,4 @@
-const { wrapSource } = require("./wrapper.js");
+const { wrapSource } = require("../src/wrapper.js");
 
 const fakeAA = (path) => {
   // TODO: properly resolve what belongs to which compartment

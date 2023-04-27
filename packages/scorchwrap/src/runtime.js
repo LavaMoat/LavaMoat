@@ -39,11 +39,11 @@
 
   const compartment_ekhm_Map = new Map();
 
-  const wrapRequireWithPolicy = (__webpack_require__, resourceId) =>
-    function (pkg) {
-      enforcePolicy(pkg, resourceId);
-      return __webpack_require__.apply(this, arguments);
-    };
+const wrapRequireWithPolicy = (require, resourceId) =>
+  function (pkg) {
+    enforcePolicy(pkg, resourceId);
+    return require.apply(this, arguments);
+  };
 
   globalThis[NAME_getLavaMoatEvalKitForCompartment] = (
     resourceId,
