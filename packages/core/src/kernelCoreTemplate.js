@@ -97,6 +97,9 @@
     Object.freeze(kernel)
     return kernel
 
+    // generate final scuttling options (1) by taking default
+    // options into consideration, (2) turning RE strings into
+    // actual REs and (3) without mutating original opts object
     function generateScuttleOpts(originalOpts) {
       const defaultOpts = {
         enabled: true,
