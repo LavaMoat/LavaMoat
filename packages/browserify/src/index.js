@@ -4,6 +4,7 @@ const { getDefaultPaths } = require('lavamoat-core')
 const jsonStringify = require('json-stable-stringify')
 const { createModuleInspectorSpy } = require('./createModuleInspectorSpy.js')
 const { createPackageDataStream } = require('./createPackageDataStream.js')
+const { createCompartmentMapperStream } = require('./createCompartmentMapperStream.js')
 const createLavaPack = require('@lavamoat/lavapack')
 const { createSesWorkaroundsTransform } = require('./sesTransforms')
 const { loadCanonicalNameMap } = require('@lavamoat/aa')
@@ -60,6 +61,12 @@ function plugin (browserify, pluginOpts) {
     browserify.pipeline.get('emit-deps').unshift(createPackageDataStream({
       getCanonicalNameMap,
     }))
+
+    if (configuration.onCompartmentMap) {
+      browserify.pipeline.get('emit-deps').push(createCompartmentMapperStream({
+        onCompartmentMap: configuration.onCompartmentMap,
+      }))
+    }
 
     // if writeAutoPolicy activated, insert hook
     if (configuration.writeAutoPolicy) {

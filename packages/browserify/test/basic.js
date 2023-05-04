@@ -79,3 +79,24 @@ test('basic - lavamoat bundle without prelude', async (t) => {
 
   t.true(didCallLoadBundle)
 })
+
+
+// test.only('compartment map', async (t) => {
+//   const scenario = createScenarioFromScaffold({
+//     defineOne: () => {
+//       module.exports = require('two')
+//     },
+//     defineTwo: () => {
+//       module.exports = global
+//     },
+//   })
+//   // await autoConfigForScenario({ scenario })
+//   const { bundleForScenario } = await createBundleForScenario({
+//     scenario,
+//     onCompartmentMap: ({ compartmentMap, moduleRegistry }) => {
+//       console.log('compartmentMap', compartmentMap)
+//     },
+//   })
+//   const hasGlobalInjection = bundleForScenario.includes('typeof global !== \\"undefined\\" ? global :')
+//   t.false(hasGlobalInjection, 'did not inject "global" ref')
+// })
