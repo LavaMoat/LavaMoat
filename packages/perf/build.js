@@ -31,6 +31,10 @@ const bundler = browserify(['./entry.js'], {
 })
 
 // build
+main().catch((err) => {
+  console.error(err)
+  process.exit(1)
+})
 
 async function main () {
   fs.mkdirSync('./bundle', { recursive: true })
