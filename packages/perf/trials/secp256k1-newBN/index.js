@@ -22,6 +22,9 @@ const tasks = {
     prep: 'lavamoat entry.js --writeAutoPolicy',
     run: 'lavamoat entry.js',
   },
+  'endo-unsafe': {
+    run: 'node ../../endo.js',
+  },
   // 'bify+lavamoat w/ harden': {
   //   prep: 'yarn build:harden',
   //   run: 'node bundle.js',

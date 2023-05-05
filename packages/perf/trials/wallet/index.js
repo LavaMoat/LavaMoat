@@ -18,6 +18,9 @@ const tasks = {
     prep: 'yarn build:default',
     run: 'node bundle/default.js',
   },
+  'endo-unsafe': {
+    run: 'node ../../endo.js',
+  },
   // ses rejects some eval?
   // 'bify+ses': {
   //   // reuse previous build

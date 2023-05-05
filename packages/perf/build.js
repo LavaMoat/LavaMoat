@@ -7,6 +7,7 @@ const { pipeline } = require('stream')
 // "default": "--plugin [ lavamoat-browserify --policy ./lavamoat-policy.json ] > bundle.js",
 // "harden": "--plugin [ lavamoat-browserify --policy ./lavamoat-policy-harden.json ] > bundle.js",
 // "unsafe": "> bundle.js",
+
 const buildTarget = process.env.TARGET
 const useLavamoat = buildTarget !== 'unsafe'
 const policyName = buildTarget
@@ -30,14 +31,25 @@ const bundler = browserify(['./entry.js'], {
 })
 
 // build
-fs.mkdirSync('./bundle', { recursive: true })
-pipeline(
-  bundler.bundle(),
-  fs.createWriteStream(destPath),
-  (err) => {
-    if (err) {
-      console.error(err)
-      process.exit(1)
-    }
+
+async function main () {
+  fs.mkdirSync('./bundle', { recursive: true })
+  await performBundle()
+  // workaround for lavamoat-browserify - need to rebuild after policy is written
+  if (useLavamoat) {
+    await performBundle()
   }
-)
+}
+
+function performBundle () {
+  return new Promise((resolve, reject) => {
+    pipeline(
+      bundler.bundle(),
+      fs.createWriteStream(destPath),
+      (err, bundle) => {
+        if (err) return reject(err)
+        resolve(bundle)
+      }
+    )
+  })
+}

@@ -23,7 +23,8 @@
     "lavamoat-browserify": "^15.5.0",
     "lavamoat": "^6.4.0",
     "readable-stream": "^3.6.0",
-    "ses": "^0.6.4"
+    "@endo/compartment-mapper": "^0.8.4",
+    "ses": "^0.18.4"
   },
   "devDependencies": {
     "serve": "^11.2.0"

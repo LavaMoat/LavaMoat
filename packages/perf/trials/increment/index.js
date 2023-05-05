@@ -1,6 +1,6 @@
 const { performTest } = require('../../performTask')
 
-const nRange = [0, 1e10]
+const nRange = [0, 5e9]
 
 const tasks = {
   'node': {
@@ -17,6 +17,9 @@ const tasks = {
   'lavamoat-bify': {
     prep: 'yarn build:default',
     run: 'node bundle/default.js',
+  },
+  'endo-unsafe': {
+    run: 'node ../../endo.js',
   },
   // 'bify+ses': {
   //   // reuse previous build

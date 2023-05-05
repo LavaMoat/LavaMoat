@@ -1,7 +1,8 @@
-console.log('hi')
-
 const ethUtil = require('ethereumjs-util')
-const Buffer = require('safe-buffer').Buffer
+const Buffer = require('buffer').Buffer
+const BN = require('secp256k1/lib/js/bn')
+const ECJPoint = require('secp256k1/lib/js/ecjpoint')
+const ECPoint = require('secp256k1/lib/js/ecpoint')
 
 // use globalThis.process to avoid hardcoding value when bundling
 const nTimes = Number.parseInt(globalThis.process.env.PERF_N || 5, 10)
@@ -10,10 +11,6 @@ const nTimes = Number.parseInt(globalThis.process.env.PERF_N || 5, 10)
 
 const passphrase = `brain wallet seed #${0}`
 const privKey = ethUtil.keccak256(Buffer.from(passphrase))
-const BN = require('secp256k1/lib/js/bn')
-const ECJPoint = require('secp256k1/lib/js/ecjpoint')
-const ECPoint = require('secp256k1/lib/js/ecpoint')
-
 
 const privateKey = privKey
 const d = BN.fromBuffer(privateKey)

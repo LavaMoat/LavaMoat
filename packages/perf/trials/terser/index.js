@@ -18,6 +18,9 @@ const tasks = {
     prep: 'yarn build:default',
     run: 'node bundle/default.js',
   },
+  // 'endo-unsafe': {
+  //   run: 'node ../../endo.js',
+  // },
   // 'bify+ses': {
   //   // reuse previous build
   //   run: `node -p "global.globalThis=global;require('lavamoat-core/lib/ses.umd.js');lockdown({ errorTaming: 'unsafe' });const c = new Compartment({ global });c.evaluate(require('fs').readFileSync('./bundle.js','utf8').split('-->').join('-- >').split('<!--').join('<! --').split('import(').join('__import__('))"`,
