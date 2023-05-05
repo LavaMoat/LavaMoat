@@ -45,26 +45,22 @@ module.exports = [
       name: 'globalWrites - and reads',
       defineOne: () => {
         module.exports = {
-          type: typeof globalThis.xyz,
-          value: globalThis.xyz
+          type: typeof globalThis.setTimeout,
         }
       },
       config: {
         resources: {
           one: {
             globals: {
-              xyz: 'write'
+              // using "setTimeout" as an example of an endowment available
+              // in all testing environments
+              setTimeout: 'write'
             }
           },
         }
       },
-      // populate evaluation realm global
-      beforeCreateKernel: (scenario) => {
-        scenario.globalThis.xyz = 123
-      },
       expectedResult: {
-        type: 'number',
-        value: 123,
+        type: 'function',
       },
     })
     return scenario
