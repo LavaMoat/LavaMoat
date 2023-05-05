@@ -6,6 +6,13 @@ const CopyPlugin = require('copy-webpack-plugin')
 
 const distPath = path.join(__dirname, '../dist')
 
+// TODO: temporary workaround for making webpack 4 work across Node.js versions
+// Remove once project upgraded to webpack 5
+// https://stackoverflow.com/questions/69394632/webpack-build-failing-with-err-ossl-evp-unsupported/69691525#69691525
+const crypto = require('crypto')
+const crypto_orig_createHash = crypto.createHash
+crypto.createHash = algorithm => crypto_orig_createHash(algorithm === 'md4' ? 'sha256' : algorithm)
+
 module.exports = {
   devServer: {
     contentBase: distPath,
