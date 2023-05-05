@@ -25,7 +25,7 @@
     "json-stable-stringify": "^1.0.2",
     "lavamoat-core": "^14.0.0",
     "lavamoat-tofu": "^6.0.2",
-    "node-gyp-build": "^4.2.3",
+    "node-gyp-build": "^4.6.0",
     "resolve": "^1.17.0",
     "yargs": "^16.0.0"
   },
