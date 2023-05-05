@@ -60,8 +60,6 @@
       errorTaming: 'unsafe',
       // shows the full call stack
       stackFiltering: 'verbose',
-      // deep stacks
-      consoleTaming: 'unsafe',
     }
 
     lockdown(lockdownOptions)
