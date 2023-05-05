@@ -1,1 +1,1 @@
-require('tape')
+require('react')

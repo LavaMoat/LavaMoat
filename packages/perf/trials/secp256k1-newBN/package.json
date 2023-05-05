@@ -7,14 +7,12 @@
     "start": "yarn stats && yarn chart",
     "stats": "node index.js > perf.csv",
     "chart": "cat perf.csv | chart-csv > chart.html",
-    "lavamoat": "TARGET='autogen' node ../../build.js",
-    "build": "TARGET='default' node ../../build.js",
+    "build:default": "TARGET='default' node ../../build.js",
     "build:harden": "TARGET='harden' node ../../build.js",
     "build:unsafe": "TARGET='unsafe' node ../../build.js"
   },
   "dependencies": {
     "chart-csv": "kumavis/chart-csv#master",
-    "eth-sig-util": "^2.5.0",
-    "ethereumjs-wallet": "^0.6.3"
+    "secp256k1": "^3.7.1"
   }
 }

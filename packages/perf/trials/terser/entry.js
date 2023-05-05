@@ -1,19 +1,26 @@
 const { minify } = require('terser')
 
-// use `global.process` so it works correctly under node
-const nTimes = Number.parseInt(global.process.env.PERF_N || 5, 10)
+// use globalThis.process to avoid hardcoding value when bundling
+const nTimes = Number.parseInt(globalThis.process.env.PERF_N || 5, 10)
 
-loop()
-
-async function loop () {
-  for (let index = 0; index < nTimes; index++) {
-    await main()
-  }
-}
+asyncSeriesRepeat(nTimes, main)
 
 async function main () {
   await minify({
     "file1.js": "function add(first, second) { return first + second; }",
     "file2.js": "console.log(add(1 + 2, 3 + 4));"
   })
+}
+
+async function asyncSeries(tasks) {
+  const results = [];
+  for (const task of tasks) {
+    results.push(await task());
+  }
+  return results;
+}
+
+async function asyncSeriesRepeat (n, task) {
+  const tasks = Array(n).fill(task);
+  return await asyncSeries(tasks);
 }
