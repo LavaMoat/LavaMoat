@@ -4,14 +4,15 @@
   "version": "0.0.0",
   "scripts": {
     "serve": "serve .",
-    "start": "yarn run:wallet && yarn run:increment && yarn run:secp256k1-mixedAdd && yarn run:secp256k1-newBN && yarn run:bify-simple && yarn run:pull-stream && yarn run:terser",
+    "start": "yarn run:wallet && yarn run:increment && yarn run:secp256k1-mixedAdd && yarn run:secp256k1-newBN && yarn run:bify-simple && yarn run:pull-stream && yarn run:terser && yarn run:typed-array",
     "run:wallet": "(cd trials/wallet && yarn && yarn start)",
     "run:increment": "(cd trials/increment && yarn && yarn start)",
     "run:secp256k1-mixedAdd": "(cd trials/secp256k1-mixedAdd && yarn && yarn start)",
     "run:secp256k1-newBN": "(cd trials/secp256k1-newBN && yarn && yarn start)",
     "run:bify-simple": "(cd trials/bify-simple && yarn && yarn start)",
     "run:pull-stream": "(cd trials/pull-stream && yarn && yarn start)",
-    "run:terser": "(cd trials/terser && yarn && yarn start)"
+    "run:terser": "(cd trials/terser && yarn && yarn start)",
+    "run:typed-array": "(cd trials/typed-array && yarn && yarn start)"
   },
   "repository": {
     "type": "git",
