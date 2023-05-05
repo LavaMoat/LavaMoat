@@ -22,7 +22,7 @@
     "@lavamoat/aa": "^3.1.0",
     "bindings": "^1.5.0",
     "htmlescape": "^1.1.1",
-    "json-stable-stringify": "^1.0.1",
+    "json-stable-stringify": "^1.0.2",
     "lavamoat-core": "^14.0.0",
     "lavamoat-tofu": "^6.0.2",
     "node-gyp-build": "^4.2.3",
