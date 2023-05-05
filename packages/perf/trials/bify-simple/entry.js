@@ -1,11 +1,17 @@
+const { asyncSeriesRepeat } = require('../../util.js')
 const browserify = require('browserify')
 
-// use `global.process` so it works correctly under node
-const nTimes = Number.parseInt(global.process.env.PERF_N || 5, 10)
+// use globalThis.process to avoid hardcoding value when bundling
+const nTimes = Number.parseInt(globalThis.process.env.PERF_N || 5, 10)
 
-Promise.all(Array(nTimes).fill().forEach(async (_, index) => {
+asyncSeriesRepeat(nTimes, async () => {
   const bundler = browserify('./bundle-entry.js')
-  await new Promise(resolve => {
-    bundler.bundle().on('end', resolve)
+  await new Promise((resolve, reject) => {
+    bundler.bundle((err, _bundle) => {
+      if (err) {
+        return reject(err)
+      }
+      resolve()
+    })
   })
-}))
+})

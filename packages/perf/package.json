@@ -4,12 +4,14 @@
   "version": "0.0.0",
   "scripts": {
     "serve": "serve .",
-    "start": "yarn run start:wallet && yarn run start:localOnly && yarn run start:requireLoop && yarn run start:secp256k1 && yarn run start:newBN",
-    "start:wallet": "(cd trials/wallet && yarn && yarn start)",
-    "start:localOnly": "(cd trials/localOnly && yarn && yarn start)",
-    "start:requireLoop": "(cd trials/requireLoop && yarn && yarn start)",
-    "start:secp256k1": "(cd trials/secp256k1-mixedAdd && yarn && yarn start)",
-    "start:newBN": "(cd trials/secp256k1-newBN && yarn && yarn start)"
+    "start": "yarn run:wallet && yarn run:increment && yarn run:secp256k1-mixedAdd && yarn run:secp256k1-newBN && yarn run:bify-simple && yarn run:pull-stream && yarn run:terser",
+    "run:wallet": "(cd trials/wallet && yarn && yarn start)",
+    "run:increment": "(cd trials/increment && yarn && yarn start)",
+    "run:secp256k1-mixedAdd": "(cd trials/secp256k1-mixedAdd && yarn && yarn start)",
+    "run:secp256k1-newBN": "(cd trials/secp256k1-newBN && yarn && yarn start)",
+    "run:bify-simple": "(cd trials/bify-simple && yarn && yarn start)",
+    "run:pull-stream": "(cd trials/pull-stream && yarn && yarn start)",
+    "run:terser": "(cd trials/terser && yarn && yarn start)"
   },
   "repository": {
     "type": "git",
@@ -18,14 +20,14 @@
   },
   "dependencies": {
     "browserify": "^16.5.0",
-    "lavamoat-browserify": "4.0.0",
+    "lavamoat-browserify": "^15.5.0",
+    "lavamoat": "^6.4.0",
     "readable-stream": "^3.6.0",
     "ses": "^0.6.4"
   },
   "devDependencies": {
     "serve": "^11.2.0"
   },
-  "gitHead": "b5908eb5b2eda4a49fb7abd4d1b6e69fb9a98d0a",
   "engines": {
     "node": ">=14.0.0"
   }

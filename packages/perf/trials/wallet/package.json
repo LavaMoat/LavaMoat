@@ -7,8 +7,7 @@
     "start": "yarn stats && yarn chart",
     "stats": "node index.js > perf.csv",
     "chart": "cat perf.csv | chart-csv > chart.html",
-    "lavamoat": "TARGET='autogen' node ../../build.js",
-    "build": "TARGET='default' node ../../build.js",
+    "build:default": "TARGET='default' node ../../build.js",
     "build:harden": "TARGET='harden' node ../../build.js",
     "build:unsafe": "TARGET='unsafe' node ../../build.js"
   },

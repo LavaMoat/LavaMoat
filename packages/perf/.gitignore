@@ -1,1 +1,4 @@
+trials/*/bundle
+trials/*/lavamoat/*/policy.json
+
 node_modules

@@ -1,15 +1,10 @@
+const { asyncSeriesRepeat } = require('../../util')
 const { minify } = require('terser')
 
-// use `global.process` so it works correctly under node
-const nTimes = Number.parseInt(global.process.env.PERF_N || 5, 10)
+// use globalThis.process to avoid hardcoding value when bundling
+const nTimes = Number.parseInt(globalThis.process.env.PERF_N || 5, 10)
 
-loop()
-
-async function loop () {
-  for (let index = 0; index < nTimes; index++) {
-    await main()
-  }
-}
+asyncSeriesRepeat(nTimes, main)
 
 async function main () {
   await minify({

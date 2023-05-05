@@ -7,8 +7,11 @@ module.exports = { performTest }
 async function performTest (tasks, nRange) {
   const results = {}
   for (const [taskName, task] of Object.entries(tasks)) {
-    process.stderr.write(`running task "${taskName}"...\n`)
-    if (task.prep) await runCommand(`${task.prep}`)
+    if (task.prep) {
+      console.warn(`running task prep "${taskName}"...`)
+      await runCommand(`${task.prep}`)
+    }
+    console.warn(`running task "${taskName}"...`)
     for (const nValue of nRange) {
       const runTime = await runCommand(`PERF_N=${nValue} ${task.run}`)
       // init results container
@@ -23,7 +26,7 @@ async function performTest (tasks, nRange) {
 
 async function runCommand(command) {
   const start = process.hrtime.bigint()
-  await exec(command)
+  await exec(command, { env: process.env })
   const end = process.hrtime.bigint()
   const duration = end - start
   const durationSeconds = Number(duration)/1e9
