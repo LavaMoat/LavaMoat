@@ -10,9 +10,9 @@ const tasks = {
     prep: 'lavamoat entry.js --writeAutoPolicy',
     run: 'lavamoat entry.js',
   },
-  // 'endo-unsafe': {
-  //   run: 'node ../../endo.js',
-  // },
+  'endo-unsafe': {
+    run: 'node ../../endo.js',
+  },
 }
 
 performTest(tasks, nRange)

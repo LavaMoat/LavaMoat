@@ -5,14 +5,19 @@ const nTimes = Number.parseInt(globalThis.process.env.PERF_N || 5, 10)
 
 asyncSeriesRepeat(nTimes, async () => {
   const bundler = browserify('./bundle-entry.js')
-  await new Promise((resolve, reject) => {
-    bundler.bundle((err, _bundle) => {
+  const bundle = await new Promise((resolve, reject) => {
+    bundler.bundle((err, bundle) => {
       if (err) {
         return reject(err)
       }
-      resolve()
+      resolve(bundle)
     })
   })
+  console.log(bundle.length)
+})
+.catch((err) => {
+  console.error(err)
+  process.exit(1)
 })
 
 async function asyncSeries(tasks) {
