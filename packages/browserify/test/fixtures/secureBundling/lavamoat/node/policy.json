@@ -582,8 +582,8 @@
         "depcheck>@babel/traverse>@babel/helper-split-export-declaration": true,
         "depcheck>@babel/traverse>@babel/parser": true,
         "depcheck>@babel/traverse>@babel/types": true,
-        "depcheck>@babel/traverse>globals": true,
-        "depcheck>debug": true
+        "depcheck>@babel/traverse>debug": true,
+        "depcheck>@babel/traverse>globals": true
       }
     },
     "depcheck>@babel/traverse>@babel/generator": {
@@ -667,11 +667,12 @@
         "process.env.BABEL_TYPES_8_BREAKING": true
       },
       "packages": {
-        "depcheck>@babel/traverse>@babel/types>@babel/helper-validator-identifier": true,
+        "@babel/code-frame>@babel/highlight>@babel/helper-validator-identifier": true,
+        "depcheck>@babel/traverse>@babel/types>@babel/helper-string-parser": true,
         "depcheck>@babel/traverse>@babel/types>to-fast-properties": true
       }
     },
-    "depcheck>debug": {
+    "depcheck>@babel/traverse>debug": {
       "builtin": {
         "tty.isatty": true,
         "util.deprecate": true,
@@ -687,7 +688,7 @@
       },
       "packages": {
         "@babel/code-frame>@babel/highlight>chalk>supports-color": true,
-        "depcheck>debug>ms": true
+        "depcheck>@babel/traverse>debug>ms": true
       }
     },
     "depcheck>@vue/compiler-sfc>magic-string>@jridgewell/sourcemap-codec": {
