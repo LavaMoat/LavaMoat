@@ -27,7 +27,7 @@
     "lavamoat-tofu": "^6.0.2",
     "node-gyp-build": "^4.6.0",
     "resolve": "^1.22.3",
-    "yargs": "^16.0.0"
+    "yargs": "^17.7.2"
   },
   "devDependencies": {
     "@metamask/eslint-config-nodejs": "^10.0.0",
