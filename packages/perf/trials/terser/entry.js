@@ -3,7 +3,10 @@ const { minify } = require('terser')
 // use globalThis.process to avoid hardcoding value when bundling
 const nTimes = Number.parseInt(globalThis.process.env.PERF_N || 5, 10)
 
-asyncSeriesRepeat(nTimes, main)
+asyncSeriesRepeat(nTimes, main).catch(err => {
+  console.error(err)
+  process.exit(1)
+})
 
 async function main () {
   await minify({

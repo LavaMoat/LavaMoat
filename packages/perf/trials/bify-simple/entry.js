@@ -13,6 +13,9 @@ asyncSeriesRepeat(nTimes, async () => {
       resolve()
     })
   })
+}).catch(err => {
+  console.error(err)
+  process.exit(1)
 })
 
 async function asyncSeries(tasks) {

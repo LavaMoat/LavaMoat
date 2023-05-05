@@ -10,6 +10,10 @@ const tasks = {
     prep: 'lavamoat entry.js --writeAutoPolicy',
     run: 'lavamoat entry.js',
   },
+  'lavamoat-node scuttle': {
+    prep: 'lavamoat entry.js --writeAutoPolicy',
+    run: 'lavamoat entry.js --scuttleGlobalThis',
+  },
   'bify': {
     prep: 'yarn build:unsafe',
     run: 'node bundle/unsafe.js',
