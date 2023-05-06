@@ -69,7 +69,40 @@
         "performantResolve": true
       },
       "packages": {
-        "depcheck>resolve": true
+        "@lavamoat/aa>resolve": true
+      }
+    },
+    "@lavamoat/aa>resolve": {
+      "builtin": {
+        "fs.readFile": true,
+        "fs.readFileSync": true,
+        "fs.realpath": true,
+        "fs.realpathSync": true,
+        "fs.stat": true,
+        "fs.statSync": true,
+        "os.homedir": true,
+        "path.dirname": true,
+        "path.join": true,
+        "path.parse": true,
+        "path.relative": true,
+        "path.resolve": true
+      },
+      "globals": {
+        "process.env.HOME": true,
+        "process.env.HOMEDRIVE": true,
+        "process.env.HOMEPATH": true,
+        "process.env.LNAME": true,
+        "process.env.LOGNAME": true,
+        "process.env.USER": true,
+        "process.env.USERNAME": true,
+        "process.env.USERPROFILE": true,
+        "process.getuid": true,
+        "process.nextTick": true,
+        "process.platform": true
+      },
+      "packages": {
+        "depcheck>is-core-module": true,
+        "depcheck>resolve>path-parse": true
       }
     },
     "@lavamoat/lavapack": {
@@ -549,8 +582,8 @@
         "depcheck>@babel/traverse>@babel/helper-split-export-declaration": true,
         "depcheck>@babel/traverse>@babel/parser": true,
         "depcheck>@babel/traverse>@babel/types": true,
-        "depcheck>@babel/traverse>debug": true,
-        "depcheck>@babel/traverse>globals": true
+        "depcheck>@babel/traverse>globals": true,
+        "depcheck>debug": true
       }
     },
     "depcheck>@babel/traverse>@babel/generator": {
@@ -634,12 +667,11 @@
         "process.env.BABEL_TYPES_8_BREAKING": true
       },
       "packages": {
-        "@babel/code-frame>@babel/highlight>@babel/helper-validator-identifier": true,
-        "depcheck>@babel/traverse>@babel/types>@babel/helper-string-parser": true,
+        "depcheck>@babel/traverse>@babel/types>@babel/helper-validator-identifier": true,
         "depcheck>@babel/traverse>@babel/types>to-fast-properties": true
       }
     },
-    "depcheck>@babel/traverse>debug": {
+    "depcheck>debug": {
       "builtin": {
         "tty.isatty": true,
         "util.deprecate": true,
@@ -655,7 +687,7 @@
       },
       "packages": {
         "@babel/code-frame>@babel/highlight>chalk>supports-color": true,
-        "depcheck>@babel/traverse>debug>ms": true
+        "depcheck>debug>ms": true
       }
     },
     "depcheck>@vue/compiler-sfc>magic-string>@jridgewell/sourcemap-codec": {
@@ -699,8 +731,7 @@
         "process.env.USERPROFILE": true,
         "process.getuid": true,
         "process.nextTick": true,
-        "process.platform": true,
-        "process.versions": true
+        "process.platform": true
       },
       "packages": {
         "depcheck>is-core-module": true,
