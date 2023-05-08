@@ -556,9 +556,64 @@
         "console.error": true
       },
       "packages": {
-        "depcheck>@babel/traverse>@babel/generator>jsesc": true,
-        "depcheck>@babel/traverse>@babel/generator>source-map": true,
-        "depcheck>@babel/traverse>@babel/types": true
+        "depcheck>@babel/traverse>@babel/generator>@babel/types": true,
+        "depcheck>@babel/traverse>@babel/generator>@jridgewell/gen-mapping": true,
+        "depcheck>@babel/traverse>@babel/generator>@jridgewell/trace-mapping": true,
+        "depcheck>@babel/traverse>@babel/generator>jsesc": true
+      }
+    },
+    "depcheck>@babel/traverse>@babel/generator>@babel/types": {
+      "globals": {
+        "console.warn": true,
+        "process.env.BABEL_TYPES_8_BREAKING": true
+      },
+      "packages": {
+        "depcheck>@babel/traverse>@babel/generator>@babel/types>@babel/helper-string-parser": true,
+        "depcheck>@babel/traverse>@babel/generator>@babel/types>@babel/helper-validator-identifier": true,
+        "depcheck>@babel/traverse>@babel/types>to-fast-properties": true
+      }
+    },
+    "depcheck>@babel/traverse>@babel/generator>@jridgewell/gen-mapping": {
+      "globals": {
+        "define": true
+      },
+      "packages": {
+        "depcheck>@babel/traverse>@babel/generator>@jridgewell/gen-mapping>@jridgewell/set-array": true,
+        "depcheck>@babel/traverse>@babel/generator>@jridgewell/gen-mapping>@jridgewell/sourcemap-codec": true,
+        "depcheck>@babel/traverse>@babel/generator>@jridgewell/trace-mapping": true
+      }
+    },
+    "depcheck>@babel/traverse>@babel/generator>@jridgewell/gen-mapping>@jridgewell/set-array": {
+      "globals": {
+        "define": true
+      }
+    },
+    "depcheck>@babel/traverse>@babel/generator>@jridgewell/gen-mapping>@jridgewell/sourcemap-codec": {
+      "globals": {
+        "Buffer": true,
+        "TextDecoder": true,
+        "define": true
+      }
+    },
+    "depcheck>@babel/traverse>@babel/generator>@jridgewell/trace-mapping": {
+      "globals": {
+        "define": true
+      },
+      "packages": {
+        "depcheck>@babel/traverse>@babel/generator>@jridgewell/trace-mapping>@jridgewell/resolve-uri": true,
+        "depcheck>@babel/traverse>@babel/generator>@jridgewell/trace-mapping>@jridgewell/sourcemap-codec": true
+      }
+    },
+    "depcheck>@babel/traverse>@babel/generator>@jridgewell/trace-mapping>@jridgewell/resolve-uri": {
+      "globals": {
+        "define": true
+      }
+    },
+    "depcheck>@babel/traverse>@babel/generator>@jridgewell/trace-mapping>@jridgewell/sourcemap-codec": {
+      "globals": {
+        "Buffer": true,
+        "TextDecoder": true,
+        "define": true
       }
     },
     "depcheck>@babel/traverse>@babel/generator>jsesc": {
@@ -663,8 +718,7 @@
         "process.env.USERPROFILE": true,
         "process.getuid": true,
         "process.nextTick": true,
-        "process.platform": true,
-        "process.versions": true
+        "process.platform": true
       },
       "packages": {
         "depcheck>is-core-module": true,
