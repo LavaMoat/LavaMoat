@@ -19,7 +19,7 @@ module.exports = [
       expectedResult: Math.PI,
       opts: {
         scuttleGlobalThis: true,
-        scuttleGlobalThisExceptions: ['process', /[0-9]+/, 'Set', 'Reflect', 'Object', 'console', 'Array', 'RegExp', 'Date', 'Math'],
+        scuttleGlobalThisExceptions: ['WebAssembly', 'process', /[0-9]+/, 'Set', 'Reflect', 'Object', 'console', 'Array', 'RegExp', 'Date', 'Math'],
       },
     })
     await autoConfigForScenario({ scenario })
