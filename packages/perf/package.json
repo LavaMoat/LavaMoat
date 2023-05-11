@@ -19,7 +19,7 @@
     "directory": "packages/perf"
   },
   "dependencies": {
-    "browserify": "^16.5.0",
+    "browserify": "^17.0.0",
     "lavamoat-browserify": "^15.5.0",
     "lavamoat": "^6.4.0",
     "readable-stream": "^3.6.0",
