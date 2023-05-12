@@ -4,7 +4,6 @@ const { builtinModules: builtinPackages } = require('module')
 const resolve = require('resolve')
 const bindings = require('bindings')
 const gypBuild = require('node-gyp-build')
-const fromEntries = require('object.fromentries')
 const { codeFrameColumns } = require('@babel/code-frame')
 const { default: highlight } = require('@babel/highlight')
 const { loadCanonicalNameMap, getPackageNameForModulePath } = require('@lavamoat/aa')
@@ -57,7 +56,7 @@ module.exports = {
 
 async function parseForPolicy ({ projectRoot, entryId, policyOverride = {}, rootPackageName, shouldResolve, includeDebugInfo, ...args }) {
   const isBuiltin = (id) => builtinPackages.includes(id)
-  const { resolutions } = policyOverride  
+  const { resolutions } = policyOverride
   const canonicalNameMap = await loadCanonicalNameMap({ rootDir: projectRoot, includeDevDeps: true })
   const resolveHook = makeResolveHook({ projectRoot, resolutions, rootPackageName, canonicalNameMap })
   const importHook = makeImportHook({ rootPackageName, shouldResolve, isBuiltin, resolveHook, canonicalNameMap })
@@ -162,7 +161,7 @@ function makeImportHook ({
     // get imports
     const { cjsImports } = inspectImports(ast, null, false)
     // build import map
-    const importMap = fromEntries(cjsImports.map(requestedName => {
+    const importMap = Object.fromEntries(cjsImports.map(requestedName => {
       let depValue
       if (shouldResolve(requestedName, specifier)) {
         try {
