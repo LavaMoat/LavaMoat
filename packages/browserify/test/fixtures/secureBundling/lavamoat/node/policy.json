@@ -538,8 +538,7 @@
     },
     "depcheck>@babel/traverse": {
       "globals": {
-        "console.log": true,
-        "console.trace": true
+        "console.log": true
       },
       "packages": {
         "@babel/code-frame": true,
@@ -559,21 +558,10 @@
         "console.error": true
       },
       "packages": {
-        "depcheck>@babel/traverse>@babel/generator>@babel/types": true,
         "depcheck>@babel/traverse>@babel/generator>@jridgewell/gen-mapping": true,
         "depcheck>@babel/traverse>@babel/generator>@jridgewell/trace-mapping": true,
-        "depcheck>@babel/traverse>@babel/generator>jsesc": true
-      }
-    },
-    "depcheck>@babel/traverse>@babel/generator>@babel/types": {
-      "globals": {
-        "console.warn": true,
-        "process.env.BABEL_TYPES_8_BREAKING": true
-      },
-      "packages": {
-        "depcheck>@babel/traverse>@babel/generator>@babel/types>@babel/helper-string-parser": true,
-        "depcheck>@babel/traverse>@babel/generator>@babel/types>@babel/helper-validator-identifier": true,
-        "depcheck>@babel/traverse>@babel/types>to-fast-properties": true
+        "depcheck>@babel/traverse>@babel/generator>jsesc": true,
+        "depcheck>@babel/traverse>@babel/types": true
       }
     },
     "depcheck>@babel/traverse>@babel/generator>@jridgewell/gen-mapping": {
@@ -582,19 +570,12 @@
       },
       "packages": {
         "depcheck>@babel/traverse>@babel/generator>@jridgewell/gen-mapping>@jridgewell/set-array": true,
-        "depcheck>@babel/traverse>@babel/generator>@jridgewell/gen-mapping>@jridgewell/sourcemap-codec": true,
-        "depcheck>@babel/traverse>@babel/generator>@jridgewell/trace-mapping": true
+        "depcheck>@babel/traverse>@babel/generator>@jridgewell/trace-mapping": true,
+        "depcheck>@vue/compiler-sfc>magic-string>@jridgewell/sourcemap-codec": true
       }
     },
     "depcheck>@babel/traverse>@babel/generator>@jridgewell/gen-mapping>@jridgewell/set-array": {
       "globals": {
-        "define": true
-      }
-    },
-    "depcheck>@babel/traverse>@babel/generator>@jridgewell/gen-mapping>@jridgewell/sourcemap-codec": {
-      "globals": {
-        "Buffer": true,
-        "TextDecoder": true,
         "define": true
       }
     },
@@ -624,20 +605,9 @@
         "Buffer.isBuffer": true
       }
     },
-    "depcheck>@babel/traverse>@babel/helper-environment-visitor": {
-      "packages": {
-        "depcheck>@babel/traverse>@babel/types": true
-      }
-    },
     "depcheck>@babel/traverse>@babel/helper-function-name": {
       "packages": {
-        "depcheck>@babel/traverse>@babel/helper-function-name>@babel/helper-get-function-arity": true,
         "depcheck>@babel/traverse>@babel/helper-function-name>@babel/template": true,
-        "depcheck>@babel/traverse>@babel/types": true
-      }
-    },
-    "depcheck>@babel/traverse>@babel/helper-function-name>@babel/helper-get-function-arity": {
-      "packages": {
         "depcheck>@babel/traverse>@babel/types": true
       }
     },
@@ -660,11 +630,12 @@
     },
     "depcheck>@babel/traverse>@babel/types": {
       "globals": {
-        "console.trace": true,
+        "console.warn": true,
         "process.env.BABEL_TYPES_8_BREAKING": true
       },
       "packages": {
         "@babel/code-frame>@babel/highlight>@babel/helper-validator-identifier": true,
+        "depcheck>@babel/traverse>@babel/types>@babel/helper-string-parser": true,
         "depcheck>@babel/traverse>@babel/types>to-fast-properties": true
       }
     },
@@ -685,6 +656,13 @@
       "packages": {
         "@babel/code-frame>@babel/highlight>chalk>supports-color": true,
         "depcheck>@babel/traverse>debug>ms": true
+      }
+    },
+    "depcheck>@vue/compiler-sfc>magic-string>@jridgewell/sourcemap-codec": {
+      "globals": {
+        "Buffer": true,
+        "TextDecoder": true,
+        "define": true
       }
     },
     "depcheck>is-core-module": {
