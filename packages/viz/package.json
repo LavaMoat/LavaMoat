@@ -43,7 +43,7 @@
     "statsvr": "^3.1.1",
     "webpack": "^4.46.0",
     "webpack-cli": "^4.9.2",
-    "webpack-dev-server": "^3.11.3"
+    "webpack-dev-server": "^4.15.0"
   },
   "scripts": {
     "analyze": "source-map-explorer 'build/static/js/*.js'",
