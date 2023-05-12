@@ -27,7 +27,7 @@
     "ses": "^0.18.4"
   },
   "devDependencies": {
-    "serve": "^11.2.0"
+    "serve": "^13.0.4"
   },
   "engines": {
     "node": ">=14.0.0 <19.0.0"
