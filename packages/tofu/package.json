@@ -31,6 +31,6 @@
   },
   "homepage": "https://github.com/LavaMoat/LavaMoat/blob/main/packages/tofu/README.md",
   "engines": {
-    "node": ">=14.0.0"
+    "node": ">=14.0.0 <19.0.0"
   }
 }
