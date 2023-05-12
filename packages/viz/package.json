@@ -28,7 +28,7 @@
     "eslint-plugin-react": "^7.20.3",
     "esm": "^3.2.25",
     "gh-pages": "^2.2.0",
-    "html-webpack-plugin": "4.0.0-alpha.2",
+    "html-webpack-plugin": "^4.5.2",
     "kind-of": "^6.0.3",
     "react": "^16.8.6",
     "react-bootstrap": "^1.0.0-beta.8",
