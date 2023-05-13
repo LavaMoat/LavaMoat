@@ -795,9 +795,14 @@
         "define": true
       },
       "packages": {
-        "json-stable-stringify": true,
+        "lavamoat-core>json-stable-stringify": true,
         "lavamoat-core>lavamoat-tofu": true,
         "lavamoat-core>merge-deep": true
+      }
+    },
+    "lavamoat-core>json-stable-stringify": {
+      "packages": {
+        "lavamoat-core>json-stable-stringify>jsonify": true
       }
     },
     "lavamoat-core>lavamoat-tofu": {
