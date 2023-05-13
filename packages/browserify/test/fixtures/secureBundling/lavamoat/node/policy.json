@@ -124,11 +124,11 @@
       "packages": {
         "@lavamoat/lavapack>combine-source-map": true,
         "@lavamoat/lavapack>convert-source-map": true,
+        "@lavamoat/lavapack>json-stable-stringify": true,
         "@lavamoat/lavapack>readable-stream": true,
         "@lavamoat/lavapack>through2": true,
         "@lavamoat/lavapack>umd": true,
         "browserify>JSONStream": true,
-        "json-stable-stringify": true,
         "lavamoat-core": true
       }
     },
@@ -170,6 +170,11 @@
         "atob": true,
         "btoa": true,
         "value": true
+      }
+    },
+    "@lavamoat/lavapack>json-stable-stringify": {
+      "packages": {
+        "@lavamoat/lavapack>json-stable-stringify>jsonify": true
       }
     },
     "@lavamoat/lavapack>readable-stream": {
