@@ -16,7 +16,7 @@
   },
   "devDependencies": {
     "@metamask/eslint-config-nodejs": "^10.0.0",
-    "ses": "^0.17.0",
+    "ses": "^0.18.4",
     "eslint-plugin-ava": "^11.0.0",
     "eslint-plugin-node": "^11.1.0",
     "tmp-promise": "^3.0.2"
