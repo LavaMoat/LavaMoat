@@ -526,9 +526,14 @@
     },
     "browserify>syntax-error>acorn-node": {
       "packages": {
+        "browserify>syntax-error>acorn-node>acorn": true,
         "browserify>syntax-error>acorn-node>acorn-walk": true,
-        "eslint-plugin-ava>espree>acorn": true,
         "watchify>xtend": true
+      }
+    },
+    "browserify>syntax-error>acorn-node>acorn": {
+      "globals": {
+        "define": true
       }
     },
     "browserify>syntax-error>acorn-node>acorn-walk": {
@@ -768,11 +773,6 @@
     "duplexify>end-of-stream>once": {
       "packages": {
         "duplexify>end-of-stream>once>wrappy": true
-      }
-    },
-    "eslint-plugin-ava>espree>acorn": {
-      "globals": {
-        "define": true
       }
     },
     "json-stable-stringify": {

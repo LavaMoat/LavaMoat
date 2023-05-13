@@ -22,7 +22,7 @@
   "devDependencies": {
     "@metamask/eslint-config-nodejs": "^10.0.0",
     "ava": "^3.15.0",
-    "eslint-plugin-ava": "^11.0.0",
+    "eslint-plugin-ava": "^13.2.0",
     "eslint-plugin-node": "^11.1.0",
     "espree": "^9.5.2",
     "mississippi": "^4.0.0",
