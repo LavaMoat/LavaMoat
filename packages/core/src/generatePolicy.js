@@ -1,6 +1,5 @@
 const EventEmitter = require('events')
 const path = require('path')
-const fromEntries = require('fromentries')
 const jsonStringify = require('json-stable-stringify')
 const {
   parse,
@@ -212,7 +211,7 @@ function createModuleInspector (opts = {}) {
       // get dependencies, ignoring builtins
       const packageDeps = aggregateDeps({ packageModules, moduleIdToModuleRecord })
       if (packageDeps.length) {
-        packages = fromEntries(packageDeps.map(depPackageName => [depPackageName, true]))
+        packages = Object.fromEntries(packageDeps.map(depPackageName => [depPackageName, true]))
       }
       // get globals
       if (packageToGlobals[packageName]) {
