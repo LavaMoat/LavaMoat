@@ -123,11 +123,11 @@
       },
       "packages": {
         "@lavamoat/lavapack>combine-source-map": true,
+        "@lavamoat/lavapack>convert-source-map": true,
         "@lavamoat/lavapack>readable-stream": true,
         "@lavamoat/lavapack>through2": true,
         "@lavamoat/lavapack>umd": true,
         "browserify>JSONStream": true,
-        "convert-source-map": true,
         "json-stable-stringify": true,
         "lavamoat-core": true
       }
@@ -162,6 +162,14 @@
       },
       "packages": {
         "@lavamoat/lavapack>combine-source-map>inline-source-map>source-map": true
+      }
+    },
+    "@lavamoat/lavapack>convert-source-map": {
+      "globals": {
+        "Buffer": true,
+        "atob": true,
+        "btoa": true,
+        "value": true
       }
     },
     "@lavamoat/lavapack>readable-stream": {
@@ -555,18 +563,6 @@
     "concat-stream>buffer-from": {
       "globals": {
         "Buffer": true
-      }
-    },
-    "convert-source-map": {
-      "builtin": {
-        "fs.readFileSync": true,
-        "path.resolve": true
-      },
-      "globals": {
-        "Buffer": true,
-        "atob": true,
-        "btoa": true,
-        "value": true
       }
     },
     "depcheck>@babel/traverse": {
