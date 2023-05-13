@@ -4,8 +4,8 @@
   "main": "src/index.js",
   "license": "MIT",
   "dependencies": {
-    "@babel/parser": "^7.10.1",
-    "@babel/traverse": "^7.10.1"
+    "@babel/parser": "^7.21.8",
+    "@babel/traverse": "^7.21.5"
   },
   "devDependencies": {
     "@metamask/eslint-config-nodejs": "^11.0.1",
