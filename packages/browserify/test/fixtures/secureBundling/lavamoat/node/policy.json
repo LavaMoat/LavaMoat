@@ -88,12 +88,12 @@
       "packages": {
         "@lavamoat/lavapack>combine-source-map": true,
         "@lavamoat/lavapack>convert-source-map": true,
+        "@lavamoat/lavapack>readable-stream": true,
         "@lavamoat/lavapack>through2": true,
         "@lavamoat/lavapack>umd": true,
         "browserify>JSONStream": true,
         "json-stable-stringify": true,
-        "lavamoat-core": true,
-        "readable-stream": true
+        "lavamoat-core": true
       }
     },
     "@lavamoat/lavapack>combine-source-map": {
@@ -136,9 +136,61 @@
         "value": true
       }
     },
+    "@lavamoat/lavapack>readable-stream": {
+      "builtin": {
+        "buffer.Blob": true,
+        "buffer.Buffer": true,
+        "events.EventEmitter": true,
+        "stream": true,
+        "string_decoder.StringDecoder": true
+      },
+      "globals": {
+        "AbortController": true,
+        "AggregateError": true,
+        "Blob": true,
+        "new": true,
+        "process.env.READABLE_STREAM": true,
+        "target": true
+      },
+      "packages": {
+        "@lavamoat/lavapack>readable-stream>abort-controller": true,
+        "browserify>process": true
+      }
+    },
+    "@lavamoat/lavapack>readable-stream>abort-controller": {
+      "packages": {
+        "@lavamoat/lavapack>readable-stream>abort-controller>event-target-shim": true
+      }
+    },
+    "@lavamoat/lavapack>readable-stream>abort-controller>event-target-shim": {
+      "globals": {
+        "Event": true,
+        "EventTarget": true,
+        "console": true
+      }
+    },
     "@lavamoat/lavapack>through2": {
       "packages": {
-        "readable-stream": true
+        "@lavamoat/lavapack>through2>readable-stream": true
+      }
+    },
+    "@lavamoat/lavapack>through2>readable-stream": {
+      "builtin": {
+        "buffer.Buffer": true,
+        "events.EventEmitter": true,
+        "stream": true,
+        "util": true
+      },
+      "globals": {
+        "process.env.READABLE_STREAM": true,
+        "process.nextTick": true,
+        "process.stderr": true,
+        "process.stdout": true
+      },
+      "packages": {
+        "browserify>string_decoder": true,
+        "readable-stream>util-deprecate": true,
+        "through2>inherits": true
       }
     },
     "browser-resolve": {
@@ -567,6 +619,11 @@
         "process.cwd": true,
         "process.env": true,
         "process.platform": true
+      }
+    },
+    "browserify>process": {
+      "globals": {
+        "process": true
       }
     },
     "browserify>read-only-stream": {
