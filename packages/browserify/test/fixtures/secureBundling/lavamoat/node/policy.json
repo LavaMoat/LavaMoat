@@ -695,8 +695,8 @@
         "process": true
       },
       "packages": {
-        "@babel/code-frame>@babel/highlight>chalk>supports-color": true,
-        "depcheck>debug>ms": true
+        "depcheck>debug>ms": true,
+        "source-map-explorer>chalk>supports-color": true
       }
     },
     "depcheck>is-core-module": {
@@ -901,6 +901,24 @@
     "readable-stream>util-deprecate": {
       "builtin": {
         "util.deprecate": true
+      }
+    },
+    "source-map-explorer>chalk>supports-color": {
+      "builtin": {
+        "os.release": true,
+        "tty.isatty": true
+      },
+      "globals": {
+        "process.env": true,
+        "process.platform": true
+      },
+      "packages": {
+        "source-map-explorer>chalk>supports-color>has-flag": true
+      }
+    },
+    "source-map-explorer>chalk>supports-color>has-flag": {
+      "globals": {
+        "process.argv": true
       }
     },
     "through2": {
