@@ -30,7 +30,7 @@
     "yargs": "^17.7.2"
   },
   "devDependencies": {
-    "@metamask/eslint-config-nodejs": "^10.0.0",
+    "@metamask/eslint-config-nodejs": "^11.0.1",
     "eslint-plugin-ava": "^13.2.0",
     "eslint-plugin-node": "^11.1.0"
   },

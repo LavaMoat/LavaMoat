@@ -2,10 +2,10 @@
   "name": "lavamoat-monorepo",
   "private": true,
   "devDependencies": {
-    "@metamask/eslint-config-nodejs": "^10.0.0",
+    "@metamask/eslint-config-nodejs": "^11.0.1",
     "ava": "^4.0.1",
     "depcheck": "^1.4.0",
-    "eslint": "^7.32.0",
+    "eslint": "^8.40.0",
     "eslint-plugin-ava": "^13.2.0",
     "eslint-plugin-node": "^11.1.0",
     "lerna": "^6.6.2"

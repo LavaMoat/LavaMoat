@@ -18,10 +18,10 @@
     "lint:deps": "depcheck"
   },
   "devDependencies": {
-    "@metamask/eslint-config-nodejs": "^10.0.0",
+    "@metamask/eslint-config-nodejs": "^11.0.1",
     "ava": "^3.15.0",
     "eslint-plugin-ava": "^13.2.0",
-    "eslint-plugin-node": "^11.1.0"
+    "eslint-plugin-node": "^11.0.1"
   },
   "dependencies": {
     "resolve": "^1.22.3"
