@@ -2,7 +2,6 @@ const { parseForPolicy, LavamoatModuleRecord, generateKernel, getDefaultPaths } 
 const mergeDeep = require('merge-deep')
 const { runInContext, createContext } = require('vm')
 const path = require('path')
-const fromEntries = require('object.fromentries')
 const { promises: fs } = require('fs')
 var tmp = require('tmp-promise')
 const stringify = require('json-stable-stringify')
