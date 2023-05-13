@@ -10,7 +10,7 @@
     "node": ">=14.0.0 <19.0.0"
   },
   "dependencies": {
-    "json-stable-stringify": "^1.0.1",
+    "json-stable-stringify": "^1.0.2",
     "lavamoat-tofu": "^6.0.2",
     "merge-deep": "^3.0.2"
   },
