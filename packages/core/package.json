@@ -20,7 +20,6 @@
     "ses": "^0.17.0",
     "eslint-plugin-ava": "^11.0.0",
     "eslint-plugin-node": "^11.1.0",
-    "object.fromentries": "^2.0.2",
     "tmp-promise": "^3.0.2"
   },
   "scripts": {
