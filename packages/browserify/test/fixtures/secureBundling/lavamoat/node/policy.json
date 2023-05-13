@@ -796,7 +796,6 @@
       },
       "packages": {
         "json-stable-stringify": true,
-        "lavamoat-core>fromentries": true,
         "lavamoat-core>lavamoat-tofu": true,
         "lavamoat-core>merge-deep": true
       }
