@@ -1,10 +1,10 @@
-// lockdown({
-//   errorTaming: "unsafe",
-//   mathTaming: "unsafe",
-//   dateTaming: "unsafe",
-//   consoleTaming: "unsafe",
-//   stackFiltering: "verbose",
-// });
+lockdown({
+  errorTaming: "unsafe",
+  mathTaming: "unsafe",
+  dateTaming: "unsafe",
+  stackFiltering: "verbose",
+  // don't use console taming
+});
 
 (function () {
   const { create, freeze, assign, defineProperty } = Object;
@@ -39,11 +39,11 @@
 
   const compartment_ekhm_Map = new Map();
 
-const wrapRequireWithPolicy = (require, resourceId) =>
-  function (pkg) {
-    enforcePolicy(pkg, resourceId);
-    return require.apply(this, arguments);
-  };
+  const wrapRequireWithPolicy = (__webpack_require__, resourceId) =>
+    function (pkg) {
+      enforcePolicy(pkg, resourceId);
+      return __webpack_require__.apply(this, arguments);
+    };
 
   globalThis[NAME_getLavaMoatEvalKitForCompartment] = (
     resourceId,
