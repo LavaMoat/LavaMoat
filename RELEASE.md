@@ -54,7 +54,7 @@ This part can be done by a different person.
     - In particular, keep deployment and development/testing systems separate
   - Fresh clone to ensure a clean and consistent state
 1. `$ git checkout main && cd ${WORKSPACE_ROOT}`
-2. `$ git merge --ff-only legobeat/release-${PKGDIR}-${VERSION}`
+2. `$ git merge --ff-only release-${PKGDIR}-${VERSION}`
 3. Install and build workspace
   - `$ NODE_ENV=production yarn --frozen-lockfile --check-files --production=false`
   - `$ NODE_ENV=production yarn setup`
@@ -66,3 +66,44 @@ This part can be done by a different person.
   - `$ npm whoami` should now return your npmjs.org username
 7. `$ yarn run publish`
 8. Close down environment and ensure npm token is no longer present
+
+---
+
+# Release dependency
+
+*when releasing, go top-down*
+
+```mermaid
+flowchart BT;
+  allow-scripts --> aa
+  browserify --> lavapack
+  browserify --> aa
+  browserify --> core
+  core --> tofu
+  lavapack --> core
+  node --> core
+  node --> tofu
+  node --> aa
+  perf --> browserify
+  perf --> node
+  viz --> core
+  survey --> node
+  survey--> tofu
+
+```
+
+
+| folder | npm name | deps |
+|---|---|---|
+| aa | @lavamoat/aa |  |
+| allow-scripts | @lavamoat/allow-scripts |  @lavamoat/aa |
+| browserify | lavamoat-browserify |  @lavamoat/aa, @lavamoat/lavapack, lavamoat-core |
+| core | lavamoat-core |  lavamoat-tofu |
+| lavapack | @lavamoat/lavapack |  lavamoat-core |
+| node | lavamoat |  @lavamoat/aa, lavamoat-core, lavamoat-tofu |
+| perf | lavamoat-perf |  lavamoat-browserify, lavamoat |
+| preinstall-always-fail | @lavamoat/preinstall-always-fail | |
+| survey | survey |  lavamoat, lavamoat-tofu |
+| tofu | lavamoat-tofu |  |
+| viz | lavamoat-viz |  lavamoat-core |
+| yarn-plugin-allow-scripts | @lavamoat/yarn-plugin-allow-scripts |  |
