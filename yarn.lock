@@ -3046,7 +3046,7 @@ accessor-fn@1:
   resolved "https://registry.yarnpkg.com/accessor-fn/-/accessor-fn-1.3.2.tgz#66074d0127367e996197197822fae846ef0928e7"
   integrity sha512-W4/Lj/gry8AHy+IC7Havr7fNbphHDzVAiZd5h10g8LRRz6ZKla3A1/lkFqoV1jh13R0eJLGWjDBlRGK36fcWiw==
 
-acorn-jsx@^5.3.1:
+acorn-jsx@^5.3.1, acorn-jsx@^5.3.2:
   version "5.3.2"
   resolved "https://registry.yarnpkg.com/acorn-jsx/-/acorn-jsx-5.3.2.tgz#7ed5bb55908b3b2f1bc55c6af1653bada7f07937"
   integrity sha512-rq9s+JNhf0IChjtDXxllJ7g41oZk5SlXtp0LHwyA5cejwn7vKmKp4pPri6YEePv2PU65sAsegbXtIinmDFDXgQ==
@@ -3084,6 +3084,11 @@ acorn@^8.0.4, acorn@^8.7.0:
   version "8.7.0"
   resolved "https://registry.yarnpkg.com/acorn/-/acorn-8.7.0.tgz#90951fde0f8f09df93549481e5fc141445b791cf"
   integrity sha512-V/LGr1APy+PXIwKebEWrkZPwoeoF+w1jiOBUmuxuiUIaOHtob8Qc9BTrYo7VuI5fR8tqsy+buA2WFooR5olqvQ==
+
+acorn@^8.8.0:
+  version "8.8.2"
+  resolved "https://registry.yarnpkg.com/acorn/-/acorn-8.8.2.tgz#1b2f25db02af965399b9776b0c2c391276d37c4a"
+  integrity sha512-xjIYgE8HBrkpd/sJqOGNspf8uHG+NOHGOw6a/Urj8taM2EXfdNAH2oFcPeIFfsv3+kz/mJrS5VuMqbNLjCa2vw==
 
 add-stream@^1.0.0:
   version "1.0.0"
@@ -5001,6 +5006,11 @@ convert-source-map@^1.7.0, convert-source-map@^1.9.0:
   resolved "https://registry.yarnpkg.com/convert-source-map/-/convert-source-map-1.9.0.tgz#7faae62353fb4213366d0ca98358d22e8368b05f"
   integrity sha512-ASFBup0Mz1uyiIjANan1jzLQami9z1PoYSZCiiYW2FczPbenXc45FZdBZLzOT+r6+iciuEModtmCti+hjaAk0A==
 
+convert-source-map@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/convert-source-map/-/convert-source-map-2.0.0.tgz#4b560f649fc4e918dd0ab75cf4961e8bc882d82a"
+  integrity sha512-Kvp459HrV2FEJ1CAsi1Ku+MY3kasH19TFykTz2xWmMeq6bk2NU3XXvfJ+Q61m0xktWwt+1HSYf3JZsTms3aRJg==
+
 convert-source-map@~1.1.0:
   version "1.1.3"
   resolved "https://registry.yarnpkg.com/convert-source-map/-/convert-source-map-1.1.3.tgz#4829c877e9fe49b3161f3bf3673888e204699860"
@@ -6653,6 +6663,11 @@ eslint-visitor-keys@^2.0.0:
   resolved "https://registry.yarnpkg.com/eslint-visitor-keys/-/eslint-visitor-keys-2.1.0.tgz#f65328259305927392c938ed44eb0a5c9b2bd303"
   integrity sha512-0rSmRBzXgDzIsD6mGdJgevzgezI534Cer5L/vyMX0kHzT/jiB43jRhd9YUlMGYLQy2zprNmoT8qasCGtY+QaKw==
 
+eslint-visitor-keys@^3.4.1:
+  version "3.4.1"
+  resolved "https://registry.yarnpkg.com/eslint-visitor-keys/-/eslint-visitor-keys-3.4.1.tgz#c22c48f48942d08ca824cc526211ae400478a994"
+  integrity sha512-pZnmmLwYzf+kWaM/Qgrvpen51upAktaaiI01nsJD/Yr3lMOdNtq0cxkrrg16w64VtisN6okbs7Q8AfGqj4c9fA==
+
 eslint@^7.22.0, eslint@^7.5.0:
   version "7.32.0"
   resolved "https://registry.yarnpkg.com/eslint/-/eslint-7.32.0.tgz#c6d328a14be3fb08c8d1d21e12c02fdb7a2a812d"
@@ -6712,6 +6727,15 @@ espree@^7.2.0, espree@^7.3.0, espree@^7.3.1:
     acorn "^7.4.0"
     acorn-jsx "^5.3.1"
     eslint-visitor-keys "^1.3.0"
+
+espree@^9.5.2:
+  version "9.5.2"
+  resolved "https://registry.yarnpkg.com/espree/-/espree-9.5.2.tgz#e994e7dc33a082a7a82dceaf12883a829353215b"
+  integrity sha512-7OASN1Wma5fum5SrNhFMAMJxOUAbhyfQ8dQ//PJaJbNw0URTPWqIghHWt1MmAANKhHZIYOHruW4Kw4ruUWOdGw==
+  dependencies:
+    acorn "^8.8.0"
+    acorn-jsx "^5.3.2"
+    eslint-visitor-keys "^3.4.1"
 
 esprima@^4.0.0:
   version "4.0.1"
@@ -9742,7 +9766,7 @@ meow@^8.0.0:
     type-fest "^0.18.0"
     yargs-parser "^20.2.3"
 
-merge-deep@^3.0.2:
+merge-deep@^3.0.2, merge-deep@^3.0.3:
   version "3.0.3"
   resolved "https://registry.yarnpkg.com/merge-deep/-/merge-deep-3.0.3.tgz#1a2b2ae926da8b2ae93a0ac15d90cd1922766003"
   integrity sha512-qtmzAS6t6grwEkNrunqTBdn0qKwFgNWvlxUbAV8es9M7Ot1EbyApytCnvE0jALPa46ZpKDUo527kKiaWplmlFA==
@@ -12699,11 +12723,6 @@ serve@^13.0.4:
     serve-handler "6.1.3"
     update-check "1.5.2"
 
-ses@^0.17.0:
-  version "0.17.0"
-  resolved "https://registry.yarnpkg.com/ses/-/ses-0.17.0.tgz#4e37cd1c4003e4448df2e84983900ccc5e2f095a"
-  integrity sha512-ObQ4DF4OgkmuPVRZLSmB1E+8jWh6lnlSpN9JHnphAUb/5J6k7da+7kj63cXrz53NDPd69rUV3DsfRBNBx8xcPQ==
-
 ses@^0.18.4:
   version "0.18.4"
   resolved "https://registry.yarnpkg.com/ses/-/ses-0.18.4.tgz#28781719870262afc6928b7d6d94dc16318dbd86"
@@ -13675,7 +13694,7 @@ tinylogic@^1.0.3:
   dependencies:
     chevrotain "^9.1.0"
 
-tmp-promise@^3.0.2, tmp-promise@^3.0.3:
+tmp-promise@^3.0.3:
   version "3.0.3"
   resolved "https://registry.yarnpkg.com/tmp-promise/-/tmp-promise-3.0.3.tgz#60a1a1cc98c988674fcbfd23b6e3367bdeac4ce7"
   integrity sha512-RwM7MoPojPxsOBYnyd2hy0bxtIlVrihNs9pj5SUvY8Zz1sQcQG2tG1hSr8PDxfgEB8RNKDhqbIlroIarSNDNsQ==
