@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "scripts": {
-    "serve": "serve .",
+    "serve": "^14.2.0",
     "start": "yarn run:wallet && yarn run:increment && yarn run:secp256k1-mixedAdd && yarn run:secp256k1-newBN && yarn run:bify-simple && yarn run:pull-stream && yarn run:terser",
     "run:wallet": "(cd trials/wallet && yarn && yarn start)",
     "run:increment": "(cd trials/increment && yarn && yarn start)",
@@ -27,7 +27,7 @@
     "ses": "^0.18.4"
   },
   "devDependencies": {
-    "serve": "^13.0.4"
+    "serve": "^14.2.0"
   },
   "engines": {
     "node": ">=14.0.0 <19.0.0"
