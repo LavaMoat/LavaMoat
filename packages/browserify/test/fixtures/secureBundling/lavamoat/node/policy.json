@@ -69,40 +69,7 @@
         "performantResolve": true
       },
       "packages": {
-        "@lavamoat/aa>resolve": true
-      }
-    },
-    "@lavamoat/aa>resolve": {
-      "builtin": {
-        "fs.readFile": true,
-        "fs.readFileSync": true,
-        "fs.realpath": true,
-        "fs.realpathSync": true,
-        "fs.stat": true,
-        "fs.statSync": true,
-        "os.homedir": true,
-        "path.dirname": true,
-        "path.join": true,
-        "path.parse": true,
-        "path.relative": true,
-        "path.resolve": true
-      },
-      "globals": {
-        "process.env.HOME": true,
-        "process.env.HOMEDRIVE": true,
-        "process.env.HOMEPATH": true,
-        "process.env.LNAME": true,
-        "process.env.LOGNAME": true,
-        "process.env.USER": true,
-        "process.env.USERNAME": true,
-        "process.env.USERPROFILE": true,
-        "process.getuid": true,
-        "process.nextTick": true,
-        "process.platform": true
-      },
-      "packages": {
-        "depcheck>is-core-module": true,
-        "depcheck>resolve>path-parse": true
+        "depcheck>resolve": true
       }
     },
     "@lavamoat/lavapack": {
@@ -128,8 +95,8 @@
         "@lavamoat/lavapack>through2": true,
         "@lavamoat/lavapack>umd": true,
         "browserify>JSONStream": true,
-        "lavamoat-core": true,
-        "lavamoat-core>json-stable-stringify": true
+        "json-stable-stringify": true,
+        "lavamoat-core": true
       }
     },
     "@lavamoat/lavapack>combine-source-map": {
@@ -283,9 +250,14 @@
         "@lavamoat/lavapack>combine-source-map": true,
         "@lavamoat/lavapack>umd": true,
         "browserify>JSONStream": true,
+        "browserify>browser-pack>safe-buffer": true,
         "browserify>through2": true,
-        "browserify>util>safe-buffer": true,
         "watchify>defined": true
+      }
+    },
+    "browserify>browser-pack>safe-buffer": {
+      "builtin": {
+        "buffer": true
       }
     },
     "browserify>cached-path-relative": {
@@ -511,7 +483,7 @@
     },
     "browserify>string_decoder": {
       "packages": {
-        "browserify>util>safe-buffer": true
+        "browserify>browser-pack>safe-buffer": true
       }
     },
     "browserify>syntax-error": {
@@ -546,11 +518,6 @@
       "packages": {
         "browserify>readable-stream": true,
         "watchify>xtend": true
-      }
-    },
-    "browserify>util>safe-buffer": {
-      "builtin": {
-        "buffer": true
       }
     },
     "concat-stream": {
@@ -791,14 +758,9 @@
         "define": true
       },
       "packages": {
-        "lavamoat-core>json-stable-stringify": true,
+        "json-stable-stringify": true,
         "lavamoat-core>lavamoat-tofu": true,
         "lavamoat-core>merge-deep": true
-      }
-    },
-    "lavamoat-core>json-stable-stringify": {
-      "packages": {
-        "lavamoat-core>json-stable-stringify>jsonify": true
       }
     },
     "lavamoat-core>lavamoat-tofu": {
