@@ -128,7 +128,7 @@
         "Buffer": true
       },
       "packages": {
-        "@lavamoat/lavapack>combine-source-map>inline-source-map>source-map": true
+        "@lavamoat/lavapack>combine-source-map>source-map": true
       }
     },
     "@lavamoat/lavapack>convert-source-map": {
