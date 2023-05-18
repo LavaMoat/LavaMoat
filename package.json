@@ -16,7 +16,7 @@
     "lerna": "^6.6.2"
   },
   "engines": {
-    "node": ">=14.0.0 <19.0.0"
+    "node": ">=14.0.0"
   },
   "scripts": {
     "test": "lerna run --concurrency 1 test",
