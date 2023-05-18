@@ -17,8 +17,8 @@
     "lint:deps": "depcheck"
   },
   "dependencies": {
-    "@babel/code-frame": "^7.10.4",
-    "@babel/highlight": "^7.10.4",
+    "@babel/code-frame": "^7.21.4",
+    "@babel/highlight": "^7.18.6",
     "@lavamoat/aa": "^3.1.0",
     "bindings": "^1.5.0",
     "htmlescape": "^1.1.1",
