@@ -29,6 +29,9 @@
   "devDependencies": {
     "serve": "^14.2.0"
   },
+  "resolutions": {
+    "serve/boxen/type-fest": "^2.13.0"
+  },
   "engines": {
     "node": ">=14.0.0 <19.0.0"
   }

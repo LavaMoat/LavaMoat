@@ -1,6 +1,11 @@
 {
   "name": "lavamoat-monorepo",
   "private": true,
+  "resolutions": {
+    "type-fest": "^0.21.3",
+    "lavamoat-perf/serve/boxen/type-fest": "^2.19.0",
+    "util": "^0.12.5"
+  },
   "devDependencies": {
     "@metamask/eslint-config-nodejs": "^11.0.1",
     "ava": "^4.0.1",
