@@ -4,7 +4,7 @@
   "main": "index.js",
   "version": "6.0.9",
   "dependencies": {
-    "lavamoat-core": "^10.0.1",
+    "lavamoat-core": "^14.1.0",
     "ncp": "^2.0.0",
     "open": "^7.0.3",
     "pify": "^4.0.1",
@@ -23,9 +23,9 @@
     "copy-webpack-plugin": "^6.4.1",
     "css-loader": "^3.6.0",
     "d3": "^5.12.0",
-    "eslint": "^7.5.0",
-    "eslint-plugin-import": "^2.22.0",
-    "eslint-plugin-react": "^7.20.3",
+    "eslint": "^8.40.0",
+    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-react": "^7.32.2",
     "esm": "^3.2.25",
     "gh-pages": "^2.2.0",
     "html-webpack-plugin": "^4.5.2",
@@ -42,8 +42,8 @@
     "three-spritetext": "^1.5.1",
     "statsvr": "^3.1.1",
     "webpack": "^4.46.0",
-    "webpack-cli": "^3.3.12",
-    "webpack-dev-server": "^3.11.3"
+    "webpack-cli": "^4.9.2",
+    "webpack-dev-server": "^4.15.0"
   },
   "scripts": {
     "analyze": "source-map-explorer 'build/static/js/*.js'",

@@ -26,11 +26,11 @@
   },
   "devDependencies": {
     "@babel/code-frame": "^7.16.7",
-    "@metamask/eslint-config-nodejs": "^10.0.0",
+    "@metamask/eslint-config-nodejs": "^11.0.1",
     "bify-package-factor": "^1.0.7",
     "browserify": "^17.0.0",
     "depcheck": "^1.4.0",
-    "eslint-plugin-ava": "^11.0.0",
+    "eslint-plugin-ava": "^13.2.0",
     "eslint-plugin-node": "^11.1.0",
     "keccak": "^3.0.2",
     "source-map-explorer": "^2.5.3",

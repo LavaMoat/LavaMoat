@@ -1,14 +1,19 @@
 {
   "name": "lavamoat-monorepo",
   "private": true,
+  "resolutions": {
+    "type-fest": "^0.21.3",
+    "lavamoat-perf/serve/boxen/type-fest": "^2.19.0",
+    "util": "^0.12.5"
+  },
   "devDependencies": {
-    "@metamask/eslint-config-nodejs": "^10.0.0",
+    "@metamask/eslint-config-nodejs": "^11.0.1",
     "ava": "^4.0.1",
     "depcheck": "^1.4.0",
-    "eslint": "^7.22.0",
-    "eslint-plugin-ava": "^11.0.0",
+    "eslint": "^8.40.0",
+    "eslint-plugin-ava": "^13.2.0",
     "eslint-plugin-node": "^11.1.0",
-    "lerna": "^5.6.2"
+    "lerna": "^6.6.2"
   },
   "engines": {
     "node": ">=14.0.0 <19.0.0"
@@ -25,5 +30,11 @@
   "workspaces": [
     "packages/*"
   ],
-  "version": "0.0.0"
+  "version": "0.0.0",
+  "lavamoat": {
+    "allowScripts": {
+      "lerna>nx": false,
+      "lerna>nx>@parcel/watcher": false
+    }
+  }
 }

@@ -23,6 +23,7 @@
           "curly": ["error", "all"],
           "eol-last": ["error", "always"],
           "indent": ["error", 2, {"SwitchCase": 1, "ObjectExpression": "first"}],
+          "no-restricted-globals": 0,
           "no-unexpected-multiline": "error",
           "quotes": ["error", "single"],
           "semi": ["error", "never"],
