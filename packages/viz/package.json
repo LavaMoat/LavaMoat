@@ -12,9 +12,9 @@
     "yargs": "^16.0.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.21.8",
-    "@babel/preset-env": "^7.10.4",
-    "@babel/preset-react": "^7.8.3",
+    "@babel/core": "7.21.8",
+    "@babel/preset-env": "^7.21.5",
+    "@babel/preset-react": "^7.18.6",
     "@metamask/eslint-config": "2",
     "arr-union": "^3.1.0",
     "babel-loader": "^8.3.0",
