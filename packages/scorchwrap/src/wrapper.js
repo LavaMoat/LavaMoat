@@ -8,6 +8,7 @@ const q = JSON.stringify;
  * @property {string} source
  * @property {string} id
  * @property {string[] | Set<string>} runtimeKit
+ * @property {string} evalKitFunctionName
  * @property {boolean} [runChecks]
  *
  */
@@ -15,7 +16,6 @@ const q = JSON.stringify;
 const NAME_globalThis = 'G';
 const NAME_scopeTerminator = 'ST';
 const NAME_runtimeHandler = 'RH';
-const NAME_getLavaMoatEvalKitForCompartment = '__LM__';
 
 
 /**
@@ -37,6 +37,7 @@ exports.wrapper = function wrapper({
   source,
   id,
   runtimeKit,
+  evalKitFunctionName,
   runChecks = true,
 }) {
   // validateSource(source);
@@ -58,7 +59,7 @@ exports.wrapper = function wrapper({
       }
     }
     }
-}).call(${NAME_getLavaMoatEvalKitForCompartment}(${q(id)}, { ${Array.from(
+}).call(${evalKitFunctionName}(${q(id)}, { ${Array.from(
     runtimeKit
   ).join(",")}}))()`;
   if (runChecks) {
