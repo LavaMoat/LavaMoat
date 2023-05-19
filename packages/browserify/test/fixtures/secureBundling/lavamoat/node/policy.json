@@ -153,8 +153,20 @@
         "target": true
       },
       "packages": {
-        "browserify>process": true,
-        "readable-stream>abort-controller": true
+        "@lavamoat/lavapack>readable-stream>abort-controller": true,
+        "browserify>process": true
+      }
+    },
+    "@lavamoat/lavapack>readable-stream>abort-controller": {
+      "packages": {
+        "@lavamoat/lavapack>readable-stream>abort-controller>event-target-shim": true
+      }
+    },
+    "@lavamoat/lavapack>readable-stream>abort-controller>event-target-shim": {
+      "globals": {
+        "Event": true,
+        "EventTarget": true,
+        "console": true
       }
     },
     "@lavamoat/lavapack>through2": {
@@ -177,7 +189,7 @@
       },
       "packages": {
         "browserify>string_decoder": true,
-        "keccak>readable-stream>util-deprecate": true,
+        "readable-stream>util-deprecate": true,
         "through2>inherits": true
       }
     },
@@ -318,7 +330,7 @@
         "browserify>concat-stream>readable-stream>string_decoder": true,
         "browserify>readable-stream>core-util-is": true,
         "browserify>readable-stream>process-nextick-args": true,
-        "keccak>readable-stream>util-deprecate": true,
+        "readable-stream>util-deprecate": true,
         "through2>inherits": true
       }
     },
@@ -363,7 +375,7 @@
         "browserify>duplexer2>readable-stream>string_decoder": true,
         "browserify>readable-stream>core-util-is": true,
         "browserify>readable-stream>process-nextick-args": true,
-        "keccak>readable-stream>util-deprecate": true,
+        "readable-stream>util-deprecate": true,
         "through2>inherits": true
       }
     },
@@ -461,7 +473,7 @@
         "browserify>labeled-stream-splicer>stream-splicer>readable-stream>string_decoder": true,
         "browserify>readable-stream>core-util-is": true,
         "browserify>readable-stream>process-nextick-args": true,
-        "keccak>readable-stream>util-deprecate": true,
+        "readable-stream>util-deprecate": true,
         "through2>inherits": true
       }
     },
@@ -534,7 +546,7 @@
         "browserify>module-deps>readable-stream>string_decoder": true,
         "browserify>readable-stream>core-util-is": true,
         "browserify>readable-stream>process-nextick-args": true,
-        "keccak>readable-stream>util-deprecate": true,
+        "readable-stream>util-deprecate": true,
         "through2>inherits": true
       }
     },
@@ -574,7 +586,7 @@
         "browserify>module-deps>stream-combiner2>readable-stream>string_decoder": true,
         "browserify>readable-stream>core-util-is": true,
         "browserify>readable-stream>process-nextick-args": true,
-        "keccak>readable-stream>util-deprecate": true,
+        "readable-stream>util-deprecate": true,
         "through2>inherits": true
       }
     },
@@ -639,7 +651,7 @@
         "browserify>read-only-stream>readable-stream>string_decoder": true,
         "browserify>readable-stream>core-util-is": true,
         "browserify>readable-stream>process-nextick-args": true,
-        "keccak>readable-stream>util-deprecate": true,
+        "readable-stream>util-deprecate": true,
         "through2>inherits": true
       }
     },
@@ -779,7 +791,7 @@
         "browserify>through2>readable-stream>isarray": true,
         "browserify>through2>readable-stream>safe-buffer": true,
         "browserify>through2>readable-stream>string_decoder": true,
-        "keccak>readable-stream>util-deprecate": true,
+        "readable-stream>util-deprecate": true,
         "through2>inherits": true
       }
     },
@@ -825,7 +837,7 @@
       },
       "packages": {
         "browserify>string_decoder": true,
-        "keccak>readable-stream>util-deprecate": true,
+        "readable-stream>util-deprecate": true,
         "through2>inherits": true
       }
     },
@@ -874,13 +886,8 @@
       },
       "packages": {
         "browserify>string_decoder": true,
-        "keccak>readable-stream>util-deprecate": true,
+        "readable-stream>util-deprecate": true,
         "through2>inherits": true
-      }
-    },
-    "keccak>readable-stream>util-deprecate": {
-      "builtin": {
-        "util.deprecate": true
       }
     },
     "lavamoat-core": {
@@ -1108,35 +1115,26 @@
     },
     "readable-stream": {
       "builtin": {
-        "buffer.Blob": true,
         "buffer.Buffer": true,
         "events.EventEmitter": true,
         "stream": true,
-        "string_decoder.StringDecoder": true
+        "util": true
       },
       "globals": {
-        "AbortController": true,
-        "AggregateError": true,
-        "Blob": true,
-        "new": true,
         "process.env.READABLE_STREAM": true,
-        "target": true
+        "process.nextTick": true,
+        "process.stderr": true,
+        "process.stdout": true
       },
       "packages": {
-        "browserify>process": true,
-        "readable-stream>abort-controller": true
+        "browserify>string_decoder": true,
+        "readable-stream>util-deprecate": true,
+        "through2>inherits": true
       }
     },
-    "readable-stream>abort-controller": {
-      "packages": {
-        "readable-stream>abort-controller>event-target-shim": true
-      }
-    },
-    "readable-stream>abort-controller>event-target-shim": {
-      "globals": {
-        "Event": true,
-        "EventTarget": true,
-        "console": true
+    "readable-stream>util-deprecate": {
+      "builtin": {
+        "util.deprecate": true
       }
     },
     "source-map-explorer>chalk>supports-color": {
@@ -1162,32 +1160,13 @@
         "process.nextTick": true
       },
       "packages": {
-        "through2>inherits": true,
-        "through2>readable-stream": true
+        "readable-stream": true,
+        "through2>inherits": true
       }
     },
     "through2>inherits": {
       "builtin": {
         "util.inherits": true
-      }
-    },
-    "through2>readable-stream": {
-      "builtin": {
-        "buffer.Buffer": true,
-        "events.EventEmitter": true,
-        "stream": true,
-        "util": true
-      },
-      "globals": {
-        "process.env.READABLE_STREAM": true,
-        "process.nextTick": true,
-        "process.stderr": true,
-        "process.stdout": true
-      },
-      "packages": {
-        "browserify>string_decoder": true,
-        "keccak>readable-stream>util-deprecate": true,
-        "through2>inherits": true
       }
     }
   }
