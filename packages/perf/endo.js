@@ -69,27 +69,41 @@ async function main () {
     {
       modules,
       globals: {
+        // providing the whole process causes an issue on node v16.26.0
+        // https://github.com/nodejs/node/issues/43496
+        process: {
+          env: process.env,
+          cwd: process.cwd,
+          version: process.version,
+          nextTick: process.nextTick,
+        },
         console,
-        process,
         Buffer,
+        // expose node global as globalThis alias
+        get global () {
+          return this
+        }
       },
       moduleTransforms: {
         'cjs': makeSesModuleTransform('cjs'),
         'mjs': makeSesModuleTransform('mjs'),
+      },
+      commonDependencies: {
+        'loose-envify': 'loose-envify',
       }
     },
   )
 
   function makeSesModuleTransform (language) {
     return function sesModuleTransform (sourceBytes, _speciefier, _location) {
-      const transformedSource = _applySesEvasions(sourceBytes.toString())
+      const transformedSource = _applySourceTransforms(sourceBytes.toString())
       const bytes = Buffer.from(transformedSource, 'utf8')
       return { bytes, parser: language }
     }
   }
 
-  function _applySesEvasions (source) {
-    const result = applySesEvasions(source)
+  function _applySourceTransforms (source) {
+    const result = applySourceTransforms(source)
     // if (result !== source) {
     //   console.log('transformed source')
     //   console.log(result.split('\n').map((line, i) => `${i + 1}: ${line}`).join('\n'))
@@ -100,7 +114,7 @@ async function main () {
   }
 
   
-  function applySesEvasions (source) {
+  function applySourceTransforms (source) {
     return applyTransforms(source, [
       evadeHtmlCommentTest,
       evadeImportExpressionTest,
