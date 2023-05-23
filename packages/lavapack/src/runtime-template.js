@@ -52,7 +52,7 @@
 
   function loadModuleData (moduleId) {
     // eslint-disable-next-line node/global-require
-    if (typeof window === 'undefined' && require('node:module').isBuiltin(moduleId)) {
+    if (typeof window === 'undefined' && typeof require !== 'undefined' && require('node:module').isBuiltin(moduleId)) {
       return {
         type: 'builtin',
         package: moduleId,
