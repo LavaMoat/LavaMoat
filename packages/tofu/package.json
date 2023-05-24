@@ -4,13 +4,13 @@
   "main": "src/index.js",
   "license": "MIT",
   "dependencies": {
-    "@babel/parser": "^7.10.1",
-    "@babel/traverse": "^7.10.1"
+    "@babel/parser": "^7.21.8",
+    "@babel/traverse": "^7.21.5"
   },
   "devDependencies": {
-    "@metamask/eslint-config-nodejs": "^10.0.0",
-    "deep-equal": "^2.0.3",
-    "eslint-plugin-ava": "^11.0.0",
+    "@metamask/eslint-config-nodejs": "^11.0.1",
+    "deep-equal": "^2.2.1",
+    "eslint-plugin-ava": "^13.2.0",
     "eslint-plugin-node": "^11.1.0"
   },
   "scripts": {

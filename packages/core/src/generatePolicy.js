@@ -1,6 +1,5 @@
 const EventEmitter = require('events')
 const path = require('path')
-const fromEntries = require('fromentries')
 const jsonStringify = require('json-stable-stringify')
 const {
   parse,
@@ -97,7 +96,7 @@ function createModuleInspector (opts = {}) {
     // skip json files
     const filename = moduleRecord.file || 'unknown'
     const fileExtension = path.extname(filename)
-    if (fileExtension !== '.js') {
+    if (!fileExtension.match(/^\.([cm]?js|ts)$/)) {
       return
     }
     // get ast (parse or use cached)
@@ -212,7 +211,7 @@ function createModuleInspector (opts = {}) {
       // get dependencies, ignoring builtins
       const packageDeps = aggregateDeps({ packageModules, moduleIdToModuleRecord })
       if (packageDeps.length) {
-        packages = fromEntries(packageDeps.map(depPackageName => [depPackageName, true]))
+        packages = Object.fromEntries(packageDeps.map(depPackageName => [depPackageName, true]))
       }
       // get globals
       if (packageToGlobals[packageName]) {

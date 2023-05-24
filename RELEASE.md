@@ -53,16 +53,60 @@ This part can be done by a different person.
   - Ensure you are doing this from a secure environment and handle the npm credentials with utmost care
     - In particular, keep deployment and development/testing systems separate
   - Fresh clone to ensure a clean and consistent state
-1. `$ git checkout main && cd ${WORKSPACE_ROOT}`
-2. `$ git merge --ff-only legobeat/release-${PKGDIR}-${VERSION}`
-3. Install and build workspace
+1. `$ cd ${WORKSPACE_ROOT}`
+2. `$ git checkout main`
+3. `$ git pull` - just to make sure it's fresh
+4. `$ git merge --ff-only release-${PKGDIR}-${VERSION}`
+5. Install and build workspace
   - `$ NODE_ENV=production yarn --frozen-lockfile --check-files --production=false`
   - `$ NODE_ENV=production yarn setup`
   - `$ NODE_ENV=production yarn build`
-4. `$ yarn test:prep && yarn test`
-5. `$ git push origin main`
-6. Authenticate as your user on npmjs.org:
+6. `$ yarn test:prep && yarn test`
+7. `$ git push origin main`
+8. Authenticate as your user on npmjs.org:
   - `$ npm login`
   - `$ npm whoami` should now return your npmjs.org username
-7. `$ yarn run publish`
-8. Close down environment and ensure npm token is no longer present
+9.  go to the package dir `$ cd packages/{PKGDIR}`
+10. `$ npm publish`
+11. Close down environment and ensure npm token is no longer present
+
+---
+
+# Release dependency
+
+*when releasing, go top-down*
+
+```mermaid
+flowchart BT;
+  allow-scripts --> aa
+  browserify --> lavapack
+  browserify --> aa
+  browserify --> core
+  core --> tofu
+  lavapack --> core
+  node --> core
+  node --> tofu
+  node --> aa
+  perf --> browserify
+  perf --> node
+  viz --> core
+  survey --> node
+  survey--> tofu
+
+```
+
+
+| folder                    | npm name                            | deps                                            |
+| ------------------------- | ----------------------------------- | ----------------------------------------------- |
+| aa                        | @lavamoat/aa                        |                                                 |
+| allow-scripts             | @lavamoat/allow-scripts             | @lavamoat/aa                                    |
+| browserify                | lavamoat-browserify                 | @lavamoat/aa, @lavamoat/lavapack, lavamoat-core |
+| core                      | lavamoat-core                       | lavamoat-tofu                                   |
+| lavapack                  | @lavamoat/lavapack                  | lavamoat-core                                   |
+| node                      | lavamoat                            | @lavamoat/aa, lavamoat-core, lavamoat-tofu      |
+| perf                      | lavamoat-perf                       | lavamoat-browserify, lavamoat                   |
+| preinstall-always-fail    | @lavamoat/preinstall-always-fail    |                                                 |
+| survey                    | survey                              | lavamoat, lavamoat-tofu                         |
+| tofu                      | lavamoat-tofu                       |                                                 |
+| viz                       | lavamoat-viz                        | lavamoat-core                                   |
+| yarn-plugin-allow-scripts | @lavamoat/yarn-plugin-allow-scripts |                                                 |

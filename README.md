@@ -92,6 +92,7 @@ LavaMoat offers further (yet advanced) security enhancement to LavaMoat protecti
 - [JavaScript Supply Chain Security - Adam Baldwin - LocoMocoSec 2019 ~25min](https://www.youtube.com/watch?v=HDo2iOlkbyc)
 - [Analysis of an exploited npm package – Jarrod Overson - Amsterdam JSNation Conference 2019  ~25min](https://www.youtube.com/watch?v=cvtt8TexqbU)
 - [How Malicious NPM Packages Make Your Apps Vulnerable - SnykLive stream 2022 ~1h](https://youtu.be/STC_ubJNiMs?t=287)
+- [Object-capability security for JavaScript applications - KU Leuven Cybersecurity seminar 2022 ~1h](https://www.youtube.com/watch?v=bc6JzoCkCE0)
 
 ## Supporters
 

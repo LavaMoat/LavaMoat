@@ -1,13 +1,14 @@
 {
   "devDependencies": {
-    "browserify": "^16.5.0",
-    "serve": "^11.3.0"
+    "browserify": "^17.0.0",
+    "lavamoat-browserify": "^15.5.0",
+    "serve": "^14.2.0"
   },
   "scripts": {
     "lavamoat": "browserify index.js --plugin [ lavamoat-browserify --writeAutoPolicy --policy ./policy.json ] > /dev/null",
     "start": "browserify index.js --plugin [ lavamoat-browserify --policy ./policy.json ] > bundle.js && serve ."
   },
   "dependencies": {
-    "metamask-logo": "^2.2.1"
+    "metamask-logo": "^2.5.0"
   }
 }

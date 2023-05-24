@@ -1,0 +1,21 @@
+{
+  "resources": {
+    "react>loose-envify": {
+      "builtin": {
+        "stream": true,
+        "util": true
+      },
+      "packages": {
+        "react>loose-envify>js-tokens": true
+      },
+      "globals": {
+        "process": true
+      }
+    },
+    "browserify>module-deps": {
+      "packages": {
+        "react>loose-envify": true
+      }
+    }
+  }
+}

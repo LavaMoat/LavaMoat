@@ -8,38 +8,37 @@
     "test": "test"
   },
   "engines": {
-    "node": ">=14.0.0"
+    "node": ">=14.0.0 <19.0.0"
   },
   "dependencies": {
-    "@babel/code-frame": "^7.16.7",
     "@lavamoat/aa": "^3.1.0",
-    "@lavamoat/lavapack": "^5.0.0",
+    "@lavamoat/lavapack": "^5.1.0",
     "browser-resolve": "^2.0.0",
     "concat-stream": "^2.0.0",
-    "convert-source-map": "^1.8.0",
+    "convert-source-map": "^1.9.0",
     "duplexify": "^4.1.1",
     "json-stable-stringify": "^1.0.1",
-    "lavamoat-core": "^14.0.0",
+    "lavamoat-core": "^14.1.0",
     "pify": "^4.0.1",
     "readable-stream": "^3.6.0",
-    "source-map": "^0.7.3",
+    "source-map": "^0.7.4",
     "through2": "^3.0.0"
   },
   "devDependencies": {
-    "@metamask/eslint-config-nodejs": "^10.0.0",
+    "@babel/code-frame": "^7.21.4",
+    "@metamask/eslint-config-nodejs": "^11.0.1",
     "bify-package-factor": "^1.0.7",
     "browserify": "^17.0.0",
     "depcheck": "^1.4.0",
-    "eslint-plugin-ava": "^11.0.0",
+    "eslint-plugin-ava": "^13.2.0",
     "eslint-plugin-node": "^11.1.0",
     "keccak": "^3.0.2",
-    "source-map": "^0.7.3",
-    "source-map-explorer": "^2.5.2",
+    "source-map-explorer": "^2.5.3",
     "sourcemap-validator": "^2.1.0",
     "throat": "^5.0.0",
     "tmp-promise": "^3.0.3",
     "vinyl-buffer": "^1.0.1",
-    "watchify": "^3.11.1"
+    "watchify": "^4.0.0"
   },
   "scripts": {
     "test": "ava --timeout 2m --concurrency 1",
@@ -57,5 +56,10 @@
     "url": "https://github.com/LavaMoat/lavamoat/issues"
   },
   "homepage": "https://github.com/LavaMoat/lavamoat#readme",
-  "gitHead": "28a238fc4c3d55650bd2ba9a3603b1f275567286"
+  "gitHead": "28a238fc4c3d55650bd2ba9a3603b1f275567286",
+  "lavamoat": {
+    "allowScripts": {
+      "keccak": false
+    }
+  }
 }

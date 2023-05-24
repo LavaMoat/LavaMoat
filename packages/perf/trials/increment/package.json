@@ -1,0 +1,19 @@
+{
+  "devDependencies": {
+    "browserify": "^17.0.0",
+    "serve": "^14.2.0"
+  },
+  "scripts": {
+    "start": "yarn stats && yarn chart",
+    "stats": "node index.js > perf.csv",
+    "chart": "cat perf.csv | chart-csv > chart.html",
+    "build:default": "TARGET='default' node ../../build.js",
+    "build:harden": "TARGET='harden' node ../../build.js",
+    "build:unsafe": "TARGET='unsafe' node ../../build.js"
+  },
+  "dependencies": {
+    "chart-csv": "kumavis/chart-csv#master",
+    "@metamask/eth-sig-util": "^5.1.0",
+    "ethereumjs-wallet": "^1.0.2"
+  }
+}
