@@ -16,12 +16,12 @@ const rootSlug = '$root$'
 module.exports = { rootSlug, createModuleInspector, getDefaultPaths }
 
 function createModuleInspector (opts = {}) {
-  const moduleIdToModuleRecord = {}
+  const moduleIdToModuleRecord = new Map()
   // "packageToModules" does not include builtin modules
-  const packageToModules = {}
-  const packageToGlobals = {}
-  const packageToBuiltinImports = {}
-  const packageToNativeModules = {}
+  const packageToModules = new Map()
+  const packageToGlobals = new Map()
+  const packageToBuiltinImports = new Map()
+  const packageToNativeModules = new Map()
   const debugInfo = {}
 
   const inspector = new EventEmitter()
@@ -37,7 +37,7 @@ function createModuleInspector (opts = {}) {
   function inspectModule (moduleRecord, { isBuiltin, includeDebugInfo = false } = {}) {
     const { packageName, specifier, type } = moduleRecord
     // record the module
-    moduleIdToModuleRecord[specifier] = moduleRecord
+    moduleIdToModuleRecord.set(specifier, moduleRecord)
     // call the correct analyzer for the module type
     switch (type) {
       case 'builtin': {
@@ -68,7 +68,10 @@ function createModuleInspector (opts = {}) {
     // LavaMoat does attempt to sandbox native modules
     // packages with native modules need to specify that in the policy file
     const { packageName } = moduleRecord
-    const packageNativeModules = packageToNativeModules[packageName] = packageToNativeModules[packageName] || []
+    if (!packageToNativeModules.has(packageName)) {
+      packageToNativeModules.set(packageName, [])
+    }
+    const packageNativeModules = packageToNativeModules.get(packageName)
     packageNativeModules.push(moduleRecord)
   }
 
@@ -76,9 +79,12 @@ function createModuleInspector (opts = {}) {
     const { packageName, specifier } = moduleRecord
     let moduleDebug
     // record the module
-    moduleIdToModuleRecord[specifier] = moduleRecord
+    moduleIdToModuleRecord.set(specifier, moduleRecord)
     // initialize mapping from package to module
-    const packageModules = packageToModules[packageName] = packageToModules[packageName] || {}
+    if (!packageToModules.has(packageName)) {
+      packageToModules.set(packageName, new Map())
+    }
+    const packageModules = packageToModules.get(packageName)
     packageModules[specifier] = moduleRecord
     // initialize module debug info
     if (includeDebugInfo) {
@@ -172,9 +178,12 @@ function createModuleInspector (opts = {}) {
       moduleDebug.globals = mapToObj(foundGlobals)
     }
     // agregate globals
-    let packageGlobals = packageToGlobals[packageName] || []
+    if (!packageToGlobals.has(packageName)) {
+      packageToGlobals.set(packageName, [])
+    }
+    let packageGlobals = packageToGlobals.get(packageName)
     packageGlobals = mergeGlobalsPolicy(packageGlobals, foundGlobals)
-    packageToGlobals[packageName] = packageGlobals
+    packageToGlobals.set(packageName, packageGlobals)
   }
 
   function inspectForImports (ast, moduleRecord, packageName, isBuiltin, includeDebugInfo) {
@@ -192,15 +201,18 @@ function createModuleInspector (opts = {}) {
       moduleDebug.builtin = moduleBuiltins
     }
     // aggregate package builtins
-    let packageBuiltins = packageToBuiltinImports[packageName] || []
+    if (!packageToBuiltinImports.has(packageName)) {
+      packageToBuiltinImports.set(packageName, [])
+    }
+    let packageBuiltins = packageToBuiltinImports.get(packageName)
     packageBuiltins = [...packageBuiltins, ...moduleBuiltins]
-    packageToBuiltinImports[packageName] = packageBuiltins
+    packageToBuiltinImports.set(packageName, packageBuiltins)
   }
 
   function generatePolicy ({ policyOverride, includeDebugInfo } = {}) {
     const resources = {}
     const policy = { resources }
-    Object.entries(packageToModules).forEach(([packageName, packageModules]) => {
+    packageToModules.forEach((packageModules, packageName) => {
       // the policy fields for each package
       let globals, builtin, packages, native
       // skip for root modules (modules not from deps)
@@ -214,8 +226,8 @@ function createModuleInspector (opts = {}) {
         packages = Object.fromEntries(packageDeps.map(depPackageName => [depPackageName, true]))
       }
       // get globals
-      if (packageToGlobals[packageName]) {
-        globals = mapToObj(packageToGlobals[packageName])
+      if (packageToGlobals.has(packageName)) {
+        globals = mapToObj(packageToGlobals.get(packageName))
         // prefer "true" over "read" for clearer difference between
         // read/write syntax highlighting
         Object.keys(globals).forEach(key => {
@@ -225,7 +237,7 @@ function createModuleInspector (opts = {}) {
         })
       }
       // get builtin imports
-      const builtinImports = packageToBuiltinImports[packageName]
+      const builtinImports = packageToBuiltinImports.get(packageName)
       if (builtinImports && builtinImports.length) {
         builtin = {}
         reduceToTopmostApiCallsFromStrings(builtinImports).forEach(path => {
@@ -233,10 +245,7 @@ function createModuleInspector (opts = {}) {
         })
       }
       // get native modules
-      const packageNativeModules = packageToNativeModules[packageName]
-      if (packageNativeModules) {
-        native = true
-      }
+      native = packageToNativeModules.has(packageName)
       // skip package policy if there are no settings needed
       if (!packages && !globals && !builtin) {
         return
@@ -280,7 +289,7 @@ function aggregateDeps ({ packageModules, moduleIdToModuleRecord }) {
         return
       }
       // get packageName from module record, or guess
-      const moduleRecord = moduleIdToModuleRecord[specifier]
+      const moduleRecord = moduleIdToModuleRecord.get(specifier)
       if (moduleRecord) {
         // builtin modules are ignored here, handled elsewhere
         if (moduleRecord.type === 'builtin') {
