@@ -11149,29 +11149,7 @@ module.exports = {
   return module.exports
 })()
 
-    const scuttleGlobalThisDefaults = {
-      enabled: true,
-      exceptions: [],
-      recursive: false,
-    }
-    const {
-      enabled: scuttleGlobalThisEnabled,
-      exceptions: scuttleGlobalThisExceptions,
-      recursive: scuttleGlobalThisRecursive,
-    } = scuttleGlobalThis === true ? scuttleGlobalThisDefaults : scuttleGlobalThis
-
-    let snow = (cb, win) => cb(win)
-    if (scuttleGlobalThisRecursive) {
-      if (!globalRef.SNOW) {
-        throw new Error(
-          'LavaMoat - scuttleGlobalThis is configured to be enabled recursively. ' +
-          'For that, Snow-JS must be included before LavaMoat executes. ' +
-          'To learn more visit https://github.com/LavaMoat/LavaMoat/pull/462.',
-        )
-      }
-      snow = globalRef.SNOW
-    }
-
+    const scuttleOpts = generateScuttleOpts(scuttleGlobalThis)
     const moduleCache = new Map()
     const packageCompartmentCache = new Map()
     const globalStore = new Map()
@@ -11180,22 +11158,11 @@ module.exports = {
     const rootPackageCompartment = createRootPackageCompartment(globalRef)
 
     // scuttle globalThis right after we used it to create the root package compartment
-    if (scuttleGlobalThisEnabled) {
-      if (!Array.isArray(scuttleGlobalThisExceptions)) {
-        throw new Error(`LavaMoat - scuttleGlobalThis.exceptions must be an array, got "${typeof scuttleGlobalThisExceptions}"`)
+    if (scuttleOpts.enabled) {
+      if (!Array.isArray(scuttleOpts.exceptions)) {
+        throw new Error(`LavaMoat - scuttleGlobalThis.exceptions must be an array, got "${typeof scuttleOpts.exceptions}"`)
       }
-      // turn scuttleGlobalThis.exceptions regexes strings to actual regexes
-      for (let i = 0; i < scuttleGlobalThisExceptions.length; i++) {
-        const prop = scuttleGlobalThisExceptions[i]
-        if (!prop.startsWith('/')) {
-          continue
-        }
-        const parts = prop.split('/')
-        const pattern = parts.slice(1, -1).join('/')
-        const flags = parts[parts.length - 1]
-        scuttleGlobalThisExceptions[i] = new RegExp(pattern, flags)
-      }
-      snow(realm => performScuttleGlobalThis(realm, scuttleGlobalThisExceptions), globalRef)
+      scuttleOpts.scuttlerFunc(globalRef, realm => performScuttleGlobalThis(realm, scuttleOpts.exceptions))
     }
 
     const kernel = {
@@ -11207,6 +11174,40 @@ module.exports = {
     }
     Object.freeze(kernel)
     return kernel
+
+    function generateScuttleOpts(originalOpts) {
+      const defaultOpts = {
+        enabled: true,
+        exceptions: [],
+        scuttlerName: '',
+      }
+      const opts = Object.assign({},
+        originalOpts === true ? { ... defaultOpts } : { ...originalOpts },
+        { scuttlerFunc: (globalRef, scuttle) => scuttle(globalRef) },
+        { exceptions: (originalOpts.exceptions || defaultOpts.exceptions).map(e => toRE(e)) },
+      )
+      if (opts.scuttlerName) {
+        if (!globalRef[opts.scuttlerName]) {
+          throw new Error(
+            `LavaMoat - 'scuttlerName' function "${opts.scuttlerName}" expected on globalRef.` +
+            'To learn more visit https://github.com/LavaMoat/LavaMoat/pull/462.',
+          )
+        }
+        opts.scuttlerFunc = globalRef[opts.scuttlerName]
+      }
+      return opts
+
+      function toRE(except) {
+        // turn scuttleGlobalThis.exceptions regexes strings to actual regexes
+        if (!except.startsWith('/')) {
+          return except
+        }
+        const parts = except.split('/')
+        const pattern = parts.slice(1, -1).join('/')
+        const flags = parts[parts.length - 1]
+        return new RegExp(pattern, flags)
+      }
+    }
 
     function performScuttleGlobalThis (globalRef, extraPropsToAvoid = new Array()) {
       const props = new Array()

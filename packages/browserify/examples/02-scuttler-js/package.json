@@ -1,0 +1,13 @@
+{
+  "devDependencies": {
+    "browserify": "^16.5.0",
+    "serve": "^11.3.0"
+  },
+  "scripts": {
+    "lavamoat": "AUTOCONFIG=1 node ./build.js",
+    "start": "node ./build.js && serve ."
+  },
+  "dependencies": {
+    "metamask-logo": "^2.2.1"
+  }
+}
