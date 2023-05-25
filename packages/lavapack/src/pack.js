@@ -56,7 +56,7 @@ function createPacker({
   sourceRoot,
   sourceMapPrefix,
   bundleWithPrecompiledModules = true,
-  scuttleGlobalThis = {},
+  scuttleGlobalThis,
   scuttleGlobalThisExceptions,
 } = {}) {
   // stream/parser wrapping incase raw: false
@@ -87,22 +87,17 @@ function createPacker({
 
   if (scuttleGlobalThisExceptions) {
     console.warn('Lavamoat - "scuttleGlobalThisExceptions" is deprecated. Use "scuttleGlobalThis.exceptions" instead.')
-    if (scuttleGlobalThis === true) {
-      scuttleGlobalThis = {enabled: true}
-    }
   }
-  const exceptions = scuttleGlobalThis?.exceptions || scuttleGlobalThisExceptions
-  scuttleGlobalThis.exceptions = exceptions
-
-  // toString regexps if there's any
-  if (exceptions) {
-    for (let i = 0; i < exceptions.length; i++) {
-      exceptions[i] = String(exceptions[i])
-    }
+  const _scuttleGlobalThis = !!scuttleGlobalThis ? {
+    enabled: scuttleGlobalThis === true || (scuttleGlobalThis === 'object' && scuttleGlobalThis.enabled),
+    exceptions: (typeof scuttleGlobalThis === 'object' && scuttleGlobalThis.exceptions || scuttleGlobalThisExceptions || [])
+      .map(e => String(e)), // cast any regexes into strings
+  } : {
+    enabled: false,
   }
 
   prelude = prelude.replace('__lavamoatSecurityOptions__', JSON.stringify({
-    scuttleGlobalThis,
+    scuttleGlobalThis: _scuttleGlobalThis,
   }))
 
   // note: pack stream cant started emitting data until its received its first module
