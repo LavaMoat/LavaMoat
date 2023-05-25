@@ -53,7 +53,6 @@ function createPacker({
   policy = {},
   // prune policy to only include packages used in the bundle
   prunePolicy = false,
-  externalRequireName,
   sourceRoot,
   sourceMapPrefix,
   bundleWithPrecompiledModules = true,
