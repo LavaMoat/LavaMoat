@@ -129,14 +129,14 @@
         .flatMap(proto => Object.getOwnPropertyNames(proto))
 
       // support LM, SES exported APIs and polyfills
-      const baseIgnoreProps = ['Compartment', 'Error', 'globalThis']
+      const baseIgnoreProps = [/^Compartment$/, /^Error$/, /^globalThis$/]
       const ignoreProps = Array.from(new Set([
         ...baseIgnoreProps,
         ...extraIgnoreProps,
       ]))
 
       for (const prop of props) {
-        if (ignoreProps.some(p => prop.match(p))) {
+        if (ignoreProps.some(p => p.test(prop))) {
           continue
         }
 
@@ -523,13 +523,16 @@
     }
 
     function decodeRegexp (s) {
-      if (!s.startsWith('/')) {
-        // escape regexp https://stackoverflow.com/questions/3561493/is-there-a-regexp-escape-function-in-javascript
-        return new RegExp(s.replace(/[/\-\\^$*+?.()|[\]{}]/gu, '\\$&'))
+      switch (s.type) {
+        case 'regex':
+          const parts = s.value.split('/')
+          const flags = parts.pop()
+          return new RegExp(parts.join('/'), flags)
+        case 'string':
+          return new RegExp(s.value.replace(/[/\-\\^$*+?.()|[\]{}]/gu, '\\$&'))
+        default:
+          throw new Error(`Invalid Regexp type ${s.type}`)
       }
-      const parts = s.split('/')
-      const flags = parts.pop()
-      return new RegExp(parts.join('/'), flags)
     }
   }
 })()

@@ -30,6 +30,22 @@ function getStrictScopeTerminatorShimSrc () {
   return strictScopeTerminatorSrc
 }
 
+function encodeRegexp(e) {
+  if (e.startsWith('/') || e instanceof RegExp) {
+    return {
+      type: 'regex',
+      value: String(e),
+    }
+  }
+  if (typeof e === 'string') {
+    return {
+      type: 'string',
+      value: e,
+    }
+  }
+  throw new Error(`Invalid regexp type "${typeof e}"`)
+}
+
 function encodeScuttleOptions (opts) {
   if (opts?.scuttleGlobalThisExceptions) {
     console.warn('Lavamoat - "scuttleGlobalThisExceptions" is deprecated. Use "scuttleGlobalThis.exceptions" instead.')
@@ -38,7 +54,7 @@ function encodeScuttleOptions (opts) {
   return {
     enabled: opts?.hasOwnProperty('scuttleGlobalThis') && (opts.scuttleGlobalThis === true || !!opts.scuttleGlobalThis.enabled),
     // options need to be JSON-serializable: string-encode regexes
-    exceptions: (opts?.scuttleGlobalThis.exceptions || opts?.scuttleGlobalThisExceptions)?.map(e => String(e)),
+    exceptions: (opts?.scuttleGlobalThis.exceptions || opts?.scuttleGlobalThisExceptions)?.map(e => encodeRegexp(e)),
     scuttlerName: opts?.scuttleGlobalThis.scuttlerName,
   }
 }
