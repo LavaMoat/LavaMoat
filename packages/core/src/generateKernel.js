@@ -31,19 +31,15 @@ function getStrictScopeTerminatorShimSrc () {
 }
 
 function encodeScuttleOptions (opts) {
-  if (!opts?.hasOwnProperty('scuttleGlobalThis') || !opts.scuttleGlobalThis) {
-    return { enabled: false }
-  }
-
-  if (opts.scuttleGlobalThisExceptions) {
+  if (opts?.scuttleGlobalThisExceptions) {
     console.warn('Lavamoat - "scuttleGlobalThisExceptions" is deprecated. Use "scuttleGlobalThis.exceptions" instead.')
   }
 
   return {
-    enabled: opts.scuttleGlobalThis === true || !!opts.scuttleGlobalThis.enabled,
+    enabled: opts?.hasOwnProperty('scuttleGlobalThis') && (opts.scuttleGlobalThis === true || !!opts.scuttleGlobalThis.enabled),
     // options need to be JSON-serializable: string-encode regexes
-    exceptions: (opts.scuttleGlobalThis.exceptions || opts.scuttleGlobalThisExceptions)?.map(e => String(e)),
-    scuttlerName: opts.scuttleGlobalThis.scuttlerName,
+    exceptions: (opts?.scuttleGlobalThis.exceptions || opts?.scuttleGlobalThisExceptions)?.map(e => String(e)),
+    scuttlerName: opts?.scuttleGlobalThis.scuttlerName,
   }
 }
 
