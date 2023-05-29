@@ -30,37 +30,36 @@ function getStrictScopeTerminatorShimSrc () {
   return strictScopeTerminatorSrc
 }
 
+function encodeScuttleOptions (opts) {
+  if (!opts?.hasOwnProperty('scuttleGlobalThis') || !opts.scuttleGlobalThis) {
+    return { enabled: false }
+  }
+
+  if (opts.scuttleGlobalThisExceptions) {
+    console.warn('Lavamoat - "scuttleGlobalThisExceptions" is deprecated. Use "scuttleGlobalThis.exceptions" instead.')
+  }
+
+  return {
+    enabled: opts.scuttleGlobalThis === true || !!opts.scuttleGlobalThis.enabled,
+    // options need to be JSON-serializable: string-encode regexes
+    exceptions: (opts.scuttleGlobalThis.exceptions || opts.scuttleGlobalThisExceptions)?.map(e => String(e)),
+    scuttlerName: opts.scuttleGlobalThis.scuttlerName,
+  }
+}
+
 // takes the kernelTemplate and populates it with the libraries
-function generateKernel (_opts = {}) {
-  const opts = Object.assign({}, _opts)
+function generateKernel (opts = {}) {
   const kernelCode = generateKernelCore()
+  const scuttleGlobalThis = encodeScuttleOptions(opts)
 
   let output = kernelTemplate
   output = replaceTemplateRequire(output, 'ses', sesSrc)
   output = stringReplace(output, '__createKernelCore__', kernelCode)
   output = stringReplace(output, '__lavamoatDebugOptions__', JSON.stringify({debugMode: !!opts.debugMode}))
-  if (opts?.hasOwnProperty('scuttleGlobalThis')) {
-    // scuttleGlobalThis config placeholder should be set only if ordered so explicitly.
-    // if not, should be left as is to be replaced by a later processor (e.g. LavaPack).
-    let scuttleGlobalThis = opts.scuttleGlobalThis
-    if (opts.scuttleGlobalThisExceptions) {
-      console.warn('Lavamoat - "scuttleGlobalThisExceptions" is deprecated. Use "scuttleGlobalThis.exceptions" instead.')
-      if (scuttleGlobalThis === true) {
-        scuttleGlobalThis = {enabled: true}
-      }
-    }
-    const exceptions = scuttleGlobalThis?.exceptions || opts.scuttleGlobalThisExceptions
-    scuttleGlobalThis.exceptions = exceptions
-    if (exceptions) {
-      // toString regexps if there's any
-      for (let i = 0; i < exceptions.length; i++) {
-        exceptions[i] = String(exceptions[i])
-      }
-    }
-    output = stringReplace(output, '__lavamoatSecurityOptions__', JSON.stringify({
-      scuttleGlobalThis,
-    }))
-  }
+
+  output = stringReplace(output, '__lavamoatSecurityOptions__', JSON.stringify({
+    scuttleGlobalThis,
+  }))
 
   return output
 }

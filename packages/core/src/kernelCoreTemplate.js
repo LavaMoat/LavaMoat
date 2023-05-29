@@ -60,7 +60,7 @@
     prepareModuleInitializerArgs,
     getExternalCompartment,
     globalThisRefs = ['globalThis'],
-    scuttleGlobalThis = {},
+    scuttleGlobalThis,
     debugMode = false,
     runWithPrecompiledModules = false,
     reportStatsHook = () => {},
@@ -71,15 +71,14 @@
     const { prepareCompartmentGlobalFromConfig } = templateRequire('makePrepareRealmGlobalFromConfig')(generalUtils)
     const { strictScopeTerminator } = templateRequire('strict-scope-terminator')
 
-    const scuttleOpts = generateScuttleOpts(scuttleGlobalThis)
     const moduleCache = new Map()
     const packageCompartmentCache = new Map()
     const globalStore = new Map()
 
     const rootPackageName = '$root$'
+    const scuttleOpts = decodeScuttleOptions(scuttleGlobalThis || {})
     const rootPackageCompartment = createRootPackageCompartment(globalRef)
-
-    // scuttle globalThis right after we used it to create the root package compartment
+    // scuttle globalThis immediately after using it to create the root package compartment on the line above
     if (scuttleOpts.enabled) {
       if (!Array.isArray(scuttleOpts.exceptions)) {
         throw new Error(`LavaMoat - scuttleGlobalThis.exceptions must be an array, got "${typeof scuttleOpts.exceptions}"`)
@@ -97,81 +96,91 @@
     Object.freeze(kernel)
     return kernel
 
-    // generate final scuttling options (1) by taking default
-    // options into consideration, (2) turning RE strings into
-    // actual REs and (3) without mutating original opts object
-    function generateScuttleOpts(originalOpts) {
+    // generate final scuttling options by
+    // (1) taking default options into consideration,
+    // (2) turning strings into actual regexps
+    // (3) mapping scuttlerFunc from scuttlerName
+    function decodeScuttleOptions(opts) {
+      if (opts.scuttlerName && !globalRef[opts.scuttlerName]) {
+        throw new Error(
+          `LavaMoat - 'scuttlerName' function "${opts.scuttlerName}" expected on globalRef.` +
+          'To learn more visit https://github.com/LavaMoat/LavaMoat/pull/462.',
+        )
+      }
       const defaultOpts = {
         enabled: true,
         exceptions: [],
         scuttlerName: '',
       }
-      const opts = Object.assign({},
-        originalOpts === true ? { ... defaultOpts } : { ...originalOpts },
-        { scuttlerFunc: (globalRef, scuttle) => scuttle(globalRef) },
-        { exceptions: (originalOpts.exceptions || defaultOpts.exceptions).map(e => toRE(e)) },
+      return Object.assign({},
+        {
+          ...defaultOpts,
+          ...opts,
+          exceptions: opts.exceptions?.map(p => decodeRegexp(p)),
+          scuttlerFunc: opts.scuttlerName
+            ? globalRef[opts.scuttlerName]
+            : (global, scuttle) => scuttle(global),
+        },
       )
-      if (opts.scuttlerName) {
-        if (!globalRef[opts.scuttlerName]) {
-          throw new Error(
-            `LavaMoat - 'scuttlerName' function "${opts.scuttlerName}" expected on globalRef.` +
-            'To learn more visit https://github.com/LavaMoat/LavaMoat/pull/462.',
-          )
-        }
-        opts.scuttlerFunc = globalRef[opts.scuttlerName]
-      }
-      return opts
+    }
 
-      function toRE(except) {
-        // turn scuttleGlobalThis.exceptions regexes strings to actual regexes
-        if (!except.startsWith('/')) {
-          return except
+    function performScuttleGlobalThis (globalRef, extraIgnoreProps = []) {
+      const props = getPrototypeChain(globalRef)
+        .flatMap(proto => Object.getOwnPropertyNames(proto))
+
+      // support LM, SES exported APIs and polyfills
+      const baseIgnoreProps = ['Compartment', 'Error', 'globalThis']
+      const ignoreProps = Array.from(new Set([
+        ...baseIgnoreProps,
+        ...extraIgnoreProps,
+      ]))
+
+      for (const prop of props) {
+        if (ignoreProps.some(p => prop.match(p))) {
+          continue
         }
-        const parts = except.split('/')
-        const pattern = parts.slice(1, -1).join('/')
-        const flags = parts[parts.length - 1]
-        return new RegExp(pattern, flags)
+
+        const desc = createDescriptor(globalRef, prop)
+        if (!desc) {
+          continue
+        }
+
+        Object.defineProperty(globalRef, prop, desc)
       }
     }
 
-    function performScuttleGlobalThis (globalRef, extraPropsToAvoid = new Array()) {
-      const props = new Array()
-      getPrototypeChain(globalRef)
-        .forEach(proto =>
-          props.push(...Object.getOwnPropertyNames(proto)))
-
-      // support LM,SES exported APIs and polyfills
-      const avoidForLavaMoatCompatibility = ['Compartment', 'Error', 'globalThis']
-      const propsToAvoid = new Set([...avoidForLavaMoatCompatibility, ...extraPropsToAvoid])
-
-      const obj = Object.create(null)
-      for (const prop of props) {
-        function set() {
-          console.warn(
-            `LavaMoat - property "${prop}" of globalThis cannot be set under scuttling mode. ` +
-            'To learn more visit https://github.com/LavaMoat/LavaMoat/pull/360.',
-          )
-        }
-        function get() {
-          throw new Error(
-            `LavaMoat - property "${prop}" of globalThis is inaccessible under scuttling mode. ` +
-            'To learn more visit https://github.com/LavaMoat/LavaMoat/pull/360.',
-          )
-        }
-        if (shouldAvoidProp(propsToAvoid, prop)) {
-          continue
-        }
-        let desc = Object.getOwnPropertyDescriptor(globalRef, prop)
-        if (desc?.configurable === true) {
-          desc = { configurable: false, set, get }
-        } else if (desc?.writable === true) {
-          const p = new Proxy(obj, { getPrototypeOf: get, get, set } )
-          desc = { configurable: false, writable: false, value: p }
-        } else {
-          continue
-        }
-        Object.defineProperty(globalRef, prop, desc)
+    function createDescriptor(globalRef, prop) {
+      function set() {
+        console.warn(
+          `LavaMoat - property "${prop}" of globalThis cannot be set under scuttling mode. ` +
+          'To learn more visit https://github.com/LavaMoat/LavaMoat/pull/360.',
+        )
       }
+      function get() {
+        throw new Error(
+          `LavaMoat - property "${prop}" of globalThis is inaccessible under scuttling mode. ` +
+          'To learn more visit https://github.com/LavaMoat/LavaMoat/pull/360.',
+        )
+      }
+      const desc = Object.getOwnPropertyDescriptor(globalRef, prop)
+      if (desc?.configurable === true) {
+        return {
+          configurable: false,
+          set,
+          get,
+        }
+      }
+      if (desc?.writable === true) {
+        return {
+          configurable: false,
+          writable: false,
+          value: new Proxy(
+            Object.create(null),
+            { get, set, getPrototypeOf: get },
+          ),
+        }
+      }
+      return null
     }
 
     // this function instantiaties a module from a moduleId.
@@ -513,16 +522,14 @@
       return protoChain
     }
 
-    function shouldAvoidProp(propsToAvoid, prop) {
-      for (const avoid of propsToAvoid) {
-        if (avoid instanceof RegExp && avoid.test(prop)) {
-          return true
-        }
-        if (propsToAvoid.has(prop)) {
-          return true
-        }
+    function decodeRegexp (s) {
+      if (!s.startsWith('/')) {
+        // escape regexp https://stackoverflow.com/questions/3561493/is-there-a-regexp-escape-function-in-javascript
+        return new RegExp(s.replace(/[/\-\\^$*+?.()|[\]{}]/gu, '\\$&'))
       }
-      return false
+      const parts = s.split('/')
+      const flags = parts.pop()
+      return new RegExp(parts.join('/'), flags)
     }
   }
 })()
