@@ -30,6 +30,7 @@ module.exports = {
   // ... other webpack configuration properties
   plugins: [
     new ScorchWrapPlugin({
+      policy: { ... LavaMoat policy structure ... }
       runChecks: true,
     //   diagnosticsVerbosity: 2,
     }),
@@ -40,7 +41,18 @@ module.exports = {
 
 One important thing to note when using the ScorchWrap plugin is that it disables the `concatenateModules` optimization in webpack. This is because concatenation won't work with wrapped modules.
 
+# Security Claims
 
+- SES must be added to the page without any bundling or transforming for any security guarantees to be sustained.
+- Each javascript module resulting from the webpack build is scoped to its package's policy
+
+Threat model
+
+- webpack itself is considered trusted
+- all plugins can bypass LavaMoat protections intentionally
+- It's unlikely but possible that a plugin can bypass LavaMoat protections unintentionally
+- It should not be possible for loaders to bypass LavaMoat protections
+- Some plugins (eg. MiniCssExtractPlugin) execute code from the bundle at build time. To make the plugin work you need to trust it and the modules it runs and add the ScorchWrap.ignore loader for them.
 # Development
 
 ## Manual testing
@@ -50,9 +62,7 @@ run `yarn` and `yarn lib:ses` in the packages/scorchwrap folder before you begin
 `cd app`  
 run `npm ci`  
 run `npm test` to trigger the build  
-open test.html in the browser and look at the console
-
-> something is off with error taming, because the message is null ever since I introduced lockdown. lockdown call is commented out in runtime for now. 
+open dist/index.html in the browser and look at the console
 
 ## Testing
 
@@ -61,7 +71,7 @@ List of what to cover ordered by priority
 - [ ] e2e test creating a bundle and run it in a headless browser to check for errors
 - [ ] cover all module types
 - [ ] configure bundle splitting
-- [ ] cover all types of runtimeRequirements with examples
+- [ ] cover all types of runtimeRequirements with examples (stuff passed to closures along with modue and exports and `__webpack_require__`, also all the methods on `__webpack_require__`)
 - [ ] cover webpack magic comments
 
 ## Features
@@ -74,6 +84,7 @@ There's two ways we could handle policy
 2. add to runtime, keyed  
    For now holding on to the entire policy seems like a better idea, we could compress the keys at compile time easily.
    
+Current implementation inlines the policy as-is into the bundle.
 
 
 

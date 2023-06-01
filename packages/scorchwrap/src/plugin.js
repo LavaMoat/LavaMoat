@@ -8,19 +8,23 @@
 /** @typedef {object} ScorchWrapPluginOptions
  * @property {boolean} [runChecks] - check resulting code with wrapping for correctnesss
  * @property {number} [diagnosticsVerbosity] - a number representing diagnostics output verbosity, the larger the more overwhelming
+ * @property {object} policy - LavaMoat policy
  */
 
 const path = require("path");
 const {
   NormalModule,
   WebpackError,
-  NormalModuleReplacementPlugin,
+  RuntimeGlobals,
+  RuntimeModule,
   // ModuleDependency,
 } = require("webpack");
 const { wrapper } = require("./wrapper");
 const diag = require("./diagnostics");
 
+const { readFileSync } = require("fs");
 const { ConcatSource, RawSource } = require("webpack-sources");
+
 // @ts-ignore // this one doesn't have official types
 const RUNTIME_GLOBALS = require("webpack/lib/RuntimeGlobals");
 
@@ -35,15 +39,16 @@ const JAVASCRIPT_MODULE_TYPE_AUTO = "javascript/auto";
 const JAVASCRIPT_MODULE_TYPE_DYNAMIC = "javascript/dynamic";
 const JAVASCRIPT_MODULE_TYPE_ESM = "javascript/esm";
 
-const RUNTIME_PATH = "./_LM_RUNTIME_"; //path.resolve(__dirname, "./runtime.js");
+const RUNTIME_KEY = `_LM_`;
+const IGNORE_LOADER = path.join(__dirname, "./ignoreLoader.js");
 
 /**
- * @param {string} path
+ * @param {string} modulePath
  * @returns
  */
-const fakeAA = (path) => {
+const fakeAA = (modulePath) => {
   // TODO: properly resolve what belongs to which compartment
-  let chunks = path.split("node_modules/");
+  let chunks = modulePath.split("node_modules/");
   chunks[0] = "app";
   chunks = chunks.map((chunk) => {
     // only keep the @scope/package or package name
@@ -97,9 +102,9 @@ function processRequirements(requirements, module) {
 }
 
 /**
- * @param {ScorchWrapPluginOptions} options
+ * @param {object} options
  */
-const wrapGeneratorMaker = ({ runChecks }) => {
+const wrapGeneratorMaker = ({ warnings, runChecks }) => {
   /**
    * @param {Generator} generatorInstance
    * @returns {Generator}
@@ -108,6 +113,10 @@ const wrapGeneratorMaker = ({ runChecks }) => {
     // Monkey-patching JavascriptGenerator. Yes, this could be nicer.
     // Using features of the generator itself we might be able to achieve the same
     // but it would be more suseptible to changes in webpack.
+    // TODO: consider turning that into a weakset too
+    if (generatorInstance.generate.scorchwrap) {
+      return generatorInstance;
+    }
     const originalGenerate = generatorInstance.generate;
     /**
      *
@@ -125,15 +134,13 @@ const wrapGeneratorMaker = ({ runChecks }) => {
       const originalGeneratedSource = originalGenerate.apply(this, arguments);
       // originalGenerate adds requirements to options.runtimeRequirements
 
-      // TODO: find a nicer way to do it maybe?
-      if (module.rawRequest === RUNTIME_PATH) {
+      // skip doing anything if marked as ignored by the ignoreLoader
+      if (module.loaders.some(({ loader }) => loader === IGNORE_LOADER)) {
+        warnings.push(
+          new WebpackError("ScorchWrapPlugin: ignoring " + module.rawRequest)
+        );
         return originalGeneratedSource;
       }
-      // if(module.loaders[0] && module.loaders[0].loader.includes('node_modules/css-loader/dist/cjs.js')) {
-      // if (module.rawRequest.includes("node_modules/css-loader/dist/")) {
-      //   console.error(">>>", module.rawRequest, module.loaders);
-      //   return originalGeneratedSource;
-      // }
 
       // Turn off "use strict" being added in front of modules on final wrapping by webpack.
       // If anything attempts to reverse it, we want to ignore it
@@ -153,7 +160,7 @@ const wrapGeneratorMaker = ({ runChecks }) => {
         });
       }
 
-      const packageId = fakeAA(module.rawRequest);
+      const packageId = fakeAA(module.request);
 
       let { before, after, source, sourceChanged } = wrapper({
         // There's probably a good reason why webpack stores source in those objects instead
@@ -164,7 +171,7 @@ const wrapGeneratorMaker = ({ runChecks }) => {
         id: packageId,
         runtimeKit: processRequirements(options.runtimeRequirements, module),
         runChecks,
-        evalKitFunctionName: `__webpack_require__('${RUNTIME_PATH}')`,
+        evalKitFunctionName: `__webpack_require__.${RUNTIME_KEY}.E`,
       });
 
       diag.rawDebug(3, {
@@ -172,21 +179,6 @@ const wrapGeneratorMaker = ({ runChecks }) => {
         requirements: options.runtimeRequirements,
         sourceChanged,
       });
-
-      // isEntryModule is deprecated and breaks bacause no chunk graph available
-      // if(shouldGenerateRuntime && module.isEntryModule()){
-      //   shouldGenerateRuntime = false;
-      //   // add the runtime once.
-      //   before = `
-      //   window.__LM__ = window.__LM__ || ()=>{
-      //     console.log('works')
-      //   };
-      //   `+before;
-      // }
-
-      if (module.rawRequest.includes("node_modules/css-loader/dist/")) {
-        before = "debugger;" + before;
-      }
 
       // using this in webpack.config.ts complained about made up issues
       if (sourceChanged) {
@@ -202,9 +194,55 @@ const wrapGeneratorMaker = ({ runChecks }) => {
         );
       }
     };
+    generatorInstance.generate.scorchwrap = true;
     return generatorInstance;
   };
 };
+
+class VirtualRuntimeModule extends RuntimeModule {
+  constructor({ name, source }) {
+    super(name);
+    this.source = source;
+  }
+  generate() {
+    return this.source;
+  }
+}
+const assembleRuntime = (KEY, runtimeModules) => {
+  const assembly = [];
+  assembly.push([KEY, `__webpack_require__.${KEY}={};`]);
+  runtimeModules.map(({ file, data, name }) => {
+    let runtimeSource;
+    if (file) {
+      runtimeSource =
+        `const LAVAMOAT = __webpack_require__.${KEY};` +
+        readFileSync(path.join(__dirname, file), "utf-8");
+    }
+    if (data) {
+      runtimeSource = `__webpack_require__.${KEY}['${name}'] = Object.freeze(${JSON.stringify(
+        data
+      )})`;
+    }
+    assembly.push([name, runtimeSource]);
+  });
+  return {
+    addTo({ compilation, chunk }) {
+      assembly.forEach(([name, source]) =>
+        compilation.addRuntimeModule(
+          chunk,
+          new VirtualRuntimeModule({
+            name: "LavaMoat/" + name,
+            source,
+          })
+        )
+      );
+    },
+  };
+};
+
+// =================================================================
+// Plugin code
+// =================================================================
 
 const PLUGIN_NAME = "ScorchWrapPlugin";
 
@@ -213,67 +251,28 @@ class ScorchWrapPlugin {
    * @constructor
    * @param {ScorchWrapPluginOptions} [options]
    */
-  constructor(options = {}) {
+  constructor(options = { policy: {} }) {
     this.options = options;
     diag.level = options.diagnosticsVerbosity || 0;
-
-    // this.replacementPlugin = new NormalModuleReplacementPlugin(
-    //   /_LM_RUNTIME_/,
-    //   RUNTIME_PATH
-    // );
   }
   /**
    * @param {Compiler} compiler the compiler instance
    * @returns {void}
    */
   apply(compiler) {
+    const options = this.options;
+
     // Concatenation won't work with wrapped modules. Have to disable it.
     compiler.options.optimization.concatenateModules = false;
     // TODO: Research. If we fiddle a little with how we wrap the module, it might be possible to get inlining to work eventually.
-
-    // this.replacementPlugin.apply(compiler);
-
-    // compiler.options.module.rules.push({
-    //   test(req) {
-    //     if (
-    //       allowedPaths.some((p) => req.includes(path.join(compiler.context, p)))
-    //     ) {
-    //       return /\.(js|jsx|ts|tsx|md|mdx|mjs)$/i.test(req);
-    //     }
-    //     return false;
-    //   },
-    //   include: compiler.context,
-    //   exclude: [
-    //     /node_modules/,
-    //   ],
-    //   loader: path.resolve(__dirname, './lruntime-oader.js'),
-    //   options: {
-            // policy:
-            //   this.options.policy
-    //    },
-    // });
-
-    // compiler.hooks.compilation.tap('EntryDependencyPlugin', (compilation) => {
-    //   compilation.hooks.buildModule.tap('EntryDependencyPlugin', (module) => {
-    //     // Check if this is the entry module
-    //     if (module.isEntryModule()) {
-    //       // Add a dependency on lodash
-    //       console.error('aaaaa');
-    //       const dep = new ModuleDependency();
-    //       dep.request = '_LM_RUNTIME_';
-    //       module.addDependency(dep);
-    //     }
-    //   });
-    // });
-
-
-    compiler.options.entry.main.import.unshift(RUNTIME_PATH);
 
     let mainCompilationWarnings;
 
     compiler.hooks.thisCompilation.tap(
       PLUGIN_NAME,
       (compilation, { normalModuleFactory }) => {
+        // =================================================================
+
         if (!mainCompilationWarnings) {
           mainCompilationWarnings = compilation.warnings;
           mainCompilationWarnings.push(
@@ -282,26 +281,41 @@ class ScorchWrapPlugin {
             )
           );
         }
-        if (compilation.compiler.isChild()) {
-          if (
-            compilation.compiler.name?.startsWith("mini-css-extract-plugin")
-          ) {
-            // Check if it's a child compilation used by a specific plugin
-            // TODO: make the list of plugins configurable.
-            mainCompilationWarnings.push(
-              new WebpackError(
-                "ScorchWrapPlugin: SKIPPING child compilation for" + compilation.compiler.name
-              )
-            );
-            return;
-          } else {
-            mainCompilationWarnings.push(
-              new WebpackError(
-                "ScorchWrapPlugin: Entered child compilation for " + compilation.compiler.name
-              )
-            );
+        // =================================================================
+
+        // This part adds LavaMoat runtime to webpack runtime for every chunk that needs runtime.
+        // I stole this from Zach of module federation fame
+
+        const onceForChunkSet = new WeakSet();
+        const lavaMoatRuntime = assembleRuntime(RUNTIME_KEY, [
+          { name: "options", data: options },
+          { name: "runtime", file: "./runtime.js" },
+        ]);
+
+        // Define a handler function to be called for each chunk in the compilation.
+        compilation.hooks.additionalChunkRuntimeRequirements.tap(
+          PLUGIN_NAME + "_runtime",
+          (chunk, set) => {
+            // If the chunk has already been processed, skip it.
+            if (onceForChunkSet.has(chunk)) return;
+            set.add(RuntimeGlobals.onChunksLoaded); // TODO: develop an understanding of what this line does xD
+
+            // Mark the chunk as processed by adding it to the WeakSet.
+            onceForChunkSet.add(chunk);
+
+            if (chunk.hasRuntime()) {
+              // Add the runtime modules to the chunk, which handles
+              // the runtime logic for wrapping with lavamoat.
+              lavaMoatRuntime.addTo({
+                compilation,
+                chunk,
+              });
+            }
           }
-        }
+        );
+
+        // =================================================================
+        // javascript modules generator tweaks installation
 
         const runChecks = this.options.runChecks || diag.level > 0;
         normalModuleFactory.hooks.generator
@@ -309,6 +323,7 @@ class ScorchWrapPlugin {
           .tap(
             PLUGIN_NAME,
             wrapGeneratorMaker({
+              warnings: mainCompilationWarnings,
               runChecks,
             })
           );
@@ -317,164 +332,24 @@ class ScorchWrapPlugin {
           .tap(
             PLUGIN_NAME,
             wrapGeneratorMaker({
+              warnings: mainCompilationWarnings,
               runChecks,
             })
           );
         normalModuleFactory.hooks.generator.for(JAVASCRIPT_MODULE_TYPE_ESM).tap(
           PLUGIN_NAME,
           wrapGeneratorMaker({
+            warnings: mainCompilationWarnings,
             runChecks,
           })
         );
-
-        // =================
-        const MOD_NAME = "_LM_RUNTIME_";
-
-        // compilation.hooks.resolve.tapAsync(
-        //   'LMLMResolverPlugin',
-        //   (request, resolveContext, callback) => {
-        //     if (request.request === MOD_NAME || request.rawRequest === MOD_NAME) {
-        //       console.error('zzz', request  )
-        //       const resolvedPath = path.resolve(__dirname, './runtime.js');
-        //       // Update the resolved request path
-        //       request.request = resolvedPath;
-        //     }
-        //     callback();
-        //   }
-        // );
-
-        // compilation.hooks.additionalChunkAssets.tap("PLUGIN_NAME", () => {
-        //   console.error(">>>", 1);
-        //   const source = 'console.error("$$$")';
-
-        //   const moduleFactory = compilation.moduleFactory;
-
-        //   // Create a module from a string
-        //   const module = moduleFactory.create({
-        //     type: "javascript/auto",
-        //     request: "./string-module.js",
-        //     userRequest: "./string-module.js",
-        //     rawSource: 'export default "Hello world!";',
-        //   });
-
-        //   // Add the module to a chunk
-        //   compilation.chunks.forEach((chunk) => {
-        //     chunk.addModule(module);
-        //   });
-        //   // const module = new compilation.moduleFactory.create({
-        //   //   type: "javascript/auto",
-        //   //   request: MOD_NAME,
-        //   //   userRequest: MOD_NAME,
-        //   // });
-
-        //   // compilation.addModule(
-        //   //   new RawSource(source),
-        //   //   {
-        //   //     identifier: ()=>MOD_NAME,
-        //   //     type: 'javascript/auto'
-        //   //   }
-        //   // );
-        //   // compilation.chunks.forEach((chunk) => {
-        //   //   chunk.addModule(RawSource(source));
-        //   //   chunk.addModuleDependencies([module]);
-        //   //   console.error(">>>");
-        //   // });
-        // });
-
-        let mmm = null;
-
-        // normalModuleFactory.hooks.createModule.tap(PLUGIN_NAME, (module) => {
-        //   console.error(">>", module.rawRequest);
-
-        //   if (!mmm) {
-        //     mmm = module;
-
-        //     const customModuleDependency = new module.constructor.Dependency(
-        //       module.userRequest
-        //     );
-
-        //     // Add the dependency to the module
-        //     module.dependencies.push(customModuleDependency);
-
-        //     // Resolve the module request
-        //     const resolvedModule = normalModuleFactory.resolverFactory
-        //       .get("normal")
-        //       .resolveSync({}, "", "/path/to/customModule.js");
-
-        //     // Update the module's resource and context
-        //     module.resource = resolvedModule;
-        //     module.context = "";
-
-        //     // Return the modified module
-        //     return module;
-
-        //     const stringModule = new NormalModule({
-        //       request: MOD_NAME,
-        //       context: module.context,
-        //       rawRequest: MOD_NAME,
-        //       resource: MOD_NAME,
-        //       parser: module.parser,
-        //       generator: module.generator,
-        //       // generator: {generate: ()=>{
-        //       //   return new RawSource(`console.error('$$$')`);
-        //       // }},
-        //       type: "javascript/auto",
-        //       userRequest: MOD_NAME,
-        //       loaders: [],
-        //     });
-        //     stringModule.buildInfo = {
-        //       strict: false,
-        //     };
-
-        //     // Set the module code for the newly created module
-        //     stringModule._source = new RawSource(`console.error('$$$')`);
-
-        //     // Add the new module to the compilation
-        //     compilation.modules.add(stringModule);
-        //   }
-        // });
-
-        // compilation.hooks.buildModule.tap(PLUGIN_NAME, (module) => {
-        //   // if(require('util').inspect(module).includes("./node_modules/@chainsafe/persistent-merkle-tree/lib/gindex.js")) {
-        //     // }
-        //     if(!mmm){
-        //       mmm= module;
-        //         console.error('>>>', module)
-
-        //     const MOD_NAME = '_LM_RUNTIME_';
-        //     const stringModule = new NormalModule({
-        //       request: MOD_NAME,
-        //       context: mmm.context,
-        //       rawRequest: MOD_NAME,
-        //       resource: MOD_NAME,
-        //       parser: mmm.parser,
-        //       generator: mmm.generator,
-        //       // generator: {generate: ()=>{
-        //       //   return new RawSource(`console.error('$$$')`);
-        //       // }},
-        //       type: "javascript/auto",
-        //       userRequest: MOD_NAME,
-        //       loaders: [],
-        //     });
-        //     stringModule._isEvaluatingSideEffects = true;
-        //     stringModule.buildInfo = {
-        //       strict: false,
-        //     };
-
-        //     // Set the module code for the newly created module
-        //     stringModule._source = new RawSource(`console.error('$$$')`);
-
-        //     // Add the new module to the compilation
-        //     compilation.modules.add(stringModule);
-        //   }
-        // });
 
         // TODO: add later hooks to optionally verify correctness and totality
         // of wrapping for the paranoid mode.
       }
     );
 
-    // Another way to get close to where we need to make changes:
+    // Another potential way to get close to where we need to make changes:
     // compiler.hooks.compilation.tap(PLUGIN_NAME, (compilation) => {
     //   const JavascriptModulesPlugin = compiler.webpack.javascript.JavascriptModulesPlugin
     //   const hooks = JavascriptModulesPlugin.getCompilationHooks(compilation);
@@ -487,5 +362,7 @@ class ScorchWrapPlugin {
     // });
   }
 }
+
+ScorchWrapPlugin.ignore = IGNORE_LOADER;
 
 module.exports = ScorchWrapPlugin;
