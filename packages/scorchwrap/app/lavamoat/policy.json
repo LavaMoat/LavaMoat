@@ -1,0 +1,87 @@
+{
+  "resources": {
+    "@ethereumjs/util": {
+      "builtin": {
+        "buffer.Buffer.from": true,
+        "events.EventEmitter": true
+      },
+      "globals": {
+        "Buffer.alloc": true,
+        "Buffer.allocUnsafe": true,
+        "Buffer.byteLength": true,
+        "Buffer.concat": true,
+        "Buffer.from": true,
+        "Buffer.isBuffer": true,
+        "console.warn": true
+      },
+      "packages": {
+        "@ethereumjs/util>@chainsafe/ssz": true,
+        "@ethereumjs/util>@ethereumjs/rlp": true,
+        "@ethereumjs/util>ethereum-cryptography": true
+      }
+    },
+    "@ethereumjs/util>@chainsafe/ssz": {
+      "globals": {
+        "Buffer.alloc": true
+      },
+      "packages": {
+        "@ethereumjs/util>@chainsafe/ssz>@chainsafe/as-sha256": true,
+        "@ethereumjs/util>@chainsafe/ssz>@chainsafe/persistent-merkle-tree": true,
+        "@ethereumjs/util>@chainsafe/ssz>case": true
+      }
+    },
+    "@ethereumjs/util>@chainsafe/ssz>@chainsafe/as-sha256": {
+      "globals": {
+        "WebAssembly.Instance": true,
+        "WebAssembly.Module": true
+      }
+    },
+    "@ethereumjs/util>@chainsafe/ssz>@chainsafe/persistent-merkle-tree": {
+      "globals": {
+        "WeakRef": true
+      },
+      "packages": {
+        "@ethereumjs/util>@chainsafe/ssz>@chainsafe/as-sha256": true
+      }
+    },
+    "@ethereumjs/util>@ethereumjs/rlp": {
+      "globals": {
+        "TextEncoder": true
+      }
+    },
+    "@ethereumjs/util>ethereum-cryptography": {
+      "globals": {
+        "TextDecoder": true,
+        "crypto": true
+      },
+      "packages": {
+        "@ethereumjs/util>ethereum-cryptography>@noble/hashes": true,
+        "@ethereumjs/util>ethereum-cryptography>@noble/secp256k1": true
+      }
+    },
+    "@ethereumjs/util>ethereum-cryptography>@noble/hashes": {
+      "builtin": {
+        "crypto": true
+      },
+      "globals": {
+        "TextEncoder": true
+      }
+    },
+    "@ethereumjs/util>ethereum-cryptography>@noble/secp256k1": {
+      "builtin": {
+        "crypto": true
+      },
+      "globals": {
+        "crypto": true
+      }
+    },
+    "fast-json-patch": {
+      "globals": {
+        "addEventListener": true,
+        "clearTimeout": true,
+        "removeEventListener": true,
+        "setTimeout": true
+      }
+    }
+  }
+}

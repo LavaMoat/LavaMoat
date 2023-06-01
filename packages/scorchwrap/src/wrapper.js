@@ -47,7 +47,10 @@ exports.wrapper = function wrapper({
   const sourceChanged = source !== sesCompatibleSource;
 
   // TODO: Consider: We could save some bytes by merging scopeTerminator and runtimeHandler, but then runtime calls would go through a proxy, which is slower. Merging runtimeKit with globalThis would also be problematic.
+
+  // return NOOP if runtime didn't produce a scope terminator
   const before = `(function(){
+     if (!this.${NAME_scopeTerminator}) return ()=>{};
      with (this.${NAME_scopeTerminator}) {
       with (this.${NAME_runtimeHandler}) {
       with (this.${NAME_globalThis}) {
