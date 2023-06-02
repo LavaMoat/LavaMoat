@@ -63,12 +63,14 @@ This part can be done by a different person.
   - `$ NODE_ENV=production yarn build`
 6. `$ yarn test:prep && yarn test`
 7. `$ git push origin main`
-8. Authenticate as your user on npmjs.org:
+8. `$ git tag ${PKGDIR}-v${VERSION}
+9. `$ git push origin ${PKGDIR}-v${VERSION}`
+10. Authenticate as your user on npmjs.org:
   - `$ npm login`
   - `$ npm whoami` should now return your npmjs.org username
-9.  go to the package dir `$ cd packages/{PKGDIR}`
-10. `$ npm publish`
-11. Close down environment and ensure npm token is no longer present
+11. `$ cd packages/{PKGDIR}`
+12. `$ npm publish`
+13. Close down environment and ensure npm token is no longer present
 
 ---
 
