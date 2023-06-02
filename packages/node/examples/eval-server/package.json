@@ -6,7 +6,7 @@
   "license": "MIT",
   "dependencies": {
     "bad-idea-eval-server": "^1.0.0",
-    "lavamoat": "^1.0.5"
+    "lavamoat": "^7.0.0"
   },
   "scripts": {
     "setup": "yarn install",
