@@ -111,6 +111,7 @@ function getConfigurationFromPluginOpts (pluginOpts) {
     pr: 'includePrelude',
     prelude: 'includePrelude',
     pp: 'prunePolicy',
+    prunepolicy: 'prunePolicy',
     d: 'debugMode',
     debug: 'debugMode',
     stats: 'statsMode',
