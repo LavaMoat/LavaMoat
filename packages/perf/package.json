@@ -20,7 +20,7 @@
   },
   "dependencies": {
     "browserify": "^17.0.0",
-    "lavamoat-browserify": "^15.5.0",
+    "lavamoat-browserify": "^15.6.0",
     "lavamoat": "^7.0.0",
     "readable-stream": "^3.6.0",
     "@endo/compartment-mapper": "^0.8.4",
