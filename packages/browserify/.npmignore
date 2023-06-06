@@ -1,0 +1,7 @@
+test/
+examples/
+.depcheckrc
+.eslintignore
+.eslintrc.json
+ava.config.cjs
+yarn-error.log
