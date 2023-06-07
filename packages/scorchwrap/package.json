@@ -4,7 +4,7 @@
   "description": "",
   "main": "src/plugin.js",
   "scripts": {
-    "lib:ses": "cp ../../node_modules/ses/dist/lockdown.umd.js ./app/lib/lockdown.umd.js"
+    "lib:ses": "cp ../../node_modules/ses/dist/lockdown.umd.js ./app/ses/lockdown.umd.js"
   },
   "dependencies": {
     "lavamoat-core": "^14.1.1",

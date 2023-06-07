@@ -7,14 +7,13 @@ const LOCKDOWN_ON = (typeof lockdown !== "undefined");
 if (LOCKDOWN_ON) {
   lockdown(LAVAMOAT.options.lockdown);
 } else {
-  console && console.warn('LavaMoat: not executing, SES is missing.');
+  console && console.warn('LavaMoat: runtime execution started without SES present, not running any modules.');
 }
 
 // These must match assumptions in the wrapper.js
-// TODO: drill them down from options
-const NAME_globalThis = "G";
-const NAME_scopeTerminator = "ST";
-const NAME_runtimeHandler = "RH";
+// sharedKeys are included in the runtime 
+
+const { NAME_globalThis, NAME_scopeTerminator, NAME_runtimeHandler } = LAVAMOAT.ENUM;
 
 // strictScopeTerminator from SES is not strict enough - `has` would only return true for globals
 // and here we want to prevent reaching into the scope where local variables from bundle runtime are available.
