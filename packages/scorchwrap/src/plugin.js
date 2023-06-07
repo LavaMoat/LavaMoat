@@ -9,6 +9,7 @@
  * @property {boolean} [runChecks] - check resulting code with wrapping for correctnesss
  * @property {number} [diagnosticsVerbosity] - a number representing diagnostics output verbosity, the larger the more overwhelming
  * @property {object} policy - LavaMoat policy
+ * @property {object} [lockdown] - options to pass to lockdown
  */
 
 const path = require("path");
@@ -19,11 +20,13 @@ const {
   RuntimeModule,
   // ModuleDependency,
 } = require("webpack");
-const { wrapper } = require("./wrapper");
-const diag = require("./diagnostics");
+const { wrapper } = require("./buildtime/wrapper");
+const { pathsToIdentifiers } = require("./buildtime/aa");
+const diag = require("./buildtime/diagnostics");
+const stateMachine = require("./buildtime/stateMachine");
 
 const { readFileSync } = require("fs");
-const { ConcatSource, RawSource } = require("webpack-sources");
+const { ConcatSource } = require("webpack-sources");
 
 // @ts-ignore // this one doesn't have official types
 const RUNTIME_GLOBALS = require("webpack/lib/RuntimeGlobals");
@@ -42,24 +45,6 @@ const JAVASCRIPT_MODULE_TYPE_ESM = "javascript/esm";
 const RUNTIME_KEY = `_LM_`;
 const IGNORE_LOADER = path.join(__dirname, "./ignoreLoader.js");
 
-/**
- * @param {string} modulePath
- * @returns
- */
-const fakeAA = (modulePath) => {
-  // TODO: properly resolve what belongs to which compartment
-  let chunks = modulePath.split("node_modules/");
-  chunks[0] = "app";
-  chunks = chunks.map((chunk) => {
-    // only keep the @scope/package or package name
-    const parts = chunk.split("/");
-    if (parts[0].startsWith("@")) {
-      return parts.slice(0, 2).join("/");
-    }
-    return parts[0];
-  });
-  return chunks.join(">");
-};
 
 // TODO: processing requirements needs to be a tiny bit more clever yet.
 // Look in JavascriptModulesPlugin for how it decides if module and exports are unused.
@@ -104,7 +89,7 @@ function processRequirements(requirements, module) {
 /**
  * @param {object} options
  */
-const wrapGeneratorMaker = ({ warnings, runChecks }) => {
+const wrapGeneratorMaker = ({ ignores, getIdentifierForPath, runChecks }) => {
   /**
    * @param {Generator} generatorInstance
    * @returns {Generator}
@@ -113,6 +98,7 @@ const wrapGeneratorMaker = ({ warnings, runChecks }) => {
     // Monkey-patching JavascriptGenerator. Yes, this could be nicer.
     // Using features of the generator itself we might be able to achieve the same
     // but it would be more suseptible to changes in webpack.
+
     // TODO: consider turning that into a weakset too
     if (generatorInstance.generate.scorchwrap) {
       return generatorInstance;
@@ -125,6 +111,7 @@ const wrapGeneratorMaker = ({ warnings, runChecks }) => {
      * @returns {Source}
      */
     generatorInstance.generate = function (module, options) {
+      console.error(">>>G");
       diag.rawDebug(4, {
         module,
         options,
@@ -136,9 +123,8 @@ const wrapGeneratorMaker = ({ warnings, runChecks }) => {
 
       // skip doing anything if marked as ignored by the ignoreLoader
       if (module.loaders.some(({ loader }) => loader === IGNORE_LOADER)) {
-        warnings.push(
-          new WebpackError("ScorchWrapPlugin: ignoring " + module.rawRequest)
-        );
+        ignores.push(module.rawRequest);
+        diag.rawDebug(3, `skipped wrapping ${module.rawRequest}`);
         return originalGeneratedSource;
       }
 
@@ -160,7 +146,7 @@ const wrapGeneratorMaker = ({ warnings, runChecks }) => {
         });
       }
 
-      const packageId = fakeAA(module.request);
+      const packageId = getIdentifierForPath(module.request);
 
       let { before, after, source, sourceChanged } = wrapper({
         // There's probably a good reason why webpack stores source in those objects instead
@@ -208,33 +194,37 @@ class VirtualRuntimeModule extends RuntimeModule {
     return this.source;
   }
 }
+
+// Runtime modules are not being built nor wrapped by webpack, so I rolled my own tiny concatenator.
+// It's using a shared namespace technique instead of scoping `exports` variables
+// to avoid confusing anyone into believing it's actually CJS.
+// Criticism will only be accepted in a form of working PR with less total lines and less magic.
 const assembleRuntime = (KEY, runtimeModules) => {
-  const assembly = [];
-  assembly.push([KEY, `__webpack_require__.${KEY}={};`]);
-  runtimeModules.map(({ file, data, name }) => {
-    let runtimeSource;
+  let assembly = `__webpack_require__.${KEY} = Object.create(null); 
+  const LAVAMOAT = __webpack_require__.${KEY};`;
+  runtimeModules.map(({ file, data, name, json }) => {
+    let sourceString;
     if (file) {
-      runtimeSource =
-        `const LAVAMOAT = __webpack_require__.${KEY};` +
-        readFileSync(path.join(__dirname, file), "utf-8");
+      sourceString = readFileSync(path.join(__dirname, file), "utf-8");
     }
     if (data) {
-      runtimeSource = `__webpack_require__.${KEY}['${name}'] = Object.freeze(${JSON.stringify(
-        data
-      )})`;
+      sourceString = JSON.stringify(data);
     }
-    assembly.push([name, runtimeSource]);
+    if (json) {
+      sourceString = `LAVAMOAT['${name}'] = (${sourceString});`;
+    }
+    assembly += `\n;/*${name}*/;\n${sourceString}`;
   });
+  // use harden from SES if available
+  assembly += `;(typeof harden !== 'undefined') && harden(__webpack_require__.${KEY});`;
   return {
     addTo({ compilation, chunk }) {
-      assembly.forEach(([name, source]) =>
-        compilation.addRuntimeModule(
-          chunk,
-          new VirtualRuntimeModule({
-            name: "LavaMoat/" + name,
-            source,
-          })
-        )
+      compilation.addRuntimeModule(
+        chunk,
+        new VirtualRuntimeModule({
+          name: "LavaMoat/runtime",
+          source: assembly,
+        })
       );
     },
   };
@@ -253,6 +243,14 @@ class ScorchWrapPlugin {
    */
   constructor(options = { policy: {} }) {
     this.options = options;
+    this.STATE = stateMachine({
+      start: "start",
+      transitions: {
+        finishCollectingPaths: ["start", "pathsCollected"],
+        processPaths: ["pathsCollected", "pathsProcessed"],
+        runtimeStarted: ["pathsProcessed", "runtime"],
+      },
+    });
     diag.level = options.diagnosticsVerbosity || 0;
   }
   /**
@@ -261,6 +259,7 @@ class ScorchWrapPlugin {
    */
   apply(compiler) {
     const options = this.options;
+    const STATE = this.STATE;
 
     // Concatenation won't work with wrapped modules. Have to disable it.
     compiler.options.optimization.concatenateModules = false;
@@ -281,21 +280,98 @@ class ScorchWrapPlugin {
             )
           );
         }
+
+        // =================================================================
+        // javascript modules generator tweaks installation
+
+        const ignores = [];
+        const knownPaths = [];
+        let pathToIdentifierLookup = {};
+        const runChecks = this.options.runChecks || diag.level > 0;
+
+        // Caveat: this might be called before the lookup map is ready if a plugin is running a child compilation or alike. Note that in those cases wrapped code is not meant to run and policy will be empty.
+        const getIdentifierForPath = (p) => pathToIdentifierLookup[p] || 'none';
+
+        const coveredTypes = [
+          JAVASCRIPT_MODULE_TYPE_AUTO,
+          JAVASCRIPT_MODULE_TYPE_DYNAMIC,
+          JAVASCRIPT_MODULE_TYPE_ESM,
+        ];
+
+        // collect all paths resolved for the bundle
+        normalModuleFactory.hooks.afterResolve.tap(
+          PLUGIN_NAME,
+          (resolveData) => {
+            // TODO - typescript claims createData could be undefined. Do we care for those cases?
+            // Leaving it in a state where we'll get an error first time it happens.
+            if (coveredTypes.includes(resolveData.createData.type)) {
+              knownPaths.push(resolveData.createData.resourceResolveData.path);
+            }
+          }
+        );
+        compilation.hooks.finishModules.tap(PLUGIN_NAME, () => {
+          STATE.transition("finishCollectingPaths");
+        });
+
+        // Hook into all types of JavaScript NormalModules
+        for (const moduleType of coveredTypes) {
+          normalModuleFactory.hooks.generator.for(moduleType).tap(
+            PLUGIN_NAME,
+            wrapGeneratorMaker({
+              ignores,
+              runChecks,
+              getIdentifierForPath,
+            })
+          );
+        }
+
+        compilation.hooks.afterProcessAssets.tap(PLUGIN_NAME, () => {
+          mainCompilationWarnings.push(
+            new WebpackError(
+              `in ScorchWrapPlugin: ignored modules \n  ${ignores.join("\n  ")}`
+            )
+          );
+        });
+
+        // =================================================================
+
+        // trigger for paths processing
+        STATE.on("pathsCollected", () => {
+          pathToIdentifierLookup = pathsToIdentifiers(knownPaths);
+
+          STATE.transition("processPaths");
+        });
+
         // =================================================================
 
         // This part adds LavaMoat runtime to webpack runtime for every chunk that needs runtime.
         // I stole this from Zach of module federation fame
 
         const onceForChunkSet = new WeakSet();
-        const lavaMoatRuntime = assembleRuntime(RUNTIME_KEY, [
-          { name: "options", data: options },
-          { name: "runtime", file: "./runtime.js" },
-        ]);
+        const runtimeOptions = {
+          lockdown: options.lockdown,
+        };
 
         // Define a handler function to be called for each chunk in the compilation.
         compilation.hooks.additionalChunkRuntimeRequirements.tap(
           PLUGIN_NAME + "_runtime",
           (chunk, set) => {
+            console.error("\n\n>>>R");
+            if (STATE.getState() !== "pathsProcessed") {
+              mainCompilationWarnings.push(
+                new WebpackError(
+                  "ScorchWrap: generating runtime before all modules resolved. This might be part of a sub-compilation of a plugin."
+                )
+              );
+            }
+
+            const lavaMoatRuntime = assembleRuntime(RUNTIME_KEY, [
+              { name: "options", data: runtimeOptions, json: true },
+              { name: "policy", data: runtimeOptions.policy, json: true },
+              { name: "ENUM", file: "./ENUM.json", json: true },
+              { name: "runtime", file: "./runtime/runtime.js" },
+            ]);
+
             // If the chunk has already been processed, skip it.
             if (onceForChunkSet.has(chunk)) return;
             set.add(RuntimeGlobals.onChunksLoaded); // TODO: develop an understanding of what this line does xD
@@ -314,52 +390,10 @@ class ScorchWrapPlugin {
           }
         );
 
-        // =================================================================
-        // javascript modules generator tweaks installation
-
-        const runChecks = this.options.runChecks || diag.level > 0;
-        normalModuleFactory.hooks.generator
-          .for(JAVASCRIPT_MODULE_TYPE_AUTO)
-          .tap(
-            PLUGIN_NAME,
-            wrapGeneratorMaker({
-              warnings: mainCompilationWarnings,
-              runChecks,
-            })
-          );
-        normalModuleFactory.hooks.generator
-          .for(JAVASCRIPT_MODULE_TYPE_DYNAMIC)
-          .tap(
-            PLUGIN_NAME,
-            wrapGeneratorMaker({
-              warnings: mainCompilationWarnings,
-              runChecks,
-            })
-          );
-        normalModuleFactory.hooks.generator.for(JAVASCRIPT_MODULE_TYPE_ESM).tap(
-          PLUGIN_NAME,
-          wrapGeneratorMaker({
-            warnings: mainCompilationWarnings,
-            runChecks,
-          })
-        );
-
         // TODO: add later hooks to optionally verify correctness and totality
         // of wrapping for the paranoid mode.
       }
     );
-
-    // Another potential way to get close to where we need to make changes:
-    // compiler.hooks.compilation.tap(PLUGIN_NAME, (compilation) => {
-    //   const JavascriptModulesPlugin = compiler.webpack.javascript.JavascriptModulesPlugin
-    //   const hooks = JavascriptModulesPlugin.getCompilationHooks(compilation);
-    //   hooks.renderModuleContent.tap(
-    //     PLUGIN_NAME,
-    //     (moduleSource, module, ctx) => {
-    //       console.error({ moduleSource, module, ctx });
-    //     }
-    //   );
-    // });
   }
 }
 

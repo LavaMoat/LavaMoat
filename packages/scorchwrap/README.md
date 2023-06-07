@@ -64,7 +64,7 @@ run `npm ci`
 run `npm test` to trigger the build  
 open dist/index.html in the browser and look at the console
 
-## Testing
+## Testing TODO
 
 List of what to cover ordered by priority
 
@@ -85,6 +85,11 @@ There's two ways we could handle policy
    For now holding on to the entire policy seems like a better idea, we could compress the keys at compile time easily.
    
 Current implementation inlines the policy as-is into the bundle.
+
+### package identification
+If we run a'a' on the dependencies, we're going to need means to look them up by path. It'd be nice to collect the paths first and only create IDs based on the paths included in the bundle instead of going through entire node_modules. We could collect the IDs on an earlier phase, before generate, to create a mapping from paths to IDs only for the packages involved. 
+
+After a mapping is built, the actual values of identifiers are no longer important, for bundling policy into the runtime and wrapping packages they just need to match, so it makes sense to replace them with random values before they're rendered into the bundle.
 
 
 

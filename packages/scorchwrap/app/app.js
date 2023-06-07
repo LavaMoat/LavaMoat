@@ -11,6 +11,6 @@ function run() {
   console.log(leftpad(what, 10, "0"));
   console.log(eth, j);
   // to see it error out because a global is missing:
-  // window.location.href = "https://example.com";
+  window.location.href = "https://example.com";
 }
 run();
