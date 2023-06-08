@@ -63,7 +63,7 @@ This part can be done by a different person.
   - `$ NODE_ENV=production yarn build`
 6. `$ yarn test:prep && yarn test`
 7. `$ git push origin main`
-8. `$ git tag ${PKGDIR}-v${VERSION}
+8. `$ git tag ${PKGDIR}-v${VERSION}`
 9. `$ git push origin ${PKGDIR}-v${VERSION}`
 10. Authenticate as your user on npmjs.org:
   - `$ npm login`

@@ -9,7 +9,7 @@
     "express": "^4.17.3"
   },
   "devDependencies": {
-    "lavamoat": "^1.0.10",
+    "lavamoat": "^7.0.0",
     "patch-package": "^6.2.1",
     "postinstall-postinstall": "^2.1.0"
   },
