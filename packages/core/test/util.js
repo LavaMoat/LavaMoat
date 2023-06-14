@@ -77,7 +77,7 @@ function createScenarioFromScaffold ({
   files = [],
   builtin = {},
   context = {},
-  opts = {},
+  opts = {scuttleGlobalThis: {}},
   config,
   configOverride,
   defineEntry,
@@ -272,8 +272,7 @@ async function runScenario ({
     beforeCreateKernel = () => {}
 } = scenario
   const lavamoatConfig = mergeDeep(config, configOverride)
-  const { scuttleGlobalThis, scuttleGlobalThisExceptions } = opts
-  const kernelSrc = generateKernel({ scuttleGlobalThis, scuttleGlobalThisExceptions })
+  const kernelSrc = generateKernel(opts)
   const { hookedConsole, firstLogEventPromise } = createHookedConsole()
   Object.assign(scenario.context, { console: hookedConsole })
   const { result: createKernel, vmGlobalThis, vmContext, vmFeralFunction } = evaluateWithSourceUrl('LavaMoat/core-test/kernel', kernelSrc, scenario.context)

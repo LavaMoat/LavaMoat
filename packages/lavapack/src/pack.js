@@ -57,17 +57,17 @@ function createPacker({
   sourceRoot,
   sourceMapPrefix,
   bundleWithPrecompiledModules = true,
-  scuttleGlobalThis = false,
-  scuttleGlobalThisExceptions = [],
+  scuttleGlobalThis = {},
+  scuttleGlobalThisExceptions,
 } = {}) {
   // stream/parser wrapping incase raw: false
   const parser = raw ? through.obj() : JSONStream.parse([true])
   const stream = through.obj(
     function (buf, _, next) {
-      parser.write(buf); next() 
+      parser.write(buf); next()
     },
     function () {
-      parser.end() 
+      parser.end()
     },
   )
 
@@ -86,14 +86,24 @@ function createPacker({
   }
   assert(policy, 'must specify a policy')
 
+  if (scuttleGlobalThisExceptions) {
+    console.warn('Lavamoat - "scuttleGlobalThisExceptions" is deprecated. Use "scuttleGlobalThis.exceptions" instead.')
+    if (scuttleGlobalThis === true) {
+      scuttleGlobalThis = {enabled: true}
+    }
+  }
+  const exceptions = scuttleGlobalThis?.exceptions || scuttleGlobalThisExceptions
+  scuttleGlobalThis.exceptions = exceptions
+
   // toString regexps if there's any
-  for (let i = 0; i < scuttleGlobalThisExceptions.length; i++) {
-    scuttleGlobalThisExceptions[i] = String(scuttleGlobalThisExceptions[i])
+  if (exceptions) {
+    for (let i = 0; i < exceptions.length; i++) {
+      exceptions[i] = String(exceptions[i])
+    }
   }
 
   prelude = prelude.replace('__lavamoatSecurityOptions__', JSON.stringify({
     scuttleGlobalThis,
-    scuttleGlobalThisExceptions,
   }))
 
   // note: pack stream cant started emitting data until its received its first module
@@ -164,7 +174,7 @@ function createPacker({
       stream.push(generateBundleLoaderInitial())
     }
     entryFiles = entryFiles.filter(function (x) {
-      return x !== undefined 
+      return x !== undefined
     })
 
     // filter the policy removing packages that arent included
@@ -197,7 +207,7 @@ function createPacker({
       if (sourceMapPrefix) {
         comment = comment.replace(
           /^\/\/#/, function () {
-            return sourceMapPrefix 
+            return sourceMapPrefix
           },
         )
       }

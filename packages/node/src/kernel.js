@@ -15,10 +15,19 @@ const nativeRequire = require
 module.exports = { createKernel }
 
 function createKernel ({ projectRoot, lavamoatPolicy, canonicalNameMap, debugMode, statsMode, scuttleGlobalThis, scuttleGlobalThisExceptions }) {
+  if (scuttleGlobalThisExceptions) {
+    console.warn('Lavamoat - "scuttleGlobalThisExceptions" is deprecated. Use "scuttleGlobalThis.exceptions" instead.')
+    if (scuttleGlobalThis === true) {
+      scuttleGlobalThis = {enabled: true}
+    }
+    scuttleGlobalThis = Object.assign({}, scuttleGlobalThis)
+    scuttleGlobalThis.exceptions = scuttleGlobalThis?.exceptions || scuttleGlobalThisExceptions
+  }
+
   const { resolutions } = lavamoatPolicy
   const getRelativeModuleId = createModuleResolver({ projectRoot, resolutions, canonicalNameMap })
   const loadModuleData = createModuleLoader({ canonicalNameMap })
-  const kernelSrc = generateKernel({ debugMode, scuttleGlobalThis, scuttleGlobalThisExceptions })
+  const kernelSrc = generateKernel({ debugMode, scuttleGlobalThis })
   const createKernel = evaluateWithSourceUrl('LavaMoat/node/kernel', kernelSrc)
   const reportStatsHook = statsMode ? makeInitStatsHook({ onStatsReady }) : noop
   const kernel = createKernel({

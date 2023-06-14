@@ -19,7 +19,6 @@
     // security options are hard-coded at build time
     const {
       scuttleGlobalThis,
-      scuttleGlobalThisExceptions,
     } = __lavamoatSecurityOptions__
 
     function getGlobalRef () {
@@ -75,7 +74,6 @@
       globalRef,
       globalThisRefs,
       scuttleGlobalThis,
-      scuttleGlobalThisExceptions,
       debugMode,
       runWithPrecompiledModules,
       reportStatsHook,

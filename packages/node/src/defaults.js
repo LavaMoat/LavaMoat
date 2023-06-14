@@ -3,7 +3,7 @@ const { getDefaultPaths } = require('lavamoat-core')
 const defaultPaths = getDefaultPaths('node')
 
 module.exports = {
-  scuttleGlobalThis: false,
+  scuttleGlobalThis: {},
   scuttleGlobalThisExceptions: [],
   writeAutoPolicy: false,
   writeAutoPolicyDebug: false,

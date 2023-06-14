@@ -136,12 +136,6 @@ async function runBrowserify ({
   scenario,
   bundleWithPrecompiledModules = true,
 }) {
-  if (scenario?.opts?.scuttleGlobalThisExceptions) {
-    // toString regexps if there's any
-    for (let i = 0; i < scenario.opts.scuttleGlobalThisExceptions.length; i++) {
-      scenario.opts.scuttleGlobalThisExceptions[i] = String(scenario.opts.scuttleGlobalThisExceptions[i])
-    }
-  }
   const lavamoatParams = {
     entries: scenario.entries,
     opts: {

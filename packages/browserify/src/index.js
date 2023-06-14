@@ -153,6 +153,14 @@ function getConfigurationFromPluginOpts (pluginOpts) {
     pluginOpts.projectRoot = process.cwd()
   }
 
+  if (pluginOpts.scuttleGlobalThisExceptions) {
+    console.warn('Lavamoat - "scuttleGlobalThisExceptions" is deprecated. Use "scuttleGlobalThis.exceptions" instead.')
+    if (pluginOpts.scuttleGlobalThis === true) {
+      pluginOpts.scuttleGlobalThis = {enabled: true}
+    }
+    pluginOpts.scuttleGlobalThis.exceptions = pluginOpts.scuttleGlobalThis?.exceptions || pluginOpts.scuttleGlobalThisExceptions
+  }
+
   const configuration = {
     projectRoot: pluginOpts.projectRoot,
     includePrelude: 'includePrelude' in pluginOpts ? Boolean(pluginOpts.includePrelude) : true,
@@ -160,7 +168,6 @@ function getConfigurationFromPluginOpts (pluginOpts) {
     debugMode: Boolean(pluginOpts.debugMode),
     statsMode: Boolean(pluginOpts.statsMode),
     scuttleGlobalThis: pluginOpts.scuttleGlobalThis,
-    scuttleGlobalThisExceptions: pluginOpts.scuttleGlobalThisExceptions,
     writeAutoPolicy: Boolean(pluginOpts.writeAutoPolicy || pluginOpts.writeAutoPolicyDebug),
     writeAutoPolicyDebug: Boolean(pluginOpts.writeAutoPolicyDebug),
     bundleWithPrecompiledModules: 'bundleWithPrecompiledModules' in pluginOpts ? Boolean(pluginOpts.bundleWithPrecompiledModules) : true,

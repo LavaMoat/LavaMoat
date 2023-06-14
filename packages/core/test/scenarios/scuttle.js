@@ -18,9 +18,11 @@ module.exports = [
       defineOne: one,
       expectedResult: Math.PI,
       opts: {
-        scuttleGlobalThis: true,
-        scuttleGlobalThisExceptions: ['WebAssembly', 'process', /[0-9]+/, 'Set', 'Reflect', 'Object', 'console', 'Array', 'RegExp', 'Date', 'Math'],
-      },
+        scuttleGlobalThis: {
+          enabled: true,
+          exceptions: ['WebAssembly', 'process', '/[0-9]+/', 'Set', 'Reflect', 'Object', 'console', 'Array', 'RegExp', 'Date', 'Math'],
+        }
+      }
     })
     await autoConfigForScenario({ scenario })
     return scenario
@@ -30,8 +32,10 @@ module.exports = [
       name: 'scuttle - host env global object is too scuttled to work',
       defineOne: one,
       opts: {
-        scuttleGlobalThis: true,
-        scuttleGlobalThisExceptions: ['WebAssembly', 'process', '/[0-9]+/', /*'Set', 'Reflect', 'Object', 'console', 'Array', 'RegExp', 'Date', 'Math'*/],
+        scuttleGlobalThis: {
+          enabled: true,
+          exceptions: ['WebAssembly', 'process', '/[0-9]+/', /*'Set', 'Reflect', 'Object', 'console', 'Array', 'RegExp', 'Date', 'Math'*/],
+        }
       },
       expectedFailure: true,
       expectedFailureMessageRegex: /SES_UNHANDLED_REJECTION|inaccessible under scuttling mode./,

@@ -75,6 +75,9 @@ LavaMoat modifies the bundle's runtime to enforce the configured constraints.
 [lavamoatViz]: https://lavamoat.github.io/LavaMoat/
 The [lavamoat viz][lavamoatViz] is a tool to visualize an application's dependency graph and assess package dangerousness.
 
+### Scuttling security feature
+
+LavaMoat offers further (yet advanced) security enhancement to LavaMoat protection which is known as `scuttling` - an optional feature which is turned off by default and can enhance the security LavaMoat will apply to your application. Before using it, make sure to get yourself familiar with it and with the implications of using it by reading its [doc file][ScuttlingDoc].
 
 ## Further reading on software supplychain security
 
@@ -103,6 +106,7 @@ Runs on [Agoric](https://github.com/agoric/)
 [SesComputingGuide]: https://github.com/endojs/endo/blob/master/packages/ses/docs/secure-coding-guide.md
 
 [PolicyDoc]: ./docs/policy.md
+[ScuttlingDoc]: ./docs/scuttling.md
 [LavamoatNode]: ./packages/node
 [LavamoatBrowserify]: ./packages/browserify
 [LavamoatViz]: ./packages/viz

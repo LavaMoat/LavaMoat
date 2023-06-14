@@ -31,7 +31,6 @@ async function runLava (options) {
     policyOverridePath,
     projectRoot,
     scuttleGlobalThis,
-    scuttleGlobalThisExceptions,
     debugMode,
     statsMode,
   } = options
@@ -66,7 +65,6 @@ async function runLava (options) {
       lavamoatPolicy,
       canonicalNameMap,
       scuttleGlobalThis,
-      scuttleGlobalThisExceptions,
       debugMode,
       statsMode,
     })
