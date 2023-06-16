@@ -367,7 +367,7 @@ class ScorchWrapPlugin {
 
             const lavaMoatRuntime = assembleRuntime(RUNTIME_KEY, [
               { name: "options", data: runtimeOptions, json: true },
-              { name: "policy", data: runtimeOptions.policy, json: true },
+              { name: "policy", data: options.policy, json: true },
               { name: "ENUM", file: "./ENUM.json", json: true },
               { name: "runtime", file: "./runtime/runtime.js" },
             ]);

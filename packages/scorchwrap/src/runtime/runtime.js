@@ -1,4 +1,4 @@
-const { create, freeze, assign, defineProperty } = Object;
+const { create, freeze, assign, defineProperty, entries, fromEntries } = Object;
 
 // SES is added to the page, but not when fragments of the bundle are running during compilation.
 // Some plugins, like CSS extractors, are running code from the bundle at compile time and need not to fail here.
@@ -32,6 +32,19 @@ const enforcePolicy = (pkg, resourceId) => {
   // I could throw
 };
 const getGlobalsForPolicy = (resourceId) => {
+  if(LAVAMOAT.policy?.resources[resourceId]?.globals) {
+    return fromEntries(
+      entries(LAVAMOAT.policy.resources[resourceId].globals)
+      .filter(([key, value]) => value)
+      .map(([key, value]) => {
+        if(typeof globalThis[key] === 'function') {
+          return [key, globalThis[key].bind(globalThis)]
+        }
+        return [key, globalThis[key]]
+      })
+    )
+
+  }
   // I could return a subset of globals
   return {
     console,
