@@ -17,13 +17,13 @@ When using LavaMoat (node/lavapack/browserify), it accepts the argument `scuttle
 scuttleGlobalThis: {
   enabled: <boolean>,     // default: false
   exceptions: []<string>, // default: []
-  scuttler: <string>,     // default: ''
+  scuttlerName: <string>, // default: ''
 }
 ```
 
 * `enabled` - whether to enable scuttling security feature or not
 * `exceptions` - if `enabled:true`, provide a list of properties to avoid scuttling (which means, not to remove those from the global object)
-* `scuttler` - optionally, you can provide a string pointing to a reference on the global object, which should refer to a function with which you can hook into the scuttling process at runtime (when `scuttler` is left untouched, LavaMoat runtime won't try using an external scuttler):
+* `scuttlerName` - optionally, you can provide a string pointing to a reference on the global object, which should refer to a function with which you can hook into the scuttling process at runtime (when `scuttlerName` is left untouched, LavaMoat runtime won't try using an external scuttler):
 
 ```javascript
 Object.defineProperty(window, 'SCUTTLER', {
@@ -61,7 +61,7 @@ But because of how LavaMoat works, the two instances of the `alert` functions ar
 
 What's also special about the LavaMoat sandbox envs, is that they make sure no other APIs are accessible by the dependency other than just the APIs the dependency is allowed to consume.
 
-However, if for any reason the dependency manages to escape that sandboxed environment and find its way to the gloal object of the application, it can access all of the different APIs it has to offer, including those that it was not supposed to access originally.
+However, if for any reason the dependency manages to escape that sandboxed environment and find its way to the global object of the application, it can access all of the different APIs it has to offer, including those that it was not supposed to access originally.
 
 Lucky for us, as a security enhancement to LavaMoat, we can remove those APIs from the global object, because as mentioned above, they are different from those that are endowed to each package which means they might not be needed.
 
