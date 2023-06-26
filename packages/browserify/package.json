@@ -28,7 +28,7 @@
     "@babel/code-frame": "^7.21.4",
     "bify-package-factor": "^1.0.7",
     "browserify": "^17.0.0",
-    "keccak": "^3.0.2",
+    "keccak": "^3.0.3",
     "source-map-explorer": "^2.5.3",
     "sourcemap-validator": "^2.1.0",
     "throat": "^5.0.0",

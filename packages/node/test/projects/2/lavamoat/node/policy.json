@@ -1,9 +1,6 @@
 {
   "resources": {
     "keccak": {
-      "builtin": {
-        "stream.Transform": true
-      },
       "globals": {
         "Buffer.from": true,
         "Buffer.isBuffer": true,
@@ -11,7 +8,8 @@
       },
       "native": true,
       "packages": {
-        "keccak>node-gyp-build": true
+        "keccak>node-gyp-build": true,
+        "keccak>readable-stream": true
       }
     },
     "keccak>node-gyp-build": {
@@ -28,6 +26,45 @@
         "__non_webpack_require__": true,
         "__webpack_require__": true,
         "process": true
+      }
+    },
+    "keccak>readable-stream": {
+      "builtin": {
+        "buffer.Buffer": true,
+        "events.EventEmitter": true,
+        "stream": true,
+        "util": true
+      },
+      "globals": {
+        "process.env.READABLE_STREAM": true,
+        "process.nextTick": true,
+        "process.stderr": true,
+        "process.stdout": true
+      },
+      "packages": {
+        "keccak>readable-stream>inherits": true,
+        "keccak>readable-stream>string_decoder": true,
+        "keccak>readable-stream>util-deprecate": true
+      }
+    },
+    "keccak>readable-stream>inherits": {
+      "builtin": {
+        "util.inherits": true
+      }
+    },
+    "keccak>readable-stream>string_decoder": {
+      "packages": {
+        "keccak>readable-stream>string_decoder>safe-buffer": true
+      }
+    },
+    "keccak>readable-stream>string_decoder>safe-buffer": {
+      "builtin": {
+        "buffer": true
+      }
+    },
+    "keccak>readable-stream>util-deprecate": {
+      "builtin": {
+        "util.deprecate": true
       }
     }
   }
