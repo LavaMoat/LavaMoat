@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 
-const yargs = require('yargs')
+const yargs = require('yargs/yargs')
+const { hideBin } = require('yargs/helpers')
 const { runAllowedPackages, setDefaultConfiguration, printPackagesList } = require('./index.js')
 const { writeRcFile, editPackageJson } = require('./setup.js')
-const { FEATURE } = require('./toggles') 
+const { FEATURE } = require('./toggles')
 
 start().catch((err) => {
   console.error(err)
@@ -46,7 +47,7 @@ async function start () {
 }
 
 function parseArgs () {
-  const argsParser = yargs
+  const argsParser = yargs(hideBin(process.argv))
     .usage('Usage: $0 <command> [options]')
     .command('$0', 'run the allowed scripts')
     .command('run', 'run the allowed scripts')
@@ -60,7 +61,7 @@ function parseArgs () {
     })
     .help()
 
-  const parsedArgs = argsParser.parse()
+  const parsedArgs = argsParser.parseSync()
   parsedArgs.command = parsedArgs._[0]
 
   return parsedArgs

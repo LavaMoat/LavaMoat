@@ -114,3 +114,5 @@ temp/
 
 # JetBrains
 .idea
+
+packages/allow-scripts/types

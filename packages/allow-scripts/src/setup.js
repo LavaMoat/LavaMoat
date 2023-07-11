@@ -35,11 +35,22 @@ module.exports = {
   editPackageJson,
 }
 
+/**
+ *
+ * @param {string} filename
+ * @returns {string}
+ */
 function addInstallParentDir(filename) {
   const rootDir = process.env.INIT_CWD || process.cwd()
   return path.join(rootDir, filename)
 }
 
+/**
+ *
+ * @param {string} entry
+ * @param {string} file
+ * @returns {boolean}
+ */
 function isEntryPresent(entry, file) {
   const rcPath = addInstallParentDir(file)
   if (!existsSync(rcPath)) {
@@ -49,6 +60,10 @@ function isEntryPresent(entry, file) {
   return rcFileContents.includes(entry)
 }
 
+/**
+ *
+ * @param {WriteRcFileContentOpts} param0
+ */
 function writeRcFileContent({file, entry}) {
   const rcPath = addInstallParentDir(file)
 
@@ -60,11 +75,14 @@ function writeRcFileContent({file, entry}) {
   }
 }
 
+/**
+ * @type {boolean}
+ */
 let binsBlockedMemo
+
 /**
  *
- * @param {Object} args
- * @param {boolean} noMemoization - turn off memoization, make a fresh lookup
+ * @param {AreBinsBlockedOpts} args
  * @returns {boolean}
  */
 function areBinsBlocked({ noMemoization = false } = {}) {
@@ -156,3 +174,14 @@ function editPackageJson () {
     writeFileSync(addInstallParentDir('package.json'), JSON.stringify(packageJson, null, 2))
   }
 }
+
+/**
+ * @typedef WriteRcFileContentOpts
+ * @property {string} file
+ * @property {string} entry
+ */
+
+/**
+ * @typedef AreBinsBlockedOpts
+ * @property {boolean} [noMemoization] turn off memoization, make a fresh lookup
+ */

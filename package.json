@@ -8,6 +8,9 @@
   "devDependencies": {
     "@commitlint/cli": "^17.6.7",
     "@commitlint/config-conventional": "^17.6.7",
+    "@tsconfig/node14": "^14.1.0",
+    "@types/node": "^20.4.1",
+    "@types/yargs": "^17.0.24",
     "ava": "^5.3.1",
     "conventional-changelog-conventionalcommits": "^6.1.0",
     "cross-env": "^7.0.3",
@@ -19,6 +22,7 @@
     "eslint-plugin-react": "^7.33.0",
     "husky": "^8.0.3",
     "lerna": "^7.1.4",
+    "typescript": "^5.1.6",
     "lint-staged": "^13.2.3"
   },
   "engines": {
@@ -31,8 +35,12 @@
     "lint:eslint": "eslint .",
     "lint:fix": "eslint . --fix",
     "lint:deps": "lerna run lint:deps",
-    "build": "npm -w @lavamoat/lavapack -w @lavamoat/viz -w @lavamoat/yarn-plugin-allow-scripts run build",
+    "build": "npm -w @lavamoat/lavapack -w @lavamoat/viz -w @lavamoat/yarn-plugin-allow-scripts run build && npm run build:types",
+    "build:types": "tsc -b",
+    "clean:types": "tsc -b --clean",
+    "watch:types": "tsc -b --watch",
     "rebuild": "npm -w @lavamoat/lavapack -w @lavamoat/viz -w @lavamoat/yarn-plugin-allow-scripts run rebuild",
+    "rebuild:types": "npm run clean:types; npm run build:types",
     "lint:staged": "lint-staged",
     "lint:commit": "commitlint",
     "postinstall": "husky install",
