@@ -1,0 +1,93 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "LavaMoat Policy Schema",
+  "$id": "lavamoat-policy.v0-0-1",
+  "type": "object",
+  "description": "Schema for LavaMoat policy files",
+  "properties": {
+    "resources": {
+      "description": "Describe the resources available to your application and direct dependencies",
+      "title": "Resources",
+      "type": "object",
+      "$comment": "Keys are canonical paths to dependencies - one or more valid npm package names joined by a \">\" character. For more, see the [@lavamoat/aa](https://github.com/lavamoat/aa) package",
+      "patternProperties": {
+        "^[^>]+(>[^>]+)*$": {
+          "$ref": "#/$defs/resourcePolicy"
+        }
+      },
+      "additionalProperties": false
+    },
+    "resolutions": {
+      "type": "object",
+      "title": "Resolutions",
+      "description": "Custom run-time module resolutions by direct dependency",
+      "patternProperties": {
+        "^[^>]+(>[^>]+)*$": {
+          "type": "object",
+          "patternProperties": {
+            "^[^>]+(>[^>]+)*$": {
+              "type": "string",
+              "pattern": "^(\\.{1,2})(/(?=[^/\\0])[^/\\0]+)*/?$",
+              "minLength": 1,
+              "description": "Relative POSIX path to module from package root"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+  "anyOf": [{ "required": ["resources"] }, { "required": ["resolutions"] }],
+  "$defs": {
+    "resourcePolicy": {
+      "type": "object",
+      "title": "Resource Policy",
+      "properties": {
+        "globals": {
+          "title": "Globals",
+          "description": "Globals (including properties using dot notation) accessible to the module; `true` to allow and `false` to deny",
+          "type": "object",
+          "$comment": "A global property key can be any string (accessible via bracket notation)",
+          "additionalProperties": {
+            "enum": ["read", "write", true, false]
+          }
+        },
+        "native": {
+          "title": "Natives",
+          "description": "Native modules accessible to the module; `true` to allow and `false` to deny",
+          "type": "object",
+          "patternProperties": {
+            "^[^>]+(>[^>]+)*$": {
+              "type": "boolean"
+            }
+          },
+          "additionalProperties": false
+        },
+        "builtin": {
+          "title": "Node.js Built-in Modules",
+          "description": "Node.js built-in modules (including properties using dot notation); `true` to allow and `false` to deny",
+          "type": "object",
+          "$comment": "I don't think narrowing the possible values here is feasible (or maintainable)",
+          "additionalProperties": {
+            "type": "boolean"
+          }
+        },
+        "packages": {
+          "type": "object",
+          "title": "External Packages",
+          "description": "Additional external packages (in their entirety) accessible to the module; `true` to allow and `false` to deny",
+          "$comment": "This one or more valid npm package names delimited by a \">\" character",
+          "patternProperties": {
+            "^(@[a-z0-9-~][a-z0-9-._~]*/)?[a-z0-9-~][a-z0-9-._~]*(>(@[a-z0-9-~][a-z0-9-._~]*/)?[a-z0-9-~][a-z0-9-._~]*)*$": {
+              "type": "boolean"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}
