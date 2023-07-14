@@ -1,5 +1,7 @@
 # ScorchWrap PoC
 
+> It's like stretchwrap, but with lava
+
 ScorchWrap is a webpack plugin that wraps each module in the bundle in a container and enforces LavaMoat Policies per package.
 
 Implemented capabilities:
@@ -7,7 +9,7 @@ Implemented capabilities:
  - [x] wrapping built module sources 
  - [x] runtime to make wrapped modules work
  - [x] turn off concatenateModules and warn it's incompatible
- - [ ] inlining runtime into the bundle
+ - [x] inlining runtime into the bundle
  - [ ] using actual policies
  - [ ] researching and covering all `__webpack_require__.*` functions for security as needed 
  - [ ] paranoid mode checks
@@ -55,6 +57,29 @@ Threat model
 - Some plugins (eg. MiniCssExtractPlugin) execute code from the bundle at build time. To make the plugin work you need to trust it and the modules it runs and add the ScorchWrap.ignore loader for them.
 # Development
 
+## Control flow
+
+A diagram of the chronological relationships between various hooks would still be complex and easily outdated, so we've opted to explicitly define intermediate states and use the state machine throughout to make following what's going on easier. See `stateMachine()` in plugin.js
+
+### package identifiers
+
+We use @lavamoat/aa to identify packages for the policy. 
+As part of this plugin we'll need to identify modules in a compatible way and then work the policy into the bundle runtime.  
+At that point, when everything i bundled, there's no point in maintaining full identifiers, so they can be replaced with numbers to occupy less space.
+
+```mermaid
+flowchart TD;
+
+aa[AA identifiers in policy] --> p[policy processing]
+wp[paths of the bundle] --> waa[paths mapped to AAs]
+waa --> p
+p --> w[replace AAs with numbers from a sequence]
+w --> b[use short identifiers in the bundle and inlined policy]
+
+
+
+```
+
 ## Manual testing
 
 run `yarn` and `yarn lib:ses` in the packages/scorchwrap folder before you begin
@@ -68,7 +93,7 @@ open dist/index.html in the browser and look at the console
 
 List of what to cover ordered by priority
 
-- [ ] e2e test creating a bundle and run it in a headless browser to check for errors
+- [ ] e2e test creating a bundle and run it to check for errors
 - [ ] cover all module types
 - [ ] configure bundle splitting
 - [ ] cover all types of runtimeRequirements with examples (stuff passed to closures along with modue and exports and `__webpack_require__`, also all the methods on `__webpack_require__`)
