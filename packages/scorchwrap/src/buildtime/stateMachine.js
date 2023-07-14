@@ -4,7 +4,6 @@ const diag = require("./diagnostics");
 /**
  * Add and remove listeners like with a regular EventEmitter. Use .transition(name) to trigger a state transition
  *
- *
  * @param {object} options
  * @param {Record<string,[string,string]>} options.transitions
  * @param {string} options.start
@@ -29,7 +28,7 @@ module.exports = function stateMachine({ transitions, start }) {
       );
     }
     currentState = tr[1];
-    diag.rawDebug(0, `> state transition ${tr.join("=>")}`);
+    diag.rawDebug(1, `> state transition ${tr.join("=>")}`);
 
     emit(currentState);
   };
