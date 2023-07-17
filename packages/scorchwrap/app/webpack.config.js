@@ -4,7 +4,6 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const path = require("path");
 
-
 module.exports = {
   entry: {
     app: "./app.js",
@@ -25,8 +24,10 @@ module.exports = {
         errorTaming: "unsafe",
         mathTaming: "unsafe",
         dateTaming: "unsafe",
+        consoleTaming: "unsafe",
       },
-      policy: require('./lavamoat/policy.json'),
+      policy: require("./lavamoat/policy.json"),
+      readableResourceIds: true,
       runChecks: true,
       diagnosticsVerbosity: 2,
     }),
@@ -37,7 +38,7 @@ module.exports = {
       // experimentalUseImportModule: false, // turns off some module execution at build time
     }),
     new HtmlWebpackPlugin({
-      template: './index.html'
+      template: "./index.html",
     }),
   ],
   module: {
@@ -72,13 +73,13 @@ module.exports = {
         ],
         sideEffects: true,
       },
-      { 
-        // MiniCssExtractPlugin with their default experimentalUseImportModule 
+      {
+        // MiniCssExtractPlugin with their default experimentalUseImportModule
         // executes css-loader inside modules at runtime. Gotta avoid wrapping that.
         // With enough work, we could ship default policies for popular plugins that use this and bundle lockdown but that seems like an overkill
         test: /node_modules\/css-loader\/dist\/.*\.js$/,
-        use: [ScorchWrap.ignore]
-      }
+        use: [ScorchWrap.ignore],
+      },
     ],
   },
 };

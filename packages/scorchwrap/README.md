@@ -10,11 +10,17 @@ Implemented capabilities:
  - [x] runtime to make wrapped modules work
  - [x] turn off concatenateModules and warn it's incompatible
  - [x] inlining runtime into the bundle
- - [ ] using actual policies
+ - [x] including actual policies
+ - [ ] using policies to control module loading at runtime
+ - [ ] using policies to limit globals at runtime
  - [ ] researching and covering all `__webpack_require__.*` functions for security as needed 
+ - [ ] support dynamic imports/requires reaching beyond the bundled content
  - [ ] paranoid mode checks
  - [ ] research potential concatenateModules support
  - [ ] ecosystem compatibility quirks we're yet to find
+
+*(for more specific issues to solve see TODO comments in code)*
+
 
 
 ## Usage
@@ -42,6 +48,10 @@ module.exports = {
 ```
 
 One important thing to note when using the ScorchWrap plugin is that it disables the `concatenateModules` optimization in webpack. This is because concatenation won't work with wrapped modules.
+
+### Gotchas
+
+- Webpack will gladly add missing dependencies for node builtins like the `events` or `buffer` packages. For LavaMoat policy to handle it, the package needs to be explicitly listed in prod dependencies.
 
 # Security Claims
 
@@ -76,9 +86,16 @@ waa --> p
 p --> w[replace AAs with numbers from a sequence]
 w --> b[use short identifiers in the bundle and inlined policy]
 
-
-
 ```
+
+#### Ignored modules
+Webpack generates this:
+```
+const nodeCrypto = __webpack_require__(/*! crypto */ "?0b7d");
+```
+when a module is ignored (Node builtins are a good example of that. If you want a builtin to work, you sometimes need to supply a package for it as a dependency yourself)
+A carveout is necessary in policy enforcement for these modules. 
+Sadly, even treeshaking doesn't eliminate that module. It's left there and failing to work when reached by runtime control flow.
 
 ## Manual testing
 
