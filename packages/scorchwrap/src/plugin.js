@@ -7,6 +7,7 @@
 
 /** @typedef {object} ScorchWrapPluginOptions
  * @property {boolean} [runChecks] - check resulting code with wrapping for correctnesss
+ * @property {boolean} [readableResourceIds] - should resourceIds be readable or turned into numbers - defaults to (mode==='development')
  * @property {number} [diagnosticsVerbosity] - a number representing diagnostics output verbosity, the larger the more overwhelming
  * @property {object} policy - LavaMoat policy
  * @property {object} [lockdown] - options to pass to lockdown
@@ -21,10 +22,7 @@ const {
   // ModuleDependency,
 } = require("webpack");
 const { wrapper } = require("./buildtime/wrapper");
-const {
-  pathsToIdentifiers,
-  generateIdentifierLookup,
-} = require("./buildtime/aa");
+const { generateIdentifierLookup } = require("./buildtime/aa");
 const diag = require("./buildtime/diagnostics");
 const stateMachine = require("./buildtime/stateMachine");
 
@@ -33,6 +31,7 @@ const { ConcatSource } = require("webpack-sources");
 
 // @ts-ignore // this one doesn't have official types
 const RUNTIME_GLOBALS = require("webpack/lib/RuntimeGlobals");
+const { loadCanonicalNameMap } = require("@lavamoat/aa");
 
 // TODO: upcoming version of webpack may expose these constants
 // https://github.com/webpack/webpack/blob/07ac43333654280c5bc6014a3a69eda4c3b80273/lib/ModuleTypeConstants.js
@@ -88,10 +87,16 @@ function processRequirements(requirements, module) {
   return runtimeKit;
 }
 
+// TODO: this should probably be extracted to a separate file for easier navigation
 /**
  * @param {object} options
  */
-const wrapGeneratorMaker = ({ ignores, getIdentifierForPath, runChecks }) => {
+const wrapGeneratorMaker = ({
+  ignores,
+  getIdentifierForPath,
+  runChecks,
+  STATE,
+}) => {
   /**
    * @param {Generator} generatorInstance
    * @returns {Generator}
@@ -113,8 +118,7 @@ const wrapGeneratorMaker = ({ ignores, getIdentifierForPath, runChecks }) => {
      * @returns {Source}
      */
     generatorInstance.generate = function (module, options) {
-      console.error(">>>G");
-      diag.rawDebug(4, {
+      diag.rawDebug(5, {
         module,
         options,
       });
@@ -149,7 +153,11 @@ const wrapGeneratorMaker = ({ ignores, getIdentifierForPath, runChecks }) => {
         });
       }
 
-      const packageId = getIdentifierForPath(module.request);
+      const packageId = getIdentifierForPath(module.resource);
+      if (packageId === undefined) {
+        console.log(module) 
+        throw Error(`Failed to find a packageId for ${module.resource}`);
+      }
 
       let { before, after, source, sourceChanged } = wrapper({
         // There's probably a good reason why webpack stores source in those objects instead
@@ -160,7 +168,7 @@ const wrapGeneratorMaker = ({ ignores, getIdentifierForPath, runChecks }) => {
         id: packageId,
         runtimeKit: processRequirements(options.runtimeRequirements, module),
         runChecks,
-        evalKitFunctionName: `__webpack_require__.${RUNTIME_KEY}.E`,
+        evalKitFunctionName: `__webpack_require__.${RUNTIME_KEY}`,
       });
 
       diag.rawDebug(3, {
@@ -204,8 +212,7 @@ class VirtualRuntimeModule extends RuntimeModule {
 // to avoid confusing anyone into believing it's actually CJS.
 // Criticism will only be accepted in a form of working PR with less total lines and less magic.
 const assembleRuntime = (KEY, runtimeModules) => {
-  let assembly = `__webpack_require__.${KEY} = Object.create(null); 
-  const LAVAMOAT = __webpack_require__.${KEY};`;
+  let assembly = `const LAVAMOAT = Object.create(null);`;
   runtimeModules.map(({ file, data, name, json }) => {
     let sourceString;
     if (file) {
@@ -220,7 +227,9 @@ const assembleRuntime = (KEY, runtimeModules) => {
     assembly += `\n;/*${name}*/;\n${sourceString}`;
   });
   // use harden from SES if available
-  assembly += `;(typeof harden !== 'undefined') && harden(__webpack_require__.${KEY});`;
+  assembly += `;
+  __webpack_require__.${KEY} = LAVAMOAT.runtimeWrapper;
+  (typeof harden !== 'undefined') && harden(__webpack_require__.${KEY});`; // The harden line is likely unnecessary as the handler is being frozen anyway
   return {
     addTo({ compilation, chunk }) {
       compilation.addRuntimeModule(
@@ -263,7 +272,12 @@ class ScorchWrapPlugin {
    */
   apply(compiler) {
     const options = this.options;
+    if (typeof options.readableResourceIds === "undefined") {
+      // default options.readableResourceIds to true if webpack configuration sets development mode
+      options.readableResourceIds = compiler.options.mode !== "production";
+    }
     const STATE = this.STATE;
+    let canonicalNameMap;
 
     // Concatenation won't work with wrapped modules. Have to disable it.
     compiler.options.optimization.concatenateModules = false;
@@ -276,6 +290,18 @@ class ScorchWrapPlugin {
     // compiler.options.optimization.sideEffects = false;
     // compiler.options.optimization.moduleIds = "hashed";
     // compiler.options.optimization.chunkIds = "named";
+
+    // =================================================================
+    // run long asynchronous processing ahead of time
+    compiler.hooks.beforeRun.tapAsync(
+      "PLUGIN_NAME",
+      async (compilation, callback) => {
+        canonicalNameMap = await loadCanonicalNameMap({
+          rootDir: compiler.context,
+        });
+        callback();
+      }
+    );
 
     let mainCompilationWarnings;
 
@@ -298,6 +324,7 @@ class ScorchWrapPlugin {
 
         const ignores = [];
         const knownPaths = [];
+        const unenforceableModuleIds = [];
         // let pathToIdentifierLookup = {};
         let identifierLookup;
         const runChecks = this.options.runChecks || diag.level > 0;
@@ -305,17 +332,23 @@ class ScorchWrapPlugin {
         // Caveat: this might be called before the lookup map is ready if a plugin is running a child compilation or alike.
         // Note that in those cases wrapped code is not meant to run and policy will be empty.
         const getIdentifierForPath = (p) => {
-          const withoutLoaders = p.replace(/[?!].*$/, "");
-          return identifierLookup.pathToModuleId(withoutLoaders) || "none";
-        }
+          return identifierLookup.pathToResourceId(p);
+        };
 
         // trigger for paths processing - after they've been collected
         STATE.on("pathsCollected", () => {
-          identifierLookup = generateIdentifierLookup(
-            knownPaths,
-            options.policy
+          identifierLookup = generateIdentifierLookup({
+            readableResourceIds: options.readableResourceIds,
+            unenforceableModuleIds,
+            paths: knownPaths,
+            policy: options.policy,
+            canonicalNameMap,
+          });
+          mainCompilationWarnings.push(
+            new WebpackError(
+              `ScorchWrapPlugin: the following module ids can't be controlled by policy and must be ignored at runtime: \n  ${unenforceableModuleIds.join()}`
+            )
           );
-          // pathToIdentifierLookup = pathsToIdentifiers(knownPaths);
           STATE.transition("pathProcessingDone");
         });
 
@@ -325,20 +358,46 @@ class ScorchWrapPlugin {
           JAVASCRIPT_MODULE_TYPE_ESM,
         ];
 
-        // collect all paths resolved for the bundle
-        normalModuleFactory.hooks.afterResolve.tap(
-          PLUGIN_NAME,
-          (resolveData) => {
-            // TODO - typescript claims createData could be undefined. Do we care for those cases?
-            // Leaving it in a state where we'll get an error first time it happens.
-            if (coveredTypes.includes(resolveData.createData.type)) {
-              knownPaths.push(resolveData.createData.resourceResolveData.path);
-            }
-          }
-        );
-        compilation.hooks.finishModules.tap(PLUGIN_NAME, () => {
+        // Old: good for collecting all possible paths, but bad for matching them with module ids
+        // collect all paths resolved for the bundle and transition afterwards
+        // normalModuleFactory.hooks.afterResolve.tap(
+        //   PLUGIN_NAME,
+        //   (resolveData) => {
+        //     // TODO - typescript claims createData could be undefined. Do we care for those cases?
+        //     // Leaving it in a state where we'll get an error first time it happens.
+        //     if (coveredTypes.includes(resolveData.createData.type)) {
+        //       knownPaths.push([resolveData.createData.resourceResolveData.path, /*resolveData.createData.moduleId*/]);
+        //     }
+        //   }
+        // );
+        // compilation.hooks.finishModules.tap(PLUGIN_NAME, () => {
+        //   STATE.transition("finishCollectingPaths");
+        // });
+        compilation.hooks.afterOptimizeChunkIds.tap("MyPlugin", (chunks) => {
+          const chunkGraph = compilation.chunkGraph;
+
+          chunks.forEach((chunk) => {
+            chunkGraph.getChunkModules(chunk).forEach((module) => {
+              const moduleId = chunkGraph.getModuleId(module);
+              if (
+                module.type === JAVASCRIPT_MODULE_TYPE_DYNAMIC &&
+                module.identifierStr &&
+                module.identifierStr.startsWith("ignored")
+              ) {
+                unenforceableModuleIds.push(moduleId);
+              } else {
+                knownPaths.push({ path: module.resource, moduleId }); // typescript is complaining about the use of `resource` here, but it's actually there.
+              }
+            });
+          });
+          diag.rawDebug(4, { knownPaths });
           STATE.transition("finishCollectingPaths");
         });
+        // lists modules, but reaching for id can give a deprecation warning.
+        // compilation.hooks.afterOptimizeModuleIds.tap(PLUGIN_NAME, (modules) => {
+        //   console.log('________________________________',modules.__proto__.constructor)
+        //   Array.from(modules).map(module => console.log(module.resource, module.id))
+        // });
 
         // Hook into all types of JavaScript NormalModules
         for (const moduleType of coveredTypes) {
@@ -348,6 +407,7 @@ class ScorchWrapPlugin {
               ignores,
               runChecks,
               getIdentifierForPath,
+              STATE,
             })
           );
         }
@@ -355,6 +415,7 @@ class ScorchWrapPlugin {
         // Report on ignored modules as late as possible.
         // This hook happens after all module generators have been executed.
         compilation.hooks.afterProcessAssets.tap(PLUGIN_NAME, () => {
+          diag.rawDebug(3, "> afterProcessAssets");
           mainCompilationWarnings.push(
             new WebpackError(
               `in ScorchWrapPlugin: ignored modules \n  ${ignores.join("\n  ")}`
@@ -376,12 +437,13 @@ class ScorchWrapPlugin {
         compilation.hooks.additionalChunkRuntimeRequirements.tap(
           PLUGIN_NAME + "_runtime",
           (chunk, set) => {
+            diag.rawDebug(3, "> additionalChunkRuntimeRequirements");
             console.error("\n\n>>>R");
             let policyData;
             if (STATE.getState() !== "pathsProcessed") {
               mainCompilationWarnings.push(
                 new WebpackError(
-                  "ScorchWrapPlugin: generating runtime before all modules resolved. This might be part of a sub-compilation of a plugin."
+                  "ScorchWrapPlugin: generating runtime before all modules resolved. This might be part of a sub-compilation of a plugin. Please check for any unwanted interference between plugins."
                 )
               );
               policyData = {};
@@ -391,6 +453,21 @@ class ScorchWrapPlugin {
             }
 
             const lavaMoatRuntime = assembleRuntime(RUNTIME_KEY, [
+              {
+                name: "root",
+                data: identifierLookup?.root,
+                json: true,
+              },
+              {
+                name: "idmap",
+                data: identifierLookup?.identifiersForModuleIds,
+                json: true,
+              },
+              {
+                name: "unenforceable",
+                data: identifierLookup?.unenforceableModuleIds,
+                json: true,
+              },
               { name: "options", data: runtimeOptions, json: true },
               { name: "policy", data: policyData, json: true },
               { name: "ENUM", file: "./ENUM.json", json: true },
@@ -399,7 +476,7 @@ class ScorchWrapPlugin {
 
             // If the chunk has already been processed, skip it.
             if (onceForChunkSet.has(chunk)) return;
-            set.add(RuntimeGlobals.onChunksLoaded); // TODO: develop an understanding of what this line does xD
+            // set.add(RuntimeGlobals.onChunksLoaded); // TODO: develop an understanding of what this line does and why it was a part of the runtime setup for module federation
 
             // Mark the chunk as processed by adding it to the WeakSet.
             onceForChunkSet.add(chunk);

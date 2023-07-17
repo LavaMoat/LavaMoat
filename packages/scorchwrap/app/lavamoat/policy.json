@@ -1,10 +1,20 @@
 {
   "resources": {
+    "leftpad": {},
+    "buffer>ieee754": {},
+    "@ethereumjs/util>@chainsafe/ssz>case": {},
+    "events": {},
+
+    "buffer": {
+      "packages":{
+        "buffer>base64-js": true,
+        "buffer>ieee754": true
+      }
+    },
+    "buffer>base64-js": {},
+    "@ethereumjs/util>ethereum-cryptography>@noble/hashes": {},
+    "@ethereumjs/util>ethereum-cryptography>@noble/secp256k1": {},
     "@ethereumjs/util": {
-      "builtin": {
-        "buffer.Buffer.from": true,
-        "events.EventEmitter": true
-      },
       "globals": {
         "Buffer.alloc": true,
         "Buffer.allocUnsafe": true,
@@ -15,6 +25,9 @@
         "console.warn": true
       },
       "packages": {
+        "buffer": true,
+        "buffer>base64-js": true,
+        "events": true,
         "@ethereumjs/util>@chainsafe/ssz": true,
         "@ethereumjs/util>@ethereumjs/rlp": true,
         "@ethereumjs/util>ethereum-cryptography": true
@@ -60,7 +73,7 @@
       }
     },
     "@ethereumjs/util>ethereum-cryptography>@noble/hashes": {
-      "builtin": {
+      "packages": {
         "crypto": true
       },
       "globals": {
@@ -68,7 +81,7 @@
       }
     },
     "@ethereumjs/util>ethereum-cryptography>@noble/secp256k1": {
-      "builtin": {
+      "packages": {
         "crypto": true
       },
       "globals": {
