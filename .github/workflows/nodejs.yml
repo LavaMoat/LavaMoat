@@ -11,6 +11,8 @@ jobs:
     strategy:
       matrix:
         node-version: [14.x, 16.x, 18.x]
+    env:
+      FORCE_COLOR: 1
     steps:
       - name: Checkout
         uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3
@@ -19,7 +21,7 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: "npm"
-      - name: Upgrade npm
+      - name: Upgrade npm # for workspace support
         run: npm i -g npm
       - name: Install Dependencies
         uses: bahmutov/npm-install@1a235c31658a322a3b024444759650ee6345c26d # tag=v1
