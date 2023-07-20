@@ -22,7 +22,8 @@
   },
   "scripts": {
     "build": "builder build plugin",
-    "rebuild": "npm run build"
+    "rebuild": "npm run build",
+    "lint": "exit 0"
   },
   "packageManager": "yarn@3.1.1",
   "engines": {
