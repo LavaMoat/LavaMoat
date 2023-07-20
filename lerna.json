@@ -1,5 +1,18 @@
 {
+  "$schema": "https://json.schemastore.org/lerna",
+  "changelogPreset": "conventional-changelog-conventionalcommits",
+  "command": {
+    "publish": {
+      "message": "chore: publish"
+    },
+    "version": {
+      "allowBranch": "main",
+      "conventionalCommits": true,
+      "createRelease": "github"
+    }
+  },
+  "ignoreChanges": ["**/test/**", "**/*.md"],
   "npmClient": "npm",
-  "useWorkspaces": true,
+  "useNx": false,
   "version": "independent"
 }
