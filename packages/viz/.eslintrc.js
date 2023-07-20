@@ -28,4 +28,9 @@ module.exports = {
     'import/unambiguous': 0,
     'react/prop-types': 0
   },
+  settings: {
+    react: {
+      version: 'detect'
+    }
+  }
 }
