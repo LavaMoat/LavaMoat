@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\"",
+    "test": "exit 0",
     "preinstall": "echo \"Don't run npm lifecycle scripts by default! Create a .yarnrc or .npmrc and set enableScripts: false. Then, whitelist them with @lavamoat/allow-scripts\" && exit 1"
   },
   "repository": {

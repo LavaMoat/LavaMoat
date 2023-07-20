@@ -8,10 +8,10 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "test": "yarn test:prep && yarn test:run",
-    "test:prep": "for d in ./test/projects/*/ ; do (cd \"$d\" && NODE_ENV=development yarn setup && ../../../src/cli.js -a index.js); done",
+    "test": "npm run test:prep && npm run test:run",
+    "test:prep": "for d in ./test/projects/*/ ; do (cd \"$d\" && NODE_ENV=development npm run setup && ../../../src/cli.js -a index.js); done",
     "test:run": "ava --timeout=30s test/index.js",
-    "lint": "yarn lint:eslint && yarn lint:deps",
+    "lint": "npm run lint:eslint && npm run lint:deps",
     "lint:eslint": "eslint .",
     "lint:fix": "eslint . --fix",
     "lint:deps": "depcheck"
