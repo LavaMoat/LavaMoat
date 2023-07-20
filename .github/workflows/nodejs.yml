@@ -1,6 +1,9 @@
 name: CI
 on: [push, pull_request]
 
+permissions:
+  contents: read
+
 jobs:
   test:
     name: test
@@ -10,14 +13,20 @@ jobs:
         node-version: [14.x, 16.x, 18.x]
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c # v3
         with:
           node-version: ${{ matrix.node-version }}
+          cache: "npm"
+      - name: Upgrade npm
+        run: npm i -g npm
       - name: Install Dependencies
-        run: yarn --frozen-lockfile --ignore-scripts
+        uses: bahmutov/npm-install@1a235c31658a322a3b024444759650ee6345c26d # tag=v1
+        with:
+          useRollingCache: true
+          install-command: npm ci --foreground-scripts
       - name: Lint
-        run: yarn lint
+        run: npm run lint
       - name: Test
-        run: yarn test
+        run: npm test
