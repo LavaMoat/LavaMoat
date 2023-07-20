@@ -8,11 +8,12 @@
   "devDependencies": {
     "@metamask/eslint-config-nodejs": "^11.0.1",
     "ava": "^5.2.0",
+    "conventional-changelog-conventionalcommits": "^6.1.0",
     "depcheck": "^1.4.0",
     "eslint": "^8.40.0",
     "eslint-plugin-ava": "^13.2.0",
     "eslint-plugin-node": "^11.1.0",
-    "lerna": "^6.6.2"
+    "lerna": "^7.1.4"
   },
   "engines": {
     "node": ">=14.0.0"
@@ -25,7 +26,7 @@
     "preversion": "npm run rebuild",
     "build": "npm -w @lavamoat/lavapack -w @lavamoat/viz -w @lavamoat/yarn-plugin-allow-scripts run build",
     "rebuild": "npm -w @lavamoat/lavapack -w @lavamoat/viz -w @lavamoat/yarn-plugin-allow-scripts run rebuild",
-    "publish": "lerna publish from-package --no-push --no-git-tag-version --yes",
+    "publish": "lerna publish",
     "setup": "allow-scripts"
   },
   "workspaces": [
