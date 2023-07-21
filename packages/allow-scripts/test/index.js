@@ -1,32 +1,36 @@
 const test = require('ava')
-const fs = require('fs')
-const path = require('path')
-const { spawnSync } = require('child_process')
+const fs = require('node:fs')
+const path = require('node:path')
+const { spawnSync } = require('node:child_process')
+
+/**
+ * Path to the allow-scripts executable
+ */
+const ALLOW_SCRIPTS_BIN = require.resolve('../src/cli')
+
+/**
+ * For fat fingers
+ */
+const PACKAGE_JSON = 'package.json'
 
 test('cli - auto command', (t) => {
   // set up the directories
-  let allowScriptsSrcRoot = path.join(__dirname, '..', 'src')
   let projectRoot = path.join(__dirname, 'projects', '1')
 
   // delete any existing package.json
-  fs.unlink(path.join(projectRoot, 'package.json'), err => {
-    if (err && err.code !== 'ENOENT') {
-      throw err
-    }
-  })
+  fs.rmSync(path.join(projectRoot, PACKAGE_JSON), { force: true });
 
   // npm init -y
   spawnSync('npm', ['init', '-y'], realisticEnvOptions(projectRoot))
 
   // run the auto command
-  let cmd = path.join(allowScriptsSrcRoot, 'cli.js')
-  let result = spawnSync(cmd, ['auto'], realisticEnvOptions(projectRoot))
+  let result = spawnSync(ALLOW_SCRIPTS_BIN, ['auto'], realisticEnvOptions(projectRoot))
 
   // forward error output for debugging
   console.error(result.stderr.toString('utf-8'))
 
   // get the package.json
-  const packageJsonContents = JSON.parse(fs.readFileSync(path.join(projectRoot, 'package.json'), 'utf8'))
+  const packageJsonContents = JSON.parse(fs.readFileSync(path.join(projectRoot, PACKAGE_JSON), 'utf8'))
 
   // assert its contents
   t.deepEqual(packageJsonContents.lavamoat, {
@@ -35,30 +39,24 @@ test('cli - auto command', (t) => {
     }
   })
 })
+
 test('cli - auto command with experimental bins', (t) => {
   // set up the directories
-  let allowScriptsSrcRoot = path.join(__dirname, '..', 'src')
   let projectRoot = path.join(__dirname, 'projects', '1')
 
-  // delete any existing package.json
-  fs.unlink(path.join(projectRoot, 'package.json'), err => {
-    if (err && err.code !== 'ENOENT') {
-      throw err
-    }
-  })
+  fs.rmSync(path.join(projectRoot, PACKAGE_JSON), { force: true });
 
   // npm init -y
   spawnSync('npm', ['init', '-y'], realisticEnvOptions(projectRoot))
 
   // run the auto command
-  let cmd = path.join(allowScriptsSrcRoot, 'cli.js')
-  let result = spawnSync(cmd, ['auto', '--experimental-bins'], realisticEnvOptions(projectRoot))
+  let result = spawnSync(ALLOW_SCRIPTS_BIN, ['auto', '--experimental-bins'], realisticEnvOptions(projectRoot))
 
   // forward error output for debugging
   console.error(result.stderr.toString('utf-8'))
 
   // get the package.json
-  const packageJsonContents = JSON.parse(fs.readFileSync(path.join(projectRoot, 'package.json'), 'utf8'))
+  const packageJsonContents = JSON.parse(fs.readFileSync(path.join(projectRoot, PACKAGE_JSON), 'utf8'))
 
   // assert its contents
   t.deepEqual(packageJsonContents.lavamoat, {
@@ -74,19 +72,17 @@ test('cli - auto command with experimental bins', (t) => {
 
 test('cli - run command - good dep at the root', (t) => {
   // set up the directories
-  let allowScriptsSrcRoot = path.join(__dirname, '..', 'src')
   let projectRoot = path.join(__dirname, 'projects', '2')
 
   // clean up from a previous run
   // the force option is only here to stop rm complaining if target is missing
-  fs.rmSync(path.join(projectRoot, './node_modules/.bin'), {
+  fs.rmSync(path.join(projectRoot, 'node_modules', '.bin'), {
     recursive: true,
     force: true
   })
 
   // run the "run" command
-  let cmd = path.join(allowScriptsSrcRoot, 'cli.js')
-  let result = spawnSync(cmd, ['run'], realisticEnvOptions(projectRoot))
+  let result = spawnSync(ALLOW_SCRIPTS_BIN, ['run'], realisticEnvOptions(projectRoot))
 
   // forward error output for debugging
   console.error(result.stderr.toString('utf-8'))
@@ -109,19 +105,17 @@ test('cli - run command - good dep at the root', (t) => {
 })
 test('cli - run command - good dep at the root with experimental bins', (t) => {
   // set up the directories
-  let allowScriptsSrcRoot = path.join(__dirname, '..', 'src')
   let projectRoot = path.join(__dirname, 'projects', '2')
 
   // clean up from a previous run
   // the force option is only here to stop rm complaining if target is missing
-  fs.rmSync(path.join(projectRoot, './node_modules/.bin'), {
+  fs.rmSync(path.join(projectRoot, 'node_modules', '.bin'), {
     recursive: true,
     force: true
   })
 
   // run the "run" command
-  let cmd = path.join(allowScriptsSrcRoot, 'cli.js')
-  let result = spawnSync(cmd, ['run', '--experimental-bins'], realisticEnvOptions(projectRoot))
+  let result = spawnSync(ALLOW_SCRIPTS_BIN, ['run', '--experimental-bins'], realisticEnvOptions(projectRoot))
 
   // forward error output for debugging
   console.error(result.stderr.toString('utf-8'))
@@ -138,7 +132,7 @@ test('cli - run command - good dep at the root with experimental bins', (t) => {
     '',
   ])
 
-  t.assert(fs.existsSync(path.join(projectRoot, './node_modules/.bin/good')), 'Expected a bin script to be installed in top level node_modules')
+  t.assert(fs.existsSync(path.join(projectRoot, 'node_modules', '.bin', 'good')), 'Expected a bin script to be installed in top level node_modules')
 
   // note
   // we could also test whether the preinstall script is
@@ -150,22 +144,25 @@ test('cli - run command - good dep at the root with experimental bins', (t) => {
 
 test('cli - run command - good dep as a sub dep', (t) => {
   // set up the directories
-  let allowScriptsSrcRoot = path.join(__dirname, '..', 'src')
   let projectRoot = path.join(__dirname, 'projects', '3')
+
+  // clean up from a previous run
+  // the force option is only here to stop rm complaining if target is missing
+  fs.rmSync(path.join(projectRoot, 'node_modules', 'bbb', '.goodscriptworked'), { force: true })
+  fs.rmSync(path.join(projectRoot, 'node_modules', '.bin'), {
+    recursive: true,
+    force: true
+  })
 
   // generate the bin link
   spawnSync('npm', ['rebuild', 'good_dep'], realisticEnvOptions(projectRoot))
 
-  // clean up from a previous run
-  // the force option is only here to stop rm complaining if target is missing
-  fs.rmSync(path.join(projectRoot, './node_modules/bbb/.goodscriptworked'), { force: true })
   // run the "run" command
-  let cmd = path.join(allowScriptsSrcRoot, 'cli.js')
-  let result = spawnSync(cmd, ['run'], realisticEnvOptions(projectRoot))
+  let result = spawnSync(ALLOW_SCRIPTS_BIN, ['run'], realisticEnvOptions(projectRoot))
 
   // uncomment to forward error output for debugging
-  // console.error(result.stdout.toString('utf-8'))
-  // console.error(result.stderr.toString('utf-8'))
+  console.error(result.stdout.toString('utf-8'))
+  console.error(result.stderr.toString('utf-8'))
 
   // assert the output
   t.deepEqual(result.stdout.toString().split('\n'), [
@@ -182,26 +179,23 @@ test('cli - run command - good dep as a sub dep', (t) => {
 
 test('cli - run command - good dep as a sub dep with experimental bins', (t) => {
   // set up the directories
-  let allowScriptsSrcRoot = path.join(__dirname, '..', 'src')
   let projectRoot = path.join(__dirname, 'projects', '3')
 
   // clean up from a previous run
   // the force option is only here to stop rm complaining if target is missing
-  fs.rmSync(path.join(projectRoot, './node_modules/bbb/.goodscriptworked'), { force: true })
-  fs.rmSync(path.join(projectRoot, './node_modules/bbb/node_modules/.bin'), {
+  fs.rmSync(path.join(projectRoot, 'node_modules', 'bbb', '.goodscriptworked'), { force: true })
+  fs.rmSync(path.join(projectRoot, 'node_modules', '.bin'), {
     recursive: true,
     force: true
   })
   // run the "run" command
-  let cmd = path.join(allowScriptsSrcRoot, 'cli.js')
-  let result = spawnSync(cmd, ['run', '--experimental-bins'], realisticEnvOptions(projectRoot))
+  let result = spawnSync(ALLOW_SCRIPTS_BIN, ['run', '--experimental-bins'], realisticEnvOptions(projectRoot))
 
   // uncomment to forward error output for debugging
   // console.error(result.stdout.toString('utf-8'))
   // console.error(result.stderr.toString('utf-8'))
 
-  
-  t.assert(fs.existsSync(path.join(projectRoot, './node_modules/bbb/node_modules/.bin/good')), 'Expected a nested bin script to be installed in bbb/node_modules/.bin')
+  t.assert(fs.existsSync(path.join(projectRoot, 'node_modules', 'bbb', 'node_modules', '.bin', 'good')), 'Expected a nested bin script to be installed in bbb/node_modules/.bin')
   const errarr = result.stderr.toString().split('\n')
   t.assert(errarr.every(line=>!line.includes('you shall not pass')), 'Should not have run the parent script from the nested package postinstall')
   t.assert(errarr.some(line=>line.includes(`"good": "node_modules/`)), 'Expected to see instructions on how to enable a bin script1')
@@ -221,6 +215,10 @@ test('cli - run command - good dep as a sub dep with experimental bins', (t) => 
 
 })
 
+/**
+ * @param {string} projectRoot
+ * @returns {import('node:child_process').SpawnSyncOptions}
+ */
 function realisticEnvOptions(projectRoot) {
   return { cwd: projectRoot, env: { ...process.env, INIT_CWD: projectRoot } }
 }

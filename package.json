@@ -19,7 +19,7 @@
   },
   "scripts": {
     "test": "npm --workspaces test",
-    "test:prep": "npm --workspaces run test:prep",
+    "test:prep": "lerna run test:prep",
     "lint": "npm --workspaces run lint",
     "lint:fix": "npm --workspaces run lint:fix",
     "preversion": "npm run rebuild",
