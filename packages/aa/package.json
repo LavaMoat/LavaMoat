@@ -12,16 +12,7 @@
   "scripts": {
     "test": "npm run test:run",
     "test:run": "ava --timeout=30s test/index.js",
-    "lint": "npm run lint:eslint && npm run lint:deps",
-    "lint:eslint": "eslint .",
-    "lint:fix": "eslint . --fix",
     "lint:deps": "depcheck"
-  },
-  "devDependencies": {
-    "@metamask/eslint-config-nodejs": "^11.0.1",
-    "ava": "^5.2.0",
-    "eslint-plugin-ava": "^13.2.0",
-    "eslint-plugin-node": "^11.0.1"
   },
   "dependencies": {
     "resolve": "^1.22.3"

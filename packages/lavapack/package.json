@@ -20,18 +20,11 @@
     "umd": "^3.0.3"
   },
   "devDependencies": {
-    "@metamask/eslint-config-nodejs": "^11.0.1",
-    "ava": "^5.2.0",
-    "eslint-plugin-ava": "^13.2.0",
-    "eslint-plugin-node": "^11.1.0",
     "espree": "^9.5.2",
     "mississippi": "^4.0.0",
     "source-map": "^0.7.4"
   },
   "scripts": {
-    "lint": "npm run lint:eslint && npm run lint:deps",
-    "lint:eslint": "eslint .",
-    "lint:fix": "eslint . --fix",
     "lint:deps": "depcheck",
     "test": "npm run test:ava && npm run test:ecma",
     "test:ava": "ava --timeout=30s test/index.js",

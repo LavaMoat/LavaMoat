@@ -8,13 +8,10 @@
   "main": "src/index.js",
   "license": "MIT",
   "scripts": {
-    "test": "npm run test:prep && npm run test:run",
-    "test:prep": "for d in ./test/projects/*/ ; do (cd \"$d\" && NODE_ENV=development npm run setup && ../../../src/cli.js -a index.js); done",
-    "test:run": "ava --timeout=30s test/index.js",
-    "lint": "npm run lint:eslint && npm run lint:deps",
-    "lint:eslint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "lint:deps": "depcheck"
+    "lint:deps": "depcheck",
+    "test": "npm run test:prep && npm run test:ava",
+    "test:prep": "for d in ./test/projects/*/ ; do (cd \"$d\" && NODE_ENV=development yarn setup && ../../../src/cli.js -a index.js); done",
+    "test:ava": "ava --timeout=30s test/index.js"
   },
   "dependencies": {
     "@babel/code-frame": "^7.21.4",
@@ -28,11 +25,6 @@
     "node-gyp-build": "^4.6.0",
     "resolve": "^1.22.3",
     "yargs": "^17.7.2"
-  },
-  "devDependencies": {
-    "@metamask/eslint-config-nodejs": "^11.0.1",
-    "eslint-plugin-ava": "^13.2.0",
-    "eslint-plugin-node": "^11.1.0"
   },
   "directories": {
     "example": "examples",

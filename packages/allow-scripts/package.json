@@ -29,20 +29,12 @@
   "directories": {
     "test": "test"
   },
-  "devDependencies": {
-    "@metamask/eslint-config-nodejs": "^11.0.1",
-    "ava": "^5.2.0",
-    "eslint-plugin-ava": "^13.2.0",
-    "eslint-plugin-node": "^11.1.0"
-  },
   "scripts": {
-    "test": "npm run test:run",
-    "test:run": "ava --timeout=30s test/index.js",
-    "test:prep": "for d in ./test/projects/*/ ; do (cd \"$d\" && ../../../src/cli.js auto --experimental-bins); done",
     "lint": "npm run lint:eslint && npm run lint:deps",
-    "lint:eslint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "lint:deps": "depcheck"
+    "lint:deps": "depcheck",
+    "test": "npm run test:prep && npm run test:run",
+    "test:run": "ava --timeout=30s test/index.js",
+    "test:prep": "for d in ./test/projects/*/ ; do (cd \"$d\" && ../../../src/cli.js auto --experimental-bins); done"
   },
   "author": "",
   "homepage": "https://github.com/LavaMoat/LavaMoat/tree/main/packages/allow-scripts",

@@ -8,17 +8,11 @@
     "@babel/traverse": "^7.21.5"
   },
   "devDependencies": {
-    "@metamask/eslint-config-nodejs": "^11.0.1",
-    "deep-equal": "^2.2.1",
-    "eslint-plugin-ava": "^13.2.0",
-    "eslint-plugin-node": "^11.1.0"
+    "deep-equal": "^2.2.1"
   },
   "scripts": {
-    "test": "ava --timeout=30s test/index.js",
-    "lint": "npm run lint:eslint && npm run lint:deps",
-    "lint:eslint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "lint:deps": "depcheck"
+    "lint:deps": "depcheck",
+    "test": "ava --timeout=30s test/index.js"
   },
   "description": "This is the TOFU (trust-on-first-use) static analysis tool used by LavaMoat to automatically generate useable config",
   "directories": {

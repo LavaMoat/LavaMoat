@@ -26,12 +26,8 @@
   },
   "devDependencies": {
     "@babel/code-frame": "^7.21.4",
-    "@metamask/eslint-config-nodejs": "^11.0.1",
     "bify-package-factor": "^1.0.7",
     "browserify": "^17.0.0",
-    "depcheck": "^1.4.0",
-    "eslint-plugin-ava": "^13.2.0",
-    "eslint-plugin-node": "^11.1.0",
     "keccak": "^3.0.2",
     "source-map-explorer": "^2.5.3",
     "sourcemap-validator": "^2.1.0",
@@ -41,12 +37,11 @@
     "watchify": "^4.0.0"
   },
   "scripts": {
-    "test": "ava --timeout 2m --concurrency 1",
-    "test:prep": "WRITE_AUTO_POLICY=1 ./test/fixtures/secureBundling/run.sh",
-    "lint": "npm run lint:eslint && npm run lint:deps",
-    "lint:eslint": "eslint .",
-    "lint:fix": "eslint . --fix",
     "lint:deps": "depcheck",
+    "test": "npm run test:prep && npm run test:ava",
+    "test:prep": "WRITE_AUTO_POLICY=1 ./test/fixtures/secureBundling/run.sh",
+
+    "test:ava": "ava --timeout 2m --concurrency 1",
     "build:ses": "(cd ./node_modules/ses && npm install && npm run build && cp ./dist/ses.umd.js ../../lib/)"
   },
   "author": "kumavis",
