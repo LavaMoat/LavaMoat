@@ -12,7 +12,6 @@
     "run:bify-simple": "(cd trials/bify-simple && npm install && npm start)",
     "run:pull-stream": "(cd trials/pull-stream && npm install && npm start)",
     "run:terser": "(cd trials/terser && npm install && npm start)",
-    "lint": "exit 0",
     "test": "exit 0"
   },
   "repository": {
