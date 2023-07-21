@@ -9,7 +9,7 @@
     "lavamoat": "^7.0.0"
   },
   "scripts": {
-    "setup": "yarn install",
+    "setup": "npm install",
     "start": "echo 'unsafe: yarn start:node\nsafer: yarn start:lavamoat'",
     "start:lavamoat": "lavamoat index.js --writeAutoConfig && lavamoat index.js",
     "start:node": "node index.js"
