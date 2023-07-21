@@ -1,3 +1,7 @@
 ignores:
   # monorepo deps
   - 'ava'
+  - "@types/npmcli__promise-spawn"
+
+  # only types (from @types/npmcli__promise-spawn) are referenced
+  - "@npmcli/promise-spawn"

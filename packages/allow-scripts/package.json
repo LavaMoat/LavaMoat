@@ -15,7 +15,7 @@
     "@npmcli/run-script": "^6.0.0",
     "bin-links": "4.0.1",
     "npm-normalize-package-bin": "^3.0.0",
-    "yargs": "^16.2.0"
+    "yargs": "^17.7.2"
   },
   "repository": {
     "type": "git",
@@ -28,6 +28,9 @@
   "description": "A tool for running only the dependency lifecycle hooks specified in an allowlist.",
   "directories": {
     "test": "test"
+  },
+  "devDependencies": {
+    "@types/npmcli__promise-spawn": "^6.0.0"
   },
   "scripts": {
     "test": "npm run test:run",
@@ -45,5 +48,6 @@
       "test/*.spec.js"
     ],
     "timeout": "30s"
-  }
+  },
+  "types": "./types/index.d.ts"
 }

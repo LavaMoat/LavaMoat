@@ -1,8 +1,7 @@
-const {
-  existsSync,
-  appendFileSync,
-  readFileSync,
-  writeFileSync,
+const { existsSync,
+        appendFileSync,
+        readFileSync,
+        writeFileSync,
 } = require('fs')
 const { spawnSync } = require('child_process')
 const path = require('path')
@@ -29,17 +28,29 @@ const YARN3 = {
   },
 }
 
+
 module.exports = {
   writeRcFile,
   areBinsBlocked,
   editPackageJson,
 }
 
+/**
+ *
+ * @param {string} filename
+ * @returns {string}
+ */
 function addInstallParentDir(filename) {
   const rootDir = process.env.INIT_CWD || process.cwd()
   return path.join(rootDir, filename)
 }
 
+/**
+ *
+ * @param {string} entry
+ * @param {string} file
+ * @returns {boolean}
+ */
 function isEntryPresent(entry, file) {
   const rcPath = addInstallParentDir(file)
   if (!existsSync(rcPath)) {
@@ -49,37 +60,40 @@ function isEntryPresent(entry, file) {
   return rcFileContents.includes(entry)
 }
 
-function writeRcFileContent({ file, entry }) {
+/**
+ *
+ * @param {WriteRcFileContentOpts} param0
+ */
+function writeRcFileContent({file, entry}) {
   const rcPath = addInstallParentDir(file)
 
   if (isEntryPresent(entry, file)) {
-    console.log(
-      `@lavamoat/allow-scripts: file ${rcPath} already exists with entry: ${entry}.`
-    )
+    console.log(`@lavamoat/allow-scripts: file ${rcPath} already exists with entry: ${entry}.`)
   } else {
     appendFileSync(rcPath, entry + '\n')
     console.log(`@lavamoat/allow-scripts: added entry to ${rcPath}: ${entry}.`)
   }
 }
 
+/**
+ * @type {boolean}
+ */
 let binsBlockedMemo
+
 /**
  *
- * @param {Object} args
- * @param {boolean} noMemoization - turn off memoization, make a fresh lookup
+ * @param {AreBinsBlockedOpts} args
  * @returns {boolean}
  */
 function areBinsBlocked({ noMemoization = false } = {}) {
-  if (noMemoization || binsBlockedMemo === undefined) {
-    binsBlockedMemo =
-      isEntryPresent(NPM.CONF.BINS, NPM.RCFILE) ||
-      isEntryPresent(YARN1.CONF.BINS, YARN1.RCFILE)
+  if(noMemoization || binsBlockedMemo === undefined) {
+    binsBlockedMemo = isEntryPresent(NPM.CONF.BINS, NPM.RCFILE) || isEntryPresent(YARN1.CONF.BINS, YARN1.RCFILE)
     // Once yarn3 support via plugin comes in, this function would need to detect that, or cease to exist.
   }
   return binsBlockedMemo
 }
 
-function writeRcFile() {
+function writeRcFile () {
   const yarnRcExists = existsSync(addInstallParentDir(YARN1.RCFILE))
   const yarnYmlExists = existsSync(addInstallParentDir(YARN3.RCFILE))
   const npmRcExists = existsSync(addInstallParentDir(NPM.RCFILE))
@@ -92,7 +106,7 @@ function writeRcFile() {
       exists: yarnRcExists,
       entry: YARN1.CONF.SCRIPTS,
     })
-    if (FEATURE.bins) {
+    if(FEATURE.bins) {
       configs.push({
         file: YARN1.RCFILE,
         exists: yarnRcExists,
@@ -114,7 +128,7 @@ function writeRcFile() {
       exists: npmRcExists,
       entry: NPM.CONF.SCRIPTS,
     })
-    if (FEATURE.bins) {
+    if(FEATURE.bins) {
       configs.push({
         file: NPM.RCFILE,
         exists: npmRcExists,
@@ -126,7 +140,7 @@ function writeRcFile() {
   configs.forEach(writeRcFileContent)
 }
 
-function editPackageJson() {
+function editPackageJson () {
   let cmd, cmdArgs
 
   if (existsSync('./.npmrc')) {
@@ -141,32 +155,33 @@ function editPackageJson() {
 
   if (result.status !== 0) {
     process.stderr.write(result.stderr)
-    console.log(
-      '@lavamoat/allow-scripts: Could not add @lavamoat/preinstall-always-fail.'
-    )
+    console.log('@lavamoat/allow-scripts: Could not add @lavamoat/preinstall-always-fail.')
   } else {
-    console.log(
-      '@lavamoat/allow-scripts: Added dependency @lavamoat/preinstall-always-fail.'
-    )
+    console.log('@lavamoat/allow-scripts: Added dependency @lavamoat/preinstall-always-fail.')
   }
 
-  if (FEATURE.bins) {
+  if(FEATURE.bins) {
     // no motivation to fix lint here, there's a better implementation of this in a neighboring branch
     // eslint-disable-next-line n/global-require
     const packageJson = require(addInstallParentDir('package.json'))
-    if (!packageJson.scripts) {
+    if(!packageJson.scripts) {
       packageJson.scripts = {}
     }
     // If you think `node ` is redundant below, be aware that `./cli.js` won't work on Windows,
     // but passing a unix-style path to node on Windows works fine.
-    packageJson.scripts['allow-scripts'] =
-      'node ./node_modules/@lavamoat/allow-scripts/src/cli.js --experimental-bins'
-    console.log(
-      '@lavamoat/allow-scripts: Adding allow-scripts as a package.json script with direct path.'
-    )
-    writeFileSync(
-      addInstallParentDir('package.json'),
-      JSON.stringify(packageJson, null, 2)
-    )
+    packageJson.scripts['allow-scripts'] = 'node ./node_modules/@lavamoat/allow-scripts/src/cli.js --experimental-bins'
+    console.log('@lavamoat/allow-scripts: Adding allow-scripts as a package.json script with direct path.')
+    writeFileSync(addInstallParentDir('package.json'), JSON.stringify(packageJson, null, 2))
   }
 }
+
+/**
+ * @typedef WriteRcFileContentOpts
+ * @property {string} file
+ * @property {string} entry
+ */
+
+/**
+ * @typedef AreBinsBlockedOpts
+ * @property {boolean} [noMemoization] turn off memoization, make a fresh lookup
+ */

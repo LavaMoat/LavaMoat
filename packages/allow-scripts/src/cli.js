@@ -1,11 +1,8 @@
 #!/usr/bin/env node
 
-const yargs = require('yargs')
-const {
-  runAllowedPackages,
-  setDefaultConfiguration,
-  printPackagesList,
-} = require('./index.js')
+const yargs = require('yargs/yargs')
+const { hideBin } = require('yargs/helpers')
+const { runAllowedPackages, setDefaultConfiguration, printPackagesList } = require('./index.js')
 const { writeRcFile, editPackageJson } = require('./setup.js')
 const { FEATURE } = require('./toggles')
 
@@ -14,7 +11,7 @@ start().catch((err) => {
   process.exit(1)
 })
 
-async function start() {
+async function start () {
   const rootDir = process.cwd()
 
   const parsedArgs = parseArgs()
@@ -44,15 +41,13 @@ async function start() {
     }
     // (error) unrecognized
     default: {
-      throw new Error(
-        `@lavamoat/allow-scripts - unknown command "${parsedArgs.command}"`
-      )
+      throw new Error(`@lavamoat/allow-scripts - unknown command "${parsedArgs.command}"`)
     }
   }
 }
 
-function parseArgs() {
-  const argsParser = yargs
+function parseArgs () {
+  const argsParser = yargs(hideBin(process.argv))
     .usage('Usage: $0 <command> [options]')
     .command('$0', 'run the allowed scripts')
     .command('run', 'run the allowed scripts')
@@ -60,14 +55,13 @@ function parseArgs() {
     .command('setup', 'configure local repository to use allow-scripts')
     .option('experimental-bins', {
       alias: 'bin',
-      describe:
-        'opt-in to set up experimental protection against bin script confusion',
+      describe: 'opt-in to set up experimental protection against bin script confusion',
       type: 'boolean',
       default: false,
     })
     .help()
 
-  const parsedArgs = argsParser.parse()
+  const parsedArgs = argsParser.parseSync()
   parsedArgs.command = parsedArgs._[0]
 
   return parsedArgs
