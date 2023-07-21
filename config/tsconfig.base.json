@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "allowSyntheticDefaultImports": true,
+    "checkJs": true,
+    "declaration": true,
+    "declarationMap": true,
+    "emitDeclarationOnly": true,
+    "composite": true,
+    "types": ["node"]
+  },
+  "extends": "@tsconfig/node14/tsconfig.json"
+}

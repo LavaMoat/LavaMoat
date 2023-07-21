@@ -11,18 +11,22 @@ const setup = require('./setup')
 
 /**
  * @typedef {Object} PkgConfs
- * @property {Object} packageJson
+ * @property {Record<string,any>} packageJson
  * @property {Object} configs
  * @property {ScriptsConfig} configs.lifecycle
  * @property {BinsConfig} configs.bin
  * @property {boolean} somePoliciesAreMissing
- *
+ */
+
+/**
  * Individual package info
  * @typedef {Object} PkgInfo
  * @property {string} canonicalName
  * @property {string} path
  * @property {Object} scripts
- *
+ */
+
+/**
  * Individual bin link info
  * @typedef {Object} BinInfo
  * @property {string} canonicalName
@@ -31,25 +35,31 @@ const setup = require('./setup')
  * @property {string} path
  * @property {string} link
  * @property {string} fullLinkPath
- *
+**/
+
+/**
  * Configuration for a type of scripts policies
  * @typedef {Object} ScriptsConfig
- * @property {Object} allowConfig
+ * @property {Record<string,any>} allowConfig
  * @property {Map<string,[PkgInfo]>} packagesWithScripts
- * @property {Array} allowedPatterns
- * @property {Array} disallowedPatterns
- * @property {Array} missingPolicies
- * @property {Array} excessPolicies
- *
+ * @property {Array<string>} allowedPatterns
+ * @property {Array<string>} disallowedPatterns
+ * @property {Array<string>} missingPolicies
+ * @property {Array<string>} excessPolicies
+ */
+
+/**
  * @typedef {Map<string,[BinInfo]>} BinCandidates
- *
+ */
+
+/**
  * Configuration for a type of bins policies
  * @typedef {Object} BinsConfig
- * @property {Object} allowConfig
+ * @property {Record<string,any>} allowConfig
  * @property {BinCandidates} binCandidates
  * @property {Array<BinInfo>} allowedBins
  * @property {Array<BinInfo>} firewalledBins
- * @property {Array} excessPolicies
+ * @property {Array<string>} excessPolicies
  * @property {boolean} somePoliciesAreMissing
  */
 
@@ -61,6 +71,10 @@ module.exports = {
   setup,
 }
 
+/**
+ *
+ * @param {GetOptionsForBinOpts} param0
+ */
 async function getOptionsForBin({ rootDir, name }) {
   const {
     configs: {
@@ -74,6 +88,10 @@ async function getOptionsForBin({ rootDir, name }) {
 }
 
 
+/**
+ * @param {RunAllowedPackagesOpts} param0
+ * @returns {Promise<void>}
+ */
 async function runAllowedPackages({ rootDir }) {
   const {
     configs: {
@@ -131,6 +149,9 @@ async function runAllowedPackages({ rootDir }) {
   await runScript({ event: 'prepare', path: rootDir })
 }
 
+/**
+ * @param {SetDefaultConfigurationOpts} param0
+ */
 async function setDefaultConfiguration({ rootDir }) {
   const conf = await loadAllPackageConfigurations({ rootDir })
   const {
@@ -167,6 +188,10 @@ async function setDefaultConfiguration({ rootDir }) {
   })
 }
 
+/**
+ * @param {PrintPackagesListOpts} param0
+ * @returns {Promise<void>}
+ */
 async function printPackagesList({ rootDir }) {
   const {
     configs: {
@@ -180,6 +205,10 @@ async function printPackagesList({ rootDir }) {
 }
 
 
+/**
+ *
+ * @param {PrintMissingPoliciesIfAnyOpts} param0
+ */
 function printMissingPoliciesIfAny({ missingPolicies = [], packagesWithScripts = new Map() }) {
   if(missingPolicies.length) {
     console.log('packages missing configuration:')
@@ -208,6 +237,7 @@ async function runAllScriptsForEvent({ event, packages }) {
 }
 /**
  * @param {Array<BinInfo>} allowedBins
+ * @returns {Promise<void>}
  */
 async function installBinScripts(allowedBins) {
   for (const { bin, path, link, canonicalName } of allowedBins) {
@@ -219,6 +249,7 @@ async function installBinScripts(allowedBins) {
  * Points all bins on the list to whichbin.js cli app from allow-scripts
  * @param {Array<BinInfo>} firewalledBins
  * @param {string} link - absolute path to the whichbin.js script
+ * @returns {Promise<void>}
  */
 async function installBinFirewall(firewalledBins, link) {
   // Note how we take the path of the original package so that the bin is added at the appropriate level of node_modules nesting
@@ -227,6 +258,10 @@ async function installBinFirewall(firewalledBins, link) {
   }
 }
 
+/**
+ * @param {RunScriptOpts} param0
+ * @returns {Promise<void>}
+ */
 async function runScript({ path, event }) {
   await npmRunScript({
     // required, the script to run
@@ -253,6 +288,7 @@ const bannedBins = new Set(['node', 'npm', 'yarn', 'pnpm'])
  * @param {BinCandidates} binCandidates
  */
 function prepareBinScriptsPolicy(binCandidates) {
+  /** @type {Record<string,string>} */
   const policy = {}
   // pick direct dependencies without conflicts and enable them by default unless colliding with bannedBins
   for ( const [bin, infos] of binCandidates.entries()) {
@@ -341,10 +377,8 @@ function printPackagesByScriptConfiguration({
 
 /**
  *
- * @param {Object} args
- * @param {string} args.rootDir
- * @param {PkgConfs} args.conf
- * @returns {Promise}
+ * @param {SavePackageConfigurationsOpts} param0
+ * @returns {Promise<void>}
  */
 async function savePackageConfigurations({ rootDir, conf: {
   packageJson,
@@ -483,6 +517,11 @@ function indexBinsConfiguration(config) {
   return config
 }
 
+/**
+ *
+ * @param {(value: any) => any} getterFn
+ * @returns {(a: any, b: any) => 1|-1|0}
+ */
 function sortBy(getterFn) {
   return (a, b) => {
     const aVal = getterFn(a)
@@ -496,3 +535,44 @@ function sortBy(getterFn) {
     }
   }
 }
+
+/**
+ * @typedef RunScriptOpts
+ * @property {string} event
+ * @property {string} path
+ */
+
+
+/**
+ * @typedef SavePackageConfigurationsOpts
+ * @property {string} rootDir
+ * @property {PkgConfs} conf
+ */
+
+/**
+ * @typedef GetOptionsForBinOpts
+ * @property {string} rootDir
+ * @property {string} name
+ *
+ */
+
+/**
+ * @typedef RunAllowedPackagesOpts
+ * @property {string} rootDir
+ */
+
+/**
+ * @typedef PrintPackagesListOpts
+ * @property {string} rootDir
+ */
+
+/**
+ * @typedef SetDefaultConfigurationOpts
+ * @property {string} rootDir
+ */
+
+/**
+ * @typedef PrintMissingPoliciesIfAnyOpts
+ * @property {string[]} [missingPolicies]
+ * @property {Map<string,unknown[]>} [packagesWithScripts]
+ */
