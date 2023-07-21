@@ -14,7 +14,7 @@
     "postinstall-postinstall": "^2.1.0"
   },
   "scripts": {
-    "setup": "yarn install && patch-package",
+    "setup": "npm install && patch-package",
     "start": "echo 'node: yarn start:node\nlavamoat: yarn start:lavamoat\ncustom: yarn start:lavamoat'",
     "start:node": "node index.js",
     "start:lavamoat": "lavamoat index.js",

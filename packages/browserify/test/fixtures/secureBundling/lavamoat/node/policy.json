@@ -85,6 +85,7 @@
       "globals": {
         "__dirname": true,
         "__filename.slice": true,
+        "console.warn": true,
         "process.cwd": true,
         "setTimeout": true
       },
