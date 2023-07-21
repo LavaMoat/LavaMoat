@@ -1,10 +1,10 @@
 {
   "name": "test-2",
   "scripts": {
-    "setup": "npm install --no-package-lock && patch-package"
+    "setup": "npm install && patch-package"
   },
   "dependencies": {
-    "keccak": "^3.0.0"
+    "keccak": "3.0.0"
   },
   "devDependencies": {
     "patch-package": "^6.2.2"
