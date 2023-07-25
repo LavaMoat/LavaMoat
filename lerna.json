@@ -3,7 +3,10 @@
   "changelogPreset": "conventional-changelog-conventionalcommits",
   "command": {
     "publish": {
-      "message": "chore: publish"
+      "message": "chore: publish",
+      "fromPackage": true,
+      "push": false,
+      "gitTagVersion": false
     },
     "version": {
       "allowBranch": "main",

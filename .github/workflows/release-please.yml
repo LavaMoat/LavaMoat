@@ -1,0 +1,24 @@
+# this workflow automatically creates release PRs when something gets merged into the main branch.
+# we're using the strategy documented here https://github.com/googleapis/release-please/blob/main/docs/manifest-releaser.md
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  pull-requests: write
+
+name: release-please
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: google-github-actions/release-please-action@ca6063f4ed81b55db15b8c42d1b6f7925866342d # v3
+        with:
+          release-type: node
+          command: manifest
+          # see https://github.com/google-github-actions/release-please-action#github-credentials
+          # in case we want to run more workflows
