@@ -22,7 +22,7 @@
     "tmp-promise": "^3.0.3"
   },
   "scripts": {
-    "lint": "yarn lint:eslint && yarn lint:deps",
+    "lint": "npm run lint:eslint && npm run lint:deps",
     "lint:eslint": "eslint .",
     "lint:fix": "eslint --fix .",
     "lint:deps": "depcheck",

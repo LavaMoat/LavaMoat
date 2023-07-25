@@ -5,7 +5,7 @@
   "bin": {
     "allow-scripts": "src/cli.js"
   },
-  "exports":{
+  "exports": {
     ".": "./src/index.js",
     "./setup": "./src/setup.js"
   },
@@ -36,10 +36,10 @@
     "eslint-plugin-node": "^11.1.0"
   },
   "scripts": {
-    "test": "yarn test:run",
+    "test": "npm run test:run",
     "test:run": "ava --timeout=30s test/index.js",
     "test:prep": "for d in ./test/projects/*/ ; do (cd \"$d\" && ../../../src/cli.js auto --experimental-bins); done",
-    "lint": "yarn lint:eslint && yarn lint:deps",
+    "lint": "npm run lint:eslint && npm run lint:deps",
     "lint:eslint": "eslint .",
     "lint:fix": "eslint . --fix",
     "lint:deps": "depcheck"
@@ -48,5 +48,5 @@
   "homepage": "https://github.com/LavaMoat/LavaMoat/tree/main/packages/allow-scripts",
   "engines": {
     "node": ">=14.0.0"
-  }
+}
 }

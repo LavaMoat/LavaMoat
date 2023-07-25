@@ -1,7 +1,7 @@
 {
   "name": "test-2",
   "scripts": {
-    "setup": "yarn install && patch-package"
+    "setup": "npm install && patch-package"
   },
   "dependencies": {
     "keccak": "^3.0.0"

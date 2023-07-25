@@ -29,13 +29,14 @@
     "source-map": "^0.7.4"
   },
   "scripts": {
-    "lint": "yarn lint:eslint && yarn lint:deps",
+    "lint": "npm run lint:eslint && npm run lint:deps",
     "lint:eslint": "eslint .",
     "lint:fix": "eslint . --fix",
     "lint:deps": "depcheck",
-    "test": "yarn test:ava && yarn test:ecma",
+    "test": "npm run test:ava && npm run test:ecma",
     "test:ava": "ava --timeout=30s test/index.js",
     "test:ecma": "node test/runtimeEcma.js",
+    "rebuild": "npm run build",
     "build": "node ./src/build-runtime.js"
   },
   "author": "kumavis",
