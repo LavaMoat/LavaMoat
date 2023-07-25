@@ -36,11 +36,12 @@
     "react-dom": "^16.8.6",
     "react-force-graph-2d": "^1.23.10",
     "react-hyperscript": "^3.2.0",
+    "rimraf": "^5.0.1",
+    "statsvr": "^3.1.1",
     "style-loader": "^3.3.2",
     "three": "^0.125.0",
     "three-forcegraph": "^1.36.1",
     "three-spritetext": "^1.5.1",
-    "statsvr": "^3.1.1",
     "webpack": "^5.83.1",
     "webpack-cli": "^5.1.1",
     "webpack-dev-server": "^4.15.0"
@@ -48,12 +49,14 @@
   "scripts": {
     "analyze": "source-map-explorer 'build/static/js/*.js'",
     "start": "webpack-dev-server --config ./src/webpack.config.js",
-    "test": "yarn build",
+    "test": "npm run build",
     "lint": "eslint .",
-    "lint:fix": "yarn lint --fix .",
+    "lint:fix": "npm run lint --fix .",
     "build": "webpack --config ./src/webpack.config.js",
     "deploy": "yarn run build && gh-pages -d dist",
-    "prepublishOnly": "yarn run deploy"
+    "prepublishOnly": "yarn run deploy",
+    "rebuild": "npm run clean && npm run build",
+    "clean": "rimraf ./dist"
   },
   "babel": {
     "presets": [
