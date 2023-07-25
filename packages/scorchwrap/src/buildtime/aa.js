@@ -1,5 +1,4 @@
 // @ts-check
-// Should translate AAs to numbers?
 const { getPackageNameForModulePath } = require("@lavamoat/aa");
 const diag = require("./diagnostics");
 
@@ -8,6 +7,7 @@ const ROOT_IDENTIFIER = "$root$";
 const lookUp = (needle, haystack) => {
   const value = haystack[needle];
   if (value === undefined) {
+    // TODO: remove this or replace with a better integrated warning
     // When using the resolve-related hooks for finding out paths we'd get paths not included in the bundle trigger this case. Now it should not happen unless policy is incomplete.
     // This needs more observation/investigation
     console.trace(`Cannot find a match for ${needle} in policy`);
@@ -69,9 +69,8 @@ exports.generateIdentifierLookup = ({
     translate = (i) => `${usedIdentifiersIndex[i]}`;
   }
 
-  // TODO: it's likely that the current way we generate real AAs from node_modules would produce different identifiers than it'd otherwise produce from just looking at the paths in use.
-  // We'll need to persist enough data to look up paths OR make sure policy generation only takes into account the paths involved.
-  // Also, the numbers should probably come from webpack itself for later lookup at runtime
+  // TODO: consider taking the list of paths used by webpack and running the entire AA algorithm only on that instead of relying on AA running through everything first. 
+  // It might give us identifiers that are more stable and would surely be much faster.
 
   const pathLookup = pathsToIdentifiers(paths);
   const identifiersWithKnownPaths = new Set(
