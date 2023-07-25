@@ -46,7 +46,7 @@ exports.wrapper = function wrapper({
 
   // TODO: Consider: We could save some bytes by merging scopeTerminator and runtimeHandler, but then runtime calls would go through a proxy, which is slower. Merging runtimeKit with globalThis would also be problematic.
 
-  // return NOOP if runtime didn't produce a scope terminator
+  // return NO-OP if runtime didn't produce a scope terminator
   const before = `(function(){
      if (!this.${NAME_scopeTerminator}) return ()=>{};
      with (this.${NAME_scopeTerminator}) {
