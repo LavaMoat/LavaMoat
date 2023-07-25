@@ -21,7 +21,8 @@
     "directory": "packages/yarn-plugin-allow-scripts"
   },
   "scripts": {
-    "build": "builder build plugin"
+    "build": "builder build plugin",
+    "rebuild": "npm run build"
   },
   "packageManager": "yarn@3.1.1",
   "engines": {

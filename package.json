@@ -1,9 +1,8 @@
 {
   "name": "lavamoat-monorepo",
   "private": true,
-  "resolutions": {
-    "type-fest": "^0.21.3",
-    "lavamoat-perf/serve/boxen/type-fest": "^2.19.0",
+  "overrides": {
+    "type-fest": "^2.19.0",
     "util": "^0.12.5"
   },
   "devDependencies": {
@@ -19,13 +18,15 @@
     "node": ">=14.0.0"
   },
   "scripts": {
-    "test": "lerna run --concurrency 1 test",
-    "test:prep": "lerna run test:prep",
-    "lint": "lerna run lint",
-    "lint:fix": "lerna run lint:fix",
-    "build": "lerna run build",
+    "test": "npm --workspaces test",
+    "test:prep": "npm --workspaces run test:prep",
+    "lint": "npm --workspaces run lint",
+    "lint:fix": "npm --workspaces run lint:fix",
+    "preversion": "npm run rebuild",
+    "build": "npm -w @lavamoat/lavapack -w @lavamoat/viz -w @lavamoat/yarn-plugin-allow-scripts run build",
+    "rebuild": "npm -w @lavamoat/lavapack -w @lavamoat/viz -w @lavamoat/yarn-plugin-allow-scripts run rebuild",
     "publish": "lerna publish from-package --no-push --no-git-tag-version --yes",
-    "setup": "lerna bootstrap -- --frozen-lockfile --check-files --production=false && yarn allow-scripts"
+    "setup": "allow-scripts"
   },
   "workspaces": [
     "packages/*"

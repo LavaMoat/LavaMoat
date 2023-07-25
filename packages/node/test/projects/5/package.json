@@ -1,7 +1,7 @@
 {
   "name": "test-5",
   "scripts": {
-    "setup": "yarn install"
+    "setup": "npm install"
   },
   "dependencies": {
     "a": "file:./fake_node_modules/a"
