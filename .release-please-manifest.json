@@ -1,0 +1,12 @@
+{
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/manifest.json",
+  "packages/aa": "3.1.2",
+  "packages/allow-scripts": "2.3.1",
+  "packages/browserify": "15.7.0",
+  "packages/core": "14.2.0",
+  "packages/lavapack": "5.2.0",
+  "packages/node": "7.1.0",
+  "packages/preinstall-always-fail": "1.0.0",
+  "packages/tofu": "6.0.2",
+  "packages/viz": "6.0.9"
+}
