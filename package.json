@@ -6,6 +6,8 @@
     "util": "^0.12.5"
   },
   "devDependencies": {
+    "@commitlint/cli": "^17.6.7",
+    "@commitlint/config-conventional": "^17.6.7",
     "@metamask/eslint-config-nodejs": "^11.0.1",
     "ava": "^5.2.0",
     "conventional-changelog-conventionalcommits": "^6.1.0",
@@ -13,7 +15,9 @@
     "eslint": "^8.40.0",
     "eslint-plugin-ava": "^13.2.0",
     "eslint-plugin-node": "^11.1.0",
-    "lerna": "^7.1.4"
+    "husky": "^8.0.3",
+    "lerna": "^7.1.4",
+    "lint-staged": "^13.2.3"
   },
   "engines": {
     "node": ">=14.0.0"
@@ -23,11 +27,19 @@
     "test:prep": "lerna run test:prep",
     "lint": "npm --workspaces run lint",
     "lint:fix": "npm --workspaces run lint:fix",
-    "preversion": "npm run rebuild",
     "build": "npm -w @lavamoat/lavapack -w @lavamoat/viz -w @lavamoat/yarn-plugin-allow-scripts run build",
     "rebuild": "npm -w @lavamoat/lavapack -w @lavamoat/viz -w @lavamoat/yarn-plugin-allow-scripts run rebuild",
+    "lint:staged": "lint-staged",
+    "lint:commit": "commitlint",
+    "postinstall": "husky install",
+    "prepare": "npm run rebuild",
     "publish": "lerna publish",
     "setup": "allow-scripts"
+  },
+  "lint-staged": {
+    "*.js": [
+      "eslint --fix"
+    ]
   },
   "workspaces": [
     "packages/*"
@@ -36,7 +48,8 @@
   "lavamoat": {
     "allowScripts": {
       "lerna>nx": false,
-      "lerna>nx>@parcel/watcher": false
+      "lerna>nx>@parcel/watcher": false,
+      "$root$": true
     }
   }
 }
