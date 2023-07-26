@@ -12,10 +12,10 @@ test('generatePolicy - basic config', async (t) => {
     resources: {
       test: {
         globals: {
-          'location.href': true
-        }
-      }
-    }
+          'location.href': true,
+        },
+      },
+    },
   }, 'config matched expected')
 })
 
@@ -35,11 +35,11 @@ test('generatePolicy - config with debugInfo', async (t) => {
       content: '(function () {\n    location.href\n  })()',
       importMap: {},
       packageName: 'test',
-      moduleInitializer: undefined
+      moduleInitializer: undefined,
     },
     globals: {
-      'location.href': 'read'
-    }
+      'location.href': 'read',
+    },
   }, 'config matched expected')
 })
 
@@ -55,10 +55,10 @@ test('generatePolicy - ignore various refs', async (t) => {
     resources: {
       test: {
         globals: {
-          nonIgnoredGlobal: true
-        }
-      }
-    }
+          nonIgnoredGlobal: true,
+        },
+      },
+    },
   }, 'config matched expected')
 })
 
@@ -73,10 +73,10 @@ test('generatePolicy - config ignores global refs', async (t) => {
       test: {
         globals: {
           'location.href': true,
-          XMLHttpRequest: true
-        }
-      }
-    }
+          XMLHttpRequest: true,
+        },
+      },
+    },
   }, 'config matches expected')
 })
 
@@ -86,7 +86,7 @@ test('generatePolicy - config ignores global refs when properties are not access
   })
 
   t.deepEqual(config, {
-    resources: {}
+    resources: {},
   }, 'config matches expected')
 })
 
@@ -96,7 +96,7 @@ test('generatePolicy - config ignores global refs accessed with whitelist items'
   })
 
   t.deepEqual(config, {
-    resources: {}
+    resources: {},
   }, 'config matches expected')
 })
 
@@ -106,7 +106,7 @@ test('generatePolicy - config ignores newer intrinsics', async (t) => {
   })
 
   t.deepEqual(config, {
-    resources: {}
+    resources: {},
   }, 'config matches expected')
 })
 

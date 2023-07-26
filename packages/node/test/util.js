@@ -3,7 +3,7 @@ const execFile = util.promisify(require('child_process').execFile)
 const { prepareScenarioOnDisk } = require('lavamoat-core/test/util.js')
 module.exports = {
   runLavamoat,
-  runScenario
+  runScenario,
 }
 
 function setOptToArgs(args, key, value) {
@@ -26,7 +26,9 @@ function setOptToArgs(args, key, value) {
 
 function convertOptsToArgs ({ scenario }) {
   const { entries, opts } = scenario
-  if (entries.length !== 1) throw new Error('LavaMoat - invalid entries')
+  if (entries.length !== 1) {
+    throw new Error('LavaMoat - invalid entries')
+  }
   const firstEntry = entries[0]
   const args = [firstEntry]
   Object

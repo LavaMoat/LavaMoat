@@ -1,7 +1,7 @@
 const test = require('ava')
 
 const {
-  runScenario
+  runScenario,
 } = require('./util')
 
 const { createScenarioFromScaffold, runAndTestScenario } = require('lavamoat-core/test/util')
@@ -18,8 +18,8 @@ test('arguments - lavamoat command aliases work - advanced', async (t) => {
       p: '',
       pp: true,
       d: true,
-      dp: true
-    }
+      dp: true,
+    },
   })
   await runAndTestScenario(t, scenario, runScenario)
 })
@@ -31,7 +31,7 @@ test('arguments - invalid lavamoat commands fail', async (t) => {
     },
     opts: {
       z: true,
-      c: true
+      c: true,
     },
     expectedFailure: true,
   })

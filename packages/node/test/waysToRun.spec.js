@@ -12,7 +12,7 @@ test('use lavamoat cli', async (t) => {
   const output = await execFile(lavamoatPath, [entryPath], { cwd: projectRoot })
   t.deepEqual(output.stdout.split('\n'), [
     'keccak256: 5cad7cf49f610ec53189e06d3c8668789441235613408f8fabcb4ad8dad94db5',
-    ''
+    '',
   ], 'should return expected output')
 })
 
@@ -23,7 +23,7 @@ test('use lavamoat programmatically', async (t) => {
   await runLava({
     entryPath,
     projectRoot,
-    debugMode: true
+    debugMode: true,
   })
 
   // TODO: add means to endow entry with new references and pass a callback to assert it's been called.

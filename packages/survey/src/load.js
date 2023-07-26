@@ -5,7 +5,7 @@ const { downloadPackage } = require('./downloadPackage.js')
 const { fileExists } = require('./util.js')
 
 module.exports = {
-  loadPackage
+  loadPackage,
 }
 
 

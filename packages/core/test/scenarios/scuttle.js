@@ -21,8 +21,8 @@ module.exports = [
         scuttleGlobalThis: {
           enabled: true,
           exceptions: ['WebAssembly', 'process', '/[0-9]+/', 'Set', 'Reflect', 'Object', 'console', 'Array', 'RegExp', 'Date', 'Math'],
-        }
-      }
+        },
+      },
     })
     await autoConfigForScenario({ scenario })
     return scenario
@@ -34,8 +34,8 @@ module.exports = [
       opts: {
         scuttleGlobalThis: {
           enabled: true,
-          exceptions: ['WebAssembly', 'process', '/[0-9]+/', /*'Set', 'Reflect', 'Object', 'console', 'Array', 'RegExp', 'Date', 'Math'*/],
-        }
+          exceptions: ['WebAssembly', 'process', '/[0-9]+/' /*'Set', 'Reflect', 'Object', 'console', 'Array', 'RegExp', 'Date', 'Math'*/],
+        },
       },
       expectedFailure: true,
       expectedFailureMessageRegex: /SES_UNHANDLED_REJECTION|inaccessible under scuttling mode./,

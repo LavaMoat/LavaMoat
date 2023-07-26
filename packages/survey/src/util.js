@@ -7,7 +7,9 @@ async function fileExists (path) {
     await fs.access(path)
     return true
   } catch (err) {
-    if (err.code === 'ENOENT') return false
+    if (err.code === 'ENOENT') {
+      return false
+    }
     throw err
   }
 }

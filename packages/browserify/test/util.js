@@ -30,7 +30,7 @@ module.exports = {
   runBrowserify,
   bundleAsync,
   prepareBrowserifyScenarioOnDisk,
-  createBrowserifyScenarioFromScaffold
+  createBrowserifyScenarioFromScaffold,
 }
 
 async function copyFolder(from, to, opts = {skip: []}) {
@@ -114,7 +114,7 @@ function createWatchifyBundler (pluginOpts) {
       [watchify, { poll: true }],
       // add lavamoat after watchify
       [lavamoatPlugin, pluginOpts],
-    ]
+    ],
   })
   return bundler
 }
@@ -191,7 +191,7 @@ async function prepareBrowserifyScenarioOnDisk ({ scenario }) {
   // copy browserify build runner
   const paths = {
     normal: `${__dirname}/fixtures/runBrowserify.js`,
-    factor: `${__dirname}/fixtures/runBrowserifyBundleFactor.js`
+    factor: `${__dirname}/fixtures/runBrowserifyBundleFactor.js`,
   }
   await fs.copyFile(runBrowserifyPath, path.join(projectDir, 'runBrowserify.js'))
   return { projectDir, policyDir }
@@ -207,7 +207,7 @@ async function createBundleForScenario ({
     scenario.dir = projectDir
     policy = policyDir
   } else {
-    policy = path.join(scenario.dir, `/lavamoat/browserify/`)
+    policy = path.join(scenario.dir, '/lavamoat/browserify/')
   }
 
   const { output: { stdout: bundle, stderr } } = await runBrowserify({ scenario, bundleWithPrecompiledModules })

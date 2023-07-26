@@ -5,7 +5,7 @@ const { parse, inspectEsmImports } = require('../src/index')
 testInspect('esm - basic', {}, `
   import fs from 'fs'
 `, {
-  esmImports: ['fs']
+  esmImports: ['fs'],
 })
 
 // from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import
@@ -35,8 +35,8 @@ testInspect('esm - full set', {}, `
     'package07.export8',
     'package08',
     'package09',
-    'package09'
-  ]
+    'package09',
+  ],
 })
 
 function testInspect (label, opts, fn, expectedResultObj) {
@@ -56,13 +56,15 @@ function testInspect (label, opts, fn, expectedResultObj) {
     }
 
     t.deepEqual(resultSorted, expectedSorted)
-      })
+  })
 }
 
 function sortBy (key) {
   return (a, b) => {
     const vA = a[key]; const vB = b[key]
-    if (vA === vB) return 0
+    if (vA === vB) {
+      return 0
+    }
     return vA > vB ? 1 : -1
   }
 }

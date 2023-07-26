@@ -62,8 +62,8 @@ function writeRcFileContent({file, entry}) {
 
 let binsBlockedMemo
 /**
- * 
- * @param {Object} args 
+ *
+ * @param {Object} args
  * @param {boolean} noMemoization - turn off memoization, make a fresh lookup
  * @returns {boolean}
  */
@@ -141,15 +141,15 @@ function editPackageJson () {
   } else {
     console.log('@lavamoat/allow-scripts: Added dependency @lavamoat/preinstall-always-fail.')
   }
-  
+
   if(FEATURE.bins) {
     // no motivation to fix lint here, there's a better implementation of this in a neighboring branch
-    // eslint-disable-next-line node/global-require
+    // eslint-disable-next-line n/global-require
     const packageJson = require(addInstallParentDir('package.json'))
     if(!packageJson.scripts) {
       packageJson.scripts = {}
     }
-    // If you think `node ` is redundant below, be aware that `./cli.js` won't work on Windows, 
+    // If you think `node ` is redundant below, be aware that `./cli.js` won't work on Windows,
     // but passing a unix-style path to node on Windows works fine.
     packageJson.scripts['allow-scripts'] = 'node ./node_modules/@lavamoat/allow-scripts/src/cli.js --experimental-bins'
     console.log('@lavamoat/allow-scripts: Adding allow-scripts as a package.json script with direct path.')

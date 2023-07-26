@@ -12,8 +12,8 @@ test.skip('arguments - lavamoat command aliases work - autoconfig', async (t) =>
     },
     expectedResult: 5,
     opts: {
-      ar: true
-    }
+      ar: true,
+    },
   })
   const testResult = await runScenario({ scenario })
   scenario.checkResult(t, testResult, scenario)
@@ -27,8 +27,8 @@ test.skip('arguments - lavamoat command aliases work - advanced', async (t) => {
     expectedResult: 5,
     opts: {
       d: true,
-      dp: true
-    }
+      dp: true,
+    },
   })
   const testResult = await runScenario({ scenario })
   scenario.checkResult(t, testResult, scenario)
@@ -42,9 +42,9 @@ test.skip('arguments - invalid lavamoat commands fail', async (t) => {
     },
     opts: {
       z: true,
-      c: true
+      c: true,
     },
-    expectedFailure: true
+    expectedFailure: true,
   })
   await runAndTestScenario(t, scenario, runScenario)
 })

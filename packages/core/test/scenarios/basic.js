@@ -8,9 +8,11 @@ module.exports = [
         module.exports = require('two')(5)
       },
       defineTwo: () => {
-        module.exports = function (n) { return n * 111 }
+        module.exports = function (n) {
+          return n * 111 
+        }
       },
-      expectedResult: 555
+      expectedResult: 555,
     })
     return scenario
   },
@@ -27,7 +29,7 @@ module.exports = [
         // dummy testResult to make sure everything worked
         module.exports = 123
       },
-      expectedResult: 123
+      expectedResult: 123,
     })
     return scenario
   },
@@ -36,12 +38,14 @@ module.exports = [
       name: 'basic - Function constructor for constructing constructor functions',
       defineOne: () => {
         const abc = new Function('this.value = this.derp()')
-        abc.prototype.derp = function() { return 123 }
+        abc.prototype.derp = function() {
+          return 123 
+        }
         const xyz = new abc()
         module.exports = xyz.value
       },
-      expectedResult: 123
+      expectedResult: 123,
     })
     return scenario
-  }
+  },
 ]

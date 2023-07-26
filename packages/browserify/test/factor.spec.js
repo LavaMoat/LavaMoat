@@ -1,11 +1,11 @@
 const test = require('ava')
 const {
   fillInFileDetails,
-  functionToString
+  functionToString,
 } = require('lavamoat-core/test/util')
 const {
   createBundleForScenario,
-  runScenario
+  runScenario,
 } = require('./util')
 
 // eslint-disable-next-line ava/no-skip-test
@@ -26,22 +26,22 @@ test.skip('package factor bundle', async (t) => {
             '@lavamoat/lavapack': '*',
             'through2': '*',
             'vinyl-buffer': '*',
-          }
+          },
         })}`,
       },
       './node_modules/a/package.json': {
         content: `${JSON.stringify({
-          dependencies: {}
+          dependencies: {},
         })}`,
       },
       './node_modules/b/package.json': {
         content: `${JSON.stringify({
-          dependencies: {}
+          dependencies: {},
         })}`,
       },
       './node_modules/c/package.json': {
         content: `${JSON.stringify({
-          dependencies: {}
+          dependencies: {},
         })}`,
       },
       './node_modules/b/index.js': {
@@ -51,14 +51,14 @@ test.skip('package factor bundle', async (t) => {
         importMap: {},
         content: functionToString(() => {
           module.exports = global.three
-        })
+        }),
       },
       './src/12.js': {
         packageName: '$root$',
         importMap: {},
         content: functionToString(() => {
           module.exports = 10
-        })
+        }),
       },
       './src/1.js': {
         // src/1.js
@@ -66,29 +66,29 @@ test.skip('package factor bundle', async (t) => {
         importMap: {
           a: './node_modules/a/index.js',
           b: './node_modules/b/index.js',
-          './10': './src/10.js'
+          './10': './src/10.js',
         },
         content: functionToString(() => {
           const testResult = require('a') * require('b') * require('./10')
           console.log(JSON.stringify(testResult, null, 2))
         }),
-        entry: true
+        entry: true,
       },
       './src/10.js': {
         packageName: '$root$',
         importMap: {
-          './12': './src/12.js'
+          './12': './src/12.js',
         },
         content: functionToString(() => {
           module.exports = require('./12')
-        })
+        }),
       },
       './node_modules/a/index.js': {
         packageName: 'a',
         importMap: {},
         content: functionToString(() => {
           module.exports = global.two
-        })
+        }),
       },
       './src/2.js': {
         // src/2.js
@@ -102,44 +102,44 @@ test.skip('package factor bundle', async (t) => {
           const testResult = require('b') * require('c') * require('./11')
           console.log(JSON.stringify(testResult, null, 2))
         }),
-        entry: true
+        entry: true,
       },
       './src/11.js': {
         packageName: '$root$',
         importMap: {
-          './12': './src/12.js'
+          './12': './src/12.js',
         },
         content: functionToString(() => {
           module.exports = require('./12')
-        })
+        }),
       },
       './node_modules/c/index.js': {
         packageName: 'c',
         importMap: {},
         content: functionToString(() => {
           module.exports = global.four
-        })
-      }
+        }),
+      },
     }),
     entries: ['./src/1.js', './src/2.js'],
     config: {
       resources: {
         c: {
           globals: {
-            four: true
-          }
+            four: true,
+          },
         },
         a: {
           globals: {
-            two: true
-          }
+            two: true,
+          },
         },
         b: {
           globals: {
-            three: true
-          }
-        }
-      }
+            three: true,
+          },
+        },
+      },
     },
     opts: {
       // TODO: this breaks when enabled (for some reason)
@@ -150,7 +150,7 @@ test.skip('package factor bundle', async (t) => {
       three: 3,
       four: 4,
     },
-    type: 'factor'
+    type: 'factor',
   }
 
   const { bundleForScenario: rawOutput } = await createBundleForScenario({ scenario })
@@ -160,7 +160,7 @@ test.skip('package factor bundle', async (t) => {
   t.deepEqual(relativeNames, [
     'common.js',
     'src/1.js',
-    'src/2.js'
+    'src/2.js',
   ], 'relative filenames are as expected')
 
   const testResult1 = await runScenario({ scenario, bundle: vinylBundles['common.js'] + vinylBundles['src/1.js'] })

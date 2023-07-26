@@ -6,26 +6,26 @@ testInspect('cjs - basic', {}, () => {
   const fs = require('fs')
   module.exports = fs
 }, {
-  cjsImports: ['fs']
+  cjsImports: ['fs'],
 })
 
 testInspect('cjs - shadowed require', {}, () => {
   const require = () => {}
   require('fs')
 }, {
-  cjsImports: []
+  cjsImports: [],
 })
 
 testInspect('cjs - include even if require result not stored in variable', {}, () => {
   require('fs').readFileSync
 }, {
-  cjsImports: ['fs.readFileSync']
+  cjsImports: ['fs.readFileSync'],
 })
 
 testInspect('cjs - include even if declared var is unused', {}, () => {
   const rfs = require('fs').readFileSync
 }, {
-  cjsImports: ['fs.readFileSync']
+  cjsImports: ['fs.readFileSync'],
 })
 
 // testInspect('cjs - require rename', {}, () => {
@@ -42,22 +42,22 @@ testInspect('cjs - basic destructure', {}, () => {
 }, {
   cjsImports: [
     'fs.readFileSync',
-    'fs.createReadStream'
-  ]
+    'fs.createReadStream',
+  ],
 })
 
 testInspect('cjs - basic member', {}, () => {
   const rfs = require('fs').readFileSync
   rfs()
 }, {
-  cjsImports: ['fs.readFileSync']
+  cjsImports: ['fs.readFileSync'],
 })
 
 testInspect('cjs - mixed destructuring and member', {}, () => {
   const { constructor: { name: [bigEff] } } = require('fs').readFileSync
   bigEff()
 }, {
-  cjsImports: ['fs.readFileSync.constructor.name.0']
+  cjsImports: ['fs.readFileSync.constructor.name.0'],
 })
 
 testInspect('cjs - usage basic', {}, () => {
@@ -67,17 +67,18 @@ testInspect('cjs - usage basic', {}, () => {
 }, {
   cjsImports: [
     'fs.readFileSync',
-    'fs.createReadStream'
-  ]
+    'fs.createReadStream',
+  ],
 })
 
 testInspect('cjs - usage advanced', {}, () => {
+  // eslint-disable-next-line n/prefer-global/process
   const { sourceUrl: url } = require('process').release
   url.includes('v12')
 }, {
   cjsImports: [
-    'process.release.sourceUrl.includes'
-  ]
+    'process.release.sourceUrl.includes',
+  ],
 })
 
 function testInspect (label, opts, fn, expectedResultObj) {
@@ -97,13 +98,15 @@ function testInspect (label, opts, fn, expectedResultObj) {
     }
 
     t.deepEqual(resultSorted, expectedSorted)
-      })
+  })
 }
 
 function sortBy (key) {
   return (a, b) => {
     const vA = a[key]; const vB = b[key]
-    if (vA === vB) return 0
+    if (vA === vB) {
+      return 0
+    }
     return vA > vB ? 1 : -1
   }
 }

@@ -47,9 +47,11 @@ function performBundle () {
       bundler.bundle(),
       fs.createWriteStream(destPath),
       (err, bundle) => {
-        if (err) return reject(err)
+        if (err) {
+          return reject(err)
+        }
         resolve(bundle)
-      }
+      },
     )
   })
 }

@@ -84,7 +84,7 @@ test('destructuring.js - ES2015 variable destructuring', (t) => {
 test('detect.js - check locals and globals', (t) => {
   t.deepEqual(
     detect(read('detect.js')),
-    ['w', 'foo', 'process', 'console', 'AAA', 'BBB', 'CCC', 'xyz', 'ZZZ', 'BLARG', 'RAWR'].sort()
+    ['w', 'foo', 'process', 'console', 'AAA', 'BBB', 'CCC', 'xyz', 'ZZZ', 'BLARG', 'RAWR'].sort(),
   )
 })
 // test('detect.js - check variable names', (t) => {

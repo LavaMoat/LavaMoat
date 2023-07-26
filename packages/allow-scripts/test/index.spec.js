@@ -18,7 +18,7 @@ test('cli - auto command', (t) => {
   let projectRoot = path.join(__dirname, 'projects', '1')
 
   // delete any existing package.json
-  fs.rmSync(path.join(projectRoot, PACKAGE_JSON), { force: true });
+  fs.rmSync(path.join(projectRoot, PACKAGE_JSON), { force: true })
 
   // npm init -y
   spawnSync('npm', ['init', '-y'], realisticEnvOptions(projectRoot))
@@ -35,8 +35,8 @@ test('cli - auto command', (t) => {
   // assert its contents
   t.deepEqual(packageJsonContents.lavamoat, {
     allowScripts: {
-      'bbb>evil_dep': false
-    }
+      'bbb>evil_dep': false,
+    },
   })
 })
 
@@ -44,7 +44,7 @@ test('cli - auto command with experimental bins', (t) => {
   // set up the directories
   let projectRoot = path.join(__dirname, 'projects', '1')
 
-  fs.rmSync(path.join(projectRoot, PACKAGE_JSON), { force: true });
+  fs.rmSync(path.join(projectRoot, PACKAGE_JSON), { force: true })
 
   // npm init -y
   spawnSync('npm', ['init', '-y'], realisticEnvOptions(projectRoot))
@@ -65,8 +65,8 @@ test('cli - auto command with experimental bins', (t) => {
       karramba: 'node_modules/bbb/index.js',
     },
     allowScripts: {
-      'bbb>evil_dep': false
-    }
+      'bbb>evil_dep': false,
+    },
   })
 })
 
@@ -78,7 +78,7 @@ test('cli - run command - good dep at the root', (t) => {
   // the force option is only here to stop rm complaining if target is missing
   fs.rmSync(path.join(projectRoot, 'node_modules', '.bin'), {
     recursive: true,
-    force: true
+    force: true,
   })
 
   // run the "run" command
@@ -111,7 +111,7 @@ test('cli - run command - good dep at the root with experimental bins', (t) => {
   // the force option is only here to stop rm complaining if target is missing
   fs.rmSync(path.join(projectRoot, 'node_modules', '.bin'), {
     recursive: true,
-    force: true
+    force: true,
   })
 
   // run the "run" command
@@ -151,7 +151,7 @@ test('cli - run command - good dep as a sub dep', (t) => {
   fs.rmSync(path.join(projectRoot, 'node_modules', 'bbb', '.goodscriptworked'), { force: true })
   fs.rmSync(path.join(projectRoot, 'node_modules', '.bin'), {
     recursive: true,
-    force: true
+    force: true,
   })
 
   // generate the bin link
@@ -186,7 +186,7 @@ test('cli - run command - good dep as a sub dep with experimental bins', (t) => 
   fs.rmSync(path.join(projectRoot, 'node_modules', 'bbb', '.goodscriptworked'), { force: true })
   fs.rmSync(path.join(projectRoot, 'node_modules', '.bin'), {
     recursive: true,
-    force: true
+    force: true,
   })
   // run the "run" command
   let result = spawnSync(ALLOW_SCRIPTS_BIN, ['run', '--experimental-bins'], realisticEnvOptions(projectRoot))
@@ -197,10 +197,10 @@ test('cli - run command - good dep as a sub dep with experimental bins', (t) => 
 
   t.assert(fs.existsSync(path.join(projectRoot, 'node_modules', 'bbb', 'node_modules', '.bin', 'good')), 'Expected a nested bin script to be installed in bbb/node_modules/.bin')
   const errarr = result.stderr.toString().split('\n')
-  t.assert(errarr.every(line=>!line.includes('you shall not pass')), 'Should not have run the parent script from the nested package postinstall')
-  t.assert(errarr.some(line=>line.includes(`"good": "node_modules/`)), 'Expected to see instructions on how to enable a bin script1')
-  t.assert(errarr.some(line=>line.includes(`node_modules/good_dep/cli.sh`)), 'Expected to see instructions on how to enable a bin script2')
-  t.assert(errarr.some(line=>line.includes(`node_modules/aaa/shouldntrun.sh`)), 'Expected to see instructions on how to enable a bin script3')
+  t.assert(errarr.every(line => !line.includes('you shall not pass')), 'Should not have run the parent script from the nested package postinstall')
+  t.assert(errarr.some(line => line.includes('"good": "node_modules/')), 'Expected to see instructions on how to enable a bin script1')
+  t.assert(errarr.some(line => line.includes('node_modules/good_dep/cli.sh')), 'Expected to see instructions on how to enable a bin script2')
+  t.assert(errarr.some(line => line.includes('node_modules/aaa/shouldntrun.sh')), 'Expected to see instructions on how to enable a bin script3')
   // assert the output
   t.deepEqual(result.stdout.toString().split('\n'), [
     'installing bin scripts',

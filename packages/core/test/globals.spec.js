@@ -1,7 +1,7 @@
 const test = require('ava')
 const {
   createScenarioFromScaffold,
-  runScenario
+  runScenario,
 } = require('./util')
 
 test('globals - ensure global property this-value unwrapped', async (t) => {
@@ -10,7 +10,7 @@ test('globals - ensure global property this-value unwrapped', async (t) => {
     defineOne: () => {
       module.exports = {
         direct: globalThis.xyz,
-        indirect: Reflect.getOwnPropertyDescriptor(globalThis, 'xyz').get()
+        indirect: Reflect.getOwnPropertyDescriptor(globalThis, 'xyz').get(),
       }
     },
     context: {
@@ -19,22 +19,22 @@ test('globals - ensure global property this-value unwrapped', async (t) => {
         // debugger
 
         return (this === scenario.globalThis || this === scenario.vmContext)
-      }
+      },
     },
     config: {
       resources: {
         one: {
           globals: {
-            xyz: true
-          }
-        }
-      }
+            xyz: true,
+          },
+        },
+      },
     },
   })
   const testResult = await runScenario({ scenario })
   t.deepEqual(testResult, {
     direct: true,
-    indirect: false
+    indirect: false,
   }, 'expected result, did not error')
 })
 
@@ -59,28 +59,28 @@ test('globals - ensure window.document getter behavior support', async (t) => {
         // node vm weird, sometimes calls with vm context instead of vm global this
         if (this !== scenario.globalThis && this !== scenario.vmContext) {
           // chrome: Uncaught TypeError: Illegal invocation
-          throw new TypeError("'get document' called on an object that does not implement interface Window")
+          throw new TypeError('\'get document\' called on an object that does not implement interface Window')
         }
         return {
           location: {
-            href: 'beepboop.bong'
-          }
+            href: 'beepboop.bong',
+          },
         }
-      }
+      },
     },
     config: {
       resources: {
         one: {
           globals: {
-            document: true
-          }
+            document: true,
+          },
         },
         two: {
           globals: {
-            'document.location.href': true
-          }
-        }
-      }
+            'document.location.href': true,
+          },
+        },
+      },
     },
   })
   const testResult = await runScenario({ scenario })
@@ -95,8 +95,8 @@ test('globals - ensure circular refs on package compartment global', async (t) =
       console.log(JSON.stringify(testResult, null, 2))
     },
     kernelArgs: {
-      globalThisRefs: ['xyz', 'globalThis']
-    }
+      globalThisRefs: ['xyz', 'globalThis'],
+    },
   })
   const testResult = await runScenario({ scenario })
   t.is(testResult, true, 'xyz references globalThis')
@@ -117,18 +117,18 @@ test('globals - ensure setTimeout calls dont trigger illegal invocation', async 
       resources: {
         one: {
           globals: {
-            setTimeout: true
-          }
-        }
-      }
+            setTimeout: true,
+          },
+        },
+      },
     },
     context: {
       setTimeout () {
         if (this !== scenario.globalThis && this !== scenario.vmContext) {
           // chrome: Uncaught TypeError: Illegal invocation
-          throw new TypeError("'setTimeout' called on an object that does not implement interface Window")
+          throw new TypeError('\'setTimeout\' called on an object that does not implement interface Window')
         }
-      }
+      },
     },
   })
   const testResult = await runScenario({ scenario })
@@ -157,16 +157,18 @@ test('globals - endowing bind on a function', async (t) => {
       }
     },
     context: {
-      abc: function () { return this }
+      abc: function () {
+        return this 
+      },
     },
     config: {
       resources: {
         one: {
           globals: {
-            'abc.bind': true
-          }
+            'abc.bind': true,
+          },
         },
-      }
+      },
     },
   })
   const testResult = await runScenario({ scenario })
@@ -195,10 +197,10 @@ test('globals - endowing properties on the globalThis prototype chain', async (t
       resources: {
         one: {
           globals: {
-            'abc': true
-          }
+            'abc': true,
+          },
         },
-      }
+      },
     },
   })
   const testResult = await runScenario({ scenario })
@@ -212,16 +214,18 @@ test('globals - explicitly disallowing properties on the globalThis', async (t) 
       module.exports = globalThis.abc()
     },
     context: {
-      abc: function () { return 42 }
+      abc: function () {
+        return 42 
+      },
     },
     config: {
       resources: {
         one: {
           globals: {
-            'abc': false
-          }
+            'abc': false,
+          },
         },
-      }
+      },
     },
   })
   await t.throwsAsync(runScenario({ scenario }), { message: 'globalThis.abc is not a function' })
@@ -234,26 +238,28 @@ test('globals - explicitly disallowing properties on the globalThis via override
       module.exports = globalThis.abc()
     },
     context: {
-      abc: function () { return 42 }
+      abc: function () {
+        return 42 
+      },
     },
     config: {
       resources: {
         one: {
           globals: {
-            'abc': true
-          }
-        }
-      }
+            'abc': true,
+          },
+        },
+      },
     },
     configOverride: {
       resources: {
         one: {
           globals: {
-            'abc': false
-          }
-        }
-      }
-    }
+            'abc': false,
+          },
+        },
+      },
+    },
   })
   await t.throwsAsync(runScenario({ scenario }), { message: 'globalThis.abc is not a function' })
 })
@@ -263,7 +269,7 @@ test('globals - nested property true.false.true', async (t) => {
   // When this behavior changes, update /docs/policy.md
   const shared = {
     context: {
-      a: { ok: 42, b: { c: ()=>42, notOk:41 }},
+      a: { ok: 42, b: { c: () => 42, notOk:41 }},
     },
     config: {
       resources: {
@@ -272,9 +278,9 @@ test('globals - nested property true.false.true', async (t) => {
             'a': true,
             'a.b': false,
             'a.b.c':true,
-          }
+          },
         },
-      }
+      },
     },
   }
   const handlesAccess = createScenarioFromScaffold({
@@ -284,9 +290,9 @@ test('globals - nested property true.false.true', async (t) => {
         a_ok: !!globalThis.a.ok,
         a_b_notOk: !!globalThis.a.b.notOk,
         a_b_c: globalThis.a.b.c(),
-      };
+      }
     },
-    ...shared
+    ...shared,
   })
 
   const testResult = await runScenario({ scenario: handlesAccess })
@@ -301,8 +307,8 @@ test('globals - nested property false.true', async (t) => {
   'use strict'
   const shared = {
     context: {
-      a: { b: { c: ()=>42, notOk:41 }},
-      x: { notOk:41, y: ()=>42 },
+      a: { b: { c: () => 42, notOk:41 }},
+      x: { notOk:41, y: () => 42 },
     },
     config: {
       resources: {
@@ -311,10 +317,10 @@ test('globals - nested property false.true', async (t) => {
             'a.b': false,
             'a.b.c':true,
             'x': false,
-            'x.y': true
-          }
+            'x.y': true,
+          },
         },
-      }
+      },
     },
   }
   const handlesAccess = createScenarioFromScaffold({
@@ -326,9 +332,9 @@ test('globals - nested property false.true', async (t) => {
         x_notOk: !!globalThis.x.notOk,
         a_b_notOk: !!globalThis.a.b.notOk,
         a_b_c: globalThis.a.b.c(),
-      };
+      }
     },
-    ...shared
+    ...shared,
   })
 
   const testResult = await runScenario({ scenario: handlesAccess })
@@ -343,7 +349,7 @@ test.failing('globals - nested property true.false', async (t) => {
   // When this behavior changes, update /docs/policy.md
   const shared = {
     context: {
-      a: { ok: 42, b: { c: ()=>42, notOk:41 }},
+      a: { ok: 42, b: { c: () => 42, notOk:41 }},
     },
     config: {
       resources: {
@@ -351,9 +357,9 @@ test.failing('globals - nested property true.false', async (t) => {
           globals: {
             'a': true,
             'a.b': false,
-          }
+          },
         },
-      }
+      },
     },
   }
   const handlesAccess = createScenarioFromScaffold({
@@ -362,9 +368,9 @@ test.failing('globals - nested property true.false', async (t) => {
         a: !!globalThis.a,
         a_ok: !!globalThis.a.ok,
         a_b: !!globalThis.a.b,
-      };
+      }
     },
-    ...shared
+    ...shared,
   })
 
   const testResult = await runScenario({ scenario: handlesAccess })
@@ -386,33 +392,33 @@ test('globals - firefox addon chrome api lazy getter works', async (t) => {
       function exportLazyGetter(object, prop, getter) {
         let redefine = value => {
           if (value === undefined) {
-            delete object[prop];
+            delete object[prop]
           } else {
             Object.defineProperty(object, prop, {
               enumerable: true,
               configurable: true,
               writable: true,
               value,
-            });
+            })
           }
 
-          getter = null;
+          getter = null
 
-          return value;
-        };
+          return value
+        }
 
         Object.defineProperty(object, prop, {
           enumerable: true,
           configurable: true,
 
           get: function() {
-            return redefine(getter.call(this));
+            return redefine(getter.call(this))
           },
 
           set: function(value) {
-            redefine(value);
-          }
-        });
+            redefine(value)
+          },
+        })
       }
       exportLazyGetter(globalThis, 'chrome', () => 'xyz')
     },
@@ -420,16 +426,16 @@ test('globals - firefox addon chrome api lazy getter works', async (t) => {
       resources: {
         one: {
           globals: {
-            'chrome': true
-          }
+            'chrome': true,
+          },
         },
-      }
+      },
     },
     context: {
       chrome: {
-        runtime: 'xyz'
-      }
-    }
+        runtime: 'xyz',
+      },
+    },
   })
   const testResult = await runScenario({ scenario })
   t.is(testResult, 'xyz', 'expected result, did not error')
