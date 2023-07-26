@@ -1,10 +1,10 @@
 const test = require('ava')
 const {
-  runScenario
+  runScenario,
 } = require('./util')
 const {
   createScenarioFromScaffold,
-  runAndTestScenario
+  runAndTestScenario,
 } = require('lavamoat-core/test/util')
 
 test('globalRef - has only the expected global circular refs', async (t) => {
@@ -22,8 +22,8 @@ test('globalRef - has only the expected global circular refs', async (t) => {
       'window',
       'self',
       'global',
-      'globalThis'
-    ].sort()
+      'globalThis',
+    ].sort(),
   })
   await runAndTestScenario(t, scenario, runScenario)
 })
@@ -33,10 +33,18 @@ test('globalRef - globalRef - check default containment', async (t) => {
     name: 'globalRef - check default containment',
     defineOne: () => {
       const testResults = {}
-      try { testResults.objCheckThis = this.Object === Object } catch (_) { }
-      try { testResults.objCheckSelf = self.Object === Object } catch (_) { }
-      try { testResults.objCheckGlobal = global.Object === Object } catch (_) { }
-      try { testResults.thisIsExports = exports === this } catch (_) { }
+      try {
+        testResults.objCheckThis = this.Object === Object 
+      } catch (_) { }
+      try {
+        testResults.objCheckSelf = self.Object === Object 
+      } catch (_) { }
+      try {
+        testResults.objCheckGlobal = global.Object === Object 
+      } catch (_) { }
+      try {
+        testResults.thisIsExports = exports === this 
+      } catch (_) { }
       module.exports = testResults
     },
     expectedResult: {
@@ -44,7 +52,7 @@ test('globalRef - globalRef - check default containment', async (t) => {
       objCheckSelf: true,
       objCheckGlobal: true,
       thisIsExports: true,
-    }
+    },
   })
   await runAndTestScenario(t, scenario, runScenario)
 })
@@ -56,25 +64,41 @@ test('globalRef - ensure endowments are accessible on globals', async (t) => {
       const testResults = {}
       testResults.contextHasPostMessage = typeof postMessage !== 'undefined'
       testResults.selfHasPostMessage = !!self.postMessage
-      try { testResults.checkThis = this.postMessage === postMessage } catch (err) { checkThis = err.message }
-      try { testResults.checkSelf = self.postMessage === postMessage } catch (err) { checkSelf = err.message }
-      try { testResults.checkWindow = window.postMessage === postMessage } catch (err) { checkWindow = err.message }
-      try { testResults.checkGlobal = global.postMessage === postMessage } catch (err) { checkGlobal = err.message }
+      try {
+        testResults.checkThis = this.postMessage === postMessage 
+      } catch (err) {
+        checkThis = err.message 
+      }
+      try {
+        testResults.checkSelf = self.postMessage === postMessage 
+      } catch (err) {
+        checkSelf = err.message 
+      }
+      try {
+        testResults.checkWindow = window.postMessage === postMessage 
+      } catch (err) {
+        checkWindow = err.message 
+      }
+      try {
+        testResults.checkGlobal = global.postMessage === postMessage 
+      } catch (err) {
+        checkGlobal = err.message 
+      }
       module.exports = testResults
     },
     config: {
       resources: {
         '$root$': {
           packages: {
-            one: true
-          }
+            one: true,
+          },
         },
         one: {
           globals: {
-            postMessage: true
-          }
-        }
-      }
+            postMessage: true,
+          },
+        },
+      },
     },
     expectedResult: {
       // "this" is module.exports
@@ -83,11 +107,13 @@ test('globalRef - ensure endowments are accessible on globals', async (t) => {
       checkWindow: true,
       checkGlobal: true,
       contextHasPostMessage: true,
-      selfHasPostMessage: true
+      selfHasPostMessage: true,
     },
     context: {
-      postMessage: () => { throw new Error('this should never be called') }
-    }
+      postMessage: () => {
+        throw new Error('this should never be called') 
+      },
+    },
   })
   await runAndTestScenario(t, scenario, runScenario)
 })

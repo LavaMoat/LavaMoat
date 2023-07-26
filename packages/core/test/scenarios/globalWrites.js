@@ -18,26 +18,26 @@ module.exports = [
         resources: {
           one: {
             packages: {
-              two: true
-            }
+              two: true,
+            },
           },
           two: {
             globals: {
-              xyz: 'write'
+              xyz: 'write',
             },
             packages: {
-              three: true
-            }
+              three: true,
+            },
           },
           three: {
             globals: {
-              xyz: true
-            }
-          }
-        }
+              xyz: true,
+            },
+          },
+        },
       },
-      expectedResult: true
+      expectedResult: true,
     })
     return scenario
-  }
+  },
 ]

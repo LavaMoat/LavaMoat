@@ -1,10 +1,10 @@
 const test = require('ava')
 const {
   runScenario,
-  createBrowserifyScenarioFromScaffold
+  createBrowserifyScenarioFromScaffold,
 } = require('./util')
 const {
-  runAndTestScenario
+  runAndTestScenario,
 } = require('lavamoat-core/test/util.js')
 
 // TODO: this should be resolving to a browserify dependency
@@ -19,11 +19,11 @@ test('globals - process is properly injected', async (t) => {
       resources: {
         one: {
           packages: {
-            'browserify>process': true
-          }
-        }
-      }
-    }
+            'browserify>process': true,
+          },
+        },
+      },
+    },
   })
   await runAndTestScenario(t, scenario, runScenario)
 })

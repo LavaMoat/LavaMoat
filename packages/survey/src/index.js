@@ -46,14 +46,18 @@ async function start () {
   // const packages = ['relay-compiler']
   const allConfigs = { resources: {} }
   await Promise.all(packages.map(async (packageName) => {
-    if (parseBlacklist.includes(packageName)) return
+    if (parseBlacklist.includes(packageName)) {
+      return
+    }
     const config = await concurrencyLimit(() => loadPolicy(packageName))
     if (!config || !config.resources) {
       console.warn(`config for "${packageName}" is broken`)
       return
     }
     // skip if empty
-    if (!config.resources[packageName]) return
+    if (!config.resources[packageName]) {
+      return
+    }
     allConfigs.resources[packageName] = config.resources[packageName]
   }))
   await writeConfig('_all', allConfigs)
@@ -120,7 +124,7 @@ async function writeConfig (packageName, config) {
 }
 
 function getPolicyPath (packageName) {
-  const policyDir = path.resolve(__dirname, `../results/`)
+  const policyDir = path.resolve(__dirname, '../results/')
   const policyPath = `${policyDir}/${packageName}.json`
   return policyPath
 }

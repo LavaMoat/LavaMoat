@@ -1,16 +1,16 @@
 const test = require('ava')
 
 const {
-  autoConfigForScenario
+  autoConfigForScenario,
 } = require('./util')
 const {
-  createScenarioFromScaffold
+  createScenarioFromScaffold,
 } = require('lavamoat-core/test/util')
 
 test('generatePolicy - empty policy', async (t) => {
   const scenario = createScenarioFromScaffold({
     defineEntry: () => {},
-    defaultPolicy: false
+    defaultPolicy: false,
   })
   const policy = await autoConfigForScenario({ scenario })
   t.deepEqual(policy, { resources: {} }, 'policy matches expected')
@@ -18,8 +18,10 @@ test('generatePolicy - empty policy', async (t) => {
 
 test('generatePolicy - basic policy', async (t) => {
   const scenario = createScenarioFromScaffold({
-    defineOne: () => { module.exports = global.two },
-    defaultPolicy: false
+    defineOne: () => {
+      module.exports = global.two 
+    },
+    defaultPolicy: false,
   })
 
   const policy = await autoConfigForScenario({ scenario })
@@ -27,10 +29,10 @@ test('generatePolicy - basic policy', async (t) => {
     resources: {
       one: {
         globals: {
-          two: true
-        }
-      }
-    }
+          two: true,
+        },
+      },
+    },
   })
 })
 
@@ -42,17 +44,17 @@ test('generatePolicy - ignore various refs', async (t) => {
       const globalRefs = [typeof globalThis, typeof self, typeof window]
       global.xyz
     },
-    defaultPolicy: false
+    defaultPolicy: false,
   })
   const policy = await autoConfigForScenario({ scenario })
   t.deepEqual(policy, {
     resources: {
       one: {
         globals: {
-          xyz: true
-        }
-      }
-    }
+          xyz: true,
+        },
+      },
+    },
   })
 })
 
@@ -63,7 +65,7 @@ test('generatePolicy - policy ignores global refs', async (t) => {
       const href = window.location.href
       const xhr = new window.XMLHttpRequest()
     },
-    defaultPolicy: false
+    defaultPolicy: false,
   })
   const policy = await autoConfigForScenario({ scenario })
   t.deepEqual(policy, {
@@ -71,10 +73,10 @@ test('generatePolicy - policy ignores global refs', async (t) => {
       one: {
         globals: {
           'location.href': true,
-          XMLHttpRequest: true
-        }
-      }
-    }
+          XMLHttpRequest: true,
+        },
+      },
+    },
   })
 })
 
@@ -83,11 +85,11 @@ test('generatePolicy - policy ignores global refs when properties are not access
     defineOne: () => {
       typeof window !== undefined
     },
-    defaultPolicy: false
+    defaultPolicy: false,
   })
   const policy = await autoConfigForScenario({ scenario })
   t.deepEqual(policy, {
-    resources: {}
+    resources: {},
   })
 })
 
@@ -98,12 +100,12 @@ test('generatePolicy - policy ignores global refs accessed with allowlist items'
     },
     defaultPolicy: false,
     expectedResult: {
-      resources: {}
-    }
+      resources: {},
+    },
   })
   const policy = await autoConfigForScenario({ scenario })
   t.deepEqual(policy, {
-    resources: {}
+    resources: {},
   })
 })
 
@@ -124,25 +126,25 @@ test('generatePolicy - policy endows "process" properly', async (t) => {
           // must include browserify so we know to find the builtin deps
           devDependencies: {
             'browserify': '^16.2.3',
-          }
+          },
         })}`,
-      }
-    }
+      },
+    },
   })
   const policy = await autoConfigForScenario({ scenario })
   t.deepEqual(policy, {
     resources: {
       one: {
         packages: {
-          'browserify>process': true
-        }
+          'browserify>process': true,
+        },
       },
       'browserify>process': {
         globals: {
           clearTimeout: true,
-          setTimeout: true
-        }
-      }
-    }
+          setTimeout: true,
+        },
+      },
+    },
   })
 })

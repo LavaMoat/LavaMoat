@@ -13,7 +13,7 @@ module.exports = [
       defineTwo: () => {
         module.exports = { xyz: 1 }
       },
-      expectedResult: 2
+      expectedResult: 2,
     })
     return scenario
   },
@@ -29,7 +29,7 @@ module.exports = [
       defineTwo: () => {
         module.exports = { xyz: 1 }
       },
-      expectedResult: 1
+      expectedResult: 1,
     })
     return scenario
   },
@@ -42,10 +42,10 @@ module.exports = [
       defineTwo: () => {
         module.exports = undefined
       },
-      expectedResult: null
+      expectedResult: null,
     })
     return scenario
-  }
+  },
   // async () => {
   //   const scenario = createScenarioFromScaffold({
   //     name: 'exportsDefense - indirectly imported package should be readOnly',

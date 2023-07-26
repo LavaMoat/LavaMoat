@@ -32,14 +32,18 @@ async function parseForPolicy ({ packageDir, entryId, rootPackageName }) {
   // we also want to gracefully handle resolution failures
   const shouldResolve = (requestedName, parentSpecifier) => {
     const looksLikePackage = !(requestedName.startsWith('.') || requestedName.startsWith('/'))
-    if (looksLikePackage) return false
+    if (looksLikePackage) {
+      return false
+    }
     // attempt to resolve
     let resolved
     try {
       resolved = resolveHook(requestedName, parentSpecifier)
     } catch (err) {
       // ignore modules that cant be resolved
-      if (err.code === 'MODULE_NOT_FOUND') return false
+      if (err.code === 'MODULE_NOT_FOUND') {
+        return false
+      }
       throw err
     }
     const extension = path.extname(resolved).slice(1)
@@ -58,18 +62,22 @@ async function parseForPolicy ({ packageDir, entryId, rootPackageName }) {
   }
 
   // dont include empty config
-  if (Object.keys(environment).length === 0) return { resources: {} }
+  if (Object.keys(environment).length === 0) {
+    return { resources: {} }
+  }
 
   return {
     resources: {
       [rootPackageName]: {
-        environment
-      }
-    }
+        environment,
+      },
+    },
   }
 
   function visitorFn (moduleRecord) {
-    if (!moduleRecord.ast) return
+    if (!moduleRecord.ast) {
+      return
+    }
     const { primordialMutations, strictModeViolations, dynamicRequires } = inspectSesCompat(moduleRecord.ast)
     const serializableResults = {}
     if (primordialMutations.length) {

@@ -8,7 +8,7 @@ test('envConfig - intrinsic prototype mutating package running in unfrozen realm
       const two = require('two')
       module.exports = {
         one: Function.prototype.xyz,
-        two
+        two,
       }
     },
     defineTwo: () => {
@@ -17,15 +17,15 @@ test('envConfig - intrinsic prototype mutating package running in unfrozen realm
       module.exports = Function.prototype.xyz
     },
     expectedResult: {
-      two: 'Hello'
+      two: 'Hello',
     },
     config: {
       resources: {
         two: {
-          env: 'unfrozen'
-        }
-      }
-    }
+          env: 'unfrozen',
+        },
+      },
+    },
   })
   const testResult = await runScenario({ scenario })
   scenario.checkResult(t, testResult, scenario)
@@ -38,7 +38,7 @@ test('envConfig - module.exports from the same Realm as its Compartment', async 
       module.exports = {
         one: module.exports instanceof Object,
         two: two.isSameRealm,
-        cross: two.defaultExportsObj instanceof Object
+        cross: two.defaultExportsObj instanceof Object,
       }
     },
     defineTwo: () => {
@@ -46,21 +46,21 @@ test('envConfig - module.exports from the same Realm as its Compartment', async 
       const isSameRealm = defaultExportsObj instanceof Object
       module.exports = {
         defaultExportsObj,
-        isSameRealm
+        isSameRealm,
       }
     },
     expectedResult: {
       one: true,
       two: true,
-      cross: false
+      cross: false,
     },
     config: {
       resources: {
         two: {
-          env: 'unfrozen'
-        }
-      }
-    }
+          env: 'unfrozen',
+        },
+      },
+    },
   })
   const testResult = await runScenario({ scenario })
   scenario.checkResult(t, testResult, scenario)

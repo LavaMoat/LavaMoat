@@ -8,14 +8,17 @@ test('fnToCodeBlock utility works', (t) => {
   })
 
   t.is(src, '(() => {\n    1 + 2 + 3\n  })()')
-  })
+})
 
 testInspect('detects global reads', {}, () => {
   const x = xyz
-  (function (a) { return a })(abc)
+  // eslint-disable-next-line no-unexpected-multiline
+  (function (a) {
+    return a
+  })(abc)
 }, {
   xyz: 'read',
-  abc: 'read'
+  abc: 'read',
 })
 
 testInspect('doesnt detect "this"', {}, () => {
@@ -27,105 +30,107 @@ testInspect('doesnt detect properties on "this"', {}, () => {
 }, {})
 
 testInspect('detects reads on globalRefs', {
-  globalRefs: ['zzz']
+  globalRefs: ['zzz'],
 }, () => {
   const x = zzz.abc
 }, {
-  abc: 'read'
+  abc: 'read',
 })
 
 testInspect('detects reads on multiple globalRefs', {
-  globalRefs: ['a', 'b', 'c']
+  globalRefs: ['a', 'b', 'c'],
 }, () => {
   const x = a.x + b.y * c.z
 }, {
   x: 'read',
   y: 'read',
-  z: 'read'
+  z: 'read',
 })
 
 testInspect('detects implicit global writes', {}, () => {
   xyz = true
 }, {
-  xyz: 'write'
+  xyz: 'write',
 })
 
 testInspect('detects implicit global writes with mixed usage', {}, () => {
   z = xyz
-  xyz = (function (a) { return a })(abc)
+  xyz = (function (a) {
+    return a
+  })(abc)
 }, {
   xyz: 'write',
   abc: 'read',
-  z: 'write'
+  z: 'write',
 })
 
 testInspect('detects assignment to property on globalRefs', {
-  globalRefs: ['zzz']
+  globalRefs: ['zzz'],
 }, () => {
   zzz.abc = true
 }, {
-  abc: 'write'
+  abc: 'write',
 })
 
 testInspect('never suggest access to full globalRef', {
-  globalRefs: ['zzz']
+  globalRefs: ['zzz'],
 }, () => {
   const x = zzz
 }, {})
 
 testInspect('detects combined globalRef assignment and reads', {
-  globalRefs: ['zzz']
+  globalRefs: ['zzz'],
 }, () => {
   zzz.abc = xyz.abc
 }, {
   abc: 'write',
-  'xyz.abc': 'read'
+  'xyz.abc': 'read',
 })
 
 testInspect('not picking up assignments to non-global matching globalRef name', {
-  globalRefs: ['xyz']
+  globalRefs: ['xyz'],
 }, () => {
   const xyz = {}
   xyz.abc
 }, {})
 
 testInspect('elevating computed property lookups to globalRef 1', {
-  globalRefs: ['abc']
+  globalRefs: ['abc'],
 }, () => {
   const key = 'hello'
   abc.xyz[key]
 }, {
-  xyz: 'read'
+  xyz: 'read',
 })
 
 testInspect('elevating computed property lookups to globalRef 2', {
-  globalRefs: ['abc']
+  globalRefs: ['abc'],
 }, () => {
   const key = 'hello'
   abc.xyz.ijk[key]
 }, {
-  'xyz.ijk': 'read'
+  'xyz.ijk': 'read',
 })
 
 testInspect('picking up mixed explicit and computed property lookups', {
-  globalRefs: ['window']
+  globalRefs: ['window'],
 }, () => {
   const key = 'hello'
   window.location[key]
   window.location.href
 }, {
-  location: 'read'
+  location: 'read',
 })
 
 testInspect('not picking up js language features', {
-  globalRefs: ['window']
+  globalRefs: ['window'],
 }, () => {
   Object
   window.Object
 }, {})
 
 testInspect('ignore globalRef without property lookup', {
-  globalRefs: ['window']
+  globalRefs: ['window'],
 }, () => {
   typeof window === undefined
 }, {})
@@ -137,26 +142,26 @@ testInspect('get granular platform api', {}, () => {
 }, {
   'document.createElement': 'read',
   'location.href': 'read',
-  'navigator.userAgent': 'read'
+  'navigator.userAgent': 'read',
 })
 
 testInspect('get granular platform api when nested under global', {
-  globalRefs: ['window']
+  globalRefs: ['window'],
 }, () => {
   window.location.href
 }, {
-  'location.href': 'read'
+  'location.href': 'read',
 })
 
 testInspect('take platform api, up to computed', {
-  globalRefs: ['window']
+  globalRefs: ['window'],
 }, () => {
   const key = 'hello'
   document.body.children[key]
   window.location.href[key]
 }, {
   'document.body.children': 'read',
-  'location.href': 'read'
+  'location.href': 'read',
 })
 
 testInspect('raise globals to highest used', {}, () => {
@@ -166,94 +171,94 @@ testInspect('raise globals to highest used', {}, () => {
   document.body.children.indexOf
 }, {
   location: 'read',
-  'document.body.children': 'read'
+  'document.body.children': 'read',
 })
 
 testInspect('correctly finds deep "process.env" reference', {}, () => {
   process.env.READABLE_STREAM === 'disable'
 }, {
-  'process.env.READABLE_STREAM': 'read'
+  'process.env.READABLE_STREAM': 'read',
 })
 
 testInspect('read access to object implies write access to properties', {}, () => {
   const x = location
   location.href = 'website'
 }, {
-  location: 'read'
+  location: 'read',
 })
 
 testInspect('object destructuring', {
-  globalRefs: ['globalThis']
+  globalRefs: ['globalThis'],
 }, () => {
   const { abc } = globalThis
   const xyz = globalThis.xyz
 }, {
   abc: 'read',
-  xyz: 'read'
+  xyz: 'read',
 })
 
 testInspect('object destructuring with branching', {
-  globalRefs: ['globalThis']
+  globalRefs: ['globalThis'],
 }, () => {
   const { y: { z }, w } = globalThis.x
 }, {
   'x.y.z': 'read',
-  'x.w': 'read'
+  'x.w': 'read',
 })
 
 testInspect('array destructuring', {
-  globalRefs: ['globalThis']
+  globalRefs: ['globalThis'],
 }, () => {
   const [one, two, three] = globalThis.snakes
 }, {
   'snakes.0': 'read',
   'snakes.1': 'read',
-  'snakes.2': 'read'
+  'snakes.2': 'read',
 })
 
 testInspect('complex mixed destructuring', {
-  globalRefs: ['globalThis']
+  globalRefs: ['globalThis'],
 }, () => {
   const [
     { name: primaryThingName },
     { name: secondaryThingName, ...secondaryThingProps },
-    { name: [...tertiaryThingName] }
+    { name: [...tertiaryThingName] },
   ] = globalThis.things
 }, {
   'things.0.name': 'read',
   'things.1': 'read',
-  'things.2.name': 'read'
+  'things.2.name': 'read',
 })
 
 testInspect('paths stop at computed props', {
-  globalRefs: ['globalThis']
+  globalRefs: ['globalThis'],
 }, () => {
   const key = Math.random()
   const { b, c } = globalThis[key].a
   const { [key]: y, z } = globalThis.x
 }, {
-  x: 'read'
+  x: 'read',
 })
 
 testInspect('new intrinsics like BigInt are ignored', {
-  globalRefs: ['globalThis']
+  globalRefs: ['globalThis'],
 }, () => {
   BigInt(123)
 }, {})
 
 testInspect('object destructuring 2', {
-  globalRefs: ['globalThis']
+  globalRefs: ['globalThis'],
 }, () => {
-  const { source: { location: { npm: { filePath, iconPath }, }, }, } = manifest
+  const { source: { location: { npm: { filePath, iconPath } } } } = manifest
 }, {
   'manifest.source.location.npm.filePath': 'read',
   'manifest.source.location.npm.iconPath': 'read',
 })
 
 testInspect('optional chaining', {
-  globalRefs: ['globalThis']
+  globalRefs: ['globalThis'],
 }, () => {
-  manifest.source?.location?.npm?.filePath;
+  manifest.source?.location?.npm?.filePath
 }, {
   'manifest.source.location.npm.filePath': 'read',
 })
@@ -273,13 +278,15 @@ function testInspect (label, opts, fn, expectedResultObj) {
     }
 
     t.deepEqual(resultSorted, expectedSorted)
-      })
+  })
 }
 
 function sortBy (key) {
   return (a, b) => {
     const vA = a[key]; const vB = b[key]
-    if (vA === vB) return 0
+    if (vA === vB) {
+      return 0
+    }
     return vA > vB ? 1 : -1
   }
 }

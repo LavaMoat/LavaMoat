@@ -6,16 +6,22 @@ module.exports = [
       name: 'globalRef - check default containment',
       defineOne: () => {
         const testResults = {}
-        try { testResults.objCheckThis = this.Object === Object } catch (_) { }
-        try { testResults.objCheckGlobal = globalThis.Object === Object } catch (_) { }
-        try { testResults.thisIsExports = exports === this } catch (_) { }
+        try {
+          testResults.objCheckThis = this.Object === Object 
+        } catch (_) { }
+        try {
+          testResults.objCheckGlobal = globalThis.Object === Object 
+        } catch (_) { }
+        try {
+          testResults.thisIsExports = exports === this 
+        } catch (_) { }
         module.exports = testResults
       },
       expectedResult: {
         objCheckThis: false,
         objCheckGlobal: true,
-        thisIsExports: true
-      }
+        thisIsExports: true,
+      },
     })
     return scenario
   },
@@ -40,12 +46,14 @@ module.exports = [
         } catch (e) {
           error = e
           // This works if the window reference is available
-          if (typeof window === 'object') g = window
+          if (typeof window === 'object') {
+            g = window
+          }
         }
         // test webpack result against globalThis
         module.exports = { match: g === globalThis, type: typeof g, error: error && error.message }
       },
-      expectedResult: { match: true, type: 'object' }
+      expectedResult: { match: true, type: 'object' },
     })
     return scenario
   },
@@ -55,8 +63,8 @@ module.exports = [
       defineOne: () => {
         module.exports = function () {} instanceof globalThis.Function
       },
-      expectedResult: true
+      expectedResult: true,
     })
     return scenario
-  }
+  },
 ]

@@ -52,12 +52,12 @@ module.exports = [
         resources: {
           one: {
             globals: {
-              'globalThis.__proto__': true
-            }
-          }
-        }
+              'globalThis.__proto__': true,
+            },
+          },
+        },
       },
-      expectedFailure: true
+      expectedFailure: true,
     })
     return scenario
   },
@@ -68,12 +68,12 @@ module.exports = [
         resources: {
           one: {
             packages: {
-              two: false
-            }
-          }
-        }
+              two: false,
+            },
+          },
+        },
       },
-      expectedFailure: true
+      expectedFailure: true,
     })
     return scenario
   },
@@ -146,13 +146,13 @@ module.exports = [
         resourcessssss: {
           three: {
             packages: {
-              two: true
-            }
-          }
-        }
+              two: true,
+            },
+          },
+        },
       },
       expectedFailure: true,
-      defaultPolicy: false
+      defaultPolicy: false,
     })
     return scenario
   },
@@ -163,13 +163,13 @@ module.exports = [
         resources: {
           three: {
             packagesssss: {
-              two: true
-            }
-          }
-        }
+              two: true,
+            },
+          },
+        },
       },
       expectedFailure: true,
-      defaultPolicy: false
+      defaultPolicy: false,
     })
     return scenario
   },
@@ -180,16 +180,16 @@ module.exports = [
         resources: {
           three: {
             packages: {
-              two: true
+              two: true,
             },
             globalsss: {
-              console: true
-            }
-          }
-        }
+              console: true,
+            },
+          },
+        },
       },
       expectedFailure: true,
-      defaultPolicy: false
+      defaultPolicy: false,
     })
     return scenario
   },
@@ -200,16 +200,16 @@ module.exports = [
         resources: {
           three: {
             packages: {
-              two: true
+              two: true,
             },
             globals: {
-              console: false
-            }
-          }
-        }
+              console: false,
+            },
+          },
+        },
       },
       expectedFailure: true,
-      defaultPolicy: false
+      defaultPolicy: false,
     })
     return scenario
   },
@@ -220,39 +220,39 @@ module.exports = [
         resources: {
           '$root$': {
             packages: {
-              two: true
-            }
+              two: true,
+            },
           },
           one: {
             packages: {
-              two: true
-            }
+              two: true,
+            },
           },
           two: {
             packages: {
-              three: true
-            }
-          }
-        }
+              three: true,
+            },
+          },
+        },
       },
       configOverride: {
         resources: {
           '$root$': {
             packages: {
-              two: true
-            }
+              two: true,
+            },
           },
           two: {
             packages: {
-              three: true
+              three: true,
             },
             globals: {
-              console: 'write'
-            }
-          }
-        }
-      }
+              console: 'write',
+            },
+          },
+        },
+      },
     })
     return scenario
-  }
+  },
 ]

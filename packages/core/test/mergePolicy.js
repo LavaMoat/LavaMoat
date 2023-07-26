@@ -8,28 +8,28 @@ testMerge('merge with resources', {
       globals: {
         abc: true,
         xyz: false,
-        'a.b.c': true
+        'a.b.c': true,
       },
       builtin: {
         derp: true,
-        qwerty: false
-      }
-    }
-  }
+        qwerty: false,
+      },
+    },
+  },
 }, {
   resources: {
     babel: {
       globals: {
         def: true,
         ghi: false,
-        'a.b': true
+        'a.b': true,
       },
       builtin: {
         derp: true,
-        qwerty: false
-      }
-    }
-  }
+        qwerty: false,
+      },
+    },
+  },
 }, {
   resources: {
     babel: {
@@ -38,14 +38,14 @@ testMerge('merge with resources', {
         xyz: false,
         def: true,
         ghi: false,
-        'a.b': true
+        'a.b': true,
       },
       builtin: {
         derp: true,
-        qwerty: false
-      }
-    }
-  }
+        qwerty: false,
+      },
+    },
+  },
 })
 
 testMerge('overrides to disallow', {
@@ -55,27 +55,27 @@ testMerge('overrides to disallow', {
         abc: true,
         xyz: false,
         'a.b': true,
-        'q.w.e': true
+        'q.w.e': true,
       },
       builtin: {
         derp: true,
-        qwerty: false
-      }
-    }
-  }
+        qwerty: false,
+      },
+    },
+  },
 }, {
   resources: {
     babel: {
       globals: {
         abc: false,
         'a.b.c': false, // this is not supported
-        'q.w': false
+        'q.w': false,
       },
       builtin: {
         derp: false,
-      }
-    }
-  }
+      },
+    },
+  },
 },  {
   resources: {
     babel: {

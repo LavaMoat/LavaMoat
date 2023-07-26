@@ -8,7 +8,7 @@ const pack = require('../')
 
 test('dummy test', (t) => {
   pack({
-    includePrelude: false
+    includePrelude: false,
   })
   t.pass('no error thrown')
 })
@@ -27,7 +27,7 @@ test('sourcemap test', async (t) => {
   pipe(
     packStream,
     concat(resolve),
-    callback
+    callback,
   )
 
   // add modules
@@ -37,9 +37,9 @@ test('sourcemap test', async (t) => {
     source: 'require(\'./log.js\'); require(\'./util.js\')',
     deps: {
       './log.js': '2',
-      './util.js': '3'
+      './util.js': '3',
     },
-    entry: true
+    entry: true,
   }, {
     id: '2',
     sourceFile: 'log.js',

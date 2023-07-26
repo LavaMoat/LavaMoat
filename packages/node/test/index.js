@@ -12,8 +12,8 @@ test('parseForPolicy - resolutions', async (t) => {
   const resolutions = {
     a: {
       fs: `${projectRoot}/fake-fs.js`,
-      b: `${projectRoot}/fake-b.js`
-    }
+      b: `${projectRoot}/fake-b.js`,
+    },
   }
 
   const policy1 = await parseForPolicy({ entryId, projectRoot })
@@ -21,18 +21,18 @@ test('parseForPolicy - resolutions', async (t) => {
     resources: {
       a: {
         builtin: {
-          'fs.deleteEntireHardDrive': true
+          'fs.deleteEntireHardDrive': true,
         },
         packages: {
-          b: true
-        }
+          b: true,
+        },
       },
       b: {
         'builtin': {
-          'http': true
-        }
-      }
-    }
+          'http': true,
+        },
+      },
+    },
   })
 
   const policy2 = await parseForPolicy({ entryId, projectRoot, policyOverride: { resolutions } })
@@ -41,10 +41,10 @@ test('parseForPolicy - resolutions', async (t) => {
     resources: {
       a: {
         packages: {
-          '$root$': true
-        }
+          '$root$': true,
+        },
       },
-    }
+    },
   }, 'policy resources do not include data on packages not parsed due to resolutions')
 })
 
@@ -57,20 +57,20 @@ test('parseForPolicy - require a userspace package with a builtin name', async (
     resources: {
       a: {
         packages: {
-          events: true
-        }
+          events: true,
+        },
       },
       b: {
         builtin: {
-          'events.EventEmitter': true
-        }
+          'events.EventEmitter': true,
+        },
       },
       events: {
         globals: {
-          console: true
-        }
-      }
-    }
+          console: true,
+        },
+      },
+    },
   })
 })
 
@@ -79,7 +79,7 @@ test('parseForPolicy - indirectly used packages are included in parent\'s allowl
   const entryId = `${projectRoot}/index.js`
   const policy = await parseForPolicy({ entryId, projectRoot })
   t.deepEqual(policy, {
-    resources: { a: { builtin: { crypto: true } } }
+    resources: { a: { builtin: { crypto: true } } },
   })
 })
 
@@ -89,12 +89,12 @@ test('execute - resolutions', async (t) => {
   const entryId = './index.js'
   const { output } = await runLavamoat({
     cwd: projectRoot,
-    args: [entryId]
+    args: [entryId],
   })
   t.deepEqual(output.stdout.split('\n'), [
     'fake-fs called',
     'value: 42',
-    ''
+    '',
   ], 'should not have any standard output')
 })
 
@@ -103,11 +103,11 @@ test('execute - keccak with native modules', async (t) => {
   const entryId = './index.js'
   const { output } = await runLavamoat({
     cwd: projectRoot,
-    args: [entryId]
+    args: [entryId],
   })
   t.deepEqual(output.stdout.split('\n'), [
     'keccak256: 5cad7cf49f610ec53189e06d3c8668789441235613408f8fabcb4ad8dad94db5',
-    ''
+    '',
   ], 'should not have any standard output')
 })
 
@@ -116,10 +116,10 @@ test('execute - core modules and buffers', async (t) => {
   const entryId = './index.js'
   const { output } = await runLavamoat({
     cwd: projectRoot,
-    args: [entryId]
+    args: [entryId],
   })
   t.deepEqual(output.stdout.split('\n'), [
     'sha256: fb1520a08f1bc43831d0000dc76f6b0f027bafd36c55b1f43fc54c60c2f831da',
-    ''
+    '',
   ], 'should not have any standard output')
 })

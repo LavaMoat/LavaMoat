@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/* eslint-disable node/shebang */
+/* eslint-disable n/shebang */
 
 // @ts-check
 const path = require('path')
@@ -22,7 +22,7 @@ async function start () {
   }
 
   console.error(`-lavamoat--allow-scripts---------------------------------------------------
-There's no policy for the '${binName}' bin script. 
+There's no policy for the '${binName}' bin script.
 You can allow this script to run by adding it to lavamoat->allowBins in package.json
 
 Add a line like this in allowBins:
@@ -34,10 +34,10 @@ Add a line like this in allowBins:
   ${currentBinCandidates.map(c => c.fullLinkPath).join('\n')}
 `)
   }
-  
+
   console.error(`After you're done configuring, run allow-scripts again.
 ---------------------------------------------------------------------------`)
 
   process.exit(42)
-  
+
 }

@@ -3,43 +3,43 @@ const { utils: { mergePolicy, mergeConfigEntire, objToMap, mapToObj } } = requir
 
 testMergePartial('upgrades reads to writes', {
   abc: 'write',
-  xyz: 'read'
+  xyz: 'read',
 }, {
   abc: 'read',
-  xyz: 'write'
+  xyz: 'write',
 }, {
   abc: 'write',
-  xyz: 'write'
+  xyz: 'write',
 })
 
 testMergePartial('adds new packages', {
   abc: 'write',
-  xyz: 'read'
+  xyz: 'read',
 }, {
   def: 'read',
-  ghi: 'write'
+  ghi: 'write',
 }, {
   abc: 'write',
   xyz: 'read',
   def: 'read',
-  ghi: 'write'
+  ghi: 'write',
 })
 
 testMergePartial('dedupe overlapping', {
-  'abc.xyz': 'read'
+  'abc.xyz': 'read',
 }, {
-  abc: 'read'
+  abc: 'read',
 }, {
-  abc: 'read'
+  abc: 'read',
 })
 
 testMergePartial('non-overlapping', {
-  abc: 'read'
+  abc: 'read',
 }, {
-  'xyz.jkl': 'write'
+  'xyz.jkl': 'write',
 }, {
   abc: 'read',
-  'xyz.jkl': 'write'
+  'xyz.jkl': 'write',
 })
 
 function testMergePartial (label, configA, configB, expectedResultObj) {

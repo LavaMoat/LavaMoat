@@ -1,16 +1,21 @@
+/* eslint-disable n/prefer-global/buffer */
 const test = require('ava')
 const {
   createScenarioFromScaffold,
   runScenario,
-  runAndTestScenario
+  runAndTestScenario,
 } = require('./util.js')
 
 test('builtin - basic access', async (t) => {
   const scenario = createScenarioFromScaffold({
     defineOne: () => {
       let abc = null; let xyz = null
-      try { abc = require('abc') } catch (_) {}
-      try { xyz = require('xyz') } catch (_) {}
+      try {
+        abc = require('abc')
+      } catch (_) {}
+      try {
+        xyz = require('xyz')
+      } catch (_) {}
 
       module.exports = { abc, xyz }
     },
@@ -19,15 +24,15 @@ test('builtin - basic access', async (t) => {
         one: {
           builtin: {
             abc: true,
-            xyz: false
-          }
-        }
-      }
+            xyz: false,
+          },
+        },
+      },
     },
     expectedResult: { abc: 123, xyz: null },
     builtin: {
-      abc: 123
-    }
+      abc: 123,
+    },
   })
 
   await runAndTestScenario(t, scenario, runScenario)
@@ -42,18 +47,18 @@ test('builtin - access via paths', async (t) => {
       resources: {
         one: {
           builtin: {
-            'abc.xyz': true
-          }
-        }
-      }
+            'abc.xyz': true,
+          },
+        },
+      },
     },
     expectedResult: { xyz: 123 },
     builtin: {
       abc: {
         xyz: 123,
-        ijk: 456
-      }
-    }
+        ijk: 456,
+      },
+    },
   })
 
   await runAndTestScenario(t, scenario, runScenario)
@@ -67,7 +72,7 @@ test('builtin - paths soft-bindings preserve "this" but allow override', async (
       module.exports = {
         overrideCheck: two.overrideCheck(Buffer.from([1, 2, 3])),
         thisCheck: two.thisCheck(),
-        classCheck: two.classCheck()
+        classCheck: two.classCheck(),
       }
     },
 
@@ -94,29 +99,33 @@ test('builtin - paths soft-bindings preserve "this" but allow override', async (
       resources: {
         one: {
           builtin: {
-            'buffer.Buffer.from': true
-          }
+            'buffer.Buffer.from': true,
+          },
         },
         two: {
           builtin: {
             // these paths are carefully constructed to try and split the fn from its parent
             'buffer.Buffer.prototype.slice': true,
             'thisChecker.check': true,
-            'someClass.SomeClass': true
-          }
-        }
-      }
+            'someClass.SomeClass': true,
+          },
+        },
+      },
     },
     expectedResult: {
       overrideCheck: true,
       thisCheck: true,
-      classCheck: true
+      classCheck: true,
     },
     builtin: {
       buffer: require('buffer'),
-      thisChecker: (() => { const parent = {}; parent.check = function () { return this === parent }; return parent })(),
-      someClass: { SomeClass: class SomeClass {} }
-    }
+      thisChecker: (() => {
+        const parent = {}; parent.check = function () {
+          return this === parent
+        }; return parent
+      })(),
+      someClass: { SomeClass: class SomeClass {} },
+    },
   })
 
   await runAndTestScenario(t, scenario, runScenario)

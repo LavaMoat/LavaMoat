@@ -392,7 +392,7 @@ class DepGraph extends React.Component {
   }
 
   renderSelectedNodeCode (selectedModule) {
-    // eslint-disable-next-line node/global-require
+    // eslint-disable-next-line n/global-require
     require('codemirror/mode/javascript/javascript')
     const { policyData } = this.props
     const { debug: { debugInfo } } = policyData

@@ -15,7 +15,7 @@ const assert = require('assert')
 const JSONStream = require('JSONStream')
 const through = require('through2')
 const umd = require('umd')
-// eslint-disable-next-line node/prefer-global/buffer
+// eslint-disable-next-line n/prefer-global/buffer
 const { Buffer } = require('buffer')
 const combineSourceMap = require('combine-source-map')
 const convertSourceMap = require('convert-source-map')

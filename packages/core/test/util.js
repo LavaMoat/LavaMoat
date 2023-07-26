@@ -19,7 +19,7 @@ module.exports = {
   createHookedConsole,
   fillInFileDetails,
   functionToString,
-  runAndTestScenario
+  runAndTestScenario,
 }
 
 async function generatePolicyFromFiles ({ files, ...opts }) {
@@ -33,7 +33,7 @@ async function generatePolicyFromFiles ({ files, ...opts }) {
     },
     isBuiltin: () => false,
     includeDebugInfo: false,
-    ...opts
+    ...opts,
   })
 
   return config
@@ -42,7 +42,7 @@ async function generatePolicyFromFiles ({ files, ...opts }) {
 function createScenarioFromScaffold ({
   name = 'template scenario',
   expectedResult = {
-    value: 'this is module two'
+    value: 'this is module two',
   },
   testType = 'deepEqual',
   checkPostRun = async (t, result, err, scenario) => {
@@ -99,13 +99,13 @@ function createScenarioFromScaffold ({
 
   function _defineTwo () {
     module.exports = {
-      value: 'this is module two'
+      value: 'this is module two',
     }
   }
 
   function _defineThree () {
     module.exports = {
-      value: 'this is module three'
+      value: 'this is module three',
     }
   }
 
@@ -116,9 +116,9 @@ function createScenarioFromScaffold ({
       importMap: {
         one: 'node_modules/one/index.js',
         two: 'node_modules/two/index.js',
-        three: 'node_modules/three/index.js'
+        three: 'node_modules/three/index.js',
       },
-      entry: true
+      entry: true,
     },
     'package.json': {
       content: `${JSON.stringify({
@@ -128,7 +128,7 @@ function createScenarioFromScaffold ({
           three: '1.0.0',
         },
         devDependencies: {
-        }
+        },
       }, null, 2)}`,
     },
     'node_modules/one/index.js': {
@@ -136,46 +136,46 @@ function createScenarioFromScaffold ({
       content: `(${defineOne || _defineOne}).call(this)`,
       importMap: {
         two: 'node_modules/two/index.js',
-        three: 'node_modules/three/index.js'
-      }
+        three: 'node_modules/three/index.js',
+      },
     },
     'node_modules/one/package.json': {
       content: `${JSON.stringify({
         dependencies: {
           two: '1.0.0',
           three: '1.0.0',
-        }
+        },
       }, null, 2)}`,
     },
     'node_modules/two/index.js': {
       packageName: 'two',
       content: `(${defineTwo || _defineTwo}).call(this)`,
       importMap: {
-        three: 'node_modules/three/index.js'
-      }
+        three: 'node_modules/three/index.js',
+      },
     },
     'node_modules/two/package.json': {
       content: `${JSON.stringify({
         dependencies: {
           three: '1.0.0',
-        }
+        },
       }, null, 2)}`,
     },
     'node_modules/three/index.js': {
       packageName: 'three',
       content: `(${defineThree || _defineThree}).call(this)`,
       importMap: {
-        one: 'node_modules/one/index.js'
-      }
+        one: 'node_modules/one/index.js',
+      },
     },
     'node_modules/three/package.json': {
       content: `${JSON.stringify({
         dependencies: {
           one: '1.0.0',
-        }
+        },
       }, null, 2)}`,
     },
-    ...files
+    ...files,
   })
 
   let _config
@@ -185,15 +185,15 @@ function createScenarioFromScaffold ({
         one: {
           packages: {
             two: true,
-            three: true
-          }
+            three: true,
+          },
         },
         two: {
           packages: {
-            three: true
-          }
-        }
-      }
+            three: true,
+          },
+        },
+      },
     }, config)
   } else {
     _config = config
@@ -203,10 +203,10 @@ function createScenarioFromScaffold ({
     resources: {
       one: {
         packages: {
-          five: true
-        }
-      }
-    }
+          five: true,
+        },
+      },
+    },
   }, configOverride)
 
   return {
@@ -233,7 +233,9 @@ function createScenarioFromScaffold ({
 function createHookedConsole () {
   let hasResolved = false
   let resolve
-  const firstLogEventPromise = new Promise(_resolve => { resolve = _resolve })
+  const firstLogEventPromise = new Promise(_resolve => {
+    resolve = _resolve 
+  })
   const hookedLog = (message) => {
     if (hasResolved) {
       throw new Error(`console.log called multiple times. got "${message}"`)
@@ -269,8 +271,8 @@ async function runScenario ({
     builtin,
     kernelArgs = {},
     opts = {},
-    beforeCreateKernel = () => {}
-} = scenario
+    beforeCreateKernel = () => {},
+  } = scenario
   const lavamoatConfig = mergeDeep(config, configOverride)
   const kernelSrc = generateKernel(opts)
   const { hookedConsole, firstLogEventPromise } = createHookedConsole()
@@ -296,7 +298,7 @@ async function runScenario ({
         type: moduleRecord.type,
         file: moduleRecord.file,
         deps: moduleRecord.importMap,
-        moduleInitializer: moduleRecord.moduleInitializer
+        moduleInitializer: moduleRecord.moduleInitializer,
       }
       // append the source or prepare the precompiledInitializer
       const intializerSource = `(function(exports, require, module, __filename, __dirname){\n${applySourceTransforms(moduleRecord.content)}\n})`
@@ -371,7 +373,9 @@ function moduleDataForBuiltin (builtinObj, name) {
     file: name,
     package: name,
     type: 'builtin',
-    moduleInitializer: (_, _2, module) => { module.exports = builtinObj[name] }
+    moduleInitializer: (_, _2, module) => {
+      module.exports = builtinObj[name] 
+    },
   }
 }
 
@@ -423,10 +427,10 @@ async function createConfigForTest (testFn, opts = {}) {
     file: './entry.js',
     packageName: '$root$',
     importMap: {
-      test: './node_modules/test/index.js'
+      test: './node_modules/test/index.js',
     },
     content: 'require("test")',
-    entry: true
+    entry: true,
   }, {
     // non-entry
     type: 'js',
@@ -434,7 +438,7 @@ async function createConfigForTest (testFn, opts = {}) {
     file: './node_modules/test/index.js',
     packageName: 'test',
     importMap: {},
-    content: `(${testFn})()`
+    content: `(${testFn})()`,
   }]
   const policy = await generatePolicyFromFiles({ files, ...opts })
   return policy
@@ -448,7 +452,9 @@ async function autoConfigForScenario ({ scenario, opts = {} }) {
 
 function convertOptsToArgs ({ scenario }) {
   const { entries } = scenario
-  if (entries.length !== 1) throw new Error('LavaMoat - invalid entries')
+  if (entries.length !== 1) {
+    throw new Error('LavaMoat - invalid entries')
+  }
   const firstEntry = entries[0]
   return [firstEntry]
 }

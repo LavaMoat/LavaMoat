@@ -13,7 +13,7 @@ module.exports = [
         const importString = 'import x from "y"'
         module.exports = { comment, importString }
       },
-      testType: 'truthy'
+      testType: 'truthy',
     })
     return scenario
   },
@@ -34,7 +34,7 @@ module.exports = [
         module.exports = SubError
         /* eslint-enable */
       },
-      testType: 'truthy'
+      testType: 'truthy',
     })
     return scenario
   },
@@ -54,8 +54,8 @@ module.exports = [
         function SuperClass () {}
         module.exports = SuperClass
       },
-      testType: 'truthy'
+      testType: 'truthy',
     })
     return scenario
-  }
+  },
 ]

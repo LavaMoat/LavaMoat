@@ -10,56 +10,56 @@ test('inspectPrimordialAssignments - basic', (t) => {
     'hello world'
   `)
   t.deepEqual(results, [])
-  })
+})
 
 test('inspectPrimordialAssignments - assignment to toString on prototype', (t) => {
   const results = inspectPrimordialAssignmentsTest(`
     MyClass.prototype.toString = () => 'hello'
   `)
   t.deepEqual(results, [])
-  })
+})
 
 test('inspectPrimordialAssignments - assignment to toString', (t) => {
   const results = inspectPrimordialAssignmentsTest(`
     exports.toString = () => 'hello'
   `)
   t.deepEqual(results, [])
-  })
+})
 
 test('inspectPrimordialAssignments - assignment to frozen primordial', (t) => {
   const results = inspectPrimordialAssignmentsTest(`
     Array.prototype.bogoSort = () => 'hello'
   `)
   t.is(results.length, 1)
-  })
+})
 
 test('inspectPrimordialAssignments - primordial potential false positive - instrinsic', (t) => {
   const results = inspectPrimordialAssignmentsTest(`
     window.Array === Array
   `)
   t.deepEqual(results, [])
-  })
+})
 
 test('inspectPrimordialAssignments - primordial potential false positive - keyword', (t) => {
   const results = inspectPrimordialAssignmentsTest(`
     const args = Array.prototype.slice.call(arguments)
   `)
   t.deepEqual(results, [])
-  })
+})
 
 test('inspectPrimordialAssignments - primordial modify property', (t) => {
   const results = inspectPrimordialAssignmentsTest(`
     Object.keys.extra = 'hello'
   `)
   t.is(results.length, 1)
-  })
+})
 
 test('inspectPrimordialAssignments - primordial Error modify property', (t) => {
   const results = inspectPrimordialAssignmentsTest(`
     Error.prepareStackTrace = () => {}
   `)
   t.is(results.length, 1)
-  })
+})
 
 test('inspectPrimordialAssignments - ensure shadowed references not counted - simple', (t) => {
   const results = inspectPrimordialAssignmentsTest(`
@@ -67,7 +67,7 @@ test('inspectPrimordialAssignments - ensure shadowed references not counted - si
     Promise.all = () => {}
   `)
   t.is(results.length, 0)
-  })
+})
 
 test('inspectPrimordialAssignments - ensure shadowed references not counted - complex', (t) => {
   const results = inspectPrimordialAssignmentsTest(`
@@ -81,4 +81,4 @@ test('inspectPrimordialAssignments - ensure shadowed references not counted - co
   })()
   `)
   t.is(results.length, 1)
-  })
+})

@@ -16,9 +16,9 @@ const {
 test('policy - default policy path is generated with autoconfig if path is not specified', async (t) => {
   const scenario = createScenarioFromScaffold({
     opts: {
-      writeAutoPolicy: true
+      writeAutoPolicy: true,
     },
-    contextName: 'browserify'
+    contextName: 'browserify',
   })
   const { policyDir } = await prepareBrowserifyScenarioOnDisk({ scenario })
   const expectedPath = path.join(policyDir, 'policy.json')
@@ -45,12 +45,12 @@ test('Policy is applied if not specified and already exists at default path', as
       resources: {
         three: {
           packages: {
-            two: true
-          }
-        }
-      }
+            two: true,
+          },
+        },
+      },
     },
-    expectedResult: 30
+    expectedResult: 30,
   })
   await runAndTestScenario(t, scenario, runScenario)
 })
@@ -59,8 +59,8 @@ test('Policy - Applies writeAutoPolicyDebug plugin option and dumps module objec
   const scenario = createScenarioFromScaffold({
     opts: {
       writeAutoPolicy: true,
-      writeAutoPolicyDebug: true
-    }
+      writeAutoPolicyDebug: true,
+    },
   })
   const { policyDir } = await prepareBrowserifyScenarioOnDisk({ scenario })
   const expectedPath = path.join(policyDir, 'policy-debug.json')
@@ -76,7 +76,7 @@ test('Policy - watchify listens for policy file changes', async (t) => {
   const scenario = createScenarioFromScaffold({
     opts: {
       writeAutoPolicy: true,
-    }
+    },
   })
   const { projectDir, policyDir } = await prepareBrowserifyScenarioOnDisk({ scenario })
   await runBrowserify({ scenario })
