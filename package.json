@@ -3,7 +3,7 @@
   "private": true,
   "resolutions": {
     "type-fest": "^0.21.3",
-    "lavamoat-perf/serve/boxen/type-fest": "^2.19.0",
+    "serve@14.2>boxen@*>type-fest": "^2.19.0",
     "util": "^0.12.5"
   },
   "devDependencies": {
@@ -27,9 +27,7 @@
     "publish": "lerna publish from-package --no-push --no-git-tag-version --yes",
     "setup": "lerna bootstrap -- --frozen-lockfile --check-files --production=false && pnpm allow-scripts"
   },
-  "workspaces": [
-    "packages/*"
-  ],
+  "packageManager": "pnpm@8.6.10",
   "version": "0.0.0",
   "lavamoat": {
     "allowScripts": {
