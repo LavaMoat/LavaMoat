@@ -36,10 +36,10 @@
     "eslint-plugin-node": "^11.1.0"
   },
   "scripts": {
-    "test": "yarn test:run",
+    "test": "pnpm test:run",
     "test:run": "ava --timeout=30s test/index.js",
     "test:prep": "for d in ./test/projects/*/ ; do (cd \"$d\" && ../../../src/cli.js auto --experimental-bins); done",
-    "lint": "yarn lint:eslint && yarn lint:deps",
+    "lint": "pnpm lint:eslint && pnpm lint:deps",
     "lint:eslint": "eslint .",
     "lint:fix": "eslint . --fix",
     "lint:deps": "depcheck"

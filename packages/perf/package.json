@@ -4,14 +4,14 @@
   "version": "0.0.0",
   "scripts": {
     "serve": "^14.2.0",
-    "start": "yarn run:wallet && yarn run:increment && yarn run:secp256k1-mixedAdd && yarn run:secp256k1-newBN && yarn run:bify-simple && yarn run:pull-stream && yarn run:terser",
-    "run:wallet": "(cd trials/wallet && yarn && yarn start)",
-    "run:increment": "(cd trials/increment && yarn && yarn start)",
-    "run:secp256k1-mixedAdd": "(cd trials/secp256k1-mixedAdd && yarn && yarn start)",
-    "run:secp256k1-newBN": "(cd trials/secp256k1-newBN && yarn && yarn start)",
-    "run:bify-simple": "(cd trials/bify-simple && yarn && yarn start)",
-    "run:pull-stream": "(cd trials/pull-stream && yarn && yarn start)",
-    "run:terser": "(cd trials/terser && yarn && yarn start)"
+    "start": "pnpm run:wallet && pnpm run:increment && pnpm run:secp256k1-mixedAdd && pnpm run:secp256k1-newBN && pnpm run:bify-simple && pnpm run:pull-stream && pnpm run:terser",
+    "run:wallet": "(cd trials/wallet && pnpm && pnpm start)",
+    "run:increment": "(cd trials/increment && pnpm && pnpm start)",
+    "run:secp256k1-mixedAdd": "(cd trials/secp256k1-mixedAdd && pnpm && pnpm start)",
+    "run:secp256k1-newBN": "(cd trials/secp256k1-newBN && pnpm && pnpm start)",
+    "run:bify-simple": "(cd trials/bify-simple && pnpm && pnpm start)",
+    "run:pull-stream": "(cd trials/pull-stream && pnpm && pnpm start)",
+    "run:terser": "(cd trials/terser && pnpm && pnpm start)"
   },
   "repository": {
     "type": "git",

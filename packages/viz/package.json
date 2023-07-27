@@ -48,12 +48,12 @@
   "scripts": {
     "analyze": "source-map-explorer 'build/static/js/*.js'",
     "start": "webpack-dev-server --config ./src/webpack.config.js",
-    "test": "yarn build",
+    "test": "pnpm build",
     "lint": "eslint .",
-    "lint:fix": "yarn lint --fix .",
+    "lint:fix": "pnpm lint --fix .",
     "build": "webpack --config ./src/webpack.config.js",
-    "deploy": "yarn run build && gh-pages -d dist",
-    "prepublishOnly": "yarn run deploy"
+    "deploy": "pnpm run build && gh-pages -d dist",
+    "prepublishOnly": "pnpm run deploy"
   },
   "babel": {
     "presets": [

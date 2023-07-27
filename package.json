@@ -25,7 +25,7 @@
     "lint:fix": "lerna run lint:fix",
     "build": "lerna run build",
     "publish": "lerna publish from-package --no-push --no-git-tag-version --yes",
-    "setup": "lerna bootstrap -- --frozen-lockfile --check-files --production=false && yarn allow-scripts"
+    "setup": "lerna bootstrap -- --frozen-lockfile --check-files --production=false && pnpm allow-scripts"
   },
   "workspaces": [
     "packages/*"

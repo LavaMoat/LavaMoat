@@ -4,7 +4,7 @@
     "serve": "^14.2.0"
   },
   "scripts": {
-    "start": "yarn stats && yarn chart",
+    "start": "pnpm stats && pnpm chart",
     "stats": "node index.js > perf.csv",
     "chart": "cat perf.csv | chart-csv > chart.html",
     "build:default": "TARGET='default' node ../../build.js",
