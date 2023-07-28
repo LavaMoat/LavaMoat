@@ -6,7 +6,15 @@ const path = require("path");
 
 module.exports = {
   entry: {
-    app: "./app.js",
+    app: {
+      import: './app.js',
+      dependOn: 'shared',
+    },
+    app2: {
+      import: './app2.js',
+      dependOn: 'shared',
+    },
+    shared: 'leftpad',
   },
   // both modes work
   // mode: "production",
@@ -14,6 +22,9 @@ module.exports = {
   output: {
     filename: "[name].js",
     path: path.resolve(__dirname, "dist"),
+  },
+  optimization: {
+    runtimeChunk: 'single',
   },
   // sourcemaps remain correct and don't seem to contain artifacts from the wrapper
   devtool: false,
@@ -29,7 +40,7 @@ module.exports = {
       policy: require("./lavamoat/policy.json"),
       readableResourceIds: true,
       runChecks: true,
-      diagnosticsVerbosity: 2,
+      diagnosticsVerbosity: 1,
     }),
     // virtualModules,
     new ProgressPlugin(),

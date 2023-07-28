@@ -67,11 +67,11 @@ function processRequirements(requirements, module) {
     }
     if (chunks[0] === "__webpack_exports__") {
       runtimeKit.add(module.exportsArgument);
-    }
-    if (chunks[0] === "module") {
+    } else if (chunks[0] === "module") {
       runtimeKit.add(module.moduleArgument);
+    } else {
+      runtimeKit.add(chunks[0]);
     }
-    runtimeKit.add(chunks[0]);
   }
   diag.run(2, () => {
     runtimeKit.add(`/* ${Array.from(requirements).join()} */`);
@@ -125,8 +125,6 @@ const wrapGeneratorMaker = ({
         return originalGeneratedSource;
       }
 
-      // originalGenerate adds requirements to options.runtimeRequirements. runtimeKit needs to be derived from those.
-
       // skip doing anything if marked as ignored by the ignoreLoader
       // TODO: what if someone specifies this loader inline in a require or import?
       if (module.loaders.some(({ loader }) => loader === IGNORE_LOADER)) {
@@ -134,6 +132,10 @@ const wrapGeneratorMaker = ({
         diag.rawDebug(3, `skipped wrapping ${module.rawRequest}`);
         return originalGeneratedSource;
       }
+
+      // originalGenerate adds requirements to options.runtimeRequirements. runtimeKit needs to be derived from those.
+      // We also depend on __webpack_require__ being there, so let's add it
+      options.runtimeRequirements.add("__webpack_require__");
 
       // Turn off "use strict" being added in front of modules on final wrapping by webpack.
       // If anything attempts to reverse it, we want to ignore it
@@ -265,29 +267,24 @@ class ScorchWrapPlugin {
    * @returns {void}
    */
   apply(compiler) {
+    // TODO: figure out the right scope to use this chronology tool
+    const PROGRESS = progress({
+      steps: [
+        "start",
+        "canonicalNameMap",
+        "pathsCollected",
+        "pathsProcessed",
+        "gneratorCalled:repeats",
+        "runtimeAdded:repeats",
+        "finish",
+      ],
+    });
+
     const options = this.options;
     if (typeof options.readableResourceIds === "undefined") {
       // default options.readableResourceIds to true if webpack configuration sets development mode
       options.readableResourceIds = compiler.options.mode !== "production";
     }
-    // TODO: figure out the right scope to use this chronology tool
-    const PROGRESS = progress({
-      steps: [
-        "start",
-        "canonicalNameMapGenerated",
-        "pathsCollected",
-        "pathsProcessed",
-        "gneratorCalled",
-        "runtimeStart",
-        "runtimeAdded",
-        "finish",
-      ],
-    });
-    compiler.hooks.emit.tap(PLUGIN_NAME, () => {
-      // By the time assets are emitted we must be done wth our work.
-      // This will ensure all previous steps have been done.
-      PROGRESS.report("finish");
-    });
 
     let canonicalNameMap;
 
@@ -304,15 +301,15 @@ class ScorchWrapPlugin {
     // compiler.options.optimization.chunkIds = "named";
 
     // =================================================================
-    // run long asynchronous processing ahead of time
+    // run long asynchronous processing ahead of all compilations
     compiler.hooks.beforeRun.tapAsync(
       PLUGIN_NAME,
       async (compilation, callback) => {
         canonicalNameMap = await loadCanonicalNameMap({
           rootDir: compiler.context,
         });
-        PROGRESS.report("canonicalNameMapGenerated");
         callback();
+        PROGRESS.report("canonicalNameMap");
       }
     );
 
@@ -321,6 +318,12 @@ class ScorchWrapPlugin {
     compiler.hooks.thisCompilation.tap(
       PLUGIN_NAME,
       (compilation, { normalModuleFactory }) => {
+        compilation.hooks.optimizeAssets.tap(PLUGIN_NAME, () => {
+          // By the time assets are being optimized we should have finished.
+          // This will ensure all previous steps have been done.
+          PROGRESS.report("finish");
+        });
+
         // =================================================================
 
         if (!mainCompilationWarnings) {
@@ -451,65 +454,67 @@ class ScorchWrapPlugin {
         compilation.hooks.additionalChunkRuntimeRequirements.tap(
           PLUGIN_NAME + "_runtime",
           (chunk, set) => {
-            if (!PROGRESS.done("pathsProcessed")) {
-              mainCompilationWarnings.push(
-                new WebpackError(
-                  "ScorchWrapPlugin: Something was generating runtime before all modules were identified. This might be part of a sub-compilation of a plugin. Please check for any unwanted interference between plugins."
-                )
-              );
-              diag.rawDebug(
-                1,
-                "> skipped adding runtime (additionalChunkRuntimeRequirements)"
-              );
-              // It's possible to generate the runtime with an empty policy to make the wrapped code work. It's no longer necessasry now that `generate` function is only wrapping anything if runtime has already been added.
-            } else {
-              diag.rawDebug(
-                1,
-                "> adding runtime (additionalChunkRuntimeRequirements)"
-              );
-              // narrow down the policy and map to module identifiers
-              const policyData = identifierLookup.getTranslatedPolicy();
-              PROGRESS.report("runtimeStart");
+            if (chunk.hasRuntime()) {
+              if (!PROGRESS.done("gneratorCalled")) {
+                mainCompilationWarnings.push(
+                  new WebpackError(
+                    "ScorchWrapPlugin: Something was generating runtime before all modules were identified. This might be part of a sub-compilation of a plugin. Please check for any unwanted interference between plugins."
+                  )
+                );
+                diag.rawDebug(
+                  1,
+                  "> skipped adding runtime (additionalChunkRuntimeRequirements)"
+                );
+                // It's possible to generate the runtime with an empty policy to make the wrapped code work.
+                // It's no longer necessasry now that `generate` function is only wrapping anything if paths were processed,
+                // which corresponds to it being the main compilation. But plugins may exist that conflict with that assumption;
+                // in which case we're gonna have to bring back the runtime with empty policy
+              } else {
+                diag.rawDebug(
+                  1,
+                  "> adding runtime (additionalChunkRuntimeRequirements)"
+                );
+                // narrow down the policy and map to module identifiers
+                const policyData = identifierLookup.getTranslatedPolicy();
 
-              const lavaMoatRuntime = assembleRuntime(RUNTIME_KEY, [
-                {
-                  name: "root",
-                  data: identifierLookup?.root,
-                  json: true,
-                },
-                {
-                  name: "idmap",
-                  data: identifierLookup?.identifiersForModuleIds,
-                  json: true,
-                },
-                {
-                  name: "unenforceable",
-                  data: identifierLookup?.unenforceableModuleIds,
-                  json: true,
-                },
-                { name: "options", data: runtimeOptions, json: true },
-                { name: "policy", data: policyData, json: true },
-                { name: "ENUM", file: "./ENUM.json", json: true },
-                { name: "runtime", file: "./runtime/runtime.js" },
-              ]);
+                const lavaMoatRuntime = assembleRuntime(RUNTIME_KEY, [
+                  {
+                    name: "root",
+                    data: identifierLookup?.root,
+                    json: true,
+                  },
+                  {
+                    name: "idmap",
+                    data: identifierLookup?.identifiersForModuleIds,
+                    json: true,
+                  },
+                  {
+                    name: "unenforceable",
+                    data: identifierLookup?.unenforceableModuleIds,
+                    json: true,
+                  },
+                  { name: "options", data: runtimeOptions, json: true },
+                  { name: "policy", data: policyData, json: true },
+                  { name: "ENUM", file: "./ENUM.json", json: true },
+                  { name: "runtime", file: "./runtime/runtime.js" },
+                ]);
 
-              // If the chunk has already been processed, skip it.
-              if (onceForChunkSet.has(chunk)) return;
-              // set.add(RuntimeGlobals.onChunksLoaded); // TODO: develop an understanding of what this line does and why it was a part of the runtime setup for module federation
+                // If the chunk has already been processed, skip it.
+                if (onceForChunkSet.has(chunk)) return;
+                // set.add(RuntimeGlobals.onChunksLoaded); // TODO: develop an understanding of what this line does and why it was a part of the runtime setup for module federation
 
-              // Mark the chunk as processed by adding it to the WeakSet.
-              onceForChunkSet.add(chunk);
+                // Mark the chunk as processed by adding it to the WeakSet.
+                onceForChunkSet.add(chunk);
 
-              if (chunk.hasRuntime()) {
                 // Add the runtime modules to the chunk, which handles
                 // the runtime logic for wrapping with lavamoat.
                 lavaMoatRuntime.addTo({
                   compilation,
                   chunk,
                 });
-              }
 
-              PROGRESS.report("runtimeAdded");
+                PROGRESS.report("runtimeAdded");
+              }
             }
           }
         );

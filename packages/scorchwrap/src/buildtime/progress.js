@@ -17,14 +17,23 @@ const diag = require("./diagnostics");
  * @returns {ProgressAPI}
  */
 module.exports = function progress({ steps }) {
+  const canRepeat = new Set();
+
+  steps = steps.map((step) => {
+    const [st, info] = step.split(":");
+    if (info === "repeats") {
+      canRepeat.add(st);
+    }
+    return st;
+  });
   let currentStep = 0;
   const done = new Set();
 
   const API = {};
 
   API.report = (step) => {
-    if (steps[currentStep] === step) {
-      diag.rawDebug(3, `\n> Reporting ${step} again`);
+    if (canRepeat.has(step) && steps[currentStep] === step) {
+      diag.rawDebug(2, `\n> Reporting ${step} again`);
       return;
     }
     done.add(step);
@@ -41,7 +50,7 @@ module.exports = function progress({ steps }) {
   };
   API.is = (query) => {
     const current = steps[currentStep];
-    diag.rawDebug(3, `\n> Checking (${current}).is(${query})`);
+    diag.rawDebug(2, `\n> Checking (${current}).is(${query})`);
     return current === query;
   };
   API.done = (query) => {
