@@ -23,18 +23,17 @@ module.exports = {
     // https://eslint.org/docs/latest/use/configure/language-options#specifying-environments
     ecmaVersion: 12,
   },
-  env: { es2020: true }, // this should be synced with the version of V8 used by the min supported node version
-  extends: ['@metamask/eslint-config-nodejs'],
+  env: { es2020: true, node: true }, // this should be synced with the version of V8 used by the min supported node version
+  extends: ['eslint:recommended', 'plugin:n/recommended'],
   rules: {
-    // base rules. should probably use eslint/recommended instead.
+    // base rules; none of these are in eslint/recommended
     'arrow-spacing': ['error', { before: true, after: true }],
     'brace-style': ['error', '1tbs'],
     'comma-dangle': ['error', 'always-multiline'],
     curly: ['error', 'all'],
     'eol-last': ['error', 'always'],
     indent: ['error', 2, { SwitchCase: 1, ObjectExpression: 'first' }],
-    'no-restricted-globals': 0,
-    'no-unexpected-multiline': 'error',
+    'no-empty': ['error', { allowEmptyCatch: true }],
     quotes: ['error', 'single'],
     semi: ['error', 'never'],
     'space-before-blocks': ['error', 'always'],
@@ -47,19 +46,31 @@ module.exports = {
       },
     ],
 
-    // plugin rules
+    // additional errors not in n/recommended
+    'n/callback-return': 'error',
+    'n/handle-callback-err': 'error',
+    'n/no-callback-literal': 'error',
+    'n/no-mixed-requires': 'error',
+    'n/no-new-require': 'error',
+    'n/no-restricted-import': 'error',
+    'n/no-restricted-require': 'error',
+    'n/prefer-global/buffer': 'error',
+    'n/prefer-global/console': 'error',
+    'n/prefer-global/process': 'error',
+    'n/prefer-global/text-decoder': 'error',
+    'n/prefer-global/text-encoder': 'error',
+    'n/prefer-global/url-search-params': 'error',
+    'n/prefer-global/url': 'error',
+    'n/prefer-promises/dns': 'error',
+    'n/prefer-promises/fs': 'error',
 
-    // all of these override stuff set in @metamask/eslint-config-nodejs.
-    'n/no-extraneous-require': 0,
-    'n/global-require': 0,
-    'n/exports-style': 0,
-    'n/no-process-env': 0,
-    // this rule seems broken
-    'n/no-unpublished-require': 0,
-    // we should probably actually fix these three and disable this override.
-    'n/no-sync': 0,
-    'n/no-process-exit': 0,
-    'n/no-path-concat': 0,
+    // these rules seem broken in a monorepo
+    'n/no-extraneous-require': 'off',
+    'n/no-unpublished-require': 'off',
+
+    // we should probably actually fix these three and turn these back on
+    'n/no-sync': 'off', // very few reasons to actually use this; "CLI tool" is not one of them
+    'n/no-process-exit': 'off', // should not be used with async code
   },
   // these are plugin-specific settings.
   settings: {
@@ -78,7 +89,7 @@ module.exports = {
       files: ['packages/*/test/**/*.js', 'packages/*/src/**/*.test.js'],
       extends: ['plugin:ava/recommended'],
       rules: {
-        'ava/no-import-test-files': 0,
+        'ava/no-import-test-files': 'off',
       },
     },
     {
@@ -87,6 +98,49 @@ module.exports = {
         Compartment: 'readonly',
         templateRequire: 'readonly',
         lockdown: 'readonly',
+      },
+    },
+    {
+      files: ['packages/*/test/**/*.js'],
+      env: {
+        browser: true,
+      },
+      rules: {
+        'no-unused-vars': 'off',
+        'no-undef': 'off',
+        'n/no-path-concat': 'off', // this should be removed and the issues fixed
+        'n/no-missing-require': 'off',
+      },
+    },
+    {
+      files: ['packages/core/lib/**/*.js'],
+      rules: {
+        'no-unused-vars': 'off',
+      },
+    },
+    {
+      files: ['packages/lavapack/src/*-template.js'],
+      globals: {
+        templateRequire: 'readonly',
+        self: 'readonly',
+        __reportStatsHook__: 'readonly',
+        __createKernel__: 'readonly',
+      },
+    },
+    {
+      files: ['packages/core/src/*Template.js'],
+      globals: {
+        __lavamoatDebugOptions__: 'readonly',
+        __lavamoatSecurityOptions__: 'readonly',
+        self: 'readonly',
+        __createKernelCore__: 'readonly',
+      },
+    },
+    {
+      files: ['packages/perf/**/*.js'],
+      globals: {
+        lockdown: 'readonly',
+        Compartment: 'readonly',
       },
     },
     {
@@ -105,11 +159,18 @@ module.exports = {
       extends: ['plugin:react/recommended'],
       plugins: ['react', 'import'],
       rules: {
-        'no-negated-condition': 0,
+        'no-negated-condition': 'off',
         'import/extensions': ['error', 'always', { ignorePackages: true }],
-        'import/no-unassigned-import': 0,
-        'import/unambiguous': 0,
-        'react/prop-types': 0,
+        'import/no-unassigned-import': 'off',
+        'import/unambiguous': 'off',
+        'react/prop-types': 'off',
+        'n/no-missing-import': 'off',
+      },
+    },
+    {
+      files: ['packages/viz/src/App.test.js'],
+      env: {
+        mocha: true,
       },
     },
   ],
