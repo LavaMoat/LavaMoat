@@ -48,6 +48,7 @@
     // create the SES rootRealm
     // "templateRequire" calls are inlined in "generateKernel"
     // load-bearing semi-colon, do not remove
+    // eslint-disable-next-line no-extra-semi
     ;templateRequire('ses')
 
     const lockdownOptions = {

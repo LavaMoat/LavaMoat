@@ -5,7 +5,7 @@ import 'codemirror/lib/codemirror.css'
 import './css/index.css'
 import App from './App.js'
 import * as serviceWorker from './serviceWorker.js'
-import ScratchPad from './scene.js'
+import './scene.js'
 
 ReactDOM.render(<App />, document.getElementById('root'))
 // ReactDOM.render(<ScratchPad />, document.getElementById('root'))

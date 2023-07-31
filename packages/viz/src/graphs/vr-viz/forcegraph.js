@@ -34,7 +34,7 @@ export class FastThreeForceGraph extends Group {
         collisionObject.visible = false
         return collisionObject
       })
-      .linkThreeObject((link) => {
+      .linkThreeObject(() => {
         // create dummy object, only used to statisy ThreeForceGraph
         const dummyObject = new Object3D()
         dummyObject.visible = false
@@ -47,7 +47,7 @@ export class FastThreeForceGraph extends Group {
         // override link position update
         return true
       })
-    
+
     this.graph.visible = false
     this.collisionObjects = this.graph.children
 

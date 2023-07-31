@@ -94,6 +94,7 @@ function testInspect (label, opts, fn, expectedResultObj) {
       label, opts
       console.log(resultSorted)
       console.log(expectedSorted)
+      // eslint-disable-next-line no-debugger
       debugger
     }
 

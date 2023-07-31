@@ -11,7 +11,7 @@ const { DepGraph } = require('./graphs/DepGraph.js')
 const { LavamoatPolicies } = globalThis
 
 // merge all configs into final
-for (const [policyName, policyData] of Object.entries(LavamoatPolicies)) {
+for (const [, policyData] of Object.entries(LavamoatPolicies)) {
   if (!policyData.final) {
     if (policyData.override) {
       policyData.final = mergePolicy(policyData.primary, policyData.override)
@@ -27,7 +27,7 @@ const defaultPolicyName = policyNames[0]
 class App extends Component {
 
   selectPolicy (target) {
-    this.setState(state => ({ policyName: target }))
+    this.setState(() => ({ policyName: target }))
   }
 
   render () {

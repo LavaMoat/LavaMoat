@@ -13,7 +13,7 @@ var union = require('arr-union')
 var clone = require('clone-deep')
 var typeOf = require('kind-of')
 
-module.exports = function mergeDeep(orig, objects) {
+module.exports = function mergeDeep(orig) {
   if (!isObject(orig) && !Array.isArray(orig)) {
     orig = {}
   }

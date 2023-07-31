@@ -89,10 +89,10 @@ test('cli - run command - good dep at the root', (t) => {
 
   // assert the output
   t.deepEqual(result.stdout.toString().split('\n'), [
-    'running lifecycle scripts for event \"preinstall\"',
+    'running lifecycle scripts for event "preinstall"',
     '- good_dep',
-    'running lifecycle scripts for event \"install\"',
-    'running lifecycle scripts for event \"postinstall\"',
+    'running lifecycle scripts for event "install"',
+    'running lifecycle scripts for event "postinstall"',
     'running lifecycle scripts for top level package',
     '',
   ])
@@ -124,10 +124,10 @@ test('cli - run command - good dep at the root with experimental bins', (t) => {
   t.deepEqual(result.stdout.toString().split('\n'), [
     'installing bin scripts',
     '- good - from package: good_dep',
-    'running lifecycle scripts for event \"preinstall\"',
+    'running lifecycle scripts for event "preinstall"',
     '- good_dep',
-    'running lifecycle scripts for event \"install\"',
-    'running lifecycle scripts for event \"postinstall\"',
+    'running lifecycle scripts for event "install"',
+    'running lifecycle scripts for event "postinstall"',
     'running lifecycle scripts for top level package',
     '',
   ])
@@ -166,10 +166,10 @@ test('cli - run command - good dep as a sub dep', (t) => {
 
   // assert the output
   t.deepEqual(result.stdout.toString().split('\n'), [
-    'running lifecycle scripts for event \"preinstall\"',
+    'running lifecycle scripts for event "preinstall"',
     '- bbb>good_dep',
-    'running lifecycle scripts for event \"install\"',
-    'running lifecycle scripts for event \"postinstall\"',
+    'running lifecycle scripts for event "install"',
+    'running lifecycle scripts for event "postinstall"',
     '- bbb',
     'running lifecycle scripts for top level package',
     '',
@@ -205,10 +205,10 @@ test('cli - run command - good dep as a sub dep with experimental bins', (t) => 
   t.deepEqual(result.stdout.toString().split('\n'), [
     'installing bin scripts',
     '- good - from package: aaa',
-    'running lifecycle scripts for event \"preinstall\"',
+    'running lifecycle scripts for event "preinstall"',
     '- bbb>good_dep',
-    'running lifecycle scripts for event \"install\"',
-    'running lifecycle scripts for event \"postinstall\"',
+    'running lifecycle scripts for event "install"',
+    'running lifecycle scripts for event "postinstall"',
     '- bbb',
     '',
   ])

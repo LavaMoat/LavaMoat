@@ -45,7 +45,7 @@ export class BufferGeometryController {
     }
     // update draw range. check position attribute size to see if
     // we are counting indices or vertices
-    const [_, count] = this.attributeSizes.position
+    const [, count] = this.attributeSizes.position
     this.geometry.setDrawRange(0, (itemCount + 1) * count)
     return index
   }
@@ -130,7 +130,7 @@ export class InstancedBufferGeometryController {
     }
     // update draw range. check position attribute size to see if
     // we are counting indices or vertices
-    const [_, count] = this.attributeSizes.position
+    const [, count] = this.attributeSizes.position
     this.geometry.setDrawRange(0, (itemCount + 1) * count)
     return index
   }

@@ -277,7 +277,7 @@ function validatePolicy (policy) {
     throw new Error('LavaMoat - Expected label \'resources\' for configuration key')
   }
 
-  Object.entries(policy.resources).forEach(([packageName, packageOpts], index) => {
+  Object.entries(policy.resources).forEach(([, packageOpts]) => {
     const packageOptions = Object.keys(packageOpts)
     const packageEntries = Object.values(packageOpts)
     const optionsWhitelist = ['globals', 'packages']

@@ -80,18 +80,18 @@ async function generateConfigFile (packageName) {
 }
 
 async function generatePolicy (packageName) {
-  const { package, packageDir } = await loadPackage(packageName)
+  const { package: pkg, packageDir } = await loadPackage(packageName)
   // if main is explicitly empty, skip (@types/node, etc)
-  if (package.main === '') {
+  if (pkg.main === '') {
     console.warn(`skipped "${packageName}" - explicitly no entry`)
     return { resources: {} }
   }
   // normalize the id as a relative path
-  const entryId = './' + path.relative('./', package.main || 'index.js')
+  const entryId = './' + path.relative('./', pkg.main || 'index.js')
   const resolveHook = makeResolveHook({ cwd: packageDir })
-  let entryFull
+
   try {
-    entryFull = resolveHook(entryId, `${packageDir}/package.json`)
+    resolveHook(entryId, `${packageDir}/package.json`)
   } catch (err) {
     if (err.code === 'MODULE_NOT_FOUND') {
       console.warn(`skipped "${packageName}" - no entry`)
@@ -117,7 +117,6 @@ async function generatePolicy (packageName) {
 async function writeConfig (packageName, config) {
   const configContent = JSON.stringify(config, null, 2)
   const policyPath = getPolicyPath(packageName)
-  const policyDir = path.dirname(policyPath)
   // ensure dir exists (this includes the package scope)
   await fs.mkdir(path.dirname(policyPath), { recursive: true })
   await fs.writeFile(policyPath, configContent)
