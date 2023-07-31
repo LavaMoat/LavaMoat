@@ -17,13 +17,13 @@ const setup = require('./setup')
  * @property {BinsConfig} configs.bin
  * @property {boolean} somePoliciesAreMissing
  *
- * Individual package info 
+ * Individual package info
  * @typedef {Object} PkgInfo
  * @property {string} canonicalName
  * @property {string} path
  * @property {Object} scripts
  *
- * Individual bin link info 
+ * Individual bin link info
  * @typedef {Object} BinInfo
  * @property {string} canonicalName
  * @property {boolean} isDirect
@@ -41,7 +41,7 @@ const setup = require('./setup')
  * @property {Array} missingPolicies
  * @property {Array} excessPolicies
  *
- * @typedef {Map<string,[BinInfo]>} BinCandidates 
+ * @typedef {Map<string,[BinInfo]>} BinCandidates
  *
  * Configuration for a type of bins policies
  * @typedef {Object} BinsConfig
@@ -193,8 +193,8 @@ function printMissingPoliciesIfAny({ missingPolicies = [], packagesWithScripts =
 // internals
 
 /**
- * 
- * @param {Object} arg 
+ *
+ * @param {Object} arg
  * @param {string} arg.event
  * @param {Array<PkgInfo>} arg.packages
  */
@@ -207,7 +207,7 @@ async function runAllScriptsForEvent({ event, packages }) {
   }
 }
 /**
- * @param {Array<BinInfo>} allowedBins 
+ * @param {Array<BinInfo>} allowedBins
  */
 async function installBinScripts(allowedBins) {
   for (const { bin, path, link, canonicalName } of allowedBins) {
@@ -217,7 +217,7 @@ async function installBinScripts(allowedBins) {
 }
 /**
  * Points all bins on the list to whichbin.js cli app from allow-scripts
- * @param {Array<BinInfo>} firewalledBins 
+ * @param {Array<BinInfo>} firewalledBins
  * @param {string} link - absolute path to the whichbin.js script
  */
 async function installBinFirewall(firewalledBins, link) {
@@ -250,7 +250,7 @@ async function runScript({ path, event }) {
 const bannedBins = new Set(['node', 'npm', 'yarn', 'pnpm'])
 
 /**
- * @param {BinCandidates} binCandidates 
+ * @param {BinCandidates} binCandidates
  */
 function prepareBinScriptsPolicy(binCandidates) {
   const policy = {}
@@ -267,7 +267,7 @@ function prepareBinScriptsPolicy(binCandidates) {
 
 
 /**
- * @param {BinsConfig} param0 
+ * @param {BinsConfig} param0
  */
 function printPackagesByBins({
   allowedBins,
@@ -292,7 +292,7 @@ function printPackagesByBins({
 }
 
 /**
- * @param {ScriptsConfig} param0 
+ * @param {ScriptsConfig} param0
  */
 function printPackagesByScriptConfiguration({
   packagesWithScripts,
@@ -340,8 +340,8 @@ function printPackagesByScriptConfiguration({
 }
 
 /**
- * 
- * @param {Object} args 
+ *
+ * @param {Object} args
  * @param {string} args.rootDir
  * @param {PkgConfs} args.conf
  * @returns {Promise}
@@ -362,8 +362,8 @@ async function savePackageConfigurations({ rootDir, conf: {
 }
 
 /**
- * 
- * @param {Object} args 
+ *
+ * @param {Object} args
  * @param {string} args.rootDir
  * @returns {Promise<PkgConfs>}
  */
@@ -372,13 +372,14 @@ async function loadAllPackageConfigurations({ rootDir }) {
   const binCandidates = new Map()
 
   const dependencyMap = await loadCanonicalNameMap({ rootDir, includeDevDeps: true })
-  const sortedDepEntries = Array.from(dependencyMap.entries()).sort(sortBy(([filePath, canonicalName]) => canonicalName))
+  const sortedDepEntries = Array.from(dependencyMap.entries()).sort(sortBy(([, canonicalName]) => canonicalName))
   const packageJson = JSON.parse(await fs.readFile(path.join(rootDir, 'package.json'), 'utf8'))
   const directDeps = new Set([...Object.keys(packageJson.devDependencies||{}),...Object.keys(packageJson.dependencies||{})])
 
   for (const [filePath, canonicalName] of sortedDepEntries) {
     // const canonicalName = getCanonicalNameForPath({ rootDir, filePath: filePath })
     let depPackageJson
+    // eslint-disable-next-line no-useless-catch
     try {
       depPackageJson = JSON.parse(await fs.readFile(path.join(filePath, 'package.json'), 'utf-8'))
     } catch (err) {
@@ -412,7 +413,7 @@ async function loadAllPackageConfigurations({ rootDir }) {
         }
         collection.push({
           // canonical name for a direct dependency is just dependency name
-          isDirect: directDeps.has(canonicalName), 
+          isDirect: directDeps.has(canonicalName),
           bin: name,
           path: filePath,
           link,
@@ -455,9 +456,9 @@ function indexLifecycleConfiguration(config) {
   // packages with config
   const configuredPatterns = Object.keys(config.allowConfig)
   // select allowed + disallowed
-  config.allowedPatterns = Object.entries(config.allowConfig).filter(([pattern, packageData]) => !!packageData).map(([pattern]) => pattern)
+  config.allowedPatterns = Object.entries(config.allowConfig).filter(([, packageData]) => !!packageData).map(([pattern]) => pattern)
 
-  config.disallowedPatterns = Object.entries(config.allowConfig).filter(([pattern, packageData]) => !packageData).map(([pattern]) => pattern)
+  config.disallowedPatterns = Object.entries(config.allowConfig).filter(([, packageData]) => !packageData).map(([pattern]) => pattern)
 
   config.missingPolicies = Array.from(config.packagesWithScripts.keys())
     .filter(pattern => !configuredPatterns.includes(pattern))

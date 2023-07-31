@@ -234,7 +234,7 @@ function createHookedConsole () {
   let hasResolved = false
   let resolve
   const firstLogEventPromise = new Promise(_resolve => {
-    resolve = _resolve 
+    resolve = _resolve
   })
   const hookedLog = (message) => {
     if (hasResolved) {
@@ -359,7 +359,6 @@ function fillInFileDetails (files) {
     if (path.extname(file) === '.js') {
       // parse as LavamoatModuleRecord
       fileObj.specifier = fileObj.file || file
-      fileObj.packageName = fileObj.packageName
       fileObj.type = fileObj.type || 'js'
       fileObj.entry = Boolean(fileObj.entry)
     }
@@ -374,7 +373,7 @@ function moduleDataForBuiltin (builtinObj, name) {
     package: name,
     type: 'builtin',
     moduleInitializer: (_, _2, module) => {
-      module.exports = builtinObj[name] 
+      module.exports = builtinObj[name]
     },
   }
 }

@@ -1,3 +1,4 @@
+// eslint-disable-next-line no-extra-semi
 ;(function() {
   function getGlobalRef () {
     if (typeof globalThis !== 'undefined') {
@@ -43,6 +44,7 @@
   }
 
   // it is called by the modules collection that will be appended to this file
+  // eslint-disable-next-line no-unused-vars
   function loadBundle (newModules, entryPoints, bundlePolicy) {
     // ignore bundlePolicy as we wont be enforcing it
     // verify + load in each module

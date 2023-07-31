@@ -41,11 +41,11 @@ const alwaysThrowHandler = new Proxy(
   }),
 )
 
-/*
- * scopeProxyHandlerProperties
+/**
  * scopeTerminatorHandler manages a strictScopeTerminator Proxy which serves as
  * the final scope boundary that will always return "undefined" in order
  * to prevent access to "start compartment globals".
+ * @type {ProxyHandler}
  */
 const scopeProxyHandlerProperties = {
   get(_shadow, _prop) {

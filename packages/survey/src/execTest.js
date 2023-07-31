@@ -7,7 +7,7 @@ const { spawn, exec: execCb } = require('child_process')
 
 const exec = promisify(execCb)
 const makeTempDir = async () => {
-  return await fs.mkdtemp(path.join(os.tmpdir(), 'lavamoat-survey-')) 
+  return await fs.mkdtemp(path.join(os.tmpdir(), 'lavamoat-survey-'))
 }
 const mitmPath = new URL('../mitm', `file://${__filename}`).pathname
 
@@ -42,12 +42,12 @@ async function prepareRepo ({ projectDir, gitRepo, gitRef }) {
 }
 
 async function installDependencies ({ projectDir }) {
-  const { stdout, stderr } = await exec('yarn install', { cwd: projectDir })
+  await exec('yarn install', { cwd: projectDir })
   console.log('deps installed')
 }
 
 async function runPlainTests ({ projectDir }) {
-  const { stdout, stderr } = await exec('yarn run test', { cwd: projectDir })
+  await exec('yarn run test', { cwd: projectDir })
   console.log('tests passed directly')
 }
 

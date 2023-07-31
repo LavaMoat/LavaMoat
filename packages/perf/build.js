@@ -32,6 +32,7 @@ const bundler = browserify(['./entry.js'], {
 
 // build
 
+// eslint-disable-next-line no-unused-vars
 async function main () {
   fs.mkdirSync('./bundle', { recursive: true })
   await performBundle()

@@ -91,7 +91,6 @@ async function main () {
       console.info('serving a pre-built dashboard. to generate new dashboard and serve use "lavamoat-viz --serve"')
       console.info('this is equivalent to "npx serve ./viz"')
       console.info('\n')
-      const fullDest = path.resolve(dest)
       return await serveViz(dest)
     }
     default: {

@@ -43,7 +43,7 @@ function makeGetEndowmentsForConfig ({ createFunctionWrapper }) {
       // false means no access. It's necessary so that overrides can also be used to tighten the policy
       if (configValue === false) {
         explicitlyBanned.push(path)
-        return 
+        return
       }
       // write access handled elsewhere
       if (configValue === 'write') {
@@ -238,6 +238,7 @@ function makeGetEndowmentsForConfig ({ createFunctionWrapper }) {
 
 function getPropertyDescriptorDeep (target, key) {
   let receiver = target
+  // eslint-disable-next-line no-constant-condition
   while (true) {
     // abort if this is the end of the prototype chain.
     if (!receiver) {

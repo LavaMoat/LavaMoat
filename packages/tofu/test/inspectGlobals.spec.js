@@ -132,6 +132,8 @@ testInspect('not picking up js language features', {
 testInspect('ignore globalRef without property lookup', {
   globalRefs: ['window'],
 }, () => {
+  // XXX: this is probably wrong.  either use `typeof window === 'undefined'` or `window === undefined`
+  // eslint-disable-next-line valid-typeof
   typeof window === undefined
 }, {})
 
@@ -274,6 +276,7 @@ function testInspect (label, opts, fn, expectedResultObj) {
     // for debugging
     if (!deepEqual(resultSorted, expectedSorted)) {
       label, opts
+      // eslint-disable-next-line no-debugger
       debugger
     }
 

@@ -327,7 +327,9 @@ class DepGraph extends React.Component {
       onHoverStart: ({ object: { name: nodeId } }, controller) => {
         setControllerText(controller, `${nodeId}`)
       },
-      onSelectStart: ({ object: { name: nodeId } }, controller) => {
+      onSelectStart: ({ object: { name: nodeId } }) => {
+        // FIXME: this is most certainly broken
+        // eslint-disable-next-line no-undef
         actions.selectPackage(nodeId)
       },
       controller1,

@@ -30,7 +30,7 @@ export default class ThreeComponent extends React.Component {
     // // scene.add(floor);
 
     // this.scene.add(new THREE.HemisphereLight(0x808080, 0x606060))
-    
+
     // this.renderer = new THREE.WebGLRenderer({
     //     canvas: this.canvas,
     //     antialias: false,
@@ -78,8 +78,8 @@ export default class ThreeComponent extends React.Component {
     window.addEventListener('resize', this.onWindowResize)
   }
 
-  componentDidUpdate(prevProps, prevState) {
-    // Pass updated props to 
+  componentDidUpdate() {
+    // Pass updated props to
     const newValue = this.props.whateverProperty
     this.updateValue(newValue)
   }
@@ -100,7 +100,7 @@ export default class ThreeComponent extends React.Component {
     this.renderer.setSize(innerWidth, innerHeight)
   }
 
-  updateValue (value) {
+  updateValue () {
     // Whatever you need to do with React props
   }
 

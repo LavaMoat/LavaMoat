@@ -10,6 +10,7 @@ const path = require('path')
 const node = process.env.NVM_BIN ? `${process.env.NVM_BIN}/node` : process.argv[0]
 const npxPath = path.resolve(node, '../npx')
 const lavamoat = require.resolve('lavamoat/src/index.js')
+// eslint-disable-next-line no-unused-vars
 const lockdown = new URL('../src/lockdown.cjs', `file://${__filename}`).pathname
 const mitm = new URL('../mitm/node', `file://${__filename}`).pathname
 

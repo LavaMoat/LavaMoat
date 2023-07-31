@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 const test = require('ava')
 
 const {
@@ -19,7 +20,7 @@ test('generatePolicy - empty policy', async (t) => {
 test('generatePolicy - basic policy', async (t) => {
   const scenario = createScenarioFromScaffold({
     defineOne: () => {
-      module.exports = global.two 
+      module.exports = global.two
     },
     defaultPolicy: false,
   })
@@ -83,6 +84,8 @@ test('generatePolicy - policy ignores global refs', async (t) => {
 test('generatePolicy - policy ignores global refs when properties are not accessed', async (t) => {
   const scenario = createScenarioFromScaffold({
     defineOne: () => {
+      // XXX: this is probably wrong.  either use `typeof window === 'undefined'` or `window === undefined`
+      // eslint-disable-next-line valid-typeof
       typeof window !== undefined
     },
     defaultPolicy: false,

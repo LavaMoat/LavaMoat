@@ -59,7 +59,7 @@ async function main () {
     path: await addToCompartment('path', require('path')),
     fs: await addToCompartment('fs', require('fs')),
   }
-  
+
 
   const readPowers = makeReadPowers({ fs, url, crypto })
   const moduleLocation = url.pathToFileURL(process.cwd() + '/entry.js')
@@ -81,7 +81,7 @@ async function main () {
   )
 
   function makeSesModuleTransform (language) {
-    return function sesModuleTransform (sourceBytes, _speciefier, _location) {
+    return function sesModuleTransform (sourceBytes) {
       const transformedSource = _applySesEvasions(sourceBytes.toString())
       const bytes = Buffer.from(transformedSource, 'utf8')
       return { bytes, parser: language }
@@ -99,13 +99,13 @@ async function main () {
     return result
   }
 
-  
+
   function applySesEvasions (source) {
     return applyTransforms(source, [
       evadeHtmlCommentTest,
       evadeImportExpressionTest,
       (src) => {
-        const someDirectEvalPattern = /(^|[^.])\beval(\s*\()/g      
+        const someDirectEvalPattern = /(^|[^.])\beval(\s*\()/g
         return src.replaceAll(someDirectEvalPattern, '$1(0,eval)(')
       },
     ])

@@ -10,6 +10,8 @@ module.exports = {
   getTopPackages,
 }
 
+// XXX: remove if unneeded
+// eslint-disable-next-line no-unused-vars
 const npmDependentsScraper = createScraper({
   buildUrl: ({ offset }) => `https://www.npmjs.com/browse/depended?offset=${offset}`,
   entrySelector: '.flex-row.pr3',
@@ -43,7 +45,7 @@ const librariesIoRankScraper = createScraper({
 })
 
 async function getTopPackages () {
-  const indexPath = path.resolve(__dirname + '/../downloads/index.json')
+  const indexPath = path.resolve(__dirname, '..', 'downloads', 'index.json')
   try {
     const indexContent = await fs.readFile(indexPath, 'utf8')
     return JSON.parse(indexContent)
@@ -77,7 +79,7 @@ function createScraper ({ buildUrl, entrySelector, packagesPerPage, maxResults }
     }), { concurrency: 8 })
     return pageResults.flat().slice(0, count)
   }
-  
+
   async function downloadPage (page) {
     const offset = page * packagesPerPage
     const url = buildUrl({ page, offset })

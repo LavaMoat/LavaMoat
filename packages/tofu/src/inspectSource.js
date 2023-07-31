@@ -107,7 +107,7 @@ function inspectGlobals (source, {
   }
 }
 
-function inspectEsmImports (ast, packagesToInspect) {
+function inspectEsmImports (ast) {
   const esmImports = []
   traverse(ast, {
     ImportDeclaration: (path) => {
