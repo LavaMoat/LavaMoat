@@ -3,6 +3,9 @@
   "references": [
     {
       "path": "packages/allow-scripts"
+    },
+    {
+      "path": "packages/aa"
     }
   ]
 }
