@@ -1,102 +1,34 @@
-# Semantic Release Workflow
+# Release Workflow
 
-LavaMoat follows [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.html).
-This lays out part of the steps involved in drafting and publishing any of the LavaMoat packages monotonically.
+LavaMoat follows [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.html) and uses [Conventional Commits][] to enable automation.
 
-## 0. Prerequirements
+## Automated Release Process
 
-- One package per release
-- Releases are always monotonically from current `main`.
-- Ensure your local `main` branch is up to date
-- Perform any necessary manual or local tests not covered in automatic tests
-- Review the commits since the last release: `$ git log main...$(git log --grep "${PKGDIR}/version - ${CURRENT_VERSION}" --format=tformat:%h) packages/${PKGDIR}`
-- Review the diff since the last release: `$ git diff main $(git log --grep "${PKGDIR}/version - ${CURRENT_VERSION}" --format=tformat:%h) packages/${PKGDIR}`
-- Determine the new version number based on the nature of changes
-  - Follow up with author or reviewers if the SemVer-nature of an included change is unclear before proceeding
+The [Release Please][] GitHub Action automates all parts of the release process _except_ the publish to the public npm registry.
 
-## 1. Preparing your release
+This is how it works:
 
-1) Bumping version
-  - Create a new branch: `git checkout -b release-${PKGDIR}-${VERSION}`
-  - Bump the `version` field in `packages/{PKGDIR}/package.json` in an individual commit
-    - Commit title must be of format `${PKGDIR}/version - ${VERSION}`
-    - Commit body must contain an exhaustive list of changes to the package since last release (commit hashes and/or merged PR numbers).
-  - Build, lint, and test the package
-2) Bumping dependents
-  - Identify any other packages in the monorepo that depend on the current version of this package and should have their versions bumped
-    - Useful: `$ find packages -maxdepth 2 -name package.json -exec jq '[.name, .dependencies["PKGNAME"], .devDependencies["PKGNAME"]] | select(.[1] or .[2])|@tsv' {} -r \;`
-  - Perform updates of dependents if necessary in additional commit
-  - Build, lint, and test any updated dependants
-    - Keep in mind that as long as the version range of the dependency is satisfied by the locally checked out package, internal dependencies will be linked to that. Otherwise, it's fetched from the configured registry like any other dependency.
-3) Review
-  - Build, lint, and test the workspace
-  - `git diff release-${PKGDIR}-${VERSION} main` should only contain version and dependency bumps in `package.json` files, and the corresponding changes in `yarn.lock`
+1. A contributor creates a PR targeting the default branch (`main`) with commit messages in the [Conventional Commits][] format. PRs may contain changes across packages. _Note: a PR will fail checks if the commit is not in a valid format._
+2. Once this PR is merged into its target branch (`main`), Release Please creates a pull request (or updates one if it already exists). The description will contain the current changelog; the commits will contain updates to the `package.json` and `CHANGELOG.md` files. _Draft_ releases for each package will be created at this time; one per package to be released. _Expect to see an open Release Please PR often!_
+3. As additional contributor PRs are merged into `main`, the Release Please PR will be rebased and updated to reflect these changes. Dependencies will be automatically bumped between packages as needed--and kept at the latest version regardless of breaking changes.
+4. A maintainer reviews a Release Please PR, and when they are satisfied with the changes, they rebase into `main`. This will trigger Release Please again, but this time the draft GitHub Releases will become official and tags will be pushed. This will be a _single commit_ containing one or more tags (one per package released). Release Please will now delete its PR branch.
 
-## 2. Submitting a release PR
+Once a Release Please PR has been merged into `main`, _the maintainer who merged it **should** publish the package to npm as soon as possible_. See the next section.
 
-Open a new [pull request](https://github.com/LavaMoat/LavaMoat/compare) from your branch targeting `main`.
+> Release Please [recommends](https://github.com/googleapis/release-please#linear-git-commit-history-use-squash-merge) PRs are _squashed_ instead of simply rebased.
+>
+> Please also note [how to represent multiple changes in a single commit message](https://github.com/googleapis/release-please#what-if-my-pr-contains-multiple-fixes-or-features).
 
-The PR description should contain an exhaustive list of included changes - usually you can just copy the commit message verbatim.
+## Humans Publish to npm
 
-If there are particularities reviewers should be aware of (urgency, manual testing steps), that should be mentioned in the description or in comments to the PR.
+[Lerna][] handles the publishing duties for us, but a human must trigger it. The process is straightforward:
 
-Request review from the LavaMoat/devs team. Await approval.
+1. Ensure you are logged in to npm; use `npm login` and/or `npm whoami`. **Do not do this on an untrusted machine.**
+2. In your `LavaMoat` working copy, checkout `main` and pull it from `origin`.
+3. Execute `npm ci` ("clean install"; not "continuous integration") to install using the lockfile (`package-lock.json`). This will obliterate any `node_modules` and `packages/*/node_modules` directories.
+4. Execute `npm run publish`. The `rebuild`, `test:prep` and `test` scripts will be run. Once this is complete, Lerna will ask for confirmation. Approve, and Lerna will publish _all_ packages that have not yet been published. At this time you may also be asked for 2FA.
 
-## 3. Publish to npmjs.com
-
-This part can be done by a different person.
-
-0. Prerequisites
-  - PR reviewed
-  - Credentials to a user on npmjs.org with publish permissions to the relevant package
-  - Push permissions to https://github.com/LavaMoat/LavaMoat `main` branch
-  - Ensure you are doing this from a secure environment and handle the npm credentials with utmost care
-    - In particular, keep deployment and development/testing systems separate
-  - Fresh clone to ensure a clean and consistent state
-1. `$ cd ${WORKSPACE_ROOT}`
-2. `$ git checkout main`
-3. `$ git pull` - just to make sure it's fresh
-4. `$ git merge --ff-only release-${PKGDIR}-${VERSION}`
-5. Install and build workspace
-  - `$ NODE_ENV=production yarn --frozen-lockfile --check-files --production=false`
-  - `$ NODE_ENV=production yarn setup`
-  - `$ NODE_ENV=production yarn build`
-6. `$ yarn test:prep && yarn test`
-7. `$ git push origin main`
-8. `$ git tag ${PKGDIR}-v${VERSION}`
-9. `$ git push origin ${PKGDIR}-v${VERSION}`
-10. Authenticate as your user on npmjs.org:
-  - `$ npm login`
-  - `$ npm whoami` should now return your npmjs.org username
-11. `$ cd packages/{PKGDIR}`
-12. `$ npm publish`
-13. Close down environment and ensure npm token is no longer present
-
----
-
-# Release dependency
-
-*when releasing, go top-down*
-
-```mermaid
-flowchart BT;
-  allow-scripts --> aa
-  browserify --> lavapack
-  browserify --> aa
-  browserify --> core
-  core --> tofu
-  lavapack --> core
-  node --> core
-  node --> tofu
-  node --> aa
-  perf --> browserify
-  perf --> node
-  viz --> core
-  survey --> node
-  survey--> tofu
-
-```
-
+## Addendum: Workspace Dependency Table
 
 | folder                    | npm name                            | deps                                            |
 | ------------------------- | ----------------------------------- | ----------------------------------------------- |
@@ -112,3 +44,7 @@ flowchart BT;
 | tofu                      | lavamoat-tofu                       |                                                 |
 | viz                       | lavamoat-viz                        | lavamoat-core                                   |
 | yarn-plugin-allow-scripts | @lavamoat/yarn-plugin-allow-scripts |                                                 |
+
+[Release Please]: https://github.com/google-github-actions/release-please-action
+[Conventional Commits]: https://www.conventionalcommits.org/en/v1.0.0/#summary
+[Lerna]: https://lerna.js.org
