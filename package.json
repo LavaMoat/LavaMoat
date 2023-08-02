@@ -11,6 +11,7 @@
     "@metamask/eslint-config-nodejs": "^11.0.1",
     "ava": "^5.2.0",
     "conventional-changelog-conventionalcommits": "^6.1.0",
+    "cross-env": "^7.0.3",
     "depcheck": "^1.4.0",
     "eslint": "^8.40.0",
     "eslint-plugin-ava": "^13.2.0",
@@ -32,7 +33,7 @@
     "lint:staged": "lint-staged",
     "lint:commit": "commitlint",
     "postinstall": "husky install",
-    "prepublishOnly": "npm run rebuild && npm run test:prep && npm run test",
+    "prepublishOnly": "cross-env NODE_ENV=production npm run rebuild && npm run test:prep && npm run test",
     "publish": "lerna publish",
     "setup": "allow-scripts"
   },
