@@ -32,7 +32,7 @@
     "lint:staged": "lint-staged",
     "lint:commit": "commitlint",
     "postinstall": "husky install",
-    "prepare": "npm run rebuild",
+    "prepublishOnly": "npm run rebuild && npm run test:prep && npm run test",
     "publish": "lerna publish",
     "setup": "allow-scripts"
   },
