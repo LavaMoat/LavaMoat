@@ -11,5 +11,5 @@
     "packages/tofu": {},
     "packages/viz": {}
   },
-  "separate-pull-requests": true
+  "plugins": ["node-workspace"]
 }
