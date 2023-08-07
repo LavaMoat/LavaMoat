@@ -2391,7 +2391,7 @@ const        evadeHtmlCommentTest=  (src)=>{
 // /////////////////////////////////////////////////////////////////////////////
 $h‍_once.evadeHtmlCommentTest(evadeHtmlCommentTest);
 const importPattern=  new FERAL_REG_EXP(
-  '(^|[^.])\\bimport(\\s*(?:\\(|/[/*]))',
+  '(^|[^.]|\\.\\.\\.)\\bimport(\\s*(?:\\(|/[/*]))',
   'g');
 
 
