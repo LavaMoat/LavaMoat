@@ -3,7 +3,7 @@ const test = require('ava')
 const { pipe, from, concat } = require('mississippi')
 const { SourceMapConsumer } = require('source-map')
 const convertSourceMap = require('convert-source-map')
-const pack = require('../')
+const pack = require('../src')
 
 
 test('dummy test', (t) => {
@@ -70,7 +70,7 @@ test('sourcemap test', async (t) => {
     const bundleLine = bundleString.split('\n')[bundleStartPos.line - 1]
     console.log(`${sourceFile}:\n${bundleLine}`)
   })
-  
+
   consumer.destroy()
   t.pass('no error thrown')
 })

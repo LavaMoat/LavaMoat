@@ -10,7 +10,7 @@
   "scripts": {
     "test": "npm run test:prep && npm run test:run",
     "test:prep": "for d in ./test/projects/*/ ; do (cd \"$d\" && NODE_ENV=development npm run setup && ../../../src/cli.js -a index.js); done",
-    "test:run": "ava --timeout=30s test/index.js",
+    "test:run": "ava",
     "lint": "npm run lint:eslint && npm run lint:deps",
     "lint:eslint": "eslint .",
     "lint:fix": "eslint . --fix",
@@ -47,5 +47,11 @@
   "description": "",
   "engines": {
     "node": ">=14.0.0 <19.0.0"
+  },
+  "ava": {
+    "files": [
+      "test/*.spec.js"
+    ],
+    "timeout": "30s"
   }
 }

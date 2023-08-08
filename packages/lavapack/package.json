@@ -33,9 +33,7 @@
     "lint:eslint": "eslint .",
     "lint:fix": "eslint . --fix",
     "lint:deps": "depcheck",
-    "test": "npm run test:ava && npm run test:ecma",
-    "test:ava": "ava --timeout=30s test/index.js",
-    "test:ecma": "node test/runtimeEcma.js",
+    "test": "ava",
     "rebuild": "npm run build",
     "build": "node ./src/build-runtime.js"
   },
@@ -46,5 +44,11 @@
     "url": "https://github.com/LavaMoat/lavamoat/issues"
   },
   "homepage": "https://github.com/LavaMoat/lavamoat#readme",
+  "ava": {
+    "files": [
+      "test/*.spec.js"
+    ],
+    "timeout": "30s"
+  },
   "gitHead": "28a238fc4c3d55650bd2ba9a3603b1f275567286"
 }

@@ -41,7 +41,7 @@
     "watchify": "^4.0.0"
   },
   "scripts": {
-    "test": "ava --timeout 2m --concurrency 1",
+    "test": "ava",
     "test:prep": "WRITE_AUTO_POLICY=1 ./test/fixtures/secureBundling/run.sh",
     "lint": "npm run lint:eslint && npm run lint:deps",
     "lint:eslint": "eslint .",
@@ -61,5 +61,12 @@
     "allowScripts": {
       "keccak": false
     }
+  },
+  "ava": {
+    "files": [
+      "test/*.spec.js"
+    ],
+    "timeout": "2m",
+    "concurrency": 1
   }
 }

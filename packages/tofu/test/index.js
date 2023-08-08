@@ -1,7 +1,0 @@
-require('./findGlobals')
-require('./inspectGlobals')
-require('./inspectImports')
-require('./inspectEsmImports')
-require('./inspectPrimordialAssignments')
-require('./inspectSesCompat')
-require('./util')

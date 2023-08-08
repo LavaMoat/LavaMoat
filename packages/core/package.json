@@ -26,7 +26,7 @@
     "lint:eslint": "eslint .",
     "lint:fix": "eslint --fix .",
     "lint:deps": "depcheck",
-    "test": "ava --timeout=30s test/index.js",
+    "test": "ava",
     "lib:ses": "echo 'disabled SES overwrite in this branch'; exit 1 #cp ../../node_modules/ses/dist/lockdown.umd.js ./lib/lockdown.umd.js"
   },
   "author": "kumavis",
@@ -42,5 +42,11 @@
       "templateRequire": "readonly",
       "lockdown": "readonly"
     }
+  },
+  "ava": {
+    "files": [
+      "test/*.spec.js"
+    ],
+    "timeout": "30s"
   }
 }

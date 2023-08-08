@@ -1,10 +1,6 @@
 const test = require('ava')
 const { parseForPolicy } = require('../src/parseForPolicy')
 const { runLavamoat } = require('./util')
-require('./arguments')
-require('./envConfig')
-require('./globals')
-require('./runScenarios')
 
 test('parseForPolicy - resolutions', async (t) => {
   const projectRoot = `${__dirname}/projects/1`

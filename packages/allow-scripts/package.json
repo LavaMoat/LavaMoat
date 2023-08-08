@@ -37,7 +37,7 @@
   },
   "scripts": {
     "test": "npm run test:run",
-    "test:run": "ava --timeout=30s test/index.js",
+    "test:run": "ava",
     "test:prep": "for d in ./test/projects/*/ ; do (cd \"$d\" && ../../../src/cli.js auto --experimental-bins); done",
     "lint": "npm run lint:eslint && npm run lint:deps",
     "lint:eslint": "eslint .",
@@ -48,5 +48,11 @@
   "homepage": "https://github.com/LavaMoat/LavaMoat/tree/main/packages/allow-scripts",
   "engines": {
     "node": ">=14.0.0"
-}
+  },
+  "ava": {
+    "files": [
+      "test/*.spec.js"
+    ],
+    "timeout": "30s"
+  }
 }
