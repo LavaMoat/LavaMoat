@@ -1,7 +1,15 @@
 const test = require('ava')
 const { utils: { mergePolicy, mergeConfigEntire, objToMap, mapToObj } } = require('../src/index')
 
-testMergePartial('upgrades reads to writes', {
+const testMergePartial = test.macro(
+  (t, configA, configB, expectedResultObj) => {
+    const result = mergePolicy(objToMap(configA), objToMap(configB))
+    const resultObj = mapToObj(result)
+    t.deepEqual(resultObj, expectedResultObj)
+  }
+)
+
+test('upgrades reads to writes', testMergePartial, {
   abc: 'write',
   xyz: 'read'
 }, {
@@ -12,7 +20,7 @@ testMergePartial('upgrades reads to writes', {
   xyz: 'write'
 })
 
-testMergePartial('adds new packages', {
+test('adds new packages', testMergePartial, {
   abc: 'write',
   xyz: 'read'
 }, {
@@ -25,7 +33,7 @@ testMergePartial('adds new packages', {
   ghi: 'write'
 })
 
-testMergePartial('dedupe overlapping', {
+test('dedupe overlapping', testMergePartial, {
   'abc.xyz': 'read'
 }, {
   abc: 'read'
@@ -33,7 +41,7 @@ testMergePartial('dedupe overlapping', {
   abc: 'read'
 })
 
-testMergePartial('non-overlapping', {
+test('non-overlapping', testMergePartial, {
   abc: 'read'
 }, {
   'xyz.jkl': 'write'
@@ -41,11 +49,3 @@ testMergePartial('non-overlapping', {
   abc: 'read',
   'xyz.jkl': 'write'
 })
-
-function testMergePartial (label, configA, configB, expectedResultObj) {
-  test(label, (t) => {
-    const result = mergePolicy(objToMap(configA), objToMap(configB))
-    const resultObj = mapToObj(result)
-    t.deepEqual(resultObj, expectedResultObj)
-  })
-}
