@@ -1,19 +1,16 @@
-declare module "npm-normalize-package-bin" {
-  namespace normalizePackageBin {
-    interface PackageBin {
-      name: string;
-      bin?: string | Record<string, string>;
-    }
+declare module 'npm-normalize-package-bin' {
+  import type { PackageJson } from 'type-fest'
 
-    interface NormalizedPackageBin {
-      name: string;
-      bin?: Record<string, string>;
+  namespace normalizePackageBin {
+    export { PackageJson }
+    export type NormalizedBinPackageJson = Omit<PackageJson, 'bin'> & {
+      bin?: Partial<Record<string, string>>
     }
   }
 
   function normalizePackageBin(
-    pkg: normalizePackageBin.PackageBin
-  ): normalizePackageBin.NormalizedPackageBin;
+    pkg: normalizePackageBin.PackageJson
+  ): normalizePackageBin.NormalizedBinPackageJson
 
-  export = normalizePackageBin;
+  export = normalizePackageBin
 }

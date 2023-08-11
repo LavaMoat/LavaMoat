@@ -1,4 +1,4 @@
-declare module "bin-links/lib/link-bin.js" {
+declare module 'bin-links/lib/link-bin.js' {
   namespace linkBin {
     interface LinkBinOptions {
       path: string;

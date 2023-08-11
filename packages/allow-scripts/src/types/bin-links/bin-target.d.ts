@@ -1,4 +1,4 @@
-declare module "bin-links/lib/bin-target.js" {
+declare module 'bin-links/lib/bin-target.js' {
   namespace binTarget {
     interface BinTargetOptions {
       top?: string;
