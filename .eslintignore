@@ -12,3 +12,4 @@ packages/perf/trials/**/*
 packages/survey/mitm/**/*
 packages/viz/dist/**/*
 packages/viz/src/example-policies/**/*
+packages/yarn-plugin-allow-scripts/bundles
