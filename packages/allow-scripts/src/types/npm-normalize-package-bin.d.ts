@@ -1,4 +1,4 @@
-declare module "npm-normalize-package-bin" {
+declare module 'npm-normalize-package-bin' {
   namespace normalizePackageBin {
     interface PackageBin {
       name: string;

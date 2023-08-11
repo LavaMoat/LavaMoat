@@ -1,6 +1,6 @@
 // XXX: temporary while `@lavamoat/aa` exports no types
 
-declare module "@lavamoat/aa" {
+declare module '@lavamoat/aa' {
   export interface Resolver {
     sync(path: string, opts: { basedir: string }): string;
   }

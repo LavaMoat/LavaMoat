@@ -1,4 +1,4 @@
-declare module "bin-links/lib/shim-bin.js" {
+declare module 'bin-links/lib/shim-bin.js' {
   namespace shimBin {
     interface ShimBinOptions {
       path: string;
