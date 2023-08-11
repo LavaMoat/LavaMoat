@@ -35,7 +35,12 @@ function setOptToArgs(args, key, value) {
   }
 }
 
-function convertOptsToArgs({ scenario }) {
+/**
+ * Converts options within a `NormalizedScenario` to CLI args.
+ * @param {import('lavamoat-core/test/scenarios/scenario').NormalizedScenario} scenario
+ * @returns {string[]}
+ */
+function convertOptsToArgs(scenario) {
   const { entries, opts } = scenario
   if (entries.length !== 1) {
     throw new Error('LavaMoat - invalid entries')
@@ -46,18 +51,32 @@ function convertOptsToArgs({ scenario }) {
   return args
 }
 
+/**
+ * Runs Lavamoat CLI
+ * @param {{args?: string[], cwd?: string}} opts
+ * @returns {Promise<{output: {stdout: string, stderr: string}}>}
+ */
 async function runLavamoat({ args = [], cwd = process.cwd() } = {}) {
   const lavamoatPath = require.resolve('../src/cli')
   const output = await execFile(lavamoatPath, args, { cwd })
   return { output }
 }
 
+/**
+ * Run the given scenario.
+ *
+ * The `scenario` itself should be passed thru `createScenarioFromScaffold` to normalize it.
+ *
+ * @template [T=unknown]
+ * @param {{scenario: NormalizedScenario}} opts
+ * @returns {Promise<T>}
+ */
 async function runScenario({ scenario }) {
   const { projectDir } = await prepareScenarioOnDisk({
     scenario,
     policyName: 'node',
   })
-  const args = convertOptsToArgs({ scenario })
+  const args = convertOptsToArgs(scenario)
   const {
     output: { stdout, stderr },
   } = await runLavamoat({ args, cwd: projectDir })

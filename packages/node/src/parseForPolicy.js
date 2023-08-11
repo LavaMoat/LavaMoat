@@ -69,6 +69,21 @@ module.exports = {
   resolutionOmittedExtensions,
 }
 
+/**
+ * @typedef ParseForPolicyOpts
+ * @property {string} projectRoot
+ * @property {string} entryId
+ * @property {import('lavamoat-core').LavaMoatPolicy} policyOverride
+ * @property {string} rootPackageName
+ * @property {(requestedName: string, specifier: string) => boolean} shouldResolve
+ * @property {includeDebugInfo} boolean
+ */
+
+/**
+ *
+ * @param {ParseForPolicyOpts} opts
+ * @returns {Promise<import('lavamoat-core').LavaMoatPolicy>}
+ */
 async function parseForPolicy({
   projectRoot,
   entryId,
