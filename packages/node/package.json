@@ -8,10 +8,11 @@
   "main": "src/index.js",
   "license": "MIT",
   "scripts": {
-    "lint:deps": "depcheck",
-    "test": "npm run test:prep && npm run test:ava",
-    "test:prep": "for d in ./test/projects/*/ ; do (cd \"$d\" && NODE_ENV=development yarn setup && ../../../src/cli.js -a index.js); done",
-    "test:ava": "ava"
+    "test": "npm run test:npm && npm run test:yarn1",
+    "test:prepare": "node ./test/prepare.js",
+    "test:npm": "cross-env LAVAMOAT_PM=npm@latest npm run test:prepare && ava",
+    "test:yarn1": "cross-env LAVAMOAT_PM=yarn@1 npm run test:prepare && ava",
+    "lint:deps": "depcheck"
   },
   "dependencies": {
     "@babel/code-frame": "^7.22.13",

@@ -1,14 +1,15 @@
+const path = require('node:path')
 const test = require('ava')
 const { parseForPolicy } = require('../src/parseForPolicy')
 const { runLavamoat } = require('./util')
 
 test('parseForPolicy - resolutions', async (t) => {
-  const projectRoot = `${__dirname}/projects/1`
-  const entryId = `${projectRoot}/index.js`
+  const projectRoot = path.join(__dirname, 'projects', '1')
+  const entryId = path.join(projectRoot, 'index.js')
   const resolutions = {
     a: {
-      fs: `${projectRoot}/fake-fs.js`,
-      b: `${projectRoot}/fake-b.js`,
+      fs: path.join(projectRoot, 'fake-fs.js'),
+      b: path.join(projectRoot, 'fake-b.js'),
     },
   }
 
@@ -53,8 +54,8 @@ test('parseForPolicy - resolutions', async (t) => {
 })
 
 test('parseForPolicy - require a userspace package with a builtin name', async (t) => {
-  const projectRoot = `${__dirname}/projects/4`
-  const entryId = `${projectRoot}/index.js`
+  const projectRoot = path.join(__dirname, 'projects', '4')
+  const entryId = path.join(projectRoot, 'index.js')
 
   const policy = await parseForPolicy({ entryId, projectRoot })
   t.deepEqual(policy, {
@@ -79,8 +80,8 @@ test('parseForPolicy - require a userspace package with a builtin name', async (
 })
 
 test("parseForPolicy - indirectly used packages are included in parent's allowlist", async (t) => {
-  const projectRoot = `${__dirname}/projects/5`
-  const entryId = `${projectRoot}/index.js`
+  const projectRoot = path.join(__dirname, 'projects', '5')
+  const entryId = path.join(projectRoot, 'index.js')
   const policy = await parseForPolicy({ entryId, projectRoot })
   t.deepEqual(policy, {
     resources: { a: { builtin: { crypto: true } } },
@@ -104,8 +105,8 @@ test('parseForPolicy - find node:-prefixed builtins', async (t) => {
 
 // run lavamoat-node
 test('execute - resolutions', async (t) => {
-  const projectRoot = `${__dirname}/projects/1`
-  const entryId = './index.js'
+  const projectRoot = path.join(__dirname, 'projects', '1')
+  const entryId = path.join(projectRoot, 'index.js')
   const { output } = await runLavamoat({
     cwd: projectRoot,
     args: [entryId],
@@ -118,8 +119,8 @@ test('execute - resolutions', async (t) => {
 })
 
 test('execute - keccak with native modules', async (t) => {
-  const projectRoot = `${__dirname}/projects/2`
-  const entryId = './index.js'
+  const projectRoot = path.join(__dirname, 'projects', '2')
+  const entryId = path.join(projectRoot, 'index.js')
   const { output } = await runLavamoat({
     cwd: projectRoot,
     args: [entryId],
@@ -135,8 +136,8 @@ test('execute - keccak with native modules', async (t) => {
 })
 
 test('execute - core modules and buffers', async (t) => {
-  const projectRoot = `${__dirname}/projects/3`
-  const entryId = './index.js'
+  const projectRoot = path.join(__dirname, 'projects', '3')
+  const entryId = path.join(projectRoot, 'index.js')
   const { output } = await runLavamoat({
     cwd: projectRoot,
     args: [entryId],
