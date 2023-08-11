@@ -17,6 +17,7 @@ module.exports = {
     'packages/viz/dist/**/*',
     'packages/viz/src/example-policies/**/*',
   ],
+  parser: '@typescript-eslint/parser',
   parserOptions: {
     // this should be whatever the latest env version provides. some plugin is
     // messing with this, so we need to set it manually.
@@ -85,6 +86,10 @@ module.exports = {
     },
   },
   overrides: [
+    {
+      files: ['packages/**/*.ts'],
+      extends: ['plugin:@typescript-eslint/recommended'],
+    },
     {
       files: ['packages/*/test/**/*.js', 'packages/*/src/**/*.test.js'],
       extends: ['plugin:ava/recommended'],
