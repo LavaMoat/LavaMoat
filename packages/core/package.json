@@ -1,6 +1,6 @@
 {
   "name": "lavamoat-core",
-  "version": "14.2.0",
+  "version": "14.2.1",
   "description": "LavaMoat kernel and utils",
   "main": "src/index.js",
   "directories": {
@@ -27,7 +27,7 @@
     "lint:fix": "eslint --fix .",
     "lint:deps": "depcheck",
     "test": "ava --timeout=30s test/index.js",
-    "lib:ses": "cp ../../node_modules/ses/dist/lockdown.umd.js ./lib/lockdown.umd.js"
+    "lib:ses": "echo 'disabled SES overwrite in this branch'; exit 1 #cp ../../node_modules/ses/dist/lockdown.umd.js ./lib/lockdown.umd.js"
   },
   "author": "kumavis",
   "license": "MIT",
