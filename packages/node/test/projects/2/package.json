@@ -1,12 +1,12 @@
 {
   "name": "test-2",
   "scripts": {
-    "setup": "npm install && patch-package"
+    "setup": "patch-package"
   },
   "dependencies": {
     "keccak": "3.0.0"
   },
   "devDependencies": {
-    "patch-package": "^6.2.2"
+    "patch-package": "6.2.2"
   }
 }

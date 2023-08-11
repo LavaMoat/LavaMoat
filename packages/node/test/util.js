@@ -1,3 +1,5 @@
+// @ts-check
+
 const util = require('util')
 const execFile = util.promisify(require('child_process').execFile)
 const { prepareScenarioOnDisk } = require('lavamoat-core/test/util.js')
@@ -6,6 +8,15 @@ module.exports = {
   runScenario,
 }
 
+/**
+ * Add one or more CLI options to an array of args
+ *
+ * Mutates `args`
+ * @param {string[]} args - Array of args
+ * @param {string} key - Option name
+ * @param {any} value - Value; if array, `key` will be set multiple times
+ * @returns {void}
+ */
 function setOptToArgs(args, key, value) {
   if (Array.isArray(value)) {
     value.forEach((v) => setOptToArgs(args, key, v))
@@ -36,7 +47,7 @@ function convertOptsToArgs({ scenario }) {
 }
 
 async function runLavamoat({ args = [], cwd = process.cwd() } = {}) {
-  const lavamoatPath = `${__dirname}/../src/cli.js`
+  const lavamoatPath = require.resolve('../src/cli')
   const output = await execFile(lavamoatPath, args, { cwd })
   return { output }
 }
