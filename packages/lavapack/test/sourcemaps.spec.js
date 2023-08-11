@@ -2,8 +2,8 @@
 // to be migrated into lavapack from lavamoat-browserify
 
 const test = require('ava')
-const UglifyJS = require('uglify-js')
-const { SourceMapConsumer } = require('source-map')
+// const UglifyJS = require('uglify-js')
+// const { SourceMapConsumer } = require('source-map')
 
 test.skip('sourcemaps - adjust maps for wrapper', async (t) => {
   const { wrapIntoModuleInitializer } = require('../src/sourcemaps')
