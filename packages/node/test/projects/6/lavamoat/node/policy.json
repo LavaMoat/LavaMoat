@@ -1,0 +1,9 @@
+{
+  "resources": {
+    "a": {
+      "builtin": {
+        "node:events.EventEmitter": true
+      }
+    }
+  }
+}

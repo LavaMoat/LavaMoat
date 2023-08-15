@@ -83,6 +83,21 @@ test('parseForPolicy - indirectly used packages are included in parent\'s allowl
   })
 })
 
+test('parseForPolicy - find node:-prefixed builtins', async (t) => {
+  const projectRoot = `${__dirname}/projects/6`;
+  const entryId = `${projectRoot}/index.js`;
+  const policy = await parseForPolicy({ entryId, projectRoot });
+  t.deepEqual(policy, {
+    resources: {
+      a: {
+        builtin: {
+          'node:events.EventEmitter': true
+        }
+      }
+    }
+  });
+})
+
 // run lavamoat-node
 test('execute - resolutions', async (t) => {
   const projectRoot = `${__dirname}/projects/1`

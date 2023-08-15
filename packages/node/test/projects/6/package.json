@@ -1,0 +1,9 @@
+{
+  "name": "test-6",
+  "scripts": {
+    "setup": "npm install"
+  },
+  "dependencies": {
+    "a": "file:./fake_node_modules/a"
+  }
+}

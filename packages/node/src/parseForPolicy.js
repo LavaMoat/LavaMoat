@@ -1,6 +1,6 @@
 const path = require('path')
 const { promises: fs } = require('fs')
-const { builtinModules: builtinPackages } = require('module')
+const { builtinModules } = require('module')
 const resolve = require('resolve')
 const bindings = require('bindings')
 const gypBuild = require('node-gyp-build')
@@ -18,6 +18,11 @@ const { checkForResolutionOverride } = require('./resolutions')
 // file extension omitted can be omitted, eg https://npmfs.com/package/yargs/17.0.1/yargs
 const commonjsExtensions = ['', '.js', '.cjs']
 const resolutionOmittedExtensions = ['.js', '.json']
+
+/**
+ * Allow use of `node:` prefixed builtins.
+ */
+const builtinPackages = [...builtinModules, ...builtinModules.map(id => `node:${id}`)]
 
 // approximate polyfill for node builtin
 const createRequire = (url) => {
