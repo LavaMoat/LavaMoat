@@ -5,7 +5,7 @@
     "lavamoat-run-command": "src/run-command.js"
   },
   "version": "7.1.0",
-  "main": "index.js",
+  "main": "src/index.js",
   "license": "MIT",
   "scripts": {
     "test": "yarn test:prep && yarn test:run",
