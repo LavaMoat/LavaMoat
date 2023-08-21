@@ -211,13 +211,17 @@ class VirtualRuntimeModule extends RuntimeModule {
   }
 }
 
+function removeMultilineComments(source) {
+  return source.replace(/\/\*[\s\S]*?\*\//g, "");
+}
+
 // Runtime modules are not being built nor wrapped by webpack, so I rolled my own tiny concatenator.
 // It's using a shared namespace technique instead of scoping `exports` variables
 // to avoid confusing anyone into believing it's actually CJS.
 // Criticism will only be accepted in a form of working PR with less total lines and less magic.
 const assembleRuntime = (KEY, runtimeModules) => {
   let assembly = `const LAVAMOAT = Object.create(null);`;
-  runtimeModules.map(({ file, data, name, json }) => {
+  runtimeModules.map(({ file, data, name, json, shimRequire }) => {
     let sourceString;
     if (file) {
       sourceString = readFileSync(path.join(__dirname, file), "utf-8");
@@ -227,6 +231,17 @@ const assembleRuntime = (KEY, runtimeModules) => {
     }
     if (json) {
       sourceString = `LAVAMOAT['${name}'] = (${sourceString});`;
+    }
+    if (shimRequire) {
+      sourceString = readFileSync(require.resolve(shimRequire), "utf-8");
+      sourceString = removeMultilineComments(sourceString);
+      sourceString = `;(()=>{
+        const module = {exports: {}};
+        const exports = module.exports;
+          ${sourceString}
+        ;
+        LAVAMOAT['${name}'] = module.exports;
+      })();`;
     }
     assembly += `\n;/*${name}*/;\n${sourceString}`;
   });
@@ -302,15 +317,18 @@ class ScorchWrapPlugin {
 
     // =================================================================
     // run long asynchronous processing ahead of all compilations
-    compiler.hooks.beforeRun.tapAsync(
-      PLUGIN_NAME,
-      async (compilation, callback) => {
-        canonicalNameMap = await loadCanonicalNameMap({
-          rootDir: compiler.context,
-        });
-        callback();
-        PROGRESS.report("canonicalNameMap");
-      }
+    compiler.hooks.beforeRun.tapAsync(PLUGIN_NAME, (compilation, callback) =>
+      loadCanonicalNameMap({
+        rootDir: compiler.context,
+      })
+        .then((map) => {
+          canonicalNameMap = map;
+          callback();
+          PROGRESS.report("canonicalNameMap");
+        })
+        .catch((err) => {
+          callback(err);
+        })
     );
 
     let mainCompilationWarnings;
@@ -480,22 +498,31 @@ class ScorchWrapPlugin {
                 const lavaMoatRuntime = assembleRuntime(RUNTIME_KEY, [
                   {
                     name: "root",
-                    data: identifierLookup?.root,
+                    data: identifierLookup.root || null,
                     json: true,
                   },
                   {
                     name: "idmap",
-                    data: identifierLookup?.identifiersForModuleIds,
+                    data: identifierLookup.identifiersForModuleIds || null,
                     json: true,
                   },
                   {
                     name: "unenforceable",
-                    data: identifierLookup?.unenforceableModuleIds,
+                    data: identifierLookup.unenforceableModuleIds || null,
                     json: true,
                   },
                   { name: "options", data: runtimeOptions, json: true },
                   { name: "policy", data: policyData, json: true },
                   { name: "ENUM", file: "./ENUM.json", json: true },
+                  {
+                    name: "makeGetEndowments",
+                    shimRequire:
+                      "lavamoat-core/src/makeGetEndowmentsForConfig.js",
+                  },
+                  {
+                    name: "coreUtils",
+                    shimRequire: "lavamoat-core/src/makeGeneralUtils.js",
+                  },
                   { name: "runtime", file: "./runtime/runtime.js" },
                 ]);
 
