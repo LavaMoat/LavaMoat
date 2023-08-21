@@ -32,6 +32,7 @@ The ScorchWrap plugin takes an optional options object with the following proper
 - runChecks: Optional boolean property to indicate whether to check resulting code with wrapping for correctness. Default is false.
 - diagnosticsVerbosity: Optional number property to represent diagnostics output verbosity. A larger number means more overwhelming diagnostics output. Default is 0.  
   Setting positive verbosity will enable runChecks.
+- readableResourceIds: Decide whether to keep resource IDs human readable (regardless of production/development mode). If false, they are replaced with a sequence of numbers. Keeping them readable may be useful for debugging when a policy violation error is thrown.
 
 ```js
 const ScorchWrapPlugin = require('@lavamoat/scorchwrap');
