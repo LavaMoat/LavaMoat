@@ -1,10 +1,10 @@
 // @ts-check
 /// <reference path="./runtime.d.ts" />
 
-const { create, freeze, assign, defineProperty, entries, fromEntries } = Object;
+const { create, freeze, assign, defineProperty, entries, fromEntries, getOwnPropertyDescriptors } = Object;
 
 // Avoid running any wrapped code or using compartment if lockdown was not called.
-// This is for when the bundle ends up running despite SES being missing. 
+// This is for when the bundle ends up running despite SES being missing.
 // It was previously useful for sub-compilations running an incomplete bundle as part of the build, but currently that is being skipped. We might go back to it for the sake of build time security if it's deemed worthwihile in absence of lockdown.
 const LOCKDOWN_ON = typeof lockdown !== "undefined";
 if (LOCKDOWN_ON) {
@@ -60,27 +60,21 @@ const enforcePolicy = (requestedResourceId, referrerResourceId) => {
   );
 };
 const getGlobalsForPolicy = (resourceId) => {
-  // TODO: port the complete implementation from lavamoat-core here
-  if (LAVAMOAT.policy?.resources[resourceId]?.globals) {
-    return fromEntries(
-      entries(LAVAMOAT.policy.resources[resourceId].globals)
-        .filter(([key, value]) => value)
-        .map(([key, value]) => {
-          key = key.split(".")[0];
-          if (typeof globalThis[key] === "function") {
-            return [key, globalThis[key].bind(globalThis)];
-          }
-          return [key, globalThis[key]];
-        })
-    );
-  }
+  const createFunctionWrapper = LAVAMOAT.coreUtils().createFunctionWrapper;
+  const { getEndowmentsForConfig } = LAVAMOAT.makeGetEndowments({
+    createFunctionWrapper,
+  });
+
   if (resourceId === LAVAMOAT.root) {
-    return {
-      ...globalThis,
-      console,
-    };
+    return globalThis;
   }
-  return {};
+  // TODO: getEndowmentsForConfig doesn't implement support for "write"
+  // It'd be nice to refactor core and put it all in one place
+  const endowments = getEndowmentsForConfig(
+    globalThis,
+    LAVAMOAT.policy.resources[resourceId]
+  );
+  return endowments;
 };
 
 const compartmentMap = new Map();
@@ -142,10 +136,15 @@ const lavamoatRuntimeWrapper = (resourceId, runtimeKit) => {
   freeze(runtimeHandler);
 
   if (!compartmentMap.has(resourceId)) {
+    const c = new Compartment();
+    // This is necessary because Compartment constructor won't endow non-enumerable properties
+    for (const descriptor of entries(getOwnPropertyDescriptors(getGlobalsForPolicy(resourceId)))){
+      Object.defineProperty(c.globalThis, descriptor[0], descriptor[1]);
+    }
     // Create a compartment with globals attenuated according to the policy
     compartmentMap.set(
       resourceId,
-      new Compartment(getGlobalsForPolicy(resourceId))
+      c
     );
   }
 

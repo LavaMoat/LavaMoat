@@ -8,17 +8,17 @@
     "lib:ses": "cp ../../node_modules/ses/dist/lockdown.umd.js ./app/ses/lockdown.umd.js"
   },
   "dependencies": {
-    "lavamoat-core": "^14.1.1",
-    "webpack-sources":"^3.2.3",
+    "lavamoat-core": "^14.2.1",
+    "webpack-sources": "^3.2.3",
     "webpack-virtual-modules": "^0.5.0"
   },
   "peerDependencies": {
     "webpack": "^5.80.2"
   },
   "devDependencies": {
+    "@types/webpack-sources": "^3.2.0",
     "ses": "^0.18.5",
-    "webpack": "^5.84.1",
-    "@types/webpack-sources":"^3.2.0"
+    "webpack": "^5.84.1"
   },
   "keywords": [],
   "author": "",
