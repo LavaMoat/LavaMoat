@@ -1,7 +1,0 @@
-require('./builtin.js')
-require('./globals.js')
-require('./generatePolicy.js')
-require('./makeGetEndowmentsForConfig.js')
-require('./mergePolicy.js')
-require('./runScenarios.js')
-require('./circularDeps.js')

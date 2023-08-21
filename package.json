@@ -9,7 +9,7 @@
     "@commitlint/cli": "^17.6.7",
     "@commitlint/config-conventional": "^17.6.7",
     "@metamask/eslint-config-nodejs": "^11.0.1",
-    "ava": "^5.2.0",
+    "ava": "^5.3.1",
     "conventional-changelog-conventionalcommits": "^6.1.0",
     "cross-env": "^7.0.3",
     "depcheck": "^1.4.0",
@@ -52,5 +52,11 @@
       "lerna>nx>@parcel/watcher": false,
       "$root$": true
     }
+  },
+  "ava": {
+    "files": [
+      "packages/*/test/*.spec.js"
+    ],
+    "timeout": "2m"
   }
 }
