@@ -26,7 +26,7 @@
     "lavamoat": "^7.0.0",
     "readable-stream": "^3.6.0",
     "@endo/compartment-mapper": "^0.8.4",
-    "ses": "^0.18.4"
+    "ses": "^0.18.7"
   },
   "devDependencies": {
     "serve": "^14.2.0"

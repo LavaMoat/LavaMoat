@@ -18,7 +18,7 @@
     "@metamask/eslint-config-nodejs": "^11.0.1",
     "eslint-plugin-ava": "^13.2.0",
     "eslint-plugin-node": "^11.1.0",
-    "ses": "^0.18.4",
+    "ses": "^0.18.7",
     "tmp-promise": "^3.0.3"
   },
   "scripts": {
@@ -27,7 +27,7 @@
     "lint:fix": "eslint --fix .",
     "lint:deps": "depcheck",
     "test": "ava",
-    "lib:ses": "echo 'disabled SES overwrite in this branch'; exit 1 #cp ../../node_modules/ses/dist/lockdown.umd.js ./lib/lockdown.umd.js"
+    "lib:ses": "cp ../../node_modules/ses/dist/lockdown.umd.js ./lib/lockdown.umd.js"
   },
   "author": "kumavis",
   "license": "MIT",
