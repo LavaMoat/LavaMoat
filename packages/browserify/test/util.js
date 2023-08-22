@@ -11,7 +11,6 @@ const util = require('util')
 const tmp = require('tmp-promise')
 const { spawnSync } = require('child_process')
 const execFile = util.promisify(require('child_process').execFile)
-const limitConcurrency = require('throat')(1)
 
 const localLavaMoatDeps = {
   lavapack: '@lavamoat/lavapack',
@@ -53,8 +52,8 @@ async function copyFolder(from, to, opts = {skip: []}) {
 function overrideDepsWithLocalPackages(projectDir) {
   for (const [dirName, name] of Object.entries(localLavaMoatDeps)) {
     const src = path.resolve(__dirname, '..', '..', dirName)
-    spawnSync('yarn', ['unlink', name], { cwd: projectDir })
-    const res = spawnSync('yarn', ['link'], { cwd: src })
+    spawnSync('npm', ['unlink', name], { cwd: projectDir })
+    const res = spawnSync('npm', ['link'], { cwd: src })
     if (res.status !== 0) {
       const err = res.stderr.toString()
       console.error({
@@ -67,7 +66,7 @@ function overrideDepsWithLocalPackages(projectDir) {
       throw new Error(err)
     }
   }
-  const res = spawnSync('yarn', ['link', ...Object.values(localLavaMoatDeps)], { cwd: projectDir })
+  const res = spawnSync('npm', ['link', ...Object.values(localLavaMoatDeps)], { cwd: projectDir })
   if (res.status !== 0) {
     const err = res.stderr.toString()
     console.error({
@@ -174,12 +173,9 @@ async function prepareBrowserifyScenarioOnDisk ({ scenario }) {
     )
     runBrowserifyPath = `${__dirname}/fixtures/runBrowserifyBundleFactor.js`
   }
-  // yarn link workspace dependencies
+  // npm link workspace dependencies
   overrideDepsWithLocalPackages(projectDir)
-  // limit concurrency so that yarn v1 doesnt break its own cache
-  const installDevDepsResult = await limitConcurrency(async function () {
-    return spawnSync('yarn', ['add','--network-concurrency 1', '--prefer-offline', '-D', ...depsToInstall], { cwd: projectDir })
-  })
+  const installDevDepsResult = spawnSync('npm', ['install', '--prefer-offline', '-D', ...depsToInstall], { cwd: projectDir })
   if (installDevDepsResult.status !== 0) {
     const msg = `Error while installing devDeps:\n${installDevDepsResult.stderr.toString()}\npackages: ${depsToInstall}`
     throw new Error(msg)
