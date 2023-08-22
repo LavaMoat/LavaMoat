@@ -45,11 +45,8 @@ function makeGetEndowmentsForConfig ({ createFunctionWrapper }) {
         explicitlyBanned.push(path)
         return 
       }
-      // write access handled elsewhere
-      if (configValue === 'write') {
-        return
-      }
-      if (configValue !== true) {
+      // to allow read access, the value must be true or "write"
+      if (configValue !== true && configValue !== 'write') {
         throw new Error(`LavaMoat - unrecognizable policy value (${typeof configValue}) for path "${path}"`)
       }
       whitelistedReads.push(path)

@@ -39,5 +39,30 @@ module.exports = [
       expectedResult: true
     })
     return scenario
-  }
+  },
+  async () => {
+    const scenario = createScenarioFromScaffold({
+      name: 'globalWrites - and reads',
+      defineOne: () => {
+        module.exports = {
+          type: typeof globalThis.setTimeout,
+        }
+      },
+      config: {
+        resources: {
+          one: {
+            globals: {
+              // using "setTimeout" as an example of an endowment available
+              // in all testing environments
+              setTimeout: 'write'
+            }
+          },
+        }
+      },
+      expectedResult: {
+        type: 'function',
+      },
+    })
+    return scenario
+  },
 ]

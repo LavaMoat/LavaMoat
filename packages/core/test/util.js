@@ -389,7 +389,12 @@ function prepareModuleInitializerArgs (requireRelativeWithContext, moduleObj, mo
 
 function evaluateWithSourceUrl (filename, content, context) {
 
-  const vmContext = createContext()
+  const vmContext = createContext({
+    // vm does not have setTimeout
+    // we check for presence of "setTimeout" in a test
+    // bc its an example of an endowment available in all environments
+    setTimeout: () => { throw new Error('setTimeout not available in vm context') },
+  })
   const vmGlobalThis = runInContext('this', vmContext)
   const vmFeralFunction = vmGlobalThis.Function
 
