@@ -13,8 +13,8 @@ module.exports = [
         module.exports = {}
       },
       expectedResult: {
-        xyz: 42
-      }
+        xyz: 42,
+      },
     })
     return scenario
   },
@@ -26,7 +26,7 @@ module.exports = [
         two.xyz = 42
         module.exports = {
           xyz: two.xyz,
-          call: two()
+          call: two(),
         }
       },
       defineTwo: () => {
@@ -34,8 +34,8 @@ module.exports = [
       },
       expectedResult: {
         xyz: 42,
-        call: 100
-      }
+        call: 100,
+      },
     })
     return scenario
   },
@@ -48,7 +48,7 @@ module.exports = [
         module.exports = {
           abc: new ModernClass().abc,
           jkl: ModernClass.jkl,
-          xyz: ModernClass.xyz
+          xyz: ModernClass.xyz,
         }
       },
       defineTwo: () => {
@@ -63,8 +63,8 @@ module.exports = [
       expectedResult: {
         abc: 123,
         jkl: 101,
-        xyz: 42
-      }
+        xyz: 42,
+      },
     })
     return scenario
   },
@@ -81,7 +81,7 @@ module.exports = [
         }
         module.exports = {
           abc: new NewClass().abc,
-          jkl: NewClass.jkl
+          jkl: NewClass.jkl,
         }
       },
       defineTwo: () => {
@@ -95,8 +95,8 @@ module.exports = [
       },
       expectedResult: {
         abc: 456,
-        jkl: 101
-      }
+        jkl: 101,
+      },
     })
     return scenario
   },
@@ -110,7 +110,7 @@ module.exports = [
       defineTwo: () => {
         module.exports = [1, 2, 3]
       },
-      expectedResult: true
+      expectedResult: true,
     })
     return scenario
   },
@@ -126,7 +126,7 @@ module.exports = [
       defineTwo: () => {
         module.exports = { xyz: () => ({}) }
       },
-      expectedResult: 123
+      expectedResult: 123,
     })
     return scenario
   },
@@ -142,28 +142,28 @@ module.exports = [
       },
       defineTwo: () => {
         module.exports = {
-          get: () => globalThis.get()
+          get: () => globalThis.get(),
         }
       },
       config: {
         resources: {
           one: {
             globals: {
-              check: true
-            }
+              check: true,
+            },
           },
           two: {
             globals: {
-              get: true
-            }
-          }
-        }
+              get: true,
+            },
+          },
+        },
       },
       context: {
         get: () => testObj,
-        check: (target) => target === testObj
+        check: (target) => target === testObj,
       },
-      expectedResult: true
+      expectedResult: true,
     })
     return scenario
   },
@@ -179,32 +179,32 @@ module.exports = [
       },
       defineOne: () => {
         module.exports = {
-          get: () => globalThis.get()
+          get: () => globalThis.get(),
         }
       },
       config: {
         resources: {
           '$root$': {
             packages: {
-              one: true
+              one: true,
             },
             globals: {
-              check: true
-            }
+              check: true,
+            },
           },
           one: {
             globals: {
-              get: true
-            }
-          }
-        }
+              get: true,
+            },
+          },
+        },
       },
       context: {
         get: () => testObj,
-        check: (target) => target === testObj
+        check: (target) => target === testObj,
       },
-      expectedResult: true
+      expectedResult: true,
     })
     return scenario
-  }
+  },
 ]

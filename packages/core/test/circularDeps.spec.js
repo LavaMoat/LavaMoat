@@ -1,7 +1,7 @@
 const test = require('ava')
 const {
   createScenarioFromScaffold,
-  runScenario
+  runScenario,
 } = require('./util')
 
 test('circularDeps - multi-module circular deps dont inf loop', async (t) => {
@@ -17,14 +17,14 @@ test('circularDeps - multi-module circular deps dont inf loop', async (t) => {
       module.exports = 42
     },
     config: {
-    resources: {
-      three: {
-        packages: {
-          one: true,
-        }
-      }
-    }
-  }
+      resources: {
+        three: {
+          packages: {
+            one: true,
+          },
+        },
+      },
+    },
   })
   const testResult = await runScenario({ scenario })
 

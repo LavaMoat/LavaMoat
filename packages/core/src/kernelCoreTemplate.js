@@ -146,12 +146,14 @@
 
       const obj = Object.create(null)
       for (const prop of props) {
+        // eslint-disable-next-line no-inner-declarations
         function set() {
           console.warn(
             `LavaMoat - property "${prop}" of globalThis cannot be set under scuttling mode. ` +
             'To learn more visit https://github.com/LavaMoat/LavaMoat/pull/360.',
           )
         }
+        // eslint-disable-next-line no-inner-declarations
         function get() {
           throw new Error(
             `LavaMoat - property "${prop}" of globalThis is inaccessible under scuttling mode. ` +
@@ -230,6 +232,7 @@
         // this is passed to the module initializer
         // it adds the context of the parent module
         // this could be replaced via "Function.prototype.bind" if its more performant
+        // eslint-disable-next-line no-inner-declarations
         function requireRelativeWithContext (requestedName) {
           const parentModuleExports = moduleObj.exports
           const parentModuleData = moduleData
@@ -248,7 +251,8 @@
       const parentModulePackageName = parentModuleData.package
       const parentPackagesWhitelist = parentPackagePolicy.packages
       const parentBuiltinsWhitelist = Object.entries(parentPackagePolicy.builtin)
-        .filter(([_, allowed]) => allowed === true)
+        .filter(([, allowed]) => allowed === true)
+        // eslint-disable-next-line no-unused-vars
         .map(([packagePath, allowed]) => packagePath.split('.')[0])
 
       // resolve the moduleId from the requestedName
@@ -298,6 +302,7 @@
           // grab all allowed builtin paths that match this package
             .filter(([packagePath, allowed]) => allowed === true && moduleId === packagePath.split('.')[0])
           // only include the paths after the packageName
+            // eslint-disable-next-line no-unused-vars
             .map(([packagePath, allowed]) => packagePath.split('.').slice(1).join('.'))
             .sort()
         )
@@ -475,7 +480,7 @@
       // transform functions, getters & setters on prop descs. Solves SES scope proxy bug
       Object.entries(Object.getOwnPropertyDescriptors(endowments))
         // ignore non-configurable properties because we are modifying endowments in place
-        .filter(([key, propDesc]) => propDesc.configurable)
+        .filter(([, propDesc]) => propDesc.configurable)
         .forEach(([key, propDesc]) => {
           const wrappedPropDesc = applyEndowmentPropDescTransforms(propDesc, packageCompartment, rootPackageCompartment.globalThis)
           Reflect.defineProperty(endowments, key, wrappedPropDesc)

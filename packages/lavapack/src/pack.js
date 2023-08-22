@@ -15,7 +15,7 @@ const assert = require('assert')
 const JSONStream = require('JSONStream')
 const through = require('through2')
 const umd = require('umd')
-// eslint-disable-next-line node/prefer-global/buffer
+// eslint-disable-next-line n/prefer-global/buffer
 const { Buffer } = require('buffer')
 const combineSourceMap = require('combine-source-map')
 const convertSourceMap = require('convert-source-map')
@@ -53,6 +53,8 @@ function createPacker({
   policy = {},
   // prune policy to only include packages used in the bundle
   prunePolicy = false,
+  // XXX: what is this?
+  // eslint-disable-next-line no-unused-vars
   externalRequireName,
   sourceRoot,
   sourceMapPrefix,
@@ -232,7 +234,7 @@ function createPacker({
   }
 
   function serializeModule (moduleData, sourceMeta) {
-    const { id, packageName, source, deps, file } = moduleData
+    const { id, packageName, deps, file } = moduleData
     const relativeFilePath = file && path.relative(basedir, file)
     // for now, ignore new sourcemap and just append original filename
     // serialize final module entry

@@ -15,9 +15,9 @@ module.exports = [
         // eslint-disable-next-line
         module.exports.check = (target) => target.hasOwnProperty('Number')
       },
-      expectedResult: true
+      expectedResult: true,
     })
     await autoConfigForScenario({ scenario })
     return scenario
-  }
+  },
 ]

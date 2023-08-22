@@ -1,4 +1,4 @@
-const { readFileSync, statSync } = require('fs')
+const { readFileSync } = require('fs')
 const path = require('path')
 const nodeResolve = require('resolve')
 
@@ -31,7 +31,7 @@ function createPerformantResolve () {
         readPackageSync: readPackageWithout(path),
       }),
   }
-};
+}
 
 /**
  * @param {object} options
@@ -39,7 +39,7 @@ function createPerformantResolve () {
  */
 async function loadCanonicalNameMap({ rootDir, includeDevDeps, resolve } = {}) {
   const canonicalNameMap = new Map()
-  // performant resolve avoids loading package.jsons if their path is what's being resolved, 
+  // performant resolve avoids loading package.jsons if their path is what's being resolved,
   // offering 2x performance improvement compared to using original resolve
   resolve = resolve || createPerformantResolve()
   // resolve = resolve || nodeResolve
@@ -87,7 +87,8 @@ let nextLevelTodos
  * @param {object} options
  * @returns {Map<{packageDir: string, logicalPathParts: string[]}>}
  */
-function walkDependencyTreeForBestLogicalPaths({ packageDir, logicalPath = [], includeDevDeps = false, visited = new Set(), resolve = performantResolve }) {
+function walkDependencyTreeForBestLogicalPaths({ packageDir, logicalPath = [], includeDevDeps = false, visited = new Set(), resolve }) {
+  resolve = resolve ?? createPerformantResolve()
   const preferredPackageLogicalPathMap = new Map()
   // add the entry package as the first work unit
   currentLevelTodos = [{ packageDir, logicalPath, includeDevDeps, visited, resolve }]

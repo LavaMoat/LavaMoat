@@ -1,17 +1,16 @@
 ignores:
   # monorepo deps
-  - "ava"
-  - "eslint"
+  - 'ava'
   # tests - used in tests
-  - "lavamoat-browserify"
-  - "keccak"
+  - 'lavamoat-browserify'
+  - 'keccak'
   # tests - fake packages
-  - "banana"
-  - "two"
-  - "one"
-  - "victim"
-  - "attacker"
-  - "three"
-  - "a"
-  - "b"
-  - "c"
+  - 'banana'
+  - 'two'
+  - 'one'
+  - 'victim'
+  - 'attacker'
+  - 'three'
+  - 'a'
+  - 'b'
+  - 'c'

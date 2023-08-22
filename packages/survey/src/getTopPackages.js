@@ -7,9 +7,11 @@ const pLimit = require('p-limit')
 const concurrencyLimit = pLimit(8)
 
 module.exports = {
-  getTopPackages
+  getTopPackages,
 }
 
+// XXX: remove if unneeded
+// eslint-disable-next-line no-unused-vars
 const npmDependentsScraper = createScraper({
   buildUrl: ({ offset }) => `https://www.npmjs.com/browse/depended?offset=${offset}`,
   entrySelector: '.flex-row.pr3',
@@ -43,7 +45,7 @@ const librariesIoRankScraper = createScraper({
 })
 
 async function getTopPackages () {
-  const indexPath = path.resolve(__dirname + '/../downloads/index.json')
+  const indexPath = path.resolve(__dirname, '..', 'downloads', 'index.json')
   try {
     const indexContent = await fs.readFile(indexPath, 'utf8')
     return JSON.parse(indexContent)
@@ -66,22 +68,26 @@ function createScraper ({ buildUrl, entrySelector, packagesPerPage, maxResults }
   return downloadTopPackages
 
   async function downloadTopPackages (count) {
-    if (maxResults !== undefined) count = Math.max(count, maxResults)
+    if (maxResults !== undefined) {
+      count = Math.max(count, maxResults)
+    }
     const pagesRequired = Math.ceil(count / packagesPerPage)
     const pageResults = await Promise.all(Array(pagesRequired).fill().map(async (_, index) => {
       return concurrencyLimit(
-        () => downloadPage(index)
+        () => downloadPage(index),
       )
     }), { concurrency: 8 })
     return pageResults.flat().slice(0, count)
   }
-  
+
   async function downloadPage (page) {
     const offset = page * packagesPerPage
     const url = buildUrl({ page, offset })
     const res = await fetch(url)
     const content = await res.text()
-    if (res.status !== 200) throw new Error(`Error fetching "${url}":\n${content}`)
+    if (res.status !== 200) {
+      throw new Error(`Error fetching "${url}":\n${content}`)
+    }
     const $ = cheerio.load(content)
     const rows = $(entrySelector)
     const packages = [].map.call(rows, (item) => $(item).text())

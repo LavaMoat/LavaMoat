@@ -1,12 +1,12 @@
-const path = require('path');
-const test = require('ava');
-const { loadCanonicalNameMap } = require('../src/index.js');
+const path = require('path')
+const test = require('ava')
+const { loadCanonicalNameMap } = require('../src/index.js')
 
 test('project 1', async t => {
-  const canonicalNameMap = await loadCanonicalNameMap({ rootDir: path.join(__dirname, 'projects', '1') });
+  const canonicalNameMap = await loadCanonicalNameMap({ rootDir: path.join(__dirname, 'projects', '1') })
   // normalize results to be relative
   const normalizedMapEntries = Array.from(canonicalNameMap.entries()).sort()
-    .map(([packagePath,canonicalName])=>[path.relative(__dirname,packagePath), canonicalName])
+    .map(([packagePath,canonicalName]) => [path.relative(__dirname,packagePath), canonicalName])
   t.deepEqual(normalizedMapEntries, [
     [
       'projects/1',
@@ -14,7 +14,7 @@ test('project 1', async t => {
     ],
     [
       'projects/1/node_modules/aaa',
-      'aaa'
+      'aaa',
     ],
     [
       'projects/1/node_modules/bbb',
@@ -28,10 +28,10 @@ test('project 1', async t => {
 })
 
 test('project 2', async t => {
-  const canonicalNameMap = await loadCanonicalNameMap({ rootDir: path.join(__dirname, 'projects', '2') });
+  const canonicalNameMap = await loadCanonicalNameMap({ rootDir: path.join(__dirname, 'projects', '2') })
   // normalize results to be relative
   const normalizedMapEntries = Array.from(canonicalNameMap.entries()).sort()
-    .map(([packagePath,canonicalName])=>[path.relative(__dirname,packagePath), canonicalName])
+    .map(([packagePath,canonicalName]) => [path.relative(__dirname,packagePath), canonicalName])
   t.deepEqual(normalizedMapEntries, [
     [
       'projects/2',
@@ -52,15 +52,15 @@ test('project 2', async t => {
     [
       'projects/2/node_modules/good_dep',
       'good_dep',
-    ]
+    ],
   ])
 })
 
 test('project 3', async t => {
-  const canonicalNameMap = await loadCanonicalNameMap({ rootDir: path.join(__dirname, 'projects', '3') });
+  const canonicalNameMap = await loadCanonicalNameMap({ rootDir: path.join(__dirname, 'projects', '3') })
   // normalize results to be relative
   const normalizedMapEntries = Array.from(canonicalNameMap.entries()).sort()
-    .map(([packagePath,canonicalName])=>[path.relative(__dirname,packagePath), canonicalName])
+    .map(([packagePath,canonicalName]) => [path.relative(__dirname,packagePath), canonicalName])
   t.deepEqual(normalizedMapEntries, [
     [
       'projects/3',

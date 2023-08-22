@@ -8,14 +8,15 @@
   "devDependencies": {
     "@commitlint/cli": "^17.6.7",
     "@commitlint/config-conventional": "^17.6.7",
-    "@metamask/eslint-config-nodejs": "^11.0.1",
     "ava": "^5.3.1",
     "conventional-changelog-conventionalcommits": "^6.1.0",
     "cross-env": "^7.0.3",
     "depcheck": "^1.4.0",
-    "eslint": "^8.40.0",
-    "eslint-plugin-ava": "^13.2.0",
-    "eslint-plugin-node": "^11.1.0",
+    "eslint": "^8.45.0",
+    "eslint-plugin-ava": "^14.0.0",
+    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-n": "^15.7.0",
+    "eslint-plugin-react": "^7.33.0",
     "husky": "^8.0.3",
     "lerna": "^7.1.4",
     "lint-staged": "^13.2.3"
@@ -26,8 +27,10 @@
   "scripts": {
     "test": "npm --workspaces test",
     "test:prep": "lerna run test:prep",
-    "lint": "npm --workspaces run lint",
-    "lint:fix": "npm --workspaces run lint:fix",
+    "lint": "npm run lint:eslint && npm run lint:deps",
+    "lint:eslint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "lint:deps": "lerna run lint:deps",
     "build": "npm -w @lavamoat/lavapack -w @lavamoat/viz -w @lavamoat/yarn-plugin-allow-scripts run build",
     "rebuild": "npm -w @lavamoat/lavapack -w @lavamoat/viz -w @lavamoat/yarn-plugin-allow-scripts run rebuild",
     "lint:staged": "lint-staged",
@@ -52,6 +55,11 @@
       "lerna>nx>@parcel/watcher": false,
       "$root$": true
     }
+  },
+  "prettier": {
+    "singleQuote": true,
+    "semi": false,
+    "trailingComma": "all"
   },
   "ava": {
     "files": [

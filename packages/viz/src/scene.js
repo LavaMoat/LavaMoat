@@ -78,7 +78,7 @@ export default class ScratchPad extends ThreeComponent {
     const graph = new FastThreeForceGraph({ graphData: packageData })
     this.graph = graph
     const scale = 0.1
-    graph.scale.set(scale, scale, scale)   
+    graph.scale.set(scale, scale, scale)
     this.scene.add(graph)
 
     this.animateListeners = []

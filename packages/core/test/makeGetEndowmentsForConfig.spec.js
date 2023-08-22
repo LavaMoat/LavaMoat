@@ -11,13 +11,13 @@ test('getEndowmentsForConfig', (t) => {
   const getEndowmentsForConfig = prepareTest()
   const sourceGlobal = {
     namespace: {
-      stringValue: 'yabbadabbadoo'
-    }
+      stringValue: 'yabbadabbadoo',
+    },
   }
   const config = {
     globals: {
-      'namespace.stringValue.includes': true
-    }
+      'namespace.stringValue.includes': true,
+    },
   }
   const resultGlobal = getEndowmentsForConfig(sourceGlobal, config)
   t.is(sourceGlobal.namespace.stringValue.includes('dab'), true)
@@ -30,8 +30,8 @@ test('getEndowmentsForConfig - siblings', (t) => {
   const config = {
     globals: {
       'Buffer.from': true,
-      'Buffer.isBuffer': true
-    }
+      'Buffer.isBuffer': true,
+    },
   }
   const resultGlobal = getEndowmentsForConfig(sourceGlobal, config)
   {
@@ -40,7 +40,7 @@ test('getEndowmentsForConfig - siblings', (t) => {
     t.is(typeof resultProp.value, 'function')
     t.deepEqual(resultProp, {
       ...sourceProp,
-      value: resultProp.value
+      value: resultProp.value,
     }, 'prop descriptor matches (except value)')
   }
   {
@@ -49,18 +49,20 @@ test('getEndowmentsForConfig - siblings', (t) => {
     t.is(typeof resultProp.value, 'function')
     t.deepEqual(resultProp, {
       ...sourceProp,
-      value: resultProp.value
+      value: resultProp.value,
     }, 'prop descriptor matches (except value)')
   }
 })
 
 test('getEndowmentsForConfig - getter', (t) => {
   const getEndowmentsForConfig = prepareTest()
-  const sourceGlobal = { get abc () { return { xyz: 42 } } }
+  const sourceGlobal = { get abc () {
+    return { xyz: 42 } 
+  } }
   const config = {
     globals: {
-      'abc.xyz': true
-    }
+      'abc.xyz': true,
+    },
   }
   const resultGlobal = getEndowmentsForConfig(sourceGlobal, config)
   {
@@ -72,7 +74,7 @@ test('getEndowmentsForConfig - getter', (t) => {
       enumerable,
       configurable,
       value: resultProp.value,
-      writable: true
+      writable: true,
     }, 'prop descriptor matches (except value)')
   }
 })
@@ -84,12 +86,12 @@ test('getEndowmentsForConfig - ensure window.document getter behavior support', 
   const sourceGlobal = {
     get xyz() {
       return this
-    }
+    },
   }
   const config = {
     globals: {
-      xyz: true
-    }
+      xyz: true,
+    },
   }
   const resultGlobal = getEndowmentsForConfig(sourceGlobal, config)
 
@@ -110,12 +112,12 @@ test('getEndowmentsForConfig - specify unwrap to', (t) => {
   const sourceGlobal = {
     get xyz() {
       return this
-    }
+    },
   }
   const config = {
     globals: {
-      xyz: true
-    }
+      xyz: true,
+    },
   }
   const resultGlobal = getEndowmentsForConfig(sourceGlobal, config, unwrapTo)
   const getter = Reflect.getOwnPropertyDescriptor(resultGlobal, 'xyz').get
@@ -137,12 +139,12 @@ test('getEndowmentsForConfig - specify unwrap from, unwrap to', (t) => {
   const sourceGlobal = {
     get xyz() {
       return this
-    }
+    },
   }
   const config = {
     globals: {
-      xyz: true
-    }
+      xyz: true,
+    },
   }
   const resultGlobal = getEndowmentsForConfig(sourceGlobal, config, unwrapTo, unwrapFrom)
   const getter = Reflect.getOwnPropertyDescriptor(resultGlobal, 'xyz').get
@@ -161,12 +163,14 @@ test('getEndowmentsForConfig - endowing bind of a function', async (t) => {
   'use strict'
   const getEndowmentsForConfig = prepareTest()
   const sourceGlobal = {
-    abc: function () { return this }
+    abc: function () {
+      return this 
+    },
   }
   const config = {
     globals: {
-      'abc.bind': true
-    }
+      'abc.bind': true,
+    },
   }
   const resultGlobal = getEndowmentsForConfig(sourceGlobal, config)
 
@@ -185,12 +189,14 @@ test('getEndowmentsForConfig - ensure setTimeout calls dont trigger illegal invo
   // compartment.globalThis.document would error because 'this' value is not window
   const getEndowmentsForConfig = prepareTest()
   const sourceGlobal = {
-    setTimeout () { return this }
+    setTimeout () {
+      return this 
+    },
   }
   const config = {
     globals: {
-      setTimeout: true
-    }
+      setTimeout: true,
+    },
   }
   const resultGlobal = getEndowmentsForConfig(sourceGlobal, config)
   t.is(resultGlobal.setTimeout(), sourceGlobal)

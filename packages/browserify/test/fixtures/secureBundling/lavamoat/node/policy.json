@@ -69,7 +69,7 @@
         "performantResolve": true
       },
       "packages": {
-        "depcheck>resolve": true
+        "browserify>resolve": true
       }
     },
     "@lavamoat/lavapack": {
@@ -156,7 +156,7 @@
         "process.platform": true
       },
       "packages": {
-        "depcheck>resolve": true
+        "browserify>resolve": true
       }
     },
     "browserify": {
@@ -187,10 +187,10 @@
         "browserify>labeled-stream-splicer": true,
         "browserify>module-deps": true,
         "browserify>read-only-stream": true,
+        "browserify>resolve": true,
         "browserify>shasum-object": true,
         "browserify>syntax-error": true,
         "browserify>through2": true,
-        "depcheck>resolve": true,
         "through2>inherits": true,
         "watchify>defined": true,
         "watchify>xtend": true
@@ -465,8 +465,8 @@
         "browserify>module-deps>readable-stream": true,
         "browserify>module-deps>stream-combiner2": true,
         "browserify>parents": true,
+        "browserify>resolve": true,
         "browserify>through2": true,
-        "depcheck>resolve": true,
         "through2>inherits": true,
         "watchify>defined": true,
         "watchify>xtend": true
@@ -622,6 +622,52 @@
         "process": true
       }
     },
+    "browserify>resolve": {
+      "builtin": {
+        "fs.readFile": true,
+        "fs.readFileSync": true,
+        "fs.realpath": true,
+        "fs.realpathSync": true,
+        "fs.stat": true,
+        "fs.statSync": true,
+        "os.homedir": true,
+        "path.dirname": true,
+        "path.join": true,
+        "path.parse": true,
+        "path.relative": true,
+        "path.resolve": true
+      },
+      "globals": {
+        "process.env.HOME": true,
+        "process.env.HOMEDRIVE": true,
+        "process.env.HOMEPATH": true,
+        "process.env.LNAME": true,
+        "process.env.LOGNAME": true,
+        "process.env.USER": true,
+        "process.env.USERNAME": true,
+        "process.env.USERPROFILE": true,
+        "process.getuid": true,
+        "process.nextTick": true,
+        "process.platform": true
+      },
+      "packages": {
+        "browserify>resolve>is-core-module": true,
+        "browserify>resolve>path-parse": true
+      }
+    },
+    "browserify>resolve>is-core-module": {
+      "globals": {
+        "process.versions": true
+      },
+      "packages": {
+        "browserify>has": true
+      }
+    },
+    "browserify>resolve>path-parse": {
+      "globals": {
+        "process.platform": true
+      }
+    },
     "browserify>shasum-object": {
       "builtin": {
         "crypto.createHash": true
@@ -723,181 +769,6 @@
         "Buffer": true
       }
     },
-    "depcheck>@babel/traverse": {
-      "globals": {
-        "console.log": true
-      },
-      "packages": {
-        "@babel/code-frame": true,
-        "depcheck>@babel/traverse>@babel/generator": true,
-        "depcheck>@babel/traverse>@babel/helper-environment-visitor": true,
-        "depcheck>@babel/traverse>@babel/helper-function-name": true,
-        "depcheck>@babel/traverse>@babel/helper-hoist-variables": true,
-        "depcheck>@babel/traverse>@babel/helper-split-export-declaration": true,
-        "depcheck>@babel/traverse>@babel/parser": true,
-        "depcheck>@babel/traverse>@babel/types": true,
-        "depcheck>@babel/traverse>globals": true,
-        "depcheck>debug": true
-      }
-    },
-    "depcheck>@babel/traverse>@babel/generator": {
-      "globals": {
-        "console.error": true
-      },
-      "packages": {
-        "depcheck>@babel/traverse>@babel/generator>@jridgewell/gen-mapping": true,
-        "depcheck>@babel/traverse>@babel/generator>@jridgewell/trace-mapping": true,
-        "depcheck>@babel/traverse>@babel/generator>jsesc": true,
-        "depcheck>@babel/traverse>@babel/types": true
-      }
-    },
-    "depcheck>@babel/traverse>@babel/generator>@jridgewell/gen-mapping": {
-      "globals": {
-        "define": true
-      },
-      "packages": {
-        "depcheck>@babel/traverse>@babel/generator>@jridgewell/gen-mapping>@jridgewell/set-array": true,
-        "depcheck>@babel/traverse>@babel/generator>@jridgewell/trace-mapping": true,
-        "depcheck>@vue/compiler-sfc>magic-string>@jridgewell/sourcemap-codec": true
-      }
-    },
-    "depcheck>@babel/traverse>@babel/generator>@jridgewell/gen-mapping>@jridgewell/set-array": {
-      "globals": {
-        "define": true
-      }
-    },
-    "depcheck>@babel/traverse>@babel/generator>@jridgewell/trace-mapping": {
-      "globals": {
-        "define": true
-      },
-      "packages": {
-        "depcheck>@babel/traverse>@babel/generator>@jridgewell/trace-mapping>@jridgewell/resolve-uri": true,
-        "depcheck>@babel/traverse>@babel/generator>@jridgewell/trace-mapping>@jridgewell/sourcemap-codec": true
-      }
-    },
-    "depcheck>@babel/traverse>@babel/generator>@jridgewell/trace-mapping>@jridgewell/resolve-uri": {
-      "globals": {
-        "define": true
-      }
-    },
-    "depcheck>@babel/traverse>@babel/generator>@jridgewell/trace-mapping>@jridgewell/sourcemap-codec": {
-      "globals": {
-        "Buffer": true,
-        "TextDecoder": true,
-        "define": true
-      }
-    },
-    "depcheck>@babel/traverse>@babel/generator>jsesc": {
-      "globals": {
-        "Buffer.isBuffer": true
-      }
-    },
-    "depcheck>@babel/traverse>@babel/helper-function-name": {
-      "packages": {
-        "depcheck>@babel/traverse>@babel/helper-function-name>@babel/template": true,
-        "depcheck>@babel/traverse>@babel/types": true
-      }
-    },
-    "depcheck>@babel/traverse>@babel/helper-function-name>@babel/template": {
-      "packages": {
-        "@babel/code-frame": true,
-        "depcheck>@babel/traverse>@babel/parser": true,
-        "depcheck>@babel/traverse>@babel/types": true
-      }
-    },
-    "depcheck>@babel/traverse>@babel/helper-hoist-variables": {
-      "packages": {
-        "depcheck>@babel/traverse>@babel/types": true
-      }
-    },
-    "depcheck>@babel/traverse>@babel/helper-split-export-declaration": {
-      "packages": {
-        "depcheck>@babel/traverse>@babel/types": true
-      }
-    },
-    "depcheck>@babel/traverse>@babel/types": {
-      "globals": {
-        "console.warn": true,
-        "process.env.BABEL_TYPES_8_BREAKING": true
-      },
-      "packages": {
-        "@babel/code-frame>@babel/highlight>@babel/helper-validator-identifier": true,
-        "depcheck>@babel/traverse>@babel/types>@babel/helper-string-parser": true,
-        "depcheck>@babel/traverse>@babel/types>to-fast-properties": true
-      }
-    },
-    "depcheck>@vue/compiler-sfc>magic-string>@jridgewell/sourcemap-codec": {
-      "globals": {
-        "Buffer": true,
-        "TextDecoder": true,
-        "define": true
-      }
-    },
-    "depcheck>debug": {
-      "builtin": {
-        "tty.isatty": true,
-        "util.deprecate": true,
-        "util.format": true,
-        "util.inspect": true
-      },
-      "globals": {
-        "console": true,
-        "document": true,
-        "localStorage": true,
-        "navigator": true,
-        "process": true
-      },
-      "packages": {
-        "depcheck>debug>ms": true,
-        "source-map-explorer>chalk>supports-color": true
-      }
-    },
-    "depcheck>is-core-module": {
-      "globals": {
-        "process.versions": true
-      },
-      "packages": {
-        "browserify>has": true
-      }
-    },
-    "depcheck>resolve": {
-      "builtin": {
-        "fs.readFile": true,
-        "fs.readFileSync": true,
-        "fs.realpath": true,
-        "fs.realpathSync": true,
-        "fs.stat": true,
-        "fs.statSync": true,
-        "os.homedir": true,
-        "path.dirname": true,
-        "path.join": true,
-        "path.parse": true,
-        "path.relative": true,
-        "path.resolve": true
-      },
-      "globals": {
-        "process.env.HOME": true,
-        "process.env.HOMEDRIVE": true,
-        "process.env.HOMEPATH": true,
-        "process.env.LNAME": true,
-        "process.env.LOGNAME": true,
-        "process.env.USER": true,
-        "process.env.USERNAME": true,
-        "process.env.USERPROFILE": true,
-        "process.getuid": true,
-        "process.nextTick": true,
-        "process.platform": true
-      },
-      "packages": {
-        "depcheck>is-core-module": true,
-        "depcheck>resolve>path-parse": true
-      }
-    },
-    "depcheck>resolve>path-parse": {
-      "globals": {
-        "process.platform": true
-      }
-    },
     "duplexify": {
       "globals": {
         "Buffer": true,
@@ -954,8 +825,137 @@
         "console.log": true
       },
       "packages": {
-        "depcheck>@babel/traverse": true,
-        "depcheck>@babel/traverse>@babel/parser": true
+        "lavamoat-core>lavamoat-tofu>@babel/parser": true,
+        "lavamoat-core>lavamoat-tofu>@babel/traverse": true
+      }
+    },
+    "lavamoat-core>lavamoat-tofu>@babel/traverse": {
+      "globals": {
+        "console.log": true
+      },
+      "packages": {
+        "@babel/code-frame": true,
+        "lavamoat-core>lavamoat-tofu>@babel/parser": true,
+        "lavamoat-core>lavamoat-tofu>@babel/traverse>@babel/generator": true,
+        "lavamoat-core>lavamoat-tofu>@babel/traverse>@babel/helper-environment-visitor": true,
+        "lavamoat-core>lavamoat-tofu>@babel/traverse>@babel/helper-function-name": true,
+        "lavamoat-core>lavamoat-tofu>@babel/traverse>@babel/helper-hoist-variables": true,
+        "lavamoat-core>lavamoat-tofu>@babel/traverse>@babel/helper-split-export-declaration": true,
+        "lavamoat-core>lavamoat-tofu>@babel/traverse>@babel/types": true,
+        "lavamoat-core>lavamoat-tofu>@babel/traverse>debug": true,
+        "lavamoat-core>lavamoat-tofu>@babel/traverse>globals": true
+      }
+    },
+    "lavamoat-core>lavamoat-tofu>@babel/traverse>@babel/generator": {
+      "globals": {
+        "console.error": true
+      },
+      "packages": {
+        "lavamoat-core>lavamoat-tofu>@babel/traverse>@babel/generator>@jridgewell/gen-mapping": true,
+        "lavamoat-core>lavamoat-tofu>@babel/traverse>@babel/generator>@jridgewell/trace-mapping": true,
+        "lavamoat-core>lavamoat-tofu>@babel/traverse>@babel/generator>jsesc": true,
+        "lavamoat-core>lavamoat-tofu>@babel/traverse>@babel/types": true
+      }
+    },
+    "lavamoat-core>lavamoat-tofu>@babel/traverse>@babel/generator>@jridgewell/gen-mapping": {
+      "globals": {
+        "define": true
+      },
+      "packages": {
+        "lavamoat-core>lavamoat-tofu>@babel/traverse>@babel/generator>@jridgewell/gen-mapping>@jridgewell/set-array": true,
+        "lavamoat-core>lavamoat-tofu>@babel/traverse>@babel/generator>@jridgewell/gen-mapping>@jridgewell/sourcemap-codec": true,
+        "lavamoat-core>lavamoat-tofu>@babel/traverse>@babel/generator>@jridgewell/trace-mapping": true
+      }
+    },
+    "lavamoat-core>lavamoat-tofu>@babel/traverse>@babel/generator>@jridgewell/gen-mapping>@jridgewell/set-array": {
+      "globals": {
+        "define": true
+      }
+    },
+    "lavamoat-core>lavamoat-tofu>@babel/traverse>@babel/generator>@jridgewell/gen-mapping>@jridgewell/sourcemap-codec": {
+      "globals": {
+        "Buffer": true,
+        "TextDecoder": true,
+        "define": true
+      }
+    },
+    "lavamoat-core>lavamoat-tofu>@babel/traverse>@babel/generator>@jridgewell/trace-mapping": {
+      "globals": {
+        "define": true
+      },
+      "packages": {
+        "lavamoat-core>lavamoat-tofu>@babel/traverse>@babel/generator>@jridgewell/trace-mapping>@jridgewell/resolve-uri": true,
+        "lavamoat-core>lavamoat-tofu>@babel/traverse>@babel/generator>@jridgewell/trace-mapping>@jridgewell/sourcemap-codec": true
+      }
+    },
+    "lavamoat-core>lavamoat-tofu>@babel/traverse>@babel/generator>@jridgewell/trace-mapping>@jridgewell/resolve-uri": {
+      "globals": {
+        "define": true
+      }
+    },
+    "lavamoat-core>lavamoat-tofu>@babel/traverse>@babel/generator>@jridgewell/trace-mapping>@jridgewell/sourcemap-codec": {
+      "globals": {
+        "Buffer": true,
+        "TextDecoder": true,
+        "define": true
+      }
+    },
+    "lavamoat-core>lavamoat-tofu>@babel/traverse>@babel/generator>jsesc": {
+      "globals": {
+        "Buffer.isBuffer": true
+      }
+    },
+    "lavamoat-core>lavamoat-tofu>@babel/traverse>@babel/helper-function-name": {
+      "packages": {
+        "lavamoat-core>lavamoat-tofu>@babel/traverse>@babel/helper-function-name>@babel/template": true,
+        "lavamoat-core>lavamoat-tofu>@babel/traverse>@babel/types": true
+      }
+    },
+    "lavamoat-core>lavamoat-tofu>@babel/traverse>@babel/helper-function-name>@babel/template": {
+      "packages": {
+        "@babel/code-frame": true,
+        "lavamoat-core>lavamoat-tofu>@babel/parser": true,
+        "lavamoat-core>lavamoat-tofu>@babel/traverse>@babel/types": true
+      }
+    },
+    "lavamoat-core>lavamoat-tofu>@babel/traverse>@babel/helper-hoist-variables": {
+      "packages": {
+        "lavamoat-core>lavamoat-tofu>@babel/traverse>@babel/types": true
+      }
+    },
+    "lavamoat-core>lavamoat-tofu>@babel/traverse>@babel/helper-split-export-declaration": {
+      "packages": {
+        "lavamoat-core>lavamoat-tofu>@babel/traverse>@babel/types": true
+      }
+    },
+    "lavamoat-core>lavamoat-tofu>@babel/traverse>@babel/types": {
+      "globals": {
+        "console.warn": true,
+        "process.env.BABEL_TYPES_8_BREAKING": true
+      },
+      "packages": {
+        "@babel/code-frame>@babel/highlight>@babel/helper-validator-identifier": true,
+        "lavamoat-core>lavamoat-tofu>@babel/traverse>@babel/types>@babel/helper-string-parser": true,
+        "lavamoat-core>lavamoat-tofu>@babel/traverse>@babel/types>to-fast-properties": true
+      }
+    },
+    "lavamoat-core>lavamoat-tofu>@babel/traverse>debug": {
+      "builtin": {
+        "tty.isatty": true,
+        "util.deprecate": true,
+        "util.format": true,
+        "util.inspect": true
+      },
+      "globals": {
+        "console": true,
+        "document": true,
+        "localStorage": true,
+        "navigator": true,
+        "process": true
+      },
+      "packages": {
+        "lavamoat-core>lavamoat-tofu>@babel/traverse>debug>ms": true,
+        "source-map-explorer>chalk>supports-color": true
       }
     },
     "lavamoat-core>merge-deep": {

@@ -20,11 +20,13 @@ test.skip('sourcemaps - adjust maps for wrapper', async (t) => {
       filename: './foo.js',
       // inline sourcemaps with sources included
       url: 'inline',
-      includeSources: true
-    }
+      includeSources: true,
+    },
   })
 
-  if (result.error) t.ifError(result.error)
+  if (result.error) {
+    t.ifError(result.error)
+  }
 
   // ensure minification worked
   t.true(indicesOf('\n', fooSource).length > 1)
@@ -34,12 +36,14 @@ test.skip('sourcemaps - adjust maps for wrapper', async (t) => {
   const wrappedSourceMeta = wrapIntoModuleInitializer(result.code)
   await validateSourcemaps(t, wrappedSourceMeta)
 
-  })
+})
 
 function indicesOf (substring, string) {
   const result = []
   let index = -1
-  while ((index = string.indexOf(substring, index + 1)) >= 0) result.push(index)
+  while ((index = string.indexOf(substring, index + 1)) >= 0) {
+    result.push(index)
+  }
   return result
 }
 
@@ -68,7 +72,9 @@ async function validateSourcemaps (t, sourceMeta) {
         const sourceContent = consumer.sourceContentFor(result.source)
         const sourceLines = sourceContent.split('\n')
         const line = sourceLines[result.line - 1]
-        if (!line.includes(targetSlug)) t.fail(`could not find target "${targetSlug}" in source`)
+        if (!line.includes(targetSlug)) {
+          t.fail(`could not find target "${targetSlug}" in source`)
+        }
       })
     })
   t.true(true, 'sourcemaps look ok')

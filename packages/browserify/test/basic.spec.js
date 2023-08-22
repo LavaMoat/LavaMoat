@@ -4,13 +4,13 @@ const {
   createBundleFromEntry,
   evalBundle,
   createBundleForScenario,
-  runScenario
+  runScenario,
 } = require('./util')
 
 const {
   createScenarioFromScaffold,
   autoConfigForScenario,
-  runAndTestScenario
+  runAndTestScenario,
 } = require('lavamoat-core/test/util')
 
 test('basic - browserify bundle doesnt inject global', async (t) => {
@@ -43,11 +43,11 @@ test('basic - lavamoat policy and bundle', async (t) => {
     },
     defineTwo: () => {
       module.exports = () => location.href
-    }
+    },
   })
   await autoConfigForScenario({ scenario })
   const { bundleForScenario } = await createBundleForScenario({ scenario })
-  
+
   t.true(bundleForScenario.includes('"location.href":true'), 'prelude includes href policy')
 
   const testHref = 'https://funky.town.gov/yolo?snake=yes'
@@ -65,7 +65,7 @@ test('basic - lavamoat bundle without prelude', async (t) => {
     defineTwo: () => {
       module.exports = () => location.href
     },
-    opts: { includePrelude: false }
+    opts: { includePrelude: false },
   })
 
   await autoConfigForScenario({ scenario })
@@ -73,7 +73,9 @@ test('basic - lavamoat bundle without prelude', async (t) => {
 
   let didCallLoadBundle = false
   const testGlobal = {
-    LavaPack: { loadBundle: () => { didCallLoadBundle = true } }
+    LavaPack: { loadBundle: () => {
+      didCallLoadBundle = true
+    } },
   }
   evalBundle(bundleForScenario, testGlobal)
 

@@ -43,7 +43,7 @@ function parseConfigDebugForPackages (policyName, policyDebugData, policyFinal) 
   const { debugInfo } = policyDebugData
   const { resources } = policyFinal
   // aggregate info under package name
-  Object.entries(debugInfo).forEach(([_, moduleDebugInfo]) => {
+  Object.entries(debugInfo).forEach(([, moduleDebugInfo]) => {
     const { moduleRecord } = moduleDebugInfo
     const packageId = moduleRecord.packageName
     let packageData = packages[packageId]
@@ -79,7 +79,7 @@ function parseConfigDebugForPackages (policyName, policyDebugData, policyFinal) 
     })
   })
   // modify danger rank
-  Object.entries(packages).forEach(([_, packageData]) => {
+  Object.entries(packages).forEach(([, packageData]) => {
     const dangerRank = getDangerRankForPackage(packageData, envConfig)
     packageData.dangerRank = dangerRank
   })
@@ -97,7 +97,7 @@ function createGraph (packages, policyFinal, {
   const nodes = []
   const links = []
   // for each module, create node and links
-  Object.entries(packages).forEach(([_, packageData]) => {
+  Object.entries(packages).forEach(([, packageData]) => {
     const { importMap } = packageData
     const packageId = packageData.id
     // skip hidden packages
@@ -332,7 +332,7 @@ function sortByKey (key, reverse = false) {
     return aVal > bVal ? reverseVal : -reverseVal
   }
 }
-  
+
 
 export {
   parseConfigDebugForPackages,

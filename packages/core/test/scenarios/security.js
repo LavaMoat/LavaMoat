@@ -9,10 +9,14 @@ module.exports = [
         module.exports = { objectXyz: 'xyz' in Object, protoXyz: 'xyz' in Object.prototype }
       },
       defineTwo: () => {
-        try { Object.xyz = 123 } catch (_) { }
-        try { Object.protoype.xyz = 123 } catch (_) { }
+        try {
+          Object.xyz = 123 
+        } catch (_) { }
+        try {
+          Object.protoype.xyz = 123 
+        } catch (_) { }
       },
-      expectedResult: { objectXyz: false, protoXyz: false }
+      expectedResult: { objectXyz: false, protoXyz: false },
     })
     return scenario
   },
@@ -23,12 +27,14 @@ module.exports = [
         module.exports = typeof require('two') === 'function'
       },
       defineTwo: () => {
-        try { module.exports = setTimeout } catch (_) {}
+        try {
+          module.exports = setTimeout 
+        } catch (_) {}
       },
-      expectedResult: false
+      expectedResult: false,
     })
     return scenario
-  }
+  },
   // async () => {
   //   const scenario = createScenarioFromScaffold({
   //     name: 'security - prevent module exports shallow mutation',

@@ -59,6 +59,7 @@ function createModuleInspector (opts = {}) {
     }
   }
 
+  // eslint-disable-next-line no-unused-vars
   function inspectBuiltinModule (moduleRecord) {
     // builtins themselves do not require any configuration
     // packages that import builtins need to add that to their configuration
@@ -189,7 +190,7 @@ function createModuleInspector (opts = {}) {
   function inspectForImports (ast, moduleRecord, packageName, isBuiltin, includeDebugInfo) {
     // get all requested names that resolve to isBuiltin
     const namesForBuiltins = Object.entries(moduleRecord.importMap)
-      .filter(([_, resolvedName]) => isBuiltin(resolvedName))
+      .filter(([, resolvedName]) => isBuiltin(resolvedName))
       .map(([requestedName]) => requestedName)
     const { cjsImports: moduleBuiltins } = inspectImports(ast, namesForBuiltins)
     if (!moduleBuiltins.length) {
