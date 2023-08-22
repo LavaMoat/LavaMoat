@@ -1,4 +1,4 @@
-import { Mesh, CircleGeometry, Points, PointsMaterial, ShaderMaterial, RawShaderMaterial, TextureLoader } from 'three'
+import { Mesh, CircleGeometry, RawShaderMaterial, TextureLoader } from 'three'
 import { InstancedBufferGeometryController } from './buffer-geometry-controller.js'
 
 const vertexShader2 = `
@@ -27,7 +27,7 @@ void main() {
 
   mvPosition.xyz += position * scale * size;
   gl_Position = projectionMatrix * mvPosition;
-  
+
   vUv = uv;
   vColor = color;
 }

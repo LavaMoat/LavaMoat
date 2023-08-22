@@ -1,6 +1,0 @@
-src/example-policies/
-!src
-!test
-**/*.js
-!src/**/*.js
-!test/**/*.js
