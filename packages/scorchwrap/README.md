@@ -1,8 +1,8 @@
 # ScorchWrap PoC
 
-> It's like stretchwrap, but with lava
+> It's like shrinkwrap, but with lava
 
-ScorchWrap is a webpack plugin that wraps each module in the bundle in a container and enforces LavaMoat Policies per package.
+ScorchWrap is a webpack plugin that wraps each module in the bundle in a Compartment and enforces LavaMoat Policies per package.
 
 Implemented capabilities:
 
@@ -13,7 +13,8 @@ Implemented capabilities:
  - [x] including actual policies
  - [x] using identifiers matching the policy
  - [x] using policies to control module loading at runtime
- - [ ] using policies to limit globals at runtime
+ - [x] using policies to limit globals at runtime
+ - [ ] support for "write" value in globals policy
  - [ ] researching and covering all `__webpack_require__.*` functions for security as needed 
  - [ ] support dynamic imports/requires reaching beyond the bundled content
  - [ ] paranoid mode checks
@@ -27,8 +28,10 @@ Implemented capabilities:
 
 ## Usage
 
-The ScorchWrap plugin takes an optional options object with the following properties:
+The ScorchWrap plugin takes an options object with the following properties:
 
+- lockdown: set configuration for SES lockdown. Default from SES is likely too strict.
+- policy: the LavaMoat policy object. (unstable. This will surely change before v1 or a policy loader export will be provided from the main package to incorporate policy-override files)
 - runChecks: Optional boolean property to indicate whether to check resulting code with wrapping for correctness. Default is false.
 - diagnosticsVerbosity: Optional number property to represent diagnostics output verbosity. A larger number means more overwhelming diagnostics output. Default is 0.  
   Setting positive verbosity will enable runChecks.
@@ -68,6 +71,7 @@ One important thing to note when using the ScorchWrap plugin is that it disables
 # Security Claims
 
 - SES must be added to the page without any bundling or transforming for any security guarantees to be sustained.
+  - The plugin could add it as an asset to the compilation if that's a good Developer Experience. Feedback welcome.
 - Each javascript module resulting from the webpack build is scoped to its package's policy
 
 Threat model
@@ -77,7 +81,7 @@ Threat model
 - It's unlikely but possible that a plugin can bypass LavaMoat protections unintentionally.
 - It should not be possible for loaders to bypass LavaMoat protections.
 - Some plugins (eg. MiniCssExtractPlugin) execute code from the bundle at build time. To make the plugin work you need to trust it and the modules it runs and add the ScorchWrap.ignore loader for them. 
-- ScorchWrap plugin is not protecting you against malicious packages being executed by other plugins at runtime
+- ScorchWrap plugin is not protecting you against malicious packages being executed by other plugins at runtime (but lavamoat cli could)
 # Development
 
 ## Control flow
@@ -115,7 +119,7 @@ Sadly, even treeshaking doesn't eliminate that module. It's left there and faili
 
 ## Manual testing
 
-run `yarn` and `yarn lib:ses` in the packages/scorchwrap folder before you begin
+run `npm ci` and `npm run lib:ses` in the packages/scorchwrap folder before you begin
 
 `cd app`  
 run `npm ci`  
@@ -142,7 +146,7 @@ There's two ways we could handle policy
 2. add to runtime, keyed  
    For now holding on to the entire policy seems like a better idea, we could compress the keys at compile time easily.
    
-Current implementation inlines the policy as-is into the bundle.
+Current implementation inlines the entire policy into the bundle once (option 2).
 
 ### package identification
 If we run a'a' on the dependencies, we're going to need means to look them up by path. It'd be nice to collect the paths first and only create IDs based on the paths included in the bundle instead of going through entire node_modules. We could collect the IDs on an earlier phase, before generate, to create a mapping from paths to IDs only for the packages involved. 
@@ -155,7 +159,7 @@ After a mapping is built, the actual values of identifiers are no longer importa
 ### modes
 
 - default 
-- paranoid - adds extra checks
+- paranoid - adds extra checks (not implemented)
 
 Things it could check in paranoid mode
 - use other hooks to check if the number of bundle entries equals the number of entries processed by the wrapper
