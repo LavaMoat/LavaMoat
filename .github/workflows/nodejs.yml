@@ -20,15 +20,20 @@ jobs:
         uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c # v3
         with:
           node-version: ${{ matrix.node-version }}
-          cache: "npm"
+          cache: 'npm'
       - name: Upgrade npm # for workspace support
         run: npm i -g npm
       - name: Install Dependencies
         uses: bahmutov/npm-install@1a235c31658a322a3b024444759650ee6345c26d # tag=v1
         with:
           useRollingCache: true
-          install-command: npm ci --foreground-scripts
+          install-command: npm install --foreground-scripts
       - name: Lint
         run: npm run lint
       - name: Test
         run: npm test
+
+      - # if `npm install` updated `package-lock.json`, this ensures
+        # a clean install works as expected
+        name: Check Lockfile
+        run: npm ci
