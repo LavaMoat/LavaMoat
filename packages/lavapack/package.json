@@ -32,7 +32,10 @@
   },
   "author": "kumavis",
   "license": "MIT",
-  "repository": "git+https://github.com/LavaMoat/lavamoat.git",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LavaMoat/lavamoat.git"
+  },
   "bugs": {
     "url": "https://github.com/LavaMoat/lavamoat/issues"
   },

@@ -2,6 +2,7 @@ const { join: pathJoin } = require('path')
 const { promises: { readFile, writeFile }} = require('fs')
 const { generateKernel, makeInitStatsHook } = require('lavamoat-core')
 const { getStrictScopeTerminatorShimSrc, replaceTemplateRequire } = require('lavamoat-core/src/generateKernel')
+const espree = require('espree')
 
 module.exports = buildRuntimeUMD
 
@@ -10,10 +11,26 @@ function markAsGenerated(output, file) {
   return `// DO NOT EDIT! THIS FILE IS GENERATED FROM "${file}" BY RUNNING "${runner}"\n\n` + output
 }
 
+const ECMA_VERSION_2020 = 2020
+
+function assertEcmaVersion(code, ecmaVersion) {
+  try {
+    espree.parse(code, {
+      ecmaVersion,
+    })
+  } catch (err) {
+    const { message, lineNumber, column } = err
+    console.error(message, `at line ${lineNumber}, column ${column}`)
+    console.error(`Failed to parse runtime.js as ECMA ${ecmaVersion}`)
+    throw err
+  }
+}
+
 async function buildRuntimeCJS () {
   const runtimeCjsTemplate = await readFile(pathJoin(__dirname, 'runtime-cjs-template.js'), 'utf8')
   let output = replaceTemplateRequire(runtimeCjsTemplate, 'strict-scope-terminator', getStrictScopeTerminatorShimSrc())
   output = markAsGenerated(output, 'runtime-cjs-template.js')
+  assertEcmaVersion(output, ECMA_VERSION_2020)
   await writeFile(pathJoin(__dirname, 'runtime-cjs.js'), output)
 }
 
@@ -27,6 +44,7 @@ async function buildRuntimeES (opts) {
   const statsCode = `(${makeInitStatsHook})({ onStatsReady })`
   output = stringReplace(output, '__reportStatsHook__', statsCode)
   output = markAsGenerated(output, 'runtime-template.js')
+  assertEcmaVersion(output, ECMA_VERSION_2020)
   await writeFile(pathJoin(__dirname, 'runtime.js'), output)
 }
 

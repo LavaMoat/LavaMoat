@@ -10,7 +10,6 @@
     "@commitlint/config-conventional": "^17.6.7",
     "ava": "^5.3.1",
     "conventional-changelog-conventionalcommits": "^6.1.0",
-    "cross-env": "^7.0.3",
     "depcheck": "^1.4.0",
     "eslint": "^8.45.0",
     "eslint-plugin-ava": "^14.0.0",
@@ -25,20 +24,22 @@
     "node": ">=14.0.0"
   },
   "scripts": {
-    "test": "npm --workspaces test",
-    "test:prep": "lerna run test:prep",
-    "lint": "npm run lint:eslint && npm run lint:deps",
+    "build": "lerna run build",
+    "lint:commit": "commitlint",
+    "lint:deps": "lerna run lint:deps",
     "lint:eslint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "lint:deps": "lerna run lint:deps",
-    "build": "npm -w @lavamoat/lavapack -w @lavamoat/viz -w @lavamoat/yarn-plugin-allow-scripts run build",
-    "rebuild": "npm -w @lavamoat/lavapack -w @lavamoat/viz -w @lavamoat/yarn-plugin-allow-scripts run rebuild",
     "lint:staged": "lint-staged",
-    "lint:commit": "commitlint",
-    "postinstall": "husky install",
-    "prepublishOnly": "cross-env NODE_ENV=production npm run rebuild && npm run test:prep && npm run test",
-    "publish": "lerna publish",
-    "setup": "allow-scripts"
+    "lint": "npm run lint:eslint && npm run lint:deps",
+    "postinstall": "husky install; npm run rebuild",
+    "release:lerna": "lerna publish",
+    "release:rebuild": "npm run rebuild && npm run test:prep && npm run test:workspaces",
+    "release": "npm run publish:rebuild && npm run publish:lerna",
+    "rebuild": "lerna run rebuild",
+    "setup": "allow-scripts",
+    "test:prep": "lerna run test:prep",
+    "test:workspaces": "npm run --workspaces test",
+    "test": "npm run build && npm run test:prep && npm run test:workspaces"
   },
   "lint-staged": {
     "*.js": [
