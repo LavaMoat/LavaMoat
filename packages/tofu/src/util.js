@@ -42,7 +42,9 @@ function getNameFromNode (node) {
     return node.name
   } else if (node.type === 'ThisExpression') {
     return 'this'
-  } else {
+  } else if (node.type === 'PrivateName') {
+    return `#${node.id.name}`
+  }else {
     throw new Error(`unknown ast node type when trying to get name: "${node.type}"`)
   }
 }
@@ -139,7 +141,7 @@ function objToMap (obj) {
 function mapToObj (map) {
   const obj = {}
   map.forEach((value, key) => {
-    obj[key] = value 
+    obj[key] = value
   })
   return obj
 }

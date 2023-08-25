@@ -1,10 +1,12 @@
 class MyClass extends SuperClass {
+    #i;
     constructor(a) {
         super();
         this.a = a;
+        this.#i = 'i';
     }
     get b() {
-        return this.a;
+        return this.a + this.#i;
     }
     set b(_b) {
         this.a = _b;
