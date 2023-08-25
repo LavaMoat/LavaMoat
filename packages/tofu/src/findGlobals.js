@@ -55,6 +55,11 @@ function findGlobals (ast) {
         }
       }
 
+      // private names are not globals
+      if (parentType === 'PrivateName' && path.parent.id === path.node) {
+        return
+      }
+
       // save global
       saveGlobal(path)
     },
