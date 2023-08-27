@@ -1,0 +1,19 @@
+name: CI
+description: 'Run developer scripts in alternative environment'
+on: [push, pull_request]
+
+permissions:
+  contents: read
+
+jobs:
+  test-dev-alpine:
+    name: test-dev-alpine
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3
+      - name: Build OCI image
+        run: docker build -t localhost/lt-alpine:latest -f test/integration/Dockerfile-alpine .
+      - name: Test
+        run: docker run --rm -it localhost/lt-alpine run test
+
