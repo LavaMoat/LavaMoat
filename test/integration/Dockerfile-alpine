@@ -1,0 +1,6 @@
+FROM node:18-alpine
+WORKDIR /app
+USER 1000
+COPY --chown=1000 . .
+RUN npm install && npm run setup && npm run test:prep && npm run build
+ENTRYPOINT ["/usr/local/bin/npm"]
