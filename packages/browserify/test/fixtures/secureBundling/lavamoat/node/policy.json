@@ -60,13 +60,9 @@
     "@lavamoat/aa": {
       "builtin": {
         "fs.readFileSync": true,
-        "fs.statSync": true,
         "path.dirname": true,
         "path.join": true,
         "path.relative": true
-      },
-      "globals": {
-        "performantResolve": true
       },
       "packages": {
         "browserify>resolve": true
