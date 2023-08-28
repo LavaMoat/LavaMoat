@@ -3,12 +3,12 @@ module.exports = {
   // this is the same as an .eslintignore file
   ignorePatterns: [
     '.yarn/**/*',
-    '**/*.umd.js',
     '**/node_modules/**/*',
     'docs/**/*',
     'packages/*/examples/**/*',
     'packages/*/test/**/fixtures/**/*',
     'packages/*/test/projects/**/*',
+    'packages/core/lib/*.umd.js',
     'packages/lavapack/bundle.js',
     'packages/lavapack/src/runtime-cjs.js',
     'packages/lavapack/src/runtime.js',
@@ -23,28 +23,13 @@ module.exports = {
     // https://eslint.org/docs/latest/use/configure/language-options#specifying-environments
     ecmaVersion: 12,
   },
-  env: { es2020: true, node: true }, // this should be synced with the version of V8 used by the min supported node version
-  extends: ['eslint:recommended', 'plugin:n/recommended'],
+  // this should be synced with the version of V8 used by the min supported node version
+  env: { es2020: true, node: true },
+  // the prettier config disables all eslint rules known to conflict with prettier
+  extends: ['eslint:recommended', 'plugin:n/recommended', 'prettier'],
   rules: {
     // base rules; none of these are in eslint/recommended
-    'arrow-spacing': ['error', { before: true, after: true }],
-    'brace-style': ['error', '1tbs'],
-    'comma-dangle': ['error', 'always-multiline'],
-    curly: ['error', 'all'],
-    'eol-last': ['error', 'always'],
-    indent: ['error', 2, { SwitchCase: 1, ObjectExpression: 'first' }],
     'no-empty': ['error', { allowEmptyCatch: true }],
-    quotes: ['error', 'single'],
-    semi: ['error', 'never'],
-    'space-before-blocks': ['error', 'always'],
-    'space-before-function-paren': [
-      'error',
-      {
-        anonymous: 'ignore',
-        named: 'ignore',
-        asyncArrow: 'always',
-      },
-    ],
 
     // additional errors not in n/recommended
     'n/callback-return': 'error',

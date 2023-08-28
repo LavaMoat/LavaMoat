@@ -1,0 +1,17 @@
+# generated or vendored
+packages/core/src/kernel*.js
+packages/core/lib/*.umd.js
+packages/lavapack/bundle.js
+packages/lavapack/src/runtime*.js
+packages/viz/dist/**/*
+
+# potentially too big to parse
+policy-overrides.json
+policy.json
+packages/viz/src/example-policies/**/*
+
+# don't conflict with whatever package managers do
+.yarn/**/*
+package-lock.json
+package.json
+yarn.lock
