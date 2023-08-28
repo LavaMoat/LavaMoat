@@ -4,6 +4,7 @@ packages/core/lib/*.umd.js
 packages/lavapack/bundle.js
 packages/lavapack/src/runtime*.js
 packages/viz/dist/**/*
+packages/*/CHANGELOG.md
 
 # potentially too big to parse
 policy-overrides.json
