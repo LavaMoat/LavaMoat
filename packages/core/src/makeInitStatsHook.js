@@ -1,7 +1,18 @@
+// @ts-check
+
 module.exports = { makeInitStatsHook }
 
+/**
+ * If `statsMode` is enabled in the kernel, this factory will be called to create a hook
+ * which, in turn, calls {@linkcode MakeInitStatsHookOptions.onStatsReady} when the a top-level
+ * module has finished processing
+ *
+ * @param {import('./stats').MakeInitStatsHookOptions} options
+ * @returns {import('./stats').ReportStatsHook}
+ */
 function makeInitStatsHook ({ onStatsReady }) {
-  let statModuleStack = []
+  /** @type {import('./stats').StatRecord[]} */
+  const statModuleStack = []
   return reportStatsHook
 
   function reportStatsHook (event, moduleId) {
@@ -9,12 +20,11 @@ function makeInitStatsHook ({ onStatsReady }) {
       // record start
       const startTime = Date.now()
       // console.log(`loaded module ${moduleId}`)
+      /** @type {import('./stats').StatRecord} */
       const statRecord = {
         'name': moduleId,
-        'value': null,
         'children': [],
         'startTime': startTime,
-        'endTime': null,
       }
       // add as child to current
       if (statModuleStack.length > 0) {
@@ -37,8 +47,7 @@ function makeInitStatsHook ({ onStatsReady }) {
       // console.log(`loaded module ${moduleId} in ${duration}ms`)
       // check if totally done
       if (statModuleStack.length === 1) {
-        currentStat.version = 1
-        onStatsReady(currentStat)
+        onStatsReady({...currentStat, version: 1})
       }
       statModuleStack.pop()
     }
