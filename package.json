@@ -12,13 +12,15 @@
     "conventional-changelog-conventionalcommits": "^6.1.0",
     "depcheck": "^1.4.0",
     "eslint": "^8.45.0",
+    "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-ava": "^14.0.0",
     "eslint-plugin-import": "^2.27.5",
     "eslint-plugin-n": "^15.7.0",
     "eslint-plugin-react": "^7.33.0",
     "husky": "^8.0.3",
     "lerna": "^7.1.4",
-    "lint-staged": "^13.2.3"
+    "lint-staged": "^13.2.3",
+    "prettier": "^3.0.2"
   },
   "engines": {
     "node": ">=14.0.0 <=20.x"
@@ -43,7 +45,14 @@
   },
   "lint-staged": {
     "*.js": [
-      "eslint --fix"
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.(ts|md|ya?ml)": [
+      "prettier --write"
+    ],
+    "!((package|policy)*).json": [
+      "prettier --write"
     ]
   },
   "workspaces": [
@@ -60,7 +69,7 @@
   "prettier": {
     "singleQuote": true,
     "semi": false,
-    "trailingComma": "all"
+    "trailingComma": "es5"
   },
   "ava": {
     "files": [
