@@ -50,11 +50,11 @@ async function copyFolder(from, to, opts = {skip: []}) {
   }
 }
 
-function overrideDepsWithLocalPackages(projectDir) {
+function overrideDepsWithLocalPackages({projectDir, globalDir}) {
   for (const [dirName, name] of Object.entries(localLavaMoatDeps)) {
     const src = path.resolve(__dirname, '..', '..', dirName)
     spawnSync('yarn', ['unlink', name], { cwd: projectDir })
-    const res = spawnSync('yarn', ['link'], { cwd: src })
+    const res = spawnSync('yarn', ['link', '--global-folder', globalDir], { cwd: src })
     if (res.status !== 0) {
       const err = res.stderr.toString()
       console.error({
@@ -67,7 +67,7 @@ function overrideDepsWithLocalPackages(projectDir) {
       throw new Error(err)
     }
   }
-  const res = spawnSync('yarn', ['link', ...Object.values(localLavaMoatDeps)], { cwd: projectDir })
+  const res = spawnSync('yarn', ['link', '--global-folder', globalDir, ...Object.values(localLavaMoatDeps)], { cwd: projectDir })
   if (res.status !== 0) {
     const err = res.stderr.toString()
     console.error({
@@ -162,8 +162,10 @@ async function runBrowserify ({
 
 async function prepareBrowserifyScenarioOnDisk ({ scenario }) {
   const { path: projectDir } = await tmp.dir()
+  const { path: globalDir } = await tmp.dir()
   scenario.dir = projectDir
   console.warn(`created test project directory at "${projectDir}"`)
+  console.warn(`created temporary globals directory at "${globalDir}"`)
   const depsToInstall = ['browserify@^17', 'lavamoat-browserify']
   let runBrowserifyPath = `${__dirname}/fixtures/runBrowserify.js`
   if (scenario.type === 'factor') {
@@ -175,7 +177,7 @@ async function prepareBrowserifyScenarioOnDisk ({ scenario }) {
     runBrowserifyPath = `${__dirname}/fixtures/runBrowserifyBundleFactor.js`
   }
   // yarn link workspace dependencies
-  overrideDepsWithLocalPackages(projectDir)
+  overrideDepsWithLocalPackages({projectDir, globalDir})
   // limit concurrency so that yarn v1 doesnt break its own cache
   const installDevDepsResult = await limitConcurrency(async function () {
     return spawnSync('yarn', ['add','--network-concurrency 1', '--prefer-offline', '-D', ...depsToInstall], { cwd: projectDir })
