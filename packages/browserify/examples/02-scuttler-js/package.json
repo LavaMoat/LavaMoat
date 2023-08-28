@@ -8,6 +8,7 @@
     "start": "node ./build.js && serve ."
   },
   "dependencies": {
+    "lavamoat-browserify": "file:../../../../..",
     "metamask-logo": "^2.2.1"
   }
 }
