@@ -93,15 +93,30 @@ This section describes how to configure your development environment to hack on 
 
 #### Platform
 
-LavaMoat can comfortably be developed using Linux, macOS, or Windows (but we recommend using WSL on Windows).
+LavaMoat officially supports building on the following operating systems and architectures:
+
+- Latest Ubuntu LTS [`x86_64`]
+- Debian Stable [`x86_64`]
+- Latest Alpine Linux Stable [`x86_64`]
+
+On a best-effort basis, development should also be expected to work on:
+
+- macOS 13.5+ [`x86_64` / `aarch64`]
+- Windows Subsystem for Linux 1 [`x86_64`]
+- Windows Subsystem for Linux 2 [`x86_64` / `aarch64`]
+- Latest Ubuntu LTS [`aarch64`]
+- Debian Stable [`aarch64`]
+- Latest Alpine Linux Stable [`aarch64`]
+
+Developer experience reports for supported and unsupported platforms and compatibility fixes are welcome.
 
 #### Node.js
 
-LavaMoat is distributed as a [Node.js][node] command-line tool. You'll want to install the latest LTS version (see the [Node.js release schedule][release-schedule] for more information).
+LavaMoat is distributed as a [Node.js][node] command-line tool. You'll want to install the active LTS version (see the [Node.js release schedule][release-schedule] for more information).
 
 :::tip
 
-Don't have Node.js installed? You can [download and install Node.js from the official site][node-download], but we recommend using a Node.js version manager (e.g., [nvm][]).
+Don't have Node.js installed? You can [download and install Node.js from the official site][node-download].
 
 :::
 
