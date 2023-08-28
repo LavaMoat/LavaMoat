@@ -1,0 +1,14 @@
+.yarn/**/*
+**/node_modules/**/*
+docs/**/*
+packages/*/examples/**/*
+packages/*/test/**/fixtures/**/*
+packages/*/test/projects/**/*
+packages/core/lib/*.umd.js
+packages/lavapack/bundle.js
+packages/lavapack/src/runtime-cjs.js
+packages/lavapack/src/runtime.js
+packages/perf/trials/**/*
+packages/survey/mitm/**/*
+packages/viz/dist/**/*
+packages/viz/src/example-policies/**/*

@@ -1,22 +1,5 @@
 module.exports = {
   root: true,
-  // this is the same as an .eslintignore file
-  ignorePatterns: [
-    '.yarn/**/*',
-    '**/node_modules/**/*',
-    'docs/**/*',
-    'packages/*/examples/**/*',
-    'packages/*/test/**/fixtures/**/*',
-    'packages/*/test/projects/**/*',
-    'packages/core/lib/*.umd.js',
-    'packages/lavapack/bundle.js',
-    'packages/lavapack/src/runtime-cjs.js',
-    'packages/lavapack/src/runtime.js',
-    'packages/perf/trials/**/*',
-    'packages/survey/mitm/**/*',
-    'packages/viz/dist/**/*',
-    'packages/viz/src/example-policies/**/*',
-  ],
   parserOptions: {
     // this should be whatever the latest env version provides. some plugin is
     // messing with this, so we need to set it manually.
