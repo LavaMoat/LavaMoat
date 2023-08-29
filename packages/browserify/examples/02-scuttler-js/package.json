@@ -7,6 +7,7 @@
     "lavamoat": "AUTOCONFIG=1 node ./build.js",
     "start": "node ./build.js && serve ."
   },
+  "private": true,
   "dependencies": {
     "lavamoat-browserify": "file:../../../../..",
     "metamask-logo": "^2.2.1"

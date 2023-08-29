@@ -8,6 +8,7 @@
     "lavamoat": "AUTOCONFIG=1 node ./build.js",
     "start": "node ./build.js && serve ."
   },
+  "private": true,
   "dependencies": {
     "metamask-logo": "^2.5.0"
   }
