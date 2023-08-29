@@ -7,50 +7,47 @@ export interface StatRecord {
   /**
    * Module ID
    */
-  name: string;
+  name: string
 
   /**
    * Start time (in ms)
    */
-  startTime: number;
+  startTime: number
 
   /**
    * Children, if any
    */
-  children: StatRecord[];
+  children: StatRecord[]
   /**
    * Duration (in ms)
    */
-  value?: number;
+  value?: number
 
   /**
    * End time (in ms)
    */
 
-  endTime?: number;
+  endTime?: number
 }
 
-export interface TopLevelStatsRecord extends StatsRecord {
+export interface TopLevelStatRecord extends StatRecord {
   /**
    * Stats API version
    *
    * @privateRemarks I guess?
    */
-  version: 1;
+  version: 1
 }
 
 /**
  * @internal
  */
-export type ReportStatsHook = (
-  event: "start" | "end",
-  moduleId: string,
-) => void;
+export type ReportStatsHook = (event: 'start' | 'end', moduleId: string) => void
 
 /**
  * Options for `makeInitStatsHook`
  * @todo Move def of `onStatsReady` to kernel options
  */
 export interface MakeInitStatsHookOptions {
-  onStatsReady: (stats: TopLevelStatRecord) => void;
+  onStatsReady: (stats: TopLevelStatRecord) => void
 }

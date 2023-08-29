@@ -15,6 +15,7 @@ function makeInitStatsHook ({ onStatsReady }) {
   const statModuleStack = []
   return reportStatsHook
 
+  /** @type {import('./stats').ReportStatsHook} */
   function reportStatsHook (event, moduleId) {
     if (event === 'start') {
       // record start

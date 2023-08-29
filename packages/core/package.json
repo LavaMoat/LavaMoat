@@ -35,5 +35,6 @@
       "test/*.spec.js"
     ],
     "timeout": "30s"
-  }
+  },
+  "types": "./types/index.d.ts"
 }
