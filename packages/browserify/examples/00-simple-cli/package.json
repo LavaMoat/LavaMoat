@@ -8,6 +8,7 @@
     "lavamoat": "browserify index.js --plugin [ lavamoat-browserify --writeAutoPolicy --policy ./policy.json ] > /dev/null",
     "start": "browserify index.js --plugin [ lavamoat-browserify --policy ./policy.json ] > bundle.js && serve ."
   },
+  "private": true,
   "dependencies": {
     "metamask-logo": "^2.5.0"
   }
