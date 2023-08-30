@@ -1,0 +1,9 @@
+{
+  "resources": {
+    "bad>!!packagename": {
+      "globals": {
+        "console": true
+      }
+    }
+  }
+}
