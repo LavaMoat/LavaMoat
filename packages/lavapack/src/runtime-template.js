@@ -53,6 +53,19 @@
 
 
   function loadModuleData (moduleId) {
+    // eslint-disable-next-line node/global-require
+    if (typeof window === 'undefined' && typeof require !== 'undefined' && require('node:module').isBuiltin(moduleId)) {
+      return {
+        type: 'builtin',
+        package: moduleId,
+        id: moduleId,
+        // Using unprotected require
+        moduleInitializer: (_, module) => {
+          // eslint-disable-next-line node/global-require
+          module.exports = require(moduleId)
+        },
+      }
+    }
     if (!moduleRegistry.has(moduleId)) {
       throw new Error(`no module registered for "${moduleId}" (${typeof moduleId})`)
     }

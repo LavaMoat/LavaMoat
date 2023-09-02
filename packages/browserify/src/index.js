@@ -8,6 +8,7 @@ const createLavaPack = require('@lavamoat/lavapack')
 const { createSesWorkaroundsTransform } = require('./sesTransforms')
 const { loadCanonicalNameMap } = require('@lavamoat/aa')
 const browserResolve = require('browser-resolve')
+const { isBuiltin } = require('node:module')
 
 
 // these are the reccomended arguments for lavaMoat to work well with browserify
@@ -71,7 +72,7 @@ function plugin (browserify, pluginOpts) {
       browserify.pipeline.get('emit-deps').push(createModuleInspectorSpy({
         policyOverride,
         // no builtins in the browser (yet!)
-        isBuiltin: () => false,
+        isBuiltin: (name) => browserify._options.node && isBuiltin(name),
         // should prepare debug info
         includeDebugInfo: configuration.writeAutoPolicyDebug,
         // write policy files to disk
@@ -280,11 +281,11 @@ function validatePolicy (policy) {
   Object.entries(policy.resources).forEach(([, packageOpts]) => {
     const packageOptions = Object.keys(packageOpts)
     const packageEntries = Object.values(packageOpts)
-    const optionsWhitelist = ['globals', 'packages']
+    const optionsWhitelist = ['globals', 'packages', 'builtin']
     const valuesWhitelist = [true, 'write']
 
     if (!packageOptions.every(packageOpt => optionsWhitelist.includes(packageOpt))) {
-      throw new Error('LavaMoat - Unrecognized package options. Expected \'globals\' or \'packages\'')
+      throw new Error('LavaMoat - Unrecognized package options. Expected either  \'builtin\', \'globals\' or \'packages\'')
     }
 
     packageEntries.forEach((entry) => {
