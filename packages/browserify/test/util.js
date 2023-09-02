@@ -33,23 +33,6 @@ module.exports = {
   createBrowserifyScenarioFromScaffold,
 }
 
-async function copyFolder(from, to, opts = {skip: []}) {
-  await fs.mkdir(to, { recursive: true })
-  const elements = await fs.readdir(from)
-  for (const element of elements) {
-    if (opts.skip.includes(element)) {
-      continue
-    }
-    const f = path.join(from, element), t = path.join(to, element)
-    const stat = await fs.lstat(f)
-    if (stat.isFile()) {
-      await fs.copyFile(f, t)
-    } else {
-      await copyFolder(f, t, opts)
-    }
-  }
-}
-
 function overrideDepsWithLocalPackages(projectDir) {
   for (const [dirName, name] of Object.entries(localLavaMoatDeps)) {
     const src = path.resolve(__dirname, '..', '..', dirName)
@@ -189,10 +172,6 @@ async function prepareBrowserifyScenarioOnDisk ({ scenario }) {
   // we copy files first so that we dont attempt to install the immaginary deps
   const { policyDir } = await prepareScenarioOnDisk({ scenario, projectDir, policyName: 'browserify' })
   // copy browserify build runner
-  const paths = {
-    normal: `${__dirname}/fixtures/runBrowserify.js`,
-    factor: `${__dirname}/fixtures/runBrowserifyBundleFactor.js`,
-  }
   await fs.copyFile(runBrowserifyPath, path.join(projectDir, 'runBrowserify.js'))
   return { projectDir, policyDir }
 }
