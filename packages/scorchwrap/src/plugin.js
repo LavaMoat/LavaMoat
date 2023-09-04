@@ -146,6 +146,7 @@ const wrapGeneratorMaker = ({
         Object.defineProperty(module.buildInfo, "strict", {
           get: () => false,
           set: () => {
+            // TODO: make the error more informative - explaining why the attempt to strict mode had to be skipped here but is applied anyway
             console.warn(
               "Attempted to set strict mode on module",
               module.rawRequest,
@@ -390,13 +391,18 @@ class ScorchWrapPlugin {
         // compilation.hooks.finishModules.tap(PLUGIN_NAME, () => {
         //   PROGRESS.report("pathsCollected");
         // });
-        compilation.hooks.afterOptimizeChunkIds.tap("MyPlugin", (chunks) => {
+        compilation.hooks.afterOptimizeChunkIds.tap(PLUGIN_NAME, (chunks) => {
           const chunkGraph = compilation.chunkGraph;
 
           chunks.forEach((chunk) => {
             chunkGraph.getChunkModules(chunk).forEach((module) => {
               const moduleId = chunkGraph.getModuleId(module);
               if (
+                // Webpack has a concept of ignored modules
+                // When a module is ignored a carveout is necessary in policy enforcement for it because the ID that webpack creates for it is not exactly helpful. 
+                // example outcome in the bundle: `const nodeCrypto = __webpack_require__(/*! crypto */ "?0b7d");`
+                // Sadly, even treeshaking doesn't eliminate that module. It's left there and failing to work when reached by runtime policy enforcement.
+                // Below is the most reliable way I've found to date to identify ignored modules.
                 (module.type === JAVASCRIPT_MODULE_TYPE_DYNAMIC &&
                   module.identifierStr &&
                   module.identifierStr.startsWith("ignored")) ||
@@ -418,11 +424,13 @@ class ScorchWrapPlugin {
             policy: options.policy,
             canonicalNameMap,
           });
-          mainCompilationWarnings.push(
-            new WebpackError(
-              `ScorchWrapPlugin: the following module ids can't be controlled by policy and must be ignored at runtime: \n  ${unenforceableModuleIds.join()}`
-            )
-          );
+          if(unenforceableModuleIds.length > 0) {
+            mainCompilationWarnings.push(
+              new WebpackError(
+                `ScorchWrapPlugin: the following module ids can't be controlled by policy and must be ignored at runtime: \n  ${unenforceableModuleIds.join()}`
+                )
+                );
+          }
           PROGRESS.report("pathsProcessed");
         });
         // lists modules, but reaching for id can give a deprecation warning.
