@@ -1,8 +1,8 @@
 // @ts-check
 /// <reference path="./runtime.d.ts" />
 
-const { create, freeze, assign, defineProperty, entries, fromEntries, getOwnPropertyDescriptors } = Object;
-
+const { create, freeze, assign, defineProperty, entries, fromEntries, getOwnPropertyDescriptors, getOwnPropertyNames } = Object;
+const warn = typeof console === 'object' ? console.warn : () => { };
 // Avoid running any wrapped code or using compartment if lockdown was not called.
 // This is for when the bundle ends up running despite SES being missing.
 // It was previously useful for sub-compilations running an incomplete bundle as part of the build, but currently that is being skipped. We might go back to it for the sake of build time security if it's deemed worthwihile in absence of lockdown.
@@ -10,10 +10,9 @@ const LOCKDOWN_ON = typeof lockdown !== "undefined";
 if (LOCKDOWN_ON) {
   lockdown(LAVAMOAT.options.lockdown);
 } else {
-  console &&
-    console.warn(
-      "LavaMoat: runtime execution started without SES present, switching to no-op."
-    );
+  warn(
+    "LavaMoat: runtime execution started without SES present, switching to no-op."
+  );
 }
 
 // These must match assumptions in the wrapper.js
@@ -54,9 +53,9 @@ const enforcePolicy = (requestedResourceId, referrerResourceId) => {
   }
   throw Error(
     "Policy does not allow importing " +
-      requestedResourceId +
-      " from " +
-      referrerResourceId
+    requestedResourceId +
+    " from " +
+    referrerResourceId
   );
 };
 const getGlobalsForPolicy = (resourceId) => {
@@ -114,16 +113,35 @@ const lavamoatRuntimeWrapper = (resourceId, runtimeKit) => {
       resourceId
     );
 
-    // TODO: figure out what to wrap if anything
-    // Some of these may have to be limited, probably by configurationn
-    assign(policyRequire, __webpack_require__);
+    // TODO: figure out what to wrap and what to copy
+    // TODO: most of the work here could be done once instead of for each wrapping
 
-    // override webpack_require functionalities
+    // Webpack has built-in plugins that add more runtime functions. We might need to support them eventually. 
+    // It's a case-by-case basis decision.
+    // TODO: print a warning for other functions on the __webpack_require__ namespace that we're not supporting.
+    //   It's probably best served at build time though - with runtimeRequirements or looking at the items in webpack runtime when adding lavamoat runtime.
+    
+    // The following seem harmless and are used by default: ['O', 'n', 'd', 'o', 'r', 's']
+    const supportedRuntimeItems = ['O', 'n', 'd', 'o', 'r', 's'];
+    for (const item of supportedRuntimeItems) {
+      policyRequire[item] = harden(__webpack_require__[item]);
+    }
+
+    // TODO: check if this is not breaking anything
+    policyRequire.m = new Proxy({}, {
+      has: (target, prop) => {
+        warn(`A module attempted to read ${prop} directly from webpack's module cache`);
+        return false;
+      }
+    })
+
+    // override nmd to limit what it can mutate
     policyRequire.nmd = (moduleReference) => {
       if (moduleReference === module) {
         module = __webpack_require__.nmd(module);
       }
     };
+   
     overrides.__webpack_require__ = policyRequire;
   }
   const runtimeHandler = assign(create(null), runtimeKit, overrides);
@@ -131,14 +149,14 @@ const lavamoatRuntimeWrapper = (resourceId, runtimeKit) => {
   // allow setting, but ignore value for /* module decorator */ module = __webpack_require__.nmd(module);
   defineProperty(runtimeHandler, "module", {
     get: () => module,
-    set: () => {},
+    set: () => { },
   });
   freeze(runtimeHandler);
 
   if (!compartmentMap.has(resourceId)) {
     const c = new Compartment();
     // This is necessary because Compartment constructor won't endow non-enumerable properties
-    for (const descriptor of entries(getOwnPropertyDescriptors(getGlobalsForPolicy(resourceId)))){
+    for (const descriptor of entries(getOwnPropertyDescriptors(getGlobalsForPolicy(resourceId)))) {
       Object.defineProperty(c.globalThis, descriptor[0], descriptor[1]);
     }
     // Create a compartment with globals attenuated according to the policy

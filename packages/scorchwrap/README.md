@@ -70,6 +70,8 @@ One important thing to note when using the ScorchWrap plugin is that it disables
 
 # Security Claims
 
+This is a beta version and it does not provide any guarantees, even those listed below. Use at your own risk.
+
 - SES must be added to the page without any bundling or transforming for any security guarantees to be sustained.
   - The plugin could add it as an asset to the compilation if that's a good Developer Experience. Feedback welcome.
 - Each javascript module resulting from the webpack build is scoped to its package's policy
@@ -82,6 +84,10 @@ Threat model
 - It should not be possible for loaders to bypass LavaMoat protections.
 - Some plugins (eg. MiniCssExtractPlugin) execute code from the bundle at build time. To make the plugin work you need to trust it and the modules it runs and add the ScorchWrap.ignore loader for them. 
 - ScorchWrap plugin is not protecting you against malicious packages being executed by other plugins at runtime (but lavamoat cli could)
+
+Webpack runtime
+
+Elements of webpack runtime (`__webpack_require__.*`) are currently mostly left intact. To avoid opening up potential bypasses, some functionality of the webpack runtime will need to be restricted.
 # Development
 
 ## Control flow
@@ -127,6 +133,8 @@ run `npm test` to trigger the build
 open dist/index.html in the browser and look at the console
 
 ## Testing TODO
+
+https://github.com/webpack/webpack/tree/main/examples contains potentially all unique things webpack supports. We should pick examples to cover from there.
 
 List of what to cover ordered by priority
 
