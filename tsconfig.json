@@ -12,6 +12,9 @@
       "path": "packages/aa"
     },
     {
+      "path": "packages/endomoat"
+    },
+    {
       "path": "packages/core"
     }
   ]
