@@ -11,7 +11,8 @@ const util = require('util')
 const tmp = require('tmp-promise')
 const { spawnSync } = require('child_process')
 const execFile = util.promisify(require('child_process').execFile)
-const limitConcurrency = require('throat')(1)
+
+const WORKSPACE_ROOT = path.resolve(__dirname, '..', '..', '..')
 
 const localLavaMoatDeps = {
   lavapack: '@lavamoat/lavapack',
@@ -34,28 +35,16 @@ module.exports = {
 }
 
 function overrideDepsWithLocalPackages(projectDir) {
-  for (const [dirName, name] of Object.entries(localLavaMoatDeps)) {
-    const src = path.resolve(__dirname, '..', '..', dirName)
-    spawnSync('yarn', ['unlink', name], { cwd: projectDir })
-    const res = spawnSync('yarn', ['link'], { cwd: src })
-    if (res.status !== 0) {
-      const err = res.stderr.toString()
-      console.error({
-        dirName,
-        name,
-        err,
-        out: res.stdout.toString(),
-        status: res.status,
-      })
-      throw new Error(err)
-    }
-  }
-  const res = spawnSync('yarn', ['link', ...Object.values(localLavaMoatDeps)], { cwd: projectDir })
-  if (res.status !== 0) {
-    const err = res.stderr.toString()
+  const localPkgPaths = Object.keys(localLavaMoatDeps).map(workspaceDirname => path.resolve(WORKSPACE_ROOT, 'packages', workspaceDirname))
+
+  // link all of the workspaces to the temp dir project. no need to unlink
+  // first; this will overwrite any already-present links
+  const res2 = spawnSync('npm', ['install', '--ignore-scripts', ...Object.values(localPkgPaths)], { cwd: projectDir, encoding: 'utf8'})
+  if (res2.status !== 0) {
+    const err = res.stderr
     console.error({
       err,
-      out: res.stdout.toString(),
+      out: res.stdout,
       status: res.status,
     })
     throw new Error(err)
@@ -147,7 +136,7 @@ async function prepareBrowserifyScenarioOnDisk ({ scenario }) {
   const { path: projectDir } = await tmp.dir()
   scenario.dir = projectDir
   console.warn(`created test project directory at "${projectDir}"`)
-  const depsToInstall = ['browserify@^17', 'lavamoat-browserify']
+  const depsToInstall = ['browserify@^17']
   let runBrowserifyPath = `${__dirname}/fixtures/runBrowserify.js`
   if (scenario.type === 'factor') {
     depsToInstall.push(
@@ -157,17 +146,18 @@ async function prepareBrowserifyScenarioOnDisk ({ scenario }) {
     )
     runBrowserifyPath = `${__dirname}/fixtures/runBrowserifyBundleFactor.js`
   }
-  // yarn link workspace dependencies
-  overrideDepsWithLocalPackages(projectDir)
-  // limit concurrency so that yarn v1 doesnt break its own cache
-  const installDevDepsResult = await limitConcurrency(async function () {
-    return spawnSync('yarn', ['add','--network-concurrency 1', '--prefer-offline', '-D', ...depsToInstall], { cwd: projectDir })
-  })
+
+  // install must happen before link, otherwise npm will remove any linked packages upon install
+  const installDevDepsResult = spawnSync('npm', ['install', '--ignore-scripts', ...depsToInstall], { cwd: projectDir, encoding: 'utf8' })
+
   if (installDevDepsResult.status !== 0) {
-    const msg = `Error while installing devDeps:\n${installDevDepsResult.stderr.toString()}\npackages: ${depsToInstall}`
+    const msg = `Error while installing devDeps:\n${installDevDepsResult.stderr}\npackages: ${depsToInstall}`
     throw new Error(msg)
   }
-  console.warn('installed browserify + lavamoat plugin')
+  console.warn('installed %s', depsToInstall.join(', '))
+
+  overrideDepsWithLocalPackages(projectDir)
+
   // copy scenario files
   // we copy files first so that we dont attempt to install the immaginary deps
   const { policyDir } = await prepareScenarioOnDisk({ scenario, projectDir, policyName: 'browserify' })
