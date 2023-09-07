@@ -31,7 +31,6 @@
     "keccak": "^3.0.2",
     "source-map-explorer": "^2.5.3",
     "sourcemap-validator": "^2.1.0",
-    "throat": "^5.0.0",
     "tmp-promise": "^3.0.3",
     "vinyl-buffer": "^1.0.1",
     "watchify": "^4.0.0"

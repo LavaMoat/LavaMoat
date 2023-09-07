@@ -81,6 +81,7 @@
       "globals": {
         "__dirname": true,
         "__filename.slice": true,
+        "console.error": true,
         "console.warn": true,
         "process.cwd": true,
         "setTimeout": true
@@ -91,6 +92,7 @@
         "@lavamoat/lavapack>through2": true,
         "@lavamoat/lavapack>umd": true,
         "browserify>JSONStream": true,
+        "external:../../node_modules/espree/dist/espree.cjs": true,
         "json-stable-stringify": true,
         "lavamoat-core": true,
         "readable-stream": true
@@ -788,6 +790,25 @@
     "duplexify>end-of-stream>once": {
       "packages": {
         "duplexify>end-of-stream>once>wrappy": true
+      }
+    },
+    "external:../../node_modules/acorn-jsx/index.js": {
+      "packages": {
+        "external:../../node_modules/acorn-jsx/xhtml.js": true,
+        "external:../../node_modules/acorn/dist/acorn.js": true
+      }
+    },
+    "external:../../node_modules/acorn/dist/acorn.js": {
+      "globals": {
+        "console": true,
+        "define": true
+      }
+    },
+    "external:../../node_modules/espree/dist/espree.cjs": {
+      "packages": {
+        "external:../../node_modules/acorn-jsx/index.js": true,
+        "external:../../node_modules/acorn/dist/acorn.js": true,
+        "external:../../node_modules/eslint-visitor-keys/dist/eslint-visitor-keys.cjs": true
       }
     },
     "json-stable-stringify": {
