@@ -1,7 +1,7 @@
-const { applySourceTransforms } = require("lavamoat-core");
-const diag = require("./diagnostics");
-const fs = require("fs");
-const q = JSON.stringify;
+const { applySourceTransforms } = require('lavamoat-core')
+const diag = require('./diagnostics')
+const fs = require('fs')
+const q = JSON.stringify
 
 /**
  * @typedef {object} WrappingInput
@@ -13,7 +13,7 @@ const q = JSON.stringify;
  *
  */
 
-const { NAME_globalThis, NAME_scopeTerminator, NAME_runtimeHandler } = require('../ENUM.json');
+const { NAME_globalThis, NAME_scopeTerminator, NAME_runtimeHandler } = require('../ENUM.json')
 
 
 /**
@@ -22,9 +22,9 @@ const { NAME_globalThis, NAME_scopeTerminator, NAME_runtimeHandler } = require('
  * @returns {string}
  */
 exports.wrapSource = function wrapSource(options) {
-  const { before, after, source } = wrapper(options);
-  return `${before}${source}${after}`;
-};
+  const { before, after, source } = wrapper(options)
+  return `${before}${source}${after}`
+}
 
 /**
  *
@@ -41,8 +41,8 @@ exports.wrapper = function wrapper({
   // validateSource(source);
 
   // No AST used in these transforms, so string cmparison should indicate if anything was changed.
-  const sesCompatibleSource = applySourceTransforms(source);
-  const sourceChanged = source !== sesCompatibleSource;
+  const sesCompatibleSource = applySourceTransforms(source)
+  const sourceChanged = source !== sesCompatibleSource
 
   // TODO: Consider: We could save some bytes by merging scopeTerminator and runtimeHandler, but then runtime calls would go through a proxy, which is slower. Merging runtimeKit with globalThis would also be problematic.
 
@@ -53,7 +53,7 @@ exports.wrapper = function wrapper({
       with (this.${NAME_runtimeHandler}) {
       with (this.${NAME_globalThis}) {
         return function() { 'use strict';
-`;
+`
 
   const after = `
         };
@@ -61,35 +61,35 @@ exports.wrapper = function wrapper({
     }
     }
 }).call(${evalKitFunctionName}(${q(id)}, { ${Array.from(
-    runtimeKit
-  ).join(",")}}))()`;
+  runtimeKit,
+).join(',')}}))()`
   if (runChecks) {
-    validateSource(before + sesCompatibleSource + after);
+    validateSource(before + sesCompatibleSource + after)
   }
   return {
     before,
     after,
     source: sesCompatibleSource,
     sourceChanged,
-  };
-};
+  }
+}
 
 function validateSource(source) {
-  const validityFlag = "E_VALIDATION" + Math.random().toFixed(10);
+  const validityFlag = 'E_VALIDATION' + Math.random().toFixed(10)
   // If wrapping results with invalid JS, webpack may not report that at later stages
   // or we might get an error complaoining about with in strict mode even if the issue is mismatching curlies
   try {
-    Function(`{throw "${validityFlag}"};;` + source)();
+    Function(`{throw "${validityFlag}"};;` + source)()
   } catch (e) {
     if (e !== validityFlag) {
       diag.run(1, () => {
-        fs.writeFileSync(validityFlag + ".js", source+`
+        fs.writeFileSync(validityFlag + '.js', source+`
 /*
 ${e}
 */
-        `);
-      });
-      throw Error(validityFlag + "wrapped module is not valid JS\n" + e);
+        `)
+      })
+      throw Error(validityFlag + 'wrapped module is not valid JS\n' + e)
     }
   }
 }

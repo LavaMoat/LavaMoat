@@ -1,5 +1,5 @@
 export const thing = (x) => {
-  return x + 1;
-};
+  return x + 1
+}
 
-export const treeshakeable = 13371337;
+export const treeshakeable = 13371337

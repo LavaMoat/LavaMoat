@@ -1,10 +1,10 @@
-let level = 0;
+let level = 0
 module.exports = {
   set level(value) {
-    level = value;
+    level = value
   },
   get level() {
-    return level;
+    return level
   },
   /**
    *
@@ -13,7 +13,7 @@ module.exports = {
    */
   run: (lvl, cb) => {
     if (level >= lvl) {
-      return cb();
+      return cb()
     }
   },
   /**
@@ -23,7 +23,7 @@ module.exports = {
    */
   rawDebug: (lvl, content) => {
     if (level >= lvl) {
-      process._rawDebug(content);
+      process._rawDebug(content)
     }
   },
-};
+}

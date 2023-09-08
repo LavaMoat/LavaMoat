@@ -24,7 +24,6 @@
   "author": "",
   "license": "Apache-2.0",
   "files": [
-    "src",
-    "lib"
+    "src"
   ]
 }
