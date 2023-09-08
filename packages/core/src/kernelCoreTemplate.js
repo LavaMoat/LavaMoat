@@ -67,7 +67,7 @@
   }) {
     // "templateRequire" calls are inlined in "generateKernel"
     const generalUtils = templateRequire('makeGeneralUtils')()
-    const { getEndowmentsForConfig, makeMinimalViewOfRef, applyEndowmentPropDescTransforms } = templateRequire('makeGetEndowmentsForConfig')(generalUtils)
+    const { getEndowmentsForConfig, makeMinimalViewOfRef, applyEndowmentPropDescTransforms, copyWrappedGlobals } = templateRequire('makeGetEndowmentsForConfig')(generalUtils)
     const { prepareCompartmentGlobalFromConfig } = templateRequire('makePrepareRealmGlobalFromConfig')(generalUtils)
     const { strictScopeTerminator } = templateRequire('strict-scope-terminator')
 
@@ -386,55 +386,8 @@
       // - Math is for untamed Math.random
       // - Date is for untamed Date.now
       const rootPackageCompartment = new Compartment({ Math, Date })
-      // find the relevant endowment sources
-      const globalProtoChain = getPrototypeChain(globalRef)
-      // the index for the common prototypal ancestor, Object.prototype
-      // this should always be the last index, but we check just in case
-      const commonPrototypeIndex = globalProtoChain.findIndex(globalProtoChainEntry => globalProtoChainEntry === Object.prototype)
-      if (commonPrototypeIndex === -1) {
-        throw new Error('Lavamoat - unable to find common prototype between Compartment and globalRef')
-      }
-      // we will copy endowments from all entries in the prototype chain, excluding Object.prototype
-      const endowmentSources = globalProtoChain.slice(0, commonPrototypeIndex)
 
-      // call all getters, in case of behavior change (such as with FireFox lazy getters)
-      // call on contents of endowmentsSources directly instead of in new array instances. If there is a lazy getter it only changes the original prop desc.
-      endowmentSources.forEach(source => {
-        const descriptors = Object.getOwnPropertyDescriptors(source)
-        Object.values(descriptors).forEach(desc => {
-          if ('get' in desc) {
-            try {
-              // calling getters can potentially throw (e.g. localStorage inside a sandboxed iframe)
-              Reflect.apply(desc.get, globalRef, [])
-            } catch {}
-          }
-        })
-      })
-
-      const endowmentSourceDescriptors = endowmentSources.map(globalProtoChainEntry => Object.getOwnPropertyDescriptors(globalProtoChainEntry))
-      // flatten propDesc collections with precedence for globalThis-end of the prototype chain
-      const endowmentDescriptorsFlat = Object.assign(Object.create(null), ...endowmentSourceDescriptors.reverse())
-      // expose all own properties of globalRef, including non-enumerable
-      Object.entries(endowmentDescriptorsFlat)
-        // ignore properties already defined on compartment global
-        .filter(([key]) => !(key in rootPackageCompartment.globalThis))
-        // ignore circular globalThis refs
-        .filter(([key]) => !(globalThisRefs.includes(key)))
-        // define property on compartment global
-        .forEach(([key, desc]) => {
-          // unwrap functions, setters/getters & apply scope proxy workaround
-          const wrappedPropDesc = applyEndowmentPropDescTransforms(desc, rootPackageCompartment, globalRef)
-          Reflect.defineProperty(rootPackageCompartment.globalThis, key, wrappedPropDesc)
-        })
-      // global circular references otherwise added by prepareCompartmentGlobalFromConfig
-      // Add all circular refs to root package compartment globalThis
-      for (const ref of globalThisRefs) {
-        if (ref in rootPackageCompartment.globalThis) {
-          continue
-        }
-        rootPackageCompartment.globalThis[ref] = rootPackageCompartment.globalThis
-      }
-
+      copyWrappedGlobals(globalRef, rootPackageCompartment.globalThis, globalThisRefs)
       // save the compartment for use by other modules in the package
       packageCompartmentCache.set(rootPackageName, rootPackageCompartment)
 
@@ -482,7 +435,7 @@
         // ignore non-configurable properties because we are modifying endowments in place
         .filter(([, propDesc]) => propDesc.configurable)
         .forEach(([key, propDesc]) => {
-          const wrappedPropDesc = applyEndowmentPropDescTransforms(propDesc, packageCompartment, rootPackageCompartment.globalThis)
+          const wrappedPropDesc = applyEndowmentPropDescTransforms(propDesc, packageCompartment.globalThis, rootPackageCompartment.globalThis)
           Reflect.defineProperty(endowments, key, wrappedPropDesc)
         })
 
