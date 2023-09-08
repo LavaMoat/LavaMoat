@@ -1,9 +1,8 @@
 const test = require('ava')
-const makeGetEndowmentsForConfig = require('../src/makeGetEndowmentsForConfig.js')
-const makeGeneralUtils = require('../src/makeGeneralUtils.js')
+const endowmentsToolkit = require('../src/endowmentsToolkit.js')
 
 function prepareTest() {
-  const { getEndowmentsForConfig } = makeGetEndowmentsForConfig(makeGeneralUtils())
+  const { getEndowmentsForConfig } = endowmentsToolkit()
   return getEndowmentsForConfig
 }
 
