@@ -35,6 +35,11 @@ function makePrepareRealmGlobalFromConfig ({ createFunctionWrapper }) {
     const topLevelWriteAccessKeys = getTopLevelWriteAccessFromPackageConfig(globalsConfig)
     const topLevelReadAccessKeys = getTopLevelReadAccessFromPackageConfig(globalsConfig)
 
+    // NOTE: getters for read should only ever be needed on props marked for 'write' (unless we want to allow sloppy behavior from the root compartment modifying everything...)
+    // Making a pass over the entire policy and collecting the names of writable items would limit the number of getters created here to the minimum.
+    // the change should not be introduced here though as we don't want to change the existing behavior of lavamoat-browserify
+    // If you're looking at this for the purpose of moving the code to the new core toolkit for endowments building, there's likely a copy of this functionality already
+
     // define accessors
 
     // allow read access via globalStore or packageCompartmentGlobal

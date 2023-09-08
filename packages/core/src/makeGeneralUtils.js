@@ -1,5 +1,8 @@
 module.exports = makeGeneralUtils
 
+/**
+ * @deprecated - inlined in endowmentsToolkit (see core/src/endowmentsToolkit.js)
+ */
 function makeGeneralUtils () {
   return {
     createFunctionWrapper,

@@ -66,9 +66,8 @@
     reportStatsHook = () => {},
   }) {
     // "templateRequire" calls are inlined in "generateKernel"
-    const generalUtils = templateRequire('makeGeneralUtils')()
-    const { getEndowmentsForConfig, makeMinimalViewOfRef, applyEndowmentPropDescTransforms, copyWrappedGlobals } = templateRequire('makeGetEndowmentsForConfig')(generalUtils)
-    const { prepareCompartmentGlobalFromConfig } = templateRequire('makePrepareRealmGlobalFromConfig')(generalUtils)
+    const { getEndowmentsForConfig, makeMinimalViewOfRef, applyEndowmentPropDescTransforms, copyWrappedGlobals, createFunctionWrapper } = templateRequire('endowmentsToolkit')()
+    const { prepareCompartmentGlobalFromConfig } = templateRequire('makePrepareRealmGlobalFromConfig')({ createFunctionWrapper })
     const { strictScopeTerminator } = templateRequire('strict-scope-terminator')
 
     const scuttleOpts = generateScuttleOpts(scuttleGlobalThis)
@@ -431,6 +430,7 @@
       }
 
       // transform functions, getters & setters on prop descs. Solves SES scope proxy bug
+      // WARNING: this part should be unnecessary since SES refactor into multiple nested with statements
       Object.entries(Object.getOwnPropertyDescriptors(endowments))
         // ignore non-configurable properties because we are modifying endowments in place
         .filter(([, propDesc]) => propDesc.configurable)

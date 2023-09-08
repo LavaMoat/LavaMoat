@@ -1,13 +1,13 @@
 // the contents of this file will be copied into the prelude template
 // this module has been written so that it required directly or copied and added to the template with a small wrapper
-module.exports = makeGetEndowmentsForConfig
+module.exports = endowmentsToolkit
 
 // utilities for generating the endowments object based on a globalRef and a config
 
 // The config uses a period-deliminated path notation to pull out deep values from objects
 // These utilities help create an object populated with only the deep properties specified in the config
 
-function makeGetEndowmentsForConfig({ createFunctionWrapper }) {
+function endowmentsToolkit({ createFunctionWrapper = defaultCreateFunctionWrapper } = {}) {
   return {
     getEndowmentsForConfig,
     makeMinimalViewOfRef,
@@ -15,6 +15,7 @@ function makeGetEndowmentsForConfig({ createFunctionWrapper }) {
     applyGetSetPropDescTransforms,
     applyEndowmentPropDescTransforms,
     copyWrappedGlobals,
+    createFunctionWrapper,
   }
 
   /**
@@ -326,4 +327,20 @@ function makeGetEndowmentsForConfig({ createFunctionWrapper }) {
     }
     return protoChain
   }
+}
+
+function defaultCreateFunctionWrapper(sourceValue, unwrapTest, unwrapTo) {
+  const newValue = function (...args) {
+    if (new.target) {
+      // handle constructor calls
+      return Reflect.construct(sourceValue, args, new.target)
+    } else {
+      // handle function calls
+      // unwrap to target value if this value is the source package compartment's globalThis
+      const thisRef = unwrapTest(this) ? unwrapTo : this
+      return Reflect.apply(sourceValue, thisRef, args)
+    }
+  }
+  Object.defineProperties(newValue, Object.getOwnPropertyDescriptors(sourceValue))
+  return newValue
 }
