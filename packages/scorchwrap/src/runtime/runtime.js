@@ -3,8 +3,15 @@
 /* global LAVAMOAT */
 /* global lockdown, harden, Compartment */
 
-const { create, freeze, assign, defineProperty, entries, fromEntries, getOwnPropertyDescriptors, getOwnPropertyNames } = Object
-const warn = typeof console === 'object' ? console.warn : () => { }
+const {
+  create,
+  freeze,
+  assign,
+  defineProperty,
+  defineProperties,
+  getOwnPropertyDescriptors,
+} = Object
+const warn = typeof console === 'object' ? console.warn : () => {}
 // Avoid running any wrapped code or using compartment if lockdown was not called.
 // This is for when the bundle ends up running despite SES being missing.
 // It was previously useful for sub-compilations running an incomplete bundle as part of the build, but currently that is being skipped. We might go back to it for the sake of build time security if it's deemed worthwihile in absence of lockdown.
@@ -16,6 +23,9 @@ if (LOCKDOWN_ON) {
     'LavaMoat: runtime execution started without SES present, switching to no-op.',
   )
 }
+
+const { getEndowmentsForConfig, copyWrappedGlobals } =
+  LAVAMOAT.endowmentsToolkit()
 
 // These must match assumptions in the wrapper.js
 // sharedKeys are included in the runtime
@@ -55,31 +65,34 @@ const enforcePolicy = (requestedResourceId, referrerResourceId) => {
     return
   }
   throw Error(
-    'Policy does not allow importing ' +
-    requestedResourceId +
-    ' from ' +
-    referrerResourceId
+    `Policy does not allow importing ${requestedResourceId} from ${referrerResourceId}`,
   )
 }
 
-const getGlobalsForPolicy = (resourceId, packageCompartmentGlobal) => {
-  const createFunctionWrapper = LAVAMOAT.coreUtils().createFunctionWrapper
-  const { getEndowmentsForConfig } = LAVAMOAT.makeGetEndowments({
-    createFunctionWrapper,
-  })
-
+const theRealGlobalThis = globalThis
+let rootCompartmentGlobalThis
+const installGlobalsForPolicy = (resourceId, packageCompartmentGlobal) => {
   if (resourceId === LAVAMOAT.root) {
-    return globalThis
+    rootCompartmentGlobalThis = packageCompartmentGlobal
+    copyWrappedGlobals(theRealGlobalThis, rootCompartmentGlobalThis, [
+      'globalThis',
+      'window',
+      'self',
+    ])
+  } else {
+    // TODO: getEndowmentsForConfig doesn't implement support for "write"
+    const endowments = getEndowmentsForConfig(
+      rootCompartmentGlobalThis,
+      LAVAMOAT.policy.resources[resourceId],
+      globalThis,
+      packageCompartmentGlobal,
+    )
+
+    defineProperties(
+      packageCompartmentGlobal,
+      getOwnPropertyDescriptors(endowments),
+    )
   }
-  // TODO: getEndowmentsForConfig doesn't implement support for "write"
-  // It'd be nice to refactor core and put it all in one place
-  const endowments = getEndowmentsForConfig(
-    globalThis,
-    LAVAMOAT.policy.resources[resourceId],
-    globalThis,
-    packageCompartmentGlobal,
-  )
-  return endowments
 }
 
 const compartmentMap = new Map()
@@ -114,15 +127,12 @@ const lavamoatRuntimeWrapper = (resourceId, runtimeKit) => {
 
   if (__webpack_require__) {
     // wrap webpack runtime for policy check and hardening
-    const policyRequire = wrapRequireWithPolicy(
-      __webpack_require__,
-      resourceId,
-    )
+    const policyRequire = wrapRequireWithPolicy(__webpack_require__, resourceId)
 
     // TODO: figure out what to wrap and what to copy
     // TODO: most of the work here could be done once instead of for each wrapping
 
-    // Webpack has built-in plugins that add more runtime functions. We might need to support them eventually. 
+    // Webpack has built-in plugins that add more runtime functions. We might need to support them eventually.
     // It's a case-by-case basis decision.
     // TODO: print a warning for other functions on the __webpack_require__ namespace that we're not supporting.
     //   It's probably best served at build time though - with runtimeRequirements or looking at the items in webpack runtime when adding lavamoat runtime.
@@ -134,12 +144,17 @@ const lavamoatRuntimeWrapper = (resourceId, runtimeKit) => {
     }
 
     // TODO: check if this is not breaking anything
-    policyRequire.m = new Proxy({}, {
-      has: (target, prop) => {
-        warn(`A module attempted to read ${prop} directly from webpack's module cache`)
-        return false
+    policyRequire.m = new Proxy(
+      {},
+      {
+        has: (target, prop) => {
+          warn(
+            `A module attempted to read ${prop} directly from webpack's module cache`,
+          )
+          return false
+        },
       },
-    })
+    )
 
     // override nmd to limit what it can mutate
     policyRequire.nmd = (moduleReference) => {
@@ -155,21 +170,15 @@ const lavamoatRuntimeWrapper = (resourceId, runtimeKit) => {
   // allow setting, but ignore value for /* module decorator */ module = __webpack_require__.nmd(module)
   defineProperty(runtimeHandler, 'module', {
     get: () => module,
-    set: () => { },
+    set: () => {},
   })
   freeze(runtimeHandler)
 
   if (!compartmentMap.has(resourceId)) {
-    const c = new Compartment()
-    // This is necessary because Compartment constructor won't endow non-enumerable properties
-    for (const descriptor of entries(getOwnPropertyDescriptors(getGlobalsForPolicy(resourceId, c.globalThis)))) {
-      Object.defineProperty(c.globalThis, descriptor[0], descriptor[1])
-    }
     // Create a compartment with globals attenuated according to the policy
-    compartmentMap.set(
-      resourceId,
-      c,
-    )
+    const c = new Compartment()
+    installGlobalsForPolicy(resourceId, c.globalThis)
+    compartmentMap.set(resourceId, c)
   }
 
   return {
