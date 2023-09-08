@@ -1,8 +1,8 @@
-const ScorchWrap = require("../src/plugin.js");
-const { ProgressPlugin } = require("webpack");
-const MiniCssExtractPlugin = require("mini-css-extract-plugin");
-const HtmlWebpackPlugin = require("html-webpack-plugin");
-const path = require("path");
+const ScorchWrap = require('../src/plugin.js')
+const { ProgressPlugin } = require('webpack')
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+const HtmlWebpackPlugin = require('html-webpack-plugin')
+const path = require('path')
 
 module.exports = {
   entry: {
@@ -18,10 +18,10 @@ module.exports = {
   },
   // both modes work
   // mode: "production",
-  mode: "development",
+  mode: 'development',
   output: {
-    filename: "[name].js",
-    path: path.resolve(__dirname, "dist"),
+    filename: '[name].js',
+    path: path.resolve(__dirname, 'dist'),
   },
   optimization: {
     runtimeChunk: 'single',
@@ -32,12 +32,12 @@ module.exports = {
   plugins: [
     new ScorchWrap({
       lockdown: {
-        errorTaming: "unsafe",
-        mathTaming: "unsafe",
-        dateTaming: "unsafe",
-        consoleTaming: "unsafe",
+        errorTaming: 'unsafe',
+        mathTaming: 'unsafe',
+        dateTaming: 'unsafe',
+        consoleTaming: 'unsafe',
       },
-      policy: require("./lavamoat/policy.json"),
+      policy: require('./lavamoat/policy.json'),
       readableResourceIds: true,
       runChecks: true,
       diagnosticsVerbosity: 1,
@@ -45,11 +45,11 @@ module.exports = {
     // virtualModules,
     new ProgressPlugin(),
     new MiniCssExtractPlugin({
-      filename: "styles/[name].css",
+      filename: 'styles/[name].css',
       // experimentalUseImportModule: false, // turns off some module execution at build time
     }),
     new HtmlWebpackPlugin({
-      template: "./index.html",
+      template: './index.html',
     }),
   ],
   module: {
@@ -65,9 +65,9 @@ module.exports = {
         test: /\.ts$/,
         use: [
           {
-            loader: "esbuild-loader",
+            loader: 'esbuild-loader',
             options: {
-              loader: "ts",
+              loader: 'ts',
             },
           },
         ],
@@ -79,7 +79,7 @@ module.exports = {
         use: [
           MiniCssExtractPlugin.loader,
           // "style-loader",
-          "css-loader",
+          'css-loader',
           ScorchWrap.ignore,
         ],
         sideEffects: true,
@@ -93,4 +93,4 @@ module.exports = {
       },
     ],
   },
-};
+}

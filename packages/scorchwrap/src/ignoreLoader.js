@@ -1,1 +1,1 @@
-module.exports = (source) => source;
+module.exports = (source) => source
