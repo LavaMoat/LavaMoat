@@ -2,10 +2,10 @@
 // this module has been written so that it required directly or copied and added to the template with a small wrapper
 module.exports = endowmentsToolkit
 
-// utilities for generating the endowments object based on a globalRef and a config
+// utilities for generating the endowments object based on a globalRef and a packagePolicy
 
-// The config uses a period-deliminated path notation to pull out deep values from objects
-// These utilities help create an object populated with only the deep properties specified in the config
+// The packagePolicy uses a period-deliminated path notation to pull out deep values from objects
+// These utilities help create an object populated with only the deep properties specified in the packagePolicy
 
 function endowmentsToolkit({ createFunctionWrapper = defaultCreateFunctionWrapper } = {}) {
   return {
@@ -19,40 +19,39 @@ function endowmentsToolkit({ createFunctionWrapper = defaultCreateFunctionWrappe
   }
 
   /**
-   *
-   * @function getEndowmentsForConfig
+   * @function getEndowmentsForConfig Creates an object populated with only the deep properties specified in the packagePolicy
    * @param {object} sourceRef - Object from which to copy properties
-   * @param {object} config - LavaMoat package config
+   * @param {object} packagePolicy - LavaMoat policy item representing a package
    * @param {object} unwrapTo - For getters and setters, when the this-value is unwrapFrom, is replaced as unwrapTo
    * @param {object} unwrapFrom - For getters and setters, the this-value to replace (default: targetRef)
    * @return {object} - The targetRef
    *
    */
-  function getEndowmentsForConfig(sourceRef, config, unwrapTo, unwrapFrom) {
-    if (!config.globals) {
+  function getEndowmentsForConfig(sourceRef, packagePolicy, unwrapTo, unwrapFrom) {
+    if (!packagePolicy.globals) {
       return {}
     }
-    // validate read access from config
+    // validate read access from packagePolicy
     const whitelistedReads = []
     const explicitlyBanned = []
-    Object.entries(config.globals).forEach(([path, configValue]) => {
+    Object.entries(packagePolicy.globals).forEach(([path, packagePolicyValue]) => {
       const pathParts = path.split('.')
       // disallow dunder proto in path
       const pathContainsDunderProto = pathParts.some(pathPart => pathPart === '__proto__')
       if (pathContainsDunderProto) {
-        throw new Error(`Lavamoat - "__proto__" disallowed when creating minial view. saw "${path}"`)
+        throw new Error(`Lavamoat - "__proto__" disallowed when creating minimal view. saw "${path}"`)
       }
       // false means no access. It's necessary so that overrides can also be used to tighten the policy
-      if (configValue === false) {
+      if (packagePolicyValue === false) {
         explicitlyBanned.push(path)
         return
       }
       // write access handled elsewhere
-      if (configValue === 'write') {
+      if (packagePolicyValue === 'write') {
         return
       }
-      if (configValue !== true) {
-        throw new Error(`LavaMoat - unrecognizable policy value (${typeof configValue}) for path "${path}"`)
+      if (packagePolicyValue !== true) {
+        throw new Error(`LavaMoat - unrecognizable policy value (${typeof packagePolicyValue}) for path "${path}"`)
       }
       whitelistedReads.push(path)
     })
