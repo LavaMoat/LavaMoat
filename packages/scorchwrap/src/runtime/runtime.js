@@ -97,7 +97,7 @@ const installGlobalsForPolicy = (resourceId, packageCompartmentGlobal) => {
 
 const compartmentMap = new Map()
 const findResourceId = (moduleId) => {
-  const found = LAVAMOAT.idmap.find(([_resourceId, moduleIds]) =>
+  const found = LAVAMOAT.idmap.find(([, moduleIds]) =>
     moduleIds.includes(moduleId),
   )
   if (found) {

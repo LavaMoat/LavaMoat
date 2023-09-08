@@ -80,7 +80,7 @@ exports.generateIdentifierLookup = ({
   crossReference(identifiersWithKnownPaths, usedIdentifiers)
 
   const identifiersForModuleIds = Object.entries(
-    Object.entries(pathLookup).reduce((acc, [_path, { aa, moduleId }]) => {
+    Object.entries(pathLookup).reduce((acc, [, { aa, moduleId }]) => {
       const key = translate(aa)
       if (acc[key] === undefined) {
         acc[key] = []
