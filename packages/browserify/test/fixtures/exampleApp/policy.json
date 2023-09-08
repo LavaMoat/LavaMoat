@@ -4,6 +4,11 @@
       "packages": {
       }
     },
+    "browserify>browser-pack>safe-buffer": {
+      "packages": {
+        "browserify>buffer": true
+      }
+    },
     "browserify>buffer": {
       "globals": {
         "console": true
@@ -26,12 +31,7 @@
     },
     "browserify>string_decoder": {
       "packages": {
-        "browserify>util>safe-buffer": true
-      }
-    },
-    "browserify>util>safe-buffer": {
-      "packages": {
-        "browserify>buffer": true
+        "browserify>browser-pack>safe-buffer": true
       }
     },
     "keccak": {

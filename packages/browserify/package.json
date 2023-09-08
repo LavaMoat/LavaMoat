@@ -20,15 +20,15 @@
     "json-stable-stringify": "^1.0.1",
     "lavamoat-core": "^14.2.1",
     "pify": "^4.0.1",
-    "readable-stream": "^3.6.0",
+    "readable-stream": "^4.4.0",
     "source-map": "^0.7.4",
-    "through2": "^3.0.0"
+    "through2": "^4.0.2"
   },
   "devDependencies": {
     "@babel/code-frame": "^7.21.4",
     "bify-package-factor": "^1.0.7",
     "browserify": "^17.0.0",
-    "keccak": "^3.0.2",
+    "keccak": "^3.0.3",
     "source-map-explorer": "^2.5.3",
     "sourcemap-validator": "^2.1.0",
     "throat": "^5.0.0",
