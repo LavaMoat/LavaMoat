@@ -3,15 +3,15 @@
 /** @typedef {import("webpack").Compiler} Compiler */
 /** @typedef {import("webpack").Compilation} Compilation */
 /** @typedef {import("webpack").Generator} Generator */
+/** @typedef {import("webpack").NormalModule} NormalModule */
 /** @typedef {import("webpack").sources.Source} Source */
 /** @typedef {import("./types.js").ScorchWrapPluginOptions} ScorchWrapPluginOptions */
 
 const path = require('path')
 const {
-  NormalModule,
   WebpackError,
-  RuntimeGlobals,
   RuntimeModule,
+  // RuntimeGlobals,
   // ModuleDependency,
 } = require('webpack')
 const { wrapper } = require('./buildtime/wrapper')
@@ -479,7 +479,7 @@ class ScorchWrapPlugin {
         // Define a handler function to be called for each chunk in the compilation.
         compilation.hooks.additionalChunkRuntimeRequirements.tap(
           PLUGIN_NAME + '_runtime',
-          (chunk, set) => {
+          (chunk /*, set*/) => {
             if (chunk.hasRuntime()) {
               if (!PROGRESS.done('gneratorCalled')) {
                 mainCompilationWarnings.push(

@@ -15,17 +15,6 @@ const q = JSON.stringify
 
 const { NAME_globalThis, NAME_scopeTerminator, NAME_runtimeHandler } = require('../ENUM.json')
 
-
-/**
- *
- * @param {WrappingInput} params
- * @returns {string}
- */
-exports.wrapSource = function wrapSource(options) {
-  const { before, after, source } = wrapper(options)
-  return `${before}${source}${after}`
-}
-
 /**
  *
  * @param {WrappingInput} params
