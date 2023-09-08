@@ -523,13 +523,9 @@ class ScorchWrapPlugin {
                   { name: 'policy', data: policyData, json: true },
                   { name: 'ENUM', file: './ENUM.json', json: true },
                   {
-                    name: 'makeGetEndowments',
+                    name: 'endowmentsToolkit',
                     shimRequire:
-                      'lavamoat-core/src/makeGetEndowmentsForConfig.js',
-                  },
-                  {
-                    name: 'coreUtils',
-                    shimRequire: 'lavamoat-core/src/makeGeneralUtils.js',
+                      'lavamoat-core/src/endowmentsToolkit.js',
                   },
                   { name: 'runtime', file: './runtime/runtime.js' },
                 ])
