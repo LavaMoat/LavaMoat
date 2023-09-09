@@ -81,6 +81,7 @@
       "globals": {
         "__dirname": true,
         "__filename.slice": true,
+        "console.error": true,
         "console.warn": true,
         "process.cwd": true,
         "setTimeout": true
@@ -91,6 +92,7 @@
         "@lavamoat/lavapack>through2": true,
         "@lavamoat/lavapack>umd": true,
         "browserify>JSONStream": true,
+        "external:../../node_modules/espree/dist/espree.cjs": true,
         "json-stable-stringify": true,
         "lavamoat-core": true,
         "readable-stream": true
@@ -187,7 +189,7 @@
         "browserify>shasum-object": true,
         "browserify>syntax-error": true,
         "browserify>through2": true,
-        "through2>inherits": true,
+        "duplexify>inherits": true,
         "watchify>defined": true,
         "watchify>xtend": true
       }
@@ -255,7 +257,7 @@
         "browserify>concat-stream>readable-stream": true,
         "concat-stream>buffer-from": true,
         "concat-stream>typedarray": true,
-        "through2>inherits": true
+        "duplexify>inherits": true
       }
     },
     "browserify>concat-stream>readable-stream": {
@@ -278,8 +280,8 @@
         "browserify>concat-stream>readable-stream>string_decoder": true,
         "browserify>readable-stream>core-util-is": true,
         "browserify>readable-stream>process-nextick-args": true,
-        "readable-stream>util-deprecate": true,
-        "through2>inherits": true
+        "duplexify>inherits": true,
+        "readable-stream>util-deprecate": true
       }
     },
     "browserify>concat-stream>readable-stream>safe-buffer": {
@@ -323,8 +325,8 @@
         "browserify>duplexer2>readable-stream>string_decoder": true,
         "browserify>readable-stream>core-util-is": true,
         "browserify>readable-stream>process-nextick-args": true,
-        "readable-stream>util-deprecate": true,
-        "through2>inherits": true
+        "duplexify>inherits": true,
+        "readable-stream>util-deprecate": true
       }
     },
     "browserify>duplexer2>readable-stream>safe-buffer": {
@@ -388,7 +390,7 @@
     "browserify>labeled-stream-splicer": {
       "packages": {
         "browserify>labeled-stream-splicer>stream-splicer": true,
-        "through2>inherits": true
+        "duplexify>inherits": true
       }
     },
     "browserify>labeled-stream-splicer>stream-splicer": {
@@ -398,7 +400,7 @@
       },
       "packages": {
         "browserify>labeled-stream-splicer>stream-splicer>readable-stream": true,
-        "through2>inherits": true
+        "duplexify>inherits": true
       }
     },
     "browserify>labeled-stream-splicer>stream-splicer>readable-stream": {
@@ -421,8 +423,8 @@
         "browserify>labeled-stream-splicer>stream-splicer>readable-stream>string_decoder": true,
         "browserify>readable-stream>core-util-is": true,
         "browserify>readable-stream>process-nextick-args": true,
-        "readable-stream>util-deprecate": true,
-        "through2>inherits": true
+        "duplexify>inherits": true,
+        "readable-stream>util-deprecate": true
       }
     },
     "browserify>labeled-stream-splicer>stream-splicer>readable-stream>safe-buffer": {
@@ -463,7 +465,7 @@
         "browserify>parents": true,
         "browserify>resolve": true,
         "browserify>through2": true,
-        "through2>inherits": true,
+        "duplexify>inherits": true,
         "watchify>defined": true,
         "watchify>xtend": true
       }
@@ -494,8 +496,8 @@
         "browserify>module-deps>readable-stream>string_decoder": true,
         "browserify>readable-stream>core-util-is": true,
         "browserify>readable-stream>process-nextick-args": true,
-        "readable-stream>util-deprecate": true,
-        "through2>inherits": true
+        "duplexify>inherits": true,
+        "readable-stream>util-deprecate": true
       }
     },
     "browserify>module-deps>readable-stream>safe-buffer": {
@@ -534,8 +536,8 @@
         "browserify>module-deps>stream-combiner2>readable-stream>string_decoder": true,
         "browserify>readable-stream>core-util-is": true,
         "browserify>readable-stream>process-nextick-args": true,
-        "readable-stream>util-deprecate": true,
-        "through2>inherits": true
+        "duplexify>inherits": true,
+        "readable-stream>util-deprecate": true
       }
     },
     "browserify>module-deps>stream-combiner2>readable-stream>safe-buffer": {
@@ -594,8 +596,8 @@
         "browserify>read-only-stream>readable-stream>string_decoder": true,
         "browserify>readable-stream>core-util-is": true,
         "browserify>readable-stream>process-nextick-args": true,
-        "readable-stream>util-deprecate": true,
-        "through2>inherits": true
+        "duplexify>inherits": true,
+        "readable-stream>util-deprecate": true
       }
     },
     "browserify>read-only-stream>readable-stream>safe-buffer": {
@@ -734,8 +736,8 @@
         "browserify>through2>readable-stream>isarray": true,
         "browserify>through2>readable-stream>safe-buffer": true,
         "browserify>through2>readable-stream>string_decoder": true,
-        "readable-stream>util-deprecate": true,
-        "through2>inherits": true
+        "duplexify>inherits": true,
+        "readable-stream>util-deprecate": true
       }
     },
     "browserify>through2>readable-stream>safe-buffer": {
@@ -756,8 +758,8 @@
       "packages": {
         "concat-stream>buffer-from": true,
         "concat-stream>typedarray": true,
-        "readable-stream": true,
-        "through2>inherits": true
+        "duplexify>inherits": true,
+        "readable-stream": true
       }
     },
     "concat-stream>buffer-from": {
@@ -772,9 +774,9 @@
       },
       "packages": {
         "duplexify>end-of-stream": true,
+        "duplexify>inherits": true,
         "duplexify>stream-shift": true,
-        "readable-stream": true,
-        "through2>inherits": true
+        "readable-stream": true
       }
     },
     "duplexify>end-of-stream": {
@@ -788,6 +790,30 @@
     "duplexify>end-of-stream>once": {
       "packages": {
         "duplexify>end-of-stream>once>wrappy": true
+      }
+    },
+    "duplexify>inherits": {
+      "builtin": {
+        "util.inherits": true
+      }
+    },
+    "external:../../node_modules/acorn-jsx/index.js": {
+      "packages": {
+        "external:../../node_modules/acorn-jsx/xhtml.js": true,
+        "external:../../node_modules/acorn/dist/acorn.js": true
+      }
+    },
+    "external:../../node_modules/acorn/dist/acorn.js": {
+      "globals": {
+        "console": true,
+        "define": true
+      }
+    },
+    "external:../../node_modules/espree/dist/espree.cjs": {
+      "packages": {
+        "external:../../node_modules/acorn-jsx/index.js": true,
+        "external:../../node_modules/acorn/dist/acorn.js": true,
+        "external:../../node_modules/eslint-visitor-keys/dist/eslint-visitor-keys.cjs": true
       }
     },
     "json-stable-stringify": {
@@ -1033,8 +1059,8 @@
       },
       "packages": {
         "browserify>string_decoder": true,
-        "readable-stream>util-deprecate": true,
-        "through2>inherits": true
+        "duplexify>inherits": true,
+        "readable-stream>util-deprecate": true
       }
     },
     "readable-stream>util-deprecate": {
@@ -1061,17 +1087,8 @@
       }
     },
     "through2": {
-      "globals": {
-        "process.nextTick": true
-      },
       "packages": {
-        "readable-stream": true,
-        "through2>inherits": true
-      }
-    },
-    "through2>inherits": {
-      "builtin": {
-        "util.inherits": true
+        "readable-stream": true
       }
     }
   }
