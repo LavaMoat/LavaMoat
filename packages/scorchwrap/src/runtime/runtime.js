@@ -175,8 +175,8 @@ const lavamoatRuntimeWrapper = (resourceId, runtimeKit) => {
   freeze(runtimeHandler)
 
   if (!compartmentMap.has(resourceId)) {
-    // Create a compartment with globals attenuated according to the policy
-    const c = new Compartment()
+    // Endow original Math and Date, because SES tames them and we don't need that
+    const c = new Compartment({ Math, Date })
     installGlobalsForPolicy(resourceId, c.globalThis)
     compartmentMap.set(resourceId, c)
   }
