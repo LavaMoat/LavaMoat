@@ -122,6 +122,7 @@ function getConfigurationFromPluginOpts (pluginOpts) {
   const nonAliasedOptions = [
     'scuttleGlobalThis',
     'scuttleGlobalThisExceptions',
+    'lockdownOptions',
     'bundleWithPrecompiledModules',
     'policyDebug',
     'projectRoot',
@@ -172,6 +173,7 @@ function getConfigurationFromPluginOpts (pluginOpts) {
     writeAutoPolicyDebug: Boolean(pluginOpts.writeAutoPolicyDebug),
     bundleWithPrecompiledModules: 'bundleWithPrecompiledModules' in pluginOpts ? Boolean(pluginOpts.bundleWithPrecompiledModules) : true,
     actionOverrides: {},
+    lockdownOptions: pluginOpts.lockdownOptions,
   }
 
   // check for action overrides
