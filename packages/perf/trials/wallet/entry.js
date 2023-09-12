@@ -5,5 +5,5 @@ const nTimes = Number.parseInt(globalThis.process.env.PERF_N || 5, 10)
 
 for (let index = 0; index < nTimes; index++) {
   const wallet = brainwallet(`brain wallet seed #${index}`)
-  console.log(wallet.getAddressString())
+  // console.log(wallet.getAddressString())
 }

@@ -22,6 +22,10 @@ const tasks = {
     prep: 'lavamoat entry.js --writeAutoPolicy',
     run: 'lavamoat entry.js',
   },
+  'lavamoat-node scuttle': {
+    prep: 'lavamoat entry.js --writeAutoPolicy',
+    run: 'lavamoat entry.js --scuttleGlobalThis',
+  },
   'endo-unsafe': {
     run: 'node ../../endo.js',
   },

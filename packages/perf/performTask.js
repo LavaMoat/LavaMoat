@@ -19,8 +19,12 @@ async function performTest (tasks, nRange) {
       resultsContainer.push(runTime)
     }
   }
+  // sort results by key
+  const sortedResults = Object.fromEntries(Object.entries(results).sort(([a], [b]) => {
+    return b > a ? -1 : 1
+  }))
   // log results
-  process.stdout.write(resultsAsCsv(results, nRange))
+  process.stdout.write(resultsAsCsv(sortedResults, nRange))
   return results
 }
 

@@ -15,4 +15,7 @@ new Promise(resolve => {
       resolve(array)
     })
   )
+}).catch(err => {
+  console.error(err)
+  process.exit(1)
 })
