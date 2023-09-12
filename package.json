@@ -18,7 +18,6 @@
     "eslint-plugin-n": "^15.7.0",
     "eslint-plugin-react": "^7.33.0",
     "husky": "^8.0.3",
-    "lerna": "^7.3.0",
     "lint-staged": "^13.2.3",
     "prettier": "^3.0.2"
   },
@@ -26,21 +25,21 @@
     "node": ">=14.0.0 <=20.x"
   },
   "scripts": {
-    "build": "lerna run build",
+    "build": "npm run --workspaces --if-present build",
     "lint:commit": "commitlint",
-    "lint:deps": "lerna run lint:deps",
+    "lint:deps": "npm run --workspaces lint:deps",
     "lint:eslint": "eslint .",
     "lint:fix": "eslint . --fix",
     "lint:staged": "lint-staged",
     "lint": "npm run lint:eslint && npm run lint:deps",
     "postinstall": "husky install; npm run rebuild",
-    "release:lerna": "lerna publish from-package",
-    "release:rebuild": "npm run rebuild && npm run test:prep && npm run test:workspaces",
-    "release": "npm run release:rebuild && npm run release:lerna",
-    "rebuild": "lerna run rebuild",
+    "release:workspaces": "npm publish --workspaces",
+    "release": "npm run rebuild && npm run test:prep && npm run test:workspaces && npm run release:workspaces",
+    "rebuild": "npm run --workspaces --if-present rebuild",
     "setup": "allow-scripts",
-    "test:prep": "lerna run test:prep",
-    "test:workspaces": "npm run --workspaces test",
+    "test:prep": "npm run --workspaces --if-present test:prep",
+    "test:workspaces": "npm run test:prep && npm run --workspaces --if-present test",
+    "test:rebuild": "npm run rebuild && npm run test:workspaces",
     "test": "npm run build && npm run test:prep && npm run test:workspaces"
   },
   "lint-staged": {
@@ -61,8 +60,6 @@
   "version": "0.0.0",
   "lavamoat": {
     "allowScripts": {
-      "lerna>nx": false,
-      "lerna>nx>@parcel/watcher": false,
       "$root$": true
     }
   },

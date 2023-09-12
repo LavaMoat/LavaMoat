@@ -14,8 +14,7 @@
   "scripts": {
     "start": "node src/index.js",
     "postinstall": "node src/prepareHook.js",
-    "zzz": "node zzz.js",
-    "test": "exit 0"
+    "zzz": "node zzz.js"
   },
   "devDependencies": {},
   "engines": {
