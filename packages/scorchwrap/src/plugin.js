@@ -8,7 +8,7 @@
 /** @typedef {import("./types.js").ScorchWrapPluginOptions} ScorchWrapPluginOptions */
 
 const path = require('path')
-const { WebpackError } = require('webpack')
+const { WebpackError, RuntimeModule } = require('webpack')
 const { wrapper } = require('./buildtime/wrapper')
 const { generateIdentifierLookup } = require('./buildtime/aa')
 const diag = require('./buildtime/diagnostics')
@@ -476,10 +476,13 @@ class ScorchWrapPlugin {
 
                 // Add the runtime modules to the chunk, which handles
                 // the runtime logic for wrapping with lavamoat.
-                lavaMoatRuntime.addTo({
-                  compilation,
+                compilation.addRuntimeModule(
                   chunk,
-                })
+                  new RuntimeModule({
+                    name: 'LavaMoat/runtime',
+                    source: lavaMoatRuntime,
+                  }),
+                )
 
                 PROGRESS.report('runtimeAdded')
               }

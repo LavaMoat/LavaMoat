@@ -1,15 +1,4 @@
 const {readFileSync} = require('fs')
-const { RuntimeModule} = require('webpack')
-
-class VirtualRuntimeModule extends RuntimeModule {
-  constructor({ name, source }) {
-    super(name)
-    this.source = source
-  }
-  generate() {
-    return this.source
-  }
-}
 
 function removeMultilineComments(source) {
   return source.replace(/\/\*[\s\S]*?\*\//g, '')
@@ -48,17 +37,7 @@ const assembleRuntime = (KEY, runtimeModules) => {
   assembly += `;
   __webpack_require__.${KEY} = LAVAMOAT.defaultExport;
   (typeof harden !== 'undefined') && harden(__webpack_require__.${KEY});` // The harden line is likely unnecessary as the handler is being frozen anyway
-  return {
-    addTo({ compilation, chunk }) {
-      compilation.addRuntimeModule(
-        chunk,
-        new VirtualRuntimeModule({
-          name: 'LavaMoat/runtime',
-          source: assembly,
-        }),
-      )
-    },
-  }
+  return assembly
 }
 
 module.exports = { assembleRuntime }
