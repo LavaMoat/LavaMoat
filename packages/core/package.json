@@ -15,7 +15,7 @@
     "merge-deep": "^3.0.3"
   },
   "devDependencies": {
-    "ses": "^0.18.7",
+    "ses": "^0.18.8",
     "tmp-promise": "^3.0.3"
   },
   "scripts": {
