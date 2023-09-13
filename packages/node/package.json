@@ -4,7 +4,7 @@
     "lavamoat": "src/cli.js",
     "lavamoat-run-command": "src/run-command.js"
   },
-  "version": "7.1.1",
+  "version": "7.1.2",
   "main": "src/index.js",
   "license": "MIT",
   "scripts": {
@@ -20,7 +20,7 @@
     "bindings": "^1.5.0",
     "htmlescape": "^1.1.1",
     "json-stable-stringify": "^1.0.2",
-    "lavamoat-core": "^14.2.2",
+    "lavamoat-core": "^14.2.3",
     "lavamoat-tofu": "^6.0.3",
     "node-gyp-build": "^4.6.0",
     "resolve": "^1.22.3",

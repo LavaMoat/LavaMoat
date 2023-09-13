@@ -1,5 +1,12 @@
 # Changelog
 
+## [14.2.3](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v14.2.2...lavamoat-core-v14.2.3) (2023-09-13)
+
+
+### Bug Fixes
+
+* **core,perf:** bump ses to 0.18.8 ([d7a3b4d](https://github.com/LavaMoat/LavaMoat/commit/d7a3b4dc6ccf019673029c849dc59312c0410692))
+
 ## [14.2.2](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v14.2.1...lavamoat-core-v14.2.2) (2023-09-08)
 
 

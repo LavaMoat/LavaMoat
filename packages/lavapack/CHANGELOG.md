@@ -1,5 +1,11 @@
 # Changelog
 
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-core bumped from ^14.2.2 to ^14.2.3
+
 ## [5.2.2](https://github.com/LavaMoat/LavaMoat/compare/lavapack-v5.2.1...lavapack-v5.2.2) (2023-09-08)
 
 
