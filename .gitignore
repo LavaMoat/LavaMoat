@@ -114,3 +114,6 @@ temp/
 
 # JetBrains
 .idea
+
+# VScode
+.vscode
