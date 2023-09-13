@@ -4,21 +4,21 @@ LavaMoat follows [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.html
 
 ## How to Publish to npm
 
-1. **Review, approve, then merge** a currently-open [Release Please][] pull request.
+1. **Review, approve, then merge** the currently-open [Release Please pull request](https://github.com/LavaMoat/LavaMoat/pulls?q=is%3Aopen+is%3Apr+label%3A%22autorelease%3A+pending%22+sort%3Aupdated-desc).
    > See [How Releases Work](#how-releases-work) for more information.
 2. _Immediately after_ merging, **checkout** the `main` branch and **pull** the changes from [LavaMoat/LavaMoat][] into your working copy.
-   > It is recommended you make a clean clone or use a separate local copy for publishing. 
+   > It is recommended you make a clean clone or use a separate local copy for publishing.
    > Never publish from a fork.
    > Pulling `main` _should_ be a fast-forward operation; if it isn't, please start from a clean clone to be on the safe side.
 3. **Assert** you are logged in to the npm registry; use `npm login` and/or `npm whoami`. _Do not do this on an untrusted machine._
 4. **Assert** your working copy has no modifications (e.g., via `git status`).
-5. **Execute** `npm ci` ("Clean Install"; not "Continuous Integration").
+5. **Assert** you are running Node.js v18.0.0 or later (via `node --version`) and npm v9.8.1 or later (via `npm --version`).
+6. **Execute** `npm ci` ("Clean Install"; not "Continuous Integration").
    > This operation will obliterate any `node_modules` and `packages/*/node_modules` directories before installation.
-6. Be ready with your 2FA passcode, then **execute** `npm run release`. Artifacts will be rebuilt and the default set of tests will run.
-7. **Confirm** the publish operation when prompted by Lerna.
-   > Lerna will automatically determine which packages need to be published and will publish all of them. _Do not attempt to publish individual packages!_
+7. Be ready with your 2FA passcode, then **execute** `npm run release`. Artifacts will be rebuilt and the default set of tests will run. _Do not attempt to publish individual packages!_
 8. When prompted, **enter** your 2FA passcode. This will finally trigger the publish(es).
-9. **Verify** the published package(s) on [npm][].
+9. **Verify** the published package(s) on [npm](https://www.npmjs.com/search?q=lavamoat).
+10. For extra credit, **verify** the [GitHub Releases](https://github.com/LavaMoat/LavaMoat/releases).
 
 ## How Releases Work
 
@@ -33,7 +33,7 @@ This is the process:
    >
    > Please also read [how to represent multiple changes in a single commit message](https://github.com/googleapis/release-please#what-if-my-pr-contains-multiple-fixes-or-features).
 3. The Release Please Action triggers, and it creates (or updates) a "release" pull request (there will only ever be one at a time); we call this the _Release Please PR_. The PR will contain a _single commit_, and its description will contain an auto-generated changelog. Release Please will also create a _Draft_ GitHub Release _for each_ package to be released.
-   > This pull request should be called something like "chore: release x.x.x", and it will have been opened by user `@github-actions[bot]`.
+   > This pull request will have title "chore: main" and the label `autorelease: pending`. It will have been opened by user `@github-actions[bot]`.
    >
    > Expect to see an open Release Please PR most of the time!
 4. As additional PRs from contributors are merged into `main`, the Release Please Action will rebase and update the Release Please PR to reflect these changes. Dependencies will be automatically bumped between packages as needed—and kept at the latest version _regardless_ of any major version bumps.
@@ -70,4 +70,3 @@ This does _not_, however, prevent a maintainer from running `lerna publish` with
 [Release Please]: https://github.com/google-github-actions/release-please-action
 [Conventional Commits]: https://www.conventionalcommits.org/en/v1.0.0/#summary
 [LavaMoat/LavaMoat]: https://github.com/LavaMoat/LavaMoat
-[npm]: https://www.npmjs.org
