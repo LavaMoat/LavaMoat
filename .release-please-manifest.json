@@ -1,11 +1,11 @@
 {
   "packages/aa": "3.1.2",
   "packages/allow-scripts": "2.3.1",
-  "packages/browserify": "15.7.3",
+  "packages/browserify": "15.7.4",
   "packages/core": "14.2.3",
-  "packages/lavapack": "5.2.3",
+  "packages/lavapack": "5.2.4",
   "packages/node": "7.1.2",
   "packages/preinstall-always-fail": "1.0.0",
   "packages/tofu": "6.0.3",
-  "packages/viz": "6.0.11"
+  "packages/viz": "6.0.12"
 }
