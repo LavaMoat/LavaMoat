@@ -1,6 +1,6 @@
 {
   "name": "@lavamoat/lavapack",
-  "version": "5.2.3",
+  "version": "5.2.4",
   "description": "LavaMoat packer",
   "publishConfig": {
     "access": "public"
@@ -30,7 +30,10 @@
     "rebuild": "npm run build",
     "build": "node ./src/build-runtime.js"
   },
-  "files": ["src/", "CHANGELOG.md"],
+  "files": [
+    "src/",
+    "CHANGELOG.md"
+  ],
   "author": "kumavis",
   "license": "MIT",
   "repository": {
