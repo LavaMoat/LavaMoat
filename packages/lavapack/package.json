@@ -30,6 +30,7 @@
     "rebuild": "npm run build",
     "build": "node ./src/build-runtime.js"
   },
+  "files": ["src/", "CHANGELOG.md"],
   "author": "kumavis",
   "license": "MIT",
   "repository": {
