@@ -33,6 +33,8 @@ export interface ResourcePolicy {
   globals?: Globals
   builtins?: NodeJsBuiltins
   packages?: ExternalPackages
+
+  native?: Natives
 }
 
 /**
@@ -53,6 +55,13 @@ export interface NodeJsBuiltins {
  * Additional external packages (in their entirety) accessible to the module; `true` to allow and `false` to deny
  */
 export interface ExternalPackages {
+  [k: string]: boolean
+}
+
+/**
+ * Native modules
+ */
+export interface Natives {
   [k: string]: boolean
 }
 

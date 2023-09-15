@@ -54,6 +54,17 @@
             "type": "boolean"
           }
         },
+        "native": {
+          "title": "Natives",
+          "description": "Native modules accessible to the module; `true` to allow and `false` to deny",
+          "type": "object",
+          "patternProperties": {
+            "^(@[a-z0-9-~][a-z0-9-._~]*/)?[a-z0-9-~][a-z0-9-._~]*(>(@[a-z0-9-~][a-z0-9-._~]*/)?[a-z0-9-~][a-z0-9-._~]*)*$": {
+              "type": "boolean"
+            }
+          },
+          "additionalProperties": false
+        },
         "builtins": {
           "title": "Node.js Builtins",
           "description": "Node.js builtins (including properties using dot notation); `true` to allow and `false` to deny",
