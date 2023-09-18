@@ -2,8 +2,8 @@ const test = require('ava')
 const { generateIdentifierLookup } = require('../src/buildtime/aa')
 
 test('aa - generateIdentifierLookup', (t) => {
-  const lookupTools = generateIdentifierLookup(
-    [
+  const lookupTools = generateIdentifierLookup({
+    paths: [
       '/home/user/app/app.js',
       '/home/user/app/node_modules/leftpad/index.js',
       '/home/user/app/node_modules/fast-json-patch/index.mjs',
@@ -11,7 +11,7 @@ test('aa - generateIdentifierLookup', (t) => {
       '/home/user/app/node_modules/@ethereumjs/util/node_modules/ethereum-cryptography/dist/index.js',
       '/home/user/app/node_modules/fast-json-patch/module/duplex.mjs',
     ],
-    {
+    policy: {
       resources: {
         '@ethereumjs/util': {
           globals: 1,
@@ -59,10 +59,23 @@ test('aa - generateIdentifierLookup', (t) => {
         },
       },
     },
-  )
+    canonicalNameMap: new Map(Object.entries({
+      '/home/user/app': '$root$',
+      '/home/user/app/node_modules/leftpad/': 'leftpad',
+      '/home/user/app/node_modules/fast-json-patch': 'fast-json-patch',
+      '/home/user/app/node_modules/fast-json-patch/module': 'fast-json-patch',
+      '/home/user/app/node_modules/@ethereumjs/util/dist/': '@ethereumjs/util',
+      '/home/user/app/node_modules/@ethereumjs/util/node_modules/ethereum-cryptography/dist/':
+        '@ethereumjs/util>ethereum-cryptography',
+    })),
+    unenforceableModuleIds: [],
+    readableResourceIds: true,
+  })
 
   const translatedPolicy = lookupTools.getTranslatedPolicy()
-  console.log(translatedPolicy.resources)
-  t.is(Object.keys(translatedPolicy.resources).length, 3)
+  
+  // TODO: modify the input and assert that filtering works in policy translation
+  t.is(Object.keys(translatedPolicy.resources).length, 9)
   // TODO: assert on packages translations
+
 })
