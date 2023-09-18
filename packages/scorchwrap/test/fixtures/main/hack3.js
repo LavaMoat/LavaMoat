@@ -1,0 +1,1 @@
+require('prototype-poisoning-package')

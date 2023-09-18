@@ -1,0 +1,15 @@
+{
+  "name": "app",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "commonjs-package": "1.0.0",
+    "es6-module-package": "1.0.0",
+    "side-effects-package": "1.0.0",
+    "typescript-package": "1.0.0",
+    "umd-package": "1.0.0",
+    "fetch-package": "1.0.0",
+    "loader-hack": "1.0.0",
+    "prototype-poisoning-package": "1.0.0"
+  }
+}

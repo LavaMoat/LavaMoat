@@ -117,3 +117,5 @@ temp/
 
 # VScode
 .vscode
+
+!**/fixtures/main/node_modules
