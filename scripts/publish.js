@@ -50,12 +50,27 @@ async function publish(pkgs, dryRun = true) {
 }
 
 /**
+ * A JSON.parse that doesn't mind a rejected promise
+ * @param {Promise<string>} promise
+ * @returns {Promise<any>}
+ */
+const chillJSONParse = async (promise) =>
+  promise
+    .catch((err) => {
+      console.error(err.message)
+      return '{}'
+    })
+    .then(JSON.parse)
+
+/**
  * Inspects all workspaces and publishes any that have not yet been published
  * @returns {Promise<void>}
  */
 async function main() {
   // all workspace dirs
-  const dirents = await glob(workspaces, { cwd: ROOT, withFileTypes: true })
+  const dirents = await glob(workspaces, { cwd: ROOT, withFileTypes: true, ignore: {
+    ignored: p => !p.parent || !p.isDirectory(),
+  }, })
 
   const pkgs = /** @type {string[]} */ (
     (
@@ -66,29 +81,18 @@ async function main() {
            * hasn't already been published
            */
           async (dirent) => {
-            if (!dirent.parent || !dirent.isDirectory()) {
-              return
-            }
-            const { name, version, private } = JSON.parse(
-              await fs.readFile(
-                path.join(
-                  ROOT,
-                  dirent.parent.name,
-                  dirent.name,
-                  'package.json'
-                ),
-                'utf8'
-              )
+            const { name, version, private } = await chillJSONParse(
+              fs.readFile(path.join(dirent.fullpath(), 'package.json'), 'utf8')
             )
-            if (private) {
+            if (private || !name) {
               return
             }
 
-            const { stdout } = await exec(`npm view ${name} versions --json`, {
-              cwd: ROOT,
-            })
-
-            const versions = JSON.parse(stdout)
+            const versions = await chillJSONParse(
+              exec(`npm view ${name} versions --json`, {
+                cwd: ROOT,
+              }).then(({ stdout }) => stdout)
+            )
             if (versions.includes(version)) {
               console.info(`Skipping ${name}@${version}; already published`)
               return
@@ -99,6 +103,7 @@ async function main() {
       )
     ).filter(Boolean)
   )
+  
 
   if (pkgs.length === 0) {
     console.info('Nothing to publish')
