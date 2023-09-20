@@ -20,6 +20,7 @@
     "glob": "^10.3.4",
     "husky": "^8.0.3",
     "lint-staged": "^13.2.3",
+    "memfs": "^4.3.0",
     "prettier": "^3.0.2"
   },
   "engines": {
@@ -34,15 +35,16 @@
     "lint:staged": "lint-staged",
     "lint": "npm run lint:eslint && npm run lint:deps",
     "postinstall": "husky install; npm run rebuild",
-    "release:lerna": "node scripts/publish.js",
-    "release:dry-run": "node scripts/publish.js --dry-run",
+    "release:publish": "node scripts/publish.js --newPkg=${npm_config_newpkg}",
+    "release:dry-run": "node scripts/publish.js --dry-run --newPkg=${npm_config_newpkg}",
     "release:rebuild": "npm run rebuild && npm run test:prep && npm run test:workspaces",
-    "release": "npm run release:rebuild && npm run release:lerna",
+    "release": "npm run release:rebuild && npm run release:publish --newPkg=${npm_config_newpkg}",
     "rebuild": "npm run --workspaces --if-present rebuild",
     "setup": "allow-scripts",
     "test:prep": "npm run --workspaces --if-present test:prep",
     "test:workspaces": "npm run --workspaces --if-present test",
-    "test": "npm run build && npm run test:prep && npm run test:workspaces"
+    "test:scripts": "ava --config scripts/ava.config.mjs",
+    "test": "npm run build && npm run test:prep && npm run test:workspaces && npm run test:scripts"
   },
   "lint-staged": {
     "*.js": [
@@ -72,7 +74,8 @@
   },
   "ava": {
     "files": [
-      "packages/*/test/*.spec.js"
+      "packages/*/test/*.spec.js",
+      "scripts/*.spec.js"
     ],
     "timeout": "2m"
   }
