@@ -4,7 +4,6 @@
   "command": {
     "publish": {
       "message": "chore: publish",
-      "fromPackage": true,
       "push": false,
       "gitTagVersion": false
     },

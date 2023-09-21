@@ -4,7 +4,7 @@
     "lavamoat": "src/cli.js",
     "lavamoat-run-command": "src/run-command.js"
   },
-  "version": "7.1.0",
+  "version": "7.3.1",
   "main": "src/index.js",
   "license": "MIT",
   "scripts": {
@@ -16,12 +16,12 @@
   "dependencies": {
     "@babel/code-frame": "^7.21.4",
     "@babel/highlight": "^7.18.6",
-    "@lavamoat/aa": "^3.1.0",
+    "@lavamoat/aa": "^3.1.5",
     "bindings": "^1.5.0",
     "htmlescape": "^1.1.1",
     "json-stable-stringify": "^1.0.2",
-    "lavamoat-core": "^14.2.1",
-    "lavamoat-tofu": "^6.0.2",
+    "lavamoat-core": "^14.4.1",
+    "lavamoat-tofu": "^6.2.1",
     "node-gyp-build": "^4.6.0",
     "resolve": "^1.22.3",
     "yargs": "^17.7.2"
@@ -38,7 +38,7 @@
   "homepage": "https://github.com/LavaMoat/lavamoat#readme",
   "description": "",
   "engines": {
-    "node": ">=14.0.0 <19.0.0"
+    "node": ">=14.0.0 <=20.x"
   },
   "ava": {
     "files": [

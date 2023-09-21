@@ -1,21 +1,21 @@
 {
   "name": "lavamoat-core",
-  "version": "14.2.1",
+  "version": "14.4.1",
   "description": "LavaMoat kernel and utils",
   "main": "src/index.js",
   "directories": {
     "lib": "lib"
   },
   "engines": {
-    "node": ">=14.0.0 <19.0.0"
+    "node": ">=14.0.0 <=20.x"
   },
   "dependencies": {
     "json-stable-stringify": "^1.0.2",
-    "lavamoat-tofu": "^6.0.2",
+    "lavamoat-tofu": "^6.2.1",
     "merge-deep": "^3.0.3"
   },
   "devDependencies": {
-    "ses": "^0.18.7",
+    "ses": "^0.18.8",
     "tmp-promise": "^3.0.3"
   },
   "scripts": {

@@ -2,9 +2,9 @@
   "name": "lavamoat-viz",
   "description": "This is a dashboard for exploring a dependency graph and LavaMoat policy file",
   "main": "index.js",
-  "version": "6.0.9",
+  "version": "6.2.1",
   "dependencies": {
-    "lavamoat-core": "^14.2.1",
+    "lavamoat-core": "^14.4.1",
     "ncp": "^2.0.0",
     "open": "^7.0.3",
     "pify": "^4.0.1",
@@ -21,7 +21,7 @@
     "codemirror": "^5.54.0",
     "copy-webpack-plugin": "^10.2.4",
     "css-loader": "^6.7.3",
-    "d3": "^5.12.0",
+    "d3": "^7.8.5",
     "esm": "^3.2.25",
     "gh-pages": "^2.2.0",
     "html-webpack-plugin": "^5.5.1",
@@ -47,8 +47,7 @@
     "start": "webpack-dev-server --config ./src/webpack.config.js",
     "test": "npm run build",
     "build": "webpack --config ./src/webpack.config.js",
-    "deploy": "npm run build && gh-pages -d dist",
-    "prepublishOnly": "npm run deploy",
+    "deploy": "npm run rebuild && gh-pages -d dist",
     "rebuild": "npm run clean && npm run build",
     "clean": "rimraf ./dist"
   },
@@ -75,6 +74,11 @@
     "lavamoat-viz": "./bin/index.js"
   },
   "engines": {
-    "node": ">=14.0.0 <19.0.0"
-  }
+    "node": ">=14.0.0 <=20.x"
+  },
+  "files": [
+    "bin",
+    "dist",
+    ".browserslistrc"
+  ]
 }

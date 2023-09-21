@@ -120,9 +120,9 @@ const wrapGeneratorMaker = ({
         return originalGeneratedSource
       }
 
-      // skip doing anything if marked as ignored by the ignoreLoader
-      // TODO: what if someone specifies this loader inline in a require or import?
-      if (module.loaders.some(({ loader }) => loader === IGNORE_LOADER)) {
+      // skip doing anything if marked as ignored by the ignoreLoader,
+      // only accept ignore loader from config, not inline
+      if (module.loaders.some(({ loader }) => loader === IGNORE_LOADER) && !module.rawRequest.includes(IGNORE_LOADER)) {
         ignores.push(module.rawRequest)
         diag.rawDebug(3, `skipped wrapping ${module.rawRequest}`)
         return originalGeneratedSource
@@ -456,13 +456,13 @@ class ScorchWrapPlugin {
                   },
                   { name: 'options', data: runtimeOptions, json: true },
                   { name: 'policy', data: policyData, json: true },
-                  { name: 'ENUM', file: path.join(__dirname, './ENUM.json'), json: true },
+                  { name: 'ENUM', file: './ENUM.json', json: true },
                   {
                     name: 'endowmentsToolkit',
                     shimRequire:
                       'lavamoat-core/src/endowmentsToolkit.js',
                   },
-                  { name: 'runtime', file: path.join(__dirname, './runtime/runtime.js') },
+                  { name: 'runtime', file: './runtime/runtime.js' },
                 ])
 
                 // If the chunk has already been processed, skip it.
