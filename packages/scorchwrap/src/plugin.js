@@ -456,13 +456,13 @@ class ScorchWrapPlugin {
                   },
                   { name: 'options', data: runtimeOptions, json: true },
                   { name: 'policy', data: policyData, json: true },
-                  { name: 'ENUM', file: './ENUM.json', json: true },
+                  { name: 'ENUM', file: path.join(__dirname, './ENUM.json'), json: true },
                   {
                     name: 'endowmentsToolkit',
                     shimRequire:
                       'lavamoat-core/src/endowmentsToolkit.js',
                   },
-                  { name: 'runtime', file: './runtime/runtime.js' },
+                  { name: 'runtime', file: path.join(__dirname, './runtime/runtime.js') },
                 ])
 
                 // If the chunk has already been processed, skip it.
