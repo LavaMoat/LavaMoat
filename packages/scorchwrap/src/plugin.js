@@ -121,8 +121,10 @@ const wrapGeneratorMaker = ({
       }
 
       // skip doing anything if marked as ignored by the ignoreLoader,
-      // only accept ignore loader from config, not inline
-      if (module.loaders.some(({ loader }) => loader === IGNORE_LOADER) && !module.rawRequest.includes(IGNORE_LOADER)) {
+      // only accept ignore loader from config, not inline.
+      // Inline loader definition uses a `!` character as a loader separator. 
+      // Defining what to ignore should only be possible in the config.
+      if (module.loaders.some(({ loader }) => loader === IGNORE_LOADER) && !module.rawRequest.includes('!')) {
         ignores.push(module.rawRequest)
         diag.rawDebug(3, `skipped wrapping ${module.rawRequest}`)
         return originalGeneratedSource
