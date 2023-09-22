@@ -57,10 +57,7 @@ const enforcePolicy = (requestedResourceId, referrerResourceId) => {
   ) {
     return
   }
-  const myPolicy = LAVAMOAT.policy.resources[referrerResourceId]
-  if (!myPolicy) {
-    throw Error('Policy missing for ' + referrerResourceId)
-  }
+  const myPolicy = LAVAMOAT.policy.resources[referrerResourceId] || {}
   if (myPolicy.packages && myPolicy.packages[requestedResourceId]) {
     return
   }
@@ -83,7 +80,7 @@ const installGlobalsForPolicy = (resourceId, packageCompartmentGlobal) => {
     // TODO: getEndowmentsForConfig doesn't implement support for "write"
     const endowments = getEndowmentsForConfig(
       rootCompartmentGlobalThis,
-      LAVAMOAT.policy.resources[resourceId],
+      LAVAMOAT.policy.resources[resourceId] || {},
       globalThis,
       packageCompartmentGlobal,
     )
