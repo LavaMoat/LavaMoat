@@ -21,6 +21,9 @@ const lookUp = (needle, haystack) => {
  * @param {Array<string>} policyIds
  */
 const crossReference = (neededIds, policyIds) => {
+  // Policy generator skips packages that don't use anything, so it's ok for policy to be missing.
+  // This is only for debugging
+
   const missingIds = []
   neededIds.forEach((id) => {
     if (!policyIds.includes(id)) {
@@ -29,7 +32,8 @@ const crossReference = (neededIds, policyIds) => {
   })
   diag.rawDebug(4, { missingIds, policyIds, neededIds })
   if (missingIds.length > 0) {
-    throw new Error(
+    diag.rawDebug(
+      1,
       `Policy is missing the following resources: ${missingIds.join(', ')}`,
     )
   }
@@ -69,7 +73,7 @@ exports.generateIdentifierLookup = ({
     translate = (i) => `${usedIdentifiersIndex[i]}`
   }
 
-  // TODO: consider taking the list of paths used by webpack and running the entire AA algorithm only on that instead of relying on AA running through everything first. 
+  // TODO: consider taking the list of paths used by webpack and running the entire AA algorithm only on that instead of relying on AA running through everything first.
   // It might give us identifiers that are more stable and would surely be much faster.
 
   const pathLookup = pathsToIdentifiers(paths)
