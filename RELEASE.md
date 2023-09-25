@@ -15,10 +15,17 @@ LavaMoat follows [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.html
 5. **Assert** you are running Node.js v18.0.0 or later (via `node --version`) and npm v9.8.1 or later (via `npm --version`).
 6. **Execute** `npm ci` ("Clean Install"; not "Continuous Integration").
    > This operation will obliterate any `node_modules` and `packages/*/node_modules` directories before installation.
-7. Be ready with your 2FA passcode, then **execute** `npm run release`. Artifacts will be rebuilt and the default set of tests will run. _Do not attempt to publish individual packages!_
-8. When prompted, **enter** your 2FA passcode. This will finally trigger the publish(es).
-9. **Verify** the published package(s) on [npm](https://www.npmjs.com/search?q=lavamoat).
-10. For extra credit, **verify** the [GitHub Releases](https://github.com/LavaMoat/LavaMoat/releases).
+7. This step depends on whether you are publishing a new package:
+
+   - If you _are not_ publishing a new package, **execute** `npm run release`
+   - If you _are_ publishing a new package, **execute** `npm run release --newPkg=<package-name>`
+
+   In both cases, Artifacts will be rebuilt and the default set of tests will run. _Do not attempt to publish individual packages!_
+
+8. **Check the output** of `npm pack` to ensure the correct files are being published.
+9. If prompted, **enter** your 2FA passcode or **visit** the URL `npm` provides you. Once authenticated, the publish will proceed.
+10. **Verify** the published package(s) on [npm](https://www.npmjs.com/search?q=lavamoat).
+11. For extra credit, **verify** the [GitHub Releases](https://github.com/LavaMoat/LavaMoat/releases).
 
 ## How Releases Work
 
@@ -48,7 +55,15 @@ This is the process:
 
 This is intentional. Thus, any actions that must happen pre-publish (or pre-_anything_) must be invoked _explicitly_ in our `package.json` scripts.
 
-This does _not_, however, prevent a maintainer from running `lerna publish` without having rebuilt and tested beforehand! So: _don't do that._ **Use `npm run publish` only**.
+This does _not_, however, prevent a maintainer from running `npm publish` without having rebuilt and tested beforehand! So: _don't do that._ **Use `npm run publish` only**.
+
+## Publishing, Under the Hood
+
+If `npm` ignored workspaces that have already been published, we wouldn't need any extra tooling. But it does not ignore them, and instead aborts the operation. To avoid this, we need to first analyze the workspaces and query the registry for each to determine which packages have already been published. We filter those packages out of the list of packages to be published.
+
+This "has this been published already?" query (done via `npm view`) will naturally fail if the package does not yet exist. Since we have no way of knowing whether it _should_ exist--or perhaps was a typo--the maintainer must explicitly declare the names of the new, never-published packages. This is done via the `--newPkg` flag to `npm run release`, which makes its way into the publishing script.
+
+The publishing script is located in [`scripts/publish.js`](./scripts/publish.js).
 
 ## Addendum: Workspace Dependency Table
 
