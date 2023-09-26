@@ -5,17 +5,13 @@ const { createScenarioFromScaffold } = require('lavamoat-core/test/util')
 test('globals - has only the expected global circular refs', async (t) => {
   const scenario = createScenarioFromScaffold({
     defineOne: () => {
-      const circularKeys = Reflect.ownKeys(globalThis)
-        .filter(key => {
-          const value = globalThis[key]
-          return value === globalThis
-        })
+      const circularKeys = Reflect.ownKeys(globalThis).filter((key) => {
+        const value = globalThis[key]
+        return value === globalThis
+      })
       module.exports = circularKeys
     },
-    expectedResult: [
-      'global',
-      'globalThis',
-    ],
+    expectedResult: ['global', 'globalThis'],
   })
   const testResult = await runScenario({ scenario })
   t.is(Array.isArray(testResult), true)
@@ -29,14 +25,14 @@ test('globalRef - globalRef - check default containment', async (t) => {
     defineOne: () => {
       const testResults = {}
       try {
-        testResults.objCheckThis = this.Object === Object 
-      } catch (_) { }
+        testResults.objCheckThis = this.Object === Object
+      } catch (_) {}
       try {
-        testResults.objCheckGlobal = global.Object === Object 
-      } catch (_) { }
+        testResults.objCheckGlobal = global.Object === Object
+      } catch (_) {}
       try {
-        testResults.thisIsExports = exports === this 
-      } catch (_) { }
+        testResults.thisIsExports = exports === this
+      } catch (_) {}
       module.exports = testResults
     },
     expectedResult: {
@@ -44,6 +40,18 @@ test('globalRef - globalRef - check default containment', async (t) => {
       objCheckGlobal: true,
       thisIsExports: true,
     },
+  })
+  const testResult = await runScenario({ scenario })
+  scenario.checkResult(t, testResult, scenario)
+})
+
+test('globals - basic override mistake taming is on', async (t) => {
+  const scenario = createScenarioFromScaffold({
+    defineOne: () => {
+      Object.assign({}, { constructor: () => 1 })
+      module.exports = 1
+    },
+    expectedResult: 1,
   })
   const testResult = await runScenario({ scenario })
   scenario.checkResult(t, testResult, scenario)
