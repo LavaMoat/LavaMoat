@@ -8,18 +8,13 @@
 /** @typedef {import("./types.js").ScorchWrapPluginOptions} ScorchWrapPluginOptions */
 
 const path = require('path')
-const {
-  WebpackError,
-  RuntimeModule,
-  // RuntimeGlobals,
-  // ModuleDependency,
-} = require('webpack')
+const { WebpackError, RuntimeModule } = require('webpack')
 const { wrapper } = require('./buildtime/wrapper')
 const { generateIdentifierLookup } = require('./buildtime/aa')
 const diag = require('./buildtime/diagnostics')
 const progress = require('./buildtime/progress')
+const { assembleRuntime } = require('./buildtime/assemble')
 
-const { readFileSync } = require('fs')
 const { ConcatSource } = require('webpack-sources')
 
 // @ts-ignore // this one doesn't have official types
@@ -202,66 +197,6 @@ const wrapGeneratorMaker = ({
   }
 }
 
-class VirtualRuntimeModule extends RuntimeModule {
-  constructor({ name, source }) {
-    super(name)
-    this.source = source
-  }
-  generate() {
-    return this.source
-  }
-}
-
-function removeMultilineComments(source) {
-  return source.replace(/\/\*[\s\S]*?\*\//g, '')
-}
-
-// Runtime modules are not being built nor wrapped by webpack, so I rolled my own tiny concatenator.
-// It's using a shared namespace technique instead of scoping `exports` variables
-// to avoid confusing anyone into believing it's actually CJS.
-// Criticism will only be accepted in a form of working PR with less total lines and less magic.
-const assembleRuntime = (KEY, runtimeModules) => {
-  let assembly = 'const LAVAMOAT = Object.create(null);'
-  runtimeModules.map(({ file, data, name, json, shimRequire }) => {
-    let sourceString
-    if (file) {
-      sourceString = readFileSync(path.join(__dirname, file), 'utf-8')
-    }
-    if (data) {
-      sourceString = JSON.stringify(data)
-    }
-    if (json) {
-      sourceString = `LAVAMOAT['${name}'] = (${sourceString});`
-    }
-    if (shimRequire) {
-      sourceString = readFileSync(require.resolve(shimRequire), 'utf-8')
-      sourceString = removeMultilineComments(sourceString)
-      sourceString = `;(()=>{
-        const module = {exports: {}};
-        const exports = module.exports;
-          ${sourceString}
-        ;
-        LAVAMOAT['${name}'] = module.exports;
-      })();`
-    }
-    assembly += `\n;/*${name}*/;\n${sourceString}`
-  })
-  assembly += `;
-  __webpack_require__.${KEY} = LAVAMOAT.defaultExport;
-  (typeof harden !== 'undefined') && harden(__webpack_require__.${KEY});` // The harden line is likely unnecessary as the handler is being frozen anyway
-  return {
-    addTo({ compilation, chunk }) {
-      compilation.addRuntimeModule(
-        chunk,
-        new VirtualRuntimeModule({
-          name: 'LavaMoat/runtime',
-          source: assembly,
-        }),
-      )
-    },
-  }
-}
-
 // =================================================================
 // Plugin code
 // =================================================================
@@ -399,7 +334,7 @@ class ScorchWrapPlugin {
               const moduleId = chunkGraph.getModuleId(module)
               if (
                 // Webpack has a concept of ignored modules
-                // When a module is ignored a carveout is necessary in policy enforcement for it because the ID that webpack creates for it is not exactly helpful. 
+                // When a module is ignored a carveout is necessary in policy enforcement for it because the ID that webpack creates for it is not exactly helpful.
                 // example outcome in the bundle: `const nodeCrypto = __webpack_require__(/*! crypto */ "?0b7d");`
                 // Sadly, even treeshaking doesn't eliminate that module. It's left there and failing to work when reached by runtime policy enforcement.
                 // Below is the most reliable way I've found to date to identify ignored modules.
@@ -521,13 +456,13 @@ class ScorchWrapPlugin {
                   },
                   { name: 'options', data: runtimeOptions, json: true },
                   { name: 'policy', data: policyData, json: true },
-                  { name: 'ENUM', file: './ENUM.json', json: true },
+                  { name: 'ENUM', file: path.join(__dirname, './ENUM.json'), json: true },
                   {
                     name: 'endowmentsToolkit',
                     shimRequire:
                       'lavamoat-core/src/endowmentsToolkit.js',
                   },
-                  { name: 'runtime', file: './runtime/runtime.js' },
+                  { name: 'runtime', file: path.join(__dirname, './runtime/runtime.js') },
                 ])
 
                 // If the chunk has already been processed, skip it.
@@ -541,10 +476,13 @@ class ScorchWrapPlugin {
 
                 // Add the runtime modules to the chunk, which handles
                 // the runtime logic for wrapping with lavamoat.
-                lavaMoatRuntime.addTo({
-                  compilation,
+                compilation.addRuntimeModule(
                   chunk,
-                })
+                  new RuntimeModule({
+                    name: 'LavaMoat/runtime',
+                    source: lavaMoatRuntime,
+                  }),
+                )
 
                 PROGRESS.report('runtimeAdded')
               }
