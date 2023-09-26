@@ -1,7 +1,15 @@
-const {ENDO_ROOT_POLICY, ENDO_WILDCARD_POLICY, ENDO_WRITE_POLICY, LAVAMOAT_PKG_POLICY_ROOT, RSRC_POLICY_BUILTINS, RSRC_POLICY_GLOBALS, RSRC_POLICY_PKGS} = require('./constants')
+const {
+  ENDO_ROOT_POLICY,
+  ENDO_WILDCARD_POLICY,
+  ENDO_WRITE_POLICY,
+  LAVAMOAT_PKG_POLICY_ROOT,
+  RSRC_POLICY_BUILTINS,
+  RSRC_POLICY_GLOBALS,
+  RSRC_POLICY_PKGS,
+} = require('./constants')
 
-const {isArray} = Array
-const {entries, fromEntries} = Object
+const { isArray } = Array
+const { entries, fromEntries } = Object
 
 /**
  * @typedef {typeof ENDO_ROOT_POLICY} RootPolicy
@@ -29,10 +37,14 @@ function toEndoRsrcPkgsPolicyBuiltins(item) {
       let propName = rest.join('.')
       const itemForBuiltin = policyItem[builtinName]
       if (typeof itemForBuiltin === 'boolean') {
-        throw new TypeError('Expected a FullAttenuationDefinition; got a boolean')
+        throw new TypeError(
+          'Expected a FullAttenuationDefinition; got a boolean'
+        )
       }
       if (isArray(itemForBuiltin)) {
-        throw new TypeError('Expected a FullAttenuationDefinition; got an array')
+        throw new TypeError(
+          'Expected a FullAttenuationDefinition; got an array'
+        )
       }
       const otherParams = itemForBuiltin?.params ?? []
       policyItem[builtinName] = {
@@ -63,14 +75,13 @@ function toEndoRsrcPkgsPolicyPkgs(item) {
   return policyItem
 }
 
-
 /**
  * Converts LavaMoat `ResourcePolicy.globals` to Endo's `PackagePolicy.globals`
  * @param {Record<string, boolean>} item - A value in `ResourcePolicy`
  * @returns {NonNullable<import('@endo/compartment-mapper').PackagePolicy['globals']>}
  */
 function toEndoRsrcPkgsPolicyGlobals(item) {
-  return {...item}
+  return { ...item }
 }
 
 /**
@@ -78,7 +89,7 @@ function toEndoRsrcPkgsPolicyGlobals(item) {
  * @param {import('lavamoat-core/schema').ResourcePolicy} resources
  * @returns {import('@endo/compartment-mapper').PackagePolicy<RootPolicy>}1
  */
-function toEndoRsrcPkgsPolicy(resources)  {
+function toEndoRsrcPkgsPolicy(resources) {
   /** @type {import('@endo/compartment-mapper').PackagePolicy<RootPolicy>['packages']} */
   let packages
   /** @type {import('@endo/compartment-mapper').PackagePolicy<RootPolicy>['globals']} */
@@ -98,8 +109,7 @@ function toEndoRsrcPkgsPolicy(resources)  {
     builtins = toEndoRsrcPkgsPolicyBuiltins(resources.builtins)
   }
 
-  return {packages, globals, builtins}
-
+  return { packages, globals, builtins }
 }
 
 /**
@@ -125,8 +135,10 @@ function toEndoPolicy(lmPolicy) {
 
   if (lmPolicy.resources) {
     endoPolicy.resources = fromEntries(
-      entries(lmPolicy.resources)
-        .map(([rsrcName, rsrcPolicy]) => [rsrcName, toEndoRsrcPkgsPolicy(rsrcPolicy)]),
+      entries(lmPolicy.resources).map(([rsrcName, rsrcPolicy]) => [
+        rsrcName,
+        toEndoRsrcPkgsPolicy(rsrcPolicy),
+      ])
     )
   }
   return endoPolicy

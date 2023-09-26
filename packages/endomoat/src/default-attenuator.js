@@ -1,6 +1,8 @@
-
-const {ENDO_ROOT_POLICY: ROOT_POLICY, ENDO_WRITE_POLICY: WRITE_POLICY} = require('./constants')
-const {assign, create, keys, fromEntries, entries, defineProperties} = Object
+const {
+  ENDO_ROOT_POLICY: ROOT_POLICY,
+  ENDO_WRITE_POLICY: WRITE_POLICY,
+} = require('./constants')
+const { assign, create, keys, fromEntries, entries, defineProperties } = Object
 
 let globalOverrides = create(null)
 
@@ -28,30 +30,34 @@ const attenuators = {
       globalThis,
       fromEntries(
         entries(policy)
-          .map(
-            ([key, policyValue]) => {
-              if (policyValue) {
-                /** @type {PropertyDescriptor} */
-                const spec = {
-                  configurable: false,
-                  enumerable: true,
-                  get() {
-                    console.log('- get', key)
-                    return globalOverrides[key] ?? originalObject[/** @type {keyof typeof originalObject} */(key)]
-                  },
-                }
-                if (policyValue === WRITE_POLICY) {
-                  spec.set = value => {
-                    console.log('- set', key)
-                    globalOverrides[key] = value
-                  }
-                }
-                return [key, spec]
+          .map(([key, policyValue]) => {
+            if (policyValue) {
+              /** @type {PropertyDescriptor} */
+              const spec = {
+                configurable: false,
+                enumerable: true,
+                get() {
+                  console.log('- get', key)
+                  return (
+                    globalOverrides[key] ??
+                    originalObject[
+                      /** @type {keyof typeof originalObject} */ (key)
+                    ]
+                  )
+                },
               }
-              return [null, null]
-            })
-          .filter(([a]) => a),
-      ),
+              if (policyValue === WRITE_POLICY) {
+                spec.set = (value) => {
+                  console.log('- set', key)
+                  globalOverrides[key] = value
+                }
+              }
+              return [key, spec]
+            }
+            return [null, null]
+          })
+          .filter(([a]) => a)
+      )
     )
   },
   /**
@@ -60,13 +66,11 @@ const attenuators = {
    */
   attenuateModule(params, originalObject) {
     console.debug('attenuateModule called', params)
-    const ns = fromEntries(keys(params)
-      .map(key => [key, /** @type {any} */(originalObject)[key]]),
+    const ns = fromEntries(
+      keys(params).map((key) => [key, /** @type {any} */ (originalObject)[key]])
     )
     return ns
   },
 }
 
 module.exports = attenuators
-
-

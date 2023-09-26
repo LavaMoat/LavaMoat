@@ -1,5 +1,10 @@
 const test = require('ava').default
-const {toEndoPolicy, ROOT_POLICY, WRITE_POLICY, ANY_POLICY} = require('../src')
+const {
+  toEndoPolicy,
+  ROOT_POLICY,
+  WRITE_POLICY,
+  ANY_POLICY,
+} = require('../src')
 
 /**
  * @typedef {import('@endo/compartment-mapper').PolicyItem & import('../src').RootPolicy} LavaMoatPackagePolicyItem
@@ -11,10 +16,10 @@ test('toEndoPolicy - basic', (t) => {
     resources: {
       a: {
         packages: {
-          'b': true,
+          b: true,
         },
         globals: {
-          'console': true,
+          console: true,
         },
         builtins: {
           'fs.readFile': true,
@@ -35,8 +40,8 @@ test('toEndoPolicy - basic', (t) => {
     },
     resources: {
       a: {
-        packages: {b: true},
-        globals: {console: true},
+        packages: { b: true },
+        globals: { console: true },
         builtins: {
           fs: {
             attenuate: '@lavamoat/endomoat/attenuator/property',
