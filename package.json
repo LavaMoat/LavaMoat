@@ -28,7 +28,7 @@
     "typescript": "^5.2.2"
   },
   "engines": {
-    "node": ">=14.0.0 <=20.x"
+    "node": "^16.20.0 || ^18.0.0 || ^20.0.0"
   },
   "scripts": {
     "build": "npm run --workspaces --if-present build && npm run build:types",

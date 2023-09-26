@@ -45,7 +45,7 @@ module.exports = {
     // note that this name is "node" while the plugin is named "n".
     // probably for historical reasons, but this may eventually break.
     node: {
-      version: '14.17.0', // should be set to minimum node version supported
+      version: '16.20.0', // should be set to minimum node version supported
       allowModules: ['deep-equal'], // something weird about this dependency
     },
     react: {

@@ -38,7 +38,7 @@
   "homepage": "https://github.com/LavaMoat/lavamoat#readme",
   "description": "",
   "engines": {
-    "node": ">=14.0.0 <=20.x"
+    "node": "^16.20.0 || ^18.0.0 || ^20.0.0"
   },
   "ava": {
     "files": [
