@@ -60,7 +60,7 @@
       errorTaming: 'unsafe',
       // shows the full call stack
       stackFiltering: 'verbose',
-      // prevents most common override mistake cases from triping up users
+      // prevents most common override mistake cases from tripping up users
       overrideTaming: 'severe',
     }
 
