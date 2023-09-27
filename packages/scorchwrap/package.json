@@ -9,14 +9,12 @@
   },
   "dependencies": {
     "lavamoat-core": "^14.2.1",
-    "webpack-sources": "^3.2.3",
     "webpack-virtual-modules": "^0.5.0"
   },
   "peerDependencies": {
     "webpack": "^5.80.2"
   },
   "devDependencies": {
-    "@types/webpack-sources": "^3.2.0",
     "css-loader": "^6.7.3",
     "esbuild-loader": "^3.0.1",
     "html-webpack-plugin": "^5.5.1",
