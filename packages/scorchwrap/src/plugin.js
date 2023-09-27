@@ -8,20 +8,22 @@
 /** @typedef {import("./types.js").ScorchWrapPluginOptions} ScorchWrapPluginOptions */
 
 const path = require('path')
-const { WebpackError, RuntimeModule } = require('webpack')
+const {
+  WebpackError,
+  RuntimeModule,
+  sources: { ConcatSource },
+} = require('webpack')
 const { wrapper } = require('./buildtime/wrapper')
 const { generateIdentifierLookup } = require('./buildtime/aa')
 const diag = require('./buildtime/diagnostics')
 const progress = require('./buildtime/progress')
 const { assembleRuntime } = require('./buildtime/assemble')
 
-const { ConcatSource } = require('webpack-sources')
-
 // @ts-ignore // this one doesn't have official types
 const RUNTIME_GLOBALS = require('webpack/lib/RuntimeGlobals')
 const { loadCanonicalNameMap } = require('@lavamoat/aa')
 
-// TODO: upcoming version of webpack may expose these constants
+// TODO: upcoming version of webpack may expose these constants, but we want to support more versions
 // https://github.com/webpack/webpack/blob/07ac43333654280c5bc6014a3a69eda4c3b80273/lib/ModuleTypeConstants.js
 // const {
 //   JAVASCRIPT_MODULE_TYPE_AUTO,
@@ -75,6 +77,10 @@ function processRequirements(requirements, module) {
   return runtimeKit
 }
 
+// Use a weakset to mark generatorInstance as wrapped,
+// this is to avoid wrapping the same instance twice
+const wrappedGeneratorInstances = new WeakSet()
+
 // TODO: this should probably be extracted to a separate file for easier navigation
 /**
  * @param {object} options
@@ -94,8 +100,7 @@ const wrapGeneratorMaker = ({
     // Using features of the generator itself we might be able to achieve the same
     // but it would be more suseptible to changes in webpack.
 
-    // TODO: consider turning that into a weakset too
-    if (generatorInstance.generate.scorchwrap) {
+    if (wrappedGeneratorInstances.has(generatorInstance)) {
       return generatorInstance
     }
     const originalGenerate = generatorInstance.generate
@@ -111,9 +116,7 @@ const wrapGeneratorMaker = ({
         options,
       })
 
-      // using this in webpack.config.ts complained about some mismatch
-      // @ts-ignore
-      const originalGeneratedSource = originalGenerate.apply(this, arguments)
+      const originalGeneratedSource =originalGenerate.apply(this, arguments)
 
       // bail out if we're dealing with a subcompilation from a plugin and such - they may run too early
       if (!PROGRESS.done('pathsProcessed')) {
@@ -181,21 +184,27 @@ const wrapGeneratorMaker = ({
 
       // using this in webpack.config.ts complained about made up issues
       if (sourceChanged) {
-        // @ts-ignore
-        return /** @type {Source} */ new ConcatSource(before, source, after)
+        return new ConcatSource(before, source, after)
       } else {
-        // @ts-ignore
-        return /** @type {Source} */ new ConcatSource(
+        return new ConcatSource(
           before,
-          // @ts-ignore
           originalGeneratedSource,
           after,
         )
       }
     }
-    // @ts-ignore
-    generatorInstance.generate.scorchwrap = true
+    wrappedGeneratorInstances.add(generatorInstance)
     return generatorInstance
+  }
+}
+
+class VirtualRuntimeModule extends RuntimeModule {
+  constructor({ name, source }) {
+    super(name)
+    this.source = source
+  }
+  generate() {
+    return this.source
   }
 }
 
@@ -480,7 +489,7 @@ class ScorchWrapPlugin {
                 // the runtime logic for wrapping with lavamoat.
                 compilation.addRuntimeModule(
                   chunk,
-                  new RuntimeModule({
+                  new VirtualRuntimeModule({
                     name: 'LavaMoat/runtime',
                     source: lavaMoatRuntime,
                   }),
