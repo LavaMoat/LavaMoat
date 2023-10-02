@@ -5,7 +5,7 @@
 /** @typedef {import("webpack").Generator} Generator */
 /** @typedef {import("webpack").NormalModule} NormalModule */
 /** @typedef {import("webpack").sources.Source} Source */
-/** @typedef {import("./types.js").ScorchWrapPluginOptions} ScorchWrapPluginOptions */
+/** @typedef {import("./types.js").LavaMoatPluginOptions} LavaMoatPluginOptions */
 
 const path = require('path')
 const {
@@ -13,11 +13,11 @@ const {
   RuntimeModule,
   sources: { ConcatSource },
 } = require('webpack')
-const { wrapper } = require('./buildtime/wrapper')
-const { generateIdentifierLookup } = require('./buildtime/aa')
-const diag = require('./buildtime/diagnostics')
-const progress = require('./buildtime/progress')
-const { assembleRuntime } = require('./buildtime/assemble')
+const { wrapper } = require('./buildtime/wrapper.js')
+const { generateIdentifierLookup } = require('./buildtime/aa.js')
+const diag = require('./buildtime/diagnostics.js')
+const progress = require('./buildtime/progress.js')
+const { assembleRuntime } = require('./buildtime/assemble.js')
 
 // @ts-ignore // this one doesn't have official types
 const RUNTIME_GLOBALS = require('webpack/lib/RuntimeGlobals')
@@ -212,12 +212,12 @@ class VirtualRuntimeModule extends RuntimeModule {
 // Plugin code
 // =================================================================
 
-const PLUGIN_NAME = 'ScorchWrapPlugin'
+const PLUGIN_NAME = 'LavaMoatPlugin'
 
-class ScorchWrapPlugin {
+class LavaMoatPlugin {
   /**
    * @constructor
-   * @param {ScorchWrapPluginOptions} [options]
+   * @param {LavaMoatPluginOptions} [options]
    */
   constructor(options = { policy: {} }) {
     this.options = options
@@ -295,7 +295,7 @@ class ScorchWrapPlugin {
           mainCompilationWarnings = compilation.warnings
           mainCompilationWarnings.push(
             new WebpackError(
-              'ScorchWrapPlugin: Concatenation of modules disabled - not compatible with LavaMoat wrapped modules.',
+              'LavaMoatPlugin: Concatenation of modules disabled - not compatible with LavaMoat wrapped modules.',
             ),
           )
         }
@@ -373,7 +373,7 @@ class ScorchWrapPlugin {
           if (unenforceableModuleIds.length > 0) {
             mainCompilationWarnings.push(
               new WebpackError(
-                `ScorchWrapPlugin: the following module ids can't be controlled by policy and must be ignored at runtime: \n  ${unenforceableModuleIds.join()}`,
+                `LavaMoatPlugin: the following module ids can't be controlled by policy and must be ignored at runtime: \n  ${unenforceableModuleIds.join()}`,
               ),
             )
           }
@@ -407,7 +407,7 @@ class ScorchWrapPlugin {
           diag.rawDebug(3, '> afterProcessAssets')
           mainCompilationWarnings.push(
             new WebpackError(
-              `in ScorchWrapPlugin: ignored modules \n  ${ignores.join('\n  ')}`,
+              `in LavaMoatPlugin: ignored modules \n  ${ignores.join('\n  ')}`,
             ),
           )
         })
@@ -430,7 +430,7 @@ class ScorchWrapPlugin {
               if (!PROGRESS.done('gneratorCalled')) {
                 mainCompilationWarnings.push(
                   new WebpackError(
-                    'ScorchWrapPlugin: Something was generating runtime before all modules were identified. This might be part of a sub-compilation of a plugin. Please check for any unwanted interference between plugins.',
+                    'LavaMoatPlugin: Something was generating runtime before all modules were identified. This might be part of a sub-compilation of a plugin. Please check for any unwanted interference between plugins.',
                   ),
                 )
                 diag.rawDebug(
@@ -508,6 +508,6 @@ class ScorchWrapPlugin {
   }
 }
 
-ScorchWrapPlugin.ignore = IGNORE_LOADER
+LavaMoatPlugin.ignore = IGNORE_LOADER
 
-module.exports = ScorchWrapPlugin
+module.exports = LavaMoatPlugin

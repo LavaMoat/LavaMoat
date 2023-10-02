@@ -10,33 +10,33 @@ test.before(async (t) => {
   t.context.bundle = t.context.build.snapshot['/dist/app.js']
 })
 
-test('scorchwrap/main - dist shape', (t) => {
+test('webpack/main - dist shape', (t) => {
   t.snapshot(Object.keys(t.context.build.snapshot))
 })
 
-test('scorchwrap/main - default warning gets printed', (t) => {
+test('webpack/main - default warning gets printed', (t) => {
   t.regex(t.context.build.stdout, /Concatenation of modules disabled/)
 })
 
-test('scorchwrap/main - warns about ignored modules', (t) => {
+test('webpack/main - warns about ignored modules', (t) => {
   t.regex(
     t.context.build.stdout,
     /WARNING.*ignored modules.*src\/style\.css.*side-effects-package\/styles\.css/s,
   ) // `s` for multiline matching
 })
 
-test('scorchwrap/main - bundle runs without throwing', (t) => {
+test('webpack/main - bundle runs without throwing', (t) => {
   t.notThrows(() => {
     runScriptWithSES(t.context.bundle)
   })
 })
 
-test('scorchwrap/main - bundle contains the lavamoat wrapping', (t) => {
+test('webpack/main - bundle contains the lavamoat wrapping', (t) => {
   t.regex(t.context.bundle, /with\s?\(/)
   t.regex(t.context.bundle, /_LM_/)
 })
 
-test('scorchwrap/main - modules were included', (t) => {
+test('webpack/main - modules were included', (t) => {
   // assert each of the modules from package.json were included
   t.regex(t.context.bundle, /commonjs-package/)
   t.regex(t.context.bundle, /es6-module-package/)
@@ -45,14 +45,14 @@ test('scorchwrap/main - modules were included', (t) => {
   t.regex(t.context.bundle, /umd-package/)
 })
 
-test('scorchwrap/main - treeshaking works', (t) => {
+test('webpack/main - treeshaking works', (t) => {
   t.assert(
     !t.context.bundle.includes('13371337'),
     'Expected treeshakeable reference to be excluded',
   )
 })
 
-test('scorchwrap/main - css extraction works', (t) => {
+test('webpack/main - css extraction works', (t) => {
   const files = Object.keys(t.context.build.snapshot)
   t.assert(
     files.includes('/dist/styles/app.css'),
@@ -69,7 +69,7 @@ test('scorchwrap/main - css extraction works', (t) => {
   )
 })
 
-test('scorchwrap/main - html plugin works', (t) => {
+test('webpack/main - html plugin works', (t) => {
   const html = t.context.build.snapshot['/dist/index.html']
   t.snapshot(html)
 })

@@ -4,7 +4,7 @@
  */
 
 /**
- * @typedef {Object} ScorchWrapPluginOptions
+ * @typedef {Object} LavaMoatPluginOptions
  * @property {boolean} [runChecks] - check resulting code with wrapping for correctness
  * @property {boolean} [readableResourceIds] - should resourceIds be readable or turned into numbers - defaults to (mode==='development')
  * @property {number} [diagnosticsVerbosity] - a number representing diagnostics output verbosity, the larger the more overwhelming
@@ -43,7 +43,7 @@
  * @property {string} root - key used to indicate the root resource
  * @property {Array<[string, string[]]>} idmap - mapping from resourceIds to moduleIds
  * @property {string[]} unenforceable - List of module ids that are impossible to handle for import policy enforcement
- * @property {ScorchWrapPluginOptions} options - plugin options
+ * @property {LavaMoatPluginOptions} options - plugin options
  * @property {Policy} policy - LavaMoat policy
  * @property {Record<string, string>} ENUM - short names for items to minimize bundle size withotu losing readability
  * @property {EndowmentsToolkitFactory} endowmentsToolkit - a function that returns endowmentsToolkit

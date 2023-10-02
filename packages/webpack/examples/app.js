@@ -1,6 +1,6 @@
 import leftpad from "leftpad";
 import { thing } from "./other.mjs";
-import { what } from "./omg.ts";
+import { what } from "./omg.js";
 import * as eth from "@ethereumjs/util";
 import * as j from 'fast-json-patch';
 import './style.css';

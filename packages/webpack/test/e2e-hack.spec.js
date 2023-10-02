@@ -16,11 +16,11 @@ test.before(async (t) => {
   }, 'Expected the build to succeed')
 })
 
-test('scorchwrap/hack - dist shape', (t) => {
+test('webpack/hack - dist shape', (t) => {
   t.snapshot(Object.keys(t.context.build.snapshot))
 })
 
-test('scorchwrap/hack/loader - bundle runs without reaching the FLAG', (t) => {
+test('webpack/hack/loader - bundle runs without reaching the FLAG', (t) => {
   const FLAG = function () {
     t.fail('FLAG should not be reachable!')
   }
@@ -33,14 +33,14 @@ test('scorchwrap/hack/loader - bundle runs without reaching the FLAG', (t) => {
   )
 })
 
-test('scorchwrap/hack/loader - doublecheck in reported ignored files', (t) => {
+test('webpack/hack/loader - doublecheck in reported ignored files', (t) => {
   t.notRegex(
     t.context.build.stdout,
     /ignored modules.*hack.js/s,
   ) // `s` for multiline matching
 })
 
-test('scorchwrap/hack/fetch - disallows fetch', (t) => {
+test('webpack/hack/fetch - disallows fetch', (t) => {
   t.throws(
     () => {
       runScriptWithSES(t.context.build.snapshot['/dist/hack2.js'], {})
@@ -49,7 +49,7 @@ test('scorchwrap/hack/fetch - disallows fetch', (t) => {
   )
 })
 
-test('scorchwrap/hack/fetch - cannot pollute prototypes', (t) => {
+test('webpack/hack/fetch - cannot pollute prototypes', (t) => {
   t.throws(
     () => {
       runScriptWithSES(t.context.build.snapshot['/dist/hack3.js'], {})

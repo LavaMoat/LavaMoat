@@ -1,4 +1,4 @@
-const ScorchWrap = require('../../../src/plugin.js')
+const LavaMoatPlugin = require('../../../src/plugin.js')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const path = require('path')
@@ -14,7 +14,7 @@ module.exports = {
   },
   devtool: false,
   plugins: [
-    new ScorchWrap({
+    new LavaMoatPlugin({
       lockdown: {
         errorTaming: 'unsafe',
         mathTaming: 'unsafe',
@@ -68,7 +68,7 @@ module.exports = {
       },
       {
         test: /\.css$/,
-        use: [MiniCssExtractPlugin.loader, 'css-loader', ScorchWrap.ignore],
+        use: [MiniCssExtractPlugin.loader, 'css-loader', LavaMoatPlugin.ignore],
         sideEffects: true,
       },
     ],

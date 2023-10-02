@@ -39,7 +39,7 @@ module.exports = function progress({ steps }) {
     done.add(step)
     if (steps[currentStep + 1] !== step) {
       throw Error(
-        `ScorchWrap Plugin: Progress reported '${step}' but the next step was expected to be '${
+        `LavaMoatPlugin Plugin: Progress reported '${step}' but the next step was expected to be '${
           steps[currentStep + 1]
         }'`,
       )
@@ -61,7 +61,7 @@ module.exports = function progress({ steps }) {
       return
     }
     throw Error(
-      `ScorchWrap Plugin: Expected '${query}' to be done, but we're at '${steps[currentStep]}'`,
+      `LavaMoatPlugin Plugin: Expected '${query}' to be done, but we're at '${steps[currentStep]}'`,
     )
   }
   return API

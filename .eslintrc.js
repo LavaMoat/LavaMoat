@@ -7,7 +7,6 @@ module.exports = {
     '**/node_modules/**/*',
     'docs/**/*',
     'packages/*/examples/**/*',
-    'packages/scorchwrap/app/**/*',
     'packages/*/test/**/fixtures/**/*',
     'packages/*/test/projects/**/*',
     'packages/lavapack/bundle.js',

@@ -1,4 +1,4 @@
-const ScorchWrap = require('../src/plugin.js')
+const LavaMoat = require('../src/plugin.js')
 const { ProgressPlugin } = require('webpack')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
@@ -30,7 +30,7 @@ module.exports = {
   devtool: false,
   // devtool: "source-map",
   plugins: [
-    new ScorchWrap({
+    new LavaMoat({
       lockdown: {
         errorTaming: 'unsafe',
         mathTaming: 'unsafe',
@@ -80,16 +80,9 @@ module.exports = {
           MiniCssExtractPlugin.loader,
           // "style-loader",
           'css-loader',
-          ScorchWrap.ignore,
+          LavaMoat.ignore,
         ],
         sideEffects: true,
-      },
-      {
-        // MiniCssExtractPlugin with their default experimentalUseImportModule
-        // executes css-loader inside modules at runtime. Gotta avoid wrapping that.
-        // With enough work, we could ship default policies for popular plugins that use this and bundle lockdown but that seems like an overkill
-        test: /node_modules\/css-loader\/dist\/.*\.js$/,
-        use: [ScorchWrap.ignore],
       },
     ],
   },
