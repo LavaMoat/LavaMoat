@@ -60,6 +60,8 @@
       errorTaming: 'unsafe',
       // shows the full call stack
       stackFiltering: 'verbose',
+      // prevents most common override mistake cases from tripping up users
+      overrideTaming: 'severe',
     }
 
     lockdown(lockdownOptions)
