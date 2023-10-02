@@ -19,6 +19,7 @@
     // security options are hard-coded at build time
     const {
       scuttleGlobalThis,
+      lockdownOptions,
     } = __lavamoatSecurityOptions__
 
     function getGlobalRef () {
@@ -51,7 +52,7 @@
     // eslint-disable-next-line no-extra-semi
     ;templateRequire('ses')
 
-    const lockdownOptions = {
+    const DEFAULT_LOCKDOWN_OPTIONS = {
       // gives a semi-high resolution timer
       dateTaming: 'unsafe',
       // this is introduces non-determinism, but is otherwise safe
@@ -64,7 +65,7 @@
       overrideTaming: 'severe',
     }
 
-    lockdown(lockdownOptions)
+    lockdown(Object.assign({}, DEFAULT_LOCKDOWN_OPTIONS, lockdownOptions ?? {}))
 
     // initialize the kernel
     const createKernelCore = __createKernelCore__

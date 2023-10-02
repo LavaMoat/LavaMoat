@@ -61,6 +61,7 @@ function createPacker({
   bundleWithPrecompiledModules = true,
   scuttleGlobalThis = {},
   scuttleGlobalThisExceptions,
+  lockdownOptions = {},
 } = {}) {
   // stream/parser wrapping incase raw: false
   const parser = raw ? through.obj() : JSONStream.parse([true])
@@ -106,6 +107,7 @@ function createPacker({
 
   prelude = prelude.replace('__lavamoatSecurityOptions__', JSON.stringify({
     scuttleGlobalThis,
+    lockdownOptions,
   }))
 
   // note: pack stream cant started emitting data until its received its first module
