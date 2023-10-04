@@ -1,6 +1,4 @@
-const {
-  generateKernel,
-} = require('./generateKernel')
+const { generateKernel } = require('./generateKernel')
 const { createModuleInspector, getDefaultPaths } = require('./generatePolicy')
 const { parseForPolicy } = require('./parseForPolicy')
 const { LavamoatModuleRecord } = require('./moduleRecord')

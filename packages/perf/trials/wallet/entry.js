@@ -1,4 +1,6 @@
-const { thirdparty: { fromEtherCamp: brainwallet } } = require('ethereumjs-wallet')
+const {
+  thirdparty: { fromEtherCamp: brainwallet },
+} = require('ethereumjs-wallet')
 
 // use globalThis.process to avoid hardcoding value when bundling
 const nTimes = Number.parseInt(globalThis.process.env.PERF_N || 5, 10)

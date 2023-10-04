@@ -8,13 +8,17 @@ module.exports = {
   createSesWorkaroundsTransform,
 }
 
-function createSesWorkaroundsTransform () {
-  return makeStringTransform('ses-workarounds', { excludeExtension: ['.json'] }, (content) => {
-    return applySourceTransforms(content)
-  })
+function createSesWorkaroundsTransform() {
+  return makeStringTransform(
+    'ses-workarounds',
+    { excludeExtension: ['.json'] },
+    (content) => {
+      return applySourceTransforms(content)
+    }
+  )
 }
 
-function makeStringTransform (name, options, transformHandler) {
+function makeStringTransform(name, options, transformHandler) {
   return function (file) {
     if (options.excludeExtension) {
       if (options.excludeExtension.includes(path.extname(file))) {
@@ -25,7 +29,7 @@ function makeStringTransform (name, options, transformHandler) {
   }
 }
 
-function makeTransformStream (transformHandler) {
+function makeTransformStream(transformHandler) {
   const outStream = new PassThrough()
   return duplexify(
     concatStream((buffer) => {
@@ -38,6 +42,6 @@ function makeTransformStream (transformHandler) {
       }
       outStream.end(transformed)
     }),
-    outStream,
+    outStream
   )
 }

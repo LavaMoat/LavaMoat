@@ -23,7 +23,7 @@ const jsonStringify = require('json-stable-stringify')
 
 const defaultPreludePath = path.join(__dirname, '_prelude.js')
 
-function newlinesIn (src) {
+function newlinesIn(src) {
   if (!src) {
     return 0
   }
@@ -35,7 +35,7 @@ module.exports = createPacker
 
 function createPacker({
   // hook for applying sourcemaps
-  sourcePathForModule = row => row.sourceFile,
+  sourcePathForModule = (row) => row.sourceFile,
   // input is (true:) objects (false:) json strings
   raw = false,
   standalone = false,
@@ -66,11 +66,12 @@ function createPacker({
   const parser = raw ? through.obj() : JSONStream.parse([true])
   const stream = through.obj(
     function (buf, _, next) {
-      parser.write(buf); next()
+      parser.write(buf)
+      next()
     },
     function () {
       parser.end()
-    },
+    }
   )
 
   // these are decorated for some reason
@@ -84,17 +85,23 @@ function createPacker({
   let sourcemap
 
   if (includePrelude) {
-    assert(prelude, 'LavaMoat CustomPack: must specify a prelude if "includePrelude" is true (default: true)')
+    assert(
+      prelude,
+      'LavaMoat CustomPack: must specify a prelude if "includePrelude" is true (default: true)'
+    )
   }
   assert(policy, 'must specify a policy')
 
   if (scuttleGlobalThisExceptions) {
-    console.warn('Lavamoat - "scuttleGlobalThisExceptions" is deprecated. Use "scuttleGlobalThis.exceptions" instead.')
+    console.warn(
+      'Lavamoat - "scuttleGlobalThisExceptions" is deprecated. Use "scuttleGlobalThis.exceptions" instead.'
+    )
     if (scuttleGlobalThis === true) {
-      scuttleGlobalThis = {enabled: true}
+      scuttleGlobalThis = { enabled: true }
     }
   }
-  const exceptions = scuttleGlobalThis?.exceptions || scuttleGlobalThisExceptions
+  const exceptions =
+    scuttleGlobalThis?.exceptions || scuttleGlobalThisExceptions
   scuttleGlobalThis.exceptions = exceptions
 
   // toString regexps if there's any
@@ -104,9 +111,12 @@ function createPacker({
     }
   }
 
-  prelude = prelude.replace('__lavamoatSecurityOptions__', JSON.stringify({
-    scuttleGlobalThis,
-  }))
+  prelude = prelude.replace(
+    '__lavamoatSecurityOptions__',
+    JSON.stringify({
+      scuttleGlobalThis,
+    })
+  )
 
   // note: pack stream cant started emitting data until its received its first module
   // this is because the browserify pipeline is leaky until its finished being setup
@@ -114,8 +124,7 @@ function createPacker({
 
   return stream
 
-
-  function onModule (moduleData, _, next) {
+  function onModule(moduleData, _, next) {
     if (first && standalone) {
       const pre = umd.prelude(standalone).trim()
       stream.push(Buffer.from(pre + 'return ', 'utf8'))
@@ -134,12 +143,12 @@ function createPacker({
       if (includePrelude) {
         sourcemap.addFile(
           { sourceFile: preludePath, source: prelude },
-          { line: 0 },
+          { line: 0 }
         )
       }
     }
 
-    const moduleEntryPrefix = (first ? '' : ',\n')
+    const moduleEntryPrefix = first ? '' : ',\n'
     lineno += newlinesIn(moduleEntryPrefix)
     stream.push(Buffer.from(moduleEntryPrefix, 'utf8'))
 
@@ -148,14 +157,18 @@ function createPacker({
       packages.add(packageName)
     }
 
-    const sourceMeta = prepareModuleInitializer(moduleData, sourcePathForModule, bundleWithPrecompiledModules)
+    const sourceMeta = prepareModuleInitializer(
+      moduleData,
+      sourcePathForModule,
+      bundleWithPrecompiledModules
+    )
     const wrappedSource = serializeModule(moduleData, sourceMeta)
 
     if (moduleData.sourceFile && !moduleData.nomap) {
       // add current file to the sourcemap
       sourcemap.addFile(
         { sourceFile: moduleData.sourceFile, source: moduleData.source },
-        { line: lineno + sourceMeta.offset },
+        { line: lineno + sourceMeta.offset }
       )
     }
 
@@ -171,7 +184,7 @@ function createPacker({
     next()
   }
 
-  function onDone () {
+  function onDone() {
     if (first) {
       stream.push(generateBundleLoaderInitial())
     }
@@ -193,25 +206,30 @@ function createPacker({
 
     // close the loadBundle request
     stream.push(
-      Buffer.from(`],${JSON.stringify(entryFiles)},${JSON.stringify(minimalPolicy)})`, 'utf8'),
+      Buffer.from(
+        `],${JSON.stringify(entryFiles)},${JSON.stringify(minimalPolicy)})`,
+        'utf8'
+      )
     )
 
     if (standalone && !first) {
-      stream.push(Buffer.from(
-        '(' + JSON.stringify(stream.standaloneModule) + ')' +
-                    umd.postlude(standalone),
-        'utf8',
-      ))
+      stream.push(
+        Buffer.from(
+          '(' +
+            JSON.stringify(stream.standaloneModule) +
+            ')' +
+            umd.postlude(standalone),
+          'utf8'
+        )
+      )
     }
 
     if (sourcemap) {
       let comment = sourcemap.comment()
       if (sourceMapPrefix) {
-        comment = comment.replace(
-          /^\/\/#/, function () {
-            return sourceMapPrefix
-          },
-        )
+        comment = comment.replace(/^\/\/#/, function () {
+          return sourceMapPrefix
+        })
       }
       stream.push(Buffer.from('\n' + comment + '\n', 'utf8'))
     }
@@ -222,7 +240,7 @@ function createPacker({
     stream.push(null)
   }
 
-  function generateBundleLoaderInitial () {
+  function generateBundleLoaderInitial() {
     let output = ''
     // append prelude if requested
     if (includePrelude) {
@@ -233,7 +251,7 @@ function createPacker({
     return Buffer.from(output, 'utf8')
   }
 
-  function serializeModule (moduleData, sourceMeta) {
+  function serializeModule(moduleData, sourceMeta) {
     const { id, packageName, deps, file } = moduleData
     const relativeFilePath = file && path.relative(basedir, file)
     // for now, ignore new sourcemap and just append original filename
@@ -246,7 +264,9 @@ function createPacker({
       // source: sourceMeta.code
     }
     const moduleInitializer = sourceMeta.code
-    let serializedEntry = `[${jsonStringify(id)}, ${jsonStringify(deps)}, ${moduleInitializer}, {`
+    let serializedEntry = `[${jsonStringify(id)}, ${jsonStringify(
+      deps
+    )}, ${moduleInitializer}, {`
     // add metadata
     Object.entries(jsonSerializeableData).forEach(([key, value]) => {
       // skip missing values
@@ -261,16 +281,25 @@ function createPacker({
   }
 }
 
-function prepareModuleInitializer (moduleData, sourcePathForModule, bundleWithPrecompiledModules) {
+function prepareModuleInitializer(
+  moduleData,
+  sourcePathForModule,
+  bundleWithPrecompiledModules
+) {
   const normalizedSource = moduleData.source.split('\r\n').join('\n')
   // extract sourcemaps
   const sourceMeta = extractSourceMaps(normalizedSource)
   // create wrapper + update sourcemaps
-  const newSourceMeta = wrapInModuleInitializer(moduleData, sourceMeta, sourcePathForModule, bundleWithPrecompiledModules)
+  const newSourceMeta = wrapInModuleInitializer(
+    moduleData,
+    sourceMeta,
+    sourcePathForModule,
+    bundleWithPrecompiledModules
+  )
   return newSourceMeta
 }
 
-function extractSourceMaps (sourceCode) {
+function extractSourceMaps(sourceCode) {
   const converter = convertSourceMap.fromSource(sourceCode)
   // if (!converter) throw new Error('Unable to find original inlined sourcemap')
   const maps = converter && converter.toObject()
@@ -278,12 +307,16 @@ function extractSourceMaps (sourceCode) {
   return { code, maps }
 }
 
-function wrapInModuleInitializer (moduleData, sourceMeta, sourcePathForModule, bundleWithPrecompiledModules) {
+function wrapInModuleInitializer(
+  moduleData,
+  sourceMeta,
+  sourcePathForModule,
+  bundleWithPrecompiledModules
+) {
   const filename = encodeURI(String(moduleData.file))
   let moduleWrapperSource
   if (bundleWithPrecompiledModules) {
-    moduleWrapperSource = (
-      `function(){
+    moduleWrapperSource = `function(){
   with (this.scopeTerminator) {
   with (this.globalThis) {
     return function() {
@@ -296,7 +329,6 @@ __MODULE_CONTENT__
   }
   }
 }`
-    )
   } else {
     moduleWrapperSource = `// source: ${filename}\nfunction(require, module, exports){\n__MODULE_CONTENT__\n}`
   }

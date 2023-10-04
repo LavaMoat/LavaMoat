@@ -1,7 +1,11 @@
 const test = require('ava')
-const { parse, inspectPrimordialAssignments, environmentTypes } = require('../src/index')
+const {
+  parse,
+  inspectPrimordialAssignments,
+  environmentTypes,
+} = require('../src/index')
 
-function inspectPrimordialAssignmentsTest (code) {
+function inspectPrimordialAssignmentsTest(code) {
   return inspectPrimordialAssignments(parse(code))
 }
 

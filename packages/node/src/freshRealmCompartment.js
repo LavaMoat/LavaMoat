@@ -5,7 +5,7 @@ module.exports = { createFreshRealmCompartment }
 
 let sesCompartmentSrc
 
-function createFreshRealmCompartment () {
+function createFreshRealmCompartment() {
   // lazily load the Compartment source
   if (!sesCompartmentSrc) {
     sesCompartmentSrc = getSesShimSrc()
@@ -13,7 +13,10 @@ function createFreshRealmCompartment () {
   // create a seperate realm for running code
   const context = vm.createContext()
   // circular ref (used when globalThis is not present)
-  const needsGlobalThisPath = vm.runInContext('typeof globalThis === "undefined"', context)
+  const needsGlobalThisPath = vm.runInContext(
+    'typeof globalThis === "undefined"',
+    context
+  )
   if (needsGlobalThisPath) {
     context.globalThis = context
   }

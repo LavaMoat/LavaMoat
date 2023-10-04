@@ -7,14 +7,14 @@ module.exports = [
       defineOne: () => {
         const testResults = {}
         try {
-          testResults.objCheckThis = this.Object === Object 
-        } catch (_) { }
+          testResults.objCheckThis = this.Object === Object
+        } catch (_) {}
         try {
-          testResults.objCheckGlobal = globalThis.Object === Object 
-        } catch (_) { }
+          testResults.objCheckGlobal = globalThis.Object === Object
+        } catch (_) {}
         try {
-          testResults.thisIsExports = exports === this 
-        } catch (_) { }
+          testResults.thisIsExports = exports === this
+        } catch (_) {}
         module.exports = testResults
       },
       expectedResult: {
@@ -51,7 +51,11 @@ module.exports = [
           }
         }
         // test webpack result against globalThis
-        module.exports = { match: g === globalThis, type: typeof g, error: error && error.message }
+        module.exports = {
+          match: g === globalThis,
+          type: typeof g,
+          error: error && error.message,
+        }
       },
       expectedResult: { match: true, type: 'object' },
     })

@@ -8,39 +8,51 @@ test('generatePolicy - basic config', async (t) => {
     location.href
   })
 
-  t.deepEqual(config, {
-    resources: {
-      test: {
-        globals: {
-          'location.href': true,
+  t.deepEqual(
+    config,
+    {
+      resources: {
+        test: {
+          globals: {
+            'location.href': true,
+          },
         },
       },
     },
-  }, 'config matched expected')
+    'config matched expected'
+  )
 })
 
 test('generatePolicy - config with debugInfo', async (t) => {
-  const config = await createConfigForTest(function () {
-    location.href
-  }, { includeDebugInfo: true })
+  const config = await createConfigForTest(
+    function () {
+      location.href
+    },
+    { includeDebugInfo: true }
+  )
 
   const testModuleFile = './node_modules/test/index.js'
   const testPackageConfigDebugInfo = config.debugInfo[testModuleFile]
 
-  t.deepEqual(testPackageConfigDebugInfo, {
-    moduleRecord: {
-      specifier: testModuleFile,
-      file: testModuleFile,
-      type: 'js',
-      content: '(function () {\n    location.href\n  })()',
-      importMap: {},
-      packageName: 'test',
-      moduleInitializer: undefined,
+  t.deepEqual(
+    testPackageConfigDebugInfo,
+    {
+      moduleRecord: {
+        specifier: testModuleFile,
+        file: testModuleFile,
+        type: 'js',
+        // this is brittle
+        content: '(function () {\n      location.href\n    })()',
+        importMap: {},
+        packageName: 'test',
+        moduleInitializer: undefined,
+      },
+      globals: {
+        'location.href': 'read',
+      },
     },
-    globals: {
-      'location.href': 'read',
-    },
-  }, 'config matched expected')
+    'config matched expected'
+  )
 })
 
 test('generatePolicy - ignore various refs', async (t) => {
@@ -51,15 +63,19 @@ test('generatePolicy - ignore various refs', async (t) => {
     const xyz = nonIgnoredGlobal
   })
 
-  t.deepEqual(config, {
-    resources: {
-      test: {
-        globals: {
-          nonIgnoredGlobal: true,
+  t.deepEqual(
+    config,
+    {
+      resources: {
+        test: {
+          globals: {
+            nonIgnoredGlobal: true,
+          },
         },
       },
     },
-  }, 'config matched expected')
+    'config matched expected'
+  )
 })
 
 test('generatePolicy - config ignores global refs', async (t) => {
@@ -68,16 +84,20 @@ test('generatePolicy - config ignores global refs', async (t) => {
     const xhr = new window.XMLHttpRequest()
   })
 
-  t.deepEqual(config, {
-    resources: {
-      test: {
-        globals: {
-          'location.href': true,
-          XMLHttpRequest: true,
+  t.deepEqual(
+    config,
+    {
+      resources: {
+        test: {
+          globals: {
+            'location.href': true,
+            XMLHttpRequest: true,
+          },
         },
       },
     },
-  }, 'config matches expected')
+    'config matches expected'
+  )
 })
 
 test('generatePolicy - config ignores global refs when properties are not accessed', async (t) => {
@@ -85,9 +105,13 @@ test('generatePolicy - config ignores global refs when properties are not access
     typeof window !== 'undefined'
   })
 
-  t.deepEqual(config, {
-    resources: {},
-  }, 'config matches expected')
+  t.deepEqual(
+    config,
+    {
+      resources: {},
+    },
+    'config matches expected'
+  )
 })
 
 test('generatePolicy - config ignores global refs accessed with whitelist items', async (t) => {
@@ -95,9 +119,13 @@ test('generatePolicy - config ignores global refs accessed with whitelist items'
     window.Object === Object
   })
 
-  t.deepEqual(config, {
-    resources: {},
-  }, 'config matches expected')
+  t.deepEqual(
+    config,
+    {
+      resources: {},
+    },
+    'config matches expected'
+  )
 })
 
 test('generatePolicy - config ignores newer intrinsics', async (t) => {
@@ -105,9 +133,13 @@ test('generatePolicy - config ignores newer intrinsics', async (t) => {
     BigInt(123)
   })
 
-  t.deepEqual(config, {
-    resources: {},
-  }, 'config matches expected')
+  t.deepEqual(
+    config,
+    {
+      resources: {},
+    },
+    'config matches expected'
+  )
 })
 
 // we no longer throw an error, we log a warning

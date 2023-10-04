@@ -15,7 +15,7 @@ async function verifySourceMaps({ bundle }) {
   await verifyWithSourceExplorer(bundle)
 }
 
-async function verifyWithSourceExplorer (bundle) {
+async function verifyWithSourceExplorer(bundle) {
   let result
   try {
     result = await explore({ code: Buffer.from(bundle, 'utf8') })
@@ -31,7 +31,7 @@ async function verifyWithSourceExplorer (bundle) {
   }
 }
 
-async function verifySamples (bundle) {
+async function verifySamples(bundle) {
   const sourcemap = extractSourceMap(bundle).toObject()
   const consumer = await new SourceMapConsumer(sourcemap)
 
@@ -44,9 +44,7 @@ async function verifySamples (bundle) {
 
   const buildLines = bundle.split('\n')
   const targetString = 'module.exports'
-  const matchesPerLine = buildLines.map((line) =>
-    indicesOf(targetString, line),
-  )
+  const matchesPerLine = buildLines.map((line) => indicesOf(targetString, line))
   const errors = []
   matchesPerLine.forEach((matchIndices, lineIndex) => {
     matchIndices.forEach((matchColumn) => {
@@ -62,9 +60,7 @@ async function verifySamples (bundle) {
           message: 'missing source for position',
           highlightCode: true,
         })
-        errors.push(
-          `missing source for position, in bundle\n${codeSample}`,
-        )
+        errors.push(`missing source for position, in bundle\n${codeSample}`)
         return
       }
       const sourceContent = consumer.sourceContentFor(result.source)
@@ -81,15 +77,17 @@ async function verifySamples (bundle) {
           message: `expected to see ${JSON.stringify(targetString)}`,
           highlightCode: true,
         })
-        errors.push(
-          `Sourcemap seems invalid, ${result.source}\n${codeSample}`,
-        )
+        errors.push(`Sourcemap seems invalid, ${result.source}\n${codeSample}`)
       }
     })
   })
   // error if any errors collected
   if (errors.length) {
-    throw new Error(`Sourcemap validation encountered ${errors.length} errors:\n${errors.join('\n')}`)
+    throw new Error(
+      `Sourcemap validation encountered ${errors.length} errors:\n${errors.join(
+        '\n'
+      )}`
+    )
   }
 }
 

@@ -49,7 +49,7 @@ void main() {
 `
 
 export class PointsController extends InstancedBufferGeometryController {
-  constructor ({ ...args } = {}) {
+  constructor({ ...args } = {}) {
     super({
       attributeSizes: {
         position: [3, 1],
@@ -63,7 +63,7 @@ export class PointsController extends InstancedBufferGeometryController {
       },
       ...args,
     })
-    const circleGeometry = new CircleGeometry( 1, 6 )
+    const circleGeometry = new CircleGeometry(1, 6)
     this.geometry.index = circleGeometry.index
     // copy circle geometry attributes
     this.geometry.setAttribute('position', circleGeometry.attributes.position)
@@ -71,10 +71,10 @@ export class PointsController extends InstancedBufferGeometryController {
     this.geometry.setAttribute('uv', circleGeometry.attributes.uv)
   }
 
-  createMaterial () {
+  createMaterial() {
     return new RawShaderMaterial({
       uniforms: {
-        'map': { value: new TextureLoader().load( 'assets/circle.png' ) },
+        map: { value: new TextureLoader().load('assets/circle.png') },
       },
       vertexShader: vertexShader2,
       fragmentShader: fragmentShader2,
@@ -83,8 +83,8 @@ export class PointsController extends InstancedBufferGeometryController {
     })
   }
 
-  createObject (geometry, material) {
-    const mesh = new Mesh( geometry, material )
+  createObject(geometry, material) {
+    const mesh = new Mesh(geometry, material)
     return mesh
   }
 }

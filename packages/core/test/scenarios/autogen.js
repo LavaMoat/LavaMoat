@@ -1,4 +1,7 @@
-const { createScenarioFromScaffold, autoConfigForScenario } = require('../util.js')
+const {
+  createScenarioFromScaffold,
+  autoConfigForScenario,
+} = require('../util.js')
 
 module.exports = [
   async () => {

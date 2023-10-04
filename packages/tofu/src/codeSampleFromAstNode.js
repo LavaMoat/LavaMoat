@@ -1,7 +1,6 @@
-
 module.exports = { codeSampleFromAstNode }
 
-function codeSampleFromAstNode (node, moduleRecord) {
+function codeSampleFromAstNode(node, moduleRecord) {
   const result = {}
   const { content } = moduleRecord
   const { start, end } = node.loc
@@ -12,7 +11,7 @@ function codeSampleFromAstNode (node, moduleRecord) {
   // prepare sample
   const lines = content.split('\n')
   const startLine = lines[start.line - 1]
-  const sample = startLine.slice(start.column, start.column + (70))
+  const sample = startLine.slice(start.column, start.column + 70)
   result.sample = sample
   // add npmfs link if possible
   // need to separately specify npm name if possible

@@ -63,7 +63,7 @@ module.exports = [
         t.is(typeof result.non, 'number')
         t.is(isRecent(result.root), true)
         t.is(isRecent(result.non), true)
-        function isRecent (time) {
+        function isRecent(time) {
           // more recent than 2020-01-01T00:00:00.000Z
           return time > 1577836800000
         }

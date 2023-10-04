@@ -1,5 +1,5 @@
 - be sure we're stripping all sourcemaps (i think browserify does this, but lets verify)
-- currently measuring size with inline sourcemaps 
+- currently measuring size with inline sourcemaps
 - async dist is large
 - sentry dist is large
 - other views / tools

@@ -10,16 +10,20 @@ const { createKernel } = require('./kernel')
 
 const defaults = require('./defaults')
 
-
-async function runLava (options) {
-
+async function runLava(options) {
   options = Object.assign({}, defaults, options)
 
   options.projectRoot = path.resolve(options.projectRoot)
   options.entryPath = path.resolve(options.projectRoot, options.entryPath)
   options.policyPath = path.resolve(options.projectRoot, options.policyPath)
-  options.policyOverridePath = path.resolve(options.projectRoot, options.policyOverridePath)
-  options.policyDebugPath = path.resolve(options.projectRoot, options.policyDebugPath)
+  options.policyOverridePath = path.resolve(
+    options.projectRoot,
+    options.policyOverridePath
+  )
+  options.policyDebugPath = path.resolve(
+    options.projectRoot,
+    options.policyDebugPath
+  )
 
   const {
     entryPath: entryId,
@@ -34,15 +38,25 @@ async function runLava (options) {
     debugMode,
     statsMode,
   } = options
-  const shouldParseApplication = writeAutoPolicy || writeAutoPolicyDebug || writeAutoPolicyAndRun
-  const shouldRunApplication = (!writeAutoPolicy && !writeAutoPolicyDebug) || writeAutoPolicyAndRun
+  const shouldParseApplication =
+    writeAutoPolicy || writeAutoPolicyDebug || writeAutoPolicyAndRun
+  const shouldRunApplication =
+    (!writeAutoPolicy && !writeAutoPolicyDebug) || writeAutoPolicyAndRun
 
   if (shouldParseApplication) {
     // parse mode
     const includeDebugInfo = Boolean(writeAutoPolicyDebug)
-    const policyOverride = await loadPolicy({ debugMode, policyPath: policyOverridePath })
+    const policyOverride = await loadPolicy({
+      debugMode,
+      policyPath: policyOverridePath,
+    })
     console.warn(`LavaMoat generating policy from entry "${entryId}"...`)
-    const policy = await parseForPolicy({ projectRoot, entryId, policyOverride, includeDebugInfo })
+    const policy = await parseForPolicy({
+      projectRoot,
+      entryId,
+      policyOverride,
+      includeDebugInfo,
+    })
     // write policy debug file
     if (includeDebugInfo) {
       fs.mkdirSync(path.dirname(policyDebugPath), { recursive: true })
@@ -58,8 +72,15 @@ async function runLava (options) {
   }
   if (shouldRunApplication) {
     // execution mode
-    const lavamoatPolicy = await loadPolicyAndApplyOverrides({ debugMode, policyPath, policyOverridePath })
-    const canonicalNameMap = await loadCanonicalNameMap({ rootDir: projectRoot, includeDevDeps: true })
+    const lavamoatPolicy = await loadPolicyAndApplyOverrides({
+      debugMode,
+      policyPath,
+      policyOverridePath,
+    })
+    const canonicalNameMap = await loadCanonicalNameMap({
+      rootDir: projectRoot,
+      includeDevDeps: true,
+    })
     const kernel = createKernel({
       projectRoot,
       lavamoatPolicy,

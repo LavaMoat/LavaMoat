@@ -5,7 +5,7 @@ const tempMatrix = new Matrix4()
 /* eslint-disable-next-line no-empty-function */
 const noop = () => {}
 
-export function setupSelections ({
+export function setupSelections({
   getIntersectables = () => [],
   onSelectStart = noop,
   onSelectEnd = noop,
@@ -21,7 +21,7 @@ export function setupSelections ({
   controller2.addEventListener('selectend', testSelectEnd)
   subscribeTick(tickHandler)
 
-  function tickHandler () {
+  function tickHandler() {
     if (onHoverStart === noop && onHoverEnd === noop) {
       return
     }
@@ -29,7 +29,7 @@ export function setupSelections ({
     checkHover(controller2)
   }
 
-  function testSelectStart (event) {
+  function testSelectStart(event) {
     const controller = event.target
     const intersections = getIntersections(controller)
     if (intersections.length <= 0) {
@@ -40,7 +40,7 @@ export function setupSelections ({
     onSelectStart(intersection, controller)
   }
 
-  function testSelectEnd (event) {
+  function testSelectEnd(event) {
     const controller = event.target
     if (controller.userData.selected === undefined) {
       return
@@ -51,14 +51,14 @@ export function setupSelections ({
     onSelectEnd(intersection, controller)
   }
 
-  function getIntersections (controller) {
+  function getIntersections(controller) {
     tempMatrix.identity().extractRotation(controller.matrixWorld)
     raycaster.ray.origin.setFromMatrixPosition(controller.matrixWorld)
     raycaster.ray.direction.set(0, 0, -1).applyMatrix4(tempMatrix)
     return raycaster.intersectObjects(getIntersectables())
   }
 
-  function checkHover (controller) {
+  function checkHover(controller) {
     const line = controller.getObjectByName('line')
     const intersections = getIntersections(controller)
     const oldHover = controller.userData.hover
@@ -86,5 +86,4 @@ export function setupSelections ({
       onHoverStart(newHover, controller)
     }
   }
-
 }

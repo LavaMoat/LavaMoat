@@ -1,6 +1,10 @@
-const { applyTransforms, evadeHtmlCommentTest, evadeImportExpressionTest } = require('../lib/transforms.umd.js')
+const {
+  applyTransforms,
+  evadeHtmlCommentTest,
+  evadeImportExpressionTest,
+} = require('../lib/transforms.umd.js')
 
-function applySourceTransforms (source) {
+function applySourceTransforms(source) {
   return applyTransforms(source, [
     evadeHtmlCommentTest,
     evadeImportExpressionTest,
@@ -8,7 +12,7 @@ function applySourceTransforms (source) {
   ])
 }
 
-function evadeDirectEvalExpressions (source) {
+function evadeDirectEvalExpressions(source) {
   /* eslint-disable-next-line prefer-regex-literals */
   const someDirectEvalPattern = new RegExp('\\beval(\\s*\\()', 'g')
 

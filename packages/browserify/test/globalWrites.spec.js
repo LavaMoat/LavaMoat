@@ -3,9 +3,7 @@ const {
   createScenarioFromScaffold,
   runAndTestScenario,
 } = require('lavamoat-core/test/util')
-const {
-  runScenario,
-} = require('./util')
+const { runScenario } = require('./util')
 
 // here we are providing an endowments only to a module deep in a dep graph
 test('globalWrites - two deps should be able to read each others globals', async (t) => {
@@ -23,7 +21,7 @@ test('globalWrites - two deps should be able to read each others globals', async
     },
     config: {
       resources: {
-        '$root$': {
+        $root$: {
           packages: {
             two: true,
           },

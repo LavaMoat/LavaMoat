@@ -9,7 +9,7 @@ module.exports = [
       },
       defineTwo: () => {
         module.exports = function (n) {
-          return n * 111 
+          return n * 111
         }
       },
       expectedResult: 555,
@@ -22,7 +22,7 @@ module.exports = [
       defineOne: () => {
         // ensure userspace Buffer supported with lockdown
         // https://github.com/feross/buffer/blob/795bbb5bda1b39f1370ebd784bea6107b087e3a7/index.js#L611
-        function Buffer (_arg, _encodingOrOffset, _length) {}
+        function Buffer(_arg, _encodingOrOffset, _length) {}
         Object.setPrototypeOf(Buffer.prototype, Uint8Array.prototype)
         Object.setPrototypeOf(Buffer, Uint8Array)
         Buffer.prototype.toLocaleString = Buffer.prototype.toString
@@ -38,8 +38,8 @@ module.exports = [
       name: 'basic - Function constructor for constructing constructor functions',
       defineOne: () => {
         const abc = new Function('this.value = this.derp()')
-        abc.prototype.derp = function() {
-          return 123 
+        abc.prototype.derp = function () {
+          return 123
         }
         const xyz = new abc()
         module.exports = xyz.value

@@ -2,7 +2,7 @@ const { promises: fs } = require('fs')
 
 module.exports = { fileExists }
 
-async function fileExists (path) {
+async function fileExists(path) {
   try {
     await fs.access(path)
     return true

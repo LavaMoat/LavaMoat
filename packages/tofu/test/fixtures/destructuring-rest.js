@@ -1,13 +1,15 @@
+const { ...a } = {}
+a
 
-const { ...a } = {};
-a;
+const [...b] = []
+b
 
-const [...b] = [];
-b;
-
-function f ({ ...c }, [...d]) {
-  c;
-  d;
+function f({ ...c }, [...d]) {
+  c
+  d
 }
 
-({ ...e }, [...f]) => { e; f; };
+;({ ...e }, [...f]) => {
+  e
+  f
+}

@@ -1,8 +1,5 @@
 const test = require('ava')
-const {
-  createScenarioFromScaffold,
-  runScenario,
-} = require('./util')
+const { createScenarioFromScaffold, runScenario } = require('./util')
 
 test('globals - ensure global property this-value unwrapped', async (t) => {
   // compartment.globalThis.document would error because 'this' value is not window
@@ -18,7 +15,7 @@ test('globals - ensure global property this-value unwrapped', async (t) => {
         // node vm weird, sometimes calls with vm context instead of vm global this
         // debugger
 
-        return (this === scenario.globalThis || this === scenario.vmContext)
+        return this === scenario.globalThis || this === scenario.vmContext
       },
     },
     config: {
@@ -32,10 +29,14 @@ test('globals - ensure global property this-value unwrapped', async (t) => {
     },
   })
   const testResult = await runScenario({ scenario })
-  t.deepEqual(testResult, {
-    direct: true,
-    indirect: false,
-  }, 'expected result, did not error')
+  t.deepEqual(
+    testResult,
+    {
+      direct: true,
+      indirect: false,
+    },
+    'expected result, did not error'
+  )
 })
 
 test('globals - ensure window.document getter behavior support', async (t) => {
@@ -59,7 +60,9 @@ test('globals - ensure window.document getter behavior support', async (t) => {
         // node vm weird, sometimes calls with vm context instead of vm global this
         if (this !== scenario.globalThis && this !== scenario.vmContext) {
           // chrome: Uncaught TypeError: Illegal invocation
-          throw new TypeError('\'get document\' called on an object that does not implement interface Window')
+          throw new TypeError(
+            "'get document' called on an object that does not implement interface Window"
+          )
         }
         return {
           location: {
@@ -86,7 +89,6 @@ test('globals - ensure window.document getter behavior support', async (t) => {
   const testResult = await runScenario({ scenario })
   t.is(testResult, 'beepboop.bong', 'expected result, did not error')
 })
-
 
 test('globals - ensure circular refs on package compartment global', async (t) => {
   const scenario = createScenarioFromScaffold({
@@ -123,10 +125,12 @@ test('globals - ensure setTimeout calls dont trigger illegal invocation', async 
       },
     },
     context: {
-      setTimeout () {
+      setTimeout() {
         if (this !== scenario.globalThis && this !== scenario.vmContext) {
           // chrome: Uncaught TypeError: Illegal invocation
-          throw new TypeError('\'setTimeout\' called on an object that does not implement interface Window')
+          throw new TypeError(
+            "'setTimeout' called on an object that does not implement interface Window"
+          )
         }
       },
     },
@@ -158,7 +162,7 @@ test('globals - endowing bind on a function', async (t) => {
     },
     context: {
       abc: function () {
-        return this 
+        return this
       },
     },
     config: {
@@ -172,13 +176,17 @@ test('globals - endowing bind on a function', async (t) => {
     },
   })
   const testResult = await runScenario({ scenario })
-  t.deepEqual(testResult, {
-    typeof: true,
-    isUndefined: true,
-    isTrue: true,
-    is42: true,
-    isXyz: true,
-  }, 'expected result, did not error')
+  t.deepEqual(
+    testResult,
+    {
+      typeof: true,
+      isUndefined: true,
+      isTrue: true,
+      is42: true,
+      isXyz: true,
+    },
+    'expected result, did not error'
+  )
 })
 
 test('globals - endowing properties on the globalThis prototype chain', async (t) => {
@@ -197,7 +205,7 @@ test('globals - endowing properties on the globalThis prototype chain', async (t
       resources: {
         one: {
           globals: {
-            'abc': true,
+            abc: true,
           },
         },
       },
@@ -215,20 +223,22 @@ test('globals - explicitly disallowing properties on the globalThis', async (t) 
     },
     context: {
       abc: function () {
-        return 42 
+        return 42
       },
     },
     config: {
       resources: {
         one: {
           globals: {
-            'abc': false,
+            abc: false,
           },
         },
       },
     },
   })
-  await t.throwsAsync(runScenario({ scenario }), { message: 'globalThis.abc is not a function' })
+  await t.throwsAsync(runScenario({ scenario }), {
+    message: 'globalThis.abc is not a function',
+  })
 })
 
 test('globals - explicitly disallowing properties on the globalThis via overrides', async (t) => {
@@ -239,14 +249,14 @@ test('globals - explicitly disallowing properties on the globalThis via override
     },
     context: {
       abc: function () {
-        return 42 
+        return 42
       },
     },
     config: {
       resources: {
         one: {
           globals: {
-            'abc': true,
+            abc: true,
           },
         },
       },
@@ -255,13 +265,15 @@ test('globals - explicitly disallowing properties on the globalThis via override
       resources: {
         one: {
           globals: {
-            'abc': false,
+            abc: false,
           },
         },
       },
     },
   })
-  await t.throwsAsync(runScenario({ scenario }), { message: 'globalThis.abc is not a function' })
+  await t.throwsAsync(runScenario({ scenario }), {
+    message: 'globalThis.abc is not a function',
+  })
 })
 
 test('globals - nested property true.false.true', async (t) => {
@@ -269,15 +281,15 @@ test('globals - nested property true.false.true', async (t) => {
   // When this behavior changes, update /docs/policy.md
   const shared = {
     context: {
-      a: { ok: 42, b: { c: () => 42, notOk:41 }},
+      a: { ok: 42, b: { c: () => 42, notOk: 41 } },
     },
     config: {
       resources: {
         one: {
           globals: {
-            'a': true,
+            a: true,
             'a.b': false,
-            'a.b.c':true,
+            'a.b.c': true,
           },
         },
       },
@@ -300,23 +312,22 @@ test('globals - nested property true.false.true', async (t) => {
   t.is(testResult.a, true)
   t.is(testResult.a_ok, true)
   t.is(testResult.a_b_notOk, false)
-
 })
 
 test('globals - nested property false.true', async (t) => {
   'use strict'
   const shared = {
     context: {
-      a: { b: { c: () => 42, notOk:41 }},
-      x: { notOk:41, y: () => 42 },
+      a: { b: { c: () => 42, notOk: 41 } },
+      x: { notOk: 41, y: () => 42 },
     },
     config: {
       resources: {
         one: {
           globals: {
             'a.b': false,
-            'a.b.c':true,
-            'x': false,
+            'a.b.c': true,
+            x: false,
             'x.y': true,
           },
         },
@@ -349,13 +360,13 @@ test.failing('globals - nested property true.false', async (t) => {
   // When this behavior changes, update /docs/policy.md
   const shared = {
     context: {
-      a: { ok: 42, b: { c: () => 42, notOk:41 }},
+      a: { ok: 42, b: { c: () => 42, notOk: 41 } },
     },
     config: {
       resources: {
         one: {
           globals: {
-            'a': true,
+            a: true,
             'a.b': false,
           },
         },
@@ -390,7 +401,7 @@ test('globals - firefox addon chrome api lazy getter works', async (t) => {
     // define lazy getter on chrome
     beforeCreateKernel: ({ globalThis }) => {
       function exportLazyGetter(object, prop, getter) {
-        let redefine = value => {
+        let redefine = (value) => {
           if (value === undefined) {
             delete object[prop]
           } else {
@@ -411,11 +422,11 @@ test('globals - firefox addon chrome api lazy getter works', async (t) => {
           enumerable: true,
           configurable: true,
 
-          get: function() {
+          get: function () {
             return redefine(getter.call(this))
           },
 
-          set: function(value) {
+          set: function (value) {
             redefine(value)
           },
         })
@@ -426,7 +437,7 @@ test('globals - firefox addon chrome api lazy getter works', async (t) => {
       resources: {
         one: {
           globals: {
-            'chrome': true,
+            chrome: true,
           },
         },
       },

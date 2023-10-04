@@ -8,7 +8,7 @@ Named after a type of lava: ‘A‘ā https://volcanoes.usgs.gov/vsc/glossary/aa
 
 - name that does not soley rely on the package of unknown provenance's self-determined name
 - consistent across platform and package manager
-- consistent whether only prod dependencies or dev and prod dependencies are installed 
+- consistent whether only prod dependencies or dev and prod dependencies are installed
 
 #### scheme
 
@@ -17,6 +17,7 @@ The naming convention is to identify all "logical paths" from the project root t
 For example the path: `project/node_modules/xyz`
 
 with the logical paths:
+
 - `abc>ijk>xyz`
 - `abc>xyz`
 

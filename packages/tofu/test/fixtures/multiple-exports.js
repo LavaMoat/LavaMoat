@@ -1,6 +1,6 @@
 exports.foo = function () {
-  return bar;
-};
+  return bar
+}
 exports.bar = function (bar) {
-  return bar;
-};
+  return bar
+}

@@ -7,46 +7,40 @@ const renderBaseGraph = require('./base.js')
 
 module.exports = renderGraph
 
-function renderGraph (state, actions) {
+function renderGraph(state, actions) {
   return renderBaseGraph(state, actions, { renderNode, renderLink })
 }
 
-function renderNode (node, state, actions) {
+function renderNode(node, state, actions) {
   const { selectedNode } = state
   const isSelected = selectedNode === node.id
 
   const { color } = node
-  const normalRadius = ('radius' in node) ? node.radius : 5
-  const radius = isSelected ? (normalRadius * 2) : normalRadius
+  const normalRadius = 'radius' in node ? node.radius : 5
+  const radius = isSelected ? normalRadius * 2 : normalRadius
   const label = node.label || node.id
 
-  return (
-
-    s('circle', {
+  return s(
+    'circle',
+    {
       r: radius,
       fill: color,
       cx: node.x,
       cy: node.y,
       onClick: () => actions.selectNode(node.id),
-    }, [
-      s('title', `${label}`),
-    ])
-
+    },
+    [s('title', `${label}`)]
   )
 }
 
 /* eslint-disable-next-line no-unused-vars */
-function renderLink (link, state, actions) {
+function renderLink(link, state, actions) {
   const { source, target } = link
-  return (
-
-    s('line', {
-      strokeWidth: link.value,
-      x1: source.x,
-      y1: source.y,
-      x2: target.x,
-      y2: target.y,
-    })
-
-  )
+  return s('line', {
+    strokeWidth: link.value,
+    x1: source.x,
+    y1: source.y,
+    x2: target.x,
+    y2: target.y,
+  })
 }

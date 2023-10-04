@@ -9,7 +9,8 @@ const {
 test('builtin - basic access', async (t) => {
   const scenario = createScenarioFromScaffold({
     defineOne: () => {
-      let abc = null; let xyz = null
+      let abc = null
+      let xyz = null
       try {
         abc = require('abc')
       } catch (_) {}
@@ -81,7 +82,8 @@ test('builtin - paths soft-bindings preserve "this" but allow override', async (
       const thisChecker = require('thisChecker')
       const { SomeClass } = require('someClass')
       // this test ensures "Buffer.prototype.slice" is copied in a way that allows "this" to be overridden
-      module.exports.overrideCheck = (buf) => Buffer.prototype.slice.call(buf, 1, 2)[0] === buf[1]
+      module.exports.overrideCheck = (buf) =>
+        Buffer.prototype.slice.call(buf, 1, 2)[0] === buf[1]
       // this test ensures "Buffer.prototype.slice" is copied in a way that allows "this" to be overridden
       module.exports.thisCheck = () => thisChecker.check()
       // this test ensures class syntax works, with its required use of the "new" keyword
@@ -120,9 +122,11 @@ test('builtin - paths soft-bindings preserve "this" but allow override', async (
     builtin: {
       buffer: require('buffer'),
       thisChecker: (() => {
-        const parent = {}; parent.check = function () {
+        const parent = {}
+        parent.check = function () {
           return this === parent
-        }; return parent
+        }
+        return parent
       })(),
       someClass: { SomeClass: class SomeClass {} },
     },

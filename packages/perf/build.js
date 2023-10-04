@@ -18,10 +18,13 @@ const plugin = []
 
 // add lavamoat
 if (useLavamoat) {
-  plugin.push([lavamoatPlugin, {
-    writeAutoPolicy,
-    policyName: policyName,
-  }])
+  plugin.push([
+    lavamoatPlugin,
+    {
+      writeAutoPolicy,
+      policyName: policyName,
+    },
+  ])
 }
 
 // configure bundler
@@ -33,7 +36,7 @@ const bundler = browserify(['./entry.js'], {
 // build
 
 // eslint-disable-next-line no-unused-vars
-async function main () {
+async function main() {
   fs.mkdirSync('./bundle', { recursive: true })
   await performBundle()
   // workaround for lavamoat-browserify - need to rebuild after policy is written
@@ -42,7 +45,7 @@ async function main () {
   }
 }
 
-function performBundle () {
+function performBundle() {
   return new Promise((resolve, reject) => {
     pipeline(
       bundler.bundle(),
@@ -52,7 +55,7 @@ function performBundle () {
           return reject(err)
         }
         resolve(bundle)
-      },
+      }
     )
   })
 }

@@ -2,7 +2,6 @@ const ModelViewer = require('metamask-logo')
 
 // To render with fixed dimensions:
 const viewer = ModelViewer({
-
   // Dictates whether width & height are px or multiplied
   pxNotRatio: true,
   width: 500,
@@ -16,7 +15,6 @@ const viewer = ModelViewer({
 
   // head should slowly drift (overrides lookAt)
   slowDrift: false,
-
 })
 
 // add viewer to DOM

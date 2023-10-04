@@ -35,10 +35,10 @@ const alwaysThrowHandler = new Proxy(
   freeze({
     get(_shadow, prop) {
       assert.fail(
-        d`Please report unexpected scope handler trap: ${q(String(prop))}`,
+        d`Please report unexpected scope handler trap: ${q(String(prop))}`
       )
     },
-  }),
+  })
 )
 
 /**
@@ -77,7 +77,7 @@ const scopeProxyHandlerProperties = {
     const quotedProp = q(String(prop))
     console.warn(
       `getOwnPropertyDescriptor trap on scopeTerminatorHandler for ${quotedProp}`,
-      new TypeError().stack,
+      new TypeError().stack
     )
     return undefined
   },
@@ -89,13 +89,13 @@ const scopeProxyHandlerProperties = {
 const strictScopeTerminatorHandler = freeze(
   create(
     alwaysThrowHandler,
-    getOwnPropertyDescriptors(scopeProxyHandlerProperties),
-  ),
+    getOwnPropertyDescriptors(scopeProxyHandlerProperties)
+  )
 )
 
 const strictScopeTerminator = new Proxy(
   immutableObject,
-  strictScopeTerminatorHandler,
+  strictScopeTerminatorHandler
 )
 
 module.exports = {

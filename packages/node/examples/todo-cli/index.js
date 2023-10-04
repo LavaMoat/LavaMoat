@@ -31,7 +31,9 @@ const runCommandFromArgs = async (argsString) => {
   } else if (action === 'display') {
     await displayTodos()
   } else {
-    console.log('Usage:\n  display    show existing todos\n  add [text] --priority [Low|Medium|High]  create a new todo, default priority \'Medium\'')
+    console.log(
+      "Usage:\n  display    show existing todos\n  add [text] --priority [Low|Medium|High]  create a new todo, default priority 'Medium'"
+    )
   }
 }
 
@@ -40,7 +42,7 @@ const addTodo = async (todoText, priority = 'Medium') => {
   console.log(`Added todo "${todoText}" with priority "${priority}"`)
 }
 
-function highlightTodo (todoLine) {
+function highlightTodo(todoLine) {
   const [priority, todo] = todoLine.split(': ')
   switch (priority) {
     case 'High': {
@@ -58,14 +60,14 @@ function highlightTodo (todoLine) {
   }
 }
 
-function displayTodos () {
+function displayTodos() {
   try {
     console.log(chalk.greenBright("****** TODAY'S TODOS ********"))
     const stream = createReadStream(TODO_FILE)
     const lineReader = readline.createInterface({
       input: stream,
     })
-    lineReader.on('line', line => {
+    lineReader.on('line', (line) => {
       console.log(highlightTodo(line))
     })
   } catch (err) {

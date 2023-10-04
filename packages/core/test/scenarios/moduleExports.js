@@ -53,7 +53,7 @@ module.exports = [
       },
       defineTwo: () => {
         class ModernClass {
-          constructor () {
+          constructor() {
             this.abc = 123
           }
         }
@@ -74,7 +74,7 @@ module.exports = [
       defineOne: () => {
         const BaseClass = require('two')
         class NewClass extends BaseClass {
-          constructor () {
+          constructor() {
             super()
             this.abc = 456
           }
@@ -86,7 +86,7 @@ module.exports = [
       },
       defineTwo: () => {
         class BaseClass {
-          constructor () {
+          constructor() {
             this.abc = 123
           }
         }
@@ -184,7 +184,7 @@ module.exports = [
       },
       config: {
         resources: {
-          '$root$': {
+          $root$: {
             packages: {
               one: true,
             },

@@ -64,28 +64,26 @@ module.exports = {
 async function getOptionsForBin({ rootDir, name }) {
   const {
     configs: {
-      bin: {
-        binCandidates,
-      },
+      bin: { binCandidates },
     },
   } = await loadAllPackageConfigurations({ rootDir })
 
   return binCandidates.get(name)
 }
 
-
 async function runAllowedPackages({ rootDir }) {
   const {
-    configs: {
-      lifecycle,
-      bin,
-    },
+    configs: { lifecycle, bin },
     somePoliciesAreMissing,
   } = await loadAllPackageConfigurations({ rootDir })
 
   if (somePoliciesAreMissing) {
-    console.log('\n@lavamoat/allow-scripts has detected dependencies without configuration. explicit configuration required.')
-    console.log('run "allow-scripts auto" to automatically populate the configuration.\n')
+    console.log(
+      '\n@lavamoat/allow-scripts has detected dependencies without configuration. explicit configuration required.'
+    )
+    console.log(
+      'run "allow-scripts auto" to automatically populate the configuration.\n'
+    )
 
     printMissingPoliciesIfAny(lifecycle)
 
@@ -99,7 +97,10 @@ async function runAllowedPackages({ rootDir }) {
     if (bin.binCandidates.size > 0) {
       console.log('installing bin scripts')
       await installBinScripts(bin.allowedBins)
-      await installBinFirewall(bin.firewalledBins, path.join(__dirname, './whichbin.js'))
+      await installBinFirewall(
+        bin.firewalledBins,
+        path.join(__dirname, './whichbin.js')
+      )
     } else {
       console.log('no bin scripts found in dependencies')
     }
@@ -107,17 +108,27 @@ async function runAllowedPackages({ rootDir }) {
 
   // run scripts in dependencies
   if (lifecycle.allowedPatterns.length) {
-    const allowedPackagesWithScriptsLifecycleScripts = Array.from(lifecycle.packagesWithScripts.entries())
+    const allowedPackagesWithScriptsLifecycleScripts = Array.from(
+      lifecycle.packagesWithScripts.entries()
+    )
       .filter(([pattern]) => lifecycle.allowedPatterns.includes(pattern))
       .flatMap(([, packages]) => packages)
 
-
     console.log('running lifecycle scripts for event "preinstall"')
-    await runAllScriptsForEvent({ event: 'preinstall', packages: allowedPackagesWithScriptsLifecycleScripts })
+    await runAllScriptsForEvent({
+      event: 'preinstall',
+      packages: allowedPackagesWithScriptsLifecycleScripts,
+    })
     console.log('running lifecycle scripts for event "install"')
-    await runAllScriptsForEvent({ event: 'install', packages: allowedPackagesWithScriptsLifecycleScripts })
+    await runAllScriptsForEvent({
+      event: 'install',
+      packages: allowedPackagesWithScriptsLifecycleScripts,
+    })
     console.log('running lifecycle scripts for event "postinstall"')
-    await runAllScriptsForEvent({ event: 'postinstall', packages: allowedPackagesWithScriptsLifecycleScripts })
+    await runAllScriptsForEvent({
+      event: 'postinstall',
+      packages: allowedPackagesWithScriptsLifecycleScripts,
+    })
   } else {
     console.log('no allowed lifecycle scripts found in configuration')
   }
@@ -134,10 +145,7 @@ async function runAllowedPackages({ rootDir }) {
 async function setDefaultConfiguration({ rootDir }) {
   const conf = await loadAllPackageConfigurations({ rootDir })
   const {
-    configs: {
-      lifecycle,
-      bin,
-    },
+    configs: { lifecycle, bin },
     somePoliciesAreMissing,
   } = conf
 
@@ -150,14 +158,16 @@ async function setDefaultConfiguration({ rootDir }) {
 
   console.log('\nadding configuration:')
 
-  lifecycle.missingPolicies.forEach(pattern => {
+  lifecycle.missingPolicies.forEach((pattern) => {
     console.log(`- lifecycle ${pattern}`)
     lifecycle.allowConfig[pattern] = false
   })
 
-  if(FEATURE.bins && bin.somePoliciesAreMissing) {
+  if (FEATURE.bins && bin.somePoliciesAreMissing) {
     bin.allowConfig = prepareBinScriptsPolicy(bin.binCandidates)
-    console.log(`- bin scripts linked: ${Object.keys(bin.allowConfig).join(',')}`)
+    console.log(
+      `- bin scripts linked: ${Object.keys(bin.allowConfig).join(',')}`
+    )
   }
 
   // update package json
@@ -169,21 +179,20 @@ async function setDefaultConfiguration({ rootDir }) {
 
 async function printPackagesList({ rootDir }) {
   const {
-    configs: {
-      bin,
-      lifecycle,
-    },
+    configs: { bin, lifecycle },
   } = await loadAllPackageConfigurations({ rootDir })
 
   printPackagesByBins(bin)
   printPackagesByScriptConfiguration(lifecycle)
 }
 
-
-function printMissingPoliciesIfAny({ missingPolicies = [], packagesWithScripts = new Map() }) {
-  if(missingPolicies.length) {
+function printMissingPoliciesIfAny({
+  missingPolicies = [],
+  packagesWithScripts = new Map(),
+}) {
+  if (missingPolicies.length) {
     console.log('packages missing configuration:')
-    missingPolicies.forEach(pattern => {
+    missingPolicies.forEach((pattern) => {
       const collection = packagesWithScripts.get(pattern) || []
       console.log(`- ${pattern} [${collection.length} location(s)]`)
     })
@@ -223,7 +232,7 @@ async function installBinScripts(allowedBins) {
 async function installBinFirewall(firewalledBins, link) {
   // Note how we take the path of the original package so that the bin is added at the appropriate level of node_modules nesting
   for (const { bin, path: packagePath } of firewalledBins) {
-    await linkBinAbsolute({path: packagePath, bin, link, force: true } )
+    await linkBinAbsolute({ path: packagePath, bin, link, force: true })
   }
 }
 
@@ -246,7 +255,6 @@ async function runScript({ path, event }) {
   })
 }
 
-
 const bannedBins = new Set(['node', 'npm', 'yarn', 'pnpm'])
 
 /**
@@ -255,9 +263,9 @@ const bannedBins = new Set(['node', 'npm', 'yarn', 'pnpm'])
 function prepareBinScriptsPolicy(binCandidates) {
   const policy = {}
   // pick direct dependencies without conflicts and enable them by default unless colliding with bannedBins
-  for ( const [bin, infos] of binCandidates.entries()) {
-    const binsFromDirectDependencies = infos.filter(i => i.isDirect)
-    if(binsFromDirectDependencies.length === 1 && !bannedBins.has(bin)) {
+  for (const [bin, infos] of binCandidates.entries()) {
+    const binsFromDirectDependencies = infos.filter((i) => i.isDirect)
+    if (binsFromDirectDependencies.length === 1 && !bannedBins.has(bin)) {
       // there's no conflicts, seems fairly obvious choice to put it up
       policy[bin] = binsFromDirectDependencies[0].fullLinkPath
     }
@@ -265,15 +273,10 @@ function prepareBinScriptsPolicy(binCandidates) {
   return policy
 }
 
-
 /**
  * @param {BinsConfig} param0
  */
-function printPackagesByBins({
-  allowedBins,
-  excessPolicies,
-}) {
-
+function printPackagesByBins({ allowedBins, excessPolicies }) {
   console.log('\n# allowed packages with bin scripts')
   if (allowedBins.length) {
     allowedBins.forEach(({ canonicalName, bin }) => {
@@ -284,8 +287,10 @@ function printPackagesByBins({
   }
 
   if (excessPolicies.length) {
-    console.log('\n# packages with bin scripts that no longer need configuration (package or script removed or script path outdated)')
-    excessPolicies.forEach(bin => {
+    console.log(
+      '\n# packages with bin scripts that no longer need configuration (package or script removed or script path outdated)'
+    )
+    excessPolicies.forEach((bin) => {
       console.log(`- ${bin}`)
     })
   }
@@ -301,10 +306,9 @@ function printPackagesByScriptConfiguration({
   missingPolicies,
   excessPolicies,
 }) {
-
   console.log('\n# allowed packages with lifecycle scripts')
   if (allowedPatterns.length) {
-    allowedPatterns.forEach(pattern => {
+    allowedPatterns.forEach((pattern) => {
       const collection = packagesWithScripts.get(pattern) || []
       console.log(`- ${pattern} [${collection.length} location(s)]`)
     })
@@ -314,7 +318,7 @@ function printPackagesByScriptConfiguration({
 
   console.log('\n# disallowed packages with lifecycle scripts')
   if (disallowedPatterns.length) {
-    disallowedPatterns.forEach(pattern => {
+    disallowedPatterns.forEach((pattern) => {
       const collection = packagesWithScripts.get(pattern) || []
       console.log(`- ${pattern} [${collection.length} location(s)]`)
     })
@@ -324,15 +328,17 @@ function printPackagesByScriptConfiguration({
 
   if (missingPolicies.length) {
     console.log('\n# unconfigured packages with lifecycle scripts')
-    missingPolicies.forEach(pattern => {
+    missingPolicies.forEach((pattern) => {
       const collection = packagesWithScripts.get(pattern) || []
       console.log(`- ${pattern} [${collection.length} location(s)]`)
     })
   }
 
   if (excessPolicies.length) {
-    console.log('\n# packages with lifecycle scripts that no longer need configuration due to package or scripts removal')
-    excessPolicies.forEach(pattern => {
+    console.log(
+      '\n# packages with lifecycle scripts that no longer need configuration due to package or scripts removal'
+    )
+    excessPolicies.forEach((pattern) => {
       const collection = packagesWithScripts.get(pattern) || []
       console.log(`- ${pattern} [${collection.length} location(s)]`)
     })
@@ -346,10 +352,13 @@ function printPackagesByScriptConfiguration({
  * @param {PkgConfs} args.conf
  * @returns {Promise}
  */
-async function savePackageConfigurations({ rootDir, conf: {
-  packageJson,
-  configs: { lifecycle, bin },
-} }) {
+async function savePackageConfigurations({
+  rootDir,
+  conf: {
+    packageJson,
+    configs: { lifecycle, bin },
+  },
+}) {
   // update package json
   if (!packageJson.lavamoat) {
     packageJson.lavamoat = {}
@@ -371,17 +380,29 @@ async function loadAllPackageConfigurations({ rootDir }) {
   const packagesWithScriptsLifecycle = new Map()
   const binCandidates = new Map()
 
-  const dependencyMap = await loadCanonicalNameMap({ rootDir, includeDevDeps: true })
-  const sortedDepEntries = Array.from(dependencyMap.entries()).sort(sortBy(([, canonicalName]) => canonicalName))
-  const packageJson = JSON.parse(await fs.readFile(path.join(rootDir, 'package.json'), 'utf8'))
-  const directDeps = new Set([...Object.keys(packageJson.devDependencies||{}),...Object.keys(packageJson.dependencies||{})])
+  const dependencyMap = await loadCanonicalNameMap({
+    rootDir,
+    includeDevDeps: true,
+  })
+  const sortedDepEntries = Array.from(dependencyMap.entries()).sort(
+    sortBy(([, canonicalName]) => canonicalName)
+  )
+  const packageJson = JSON.parse(
+    await fs.readFile(path.join(rootDir, 'package.json'), 'utf8')
+  )
+  const directDeps = new Set([
+    ...Object.keys(packageJson.devDependencies || {}),
+    ...Object.keys(packageJson.dependencies || {}),
+  ])
 
   for (const [filePath, canonicalName] of sortedDepEntries) {
     // const canonicalName = getCanonicalNameForPath({ rootDir, filePath: filePath })
     let depPackageJson
     // eslint-disable-next-line no-useless-catch
     try {
-      depPackageJson = JSON.parse(await fs.readFile(path.join(filePath, 'package.json'), 'utf-8'))
+      depPackageJson = JSON.parse(
+        await fs.readFile(path.join(filePath, 'package.json'), 'utf-8')
+      )
     } catch (err) {
       // FIXME: leftovers of code that used to work
       // const branchIsOptional = branch.some(node => node.optional)
@@ -391,7 +412,9 @@ async function loadAllPackageConfigurations({ rootDir }) {
       throw err
     }
     const depScripts = depPackageJson.scripts || {}
-    const lifeCycleScripts = ['preinstall', 'install', 'postinstall'].filter(name => Object.prototype.hasOwnProperty.call(depScripts, name))
+    const lifeCycleScripts = ['preinstall', 'install', 'postinstall'].filter(
+      (name) => Object.prototype.hasOwnProperty.call(depScripts, name)
+    )
 
     if (lifeCycleScripts.length) {
       const collection = packagesWithScriptsLifecycle.get(canonicalName) || []
@@ -417,7 +440,7 @@ async function loadAllPackageConfigurations({ rootDir }) {
           bin: name,
           path: filePath,
           link,
-          fullLinkPath: path.relative(rootDir,path.join(filePath, link)),
+          fullLinkPath: path.relative(rootDir, path.join(filePath, link)),
           canonicalName,
         })
       })
@@ -437,7 +460,10 @@ async function loadAllPackageConfigurations({ rootDir }) {
     }),
   }
 
-  const somePoliciesAreMissing = !!(configs.lifecycle.missingPolicies.length || configs.bin.somePoliciesAreMissing)
+  const somePoliciesAreMissing = !!(
+    configs.lifecycle.missingPolicies.length ||
+    configs.bin.somePoliciesAreMissing
+  )
 
   return {
     packageJson,
@@ -456,14 +482,21 @@ function indexLifecycleConfiguration(config) {
   // packages with config
   const configuredPatterns = Object.keys(config.allowConfig)
   // select allowed + disallowed
-  config.allowedPatterns = Object.entries(config.allowConfig).filter(([, packageData]) => !!packageData).map(([pattern]) => pattern)
+  config.allowedPatterns = Object.entries(config.allowConfig)
+    .filter(([, packageData]) => !!packageData)
+    .map(([pattern]) => pattern)
 
-  config.disallowedPatterns = Object.entries(config.allowConfig).filter(([, packageData]) => !packageData).map(([pattern]) => pattern)
+  config.disallowedPatterns = Object.entries(config.allowConfig)
+    .filter(([, packageData]) => !packageData)
+    .map(([pattern]) => pattern)
 
-  config.missingPolicies = Array.from(config.packagesWithScripts.keys())
-    .filter(pattern => !configuredPatterns.includes(pattern))
+  config.missingPolicies = Array.from(config.packagesWithScripts.keys()).filter(
+    (pattern) => !configuredPatterns.includes(pattern)
+  )
 
-  config.excessPolicies = configuredPatterns.filter(pattern => !config.packagesWithScripts.has(pattern))
+  config.excessPolicies = configuredPatterns.filter(
+    (pattern) => !config.packagesWithScripts.has(pattern)
+  )
 
   return config
 }
@@ -475,11 +508,25 @@ function indexLifecycleConfiguration(config) {
  */
 function indexBinsConfiguration(config) {
   // only autogenerate the initial config. A better heuristic would be to detect if any scripts from direct dependencies are missing
-  config.somePoliciesAreMissing = !config.allowConfig && config.binCandidates.size > 0
-  config.excessPolicies = Object.keys(config.allowConfig || {}).filter(b => !config.binCandidates.has(b))
-  config.allowedBins = Object.entries(config.allowConfig || {}).map(([bin, fullPath]) => config.binCandidates.get(bin)?.find((/** @type BinInfo */ candidate) => candidate.fullLinkPath === fullPath)).filter(a => a)
+  config.somePoliciesAreMissing =
+    !config.allowConfig && config.binCandidates.size > 0
+  config.excessPolicies = Object.keys(config.allowConfig || {}).filter(
+    (b) => !config.binCandidates.has(b)
+  )
+  config.allowedBins = Object.entries(config.allowConfig || {})
+    .map(([bin, fullPath]) =>
+      config.binCandidates
+        .get(bin)
+        ?.find(
+          (/** @type BinInfo */ candidate) =>
+            candidate.fullLinkPath === fullPath
+        )
+    )
+    .filter((a) => a)
 
-  config.firewalledBins = Array.from(config.binCandidates.values()).flat().filter(binInfo => !config.allowedBins.includes(binInfo))
+  config.firewalledBins = Array.from(config.binCandidates.values())
+    .flat()
+    .filter((binInfo) => !config.allowedBins.includes(binInfo))
   return config
 }
 

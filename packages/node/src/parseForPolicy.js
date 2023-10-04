@@ -6,13 +6,20 @@ const bindings = require('bindings')
 const gypBuild = require('node-gyp-build')
 const { codeFrameColumns } = require('@babel/code-frame')
 const { default: highlight } = require('@babel/highlight')
-const { loadCanonicalNameMap, getPackageNameForModulePath } = require('@lavamoat/aa')
+const {
+  loadCanonicalNameMap,
+  getPackageNameForModulePath,
+} = require('@lavamoat/aa')
 const {
   parseForPolicy: coreParseForConfig,
   createModuleInspector,
   LavamoatModuleRecord,
 } = require('lavamoat-core')
-const { parse, inspectImports, codeSampleFromAstNode } = require('lavamoat-tofu')
+const {
+  parse,
+  inspectImports,
+  codeSampleFromAstNode,
+} = require('lavamoat-tofu')
 const { checkForResolutionOverride } = require('./resolutions')
 
 // file extension omitted can be omitted, eg https://npmfs.com/package/yargs/17.0.1/yargs
@@ -22,7 +29,10 @@ const resolutionOmittedExtensions = ['.js', '.json']
 /**
  * Allow use of `node:` prefixed builtins.
  */
-const builtinPackages = [...builtinModules, ...builtinModules.map(id => `node:${id}`)]
+const builtinPackages = [
+  ...builtinModules,
+  ...builtinModules.map((id) => `node:${id}`),
+]
 
 // approximate polyfill for node builtin
 const createRequire = (url) => {
@@ -59,24 +69,63 @@ module.exports = {
   resolutionOmittedExtensions,
 }
 
-async function parseForPolicy ({ projectRoot, entryId, policyOverride = {}, rootPackageName, shouldResolve, includeDebugInfo, ...args }) {
+async function parseForPolicy({
+  projectRoot,
+  entryId,
+  policyOverride = {},
+  rootPackageName,
+  shouldResolve,
+  includeDebugInfo,
+  ...args
+}) {
   const isBuiltin = (id) => builtinPackages.includes(id)
   const { resolutions } = policyOverride
-  const canonicalNameMap = await loadCanonicalNameMap({ rootDir: projectRoot, includeDevDeps: true })
-  const resolveHook = makeResolveHook({ projectRoot, resolutions, rootPackageName, canonicalNameMap })
-  const importHook = makeImportHook({ rootPackageName, shouldResolve, isBuiltin, resolveHook, canonicalNameMap })
-  const moduleSpecifier = resolveHook(entryId, path.join(projectRoot, 'package.json'))
+  const canonicalNameMap = await loadCanonicalNameMap({
+    rootDir: projectRoot,
+    includeDevDeps: true,
+  })
+  const resolveHook = makeResolveHook({
+    projectRoot,
+    resolutions,
+    rootPackageName,
+    canonicalNameMap,
+  })
+  const importHook = makeImportHook({
+    rootPackageName,
+    shouldResolve,
+    isBuiltin,
+    resolveHook,
+    canonicalNameMap,
+  })
+  const moduleSpecifier = resolveHook(
+    entryId,
+    path.join(projectRoot, 'package.json')
+  )
   const inspector = createModuleInspector({ isBuiltin, includeDebugInfo })
   // rich warning output
   inspector.on('compat-warning', displayRichCompatWarning)
-  return coreParseForConfig({ moduleSpecifier, importHook, isBuiltin, inspector, policyOverride, ...args })
+  return coreParseForConfig({
+    moduleSpecifier,
+    importHook,
+    isBuiltin,
+    inspector,
+    policyOverride,
+    ...args,
+  })
 }
 
-function makeResolveHook ({ projectRoot, resolutions = {}, canonicalNameMap }) {
+function makeResolveHook({ projectRoot, resolutions = {}, canonicalNameMap }) {
   return (requestedName, referrer) => {
-    const parentPackageName = getPackageNameForModulePath(canonicalNameMap, referrer)
+    const parentPackageName = getPackageNameForModulePath(
+      canonicalNameMap,
+      referrer
+    )
     // handle resolution overrides
-    const result = checkForResolutionOverride(resolutions, parentPackageName, requestedName)
+    const result = checkForResolutionOverride(
+      resolutions,
+      parentPackageName,
+      requestedName
+    )
     if (result) {
       // if path is a relative path, it should be relative to the projectRoot
       if (path.isAbsolute(result)) {
@@ -93,7 +142,9 @@ function makeResolveHook ({ projectRoot, resolutions = {}, canonicalNameMap }) {
       resolved = resolve(requestedName)
     } catch (err) {
       if (err.code === 'MODULE_NOT_FOUND') {
-        console.warn(`lavamoat - unable to resolve "${requestedName}" from "${referrer}"`)
+        console.warn(
+          `lavamoat - unable to resolve "${requestedName}" from "${referrer}"`
+        )
       }
       // return "null" to mean failed to resolve
       return null
@@ -102,7 +153,7 @@ function makeResolveHook ({ projectRoot, resolutions = {}, canonicalNameMap }) {
   }
 }
 
-function makeImportHook ({
+function makeImportHook({
   isBuiltin,
   resolveHook,
   shouldResolve = () => true,
@@ -129,10 +180,12 @@ function makeImportHook ({
     if (extension === '.json') {
       return makeJsonModuleRecord(specifier, filename, packageName)
     }
-    throw new Error(`lavamoat-node/makeImportHook - unknown module file extension "${extension}" in filename "${filename}"`)
+    throw new Error(
+      `lavamoat-node/makeImportHook - unknown module file extension "${extension}" in filename "${filename}"`
+    )
   }
 
-  function makeBuiltinModuleRecord (specifier) {
+  function makeBuiltinModuleRecord(specifier) {
     return new LavamoatModuleRecord({
       type: 'builtin',
       specifier,
@@ -145,7 +198,7 @@ function makeImportHook ({
     })
   }
 
-  function makeNativeModuleRecord (specifier, filename, packageName) {
+  function makeNativeModuleRecord(specifier, filename, packageName) {
     return new LavamoatModuleRecord({
       type: 'native',
       specifier,
@@ -158,7 +211,7 @@ function makeImportHook ({
     })
   }
 
-  async function makeJsModuleRecord (specifier, filename, packageName) {
+  async function makeJsModuleRecord(specifier, filename, packageName) {
     // load src
     const content = await fs.readFile(filename, 'utf8')
     // parse
@@ -166,40 +219,46 @@ function makeImportHook ({
     // get imports
     const { cjsImports } = inspectImports(ast, null, false)
     // build import map
-    const importMap = Object.fromEntries(cjsImports.map(requestedName => {
-      let depValue
-      if (shouldResolve(requestedName, specifier)) {
-        try {
-          depValue = resolveHook(requestedName, specifier)
-        } catch (err) {
-          // graceful failure
-          console.warn(`lavamoat-node/makeImportHandler - could not resolve "${requestedName}" from "${specifier}"`)
+    const importMap = Object.fromEntries(
+      cjsImports.map((requestedName) => {
+        let depValue
+        if (shouldResolve(requestedName, specifier)) {
+          try {
+            depValue = resolveHook(requestedName, specifier)
+          } catch (err) {
+            // graceful failure
+            console.warn(
+              `lavamoat-node/makeImportHandler - could not resolve "${requestedName}" from "${specifier}"`
+            )
+            depValue = null
+          }
+        } else {
+          // resolving is skipped so put in a dummy value
           depValue = null
         }
-      } else {
-        // resolving is skipped so put in a dummy value
-        depValue = null
-      }
-      return [requestedName, depValue]
-    }))
+        return [requestedName, depValue]
+      })
+    )
     // add policyOverride additions to import map (policy gen only)
-    const policyOverrideImports = Object.keys(policyOverride?.resources?.[packageName]?.packages ?? {})
-    await Promise.all(policyOverrideImports.map(async packageName => {
-      // skip if there is already an entry for the name
-      if (packageName in importMap[packageName]) {
-        return
-      }
-      // resolve and add package main in override
-      const packageRoot = getMapKeyForValue(canonicalNameMap, packageName)
-      const packageJson = JSON.parse(
-        await fs.readFile(
-          path.join(packageRoot, 'package.json'), 'utf8',
-        ),
-      )
-      const main = packageJson.main ?? 'index.js'
-      const mainPath = path.resolve(packageRoot, main)
-      importMap[packageName] = mainPath
-    }))
+    const policyOverrideImports = Object.keys(
+      policyOverride?.resources?.[packageName]?.packages ?? {}
+    )
+    await Promise.all(
+      policyOverrideImports.map(async (packageName) => {
+        // skip if there is already an entry for the name
+        if (packageName in importMap[packageName]) {
+          return
+        }
+        // resolve and add package main in override
+        const packageRoot = getMapKeyForValue(canonicalNameMap, packageName)
+        const packageJson = JSON.parse(
+          await fs.readFile(path.join(packageRoot, 'package.json'), 'utf8')
+        )
+        const main = packageJson.main ?? 'index.js'
+        const mainPath = path.resolve(packageRoot, main)
+        importMap[packageName] = mainPath
+      })
+    )
 
     // heuristics for detecting common dynamically imported native modules
     // important for generating a working config for apps with native modules
@@ -207,7 +266,10 @@ function makeImportHook ({
       // detect native modules using "bindings" package
       try {
         const packageDir = bindings.getRoot(filename)
-        const nativeModulePath = bindings({ path: true, module_root: packageDir })
+        const nativeModulePath = bindings({
+          path: true,
+          module_root: packageDir,
+        })
         importMap[nativeModulePath] = nativeModulePath
       } catch (err) {
         // ignore resolution failures
@@ -241,7 +303,7 @@ function makeImportHook ({
     })
   }
 
-  async function makeJsonModuleRecord (specifier, filename, packageName) {
+  async function makeJsonModuleRecord(specifier, filename, packageName) {
     // load src
     const rawContent = await fs.readFile(filename, 'utf8')
     // validate json
@@ -258,7 +320,7 @@ function makeImportHook ({
   }
 }
 
-function parseModule (moduleSrc, filename = '<unknown file>') {
+function parseModule(moduleSrc, filename = '<unknown file>') {
   let ast
   try {
     // transformFromAstAsync
@@ -283,16 +345,19 @@ function parseModule (moduleSrc, filename = '<unknown file>') {
   return ast
 }
 
-function displayRichCompatWarning ({ moduleRecord, compatWarnings }) {
+function displayRichCompatWarning({ moduleRecord, compatWarnings }) {
   const { packageName, file } = moduleRecord
-  const { primordialMutations, strictModeViolations, dynamicRequires } = compatWarnings
-  console.warn(`⚠️  Potentially Incompatible code detected in package "${packageName}" file "${file}":`)
+  const { primordialMutations, strictModeViolations, dynamicRequires } =
+    compatWarnings
+  console.warn(
+    `⚠️  Potentially Incompatible code detected in package "${packageName}" file "${file}":`
+  )
   const highlightedCode = highlight(moduleRecord.content)
   logWarnings('primordial mutation', primordialMutations)
   logWarnings('dynamic require', dynamicRequires)
   logErrors('strict mode violation', strictModeViolations)
 
-  function logWarnings (message, sites) {
+  function logWarnings(message, sites) {
     sites.forEach(({ node }) => {
       const { npmfs } = codeSampleFromAstNode(node, moduleRecord)
       if (npmfs) {
@@ -303,7 +368,7 @@ function displayRichCompatWarning ({ moduleRecord, compatWarnings }) {
     })
   }
 
-  function logErrors (category, sites) {
+  function logErrors(category, sites) {
     sites.forEach(({ loc, error }) => {
       const range = { start: loc }
       const { npmfs } = codeSampleFromAstNode({ loc: range }, moduleRecord)

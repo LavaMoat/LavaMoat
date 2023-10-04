@@ -1,6 +1,5 @@
-
 class LavamoatModuleRecord {
-  constructor ({
+  constructor({
     specifier,
     file,
     type,

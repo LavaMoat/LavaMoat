@@ -1,2 +1,4 @@
-try { }
-catch ({ message }) { message; }
+try {
+} catch ({ message }) {
+  message
+}

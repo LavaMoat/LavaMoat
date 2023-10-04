@@ -1,5 +1,5 @@
 function foo() {
   return {
-    bar: true
+    bar: true,
   }
 }

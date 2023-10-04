@@ -1,11 +1,6 @@
 const test = require('ava')
-const {
-  runScenario,
-  createBrowserifyScenarioFromScaffold,
-} = require('./util')
-const {
-  runAndTestScenario,
-} = require('lavamoat-core/test/util.js')
+const { runScenario, createBrowserifyScenarioFromScaffold } = require('./util')
+const { runAndTestScenario } = require('lavamoat-core/test/util.js')
 
 // TODO: this should be resolving to a browserify dependency
 // eslint-disable-next-line ava/no-skip-test

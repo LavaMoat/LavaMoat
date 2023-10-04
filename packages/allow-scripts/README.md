@@ -4,7 +4,6 @@ A tool for running only the dependency lifecycle hooks specified in an _allowlis
 
 > For an overview of LavaMoat tools see [the main README](https://github.com/LavaMoat/LavaMoat/tree/main/README.md)
 
-
 ### Install
 
 Adds the package to start using it in your project. be sure to include the `@lavamoat/` namespace in the package name
@@ -12,7 +11,9 @@ Adds the package to start using it in your project. be sure to include the `@lav
 ```sh
 yarn add -D @lavamoat/allow-scripts
 ```
+
 or
+
 ```sh
 npm i -D @lavamoat/allow-scripts
 ```
@@ -22,7 +23,9 @@ npm i -D @lavamoat/allow-scripts
 ```sh
 yarn allow-scripts setup
 ```
+
 or
+
 ```sh
 npx --no-install allow-scripts setup
 ```
@@ -33,7 +36,6 @@ Adds a `.yarnrc` or `.npmrc` (the latter if `package-lock.json` is present) to t
 
 Adding this package to a project **mitigates** the likelihood of accidentally running any lifecycle scripts by throwing an error during the `preinstall` script execution.
 
-
 ### Configure
 
 Automatically generates and writes a configuration into `package.json`, setting new policies as `false` by default. Edit this file as necessary.
@@ -41,7 +43,9 @@ Automatically generates and writes a configuration into `package.json`, setting 
 ```sh
 yarn allow-scripts auto
 ```
+
 or
+
 ```sh
 npx --no-install allow-scripts auto
 ```
@@ -68,7 +72,9 @@ Run **all** lifecycle scripts for the packages specified in `package.json`
 ```sh
 yarn allow-scripts
 ```
+
 or
+
 ```sh
 npx --no-install allow-scripts
 ```
@@ -84,7 +90,9 @@ Prints comprehension of configuration and dependencies with lifecycle scripts, s
 ```sh
 yarn allow-scripts list
 ```
+
 or
+
 ```sh
 npx --no-install allow-scripts list
 ```

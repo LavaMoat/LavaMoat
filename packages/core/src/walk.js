@@ -12,7 +12,7 @@ module.exports = { walk, eachNodeInTree }
  * @param {function} options.shouldImport
  * @param {Set<string>} options.visitedSpecifiers
  */
-async function walk ({
+async function walk({
   moduleSpecifier,
   importHook,
   visitorFn,
@@ -40,7 +40,7 @@ async function walk ({
  * @returns {AsyncIterableIterator<LavamoatModuleRecord>}
  */
 // NOTE: i think this is depth first in a way that doesnt take advantage of concurrency
-async function * eachNodeInTree ({
+async function* eachNodeInTree({
   moduleSpecifier,
   importHook,
   shouldImport = () => true,

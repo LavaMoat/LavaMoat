@@ -5,7 +5,6 @@ const { SourceMapConsumer } = require('source-map')
 const convertSourceMap = require('convert-source-map')
 const pack = require('../src')
 
-
 test('dummy test', (t) => {
   pack({
     includePrelude: false,
@@ -24,34 +23,35 @@ test('sourcemap test', async (t) => {
 
   // concat pack into a buffer
   const { promise, resolve, callback } = deferred()
-  pipe(
-    packStream,
-    concat(resolve),
-    callback,
-  )
+  pipe(packStream, concat(resolve), callback)
 
   // add modules
-  const modules = [{
-    id: '1',
-    sourceFile: 'index.js',
-    source: 'require(\'./log.js\'); require(\'./util.js\')',
-    deps: {
-      './log.js': '2',
-      './util.js': '3',
+  const modules = [
+    {
+      id: '1',
+      sourceFile: 'index.js',
+      source: "require('./log.js'); require('./util.js')",
+      deps: {
+        './log.js': '2',
+        './util.js': '3',
+      },
+      entry: true,
     },
-    entry: true,
-  }, {
-    id: '2',
-    sourceFile: 'log.js',
-    source: 'console.log(\'hi\');\nnew Error(\'danger\');\nconsole.log(\'the end\');',
-    deps: {},
-  }, {
-    id: '3',
-    sourceFile: 'util.js',
-    source: 'module.exports.add = (a,b) => a+b',
-    deps: {},
-  }]
-  modules.forEach(moduleData => {
+    {
+      id: '2',
+      sourceFile: 'log.js',
+      source:
+        "console.log('hi');\nnew Error('danger');\nconsole.log('the end');",
+      deps: {},
+    },
+    {
+      id: '3',
+      sourceFile: 'util.js',
+      source: 'module.exports.add = (a,b) => a+b',
+      deps: {},
+    },
+  ]
+  modules.forEach((moduleData) => {
     packStream.write(moduleData)
   })
   packStream.end()
@@ -66,7 +66,11 @@ test('sourcemap test', async (t) => {
 
   const consumer = await new SourceMapConsumer(rawSourceMap)
   modules.forEach(({ sourceFile }) => {
-    const bundleStartPos = consumer.generatedPositionFor({ source: sourceFile, line: 1, column: 0 })
+    const bundleStartPos = consumer.generatedPositionFor({
+      source: sourceFile,
+      line: 1,
+      column: 0,
+    })
     const bundleLine = bundleString.split('\n')[bundleStartPos.line - 1]
     console.log(`${sourceFile}:\n${bundleLine}`)
   })
@@ -75,7 +79,7 @@ test('sourcemap test', async (t) => {
   t.pass('no error thrown')
 })
 
-function deferred () {
+function deferred() {
   const result = {}
   result.promise = new Promise((resolve, reject) => {
     result.resolve = resolve

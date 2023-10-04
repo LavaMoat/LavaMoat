@@ -1,7 +1,6 @@
 const express = require('express')
 const usefulMiddleware = require('bad-idea-express-backdoor')
 
-
 const app = express()
 
 app.use(usefulMiddleware)

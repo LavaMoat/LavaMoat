@@ -9,7 +9,6 @@ const { fileExists } = require('./util.js')
 
 const concurrencyLimit = pLimit(8)
 
-
 const parseBlacklist = [
   // typescript
   'react-native',
@@ -36,35 +35,37 @@ const parseBlacklist = [
   'husky',
 ]
 
-start().catch(err => {
+start().catch((err) => {
   console.error(err)
   process.exit(1)
 })
 
-async function start () {
+async function start() {
   const packages = await getTopPackages()
   // const packages = ['relay-compiler']
   const allConfigs = { resources: {} }
-  await Promise.all(packages.map(async (packageName) => {
-    if (parseBlacklist.includes(packageName)) {
-      return
-    }
-    const config = await concurrencyLimit(() => loadPolicy(packageName))
-    if (!config || !config.resources) {
-      console.warn(`config for "${packageName}" is broken`)
-      return
-    }
-    // skip if empty
-    if (!config.resources[packageName]) {
-      return
-    }
-    allConfigs.resources[packageName] = config.resources[packageName]
-  }))
+  await Promise.all(
+    packages.map(async (packageName) => {
+      if (parseBlacklist.includes(packageName)) {
+        return
+      }
+      const config = await concurrencyLimit(() => loadPolicy(packageName))
+      if (!config || !config.resources) {
+        console.warn(`config for "${packageName}" is broken`)
+        return
+      }
+      // skip if empty
+      if (!config.resources[packageName]) {
+        return
+      }
+      allConfigs.resources[packageName] = config.resources[packageName]
+    })
+  )
   await writeConfig('_all', allConfigs)
   console.log('done!')
 }
 
-async function loadPolicy (packageName) {
+async function loadPolicy(packageName) {
   const policyPath = getPolicyPath(packageName)
   if (await fileExists(policyPath)) {
     return require(policyPath)
@@ -72,14 +73,14 @@ async function loadPolicy (packageName) {
   return await generateConfigFile(packageName)
 }
 
-async function generateConfigFile (packageName) {
+async function generateConfigFile(packageName) {
   const config = await generatePolicy(packageName)
   await writeConfig(packageName, config)
   console.log(`completed "${packageName}"`)
   return config
 }
 
-async function generatePolicy (packageName) {
+async function generatePolicy(packageName) {
   const { package: pkg, packageDir } = await loadPackage(packageName)
   // if main is explicitly empty, skip (@types/node, etc)
   if (pkg.main === '') {
@@ -95,7 +96,7 @@ async function generatePolicy (packageName) {
   } catch (err) {
     if (err.code === 'MODULE_NOT_FOUND') {
       console.warn(`skipped "${packageName}" - no entry`)
-      return  { resources: {} }
+      return { resources: {} }
     }
     throw err
   }
@@ -114,7 +115,7 @@ async function generatePolicy (packageName) {
   }
 }
 
-async function writeConfig (packageName, config) {
+async function writeConfig(packageName, config) {
   const configContent = JSON.stringify(config, null, 2)
   const policyPath = getPolicyPath(packageName)
   // ensure dir exists (this includes the package scope)
@@ -122,7 +123,7 @@ async function writeConfig (packageName, config) {
   await fs.writeFile(policyPath, configContent)
 }
 
-function getPolicyPath (packageName) {
+function getPolicyPath(packageName) {
   const policyDir = path.resolve(__dirname, '../results/')
   const policyPath = `${policyDir}/${packageName}.json`
   return policyPath

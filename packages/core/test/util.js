@@ -1,4 +1,9 @@
-const { parseForPolicy, LavamoatModuleRecord, generateKernel, getDefaultPaths } = require('../src/index.js')
+const {
+  parseForPolicy,
+  LavamoatModuleRecord,
+  generateKernel,
+  getDefaultPaths,
+} = require('../src/index.js')
 const mergeDeep = require('merge-deep')
 const { runInContext, createContext } = require('vm')
 const path = require('path')
@@ -22,14 +27,18 @@ module.exports = {
   runAndTestScenario,
 }
 
-async function generatePolicyFromFiles ({ files, ...opts }) {
+async function generatePolicyFromFiles({ files, ...opts }) {
   const config = await parseForPolicy({
-    moduleSpecifier: files.find(file => file.entry).specifier,
+    moduleSpecifier: files.find((file) => file.entry).specifier,
     resolveHook: (requestedName, parentAddress) => {
-      return files.find(file => file.specifier === parentAddress).importMap[requestedName]
+      return files.find((file) => file.specifier === parentAddress).importMap[
+        requestedName
+      ]
     },
     importHook: async (address) => {
-      return new LavamoatModuleRecord(files.find(file => file.specifier === address))
+      return new LavamoatModuleRecord(
+        files.find((file) => file.specifier === address)
+      )
     },
     isBuiltin: () => false,
     includeDebugInfo: false,
@@ -39,7 +48,7 @@ async function generatePolicyFromFiles ({ files, ...opts }) {
   return config
 }
 
-function createScenarioFromScaffold ({
+function createScenarioFromScaffold({
   name = 'template scenario',
   expectedResult = {
     value: 'this is module two',
@@ -55,21 +64,32 @@ function createScenarioFromScaffold ({
   checkError = async (t, err, scenario) => {
     if (scenario.expectedFailure) {
       t.truthy(err, `Scenario fails as expected: ${scenario.name} - ${err}`)
-      t.regex(err.message, scenario.expectedFailureMessageRegex, 'Error message expects to match regex')
+      t.regex(
+        err.message,
+        scenario.expectedFailureMessageRegex,
+        'Error message expects to match regex'
+      )
     } else {
       if (err) {
         t.fail(`Unexpected error in scenario: ${scenario.name} - ${err}`)
-        throw (err)
+        throw err
       }
     }
   },
   checkResult = async (t, result, scenario) => {
     if (scenario.testType === 'truthy') {
-      t.assert(result, `${scenario.name} - scenario gives expected truthy result`)
+      t.assert(
+        result,
+        `${scenario.name} - scenario gives expected truthy result`
+      )
     } else if (scenario.testType === 'falsy') {
       t.falsy(result, `${scenario.name} - scenario gives expected falsy result`)
     } else {
-      t.deepEqual(result, scenario.expectedResult, `${scenario.name} - scenario gives expected result`)
+      t.deepEqual(
+        result,
+        scenario.expectedResult,
+        `${scenario.name} - scenario gives expected result`
+      )
     }
   },
   expectedFailure = false,
@@ -77,7 +97,7 @@ function createScenarioFromScaffold ({
   files = [],
   builtin = {},
   context = {},
-  opts = {scuttleGlobalThis: {}},
+  opts = { scuttleGlobalThis: {} },
   config,
   configOverride,
   defineEntry,
@@ -88,22 +108,22 @@ function createScenarioFromScaffold ({
   dir,
   ...extraArgs
 } = {}) {
-  function _defineEntry () {
+  function _defineEntry() {
     const testResult = require('one')
     console.log(JSON.stringify(testResult, null, 2))
   }
 
-  function _defineOne () {
+  function _defineOne() {
     module.exports = require('two')
   }
 
-  function _defineTwo () {
+  function _defineTwo() {
     module.exports = {
       value: 'this is module two',
     }
   }
 
-  function _defineThree () {
+  function _defineThree() {
     module.exports = {
       value: 'this is module three',
     }
@@ -121,15 +141,18 @@ function createScenarioFromScaffold ({
       entry: true,
     },
     'package.json': {
-      content: `${JSON.stringify({
-        dependencies: {
-          one: '1.0.0',
-          two: '1.0.0',
-          three: '1.0.0',
+      content: `${JSON.stringify(
+        {
+          dependencies: {
+            one: '1.0.0',
+            two: '1.0.0',
+            three: '1.0.0',
+          },
+          devDependencies: {},
         },
-        devDependencies: {
-        },
-      }, null, 2)}`,
+        null,
+        2
+      )}`,
     },
     'node_modules/one/index.js': {
       packageName: 'one',
@@ -140,12 +163,16 @@ function createScenarioFromScaffold ({
       },
     },
     'node_modules/one/package.json': {
-      content: `${JSON.stringify({
-        dependencies: {
-          two: '1.0.0',
-          three: '1.0.0',
+      content: `${JSON.stringify(
+        {
+          dependencies: {
+            two: '1.0.0',
+            three: '1.0.0',
+          },
         },
-      }, null, 2)}`,
+        null,
+        2
+      )}`,
     },
     'node_modules/two/index.js': {
       packageName: 'two',
@@ -155,11 +182,15 @@ function createScenarioFromScaffold ({
       },
     },
     'node_modules/two/package.json': {
-      content: `${JSON.stringify({
-        dependencies: {
-          three: '1.0.0',
+      content: `${JSON.stringify(
+        {
+          dependencies: {
+            three: '1.0.0',
+          },
         },
-      }, null, 2)}`,
+        null,
+        2
+      )}`,
     },
     'node_modules/three/index.js': {
       packageName: 'three',
@@ -169,45 +200,55 @@ function createScenarioFromScaffold ({
       },
     },
     'node_modules/three/package.json': {
-      content: `${JSON.stringify({
-        dependencies: {
-          one: '1.0.0',
+      content: `${JSON.stringify(
+        {
+          dependencies: {
+            one: '1.0.0',
+          },
         },
-      }, null, 2)}`,
+        null,
+        2
+      )}`,
     },
     ...files,
   })
 
   let _config
   if (defaultPolicy) {
-    _config = mergeDeep({
-      resources: {
-        one: {
-          packages: {
-            two: true,
-            three: true,
+    _config = mergeDeep(
+      {
+        resources: {
+          one: {
+            packages: {
+              two: true,
+              three: true,
+            },
           },
-        },
-        two: {
-          packages: {
-            three: true,
+          two: {
+            packages: {
+              three: true,
+            },
           },
         },
       },
-    }, config)
+      config
+    )
   } else {
     _config = config
   }
 
-  const _configOverride = mergeDeep({
-    resources: {
-      one: {
-        packages: {
-          five: true,
+  const _configOverride = mergeDeep(
+    {
+      resources: {
+        one: {
+          packages: {
+            five: true,
+          },
         },
       },
     },
-  }, configOverride)
+    configOverride
+  )
 
   return {
     ...extraArgs,
@@ -230,10 +271,10 @@ function createScenarioFromScaffold ({
   }
 }
 
-function createHookedConsole () {
+function createHookedConsole() {
   let hasResolved = false
   let resolve
-  const firstLogEventPromise = new Promise(_resolve => {
+  const firstLogEventPromise = new Promise((_resolve) => {
     resolve = _resolve
   })
   const hookedLog = (message) => {
@@ -259,10 +300,7 @@ function createHookedConsole () {
   }
 }
 
-async function runScenario ({
-  scenario,
-  runWithPrecompiledModules = false,
-}) {
+async function runScenario({ scenario, runWithPrecompiledModules = false }) {
   const {
     entries,
     files,
@@ -277,7 +315,16 @@ async function runScenario ({
   const kernelSrc = generateKernel(opts)
   const { hookedConsole, firstLogEventPromise } = createHookedConsole()
   Object.assign(scenario.context, { console: hookedConsole })
-  const { result: createKernel, vmGlobalThis, vmContext, vmFeralFunction } = evaluateWithSourceUrl('LavaMoat/core-test/kernel', kernelSrc, scenario.context)
+  const {
+    result: createKernel,
+    vmGlobalThis,
+    vmContext,
+    vmFeralFunction,
+  } = evaluateWithSourceUrl(
+    'LavaMoat/core-test/kernel',
+    kernelSrc,
+    scenario.context
+  )
   // root global for test realm
   scenario.globalThis = vmGlobalThis
   scenario.vmContext = vmContext
@@ -301,7 +348,9 @@ async function runScenario ({
         moduleInitializer: moduleRecord.moduleInitializer,
       }
       // append the source or prepare the precompiledInitializer
-      const intializerSource = `(function(exports, require, module, __filename, __dirname){\n${applySourceTransforms(moduleRecord.content)}\n})`
+      const intializerSource = `(function(exports, require, module, __filename, __dirname){\n${applySourceTransforms(
+        moduleRecord.content
+      )}\n})`
       if (runWithPrecompiledModules) {
         moduleData.precompiledInitializer = vmFeralFunction(`
           with (this.scopeTerminator) {
@@ -325,35 +374,56 @@ async function runScenario ({
     ...kernelArgs,
   })
 
-  entries.forEach(id => kernel.internalRequire(id))
+  entries.forEach((id) => kernel.internalRequire(id))
   const testResult = await firstLogEventPromise
   return testResult
 }
 
-async function prepareScenarioOnDisk ({ scenario, policyName = 'policies', projectDir }) {
+async function prepareScenarioOnDisk({
+  scenario,
+  policyName = 'policies',
+  projectDir,
+}) {
   if (projectDir === undefined) {
-    ({ path: projectDir } = await tmp.dir())
+    ;({ path: projectDir } = await tmp.dir())
   }
   const filesToWrite = Object.values(scenario.files)
   if (!scenario.opts.writeAutoPolicy) {
     const defaultPaths = getDefaultPaths(policyName)
-    const primaryPath = typeof scenario.opts.policy === 'string' ? scenario.opts.policy : defaultPaths.primary
-    filesToWrite.push({ file: primaryPath, content: stringify(scenario.config) })
+    const primaryPath =
+      typeof scenario.opts.policy === 'string'
+        ? scenario.opts.policy
+        : defaultPaths.primary
+    filesToWrite.push({
+      file: primaryPath,
+      content: stringify(scenario.config),
+    })
     if (scenario.configOverride) {
-      const overridePath = typeof scenario.opts.policyOverride === 'string' ? scenario.opts.policyOverride : defaultPaths.override
-      filesToWrite.push({ file: overridePath, content: stringify(scenario.configOverride) })
+      const overridePath =
+        typeof scenario.opts.policyOverride === 'string'
+          ? scenario.opts.policyOverride
+          : defaultPaths.override
+      filesToWrite.push({
+        file: overridePath,
+        content: stringify(scenario.configOverride),
+      })
     }
   }
-  await Promise.all(filesToWrite.map(async (file) => {
-    const fullPath = path.join(projectDir, file.file)
-    const dirname = path.dirname(fullPath)
-    await fs.mkdir(dirname, { recursive: true })
-    await fs.writeFile(fullPath, file.content)
-  }))
-  return { projectDir, policyDir: path.join(projectDir, `/lavamoat/${policyName}/`) }
+  await Promise.all(
+    filesToWrite.map(async (file) => {
+      const fullPath = path.join(projectDir, file.file)
+      const dirname = path.dirname(fullPath)
+      await fs.mkdir(dirname, { recursive: true })
+      await fs.writeFile(fullPath, file.content)
+    })
+  )
+  return {
+    projectDir,
+    policyDir: path.join(projectDir, `/lavamoat/${policyName}/`),
+  }
 }
 
-function fillInFileDetails (files) {
+function fillInFileDetails(files) {
   Object.entries(files).forEach(([file, fileObj]) => {
     fileObj.file = fileObj.file || file
     if (path.extname(file) === '.js') {
@@ -366,7 +436,7 @@ function fillInFileDetails (files) {
   return files
 }
 
-function moduleDataForBuiltin (builtinObj, name) {
+function moduleDataForBuiltin(builtinObj, name) {
   return {
     id: name,
     file: name,
@@ -378,25 +448,33 @@ function moduleDataForBuiltin (builtinObj, name) {
   }
 }
 
-function prepareModuleInitializerArgs (requireRelativeWithContext, moduleObj, moduleData) {
+function prepareModuleInitializerArgs(
+  requireRelativeWithContext,
+  moduleObj,
+  moduleData
+) {
   const require = requireRelativeWithContext
   const module = moduleObj
   const exports = moduleObj.exports
   const __filename = moduleData.file
   const __dirname = path.dirname(__filename)
   require.resolve = (requestedName) => {
-    throw new Error('require.resolve not implemented in lavamoat-core test harness')
+    throw new Error(
+      'require.resolve not implemented in lavamoat-core test harness'
+    )
   }
   return [exports, require, module, __filename, __dirname]
 }
 
-function evaluateWithSourceUrl (filename, content, context) {
-
+function evaluateWithSourceUrl(filename, content, context) {
   const vmContext = createContext()
   const vmGlobalThis = runInContext('this', vmContext)
   const vmFeralFunction = vmGlobalThis.Function
 
-  Object.defineProperties(vmGlobalThis, Object.getOwnPropertyDescriptors(context))
+  Object.defineProperties(
+    vmGlobalThis,
+    Object.getOwnPropertyDescriptors(context)
+  )
 
   // circular ref (used when globalThis is not present)
   if (!vmGlobalThis.globalThis) {
@@ -419,37 +497,40 @@ function evaluateWithSourceUrl (filename, content, context) {
   return { result, vmGlobalThis, vmContext, vmFeralFunction }
 }
 
-async function createConfigForTest (testFn, opts = {}) {
-  const files = [{
-    type: 'js',
-    specifier: './entry.js',
-    file: './entry.js',
-    packageName: '$root$',
-    importMap: {
-      test: './node_modules/test/index.js',
+async function createConfigForTest(testFn, opts = {}) {
+  const files = [
+    {
+      type: 'js',
+      specifier: './entry.js',
+      file: './entry.js',
+      packageName: '$root$',
+      importMap: {
+        test: './node_modules/test/index.js',
+      },
+      content: 'require("test")',
+      entry: true,
     },
-    content: 'require("test")',
-    entry: true,
-  }, {
-    // non-entry
-    type: 'js',
-    specifier: './node_modules/test/index.js',
-    file: './node_modules/test/index.js',
-    packageName: 'test',
-    importMap: {},
-    content: `(${testFn})()`,
-  }]
+    {
+      // non-entry
+      type: 'js',
+      specifier: './node_modules/test/index.js',
+      file: './node_modules/test/index.js',
+      packageName: 'test',
+      importMap: {},
+      content: `(${testFn})()`,
+    },
+  ]
   const policy = await generatePolicyFromFiles({ files, ...opts })
   return policy
 }
 
-async function autoConfigForScenario ({ scenario, opts = {} }) {
+async function autoConfigForScenario({ scenario, opts = {} }) {
   const files = Object.values(scenario.files)
   const policy = await generatePolicyFromFiles({ files, ...opts })
   scenario.config = policy
 }
 
-function convertOptsToArgs ({ scenario }) {
+function convertOptsToArgs({ scenario }) {
   const { entries } = scenario
   if (entries.length !== 1) {
     throw new Error('LavaMoat - invalid entries')

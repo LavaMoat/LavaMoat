@@ -1,16 +1,16 @@
 const { performTest } = require('../../performTask')
 
-const nRange = [0, 1000 ]
+const nRange = [0, 1000]
 
 const tasks = {
-  'node': {
+  node: {
     run: 'node entry.js',
   },
   'lavamoat-node': {
     prep: 'lavamoat entry.js --writeAutoPolicy',
     run: 'lavamoat entry.js',
   },
-  'bify': {
+  bify: {
     prep: 'yarn build:unsafe',
     run: 'node bundle/unsafe.js',
   },

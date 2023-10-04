@@ -3,10 +3,10 @@ const { performTest } = require('../../performTask')
 const nRange = [0, 100]
 
 const tasks = {
-  'node': {
+  node: {
     run: 'node entry.js',
   },
-  'lavamoat': {
+  lavamoat: {
     prep: 'lavamoat entry.js --writeAutoPolicy',
     run: 'lavamoat entry.js',
   },

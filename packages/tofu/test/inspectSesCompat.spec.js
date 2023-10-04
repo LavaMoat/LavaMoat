@@ -3,7 +3,7 @@ const { parse, inspectSesCompat } = require('../src/index')
 
 // some input from https://www.geeksforgeeks.org/strict-mode-javascript/
 
-function inspectSesCompatTest (code) {
+function inspectSesCompatTest(code) {
   const ast = parse(code, {
     sourceType: 'module',
     errorRecovery: true,

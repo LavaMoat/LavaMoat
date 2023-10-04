@@ -1,4 +1,7 @@
-const { createScenarioFromScaffold, autoConfigForScenario } = require('../util.js')
+const {
+  createScenarioFromScaffold,
+  autoConfigForScenario,
+} = require('../util.js')
 
 const one = () => {
   let globalObject = globalThis
@@ -20,7 +23,19 @@ module.exports = [
       opts: {
         scuttleGlobalThis: {
           enabled: true,
-          exceptions: ['WebAssembly', 'process', '/[0-9]+/', 'Set', 'Reflect', 'Object', 'console', 'Array', 'RegExp', 'Date', 'Math'],
+          exceptions: [
+            'WebAssembly',
+            'process',
+            '/[0-9]+/',
+            'Set',
+            'Reflect',
+            'Object',
+            'console',
+            'Array',
+            'RegExp',
+            'Date',
+            'Math',
+          ],
         },
       },
     })
@@ -34,11 +49,16 @@ module.exports = [
       opts: {
         scuttleGlobalThis: {
           enabled: true,
-          exceptions: ['WebAssembly', 'process', '/[0-9]+/' /*'Set', 'Reflect', 'Object', 'console', 'Array', 'RegExp', 'Date', 'Math'*/],
+          exceptions: [
+            'WebAssembly',
+            'process',
+            '/[0-9]+/' /*'Set', 'Reflect', 'Object', 'console', 'Array', 'RegExp', 'Date', 'Math'*/,
+          ],
         },
       },
       expectedFailure: true,
-      expectedFailureMessageRegex: /SES_UNHANDLED_REJECTION|inaccessible under scuttling mode./,
+      expectedFailureMessageRegex:
+        /SES_UNHANDLED_REJECTION|inaccessible under scuttling mode./,
     })
     await autoConfigForScenario({ scenario })
     return scenario

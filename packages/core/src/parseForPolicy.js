@@ -14,7 +14,7 @@ module.exports = { parseForPolicy }
  * @param {ModuleInspector} options.inspector
  * @returns {JSON} policy object
  */
-async function parseForPolicy ({
+async function parseForPolicy({
   moduleSpecifier,
   importHook,
   isBuiltin,
@@ -23,7 +23,11 @@ async function parseForPolicy ({
   includeDebugInfo,
   inspector = createModuleInspector({ isBuiltin, includeDebugInfo }),
 }) {
-  for await (const moduleRecord of eachNodeInTree({ moduleSpecifier, importHook, shouldImport })) {
+  for await (const moduleRecord of eachNodeInTree({
+    moduleSpecifier,
+    importHook,
+    shouldImport,
+  })) {
     // inspect each module
     inspector.inspectModule(moduleRecord)
   }

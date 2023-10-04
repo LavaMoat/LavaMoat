@@ -15,14 +15,19 @@ module.exports = {
   isMemberLikeExpression,
 }
 
-function getMemberExpressionNesting (identifierNode, parents) {
+function getMemberExpressionNesting(identifierNode, parents) {
   // remove the identifier node itself
   const parentsOnly = parents.slice(0, -1)
   // find unbroken membership chain closest to identifier
-  const memberExpressions = getTailmostMatchingChain(parentsOnly, isNonComputedMemberLikeExpression).reverse()
+  const memberExpressions = getTailmostMatchingChain(
+    parentsOnly,
+    isNonComputedMemberLikeExpression
+  ).reverse()
   // find parent of membership chain
   const hasMembershipChain = Boolean(memberExpressions.length)
-  const topmostMember = hasMembershipChain ? memberExpressions[0] : identifierNode
+  const topmostMember = hasMembershipChain
+    ? memberExpressions[0]
+    : identifierNode
   const topmostMemberIndex = parents.indexOf(topmostMember)
   if (topmostMemberIndex < 1) {
     throw Error('unnexpected value for memberTopIndex')
@@ -32,39 +37,47 @@ function getMemberExpressionNesting (identifierNode, parents) {
   return { memberExpressions, parentOfMembershipChain, topmostMember }
 }
 
-function getPathFromMemberExpressionChain (memberExpressions) {
-  const keys = memberExpressions.map(member => getNameFromNode(member.property))
+function getPathFromMemberExpressionChain(memberExpressions) {
+  const keys = memberExpressions.map((member) =>
+    getNameFromNode(member.property)
+  )
   return keys
 }
 
-function getNameFromNode (node) {
+function getNameFromNode(node) {
   if (node.type === 'Identifier') {
     return node.name
   } else if (node.type === 'ThisExpression') {
     return 'this'
   } else if (node.type === 'PrivateName') {
     return `#${node.id.name}`
-  }else {
-    throw new Error(`unknown ast node type when trying to get name: "${node.type}"`)
+  } else {
+    throw new Error(
+      `unknown ast node type when trying to get name: "${node.type}"`
+    )
   }
 }
 
-function isMemberLikeExpression (node) {
-  return node.type === 'MemberExpression' || node.type === 'OptionalMemberExpression'
+function isMemberLikeExpression(node) {
+  return (
+    node.type === 'MemberExpression' || node.type === 'OptionalMemberExpression'
+  )
 }
 
-function isNonComputedMemberLikeExpression (node) {
+function isNonComputedMemberLikeExpression(node) {
   return !node.computed && isMemberLikeExpression(node)
 }
 
-function isUndefinedCheck (identifierNode, parents) {
+function isUndefinedCheck(identifierNode, parents) {
   const parentExpression = parents[parents.length - 2]
-  const isTypeof = (parentExpression.type === 'UnaryExpression' || parentExpression.operator === 'typeof')
+  const isTypeof =
+    parentExpression.type === 'UnaryExpression' ||
+    parentExpression.operator === 'typeof'
   return isTypeof
 }
 
-function getTailmostMatchingChain (items, matcher) {
-  const onlyMatched = items.map(item => matcher(item) ? item : null)
+function getTailmostMatchingChain(items, matcher) {
+  const onlyMatched = items.map((item) => (matcher(item) ? item : null))
   const lastIndex = onlyMatched.lastIndexOf(null)
   if (lastIndex === -1) {
     return onlyMatched.slice()
@@ -73,7 +86,7 @@ function getTailmostMatchingChain (items, matcher) {
 }
 
 // if array contains 'x' and 'x.y' just keep 'x'
-function reduceToTopmostApiCalls (globalsConfig) {
+function reduceToTopmostApiCalls(globalsConfig) {
   const allPaths = Array.from(globalsConfig.keys()).sort()
   return allPaths.forEach((path) => {
     const parts = path.split('.')
@@ -83,9 +96,13 @@ function reduceToTopmostApiCalls (globalsConfig) {
     }
     // 'x.y.z' has parents 'x' and 'x.y'
     const parentParts = parts.slice(0, -1)
-    const parents = parentParts.map((_, index) => parentParts.slice(0, index + 1).join('.'))
+    const parents = parentParts.map((_, index) =>
+      parentParts.slice(0, index + 1).join('.')
+    )
     // dont include this if a parent appears in the array
-    const parentsAlreadyInArray = parents.some(parent => allPaths.includes(parent))
+    const parentsAlreadyInArray = parents.some((parent) =>
+      allPaths.includes(parent)
+    )
     if (parentsAlreadyInArray) {
       globalsConfig.delete(path)
     }
@@ -94,7 +111,7 @@ function reduceToTopmostApiCalls (globalsConfig) {
 }
 
 // if array contains 'x' and 'x.y' just keep 'x'
-function reduceToTopmostApiCallsFromStrings (keyPathStrings) {
+function reduceToTopmostApiCallsFromStrings(keyPathStrings) {
   // because we sort first, we never have to back track
   const allPaths = keyPathStrings.sort()
   return allPaths.filter((path) => {
@@ -105,9 +122,13 @@ function reduceToTopmostApiCallsFromStrings (keyPathStrings) {
     }
     // 'x.y.z' has parents 'x' and 'x.y'
     const parentParts = parts.slice(0, -1)
-    const parents = parentParts.map((_, index) => parentParts.slice(0, index + 1).join('.'))
+    const parents = parentParts.map((_, index) =>
+      parentParts.slice(0, index + 1).join('.')
+    )
     // dont include this if a parent appears in the array
-    const parentsAlreadyInArray = parents.some(parent => allPaths.includes(parent))
+    const parentsAlreadyInArray = parents.some((parent) =>
+      allPaths.includes(parent)
+    )
     if (parentsAlreadyInArray) {
       return false
     }
@@ -116,7 +137,7 @@ function reduceToTopmostApiCallsFromStrings (keyPathStrings) {
   })
 }
 
-function addGlobalUsage (globalsConfig, identifierPath, identifierUse) {
+function addGlobalUsage(globalsConfig, identifierPath, identifierUse) {
   // add variable to results, if not already set
   if (globalsConfig.has(identifierPath) && identifierUse !== 'write') {
     return
@@ -124,7 +145,7 @@ function addGlobalUsage (globalsConfig, identifierPath, identifierUse) {
   globalsConfig.set(identifierPath, identifierUse)
 }
 
-function mergePolicy (configA, configB) {
+function mergePolicy(configA, configB) {
   const newConfig = new Map(configA)
   Array.from(configB.entries()).forEach(([path, value]) => {
     addGlobalUsage(newConfig, path, value)
@@ -133,12 +154,12 @@ function mergePolicy (configA, configB) {
   return newConfig
 }
 
-function objToMap (obj) {
+function objToMap(obj) {
   return new Map(Object.entries(obj))
 }
 
 // Object.fromEntries not available in node v10
-function mapToObj (map) {
+function mapToObj(map) {
   const obj = {}
   map.forEach((value, key) => {
     obj[key] = value
@@ -146,7 +167,7 @@ function mapToObj (map) {
   return obj
 }
 
-function getParents (nodePath) {
+function getParents(nodePath) {
   const parents = []
   let target = nodePath
   while (target) {
@@ -157,6 +178,10 @@ function getParents (nodePath) {
   return parents
 }
 
-function isInFunctionDeclaration (path) {
-  return getParents(path.parentPath).some(parent => parent.type === 'FunctionDeclaration' || parent.type === 'FunctionExpression')
+function isInFunctionDeclaration(path) {
+  return getParents(path.parentPath).some(
+    (parent) =>
+      parent.type === 'FunctionDeclaration' ||
+      parent.type === 'FunctionExpression'
+  )
 }

@@ -2,7 +2,7 @@ import { LineSegments, LineBasicMaterial } from 'three'
 import { BufferGeometryController } from './buffer-geometry-controller.js'
 
 export class LinesController extends BufferGeometryController {
-  constructor ({ ...args } = {}) {
+  constructor({ ...args } = {}) {
     super({
       attributeSizes: {
         // overwriting default for position
@@ -17,7 +17,7 @@ export class LinesController extends BufferGeometryController {
     })
   }
 
-  createMaterial ({ color = 'white', opacity = 0.2 }) {
+  createMaterial({ color = 'white', opacity = 0.2 }) {
     return new LineBasicMaterial({
       color,
       opacity,
@@ -26,7 +26,7 @@ export class LinesController extends BufferGeometryController {
     })
   }
 
-  createObject (geometry, material) {
+  createObject(geometry, material) {
     const object = new LineSegments(geometry, material)
     object.renderOrder = 10
     return object

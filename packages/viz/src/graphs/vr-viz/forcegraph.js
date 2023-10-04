@@ -5,7 +5,11 @@ import { PointsController } from '../points-controller.js'
 import { LinesController } from '../lines-controller.js'
 
 export class FastThreeForceGraph extends Group {
-  constructor ({ graphData = { node: [], links: [] }, nodeOpts = {}, linkOpts = {} } = {}) {
+  constructor({
+    graphData = { node: [], links: [] },
+    nodeOpts = {},
+    linkOpts = {},
+  } = {}) {
     super()
 
     const sizeScaling = 1
@@ -18,18 +22,28 @@ export class FastThreeForceGraph extends Group {
     }
     const linkCount = graphData.links.length
     const nodeCount = graphData.nodes.length
-    this.linesController = new LinesController({ capacity: linkCount, ...linkOpts })
-    this.pointsController = new PointsController({ capactiy: nodeCount, ...nodeOpts })
+    this.linesController = new LinesController({
+      capacity: linkCount,
+      ...linkOpts,
+    })
+    this.pointsController = new PointsController({
+      capactiy: nodeCount,
+      ...nodeOpts,
+    })
 
     const { linesController, pointsController } = this
     this.graph = new ThreeForceGraph()
       .graphData(graphData)
       .nodeThreeObject((node) => {
-        pointsController.update(node.id, 'color', colorPallete[node.color] || colorPallete.purple)
+        pointsController.update(
+          node.id,
+          'color',
+          colorPallete[node.color] || colorPallete.purple
+        )
         pointsController.update(node.id, 'size', [sizeScaling * node.size])
         // create dummy object, only used for collision
-        const geometry = new SphereGeometry( sizeScaling * node.size, 3, 2 )
-        const collisionObject = new Mesh( geometry )
+        const geometry = new SphereGeometry(sizeScaling * node.size, 3, 2)
+        const collisionObject = new Mesh(geometry)
         collisionObject.name = node.id
         collisionObject.visible = false
         return collisionObject
@@ -41,9 +55,24 @@ export class FastThreeForceGraph extends Group {
         return dummyObject
       })
       .linkPositionUpdate((linkObject, { start, end }, link) => {
-        pointsController.update(link.source.id, 'translate', [link.source.x, link.source.y, link.source.z])
-        pointsController.update(link.target.id, 'translate', [link.target.x, link.target.y, link.target.z])
-        linesController.update(link.id, 'position', [start.x, start.y, start.z, end.x, end.y, end.z])
+        pointsController.update(link.source.id, 'translate', [
+          link.source.x,
+          link.source.y,
+          link.source.z,
+        ])
+        pointsController.update(link.target.id, 'translate', [
+          link.target.x,
+          link.target.y,
+          link.target.z,
+        ])
+        linesController.update(link.id, 'position', [
+          start.x,
+          start.y,
+          start.z,
+          end.x,
+          end.y,
+          end.z,
+        ])
         // override link position update
         return true
       })
@@ -51,17 +80,18 @@ export class FastThreeForceGraph extends Group {
     this.graph.visible = false
     this.collisionObjects = this.graph.children
 
-
     this.add(this.graph)
     this.add(linesController.object)
     this.add(pointsController.object)
   }
 
-  tickFrame () {
+  tickFrame() {
     this.graph.tickFrame()
   }
 
-  getNodes () {
-    return this.graph.children.filter(child => child.__graphObjType === 'node')
+  getNodes() {
+    return this.graph.children.filter(
+      (child) => child.__graphObjType === 'node'
+    )
   }
 }

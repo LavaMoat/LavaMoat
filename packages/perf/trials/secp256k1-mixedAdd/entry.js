@@ -14,14 +14,25 @@ const privKey = ethUtil.keccak256(Buffer.from(passphrase))
 
 const privateKey = privKey
 const d = BN.fromBuffer(privateKey)
-if (d.isOverflow() || d.isZero()) throw new Error(messages.EC_PUBLIC_KEY_CREATE_FAIL)
+if (d.isOverflow() || d.isZero())
+  throw new Error(messages.EC_PUBLIC_KEY_CREATE_FAIL)
 
 // // ECPOINTG
 const __this = {}
 
 //   // constructor
-__this.x = BN.fromBuffer(Buffer.from('79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798', 'hex'))
-__this.y = BN.fromBuffer(Buffer.from('483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8', 'hex'))
+__this.x = BN.fromBuffer(
+  Buffer.from(
+    '79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798',
+    'hex'
+  )
+)
+__this.y = BN.fromBuffer(
+  Buffer.from(
+    '483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8',
+    'hex'
+  )
+)
 __this.inf = false
 
 //   // _precompute
@@ -29,7 +40,7 @@ var ecpoint = new ECPoint(__this.x, __this.y)
 
 var dstep = 4
 var points = new Array(1 + Math.ceil(257 / dstep))
-var acc = points[0] = ecpoint
+var acc = (points[0] = ecpoint)
 for (var i = 1; i < points.length; ++i) {
   for (var j = 0; j < dstep; j++) acc = acc.dbl()
   points[i] = acc
@@ -40,8 +51,10 @@ __this.precomputed = {
   doubles: {
     step: dstep,
     points: points,
-    negpoints: points.map(function (p) { return p.neg() })
-  }
+    negpoints: points.map(function (p) {
+      return p.neg()
+    }),
+  },
 }
 
 // mul
@@ -61,6 +74,6 @@ for (var j = 0; j < naf.length; j += step) {
 
 var b = new ECJPoint(null, null, null)
 
-for (let _index = 0; _index < nTimes; _index++) { 
+for (let _index = 0; _index < nTimes; _index++) {
   b = b.mixedAdd(points[45])
 }

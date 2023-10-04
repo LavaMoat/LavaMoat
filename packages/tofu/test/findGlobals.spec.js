@@ -7,14 +7,14 @@ const test = require('ava')
 const { parse } = require('../src/index')
 const { findGlobals } = require('../src/findGlobals')
 
-function detect (code) {
+function detect(code) {
   const ast = parse(code)
   const globals = findGlobals(ast)
   const globalNames = [...globals.keys()].sort()
   return globalNames
 }
 
-function read (file) {
+function read(file) {
   return fs.readFileSync(path.resolve(__dirname + '/fixtures/', file), 'utf8')
 }
 
@@ -58,7 +58,10 @@ test('argument.js - parameters from inline arguments', (t) => {
   t.deepEqual(detect(read('argument.js')), [])
 })
 test('arrow_functions.js - arguments of arrow functions are not globals', (t) => {
-  t.deepEqual(detect(read('arrow_functions.js')), ['z', 'b', 'c', 'arguments'].sort())
+  t.deepEqual(
+    detect(read('arrow_functions.js')),
+    ['z', 'b', 'c', 'arguments'].sort()
+  )
 })
 test('assign_implicit.js - assign from an implicit global', (t) => {
   t.deepEqual(detect(read('assign_implicit.js')), ['bar'])
@@ -67,7 +70,10 @@ test('catch-pattern.js - pattern in catch', (t) => {
   t.deepEqual(detect(read('catch-pattern.js')), [])
 })
 test('class.js - ES2015 classes', (t) => {
-  t.deepEqual(detect(read('class.js')), ['G', 'OtherClass_', 'SuperClass', 'this'].sort())
+  t.deepEqual(
+    detect(read('class.js')),
+    ['G', 'OtherClass_', 'SuperClass', 'this'].sort()
+  )
 })
 test('class-expression.js - class as expression', (t) => {
   t.deepEqual(detect(read('class-expression.js')), [])
@@ -84,7 +90,19 @@ test('destructuring.js - ES2015 variable destructuring', (t) => {
 test('detect.js - check locals and globals', (t) => {
   t.deepEqual(
     detect(read('detect.js')),
-    ['w', 'foo', 'process', 'console', 'AAA', 'BBB', 'CCC', 'xyz', 'ZZZ', 'BLARG', 'RAWR'].sort(),
+    [
+      'w',
+      'foo',
+      'process',
+      'console',
+      'AAA',
+      'BBB',
+      'CCC',
+      'xyz',
+      'ZZZ',
+      'BLARG',
+      'RAWR',
+    ].sort()
   )
 })
 // test('detect.js - check variable names', (t) => {
@@ -127,7 +145,11 @@ test('named_arg.js - named argument / parameter', (t) => {
   t.deepEqual(detect(read('named_arg.js')), [])
 })
 test('names-in-object-prototype.js - check names in object prototype', (t) => {
-  t.deepEqual(detect(read('names-in-object-prototype.js')).sort(), ['__proto__', 'constructor', 'hasOwnProperty'])
+  t.deepEqual(detect(read('names-in-object-prototype.js')).sort(), [
+    '__proto__',
+    'constructor',
+    'hasOwnProperty',
+  ])
 })
 test('obj.js - globals on the right-hand of a colon in an object literal', (t) => {
   t.deepEqual(detect(read('obj.js')), ['bar', 'module'])
@@ -153,7 +175,10 @@ test('return_hash.js - named argument / parameter', (t) => {
   t.deepEqual(detect(read('return_hash.js')), [])
 })
 test('right_hand.js - globals on the right-hand of assignment', (t) => {
-  t.deepEqual(detect(read('right_hand.js')), ['exports', '__dirname', '__filename'].sort())
+  t.deepEqual(
+    detect(read('right_hand.js')),
+    ['exports', '__dirname', '__filename'].sort()
+  )
 })
 test('try_catch.js - the exception in a try catch block is a local', (t) => {
   t.deepEqual(detect(read('try_catch.js')), [])

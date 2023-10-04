@@ -1,7 +1,10 @@
 /* eslint-disable ava/no-skip-test */
 const test = require('ava')
 const { runScenario } = require('./util')
-const { createScenarioFromScaffold, runAndTestScenario } = require('lavamoat-core/test/util')
+const {
+  createScenarioFromScaffold,
+  runAndTestScenario,
+} = require('lavamoat-core/test/util')
 
 // We should test for these properly
 
