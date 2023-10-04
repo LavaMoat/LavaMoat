@@ -1,6 +1,7 @@
 # Policy file explained
 
 Say we generate a policy file for a project with the following dependency tree:
+
 ```
 app.js
 └─┬ some-package
@@ -9,6 +10,7 @@ app.js
 ```
 
 The policy file is written to `./lavamoat/node/policy.json`:
+
 ```js
 {
   "resources": {
@@ -47,19 +49,18 @@ The policy file is written to `./lavamoat/node/policy.json`:
 ```
 
 ## Fields
-### resources 
 
-All packages in your dependency graph accessible via `require()`. 
+### resources
 
-The keys of this object are names of packages assigned by LavaMoat. In order to identify a package, LavaMoat does not simply use the published name of the package, but generates a unique name by tracing the package's shortest route through its dependents within the dependency tree. This is done in order to prevent a malicious package which shares the same name as a package published to NPM from hijacking permissions. 
+All packages in your dependency graph accessible via `require()`.
 
+The keys of this object are names of packages assigned by LavaMoat. In order to identify a package, LavaMoat does not simply use the published name of the package, but generates a unique name by tracing the package's shortest route through its dependents within the dependency tree. This is done in order to prevent a malicious package which shares the same name as a package published to NPM from hijacking permissions.
 
 ### packages and builtin
 
 All packages accessible by the dependency. In this example, `some-package` has access to `entropoetry`.This means that `some-package` can `require('entropoetry')`.
 
 `entropoetry` can also `require('assert')` - a built-in module of Node.js.
-
 
 ### globals
 
@@ -89,6 +90,7 @@ Example:
 Allow `entropoetry` access to the global `URL` class and expand access to the entire `buffer` builtin on top of the generated policy above.
 
 `./lavamoat/node/policy-override.json`:
+
 ```
 {
   "resources": {
@@ -110,11 +112,13 @@ Allow `entropoetry` access to the global `URL` class and expand access to the en
 
 If LavaMoat's static analysis believes that a package refers to a certain resource, but your project does not actually use this resource, it's reasonable to deny access to this resource. You can achieve that through the policy override file.
 
-Example:  
+Example:
+
 - Forbid requiring of `assert` by `entropoetry`
 - Deny access to `console` with the exception of `console.log`
 
 `./lavamoat/node/policy-override.json`:
+
 ```
 {
   "resources": {
@@ -144,11 +148,12 @@ Example:
     "a.b": false
   }
 /*** broken example ***/
-```    
+```
 
 `a.b` will remain accessible since `a` was declared as accessible in its entirety.
 
 To properly deny access to `a.b` while allowing access to other fields of `a` you'd need an allow-list style policy like this:
+
 ```
   "globals": {
     "a.c": true,
@@ -156,7 +161,7 @@ To properly deny access to `a.b` while allowing access to other fields of `a` yo
   }
 ```
 
-----
+---
 
 More specifically, the deepest chain of properties needs to point to an allowed reference and skipping all-but-necessary access on higher levels is possible, so the following will work and allow `a.z` and `a.b.c` but not `a.b.y`
 

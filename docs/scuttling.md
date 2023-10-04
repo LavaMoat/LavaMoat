@@ -5,6 +5,7 @@ Scuttling is a LavaMoat optional security feature, first introduced in [#360](ht
 ## Warning ⚠️
 
 This feature is experimental. This means that:
+
 1. Getting it to work on your LavaMoat protected application without breaking parts of it might require some effort, especially if your application loads JavaScript code outside of LavaMoat protection.
 2. There still might be issues with this feature when trying to use it (please inform us if so!).
 3. The API to activate this feature might (and probably will) change before achieving stability.
@@ -21,17 +22,17 @@ scuttleGlobalThis: {
 }
 ```
 
-* `enabled` - whether to enable scuttling security feature or not
-* `exceptions` - if `enabled:true`, provide a list of properties to avoid scuttling (which means, not to remove those from the global object)
-* `scuttlerName` - optionally, you can provide a string pointing to a reference on the global object, which should refer to a function with which you can hook into the scuttling process at runtime (when `scuttlerName` is left untouched, LavaMoat runtime won't try using an external scuttler):
+- `enabled` - whether to enable scuttling security feature or not
+- `exceptions` - if `enabled:true`, provide a list of properties to avoid scuttling (which means, not to remove those from the global object)
+- `scuttlerName` - optionally, you can provide a string pointing to a reference on the global object, which should refer to a function with which you can hook into the scuttling process at runtime (when `scuttlerName` is left untouched, LavaMoat runtime won't try using an external scuttler):
 
 ```javascript
 Object.defineProperty(window, 'SCUTTLER', {
-        value: (globalRef, scuttle) => {
-          console.log('scuttler (start)');
-          scuttle(globalRef);
-          console.log('scuttler (end)');
-        }
+  value: (globalRef, scuttle) => {
+    console.log('scuttler (start)')
+    scuttle(globalRef)
+    console.log('scuttler (end)')
+  },
 })
 ```
 
@@ -44,15 +45,15 @@ This by definition means that the JavaScript APIs that are endowed to each envir
 
 ```html
 Application
-  <script>
-    LavaMoat runtime
-      dependencies
-        dep-a
-          alert('This alert message was initiated by "dep-a"');
-  </script>
-  <script>
-    alert('This alert message was initiated by the application')
-  </script>
+<script>
+  LavaMoat runtime
+    dependencies
+      dep-a
+        alert('This alert message was initiated by "dep-a"');
+</script>
+<script>
+  alert('This alert message was initiated by the application')
+</script>
 ```
 
 In the example above, `dep-a` which is a dependency that was bundled and is protected by LavaMoat, calls the `alert` function, and afterwards a `script` tag by the application (outside of the LavaMoat protection) also calls the `alert` function.

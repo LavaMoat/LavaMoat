@@ -3,10 +3,7 @@ const {
   fillInFileDetails,
   functionToString,
 } = require('lavamoat-core/test/util')
-const {
-  createBundleForScenario,
-  runScenario,
-} = require('./util')
+const { createBundleForScenario, runScenario } = require('./util')
 
 // eslint-disable-next-line ava/no-skip-test
 test.skip('package factor bundle', async (t) => {
@@ -20,11 +17,11 @@ test.skip('package factor bundle', async (t) => {
             c: '1.0.0',
           },
           devDependencies: {
-            'browserify': '*',
+            browserify: '*',
             'lavamoat-browserify': '*',
             'bify-package-factor': '*',
             '@lavamoat/lavapack': '*',
-            'through2': '*',
+            through2: '*',
             'vinyl-buffer': '*',
           },
         })}`,
@@ -153,18 +150,26 @@ test.skip('package factor bundle', async (t) => {
     type: 'factor',
   }
 
-  const { bundleForScenario: rawOutput } = await createBundleForScenario({ scenario })
+  const { bundleForScenario: rawOutput } = await createBundleForScenario({
+    scenario,
+  })
   const vinylBundles = JSON.parse(rawOutput)
 
   const relativeNames = Object.keys(vinylBundles).sort()
-  t.deepEqual(relativeNames, [
-    'common.js',
-    'src/1.js',
-    'src/2.js',
-  ], 'relative filenames are as expected')
+  t.deepEqual(
+    relativeNames,
+    ['common.js', 'src/1.js', 'src/2.js'],
+    'relative filenames are as expected'
+  )
 
-  const testResult1 = await runScenario({ scenario, bundle: vinylBundles['common.js'] + vinylBundles['src/1.js'] })
-  const testResult2 = await runScenario({ scenario, bundle: vinylBundles['common.js'] + vinylBundles['src/2.js'] })
+  const testResult1 = await runScenario({
+    scenario,
+    bundle: vinylBundles['common.js'] + vinylBundles['src/1.js'],
+  })
+  const testResult2 = await runScenario({
+    scenario,
+    bundle: vinylBundles['common.js'] + vinylBundles['src/2.js'],
+  })
 
   t.is(testResult1, 60)
   t.is(testResult2, 120)

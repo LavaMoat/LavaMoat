@@ -24,11 +24,10 @@ import { FastThreeForceGraph } from './vr-viz/forcegraph.js'
 
 import 'codemirror/theme/material.css'
 
-
 const lavamoatModes = ['lavamoat', 'without']
 
 class DepGraph extends React.Component {
-  constructor () {
+  constructor() {
     super()
     // prepare empty graph
     const graph = { nodes: [], links: [], container: { width: 0, height: 0 } }
@@ -49,7 +48,7 @@ class DepGraph extends React.Component {
     }
   }
 
-  componentDidMount () {
+  componentDidMount() {
     // const { forceGraph } = this
     this.triggerGraphUpdate()
 
@@ -60,24 +59,24 @@ class DepGraph extends React.Component {
     // forceGraph.d3Force('y', d3.forceY(0, 1))
   }
 
-  componentWillReceiveProps (nextProps) {
+  componentWillReceiveProps(nextProps) {
     // recalculate graph if `policyData` changes
     if (this.props.policyData !== nextProps.policyData) {
       this.triggerGraphUpdate(this.state, nextProps)
     }
   }
 
-  setStateAndUpdateGraph (newState) {
+  setStateAndUpdateGraph(newState) {
     this.setState(newState)
     this.triggerGraphUpdate(Object.assign(this.state, newState))
   }
 
-  triggerGraphUpdate (state = this.state, newProps = this.props) {
+  triggerGraphUpdate(state = this.state, newProps = this.props) {
     const { policyData } = newProps
     this.updateGraph(policyData, state, newProps)
   }
 
-  updateGraph (policyData, state, newProps) {
+  updateGraph(policyData, state, newProps) {
     const {
       packageData,
       // packageModules,
@@ -87,7 +86,11 @@ class DepGraph extends React.Component {
     const { policyName } = newProps
 
     // const newGraph = createPackageGraph(bundleData, state)
-    const packages = parseConfigDebugForPackages(policyName, policyData.debug, policyData.final)
+    const packages = parseConfigDebugForPackages(
+      policyName,
+      policyData.debug,
+      policyData.final
+    )
     const newGraph = createGraph(packages, policyData.final, state)
 
     // create a map for faster lookups by id
@@ -113,7 +116,7 @@ class DepGraph extends React.Component {
     this.setState(() => ({ packages, packageData: newGraph }))
   }
 
-  getModulesForPackage (packageId) {
+  getModulesForPackage(packageId) {
     const { policyData, policyName } = this.props
     const { debugInfo } = policyData.debug
     const packageModules = {}
@@ -135,7 +138,7 @@ class DepGraph extends React.Component {
     return packageModules
   }
 
-  render () {
+  render() {
     const { policyData } = this.props
     const {
       packages,
@@ -164,7 +167,8 @@ class DepGraph extends React.Component {
         if (selectedModule && selectedModule === moduleSpecifier) {
           newSelection = null
         } else {
-          newSelection = policyData.debug.debugInfo[moduleSpecifier].moduleRecord
+          newSelection =
+            policyData.debug.debugInfo[moduleSpecifier].moduleRecord
         }
         this.setState({
           selectedModule: newSelection,
@@ -239,8 +243,8 @@ class DepGraph extends React.Component {
 
     return (
       <div>
-        <div className='navWrapper'>
-          <div className='leftButtonsWrapper'>
+        <div className="navWrapper">
+          <div className="leftButtonsWrapper">
             <Nav
               routes={lavamoatModes}
               activeRoute={lavamoatMode}
@@ -262,12 +266,10 @@ class DepGraph extends React.Component {
             />
           </div>
 
-          <div className='viewSourceWrapper'>
-            <div className='helpMessage'>
-              {helpMessage}
-            </div>
+          <div className="viewSourceWrapper">
+            <div className="helpMessage">{helpMessage}</div>
             <button
-              className='sourceButton'
+              className="sourceButton"
               style={sourceButtonStyle}
               onClick={() => actions.toggleSource()}
             >
@@ -293,8 +295,8 @@ class DepGraph extends React.Component {
             graphData={graphData}
             linkDirectionalArrowLength={4}
             linkDirectionalArrowRelPos={1}
-            nodeLabel='label'
-            nodeVal='size'
+            nodeLabel="label"
+            nodeVal="size"
             // onNodeHover={(node) => {
             //   if (!node) return
             //   if (packageModulesMode && !packageModules[node.id]) return
@@ -309,9 +311,16 @@ class DepGraph extends React.Component {
     )
   }
 
-  onVrSessionStart (session) {
+  onVrSessionStart(session) {
     const { packageData } = this.state
-    const { scene, renderer, subscribeTick, controller1, controller2, setControllerText } = setupScene({})
+    const {
+      scene,
+      renderer,
+      subscribeTick,
+      controller1,
+      controller2,
+      setControllerText,
+    } = setupScene({})
     const scale = 0.001
     const graph = new FastThreeForceGraph({
       graphData: packageData,
@@ -341,63 +350,65 @@ class DepGraph extends React.Component {
     this.setState({ vrActive: true })
   }
 
-  onVrSessionEnd () {
+  onVrSessionEnd() {
     this.setState({ vrActive: false })
   }
 
-  renderSelectedNodeView () {
+  renderSelectedNodeView() {
     const { selectedPackage, selectedModule } = this.state
     if (selectedModule) {
       return this.renderSelectedModule(selectedModule)
     } else if (selectedPackage) {
       return this.renderSelectedPackage(selectedPackage)
     }
-    return (
-      <pre className='packageInfo'>
-        please select a package
-      </pre>
-    )
+    return <pre className="packageInfo">please select a package</pre>
   }
 
-  renderSelectedPackage (selectedPackage) {
-    const { policyData: { final: { resources: finalPolicyResources } } } = this.props
+  renderSelectedPackage(selectedPackage) {
+    const {
+      policyData: {
+        final: { resources: finalPolicyResources },
+      },
+    } = this.props
     const packagePolicy = finalPolicyResources[selectedPackage.id] || {}
     return (
-      <div className='packageInfo'>
+      <div className="packageInfo">
         <pre>{selectedPackage.id}</pre>
         policy for this package:
-        <pre>
-          {JSON.stringify(packagePolicy, null, 2)}
-        </pre>
+        <pre>{JSON.stringify(packagePolicy, null, 2)}</pre>
       </div>
     )
   }
 
-  renderSelectedModule (selectedModule) {
-    const { policyData: { debug: { debugInfo } } } = this.props
+  renderSelectedModule(selectedModule) {
+    const {
+      policyData: {
+        debug: { debugInfo },
+      },
+    } = this.props
     const moduleDebugInfo = debugInfo[selectedModule.specifier]
     const moduleDisplayInfo = { ...moduleDebugInfo, moduleRecord: undefined }
     const { packageData } = moduleDebugInfo.moduleRecord
-    const component = this.state.viewSource
-      ? this.renderSelectedNodeCode(selectedModule)
-      : (
-        <div className='packageInfo'>
-          <pre>{packageData.id}</pre>
-          <pre>{selectedModule.fileSimple}</pre>
-          policies generated from this file:
-          <pre>
-            {JSON.stringify(moduleDisplayInfo, null, 2)}
-          </pre>
-        </div>
-      )
+    const component = this.state.viewSource ? (
+      this.renderSelectedNodeCode(selectedModule)
+    ) : (
+      <div className="packageInfo">
+        <pre>{packageData.id}</pre>
+        <pre>{selectedModule.fileSimple}</pre>
+        policies generated from this file:
+        <pre>{JSON.stringify(moduleDisplayInfo, null, 2)}</pre>
+      </div>
+    )
     return component
   }
 
-  renderSelectedNodeCode (selectedModule) {
+  renderSelectedNodeCode(selectedModule) {
     // eslint-disable-next-line n/global-require
     require('codemirror/mode/javascript/javascript')
     const { policyData } = this.props
-    const { debug: { debugInfo } } = policyData
+    const {
+      debug: { debugInfo },
+    } = policyData
     const { codeMirror } = this.state
     let source
     if (codeMirror) {
@@ -407,13 +418,14 @@ class DepGraph extends React.Component {
       codeMirror.refresh()
       source = selectedModule.content
       const globals = debugInfo[selectedModule.specifier].globals || null
-      const lineNumbersForGlobals = globals === null ? [] : getLineNumbersForGlobals(source, globals)
+      const lineNumbersForGlobals =
+        globals === null ? [] : getLineNumbersForGlobals(source, globals)
       let selectedLineIndex = 0
       let line
       let lineClassActive = false
       codeMirror.focus()
       codeMirror.setOption('extraKeys', {
-        Enter (cm) {
+        Enter(cm) {
           if (lineNumbersForGlobals.length === 0) {
             return
           }

@@ -2,8 +2,8 @@
 
 ## Supported Versions
 
-at this time, only the latest version is supported 
+at this time, only the latest version is supported
 
 ## Reporting a Vulnerability
 
-please report any vulnerabilities to security@metamask.io  
+please report any vulnerabilities to security@metamask.io

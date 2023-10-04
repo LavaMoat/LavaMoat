@@ -1,6 +1,6 @@
 # LavaMoat
 
-![LavaMoat](./assets/lavamoat-logo.png "LavaMoat logo")
+![LavaMoat](./assets/lavamoat-logo.png 'LavaMoat logo')
 
 **LavaMoat** is a set of tools for securing JavaScript projects against a category of attacks called **software supply chain attacks.**
 
@@ -10,12 +10,9 @@ These attacks have already hit e.g. the cryptocurrency ecosystem and present a s
 
 In order to help mitigate the risk of such an attack we are building a suite of tools that aim to tackle the supply chain security at various stages of software lifecycle i.e. at the installation of the package, at build time and most of all - at runtime.
 
-
 **The goal of LavaMoat** is to bring added protections to modern JavaScript apps without having to rewrite them from scratch and automate a good first-start security configuration.
 
-
 ## [Watch the introduction video](https://www.youtube.com/watch?v=iaqe6F4S2tA&feature=emb_title&ab_channel=Feross)
-
 
 ### How to secure your app against supplychain attacks
 
@@ -37,11 +34,12 @@ No new install scripts showing up in your dependencies will run unexpectedly. Th
 
 ### Runtime protections
 
-You can use lavamoat to prevent malicious code introduced into a package from running. 
+You can use lavamoat to prevent malicious code introduced into a package from running.
 
 The LavaMoat runtime reduces the supply chain risk by:
-  1. Prevent modifying JavaScript's primordials (Object, String, Number, Array, ...)
-  2. Limit access to the platform API (window, document, XHR, etc) per-package
+
+1. Prevent modifying JavaScript's primordials (Object, String, Number, Array, ...)
+2. Limit access to the platform API (window, document, XHR, etc) per-package
 
 Both are provided by [SES][SesGithub] containers. Platform API access is granted by a policy file that LavaMoat can generate and allow the project to selectively customize. All details of policy file structure are documented in the [Policy file explained][PolicyDoc] doc.
 
@@ -60,19 +58,19 @@ When using LavaMoat in the browser, you can just use your favorite bundler if th
 App bundles have **two** major components:
 
 1. Runtime (aka kernel / loader / prelude / trusted computing base)
-This is the code that initializes and runs the bundle. For example, the implementation of the `require` function.
+   This is the code that initializes and runs the bundle. For example, the implementation of the `require` function.
 
 2. Module sources
-This includes the js content of the module sources, and sometimes some config information like module name aliases.
+   This includes the js content of the module sources, and sometimes some config information like module name aliases.
 
 LavaMoat modifies the bundle's runtime to enforce the configured constraints.
 
 - [LavaMoat Browserify][LavamoatBrowserify]
 
-
 ### Lavamoat Viz
 
 [lavamoatViz]: https://lavamoat.github.io/LavaMoat/
+
 The [lavamoat viz][lavamoatViz] is a tool to visualize an application's dependency graph and assess package dangerousness.
 
 ### Scuttling security feature
@@ -82,15 +80,17 @@ LavaMoat offers further (yet advanced) security enhancement to LavaMoat protecti
 ## Further reading on software supplychain security
 
 ### Articles:
+
 - [HackerNoon - I’m harvesting credit card numbers and passwords from your site. Here’s how](https://medium.com/hackernoon/im-harvesting-credit-card-numbers-and-passwords-from-your-site-here-s-how-9a8cb347c5b5)
 - [Agoric - POLA Would Have Prevented the Event-Stream Incident](https://medium.com/agoric/pola-would-have-prevented-the-event-stream-incident-45653ecbda99)
 - [Snyk - Why npm lockfiles can be a security blindspot for injecting malicious modules](https://snyk.io/blog/why-npm-lockfiles-can-be-a-security-blindspot-for-injecting-malicious-modules/)
 - [Bytecode Alliance - Building a secure by default, composable future for WebAssembly](https://bytecodealliance.org/articles/announcing-the-bytecode-alliance)
 
 ### Videos:
+
 - [Making 'npm install' Safe - Kate Sills - QCon 2020 ~40min](https://www.infoq.com/presentations/npm-install/)
 - [JavaScript Supply Chain Security - Adam Baldwin - LocoMocoSec 2019 ~25min](https://www.youtube.com/watch?v=HDo2iOlkbyc)
-- [Analysis of an exploited npm package – Jarrod Overson - Amsterdam JSNation Conference 2019  ~25min](https://www.youtube.com/watch?v=cvtt8TexqbU)
+- [Analysis of an exploited npm package – Jarrod Overson - Amsterdam JSNation Conference 2019 ~25min](https://www.youtube.com/watch?v=cvtt8TexqbU)
 - [How Malicious NPM Packages Make Your Apps Vulnerable - SnykLive stream 2022 ~1h](https://youtu.be/STC_ubJNiMs?t=287)
 - [Object-capability security for JavaScript applications - KU Leuven Cybersecurity seminar 2022 ~1h](https://www.youtube.com/watch?v=bc6JzoCkCE0)
 
@@ -104,7 +104,6 @@ Runs on [Agoric](https://github.com/agoric/)
 
 [SesGithub]: https://github.com/endojs/endo/tree/master/packages/ses
 [SesComputingGuide]: https://github.com/endojs/endo/blob/master/packages/ses/docs/secure-coding-guide.md
-
 [PolicyDoc]: ./docs/policy.md
 [ScuttlingDoc]: ./docs/scuttling.md
 [LavamoatNode]: ./packages/node

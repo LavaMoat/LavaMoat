@@ -25,7 +25,7 @@ const scenarios = [
   ...scuttle,
 ]
 
-async function * loadScenarios () {
+async function* loadScenarios() {
   for (const scenarioCreator of scenarios) {
     yield await scenarioCreator()
   }

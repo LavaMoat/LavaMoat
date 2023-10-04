@@ -1,9 +1,13 @@
-const { reduceToTopmostApiCalls, objToMap, mapToObj } = require('lavamoat-tofu/src/util')
+const {
+  reduceToTopmostApiCalls,
+  objToMap,
+  mapToObj,
+} = require('lavamoat-tofu/src/util')
 const mergeDeep = require('merge-deep')
 
 module.exports = { mergePolicy }
 
-function mergePolicy (policyA, policyB) {
+function mergePolicy(policyA, policyB) {
   const mergedPolicy = mergeDeep(policyA, policyB)
   Object.values(mergedPolicy.resources).forEach((packagePolicy) => {
     if ('globals' in packagePolicy) {
@@ -16,7 +20,7 @@ function mergePolicy (policyA, policyB) {
   return mergedPolicy
 }
 
-function dedupePolicyPaths (packagePolicy) {
+function dedupePolicyPaths(packagePolicy) {
   const itemMap = objToMap(packagePolicy)
   reduceToTopmostApiCalls(itemMap)
   return mapToObj(itemMap)

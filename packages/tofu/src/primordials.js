@@ -3,7 +3,6 @@
 // https://github.com/Agoric/SES-shim/blob/299abe011e8aac273583c983216ca8248aa73b51/packages/ses/src/whitelist.js#L18-L96
 
 module.exports.globalPropertyNames = [
-
   // *** 18.2 Function Properties of the Global Object
 
   'eval',

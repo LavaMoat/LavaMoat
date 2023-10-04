@@ -6,7 +6,6 @@ Try out a [demo](https://lavamoat.github.io/LavaMoat/)
 
 ### Usage
 
-
 ```bash
 npx lavamoat index.js --writeAutoConfigDebug
 npx lavamoat-viz --open

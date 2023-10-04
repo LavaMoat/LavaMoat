@@ -4,7 +4,6 @@ import './css/DepGraph.css'
 import * as mergePolicy from './merge-deep.js'
 import Nav from './views/nav.js'
 
-
 const { DepGraph } = require('./graphs/DepGraph.js')
 
 /* eslint-disable no-restricted-globals */
@@ -25,12 +24,11 @@ const policyNames = Object.keys(LavamoatPolicies)
 const defaultPolicyName = policyNames[0]
 
 class App extends Component {
-
-  selectPolicy (target) {
+  selectPolicy(target) {
     this.setState(() => ({ policyName: target }))
   }
 
-  render () {
+  render() {
     const state = this.state || {}
     const currentPolicyName = state.policyName || defaultPolicyName
     const currentPolicyData = LavamoatPolicies[currentPolicyName]

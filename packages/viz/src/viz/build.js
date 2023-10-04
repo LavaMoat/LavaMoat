@@ -1,6 +1,6 @@
 module.exports = { buildGraph, mergeGraph }
 
-function mergeGraph (oldGraph, newGraph, middlePoint) {
+function mergeGraph(oldGraph, newGraph, middlePoint) {
   const graph = {}
   // create index for faster lookups during merge
   const graphIndex = createGraphIndex(oldGraph)
@@ -16,7 +16,7 @@ function mergeGraph (oldGraph, newGraph, middlePoint) {
   return graph
 }
 
-function buildGraph (networkState, networkFilter, latencyMode) {
+function buildGraph(networkState, networkFilter, latencyMode) {
   const graph = { nodes: [], links: [] }
 
   // first add kitsunet nodes
@@ -37,14 +37,19 @@ function buildGraph (networkState, networkFilter, latencyMode) {
 
     Object.entries(peers).forEach(([peerId, peerStats]) => {
       // if connected to a missing node, create missing node
-      const alreadyExists = Boolean(graph.nodes.find((item) => item.id === peerId))
+      const alreadyExists = Boolean(
+        graph.nodes.find((item) => item.id === peerId)
+      )
       if (!alreadyExists) {
         const newNode = { id: peerId, type: 'missing' }
         graph.nodes.push(newNode)
       }
       const protocolNames = Object.keys(peerStats.protocols)
       // abort if network filter miss
-      if (networkFilter && !protocolNames.some((name) => name.includes(networkFilter))) {
+      if (
+        networkFilter &&
+        !protocolNames.some((name) => name.includes(networkFilter))
+      ) {
         return
       }
       const peerData = clientData.peers[peerId]
@@ -67,7 +72,7 @@ function buildGraph (networkState, networkFilter, latencyMode) {
   return graph
 }
 
-function createGraphIndex (graph) {
+function createGraphIndex(graph) {
   const graphIndex = { nodes: {}, links: {} }
   graph.nodes.forEach((node) => {
     graphIndex.nodes[node.id] = node

@@ -11,14 +11,19 @@ start().catch((err) => {
   process.exit(1)
 })
 
-async function start () {
+async function start() {
   FEATURE.bins = true
   const binName = path.basename(process.argv[1])
   const rootDir = process.env.INIT_CWD || process.cwd()
-  const currentBinCandidates = await getOptionsForBin({ rootDir, name: binName })
+  const currentBinCandidates = await getOptionsForBin({
+    rootDir,
+    name: binName,
+  })
 
-  if(!currentBinCandidates) {
-    return console.error(`There's no candidates to run as the '${binName}' bin script`)
+  if (!currentBinCandidates) {
+    return console.error(
+      `There's no candidates to run as the '${binName}' bin script`
+    )
   }
 
   console.error(`-lavamoat--allow-scripts---------------------------------------------------
@@ -31,7 +36,7 @@ Add a line like this in allowBins:
   if (currentBinCandidates.length > 1) {
     console.error(`Choose one of the following paths for the value:
 
-  ${currentBinCandidates.map(c => c.fullLinkPath).join('\n')}
+  ${currentBinCandidates.map((c) => c.fullLinkPath).join('\n')}
 `)
   }
 
@@ -39,5 +44,4 @@ Add a line like this in allowBins:
 ---------------------------------------------------------------------------`)
 
   process.exit(42)
-
 }

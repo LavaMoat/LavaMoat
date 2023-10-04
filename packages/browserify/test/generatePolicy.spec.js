@@ -1,12 +1,8 @@
 /* eslint-disable no-undef */
 const test = require('ava')
 
-const {
-  autoConfigForScenario,
-} = require('./util')
-const {
-  createScenarioFromScaffold,
-} = require('lavamoat-core/test/util')
+const { autoConfigForScenario } = require('./util')
+const { createScenarioFromScaffold } = require('lavamoat-core/test/util')
 
 test('generatePolicy - empty policy', async (t) => {
   const scenario = createScenarioFromScaffold({
@@ -58,7 +54,6 @@ test('generatePolicy - ignore various refs', async (t) => {
     },
   })
 })
-
 
 test('generatePolicy - policy ignores global refs', async (t) => {
   const scenario = createScenarioFromScaffold({
@@ -128,7 +123,7 @@ test('generatePolicy - policy endows "process" properly', async (t) => {
           },
           // must include browserify so we know to find the builtin deps
           devDependencies: {
-            'browserify': '^16.2.3',
+            browserify: '^16.2.3',
           },
         })}`,
       },

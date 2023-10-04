@@ -7,9 +7,9 @@ This is EXACTLY the same as [01-simple-js example](../01-simple-js), but with sc
 const lavamoatOpts = {
   writeAutoPolicy: false,
   scuttleGlobalThis: {
-    enabled: true,              // enable scuttling https://github.com/LavaMoat/LavaMoat/pull/360
-    exceptions: ['prompt'],     // scuttle all properties except for "prompt"
-    scuttlerName: 'SCUTTLER',   // configure an external property to pass scuttling processing to
+    enabled: true, // enable scuttling https://github.com/LavaMoat/LavaMoat/pull/360
+    exceptions: ['prompt'], // scuttle all properties except for "prompt"
+    scuttlerName: 'SCUTTLER', // configure an external property to pass scuttling processing to
   },
 }
 ```

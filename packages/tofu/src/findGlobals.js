@@ -17,7 +17,7 @@ const nonReferenceIdentifiers = [
 
 module.exports = { findGlobals }
 
-function findGlobals (ast) {
+function findGlobals(ast) {
   const globals = new Map()
   traverse(ast, {
     // ReferencedIdentifier
@@ -31,7 +31,10 @@ function findGlobals (ast) {
         return
       }
       // skip if this is the key side of a member expression
-      if (isMemberLikeExpression(path.parent) && path.parent.property === path.node) {
+      if (
+        isMemberLikeExpression(path.parent) &&
+        path.parent.property === path.node
+      ) {
         return
       }
       // skip if this is the key side of an object pattern
@@ -73,7 +76,7 @@ function findGlobals (ast) {
 
   return globals
 
-  function saveGlobal (path, name = path.node.name) {
+  function saveGlobal(path, name = path.node.name) {
     // init entry if needed
     if (!globals.has(name)) {
       globals.set(name, [])

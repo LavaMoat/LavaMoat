@@ -78,21 +78,25 @@ test('Policy - watchify listens for policy file changes', async (t) => {
       writeAutoPolicy: true,
     },
   })
-  const { projectDir, policyDir } = await prepareBrowserifyScenarioOnDisk({ scenario })
+  const { projectDir, policyDir } = await prepareBrowserifyScenarioOnDisk({
+    scenario,
+  })
   await runBrowserify({ scenario })
 
   const watchedFiles = []
-  const bundler = createWatchifyBundler({ projectRoot: projectDir, policyName: 'browserify' })
+  const bundler = createWatchifyBundler({
+    projectRoot: projectDir,
+    policyName: 'browserify',
+  })
   bundler.on('file', (file) => {
     watchedFiles.push(file)
   })
   // need to wait a tick to get file events
   await new Promise((resolve) => setTimeout(resolve))
-  const relativeFiles = watchedFiles.map(file => path.relative(policyDir, file)).sort()
-  t.deepEqual(relativeFiles, [
-    'policy-override.json',
-    'policy.json',
-  ])
+  const relativeFiles = watchedFiles
+    .map((file) => path.relative(policyDir, file))
+    .sort()
+  t.deepEqual(relativeFiles, ['policy-override.json', 'policy.json'])
 })
 
 // this test is not written correctly, im disabling it for now

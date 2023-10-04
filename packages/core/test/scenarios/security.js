@@ -6,15 +6,18 @@ module.exports = [
       name: 'security - prevent intrinsic modification',
       defineOne: () => {
         require('two')
-        module.exports = { objectXyz: 'xyz' in Object, protoXyz: 'xyz' in Object.prototype }
+        module.exports = {
+          objectXyz: 'xyz' in Object,
+          protoXyz: 'xyz' in Object.prototype,
+        }
       },
       defineTwo: () => {
         try {
-          Object.xyz = 123 
-        } catch (_) { }
+          Object.xyz = 123
+        } catch (_) {}
         try {
-          Object.protoype.xyz = 123 
-        } catch (_) { }
+          Object.protoype.xyz = 123
+        } catch (_) {}
       },
       expectedResult: { objectXyz: false, protoXyz: false },
     })
@@ -28,7 +31,7 @@ module.exports = [
       },
       defineTwo: () => {
         try {
-          module.exports = setTimeout 
+          module.exports = setTimeout
         } catch (_) {}
       },
       expectedResult: false,

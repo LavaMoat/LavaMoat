@@ -5,7 +5,7 @@ import Tabs from 'react-bootstrap/Tabs'
 const React = require('react')
 
 class NavTabs extends React.Component {
-  render () {
+  render() {
     const { routes } = this.props
     return (
       <Tabs

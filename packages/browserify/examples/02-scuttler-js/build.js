@@ -18,11 +18,8 @@ if (process.env.AUTOCONFIG) {
 
 // configure browserify
 const bundler = browserify(['./index.js'], {
-  plugin: [
-    ['lavamoat-browserify', lavamoatOpts]
-  ]
+  plugin: [['lavamoat-browserify', lavamoatOpts]],
 })
 
 // bundle and write to disk
-bundler.bundle()
-  .pipe(fs.createWriteStream('./bundle.js'))
+bundler.bundle().pipe(fs.createWriteStream('./bundle.js'))

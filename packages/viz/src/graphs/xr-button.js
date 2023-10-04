@@ -4,7 +4,7 @@ import React from 'react'
 // import '../css/DepGraph.css'
 
 export default class XrButton extends React.Component {
-  constructor () {
+  constructor() {
     super()
     this.currentSession = null
     this.state = {
@@ -13,15 +13,16 @@ export default class XrButton extends React.Component {
     }
   }
 
-  async componentDidMount () {
+  async componentDidMount() {
     if (!this.state.supportsXr) {
       return
     }
-    const supportsImmersiveVr = await navigator.xr.isSessionSupported('immersive-vr')
+    const supportsImmersiveVr =
+      await navigator.xr.isSessionSupported('immersive-vr')
     this.setState({ supportsImmersiveVr })
   }
 
-  async toggleSession () {
+  async toggleSession() {
     const { supportsImmersiveVr } = this.state
     if (!supportsImmersiveVr) {
       return
@@ -36,29 +37,33 @@ export default class XrButton extends React.Component {
 
       // activate session
       const sessionInit = { optionalFeatures: ['local-floor', 'bounded-floor'] }
-      const session = await navigator.xr.requestSession('immersive-vr', sessionInit)
+      const session = await navigator.xr.requestSession(
+        'immersive-vr',
+        sessionInit
+      )
       this.currentSession = session
       // setup start/end handlers
-      session.addEventListener('end', () => {
-        this.props.onSessionEnded(session)
-        this.currentSession = null
-      }, { once: true })
+      session.addEventListener(
+        'end',
+        () => {
+          this.props.onSessionEnded(session)
+          this.currentSession = null
+        },
+        { once: true }
+      )
       this.props.onSessionStarted(session)
     } else {
       this.currentSession.end()
     }
   }
 
-  render () {
-    const {
-      supportsXr,
-      supportsImmersiveVr,
-    } = this.state
+  render() {
+    const { supportsXr, supportsImmersiveVr } = this.state
     const showButton = supportsXr && supportsImmersiveVr
 
     return (
       <button
-        className='xrButton'
+        className="xrButton"
         onClick={() => this.toggleSession()}
         disabled={!showButton}
         style={{

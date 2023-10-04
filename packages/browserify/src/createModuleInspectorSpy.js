@@ -7,7 +7,12 @@ module.exports = { createModuleInspectorSpy }
 // it analyses modules for global namespace usages, and generates a config for LavaMoat.
 // it calls `onResult` with the config when the stream ends.
 
-function createModuleInspectorSpy ({ onResult, policyOverride, isBuiltin, includeDebugInfo }) {
+function createModuleInspectorSpy({
+  onResult,
+  policyOverride,
+  isBuiltin,
+  includeDebugInfo,
+}) {
   if (!isBuiltin) {
     throw new Error('createModuleInspectorSpy - must specify "isBuiltin"')
   }
@@ -16,13 +21,13 @@ function createModuleInspectorSpy ({ onResult, policyOverride, isBuiltin, includ
     // inspect each module
     (moduleData) => inspectBrowserifyModuleData(moduleData, inspector),
     // after all modules, submit config
-    () => onResult(inspector.generatePolicy({ policyOverride })),
+    () => onResult(inspector.generatePolicy({ policyOverride }))
   )
   return configSpy
 }
 
 // convert browserify/module-deps's internal ModuleData schema to LavamoatModuleRecord
-function inspectBrowserifyModuleData (moduleData, inspector) {
+function inspectBrowserifyModuleData(moduleData, inspector) {
   const moduleRecord = new LavamoatModuleRecord({
     specifier: moduleData.id,
     file: moduleData.file,
@@ -38,24 +43,27 @@ function inspectBrowserifyModuleData (moduleData, inspector) {
 }
 
 // a passthrough stream with handlers for observing the data
-function createSpy (onData, onEnd) {
-  return through.obj((data, _, cb) => {
-    // give data to observer fn
-    try {
-      onData(data)
-    } catch (err) {
-      return cb(err)
+function createSpy(onData, onEnd) {
+  return through.obj(
+    (data, _, cb) => {
+      // give data to observer fn
+      try {
+        onData(data)
+      } catch (err) {
+        return cb(err)
+      }
+      // pass the data through normally
+      cb(null, data)
+    },
+    (cb) => {
+      // call flush observer
+      try {
+        onEnd()
+      } catch (err) {
+        return cb(err)
+      }
+      // End as normal
+      cb()
     }
-    // pass the data through normally
-    cb(null, data)
-  }, (cb) => {
-    // call flush observer
-    try {
-      onEnd()
-    } catch (err) {
-      return cb(err)
-    }
-    // End as normal
-    cb()
-  })
+  )
 }

@@ -26,16 +26,14 @@ export const nodeEnvConfig = {
 
 export const bifyEnvConfig = {
   globals: {
-    orangeGlobals: [
-    ],
+    orangeGlobals: [],
   },
   builtins: {
-    orangeBuiltins: [
-    ],
+    orangeBuiltins: [],
   },
 }
 
-function parseConfigDebugForPackages (policyName, policyDebugData, policyFinal) {
+function parseConfigDebugForPackages(policyName, policyDebugData, policyFinal) {
   // const { resources } = policyDebugData
   // const nodes = [], links = []
   const packages = {}
@@ -87,13 +85,17 @@ function parseConfigDebugForPackages (policyName, policyDebugData, policyFinal) 
   return packages
 }
 
-function createGraph (packages, policyFinal, {
-  lavamoatMode,
-  selectedNode,
-  hiddenPackages,
-  // packageModulesMode,
-  showPackageSize = true,
-}) {
+function createGraph(
+  packages,
+  policyFinal,
+  {
+    lavamoatMode,
+    selectedNode,
+    hiddenPackages,
+    // packageModulesMode,
+    showPackageSize = true,
+  }
+) {
   const nodes = []
   const links = []
   // for each module, create node and links
@@ -104,16 +106,18 @@ function createGraph (packages, policyFinal, {
     if (hiddenPackages.includes(packageId)) {
       return
     }
-    const sizeScaling = 1/16
-    const size = showPackageSize ? (sizeScaling * radiusFromArea(packageData.size)) : 2
+    const sizeScaling = 1 / 16
+    const size = showPackageSize
+      ? sizeScaling * radiusFromArea(packageData.size)
+      : 2
     const isLavamoat = lavamoatMode === 'lavamoat'
     const label = packageData.isRoot ? '(root)' : packageId
-    const lavamoatColor = packageData.isRoot ? 'purple' : getColorForRank(packageData.dangerRank)
+    const lavamoatColor = packageData.isRoot
+      ? 'purple'
+      : getColorForRank(packageData.dangerRank)
     const color = isLavamoat ? lavamoatColor : 'red'
     // create node for modules
-    nodes.push(
-      createNode({ id: packageId, val: 2, label, color, size }),
-    )
+    nodes.push(createNode({ id: packageId, val: 2, label, color, size }))
     const selectedNodeId = selectedNode && selectedNode.id
 
     // create links for deps
@@ -137,7 +141,12 @@ function createGraph (packages, policyFinal, {
       }
 
       links.push(
-        createLink({ color: linkColor, width, source: packageId, target: childId }),
+        createLink({
+          color: linkColor,
+          width,
+          source: packageId,
+          target: childId,
+        })
       )
     })
   })
@@ -145,7 +154,11 @@ function createGraph (packages, policyFinal, {
   links.forEach((link) => {
     if (!packages[link.target]) {
       nodes.push(
-        createNode({ id: link.target, label: `${link.target} (external)`, size: 2 }),
+        createNode({
+          id: link.target,
+          label: `${link.target} (external)`,
+          size: 2,
+        })
       )
     }
   })
@@ -153,11 +166,9 @@ function createGraph (packages, policyFinal, {
   return { nodes, links }
 }
 
-const rankColors = [
-  'green', 'orange', 'brown', 'red',
-]
+const rankColors = ['green', 'orange', 'brown', 'red']
 
-function getDangerRankForPackage (packageData, envConfig) {
+function getDangerRankForPackage(packageData, envConfig) {
   if (packageData.dangerRank) {
     return packageData.dangerRank
   }
@@ -175,26 +186,31 @@ function getDangerRankForPackage (packageData, envConfig) {
   return rank
 }
 
-function getDangerRankForModule (moduleDebugInfo, envConfig) {
+function getDangerRankForModule(moduleDebugInfo, envConfig) {
   const globalsRank = getRankForGlobals(moduleDebugInfo.globals, envConfig)
   const builtinRank = getRankForBuiltins(moduleDebugInfo.builtin, envConfig)
   const typeRank = getRankForType(moduleDebugInfo.moduleRecord.type)
   if (moduleDebugInfo.moduleRecord.packageName === 'JSONStream') {
-    console.log({ id: moduleDebugInfo.moduleRecord.file, globalsRank, builtinRank, typeRank, envConfig })
-
+    console.log({
+      id: moduleDebugInfo.moduleRecord.file,
+      globalsRank,
+      builtinRank,
+      typeRank,
+      envConfig,
+    })
   }
   const rank = Math.max(globalsRank, typeRank, builtinRank)
   return rank
 }
 
-function getColorForRank (rank) {
+function getColorForRank(rank) {
   if (rank === -1) {
     return 'purple'
   }
   return rankColors[rank]
 }
 
-function getRankForGlobals (globalsConfig, envConfig) {
+function getRankForGlobals(globalsConfig, envConfig) {
   const globals = Object.keys(globalsConfig || {})
   if (globals.length === 0) {
     return 0
@@ -209,12 +225,14 @@ function getRankForGlobal(glob, envConfig) {
   return 3
 }
 
-function getRankForBuiltins (builtinsConfig, envConfig) {
+function getRankForBuiltins(builtinsConfig, envConfig) {
   const builtins = Object.keys(builtinsConfig || {})
   if (builtins.length === 0) {
     return 0
   }
-  return Math.max(...builtins.map((builtin) => getRankForBuiltin(builtin, envConfig)))
+  return Math.max(
+    ...builtins.map((builtin) => getRankForBuiltin(builtin, envConfig))
+  )
 }
 
 function getRankForBuiltin(builtin, envConfig) {
@@ -224,7 +242,7 @@ function getRankForBuiltin(builtin, envConfig) {
   return 3
 }
 
-function getRankForType (type = 'js') {
+function getRankForType(type = 'js') {
   if (type === 'js') {
     return 0
   }
@@ -237,7 +255,7 @@ function getRankForType (type = 'js') {
   return 3
 }
 
-function createLink (params) {
+function createLink(params) {
   const { source, target } = params
   const link = {
     id: `${source}-${target}`,
@@ -250,59 +268,62 @@ function createLink (params) {
   return link
 }
 
-function createNode (params) {
-  const node = { // color: 'green',
+function createNode(params) {
+  const node = {
+    // color: 'green',
     ...params,
   }
   return node
 }
 
-function radiusFromArea (area) {
+function radiusFromArea(area) {
   return Math.sqrt(area / Math.PI)
 }
 
-function fullModuleNameFromPath (file) {
+function fullModuleNameFromPath(file) {
   const segments = file.split(path.sep)
   const index = segments.lastIndexOf('node_modules')
   if (index === -1) {
     return undefined
   }
-  const moduleName = segments.filter((segment) => segments.indexOf(segment) > index).join('/')
+  const moduleName = segments
+    .filter((segment) => segments.indexOf(segment) > index)
+    .join('/')
   return moduleName
 }
 
-function getLineNumbersForGlobals (source, globals) {
+function getLineNumbersForGlobals(source, globals) {
   const sourceLines = source.split(/\r\n|\r|\n/u)
   const regexList = []
-  const sourceGlobalLines = sourceLines.reduce((filtered, line, sourceIndex) => {
-    Object.keys(globals).forEach((key, index, array) => {
-      if (regexList.length !== array.length) {
-        const regex = new RegExp(`(^|\\W)${key}($|\\W)`, 'u')
-        regexList.push(regex)
-      }
-      if (line.match(regexList[index])) {
-        filtered.push(sourceIndex)
-      }
-    })
-    return filtered
-  }, [])
+  const sourceGlobalLines = sourceLines.reduce(
+    (filtered, line, sourceIndex) => {
+      Object.keys(globals).forEach((key, index, array) => {
+        if (regexList.length !== array.length) {
+          const regex = new RegExp(`(^|\\W)${key}($|\\W)`, 'u')
+          regexList.push(regex)
+        }
+        if (line.match(regexList[index])) {
+          filtered.push(sourceIndex)
+        }
+      })
+      return filtered
+    },
+    []
+  )
   return sourceGlobalLines
 }
 
-function getEnvConfigForPolicyName (policyName) {
+function getEnvConfigForPolicyName(policyName) {
   const envConfig = policyName === 'browserify' ? bifyEnvConfig : nodeEnvConfig
   return envConfig
 }
 
-function sortIntelligently () {
-  return sortByStrategies([
-    sortByDangerRank(),
-    sortByPackageName(),
-  ])
+function sortIntelligently() {
+  return sortByStrategies([sortByDangerRank(), sortByPackageName()])
 }
 
-function sortByStrategies (sorterFns) {
-  return function sort (a, b) {
+function sortByStrategies(sorterFns) {
+  return function sort(a, b) {
     for (let i = 0; i < sorterFns.length; i++) {
       const sorter = sorterFns[i]
       const result = sorter(a, b)
@@ -314,25 +335,25 @@ function sortByStrategies (sorterFns) {
   }
 }
 
-function sortByDangerRank () {
+function sortByDangerRank() {
   return sortByKey('dangerRank', true)
 }
 
-function sortByPackageName () {
+function sortByPackageName() {
   return sortByKey('id')
 }
 
-function sortByKey (key, reverse = false) {
+function sortByKey(key, reverse = false) {
   const reverseVal = reverse ? -1 : 1
   return (a, b) => {
-    const aVal = a[key], bVal = b[key]
+    const aVal = a[key],
+      bVal = b[key]
     if (aVal === bVal) {
       return 0
     }
     return aVal > bVal ? reverseVal : -reverseVal
   }
 }
-
 
 export {
   parseConfigDebugForPackages,

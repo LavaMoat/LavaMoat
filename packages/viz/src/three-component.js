@@ -37,7 +37,6 @@ export default class ThreeComponent extends React.Component {
     // });
     // this.update = this.update.bind(this);
     // this.update()
-
   }
 
   // ******************* COMPONENT LIFECYCLE ******************* //
@@ -46,11 +45,16 @@ export default class ThreeComponent extends React.Component {
     this.canvas = this.canvasRef.current
 
     var scene = new THREE.Scene()
-    var camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 )
+    var camera = new THREE.PerspectiveCamera(
+      75,
+      window.innerWidth / window.innerHeight,
+      0.1,
+      1000
+    )
     var renderer = new THREE.WebGLRenderer({
       canvas: this.canvas,
     })
-    renderer.setSize( window.innerWidth, window.innerHeight )
+    renderer.setSize(window.innerWidth, window.innerHeight)
     // var geometry = new THREE.BoxGeometry( 1, 1, 1 );
     // var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
     // var cube = new THREE.Mesh( geometry, material );
@@ -58,13 +62,13 @@ export default class ThreeComponent extends React.Component {
     camera.position.z = -5
     camera.lookAt(0, 0, 0)
     var animate = () => {
-      requestAnimationFrame( animate )
+      requestAnimationFrame(animate)
       // cube.rotation.x += 0.01;
       // cube.rotation.y += 0.01;
       this.animate()
-      renderer.render( scene, camera )
+      renderer.render(scene, camera)
     }
-    requestAnimationFrame( animate )
+    requestAnimationFrame(animate)
 
     this.scene = scene
     this.renderer = renderer
@@ -91,22 +95,20 @@ export default class ThreeComponent extends React.Component {
   }
 
   // ******************* EVENT LISTENERS ******************* //
-  onMouseMove () {
+  onMouseMove() {
     // Mouse moves
   }
 
-  onWindowResize () {
+  onWindowResize() {
     const { innerWidth, innerHeight } = window
     this.renderer.setSize(innerWidth, innerHeight)
   }
 
-  updateValue () {
+  updateValue() {
     // Whatever you need to do with React props
   }
 
-  animate () {
-
-  }
+  animate() {}
   // update(t) {
   //   this.renderer.render(this.scene, this.camera);
   //   requestAnimationFrame(this.update);
@@ -115,13 +117,16 @@ export default class ThreeComponent extends React.Component {
   render() {
     return (
       <div className="canvasContainer">
-        <canvas ref={this.canvasRef} style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: '100vw',
-          height: '100vh',
-        }}/>
+        <canvas
+          ref={this.canvasRef}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100vw',
+            height: '100vh',
+          }}
+        />
       </div>
     )
   }

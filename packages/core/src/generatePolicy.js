@@ -7,7 +7,11 @@ const {
   inspectImports,
   inspectSesCompat,
   codeSampleFromAstNode,
-  utils: { mergePolicy: mergeGlobalsPolicy, mapToObj, reduceToTopmostApiCallsFromStrings },
+  utils: {
+    mergePolicy: mergeGlobalsPolicy,
+    mapToObj,
+    reduceToTopmostApiCallsFromStrings,
+  },
 } = require('lavamoat-tofu')
 const { mergePolicy } = require('./mergePolicy')
 
@@ -15,7 +19,7 @@ const rootSlug = '$root$'
 
 module.exports = { rootSlug, createModuleInspector, getDefaultPaths }
 
-function createModuleInspector (opts = {}) {
+function createModuleInspector(opts = {}) {
   const moduleIdToModuleRecord = new Map()
   // "packageToModules" does not include builtin modules
   const packageToModules = new Map()
@@ -34,7 +38,10 @@ function createModuleInspector (opts = {}) {
 
   return inspector
 
-  function inspectModule (moduleRecord, { isBuiltin, includeDebugInfo = false } = {}) {
+  function inspectModule(
+    moduleRecord,
+    { isBuiltin, includeDebugInfo = false } = {}
+  ) {
     const { packageName, specifier, type } = moduleRecord
     // record the module
     moduleIdToModuleRecord.set(specifier, moduleRecord)
@@ -60,12 +67,12 @@ function createModuleInspector (opts = {}) {
   }
 
   // eslint-disable-next-line no-unused-vars
-  function inspectBuiltinModule (moduleRecord) {
+  function inspectBuiltinModule(moduleRecord) {
     // builtins themselves do not require any configuration
     // packages that import builtins need to add that to their configuration
   }
 
-  function inspectNativeModule (moduleRecord) {
+  function inspectNativeModule(moduleRecord) {
     // LavaMoat does attempt to sandbox native modules
     // packages with native modules need to specify that in the policy file
     const { packageName } = moduleRecord
@@ -76,7 +83,10 @@ function createModuleInspector (opts = {}) {
     packageNativeModules.push(moduleRecord)
   }
 
-  function inspectJsModule (moduleRecord, { isBuiltin, includeDebugInfo = false }) {
+  function inspectJsModule(
+    moduleRecord,
+    { isBuiltin, includeDebugInfo = false }
+  ) {
     const { packageName, specifier } = moduleRecord
     let moduleDebug
     // record the module
@@ -107,13 +117,15 @@ function createModuleInspector (opts = {}) {
       return
     }
     // get ast (parse or use cached)
-    const ast = moduleRecord.ast || parse(moduleRecord.content, {
-      // esm support
-      sourceType: 'module',
-      // someone must have been doing this
-      allowReturnOutsideFunction: true,
-      errorRecovery: true,
-    })
+    const ast =
+      moduleRecord.ast ||
+      parse(moduleRecord.content, {
+        // esm support
+        sourceType: 'module',
+        // someone must have been doing this
+        allowReturnOutsideFunction: true,
+        errorRecovery: true,
+      })
     if (includeDebugInfo && ast.errors && ast.errors.length) {
       moduleDebug.parseErrors = ast.errors
     }
@@ -122,16 +134,26 @@ function createModuleInspector (opts = {}) {
     // get global usage
     inspectForGlobals(ast, moduleRecord, packageName, includeDebugInfo)
     // get builtin package usage
-    inspectForImports(ast, moduleRecord, packageName, isBuiltin, includeDebugInfo)
+    inspectForImports(
+      ast,
+      moduleRecord,
+      packageName,
+      isBuiltin,
+      includeDebugInfo
+    )
     // ensure module ast is cleaned up
     delete moduleRecord.ast
   }
 
-  function inspectForEnvironment (ast, moduleRecord, includeDebugInfo) {
+  function inspectForEnvironment(ast, moduleRecord, includeDebugInfo) {
     const { packageName } = moduleRecord
     const compatWarnings = inspectSesCompat(ast, packageName)
-    const { primordialMutations, strictModeViolations, dynamicRequires } = compatWarnings
-    const hasResults = primordialMutations.length > 0 || strictModeViolations.length > 0 || dynamicRequires.length > 0
+    const { primordialMutations, strictModeViolations, dynamicRequires } =
+      compatWarnings
+    const hasResults =
+      primordialMutations.length > 0 ||
+      strictModeViolations.length > 0 ||
+      dynamicRequires.length > 0
     if (!hasResults) {
       return
     }
@@ -140,9 +162,15 @@ function createModuleInspector (opts = {}) {
       moduleDebug.sesCompat = {
         ...compatWarnings,
         // fix serialization
-        primordialMutations: primordialMutations.map(({ node: { loc } }) => ({ node: { loc } })),
-        strictModeViolations: strictModeViolations.map(({ node: { loc } }) => ({ node: { loc } })),
-        dynamicRequires: dynamicRequires.map(({ node: { loc } }) => ({ node: { loc } })),
+        primordialMutations: primordialMutations.map(({ node: { loc } }) => ({
+          node: { loc },
+        })),
+        strictModeViolations: strictModeViolations.map(({ node: { loc } }) => ({
+          node: { loc },
+        })),
+        dynamicRequires: dynamicRequires.map(({ node: { loc } }) => ({
+          node: { loc },
+        })),
       }
     } else {
       // warn if non-compatible code found
@@ -150,9 +178,15 @@ function createModuleInspector (opts = {}) {
         inspector.emit('compat-warning', { moduleRecord, compatWarnings })
       } else {
         const samples = jsonStringify({
-          primordialMutations: primordialMutations.map(({ node }) => codeSampleFromAstNode(node, moduleRecord)),
-          strictModeViolations: strictModeViolations.map(({ node }) => codeSampleFromAstNode(node, moduleRecord)),
-          dynamicRequires: dynamicRequires.map(({ node }) => codeSampleFromAstNode(node, moduleRecord)),
+          primordialMutations: primordialMutations.map(({ node }) =>
+            codeSampleFromAstNode(node, moduleRecord)
+          ),
+          strictModeViolations: strictModeViolations.map(({ node }) =>
+            codeSampleFromAstNode(node, moduleRecord)
+          ),
+          dynamicRequires: dynamicRequires.map(({ node }) =>
+            codeSampleFromAstNode(node, moduleRecord)
+          ),
         })
         const errMsg = `Incompatible code detected in package "${packageName}" file "${moduleRecord.file}". Violations:\n${samples}`
         console.warn(errMsg)
@@ -160,7 +194,7 @@ function createModuleInspector (opts = {}) {
     }
   }
 
-  function inspectForGlobals (ast, moduleRecord, packageName, includeDebugInfo) {
+  function inspectForGlobals(ast, moduleRecord, packageName, includeDebugInfo) {
     const commonJsRefs = ['require', 'module', 'exports', 'arguments']
     const globalObjPrototypeRefs = Object.getOwnPropertyNames(Object.prototype)
     const foundGlobals = inspectGlobals(ast, {
@@ -187,7 +221,13 @@ function createModuleInspector (opts = {}) {
     packageToGlobals.set(packageName, packageGlobals)
   }
 
-  function inspectForImports (ast, moduleRecord, packageName, isBuiltin, includeDebugInfo) {
+  function inspectForImports(
+    ast,
+    moduleRecord,
+    packageName,
+    isBuiltin,
+    includeDebugInfo
+  ) {
     // get all requested names that resolve to isBuiltin
     const namesForBuiltins = Object.entries(moduleRecord.importMap)
       .filter(([, resolvedName]) => isBuiltin(resolvedName))
@@ -210,7 +250,7 @@ function createModuleInspector (opts = {}) {
     packageToBuiltinImports.set(packageName, packageBuiltins)
   }
 
-  function generatePolicy ({ policyOverride, includeDebugInfo } = {}) {
+  function generatePolicy({ policyOverride, includeDebugInfo } = {}) {
     const resources = {}
     const policy = { resources }
     packageToModules.forEach((packageModules, packageName) => {
@@ -222,16 +262,21 @@ function createModuleInspector (opts = {}) {
         return
       }
       // get dependencies, ignoring builtins
-      const packageDeps = aggregateDeps({ packageModules, moduleIdToModuleRecord })
+      const packageDeps = aggregateDeps({
+        packageModules,
+        moduleIdToModuleRecord,
+      })
       if (packageDeps.length) {
-        packages = Object.fromEntries(packageDeps.map(depPackageName => [depPackageName, true]))
+        packages = Object.fromEntries(
+          packageDeps.map((depPackageName) => [depPackageName, true])
+        )
       }
       // get globals
       if (packageToGlobals.has(packageName)) {
         globals = mapToObj(packageToGlobals.get(packageName))
         // prefer "true" over "read" for clearer difference between
         // read/write syntax highlighting
-        Object.keys(globals).forEach(key => {
+        Object.keys(globals).forEach((key) => {
           if (globals[key] === 'read') {
             globals[key] = true
           }
@@ -241,7 +286,7 @@ function createModuleInspector (opts = {}) {
       const builtinImports = packageToBuiltinImports.get(packageName)
       if (builtinImports && builtinImports.length) {
         builtin = {}
-        reduceToTopmostApiCallsFromStrings(builtinImports).forEach(path => {
+        reduceToTopmostApiCallsFromStrings(builtinImports).forEach((path) => {
           builtin[path] = true
         })
       }
@@ -280,29 +325,31 @@ function createModuleInspector (opts = {}) {
   }
 }
 
-function aggregateDeps ({ packageModules, moduleIdToModuleRecord }) {
+function aggregateDeps({ packageModules, moduleIdToModuleRecord }) {
   const deps = new Set()
   // get all dep package from the "packageModules" collection of modules
   Object.values(packageModules).forEach((moduleRecord) => {
-    Object.entries(moduleRecord.importMap).forEach(([requestedName, specifier]) => {
-      // skip entries where resolution was skipped
-      if (!specifier) {
-        return
-      }
-      // get packageName from module record, or guess
-      const moduleRecord = moduleIdToModuleRecord.get(specifier)
-      if (moduleRecord) {
-        // builtin modules are ignored here, handled elsewhere
-        if (moduleRecord.type === 'builtin') {
+    Object.entries(moduleRecord.importMap).forEach(
+      ([requestedName, specifier]) => {
+        // skip entries where resolution was skipped
+        if (!specifier) {
           return
         }
-        deps.add(moduleRecord.packageName)
-        return
+        // get packageName from module record, or guess
+        const moduleRecord = moduleIdToModuleRecord.get(specifier)
+        if (moduleRecord) {
+          // builtin modules are ignored here, handled elsewhere
+          if (moduleRecord.type === 'builtin') {
+            return
+          }
+          deps.add(moduleRecord.packageName)
+          return
+        }
+        // moduleRecord missing, guess package name
+        const packageName = guessPackageName(requestedName)
+        deps.add(packageName)
       }
-      // moduleRecord missing, guess package name
-      const packageName = guessPackageName(requestedName)
-      deps.add(packageName)
-    })
+    )
     // ensure the package is not listed as its own dependency
     deps.delete(moduleRecord.packageName)
   })
@@ -312,8 +359,9 @@ function aggregateDeps ({ packageModules, moduleIdToModuleRecord }) {
 }
 
 // for when you encounter a requestedName that was not inspected, likely because resolution was skipped for that module
-function guessPackageName (requestedName) {
-  const isNotPackageName = requestedName.startsWith('/') || requestedName.startsWith('.')
+function guessPackageName(requestedName) {
+  const isNotPackageName =
+    requestedName.startsWith('/') || requestedName.startsWith('.')
   if (isNotPackageName) {
     return `<unknown:${requestedName}>`
   }
@@ -325,7 +373,7 @@ function guessPackageName (requestedName) {
   return packageName
 }
 
-function getDefaultPaths (policyName) {
+function getDefaultPaths(policyName) {
   const policiesDir = 'lavamoat'
   const policyDir = path.join(policiesDir, policyName)
   return {

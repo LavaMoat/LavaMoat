@@ -92,7 +92,7 @@ const accessor = {
 }
 
 // 19.5.6 NativeError Object Structure
-function NativeError (prototype) {
+function NativeError(prototype) {
   return {
     // 19.5.6.2 Properties of the NativeError Constructors
     '**proto**': 'Error',
@@ -108,7 +108,7 @@ function NativeError (prototype) {
   }
 }
 
-function NativeErrorPrototype (constructor) {
+function NativeErrorPrototype(constructor) {
   return {
     // 19.5.6.3 Properties of the NativeError Prototype Objects
     '**proto**': 'ErrorPrototype',
@@ -124,7 +124,7 @@ function NativeErrorPrototype (constructor) {
 }
 
 // 22.2.4 The TypedArray Constructors
-function TypedArray (prototype) {
+function TypedArray(prototype) {
   return {
     // 22.2.5 Properties of the TypedArray Constructors
     '**proto**': 'TypedArray',
@@ -142,7 +142,7 @@ function TypedArray (prototype) {
   }
 }
 
-function TypedArrayPrototype (constructor) {
+function TypedArrayPrototype(constructor) {
   return {
     // 22.2.6 Properties of the TypedArray Prototype Objects
     '**proto**': 'TypedArrayPrototype',

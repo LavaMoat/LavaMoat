@@ -7,33 +7,48 @@ module.exports = makePrepareRealmGlobalFromConfig
 // The config uses a period-deliminated path notation to pull out deep values from objects
 // These utilities help modify the container global to expose the allowed globals from the globalStore OR the platform global
 
-function makePrepareRealmGlobalFromConfig ({ createFunctionWrapper }) {
+function makePrepareRealmGlobalFromConfig({ createFunctionWrapper }) {
   return {
     prepareCompartmentGlobalFromConfig,
     getTopLevelReadAccessFromPackageConfig,
     getTopLevelWriteAccessFromPackageConfig,
   }
 
-  function getTopLevelReadAccessFromPackageConfig (globalsConfig) {
+  function getTopLevelReadAccessFromPackageConfig(globalsConfig) {
     const result = Object.entries(globalsConfig)
-      .filter(([key, value]) => value === 'read' || value === true || (value === 'write' && key.split('.').length > 1))
+      .filter(
+        ([key, value]) =>
+          value === 'read' ||
+          value === true ||
+          (value === 'write' && key.split('.').length > 1)
+      )
       .map(([key]) => key.split('.')[0])
     // return unique array
     return Array.from(new Set(result))
   }
 
-  function getTopLevelWriteAccessFromPackageConfig (globalsConfig) {
+  function getTopLevelWriteAccessFromPackageConfig(globalsConfig) {
     const result = Object.entries(globalsConfig)
-      .filter(([key, value]) => value === 'write' && key.split('.').length === 1)
+      .filter(
+        ([key, value]) => value === 'write' && key.split('.').length === 1
+      )
       .map(([key]) => key)
     return result
   }
 
-  function prepareCompartmentGlobalFromConfig (packageCompartment, globalsConfig, endowments, globalStore, globalThisRefs) {
+  function prepareCompartmentGlobalFromConfig(
+    packageCompartment,
+    globalsConfig,
+    endowments,
+    globalStore,
+    globalThisRefs
+  ) {
     const packageCompartmentGlobal = packageCompartment.globalThis
     // lookup top level read + write access keys
-    const topLevelWriteAccessKeys = getTopLevelWriteAccessFromPackageConfig(globalsConfig)
-    const topLevelReadAccessKeys = getTopLevelReadAccessFromPackageConfig(globalsConfig)
+    const topLevelWriteAccessKeys =
+      getTopLevelWriteAccessFromPackageConfig(globalsConfig)
+    const topLevelReadAccessKeys =
+      getTopLevelReadAccessFromPackageConfig(globalsConfig)
 
     // NOTE: getters for read should only ever be needed on props marked for 'write' (unless we want to allow sloppy behavior from the root compartment modifying everything...)
     // Making a pass over the entire policy and collecting the names of writable items would limit the number of getters created here to the minimum.
@@ -43,34 +58,36 @@ function makePrepareRealmGlobalFromConfig ({ createFunctionWrapper }) {
     // define accessors
 
     // allow read access via globalStore or packageCompartmentGlobal
-    topLevelReadAccessKeys.forEach(key => {
+    topLevelReadAccessKeys.forEach((key) => {
       Object.defineProperty(packageCompartmentGlobal, key, {
-        get () {
+        get() {
           if (globalStore.has(key)) {
             return globalStore.get(key)
           } else {
             return Reflect.get(endowments, key, this)
           }
         },
-        set () {
+        set() {
           // TODO: there should be a config to throw vs silently ignore
-          console.warn(`LavaMoat: ignoring write attempt to read-access global "${key}"`)
+          console.warn(
+            `LavaMoat: ignoring write attempt to read-access global "${key}"`
+          )
         },
       })
     })
 
     // allow write access to globalStore
     // read access via globalStore or packageCompartmentGlobal
-    topLevelWriteAccessKeys.forEach(key => {
+    topLevelWriteAccessKeys.forEach((key) => {
       Object.defineProperty(packageCompartmentGlobal, key, {
-        get () {
+        get() {
           if (globalStore.has(key)) {
             return globalStore.get(key)
           } else {
             return endowments[key]
           }
         },
-        set (value) {
+        set(value) {
           globalStore.set(key, value)
         },
         enumerable: true,
@@ -79,7 +96,7 @@ function makePrepareRealmGlobalFromConfig ({ createFunctionWrapper }) {
     })
 
     // set circular globalRefs
-    globalThisRefs.forEach(key => {
+    globalThisRefs.forEach((key) => {
       // if globalRef is actually an endowment, ignore
       if (topLevelReadAccessKeys.includes(key)) {
         return
@@ -96,10 +113,13 @@ function makePrepareRealmGlobalFromConfig ({ createFunctionWrapper }) {
     const origFunction = packageCompartmentGlobal.Function
     const newFunction = function (...args) {
       const fn = origFunction(...args)
-      const unwrapTest = thisValue => thisValue === undefined
+      const unwrapTest = (thisValue) => thisValue === undefined
       return createFunctionWrapper(fn, unwrapTest, packageCompartmentGlobal)
     }
-    Object.defineProperties(newFunction, Object.getOwnPropertyDescriptors(origFunction))
+    Object.defineProperties(
+      newFunction,
+      Object.getOwnPropertyDescriptors(origFunction)
+    )
     packageCompartmentGlobal.Function = newFunction
   }
 }

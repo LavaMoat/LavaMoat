@@ -1,10 +1,6 @@
 import * as THREE from 'three'
-import {
-  OrbitControls,
-} from 'three/examples/jsm/controls/OrbitControls.js'
-import {
-  XRControllerModelFactory,
-} from 'three/examples/jsm/webxr/XRControllerModelFactory.js'
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
+import { XRControllerModelFactory } from 'three/examples/jsm/webxr/XRControllerModelFactory.js'
 import StatsVR from 'statsvr'
 
 let container
@@ -17,11 +13,11 @@ let statsVR
 
 const animateListeners = []
 
-function subscribeTick (newListener) {
+function subscribeTick(newListener) {
   animateListeners.push(newListener)
 }
 
-export function setupScene ({ debug = false } = {}) {
+export function setupScene({ debug = false } = {}) {
   init({ debug })
   animate()
   return {
@@ -39,14 +35,19 @@ export function setupScene ({ debug = false } = {}) {
   }
 }
 
-function init ({ debug }) {
+function init({ debug }) {
   container = document.createElement('div')
   document.body.appendChild(container)
 
   scene = new THREE.Scene()
   scene.background = new THREE.Color(0x808080)
 
-  camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000)
+  camera = new THREE.PerspectiveCamera(
+    50,
+    window.innerWidth / window.innerHeight,
+    0.1,
+    1000
+  )
   camera.position.set(0, 1.6, 3)
 
   controls = new OrbitControls(camera, container)
@@ -87,23 +88,38 @@ function init ({ debug }) {
   const controllerModelFactory = new XRControllerModelFactory()
 
   controllerGrip1 = renderer.xr.getControllerGrip(0)
-  controllerGrip1.add(controllerModelFactory.createControllerModel(controllerGrip1))
+  controllerGrip1.add(
+    controllerModelFactory.createControllerModel(controllerGrip1)
+  )
   scene.add(controllerGrip1)
   controllerGrip2 = renderer.xr.getControllerGrip(1)
-  controllerGrip2.add(controllerModelFactory.createControllerModel(controllerGrip2))
+  controllerGrip2.add(
+    controllerModelFactory.createControllerModel(controllerGrip2)
+  )
   scene.add(controllerGrip2)
 
-  const geometry = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, -1)])
+  const geometry = new THREE.BufferGeometry().setFromPoints([
+    new THREE.Vector3(0, 0, 0),
+    new THREE.Vector3(0, 0, -1),
+  ])
   const line = new THREE.Line(geometry)
   line.name = 'line'
   line.scale.z = 5
   controller1.add(line.clone())
   controller2.add(line.clone())
 
-  const textMesh1 = createTextMesh('', { width: 800, height: 80, geoScale: 1/800 })
+  const textMesh1 = createTextMesh('', {
+    width: 800,
+    height: 80,
+    geoScale: 1 / 800,
+  })
   controller1.add(textMesh1)
   textMesh1.position.y -= 0.15
-  const textMesh2 = createTextMesh('', { width: 800, height: 80, geoScale: 1/800 })
+  const textMesh2 = createTextMesh('', {
+    width: 800,
+    height: 80,
+    geoScale: 1 / 800,
+  })
   controller2.add(textMesh2)
   textMesh2.position.y -= 0.15
 
@@ -116,17 +132,17 @@ function init ({ debug }) {
   window.addEventListener('resize', onWindowResize, false)
 }
 
-function setControllerText (controller, text) {
+function setControllerText(controller, text) {
   controller.getObjectByName('text').updateText(text)
 }
 
-function createTextMesh (text = '', opts = {}) {
-  const { width = 200, height = 40, geoScale = 1/400 } = opts
+function createTextMesh(text = '', opts = {}) {
+  const { width = 200, height = 40, geoScale = 1 / 400 } = opts
   const textMesh = new THREE.Mesh(
-    new THREE.PlaneGeometry( width * geoScale, height * geoScale ),
+    new THREE.PlaneGeometry(width * geoScale, height * geoScale),
     new THREE.MeshBasicMaterial({
       map: createTextTexture(text),
-    }),
+    })
   )
   textMesh.name = 'text'
 
@@ -135,24 +151,24 @@ function createTextMesh (text = '', opts = {}) {
   }
 
   return textMesh
-}        
+}
 
-function createTextTexture (text = '', opts = {}) {
+function createTextTexture(text = '', opts = {}) {
   const { width = 200, height = 40 } = opts
-  const textCanvas = document.createElement( 'canvas' )
+  const textCanvas = document.createElement('canvas')
   textCanvas.width = width
   textCanvas.height = height
-  const textContext = textCanvas.getContext( '2d' )
+  const textContext = textCanvas.getContext('2d')
   textContext.fillStyle = '#000000'
-  textContext.fillRect( 0, 0, textCanvas.width, textCanvas.height )
+  textContext.fillRect(0, 0, textCanvas.width, textCanvas.height)
   textContext.fillStyle = '#FFFFFF'
   textContext.font = '14px sans-serif'
-  textContext.fillText( text, 10, 30 )
-  const textTexture = new THREE.CanvasTexture( textCanvas )
+  textContext.fillText(text, 10, 30)
+  const textTexture = new THREE.CanvasTexture(textCanvas)
   return textTexture
 }
 
-function onWindowResize () {
+function onWindowResize() {
   camera.aspect = window.innerWidth / window.innerHeight
   camera.updateProjectionMatrix()
 
@@ -161,11 +177,11 @@ function onWindowResize () {
 
 //
 
-function animate () {
+function animate() {
   renderer.setAnimationLoop(render)
 }
 
-function render () {
+function render() {
   animateListeners.forEach((fn) => fn())
   renderer.render(scene, camera)
 }

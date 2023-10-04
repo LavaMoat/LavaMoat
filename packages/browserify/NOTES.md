@@ -1,28 +1,30 @@
 some notes
-  - bundler plugins
-    - two phases: generate config, generate build
-  - lavamoat internals
-    - requireRelativeWithContext
-      - passed directly to moduleInitializer (untrusted code)
-      - calls requireRelative with parentModule context added
-    - requireRelative
-      - translates the "requestedName" (eg relative path) to a moduleId (webpack doesnt need this, it rewrites the source to use the moduleId directly)
-      - handles weird browserify-specific recursive lookups (eg buffer, timers)
-      - calls internalRequire
-      - uses the module config's protectExportsRequireTime
-    - internalRequire:
-      - instantiates the module in the specified context with
-  - known / potential issues
-    - sneaky setting of packageName by dir hacks?
-    - magicCopy doesnt walk the full prototype graph
-    - perf overhead
-    - doesnt solve architectural weaknesses
-    - doesnt enforce disabling scripts (yet!)
+
+- bundler plugins
+  - two phases: generate config, generate build
+- lavamoat internals
+  - requireRelativeWithContext
+    - passed directly to moduleInitializer (untrusted code)
+    - calls requireRelative with parentModule context added
+  - requireRelative
+    - translates the "requestedName" (eg relative path) to a moduleId (webpack doesnt need this, it rewrites the source to use the moduleId directly)
+    - handles weird browserify-specific recursive lookups (eg buffer, timers)
+    - calls internalRequire
+    - uses the module config's protectExportsRequireTime
+  - internalRequire:
+    - instantiates the module in the specified context with
+- known / potential issues
+
+  - sneaky setting of packageName by dir hacks?
+  - magicCopy doesnt walk the full prototype graph
+  - perf overhead
+  - doesnt solve architectural weaknesses
+  - doesnt enforce disabling scripts (yet!)
 
 - [ ] review the audit
   - [ ] easy
     - [ ] Issue I: [LavaMoat] Code Injection via Label in ​wrapWithReturnCjsExports
-    - [x] Issue G: [LavaMoat] Prevent Access to __​proto​__ from ​deepGet
+    - [x] Issue G: [LavaMoat] Prevent Access to **​proto​** from ​deepGet
       - fixed in f903354ca64b7aa46511d6c83d13921253df6ab1
     - [ ] Suggestion 4: [LavaMoat] Hide ​stacktraces
   - [ ] hard
@@ -38,6 +40,7 @@ some notes
     - [ ] Suggestion 5: [LavaMoat] Stronger Magic Copy
 
 LA audit kickoff todos
+
 - [x] clarify requireFns
 - [x] audit cache, looks broken
 - [x] transfer `sesify-tofu`
@@ -46,6 +49,7 @@ LA audit kickoff todos
 - [x] comment shit you cowboy
 
 another list of todos
+
 - [x] isEntry based on packageName
 - [x] remove modulePath
 - [x] unify on `<entry>` or `<root>`
@@ -66,17 +70,21 @@ another list of todos
 - [ ] using `--writeAutoConfig` should create a valid build using the generated config
 
 exportsProtection strategies
+
 - [ ] harden strategy
   - tests
 - [ ] fresh eval/instantion doesnt require magicCopy
 
 ### summary of components
+
 - Config
+
   - auto config generation
     - tofu rich parsing
       - read/write
   - user config overrides
   - config
+
     - agoric prototype: https://github.com/erights/legacy-todo/blob/master/manifest.json
       - per-package:
         - modules
@@ -98,47 +106,49 @@ exportsProtection strategies
     - specify module/global replacements
     - maybe add a config for common attenuations
 
-
 ### recent notes + todo
+
 - importer can decorate: common
 - importer can see late sets: uncommonn
 
-
 SES
-  - thoughts
-    - worried im blocked by the `typeof xyz` erroring issue
-    - can work around `globalThis.Object === Object`
-    - need to summarize endowments-sloppyGlobals-globalThis requirements
-  - [x] ok a plan of action
-    - use compartments
-    - remove sloppyGlobals
-    - define getters/setters on readable/writable globals
-  - [x] autoconfig / global detection does not support writes
-    - re-examine tofu
-    - otherwise consider whats needed to detect
-  - [x] evaluate current proposal (fixed in SES)
-    - await feedback
-    - [x] examine for differences in using getters on endowments
-    - [x] test in metamask
-      - [x] Symbol.iterator, Symbol.asyncIterator, Symbol.toStringTag
-  - [x] document and diagram scope
-    - endowments
-    - realm.global
-    - cjs module source
-  - [ ] endowment ref tree generation is kinda broken
-    - [ ] how to handle deep sets?
-  - [x] Function constructor globalThis hack (?)
+
+- thoughts
+  - worried im blocked by the `typeof xyz` erroring issue
+  - can work around `globalThis.Object === Object`
+  - need to summarize endowments-sloppyGlobals-globalThis requirements
+- [x] ok a plan of action
+  - use compartments
+  - remove sloppyGlobals
+  - define getters/setters on readable/writable globals
+- [x] autoconfig / global detection does not support writes
+  - re-examine tofu
+  - otherwise consider whats needed to detect
+- [x] evaluate current proposal (fixed in SES)
+  - await feedback
+  - [x] examine for differences in using getters on endowments
+  - [x] test in metamask
+    - [x] Symbol.iterator, Symbol.asyncIterator, Symbol.toStringTag
+- [x] document and diagram scope
+  - endowments
+  - realm.global
+  - cjs module source
+- [ ] endowment ref tree generation is kinda broken
+  - [ ] how to handle deep sets?
+- [x] Function constructor globalThis hack (?)
 
 - also interested in doing deeper dep analysis for dep dashboard
   - draw lines for global writes to global reads
 
 debug bundle sesh in metamask
+
 - ??
   -- in sentry deps, mod.require is undefined. `module.require` appears in node
-    maybe fine, as we already use this in browserify and its not supported
+  maybe fine, as we already use this in browserify and its not supported
+
   - "obs-store" doesnt have localStorage access despite use?
   - [x] setTimeout not whitelisted for package "process"
-    - problem: packageName is "_process"
+    - problem: packageName is "\_process"
   - ui <root> deps maps "react-dom" to "react-dom", not moduleId (why?)
     - external deps (uideps bundle)
   - metamask minifying the whole bundle, including kernel?
@@ -147,8 +157,8 @@ debug bundle sesh in metamask
   - [x] allow deletes for global writes
   - [x] must support globalThis getter via Function
   - [x] loading "buffer" fails - seems not added to parent modules deps map (witnessed in bn.js)
-      why: node_modules/ethjs-abi/node_modules/bn.js/lib/bn.js | grep "'buf' + 'fer'"
-      need to upgrade to a proper error
+        why: node_modules/ethjs-abi/node_modules/bn.js/lib/bn.js | grep "'buf' + 'fer'"
+        need to upgrade to a proper error
   - [ ] drop console warns
   - [ ] debugging: label package + file name
   - [x] globals
@@ -162,7 +172,7 @@ debug bundle sesh in metamask
         - [x] "regeneratorRuntime"
       - [x] fix endowment generation
         - [x] Blob.prototype is undefined
-  - [x] workaround for assigning to __proto__
+  - [x] workaround for assigning to **proto**
   - [ ] endowments
     - [ ] make sure generateEndowments works correctly with globalStore
       - seeing an error with regeneratorRuntime.mark in eth-json-rpc-middleware / json-rpc-engine
@@ -176,6 +186,7 @@ debug bundle sesh in metamask
       - doesnt seem to get new config on reload?
       - reload on config change only works once?
 - [x] babel-thing (obsolete due to fix in SES)
+
   - [x] handle frozen prototype writes to `next` (iterator)
   - [x] length of array is writable but not configurable, so defining 'length' fails (in bignumber.js)
 
@@ -187,16 +198,18 @@ debug bundle sesh in metamask
   - [ ] shouldnt need regeneratorRuntime ?
     - getting it in eth-json-rpc-middleware / json-rpc-engine
   - [ ] aes-js (old ver) modifies Array.prototype
-    dep paths:
-      <root>
-      eth-hd-keyring
-      eth-simple-keyring
-      gaba
+        dep paths:
+        <root>
+        eth-hd-keyring
+        eth-simple-keyring
+        gaba
         ethereumjs-wallet
-          aes-js
+        aes-js
 
 # older bundleEntryForModule
+
 todo
+
 - [x] shared instances of modules
   - [x] revert the seperation of eval / global injection
 - [x] make config like agoric prototype
@@ -252,12 +265,13 @@ todo
   - [x] how to create a copy of a fn class
 
 if autogen config
-  - allow browserPack to pause stream until config is generated
-  - generate config then unpause browserPack
-  - back pressure could cause a dead lock (?)
 
+- allow browserPack to pause stream until config is generated
+- generate config then unpause browserPack
+- back pressure could cause a dead lock (?)
 
 # sesify prelude/kernel
+
 - [x] pass custom endowments at require time
 - [x] pass custom endowments at config time
   - [x] get config into bundle
@@ -281,6 +295,7 @@ if autogen config
 - [x] is global caching safe? (no)
 - [x] try using the frozen realm + container architecture
 - [x] battletest via metamask
+
   - [x] background boot works : )
   - [x] sent first tx for background-only sesified
   - [x] contentscript doesnt?
@@ -292,6 +307,7 @@ if autogen config
   - [ ] ensure we dont break Constructors with our "this" fix
 - [x] browserify insertGlobal is ruining the parsing of properties on global
 - [ ] sourcemaps
+
   - [x] needs to be able to compose over existing sourcemaps
   - [ ] needs to work when there are no existing sourcemaps
   - [x] config to specify inline or file
@@ -304,6 +320,7 @@ if autogen config
 - [?] browserify the prelude
 
 # tofu parser
+
 - [x] mvp
   - [x] analyze required files for platform API usage
   - [x] use this to spit out a sesify config file (or something)
@@ -317,7 +334,7 @@ if autogen config
     - [x] raise platform api granularity to common denominator (e.g. dedupe "location" and "location.href"), including defaultGlobals
     - [?] maybe limit granularity to actual platform API surface (e.g. not "location.href.indexOf")
     - [x] browserify insertGlobal is ruining the parsing of properties on global
-        - bc declaring the global object and passing it into a closure causes acorn-globals to ignore the uses of the global var
+      - bc declaring the global object and passing it into a closure causes acorn-globals to ignore the uses of the global var
   - [x] user config defaultGlobals
   - [?] location and document.location is redundant
   - [x] location and location.href trigers page reload < !!! wow ouch !!! >
@@ -327,10 +344,12 @@ if autogen config
   - [x] update ses
 
 # audit
+
 - [ ] basic safety review
 - [ ] LA audit
 
 # devx
+
 - [ ] use autogen config if set to generate ?
 - [ ] cli support (?)
   - [x] config gen
@@ -341,10 +360,12 @@ if autogen config
   - then sesify sourcemaps get a bit worse
 
 # idea icebox
+
 - [ ] permissions as higher abstractions (network, persistence, DOM)
 - [ ] permissions sorted by risk (?)
 
 # the big ones
+
 - [x] autogen granularity
 - [x] sourcemaps
 - [x] do call with agoric/MM
@@ -352,28 +373,36 @@ if autogen config
 - [ ] perf
 
 # make perf better
-  - reduce instantiations
-    - allow module cache under certain conditions
-      - cant harden exports?
-    - lazy instantiation via "universal proxy"
-      - my guess: we use most things on boot
-  - improve instantiation perf
-    - transform src with endowments injection (build time slow down)
+
+- reduce instantiations
+  - allow module cache under certain conditions
+    - cant harden exports?
+  - lazy instantiation via "universal proxy"
+    - my guess: we use most things on boot
+- improve instantiation perf
+  - transform src with endowments injection (build time slow down)
 
 # dangers of module cache
+
 - mutating the exports
 - cant be done if it includes unhardenables (?)
 
 ### cli testing
+
 eval in sesify bundle
+
 ```
 echo 'console.log(self.process === process)' | browserify - --detect-globals false --no-builtins -p [ './src/index.js' --sesifyConfig '{"resources":{"<root>":{"globals":{"console":true,"process":true}}}}' ] | node
 ```
+
 eval in ses
+
 ```
 node -p "try { require('ses').makeSESRootRealm().evaluate('const x = {}; x.hasOwnProperty = ()=>{}') } catch (err) { console.log(err.message) }"
 ```
+
 npm bug workaround
+
 ```
 npm unlink sesify && npm i && npm link sesify
 ```

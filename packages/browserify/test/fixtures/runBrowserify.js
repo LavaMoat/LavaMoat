@@ -8,7 +8,7 @@ browserify(params.entries, {
   // enable inline sourcemaps
   debug: true,
   ...lavamoatPlugin.args,
-  plugin: [
-    [lavamoatPlugin, params.opts]
-  ],
-}).bundle().pipe(process.stdout)
+  plugin: [[lavamoatPlugin, params.opts]],
+})
+  .bundle()
+  .pipe(process.stdout)

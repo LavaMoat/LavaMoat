@@ -1,13 +1,13 @@
-ignore-dirs: "lib"
+ignore-dirs: 'lib'
 ignores:
-  - "ses"
+  - 'ses'
   # monorepo deps
-  - "ava"
+  - 'ava'
   # tests - fake packages
-  - "abc"
-  - "xyz"
-  - "two"
-  - "three"
-  - "thisChecker"
-  - "someClass"
-  - "one"
+  - 'abc'
+  - 'xyz'
+  - 'two'
+  - 'three'
+  - 'thisChecker'
+  - 'someClass'
+  - 'one'

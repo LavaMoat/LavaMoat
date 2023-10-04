@@ -4,7 +4,6 @@ const os = require('os')
 const { promises: fs } = require('fs')
 const { spawn, exec: execCb } = require('child_process')
 
-
 const exec = promisify(execCb)
 const makeTempDir = async () => {
   return await fs.mkdtemp(path.join(os.tmpdir(), 'lavamoat-survey-'))
@@ -23,7 +22,7 @@ execTest({
 // 2. npm/yarn install
 // 3. npm run test (no lavamoat)
 // 4. run tests (lavamoat gen-and-run)
-async function execTest ({ gitRepo, gitRef }) {
+async function execTest({ gitRepo, gitRef }) {
   const projectDir = await makeTempDir()
   console.log('running lavamoat exec test')
   console.log(`${gitRepo} #${gitRef ? gitRef : '<default>'} in ${projectDir}`)
@@ -33,7 +32,7 @@ async function execTest ({ gitRepo, gitRef }) {
   await runLavamoatTests({ projectDir })
 }
 
-async function prepareRepo ({ projectDir, gitRepo, gitRef }) {
+async function prepareRepo({ projectDir, gitRepo, gitRef }) {
   await exec(`git clone ${gitRepo} .`, { cwd: projectDir })
   if (gitRef) {
     await exec(`git checkout ${gitRef}`, { cwd: projectDir })
@@ -41,17 +40,17 @@ async function prepareRepo ({ projectDir, gitRepo, gitRef }) {
   console.log(`repo prepared ${projectDir}`)
 }
 
-async function installDependencies ({ projectDir }) {
+async function installDependencies({ projectDir }) {
   await exec('yarn install', { cwd: projectDir })
   console.log('deps installed')
 }
 
-async function runPlainTests ({ projectDir }) {
+async function runPlainTests({ projectDir }) {
   await exec('yarn run test', { cwd: projectDir })
   console.log('tests passed directly')
 }
 
-async function runLavamoatTests ({ projectDir }) {
+async function runLavamoatTests({ projectDir }) {
   // yarn modifies the path, injecting a `node` ref so we avoid it
   // npx is whitelisted in the node mitm script
   const testCommand = require(`${projectDir}/package.json`).scripts.test
@@ -65,5 +64,5 @@ async function mitmExec(arg, args, opts) {
     stdio: 'inherit',
     ...opts,
   })
-  return new Promise(resolve => child.on('exit', resolve))
+  return new Promise((resolve) => child.on('exit', resolve))
 }

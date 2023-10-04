@@ -10,7 +10,7 @@ module.exports = {
   createPerformantResolve,
 }
 
-function createPerformantResolve () {
+function createPerformantResolve() {
   const readPackageWithout = (self) => (readFileSync, pkgfile) => {
     // avoid loading the package.json we're just trying to resolve
     if (pkgfile.endsWith(self)) {
@@ -21,7 +21,7 @@ function createPerformantResolve () {
     try {
       var pkg = JSON.parse(body)
       return pkg
-    } catch (jsonErr) { }
+    } catch (jsonErr) {}
   }
 
   return {
@@ -44,7 +44,12 @@ async function loadCanonicalNameMap({ rootDir, includeDevDeps, resolve } = {}) {
   resolve = resolve || createPerformantResolve()
   // resolve = resolve || nodeResolve
   // walk tree
-  const logicalPathMap = walkDependencyTreeForBestLogicalPaths({ packageDir: rootDir, includeDevDeps, resolve, canonicalNameMap })
+  const logicalPathMap = walkDependencyTreeForBestLogicalPaths({
+    packageDir: rootDir,
+    includeDevDeps,
+    resolve,
+    canonicalNameMap,
+  })
   //convert dependency paths to canonical package names
   for (const [packageDir, logicalPathParts] of logicalPathMap.entries()) {
     const logicalPathString = logicalPathParts.join('>')
@@ -87,11 +92,19 @@ let nextLevelTodos
  * @param {object} options
  * @returns {Map<{packageDir: string, logicalPathParts: string[]}>}
  */
-function walkDependencyTreeForBestLogicalPaths({ packageDir, logicalPath = [], includeDevDeps = false, visited = new Set(), resolve }) {
+function walkDependencyTreeForBestLogicalPaths({
+  packageDir,
+  logicalPath = [],
+  includeDevDeps = false,
+  visited = new Set(),
+  resolve,
+}) {
   resolve = resolve ?? createPerformantResolve()
   const preferredPackageLogicalPathMap = new Map()
   // add the entry package as the first work unit
-  currentLevelTodos = [{ packageDir, logicalPath, includeDevDeps, visited, resolve }]
+  currentLevelTodos = [
+    { packageDir, logicalPath, includeDevDeps, visited, resolve },
+  ]
   nextLevelTodos = []
   // drain work queue until empty, avoid going depth-first by prioritizing the current depth level
   do {
@@ -105,8 +118,16 @@ function walkDependencyTreeForBestLogicalPaths({ packageDir, logicalPath = [], i
   return preferredPackageLogicalPathMap
 }
 
-function processOnePackageInLogicalTree(preferredPackageLogicalPathMap, resolve) {
-  const { packageDir, logicalPath = [], includeDevDeps = false, visited = new Set() } = currentLevelTodos.pop()
+function processOnePackageInLogicalTree(
+  preferredPackageLogicalPathMap,
+  resolve
+) {
+  const {
+    packageDir,
+    logicalPath = [],
+    includeDevDeps = false,
+    visited = new Set(),
+  } = currentLevelTodos.pop()
   const depsToWalk = getDependencies(packageDir, includeDevDeps)
   const results = []
 
@@ -136,7 +157,12 @@ function processOnePackageInLogicalTree(preferredPackageLogicalPathMap, resolve)
       // set as the new best so far
       preferredPackageLogicalPathMap.set(childPackageDir, childLogicalPath)
       // continue walking children, adding them to the end of the queue
-      nextLevelTodos.push({ packageDir: childPackageDir, logicalPath: childLogicalPath, includeDevDeps: false, visited: childVisited })
+      nextLevelTodos.push({
+        packageDir: childPackageDir,
+        logicalPath: childLogicalPath,
+        includeDevDeps: false,
+        visited: childVisited,
+      })
     } else {
       // debug: log skipped path traversals
       // console.log(`skipping "${childPackageDir}"\n  preferred "${theCurrentBest}"\n  current "${childLogicalPath}"`)
@@ -157,15 +183,18 @@ function getPackageNameForModulePath(canonicalNameMap, modulePath) {
   const relativeToPackageDir = path.relative(packageDir, modulePath)
   // files should never be associated with a package directory across a package boundary (as tested via the presense of "node_modules" in the path)
   if (relativeToPackageDir.includes('node_modules')) {
-    throw new Error(`LavaMoat - Encountered unknown package directory for file "${modulePath}"`)
+    throw new Error(
+      `LavaMoat - Encountered unknown package directory for file "${modulePath}"`
+    )
   }
   return packageName
 }
 
 function getPackageDirForModulePath(canonicalNameMap, modulePath) {
   // find which of these directories the module is in
-  const matchingPackageDirs = Array.from(canonicalNameMap.keys())
-    .filter(packageDir => modulePath.startsWith(packageDir))
+  const matchingPackageDirs = Array.from(canonicalNameMap.keys()).filter(
+    (packageDir) => modulePath.startsWith(packageDir)
+  )
   if (matchingPackageDirs.length === 0) {
     return undefined
     // throw new Error(`Could not find package for module path: "${modulePath}" out of these package dirs:\n${Array.from(canonicalNameMap.keys()).join('\n')}`)

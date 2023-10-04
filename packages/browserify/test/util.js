@@ -6,7 +6,12 @@ const path = require('path')
 const watchify = require('watchify')
 const lavamoatPlugin = require('../src/index')
 const { verifySourceMaps } = require('./sourcemaps')
-const { createScenarioFromScaffold, prepareScenarioOnDisk, evaluateWithSourceUrl, createHookedConsole } = require('lavamoat-core/test/util.js')
+const {
+  createScenarioFromScaffold,
+  prepareScenarioOnDisk,
+  evaluateWithSourceUrl,
+  createHookedConsole,
+} = require('lavamoat-core/test/util.js')
 const util = require('util')
 const tmp = require('tmp-promise')
 const { spawnSync } = require('child_process')
@@ -35,11 +40,17 @@ module.exports = {
 }
 
 function overrideDepsWithLocalPackages(projectDir) {
-  const localPkgPaths = Object.keys(localLavaMoatDeps).map(workspaceDirname => path.resolve(WORKSPACE_ROOT, 'packages', workspaceDirname))
+  const localPkgPaths = Object.keys(localLavaMoatDeps).map((workspaceDirname) =>
+    path.resolve(WORKSPACE_ROOT, 'packages', workspaceDirname)
+  )
 
   // link all of the workspaces to the temp dir project. no need to unlink
   // first; this will overwrite any already-present links
-  const res2 = spawnSync('npm', ['install', '--ignore-scripts', ...Object.values(localPkgPaths)], { cwd: projectDir, encoding: 'utf8'})
+  const res2 = spawnSync(
+    'npm',
+    ['install', '--ignore-scripts', ...Object.values(localPkgPaths)],
+    { cwd: projectDir, encoding: 'utf8' }
+  )
   if (res2.status !== 0) {
     const err = res.stderr
     console.error({
@@ -51,32 +62,40 @@ function overrideDepsWithLocalPackages(projectDir) {
   }
 }
 
-async function createBundleFromEntry (path, pluginOpts = {}) {
+async function createBundleFromEntry(path, pluginOpts = {}) {
   pluginOpts.policy = pluginOpts.policy || { resources: {} }
-  const bifyOpts = Object.assign({
-    // inline sourcemaps
-    debug: true,
-  }, lavamoatPlugin.args)
+  const bifyOpts = Object.assign(
+    {
+      // inline sourcemaps
+      debug: true,
+    },
+    lavamoatPlugin.args
+  )
   const bundler = browserify([], bifyOpts)
   bundler.add(path)
   bundler.plugin(lavamoatPlugin, pluginOpts)
   return bundleAsync(bundler)
 }
 
-async function autoConfigForScenario ({ scenario }) {
-  const copiedScenario = {...scenario, opts: {...scenario.opts, writeAutoPolicy: true }}
-  const { policyDir } = await createBundleForScenario({ scenario: copiedScenario })
+async function autoConfigForScenario({ scenario }) {
+  const copiedScenario = {
+    ...scenario,
+    opts: { ...scenario.opts, writeAutoPolicy: true },
+  }
+  const { policyDir } = await createBundleForScenario({
+    scenario: copiedScenario,
+  })
   const fullPath = path.join(policyDir, 'policy.json')
   const policy = await fs.readFile(fullPath, 'utf8')
   return JSON.parse(policy)
 }
 
-async function bundleAsync (bundler) {
-  const src = await pify(cb => bundler.bundle(cb))()
+async function bundleAsync(bundler) {
+  const src = await pify((cb) => bundler.bundle(cb))()
   return src.toString()
 }
 
-function createWatchifyBundler (pluginOpts) {
+function createWatchifyBundler(pluginOpts) {
   const bundler = browserify([], {
     debug: true,
     cache: {},
@@ -91,7 +110,7 @@ function createWatchifyBundler (pluginOpts) {
   return bundler
 }
 
-function evalBundle (bundle, context) {
+function evalBundle(bundle, context) {
   const newContext = Object.assign({}, context)
   // ensure the context has a reference to the global (for node versions without globalThis)
   newContext.global = newContext
@@ -104,7 +123,7 @@ function evalBundle (bundle, context) {
   return newContext.testResult
 }
 
-async function runBrowserify ({
+async function runBrowserify({
   scenario,
   bundleWithPrecompiledModules = true,
 }) {
@@ -132,7 +151,7 @@ async function runBrowserify ({
 
 // const limited = require('throat')(2)
 
-async function prepareBrowserifyScenarioOnDisk ({ scenario }) {
+async function prepareBrowserifyScenarioOnDisk({ scenario }) {
   const { path: projectDir } = await tmp.dir()
   scenario.dir = projectDir
   console.warn(`created test project directory at "${projectDir}"`)
@@ -142,13 +161,17 @@ async function prepareBrowserifyScenarioOnDisk ({ scenario }) {
     depsToInstall.push(
       'through2@^3',
       'vinyl-buffer@^1',
-      'bify-package-factor@^1',
+      'bify-package-factor@^1'
     )
     runBrowserifyPath = `${__dirname}/fixtures/runBrowserifyBundleFactor.js`
   }
 
   // install must happen before link, otherwise npm will remove any linked packages upon install
-  const installDevDepsResult = spawnSync('npm', ['install', '--ignore-scripts', ...depsToInstall], { cwd: projectDir, encoding: 'utf8' })
+  const installDevDepsResult = spawnSync(
+    'npm',
+    ['install', '--ignore-scripts', ...depsToInstall],
+    { cwd: projectDir, encoding: 'utf8' }
+  )
 
   if (installDevDepsResult.status !== 0) {
     const msg = `Error while installing devDeps:\n${installDevDepsResult.stderr}\npackages: ${depsToInstall}`
@@ -160,33 +183,44 @@ async function prepareBrowserifyScenarioOnDisk ({ scenario }) {
 
   // copy scenario files
   // we copy files first so that we dont attempt to install the immaginary deps
-  const { policyDir } = await prepareScenarioOnDisk({ scenario, projectDir, policyName: 'browserify' })
+  const { policyDir } = await prepareScenarioOnDisk({
+    scenario,
+    projectDir,
+    policyName: 'browserify',
+  })
   // copy browserify build runner
-  await fs.copyFile(runBrowserifyPath, path.join(projectDir, 'runBrowserify.js'))
+  await fs.copyFile(
+    runBrowserifyPath,
+    path.join(projectDir, 'runBrowserify.js')
+  )
   return { projectDir, policyDir }
 }
 
-async function createBundleForScenario ({
+async function createBundleForScenario({
   scenario,
   bundleWithPrecompiledModules = true,
 }) {
   let policy
   if (!scenario.dir) {
-    const { projectDir, policyDir } = await prepareBrowserifyScenarioOnDisk({ scenario })
+    const { projectDir, policyDir } = await prepareBrowserifyScenarioOnDisk({
+      scenario,
+    })
     scenario.dir = projectDir
     policy = policyDir
   } else {
     policy = path.join(scenario.dir, '/lavamoat/browserify/')
   }
 
-  const { output: { stdout: bundle, stderr } } = await runBrowserify({ scenario, bundleWithPrecompiledModules })
+  const {
+    output: { stdout: bundle, stderr },
+  } = await runBrowserify({ scenario, bundleWithPrecompiledModules })
   if (stderr.length) {
     console.warn(stderr)
   }
   return { bundleForScenario: bundle, policyDir: policy }
 }
 
-async function runScenario ({
+async function runScenario({
   scenario,
   bundle,
   runWithPrecompiledModules = true,
@@ -210,7 +244,7 @@ async function runScenario ({
   return testResult
 }
 
-function createBrowserifyScenarioFromScaffold (...args) {
+function createBrowserifyScenarioFromScaffold(...args) {
   const scenario = createScenarioFromScaffold(...args)
   // ammend scenario to list browserify as a dependency
   const packageJsonFileObject = scenario.files['package.json']
@@ -218,6 +252,10 @@ function createBrowserifyScenarioFromScaffold (...args) {
   if (!packageJsonFileContentObj.devDependencies['browserify']) {
     packageJsonFileContentObj.devDependencies['browserify'] = '*'
   }
-  packageJsonFileObject.content = JSON.stringify(packageJsonFileContentObj, null, 2)
+  packageJsonFileObject.content = JSON.stringify(
+    packageJsonFileContentObj,
+    null,
+    2
+  )
   return scenario
 }

@@ -1,5 +1,10 @@
-const { inspectPrimordialAssignments } = require('./inspectPrimordialAssignments.js')
-const { whitelist: sesAllowlist, FunctionInstance } = require('./ses-whitelist.js')
+const {
+  inspectPrimordialAssignments,
+} = require('./inspectPrimordialAssignments.js')
+const {
+  whitelist: sesAllowlist,
+  FunctionInstance,
+} = require('./ses-whitelist.js')
 const { inspectDynamicRequires } = require('./inspectSource.js')
 
 module.exports = { inspectSesCompat }
@@ -8,19 +13,21 @@ const strictModeViolationErrorCues = [
   'Unexpected reserved word',
   'Legacy octal literals are not allowed in strict mode',
   'Expecting Unicode escape sequence',
-  '\'with\' in strict mode',
+  "'with' in strict mode",
   'Deleting local variable in strict mode',
 ]
 
-function inspectSesCompat (ast) {
+function inspectSesCompat(ast) {
   const results = {
     primordialMutations: [],
     strictModeViolations: [],
     dynamicRequires: [],
   }
   // check for strict mode violations
-  ;(ast.errors || []).forEach(error => {
-    if (strictModeViolationErrorCues.some(msg => error.message.includes(msg))) {
+  ;(ast.errors || []).forEach((error) => {
+    if (
+      strictModeViolationErrorCues.some((msg) => error.message.includes(msg))
+    ) {
       const { loc, pos } = error
       results.strictModeViolations.push({ error, loc, pos })
     } else {
@@ -30,8 +37,9 @@ function inspectSesCompat (ast) {
     }
   })
   // check for mutations to named intrinsics
-  const sesNamedIntrinsics = Reflect.ownKeys(sesAllowlist)
-    .filter(k => k in global && typeof sesAllowlist[k] === 'object')
+  const sesNamedIntrinsics = Reflect.ownKeys(sesAllowlist).filter(
+    (k) => k in global && typeof sesAllowlist[k] === 'object'
+  )
   const possibleHits = inspectPrimordialAssignments(ast, sesNamedIntrinsics)
   // check mutations for ses compat
   possibleHits.forEach((intrinsicMutation) => {
@@ -46,7 +54,7 @@ function inspectSesCompat (ast) {
   return results
 }
 
-function hasSetterInWhitelist (memberPath) {
+function hasSetterInWhitelist(memberPath) {
   let allowListTarget = sesAllowlist
   // ensure member path in whitelist
   for (const pathPart of memberPath) {

@@ -3,10 +3,10 @@ const { performTest } = require('../../performTask')
 const nRange = [0, 5000]
 
 const tasks = {
-  'node': {
+  node: {
     run: 'node entry.js',
   },
-  'bify': {
+  bify: {
     prep: 'yarn build:unsafe',
     run: 'node bundle/unsafe.js',
   },

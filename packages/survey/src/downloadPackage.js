@@ -7,8 +7,7 @@ module.exports = {
   downloadPackage,
 }
 
-
-async function downloadPackage (packageName) {
+async function downloadPackage(packageName) {
   const downloadDir = resolve(join(__dirname, '..', 'downloads'))
   const packageDir = `${downloadDir}/${packageName}`
   await fs.rmdir(packageDir, { recursive: true })

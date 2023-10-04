@@ -1,6 +1,6 @@
 ignores:
   # monorepo deps
-  - "ava"
+  - 'ava'
   # tests - fake packages
-  - "bar"
-  - "bing"
+  - 'bar'
+  - 'bing'

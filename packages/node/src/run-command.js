@@ -9,21 +9,29 @@ const { runLava } = require('./index')
 
 const defaults = require('./defaults')
 
-runLava(parseArgs()).catch(err => {
+runLava(parseArgs()).catch((err) => {
   // explicity log stack to workaround https://github.com/endojs/endo/issues/944
   console.error(err.stack || err)
   process.exit(1)
 })
 
-function parseArgs () {
+function parseArgs() {
   const argsParser = yargs
-    .usage('$0', 'lavamoat-run-command [flags for lavamoat] -- command [args for the command]', (yarn) => yargsFlags(yarn, defaults))
+    .usage(
+      '$0',
+      'lavamoat-run-command [flags for lavamoat] -- command [args for the command]',
+      (yarn) => yargsFlags(yarn, defaults)
+    )
     .help()
 
   const parsedArgs = argsParser.parse()
   const commandName = parsedArgs._[0]
 
-  const binEntry = path.resolve(process.cwd(), './node_modules/.bin/', commandName)
+  const binEntry = path.resolve(
+    process.cwd(),
+    './node_modules/.bin/',
+    commandName
+  )
   if (!fs.existsSync(binEntry)) {
     console.error(`Error: '${commandName}' is not one of the locally installed commands. Missing: '${binEntry}'
     Possible reasons for this error:
@@ -34,9 +42,9 @@ function parseArgs () {
   }
 
   parsedArgs.entryPath = path.resolve(
-    process.cwd(), 
+    process.cwd(),
     'node_modules/.bin/',
-    fs.readlinkSync(binEntry),
+    fs.readlinkSync(binEntry)
   )
 
   // patch process.argv so it matches the normal pattern
@@ -47,4 +55,3 @@ function parseArgs () {
 
   return parsedArgs
 }
-

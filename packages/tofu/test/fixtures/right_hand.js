@@ -1,3 +1,2 @@
-
-exports.filename = __filename;
-exports.dirname = __dirname;
+exports.filename = __filename
+exports.dirname = __dirname

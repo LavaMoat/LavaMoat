@@ -3,12 +3,12 @@ module.exports = makeGeneralUtils
 /**
  * @deprecated - inlined in endowmentsToolkit (see core/src/endowmentsToolkit.js)
  */
-function makeGeneralUtils () {
+function makeGeneralUtils() {
   return {
     createFunctionWrapper,
   }
 
-  function createFunctionWrapper (sourceValue, unwrapTest, unwrapTo) {
+  function createFunctionWrapper(sourceValue, unwrapTest, unwrapTo) {
     const newValue = function (...args) {
       if (new.target) {
         // handle constructor calls
@@ -20,7 +20,10 @@ function makeGeneralUtils () {
         return Reflect.apply(sourceValue, thisRef, args)
       }
     }
-    Object.defineProperties(newValue, Object.getOwnPropertyDescriptors(sourceValue))
+    Object.defineProperties(
+      newValue,
+      Object.getOwnPropertyDescriptors(sourceValue)
+    )
     return newValue
   }
 }

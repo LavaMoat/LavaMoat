@@ -3,7 +3,11 @@ const fs = require('fs')
 const path = require('path')
 const resolve = require('resolve')
 const { sanitize } = require('htmlescape')
-const { generateKernel, applySourceTransforms, makeInitStatsHook } = require('lavamoat-core')
+const {
+  generateKernel,
+  applySourceTransforms,
+  makeInitStatsHook,
+} = require('lavamoat-core')
 const { getPackageNameForModulePath } = require('@lavamoat/aa')
 const { checkForResolutionOverride } = require('./resolutions')
 const { resolutionOmittedExtensions } = require('./parseForPolicy')
@@ -14,18 +18,33 @@ const nativeRequire = require
 
 module.exports = { createKernel }
 
-function createKernel ({ projectRoot, lavamoatPolicy, canonicalNameMap, debugMode, statsMode, scuttleGlobalThis, scuttleGlobalThisExceptions }) {
+function createKernel({
+  projectRoot,
+  lavamoatPolicy,
+  canonicalNameMap,
+  debugMode,
+  statsMode,
+  scuttleGlobalThis,
+  scuttleGlobalThisExceptions,
+}) {
   if (scuttleGlobalThisExceptions) {
-    console.warn('Lavamoat - "scuttleGlobalThisExceptions" is deprecated. Use "scuttleGlobalThis.exceptions" instead.')
+    console.warn(
+      'Lavamoat - "scuttleGlobalThisExceptions" is deprecated. Use "scuttleGlobalThis.exceptions" instead.'
+    )
     if (scuttleGlobalThis === true) {
-      scuttleGlobalThis = {enabled: true}
+      scuttleGlobalThis = { enabled: true }
     }
     scuttleGlobalThis = Object.assign({}, scuttleGlobalThis)
-    scuttleGlobalThis.exceptions = scuttleGlobalThis?.exceptions || scuttleGlobalThisExceptions
+    scuttleGlobalThis.exceptions =
+      scuttleGlobalThis?.exceptions || scuttleGlobalThisExceptions
   }
 
   const { resolutions } = lavamoatPolicy
-  const getRelativeModuleId = createModuleResolver({ projectRoot, resolutions, canonicalNameMap })
+  const getRelativeModuleId = createModuleResolver({
+    projectRoot,
+    resolutions,
+    canonicalNameMap,
+  })
   const loadModuleData = createModuleLoader({ canonicalNameMap })
   const kernelSrc = generateKernel({ debugMode, scuttleGlobalThis })
   const createKernel = evaluateWithSourceUrl('LavaMoat/node/kernel', kernelSrc)
@@ -42,15 +61,21 @@ function createKernel ({ projectRoot, lavamoatPolicy, canonicalNameMap, debugMod
   return kernel
 }
 
-function getExternalCompartment (packageName, packagePolicy) {
+function getExternalCompartment(packageName, packagePolicy) {
   const envPolicy = packagePolicy.env
   if (packagePolicy.env === 'unfrozen') {
     return createFreshRealmCompartment()
   }
-  throw new Error(`LavaMoat/node - unrecognized "env" policy setting for package "${packageName}", "${envPolicy}"`)
+  throw new Error(
+    `LavaMoat/node - unrecognized "env" policy setting for package "${packageName}", "${envPolicy}"`
+  )
 }
 
-function prepareModuleInitializerArgs (requireRelativeWithContext, moduleObj, moduleData) {
+function prepareModuleInitializerArgs(
+  requireRelativeWithContext,
+  moduleObj,
+  moduleData
+) {
   const require = requireRelativeWithContext
   const module = moduleObj
   const exports = moduleObj.exports
@@ -62,12 +87,19 @@ function prepareModuleInitializerArgs (requireRelativeWithContext, moduleObj, mo
   return [exports, require, module, __filename, __dirname]
 }
 
-function createModuleResolver ({ projectRoot, resolutions, canonicalNameMap }) {
-  return function getRelativeModuleId (parentAbsolutePath, requestedName) {
+function createModuleResolver({ projectRoot, resolutions, canonicalNameMap }) {
+  return function getRelativeModuleId(parentAbsolutePath, requestedName) {
     // handle resolution overrides
     let parentDir = path.dirname(parentAbsolutePath)
-    const parentPackageName = getPackageNameForModulePath(canonicalNameMap, parentDir)
-    const result = checkForResolutionOverride(resolutions, parentPackageName, requestedName)
+    const parentPackageName = getPackageNameForModulePath(
+      canonicalNameMap,
+      parentDir
+    )
+    const result = checkForResolutionOverride(
+      resolutions,
+      parentPackageName,
+      requestedName
+    )
     if (result) {
       requestedName = result
       // if path is a relative path, it should be relative to the projectRoot
@@ -84,8 +116,8 @@ function createModuleResolver ({ projectRoot, resolutions, canonicalNameMap }) {
   }
 }
 
-function createModuleLoader ({ canonicalNameMap }) {
-  return function loadModuleData (absolutePath) {
+function createModuleLoader({ canonicalNameMap }) {
+  return function loadModuleData(absolutePath) {
     // load builtin modules (eg "fs")
     if (resolve.isCore(absolutePath)) {
       return {
@@ -98,9 +130,12 @@ function createModuleLoader ({ canonicalNameMap }) {
           module.exports = nativeRequire(absolutePath)
         },
       }
-    // load compiled native module
+      // load compiled native module
     } else if (isNativeModule(absolutePath)) {
-      const packageName = getPackageNameForModulePath(canonicalNameMap, absolutePath)
+      const packageName = getPackageNameForModulePath(
+        canonicalNameMap,
+        absolutePath
+      )
       return {
         type: 'native',
         file: absolutePath,
@@ -111,7 +146,7 @@ function createModuleLoader ({ canonicalNameMap }) {
           module.exports = nativeRequire(absolutePath)
         },
       }
-    // load normal user-space module
+      // load normal user-space module
     } else {
       const moduleContent = fs.readFileSync(absolutePath, 'utf8')
       // apply source transforms
@@ -140,14 +175,20 @@ function createModuleLoader ({ canonicalNameMap }) {
       // ses needs to take a fucking chill pill
       if (isJSON) {
         transformedContent = transformedContent
-          .split('-import-').join('-imp ort-')
+          .split('-import-')
+          .join('-imp ort-')
       } else {
         transformedContent = transformedContent
-          .split('"babel-plugin-dynamic-import-node').join('"babel-plugin-dynamic-imp" + "ort-node')
-          .split('"@babel/plugin-proposal-dynamic-import').join('"@babel/plugin-proposal-dynamic-imp" + "ort')
-          .split('// Re-export lib/utils, so that consumers can import').join('// Re-export lib/utils, so that consumers can imp_ort')
-          .split('// babel-plugin-dynamic-import').join('// babel-plugin-dynamic-imp ort')
-          .split('// eslint-disable-next-line import/no-unresolved').join('// eslint-disable-next-line imp_ort/no-unresolved')
+          .split('"babel-plugin-dynamic-import-node')
+          .join('"babel-plugin-dynamic-imp" + "ort-node')
+          .split('"@babel/plugin-proposal-dynamic-import')
+          .join('"@babel/plugin-proposal-dynamic-imp" + "ort')
+          .split('// Re-export lib/utils, so that consumers can import')
+          .join('// Re-export lib/utils, so that consumers can imp_ort')
+          .split('// babel-plugin-dynamic-import')
+          .join('// babel-plugin-dynamic-imp ort')
+          .split('// eslint-disable-next-line import/no-unresolved')
+          .join('// eslint-disable-next-line imp_ort/no-unresolved')
       }
       // wrap in moducreateModuleResolverleInitializer
       // security: ensure module path does not inject code
@@ -155,7 +196,10 @@ function createModuleLoader ({ canonicalNameMap }) {
         throw new Error('invalid newline in module source path')
       }
       const wrappedContent = `(function(exports, require, module, __filename, __dirname){\n${transformedContent}\n})`
-      const packageName = getPackageNameForModulePath(canonicalNameMap, absolutePath)
+      const packageName = getPackageNameForModulePath(
+        canonicalNameMap,
+        absolutePath
+      )
 
       return {
         type: 'js',
@@ -168,18 +212,20 @@ function createModuleLoader ({ canonicalNameMap }) {
   }
 }
 
-function isNativeModule (filename) {
+function isNativeModule(filename) {
   const fileExtension = filename.split('.').pop()
   return fileExtension === 'node'
 }
 
-function evaluateWithSourceUrl (filename, content) {
+function evaluateWithSourceUrl(filename, content) {
   return eval(`${content}\n//# sourceURL=${filename}`)
 }
 
-function onStatsReady (moduleGraphStatsObj) {
+function onStatsReady(moduleGraphStatsObj) {
   const graphId = Date.now()
-  console.warn(`completed module graph init "${graphId}" in ${moduleGraphStatsObj.value}ms ("${moduleGraphStatsObj.name}")`)
+  console.warn(
+    `completed module graph init "${graphId}" in ${moduleGraphStatsObj.value}ms ("${moduleGraphStatsObj.name}")`
+  )
   const statsFilePath = `./lavamoat-flame-${graphId}.json`
   console.warn(`wrote stats file to "${statsFilePath}"`)
   fs.writeFileSync(statsFilePath, JSON.stringify(moduleGraphStatsObj, null, 2))

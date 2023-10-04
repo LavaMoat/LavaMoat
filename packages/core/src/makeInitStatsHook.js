@@ -1,20 +1,20 @@
 module.exports = { makeInitStatsHook }
 
-function makeInitStatsHook ({ onStatsReady }) {
+function makeInitStatsHook({ onStatsReady }) {
   let statModuleStack = []
   return reportStatsHook
 
-  function reportStatsHook (event, moduleId) {
+  function reportStatsHook(event, moduleId) {
     if (event === 'start') {
       // record start
       const startTime = Date.now()
       // console.log(`loaded module ${moduleId}`)
       const statRecord = {
-        'name': moduleId,
-        'value': null,
-        'children': [],
-        'startTime': startTime,
-        'endTime': null,
+        name: moduleId,
+        value: null,
+        children: [],
+        startTime: startTime,
+        endTime: null,
       }
       // add as child to current
       if (statModuleStack.length > 0) {
@@ -28,7 +28,11 @@ function makeInitStatsHook ({ onStatsReady }) {
       const currentStat = statModuleStack[statModuleStack.length - 1]
       // sanity check, should only get an end for the current top of stack
       if (currentStat.name !== moduleId) {
-        console.error(`stats hook misaligned "${currentStat.name}", "${moduleId}" ${statModuleStack.map(e => e.name).join()}`)
+        console.error(
+          `stats hook misaligned "${
+            currentStat.name
+          }", "${moduleId}" ${statModuleStack.map((e) => e.name).join()}`
+        )
       }
       currentStat.endTime = endTime
       const startTime = currentStat.startTime
@@ -43,5 +47,4 @@ function makeInitStatsHook ({ onStatsReady }) {
       statModuleStack.pop()
     }
   }
-
 }

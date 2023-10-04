@@ -1,3 +1,3 @@
 module.exports = {
-  deleteEntireHardDrive: () => console.log('fake-fs called')
+  deleteEntireHardDrive: () => console.log('fake-fs called'),
 }

@@ -24,24 +24,32 @@ test('parseForPolicy - resolutions', async (t) => {
         },
       },
       b: {
-        'builtin': {
-          'http': true,
+        builtin: {
+          http: true,
         },
       },
     },
   })
 
-  const policy2 = await parseForPolicy({ entryId, projectRoot, policyOverride: { resolutions } })
-  t.deepEqual(policy2, {
-    resolutions,
-    resources: {
-      a: {
-        packages: {
-          '$root$': true,
+  const policy2 = await parseForPolicy({
+    entryId,
+    projectRoot,
+    policyOverride: { resolutions },
+  })
+  t.deepEqual(
+    policy2,
+    {
+      resolutions,
+      resources: {
+        a: {
+          packages: {
+            $root$: true,
+          },
         },
       },
     },
-  }, 'policy resources do not include data on packages not parsed due to resolutions')
+    'policy resources do not include data on packages not parsed due to resolutions'
+  )
 })
 
 test('parseForPolicy - require a userspace package with a builtin name', async (t) => {
@@ -70,7 +78,7 @@ test('parseForPolicy - require a userspace package with a builtin name', async (
   })
 })
 
-test('parseForPolicy - indirectly used packages are included in parent\'s allowlist', async (t) => {
+test("parseForPolicy - indirectly used packages are included in parent's allowlist", async (t) => {
   const projectRoot = `${__dirname}/projects/5`
   const entryId = `${projectRoot}/index.js`
   const policy = await parseForPolicy({ entryId, projectRoot })
@@ -102,11 +110,11 @@ test('execute - resolutions', async (t) => {
     cwd: projectRoot,
     args: [entryId],
   })
-  t.deepEqual(output.stdout.split('\n'), [
-    'fake-fs called',
-    'value: 42',
-    '',
-  ], 'should not have any standard output')
+  t.deepEqual(
+    output.stdout.split('\n'),
+    ['fake-fs called', 'value: 42', ''],
+    'should not have any standard output'
+  )
 })
 
 test('execute - keccak with native modules', async (t) => {
@@ -116,10 +124,14 @@ test('execute - keccak with native modules', async (t) => {
     cwd: projectRoot,
     args: [entryId],
   })
-  t.deepEqual(output.stdout.split('\n'), [
-    'keccak256: 5cad7cf49f610ec53189e06d3c8668789441235613408f8fabcb4ad8dad94db5',
-    '',
-  ], 'should not have any standard output')
+  t.deepEqual(
+    output.stdout.split('\n'),
+    [
+      'keccak256: 5cad7cf49f610ec53189e06d3c8668789441235613408f8fabcb4ad8dad94db5',
+      '',
+    ],
+    'should not have any standard output'
+  )
 })
 
 test('execute - core modules and buffers', async (t) => {
@@ -129,8 +141,12 @@ test('execute - core modules and buffers', async (t) => {
     cwd: projectRoot,
     args: [entryId],
   })
-  t.deepEqual(output.stdout.split('\n'), [
-    'sha256: fb1520a08f1bc43831d0000dc76f6b0f027bafd36c55b1f43fc54c60c2f831da',
-    '',
-  ], 'should not have any standard output')
+  t.deepEqual(
+    output.stdout.split('\n'),
+    [
+      'sha256: fb1520a08f1bc43831d0000dc76f6b0f027bafd36c55b1f43fc54c60c2f831da',
+      '',
+    ],
+    'should not have any standard output'
+  )
 })

@@ -1,2 +1,2 @@
-var foo;
-foo = bar;
+var foo
+foo = bar

@@ -11,43 +11,41 @@ const syntheticModulesCompartment = new Compartment(
   {},
   {
     name: 'syntheticModules',
-    resolveHook: moduleSpecifier => moduleSpecifier,
-    importHook: async moduleSpecifier => {
+    resolveHook: (moduleSpecifier) => moduleSpecifier,
+    importHook: async (moduleSpecifier) => {
       const ns =
         rawModules[moduleSpecifier].default || rawModules[moduleSpecifier]
 
       const staticModuleRecord = Object.freeze({
         imports: [],
         exports: Array.from(new Set(Object.keys(ns).concat(['default']))),
-        execute: moduleExports => {
+        execute: (moduleExports) => {
           Object.assign(moduleExports, ns)
           moduleExports.default = ns
         },
       })
       return staticModuleRecord
     },
-  },
+  }
 )
 const addToCompartment = async (name, nsObject) => {
   rawModules[name] = nsObject
   return (await syntheticModulesCompartment.import(name)).namespace
 }
 
-
 main().catch((err) => {
   console.error(err)
   process.exit(1)
 })
 
-async function main () {
-  const { makeReadPowers } = await import('@endo/compartment-mapper/node-powers.js')
+async function main() {
+  const { makeReadPowers } = await import(
+    '@endo/compartment-mapper/node-powers.js'
+  )
   const { importLocation } = await import('@endo/compartment-mapper')
   const { transforms } = await import('ses/tools.js')
-  const {
-    evadeHtmlCommentTest,
-    evadeImportExpressionTest,
-    applyTransforms,
-  } = transforms
+  const { evadeHtmlCommentTest, evadeImportExpressionTest, applyTransforms } =
+    transforms
 
   const modules = {
     stream: await addToCompartment('stream', require('stream')),
@@ -60,35 +58,30 @@ async function main () {
     fs: await addToCompartment('fs', require('fs')),
   }
 
-
   const readPowers = makeReadPowers({ fs, url, crypto })
   const moduleLocation = url.pathToFileURL(process.cwd() + '/entry.js')
-  await importLocation(
-    readPowers,
-    moduleLocation,
-    {
-      modules,
-      globals: {
-        console,
-        process,
-        Buffer,
-      },
-      moduleTransforms: {
-        'cjs': makeSesModuleTransform('cjs'),
-        'mjs': makeSesModuleTransform('mjs'),
-      },
+  await importLocation(readPowers, moduleLocation, {
+    modules,
+    globals: {
+      console,
+      process,
+      Buffer,
     },
-  )
+    moduleTransforms: {
+      cjs: makeSesModuleTransform('cjs'),
+      mjs: makeSesModuleTransform('mjs'),
+    },
+  })
 
-  function makeSesModuleTransform (language) {
-    return function sesModuleTransform (sourceBytes) {
+  function makeSesModuleTransform(language) {
+    return function sesModuleTransform(sourceBytes) {
       const transformedSource = _applySesEvasions(sourceBytes.toString())
       const bytes = Buffer.from(transformedSource, 'utf8')
       return { bytes, parser: language }
     }
   }
 
-  function _applySesEvasions (source) {
+  function _applySesEvasions(source) {
     const result = applySesEvasions(source)
     // if (result !== source) {
     //   console.log('transformed source')
@@ -99,8 +92,7 @@ async function main () {
     return result
   }
 
-
-  function applySesEvasions (source) {
+  function applySesEvasions(source) {
     return applyTransforms(source, [
       evadeHtmlCommentTest,
       evadeImportExpressionTest,

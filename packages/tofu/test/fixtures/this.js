@@ -1,1 +1,1 @@
-return this.foo;
+return this.foo

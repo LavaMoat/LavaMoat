@@ -22,5 +22,4 @@ const bundler = browserify([entryPath], bifyOpts)
 bundler.plugin(lavamoatPlugin, lavamoatOpts)
 
 // bundle
-bundler.bundle()
-  .pipe(process.stdout)
+bundler.bundle().pipe(process.stdout)

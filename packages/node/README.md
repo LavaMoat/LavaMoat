@@ -2,12 +2,12 @@
 
 `lavamoat` is a NodeJS runtime where modules are defined in [SES][SesGithub] Compartments. It aims to reduce the risk of malicious code in the app dependency graph, known as "software supply chain attacks".
 
-## LavaMoat Runtime 
+## LavaMoat Runtime
 
 LavaMoat differs from the standard node runtime in that it:
 
 1. Uses `lockdown()` from [SES][SesGithub] to prevent tampering with the execution environment.
-   Thanks to lockdown, prototype-pollution attacks are neutralized. It's also a prerequisite to code isolation. 
+   Thanks to lockdown, prototype-pollution attacks are neutralized. It's also a prerequisite to code isolation.
 2. Uses SES Compartments to isolate each package's execution.
    Packages don't share references to anything unless explicitly passed in or allowed by policy. Custom `require` and linking implementation is provided for the purpose of loading allowed dependencies.
 3. Enforces the app-specified LavaMoat policy.
@@ -17,12 +17,12 @@ The result is a runtime that should work just as before, but provides some prote
 
 > For an overview of LavaMoat tools see [the main README](https://github.com/LavaMoat/LavaMoat/tree/main/README.md)
 
-
 ## Install
 
-*Before you use lavamoat runtime protections, make sure you've set up allow-scripts and install dependencies using that setup.*
+_Before you use lavamoat runtime protections, make sure you've set up allow-scripts and install dependencies using that setup._
 
 Use one of:
+
 ```
 npm i lavamoat
 yarn add lavamoat
@@ -32,15 +32,15 @@ yarn add lavamoat
 
 ### Recommended usage
 
-1. Install 
-2. Run your application once with `lavamoat app.js --autopolicy` 
+1. Install
+2. Run your application once with `lavamoat app.js --autopolicy`
 3. Inspect the `./lavamoat/node/policy.json` file it generated
 4. Run your application with `lavamoat app.js`
 5. If you find you need to change the policy in step 2 or 3 create a `./lavamoat/node/policy-override.json` file and introduce changes there. You can both expand and trim the permissions.
 
-> **Note** 
-> You can regenerate the main policy file on updates (and review for unexpected new permissions) while the modifications you needed to make remain in a separate overrides file. It makes reviewing and maintaining both files easier. 
->  
+> **Note**
+> You can regenerate the main policy file on updates (and review for unexpected new permissions) while the modifications you needed to make remain in a separate overrides file. It makes reviewing and maintaining both files easier.
+>
 > See also: [Policy file explained](https://github.com/LavaMoat/LavaMoat/tree/main/docs/policy.md)
 
 ### All options
@@ -127,7 +127,6 @@ $ lavamoat index.js --override './policies/policy-override.json'
 
 - Got a dependency that wont quite work under LavaMoat? try [patch-package](https://www.npmjs.com/package/patch-package)
 
-
 ## Programmatic usage
 
 Programmatic usage is almost identical to the commandline and its arguments.
@@ -136,17 +135,16 @@ Programmatic usage is almost identical to the commandline and its arguments.
 const { runLava } = require('lavamoat')
 
 runLava({
-   entryPath: './app.js',
-   // Optional:
-   writeAutoPolicy: false,
-   writeAutoPolicyDebug: false,
-   writeAutoPolicyAndRun: false,
-   policyPath: 'path to file',
-   policyDebugPath: 'path to file',
-   policyOverridePath: 'path to file',
-   projectRoot: process.cwd(),
-   debugMode: false,
-   statsMode: false,
+  entryPath: './app.js',
+  // Optional:
+  writeAutoPolicy: false,
+  writeAutoPolicyDebug: false,
+  writeAutoPolicyAndRun: false,
+  policyPath: 'path to file',
+  policyDebugPath: 'path to file',
+  policyOverridePath: 'path to file',
+  projectRoot: process.cwd(),
+  debugMode: false,
+  statsMode: false,
 })
 ```
-

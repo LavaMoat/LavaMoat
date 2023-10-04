@@ -34,30 +34,52 @@ test('getEndowmentsForConfig - siblings', (t) => {
   }
   const resultGlobal = getEndowmentsForConfig(sourceGlobal, config)
   {
-    const sourceProp = Object.getOwnPropertyDescriptor(sourceGlobal.Buffer, 'from')
-    const resultProp = Object.getOwnPropertyDescriptor(resultGlobal.Buffer, 'from')
+    const sourceProp = Object.getOwnPropertyDescriptor(
+      sourceGlobal.Buffer,
+      'from'
+    )
+    const resultProp = Object.getOwnPropertyDescriptor(
+      resultGlobal.Buffer,
+      'from'
+    )
     t.is(typeof resultProp.value, 'function')
-    t.deepEqual(resultProp, {
-      ...sourceProp,
-      value: resultProp.value,
-    }, 'prop descriptor matches (except value)')
+    t.deepEqual(
+      resultProp,
+      {
+        ...sourceProp,
+        value: resultProp.value,
+      },
+      'prop descriptor matches (except value)'
+    )
   }
   {
-    const sourceProp = Object.getOwnPropertyDescriptor(sourceGlobal.Buffer, 'isBuffer')
-    const resultProp = Object.getOwnPropertyDescriptor(resultGlobal.Buffer, 'isBuffer')
+    const sourceProp = Object.getOwnPropertyDescriptor(
+      sourceGlobal.Buffer,
+      'isBuffer'
+    )
+    const resultProp = Object.getOwnPropertyDescriptor(
+      resultGlobal.Buffer,
+      'isBuffer'
+    )
     t.is(typeof resultProp.value, 'function')
-    t.deepEqual(resultProp, {
-      ...sourceProp,
-      value: resultProp.value,
-    }, 'prop descriptor matches (except value)')
+    t.deepEqual(
+      resultProp,
+      {
+        ...sourceProp,
+        value: resultProp.value,
+      },
+      'prop descriptor matches (except value)'
+    )
   }
 })
 
 test('getEndowmentsForConfig - getter', (t) => {
   const getEndowmentsForConfig = prepareTest()
-  const sourceGlobal = { get abc () {
-    return { xyz: 42 } 
-  } }
+  const sourceGlobal = {
+    get abc() {
+      return { xyz: 42 }
+    },
+  }
   const config = {
     globals: {
       'abc.xyz': true,
@@ -69,12 +91,16 @@ test('getEndowmentsForConfig - getter', (t) => {
     const resultProp = Object.getOwnPropertyDescriptor(resultGlobal, 'abc')
     t.deepEqual(resultProp.value, { xyz: 42 })
     const { enumerable, configurable } = sourceProp
-    t.deepEqual(resultProp, {
-      enumerable,
-      configurable,
-      value: resultProp.value,
-      writable: true,
-    }, 'prop descriptor matches (except value)')
+    t.deepEqual(
+      resultProp,
+      {
+        enumerable,
+        configurable,
+        value: resultProp.value,
+        writable: true,
+      },
+      'prop descriptor matches (except value)'
+    )
   }
 })
 
@@ -145,7 +171,12 @@ test('getEndowmentsForConfig - specify unwrap from, unwrap to', (t) => {
       xyz: true,
     },
   }
-  const resultGlobal = getEndowmentsForConfig(sourceGlobal, config, unwrapTo, unwrapFrom)
+  const resultGlobal = getEndowmentsForConfig(
+    sourceGlobal,
+    config,
+    unwrapTo,
+    unwrapFrom
+  )
   const getter = Reflect.getOwnPropertyDescriptor(resultGlobal, 'xyz').get
 
   t.is(resultGlobal.xyz, resultGlobal)
@@ -163,7 +194,7 @@ test('getEndowmentsForConfig - endowing bind of a function', async (t) => {
   const getEndowmentsForConfig = prepareTest()
   const sourceGlobal = {
     abc: function () {
-      return this 
+      return this
     },
   }
   const config = {
@@ -188,8 +219,8 @@ test('getEndowmentsForConfig - ensure setTimeout calls dont trigger illegal invo
   // compartment.globalThis.document would error because 'this' value is not window
   const getEndowmentsForConfig = prepareTest()
   const sourceGlobal = {
-    setTimeout () {
-      return this 
+    setTimeout() {
+      return this
     },
   }
   const config = {
