@@ -25,6 +25,28 @@
     "test": "ava",
     "lib:ses": "cp ../../node_modules/ses/dist/lockdown.umd.js ./lib/lockdown.umd.js"
   },
+  "exports": {
+    ".": {
+      "types": "./types/src/index.d.ts",
+      "default": "./src/index.js"
+    },
+    "./src/*": "./src/*.js",
+    "./lib/*": "./lib/*.js",
+    "./test": "./src/testUtils.js",
+    "./test/scenarios": "./test/scenarios/index.js",
+    "./schema": {
+      "types": "./types/src/schema/index.d.ts",
+      "default": null
+    }
+  },
+  "files": [
+    "src",
+    "lib",
+    "types",
+    "test",
+    "CHANGELOG.md",
+    "!**/*.tsbuildinfo"
+  ],
   "author": "kumavis",
   "license": "MIT",
   "repository": "git+https://github.com/LavaMoat/lavamoat.git",

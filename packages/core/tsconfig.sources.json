@@ -1,0 +1,8 @@
+{
+  "extends": "../../config/tsconfig.emit-declarations.json",
+  "compilerOptions": {
+    "outDir": "./types",
+    "checkJs": false
+  },
+  "include": ["lib/transforms.umd.js", "src"]
+}

@@ -1,0 +1,10 @@
+{
+  "extends": "../../config/tsconfig.test.json",
+  "include": ["test/**/*"],
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "NodeNext",
+    "checkJs": false
+  },
+  "references": [{ "path": "./tsconfig.sources.json" }]
+}

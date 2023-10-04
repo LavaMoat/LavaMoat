@@ -33,7 +33,7 @@ module.exports = { LavamoatModuleRecord }
  * @property {string} type
  * @property {string} packageName
  * @property {string} content
- * @property {Record<string, string>} [importMap]
+ * @property {Record<string, string>} importMap
  * @property {import('@babel/types').File} [ast]
  * @property {(...args: any[]) => any} moduleInitializer
  * @todo `moduleInitializer` probably needs narrowing
