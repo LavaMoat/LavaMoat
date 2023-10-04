@@ -46,6 +46,9 @@ One important thing to note when using the LavaMoat plugin is that it disables t
 
 ### Avoiding wrapping specific modules
 
+> [!WARNING]
+> This is an experimental feature and ignoring may be configured differently in the future if this approach is proven insecure. 
+
 The default way to define specific behaviors for webpack is creating module rules. To ensure ignore rules are applied on the same exact files that match certain rules (the same RegExp may be matched against different things at different times) we're providing the ignore functionality as a loader you can add to the list of existing loaders or use individually.  
 The loader is available as `LavaMoat.ignore` from the default export of the plugin. It doesn't do anything to the code, but its presence is detected and treated as a mark on the file. Any file that's been processed by `LavaMoat.ignore` will not be wrapped in a Compartment.
 
