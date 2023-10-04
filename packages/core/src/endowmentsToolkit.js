@@ -1,3 +1,5 @@
+// @ts-check
+
 // the contents of this file will be copied into the prelude template
 // this module has been written so that it required directly or copied and added to the template with a small wrapper
 module.exports = endowmentsToolkit
@@ -21,13 +23,12 @@ function endowmentsToolkit({
   }
 
   /**
-   * @function getEndowmentsForConfig Creates an object populated with only the deep properties specified in the packagePolicy
+   * Creates an object populated with only the deep properties specified in the packagePolicy
    * @param {object} sourceRef - Object from which to copy properties
-   * @param {object} packagePolicy - LavaMoat policy item representing a package
+   * @param {import('./schema').PackagePolicy} packagePolicy - LavaMoat policy item representing a package
    * @param {object} unwrapTo - For getters and setters, when the this-value is unwrapFrom, is replaced as unwrapTo
    * @param {object} unwrapFrom - For getters and setters, the this-value to replace (default: targetRef)
-   * @return {object} - The targetRef
-   *
+   * @returns {object} - The targetRef
    */
   function getEndowmentsForConfig(
     sourceRef,
@@ -39,7 +40,9 @@ function endowmentsToolkit({
       return {}
     }
     // validate read access from packagePolicy
+    /** @type {string[]} */
     const whitelistedReads = []
+    /** @type {string[]} */
     const explicitlyBanned = []
     Object.entries(packagePolicy.globals).forEach(
       ([path, packagePolicyValue]) => {
@@ -79,6 +82,15 @@ function endowmentsToolkit({
     )
   }
 
+  /**
+   *
+   * @param {object} sourceRef
+   * @param {string[]} paths
+   * @param {object} unwrapTo
+   * @param {object} unwrapFrom
+   * @param {string[]} explicitlyBanned
+   * @returns {object}
+   */
   function makeMinimalViewOfRef(
     sourceRef,
     paths,
@@ -86,6 +98,7 @@ function endowmentsToolkit({
     unwrapFrom,
     explicitlyBanned = []
   ) {
+    /** @type {object} */
     const targetRef = {}
     paths.forEach((path) => {
       copyValueAtPath(
@@ -101,13 +114,37 @@ function endowmentsToolkit({
     return targetRef
   }
 
+  /**
+   * @param {string} visited
+   * @param {string} next
+   */
   function extendPath(visited, next) {
+    // XXX: second part of this conditional should be unnecessary
     if (!visited || visited.length === 0) {
       return next
     }
     return `${visited}.${next}`
   }
 
+  /**
+   * @template T
+   * @param {T|null} value
+   * @returns {value is null}
+   */
+  function isEmpty(value) {
+    return !value
+  }
+
+  /**
+   *
+   * @param {string} visitedPath
+   * @param {string[]} pathParts
+   * @param {string[]} explicitlyBanned
+   * @param {object} sourceRef
+   * @param {object} targetRef
+   * @param {object} unwrapTo
+   * @param {object} unwrapFrom
+   */
   function copyValueAtPath(
     visitedPath,
     pathParts,
@@ -129,7 +166,7 @@ function endowmentsToolkit({
     )
 
     // if source missing the value to copy, just skip it
-    if (!sourcePropDesc) {
+    if (isEmpty(sourcePropDesc)) {
       return
     }
 
@@ -154,7 +191,7 @@ function endowmentsToolkit({
 
     // if this is not the last path in the assignment, walk into the containing reference
     if (remainingParts.length > 0) {
-      const { sourceValue, sourceWritable } = getSourceValue()
+      const { sourceValue, sourceWritable } = getSourceValue(sourcePropDesc)
       const nextSourceRef = sourceValue
       let nextTargetRef
       // check if value exists on target and does not need selective treatment
@@ -206,7 +243,7 @@ function endowmentsToolkit({
 
     // need to determine the value type in order to copy it with
     // this-value unwrapping support
-    const { sourceValue, sourceWritable } = getSourceValue()
+    const { sourceValue, sourceWritable } = getSourceValue(sourcePropDesc)
 
     // not a function - copy as is
     if (typeof sourceValue !== 'function') {
@@ -214,6 +251,11 @@ function endowmentsToolkit({
       return
     }
     // otherwise add workaround for functions to swap back to the sourceal "this" reference
+    /**
+     * @template T
+     * @param {T} thisValue
+     * @returns {thisValue is typeof unwrapFrom}
+     */
     const unwrapTest = (thisValue) => thisValue === unwrapFrom
     const newValue = createFunctionWrapper(sourceValue, unwrapTest, unwrapTo)
     const newPropDesc = {
@@ -224,7 +266,12 @@ function endowmentsToolkit({
     }
     Reflect.defineProperty(targetRef, nextPart, newPropDesc)
 
-    function getSourceValue() {
+    /**
+     *
+     * @param {TypedPropertyDescriptor<any>} sourcePropDesc
+     * @returns {{sourceValue: any, sourceWritable: boolean|undefined}}
+     */
+    function getSourceValue(sourcePropDesc) {
       // determine the source value, this coerces getters to values
       // im deeply sorry, respecting getters was complicated and
       // my brain is not very good
@@ -232,7 +279,7 @@ function endowmentsToolkit({
       if ('value' in sourcePropDesc) {
         sourceValue = sourcePropDesc.value
         sourceWritable = sourcePropDesc.writable
-      } else if ('get' in sourcePropDesc) {
+      } else if ('get' in sourcePropDesc && sourcePropDesc.get) {
         sourceValue = sourcePropDesc.get.call(unwrapTo)
         sourceWritable = 'set' in sourcePropDesc
       } else {
@@ -244,6 +291,13 @@ function endowmentsToolkit({
     }
   }
 
+  /**
+   *
+   * @param {PropertyDescriptor} propDesc
+   * @param {object} unwrapFromCompartmentGlobalThis
+   * @param {object} unwrapToGlobalThis
+   * @returns {PropertyDescriptor}
+   */
   function applyEndowmentPropDescTransforms(
     propDesc,
     unwrapFromCompartmentGlobalThis,
@@ -263,6 +317,13 @@ function endowmentsToolkit({
     return newPropDesc
   }
 
+  /**
+   *
+   * @param {PropertyDescriptor} sourcePropDesc
+   * @param {object} unwrapFromGlobalThis
+   * @param {object} unwrapToGlobalThis
+   * @returns {PropertyDescriptor}
+   */
   function applyGetSetPropDescTransforms(
     sourcePropDesc,
     unwrapFromGlobalThis,
@@ -270,13 +331,15 @@ function endowmentsToolkit({
   ) {
     const wrappedPropDesc = { ...sourcePropDesc }
     if (sourcePropDesc.get) {
+      const getter = sourcePropDesc.get
       wrappedPropDesc.get = function () {
+        // eslint-disable-next-line @typescript-eslint/no-this-alias
         const receiver = this
         // replace the "receiver" value if it points to fake parent
         const receiverRef =
           receiver === unwrapFromGlobalThis ? unwrapToGlobalThis : receiver
         // sometimes getters replace themselves with static properties, as seen wih the FireFox runtime
-        const result = Reflect.apply(sourcePropDesc.get, receiverRef, [])
+        const result = Reflect.apply(getter, receiverRef, [])
         if (typeof result === 'function') {
           // functions must be wrapped to ensure a good this-value.
           // lockdown causes some propDescs to go to value -> getter,
@@ -286,6 +349,10 @@ function endowmentsToolkit({
           // "getter.originalValue" property being available
           return createFunctionWrapper(
             result,
+            /**
+             * @param {any} thisValue
+             * @returns {thisValue is typeof unwrapFromGlobalThis}
+             */
             (thisValue) => thisValue === unwrapFromGlobalThis,
             unwrapToGlobalThis
           )
@@ -295,17 +362,26 @@ function endowmentsToolkit({
       }
     }
     if (sourcePropDesc.set) {
+      const setter = sourcePropDesc.set
       wrappedPropDesc.set = function (value) {
         // replace the "receiver" value if it points to fake parent
+        // eslint-disable-next-line @typescript-eslint/no-this-alias
         const receiver = this
         const receiverRef =
           receiver === unwrapFromGlobalThis ? unwrapToGlobalThis : receiver
-        return Reflect.apply(sourcePropDesc.set, receiverRef, [value])
+        return Reflect.apply(setter, receiverRef, [value])
       }
     }
     return wrappedPropDesc
   }
 
+  /**
+   *
+   * @param {PropertyDescriptor} propDesc
+   * @param {object} unwrapFromCompartmentGlobalThis
+   * @param {object} unwrapToGlobalThis
+   * @returns {PropertyDescriptor}
+   */
   function applyFunctionPropDescTransform(
     propDesc,
     unwrapFromCompartmentGlobalThis,
@@ -314,6 +390,10 @@ function endowmentsToolkit({
     if (!('value' in propDesc && typeof propDesc.value === 'function')) {
       return propDesc
     }
+    /**
+     * @param {any} thisValue
+     * @returns {thisValue is typeof unwrapFromCompartmentGlobalThis}
+     */
     const unwrapTest = (thisValue) => {
       // unwrap function calls this-value to unwrapToGlobalThis when:
       // this value is globalThis ex. globalThis.abc()
@@ -328,12 +408,19 @@ function endowmentsToolkit({
     return { ...propDesc, value: newFn }
   }
 
+  /**
+   *
+   * @param {object|null} target
+   * @param {PropertyKey} key
+   * @returns {{prop: PropertyDescriptor|null, receiver: object|null}}
+   */
   function getPropertyDescriptorDeep(target, key) {
+    /** @type {object|null} */
     let receiver = target
     // eslint-disable-next-line no-constant-condition
     while (true) {
       // abort if this is the end of the prototype chain.
-      if (!receiver) {
+      if (receiver === null) {
         return { prop: null, receiver: null }
       }
       // support lookup on objects and primitives
@@ -348,11 +435,17 @@ function endowmentsToolkit({
       } else {
         // prototype lookup for primitives
         // eslint-disable-next-line no-proto
-        receiver = receiver.__proto__
+        receiver = /** @type {any} */ (receiver).__proto__
       }
     }
   }
 
+  /**
+   *
+   * @param {object} globalRef
+   * @param {Record<PropertyKey, any>} target
+   * @param {string[]} globalThisRefs
+   */
   function copyWrappedGlobals(
     globalRef,
     target,
@@ -379,7 +472,7 @@ function endowmentsToolkit({
     endowmentSources.forEach((source) => {
       const descriptors = Object.getOwnPropertyDescriptors(source)
       Object.values(descriptors).forEach((desc) => {
-        if ('get' in desc) {
+        if ('get' in desc && desc.get) {
           try {
             // calling getters can potentially throw (e.g. localStorage inside a sandboxed iframe)
             Reflect.apply(desc.get, globalRef, [])
@@ -424,8 +517,12 @@ function endowmentsToolkit({
     return target
   }
 
-  // util for getting the prototype chain as an array
-  // includes the provided value in the result
+  /**
+   * util for getting the prototype chain as an array
+   * includes the provided value in the result
+   * @param {any} value
+   * @returns {any[]}
+   */
   function getPrototypeChain(value) {
     const protoChain = []
     let current = value
@@ -440,7 +537,19 @@ function endowmentsToolkit({
   }
 }
 
+/**
+ *
+ * @param {(...args: any[]) => any} sourceValue
+ * @param {(value: any) => boolean} unwrapTest
+ * @param {object} unwrapTo
+ * @returns {(...args: any[]) => any}
+ */
 function defaultCreateFunctionWrapper(sourceValue, unwrapTest, unwrapTo) {
+  /**
+   * @param {...any[]} args
+   * @this {object}
+   * @returns {any}
+   */
   const newValue = function (...args) {
     if (new.target) {
       // handle constructor calls

@@ -1,3 +1,5 @@
+// @ts-check
+
 const EventEmitter = require('events')
 const path = require('path')
 const jsonStringify = require('json-stable-stringify')
@@ -12,6 +14,7 @@ const {
     mapToObj,
     reduceToTopmostApiCallsFromStrings,
   },
+  // @ts-expect-error no types yet
 } = require('lavamoat-tofu')
 const { mergePolicy } = require('./mergePolicy')
 
@@ -19,28 +22,40 @@ const rootSlug = '$root$'
 
 module.exports = { rootSlug, createModuleInspector, getDefaultPaths }
 
-function createModuleInspector(opts = {}) {
+/**
+ *
+ * @param {ModuleInspectorOptions} opts
+ * @returns {ModuleInspector}
+ */
+function createModuleInspector(opts) {
   const moduleIdToModuleRecord = new Map()
   // "packageToModules" does not include builtin modules
   const packageToModules = new Map()
   const packageToGlobals = new Map()
+  /** @type {Map<string, string[]>} */
   const packageToBuiltinImports = new Map()
   const packageToNativeModules = new Map()
+  /** @type {Record<string, import('./schema').DebugInfo>} */
   const debugInfo = {}
 
-  const inspector = new EventEmitter()
+  /** @type {ModuleInspector} */
+  const inspector = /** @type {any} */ (new EventEmitter())
   inspector.inspectModule = (moduleRecord, opts2 = {}) => {
     inspectModule(moduleRecord, { ...opts, ...opts2 })
   }
-  inspector.generatePolicy = (opts2 = {}) => {
+  inspector.generatePolicy = (opts2) => {
     return generatePolicy({ ...opts, ...opts2 })
   }
 
   return inspector
 
+  /**
+   * @param {import('./moduleRecord').LavamoatModuleRecord} moduleRecord
+   * @param {ModuleInspectorOptions} opts
+   */
   function inspectModule(
     moduleRecord,
-    { isBuiltin, includeDebugInfo = false } = {}
+    { isBuiltin, includeDebugInfo = false }
   ) {
     const { packageName, specifier, type } = moduleRecord
     // record the module
@@ -66,13 +81,22 @@ function createModuleInspector(opts = {}) {
     }
   }
 
-  // eslint-disable-next-line no-unused-vars
-  function inspectBuiltinModule(moduleRecord) {
+  /**
+   * @param {import('./moduleRecord').LavamoatModuleRecord} moduleRecord
+   * @param {Partial<ModuleInspectorOptions>} opts
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  function inspectBuiltinModule(moduleRecord, opts) {
     // builtins themselves do not require any configuration
     // packages that import builtins need to add that to their configuration
   }
 
-  function inspectNativeModule(moduleRecord) {
+  /**
+   * @param {import('./moduleRecord').LavamoatModuleRecord} moduleRecord
+   * @param {Partial<ModuleInspectorOptions>} opts
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  function inspectNativeModule(moduleRecord, opts) {
     // LavaMoat does attempt to sandbox native modules
     // packages with native modules need to specify that in the policy file
     const { packageName } = moduleRecord
@@ -83,6 +107,20 @@ function createModuleInspector(opts = {}) {
     packageNativeModules.push(moduleRecord)
   }
 
+  /**
+   *
+   * @param {AST} ast
+   * @returns {ast is import('@babel/parser').ParseResult<import('@babel/types').File>}
+   */
+  function isParsedAST(ast) {
+    return 'errors' in ast
+  }
+
+  /**
+   *
+   * @param {import('./moduleRecord').LavamoatModuleRecord} moduleRecord
+   * @param {ModuleInspectorOptions} opts
+   */
   function inspectJsModule(
     moduleRecord,
     { isBuiltin, includeDebugInfo = false }
@@ -99,9 +137,11 @@ function createModuleInspector(opts = {}) {
     packageModules[specifier] = moduleRecord
     // initialize module debug info
     if (includeDebugInfo) {
-      moduleDebug = debugInfo[specifier] = {}
+      moduleDebug = debugInfo[specifier] = /** @type {any} */ ({})
       // append moduleRecord, ensure ast is not copied
-      const debugData = { ...moduleRecord }
+      const debugData = {
+        ...moduleRecord,
+      }
       delete debugData.ast
       moduleDebug.moduleRecord = debugData
     }
@@ -117,6 +157,10 @@ function createModuleInspector(opts = {}) {
       return
     }
     // get ast (parse or use cached)
+    /**
+     * @todo - Put this in `LavamoatModuleRecord` instead
+     * @type {AST}
+     */
     const ast =
       moduleRecord.ast ||
       parse(moduleRecord.content, {
@@ -126,7 +170,7 @@ function createModuleInspector(opts = {}) {
         allowReturnOutsideFunction: true,
         errorRecovery: true,
       })
-    if (includeDebugInfo && ast.errors && ast.errors.length) {
+    if (includeDebugInfo && isParsedAST(ast) && ast.errors.length) {
       moduleDebug.parseErrors = ast.errors
     }
     // ensure ses compatibility
@@ -145,9 +189,18 @@ function createModuleInspector(opts = {}) {
     delete moduleRecord.ast
   }
 
+  /**
+   *
+   * @param {AST} ast
+   * @param {import('./moduleRecord').LavamoatModuleRecord} moduleRecord
+   * @param {boolean} includeDebugInfo
+   * @returns
+   */
   function inspectForEnvironment(ast, moduleRecord, includeDebugInfo) {
     const { packageName } = moduleRecord
-    const compatWarnings = inspectSesCompat(ast, packageName)
+    const compatWarnings = inspectSesCompat(ast)
+
+    /** @type {import('./schema').SesCompat} */
     const { primordialMutations, strictModeViolations, dynamicRequires } =
       compatWarnings
     const hasResults =
@@ -160,6 +213,7 @@ function createModuleInspector(opts = {}) {
     if (includeDebugInfo) {
       const moduleDebug = debugInfo[moduleRecord.specifier]
       moduleDebug.sesCompat = {
+        // XXX: I don't think this is needed, since it appears we overwrite all properties
         ...compatWarnings,
         // fix serialization
         primordialMutations: primordialMutations.map(({ node: { loc } }) => ({
@@ -194,6 +248,13 @@ function createModuleInspector(opts = {}) {
     }
   }
 
+  /**
+   *
+   * @param {AST} ast
+   * @param {import('./moduleRecord').LavamoatModuleRecord} moduleRecord
+   * @param {string} packageName
+   * @param {boolean} includeDebugInfo
+   */
   function inspectForGlobals(ast, moduleRecord, packageName, includeDebugInfo) {
     const commonJsRefs = ['require', 'module', 'exports', 'arguments']
     const globalObjPrototypeRefs = Object.getOwnPropertyNames(Object.prototype)
@@ -221,6 +282,15 @@ function createModuleInspector(opts = {}) {
     packageToGlobals.set(packageName, packageGlobals)
   }
 
+  /**
+   *
+   * @param {AST} ast
+   * @param {import('./moduleRecord').LavamoatModuleRecord} moduleRecord
+   * @param {string} packageName
+   * @param {(value: string) => boolean} isBuiltin
+   * @param {boolean} includeDebugInfo
+   * @returns
+   */
   function inspectForImports(
     ast,
     moduleRecord,
@@ -246,16 +316,28 @@ function createModuleInspector(opts = {}) {
       packageToBuiltinImports.set(packageName, [])
     }
     let packageBuiltins = packageToBuiltinImports.get(packageName)
-    packageBuiltins = [...packageBuiltins, ...moduleBuiltins]
+    packageBuiltins = [...(packageBuiltins ?? []), ...moduleBuiltins]
     packageToBuiltinImports.set(packageName, packageBuiltins)
   }
 
-  function generatePolicy({ policyOverride, includeDebugInfo } = {}) {
+  /**
+   * @type {GeneratePolicyFn}
+   */
+  function generatePolicy({ policyOverride, includeDebugInfo = false }) {
+    /** @type {import('./schema').Resources} */
     const resources = {}
+    /** @type {import('./schema').LavaMoatPolicyDebug | import('./schema').LavaMoatPolicy} */
     const policy = { resources }
     packageToModules.forEach((packageModules, packageName) => {
       // the policy fields for each package
-      let globals, builtin, packages, native
+      /** @type {import('./schema').ResourcePolicy['globals']} */
+      let globals
+      /** @type {import('./schema').ResourcePolicy['builtin']} */
+      let builtin
+      /** @type {import('./schema').ResourcePolicy['packages']} */
+      let packages
+      /** @type {import('./schema').ResourcePolicy['native']} */
+      let native
       // skip for root modules (modules not from deps)
       const isRootModule = packageName === rootSlug
       if (isRootModule) {
@@ -273,22 +355,28 @@ function createModuleInspector(opts = {}) {
       }
       // get globals
       if (packageToGlobals.has(packageName)) {
-        globals = mapToObj(packageToGlobals.get(packageName))
+        const globalMap = mapToObj(packageToGlobals.get(packageName))
         // prefer "true" over "read" for clearer difference between
         // read/write syntax highlighting
-        Object.keys(globals).forEach((key) => {
-          if (globals[key] === 'read') {
-            globals[key] = true
+        Object.keys(globalMap).forEach((key) => {
+          if (globalMap[key] === 'read') {
+            globalMap[key] = true
           }
         })
+        globals = globalMap
       }
       // get builtin imports
       const builtinImports = packageToBuiltinImports.get(packageName)
       if (builtinImports && builtinImports.length) {
-        builtin = {}
-        reduceToTopmostApiCallsFromStrings(builtinImports).forEach((path) => {
-          builtin[path] = true
+        /** @type {Record<string, boolean>} */
+        const importBuiltin = {}
+        const topmostApiCalls = /** @type {string[]} */ (
+          reduceToTopmostApiCallsFromStrings(builtinImports)
+        )
+        topmostApiCalls.forEach((path) => {
+          importBuiltin[path] = true
         })
+        builtin = importBuiltin
       }
       // get native modules
       native = packageToNativeModules.has(packageName)
@@ -316,7 +404,9 @@ function createModuleInspector(opts = {}) {
 
     // append serializeable debug info
     if (includeDebugInfo) {
-      policy.debugInfo = debugInfo
+      // this is here because we should be using semicolons :D
+      // prettier-ignore
+      ;(/** @type {import('./schema').LavaMoatPolicyDebug} */(policy).debugInfo = debugInfo)
     }
 
     // merge override policy
@@ -325,6 +415,11 @@ function createModuleInspector(opts = {}) {
   }
 }
 
+/**
+ *
+ * @param {{packageModules: Record<string,import('./moduleRecord').LavamoatModuleRecord>, moduleIdToModuleRecord: Map<string,import('./moduleRecord').LavamoatModuleRecord>}} opts
+ * @returns
+ */
 function aggregateDeps({ packageModules, moduleIdToModuleRecord }) {
   const deps = new Set()
   // get all dep package from the "packageModules" collection of modules
@@ -358,7 +453,12 @@ function aggregateDeps({ packageModules, moduleIdToModuleRecord }) {
   return depsArray
 }
 
-// for when you encounter a requestedName that was not inspected, likely because resolution was skipped for that module
+/**
+ * For when you encounter a `requestedName` that was not inspected, likely because
+ * resolution was skipped for that module
+ * @param {string} requestedName
+ * @returns {string}
+ */
 function guessPackageName(requestedName) {
   const isNotPackageName =
     requestedName.startsWith('/') || requestedName.startsWith('.')
@@ -373,6 +473,11 @@ function guessPackageName(requestedName) {
   return packageName
 }
 
+/**
+ *
+ * @param {string} policyName
+ * @returns
+ */
 function getDefaultPaths(policyName) {
   const policiesDir = 'lavamoat'
   const policyDir = path.join(policiesDir, policyName)
@@ -384,3 +489,35 @@ function getDefaultPaths(policyName) {
     debug: path.join(policyDir, 'policy-debug.json'),
   }
 }
+
+/**
+ * @callback GeneratePolicyFn
+ * @param {Partial<ModuleInspectorOptions> & {policyOverride: import('./schema').LavaMoatPolicy}} opts
+ * @returns {import('./schema').LavaMoatPolicy | import('./schema').LavaMoatPolicyDebug}
+ */
+
+/**
+ * @callback InspectModuleFn
+ * @param {import('./moduleRecord').LavamoatModuleRecord} moduleRecord
+ * @param {Partial<ModuleInspectorOptions>} opts
+ */
+
+/**
+ * @typedef ModuleInspectorOptions
+ * @property {(value: string) => boolean} isBuiltin
+ * @property {boolean} [includeDebugInfo]
+ */
+
+/**
+ * @typedef ModuleInspectorMembers
+ * @property {GeneratePolicyFn} generatePolicy
+ * @property {InspectModuleFn} inspectModule
+ */
+
+/**
+ * @typedef {import('node:events').EventEmitter & ModuleInspectorMembers} ModuleInspector
+ */
+
+/**
+ * @typedef {import('@babel/parser').ParseResult<import('@babel/types').File> | import('@babel/types').File} AST
+ */

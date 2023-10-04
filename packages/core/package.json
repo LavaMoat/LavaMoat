@@ -12,9 +12,11 @@
   "dependencies": {
     "json-stable-stringify": "^1.0.2",
     "lavamoat-tofu": "^6.2.1",
-    "merge-deep": "^3.0.3"
+    "merge-deep": "^3.0.3",
+    "type-fest": "^4.3.3"
   },
   "devDependencies": {
+    "@types/json-stable-stringify": "^1.0.34",
     "ses": "^0.18.8",
     "tmp-promise": "^3.0.3"
   },
@@ -35,5 +37,13 @@
       "test/*.spec.js"
     ],
     "timeout": "30s"
-  }
+  },
+  "types": "./types/src/types.d.ts",
+  "files": [
+    "lib",
+    "src",
+    "types",
+    "!*.tsbuildinfo",
+    "CHANGELOG.md"
+  ]
 }
