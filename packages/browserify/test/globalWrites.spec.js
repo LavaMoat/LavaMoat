@@ -2,7 +2,7 @@ const test = require('ava')
 const {
   createScenarioFromScaffold,
   runAndTestScenario,
-} = require('lavamoat-core/test/util')
+} = require('lavamoat-core/test')
 const { runScenario } = require('./util')
 
 // here we are providing an endowments only to a module deep in a dep graph

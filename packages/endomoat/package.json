@@ -3,7 +3,9 @@
   "version": "2.3.1",
   "main": "src/index.js",
   "license": "MIT",
-  "dependencies": {},
+  "dependencies": {
+    "type-fest": "^4.3.2"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/LavaMoat/LavaMoat.git",
@@ -16,6 +18,7 @@
   "directories": {
     "test": "test"
   },
+  "type": "module",
   "scripts": {
     "test": "npm run test:run",
     "test:run": "ava",

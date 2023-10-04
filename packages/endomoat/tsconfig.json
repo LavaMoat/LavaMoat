@@ -1,13 +1,4 @@
 {
-  "extends": "../../config/tsconfig.base.json",
-  "include": ["src", "test/index.spec.js"],
-  "compilerOptions": {
-    "outDir": "types",
-    "rootDir": "src",
-    "skipLibCheck": false,
-    "paths": {
-      "lavamoat-core": ["../core"]
-    }
-  },
-  "references": [{ "path": "../core" }]
+  "references": [{ "path": "./src" }, { "path": "./test" }],
+  "files": []
 }

@@ -11,7 +11,7 @@ const {
   createScenarioFromScaffold,
   autoConfigForScenario,
   runAndTestScenario,
-} = require('lavamoat-core/test/util')
+} = require('lavamoat-core/test')
 
 test('basic - browserify bundle doesnt inject global', async (t) => {
   const bundle = await createBundleFromEntry(__dirname + '/fixtures/global.js')

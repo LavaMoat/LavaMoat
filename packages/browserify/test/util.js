@@ -11,7 +11,7 @@ const {
   prepareScenarioOnDisk,
   evaluateWithSourceUrl,
   createHookedConsole,
-} = require('lavamoat-core/test/util.js')
+} = require('lavamoat-core/test')
 const util = require('util')
 const tmp = require('tmp-promise')
 const { spawnSync } = require('child_process')

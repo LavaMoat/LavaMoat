@@ -3,7 +3,7 @@ const { runScenario } = require('./util')
 const {
   createScenarioFromScaffold,
   runAndTestScenario,
-} = require('lavamoat-core/test/util')
+} = require('lavamoat-core/test')
 
 test('globalRef - has only the expected global circular refs', async (t) => {
   const scenario = createScenarioFromScaffold({

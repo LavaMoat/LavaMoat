@@ -1,8 +1,5 @@
 const test = require('ava')
-const {
-  fillInFileDetails,
-  functionToString,
-} = require('lavamoat-core/test/util')
+const { fillInFileDetails, functionToString } = require('lavamoat-core/test')
 const { createBundleForScenario, runScenario } = require('./util')
 
 // eslint-disable-next-line ava/no-skip-test

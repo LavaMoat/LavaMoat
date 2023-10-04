@@ -4,7 +4,7 @@ const path = require('path')
 const {
   createScenarioFromScaffold,
   runAndTestScenario,
-} = require('lavamoat-core/test/util')
+} = require('lavamoat-core/test')
 
 const {
   runScenario,

@@ -1,17 +1,16 @@
-const test = require('ava').default
-const {
+import test from 'ava'
+import {
   toEndoPolicy,
-  ROOT_POLICY,
-  WRITE_POLICY,
-  ANY_POLICY,
-} = require('../src')
+  ENDO_ROOT_POLICY,
+  ENDO_WILDCARD_POLICY,
+} from '../src/index.js'
 
 /**
- * @typedef {import('@endo/compartment-mapper').PolicyItem & import('../src').RootPolicy} LavaMoatPackagePolicyItem
+ * @typedef {import('@endo/compartment-mapper').PolicyItem & import('../src/policy-converter').RootPolicy} LavaMoatPackagePolicyItem
  */
 
 test('toEndoPolicy - basic', (t) => {
-  /** @type {import('lavamoat-core/schema').LavaMoatPolicySchema} */
+  /** @type {import('../src/schema').LavaMoatPolicy} */
   const lmPolicy = {
     resources: {
       a: {
@@ -33,10 +32,10 @@ test('toEndoPolicy - basic', (t) => {
   const expected = {
     defaultAttenuator: '@lavamoat/endomoat/attenuator/default',
     entry: {
-      globals: [ROOT_POLICY],
+      globals: [ENDO_ROOT_POLICY],
       noGlobalFreeze: true,
-      packages: ANY_POLICY,
-      builtins: ANY_POLICY,
+      packages: ENDO_WILDCARD_POLICY,
+      builtins: ENDO_WILDCARD_POLICY,
     },
     resources: {
       a: {

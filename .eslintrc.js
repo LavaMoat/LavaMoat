@@ -40,6 +40,7 @@ module.exports = {
 
     // these rules seem broken in a monorepo
     'n/no-extraneous-require': 'off',
+    'n/no-extraneous-import': 'off',
     'n/no-unpublished-require': 'off',
 
     // we should probably actually fix these three and turn these back on
@@ -112,7 +113,13 @@ module.exports = {
       },
     },
     {
-      files: ['packages/*/test/**/*.js', 'packages/*/src/**/*.spec.js'],
+      files: ['packages/endomoat/**/*.js'],
+      parserOptions: {
+        sourceType: 'module',
+      },
+    },
+    {
+      files: ['packages/*/test/**/*.js', 'packages/*/src/**/*.test.js'],
       extends: ['plugin:ava/recommended'],
       rules: {
         'ava/no-import-test-files': 'off',

@@ -1,6 +1,6 @@
 const util = require('util')
 const execFile = util.promisify(require('child_process').execFile)
-const { prepareScenarioOnDisk } = require('lavamoat-core/test/util.js')
+const { prepareScenarioOnDisk } = require('lavamoat-core/test')
 module.exports = {
   runLavamoat,
   runScenario,

@@ -2,7 +2,7 @@
 const test = require('ava')
 
 const { autoConfigForScenario } = require('./util')
-const { createScenarioFromScaffold } = require('lavamoat-core/test/util')
+const { createScenarioFromScaffold } = require('lavamoat-core/test')
 
 test('generatePolicy - empty policy', async (t) => {
   const scenario = createScenarioFromScaffold({

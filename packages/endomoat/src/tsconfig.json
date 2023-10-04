@@ -1,0 +1,10 @@
+{
+  "extends": "../../../config/tsconfig.base.json",
+  "include": ["."],
+  "compilerOptions": {
+    "outDir": "../types",
+    "target": "esnext",
+    "module": "NodeNext",
+    "allowImportingTsExtensions": true
+  }
+}

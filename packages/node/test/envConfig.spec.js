@@ -1,6 +1,6 @@
 const test = require('ava')
 const { runScenario } = require('./util')
-const { createScenarioFromScaffold } = require('lavamoat-core/test/util')
+const { createScenarioFromScaffold } = require('lavamoat-core/test')
 
 test('envConfig - intrinsic prototype mutating package running in unfrozen realm does not pollute other package intrinsics', async (t) => {
   const scenario = createScenarioFromScaffold({

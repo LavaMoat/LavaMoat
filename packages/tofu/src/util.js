@@ -1,3 +1,5 @@
+// @ts-check
+
 module.exports = {
   getMemberExpressionNesting,
   getPathFromMemberExpressionChain,
@@ -14,6 +16,8 @@ module.exports = {
   isInFunctionDeclaration,
   isMemberLikeExpression,
 }
+
+const { fromEntries } = Object
 
 function getMemberExpressionNesting(identifierNode, parents) {
   // remove the identifier node itself
@@ -154,17 +158,22 @@ function mergePolicy(configA, configB) {
   return newConfig
 }
 
+/**
+ * @template T
+ * @param {Record<string, T>} obj
+ * @returns {Map<string, T>}
+ */
 function objToMap(obj) {
   return new Map(Object.entries(obj))
 }
 
-// Object.fromEntries not available in node v10
+/**
+ * @template T
+ * @param {Map<string, T>} map
+ * @returns {Record<string, T>}
+ */
 function mapToObj(map) {
-  const obj = {}
-  map.forEach((value, key) => {
-    obj[key] = value
-  })
-  return obj
+  return fromEntries(map)
 }
 
 function getParents(nodePath) {

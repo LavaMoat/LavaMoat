@@ -1,18 +1,15 @@
-const {
-  ENDO_ROOT_POLICY: ROOT_POLICY,
-  ENDO_WRITE_POLICY: WRITE_POLICY,
-} = require('./constants')
+import {
+  ENDO_ROOT_POLICY as ROOT_POLICY,
+  ENDO_WRITE_POLICY as WRITE_POLICY,
+} from './constants.js'
+
 const { assign, create, keys, fromEntries, entries, defineProperties } = Object
 
 let globalOverrides = create(null)
 
-/**
- * @typedef {import('@endo/compartment-mapper').PolicyItem<import('.').RootPolicy|import('.').WritePolicy>} GlobalsPolicy
- */
-
-const attenuators = {
+export default {
   /**
-   * @type {import('@endo/compartment-mapper').GlobalAttenuatorFn<[import('@endo/compartment-mapper').PackagePolicy<void, GlobalsPolicy>['globals']]>}
+   * @type {import('./compartment-mapper-types.js').GlobalAttenuatorFn<[import('./policy-converter.js').LavaMoatPackagePolicy['globals']]>}
    */
   attenuateGlobals(params, originalObject, globalThis) {
     const policy = params[0]
@@ -26,43 +23,43 @@ const attenuators = {
       globalOverrides = globalThis
       return
     }
+    if (policy === WRITE_POLICY) {
+      throw new Error('Not yet implemented')
+    }
     defineProperties(
       globalThis,
       fromEntries(
         entries(policy)
+          .filter(([, policyValue]) => Boolean(policyValue))
           .map(([key, policyValue]) => {
-            if (policyValue) {
-              /** @type {PropertyDescriptor} */
-              const spec = {
-                configurable: false,
-                enumerable: true,
-                get() {
-                  console.log('- get', key)
-                  return (
-                    globalOverrides[key] ??
-                    originalObject[
-                      /** @type {keyof typeof originalObject} */ (key)
-                    ]
-                  )
-                },
-              }
-              if (policyValue === WRITE_POLICY) {
-                spec.set = (value) => {
-                  console.log('- set', key)
-                  globalOverrides[key] = value
-                }
-              }
-              return [key, spec]
+            /** @type {PropertyDescriptor} */
+            const spec = {
+              configurable: false,
+              enumerable: true,
+              get() {
+                console.log('- get', key)
+                return (
+                  globalOverrides[key] ??
+                  originalObject[
+                    /** @type {keyof typeof originalObject} */ (key)
+                  ]
+                )
+              },
             }
-            return [null, null]
+            if (policyValue === WRITE_POLICY) {
+              spec.set = (value) => {
+                console.log('- set', key)
+                globalOverrides[key] = value
+              }
+            }
+            return [key, spec]
           })
-          .filter(([a]) => a)
       )
     )
   },
   /**
    * Picks stuff in the policy out of the original object
-   * @type {import('@endo/compartment-mapper').ModuleAttenuatorFn<[import('@endo/compartment-mapper').PackagePolicy['packages']]>}
+   * @type {import('./compartment-mapper-types.js').ModuleAttenuatorFn<[import('./policy-converter.js').LavaMoatPackagePolicy['packages']]>}
    */
   attenuateModule(params, originalObject) {
     console.debug('attenuateModule called', params)
@@ -72,5 +69,3 @@ const attenuators = {
     return ns
   },
 }
-
-module.exports = attenuators

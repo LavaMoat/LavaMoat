@@ -1,7 +1,7 @@
 const test = require('ava')
 const { runScenario } = require('./util')
-const { loadScenarios } = require('lavamoat-core/test/scenarios/index')
-const { runAndTestScenario } = require('lavamoat-core/test/util')
+const { loadScenarios } = require('lavamoat-core/test/scenarios')
+const { runAndTestScenario } = require('lavamoat-core/test')
 
 test('Run scenarios', async (t) => {
   for await (const scenario of loadScenarios()) {

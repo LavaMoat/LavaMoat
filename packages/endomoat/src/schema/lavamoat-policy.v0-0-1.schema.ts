@@ -1,23 +1,14 @@
-/**
- * Adapted from `type-fest` and simplified
- */
-export type RequireAtLeastOne<
-  ObjectType,
-  KeysType extends keyof ObjectType = keyof ObjectType,
-> = {
-  [Key in KeysType]-?: Required<Pick<ObjectType, Key>> &
-    Partial<Pick<ObjectType, Exclude<KeysType, Key>>>
-}[KeysType]
+import { RequireAtLeastOne } from 'type-fest'
 
 /**
  * Schema for LavaMoat policy files
  */
-export type LavaMoatPolicySchema = RequireAtLeastOne<
-  PartialLavaMoatPolicySchema,
+export type LavaMoatPolicy = RequireAtLeastOne<
+  PartialLavaMoatPolicy,
   'resources' | 'resolutions'
 >
 
-export interface PartialLavaMoatPolicySchema {
+export interface PartialLavaMoatPolicy {
   resources?: Resources
   resolutions?: Resolutions
 }

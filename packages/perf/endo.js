@@ -38,6 +38,10 @@ main().catch((err) => {
   process.exit(1)
 })
 
+/** @type {import('ses').RepairOptions} */
+// eslint-disable-next-line no-unused-vars
+const foo = {}
+
 async function main() {
   const { makeReadPowers } = await import(
     '@endo/compartment-mapper/node-powers.js'
