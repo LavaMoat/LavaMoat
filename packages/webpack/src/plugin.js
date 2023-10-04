@@ -33,8 +33,6 @@ const { RUNTIME_KEY } = require('./ENUM.json')
 const { wrapGeneratorMaker } = require('./buildtime/generator.js')
 const IGNORE_LOADER = path.join(__dirname, './ignoreLoader.js')
 
-
-
 class VirtualRuntimeModule extends RuntimeModule {
   constructor({ name, source }) {
     super(name)
@@ -50,6 +48,18 @@ class VirtualRuntimeModule extends RuntimeModule {
 // =================================================================
 
 const PLUGIN_NAME = 'LavaMoatPlugin'
+const lockdownDefaults = {
+  // gives a semi-high resolution timer
+  dateTaming: 'unsafe',
+  // this is introduces non-determinism, but is otherwise safe
+  mathTaming: 'unsafe',
+  // lets code observe call stack, but easier debuggability
+  errorTaming: 'unsafe',
+  // shows the full call stack
+  stackFiltering: 'verbose',
+  // prevents most common override mistake cases from tripping up users
+  overrideTaming: 'severe',
+}
 
 class LavaMoatPlugin {
   /**
@@ -57,6 +67,9 @@ class LavaMoatPlugin {
    * @param {LavaMoatPluginOptions} [options]
    */
   constructor(options = { policy: {} }) {
+    if(!options.lockdown) {
+      options.lockdown = lockdownDefaults
+    }
     this.options = options
 
     diag.level = options.diagnosticsVerbosity || 0
