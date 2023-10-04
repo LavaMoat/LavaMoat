@@ -1,11 +1,18 @@
 {
+  "extends": "@tsconfig/node16/tsconfig.json",
   "files": [],
+  "compilerOptions": {
+    "noEmit": true
+  },
   "references": [
     {
       "path": "packages/allow-scripts"
     },
     {
       "path": "packages/aa"
+    },
+    {
+      "path": "packages/core"
     }
   ]
 }

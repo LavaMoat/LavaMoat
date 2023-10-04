@@ -10,12 +10,15 @@ module.exports = {
     tsconfigRootDir: __dirname,
   },
   // this should be synced with the version of V8 used by the min supported node version
-  env: { es2020: true, node: true },
+  env: { es2021: true, node: true },
   // the prettier config disables all eslint rules known to conflict with prettier
   extends: ['eslint:recommended', 'plugin:n/recommended', 'prettier'],
   rules: {
     // base rules; none of these are in eslint/recommended
     'no-empty': ['error', { allowEmptyCatch: true }],
+
+    // @typescript-eslint/no-unused-vars is more robust
+    'no-unused-vars': 'off',
 
     // additional errors not in n/recommended
     'n/callback-return': 'error',
@@ -70,11 +73,8 @@ module.exports = {
         'n/no-missing-import': 'off',
       },
     },
-    /**
-     *
-     */
     {
-      files: ['packages/allow-scripts/src/**/*.js'],
+      files: ['packages/allow-scripts/src/**/*'],
       parser: '@typescript-eslint/parser',
       extends: ['plugin:@typescript-eslint/recommended'],
       parserOptions: {
@@ -82,7 +82,31 @@ module.exports = {
       },
     },
     {
-      files: ['packages/*/src/**/*.js'],
+      files: ['packages/aa/src/**/*'],
+      parser: '@typescript-eslint/parser',
+      extends: ['plugin:@typescript-eslint/recommended'],
+      parserOptions: {
+        project: ['./packages/aa/tsconfig.json'],
+      },
+    },
+    {
+      files: ['packages/core/src/**/*'],
+      parser: '@typescript-eslint/parser',
+      extends: ['plugin:@typescript-eslint/recommended'],
+      parserOptions: {
+        project: ['./packages/core/config/tsconfig.sources.json'],
+      },
+    },
+    {
+      files: ['packages/core/test/**/*'],
+      parser: '@typescript-eslint/parser',
+      extends: ['plugin:@typescript-eslint/recommended'],
+      parserOptions: {
+        project: ['./packages/core/config/tsconfig.test.json'],
+      },
+    },
+    {
+      files: ['packages/*/src/**/*.js', 'packages/*/test/**/*.js'],
       rules: {
         '@typescript-eslint/no-var-requires': 'off',
       },
@@ -108,16 +132,10 @@ module.exports = {
         browser: true,
       },
       rules: {
-        'no-unused-vars': 'off',
+        '@typescript-eslint/no-unused-vars': 'off',
         'no-undef': 'off',
         'n/no-path-concat': 'off', // this should be removed and the issues fixed
         'n/no-missing-require': 'off',
-      },
-    },
-    {
-      files: ['packages/core/lib/**/*.js'],
-      rules: {
-        'no-unused-vars': 'off',
       },
     },
     {

@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "composite": true,
+    "allowSyntheticDefaultImports": true,
+    "allowJs": true,
+    "checkJs": true,
+    "emitDeclarationOnly": false,
+    "noEmit": true
+  },
+  "extends": "./tsconfig.base.json"
+}

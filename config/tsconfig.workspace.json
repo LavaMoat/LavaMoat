@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "composite": true,
+    "allowSyntheticDefaultImports": true,
+    "allowJs": true,
+    "checkJs": true
+  },
+  "extends": "./tsconfig.base.json"
+}

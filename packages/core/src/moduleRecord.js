@@ -1,4 +1,8 @@
 class LavamoatModuleRecord {
+  /**
+   *
+   * @param {LavamoatModuleRecordOptions} opts
+   */
   constructor({
     specifier,
     file,
@@ -21,3 +25,17 @@ class LavamoatModuleRecord {
 }
 
 module.exports = { LavamoatModuleRecord }
+
+/**
+ * @typedef LavamoatModuleRecordOptions
+ * @property {string} specifier
+ * @property {string} file
+ * @property {string} type
+ * @property {string} packageName
+ * @property {string} content
+ * @property {Record<string, string>} [importMap]
+ * @property {import('@babel/types').File} [ast]
+ * @property {(...args: any[]) => any} moduleInitializer
+ * @todo `moduleInitializer` probably needs narrowing
+ * @todo `@babel/types` should be a prod dep
+ */

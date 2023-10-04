@@ -1,10 +1,9 @@
 {
-  "extends": "../../config/tsconfig.base.json",
+  "extends": "../../config/tsconfig.emit-declarations.json",
   "include": ["src"],
   "compilerOptions": {
     "outDir": "types",
     "rootDir": "src",
-    "skipLibCheck": false,
     "paths": {
       "@lavamoat/aa": ["../aa"]
     }
