@@ -5,18 +5,26 @@ const s = require('react-hyperscript')
 
 module.exports = renderGraph
 
-function renderGraph (state, actions, { renderNode, renderLink }) {
+function renderGraph(state, actions, { renderNode, renderLink }) {
   const { graph } = state
   const { nodes, links } = graph
 
-  return (
-
-    s('g', {
+  return s(
+    'g',
+    {
       className: 'graph',
-    }, [
-      s('g', { className: 'links' }, links.map((link) => renderLink(link, state, actions))),
-      s('g', { className: 'nodes' }, nodes.map((node) => renderNode(node, state, actions))),
-    ])
-
+    },
+    [
+      s(
+        'g',
+        { className: 'links' },
+        links.map((link) => renderLink(link, state, actions))
+      ),
+      s(
+        'g',
+        { className: 'nodes' },
+        nodes.map((node) => renderNode(node, state, actions))
+      ),
+    ]
   )
 }

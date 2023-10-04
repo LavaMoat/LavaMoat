@@ -3,13 +3,13 @@ const forceBoundry2 = require('./forceBoundry.js').default
 
 module.exports = { setupSimulation, setupSimulationForces }
 
-function setupSimulation (state) {
+function setupSimulation(state) {
   const simulation = d3.forceSimulation()
   setupSimulationForces(simulation, state)
   return simulation
 }
 
-function setupSimulationForces (simulation, state) {
+function setupSimulationForces(simulation, state) {
   const nodes = Object.values(state.nodes)
   const links = Object.values(state.links)
   const width = state.container.width || 0
@@ -18,10 +18,23 @@ function setupSimulationForces (simulation, state) {
   simulation
     .nodes(nodes)
     // pull nodes along links
-    .force('link', d3.forceLink().id((d) => d.id).links(links).distance((d) => d.distance))
+    .force(
+      'link',
+      d3
+        .forceLink()
+        .id((d) => d.id)
+        .links(links)
+        .distance((d) => d.distance)
+    )
     // push nodes away from each other
-    .force('charge', d3.forceManyBody().strength((d) => -4 * d.radius))
-    .force('collision', d3.forceCollide().radius((d) => 1.2 * d.radius))
+    .force(
+      'charge',
+      d3.forceManyBody().strength((d) => -4 * d.radius)
+    )
+    .force(
+      'collision',
+      d3.forceCollide().radius((d) => 1.2 * d.radius)
+    )
     // translate nodes around the center
     .force('center', d3.forceCenter(width / 2, height / 2))
     // push nodes towards the center

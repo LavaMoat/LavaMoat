@@ -1,6 +1,6 @@
 .packageWrapper:hover {
-    cursor: pointer;
-    background: #dcdcdc;
+  cursor: pointer;
+  background: #dcdcdc;
 }
 .moduleWrapper:hover {
   cursor: pointer;
@@ -29,7 +29,7 @@
   height: 100%;
 }
 .CodeMirror {
-  width: 100%
+  width: 100%;
 }
 .listStyle {
   border-bottom: 1px solid rgba(48, 48, 48, 0.15);
@@ -51,7 +51,8 @@
   padding: 12px;
   z-index: 1;
 }
-.packageWrapper, .moduleWrapper {
+.packageWrapper,
+.moduleWrapper {
   display: flex;
   justify-content: start;
   align-items: center;
@@ -100,7 +101,6 @@
   background-color: purple;
 }
 
-
 .moduleList {
   margin-left: 30px;
 }
@@ -117,5 +117,5 @@
   height: 100%;
 }
 .highlight {
-  background-color: #FFFF00 !important
+  background-color: #ffff00 !important;
 }

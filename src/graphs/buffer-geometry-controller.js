@@ -1,7 +1,12 @@
-import { BufferGeometry, InstancedBufferGeometry, Float32BufferAttribute, InstancedBufferAttribute } from 'three'
+import {
+  BufferGeometry,
+  InstancedBufferGeometry,
+  Float32BufferAttribute,
+  InstancedBufferAttribute,
+} from 'three'
 
 export class BufferGeometryController {
-  constructor ({ capacity = 100, attributeSizes = {}, ...args } = {}) {
+  constructor({ capacity = 100, attributeSizes = {}, ...args } = {}) {
     this.idToIndex = new Map()
     this.material = this.createMaterial({ ...args })
     this.geometry = new BufferGeometry()
@@ -19,7 +24,7 @@ export class BufferGeometryController {
     this.setCapacity(capacity)
   }
 
-  update (id, attributeKey, value) {
+  update(id, attributeKey, value) {
     let index
     // get index for entry
     if (this.idToIndex.has(id)) {
@@ -35,7 +40,7 @@ export class BufferGeometryController {
     attributeValue.needsUpdate = true
   }
 
-  createEntry (id) {
+  createEntry(id) {
     const itemCount = this.idToIndex.size
     const index = itemCount
     this.idToIndex.set(id, index)
@@ -50,7 +55,7 @@ export class BufferGeometryController {
     return index
   }
 
-  setCapacity (newCapacity) {
+  setCapacity(newCapacity) {
     for (const attributeKey in this.attributeSizes) {
       const [length, count] = this.attributeSizes[attributeKey]
       // size is capacity * length (number of floats per vertex) * count (number of vertices per item)
@@ -60,14 +65,22 @@ export class BufferGeometryController {
       if (attribute !== undefined && attribute.array.length > 0) {
         newAttributeValues.set(attribute.array)
       }
-      this.geometry.setAttribute(attributeKey, new Float32BufferAttribute(newAttributeValues, length))
+      this.geometry.setAttribute(
+        attributeKey,
+        new Float32BufferAttribute(newAttributeValues, length)
+      )
     }
     this.capacity = newCapacity
   }
 }
 
 export class InstancedBufferGeometryController {
-  constructor ({ capacity = 100, attributeSizes = {}, instancedAttributeSizes = {}, ...args } = {}) {
+  constructor({
+    capacity = 100,
+    attributeSizes = {},
+    instancedAttributeSizes = {},
+    ...args
+  } = {}) {
     this.idToIndex = new Map()
     this.material = this.createMaterial({ ...args })
     this.geometry = new InstancedBufferGeometry()
@@ -88,7 +101,7 @@ export class InstancedBufferGeometryController {
     this.setCapacity(capacity)
   }
 
-  updateAttribute (attributeKey, value) {
+  updateAttribute(attributeKey, value) {
     // let index
     // // get index for entry
     // if (this.idToIndex.has(id)) {
@@ -104,7 +117,7 @@ export class InstancedBufferGeometryController {
     attributeValue.needsUpdate = true
   }
 
-  update (id, attributeKey, value) {
+  update(id, attributeKey, value) {
     let index
     // get index for entry
     if (this.idToIndex.has(id)) {
@@ -120,7 +133,7 @@ export class InstancedBufferGeometryController {
     attributeValue.needsUpdate = true
   }
 
-  createEntry (id) {
+  createEntry(id) {
     const itemCount = this.idToIndex.size
     const index = itemCount
     this.idToIndex.set(id, index)
@@ -135,7 +148,7 @@ export class InstancedBufferGeometryController {
     return index
   }
 
-  setCapacity (newCapacity) {
+  setCapacity(newCapacity) {
     for (const attributeKey in this.instancedAttributeSizes) {
       const [length, count] = this.instancedAttributeSizes[attributeKey]
       // size is capacity * length (number of floats per vertex) * count (number of vertices per item)
@@ -145,7 +158,10 @@ export class InstancedBufferGeometryController {
       if (attribute !== undefined && attribute.array.length > 0) {
         newAttributeValues.set(attribute.array)
       }
-      this.geometry.setAttribute(attributeKey, new InstancedBufferAttribute(newAttributeValues, length))
+      this.geometry.setAttribute(
+        attributeKey,
+        new InstancedBufferAttribute(newAttributeValues, length)
+      )
     }
     this.capacity = newCapacity
     console.log(this.geometry.instanceCount, this.geometry._maxInstanceCount)

@@ -11,7 +11,8 @@ const distPath = path.join(__dirname, '../dist')
 // https://stackoverflow.com/questions/69394632/webpack-build-failing-with-err-ossl-evp-unsupported/69691525#69691525
 const crypto = require('crypto')
 const crypto_orig_createHash = crypto.createHash
-crypto.createHash = algorithm => crypto_orig_createHash(algorithm === 'md4' ? 'sha256' : algorithm)
+crypto.createHash = (algorithm) =>
+  crypto_orig_createHash(algorithm === 'md4' ? 'sha256' : algorithm)
 
 module.exports = {
   devServer: {

@@ -1,45 +1,43 @@
 /* eslint-disable import/no-unassigned-import */
 import React from 'react'
-import {
-  getColorForRank,
-} from '../graphs/utils/utils.js'
+import { getColorForRank } from '../graphs/utils/utils.js'
 import '../css/DepGraph.css'
 
 class DepList extends React.Component {
-  constructor () {
+  constructor() {
     super()
     this.state = {
       // codeMirror: null,
     }
   }
 
-  render () {
-    const {
-      sortedPackages,
-    } = this.props
+  render() {
+    const { sortedPackages } = this.props
 
     return (
       <div>
         <div className="packagesStyle">
-          <div style={{ marginBottom: '10px' }}>Packages containing globals</div>
+          <div style={{ marginBottom: '10px' }}>
+            Packages containing globals
+          </div>
           <div>
-            {sortedPackages.map((packageData, index) => this.renderPackage(packageData, index))}
+            {sortedPackages.map((packageData, index) =>
+              this.renderPackage(packageData, index)
+            )}
           </div>
         </div>
       </div>
     )
   }
 
-  renderPackage (packageData, index) {
-    const { actions, selectedPackage, selectedModule, hiddenPackages } = this.props
+  renderPackage(packageData, index) {
+    const { actions, selectedPackage, selectedModule, hiddenPackages } =
+      this.props
     const isExpanded = selectedPackage && packageData.id === selectedPackage.id
     const isSelected = isExpanded && !selectedModule
     const packageIsVisible = !hiddenPackages.includes(packageData.id)
     return (
-      <div
-        key={index}
-        className="listStyle"
-      >
+      <div key={index} className="listStyle">
         <div
           className="packageWrapper"
           // onMouseEnter={() => {
@@ -55,7 +53,9 @@ class DepList extends React.Component {
           }}
         >
           <div
-            className={`packageIcon color-${getColorForRank(packageData.dangerRank)}`}
+            className={`packageIcon color-${getColorForRank(
+              packageData.dangerRank
+            )}`}
             onClick={(event) => {
               event.stopPropagation()
               actions.togglePackageVisibility(packageData.id)
@@ -70,7 +70,7 @@ class DepList extends React.Component {
     )
   }
 
-  renderPackageModuleList (packageData) {
+  renderPackageModuleList(packageData) {
     const { sortedModules } = this.props
     if (packageData.type === 'builtin') {
       return null
@@ -80,19 +80,19 @@ class DepList extends React.Component {
     }
     return (
       <div className="moduleList">
-        {sortedModules.map((module, index) => this.renderPackageModule(module, index))}
+        {sortedModules.map((module, index) =>
+          this.renderPackageModule(module, index)
+        )}
       </div>
     )
   }
 
-  renderPackageModule (module, index) {
+  renderPackageModule(module, index) {
     const { actions, selectedModule } = this.props
-    const isSelected = selectedModule && selectedModule.specifier === module.specifier
+    const isSelected =
+      selectedModule && selectedModule.specifier === module.specifier
     return (
-      <div
-        key={index}
-        className="listStyle"
-      >
+      <div key={index} className="listStyle">
         <div
           className="moduleWrapper"
           id={`${index}`}

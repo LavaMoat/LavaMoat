@@ -21,55 +21,66 @@ const commandDefaults = {
 
 main().catch((err) => console.error(err))
 
-function parseArgs () {
+function parseArgs() {
   const defaultCommand = 'generate'
   const argsParser = yargs
     .usage('Usage: $0 <command> [options]')
-    .command(['generate', '$0'], 'generate topological visualization for dep graph', (yargs) => {
-      // path to write viz output
-      yargs.option('dest', {
-        describe: 'path to write viz output',
-        type: 'string',
-        default: commandDefaults.dest,
-      })
-      // the directory containing the individual policy directories
-      yargs.option('policiesDir', {
-        describe: 'the directory containing the individual policy directories',
-        type: 'string',
-        default: commandDefaults.policiesDir,
-      })
-      // the name of the policies to include in the dashboard under the policies directory. default: all
-      yargs.option('policyNames', {
-        describe: 'the name of the policies to include in the dashboard under the policies directory. default: all',
-        type: 'array',
-        default: commandDefaults.policyNames,
-      })
-      // JSON object containings paths to the specific policy files
-      yargs.option('policyFilePathsJson', {
-        describe: 'json string indicating the individual policy file locations',
-        type: 'string',
-      })
-      // open the output dir
-      yargs.option('open', {
-        describe: 'open the visualization',
-        type: 'boolean',
-        default: false,
-      })
-      // open the output dir
-      yargs.option('serve', {
-        describe: 'serve the visualization via a static server',
-        type: 'boolean',
-        default: false,
-      })
-    })
-    .command('serve', 'serve the visualization via a static server', (yargs) => {
-      // path to serve viz output
-      yargs.option('dest', {
-        describe: 'path to serve the viz from',
-        type: 'string',
-        default: commandDefaults.dest,
-      })
-    })
+    .command(
+      ['generate', '$0'],
+      'generate topological visualization for dep graph',
+      (yargs) => {
+        // path to write viz output
+        yargs.option('dest', {
+          describe: 'path to write viz output',
+          type: 'string',
+          default: commandDefaults.dest,
+        })
+        // the directory containing the individual policy directories
+        yargs.option('policiesDir', {
+          describe:
+            'the directory containing the individual policy directories',
+          type: 'string',
+          default: commandDefaults.policiesDir,
+        })
+        // the name of the policies to include in the dashboard under the policies directory. default: all
+        yargs.option('policyNames', {
+          describe:
+            'the name of the policies to include in the dashboard under the policies directory. default: all',
+          type: 'array',
+          default: commandDefaults.policyNames,
+        })
+        // JSON object containings paths to the specific policy files
+        yargs.option('policyFilePathsJson', {
+          describe:
+            'json string indicating the individual policy file locations',
+          type: 'string',
+        })
+        // open the output dir
+        yargs.option('open', {
+          describe: 'open the visualization',
+          type: 'boolean',
+          default: false,
+        })
+        // open the output dir
+        yargs.option('serve', {
+          describe: 'serve the visualization via a static server',
+          type: 'boolean',
+          default: false,
+        })
+      }
+    )
+    .command(
+      'serve',
+      'serve the visualization via a static server',
+      (yargs) => {
+        // path to serve viz output
+        yargs.option('dest', {
+          describe: 'path to serve the viz from',
+          type: 'string',
+          default: commandDefaults.dest,
+        })
+      }
+    )
     .help()
     .strict()
 
@@ -78,17 +89,19 @@ function parseArgs () {
   return parsedArgs
 }
 
-async function main () {
+async function main() {
   const args = parseArgs()
   const { command, dest } = args
   switch (command) {
-    case 'generate':  {
+    case 'generate': {
       // newline for clearer output
       console.info('')
       return await generateViz(args)
     }
-    case 'serve':  {
-      console.info('serving a pre-built dashboard. to generate new dashboard and serve use "lavamoat-viz --serve"')
+    case 'serve': {
+      console.info(
+        'serving a pre-built dashboard. to generate new dashboard and serve use "lavamoat-viz --serve"'
+      )
       console.info('this is equivalent to "npx serve ./viz"')
       console.info('\n')
       return await serveViz(dest)
@@ -99,8 +112,9 @@ async function main () {
   }
 }
 
-async function generateViz (args) {
-  let { dest, open, serve, policiesDir, policyNames, policyFilePathsJson } = args
+async function generateViz(args) {
+  let { dest, open, serve, policiesDir, policyNames, policyFilePathsJson } =
+    args
   const fullDest = path.resolve(dest)
   const source = path.join(__dirname, '/../dist/')
   // copy app dir
@@ -110,19 +124,30 @@ async function generateViz (args) {
   if (!policyNames.length) {
     policyNames = await getDirectories(policiesDir)
   }
-  const policyFilePaths = policyFilePathsJson ? JSON.parse(policyFilePathsJson) : {}
+  const policyFilePaths = policyFilePathsJson
+    ? JSON.parse(policyFilePathsJson)
+    : {}
   // write each policy data injection
-  const policyDataInjectionFilePaths = await Promise.all(policyNames.map(async (policyName) => {
-    const policyFilePathsForProject = policyFilePaths[policyName] || {}
-    return await createPolicyDataInjectionFile({ policyName, fullDest, policyFilePathsForProject })
-  }))
+  const policyDataInjectionFilePaths = await Promise.all(
+    policyNames.map(async (policyName) => {
+      const policyFilePathsForProject = policyFilePaths[policyName] || {}
+      return await createPolicyDataInjectionFile({
+        policyName,
+        fullDest,
+        policyFilePathsForProject,
+      })
+    })
+  )
   // add data-injection file
   const dataInjectionContent = policyDataInjectionFilePaths
     // .map(filepath => { console.log(filepath, fullDest, path.relative(fullDest, filepath)); return filepath;})
-    .map(filepath => path.relative(fullDest, filepath))
-    .map(relPath => `import "./${relPath}";`)
+    .map((filepath) => path.relative(fullDest, filepath))
+    .map((relPath) => `import "./${relPath}";`)
     .join('\n')
-  await fs.writeFile(`${fullDest}/injectConfigDebugData.js`, dataInjectionContent)
+  await fs.writeFile(
+    `${fullDest}/injectConfigDebugData.js`,
+    dataInjectionContent
+  )
 
   // dashboard prepared! report done
   console.log(`generated viz in "${dest}"`)
@@ -141,16 +166,22 @@ async function generateViz (args) {
   }
 }
 
-async function serveViz (fullDest) {
-  const server = http.createServer((req, res) => handler(req, res, { public: fullDest }))
+async function serveViz(fullDest) {
+  const server = http.createServer((req, res) =>
+    handler(req, res, { public: fullDest })
+  )
   const port = 5000
   const url = `http://localhost:${port}`
-  await new Promise(resolve => server.listen(port, resolve))
+  await new Promise((resolve) => server.listen(port, resolve))
   console.log(`Running at ${url}`)
   return url
 }
 
-async function createPolicyDataInjectionFile ({ policyName, fullDest, policyFilePathsForProject }) {
+async function createPolicyDataInjectionFile({
+  policyName,
+  fullDest,
+  policyFilePathsForProject,
+}) {
   const policyData = await loadPolicyData(policyName, policyFilePathsForProject)
   // json esm modules dont exist yet so we do this
   const policyDataInjectionContent = `
@@ -165,13 +196,9 @@ async function createPolicyDataInjectionFile ({ policyName, fullDest, policyFile
   return filepath
 }
 
-async function loadPolicyData (policyName, fileLocations) {
+async function loadPolicyData(policyName, fileLocations) {
   const defaultPaths = getDefaultPaths(policyName)
-  const [
-    debug,
-    primary,
-    override,
-  ] = await Promise.all([
+  const [debug, primary, override] = await Promise.all([
     loadPolicyFile(fileLocations.debug || defaultPaths.debug),
     loadPolicyFile(fileLocations.primary || defaultPaths.primary),
     // loadPolicyFile(fileLocations.override || defaultPaths.override),
@@ -180,15 +207,15 @@ async function loadPolicyData (policyName, fileLocations) {
   return policyData
 }
 
-async function loadPolicyFile (filepath) {
+async function loadPolicyFile(filepath) {
   const content = await fs.readFile(filepath, 'utf8')
   const policy = JSON.parse(content)
   return policy
 }
 
-async function getDirectories (filepath) {
+async function getDirectories(filepath) {
   const dirEntries = await fs.readdir(filepath, { withFileTypes: true })
   return dirEntries
-    .filter(entry => entry.isDirectory())
-    .map(dir => dir.name)
+    .filter((entry) => entry.isDirectory())
+    .map((dir) => dir.name)
 }

@@ -38,15 +38,10 @@ export default class ScratchPad extends ThreeComponent {
     // }
 
     const packageData = {
-      nodes: [], links: [],
+      nodes: [],
+      links: [],
     }
-    const colors = [
-      'purple',
-      'green',
-      'orange',
-      'brown',
-      'red',
-    ]
+    const colors = ['purple', 'green', 'orange', 'brown', 'red']
 
     for (let index = 0; index < 200; index++) {
       const node = {
@@ -58,12 +53,15 @@ export default class ScratchPad extends ThreeComponent {
 
       const offset = Math.floor(Math.random() * packageData.nodes.length)
       new Set(
-        Array(3).fill()
+        Array(3)
+          .fill()
           .map((_, index) => {
-            return packageData.nodes[(offset + index) % packageData.nodes.length]
+            return packageData.nodes[
+              (offset + index) % packageData.nodes.length
+            ]
           })
-          .filter(pair => pair.id !== node.id),
-      ).forEach(pair => {
+          .filter((pair) => pair.id !== node.id)
+      ).forEach((pair) => {
         const link = {
           id: `${node.id}-${pair.id}`,
           source: node.id,
@@ -71,7 +69,6 @@ export default class ScratchPad extends ThreeComponent {
         }
         packageData.links.push(link)
       })
-
     }
     globalThis.packageData = packageData
 
@@ -89,18 +86,16 @@ export default class ScratchPad extends ThreeComponent {
       graph.tickFrame()
     })
 
-    const controls = new OrbitControls( this.camera, this.renderer.domElement )
+    const controls = new OrbitControls(this.camera, this.renderer.domElement)
     subscribeTick(() => {
       controls.update()
     })
 
     this.camera.position.set(0, 100, 3)
     this.camera.lookAt(0, 0, 0)
-
   }
 
-  animate () {
-    this.animateListeners.forEach(listener => listener())
+  animate() {
+    this.animateListeners.forEach((listener) => listener())
   }
-
 }
