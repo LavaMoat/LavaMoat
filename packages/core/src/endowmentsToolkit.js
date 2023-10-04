@@ -432,7 +432,7 @@ function endowmentsToolkit({
     // eslint-disable-next-line no-constant-condition
     while (true) {
       // abort if this is the end of the prototype chain.
-      if (!receiver) {
+      if (receiver === null) {
         return { prop: null, receiver: null }
       }
       // support lookup on objects and primitives
