@@ -76,7 +76,11 @@ Ignore loader will only work when used in webpack config. Specifying it inline `
 #### Implicit modules
 - Webpack may include dependencies for node builtins like the `events` or `buffer` packages. In other cases it will ignore the builtins and provide empty modules in their place. (see below)
 
-TODO: describe what happens when missing
+When a dependency (eg. buffer) is provided by webpack and you need to add it explicitly to your dependencies you'll get the following error:
+```
+Error: LavaMoat - Encountered unknown package directory for file "/home/(...)/node_modules/buffer/index.js"
+```
+
 #### Webpack-ignored modules
 Webpack generates this:
 ```js
