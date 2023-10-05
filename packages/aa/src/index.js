@@ -1,3 +1,5 @@
+'use strict'
+
 const { readFileSync } = require('fs')
 const path = require('path')
 const nodeResolve = require('resolve')
@@ -10,7 +12,14 @@ module.exports = {
   createPerformantResolve,
 }
 
+/**
+ * @returns {Resolver}
+ */
 function createPerformantResolve() {
+  /**
+   * @param {string} self
+   * @returns {(readFileSync: (file: string) => (string|{toString(): string}), pkgfile: string) => Record<string,unknown>}
+   */
   const readPackageWithout = (self) => (readFileSync, pkgfile) => {
     // avoid loading the package.json we're just trying to resolve
     if (pkgfile.endsWith(self)) {
@@ -19,6 +28,7 @@ function createPerformantResolve() {
     // original readPackageSync implementation from resolve internals:
     var body = readFileSync(pkgfile)
     try {
+      // @ts-expect-error - JSON.parse calls toString() on its parameter if not given a string
       var pkg = JSON.parse(body)
       return pkg
     } catch (jsonErr) {}
@@ -34,11 +44,11 @@ function createPerformantResolve() {
 }
 
 /**
- * @param {object} options
- * @returns {Promise<Map<string, string>>}
+ * @param {LoadCanonicalNameMapOpts} options
+ * @returns {Promise<CanonicalNameMap>}
  */
-async function loadCanonicalNameMap({ rootDir, includeDevDeps, resolve } = {}) {
-  const canonicalNameMap = new Map()
+async function loadCanonicalNameMap({ rootDir, includeDevDeps, resolve }) {
+  const canonicalNameMap = /** @type {CanonicalNameMap} */ (new Map())
   // performant resolve avoids loading package.jsons if their path is what's being resolved,
   // offering 2x performance improvement compared to using original resolve
   resolve = resolve || createPerformantResolve()
@@ -48,7 +58,6 @@ async function loadCanonicalNameMap({ rootDir, includeDevDeps, resolve } = {}) {
     packageDir: rootDir,
     includeDevDeps,
     resolve,
-    canonicalNameMap,
   })
   //convert dependency paths to canonical package names
   for (const [packageDir, logicalPathParts] of logicalPathMap.entries()) {
@@ -61,18 +70,30 @@ async function loadCanonicalNameMap({ rootDir, includeDevDeps, resolve } = {}) {
   return canonicalNameMap
 }
 
+/**
+ * @param {Resolver} resolve
+ * @param {string} depName
+ * @param {string} packageDir
+ * @returns {string|undefined}
+ */
 function wrappedResolveSync(resolve, depName, packageDir) {
   const depRelativePackageJsonPath = path.join(depName, 'package.json')
   try {
     return resolve.sync(depRelativePackageJsonPath, { basedir: packageDir })
   } catch (err) {
-    if (!err.message.includes('Cannot find module')) {
+    if (!(/** @type {Error} */ (err).message.includes('Cannot find module'))) {
       throw err
     }
     // debug: log resolution failures
     // console.log('resolve failed', depName, packageDir)
   }
 }
+
+/**
+ * @param {string} packageDir
+ * @param {boolean} includeDevDeps
+ * @returns {string[]}
+ */
 function getDependencies(packageDir, includeDevDeps) {
   const packageJsonPath = path.join(packageDir, 'package.json')
   const rawPackageJson = readFileSync(packageJsonPath, 'utf8')
@@ -86,11 +107,15 @@ function getDependencies(packageDir, includeDevDeps) {
   return depsToWalk
 }
 
+/** @type {WalkDepTreeOpts[]} */
 let currentLevelTodos
+
+/** @type {WalkDepTreeOpts[]} */
 let nextLevelTodos
+
 /**
- * @param {object} options
- * @returns {Map<{packageDir: string, logicalPathParts: string[]}>}
+ * @param {WalkDepTreeOpts} options
+ * @returns {Map<string, string[]>}
  */
 function walkDependencyTreeForBestLogicalPaths({
   packageDir,
@@ -100,6 +125,7 @@ function walkDependencyTreeForBestLogicalPaths({
   resolve,
 }) {
   resolve = resolve ?? createPerformantResolve()
+  /** @type {Map<string, string[]>} */
   const preferredPackageLogicalPathMap = new Map()
   // add the entry package as the first work unit
   currentLevelTodos = [
@@ -118,6 +144,10 @@ function walkDependencyTreeForBestLogicalPaths({
   return preferredPackageLogicalPathMap
 }
 
+/**
+ * @param {Map<string, string[]>} preferredPackageLogicalPathMap
+ * @param {Resolver} resolve
+ */
 function processOnePackageInLogicalTree(
   preferredPackageLogicalPathMap,
   resolve
@@ -127,9 +157,8 @@ function processOnePackageInLogicalTree(
     logicalPath = [],
     includeDevDeps = false,
     visited = new Set(),
-  } = currentLevelTodos.pop()
+  } = /** @type {WalkDepTreeOpts} */ (currentLevelTodos.pop())
   const depsToWalk = getDependencies(packageDir, includeDevDeps)
-  const results = []
 
   // deps are already sorted by preference for paths
   for (const depName of depsToWalk) {
@@ -170,16 +199,20 @@ function processOnePackageInLogicalTree(
       continue
     }
   }
-  return results
 }
 
+/**
+ * @param {CanonicalNameMap} canonicalNameMap
+ * @param {string} modulePath
+ * @returns {string}
+ */
 function getPackageNameForModulePath(canonicalNameMap, modulePath) {
   const packageDir = getPackageDirForModulePath(canonicalNameMap, modulePath)
   if (packageDir === undefined) {
     const relativeToRoot = path.relative(canonicalNameMap.rootDir, modulePath)
     return `external:${relativeToRoot}`
   }
-  const packageName = canonicalNameMap.get(packageDir)
+  const packageName = /** @type {string} */ (canonicalNameMap.get(packageDir))
   const relativeToPackageDir = path.relative(packageDir, modulePath)
   // files should never be associated with a package directory across a package boundary (as tested via the presense of "node_modules" in the path)
   if (relativeToPackageDir.includes('node_modules')) {
@@ -190,6 +223,11 @@ function getPackageNameForModulePath(canonicalNameMap, modulePath) {
   return packageName
 }
 
+/**
+ * @param {CanonicalNameMap} canonicalNameMap
+ * @param {string} modulePath
+ * @returns {string|undefined}
+ */
 function getPackageDirForModulePath(canonicalNameMap, modulePath) {
   // find which of these directories the module is in
   const matchingPackageDirs = Array.from(canonicalNameMap.keys()).filter(
@@ -203,12 +241,22 @@ function getPackageDirForModulePath(canonicalNameMap, modulePath) {
   return longestMatch
 }
 
-// for comparing string lengths
+/**
+ * for comparing string lengths
+ * @param {string} a
+ * @param {string} b
+ * @returns {string}
+ */
 function takeLongest(a, b) {
   return a.length > b.length ? a : b
 }
 
-// for package logical path names
+/**
+ * for package logical path names
+ * @param {string} a
+ * @param {string} b
+ * @returns {0|1|-1}
+ */
 function comparePreferredPackageName(a, b) {
   // prefer shorter package names
   if (a.length > b.length) {
@@ -226,7 +274,12 @@ function comparePreferredPackageName(a, b) {
   }
 }
 
-// for comparing package logical path arrays (shorter is better)
+/**
+ * for comparing package logical path arrays (shorter is better)
+ * @param {string[]} [aPath]
+ * @param {string[]} [bPath]
+ * @returns {0|1|-1}
+ */
 function comparePackageLogicalPaths(aPath, bPath) {
   // undefined is not preferred
   if (aPath === undefined && bPath === undefined) {
@@ -261,3 +314,29 @@ function comparePackageLogicalPaths(aPath, bPath) {
   }
   return 0
 }
+
+/**
+ * @typedef Resolver
+ * @property {(path: string, opts: {basedir: string}) => string} sync
+ */
+
+/**
+ * @typedef LoadCanonicalNameMapOpts
+ * @property {string} rootDir
+ * @property {boolean} [includeDevDeps]
+ * @property {Resolver} [resolve]
+ */
+
+/**
+ * @internal
+ * @typedef WalkDepTreeOpts
+ * @property {string} packageDir
+ * @property {string[]} [logicalPath]
+ * @property {boolean} [includeDevDeps]
+ * @property {Set<string>} [visited]
+ * @property {Resolver} [resolve]
+ */
+
+/**
+ * @typedef {Map<string, string> & {rootDir: string}} CanonicalNameMap
+ */

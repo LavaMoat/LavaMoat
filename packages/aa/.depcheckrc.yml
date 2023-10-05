@@ -1,3 +1,5 @@
 ignores:
   # monorepo deps
   - 'ava'
+  # types
+  - "@types/resolve"

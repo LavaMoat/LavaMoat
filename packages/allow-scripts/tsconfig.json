@@ -4,6 +4,10 @@
   "compilerOptions": {
     "outDir": "types",
     "rootDir": "src",
-    "skipLibCheck": false
-  }
+    "skipLibCheck": false,
+    "paths": {
+      "@lavamoat/aa": ["../aa"]
+    }
+  },
+  "references": [{ "path": "../aa" }]
 }
