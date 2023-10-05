@@ -80,7 +80,7 @@ module.exports = {
           MiniCssExtractPlugin.loader,
           // "style-loader",
           'css-loader',
-          LavaMoat.ignore,
+          LavaMoat.exclude,
         ],
         sideEffects: true,
       },

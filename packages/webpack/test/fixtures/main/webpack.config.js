@@ -68,7 +68,7 @@ module.exports = {
       },
       {
         test: /\.css$/,
-        use: [MiniCssExtractPlugin.loader, 'css-loader', LavaMoatPlugin.ignore],
+        use: [MiniCssExtractPlugin.loader, 'css-loader', LavaMoatPlugin.exclude],
         sideEffects: true,
       },
     ],

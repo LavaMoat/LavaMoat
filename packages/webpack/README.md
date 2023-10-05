@@ -44,13 +44,13 @@ module.exports = {
 
 One important thing to note when using the LavaMoat plugin is that it disables the `concatenateModules` optimization in webpack. This is because concatenation won't work with wrapped modules.
 
-### Avoiding wrapping specific modules
+### Excluding modules
 
 > [!WARNING]
-> This is an experimental feature and ignoring may be configured differently in the future if this approach is proven insecure. 
+> This is an experimental feature and excluding may be configured differently in the future if this approach is proven insecure. 
 
-The default way to define specific behaviors for webpack is creating module rules. To ensure ignore rules are applied on the same exact files that match certain rules (the same RegExp may be matched against different things at different times) we're providing the ignore functionality as a loader you can add to the list of existing loaders or use individually.  
-The loader is available as `LavaMoat.ignore` from the default export of the plugin. It doesn't do anything to the code, but its presence is detected and treated as a mark on the file. Any file that's been processed by `LavaMoat.ignore` will not be wrapped in a Compartment.
+The default way to define specific behaviors for webpack is creating module rules. To ensure exclude rules are applied on the same exact files that match certain rules (the same RegExp may be matched against different things at different times) we're providing the exclude functionality as a loader you can add to the list of existing loaders or use individually.  
+The loader is available as `LavaMoat.exclude` from the default export of the plugin. It doesn't do anything to the code, but its presence is detected and treated as a mark on the file. Any file that's been processed by `LavaMoat.exclude` will not be wrapped in a Compartment.
 
 Example: avoid wrapping CSS modules:
 ```js
@@ -61,7 +61,7 @@ module: {
         use: [
           MiniCssExtractPlugin.loader,
           'css-loader',
-          LavaMoat.ignore,
+          LavaMoat.exclude,
         ],
         sideEffects: true,
       },
@@ -69,7 +69,7 @@ module: {
   },
 ```
 
-Ignore loader will only work when used in webpack config. Specifying it inline `require('path/to/ignoreLoader.js!./module.js')` will not result in module.js being ignored. (This is a security feature to prevent your dependencies from declaring they want to be ignored.)
+Ignore loader will only work when used in webpack config. Specifying it inline `require('path/to/excludeLoader.js!./module.js')` will not result in module.js being excluded. (This is a security feature to prevent your dependencies from declaring they want to be excluded.)
 
 ### Gotchas
 
@@ -110,7 +110,7 @@ Threat model
 - All plugins can bypass LavaMoat protections intentionally.
 - It's unlikely but possible that a plugin can bypass LavaMoat protections unintentionally.
 - It should not be possible for loaders to bypass LavaMoat protections.
-- Some plugins (eg. MiniCssExtractPlugin) execute code from the bundle at build time. To make the plugin work you need to trust it and the modules it runs and add the LavaMoat.ignore loader for them. 
+- Some plugins (eg. MiniCssExtractPlugin) execute code from the bundle at build time. To make the plugin work you need to trust it and the modules it runs and add the LavaMoat.exclude loader for them. 
 - LavaMoat plugin is not protecting you against malicious packages being executed by other plugins at runtime (but lavamoat cli could)
 
 Webpack runtime

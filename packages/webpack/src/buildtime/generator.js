@@ -15,7 +15,7 @@ const diag = require('./diagnostics.js')
 const RUNTIME_GLOBALS = require('webpack/lib/RuntimeGlobals')
 const { RUNTIME_KEY } = require('../ENUM.json')
 
-const IGNORE_LOADER = path.join(__dirname, '../ignoreLoader.js')
+const EXCLUDE_LOADER = path.join(__dirname, '../excludeLoader.js')
 
 // TODO: processing requirements needs to be a tiny bit more clever yet.
 // Look in JavascriptModulesPlugin for how it decides if module and exports are unused.
@@ -67,7 +67,7 @@ const wrappedGeneratorInstances = new WeakSet()
  * @param {object} options
  */
 exports.wrapGeneratorMaker = ({
-  ignores,
+  excludes,
   getIdentifierForPath,
   runChecks,
   PROGRESS,
@@ -104,12 +104,12 @@ exports.wrapGeneratorMaker = ({
         return originalGeneratedSource
       }
 
-      // skip doing anything if marked as ignored by the ignoreLoader,
-      // only accept ignore loader from config, not inline.
+      // skip doing anything if marked as excluded by the excludeLoader,
+      // only accept exclude loader from config, not inline.
       // Inline loader definition uses a `!` character as a loader separator. 
-      // Defining what to ignore should only be possible in the config.
-      if (module.loaders.some(({ loader }) => loader === IGNORE_LOADER) && !module.rawRequest.includes('!')) {
-        ignores.push(module.rawRequest)
+      // Defining what to exclude should only be possible in the config.
+      if (module.loaders.some(({ loader }) => loader === EXCLUDE_LOADER) && !module.rawRequest.includes('!')) {
+        excludes.push(module.rawRequest)
         diag.rawDebug(3, `skipped wrapping ${module.rawRequest}`)
         return originalGeneratedSource
       }

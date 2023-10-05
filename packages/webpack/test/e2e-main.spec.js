@@ -18,10 +18,10 @@ test('webpack/main - default warning gets printed', (t) => {
   t.regex(t.context.build.stdout, /Concatenation of modules disabled/)
 })
 
-test('webpack/main - warns about ignored modules', (t) => {
+test('webpack/main - warns about excluded modules', (t) => {
   t.regex(
     t.context.build.stdout,
-    /WARNING.*ignored modules.*src\/style\.css.*side-effects-package\/styles\.css/s,
+    /WARNING.*excluded modules.*src\/style\.css.*side-effects-package\/styles\.css/s,
   ) // `s` for multiline matching
 })
 

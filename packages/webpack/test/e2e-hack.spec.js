@@ -33,10 +33,10 @@ test('webpack/hack/loader - bundle runs without reaching the FLAG', (t) => {
   )
 })
 
-test('webpack/hack/loader - doublecheck in reported ignored files', (t) => {
+test('webpack/hack/loader - doublecheck in reported excluded files', (t) => {
   t.notRegex(
     t.context.build.stdout,
-    /ignored modules.*hack.js/s,
+    /excluded modules.*hack.js/s,
   ) // `s` for multiline matching
 })
 

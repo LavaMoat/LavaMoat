@@ -31,7 +31,7 @@ const JAVASCRIPT_MODULE_TYPE_ESM = 'javascript/esm'
 
 const { RUNTIME_KEY } = require('./ENUM.json')
 const { wrapGeneratorMaker } = require('./buildtime/generator.js')
-const IGNORE_LOADER = path.join(__dirname, './ignoreLoader.js')
+const EXCLUDE_LOADER = path.join(__dirname, './excludeLoader.js')
 
 class VirtualRuntimeModule extends RuntimeModule {
   constructor({ name, source }) {
@@ -153,7 +153,7 @@ class LavaMoatPlugin {
         // =================================================================
         // processin of the paths involved in the bundle and cross-check with policy
 
-        const ignores = []
+        const excludes = []
         const knownPaths = []
         const unenforceableModuleIds = []
         let identifierLookup
@@ -242,7 +242,7 @@ class LavaMoatPlugin {
           normalModuleFactory.hooks.generator.for(moduleType).tap(
             PLUGIN_NAME,
             wrapGeneratorMaker({
-              ignores,
+              excludes: excludes,
               runChecks,
               getIdentifierForPath,
               PROGRESS,
@@ -250,13 +250,13 @@ class LavaMoatPlugin {
           )
         }
 
-        // Report on ignored modules as late as possible.
+        // Report on excluded modules as late as possible.
         // This hook happens after all module generators have been executed.
         compilation.hooks.afterProcessAssets.tap(PLUGIN_NAME, () => {
           diag.rawDebug(3, '> afterProcessAssets')
           mainCompilationWarnings.push(
             new WebpackError(
-              `in LavaMoatPlugin: ignored modules \n  ${ignores.join('\n  ')}`,
+              `in LavaMoatPlugin: excluded modules \n  ${excludes.join('\n  ')}`,
             ),
           )
         })
@@ -357,6 +357,6 @@ class LavaMoatPlugin {
   }
 }
 
-LavaMoatPlugin.ignore = IGNORE_LOADER
+LavaMoatPlugin.exclude = EXCLUDE_LOADER
 
 module.exports = LavaMoatPlugin
