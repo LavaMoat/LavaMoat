@@ -5,6 +5,9 @@ module.exports = {
     // messing with this, so we need to set it manually.
     // https://eslint.org/docs/latest/use/configure/language-options#specifying-environments
     ecmaVersion: 12,
+
+    // for @typescript-eslint/parser, wherever it's used
+    tsconfigRootDir: __dirname,
   },
   // this should be synced with the version of V8 used by the min supported node version
   env: { es2020: true, node: true },
@@ -53,8 +56,39 @@ module.exports = {
     },
   },
   overrides: [
+    /**
+     * All `.ts` files should be checked via `@typescript-eslint/parser`
+     */
     {
-      files: ['packages/*/test/**/*.js', 'packages/*/src/**/*.test.js'],
+      files: ['packages/**/*.ts'],
+      parser: '@typescript-eslint/parser',
+      extends: ['plugin:@typescript-eslint/recommended-type-checked'],
+      parserOptions: {
+        project: ['./packages/*/tsconfig.json'],
+      },
+      rules: {
+        'n/no-missing-import': 'off',
+      },
+    },
+    /**
+     *
+     */
+    {
+      files: ['packages/allow-scripts/src/**/*.js'],
+      parser: '@typescript-eslint/parser',
+      extends: ['plugin:@typescript-eslint/recommended'],
+      parserOptions: {
+        project: ['./packages/allow-scripts/tsconfig.json'],
+      },
+    },
+    {
+      files: ['packages/*/src/**/*.js'],
+      rules: {
+        '@typescript-eslint/no-var-requires': 'off',
+      },
+    },
+    {
+      files: ['packages/*/test/**/*.js', 'packages/*/src/**/*.spec.js'],
       extends: ['plugin:ava/recommended'],
       rules: {
         'ava/no-import-test-files': 'off',

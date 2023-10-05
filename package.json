@@ -11,6 +11,8 @@
     "@tsconfig/node16": "^16.1.1",
     "@types/node": "^20.5.9",
     "@types/yargs": "^17.0.24",
+    "@typescript-eslint/eslint-plugin": "^6.7.3",
+    "@typescript-eslint/parser": "^6.7.3",
     "ava": "^5.3.1",
     "conventional-changelog-conventionalcommits": "^6.1.0",
     "depcheck": "^1.4.0",
@@ -25,6 +27,7 @@
     "lint-staged": "^13.2.3",
     "memfs": "^4.3.0",
     "prettier": "^3.0.2",
+    "type-fest": "^2.19.0",
     "typescript": "^5.2.2"
   },
   "engines": {
