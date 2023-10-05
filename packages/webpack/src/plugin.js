@@ -291,6 +291,14 @@ class LavaMoatPlugin {
                 // which corresponds to it being the main compilation. But plugins may exist that conflict with that assumption;
                 // in which case we're gonna have to bring back the runtime with empty policy
               } else {
+                // If the chunk has already been processed, skip it.
+                if (onceForChunkSet.has(chunk)) {
+                  diag.rawDebug(
+                    1,
+                    '> skipped adding runtime (additionalChunkRuntimeRequirements)',
+                  )
+                  return
+                }
                 diag.rawDebug(
                   1,
                   '> adding runtime (additionalChunkRuntimeRequirements)',
@@ -325,10 +333,7 @@ class LavaMoatPlugin {
                   { name: 'runtime', file: path.join(__dirname, './runtime/runtime.js') },
                 ])
 
-                // If the chunk has already been processed, skip it.
-                if (onceForChunkSet.has(chunk)) {
-                  return
-                }
+                
                 // set.add(RuntimeGlobals.onChunksLoaded); // TODO: develop an understanding of what this line does and why it was a part of the runtime setup for module federation
 
                 // Mark the chunk as processed by adding it to the WeakSet.
