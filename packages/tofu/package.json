@@ -25,7 +25,7 @@
   },
   "homepage": "https://github.com/LavaMoat/LavaMoat/blob/main/packages/tofu/README.md",
   "engines": {
-    "node": ">=14.0.0"
+    "node": "^16.20.0 || ^18.0.0 || ^20.0.0"
   },
   "ava": {
     "files": [
