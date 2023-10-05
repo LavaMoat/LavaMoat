@@ -68,7 +68,7 @@ async function runLavamoat({ args = [], cwd = process.cwd() } = {}) {
  * The `scenario` itself should be passed thru `createScenarioFromScaffold` to normalize it.
  *
  * @template [T=unknown]
- * @param {{scenario: NormalizedScenario}} opts
+ * @param {{scenario: import('lavamoat-core/test/scenarios/scenario').NormalizedScenario}} opts
  * @returns {Promise<T>}
  */
 async function runScenario({ scenario }) {

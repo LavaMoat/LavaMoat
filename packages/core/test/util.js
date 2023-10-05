@@ -1,5 +1,5 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable n/no-missing-require */
+// @ts-check
+
 const {
   parseForPolicy,
   LavamoatModuleRecord,
@@ -28,17 +28,32 @@ module.exports = {
   runAndTestScenario,
 }
 
+/**
+ * @typedef {Partial<import('../src/parseForPolicy').ParseForPolicyOpts> & {
+ *   files: import('./scenarios/scenario').NormalizedScenarioJSFile[]
+ * }} GeneratePolicyFromFilesOpts
+ */
+
+/**
+ * @param {GeneratePolicyFromFilesOpts} opts
+ * @returns
+ */
 async function generatePolicyFromFiles({ files, ...opts }) {
   const config = await parseForPolicy({
-    moduleSpecifier: files.find((file) => file.entry).specifier,
+    moduleSpecifier:
+      /** @type {import('./scenarios/scenario').NormalizedScenarioJSFile} */ (
+        files.find((file) => file.entry)
+      ).specifier,
     resolveHook: (requestedName, parentAddress) => {
-      return files.find((file) => file.specifier === parentAddress).importMap[
-        requestedName
-      ]
+      return /** @type {import('./scenarios/scenario').NormalizedScenarioJSFile} */ (
+        files.find((file) => file.specifier === parentAddress)
+      ).importMap[requestedName]
     },
     importHook: async (address) => {
       return new LavamoatModuleRecord(
-        files.find((file) => file.specifier === address)
+        /** @type {import('./scenarios/scenario').NormalizedBuiltin} */ (
+          files.find((file) => file.specifier === address)
+        )
       )
     },
     isBuiltin: () => false,
@@ -49,6 +64,14 @@ async function generatePolicyFromFiles({ files, ...opts }) {
   return config
 }
 
+/**
+ * Given an incomplete scenario definition, normalize it in preparation for
+ * running.
+ *
+ * @template [Result=unknown] Default is `unknown`
+ * @param {import('./scenarios/scenario').Scenario<Result>} scenario
+ * @returns {import('./scenarios/scenario').NormalizedScenario<Result>}
+ */
 function createScenarioFromScaffold({
   name = 'template scenario',
   expectedResult = {
@@ -57,9 +80,14 @@ function createScenarioFromScaffold({
   testType = 'deepEqual',
   checkPostRun = async (t, result, err, scenario) => {
     if (err) {
-      await scenario.checkError(t, err, scenario)
+      await /** @type {import('./scenarios/scenario').ScenarioCheckErrorFn<Result>} */ (
+        scenario.checkError
+      )(t, err, scenario)
     } else {
-      await scenario.checkResult(t, result, scenario)
+      // assumes `result` is not undefined
+      await /** @type {import('./scenarios/scenario').ScenarioCheckResultFn<Result>} */ (
+        scenario.checkResult
+      )(t, /** @type {Result} */ (result), scenario)
     }
   },
   checkError = async (t, err, scenario) => {
@@ -67,7 +95,7 @@ function createScenarioFromScaffold({
       t.truthy(err, `Scenario fails as expected: ${scenario.name} - ${err}`)
       t.regex(
         err.message,
-        scenario.expectedFailureMessageRegex,
+        /** @type {RegExp} */ (scenario.expectedFailureMessageRegex),
         'Error message expects to match regex'
       )
     } else {
@@ -95,7 +123,7 @@ function createScenarioFromScaffold({
   },
   expectedFailure = false,
   expectedFailureMessageRegex = /[\s\S]*/,
-  files = [],
+  files = {},
   builtin = {},
   context = {},
   opts = { scuttleGlobalThis: {} },
@@ -110,11 +138,13 @@ function createScenarioFromScaffold({
   ...extraArgs
 } = {}) {
   function _defineEntry() {
+    // @ts-expect-error - does not exist
     const testResult = require('one')
     console.log(JSON.stringify(testResult, null, 2))
   }
 
   function _defineOne() {
+    // @ts-expect-error - does not exist
     module.exports = require('two')
   }
 
@@ -278,10 +308,12 @@ function createScenarioFromScaffold({
 
 function createHookedConsole() {
   let hasResolved = false
+  /** @type {(arg: any) => void} */
   let resolve
   const firstLogEventPromise = new Promise((_resolve) => {
     resolve = _resolve
   })
+  /** @param {string} message */
   const hookedLog = (message) => {
     if (hasResolved) {
       throw new Error(`console.log called multiple times. got "${message}"`)
@@ -305,6 +337,36 @@ function createHookedConsole() {
   }
 }
 
+/**
+ * Options for {@link PlatformRunScenario}
+ *
+ * @template [Result=unknown] Default is `unknown`
+ * @typedef PlatformRunScenarioOpts
+ * @property {import('./scenarios/scenario').NormalizedScenario<Result>} scenario
+ * @property {boolean} [runWithPrecompiledModules]
+ * @property {(...args: any[]) => void} [log]
+ */
+
+/**
+ * Scenario runner function provided by the consuming platform.
+ *
+ * Called by {@link runAndTestScenario}
+ *
+ * @template [Result=unknown] Default is `unknown`
+ * @callback PlatformRunScenario
+ * @param {PlatformRunScenarioOpts<Result>} opts
+ * @returns {Promise<Result>}
+ */
+
+/**
+ * Run the given scenario.
+ *
+ * The `scenario` itself should be passed thru `createScenarioFromScaffold` to
+ * normalize it.
+ *
+ * @template [Result=unknown] Default is `unknown`
+ * @type {PlatformRunScenario<Result>}
+ */
 async function runScenario({ scenario, runWithPrecompiledModules = false }) {
   const {
     entries,
@@ -339,11 +401,16 @@ async function runScenario({ scenario, runWithPrecompiledModules = false }) {
   const kernel = createKernel({
     runWithPrecompiledModules,
     lavamoatConfig,
+    /** @param {string} id */
     loadModuleData: (id) => {
       if (id in builtin) {
         return moduleDataForBuiltin(builtin, id)
       }
       const moduleRecord = files[id]
+      /**
+       * @type {any}
+       * @todo Need a type for "module data"
+       */
       const moduleData = {
         id: moduleRecord.specifier,
         package: moduleRecord.packageName,
@@ -372,8 +439,17 @@ async function runScenario({ scenario, runWithPrecompiledModules = false }) {
       }
       return moduleData
     },
+    /**
+     * @param {string} id
+     * @param {string} relative
+     * @returns {string}
+     */
     getRelativeModuleId: (id, relative) => {
-      return files[id].importMap[relative] || relative
+      return (
+        /** @type {import('./scenarios/scenario').NormalizedScenarioJSFile} */ (
+          files[id]
+        ).importMap[relative] || relative
+      )
     },
     prepareModuleInitializerArgs,
     ...kernelArgs,
@@ -403,8 +479,8 @@ async function runScenario({ scenario, runWithPrecompiledModules = false }) {
  * @param {Object} options - The options for preparing the scenario.
  * @param {FsPromiseApi} [options.fs] - The file system module to use (default:
  *   `node:fs/promises`).
- * @param {Object} options.scenario - The scenario object containing the files
- *   to write.
+ * @param {import('./scenarios/scenario').Scenario} options.scenario - The
+ *   scenario object containing the files to write.
  * @param {string} [options.policyName='policies'] - The name of the policy
  *   directory (default: 'policies'). Default is `'policies'`
  * @param {string} [options.projectDir] - The project directory path.
@@ -420,12 +496,12 @@ async function prepareScenarioOnDisk({
   if (projectDir === undefined) {
     ;({ path: projectDir } = await tmp.dir())
   }
-  const filesToWrite = Object.values(scenario.files)
-  if (!scenario.opts.writeAutoPolicy) {
+  const filesToWrite = Object.values(scenario.files ?? {})
+  if (!scenario.opts?.writeAutoPolicy) {
     const defaultPaths = getDefaultPaths(policyName)
     const primaryPath =
-      typeof scenario.opts.policy === 'string'
-        ? scenario.opts.policy
+      typeof scenario.opts?.policyPath === 'string'
+        ? scenario.opts.policyPath
         : defaultPaths.primary
     filesToWrite.push({
       file: primaryPath,
@@ -433,8 +509,8 @@ async function prepareScenarioOnDisk({
     })
     if (scenario.configOverride) {
       const overridePath =
-        typeof scenario.opts.policyOverride === 'string'
-          ? scenario.opts.policyOverride
+        typeof scenario.opts?.policyOverridePath === 'string'
+          ? scenario.opts.policyOverridePath
           : defaultPaths.override
       filesToWrite.push({
         file: overridePath,
@@ -444,7 +520,12 @@ async function prepareScenarioOnDisk({
   }
   await Promise.all(
     filesToWrite.map(async (file) => {
-      const fullPath = path.join(projectDir, file.file)
+      const fullPath = path.join(
+        /** @type {string} */ (projectDir),
+        /** @type {import('./scenarios/scenario').NormalizedScenarioJSFile} */ (
+          file
+        ).file
+      )
       const dirname = path.dirname(fullPath)
       await fs.mkdir(dirname, { recursive: true })
       await fs.writeFile(fullPath, file.content)
@@ -456,6 +537,10 @@ async function prepareScenarioOnDisk({
   }
 }
 
+/**
+ * @param {Record<string, import('./scenarios/scenario').ScenarioFile>} files
+ * @returns
+ */
 function fillInFileDetails(files) {
   Object.entries(files).forEach(([file, fileObj]) => {
     fileObj.file = fileObj.file || file
@@ -469,36 +554,57 @@ function fillInFileDetails(files) {
   return files
 }
 
+/**
+ * @param {Record<string, any>} builtinObj
+ * @param {string} name
+ * @returns {any}
+ * @todo Type the module data
+ */
 function moduleDataForBuiltin(builtinObj, name) {
   return {
     id: name,
     file: name,
     package: name,
     type: 'builtin',
+    /** @type {import('./scenarios/scenario').ScenarioFile['moduleInitializer']} */
     moduleInitializer: (_, _2, module) => {
       module.exports = builtinObj[name]
     },
   }
 }
 
+/**
+ * @param {((id: string) => unknown) & { resolve: (id: string) => string }} requireRelativeWithContext
+ * @param {any} moduleObj
+ * @param {any} moduleData
+ * @returns
+ */
 function prepareModuleInitializerArgs(
   requireRelativeWithContext,
   moduleObj,
   moduleData
 ) {
-  const require = requireRelativeWithContext
+  /** @type {NodeJS.Require} */
+  const require = /** @type {any} */ (requireRelativeWithContext)
   const module = moduleObj
   const exports = moduleObj.exports
   const __filename = moduleData.file
   const __dirname = path.dirname(__filename)
-  require.resolve = (requestedName) => {
-    throw new Error(
-      'require.resolve not implemented in lavamoat-core test harness'
-    )
-  }
+  require.resolve = /** @type {any} */ (
+    () => {
+      throw new Error(
+        'require.resolve not implemented in lavamoat-core test harness'
+      )
+    }
+  )
   return [exports, require, module, __filename, __dirname]
 }
 
+/**
+ * @param {string} filename
+ * @param {string} content
+ * @param {object} context
+ */
 function evaluateWithSourceUrl(filename, content, context) {
   const vmContext = createContext()
   const vmGlobalThis = runInContext('this', vmContext)
@@ -523,7 +629,7 @@ function evaluateWithSourceUrl(filename, content, context) {
   try {
     result = runInContext(`${content}\n//# sourceURL=${filename}`, vmContext)
   } catch (e) {
-    console.log(e.stack)
+    console.log(/** @type {Error} */ (e).stack)
     throw e
   }
   // pull out test result value from context (not always used)
@@ -533,14 +639,15 @@ function evaluateWithSourceUrl(filename, content, context) {
 /**
  * Create a LavaMoat policy config for a given test function
  *
- * @param {(() => any) | string} testFn - Test function which will be wrapped
- *   and used as the module contents; otherwise a string of the module contents.
- *   ESM modules must use a string, since `import` and `export` are only valid
- *   at the top level.
- * @param {import('../src/parseForPolicy.js').ParseForPolicyOpts} opts
+ * @param {() => any} testFn - Test function which will be wrapped and used as
+ *   the module contents; otherwise a string of the module contents. ESM modules
+ *   must use a string, since `import` and `export` are only valid at the top
+ *   level.
+ * @param {Partial<GeneratePolicyFromFilesOpts>} [opts]
  * @returns {Promise<import('../src/schema').LavaMoatPolicy>}
  */
 async function createConfigForTest(testFn, opts = {}) {
+  /** @type {import('./scenarios/scenario').NormalizedScenarioJSFile[]} */
   const files = [
     {
       type: 'js',
@@ -567,12 +674,24 @@ async function createConfigForTest(testFn, opts = {}) {
   return policy
 }
 
+/**
+ * @param {object} opts
+ * @param {import('./scenarios/scenario').Scenario} opts.scenario
+ * @param {Partial<GeneratePolicyFromFilesOpts>} [opts.opts]
+ */
 async function autoConfigForScenario({ scenario, opts = {} }) {
-  const files = Object.values(scenario.files)
+  const files =
+    /** @type {import('./scenarios/scenario').NormalizedScenarioJSFile[]} */ (
+      Object.values(scenario.files ?? {})
+    )
   const policy = await generatePolicyFromFiles({ files, ...opts })
   scenario.config = policy
 }
 
+/**
+ * @param {object} opts
+ * @param {import('./scenarios/scenario').NormalizedScenario} opts.scenario
+ */
 function convertOptsToArgs({ scenario }) {
   const { entries } = scenario
   if (entries.length !== 1) {
@@ -582,16 +701,30 @@ function convertOptsToArgs({ scenario }) {
   return [firstEntry]
 }
 
+/**
+ * @param {string} func
+ * @returns {unknown}
+ */
 function functionToString(func) {
   return `(${func}).call(this)`
 }
 
+/**
+ * @template [Result=unknown] Default is `unknown`
+ * @param {import('ava').ExecutionContext} t
+ * @param {import('./scenarios/scenario').NormalizedScenario<Result>} scenario
+ * @param {PlatformRunScenario<Result>} platformRunScenario
+ * @returns {Promise<Result | undefined>}
+ */
 async function runAndTestScenario(t, scenario, platformRunScenario) {
-  let result, err
+  /** @type {Result | undefined} */
+  let result
+  /** @type {Error | undefined} */
+  let err
   try {
     result = await platformRunScenario({ scenario, log: t.log.bind(t) })
   } catch (e) {
-    err = e
+    err = /** @type {Error} */ (e)
   }
   await scenario.checkPostRun(t, result, err, scenario)
   return result

@@ -22,6 +22,8 @@ const defaultPaths = getDefaultPaths('node')
  * @property {string} [projectRoot]
  * @property {boolean} [debugMode]
  * @property {boolean} [statsMode]
+ * @property {string} [policy] - Alias for `policyPath`?
+ * @property {string} [policyOverride] - Alias for `policyOverridePath`?
  */
 
 /** @type {LavaMoatOpts} */
