@@ -162,7 +162,7 @@ exports.wrapGeneratorMaker = ({
         sourceChanged,
       })
 
-      PROGRESS.report('gneratorCalled')
+      PROGRESS.report('generatorCalled')
 
       // using this in webpack.config.ts complained about made up issues
       if (sourceChanged) {

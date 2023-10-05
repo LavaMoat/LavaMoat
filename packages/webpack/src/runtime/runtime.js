@@ -141,12 +141,13 @@ const lavamoatRuntimeWrapper = (resourceId, runtimeKit) => {
     }
 
     // TODO: check if this is not breaking anything
+    // @ts-expect-error - webpack runtime is not typed
     policyRequire.m = new Proxy(
       {},
       {
         has: (target, prop) => {
           warn(
-            `A module attempted to read ${prop} directly from webpack's module cache`,
+            `A module attempted to read ${String(prop)} directly from webpack's module cache`,
           )
           return false
         },
@@ -154,6 +155,7 @@ const lavamoatRuntimeWrapper = (resourceId, runtimeKit) => {
     )
 
     // override nmd to limit what it can mutate
+    // @ts-expect-error - webpack runtime is not typed
     policyRequire.nmd = (moduleReference) => {
       if (moduleReference === module) {
         module = __webpack_require__.nmd(module)

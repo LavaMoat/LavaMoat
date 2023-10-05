@@ -1,10 +1,5 @@
 // @ts-check
 
-/** @typedef {import("webpack").Compiler} Compiler */
-/** @typedef {import("webpack").Compilation} Compilation */
-/** @typedef {import("webpack").Generator} Generator */
-/** @typedef {import("./types.js").LavaMoatPluginOptions} LavaMoatPluginOptions */
-
 const path = require('path')
 const {
   WebpackError,
@@ -15,7 +10,6 @@ const diag = require('./buildtime/diagnostics.js')
 const progress = require('./buildtime/progress.js')
 const { assembleRuntime } = require('./buildtime/assemble.js')
 
-// @ts-ignore // this one doesn't have official types
 const { loadCanonicalNameMap } = require('@lavamoat/aa')
 
 // TODO: upcoming version of webpack may expose these constants, but we want to support more versions
@@ -49,10 +43,6 @@ class VirtualRuntimeModule extends RuntimeModule {
 
 const PLUGIN_NAME = 'LavaMoatPlugin'
 const lockdownDefaults = {
-  // gives a semi-high resolution timer
-  dateTaming: 'unsafe',
-  // this is introduces non-determinism, but is otherwise safe
-  mathTaming: 'unsafe',
   // lets code observe call stack, but easier debuggability
   errorTaming: 'unsafe',
   // shows the full call stack
@@ -62,9 +52,8 @@ const lockdownDefaults = {
 }
 
 class LavaMoatPlugin {
-  /**
-   * @constructor
-   * @param {LavaMoatPluginOptions} [options]
+  /**   
+   * @param {import("./types.js").LavaMoatPluginOptions} [options]
    */
   constructor(options = { policy: {} }) {
     if(!options.lockdown) {
@@ -75,7 +64,7 @@ class LavaMoatPlugin {
     diag.level = options.diagnosticsVerbosity || 0
   }
   /**
-   * @param {Compiler} compiler the compiler instance
+   * @param {import("webpack").Compiler} compiler the compiler instance
    * @returns {void}
    */
   apply(compiler) {
@@ -86,7 +75,7 @@ class LavaMoatPlugin {
         'canonicalNameMap',
         'pathsCollected',
         'pathsProcessed',
-        'gneratorCalled:repeats',
+        'generatorCalled:repeats',
         'runtimeAdded:repeats',
         'finish',
       ],
@@ -104,7 +93,7 @@ class LavaMoatPlugin {
     compiler.options.optimization.concatenateModules = false
     // TODO: Research. If we fiddle a little with how we wrap the module, it might be possible to get inlining to work eventually by adding a closure that returns the module namespace. I just don't want to get into the compatibility of it all yet.
     // TODO: explore how these settings affect the Compartment wrapping etc.
-    // compiler.options.optimization.runtimeChunk = false;
+    // compiler.options.optimization.runtimeChunk = false; // that one is ok, checked
     // compiler.options.optimization.mangleExports = false;
     // compiler.options.optimization.usedExports = false;
     // compiler.options.optimization.providedExports = false;
@@ -190,7 +179,7 @@ class LavaMoatPlugin {
         compilation.hooks.afterOptimizeChunkIds.tap(PLUGIN_NAME, (chunks) => {
           const chunkGraph = compilation.chunkGraph
 
-          chunks.forEach((chunk) => {
+          Array.from(chunks).forEach((chunk) => {
             chunkGraph.getChunkModules(chunk).forEach((module) => {
               const moduleId = chunkGraph.getModuleId(module)
               if (
@@ -200,13 +189,14 @@ class LavaMoatPlugin {
                 // Sadly, even treeshaking doesn't eliminate that module. It's left there and failing to work when reached by runtime policy enforcement.
                 // Below is the most reliable way I've found to date to identify ignored modules.
                 (module.type === JAVASCRIPT_MODULE_TYPE_DYNAMIC &&
-                  module.identifierStr &&
-                  module.identifierStr.startsWith('ignored')) ||
-                module.resource === undefined // better to explicitly list it as unenforceable than let it fall through the cracks
+                  // @ts-expect-error BAD TYPES
+                  module.identifierStr?.startsWith('ignored')) ||
+                  // @ts-expect-error BAD TYPES
+                  module.resource === undefined // better to explicitly list it as unenforceable than let it fall through the cracks
               ) {
                 unenforceableModuleIds.push(moduleId)
               } else {
-                knownPaths.push({ path: module.resource, moduleId }) // typescript is complaining about the use of `resource` here, but it's actually there.
+                knownPaths.push({ path: /** @type {any} */(module).resource, moduleId }) // typescript is complaining about the use of `resource` here, but it's actually there.
               }
             })
           })
@@ -276,7 +266,7 @@ class LavaMoatPlugin {
           PLUGIN_NAME + '_runtime',
           (chunk /*, set*/) => {
             if (chunk.hasRuntime()) {
-              if (!PROGRESS.done('gneratorCalled')) {
+              if (!PROGRESS.done('generatorCalled')) {
                 mainCompilationWarnings.push(
                   new WebpackError(
                     'LavaMoatPlugin: Something was generating runtime before all modules were identified. This might be part of a sub-compilation of a plugin. Please check for any unwanted interference between plugins.',

@@ -1,4 +1,3 @@
-/// <reference path="../types.js" />
 /// <reference types="ses" />
 
-declare const LAVAMOAT: RuntimeNamespace;
+declare const LAVAMOAT: import('../types.js').RuntimeNamespace;

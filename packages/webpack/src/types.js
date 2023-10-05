@@ -13,7 +13,7 @@
  */
 
 /**
- * @typedef {function} GetEndowmentsForConfig Creates an object populated with only the deep properties specified in the packagePolicy
+ * @callback GetEndowmentsForConfig Creates an object populated with only the deep properties specified in the packagePolicy
  * @param {object} sourceRef - Object from which to copy properties
  * @param {object} packagePolicy - LavaMoat policy item representing a package
  * @param {object} unwrapTo - For getters and setters, when the this-value is unwrapFrom, is replaced as unwrapTo
@@ -25,16 +25,16 @@
 /**
  * @typedef {Object} EndowmentsToolkit
  * @property {GetEndowmentsForConfig} getEndowmentsForConfig
- * @property {Function} makeMinimalViewOfRef - Creates a minimal view of a reference (e.g. a global) that only exposes the properties specified in the packagePolicy
- * @property {Function} copyValueAtPath - Copies a value at a specific path from the source reference to the target reference
- * @property {Function} applyGetSetPropDescTransforms 
- * @property {Function} applyEndowmentPropDescTransforms 
- * @property {Function} copyWrappedGlobals - Copies wrapped globals from a global reference to a target object with wrapping
- * @property {Function} createFunctionWrapper - conditionally binds a function - used to ensure functions (like fetch) get called on the this they expect
+ * @property {(...args: any[]) => unknown} makeMinimalViewOfRef - Creates a minimal view of a reference (e.g. a global) that only exposes the properties specified in the packagePolicy
+ * @property {(...args: any[]) => unknown} copyValueAtPath - Copies a value at a specific path from the source reference to the target reference
+ * @property {(...args: any[]) => unknown} applyGetSetPropDescTransforms 
+ * @property {(...args: any[]) => unknown} applyEndowmentPropDescTransforms 
+ * @property {(...args: any[]) => unknown} copyWrappedGlobals - Copies wrapped globals from a global reference to a target object with wrapping
+ * @property {(...args: any[]) => unknown} createFunctionWrapper - conditionally binds a function - used to ensure functions (like fetch) get called on the this they expect
  */
 
 /**
- * @typedef {function} EndowmentsToolkitFactory
+ * @callback EndowmentsToolkitFactory
  * @returns {EndowmentsToolkit}
  */
 
@@ -47,5 +47,8 @@
  * @property {Policy} policy - LavaMoat policy
  * @property {Record<string, string>} ENUM - short names for items to minimize bundle size withotu losing readability
  * @property {EndowmentsToolkitFactory} endowmentsToolkit - a function that returns endowmentsToolkit
- * @property {function} defaultExport - the function that will be surfaced to the wrapper as `__webpack_require__._LM_`
+ * @property {(...args: any[]) => unknown} defaultExport - the function that will be surfaced to the wrapper as `__webpack_require__._LM_`
  */
+
+module.exports = {}
+

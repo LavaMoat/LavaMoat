@@ -30,8 +30,6 @@ module.exports = {
       // SES lockdown options to use at runtime
       // lockdown: {
       //   errorTaming: "unsafe",
-      //   mathTaming: "unsafe",
-      //   dateTaming: "unsafe",
       //   consoleTaming: "unsafe",
       //   overrideTaming: "severe"
       // },
@@ -49,19 +47,22 @@ One important thing to note when using the LavaMoat plugin is that it disables t
 > This is an experimental feature and excluding may be configured differently in the future if this approach is proven insecure.
 
 The default way to define specific behaviors for webpack is creating module rules. To ensure exclude rules are applied on the same exact files that match certain rules (the same RegExp may be matched against different things at different times) we're providing the exclude functionality as a loader you can add to the list of existing loaders or use individually.  
-The loader is available as `LavaMoat.exclude` from the default export of the plugin. It doesn't do anything to the code, but its presence is detected and treated as a mark on the file. Any file that's been processed by `LavaMoat.exclude` will not be wrapped in a Compartment.
+The loader is available as `LavaMoatPlugin.exclude` from the default export of the plugin. It doesn't do anything to the code, but its presence is detected and treated as a mark on the file. Any file that's been processed by `LavaMoatPlugin.exclude` will not be wrapped in a Compartment.
+
+> [!NOTE]
+> Exclude loader will only work when used in webpack config. Specifying it inline `require('path/to/excludeLoader.js!./module.js')` will not result in module.js being excluded. (This is a security feature to prevent your dependencies from declaring they want to be excluded.)
 
 Example: avoid wrapping CSS modules:
 
 ```js
-module: {
+  module: {
     rules: [
       {
         test: /\.css$/,
         use: [
           MiniCssExtractPlugin.loader,
           'css-loader',
-          LavaMoat.exclude,
+          LavaMoatPlugin.exclude,
         ],
         sideEffects: true,
       },
@@ -69,7 +70,7 @@ module: {
   },
 ```
 
-Ignore loader will only work when used in webpack config. Specifying it inline `require('path/to/excludeLoader.js!./module.js')` will not result in module.js being excluded. (This is a security feature to prevent your dependencies from declaring they want to be excluded.)
+See: `examples/webpack.config.js` for a complete example.
 
 ### Gotchas
 
@@ -88,12 +89,13 @@ Error: LavaMoat - Encountered unknown package directory for file "/home/(...)/no
 When a built-in Node.js module is ignored, Webpack generates something like this:
 
 ```js
-const nodeCrypto = __webpack_require__(/*! crypto */ "?0b7d");
+const nodeCrypto = __webpack_require__(/*! crypto */ '?0b7d')
+```
+
 A carveout is necessary in policy enforcement for these modules.
 Sadly, even treeshaking doesn't eliminate that module. It's left there and failing to work when reached by runtime control flow.
 
-LavaMoat plugin is prepared to skip those and if a package attempts to import a webpack-ignored module an error will not be thrown even if it's not explicitly allowed by policy
-```
+This plugin will skip policy enforcement for such ignored modules.
 
 # Security Claims
 
@@ -125,6 +127,7 @@ Run `npm test` to start the automated tests.
 To prepare, run `npm ci` and `npm run lib:ses` in the packages/webpack folder before you begin
 
 Then:
+
 - Navigate to `example/`
 - Run `npm ci` and `npm test`
 - Open `dist/index.html` in your browser and inspect the console

@@ -53,6 +53,9 @@ module.exports = function progress({ steps }) {
     diag.rawDebug(2, `\n> Checking (${current}).is(${query})`)
     return current === query
   }
+  API.get = () => {
+    return steps[currentStep]
+  }
   API.done = (query) => {
     return done.has(query)
   }
