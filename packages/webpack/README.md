@@ -74,19 +74,18 @@ Ignore loader will only work when used in webpack config. Specifying it inline `
 ### Gotchas
 
 #### Implicit modules
-- Webpack may include dependencies for node builtins like the `events` or `buffer` packages. In other cases it will ignore the builtins and provide empty modules in their place. (see below)
+- Webpack may include dependencies polyfilling Node.js built-ins, such as the `events` or `buffer` packages. In other cases, it will ignore the built-ins and provide empty modules in their place (see below).
 
-When a dependency (eg. buffer) is provided by webpack and you need to add it explicitly to your dependencies you'll get the following error:
+When a dependency (eg. `buffer`) is provided by Webpack, and you need to add it explicitly to your dependencies, you'll receive the following error:
 ```
 Error: LavaMoat - Encountered unknown package directory for file "/home/(...)/node_modules/buffer/index.js"
 ```
 
 #### Webpack-ignored modules
-Webpack generates this:
+When a built-in Node.js module is ignored, Webpack generates something like this:
+
 ```js
 const nodeCrypto = __webpack_require__(/*! crypto */ "?0b7d");
-```
-when a builtin module is ignored (Node builtins are a good example of that. If you want a builtin to work, you sometimes need to supply a package for it as a dependency yourself)
 A carveout is necessary in policy enforcement for these modules. 
 Sadly, even treeshaking doesn't eliminate that module. It's left there and failing to work when reached by runtime control flow.
 
@@ -98,24 +97,24 @@ LavaMoat plugin is prepared to skip those and if a package attempts to import a 
 
 # Security Claims
 
-This is a beta version and it does not provide any guarantees, even those listed below. Use at your own risk.
+**This is a _beta_ release and does not provide any guarantees; even those listed below. Use at your own risk!**
 
 - SES must be added to the page without any bundling or transforming for any security guarantees to be sustained.
   - The plugin could add it as an asset to the compilation if that's a good Developer Experience. Feedback welcome.
 - Each javascript module resulting from the webpack build is scoped to its package's policy
 
-Threat model
+## Threat Model
 
 - Webpack itself is considered trusted.
 - All plugins can bypass LavaMoat protections intentionally.
-- It's unlikely but possible that a plugin can bypass LavaMoat protections unintentionally.
+- It's unlikely _but possible_ that a plugin can bypass LavaMoat protections _unintentionally_.
 - It should not be possible for loaders to bypass LavaMoat protections.
 - Some plugins (eg. MiniCssExtractPlugin) execute code from the bundle at build time. To make the plugin work you need to trust it and the modules it runs and add the LavaMoat.exclude loader for them. 
-- LavaMoat plugin is not protecting you against malicious packages being executed by other plugins at runtime (but lavamoat cli could)
+- This Webpack plugin _does not_ protect against malicious execution by other third-party plugins at runtime (use [LavaMoat](https://npm.im/lavamoat) for that).
 
-Webpack runtime
+## Webpack runtime
 
-Elements of webpack runtime (`__webpack_require__.*`) are currently mostly left intact. To avoid opening up potential bypasses, some functionality of the webpack runtime will need to be restricted.
+Elements of the Webpack runtime (e.g., `__webpack_require__.*`) are currently mostly left intact. To avoid opening up potential bypasses, some functionality of the Webpack runtime will need to be restricted.
 
 
 
