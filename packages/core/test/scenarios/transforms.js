@@ -1,4 +1,4 @@
-const { createScenarioFromScaffold } = require('../util.js')
+const { createScenarioFromScaffold } = require('../util')
 
 module.exports = [
   async () => {

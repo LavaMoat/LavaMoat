@@ -10,7 +10,7 @@ const transforms = require('./transforms')
 const globalRef = require('./globalRef')
 const scuttle = require('./scuttle')
 
-module.exports = { loadScenarios }
+/** @type {import('./scenario').ScenarioFactory[]} */
 const scenarios = [
   ...autogen,
   ...security,
@@ -30,3 +30,5 @@ async function* loadScenarios() {
     yield await scenarioCreator()
   }
 }
+
+module.exports = { loadScenarios }
