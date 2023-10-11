@@ -39,5 +39,6 @@
     ".": "./src/index.js",
     "./attenuator/default": "./src/default-attenuator.js",
     "./attenuator/property": "./src/property-attenuator.js"
-  }
+  },
+  "private": true
 }
