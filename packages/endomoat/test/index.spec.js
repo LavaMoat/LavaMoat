@@ -6,11 +6,11 @@ import {
 } from '../src/index.js'
 
 /**
- * @typedef {import('@endo/compartment-mapper').PolicyItem & import('../src/policy-converter').RootPolicy} LavaMoatPackagePolicyItem
+ * @typedef {import('@endo/compartment-mapper').PolicyItem & import('../src/policy-converter.js').RootPolicy} LavaMoatPackagePolicyItem
  */
 
 test('toEndoPolicy - basic', (t) => {
-  /** @type {import('../src/schema').LavaMoatPolicy} */
+  /** @type {import('lavamoat-core/schema').LavaMoatPolicy} */
   const lmPolicy = {
     resources: {
       a: {
@@ -20,7 +20,7 @@ test('toEndoPolicy - basic', (t) => {
         globals: {
           console: true,
         },
-        builtins: {
+        builtin: {
           'fs.readFile': true,
         },
       },

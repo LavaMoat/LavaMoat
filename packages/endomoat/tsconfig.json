@@ -1,4 +1,5 @@
 {
+  "extends": "../../config/tsconfig.workspace.json",
   "references": [{ "path": "./src" }, { "path": "./test" }],
   "files": []
 }

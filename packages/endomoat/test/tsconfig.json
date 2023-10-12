@@ -1,11 +1,5 @@
 {
-  "extends": "../../../config/tsconfig.base.json",
+  "extends": "../../../config/tsconfig.test.json",
   "include": ["."],
-  "compilerOptions": {
-    "emitDeclarationOnly": false,
-    "noEmit": true,
-    "target": "esnext",
-    "module": "NodeNext"
-  },
   "references": [{ "path": "../src" }]
 }
