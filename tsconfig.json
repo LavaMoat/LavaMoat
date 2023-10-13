@@ -13,9 +13,6 @@
     },
     {
       "path": "packages/endomoat"
-    },
-    {
-      "path": "./packages/core"
     }
   ]
 }

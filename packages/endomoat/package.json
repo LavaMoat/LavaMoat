@@ -4,6 +4,8 @@
   "main": "src/index.js",
   "license": "MIT",
   "dependencies": {
+    "@types/node": "^20.8.5",
+    "ses": "^0.18.8",
     "type-fest": "^4.3.2"
   },
   "repository": {

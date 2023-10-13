@@ -5,6 +5,6 @@
     "outDir": "../types",
     "target": "esnext",
     "module": "NodeNext",
-    "allowImportingTsExtensions": true
+    "types": ["node", "ses"]
   }
 }

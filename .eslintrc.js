@@ -117,6 +117,7 @@ module.exports = {
       parserOptions: {
         sourceType: 'module',
       },
+      extends: ['plugin:@endo/recommended'],
     },
     {
       files: ['packages/*/test/**/*.js', 'packages/*/src/**/*.test.js'],

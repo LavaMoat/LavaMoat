@@ -8,6 +8,8 @@
   "devDependencies": {
     "@commitlint/cli": "^17.6.7",
     "@commitlint/config-conventional": "^17.6.7",
+    "@endo/eslint-plugin": "^0.5.2",
+    "@jessie.js/eslint-plugin": "^0.4.0",
     "@tsconfig/node16": "^16.1.1",
     "@types/node": "^20.5.9",
     "@types/yargs": "^17.0.24",

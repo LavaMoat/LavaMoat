@@ -9,7 +9,7 @@ let globalOverrides = create(null)
 
 export default {
   /**
-   * @type {import('./compartment-mapper-types.js').GlobalAttenuatorFn<[import('./policy-converter.js').LavaMoatPackagePolicy['globals']]>}
+   * @type {import('@endo/compartment-mapper').GlobalAttenuatorFn<[import('./policy-converter.js').LavaMoatPackagePolicy['globals']]>}
    */
   attenuateGlobals(params, originalObject, globalThis) {
     const policy = params[0]
@@ -59,7 +59,7 @@ export default {
   },
   /**
    * Picks stuff in the policy out of the original object
-   * @type {import('./compartment-mapper-types.js').ModuleAttenuatorFn<[import('./policy-converter.js').LavaMoatPackagePolicy['packages']]>}
+   * @type {import('@endo/compartment-mapper').ModuleAttenuatorFn<[import('./policy-converter.js').LavaMoatPackagePolicy['packages']]>}
    */
   attenuateModule(params, originalObject) {
     console.debug('attenuateModule called', params)

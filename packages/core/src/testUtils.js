@@ -460,6 +460,7 @@ function prepareModuleInitializerArgs(
   const exports = moduleObj.exports
   const __filename = moduleData.file
   const __dirname = path.dirname(__filename)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   require.resolve = (requestedName) => {
     throw new Error(
       'require.resolve not implemented in lavamoat-core test harness'

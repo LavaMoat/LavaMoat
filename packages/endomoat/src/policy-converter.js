@@ -27,14 +27,14 @@ const { entries, fromEntries } = Object
 
 /**
  * An Endo policy tailored to LavaMoat's default attenuator
- * @typedef {import('./compartment-mapper-types.js').Policy<LavaMoatPackagePolicyItem, LavaMoatGlobalPolicyItem>} LavaMoatEndoPolicy
+ * @typedef {import('@endo/compartment-mapper').Policy<LavaMoatPackagePolicyItem, LavaMoatGlobalPolicyItem>} LavaMoatEndoPolicy
  */
 
 /**
  * Package policy based on {@link LavaMoatPackagePolicyItem} and {@link LavaMoatGlobalPolicyItem}.
  *
  * Member of {@link LavaMoatEndoPolicy}
- * @typedef {import('./compartment-mapper-types.js').PackagePolicy<LavaMoatPackagePolicyItem, LavaMoatGlobalPolicyItem>} LavaMoatPackagePolicy
+ * @typedef {import('@endo/compartment-mapper').PackagePolicy<LavaMoatPackagePolicyItem, LavaMoatGlobalPolicyItem>} LavaMoatPackagePolicy
  */
 
 const DEFAULT_ATTENUATOR = '@lavamoat/endomoat/attenuator/default'
