@@ -6,6 +6,15 @@ LavaMoat Webpack Plugin wraps each module in the bundle in a [Compartment](https
 
 ## Usage
 
+> Initial Beta version requires you to add SES lockdown to the page manually. We're working on finding the best option to automate adding it.
+> Initial Beta version requires you to generate the policy with lavamoat CLI. We're working on moving that into the plugin.
+
+1. Generate a policy file for your app's entry `npx lavamoat --autopolicy path/to/index.js` and adjust it if needed.
+2. Note that `builtins` in the policy indicate modules that webpack will either polyfill or ignore, so they need to be moved to `packages` and explicitly added as dependencies or just removed.
+3. Create a webpack bundle with the LavaMoat plugin enabled and pass the policy from the policy file to it in options.
+4. Copy `node_modules/ses/dist/lockdown.umd.js` into your built project and add a `<script>` tag pointing to it before the bundle. The file must remain unchanged. (Alternatively, it's also fine if you prepend the file to the bundle itself.)
+
+
 The LavaMoat plugin takes an options object with the following properties:
 
 - policy: the LavaMoat policy object. (unstable. This will surely change before v1 or a policy loader export will be provided from the main package to incorporate policy-override files)
