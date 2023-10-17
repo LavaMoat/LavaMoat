@@ -4,6 +4,7 @@
   "packages": {
     "packages/aa": {},
     "packages/allow-scripts": {},
+    "packages/webpack": {},
     "packages/browserify": {},
     "packages/core": {},
     "packages/lavapack": {},

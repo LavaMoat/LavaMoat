@@ -1,15 +1,14 @@
 {
   "name": "@lavamoat/webpack",
   "version": "0.0.1-beta.0",
-  "description": "LavaMoat Webpack plugin for running dependencies in compartments and without eval",
+  "description": "LavaMoat Webpack plugin for running dependencies in Compartments without eval",
   "main": "src/plugin.js",
   "scripts": {
     "test": "ava --timeout=30s test/*.spec.js",
     "lib:ses": "cp ../../node_modules/ses/dist/lockdown.umd.js ./example/ses/lockdown.umd.js"
   },
   "dependencies": {
-    "lavamoat-core": "^14.2.1",
-    "webpack-virtual-modules": "^0.5.0"
+    "lavamoat-core": "^14.2.1"
   },
   "peerDependencies": {
     "webpack": "^5.80.2"

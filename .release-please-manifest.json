@@ -1,6 +1,7 @@
 {
   "packages/aa": "3.1.5",
   "packages/allow-scripts": "2.5.1",
+  "packages/webpack": "0.0.1-beta.0",
   "packages/browserify": "16.0.0",
   "packages/core": "14.4.1",
   "packages/lavapack": "5.4.1",
