@@ -1,0 +1,46 @@
+{
+  "name": "@lavamoat/webpack",
+  "version": "0.0.1-beta.0",
+  "description": "LavaMoat Webpack plugin for running dependencies in compartments and without eval",
+  "main": "src/plugin.js",
+  "scripts": {
+    "test": "ava --timeout=30s test/*.spec.js",
+    "lib:ses": "cp ../../node_modules/ses/dist/lockdown.umd.js ./example/ses/lockdown.umd.js"
+  },
+  "dependencies": {
+    "lavamoat-core": "^14.2.1",
+    "webpack-virtual-modules": "^0.5.0"
+  },
+  "peerDependencies": {
+    "webpack": "^5.80.2"
+  },
+  "devDependencies": {
+    "css-loader": "^6.7.3",
+    "esbuild-loader": "^3.0.1",
+    "html-webpack-plugin": "^5.5.1",
+    "memfs": "^4.3.0",
+    "mini-css-extract-plugin": "^2.7.5",
+    "ses": "^0.18.5",
+    "typescript": "^5.0.2",
+    "webpack": "^5.84.1"
+  },
+  "keywords": [
+    "webpack",
+    "bundle",
+    "security",
+    "ses",
+    "compartment",
+    "sandbox",
+    "hardened"
+  ],
+  "author": "LavaMoat Team",
+  "license": "Apache-2.0",
+  "files": [
+    "src"
+  ],
+  "repository": "git+https://github.com/LavaMoat/lavamoat.git",
+  "bugs": {
+    "url": "https://github.com/LavaMoat/lavamoat/issues"
+  },
+  "homepage": "https://github.com/LavaMoat/lavamoat#readme"
+}

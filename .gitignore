@@ -120,3 +120,5 @@ packages/aa/types
 
 # VScode
 .vscode
+
+!**/fixtures/main/node_modules
