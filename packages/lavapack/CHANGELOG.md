@@ -6,6 +6,29 @@
   * dependencies
     * lavamoat-core bumped from ^14.2.2 to ^14.2.3
 
+## [6.0.0](https://github.com/LavaMoat/LavaMoat/compare/lavapack-v5.4.1...lavapack-v6.0.0) (2023-10-18)
+
+
+### ⚠ BREAKING CHANGES
+
+* The minimum supported Node.js version is now v16.20.0.
+
+### Features
+
+* node20 ([ef3a0da](https://github.com/LavaMoat/LavaMoat/commit/ef3a0da9960d7f5734e3d4180ebafdae2432a260))
+
+
+### Bug Fixes
+
+* drop Node.js v14 ([#729](https://github.com/LavaMoat/LavaMoat/issues/729)) ([10c667b](https://github.com/LavaMoat/LavaMoat/commit/10c667bd88eaabf60a8fd8e4493cc7676848b201))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-core bumped from ^14.4.1 to ^15.0.0
+
 ## [5.4.1](https://github.com/LavaMoat/LavaMoat/compare/lavapack-v5.4.0...lavapack-v5.4.1) (2023-09-14)
 
 

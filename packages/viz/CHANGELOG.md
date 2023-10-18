@@ -1,5 +1,29 @@
 # Changelog
 
+## [7.0.0](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-viz-v6.2.1...lavamoat-viz-v7.0.0) (2023-10-18)
+
+
+### ⚠ BREAKING CHANGES
+
+* The minimum supported Node.js version is now v16.20.0.
+
+### Features
+
+* node20 ([ef3a0da](https://github.com/LavaMoat/LavaMoat/commit/ef3a0da9960d7f5734e3d4180ebafdae2432a260))
+
+
+### Bug Fixes
+
+* **browserify,node,tofu,viz:** bump babel packages ([4e12040](https://github.com/LavaMoat/LavaMoat/commit/4e12040945897983456dce9b83a174e116c99f66))
+* drop Node.js v14 ([#729](https://github.com/LavaMoat/LavaMoat/issues/729)) ([10c667b](https://github.com/LavaMoat/LavaMoat/commit/10c667bd88eaabf60a8fd8e4493cc7676848b201))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-core bumped from ^14.4.1 to ^15.0.0
+
 ## [6.2.1](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-viz-v6.2.0...lavamoat-viz-v6.2.1) (2023-09-14)
 
 
