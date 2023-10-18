@@ -4,8 +4,7 @@
   "description": "LavaMoat Webpack plugin for running dependencies in Compartments without eval",
   "main": "src/plugin.js",
   "scripts": {
-    "test": "ava --timeout=30s test/*.spec.js",
-    "lib:ses": "cp ../../node_modules/ses/dist/lockdown.umd.js ./example/ses/lockdown.umd.js"
+    "test": "ava --timeout=30s test/*.spec.js"
   },
   "dependencies": {
     "lavamoat-core": "^15.0.0"

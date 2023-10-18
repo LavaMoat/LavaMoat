@@ -33,14 +33,13 @@ module.exports = {
       readableResourceIds: true,
       runChecks: true,
       diagnosticsVerbosity: 0,
+      HtmlWebpackPluginInterop: true,
     }),
     new MiniCssExtractPlugin({
       filename: 'styles/[name].css',
       // experimentalUseImportModule: false, // turns off some module execution at build time
     }),
-    new HtmlWebpackPlugin({
-      template: './index.html',
-    }),
+    new HtmlWebpackPlugin(),
   ],
   module: {
     rules: [
@@ -68,7 +67,11 @@ module.exports = {
       },
       {
         test: /\.css$/,
-        use: [MiniCssExtractPlugin.loader, 'css-loader', LavaMoatPlugin.exclude],
+        use: [
+          MiniCssExtractPlugin.loader,
+          'css-loader',
+          LavaMoatPlugin.exclude,
+        ],
         sideEffects: true,
       },
     ],
