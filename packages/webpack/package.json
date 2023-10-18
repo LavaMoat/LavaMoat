@@ -8,7 +8,7 @@
     "lib:ses": "cp ../../node_modules/ses/dist/lockdown.umd.js ./example/ses/lockdown.umd.js"
   },
   "dependencies": {
-    "lavamoat-core": "^14.2.1"
+    "lavamoat-core": "^15.0.0"
   },
   "peerDependencies": {
     "webpack": "^5.80.2"
