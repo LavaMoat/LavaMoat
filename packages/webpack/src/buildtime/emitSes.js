@@ -18,10 +18,22 @@ module.exports = {
         HtmlWebpackPluginInUse.constructor
           .getHooks(compilation)
           .beforeEmit.tapAsync('LavaMoatWebpackPlugin-lockdown', (data, cb) => {
-            data.html = data.html.replace(
-              /<head[^>]*>/,
-              '$&<script src="./lockdown.js"></script>'
-            )
+            const scriptTag = '<script src="./lockdown.js"></script>'
+            const headTagRegex = /<head[^>]*>/i
+            const scriptTagRegex = /<script/i
+
+            if (headTagRegex.test(data.html)) {
+              data.html = data.html.replace(headTagRegex, `$&${scriptTag}`)
+            } else if (scriptTagRegex.test(data.html)) {
+              data.html = data.html.replace(
+                scriptTagRegex,
+                `${scriptTag}<script`
+              )
+            } else {
+              throw Error(
+                'LavaMoat: Could not insert lockdown.js script tag, no suitable location found in the html template'
+              )
+            }
             cb(null, data)
           })
       }
