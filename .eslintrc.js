@@ -37,6 +37,7 @@ module.exports = {
 
     // these rules seem broken in a monorepo
     'n/no-extraneous-require': 'off',
+    'n/no-extraneous-import': 'off',
     'n/no-unpublished-require': 'off',
 
     // we should probably actually fix these three and turn these back on
