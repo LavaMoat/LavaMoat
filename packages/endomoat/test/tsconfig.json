@@ -1,0 +1,14 @@
+{
+  "extends": "../../../.config/tsconfig.test.json",
+  "compilerOptions": {
+    "rootDir": "..",
+    "paths": {
+      "lavamoat-core": ["../../core"]
+    },
+    "target": "esnext",
+    "module": "NodeNext",
+    "types": ["node", "ses"]
+  },
+  "include": ["."],
+  "references": [{ "path": "../src/tsconfig.json" }]
+}
