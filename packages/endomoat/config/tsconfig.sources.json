@@ -1,0 +1,15 @@
+{
+  "extends": "../../../config/tsconfig.emit-declarations.json",
+  "compilerOptions": {
+    "outDir": "../types",
+    "rootDir": "..",
+    "paths": {
+      "lavamoat-core": ["../../core"]
+    },
+    "target": "esnext",
+    "module": "NodeNext",
+    "types": ["node", "ses"]
+  },
+  "include": ["../src"],
+  "references": [{ "path": "../../core" }]
+}

@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "types": ["node"],
     "allowJs": true,
     "allowSyntheticDefaultImports": true,
     "checkJs": true,

@@ -1,0 +1,46 @@
+{
+  "name": "@lavamoat/endomoat",
+  "version": "2.3.1",
+  "main": "src/index.js",
+  "license": "MIT",
+  "dependencies": {
+    "@types/node": "^20.8.5",
+    "ses": "^0.18.8",
+    "type-fest": "^4.4.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LavaMoat/LavaMoat.git",
+    "directory": "packages/endomoat"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "description": "Converts Lavamoat Policies to Endo Policies",
+  "directories": {
+    "test": "test"
+  },
+  "type": "module",
+  "scripts": {
+    "test": "npm run test:run",
+    "test:run": "ava",
+    "lint:deps": "depcheck"
+  },
+  "author": "Lavamoat Project",
+  "homepage": "https://github.com/LavaMoat/LavaMoat/tree/main/packages/endomoat",
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "ava": {
+    "files": [
+      "test/*.spec.js"
+    ],
+    "timeout": "30s"
+  },
+  "exports": {
+    ".": "./src/index.js",
+    "./attenuator/default": "./src/default-attenuator.js",
+    "./attenuator/property": "./src/property-attenuator.js"
+  },
+  "private": true
+}
