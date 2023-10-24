@@ -20,14 +20,14 @@
     "directory": "packages/perf"
   },
   "dependencies": {
-    "browserify": "^17.0.0",
-    "lavamoat-browserify": "^15.7.1",
-    "lavamoat": "^7.0.0",
-    "readable-stream": "^3.6.0",
     "@endo/compartment-mapper": "^0.8.4",
+    "browserify": "^17.0.0",
+    "readable-stream": "^3.6.0",
     "ses": "^0.18.8"
   },
   "devDependencies": {
+    "lavamoat": "^8.0.0",
+    "lavamoat-browserify": "^17.0.0",
     "serve": "^14.2.0"
   },
   "engines": {

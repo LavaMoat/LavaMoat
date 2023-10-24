@@ -6,8 +6,8 @@
   "license": "MIT",
   "dependencies": {
     "cheerio": "^1.0.0-rc.12",
-    "lavamoat": "^7.0.0",
-    "lavamoat-tofu": "^6.0.2",
+    "lavamoat": "^8.0.0",
+    "lavamoat-tofu": "^6.2.1",
     "node-fetch": "^2.6.9",
     "p-limit": "^3.1.0"
   },
@@ -17,7 +17,6 @@
     "zzz": "node zzz.js",
     "test": "exit 0"
   },
-  "devDependencies": {},
   "engines": {
     "node": "^16.20.0 || ^18.0.0 || ^20.0.0"
   }
