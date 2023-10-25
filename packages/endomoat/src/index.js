@@ -3,8 +3,17 @@ import 'ses'
 export * from './policy-converter.js'
 export * from './constants.js'
 
+import { toEndoPolicy } from './policy-converter.js'
+
+import fs from 'fs'
+
+import { importLocation } from '@endo/comprtment-mapper'
+
 // TODO: need function which accepts filepath and policy
 // use a hardcoded policy for now
+
+const readPower = async (location) =>
+  fs.promises.readFile(new URL(location).pathname)
 
 /**
  * @type {import('@endo/compartment-mapper').ExitModuleImportHook}
@@ -19,8 +28,22 @@ export const importHook = async (specifier) => {
         moduleExports.default = ns
         Object.assign(moduleExports, ns)
       },
-    })
-  )
+    }))
+}
+
+export const run = async (entrypointPath, policy) => {
+  const { namespace } = await importLocation(readPower, entrypointPath, {
+    policy: toEndoPolicy(policy),
+    globals: globalThis,
+    importHook,
+    modules: {
+      'USE_ME_AS_DEFAULT_ATTENUATOR_NAME': {
+        attenuateGlobals: () => {
+          console.log('lol, this works')
+        },
+      },
+    },
+  })
 }
 
 // call importlocation with this importhook, readpower, (converted) policy

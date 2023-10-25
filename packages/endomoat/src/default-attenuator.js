@@ -2,61 +2,60 @@ import {
   ENDO_ROOT_POLICY as ROOT_POLICY,
   ENDO_WRITE_POLICY as WRITE_POLICY,
 } from './constants.js'
+import { copyWrappedGlobals, getEndowmentsForConfig } from 'lavamoat-core/src/endowmentsToolkit.js' // TODO: add proper exporst in core package.json
 
-const { assign, create, keys, fromEntries, entries, defineProperties } = Object
+const {
+  assign,
+  create,
+  keys,
+  fromEntries,
+  entries,
+  defineProperties,
+  getOwnPropertyDescriptors,
+} = Object
 
-let globalOverrides = create(null)
+let rootCompartmentGlobalThis
 
 export default {
   /**
    * @type {import('@endo/compartment-mapper').GlobalAttenuatorFn<[import('./policy-converter.js').LavaMoatPackagePolicy['globals']]>}
    */
-  attenuateGlobals(params, originalObject, globalThis) {
+  attenuateGlobals(params, originalGlobalThis, packageCompartmentGlobalThis) {
     const policy = params[0]
     if (!policy) {
       return
     }
     console.debug('attenuateGlobals called', params)
     if (policy === ROOT_POLICY) {
-      assign(globalThis, originalObject)
-      // This assumes that the root compartment is the first to be attenuated
-      globalOverrides = globalThis
-      return
-    }
-    if (policy === WRITE_POLICY) {
-      throw new Error('Not yet implemented')
-    }
-    defineProperties(
-      globalThis,
-      fromEntries(
-        entries(policy)
-          .filter(([, policyValue]) => Boolean(policyValue))
-          .map(([key, policyValue]) => {
-            /** @type {PropertyDescriptor} */
-            const spec = {
-              configurable: false,
-              enumerable: true,
-              get() {
-                console.log('- get', key)
-                return (
-                  globalOverrides[key] ??
-                  originalObject[
-                    /** @type {keyof typeof originalObject} */ (key)
-                  ]
-                )
-              },
-            }
-            if (policyValue === WRITE_POLICY) {
-              spec.set = (value) => {
-                console.log('- set', key)
-                globalOverrides[key] = value
-              }
-            }
-            return [key, spec]
-          })
+      rootCompartmentGlobalThis = packageCompartmentGlobalThis
+      // ^ this is a little dumb, but only a little - assuming importLocation is called only once in parallel. The thing is - even if it isn't, the new one will have a new copy of this module anyway.
+      // That is unless we decide to use `modules` for passing the attenuator, in which case we have an attenuator defined outside of Endo and we can scope it as we wish. Tempting. Slightly less secure, because if we have a prototype pollution or RCE in the attenuator, we're exposing the outside instead of the attenuators compartment.
+      copyWrappedGlobals(originalGlobalThis, packageCompartmentGlobalThis, [
+        'globalThis',
+        'global',
+      ])
+    } else {
+      // TODO: getEndowmentsForConfig doesn't implement support for "write"
+      const endowments = getEndowmentsForConfig(
+        rootCompartmentGlobalThis,
+        policy,
+        // rootCompartmentGlobalThis, // Not sure if it works, but with this as a 3rd argument, in theory, each compartment would unwrap functions to the root conpartment's globalThis, where all copied functions are set up to unwrap to actual globalThis
+        // instead I'm opting for a single unwrap since we now have access to the actual globalThis
+        originalGlobalThis,
+        packageCompartmentGlobalThis
       )
-    )
+
+      defineProperties(
+        packageCompartmentGlobalThis,
+        getOwnPropertyDescriptors(endowments)
+      )
+    }
+    // Write is per field not for all globals. It'll need to be implemented in getEndowmentsForConfig or the defineProperties step afterwards when it gets handled by another function from endowmentsToolkit (the latter more likely)
+    // - if (policy === WRITE_POLICY) {
+    // -   throw new Error('Not yet implemented')
+    // - }
   },
+
   /**
    * Picks stuff in the policy out of the original object
    * @type {import('@endo/compartment-mapper').ModuleAttenuatorFn<[import('./policy-converter.js').LavaMoatPackagePolicy['packages']]>}
