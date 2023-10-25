@@ -141,7 +141,11 @@ const Publish = {
     } = {}
   ) {
     await new Promise((resolve, reject) => {
-      const args = ['publish', ...pkgs.map((name) => `--workspace=${name}`)]
+      const args = [
+        'publish',
+        '--access=public',
+        ...pkgs.map((name) => `--workspace=${name}`),
+      ]
       if (dryRun) {
         args.push('--dry-run')
       }
