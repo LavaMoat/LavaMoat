@@ -608,7 +608,7 @@ test('invokeNpmPublish - basic usage', async (t) => {
   t.deepEqual(t.context.spawn.callArgs, [
     [
       'npm',
-      ['publish', `--workspace=${pkgName}`],
+      ['publish', '--access=public', `--workspace=${pkgName}`],
       { stdio: 'inherit', cwd: '/', shell: true },
     ],
   ])
@@ -626,7 +626,7 @@ test('invokeNpmPublish - dry run', async (t) => {
   t.deepEqual(t.context.spawn.callArgs, [
     [
       'npm',
-      ['publish', `--workspace=${pkgName}`, '--dry-run'],
+      ['publish', '--access=public', `--workspace=${pkgName}`, '--dry-run'],
       { stdio: 'inherit', cwd: '/', shell: true },
     ],
   ])
