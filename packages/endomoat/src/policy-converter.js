@@ -134,7 +134,8 @@ function toEndoRsrcPkgsPolicy(resources) {
 export function toEndoPolicy(lmPolicy) {
   /** @type {LavaMoatEndoPolicy} */
   const endoPolicy = {
-    defaultAttenuator: DEFAULT_ATTENUATOR,
+    //TODO: generate a policy resource for the default attenuator
+    defaultAttenuator: DEFAULT_ATTENUATOR, 
     entry: {
       [RSRC_POLICY_GLOBALS]: [ENDO_ROOT_POLICY],
       [RSRC_POLICY_PKGS]: ENDO_WILDCARD_POLICY,
