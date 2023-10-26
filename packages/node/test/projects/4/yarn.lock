@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"a@file:./fake_node_modules/a":
+"a@file:./node-modules/a":
   version "1.0.0"
 
-"b@file:./fake_node_modules/b":
+"b@file:./node-modules/b":
   version "1.0.0"
 
 events@^3.2.0:

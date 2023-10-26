@@ -4,6 +4,6 @@
     "setup": "npm install"
   },
   "dependencies": {
-    "a": "file:./fake_node_modules/a"
+    "a": "file:./node-modules/a"
   }
 }
