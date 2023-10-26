@@ -1,55 +1,17 @@
 import test from 'ava'
-import {
-  toEndoPolicy,
-  ENDO_ROOT_POLICY,
-  ENDO_WILDCARD_POLICY,
-} from '../src/index.js'
+import { run } from '../src/index.js'
 
-/**
- * @typedef {import('@endo/compartment-mapper').PolicyItem & import('../src/policy-converter').RootPolicy} LavaMoatPackagePolicyItem
- */
+import path from 'path'
 
-test('toEndoPolicy - basic', (t) => {
-  /** @type {import('../src/schema').LavaMoatPolicy} */
-  const lmPolicy = {
-    resources: {
-      a: {
-        packages: {
-          b: true,
-        },
-        globals: {
-          console: true,
-        },
-        builtins: {
-          'fs.readFile': true,
-        },
-      },
-    },
+
+test('run a file', async t => {
+  const entryFile = new URL('./fixtures/main/app.js', import.meta.url).href
+  const policy = {
+    resources: {}
   }
-  /**
-   * @type {import('@endo/compartment-mapper').Policy<LavaMoatPackagePolicyItem>}
-   */
-  const expected = {
-    defaultAttenuator: '@lavamoat/endomoat/attenuator/default',
-    entry: {
-      globals: [ENDO_ROOT_POLICY],
-      noGlobalFreeze: true,
-      packages: ENDO_WILDCARD_POLICY,
-      builtins: ENDO_WILDCARD_POLICY,
-    },
-    resources: {
-      a: {
-        packages: { b: true },
-        globals: { console: true },
-        builtins: {
-          fs: {
-            attenuate: '@lavamoat/endomoat/attenuator/property',
-            params: ['readFile'],
-          },
-        },
-      },
-    },
-  }
-
-  t.deepEqual(toEndoPolicy(lmPolicy), expected)
+  debugger;
+  const result = await run(entryFile, policy)
+  t.deepEqual(result, {
+    hello: 'world'
+  })
 })

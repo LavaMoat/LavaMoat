@@ -1,0 +1,12 @@
+{
+  "name": "main",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "keywords": [],
+  "dependencies": {
+    "@lavamoat/endomoat": "../../../"
+  },
+  "author": "",
+  "license": "ISC"
+}
