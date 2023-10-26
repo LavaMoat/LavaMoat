@@ -4,22 +4,38 @@
  * Prepares test fixture directories for use by the test suite using an
  * arbitrary package manager set via the `LAVAMOAT_PM` env var.
  *
- * The default package manager is `npm@latest`.
- *
  * @packageDocumentation
  */
 
 'use strict'
 
+const Module = require('node:module')
 const path = require('node:path')
-const { execFile } = require('node:child_process')
+const { execFile, spawnSync } = require('node:child_process')
 const { promisify } = require('node:util')
 const { rm, readdir } = require('node:fs/promises')
+const os = require('node:os')
 
 const exec = promisify(execFile)
 
-const LAVAMOAT_PM = process.env.LAVAMOAT_PM ?? 'npm@latest'
+/**
+ * @todo Change this to `npm@latest` when Node.js v16 support is dropped
+ */
+const LAVAMOAT_PM = process.env.LAVAMOAT_PM ?? 'npm@next-9'
 const PROJECTS_DIR = path.join(__dirname, 'projects')
+
+/**
+ * Path to `corepack` as installed in the workspace root
+ */
+const COREPACK_PATH = path.dirname(require.resolve('corepack/package.json'))
+
+/**
+ * Path to `corepack` executable from workspace root
+ */
+const COREPACK_BIN = path.resolve(
+  COREPACK_PATH,
+  require('corepack/package.json').bin.corepack
+)
 
 /**
  * Blast `node_modules` in `cwd`
@@ -27,7 +43,43 @@ const PROJECTS_DIR = path.join(__dirname, 'projects')
  * @returns {Promise<void>}
  */
 async function clean(cwd) {
-  await rm(path.join(cwd, 'node_modules'), { recursive: true, force: true })
+  const nodeModulesPath = path.join(cwd, 'node_modules')
+  await rm(nodeModulesPath, { recursive: true, force: true })
+}
+
+/**
+ * Resolves a module's installation path (_not_ entry point) from some other directory.
+ *
+ * @param {string} cwd - Some other directory
+ * @param {string} moduleId - Module to resolve
+ * @returns {string} Resolved dir path
+ */
+function resolveDependencyFrom(cwd, moduleId) {
+  return path.dirname(
+    Module.createRequire(path.join(cwd, 'index.js')).resolve(
+      `${moduleId}/package.json`
+    )
+  )
+}
+
+/**
+ * Some native packages may not ship binaries for Apple silicon, so we have to
+ * rebuild them
+ * @param {string} cwd
+ */
+async function setupAppleSilicon(cwd) {
+  const { dependencies } = require(`${cwd}/package.json`)
+  const KECCAK = 'keccak'
+
+  // keccak ships no binaries for arm64 darwin
+  if (KECCAK in dependencies) {
+    console.debug(`Rebuilding ${KECCAK} for ${os.platform()}/${os.arch()}...`)
+    const keccakPath = resolveDependencyFrom(cwd, KECCAK)
+    spawnSync(COREPACK_BIN, [LAVAMOAT_PM, 'exec', 'node-gyp-build'], {
+      cwd: keccakPath,
+      stdio: 'inherit',
+    })
+  }
 }
 
 /**
@@ -37,21 +89,24 @@ async function clean(cwd) {
  * @returns {Promise<void>}
  */
 async function setup(cwd) {
-  // it just so happens that both yarn and npm use the same commands here.
-  // this is not guaranteed to always be the case!
-  await exec('corepack', [LAVAMOAT_PM, 'install'], { cwd })
-  await exec('corepack', [LAVAMOAT_PM, 'run', 'setup'], { cwd })
-  await exec('node', [require.resolve('../src/cli'), '-a', 'index.js'], {
-    cwd,
-  })
+  // assume 'install' is the subcommand on any package manager
+  await exec(COREPACK_BIN, [LAVAMOAT_PM, 'install'], { cwd })
+  await exec(COREPACK_BIN, [LAVAMOAT_PM, 'run', 'setup'], { cwd })
+
+  if (os.platform() === 'darwin' && os.arch() === 'arm64') {
+    await setupAppleSilicon(cwd)
+  }
+
+  await exec(
+    process.execPath,
+    [require.resolve('../src/cli'), '-a', 'index.js'],
+    {
+      cwd,
+    }
+  )
 }
 
 async function main() {
-  if (process.version.startsWith('v14') && LAVAMOAT_PM.startsWith('yarn')) {
-    console.error('Skipping Yarn setup for Node.js v14 due to incompatibilities')
-    return
-  }
-
   const dirents = await readdir(PROJECTS_DIR, { withFileTypes: true })
 
   for (const dirent of dirents) {
