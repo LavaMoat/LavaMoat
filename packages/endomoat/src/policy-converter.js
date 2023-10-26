@@ -149,6 +149,8 @@ export function toEndoPolicy(lmPolicy) {
       ])
     ),
   }
+  // add this to make endo allow the attenuator at all, TODO: generate this from the policy or build into Endo
+  endoPolicy.resources['@lavamoat/endomoat'] = {}
 
   return endoPolicy
 }

@@ -1,5 +1,9 @@
 import test from 'ava'
-import { ENDO_ROOT_POLICY, ENDO_WILDCARD_POLICY } from '../src/index.js'
+import {
+  ENDO_ROOT_POLICY,
+  ENDO_WILDCARD_POLICY,
+} from '../src/index.js'
+
 import { toEndoPolicy } from '../src/policy-converter.js'
 
 /**

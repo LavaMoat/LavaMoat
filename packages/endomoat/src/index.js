@@ -7,7 +7,7 @@ import { toEndoPolicy } from './policy-converter.js'
 
 import fs from 'fs'
 
-import { importLocation } from '@endo/comprtment-mapper'
+import { importLocation } from '@endo/compartment-mapper'
 
 // TODO: need function which accepts filepath and policy
 // use a hardcoded policy for now
@@ -44,6 +44,7 @@ export const run = async (entrypointPath, policy) => {
       },
     },
   })
+  return namespace
 }
 
 // call importlocation with this importhook, readpower, (converted) policy
