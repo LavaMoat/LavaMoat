@@ -10,7 +10,7 @@
   "scripts": {
     "test": "npm run test:npm && npm run test:yarn1",
     "test:prepare": "node ./test/prepare.js",
-    "test:npm": "cross-env LAVAMOAT_PM=npm@latest npm run test:prepare && ava",
+    "test:npm": "npm run test:prepare && ava",
     "test:yarn1": "cross-env LAVAMOAT_PM=yarn@1 npm run test:prepare && ava",
     "lint:deps": "depcheck"
   },
