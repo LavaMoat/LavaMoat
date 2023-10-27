@@ -1,19 +1,14 @@
+import { ENDO_ROOT_POLICY as ROOT_POLICY } from './constants.js'
 import {
-  ENDO_ROOT_POLICY as ROOT_POLICY,
-  ENDO_WRITE_POLICY as WRITE_POLICY,
-} from './constants.js'
-import { copyWrappedGlobals, getEndowmentsForConfig } from 'lavamoat-core/src/endowmentsToolkit.js' // TODO: add proper exporst in core package.json
+  copyWrappedGlobals,
+  getEndowmentsForConfig,
+  // @ts-expect-error - needs exports
+} from 'lavamoat-core/src/endowmentsToolkit.js'
 
-const {
-  assign,
-  create,
-  keys,
-  fromEntries,
-  entries,
-  defineProperties,
-  getOwnPropertyDescriptors,
-} = Object
+const { keys, fromEntries, defineProperties, getOwnPropertyDescriptors } =
+  Object
 
+/** @type {object} */
 let rootCompartmentGlobalThis
 
 export default {
