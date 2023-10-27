@@ -6,16 +6,21 @@ export * from './constants.js'
 // TODO: need function which accepts filepath and policy
 // use a hardcoded policy for now
 
+/**
+ * @type {import('@endo/compartment-mapper').ExitModuleImportHook}
+ */
 export const importHook = async (specifier) => {
   const ns = await import(specifier)
-  return Object.freeze({
-    imports: [],
-    exports: Object.keys(ns),
-    execute: (moduleExports) => {
-      moduleExports.default = ns
-      Object.assign(moduleExports, ns)
-    },
-  })
+  return Object.freeze(
+    /** @type {import('ses').ThirdPartyStaticModuleInterface} */ ({
+      imports: [],
+      exports: Object.keys(ns),
+      execute: (moduleExports) => {
+        moduleExports.default = ns
+        Object.assign(moduleExports, ns)
+      },
+    })
+  )
 }
 
 // call importlocation with this importhook, readpower, (converted) policy

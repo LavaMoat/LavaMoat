@@ -113,7 +113,7 @@ function toEndoRsrcPkgsPolicyGlobals(item) {
 
 /**
  * Converters LavaMoat `ResourcePolicy` to Endo's `PackagePolicy`
- * @param {import('./schema/index.js').ResourcePolicy} resources
+ * @param {import('lavamoat-core').ResourcePolicy} resources
  * @returns {LavaMoatPackagePolicy}
  */
 function toEndoRsrcPkgsPolicy(resources) {
@@ -121,14 +121,14 @@ function toEndoRsrcPkgsPolicy(resources) {
   const pkgPolicy = {
     packages: toEndoRsrcPkgsPolicyPkgs(resources.packages),
     globals: toEndoRsrcPkgsPolicyGlobals(resources.globals),
-    builtins: toEndoRsrcPkgsPolicyBuiltins(resources.builtins),
+    builtins: toEndoRsrcPkgsPolicyBuiltins(resources.builtin),
   }
   return pkgPolicy
 }
 
 /**
  * Converts a LavaMoat policy to an Endo policy
- * @param {import('./schema/index.js').LavaMoatPolicy} lmPolicy
+ * @param {import('lavamoat-core').LavaMoatPolicy} lmPolicy
  * @returns {LavaMoatEndoPolicy}
  */
 export function toEndoPolicy(lmPolicy) {

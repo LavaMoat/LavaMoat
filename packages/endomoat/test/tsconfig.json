@@ -9,6 +9,6 @@
     "module": "NodeNext",
     "types": ["node", "ses"]
   },
-  "include": ["."],
-  "references": [{ "path": "../src/tsconfig.json" }]
+  "include": ["../test"],
+  "references": [{ "path": "./tsconfig.sources.json" }]
 }
