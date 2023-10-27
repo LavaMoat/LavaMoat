@@ -11,7 +11,10 @@ import { importLocation } from '@endo/compartment-mapper'
 
 // TODO: need function which accepts filepath and policy
 // use a hardcoded policy for now
-
+/**
+ *
+ * @type {import('@endo/compartment-mapper').ReadFn}
+ */
 const readPower = async (location) =>
   fs.promises.readFile(new URL(location).pathname)
 
@@ -28,16 +31,22 @@ export const importHook = async (specifier) => {
         moduleExports.default = ns
         Object.assign(moduleExports, ns)
       },
-    }))
+    })
+  )
 }
 
+/**
+ *
+ * @param {string} entrypointPath
+ * @param {import('lavamoat-core').LavaMoatPolicy} policy
+ */
 export const run = async (entrypointPath, policy) => {
   const { namespace } = await importLocation(readPower, entrypointPath, {
     policy: toEndoPolicy(policy),
     globals: globalThis,
     importHook,
     modules: {
-      'USE_ME_AS_DEFAULT_ATTENUATOR_NAME': {
+      USE_ME_AS_DEFAULT_ATTENUATOR_NAME: {
         attenuateGlobals: () => {
           console.log('lol, this works')
         },
