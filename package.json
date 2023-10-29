@@ -15,6 +15,7 @@
     "@typescript-eslint/parser": "^6.7.3",
     "ava": "^5.3.1",
     "conventional-changelog-conventionalcommits": "^6.1.0",
+    "cross-env": "^7.0.3",
     "depcheck": "^1.4.0",
     "eslint": "^8.45.0",
     "eslint-config-prettier": "^9.0.0",
@@ -30,8 +31,12 @@
     "type-fest": "^2.19.0",
     "typescript": "^5.2.2"
   },
+  "optionalDependencies": {
+    "corepack": "0.20.0"
+  },
   "engines": {
-    "node": "^16.20.0 || ^18.0.0 || ^20.0.0"
+    "node": "^16.20.0 || ^18.0.0 || ^20.0.0",
+    "npm": ">=7.0.0"
   },
   "scripts": {
     "build": "npm run --workspaces --if-present build && npm run build:types",

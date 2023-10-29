@@ -1,7 +1,7 @@
 {
   "name": "test-5",
   "scripts": {
-    "setup": "npm install"
+    "setup": "exit 0"
   },
   "dependencies": {
     "a": "file:./fake_node_modules/a"
