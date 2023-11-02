@@ -1,10 +1,9 @@
 {
   "extends": "../../../.config/tsconfig.test.json",
   "compilerOptions": {
-    "checkJs": false,
-    "rootDir": "."
+    "checkJs": false
   },
-  "include": ["**/*"],
+  "include": ["**/*.spec.js"],
   "references": [
     {
       "path": "../src/tsconfig.json"

@@ -1,0 +1,8 @@
+{
+  "extends": "./tsconfig.workspace.json",
+  "compilerOptions": {
+    "declaration": true,
+    "declarationMap": true,
+    "emitDeclarationOnly": true
+  }
+}

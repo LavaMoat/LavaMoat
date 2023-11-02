@@ -49,5 +49,12 @@
     ],
     "timeout": "30s"
   },
-  "types": "./types/index.d.ts"
+  "types": "./types/index.d.ts",
+  "files": [
+    "src",
+    "types",
+    "CHANGELOG.md",
+    "!*.tsbuildinfo",
+    "!tsconfig.json"
+  ]
 }

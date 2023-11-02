@@ -1,13 +1,8 @@
 {
-  "extends": "../../config/tsconfig.base.json",
-  "include": ["src"],
-  "compilerOptions": {
-    "outDir": "types",
-    "rootDir": "src",
-    "skipLibCheck": false,
-    "paths": {
-      "@lavamoat/aa": ["../aa"]
-    }
-  },
-  "references": [{ "path": "../aa" }]
+  "extends": "../../.config/tsconfig.workspace.json",
+  "files": [],
+  "references": [
+    { "path": "./src/tsconfig.json" },
+    { "path": "./test/tsconfig.json" }
+  ]
 }
