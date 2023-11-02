@@ -49,14 +49,13 @@
     "lint:fix": "eslint . --fix",
     "lint:staged": "lint-staged",
     "lint": "npm run lint:eslint && npm run lint:deps",
-    "postinstall": "husky install; npm run rebuild",
     "release:publish": "node scripts/publish.js --newPkg=${npm_config_newpkg}",
     "release:dry-run": "node scripts/publish.js --dry-run --newPkg=${npm_config_newpkg}",
     "release:rebuild": "npm run rebuild && npm run test:prep && npm run test:workspaces",
     "release": "npm run release:rebuild && npm run release:publish --newPkg=${npm_config_newpkg}",
     "rebuild": "npm run --workspaces --if-present rebuild && npm run rebuild:types",
     "rebuild:types": "npm run clean:types && npm run build:types",
-    "setup": "allow-scripts",
+    "setup": "husky install; npm run rebuild",
     "test:prep": "npm run --workspaces --if-present test:prep",
     "test:workspaces": "npm run --workspaces --if-present test",
     "test:scripts": "ava --config scripts/ava.config.mjs",
@@ -78,11 +77,6 @@
     "packages/*"
   ],
   "version": "0.0.0",
-  "lavamoat": {
-    "allowScripts": {
-      "$root$": true
-    }
-  },
   "prettier": {
     "singleQuote": true,
     "semi": false,
