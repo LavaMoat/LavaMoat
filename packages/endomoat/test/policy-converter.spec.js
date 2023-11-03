@@ -1,8 +1,5 @@
 import test from 'ava'
-import {
-  ENDO_ROOT_POLICY,
-  ENDO_WILDCARD_POLICY,
-} from '../src/index.js'
+import { ENDO_ROOT_POLICY, ENDO_WILDCARD_POLICY } from '../src/index.js'
 
 import { toEndoPolicy } from '../src/policy-converter.js'
 
@@ -31,7 +28,7 @@ test('toEndoPolicy - basic', (t) => {
    * @type {import('@endo/compartment-mapper').Policy<LavaMoatPackagePolicyItem>}
    */
   const expected = {
-    defaultAttenuator: '@lavamoat/endomoat/attenuator/default',
+    defaultAttenuator: '@lavamoat/endomoat/attenuator',
     entry: {
       globals: [ENDO_ROOT_POLICY],
       noGlobalFreeze: true,
@@ -39,12 +36,13 @@ test('toEndoPolicy - basic', (t) => {
       builtins: ENDO_WILDCARD_POLICY,
     },
     resources: {
+      '@lavamoat/endomoat': {},
       a: {
         packages: { b: true },
         globals: { console: true },
         builtins: {
           fs: {
-            attenuate: '@lavamoat/endomoat/attenuator/property',
+            attenuate: '@lavamoat/endomoat/attenuator',
             params: ['readFile'],
           },
         },

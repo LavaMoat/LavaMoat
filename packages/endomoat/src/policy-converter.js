@@ -37,7 +37,7 @@ const { entries, fromEntries } = Object
  * @typedef {import('@endo/compartment-mapper').PackagePolicy<LavaMoatPackagePolicyItem, LavaMoatGlobalPolicyItem>} LavaMoatPackagePolicy
  */
 
-const DEFAULT_ATTENUATOR = '@lavamoat/endomoat/attenuator/default'
+const DEFAULT_ATTENUATOR = '@lavamoat/endomoat/attenuator'
 
 /**
  * Converts LavaMoat `ResourcePolicy.builtins` to Endo's `PackagePolicy.builtins`
@@ -135,7 +135,7 @@ export function toEndoPolicy(lmPolicy) {
   /** @type {LavaMoatEndoPolicy} */
   const endoPolicy = {
     //TODO: generate a policy resource for the default attenuator
-    defaultAttenuator: DEFAULT_ATTENUATOR, 
+    defaultAttenuator: DEFAULT_ATTENUATOR,
     entry: {
       [RSRC_POLICY_GLOBALS]: [ENDO_ROOT_POLICY],
       [RSRC_POLICY_PKGS]: ENDO_WILDCARD_POLICY,
@@ -150,7 +150,11 @@ export function toEndoPolicy(lmPolicy) {
     ),
   }
   // add this to make endo allow the attenuator at all, TODO: generate this from the policy or build into Endo
-  endoPolicy.resources['@lavamoat/endomoat'] = {}
+  endoPolicy.resources['@lavamoat/endomoat'] = {
+    [RSRC_POLICY_PKGS]: ENDO_WILDCARD_POLICY,
+    [RSRC_POLICY_GLOBALS]: ENDO_WILDCARD_POLICY,
+    [RSRC_POLICY_BUILTINS]: ENDO_WILDCARD_POLICY,
+  }
 
   return endoPolicy
 }

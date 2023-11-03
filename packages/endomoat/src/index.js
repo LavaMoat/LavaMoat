@@ -1,13 +1,14 @@
 import 'ses'
+import { evadeCensor } from '@endo/evasive-transform'
+import { toEndoPolicy } from './policy-converter.js'
+import fs from 'node:fs'
+import { importLocation } from '@endo/compartment-mapper'
 
 export * from './policy-converter.js'
 export * from './constants.js'
 
-import { toEndoPolicy } from './policy-converter.js'
-
-import fs from 'fs'
-
-import { importLocation } from '@endo/compartment-mapper'
+const textDecoder = new TextDecoder()
+const textEncoder = new TextEncoder()
 
 // TODO: need function which accepts filepath and policy
 // use a hardcoded policy for now
@@ -45,11 +46,22 @@ export const run = async (entrypointPath, policy) => {
     policy: toEndoPolicy(policy),
     globals: globalThis,
     importHook,
-    modules: {
-      USE_ME_AS_DEFAULT_ATTENUATOR_NAME: {
-        attenuateGlobals: () => {
-          console.log('lol, this works')
-        },
+    moduleTransforms: {
+      async mjs(
+        sourceBytes,
+        specifier,
+        location,
+        _packageLocation,
+        { sourceMap }
+      ) {
+        const source = textDecoder.decode(sourceBytes)
+        const { code, map } = await evadeCensor(source, {
+          sourceMap,
+          sourceUrl: new URL(specifier, location).href,
+          sourceType: 'module',
+        })
+        const objectBytes = textEncoder.encode(code)
+        return { bytes: objectBytes, parser: 'mjs', map }
       },
     },
   })
