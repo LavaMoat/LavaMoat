@@ -29,7 +29,8 @@
   "author": "Lavamoat Project",
   "homepage": "https://github.com/LavaMoat/LavaMoat/tree/main/packages/endomoat",
   "engines": {
-    "node": ">=14.0.0"
+    "node": "^16.20.0 || ^18.0.0 || ^20.0.0",
+    "npm": ">=7.0.0"
   },
   "ava": {
     "files": [
