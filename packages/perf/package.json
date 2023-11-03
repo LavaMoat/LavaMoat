@@ -20,7 +20,7 @@
     "directory": "packages/perf"
   },
   "dependencies": {
-    "@endo/compartment-mapper": "^0.8.4",
+    "@endo/compartment-mapper": "^0.9.2",
     "browserify": "^17.0.0",
     "readable-stream": "^3.6.0",
     "ses": "^0.18.8"
