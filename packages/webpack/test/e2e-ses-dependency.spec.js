@@ -1,4 +1,5 @@
 const test = require('ava')
+// eslint-disable-next-line ava/no-import-test-files
 const { scaffold, runScriptWithSES, runScript } = require('./scaffold.js')
 const webpackConfigDefault = require('./fixtures/main/webpack.config.js')
 
@@ -29,6 +30,6 @@ test('webpack/ses-dependency - test the test', (t) => {
     () => {
       runScriptWithSES(t.context.build.snapshot['/dist/throws.js'], {})
     },
-    { message: /This error should not have been thrown/ },
+    { message: /This error should not have been thrown/ }
   )
 })

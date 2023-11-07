@@ -1,4 +1,5 @@
 const test = require('ava')
+// eslint-disable-next-line ava/no-import-test-files
 const { scaffold, runScriptWithSES } = require('./scaffold.js')
 const webpackConfigDefault = require('./fixtures/main/webpack.config.js')
 
@@ -21,7 +22,7 @@ test('webpack/main - default warning gets printed', (t) => {
 test('webpack/main - warns about excluded modules', (t) => {
   t.regex(
     t.context.build.stdout,
-    /WARNING.*excluded modules.*src\/style\.css.*side-effects-package\/styles\.css/s,
+    /WARNING.*excluded modules.*src\/style\.css.*side-effects-package\/styles\.css/s
   ) // `s` for multiline matching
 })
 
@@ -48,7 +49,7 @@ test('webpack/main - modules were included', (t) => {
 test('webpack/main - treeshaking works', (t) => {
   t.assert(
     !t.context.bundle.includes('13371337'),
-    'Expected treeshakeable reference to be excluded',
+    'Expected treeshakeable reference to be excluded'
   )
 })
 
@@ -56,16 +57,16 @@ test('webpack/main - css extraction works', (t) => {
   const files = Object.keys(t.context.build.snapshot)
   t.assert(
     files.includes('/dist/styles/app.css'),
-    `Expected /dist/styles/app.css to be among files: ${files.join()}`,
+    `Expected /dist/styles/app.css to be among files: ${files.join()}`
   )
   const styles = t.context.build.snapshot['/dist/styles/app.css']
   t.true(
     styles.includes('.app-main'),
-    `Expected styles to include '.app-main', but got: ${styles}`,
+    `Expected styles to include '.app-main', but got: ${styles}`
   )
   t.true(
     styles.includes('.side-effects-package'),
-    `Expected styles to include '.side-effects-package', but got: ${styles}`,
+    `Expected styles to include '.side-effects-package', but got: ${styles}`
   )
 })
 

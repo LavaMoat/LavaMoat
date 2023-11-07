@@ -1,3 +1,5 @@
+/* eslint-disable no-undef */
+
 const test = require('ava')
 const deepEqual = require('deep-equal')
 const { inspectGlobals } = require('../src/index')

@@ -1,4 +1,5 @@
 const test = require('ava')
+// eslint-disable-next-line ava/no-import-test-files
 const { scaffold, runScriptWithSES, runScript } = require('./scaffold.js')
 const webpackConfigDefault = require('./fixtures/main/webpack.config.js')
 
@@ -29,15 +30,12 @@ test('webpack/hack/loader - bundle runs without reaching the FLAG', (t) => {
     () => {
       runScriptWithSES(t.context.build.snapshot['/dist/hack1.js'], { FLAG })
     },
-    { message: /FLAG is not a function/ },
+    { message: /FLAG is not a function/ }
   )
 })
 
 test('webpack/hack/loader - doublecheck in reported excluded files', (t) => {
-  t.notRegex(
-    t.context.build.stdout,
-    /excluded modules.*hack.js/s,
-  ) // `s` for multiline matching
+  t.notRegex(t.context.build.stdout, /excluded modules.*hack.js/s) // `s` for multiline matching
 })
 
 test('webpack/hack/fetch - disallows fetch', (t) => {
@@ -45,7 +43,7 @@ test('webpack/hack/fetch - disallows fetch', (t) => {
     () => {
       runScriptWithSES(t.context.build.snapshot['/dist/hack2.js'], {})
     },
-    { message: /fetch is not a function/ },
+    { message: /fetch is not a function/ }
   )
 })
 
@@ -54,6 +52,6 @@ test('webpack/hack/fetch - cannot pollute prototypes', (t) => {
     () => {
       runScriptWithSES(t.context.build.snapshot['/dist/hack3.js'], {})
     },
-    { message: /Cannot add property polluted, object is not extensible/ },
+    { message: /Cannot add property polluted, object is not extensible/ }
   )
 })
