@@ -1,5 +1,6 @@
 ignores:
   # monorepo deps
   - 'ava'
+  - '@typescript-eslint/parser'
   # types
-  - "@types/resolve"
+  - '@types/resolve'

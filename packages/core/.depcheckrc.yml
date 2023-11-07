@@ -3,6 +3,7 @@ ignores:
   - 'ses'
   # monorepo deps
   - 'ava'
+  - '@typescript-eslint/parser'
   # tests - fake packages
   - 'abc'
   - 'xyz'
