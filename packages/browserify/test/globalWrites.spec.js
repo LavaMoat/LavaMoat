@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 const test = require('ava')
 const {
   createScenarioFromScaffold,

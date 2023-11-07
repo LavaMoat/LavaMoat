@@ -1,4 +1,4 @@
-/* eslint-disable ava/no-skip-test */
+/* eslint-disable ava/no-skip-test, no-undef, n/no-missing-require */
 // to be migrated into lavapack from lavamoat-browserify
 
 const test = require('ava')
