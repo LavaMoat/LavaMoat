@@ -85,7 +85,7 @@ function createModuleInspector(opts) {
    * @param {import('./moduleRecord').LavamoatModuleRecord} moduleRecord
    * @param {Partial<ModuleInspectorOptions>} opts
    */
-  // eslint-disable-next-line no-unused-vars
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   function inspectBuiltinModule(moduleRecord, opts) {
     // builtins themselves do not require any configuration
     // packages that import builtins need to add that to their configuration
@@ -95,7 +95,7 @@ function createModuleInspector(opts) {
    * @param {import('./moduleRecord').LavamoatModuleRecord} moduleRecord
    * @param {Partial<ModuleInspectorOptions>} opts
    */
-  // eslint-disable-next-line no-unused-vars
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   function inspectNativeModule(moduleRecord, opts) {
     // LavaMoat does attempt to sandbox native modules
     // packages with native modules need to specify that in the policy file
