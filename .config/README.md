@@ -68,3 +68,57 @@ In addition the root `tsconfig.json` serves as the "default" for files in the re
    > If your entry point is not in `src/`, you will need to add `"rootDir": ".."` to `src/tsconfig.json`'s `compilerOptions`, then add `../index.js` (or whatever it is) to the `includes` property.
 5. _If you have an `exports` field_, [read this](https://www.typescriptlang.org/docs/handbook/modules/reference.html#packagejson-exports) and do that.
 6. Add `types`, `!tsconfig.json` and `!*.tsbuildinfo` to the `files` prop of your `package.json`. If it doesn't exist, create it, and add whatever other files you need to put in the published package. Check your work with `npm pack --dry-run`.
+
+## ESLint Configuration
+
+This directory contains the following configuration(s):
+
+- [`eslintrc.typed-workspace.js`](./eslintrc.typed-workspace.js) - to be extended in the `.eslintrc.js` of a TypeScript-enabled workspace.
+
+  This config uses a type-aware parser (`@typescript-eslint/parser`) to provide more accurate linting, which works on both TypeScript sources and JavaScript sources (those which are type-checked, anyhow).
+
+### How to Configure a Workspace for ESLint
+
+All workspaces will inherit config from the [root ESLint config][].
+
+Please use a CJS file named `.eslintrc.js` (for consistency).
+
+#### TypeScript-Enabled Workspaces
+
+For TS-enabled workspaces, **an `.eslintrc.js` file is required**.
+
+Scaffold your `.eslintrc.js` like so:
+
+```js
+// @ts-check
+
+/**
+ * @type {import('eslint').Linter.Config}
+ */
+module.exports = {
+  extends: '../../.config/eslintrc.typed-workspace',
+}
+```
+
+#### Everything Else
+
+For other workspaces, **`.eslintrc.js` is optional**. It is only necessary if the workspace needs no changes from the [root ESLint config][].
+
+It's recommended to use this as a starting point, as it will give you in-editor feedback if your config is invalid:
+
+```js
+// @ts-check
+
+/**
+ * @type {import('eslint').Linter.Config}
+ */
+module.exports = {
+  // go to town here
+}
+```
+
+### Resources
+
+- [ESLint Configuration Docs](https://eslint.org/docs/user-guide/configuring)
+
+[root ESLint config]: ../.eslintrc.js
