@@ -1,16 +1,23 @@
+// @ts-check
+
 // specifier = exact unique module name
 // requestedName = what a module asks to import
 
 module.exports = { walk, eachNodeInTree }
 
 /**
- * @function walk
+ * @callback VisitorFn
+ * @param {import('./moduleRecord').LavamoatModuleRecord} moduleRecord
+ * @returns {void}
+ */
+
+/**
  * @param {object} options
  * @param {string} options.moduleSpecifier
- * @param {function} options.importHook
- * @param {function} options.visitorFn
- * @param {function} options.shouldImport
- * @param {Set<string>} options.visitedSpecifiers
+ * @param {import('./parseForPolicy').ImportHookFn} options.importHook
+ * @param {VisitorFn} options.visitorFn
+ * @param {import('./parseForPolicy').ShouldImportFn} options.shouldImport
+ * @param {Set<string>} [options.visitedSpecifiers]
  */
 async function walk({
   moduleSpecifier,
@@ -31,13 +38,12 @@ async function walk({
 }
 
 /**
- * @function eachNodeInTree
  * @param {object} options
- * @param {string} options.moduleSpecifier,
- * @param {function} options.importHook,
- * @param {bool} options.shouldImport,
- * @param {Set<string>} options.visitedSpecifiers
- * @returns {AsyncIterableIterator<LavamoatModuleRecord>}
+ * @param {string} options.moduleSpecifier
+ * @param {import('./parseForPolicy').ImportHookFn} options.importHook
+ * @param {import('./parseForPolicy').ShouldImportFn} [options.shouldImport]
+ * @param {Set<string>} [options.visitedSpecifiers]
+ * @returns {AsyncIterableIterator<import('./moduleRecord').LavamoatModuleRecord>}
  */
 // NOTE: i think this is depth first in a way that doesnt take advantage of concurrency
 async function* eachNodeInTree({

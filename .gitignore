@@ -115,8 +115,8 @@ temp/
 # JetBrains
 .idea
 
-packages/allow-scripts/types
-packages/aa/types
+# generated types
+packages/*/types
 
 # VScode
 .vscode

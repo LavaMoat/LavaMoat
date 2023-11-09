@@ -11,3 +11,5 @@ ignores:
   - 'thisChecker'
   - 'someClass'
   - 'one'
+  # types
+  - '@types/json-stable-stringify'
