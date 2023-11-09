@@ -32,9 +32,9 @@ module.exports = { LavamoatModuleRecord }
  * @typedef LavamoatModuleRecordOptions
  * @property {string} specifier
  * @property {string} file
- * @property {string} type
+ * @property {'builtin'|'native'|'js'} type
  * @property {string} packageName
- * @property {string} content
+ * @property {string} [content]
  * @property {Record<string, string>} [importMap]
  * @property {import('@babel/types').File} [ast]
  * @property {(...args: any[]) => any} moduleInitializer

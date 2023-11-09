@@ -4,7 +4,11 @@
   "main": "src/index.js",
   "license": "MIT",
   "dependencies": {
+    "@babel/code-frame": "^7.22.13",
+    "@babel/highlight": "^7.22.20",
     "@types/node": "^20.8.5",
+    "bindings": "^1.5.0",
+    "lavamoat-tofu": "^7.0.0",
     "ses": "^0.18.8",
     "type-fest": "^4.4.0"
   },
@@ -39,8 +43,12 @@
   },
   "exports": {
     ".": "./src/index.js",
-    "./attenuator/default": "./src/default-attenuator.js",
-    "./attenuator/property": "./src/property-attenuator.js"
+    "./attenuator": "./src/default-attenuator.js"
   },
-  "private": true
+  "private": true,
+  "devDependencies": {
+    "@types/babel__code-frame": "^7.0.6",
+    "@types/bindings": "^1.5.4",
+    "memfs": "^4.6.0"
+  }
 }

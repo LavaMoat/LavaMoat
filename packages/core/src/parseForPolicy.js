@@ -39,6 +39,7 @@ async function parseForPolicy({
 
 /**
  * @callback IsBuiltinFn
+ * @param {string} specifier
  * @returns {boolean}
  */
 
@@ -53,12 +54,12 @@ async function parseForPolicy({
  * @callback ResolveFn
  * @param {string} requestedName
  * @param {string} parentAddress
- * @returns {string|undefined}
+ * @returns {string|undefined|null}
  */
 
 /**
  * @typedef ParseForPolicyOpts
- * @property {string} moduleSpecifier
+ * @property {string|null} moduleSpecifier
  * @property {ImportHookFn} importHook
  * @property {IsBuiltinFn} isBuiltin
  * @property {ShouldImportFn} [shouldImport]

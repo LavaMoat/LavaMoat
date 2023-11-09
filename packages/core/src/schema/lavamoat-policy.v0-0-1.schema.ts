@@ -10,6 +10,8 @@ export type LavaMoatPolicy = RequireAtLeastOne<
 >
 export type LavaMoatPolicyOverrides = PartialLavaMoatPolicy
 
+export type LavaMoatPolicyOverride = PartialLavaMoatPolicy
+
 export type LavaMoatPolicyDebug = LavaMoatPolicy & {
   debugInfo: Record<string, DebugInfo>
 }
