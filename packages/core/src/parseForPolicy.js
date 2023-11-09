@@ -1,18 +1,13 @@
+// @ts-check
+
 const { createModuleInspector } = require('./generatePolicy')
 const { eachNodeInTree } = require('./walk')
 
 module.exports = { parseForPolicy }
 
 /**
- * @function parseForPolicy
- * @param {object} options
- * @param {string} options.moduleSpecifier
- * @param {function} options.isBuiltin
- * @param {function} options.shouldImport
- * @param {object} options.policyOverride
- * @param {bool} options.includeDebugInfo
- * @param {ModuleInspector} options.inspector
- * @returns {JSON} policy object
+ * @param {ParseForPolicyOpts} opts
+ * @returns {Promise<import('./schema').LavaMoatPolicy>} policy object
  */
 async function parseForPolicy({
   moduleSpecifier,
@@ -35,3 +30,46 @@ async function parseForPolicy({
   const policy = inspector.generatePolicy({ policyOverride })
   return policy
 }
+
+/**
+ * @callback ImportHookFn
+ * @param {string} address
+ * @returns {Promise<import('./moduleRecord').LavamoatModuleRecord>}
+ */
+
+/**
+ * @callback IsBuiltinFn
+ * @returns {boolean}
+ */
+
+/**
+ * @callback ShouldImportFn
+ * @param {string} childSpecifier
+ * @param {string} moduleSpecifier
+ * @returns {boolean}
+ */
+
+/**
+ * @callback ResolveFn
+ * @param {string} requestedName
+ * @param {string} parentAddress
+ * @returns {string|undefined}
+ */
+
+/**
+ * @typedef ParseForPolicyOpts
+ * @property {string} moduleSpecifier
+ * @property {ImportHookFn} importHook
+ * @property {IsBuiltinFn} isBuiltin
+ * @property {ShouldImportFn} [shouldImport]
+ * @property {ResolveFn} [resolveHook]
+ * @property {import('./schema').LavaMoatPolicyOverrides} [policyOverride]
+ * @property {boolean} [includeDebugInfo]
+ * @property {import('./generatePolicy').ModuleInspector} [inspector]
+ */
+
+/**
+ *
+ * @param {ParseForPolicyOpts} opts
+ * @returns {Promise<import('./schema').LavaMoatPolicySchema>} policy object
+ */

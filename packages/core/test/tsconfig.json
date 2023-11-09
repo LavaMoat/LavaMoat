@@ -1,0 +1,17 @@
+{
+  "extends": ["../../../config/tsconfig.base.json"],
+  "compilerOptions": {
+    "composite": true,
+    "allowSyntheticDefaultImports": true,
+    "allowJs": true,
+    "checkJs": false,
+    "emitDeclarationOnly": false,
+    "noEmit": true
+  },
+  "include": ["**/*.js"],
+  "references": [
+    {
+      "path": "../src/tsconfig.json"
+    }
+  ]
+}
