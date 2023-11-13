@@ -19,8 +19,8 @@ module.exports = {
           .getHooks(compilation)
           .beforeEmit.tapAsync('LavaMoatWebpackPlugin-lockdown', (data, cb) => {
             const scriptTag = '<script src="./lockdown.js"></script>'
-            const headTagRegex = /<head[^>]*>/i
-            const scriptTagRegex = /<script/i
+            const headTagRegex = /<head[^>]*>/iu
+            const scriptTagRegex = /<script/iu
 
             if (headTagRegex.test(data.html)) {
               data.html = data.html.replace(headTagRegex, `$&${scriptTag}`)
