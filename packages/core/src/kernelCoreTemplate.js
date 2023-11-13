@@ -69,8 +69,8 @@
     const { getEndowmentsForConfig, makeMinimalViewOfRef, applyEndowmentPropDescTransforms, copyWrappedGlobals, createFunctionWrapper } = templateRequire('endowmentsToolkit')()
     const { prepareCompartmentGlobalFromConfig } = templateRequire('makePrepareRealmGlobalFromConfig')({ createFunctionWrapper })
     const { strictScopeTerminator } = templateRequire('strict-scope-terminator')
+    const { applyDefaultScuttling } = templateRequire('scuttle')
 
-    const scuttleOpts = generateScuttleOpts(scuttleGlobalThis)
     const moduleCache = new Map()
     const packageCompartmentCache = new Map()
     const globalStore = new Map()
@@ -78,13 +78,7 @@
     const rootPackageName = '$root$'
     const rootPackageCompartment = createRootPackageCompartment(globalRef)
 
-    // scuttle globalThis right after we used it to create the root package compartment
-    if (scuttleOpts.enabled) {
-      if (!Array.isArray(scuttleOpts.exceptions)) {
-        throw new Error(`LavaMoat - scuttleGlobalThis.exceptions must be an array, got "${typeof scuttleOpts.exceptions}"`)
-      }
-      scuttleOpts.scuttlerFunc(globalRef, realm => performScuttleGlobalThis(realm, scuttleOpts.exceptions))
-    }
+    applyDefaultScuttling(globalRef, scuttleGlobalThis)
 
     const kernel = {
       internalRequire,
@@ -95,85 +89,6 @@
     }
     Object.freeze(kernel)
     return kernel
-
-    // generate final scuttling options (1) by taking default
-    // options into consideration, (2) turning RE strings into
-    // actual REs and (3) without mutating original opts object
-    function generateScuttleOpts(originalOpts) {
-      const defaultOpts = {
-        enabled: true,
-        exceptions: [],
-        scuttlerName: '',
-      }
-      const opts = Object.assign({},
-        originalOpts === true ? { ... defaultOpts } : { ...originalOpts },
-        { scuttlerFunc: (globalRef, scuttle) => scuttle(globalRef) },
-        { exceptions: (originalOpts.exceptions || defaultOpts.exceptions).map(e => toRE(e)) },
-      )
-      if (opts.scuttlerName) {
-        if (!globalRef[opts.scuttlerName]) {
-          throw new Error(
-            `LavaMoat - 'scuttlerName' function "${opts.scuttlerName}" expected on globalRef.` +
-            'To learn more visit https://github.com/LavaMoat/LavaMoat/pull/462.',
-          )
-        }
-        opts.scuttlerFunc = globalRef[opts.scuttlerName]
-      }
-      return opts
-
-      function toRE(except) {
-        // turn scuttleGlobalThis.exceptions regexes strings to actual regexes
-        if (!except.startsWith('/')) {
-          return except
-        }
-        const parts = except.split('/')
-        const pattern = parts.slice(1, -1).join('/')
-        const flags = parts[parts.length - 1]
-        return new RegExp(pattern, flags)
-      }
-    }
-
-    function performScuttleGlobalThis (globalRef, extraPropsToAvoid = new Array()) {
-      const props = new Array()
-      getPrototypeChain(globalRef)
-        .forEach(proto =>
-          props.push(...Object.getOwnPropertyNames(proto)))
-
-      // support LM,SES exported APIs and polyfills
-      const avoidForLavaMoatCompatibility = ['Compartment', 'Error', 'globalThis']
-      const propsToAvoid = new Set([...avoidForLavaMoatCompatibility, ...extraPropsToAvoid])
-
-      const obj = Object.create(null)
-      for (const prop of props) {
-        // eslint-disable-next-line no-inner-declarations
-        function set() {
-          console.warn(
-            `LavaMoat - property "${prop}" of globalThis cannot be set under scuttling mode. ` +
-            'To learn more visit https://github.com/LavaMoat/LavaMoat/pull/360.',
-          )
-        }
-        // eslint-disable-next-line no-inner-declarations
-        function get() {
-          throw new Error(
-            `LavaMoat - property "${prop}" of globalThis is inaccessible under scuttling mode. ` +
-            'To learn more visit https://github.com/LavaMoat/LavaMoat/pull/360.',
-          )
-        }
-        if (shouldAvoidProp(propsToAvoid, prop)) {
-          continue
-        }
-        let desc = Object.getOwnPropertyDescriptor(globalRef, prop)
-        if (desc?.configurable === true) {
-          desc = { configurable: false, set, get }
-        } else if (desc?.writable === true) {
-          const p = new Proxy(obj, { getPrototypeOf: get, get, set } )
-          desc = { configurable: false, writable: false, value: p }
-        } else {
-          continue
-        }
-        Object.defineProperty(globalRef, prop, desc)
-      }
-    }
 
     // this function instantiaties a module from a moduleId.
     // 1. loads the module metadata and policy
@@ -459,28 +374,5 @@
       return packageConfig
     }
 
-    // util for getting the prototype chain as an array
-    // includes the provided value in the result
-    function getPrototypeChain (value) {
-      const protoChain = []
-      let current = value
-      while (current && (typeof current === 'object' || typeof current === 'function')) {
-        protoChain.push(current)
-        current = Reflect.getPrototypeOf(current)
-      }
-      return protoChain
-    }
-
-    function shouldAvoidProp(propsToAvoid, prop) {
-      for (const avoid of propsToAvoid) {
-        if (avoid instanceof RegExp && avoid.test(prop)) {
-          return true
-        }
-        if (propsToAvoid.has(prop)) {
-          return true
-        }
-      }
-      return false
-    }
   }
 })()

@@ -22,6 +22,7 @@ const endowmentsToolkitSrc = fs.readFileSync(
   path.join(__dirname, '/endowmentsToolkit.js'),
   'utf-8'
 )
+const scuttleSrc = fs.readFileSync(path.join(__dirname, '/scuttle.js'), 'utf-8')
 const makePrepareRealmGlobalFromConfigSrc = fs.readFileSync(
   path.join(__dirname, '/makePrepareRealmGlobalFromConfig.js'),
   'utf-8'
@@ -102,6 +103,7 @@ function generateKernelCore() {
     'endowmentsToolkit',
     endowmentsToolkitSrc
   )
+  output = replaceTemplateRequire(output, 'scuttle', scuttleSrc)
   output = replaceTemplateRequire(
     output,
     'makePrepareRealmGlobalFromConfig',
