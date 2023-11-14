@@ -38,7 +38,8 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/LavaMoat/lavamoat.git"
+    "url": "https://github.com/LavaMoat/lavamoat.git",
+    "directory": "packages/lavapack"
   },
   "bugs": {
     "url": "https://github.com/LavaMoat/lavamoat/issues"

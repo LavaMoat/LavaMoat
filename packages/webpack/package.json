@@ -36,9 +36,17 @@
   "files": [
     "src"
   ],
-  "repository": "git+https://github.com/LavaMoat/lavamoat.git",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LavaMoat/lavamoat.git",
+    "directory": "packages/webpack"
+  },
   "bugs": {
     "url": "https://github.com/LavaMoat/lavamoat/issues"
   },
-  "homepage": "https://github.com/LavaMoat/lavamoat#readme"
+  "homepage": "https://github.com/LavaMoat/lavamoat#readme",
+  "engines": {
+    "node": "^16.20.0 || ^18.0.0 || ^20.0.0",
+    "npm": ">=7.0.0"
+  }
 }
