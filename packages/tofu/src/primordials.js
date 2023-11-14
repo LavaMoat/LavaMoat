@@ -2,7 +2,7 @@
 // https://github.com/Agoric/SES-shim/blob/842cef46891bda69c0022cf66b05c85a7c7c77b2/packages/make-simple-evaluate/src/main.js#L2-L64
 // https://github.com/Agoric/SES-shim/blob/299abe011e8aac273583c983216ca8248aa73b51/packages/ses/src/whitelist.js#L18-L96
 
-module.exports.globalPropertyNames = [
+module.exports.globalPropertyNames = /** @type {const} */ ([
   // *** 18.2 Function Properties of the Global Object
 
   'eval',
@@ -71,7 +71,11 @@ module.exports.globalPropertyNames = [
   'BigUint64Array',
   'NaN',
   'Infinity',
-]
+])
 
 // js language keywords that are not global properties
-module.exports.languageRefs = ['this', 'arguments', 'undefined']
+module.exports.languageRefs = /** @type {const} */ ([
+  'this',
+  'arguments',
+  'undefined',
+])

@@ -4,3 +4,8 @@ ignores:
   # tests - fake packages
   - 'bar'
   - 'bing'
+  # types
+  - '@babel/types'
+  - '@types/babel__traverse'
+  - 'type-fest'
+  - 'lavamoat-core'

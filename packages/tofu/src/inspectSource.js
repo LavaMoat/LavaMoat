@@ -21,6 +21,20 @@ module.exports = {
   inspectDynamicRequires,
 }
 
+/**
+ * @typedef InspectGlobalsOpts
+ * @property {readonly string[]} [ignoredRefs]
+ * @property {readonly string[]} [globalRefs]
+ * @property {readonly string[]} [globalPropertyNames]
+ * @property {readonly string[]} [languageRefs]
+ */
+
+/**
+ *
+ * @param {import('../../core/src/generatePolicy').AST|string} source
+ * @param {InspectGlobalsOpts} options
+ * @returns
+ */
 function inspectGlobals(
   source,
   {
@@ -44,6 +58,11 @@ function inspectGlobals(
 
   return globalsConfig
 
+  /**
+   *
+   * @param {string} name
+   * @param {import('./findGlobals').IdentifierOrThisExpressionNodePath[]} paths
+   */
   function inspectDetectedGlobalVariables(name, paths) {
     // skip if module global
     if (ignoredRefs.includes(name)) {
@@ -56,7 +75,13 @@ function inspectGlobals(
         path: keyPath,
         identifierUse,
         parent,
-      } = inspectIdentifierForDirectMembershipChain(name, path.node, parents)
+      } = inspectIdentifierForDirectMembershipChain(
+        name,
+        path.node,
+        /** @type {import('./inspectPrimordialAssignments').MemberLikeExpression[]} */ (
+          parents
+        )
+      )
       // if nested API lookup begins with a globalRef, drop it
       if (globalRefs.includes(keyPath[0])) {
         keyPath.shift()
@@ -86,16 +111,26 @@ function inspectGlobals(
     })
   }
 
+  /**
+   *
+   * @param {string} variableName
+   * @param {import('@babel/types').Identifier|import('@babel/types').ThisExpression} identifierNode
+   * @param {import('./inspectPrimordialAssignments').MemberLikeExpression[]} parents
+   * @returns
+   */
   function inspectIdentifierForDirectMembershipChain(
     variableName,
     identifierNode,
     parents
   ) {
+    /** @type {import('../../core/src/schema').GlobalPolicyValue} */
     let identifierUse = 'read'
     const { memberExpressions, parentOfMembershipChain, topmostMember } =
       getMemberExpressionNesting(identifierNode, parents)
     // determine if used in an assignment expression
+    // @ts-ignore - FIXME needs logic changes for type safety
     const isAssignment = parentOfMembershipChain.type === 'AssignmentExpression'
+    // @ts-ignore - FIXME needs logic changes for type safety
     const isAssignmentTarget = parentOfMembershipChain.left === topmostMember
     if (isAssignment && isAssignmentTarget) {
       // this membership chain is being assigned to
@@ -116,6 +151,12 @@ function inspectGlobals(
     return { identifierUse, path, parent: parentOfMembershipChain }
   }
 
+  /**
+   *
+   * @param {string} identifierPath
+   * @param {import('../../core/src/schema').GlobalPolicyValue} identifierUse
+   * @returns
+   */
   function maybeAddGlobalUsage(identifierPath, identifierUse) {
     const topmostRef = identifierPath.split('.')[0]
     // skip intrinsics and other language features
@@ -133,7 +174,13 @@ function inspectGlobals(
   }
 }
 
+/**
+ *
+ * @param {import('../../core/src/generatePolicy').AST} ast
+ * @returns {{esmImports: string[]}}
+ */
 function inspectEsmImports(ast) {
+  /** @type {string[]} */
   const esmImports = []
   traverse(ast, {
     ImportDeclaration: (path) => {
@@ -157,13 +204,16 @@ function inspectEsmImports(ast) {
             return
           }
           case 'ImportSpecifier': {
+            // @ts-ignore - FIXME needs logic changes for type safety
             const importName = `${importSource}.${spec.imported.name}`
             esmImports.push(importName)
             return
           }
           default: {
             throw new Error(
-              `inspectEsmImports - unknown import specifier type "${spec.type}"`
+              `inspectEsmImports - unknown import specifier type "${
+                /** @type {import('@babel/types').Node} */ (spec).type
+              }"`
             )
           }
         }
@@ -173,7 +223,17 @@ function inspectEsmImports(ast) {
   return { esmImports }
 }
 
+/**
+ * @typedef {import('@babel/traverse').NodePath<import('@babel/types').CallExpression>} RequireCallResult
+ */
+
+/**
+ *
+ * @param {import('@babel/types').Node} ast
+ * @returns {RequireCallResult[]}
+ */
 function findAllCallsToRequire(ast) {
+  /** @type {RequireCallResult[]} */
   const matches = []
   traverse(ast, {
     CallExpression: function (path) {
@@ -195,6 +255,11 @@ function findAllCallsToRequire(ast) {
   return matches
 }
 
+/**
+ *
+ * @param {import('@babel/types').Node} ast
+ * @returns {RequireCallResult[]}
+ */
 function inspectDynamicRequires(ast) {
   const requireCalls = findAllCallsToRequire(ast)
   const dynamicRequireCalls = requireCalls.filter((path) => {
@@ -216,7 +281,14 @@ function inspectDynamicRequires(ast) {
   return dynamicRequireCalls
 }
 
+/**
+ *
+ * @param {import('@babel/types').Node} ast
+ * @param {string[]} packagesToInspect
+ * @param {boolean} deep
+ */
 function inspectImports(ast, packagesToInspect, deep = true) {
+  /** @type {string[][]} */
   const cjsImports = []
   const requireCalls = findAllCallsToRequire(ast)
   requireCalls.forEach((path) => {
@@ -262,10 +334,11 @@ function inspectImports(ast, packagesToInspect, deep = true) {
       initialKeyPath
     )
     declaredVars.forEach(({ node, keyPath }) => {
+      // @ts-ignore - FIXME - `name` not present on all nodes of type `Declaration`
       const varName = node.name
-      const refs = path.scope.getBinding(varName).referencePaths
+      const refs = path.scope.getBinding(varName)?.referencePaths
       // if the var is not used anywhere, still whitelist it so the require call doesnt fail
-      if (!refs.length) {
+      if (!refs?.length) {
         // add to results
         cjsImports.push(keyPath)
         return
@@ -291,6 +364,16 @@ function inspectImports(ast, packagesToInspect, deep = true) {
   return { cjsImports: cjsImportStrings }
 }
 
+/**
+ * @typedef {{node: import('@babel/types').PatternLike|import('@babel/types').AssignmentPattern['left'], keyPath: string[]}} Declaration
+ */
+
+/**
+ *
+ * @param {import('@babel/types').LVal|import('@babel/types').Expression} node
+ * @param {string[]} keyPath
+ * @returns {Declaration[]}}
+ */
 function inspectPatternElementForDeclarations(node, keyPath = []) {
   if (node.type === 'ObjectPattern') {
     return inspectObjectPatternForDeclarations(node, keyPath)
@@ -309,46 +392,77 @@ function inspectPatternElementForDeclarations(node, keyPath = []) {
   }
 }
 
+/**
+ *
+ * @param {import('@babel/types').ObjectPattern} node
+ * @param {string[]} keyPath
+ * @returns {Declaration[]}
+ */
 function inspectObjectPatternForDeclarations(node, keyPath) {
   // if it has computed props or a RestElement, we cant meaningfully pursue any deeper
   // return the node with the current path
   const expansionForbidden = node.properties.some(
-    (prop) => prop.computed || prop.type === 'RestElement'
+    (prop) =>
+      /** @type {import('@babel/types').ObjectProperty} */ (prop).computed ||
+      prop.type === 'RestElement'
   )
   if (expansionForbidden) {
     return [{ node, keyPath }]
   }
-  // expand each property into a path, recursively
+  /** @type {Declaration[]} */
   let results = []
+  // expand each property into a path, recursively
   node.properties.forEach((prop) => {
-    const propName = prop.key.name
-    const child = prop.value
-    results = results.concat(
-      inspectPatternElementForDeclarations(child, [...keyPath, propName])
-    )
+    // @ts-expect-error - could be a RestElement
+    if ('name' in prop.key) {
+      // @ts-expect-error - could be a RestElement
+      const propName = prop.key.name
+      // @ts-expect-error - could be a RestElement
+      const child = prop.value
+      results = results.concat(
+        inspectPatternElementForDeclarations(child, [...keyPath, propName])
+      )
+    }
   })
   return results
 }
 
+/**
+ *
+ * @param {import('@babel/types').ArrayPattern} node
+ * @param {string[]} keyPath
+ * @returns {Declaration[]}
+ */
 function inspectArrayPatternForDeclarations(node, keyPath) {
   // if it has a RestElement, we cant meaningfully pursue any deeper
   // return the node with the current path
   const expansionForbidden = node.elements.some(
-    (el) => el.type === 'RestElement'
+    (el) => el?.type === 'RestElement'
   )
   if (expansionForbidden) {
     return [{ node, keyPath }]
   }
-  // expand each property into a path, recursively
+  /** @type {Declaration[]} */
   let results = []
+  // expand each property into a path, recursively
   node.elements.forEach((child, propName) => {
-    results = results.concat(
-      inspectPatternElementForDeclarations(child, [...keyPath, propName])
-    )
+    if (child) {
+      results = results.concat(
+        inspectPatternElementForDeclarations(child, [
+          ...keyPath,
+          String(propName),
+        ])
+      )
+    }
   })
   return results
 }
 
+/**
+ *
+ * @param {import('@babel/types').Node | import('@babel/types').PatternLike} child
+ * @returns
+ */
 function inspectPatternElementForKeys(child) {
   if (child.type === 'ObjectPattern') {
     return inspectObjectPatternForKeys(child)
@@ -367,48 +481,69 @@ function inspectPatternElementForKeys(child) {
   }
 }
 
+/**
+ *
+ * @param {import('@babel/types').ObjectPattern} node
+ * @returns
+ */
 function inspectObjectPatternForKeys(node) {
   // if it has computed props or a RestElement, we cant meaningfully pursue any deeper
   // so return a single empty path, meaning "one result, the whole thing"
   const expansionForbidden = node.properties.some(
-    (prop) => prop.computed || prop.type === 'RestElement'
+    (prop) =>
+      /** @type {import('@babel/types').ObjectProperty} */ (prop).computed ||
+      prop.type === 'RestElement'
   )
   if (expansionForbidden) {
     return [[]]
   }
   // expand each property into a path, recursively
+  /** @type {string[][]} */
   let keys = []
-  node.properties.forEach((prop) => {
-    const propName = prop.key.name
-    const child = prop.value
-    keys = keys.concat(
-      inspectPatternElementForKeys(child).map((partial) => [
-        propName,
-        ...partial,
-      ])
-    )
+  const properties = /** @type {import('@babel/types').ObjectProperty[]} */ (
+    node.properties
+  )
+  properties.forEach((prop) => {
+    if ('name' in prop.key) {
+      const propName = prop.key.name
+      const child = prop.value
+      keys = keys.concat(
+        inspectPatternElementForKeys(child).map((partial) => [
+          propName,
+          ...partial,
+        ])
+      )
+    }
   })
   return keys
 }
 
+/**
+ *
+ * @param {import('@babel/types').ArrayPattern} node
+ * @returns {string[][]}
+ */
 function inspectArrayPatternForKeys(node) {
   // if it has a RestElement, we cant meaningfully pursue any deeper
   // so return a single empty path, meaning "one result, the whole thing"
   const expansionForbidden = node.elements.some(
-    (el) => el.type === 'RestElement'
+    (el) => el?.type === 'RestElement'
   )
   if (expansionForbidden) {
     return [[]]
   }
-  // expand each property into a path, recursively
+  /** @type {string[][]} */
   let keys = []
+  // expand each property into a path, recursively
   node.elements.forEach((child, propName) => {
-    keys = keys.concat(
-      inspectPatternElementForKeys(child).map((partial) => [
-        propName,
-        ...partial,
-      ])
-    )
+    if (child) {
+      keys = keys.concat(
+        inspectPatternElementForKeys(child).map((partial) => [
+          String(propName),
+          ...partial,
+        ])
+      )
+    }
   })
   return keys
 }
