@@ -63,7 +63,11 @@
     ]
   },
   "servedPath": "./",
-  "repository": "git+https://github.com/LavaMoat/lavamoat.git",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LavaMoat/lavamoat.git",
+    "directory": "packages/viz"
+  },
   "author": "kumavis <aaron@kumavis.me>",
   "license": "MIT",
   "bugs": {
