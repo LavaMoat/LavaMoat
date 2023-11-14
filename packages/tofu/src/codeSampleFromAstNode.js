@@ -1,5 +1,11 @@
 module.exports = { codeSampleFromAstNode }
 
+/**
+ *
+ * @param {import('@babel/types').Node & {loc: import('@babel/types').SourceLocation}} node
+ * @param {import('lavamoat-core').LavamoatModuleRecord} moduleRecord
+ * @returns
+ */
 function codeSampleFromAstNode(node, moduleRecord) {
   const result = {}
   const { content } = moduleRecord
@@ -9,7 +15,7 @@ function codeSampleFromAstNode(node, moduleRecord) {
     result.range += `,${end.line}:${end.column}`
   }
   // prepare sample
-  const lines = content.split('\n')
+  const lines = /** @type {string} */ (content).split('\n')
   const startLine = lines[start.line - 1]
   const sample = startLine.slice(start.column, start.column + 70)
   result.sample = sample

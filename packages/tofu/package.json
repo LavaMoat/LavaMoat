@@ -26,15 +26,20 @@
   },
   "dependencies": {
     "@babel/parser": "7.23.6",
-    "@babel/traverse": "7.23.7"
+    "@babel/traverse": "7.23.7",
+    "@babel/types": "7.23.6",
+    "@types/babel__traverse": "7.20.5",
+    "type-fest": "4.7.1"
   },
   "devDependencies": {
-    "deep-equal": "2.2.3"
+    "deep-equal": "2.2.3",
+    "lavamoat-core": "^15.0.0"
   },
   "ava": {
     "files": [
       "test/*.spec.js"
     ],
     "timeout": "30s"
-  }
+  },
+  "types": "./types/index.d.ts"
 }

@@ -1,0 +1,11 @@
+{
+  "extends": "../../../.config/tsconfig.src.json",
+  "compilerOptions": {
+    "outDir": "../types",
+    "paths": {
+      "lavamoat-core": ["../../core"]
+    }
+  },
+  "include": ["."],
+  "references": [{ "path": "../../core/tsconfig.json" }]
+}

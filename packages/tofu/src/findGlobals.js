@@ -17,7 +17,17 @@ const nonReferenceIdentifiers = [
 
 module.exports = { findGlobals }
 
+/**
+ * @typedef {import('@babel/traverse').NodePath<import('@babel/types').Identifier|import('@babel/types').ThisExpression>} IdentifierOrThisExpressionNodePath
+ */
+
+/**
+ *
+ * @param {import('@babel/types').Node} ast
+ * @returns {Map<string, IdentifierOrThisExpressionNodePath[]>}
+ */
 function findGlobals(ast) {
+  /** @type {ReturnType<typeof findGlobals>} */
   const globals = new Map()
   traverse(ast, {
     // ReferencedIdentifier
@@ -76,13 +86,21 @@ function findGlobals(ast) {
 
   return globals
 
+  /**
+   *
+   * @param {IdentifierOrThisExpressionNodePath} path
+   * @param {string} [name]
+   */
+  // @ts-ignore - FIXME needs logic changes for type safety
   function saveGlobal(path, name = path.node.name) {
     // init entry if needed
     if (!globals.has(name)) {
       globals.set(name, [])
     }
     // append ref
-    const refsForName = globals.get(name)
+    const refsForName = /** @type {IdentifierOrThisExpressionNodePath[]} */ (
+      globals.get(name)
+    )
     refsForName.push(path)
   }
 }
