@@ -14,6 +14,7 @@ const {
     mapToObj,
     reduceToTopmostApiCallsFromStrings,
   },
+  inspectEsmImports,
   // @ts-expect-error no types yet
 } = require('lavamoat-tofu')
 const { mergePolicy } = require('./mergePolicy')
@@ -302,21 +303,36 @@ function createModuleInspector(opts) {
     const namesForBuiltins = Object.entries(moduleRecord.importMap)
       .filter(([, resolvedName]) => isBuiltin(resolvedName))
       .map(([requestedName]) => requestedName)
-    const { cjsImports: moduleBuiltins } = inspectImports(ast, namesForBuiltins)
-    if (!moduleBuiltins.length) {
+    const { esmImports: esmModuleBuiltins } = inspectEsmImports(
+      ast,
+      namesForBuiltins
+    )
+    const { cjsImports: cjsModuleBuiltins } = inspectImports(
+      ast,
+      namesForBuiltins
+    )
+    if (cjsModuleBuiltins.length + esmModuleBuiltins.length === 0) {
       return
     }
     // add debug info
     if (includeDebugInfo) {
       const moduleDebug = debugInfo[moduleRecord.specifier]
-      moduleDebug.builtin = moduleBuiltins
+      moduleDebug.builtin = [
+        ...new Set([...esmModuleBuiltins, ...cjsModuleBuiltins]),
+      ]
     }
     // aggregate package builtins
     if (!packageToBuiltinImports.has(packageName)) {
       packageToBuiltinImports.set(packageName, [])
     }
-    let packageBuiltins = packageToBuiltinImports.get(packageName)
-    packageBuiltins = [...(packageBuiltins ?? []), ...moduleBuiltins]
+    let packageBuiltins = packageToBuiltinImports.get(packageName) ?? []
+    packageBuiltins = [
+      ...new Set([
+        ...packageBuiltins,
+        ...cjsModuleBuiltins,
+        ...esmModuleBuiltins,
+      ]),
+    ]
     packageToBuiltinImports.set(packageName, packageBuiltins)
   }
 

@@ -1,7 +1,6 @@
-const path = require('path')
-const { promises: fs } = require('fs')
-const { builtinModules } = require('module')
-const resolve = require('resolve')
+const path = require('node:path')
+const fs = require('node:fs/promises')
+const { Module, builtinModules } = require('node:module')
 const bindings = require('bindings')
 const gypBuild = require('node-gyp-build')
 const { codeFrameColumns } = require('@babel/code-frame')
@@ -19,88 +18,77 @@ const {
   parse,
   inspectImports,
   codeSampleFromAstNode,
+  inspectEsmImports,
 } = require('lavamoat-tofu')
 const { checkForResolutionOverride } = require('./resolutions')
 
+/**
+ * @callback ResolveHook
+ * @param {string} requestedName
+ * @param {string} referrer
+ * @returns {string|null}
+ */
+
 // file extension omitted can be omitted, eg https://npmfs.com/package/yargs/17.0.1/yargs
-const commonjsExtensions = ['', '.js', '.cjs']
-const resolutionOmittedExtensions = ['.js', '.json']
+const jsExtensions = new Set(
+  /** @type {const} */ (['.cjs', '.mjs', '.js', '.json'])
+)
+const cjsResolutionOmittedExtensions = /** @type {const} */ (['.js', '.json'])
 
 /**
  * Allow use of `node:` prefixed builtins.
  */
-const builtinPackages = [
-  ...builtinModules,
-  ...builtinModules.map((id) => `node:${id}`),
-]
+const BUILTIN_MODULES = Object.freeze(
+  new Set(
+    /** @type {const} */ ([
+      ...builtinModules,
+      ...builtinModules.map((id) => `node:${id}`),
+    ])
+  )
+)
 
-// approximate polyfill for node builtin
-const createRequire = (url) => {
-  return {
-    resolve: (requestedName) => {
-      const basedir = path.dirname(url.pathname)
-      const result = resolve.sync(requestedName, {
-        basedir,
-        extensions: resolutionOmittedExtensions,
-      })
-      // check for missing builtin modules (e.g. 'worker_threads' in node v10)
-      // the "resolve" package resolves as "worker_threads" even if missing
-      const resultMatchesRequest = requestedName === result
-      if (resultMatchesRequest) {
-        const isBuiltinModule = builtinPackages.includes(result)
-        const looksLikeAPath = requestedName.includes('/')
-        if (!looksLikeAPath && !isBuiltinModule) {
-          const errMsg = `Cannot find module '${requestedName}' from '${basedir}'`
-          const err = new Error(errMsg)
-          err.code = 'MODULE_NOT_FOUND'
-          throw err
-        }
-      }
-      // return resolved path
-      return result
-    },
-  }
+function isBuiltin(name) {
+  return BUILTIN_MODULES.has(name)
 }
 
 module.exports = {
   parseForPolicy,
   makeResolveHook,
   makeImportHook,
-  resolutionOmittedExtensions,
+  resolutionOmittedExtensions: cjsResolutionOmittedExtensions,
 }
 
 async function parseForPolicy({
-  projectRoot,
+  projectRoot: rootDir,
   entryId,
   policyOverride = {},
-  rootPackageName,
   shouldResolve,
   includeDebugInfo,
   ...args
 }) {
-  const isBuiltin = (id) => builtinPackages.includes(id)
+  // XXX: if the pkg at rootDir contains subpath or conditional exports, the
+  // entry ID _must_ be one of those exports.
+
   const { resolutions } = policyOverride
+  const pkgJsonPath = path.join(rootDir, 'package.json')
+
   const canonicalNameMap = await loadCanonicalNameMap({
-    rootDir: projectRoot,
+    rootDir,
     includeDevDeps: true,
   })
-  const resolveHook = makeResolveHook({
-    projectRoot,
+
+  const resolveHook = makeResolveHook(rootDir, canonicalNameMap, {
     resolutions,
-    rootPackageName,
-    canonicalNameMap,
   })
+
   const importHook = makeImportHook({
-    rootPackageName,
     shouldResolve,
-    isBuiltin,
     resolveHook,
     canonicalNameMap,
   })
-  const moduleSpecifier = resolveHook(
-    entryId,
-    path.join(projectRoot, 'package.json')
-  )
+
+  const moduleSpecifier = resolveHook(String(entryId).trim(), pkgJsonPath)
+  console.debug('moduleSpecifier = %s', moduleSpecifier)
   const inspector = createModuleInspector({ isBuiltin, includeDebugInfo })
   // rich warning output
   inspector.on('compat-warning', displayRichCompatWarning)
@@ -114,54 +102,105 @@ async function parseForPolicy({
   })
 }
 
-function makeResolveHook({ projectRoot, resolutions = {}, canonicalNameMap }) {
+/**
+ *
+ * @param {string} rootDir
+ * @param {Record<string, string>} canonicalNameMap
+ * @param {Record<string, string>} [resolutions]
+ * @returns {ResolveHook}
+ */
+function makeResolutionResolveHook(rootDir, canonicalNameMap, resolutions) {
+  if (!resolutions || Object.keys(resolutions).length === 0) {
+    // eslint-disable-next-line no-unused-vars
+    return (requestedName, referrer) => null
+  }
   return (requestedName, referrer) => {
     const parentPackageName = getPackageNameForModulePath(
       canonicalNameMap,
       referrer
     )
     // handle resolution overrides
-    const result = checkForResolutionOverride(
-      resolutions,
-      parentPackageName,
-      requestedName
+    return (
+      checkForResolutionOverride(
+        resolutions,
+        parentPackageName,
+        requestedName
+      ) ?? null
     )
-    if (result) {
-      // if path is a relative path, it should be relative to the projectRoot
-      if (path.isAbsolute(result)) {
-        requestedName = result
-      } else {
-        requestedName = path.resolve(projectRoot, result)
-      }
+  }
+}
+
+/**
+ * Creates a resolve hook for a given project root, package.json, and canonical name map.
+ * @param {string} rootDir - The root directory of the project.
+ * @param {Record<string, string>} canonicalNameMap - A map of canonical names to module IDs.
+ * @param {Object} opts - An optional object containing additional options.
+ * @param {Record<string, string>} [opts.resolutions] - A map of package names to paths to override resolution.
+ * @returns {ResolveHook} - A resolve hook function.
+ */
+function makeResolveHook(rootDir, canonicalNameMap, opts = {}) {
+  const getResolutionOverride = makeResolutionResolveHook(
+    rootDir,
+    canonicalNameMap,
+    opts.resolutions
+  )
+
+  return (requestedName, referrer) => {
+    const resolutionOverride = getResolutionOverride(
+      rootDir,
+      requestedName,
+      referrer
+    )
+
+    if (isBuiltin(requestedName)) {
+      return requestedName
     }
-    // utilize node's internal resolution algo
-    const { resolve } = createRequire(new URL(`file://${referrer}`))
-    /* eslint-disable no-useless-catch */
-    let resolved
-    try {
-      resolved = resolve(requestedName)
-    } catch (err) {
-      if (err.code === 'MODULE_NOT_FOUND') {
+
+    requestedName = requestedName || '.'
+
+    if (requestedName.startsWith('#')) {
+      // TODO: subpath imports
+    } else {
+      if (resolutionOverride) {
+        if (path.isAbsolute(resolutionOverride)) {
+          requestedName = path.relative(rootDir, resolutionOverride)
+        } else {
+          requestedName = resolutionOverride
+        }
+      }
+
+      // 3rd party package.  we need to read its package.json
+      const { resolve } = Module.createRequire(referrer)
+      /* eslint-disable no-useless-catch */
+      try {
+        return resolve(requestedName)
+      } catch (err) {
         console.warn(
           `lavamoat - unable to resolve "${requestedName}" from "${referrer}"`
         )
       }
-      // return "null" to mean failed to resolve
       return null
     }
-    return resolved
   }
 }
 
+/**
+ * Creates an import hook function passed into `lavamoat-core` for policy generation
+ *
+ * @param {Object} options - An object containing options for the import hook.
+ * @param {ResolveHook} options.resolveHook - A function that resolves a module specifier to a filename.
+ * @param {(requestedName?: string, specifier?: string) => boolean)} [options.shouldResolve] - A function that returns `true` if the given import should be resolved.
+ * @param {import('@lavamoat/aa').CanonicalNameMap} options.canonicalNameMap - A map of package names to their canonical paths.
+ * @param {LavamoatPolicy} [options.policyOverride] - A policy override object.
+ * @returns {(specifier: string) => Promise<LavamoatModuleRecord>} An import hook function.
+ */
 function makeImportHook({
-  isBuiltin,
   resolveHook,
   shouldResolve = () => true,
   canonicalNameMap,
   policyOverride,
 }) {
   return async (specifier) => {
-    // see if its a builtin
     if (isBuiltin(specifier)) {
       return makeBuiltinModuleRecord(specifier)
     }
@@ -171,7 +210,7 @@ function makeImportHook({
     const extension = path.extname(filename)
     const packageName = getPackageNameForModulePath(canonicalNameMap, filename)
 
-    if (commonjsExtensions.includes(extension)) {
+    if (jsExtensions.has(extension)) {
       return makeJsModuleRecord(specifier, filename, packageName)
     }
     if (extension === '.node') {
@@ -185,6 +224,12 @@ function makeImportHook({
     )
   }
 
+  /**
+   * Creates a new {@link LavamoatModuleRecord} for a built-in Node.js module.
+   *
+   * @param {string} specifier - The name of the built-in module.
+   * @returns {LavamoatModuleRecord} A new LavamoatModuleRecord instance.
+   */
   function makeBuiltinModuleRecord(specifier) {
     return new LavamoatModuleRecord({
       type: 'builtin',
@@ -198,6 +243,14 @@ function makeImportHook({
     })
   }
 
+  /**
+   * Creates a new {@link LavamoatModuleRecord} object for a native module.
+   *
+   * @param {string} specifier - The module specifier.
+   * @param {string} filename - The filename of the module.
+   * @param {string} packageName - The name of the package the module belongs to.
+   * @returns {LavamoatModuleRecord} A new LavamoatModuleRecord object.
+   */
   function makeNativeModuleRecord(specifier, filename, packageName) {
     return new LavamoatModuleRecord({
       type: 'native',
@@ -211,16 +264,31 @@ function makeImportHook({
     })
   }
 
+  /**
+   * Creates a CommonJS module record.
+   *
+   * @param {string} specifier - The module specifier.
+   * @param {string} filename - The filename of the module.
+   * @param {string} packageName - The name of the package.
+   * @returns {Promise<LavamoatModuleRecord>} A promise that resolves to a LavamoatModuleRecord object.
+   */
   async function makeJsModuleRecord(specifier, filename, packageName) {
     // load src
     const content = await fs.readFile(filename, 'utf8')
     // parse
     const ast = parseModule(content, specifier)
     // get imports
+    const { esmImports } = inspectEsmImports(ast, null, false)
     const { cjsImports } = inspectImports(ast, null, false)
+
+    // FIXME: if the package is CJS, and the extension is not `.mjs`, then the
+    // file cannot contain `import` statements. this will require reading the
+    // local `package.json` to determine, however.
+    const imports = [...new Set([...esmImports, ...cjsImports])]
+
     // build import map
     const importMap = Object.fromEntries(
-      cjsImports.map((requestedName) => {
+      imports.map((requestedName) => {
         let depValue
         if (shouldResolve(requestedName, specifier)) {
           try {
@@ -228,7 +296,7 @@ function makeImportHook({
           } catch (err) {
             // graceful failure
             console.warn(
-              `lavamoat-node/makeImportHandler - could not resolve "${requestedName}" from "${specifier}"`
+              `lavamoat-node/makeJsModuleRecord - could not resolve "${requestedName}" from "${specifier}"`
             )
             depValue = null
           }
@@ -260,6 +328,41 @@ function makeImportHook({
       })
     )
 
+    handleNativeModules(filename, importMap)
+
+    return new LavamoatModuleRecord({
+      type: 'js',
+      specifier,
+      file: filename,
+      packageName,
+      content,
+      importMap,
+      ast,
+    })
+  }
+
+  async function makeJsonModuleRecord(specifier, filename, packageName) {
+    // load src
+    const rawContent = await fs.readFile(filename, 'utf8')
+    // validate json
+    JSON.parse(rawContent)
+    // wrap as commonjs module
+    const cjsContent = `module.exports=${rawContent}`
+    return new LavamoatModuleRecord({
+      type: 'js',
+      specifier,
+      file: filename,
+      packageName,
+      content: cjsContent,
+    })
+  }
+
+  /**
+   * Detects common dynamically imported native modules and adds them to the import map
+   * @param {string} filename - The name of the file.
+   * @param {Record<string,string>} importMap - The import map object.
+   */
+  function handleNativeModules(filename, importMap) {
     // heuristics for detecting common dynamically imported native modules
     // important for generating a working config for apps with native modules
     if (importMap.bindings) {
@@ -291,32 +394,6 @@ function makeImportHook({
         }
       }
     }
-
-    return new LavamoatModuleRecord({
-      type: 'js',
-      specifier,
-      file: filename,
-      packageName,
-      content,
-      importMap,
-      ast,
-    })
-  }
-
-  async function makeJsonModuleRecord(specifier, filename, packageName) {
-    // load src
-    const rawContent = await fs.readFile(filename, 'utf8')
-    // validate json
-    JSON.parse(rawContent)
-    // wrap as commonjs module
-    const cjsContent = `module.exports=${rawContent}`
-    return new LavamoatModuleRecord({
-      type: 'js',
-      specifier,
-      file: filename,
-      packageName,
-      content: cjsContent,
-    })
   }
 }
 

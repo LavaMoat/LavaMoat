@@ -1,0 +1,11 @@
+{
+  "name": "lavamoat-core-esm-test",
+  "type": "module",
+  "version": "1.0.0",
+  "exports": {
+    ".": "./index.js"
+  },
+  "dependencies": {
+    "foo": "1.0.0"
+  }
+}

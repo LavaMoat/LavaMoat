@@ -146,18 +146,11 @@ function inspectEsmImports(ast) {
       const importSource = source.value
       specifiers.forEach((spec) => {
         switch (spec.type) {
-          case 'ImportDefaultSpecifier': {
-            const importName = importSource
-            esmImports.push(importName)
-            return
-          }
-          case 'ImportNamespaceSpecifier': {
-            const importName = importSource
-            esmImports.push(importName)
-            return
-          }
+          case 'ImportDefaultSpecifier':
+          case 'ImportNamespaceSpecifier':
           case 'ImportSpecifier': {
-            const importName = `${importSource}.${spec.imported.name}`
+            // const importName = `${importSource}.${spec.imported.name}`
+            const importName = importSource
             esmImports.push(importName)
             return
           }
