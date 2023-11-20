@@ -158,29 +158,24 @@ function makeResolveHook(rootDir, canonicalNameMap, opts = {}) {
 
     requestedName = requestedName || '.'
 
-    if (requestedName.startsWith('#')) {
-      // TODO: subpath imports
-    } else {
-      if (resolutionOverride) {
-        if (path.isAbsolute(resolutionOverride)) {
-          requestedName = path.relative(rootDir, resolutionOverride)
-        } else {
-          requestedName = resolutionOverride
-        }
+    if (resolutionOverride) {
+      if (path.isAbsolute(resolutionOverride)) {
+        requestedName = path.relative(rootDir, resolutionOverride)
+      } else {
+        requestedName = resolutionOverride
       }
-
-      // 3rd party package.  we need to read its package.json
-      const { resolve } = Module.createRequire(referrer)
-      /* eslint-disable no-useless-catch */
-      try {
-        return resolve(requestedName)
-      } catch (err) {
-        console.warn(
-          `lavamoat - unable to resolve "${requestedName}" from "${referrer}"`
-        )
-      }
-      return null
     }
+
+    const { resolve } = Module.createRequire(referrer)
+    /* eslint-disable no-useless-catch */
+    try {
+      return resolve(requestedName)
+    } catch (err) {
+      console.warn(
+        `lavamoat - unable to resolve "${requestedName}" from "${referrer}"`
+      )
+    }
+    return null
   }
 }
 

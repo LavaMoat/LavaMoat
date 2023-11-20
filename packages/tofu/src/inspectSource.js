@@ -133,7 +133,7 @@ function inspectGlobals(
   }
 }
 
-function inspectEsmImports(ast) {
+function inspectEsmImports(ast, packagesToInspect) {
   const esmImports = []
   traverse(ast, {
     ImportDeclaration: (path) => {
@@ -149,9 +149,13 @@ function inspectEsmImports(ast) {
           case 'ImportDefaultSpecifier':
           case 'ImportNamespaceSpecifier':
           case 'ImportSpecifier': {
-            // const importName = `${importSource}.${spec.imported.name}`
-            const importName = importSource
-            esmImports.push(importName)
+            if (
+              packagesToInspect &&
+              !packagesToInspect.includes(importSource)
+            ) {
+              return
+            }
+            esmImports.push(importSource)
             return
           }
           default: {
