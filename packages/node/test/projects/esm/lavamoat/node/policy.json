@@ -1,0 +1,13 @@
+{
+  "resources": {
+    "foo": {
+      "builtin": {
+        "node:events": true,
+        "node:util": true
+      },
+      "globals": {
+        "console.log": true
+      }
+    }
+  }
+}
