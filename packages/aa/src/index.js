@@ -80,6 +80,11 @@ function wrappedResolveSync(resolve, depName, packageDir) {
   const depRelativePackageJsonPath = path.join(depName, 'package.json')
   try {
     return resolve.sync(depRelativePackageJsonPath, { basedir: packageDir })
+  } catch {}
+  try {
+    return createPerformantResolve().sync(depRelativePackageJsonPath, {
+      basedir: packageDir,
+    })
   } catch (err) {
     if (!(/** @type {Error} */ (err).message.includes('Cannot find module'))) {
       throw err
