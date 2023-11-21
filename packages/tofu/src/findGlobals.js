@@ -15,6 +15,17 @@ const nonReferenceIdentifiers = [
   'RestElement',
 ]
 
+const importExportSpecifierTypes = new Set(
+  /** @type {const} */ ([
+    'ImportSpecifier',
+    'ImportDefaultSpecifier',
+    'ImportNamespaceSpecifier',
+    'ExportSpecifier',
+    'ExportDefaultSpecifier',
+    'MetaProperty',
+  ])
+)
+
 module.exports = { findGlobals }
 
 function findGlobals(ast) {
@@ -27,6 +38,12 @@ function findGlobals(ast) {
       if (nonReferenceIdentifiers.includes(parentType)) {
         return
       }
+
+      // toss out esm imports/exports
+      if (importExportSpecifierTypes.has(parentType)) {
+        return
+      }
+
       if (parentType === 'VariableDeclarator' && path.parent.id === path.node) {
         return
       }

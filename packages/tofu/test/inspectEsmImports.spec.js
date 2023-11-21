@@ -29,6 +29,10 @@ testInspect(
   import defaultExport3, * as name2 from "package09";
   import "package10";
   var promise = import("package11");
+  export * as name3 from "package12";
+  export { name4 } from "package13";
+  export { default as name5 } from "package14";
+  export const foo = "bar";
 `,
   {
     esmImports: [
@@ -37,14 +41,14 @@ testInspect(
       'package03',
       'package04',
       'package05',
-      'package05',
       'package06/path/to/specific/un-exported/file',
-      'package06/path/to/specific/un-exported/file',
-      'package07',
       'package07',
       'package08',
       'package09',
-      'package09',
+      'package10',
+      'package12',
+      'package13',
+      'package14',
     ],
   }
 )

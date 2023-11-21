@@ -133,41 +133,38 @@ function inspectGlobals(
   }
 }
 
+/**
+ * This finds all modules `import`ed into the AST, as well as any re-exported modules.
+ *
+ * @param {import('@babel/types').Node} ast
+ * @param {string[]} [packagesToInspect]
+ * @returns {{ esmImports: string[] }}
+ */
 function inspectEsmImports(ast, packagesToInspect) {
-  const esmImports = []
+  const pkgsToInspect = new Set(packagesToInspect)
+  /** @type {Set<string>} */
+  const esmImports = new Set()
+
+  const handleNodePath = (path) => {
+    const importSource = path.node.source?.value
+
+    if (
+      importSource &&
+      ((packagesToInspect && pkgsToInspect.has(importSource)) ||
+        !packagesToInspect)
+    ) {
+      esmImports.add(importSource)
+    }
+  }
+
   traverse(ast, {
-    ImportDeclaration: (path) => {
-      const { node } = path
-      const { specifiers, source } = node
-      // not sure if this is ever not a StringLiteral, but just in case
-      if (source.type !== 'StringLiteral') {
-        return
-      }
-      const importSource = source.value
-      specifiers.forEach((spec) => {
-        switch (spec.type) {
-          case 'ImportDefaultSpecifier':
-          case 'ImportNamespaceSpecifier':
-          case 'ImportSpecifier': {
-            if (
-              packagesToInspect &&
-              !packagesToInspect.includes(importSource)
-            ) {
-              return
-            }
-            esmImports.push(importSource)
-            return
-          }
-          default: {
-            throw new Error(
-              `inspectEsmImports - unknown import specifier type "${spec.type}"`
-            )
-          }
-        }
-      })
+    ExportNamedDeclaration: (path) => {
+      handleNodePath(path)
     },
+    ImportDeclaration: handleNodePath,
   })
-  return { esmImports }
+
+  return { esmImports: [...esmImports] }
 }
 
 function findAllCallsToRequire(ast) {

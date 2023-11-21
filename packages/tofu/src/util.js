@@ -167,7 +167,14 @@ function mapToObj(map) {
   return obj
 }
 
+/**
+ * Returns an array of a `NodePath`'s parent nodes (to the root)
+ *
+ * @param {import("@babel/traverse").NodePath} nodePath
+ * @returns {import('@babel/types').Node[]}
+ */
 function getParents(nodePath) {
+  /** @type {import('@babel/types').Node[]} */
   const parents = []
   let target = nodePath
   while (target) {
@@ -178,10 +185,20 @@ function getParents(nodePath) {
   return parents
 }
 
-function isInFunctionDeclaration(path) {
-  return getParents(path.parentPath).some(
-    (parent) =>
-      parent.type === 'FunctionDeclaration' ||
-      parent.type === 'FunctionExpression'
-  )
+/**
+ * Determines if this `Node` is a descendant of a `FunctionDeclaration` or `FunctionExpression`.
+ *
+ * @param {import("@babel/traverse").NodePath} nodePath
+ * @returns {boolean}
+ */
+function isInFunctionDeclaration(nodePath) {
+  let target = nodePath.parentPath
+  while (target) {
+    // if function declaration found, short-circuit instead of continuing
+    if (target.isFunctionDeclaration() || target.isFunctionExpression()) {
+      return true
+    }
+    target = target.parentPath
+  }
+  return false
 }
