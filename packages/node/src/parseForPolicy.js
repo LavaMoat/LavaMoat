@@ -72,9 +72,13 @@ async function parseForPolicy({
   const { resolutions } = policyOverride
   const pkgJsonPath = path.join(rootDir, 'package.json')
 
+  const resolve = Module.createRequire(pkgJsonPath).resolve
   const canonicalNameMap = await loadCanonicalNameMap({
     rootDir,
     includeDevDeps: true,
+    resolve: {
+      sync: resolve,
+    },
   })
 
   const resolveHook = makeResolveHook(rootDir, canonicalNameMap, {
@@ -167,7 +171,7 @@ function makeResolveHook(rootDir, canonicalNameMap, opts = {}) {
     }
 
     const { resolve } = Module.createRequire(referrer)
-    /* eslint-disable no-useless-catch */
+
     try {
       return resolve(requestedName)
     } catch (err) {
@@ -206,7 +210,8 @@ function makeImportHook({
     const packageName = getPackageNameForModulePath(canonicalNameMap, filename)
 
     if (jsExtensions.has(extension)) {
-      return makeJsModuleRecord(specifier, filename, packageName)
+      const moduleRecord = makeJsModuleRecord(specifier, filename, packageName)
+      return moduleRecord
     }
     if (extension === '.node') {
       return makeNativeModuleRecord(specifier, filename, packageName)
