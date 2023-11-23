@@ -174,11 +174,6 @@ function getPrototypeChain(value) {
   return protoChain
 }
 
-/**
- * @type {object}
- * @property {Function} performScuttleGlobalThis - Scuttle the globalThis object once.
- * @property {Function} applyDefaultScuttling - Apply default scuttling from options.
- */
 module.exports = {
   performScuttleGlobalThis,
   applyDefaultScuttling,
