@@ -1,11 +1,12 @@
 import 'ses'
-import { evadeCensor } from '@endo/evasive-transform'
-import { toEndoPolicy } from './policy-converter.js'
-import fs from 'node:fs'
-import { importLocation } from '@endo/compartment-mapper'
 
-export * from './policy-converter.js'
+import { importLocation } from '@endo/compartment-mapper'
+import { evadeCensor } from '@endo/evasive-transform'
+import fs from 'node:fs'
+import { toEndoPolicy } from './policy-converter.js'
+
 export * from './constants.js'
+export * from './policy-converter.js'
 
 const textDecoder = new TextDecoder()
 const textEncoder = new TextEncoder()
@@ -38,33 +39,31 @@ export const importHook = async (specifier) => {
 
 /**
  *
- * @param {string} entrypointPath
+ * @param {string|URL} entrypointPath
  * @param {import('lavamoat-core').LavaMoatPolicy} policy
  */
 export const run = async (entrypointPath, policy) => {
-  const { namespace } = await importLocation(readPower, entrypointPath, {
-    policy: toEndoPolicy(policy),
-    globals: globalThis,
-    importHook,
-    moduleTransforms: {
-      async mjs(
-        sourceBytes,
-        specifier,
-        location,
-        _packageLocation,
-        { sourceMap }
-      ) {
-        const source = textDecoder.decode(sourceBytes)
-        const { code, map } = await evadeCensor(source, {
-          sourceMap,
-          sourceUrl: new URL(specifier, location).href,
-          sourceType: 'module',
-        })
-        const objectBytes = textEncoder.encode(code)
-        return { bytes: objectBytes, parser: 'mjs', map }
+  const { namespace } = await importLocation(
+    readPower,
+    entrypointPath.toString(),
+    {
+      policy: toEndoPolicy(policy),
+      globals: globalThis,
+      importHook,
+      moduleTransforms: {
+        async mjs(sourceBytes, specifier, location, _packageLocation, opts) {
+          const source = textDecoder.decode(sourceBytes)
+          const { code, map } = await evadeCensor(source, {
+            sourceMap: opts?.sourceMap,
+            sourceUrl: new URL(specifier, location).href,
+            sourceType: 'module',
+          })
+          const objectBytes = textEncoder.encode(code)
+          return { bytes: objectBytes, parser: 'mjs', map }
+        },
       },
-    },
-  })
+    }
+  )
   return namespace
 }
 

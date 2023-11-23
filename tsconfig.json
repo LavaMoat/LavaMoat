@@ -6,16 +6,16 @@
   },
   "references": [
     {
-      "path": "packages/allow-scripts"
+      "path": "packages/allow-scripts/tsconfig.json"
     },
     {
-      "path": "packages/aa"
+      "path": "packages/aa/tsconfig.json"
     },
     {
-      "path": "packages/core"
+      "path": "packages/core/tsconfig.json"
     },
     {
-      "path": "packages/endomoat"
+      "path": "packages/endomoat/tsconfig.json"
     }
   ]
 }

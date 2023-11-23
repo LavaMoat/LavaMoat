@@ -1,3 +1,5 @@
+import 'ses'
+
 import { ENDO_ROOT_POLICY as ROOT_POLICY } from './constants.js'
 // @ts-expect-error - needs exports
 import * as EndowmentsToolkit from 'lavamoat-core/src/endowmentsToolkit.js'

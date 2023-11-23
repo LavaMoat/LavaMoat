@@ -10,5 +10,5 @@
     "types": ["node", "ses"]
   },
   "include": ["../test"],
-  "references": [{ "path": "./tsconfig.sources.json" }]
+  "references": [{ "path": "../src/tsconfig.json" }]
 }
