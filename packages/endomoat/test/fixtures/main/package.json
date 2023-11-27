@@ -5,8 +5,9 @@
   "main": "app.js",
   "keywords": [],
   "dependencies": {
-    "@lavamoat/endomoat": "../../../"
+    "@lavamoat/endomoat": "file:../../.."
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "type": "module"
 }
