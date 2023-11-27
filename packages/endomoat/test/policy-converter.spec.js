@@ -37,7 +37,11 @@ test('toEndoPolicy - basic', (t) => {
       builtins: ENDO_WILDCARD_POLICY,
     },
     resources: {
-      '@lavamoat/endomoat': {},
+      '@lavamoat/endomoat': {
+        globals: ENDO_WILDCARD_POLICY,
+        packages: ENDO_WILDCARD_POLICY,
+        builtins: ENDO_WILDCARD_POLICY,
+      },
       a: {
         packages: { b: true },
         globals: { console: true },
