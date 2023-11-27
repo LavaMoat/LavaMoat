@@ -379,14 +379,17 @@ function endowmentsToolkit({
       }
     }
     if (sourcePropDesc.set) {
-      const setter = sourcePropDesc.set
       wrappedPropDesc.set = function (value) {
         // replace the "receiver" value if it points to fake parent
         // eslint-disable-next-line @typescript-eslint/no-this-alias
         const receiver = this
         const receiverRef =
           receiver === unwrapFromGlobalThis ? unwrapToGlobalThis : receiver
-        return Reflect.apply(setter, receiverRef, [value])
+        return Reflect.apply(
+          /** @type {(v: any) => void} */ (sourcePropDesc.set),
+          receiverRef,
+          [value]
+        )
       }
     }
     return wrappedPropDesc
