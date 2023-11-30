@@ -20,7 +20,7 @@ if (LOCKDOWN_ON) {
   lockdown(LAVAMOAT.options.lockdown)
 } else {
   warn(
-    'LavaMoat: runtime execution started without SES present, switching to no-op.',
+    'LavaMoat: runtime execution started without SES present, switching to no-op.'
   )
 }
 
@@ -41,8 +41,8 @@ const stricterScopeTerminator = freeze(
     freeze({
       // TODO: emulate a reference error in a getter.
       has: freeze(() => true),
-    }),
-  ),
+    })
+  )
 )
 
 // Policy implementation
@@ -62,7 +62,7 @@ const enforcePolicy = (requestedResourceId, referrerResourceId) => {
     return
   }
   throw Error(
-    `Policy does not allow importing ${requestedResourceId} from ${referrerResourceId}`,
+    `Policy does not allow importing ${requestedResourceId} from ${referrerResourceId}`
   )
 }
 
@@ -82,12 +82,12 @@ const installGlobalsForPolicy = (resourceId, packageCompartmentGlobal) => {
       rootCompartmentGlobalThis,
       LAVAMOAT.policy.resources[resourceId] || {},
       globalThis,
-      packageCompartmentGlobal,
+      packageCompartmentGlobal
     )
 
     defineProperties(
       packageCompartmentGlobal,
-      getOwnPropertyDescriptors(endowments),
+      getOwnPropertyDescriptors(endowments)
     )
   }
 }
@@ -95,7 +95,7 @@ const installGlobalsForPolicy = (resourceId, packageCompartmentGlobal) => {
 const compartmentMap = new Map()
 const findResourceId = (moduleId) => {
   const found = LAVAMOAT.idmap.find(([, moduleIds]) =>
-    moduleIds.includes(moduleId),
+    moduleIds.includes(moduleId)
   )
   if (found) {
     return found[0]
@@ -147,11 +147,13 @@ const lavamoatRuntimeWrapper = (resourceId, runtimeKit) => {
       {
         has: (target, prop) => {
           warn(
-            `A module attempted to read ${String(prop)} directly from webpack's module cache`,
+            `A module attempted to read ${String(
+              prop
+            )} directly from webpack's module cache`
           )
           return false
         },
-      },
+      }
     )
 
     // override nmd to limit what it can mutate
@@ -170,6 +172,14 @@ const lavamoatRuntimeWrapper = (resourceId, runtimeKit) => {
   defineProperty(runtimeHandler, 'module', {
     get: () => module,
     set: () => {},
+  })
+  // Make it possible to overwrite `exports` locally despite runtimeHandler being frozen
+  let exportsReference = runtimeHandler.exports
+  defineProperty(runtimeHandler, 'exports', {
+    get: () => exportsReference,
+    set: (value) => {
+      exportsReference = value
+    },
   })
   freeze(runtimeHandler)
 
