@@ -5,4 +5,5 @@ module.exports = {
   parserOptions: {
     sourceType: 'module',
   },
+  extends: ['plugin:@endo/recommended'],
 }

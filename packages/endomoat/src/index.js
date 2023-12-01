@@ -1,4 +1,5 @@
 import 'ses'
+lockdown()
 
 import { importLocation } from '@endo/compartment-mapper'
 import { evadeCensor } from '@endo/evasive-transform'

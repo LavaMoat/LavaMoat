@@ -1,8 +1,8 @@
-import 'ses'
-
 import { ENDO_ROOT_POLICY as ROOT_POLICY } from './constants.js'
 // @ts-expect-error - needs exports
 import endowmentsToolkit from 'lavamoat-core/src/endowmentsToolkit.js'
+// eslint-disable-next-line n/prefer-global/console
+import console from 'node:console'
 
 const { copyWrappedGlobals, getEndowmentsForConfig } = endowmentsToolkit()
 
