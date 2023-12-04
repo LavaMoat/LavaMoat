@@ -3,12 +3,14 @@ lockdown()
 
 import { importLocation } from '@endo/compartment-mapper'
 import { evadeCensor } from '@endo/evasive-transform'
+import { applySourceTransforms } from 'lavamoat-core'
 import fs from 'node:fs'
 import { toEndoPolicy } from './policy-converter.js'
 
 export * from './constants.js'
 export * from './policy-converter.js'
 
+const { freeze, keys, assign } = Object
 const textDecoder = new TextDecoder()
 const textEncoder = new TextEncoder()
 
@@ -18,7 +20,7 @@ const textEncoder = new TextEncoder()
  *
  * @type {import('@endo/compartment-mapper').ReadFn}
  */
-const readPower = async (location) =>
+const defaultReadPower = async (location) =>
   fs.promises.readFile(new URL(location).pathname)
 
 /**
@@ -26,13 +28,13 @@ const readPower = async (location) =>
  */
 export const importHook = async (specifier) => {
   const ns = await import(specifier)
-  return Object.freeze(
+  return freeze(
     /** @type {import('ses').ThirdPartyStaticModuleInterface} */ ({
       imports: [],
-      exports: Object.keys(ns),
+      exports: keys(ns),
       execute: (moduleExports) => {
         moduleExports.default = ns
-        Object.assign(moduleExports, ns)
+        assign(moduleExports, ns)
       },
     })
   )
@@ -40,32 +42,102 @@ export const importHook = async (specifier) => {
 
 /**
  *
+ * @param {unknown} value
+ * @returns {value is RunOptionsWithEndoPolicy}
+ */
+function isRunOptionsWithEndoPolicy(value) {
+  return Boolean(
+    value &&
+      typeof value === 'object' &&
+      'endoPolicy' in value &&
+      typeof value.endoPolicy === 'object'
+  )
+}
+
+/**
+ * Options for {@link run}
+ *
+ * @typedef RunOptions
+ * @property {import('@endo/compartment-mapper').ReadFn} [readPower]
+ * @property {import('./policy-converter.js').LavaMoatEndoPolicy} [endoPolicy]
+ */
+
+/**
+ * Options for {@link run} where {@link RunOptions.endoPolicy} is required
+ *
+ * @typedef {import('type-fest').SetRequired<RunOptions, 'endoPolicy'>} RunOptionsWithEndoPolicy
+ */
+
+/**
+ * Runs a program in endomoat given an Endo policy
+ *
+ * @overload
+ * @param {string|URL} entrypointPath
+ * @param {RunOptionsWithEndoPolicy} opts
+ * @returns {Promise<unknown>}
+ */
+
+/**
+ * Runs a program in endomoat given a LavaMoat policy
+ *
+ * @overload
  * @param {string|URL} entrypointPath
  * @param {import('lavamoat-core').LavaMoatPolicy} policy
+ * @param {RunOptions} [opts]
+ * @returns {Promise<unknown>}
  */
-export const run = async (entrypointPath, policy) => {
-  const { namespace } = await importLocation(
-    readPower,
-    entrypointPath.toString(),
-    {
-      policy: toEndoPolicy(policy),
-      globals: globalThis,
-      importHook,
-      moduleTransforms: {
-        async mjs(sourceBytes, specifier, location, _packageLocation, opts) {
-          const source = textDecoder.decode(sourceBytes)
-          const { code, map } = await evadeCensor(source, {
-            sourceMap: opts?.sourceMap,
-            sourceUrl: new URL(specifier, location).href,
-            sourceType: 'module',
-          })
-          const objectBytes = textEncoder.encode(code)
-          return { bytes: objectBytes, parser: 'mjs', map }
-        },
-      },
-    }
-  )
+
+/**
+ * Runs a program in endomoat
+ * @param {string|URL} entrypointPath
+ * @param {import('lavamoat-core').LavaMoatPolicy|RunOptionsWithEndoPolicy} policyOrOpts
+ * @param {RunOptions} [opts]
+ * @returns {Promise<unknown>}
+ */
+export async function run(entrypointPath, policyOrOpts, opts = {}) {
+  /** @type {import('./policy-converter.js').LavaMoatEndoPolicy} */
+  let policy
+  if (isRunOptionsWithEndoPolicy(policyOrOpts)) {
+    opts = policyOrOpts
+    policy = policyOrOpts.endoPolicy
+  } else {
+    policy = toEndoPolicy(policyOrOpts)
+  }
+  const { readPower = defaultReadPower } = opts
+
+  const { namespace } = await importLocation(readPower, `${entrypointPath}`, {
+    policy,
+    globals: globalThis,
+    importHook,
+    moduleTransforms: {
+      cjs: createModuleTransform('cjs'),
+      mjs: createModuleTransform('mjs'),
+    },
+  })
   return namespace
+}
+
+/**
+ * Create module transform which performs source transforms to evade SES
+ * restrictions
+ *
+ * @param {import('@endo/compartment-mapper').Language} parser
+ * @returns {import('@endo/compartment-mapper').ModuleTransform}
+ */
+function createModuleTransform(parser) {
+  return async (sourceBytes, specifier, location, _packageLocation, opts) => {
+    let source = textDecoder.decode(sourceBytes)
+    // FIXME: this function calls stuff we could get in `ses/tools.js`
+    // except `evadeDirectEvalExpressions`. unclear if we should be using this from `lavamoat-core`
+    source = applySourceTransforms(source)
+    const { code, map } = await evadeCensor(source, {
+      sourceMap: opts?.sourceMap,
+      sourceUrl: new URL(specifier, location).href,
+      sourceType: 'module',
+    })
+    const objectBytes = textEncoder.encode(code)
+    return { bytes: objectBytes, parser, map }
+  }
 }
 
 // call importlocation with this importhook, readpower, (converted) policy

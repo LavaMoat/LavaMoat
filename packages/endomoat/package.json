@@ -45,5 +45,9 @@
     ".": "./src/index.js",
     "./attenuator": "./src/default-attenuator.js"
   },
-  "private": true
+  "private": true,
+  "devDependencies": {
+    "@types/capture-console": "^1.0.5",
+    "capture-console": "^1.0.2"
+  }
 }

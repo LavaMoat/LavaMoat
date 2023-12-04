@@ -24,7 +24,6 @@ export function attenuateGlobals(
   if (!policy) {
     return
   }
-  console.debug('attenuateGlobals called', params)
   if (policy === ROOT_POLICY) {
     rootCompartmentGlobalThis = packageCompartmentGlobalThis
     // ^ this is a little dumb, but only a little - assuming importLocation is called only once in parallel. The thing is - even if it isn't, the new one will have a new copy of this module anyway.
