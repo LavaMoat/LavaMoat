@@ -1,3 +1,4 @@
+// @ts-check
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable n/no-missing-require */
 const {
@@ -7,50 +8,38 @@ const {
   getDefaultPaths,
 } = require('../src')
 const mergeDeep = require('merge-deep')
-const { runInContext, createContext } = require('vm')
+const { runInContext, createContext } = require('node:vm')
 const path = require('node:path')
-const { promises: fs } = require('fs')
 var tmp = require('tmp-promise')
 const stringify = require('json-stable-stringify')
 const { applySourceTransforms } = require('../src/sourceTransforms.js')
 
-module.exports = {
-  generateConfigFromFiles: generatePolicyFromFiles,
-  createScenarioFromScaffold,
-  runScenario,
-  createConfigForTest,
-  autoConfigForScenario,
-  prepareScenarioOnDisk,
-  convertOptsToArgs,
-  evaluateWithSourceUrl,
-  createHookedConsole,
-  fillInFileDetails,
-  functionToString,
-  runAndTestScenario,
-}
+const generatePolicyFromFiles = (exports.generatePolicyFromFiles =
+  async function generatePolicyFromFiles({ files, ...opts }) {
+    const config = await parseForPolicy({
+      moduleSpecifier: files.find((file) => file.entry).specifier,
+      resolveHook: (requestedName, parentAddress) => {
+        return files.find((file) => file.specifier === parentAddress).importMap[
+          requestedName
+        ]
+      },
+      importHook: async (address) => {
+        return new LavamoatModuleRecord(
+          files.find((file) => file.specifier === address)
+        )
+      },
+      isBuiltin: () => false,
+      includeDebugInfo: false,
+      ...opts,
+    })
 
-async function generatePolicyFromFiles({ files, ...opts }) {
-  const config = await parseForPolicy({
-    moduleSpecifier: files.find((file) => file.entry).specifier,
-    resolveHook: (requestedName, parentAddress) => {
-      return files.find((file) => file.specifier === parentAddress).importMap[
-        requestedName
-      ]
-    },
-    importHook: async (address) => {
-      return new LavamoatModuleRecord(
-        files.find((file) => file.specifier === address)
-      )
-    },
-    isBuiltin: () => false,
-    includeDebugInfo: false,
-    ...opts,
+    return config
   })
 
-  return config
-}
+/** @deprecated Use {@link exports.generatePolicyFromFiles} instead */
+exports.generateConfigFromFiles = exports.generatePolicyFromFiles
 
-function createScenarioFromScaffold({
+exports.createScenarioFromScaffold = function createScenarioFromScaffold({
   name = 'template scenario',
   expectedResult = {
     value: 'this is module two',
@@ -273,36 +262,40 @@ function createScenarioFromScaffold({
   }
 }
 
-function createHookedConsole() {
-  let hasResolved = false
-  let resolve
-  const firstLogEventPromise = new Promise((_resolve) => {
-    resolve = _resolve
+const createHookedConsole = (exports.createHookedConsole =
+  function createHookedConsole() {
+    let hasResolved = false
+    let resolve
+    const firstLogEventPromise = new Promise((_resolve) => {
+      resolve = _resolve
+    })
+    const hookedLog = (message) => {
+      if (hasResolved) {
+        throw new Error(`console.log called multiple times. got "${message}"`)
+      }
+      hasResolved = true
+      // run result through serialization boundary. this ensures these tests:
+      // - work across a serialization boundary
+      // - return simple objects non wrapped by membranes
+      let result
+      try {
+        result = JSON.parse(message)
+      } catch (err) {
+        throw new Error(`LavaMoat - failed to parse test output:\n${message}`)
+      }
+      resolve(result)
+    }
+    const hookedConsole = { ...console, log: hookedLog }
+    return {
+      firstLogEventPromise,
+      hookedConsole,
+    }
   })
-  const hookedLog = (message) => {
-    if (hasResolved) {
-      throw new Error(`console.log called multiple times. got "${message}"`)
-    }
-    hasResolved = true
-    // run result through serialization boundary. this ensures these tests:
-    // - work across a serialization boundary
-    // - return simple objects non wrapped by membranes
-    let result
-    try {
-      result = JSON.parse(message)
-    } catch (err) {
-      throw new Error(`LavaMoat - failed to parse test output:\n${message}`)
-    }
-    resolve(result)
-  }
-  const hookedConsole = { ...console, log: hookedLog }
-  return {
-    firstLogEventPromise,
-    hookedConsole,
-  }
-}
 
-async function runScenario({ scenario, runWithPrecompiledModules = false }) {
+exports.runScenario = async function runScenario({
+  scenario,
+  runWithPrecompiledModules = false,
+}) {
   const {
     entries,
     files,
@@ -381,7 +374,24 @@ async function runScenario({ scenario, runWithPrecompiledModules = false }) {
   return testResult
 }
 
-async function prepareScenarioOnDisk({
+/**
+ * The subset of the `fs/promises` module that is used by `prepareScenarioOnDisk`.
+ * @typedef FsPromiseApi
+ * @property {(dir: string, opts?: import('node:fs').MakeDirectoryOptions & {recursive: true}) => Promise<string|undefined>} mkdir
+ * @property {(filepath: string, data: any) => Promise<void>} writeFile
+ */
+
+/**
+ * Prepares a scenario on disk by writing files based on the provided scenario object.
+ * @param {Object} options - The options for preparing the scenario.
+ * @param {FsPromiseApi} [options.fs] - The file system module to use (default: `node:fs/promises`).
+ * @param {Object} options.scenario - The scenario object containing the files to write.
+ * @param {string} [options.policyName='policies'] - The name of the policy directory (default: 'policies').
+ * @param {string} [options.projectDir] - The project directory path.
+ * @returns {Promise<{projectDir: string, policyDir: string}>} - An object containing the project directory path and the policy directory path.
+ */
+exports.prepareScenarioOnDisk = async function prepareScenarioOnDisk({
+  fs = require('node:fs/promises'),
   scenario,
   policyName = 'policies',
   projectDir,
@@ -425,18 +435,19 @@ async function prepareScenarioOnDisk({
   }
 }
 
-function fillInFileDetails(files) {
-  Object.entries(files).forEach(([file, fileObj]) => {
-    fileObj.file = fileObj.file || file
-    if (path.extname(file) === '.js') {
-      // parse as LavamoatModuleRecord
-      fileObj.specifier = fileObj.file || file
-      fileObj.type = fileObj.type || 'js'
-      fileObj.entry = Boolean(fileObj.entry)
-    }
+const fillInFileDetails = (exports.fillInFileDetails =
+  function fillInFileDetails(files) {
+    Object.entries(files).forEach(([file, fileObj]) => {
+      fileObj.file = fileObj.file || file
+      if (path.extname(file) === '.js') {
+        // parse as LavamoatModuleRecord
+        fileObj.specifier = fileObj.file || file
+        fileObj.type = fileObj.type || 'js'
+        fileObj.entry = Boolean(fileObj.entry)
+      }
+    })
+    return files
   })
-  return files
-}
 
 function moduleDataForBuiltin(builtinObj, name) {
   return {
@@ -468,38 +479,42 @@ function prepareModuleInitializerArgs(
   return [exports, require, module, __filename, __dirname]
 }
 
-function evaluateWithSourceUrl(filename, content, context) {
-  const vmContext = createContext()
-  const vmGlobalThis = runInContext('this', vmContext)
-  const vmFeralFunction = vmGlobalThis.Function
+const evaluateWithSourceUrl = (exports.evaluateWithSourceUrl =
+  function evaluateWithSourceUrl(filename, content, context) {
+    const vmContext = createContext()
+    const vmGlobalThis = runInContext('this', vmContext)
+    const vmFeralFunction = vmGlobalThis.Function
 
-  Object.defineProperties(
-    vmGlobalThis,
-    Object.getOwnPropertyDescriptors(context)
-  )
+    Object.defineProperties(
+      vmGlobalThis,
+      Object.getOwnPropertyDescriptors(context)
+    )
 
-  // circular ref (used when globalThis is not present)
-  if (!vmGlobalThis.globalThis) {
-    vmGlobalThis.globalThis = vmGlobalThis
-  }
-  // Since the browserify test uses this vm util as a browser env simulation,
-  // creating actual dom nodes that can leak the real global object is not possible,
-  // therefore there is no way to access the real global object otherwise, but since we
-  // have to (for the scuttling tests) - we intentionally export this util func to solve this:
-  vmGlobalThis.getTrueGlobalThisForTestsOnly = () => vmGlobalThis
-  // perform eval
-  let result
-  try {
-    result = runInContext(`${content}\n//# sourceURL=${filename}`, vmContext)
-  } catch (e) {
-    console.log(e.stack)
-    throw e
-  }
-  // pull out test result value from context (not always used)
-  return { result, vmGlobalThis, vmContext, vmFeralFunction }
-}
+    // circular ref (used when globalThis is not present)
+    if (!vmGlobalThis.globalThis) {
+      vmGlobalThis.globalThis = vmGlobalThis
+    }
+    // Since the browserify test uses this vm util as a browser env simulation,
+    // creating actual dom nodes that can leak the real global object is not possible,
+    // therefore there is no way to access the real global object otherwise, but since we
+    // have to (for the scuttling tests) - we intentionally export this util func to solve this:
+    vmGlobalThis.getTrueGlobalThisForTestsOnly = () => vmGlobalThis
+    // perform eval
+    let result
+    try {
+      result = runInContext(`${content}\n//# sourceURL=${filename}`, vmContext)
+    } catch (e) {
+      console.log(e.stack)
+      throw e
+    }
+    // pull out test result value from context (not always used)
+    return { result, vmGlobalThis, vmContext, vmFeralFunction }
+  })
 
-async function createConfigForTest(testFn, opts = {}) {
+exports.createConfigForTest = async function createConfigForTest(
+  testFn,
+  opts = {}
+) {
   const files = [
     {
       type: 'js',
@@ -526,13 +541,16 @@ async function createConfigForTest(testFn, opts = {}) {
   return policy
 }
 
-async function autoConfigForScenario({ scenario, opts = {} }) {
+exports.autoConfigForScenario = async function autoConfigForScenario({
+  scenario,
+  opts = {},
+}) {
   const files = Object.values(scenario.files)
   const policy = await generatePolicyFromFiles({ files, ...opts })
   scenario.config = policy
 }
 
-function convertOptsToArgs({ scenario }) {
+exports.convertOptsToArgs = function convertOptsToArgs({ scenario }) {
   const { entries } = scenario
   if (entries.length !== 1) {
     throw new Error('LavaMoat - invalid entries')
@@ -541,11 +559,15 @@ function convertOptsToArgs({ scenario }) {
   return [firstEntry]
 }
 
-function functionToString(func) {
+exports.functionToString = function functionToString(func) {
   return `(${func}).call(this)`
 }
 
-async function runAndTestScenario(t, scenario, platformRunScenario) {
+exports.runAndTestScenario = async function runAndTestScenario(
+  t,
+  scenario,
+  platformRunScenario
+) {
   let result, err
   try {
     result = await platformRunScenario({ scenario })
