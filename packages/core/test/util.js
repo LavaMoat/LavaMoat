@@ -145,6 +145,7 @@ function createScenarioFromScaffold({
     'package.json': {
       content: `${JSON.stringify(
         {
+          name,
           dependencies: {
             one: '1.0.0',
             two: '1.0.0',
@@ -167,6 +168,7 @@ function createScenarioFromScaffold({
     'node_modules/one/package.json': {
       content: `${JSON.stringify(
         {
+          name: 'one',
           dependencies: {
             two: '1.0.0',
             three: '1.0.0',
@@ -186,6 +188,7 @@ function createScenarioFromScaffold({
     'node_modules/two/package.json': {
       content: `${JSON.stringify(
         {
+          name: 'two',
           dependencies: {
             three: '1.0.0',
           },
@@ -204,6 +207,7 @@ function createScenarioFromScaffold({
     'node_modules/three/package.json': {
       content: `${JSON.stringify(
         {
+          name: 'three',
           dependencies: {
             one: '1.0.0',
           },
