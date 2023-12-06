@@ -30,7 +30,10 @@
     "test": "test"
   },
   "devDependencies": {
-    "@types/npmcli__promise-spawn": "^6.0.0"
+    "@types/micromatch": "^4.0.6",
+    "@types/npmcli__promise-spawn": "^6.0.0",
+    "@yarnpkg/shell": "^4.0.0",
+    "@yarnpkg/core": "^4.0.0"
   },
   "scripts": {
     "test": "npm run test:run",
