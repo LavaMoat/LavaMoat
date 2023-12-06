@@ -64,7 +64,7 @@ module.exports = {
       parser: '@typescript-eslint/parser',
       extends: ['plugin:@typescript-eslint/recommended-type-checked'],
       parserOptions: {
-        project: ['./packages/*/tsconfig.json'],
+        project: true,
       },
       rules: {
         'n/no-missing-import': 'off',

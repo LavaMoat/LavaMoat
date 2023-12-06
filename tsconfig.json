@@ -6,6 +6,9 @@
     },
     {
       "path": "packages/aa"
+    },
+    {
+      "path": "packages/core"
     }
   ]
 }
