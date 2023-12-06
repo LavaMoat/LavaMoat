@@ -36,7 +36,6 @@ module.exports = {
     'n/prefer-promises/fs': 'error',
 
     // these rules seem broken in a monorepo
-    'n/no-extraneous-require': 'off',
     'n/no-unpublished-require': 'off',
 
     // we should probably actually fix these three and turn these back on
@@ -136,6 +135,10 @@ module.exports = {
         'no-undef': 'off',
         'n/no-path-concat': 'off', // this should be removed and the issues fixed
         'n/no-missing-require': 'off',
+
+        // these two are broken in monorepos that resolve dev deps from the workspace root
+        'n/no-extraneous-import': 'off',
+        'n/no-extraneous-require': 'off',
       },
     },
     {
