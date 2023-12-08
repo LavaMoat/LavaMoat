@@ -70,6 +70,30 @@ module.exports = {
         'n/no-missing-import': 'off',
       },
     },
+    {
+      files: ['packages/allow-scripts/src/**/*'],
+      parser: '@typescript-eslint/parser',
+      extends: ['plugin:@typescript-eslint/recommended'],
+      parserOptions: {
+        project: true,
+      },
+    },
+    {
+      files: ['packages/aa/src/**/*'],
+      parser: '@typescript-eslint/parser',
+      extends: ['plugin:@typescript-eslint/recommended'],
+      parserOptions: {
+        project: true,
+      },
+    },
+    {
+      files: ['packages/core/src/**/*'],
+      parser: '@typescript-eslint/parser',
+      extends: ['plugin:@typescript-eslint/recommended'],
+      parserOptions: {
+        project: true,
+      },
+    },
     /**
      *
      */
@@ -78,7 +102,7 @@ module.exports = {
       parser: '@typescript-eslint/parser',
       extends: ['plugin:@typescript-eslint/recommended'],
       parserOptions: {
-        project: ['./packages/allow-scripts/tsconfig.json'],
+        project: true,
       },
     },
     {
