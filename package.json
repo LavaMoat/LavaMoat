@@ -29,7 +29,7 @@
     "memfs": "^4.3.0",
     "prettier": "^3.0.2",
     "type-fest": "^4.7.1",
-    "typescript": "^5.2.2"
+    "typescript": "~5.2.2"
   },
   "optionalDependencies": {
     "corepack": "0.20.0"
