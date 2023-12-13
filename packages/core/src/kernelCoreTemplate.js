@@ -69,7 +69,7 @@
     const { getEndowmentsForConfig, makeMinimalViewOfRef, applyEndowmentPropDescTransforms, copyWrappedGlobals, createFunctionWrapper } = templateRequire('endowmentsToolkit')()
     const { prepareCompartmentGlobalFromConfig } = templateRequire('makePrepareRealmGlobalFromConfig')({ createFunctionWrapper })
     const { strictScopeTerminator } = templateRequire('strict-scope-terminator')
-    const { applyDefaultScuttling } = templateRequire('scuttle')
+    const { scuttle } = templateRequire('scuttle')
 
     const moduleCache = new Map()
     const packageCompartmentCache = new Map()
@@ -78,7 +78,7 @@
     const rootPackageName = '$root$'
     const rootPackageCompartment = createRootPackageCompartment(globalRef)
 
-    applyDefaultScuttling(globalRef, scuttleGlobalThis)
+    scuttle(globalRef, scuttleGlobalThis)
 
     const kernel = {
       internalRequire,
