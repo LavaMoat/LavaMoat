@@ -12,6 +12,17 @@
  */
 
 const {
+  Object,
+  Array,
+  Error,
+  RegExp,
+  Set,
+  console,
+  Proxy,
+  Reflect,
+} = globalThis
+
+const {
   assign,
   getOwnPropertyNames,
   getOwnPropertyDescriptor,
@@ -19,18 +30,31 @@ const {
   defineProperty,
 } = Object
 
+const {
+  isArray,
+  from,
+} = Array
+
+const {
+  getPrototypeOf,
+} = Reflect
+
+const {
+  warn,
+} = console
+
 /**
  * Applies scuttling, with the default set of options, including using Snow if passed in as scuttlerFunc.
- * cSuttle globalThis right after we used it to create the root package compartment
+ * Scuttle globalThis right after we used it to create the root package compartment.
  *
  * @param {GlobalRef} globalRef - Reference to the global object.
  * @param {ScuttleOpts} opts - Scuttling options.
  */
-function applyDefaultScuttling(globalRef, opts) {
+function scuttle(globalRef, opts) {
   const scuttleOpts = generateScuttleOpts(globalRef, opts)
 
   if (scuttleOpts.enabled) {
-    if (!Array.isArray(scuttleOpts.exceptions)) {
+    if (!isArray(scuttleOpts.exceptions)) {
       throw new Error(
         `LavaMoat - scuttleGlobalThis.exceptions must be an array, got "${typeof scuttleOpts.exceptions}"`
       )
@@ -112,7 +136,7 @@ function performScuttleGlobalThis(globalRef, extraPropsToAvoid = new Array()) {
   for (const prop of props) {
     // eslint-disable-next-line no-inner-declarations
     function set() {
-      console.warn(
+      warn(
         `LavaMoat - property "${prop}" of globalThis cannot be set under scuttling mode. ` +
           'To learn more visit https://github.com/LavaMoat/LavaMoat/pull/360.'
       )
@@ -145,17 +169,8 @@ function performScuttleGlobalThis(globalRef, extraPropsToAvoid = new Array()) {
  * @param {string} prop - Property to check.
  * @returns {boolean} - Whether the property should be avoided or not.
  */
-function shouldAvoidProp(propsToAvoid, prop) {
-  for (const avoid of propsToAvoid) {
-    if (avoid instanceof RegExp && avoid.test(prop)) {
-      return true
-    }
-    if (propsToAvoid.has(prop)) {
-      return true
-    }
-  }
-  return false
-}
+const shouldAvoidProp = (propsToAvoid, prop) => from(propsToAvoid)
+  .some(avoid => avoid === prop || new RegExp(avoid).test(prop))
 
 /**
  * @param {object} value - object to get the prototype chain from.
@@ -164,17 +179,16 @@ function shouldAvoidProp(propsToAvoid, prop) {
 function getPrototypeChain(value) {
   const protoChain = []
   let current = value
-  while (
-    current &&
-    (typeof current === 'object' || typeof current === 'function')
-  ) {
+  while (current) {
+    if (typeof current !== 'object' && typeof current !== 'function') {
+      break;
+    }
     protoChain.push(current)
-    current = Reflect.getPrototypeOf(current)
+    current = getPrototypeOf(current)
   }
   return protoChain
 }
 
 module.exports = {
-  performScuttleGlobalThis,
-  applyDefaultScuttling,
+  scuttle,
 }
