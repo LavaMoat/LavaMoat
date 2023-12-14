@@ -1,8 +1,8 @@
 {
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.codeActionsOnSave": {
-    "source.fixAll": true,
-    "source.formatDocument": true
+    "source.fixAll": "explicit",
+    "source.formatDocument": "explicit"
   },
   "prettier.useEditorConfig": true
 }
