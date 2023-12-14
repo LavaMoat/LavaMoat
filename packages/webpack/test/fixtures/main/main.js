@@ -1,5 +1,6 @@
 import { hello as helloCommonJS } from 'commonjs-package'
 import { re } from 'commonjs-quirks'
+import { hello as helloBuiltins } from 'builtins-package'
 import { hello as helloES6 } from 'es6-module-package'
 import 'side-effects-package/styles.css'
 import { hello as helloTypeScript } from 'typescript-package'

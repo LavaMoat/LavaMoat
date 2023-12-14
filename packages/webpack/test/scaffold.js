@@ -7,16 +7,25 @@ const { toSnapshotSync } = require('memfs/lib/snapshot')
 const { createContext, Script, runInNewContext } = require('vm')
 const { readFileSync } = require('fs')
 
-exports.scaffold = async function runWebpackBuild(webpackConfig) {
+exports.scaffold = async function runWebpackBuild(
+  webpackConfig,
+  { writeFS = false } = {}
+) {
   // Resolve the root directory
   webpackConfig.context = path.resolve(__dirname, 'fixtures/main/')
 
   // Create a compiler instance
   const compiler = webpack(webpackConfig)
+  let fs
 
-  // Use memfs to write the output to memory
-  const memoryFs = memfs.createFsFromVolume(new memfs.Volume())
-  compiler.outputFileSystem = memoryFs
+  if (!writeFS) {
+    // Use memfs to write the output to memory
+    const memoryFs = memfs.createFsFromVolume(new memfs.Volume())
+    compiler.outputFileSystem = memoryFs
+    fs = memoryFs
+  } else {
+    fs = require('fs')
+  }
 
   return new Promise((resolve, reject) => {
     // Run the compiler
@@ -34,7 +43,7 @@ exports.scaffold = async function runWebpackBuild(webpackConfig) {
       }
 
       // Get a snapshot of all files in the memory file system
-      const snapshot = convertToMap(toSnapshotSync({ fs: memoryFs }))
+      const snapshot = convertToMap(toSnapshotSync({ fs }))
 
       resolve({
         stdout: stats ? stats.toString({ colors: false }) : '',
@@ -77,7 +86,7 @@ exports.runScript = runScript
 function runScriptWithSES(bundle, globals = {}) {
   if (typeof bundle !== 'string' || bundle === '') {
     throw new Error(
-      'runScriptWithSES requires a bundle string as the first argument',
+      'runScriptWithSES requires a bundle string as the first argument'
     )
   }
   const lockdownCode = readFileSync(require.resolve('ses'), 'utf8')

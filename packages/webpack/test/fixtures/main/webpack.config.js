@@ -41,6 +41,14 @@ module.exports = {
     }),
     new HtmlWebpackPlugin(),
   ],
+  resolve: {
+    alias: {
+      // crypto: require.resolve('crypto-browserify'), // deliberately left out, becasue we're testing for ignored modules
+      stream: require.resolve('stream-browserify'),
+      buffer: require.resolve('buffer/'),
+      util: require.resolve('util/'),
+    },
+  },
   module: {
     rules: [
       {

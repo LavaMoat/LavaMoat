@@ -3,6 +3,7 @@
 const path = require('path')
 const { WebpackError, RuntimeModule } = require('webpack')
 const Compilation = require('webpack/lib/Compilation')
+const resolve = require('browser-resolve')
 
 const { generateIdentifierLookup } = require('./buildtime/aa.js')
 const diag = require('./buildtime/diagnostics.js')
@@ -101,11 +102,28 @@ class LavaMoatPlugin {
     // compiler.options.optimization.moduleIds = "hashed";
     // compiler.options.optimization.chunkIds = "named";
 
+    // sadly regular webpack compilation doesn't allow for synchronous resolver.
+    //  Error: Cannot 'resolveSync' because the fileSystem is not sync. Use 'resolve'!
+    // function adapterFunction(resolver) {
+    //   return function(id, options) {
+    //     // Extract the directory and module name from the id
+    //     const dir = path.dirname(id);
+    //     const moduleName = path.basename(id);
+
+    //     // Call the resolver with the appropriate arguments
+    //     return resolver(options, dir, moduleName);
+    //   };
+    // }
+    // resolve = { sync: adapterFunction(compilation.resolverFactory.get('normal').resolveSync.bind(compilation.resolverFactory.get('normal'))) }
+
     // =================================================================
     // run long asynchronous processing ahead of all compilations
+
     compiler.hooks.beforeRun.tapAsync(PLUGIN_NAME, (compilation, callback) =>
       loadCanonicalNameMap({
         rootDir: compiler.context,
+        includeDevDeps: true, // can't reliably assume people only bundle prod deps
+        resolve,
       })
         .then((map) => {
           canonicalNameMap = map
@@ -117,6 +135,7 @@ class LavaMoatPlugin {
         })
     )
 
+    /** @type WebpackError[] */
     let mainCompilationWarnings
 
     compiler.hooks.thisCompilation.tap(
@@ -192,9 +211,12 @@ class LavaMoatPlugin {
                   // @ts-expect-error BAD TYPES
                   module.identifierStr?.startsWith('ignored')) ||
                 // @ts-expect-error BAD TYPES
-                module.resource === undefined // better to explicitly list it as unenforceable than let it fall through the cracks
+                (module.resource === undefined && moduleId) // better to explicitly list it as unenforceable than let it fall through the cracks
               ) {
-                unenforceableModuleIds.push(moduleId)
+                // @ts-expect-error BAD TYPES
+                unenforceableModuleIds.push(
+                  `${moduleId}<${module?.readableIdentifierStr}>`
+                )
               } else {
                 knownPaths.push({
                   path: /** @type {any} */ (module).resource,
@@ -216,7 +238,7 @@ class LavaMoatPlugin {
           if (unenforceableModuleIds.length > 0) {
             mainCompilationWarnings.push(
               new WebpackError(
-                `LavaMoatPlugin: the following module ids can't be controlled by policy and must be ignored at runtime: \n  ${unenforceableModuleIds.join()}`
+                `LavaMoatPlugin: the following module ids can't be controlled by policy and will be ignored at runtime (to fix, provide a resolve.alias in webpack config): \n  ${unenforceableModuleIds.join()}`
               )
             )
           }

@@ -5,6 +5,7 @@
   "dependencies": {
     "commonjs-package": "1.0.0",
     "commonjs-quirks": "1.0.0",
+    "builtins-package": "1.0.0",
     "es6-module-package": "1.0.0",
     "side-effects-package": "1.0.0",
     "typescript-package": "1.0.0",
