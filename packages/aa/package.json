@@ -15,7 +15,7 @@
     "lint:deps": "depcheck"
   },
   "devDependencies": {
-    "@types/resolve": "1.20.3"
+    "@types/resolve": "1.20.6"
   },
   "dependencies": {
     "resolve": "^1.22.3"
