@@ -24,7 +24,7 @@ jobs:
       - name: Upgrade npm # for workspace support
         run: npm i -g npm@9 # npm@9 supports our supported Node.js versions
       - name: Install Dependencies
-        uses: bahmutov/npm-install@1a235c31658a322a3b024444759650ee6345c26d # v1.8.25
+        uses: bahmutov/npm-install@2509f13e8485d88340a789a3f7ca11aaac47c9fc # v1.8.36
         with:
           useRollingCache: true
           install-command: npm ci --foreground-scripts
@@ -49,7 +49,7 @@ jobs:
       - name: Upgrade npm # for workspace support
         run: npm i -g npm@9 # npm@9 supports our supported Node.js versions
       - name: Install Dependencies
-        uses: bahmutov/npm-install@1a235c31658a322a3b024444759650ee6345c26d # v1.8.25
+        uses: bahmutov/npm-install@2509f13e8485d88340a789a3f7ca11aaac47c9fc # v1.8.36
         with:
           useRollingCache: true
           install-command: npm ci --foreground-scripts
