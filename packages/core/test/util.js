@@ -385,7 +385,24 @@ async function runScenario({ scenario, runWithPrecompiledModules = false }) {
   return testResult
 }
 
+/**
+ * The subset of the `fs/promises` module that is used by `prepareScenarioOnDisk`.
+ * @typedef FsPromiseApi
+ * @property {(dir: string, opts?: import('node:fs').MakeDirectoryOptions & {recursive: true}) => Promise<string|undefined>} mkdir
+ * @property {(filepath: string, data: any) => Promise<void>} writeFile
+ */
+
+/**
+ * Prepares a scenario on disk by writing files based on the provided scenario object.
+ * @param {Object} options - The options for preparing the scenario.
+ * @param {FsPromiseApi} [options.fs] - The file system module to use (default: `node:fs/promises`).
+ * @param {Object} options.scenario - The scenario object containing the files to write.
+ * @param {string} [options.policyName='policies'] - The name of the policy directory (default: 'policies').
+ * @param {string} [options.projectDir] - The project directory path.
+ * @returns {Promise<{projectDir: string, policyDir: string}>} - An object containing the project directory path and the policy directory path.
+ */
 async function prepareScenarioOnDisk({
+  fs = require('node:fs/promises'),
   scenario,
   policyName = 'policies',
   projectDir,
