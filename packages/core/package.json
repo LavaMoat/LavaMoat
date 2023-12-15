@@ -16,7 +16,7 @@
     "type-fest": "^4.7.1"
   },
   "devDependencies": {
-    "@types/json-stable-stringify": "^1.0.34",
+    "@types/json-stable-stringify": "1.0.36",
     "ses": "^0.18.8",
     "tmp-promise": "^3.0.3"
   },

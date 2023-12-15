@@ -30,7 +30,7 @@
     "test": "test"
   },
   "devDependencies": {
-    "@types/npmcli__promise-spawn": "^6.0.0"
+    "@types/npmcli__promise-spawn": "6.0.1"
   },
   "scripts": {
     "test": "npm run test:run",
