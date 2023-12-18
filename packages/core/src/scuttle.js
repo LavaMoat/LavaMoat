@@ -11,16 +11,8 @@
  * @property {object} [globalThis] - Reference to the global object.
  */
 
-const {
-  Object,
-  Array,
-  Error,
-  RegExp,
-  Set,
-  console,
-  Proxy,
-  Reflect,
-} = globalThis
+const { Object, Array, Error, RegExp, Set, console, Proxy, Reflect } =
+  globalThis
 
 const {
   assign,
@@ -30,18 +22,11 @@ const {
   defineProperty,
 } = Object
 
-const {
-  isArray,
-  from,
-} = Array
+const { isArray, from } = Array
 
-const {
-  getPrototypeOf,
-} = Reflect
+const { getPrototypeOf } = Reflect
 
-const {
-  warn,
-} = console
+const { warn } = console
 
 /**
  * Applies scuttling, with the default set of options, including using Snow if passed in as scuttlerFunc.
@@ -70,7 +55,7 @@ function scuttle(globalRef, opts) {
  * @param {ScuttleOpts|boolean} originalOpts - Scuttling options. Accepts `true` for backwards compatibility.
  * @returns {ScuttleOpts} - Final scuttling options.
  */
-function generateScuttleOpts(globalRef, originalOpts) {
+function generateScuttleOpts(globalRef, originalOpts = create(null)) {
   const defaultOpts = {
     enabled: true,
     exceptions: [],
@@ -169,8 +154,10 @@ function performScuttleGlobalThis(globalRef, extraPropsToAvoid = new Array()) {
  * @param {string} prop - Property to check.
  * @returns {boolean} - Whether the property should be avoided or not.
  */
-const shouldAvoidProp = (propsToAvoid, prop) => from(propsToAvoid)
-  .some(avoid => avoid === prop || new RegExp(avoid).test(prop))
+const shouldAvoidProp = (propsToAvoid, prop) =>
+  from(propsToAvoid).some(
+    (avoid) => avoid === prop || new RegExp(avoid).test(prop)
+  )
 
 /**
  * @param {object} value - object to get the prototype chain from.
@@ -181,7 +168,7 @@ function getPrototypeChain(value) {
   let current = value
   while (current) {
     if (typeof current !== 'object' && typeof current !== 'function') {
-      break;
+      break
     }
     protoChain.push(current)
     current = getPrototypeOf(current)
