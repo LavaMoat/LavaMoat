@@ -107,6 +107,8 @@ module.exports = {
     {
       files: ['packages/*/src/**/*.js'],
       rules: {
+        // Array constructor allows us to leverage defensive coding
+        '@typescript-eslint/no-array-constructor': 'off',
         '@typescript-eslint/no-var-requires': 'off',
       },
     },

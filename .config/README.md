@@ -48,7 +48,7 @@ In addition the root `tsconfig.json` serves as the "default" for files in the re
 
    This file controls how and where `tsc` emits declarations; our convention is to dump them all in `types/`. We also want to publish these types along with our packages (see step 6).
 
-   `tsconfig.src.json` contains `checkJs: true`; `tsc` will expect _all_ `.js` files to be well-typed. If that's not applicable to the package you're setting up, override the value to `false` and add `// @ts-check` to the top of each file needing typechecking.
+   `tsconfig.src.json` contains `checkJs: true`; `tsc` will expect _all_ `.js` files to be well-typed. If that's not applicable to the package you're setting up, override the value to `false` and add `// @ts-check` to the top of each file needing typechecking. 
 
    If you are a glutton for punishment, add `strict: true` to this config file. It's not the default for this repository tho.
 
