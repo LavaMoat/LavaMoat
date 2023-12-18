@@ -30,7 +30,7 @@
     "test": "test"
   },
   "devDependencies": {
-    "@types/npmcli__promise-spawn": "^6.0.0"
+    "@types/npmcli__promise-spawn": "6.0.3"
   },
   "scripts": {
     "test": "npm run test:run",
@@ -49,5 +49,12 @@
     ],
     "timeout": "30s"
   },
-  "types": "./types/index.d.ts"
+  "types": "./types/index.d.ts",
+  "files": [
+    "src",
+    "types",
+    "CHANGELOG.md",
+    "!*.tsbuildinfo",
+    "!tsconfig.json"
+  ]
 }

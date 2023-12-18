@@ -1,0 +1,6 @@
+{
+  "extends": "./tsconfig.workspace.json",
+  "compilerOptions": {
+    "noEmit": true
+  }
+}

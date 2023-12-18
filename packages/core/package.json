@@ -12,9 +12,11 @@
   "dependencies": {
     "json-stable-stringify": "^1.0.2",
     "lavamoat-tofu": "^7.0.0",
-    "merge-deep": "^3.0.3"
+    "merge-deep": "^3.0.3",
+    "type-fest": "^4.7.1"
   },
   "devDependencies": {
+    "@types/json-stable-stringify": "1.0.36",
     "ses": "^0.18.8",
     "tmp-promise": "^3.0.3"
   },
@@ -25,7 +27,11 @@
   },
   "author": "kumavis",
   "license": "MIT",
-  "repository": "git+https://github.com/LavaMoat/lavamoat.git",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LavaMoat/lavamoat.git",
+    "directory": "packages/core"
+  },
   "bugs": {
     "url": "https://github.com/LavaMoat/lavamoat/issues"
   },
@@ -35,5 +41,13 @@
       "test/*.spec.js"
     ],
     "timeout": "30s"
-  }
+  },
+  "types": "./types/src/types.d.ts",
+  "files": [
+    "lib",
+    "src",
+    "types",
+    "!*.tsbuildinfo",
+    "CHANGELOG.md"
+  ]
 }

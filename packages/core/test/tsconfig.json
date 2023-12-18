@@ -1,0 +1,13 @@
+{
+  "extends": "../../../.config/tsconfig.test.json",
+  "compilerOptions": {
+    "checkJs": false,
+    "rootDir": "."
+  },
+  "include": ["**/*"],
+  "references": [
+    {
+      "path": "../src/tsconfig.json"
+    }
+  ]
+}

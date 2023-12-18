@@ -32,7 +32,11 @@
     "test": "test"
   },
   "author": "kumavis",
-  "repository": "git+https://github.com/LavaMoat/lavamoat.git",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LavaMoat/lavamoat.git",
+    "directory": "packages/node"
+  },
   "bugs": {
     "url": "https://github.com/LavaMoat/lavamoat/issues"
   },

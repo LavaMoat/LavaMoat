@@ -6,14 +6,12 @@ LavaMoat Webpack Plugin wraps each module in the bundle in a [Compartment](https
 
 ## Usage
 
-> Initial Beta version requires you to add SES lockdown to the page manually. We're working on finding the best option to automate adding it.
 > Initial Beta version requires you to generate the policy with lavamoat CLI. We're working on moving that into the plugin.
 
 1. Generate a policy file for your app's entry `npx lavamoat --autopolicy path/to/index.js` and adjust it if needed.
 2. Note that `builtins` in the policy indicate modules that webpack will either polyfill or ignore, so they need to be moved to `packages` and explicitly added as dependencies or just removed.
 3. Create a webpack bundle with the LavaMoat plugin enabled and pass the policy from the policy file to it in options.
-4. Copy `node_modules/ses/dist/lockdown.umd.js` into your built project and add a `<script>` tag pointing to it before the bundle. The file must remain unchanged. (Alternatively, it's also fine if you prepend the file to the bundle itself.)
-
+4. Make sure you add a `<script src="./lockdown.js"></script>` before all other scripts or enable the `HtmlWebpackPluginInterop` option if you're using `html-webpack-plugin`.
 
 The LavaMoat plugin takes an options object with the following properties:
 
@@ -23,6 +21,7 @@ The LavaMoat plugin takes an options object with the following properties:
   Setting positive verbosity will enable runChecks.
 - readableResourceIds: Decide whether to keep resource IDs human readable (regardless of production/development mode). If false, they are replaced with a sequence of numbers. Keeping them readable may be useful for debugging when a policy violation error is thrown.
 - lockdown: set configuration for [SES lockdown](). Setting the option replaces defaults from LavaMoat.
+- HtmlWebpackPluginInterop: add a script tag to the html output for lockdown.js if HtmlWebpackPlugin is in use
 
 ```js
 const LavaMoatPlugin = require('@lavamoat/webpack')
@@ -42,6 +41,7 @@ module.exports = {
       //   consoleTaming: "unsafe",
       //   overrideTaming: "severe"
       // },
+      // HtmlWebpackPluginInterop: false, // set it to true if you want a script tag for lockdown.js to automatically be added to your HTML template
     }),
   ],
   // ... other webpack configuration properties
@@ -132,10 +132,6 @@ Elements of the Webpack runtime (e.g., `__webpack_require__.*`) are currently mo
 Run `npm test` to start the automated tests.
 
 ## Manual testing
-
-To prepare, run `npm ci` and `npm run lib:ses` in the packages/webpack folder before you begin
-
-Then:
 
 - Navigate to `example/`
 - Run `npm ci` and `npm test`

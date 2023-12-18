@@ -1,4 +1,5 @@
 import { hello as helloCommonJS } from 'commonjs-package'
+import { re } from 'commonjs-quirks'
 import { hello as helloES6 } from 'es6-module-package'
 import 'side-effects-package/styles.css'
 import { hello as helloTypeScript } from 'typescript-package'
@@ -12,11 +13,12 @@ import './src/style.css'
 function run() {
   console.log(
     helloCommonJS(),
+    JSON.stringify(re),
     helloES6(),
     helloTypeScript(),
     helloUMD(),
     thing(),
-    what,
+    what
   )
 }
 

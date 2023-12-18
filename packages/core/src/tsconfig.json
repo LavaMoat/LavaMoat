@@ -1,0 +1,9 @@
+{
+  "extends": "../../../.config/tsconfig.src.json",
+  "compilerOptions": {
+    "checkJs": false,
+    "rootDir": "..",
+    "outDir": "../types"
+  },
+  "include": ["../lib/transforms.umd.js", "."]
+}

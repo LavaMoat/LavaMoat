@@ -1,8 +1,7 @@
 {
-  "extends": "../../config/tsconfig.base.json",
-  "include": ["src"],
-  "compilerOptions": {
-    "rootDir": "src",
-    "outDir": "types"
-  }
+  "extends": "../../.config/tsconfig.workspace.json",
+  "references": [
+    { "path": "./src/tsconfig.json" },
+    { "path": "./test/tsconfig.json" }
+  ]
 }

@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.1.0-beta.0](https://github.com/LavaMoat/LavaMoat/compare/webpack-v0.0.1-beta.0...webpack-v0.1.0-beta.0) (2023-11-23)
+
+
+### Features
+
+* **webpack:** add emitting lockdown.js to dist ([5eb0bfb](https://github.com/LavaMoat/LavaMoat/commit/5eb0bfbf18936485e627e423c1818e65bdfd111d))
+
+
+### Bug Fixes
+
+* **webpack:** avoid missing the script insertion if head tag is missing in html-webpack-plugin template ([fc1d2aa](https://github.com/LavaMoat/LavaMoat/commit/fc1d2aadc1c7d68a882f71ae696b21f8c09e6f73))
+* **webpack:** improve regex-based script insertion for html-webpack-plugin in emitSes.js ([3d8b4db](https://github.com/LavaMoat/LavaMoat/commit/3d8b4db8853e6fc8bea133e11e204e7360dcf557))
+
 ## [0.0.1-beta.0](https://github.com/LavaMoat/LavaMoat/compare/webpack-v0.0.1-beta.0...webpack-v0.0.1-beta.0) (2023-10-18)
 
 

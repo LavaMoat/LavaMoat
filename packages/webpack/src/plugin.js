@@ -1,10 +1,9 @@
 // @ts-check
 
 const path = require('path')
-const {
-  WebpackError,
-  RuntimeModule,
-} = require('webpack')
+const { WebpackError, RuntimeModule } = require('webpack')
+const Compilation = require('webpack/lib/Compilation')
+
 const { generateIdentifierLookup } = require('./buildtime/aa.js')
 const diag = require('./buildtime/diagnostics.js')
 const progress = require('./buildtime/progress.js')
@@ -25,6 +24,7 @@ const JAVASCRIPT_MODULE_TYPE_ESM = 'javascript/esm'
 
 const { RUNTIME_KEY } = require('./ENUM.json')
 const { wrapGeneratorMaker } = require('./buildtime/generator.js')
+const { sesEmitHook } = require('./buildtime/emitSes.js')
 const EXCLUDE_LOADER = path.join(__dirname, './excludeLoader.js')
 
 class VirtualRuntimeModule extends RuntimeModule {
@@ -52,11 +52,11 @@ const lockdownDefaults = {
 }
 
 class LavaMoatPlugin {
-  /**   
+  /**
    * @param {import("./types.js").LavaMoatPluginOptions} [options]
    */
   constructor(options = { policy: {} }) {
-    if(!options.lockdown) {
+    if (!options.lockdown) {
       options.lockdown = lockdownDefaults
     }
     this.options = options
@@ -114,7 +114,7 @@ class LavaMoatPlugin {
         })
         .catch((err) => {
           callback(err)
-        }),
+        })
     )
 
     let mainCompilationWarnings
@@ -134,8 +134,8 @@ class LavaMoatPlugin {
           mainCompilationWarnings = compilation.warnings
           mainCompilationWarnings.push(
             new WebpackError(
-              'LavaMoatPlugin: Concatenation of modules disabled - not compatible with LavaMoat wrapped modules.',
-            ),
+              'LavaMoatPlugin: Concatenation of modules disabled - not compatible with LavaMoat wrapped modules.'
+            )
           )
         }
 
@@ -191,12 +191,15 @@ class LavaMoatPlugin {
                 (module.type === JAVASCRIPT_MODULE_TYPE_DYNAMIC &&
                   // @ts-expect-error BAD TYPES
                   module.identifierStr?.startsWith('ignored')) ||
-                  // @ts-expect-error BAD TYPES
-                  module.resource === undefined // better to explicitly list it as unenforceable than let it fall through the cracks
+                // @ts-expect-error BAD TYPES
+                module.resource === undefined // better to explicitly list it as unenforceable than let it fall through the cracks
               ) {
                 unenforceableModuleIds.push(moduleId)
               } else {
-                knownPaths.push({ path: /** @type {any} */(module).resource, moduleId }) // typescript is complaining about the use of `resource` here, but it's actually there.
+                knownPaths.push({
+                  path: /** @type {any} */ (module).resource,
+                  moduleId,
+                }) // typescript is complaining about the use of `resource` here, but it's actually there.
               }
             })
           })
@@ -213,8 +216,8 @@ class LavaMoatPlugin {
           if (unenforceableModuleIds.length > 0) {
             mainCompilationWarnings.push(
               new WebpackError(
-                `LavaMoatPlugin: the following module ids can't be controlled by policy and must be ignored at runtime: \n  ${unenforceableModuleIds.join()}`,
-              ),
+                `LavaMoatPlugin: the following module ids can't be controlled by policy and must be ignored at runtime: \n  ${unenforceableModuleIds.join()}`
+              )
             )
           }
           PROGRESS.report('pathsProcessed')
@@ -236,7 +239,7 @@ class LavaMoatPlugin {
               runChecks,
               getIdentifierForPath,
               PROGRESS,
-            }),
+            })
           )
         }
 
@@ -246,8 +249,8 @@ class LavaMoatPlugin {
           diag.rawDebug(3, '> afterProcessAssets')
           mainCompilationWarnings.push(
             new WebpackError(
-              `in LavaMoatPlugin: excluded modules \n  ${excludes.join('\n  ')}`,
-            ),
+              `in LavaMoatPlugin: excluded modules \n  ${excludes.join('\n  ')}`
+            )
           )
         })
 
@@ -269,12 +272,12 @@ class LavaMoatPlugin {
               if (!PROGRESS.done('generatorCalled')) {
                 mainCompilationWarnings.push(
                   new WebpackError(
-                    'LavaMoatPlugin: Something was generating runtime before all modules were identified. This might be part of a sub-compilation of a plugin. Please check for any unwanted interference between plugins.',
-                  ),
+                    'LavaMoatPlugin: Something was generating runtime before all modules were identified. This might be part of a sub-compilation of a plugin. Please check for any unwanted interference between plugins.'
+                  )
                 )
                 diag.rawDebug(
                   1,
-                  '> skipped adding runtime (additionalChunkRuntimeRequirements)',
+                  '> skipped adding runtime (additionalChunkRuntimeRequirements)'
                 )
                 // It's possible to generate the runtime with an empty policy to make the wrapped code work.
                 // It's no longer necessasry now that `generate` function is only wrapping anything if paths were processed,
@@ -285,13 +288,13 @@ class LavaMoatPlugin {
                 if (onceForChunkSet.has(chunk)) {
                   diag.rawDebug(
                     1,
-                    '> skipped adding runtime (additionalChunkRuntimeRequirements)',
+                    '> skipped adding runtime (additionalChunkRuntimeRequirements)'
                   )
                   return
                 }
                 diag.rawDebug(
                   1,
-                  '> adding runtime (additionalChunkRuntimeRequirements)',
+                  '> adding runtime (additionalChunkRuntimeRequirements)'
                 )
                 // narrow down the policy and map to module identifiers
                 const policyData = identifierLookup.getTranslatedPolicy()
@@ -314,16 +317,21 @@ class LavaMoatPlugin {
                   },
                   { name: 'options', data: runtimeOptions, json: true },
                   { name: 'policy', data: policyData, json: true },
-                  { name: 'ENUM', file: path.join(__dirname, './ENUM.json'), json: true },
+                  {
+                    name: 'ENUM',
+                    file: path.join(__dirname, './ENUM.json'),
+                    json: true,
+                  },
                   {
                     name: 'endowmentsToolkit',
-                    shimRequire:
-                      'lavamoat-core/src/endowmentsToolkit.js',
+                    shimRequire: 'lavamoat-core/src/endowmentsToolkit.js',
                   },
-                  { name: 'runtime', file: path.join(__dirname, './runtime/runtime.js') },
+                  {
+                    name: 'runtime',
+                    file: path.join(__dirname, './runtime/runtime.js'),
+                  },
                 ])
 
-                
                 // set.add(RuntimeGlobals.onChunksLoaded); // TODO: develop an understanding of what this line does and why it was a part of the runtime setup for module federation
 
                 // Mark the chunk as processed by adding it to the WeakSet.
@@ -336,18 +344,34 @@ class LavaMoatPlugin {
                   new VirtualRuntimeModule({
                     name: 'LavaMoat/runtime',
                     source: lavaMoatRuntime,
-                  }),
+                  })
                 )
 
                 PROGRESS.report('runtimeAdded')
               }
             }
+          }
+        )
+
+        const HtmlWebpackPluginInUse = compiler.options.plugins.find(
+          (plugin) => plugin.constructor.name === 'HtmlWebpackPlugin'
+        )
+
+        compilation.hooks.processAssets.tap(
+          {
+            name: PLUGIN_NAME,
+            stage: Compilation.PROCESS_ASSETS_STAGE_ADDITIONAL,
           },
+          sesEmitHook({
+            compilation,
+            HtmlWebpackPluginInUse,
+            HtmlWebpackPluginInterop: options.HtmlWebpackPluginInterop,
+          })
         )
 
         // TODO: add later hooks to optionally verify correctness and totality
         // of wrapping for the paranoid mode.
-      },
+      }
     )
   }
 }

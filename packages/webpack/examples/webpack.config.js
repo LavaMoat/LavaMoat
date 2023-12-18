@@ -41,6 +41,7 @@ module.exports = {
       readableResourceIds: true,
       runChecks: true,
       diagnosticsVerbosity: 1,
+      HtmlWebpackPluginInterop: true,
     }),
     // virtualModules,
     new ProgressPlugin(),
@@ -48,9 +49,7 @@ module.exports = {
       filename: 'styles/[name].css',
       // experimentalUseImportModule: false, // turns off some module execution at build time
     }),
-    new HtmlWebpackPlugin({
-      template: './index.html',
-    }),
+    new HtmlWebpackPlugin(),
   ],
   module: {
     rules: [

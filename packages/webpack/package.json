@@ -1,13 +1,13 @@
 {
   "name": "@lavamoat/webpack",
-  "version": "0.0.1-beta.0",
+  "version": "0.1.0-beta.0",
   "description": "LavaMoat Webpack plugin for running dependencies in Compartments without eval",
   "main": "src/plugin.js",
   "scripts": {
-    "test": "ava --timeout=30s test/*.spec.js",
-    "lib:ses": "cp ../../node_modules/ses/dist/lockdown.umd.js ./example/ses/lockdown.umd.js"
+    "test": "ava"
   },
   "dependencies": {
+    "@lavamoat/aa": "^4.0.0",
     "lavamoat-core": "^15.0.0"
   },
   "peerDependencies": {
@@ -37,9 +37,23 @@
   "files": [
     "src"
   ],
-  "repository": "git+https://github.com/LavaMoat/lavamoat.git",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LavaMoat/lavamoat.git",
+    "directory": "packages/webpack"
+  },
   "bugs": {
     "url": "https://github.com/LavaMoat/lavamoat/issues"
   },
-  "homepage": "https://github.com/LavaMoat/lavamoat#readme"
+  "homepage": "https://github.com/LavaMoat/lavamoat#readme",
+  "engines": {
+    "node": "^16.20.0 || ^18.0.0 || ^20.0.0",
+    "npm": ">=7.0.0"
+  },
+  "ava": {
+    "files": [
+      "test/*.spec.js"
+    ],
+    "timeout": "30s"
+  }
 }

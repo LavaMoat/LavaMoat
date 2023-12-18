@@ -7,6 +7,7 @@
  * @typedef {Object} LavaMoatPluginOptions
  * @property {boolean} [runChecks] - check resulting code with wrapping for correctness
  * @property {boolean} [readableResourceIds] - should resourceIds be readable or turned into numbers - defaults to (mode==='development')
+ * @property {boolean} [HtmlWebpackPluginInterop] - add a script tag to the html output for lockdown.js if HtmlWebpackPlugin is in use
  * @property {number} [diagnosticsVerbosity] - a number representing diagnostics output verbosity, the larger the more overwhelming
  * @property {Object} policy - LavaMoat policy
  * @property {Object} [lockdown] - options to pass to lockdown
@@ -27,8 +28,8 @@
  * @property {GetEndowmentsForConfig} getEndowmentsForConfig
  * @property {(...args: any[]) => unknown} makeMinimalViewOfRef - Creates a minimal view of a reference (e.g. a global) that only exposes the properties specified in the packagePolicy
  * @property {(...args: any[]) => unknown} copyValueAtPath - Copies a value at a specific path from the source reference to the target reference
- * @property {(...args: any[]) => unknown} applyGetSetPropDescTransforms 
- * @property {(...args: any[]) => unknown} applyEndowmentPropDescTransforms 
+ * @property {(...args: any[]) => unknown} applyGetSetPropDescTransforms
+ * @property {(...args: any[]) => unknown} applyEndowmentPropDescTransforms
  * @property {(...args: any[]) => unknown} copyWrappedGlobals - Copies wrapped globals from a global reference to a target object with wrapping
  * @property {(...args: any[]) => unknown} createFunctionWrapper - conditionally binds a function - used to ensure functions (like fetch) get called on the this they expect
  */
@@ -51,4 +52,3 @@
  */
 
 module.exports = {}
-

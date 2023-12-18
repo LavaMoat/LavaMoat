@@ -1,4 +1,4 @@
-/* eslint-disable no-undef, no-unused-vars, no-unused-expressions, no-extend-native */
+/* eslint-disable no-undef, @typescript-eslint/no-unused-vars, no-unused-expressions, no-extend-native */
 const test = require('ava')
 
 const { createConfigForTest } = require('./util')

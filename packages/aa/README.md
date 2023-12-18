@@ -2,7 +2,7 @@
 
 LavaMoat's canonical package name convention.
 
-Named after a type of lava: ‘A‘ā https://volcanoes.usgs.gov/vsc/glossary/aa.html
+Named after a type of lava: ʻAʻā https://volcanoes.usgs.gov/vsc/glossary/aa.html
 
 #### goals
 

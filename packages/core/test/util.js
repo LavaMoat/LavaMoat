@@ -1,12 +1,14 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable n/no-missing-require */
 const {
   parseForPolicy,
   LavamoatModuleRecord,
   generateKernel,
   getDefaultPaths,
-} = require('../src/index.js')
+} = require('../src')
 const mergeDeep = require('merge-deep')
 const { runInContext, createContext } = require('vm')
-const path = require('path')
+const path = require('node:path')
 const { promises: fs } = require('fs')
 var tmp = require('tmp-promise')
 const stringify = require('json-stable-stringify')
