@@ -50,7 +50,7 @@
     "lint:staged": "lint-staged",
     "lint": "npm run lint:eslint && npm run lint:deps",
     "release:publish": "node scripts/publish.js --newPkg=${npm_config_newpkg}",
-    "release:dry-run": "node scripts/publish.js --dry-run --newPkg=${npm_config_newpkg}",
+    "release:dry-run": "node scripts/publish.js --dryRun --newPkg=${npm_config_newpkg}",
     "release:rebuild": "npm run rebuild && npm run test:prep && npm run test:workspaces",
     "release": "npm run release:rebuild && npm run release:publish --newPkg=${npm_config_newpkg}",
     "rebuild": "npm run --workspaces --if-present rebuild && npm run rebuild:types",
