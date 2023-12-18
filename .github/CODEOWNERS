@@ -2,7 +2,9 @@
 * @LavaMoat/devs
 
 *eslint* @boneskull
-tsconfig*.json @boneskull
+tsconfig*.json @boneskull @legobeat
+yarn.lock @legobeat
+{,packages/*/}package.json @legobeat
 *release-please* @boneskull
 .husky/**/* @boneskull
 .config/README.md @boneskull
