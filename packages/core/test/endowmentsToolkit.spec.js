@@ -23,6 +23,25 @@ test('getEndowmentsForConfig', (t) => {
   t.is(resultGlobal.namespace.stringValue.includes('dab'), true)
 })
 
+test('getEndowmentsForConfig - function on proto', (t) => {
+  const getEndowmentsForConfig = prepareTest()
+  const assertMe = Symbol('assertMe')
+  const appendChild = () => assertMe
+  const theProto = {
+    appendChild,
+  }
+  const sourceGlobal = {
+    lookAtMyProto: Object.create(theProto),
+  }
+  const config = {
+    globals: {
+      'lookAtMyProto.appendChild': true,
+    },
+  }
+  const resultGlobal = getEndowmentsForConfig(sourceGlobal, config)
+  t.is(resultGlobal.lookAtMyProto.appendChild(), assertMe)
+})
+
 test('getEndowmentsForConfig - siblings', (t) => {
   const getEndowmentsForConfig = prepareTest()
   const sourceGlobal = { Buffer }
