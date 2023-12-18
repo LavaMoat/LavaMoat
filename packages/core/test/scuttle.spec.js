@@ -20,7 +20,7 @@ function testScuttling(
 ) {
   return intrinsics.some((intrinsic) => {
     try {
-      new globalRef[intrinsic]()
+      const _ = globalRef[intrinsic]
       return false
     } catch (e) {
       if (err(intrinsic) === e.message) {
