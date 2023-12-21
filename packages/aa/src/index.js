@@ -12,10 +12,19 @@ module.exports = {
   createPerformantResolve,
 }
 
+/** @type {Resolver|undefined} */
+let performantResolve
+
 /**
+ * performant resolve avoids loading package.jsons if their path is what's being
+ * resolved, offering 2x performance improvement compared to using original
+ * resolve
  * @returns {Resolver}
  */
 function createPerformantResolve() {
+  if (performantResolve) {
+    return performantResolve
+  }
   /**
    * @param {string} self
    * @returns {(
@@ -37,25 +46,26 @@ function createPerformantResolve() {
     } catch (jsonErr) {}
   }
 
-  return {
+  performantResolve = {
     sync: (path, { basedir }) =>
       nodeResolve.sync(path, {
         basedir,
         readPackageSync: readPackageWithout(path),
       }),
   }
+  return performantResolve
 }
 
 /**
  * @param {LoadCanonicalNameMapOpts} options
  * @returns {Promise<CanonicalNameMap>}
  */
-async function loadCanonicalNameMap({ rootDir, includeDevDeps, resolve }) {
+async function loadCanonicalNameMap({
+  rootDir,
+  includeDevDeps,
+  resolve = createPerformantResolve(),
+}) {
   const canonicalNameMap = /** @type {CanonicalNameMap} */ (new Map())
-  // performant resolve avoids loading package.jsons if their path is what's being resolved,
-  // offering 2x performance improvement compared to using original resolve
-  resolve = resolve || createPerformantResolve()
-  // resolve = resolve || nodeResolve
   // walk tree
   const logicalPathMap = walkDependencyTreeForBestLogicalPaths({
     packageDir: rootDir,
@@ -83,12 +93,25 @@ function wrappedResolveSync(resolve, depName, packageDir) {
   const depRelativePackageJsonPath = path.join(depName, 'package.json')
   try {
     return resolve.sync(depRelativePackageJsonPath, { basedir: packageDir })
-  } catch (err) {
-    if (!(/** @type {Error} */ (err).message.includes('Cannot find module'))) {
-      throw err
+  } catch (e) {
+    const performantResolve = createPerformantResolve()
+    const err = /** @type {Error} */ (e)
+    if (
+      err.message?.includes('Cannot find module') &&
+      resolve !== performantResolve
+    ) {
+      try {
+        return performantResolve.sync(depRelativePackageJsonPath, {
+          basedir: packageDir,
+        })
+      } catch (err) {
+        if (
+          !(/** @type {Error} */ (err).message?.includes('Cannot find module'))
+        ) {
+          throw err
+        }
+      }
     }
-    // debug: log resolution failures
-    // console.log('resolve failed', depName, packageDir)
   }
 }
 
@@ -125,9 +148,8 @@ function walkDependencyTreeForBestLogicalPaths({
   logicalPath = [],
   includeDevDeps = false,
   visited = new Set(),
-  resolve,
+  resolve = createPerformantResolve(),
 }) {
-  resolve = resolve ?? createPerformantResolve()
   /** @type {Map<string, string[]>} */
   const preferredPackageLogicalPathMap = new Map()
   // add the entry package as the first work unit
