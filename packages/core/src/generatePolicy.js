@@ -14,6 +14,7 @@ const {
     mapToObj,
     reduceToTopmostApiCallsFromStrings,
   },
+  inspectEsmImports,
   // @ts-expect-error no types yet
 } = require('lavamoat-tofu')
 const { mergePolicy } = require('./mergePolicy')
@@ -38,13 +39,16 @@ function createModuleInspector(opts) {
   const debugInfo = {}
 
   /** @type {ModuleInspector} */
-  const inspector = /** @type {any} */ (new EventEmitter())
-  inspector.inspectModule = (moduleRecord, opts2 = {}) => {
-    inspectModule(moduleRecord, { ...opts, ...opts2 })
-  }
-  inspector.generatePolicy = (opts2) => {
-    return generatePolicy({ ...opts, ...opts2 })
-  }
+  const inspector = Object.assign(new EventEmitter(), {
+    /** @type {InspectModuleFn} */
+    inspectModule: (moduleRecord, opts2) => {
+      inspectModule(moduleRecord, { ...opts, ...opts2 })
+    },
+    /** @type {GeneratePolicyFn} */
+    generatePolicy: (opts2) => {
+      return generatePolicy({ ...opts, ...opts2 })
+    },
+  })
 
   return inspector
 
@@ -251,7 +255,14 @@ function createModuleInspector(opts) {
    * @param {boolean} includeDebugInfo
    */
   function inspectForGlobals(ast, moduleRecord, packageName, includeDebugInfo) {
-    const commonJsRefs = ['require', 'module', 'exports', 'arguments']
+    const commonJsRefs = [
+      'require',
+      'module',
+      'exports',
+      'arguments',
+      'import',
+      'export',
+    ]
     const globalObjPrototypeRefs = Object.getOwnPropertyNames(Object.prototype)
     const foundGlobals = inspectGlobals(ast, {
       // browserify commonjs scope
@@ -296,21 +307,33 @@ function createModuleInspector(opts) {
     const namesForBuiltins = Object.entries(moduleRecord.importMap)
       .filter(([, resolvedName]) => isBuiltin(resolvedName))
       .map(([requestedName]) => requestedName)
-    const { cjsImports: moduleBuiltins } = inspectImports(ast, namesForBuiltins)
-    if (!moduleBuiltins.length) {
+    const esmModuleBuiltins = inspectEsmImports(ast, namesForBuiltins)
+    const { cjsImports: cjsModuleBuiltins } = inspectImports(
+      ast,
+      namesForBuiltins
+    )
+    if (cjsModuleBuiltins.length + esmModuleBuiltins.length === 0) {
       return
     }
     // add debug info
     if (includeDebugInfo) {
       const moduleDebug = debugInfo[moduleRecord.specifier]
-      moduleDebug.builtin = moduleBuiltins
+      moduleDebug.builtin = [
+        ...new Set([...esmModuleBuiltins, ...cjsModuleBuiltins]),
+      ]
     }
     // aggregate package builtins
     if (!packageToBuiltinImports.has(packageName)) {
       packageToBuiltinImports.set(packageName, [])
     }
-    let packageBuiltins = packageToBuiltinImports.get(packageName)
-    packageBuiltins = [...(packageBuiltins ?? []), ...moduleBuiltins]
+    let packageBuiltins = packageToBuiltinImports.get(packageName) ?? []
+    packageBuiltins = [
+      ...new Set([
+        ...packageBuiltins,
+        ...cjsModuleBuiltins,
+        ...esmModuleBuiltins,
+      ]),
+    ]
     packageToBuiltinImports.set(packageName, packageBuiltins)
   }
 
