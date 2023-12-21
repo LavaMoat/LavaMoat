@@ -28,6 +28,7 @@
     "lint-staged": "^13.2.3",
     "memfs": "^4.3.0",
     "prettier": "3.0.3",
+    "prettier-plugin-pkg": "0.18.0",
     "prettier-plugin-jsdoc": "1.1.1",
     "type-fest": "^4.7.1",
     "typescript": "~5.2.2"
@@ -67,10 +68,10 @@
       "eslint --fix",
       "prettier --write"
     ],
-    "*.(ts|md|ya?ml)": [
+    "*.(ts|md|ya?ml|json)": [
       "prettier --write"
     ],
-    "!((package|policy)*).json": [
+    "!((package-lock|policy)*).json": [
       "prettier --write"
     ]
   },
@@ -81,7 +82,7 @@
   "prettier": {
     "jsdocCommentLineStrategy": "keep",
     "jsdocPreferCodeFences": true,
-    "plugins": ["prettier-plugin-jsdoc"],
+    "plugins": ["prettier-plugin-jsdoc", "prettier-plugin-pkg"],
     "semi": false,
     "singleQuote": true,
     "trailingComma": "es5",

@@ -14,5 +14,4 @@ packages/viz/src/example-policies/**/*
 # don't conflict with whatever package managers do
 .yarn/**/*
 package-lock.json
-package.json
 yarn.lock
