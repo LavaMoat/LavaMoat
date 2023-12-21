@@ -1,8 +1,39 @@
 {
   "name": "lavamoat-viz",
-  "description": "This is a dashboard for exploring a dependency graph and LavaMoat policy file",
-  "main": "index.js",
   "version": "7.0.0",
+  "description": "This is a dashboard for exploring a dependency graph and LavaMoat policy file",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LavaMoat/lavamoat.git",
+    "directory": "packages/viz"
+  },
+  "homepage": "https://github.com/LavaMoat/LavaMoat/blob/main/packages/viz/README.md",
+  "bugs": {
+    "url": "https://github.com/LavaMoat/lavamoat/issues"
+  },
+  "author": "kumavis <aaron@kumavis.me>",
+  "license": "MIT",
+  "engines": {
+    "node": "^16.20.0 || ^18.0.0 || ^20.0.0"
+  },
+  "bin": {
+    "lavamoat-viz": "./bin/index.js"
+  },
+  "main": "index.js",
+  "files": [
+    ".browserslistrc",
+    "bin",
+    "dist"
+  ],
+  "scripts": {
+    "analyze": "source-map-explorer 'build/static/js/*.js'",
+    "build": "webpack --config ./src/webpack.config.js",
+    "clean": "rimraf ./dist",
+    "deploy": "npm run rebuild && gh-pages -d dist",
+    "rebuild": "npm run clean && npm run build",
+    "start": "webpack-dev-server --config ./src/webpack.config.js",
+    "test": "npm run build"
+  },
   "dependencies": {
     "lavamoat-core": "^15.0.0",
     "ncp": "^2.0.0",
@@ -42,15 +73,6 @@
     "webpack-cli": "^5.1.1",
     "webpack-dev-server": "^4.15.0"
   },
-  "scripts": {
-    "analyze": "source-map-explorer 'build/static/js/*.js'",
-    "start": "webpack-dev-server --config ./src/webpack.config.js",
-    "test": "npm run build",
-    "build": "webpack --config ./src/webpack.config.js",
-    "deploy": "npm run rebuild && gh-pages -d dist",
-    "rebuild": "npm run clean && npm run build",
-    "clean": "rimraf ./dist"
-  },
   "babel": {
     "presets": [
       "@babel/preset-react",
@@ -62,27 +84,5 @@
       ]
     ]
   },
-  "servedPath": "./",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/LavaMoat/lavamoat.git",
-    "directory": "packages/viz"
-  },
-  "author": "kumavis <aaron@kumavis.me>",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/LavaMoat/lavamoat/issues"
-  },
-  "homepage": "https://github.com/LavaMoat/LavaMoat/blob/main/packages/viz/README.md",
-  "bin": {
-    "lavamoat-viz": "./bin/index.js"
-  },
-  "engines": {
-    "node": "^16.20.0 || ^18.0.0 || ^20.0.0"
-  },
-  "files": [
-    "bin",
-    "dist",
-    ".browserslistrc"
-  ]
+  "servedPath": "./"
 }
