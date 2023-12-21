@@ -2,16 +2,43 @@
   "name": "@lavamoat/webpack",
   "version": "0.1.0-beta.0",
   "description": "LavaMoat Webpack plugin for running dependencies in Compartments without eval",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LavaMoat/lavamoat.git",
+    "directory": "packages/webpack"
+  },
+  "homepage": "https://github.com/LavaMoat/lavamoat#readme",
+  "bugs": {
+    "url": "https://github.com/LavaMoat/lavamoat/issues"
+  },
+  "author": "LavaMoat Team",
+  "license": "Apache-2.0",
+  "engines": {
+    "node": "^16.20.0 || ^18.0.0 || ^20.0.0",
+    "npm": ">=7.0.0"
+  },
   "main": "src/plugin.js",
+  "files": [
+    "src"
+  ],
+  "keywords": [
+    "webpack",
+    "bundle",
+    "security",
+    "ses",
+    "compartment",
+    "sandbox",
+    "hardened"
+  ],
   "scripts": {
     "test": "ava"
+  },
+  "peerDependencies": {
+    "webpack": "^5.80.2"
   },
   "dependencies": {
     "@lavamoat/aa": "^4.0.0",
     "lavamoat-core": "^15.0.0"
-  },
-  "peerDependencies": {
-    "webpack": "^5.80.2"
   },
   "devDependencies": {
     "css-loader": "^6.7.3",
@@ -22,33 +49,6 @@
     "ses": "^0.18.5",
     "typescript": "^5.0.2",
     "webpack": "^5.84.1"
-  },
-  "keywords": [
-    "webpack",
-    "bundle",
-    "security",
-    "ses",
-    "compartment",
-    "sandbox",
-    "hardened"
-  ],
-  "author": "LavaMoat Team",
-  "license": "Apache-2.0",
-  "files": [
-    "src"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/LavaMoat/lavamoat.git",
-    "directory": "packages/webpack"
-  },
-  "bugs": {
-    "url": "https://github.com/LavaMoat/lavamoat/issues"
-  },
-  "homepage": "https://github.com/LavaMoat/lavamoat#readme",
-  "engines": {
-    "node": "^16.20.0 || ^18.0.0 || ^20.0.0",
-    "npm": ">=7.0.0"
   },
   "ava": {
     "files": [

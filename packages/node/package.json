@@ -1,18 +1,36 @@
 {
   "name": "lavamoat",
+  "version": "8.0.0",
+  "description": "",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LavaMoat/lavamoat.git",
+    "directory": "packages/node"
+  },
+  "homepage": "https://github.com/LavaMoat/lavamoat#readme",
+  "bugs": {
+    "url": "https://github.com/LavaMoat/lavamoat/issues"
+  },
+  "author": "kumavis",
+  "license": "MIT",
+  "engines": {
+    "node": "^16.20.0 || ^18.0.0 || ^20.0.0"
+  },
   "bin": {
     "lavamoat": "src/cli.js",
     "lavamoat-run-command": "src/run-command.js"
   },
-  "version": "8.0.0",
   "main": "src/index.js",
-  "license": "MIT",
+  "directories": {
+    "example": "examples",
+    "test": "test"
+  },
   "scripts": {
+    "lint:deps": "depcheck",
     "test": "npm run test:npm && npm run test:yarn1",
-    "test:prepare": "node ./test/prepare.js",
     "test:npm": "npm run test:prepare && ava",
-    "test:yarn1": "cross-env LAVAMOAT_PM=yarn@1 npm run test:prepare && ava",
-    "lint:deps": "depcheck"
+    "test:prepare": "node ./test/prepare.js",
+    "test:yarn1": "cross-env LAVAMOAT_PM=yarn@1 npm run test:prepare && ava"
   },
   "dependencies": {
     "@babel/code-frame": "^7.22.13",
@@ -26,24 +44,6 @@
     "node-gyp-build": "^4.6.0",
     "resolve": "^1.22.3",
     "yargs": "^17.7.2"
-  },
-  "directories": {
-    "example": "examples",
-    "test": "test"
-  },
-  "author": "kumavis",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/LavaMoat/lavamoat.git",
-    "directory": "packages/node"
-  },
-  "bugs": {
-    "url": "https://github.com/LavaMoat/lavamoat/issues"
-  },
-  "homepage": "https://github.com/LavaMoat/lavamoat#readme",
-  "description": "",
-  "engines": {
-    "node": "^16.20.0 || ^18.0.0 || ^20.0.0"
   },
   "ava": {
     "files": [

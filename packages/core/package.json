@@ -2,12 +2,36 @@
   "name": "lavamoat-core",
   "version": "15.0.0",
   "description": "LavaMoat kernel and utils",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LavaMoat/lavamoat.git",
+    "directory": "packages/core"
+  },
+  "homepage": "https://github.com/LavaMoat/lavamoat#readme",
+  "bugs": {
+    "url": "https://github.com/LavaMoat/lavamoat/issues"
+  },
+  "author": "kumavis",
+  "license": "MIT",
+  "engines": {
+    "node": "^16.20.0 || ^18.0.0 || ^20.0.0"
+  },
   "main": "src/index.js",
+  "types": "./types/src/types.d.ts",
   "directories": {
     "lib": "lib"
   },
-  "engines": {
-    "node": "^16.20.0 || ^18.0.0 || ^20.0.0"
+  "files": [
+    "CHANGELOG.md",
+    "lib",
+    "src",
+    "types",
+    "!*.tsbuildinfo"
+  ],
+  "scripts": {
+    "lib:ses": "cp ../../node_modules/ses/dist/lockdown.umd.js ./lib/lockdown.umd.js",
+    "lint:deps": "depcheck",
+    "test": "ava"
   },
   "dependencies": {
     "json-stable-stringify": "^1.0.2",
@@ -20,34 +44,10 @@
     "ses": "^0.18.8",
     "tmp-promise": "^3.0.3"
   },
-  "scripts": {
-    "lint:deps": "depcheck",
-    "test": "ava",
-    "lib:ses": "cp ../../node_modules/ses/dist/lockdown.umd.js ./lib/lockdown.umd.js"
-  },
-  "author": "kumavis",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/LavaMoat/lavamoat.git",
-    "directory": "packages/core"
-  },
-  "bugs": {
-    "url": "https://github.com/LavaMoat/lavamoat/issues"
-  },
-  "homepage": "https://github.com/LavaMoat/lavamoat#readme",
   "ava": {
     "files": [
       "test/*.spec.js"
     ],
     "timeout": "30s"
-  },
-  "types": "./types/src/types.d.ts",
-  "files": [
-    "lib",
-    "src",
-    "types",
-    "!*.tsbuildinfo",
-    "CHANGELOG.md"
-  ]
+  }
 }

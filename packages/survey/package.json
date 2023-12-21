@@ -1,9 +1,18 @@
 {
   "name": "survey",
   "version": "1.0.1",
-  "private": true,
-  "main": "index.js",
   "license": "MIT",
+  "private": true,
+  "engines": {
+    "node": "^16.20.0 || ^18.0.0 || ^20.0.0"
+  },
+  "main": "index.js",
+  "scripts": {
+    "postinstall": "node src/prepareHook.js",
+    "start": "node src/index.js",
+    "test": "exit 0",
+    "zzz": "node zzz.js"
+  },
   "dependencies": {
     "cheerio": "^1.0.0-rc.12",
     "lavamoat": "^8.0.0",
@@ -11,14 +20,5 @@
     "lavamoat-tofu": "^7.0.0",
     "node-fetch": "^2.6.9",
     "p-limit": "^3.1.0"
-  },
-  "scripts": {
-    "start": "node src/index.js",
-    "postinstall": "node src/prepareHook.js",
-    "zzz": "node zzz.js",
-    "test": "exit 0"
-  },
-  "engines": {
-    "node": "^16.20.0 || ^18.0.0 || ^20.0.0"
   }
 }
