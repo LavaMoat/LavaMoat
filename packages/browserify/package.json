@@ -4,7 +4,7 @@
   "description": "browserify plugin for sandboxing dependencies with LavaMoat",
   "repository": {
     "type": "git",
-    "url": "https://github.com/LavaMoat/lavamoat.git",
+    "url": "git+https://github.com/LavaMoat/lavamoat.git",
     "directory": "packages/browserify"
   },
   "homepage": "https://github.com/LavaMoat/lavamoat#readme",

@@ -4,7 +4,7 @@
   "description": "A Yarn plugin for running `@lavamoat/allow-scripts` after install",
   "repository": {
     "type": "git",
-    "url": "https://github.com/LavaMoat/LavaMoat.git",
+    "url": "git+https://github.com/LavaMoat/LavaMoat.git",
     "directory": "packages/yarn-plugin-allow-scripts"
   },
   "license": "MIT",
