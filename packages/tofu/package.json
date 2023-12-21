@@ -22,7 +22,6 @@
     "test": "test"
   },
   "scripts": {
-    "lint:deps": "depcheck",
     "test": "ava"
   },
   "peerDependencies": {
