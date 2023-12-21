@@ -33,7 +33,6 @@
     "!tsconfig.json"
   ],
   "scripts": {
-    "lint:deps": "depcheck",
     "test": "npm run test:run",
     "test:prep": "node test/prepare.js",
     "test:run": "ava"
