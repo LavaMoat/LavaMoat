@@ -35,11 +35,16 @@ function endowmentsToolkit({
   }
 
   /**
-   * Creates an object populated with only the deep properties specified in the packagePolicy
+   * Creates an object populated with only the deep properties specified in the
+   * packagePolicy
+   *
    * @param {object} sourceRef - Object from which to copy properties
-   * @param {LMPolicy.PackagePolicy} packagePolicy - LavaMoat policy item representing a package
-   * @param {object} unwrapTo - For getters and setters, when the this-value is unwrapFrom, is replaced as unwrapTo
-   * @param {object} unwrapFrom - For getters and setters, the this-value to replace (default: targetRef)
+   * @param {LMPolicy.PackagePolicy} packagePolicy - LavaMoat policy item
+   *   representing a package
+   * @param {object} unwrapTo - For getters and setters, when the this-value is
+   *   unwrapFrom, is replaced as unwrapTo
+   * @param {object} unwrapFrom - For getters and setters, the this-value to
+   *   replace (default: targetRef)
    * @returns {object} - The targetRef
    */
   function getEndowmentsForConfig(
@@ -95,7 +100,6 @@ function endowmentsToolkit({
   }
 
   /**
-   *
    * @param {object} sourceRef
    * @param {string[]} paths
    * @param {object} unwrapTo
@@ -140,7 +144,7 @@ function endowmentsToolkit({
 
   /**
    * @template T
-   * @param {T|null} value
+   * @param {T | null} value
    * @returns {value is null}
    */
   function isEmpty(value) {
@@ -148,7 +152,6 @@ function endowmentsToolkit({
   }
 
   /**
-   *
    * @param {string} visitedPath
    * @param {string[]} pathParts
    * @param {string[]} explicitlyBanned
@@ -279,9 +282,8 @@ function endowmentsToolkit({
     Reflect.defineProperty(targetRef, nextPart, newPropDesc)
 
     /**
-     *
      * @param {TypedPropertyDescriptor<any>} sourcePropDesc
-     * @returns {{sourceValue: any, sourceWritable: boolean|undefined}}
+     * @returns {{ sourceValue: any; sourceWritable: boolean | undefined }}
      */
     function getSourceValue(sourcePropDesc) {
       // determine the source value, this coerces getters to values
@@ -304,7 +306,6 @@ function endowmentsToolkit({
   }
 
   /**
-   *
    * @param {PropertyDescriptor} propDesc
    * @param {object} unwrapFromCompartmentGlobalThis
    * @param {object} unwrapToGlobalThis
@@ -330,7 +331,6 @@ function endowmentsToolkit({
   }
 
   /**
-   *
    * @param {PropertyDescriptor} sourcePropDesc
    * @param {object} unwrapFromGlobalThis
    * @param {object} unwrapToGlobalThis
@@ -396,7 +396,6 @@ function endowmentsToolkit({
   }
 
   /**
-   *
    * @param {PropertyDescriptor} propDesc
    * @param {object} unwrapFromCompartmentGlobalThis
    * @param {object} unwrapToGlobalThis
@@ -429,13 +428,12 @@ function endowmentsToolkit({
   }
 
   /**
-   *
-   * @param {object|null} target
+   * @param {object | null} target
    * @param {PropertyKey} key
-   * @returns {{prop: PropertyDescriptor|null, receiver: object|null}}
+   * @returns {{ prop: PropertyDescriptor | null; receiver: object | null }}
    */
   function getPropertyDescriptorDeep(target, key) {
-    /** @type {object|null} */
+    /** @type {object | null} */
     let receiver = target
     // eslint-disable-next-line no-constant-condition
     while (true) {
@@ -461,7 +459,6 @@ function endowmentsToolkit({
   }
 
   /**
-   *
    * @param {object} globalRef
    * @param {Record<PropertyKey, any>} target
    * @param {string[]} globalThisRefs
@@ -538,8 +535,9 @@ function endowmentsToolkit({
   }
 
   /**
-   * util for getting the prototype chain as an array
-   * includes the provided value in the result
+   * Util for getting the prototype chain as an array includes the provided
+   * value in the result
+   *
    * @param {any} value
    * @returns {any[]}
    */
@@ -563,8 +561,8 @@ function endowmentsToolkit({
 function defaultCreateFunctionWrapper(sourceValue, unwrapTest, unwrapTo) {
   /**
    * @param {...any[]} args
-   * @this {object}
    * @returns {any}
+   * @this {object}
    */
   const newValue = function (...args) {
     if (new.target) {

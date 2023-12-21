@@ -23,7 +23,6 @@ const rootSlug = '$root$'
 module.exports = { rootSlug, createModuleInspector, getDefaultPaths }
 
 /**
- *
  * @param {ModuleInspectorOptions} opts
  * @returns {ModuleInspector}
  */
@@ -108,7 +107,6 @@ function createModuleInspector(opts) {
   }
 
   /**
-   *
    * @param {AST} ast
    * @returns {ast is import('@babel/parser').ParseResult<import('@babel/types').File>}
    */
@@ -117,7 +115,6 @@ function createModuleInspector(opts) {
   }
 
   /**
-   *
    * @param {import('./moduleRecord').LavamoatModuleRecord} moduleRecord
    * @param {ModuleInspectorOptions} opts
    */
@@ -158,8 +155,8 @@ function createModuleInspector(opts) {
     }
     // get ast (parse or use cached)
     /**
-     * @todo - Put this in `LavamoatModuleRecord` instead
      * @type {AST}
+     * @todo - Put this in `LavamoatModuleRecord` instead
      */
     const ast =
       moduleRecord.ast ||
@@ -190,7 +187,6 @@ function createModuleInspector(opts) {
   }
 
   /**
-   *
    * @param {AST} ast
    * @param {import('./moduleRecord').LavamoatModuleRecord} moduleRecord
    * @param {boolean} includeDebugInfo
@@ -249,7 +245,6 @@ function createModuleInspector(opts) {
   }
 
   /**
-   *
    * @param {AST} ast
    * @param {import('./moduleRecord').LavamoatModuleRecord} moduleRecord
    * @param {string} packageName
@@ -283,7 +278,6 @@ function createModuleInspector(opts) {
   }
 
   /**
-   *
    * @param {AST} ast
    * @param {import('./moduleRecord').LavamoatModuleRecord} moduleRecord
    * @param {string} packageName
@@ -326,7 +320,10 @@ function createModuleInspector(opts) {
   function generatePolicy({ policyOverride, includeDebugInfo = false }) {
     /** @type {import('./schema').Resources} */
     const resources = {}
-    /** @type {import('./schema').LavaMoatPolicyDebug | import('./schema').LavaMoatPolicy} */
+    /**
+     * @type {import('./schema').LavaMoatPolicyDebug
+     *   | import('./schema').LavaMoatPolicy}
+     */
     const policy = { resources }
     packageToModules.forEach((packageModules, packageName) => {
       // the policy fields for each package
@@ -416,8 +413,16 @@ function createModuleInspector(opts) {
 }
 
 /**
- *
- * @param {{packageModules: Record<string,import('./moduleRecord').LavamoatModuleRecord>, moduleIdToModuleRecord: Map<string,import('./moduleRecord').LavamoatModuleRecord>}} opts
+ * @param {{
+ *   packageModules: Record<
+ *     string,
+ *     import('./moduleRecord').LavamoatModuleRecord
+ *   >
+ *   moduleIdToModuleRecord: Map<
+ *     string,
+ *     import('./moduleRecord').LavamoatModuleRecord
+ *   >
+ * }} opts
  * @returns
  */
 function aggregateDeps({ packageModules, moduleIdToModuleRecord }) {
@@ -454,8 +459,9 @@ function aggregateDeps({ packageModules, moduleIdToModuleRecord }) {
 }
 
 /**
- * For when you encounter a `requestedName` that was not inspected, likely because
- * resolution was skipped for that module
+ * For when you encounter a `requestedName` that was not inspected, likely
+ * because resolution was skipped for that module
+ *
  * @param {string} requestedName
  * @returns {string}
  */
@@ -474,7 +480,6 @@ function guessPackageName(requestedName) {
 }
 
 /**
- *
  * @param {string} policyName
  * @returns
  */
@@ -492,8 +497,11 @@ function getDefaultPaths(policyName) {
 
 /**
  * @callback GeneratePolicyFn
- * @param {Partial<ModuleInspectorOptions> & {policyOverride?: import('./schema').LavaMoatPolicyOverrides}} opts
- * @returns {import('./schema').LavaMoatPolicy | import('./schema').LavaMoatPolicyDebug}
+ * @param {Partial<ModuleInspectorOptions> & {
+ *   policyOverride?: import('./schema').LavaMoatPolicyOverrides
+ * }} opts
+ * @returns {import('./schema').LavaMoatPolicy
+ *   | import('./schema').LavaMoatPolicyDebug}
  */
 
 /**
@@ -519,5 +527,6 @@ function getDefaultPaths(policyName) {
  */
 
 /**
- * @typedef {import('@babel/parser').ParseResult<import('@babel/types').File> | import('@babel/types').File} AST
+ * @typedef {import('@babel/parser').ParseResult<import('@babel/types').File>
+ *   | import('@babel/types').File} AST
  */

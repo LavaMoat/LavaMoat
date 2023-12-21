@@ -53,7 +53,7 @@ const lockdownDefaults = {
 
 class LavaMoatPlugin {
   /**
-   * @param {import("./types.js").LavaMoatPluginOptions} [options]
+   * @param {import('./types.js').LavaMoatPluginOptions} [options]
    */
   constructor(options = { policy: {} }) {
     if (!options.lockdown) {
@@ -64,7 +64,7 @@ class LavaMoatPlugin {
     diag.level = options.diagnosticsVerbosity || 0
   }
   /**
-   * @param {import("webpack").Compiler} compiler the compiler instance
+   * @param {import('webpack').Compiler} compiler The compiler instance
    * @returns {void}
    */
   apply(compiler) {

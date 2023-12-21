@@ -16,7 +16,7 @@ declare module '@npmcli/run-script' {
   }
 
   function npmRunScript(
-    opts: npmRunScript.RunScriptOptions,
+    opts: npmRunScript.RunScriptOptions
   ): ReturnType<typeof PromiseSpawn>
 
   export = npmRunScript

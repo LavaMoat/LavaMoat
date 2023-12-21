@@ -43,7 +43,9 @@ async function walk({
  * @param {import('./parseForPolicy').ImportHookFn} options.importHook
  * @param {import('./parseForPolicy').ShouldImportFn} [options.shouldImport]
  * @param {Set<string>} [options.visitedSpecifiers]
- * @returns {AsyncIterableIterator<import('./moduleRecord').LavamoatModuleRecord>}
+ * @returns {AsyncIterableIterator<
+ *   import('./moduleRecord').LavamoatModuleRecord
+ * >}
  */
 // NOTE: i think this is depth first in a way that doesnt take advantage of concurrency
 async function* eachNodeInTree({

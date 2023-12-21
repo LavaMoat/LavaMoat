@@ -20,6 +20,7 @@ const setup = require('./setup')
 
 /**
  * Individual package info
+ *
  * @typedef {Object} PkgInfo
  * @property {string} canonicalName
  * @property {string} path
@@ -28,6 +29,7 @@ const setup = require('./setup')
 
 /**
  * Individual bin link info
+ *
  * @typedef {Object} BinInfo
  * @property {string} canonicalName
  * @property {boolean} isDirect
@@ -35,31 +37,33 @@ const setup = require('./setup')
  * @property {string} path
  * @property {string} link
  * @property {string} fullLinkPath
- **/
-
-/**
- * Configuration for a type of scripts policies
- * @typedef {Object} ScriptsConfig
- * @property {Record<string,any>} allowConfig
- * @property {Map<string,[PkgInfo]>} packagesWithScripts
- * @property {Array<string>} allowedPatterns
- * @property {Array<string>} disallowedPatterns
- * @property {Array<string>} missingPolicies
- * @property {Array<string>} excessPolicies
  */
 
 /**
- * @typedef {Map<string,BinInfo[]>} BinCandidates
+ * Configuration for a type of scripts policies
+ *
+ * @typedef {Object} ScriptsConfig
+ * @property {Record<string, any>} allowConfig
+ * @property {Map<string, [PkgInfo]>} packagesWithScripts
+ * @property {string[]} allowedPatterns
+ * @property {string[]} disallowedPatterns
+ * @property {string[]} missingPolicies
+ * @property {string[]} excessPolicies
+ */
+
+/**
+ * @typedef {Map<string, BinInfo[]>} BinCandidates
  */
 
 /**
  * Configuration for a type of bins policies
+ *
  * @typedef {Object} BinsConfig
- * @property {Record<string,any>} allowConfig
+ * @property {Record<string, any>} allowConfig
  * @property {BinCandidates} binCandidates
- * @property {Array<BinInfo>} allowedBins
- * @property {Array<BinInfo>} firewalledBins
- * @property {Array<string>} excessPolicies
+ * @property {BinInfo[]} allowedBins
+ * @property {BinInfo[]} firewalledBins
+ * @property {string[]} excessPolicies
  * @property {boolean} somePoliciesAreMissing
  */
 
@@ -72,7 +76,6 @@ module.exports = {
 }
 
 /**
- *
  * @param {GetOptionsForBinOpts} param0
  */
 async function getOptionsForBin({ rootDir, name }) {
@@ -212,7 +215,6 @@ async function printPackagesList({ rootDir }) {
 }
 
 /**
- *
  * @param {PrintMissingPoliciesIfAnyOpts} param0
  */
 function printMissingPoliciesIfAny({
@@ -231,10 +233,9 @@ function printMissingPoliciesIfAny({
 // internals
 
 /**
- *
  * @param {Object} arg
  * @param {string} arg.event
- * @param {Array<PkgInfo>} arg.packages
+ * @param {PkgInfo[]} arg.packages
  */
 async function runAllScriptsForEvent({ event, packages }) {
   for (const { canonicalName, path, scripts } of packages) {
@@ -245,7 +246,7 @@ async function runAllScriptsForEvent({ event, packages }) {
   }
 }
 /**
- * @param {Array<BinInfo>} allowedBins
+ * @param {BinInfo[]} allowedBins
  * @returns {Promise<void>}
  */
 async function installBinScripts(allowedBins) {
@@ -256,8 +257,9 @@ async function installBinScripts(allowedBins) {
 }
 /**
  * Points all bins on the list to whichbin.js cli app from allow-scripts
- * @param {Array<BinInfo>} firewalledBins
- * @param {string} link - absolute path to the whichbin.js script
+ *
+ * @param {BinInfo[]} firewalledBins
+ * @param {string} link - Absolute path to the whichbin.js script
  * @returns {Promise<void>}
  */
 async function installBinFirewall(firewalledBins, link) {
@@ -296,7 +298,7 @@ const bannedBins = new Set(['node', 'npm', 'yarn', 'pnpm'])
  * @param {BinCandidates} binCandidates
  */
 function prepareBinScriptsPolicy(binCandidates) {
-  /** @type {Record<string,string>} */
+  /** @type {Record<string, string>} */
   const policy = {}
   // pick direct dependencies without conflicts and enable them by default unless colliding with bannedBins
   for (const [bin, infos] of binCandidates.entries()) {
@@ -382,7 +384,6 @@ function printPackagesByScriptConfiguration({
 }
 
 /**
- *
  * @param {SavePackageConfigurationsOpts} param0
  * @returns {Promise<void>}
  */
@@ -405,7 +406,6 @@ async function savePackageConfigurations({
 }
 
 /**
- *
  * @param {Object} args
  * @param {string} args.rootDir
  * @returns {Promise<PkgConfs>}
@@ -453,7 +453,13 @@ async function loadAllPackageConfigurations({ rootDir }) {
     )
 
     if (lifeCycleScripts.length) {
-      /** @type {{canonicalName: string, path: string, scripts: LavamoatPackageJson['scripts']}[]} */
+      /**
+       * @type {{
+       *   canonicalName: string
+       *   path: string
+       *   scripts: LavamoatPackageJson['scripts']
+       * }[]}
+       */
       const collection = packagesWithScriptsLifecycle.get(canonicalName) || []
       collection.push({
         canonicalName,
@@ -513,9 +519,14 @@ async function loadAllPackageConfigurations({ rootDir }) {
 }
 
 /**
- * Adds helpful redundancy to the config object thus producing a full ScriptsConfig type
- * @param {import('type-fest').SetRequired<Partial<ScriptsConfig>, 'packagesWithScripts'>} config
- * @return {ScriptsConfig}
+ * Adds helpful redundancy to the config object thus producing a full
+ * ScriptsConfig type
+ *
+ * @param {import('type-fest').SetRequired<
+ *   Partial<ScriptsConfig>,
+ *   'packagesWithScripts'
+ * >} config
+ * @returns {ScriptsConfig}
  */
 function indexLifecycleConfiguration(config) {
   config.allowConfig = config.allowConfig || {}
@@ -542,9 +553,14 @@ function indexLifecycleConfiguration(config) {
 }
 
 /**
- * Adds helpful redundancy to the config object thus producing a full {@link BinsConfig} type
- * @param {import('type-fest').SetRequired<Partial<BinsConfig>, 'binCandidates'>} config
- * @return {BinsConfig}
+ * Adds helpful redundancy to the config object thus producing a full
+ * {@link BinsConfig} type
+ *
+ * @param {import('type-fest').SetRequired<
+ *   Partial<BinsConfig>,
+ *   'binCandidates'
+ * >} config
+ * @returns {BinsConfig}
  */
 function indexBinsConfiguration(config) {
   // only autogenerate the initial config. A better heuristic would be to detect if any scripts from direct dependencies are missing
@@ -573,11 +589,10 @@ function indexBinsConfiguration(config) {
 }
 
 /**
- *
  * @template T
  * @template U
  * @param {(value: T) => U} getterFn
- * @returns {(a: T, b: T) => 1|-1|0}
+ * @returns {(a: T, b: T) => 1 | -1 | 0}
  */
 function sortBy(getterFn) {
   return (a, b) => {
@@ -600,7 +615,6 @@ function sortBy(getterFn) {
  */
 
 /**
- *
  * @typedef SavePackageConfigurationsOpts
  * @property {string} rootDir
  * @property {PkgConfs} conf
@@ -610,7 +624,6 @@ function sortBy(getterFn) {
  * @typedef GetOptionsForBinOpts
  * @property {string} rootDir
  * @property {string} name
- *
  */
 
 /**
@@ -631,20 +644,20 @@ function sortBy(getterFn) {
 /**
  * @typedef PrintMissingPoliciesIfAnyOpts
  * @property {string[]} [missingPolicies]
- * @property {Map<string,unknown[]>} [packagesWithScripts]
+ * @property {Map<string, unknown[]>} [packagesWithScripts]
  */
 
 /**
  * @typedef PkgLavamoatConfig
- * @property {Record<string,any>} [allowScripts]
- * @property {Record<string,any>} [allowBins]
- * @property {Record<string,any>} [allowConfig]
- * @property {Record<string,any>} [allowedPatterns]
- * @property {Record<string,any>} [disallowedPatterns]
- * @property {Record<string,any>} [missingPolicies]
- * @property {Record<string,any>} [excessPolicies]
+ * @property {Record<string, any>} [allowScripts]
+ * @property {Record<string, any>} [allowBins]
+ * @property {Record<string, any>} [allowConfig]
+ * @property {Record<string, any>} [allowedPatterns]
+ * @property {Record<string, any>} [disallowedPatterns]
+ * @property {Record<string, any>} [missingPolicies]
+ * @property {Record<string, any>} [excessPolicies]
  */
 
 /**
- * @typedef {import('type-fest').PackageJson & {lavamoat: PkgLavamoatConfig}} LavamoatPackageJson
+ * @typedef {import('type-fest').PackageJson & { lavamoat: PkgLavamoatConfig }} LavamoatPackageJson
  */

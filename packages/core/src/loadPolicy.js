@@ -10,7 +10,7 @@ module.exports = { loadPolicy, loadPolicyAndApplyOverrides }
  * Reads a policy file from disk, if present
  *
  * @param {PolicyOpts} opts
- * @returns {Promise<import('./schema').LavaMoatPolicy|undefined>}
+ * @returns {Promise<import('./schema').LavaMoatPolicy | undefined>}
  */
 async function readPolicyFile({ debugMode, policyPath }) {
   if (debugMode) {
@@ -31,9 +31,12 @@ async function readPolicyFile({ debugMode, policyPath }) {
 /**
  * Loads a policy from disk, returning a default empty policy if not found.
  *
- * @todo Because there is no validation taking place, the resulting value could be literally anything `JSON.parse()` could return. Also note that this returns a `LavaMoatPolicy` when we could be asking for a `LavaMoatPolicyOverrides`; make your type assertions accordingly!
  * @param {PolicyOpts} opts
  * @returns {Promise<import('./schema').LavaMoatPolicy>}
+ * @todo Because there is no validation taking place, the resulting value could
+ *   be literally anything `JSON.parse()` could return. Also note that this
+ *   returns a `LavaMoatPolicy` when we could be asking for a
+ *   `LavaMoatPolicyOverrides`; make your type assertions accordingly!
  */
 async function loadPolicy({ debugMode, policyPath }) {
   /** @type {import('./schema').LavaMoatPolicy} */
@@ -56,7 +59,7 @@ async function loadPolicy({ debugMode, policyPath }) {
  *
  * If overrides exist, writes the overrides _back_ into the policy file.
  *
- * @param {PolicyOpts & {policyOverridePath: string}} opts
+ * @param {PolicyOpts & { policyOverridePath: string }} opts
  * @returns {Promise<import('./schema').LavaMoatPolicy>}
  */
 async function loadPolicyAndApplyOverrides({
@@ -67,7 +70,7 @@ async function loadPolicyAndApplyOverrides({
   const policy = await loadPolicy({ debugMode, policyPath })
 
   const policyOverride =
-    /** @type {import('./schema').LavaMoatPolicyOverrides|undefined} */ (
+    /** @type {import('./schema').LavaMoatPolicyOverrides | undefined} */ (
       await readPolicyFile({ debugMode, policyPath: policyOverridePath })
     )
 

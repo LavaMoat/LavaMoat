@@ -7,7 +7,6 @@ module.exports = {
     return level
   },
   /**
-   *
    * @param {number} verbosity
    * @param {function} cb
    */
@@ -17,7 +16,6 @@ module.exports = {
     }
   },
   /**
-   *
    * @param {number} verbosity
    * @param {any} content
    */

@@ -18,7 +18,10 @@ module.exports = {
 function createPerformantResolve() {
   /**
    * @param {string} self
-   * @returns {(readFileSync: (file: string) => (string|{toString(): string}), pkgfile: string) => Record<string,unknown>}
+   * @returns {(
+   *   readFileSync: (file: string) => string | { toString(): string },
+   *   pkgfile: string
+   * ) => Record<string, unknown>}
    */
   const readPackageWithout = (self) => (readFileSync, pkgfile) => {
     // avoid loading the package.json we're just trying to resolve
@@ -74,7 +77,7 @@ async function loadCanonicalNameMap({ rootDir, includeDevDeps, resolve }) {
  * @param {Resolver} resolve
  * @param {string} depName
  * @param {string} packageDir
- * @returns {string|undefined}
+ * @returns {string | undefined}
  */
 function wrappedResolveSync(resolve, depName, packageDir) {
   const depRelativePackageJsonPath = path.join(depName, 'package.json')
@@ -226,7 +229,7 @@ function getPackageNameForModulePath(canonicalNameMap, modulePath) {
 /**
  * @param {CanonicalNameMap} canonicalNameMap
  * @param {string} modulePath
- * @returns {string|undefined}
+ * @returns {string | undefined}
  */
 function getPackageDirForModulePath(canonicalNameMap, modulePath) {
   // find which of these directories the module is in
@@ -242,7 +245,8 @@ function getPackageDirForModulePath(canonicalNameMap, modulePath) {
 }
 
 /**
- * for comparing string lengths
+ * For comparing string lengths
+ *
  * @param {string} a
  * @param {string} b
  * @returns {string}
@@ -252,10 +256,11 @@ function takeLongest(a, b) {
 }
 
 /**
- * for package logical path names
+ * For package logical path names
+ *
  * @param {string} a
  * @param {string} b
- * @returns {0|1|-1}
+ * @returns {0 | 1 | -1}
  */
 function comparePreferredPackageName(a, b) {
   // prefer shorter package names
@@ -275,10 +280,11 @@ function comparePreferredPackageName(a, b) {
 }
 
 /**
- * for comparing package logical path arrays (shorter is better)
+ * For comparing package logical path arrays (shorter is better)
+ *
  * @param {string[]} [aPath]
  * @param {string[]} [bPath]
- * @returns {0|1|-1}
+ * @returns {0 | 1 | -1}
  */
 function comparePackageLogicalPaths(aPath, bPath) {
   // undefined is not preferred
@@ -317,7 +323,7 @@ function comparePackageLogicalPaths(aPath, bPath) {
 
 /**
  * @typedef Resolver
- * @property {(path: string, opts: {basedir: string}) => string} sync
+ * @property {(path: string, opts: { basedir: string }) => string} sync
  */
 
 /**
@@ -328,15 +334,15 @@ function comparePackageLogicalPaths(aPath, bPath) {
  */
 
 /**
- * @internal
  * @typedef WalkDepTreeOpts
  * @property {string} packageDir
  * @property {string[]} [logicalPath]
  * @property {boolean} [includeDevDeps]
  * @property {Set<string>} [visited]
  * @property {Resolver} [resolve]
+ * @internal
  */
 
 /**
- * @typedef {Map<string, string> & {rootDir: string}} CanonicalNameMap
+ * @typedef {Map<string, string> & { rootDir: string }} CanonicalNameMap
  */
