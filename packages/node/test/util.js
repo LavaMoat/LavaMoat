@@ -2,6 +2,7 @@
 
 const util = require('util')
 const execFile = util.promisify(require('child_process').execFile)
+// @ts-expect-error - no types
 const { prepareScenarioOnDisk } = require('lavamoat-core/test/util.js')
 module.exports = {
   runLavamoat,

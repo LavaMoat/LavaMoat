@@ -2,6 +2,10 @@ const path = require('node:path')
 const test = require('ava')
 const { parseForPolicy } = require('../src/parseForPolicy')
 const { runLavamoat } = require('./util')
+const util = require('node:util')
+
+// set this deep enough to print entire policy diffs
+util.inspect.defaultOptions.depth = 4
 
 test('parseForPolicy - resolutions', async (t) => {
   const projectRoot = path.join(__dirname, 'projects', '1')
@@ -97,6 +101,25 @@ test('parseForPolicy - find node:-prefixed builtins', async (t) => {
       a: {
         builtin: {
           'node:events.EventEmitter': true,
+        },
+      },
+    },
+  })
+})
+
+test('parseForPolicy - esm', async (t) => {
+  const projectRoot = path.join(__dirname, 'projects', 'esm')
+  const entryId = path.join(projectRoot, 'index.js')
+  const policy = await parseForPolicy({ entryId, projectRoot })
+  t.deepEqual(policy, {
+    resources: {
+      foo: {
+        builtin: {
+          events: true,
+          'node:util': true,
+        },
+        globals: {
+          'console.log': true,
         },
       },
     },
