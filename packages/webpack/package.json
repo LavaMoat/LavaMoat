@@ -4,7 +4,7 @@
   "description": "LavaMoat Webpack plugin for running dependencies in Compartments without eval",
   "repository": {
     "type": "git",
-    "url": "https://github.com/LavaMoat/lavamoat.git",
+    "url": "git+https://github.com/LavaMoat/lavamoat.git",
     "directory": "packages/webpack"
   },
   "homepage": "https://github.com/LavaMoat/lavamoat#readme",
