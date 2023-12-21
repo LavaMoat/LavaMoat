@@ -54,7 +54,7 @@ async function parseForPolicy({
  * @callback ResolveFn
  * @param {string} requestedName
  * @param {string} parentAddress
- * @returns {string | undefined}
+ * @returns {string | null}
  */
 
 /**
