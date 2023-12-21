@@ -26,7 +26,6 @@
     "test": "test"
   },
   "scripts": {
-    "lint:deps": "depcheck",
     "test": "npm run test:npm && npm run test:yarn1",
     "test:npm": "npm run test:prepare && ava",
     "test:prepare": "node ./test/prepare.js",

@@ -1,9 +1,0 @@
-ignores:
-  # monorepo deps
-  - 'ava'
-  - '@types/npmcli__promise-spawn'
-  - '@typescript-eslint/parser'
-
-  # only types (from @types/npmcli__promise-spawn) are referenced
-  - '@npmcli/promise-spawn'
-  - 'type-fest'
