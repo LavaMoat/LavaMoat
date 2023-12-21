@@ -28,6 +28,7 @@
     "lint-staged": "^13.2.3",
     "memfs": "^4.3.0",
     "prettier": "3.0.3",
+    "prettier-plugin-jsdoc": "1.1.1",
     "type-fest": "^4.7.1",
     "typescript": "~5.2.2"
   },
@@ -78,9 +79,13 @@
   ],
   "version": "0.0.0",
   "prettier": {
-    "singleQuote": true,
+    "jsdocCommentLineStrategy": "keep",
+    "jsdocPreferCodeFences": true,
+    "plugins": ["prettier-plugin-jsdoc"],
     "semi": false,
-    "trailingComma": "es5"
+    "singleQuote": true,
+    "trailingComma": "es5",
+    "tsdoc": true
   },
   "ava": {
     "files": [
