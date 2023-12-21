@@ -16,7 +16,7 @@ const {
 
 module.exports = {
   inspectGlobals,
-  inspectImports,
+  inspectImports: inspectRequires,
   inspectEsmImports,
   inspectDynamicRequires,
 }
@@ -30,8 +30,7 @@ module.exports = {
  */
 
 /**
- *
- * @param {import('../../core/src/generatePolicy').AST|string} source
+ * @param {import('../../core/src/generatePolicy').AST | string} source
  * @param {InspectGlobalsOpts} options
  * @returns
  */
@@ -59,7 +58,6 @@ function inspectGlobals(
   return globalsConfig
 
   /**
-   *
    * @param {string} name
    * @param {import('./findGlobals').IdentifierOrThisExpressionNodePath[]} paths
    */
@@ -112,9 +110,9 @@ function inspectGlobals(
   }
 
   /**
-   *
    * @param {string} variableName
-   * @param {import('@babel/types').Identifier|import('@babel/types').ThisExpression} identifierNode
+   * @param {import('@babel/types').Identifier
+   *   | import('@babel/types').ThisExpression} identifierNode
    * @param {import('./inspectPrimordialAssignments').MemberLikeExpression[]} parents
    * @returns
    */
@@ -152,7 +150,6 @@ function inspectGlobals(
   }
 
   /**
-   *
    * @param {string} identifierPath
    * @param {import('../../core/src/schema').GlobalPolicyValue} identifierUse
    * @returns
@@ -175,60 +172,47 @@ function inspectGlobals(
 }
 
 /**
+ * This finds all modules `import`ed into the AST, as well as any re-exported
+ * modules.
  *
- * @param {import('../../core/src/generatePolicy').AST} ast
- * @returns {{esmImports: string[]}}
+ * @param {import('@babel/types').Node} ast
+ * @param {string[]} [packagesToInspect]
+ * @returns {{ esmImports: string[] }}
  */
-function inspectEsmImports(ast) {
-  /** @type {string[]} */
-  const esmImports = []
+function inspectEsmImports(ast, packagesToInspect) {
+  const pkgsToInspect = new Set(packagesToInspect)
+  /** @type {Set<string>} */
+  const esmImports = new Set()
+
+  const handleNodePath = (path) => {
+    const importSource = path.node.source?.value
+
+    if (
+      importSource &&
+      ((packagesToInspect && pkgsToInspect.has(importSource)) ||
+        !packagesToInspect)
+    ) {
+      esmImports.add(importSource)
+    }
+  }
+
   traverse(ast, {
-    ImportDeclaration: (path) => {
-      const { node } = path
-      const { specifiers, source } = node
-      // not sure if this is ever not a StringLiteral, but just in case
-      if (source.type !== 'StringLiteral') {
-        return
-      }
-      const importSource = source.value
-      specifiers.forEach((spec) => {
-        switch (spec.type) {
-          case 'ImportDefaultSpecifier': {
-            const importName = importSource
-            esmImports.push(importName)
-            return
-          }
-          case 'ImportNamespaceSpecifier': {
-            const importName = importSource
-            esmImports.push(importName)
-            return
-          }
-          case 'ImportSpecifier': {
-            // @ts-ignore - FIXME needs logic changes for type safety
-            const importName = `${importSource}.${spec.imported.name}`
-            esmImports.push(importName)
-            return
-          }
-          default: {
-            throw new Error(
-              `inspectEsmImports - unknown import specifier type "${
-                /** @type {import('@babel/types').Node} */ (spec).type
-              }"`
-            )
-          }
-        }
-      })
+    ExportNamedDeclaration: (path) => {
+      handleNodePath(path)
     },
+    ImportDeclaration: handleNodePath,
   })
-  return { esmImports }
+
+  return { esmImports: [...esmImports] }
 }
 
 /**
- * @typedef {import('@babel/traverse').NodePath<import('@babel/types').CallExpression>} RequireCallResult
+ * @typedef {import('@babel/traverse').NodePath<
+ *   import('@babel/types').CallExpression
+ * >} RequireCallResult
  */
 
 /**
- *
  * @param {import('@babel/types').Node} ast
  * @returns {RequireCallResult[]}
  */
@@ -256,7 +240,6 @@ function findAllCallsToRequire(ast) {
 }
 
 /**
- *
  * @param {import('@babel/types').Node} ast
  * @returns {RequireCallResult[]}
  */
@@ -282,13 +265,15 @@ function inspectDynamicRequires(ast) {
 }
 
 /**
+ * This finds all modules `required`ed into the AST, as well as any re-exported
+ * modules.
  *
  * @param {import('@babel/types').Node} ast
- * @param {string[]} packagesToInspect
- * @param {boolean} deep
+ * @param {string[]} [packagesToInspect]
+ * @param {boolean} [deep]
+ * @returns {{ cjsImports: string[] }}
  */
-function inspectImports(ast, packagesToInspect, deep = true) {
-  /** @type {string[][]} */
+function inspectRequires(ast, packagesToInspect, deep = true) {
   const cjsImports = []
   const requireCalls = findAllCallsToRequire(ast)
   requireCalls.forEach((path) => {
@@ -365,14 +350,18 @@ function inspectImports(ast, packagesToInspect, deep = true) {
 }
 
 /**
- * @typedef {{node: import('@babel/types').PatternLike|import('@babel/types').AssignmentPattern['left'], keyPath: string[]}} Declaration
+ * @typedef {{
+ *   node:
+ *     | import('@babel/types').PatternLike
+ *     | import('@babel/types').AssignmentPattern['left']
+ *   keyPath: string[]
+ * }} Declaration
  */
 
 /**
- *
- * @param {import('@babel/types').LVal|import('@babel/types').Expression} node
+ * @param {import('@babel/types').LVal | import('@babel/types').Expression} node
  * @param {string[]} keyPath
- * @returns {Declaration[]}}
+ * @returns {Declaration[]} }
  */
 function inspectPatternElementForDeclarations(node, keyPath = []) {
   if (node.type === 'ObjectPattern') {
@@ -393,7 +382,6 @@ function inspectPatternElementForDeclarations(node, keyPath = []) {
 }
 
 /**
- *
  * @param {import('@babel/types').ObjectPattern} node
  * @param {string[]} keyPath
  * @returns {Declaration[]}
@@ -428,7 +416,6 @@ function inspectObjectPatternForDeclarations(node, keyPath) {
 }
 
 /**
- *
  * @param {import('@babel/types').ArrayPattern} node
  * @param {string[]} keyPath
  * @returns {Declaration[]}
@@ -459,7 +446,6 @@ function inspectArrayPatternForDeclarations(node, keyPath) {
 }
 
 /**
- *
  * @param {import('@babel/types').Node | import('@babel/types').PatternLike} child
  * @returns
  */
@@ -482,7 +468,6 @@ function inspectPatternElementForKeys(child) {
 }
 
 /**
- *
  * @param {import('@babel/types').ObjectPattern} node
  * @returns
  */
@@ -519,7 +504,6 @@ function inspectObjectPatternForKeys(node) {
 }
 
 /**
- *
  * @param {import('@babel/types').ArrayPattern} node
  * @returns {string[][]}
  */
