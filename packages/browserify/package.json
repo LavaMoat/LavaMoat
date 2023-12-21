@@ -2,13 +2,31 @@
   "name": "lavamoat-browserify",
   "version": "17.0.0",
   "description": "browserify plugin for sandboxing dependencies with LavaMoat",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LavaMoat/lavamoat.git",
+    "directory": "packages/browserify"
+  },
+  "homepage": "https://github.com/LavaMoat/lavamoat#readme",
+  "bugs": {
+    "url": "https://github.com/LavaMoat/lavamoat/issues"
+  },
+  "author": "kumavis",
+  "license": "MIT",
+  "engines": {
+    "node": "^16.20.0 || ^18.0.0 || ^20.0.0"
+  },
   "main": "src/index.js",
   "directories": {
     "lib": "lib",
     "test": "test"
   },
-  "engines": {
-    "node": "^16.20.0 || ^18.0.0 || ^20.0.0"
+  "scripts": {
+    "build:ses": "(cd ./node_modules/ses && npm install && npm run build && cp ./dist/ses.umd.js ../../lib/)",
+    "lint:deps": "depcheck",
+    "test": "npm run test:prep && npm run test:ava",
+    "test:ava": "ava",
+    "test:prep": "WRITE_AUTO_POLICY=1 ./test/fixtures/secureBundling/run.sh"
   },
   "dependencies": {
     "@lavamoat/aa": "^4.0.0",
@@ -35,35 +53,17 @@
     "vinyl-buffer": "^1.0.1",
     "watchify": "^4.0.0"
   },
-  "scripts": {
-    "lint:deps": "depcheck",
-    "test": "npm run test:prep && npm run test:ava",
-    "test:prep": "WRITE_AUTO_POLICY=1 ./test/fixtures/secureBundling/run.sh",
-    "test:ava": "ava",
-    "build:ses": "(cd ./node_modules/ses && npm install && npm run build && cp ./dist/ses.umd.js ../../lib/)"
-  },
-  "author": "kumavis",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/LavaMoat/lavamoat.git",
-    "directory": "packages/browserify"
-  },
-  "bugs": {
-    "url": "https://github.com/LavaMoat/lavamoat/issues"
-  },
-  "homepage": "https://github.com/LavaMoat/lavamoat#readme",
-  "gitHead": "28a238fc4c3d55650bd2ba9a3603b1f275567286",
-  "lavamoat": {
-    "allowScripts": {
-      "keccak": false
-    }
-  },
   "ava": {
     "files": [
       "test/*.spec.js"
     ],
     "timeout": "2m",
     "concurrency": 1
+  },
+  "gitHead": "28a238fc4c3d55650bd2ba9a3603b1f275567286",
+  "lavamoat": {
+    "allowScripts": {
+      "keccak": false
+    }
   }
 }

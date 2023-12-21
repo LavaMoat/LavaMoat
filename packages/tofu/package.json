@@ -1,35 +1,35 @@
 {
   "name": "lavamoat-tofu",
   "version": "7.0.0",
-  "main": "src/index.js",
+  "description": "This is the TOFU (trust-on-first-use) static analysis tool used by LavaMoat to automatically generate useable config",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LavaMoat/lavamoat.git",
+    "directory": "packages/tofu"
+  },
+  "homepage": "https://github.com/LavaMoat/LavaMoat/blob/main/packages/tofu/README.md",
+  "bugs": {
+    "url": "https://github.com/LavaMoat/lavamoat/issues"
+  },
+  "author": "kumavis",
   "license": "MIT",
+  "engines": {
+    "node": "^16.20.0 || ^18.0.0 || ^20.0.0"
+  },
+  "main": "src/index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "lint:deps": "depcheck",
+    "test": "ava"
+  },
   "dependencies": {
     "@babel/parser": "^7.23.0",
     "@babel/traverse": "^7.23.2"
   },
   "devDependencies": {
     "deep-equal": "^2.2.1"
-  },
-  "scripts": {
-    "lint:deps": "depcheck",
-    "test": "ava"
-  },
-  "description": "This is the TOFU (trust-on-first-use) static analysis tool used by LavaMoat to automatically generate useable config",
-  "directories": {
-    "test": "test"
-  },
-  "author": "kumavis",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/LavaMoat/lavamoat.git",
-    "directory": "packages/tofu"
-  },
-  "bugs": {
-    "url": "https://github.com/LavaMoat/lavamoat/issues"
-  },
-  "homepage": "https://github.com/LavaMoat/LavaMoat/blob/main/packages/tofu/README.md",
-  "engines": {
-    "node": "^16.20.0 || ^18.0.0 || ^20.0.0"
   },
   "ava": {
     "files": [

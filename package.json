@@ -1,9 +1,39 @@
 {
   "name": "lavamoat-monorepo",
+  "version": "0.0.0",
   "private": true,
-  "overrides": {
-    "type-fest": "$type-fest",
-    "util": "^0.12.5"
+  "workspaces": [
+    "packages/*"
+  ],
+  "engines": {
+    "node": "^16.20.0 || ^18.0.0 || ^20.0.0",
+    "npm": ">=7.0.0"
+  },
+  "scripts": {
+    "build": "npm run --workspaces --if-present build && npm run build:types",
+    "build:types": "tsc -b",
+    "clean:types": "tsc -b --clean",
+    "lint": "npm run lint:eslint && npm run lint:deps",
+    "lint:commit": "commitlint",
+    "lint:deps": "npm run --workspaces --if-present lint:deps",
+    "lint:eslint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "lint:staged": "lint-staged",
+    "rebuild": "npm run --workspaces --if-present rebuild && npm run rebuild:types",
+    "rebuild:types": "npm run clean:types && npm run build:types",
+    "release": "npm run release:rebuild && npm run release:publish --newPkg=${npm_config_newpkg}",
+    "release:dry-run": "node scripts/publish.js --dryRun --newPkg=${npm_config_newpkg}",
+    "release:publish": "node scripts/publish.js --newPkg=${npm_config_newpkg}",
+    "release:rebuild": "npm run rebuild && npm run test:prep && npm run test:workspaces",
+    "setup": "husky install; npm run rebuild",
+    "test": "npm run build && npm run test:prep && npm run test:workspaces && npm run test:scripts",
+    "test:prep": "npm run --workspaces --if-present test:prep",
+    "test:scripts": "ava --config scripts/ava.config.mjs",
+    "test:workspaces": "npm run --workspaces --if-present test",
+    "watch:types": "tsc -b --watch"
+  },
+  "optionalDependencies": {
+    "corepack": "0.20.0"
   },
   "devDependencies": {
     "@commitlint/cli": "^17.6.7",
@@ -33,35 +63,16 @@
     "type-fest": "^4.7.1",
     "typescript": "~5.2.2"
   },
-  "optionalDependencies": {
-    "corepack": "0.20.0"
+  "overrides": {
+    "type-fest": "$type-fest",
+    "util": "^0.12.5"
   },
-  "engines": {
-    "node": "^16.20.0 || ^18.0.0 || ^20.0.0",
-    "npm": ">=7.0.0"
-  },
-  "scripts": {
-    "build": "npm run --workspaces --if-present build && npm run build:types",
-    "build:types": "tsc -b",
-    "clean:types": "tsc -b --clean",
-    "watch:types": "tsc -b --watch",
-    "lint:commit": "commitlint",
-    "lint:deps": "npm run --workspaces --if-present lint:deps",
-    "lint:eslint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "lint:staged": "lint-staged",
-    "lint": "npm run lint:eslint && npm run lint:deps",
-    "release:publish": "node scripts/publish.js --newPkg=${npm_config_newpkg}",
-    "release:dry-run": "node scripts/publish.js --dryRun --newPkg=${npm_config_newpkg}",
-    "release:rebuild": "npm run rebuild && npm run test:prep && npm run test:workspaces",
-    "release": "npm run release:rebuild && npm run release:publish --newPkg=${npm_config_newpkg}",
-    "rebuild": "npm run --workspaces --if-present rebuild && npm run rebuild:types",
-    "rebuild:types": "npm run clean:types && npm run build:types",
-    "setup": "husky install; npm run rebuild",
-    "test:prep": "npm run --workspaces --if-present test:prep",
-    "test:workspaces": "npm run --workspaces --if-present test",
-    "test:scripts": "ava --config scripts/ava.config.mjs",
-    "test": "npm run build && npm run test:prep && npm run test:workspaces && npm run test:scripts"
+  "ava": {
+    "files": [
+      "packages/*/test/*.spec.js",
+      "scripts/*.spec.js"
+    ],
+    "timeout": "2m"
   },
   "lint-staged": {
     "*.js": [
@@ -75,10 +86,6 @@
       "prettier --write"
     ]
   },
-  "workspaces": [
-    "packages/*"
-  ],
-  "version": "0.0.0",
   "prettier": {
     "jsdocCommentLineStrategy": "keep",
     "jsdocPreferCodeFences": true,

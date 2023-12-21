@@ -1,45 +1,45 @@
 {
   "name": "@lavamoat/aa",
   "version": "4.0.0",
-  "main": "src/index.js",
+  "description": "LavaMoat's secure package naming convention",
+  "author": "kumavis",
+  "license": "MIT",
+  "engines": {
+    "node": "^16.20.0 || ^18.0.0 || ^20.0.0"
+  },
   "bin": {
     "lavamoat-ls": "src/cli.js"
   },
-  "license": "MIT",
-  "publishConfig": {
-    "access": "public"
+  "main": "src/index.js",
+  "types": "./types/index.d.ts",
+  "directories": {
+    "test": "test"
   },
+  "files": [
+    "CHANGELOG.md",
+    "src",
+    "types",
+    "!*.tsbuildinfo",
+    "!tsconfig.json"
+  ],
   "scripts": {
+    "lint:deps": "depcheck",
     "test": "npm run test:run",
-    "test:run": "ava",
-    "lint:deps": "depcheck"
-  },
-  "devDependencies": {
-    "@types/resolve": "1.20.6"
+    "test:run": "ava"
   },
   "dependencies": {
     "resolve": "^1.22.3"
   },
-  "description": "LavaMoat's secure package naming convention",
-  "directories": {
-    "test": "test"
+  "devDependencies": {
+    "@types/resolve": "1.20.6"
   },
-  "author": "kumavis",
-  "engines": {
-    "node": "^16.20.0 || ^18.0.0 || ^20.0.0"
+  "publishConfig": {
+    "access": "public"
   },
   "ava": {
     "files": [
       "test/*.spec.js"
     ],
     "timeout": "30s"
-  },
-  "types": "./types/index.d.ts",
-  "files": [
-    "src",
-    "types",
-    "CHANGELOG.md",
-    "!*.tsbuildinfo",
-    "!tsconfig.json"
-  ]
+  }
 }

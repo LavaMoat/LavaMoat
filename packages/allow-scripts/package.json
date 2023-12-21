@@ -1,15 +1,43 @@
 {
   "name": "@lavamoat/allow-scripts",
   "version": "3.0.0",
-  "main": "src/index.js",
+  "description": "A tool for running only the dependency lifecycle hooks specified in an allowlist.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LavaMoat/LavaMoat.git",
+    "directory": "packages/allow-scripts"
+  },
+  "homepage": "https://github.com/LavaMoat/LavaMoat/tree/main/packages/allow-scripts",
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": "^16.20.0 || ^18.0.0 || ^20.0.0"
+  },
   "bin": {
     "allow-scripts": "src/cli.js"
   },
+  "main": "src/index.js",
   "exports": {
     ".": "./src/index.js",
     "./setup": "./src/setup.js"
   },
-  "license": "MIT",
+  "types": "./types/index.d.ts",
+  "directories": {
+    "test": "test"
+  },
+  "files": [
+    "CHANGELOG.md",
+    "src",
+    "types",
+    "!*.tsbuildinfo",
+    "!tsconfig.json"
+  ],
+  "scripts": {
+    "lint:deps": "depcheck",
+    "test": "npm run test:run",
+    "test:prep": "for d in ./test/projects/*/ ; do (cd \"$d\" && ../../../src/cli.js auto --experimental-bins); done",
+    "test:run": "ava"
+  },
   "dependencies": {
     "@lavamoat/aa": "^4.0.0",
     "@npmcli/run-script": "^6.0.0",
@@ -17,44 +45,16 @@
     "npm-normalize-package-bin": "^3.0.0",
     "yargs": "^17.7.2"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/LavaMoat/LavaMoat.git",
-    "directory": "packages/allow-scripts"
-  },
-  "publishConfig": {
-    "access": "public"
-  },
-  "description": "A tool for running only the dependency lifecycle hooks specified in an allowlist.",
-  "directories": {
-    "test": "test"
-  },
   "devDependencies": {
     "@types/npmcli__promise-spawn": "6.0.3"
   },
-  "scripts": {
-    "test": "npm run test:run",
-    "test:run": "ava",
-    "test:prep": "for d in ./test/projects/*/ ; do (cd \"$d\" && ../../../src/cli.js auto --experimental-bins); done",
-    "lint:deps": "depcheck"
-  },
-  "author": "",
-  "homepage": "https://github.com/LavaMoat/LavaMoat/tree/main/packages/allow-scripts",
-  "engines": {
-    "node": "^16.20.0 || ^18.0.0 || ^20.0.0"
+  "publishConfig": {
+    "access": "public"
   },
   "ava": {
     "files": [
       "test/*.spec.js"
     ],
     "timeout": "30s"
-  },
-  "types": "./types/index.d.ts",
-  "files": [
-    "src",
-    "types",
-    "CHANGELOG.md",
-    "!*.tsbuildinfo",
-    "!tsconfig.json"
-  ]
+  }
 }
