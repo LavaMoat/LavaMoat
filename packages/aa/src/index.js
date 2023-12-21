@@ -1,7 +1,7 @@
 'use strict'
 
-const { readFileSync } = require('fs')
-const path = require('path')
+const { readFileSync } = require('node:fs')
+const path = require('node:path')
 const nodeResolve = require('resolve')
 
 module.exports = {
@@ -13,28 +13,50 @@ module.exports = {
 }
 
 /**
+ * Default resolver if none provided
+ */
+const performantResolve = createPerformantResolve()
+
+/**
+ * A `string` or something coercible to a `string`
+ *
+ * @remarks
+ * This is equivalent to the internal `StringOrToString` type of `resolve`
+ * @typedef {string | { toString: () => string }} StringOrToString
+ */
+
+/**
+ * Performant resolve avoids loading package.jsons if their path is what's being
+ * resolved, offering 2x performance improvement compared to using original
+ * resolve
+ *
  * @returns {Resolver}
  */
 function createPerformantResolve() {
+  if (performantResolve) {
+    return performantResolve
+  }
   /**
-   * @param {string} self
-   * @returns {(
-   *   readFileSync: (file: string) => string | { toString(): string },
-   *   pkgfile: string
-   * ) => Record<string, unknown>}
+   * @param {string} filepath
    */
-  const readPackageWithout = (self) => (readFileSync, pkgfile) => {
-    // avoid loading the package.json we're just trying to resolve
-    if (pkgfile.endsWith(self)) {
-      return {}
+  const readPackageWithout = (filepath) => {
+    /**
+     * @param {(path: string) => StringOrToString} readFileSync - Sync file
+     *   reader
+     * @param {string} otherFilepath - Path to another `package.json`
+     * @returns {Record<string, unknown> | undefined}
+     */
+    return (readFileSync, otherFilepath) => {
+      // avoid loading the package.json we're just trying to resolve
+      if (otherFilepath.endsWith(filepath)) {
+        return {}
+      }
+      // original readPackageSync implementation from resolve internals:
+      const body = readFileSync(otherFilepath)
+      try {
+        return JSON.parse(`${body}`)
+      } catch (jsonErr) {}
     }
-    // original readPackageSync implementation from resolve internals:
-    var body = readFileSync(pkgfile)
-    try {
-      // @ts-expect-error - JSON.parse calls toString() on its parameter if not given a string
-      var pkg = JSON.parse(body)
-      return pkg
-    } catch (jsonErr) {}
   }
 
   return {
@@ -50,12 +72,12 @@ function createPerformantResolve() {
  * @param {LoadCanonicalNameMapOpts} options
  * @returns {Promise<CanonicalNameMap>}
  */
-async function loadCanonicalNameMap({ rootDir, includeDevDeps, resolve }) {
+async function loadCanonicalNameMap({
+  rootDir,
+  includeDevDeps,
+  resolve = performantResolve,
+}) {
   const canonicalNameMap = /** @type {CanonicalNameMap} */ (new Map())
-  // performant resolve avoids loading package.jsons if their path is what's being resolved,
-  // offering 2x performance improvement compared to using original resolve
-  resolve = resolve || createPerformantResolve()
-  // resolve = resolve || nodeResolve
   // walk tree
   const logicalPathMap = walkDependencyTreeForBestLogicalPaths({
     packageDir: rootDir,
@@ -83,12 +105,24 @@ function wrappedResolveSync(resolve, depName, packageDir) {
   const depRelativePackageJsonPath = path.join(depName, 'package.json')
   try {
     return resolve.sync(depRelativePackageJsonPath, { basedir: packageDir })
-  } catch (err) {
-    if (!(/** @type {Error} */ (err).message.includes('Cannot find module'))) {
-      throw err
+  } catch (e) {
+    const err = /** @type {Error} */ (e)
+    if (
+      err.message?.includes('Cannot find module') &&
+      resolve !== performantResolve
+    ) {
+      try {
+        return performantResolve.sync(depRelativePackageJsonPath, {
+          basedir: packageDir,
+        })
+      } catch (err) {
+        if (
+          !(/** @type {Error} */ (err).message?.includes('Cannot find module'))
+        ) {
+          throw err
+        }
+      }
     }
-    // debug: log resolution failures
-    // console.log('resolve failed', depName, packageDir)
   }
 }
 
@@ -125,9 +159,8 @@ function walkDependencyTreeForBestLogicalPaths({
   logicalPath = [],
   includeDevDeps = false,
   visited = new Set(),
-  resolve,
+  resolve = performantResolve,
 }) {
-  resolve = resolve ?? createPerformantResolve()
   /** @type {Map<string, string[]>} */
   const preferredPackageLogicalPathMap = new Map()
   // add the entry package as the first work unit
