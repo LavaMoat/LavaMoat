@@ -1,8 +1,8 @@
 // @ts-check
 
-/** @typedef {import("webpack").Generator} Generator */
-/** @typedef {import("webpack").NormalModule} NormalModule */
-/** @typedef {import("webpack").sources.Source} Source */
+/** @typedef {import('webpack').Generator} Generator */
+/** @typedef {import('webpack').NormalModule} NormalModule */
+/** @typedef {import('webpack').sources.Source} Source */
 
 const path = require('path')
 const {
@@ -20,7 +20,6 @@ const EXCLUDE_LOADER = path.join(__dirname, '../excludeLoader.js')
 // TODO: processing requirements needs to be a tiny bit more clever yet.
 // Look in JavascriptModulesPlugin for how it decides if module and exports are unused.
 /**
- *
  * @param {Set<string>} requirements
  * @param {NormalModule} module
  * @returns
@@ -57,7 +56,6 @@ function processRequirements(requirements, module) {
   return runtimeKit
 }
 
-
 // Use a weakset to mark generatorInstance as wrapped,
 // this is to avoid wrapping the same instance twice
 const wrappedGeneratorInstances = new WeakSet()
@@ -86,9 +84,8 @@ exports.wrapGeneratorMaker = ({
     }
     const originalGenerate = generatorInstance.generate
     /**
-     *
      * @param {NormalModule} module
-     * @param {*} options - GeneratorOptions type not exported fromw ebpack
+     * @param {any} options - GeneratorOptions type not exported fromw ebpack
      * @returns {Source}
      */
     generatorInstance.generate = function (module, options) {
@@ -97,7 +94,7 @@ exports.wrapGeneratorMaker = ({
         options,
       })
 
-      const originalGeneratedSource =originalGenerate.apply(this, arguments)
+      const originalGeneratedSource = originalGenerate.apply(this, arguments)
 
       // bail out if we're dealing with a subcompilation from a plugin and such - they may run too early
       if (!PROGRESS.done('pathsProcessed')) {
@@ -106,9 +103,12 @@ exports.wrapGeneratorMaker = ({
 
       // skip doing anything if marked as excluded by the excludeLoader,
       // only accept exclude loader from config, not inline.
-      // Inline loader definition uses a `!` character as a loader separator. 
+      // Inline loader definition uses a `!` character as a loader separator.
       // Defining what to exclude should only be possible in the config.
-      if (module.loaders.some(({ loader }) => loader === EXCLUDE_LOADER) && !module.rawRequest.includes('!')) {
+      if (
+        module.loaders.some(({ loader }) => loader === EXCLUDE_LOADER) &&
+        !module.rawRequest.includes('!')
+      ) {
         excludes.push(module.rawRequest)
         diag.rawDebug(3, `skipped wrapping ${module.rawRequest}`)
         return originalGeneratedSource
@@ -132,7 +132,7 @@ exports.wrapGeneratorMaker = ({
             console.warn(
               'Attempted to set strict mode on module',
               module.rawRequest,
-              Error().stack,
+              Error().stack
             )
           },
         })
@@ -168,11 +168,7 @@ exports.wrapGeneratorMaker = ({
       if (sourceChanged) {
         return new ConcatSource(before, source, after)
       } else {
-        return new ConcatSource(
-          before,
-          originalGeneratedSource,
-          after,
-        )
+        return new ConcatSource(before, originalGeneratedSource, after)
       }
     }
     wrappedGeneratorInstances.add(generatorInstance)

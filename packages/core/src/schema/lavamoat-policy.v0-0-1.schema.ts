@@ -22,13 +22,13 @@ export interface PartialLavaMoatPolicy {
 export interface DebugInfo {
   /**
    * @todo This is an array of `@babel/parser`'s `ParseError`. To use it
-   * directly we'd need to add `@babel/parser` as a production dependency of
-   * `lavamoat-tofu`, and I don't want to do that right now.
+   *   directly we'd need to add `@babel/parser` as a production dependency of
+   *   `lavamoat-tofu`, and I don't want to do that right now.
    */
   parseErrors?: { code: string; reasonCode: string }[]
   moduleRecord: Omit<LavamoatModuleRecord, 'ast'>
   /**
-   * @todo move these types into lavamoat-tofu
+   * @todo Move these types into lavamoat-tofu
    */
   sesCompat: SesCompat
   globals: Record<string, boolean>
@@ -79,21 +79,24 @@ export interface ResourcePolicy {
 }
 
 /**
- * Globals (including properties using dot notation) accessible to the module; `true` to allow and `false` to deny
+ * Globals (including properties using dot notation) accessible to the module;
+ * `true` to allow and `false` to deny
  */
 export interface GlobalPolicy {
   [k: string]: boolean
 }
 
 /**
- * Node.js builtins (including properties using dot notation); `true` to allow and `false` to deny
+ * Node.js builtins (including properties using dot notation); `true` to allow
+ * and `false` to deny
  */
 export interface BuiltinPolicy {
   [k: string]: boolean
 }
 
 /**
- * Additional external packages (in their entirety) accessible to the module; `true` to allow and `false` to deny
+ * Additional external packages (in their entirety) accessible to the module;
+ * `true` to allow and `false` to deny
  */
 export interface PackagePolicy {
   [k: string]: boolean

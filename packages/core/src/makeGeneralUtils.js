@@ -1,7 +1,8 @@
 module.exports = makeGeneralUtils
 
 /**
- * @deprecated - inlined in endowmentsToolkit (see core/src/endowmentsToolkit.js)
+ * @deprecated - Inlined in endowmentsToolkit (see
+ *   core/src/endowmentsToolkit.js)
  */
 function makeGeneralUtils() {
   return {

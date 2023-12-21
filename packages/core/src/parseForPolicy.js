@@ -7,7 +7,7 @@ module.exports = { parseForPolicy }
 
 /**
  * @param {ParseForPolicyOpts} opts
- * @returns {Promise<import('./schema').LavaMoatPolicy>} policy object
+ * @returns {Promise<import('./schema').LavaMoatPolicy>} Policy object
  */
 async function parseForPolicy({
   moduleSpecifier,
@@ -54,7 +54,7 @@ async function parseForPolicy({
  * @callback ResolveFn
  * @param {string} requestedName
  * @param {string} parentAddress
- * @returns {string|undefined}
+ * @returns {string | undefined}
  */
 
 /**
@@ -70,7 +70,6 @@ async function parseForPolicy({
  */
 
 /**
- *
  * @param {ParseForPolicyOpts} opts
- * @returns {Promise<import('./schema').LavaMoatPolicySchema>} policy object
+ * @returns {Promise<import('./schema').LavaMoatPolicySchema>} Policy object
  */

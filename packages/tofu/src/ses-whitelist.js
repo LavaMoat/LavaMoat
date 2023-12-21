@@ -1,18 +1,14 @@
 // modified from https://github.com/Agoric/SES-shim/blob/aefefbfcbe53f5b4520542bfb4da14dd68f13ec6/packages/ses/src/whitelist.js
 
 /**
- * @fileoverview Exports {@code whitelist}, a recursively defined
- * JSON record enumerating all intrinsics and their properties
- * according to ECMA specs.
- *
+ * @file Exports {@code whitelist}, a recursively defined JSON record
+ *   enumerating all intrinsics and their properties according to ECMA specs.
  * @author JF Paradis
  */
 
 /**
  * <p>Each JSON record enumerates the disposition of the properties on
- *    some corresponding intrinsic object.
- *
- * <p>All records are made of key-value pairs where the key
+ *    some corresponding intrinsic object.<p>All records are made of key-value pairs where the key
  *    is the property to process, and the value is the associated
  *    dispositions a.k.a. the "permit". Those permits can be:
  * <ul>
@@ -34,9 +30,7 @@
  *     whitelisted and that next record represents the disposition of
  *     the object which is its value. For example, {@code "Object"}
  *     leads to another record explaining what properties {@code
- *     "Object"} may have and how each such property should be treated.
- *
- * <p>Notes:
+ *     "Object"} may have and how each such property should be treated.<p>Notes:
  * <li>"**proto**" is used to refer to "__proto__" without creating
  *     an actual prototype.
  * <li>"ObjectPrototype" is the default "**proto**" (when not specified).

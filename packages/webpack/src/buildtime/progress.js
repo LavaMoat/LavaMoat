@@ -3,10 +3,15 @@ const diag = require('./diagnostics')
 
 /**
  * @typedef {object} ProgressAPI
- * @property {(expectedStep: string) => boolean} is - checks if current progress matches expectedStep
- * @property {(expectedStep: string) => boolean} done - checks if expectedStep was already reported.
- * @property {(expectedStep: string) => void} assertDone - throws if expectedStep was not already reported.
- * @property {(step: string) => void} report - moves progress forward if step passed is the next step. no-op if current step (reporting progress is idempotent)
+ * @property {(expectedStep: string) => boolean} is - Checks if current progress
+ *   matches expectedStep
+ * @property {(expectedStep: string) => boolean} done - Checks if expectedStep
+ *   was already reported.
+ * @property {(expectedStep: string) => void} assertDone - Throws if
+ *   expectedStep was not already reported.
+ * @property {(step: string) => void} report - Moves progress forward if step
+ *   passed is the next step. no-op if current step (reporting progress is
+ *   idempotent)
  */
 
 /**
@@ -41,7 +46,7 @@ module.exports = function progress({ steps }) {
       throw Error(
         `LavaMoatPlugin Plugin: Progress reported '${step}' but the next step was expected to be '${
           steps[currentStep + 1]
-        }'`,
+        }'`
       )
     } else {
       diag.rawDebug(1, `\n> progress ${steps[currentStep]}->${step}`)
@@ -64,7 +69,7 @@ module.exports = function progress({ steps }) {
       return
     }
     throw Error(
-      `LavaMoatPlugin Plugin: Expected '${query}' to be done, but we're at '${steps[currentStep]}'`,
+      `LavaMoatPlugin Plugin: Expected '${query}' to be done, but we're at '${steps[currentStep]}'`
     )
   }
   return API

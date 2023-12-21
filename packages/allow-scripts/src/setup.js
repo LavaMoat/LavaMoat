@@ -36,7 +36,6 @@ module.exports = {
 }
 
 /**
- *
  * @param {string} filename
  * @returns {string}
  */
@@ -46,7 +45,6 @@ function addInstallParentDir(filename) {
 }
 
 /**
- *
  * @param {string} entry
  * @param {string} file
  * @returns {boolean}
@@ -61,7 +59,6 @@ function isEntryPresent(entry, file) {
 }
 
 /**
- *
  * @param {WriteRcFileContentOpts} param0
  */
 function writeRcFileContent({ file, entry }) {
@@ -83,7 +80,6 @@ function writeRcFileContent({ file, entry }) {
 let binsBlockedMemo
 
 /**
- *
  * @param {AreBinsBlockedOpts} args
  * @returns {boolean}
  */
@@ -198,5 +194,5 @@ function editPackageJson() {
 
 /**
  * @typedef AreBinsBlockedOpts
- * @property {boolean} [noMemoization] turn off memoization, make a fresh lookup
+ * @property {boolean} [noMemoization] Turn off memoization, make a fresh lookup
  */

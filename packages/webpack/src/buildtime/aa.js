@@ -18,7 +18,7 @@ const lookUp = (needle, haystack) => {
 
 /**
  * @param {Set<string>} neededIds
- * @param {Array<string>} policyIds
+ * @param {string[]} policyIds
  */
 const crossReference = (neededIds, policyIds) => {
   // Policy generator skips packages that don't use anything, so it's ok for policy to be missing.
@@ -34,7 +34,7 @@ const crossReference = (neededIds, policyIds) => {
   if (missingIds.length > 0) {
     diag.rawDebug(
       1,
-      `Policy is missing the following resources: ${missingIds.join(', ')}`,
+      `Policy is missing the following resources: ${missingIds.join(', ')}`
     )
   }
 }
@@ -62,7 +62,7 @@ exports.generateIdentifierLookup = ({
   const usedIdentifiers = Object.keys(policy.resources)
   usedIdentifiers.unshift(ROOT_IDENTIFIER)
   const usedIdentifiersIndex = Object.fromEntries(
-    usedIdentifiers.map((id, index) => [id, index]),
+    usedIdentifiers.map((id, index) => [id, index])
   )
   // choose the implementation - to translate from AA to numbers or not
   let translate
@@ -78,7 +78,7 @@ exports.generateIdentifierLookup = ({
 
   const pathLookup = pathsToIdentifiers(paths)
   const identifiersWithKnownPaths = new Set(
-    Object.values(pathLookup).map((pl) => pl.aa),
+    Object.values(pathLookup).map((pl) => pl.aa)
   )
 
   crossReference(identifiersWithKnownPaths, usedIdentifiers)
@@ -91,7 +91,7 @@ exports.generateIdentifierLookup = ({
       }
       acc[key].push(moduleId)
       return acc
-    }, {}),
+    }, {})
   )
 
   const translateResource = (resource) => ({
@@ -102,7 +102,7 @@ exports.generateIdentifierLookup = ({
         Object.entries(resource.packages).map(([id, value]) => [
           translate(id),
           value,
-        ]),
+        ])
       ),
   })
 
@@ -130,7 +130,7 @@ exports.generateIdentifierLookup = ({
             .map(([id, resource]) => [
               translate(id),
               translateResource(resource),
-            ]),
+            ])
         ),
       }
       return translatedPolicy

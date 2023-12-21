@@ -10,15 +10,22 @@ const q = JSON.stringify
  * @property {string[] | Set<string>} runtimeKit
  * @property {string} evalKitFunctionName
  * @property {boolean} [runChecks]
- *
  */
 
-const { NAME_globalThis, NAME_scopeTerminator, NAME_runtimeHandler } = require('../ENUM.json')
+const {
+  NAME_globalThis,
+  NAME_scopeTerminator,
+  NAME_runtimeHandler,
+} = require('../ENUM.json')
 
 /**
- *
  * @param {WrappingInput} params
- * @returns {{before: string, after: string, source: string, sourceChanged: boolean}}
+ * @returns {{
+ *   before: string
+ *   after: string
+ *   source: string
+ *   sourceChanged: boolean
+ * }}
  */
 exports.wrapper = function wrapper({
   source,
@@ -49,9 +56,9 @@ exports.wrapper = function wrapper({
       }
     }
     }
-}).call(${evalKitFunctionName}(${q(id)}, { ${Array.from(
-  runtimeKit,
-).join(',')}}))()`
+}).call(${evalKitFunctionName}(${q(id)}, { ${Array.from(runtimeKit).join(
+    ','
+  )}}))()`
   if (runChecks) {
     validateSource(before + sesCompatibleSource + after)
   }
@@ -72,11 +79,15 @@ function validateSource(source) {
   } catch (e) {
     if (e !== validityFlag) {
       diag.run(1, () => {
-        fs.writeFileSync(validityFlag + '.js', source+`
+        fs.writeFileSync(
+          validityFlag + '.js',
+          source +
+            `
 /*
 ${e}
 */
-        `)
+        `
+        )
       })
       throw Error(validityFlag + 'wrapped module is not valid JS\n' + e)
     }
