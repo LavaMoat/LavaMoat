@@ -16,7 +16,7 @@ const {
 
 module.exports = {
   inspectGlobals,
-  inspectImports: inspectRequires,
+  inspectRequires,
   inspectEsmImports,
   inspectDynamicRequires,
 }

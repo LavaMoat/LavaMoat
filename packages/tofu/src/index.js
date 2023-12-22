@@ -2,7 +2,7 @@ const { parse } = require('@babel/parser')
 const { default: traverse } = require('@babel/traverse')
 const {
   inspectGlobals,
-  inspectImports,
+  inspectRequires,
   inspectEsmImports,
   inspectDynamicRequires,
 } = require('./inspectSource')
@@ -15,7 +15,9 @@ const utils = require('./util')
 
 module.exports = {
   inspectGlobals,
-  inspectImports,
+  /** @deprecated - Use {@link inspectRequires} */
+  inspectImports: inspectRequires,
+  inspectRequires,
   inspectEsmImports,
   inspectDynamicRequires,
   utils,
