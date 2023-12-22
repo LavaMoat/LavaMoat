@@ -16,7 +16,7 @@
     "ava": "^5.3.1",
     "conventional-changelog-conventionalcommits": "^6.1.0",
     "cross-env": "^7.0.3",
-    "depcheck": "^1.4.0",
+    "depcheck": "^1.4.3",
     "eslint": "8.46.0",
     "eslint-config-prettier": "9.0.0",
     "eslint-plugin-ava": "14.0.0",
