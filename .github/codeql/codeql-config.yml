@@ -1,4 +1,5 @@
-name: 'My CodeQL config'
+name: 'LavaMoat CodeQL Config'
 
 paths-ignore:
   - 'packages/viz/src/example-policies/policy-*.js'
+  - 'packages/perf/trials/**/*.html'
