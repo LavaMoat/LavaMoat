@@ -25,11 +25,11 @@
     "test": "ava"
   },
   "dependencies": {
-    "@babel/parser": "^7.23.0",
-    "@babel/traverse": "^7.23.2"
+    "@babel/parser": "7.23.5",
+    "@babel/traverse": "7.23.2"
   },
   "devDependencies": {
-    "deep-equal": "^2.2.1"
+    "deep-equal": "2.2.1"
   },
   "ava": {
     "files": [

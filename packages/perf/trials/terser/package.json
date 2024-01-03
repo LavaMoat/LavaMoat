@@ -1,7 +1,7 @@
 {
   "devDependencies": {
-    "browserify": "^17.0.0",
-    "serve": "^14.2.0"
+    "browserify": "17.0.0",
+    "serve": "14.2.0"
   },
   "scripts": {
     "start": "yarn stats && yarn chart",
@@ -13,6 +13,6 @@
   },
   "dependencies": {
     "chart-csv": "kumavis/chart-csv#master",
-    "terser": "^5.14.2"
+    "terser": "5.14.2"
   }
 }

@@ -1,7 +1,7 @@
 {
   "devDependencies": {
-    "browserify": "^17.0.0",
-    "serve": "^14.2.0"
+    "browserify": "17.0.0",
+    "serve": "14.2.0"
   },
   "scripts": {
     "start": "yarn stats && yarn chart",
@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "chart-csv": "kumavis/chart-csv#master",
-    "@metamask/eth-sig-util": "^5.1.0",
-    "ethereumjs-wallet": "^1.0.2"
+    "@metamask/eth-sig-util": "5.1.0",
+    "ethereumjs-wallet": "1.0.2"
   }
 }

@@ -14,11 +14,11 @@
     "zzz": "node zzz.js"
   },
   "dependencies": {
-    "cheerio": "^1.0.0-rc.12",
+    "cheerio": "1.0.0-rc.12",
     "lavamoat": "^8.0.0",
     "lavamoat-core": "^15.0.0",
     "lavamoat-tofu": "^7.0.0",
-    "node-fetch": "^2.6.9",
-    "p-limit": "^3.1.0"
+    "node-fetch": "2.6.11",
+    "p-limit": "2.3.0"
   }
 }
