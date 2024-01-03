@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "chart-csv": "kumavis/chart-csv#master",
-    "react": "^18.2.0",
-    "browserify": "^17.0.0"
+    "react": "18.2.0",
+    "browserify": "17.0.0"
   }
 }

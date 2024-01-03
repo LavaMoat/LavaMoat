@@ -41,14 +41,14 @@
     "lavamoat-core": "^15.0.0"
   },
   "devDependencies": {
-    "css-loader": "^6.7.3",
-    "esbuild-loader": "^3.0.1",
-    "html-webpack-plugin": "^5.5.1",
-    "memfs": "^4.3.0",
-    "mini-css-extract-plugin": "^2.7.5",
-    "ses": "^0.18.5",
-    "typescript": "^5.0.2",
-    "webpack": "^5.84.1"
+    "css-loader": "6.7.3",
+    "esbuild-loader": "3.2.0",
+    "html-webpack-plugin": "5.5.1",
+    "memfs": "4.6.0",
+    "mini-css-extract-plugin": "2.7.6",
+    "ses": "0.18.8",
+    "typescript": "5.2.2",
+    "webpack": "5.89.0"
   },
   "ava": {
     "files": [

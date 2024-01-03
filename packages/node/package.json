@@ -33,17 +33,17 @@
     "test:yarn1": "cross-env LAVAMOAT_PM=yarn@1 npm run test:prepare && ava"
   },
   "dependencies": {
-    "@babel/code-frame": "^7.22.13",
-    "@babel/highlight": "^7.22.20",
+    "@babel/code-frame": "7.22.13",
+    "@babel/highlight": "7.22.20",
     "@lavamoat/aa": "^4.0.0",
-    "bindings": "^1.5.0",
-    "htmlescape": "^1.1.1",
-    "json-stable-stringify": "^1.0.2",
+    "bindings": "1.5.0",
+    "htmlescape": "1.1.1",
+    "json-stable-stringify": "1.0.2",
     "lavamoat-core": "^15.0.0",
     "lavamoat-tofu": "^7.0.0",
-    "node-gyp-build": "^4.6.0",
-    "resolve": "^1.22.3",
-    "yargs": "^17.7.2"
+    "node-gyp-build": "4.6.0",
+    "resolve": "1.22.8",
+    "yargs": "16.2.0"
   },
   "ava": {
     "files": [
