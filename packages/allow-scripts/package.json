@@ -43,7 +43,7 @@
     "@npmcli/run-script": "^6.0.0",
     "bin-links": "4.0.3",
     "npm-normalize-package-bin": "^3.0.0",
-    "yargs": "^17.7.2"
+    "yargs": "17.7.2"
   },
   "devDependencies": {
     "@types/npmcli__promise-spawn": "6.0.3"
