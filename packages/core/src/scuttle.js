@@ -28,6 +28,22 @@ const { getPrototypeOf } = Reflect
 
 const { warn } = console
 
+function generateInvokers(prop) {
+  return {get, set}
+  function set() {
+    warn(
+      `LavaMoat - property "${prop}" of globalThis cannot be set under scuttling mode. ` +
+      'To learn more visit https://github.com/LavaMoat/LavaMoat/pull/360.'
+    )
+  }
+  function get() {
+    throw new Error(
+      `LavaMoat - property "${prop}" of globalThis is inaccessible under scuttling mode. ` +
+      'To learn more visit https://github.com/LavaMoat/LavaMoat/pull/360.'
+    )
+  }
+}
+
 /**
  * Applies scuttling, with the default set of options, including using Snow if passed in as scuttlerFunc.
  * Scuttle globalThis right after we used it to create the root package compartment.
@@ -119,20 +135,7 @@ function performScuttleGlobalThis(globalRef, extraPropsToAvoid = new Array()) {
 
   const obj = create(null)
   for (const prop of props) {
-    // eslint-disable-next-line no-inner-declarations
-    function set() {
-      warn(
-        `LavaMoat - property "${prop}" of globalThis cannot be set under scuttling mode. ` +
-          'To learn more visit https://github.com/LavaMoat/LavaMoat/pull/360.'
-      )
-    }
-    // eslint-disable-next-line no-inner-declarations
-    function get() {
-      throw new Error(
-        `LavaMoat - property "${prop}" of globalThis is inaccessible under scuttling mode. ` +
-          'To learn more visit https://github.com/LavaMoat/LavaMoat/pull/360.'
-      )
-    }
+    const {get, set} = generateInvokers(prop)
     if (shouldAvoidProp(propsToAvoid, prop)) {
       continue
     }
