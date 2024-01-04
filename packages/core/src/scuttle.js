@@ -134,10 +134,10 @@ function performScuttleGlobalThis(globalRef, extraPropsToAvoid = new Array()) {
   ])
 
   const obj = create(null)
-  for (const prop of props) {
+  props.forEach(prop => {
     const {get, set} = generateInvokers(prop)
     if (shouldAvoidProp(propsToAvoid, prop)) {
-      continue
+      return
     }
     let desc = getOwnPropertyDescriptor(globalRef, prop)
     if (desc?.configurable === true) {
@@ -146,10 +146,10 @@ function performScuttleGlobalThis(globalRef, extraPropsToAvoid = new Array()) {
       const p = new Proxy(obj, { getPrototypeOf: get, get, set })
       desc = { configurable: false, writable: false, value: p }
     } else {
-      continue
+      return
     }
     defineProperty(globalRef, prop, desc)
-  }
+  })
 }
 
 /**
