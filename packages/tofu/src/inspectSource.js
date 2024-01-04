@@ -176,14 +176,22 @@ function inspectGlobals(
  * modules.
  *
  * @param {import('@babel/types').Node} ast
- * @param {string[]} [packagesToInspect]
- * @returns {{ esmImports: string[] }}
+ * @param {string[]} [packagesToInspect] - List of module IDs to look for; if
+ *   omitted, will inspect all imports
+ * @returns {string[]} - List of imported identifiers
  */
 function inspectEsmImports(ast, packagesToInspect) {
   const pkgsToInspect = new Set(packagesToInspect)
+
   /** @type {Set<string>} */
   const esmImports = new Set()
 
+  /**
+   * @param {import('@babel/traverse').NodePath<
+   *   | import('@babel/types').ImportDeclaration
+   *   | import('@babel/types').ExportNamedDeclaration
+   * >} path
+   */
   const handleNodePath = (path) => {
     const importSource = path.node.source?.value
 
@@ -203,7 +211,7 @@ function inspectEsmImports(ast, packagesToInspect) {
     ImportDeclaration: handleNodePath,
   })
 
-  return { esmImports: [...esmImports] }
+  return [...esmImports]
 }
 
 /**
