@@ -119,8 +119,8 @@ function generateScuttleOpts(globalRef, originalOpts = create(null)) {
  * @param {GlobalRef} globalRef - Reference to the global object.
  * @param {Array<string|RegExp>} extraPropsToAvoid - List of additional properties to exclude from scuttling beyond the default ones.
  */
-function performScuttleGlobalThis(globalRef, extraPropsToAvoid = new Array()) {
-  const props = new Array()
+function performScuttleGlobalThis(globalRef, extraPropsToAvoid = []) {
+  const props = []
   getPrototypeChain(globalRef).forEach((proto) =>
     props.push(...getOwnPropertyNames(proto))
   )
