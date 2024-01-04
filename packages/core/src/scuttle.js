@@ -3,7 +3,6 @@
  * @property {boolean} enabled - Whether scuttling is enabled or not.
  * @property {Array<string|RegExp>} exceptions - List of properties to exclude from scuttling.
  * @property {string} scuttlerName - Name of the scuttler function to use.
- * @property {(globalRef: object, scuttle: Function) => void} scuttlerFunc - Scuttler function to use.
  */
 
 /**
