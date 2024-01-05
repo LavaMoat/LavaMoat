@@ -62,8 +62,8 @@
     "lint-staged": "13.2.3",
     "memfs": "4.6.0",
     "prettier": "3.0.3",
-    "prettier-plugin-pkg": "0.18.0",
     "prettier-plugin-jsdoc": "1.1.1",
+    "prettier-plugin-pkg": "0.18.0",
     "type-fest": "4.7.1",
     "typescript": "5.2.2"
   },
@@ -93,17 +93,13 @@
   "prettier": {
     "jsdocCommentLineStrategy": "keep",
     "jsdocPreferCodeFences": true,
-    "plugins": ["prettier-plugin-jsdoc", "prettier-plugin-pkg"],
+    "plugins": [
+      "prettier-plugin-jsdoc",
+      "prettier-plugin-pkg"
+    ],
     "semi": false,
     "singleQuote": true,
     "trailingComma": "es5",
     "tsdoc": true
-  },
-  "ava": {
-    "files": [
-      "packages/*/test/*.spec.js",
-      "scripts/*.spec.js"
-    ],
-    "timeout": "2m"
   }
 }
