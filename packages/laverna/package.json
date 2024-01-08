@@ -1,0 +1,48 @@
+{
+  "name": "@lavamoat/laverna",
+  "version": "0.0.0",
+  "description": "Publish multiple workspaces (that's all)",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LavaMoat/lavamoat.git",
+    "directory": "packages/laverna"
+  },
+  "homepage": "https://github.com/LavaMoat/LavaMoat/blob/main/packages/laverna/README.md",
+  "bugs": {
+    "url": "https://github.com/LavaMoat/lavamoat/issues"
+  },
+  "author": "boneskull",
+  "license": "MIT",
+  "engines": {
+    "node": "^18.13.0 || ^20.0.0",
+    "npm": ">=8.19.3"
+  },
+  "bin": {
+    "laverna": "src/cli.js"
+  },
+  "main": "src/index.js",
+  "types": "types/src/index.d.ts",
+  "directories": {
+    "test": "test"
+  },
+  "files": [
+    "CHANGELOG.md",
+    "src/*.js",
+    "types",
+    "!*.tsbuildinfo"
+  ],
+  "scripts": {
+    "test": "ava"
+  },
+  "dependencies": {
+    "glob": "10.3.10",
+    "kleur": "4.1.5",
+    "type-fest": "4.7.1"
+  },
+  "devDependencies": {
+    "memfs": "4.6.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

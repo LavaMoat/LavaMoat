@@ -5,6 +5,7 @@
   "packages/browserify": "17.0.2",
   "packages/core": "15.1.1",
   "packages/lavapack": "6.0.2",
+  "packages/laverna": "0.0.0",
   "packages/node": "8.0.2",
   "packages/preinstall-always-fail": "2.0.0",
   "packages/tofu": "7.1.0",
