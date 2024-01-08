@@ -5,8 +5,8 @@
  *
  * `memfs` is used to mock the filesystem.
  *
- * @see {@link https://npm.im/memfs}
  * @packageDocumentation
+ * @see {@link https://npm.im/memfs}
  */
 
 const crypto = require('node:crypto')
@@ -28,15 +28,23 @@ const realExec = util.promisify(require('child_process').exec)
  * care more about what was logged and less about the order in which it was
  * logged
  *
- * @typedef {Console & {callArgs: Map<PropertyKey, any[]>}} ConsolePeeper
+ * @typedef {Console & { callArgs: Map<PropertyKey, any[]> }} ConsolePeeper
  */
 
 /**
  * Stub `child_process.spawn()` which records args provided to its method calls.
  *
- * The `handler` prop should be a function which returns an `EventEmitter` which asynchronously emits an `exit` event and/or an `error` event.
+ * The `handler` prop should be a function which returns an `EventEmitter` which
+ * asynchronously emits an `exit` event and/or an `error` event.
  *
- * @typedef {import('./publish').SpawnFn & {callArgs: [cmd: string, args: string[], opts?: any][],  handler: (cmd: string, args?: string[], opts?: any) => import('node:events').EventEmitter}} SpawnPeeper
+ * @typedef {import('./publish').SpawnFn & {
+ *   callArgs: [cmd: string, args: string[], opts?: any][]
+ *   handler: (
+ *     cmd: string,
+ *     args?: string[],
+ *     opts?: any
+ *   ) => import('node:events').EventEmitter
+ * }} SpawnPeeper
  */
 
 /**
@@ -60,7 +68,8 @@ const nullConsole = new Proxy(globalThis.console, {
 })
 
 /**
- * Stub of `child_process.spawn()` that does nothing; this is the default `spawn` stub
+ * Stub of `child_process.spawn()` that does nothing; this is the default
+ * `spawn` stub
  */
 const nullSpawn = () => {
   const ee = new EventEmitter()
@@ -81,6 +90,7 @@ const DEFAULT_ROOT_PKG_JSON = JSON.stringify({
 
 /**
  * Random pkg name used to test new package detection
+ *
  * @returns {string} A random package name
  */
 function getRandomPkgName() {
@@ -108,6 +118,7 @@ test.beforeEach((t) => {
   /**
    * A {@link SpawnPeeper} whose default behavior is to immediately emit an
    * `exit` event with a `0` exit code.
+   *
    * @type {SpawnPeeper}
    */
   const peeperSpawn = Object.assign(

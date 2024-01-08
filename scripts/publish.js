@@ -41,11 +41,14 @@ const DEFAULT_SPAWN_OPTS = /** @type {const} */ ({
 })
 
 /**
- * `Dirent`-like object returned by `glob`; adds a `fullpath()` method and `parent` prop
+ * `Dirent`-like object returned by `glob`; adds a `fullpath()` method and
+ * `parent` prop
  *
  * @defaultValue `Path` from `path-scurry`, which is resolved by `glob()` if the
- * `withFileTypes` option is `true`
- * @typedef {import('fs').Dirent & {fullpath: () => string, parent?: GlobDirent}} GlobDirent
+ * @typedef {import('fs').Dirent & {
+ *   fullpath: () => string
+ *   parent?: GlobDirent
+ * }} GlobDirent
  */
 
 /**
@@ -54,14 +57,21 @@ const DEFAULT_SPAWN_OPTS = /** @type {const} */ ({
  * Returned `EventEmitter` _must_ emit `exit` and _may_ emit `error`.
  *
  * @defaultValue `childProcess.spawn`
- * @typedef {(cmd: string, args: string[], opts: typeof DEFAULT_SPAWN_OPTS) => import('events').EventEmitter} SpawnFn
+ * @typedef {(
+ *   cmd: string,
+ *   args: string[],
+ *   opts: typeof DEFAULT_SPAWN_OPTS
+ * ) => import('events').EventEmitter} SpawnFn
  */
 
 /**
  * Function used to execute commands and retrieve the `stdout` and `stderr` from
  * execution.
  *
- * @typedef {(cmd: string, opts: {cwd: string}) => Promise<{stdout: string, stderr: string}>} ExecFn
+ * @typedef {(
+ *   cmd: string,
+ *   opts: { cwd: string }
+ * ) => Promise<{ stdout: string; stderr: string }>} ExecFn
  */
 
 /**
@@ -70,8 +80,10 @@ const DEFAULT_SPAWN_OPTS = /** @type {const} */ ({
  * Pretty tightly-bound to `glob`, unfortunately.
  *
  * @defaultValue `Glob.glob`
- * @typedef {(pattern: string | string[], opts: typeof DEFAULT_GLOB_OPTS) =>
- * Promise<GlobDirent[]>} GlobFn
+ * @typedef {(
+ *   pattern: string | string[],
+ *   opts: typeof DEFAULT_GLOB_OPTS
+ * ) => Promise<GlobDirent[]>} GlobFn
  */
 
 /**
@@ -83,11 +95,18 @@ const DEFAULT_SPAWN_OPTS = /** @type {const} */ ({
 
 /**
  * Loosey-gooesy `fs.promises` implementation
- * @typedef {{[K in keyof Pick<typeof Fs.promises, 'lstat' | 'readdir' | 'readlink' | 'realpath' | 'readFile'>]: (...args: any[]) => Promise<any>}} MinimalFsPromises
+ *
+ * @typedef {{
+ *   [K in keyof Pick<
+ *     typeof Fs.promises,
+ *     'lstat' | 'readdir' | 'readlink' | 'realpath' | 'readFile'
+ *   >]: (...args: any[]) => Promise<any>
+ * }} MinimalFsPromises
  */
 
 /**
  * Bare minimum `fs` implementation for our purposes
+ *
  * @typedef MinimalFs
  * @property {MinimalFsPromises} promises
  */
@@ -110,11 +129,12 @@ const DEFAULT_SPAWN_OPTS = /** @type {const} */ ({
 /**
  * Minimal `package.json` definition.
  *
- * @todo If we ever pull in `type-fest` for whatever reason, use its `PackageJson` instead.
  * @typedef PackageJson
  * @property {boolean} [private]
  * @property {string} name
  * @property {string} version
+ * @todo If we ever pull in `type-fest` for whatever reason, use its
+ *   `PackageJson` instead.
  */
 
 /**
@@ -123,6 +143,7 @@ const DEFAULT_SPAWN_OPTS = /** @type {const} */ ({
 const Publish = {
   /**
    * Invoke `npm publish`
+   *
    * @param {string[]} pkgs - List of package names to publish
    * @param {object} opts
    * @param {boolean} [opts.dryRun] - Whether to publish in dry-run mode
@@ -187,7 +208,7 @@ const Publish = {
 
     const { promises: fs } = _fs
 
-    /** @type {string|Buffer} */
+    /** @type {string | Buffer} */
     let rootPkgJsonContents
     const rootPkgJsonPath = path.resolve(cwd, 'package.json')
     try {
@@ -214,8 +235,8 @@ const Publish = {
     }
 
     /**
-     * @see {@link https://github.com/isaacs/node-glob/issues/551}
      * @type {GlobDirent[]}
+     * @see {@link https://github.com/isaacs/node-glob/issues/551}
      */
     let dirents
     try {
@@ -233,29 +254,31 @@ const Publish = {
       )
     }
 
-    /** @type {{name: string, version: string}[]} */
+    /** @type {{ name: string; version: string }[]} */
     let pkgs
 
     try {
-      pkgs = /** @type {{name: string, version: string}[]} */ (
+      pkgs = /** @type {{ name: string; version: string }[]} */ (
         (
           await Promise.all(
             dirents.map(
               /**
-               * Given a dirent object from `glob`, returns the package name if it
-               * hasn't already been published
+               * Given a dirent object from `glob`, returns the package name if
+               * it hasn't already been published
                */
               async (dirent) => {
                 /**
                  * Parsed contents of `package.json` for the package in the dir
                  * represented by `dirent`
+                 *
                  * @type {PackageJson}
                  */
                 let pkg
 
                 /**
                  * `package.json` contents as read from file
-                 * @type {Buffer|string}
+                 *
+                 * @type {Buffer | string}
                  */
                 let pkgJsonContents
 
@@ -300,7 +323,8 @@ const Publish = {
 
                 /**
                  * Raw STDOUT of `npm view <name> versions --json`
-                 * @type {string|undefined}
+                 *
+                 * @type {string | undefined}
                  */
                 let versionContents
                 try {
@@ -315,7 +339,13 @@ const Publish = {
                     // when called with `--json`, you get a JSON error.
                     // this could also be handled in a catch() chained to the `exec` promise
                     if ('stdout' in err) {
-                      /** @type {{error: {code: string, summary: string, detail: string}}} */
+                      /** @type {{
+  error: {
+    code: string
+    summary: string
+    detail: string
+  }
+}} */
                       let errJson
                       try {
                         errJson = parseJson(err.stdout)
@@ -333,6 +363,7 @@ const Publish = {
                 if (versionContents !== undefined) {
                   /**
                    * List of published versions for this pkg
+                   *
                    * @type {string[]}
                    */
                   let versions
@@ -398,6 +429,7 @@ const Publish = {
 
   /**
    * Parses CLI args for script
+   *
    * @param {string[]} [args]
    */
   parseArgs(args) {
