@@ -17,12 +17,16 @@
     "node": "^16.20.0 || ^18.0.0 || ^20.0.0"
   },
   "main": "src/index.js",
+  "types": "./types/index.d.ts",
   "directories": {
     "test": "test"
   },
   "scripts": {
     "lint:deps": "depcheck",
     "test": "ava"
+  },
+  "peerDependencies": {
+    "lavamoat-core": "^15.0.0"
   },
   "dependencies": {
     "@babel/parser": "7.23.6",
@@ -32,14 +36,12 @@
     "type-fest": "4.7.1"
   },
   "devDependencies": {
-    "deep-equal": "2.2.3",
-    "lavamoat-core": "^15.0.0"
+    "deep-equal": "2.2.3"
   },
   "ava": {
     "files": [
       "test/*.spec.js"
     ],
     "timeout": "30s"
-  },
-  "types": "./types/index.d.ts"
+  }
 }
