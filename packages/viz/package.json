@@ -58,7 +58,7 @@
     "html-webpack-plugin": "5.5.1",
     "kind-of": "6.0.3",
     "react": "16.14.0",
-    "react-bootstrap": "1.6.7",
+    "react-bootstrap": "1.6.8",
     "react-codemirror2": "7.2.1",
     "react-dom": "16.14.0",
     "react-force-graph-2d": "1.23.15",
