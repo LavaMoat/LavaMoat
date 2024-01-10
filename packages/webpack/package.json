@@ -43,7 +43,7 @@
   "devDependencies": {
     "css-loader": "6.7.4",
     "esbuild-loader": "3.2.0",
-    "html-webpack-plugin": "5.5.1",
+    "html-webpack-plugin": "5.5.4",
     "memfs": "4.6.0",
     "mini-css-extract-plugin": "2.7.6",
     "ses": "0.18.8",
