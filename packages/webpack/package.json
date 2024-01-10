@@ -45,7 +45,7 @@
     "esbuild-loader": "3.2.0",
     "html-webpack-plugin": "5.5.4",
     "memfs": "4.6.0",
-    "mini-css-extract-plugin": "2.7.6",
+    "mini-css-extract-plugin": "2.7.7",
     "ses": "0.18.8",
     "typescript": "5.2.2",
     "webpack": "5.89.0"
