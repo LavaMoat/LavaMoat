@@ -51,7 +51,7 @@
     "clone-deep": "4.0.1",
     "codemirror": "5.65.2",
     "copy-webpack-plugin": "10.2.4",
-    "css-loader": "6.7.3",
+    "css-loader": "6.7.4",
     "d3": "7.8.5",
     "esm": "3.2.25",
     "gh-pages": "2.2.0",
