@@ -41,7 +41,7 @@
     "packages"
   ],
   "scripts": {
-    "test": "ava"
+    "test": "ava --config=ava.config.js"
   },
   "dependencies": {
     "glob": "10.3.10",
