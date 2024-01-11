@@ -31,6 +31,15 @@
     "types",
     "!*.tsbuildinfo"
   ],
+  "keywords": [
+    "publish",
+    "lerna",
+    "workspace",
+    "workspaces",
+    "monorepo",
+    "release",
+    "packages"
+  ],
   "scripts": {
     "test": "ava"
   },
