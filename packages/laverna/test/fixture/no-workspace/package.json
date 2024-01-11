@@ -1,0 +1,5 @@
+{
+  "name": "no-workspace",
+  "version": "1.0.0",
+  "description": "Has no workspaces field; does not work with Laverna"
+}
