@@ -282,6 +282,7 @@ function inspectDynamicRequires(ast) {
  * @returns {{ cjsImports: string[] }}
  */
 function inspectRequires(ast, packagesToInspect, deep = true) {
+  /** @type {string[][]} */
   const cjsImports = []
   const requireCalls = findAllCallsToRequire(ast)
   requireCalls.forEach((path) => {

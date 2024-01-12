@@ -17,14 +17,15 @@ module.exports = {
 
 /**
  * @typedef MemberExpressionNesting
- * @property {import("./inspectPrimordialAssignments").NonComputedMemberLikeExpression[]} memberExpressions
- * @property {import("./inspectPrimordialAssignments").MemberLikeExpression} parentOfMembershipChain
- * @property {import("./inspectPrimordialAssignments").MemberLikeExpression|import("@babel/types").LVal} topmostMember
+ * @property {import('./inspectPrimordialAssignments').NonComputedMemberLikeExpression[]} memberExpressions
+ * @property {import('./inspectPrimordialAssignments').MemberLikeExpression} parentOfMembershipChain
+ * @property {import('./inspectPrimordialAssignments').MemberLikeExpression
+ *   | import('@babel/types').LVal} topmostMember
  */
 
 /**
- * @param {import("@babel/types").Node} identifierNode
- * @param {import("@babel/types").Node[]} parents
+ * @param {import('@babel/types').Node} identifierNode
+ * @param {import('@babel/types').Node[]} parents
  * @returns
  */
 function getMemberExpressionNesting(identifierNode, parents) {
@@ -32,7 +33,7 @@ function getMemberExpressionNesting(identifierNode, parents) {
   const parentsOnly = parents.slice(0, -1)
   // find unbroken membership chain closest to identifier
   const memberExpressions = getTailmostMatchingChain(
-    /** @type {import("./inspectPrimordialAssignments").NonComputedMemberLikeExpression[]} */ (
+    /** @type {import('./inspectPrimordialAssignments').NonComputedMemberLikeExpression[]} */ (
       parentsOnly
     ),
     isNonComputedMemberLikeExpression
@@ -52,8 +53,7 @@ function getMemberExpressionNesting(identifierNode, parents) {
 }
 
 /**
- *
- * @param {import("./inspectPrimordialAssignments").MemberLikeExpression[]} memberExpressions
+ * @param {import('./inspectPrimordialAssignments').MemberLikeExpression[]} memberExpressions
  * @returns {string[]}
  */
 function getPathFromMemberExpressionChain(memberExpressions) {
@@ -64,8 +64,7 @@ function getPathFromMemberExpressionChain(memberExpressions) {
 }
 
 /**
- *
- * @param {import("@babel/types").Node} node
+ * @param {import('@babel/types').Node} node
  * @returns {string}
  */
 function getNameFromNode(node) {
@@ -83,8 +82,7 @@ function getNameFromNode(node) {
 }
 
 /**
- *
- * @param {import("@babel/types").Node} node
+ * @param {import('@babel/types').Node} node
  * @returns {node is import("./inspectPrimordialAssignments").MemberLikeExpression}
  */
 function isMemberLikeExpression(node) {
@@ -94,8 +92,7 @@ function isMemberLikeExpression(node) {
 }
 
 /**
- *
- * @param {import("./inspectPrimordialAssignments").MemberLikeExpression} node
+ * @param {import('./inspectPrimordialAssignments').MemberLikeExpression} node
  * @returns {node is import("./inspectPrimordialAssignments").NonComputedMemberLikeExpression}
  */
 function isNonComputedMemberLikeExpression(node) {
@@ -103,14 +100,13 @@ function isNonComputedMemberLikeExpression(node) {
 }
 
 /**
- *
- * @param {import("@babel/types").LVal} identifierNode
- * @param {import("@babel/types").Node[]} parents
+ * @param {import('@babel/types').LVal} identifierNode
+ * @param {import('@babel/types').Node[]} parents
  * @returns {boolean}
  */
 function isUndefinedCheck(identifierNode, parents) {
   const parentExpression =
-    /** @type {import("@babel/types").UnaryExpression} */ (
+    /** @type {import('@babel/types').UnaryExpression} */ (
       parents[parents.length - 2]
     )
   const isTypeof =
@@ -134,7 +130,8 @@ function getTailmostMatchingChain(items, matcher) {
 }
 
 /**
- * if array contains 'x' and 'x.y' just keep 'x'
+ * If array contains 'x' and 'x.y' just keep 'x'
+ *
  * @param {Map<string, import('lavamoat-core').GlobalPolicyValue>} globalsConfig
  * @returns
  */
@@ -163,7 +160,8 @@ function reduceToTopmostApiCalls(globalsConfig) {
 }
 
 /**
- * if array contains 'x' and 'x.y' just keep 'x'
+ * If array contains 'x' and 'x.y' just keep 'x'
+ *
  * @param {string[]} keyPathStrings
  * @returns {string[]}
  */
@@ -194,7 +192,8 @@ function reduceToTopmostApiCallsFromStrings(keyPathStrings) {
 }
 
 /**
- * add variable to results, if not already set
+ * Add variable to results, if not already set
+ *
  * @param {Map<string, import('lavamoat-core').GlobalPolicyValue>} globalsConfig
  * @param {string} identifierPath
  * @param {import('lavamoat-core').GlobalPolicyValue} identifierUse
@@ -208,6 +207,7 @@ function addGlobalUsage(globalsConfig, identifierPath, identifierUse) {
 
 /**
  * Merge two global policy configs (as `Map`s) together
+ *
  * @param {Map<string, import('lavamoat-core').GlobalPolicyValue>} configA
  * @param {Map<string, import('lavamoat-core').GlobalPolicyValue>} configB
  * @returns
@@ -233,7 +233,7 @@ function objToMap(obj) {
 /**
  * @template V
  * @param {Map<PropertyKey, V>} map
- * @returns {{[k: string]: V}}if array contains 'x' and 'x.y' just keep 'x'
+ * @returns {{ [k: string]: V }} If array contains 'x' and 'x.y' just keep 'x'
  */
 function mapToObj(map) {
   return Object.fromEntries(map)
@@ -242,8 +242,8 @@ function mapToObj(map) {
 /**
  * Returns an array of a `NodePath`'s parent nodes (to the root)
  *
- * @param {import('@babel/traverse').NodePath<any>|null} nodePath
- * @returns {import("@babel/types").Node[]}
+ * @param {import('@babel/traverse').NodePath<any> | null} nodePath
+ * @returns {import('@babel/types').Node[]}
  */
 function getParents(nodePath) {
   /** @type {import('@babel/types').Node[]} */
@@ -260,9 +260,10 @@ function getParents(nodePath) {
 }
 
 /**
- * Determines if this `Node` is a descendant of a `FunctionDeclaration` or `FunctionExpression`.
+ * Determines if this `Node` is a descendant of a `FunctionDeclaration` or
+ * `FunctionExpression`.
  *
- * @param {import('@babel/traverse').NodePath<any>} path
+ * @param {import('@babel/traverse').NodePath<any>} nodePath
  * @returns {boolean}
  */
 function isInFunctionDeclaration(nodePath) {
