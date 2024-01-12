@@ -40,7 +40,7 @@
     "open": "7.4.2",
     "pify": "4.0.1",
     "serve-handler": "6.1.5",
-    "yargs": "16.2.0"
+    "yargs": "17.7.2"
   },
   "devDependencies": {
     "@babel/core": "7.23.7",
