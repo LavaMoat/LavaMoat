@@ -39,6 +39,7 @@ const COREPACK_BIN = path.resolve(
 
 /**
  * Blast `node_modules` in `cwd`
+ *
  * @param {string} cwd - Project dir
  * @returns {Promise<void>}
  */
@@ -48,7 +49,8 @@ async function clean(cwd) {
 }
 
 /**
- * Resolves a module's installation path (_not_ entry point) from some other directory.
+ * Resolves a module's installation path (_not_ entry point) from some other
+ * directory.
  *
  * @param {string} cwd - Some other directory
  * @param {string} moduleId - Module to resolve
@@ -65,9 +67,10 @@ function resolveDependencyFrom(cwd, moduleId) {
 /**
  * Some native packages may not ship binaries for Apple silicon, so we have to
  * rebuild them
+ *
  * @param {string} cwd
  */
-async function setupAppleSilicon(cwd) {
+async function rebuild(cwd) {
   const { dependencies } = require(`${cwd}/package.json`)
   const KECCAK = 'keccak'
 
@@ -85,6 +88,7 @@ async function setupAppleSilicon(cwd) {
 /**
  * Install a project's deps via a package manager, run the `setup` script, then
  * execute `lavamoat` on the `index.js` file.
+ *
  * @param {string} cwd - Project dir
  * @returns {Promise<void>}
  */
@@ -93,9 +97,7 @@ async function setup(cwd) {
   await exec(COREPACK_BIN, [LAVAMOAT_PM, 'install'], { cwd })
   await exec(COREPACK_BIN, [LAVAMOAT_PM, 'run', 'setup'], { cwd })
 
-  if (os.platform() === 'darwin' && os.arch() === 'arm64') {
-    await setupAppleSilicon(cwd)
-  }
+  await rebuild(cwd)
 
   await exec(
     process.execPath,
