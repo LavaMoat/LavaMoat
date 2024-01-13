@@ -1,0 +1,93 @@
+'pkg:@lavamoat/aa':
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'packages/aa/**'
+
+'pkg:@lavamoat/allow-scripts':
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'packages/allow-scripts/**'
+
+'pkg:lavamoat-browserify':
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'packages/browserify/**'
+
+'pkg:lavamoat-core':
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'packages/core/**'
+
+'pkg:lavamoat-perf':
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'packages/perf/**'
+
+'pkg:@lavamoat/preinstall-always-fail':
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'packages/preinstall-always-fail/**'
+
+'pkg:survey':
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'packages/survey/**'
+
+'pkg:lavamoat-tofu':
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'packages/tofu/**'
+
+'pkg:lavamoat-viz':
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'packages/viz/**'
+
+'pkg:@lavamoat/webpack':
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'packages/webpack/**'
+
+'pkg:@lavamoat/lavapack':
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'packages/lavapack/**'
+
+'pkg:@lavamoat/yarn-plugin-allow-scripts':
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'packages/yarn-plugin-allow-scripts/**'
+
+'dependencies':
+  - changed-files:
+      - any-glob-to-any-file:
+          # this can't capture digest changes in workflow files
+          - 'packages/*/package.json'
+          - './package?(-lock).json'
+
+'chore':
+  - changed-files:
+      - any-glob-to-any-file:
+          # general config-related stuff
+          - '.github/**'
+          - '.husky/**'
+          - '**/.*' # all dotfiles
+          - '**/.config/**'
+          - '**/*.config.*'
+          - '*release-please*'
+          - '**/tsconfig*.json'
+
+          # adhoc scripts
+          - '**/scripts/**'
+
+          # test-related
+          - 'packages/*/test/**'
+          - 'packages/*/*.spec.{?([mc])js,ts}'
+
+'documentation':
+  - changed-files:
+      - any-glob-to-any-file:
+          - '**/*.md'
+          - '!**/snapshots/**'
+          - '**/docs/**'
+          - '**/example?(s)/**'
