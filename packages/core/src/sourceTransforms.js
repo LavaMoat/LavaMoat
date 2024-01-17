@@ -12,9 +12,11 @@ function applySourceTransforms(source) {
   ])
 }
 
+// create the RegExp once to avoid creating it over and over again
+// helps work around https://github.com/MetaMask/metamask-extension/issues/21006
+const someDirectEvalPattern = new RegExp('\\beval(\\s*\\()', 'g')
 function evadeDirectEvalExpressions(source) {
   /* eslint-disable-next-line prefer-regex-literals */
-  const someDirectEvalPattern = new RegExp('\\beval(\\s*\\()', 'g')
 
   const replaceFn = (_, p1) => `(0,eval)${p1}`
   return source.replace(someDirectEvalPattern, replaceFn)

@@ -70,6 +70,8 @@
     const { prepareCompartmentGlobalFromConfig } = templateRequire('makePrepareRealmGlobalFromConfig')({ createFunctionWrapper })
     const { strictScopeTerminator } = templateRequire('strict-scope-terminator')
 
+    // cache regular expressions to work around https://github.com/MetaMask/metamask-extension/issues/21006
+    const regexCache = new Map()
     const scuttleOpts = generateScuttleOpts(scuttleGlobalThis)
     const moduleCache = new Map()
     const packageCompartmentCache = new Map()
@@ -126,10 +128,15 @@
         if (!except.startsWith('/')) {
           return except
         }
+        if (regexCache.has(except)) {
+          return regexCache.get(except)
+        }
         const parts = except.split('/')
         const pattern = parts.slice(1, -1).join('/')
         const flags = parts[parts.length - 1]
-        return new RegExp(pattern, flags)
+        const re = new RegExp(pattern, flags)
+        regexCache.set(except, re)
+        return re
       }
     }
 
