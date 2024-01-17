@@ -69,6 +69,7 @@
     "typescript": "5.3.3"
   },
   "overrides": {
+    "@types/node": "$@types/node",
     "ses": "$ses",
     "type-fest": "$type-fest",
     "util": "0.12.5"
