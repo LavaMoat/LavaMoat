@@ -67,7 +67,7 @@
 
 'chore':
   - changed-files:
-      - any-glob-to-any-file:
+      - any-glob-to-all-files:
           # general config-related stuff
           - '.github/**'
           - '.husky/**'
