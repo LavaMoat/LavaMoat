@@ -88,6 +88,7 @@
   - changed-files:
       - any-glob-to-any-file:
           - '**/*.md'
-          - '!**/snapshots/**'
           - '**/docs/**'
           - '**/example?(s)/**'
+      - all-globs-to-all-files:
+          - '!**/snapshots/**/*.md'
