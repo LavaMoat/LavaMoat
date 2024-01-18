@@ -243,3 +243,61 @@ test(
     t.true(result.stderr.includes('@lavamoat/larvamoat@0.1.0'))
   }
 )
+
+test(
+  'cli - new package (kebab-case)',
+  testProject,
+  { name: 'new-pkg', args: ['--new-pkg=@lavamoat/larvamoat'] },
+  async (t, result) => {
+    t.plan(4)
+
+    t.like(result, {
+      isError: false,
+      code: undefined,
+    })
+
+    t.true(
+      result.stderr.includes('Package @lavamoat/larvamoat confirmed as new')
+    )
+    t.true(result.stderr.includes('These package(s) will be published'))
+    t.true(result.stderr.includes('@lavamoat/larvamoat@0.1.0'))
+  }
+)
+
+test(
+  'cli - mixed-cased error (new package)',
+  testProject,
+  {
+    name: 'new-pkg',
+    args: ['--new-pkg=@lavamoat/larvamoat', '--newPkg=@lavamoat/larvamoat'],
+  },
+  async (t, result) => {
+    t.like(result, {
+      isError: true,
+      code: 1,
+    })
+
+    t.true(
+      result.stderr.includes('Use camelCase or kebab-case flags; not both')
+    )
+  }
+)
+
+test(
+  'cli - mixed-cased error (dry run)',
+  testProject,
+  {
+    name: 'new-version',
+    args: ['--dry-run'], // dryRun is already present via the macro
+  },
+  async (t, result) => {
+    t.like(result, {
+      isError: true,
+      code: 1,
+    })
+
+    t.true(
+      result.stderr.includes('Use camelCase or kebab-case flags; not both')
+    )
+  }
+)

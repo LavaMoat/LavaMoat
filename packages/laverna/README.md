@@ -65,7 +65,7 @@ Problems? Visit https://github.com/LavaMoat/lavamoat/issues
 For a typical release workflow, you might:
 
 1. Bump workspace versions (e.g. via [release-please-action](https://github.com/google-github-actions/release-please-action))
-2. In your updated working copy's workspace root, run `npm exec laverna` (or `npm exec laverna -- --dry-run` first)
+2. In your updated working copy's workspace root, run `npm exec laverna` (or `npm exec laverna -- --dryRun` first)
 3. Bask in glory
 
 ### Publishing a New Package
@@ -73,7 +73,7 @@ For a typical release workflow, you might:
 If you're publishing a package in a new workspace, you might:
 
 1. Set the initial version of the new package (call it `foo`) in its `package.json`.
-2. Run `npm exec laverna -- --newPkg=foo` (or `npm exec laverna -- --newPkg=foo --dry-run` first)
+2. Run `npm exec laverna -- --newPkg=foo` (or `npm exec laverna -- --newPkg=foo --dryRun` first)
 3. Profit
 
 ### Automating Publishes

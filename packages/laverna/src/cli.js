@@ -17,6 +17,40 @@ const { name, bugs, version, description } = require('../package.json')
  */
 
 /**
+ * Options for {@link util.parseArgs} config (`options` property).
+ *
+ * @satisfies {import('node:util').ParseArgsConfig['options']}
+ */
+const options = /**
+ * @type {const}
+ */ ({
+  dryRun: {
+    type: 'boolean',
+  },
+  'dry-run': {
+    type: 'boolean',
+  },
+  root: {
+    type: 'string',
+  },
+  help: {
+    type: 'boolean',
+  },
+  newPkg: {
+    type: 'string',
+    multiple: true,
+  },
+  'new-pkg': {
+    type: 'string',
+    multiple: true,
+  },
+  yes: {
+    type: 'boolean',
+    short: 'y',
+  },
+})
+
+/**
  * Parses CLI args
  *
  * @param {string[]} [args]
@@ -24,51 +58,44 @@ const { name, bugs, version, description } = require('../package.json')
 function parseArgs(args) {
   const { values } = util.parseArgs({
     args,
-    options: {
-      dryRun: {
-        type: 'boolean',
-      },
-      root: {
-        type: 'string',
-      },
-      help: {
-        type: 'boolean',
-      },
-      newPkg: {
-        type: 'string',
-        multiple: true,
-      },
-      yes: {
-        type: 'boolean',
-        short: 'y',
-      },
-    },
+    options,
   })
   return values
 }
 
-if (require.main === module) {
+function main() {
   let opts = parseArgs()
 
   if (opts.help) {
     // this should be the only place we write to stdout unless we
     // want to start outputting JSON
     console.log(`
-${bold('laverna')} [options..]
+  ${bold('laverna')} [options..]
 
-${italic(description)}
+  ${italic(description)}
 
-Options:
+  Options:
 
- --dryRun        - Enable dry-run mode
- --root=<path>   - Path to workspace root (default: current working dir)
- --newPkg=<name> - Workspace <name> has never been published (repeatable)
- --yes/-y        - Skip confirmation prompt
+  --dryRun        - Enable dry-run mode
+  --root=<path>   - Path to workspace root (default: current working dir)
+  --newPkg=<name> - Workspace <name> has never been published (repeatable)
+  --yes/-y        - Skip confirmation prompt
 
-Problems? Visit ${bugs.url}
+  Problems? Visit ${bugs.url}
 
-`)
+  `)
   } else {
+    // refuse to run with both camelCase and kebab-case flags
+    if ((opts.dryRun && opts['dry-run']) || (opts.newPkg && opts['new-pkg'])) {
+      console.error(ERR, 'Use camelCase or kebab-case flags; not both')
+      process.exitCode = 1
+      return
+    }
+
+    // prefer camelCase
+    opts.dryRun = opts.dryRun ?? opts['dry-run']
+    opts.newPkg = opts.newPkg ?? opts['new-pkg']
+
     console.error(`📦 ${bold(magenta(name)) + gray('@') + magenta(version)}\n`)
     const laverna = new Laverna(opts)
     laverna.publishWorkspaces().catch((err) => {
@@ -76,4 +103,8 @@ Problems? Visit ${bugs.url}
       process.exitCode = 1
     })
   }
+}
+
+if (require.main === module) {
+  main()
 }
