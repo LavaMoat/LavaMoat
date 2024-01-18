@@ -24,9 +24,5 @@
     "@yarnpkg/cli": "3.5.1",
     "@yarnpkg/core": "3.5.1",
     "clipanion": "3.2.1"
-  },
-  "devDependencies": {
-    "@types/node": "20.11.5",
-    "typescript": "5.3.3"
   }
 }
