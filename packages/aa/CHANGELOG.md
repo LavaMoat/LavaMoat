@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.0.1](https://github.com/LavaMoat/LavaMoat/compare/aa-v4.0.0...aa-v4.0.1) (2024-01-18)
+
+
+### Bug Fixes
+
+* **deps:** pin dependencies ([4006c1f](https://github.com/LavaMoat/LavaMoat/commit/4006c1f386c3024e8a8092ded9b98ede20de084e))
+
 ## [4.0.0](https://github.com/LavaMoat/LavaMoat/compare/aa-v3.1.5...aa-v4.0.0) (2023-10-18)
 
 

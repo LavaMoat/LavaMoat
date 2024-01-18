@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.1.1-beta.0](https://github.com/LavaMoat/LavaMoat/compare/webpack-v0.1.0-beta.0...webpack-v0.1.1-beta.0) (2024-01-18)
+
+
+### Bug Fixes
+
+* **deps:** pin dependencies ([4006c1f](https://github.com/LavaMoat/LavaMoat/commit/4006c1f386c3024e8a8092ded9b98ede20de084e))
+* **webpack,survey:** add missing deps ([52e7b1c](https://github.com/LavaMoat/LavaMoat/commit/52e7b1ce3a3302f119bc5ff44aa298c21f77b255))
+* **webpack:** compatibility fix for overwriting exports reference in cjs ([2259d74](https://github.com/LavaMoat/LavaMoat/commit/2259d74c23f627cb4839370ffc1dc98813b495d6))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @lavamoat/aa bumped from ^4.0.0 to ^4.0.1
+    * lavamoat-core bumped from ^15.0.0 to ^15.1.0
+
 ## [0.1.0-beta.0](https://github.com/LavaMoat/LavaMoat/compare/webpack-v0.0.1-beta.0...webpack-v0.1.0-beta.0) (2023-11-23)
 
 

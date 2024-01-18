@@ -1,5 +1,19 @@
 # Changelog
 
+## [7.1.0](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-tofu-v7.0.0...lavamoat-tofu-v7.1.0) (2024-01-18)
+
+
+### Features
+
+* **tofu:** provide type definitions ([5057d19](https://github.com/LavaMoat/LavaMoat/commit/5057d1972eac01531ad0c06de0038a97aa419378))
+
+
+### Bug Fixes
+
+* **core:** update LavaMoatPolicy types ([d9292ca](https://github.com/LavaMoat/LavaMoat/commit/d9292ca7b99a0eedc215670cb1791f6dd0c3ce07))
+* **deps:** pin dependencies ([4006c1f](https://github.com/LavaMoat/LavaMoat/commit/4006c1f386c3024e8a8092ded9b98ede20de084e))
+* **tofu:** make lavamoat-core a peer dep ([21b0b2b](https://github.com/LavaMoat/LavaMoat/commit/21b0b2b1295bde752e5f213dfa93d3a375579e20))
+
 ## [7.0.0](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-tofu-v6.2.1...lavamoat-tofu-v7.0.0) (2023-10-18)
 
 

@@ -1,6 +1,6 @@
 {
   "name": "@lavamoat/lavapack",
-  "version": "6.0.0",
+  "version": "6.0.1",
   "description": "LavaMoat packer",
   "repository": {
     "type": "git",
@@ -33,7 +33,7 @@
     "convert-source-map": "2.0.0",
     "espree": "9.6.1",
     "json-stable-stringify": "1.0.2",
-    "lavamoat-core": "^15.0.0",
+    "lavamoat-core": "^15.1.0",
     "readable-stream": "3.6.2",
     "through2": "2.0.5",
     "umd": "3.0.3"

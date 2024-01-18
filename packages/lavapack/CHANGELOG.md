@@ -6,6 +6,22 @@
   * dependencies
     * lavamoat-core bumped from ^14.2.2 to ^14.2.3
 
+## [6.0.1](https://github.com/LavaMoat/LavaMoat/compare/lavapack-v6.0.0...lavapack-v6.0.1) (2024-01-18)
+
+
+### Bug Fixes
+
+* **deps:** pin dependencies ([4006c1f](https://github.com/LavaMoat/LavaMoat/commit/4006c1f386c3024e8a8092ded9b98ede20de084e))
+* **deps:** update dependency convert-source-map to v2.0.0 ([f91b369](https://github.com/LavaMoat/LavaMoat/commit/f91b36962dc52fd63c824e6428589202d9a5535e))
+* **lavapack:** espree should be a dep, not a dev dep ([bd71b06](https://github.com/LavaMoat/LavaMoat/commit/bd71b061b77343f0a8efa16be00b0801de8471a2))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-core bumped from ^15.0.0 to ^15.1.0
+
 ## [6.0.0](https://github.com/LavaMoat/LavaMoat/compare/lavapack-v5.4.1...lavapack-v6.0.0) (2023-10-18)
 
 
