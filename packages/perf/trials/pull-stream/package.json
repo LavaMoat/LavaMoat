@@ -13,6 +13,6 @@
   },
   "dependencies": {
     "chart-csv": "kumavis/chart-csv#master",
-    "pull-stream": "3.6.14"
+    "pull-stream": "3.7.0"
   }
 }
