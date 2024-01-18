@@ -38,7 +38,7 @@
     "json-stable-stringify": "1.1.1",
     "lavamoat-tofu": "^7.1.0",
     "merge-deep": "3.0.3",
-    "type-fest": "4.7.1"
+    "type-fest": "4.9.0"
   },
   "devDependencies": {
     "@types/json-stable-stringify": "1.0.36",
