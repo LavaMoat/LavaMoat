@@ -6,6 +6,12 @@
   * dependencies
     * lavamoat-core bumped from ^14.2.2 to ^14.2.3
 
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-core bumped from ^15.1.0 to ^15.1.1
+
 ## [8.0.1](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-v8.0.0...lavamoat-v8.0.1) (2024-01-18)
 
 

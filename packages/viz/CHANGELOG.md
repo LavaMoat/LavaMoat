@@ -1,5 +1,11 @@
 # Changelog
 
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-core bumped from ^15.1.0 to ^15.1.1
+
 ## [7.0.1](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-viz-v7.0.0...lavamoat-viz-v7.0.1) (2024-01-18)
 
 
