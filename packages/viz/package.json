@@ -59,7 +59,7 @@
     "kind-of": "6.0.3",
     "react": "16.14.0",
     "react-bootstrap": "1.6.8",
-    "react-codemirror2": "7.2.1",
+    "react-codemirror2": "7.3.0",
     "react-dom": "16.14.0",
     "react-force-graph-2d": "1.23.15",
     "react-hyperscript": "3.2.0",
