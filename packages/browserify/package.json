@@ -35,7 +35,7 @@
     "concat-stream": "1.6.2",
     "convert-source-map": "2.0.0",
     "duplexify": "4.1.2",
-    "json-stable-stringify": "1.0.2",
+    "json-stable-stringify": "1.1.1",
     "lavamoat-core": "^15.1.1",
     "pify": "4.0.1",
     "readable-stream": "3.6.2",
