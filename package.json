@@ -64,10 +64,12 @@
     "prettier": "3.0.3",
     "prettier-plugin-jsdoc": "1.1.1",
     "prettier-plugin-pkg": "0.18.0",
+    "ses": "1.1.0",
     "type-fest": "4.7.1",
     "typescript": "5.2.2"
   },
   "overrides": {
+    "ses": "$ses",
     "type-fest": "$type-fest",
     "util": "0.12.5"
   },
