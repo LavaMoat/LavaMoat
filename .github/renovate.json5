@@ -6,7 +6,6 @@
     'group:definitelyTyped', // groups all `@types/*` packages together
     'helpers:pinGitHubActionDigests', // pins SHAs of GitHub actions
     ':enableVulnerabilityAlerts', // enables GitHub vulnerability alerts
-    ':rebaseStalePrs', // automatically rebase stale PRs against main
     ':semanticCommits', // use semantic commits
     'group:linters', // group lint-related packages together
   ],
