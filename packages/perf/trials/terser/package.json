@@ -13,6 +13,6 @@
   },
   "dependencies": {
     "chart-csv": "kumavis/chart-csv#master",
-    "terser": "5.14.2"
+    "terser": "5.27.0"
   }
 }
