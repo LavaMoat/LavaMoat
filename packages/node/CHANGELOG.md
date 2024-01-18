@@ -6,6 +6,24 @@
   * dependencies
     * lavamoat-core bumped from ^14.2.2 to ^14.2.3
 
+## [8.0.1](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-v8.0.0...lavamoat-v8.0.1) (2024-01-18)
+
+
+### Bug Fixes
+
+* **deps:** pin dependencies ([4006c1f](https://github.com/LavaMoat/LavaMoat/commit/4006c1f386c3024e8a8092ded9b98ede20de084e))
+* **deps:** update dependency node-gyp-build to v4.6.1 ([570e00f](https://github.com/LavaMoat/LavaMoat/commit/570e00fcf70535e8c1abb9ee117d873130283cca))
+* **deps:** update dependency yargs to v17.7.2 ([a1b21d3](https://github.com/LavaMoat/LavaMoat/commit/a1b21d3db1904d05cd9e82bc62eb56dfafb76be2))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @lavamoat/aa bumped from ^4.0.0 to ^4.0.1
+    * lavamoat-core bumped from ^15.0.0 to ^15.1.0
+    * lavamoat-tofu bumped from ^7.0.0 to ^7.1.0
+
 ## [8.0.0](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-v7.3.1...lavamoat-v8.0.0) (2023-10-18)
 
 

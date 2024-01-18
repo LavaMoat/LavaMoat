@@ -13,6 +13,23 @@
   * dependencies
     * @lavamoat/lavapack bumped from ^5.2.3 to ^5.2.4
 
+## [17.0.1](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-browserify-v17.0.0...lavamoat-browserify-v17.0.1) (2024-01-18)
+
+
+### Bug Fixes
+
+* **deps:** pin dependencies ([4006c1f](https://github.com/LavaMoat/LavaMoat/commit/4006c1f386c3024e8a8092ded9b98ede20de084e))
+* **deps:** update dependency convert-source-map to v2.0.0 ([f91b369](https://github.com/LavaMoat/LavaMoat/commit/f91b36962dc52fd63c824e6428589202d9a5535e))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @lavamoat/aa bumped from ^4.0.0 to ^4.0.1
+    * @lavamoat/lavapack bumped from ^6.0.0 to ^6.0.1
+    * lavamoat-core bumped from ^15.0.0 to ^15.1.0
+
 ## [17.0.0](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-browserify-v16.0.0...lavamoat-browserify-v17.0.0) (2023-10-18)
 
 
