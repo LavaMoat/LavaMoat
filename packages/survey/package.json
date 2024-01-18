@@ -18,7 +18,7 @@
     "lavamoat": "^8.0.0",
     "lavamoat-core": "^15.0.0",
     "lavamoat-tofu": "^7.0.0",
-    "node-fetch": "2.6.13",
+    "node-fetch": "2.7.0",
     "p-limit": "2.3.0"
   }
 }
