@@ -1,5 +1,12 @@
 # Changelog
 
+## [15.1.1](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v15.1.0...lavamoat-core-v15.1.1) (2024-01-18)
+
+
+### Bug Fixes
+
+* **core:** update SES to v1.1.0 in core ([29ad47d](https://github.com/LavaMoat/LavaMoat/commit/29ad47d0a80014c2fe37433734a853309d065c69))
+
 ## [15.1.0](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v15.0.0...lavamoat-core-v15.1.0) (2024-01-18)
 
 
