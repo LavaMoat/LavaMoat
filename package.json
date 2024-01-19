@@ -96,6 +96,7 @@
   "prettier": {
     "jsdocCommentLineStrategy": "keep",
     "jsdocPreferCodeFences": true,
+    "jsdocTagsOrder": "{\"template\": 24.5}",
     "plugins": [
       "prettier-plugin-jsdoc",
       "prettier-plugin-pkg"
