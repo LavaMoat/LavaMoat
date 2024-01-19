@@ -3,12 +3,12 @@
   "compilerOptions": {
     "strict": true,
     "rootDir": "..",
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
   },
-  "include": ["**/*.spec.js"],
+  "include": ["**/*.spec.js", "types.d.ts"],
   "references": [
     {
-      "path": "../src/tsconfig.json"
-    }
-  ]
+      "path": "../src/tsconfig.json",
+    },
+  ],
 }

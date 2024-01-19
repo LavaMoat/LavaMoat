@@ -1,3 +1,6 @@
+/**
+ * @type {import('eslint').Linter.Config}
+ */
 module.exports = {
   rules: {
     'no-restricted-globals': [
@@ -16,4 +19,6 @@ module.exports = {
       },
     ],
   },
+  // this file is essentially vendored
+  ignorePatterns: 'test/types.d.ts',
 }
