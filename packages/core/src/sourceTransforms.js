@@ -12,12 +12,12 @@ function applySourceTransforms(source) {
   ])
 }
 
+const DIRECT_EVAL_REPLACE_FN = (_, p1) => '(0,eval)' + p1
 function evadeDirectEvalExpressions(source) {
-  /* eslint-disable-next-line prefer-regex-literals */
-  const someDirectEvalPattern = new RegExp('\\beval(\\s*\\()', 'g')
-
-  const replaceFn = (_, p1) => `(0,eval)${p1}`
-  return source.replace(someDirectEvalPattern, replaceFn)
+  return source.replace(
+    /\beval(\s*\()/g,
+    DIRECT_EVAL_REPLACE_FN
+  )
 }
 
 module.exports = {
