@@ -40,8 +40,8 @@
     "corepack": "0.20.0"
   },
   "devDependencies": {
-    "@commitlint/cli": "17.8.1",
-    "@commitlint/config-conventional": "17.8.1",
+    "@commitlint/cli": "18.4.4",
+    "@commitlint/config-conventional": "18.4.4",
     "@tsconfig/node16": "16.1.1",
     "@types/node": "18.19.8",
     "@types/yargs": "17.0.32",
