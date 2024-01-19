@@ -85,16 +85,11 @@ function main() {
 
   `)
   } else {
-    // refuse to run with both camelCase and kebab-case flags
-    if ((opts.dryRun && opts['dry-run']) || (opts.newPkg && opts['new-pkg'])) {
-      console.error(ERR, 'Use camelCase or kebab-case flags; not both')
-      process.exitCode = 1
-      return
-    }
-
     // prefer camelCase
-    opts.dryRun = opts.dryRun ?? opts['dry-run']
-    opts.newPkg = opts.newPkg ?? opts['new-pkg']
+    opts.dryRun = opts.dryRun || opts['dry-run']
+    opts.newPkg = [
+      ...new Set([...(opts.newPkg ?? []), ...(opts['new-pkg'] ?? [])]),
+    ]
 
     console.error(`📦 ${bold(magenta(name)) + gray('@') + magenta(version)}\n`)
     const laverna = new Laverna(opts)

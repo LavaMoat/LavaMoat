@@ -6,6 +6,7 @@ const path = require('node:path')
 const { version } = require('../package.json')
 
 const LAVERNA_SCRIPT = require.resolve('../src/cli.js')
+const RELATIVE_LAVERNA_SCRIPT = path.relative(process.cwd(), LAVERNA_SCRIPT)
 const FIXTURE_DIR = path.join(__dirname, 'fixture')
 
 /**
@@ -57,9 +58,9 @@ const testProject = test.macro(
     const { name, args = [], opts = {} } = params
     const cwd = path.join(FIXTURE_DIR, name)
 
-    t.log(`Using fixture: ${path.relative(process.cwd(), cwd)}`)
+    t.log(`Fixture: ${path.relative(process.cwd(), cwd)}`)
 
-    return impl(t, await runCli(args, { ...opts, cwd }))
+    return impl(t, await runCli(t, args, { ...opts, cwd }))
   }
 )
 
@@ -71,7 +72,9 @@ const testProject = test.macro(
  * - Forces `--dryRun` to be set to prevent `npm publish` from actually running
  * - Forces `--yes` to be set to prevent confirmation prompt
  *
+ * @template [Context=unknown] Default is `unknown`
  * @overload
+ * @param {import('ava').ExecutionContext<Context>} t - AVA test context
  * @param {import('node:child_process').ExecFileOptions} [opts]
  * @returns {Promise<RunCliResult | RunCliFailureResult>}
  */
@@ -84,7 +87,9 @@ const testProject = test.macro(
  * - Forces `--dryRun` to be set to prevent `npm publish` from actually running
  * - Forces `--yes` to be set to prevent confirmation prompt
  *
+ * @template [Context=unknown] Default is `unknown`
  * @overload
+ * @param {import('ava').ExecutionContext<Context>} t - AVA test context
  * @param {string[]} args
  * @param {import('node:child_process').ExecFileOptions} [opts]
  * @returns {Promise<RunCliResult | RunCliFailureResult>}
@@ -98,11 +103,13 @@ const testProject = test.macro(
  * - Forces `--dryRun` to be set to prevent `npm publish` from actually running
  * - Forces `--yes` to be set to prevent confirmation prompt
  *
+ * @template [Context=unknown] Default is `unknown`
+ * @param {import('ava').ExecutionContext<Context>} t - AVA test context
  * @param {string[] | import('node:child_process').ExecFileOptions} [argsOrOpts]
  * @param {import('node:child_process').ExecFileOptions} [maybeOpts]
  * @returns {Promise<RunCliResult | RunCliFailureResult>}
  */
-async function runCli(argsOrOpts, maybeOpts = {}) {
+async function runCli(t, argsOrOpts, maybeOpts = {}) {
   /** @type {string[]} */
   let args
   /** @type {import('node:child_process').ExecFileOptions} */
@@ -122,6 +129,9 @@ async function runCli(argsOrOpts, maybeOpts = {}) {
     env: { PATH: process.env.PATH, ...opts.env, NO_COLOR: '1' },
   }
   args = [...new Set([...args, '--dryRun', '--yes'])]
+
+  const command = [process.execPath, RELATIVE_LAVERNA_SCRIPT, ...args].join(' ')
+  t.log(`Command: ${command}`)
 
   /** @type {RunCliResult | RunCliFailureResult} >} */
   let result
@@ -156,7 +166,7 @@ async function runCli(argsOrOpts, maybeOpts = {}) {
 
 test('cli - prints help', async (t) => {
   t.plan(2)
-  const result = await runCli(['--help'])
+  const result = await runCli(t, ['--help'])
 
   t.snapshot(result.stdout)
   t.like(result, { isError: false, code: undefined })
@@ -265,39 +275,28 @@ test(
 )
 
 test(
-  'cli - mixed-cased error (new package)',
+  'cli - new package (mixed)',
   testProject,
   {
-    name: 'new-pkg',
-    args: ['--new-pkg=@lavamoat/larvamoat', '--newPkg=@lavamoat/larvamoat'],
+    name: 'new-pkgs',
+    args: ['--new-pkg=@lavamoat/larvamoat', '--newPkg=@lavamoat/lavamutt'],
   },
   async (t, result) => {
+    t.plan(6)
+
     t.like(result, {
-      isError: true,
-      code: 1,
+      isError: false,
+      code: undefined,
     })
 
     t.true(
-      result.stderr.includes('Use camelCase or kebab-case flags; not both')
+      result.stderr.includes('Package @lavamoat/larvamoat confirmed as new')
     )
-  }
-)
-
-test(
-  'cli - mixed-cased error (dry run)',
-  testProject,
-  {
-    name: 'new-version',
-    args: ['--dry-run'], // dryRun is already present via the macro
-  },
-  async (t, result) => {
-    t.like(result, {
-      isError: true,
-      code: 1,
-    })
-
     t.true(
-      result.stderr.includes('Use camelCase or kebab-case flags; not both')
+      result.stderr.includes('Package @lavamoat/lavamutt confirmed as new')
     )
+    t.true(result.stderr.includes('These package(s) will be published'))
+    t.true(result.stderr.includes('@lavamoat/larvamoat@0.1.0'))
+    t.true(result.stderr.includes('@lavamoat/lavamutt@0.1.0'))
   }
 )
