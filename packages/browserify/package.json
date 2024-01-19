@@ -32,7 +32,7 @@
     "@lavamoat/aa": "^4.0.1",
     "@lavamoat/lavapack": "^6.0.2",
     "browser-resolve": "2.0.0",
-    "concat-stream": "1.6.2",
+    "concat-stream": "2.0.0",
     "convert-source-map": "2.0.0",
     "duplexify": "4.1.2",
     "json-stable-stringify": "1.1.1",
