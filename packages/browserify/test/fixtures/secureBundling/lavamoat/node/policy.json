@@ -287,16 +287,11 @@
       "packages": {
         "browserify>browser-pack>safe-buffer": true,
         "browserify>browser-pack>through2>readable-stream>isarray": true,
-        "browserify>browser-pack>through2>readable-stream>string_decoder": true,
         "browserify>readable-stream>core-util-is": true,
         "browserify>readable-stream>process-nextick-args": true,
+        "browserify>string_decoder": true,
         "duplexify>inherits": true,
         "readable-stream>util-deprecate": true
-      }
-    },
-    "browserify>browser-pack>through2>readable-stream>string_decoder": {
-      "packages": {
-        "browserify>browser-pack>safe-buffer": true
       }
     },
     "browserify>cached-path-relative": {
@@ -354,9 +349,9 @@
       "packages": {
         "browserify>deps-sort>through2>readable-stream>isarray": true,
         "browserify>deps-sort>through2>readable-stream>safe-buffer": true,
-        "browserify>deps-sort>through2>readable-stream>string_decoder": true,
         "browserify>readable-stream>core-util-is": true,
         "browserify>readable-stream>process-nextick-args": true,
+        "browserify>string_decoder": true,
         "duplexify>inherits": true,
         "readable-stream>util-deprecate": true
       }
@@ -364,11 +359,6 @@
     "browserify>deps-sort>through2>readable-stream>safe-buffer": {
       "builtin": {
         "buffer": true
-      }
-    },
-    "browserify>deps-sort>through2>readable-stream>string_decoder": {
-      "packages": {
-        "browserify>deps-sort>through2>readable-stream>safe-buffer": true
       }
     },
     "browserify>duplexer2": {
@@ -393,9 +383,9 @@
       "packages": {
         "browserify>duplexer2>readable-stream>isarray": true,
         "browserify>duplexer2>readable-stream>safe-buffer": true,
-        "browserify>duplexer2>readable-stream>string_decoder": true,
         "browserify>readable-stream>core-util-is": true,
         "browserify>readable-stream>process-nextick-args": true,
+        "browserify>string_decoder": true,
         "duplexify>inherits": true,
         "readable-stream>util-deprecate": true
       }
@@ -403,11 +393,6 @@
     "browserify>duplexer2>readable-stream>safe-buffer": {
       "builtin": {
         "buffer": true
-      }
-    },
-    "browserify>duplexer2>readable-stream>string_decoder": {
-      "packages": {
-        "browserify>duplexer2>readable-stream>safe-buffer": true
       }
     },
     "browserify>glob>path-is-absolute": {
@@ -464,9 +449,9 @@
       "packages": {
         "browserify>insert-module-globals>through2>readable-stream>isarray": true,
         "browserify>insert-module-globals>through2>readable-stream>safe-buffer": true,
-        "browserify>insert-module-globals>through2>readable-stream>string_decoder": true,
         "browserify>readable-stream>core-util-is": true,
         "browserify>readable-stream>process-nextick-args": true,
+        "browserify>string_decoder": true,
         "duplexify>inherits": true,
         "readable-stream>util-deprecate": true
       }
@@ -474,11 +459,6 @@
     "browserify>insert-module-globals>through2>readable-stream>safe-buffer": {
       "builtin": {
         "buffer": true
-      }
-    },
-    "browserify>insert-module-globals>through2>readable-stream>string_decoder": {
-      "packages": {
-        "browserify>insert-module-globals>through2>readable-stream>safe-buffer": true
       }
     },
     "browserify>insert-module-globals>undeclared-identifiers": {
@@ -532,9 +512,9 @@
       "packages": {
         "browserify>labeled-stream-splicer>stream-splicer>readable-stream>isarray": true,
         "browserify>labeled-stream-splicer>stream-splicer>readable-stream>safe-buffer": true,
-        "browserify>labeled-stream-splicer>stream-splicer>readable-stream>string_decoder": true,
         "browserify>readable-stream>core-util-is": true,
         "browserify>readable-stream>process-nextick-args": true,
+        "browserify>string_decoder": true,
         "duplexify>inherits": true,
         "readable-stream>util-deprecate": true
       }
@@ -542,11 +522,6 @@
     "browserify>labeled-stream-splicer>stream-splicer>readable-stream>safe-buffer": {
       "builtin": {
         "buffer": true
-      }
-    },
-    "browserify>labeled-stream-splicer>stream-splicer>readable-stream>string_decoder": {
-      "packages": {
-        "browserify>labeled-stream-splicer>stream-splicer>readable-stream>safe-buffer": true
       }
     },
     "browserify>module-deps": {
@@ -617,9 +592,9 @@
       "packages": {
         "browserify>module-deps>readable-stream>isarray": true,
         "browserify>module-deps>readable-stream>safe-buffer": true,
-        "browserify>module-deps>readable-stream>string_decoder": true,
         "browserify>readable-stream>core-util-is": true,
         "browserify>readable-stream>process-nextick-args": true,
+        "browserify>string_decoder": true,
         "duplexify>inherits": true,
         "readable-stream>util-deprecate": true
       }
@@ -627,11 +602,6 @@
     "browserify>module-deps>readable-stream>safe-buffer": {
       "builtin": {
         "buffer": true
-      }
-    },
-    "browserify>module-deps>readable-stream>string_decoder": {
-      "packages": {
-        "browserify>module-deps>readable-stream>safe-buffer": true
       }
     },
     "browserify>module-deps>stream-combiner2": {
@@ -657,9 +627,9 @@
       "packages": {
         "browserify>module-deps>stream-combiner2>readable-stream>isarray": true,
         "browserify>module-deps>stream-combiner2>readable-stream>safe-buffer": true,
-        "browserify>module-deps>stream-combiner2>readable-stream>string_decoder": true,
         "browserify>readable-stream>core-util-is": true,
         "browserify>readable-stream>process-nextick-args": true,
+        "browserify>string_decoder": true,
         "duplexify>inherits": true,
         "readable-stream>util-deprecate": true
       }
@@ -667,11 +637,6 @@
     "browserify>module-deps>stream-combiner2>readable-stream>safe-buffer": {
       "builtin": {
         "buffer": true
-      }
-    },
-    "browserify>module-deps>stream-combiner2>readable-stream>string_decoder": {
-      "packages": {
-        "browserify>module-deps>stream-combiner2>readable-stream>safe-buffer": true
       }
     },
     "browserify>module-deps>through2": {
@@ -729,9 +694,9 @@
       "packages": {
         "browserify>read-only-stream>readable-stream>isarray": true,
         "browserify>read-only-stream>readable-stream>safe-buffer": true,
-        "browserify>read-only-stream>readable-stream>string_decoder": true,
         "browserify>readable-stream>core-util-is": true,
         "browserify>readable-stream>process-nextick-args": true,
+        "browserify>string_decoder": true,
         "duplexify>inherits": true,
         "readable-stream>util-deprecate": true
       }
@@ -739,11 +704,6 @@
     "browserify>read-only-stream>readable-stream>safe-buffer": {
       "builtin": {
         "buffer": true
-      }
-    },
-    "browserify>read-only-stream>readable-stream>string_decoder": {
-      "packages": {
-        "browserify>read-only-stream>readable-stream>safe-buffer": true
       }
     },
     "browserify>readable-stream": {
@@ -764,8 +724,8 @@
         "browserify>readable-stream>core-util-is": true,
         "browserify>readable-stream>isarray": true,
         "browserify>readable-stream>process-nextick-args": true,
+        "browserify>readable-stream>safe-buffer": true,
         "browserify>string_decoder": true,
-        "browserify>string_decoder>safe-buffer": true,
         "duplexify>inherits": true,
         "readable-stream>util-deprecate": true
       }
@@ -778,6 +738,11 @@
     "browserify>readable-stream>process-nextick-args": {
       "globals": {
         "process": true
+      }
+    },
+    "browserify>readable-stream>safe-buffer": {
+      "builtin": {
+        "buffer": true
       }
     },
     "browserify>resolve": {
@@ -1217,19 +1182,9 @@
         "process.stdout": true
       },
       "packages": {
+        "browserify>string_decoder": true,
         "duplexify>inherits": true,
-        "readable-stream>string_decoder": true,
         "readable-stream>util-deprecate": true
-      }
-    },
-    "readable-stream>string_decoder": {
-      "packages": {
-        "readable-stream>string_decoder>safe-buffer": true
-      }
-    },
-    "readable-stream>string_decoder>safe-buffer": {
-      "builtin": {
-        "buffer": true
       }
     },
     "readable-stream>util-deprecate": {
