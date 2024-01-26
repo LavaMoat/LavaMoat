@@ -1,27 +1,28 @@
 // @ts-check
 
 /**
- * @summary The root ESLint configuration.
- * @description
- *
  * - If a workspace emits declaration files, it should contain a `.eslintrc.js`
- * which extends {@link file://./.config/eslintrc.typed-workspace.js}.
- * - A workspace _only_ needs its own `.eslintrc.js` if it needs to override this configuration.
+ *   which extends {@link file://./.config/eslintrc.typed-workspace.js}.
+ * - A workspace _only_ needs its own `.eslintrc.js` if it needs to override this
+ *   configuration.
  * - While you may be tempted, please do not use an `eslintConfig` prop in your
- * `package.json`; use `.eslintrc.js` for consistency.
+ *   `package.json`; use `.eslintrc.js` for consistency.
  * - Note: glob patterns in this file should _not_ be relative.
  *
+ * @summary The root ESLint configuration.
  * @packageDocumentation
  */
 
 /**
  * The minimum EcmaScript runtime environment to support
+ *
  * @see {@link https://eslint.org/docs/latest/use/configure/language-options#specifying-environments}
  */
 const ECMASCRIPT_ENV = 'es2021'
 
 /**
  * The minimum EcmaScript language version to support
+ *
  * @see {@link https://eslint.org/docs/latest/use/configure/language-options#specifying-parser-options}
  */
 const ECMASCRIPT_VERSION = 2021
@@ -86,6 +87,7 @@ module.exports = {
     node: {
       /**
        * For `n/no-missing-import`
+       *
        * @see {@link https://github.com/eslint-community/eslint-plugin-n/blob/master/docs/rules/no-missing-import.md}
        */
       allowModules: ['deep-equal'], // something weird about this dependency
@@ -94,10 +96,10 @@ module.exports = {
        * For `n/no-unsupported-features`.
        *
        * `eslint-plugin-n` looks in the `engines` field of the closest
-       * `package.json` to the file being linted to determine this value.  For
+       * `package.json` to the file being linted to determine this value. For
        * our workspaces, this field is present, but in some test fixtures it may
        * not be. We _do_ try to ignore test fixtures, but that is easy to
-       * accidentally override via `eslint` on the command line.  So, the safest
+       * accidentally override via `eslint` on the command line. So, the safest
        * thing is to just set it here.
        */
       version: MIN_NODE_VERSION,
@@ -126,6 +128,10 @@ module.exports = {
         'n/no-missing-import': 'off',
       },
       parser: '@typescript-eslint/parser',
+    },
+    {
+      files: ['**/tsconfig*.json', '**/*.json5', '**/*.jsonc'],
+      extends: ['plugin:jsonc/prettier'],
     },
   ],
   ignorePatterns: [
