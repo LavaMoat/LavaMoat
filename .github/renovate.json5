@@ -9,5 +9,43 @@
     ':semanticCommits', // use semantic commits
     'group:linters', // group lint-related packages together
   ],
+  packageRules: [
+    {
+      // as long as we use CJS, everything owned by @sindresorhus should be in this list
+      matchPackageNames: [
+        '@types/wrap-ansi',
+        'chalk',
+        'conf',
+        'del',
+        'delay',
+        'env-paths',
+        'execa',
+        'figures',
+        'find-up',
+        'get-port',
+        'get-stream',
+        'globby',
+        'got',
+        'inquirer',
+        'log-symbols',
+        'open',
+        'ora',
+        'p-ify',
+        'p-limit',
+        'p-retry',
+        'pkg-dir',
+        'read-pkg',
+        'strip-ansi',
+        'supports-color',
+        'term-size',
+        'terminal-link',
+        'vinyl-paths',
+        'wrap-ansi',
+        'write-pkg',
+      ],
+      matchUpdateTypes: ['major'],
+      enabled: false,
+    },
+  ],
   transitiveRemediation: true,
 }
