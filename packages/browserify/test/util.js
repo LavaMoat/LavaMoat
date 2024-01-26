@@ -33,12 +33,12 @@ function overrideDepsWithLocalPackages(projectDir, log) {
 
   // link all of the workspaces to the temp dir project. no need to unlink
   // first; this will overwrite any already-present links
-  const res2 = spawnSync(
+  const res = spawnSync(
     'npm',
     ['install', '--ignore-scripts', ...Object.values(localPkgPaths)],
     { cwd: projectDir, encoding: 'utf8' }
   )
-  if (res2.status !== 0) {
+  if (res.status !== 0) {
     const err = res.stderr
     log({
       err,
