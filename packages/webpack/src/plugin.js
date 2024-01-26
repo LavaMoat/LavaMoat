@@ -7,6 +7,7 @@ const Compilation = require('webpack/lib/Compilation')
 const { generateIdentifierLookup } = require('./buildtime/aa.js')
 const diag = require('./buildtime/diagnostics.js')
 const progress = require('./buildtime/progress.js')
+const { createPolicyGenerator } = require('./buildtime/policyGenerator.js')
 const { assembleRuntime } = require('./buildtime/assemble.js')
 
 const { loadCanonicalNameMap } = require('@lavamoat/aa')
@@ -22,9 +23,11 @@ const JAVASCRIPT_MODULE_TYPE_AUTO = 'javascript/auto'
 const JAVASCRIPT_MODULE_TYPE_DYNAMIC = 'javascript/dynamic'
 const JAVASCRIPT_MODULE_TYPE_ESM = 'javascript/esm'
 
+// @ts-ignore
 const { RUNTIME_KEY } = require('./ENUM.json')
 const { wrapGeneratorMaker } = require('./buildtime/generator.js')
 const { sesEmitHook } = require('./buildtime/emitSes.js')
+const { read, readFileSync } = require('fs')
 const EXCLUDE_LOADER = path.join(__dirname, './excludeLoader.js')
 
 class VirtualRuntimeModule extends RuntimeModule {
@@ -58,6 +61,13 @@ class LavaMoatPlugin {
   constructor(options = { policy: {} }) {
     if (!options.lockdown) {
       options.lockdown = lockdownDefaults
+    }
+    if (!options.policyLocation) {
+      options.policyLocation = './lavamoat/webpack'
+    }
+    if(!options.policy) {
+      // TODO: policyOverride and error handling
+      options.policy = JSON.parse(readFileSync(path.join(options.policyLocation, 'policy.json'), 'utf8'))
     }
     this.options = options
 
@@ -140,6 +150,13 @@ class LavaMoatPlugin {
         }
 
         // =================================================================
+        const policyGenerator = createPolicyGenerator({
+          enabled: options.generatePolicy,
+          location: options.policyLocation,
+          canonicalNameMap,
+        })
+
+        // =================================================================
         // processin of the paths involved in the bundle and cross-check with policy
 
         const excludes = []
@@ -182,6 +199,16 @@ class LavaMoatPlugin {
           Array.from(chunks).forEach((chunk) => {
             chunkGraph.getChunkModules(chunk).forEach((module) => {
               const moduleId = chunkGraph.getModuleId(module)
+              // TODO: potentially a place to hook into for policy generation
+              // Module policies can be merged into a per-package policy in a second pass or right away, depending on what we can pull off for the ID generation.
+              // Seems like it'd make sense to do it right away.
+              if (module.resource) {
+                policyGenerator.inspectWebpackModule(
+                  module,
+                  compilation.moduleGraph.getOutgoingConnections(module)
+                )
+              }
+
               if (
                 // Webpack has a concept of ignored modules
                 // When a module is ignored a carveout is necessary in policy enforcement for it because the ID that webpack creates for it is not exactly helpful.
@@ -205,6 +232,9 @@ class LavaMoatPlugin {
           })
           diag.rawDebug(4, { knownPaths })
           PROGRESS.report('pathsCollected')
+          
+          diag.rawDebug(2, 'writing policy')
+          policyGenerator.writePolicy()
 
           identifierLookup = generateIdentifierLookup({
             readableResourceIds: options.readableResourceIds,
@@ -213,6 +243,7 @@ class LavaMoatPlugin {
             policy: options.policy,
             canonicalNameMap,
           })
+
           if (unenforceableModuleIds.length > 0) {
             mainCompilationWarnings.push(
               new WebpackError(
@@ -222,12 +253,7 @@ class LavaMoatPlugin {
           }
           PROGRESS.report('pathsProcessed')
         })
-        // lists modules, but reaching for id can give a deprecation warning.
-        // compilation.hooks.afterOptimizeModuleIds.tap(PLUGIN_NAME, (modules) => {
-        //   console.log('________________________________',modules.__proto__.constructor)
-        //   Array.from(modules).map(module => console.log(module.resource, module.id))
-        // });
-
+     
         // =================================================================
         // javascript modules generator tweaks installation
 
@@ -354,9 +380,10 @@ class LavaMoatPlugin {
         )
 
         const HtmlWebpackPluginInUse = compiler.options.plugins.find(
-          (plugin) => plugin.constructor.name === 'HtmlWebpackPlugin'
+          (plugin) => plugin && plugin.constructor.name === 'HtmlWebpackPlugin'
         )
 
+        // TODO: avoid minification
         compilation.hooks.processAssets.tap(
           {
             name: PLUGIN_NAME,
