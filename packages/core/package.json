@@ -1,6 +1,6 @@
 {
   "name": "lavamoat-core",
-  "version": "15.0.0",
+  "version": "15.1.1",
   "description": "LavaMoat kernel and utils",
   "repository": {
     "type": "git",
@@ -31,17 +31,18 @@
   "scripts": {
     "lib:ses": "cp ../../node_modules/ses/dist/lockdown.umd.js ./lib/lockdown.umd.js",
     "lint:deps": "depcheck",
-    "test": "ava"
+    "test": "ava && npm run test:ses",
+    "test:ses": "diff -q ../../node_modules/ses/dist/lockdown.umd.js ./lib/lockdown.umd.js"
   },
   "dependencies": {
-    "json-stable-stringify": "1.0.2",
-    "lavamoat-tofu": "^7.0.0",
+    "json-stable-stringify": "1.1.1",
+    "lavamoat-tofu": "^7.1.0",
     "merge-deep": "3.0.3",
-    "type-fest": "4.7.1"
+    "type-fest": "4.10.0"
   },
   "devDependencies": {
     "@types/json-stable-stringify": "1.0.36",
-    "ses": "0.18.8",
+    "ses": "1.1.0",
     "tmp-promise": "3.0.3"
   },
   "ava": {

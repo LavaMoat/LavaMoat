@@ -9,7 +9,7 @@
   },
   "license": "MIT",
   "private": true,
-  "packageManager": "yarn@3.1.1",
+  "packageManager": "yarn@3.7.0",
   "engines": {
     "node": "^16.20.0 || ^18.0.0 || ^20.0.0"
   },
@@ -20,13 +20,9 @@
     "test": "exit 0"
   },
   "dependencies": {
-    "@yarnpkg/builder": "3.2.7",
-    "@yarnpkg/cli": "3.5.1",
-    "@yarnpkg/core": "3.5.1",
+    "@yarnpkg/builder": "3.3.1",
+    "@yarnpkg/cli": "3.7.0",
+    "@yarnpkg/core": "3.6.0",
     "clipanion": "3.2.1"
-  },
-  "devDependencies": {
-    "@types/node": "20.10.8",
-    "typescript": "5.2.2"
   }
 }

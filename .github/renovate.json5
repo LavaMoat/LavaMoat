@@ -5,10 +5,7 @@
     'config:js-app', // everything gets pinned except peer deps (plus a bunch of other reasonable defaults)
     'group:definitelyTyped', // groups all `@types/*` packages together
     'helpers:pinGitHubActionDigests', // pins SHAs of GitHub actions
-    ':automergePatch', // automatically merges "patch" and "pin" PRs on check success
-    ':automergeDigest', // automatically merges "digest" PRs on check success
     ':enableVulnerabilityAlerts', // enables GitHub vulnerability alerts
-    ':rebaseStalePrs', // automatically rebase stale PRs against main
     ':semanticCommits', // use semantic commits
     'group:linters', // group lint-related packages together
   ],

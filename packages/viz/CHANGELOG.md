@@ -1,5 +1,26 @@
 # Changelog
 
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-core bumped from ^15.1.0 to ^15.1.1
+
+## [7.0.1](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-viz-v7.0.0...lavamoat-viz-v7.0.1) (2024-01-18)
+
+
+### Bug Fixes
+
+* **deps:** pin dependencies ([4006c1f](https://github.com/LavaMoat/LavaMoat/commit/4006c1f386c3024e8a8092ded9b98ede20de084e))
+* **deps:** update dependency yargs to v17.7.2 ([a1b21d3](https://github.com/LavaMoat/LavaMoat/commit/a1b21d3db1904d05cd9e82bc62eb56dfafb76be2))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-core bumped from ^15.0.0 to ^15.1.0
+
 ## [7.0.0](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-viz-v6.2.1...lavamoat-viz-v7.0.0) (2023-10-18)
 
 

@@ -1,5 +1,21 @@
 # Changelog
 
+## [3.0.1](https://github.com/LavaMoat/LavaMoat/compare/allow-scripts-v3.0.0...allow-scripts-v3.0.1) (2024-01-18)
+
+
+### Bug Fixes
+
+* **deps:** pin dependencies ([4006c1f](https://github.com/LavaMoat/LavaMoat/commit/4006c1f386c3024e8a8092ded9b98ede20de084e))
+* **deps:** update dependency bin-links to v4.0.3 ([b8efb10](https://github.com/LavaMoat/LavaMoat/commit/b8efb100f4ce0b6a42ad37f16b524b3c4d4acc50))
+* **deps:** update dependency npm-normalize-package-bin to v3.0.1 ([d2576fb](https://github.com/LavaMoat/LavaMoat/commit/d2576fb4fd6c21f15a03329d2bdef0521a6ab4f7))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @lavamoat/aa bumped from ^4.0.0 to ^4.0.1
+
 ## [3.0.0](https://github.com/LavaMoat/LavaMoat/compare/allow-scripts-v2.5.1...allow-scripts-v3.0.0) (2023-10-18)
 
 

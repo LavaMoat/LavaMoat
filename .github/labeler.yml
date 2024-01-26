@@ -67,7 +67,7 @@
 
 'chore':
   - changed-files:
-      - any-glob-to-any-file:
+      - any-glob-to-all-files:
           # general config-related stuff
           - '.github/**'
           - '.husky/**'
@@ -87,8 +87,9 @@
 'documentation':
   - changed-files:
       - any-glob-to-any-file:
+          # note: this will include snapshot *.md files.
+          # someone is welcome to figure out how to exclude these, but I give up
           - '**/*.md'
           - '**/docs/**'
           - '**/example?(s)/**'
-      - all-globs-to-all-files:
-          - '!**/snapshots/**/*.md'
+
