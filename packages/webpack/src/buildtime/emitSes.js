@@ -10,6 +10,7 @@ module.exports = {
     () => {
       // Read the file you want to add to the output
       const sesFile = readFileSync(require.resolve('ses'), 'utf-8')
+      // TODO: instead manually copy to compiler.options.output.path
       const asset = new RawSource(sesFile)
 
       compilation.emitAsset('lockdown.js', asset)

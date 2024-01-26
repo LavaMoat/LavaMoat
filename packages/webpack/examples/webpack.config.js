@@ -37,7 +37,7 @@ module.exports = {
         dateTaming: 'unsafe',
         consoleTaming: 'unsafe',
       },
-      policy: require('./lavamoat/policy.json'),
+      generatePolicy: true,
       readableResourceIds: true,
       runChecks: true,
       diagnosticsVerbosity: 1,
