@@ -15,7 +15,7 @@ const one = () => {
 }
 
 module.exports = [
-  async () => {
+  async (log = console.error.bind(console)) => {
     const scenario = createScenarioFromScaffold({
       name: 'scuttle - host env global object is scuttled to work',
       defineOne: one,
@@ -39,10 +39,10 @@ module.exports = [
         },
       },
     })
-    await autoConfigForScenario({ scenario })
+    await autoConfigForScenario({ scenario, log })
     return scenario
   },
-  async () => {
+  async (log = console.error.bind(console)) => {
     const scenario = createScenarioFromScaffold({
       name: 'scuttle - host env global object is too scuttled to work',
       defineOne: one,
@@ -60,7 +60,7 @@ module.exports = [
       expectedFailureMessageRegex:
         /SES_UNHANDLED_REJECTION|inaccessible under scuttling mode./,
     })
-    await autoConfigForScenario({ scenario })
+    await autoConfigForScenario({ scenario, log })
     return scenario
   },
 ]
