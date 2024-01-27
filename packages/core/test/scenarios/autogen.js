@@ -4,7 +4,7 @@ const {
 } = require('../util.js')
 
 module.exports = [
-  async () => {
+  async (log = console.error.bind(console)) => {
     const scenario = createScenarioFromScaffold({
       name: 'autogen - react-devtools-core hasOwnProperty',
       defineOne: () => {
@@ -20,7 +20,7 @@ module.exports = [
       },
       expectedResult: true,
     })
-    await autoConfigForScenario({ scenario })
+    await autoConfigForScenario({ scenario, log })
     return scenario
   },
 ]
