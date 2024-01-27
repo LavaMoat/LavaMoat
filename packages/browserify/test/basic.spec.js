@@ -1,3 +1,4 @@
+/* eslint-disable ava/use-t-well */
 const test = require('ava')
 
 const {
@@ -30,8 +31,12 @@ test('basic - browserify bundle doesnt inject global in deps', async (t) => {
       module.exports = global
     },
   })
-  await autoConfigForScenario({ scenario })
-  const { bundleForScenario } = await createBundleForScenario({ scenario })
+  const log = t.log.bind(t)
+  await autoConfigForScenario({ scenario, log })
+  const { bundleForScenario } = await createBundleForScenario({
+    scenario,
+    log,
+  })
   const hasGlobalInjection = bundleForScenario.includes(
     'typeof global !== \\"undefined\\" ? global :'
   )
@@ -48,8 +53,12 @@ test('basic - lavamoat policy and bundle', async (t) => {
       module.exports = () => location.href
     },
   })
-  await autoConfigForScenario({ scenario })
-  const { bundleForScenario } = await createBundleForScenario({ scenario })
+  const log = t.log.bind(t)
+  await autoConfigForScenario({ scenario, log })
+  const { bundleForScenario } = await createBundleForScenario({
+    scenario,
+    log,
+  })
 
   t.true(
     bundleForScenario.includes('"location.href":true'),
@@ -74,8 +83,12 @@ test('basic - lavamoat bundle without prelude', async (t) => {
     opts: { includePrelude: false },
   })
 
-  await autoConfigForScenario({ scenario })
-  const { bundleForScenario } = await createBundleForScenario({ scenario })
+  const log = t.log.bind(t)
+  await autoConfigForScenario({ scenario, log })
+  const { bundleForScenario } = await createBundleForScenario({
+    scenario,
+    log,
+  })
 
   let didCallLoadBundle = false
   const testGlobal = {

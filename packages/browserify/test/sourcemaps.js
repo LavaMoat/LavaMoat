@@ -6,11 +6,11 @@ const { codeFrameColumns } = require('@babel/code-frame')
 
 module.exports = { verifySourceMaps }
 
-async function verifySourceMaps({ bundle }) {
+async function verifySourceMaps({ bundle, log = console.error.bind(console) }) {
   // basic sanity checking
   validate(bundle)
   // our custom sample checking
-  await verifySamples(bundle)
+  await verifySamples(bundle, log)
   // generate a sourcemap explorer because its stricter than some other validations
   await verifyWithSourceExplorer(bundle)
 }
@@ -31,13 +31,13 @@ async function verifyWithSourceExplorer(bundle) {
   }
 }
 
-async function verifySamples(bundle) {
+async function verifySamples(bundle, log) {
   const sourcemap = extractSourceMap(bundle).toObject()
   const consumer = await new SourceMapConsumer(sourcemap)
 
   const hasContentsOfAllSources = consumer.hasContentsOfAllSources()
   if (!hasContentsOfAllSources) {
-    console.warn('SourcemapValidator - missing content of some sources...')
+    log('SourcemapValidator - missing content of some sources...')
   }
 
   let sampleCount = 0
