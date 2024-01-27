@@ -133,8 +133,8 @@ function testInspect(label, opts, fn, expectedResultObj) {
     // for debugging
     if (!deepEqual(resultSorted, expectedSorted)) {
       label, opts
-      console.log(resultSorted)
-      console.log(expectedSorted)
+      t.log(resultSorted)
+      t.log(expectedSorted)
       // eslint-disable-next-line no-debugger
       debugger
     }
