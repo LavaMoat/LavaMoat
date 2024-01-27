@@ -13,7 +13,7 @@ test('Run scenarios', async (t) => {
     ) {
       continue
     }
-    console.log(`Running Node Scenario: ${scenario.name}`)
+    t.log(`Running Node Scenario: ${scenario.name}`)
     await runAndTestScenario(t, scenario, ({ scenario }) =>
       runScenario({ scenario })
     )
