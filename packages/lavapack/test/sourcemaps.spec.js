@@ -66,9 +66,9 @@ async function validateSourcemaps(t, sourceMeta) {
         const result = consumer.originalPositionFor(position)
         if (!result.source) {
           t.fail(`missing source for position: ${JSON.stringify(position)}`)
-          console.warn('=======')
-          console.warn(contentForPosition(sourceLines, position))
-          console.warn('=======')
+          t.log('=======')
+          t.log(contentForPosition(sourceLines, position))
+          t.log('=======')
           return
         }
         const sourceContent = consumer.sourceContentFor(result.source)
