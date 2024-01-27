@@ -58,7 +58,7 @@ test('sourcemap test', async (t) => {
 
   const bundleBuffer = await promise
   const bundleString = bundleBuffer.toString()
-  console.log(bundleString)
+  t.log(bundleString)
   fs.writeFileSync('./bundle.js', bundleBuffer)
 
   const converter = convertSourceMap.fromSource(bundleString)
@@ -72,7 +72,7 @@ test('sourcemap test', async (t) => {
       column: 0,
     })
     const bundleLine = bundleString.split('\n')[bundleStartPos.line - 1]
-    console.log(`${sourceFile}:\n${bundleLine}`)
+    t.log(`${sourceFile}:\n${bundleLine}`)
   })
 
   consumer.destroy()
