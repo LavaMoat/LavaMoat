@@ -31,7 +31,7 @@ test('cli - auto command', (t) => {
   )
 
   // forward error output for debugging
-  console.error(result.stderr.toString('utf-8'))
+  t.log(result.stderr.toString('utf-8'))
 
   // get the package.json
   const packageJsonContents = JSON.parse(
@@ -63,7 +63,7 @@ test('cli - auto command with experimental bins', (t) => {
   )
 
   // forward error output for debugging
-  console.error(result.stderr.toString('utf-8'))
+  t.log(result.stderr.toString('utf-8'))
 
   // get the package.json
   const packageJsonContents = JSON.parse(
@@ -101,7 +101,7 @@ test('cli - run command - good dep at the root', (t) => {
   )
 
   // forward error output for debugging
-  console.error(result.stderr.toString('utf-8'))
+  t.log(result.stderr.toString('utf-8'))
 
   // assert the output
   t.deepEqual(result.stdout.toString().split('\n'), [
@@ -138,7 +138,7 @@ test('cli - run command - good dep at the root with experimental bins', (t) => {
   )
 
   // forward error output for debugging
-  console.error(result.stderr.toString('utf-8'))
+  t.log(result.stderr.toString('utf-8'))
 
   // assert the output
   t.deepEqual(result.stdout.toString().split('\n'), [
@@ -190,8 +190,8 @@ test('cli - run command - good dep as a sub dep', (t) => {
   )
 
   // uncomment to forward error output for debugging
-  console.error(result.stdout.toString('utf-8'))
-  console.error(result.stderr.toString('utf-8'))
+  t.log(result.stdout.toString('utf-8'))
+  t.log(result.stderr.toString('utf-8'))
 
   // assert the output
   t.deepEqual(result.stdout.toString().split('\n'), [
@@ -227,8 +227,8 @@ test('cli - run command - good dep as a sub dep with experimental bins', (t) => 
   )
 
   // uncomment to forward error output for debugging
-  // console.error(result.stdout.toString('utf-8'))
-  // console.error(result.stderr.toString('utf-8'))
+  // t.log(result.stdout.toString('utf-8'))
+  // t.log(result.stderr.toString('utf-8'))
 
   t.assert(
     fs.existsSync(
