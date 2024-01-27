@@ -1,3 +1,4 @@
+/* eslint-disable ava/use-t-well */
 const test = require('ava')
 const fs = require('fs')
 const path = require('path')
@@ -20,7 +21,10 @@ test('policy - default policy path is generated with autoconfig if path is not s
     },
     contextName: 'browserify',
   })
-  const { policyDir } = await prepareBrowserifyScenarioOnDisk({ scenario })
+  const { policyDir } = await prepareBrowserifyScenarioOnDisk({
+    scenario,
+    log: t.log.bind(t),
+  })
   const expectedPath = path.join(policyDir, 'policy.json')
 
   t.false(fs.existsSync(expectedPath), 'Policy file does not yet exist')
@@ -62,7 +66,10 @@ test('Policy - Applies writeAutoPolicyDebug plugin option and dumps module objec
       writeAutoPolicyDebug: true,
     },
   })
-  const { policyDir } = await prepareBrowserifyScenarioOnDisk({ scenario })
+  const { policyDir } = await prepareBrowserifyScenarioOnDisk({
+    scenario,
+    log: t.log.bind(t),
+  })
   const expectedPath = path.join(policyDir, 'policy-debug.json')
 
   t.false(fs.existsSync(expectedPath), 'Module data does not yet exist')
@@ -80,6 +87,7 @@ test('Policy - watchify listens for policy file changes', async (t) => {
   })
   const { projectDir, policyDir } = await prepareBrowserifyScenarioOnDisk({
     scenario,
+    log: t.log.bind(t),
   })
   await runBrowserify({ scenario })
 

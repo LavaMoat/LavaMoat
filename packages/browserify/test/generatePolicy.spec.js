@@ -1,3 +1,4 @@
+/* eslint-disable ava/use-t-well */
 /* eslint-disable no-undef */
 const test = require('ava')
 
@@ -9,7 +10,7 @@ test('generatePolicy - empty policy', async (t) => {
     defineEntry: () => {},
     defaultPolicy: false,
   })
-  const policy = await autoConfigForScenario({ scenario })
+  const policy = await autoConfigForScenario({ scenario, log: t.log.bind(t) })
   t.deepEqual(policy, { resources: {} }, 'policy matches expected')
 })
 
@@ -21,7 +22,7 @@ test('generatePolicy - basic policy', async (t) => {
     defaultPolicy: false,
   })
 
-  const policy = await autoConfigForScenario({ scenario })
+  const policy = await autoConfigForScenario({ scenario, log: t.log.bind(t) })
   t.deepEqual(policy, {
     resources: {
       one: {
@@ -43,7 +44,7 @@ test('generatePolicy - ignore various refs', async (t) => {
     },
     defaultPolicy: false,
   })
-  const policy = await autoConfigForScenario({ scenario })
+  const policy = await autoConfigForScenario({ scenario, log: t.log.bind(t) })
   t.deepEqual(policy, {
     resources: {
       one: {
@@ -63,7 +64,7 @@ test('generatePolicy - policy ignores global refs', async (t) => {
     },
     defaultPolicy: false,
   })
-  const policy = await autoConfigForScenario({ scenario })
+  const policy = await autoConfigForScenario({ scenario, log: t.log.bind(t) })
   t.deepEqual(policy, {
     resources: {
       one: {
@@ -85,7 +86,7 @@ test('generatePolicy - policy ignores global refs when properties are not access
     },
     defaultPolicy: false,
   })
-  const policy = await autoConfigForScenario({ scenario })
+  const policy = await autoConfigForScenario({ scenario, log: t.log.bind(t) })
   t.deepEqual(policy, {
     resources: {},
   })
@@ -101,7 +102,7 @@ test('generatePolicy - policy ignores global refs accessed with allowlist items'
       resources: {},
     },
   })
-  const policy = await autoConfigForScenario({ scenario })
+  const policy = await autoConfigForScenario({ scenario, log: t.log.bind(t) })
   t.deepEqual(policy, {
     resources: {},
   })
@@ -129,7 +130,7 @@ test('generatePolicy - policy endows "process" properly', async (t) => {
       },
     },
   })
-  const policy = await autoConfigForScenario({ scenario })
+  const policy = await autoConfigForScenario({ scenario, log: t.log.bind(t) })
   t.deepEqual(policy, {
     resources: {
       one: {

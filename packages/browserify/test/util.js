@@ -26,20 +26,7 @@ const localLavaMoatDeps = {
   core: 'lavamoat-core',
 }
 
-module.exports = {
-  createBundleFromEntry,
-  createWatchifyBundler,
-  evalBundle,
-  runScenario,
-  createBundleForScenario,
-  autoConfigForScenario,
-  runBrowserify,
-  bundleAsync,
-  prepareBrowserifyScenarioOnDisk,
-  createBrowserifyScenarioFromScaffold,
-}
-
-function overrideDepsWithLocalPackages(projectDir) {
+function overrideDepsWithLocalPackages(projectDir, log) {
   const localPkgPaths = Object.keys(localLavaMoatDeps).map((workspaceDirname) =>
     path.resolve(WORKSPACE_ROOT, 'packages', workspaceDirname)
   )
@@ -53,7 +40,7 @@ function overrideDepsWithLocalPackages(projectDir) {
   )
   if (res2.status !== 0) {
     const err = res.stderr
-    console.error({
+    log({
       err,
       out: res.stdout,
       status: res.status,
@@ -77,13 +64,15 @@ async function createBundleFromEntry(path, pluginOpts = {}) {
   return bundleAsync(bundler)
 }
 
-async function autoConfigForScenario({ scenario }) {
+async function autoConfigForScenario({ scenario, log }) {
+  log ??= console.error.bind(console)
   const copiedScenario = {
     ...scenario,
     opts: { ...scenario.opts, writeAutoPolicy: true },
   }
   const { policyDir } = await createBundleForScenario({
     scenario: copiedScenario,
+    log,
   })
   const fullPath = path.join(policyDir, 'policy.json')
   const policy = await fs.readFile(fullPath, 'utf8')
@@ -149,12 +138,11 @@ async function runBrowserify({
   return { output }
 }
 
-// const limited = require('throat')(2)
-
-async function prepareBrowserifyScenarioOnDisk({ scenario }) {
+async function prepareBrowserifyScenarioOnDisk({ scenario, log }) {
   const { path: projectDir } = await tmp.dir()
+  log ??= console.error.bind(console)
   scenario.dir = projectDir
-  console.warn(`created test project directory at "${projectDir}"`)
+  log(`created test project directory at "${projectDir}"`)
   const depsToInstall = ['browserify@^17']
   let runBrowserifyPath = `${__dirname}/fixtures/runBrowserify.js`
   if (scenario.type === 'factor') {
@@ -177,9 +165,9 @@ async function prepareBrowserifyScenarioOnDisk({ scenario }) {
     const msg = `Error while installing devDeps:\n${installDevDepsResult.stderr}\npackages: ${depsToInstall}`
     throw new Error(msg)
   }
-  console.warn('installed %s', depsToInstall.join(', '))
+  log(`installed ${depsToInstall.join(', ')}`)
 
-  overrideDepsWithLocalPackages(projectDir)
+  overrideDepsWithLocalPackages(projectDir, log)
 
   // copy scenario files
   // we copy files first so that we dont attempt to install the immaginary deps
@@ -199,11 +187,14 @@ async function prepareBrowserifyScenarioOnDisk({ scenario }) {
 async function createBundleForScenario({
   scenario,
   bundleWithPrecompiledModules = true,
+  log,
 }) {
+  log ??= console.error.bind(console)
   let policy
   if (!scenario.dir) {
     const { projectDir, policyDir } = await prepareBrowserifyScenarioOnDisk({
       scenario,
+      log,
     })
     scenario.dir = projectDir
     policy = policyDir
@@ -215,7 +206,7 @@ async function createBundleForScenario({
     output: { stdout: bundle, stderr },
   } = await runBrowserify({ scenario, bundleWithPrecompiledModules })
   if (stderr.length) {
-    console.warn(stderr)
+    log(stderr)
   }
   return { bundleForScenario: bundle, policyDir: policy }
 }
@@ -224,18 +215,21 @@ async function runScenario({
   scenario,
   bundle,
   runWithPrecompiledModules = true,
+  log,
 }) {
+  log ??= console.error.bind(console)
   if (!bundle) {
     const { bundleForScenario } = await createBundleForScenario({
       scenario,
       bundleWithPrecompiledModules: runWithPrecompiledModules,
+      log,
     })
     bundle = bundleForScenario
     await fs.writeFile(path.join(scenario.dir, 'bundle.js'), bundle)
   }
   // dont validate factored bundles
   if (scenario.type !== 'factor') {
-    await verifySourceMaps({ bundle })
+    await verifySourceMaps({ bundle, log })
   }
   const { hookedConsole, firstLogEventPromise } = createHookedConsole()
   Object.assign(scenario.context, { console: hookedConsole })
@@ -258,4 +252,17 @@ function createBrowserifyScenarioFromScaffold(...args) {
     2
   )
   return scenario
+}
+
+module.exports = {
+  createBundleFromEntry,
+  createWatchifyBundler,
+  evalBundle,
+  runScenario,
+  createBundleForScenario,
+  autoConfigForScenario,
+  runBrowserify,
+  bundleAsync,
+  prepareBrowserifyScenarioOnDisk,
+  createBrowserifyScenarioFromScaffold,
 }

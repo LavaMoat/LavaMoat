@@ -150,8 +150,12 @@ test.skip('package factor bundle', async (t) => {
     type: 'factor',
   }
 
+  // eslint-disable-next-line ava/use-t-well
+  const log = t.log.bind(t)
+
   const { bundleForScenario: rawOutput } = await createBundleForScenario({
     scenario,
+    log,
   })
   const vinylBundles = JSON.parse(rawOutput)
 
@@ -165,10 +169,12 @@ test.skip('package factor bundle', async (t) => {
   const testResult1 = await runScenario({
     scenario,
     bundle: vinylBundles['common.js'] + vinylBundles['src/1.js'],
+    log,
   })
   const testResult2 = await runScenario({
     scenario,
     bundle: vinylBundles['common.js'] + vinylBundles['src/2.js'],
+    log,
   })
 
   t.is(testResult1, 60)
