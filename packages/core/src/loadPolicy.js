@@ -1,23 +1,24 @@
 // @ts-check
 
 const fs = require('node:fs/promises')
+const { readFileSync } = require('node:fs')
 const { mergePolicy } = require('./mergePolicy')
 const jsonStringify = require('json-stable-stringify')
 
-module.exports = { loadPolicy, loadPolicyAndApplyOverrides }
+module.exports = { loadPolicy, loadPolicyAndApplyOverrides, loadPoliciesSync }
 
 /**
  * Reads a policy file from disk, if present
  *
  * @param {PolicyOpts} opts
- * @returns {Promise<import('./schema').LavaMoatPolicy | undefined>}
+ * @returns {import('./schema').LavaMoatPolicy | undefined}
  */
-async function readPolicyFile({ debugMode, policyPath }) {
+function readPolicyFileSync({ debugMode, policyPath }) {
   if (debugMode) {
     console.warn(`Lavamoat looking for policy at '${policyPath}'`)
   }
   try {
-    const rawPolicy = await fs.readFile(policyPath, 'utf8')
+    const rawPolicy = readFileSync(policyPath, 'utf8')
     return JSON.parse(rawPolicy)
   } catch (err) {
     if (/** @type {NodeJS.ErrnoException} */ (err).code !== 'ENOENT') {
@@ -42,7 +43,7 @@ async function loadPolicy({ debugMode, policyPath }) {
   /** @type {import('./schema').LavaMoatPolicy} */
   let policy = { resources: {} }
   try {
-    const rawPolicy = await readPolicyFile({ debugMode, policyPath })
+    const rawPolicy = readPolicyFileSync({ debugMode, policyPath })
     policy = rawPolicy ?? policy
   } catch (err) {
     if (/** @type {NodeJS.ErrnoException} */ (err).code !== 'ENOENT') {
@@ -71,7 +72,7 @@ async function loadPolicyAndApplyOverrides({
 
   const policyOverride =
     /** @type {import('./schema').LavaMoatPolicyOverrides | undefined} */ (
-      await readPolicyFile({ debugMode, policyPath: policyOverridePath })
+      readPolicyFileSync({ debugMode, policyPath: policyOverridePath })
     )
 
   if (!policyOverride) {
@@ -90,6 +91,40 @@ async function loadPolicyAndApplyOverrides({
   await fs.writeFile(policyPath, jsonStringify(finalPolicy, { space: 2 }))
 
   return finalPolicy
+}
+
+/**
+ * Loads policy and policy overrides from disk and merges them.
+ *
+ * Doesn't write anything back to disk.
+ *
+ * @param {PolicyOpts & { policyOverridePath: string }} opts
+ * @returns {{
+ *   policy: import('./schema').LavaMoatPolicy
+ *   applyOverride: (
+ *     main: import('./schema').LavaMoatPolicy
+ *   ) => import('./schema').LavaMoatPolicy
+ * }}
+ */
+function loadPoliciesSync({ debugMode, policyPath, policyOverridePath }) {
+  const policy = readPolicyFileSync({ debugMode, policyPath })
+  const policyOverride = readPolicyFileSync({
+    debugMode,
+    policyPath: policyOverridePath,
+  })
+
+  return {
+    policy,
+    applyOverride: (main) => {
+      if (!policyOverride) {
+        return main
+      }
+      if (debugMode) {
+        console.warn('Merging policy-override.json into policy.json')
+      }
+      return mergePolicy(main, policyOverride)
+    },
+  }
 }
 
 /**

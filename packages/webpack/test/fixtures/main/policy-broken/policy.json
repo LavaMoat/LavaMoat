@@ -1,0 +1,14 @@
+{
+  "resources": {
+    "commonjs-package": {
+      "packages": {
+        "umd-package": true
+      }
+    },
+    "umd-package": {
+      "globals": {
+        "define": true
+      }
+    }
+  }
+}

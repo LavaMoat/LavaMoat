@@ -1,0 +1,9 @@
+{
+  "resources": {
+    "commonjs-package": {
+      "packages": {
+        "umd-package": false
+      }
+    }
+  }
+}

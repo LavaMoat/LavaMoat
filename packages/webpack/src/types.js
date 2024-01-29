@@ -5,8 +5,11 @@
 
 /**
  * @typedef {Object} LavaMoatPluginOptions
- * @property {boolean} [generatePolicy] - generate the policy file
- * @property {string} [policyLocation] - folder where policy files are stored, defaults to './lavamoat/webpack'
+ * @property {boolean} [generatePolicy] - Generate the policy file
+ * @property {string} [policyLocation] - Folder where policy files are stored,
+ *   defaults to './lavamoat/webpack'
+ * @property {boolean} [emitPolicySnapshot] - Additionally put policy in dist of
+ *   webpack compilation
  * @property {boolean} [runChecks] - Check resulting code with wrapping for
  *   correctness
  * @property {boolean} [readableResourceIds] - Should resourceIds be readable or
@@ -15,7 +18,8 @@
  *   output for lockdown.js if HtmlWebpackPlugin is in use
  * @property {number} [diagnosticsVerbosity] - A number representing diagnostics
  *   output verbosity, the larger the more overwhelming
- * @property {Object} [policy] - LavaMoat policy object - if programmaticly created
+ * @property {Object} [policy] - LavaMoat policy object - if programmaticly
+ *   created
  * @property {Object} [lockdown] - Options to pass to lockdown
  */
 
