@@ -2,7 +2,8 @@
  * @typedef {object} ScuttleOpts
  * @property {boolean} enabled - Whether scuttling is enabled or not.
  * @property {Array<string|RegExp>} exceptions - List of properties to exclude from scuttling.
- * @property {string} scuttlerName - Name of the scuttler function to use.
+ * @property {string} scuttlerName - Name of the scuttler function to use which is expected to be found as a
+ * property on the global object (e.g. if scuttlerName is 'x', scuttler function is obtained from globalThis['x']).
  */
 
 /**
