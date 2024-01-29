@@ -13,6 +13,10 @@
     {
       // as long as we use CJS, everything owned by @sindresorhus should be in this list
       matchPackageNames: [
+        // Missing support for LavaMoat supported major Node.js version(s)
+        'copy-webpack-plugin',
+
+        // ESM-only packages
         '@types/wrap-ansi',
         'chalk',
         'conf',
