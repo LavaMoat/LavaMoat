@@ -12,12 +12,14 @@ function applySourceTransforms(source) {
   ])
 }
 
+
+// create the RegExp once to avoid creating it over and over again
+// helps work around https://github.com/MetaMask/metamask-extension/issues/21006
+const someDirectEvalPattern = /\beval(\s*\()/g
 const DIRECT_EVAL_REPLACE_FN = (_, p1) => '(0,eval)' + p1
 function evadeDirectEvalExpressions(source) {
-  return source.replace(
-    /\beval(\s*\()/g,
-    DIRECT_EVAL_REPLACE_FN
-  )
+  // NOTE: str.replace is not affected by .lastIndex so we can reuse the regex
+  return source.replace(someDirectEvalPattern, DIRECT_EVAL_REPLACE_FN)
 }
 
 module.exports = {
