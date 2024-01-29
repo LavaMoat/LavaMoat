@@ -28,17 +28,17 @@ const { getPrototypeOf } = Reflect
 const { warn } = console
 
 function generateInvokers(prop) {
-  return {get, set}
+  return { get, set }
   function set() {
     warn(
       `LavaMoat - property "${prop}" of globalThis cannot be set under scuttling mode. ` +
-      'To learn more visit https://github.com/LavaMoat/LavaMoat/pull/360.'
+        'To learn more visit https://github.com/LavaMoat/LavaMoat/pull/360.'
     )
   }
   function get() {
     throw new Error(
       `LavaMoat - property "${prop}" of globalThis is inaccessible under scuttling mode. ` +
-      'To learn more visit https://github.com/LavaMoat/LavaMoat/pull/360.'
+        'To learn more visit https://github.com/LavaMoat/LavaMoat/pull/360.'
     )
   }
 }
@@ -133,8 +133,8 @@ function performScuttleGlobalThis(globalRef, extraPropsToAvoid = []) {
   ])
 
   const obj = create(null)
-  props.forEach(prop => {
-    const {get, set} = generateInvokers(prop)
+  props.forEach((prop) => {
+    const { get, set } = generateInvokers(prop)
     if (shouldAvoidProp(propsToAvoid, prop)) {
       return
     }
@@ -158,7 +158,9 @@ function performScuttleGlobalThis(globalRef, extraPropsToAvoid = []) {
  */
 const shouldAvoidProp = (propsToAvoid, prop) =>
   from(propsToAvoid).some(
-    (avoid) => avoid === prop || new RegExp(avoid).test(prop)
+    (avoid) =>
+      (typeof avoid === 'string' && avoid === prop) ||
+      (avoid instanceof RegExp && avoid.test(prop))
   )
 
 /**
