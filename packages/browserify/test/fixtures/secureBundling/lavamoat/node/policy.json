@@ -89,10 +89,10 @@
       },
       "packages": {
         "@lavamoat/lavapack>combine-source-map": true,
-        "@lavamoat/lavapack>convert-source-map": true,
         "@lavamoat/lavapack>espree": true,
         "@lavamoat/lavapack>umd": true,
         "browserify>JSONStream": true,
+        "convert-source-map": true,
         "json-stable-stringify": true,
         "lavamoat-core": true,
         "readable-stream": true,
@@ -129,18 +129,6 @@
       },
       "packages": {
         "@lavamoat/lavapack>combine-source-map>inline-source-map>source-map": true
-      }
-    },
-    "@lavamoat/lavapack>convert-source-map": {
-      "builtin": {
-        "fs.readFileSync": true,
-        "path.resolve": true
-      },
-      "globals": {
-        "Buffer": true,
-        "atob": true,
-        "btoa": true,
-        "value": true
       }
     },
     "@lavamoat/lavapack>espree": {
@@ -871,6 +859,14 @@
     "concat-stream>buffer-from": {
       "globals": {
         "Buffer": true
+      }
+    },
+    "convert-source-map": {
+      "globals": {
+        "Buffer": true,
+        "atob": true,
+        "btoa": true,
+        "value": true
       }
     },
     "duplexify": {
