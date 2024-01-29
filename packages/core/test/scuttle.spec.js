@@ -8,119 +8,138 @@ const SCUTTLER_NAME_ERROR = {
     'To learn more visit https://github.com/LavaMoat/LavaMoat/pull/462.',
 }
 
+const getPropsGroups = (g) => ({
+  all: Object.getOwnPropertyNames(g),
+  configurables: Object.getOwnPropertyNames(g)
+    // props that scuttling will agree to scuttle
+    .filter(
+      (p) =>
+        Object.getOwnPropertyDescriptor(g, p).configurable ||
+        Object.getOwnPropertyDescriptor(g, p).writable
+    )
+    // remove hardcoded props scuttling ignores on purpose
+    .filter((p) => !['Compartment', 'Error', 'globalThis'].includes(p)),
+})
+
 const err = (intrinsic) =>
   'LavaMoat - property "' +
   intrinsic +
   '" of globalThis is inaccessible under ' +
   'scuttling mode. To learn more visit https://github.com/LavaMoat/LavaMoat/pull/360.'
 
-function testScuttling(
-  globalRef,
-  intrinsics = ['Array', 'Int8Array', 'RegExp']
-) {
-  return intrinsics.some((intrinsic) => {
-    try {
-      const _ = globalRef[intrinsic]
-      return false
-    } catch (e) {
-      if (err(intrinsic) === e.message) {
-        return true
-      }
-      throw new Error('Unknown error thrown at testScuttling: ' + e.message)
-    }
-  })
-}
-
 test('scuttle - no opts', (t) => {
   const { vmGlobalThis } = evaluateWithSourceUrl('some-code', ';', {})
-  t.is(testScuttling(vmGlobalThis), false, 'expect intrinsics to be accessible')
+  const { all } = getPropsGroups(vmGlobalThis)
+  all.map((p) => vmGlobalThis[p])
   scuttle(vmGlobalThis)
-  t.is(testScuttling(vmGlobalThis), false, 'expect intrinsics to be accessible')
+  all.map((p) => vmGlobalThis[p])
+  t.pass()
 })
 
 test('scuttle - opts as bool', (t) => {
   const { vmGlobalThis } = evaluateWithSourceUrl('some-code', ';', {})
-  t.is(testScuttling(vmGlobalThis), false, 'expect intrinsics to be accessible')
+  const { all, configurables } = getPropsGroups(vmGlobalThis)
+  all.map((p) => vmGlobalThis[p])
   scuttle(vmGlobalThis, false)
-  t.is(testScuttling(vmGlobalThis), false, 'expect intrinsics to be accessible')
+  all.map((p) => vmGlobalThis[p])
   scuttle(vmGlobalThis, true)
-  t.is(
-    testScuttling(vmGlobalThis),
-    true,
-    'expect intrinsics to not be accessible'
+  all.map((p) =>
+    !configurables.includes(p)
+      ? vmGlobalThis[p]
+      : t.throws(() => vmGlobalThis[p], { message: err(p) })
   )
 })
 
 test('scuttle - opts as object', (t) => {
   const { vmGlobalThis } = evaluateWithSourceUrl('some-code', ';', {})
-  t.is(testScuttling(vmGlobalThis), false, 'expect intrinsics to be accessible')
+  const { all, configurables } = getPropsGroups(vmGlobalThis)
+  all.map((p) => vmGlobalThis[p])
   scuttle(vmGlobalThis, {})
-  t.is(testScuttling(vmGlobalThis), false, 'expect intrinsics to be accessible')
+  all.map((p) => vmGlobalThis[p])
   scuttle(vmGlobalThis, { enabled: false })
-  t.is(testScuttling(vmGlobalThis), false, 'expect intrinsics to be accessible')
+  all.map((p) => vmGlobalThis[p])
   scuttle(vmGlobalThis, { enabled: true })
-  t.is(
-    testScuttling(vmGlobalThis),
-    true,
-    'expect intrinsics to not be accessible'
+  all.map((p) =>
+    !configurables.includes(p)
+      ? vmGlobalThis[p]
+      : t.throws(() => vmGlobalThis[p], { message: err(p) })
   )
 })
 
 test('scuttle - exceptions', (t) => {
   const { vmGlobalThis } = evaluateWithSourceUrl('some-code', ';', {})
-  t.is(testScuttling(vmGlobalThis), false, 'expect intrinsics to be accessible')
+  const { all, configurables } = getPropsGroups(vmGlobalThis)
+  all.map((p) => vmGlobalThis[p])
   scuttle(vmGlobalThis, {
     enabled: true,
     exceptions: ['/[a-zA-Z0-9]*Array/', 'RegExp'],
   })
-  t.is(
-    testScuttling(vmGlobalThis, ['String']),
-    true,
-    'expect intrinsics to not be accessible'
-  )
-  t.is(testScuttling(vmGlobalThis), false, 'expect intrinsics to be accessible')
+  const exceptions = [
+    'RegExp',
+    'Array',
+    'ArrayBuffer',
+    'Uint8Array',
+    'Int8Array',
+    'Uint16Array',
+    'Int16Array',
+    'Uint32Array',
+    'Int32Array',
+    'Float32Array',
+    'Float64Array',
+    'Uint8ClampedArray',
+    'BigUint64Array',
+    'BigInt64Array',
+    'SharedArrayBuffer',
+  ]
+  exceptions.map((p) => vmGlobalThis[p])
+  all
+    .filter((p) => !exceptions.includes(p))
+    .map(
+      (p) =>
+        configurables.includes(p) &&
+        t.throws(() => vmGlobalThis[p], { message: err(p) })
+    )
 })
 
 test('scuttle - scuttle func', (t) => {
   const { vmGlobalThis } = evaluateWithSourceUrl('some-code', ';', {})
-  t.is(testScuttling(vmGlobalThis), false, 'expect intrinsics to be accessible')
+  const { all, configurables } = getPropsGroups(vmGlobalThis)
+  all.map((p) => vmGlobalThis[p])
   let globalRef
   const cb = (realm, scuttle) => ((globalRef = realm), scuttle(realm))
-  t.throws(
-    (_) => scuttle(vmGlobalThis, { enabled: true, scuttlerName: 'SCUTTLER' }),
-    SCUTTLER_NAME_ERROR
-  )
-  Object.defineProperty(vmGlobalThis, 'SCUTTLER', { value: cb })
-  scuttle(vmGlobalThis, { enabled: true, scuttlerName: 'SCUTTLER' })
+  const opts = { enabled: true, scuttlerName: 'SCUTTLER' }
+  t.throws(() => scuttle(vmGlobalThis, opts), SCUTTLER_NAME_ERROR)
+  Object.defineProperty(vmGlobalThis, opts.scuttlerName, { value: cb })
+  scuttle(vmGlobalThis, opts)
   t.is(
     globalRef,
     vmGlobalThis,
     'expect global reference to be the same as provided by the scuttler function'
   )
-  t.is(
-    testScuttling(vmGlobalThis),
-    true,
-    'expect intrinsics to not be accessible'
+  all.map((p) =>
+    !configurables.includes(p)
+      ? vmGlobalThis[p]
+      : t.throws(() => vmGlobalThis[p], { message: err(p) })
   )
 })
 
 test('scuttle - resilient', (t) => {
   const { vmGlobalThis } = evaluateWithSourceUrl('some-code', ';', {})
-  t.is(testScuttling(vmGlobalThis), false, 'expect intrinsics to be accessible')
+  const { all, configurables } = getPropsGroups(vmGlobalThis)
+  all.map((p) => vmGlobalThis[p])
   scuttle(vmGlobalThis, { enabled: true })
-  t.is(
-    testScuttling(vmGlobalThis),
-    true,
-    'expect intrinsics to not be accessible'
+  all.map((p) =>
+    !configurables.includes(p)
+      ? vmGlobalThis[p]
+      : t.throws(() => vmGlobalThis[p], { message: err(p) })
   )
-  t.throws(
-    (_) => Object.defineProperty(vmGlobalThis, 'Array', { value: 111 }),
-    { message: 'Cannot redefine property: Array' }
-  )
+  t.throws(() => Object.defineProperty(vmGlobalThis, 'Array', { value: 111 }), {
+    message: 'Cannot redefine property: Array',
+  })
   vmGlobalThis.Array = 1
-  t.is(
-    testScuttling(vmGlobalThis, Object.getOwnPropertyNames(vmGlobalThis)),
-    true,
-    'expect intrinsics to not be accessible'
+  all.map((p) =>
+    !configurables.includes(p)
+      ? vmGlobalThis[p]
+      : t.throws(() => vmGlobalThis[p], { message: err(p) })
   )
 })
