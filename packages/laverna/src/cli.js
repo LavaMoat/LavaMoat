@@ -39,10 +39,12 @@ const options = /**
   newPkg: {
     type: 'string',
     multiple: true,
+    default: [],
   },
   'new-pkg': {
     type: 'string',
     multiple: true,
+    default: [],
   },
   yes: {
     type: 'boolean',
