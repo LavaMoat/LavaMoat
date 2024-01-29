@@ -27,7 +27,6 @@ const JAVASCRIPT_MODULE_TYPE_ESM = 'javascript/esm'
 const { RUNTIME_KEY } = require('./ENUM.json')
 const { wrapGeneratorMaker } = require('./buildtime/generator.js')
 const { sesEmitHook } = require('./buildtime/emitSes.js')
-const { read, readFileSync } = require('fs')
 const EXCLUDE_LOADER = path.join(__dirname, './excludeLoader.js')
 
 class VirtualRuntimeModule extends RuntimeModule {
@@ -58,16 +57,12 @@ class LavaMoatPlugin {
   /**
    * @param {import('./types.js').LavaMoatPluginOptions} [options]
    */
-  constructor(options = { policy: {} }) {
+  constructor(options = {}) {
     if (!options.lockdown) {
       options.lockdown = lockdownDefaults
     }
     if (!options.policyLocation) {
       options.policyLocation = './lavamoat/webpack'
-    }
-    if(!options.policy) {
-      // TODO: policyOverride and error handling
-      options.policy = JSON.parse(readFileSync(path.join(options.policyLocation, 'policy.json'), 'utf8'))
     }
     this.options = options
 
@@ -151,9 +146,12 @@ class LavaMoatPlugin {
 
         // =================================================================
         const policyGenerator = createPolicyGenerator({
+          policyFromOptions: options.policy,
           enabled: options.generatePolicy,
           location: options.policyLocation,
+          emit: options.emitPolicySnapshot,
           canonicalNameMap,
+          compilation,
         })
 
         // =================================================================
@@ -202,6 +200,7 @@ class LavaMoatPlugin {
               // TODO: potentially a place to hook into for policy generation
               // Module policies can be merged into a per-package policy in a second pass or right away, depending on what we can pull off for the ID generation.
               // Seems like it'd make sense to do it right away.
+              // @ts-expect-error BAD TYPES
               if (module.resource) {
                 policyGenerator.inspectWebpackModule(
                   module,
@@ -232,9 +231,11 @@ class LavaMoatPlugin {
           })
           diag.rawDebug(4, { knownPaths })
           PROGRESS.report('pathsCollected')
-          
+
           diag.rawDebug(2, 'writing policy')
-          policyGenerator.writePolicy()
+          // use the generated policy to save the user one additional pass
+          // getting the policy also writes all files where necessary
+          options.policy = policyGenerator.getPolicy()
 
           identifierLookup = generateIdentifierLookup({
             readableResourceIds: options.readableResourceIds,
@@ -253,7 +254,7 @@ class LavaMoatPlugin {
           }
           PROGRESS.report('pathsProcessed')
         })
-     
+
         // =================================================================
         // javascript modules generator tweaks installation
 
@@ -283,7 +284,7 @@ class LavaMoatPlugin {
         // =================================================================
 
         // This part adds LavaMoat runtime to webpack runtime for every chunk that needs runtime.
-        // I stole this from Zach of module federation fame
+        // I stole the idea from Zach of module federation fame
 
         const onceForChunkSet = new WeakSet()
         const runtimeOptions = {

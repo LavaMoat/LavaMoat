@@ -3,77 +3,83 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const path = require('path')
 
-module.exports = {
-  entry: {
-    app: './main.js',
+const defaultLmOptions = {
+  lockdown: {
+    errorTaming: 'unsafe',
+    mathTaming: 'unsafe',
+    dateTaming: 'unsafe',
+    consoleTaming: 'unsafe',
   },
-  mode: 'production',
-  output: {
-    filename: '[name].js',
-    path: '/dist',
-  },
-  devtool: false,
-  plugins: [
-    new LavaMoatPlugin({
-      lockdown: {
-        errorTaming: 'unsafe',
-        mathTaming: 'unsafe',
-        dateTaming: 'unsafe',
-        consoleTaming: 'unsafe',
-      },
-      policy: {
-        resources: {
-          'umd-package': {
-            globals: {
-              define: true,
-            },
-          },
-        },
-      },
-      readableResourceIds: true,
-      runChecks: true,
-      diagnosticsVerbosity: 0,
-      HtmlWebpackPluginInterop: true,
-    }),
-    new MiniCssExtractPlugin({
-      filename: 'styles/[name].css',
-      // experimentalUseImportModule: false, // turns off some module execution at build time
-    }),
-    new HtmlWebpackPlugin(),
-  ],
-  module: {
-    rules: [
-      {
-        test: /\.ts$/,
-        use: [
-          {
-            loader: 'esbuild-loader',
-            options: {
-              loader: 'ts',
-              tsconfigRaw: {
-                compilerOptions: {
-                  noImplicitAny: true,
-                  target: 'es6',
-                  jsx: 'react',
-                  moduleResolution: 'node',
-                  allowSyntheticDefaultImports: true,
-                  esModuleInterop: true,
+  policyLocation: path.resolve(__dirname, 'policy'),
+  readableResourceIds: true,
+  runChecks: true,
+  diagnosticsVerbosity: 0,
+  HtmlWebpackPluginInterop: true,
+}
+
+module.exports = makeConfig()
+
+Object.defineProperty(module.exports, 'makeConfig', {
+  enumerable: false,
+  value: makeConfig,
+})
+
+function makeConfig(lmOptions = {}) {
+  return {
+    entry: {
+      app: './main.js',
+    },
+    mode: 'production',
+    output: {
+      filename: '[name].js',
+      path: '/dist',
+    },
+    devtool: false,
+    plugins: [
+      new LavaMoatPlugin({
+        ...defaultLmOptions,
+        ...lmOptions,
+      }),
+      new MiniCssExtractPlugin({
+        filename: 'styles/[name].css',
+        // experimentalUseImportModule: false, // turns off some module execution at build time
+      }),
+      new HtmlWebpackPlugin(),
+    ],
+    module: {
+      rules: [
+        {
+          test: /\.ts$/,
+          use: [
+            {
+              loader: 'esbuild-loader',
+              options: {
+                loader: 'ts',
+                tsconfigRaw: {
+                  compilerOptions: {
+                    noImplicitAny: true,
+                    target: 'es6',
+                    jsx: 'react',
+                    moduleResolution: 'node',
+                    allowSyntheticDefaultImports: true,
+                    esModuleInterop: true,
+                  },
                 },
               },
             },
-          },
-        ],
-        exclude: /node_modules/,
-      },
-      {
-        test: /\.css$/,
-        use: [
-          MiniCssExtractPlugin.loader,
-          'css-loader',
-          LavaMoatPlugin.exclude,
-        ],
-        sideEffects: true,
-      },
-    ],
-  },
+          ],
+          exclude: /node_modules/,
+        },
+        {
+          test: /\.css$/,
+          use: [
+            MiniCssExtractPlugin.loader,
+            'css-loader',
+            LavaMoatPlugin.exclude,
+          ],
+          sideEffects: true,
+        },
+      ],
+    },
+  }
 }
