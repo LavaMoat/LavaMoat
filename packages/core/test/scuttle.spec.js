@@ -71,7 +71,7 @@ test('scuttle - exceptions', (t) => {
   t.is(testScuttling(vmGlobalThis), false, 'expect intrinsics to be accessible')
   scuttle(vmGlobalThis, {
     enabled: true,
-    exceptions: ['/[a-zA-Z0-8]*Array/', 'RegExp'],
+    exceptions: ['/[a-zA-Z0-9]*Array/', 'RegExp'],
   })
   t.is(
     testScuttling(vmGlobalThis, ['String']),
