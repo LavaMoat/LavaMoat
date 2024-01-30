@@ -13,3 +13,4 @@ ignores:
   - 'one'
   # types
   - '@types/json-stable-stringify'
+  - '@babel/types'
