@@ -1,5 +1,5 @@
-/* eslint-disable ava/use-t-well */
-/* eslint-disable no-undef */
+/* eslint-disable no-unused-vars, ava/use-t-well */
+
 const test = require('ava')
 
 const { autoConfigForScenario } = require('./util')
@@ -38,6 +38,7 @@ test('generatePolicy - ignore various refs', async (t) => {
   const scenario = createScenarioFromScaffold({
     defineOne: () => {
       const js = [this]
+      // eslint-disable-next-line no-undef
       const ignored = [global, require, module, exports, arguments]
       const globalRefs = [typeof globalThis, typeof self, typeof window]
       global.xyz

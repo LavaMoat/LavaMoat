@@ -41,6 +41,7 @@ testInspect(
   'cjs - include even if declared var is unused',
   {},
   () => {
+    // eslint-disable-next-line no-unused-vars
     const rfs = require('fs').readFileSync
   },
   {

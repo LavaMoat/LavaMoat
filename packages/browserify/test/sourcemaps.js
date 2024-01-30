@@ -16,9 +16,8 @@ async function verifySourceMaps({ bundle, log = console.error.bind(console) }) {
 }
 
 async function verifyWithSourceExplorer(bundle) {
-  let result
   try {
-    result = await explore({ code: Buffer.from(bundle, 'utf8') })
+    await explore({ code: Buffer.from(bundle, 'utf8') })
   } catch (resultWithError) {
     if (resultWithError.errors) {
       resultWithError.errors.forEach((exploreError) => {
@@ -40,15 +39,12 @@ async function verifySamples(bundle, log) {
     log('SourcemapValidator - missing content of some sources...')
   }
 
-  let sampleCount = 0
-
   const buildLines = bundle.split('\n')
   const targetString = 'module.exports'
   const matchesPerLine = buildLines.map((line) => indicesOf(targetString, line))
   const errors = []
   matchesPerLine.forEach((matchIndices, lineIndex) => {
     matchIndices.forEach((matchColumn) => {
-      sampleCount += 1
       const position = { line: lineIndex + 1, column: matchColumn }
       const result = consumer.originalPositionFor(position)
       // warn if source content is missing

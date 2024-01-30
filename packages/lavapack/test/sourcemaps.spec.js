@@ -13,6 +13,7 @@ test.skip('sourcemaps - adjust maps for wrapper', async (t) => {
   var three = two + 1
   `
 
+  // eslint-disable-next-line no-undef
   const result = UglifyJS.minify(
     { './foo.js': fooSource },
     {
@@ -52,6 +53,7 @@ function indicesOf(substring, string) {
 // this is not perfecct - just a heuristic
 async function validateSourcemaps(t, sourceMeta) {
   const targetSlug = 'new Error'
+  // eslint-disable-next-line no-undef
   const consumer = await new SourceMapConsumer(sourceMeta.maps)
   t.true(consumer.hasContentsOfAllSources(), 'has the contents of all sources')
 

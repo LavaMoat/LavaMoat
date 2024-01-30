@@ -1,4 +1,5 @@
-/* eslint-disable no-undef */
+/* eslint-disable no-unused-vars */
+/* global xyz: true, zzz, a, b, c, z: true, abc: true, manifest */
 
 const { EOL } = require('node:os')
 const test = require('ava')

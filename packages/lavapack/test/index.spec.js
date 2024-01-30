@@ -1,6 +1,6 @@
 const fs = require('fs')
 const test = require('ava')
-const { pipe, from, concat } = require('mississippi')
+const { pipe, concat } = require('mississippi')
 const { SourceMapConsumer } = require('source-map')
 const convertSourceMap = require('convert-source-map')
 const pack = require('../src')
