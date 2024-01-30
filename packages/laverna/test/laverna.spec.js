@@ -135,6 +135,7 @@ test.beforeEach((t) => {
      * @param {import('node:child_process').SpawnOptions} opts
      * @returns {import('node:events').EventEmitter}
      */
+    // eslint-disable-next-line no-unused-vars
     (cmd, args, opts) => {
       const ee = new EventEmitter()
       setImmediate(() => {

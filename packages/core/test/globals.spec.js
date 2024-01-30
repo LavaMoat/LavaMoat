@@ -1,4 +1,5 @@
-/* eslint-disable no-undef, @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* global abc: true, xyz, chrome */
 
 const test = require('ava')
 const { createScenarioFromScaffold, runScenario } = require('./util')

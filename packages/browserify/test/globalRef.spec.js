@@ -1,4 +1,6 @@
-/* eslint-disable no-undef */
+// eslint-disable-next-line no-unused-vars
+/* global checkThis: true, checkSelf: true, checkWindow: true, checkGlobal: true */
+
 const test = require('ava')
 const { runScenario } = require('./util')
 const {

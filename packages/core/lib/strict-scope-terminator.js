@@ -24,11 +24,10 @@ const d = (strings, args) => strings.join() + args.join()
 const q = (arg) => arg
 
 /**
- * alwaysThrowHandler
- * This is an object that throws if any property is called. It's used as
- * a proxy handler which throws on any trap called.
- * It's made from a proxy with a get trap that throws. It's safe to
- * create one and share it between all Proxy handlers.
+ * AlwaysThrowHandler This is an object that throws if any property is called.
+ * It's used as a proxy handler which throws on any trap called. It's made from
+ * a proxy with a get trap that throws. It's safe to create one and share it
+ * between all Proxy handlers.
  */
 const alwaysThrowHandler = new Proxy(
   immutableObject,
@@ -42,16 +41,19 @@ const alwaysThrowHandler = new Proxy(
 )
 
 /**
- * scopeTerminatorHandler manages a strictScopeTerminator Proxy which serves as
- * the final scope boundary that will always return "undefined" in order
- * to prevent access to "start compartment globals".
+ * ScopeTerminatorHandler manages a strictScopeTerminator Proxy which serves as
+ * the final scope boundary that will always return "undefined" in order to
+ * prevent access to "start compartment globals".
+ *
  * @type {ProxyHandler}
  */
 const scopeProxyHandlerProperties = {
+  // eslint-disable-next-line no-unused-vars
   get(_shadow, _prop) {
     return undefined
   },
 
+  // eslint-disable-next-line no-unused-vars
   set(_shadow, prop, _value) {
     // We should only hit this if the has() hook returned true matches the v8
     // ReferenceError message "Uncaught ReferenceError: xyz is not defined"

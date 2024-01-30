@@ -1,6 +1,6 @@
 const test = require('ava')
 // eslint-disable-next-line ava/no-import-test-files
-const { scaffold, runScriptWithSES, runScript } = require('./scaffold.js')
+const { scaffold, runScriptWithSES } = require('./scaffold.js')
 const webpackConfigDefault = require('./fixtures/main/webpack.config.js')
 
 test.before(async (t) => {

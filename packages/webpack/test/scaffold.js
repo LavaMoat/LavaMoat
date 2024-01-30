@@ -2,7 +2,7 @@ const path = require('path')
 const webpack = require('webpack')
 const memfs = require('memfs')
 const { toSnapshotSync } = require('memfs/lib/snapshot')
-const { createContext, Script, runInNewContext } = require('vm')
+const { createContext, runInNewContext } = require('vm')
 const { readFileSync } = require('fs')
 
 /**

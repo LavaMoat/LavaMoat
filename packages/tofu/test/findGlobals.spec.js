@@ -2,7 +2,6 @@
 
 const fs = require('fs')
 const path = require('path')
-const assert = require('assert')
 const test = require('ava')
 const { parse } = require('../src/index')
 const { findGlobals } = require('../src/findGlobals')
