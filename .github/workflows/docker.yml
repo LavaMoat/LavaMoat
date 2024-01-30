@@ -32,22 +32,11 @@ jobs:
         with:
           image: dev:latest
           run: 'npm run lint && npm run lint:fix'
-      - name: publish
+      - name: publish-dry-run
         uses: addnab/docker-run-action@4f65fabd2431ebc8d299f8e5a018d79a769ae185 # v3
-        env:
-          VERDACCIO_STORAGE_PATH: /app/verdaccio/storage
         with:
           image: dev:latest
-          run: >
-            git init -b main &&
-              git add package.json packages/*/package.json &&
-              git commit -m 'feat!: Add manifests' &&
-              npm ci &&
-              (verdaccio &) &&
-              sleep 7 &&
-              npm set registry http://localhost:4873 &&
-              sh -c '(echo user; sleep 0.5; echo password; sleep 0.5; echo email@example.com) | npm --registry=http://localhost:4873 adduser --auth-type legacy' &&
-              npm run release:publish
+          run: npm run release:dry-run && npm run release:publish -- --dryRun
       - name: rebuild
         uses: addnab/docker-run-action@4f65fabd2431ebc8d299f8e5a018d79a769ae185 # v3
         with:

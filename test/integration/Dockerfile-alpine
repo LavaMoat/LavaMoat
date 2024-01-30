@@ -9,13 +9,8 @@ USER node
 
 RUN git config --global user.email "you@example.com" && \
   git config --global user.name "Your Name" && \
-  npm config set prefix '~/.local/' && \
   npm install && \
   npm run setup && \
-  npm run build && \
-  mkdir -p /app/verdaccio/storage && \
-  npm i -g verdaccio && \
-  rm /home/node/.npmrc
+  npm run build
 
-ENV PATH="/home/node/.local/bin:$PATH"
 ENTRYPOINT ["/usr/local/bin/npm"]
