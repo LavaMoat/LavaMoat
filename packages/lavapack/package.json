@@ -50,6 +50,5 @@
       "test/*.spec.js"
     ],
     "timeout": "30s"
-  },
-  "gitHead": "28a238fc4c3d55650bd2ba9a3603b1f275567286"
+  }
 }

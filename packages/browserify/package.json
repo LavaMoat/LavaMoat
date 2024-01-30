@@ -60,7 +60,6 @@
     "timeout": "2m",
     "concurrency": 1
   },
-  "gitHead": "28a238fc4c3d55650bd2ba9a3603b1f275567286",
   "lavamoat": {
     "allowScripts": {
       "keccak": false
