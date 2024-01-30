@@ -15,6 +15,7 @@
       matchPackageNames: [
         // Missing support for LavaMoat supported major Node.js version(s)
         'copy-webpack-plugin',
+        'espree',
 
         // ESM-only packages
         '@types/wrap-ansi',
