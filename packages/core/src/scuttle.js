@@ -8,7 +8,7 @@
 
 /**
  * @typedef {object} GlobalRef
- * @property {object} [globalThis] - Reference to the global object.
+ * @property {Record<string, any>} [globalThis] - Reference to the global object.
  */
 
 const { Object, Array, Error, RegExp, Set, console, Proxy, Reflect } =
