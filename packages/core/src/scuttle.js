@@ -57,7 +57,7 @@ function scuttle(globalRef, opts) {
   if (scuttleOpts.enabled) {
     if (!isArray(scuttleOpts.exceptions)) {
       throw new Error(
-        `LavaMoat - scuttleGlobalThis.exceptions must be an array, got "${typeof scuttleOpts.exceptions}"`
+        `LavaMoat - exceptions must be an array, got ${typeof scuttleOpts.exceptions}`
       )
     }
     scuttleOpts.scuttlerFunc(globalRef, (realm) =>
