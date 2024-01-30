@@ -55,9 +55,6 @@ module.exports = {
     // base rules; none of these are in eslint/recommended
     'no-empty': ['error', { allowEmptyCatch: true }],
 
-    // @typescript-eslint/no-unused-vars is more robust
-    'no-unused-vars': 'off',
-
     // additional errors not in n/recommended
     'n/callback-return': 'error',
     'n/handle-callback-err': 'error',
@@ -126,6 +123,8 @@ module.exports = {
       rules: {
         // eslint-plugin-n does not understand typescript imports
         'n/no-missing-import': 'off',
+        // eslint doesn't understand typescript
+        'no-unused-vars': 'off'
       },
       parser: '@typescript-eslint/parser',
     },
