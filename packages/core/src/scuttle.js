@@ -79,7 +79,7 @@ function generateScuttleOpts(globalRef, originalOpts = create(null)) {
   }
   const opts = assign(
     {},
-    originalOpts === true ? { ...defaultOpts } : { ...originalOpts },
+    originalOpts === true ? defaultOpts : originalOpts,
     { scuttlerFunc: (globalRef, scuttle) => scuttle(globalRef) },
     {
       exceptions: (originalOpts.exceptions || defaultOpts.exceptions).map((e) =>
