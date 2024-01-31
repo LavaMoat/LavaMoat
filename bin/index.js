@@ -140,11 +140,17 @@ async function generateViz(args) {
   )
   // add data-injection file
   const dataInjectionContent = policyDataInjectionFilePaths
-    .map(filepath => path.relative(fullDest, filepath))
-    .map(relPath => `<script src="./${relPath}"></script>`)
+    .map((filepath) => path.relative(fullDest, filepath))
+    .map((relPath) => `<script src="./${relPath}"></script>`)
     .join('\n    ')
-  const htmlTemplate = await fs.readFile(path.join(__dirname, '../dist/index.html'), 'utf-8')
-  const templatedHTML = htmlTemplate.replace('${INJECTED_POLICIES}', dataInjectionContent)
+  const htmlTemplate = await fs.readFile(
+    path.join(__dirname, '../dist/index.html.template'),
+    'utf-8'
+  )
+  const templatedHTML = htmlTemplate.replace(
+    '${INJECTED_POLICIES}',
+    dataInjectionContent
+  )
   await fs.writeFile(`${fullDest}/index.html`, templatedHTML)
 
   // dashboard prepared! report done
