@@ -140,14 +140,12 @@ async function generateViz(args) {
   )
   // add data-injection file
   const dataInjectionContent = policyDataInjectionFilePaths
-    // .map(filepath => { console.log(filepath, fullDest, path.relative(fullDest, filepath)); return filepath;})
-    .map((filepath) => path.relative(fullDest, filepath))
-    .map((relPath) => `import "./${relPath}";`)
-    .join('\n')
-  await fs.writeFile(
-    `${fullDest}/injectConfigDebugData.js`,
-    dataInjectionContent
-  )
+    .map(filepath => path.relative(fullDest, filepath))
+    .map(relPath => `<script src="./${relPath}"></script>`)
+    .join('\n    ')
+  const htmlTemplate = await fs.readFile(path.join(__dirname, '../dist/index.html'), 'utf-8')
+  const templatedHTML = htmlTemplate.replace('${INJECTED_POLICIES}', dataInjectionContent)
+  await fs.writeFile(`${fullDest}/index.html`, templatedHTML)
 
   // dashboard prepared! report done
   console.log(`generated viz in "${dest}"`)
