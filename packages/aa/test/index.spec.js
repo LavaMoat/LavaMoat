@@ -11,7 +11,7 @@ function normalizeEntries(map) {
   return [...map.entries()]
     .sort()
     .map(([packagePath, canonicalName]) => [
-      path.relative(__dirname, packagePath),
+      path.normalize(path.relative(__dirname, packagePath)),
       canonicalName,
     ])
 }
