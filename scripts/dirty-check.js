@@ -38,31 +38,31 @@ const execFile = promisify(require('node:child_process').execFile)
  */
 async function main() {
   await execFile('git', ['add', '.'])
-  const { stdout } = await execFile(
+  const diffResultPromise = execFile(
     'git',
-    ['diff', '--staged', '-b', '--name-only'],
-    {
-      encoding: 'utf8',
-    }
+    ['diff', '--staged', '-b', '--quiet'],
+    { encoding: 'utf8' },
   )
 
-  const changedFiles = stdout.trim().split(/\r?\n/)
-
-  // if this is true, then something changed, and we should fail the build
-  if (changedFiles.length) {
+  try {
+    await diffResultPromise
+    console.log('::notice::No dirty files detected')
+  } catch (e) {
+    if (e.code !== 1 || e.killed || e.stderr !== '') {
+      throw e
+    }
+    // something changed, and we should fail the build
     process.exitCode = 1
 
-    for (const file of changedFiles) {
-      console.log(
-        '::error file=%s,title=Dirty File::%s changed unexpectedly; see job log for diff',
-        file,
-        file
-      )
-      const { stdout } = await execFile('git', ['diff', '--staged', '--', file])
-      console.log(stdout)
-    }
-  } else {
-    console.log('::notice::No dirty files detected')
+    console.log(
+      '::error,title=Dirty File::Working area contains unexpected changes; see job log for diff'
+    )
+    const { stdout } = await execFile(
+      'git',
+      ['diff', '--staged', '-b'],
+      { encoding: 'utf8' },
+    )
+    console.log(stdout)
   }
 }
 
