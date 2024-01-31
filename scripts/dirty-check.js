@@ -37,9 +37,14 @@ const execFile = promisify(require('node:child_process').execFile)
  *   output.
  */
 async function main() {
-  const { stdout } = await execFile('git', ['diff', '-b', '--name-only'], {
-    encoding: 'utf8',
-  })
+  await execFile('git', ['add', '.'])
+  const { stdout } = await execFile(
+    'git',
+    ['diff', '--staged', '-b', '--name-only'],
+    {
+      encoding: 'utf8',
+    }
+  )
 
   const changedFiles = stdout.trim().split(/\r?\n/)
 
@@ -53,7 +58,7 @@ async function main() {
         file,
         file
       )
-      const { stdout } = await execFile('git', ['diff', '--', file])
+      const { stdout } = await execFile('git', ['diff', '--staged', '--', file])
       console.log(stdout)
     }
   } else {
