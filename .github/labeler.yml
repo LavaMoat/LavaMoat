@@ -53,6 +53,11 @@
       - any-glob-to-any-file:
           - 'packages/lavapack/**'
 
+'pkg:@lavamoat/laverna':
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'packages/laverna/**'
+
 'pkg:@lavamoat/yarn-plugin-allow-scripts':
   - changed-files:
       - any-glob-to-any-file:
@@ -92,4 +97,3 @@
           - '**/*.md'
           - '**/docs/**'
           - '**/example?(s)/**'
-
