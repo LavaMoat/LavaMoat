@@ -41,8 +41,9 @@ module.exports = {
   },
   plugins: [
     new HtmlWebPackPlugin({
-      template: path.join(__dirname, '../src/index.html'),
+      filename: 'index.html.template',
       inject: false,
+      template: path.join(__dirname, '../src/templates/index.html.template'),
     }),
     new CopyPlugin({
       patterns: [
@@ -54,9 +55,18 @@ module.exports = {
     alias: {
       // forcegraph packages contain ESM and UMD flavors - force resolution to UMD entrypoints
       // TODO: Reconsider this as part of webpack 5 upgrade
-      'three-forcegraph': path.resolve(__dirname, '../../../node_modules/three-forcegraph/dist/three-forcegraph.js'),
-      'force-graph': path.resolve(__dirname, '../../../node_modules/force-graph/dist/force-graph.js'),
-      'react-force-graph-2d': path.resolve(__dirname, '../../../node_modules/react-force-graph-2d/dist/react-force-graph-2d.js'),
+      'force-graph': path.resolve(
+        __dirname,
+        '../../../node_modules/force-graph/dist/force-graph.js'
+      ),
+      'react-force-graph-2d': path.resolve(
+        __dirname,
+        '../../../node_modules/react-force-graph-2d/dist/react-force-graph-2d.js'
+      ),
+      'three-forcegraph': path.resolve(
+        __dirname,
+        '../../../node_modules/three-forcegraph/dist/three-forcegraph.js'
+      ),
     },
-  }
+  },
 }
