@@ -78,12 +78,14 @@ function generateScuttleOpts(globalRef, originalOpts = create(null)) {
     scuttlerName: '',
   }
   const opts = assign(
-    {},
+    create(null),
     originalOpts === true ? defaultOpts : originalOpts,
-    { scuttlerFunc: (globalRef, scuttle) => scuttle(globalRef) },
     {
-      exceptions: (originalOpts.exceptions || defaultOpts.exceptions).map((e) =>
-        toRE(e)
+      scuttlerFunc: (globalRef, scuttle) => scuttle(globalRef),
+    },
+    {
+      exceptions: (originalOpts?.exceptions || defaultOpts.exceptions).map(
+        (e) => toRE(e)
       ),
     }
   )
