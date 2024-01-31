@@ -197,8 +197,8 @@ function inspectEsmImports(ast, packagesToInspect) {
 
     if (
       importSource &&
-      ((packagesToInspect && pkgsToInspect.has(importSource)) ||
-        !packagesToInspect)
+      ((pkgsToInspect.size && pkgsToInspect.has(importSource)) ||
+        !pkgsToInspect.size)
     ) {
       esmImports.add(importSource)
     }
