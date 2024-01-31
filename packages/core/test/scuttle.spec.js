@@ -30,46 +30,46 @@ const err = (intrinsic) =>
 test('scuttle - no opts', (t) => {
   const { vmGlobalThis } = evaluateWithSourceUrl('some-code', ';', {})
   const { all } = getPropsGroups(vmGlobalThis)
-  all.map((p) => vmGlobalThis[p])
+  all.forEach((p) => vmGlobalThis[p])
   scuttle(vmGlobalThis)
-  all.map((p) => vmGlobalThis[p])
+  all.forEach((p) => vmGlobalThis[p])
   t.pass()
 })
 
 test('scuttle - opts as bool', (t) => {
   const { vmGlobalThis } = evaluateWithSourceUrl('some-code', ';', {})
   const { all, configurables } = getPropsGroups(vmGlobalThis)
-  all.map((p) => vmGlobalThis[p])
+  all.forEach((p) => vmGlobalThis[p])
   scuttle(vmGlobalThis, false)
-  all.map((p) => vmGlobalThis[p])
+  all.forEach((p) => vmGlobalThis[p])
   scuttle(vmGlobalThis, true)
-  all.map((p) =>
-    !configurables.includes(p)
-      ? vmGlobalThis[p]
-      : t.throws(() => vmGlobalThis[p], { message: err(p) })
+  all.forEach((p) =>
+    configurables.includes(p)
+      ? t.throws(() => vmGlobalThis[p], { message: err(p) })
+      : vmGlobalThis[p]
   )
 })
 
 test('scuttle - opts as object', (t) => {
   const { vmGlobalThis } = evaluateWithSourceUrl('some-code', ';', {})
   const { all, configurables } = getPropsGroups(vmGlobalThis)
-  all.map((p) => vmGlobalThis[p])
+  all.forEach((p) => vmGlobalThis[p])
   scuttle(vmGlobalThis, {})
-  all.map((p) => vmGlobalThis[p])
+  all.forEach((p) => vmGlobalThis[p])
   scuttle(vmGlobalThis, { enabled: false })
-  all.map((p) => vmGlobalThis[p])
+  all.forEach((p) => vmGlobalThis[p])
   scuttle(vmGlobalThis, { enabled: true })
-  all.map((p) =>
-    !configurables.includes(p)
-      ? vmGlobalThis[p]
-      : t.throws(() => vmGlobalThis[p], { message: err(p) })
+  all.forEach((p) =>
+    configurables.includes(p)
+      ? t.throws(() => vmGlobalThis[p], { message: err(p) })
+      : vmGlobalThis[p]
   )
 })
 
 test('scuttle - exceptions', (t) => {
   const { vmGlobalThis } = evaluateWithSourceUrl('some-code', ';', {})
   const { all, configurables } = getPropsGroups(vmGlobalThis)
-  all.map((p) => vmGlobalThis[p])
+  all.forEach((p) => vmGlobalThis[p])
   scuttle(vmGlobalThis, {
     enabled: true,
     exceptions: ['/[a-zA-Z0-9]*Array/', 'RegExp'],
@@ -91,10 +91,10 @@ test('scuttle - exceptions', (t) => {
     'BigInt64Array',
     'SharedArrayBuffer',
   ]
-  exceptions.map((p) => vmGlobalThis[p])
+  exceptions.forEach((p) => vmGlobalThis[p])
   all
     .filter((p) => !exceptions.includes(p))
-    .map(
+    .forEach(
       (p) =>
         configurables.includes(p) &&
         t.throws(() => vmGlobalThis[p], { message: err(p) })
@@ -104,7 +104,7 @@ test('scuttle - exceptions', (t) => {
 test('scuttle - scuttle func', (t) => {
   const { vmGlobalThis } = evaluateWithSourceUrl('some-code', ';', {})
   const { all, configurables } = getPropsGroups(vmGlobalThis)
-  all.map((p) => vmGlobalThis[p])
+  all.forEach((p) => vmGlobalThis[p])
   let globalRef
   const cb = (realm, scuttle) => ((globalRef = realm), scuttle(realm))
   const opts = { enabled: true, scuttlerName: 'SCUTTLER' }
@@ -116,30 +116,30 @@ test('scuttle - scuttle func', (t) => {
     vmGlobalThis,
     'expect global reference to be the same as provided by the scuttler function'
   )
-  all.map((p) =>
-    !configurables.includes(p)
-      ? vmGlobalThis[p]
-      : t.throws(() => vmGlobalThis[p], { message: err(p) })
+  all.forEach((p) =>
+    configurables.includes(p)
+      ? t.throws(() => vmGlobalThis[p], { message: err(p) })
+      : vmGlobalThis[p]
   )
 })
 
 test('scuttle - resilient', (t) => {
   const { vmGlobalThis } = evaluateWithSourceUrl('some-code', ';', {})
   const { all, configurables } = getPropsGroups(vmGlobalThis)
-  all.map((p) => vmGlobalThis[p])
+  all.forEach((p) => vmGlobalThis[p])
   scuttle(vmGlobalThis, { enabled: true })
-  all.map((p) =>
-    !configurables.includes(p)
-      ? vmGlobalThis[p]
-      : t.throws(() => vmGlobalThis[p], { message: err(p) })
+  all.forEach((p) =>
+    configurables.includes(p)
+      ? t.throws(() => vmGlobalThis[p], { message: err(p) })
+      : vmGlobalThis[p]
   )
   t.throws(() => Object.defineProperty(vmGlobalThis, 'Array', { value: 111 }), {
     message: 'Cannot redefine property: Array',
   })
   vmGlobalThis.Array = 1
-  all.map((p) =>
-    !configurables.includes(p)
-      ? vmGlobalThis[p]
-      : t.throws(() => vmGlobalThis[p], { message: err(p) })
+  all.forEach((p) =>
+    configurables.includes(p)
+      ? t.throws(() => vmGlobalThis[p], { message: err(p) })
+      : vmGlobalThis[p]
   )
 })
