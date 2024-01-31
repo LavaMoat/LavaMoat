@@ -1,4 +1,4 @@
-const { readFileSync } = require('fs')
+const { readFileSync } = require('node:fs')
 
 function removeMultilineComments(source) {
   return source.replace(/\/\*[\s\S]*?\*\//g, '')

@@ -1,5 +1,3 @@
-// @ts-check
-
 /** @typedef {import('webpack').Generator} Generator */
 /** @typedef {import('webpack').NormalModule} NormalModule */
 /** @typedef {import('webpack').sources.Source} Source */

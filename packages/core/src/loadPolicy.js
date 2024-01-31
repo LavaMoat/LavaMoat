@@ -100,7 +100,7 @@ async function loadPolicyAndApplyOverrides({
  *
  * @param {PolicyOpts & { policyOverridePath: string }} opts
  * @returns {{
- *   policy: import('./schema').LavaMoatPolicy
+ *   policy: import('./schema').LavaMoatPolicy | undefined
  *   applyOverride: (
  *     main: import('./schema').LavaMoatPolicy
  *   ) => import('./schema').LavaMoatPolicy

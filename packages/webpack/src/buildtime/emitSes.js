@@ -1,4 +1,3 @@
-// @ts-check
 const { readFileSync } = require('fs')
 const {
   sources: { RawSource },
