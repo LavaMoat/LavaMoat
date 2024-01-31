@@ -46,7 +46,6 @@ module.exports = {
     }),
     new CopyPlugin({
       patterns: [
-        { from: './src/example-policies/', to: `${distPath}/` },
         { from: './src/assets/', to: `${distPath}/assets/` },
       ],
     }),
