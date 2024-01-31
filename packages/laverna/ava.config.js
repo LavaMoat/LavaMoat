@@ -7,6 +7,8 @@ const config = {
 try {
   if (require('node:test').mock) {
     config.files.push('test/laverna.spec.js')
+  } else {
+    console.error('[SKIP] Laverna tests skipped - too old Node.js version')
   }
 } catch {}
 
