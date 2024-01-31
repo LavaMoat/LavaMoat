@@ -1,4 +1,5 @@
 /* eslint-disable no-undef, @typescript-eslint/no-unused-vars, no-unused-expressions, no-extend-native */
+const { EOL } = require('node:os')
 const test = require('ava')
 
 const { createConfigForTest } = require('./util')
@@ -42,7 +43,7 @@ test('generatePolicy - config with debugInfo', async (t) => {
         file: testModuleFile,
         type: 'js',
         // this is brittle
-        content: '(function () {\n      location.href\n    })()',
+        content: `(function () {${EOL}      location.href${EOL}    })()`,
         importMap: {},
         packageName: 'test',
         moduleInitializer: undefined,
