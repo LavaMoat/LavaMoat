@@ -1,4 +1,3 @@
-// @ts-check
 /// <reference path="./runtime.d.ts" />
 /* global LAVAMOAT */
 /* global lockdown, harden, Compartment */

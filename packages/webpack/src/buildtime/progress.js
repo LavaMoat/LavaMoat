@@ -1,4 +1,3 @@
-// @ts-check
 const diag = require('./diagnostics')
 
 /**

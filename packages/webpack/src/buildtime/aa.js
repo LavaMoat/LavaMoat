@@ -1,4 +1,3 @@
-// @ts-check
 const { getPackageNameForModulePath } = require('@lavamoat/aa')
 const diag = require('./diagnostics')
 

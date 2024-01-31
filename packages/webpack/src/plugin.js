@@ -1,8 +1,6 @@
-// @ts-check
-
 const path = require('path')
 const { WebpackError, RuntimeModule } = require('webpack')
-const Compilation = require('webpack/lib/Compilation')
+const { Compilation } = require('webpack')
 
 const { generateIdentifierLookup } = require('./buildtime/aa.js')
 const diag = require('./buildtime/diagnostics.js')
@@ -30,12 +28,18 @@ const { sesEmitHook } = require('./buildtime/emitSes.js')
 const EXCLUDE_LOADER = path.join(__dirname, './excludeLoader.js')
 
 class VirtualRuntimeModule extends RuntimeModule {
+  /**
+   * @param {Object} options - The options for the VirtualRuntimeModule.
+   * @param {string} options.name - The name of the module.
+   * @param {string} options.source - The source code of the module.
+   */
   constructor({ name, source }) {
     super(name)
-    this.source = source
+    this.virtualSource = source
   }
+
   generate() {
-    return this.source
+    return this.virtualSource
   }
 }
 
@@ -62,7 +66,7 @@ class LavaMoatPlugin {
       options.lockdown = lockdownDefaults
     }
     if (!options.policyLocation) {
-      options.policyLocation = './lavamoat/webpack'
+      options.policyLocation = path.join('.', 'lavamoat', 'webpack')
     }
     this.options = options
 
@@ -91,7 +95,7 @@ class LavaMoatPlugin {
       // default options.readableResourceIds to true if webpack configuration sets development mode
       options.readableResourceIds = compiler.options.mode !== 'production'
     }
-
+    /** @type {import('@lavamoat/aa').CanonicalNameMap} */
     let canonicalNameMap
 
     // Concatenation won't work with wrapped modules. Have to disable it.
@@ -122,6 +126,7 @@ class LavaMoatPlugin {
         })
     )
 
+    /** @type {WebpackError[]} */
     let mainCompilationWarnings
 
     compiler.hooks.thisCompilation.tap(
@@ -147,7 +152,7 @@ class LavaMoatPlugin {
         // =================================================================
         const policyGenerator = createPolicyGenerator({
           policyFromOptions: options.policy,
-          enabled: options.generatePolicy,
+          enabled: !!options.generatePolicy,
           location: options.policyLocation,
           emit: options.emitPolicySnapshot,
           canonicalNameMap,
@@ -176,6 +181,12 @@ class LavaMoatPlugin {
           JAVASCRIPT_MODULE_TYPE_ESM,
         ]
 
+        /**
+         * @param {import('webpack').Module} m
+         * @returns {m is import('webpack').NormalModule}
+         */
+        const isNormalModule = (m) => 'resource' in m
+
         // Old: good for collecting all possible paths, but bad for matching them with module ids
         // collect all paths resolved for the bundle and transition afterwards
         // normalModuleFactory.hooks.afterResolve.tap(
@@ -200,8 +211,7 @@ class LavaMoatPlugin {
               // TODO: potentially a place to hook into for policy generation
               // Module policies can be merged into a per-package policy in a second pass or right away, depending on what we can pull off for the ID generation.
               // Seems like it'd make sense to do it right away.
-              // @ts-expect-error BAD TYPES
-              if (module.resource) {
+              if (isNormalModule(module)) {
                 policyGenerator.inspectWebpackModule(
                   module,
                   compilation.moduleGraph.getOutgoingConnections(module)
@@ -282,7 +292,6 @@ class LavaMoatPlugin {
         })
 
         // =================================================================
-
         // This part adds LavaMoat runtime to webpack runtime for every chunk that needs runtime.
         // I stole the idea from Zach of module federation fame
 

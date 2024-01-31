@@ -1,13 +1,11 @@
-// TODO: scope it properly to compilation
-// const { parse, inspectGlobals } = require('lavamoat-tofu')
 const {
   createModuleInspector,
   LavamoatModuleRecord,
   loadPoliciesSync,
 } = require('lavamoat-core')
 const { getPackageNameForModulePath } = require('@lavamoat/aa')
-const { writeFileSync, mkdirSync, existsSync } = require('fs')
-const path = require('path')
+const { writeFileSync, mkdirSync } = require('node:fs')
+const path = require('node:path')
 const stringify = require('json-stable-stringify')
 const {
   sources: { RawSource },
@@ -16,12 +14,27 @@ const {
 const POLICY_SNAPSHOT_FILENAME = 'policy-snapshot.json'
 
 module.exports = {
+  /**
+   * @param {Object} opts
+   * @param {import('../types.js').Policy} [opts.policyFromOptions] - The
+   *   hardcoded policy passed in options, takes precedence over reading from
+   *   files
+   * @param {import('@lavamoat/aa').CanonicalNameMap} opts.canonicalNameMap -
+   *   Generated from aa
+   * @param {import('webpack').Compilation} opts.compilation - Webpack
+   *   compilation reference (for emitting assets)
+   * @param {boolean} opts.enabled - Whether to generate a policy
+   * @param {string} [opts.location] - Where to read/write the policy files
+   * @param {boolean} [opts.emit] - Whether to emit the policy snapshot as an
+   *   asset
+   * @returns
+   */
   createPolicyGenerator({
     policyFromOptions,
     canonicalNameMap,
     compilation,
     enabled,
-    location,
+    location = './lavamoat/webpack',
     emit = false,
   }) {
     const { policy, applyOverride } = loadPoliciesSync({
@@ -36,6 +49,7 @@ module.exports = {
         getPolicy: () => {
           let final
           if (policyFromOptions) {
+            // TODO: avoid loading the policy file if policyFromOptions is present
             final = policyFromOptions
           } else {
             final = applyOverride(policy)
@@ -61,6 +75,10 @@ module.exports = {
     })
 
     return {
+      /**
+       * @param {import('webpack').NormalModule} module
+       * @param {Iterable<import('webpack').ModuleGraphConnection>} connections
+       */
       inspectWebpackModule: (module, connections) => {
         // process._rawDebug(module.originalSource().source())
         const moduleRecord = new LavamoatModuleRecord({
@@ -72,15 +90,16 @@ module.exports = {
             canonicalNameMap,
             module.userRequest
           ),
-          content: module.originalSource().source(),
+          content: module.originalSource()?.source()?.toString(),
           importMap: {
             // connections are a much better source of information than module.dependencies which contain
             // all imported references separately along with exports and fluff
             ...Array.from(connections).reduce((acc, dep) => {
+              // @ts-expect-error - bad types?
               const depSpecifier = dep.resolvedModule.userRequest
               acc[depSpecifier] = depSpecifier
               return acc
-            }, {}),
+            }, /** @type {Record<string, string>} */ ({})),
           },
           //ast: module._ast, - would have to translate to babel anyway
         })
@@ -89,12 +108,11 @@ module.exports = {
       },
       getPolicy: () => {
         const policy = moduleInspector.generatePolicy({})
-        if (!existsSync(location)) {
-          mkdirSync(location, { recursive: true })
-        }
+        mkdirSync(location, { recursive: true })
         writeFileSync(
           path.join(location, 'policy.json'),
-          stringify(policy, { space: 2 })
+          stringify(policy, { space: 2 }),
+          'utf8'
         )
         const final = applyOverride(policy)
         if (emit) {

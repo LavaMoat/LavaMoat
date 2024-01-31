@@ -18,7 +18,7 @@
  *   output for lockdown.js if HtmlWebpackPlugin is in use
  * @property {number} [diagnosticsVerbosity] - A number representing diagnostics
  *   output verbosity, the larger the more overwhelming
- * @property {Object} [policy] - LavaMoat policy object - if programmaticly
+ * @property {Policy} [policy] - LavaMoat policy object - if programmaticly
  *   created
  * @property {Object} [lockdown] - Options to pass to lockdown
  */
