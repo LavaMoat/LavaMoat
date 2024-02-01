@@ -59,3 +59,51 @@ jobs:
         run: npm run lint:deps
       - name: Validate Lockfile
         run: npm ls
+
+  compatibility-test-windows:
+    name: Test Windows compatibility
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+    env:
+      FORCE_COLOR: 1
+    steps:
+      - name: Checkout
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@b39b52d1213e96004bfcb1c61a8a6fa8ab84f3e8 # v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - name: Install Dependencies
+        uses: bahmutov/npm-install@d476752204653fb5cce6c09db0eaf220761f5d9e # v1.8.37
+        with:
+          useRollingCache: true
+          install-command: npm ci --foreground-scripts
+      # Limit testing to packages supported to run under windows
+      - name: Test
+        run: |
+          npm run build
+          npm run --if-present --workspace=packages/aa --workspace=packages/allow-scripts --workspace=packages/browserify --workspace=packages/core --workspace=packages/lavapack --workspace=packages/node --workspace=packages/preinstall-always-fail --workspace=packages/tofu --workspace=packages/webpack --workspace=packages/yarn-plugin-allow-scripts test:prep
+          npm run --if-present --workspace=packages/aa --workspace=packages/allow-scripts --workspace=packages/browserify --workspace=packages/core --workspace=packages/lavapack --workspace=packages/node --workspace=packages/preinstall-always-fail --workspace=packages/tofu --workspace=packages/webpack --workspace=packages/yarn-plugin-allow-scripts test
+
+  compatibility-test-macos:
+    name: Test macOS compatibility
+    runs-on: macOS-latest
+    env:
+      FORCE_COLOR: 1
+    steps:
+      - name: Checkout
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@b39b52d1213e96004bfcb1c61a8a6fa8ab84f3e8 # v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - name: Install Dependencies
+        uses: bahmutov/npm-install@d476752204653fb5cce6c09db0eaf220761f5d9e # v1.8.37
+        with:
+          useRollingCache: true
+          install-command: npm ci --foreground-scripts
+      - name: Test
+        run: npm test
