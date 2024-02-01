@@ -35,7 +35,7 @@
   "scripts": {
     "lint:deps": "depcheck",
     "test": "npm run test:run",
-    "test:prep": "test/prepare.sh",
+    "test:prep": "node test/prepare.js",
     "test:run": "ava"
   },
   "dependencies": {
