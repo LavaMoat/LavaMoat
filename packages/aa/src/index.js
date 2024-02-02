@@ -269,7 +269,7 @@ function getPackageNameForModulePath(canonicalNameMap, modulePath) {
   // files should never be associated with a package directory across a package boundary (as tested via the presense of "node_modules" in the path)
   if (relativeToPackageDir.includes('node_modules')) {
     throw new Error(
-      `LavaMoat - Encountered unknown package directory for file "${modulePath}"`
+      `LavaMoat - Encountered unknown package directory "${relativeToPackageDir}" for file "${modulePath}"`
     )
   }
   return packageName
