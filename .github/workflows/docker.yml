@@ -36,7 +36,14 @@ jobs:
         uses: addnab/docker-run-action@4f65fabd2431ebc8d299f8e5a018d79a769ae185 # v3
         with:
           image: dev:latest
-          run: npm run release:dry-run && npm run release:publish -- --dryRun
+          run: |
+            # note: package scripts only seem to support maximum a single unpublished package present in the repository
+            newpkg_path=$(jq -r 'to_entries|map(select(.value=="0.0.0"))[0].key' .release-please-manifest.json)
+            export npm_config_newpkg=$(jq -r .name "${newpkg_path}/package.json")
+            echo "New package: ${npm_config_newpkg}"
+            # these two commands should be identical
+            npm run release:dry-run
+            npm run release:publish -- --dryRun
       - name: rebuild
         uses: addnab/docker-run-action@4f65fabd2431ebc8d299f8e5a018d79a769ae185 # v3
         with:
