@@ -1,6 +1,6 @@
 'use strict'
 
-const { readFileSync } = require('node:fs')
+const { readFileSync, realpathSync, lstatSync } = require('node:fs')
 const path = require('node:path')
 const nodeResolve = require('resolve')
 
@@ -143,6 +143,14 @@ function getDependencies(packageDir, includeDevDeps) {
   return depsToWalk
 }
 
+/**
+ * @param {string} location
+ */
+function isSymlink(location) {
+  const info = lstatSync(location)
+  return info.isSymbolicLink()
+}
+
 /** @type {WalkDepTreeOpts[]} */
 let currentLevelTodos
 
@@ -176,6 +184,15 @@ function walkDependencyTreeForBestLogicalPaths({
     }
   } while (currentLevelTodos.length > 0)
 
+  for (const [
+    packageDir,
+    logicalPath,
+  ] of preferredPackageLogicalPathMap.entries()) {
+    if (isSymlink(packageDir)) {
+      const realPath = realpathSync(packageDir)
+      preferredPackageLogicalPathMap.set(realPath, logicalPath)
+    }
+  }
   return preferredPackageLogicalPathMap
 }
 
