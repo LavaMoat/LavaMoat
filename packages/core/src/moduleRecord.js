@@ -3,8 +3,9 @@
 /**
  * A module record
  *
- * @template {any[]} [InitArgs=unknown[]] - Arguments for
- *   {@link LavamoatModuleRecord.moduleInitializer}. Default is `unknown[]`
+ * @template {any[]} [InitArgs=DefaultModuleInitArgs] - Arguments for
+ *   {@link LavamoatModuleRecord.moduleInitializer}. Default is
+ *   `DefaultModuleInitArgs`
  */
 class LavamoatModuleRecord {
   /**
@@ -98,9 +99,9 @@ module.exports = { LavamoatModuleRecord }
 /**
  * Options for {@link LavamoatModuleRecord} constructor.
  *
- * @template {any[]} [InitArgs=unknown[]] - Arguments for
+ * @template {any[]} [InitArgs=DefaultModuleInitArgs] - Arguments for
  *   {@link LavamoatModuleRecordOptions.moduleInitializer}. Default is
- *   `unknown[]`
+ *   `DefaultModuleInitArgs`
  * @typedef LavamoatModuleRecordOptions
  * @property {string} specifier - Module specifier
  * @property {string} file - Path to module file (or specifier)
@@ -122,9 +123,19 @@ module.exports = { LavamoatModuleRecord }
  */
 
 /**
+ * Default {@link ModuleInitializer} arguments
+ *
+ * @typedef {[
+ *   exports: Record<string, any>,
+ *   require: (id: string) => unknown,
+ *   module: Record<string, any>,
+ * ]} DefaultModuleInitArgs
+ */
+
+/**
  * Module initializer function; provides non-global variables to module scope
  *
- * @template {any[]} [InitArgs=unknown[]] - Arguments for the function. Default
- *   is `unknown[]`
+ * @template {any[]} [InitArgs=DefaultModuleInitArgs] - Arguments for the
+ *   function. Default is `DefaultModuleInitArgs`
  * @typedef {(...args: InitArgs) => void} ModuleInitializer
  */
