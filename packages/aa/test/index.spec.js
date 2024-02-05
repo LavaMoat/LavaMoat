@@ -54,7 +54,26 @@ test('project 3', async (t) => {
   ])
 })
 
-test('custom Resolver', async (t) => {
+test('project 4 - workspace symlink', async (t) => {
+  const canonicalNameMap = await loadCanonicalNameMap({
+    rootDir: path.join(__dirname, 'projects', '4', 'packages', 'stuff'),
+  })
+  // normalize results to be relative
+  const normalizedMapEntries = Array.from(canonicalNameMap.entries())
+    .sort()
+    .map(([packagePath, canonicalName]) => [
+      path.relative(__dirname, packagePath),
+      canonicalName,
+    ])
+  t.deepEqual(normalizedMapEntries, [
+    ['projects/4/node_modules/aaa', 'aaa'],
+    ['projects/4/node_modules/bbb', 'bbb'],
+    ['projects/4/packages/aaa', 'aaa'], // symlink resolved
+    ['projects/4/packages/stuff', '$root$'],
+  ])
+})
+
+test('project 1 - with custom resolver', async (t) => {
   const rootDir = path.join(__dirname, 'projects', '1')
   /** @type {import('../src/index.js').Resolver} */
   const resolver = {
