@@ -68,10 +68,13 @@ jobs:
     env:
       FORCE_COLOR: 1
       TEST_WORKSPACES: >-
+        --workspace=packages/aa
+        --workspace=packages/allow-scripts
         --workspace=packages/core
         --workspace=packages/lavapack
         --workspace=packages/preinstall-always-fail
         --workspace=packages/tofu
+        --workspace=packages/yarn-plugin-allow-scripts
     steps:
       - name: Checkout
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
