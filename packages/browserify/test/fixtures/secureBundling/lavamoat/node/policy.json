@@ -1047,6 +1047,17 @@
         "lavamoat-core>merge-deep": true
       }
     },
+    "lavamoat-core>@babel/types": {
+      "globals": {
+        "console.warn": true,
+        "process.env.BABEL_TYPES_8_BREAKING": true
+      },
+      "packages": {
+        "lavamoat-core>@babel/types>@babel/helper-string-parser": true,
+        "lavamoat-core>@babel/types>@babel/helper-validator-identifier": true,
+        "lavamoat-core>@babel/types>to-fast-properties": true
+      }
+    },
     "lavamoat-core>lavamoat-tofu": {
       "globals": {
         "console.log": true
@@ -1062,6 +1073,7 @@
       },
       "packages": {
         "@babel/code-frame": true,
+        "lavamoat-core>@babel/types": true,
         "lavamoat-core>lavamoat-tofu>@babel/parser": true,
         "lavamoat-core>lavamoat-tofu>@babel/traverse>@babel/generator": true,
         "lavamoat-core>lavamoat-tofu>@babel/traverse>@babel/helper-environment-visitor": true,
@@ -1069,8 +1081,7 @@
         "lavamoat-core>lavamoat-tofu>@babel/traverse>@babel/helper-hoist-variables": true,
         "lavamoat-core>lavamoat-tofu>@babel/traverse>@babel/helper-split-export-declaration": true,
         "lavamoat-core>lavamoat-tofu>@babel/traverse>debug": true,
-        "lavamoat-core>lavamoat-tofu>@babel/traverse>globals": true,
-        "lavamoat-core>lavamoat-tofu>@babel/types": true
+        "lavamoat-core>lavamoat-tofu>@babel/traverse>globals": true
       }
     },
     "lavamoat-core>lavamoat-tofu>@babel/traverse>@babel/generator": {
@@ -1079,10 +1090,10 @@
         "console.warn": true
       },
       "packages": {
+        "lavamoat-core>@babel/types": true,
         "lavamoat-core>lavamoat-tofu>@babel/traverse>@babel/generator>@jridgewell/gen-mapping": true,
         "lavamoat-core>lavamoat-tofu>@babel/traverse>@babel/generator>@jridgewell/trace-mapping": true,
-        "lavamoat-core>lavamoat-tofu>@babel/traverse>@babel/generator>jsesc": true,
-        "lavamoat-core>lavamoat-tofu>@babel/types": true
+        "lavamoat-core>lavamoat-tofu>@babel/traverse>@babel/generator>jsesc": true
       }
     },
     "lavamoat-core>lavamoat-tofu>@babel/traverse>@babel/generator>@jridgewell/gen-mapping": {
@@ -1128,25 +1139,25 @@
     },
     "lavamoat-core>lavamoat-tofu>@babel/traverse>@babel/helper-function-name": {
       "packages": {
-        "lavamoat-core>lavamoat-tofu>@babel/traverse>@babel/helper-function-name>@babel/template": true,
-        "lavamoat-core>lavamoat-tofu>@babel/types": true
+        "lavamoat-core>@babel/types": true,
+        "lavamoat-core>lavamoat-tofu>@babel/traverse>@babel/helper-function-name>@babel/template": true
       }
     },
     "lavamoat-core>lavamoat-tofu>@babel/traverse>@babel/helper-function-name>@babel/template": {
       "packages": {
         "@babel/code-frame": true,
-        "lavamoat-core>lavamoat-tofu>@babel/parser": true,
-        "lavamoat-core>lavamoat-tofu>@babel/types": true
+        "lavamoat-core>@babel/types": true,
+        "lavamoat-core>lavamoat-tofu>@babel/parser": true
       }
     },
     "lavamoat-core>lavamoat-tofu>@babel/traverse>@babel/helper-hoist-variables": {
       "packages": {
-        "lavamoat-core>lavamoat-tofu>@babel/types": true
+        "lavamoat-core>@babel/types": true
       }
     },
     "lavamoat-core>lavamoat-tofu>@babel/traverse>@babel/helper-split-export-declaration": {
       "packages": {
-        "lavamoat-core>lavamoat-tofu>@babel/types": true
+        "lavamoat-core>@babel/types": true
       }
     },
     "lavamoat-core>lavamoat-tofu>@babel/traverse>debug": {
@@ -1166,17 +1177,6 @@
       "packages": {
         "lavamoat-core>lavamoat-tofu>@babel/traverse>debug>ms": true,
         "source-map-explorer>chalk>supports-color": true
-      }
-    },
-    "lavamoat-core>lavamoat-tofu>@babel/types": {
-      "globals": {
-        "console.warn": true,
-        "process.env.BABEL_TYPES_8_BREAKING": true
-      },
-      "packages": {
-        "lavamoat-core>@babel/types>@babel/helper-string-parser": true,
-        "lavamoat-core>@babel/types>@babel/helper-validator-identifier": true,
-        "lavamoat-core>@babel/types>to-fast-properties": true
       }
     },
     "lavamoat-core>merge-deep": {
