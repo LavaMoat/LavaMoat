@@ -29,6 +29,7 @@
     "release:dry-run": "node scripts/publish.js --dryRun --newPkg=${npm_config_newpkg}",
     "release:publish": "node scripts/publish.js --newPkg=${npm_config_newpkg}",
     "release:rebuild": "npm run rebuild && npm run test:prep && npm run test:workspaces",
+    "resolve-pkg": "npx trash-cli -- \"node_modules\" \"packages/*/node_modules\" && npm install && git add package-lock.json",
     "setup": "husky; npm run rebuild",
     "test": "npm run build && npm run test:prep && npm run test:workspaces && npm run test:scripts",
     "test:prep": "npm run --workspaces --if-present test:prep",
