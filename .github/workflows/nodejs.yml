@@ -68,6 +68,7 @@ jobs:
     env:
       FORCE_COLOR: 1
       TEST_WORKSPACES: >-
+        --workspace=packages/core
         --workspace=packages/lavapack
         --workspace=packages/preinstall-always-fail
         --workspace=packages/tofu
