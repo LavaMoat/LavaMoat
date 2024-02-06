@@ -1,17 +1,61 @@
 const test = require('ava')
+const os = require('node:os')
 const fs = require('node:fs')
 const path = require('node:path')
 const { spawnSync } = require('node:child_process')
+const { pathToFileURL } = require('node:url')
 
-/**
- * Path to the allow-scripts executable
- */
-const ALLOW_SCRIPTS_BIN = require.resolve('../src/cli')
+const NPM_CMD = os.platform() === 'win32' ? 'npm.cmd' : 'npm'
 
 /**
  * For fat fingers
  */
 const PACKAGE_JSON = 'package.json'
+
+/**
+ * Execute allow-scripts binaries with the given arguments
+ * @param {any} t ava test object
+ * @param {string[]} args Arguments to pass
+ * @param {string} cwd Working directory to execute command from
+ * @returns {{stderr: string, stdout: string, status: number}} Process result
+ */
+const run = (t, args, cwd) => {
+  // Path to the allow-scripts executable
+  const ALLOW_SCRIPTS_BIN = require.resolve('../src/cli')
+  const options = realisticEnvOptions(cwd)
+  const result = spawnSync(
+    'node',
+    [
+      ALLOW_SCRIPTS_BIN,
+      ...args,
+    ],
+    options,
+  )
+
+  if (typeof result.stderr === 'undefined' || typeof result.status !== 'number') {
+    t.fail(
+      `Failed calling 'node ${ALLOW_SCRIPTS_BIN} ${args.join(' ')}': ${JSON.stringify(
+        {
+          cwd,
+          options,
+          result,
+        },
+        undefined,
+        2
+      )}`
+    )
+  }
+
+  // forward error output for debugging
+  t.log(result.stderr.toString('utf-8'))
+
+  return {
+    status: result.status,
+    stderr: result.stderr,
+    stdout: result.stdout,
+  }
+}
+
 
 test('cli - auto command', (t) => {
   // set up the directories
@@ -22,7 +66,7 @@ test('cli - auto command', (t) => {
 
   // npm init -y
   let initResult = spawnSync(
-    'npm',
+    NPM_CMD,
     ['init', '-y'],
     realisticEnvOptions(projectRoot)
   )
@@ -45,32 +89,16 @@ test('cli - auto command', (t) => {
   }
 
   // run the auto command
-  let result = spawnSync(
-    ALLOW_SCRIPTS_BIN,
-    ['auto'],
-    realisticEnvOptions(projectRoot)
-  )
-
-  // forward error output for debugging
-  if (typeof result.stderr !== 'undefined') {
-    t.log(result.stderr.toString('utf-8'))
-  } else {
-    t.fail(
-      `Failed calling '${ALLOW_SCRIPTS_BIN} auto': ${JSON.stringify(
-        {
-          projectRoot,
-          options: realisticEnvOptions(projectRoot),
-          result,
-        },
-        undefined,
-        2
-      )}`
-    )
-  }
+  run(t, ['auto'], projectRoot)
 
   // get the package.json
   const packageJsonContents = JSON.parse(
-    fs.readFileSync(path.join(projectRoot, PACKAGE_JSON), 'utf8')
+    fs.readFileSync(
+      pathToFileURL(
+        path.join(projectRoot.replace(path.sep, '/'), PACKAGE_JSON),
+        'utf8'
+      )
+    )
   )
 
   // assert its contents
@@ -88,35 +116,19 @@ test('cli - auto command with experimental bins', (t) => {
   fs.rmSync(path.join(projectRoot, PACKAGE_JSON), { force: true })
 
   // npm init -y
-  spawnSync('npm', ['init', '-y'], realisticEnvOptions(projectRoot))
+  spawnSync(NPM_CMD, ['init', '-y'], realisticEnvOptions(projectRoot))
 
   // run the auto command
-  let result = spawnSync(
-    ALLOW_SCRIPTS_BIN,
-    ['auto', '--experimental-bins'],
-    realisticEnvOptions(projectRoot)
-  )
-
-  // forward error output for debugging
-  if (typeof result.stderr !== 'undefined') {
-    t.log(result.stderr.toString('utf-8'))
-  } else {
-    t.fail(
-      `Failed calling '${ALLOW_SCRIPTS_BIN} auto --experimental-bins': ${JSON.stringify(
-        {
-          projectRoot,
-          options: realisticEnvOptions(projectRoot),
-          result,
-        },
-        undefined,
-        2
-      )}`
-    )
-  }
+  run(t, ['auto', '--experimental-bins'], projectRoot)
 
   // get the package.json
   const packageJsonContents = JSON.parse(
-    fs.readFileSync(path.join(projectRoot, PACKAGE_JSON), 'utf8')
+    fs.readFileSync(
+      pathToFileURL(
+        path.join(projectRoot.replace(path.sep, '/'), PACKAGE_JSON),
+        'utf8'
+      )
+    )
   )
 
   // assert its contents
@@ -143,28 +155,7 @@ test('cli - run command - good dep at the root', (t) => {
   })
 
   // run the "run" command
-  let result = spawnSync(
-    ALLOW_SCRIPTS_BIN,
-    ['run'],
-    realisticEnvOptions(projectRoot)
-  )
-
-  // forward error output for debugging
-  if (typeof result.stderr !== 'undefined') {
-    t.log(result.stderr.toString('utf-8'))
-  } else {
-    t.fail(
-      `Failed calling '${ALLOW_SCRIPTS_BIN} run': ${JSON.stringify(
-        {
-          projectRoot,
-          options: realisticEnvOptions(projectRoot),
-          result,
-        },
-        undefined,
-        2
-      )}`
-    )
-  }
+  const result = run(t, ['run'], projectRoot)
 
   // assert the output
   t.deepEqual(result.stdout.toString().split('\n'), [
@@ -194,28 +185,7 @@ test('cli - run command - good dep at the root with experimental bins', (t) => {
   })
 
   // run the "run" command
-  let result = spawnSync(
-    ALLOW_SCRIPTS_BIN,
-    ['run', '--experimental-bins'],
-    realisticEnvOptions(projectRoot)
-  )
-
-  // forward error output for debugging
-  if (typeof result.stderr !== 'undefined') {
-    t.log(result.stderr.toString('utf-8'))
-  } else {
-    t.fail(
-      `Failed calling '${ALLOW_SCRIPTS_BIN} run --experimental-bins': ${JSON.stringify(
-        {
-          projectRoot,
-          options: realisticEnvOptions(projectRoot),
-          result,
-        },
-        undefined,
-        2
-      )}`
-    )
-  }
+  const result = run(t, ['run', '--experimental-bins'], projectRoot)
 
   // assert the output
   t.deepEqual(result.stdout.toString().split('\n'), [
@@ -257,18 +227,10 @@ test('cli - run command - good dep as a sub dep', (t) => {
   })
 
   // generate the bin link
-  spawnSync('npm', ['rebuild', 'good_dep'], realisticEnvOptions(projectRoot))
+  spawnSync(NPM_CMD, ['rebuild', 'good_dep'], realisticEnvOptions(projectRoot))
 
   // run the "run" command
-  let result = spawnSync(
-    ALLOW_SCRIPTS_BIN,
-    ['run'],
-    realisticEnvOptions(projectRoot)
-  )
-
-  // uncomment to forward error output for debugging
-  // t.log(result.stdout.toString('utf-8'))
-  // t.log(result.stderr.toString('utf-8'))
+  const result = run(t, ['run'], projectRoot)
 
   // assert the output
   t.deepEqual(result.stdout.toString().split('\n'), [
@@ -297,15 +259,7 @@ test('cli - run command - good dep as a sub dep with experimental bins', (t) => 
     force: true,
   })
   // run the "run" command
-  let result = spawnSync(
-    ALLOW_SCRIPTS_BIN,
-    ['run', '--experimental-bins'],
-    realisticEnvOptions(projectRoot)
-  )
-
-  // uncomment to forward error output for debugging
-  // t.log(result.stdout.toString('utf-8'))
-  // t.log(result.stderr.toString('utf-8'))
+  const result = run(t, ['run', '--experimental-bins'], projectRoot)
 
   t.assert(
     fs.existsSync(
@@ -330,7 +284,7 @@ test('cli - run command - good dep as a sub dep with experimental bins', (t) => 
     'Expected to see instructions on how to enable a bin script1'
   )
   t.assert(
-    errarr.some((line) => line.includes('node_modules/good_dep/cli.sh')),
+    errarr.some((line) => line.includes('node_modules/good_dep/cli.js')),
     'Expected to see instructions on how to enable a bin script2'
   )
   t.assert(
@@ -355,5 +309,9 @@ test('cli - run command - good dep as a sub dep with experimental bins', (t) => 
  * @returns {import('node:child_process').SpawnSyncOptions}
  */
 function realisticEnvOptions(projectRoot) {
-  return { cwd: projectRoot, env: { ...process.env, INIT_CWD: projectRoot } }
+  return {
+    cwd: projectRoot,
+    env: { ...process.env, INIT_CWD: projectRoot },
+    encoding: 'utf-8',
+  }
 }
