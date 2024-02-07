@@ -12,6 +12,21 @@
   * dependencies
     * lavamoat-core bumped from ^15.1.0 to ^15.1.1
 
+## [6.0.3](https://github.com/LavaMoat/LavaMoat/compare/lavapack-v6.0.2...lavapack-v6.0.3) (2024-02-07)
+
+
+### Bug Fixes
+
+* **deps:** update dependency json-stable-stringify to v1.1.1 ([7d28e79](https://github.com/LavaMoat/LavaMoat/commit/7d28e79a5430f1f7c3987fc128e800efe590dd2a))
+* **deps:** update dependency through2 to v4 ([f847a36](https://github.com/LavaMoat/LavaMoat/commit/f847a368528b8fdbfcac9de845e82bd2c8274ba2))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-core bumped from ^15.1.1 to ^15.1.2
+
 ## [6.0.1](https://github.com/LavaMoat/LavaMoat/compare/lavapack-v6.0.0...lavapack-v6.0.1) (2024-01-18)
 
 

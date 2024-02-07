@@ -1,5 +1,28 @@
 # Changelog
 
+## [7.2.0](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-tofu-v7.1.0...lavamoat-tofu-v7.2.0) (2024-02-07)
+
+
+### Features
+
+* **tofu:** add ESM support ([be9594c](https://github.com/LavaMoat/LavaMoat/commit/be9594c0916fa773e2a9d7db0dae7cc92e16cd3e))
+
+
+### Bug Fixes
+
+* **deps:** update dependency type-fest to v4.10.0 ([9f2cf3c](https://github.com/LavaMoat/LavaMoat/commit/9f2cf3cb3e00fc5184268bedb6967ffc8d29d066))
+* **deps:** update dependency type-fest to v4.10.1 ([36567e7](https://github.com/LavaMoat/LavaMoat/commit/36567e7f54efab0efd2021b9f82b5e4e4c77fe4d))
+* **deps:** update dependency type-fest to v4.10.2 ([1580ed9](https://github.com/LavaMoat/LavaMoat/commit/1580ed967085ae277384fcee3eac32ab9930adcd))
+* **deps:** update dependency type-fest to v4.9.0 ([70e9ffd](https://github.com/LavaMoat/LavaMoat/commit/70e9ffdf740a7d79cee9d583a55188e4ab02617d))
+* **tofu:** fix type errors ([fe75965](https://github.com/LavaMoat/LavaMoat/commit/fe7596576265bc931fc2387bf7e352339f8d630b))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * lavamoat-core bumped from ^15.0.0 to ^15.1.2
+
 ## [7.1.0](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-tofu-v7.0.0...lavamoat-tofu-v7.1.0) (2024-01-18)
 
 

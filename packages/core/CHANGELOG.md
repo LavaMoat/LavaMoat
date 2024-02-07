@@ -1,5 +1,25 @@
 # Changelog
 
+## [15.1.2](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v15.1.1...lavamoat-core-v15.1.2) (2024-02-07)
+
+
+### Bug Fixes
+
+* **core:** update LavamoatModuleRecord ([152534d](https://github.com/LavaMoat/LavaMoat/commit/152534debcc869d72dab50e7e6b031578d13324c))
+* **deps:** update dependency @babel/types to v7.23.9 ([c2f91e9](https://github.com/LavaMoat/LavaMoat/commit/c2f91e9a3c00ff9cf47eb8d7a4eb1ace7e155c64))
+* **deps:** update dependency json-stable-stringify to v1.1.1 ([7d28e79](https://github.com/LavaMoat/LavaMoat/commit/7d28e79a5430f1f7c3987fc128e800efe590dd2a))
+* **deps:** update dependency type-fest to v4.10.0 ([9f2cf3c](https://github.com/LavaMoat/LavaMoat/commit/9f2cf3cb3e00fc5184268bedb6967ffc8d29d066))
+* **deps:** update dependency type-fest to v4.10.1 ([36567e7](https://github.com/LavaMoat/LavaMoat/commit/36567e7f54efab0efd2021b9f82b5e4e4c77fe4d))
+* **deps:** update dependency type-fest to v4.10.2 ([1580ed9](https://github.com/LavaMoat/LavaMoat/commit/1580ed967085ae277384fcee3eac32ab9930adcd))
+* **deps:** update dependency type-fest to v4.9.0 ([70e9ffd](https://github.com/LavaMoat/LavaMoat/commit/70e9ffdf740a7d79cee9d583a55188e4ab02617d))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-tofu bumped from ^7.1.0 to ^7.2.0
+
 ## [15.1.1](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v15.1.0...lavamoat-core-v15.1.1) (2024-01-18)
 
 

@@ -12,6 +12,23 @@
   * dependencies
     * lavamoat-core bumped from ^15.1.0 to ^15.1.1
 
+## [8.0.3](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-v8.0.2...lavamoat-v8.0.3) (2024-02-07)
+
+
+### Bug Fixes
+
+* **deps:** update babel monorepo ([e30facc](https://github.com/LavaMoat/LavaMoat/commit/e30facc83fd9506310bc66df34970b599243eb47))
+* **deps:** update dependency json-stable-stringify to v1.1.1 ([7d28e79](https://github.com/LavaMoat/LavaMoat/commit/7d28e79a5430f1f7c3987fc128e800efe590dd2a))
+* **deps:** update dependency node-gyp-build to v4.8.0 ([f25d495](https://github.com/LavaMoat/LavaMoat/commit/f25d4957b1abb522d13697ef2d2323485ec51597))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-core bumped from ^15.1.1 to ^15.1.2
+    * lavamoat-tofu bumped from ^7.1.0 to ^7.2.0
+
 ## [8.0.1](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-v8.0.0...lavamoat-v8.0.1) (2024-01-18)
 
 

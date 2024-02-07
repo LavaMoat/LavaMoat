@@ -6,6 +6,21 @@
   * dependencies
     * lavamoat-core bumped from ^15.1.0 to ^15.1.1
 
+## [7.0.3](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-viz-v7.0.2...lavamoat-viz-v7.0.3) (2024-02-07)
+
+
+### Bug Fixes
+
+* **deps/browserify,viz:** pify@4.0.1-&gt;5.0.0 ([0feeeb2](https://github.com/LavaMoat/LavaMoat/commit/0feeeb2725e9fbba9bebb54e50c2a9d135870c60))
+* **deps/viz:** open@7.4.2-&gt;8.4.2 ([9ebdd74](https://github.com/LavaMoat/LavaMoat/commit/9ebdd744d05e8a6826fe947a7f39d2a296484f1e))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-core bumped from ^15.1.1 to ^15.1.2
+
 ## [7.0.1](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-viz-v7.0.0...lavamoat-viz-v7.0.1) (2024-01-18)
 
 
