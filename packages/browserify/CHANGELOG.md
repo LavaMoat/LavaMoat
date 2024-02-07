@@ -20,6 +20,27 @@
     * @lavamoat/lavapack bumped from ^6.0.1 to ^6.0.2
     * lavamoat-core bumped from ^15.1.0 to ^15.1.1
 
+## [17.0.3](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-browserify-v17.0.2...lavamoat-browserify-v17.0.3) (2024-02-07)
+
+
+### Bug Fixes
+
+* **browserify/test:** result output references in error handling ([791a6af](https://github.com/LavaMoat/LavaMoat/commit/791a6af4f8bdbf02f4415dce643e6f7991578dcf))
+* **deps/browserify,viz:** pify@4.0.1-&gt;5.0.0 ([0feeeb2](https://github.com/LavaMoat/LavaMoat/commit/0feeeb2725e9fbba9bebb54e50c2a9d135870c60))
+* **deps:** update babel monorepo ([e30facc](https://github.com/LavaMoat/LavaMoat/commit/e30facc83fd9506310bc66df34970b599243eb47))
+* **deps:** update dependency concat-stream to v2 ([a7d9279](https://github.com/LavaMoat/LavaMoat/commit/a7d9279652198db3bf62687459dcce971738206a))
+* **deps:** update dependency json-stable-stringify to v1.1.1 ([7d28e79](https://github.com/LavaMoat/LavaMoat/commit/7d28e79a5430f1f7c3987fc128e800efe590dd2a))
+* **deps:** update dependency source-map to v0.7.4 ([1274a56](https://github.com/LavaMoat/LavaMoat/commit/1274a56021be68fe4cbc19108a18fe7e803205b4))
+* **deps:** update dependency through2 to v4 ([f847a36](https://github.com/LavaMoat/LavaMoat/commit/f847a368528b8fdbfcac9de845e82bd2c8274ba2))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @lavamoat/lavapack bumped from ^6.0.2 to ^6.0.3
+    * lavamoat-core bumped from ^15.1.1 to ^15.1.2
+
 ## [17.0.1](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-browserify-v17.0.0...lavamoat-browserify-v17.0.1) (2024-01-18)
 
 

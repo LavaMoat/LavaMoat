@@ -1,5 +1,14 @@
 # Changelog
 
+## [3.0.2](https://github.com/LavaMoat/LavaMoat/compare/allow-scripts-v3.0.1...allow-scripts-v3.0.2) (2024-02-07)
+
+
+### Bug Fixes
+
+* **allow-scripts:** add corepack to bannedBins ([cef66ec](https://github.com/LavaMoat/LavaMoat/commit/cef66ec03508bc9484a83c4a037c9e91c0b853c9))
+* **deps:** update dependency @npmcli/run-script to v7 ([dc7105d](https://github.com/LavaMoat/LavaMoat/commit/dc7105d23d959665392425ce95b699b0b6b35e4e))
+* **deps:** update dependency @npmcli/run-script to v7.0.4 ([b84f67b](https://github.com/LavaMoat/LavaMoat/commit/b84f67bef337e0e36535df0947e55e4c4bfe2d33))
+
 ## [3.0.1](https://github.com/LavaMoat/LavaMoat/compare/allow-scripts-v3.0.0...allow-scripts-v3.0.1) (2024-01-18)
 
 
