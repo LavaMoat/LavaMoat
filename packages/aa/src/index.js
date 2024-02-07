@@ -30,7 +30,12 @@ const performantResolve = createPerformantResolve()
  * resolved, offering 2x performance improvement compared to using original
  * resolve
  *
+ * This resolver, using the `resolve` package, is incompatible with subpath
+ * exports.
+ *
  * @returns {Resolver}
+ * @see {@link https://npm.im/resolve}
+ * @see {@link https://nodejs.org/api/packages.html#subpath-exports}
  */
 function createPerformantResolve() {
   if (performantResolve) {
@@ -96,32 +101,26 @@ async function loadCanonicalNameMap({
 }
 
 /**
- * @param {Resolver} resolve
- * @param {string} depName
- * @param {string} packageDir
+ * Resolves `package.json` of a dependency relative to `basedir`
+ *
+ * @param {Resolver} resolve - Resolver function
+ * @param {string} depName - Dependency name
+ * @param {string} basedir - Dir to resolve from
  * @returns {string | undefined}
  */
-function wrappedResolveSync(resolve, depName, packageDir) {
+function wrappedResolveSync(resolve, depName, basedir) {
   const depRelativePackageJsonPath = path.join(depName, 'package.json')
   try {
-    return resolve.sync(depRelativePackageJsonPath, { basedir: packageDir })
+    return resolve.sync(depRelativePackageJsonPath, {
+      basedir,
+    })
   } catch (e) {
     const err = /** @type {Error} */ (e)
     if (
-      err.message?.includes('Cannot find module') &&
-      resolve !== performantResolve
+      ('code' in err && err.code !== 'MODULE_NOT_FOUND') ||
+      !err.message?.startsWith('Cannot find module')
     ) {
-      try {
-        return performantResolve.sync(depRelativePackageJsonPath, {
-          basedir: packageDir,
-        })
-      } catch (err) {
-        if (
-          !(/** @type {Error} */ (err).message?.includes('Cannot find module'))
-        ) {
-          throw err
-        }
-      }
+      throw err
     }
   }
 }

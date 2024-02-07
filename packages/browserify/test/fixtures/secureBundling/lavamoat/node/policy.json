@@ -96,10 +96,10 @@
     },
     "@lavamoat/aa": {
       "builtin": {
-        "fs.readFileSync": true,
-        "path.dirname": true,
-        "path.join": true,
-        "path.relative": true
+        "node:fs.readFileSync": true,
+        "node:path.dirname": true,
+        "node:path.join": true,
+        "node:path.relative": true
       },
       "packages": {
         "browserify>resolve": true
