@@ -12,6 +12,13 @@
   * dependencies
     * lavamoat-core bumped from ^15.1.0 to ^15.1.1
 
+## [6.1.0](https://github.com/LavaMoat/LavaMoat/compare/lavapack-v6.0.3...lavapack-v6.1.0) (2024-02-07)
+
+
+### Features
+
+* **lavapack:** check syntax of a module independently of browserify's own check ([9c38cd4](https://github.com/LavaMoat/LavaMoat/commit/9c38cd47e7875dde53349dd34971c74ce34004d9))
+
 ## [6.0.3](https://github.com/LavaMoat/LavaMoat/compare/lavapack-v6.0.2...lavapack-v6.0.3) (2024-02-07)
 
 
