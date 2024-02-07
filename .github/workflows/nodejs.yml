@@ -53,12 +53,13 @@ jobs:
         with:
           useRollingCache: true
           install-command: npm ci --foreground-scripts
+      # the same thing could be accomplished via `npm lint` but this is helpful for organizing job output
       - name: Lint Sources
         run: npm run lint:eslint
       - name: Lint Dependencies
         run: npm run lint:deps
-      - name: Validate Lockfile
-        run: npm ls
+      - name: Lint Lockfile
+        run: npm run lint:lockfile
 
   compatibility-test-windows:
     name: Test Windows compatibility
