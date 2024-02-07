@@ -25,7 +25,7 @@
     "build:ses": "(cd ./node_modules/ses && npm install && npm run build && cp ./dist/ses.umd.js ../../lib/)",
     "lint:deps": "depcheck",
     "test": "npm run test:prep && npm run test:ava",
-    "test:ava": "ava",
+    "test:ava": "ava --serial",
     "test:prep": "WRITE_AUTO_POLICY=1 ./test/fixtures/secureBundling/run.sh"
   },
   "dependencies": {
