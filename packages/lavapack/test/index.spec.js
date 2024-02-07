@@ -79,6 +79,45 @@ test('sourcemap test', async (t) => {
   t.pass('no error thrown')
 })
 
+test('detect invalid module', (t) => {
+  t.plan(2)
+  const packStream = pack({
+    raw: true,
+    includePrelude: false,
+    devMode: true,
+    bundleWithPrecompiledModules: true,
+  })
+  t.throws(
+    () => {
+      packStream.write({
+        id: '2',
+        sourceFile: 'log.js',
+        source: '>>invalid code<<',
+        deps: {},
+      })
+    },
+    { message: "Invalid JavaScript: Unexpected token '>>'" }
+  )
+
+  const packStream2 = pack({
+    raw: true,
+    includePrelude: true,
+    devMode: true,
+    bundleWithPrecompiledModules: false,
+  })
+  t.throws(
+    () => {
+      packStream2.write({
+        id: '2',
+        sourceFile: 'log.js',
+        source: '>>invalid code<<',
+        deps: {},
+      })
+    },
+    { message: "Invalid JavaScript: Unexpected token '>>'" }
+  )
+})
+
 function deferred() {
   const result = {}
   result.promise = new Promise((resolve, reject) => {

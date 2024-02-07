@@ -307,12 +307,22 @@ function extractSourceMaps(sourceCode) {
   return { code, maps }
 }
 
+function assertValidJS(code) {
+  try {
+    new Function(code)
+  } catch (err) {
+    throw new Error(`Invalid JavaScript: ${err.message}`)
+  }
+}
+
 function wrapInModuleInitializer(
   moduleData,
   sourceMeta,
   sourcePathForModule,
   bundleWithPrecompiledModules
 ) {
+  // additional layer of syntax checking independent of browserify
+  assertValidJS(sourceMeta.code)
   const filename = encodeURI(String(moduleData.file))
   let moduleWrapperSource
   if (bundleWithPrecompiledModules) {
