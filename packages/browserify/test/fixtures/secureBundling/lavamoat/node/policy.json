@@ -96,7 +96,9 @@
     },
     "@lavamoat/aa": {
       "builtin": {
+        "node:fs.lstatSync": true,
         "node:fs.readFileSync": true,
+        "node:fs.realpathSync": true,
         "node:path.dirname": true,
         "node:path.join": true,
         "node:path.relative": true
