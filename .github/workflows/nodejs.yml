@@ -41,7 +41,7 @@ jobs:
       - name: Test
         run: npm test
       - name: Dirty Check
-        run: node ./scripts/dirty-check.js
+        run: npm run test:dirty-check
 
   lint:
     runs-on: ubuntu-latest

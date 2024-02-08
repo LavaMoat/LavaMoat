@@ -6,7 +6,13 @@
  * will exit with a non-zero exit code and print an "error" to the GitHub
  * Actions log for each changed file.
  *
- * This is not a shell script because portability.
+ * When running in a local development environment, it solves the same problem,
+ * but runs differently. It's expected to run after the test finish--as in
+ * CI--but it does so within the context of `lint-staged`. With `lint-staged`,
+ * any _unstaged_ changes are ignored during its task execution--but only files
+ * unstaged _when `lint-staged` begins execution_. Then, if the test suite
+ * changes any files, this script will detect _only those_ changes and take
+ * appropriate action.
  *
  * @example
  *
@@ -21,12 +27,53 @@
  * ```
  *
  * @packageDocumentation
- * @see
- * {@link https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions}
+ * @see {@link https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions}
  */
 
 const { promisify } = require('node:util')
 const execFile = promisify(require('node:child_process').execFile)
+
+const CI = Boolean(process.env.CI)
+
+/**
+ * Info logger
+ *
+ * - Outputs as a GitHub Action Command if running in CI
+ * - Writes to STDERR if running locally
+ *
+ * @param {string} message
+ */
+const info = CI
+  ? (message) => {
+      console.log(`::notice::${message}`)
+    }
+  : (message) => {
+      console.error('[INFO]', message)
+    }
+
+/**
+ * Error logger
+ *
+ * - Outputs as a GitHub Action Command if running in CI
+ * - Writes to STDERR if running locally
+ *
+ * @param {string} message
+ * @param {string} title
+ */
+const error = CI
+  ? (message, title) => {
+      console.log(`::error,title=${title}::${message}`)
+    }
+  : (message, title) => {
+      console.error('[ERROR]', title, ':', message)
+    }
+
+/**
+ * Plain logger for `git diff` output
+ *
+ * - Always writes to STDOUT
+ */
+const log = console.log.bind(console)
 
 /**
  * Asks `git` if any files changed and exits with a non-zero exit code if so.
@@ -37,16 +84,24 @@ const execFile = promisify(require('node:child_process').execFile)
  *   output.
  */
 async function main() {
-  await execFile('git', ['add', '.'])
-  const diffResultPromise = execFile(
-    'git',
-    ['diff', '--staged', '-b', '--quiet'],
-    { encoding: 'utf8' },
-  )
+  if (CI) {
+    await execFile('git', ['add', '.'])
+  }
+
+  // args for first command which just chceks if any files are dirty
+  const diffResultArgs = ['diff', '-b', '--quiet']
+
+  if (CI) {
+    diffResultArgs.push('--staged')
+  }
+
+  const diffResultPromise = execFile('git', diffResultArgs, {
+    encoding: 'utf8',
+  })
 
   try {
     await diffResultPromise
-    console.log('::notice::No dirty files detected')
+    info('No dirty files detected')
   } catch (e) {
     if (e.code !== 1 || e.killed || e.stderr !== '') {
       throw e
@@ -54,22 +109,28 @@ async function main() {
     // something changed, and we should fail the build
     process.exitCode = 1
 
-    console.log(
-      '::error,title=Dirty File::Working area contains unexpected changes; see job log for diff'
+    error(
+      'Working area contains unexpected changes; see job log for diff',
+      'Dirty File'
     )
-    const { stdout } = await execFile(
-      'git',
-      ['diff', '--staged', '-b'],
-      { encoding: 'utf8' },
-    )
-    console.log(stdout)
+
+    // args for second command which shows the actual diff(s)
+    const diffArgs = ['diff', '-b']
+    if (CI) {
+      diffArgs.push('--staged')
+    }
+    const { stdout } = await execFile('git', diffArgs, {
+      encoding: 'utf8',
+    })
+
+    log(stdout)
   }
 }
 
 if (require.main === module) {
   main().catch((err) => {
     // last resort
-    console.log(`::error::${err}`)
+    error(err, 'Unhandled Rejection')
     process.exitCode = 1
   })
 }
