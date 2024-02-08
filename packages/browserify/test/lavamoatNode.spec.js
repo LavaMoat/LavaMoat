@@ -6,7 +6,7 @@ const { evalBundle } = require('./util')
 test('lavamoat-node compat - bundle works under lavamoat node', (t) => {
   let bundle
   try {
-    bundle = execSync('./test/fixtures/secureBundling/run.sh', {
+    bundle = execSync('node ./test/fixtures/secureBundling/run.js', {
       cwd: path.resolve(__dirname, '../'),
       maxBuffer: 8192 * 10000,
     })
