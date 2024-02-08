@@ -22,7 +22,7 @@
     "lint:deps": "npm run --workspaces --if-present lint:deps",
     "lint:eslint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "lint:staged": "lint-staged",
+    "lint:staged": "lint-staged --config ./.config/lint-staged.config.js",
     "rebuild": "npm run --workspaces --if-present rebuild && npm run rebuild:types",
     "rebuild:types": "npm run clean:types && npm run build:types",
     "release": "npm run release:rebuild && npm run release:publish --newPkg=${npm_config_newpkg}",
@@ -81,18 +81,6 @@
       "scripts/*.spec.js"
     ],
     "timeout": "2m"
-  },
-  "lint-staged": {
-    "*.js": [
-      "eslint --fix",
-      "prettier --write"
-    ],
-    "*.(ts|md|ya?ml|json)": [
-      "prettier --write"
-    ],
-    "!((package-lock|policy)*).json": [
-      "prettier --write"
-    ]
   },
   "prettier": {
     "jsdocCommentLineStrategy": "keep",
