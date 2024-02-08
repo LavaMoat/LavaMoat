@@ -122,3 +122,4 @@ packages/*/types
 .vscode
 
 !**/fixtures/main/node_modules
+packages/aa/test/projects/4/node_modules/aaa

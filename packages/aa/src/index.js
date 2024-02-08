@@ -38,9 +38,6 @@ const performantResolve = createPerformantResolve()
  * @see {@link https://nodejs.org/api/packages.html#subpath-exports}
  */
 function createPerformantResolve() {
-  if (performantResolve) {
-    return performantResolve
-  }
   /**
    * @param {string} filepath
    */
@@ -117,11 +114,14 @@ function wrappedResolveSync(resolve, depName, basedir) {
   } catch (e) {
     const err = /** @type {Error} */ (e)
     if (
-      ('code' in err && err.code !== 'MODULE_NOT_FOUND') ||
-      !err.message?.startsWith('Cannot find module')
+      err &&
+      typeof err === 'object' &&
+      (('code' in err && err.code === 'MODULE_NOT_FOUND') ||
+        err.message?.startsWith('Cannot find module'))
     ) {
-      throw err
+      return
     }
+    throw err
   }
 }
 
