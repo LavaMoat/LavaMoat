@@ -91,6 +91,9 @@
     ],
     "!((package-lock|policy)*).json": [
       "prettier --write"
+    ],
+    "package-lock.json": [
+      "npm run test:prep"
     ]
   },
   "prettier": {
