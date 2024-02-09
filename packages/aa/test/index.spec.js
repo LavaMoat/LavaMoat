@@ -110,12 +110,13 @@ test('project 1 - resolution failure', async (t) => {
   const rootDir = path.join(__dirname, 'projects', '1')
   /** @type {import('../src/index.js').Resolver} */
   const resolver = {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     sync: (moduleId, { basedir }) => {
       throw new Error('grumble')
     },
   }
   await t.throwsAsync(async () => {
-    const canonicalNameMap = await loadCanonicalNameMap({
+    await loadCanonicalNameMap({
       rootDir,
       resolve: resolver,
     })
@@ -131,6 +132,7 @@ test('project 1 - resolution missing silently', async (t) => {
   ]
 
   const resolver = {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     sync: (moduleId, { basedir }) => {
       throw errors.pop()
     },
