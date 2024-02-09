@@ -52,7 +52,9 @@ test('[bench] isSymlink is significantly faster than realpathSync in a naive mic
     ratioIsBelow(
       results['isSymlink(symlink)'],
       results['realpathSync(symlink)'],
-      0.2 // the tradeoff is worth it up until close to 1, so this number can be increased.
+      0.5 // the tradeoff is worth it up until close to 1, so this number can be increased.
+      // The ratio is under 0.2 on linux and windows, slihtly above that on mac in GH actions
+      // Setting to 0.5 to avoid flakiness
     ),
     'expected isSymlink(symlink) to be much faster than realpathSync(symlink)'
   )
@@ -60,7 +62,9 @@ test('[bench] isSymlink is significantly faster than realpathSync in a naive mic
     ratioIsBelow(
       results['isSymlink(notsymlink)'],
       results['realpathSync(notsymlink)'],
-      0.2 // the tradeoff is worth it up until close to 1, so this number can be increased.
+      0.5 // the tradeoff is worth it up until close to 1, so this number can be increased.
+      // The ratio is under 0.2 on linux and windows, slihtly above that on mac in GH actions
+      // Setting to 0.5 to avoid flakiness
     ),
     'expected isSymlink(notsymlink) to be much faster than realpathSync(notsymlink)'
   )
