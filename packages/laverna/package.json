@@ -4,12 +4,12 @@
   "description": "Publish multiple workspaces (that's all)",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/LavaMoat/lavamoat.git",
+    "url": "git+https://github.com/LavaMoat/LavaMoat.git",
     "directory": "packages/laverna"
   },
   "homepage": "https://github.com/LavaMoat/LavaMoat/blob/main/packages/laverna/README.md",
   "bugs": {
-    "url": "https://github.com/LavaMoat/lavamoat/issues"
+    "url": "https://github.com/LavaMoat/LavaMoat/issues"
   },
   "author": "boneskull",
   "license": "MIT",
