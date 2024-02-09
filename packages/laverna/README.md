@@ -4,18 +4,20 @@
 
 If you're familiar with [lerna](https://lerna.js.org), **Laverna** does this: `lerna publish from-package`.
 
-If you're unfamiliar with it: **Laverna** publishes all workspaces that haven't yet been published.
+If you're unfamiliar with it: **Laverna** publishes all workspacess wherein the _current_ version hasn't yet been published.
 
 ## Features
 
 **Laverna** is a thin wrapper around `npm publish` which:
 
-- Invokes `npm publish` for all workspaces _that haven't yet been published_
-- Handles new packages (via a flag)
+- Invokes `npm publish` on _all_ workspaces _where the current version has not yet been published_
+- Publishes new packages via flag
 - Ignores private packages
-- Requires a confirmation (by default)
+- Requires confirmation (by default)
+- Prints all output from `npm publish`, including the output of `npm pack`, to enable review prior to confirmation
 - Provides a "dry-run" mode
-- Prints all output from `npm publish`, including the output of `npm pack`, to enable review
+
+**Laverna**'s scope is intentionally limited to the above use-case.
 
 ## Non-Features
 
@@ -23,10 +25,12 @@ Perhaps more importantly, **Laverna**:
 
 - Builds nothing
 - Bumps no versions
-- Does not write to `package.json`
+- Runs no user-defined scripts
+- Retains no state nor cache
+- Does not write to `package.json` or lockfiles
 - Does not interact with `git` (no tags, no commits, no pushes)
 - Does not interact with GitHub (no releases)
-- Does not cache anything
+- Avails no whims
 
 ## Supported Environments
 
@@ -46,16 +50,16 @@ npm install @lavamoat/laverna -D
 ```plain
 laverna [options..]
 
-Publish multiple workspaces (that's all)
+"Publish multiple workspaces (that's all)"
 
 Options:
 
  --dryRun        - Enable dry-run mode
  --root=<path>   - Path to workspace root (default: current working dir)
- --newPkg=<name> - Workspace <name> has never been published (repeatable)
- --yes/-y        - Skip confirmation prompt
+ --newPkg=<name> - Workspace <name> should be treated as a new package (repeatable)
+ --yes/-y        - Skip confirmation prompt (default: false; true in CI)
 
-Problems? Visit https://github.com/LavaMoat/lavamoat/issues
+Problems? Visit https://github.com/LavaMoat/LavaMoat/issues
 ```
 
 ## Examples
@@ -78,7 +82,10 @@ If you're publishing a package in a new workspace, you might:
 
 ### Automating Publishes
 
-You'll need to figure out how to add `--newPkg` to your CI/CD pipeline. Otherwise, use the `--yes` flag when invoking `laverna`.
+If the `CI` environment variable is present, `laverna` will skip the confirmation prompt before final publish (i.e., `--yes` defaults to `true`).
+
+> [!WARNING]
+> Publishing via CI can bypass 2FA protections. Use at your own risk!
 
 ## API
 

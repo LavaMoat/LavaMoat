@@ -3,7 +3,7 @@
 /* eslint-disable n/shebang */
 // @ts-check
 
-const { bold, magenta, gray, italic } = require('kleur')
+const { bold, magenta, gray, italic, cyan, underline } = require('kleur')
 const util = require('node:util')
 const { Laverna } = require('./laverna')
 const { ERR } = require('./log-symbols')
@@ -72,18 +72,18 @@ function main() {
     // this should be the only place we write to stdout unless we
     // want to start outputting JSON
     console.log(`
-  ${bold('laverna')} [options..]
+  ${cyan(bold('laverna'))} ${cyan('[options..]')}
 
-  ${italic(description)}
+  "${description}"
 
   Options:
 
-  --dryRun        - Enable dry-run mode
-  --root=<path>   - Path to workspace root (default: current working dir)
-  --newPkg=<name> - Workspace <name> has never been published (repeatable)
-  --yes/-y        - Skip confirmation prompt
+  ${bold('--dryRun')}        - Enable dry-run mode
+  ${bold('--root=<path>')}   - Path to workspace root (default: current working dir)
+  ${bold('--newPkg=<name>')} - Workspace <name> should be treated as a new package (repeatable)
+  ${bold('--yes/-y')}        - Skip confirmation prompt (default: false; true ${italic('in CI')})
 
-  Problems? Visit ${bugs.url}
+  Problems? Visit ${underline(bugs.url)}
 
   `)
   } else {
@@ -92,6 +92,8 @@ function main() {
     opts.newPkg = [
       ...new Set([...(opts.newPkg ?? []), ...(opts['new-pkg'] ?? [])]),
     ]
+    // must be true in CI; --yes=false is not a thing
+    opts.yes = Boolean(process.env.CI) || opts.yes
 
     console.error(`📦 ${bold(magenta(name)) + gray('@') + magenta(version)}\n`)
     const laverna = new Laverna(opts)
