@@ -35,6 +35,11 @@ module.exports = function progress({ steps }) {
 
   const API = {}
 
+  /**
+   * Reports progress for the given step.
+   *
+   * @param {string} step - The step to report progress for.
+   */
   API.report = (step) => {
     if (canRepeat.has(step) && steps[currentStep] === step) {
       diag.rawDebug(2, `\n> Reporting ${step} again`)
@@ -52,6 +57,9 @@ module.exports = function progress({ steps }) {
       currentStep += 1
     }
   }
+  /**
+   * @param {string} query - Step name
+   */
   API.is = (query) => {
     const current = steps[currentStep]
     diag.rawDebug(2, `\n> Checking (${current}).is(${query})`)
@@ -60,9 +68,15 @@ module.exports = function progress({ steps }) {
   API.get = () => {
     return steps[currentStep]
   }
+  /**
+   * @param {string} query - Step name
+   */
   API.done = (query) => {
     return done.has(query)
   }
+  /**
+   * @param {string} query - Step name
+   */
   API.assertDone = (query) => {
     if (done.has(query)) {
       return

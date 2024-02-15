@@ -2,6 +2,7 @@ const {
   createModuleInspector,
   LavamoatModuleRecord,
   loadPoliciesSync,
+  // @ts-expect-error - missing types
 } = require('lavamoat-core')
 const { getPackageNameForModulePath } = require('@lavamoat/aa')
 const { writeFileSync, mkdirSync } = require('node:fs')

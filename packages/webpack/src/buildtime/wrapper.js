@@ -1,3 +1,4 @@
+// @ts-expect-error - missing types
 const { applySourceTransforms } = require('lavamoat-core')
 const diag = require('./diagnostics')
 const fs = require('fs')
@@ -70,26 +71,32 @@ exports.wrapper = function wrapper({
   }
 }
 
+/**
+ * Validates the source by creating a Function from it
+ *
+ * @param {string} source
+ */
 function validateSource(source) {
   const validityFlag = 'E_VALIDATION' + Math.random().toFixed(10)
   // If wrapping results with invalid JS, webpack may not report that at later stages
-  // or we might get an error complaoining about with in strict mode even if the issue is mismatching curlies
+  // or we might get an error complaining about with in strict mode even if the issue is mismatching curlies
   try {
-    Function(`{throw "${validityFlag}"};;` + source)()
+    // This used to be
+    // Function(`{throw "${validityFlag}"};;` + source)()
+    // but function constructor should suffice to report parsing errors
+    Function(source)
   } catch (e) {
-    if (e !== validityFlag) {
-      diag.run(1, () => {
-        fs.writeFileSync(
-          validityFlag + '.js',
-          source +
-            `
+    diag.run(1, () => {
+      fs.writeFileSync(
+        validityFlag + '.js',
+        source +
+          `
 /*
 ${e}
 */
         `
-        )
-      })
-      throw Error(validityFlag + 'wrapped module is not valid JS\n' + e)
-    }
+      )
+    })
+    throw Error(validityFlag + 'wrapped module is not valid JS\n' + e)
   }
 }

@@ -44,9 +44,19 @@ const stricterScopeTerminator = freeze(
   )
 )
 
-// Policy implementation
-// This part would require bundling a subset of the core runtime
+/**
+ * Enforces the policy for resource imports.
+ *
+ * @param {string | undefined} requestedResourceId - The ID of the requested
+ *   resource.
+ * @param {string} referrerResourceId - The ID of the referrer resource.
+ * @throws {Error} Throws an error if the policy does not allow importing the
+ *   requested resource from the referrer resource.
+ */
 const enforcePolicy = (requestedResourceId, referrerResourceId) => {
+  if (typeof requestedResourceId === 'undefined') {
+    throw Error(`Requested resource ID is undefined`)
+  }
   requestedResourceId = '' + requestedResourceId
   referrerResourceId = '' + referrerResourceId
   // implicitly allow all for root and modules from the same package
@@ -57,6 +67,7 @@ const enforcePolicy = (requestedResourceId, referrerResourceId) => {
     return
   }
   const myPolicy = LAVAMOAT.policy.resources[referrerResourceId] || {}
+  // @ts-expect-error - missing details in policy type, see TODO in types.js
   if (myPolicy.packages && myPolicy.packages[requestedResourceId]) {
     return
   }
@@ -66,7 +77,15 @@ const enforcePolicy = (requestedResourceId, referrerResourceId) => {
 }
 
 const theRealGlobalThis = globalThis
+/** @type {any} */
 let rootCompartmentGlobalThis
+/**
+ * Installs globals for a specific policy resource.
+ *
+ * @param {string} resourceId - The ID of the resource.
+ * @param {Object} packageCompartmentGlobal - The global object of the package
+ *   compartment.
+ */
 const installGlobalsForPolicy = (resourceId, packageCompartmentGlobal) => {
   if (resourceId === LAVAMOAT.root) {
     rootCompartmentGlobalThis = packageCompartmentGlobal
@@ -92,6 +111,10 @@ const installGlobalsForPolicy = (resourceId, packageCompartmentGlobal) => {
 }
 
 const compartmentMap = new Map()
+/**
+ * @param {string} moduleId
+ * @returns {string | undefined}
+ */
 const findResourceId = (moduleId) => {
   const found = LAVAMOAT.idmap.find(([, moduleIds]) =>
     moduleIds.includes(moduleId)
@@ -101,15 +124,38 @@ const findResourceId = (moduleId) => {
   }
 }
 
+/**
+ * @callback WrappedRequire
+ * @param {string} specifier
+ */
+
+/**
+ * Wraps the **webpack_require** function with a policy enforcement logic.
+ *
+ * @param {function} __webpack_require__ - The original **webpack_require**
+ *   function.
+ * @param {string} referrerResourceId - The resource ID of the referrer module.
+ * @returns {WrappedRequire} - The wrapped **webpack_require** function.
+ */
 const wrapRequireWithPolicy = (__webpack_require__, referrerResourceId) =>
   function (specifier) {
     if (!LAVAMOAT.unenforceable.includes(specifier)) {
       const requestedResourceId = findResourceId(specifier)
       enforcePolicy(requestedResourceId, referrerResourceId)
     }
+    // @ts-ignore - unknown this is the point here
     return __webpack_require__.apply(this, arguments)
   }
 
+/**
+ * Wraps the webpack runtime with Lavamoat security features.
+ *
+ * @param {string} resourceId - The identifier of the resource.
+ * @param {any} runtimeKit - The runtime kit containing bits from the webpack
+ *   runtime.
+ * @returns {Object} - An object containing the wrapped runtime and other
+ *   related properties.
+ */
 const lavamoatRuntimeWrapper = (resourceId, runtimeKit) => {
   if (!LOCKDOWN_ON) {
     // Scope Terminator not being present in the output causes the wrapper closure to run a no-op instaed of the module body
@@ -136,6 +182,7 @@ const lavamoatRuntimeWrapper = (resourceId, runtimeKit) => {
     // The following seem harmless and are used by default: ['O', 'n', 'd', 'o', 'r', 's']
     const supportedRuntimeItems = ['O', 'n', 'd', 'o', 'r', 's']
     for (const item of supportedRuntimeItems) {
+      // @ts-expect-error - I'm not gonna do webppack's minified runtime typing
       policyRequire[item] = harden(__webpack_require__[item])
     }
 

@@ -14,6 +14,7 @@ const assembleRuntime = (KEY, runtimeModules) => {
     let sourceString
     if (file) {
       sourceString = readFileSync(file, 'utf-8')
+      sourceString = removeMultilineComments(sourceString)
     }
     if (data) {
       sourceString = JSON.stringify(data)

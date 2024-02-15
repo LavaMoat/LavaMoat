@@ -3,6 +3,14 @@ const diag = require('./diagnostics')
 
 const ROOT_IDENTIFIER = '$root$'
 
+/**
+ * Looks up a value in a haystack object based on the given needle.
+ *
+ * @template {string | number} T
+ * @param {T} needle - The value to look for.
+ * @param {Record<T, any>} haystack - The object to search in.
+ * @returns {any} - The value found in the haystack, or undefined if not found.
+ */
 const lookUp = (needle, haystack) => {
   const value = haystack[needle]
   if (value === undefined) {
@@ -23,6 +31,7 @@ const crossReference = (neededIds, policyIds) => {
   // Policy generator skips packages that don't use anything, so it's ok for policy to be missing.
   // This is only for debugging
 
+  /** @type {string[]} */
   const missingIds = []
   neededIds.forEach((id) => {
     if (!policyIds.includes(id)) {
@@ -38,6 +47,25 @@ const crossReference = (neededIds, policyIds) => {
   }
 }
 
+/**
+ * @typedef {Object} IdentifierLookup
+ * @property {string} root
+ * @property {(string | number)[]} unenforceableModuleIds
+ * @property {[string, (string | number)[]][]} identifiersForModuleIds
+ * @property {(path: string) => string | undefined} pathToResourceId
+ * @property {(id: string) => string} policyIdentifierToResourceId
+ * @property {() => object} getTranslatedPolicy
+ */
+
+/**
+ * @param {object} options
+ * @param {{ path: string; moduleId: string | number }[]} options.paths
+ * @param {import('../types.js').Policy} options.policy
+ * @param {import('@lavamoat/aa').CanonicalNameMap} options.canonicalNameMap
+ * @param {(string | number)[]} options.unenforceableModuleIds
+ * @param {boolean | undefined} options.readableResourceIds
+ * @returns {IdentifierLookup}
+ */
 exports.generateIdentifierLookup = ({
   paths,
   policy,
@@ -45,7 +73,11 @@ exports.generateIdentifierLookup = ({
   unenforceableModuleIds,
   readableResourceIds,
 }) => {
-  const pathsToIdentifiers = (paths) => {
+  /**
+   * @typedef {Record<string, { aa: string; moduleId: number | string }>} PathMapping
+   */
+  const pathsToIdentifiers = () => {
+    /** @type {PathMapping} */
     const mapping = {}
     for (const p of paths) {
       if (p.path) {
@@ -63,7 +95,9 @@ exports.generateIdentifierLookup = ({
   const usedIdentifiersIndex = Object.fromEntries(
     usedIdentifiers.map((id, index) => [id, index])
   )
-  // choose the implementation - to translate from AA to numbers or not
+  /**
+   * @type {(i: string) => string}
+   */
   let translate
   if (readableResourceIds) {
     translate = (i) => i
@@ -75,7 +109,7 @@ exports.generateIdentifierLookup = ({
   // TODO: consider taking the list of paths used by webpack and running the entire AA algorithm only on that instead of relying on AA running through everything first.
   // It might give us identifiers that are more stable and would surely be much faster.
 
-  const pathLookup = pathsToIdentifiers(paths)
+  const pathLookup = pathsToIdentifiers()
   const identifiersWithKnownPaths = new Set(
     Object.values(pathLookup).map((pl) => pl.aa)
   )
@@ -90,9 +124,15 @@ exports.generateIdentifierLookup = ({
       }
       acc[key].push(moduleId)
       return acc
-    }, {})
+    }, /** @type {Record<string, (string | number)[]>} */ ({}))
   )
 
+  /**
+   * TODO: use real policy type here
+   *
+   * @param {any} resource
+   * @returns
+   */
   const translateResource = (resource) => ({
     ...resource,
     packages:

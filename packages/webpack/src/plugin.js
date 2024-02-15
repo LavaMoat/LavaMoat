@@ -165,14 +165,37 @@ class LavaMoatPlugin {
         // =================================================================
         // processin of the paths involved in the bundle and cross-check with policy
 
+        /**
+         * Array of strings representing the excludes found in the generation
+         * process.
+         *
+         * @type {string[]}
+         */
         const excludes = []
+        /**
+         * Array of objects representing the paths and module ids found in the
+         * generation process.
+         *
+         * @type {{ path: string; moduleId: string | number }[]}
+         */
         const knownPaths = []
+        /**
+         * Array of module ids that are unenforceable by policy.
+         *
+         * @type {(string | number)[]}
+         */
         const unenforceableModuleIds = []
+        /**
+         * @type {import('./buildtime/aa.js').IdentifierLookup}
+         */
         let identifierLookup
         const runChecks = this.options.runChecks || diag.level > 0
 
         // Caveat: this might be called before the lookup map is ready if a plugin is running a child compilation or alike.
         // Note that in those cases wrapped code is not meant to run and policy will be empty.
+        /**
+         * @param {string} p
+         */
         const getIdentifierForPath = (p) => {
           PROGRESS.assertDone('pathsProcessed')
           return identifierLookup.pathToResourceId(p)
@@ -248,13 +271,13 @@ class LavaMoatPlugin {
           diag.rawDebug(2, 'writing policy')
           // use the generated policy to save the user one additional pass
           // getting the policy also writes all files where necessary
-          options.policy = policyGenerator.getPolicy()
+          const policyToApply = policyGenerator.getPolicy()
 
           identifierLookup = generateIdentifierLookup({
             readableResourceIds: options.readableResourceIds,
             unenforceableModuleIds,
             paths: knownPaths,
-            policy: options.policy,
+            policy: policyToApply,
             canonicalNameMap,
           })
 
