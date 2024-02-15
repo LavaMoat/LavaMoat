@@ -38,9 +38,11 @@
   },
   "dependencies": {
     "@lavamoat/aa": "^4.0.1",
+    "browser-resolve": "2.0.0",
     "lavamoat-core": "^15.1.2"
   },
   "devDependencies": {
+    "@types/browser-resolve": "2.0.4",
     "css-loader": "6.9.1",
     "esbuild-loader": "4.0.3",
     "html-webpack-plugin": "5.6.0",

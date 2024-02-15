@@ -61,6 +61,10 @@ const wrappedGeneratorInstances = new WeakSet()
 // TODO: this should probably be extracted to a separate file for easier navigation
 /**
  * @param {object} options
+ * @param {string[]} options.excludes
+ * @param {(path: string) => string | undefined} options.getIdentifierForPath
+ * @param {boolean | undefined} options.runChecks
+ * @param {import('./progress').ProgressAPI} options.PROGRESS
  */
 exports.wrapGeneratorMaker = ({
   excludes,
@@ -92,7 +96,12 @@ exports.wrapGeneratorMaker = ({
         options,
       })
 
-      const originalGeneratedSource = originalGenerate.apply(this, arguments)
+      // used to be .apply(this, arguments) but typescript complained. I feel it's worse that way
+      const originalGeneratedSource = originalGenerate.call(
+        this,
+        module,
+        options
+      )
 
       // bail out if we're dealing with a subcompilation from a plugin and such - they may run too early
       if (!PROGRESS.done('pathsProcessed')) {

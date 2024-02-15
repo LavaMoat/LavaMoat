@@ -14,6 +14,7 @@ const {
     mapToObj,
     reduceToTopmostApiCallsFromStrings,
   },
+  // @ts-expect-error no types yet
 } = require('lavamoat-tofu')
 const { mergePolicy } = require('./mergePolicy')
 

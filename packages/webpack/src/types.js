@@ -1,6 +1,8 @@
 /**
+ * TODO: get the real policy type in here
+ *
  * @typedef {Object} Policy
- * @property {Record<string, object>} resources
+ * @property {Record<string, Record<string, object>>} resources
  */
 
 /**
