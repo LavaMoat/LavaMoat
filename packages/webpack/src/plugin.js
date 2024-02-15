@@ -1,6 +1,7 @@
 const path = require('path')
 const { WebpackError, RuntimeModule } = require('webpack')
 const { Compilation } = require('webpack')
+const browserResolve = require('browser-resolve')
 
 const { generateIdentifierLookup } = require('./buildtime/aa.js')
 const diag = require('./buildtime/diagnostics.js')
@@ -115,6 +116,8 @@ class LavaMoatPlugin {
     compiler.hooks.beforeRun.tapAsync(PLUGIN_NAME, (compilation, callback) =>
       loadCanonicalNameMap({
         rootDir: compiler.context,
+        includeDevDeps: true, // even the most proper projects end up including devdeps in their bundles :()
+        resolve: browserResolve,
       })
         .then((map) => {
           canonicalNameMap = map
