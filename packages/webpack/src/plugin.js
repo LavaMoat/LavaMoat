@@ -111,6 +111,20 @@ class LavaMoatPlugin {
     // compiler.options.optimization.moduleIds = "hashed";
     // compiler.options.optimization.chunkIds = "named";
 
+    // sadly regular webpack compilation doesn't allow for synchronous resolver.
+    //  Error: Cannot 'resolveSync' because the fileSystem is not sync. Use 'resolve'!
+    // function adapterFunction(resolver) {
+    //   return function(id, options) {
+    //     // Extract the directory and module name from the id
+    //     const dir = path.dirname(id);
+    //     const moduleName = path.basename(id);
+
+    //     // Call the resolver with the appropriate arguments
+    //     return resolver(options, dir, moduleName);
+    //   };
+    // }
+    // resolve = { sync: adapterFunction(compilation.resolverFactory.get('normal').resolveSync.bind(compilation.resolverFactory.get('normal'))) }
+
     // =================================================================
     // run long asynchronous processing ahead of all compilations
     compiler.hooks.beforeRun.tapAsync(PLUGIN_NAME, (compilation, callback) =>

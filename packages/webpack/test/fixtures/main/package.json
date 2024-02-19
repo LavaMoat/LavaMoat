@@ -6,11 +6,12 @@
     "commonjs-package": "1.0.0",
     "commonjs-quirks": "1.0.0",
     "es6-module-package": "1.0.0",
-    "side-effects-package": "1.0.0",
-    "typescript-package": "1.0.0",
-    "umd-package": "1.0.0",
     "fetch-package": "1.0.0",
     "loader-hack": "1.0.0",
-    "prototype-poisoning-package": "1.0.0"
+    "node-global-package": "1.0.0",
+    "prototype-poisoning-package": "1.0.0",
+    "side-effects-package": "1.0.0",
+    "typescript-package": "1.0.0",
+    "umd-package": "1.0.0"
   }
 }

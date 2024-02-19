@@ -161,6 +161,14 @@ const lavamoatRuntimeWrapper = (resourceId, runtimeKit) => {
     // Scope Terminator not being present in the output causes the wrapper closure to run a no-op instaed of the module body
     return create(null)
   }
+
+  if (!compartmentMap.has(resourceId)) {
+    // Endow original Math and Date, because SES tames them and we don't need that
+    const c = new Compartment({ Math, Date })
+    installGlobalsForPolicy(resourceId, c.globalThis)
+    compartmentMap.set(resourceId, c)
+  }
+
   let overrides = create(null)
 
   // modules may reference `require` dynamically, but that's something we don't want to allow
@@ -202,6 +210,9 @@ const lavamoatRuntimeWrapper = (resourceId, runtimeKit) => {
       }
     )
 
+    // webpack rewrites regerences to `global` to `__webpack_require__.g` in the bundle
+    policyRequire.g = compartmentMap.get(resourceId).globalThis
+
     // override nmd to limit what it can mutate
     // @ts-expect-error - webpack runtime is not typed
     policyRequire.nmd = (moduleReference) => {
@@ -228,13 +239,6 @@ const lavamoatRuntimeWrapper = (resourceId, runtimeKit) => {
     },
   })
   freeze(runtimeHandler)
-
-  if (!compartmentMap.has(resourceId)) {
-    // Endow original Math and Date, because SES tames them and we don't need that
-    const c = new Compartment({ Math, Date })
-    installGlobalsForPolicy(resourceId, c.globalThis)
-    compartmentMap.set(resourceId, c)
-  }
 
   return {
     [NAME_scopeTerminator]: stricterScopeTerminator,
