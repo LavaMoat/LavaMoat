@@ -6,6 +6,8 @@ import { hello as helloTypeScript } from 'typescript-package'
 import { hello as helloUMD } from 'umd-package'
 import { thing } from './src/other.mjs'
 import { what } from './src/hello.ts'
+import 'node-global-package'
+
 // deliberately unused
 import { treeshakeable } from './src/treeshakeable.mjs'
 import './src/style.css'
