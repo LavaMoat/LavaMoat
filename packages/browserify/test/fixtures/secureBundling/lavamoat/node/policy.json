@@ -1024,7 +1024,7 @@
       "builtin": {
         "events": true,
         "fs.readFileSync": true,
-        "node:fs/promises.readFile": true,
+        "node:fs.readFileSync": true,
         "node:fs/promises.writeFile": true,
         "path.extname": true,
         "path.join": true

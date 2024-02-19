@@ -25,7 +25,7 @@ module.exports = {
    * @param {import('webpack').Compilation} opts.compilation - Webpack
    *   compilation reference (for emitting assets)
    * @param {boolean} opts.enabled - Whether to generate a policy
-   * @param {string} [opts.location] - Where to read/write the policy files
+   * @param {string} opts.location - Where to read/write the policy files
    * @param {boolean} [opts.emit] - Whether to emit the policy snapshot as an
    *   asset
    * @returns
@@ -35,7 +35,7 @@ module.exports = {
     canonicalNameMap,
     compilation,
     enabled,
-    location = './lavamoat/webpack',
+    location,
     emit = false,
   }) {
     const { policy, applyOverride } = loadPoliciesSync({

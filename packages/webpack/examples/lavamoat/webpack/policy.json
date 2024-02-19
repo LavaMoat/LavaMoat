@@ -84,8 +84,6 @@
     },
     "fast-json-patch": {
       "globals": {
-        "PatchError": true,
-        "_deepClone": true,
         "addEventListener": true,
         "clearTimeout": true,
         "removeEventListener": true,

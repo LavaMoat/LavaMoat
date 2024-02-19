@@ -6,12 +6,13 @@ LavaMoat Webpack Plugin wraps each module in the bundle in a [Compartment](https
 
 ## Usage
 
-> Initial Beta version requires you to generate the policy with lavamoat CLI. We're working on moving that into the plugin.
+> Policy generation is now built into the plugin. While it might get confused about aliases and custom resolvers, it should generally work even when they're in use.
 
-1. Generate a policy file for your app's entry `npx lavamoat --autopolicy path/to/index.js` and adjust it if needed.
-2. Note that `builtins` in the policy indicate modules that webpack will either polyfill or ignore, so they need to be moved to `packages` and explicitly added as dependencies or just removed.
-3. Create a webpack bundle with the LavaMoat plugin enabled and pass the policy from the policy file to it in options.
-4. Make sure you add a `<script src="./lockdown.js"></script>` before all other scripts or enable the `HtmlWebpackPluginInterop` option if you're using `html-webpack-plugin`.
+1. Create a webpack bundle with the LavaMoat plugin enabled and the `generatePolicy` flag set to true
+2. Make sure you add a `<script src="./lockdown"></script>` before all other scripts or enable the `HtmlWebpackPluginInterop` option if you're using `html-webpack-plugin`. (Note there's no `.js` there because it's the only way to prevent webpack from minifying the file thus undermining its security guarantees)
+3. Tweak the policy if needed with policy-override.json
+
+> The plugin is emitting lockdown without the `.js` extension because that's the only way to prevent it from getting minified, which is likely to break it.
 
 The LavaMoat plugin takes an options object with the following properties:
 
@@ -21,7 +22,7 @@ The LavaMoat plugin takes an options object with the following properties:
   Setting positive verbosity will enable runChecks.
 - readableResourceIds: Decide whether to keep resource IDs human readable (regardless of production/development mode). If false, they are replaced with a sequence of numbers. Keeping them readable may be useful for debugging when a policy violation error is thrown.
 - lockdown: set configuration for [SES lockdown](). Setting the option replaces defaults from LavaMoat.
-- HtmlWebpackPluginInterop: add a script tag to the html output for lockdown.js if HtmlWebpackPlugin is in use
+- HtmlWebpackPluginInterop: add a script tag to the html output for ./lockdown file if HtmlWebpackPlugin is in use
 
 ```js
 const LavaMoatPlugin = require('@lavamoat/webpack')
@@ -41,7 +42,7 @@ module.exports = {
       //   consoleTaming: "unsafe",
       //   overrideTaming: "severe"
       // },
-      // HtmlWebpackPluginInterop: false, // set it to true if you want a script tag for lockdown.js to automatically be added to your HTML template
+      // HtmlWebpackPluginInterop: false, // set it to true if you want a script tag for ./lockdown file to automatically be added to your HTML template
     }),
   ],
   // ... other webpack configuration properties
@@ -111,7 +112,7 @@ This plugin will skip policy enforcement for such ignored modules.
 **This is a _beta_ release and does not provide any guarantees; even those listed below. Use at your own risk!**
 
 - SES must be added to the page without any bundling or transforming for any security guarantees to be sustained.
-  - The plugin could add it as an asset to the compilation if that's a good Developer Experience. Feedback welcome.
+  - The plugin is attempting to add it as an asset to the compilation for the sake of Developer Experience. Feedback welcome.
 - Each javascript module resulting from the webpack build is scoped to its package's policy
 
 ## Threat Model
@@ -125,7 +126,7 @@ This plugin will skip policy enforcement for such ignored modules.
 
 ## Webpack runtime
 
-Elements of the Webpack runtime (e.g., `__webpack_require__.*`) are currently mostly left intact. To avoid opening up potential bypasses, some functionality of the Webpack runtime will need to be restricted.
+Elements of the Webpack runtime (e.g., `__webpack_require__.*`) are currently mostly left intact. To avoid opening up potential bypasses, some functionality of the Webpack runtime is not available.
 
 # Testing
 
