@@ -7,18 +7,17 @@ module.exports = {
   sesEmitHook:
     ({ compilation, HtmlWebpackPluginInUse, HtmlWebpackPluginInterop }) =>
     () => {
-      // Read the file you want to add to the output
       const sesFile = readFileSync(require.resolve('ses'), 'utf-8')
-      // TODO: instead manually copy to compiler.options.output.path
+      // TODO: to consider: instead manually copy to compiler.options.output.path
       const asset = new RawSource(sesFile)
 
-      compilation.emitAsset('lockdown.js', asset)
+      compilation.emitAsset('lockdown', asset)
 
       if (HtmlWebpackPluginInUse && HtmlWebpackPluginInterop) {
         HtmlWebpackPluginInUse.constructor
           .getHooks(compilation)
           .beforeEmit.tapAsync('LavaMoatWebpackPlugin-lockdown', (data, cb) => {
-            const scriptTag = '<script src="./lockdown.js"></script>'
+            const scriptTag = '<script src="./lockdown"></script>'
             const headTagRegex = /<head[^>]*>/iu
             const scriptTagRegex = /<script/iu
 
@@ -31,7 +30,7 @@ module.exports = {
               )
             } else {
               throw Error(
-                'LavaMoat: Could not insert lockdown.js script tag, no suitable location found in the html template'
+                'LavaMoat: Could not insert lockdown script tag, no suitable location found in the html template'
               )
             }
             cb(null, data)
