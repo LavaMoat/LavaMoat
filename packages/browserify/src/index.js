@@ -9,7 +9,7 @@ const { createSesWorkaroundsTransform } = require('./sesTransforms')
 const { loadCanonicalNameMap } = require('@lavamoat/aa')
 const browserResolve = require('browser-resolve')
 
-const POLICY_OPTIONS_ALLOWLIST = ['globals', 'packages']
+const POLICY_OPTIONS_ALLOWLIST = ['builtin', 'globals', 'native', 'packages']
 const POLICY_VALUES_ALLOWLIST = [true, 'write']
 
 // these are the reccomended arguments for lavaMoat to work well with browserify
