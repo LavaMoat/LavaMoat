@@ -24,16 +24,6 @@
         "setTimeout": true
       }
     },
-    "browserify>string_decoder": {
-      "packages": {
-        "browserify>util>safe-buffer": true
-      }
-    },
-    "browserify>util>safe-buffer": {
-      "packages": {
-        "browserify>buffer": true
-      }
-    },
     "keccak": {
       "packages": {
         "browserify>buffer": true,
@@ -47,8 +37,18 @@
         "browserify>events": true,
         "browserify>inherits": true,
         "browserify>process": true,
-        "browserify>string_decoder": true,
+        "keccak>readable-stream>string_decoder": true,
         "keccak>readable-stream>util-deprecate": true
+      }
+    },
+    "keccak>readable-stream>string_decoder": {
+      "packages": {
+        "keccak>readable-stream>string_decoder>safe-buffer": true
+      }
+    },
+    "keccak>readable-stream>string_decoder>safe-buffer": {
+      "packages": {
+        "browserify>buffer": true
       }
     },
     "keccak>readable-stream>util-deprecate": {
