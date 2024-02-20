@@ -18,13 +18,13 @@
  * The minimum EcmaScript runtime environment to support
  * @see {@link https://eslint.org/docs/latest/use/configure/language-options#specifying-environments}
  */
-const ECMASCRIPT_ENV = 'es2020'
+const ECMASCRIPT_ENV = 'es2021'
 
 /**
  * The minimum EcmaScript language version to support
  * @see {@link https://eslint.org/docs/latest/use/configure/language-options#specifying-parser-options}
  */
-const ECMASCRIPT_VERSION = 2020
+const ECMASCRIPT_VERSION = 2021
 
 /**
  * The minimum supported version of Node.js
