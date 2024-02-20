@@ -4,58 +4,72 @@
       "packages": {
       }
     },
-    "browserify>buffer": {
-      "globals": {
-        "console": true
-      },
-      "packages": {
-        "browserify>buffer>base64-js": true,
-        "browserify>buffer>ieee754": true
-      }
-    },
-    "browserify>events": {
-      "globals": {
-        "console": true
-      }
-    },
-    "browserify>process": {
-      "globals": {
-        "clearTimeout": true,
-        "setTimeout": true
-      }
-    },
-    "browserify>string_decoder": {
-      "packages": {
-        "browserify>util>safe-buffer": true
-      }
-    },
-    "browserify>util>safe-buffer": {
-      "packages": {
-        "browserify>buffer": true
+    "duplexify>inherits": {
+      "builtin": {
+        "util.inherits": true
       }
     },
     "keccak": {
-      "packages": {
-        "browserify>buffer": true,
-        "keccak>readable-stream": true
-      }
-    },
-    "keccak>readable-stream": {
-      "packages": {
-        "browserify>browser-resolve": true,
-        "browserify>buffer": true,
-        "browserify>events": true,
-        "browserify>inherits": true,
-        "browserify>process": true,
-        "browserify>string_decoder": true,
-        "keccak>readable-stream>util-deprecate": true
-      }
-    },
-    "keccak>readable-stream>util-deprecate": {
       "globals": {
-        "console.trace": true,
-        "console.warn": true,
-        "localStorage": true
+        "Buffer.alloc": true,
+        "Buffer.from": true,
+        "Buffer.isBuffer": true,
+        "__dirname": true
+      },
+      "native": true,
+      "packages": {
+        "keccak>node-gyp-build": true,
+        "readable-stream": true
+      }
+    },
+    "keccak>node-gyp-build": {
+      "builtin": {
+        "fs.existsSync": true,
+        "fs.readdirSync": true,
+        "os.arch": true,
+        "os.platform": true,
+        "path.dirname": true,
+        "path.join": true,
+        "path.resolve": true
+      },
+      "globals": {
+        "__non_webpack_require__": true,
+        "__webpack_require__": true,
+        "process": true
+      }
+    },
+    "readable-stream": {
+      "builtin": {
+        "buffer.Buffer": true,
+        "events.EventEmitter": true,
+        "stream": true,
+        "util": true
+      },
+      "globals": {
+        "process.env.READABLE_STREAM": true,
+        "process.nextTick": true,
+        "process.stderr": true,
+        "process.stdout": true
+      },
+      "packages": {
+        "duplexify>inherits": true,
+        "readable-stream>string_decoder": true,
+        "readable-stream>util-deprecate": true
+      }
+    },
+    "readable-stream>string_decoder": {
+      "packages": {
+        "readable-stream>string_decoder>safe-buffer": true
+      }
+    },
+    "readable-stream>string_decoder>safe-buffer": {
+      "builtin": {
+        "buffer": true
+      }
+    },
+    "readable-stream>util-deprecate": {
+      "builtin": {
+        "util.deprecate": true
       }
     }
   }
