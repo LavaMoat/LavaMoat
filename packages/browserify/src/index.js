@@ -324,24 +324,24 @@ function validatePolicy(policy) {
     const optionsWhitelist = ['globals', 'packages']
     const valuesWhitelist = [true, 'write']
 
-    if (
-      !packageOptions.every((packageOpt) =>
-        optionsWhitelist.includes(packageOpt)
-      )
-    ) {
+    const unrecognizedOptions = packageOptions.filter(
+      (packageOpt) => !optionsWhitelist.includes(packageOpt)
+    )
+    if (unrecognizedOptions.length) {
       throw new Error(
-        "LavaMoat - Unrecognized package options. Expected 'globals' or 'packages'"
+        `LavaMoat - Unrecognized package option(s): ${JSON.stringify(unrecognizedOptions)}. Expected any of: ${JSON.stringify(optionsWhitelist)}`
       )
     }
 
     packageEntries.forEach((entry) => {
-      Object.values(entry).forEach((value) => {
-        if (!valuesWhitelist.includes(value)) {
-          throw new Error(
-            "LavaMoat - Globals or packages endowments must be equal to 'true'"
-          )
-        }
-      })
+      const unrecognizedValues = Object.entries(entry).filter(
+        ([, value]) => !valuesWhitelist.includes(value)
+      )
+      if (unrecognizedValues.length) {
+        throw new Error(
+          `LavaMoat - Unrecognized endowment value(s) for: ${JSON.stringify(unrecognizedValues.map(([key]) => key))}. Expected any of: ${JSON.stringify(valuesWhitelist)}`
+        )
+      }
     })
   })
 }
