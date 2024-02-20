@@ -26,7 +26,7 @@
     "lint:deps": "depcheck",
     "test": "npm run test:prep && npm run test:ava",
     "test:ava": "ava --serial",
-    "test:prep": "WRITE_AUTO_POLICY=1 ./test/fixtures/secureBundling/run.sh"
+    "test:prep": "cross-env WRITE_AUTO_POLICY=1 ./test/fixtures/secureBundling/run.sh && cross-env WRITE_AUTO_POLICY=1 ../node/src/cli.js test/fixtures/exampleApp/bundleEntry.js --projectRoot ./ --policyPath test/fixtures/exampleApp/policy.json --writeAutoPolicy --policyOverride test/fixtures/exampleApp/policy-override.json"
   },
   "dependencies": {
     "@lavamoat/aa": "^4.0.1",
