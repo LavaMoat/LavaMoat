@@ -84,12 +84,10 @@ test('project 4 - workspace symlink', async (t) => {
 test('project 1 - with custom resolver', async (t) => {
   const rootDir = path.join(__dirname, 'projects', '1')
   /** @type {import('../src/index.js').Resolver} */
-  const resolver = {
-    sync: (moduleId, { basedir }) => {
-      return Module.createRequire(path.join(basedir, 'dummy.js')).resolve(
-        moduleId
-      )
-    },
+  const resolver = async (moduleId, { basedir }) => {
+    return Module.createRequire(path.join(basedir, 'dummy.js')).resolve(
+      moduleId
+    )
   }
   const canonicalNameMap = await loadCanonicalNameMap({
     rootDir,
@@ -109,11 +107,10 @@ test('project 1 - with custom resolver', async (t) => {
 test('project 1 - resolution failure', async (t) => {
   const rootDir = path.join(__dirname, 'projects', '1')
   /** @type {import('../src/index.js').Resolver} */
-  const resolver = {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    sync: (moduleId, { basedir }) => {
-      throw new Error('grumble')
-    },
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const resolver = (moduleId, { basedir }) => {
+    throw new Error('grumble')
   }
   await t.throwsAsync(async () => {
     await loadCanonicalNameMap({
@@ -131,11 +128,9 @@ test('project 1 - resolution missing silently', async (t) => {
     { code: 'MODULE_NOT_FOUND' },
   ]
 
-  const resolver = {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    sync: (moduleId, { basedir }) => {
-      throw errors.pop()
-    },
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const resolver = async (moduleId, { basedir }) => {
+    throw errors.pop()
   }
   let canonicalNameMap
   await t.notThrowsAsync(async () => {

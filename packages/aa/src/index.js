@@ -43,31 +43,52 @@ function createPerformantResolve() {
    */
   const readPackageWithout = (filepath) => {
     /**
-     * @param {(path: string) => StringOrToString} readFileSync - Sync file
-     *   reader
+     * @param {(
+     *   file: string,
+     *   cb: (err: Error | null, file?: StringOrToString) => void
+     * ) => void} readFile
+     *   - Async file reader
+     *
      * @param {string} otherFilepath - Path to another `package.json`
-     * @returns {Record<string, unknown> | undefined}
+     * @param {(err: Error | null, result?: Record<string, unknown>) => void} cb
+     *   - Callback
+     *
+     * @returns {void}
      */
-    return (readFileSync, otherFilepath) => {
+    return (readFile, otherFilepath, cb) => {
       // avoid loading the package.json we're just trying to resolve
       if (otherFilepath.endsWith(filepath)) {
-        return {}
+        return cb(null, {})
       }
       // original readPackageSync implementation from resolve internals:
-      const body = readFileSync(otherFilepath)
-      try {
-        return JSON.parse(`${body}`)
-      } catch (jsonErr) {}
+      readFile(otherFilepath, (err, body) => {
+        if (err) {
+          return cb(err)
+        }
+        try {
+          return cb(null, JSON.parse(`${body}`))
+        } catch (jsonErr) {}
+      })
     }
   }
-
-  return {
-    sync: (path, { basedir }) =>
-      nodeResolve.sync(path, {
-        basedir,
-        readPackageSync: readPackageWithout(path),
-      }),
-  }
+  // Typescript won't let me promisify without loosing track of argument types :(
+  // const promisifiedNodeResolve = promisify(nodeResolve)
+  return (path, { basedir }) =>
+    new Promise((resolve, reject) => {
+      nodeResolve(
+        path,
+        {
+          basedir,
+          readPackage: readPackageWithout(path),
+        },
+        (err, result) => {
+          if (err) {
+            return reject(err)
+          }
+          resolve(result)
+        }
+      )
+    })
 }
 
 /**
@@ -81,7 +102,7 @@ async function loadCanonicalNameMap({
 }) {
   const canonicalNameMap = /** @type {CanonicalNameMap} */ (new Map())
   // walk tree
-  const logicalPathMap = walkDependencyTreeForBestLogicalPaths({
+  const logicalPathMap = await walkDependencyTreeForBestLogicalPaths({
     packageDir: rootDir,
     includeDevDeps,
     resolve,
@@ -103,12 +124,12 @@ async function loadCanonicalNameMap({
  * @param {Resolver} resolve - Resolver function
  * @param {string} depName - Dependency name
  * @param {string} basedir - Dir to resolve from
- * @returns {string | undefined}
+ * @returns {Promise<string | undefined>}
  */
-function wrappedResolveSync(resolve, depName, basedir) {
+async function wrappedResolve(resolve, depName, basedir) {
   const depRelativePackageJsonPath = path.join(depName, 'package.json')
   try {
-    return resolve.sync(depRelativePackageJsonPath, {
+    return await resolve(depRelativePackageJsonPath, {
       basedir,
     })
   } catch (e) {
@@ -129,6 +150,8 @@ function wrappedResolveSync(resolve, depName, basedir) {
  * @param {string} packageDir
  * @param {boolean} includeDevDeps
  * @returns {string[]}
+ *
+ *   WARNING: making this async makes things consistently slower _(ツ)_/
  */
 function getDependencies(packageDir, includeDevDeps) {
   const packageJsonPath = path.join(packageDir, 'package.json')
@@ -147,7 +170,7 @@ function getDependencies(packageDir, includeDevDeps) {
  * @param {string} location
  */
 function isSymlink(location) {
-  const info = lstatSync(location)
+  const info = lstatSync(location) // lstatSync is faster than lstat
   return info.isSymbolicLink()
 }
 
@@ -159,9 +182,9 @@ let nextLevelTodos
 
 /**
  * @param {WalkDepTreeOpts} options
- * @returns {Map<string, string[]>}
+ * @returns {Promise<Map<string, string[]>>}
  */
-function walkDependencyTreeForBestLogicalPaths({
+async function walkDependencyTreeForBestLogicalPaths({
   packageDir,
   logicalPath = [],
   includeDevDeps = false,
@@ -175,13 +198,17 @@ function walkDependencyTreeForBestLogicalPaths({
     { packageDir, logicalPath, includeDevDeps, visited, resolve },
   ]
   nextLevelTodos = []
-  // drain work queue until empty, avoid going depth-first by prioritizing the current depth level
+  //avoid going depth-first by prioritizing the current depth level
   do {
-    processOnePackageInLogicalTree(preferredPackageLogicalPathMap, resolve)
-    if (currentLevelTodos.length === 0) {
-      currentLevelTodos = nextLevelTodos
-      nextLevelTodos = []
-    }
+    await runParallelMax(10, currentLevelTodos, (currentTodo) =>
+      processOnePackageInLogicalTree(
+        currentTodo,
+        preferredPackageLogicalPathMap,
+        resolve
+      )
+    )
+    currentLevelTodos = nextLevelTodos
+    nextLevelTodos = []
   } while (currentLevelTodos.length > 0)
 
   for (const [
@@ -197,10 +224,12 @@ function walkDependencyTreeForBestLogicalPaths({
 }
 
 /**
+ * @param {WalkDepTreeOpts} currentTodo
  * @param {Map<string, string[]>} preferredPackageLogicalPathMap
  * @param {Resolver} resolve
  */
-function processOnePackageInLogicalTree(
+async function processOnePackageInLogicalTree(
+  currentTodo,
   preferredPackageLogicalPathMap,
   resolve
 ) {
@@ -209,23 +238,27 @@ function processOnePackageInLogicalTree(
     logicalPath = [],
     includeDevDeps = false,
     visited = new Set(),
-  } = /** @type {WalkDepTreeOpts} */ (currentLevelTodos.pop())
+  } = currentTodo
+
   const depsToWalk = getDependencies(packageDir, includeDevDeps)
 
   // deps are already sorted by preference for paths
-  for (const depName of depsToWalk) {
-    let depPackageJsonPath = wrappedResolveSync(resolve, depName, packageDir)
+  await runParallelMax(10, depsToWalk, async (depName) => {
+    let depPackageJsonPath = await wrappedResolve(resolve, depName, packageDir)
     // ignore unresolved deps
     if (!depPackageJsonPath) {
-      continue
+      return
     }
     const childPackageDir = path.dirname(depPackageJsonPath)
     // avoid cycles, but still visit the same package
     // on disk multiple times through different logical paths
+    // so that the best logical path can be chosen
     if (visited.has(childPackageDir)) {
-      continue
+      return
     }
-    const childVisited = new Set([...visited, childPackageDir])
+    // should be slightly better than: const childVisited = new Set([...visited, childPackageDir])
+    const childVisited = new Set(visited)
+    childVisited.add(childPackageDir)
     const childLogicalPath = [...logicalPath, depName]
 
     // compare this path and current best path
@@ -248,9 +281,9 @@ function processOnePackageInLogicalTree(
       // debug: log skipped path traversals
       // console.log(`skipping "${childPackageDir}"\n  preferred "${theCurrentBest}"\n  current "${childLogicalPath}"`)
       // abort this walk, can't do better
-      continue
+      return
     }
-  }
+  })
 }
 
 /**
@@ -371,8 +404,24 @@ function comparePackageLogicalPaths(aPath, bPath) {
 }
 
 /**
- * @typedef Resolver
- * @property {(path: string, opts: { basedir: string }) => string} sync
+ * @template T
+ * @param {number} parallelMax
+ * @param {T[]} items
+ * @param {(item: T) => Promise<any>} mapper
+ * @returns {Promise<void>}
+ */
+async function runParallelMax(parallelMax, items, mapper) {
+  for (let i = 0; i < items.length; i += parallelMax) {
+    const chunk = items.slice(i, i + parallelMax)
+    await Promise.all(chunk.map(mapper))
+  }
+}
+
+/**
+ * @callback Resolver
+ * @param {string} path
+ * @param {{ basedir: string }} opts
+ * @returns {Promise<string | undefined>}
  */
 
 /**
