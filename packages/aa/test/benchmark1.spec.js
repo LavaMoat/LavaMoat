@@ -1,7 +1,7 @@
 const { realpathSync, lstatSync } = require('node:fs')
 const path = require('node:path')
 const test = require('ava')
-const { createProject4Symlink } = require('./utils')
+const { createProject4Symlink, bench } = require('./utils')
 
 function isSymlink(location) {
   const info = lstatSync(location)
@@ -15,15 +15,6 @@ const notsymlink = path.normalize(
   path.join(__dirname, './projects/4/node_modules/bbb')
 )
 
-const bench = (fn, name) => {
-  const t0 = performance.now()
-  for (let i = 0; i < 10000; i++) {
-    fn()
-  }
-  const t1 = performance.now()
-  return [name, t1 - t0]
-}
-
 const ratioIsBelow = (a, b, expected) => {
   const ratio = a / b
   return ratio < expected
@@ -31,22 +22,21 @@ const ratioIsBelow = (a, b, expected) => {
 
 test('[bench] isSymlink is significantly faster than realpathSync in a naive microbenchmark', async (t) => {
   await createProject4Symlink()
-  const entries = [
-    bench(() => {
+  const results = {
+    ...bench(() => {
       isSymlink(symlink)
     }, 'isSymlink(symlink)'),
-    bench(() => {
+    ...bench(() => {
       isSymlink(notsymlink)
     }, 'isSymlink(notsymlink)'),
-    bench(() => {
+    ...bench(() => {
       realpathSync(symlink)
     }, 'realpathSync(symlink)'),
-    bench(() => {
+    ...bench(() => {
       realpathSync(notsymlink)
     }, 'realpathSync(notsymlink)'),
-  ]
+  }
 
-  const results = Object.fromEntries(entries)
   t.log({ results })
   t.assert(
     ratioIsBelow(

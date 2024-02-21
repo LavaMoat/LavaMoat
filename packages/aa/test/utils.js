@@ -26,3 +26,21 @@ exports.createProject4Symlink = async () => {
   const target = path.join(__dirname, 'projects', '4', 'packages', 'aaa')
   await exports.osIndependentSymlink(target, src)
 }
+
+exports.bench = (fn, name, iterations = 10000) => {
+  const t0 = performance.now()
+  for (let i = 0; i < iterations; i++) {
+    fn()
+  }
+  const t1 = performance.now()
+  return { [name]: (t1 - t0) / iterations }
+}
+
+exports.benchAsync = async (fn, name, iterations = 1000) => {
+  const t0 = performance.now()
+  for (let i = 0; i < iterations; i++) {
+    await fn()
+  }
+  const t1 = performance.now()
+  return { [name]: (t1 - t0) / iterations }
+}
