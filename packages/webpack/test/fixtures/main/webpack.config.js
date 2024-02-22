@@ -52,19 +52,12 @@ function makeConfig(lmOptions = {}) {
           test: /\.ts$/,
           use: [
             {
-              loader: 'esbuild-loader',
+              loader: 'babel-loader',
               options: {
-                loader: 'ts',
-                tsconfigRaw: {
-                  compilerOptions: {
-                    noImplicitAny: true,
-                    target: 'es6',
-                    jsx: 'react',
-                    moduleResolution: 'node',
-                    allowSyntheticDefaultImports: true,
-                    esModuleInterop: true,
-                  },
-                },
+                presets: [
+                  '@babel/preset-env',
+                  '@babel/preset-typescript',
+                ],
               },
             },
           ],
