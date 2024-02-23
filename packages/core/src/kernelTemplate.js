@@ -62,7 +62,7 @@
       stackFiltering: 'verbose',
       // prevents most common override mistake cases from tripping up users
       overrideTaming: 'severe',
-      // preserves JS locale methods
+      // preserves JS locale methods, to avoid confusing users
       // prevents aliasing: toLocaleString() to toString(), etc
       localeTaming: 'unsafe',
     }
