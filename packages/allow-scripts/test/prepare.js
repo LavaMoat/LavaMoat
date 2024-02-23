@@ -1,20 +1,17 @@
-const { execSync } = require('child_process')
-const { readdirSync } = require('node:fs')
+const { execSync } = require('node:child_process')
+const { existsSync, readdirSync } = require('node:fs')
 const { join, normalize } = require('node:path')
 
 // Execute allow-scripts command inside each test project directory
-readdirSync(join(__dirname, '../test/projects/'), { withFileTypes: true })
-  .filter((p) => p.isDirectory())
+const baseDir = join(__dirname, '../test/projects/')
+readdirSync(baseDir, { withFileTypes: true })
+  .filter((p) => p.isDirectory() && existsSync(join(baseDir, p.name, 'package.json')))
   .forEach((dir) => {
-    try {
-      execSync(`node ${normalize('../../../src/cli.js')} auto --experimental-bins`, {
-        cwd: join(__dirname, '../test/projects/', dir.name),
+    execSync(
+      [process.execPath, normalize('../../../src/cli.js'), 'auto', '--experimental-bins'].join(' '),
+      {
+        cwd: join(baseDir, dir.name),
         stdio: 'inherit',
-      })
-    } catch (e) {
-      // ignore expected error
-      if (e.status !== 1) {
-        throw e
       }
-    }
+    )
   })

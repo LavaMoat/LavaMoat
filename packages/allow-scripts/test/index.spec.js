@@ -31,14 +31,14 @@ const run = (t, args, cwd) => {
   // Path to the allow-scripts executable
   const ALLOW_SCRIPTS_BIN = require.resolve('../src/cli')
   const options = realisticEnvOptions(cwd)
-  const result = spawnSync('node', [ALLOW_SCRIPTS_BIN, ...args], options)
+  const result = spawnSync(process.execPath, [ALLOW_SCRIPTS_BIN, ...args], options)
 
   if (
     typeof result.stderr === 'undefined' ||
     typeof result.status !== 'number'
   ) {
     t.fail(
-      `Failed calling 'node ${ALLOW_SCRIPTS_BIN} ${args.join(' ')}': ${JSON.stringify(
+      `Failed calling '${process.execPath} ${ALLOW_SCRIPTS_BIN} ${args.join(' ')}': ${JSON.stringify(
         {
           cwd,
           options,
