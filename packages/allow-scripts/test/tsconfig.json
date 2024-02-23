@@ -3,7 +3,7 @@
   "compilerOptions": {
     "checkJs": false
   },
-  "include": ["**/*.spec.js"],
+  "include": ["**/*.js"],
   "references": [
     {
       "path": "../src/tsconfig.json"
