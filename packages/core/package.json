@@ -39,6 +39,7 @@
   },
   "dependencies": {
     "@babel/types": "7.26.0",
+    "@lavamoat/types": "^0.0.0",
     "json-stable-stringify": "1.1.1",
     "lavamoat-tofu": "^8.0.4",
     "merge-deep": "3.0.3",
