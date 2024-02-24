@@ -6,22 +6,25 @@
   },
   "references": [
     {
-      "path": "./packages/allow-scripts"
+      "path": "packages/allow-scripts",
     },
     {
-      "path": "./packages/aa"
+      "path": "packages/aa",
     },
     {
-      "path": "./packages/core"
+      "path": "packages/core",
     },
     {
-      "path": "./packages/laverna"
+      "path": "packages/laverna",
     },
     {
-      "path": "./packages/tofu"
+      "path": "packages/tofu",
     },
     {
-      "path": "./packages/webpack"
+      "path": "packages/types",
+    },
+    {
+      "path": "packages/webpack",
     }
   ]
 }
