@@ -31,7 +31,6 @@
     "release:rebuild": "npm run rebuild && npm run test:prep && npm run test:workspaces",
     "setup": "husky; npm run rebuild",
     "test": "npm run build && npm run test:prep && npm run test:workspaces && npm run test:scripts",
-    "test:dirty-check": "node ./scripts/dirty-check.js",
     "test:prep": "npm run --workspaces --if-present test:prep",
     "test:scripts": "ava --config scripts/ava.config.mjs",
     "test:workspaces": "npm run --workspaces --if-present test",
