@@ -1,22 +1,58 @@
-import { type RequireAtLeastOne } from 'type-fest'
-import { type LavamoatModuleRecord } from '../module-record'
+import { LavamoatModuleRecord } from '../module-record'
+
+/**
+ * Schema for LavaMoat policy override files
+ *
+ * Alias of {@link LavaMoatPolicy}
+ *
+ * @deprecated Use {@link LavaMoatPolicy} instead
+ */
+export type LavaMoatPolicyOverrides = LavaMoatPolicy
+
+/**
+ * Schema for LavaMoat "debug" policy files
+ */
+export type LavaMoatPolicyDebug<T extends Resources = Resources> =
+  LavaMoatPolicy<T> & {
+    debugInfo: Record<string, DebugInfo>
+  }
 
 /**
  * Schema for LavaMoat policy files
  */
-export type LavaMoatPolicy = RequireAtLeastOne<
-  PartialLavaMoatPolicy,
-  'resources' | 'resolutions'
->
-export type LavaMoatPolicyOverrides = PartialLavaMoatPolicy
+export interface LavaMoatPolicy<T extends Resources = Resources> {
+  /**
+   * Resource policy for all packages in the application
+   */
+  resources: T
 
-export type LavaMoatPolicyDebug = LavaMoatPolicy & {
-  debugInfo: Record<string, DebugInfo>
+  /**
+   * Module resolution mapping
+   *
+   * @deprecated Resolutions are better handled by package managers. A future
+   *   version will remove support for this field.
+   */
+  resolutions?: Resolutions
+
+  /**
+   * If this is set, then the root package is considered untrusted and will have
+   * a matching policy in {@link LavaMoatPolicy.resources}
+   */
+  root?: RootPolicy<T>
 }
 
-export interface PartialLavaMoatPolicy {
-  resources?: Resources
-  resolutions?: Resolutions
+/**
+ * Root configuration
+ *
+ * @template T The value of {@link LavaMoatPolicy.resources}
+ */
+export interface RootPolicy<T extends Resources = Resources> {
+  /**
+   * Reference to a package name in {@link LavaMoatPolicy.resources}.
+   *
+   * The root will inherit policy from this package.
+   */
+  usePolicy?: keyof T
 }
 
 export interface DebugInfo {
@@ -63,9 +99,26 @@ export interface NodeLocation {
  * @deprecated - Use `true` instead
  */
 export type GlobalPolicyRead = 'read'
+
+/**
+ * A writable global property
+ */
 export type GlobalPolicyWrite = 'write'
 
-export type GlobalPolicyValue = GlobalPolicyRead | GlobalPolicyWrite | boolean
+/**
+ * A property which can be defined via {@link Object.defineProperty} and/or
+ * {@link Object.defineProperties}
+ */
+export type GlobalPolicyRedefine = 'redefine'
+
+/**
+ * Possible values for global policy
+ */
+export type GlobalPolicyValue =
+  | boolean
+  | GlobalPolicyRead
+  | GlobalPolicyRedefine
+  | GlobalPolicyWrite
 
 /**
  * Describe the resources available to your application and direct dependencies
