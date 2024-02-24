@@ -11,7 +11,8 @@
     "packages/laverna": {},
     "packages/node": {},
     "packages/preinstall-always-fail": {},
-    "packages/tofu": {}
+    "packages/tofu": {},
+    "packages/types": {}
   },
   "plugins": ["node-workspace"]
 }

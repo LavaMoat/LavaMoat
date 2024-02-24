@@ -8,5 +8,6 @@
   "packages/laverna": "1.2.0",
   "packages/node": "8.0.7",
   "packages/preinstall-always-fail": "2.1.0",
-  "packages/tofu": "7.3.0"
+  "packages/tofu": "7.3.0",
+  "packages/types": "0.0.0"
 }
