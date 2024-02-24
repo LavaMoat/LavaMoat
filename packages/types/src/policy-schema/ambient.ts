@@ -25,7 +25,9 @@ declare global {
     export type ResourcePolicy = import('./index').ResourcePolicy
     export type GlobalPolicy = import('./index').GlobalPolicy
     export type PackagePolicy = import('./index').PackagePolicy
+    export type BuiltinPolicy = import('./index').BuiltinPolicy
   }
 }
 
-export {}
+export { }
+
