@@ -7,7 +7,7 @@ module.exports = { parseForPolicy }
 
 /**
  * @param {ParseForPolicyOpts} opts
- * @returns {Promise<import('./schema').LavaMoatPolicy>} Policy object
+ * @returns {Promise<import('@lavamoat/types').LavaMoatPolicy>} Policy object
  */
 async function parseForPolicy({
   moduleSpecifier,
@@ -32,9 +32,11 @@ async function parseForPolicy({
 }
 
 /**
+ * @template {any[]} [InitArgs=import('@lavamoat/types').DefaultModuleInitArgs]
+ *   Default is `import('@lavamoat/types').DefaultModuleInitArgs`
  * @callback ImportHookFn
  * @param {string} address
- * @returns {Promise<import('./moduleRecord').LavamoatModuleRecord>}
+ * @returns {Promise<import('@lavamoat/types').LavamoatModuleRecord<InitArgs>>}
  */
 
 /**
@@ -58,18 +60,21 @@ async function parseForPolicy({
  */
 
 /**
+ * @template {any[]} [InitArgs=import('@lavamoat/types').DefaultModuleInitArgs]
+ *   Default is `import('@lavamoat/types').DefaultModuleInitArgs`
  * @typedef ParseForPolicyOpts
  * @property {string} moduleSpecifier
- * @property {ImportHookFn} importHook
+ * @property {ImportHookFn<InitArgs>} importHook
  * @property {IsBuiltinFn} isBuiltin
  * @property {ShouldImportFn} [shouldImport]
  * @property {ResolveFn} [resolveHook]
- * @property {import('./schema').LavaMoatPolicyOverrides} [policyOverride]
+ * @property {import('@lavamoat/types').LavaMoatPolicyOverrides} [policyOverride]
  * @property {boolean} [includeDebugInfo]
  * @property {import('./generatePolicy').ModuleInspector} [inspector]
  */
 
 /**
  * @param {ParseForPolicyOpts} opts
- * @returns {Promise<import('./schema').LavaMoatPolicySchema>} Policy object
+ * @returns {Promise<import('@lavamoat/types').LavaMoatPolicySchema>} Policy
+ *   object
  */
