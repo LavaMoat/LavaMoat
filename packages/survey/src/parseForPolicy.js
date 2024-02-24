@@ -4,8 +4,9 @@ const {
   makeImportHook,
 } = require('lavamoat/src/parseForPolicy')
 const { builtinModules: builtinPackages } = require('node:module')
-const { inspectSesCompat, codeSampleFromAstNode } = require('lavamoat-tofu')
+const { inspectSesCompat } = require('lavamoat-tofu')
 const { walk } = require('lavamoat-core/src/walk')
+const { codeSampleFromAstNode } = require('lavamoat-core')
 
 module.exports = { parseForPolicy }
 

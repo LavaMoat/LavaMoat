@@ -1,7 +1,15 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+// @ts-check
+
+import {
+  DefaultModuleInitArgs,
+  LavaMoatPolicy,
+  LavaMoatPolicyOverrides,
+  ModuleInitializer,
+} from '@lavamoat/types'
 import type { ExecutionContext } from 'ava'
-import { ModuleInitializer } from '../src/moduleRecord'
+import { SetRequired } from 'type-fest'
 import type { LavaMoatOpts } from '../src/options'
-import { LavaMoatPolicy, LavaMoatPolicyOverrides } from '../src/schema'
 
 export type ScenarioType = 'truthy' | 'falsy' | 'deepEqual'
 
@@ -19,7 +27,9 @@ export interface NormalizedScenarioFile extends ScenarioFile {
 /**
  * Scenario file which is a `.js` file and has had defaults applied
  */
-export interface NormalizedScenarioJSFile extends ScenarioFile {
+export interface NormalizedScenarioJSFile<
+  InitArgs extends any[] = DefaultModuleInitArgs,
+> extends ScenarioFile<InitArgs> {
   file: JSFilepath
   specifier: string
   packageName: string
@@ -28,14 +38,16 @@ export interface NormalizedScenarioJSFile extends ScenarioFile {
   importMap: Record<string, string>
 }
 
-export interface NormalizedBuiltin extends NormalizedScenarioJSFile {
-  specifier: string
-  moduleInitializer: ModuleInitializer
-}
+export type NormalizedBuiltin<InitArgs extends any[] = DefaultModuleInitArgs> =
+  SetRequired<
+    NormalizedScenarioJSFile<InitArgs>,
+    'specifier' | 'moduleInitializer'
+  >
+
 /**
  * Scenario file as provided by user
  */
-export interface ScenarioFile {
+export interface ScenarioFile<InitArgs extends any[] = DefaultModuleInitArgs> {
   /**
    * File content
    */
@@ -49,7 +61,7 @@ export interface ScenarioFile {
   type?: ScenarioFileType
   entry?: boolean
   importMap?: Record<string, string>
-  moduleInitializer?: ModuleInitializer
+  moduleInitializer?: ModuleInitializer<InitArgs>
 }
 
 export type ScenarioSourceFn = () => void

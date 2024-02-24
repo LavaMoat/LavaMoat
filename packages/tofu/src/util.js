@@ -132,7 +132,7 @@ function getTailmostMatchingChain(items, matcher) {
 /**
  * If array contains 'x' and 'x.y' just keep 'x'
  *
- * @param {Map<string, import('lavamoat-core').GlobalPolicyValue>} globalsConfig
+ * @param {Map<string, import('@lavamoat/types').GlobalPolicyValue>} globalsConfig
  * @returns
  */
 function reduceToTopmostApiCalls(globalsConfig) {
@@ -194,9 +194,9 @@ function reduceToTopmostApiCallsFromStrings(keyPathStrings) {
 /**
  * Add variable to results, if not already set
  *
- * @param {Map<string, import('lavamoat-core').GlobalPolicyValue>} globalsConfig
+ * @param {Map<string, import('@lavamoat/types').GlobalPolicyValue>} globalsConfig
  * @param {string} identifierPath
- * @param {import('lavamoat-core').GlobalPolicyValue} identifierUse
+ * @param {import('@lavamoat/types').GlobalPolicyValue} identifierUse
  */
 function addGlobalUsage(globalsConfig, identifierPath, identifierUse) {
   if (globalsConfig.has(identifierPath) && identifierUse !== 'write') {
@@ -208,8 +208,8 @@ function addGlobalUsage(globalsConfig, identifierPath, identifierUse) {
 /**
  * Merge two global policy configs (as `Map`s) together
  *
- * @param {Map<string, import('lavamoat-core').GlobalPolicyValue>} configA
- * @param {Map<string, import('lavamoat-core').GlobalPolicyValue>} configB
+ * @param {Map<string, import('@lavamoat/types').GlobalPolicyValue>} configA
+ * @param {Map<string, import('@lavamoat/types').GlobalPolicyValue>} configB
  * @returns
  */
 function mergePolicy(configA, configB) {

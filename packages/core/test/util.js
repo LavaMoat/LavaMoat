@@ -298,9 +298,9 @@ function createScenarioFromScaffold({
     expectedFailureMessageRegex,
     entries: ['entry.js'],
     files: _files,
-    config: /** @type {import('../src/schema').LavaMoatPolicy} */ (_config),
+    config: /** @type {import('@lavamoat/types').LavaMoatPolicy} */ (_config),
     configOverride:
-      /** @type {import('../src/schema').LavaMoatPolicyOverrides} */ (
+      /** @type {import('@lavamoat/types').LavaMoatPolicyOverrides} */ (
         _configOverride
       ),
     context,
@@ -644,7 +644,7 @@ function evaluateWithSourceUrl(filename, content, context) {
  *   must use a string, since `import` and `export` are only valid at the top
  *   level.
  * @param {Partial<GeneratePolicyFromFilesOpts>} [opts]
- * @returns {Promise<import('../src/schema').LavaMoatPolicy>}
+ * @returns {Promise<import('@lavamoat/types').LavaMoatPolicy>}
  */
 async function createConfigForTest(testFn, opts = {}) {
   /** @type {import('./scenario').NormalizedScenarioJSFile[]} */
