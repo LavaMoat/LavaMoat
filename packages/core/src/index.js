@@ -10,6 +10,7 @@ const {
 const { mergePolicy } = require('./mergePolicy')
 const { applySourceTransforms } = require('./sourceTransforms')
 const { makeInitStatsHook } = require('./makeInitStatsHook')
+const { codeSampleFromAstNode } = require('./codeSampleFromAstNode')
 
 module.exports = {
   // generating the kernel
@@ -27,4 +28,5 @@ module.exports = {
   LavamoatModuleRecord,
   // utils
   makeInitStatsHook,
+  codeSampleFromAstNode,
 }
