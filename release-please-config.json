@@ -4,20 +4,21 @@
   "packages": {
     "packages/aa": {},
     "packages/allow-scripts": {},
-    "packages/webpack": {},
     "packages/browserify": {},
     "packages/core": {},
     "packages/git-safe-dependencies": {
       "initial-version": "0.0.1"
     },
+    "packages/lavamoat-node": {},
     "packages/lavapack": {},
     "packages/laverna": {},
-    "packages/lavamoat-node": {},
-    "packages/preinstall-always-fail": {},
-    "packages/tofu": {},
     "packages/node": {
       "initial-version": "0.0.1"
-    }
+    },
+    "packages/preinstall-always-fail": {},
+    "packages/tofu": {},
+    "packages/types": {},
+    "packages/webpack": {}
   },
   "plugins": ["node-workspace"]
 }
