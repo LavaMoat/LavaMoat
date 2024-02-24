@@ -7,22 +7,31 @@ const { isMemberLikeExpression } = require('./util.js')
 module.exports = { inspectPrimordialAssignments }
 
 /**
+ * @typedef {import('type-fest').SetFieldType<
+ *   import('@babel/types').Node,
+ *   'loc',
+ *   import('@babel/types').SourceLocation
+ * >} NodeWithLocation
+ */
+
+/**
  * @typedef PrimordialAssignment
- * @property {import('@babel/traverse').Node} node
- * @property {import('@babel/traverse').NodePath} path
+ * @property {NodeWithLocation} node
+ * @property {import('@babel/traverse').NodePath<NodeWithLocation>} path
  * @property {string[]} memberPath
  */
 
 /**
- * @typedef {import('@babel/types').MemberExpression | import('@babel/types').OptionalMemberExpression} MemberLikeExpression
+ * @typedef {import('@babel/types').MemberExpression
+ *   | import('@babel/types').OptionalMemberExpression} MemberLikeExpression
  */
 
 /**
- * @typedef {MemberLikeExpression & Omit<MemberLikeExpression, 'computed'> & {computed: false}} NonComputedMemberLikeExpression
+ * @typedef {MemberLikeExpression &
+ *   Omit<MemberLikeExpression, 'computed'> & { computed: false }} NonComputedMemberLikeExpression
  */
 
 /**
- *
  * @param {import('@babel/types').Node} ast
  * @param {readonly string[]} namedIntrinsics
  * @returns {PrimordialAssignment[]}
@@ -63,14 +72,19 @@ function inspectPrimordialAssignments(
         return
       }
       // its a match!
-      results.push({ node, path, memberPath })
+      results.push({
+        node: /** @type {NodeWithLocation} */ (node),
+        path: /**
+         * @type {import('@babel/traverse').NodePath<NodeWithLocation>}
+         */ (path),
+        memberPath,
+      })
     },
   })
   return results
 }
 
 /**
- *
  * @param {MemberLikeExpression} node
  * @returns {string[]}
  */
