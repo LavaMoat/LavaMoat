@@ -12,7 +12,6 @@ declare global {
   namespace LMPolicy {
     export type LavaMoatPolicy = import('./index').LavaMoatPolicy
     export type LavaMoatPolicyDebug = import('./index').LavaMoatPolicyDebug
-    export type PartialLavaMoatPolicy = import('./index').PartialLavaMoatPolicy
     export type DebugInfo = import('./index').DebugInfo
     export type SesCompat = import('./index').SesCompat
     export type SesCompatObj = import('./index').SesCompatObj
@@ -25,6 +24,11 @@ declare global {
     export type ResourcePolicy = import('./index').ResourcePolicy
     export type GlobalPolicy = import('./index').GlobalPolicy
     export type PackagePolicy = import('./index').PackagePolicy
+    export type BuiltinPolicy = import('./index').BuiltinPolicy
+    export type LavaMoatPolicyOverrides =
+      import('./index').LavaMoatPolicyOverrides
+
+    export type RootPolicy = import('./index').RootPolicy
   }
 }
 

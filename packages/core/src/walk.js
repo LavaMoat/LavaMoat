@@ -7,7 +7,7 @@ module.exports = { walk, eachNodeInTree }
 
 /**
  * @callback VisitorFn
- * @param {import('./moduleRecord').LavamoatModuleRecord} moduleRecord
+ * @param {import('@lavamoat/types').LavamoatModuleRecord} moduleRecord
  * @returns {void}
  */
 
@@ -44,7 +44,7 @@ async function walk({
  * @param {import('./parseForPolicy').ShouldImportFn} [options.shouldImport]
  * @param {Set<string>} [options.visitedSpecifiers]
  * @returns {AsyncIterableIterator<
- *   import('./moduleRecord').LavamoatModuleRecord
+ *   import('@lavamoat/types').LavamoatModuleRecord
  * >}
  */
 // NOTE: i think this is depth first in a way that doesnt take advantage of concurrency
@@ -62,7 +62,7 @@ async function* eachNodeInTree({
   yield moduleRecord
 
   // walk children specified in importMap and policyOverride
-  const importMapChildren = Object.values(moduleRecord.importMap)
+  const importMapChildren = Object.values(moduleRecord.importMap ?? {})
   for (const childSpecifier of importMapChildren) {
     // skip children that are set to null (resolution was skipped)
     if (childSpecifier === null) {
