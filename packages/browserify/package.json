@@ -25,7 +25,7 @@
     "build:ses": "(cd ./node_modules/ses && npm install && npm run build && cp ./dist/ses.umd.js ../../lib/)",
     "lint:deps": "depcheck",
     "test": "npm run test:prep && npm run test:ava",
-    "test:ava": "ava --serial",
+    "test:ava": "ava",
     "test:prep": "cross-env WRITE_AUTO_POLICY=1 node ./test/fixtures/secureBundling/run.js"
   },
   "dependencies": {
@@ -52,13 +52,6 @@
     "tmp-promise": "3.0.3",
     "vinyl-buffer": "1.0.1",
     "watchify": "4.0.0"
-  },
-  "ava": {
-    "files": [
-      "test/*.spec.js"
-    ],
-    "timeout": "4m",
-    "concurrency": 1
   },
   "lavamoat": {
     "allowScripts": {
