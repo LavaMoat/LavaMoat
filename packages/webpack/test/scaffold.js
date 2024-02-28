@@ -1,5 +1,3 @@
-// @ts-check
-
 const path = require('path')
 const webpack = require('webpack')
 const memfs = require('memfs')
@@ -7,6 +5,15 @@ const { toSnapshotSync } = require('memfs/lib/snapshot')
 const { createContext, Script, runInNewContext } = require('vm')
 const { readFileSync } = require('fs')
 
+/**
+ * Run a webpack build and return the output
+ *
+ * @param {import('webpack').Configuration} webpackConfig
+ * @param {object} options
+ * @param {boolean} [options.writeFS] - Whether to write the output to the file
+ *   system
+ * @returns {Promise<{ stdout: string; snapshot?: Record<string, string> }>}
+ */
 exports.scaffold = async function runWebpackBuild(
   webpackConfig,
   { writeFS = false } = {}
@@ -16,6 +23,9 @@ exports.scaffold = async function runWebpackBuild(
 
   // Create a compiler instance
   const compiler = webpack(webpackConfig)
+  /**
+   * @type {memfs.IFs}
+   */
   let fs
 
   if (!writeFS) {
@@ -23,8 +33,6 @@ exports.scaffold = async function runWebpackBuild(
     const memoryFs = memfs.createFsFromVolume(new memfs.Volume())
     compiler.outputFileSystem = memoryFs
     fs = memoryFs
-  } else {
-    fs = require('fs')
   }
 
   return new Promise((resolve, reject) => {
@@ -42,8 +50,11 @@ exports.scaffold = async function runWebpackBuild(
         reject(Error('webpack build reported errors'))
       }
 
-      // Get a snapshot of all files in the memory file system
-      const snapshot = convertToMap(toSnapshotSync({ fs }))
+      let snapshot
+      if (!writeFS) {
+        // Get a snapshot of all files in the memory file system
+        snapshot = convertToMap(toSnapshotSync({ fs }))
+      }
 
       resolve({
         stdout: stats ? stats.toString({ colors: false }) : '',
@@ -53,7 +64,15 @@ exports.scaffold = async function runWebpackBuild(
   })
 }
 
+/**
+ * Convert a memfs snapshot to a map
+ *
+ * @param {import('memfs/lib/snapshot').SnapshotNode} input
+ * @param {string} [path]
+ * @returns {Record<string, any>}
+ */
 function convertToMap(input, path = '') {
+  /** @type {Record<string, any>} */
   let result = {}
 
   if (Array.isArray(input)) {
@@ -80,6 +99,13 @@ const defaultGlobals = () => ({
   },
 })
 
+/**
+ * Run a script in a new context, without SES
+ *
+ * @param {string} code
+ * @param {Record<string, any>} globals
+ * @returns {any}
+ */
 function runScript(code, globals = defaultGlobals()) {
   if (typeof code !== 'string' || code === '') {
     throw new Error('runScript requires a bundle string as the first argument')
@@ -89,6 +115,13 @@ function runScript(code, globals = defaultGlobals()) {
 }
 exports.runScript = runScript
 
+/**
+ * Run a script with SES
+ *
+ * @param {string} bundle
+ * @param {Record<string, any>} globals
+ * @returns {any}
+ */
 function runScriptWithSES(bundle, globals = defaultGlobals()) {
   if (typeof bundle !== 'string' || bundle === '') {
     throw new Error(
