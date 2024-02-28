@@ -142,6 +142,54 @@ test('generatePolicy - config ignores newer intrinsics', async (t) => {
   )
 })
 
+test('generatePolicy - CJS should flag import/export as global', async (t) => {
+  const config = await createConfigForTest(function () {
+    globalThis.import
+    globalThis.export
+    require('node:util')
+  })
+
+  t.deepEqual(
+    config,
+    {
+      resources: {
+        test: {
+          globals: {
+            import: true,
+            export: true,
+          },
+        },
+      },
+    },
+    'config matches expected'
+  )
+})
+
+test('generatePolicy - ESM should flag require/module/exports as global', async (t) => {
+  const config = await createConfigForTest(`
+  require('node:util');
+  let e = exports
+  let m = module.exports
+  export const foo = 'bar';
+`)
+
+  t.deepEqual(
+    config,
+    {
+      resources: {
+        test: {
+          globals: {
+            require: true,
+            exports: true,
+            'module.exports': true,
+          },
+        },
+      },
+    },
+    'config matches expected'
+  )
+})
+
 // we no longer throw an error, we log a warning
 // test('generatePolicy - primordial modification', async (t) => {
 //   try {
