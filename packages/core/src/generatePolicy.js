@@ -173,7 +173,6 @@ function createModuleInspector(opts) {
     const ast =
       moduleRecord.ast ||
       parse(moduleRecord.content, {
-        // esm support
         sourceType: 'unambiguous',
         // someone must have been doing this
         allowReturnOutsideFunction: true,
