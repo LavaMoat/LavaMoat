@@ -7,10 +7,9 @@ const {
   getDefaultPaths,
 } = require('../src')
 const mergeDeep = require('merge-deep')
-const { runInContext, createContext } = require('vm')
+const { runInContext, createContext } = require('node:vm')
 const path = require('node:path')
-const { promises: fs } = require('fs')
-var tmp = require('tmp-promise')
+const tmp = require('tmp-promise')
 const stringify = require('json-stable-stringify')
 const { applySourceTransforms } = require('../src/sourceTransforms.js')
 
@@ -531,6 +530,16 @@ function evaluateWithSourceUrl(filename, content, context) {
   return { result, vmGlobalThis, vmContext, vmFeralFunction }
 }
 
+/**
+ * Create a LavaMoat policy config for a given test function
+ *
+ * @param {(() => any) | string} testFn - Test function which will be wrapped
+ *   and used as the module contents; otherwise a string of the module contents.
+ *   ESM modules must use a string, since `import` and `export` are only valid
+ *   at the top level.
+ * @param {import('../src/parseForPolicy.js').ParseForPolicyOpts} opts
+ * @returns {Promise<import('../src/schema').LavaMoatPolicy>}
+ */
 async function createConfigForTest(testFn, opts = {}) {
   const files = [
     {
@@ -551,7 +560,7 @@ async function createConfigForTest(testFn, opts = {}) {
       file: './node_modules/test/index.js',
       packageName: 'test',
       importMap: {},
-      content: `(${testFn})()`,
+      content: typeof testFn === 'function' ? `(${testFn})()` : `${testFn}`,
     },
   ]
   const policy = await generatePolicyFromFiles({ files, ...opts })

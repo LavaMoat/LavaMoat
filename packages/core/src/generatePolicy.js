@@ -21,6 +21,14 @@ const { mergePolicy } = require('./mergePolicy')
 
 const rootSlug = '$root$'
 
+/**
+ * Symbols that look like globals but aren't; indexed by source type.
+ */
+const MODULE_REFS = /** @type {const} */ ({
+  module: ['arguments', 'import', 'export'],
+  script: ['arguments', 'require', 'module', 'exports'],
+})
+
 module.exports = { rootSlug, createModuleInspector, getDefaultPaths }
 
 /**
@@ -166,7 +174,7 @@ function createModuleInspector(opts) {
       moduleRecord.ast ||
       parse(moduleRecord.content, {
         // esm support
-        sourceType: 'module',
+        sourceType: 'unambiguous',
         // someone must have been doing this
         allowReturnOutsideFunction: true,
         errorRecovery: true,
@@ -255,18 +263,12 @@ function createModuleInspector(opts) {
    * @param {boolean} includeDebugInfo
    */
   function inspectForGlobals(ast, moduleRecord, packageName, includeDebugInfo) {
-    const commonJsRefs = [
-      'require',
-      'module',
-      'exports',
-      'arguments',
-      'import',
-      'export',
-    ]
+    const moduleRefs = MODULE_REFS[ast.program.sourceType]
+
     const globalObjPrototypeRefs = Object.getOwnPropertyNames(Object.prototype)
     const foundGlobals = inspectGlobals(ast, {
       // browserify commonjs scope
-      ignoredRefs: [...commonJsRefs, ...globalObjPrototypeRefs],
+      ignoredRefs: [...moduleRefs, ...globalObjPrototypeRefs],
       // browser global refs + browserify global
       globalRefs: ['globalThis', 'self', 'window', 'global'],
     })
