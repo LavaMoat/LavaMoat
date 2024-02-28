@@ -326,7 +326,7 @@ function parseModule(moduleSrc, filename = '<unknown file>') {
     // transformFromAstAsync
     ast = parse(moduleSrc, {
       // esm support
-      sourceType: 'module',
+      sourceType: 'unambiguous',
       // someone must have been doing this
       allowReturnOutsideFunction: true,
       // plugins: [
