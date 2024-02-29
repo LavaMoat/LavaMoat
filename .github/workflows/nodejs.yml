@@ -34,7 +34,7 @@ jobs:
       - name: Upgrade npm # for workspace support
         run: npm i -g npm@9 # npm@9 supports our supported Node.js versions
       - name: Install Dependencies
-        uses: bahmutov/npm-install@5653d39101a041a30cc58572d6bd566b90a6de20 # v1.8.38
+        uses: bahmutov/npm-install@237ded403e6012a48281f4572eab0c8eafe55b3f # v1.10.1
         with:
           useRollingCache: true
           install-command: npm ci --foreground-scripts
@@ -49,7 +49,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
       - name: Install Dependencies
-        uses: bahmutov/npm-install@5653d39101a041a30cc58572d6bd566b90a6de20 # v1.8.38
+        uses: bahmutov/npm-install@237ded403e6012a48281f4572eab0c8eafe55b3f # v1.10.1
         with:
           useRollingCache: true
           install-command: npm ci --foreground-scripts
@@ -81,7 +81,7 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - name: Install Dependencies
-        uses: bahmutov/npm-install@d476752204653fb5cce6c09db0eaf220761f5d9e # v1.8.37
+        uses: bahmutov/npm-install@237ded403e6012a48281f4572eab0c8eafe55b3f # v1.10.1
         with:
           useRollingCache: true
           install-command: npm ci --foreground-scripts
@@ -107,7 +107,7 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - name: Install Dependencies
-        uses: bahmutov/npm-install@d476752204653fb5cce6c09db0eaf220761f5d9e # v1.8.37
+        uses: bahmutov/npm-install@237ded403e6012a48281f4572eab0c8eafe55b3f # v1.10.1
         with:
           useRollingCache: true
           install-command: npm ci --foreground-scripts
