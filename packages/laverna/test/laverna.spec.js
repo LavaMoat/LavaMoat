@@ -291,7 +291,7 @@ test('publishWorkspaces - invalid workspaces - not strings', async (t) => {
   })
 })
 
-test('publishWorkspaces - invalid JSON error from npm view', async (t) => {
+test('publishWorkspaces - invalid JSON error from `npm view`', async (t) => {
   const { fs } = memfs({
     '/': {
       'package.json': DEFAULT_ROOT_PKG_JSON,
@@ -319,6 +319,42 @@ test('publishWorkspaces - invalid JSON error from npm view', async (t) => {
     {
       instanceOf: SyntaxError,
     }
+  )
+})
+
+test('publishWorkspaces - `npm view` returns a single version', async (t) => {
+  const { fs } = memfs({
+    '/': {
+      'package.json': DEFAULT_ROOT_PKG_JSON,
+      packages: {
+        workspace1: {
+          'package.json': JSON.stringify({
+            name: 'workspace1',
+            version: '1.0.0',
+          }),
+        },
+      },
+    },
+  })
+
+  await t.notThrowsAsync(
+    t.context.runLaverna(
+      {},
+      {
+        fs,
+        execFile: async () => {
+          return { stdout: '"0.0.1"', stderr: '' }
+        },
+      }
+    )
+  )
+  const args = t.context.console.error.mock.calls.flatMap(
+    (call) => call.arguments
+  )
+  t.true(
+    args.some((arg) =>
+      `${arg}`.includes('These package(s) will be published:\nworkspace1@1.0.0')
+    )
   )
 })
 
