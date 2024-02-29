@@ -122,6 +122,18 @@ testInspect(
   }
 )
 
+test('cjs - when searching among zero elements, find zero elements', (t) => {
+  const ast = parse(
+    `
+  require('./stuff')
+  require('a')
+  `,
+    { sourceType: 'script' }
+  )
+  const { cjsImports: actual } = inspectImports(ast, [])
+  t.is(actual.length, 0)
+})
+
 function testInspect(label, opts, fn, expectedResultObj) {
   test(label, (t) => {
     const source = fnToCodeBlock(fn)

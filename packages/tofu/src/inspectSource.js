@@ -181,6 +181,7 @@ function inspectGlobals(
  * @returns {string[]} - List of imported identifiers
  */
 function inspectEsmImports(ast, packagesToInspect) {
+  const shouldInspectAll = !packagesToInspect
   const pkgsToInspect = new Set(packagesToInspect)
 
   /** @type {Set<string>} */
@@ -195,11 +196,7 @@ function inspectEsmImports(ast, packagesToInspect) {
   const handleNodePath = (path) => {
     const importSource = path.node.source?.value
 
-    if (
-      importSource &&
-      ((pkgsToInspect.size && pkgsToInspect.has(importSource)) ||
-        !pkgsToInspect.size)
-    ) {
+    if (importSource && (shouldInspectAll || pkgsToInspect.has(importSource))) {
       esmImports.add(importSource)
     }
   }

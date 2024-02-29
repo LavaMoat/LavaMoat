@@ -48,6 +48,18 @@ testInspect(
   ]
 )
 
+test('esm - when searching among zero elements, find zero elements', (t) => {
+  const ast = parse(
+    `
+  import { stuff } from './stuff.mjs';
+  import a from 'a';
+  `,
+    { sourceType: 'module' }
+  )
+  const actual = inspectEsmImports(ast, [])
+  t.is(actual.length, 0)
+})
+
 function testInspect(label, opts, fn, expected) {
   test(label, (t) => {
     const source = fnToCodeBlock(fn)
