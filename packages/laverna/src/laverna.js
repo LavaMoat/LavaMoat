@@ -180,6 +180,9 @@ exports.Laverna = class Laverna {
         throw err
       }
 
+      if (typeof json === 'string') {
+        json = [json]
+      }
       if (!isStringArray(json)) {
         throw new TypeError(
           `Output from \`npm view\` for ${Laverna.pkgToString(
