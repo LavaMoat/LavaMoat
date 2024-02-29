@@ -15,7 +15,7 @@ test.before(async (t) => {
   t.context.bundle = t.context.build.snapshot['/dist/app.js']
 })
 
-test('webpack/policy-gen - dist shape', (t) => {
+test('webpack/policy-gen - policy shape', (t) => {
   t.snapshot(t.context.build.snapshot['/dist/policy-snapshot.json'])
 })
 
