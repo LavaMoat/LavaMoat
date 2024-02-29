@@ -5,6 +5,11 @@
         "umd-package": true
       }
     },
+    "es6-module-package": {
+      "packages": {
+        "umd-package": true
+      }
+    },
     "node-global-package": {
       "globals": {
         "console.log": true
