@@ -6,6 +6,12 @@
   * dependencies
     * lavamoat-core bumped from ^15.1.0 to ^15.1.1
 
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-core bumped from ^15.2.0 to ^15.2.1
+
 ## [7.0.4](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-viz-v7.0.3...lavamoat-viz-v7.0.4) (2024-02-29)
 
 
