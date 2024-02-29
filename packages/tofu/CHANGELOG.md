@@ -1,5 +1,19 @@
 # Changelog
 
+## [7.2.2](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-tofu-v7.2.1...lavamoat-tofu-v7.2.2) (2024-02-29)
+
+
+### Bug Fixes
+
+* **tofu:** fix logic error in inspectEsmImports ([4c50878](https://github.com/LavaMoat/LavaMoat/commit/4c508782be9035c41a32712dc2039b95c8a6bc06))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * lavamoat-core bumped from ^15.2.0 to ^15.2.1
+
 ## [7.2.1](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-tofu-v7.2.0...lavamoat-tofu-v7.2.1) (2024-02-29)
 
 
