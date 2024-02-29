@@ -1,13 +1,13 @@
 {
   "packages/aa": "4.1.0",
   "packages/allow-scripts": "3.0.3",
-  "packages/webpack": "0.2.0-beta.0",
-  "packages/browserify": "17.0.5",
-  "packages/core": "15.2.0",
-  "packages/lavapack": "6.1.1",
+  "packages/webpack": "0.2.1-beta.0",
+  "packages/browserify": "17.0.6",
+  "packages/core": "15.2.1",
+  "packages/lavapack": "6.1.2",
   "packages/laverna": "1.0.0",
-  "packages/node": "8.0.4",
+  "packages/node": "8.0.5",
   "packages/preinstall-always-fail": "2.0.0",
-  "packages/tofu": "7.2.1",
-  "packages/viz": "7.0.4"
+  "packages/tofu": "7.2.2",
+  "packages/viz": "7.0.5"
 }

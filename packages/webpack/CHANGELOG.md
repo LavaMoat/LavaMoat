@@ -12,6 +12,12 @@
   * dependencies
     * lavamoat-core bumped from ^15.1.1 to ^15.1.2
 
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-core bumped from ^15.2.0 to ^15.2.1
+
 ## [0.2.0-beta.0](https://github.com/LavaMoat/LavaMoat/compare/webpack-v0.1.3-beta.0...webpack-v0.2.0-beta.0) (2024-02-29)
 
 

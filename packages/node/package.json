@@ -1,6 +1,6 @@
 {
   "name": "lavamoat",
-  "version": "8.0.4",
+  "version": "8.0.5",
   "description": "",
   "repository": {
     "type": "git",
@@ -39,8 +39,8 @@
     "bindings": "1.5.0",
     "htmlescape": "1.1.1",
     "json-stable-stringify": "1.1.1",
-    "lavamoat-core": "^15.2.0",
-    "lavamoat-tofu": "^7.2.1",
+    "lavamoat-core": "^15.2.1",
+    "lavamoat-tofu": "^7.2.2",
     "node-gyp-build": "4.8.0",
     "resolve": "1.22.8",
     "yargs": "17.7.2"

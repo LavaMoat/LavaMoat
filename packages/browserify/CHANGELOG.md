@@ -26,6 +26,13 @@
   * dependencies
     * @lavamoat/lavapack bumped from ^6.0.3 to ^6.1.0
 
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @lavamoat/lavapack bumped from ^6.1.1 to ^6.1.2
+    * lavamoat-core bumped from ^15.2.0 to ^15.2.1
+
 ## [17.0.5](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-browserify-v17.0.4...lavamoat-browserify-v17.0.5) (2024-02-29)
 
 
