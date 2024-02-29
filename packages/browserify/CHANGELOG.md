@@ -26,6 +26,22 @@
   * dependencies
     * @lavamoat/lavapack bumped from ^6.0.3 to ^6.1.0
 
+## [17.0.5](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-browserify-v17.0.4...lavamoat-browserify-v17.0.5) (2024-02-29)
+
+
+### Bug Fixes
+
+* **webpack:** prevent lockdown from being minified ([aa195e5](https://github.com/LavaMoat/LavaMoat/commit/aa195e5c0ba663cda67189fd4ecd7aa62b2a1484))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @lavamoat/aa bumped from ^4.0.1 to ^4.1.0
+    * @lavamoat/lavapack bumped from ^6.1.0 to ^6.1.1
+    * lavamoat-core bumped from ^15.1.2 to ^15.2.0
+
 ## [17.0.3](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-browserify-v17.0.2...lavamoat-browserify-v17.0.3) (2024-02-07)
 
 

@@ -12,6 +12,30 @@
   * dependencies
     * lavamoat-core bumped from ^15.1.1 to ^15.1.2
 
+## [0.2.0-beta.0](https://github.com/LavaMoat/LavaMoat/compare/webpack-v0.1.3-beta.0...webpack-v0.2.0-beta.0) (2024-02-29)
+
+
+### Features
+
+* **webpack:** policy generation - experimental ([2d8c49a](https://github.com/LavaMoat/LavaMoat/commit/2d8c49ad622d53e0cdfddf12dfb3d7587905f771))
+* **webpack:** policy loading, generation and overrides put together ([1bf3702](https://github.com/LavaMoat/LavaMoat/commit/1bf370270c91afafa20b6331b0b478b16cd1b55b))
+* **webpack:** support webpack replacing  with __webpack_require__.g ([6c25451](https://github.com/LavaMoat/LavaMoat/commit/6c254510286964f0753dc0600d7b7798f7eded9c))
+* **webpack:** switch to browser-resolve and include dev dependencies in aa ([29cc3ac](https://github.com/LavaMoat/LavaMoat/commit/29cc3acb89f9f464a56076cf2d7a29c182352995))
+
+
+### Bug Fixes
+
+* **webpack:** fix typescript complaints ([fc41eda](https://github.com/LavaMoat/LavaMoat/commit/fc41eda86bfd680fbeadce72954b787864c2884f))
+* **webpack:** prevent lockdown from being minified ([aa195e5](https://github.com/LavaMoat/LavaMoat/commit/aa195e5c0ba663cda67189fd4ecd7aa62b2a1484))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @lavamoat/aa bumped from ^4.0.1 to ^4.1.0
+    * lavamoat-core bumped from ^15.1.2 to ^15.2.0
+
 ## [0.1.1-beta.0](https://github.com/LavaMoat/LavaMoat/compare/webpack-v0.1.0-beta.0...webpack-v0.1.1-beta.0) (2024-01-18)
 
 

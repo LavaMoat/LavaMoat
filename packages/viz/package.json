@@ -1,6 +1,6 @@
 {
   "name": "lavamoat-viz",
-  "version": "7.0.3",
+  "version": "7.0.4",
   "description": "This is a dashboard for exploring a dependency graph and LavaMoat policy file",
   "repository": {
     "type": "git",
@@ -34,7 +34,7 @@
     "test": "npm run build"
   },
   "dependencies": {
-    "lavamoat-core": "^15.1.2",
+    "lavamoat-core": "^15.2.0",
     "ncp": "2.0.0",
     "open": "8.4.2",
     "pify": "5.0.0",

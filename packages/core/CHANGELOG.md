@@ -1,5 +1,30 @@
 # Changelog
 
+## [15.2.0](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v15.1.2...lavamoat-core-v15.2.0) (2024-02-29)
+
+
+### Features
+
+* **core:** ESM support in policy generation ([60dc4fa](https://github.com/LavaMoat/LavaMoat/commit/60dc4fa750ffea336f23baaee7f82ea21d2ca8e3))
+* **core:** return attempted path when parsing JSON of policy fails ([ea7f3d4](https://github.com/LavaMoat/LavaMoat/commit/ea7f3d49c42e57723707eefd3c399943344077cc))
+* **core:** turn off localeTaming in ses lockdown by default ([e37582f](https://github.com/LavaMoat/LavaMoat/commit/e37582f201070bfaa734f378aa6b851892adc684))
+* **webpack:** policy loading, generation and overrides put together ([1bf3702](https://github.com/LavaMoat/LavaMoat/commit/1bf370270c91afafa20b6331b0b478b16cd1b55b))
+
+
+### Bug Fixes
+
+* **core/test:** platform-agnostic line separator ([0a898a3](https://github.com/LavaMoat/LavaMoat/commit/0a898a3e231b4281d6bd8e5543e5ead7c8f28511))
+* **core:** detect ESM/CJS imports properly ([c2c37e2](https://github.com/LavaMoat/LavaMoat/commit/c2c37e235d67a8f3ac17fed6f9475481010ef881))
+* **core:** export types from generatePolicy ([b999545](https://github.com/LavaMoat/LavaMoat/commit/b999545567e6673b42ed6b2c34153d84d7a4b283))
+* **webpack:** fix typescript complaints ([fc41eda](https://github.com/LavaMoat/LavaMoat/commit/fc41eda86bfd680fbeadce72954b787864c2884f))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-tofu bumped from ^7.2.0 to ^7.2.1
+
 ## [15.1.2](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v15.1.1...lavamoat-core-v15.1.2) (2024-02-07)
 
 
