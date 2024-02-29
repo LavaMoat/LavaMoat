@@ -52,7 +52,7 @@
     "memfs": "4.6.0",
     "mini-css-extract-plugin": "2.8.1",
     "ses": "1.1.0",
-    "webpack": "5.90.0"
+    "webpack": "5.90.3"
   },
   "ava": {
     "files": [

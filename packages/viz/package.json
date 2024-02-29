@@ -68,7 +68,7 @@
     "three": "0.160.1",
     "three-forcegraph": "1.41.10",
     "three-spritetext": "1.8.2",
-    "webpack": "4.47.0",
+    "webpack": "5.90.3",
     "webpack-cli": "4.10.0"
   },
   "babel": {
