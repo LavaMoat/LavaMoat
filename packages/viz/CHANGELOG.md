@@ -6,6 +6,23 @@
   * dependencies
     * lavamoat-core bumped from ^15.1.0 to ^15.1.1
 
+## [7.0.4](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-viz-v7.0.3...lavamoat-viz-v7.0.4) (2024-02-29)
+
+
+### Bug Fixes
+
+* **viz:** force umd resolution for force-graph packages ([e332242](https://github.com/LavaMoat/LavaMoat/commit/e332242895a3e7e41a52ba42655965f143234b7e))
+* **viz:** Import policies directly through &lt;script&gt; tag in html ([40e91e6](https://github.com/LavaMoat/LavaMoat/commit/40e91e65363448ea7e450f8bece6dd55432e13b1))
+* **viz:** Omit example policies from dist ([a60c460](https://github.com/LavaMoat/LavaMoat/commit/a60c460e625b9273e3de10a0a848d715f4b8fce9))
+* **viz:** revert webpack5 upgrade and webpack plugin updates ([a286df8](https://github.com/LavaMoat/LavaMoat/commit/a286df8ebfdc81de563198c87ca327584c077ec4))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-core bumped from ^15.1.2 to ^15.2.0
+
 ## [7.0.3](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-viz-v7.0.2...lavamoat-viz-v7.0.3) (2024-02-07)
 
 

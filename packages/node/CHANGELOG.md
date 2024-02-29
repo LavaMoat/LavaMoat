@@ -12,6 +12,22 @@
   * dependencies
     * lavamoat-core bumped from ^15.1.0 to ^15.1.1
 
+## [8.0.4](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-v8.0.3...lavamoat-v8.0.4) (2024-02-29)
+
+
+### Bug Fixes
+
+* **lavamoat:** update for ESM support in policy gen ([612b9f9](https://github.com/LavaMoat/LavaMoat/commit/612b9f9302dd04d2cd1fbe88c08bd46af5f70775))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @lavamoat/aa bumped from ^4.0.1 to ^4.1.0
+    * lavamoat-core bumped from ^15.1.2 to ^15.2.0
+    * lavamoat-tofu bumped from ^7.2.0 to ^7.2.1
+
 ## [8.0.3](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-v8.0.2...lavamoat-v8.0.3) (2024-02-07)
 
 

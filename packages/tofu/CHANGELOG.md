@@ -1,5 +1,19 @@
 # Changelog
 
+## [7.2.1](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-tofu-v7.2.0...lavamoat-tofu-v7.2.1) (2024-02-29)
+
+
+### Bug Fixes
+
+* **tofu/test:** platform-agnostic line separator ([a9c9c0f](https://github.com/LavaMoat/LavaMoat/commit/a9c9c0fc6c49e5804583a67ad8838cac46bff1a0))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * lavamoat-core bumped from ^15.1.2 to ^15.2.0
+
 ## [7.2.0](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-tofu-v7.1.0...lavamoat-tofu-v7.2.0) (2024-02-07)
 
 

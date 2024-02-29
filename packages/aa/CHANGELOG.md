@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.1.0](https://github.com/LavaMoat/LavaMoat/compare/aa-v4.0.1...aa-v4.1.0) (2024-02-29)
+
+
+### Features
+
+* **aa:** add custom resolver ([90ed26e](https://github.com/LavaMoat/LavaMoat/commit/90ed26e54b62327a240eed47186541afab4aff24))
+* **aa:** support symlinks for workspace and devtime linking compatibility ([66996c7](https://github.com/LavaMoat/LavaMoat/commit/66996c7964fecee08e4fcb0f01ee66047c8d204d))
+
 ## [4.0.1](https://github.com/LavaMoat/LavaMoat/compare/aa-v4.0.0...aa-v4.0.1) (2024-01-18)
 
 
