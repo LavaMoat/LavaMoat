@@ -1,0 +1,64 @@
+{
+  "name": "@lavamoat/endomoat",
+  "version": "2.3.1",
+  "type": "module",
+  "description": "Converts Lavamoat Policies to Endo Policies",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LavaMoat/LavaMoat.git",
+    "directory": "packages/endomoat"
+  },
+  "homepage": "https://github.com/LavaMoat/LavaMoat/tree/main/packages/endomoat",
+  "author": "Lavamoat Project",
+  "license": "MIT",
+  "private": true,
+  "engines": {
+    "node": "^16.20.0 || ^18.0.0 || ^20.0.0",
+    "npm": ">=7.0.0"
+  },
+  "bin": {
+    "endomoat": "./src/cli.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./types/index.d.ts",
+      "import": "./src/index.js"
+    },
+    "./attenuator": {
+      "types": "./types/attenuator.d.ts",
+      "import": "./src/default-attenuator.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "lint:deps": "depcheck",
+    "test": "npm run test:run",
+    "test:run": "ava"
+  },
+  "dependencies": {
+    "@endo/compartment-mapper": "1.1.4",
+    "@endo/evasive-transform": "1.0.4",
+    "@types/node": "18.19.28",
+    "lavamoat-core": "^15.3.0",
+    "ses": "1.4.1",
+    "type-fest": "4.10.3",
+    "yargs": "17.7.2"
+  },
+  "devDependencies": {
+    "@endo/eslint-plugin": "2.1.0",
+    "@jessie.js/eslint-plugin": "0.4.0",
+    "memfs": "4.8.1"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "ava": {
+    "files": [
+      "test/**/*.spec.js"
+    ],
+    "timeout": "10s"
+  }
+}
