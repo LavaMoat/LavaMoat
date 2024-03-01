@@ -1,0 +1,11 @@
+{
+  "/index.js": "// this is an integration test\n// of importing a package with a name that overlaps with a builtin\n\nconst eventsA = require('a')\nconst eventsB = require('b')\n\neventsA.once('hello', () => console.log('hi from a'))\neventsB.once('hello', () => console.log('hi from b'))\n\neventsA.emit('hello')\neventsB.emit('hello')\n",
+  "/package.json": "{\n  \"name\": \"builtins\",\n  \"scripts\": {\n    \"setup\": \"exit 0\"\n  },\n  \"dependencies\": {\n    \"a\": \"file:./node_modules/a\",\n    \"b\": \"file:./node_modules/b\"\n  }\n}\n",
+  "/node_modules/events/package.json": "{\n  \"name\": \"events\",\n  \"version\": \"1.0.0\"\n}\n",
+  "/node_modules/events/index.js": "\nconst c = console;\n\nc.log('hello world!')\n",
+  "/node_modules/b/package.json": "{\n  \"name\": \"b\",\n  \"version\": \"1.0.0\"\n}\n",
+  "/node_modules/b/index.js": "const { EventEmitter } = require('events')\n\nconst ee = new EventEmitter()\n\nmodule.exports = ee\n",
+  "/node_modules/a/index.js": "const { EventEmitter } = require('events/')\n\nconst ee = new EventEmitter()\n\nmodule.exports = ee\n",
+  "/node_modules/a/package.json": "{\n  \"name\": \"a\",\n  \"version\": \"1.0.0\",\n  \"dependencies\": {\n    \"events\": \"file:../events\"\n  }\n}\n",
+  "/lavamoat/node/policy.json": "{\n  \"resources\": {\n    \"a\": {\n      \"packages\": {\n        \"events\": true\n      }\n    },\n    \"b\": {\n      \"builtin\": {\n        \"events.EventEmitter\": true\n      }\n    },\n    \"events\": {\n      \"globals\": {\n        \"console\": true\n      }\n    }\n  }\n}"
+}
