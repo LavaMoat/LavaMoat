@@ -17,8 +17,15 @@ import assert from 'node:assert'
 import path from 'node:path'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
-import { constants, loadPolicies, run } from './index.js'
+import {
+  constants,
+  generateAndWritePolicy,
+  loadPolicies,
+  run,
+} from './index.js'
 import { readJsonFile } from './util.js'
+
+const BEHAVIOR_GROUP = 'Behavior Options:'
 
 /**
  * Main entry point to CLI
@@ -169,8 +176,70 @@ async function main(args = hideBin(process.argv)) {
         await run(argv.entrypoint, policy)
       }
     )
-    .demandCommand(1)
+    .command(
+      ['gen <entrypoint>', 'generate <entrypoint>'],
+      'Generate policy files; overwrites existing policies',
+      (yargs) =>
+        yargs
+          .options({
+            run: {
+              describe: 'Run the application after policy generated',
+              type: 'boolean',
+              group: BEHAVIOR_GROUP,
+            },
+            debug: {
+              type: 'boolean',
+              describe: 'Additionally write a debug policy',
+              group: BEHAVIOR_GROUP,
+            },
+          })
+          .positional('entrypoint', {
+            describe: 'Path to the application entry point',
+            type: 'string',
+            normalize: true,
+            coerce: path.resolve,
+          })
+          .demandOption('entrypoint')
+          /**
+           * Resolve entrypoint from `cwd`
+           */
+          .middleware((argv) => {
+            argv.entrypoint = path.resolve(argv.cwd, argv.entrypoint)
+          }, true)
+          /**
+           * This should not fail. If it does, there is a bug.
+           */
+          .check((argv) => {
+            assert(
+              path.isAbsolute(argv.entrypoint),
+              'entrypoint must be an absolute path'
+            )
+            return true
+          }),
+      async ({
+        entrypoint,
+        debug,
+        run: shouldRun,
+        policy: policyPath,
+        'policy-debug': policyDebugPath,
+      }) => {
+        const policy = await generateAndWritePolicy(entrypoint, {
+          debug,
+          policyPath,
+          policyDebugPath,
+        })
 
+        if (debug) {
+          console.error(`Wrote debug policy to ${policyDebugPath}`)
+        }
+        console.error(`Wrote policy to ${policyPath}`)
+
+        if (shouldRun) {
+          await run(entrypoint, policy)
+        }
+      }
+    )
+    .demandCommand(1)
     .parse()
 }
 

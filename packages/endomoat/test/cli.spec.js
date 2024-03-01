@@ -1,5 +1,7 @@
 import test from 'ava'
 import { execFile } from 'node:child_process'
+import fs from 'node:fs/promises'
+import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { promisify } from 'node:util'
@@ -192,3 +194,18 @@ test(
   ['run', BASIC_ENTRYPOINT, '--cwd', BASIC_ENTRYPOINT_CWD],
   'hello world'
 )
+
+test('generate - --help prints help', testCLI, ['generate', '--help'])
+
+test('generate - basic policy generation', async (t) => {
+  const tempdir = await fs.mkdtemp(path.join(tmpdir(), 'endomoat-cli-test-'))
+  const policyPath = path.join(tempdir, 'policy.json')
+  try {
+    await runCli(['generate', BASIC_ENTRYPOINT, '--policy', policyPath])
+    const json = await fs.readFile(policyPath, 'utf8')
+    const policy = JSON.parse(json)
+    t.deepEqual(policy, { resources: {} })
+  } finally {
+    await fs.rm(tempdir, { recursive: true, force: true })
+  }
+})

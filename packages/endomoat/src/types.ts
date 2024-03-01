@@ -3,16 +3,22 @@ import {
   type PackagePolicy,
   type Policy,
   type PropertyPolicy,
-  type ReadFn,
-  type ReadPowers,
 } from '@endo/compartment-mapper'
+import { Merge, MergeDeep } from 'type-fest'
+import { GeneratePolicyOptions, WithAnyReadPowers } from './policy-gen/types.js'
 
 /**
- * Options for `run`
+ * Options for `run` w/o automatic policy generation
  */
-export interface RunOptions {
-  readPowers?: ReadFn | ReadPowers
-}
+export type RunOptions = WithAnyReadPowers
+
+/**
+ * Options for `run` w/ automatic policy generation
+ */
+export type GenerateAndRunOptions = Merge<
+  GeneratePolicyOptions,
+  WithAnyReadPowers
+>
 
 /**
  * "Root" identifier for a LavaMoat global policy item in the context of an Endo
@@ -61,6 +67,9 @@ export type LavaMoatEndoPolicy = Policy<
  */
 export type GlobalAttenuatorParams = [LavaMoatGlobalPolicyItem | PropertyPolicy]
 
+/**
+ * Powers necessary to write a policy to disk
+ */
 export interface WritePowers {
   mkdir: (
     path: string,
@@ -69,6 +78,7 @@ export interface WritePowers {
   writeFile: (path: string, data: string) => Promise<void>
 }
 
-export type WritableFsAPI = FsAPI & {
-  promises: FsAPI['promises'] & WritePowers
-}
+/**
+ * Superset of {@link FsAPI} necessary to write a policy to disk
+ */
+export type WritableFsAPI = MergeDeep<FsAPI, { promises: WritePowers }>
