@@ -20,23 +20,61 @@ import { pathToFileURL } from 'node:url'
 import { importHook } from './import-hook.js'
 import { moduleTransforms } from './module-transforms.js'
 import { toEndoPolicy } from './policy-converter.js'
-import { defaultReadPowers } from './power.js'
+import { generatePolicy } from './policy-gen/index.js'
+import { isPolicy } from './policy.js'
+import { makeReadPowers } from './power.js'
 
 export * as constants from './constants.js'
+export { generateAndWritePolicy, generatePolicy } from './policy-gen/index.js'
 export { loadPolicies } from './policy.js'
 export { toEndoPolicy }
 
 /**
- * Runs a program in Endomoat with the provided policy
+ * Runs Endomoat with provided policy
  *
- * @param {string | URL} entrypointPath
+ * @overload
+ * @param {string | URL} entryFile
  * @param {import('lavamoat-core').LavaMoatPolicy} policy
  * @param {import('./types.js').RunOptions} [opts]
  * @returns {Promise<unknown>}
  */
-export async function run(entrypointPath, policy, opts = {}) {
+
+/**
+ * Runs Endomoat with an auto-generated policy, optionally writing to disk
+ *
+ * @overload
+ * @param {string | URL} entryFile
+ * @param {import('./types.js').GenerateAndRunOptions} [opts]
+ * @returns {Promise<unknown>}
+ */
+
+/**
+ * Runs a program in Endomoat
+ *
+ * @param {string | URL} entrypointPath
+ * @param {import('lavamoat-core').LavaMoatPolicy
+ *   | import('./types.js').GenerateAndRunOptions} [policyOrOpts]
+ * @param {import('./types.js').RunOptions} [opts]
+ * @returns {Promise<unknown>}
+ */
+export async function run(entrypointPath, policyOrOpts = {}, opts = {}) {
+  await Promise.resolve()
+  /** @type {import('lavamoat-core').LavaMoatPolicy} */
+  let policy
+  /** @type {import('./types.js').RunOptions} */
+  let runOpts
+
+  if (isPolicy(policyOrOpts)) {
+    policy = policyOrOpts
+    runOpts = opts
+  } else {
+    const generateOpts = policyOrOpts
+    runOpts = { readPowers: generateOpts.readPowers }
+    policy = await generatePolicy(entrypointPath, generateOpts)
+  }
+
   const endoPolicy = toEndoPolicy(policy)
-  const { readPowers = defaultReadPowers } = opts
+  const readPowers = makeReadPowers(runOpts.readPowers)
 
   const url =
     entrypointPath instanceof URL
