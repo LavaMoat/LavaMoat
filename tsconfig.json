@@ -2,23 +2,28 @@
   "extends": "@tsconfig/node16/tsconfig.json",
   "files": [],
   "compilerOptions": {
-    "allowJs": true,
+    "allowJs": true
   },
+  // the workspaces which are consumed as libraries by other workspaces should
+  // be first in this list
   "references": [
     {
-      "path": "./packages/allow-scripts",
+      "path": "./packages/allow-scripts/tsconfig.json"
     },
     {
-      "path": "./packages/aa",
+      "path": "./packages/aa/tsconfig.json"
     },
     {
-      "path": "./packages/core",
+      "path": "./packages/tofu/tsconfig.json"
     },
     {
-      "path": "./packages/laverna",
+      "path": "./packages/core/tsconfig.json"
     },
     {
-      "path": "./packages/tofu",
+      "path": "./packages/laverna/tsconfig.json"
     },
-  ],
+    {
+      "path": "./packages/endomoat/tsconfig.json"
+    }
+  ]
 }
