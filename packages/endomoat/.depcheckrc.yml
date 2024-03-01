@@ -1,0 +1,10 @@
+ignores:
+  # monorepo deps
+  - 'ava'
+
+  # eslint plugin
+  - '@jessie.js/eslint-plugin'
+
+  # types
+  - '@types/capture-console'
+  - 'type-fest'
