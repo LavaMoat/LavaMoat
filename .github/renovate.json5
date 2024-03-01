@@ -62,6 +62,15 @@
       ],
       matchUpdateTypes: ['minor', 'patch'],
       enabled: false,
+    },
+    {
+      // @types/node should be bumped to major only alongside `engines.node` in package.json
+      // We don't care about every patch release so only notify onnew minors
+      matchPackageNames: [
+        '@types/node',
+      ],
+      matchUpdateTypes: ['major', 'patch'],
+      enabled: false,
     }
   ],
   transitiveRemediation: true,
