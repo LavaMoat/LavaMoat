@@ -1,0 +1,8 @@
+{
+  "/package.json": "{\n  \"name\": \"native\",\n  \"version\": \"1.0.0\",\n  \"type\": \"module\",\n  \"license\": \"ISC\",\n  \"private\": true,\n  \"main\": \"app.js\",\n  \"dependencies\": {\n    \"hello\": \"^1.0.0\"\n  }\n}\n",
+  "/index.js": "import addon from 'hello'\nexport const hello = addon.hello()\n",
+  "/node_modules/hello/package.json": "{\n  \"name\": \"hello\",\n  \"version\": \"0.0.0\",\n  \"description\": \"this code does not run\",\n  \"private\": true,\n  \"main\": \"index.js\"\n}\n",
+  "/node_modules/hello/index.js": "var addon = require('./hello')\n\nconsole.log(addon.hello()) // 'world'\n\nmodule.exports = addon\n",
+  "/node_modules/hello/hello.node": "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000",
+  "/node_modules/hello/README.md": "This fixture is an example of a package shipping a native module (`hello.node`). `hello.node` is not _actually_ a native module, but it has the right extension and is full of null bytes. Good enough.\n"
+}
