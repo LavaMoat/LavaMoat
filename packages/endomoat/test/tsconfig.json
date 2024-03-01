@@ -1,0 +1,13 @@
+{
+  "extends": "../../../.config/tsconfig.test.json",
+  "compilerOptions": {
+    "rootDir": "..",
+    "target": "esnext",
+    "module": "NodeNext",
+    "types": ["node", "ses"],
+    "strict": true
+  },
+  "include": ["."],
+  "exclude": ["./fixture"],
+  "references": [{ "path": "../src/tsconfig.json" }]
+}

@@ -4,6 +4,8 @@
   "compilerOptions": {
     "allowJs": true
   },
+  // the workspaces which are consumed as libraries by other workspaces should
+  // be first in this list
   "references": [
     {
       "path": "./packages/allow-scripts"
@@ -22,6 +24,9 @@
     },
     {
       "path": "./packages/webpack"
+    },
+    {
+      "path": "./packages/endomoat"
     }
   ]
 }
