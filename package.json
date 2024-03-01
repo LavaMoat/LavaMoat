@@ -42,7 +42,7 @@
     "@commitlint/cli": "18.6.1",
     "@commitlint/config-conventional": "18.6.2",
     "@tsconfig/node16": "16.1.1",
-    "@types/node": "18.19.20",
+    "@types/node": "18.19.21",
     "@types/yargs": "17.0.32",
     "@typescript-eslint/eslint-plugin": "6.21.0",
     "@typescript-eslint/parser": "6.21.0",
