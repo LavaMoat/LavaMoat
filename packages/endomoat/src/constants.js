@@ -3,7 +3,6 @@
  *
  * _Type a string more than once? Make it a constant!_
  */
-
 import path from 'node:path'
 
 /**
@@ -56,3 +55,13 @@ export const RSRC_POLICY_BUILTINS = 'builtins'
  * Name of the `globals` property of a `LavaMoatPackagePolicy`
  */
 export const RSRC_POLICY_GLOBALS = 'globals'
+
+/**
+ * `builtin` module type for a `LavamoatModuleRecord`
+ */
+export const LMR_TYPE_BUILTIN = 'builtin'
+
+/**
+ * `js` module type for a `LavamoatModuleRecord`
+ */
+export const LMR_TYPE_SOURCE = 'js'
