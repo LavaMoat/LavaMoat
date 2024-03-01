@@ -51,6 +51,18 @@
       matchUpdateTypes: ['major'],
       enabled: false,
     },
+    {
+      // Disable frequent updates for dev tooling
+      // These can be updated manually but we still want to be notified about new majors
+      matchPackageNames: [
+        'commitlint',
+        'husky',
+        'lint-staged',
+        'linters',
+      ],
+      matchUpdateTypes: ['minor', 'patch'],
+      enabled: false,
+    }
   ],
   transitiveRemediation: true,
 }
