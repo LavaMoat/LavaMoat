@@ -1,0 +1,18 @@
+{
+  "resources": {
+    "lavamoat-core": {
+      "globals": {
+        "console.warn": true
+      }
+    },
+    "@lavamoat/endomoat": {
+      "packages": {
+        "lavamoat-core": true
+      },
+      "builtin": {
+        "node:console": true,
+        "node:path": true
+      }
+    }
+  }
+}
