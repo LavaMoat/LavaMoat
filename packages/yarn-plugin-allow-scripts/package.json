@@ -9,7 +9,7 @@
   },
   "license": "MIT",
   "private": true,
-  "packageManager": "yarn@3.7.0",
+  "packageManager": "yarn@3.8.0",
   "engines": {
     "node": "^16.20.0 || ^18.0.0 || ^20.0.0"
   },
@@ -21,8 +21,8 @@
   },
   "dependencies": {
     "@yarnpkg/builder": "3.3.1",
-    "@yarnpkg/cli": "3.7.0",
-    "@yarnpkg/core": "3.6.0",
+    "@yarnpkg/cli": "3.8.0",
+    "@yarnpkg/core": "3.7.0",
     "clipanion": "3.2.1"
   }
 }
