@@ -4,6 +4,7 @@ ignores:
 
   # eslint plugin
   - '@jessie.js/eslint-plugin'
+  - '@typescript-eslint/parser'
 
   # types
   - '@types/capture-console'
