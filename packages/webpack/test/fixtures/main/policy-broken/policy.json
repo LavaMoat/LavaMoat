@@ -10,9 +10,9 @@
         "umd-package": true
       }
     },
-    "node-global-package": {
+    "globals-package": {
       "globals": {
-        "console.log": true
+        "console": true
       }
     },
     "umd-package": {

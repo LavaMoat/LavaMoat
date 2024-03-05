@@ -9,6 +9,7 @@ const {
   defineProperty,
   defineProperties,
   getOwnPropertyDescriptors,
+  fromEntries,
 } = Object
 const warn = typeof console === 'object' ? console.warn : () => {}
 // Avoid running any wrapped code or using compartment if lockdown was not called.
@@ -79,6 +80,7 @@ const enforcePolicy = (requestedResourceId, referrerResourceId) => {
 const theRealGlobalThis = globalThis
 /** @type {any} */
 let rootCompartmentGlobalThis
+const globalAliases = ['globalThis', 'window', 'self']
 /**
  * Installs globals for a specific policy resource.
  *
@@ -89,11 +91,11 @@ let rootCompartmentGlobalThis
 const installGlobalsForPolicy = (resourceId, packageCompartmentGlobal) => {
   if (resourceId === LAVAMOAT.root) {
     rootCompartmentGlobalThis = packageCompartmentGlobal
-    copyWrappedGlobals(theRealGlobalThis, rootCompartmentGlobalThis, [
-      'globalThis',
-      'window',
-      'self',
-    ])
+    copyWrappedGlobals(
+      theRealGlobalThis,
+      rootCompartmentGlobalThis,
+      globalAliases
+    )
   } else {
     // TODO: getEndowmentsForConfig doesn't implement support for "write"
     const endowments = getEndowmentsForConfig(
@@ -103,6 +105,15 @@ const installGlobalsForPolicy = (resourceId, packageCompartmentGlobal) => {
       packageCompartmentGlobal
     )
 
+    defineProperties(
+      packageCompartmentGlobal,
+      fromEntries(
+        globalAliases.map((alias) => [
+          alias,
+          { value: packageCompartmentGlobal },
+        ])
+      )
+    )
     defineProperties(
       packageCompartmentGlobal,
       getOwnPropertyDescriptors(endowments)
