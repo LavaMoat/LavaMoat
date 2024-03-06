@@ -54,11 +54,11 @@
     {
       // Disable frequent updates for dev tooling
       // These can be updated manually but we still want to be notified about new majors
+      extends: ['packages:linters'],
+      matchPackagePrefixes: ['@commitlint'],
       matchPackageNames: [
-        'commitlint',
         'husky',
-        'lint-staged',
-        'linters',
+        'lint-staged'
       ],
       matchUpdateTypes: ['minor', 'patch'],
       enabled: false,
