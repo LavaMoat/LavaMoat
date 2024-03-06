@@ -29,7 +29,7 @@
     "!*.tsbuildinfo"
   ],
   "scripts": {
-    "lib:ses": "cp ../../node_modules/ses/dist/lockdown.umd.js ./lib/lockdown.umd.js",
+    "lib:ses": "cp ../../node_modules/ses/dist/lockdown.umd.js ./lib/lockdown.umd.js && git add -A ./lib/lockdown.umd.js",
     "lint:deps": "depcheck",
     "test": "ava && npm run test:ses",
     "test:ses": "diff -wq ../../node_modules/ses/dist/lockdown.umd.js ./lib/lockdown.umd.js"
