@@ -23,6 +23,7 @@
     "!tsconfig.json"
   ],
   "scripts": {
+    "bench": "node ./test/benchmark/index.js",
     "lint:deps": "depcheck",
     "test": "npm run test:run",
     "test:run": "ava"
