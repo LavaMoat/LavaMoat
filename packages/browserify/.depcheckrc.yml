@@ -14,3 +14,6 @@ ignores:
   - 'a'
   - 'b'
   - 'c'
+
+  # types
+  - '@lavamoat/types'
