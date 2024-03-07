@@ -288,7 +288,7 @@ function prepareModuleInitializer(
 ) {
   const normalizedSource = moduleData.source.split('\r\n').join('\n')
   // extract sourcemaps
-  const sourceMeta = extractSourceMaps(normalizedSource)
+  const sourceMeta = removeSourceMaps(normalizedSource)
   // create wrapper + update sourcemaps
   const newSourceMeta = wrapInModuleInitializer(
     moduleData,
@@ -299,12 +299,12 @@ function prepareModuleInitializer(
   return newSourceMeta
 }
 
-function extractSourceMaps(sourceCode) {
-  const converter = convertSourceMap.fromSource(sourceCode)
-  // if (!converter) throw new Error('Unable to find original inlined sourcemap')
-  const maps = converter && converter.toObject()
-  const code = convertSourceMap.removeComments(sourceCode)
-  return { code, maps }
+const sourceMapDropper = /(?:\/\/[@#]\s+?sourceMappingURL=.*$|\/\*[@#]\s+?sourceMappingURL=[\s\S]*?\*\/)/gm
+module.exports.sourceMapDropperRegex = sourceMapDropper
+
+function removeSourceMaps(sourceCode) {
+  const code = sourceCode.replace(sourceMapDropper, '')
+  return { code }
 }
 
 function assertValidJS(code) {
