@@ -299,7 +299,7 @@ function prepareModuleInitializer(
   return newSourceMeta
 }
 
-const sourceMapDropper = /(?:\/\/[@#]\s+?sourceMappingURL=.*$|\/\*[@#]\s+?sourceMappingURL=[\s\S]*?\*\/)/gm
+const sourceMapDropper = /^\s*?(?:\/\/[@#]\s+?sourceMappingURL=.*$|\/\*[@#]\s+?sourceMappingURL=[\s\S]*?\*\/)/gm
 module.exports.sourceMapDropperRegex = sourceMapDropper
 
 function removeSourceMaps(sourceCode) {
