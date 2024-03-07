@@ -9,3 +9,4 @@ ignores:
   - '@types/babel__traverse'
   - 'type-fest'
   - 'lavamoat-core'
+  - '@lavamoat/types'
