@@ -27,7 +27,7 @@ Even starting with adding just step 1 - the allow-scripts is a great improvement
 ### Install scripts
 
 Lavamoat's allow-scripts configures your project to disable running install scripts by default and
-gives you a configuration section in package.json where the allowed ones can be listed.  
+gives you a configuration section in package.json where the allowed ones can be listed.
 It also installs a package with an install script that fails installation as early as possible if the configuration is accidentally removed.
 
 No new install scripts showing up in your dependencies will run unexpectedly. That way you eliminate the most popular attack vector of malicious packages in recent years.
@@ -67,11 +67,13 @@ LavaMoat modifies the bundle's runtime to enforce the configured constraints.
 
 - [LavaMoat Browserify][LavamoatBrowserify]
 
-### Lavamoat Viz
+### lavamoat-viz
 
-[lavamoatViz]: https://lavamoat.github.io/LavaMoat/
+> [!WARNING] `lavamoat-viz` is currently unmaintained; we have tentative plans to resume development in the future.
 
-The [lavamoat viz][lavamoatViz] is a tool to visualize an application's dependency graph and assess package dangerousness.
+[lavamoatViz]: https://github.com/LavaMoat/LavaMoat/tree/lavamoat-viz
+
+[lavamoat-viz][lavamoatViz] is a tool to visualize an application's dependency graph and assess its security risk.
 
 ### Scuttling security feature
 
@@ -79,14 +81,14 @@ LavaMoat offers further (yet advanced) security enhancement to LavaMoat protecti
 
 ## Further reading on software supplychain security
 
-### Articles:
+### Articles
 
 - [HackerNoon - I’m harvesting credit card numbers and passwords from your site. Here’s how](https://medium.com/hackernoon/im-harvesting-credit-card-numbers-and-passwords-from-your-site-here-s-how-9a8cb347c5b5)
 - [Agoric - POLA Would Have Prevented the Event-Stream Incident](https://medium.com/agoric/pola-would-have-prevented-the-event-stream-incident-45653ecbda99)
 - [Snyk - Why npm lockfiles can be a security blindspot for injecting malicious modules](https://snyk.io/blog/why-npm-lockfiles-can-be-a-security-blindspot-for-injecting-malicious-modules/)
 - [Bytecode Alliance - Building a secure by default, composable future for WebAssembly](https://bytecodealliance.org/articles/announcing-the-bytecode-alliance)
 
-### Videos:
+### Videos
 
 - [Making 'npm install' Safe - Kate Sills - QCon 2020 ~40min](https://www.infoq.com/presentations/npm-install/)
 - [JavaScript Supply Chain Security - Adam Baldwin - LocoMocoSec 2019 ~25min](https://www.youtube.com/watch?v=HDo2iOlkbyc)
@@ -108,5 +110,4 @@ Runs on [Agoric](https://github.com/agoric/)
 [ScuttlingDoc]: ./docs/scuttling.md
 [LavamoatNode]: ./packages/node
 [LavamoatBrowserify]: ./packages/browserify
-[LavamoatViz]: ./packages/viz
 [LavamoatAllowScripts]: ./packages/allow-scripts
