@@ -982,9 +982,16 @@
     },
     "json-stable-stringify>call-bind": {
       "packages": {
+        "json-stable-stringify>call-bind>es-define-property": true,
+        "json-stable-stringify>call-bind>es-errors": true,
         "json-stable-stringify>call-bind>function-bind": true,
         "json-stable-stringify>call-bind>get-intrinsic": true,
         "json-stable-stringify>call-bind>set-function-length": true
+      }
+    },
+    "json-stable-stringify>call-bind>es-define-property": {
+      "packages": {
+        "json-stable-stringify>call-bind>get-intrinsic": true
       }
     },
     "json-stable-stringify>call-bind>get-intrinsic": {
@@ -996,6 +1003,7 @@
       "packages": {
         "browserify>assert>object.assign>has-symbols": true,
         "browserify>resolve>is-core-module>hasown": true,
+        "json-stable-stringify>call-bind>es-errors": true,
         "json-stable-stringify>call-bind>function-bind": true,
         "json-stable-stringify>call-bind>get-intrinsic>has-proto": true
       }
@@ -1003,6 +1011,7 @@
     "json-stable-stringify>call-bind>set-function-length": {
       "packages": {
         "browserify>util>which-typed-array>gopd": true,
+        "json-stable-stringify>call-bind>es-errors": true,
         "json-stable-stringify>call-bind>get-intrinsic": true,
         "json-stable-stringify>call-bind>set-function-length>define-data-property": true,
         "json-stable-stringify>call-bind>set-function-length>has-property-descriptors": true
@@ -1011,13 +1020,13 @@
     "json-stable-stringify>call-bind>set-function-length>define-data-property": {
       "packages": {
         "browserify>util>which-typed-array>gopd": true,
-        "json-stable-stringify>call-bind>get-intrinsic": true,
-        "json-stable-stringify>call-bind>set-function-length>has-property-descriptors": true
+        "json-stable-stringify>call-bind>es-define-property": true,
+        "json-stable-stringify>call-bind>es-errors": true
       }
     },
     "json-stable-stringify>call-bind>set-function-length>has-property-descriptors": {
       "packages": {
-        "json-stable-stringify>call-bind>get-intrinsic": true
+        "json-stable-stringify>call-bind>es-define-property": true
       }
     },
     "lavamoat-core": {
