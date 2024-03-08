@@ -14,10 +14,7 @@ const kernelCoreTemplate = fs.readFileSync(
   path.join(__dirname, '/kernelCoreTemplate.js'),
   'utf-8'
 )
-const sesSrc = fs.readFileSync(
-  path.join(__dirname, '/../lib/lockdown.umd.js'),
-  'utf-8'
-)
+const sesSrc = fs.readFileSync(require.resolve('ses/lockdown'), 'utf-8')
 const endowmentsToolkitSrc = fs.readFileSync(
   path.join(__dirname, '/endowmentsToolkit.js'),
   'utf-8'
