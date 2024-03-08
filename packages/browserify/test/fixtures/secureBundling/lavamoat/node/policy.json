@@ -1201,9 +1201,9 @@
       "packages": {
         "lavamoat-core>merge-deep>clone-deep>for-own": true,
         "lavamoat-core>merge-deep>clone-deep>is-plain-object": true,
+        "lavamoat-core>merge-deep>clone-deep>kind-of": true,
         "lavamoat-core>merge-deep>clone-deep>lazy-cache": true,
-        "lavamoat-core>merge-deep>clone-deep>shallow-clone": true,
-        "lavamoat-core>merge-deep>kind-of": true
+        "lavamoat-core>merge-deep>clone-deep>shallow-clone": true
       }
     },
     "lavamoat-core>merge-deep>clone-deep>for-own": {
@@ -1214,6 +1214,11 @@
     "lavamoat-core>merge-deep>clone-deep>is-plain-object": {
       "packages": {
         "lavamoat-core>merge-deep>clone-deep>is-plain-object>isobject": true
+      }
+    },
+    "lavamoat-core>merge-deep>clone-deep>kind-of": {
+      "packages": {
+        "browserify>insert-module-globals>is-buffer": true
       }
     },
     "lavamoat-core>merge-deep>clone-deep>lazy-cache": {
