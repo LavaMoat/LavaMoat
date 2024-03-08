@@ -51,6 +51,7 @@ module.exports = {
   env: { [ECMASCRIPT_ENV]: true, node: true },
   // the prettier config disables all eslint rules known to conflict with prettier
   extends: ['eslint:recommended', 'plugin:n/recommended', 'prettier'],
+  plugins: ['node-import'],
   rules: {
     // base rules; none of these are in eslint/recommended
     'no-empty': ['error', { allowEmptyCatch: true }],
@@ -79,6 +80,9 @@ module.exports = {
     // we should probably actually fix these three and turn these back on
     'n/no-sync': 'off', // very few reasons to actually use this; "CLI tool" is not one of them
     'n/no-process-exit': 'off', // should not be used with async code
+
+    // require node: prefix for builtin modules
+    'node-import/prefer-node-protocol': 'error',
   },
   settings: {
     node: {
