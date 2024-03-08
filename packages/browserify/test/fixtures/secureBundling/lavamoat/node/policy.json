@@ -109,13 +109,13 @@
     },
     "@lavamoat/lavapack": {
       "builtin": {
-        "assert": true,
-        "buffer.Buffer.from": true,
-        "fs.promises.readFile": true,
-        "fs.promises.writeFile": true,
-        "fs.readFileSync": true,
-        "path.join": true,
-        "path.relative": true
+        "node:assert": true,
+        "node:buffer.Buffer.from": true,
+        "node:fs.promises.readFile": true,
+        "node:fs.promises.writeFile": true,
+        "node:fs.readFileSync": true,
+        "node:path.join": true,
+        "node:path.relative": true
       },
       "globals": {
         "__dirname": true,
@@ -1031,12 +1031,11 @@
     },
     "lavamoat-core": {
       "builtin": {
-        "events": true,
-        "fs.readFileSync": true,
+        "node:events": true,
         "node:fs.readFileSync": true,
         "node:fs/promises.writeFile": true,
-        "path.extname": true,
-        "path.join": true
+        "node:path.extname": true,
+        "node:path.join": true
       },
       "globals": {
         "__dirname": true,

@@ -1,4 +1,4 @@
-const { callbackify } = require('util')
+const { callbackify } = require('node:util')
 const through = require('through2').obj
 const { getPackageNameForModulePath } = require('@lavamoat/aa')
 

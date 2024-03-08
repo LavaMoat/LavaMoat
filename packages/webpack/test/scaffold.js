@@ -1,9 +1,9 @@
-const path = require('path')
+const path = require('node:path')
 const webpack = require('webpack')
 const memfs = require('memfs')
 const { toSnapshotSync } = require('memfs/lib/snapshot')
-const { createContext, runInNewContext } = require('vm')
-const { readFileSync } = require('fs')
+const { createContext, runInNewContext } = require('node:vm')
+const { readFileSync } = require('node:fs')
 
 /**
  * Run a webpack build and return the output

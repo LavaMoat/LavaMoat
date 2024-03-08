@@ -4,8 +4,8 @@
 // environment PATH.
 // this has been borrowed and modified from https://github.com/agoric/ses-shim
 
-const fs = require('fs')
-const path = require('path')
+const fs = require('node:fs')
+const path = require('node:path')
 
 const node = process.env.NVM_BIN
   ? `${process.env.NVM_BIN}/node`

@@ -4,8 +4,8 @@
 // The prelude is defined in the `preludeTemplate` file, and here we inject the dynamic components,
 // such as the upgradeable SES and app specific config.
 
-const fs = require('fs')
-const path = require('path')
+const fs = require('node:fs')
+const path = require('node:path')
 const kernelTemplate = fs.readFileSync(
   path.join(__dirname, '/kernelTemplate.js'),
   'utf-8'

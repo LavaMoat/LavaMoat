@@ -1,4 +1,4 @@
-const fs = require('fs')
+const fs = require('node:fs')
 const test = require('ava')
 const { pipe, concat } = require('mississippi')
 const { SourceMapConsumer } = require('source-map')

@@ -7,7 +7,7 @@ const linkBin = isWindows
   ? require('bin-links/lib/shim-bin.js')
   : require('bin-links/lib/link-bin.js')
 
-const { dirname, resolve, relative } = require('path')
+const { dirname, resolve, relative } = require('node:path')
 
 /**
  * @param {LinkBinOpts} opts

@@ -1,4 +1,4 @@
-const { promises: fs } = require('fs')
+const { promises: fs } = require('node:fs')
 
 module.exports = { fileExists }
 

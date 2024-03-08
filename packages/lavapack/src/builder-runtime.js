@@ -1,7 +1,7 @@
-const { join: pathJoin } = require('path')
+const { join: pathJoin } = require('node:path')
 const {
   promises: { readFile, writeFile },
-} = require('fs')
+} = require('node:fs')
 const { generateKernel, makeInitStatsHook } = require('lavamoat-core')
 const {
   getStrictScopeTerminatorShimSrc,

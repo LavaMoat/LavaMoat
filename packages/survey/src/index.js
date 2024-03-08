@@ -1,5 +1,5 @@
-const { promises: fs } = require('fs')
-const path = require('path')
+const { promises: fs } = require('node:fs')
+const path = require('node:path')
 const pLimit = require('p-limit')
 const { makeResolveHook } = require('lavamoat/src/parseForPolicy')
 const { loadPackage } = require('./load.js')

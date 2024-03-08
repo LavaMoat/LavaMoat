@@ -9,14 +9,14 @@
 // - cleanup: var -> const/let
 // - cleanup/refactor
 
-const fs = require('fs')
-const path = require('path')
-const assert = require('assert')
+const fs = require('node:fs')
+const path = require('node:path')
+const assert = require('node:assert')
 const JSONStream = require('JSONStream')
 const through = require('through2')
 const umd = require('umd')
 // eslint-disable-next-line n/prefer-global/buffer
-const { Buffer } = require('buffer')
+const { Buffer } = require('node:buffer')
 const combineSourceMap = require('combine-source-map')
 const convertSourceMap = require('convert-source-map')
 const jsonStringify = require('json-stable-stringify')
