@@ -68,7 +68,7 @@ test('builtin - access via paths', async (t) => {
 test('builtin - paths soft-bindings preserve "this" but allow override', async (t) => {
   const scenario = createScenarioFromScaffold({
     defineOne: () => {
-      const { Buffer } = require('buffer')
+      const { Buffer } = require('node:buffer')
       const two = require('two')
       module.exports = {
         overrideCheck: two.overrideCheck(Buffer.from([1, 2, 3])),
@@ -78,7 +78,7 @@ test('builtin - paths soft-bindings preserve "this" but allow override', async (
     },
 
     defineTwo: () => {
-      const { Buffer } = require('buffer')
+      const { Buffer } = require('node:buffer')
       const thisChecker = require('thisChecker')
       const { SomeClass } = require('someClass')
       // this test ensures "Buffer.prototype.slice" is copied in a way that allows "this" to be overridden
@@ -101,13 +101,13 @@ test('builtin - paths soft-bindings preserve "this" but allow override', async (
       resources: {
         one: {
           builtin: {
-            'buffer.Buffer.from': true,
+            'node:buffer.Buffer.from': true,
           },
         },
         two: {
           builtin: {
             // these paths are carefully constructed to try and split the fn from its parent
-            'buffer.Buffer.prototype.slice': true,
+            'node:buffer.Buffer.prototype.slice': true,
             'thisChecker.check': true,
             'someClass.SomeClass': true,
           },
@@ -120,7 +120,7 @@ test('builtin - paths soft-bindings preserve "this" but allow override', async (
       classCheck: true,
     },
     builtin: {
-      buffer: require('buffer'),
+      'node:buffer': require('node:buffer'),
       thisChecker: (() => {
         const parent = {}
         parent.check = function () {

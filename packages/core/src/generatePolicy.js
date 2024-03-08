@@ -1,7 +1,7 @@
 // @ts-check
 
-const EventEmitter = require('events')
-const path = require('path')
+const EventEmitter = require('node:events')
+const path = require('node:path')
 const jsonStringify = require('json-stable-stringify')
 const {
   parse,

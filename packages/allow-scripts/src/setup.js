@@ -3,9 +3,9 @@ const {
   appendFileSync,
   readFileSync,
   writeFileSync,
-} = require('fs')
-const { spawnSync } = require('child_process')
-const path = require('path')
+} = require('node:fs')
+const { spawnSync } = require('node:child_process')
+const path = require('node:path')
 const { FEATURE } = require('./toggles')
 
 const NPM = {

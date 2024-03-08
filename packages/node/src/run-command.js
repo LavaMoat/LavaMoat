@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 /* eslint-disable no-eval */
 
-const path = require('path')
-const fs = require('fs')
+const path = require('node:path')
+const fs = require('node:fs')
 const yargs = require('yargs')
 const yargsFlags = require('./yargsFlags')
 const { runLava } = require('./index')

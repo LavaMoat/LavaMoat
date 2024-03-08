@@ -1,7 +1,7 @@
 // @ts-check
 
-const util = require('util')
-const execFile = util.promisify(require('child_process').execFile)
+const util = require('node:util')
+const execFile = util.promisify(require('node:child_process').execFile)
 const { prepareScenarioOnDisk } = require('lavamoat-core/test/util.js')
 module.exports = {
   runLavamoat,
@@ -12,6 +12,7 @@ module.exports = {
  * Add one or more CLI options to an array of args
  *
  * Mutates `args`
+ *
  * @param {string[]} args - Array of args
  * @param {string} key - Option name
  * @param {any} value - Value; if array, `key` will be set multiple times

@@ -1,4 +1,4 @@
-const path = require('path')
+const path = require('node:path')
 const { PassThrough } = require('readable-stream')
 const duplexify = require('duplexify')
 const concatStream = require('concat-stream')

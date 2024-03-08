@@ -1,4 +1,4 @@
-const { readFileSync } = require('fs')
+const { readFileSync } = require('node:fs')
 const {
   sources: { RawSource },
 } = require('webpack')

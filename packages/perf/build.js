@@ -1,7 +1,7 @@
-const fs = require('fs')
+const fs = require('node:fs')
 const browserify = require('browserify')
 const lavamoatPlugin = require('lavamoat-browserify')
-const { pipeline } = require('stream')
+const { pipeline } = require('node:stream')
 
 // "autogen": "--plugin [ lavamoat-browserify --writeAutoPolicy --policy ./lavamoat-policy.json ] > /dev/null",
 // "default": "--plugin [ lavamoat-browserify --policy ./lavamoat-policy.json ] > bundle.js",

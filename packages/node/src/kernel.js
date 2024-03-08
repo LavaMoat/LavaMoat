@@ -1,6 +1,6 @@
 /* eslint no-eval: 0 */
-const fs = require('fs')
-const path = require('path')
+const fs = require('node:fs')
+const path = require('node:path')
 const resolve = require('resolve')
 const { sanitize } = require('htmlescape')
 const {

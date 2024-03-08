@@ -47,7 +47,7 @@ const recordMemorySpike = (frequency = 10) => {
 
 const history = (name, value) => {
   const fs = require('node:fs')
-  const { execSync } = require('child_process')
+  const { execSync } = require('node:child_process')
   const filePath = `.bench-${name}.log` // the intention is for the file to be gitignored and only referred locally
   let log = {}
   if (fs.existsSync(filePath)) {

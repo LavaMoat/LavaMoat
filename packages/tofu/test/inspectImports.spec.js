@@ -6,11 +6,11 @@ testInspect(
   'cjs - basic',
   {},
   () => {
-    const fs = require('fs')
+    const fs = require('node:fs')
     module.exports = fs
   },
   {
-    cjsImports: ['fs'],
+    cjsImports: ['node:fs'],
   }
 )
 
@@ -19,7 +19,7 @@ testInspect(
   {},
   () => {
     const require = () => {}
-    require('fs')
+    require('node:fs')
   },
   {
     cjsImports: [],
@@ -30,10 +30,10 @@ testInspect(
   'cjs - include even if require result not stored in variable',
   {},
   () => {
-    require('fs').readFileSync
+    require('node:fs').readFileSync
   },
   {
-    cjsImports: ['fs.readFileSync'],
+    cjsImports: ['node:fs.readFileSync'],
   }
 )
 
@@ -42,7 +42,19 @@ testInspect(
   {},
   () => {
     // eslint-disable-next-line no-unused-vars
-    const rfs = require('fs').readFileSync
+    const rfs = require('node:fs').readFileSync
+  },
+  {
+    cjsImports: ['node:fs.readFileSync'],
+  }
+)
+
+testInspect(
+  'cjs - include if no prefix for builtin provided',
+  {},
+  () => {
+    // eslint-disable-next-line node-import/prefer-node-protocol
+    require('fs').readFileSync
   },
   {
     cjsImports: ['fs.readFileSync'],
@@ -60,12 +72,12 @@ testInspect(
   'cjs - basic destructure',
   {},
   () => {
-    const { readFileSync, createReadStream } = require('fs')
+    const { readFileSync, createReadStream } = require('node:fs')
     readFileSync()
     createReadStream()
   },
   {
-    cjsImports: ['fs.readFileSync', 'fs.createReadStream'],
+    cjsImports: ['node:fs.readFileSync', 'node:fs.createReadStream'],
   }
 )
 
@@ -73,11 +85,11 @@ testInspect(
   'cjs - basic member',
   {},
   () => {
-    const rfs = require('fs').readFileSync
+    const rfs = require('node:fs').readFileSync
     rfs()
   },
   {
-    cjsImports: ['fs.readFileSync'],
+    cjsImports: ['node:fs.readFileSync'],
   }
 )
 
@@ -89,11 +101,11 @@ testInspect(
       constructor: {
         name: [bigEff],
       },
-    } = require('fs').readFileSync
+    } = require('node:fs').readFileSync
     bigEff()
   },
   {
-    cjsImports: ['fs.readFileSync.constructor.name.0'],
+    cjsImports: ['node:fs.readFileSync.constructor.name.0'],
   }
 )
 
@@ -101,12 +113,12 @@ testInspect(
   'cjs - usage basic',
   {},
   () => {
-    const fs = require('fs')
+    const fs = require('node:fs')
     fs.readFileSync()
     fs.createReadStream()
   },
   {
-    cjsImports: ['fs.readFileSync', 'fs.createReadStream'],
+    cjsImports: ['node:fs.readFileSync', 'node:fs.createReadStream'],
   }
 )
 
@@ -115,11 +127,11 @@ testInspect(
   {},
   () => {
     // eslint-disable-next-line n/prefer-global/process
-    const { sourceUrl: url } = require('process').release
+    const { sourceUrl: url } = require('node:process').release
     url.includes('v12')
   },
   {
-    cjsImports: ['process.release.sourceUrl.includes'],
+    cjsImports: ['node:process.release.sourceUrl.includes'],
   }
 )
 

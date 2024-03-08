@@ -1,6 +1,6 @@
 const test = require('ava')
-const util = require('util')
-const execFile = util.promisify(require('child_process').execFile)
+const util = require('node:util')
+const execFile = util.promisify(require('node:child_process').execFile)
 
 const { runLava } = require('../src/index')
 

@@ -1,7 +1,7 @@
 // @ts-expect-error - missing types
 const { applySourceTransforms } = require('lavamoat-core')
 const diag = require('./diagnostics')
-const fs = require('fs')
+const fs = require('node:fs')
 const q = JSON.stringify
 
 /**

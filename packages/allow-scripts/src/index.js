@@ -1,7 +1,7 @@
 // @ts-check
 
-const { promises: fs } = require('fs')
-const path = require('path')
+const { promises: fs } = require('node:fs')
+const path = require('node:path')
 const npmRunScript = require('@npmcli/run-script')
 const normalizeBin = require('npm-normalize-package-bin')
 const { linkBinAbsolute, linkBinRelative } = require('./linker.js')

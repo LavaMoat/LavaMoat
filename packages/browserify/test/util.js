@@ -1,8 +1,8 @@
-const { runInNewContext } = require('vm')
+const { runInNewContext } = require('node:vm')
 const browserify = require('browserify')
 const pify = require('pify')
-const { promises: fs } = require('fs')
-const path = require('path')
+const { promises: fs } = require('node:fs')
+const path = require('node:path')
 const watchify = require('watchify')
 const lavamoatPlugin = require('../src/index')
 const { verifySourceMaps } = require('./sourcemaps')
@@ -12,10 +12,10 @@ const {
   evaluateWithSourceUrl,
   createHookedConsole,
 } = require('lavamoat-core/test/util.js')
-const util = require('util')
+const util = require('node:util')
 const tmp = require('tmp-promise')
-const { spawnSync } = require('child_process')
-const execFile = util.promisify(require('child_process').execFile)
+const { spawnSync } = require('node:child_process')
+const execFile = util.promisify(require('node:child_process').execFile)
 
 const WORKSPACE_ROOT = path.resolve(__dirname, '..', '..', '..')
 

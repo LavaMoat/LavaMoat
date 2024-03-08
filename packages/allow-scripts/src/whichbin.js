@@ -2,7 +2,7 @@
 /* eslint-disable n/shebang */
 
 // @ts-check
-const path = require('path')
+const path = require('node:path')
 const { getOptionsForBin } = require('./index.js')
 const { FEATURE } = require('./toggles.js')
 

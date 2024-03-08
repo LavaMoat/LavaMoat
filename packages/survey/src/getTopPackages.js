@@ -1,5 +1,5 @@
-const path = require('path')
-const { promises: fs } = require('fs')
+const path = require('node:path')
+const { promises: fs } = require('node:fs')
 const fetch = require('node-fetch')
 const cheerio = require('cheerio')
 const pLimit = require('p-limit')

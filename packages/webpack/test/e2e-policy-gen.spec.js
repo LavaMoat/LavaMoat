@@ -1,7 +1,7 @@
 const test = require('ava')
 const { scaffold, runScriptWithSES } = require('./scaffold.js')
 const { makeConfig } = require('./fixtures/main/webpack.config.js')
-const path = require('path')
+const path = require('node:path')
 
 test.before(async (t) => {
   const webpackConfig = makeConfig({

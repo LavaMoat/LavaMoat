@@ -1,9 +1,9 @@
-const path = require('path')
+const path = require('node:path')
 const {
   makeResolveHook,
   makeImportHook,
 } = require('lavamoat/src/parseForPolicy')
-const { builtinModules: builtinPackages } = require('module')
+const { builtinModules: builtinPackages } = require('node:module')
 const { inspectSesCompat, codeSampleFromAstNode } = require('lavamoat-tofu')
 const { walk } = require('lavamoat-core/src/walk')
 

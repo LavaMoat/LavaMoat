@@ -1,6 +1,6 @@
-const fs = require('fs')
-const url = require('url')
-const crypto = require('crypto')
+const fs = require('node:fs')
+const url = require('node:url')
+const crypto = require('node:crypto')
 
 require('ses')
 lockdown()
@@ -48,14 +48,14 @@ async function main() {
     transforms
 
   const modules = {
-    stream: await addToCompartment('stream', require('stream')),
-    events: await addToCompartment('events', require('events')),
-    buffer: await addToCompartment('buffer', require('buffer')),
-    util: await addToCompartment('util', require('util')),
-    crypto: await addToCompartment('crypto', require('crypto')),
-    assert: await addToCompartment('assert', require('assert')),
-    path: await addToCompartment('path', require('path')),
-    fs: await addToCompartment('fs', require('fs')),
+    stream: await addToCompartment('stream', require('node:stream')),
+    events: await addToCompartment('events', require('node:events')),
+    buffer: await addToCompartment('buffer', require('node:buffer')),
+    util: await addToCompartment('util', require('node:util')),
+    crypto: await addToCompartment('crypto', require('node:crypto')),
+    assert: await addToCompartment('assert', require('node:assert')),
+    path: await addToCompartment('path', require('node:path')),
+    fs: await addToCompartment('fs', require('node:fs')),
   }
 
   const readPowers = makeReadPowers({ fs, url, crypto })

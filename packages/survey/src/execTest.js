@@ -1,8 +1,8 @@
-const { promisify } = require('util')
-const path = require('path')
-const os = require('os')
-const { promises: fs } = require('fs')
-const { spawn, exec: execCb } = require('child_process')
+const { promisify } = require('node:util')
+const path = require('node:path')
+const os = require('node:os')
+const { promises: fs } = require('node:fs')
+const { spawn, exec: execCb } = require('node:child_process')
 
 const exec = promisify(execCb)
 const makeTempDir = async () => {

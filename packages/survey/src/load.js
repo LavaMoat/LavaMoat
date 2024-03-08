@@ -1,4 +1,4 @@
-const { resolve } = require('path')
+const { resolve } = require('node:path')
 const { downloadPackage } = require('./downloadPackage.js')
 const { fileExists } = require('./util.js')
 
