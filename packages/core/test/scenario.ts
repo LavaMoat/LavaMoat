@@ -1,8 +1,7 @@
-// @ts-check
-
 import type { ExecutionContext } from 'ava'
-import type { LavaMoatOpts } from '../../../node/src/defaults'
-import type { LavaMoatPolicySchema } from '../../schema'
+import { ModuleInitializer } from '../src/moduleRecord'
+import type { LavaMoatOpts } from '../src/options'
+import { LavaMoatPolicy, LavaMoatPolicyOverrides } from '../src/schema'
 
 export type ScenarioType = 'truthy' | 'falsy' | 'deepEqual'
 
@@ -31,11 +30,7 @@ export interface NormalizedScenarioJSFile extends ScenarioFile {
 
 export interface NormalizedBuiltin extends NormalizedScenarioJSFile {
   specifier: string
-  moduleInitializer: (
-    exports: Record<string, any>,
-    require: (id: string) => any,
-    module: Record<string, any>
-  ) => void
+  moduleInitializer: ModuleInitializer
 }
 /**
  * Scenario file as provided by user
@@ -54,21 +49,17 @@ export interface ScenarioFile {
   type?: ScenarioFileType
   entry?: boolean
   importMap?: Record<string, string>
-  moduleInitializer?: (
-    exports: Record<string, any>,
-    require: (id: string) => any,
-    module: Record<string, any>
-  ) => void
+  moduleInitializer?: ModuleInitializer
 }
 
 export type ScenarioSourceFn = () => void
 
 export interface Scenario<Result = unknown> {
   name?: string
-  config?: LavaMoatPolicySchema
-  configOverride?: LavaMoatPolicySchema
+  config?: LavaMoatPolicy
+  configOverride?: LavaMoatPolicyOverrides
   expectedFailure?: boolean
-  expectedResult?: any
+  expectedResult?: Result
   defineEntry?: ScenarioSourceFn
   defineOne?: ScenarioSourceFn
   defineTwo?: ScenarioSourceFn
@@ -77,14 +68,14 @@ export interface Scenario<Result = unknown> {
   expectedFailureMessageRegex?: RegExp
   files?: Record<string, ScenarioFile>
   defaultPolicy?: boolean
-  builtin?: Record<string, any>
-  context?: Record<string, any>
+  builtin?: Record<string, unknown>
+  context?: Record<string, unknown>
   opts?: LavaMoatOpts
   dir?: string
   checkPostRun?: ScenarioCheckPostRunFn<Result>
   checkError?: ScenarioCheckErrorFn<Result>
   checkResult?: ScenarioCheckResultFn<Result>
-  kernelArgs?: Record<string, any>
+  kernelArgs?: Record<string, unknown>
   beforeCreateKernel?: (scenario: NormalizedScenario<Result>) => void
 }
 
@@ -109,8 +100,8 @@ export type NormalizedScenario<Result = unknown> = Required<
 > &
   Pick<Scenario<Result>, 'dir' | 'kernelArgs' | 'beforeCreateKernel'> & {
     entries: string[]
-    globalThis?: Record<string, any>
-    vmContext?: Record<string, any>
+    globalThis?: Record<string, unknown>
+    vmContext?: Record<string, unknown>
   }
 
 export type ScenarioCheckPostRunFn<Result = unknown> = (
