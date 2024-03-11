@@ -11,19 +11,20 @@ const defaultPaths = getDefaultPaths('node')
 
 /**
  * @typedef LavaMoatOpts
- * @property {LavaMoatScuttleOpts} [scuttleGlobalThis]
+ * @property {LavaMoatScuttleOpts} [scuttleGlobalThis] Enable or disable
+ *   scuttling of `globalThis`
  * @property {string[]} [scuttleGlobalThisExceptions]
- * @property {boolean} [writeAutoPolicy]
- * @property {boolean} [writeAutoPolicyDebug]
- * @property {boolean} [writeAutoPolicyAndRun]
- * @property {string} [policyPath]
- * @property {string} [policyDebugPath]
- * @property {string} [policyOverridePath]
- * @property {string} [projectRoot]
- * @property {boolean} [debugMode]
- * @property {boolean} [statsMode]
- * @property {string} [policy] - Alias for `policyPath`?
- * @property {string} [policyOverride] - Alias for `policyOverridePath`?
+ * @property {boolean} [writeAutoPolicy] Automatically write a policy file
+ * @property {boolean} [writeAutoPolicyDebug] Automatically write a debug policy
+ *   file
+ * @property {boolean} [writeAutoPolicyAndRun] Automatically write a policy file
+ *   and run the application
+ * @property {string} [policyPath] Path to policy file
+ * @property {string} [policyDebugPath] Path to policy debug file
+ * @property {string} [policyOverridePath] Path to policy override file
+ * @property {string} [projectRoot] Path to project root
+ * @property {boolean} [debugMode] Enable debug mode
+ * @property {boolean} [statsMode] Enable stats mode
  */
 
 /** @type {LavaMoatOpts} */
