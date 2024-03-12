@@ -15,7 +15,9 @@ const {
     reduceToTopmostApiCallsFromStrings,
   },
   inspectEsmImports,
-  // @ts-expect-error no types yet
+
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore cycle causes this to be an error sometimes
 } = require('lavamoat-tofu')
 const { mergePolicy } = require('./mergePolicy')
 
@@ -172,7 +174,7 @@ function createModuleInspector(opts) {
      */
     const ast =
       moduleRecord.ast ||
-      parse(moduleRecord.content, {
+      parse(/** @type {string} */ (moduleRecord.content), {
         // esm support
         sourceType: 'unambiguous',
         // someone must have been doing this
@@ -206,11 +208,12 @@ function createModuleInspector(opts) {
    */
   function inspectForEnvironment(ast, moduleRecord, includeDebugInfo) {
     const { packageName } = moduleRecord
+    // @ts-expect-error `ParseResult` / `AST` mismatch
     const compatWarnings = inspectSesCompat(ast)
 
-    /** @type {import('./schema').SesCompat} */
     const { primordialMutations, strictModeViolations, dynamicRequires } =
-      compatWarnings
+      // @ts-expect-error `SesCompat` / `InspectSesCompatResult` mismatch
+      /** @type {import('./schema').SesCompat} */ (compatWarnings)
     const hasResults =
       primordialMutations.length > 0 ||
       strictModeViolations.length > 0 ||
@@ -241,12 +244,15 @@ function createModuleInspector(opts) {
       } else {
         const samples = jsonStringify({
           primordialMutations: primordialMutations.map(({ node }) =>
+            // @ts-expect-error `SesCompatNode` / `Node.loc` mismatch
             codeSampleFromAstNode(node, moduleRecord)
           ),
           strictModeViolations: strictModeViolations.map(({ node }) =>
+            // @ts-expect-error `SesCompatNode` / `Node.loc` mismatch
             codeSampleFromAstNode(node, moduleRecord)
           ),
           dynamicRequires: dynamicRequires.map(({ node }) =>
+            // @ts-expect-error `SesCompatNode` / `Node.loc` mismatch
             codeSampleFromAstNode(node, moduleRecord)
           ),
         })
