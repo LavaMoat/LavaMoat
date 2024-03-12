@@ -64,7 +64,7 @@
     "react-hyperscript": "3.2.0",
     "rimraf": "5.0.5",
     "statsvr": "3.1.4",
-    "style-loader": "2.0.0",
+    "style-loader": "3.3.4",
     "three": "0.162.0",
     "three-forcegraph": "1.41.13",
     "three-spritetext": "1.8.2",
