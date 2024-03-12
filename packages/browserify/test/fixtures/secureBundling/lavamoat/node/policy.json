@@ -1040,17 +1040,9 @@
       },
       "globals": {
         "__dirname": true,
-        "ast": true,
         "console.error": true,
         "console.warn": true,
-        "content": true,
-        "define": true,
-        "file": true,
-        "importMap": true,
-        "moduleInitializer": true,
-        "packageName": true,
-        "specifier": true,
-        "type": true
+        "define": true
       },
       "packages": {
         "json-stable-stringify": true,
