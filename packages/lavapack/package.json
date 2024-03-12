@@ -34,7 +34,7 @@
     "espree": "9.6.1",
     "json-stable-stringify": "1.1.1",
     "lavamoat-core": "^15.2.1",
-    "readable-stream": "3.6.2",
+    "readable-stream": "4.5.2",
     "through2": "4.0.2",
     "umd": "3.0.3"
   },
