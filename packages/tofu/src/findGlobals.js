@@ -84,6 +84,11 @@ function findGlobals(ast) {
         return
       }
 
+      // class props are not globals
+      if (parentType === 'ClassProperty' && path.parent.key === path.node) {
+        return
+      }
+
       // save global
       saveGlobal(path)
     },

@@ -430,6 +430,21 @@ testInspect(
   }
 )
 
+testInspect(
+  'class properties',
+  {},
+  () => {
+    class X {
+      y = 123
+      z
+      why() {
+        return this.y
+      }
+    }
+  },
+  {}
+)
+
 function testInspect(label, opts, fn, expectedResultObj) {
   test(label, (t) => {
     const src = fnToCodeBlock(fn)
