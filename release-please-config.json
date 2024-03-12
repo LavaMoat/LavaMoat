@@ -4,7 +4,9 @@
   "packages": {
     "packages/aa": {},
     "packages/allow-scripts": {},
-    "packages/webpack": {},
+    "packages/webpack": {
+      "versioning": "prerelease"
+    },
     "packages/browserify": {},
     "packages/core": {},
     "packages/lavapack": {},
