@@ -7,7 +7,13 @@ module.exports = {
   extends: '../../.config/eslintrc.typed-workspace',
   overrides: [
     {
-      files: ['./{src,test}/**/*.{js,ts}'],
+      files: ['./test/runScenarios.spec.mjs'],
+      parserOptions: {
+        ecmaVersion: 2022,
+      },
+    },
+    {
+      files: ['./{src,test}/**/*.{mjs,js,ts}'],
       globals: {
         Compartment: 'readonly',
         templateRequire: 'readonly',
@@ -30,7 +36,7 @@ module.exports = {
       },
     },
     {
-      files: ['test/**/*.js'],
+      files: ['test/**/*.{js,mjs}'],
       rules: {
         'n/no-missing-require': 'off',
       },
