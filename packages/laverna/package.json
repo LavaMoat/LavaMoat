@@ -46,7 +46,7 @@
   "dependencies": {
     "glob": "10.3.10",
     "kleur": "4.1.5",
-    "type-fest": "4.10.3"
+    "type-fest": "4.12.0"
   },
   "devDependencies": {
     "memfs": "4.7.7"
