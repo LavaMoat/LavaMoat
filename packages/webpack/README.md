@@ -14,15 +14,20 @@ LavaMoat Webpack Plugin wraps each module in the bundle in a [Compartment](https
 
 > The plugin is emitting lockdown without the `.js` extension because that's the only way to prevent it from getting minified, which is likely to break it.
 
-The LavaMoat plugin takes an options object with the following properties:
+The LavaMoat plugin takes an options object with the following properties (all optional):
 
-- policy: the LavaMoat policy object. (unstable. This will surely change before v1 or a policy loader export will be provided from the main package to incorporate policy-override files)
-- runChecks: Optional boolean property to indicate whether to check resulting code with wrapping for correctness. Default is false.
-- diagnosticsVerbosity: Optional number property to represent diagnostics output verbosity. A larger number means more overwhelming diagnostics output. Default is 0.  
-  Setting positive verbosity will enable runChecks.
-- readableResourceIds: Decide whether to keep resource IDs human readable (regardless of production/development mode). If false, they are replaced with a sequence of numbers. Keeping them readable may be useful for debugging when a policy violation error is thrown.
-- lockdown: set configuration for [SES lockdown](). Setting the option replaces defaults from LavaMoat.
-- HtmlWebpackPluginInterop: add a script tag to the html output for ./lockdown file if HtmlWebpackPlugin is in use
+| property                 | description                                                                                                                                                                                                                                                                                                        | default                  |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------ |
+| policyLocation           | Folder to store policy files in.                                                                                                                                                                                                                                                                                   | `./lavamoat/webpack`     |
+| generatePolicy           | Whether to generate the policy.json file. Generated policy is used in the build immediately. `policy-override.json` is applied before bundling, if present.                                                                                                                                                        | `false`                  |
+| emitPolicySnapshot       | If enabled, emits the result of merging policy with overrides into the output folder of webpack build for inspection. The file is not used by the bundle.                                                                                                                                                          | `false`                  |
+| readableResourceIds      | Boolean to decide whether to keep resource IDs human readable (possibly regardless of production/development mode). If false, they are replaced with a sequence of numbers. Keeping them readable may be useful for debugging when a policy violation error is thrown. By default follows the webpack config mode. | `(mode==='development')` |
+| lockdown                 | set configuration for [SES lockdown][]. Setting the option replaces defaults from LavaMoat.                                                                                                                                                                                                                        | reasonable defaults      |
+| HtmlWebpackPluginInterop | Boolean to add a script tag to the html output for ./lockdown file if HtmlWebpackPlugin is in use.                                                                                                                                                                                                                 | `false`                  |
+| inlineLockdown           | array of output filenames to inline lockdown into instead of adding it as a file to the output folder.                                                                                                                                                                                                             |
+| runChecks                | boolean property to indicate whether to check resulting code with wrapping for correctness.                                                                                                                                                                                                                        | `false`                  |
+| diagnosticsVerbosity     | number property to represent diagnostics output verbosity. A larger number means more overwhelming diagnostics output. Setting positive verbosity will enable runChecks.                                                                                                                                           | `0`                      |
+| policy                   | the LavaMoat policy object. (by default policy is loaded from files, this is an override)                                                                                                                                                                                                                          | `undefined`              |
 
 ```js
 const LavaMoatPlugin = require('@lavamoat/webpack')
@@ -31,18 +36,8 @@ module.exports = {
   // ... other webpack configuration properties
   plugins: [
     new LavaMoatPlugin({
-      // policy generated by lavamoat
-      policy: require('./lavamoat/policy.json'),
-      // runChecks: true, // enables checking each wrapped module source if it's still proper JavaScript (in case mismatching braces somehow survived Webpack loaders processing)
-      // readableResourceIds: true, // explicitly decide if resourceIds from policy should be readable in the bundle or turned into numbers. You might want to bundle in production mode but keep the ids for debugging
-      //   diagnosticsVerbosity: 2, // level of output verbosity from the plugin
-      // SES lockdown options to use at runtime
-      // lockdown: {
-      //   errorTaming: "unsafe",
-      //   consoleTaming: "unsafe",
-      //   overrideTaming: "severe"
-      // },
-      // HtmlWebpackPluginInterop: false, // set it to true if you want a script tag for ./lockdown file to automatically be added to your HTML template
+      generatePolicy: true,
+      // ... settings from above, optionally
     }),
   ],
   // ... other webpack configuration properties
@@ -74,7 +69,7 @@ Example: avoid wrapping CSS modules:
           'css-loader',
           LavaMoatPlugin.exclude,
         ],
-        sideEffects: true,
+        // ...
       },
     ],
   },
@@ -107,12 +102,13 @@ Sadly, even treeshaking doesn't eliminate that module. It's left there and faili
 
 This plugin will skip policy enforcement for such ignored modules.
 
-# Security Claims
+# Security
 
-**This is a _beta_ release and does not provide any guarantees; even those listed below. Use at your own risk!**
+**This is an experimental technology. Use at your own risk!**
 
-- SES must be added to the page without any bundling or transforming for any security guarantees to be sustained.
-  - The plugin is attempting to add it as an asset to the compilation for the sake of Developer Experience. Feedback welcome.
+- [SES lockdown][] must be added to the page without any bundling or transforming for any security guarantees to be sustained.
+  - The plugin is attempting to add it as an asset to the compilation for the sake of Developer Experience. `.js` extension is omitted to prevent minification.
+  - Optionally lockdown can be inlined into the bundle files. It's hard to determine which files are loaded when, so providing filenames for scripts that get to load as the first script on the page to apply lockdown only once is how one uses inlining.
 - Each javascript module resulting from the webpack build is scoped to its package's policy
 
 ## Threat Model
@@ -137,3 +133,5 @@ Run `npm test` to start the automated tests.
 - Navigate to `example/`
 - Run `npm ci` and `npm test`
 - Open `dist/index.html` in your browser and inspect the console
+
+[SES lockdown]: https://github.com/endojs/endo/tree/master/packages/ses#lockdown
