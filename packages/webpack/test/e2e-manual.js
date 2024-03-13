@@ -1,6 +1,6 @@
 // run this with node to produce the test build to disk
-const fs = require('fs')
-const path = require('path')
+const fs = require('node:fs')
+const path = require('node:path')
 const { scaffold, runScriptWithSES } = require('./scaffold.js')
 const webpackConfigDefault = require('./fixtures/main/webpack.config.js')
 const webpackConfig = {
