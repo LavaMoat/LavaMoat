@@ -25,7 +25,7 @@ const JAVASCRIPT_MODULE_TYPE_ESM = 'javascript/esm'
 // @ts-ignore
 const { RUNTIME_KEY } = require('./ENUM.json')
 const { wrapGeneratorMaker } = require('./buildtime/generator.js')
-const { sesEmitHook } = require('./buildtime/emitSes.js')
+const { sesEmitHook, sesPrefixFiles } = require('./buildtime/emitSes.js')
 const EXCLUDE_LOADER = path.join(__dirname, './excludeLoader.js')
 
 class VirtualRuntimeModule extends RuntimeModule {
@@ -63,13 +63,17 @@ class LavaMoatPlugin {
    * @param {import('./types.js').LavaMoatPluginOptions} [options]
    */
   constructor(options = {}) {
-    if (!options.lockdown) {
-      options.lockdown = lockdownDefaults
+    /**
+     * @type {import('./types.js').LavaMoatPluginOptions & {
+     *   policyLocation: string
+     *   lockdown: object
+     * }}
+     */
+    this.options = {
+      lockdown: lockdownDefaults,
+      policyLocation: path.join('.', 'lavamoat', 'webpack'),
+      ...options,
     }
-    if (!options.policyLocation) {
-      options.policyLocation = path.join('.', 'lavamoat', 'webpack')
-    }
-    this.options = options
 
     diag.level = options.diagnosticsVerbosity || 0
   }
@@ -429,22 +433,38 @@ class LavaMoatPlugin {
           }
         )
 
-        const HtmlWebpackPluginInUse = compiler.options.plugins.find(
-          (plugin) => plugin && plugin.constructor.name === 'HtmlWebpackPlugin'
-        )
-
-        // TODO: avoid minification
-        compilation.hooks.processAssets.tap(
-          {
-            name: PLUGIN_NAME,
-            stage: Compilation.PROCESS_ASSETS_STAGE_ADDITIONAL,
-          },
-          sesEmitHook({
-            compilation,
-            HtmlWebpackPluginInUse,
-            HtmlWebpackPluginInterop: options.HtmlWebpackPluginInterop,
-          })
-        )
+        if (options.inlineLockdown) {
+          compilation.hooks.processAssets.tap(
+            {
+              name: PLUGIN_NAME,
+              stage: Compilation.PROCESS_ASSETS_STAGE_OPTIMIZE_INLINE,
+            },
+            sesPrefixFiles({
+              compilation,
+              inlineLockdown: options.inlineLockdown,
+            })
+          )
+        } else {
+          const HtmlWebpackPluginInUse = compiler.options.plugins.find(
+            /**
+             * @param {unknown} plugin
+             * @returns {plugin is import('webpack').WebpackPluginInstance}
+             */
+            (plugin) =>
+              !!plugin && plugin.constructor.name === 'HtmlWebpackPlugin'
+          )
+          compilation.hooks.processAssets.tap(
+            {
+              name: PLUGIN_NAME,
+              stage: Compilation.PROCESS_ASSETS_STAGE_ADDITIONAL,
+            },
+            sesEmitHook({
+              compilation,
+              HtmlWebpackPluginInUse,
+              HtmlWebpackPluginInterop: !!options.HtmlWebpackPluginInterop,
+            })
+          )
+        }
 
         // TODO: add later hooks to optionally verify correctness and totality
         // of wrapping for the paranoid mode.
