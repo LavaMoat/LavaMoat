@@ -23,6 +23,8 @@
  * @property {Policy} [policy] - LavaMoat policy object - if programmaticly
  *   created
  * @property {Object} [lockdown] - Options to pass to lockdown
+ * @property {string[]} [inlineLockdown] - Prefix the listed files with lockdown
+ *   code
  */
 
 /**
