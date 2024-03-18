@@ -73,6 +73,10 @@ module.exports = {
     const moduleInspector = createModuleInspector({
       isBuiltin: () => false,
       includeDebugInfo: false,
+      // If the specifier is requested as a dependency in importMap but was never passed to inspectModule, its package name will be looked up here.
+      // This is a workaround to inconsistencies in how webpack represents connections. We're not aware of any security implications of this, since the package is already resolved clearly and this is only a part of policy generation, not runtime.
+      moduleToPackageFallback: (specifier) =>
+        getPackageNameForModulePath(canonicalNameMap, specifier),
     })
 
     return {

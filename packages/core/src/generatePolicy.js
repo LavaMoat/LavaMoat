@@ -348,7 +348,11 @@ function createModuleInspector(opts) {
   /**
    * @type {GeneratePolicyFn}
    */
-  function generatePolicy({ policyOverride, includeDebugInfo = false }) {
+  function generatePolicy({
+    policyOverride,
+    includeDebugInfo = false,
+    moduleToPackageFallback,
+  }) {
     /** @type {import('./schema').Resources} */
     const resources = {}
     /**
@@ -375,6 +379,7 @@ function createModuleInspector(opts) {
       const packageDeps = aggregateDeps({
         packageModules,
         moduleIdToModuleRecord,
+        moduleToPackageFallback,
       })
       if (packageDeps.length) {
         packages = Object.fromEntries(
@@ -453,10 +458,15 @@ function createModuleInspector(opts) {
  *     string,
  *     import('./moduleRecord').LavamoatModuleRecord
  *   >
+ *   moduleToPackageFallback?: (specifier: string) => string | undefined
  * }} opts
  * @returns
  */
-function aggregateDeps({ packageModules, moduleIdToModuleRecord }) {
+function aggregateDeps({
+  packageModules,
+  moduleIdToModuleRecord,
+  moduleToPackageFallback = guessPackageName,
+}) {
   const deps = new Set()
   // get all dep package from the "packageModules" collection of modules
   Object.values(packageModules).forEach((moduleRecord) => {
@@ -477,7 +487,8 @@ function aggregateDeps({ packageModules, moduleIdToModuleRecord }) {
           return
         }
         // moduleRecord missing, guess package name
-        const packageName = guessPackageName(requestedName)
+        const packageName =
+          moduleToPackageFallback(requestedName) || `<unknown:${requestedName}>`
         deps.add(packageName)
       }
     )
@@ -494,13 +505,13 @@ function aggregateDeps({ packageModules, moduleIdToModuleRecord }) {
  * because resolution was skipped for that module
  *
  * @param {string} requestedName
- * @returns {string}
+ * @returns {string | undefined}
  */
 function guessPackageName(requestedName) {
   const isNotPackageName =
     requestedName.startsWith('/') || requestedName.startsWith('.')
   if (isNotPackageName) {
-    return `<unknown:${requestedName}>`
+    return
   }
   // resolving is skipped so guess package name
   const pathParts = requestedName.split('/')
@@ -530,7 +541,9 @@ function getDefaultPaths(policyName) {
  * @callback GeneratePolicyFn
  * @param {Partial<ModuleInspectorOptions> & {
  *   policyOverride?: import('./schema').LavaMoatPolicyOverrides
+ *   moduleToPackageFallback?: (value: string) => string | undefined
  * }} opts
+ *
  * @returns {import('./schema').LavaMoatPolicy
  *   | import('./schema').LavaMoatPolicyDebug}
  */
@@ -545,6 +558,7 @@ function getDefaultPaths(policyName) {
  * @typedef ModuleInspectorOptions
  * @property {(value: string) => boolean} isBuiltin
  * @property {boolean} [includeDebugInfo]
+ * @property {(specifier: string) => string | undefined} [moduleToPackageFallback]
  */
 
 /**
