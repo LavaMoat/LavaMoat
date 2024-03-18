@@ -1,5 +1,5 @@
 const path = require('node:path')
-const { WebpackError, RuntimeModule } = require('webpack')
+const { WebpackError, RuntimeModule, webpack } = require('webpack')
 const { Compilation } = require('webpack')
 const browserResolve = require('browser-resolve')
 
@@ -125,13 +125,42 @@ class LavaMoatPlugin {
     // }
     // resolve = { sync: adapterFunction(compilation.resolverFactory.get('normal').resolveSync.bind(compilation.resolverFactory.get('normal'))) }
 
+    const webpackResolver = compiler.resolverFactory.get('normal', {
+      fileSystem: compiler.inputFileSystem,
+    })
+    const customResolve = (specifier, { basedir }) => {
+      if (specifier.endsWith('/package.json')) {
+        // webpack resolver complains that package.json is not one of the exports :(
+        // this could suffice
+        // return path.resolve(path.join(basedir, 'node_modules', specifier))
+        return browserResolve.sync(specifier, { basedir })
+      } else {
+        return new Promise((resolve, reject) => {
+          webpackResolver.resolve(
+            { context: basedir },
+            basedir,
+            specifier,
+            {},
+            (err, result) => {
+              if (err) {
+                console.log('customResolve error', err, specifier, basedir)
+                reject(err)
+              } else {
+                resolve(result)
+              }
+            }
+          )
+        })
+      }
+    }
     // =================================================================
     // run long asynchronous processing ahead of all compilations
     compiler.hooks.beforeRun.tapAsync(PLUGIN_NAME, (compilation, callback) =>
       loadCanonicalNameMap({
         rootDir: compiler.context,
         includeDevDeps: true, // even the most proper projects end up including devdeps in their bundles :()
-        resolve: browserResolve,
+        // resolve: browserResolve,
+        resolve: customResolve,
       })
         .then((map) => {
           canonicalNameMap = map

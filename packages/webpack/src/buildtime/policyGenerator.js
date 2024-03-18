@@ -104,6 +104,12 @@ module.exports = {
           },
           //ast: module._ast, - would have to translate to babel anyway
         })
+        if(module.userRequest.includes('@metamask/utils/dist') ){
+          console.log('===>',module.userRequest)
+        }
+        // if(moduleRecord.packageName === '@metamask/snaps-sdk') {
+        //   console.log(Array.from(connections).find((dep) => dep.resolvedModule.userRequest.includes('@metamask/utils')))
+        // }
 
         moduleInspector.inspectModule(moduleRecord)
       },
