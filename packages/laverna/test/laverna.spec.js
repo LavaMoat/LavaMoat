@@ -22,15 +22,15 @@ const { mock } = require('node:test')
  *
  * @typedef PublishTestContext
  * @property {{ error: import('node:test').Mock<Console['error']> }} console
- * @property {import('node:test').Mock<import('../src').SpawnFn>} spawn
+ * @property {import('node:test').Mock<import('../src/types').SpawnFn>} spawn
  * @property {(
- *   opts?: import('../src').LavernaOptions,
- *   caps?: import('../src').LavernaCapabilities
+ *   opts?: import('../src/types').LavernaOptions,
+ *   caps?: import('../src/types').LavernaCapabilities
  * ) => Promise<void>} runLaverna
  * @property {(
  *   pkgNames: string[],
- *   opts?: import('../src').LavernaOptions,
- *   caps?: import('../src').LavernaCapabilities
+ *   opts?: import('../src/types').LavernaOptions,
+ *   caps?: import('../src/types').LavernaCapabilities
  * ) => Promise<void>} runInvokePublish
  */
 
@@ -61,7 +61,7 @@ function getRandomPkgName() {
  * Base options for {@link Laverna}, providing some stubs.
  */
 const BASE_OPTS = Object.freeze(
-  /** @type {import('../src').LavernaOptions} */ ({
+  /** @type {import('../src/types').LavernaOptions} */ ({
     /**
      * Because the root of the phony `memfs` filesystem is `/`, we use it here.
      */
@@ -83,7 +83,7 @@ const BASE_OPTS = Object.freeze(
  * Base capabilities for {@link Laverna}, providing some stubs.
  */
 const BASE_CAPS = Object.freeze(
-  /** @type {import('../src').LavernaCapabilities} */ ({
+  /** @type {import('../src/types').LavernaCapabilities} */ ({
     /**
      * The phony `fs` is given to `glob`--it supports a custom `fs` module--so
      * it can find files in there.
@@ -155,8 +155,8 @@ test.beforeEach((t) => {
    * Does not create a child process
    *
    * @param {string[]} pkgNames
-   * @param {import('../src').LavernaOptions} opts
-   * @param {import('../src').LavernaCapabilities} caps
+   * @param {import('../src/types').LavernaOptions} opts
+   * @param {import('../src/types').LavernaCapabilities} caps
    * @returns {Promise<void>}
    */
   const runInvokePublish = async (pkgNames, opts = {}, caps = {}) => {
@@ -180,8 +180,8 @@ test.beforeEach((t) => {
    *
    * Does not create a child process
    *
-   * @param {import('../src').LavernaOptions} opts
-   * @param {import('../src').LavernaCapabilities} caps
+   * @param {import('../src/types').LavernaOptions} opts
+   * @param {import('../src/types').LavernaCapabilities} caps
    * @returns {Promise<void>}
    */
   const runLaverna = async (opts = {}, caps = {}) => {
