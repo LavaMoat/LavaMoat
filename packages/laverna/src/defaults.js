@@ -30,7 +30,7 @@ const DEFAULT_GLOB_OPTS = Object.freeze(
     cwd: DEFAULT_ROOT,
     withFileTypes: true,
     ignore: {
-      ignored: /** @param {import('.').GlobDirent} p */ (p) =>
+      ignored: /** @param {import('./types').GlobDirent} p */ (p) =>
         !p.parent || !p.isDirectory(),
     },
   })
@@ -41,7 +41,7 @@ exports.DEFAULT_GLOB_OPTS = DEFAULT_GLOB_OPTS
  * Default capabilities for Laverna
  */
 const DEFAULT_CAPS = Object.freeze(
-  /** @type {import('.').AllLavernaCapabilities} */ ({
+  /** @type {import('./types').AllLavernaCapabilities} */ ({
     fs: Fs,
     glob: Glob.glob,
     execFile: execFileAsync,
@@ -57,7 +57,7 @@ exports.DEFAULT_CAPS = DEFAULT_CAPS
  * Default options for Laverna
  */
 const DEFAULT_OPTS = Object.freeze(
-  /** @type {import('.').AllLavernaOptions} */ ({
+  /** @type {import('./types').AllLavernaOptions} */ ({
     dryRun: false,
     yes: false,
     root: DEFAULT_ROOT,

@@ -5,7 +5,7 @@
 
 const { bold, magenta, gray, italic, cyan, underline } = require('kleur')
 const util = require('node:util')
-const { Laverna } = require('./laverna')
+const { Laverna } = require('./index')
 const { ERR } = require('./log-symbols')
 const { name, bugs, version, description } = require('../package.json')
 
