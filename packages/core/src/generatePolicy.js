@@ -449,18 +449,21 @@ function createModuleInspector(opts) {
 }
 
 /**
- * @param {{
- *   packageModules: Record<
- *     string,
- *     import('./moduleRecord').LavamoatModuleRecord
- *   >
- *   moduleIdToModuleRecord: Map<
- *     string,
- *     import('./moduleRecord').LavamoatModuleRecord
- *   >
- *   moduleToPackageFallback?: (specifier: string) => string | undefined
- * }} opts
- * @returns
+ * @callback ModuleToPackageFallbackFn
+ * @param {string} requestedName
+ * @returns {string | undefined}
+ */
+
+/**
+ * @typedef {Object} AggregateDepsOptions
+ * @property {Record<string, import('./moduleRecord').LavamoatModuleRecord>} packageModules
+ * @property {Map<string, import('./moduleRecord').LavamoatModuleRecord>} moduleIdToModuleRecord
+ * @property {ModuleToPackageFallbackFn} [moduleToPackageFallback]
+ */
+
+/**
+ * @param {AggregateDepsOptions} opts
+ * @returns {string[]}
  */
 function aggregateDeps({
   packageModules,
@@ -504,8 +507,7 @@ function aggregateDeps({
  * For when you encounter a `requestedName` that was not inspected, likely
  * because resolution was skipped for that module
  *
- * @param {string} requestedName
- * @returns {string | undefined}
+ * @type {ModuleToPackageFallbackFn}
  */
 function guessPackageName(requestedName) {
   const isNotPackageName =
