@@ -1,4 +1,4 @@
-// ses@1.3.0
+// ses@1.4.0
 'use strict';
 (() => {
   const functors = [
@@ -164,6 +164,9 @@ const        arrayIncludes=  uncurryThis(arrayPrototype.includes);$h‍_once.arr
 const        arrayJoin=  uncurryThis(arrayPrototype.join);
 /** @type {<T, U>(thisArg: readonly T[], callbackfn: (value: T, index: number, array: T[]) => U, cbThisArg?: any) => U[]} */$h‍_once.arrayJoin(arrayJoin);
 const        arrayMap=  /** @type {any} */  uncurryThis(arrayPrototype.map);$h‍_once.arrayMap(arrayMap);
+const        arrayFlatMap=  /** @type {any} */
+  uncurryThis(arrayPrototype.flatMap);$h‍_once.arrayFlatMap(arrayFlatMap);
+
 const        arrayPop=  uncurryThis(arrayPrototype.pop);
 /** @type {<T>(thisArg: T[], ...items: T[]) => number} */$h‍_once.arrayPop(arrayPop);
 const        arrayPush=  uncurryThis(arrayPrototype.push);$h‍_once.arrayPush(arrayPush);
@@ -4683,21 +4686,28 @@ function                tameRegExpConstructor(regExpTaming=  'safe') {
       return construct(FERAL_REG_EXP, rest, new.target);
      };
 
-    const speciesDesc=  getOwnPropertyDescriptor(FERAL_REG_EXP, speciesSymbol);
-    if( !speciesDesc) {
-      throw TypeError('no RegExp[Symbol.species] descriptor');
-     }
-
     defineProperties(ResultRegExp, {
       length: { value: 2},
       prototype: {
         value: RegExpPrototype,
         writable: false,
         enumerable: false,
-        configurable: false},
+        configurable: false}});
 
-      [speciesSymbol]: speciesDesc});
 
+    // Hermes does not have `Symbol.species`. We should support such platforms.
+    if( speciesSymbol) {
+      const speciesDesc=  getOwnPropertyDescriptor(
+        FERAL_REG_EXP,
+        speciesSymbol);
+
+      if( !speciesDesc) {
+        throw TypeError('no RegExp[Symbol.species] descriptor');
+       }
+      defineProperties(ResultRegExp, {
+        [speciesSymbol]: speciesDesc});
+
+     }
     return ResultRegExp;
    };
 
@@ -5267,7 +5277,7 @@ function                tameLocaleMethods(intrinsics, localeTaming=  'safe') {
  * @param {Function} safeEvaluate
  */
 const        makeEvalFunction=  (safeEvaluate)=>{
-  // We use the the concise method syntax to create an eval without a
+  // We use the concise method syntax to create an eval without a
   // [[Construct]] behavior (such that the invocation "new eval()" throws
   // TypeError: eval is not a constructor"), but which still accepts a
   // 'this' binding.
@@ -6617,7 +6627,11 @@ function        tameDomains(domainTaming=  'safe') {
 })()
 ,
 // === functors[34] ===
-({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,   importMeta: $h‍____meta, }) => (function () { 'use strict';   let WeakSet,arrayFilter,arrayMap,arrayPush,defineProperty,freeze,fromEntries,isError,stringEndsWith,weaksetAdd,weaksetHas;$h‍_imports([["../commons.js", [["WeakSet", [$h‍_a => (WeakSet = $h‍_a)]],["arrayFilter", [$h‍_a => (arrayFilter = $h‍_a)]],["arrayMap", [$h‍_a => (arrayMap = $h‍_a)]],["arrayPush", [$h‍_a => (arrayPush = $h‍_a)]],["defineProperty", [$h‍_a => (defineProperty = $h‍_a)]],["freeze", [$h‍_a => (freeze = $h‍_a)]],["fromEntries", [$h‍_a => (fromEntries = $h‍_a)]],["isError", [$h‍_a => (isError = $h‍_a)]],["stringEndsWith", [$h‍_a => (stringEndsWith = $h‍_a)]],["weaksetAdd", [$h‍_a => (weaksetAdd = $h‍_a)]],["weaksetHas", [$h‍_a => (weaksetHas = $h‍_a)]]]],["./types.js", []],["./internal-types.js", []]]);   
+({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,   importMeta: $h‍____meta, }) => (function () { 'use strict';   let WeakSet,arrayFilter,arrayFlatMap,arrayMap,arrayPop,arrayPush,defineProperty,freeze,fromEntries,isError,stringEndsWith,stringIncludes,stringSplit,weaksetAdd,weaksetHas;$h‍_imports([["../commons.js", [["WeakSet", [$h‍_a => (WeakSet = $h‍_a)]],["arrayFilter", [$h‍_a => (arrayFilter = $h‍_a)]],["arrayFlatMap", [$h‍_a => (arrayFlatMap = $h‍_a)]],["arrayMap", [$h‍_a => (arrayMap = $h‍_a)]],["arrayPop", [$h‍_a => (arrayPop = $h‍_a)]],["arrayPush", [$h‍_a => (arrayPush = $h‍_a)]],["defineProperty", [$h‍_a => (defineProperty = $h‍_a)]],["freeze", [$h‍_a => (freeze = $h‍_a)]],["fromEntries", [$h‍_a => (fromEntries = $h‍_a)]],["isError", [$h‍_a => (isError = $h‍_a)]],["stringEndsWith", [$h‍_a => (stringEndsWith = $h‍_a)]],["stringIncludes", [$h‍_a => (stringIncludes = $h‍_a)]],["stringSplit", [$h‍_a => (stringSplit = $h‍_a)]],["weaksetAdd", [$h‍_a => (weaksetAdd = $h‍_a)]],["weaksetHas", [$h‍_a => (weaksetHas = $h‍_a)]]]],["./types.js", []],["./internal-types.js", []]]);   
+
+
+
+
 
 
 
@@ -6665,8 +6679,17 @@ function        tameDomains(domainTaming=  'safe') {
 
 /** @typedef {keyof VirtualConsole | 'profile' | 'profileEnd'} ConsoleProps */
 
-/** @type {readonly [ConsoleProps, LogSeverity | undefined][]} */
-const consoleLevelMethods=  freeze([
+/**
+ * Those console methods whose actual parameters are `(fmt?, ...args)`
+ * even if their TypeScript types claim otherwise.
+ *
+ * Each is paired with what we consider to be their log severity level.
+ * This is the same as the log severity of these on other
+ * platform console implementations when they all agree.
+ *
+ * @type {readonly [ConsoleProps, LogSeverity | undefined][]}
+ */
+const        consoleLevelMethods=  freeze([
   ['debug', 'debug'], // (fmt?, ...args) verbose level on Chrome
   ['log', 'log'], // (fmt?, ...args) info level on Chrome
   ['info', 'info'], // (fmt?, ...args)
@@ -6674,13 +6697,22 @@ const consoleLevelMethods=  freeze([
   ['error', 'error'], // (fmt?, ...args)
 
   ['trace', 'log'], // (fmt?, ...args)
-  ['dirxml', 'log'], // (fmt?, ...args)
-  ['group', 'log'], // (fmt?, ...args)
-  ['groupCollapsed', 'log']  // (fmt?, ...args)
+  ['dirxml', 'log'], // (fmt?, ...args)          but TS typed (...data)
+  ['group', 'log'], // (fmt?, ...args)           but TS typed (...label)
+  ['groupCollapsed', 'log']  // (fmt?, ...args)  but TS typed (...label)
 ]);
 
-/** @type {readonly [ConsoleProps, LogSeverity | undefined][]} */
-const consoleOtherMethods=  freeze([
+/**
+ * Those console methods other than those already enumerated by
+ * `consoleLevelMethods`.
+ *
+ * Each is paired with what we consider to be their log severity level.
+ * This is the same as the log severity of these on other
+ * platform console implementations when they all agree.
+ *
+ * @type {readonly [ConsoleProps, LogSeverity | undefined][]}
+ */$h‍_once.consoleLevelMethods(consoleLevelMethods);
+const        consoleOtherMethods=  freeze([
   ['assert', 'error'], // (value, fmt?, ...args)
   ['timeLog', 'log'], // (label?, ...args) no fmt string
 
@@ -6703,8 +6735,8 @@ const consoleOtherMethods=  freeze([
   ['timeStamp', undefined]  // (label?)
 ]);
 
-/** @type {readonly [ConsoleProps, LogSeverity | undefined][]} */
-const        consoleWhitelist=  freeze([
+/** @type {readonly [ConsoleProps, LogSeverity | undefined][]} */$h‍_once.consoleOtherMethods(consoleOtherMethods);
+const consoleWhitelist=  freeze([
   ...consoleLevelMethods,
   ...consoleOtherMethods]);
 
@@ -6736,10 +6768,10 @@ const        consoleWhitelist=  freeze([
  * ]);
  */
 
-// /////////////////////////////////////////////////////////////////////////////
+// //////////////////////////// Logging Console ////////////////////////////////
 
-/** @type {MakeLoggingConsoleKit} */$h‍_once.consoleWhitelist(consoleWhitelist);
-const makeLoggingConsoleKit=  (
+/** @type {MakeLoggingConsoleKit} */
+const        makeLoggingConsoleKit=  (
   loggedErrorHandler,
   { shouldResetForDebugging=  false}=   {})=>
      {
@@ -6781,10 +6813,24 @@ const makeLoggingConsoleKit=  (
  };$h‍_once.makeLoggingConsoleKit(makeLoggingConsoleKit);
 freeze(makeLoggingConsoleKit);
 
+/**
+ * Makes the same calls on a `baseConsole` that were made on a
+ * `loggingConsole` to produce this `log`. In this way, a logging console
+ * can be used as a buffer to delay the application of these calls to a
+ * `baseConsole`.
+ *
+ * @param {LogRecord[]} log
+ * @param {VirtualConsole} baseConsole
+ */
+const        pumpLogToConsole=  (log, baseConsole)=>  {
+  for( const [name, ...args]of  log) {
+    // eslint-disable-next-line @endo/no-polymorphic-call
+    baseConsole[name](...args);
+   }
+ };
+// //////////////////////////// Causal Console /////////////////////////////////
 
-// /////////////////////////////////////////////////////////////////////////////
-
-/** @type {ErrorInfo} */
+/** @type {ErrorInfo} */$h‍_once.pumpLogToConsole(pumpLogToConsole);
 const ErrorInfo=  {
   NOTE: 'ERROR_NOTE:',
   MESSAGE: 'ERROR_MESSAGE:',
@@ -6794,7 +6840,7 @@ const ErrorInfo=  {
 freeze(ErrorInfo);
 
 /** @type {MakeCausalConsole} */
-const makeCausalConsole=  (baseConsole, loggedErrorHandler)=>  {
+const        makeCausalConsole=  (baseConsole, loggedErrorHandler)=>  {
   if( !baseConsole) {
     return undefined;
    }
@@ -6982,11 +7028,105 @@ const makeCausalConsole=  (baseConsole, loggedErrorHandler)=>  {
  };$h‍_once.makeCausalConsole(makeCausalConsole);
 freeze(makeCausalConsole);
 
+/**
+ * @typedef {(...args: unknown[]) => void} Logger
+ */
 
-// /////////////////////////////////////////////////////////////////////////////
+/**
+ * This is a rather horrible kludge to indent the output to a logger in
+ * the case where some arguments are strings containing newlines. Part of
+ * the problem is that console-like loggers, including the one in ava,
+ * join the string arguments of the log message with a space.
+ * Because of this, there's an extra space at the beginning of each of
+ * the split lines. So this kludge compensated by putting an extra empty
+ * string at the beginning, so that the logger will add the same extra
+ * joiner.
+ * TODO: Fix this horrible kludge, and indent in a sane manner.
+ *
+ * @param {string} str
+ * @param {string} sep
+ * @param {string[]} indents
+ * @returns {string[]}
+ */
+const indentAfterAllSeps=  (str, sep, indents)=>  {
+  const [firstLine, ...restLines]=  stringSplit(str, sep);
+  const indentedRest=  arrayFlatMap(restLines, (line)=>[sep, ...indents, line]);
+  return ['', firstLine, ...indentedRest];
+ };
+
+/**
+ * @param {LoggedErrorHandler} loggedErrorHandler
+ */
+const        defineCausalConsoleFromLogger=  (loggedErrorHandler)=>{
+  /**
+   * Implement the `VirtualConsole` API badly by turning all calls into
+   * calls on `tlogger`. We need to do this to have `console` logging
+   * turn into calls to Ava's `t.log`, so these console log messages
+   * are output in the right place.
+   *
+   * @param {Logger} tlogger
+   * @returns {VirtualConsole}
+   */
+  const makeCausalConsoleFromLogger=  (tlogger)=>{
+    const indents=  [];
+    const logWithIndent=  (...args)=>  {
+      if( indents.length>  0) {
+        args=  arrayFlatMap(args, (arg)=>
+          typeof arg===  'string'&&  stringIncludes(arg, '\n')?
+              indentAfterAllSeps(arg, '\n', indents):
+              [arg]);
+
+        args=  [...indents, ...args];
+       }
+      return tlogger(...args);
+     };
+    const makeNamed=  (name, fn)=>
+      ({ [name]: (...args)=>  fn(...args)})[ name];
+
+    const baseConsole=  fromEntries([
+      ...arrayMap(consoleLevelMethods, ([name])=>  [
+        name,
+        makeNamed(name, logWithIndent)]),
+
+      ...arrayMap(consoleOtherMethods, ([name])=>  [
+        name,
+        makeNamed(name, (...args)=>  logWithIndent(name, ...args))])]);
+
+
+    // https://console.spec.whatwg.org/#grouping
+    for( const name of ['group', 'groupCollapsed']) {
+      if( baseConsole[name]) {
+        baseConsole[name]=  makeNamed(name, (...args)=>  {
+          if( args.length>=  1) {
+            // Prefix the logged data with "group" or "groupCollapsed".
+            logWithIndent(...args);
+           }
+          // A single space is enough;
+          // the host console will separate them with additional spaces.
+          arrayPush(indents, ' ');
+         });
+       }
+     }
+    if( baseConsole.groupEnd) {
+      baseConsole.groupEnd=  makeNamed('groupEnd', (...args)=>  {
+        arrayPop(indents);
+       });
+     }
+    harden(baseConsole);
+    const causalConsole=  makeCausalConsole(
+      /** @type {VirtualConsole} */  baseConsole,
+      loggedErrorHandler);
+
+    return (/** @type {VirtualConsole} */ causalConsole);
+   };
+  return freeze(makeCausalConsoleFromLogger);
+ };$h‍_once.defineCausalConsoleFromLogger(defineCausalConsoleFromLogger);
+freeze(defineCausalConsoleFromLogger);
+
+// ///////////////////////// Filter Console ////////////////////////////////////
 
 /** @type {FilterConsole} */
-const filterConsole=  (baseConsole, filter, _topic=  undefined)=>  {
+const        filterConsole=  (baseConsole, filter, _topic=  undefined)=>  {
   // TODO do something with optional topic string
   const whitelist=  arrayFilter(
     consoleWhitelist,
@@ -10550,7 +10690,60 @@ globalThis.assert=  assert;
 })()
 ,
 // === functors[53] ===
-({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,   importMeta: $h‍____meta, }) => (function () { 'use strict';   $h‍_imports([["./src/lockdown-shim.js", []],["./src/compartment-shim.js", []],["./src/assert-shim.js", []]]);   
+({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,   importMeta: $h‍____meta, }) => (function () { 'use strict';   let symbolFor,globalThis,defineCausalConsoleFromLogger,loggedErrorHandler;$h‍_imports([["./commons.js", [["symbolFor", [$h‍_a => (symbolFor = $h‍_a)]],["globalThis", [$h‍_a => (globalThis = $h‍_a)]]]],["./error/console.js", [["defineCausalConsoleFromLogger", [$h‍_a => (defineCausalConsoleFromLogger = $h‍_a)]]]],["./error/assert.js", [["loggedErrorHandler", [$h‍_a => (loggedErrorHandler = $h‍_a)]]]]]);   
+
+
+
+// TODO possible additional exports. Some are privileged.
+// export { loggedErrorHandler };
+// export {
+//   makeCausalConsole,
+//   consoleLevelMethods,
+//   consoleOtherMethods,
+//   makeLoggingConsoleKit,
+//   filterConsole,
+//   pumpLogToConsole,
+// } from './src/error/console.js';
+// export { assertLogs, throwsAndLogs } from './src/error/throws-and-logs.js';
+
+/**
+ * Makes a Console like the
+ * [SES causal `console`](https://github.com/endojs/endo/blob/master/packages/ses/src/error/README.md)
+ * but whose output is redirected to the supplied `logger` function.
+ */
+const makeCausalConsoleFromLoggerForSesAva=
+  defineCausalConsoleFromLogger(loggedErrorHandler);
+
+/**
+ *`makeCausalConsoleFromLoggerForSesAva` is privileged because it exposes
+ * unredacted error info onto the `Logger` provided by the caller. It
+ * should not be made available to non-privileged code.
+ *
+ * Further, we consider this particular API choice to be experimental
+ * and may change in the future. It is currently only intended for use by
+ * `@endo/ses-ava`, with which it will be co-maintained.
+ *
+ * Thus, this `console-shim.js` makes `makeCausalConsoleFromLoggerForSesAva`
+ * available on `globalThis` which it *assumes* is the global of the start
+ * compartment and is therefore allowed to hold powers that should not be
+ * available in constructed compartments. It makes it available as the value of
+ * a global property named by a registered symbol named
+ * `MAKE_CAUSAL_CONSOLE_FROM_LOGGER_KEY_FOR_SES_AVA`.
+ *
+ * Anyone accessing this, including `@endo/ses-ava`, should feature test for
+ * this and be tolerant of its absence. It may indeed disappear from later
+ * versions of the ses-shim.
+ */
+const MAKE_CAUSAL_CONSOLE_FROM_LOGGER_KEY_FOR_SES_AVA=  symbolFor(
+  'MAKE_CAUSAL_CONSOLE_FROM_LOGGER_KEY_FOR_SES_AVA');
+
+
+globalThis[MAKE_CAUSAL_CONSOLE_FROM_LOGGER_KEY_FOR_SES_AVA]=
+  makeCausalConsoleFromLoggerForSesAva;
+})()
+,
+// === functors[54] ===
+({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,   importMeta: $h‍____meta, }) => (function () { 'use strict';   $h‍_imports([["./src/lockdown-shim.js", []],["./src/compartment-shim.js", []],["./src/assert-shim.js", []],["./src/console-shim.js", []]]);   
 })()
 ,
 ]; // functors end
@@ -10660,6 +10853,7 @@ globalThis.assert=  assert;
       arrayIncludes: cell("arrayIncludes"),
       arrayJoin: cell("arrayJoin"),
       arrayMap: cell("arrayMap"),
+      arrayFlatMap: cell("arrayFlatMap"),
       arrayPop: cell("arrayPop"),
       arrayPush: cell("arrayPush"),
       arraySlice: cell("arraySlice"),
@@ -10840,10 +11034,13 @@ globalThis.assert=  assert;
       tameDomains: cell("tameDomains"),
     },
     {
+      consoleLevelMethods: cell("consoleLevelMethods"),
+      consoleOtherMethods: cell("consoleOtherMethods"),
       makeLoggingConsoleKit: cell("makeLoggingConsoleKit"),
+      pumpLogToConsole: cell("pumpLogToConsole"),
       makeCausalConsole: cell("makeCausalConsole"),
+      defineCausalConsoleFromLogger: cell("defineCausalConsoleFromLogger"),
       filterConsole: cell("filterConsole"),
-      consoleWhitelist: cell("consoleWhitelist"),
     },
     {
       makeRejectionHandlers: cell("makeRejectionHandlers"),
@@ -10899,6 +11096,8 @@ globalThis.assert=  assert;
     },
     {
       repairIntrinsics: cell("repairIntrinsics"),
+    },
+    {
     },
     {
     },
@@ -11030,6 +11229,7 @@ function observeImports(map, importName, importIndex) {
       arrayIncludes: cells[0].arrayIncludes.set,
       arrayJoin: cells[0].arrayJoin.set,
       arrayMap: cells[0].arrayMap.set,
+      arrayFlatMap: cells[0].arrayFlatMap.set,
       arrayPop: cells[0].arrayPop.set,
       arrayPush: cells[0].arrayPush.set,
       arraySlice: cells[0].arraySlice.set,
@@ -11538,10 +11738,13 @@ function observeImports(map, importName, importIndex) {
     liveVar: {
     },
     onceVar: {
+      consoleLevelMethods: cells[34].consoleLevelMethods.set,
+      consoleOtherMethods: cells[34].consoleOtherMethods.set,
       makeLoggingConsoleKit: cells[34].makeLoggingConsoleKit.set,
+      pumpLogToConsole: cells[34].pumpLogToConsole.set,
       makeCausalConsole: cells[34].makeCausalConsole.set,
+      defineCausalConsoleFromLogger: cells[34].defineCausalConsoleFromLogger.set,
       filterConsole: cells[34].filterConsole.set,
-      consoleWhitelist: cells[34].consoleWhitelist.set,
     },
     importMeta: {},
   });
@@ -11826,9 +12029,23 @@ function observeImports(map, importName, importIndex) {
   functors[53]({
     imports(entries) {
       const map = new Map(entries);
+      observeImports(map, "./commons.js", 0);
+      observeImports(map, "./error/console.js", 34);
+      observeImports(map, "./error/assert.js", 9);
+    },
+    liveVar: {
+    },
+    onceVar: {
+    },
+    importMeta: {},
+  });
+  functors[54]({
+    imports(entries) {
+      const map = new Map(entries);
       observeImports(map, "./src/lockdown-shim.js", 50);
       observeImports(map, "./src/compartment-shim.js", 51);
       observeImports(map, "./src/assert-shim.js", 52);
+      observeImports(map, "./src/console-shim.js", 53);
     },
     liveVar: {
     },
