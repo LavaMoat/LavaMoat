@@ -52,7 +52,7 @@ module.exports = {
           if (policyFromOptions) {
             // TODO: avoid loading the policy file if policyFromOptions is present
             final = policyFromOptions
-          } else {
+          } else if (policy) {
             final = applyOverride(policy)
           }
           if (emit) {
@@ -74,7 +74,9 @@ module.exports = {
       isBuiltin: () => false,
       includeDebugInfo: false,
       // If the specifier is requested as a dependency in importMap but was never passed to inspectModule, its package name will be looked up here.
-      // This is a workaround to inconsistencies in how webpack represents connections. We're not aware of any security implications of this, since the package is already resolved clearly and this is only a part of policy generation, not runtime.
+      // This is a workaround to inconsistencies in how webpack represents connections.
+      // Specifically what happened to surface this issue: `connections` in webpack contain a module entry that's identified by the path to its index.mjs entrypoint while the index.js entrypoint is actually used in the bundle, so inspector doesn't have a cached entry for this one and without the fallback handler would return <unknown:/...>
+      // There should be no security implications of this, since the package is already resolved clearly and this is only a part of policy generation, not runtime.
       moduleToPackageFallback: (specifier) =>
         getPackageNameForModulePath(canonicalNameMap, specifier),
     })
