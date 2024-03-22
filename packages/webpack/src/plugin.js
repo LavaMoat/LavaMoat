@@ -451,7 +451,7 @@ class LavaMoatPlugin {
              * @returns {plugin is import('webpack').WebpackPluginInstance}
              */
             (plugin) =>
-              !!plugin && plugin.constructor.name === 'HtmlWebpackPlugin'
+              !!plugin && typeof plugin === 'object' && plugin.constructor.name === 'HtmlWebpackPlugin'
           )
           compilation.hooks.processAssets.tap(
             {
