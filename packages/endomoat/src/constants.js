@@ -65,3 +65,13 @@ export const LMR_TYPE_BUILTIN = 'builtin'
  * `js` module type for a `LavamoatModuleRecord`
  */
 export const LMR_TYPE_SOURCE = 'js'
+
+/**
+ * `native` module type for a `LavamoatModuleRecord`
+ */
+export const LMR_TYPE_NATIVE = 'native'
+
+/**
+ * Name of Endo's `bytes` parser
+ */
+export const ENDO_PARSER_BYTES = 'bytes'

@@ -1,0 +1,12 @@
+{
+  "/package.json": "{\n  \"name\": \"hello\",\n  \"version\": \"0.0.0\",\n  \"type\": \"module\",\n  \"description\": \"this code actually runs\",\n  \"private\": true,\n  \"main\": \"index.js\",\n  \"scripts\": {\n    \"start\": \"npx snapshot-fs . ../json/dynamic.json\"\n  },\n  \"dependencies\": {\n    \"hello_world\": \"0.0.0\"\n  }\n}\n",
+  "/index.js": "import addon from 'hello_world'\nexport const hello = addon.hello()\n",
+  "/README.md": "This fixture is not used directly; it's only here in order to create a snapshot:\n\n```bash\nnpm run start\n```\n",
+  "/node_modules/hello_world/world.js": "export default 'world';\n",
+  "/node_modules/hello_world/package.json": "{\n  \"name\": \"hello_world\",\n  \"version\": \"0.0.0\",\n  \"description\": \"Node.js Addons Example #1\",\n  \"main\": \"hello.js\",\n  \"type\": \"module\",\n  \"private\": true,\n  \"dependencies\": {\n    \"dynamic-require\": \"1.0.0\"\n  }\n}\n",
+  "/node_modules/hello_world/hello.js": "import { dynamic } from \"dynamic-require\";\nimport { fileURLToPath } from \"url\";\n\nexport default {\n  hello: ()  => `hello ${dynamic(fileURLToPath(new URL('./world.js', import.meta.url)))}`\n}\n",
+  "/node_modules/hello_world/README.md": "THis is just a package that consumes another package (`dynamic-require`) which executes a dynamic require.\n",
+  "/node_modules/dynamic-require/world.js": "module.exports = 'world'\n",
+  "/node_modules/dynamic-require/package.json": "{\n  \"name\": \"dynamic-require\",\n  \"version\": \"1.0.0\",\n  \"license\": \"ISC\",\n  \"private\": true,\n  \"main\": \"index.js\"\n\n}\n",
+  "/node_modules/dynamic-require/index.js": "exports.dynamic = (value) => {\n  return require(value)\n}\n"
+}
