@@ -18,6 +18,27 @@
   * dependencies
     * lavamoat-core bumped from ^15.2.0 to ^15.2.1
 
+## [0.3.0-beta.0](https://github.com/LavaMoat/LavaMoat/compare/webpack-v0.2.1-beta.0...webpack-v0.3.0-beta.0) (2024-03-26)
+
+
+### Features
+
+* **core:** add external package name fallback function to options in generatePolicy, use it in webpack ([8a3a0a6](https://github.com/LavaMoat/LavaMoat/commit/8a3a0a621eba439d028a5c185f898441a7888695))
+
+
+### Bug Fixes
+
+* **webpack:** dependency fixes ([f9cc277](https://github.com/LavaMoat/LavaMoat/commit/f9cc277bd549606b56a81cf3351e6105dca50b25))
+* **webpack:** fix global aliases in non-root compartments ([18840ea](https://github.com/LavaMoat/LavaMoat/commit/18840ea153376e2bf300a3dd36077b09ee91f74c))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @lavamoat/aa bumped from ^4.1.0 to ^4.2.0
+    * lavamoat-core bumped from ^15.2.1 to ^15.3.0
+
 ## [0.2.0-beta.0](https://github.com/LavaMoat/LavaMoat/compare/webpack-v0.1.3-beta.0...webpack-v0.2.0-beta.0) (2024-02-29)
 
 

@@ -24,6 +24,20 @@
   * dependencies
     * lavamoat-core bumped from ^15.2.0 to ^15.2.1
 
+## [6.1.3](https://github.com/LavaMoat/LavaMoat/compare/lavapack-v6.1.2...lavapack-v6.1.3) (2024-03-26)
+
+
+### Bug Fixes
+
+* **deps:** update dependency readable-stream to v4 ([2a2c624](https://github.com/LavaMoat/LavaMoat/commit/2a2c624866cb7699ca3c1cf765f44118d2b88f1f))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-core bumped from ^15.2.1 to ^15.3.0
+
 ## [6.1.0](https://github.com/LavaMoat/LavaMoat/compare/lavapack-v6.0.3...lavapack-v6.1.0) (2024-02-07)
 
 

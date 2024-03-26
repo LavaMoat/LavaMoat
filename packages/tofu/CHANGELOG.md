@@ -1,5 +1,22 @@
 # Changelog
 
+## [7.2.3](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-tofu-v7.2.2...lavamoat-tofu-v7.2.3) (2024-03-26)
+
+
+### Bug Fixes
+
+* **deps:** update dependency type-fest to v4.10.3 ([95c0ae3](https://github.com/LavaMoat/LavaMoat/commit/95c0ae39d39fd75c4f5b487f5a5bcfdc78bf046e))
+* **deps:** update dependency type-fest to v4.12.0 ([29d157c](https://github.com/LavaMoat/LavaMoat/commit/29d157cea5885ad3a3b919a305fd63a6a216508f))
+* **deps:** update dependency type-fest to v4.13.1 ([ec89820](https://github.com/LavaMoat/LavaMoat/commit/ec898201439590242b27ff0c122369a9044386bf))
+* **tofu:** ClassProperty nodes are not globals ([ca63a99](https://github.com/LavaMoat/LavaMoat/commit/ca63a99a023d625dd89b3b11f4ff7d3af73f7dde)), closes [#1098](https://github.com/LavaMoat/LavaMoat/issues/1098)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * lavamoat-core bumped from ^15.2.1 to ^15.3.0
+
 ## [7.2.2](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-tofu-v7.2.1...lavamoat-tofu-v7.2.2) (2024-02-29)
 
 

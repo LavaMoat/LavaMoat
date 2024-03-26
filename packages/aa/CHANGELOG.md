@@ -1,5 +1,17 @@
 # Changelog
 
+## [4.2.0](https://github.com/LavaMoat/LavaMoat/compare/aa-v4.1.0...aa-v4.2.0) (2024-03-26)
+
+
+### Features
+
+* **aa:** Log unknown package dirs in error message ([0fa3283](https://github.com/LavaMoat/LavaMoat/commit/0fa32832a1022c160a8685d56683bac652ce67a5))
+
+
+### Bug Fixes
+
+* **test/aa:** platform-agnostic path separator ([f4b6eaf](https://github.com/LavaMoat/LavaMoat/commit/f4b6eaf302bc80b017362901a7237e542d143280))
+
 ## [4.1.0](https://github.com/LavaMoat/LavaMoat/compare/aa-v4.0.1...aa-v4.1.0) (2024-02-29)
 
 
