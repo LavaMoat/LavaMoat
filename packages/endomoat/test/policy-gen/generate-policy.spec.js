@@ -10,6 +10,12 @@ test(testPolicyForJSON, 'builtins.json')
 
 test(testPolicyForJSON, 'kitchen-sink.json')
 
+test(testPolicyForJSON, 'phony-native.json')
+
+test(testPolicyForJSON, 'native.json')
+
+test(testPolicyForJSON, 'dynamic.json')
+
 test('basic nested global access', testPolicyForModule, 'location.href', {
   resources: {
     test: {
