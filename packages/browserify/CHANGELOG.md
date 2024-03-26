@@ -33,6 +33,23 @@
     * @lavamoat/lavapack bumped from ^6.1.1 to ^6.1.2
     * lavamoat-core bumped from ^15.2.0 to ^15.2.1
 
+## [17.0.7](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-browserify-v17.0.6...lavamoat-browserify-v17.0.7) (2024-03-26)
+
+
+### Bug Fixes
+
+* **deps:** update dependency duplexify to v4.1.3 ([c7afaf4](https://github.com/LavaMoat/LavaMoat/commit/c7afaf4a2eecb16784fb5185ee9d69f696034e4d))
+* **deps:** update dependency readable-stream to v4 ([2a2c624](https://github.com/LavaMoat/LavaMoat/commit/2a2c624866cb7699ca3c1cf765f44118d2b88f1f))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @lavamoat/aa bumped from ^4.1.0 to ^4.2.0
+    * @lavamoat/lavapack bumped from ^6.1.2 to ^6.1.3
+    * lavamoat-core bumped from ^15.2.1 to ^15.3.0
+
 ## [17.0.5](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-browserify-v17.0.4...lavamoat-browserify-v17.0.5) (2024-02-29)
 
 

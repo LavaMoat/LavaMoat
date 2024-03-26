@@ -6,6 +6,30 @@
   * dependencies
     * lavamoat-tofu bumped from ^7.2.1 to ^7.2.2
 
+## [15.3.0](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v15.2.1...lavamoat-core-v15.3.0) (2024-03-26)
+
+
+### Features
+
+* **core:** add external package name fallback function to options in generatePolicy, use it in webpack ([8a3a0a6](https://github.com/LavaMoat/LavaMoat/commit/8a3a0a621eba439d028a5c185f898441a7888695))
+
+
+### Bug Fixes
+
+* **core:** remove circular ref to ambient.ts ([b370419](https://github.com/LavaMoat/LavaMoat/commit/b3704195a8a85aa88a2057dc5381cd9d297689cb))
+* **core:** update LavamoatModuleRecord to use default initializer args ([ff3991c](https://github.com/LavaMoat/LavaMoat/commit/ff3991cce7962bd9d004024c7bb7306288882f62))
+* **core:** update vendored lockdown.umd.js ([6a062e6](https://github.com/LavaMoat/LavaMoat/commit/6a062e6521ec28f876742bc723869b5782756f7f))
+* **deps:** update dependency type-fest to v4.10.3 ([95c0ae3](https://github.com/LavaMoat/LavaMoat/commit/95c0ae39d39fd75c4f5b487f5a5bcfdc78bf046e))
+* **deps:** update dependency type-fest to v4.12.0 ([29d157c](https://github.com/LavaMoat/LavaMoat/commit/29d157cea5885ad3a3b919a305fd63a6a216508f))
+* **deps:** update dependency type-fest to v4.13.1 ([ec89820](https://github.com/LavaMoat/LavaMoat/commit/ec898201439590242b27ff0c122369a9044386bf))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-tofu bumped from ^7.2.2 to ^7.2.3
+
 ## [15.2.0](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v15.1.2...lavamoat-core-v15.2.0) (2024-02-29)
 
 

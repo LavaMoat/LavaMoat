@@ -19,6 +19,22 @@
     * lavamoat-core bumped from ^15.2.0 to ^15.2.1
     * lavamoat-tofu bumped from ^7.2.1 to ^7.2.2
 
+## [8.0.6](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-v8.0.5...lavamoat-v8.0.6) (2024-03-26)
+
+
+### Bug Fixes
+
+* **node:** remove unused props from LavaMoatOpts type ([7c9ae4a](https://github.com/LavaMoat/LavaMoat/commit/7c9ae4a2c8e4f65806eb59fe2c56b75212a5ab23))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @lavamoat/aa bumped from ^4.1.0 to ^4.2.0
+    * lavamoat-core bumped from ^15.2.1 to ^15.3.0
+    * lavamoat-tofu bumped from ^7.2.2 to ^7.2.3
+
 ## [8.0.4](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-v8.0.3...lavamoat-v8.0.4) (2024-02-29)
 
 
