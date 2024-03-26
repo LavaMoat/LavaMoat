@@ -1,5 +1,7 @@
 import {
   LAVAMOAT_PKG_POLICY_ROOT,
+  LAVAMOAT_PKG_POLICY_VALUE_DYNAMIC,
+  POLICY_ITEM_DYNAMIC,
   POLICY_ITEM_ROOT,
   POLICY_ITEM_WILDCARD,
   RSRC_POLICY_BUILTINS,
@@ -40,6 +42,11 @@ function toEndoRsrcPkgsPolicyBuiltins(item) {
           'Expected a FullAttenuationDefinition; got a boolean'
         )
       }
+      if (itemForBuiltin === 'dynamic') {
+        throw new TypeError(
+          'Expected a FullAttenuationDefinition; got "dynamic"'
+        )
+      }
       if (isArray(itemForBuiltin)) {
         throw new TypeError(
           'Expected a FullAttenuationDefinition; got an array'
@@ -78,7 +85,10 @@ function toEndoRsrcPkgsPolicyPkgs(item) {
     if (key === LAVAMOAT_PKG_POLICY_ROOT) {
       throw new TypeError('Unexpected root package policy')
     } else {
-      policyItem[key] = value
+      policyItem[key] =
+        value === LAVAMOAT_PKG_POLICY_VALUE_DYNAMIC
+          ? POLICY_ITEM_DYNAMIC
+          : Boolean(value)
     }
   }
   return policyItem

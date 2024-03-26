@@ -180,6 +180,9 @@ export async function loadCompartmentMap(
       moduleLocation,
       importHook,
       moduleTransforms,
+      fallbackLanguageForExtension: {
+        node: 'bytes',
+      },
     })
 
   // `compartmentRenames` is a mapping of filepath to compartment name;

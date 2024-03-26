@@ -8,8 +8,10 @@ import { isBuiltin as nodeIsBuiltin } from 'node:module'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import {
+  ENDO_PARSER_BYTES,
   LAVAMOAT_PKG_POLICY_ROOT,
   LMR_TYPE_BUILTIN,
+  LMR_TYPE_NATIVE,
   LMR_TYPE_SOURCE,
 } from '../constants.js'
 import { defaultReadPowers } from '../power.js'
@@ -289,7 +291,10 @@ export class PolicyGeneratorContext {
    * @returns {Promise<import('lavamoat-core').LavamoatModuleRecord[]>}
    * @internal
    */
-  async buildModuleRecordsForSource(specifier, { record, sourceLocation }) {
+  async buildModuleRecordsForSource(
+    specifier,
+    { parser, record, sourceLocation }
+  ) {
     if (!sourceLocation) {
       // XXX: why would we not have a sourceLocation?
       throw new TypeError(
@@ -317,17 +322,24 @@ export class PolicyGeneratorContext {
      * The `ModuleSource.content` prop is already pre-processed by Endo, and we
      * do not want that, since it befouls our AST crawling.
      *
+     * This will not be run if the `parser` is `bytes`.
+     *
      * @remarks
      * Doing this first since it may be more likely to fail than the other
-     * operations below
-     * @type {NonNullable<
-     *   import('lavamoat-core').LavamoatModuleRecord['content']
-     * >}
+     * operations below.
+     * @type {string | undefined}
      * @todo Modify Endo to surface the original source
+     *
+     * @todo Add more exceptions to the parsers?
      */
-    const content = await this.#readPowers
-      .read(sourceLocation)
-      .then((buffer) => PolicyGeneratorContext.#decoder.decode(buffer))
+    let content
+
+    await Promise.resolve()
+    if (parser !== ENDO_PARSER_BYTES) {
+      content = await this.#readPowers
+        .read(sourceLocation)
+        .then((buffer) => PolicyGeneratorContext.#decoder.decode(buffer))
+    }
 
     /**
      * The {@link LavamoatModuleRecord.file} prop
@@ -356,7 +368,7 @@ export class PolicyGeneratorContext {
         packageName: this.packageName,
         importMap,
         content,
-        type: LMR_TYPE_SOURCE,
+        type: parser === ENDO_PARSER_BYTES ? LMR_TYPE_NATIVE : LMR_TYPE_SOURCE,
       }),
     ]
 

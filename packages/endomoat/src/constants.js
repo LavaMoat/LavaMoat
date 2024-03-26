@@ -36,10 +36,14 @@ export const POLICY_ITEM_WRITE = 'write'
  */
 export const POLICY_ITEM_WILDCARD = 'any'
 
+export const POLICY_ITEM_DYNAMIC = 'dynamic'
+
 /**
  * Designator for the root policy item in a LavaMoat policy
  */
 export const LAVAMOAT_PKG_POLICY_ROOT = '$root$'
+
+export const LAVAMOAT_PKG_POLICY_VALUE_DYNAMIC = 'dynamic'
 
 /**
  * Name of the `packages` property of a `LavaMoatPackagePolicy`
@@ -65,3 +69,13 @@ export const LMR_TYPE_BUILTIN = 'builtin'
  * `js` module type for a `LavamoatModuleRecord`
  */
 export const LMR_TYPE_SOURCE = 'js'
+
+/**
+ * `native` module type for a `LavamoatModuleRecord`
+ */
+export const LMR_TYPE_NATIVE = 'native'
+
+/**
+ * Name of Endo's `bytes` parser
+ */
+export const ENDO_PARSER_BYTES = 'bytes'
