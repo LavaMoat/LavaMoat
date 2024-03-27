@@ -23,6 +23,7 @@ import { toEndoPolicy } from './policy-converter.js'
 import { defaultReadPowers } from './power.js'
 
 export * as constants from './constants.js'
+export { generateAndWritePolicy, generatePolicy } from './policy-gen/index.js'
 export { loadPolicies } from './policy.js'
 export { toEndoPolicy }
 

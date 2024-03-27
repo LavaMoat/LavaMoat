@@ -17,7 +17,14 @@ import assert from 'node:assert'
 import path from 'node:path'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
-import { constants, loadPolicies, run } from './index.js'
+import {
+  constants,
+  generateAndWritePolicy,
+  loadPolicies,
+  run,
+} from './index.js'
+
+const BEHAVIOR_GROUP = 'Behavior Options:'
 
 yargs(hideBin(process.argv))
   .options({
@@ -110,6 +117,47 @@ yargs(hideBin(process.argv))
     async (argv) => {
       const policy = await loadPolicies(argv.policy, argv.policyOverride)
       await run(argv.entrypoint, policy)
+    }
+  )
+  .command(
+    ['gen <entrypoint>', 'generate <entrypoint>'],
+    'Generate policy files; overwrites existing policies',
+    (yargs) =>
+      yargs
+        .options({
+          run: {
+            describe: 'Run the application after policy generated',
+            type: 'boolean',
+            group: BEHAVIOR_GROUP,
+          },
+          debug: {
+            type: 'boolean',
+            describe: 'Additionally write a debug policy',
+            group: BEHAVIOR_GROUP,
+          },
+        })
+        .positional('entrypoint', {
+          describe: 'Path to the application entry point',
+          type: 'string',
+          normalize: true,
+          coerce: path.resolve,
+        })
+        .demandOption('entrypoint')
+        .middleware((argv) => {
+          argv.entrypoint = path.resolve(argv.cwd, argv.entrypoint)
+        }, true)
+        .check((argv) => {
+          assert(
+            path.isAbsolute(argv.entrypoint),
+            'entrypoint must be an absolute path'
+          )
+        }),
+    async ({ entrypoint, debug, run: shouldRun }) => {
+      const policy = await generateAndWritePolicy(entrypoint, { debug })
+
+      if (shouldRun) {
+        await run(entrypoint, policy)
+      }
     }
   )
   .demandCommand(1)
