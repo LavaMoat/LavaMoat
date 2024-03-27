@@ -1,5 +1,19 @@
 # Changelog
 
+## [7.2.4](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-tofu-v7.2.3...lavamoat-tofu-v7.2.4) (2024-03-27)
+
+
+### Bug Fixes
+
+* **deps:** update dependency type-fest to v4.14.0 ([1321a58](https://github.com/LavaMoat/LavaMoat/commit/1321a58964f36af95b30a547154a060edb63d009))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * lavamoat-core bumped from ^15.3.0 to ^15.3.1
+
 ## [7.2.3](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-tofu-v7.2.2...lavamoat-tofu-v7.2.3) (2024-03-26)
 
 
