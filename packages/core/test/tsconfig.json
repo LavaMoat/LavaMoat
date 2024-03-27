@@ -1,10 +1,12 @@
 {
-  "extends": "../../../.config/tsconfig.test.json",
+  // not extending the test config b/c we must output some types
+  "extends": "../../../.config/tsconfig.src.json",
   "compilerOptions": {
     "checkJs": false,
-    "rootDir": "."
+    "rootDir": "..",
+    "outDir": "../types"
   },
-  "include": ["**/*"],
+  "include": ["**/*.js", "**/*.ts"],
   "references": [
     {
       "path": "../src/tsconfig.json"
