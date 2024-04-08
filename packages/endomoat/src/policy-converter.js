@@ -1,3 +1,4 @@
+import { mergePolicy } from 'lavamoat-core'
 import {
   LAVAMOAT_PKG_POLICY_ROOT,
   LAVAMOAT_PKG_POLICY_VALUE_DYNAMIC,
@@ -8,6 +9,7 @@ import {
   RSRC_POLICY_GLOBALS,
   RSRC_POLICY_PKGS,
 } from './constants.js'
+import { readPolicy } from './policy.js'
 
 const { isArray } = Array
 const { entries, fromEntries } = Object
@@ -68,7 +70,8 @@ function toEndoRsrcPkgsPolicyBuiltins(item) {
  * Converts LavaMoat `ResourcePolicy.packages` to Endo's
  * `PackagePolicy.packages`
  *
- * @param {Record<string, boolean>} [item] - A value in `ResourcePolicy`
+ * @param {import('lavamoat-core').PackagePolicy} [item] - A value in
+ *   `ResourcePolicy`
  * @returns {import('./types.js').LavaMoatPackagePolicy['packages']}
  */
 function toEndoRsrcPkgsPolicyPkgs(item) {
@@ -132,9 +135,9 @@ function toEndoRsrcPkgsPolicyGlobals(item) {
 function toEndoRsrcPkgsPolicy(resources) {
   /** @type {import('./types.js').LavaMoatPackagePolicy} */
   const pkgPolicy = {
-    packages: toEndoRsrcPkgsPolicyPkgs(resources.packages),
-    globals: toEndoRsrcPkgsPolicyGlobals(resources.globals),
-    builtins: toEndoRsrcPkgsPolicyBuiltins(resources.builtin),
+    [RSRC_POLICY_PKGS]: toEndoRsrcPkgsPolicyPkgs(resources.packages),
+    [RSRC_POLICY_GLOBALS]: toEndoRsrcPkgsPolicyGlobals(resources.globals),
+    [RSRC_POLICY_BUILTINS]: toEndoRsrcPkgsPolicyBuiltins(resources.builtin),
   }
   return pkgPolicy
 }
@@ -143,12 +146,18 @@ function toEndoRsrcPkgsPolicy(resources) {
  * Converts a LavaMoat policy to an Endo policy
  *
  * @param {import('lavamoat-core').LavaMoatPolicy} lmPolicy
- * @returns {import('./types.js').LavaMoatEndoPolicy}
+ * @returns {Promise<import('./types.js').LavaMoatEndoPolicy>}
  */
-export function toEndoPolicy(lmPolicy) {
+export async function toEndoPolicy(lmPolicy) {
+  // policy for self; needed for attenuator
+  const overrides = await readPolicy(
+    new URL('./policy-override.json', import.meta.url)
+  )
+
+  const finalLMPolicy = mergePolicy(lmPolicy, overrides)
+
   /** @type {import('./types.js').LavaMoatEndoPolicy} */
   const endoPolicy = {
-    //TODO: generate a policy resource for the default attenuator
     defaultAttenuator: DEFAULT_ATTENUATOR,
     entry: {
       [RSRC_POLICY_GLOBALS]: [POLICY_ITEM_ROOT],
@@ -157,17 +166,11 @@ export function toEndoPolicy(lmPolicy) {
       noGlobalFreeze: true,
     },
     resources: fromEntries(
-      entries(lmPolicy.resources ?? {}).map(([rsrcName, rsrcPolicy]) => [
+      entries(finalLMPolicy.resources ?? {}).map(([rsrcName, rsrcPolicy]) => [
         rsrcName,
         toEndoRsrcPkgsPolicy(rsrcPolicy),
       ])
     ),
-  }
-  // add this to make endo allow the attenuator at all, TODO: generate this from the policy or build into Endo
-  endoPolicy.resources['@lavamoat/endomoat'] = {
-    [RSRC_POLICY_PKGS]: POLICY_ITEM_WILDCARD,
-    [RSRC_POLICY_GLOBALS]: POLICY_ITEM_WILDCARD,
-    [RSRC_POLICY_BUILTINS]: POLICY_ITEM_WILDCARD,
   }
 
   return endoPolicy

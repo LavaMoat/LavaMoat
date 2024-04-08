@@ -73,7 +73,7 @@ export async function run(entrypointPath, policyOrOpts = {}, opts = {}) {
     policy = await generatePolicy(entrypointPath, generateOpts)
   }
 
-  const endoPolicy = toEndoPolicy(policy)
+  const endoPolicy = await toEndoPolicy(policy)
   const readPowers = makeReadPowers(runOpts.readPowers)
 
   const url =

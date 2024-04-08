@@ -36,7 +36,8 @@
   "scripts": {
     "lint:deps": "depcheck",
     "test": "npm run test:run",
-    "test:run": "ava"
+    "test:run": "ava",
+    "update-policy": "node ./scripts/update-own-policy.js"
   },
   "dependencies": {
     "@endo/compartment-mapper": "1.1.4",
