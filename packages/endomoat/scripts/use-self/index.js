@@ -1,0 +1,1 @@
+import '@lavamoat/endomoat/attenuator'
