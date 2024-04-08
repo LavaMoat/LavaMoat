@@ -9,7 +9,7 @@ import { toEndoPolicy } from '../src/policy-converter.js'
  *   import('../src/types.js').RootPolicy} LavaMoatPackagePolicyItem
  */
 
-test('toEndoPolicy - basic', (t) => {
+test('toEndoPolicy - basic', async (t) => {
   /** @type {import('lavamoat-core').LavaMoatPolicy} */
   const lmPolicy = {
     resources: {
@@ -38,10 +38,22 @@ test('toEndoPolicy - basic', (t) => {
       builtins: POLICY_ITEM_WILDCARD,
     },
     resources: {
+      'lavamoat-core': {
+        globals: {
+          'console.warn': true,
+        },
+        builtins: undefined,
+        packages: undefined,
+      },
       '@lavamoat/endomoat': {
-        globals: POLICY_ITEM_WILDCARD,
-        packages: POLICY_ITEM_WILDCARD,
-        builtins: POLICY_ITEM_WILDCARD,
+        packages: {
+          'lavamoat-core': true,
+        },
+        globals: undefined,
+        builtins: {
+          'node:console': true,
+          'node:path': true,
+        },
       },
       a: {
         packages: { b: true },
@@ -56,5 +68,6 @@ test('toEndoPolicy - basic', (t) => {
     },
   }
 
-  t.deepEqual(toEndoPolicy(lmPolicy), expected)
+  const actual = await toEndoPolicy(lmPolicy)
+  t.deepEqual(actual, expected)
 })
