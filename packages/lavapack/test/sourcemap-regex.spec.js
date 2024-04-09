@@ -3,8 +3,7 @@ const test = require('ava')
 const { sourceMapDropperRegex } = require('../src/pack')
 
 test('sourceMapDropperRegex detects embedded sourcemap', (t) => {
-  const singleLineCodeWithSourceMap =
-    `console.log("Hello, world!")
+  const singleLineCodeWithSourceMap = `console.log("Hello, world!")
     //# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoib3V0LmpzIiwic291cmNlcyI6WyJmb28uanMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQUEifQ==`
   t.true(
     !!singleLineCodeWithSourceMap.match(sourceMapDropperRegex),
@@ -13,8 +12,7 @@ test('sourceMapDropperRegex detects embedded sourcemap', (t) => {
 })
 
 test('sourceMapDropperRegex detects embedded sourcemap with multiline comment', (t) => {
-  const singleLineCodeWithSourceMapAndMultilineComment =
-    `console.log("Hello, world!"); 
+  const singleLineCodeWithSourceMapAndMultilineComment = `console.log("Hello, world!"); 
     /*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoib3V0LmpzIiwic291cmNlcyI6WyJmb28uanMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQUEifQ== */`
   t.true(
     !!singleLineCodeWithSourceMapAndMultilineComment.match(
@@ -74,12 +72,12 @@ test('sourceMapDropperRegex detects embedded sourcemap in code with malformed mu
 stuff
 */
 `
-const modifiedCode = codeWithMultipleMultilineComments.replace(
-  sourceMapDropperRegex,
-  ''
-)
-t.snapshot(modifiedCode)
- 
+  const modifiedCode = codeWithMultipleMultilineComments.replace(
+    sourceMapDropperRegex,
+    ''
+  )
+  t.not(modifiedCode, codeWithMultipleMultilineComments)
+  t.snapshot(modifiedCode)
 })
 
 test('sourceMapDropperRegex does not detect embedded sourcemap in code without sourcemap', (t) => {
