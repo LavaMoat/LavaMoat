@@ -46,6 +46,9 @@ function makeConfig(lmOptions = {}) {
       }),
       new HtmlWebpackPlugin(),
     ],
+    resolve:{
+      fallback: { "crypto": false }
+    },
     module: {
       rules: [
         {
