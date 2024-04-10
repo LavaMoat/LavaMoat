@@ -150,6 +150,7 @@ const findResourceId = (moduleId) => {
  */
 const wrapRequireWithPolicy = (__webpack_require__, referrerResourceId) =>
   function (specifier) {
+    console.log(`[${referrerResourceId}] require(${specifier})`, LAVAMOAT.unenforceable.includes(specifier))
     if (!LAVAMOAT.unenforceable.includes(specifier)) {
       const requestedResourceId = findResourceId(specifier)
       enforcePolicy(requestedResourceId, referrerResourceId)

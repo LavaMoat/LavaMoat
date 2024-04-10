@@ -258,6 +258,9 @@ class LavaMoatPlugin {
                 )
               }
 
+              // TODO: extract this mess to a file and document even more
+              // TODO: use moduleClass to tighten what gets on the unenforceable list. It's too wide now.
+              const moduleClass = Object.getPrototypeOf(module).constructor.name
               if (
                 // Webpack has a concept of ignored modules
                 // When a module is ignored a carveout is necessary in policy enforcement for it because the ID that webpack creates for it is not exactly helpful.
@@ -267,9 +270,13 @@ class LavaMoatPlugin {
                 (module.type === JAVASCRIPT_MODULE_TYPE_DYNAMIC &&
                   // @ts-expect-error BAD TYPES
                   module.identifierStr?.startsWith('ignored')) ||
-                // @ts-expect-error BAD TYPES
-                module.resource === undefined // better to explicitly list it as unenforceable than let it fall through the cracks
+                  // @ts-expect-error BAD TYPES
+                module.resource === undefined // TODO: thiis is too general after all
               ) {
+                process._rawDebug(
+                  'ZZZZ'+Object.getPrototypeOf(module).constructor.name
+                )
+                
                 unenforceableModuleIds.push(moduleId)
               } else {
                 knownPaths.push({

@@ -1,0 +1,9 @@
+{
+  "resources": {
+    "nodejs-package": {
+      "packages": {
+        "external:../../../node:fs": true
+      }
+    }
+  }
+}
