@@ -1,3 +1,5 @@
+import crypto from 'crypto'
+
 export const thing = (x) => {
   return x + 1
 }
