@@ -234,6 +234,8 @@ class LavaMoatPlugin {
          */
         const isNormalModule = (m) => 'resource' in m
 
+        const isUnenforceableType = (t) => ['css/mini-extract'].includes(t)
+
         // Old: good for collecting all possible paths, but bad for matching them with module ids
         // collect all paths resolved for the bundle and transition afterwards
         // normalModuleFactory.hooks.afterResolve.tap(
@@ -273,21 +275,24 @@ class LavaMoatPlugin {
                   // Below is the most reliable way I've found to date to identify ignored modules.
                   (module.type === JAVASCRIPT_MODULE_TYPE_DYNAMIC &&
                     // @ts-expect-error BAD TYPES
-                    module.identifierStr?.startsWith('ignored')) ||
+                    module.identifierStr?.startsWith('ignored'))
                   // @ts-expect-error BAD TYPES
-                  module.resource === undefined // better to explicitly list it as unenforceable than let it fall through the cracks
-                ) {
-                  unenforceableModuleIds.push(moduleId)
-                } else {
-                  knownPaths.push({
-                    path: /** @type {any} */ (module).resource,
-                    moduleId,
-                  }) // typescript is complaining about the use of `resource` here, but it's actually there.
-                }
-              })
+                 // || module.resource === undefined // TODO: thiis is too general after all
+                 || isUnenforceableType(module.type)
+              ) {
+              
+
+                unenforceableModuleIds.push(moduleId)
+              } else {
+                knownPaths.push({
+                  path: /** @type {any} */ (module).resource,
+                  moduleId,
+                }) // typescript is complaining about the use of `resource` here, but it's actually there.
+              }
             })
-            diag.rawDebug(4, { knownPaths })
-            PROGRESS.report('pathsCollected')
+          })
+          diag.rawDebug(4, { knownPaths })
+          PROGRESS.report('pathsCollected')
 
             diag.rawDebug(2, 'writing policy')
             // use the generated policy to save the user one additional pass
