@@ -72,6 +72,9 @@ const enforcePolicy = (requestedResourceId, referrerResourceId) => {
   if (myPolicy.packages && myPolicy.packages[requestedResourceId]) {
     return
   }
+  if (myPolicy.builtin && myPolicy.builtin[requestedResourceId]) {
+    return
+  }
   throw Error(
     `Policy does not allow importing ${requestedResourceId} from ${referrerResourceId}`
   )
