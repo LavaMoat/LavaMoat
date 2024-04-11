@@ -2,13 +2,23 @@ const test = require('ava')
 const { scaffold, runScriptWithSES } = require('./scaffold.js')
 const { makeConfig } = require('./fixtures/main/webpack.config.js')
 const path = require('node:path')
+const {writeFileSync} = require("node:fs");
 
 test.before(async (t) => {
   const webpackConfig = makeConfig({
-    generatePolicy: true,
+    policy: {
+      "resources": {
+        "nodejs-package": {
+          "builtin": {
+            "node:fs": true,
+          }
+        }
+      }
+    },
+    // generatePolicy: true,
     emitPolicySnapshot: true,
     diagnosticsVerbosity: 1,
-    policyLocation: path.resolve(__dirname, 'fixtures/main/policy-node'),
+    // policyLocation: path.resolve(__dirname, 'fixtures/main/policy-node'),
   })
   webpackConfig.target = 'node'
   webpackConfig.mode = 'development'
@@ -19,6 +29,7 @@ test.before(async (t) => {
     t.context.build = await scaffold(webpackConfig)
   }, 'Expected the build to succeed')
   t.context.bundle = t.context.build.snapshot['/dist/app.js']
+  writeFileSync(path.join(__dirname, 'xxxyyy.js'), t.context.bundle)
 })
 
 test('webpack/node.js - policy shape', (t) => {

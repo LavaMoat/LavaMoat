@@ -31,7 +31,7 @@
     "hardened"
   ],
   "scripts": {
-    "test": "ava"
+    "test": "ava  -- test/e2e-nodejs.spec.js --update-snapshots"
   },
   "peerDependencies": {
     "webpack": "^5.80.2"
