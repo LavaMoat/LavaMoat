@@ -85,6 +85,11 @@ exports.generateIdentifierLookup = ({
           aa: getPackageNameForModulePath(canonicalNameMap, p.path),
           moduleId: p.moduleId,
         }
+      } else if (p.moduleId.startsWith('node:')) {
+        mapping[p.moduleId] = {
+          aa: p.moduleId,
+          moduleId: p.moduleId,
+        }
       }
     }
     return mapping

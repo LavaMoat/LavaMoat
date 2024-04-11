@@ -150,7 +150,9 @@ const findResourceId = (moduleId) => {
  */
 const wrapRequireWithPolicy = (__webpack_require__, referrerResourceId) =>
   function (specifier) {
-    console.log(`[${referrerResourceId}] require(${specifier})`, LAVAMOAT.unenforceable.includes(specifier))
+  debugger;
+    console.log(111222, LAVAMOAT.policy.resources[referrerResourceId])
+    // TODO we don't have to go in this if-st for "builtin" because those don't need to go though the enforceable logic
     if (!LAVAMOAT.unenforceable.includes(specifier)) {
       const requestedResourceId = findResourceId(specifier)
       enforcePolicy(requestedResourceId, referrerResourceId)

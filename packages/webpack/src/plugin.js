@@ -227,6 +227,8 @@ class LavaMoatPlugin {
          */
         const isNormalModule = (m) => 'resource' in m
 
+        const isUnenforceableType = (t) => ['css/mini-extract'].includes(t)
+
         // Old: good for collecting all possible paths, but bad for matching them with module ids
         // collect all paths resolved for the bundle and transition afterwards
         // normalModuleFactory.hooks.afterResolve.tap(
@@ -269,14 +271,15 @@ class LavaMoatPlugin {
                 // Below is the most reliable way I've found to date to identify ignored modules.
                 (module.type === JAVASCRIPT_MODULE_TYPE_DYNAMIC &&
                   // @ts-expect-error BAD TYPES
-                  module.identifierStr?.startsWith('ignored')) ||
+                  module.identifierStr?.startsWith('ignored'))
                   // @ts-expect-error BAD TYPES
-                module.resource === undefined // TODO: thiis is too general after all
+                 // || module.resource === undefined // TODO: thiis is too general after all
+                 || isUnenforceableType(module.type)
               ) {
                 process._rawDebug(
                   'ZZZZ'+Object.getPrototypeOf(module).constructor.name
                 )
-                
+
                 unenforceableModuleIds.push(moduleId)
               } else {
                 knownPaths.push({
