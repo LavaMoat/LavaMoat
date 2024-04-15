@@ -64,7 +64,7 @@ module.exports = {
               } else if (scriptTagRegex.test(data.html)) {
                 data.html = data.html.replace(
                   scriptTagRegex,
-                  `${scriptTag}<script`
+                  `${scriptTag}$&`
                 )
               } else {
                 throw Error(

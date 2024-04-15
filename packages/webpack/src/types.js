@@ -19,7 +19,7 @@
  * @property {string[]} [inlineLockdown] - Prefix the listed files with lockdown
  * @property {number} [diagnosticsVerbosity] - A number representing diagnostics
  *   output verbosity, the larger the more overwhelming
- * @property {Object} [lockdown] - Options to pass to lockdown
+ * @property {import('ses').LockdownOptions} [lockdown] - Options to pass to lockdown
  * @property {Policy} [policy] - LavaMoat policy object - if programmaticly
  *   created
  * @property {boolean} [runChecks] - Check resulting code with wrapping for
