@@ -1,10 +1,12 @@
 const test = require('ava')
 
+// Had to extract this part because node16 got confused and believed the sourcemapping comments inside strings. As a result, AVA would malfunction and create a snapshot called foo.js.
+const SRCMAPDEF_STRING = 'sourceMappingURL'
 const { sourceMapDropperRegex } = require('../src/pack')
 
 test('sourceMapDropperRegex detects embedded sourcemap', (t) => {
   const singleLineCodeWithSourceMap = `console.log("Hello, world!")
-    //# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoib3V0LmpzIiwic291cmNlcyI6WyJmb28uanMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQUEifQ==`
+    //# ${SRCMAPDEF_STRING}=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoib3V0LmpzIiwic291cmNlcyI6WyJmb28uanMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQUEifQ==`
   t.true(
     !!singleLineCodeWithSourceMap.match(sourceMapDropperRegex),
     'Should detect embedded sourcemap'
@@ -13,7 +15,7 @@ test('sourceMapDropperRegex detects embedded sourcemap', (t) => {
 
 test('sourceMapDropperRegex detects embedded sourcemap with multiline comment', (t) => {
   const singleLineCodeWithSourceMapAndMultilineComment = `console.log("Hello, world!"); 
-    /*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoib3V0LmpzIiwic291cmNlcyI6WyJmb28uanMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQUEifQ== */`
+    /*# ${SRCMAPDEF_STRING}=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoib3V0LmpzIiwic291cmNlcyI6WyJmb28uanMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQUEifQ== */`
   t.true(
     !!singleLineCodeWithSourceMapAndMultilineComment.match(
       sourceMapDropperRegex
@@ -26,7 +28,7 @@ test('sourceMapDropperRegex detects embedded sourcemap with multiline comment an
   const multiLineCodeWithSourceMapAndMultilineComment = `function greet() {
   console.log("Hello, world!");
 } 
-/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoib3V0LmpzIiwic291cmNlcyI6WyJmb28uanMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQUEifQ== */;
+/*# ${SRCMAPDEF_STRING}=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoib3V0LmpzIiwic291cmNlcyI6WyJmb28uanMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQUEifQ== */;
 var more = 'code';
 `
   t.true(
@@ -42,7 +44,7 @@ test('sourceMapDropperRegex detects embedded sourcemap in code with multiple mul
   console.log("Hello, world!");
 } 
 /* This is a regular comment */
-/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoib3V0LmpzIiwic291cmNlcyI6WyJmb28uanMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQUEifQ== */;
+/*# ${SRCMAPDEF_STRING}=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoib3V0LmpzIiwic291cmNlcyI6WyJmb28uanMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQUEifQ== */;
 /* This is another regular comment */
 var more = 'code';
 `
@@ -67,7 +69,7 @@ test('sourceMapDropperRegex detects embedded sourcemap in code with malformed mu
   console.log("Hello, world!");
 } 
 /* This is a regular comment */
-/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoib3V0LmpzIiwic291cmNlcyI6WyJmb28uanMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQUEifQ== 
+/*# ${SRCMAPDEF_STRING}=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoib3V0LmpzIiwic291cmNlcyI6WyJmb28uanMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQUEifQ== 
 
 stuff
 */
