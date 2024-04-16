@@ -51,31 +51,28 @@ class VirtualRuntimeModule extends RuntimeModule {
 // =================================================================
 
 const PLUGIN_NAME = 'LavaMoatPlugin'
-const lockdownDefaults = {
+/** @satisfies {import('ses').LockdownOptions} */
+const lockdownDefaults = /** @type {const} */ ({
   // lets code observe call stack, but easier debuggability
   errorTaming: 'unsafe',
   // shows the full call stack
   stackFiltering: 'verbose',
   // prevents most common override mistake cases from tripping up users
   overrideTaming: 'severe',
-}
+})
 
 class LavaMoatPlugin {
   /**
    * @param {import('./types.js').LavaMoatPluginOptions} [options]
    */
   constructor(options = {}) {
-    /**
-     * @type {import('./types.js').LavaMoatPluginOptions & {
-     *   policyLocation: string
-     *   lockdown: object
-     * }}
-     */
-    this.options = {
-      lockdown: lockdownDefaults,
-      policyLocation: path.join('.', 'lavamoat', 'webpack'),
-      ...options,
+    if (!options.lockdown) {
+      options.lockdown = lockdownDefaults
     }
+    if (!options.policyLocation) {
+      options.policyLocation = path.join('.', 'lavamoat', 'webpack')
+    }
+    this.options = options
 
     diag.level = options.diagnosticsVerbosity || 0
   }
@@ -181,6 +178,7 @@ class LavaMoatPlugin {
           emit: options.emitPolicySnapshot,
           canonicalNameMap,
           compilation,
+          isBuiltin: options.isBuiltin,
         })
 
         // =================================================================
