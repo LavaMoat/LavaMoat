@@ -28,6 +28,9 @@ module.exports = {
    * @param {string} opts.location - Where to read/write the policy files
    * @param {boolean} [opts.emit] - Whether to emit the policy snapshot as an
    *   asset
+   * @param {(specifier: string) => boolean} opts.isBuiltin - A function that
+   *   determines if the specifier is a builtin of the runtime platform e.g.
+   *   node:fs
    * @returns
    */
   createPolicyGenerator({
@@ -37,6 +40,7 @@ module.exports = {
     enabled,
     location,
     emit = false,
+    isBuiltin,
   }) {
     const { policy, applyOverride } = loadPoliciesSync({
       policyPath: path.join(location, 'policy.json'),
@@ -71,7 +75,7 @@ module.exports = {
     // merge result with overrides
     // return that and emit snapshot
     const moduleInspector = createModuleInspector({
-      isBuiltin: () => false,
+      isBuiltin,
       includeDebugInfo: false,
       // If the specifier is requested as a dependency in importMap but was never passed to inspectModule, its package name will be looked up here.
       // This is a workaround to inconsistencies in how webpack represents connections.
@@ -92,7 +96,7 @@ module.exports = {
           // Knowing the actual specifier is not relevant here, they're used as unique identifiers that match between here and dependencies
           specifier: module.userRequest,
           file: module.userRequest,
-          type: 'js',
+          type: isBuiltin(module.userRequest) ? 'builtin' : 'js',
           packageName: getPackageNameForModulePath(
             canonicalNameMap,
             module.userRequest

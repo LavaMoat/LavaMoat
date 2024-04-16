@@ -1,22 +1,17 @@
 const test = require('ava')
 const { scaffold, runScriptWithSES } = require('./scaffold.js')
 const { makeConfig } = require('./fixtures/main/webpack.config.js')
+const { isBuiltin } = require('node:module')
+const path = require('node:path')
 
 test.before(async (t) => {
   const webpackConfig = makeConfig({
     // TODO: replace hardcoded policy with generated one when isBuiltin gets implemented
-    // generatePolicy: true,
-    policy: {
-      resources: {
-        'nodejs-package': {
-          builtin: {
-            'node:fs': true,
-          },
-        },
-      },
-    },
+    generatePolicy: true,
     emitPolicySnapshot: true,
     diagnosticsVerbosity: 1,
+    isBuiltin,
+    policyLocation: path.resolve(__dirname, 'fixtures/main/policy-node'),
   })
   webpackConfig.target = 'node'
   webpackConfig.mode = 'development'

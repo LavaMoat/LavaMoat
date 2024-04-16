@@ -19,11 +19,16 @@
  * @property {string[]} [inlineLockdown] - Prefix the listed files with lockdown
  * @property {number} [diagnosticsVerbosity] - A number representing diagnostics
  *   output verbosity, the larger the more overwhelming
- * @property {import('ses').LockdownOptions} [lockdown] - Options to pass to lockdown
- * @property {Policy} [policy] - LavaMoat policy object - if programmaticly
+ * @property {import('ses').LockdownOptions} [lockdown] - Options to pass to
+ *   lockdown
+ * @property {string} [policyLocation] - Directory containing policy file
+ * @property {Policy} [policy] - LavaMoat policy object - if programmatically
  *   created
  * @property {boolean} [runChecks] - Check resulting code with wrapping for
  *   correctness
+ * @property {(specifier: string) => boolean} [isBuiltin] - A function that
+ *   determines if the specifier is a builtin of the runtime platform e.g.
+ *   node:fs
  */
 
 /**
