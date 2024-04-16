@@ -1,24 +1,22 @@
 const test = require('ava')
 const { scaffold, runScriptWithSES } = require('./scaffold.js')
 const { makeConfig } = require('./fixtures/main/webpack.config.js')
-const path = require('node:path')
-const {writeFileSync} = require("node:fs");
 
 test.before(async (t) => {
   const webpackConfig = makeConfig({
-    policy: {
-      "resources": {
-        "nodejs-package": {
-          "builtin": {
-            "node:fs": true,
-          }
-        }
-      }
-    },
+    // TODO: replace hardcoded policy with generated one when isBuiltin gets implemented
     // generatePolicy: true,
+    policy: {
+      resources: {
+        'nodejs-package': {
+          builtin: {
+            'node:fs': true,
+          },
+        },
+      },
+    },
     emitPolicySnapshot: true,
     diagnosticsVerbosity: 1,
-    // policyLocation: path.resolve(__dirname, 'fixtures/main/policy-node'),
   })
   webpackConfig.target = 'node'
   webpackConfig.mode = 'development'
@@ -29,16 +27,14 @@ test.before(async (t) => {
     t.context.build = await scaffold(webpackConfig)
   }, 'Expected the build to succeed')
   t.context.bundle = t.context.build.snapshot['/dist/app.js']
-  writeFileSync(path.join(__dirname, 'xxxyyy.js'), t.context.bundle)
 })
 
 test('webpack/node.js - policy shape', (t) => {
   t.snapshot(t.context.build.snapshot['/dist/policy-snapshot.json'])
-  t.snapshot(t.context.build.snapshot['/dist/app.js'])
 })
 
 test('webpack/node.js - bundle runs without throwing', (t) => {
   t.notThrows(() => {
-    runScriptWithSES(t.context.bundle, {console, require})
+    runScriptWithSES(t.context.bundle, { console, require })
   })
 })
