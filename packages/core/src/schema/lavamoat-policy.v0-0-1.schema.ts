@@ -107,8 +107,9 @@ export interface BuiltinPolicy {
  * `true` to allow and `false` to deny
  */
 export interface PackagePolicy {
-  [k: string]: boolean
+  [k: string]: PackagePolicyValue
 }
+
 /**
  * Custom run-time module resolutions by direct dependency
  */
@@ -123,3 +124,7 @@ export interface Resolutions {
     [k: string]: string
   }
 }
+
+export type PackagePolicyValue = DynamicPkgPolicy | boolean
+
+export type DynamicPkgPolicy = 'dynamic'
