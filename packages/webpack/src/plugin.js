@@ -234,7 +234,31 @@ class LavaMoatPlugin {
          */
         const isNormalModule = (m) => 'resource' in m
 
-        const isUnenforceableType = (t) => ['css/mini-extract'].includes(t)
+        // Webpack has a concept of ignored modules
+        // When a module is ignored a carveout is necessary in policy enforcement for it because the ID that webpack creates for it is not exactly helpful.
+        // example outcome in the bundle: `const nodeCrypto = __webpack_require__(/*! crypto */ "?0b7d");`
+        // Sadly, even treeshaking doesn't eliminate that module. It's left there and failing to work when reached by runtime policy enforcement.
+        // Below is the most reliable way I've found to date to identify ignored modules.
+        /**
+         * @param {import('webpack').Module} module
+         * @returns {boolean}
+         */
+        const isIgnoredModule = (module) => {
+          if (
+            module.type === JAVASCRIPT_MODULE_TYPE_DYNAMIC &&
+            // @ts-expect-error BAD TYPES
+            module.identifierStr?.startsWith('ignored')
+          ) {
+            return true
+          }
+          // Before expanding the number of unenforceable cases, make sure we're not dealing with known things that are not regular javascript modules but have to remain under enforcement
+          // const moduleClass = Object.getPrototypeOf(module).constructor.name
+          // process._rawDebug({moduleClass})
+          // if(moduleClass === 'ExternalModule'){
+          //   return false
+          // }
+          return false
+        }
 
         // Old: good for collecting all possible paths, but bad for matching them with module ids
         // collect all paths resolved for the bundle and transition afterwards
@@ -255,33 +279,19 @@ class LavaMoatPlugin {
           try {
             const chunkGraph = compilation.chunkGraph
 
-            Array.from(chunks).forEach((chunk) => {
-              chunkGraph.getChunkModules(chunk).forEach((module) => {
-                const moduleId = chunkGraph.getModuleId(module)
-                // Module policies can be merged into a per-package policy in a second pass or right away, depending on what we can pull off for the ID generation.
-                // Seems like it'd make sense to do it right away.
-                if (isNormalModule(module)) {
-                  policyGenerator.inspectWebpackModule(
-                    module,
-                    compilation.moduleGraph.getOutgoingConnections(module)
-                  )
-                }
+          Array.from(chunks).forEach((chunk) => {
+            chunkGraph.getChunkModules(chunk).forEach((module) => {
+              const moduleId = chunkGraph.getModuleId(module)
+              // Module policies can be merged into a per-package policy in a second pass or right away, depending on what we can pull off for the ID generation.
+              // Seems like it'd make sense to do it right away.
+              if (isNormalModule(module)) {
+                policyGenerator.inspectWebpackModule(
+                  module,
+                  compilation.moduleGraph.getOutgoingConnections(module)
+                )
+              }
 
-                if (
-                  // Webpack has a concept of ignored modules
-                  // When a module is ignored a carveout is necessary in policy enforcement for it because the ID that webpack creates for it is not exactly helpful.
-                  // example outcome in the bundle: `const nodeCrypto = __webpack_require__(/*! crypto */ "?0b7d");`
-                  // Sadly, even treeshaking doesn't eliminate that module. It's left there and failing to work when reached by runtime policy enforcement.
-                  // Below is the most reliable way I've found to date to identify ignored modules.
-                  (module.type === JAVASCRIPT_MODULE_TYPE_DYNAMIC &&
-                    // @ts-expect-error BAD TYPES
-                    module.identifierStr?.startsWith('ignored'))
-                  // @ts-expect-error BAD TYPES
-                 // || module.resource === undefined // TODO: thiis is too general after all
-                 || isUnenforceableType(module.type)
-              ) {
-              
-
+              if (isIgnoredModule(module)) {
                 unenforceableModuleIds.push(moduleId)
               } else {
                 knownPaths.push({
