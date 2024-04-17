@@ -6,7 +6,6 @@ const path = require('node:path')
 
 test.before(async (t) => {
   const webpackConfig = makeConfig({
-    // TODO: replace hardcoded policy with generated one when isBuiltin gets implemented
     generatePolicy: true,
     emitPolicySnapshot: true,
     diagnosticsVerbosity: 1,
