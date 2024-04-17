@@ -140,7 +140,6 @@ exports.wrapGeneratorMaker = ({
 
       const packageId = getIdentifierForPath(module.resource)
       if (packageId === undefined) {
-        console.log(module)
         throw Error(`Failed to find a packageId for ${module.resource}`)
       }
 
