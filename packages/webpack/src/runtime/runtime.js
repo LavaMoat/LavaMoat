@@ -3,6 +3,7 @@
 /* global lockdown, harden, Compartment */
 
 const {
+  keys,
   create,
   freeze,
   assign,
@@ -38,7 +39,7 @@ values(LAVAMOAT.policy.resources).forEach((resource) => {
   }
 })
 
-const { getEndowmentsForConfig, copyWrappedGlobals } =
+const { getEndowmentsForConfig, copyWrappedGlobals, getBuiltinForConfig } =
   LAVAMOAT.endowmentsToolkit({
     handleGlobalWrite: true,
     knownWritableFields,
@@ -65,23 +66,40 @@ const stricterScopeTerminator = freeze(
 /**
  * Enforces the policy for resource imports.
  *
+ * @template T
  * @param {string} specifier - The ID of the requested resource.
  * @param {string} referrerResourceId - The ID of the referrer resource.
+ * @param {() => T} wrappedRequire - The wrapped **webpack_require** function.
+ * @returns {T} The result of the wrapped **webpack_require** function.
  * @throws {Error} Throws an error if the policy does not allow importing the
  *   requested resource from the referrer resource.
  */
-const enforcePolicy = (specifier, referrerResourceId) => {
+const enforcePolicy = (specifier, referrerResourceId, wrappedRequire) => {
   if (typeof specifier === 'undefined') {
     throw Error(`Requested specifier is undefined`)
   }
-  // implicitly allow all for root
-  if (referrerResourceId === LAVAMOAT.root) {
-    return
+  // skip enforcing what we determined at build time we cannot
+  if (
+    LAVAMOAT.unenforceable.includes(specifier) ||
+    // implicitly allow all for root
+    referrerResourceId === LAVAMOAT.root
+  ) {
+    return wrappedRequire()
   }
-  const myPolicy = LAVAMOAT.policy.resources[referrerResourceId] || {}
-  // @ts-expect-error - missing details in policy type, see TODO in types.js
-  if (myPolicy.builtin && myPolicy.builtin[specifier]) {
-    return
+  const referrerPolicy = LAVAMOAT.policy.resources[referrerResourceId] || {}
+  if (referrerPolicy.builtin) {
+    // @ts-expect-error - missing details in policy type, see TODO in types.js
+    if (referrerPolicy.builtin[specifier]) {
+      return wrappedRequire()
+    }
+    if (keys(referrerPolicy.builtin).some((key) => key.startsWith(specifier))) {
+      // create minimal selection if it's a builtin and not allowed as a whole, but with subpaths
+      return getBuiltinForConfig(
+        wrappedRequire(),
+        specifier,
+        referrerPolicy.builtin
+      )
+    }
   }
   const requestedResourceId = findResourceId(specifier)
   if (!requestedResourceId) {
@@ -91,11 +109,11 @@ const enforcePolicy = (specifier, referrerResourceId) => {
   }
   // allow imports internal to the package
   if (requestedResourceId === referrerResourceId) {
-    return
+    return wrappedRequire()
   }
   // @ts-expect-error - missing details in policy type, see TODO in types.js
-  if (myPolicy.packages && myPolicy.packages[requestedResourceId]) {
-    return
+  if (referrerPolicy.packages && referrerPolicy.packages[requestedResourceId]) {
+    return wrappedRequire()
   }
 
   throw Error(
@@ -176,11 +194,9 @@ const findResourceId = (moduleId) => {
  */
 const wrapRequireWithPolicy = (__webpack_require__, referrerResourceId) =>
   function (specifier) {
-    if (!LAVAMOAT.unenforceable.includes(specifier)) {
-      enforcePolicy(specifier, referrerResourceId)
-    }
-    // @ts-ignore - unknown this is the point here
-    return __webpack_require__.apply(this, arguments)
+    // @ts-expect-error - `this` is unknowable
+    const requireThat = __webpack_require__.bind(this, ...arguments)
+    return enforcePolicy(specifier, referrerResourceId, requireThat)
   }
 
 /**
