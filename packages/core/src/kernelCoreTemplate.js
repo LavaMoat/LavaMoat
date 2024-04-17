@@ -66,7 +66,7 @@
     reportStatsHook = () => {},
   }) {
     // "templateRequire" calls are inlined in "generateKernel"
-    const { getEndowmentsForConfig, makeMinimalViewOfRef, applyEndowmentPropDescTransforms, copyWrappedGlobals, createFunctionWrapper } = templateRequire('endowmentsToolkit')()
+    const { getEndowmentsForConfig, getBuiltinForConfig, applyEndowmentPropDescTransforms, copyWrappedGlobals, createFunctionWrapper } = templateRequire('endowmentsToolkit')()
     const { prepareCompartmentGlobalFromConfig } = templateRequire('makePrepareRealmGlobalFromConfig')({ createFunctionWrapper })
     const { strictScopeTerminator } = templateRequire('strict-scope-terminator')
     const { scuttle } = templateRequire('scuttle')
@@ -211,16 +211,7 @@
 
       // create minimal selection if its a builtin and the whole path is not selected for
       if (!parentIsEntryModule && moduleData.type === 'builtin' && !parentPackagePolicy.builtin[moduleId]) {
-        const builtinPaths = (
-          Object.entries(parentPackagePolicy.builtin)
-          // grab all allowed builtin paths that match this package
-            .filter(([packagePath, allowed]) => allowed === true && moduleId === packagePath.split('.')[0])
-          // only include the paths after the packageName
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            .map(([packagePath, allowed]) => packagePath.split('.').slice(1).join('.'))
-            .sort()
-        )
-        moduleExports = makeMinimalViewOfRef(moduleExports, builtinPaths)
+        moduleExports = getBuiltinForConfig(moduleExports, moduleId, parentPackagePolicy.builtin)
       }
 
       return moduleExports

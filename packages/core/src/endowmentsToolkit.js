@@ -39,13 +39,17 @@ function endowmentsToolkit({
   knownWritableFields = new Set(),
 } = {}) {
   return {
+    // public API
     getEndowmentsForConfig,
+    copyWrappedGlobals,
+    getBuiltinForConfig,
+    createFunctionWrapper,
+    // internals exposed for core
+    // TODO: hide eventually?
     makeMinimalViewOfRef,
     copyValueAtPath,
     applyGetSetPropDescTransforms,
     applyEndowmentPropDescTransforms,
-    copyWrappedGlobals,
-    createFunctionWrapper,
   }
 
   /**
@@ -132,8 +136,8 @@ function endowmentsToolkit({
   /**
    * @param {object} sourceRef
    * @param {string[]} paths
-   * @param {object} unwrapTo
-   * @param {object} unwrapFrom
+   * @param {object} [unwrapTo]
+   * @param {object} [unwrapFrom]
    * @param {string[]} explicitlyBanned
    * @param {Set<string>} allowedWriteFields
    * @returns {object}
@@ -172,13 +176,67 @@ function endowmentsToolkit({
   }
 
   /**
+   * @param {object} moduleNamespace
+   * @param {string} moduleId
+   * @param {LMPolicy.BuiltinPolicy} policyBuiltin
+   */
+  function getBuiltinForConfig(moduleNamespace, moduleId, policyBuiltin) {
+    /** @type {string[]} */
+    const builtinPaths = []
+
+    /** @type {string[]} */
+    const explicitlyBanned = []
+
+    Object.entries(policyBuiltin).forEach(([packagePath, allowed]) => {
+      const packagePathParts = packagePath.split('.')
+      if (moduleId === packagePathParts[0]) {
+        const packagePathWithoutPackage = packagePathParts.slice(1).join('.')
+        if (allowed === true) {
+          builtinPaths.push(packagePathWithoutPackage)
+        } else if (allowed === false) {
+          explicitlyBanned.push(packagePathWithoutPackage)
+        }
+      }
+    })
+    moduleNamespace = makeMinimalViewOfRef(
+      moduleNamespace,
+      builtinPaths.sort(),
+      undefined,
+      undefined,
+      explicitlyBanned
+    )
+    return moduleNamespace
+  }
+
+  /**
+   * @param {string} visited
+   * @param {string} next
+   */
+  function extendPath(visited, next) {
+    // FIXME: second part of this conditional should be unnecessary
+    if (!visited || visited.length === 0) {
+      return next
+    }
+    return `${visited}.${next}`
+  }
+
+  /**
+   * @template T
+   * @param {T | null} value
+   * @returns {value is null}
+   */
+  function isEmpty(value) {
+    return !value
+  }
+
+  /**
    * @param {string} visitedPath
    * @param {string[]} pathParts
    * @param {string[]} explicitlyBanned
    * @param {object} sourceRef
    * @param {object} targetRef
-   * @param {object} unwrapTo
-   * @param {object} unwrapFrom
+   * @param {object} [unwrapTo]
+   * @param {object} [unwrapFrom]
    */
   function copyValueAtPath(
     visitedPath,
