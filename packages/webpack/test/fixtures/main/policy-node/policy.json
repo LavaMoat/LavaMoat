@@ -3,9 +3,6 @@
     "nodejs-package": {
       "builtin": {
         "node:fs.readdirSync": true
-      },
-      "packages": {
-        "external:../../../node:fs": true
       }
     }
   }
