@@ -43,12 +43,15 @@
  * @returns {object} - The targetRef
  */
 
+// TODO: import directly from core
 /**
  * @typedef {Object} EndowmentsToolkit
  * @property {GetEndowmentsForConfig} getEndowmentsForConfig
  * @property {(...args: any[]) => unknown} makeMinimalViewOfRef - Creates a
  *   minimal view of a reference (e.g. a global) that only exposes the
  *   properties specified in the packagePolicy
+ * @property {(...args: any[]) => unknown} getBuiltinForConfig - Creates a
+ *   minimal view of a builtin based on policy fragment
  * @property {(...args: any[]) => unknown} copyValueAtPath - Copies a value at a
  *   specific path from the source reference to the target reference
  * @property {(...args: any[]) => unknown} applyGetSetPropDescTransforms
