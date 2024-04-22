@@ -1,5 +1,10 @@
 name: CI
-on: [push, pull_request]
+on: 
+  push:
+    branches:
+      - main # limit to main, because pushes to pull-requested branches are triggered below
+  pull_request:
+    # any pull request
 
 permissions:
   contents: read
