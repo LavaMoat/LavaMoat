@@ -396,16 +396,11 @@ async function loadAllPackageConfigurations({ rootDir }) {
       !lifeCycleScripts.includes('preinstall') &&
       !lifeCycleScripts.includes('install')
     ) {
-      let bindingGypExists = false
       try {
         await fs.stat(path.join(filePath, 'binding.gyp'))
-        bindingGypExists = true
-      } catch (err) {}
-
-      if (bindingGypExists) {
         lifeCycleScripts.unshift('install')
         depScripts.install = 'node-gyp rebuild'
-      }
+      } catch {}
     }
 
     if (lifeCycleScripts.length) {
