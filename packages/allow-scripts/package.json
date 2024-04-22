@@ -55,6 +55,6 @@
     "files": [
       "test/*.spec.js"
     ],
-    "timeout": "30s"
+    "timeout": "60s"
   }
 }

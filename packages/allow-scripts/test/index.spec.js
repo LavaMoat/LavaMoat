@@ -8,11 +8,10 @@ const { pathToFileURL } = require('node:url')
 const isWindows = os.platform() === 'win32'
 const NPM_CMD = isWindows ? 'npm.cmd' : 'npm'
 /* eslint-disable ava/no-skip-test */
-const skipOnWindows =
-  isWindows
-    ? (description, ...args) =>
-        test.skip('[no Windows support] ' + description, ...args)
-    : test
+const skipOnWindows = isWindows
+  ? (description, ...args) =>
+      test.skip('[no Windows support] ' + description, ...args)
+  : test
 
 /**
  * For fat fingers
@@ -31,7 +30,11 @@ const run = (t, args, cwd) => {
   // Path to the allow-scripts executable
   const ALLOW_SCRIPTS_BIN = require.resolve('../src/cli')
   const options = realisticEnvOptions(cwd)
-  const result = spawnSync(process.execPath, [ALLOW_SCRIPTS_BIN, ...args], options)
+  const result = spawnSync(
+    process.execPath,
+    [ALLOW_SCRIPTS_BIN, ...args],
+    options
+  )
 
   if (
     typeof result.stderr === 'undefined' ||
@@ -248,6 +251,54 @@ test('cli - run command - good dep as a sub dep', (t) => {
     'running lifecycle scripts for top level package',
     '',
   ])
+})
+
+test('cli - run command - implicit build scripts for dependencies with native addons', (t) => {
+  // set up the directories
+  const projectRoot = path.join(__dirname, 'projects', '4')
+
+  const nativeDepAddonBuildDir = path.join(
+    projectRoot,
+    'node_modules',
+    'native_dep',
+    'build'
+  )
+  const disabledNativeDepAddonBuildDir = path.join(
+    projectRoot,
+    'node_modules',
+    'disabled_native_dep',
+    'build'
+  )
+
+  // cleanup old test run results
+  fs.rmSync(nativeDepAddonBuildDir, { recursive: true, force: true })
+  fs.rmSync(disabledNativeDepAddonBuildDir, { recursive: true, force: true })
+
+  // run the "run" command
+  const result = run(t, ['run'], projectRoot)
+
+  // assert the output
+  t.is(
+    result.stdout,
+    `\
+running lifecycle scripts for event "preinstall"
+running lifecycle scripts for event "install"
+- native_dep
+running lifecycle scripts for event "postinstall"
+running lifecycle scripts for top level package
+`,
+    'Expected output matches actual output'
+  )
+  t.is(
+    fs.existsSync(path.join(nativeDepAddonBuildDir, 'Release', 'addon.node')),
+    true
+  )
+  t.is(
+    fs.existsSync(
+      path.join(disabledNativeDepAddonBuildDir, 'Release', 'addon.node')
+    ),
+    false
+  )
 })
 
 skipOnWindows(
