@@ -145,14 +145,6 @@ async function prepareBrowserifyScenarioOnDisk({ scenario, log }) {
   log(`created test project directory at "${projectDir}"`)
   const depsToInstall = ['browserify@^17']
   let runBrowserifyPath = `${__dirname}/fixtures/runBrowserify.js`
-  if (scenario.type === 'factor') {
-    depsToInstall.push(
-      'through2@^3',
-      'vinyl-buffer@^1',
-      'bify-package-factor@^1'
-    )
-    runBrowserifyPath = `${__dirname}/fixtures/runBrowserifyBundleFactor.js`
-  }
 
   // install must happen before link, otherwise npm will remove any linked packages upon install
   const installDevDepsResult = spawnSync(
@@ -227,10 +219,7 @@ async function runScenario({
     bundle = bundleForScenario
     await fs.writeFile(path.join(scenario.dir, 'bundle.js'), bundle)
   }
-  // dont validate factored bundles
-  if (scenario.type !== 'factor') {
-    await verifySourceMaps({ bundle, log })
-  }
+  await verifySourceMaps({ bundle, log })
   const { hookedConsole, firstLogEventPromise } = createHookedConsole()
   Object.assign(scenario.context, { console: hookedConsole })
   evaluateWithSourceUrl('testBundle.js', bundle, scenario.context)
