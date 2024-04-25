@@ -289,15 +289,13 @@ running lifecycle scripts for top level package
 `,
     'Expected output matches actual output'
   )
-  t.is(
-    fs.existsSync(path.join(nativeDepAddonBuildDir, 'Release', 'addon.node')),
-    true
+  t.true(
+    fs.existsSync(path.join(nativeDepAddonBuildDir, 'Release', 'addon.node'))
   )
-  t.is(
+  t.false(
     fs.existsSync(
       path.join(disabledNativeDepAddonBuildDir, 'Release', 'addon.node')
-    ),
-    false
+    )
   )
 })
 
