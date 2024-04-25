@@ -1,6 +1,6 @@
 // @ts-check
 
-const { promises: fs } = require('node:fs')
+const { promises: fs, existsSync } = require('node:fs')
 const path = require('node:path')
 const npmRunScript = require('@npmcli/run-script')
 const normalizeBin = require('npm-normalize-package-bin')
@@ -454,13 +454,11 @@ async function loadAllPackageConfigurations({ rootDir }) {
 
     if (
       !lifeCycleScripts.includes('preinstall') &&
-      !lifeCycleScripts.includes('install')
+      !lifeCycleScripts.includes('install') &&
+      existsSync(path.join(filePath, 'binding.gyp'))
     ) {
-      try {
-        await fs.stat(path.join(filePath, 'binding.gyp'))
-        lifeCycleScripts.unshift('install')
-        depScripts.install = 'node-gyp rebuild'
-      } catch {}
+      lifeCycleScripts.unshift('install')
+      depScripts.install = 'node-gyp rebuild'
     }
 
     if (lifeCycleScripts.length) {
