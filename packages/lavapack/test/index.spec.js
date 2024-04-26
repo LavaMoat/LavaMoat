@@ -41,7 +41,16 @@ test('sourcemap test', async (t) => {
       id: '2',
       sourceFile: 'log.js',
       source:
-        "console.log('hi');\nnew Error('danger');\nconsole.log('the end');",
+        `console.log('hi');\nnew Error('danger');\nconsole.log('the end');
+        //# sourceMappingURL=data:application/json;charset=utf-8;base64,e30K
+        /*# sourceMappingURL=data:application/json;charset=utf-8;base64,e30K
+          }} invalid JS {{ /*
+        */
+
+          /*
+          actual comment
+          */
+        `,
       deps: {},
     },
     {
@@ -59,6 +68,9 @@ test('sourcemap test', async (t) => {
   const bundleBuffer = await promise
   const bundleString = bundleBuffer.toString()
   t.log(bundleString)
+  t.snapshot(bundleString)
+
+  // for opening with sourcemap explorer
   fs.writeFileSync('./bundle.js', bundleBuffer)
 
   const converter = convertSourceMap.fromSource(bundleString)
@@ -118,6 +130,7 @@ test('detect invalid module', (t) => {
   )
 })
 
+// TODO: use https://github.com/tc39/proposal-promise-with-resolvers when available
 function deferred() {
   const result = {}
   result.promise = new Promise((resolve, reject) => {
