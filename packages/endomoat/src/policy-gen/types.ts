@@ -1,5 +1,4 @@
 import {
-  ReadFn,
   type ArchiveOptions as EndoArchiveOptions,
   type FsAPI,
   type ReadPowers,
@@ -34,14 +33,14 @@ export interface WithReadPowers {
 }
 
 /**
- * Options having a `readPowers` property also accepting an
- * {@link FsAPI `fs`-like object} or {@link ReadFn}.
+ * Options having a `readPowers` property also accepting an {@link FsAPI
+ * `fs`-like object
  */
-export interface WithAnyReadPowers {
+export interface WithReadPowersOrFsAPI {
   /**
    * Read powers to use when loading the compartment map.
    */
-  readPowers?: ReadPowers | FsAPI | ReadFn
+  readPowers?: ReadPowers | FsAPI
 }
 
 /**
@@ -69,7 +68,7 @@ export interface WithPolicyOverride {
  */
 export type GeneratePolicyOptions = Simplify<
   ArchiveOptions &
-    WithAnyReadPowers &
+    WithReadPowersOrFsAPI &
     WithPolicyOverride &
     WithDebug &
     WritePolicyOptions

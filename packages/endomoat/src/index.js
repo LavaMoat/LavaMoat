@@ -18,7 +18,7 @@ lockdown({
 import { importLocation } from '@endo/compartment-mapper'
 import { pathToFileURL } from 'node:url'
 import { importHook, importNowHook } from './import-hook.js'
-import { moduleTransforms } from './module-transforms.js'
+import { syncModuleTransforms } from './module-transforms.js'
 import { toEndoPolicy } from './policy-converter.js'
 import { generatePolicy } from './policy-gen/index.js'
 import { isPolicy } from './policy.js'
@@ -81,16 +81,22 @@ export async function run(entrypointPath, policyOrOpts = {}, opts = {}) {
       ? `${entrypointPath}`
       : `${pathToFileURL(entrypointPath)}`
 
-  const { namespace } = await importLocation(readPowers, url, {
+  /**
+   * @type {import('@endo/compartment-mapper').SyncArchiveOptions &
+   *   import('@endo/compartment-mapper').ExecuteOptions}
+   */
+  const importOpts = {
     policy: endoPolicy,
     globals: globalThis,
     importHook,
     dynamicHook: importNowHook,
-    moduleTransforms,
+    syncModuleTransforms,
     fallbackLanguageForExtension: {
       node: 'bytes',
     },
-  })
+  }
+
+  const { namespace } = await importLocation(readPowers, url, importOpts)
 
   return namespace
 }
