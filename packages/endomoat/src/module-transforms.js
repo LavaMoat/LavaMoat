@@ -1,4 +1,4 @@
-import { evadeCensor } from '@endo/evasive-transform'
+import { evadeCensorSync } from '@endo/evasive-transform'
 import { applySourceTransforms } from 'lavamoat-core'
 
 export const decoder = new TextDecoder()
@@ -9,15 +9,15 @@ export const encoder = new TextEncoder()
  * restrictions
  *
  * @param {import('@endo/compartment-mapper').Language} parser
- * @returns {import('@endo/compartment-mapper').ModuleTransform}
+ * @returns {import('@endo/compartment-mapper').SyncModuleTransform}
  */
 export function createModuleTransform(parser) {
-  return async (sourceBytes, specifier, location, _packageLocation, opts) => {
+  return (sourceBytes, specifier, location, _packageLocation, opts) => {
     let source = decoder.decode(sourceBytes)
     // FIXME: this function calls stuff we could get in `ses/tools.js`
     // except `evadeDirectEvalExpressions`. unclear if we should be using this from `lavamoat-core`
     source = applySourceTransforms(source)
-    const { code, map } = await evadeCensor(source, {
+    const { code, map } = evadeCensorSync(source, {
       sourceMap: opts?.sourceMap,
       sourceUrl: new URL(specifier, location).href,
       sourceType: 'module',
@@ -30,7 +30,7 @@ export function createModuleTransform(parser) {
 /**
  * Standard set of module transforms for our purposes
  */
-export const moduleTransforms = /** @type {const} */ ({
+export const syncModuleTransforms = /** @type {const} */ ({
   cjs: createModuleTransform('cjs'),
   mjs: createModuleTransform('mjs'),
 })

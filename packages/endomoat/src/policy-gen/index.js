@@ -10,7 +10,7 @@ import path from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { DEFAULT_POLICY_DEBUG_PATH, DEFAULT_POLICY_PATH } from '../constants.js'
 import { importHook } from '../import-hook.js'
-import { moduleTransforms } from '../module-transforms.js'
+import { syncModuleTransforms } from '../module-transforms.js'
 import { defaultReadPowers, makeReadPowers } from '../power.js'
 import { writeJson } from '../util.js'
 import { PolicyGenerator } from './policy-generator.js'
@@ -179,7 +179,7 @@ export async function loadCompartmentMap(
       readPowers,
       moduleLocation,
       importHook,
-      moduleTransforms,
+      moduleTransforms: syncModuleTransforms,
       fallbackLanguageForExtension: {
         node: 'bytes',
       },
