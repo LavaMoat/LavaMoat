@@ -149,6 +149,7 @@ class LavaMoatPlugin {
     compiler.hooks.thisCompilation.tap(
       PLUGIN_NAME,
       (compilation, { normalModuleFactory }) => {
+        PROGRESS.reportErrorsTo(compilation.errors)
         compilation.hooks.optimizeAssets.tap(PLUGIN_NAME, () => {
           // By the time assets are being optimized we should have finished.
           // This will ensure all previous steps have been done.
