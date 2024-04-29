@@ -5,19 +5,22 @@ import {
   type PropertyPolicy,
 } from '@endo/compartment-mapper'
 import { Merge, MergeDeep } from 'type-fest'
-import { GeneratePolicyOptions, WithAnyReadPowers } from './policy-gen/types.js'
+import {
+  GeneratePolicyOptions,
+  WithReadPowersOrFsAPI,
+} from './policy-gen/types.js'
 
 /**
  * Options for `run` w/o automatic policy generation
  */
-export type RunOptions = WithAnyReadPowers
+export type RunOptions = WithReadPowersOrFsAPI
 
 /**
  * Options for `run` w/ automatic policy generation
  */
 export type GenerateAndRunOptions = Merge<
   GeneratePolicyOptions,
-  WithAnyReadPowers
+  WithReadPowersOrFsAPI
 >
 
 /**

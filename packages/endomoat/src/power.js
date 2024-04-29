@@ -7,7 +7,8 @@ import { isFsAPI } from './util.js'
 /**
  * Default read powers for Endo
  *
- * @type {import('@endo/compartment-mapper').ReadPowers}
+ * @type {import('@endo/compartment-mapper').MaybeReadPowers &
+ *   import('@endo/compartment-mapper').SyncReadPowers}
  */
 export const defaultReadPowers = endoMakeReadPowers({
   fs: nodeFs,
@@ -31,7 +32,8 @@ export const defaultReadPowers = endoMakeReadPowers({
  * @param {import('@endo/compartment-mapper').FsAPI} fs
  * @param {import('@endo/compartment-mapper').UrlAPI} [url]
  * @param {import('@endo/compartment-mapper').CryptoAPI} [crypto]
- * @returns {import('@endo/compartment-mapper').ReadPowers}
+ * @returns {import('@endo/compartment-mapper').MaybeReadPowers &
+ *   import('@endo/compartment-mapper').SyncReadPowers}
  */
 
 /**
@@ -48,11 +50,11 @@ export const defaultReadPowers = endoMakeReadPowers({
  *
  * @overload
  * @param {import('@endo/compartment-mapper').FsAPI
- *   | import('@endo/compartment-mapper').ReadFn
  *   | import('@endo/compartment-mapper').ReadPowers} [value]
  * @param {import('@endo/compartment-mapper').UrlAPI} [url]
  * @param {import('@endo/compartment-mapper').CryptoAPI} [crypto]
- * @returns {import('@endo/compartment-mapper').ReadPowers}
+ * @returns {import('@endo/compartment-mapper').MaybeReadPowers &
+ *   import('@endo/compartment-mapper').SyncReadPowers}
  */
 
 /**
