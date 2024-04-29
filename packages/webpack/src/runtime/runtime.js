@@ -17,7 +17,7 @@ const warn = typeof console === 'object' ? console.warn : () => {}
 // It was previously useful for sub-compilations running an incomplete bundle as part of the build, but currently that is being skipped. We might go back to it for the sake of build time security if it's deemed worthwihile in absence of lockdown.
 const LOCKDOWN_ON = typeof lockdown !== 'undefined'
 if (LOCKDOWN_ON) {
-  lockdown(LAVAMOAT.options.lockdown)
+  LAVAMOAT.wrapperInit(LAVAMOAT.options.lockdown)
 } else {
   warn(
     'LavaMoat: runtime execution started without SES present, switching to no-op.'

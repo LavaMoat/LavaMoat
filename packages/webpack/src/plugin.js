@@ -9,6 +9,11 @@ const progress = require('./buildtime/progress.js')
 const { createPolicyGenerator } = require('./buildtime/policyGenerator.js')
 const { assembleRuntime } = require('./buildtime/assemble.js')
 
+const compartmentWrappers = {
+  with: require('./wrappers/with.js'),
+  func: require('./wrappers/func.js'),
+}
+
 const { loadCanonicalNameMap } = require('@lavamoat/aa')
 
 // TODO: upcoming version of webpack may expose these constants, but we want to support more versions
@@ -69,6 +74,9 @@ class LavaMoatPlugin {
     if (!options.policyLocation) {
       options.policyLocation = path.join('.', 'lavamoat', 'webpack')
     }
+    if (!options.wrapper) {
+      options.wrapper = 'with'
+    }
     this.options = options
 
     diag.level = options.diagnosticsVerbosity || 0
@@ -92,6 +100,7 @@ class LavaMoatPlugin {
     })
 
     const options = this.options
+    const compartmentWrapper = compartmentWrappers[options.wrapper || 'with']
     if (typeof options.readableResourceIds === 'undefined') {
       // default options.readableResourceIds to true if webpack configuration sets development mode
       options.readableResourceIds = compiler.options.mode !== 'production'
@@ -313,6 +322,7 @@ class LavaMoatPlugin {
           normalModuleFactory.hooks.generator.for(moduleType).tap(
             PLUGIN_NAME,
             wrapGeneratorMaker({
+              wrapperImplementation: compartmentWrapper.wrap,
               excludes: excludes,
               runChecks,
               getIdentifierForPath,
@@ -402,6 +412,10 @@ class LavaMoatPlugin {
                   {
                     name: 'endowmentsToolkit',
                     shimRequire: 'lavamoat-core/src/endowmentsToolkit.js',
+                  },
+                  {
+                    name: 'wrapperInit',
+                    rawSource: compartmentWrapper.wrapperInit,
                   },
                   {
                     name: 'runtime',

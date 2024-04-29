@@ -23,6 +23,25 @@
  * @property {Policy} [policy] - LavaMoat policy object - if programmaticly
  *   created
  * @property {Object} [lockdown] - Options to pass to lockdown
+ * @property {'with' | 'func'} [wrapper] - Wrapper choice
+ */
+
+/**
+ * @typedef {object} WrapperInput
+ * @property {string} source
+ * @property {string} id
+ * @property {string[] | Set<string>} runtimeKit
+ * @property {string} evalKitFunctionName
+ */
+
+/**
+ * @callback WrapperImplementation
+ * @param {WrapperInput} input
+ * @returns {{
+ *   before: string
+ *   after: string
+ *   compatibleSource: string
+ * }}
  */
 
 /**
@@ -72,6 +91,9 @@
  *   bundle size withotu losing readability
  * @property {EndowmentsToolkitFactory} endowmentsToolkit - A function that
  *   returns endowmentsToolkit
+ * @property {(options: LavaMoatPluginOptions['lockdown']) => unknown} wrapperInit
+ *   - The runtime code of the wrapper used for compartmentalization
+ *
  * @property {(...args: any[]) => unknown} defaultExport - The function that
  *   will be surfaced to the wrapper as `__webpack_require__._LM_`
  */

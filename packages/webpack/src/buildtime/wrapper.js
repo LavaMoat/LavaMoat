@@ -1,11 +1,9 @@
-// @ts-expect-error - missing types
-const { applySourceTransforms } = require('lavamoat-core')
 const diag = require('./diagnostics')
 const fs = require('node:fs')
-const q = JSON.stringify
 
 /**
- * @typedef {object} WrappingInput
+ * @typedef {object} WrappingParams
+ * @property {import('../types').WrapperImplementationu} wrapperImplementation
  * @property {string} source
  * @property {string} id
  * @property {string[] | Set<string>} runtimeKit
@@ -13,14 +11,8 @@ const q = JSON.stringify
  * @property {boolean} [runChecks]
  */
 
-const {
-  NAME_globalThis,
-  NAME_scopeTerminator,
-  NAME_runtimeHandler,
-} = require('../ENUM.json')
-
 /**
- * @param {WrappingInput} params
+ * @param {WrappingParams} params
  * @returns {{
  *   before: string
  *   after: string
@@ -29,6 +21,7 @@ const {
  * }}
  */
 exports.wrapper = function wrapper({
+  wrapperImplementation,
   source,
   id,
   runtimeKit,
@@ -37,36 +30,21 @@ exports.wrapper = function wrapper({
 }) {
   // validateSource(source);
 
-  // No AST used in these transforms, so string cmparison should indicate if anything was changed.
-  const sesCompatibleSource = applySourceTransforms(source)
-  const sourceChanged = source !== sesCompatibleSource
+  const { before, compatibleSource, after } = wrapperImplementation({
+    source,
+    id,
+    runtimeKit,
+    evalKitFunctionName,
+  })
+  const sourceChanged = source !== compatibleSource
 
-  // TODO: Consider: We could save some bytes by merging scopeTerminator and runtimeHandler, but then runtime calls would go through a proxy, which is slower. Merging runtimeKit with globalThis would also be problematic.
-
-  // return NO-OP if runtime didn't produce a scope terminator
-  const before = `(function(){
-     if (!this.${NAME_scopeTerminator}) return ()=>{};
-     with (this.${NAME_scopeTerminator}) {
-      with (this.${NAME_runtimeHandler}) {
-      with (this.${NAME_globalThis}) {
-        return function() { 'use strict';
-`
-
-  const after = `
-        };
-      }
-    }
-    }
-}).call(${evalKitFunctionName}(${q(id)}, { ${Array.from(runtimeKit).join(
-    ','
-  )}}))()`
   if (runChecks) {
-    validateSource(before + sesCompatibleSource + after)
+    validateSource(before + compatibleSource + after)
   }
   return {
     before,
     after,
-    source: sesCompatibleSource,
+    source: compatibleSource,
     sourceChanged,
   }
 }
@@ -78,7 +56,7 @@ exports.wrapper = function wrapper({
  */
 function validateSource(source) {
   const validityFlag = 'E_VALIDATION' + Math.random().toFixed(10)
-  // If wrapping results with invalid JS, webpack may not report that at later stages
+  // If wrappingParams results with invalid JS, webpack may not report that at later stages
   // or we might get an error complaining about with in strict mode even if the issue is mismatching curlies
   try {
     // This used to be

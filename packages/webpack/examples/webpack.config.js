@@ -42,6 +42,7 @@ module.exports = {
       runChecks: true,
       diagnosticsVerbosity: 1,
       HtmlWebpackPluginInterop: true,
+      wrapper: 'func',
     }),
     // virtualModules,
     new ProgressPlugin(),

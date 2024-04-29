@@ -61,12 +61,14 @@ const wrappedGeneratorInstances = new WeakSet()
 // TODO: this should probably be extracted to a separate file for easier navigation
 /**
  * @param {object} options
+ * @param {import('../types').WrapperImplementation} options.wrapperImplementation
  * @param {string[]} options.excludes
  * @param {(path: string) => string | undefined} options.getIdentifierForPath
  * @param {boolean | undefined} options.runChecks
  * @param {import('./progress').ProgressAPI} options.PROGRESS
  */
 exports.wrapGeneratorMaker = ({
+  wrapperImplementation,
   excludes,
   getIdentifierForPath,
   runChecks,
@@ -152,6 +154,7 @@ exports.wrapGeneratorMaker = ({
       }
 
       let { before, after, source, sourceChanged } = wrapper({
+        wrapperImplementation,
         // There's probably a good reason why webpack stores source in those objects instead
         // of strings. Turning it into a string here might mean we're loosing some caching.
         // Wrapper checks if transforms changed the source and indicates it, so that we can
