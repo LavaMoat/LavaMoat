@@ -49,7 +49,7 @@ const stricterScopeTerminator = freeze(
 /**
  * Enforces the policy for resource imports.
  *
- * @template T
+ * @template {object} T
  * @param {string} specifier - The ID of the requested resource.
  * @param {string} referrerResourceId - The ID of the referrer resource.
  * @param {() => T} wrappedRequire - The wrapped **webpack_require** function.
@@ -246,6 +246,7 @@ const lavamoatRuntimeWrapper = (resourceId, runtimeKit) => {
     )
 
     // webpack rewrites regerences to `global` to `__webpack_require__.g` in the bundle
+    // @ts-expect-error - webpack runtime is not typed
     policyRequire.g = compartmentMap.get(resourceId).globalThis
 
     // override nmd to limit what it can mutate

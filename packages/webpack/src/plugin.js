@@ -68,7 +68,7 @@ class LavaMoatPlugin {
       options.lockdown = lockdownDefaults
     }
     if (!options.policyLocation) {
-      options.policyLocation = path.join('.', 'lavamoat', 'webpack')
+      options.policyLocation = path.join('lavamoat', 'webpack')
     }
     this.options = options
 

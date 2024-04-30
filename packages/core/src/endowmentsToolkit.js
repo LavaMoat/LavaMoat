@@ -18,8 +18,7 @@
 module.exports = endowmentsToolkit
 
 /**
- * @param {object} opts
- * @param {DefaultWrapperFn} [opts.createFunctionWrapper]
+ * @type {EndowmentsToolkitFactory}
  */
 function endowmentsToolkit({
   createFunctionWrapper = defaultCreateFunctionWrapper,
@@ -39,17 +38,7 @@ function endowmentsToolkit({
   }
 
   /**
-   * Creates an object populated with only the deep properties specified in the
-   * packagePolicy
-   *
-   * @param {object} sourceRef - Object from which to copy properties
-   * @param {LMPolicy.PackagePolicy} packagePolicy - LavaMoat policy item
-   *   representing a package
-   * @param {object} unwrapTo - For getters and setters, when the this-value is
-   *   unwrapFrom, is replaced as unwrapTo
-   * @param {object} unwrapFrom - For getters and setters, the this-value to
-   *   replace (default: targetRef)
-   * @returns {object} - The targetRef
+   * @type {GetEndowmentsForConfig}
    */
   function getEndowmentsForConfig(
     sourceRef,
@@ -104,12 +93,7 @@ function endowmentsToolkit({
   }
 
   /**
-   * @param {object} sourceRef
-   * @param {string[]} paths
-   * @param {object} [unwrapTo]
-   * @param {object} [unwrapFrom]
-   * @param {string[]} explicitlyBanned
-   * @returns {object}
+   * @type {MakeMinimalViewOfRef}
    */
   function makeMinimalViewOfRef(
     sourceRef,
@@ -135,9 +119,7 @@ function endowmentsToolkit({
   }
 
   /**
-   * @param {object} moduleNamespace
-   * @param {string} moduleId
-   * @param {LMPolicy.BuiltinPolicy} policyBuiltin
+   * @type {GetBuiltinForConfig}
    */
   function getBuiltinForConfig(moduleNamespace, moduleId, policyBuiltin) {
     /** @type {string[]} */
@@ -146,6 +128,8 @@ function endowmentsToolkit({
     /** @type {string[]} */
     const explicitlyBanned = []
 
+    // Collect the same paths information as getEndowmentsForConfig to enable
+    // matching behavior of policy between globals and builtins
     Object.entries(policyBuiltin).forEach(([packagePath, allowed]) => {
       const packagePathParts = packagePath.split('.')
       if (moduleId === packagePathParts[0]) {
@@ -189,13 +173,7 @@ function endowmentsToolkit({
   }
 
   /**
-   * @param {string} visitedPath
-   * @param {string[]} pathParts
-   * @param {string[]} explicitlyBanned
-   * @param {object} sourceRef
-   * @param {object} targetRef
-   * @param {object} [unwrapTo]
-   * @param {object} [unwrapFrom]
+   * @type {CopyValueAtPath}
    */
   function copyValueAtPath(
     visitedPath,
@@ -343,10 +321,7 @@ function endowmentsToolkit({
   }
 
   /**
-   * @param {PropertyDescriptor} propDesc
-   * @param {object} unwrapFromCompartmentGlobalThis
-   * @param {object} unwrapToGlobalThis
-   * @returns {PropertyDescriptor}
+   * @type {ApplyEndowmentPropDescTransforms}
    */
   function applyEndowmentPropDescTransforms(
     propDesc,
@@ -368,10 +343,7 @@ function endowmentsToolkit({
   }
 
   /**
-   * @param {PropertyDescriptor} sourcePropDesc
-   * @param {object} unwrapFromGlobalThis
-   * @param {object} unwrapToGlobalThis
-   * @returns {PropertyDescriptor}
+   * @type {ApplyGetSetPropDescTransforms}
    */
   function applyGetSetPropDescTransforms(
     sourcePropDesc,
@@ -496,9 +468,7 @@ function endowmentsToolkit({
   }
 
   /**
-   * @param {object} globalRef
-   * @param {Record<PropertyKey, any>} target
-   * @param {string[]} globalThisRefs
+   * @type {CopyWrappedGlobals}
    */
   function copyWrappedGlobals(
     globalRef,
@@ -625,4 +595,104 @@ function defaultCreateFunctionWrapper(sourceValue, unwrapTest, unwrapTo) {
  * @param {(value: any) => boolean} unwrapTest
  * @param {object} unwrapTo
  * @returns {(...args: any[]) => any}
+ */
+
+/**
+ * @callback GetEndowmentsForConfig Creates an object populated with only the
+ *   deep properties specified in the packagePolicy
+ * @param {object} sourceRef - Object from which to copy properties
+ * @param {LMPolicy.PackagePolicy} packagePolicy - LavaMoat policy item
+ *   representing a package
+ * @param {object} unwrapTo - For getters and setters, when the this-value is
+ *   unwrapFrom, is replaced as unwrapTo
+ * @param {object} unwrapFrom - For getters and setters, the this-value to
+ *   replace (default: targetRef)
+ * @returns {object} - The targetRef
+ */
+
+/**
+ * @callback CopyWrappedGlobals
+ * @param {object} globalRef
+ * @param {Record<PropertyKey, any>} target
+ * @param {string[]} globalThisRefs
+ * @returns {Record<PropertyKey, any>}
+ */
+
+/**
+ * @callback GetBuiltinForConfig Attenuate a builtin using the same logic as
+ *   globals attenuation consistently.
+ * @param {object} moduleNamespace
+ * @param {string} moduleId
+ * @param {LMPolicy.BuiltinPolicy} policyBuiltin
+ * @returns {object}
+ */
+
+/**
+ * @callback MakeMinimalViewOfRef
+ * @param {object} sourceRef
+ * @param {string[]} paths
+ * @param {object} [unwrapTo]
+ * @param {object} [unwrapFrom]
+ * @param {string[]} [explicitlyBanned]
+ * @returns {object}
+ */
+
+/**
+ * @callback CopyValueAtPath
+ * @param {string} visitedPath
+ * @param {string[]} pathParts
+ * @param {string[]} explicitlyBanned
+ * @param {object} sourceRef
+ * @param {object} targetRef
+ * @param {object} [unwrapTo]
+ * @param {object} [unwrapFrom]
+ * @returns {void}
+ */
+
+/**
+ * @callback ApplyGetSetPropDescTransforms
+ * @param {PropertyDescriptor} sourcePropDesc
+ * @param {object} unwrapFromGlobalThis
+ * @param {object} unwrapToGlobalThis
+ * @returns {PropertyDescriptor}
+ */
+
+/**
+ * @callback ApplyEndowmentPropDescTransforms
+ * @param {PropertyDescriptor} propDesc
+ * @param {object} unwrapFromCompartmentGlobalThis
+ * @param {object} unwrapToGlobalThis
+ * @returns {PropertyDescriptor}
+ */
+
+/**
+ * @typedef {object} EndowmentsToolkit
+ * @property {GetEndowmentsForConfig} getEndowmentsForConfig - Creates an object
+ *   populated with only the deep properties specified in the packagePolicy.
+ * @property {CopyWrappedGlobals} copyWrappedGlobals - Copies wrapped globals
+ *   from `globalRef` to `target`.
+ * @property {GetBuiltinForConfig} getBuiltinForConfig - Attenuates a builtin
+ *   using the same logic as globals attenuation.
+ * @property {DefaultWrapperFn} createFunctionWrapper - The
+ *   `createFunctionWrapper` function passed in the options or
+ *   `defaultCreateFunctionWrapper`.
+ * @property {MakeMinimalViewOfRef} makeMinimalViewOfRef - Creates a minimal
+ *   view of `sourceRef` with only the specified `paths`.
+ * @property {CopyValueAtPath} copyValueAtPath - Copies a value at a specific
+ *   path from `sourceRef` to `targetRef`.
+ * @property {ApplyGetSetPropDescTransforms} applyGetSetPropDescTransforms -
+ *   Applies transformations to getter/setter property descriptors.
+ * @property {ApplyEndowmentPropDescTransforms} applyEndowmentPropDescTransforms
+ *   - Applies transformations to endowment property descriptors.
+ */
+
+/**
+ * @callback EndowmentsToolkitFactory Creates an object with utility functions
+ *   for generating the endowments object based on a `globalRef` and a
+ *   `PackagePolicy`.
+ * @param {object} [opts] - Options for creating the endowments toolkit.
+ * @param {DefaultWrapperFn} [opts.createFunctionWrapper] - Custom function for
+ *   wrapping functions. Defaults to `defaultCreateFunctionWrapper`.
+ * @returns {EndowmentsToolkit} An object containing utility functions for
+ *   generating endowments.
  */

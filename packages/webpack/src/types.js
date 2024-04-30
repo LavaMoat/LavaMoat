@@ -43,31 +43,6 @@
  * @returns {object} - The targetRef
  */
 
-// TODO: import directly from core
-/**
- * @typedef {Object} EndowmentsToolkit
- * @property {GetEndowmentsForConfig} getEndowmentsForConfig
- * @property {(...args: any[]) => unknown} makeMinimalViewOfRef - Creates a
- *   minimal view of a reference (e.g. a global) that only exposes the
- *   properties specified in the packagePolicy
- * @property {(...args: any[]) => unknown} getBuiltinForConfig - Creates a
- *   minimal view of a builtin based on policy fragment
- * @property {(...args: any[]) => unknown} copyValueAtPath - Copies a value at a
- *   specific path from the source reference to the target reference
- * @property {(...args: any[]) => unknown} applyGetSetPropDescTransforms
- * @property {(...args: any[]) => unknown} applyEndowmentPropDescTransforms
- * @property {(...args: any[]) => unknown} copyWrappedGlobals - Copies wrapped
- *   globals from a global reference to a target object with wrapping
- * @property {(...args: any[]) => unknown} createFunctionWrapper - Conditionally
- *   binds a function - used to ensure functions (like fetch) get called on the
- *   this they expect
- */
-
-/**
- * @callback EndowmentsToolkitFactory
- * @returns {EndowmentsToolkit}
- */
-
 /**
  * @typedef {Object} RuntimeNamespace
  * @property {string} root - Key used to indicate the root resource
@@ -79,8 +54,9 @@
  * @property {Policy} policy - LavaMoat policy
  * @property {Record<string, string>} ENUM - Short names for items to minimize
  *   bundle size withotu losing readability
- * @property {EndowmentsToolkitFactory} endowmentsToolkit - A function that
- *   returns endowmentsToolkit
+ * @property {import('lavamoat-core').EndowmentsToolkitFactory} endowmentsToolkit
+ *   - A function that returns endowmentsToolkit
+ *
  * @property {(...args: any[]) => unknown} defaultExport - The function that
  *   will be surfaced to the wrapper as `__webpack_require__._LM_`
  */
