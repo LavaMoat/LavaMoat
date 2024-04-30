@@ -1,1 +1,1 @@
-module.exports = (source) => source
+module.exports = (/** @type {any} */ source) => source

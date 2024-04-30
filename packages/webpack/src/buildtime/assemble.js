@@ -1,5 +1,9 @@
 const { readFileSync } = require('node:fs')
 
+/**
+ * @param {string} source
+ * @returns {string}
+ */
 function removeMultilineComments(source) {
   return source.replace(/\/\*[\s\S]*?\*\//g, '')
 }
@@ -8,6 +12,12 @@ function removeMultilineComments(source) {
 // It's using a shared namespace technique instead of scoping `exports` variables
 // to avoid confusing anyone into believing it's actually CJS.
 // Criticism will only be accepted in a form of working PR with less total lines and less magic.
+
+/**
+ * @param {string} KEY
+ * @param {RuntimeModule[]} runtimeModules
+ * @returns {string}
+ */
 const assembleRuntime = (KEY, runtimeModules) => {
   let assembly = 'const LAVAMOAT = Object.create(null);'
   runtimeModules.map(({ file, data, name, json, shimRequire }) => {
@@ -40,5 +50,14 @@ const assembleRuntime = (KEY, runtimeModules) => {
   (typeof harden !== 'undefined') && harden(__webpack_require__.${KEY});` // The harden line is likely unnecessary as the handler is being frozen anyway
   return assembly
 }
+
+/**
+ * @typedef RuntimeModule
+ * @property {string} [file]
+ * @property {any} [data]
+ * @property {string} [name]
+ * @property {boolean} [json]
+ * @property {string} [shimRequire]
+ */
 
 module.exports = { assembleRuntime }

@@ -73,6 +73,7 @@ test('webpack/policy-gen - handles excludes', async (t) => {
   try {
     await scaffold(webpackConfig)
   } catch (e) {
+    t.is(typeof e.compilationErrors, 'object')
     t.truthy(
       e.compilationErrors.some(
         (err) =>
@@ -95,6 +96,7 @@ test('webpack/policy-gen - handles excludes', async (t) => {
   try {
     await scaffold(webpackConfig)
   } catch (e) {
+    t.is(typeof e.compilationErrors, 'object')
     t.falsy(
       e.compilationErrors.some((err) =>
         err.message.includes('Failed to inspect')

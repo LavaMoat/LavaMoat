@@ -90,7 +90,7 @@ exports.generateIdentifierLookup = ({
     return mapping
   }
 
-  const usedIdentifiers = Object.keys(policy.resources)
+  const usedIdentifiers = Object.keys(policy.resources || {})
   usedIdentifiers.unshift(ROOT_IDENTIFIER)
   const usedIdentifiersIndex = Object.fromEntries(
     usedIdentifiers.map((id, index) => [id, index])
@@ -164,7 +164,7 @@ exports.generateIdentifierLookup = ({
       const translatedPolicy = {
         ...policy,
         resources: Object.fromEntries(
-          Object.entries(policy.resources)
+          Object.entries(policy.resources || {})
             .filter(([id]) => identifiersWithKnownPaths.has(id)) // only saves resources that are actually used
             .map(([id, resource]) => [
               translate(id),
