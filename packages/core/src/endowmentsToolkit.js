@@ -26,13 +26,6 @@ module.exports = endowmentsToolkit
 // Exports for testing
 module.exports._test = { instrumentDynamicValueAtPath }
 
-/**
- * @param {object} opts
- * @param {DefaultWrapperFn} [opts.createFunctionWrapper]
- * @param {boolean} [opts.handleGlobalWrite]
- * @param {Set<string>} [opts.knownWritableFields] - List of globals that can be
- *   mutated later
- */
 function endowmentsToolkit({
   createFunctionWrapper = defaultCreateFunctionWrapper,
   handleGlobalWrite = false,
@@ -53,17 +46,15 @@ function endowmentsToolkit({
   }
 
   /**
-   * Creates an object populated with only the deep properties specified in the
-   * packagePolicy
-   *
-   * @param {object} sourceRef - Object from which to copy properties
+   * @template {object} T Deep properties specified in the packagePolicy
+   * @param {T} sourceRef - Object from which to copy properties
    * @param {LMPolicy.PackagePolicy} packagePolicy - LavaMoat policy item
    *   representing a package
    * @param {object} unwrapTo - For getters and setters, when the this-value is
    *   unwrapFrom, is replaced as unwrapTo
    * @param {object} unwrapFrom - For getters and setters, the this-value to
    *   replace (default: targetRef)
-   * @returns {object} - The targetRef
+   * @returns {Partial<T>} - The targetRef
    */
   function getEndowmentsForConfig(
     sourceRef,
@@ -134,13 +125,14 @@ function endowmentsToolkit({
   }
 
   /**
-   * @param {object} sourceRef
+   * @template {object} T
+   * @param {T} sourceRef
    * @param {string[]} paths
    * @param {object} [unwrapTo]
    * @param {object} [unwrapFrom]
-   * @param {string[]} explicitlyBanned
-   * @param {Set<string>} allowedWriteFields
-   * @returns {object}
+   * @param {string[]} [explicitlyBanned]
+   * @param {Set<string>} [allowedWriteFields]
+   * @returns {Partial<T>}
    */
   function makeMinimalViewOfRef(
     sourceRef,
@@ -176,9 +168,11 @@ function endowmentsToolkit({
   }
 
   /**
-   * @param {object} moduleNamespace
+   * @template {object} T
+   * @param {T} moduleNamespace
    * @param {string} moduleId
    * @param {LMPolicy.BuiltinPolicy} policyBuiltin
+   * @returns {Partial<T>}
    */
   function getBuiltinForConfig(moduleNamespace, moduleId, policyBuiltin) {
     /** @type {string[]} */
@@ -187,6 +181,8 @@ function endowmentsToolkit({
     /** @type {string[]} */
     const explicitlyBanned = []
 
+    // Collect the same paths information as getEndowmentsForConfig to enable
+    // matching behavior of policy between globals and builtins
     Object.entries(policyBuiltin).forEach(([packagePath, allowed]) => {
       const packagePathParts = packagePath.split('.')
       if (moduleId === packagePathParts[0]) {
@@ -198,14 +194,14 @@ function endowmentsToolkit({
         }
       }
     })
-    moduleNamespace = makeMinimalViewOfRef(
+    const moduleNamespaceView = makeMinimalViewOfRef(
       moduleNamespace,
       builtinPaths.sort(),
       undefined,
       undefined,
       explicitlyBanned
     )
-    return moduleNamespace
+    return moduleNamespaceView
   }
 
   /**
@@ -230,13 +226,7 @@ function endowmentsToolkit({
   }
 
   /**
-   * @param {string} visitedPath
-   * @param {string[]} pathParts
-   * @param {string[]} explicitlyBanned
-   * @param {object} sourceRef
-   * @param {object} targetRef
-   * @param {object} [unwrapTo]
-   * @param {object} [unwrapFrom]
+   * @type {CopyValueAtPath}
    */
   function copyValueAtPath(
     visitedPath,
@@ -384,10 +374,7 @@ function endowmentsToolkit({
   }
 
   /**
-   * @param {PropertyDescriptor} propDesc
-   * @param {object} unwrapFromCompartmentGlobalThis
-   * @param {object} unwrapToGlobalThis
-   * @returns {PropertyDescriptor}
+   * @type {ApplyEndowmentPropDescTransforms}
    */
   function applyEndowmentPropDescTransforms(
     propDesc,
@@ -409,10 +396,7 @@ function endowmentsToolkit({
   }
 
   /**
-   * @param {PropertyDescriptor} sourcePropDesc
-   * @param {object} unwrapFromGlobalThis
-   * @param {object} unwrapToGlobalThis
-   * @returns {PropertyDescriptor}
+   * @type {ApplyGetSetPropDescTransforms}
    */
   function applyGetSetPropDescTransforms(
     sourcePropDesc,
@@ -537,9 +521,7 @@ function endowmentsToolkit({
   }
 
   /**
-   * @param {object} globalRef
-   * @param {Record<PropertyKey, any>} target
-   * @param {string[]} globalThisRefs
+   * @type {CopyWrappedGlobals}
    */
   function copyWrappedGlobals(
     globalRef,
@@ -642,15 +624,6 @@ function extendPath(visited, next) {
     return next
   }
   return `${visited}.${next}`
-}
-
-/**
- * @template T
- * @param {T | null} value
- * @returns {value is null}
- */
-function isEmpty(value) {
-  return !value
 }
 
 /**
@@ -761,4 +734,40 @@ function defaultCreateFunctionWrapper(sourceValue, unwrapTest, unwrapTo) {
  * @param {(value: any) => boolean} unwrapTest
  * @param {object} unwrapTo
  * @returns {(...args: any[]) => any}
+ */
+
+/**
+ * @callback CopyWrappedGlobals
+ * @param {object} globalRef
+ * @param {Record<PropertyKey, any>} target
+ * @param {string[]} globalThisRefs
+ * @returns {Record<PropertyKey, any>}
+ */
+
+/**
+ * @callback CopyValueAtPath
+ * @param {string} visitedPath
+ * @param {string[]} pathParts
+ * @param {string[]} explicitlyBanned
+ * @param {object} sourceRef
+ * @param {object} targetRef
+ * @param {object} [unwrapTo]
+ * @param {object} [unwrapFrom]
+ * @returns {void}
+ */
+
+/**
+ * @callback ApplyGetSetPropDescTransforms
+ * @param {PropertyDescriptor} sourcePropDesc
+ * @param {object} unwrapFromGlobalThis
+ * @param {object} unwrapToGlobalThis
+ * @returns {PropertyDescriptor}
+ */
+
+/**
+ * @callback ApplyEndowmentPropDescTransforms
+ * @param {PropertyDescriptor} propDesc
+ * @param {object} unwrapFromCompartmentGlobalThis
+ * @param {object} unwrapToGlobalThis
+ * @returns {PropertyDescriptor}
  */

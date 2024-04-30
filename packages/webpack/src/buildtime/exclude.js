@@ -28,6 +28,6 @@ module.exports = {
    * @returns {boolean}
    */
   isExcludedUnsafe: (module) => {
-    return module.loaders.some(({ loader }) => loader === EXCLUDE_LOADER)
+    return !!module.loaders?.some(({ loader }) => loader === EXCLUDE_LOADER)
   },
 }

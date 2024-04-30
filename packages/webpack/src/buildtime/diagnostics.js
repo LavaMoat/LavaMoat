@@ -10,8 +10,8 @@ module.exports = {
    * @param {number} verbosity
    * @param {function} cb
    */
-  run: (lvl, cb) => {
-    if (level >= lvl) {
+  run: (verbosity, cb) => {
+    if (level >= verbosity) {
       return cb()
     }
   },
@@ -19,8 +19,9 @@ module.exports = {
    * @param {number} verbosity
    * @param {any} content
    */
-  rawDebug: (lvl, content) => {
-    if (level >= lvl) {
+  rawDebug: (verbosity, content) => {
+    if (level >= verbosity) {
+      // @ts-ignore - trust me, the method exists
       process._rawDebug(content)
     }
   },

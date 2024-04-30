@@ -51,28 +51,35 @@ class VirtualRuntimeModule extends RuntimeModule {
 // =================================================================
 
 const PLUGIN_NAME = 'LavaMoatPlugin'
-/** @satisfies {import('ses').LockdownOptions} */
+/** @satisfies {LockdownOptions} */
 const lockdownDefaults = /** @type {const} */ ({
+  // gives a semi-high resolution timer
+  dateTaming: 'unsafe',
+  // this is introduces non-determinism, but is otherwise safe
+  mathTaming: 'unsafe',
   // lets code observe call stack, but easier debuggability
   errorTaming: 'unsafe',
   // shows the full call stack
   stackFiltering: 'verbose',
   // prevents most common override mistake cases from tripping up users
   overrideTaming: 'severe',
+  // preserves JS locale methods, to avoid confusing users
+  // prevents aliasing: toLocaleString() to toString(), etc
+  localeTaming: 'unsafe',
 })
 
 class LavaMoatPlugin {
   /**
-   * @param {import('./types.js').LavaMoatPluginOptions} [options]
+   * @param {Partial<LavaMoatPluginOptions>} [options]
    */
   constructor(options = {}) {
-    if (!options.lockdown) {
-      options.lockdown = lockdownDefaults
+    /** @type {LavaMoatPluginOptions} */
+    this.options = {
+      policyLocation: path.join('lavamoat', 'webpack'),
+      lockdown: lockdownDefaults,
+      isBuiltin: () => false,
+      ...options,
     }
-    if (!options.policyLocation) {
-      options.policyLocation = path.join('.', 'lavamoat', 'webpack')
-    }
-    this.options = options
 
     diag.level = options.diagnosticsVerbosity || 0
   }
@@ -278,31 +285,32 @@ class LavaMoatPlugin {
           try {
             const chunkGraph = compilation.chunkGraph
 
-          Array.from(chunks).forEach((chunk) => {
-            chunkGraph.getChunkModules(chunk).forEach((module) => {
-              const moduleId = chunkGraph.getModuleId(module)
-              const moduleClass = Object.getPrototypeOf(module).constructor.name
+            Array.from(chunks).forEach((chunk) => {
+              chunkGraph.getChunkModules(chunk).forEach((module) => {
+                const moduleId = chunkGraph.getModuleId(module)
+                const moduleClass =
+                  Object.getPrototypeOf(module).constructor.name
 
-              if (isIgnoredModule(module)) {
-                unenforceableModuleIds.push(moduleId)
-              } else {
-                if (isInspectableModule(module, moduleClass)) {
-                  policyGenerator.inspectWebpackModule(
-                    module,
-                    compilation.moduleGraph.getOutgoingConnections(module)
-                  )
+                if (isIgnoredModule(module)) {
+                  unenforceableModuleIds.push(moduleId)
+                } else {
+                  if (isInspectableModule(module, moduleClass)) {
+                    policyGenerator.inspectWebpackModule(
+                      module,
+                      compilation.moduleGraph.getOutgoingConnections(module)
+                    )
+                  }
+
+                  // typescript is complaining about the use of `resource` here, but it's actually there.
+                  knownPaths.push({
+                    path: /** @type {any} */ (module).resource,
+                    moduleId,
+                  })
                 }
-
-                // typescript is complaining about the use of `resource` here, but it's actually there.
-                knownPaths.push({
-                  path: /** @type {any} */ (module).resource,
-                  moduleId,
-                })
-              }
+              })
             })
-          })
-          diag.rawDebug(4, { knownPaths })
-          PROGRESS.report('pathsCollected')
+            diag.rawDebug(4, { knownPaths })
+            PROGRESS.report('pathsCollected')
 
             diag.rawDebug(2, 'writing policy')
             // use the generated policy to save the user one additional pass
@@ -505,3 +513,45 @@ class LavaMoatPlugin {
 LavaMoatPlugin.exclude = EXCLUDE_LOADER
 
 module.exports = LavaMoatPlugin
+
+/**
+ * @typedef {Object} LavaMoatPluginOptions
+ * @property {boolean} [generatePolicy] - Generate the policy file
+ * @property {string} policyLocation - Directory containing policy files are
+ *   stored, defaults to './lavamoat/webpack'
+ * @property {boolean} [emitPolicySnapshot] - Additionally put policy in dist of
+ *   webpack compilation
+ * @property {boolean} [readableResourceIds] - Should resourceIds be readable or
+ *   turned into numbers - defaults to (mode==='development')
+ * @property {boolean} [HtmlWebpackPluginInterop] - Add a script tag to the html
+ *   output for lockdown.js if HtmlWebpackPlugin is in use
+ * @property {string[]} [inlineLockdown] - Prefix the listed files with lockdown
+ * @property {number} [diagnosticsVerbosity] - A number representing diagnostics
+ *   output verbosity, the larger the more overwhelming
+ * @property {LockdownOptions} lockdown - Options to pass to SES lockdown
+ * @property {import('lavamoat-core').LavaMoatPolicy} [policy] - LavaMoat policy
+ *   object - if programmatically created
+ * @property {boolean} [runChecks] - Check resulting code with wrapping for
+ *   correctness
+ * @property {(specifier: string) => boolean} isBuiltin - A function that
+ *   determines if the specifier is a builtin of the runtime platform e.g.
+ *   node:fs
+ */
+
+// Provided inline because import('ses') won't work in jsdoc of a cjs module
+/**
+ * @typedef {Object} LockdownOptions
+ * @property {'safe' | 'unsafe'} [regExpTaming]
+ * @property {'safe' | 'unsafe'} [localeTaming]
+ * @property {'safe' | 'unsafe'} [consoleTaming]
+ * @property {'platform' | 'exit' | 'abort' | 'report' | 'none'} [errorTrapping]
+ * @property {'report' | 'none'} [unhandledRejectionTrapping]
+ * @property {'safe' | 'unsafe'} [errorTaming]
+ * @property {'safe' | 'unsafe'} [dateTaming]
+ * @property {'safe' | 'unsafe'} [mathTaming]
+ * @property {'safeEval' | 'unsafeEval' | 'noEval'} [evalTaming]
+ * @property {'concise' | 'verbose'} [stackFiltering]
+ * @property {'moderate' | 'min' | 'severe'} [overrideTaming]
+ * @property {string[]} [overrideDebug]
+ * @property {'safe' | 'unsafe'} [domainTaming]
+ */

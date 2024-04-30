@@ -2,7 +2,6 @@ const {
   createModuleInspector,
   LavamoatModuleRecord,
   loadPoliciesSync,
-  // @ts-expect-error - missing types
 } = require('lavamoat-core')
 const { getPackageNameForModulePath } = require('@lavamoat/aa')
 const { writeFileSync, mkdirSync } = require('node:fs')
@@ -54,7 +53,8 @@ module.exports = {
       return {
         inspectWebpackModule: () => {},
         getPolicy: () => {
-          let final
+          /** @type {import('lavamoat-core').LavaMoatPolicy} */
+          let final = { resources: {} }
           if (policyFromOptions) {
             // TODO: avoid loading the policy file if policyFromOptions is present
             final = policyFromOptions
