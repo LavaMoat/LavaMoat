@@ -12,17 +12,18 @@
  *   defaults to './lavamoat/webpack'
  * @property {boolean} [emitPolicySnapshot] - Additionally put policy in dist of
  *   webpack compilation
- * @property {boolean} [runChecks] - Check resulting code with wrapping for
- *   correctness
  * @property {boolean} [readableResourceIds] - Should resourceIds be readable or
  *   turned into numbers - defaults to (mode==='development')
  * @property {boolean} [HtmlWebpackPluginInterop] - Add a script tag to the html
  *   output for lockdown.js if HtmlWebpackPlugin is in use
+ * @property {string[]} [inlineLockdown] - Prefix the listed files with lockdown
  * @property {number} [diagnosticsVerbosity] - A number representing diagnostics
  *   output verbosity, the larger the more overwhelming
+ * @property {import('ses').LockdownOptions} [lockdown] - Options to pass to lockdown
  * @property {Policy} [policy] - LavaMoat policy object - if programmaticly
  *   created
- * @property {Object} [lockdown] - Options to pass to lockdown
+ * @property {boolean} [runChecks] - Check resulting code with wrapping for
+ *   correctness
  */
 
 /**
