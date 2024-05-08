@@ -28,8 +28,6 @@ exports.wrapper = function wrapper({
   evalKitFunctionName,
   runChecks = true,
 }) {
-  // validateSource(source);
-
   const { before, compatibleSource, after } = wrapperImplementation({
     source,
     id,

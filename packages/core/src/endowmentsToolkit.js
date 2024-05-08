@@ -523,7 +523,7 @@ function endowmentsToolkit({
         )
         Reflect.defineProperty(target, key, wrappedPropDesc)
       })
-    // global circular references otherwise added by prepareCompartmentGlobalFromConfig
+    // global circular references otherwise added by getEndowmentsForConfig
     // Add all circular refs to root package compartment globalThis
     for (const ref of globalThisRefs) {
       if (ref in target) {

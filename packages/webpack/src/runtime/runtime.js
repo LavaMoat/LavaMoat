@@ -12,12 +12,16 @@ const {
   fromEntries,
 } = Object
 const warn = typeof console === 'object' ? console.warn : () => {}
+/**
+ * @type {unknown}
+ */
+let wrapperContext
 // Avoid running any wrapped code or using compartment if lockdown was not called.
 // This is for when the bundle ends up running despite SES being missing.
 // It was previously useful for sub-compilations running an incomplete bundle as part of the build, but currently that is being skipped. We might go back to it for the sake of build time security if it's deemed worthwihile in absence of lockdown.
 const LOCKDOWN_ON = typeof lockdown !== 'undefined'
 if (LOCKDOWN_ON) {
-  LAVAMOAT.wrapperInit(LAVAMOAT.options.lockdown)
+  wrapperContext = LAVAMOAT.wrapperInit(LAVAMOAT.options.lockdown)
 } else {
   warn(
     'LavaMoat: runtime execution started without SES present, switching to no-op.'
@@ -30,8 +34,12 @@ const { getEndowmentsForConfig, copyWrappedGlobals } =
 // These must match assumptions in the wrapper.js
 // sharedKeys are included in the runtime
 
-const { NAME_globalThis, NAME_scopeTerminator, NAME_runtimeHandler } =
-  LAVAMOAT.ENUM
+const {
+  NAME_globalThis,
+  NAME_scopeTerminator,
+  NAME_runtimeHandler,
+  NAME_wrapperContext,
+} = LAVAMOAT.ENUM
 
 // strictScopeTerminator from SES is not strict enough - `has` would only return true for globals
 // and here we want to prevent reaching into the scope where local variables from bundle runtime are available.
@@ -256,6 +264,7 @@ const lavamoatRuntimeWrapper = (resourceId, runtimeKit) => {
     [NAME_scopeTerminator]: stricterScopeTerminator,
     [NAME_runtimeHandler]: runtimeHandler,
     [NAME_globalThis]: compartmentMap.get(resourceId).globalThis,
+    [NAME_wrapperContext]: wrapperContext,
   }
 }
 

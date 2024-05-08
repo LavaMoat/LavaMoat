@@ -2,6 +2,6 @@
   "NAME_globalThis": "G",
   "NAME_scopeTerminator": "ST",
   "NAME_runtimeHandler": "RH",
+  "NAME_wrapperContext": "W",
   "RUNTIME_KEY": "_LM_"
-
 }

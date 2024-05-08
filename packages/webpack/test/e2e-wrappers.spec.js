@@ -33,10 +33,10 @@ test('webpack/main - dist shape', (t) => {
 
 test('webpack/main - bundle runs without throwing', (t) => {
   t.notThrows(() => {
-    runScriptWithSES(t.context['with'].bundle)
+    runScriptWithSES(t.context['with'].bundle, { console })
   })
   t.notThrows(() => {
-    runScriptWithSES(t.context['func'].bundle)
+    runScriptWithSES(t.context['func'].bundle, { console })
   })
 })
 

@@ -21,6 +21,8 @@ exports.wrap = function wrap({ source, id, runtimeKit, evalKitFunctionName }) {
   // return NO-OP if runtime didn't produce a scope terminator
   const before = `(function(){
     if (!this.${NAME_scopeTerminator}) return ()=>{};
+  //  console.log(this.${NAME_globalThis})
+
     with (this.${NAME_scopeTerminator}) {
      with (this.${NAME_runtimeHandler}) {
      with (this.${NAME_globalThis}) {
