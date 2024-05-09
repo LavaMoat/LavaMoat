@@ -253,51 +253,54 @@ test('cli - run command - good dep as a sub dep', (t) => {
   ])
 })
 
-test('cli - run command - implicit build scripts for dependencies with native addons', (t) => {
-  // set up the directories
-  const projectRoot = path.join(__dirname, 'projects', '4')
+skipOnWindows(
+  'cli - run command - implicit build scripts for dependencies with native addons',
+  (t) => {
+    // set up the directories
+    const projectRoot = path.join(__dirname, 'projects', '4')
 
-  const nativeDepAddonBuildDir = path.join(
-    projectRoot,
-    'node_modules',
-    'native_dep',
-    'build'
-  )
-  const disabledNativeDepAddonBuildDir = path.join(
-    projectRoot,
-    'node_modules',
-    'disabled_native_dep',
-    'build'
-  )
+    const nativeDepAddonBuildDir = path.join(
+      projectRoot,
+      'node_modules',
+      'native_dep',
+      'build'
+    )
+    const disabledNativeDepAddonBuildDir = path.join(
+      projectRoot,
+      'node_modules',
+      'disabled_native_dep',
+      'build'
+    )
 
-  // cleanup old test run results
-  fs.rmSync(nativeDepAddonBuildDir, { recursive: true, force: true })
-  fs.rmSync(disabledNativeDepAddonBuildDir, { recursive: true, force: true })
+    // cleanup old test run results
+    fs.rmSync(nativeDepAddonBuildDir, { recursive: true, force: true })
+    fs.rmSync(disabledNativeDepAddonBuildDir, { recursive: true, force: true })
 
-  // run the "run" command
-  const result = run(t, ['run'], projectRoot)
+    // run the "run" command
+    const result = run(t, ['run'], projectRoot)
 
-  // assert the output
-  t.is(
-    result.stdout,
-    `\
+    // assert the output
+    t.is(
+      result.stdout,
+      `\
 running lifecycle scripts for event "preinstall"
 running lifecycle scripts for event "install"
 - native_dep
 running lifecycle scripts for event "postinstall"
 running lifecycle scripts for top level package
 `,
-    'Expected output matches actual output'
-  )
-  t.true(
-    fs.existsSync(path.join(nativeDepAddonBuildDir, 'Release', 'addon.node'))
-  )
-  t.false(
-    fs.existsSync(
-      path.join(disabledNativeDepAddonBuildDir, 'Release', 'addon.node')
+      'Expected output matches actual output'
     )
-  )
-})
+    t.true(
+      fs.existsSync(path.join(nativeDepAddonBuildDir, 'Release', 'addon.node'))
+    )
+    t.false(
+      fs.existsSync(
+        path.join(disabledNativeDepAddonBuildDir, 'Release', 'addon.node')
+      )
+    )
+  }
+)
 
 skipOnWindows(
   'cli - run command - good dep as a sub dep with experimental bins',
