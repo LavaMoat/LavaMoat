@@ -1,4 +1,4 @@
-/// <reference path="./runtime.d.ts" />
+/// <reference path="./lavamoat.d.ts" />
 /* global LAVAMOAT */
 /* global lockdown, harden, Compartment */
 

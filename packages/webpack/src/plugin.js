@@ -495,3 +495,29 @@ class LavaMoatPlugin {
 LavaMoatPlugin.exclude = EXCLUDE_LOADER
 
 module.exports = LavaMoatPlugin
+
+/**
+ * @typedef {Object} LavaMoatPluginOptions
+ * @property {boolean} [generatePolicy] - Generate the policy file
+ * @property {string} [policyLocation] - Folder where policy files are stored,
+ *   defaults to './lavamoat/webpack'
+ * @property {boolean} [emitPolicySnapshot] - Additionally put policy in dist of
+ *   webpack compilation
+ * @property {boolean} [readableResourceIds] - Should resourceIds be readable or
+ *   turned into numbers - defaults to (mode==='development')
+ * @property {boolean} [HtmlWebpackPluginInterop] - Add a script tag to the html
+ *   output for lockdown.js if HtmlWebpackPlugin is in use
+ * @property {string[]} [inlineLockdown] - Prefix the listed files with lockdown
+ * @property {number} [diagnosticsVerbosity] - A number representing diagnostics
+ *   output verbosity, the larger the more overwhelming
+ * @property {import('ses').LockdownOptions} [lockdown] - Options to pass to
+ *   lockdown
+ * @property {string} [policyLocation] - Directory containing policy file
+ * @property {import('lavamoat-core').LavaMoatPolicy} [policy] - LavaMoat policy
+ *   object - if programmatically created
+ * @property {boolean} [runChecks] - Check resulting code with wrapping for
+ *   correctness
+ * @property {(specifier: string) => boolean} [isBuiltin] - A function that
+ *   determines if the specifier is a builtin of the runtime platform e.g.
+ *   node:fs
+ */
