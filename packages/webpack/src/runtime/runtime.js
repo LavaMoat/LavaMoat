@@ -53,7 +53,7 @@ const stricterScopeTerminator = freeze(
  * @param {string} specifier - The ID of the requested resource.
  * @param {string} referrerResourceId - The ID of the referrer resource.
  * @param {() => T} wrappedRequire - The wrapped **webpack_require** function.
- * @returns {T} The result of the wrapped **webpack_require** function.
+ * @returns {Partial<T>} The result of the wrapped **webpack_require** function.
  * @throws {Error} Throws an error if the policy does not allow importing the
  *   requested resource from the referrer resource.
  */
@@ -71,11 +71,13 @@ const enforcePolicy = (specifier, referrerResourceId, wrappedRequire) => {
   }
   const referrerPolicy = LAVAMOAT.policy.resources[referrerResourceId] || {}
   if (referrerPolicy.builtin) {
-    // @ts-expect-error - missing details in policy type, see TODO in types.js
     if (referrerPolicy.builtin[specifier]) {
       return wrappedRequire()
     }
-    if (keys(referrerPolicy.builtin).some((key) => key.startsWith(specifier))) {
+    if (
+      !specifier.includes('.') &&
+      keys(referrerPolicy.builtin).some((key) => key.startsWith(specifier))
+    ) {
       // create minimal selection if it's a builtin and not allowed as a whole, but with subpaths
       return getBuiltinForConfig(
         wrappedRequire(),
@@ -87,15 +89,14 @@ const enforcePolicy = (specifier, referrerResourceId, wrappedRequire) => {
   const requestedResourceId = findResourceId(specifier)
   if (!requestedResourceId) {
     throw Error(
-      `Requested specifier ${specifier} is not allowed as a builtin and not a known dependency of ${referrerResourceId}`
+      `Requested specifier ${specifier} is not allowed as a builtin and not a known dependency of ${referrerResourceId}. Regenerate policy or add it to policy-override.json.`
     )
   }
   // allow imports internal to the package
   if (requestedResourceId === referrerResourceId) {
     return wrappedRequire()
   }
-  // @ts-expect-error - missing details in policy type, see TODO in types.js
-  if (referrerPolicy.packages && referrerPolicy.packages[requestedResourceId]) {
+  if (referrerPolicy.packages?.[requestedResourceId]) {
     return wrappedRequire()
   }
 
@@ -176,9 +177,9 @@ const findResourceId = (moduleId) => {
  * @returns {WrappedRequire} - The wrapped **webpack_require** function.
  */
 const wrapRequireWithPolicy = (__webpack_require__, referrerResourceId) =>
-  function (specifier) {
-    // @ts-expect-error - `this` is unknowable
-    const requireThat = __webpack_require__.bind(this, ...arguments)
+  /** @this {object} */
+  function (specifier, ...rest) {
+    const requireThat = __webpack_require__.bind(this, specifier, ...rest)
     return enforcePolicy(specifier, referrerResourceId, requireThat)
   }
 
@@ -225,7 +226,7 @@ const lavamoatRuntimeWrapper = (resourceId, runtimeKit) => {
     // The following seem harmless and are used by default: ['O', 'n', 'd', 'o', 'r', 's']
     const supportedRuntimeItems = ['O', 'n', 'd', 'o', 'r', 's']
     for (const item of supportedRuntimeItems) {
-      // @ts-expect-error - I'm not gonna do webppack's minified runtime typing
+      // @ts-ignore - I'm not gonna do webppack's minified runtime typing
       policyRequire[item] = harden(__webpack_require__[item])
     }
 

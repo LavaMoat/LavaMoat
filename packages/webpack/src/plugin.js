@@ -70,6 +70,9 @@ class LavaMoatPlugin {
     if (!options.policyLocation) {
       options.policyLocation = path.join('lavamoat', 'webpack')
     }
+    if (!options.isBuiltin) {
+      options.isBuiltin = () => false
+    }
     this.options = options
 
     diag.level = options.diagnosticsVerbosity || 0

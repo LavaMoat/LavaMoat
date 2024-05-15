@@ -1,8 +1,5 @@
 /**
- * TODO: get the real policy type in here
- *
- * @typedef {Object} Policy
- * @property {Record<string, Record<string, object>>} resources
+ * @typedef {import('lavamoat-core').LavaMoatPolicy} Policy
  */
 
 /**
