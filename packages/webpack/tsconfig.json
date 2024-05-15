@@ -6,5 +6,9 @@
     "checkJs": true,
     "rootDir": "src",
     "outDir": "types",
+    "paths": {
+      "lavamoat-core": ["../core"]
+    }
   },
+  "references": [{ "path": "../core/tsconfig.json" }]
 }
