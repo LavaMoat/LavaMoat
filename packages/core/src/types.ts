@@ -1,10 +1,8 @@
-export * from './index'
+import type E from './endowmentsToolkit'
 
-export type {
-  EndowmentsToolkit,
-  EndowmentsToolkitFactory,
-} from './endowmentsToolkit'
 export type * from './generatePolicy'
+export * from './index'
 export type * from './moduleRecord'
 export type * from './parseForPolicy'
 export type * from './schema'
+export { E as EndowmentsToolkitFactory }
