@@ -2,7 +2,6 @@ const {
   createModuleInspector,
   LavamoatModuleRecord,
   loadPoliciesSync,
-  // @ts-expect-error - missing types
 } = require('lavamoat-core')
 const { getPackageNameForModulePath } = require('@lavamoat/aa')
 const { writeFileSync, mkdirSync } = require('node:fs')
@@ -17,9 +16,9 @@ const POLICY_SNAPSHOT_FILENAME = 'policy-snapshot.json'
 module.exports = {
   /**
    * @param {Object} opts
-   * @param {import('../types.js').Policy} [opts.policyFromOptions] - The
-   *   hardcoded policy passed in options, takes precedence over reading from
-   *   files
+   * @param {import('lavamoat-core').LavaMoatPolicy} [opts.policyFromOptions] -
+   *   The hardcoded policy passed in options, takes precedence over reading
+   *   from files
    * @param {import('@lavamoat/aa').CanonicalNameMap} opts.canonicalNameMap -
    *   Generated from aa
    * @param {import('webpack').Compilation} opts.compilation - Webpack
@@ -52,7 +51,8 @@ module.exports = {
       return {
         inspectWebpackModule: () => {},
         getPolicy: () => {
-          let final
+          /** @type {import('lavamoat-core').LavaMoatPolicy} */
+          let final = { resources: {} }
           if (policyFromOptions) {
             // TODO: avoid loading the policy file if policyFromOptions is present
             final = policyFromOptions

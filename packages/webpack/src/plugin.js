@@ -49,31 +49,35 @@ class VirtualRuntimeModule extends RuntimeModule {
 // =================================================================
 
 const PLUGIN_NAME = 'LavaMoatPlugin'
-/** @satisfies {import('ses').LockdownOptions} */
+/** @satisfies {LockdownOptions} */
 const lockdownDefaults = /** @type {const} */ ({
+  // gives a semi-high resolution timer
+  dateTaming: 'unsafe',
+  // this is introduces non-determinism, but is otherwise safe
+  mathTaming: 'unsafe',
   // lets code observe call stack, but easier debuggability
   errorTaming: 'unsafe',
   // shows the full call stack
   stackFiltering: 'verbose',
   // prevents most common override mistake cases from tripping up users
   overrideTaming: 'severe',
+  // preserves JS locale methods, to avoid confusing users
+  // prevents aliasing: toLocaleString() to toString(), etc
+  localeTaming: 'unsafe',
 })
 
 class LavaMoatPlugin {
   /**
-   * @param {import('./types.js').LavaMoatPluginOptions} [options]
+   * @param {Partial<LavaMoatPluginOptions>} [options]
    */
   constructor(options = {}) {
-    if (!options.lockdown) {
-      options.lockdown = lockdownDefaults
+    /** @type {LavaMoatPluginOptions} */
+    this.options = {
+      policyLocation: path.join('lavamoat', 'webpack'),
+      lockdown: lockdownDefaults,
+      isBuiltin: () => false,
+      ...options,
     }
-    if (!options.policyLocation) {
-      options.policyLocation = path.join('lavamoat', 'webpack')
-    }
-    if (!options.isBuiltin) {
-      options.isBuiltin = () => false
-    }
-    this.options = options
 
     diag.level = options.diagnosticsVerbosity || 0
   }
@@ -499,8 +503,8 @@ module.exports = LavaMoatPlugin
 /**
  * @typedef {Object} LavaMoatPluginOptions
  * @property {boolean} [generatePolicy] - Generate the policy file
- * @property {string} [policyLocation] - Folder where policy files are stored,
- *   defaults to './lavamoat/webpack'
+ * @property {string} policyLocation - Directory containing policy files are
+ *   stored, defaults to './lavamoat/webpack'
  * @property {boolean} [emitPolicySnapshot] - Additionally put policy in dist of
  *   webpack compilation
  * @property {boolean} [readableResourceIds] - Should resourceIds be readable or
@@ -510,14 +514,30 @@ module.exports = LavaMoatPlugin
  * @property {string[]} [inlineLockdown] - Prefix the listed files with lockdown
  * @property {number} [diagnosticsVerbosity] - A number representing diagnostics
  *   output verbosity, the larger the more overwhelming
- * @property {import('ses').LockdownOptions} [lockdown] - Options to pass to
- *   lockdown
- * @property {string} [policyLocation] - Directory containing policy file
+ * @property {LockdownOptions} lockdown - Options to pass to SES lockdown
  * @property {import('lavamoat-core').LavaMoatPolicy} [policy] - LavaMoat policy
  *   object - if programmatically created
  * @property {boolean} [runChecks] - Check resulting code with wrapping for
  *   correctness
- * @property {(specifier: string) => boolean} [isBuiltin] - A function that
+ * @property {(specifier: string) => boolean} isBuiltin - A function that
  *   determines if the specifier is a builtin of the runtime platform e.g.
  *   node:fs
+ */
+
+// Provided inline because import('ses') won't work in jsdoc of a cjs module
+/**
+ * @typedef {Object} LockdownOptions
+ * @property {'safe' | 'unsafe'} [regExpTaming]
+ * @property {'safe' | 'unsafe'} [localeTaming]
+ * @property {'safe' | 'unsafe'} [consoleTaming]
+ * @property {'platform' | 'exit' | 'abort' | 'report' | 'none'} [errorTrapping]
+ * @property {'report' | 'none'} [unhandledRejectionTrapping]
+ * @property {'safe' | 'unsafe'} [errorTaming]
+ * @property {'safe' | 'unsafe'} [dateTaming]
+ * @property {'safe' | 'unsafe'} [mathTaming]
+ * @property {'safeEval' | 'unsafeEval' | 'noEval'} [evalTaming]
+ * @property {'concise' | 'verbose'} [stackFiltering]
+ * @property {'moderate' | 'min' | 'severe'} [overrideTaming]
+ * @property {string[]} [overrideDebug]
+ * @property {'safe' | 'unsafe'} [domainTaming]
  */
