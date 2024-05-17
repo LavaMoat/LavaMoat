@@ -17,15 +17,15 @@ lockdown({
 
 import { importLocation } from '@endo/compartment-mapper'
 import { pathToFileURL } from 'node:url'
-import { importHook, importNowHook } from './import-hook.js'
-import { syncModuleTransforms } from './module-transforms.js'
+import { importHook } from './import-hook.js'
+import { createNativeParser } from './parse-native.js'
 import { toEndoPolicy } from './policy-converter.js'
-import { generatePolicy } from './policy-gen/index.js'
+// import { generatePolicy } from './policy-gen/index.js'
 import { isPolicy } from './policy.js'
 import { makeReadPowers } from './power.js'
 
 export * as constants from './constants.js'
-export { generateAndWritePolicy, generatePolicy } from './policy-gen/index.js'
+// export { generateAndWritePolicy, generatePolicy } from './policy-gen/index.js'
 export { loadPolicies } from './policy.js'
 export { toEndoPolicy }
 
@@ -68,9 +68,9 @@ export async function run(entrypointPath, policyOrOpts = {}, opts = {}) {
     policy = policyOrOpts
     runOpts = opts
   } else {
-    const generateOpts = policyOrOpts
-    runOpts = { readPowers: generateOpts.readPowers }
-    policy = await generatePolicy(entrypointPath, generateOpts)
+    // const generateOpts = policyOrOpts
+    // runOpts = { readPowers: generateOpts.readPowers }
+    // policy = await generatePolicy(entrypointPath, generateOpts)
   }
 
   const endoPolicy = await toEndoPolicy(policy)
@@ -81,22 +81,17 @@ export async function run(entrypointPath, policyOrOpts = {}, opts = {}) {
       ? `${entrypointPath}`
       : `${pathToFileURL(entrypointPath)}`
 
-  /**
-   * @type {import('@endo/compartment-mapper').SyncArchiveOptions &
-   *   import('@endo/compartment-mapper').ExecuteOptions}
-   */
-  const importOpts = {
+// look at lavamoat policy and see what is allowed a native module.
+// we will only get a file location,  package location.
+
+// implemetnt and push out
+
+  const { namespace } = await importLocation(readPowers, url, {
     policy: endoPolicy,
     globals: globalThis,
     importHook,
-    dynamicHook: importNowHook,
-    syncModuleTransforms,
-    fallbackLanguageForExtension: {
-      node: 'bytes',
-    },
-  }
-
-  const { namespace } = await importLocation(readPowers, url, importOpts)
+    parsers: [{languages: ['native'], parser: createNativeParser(policy), extensions: ['node']}]
+  })
 
   return namespace
 }
