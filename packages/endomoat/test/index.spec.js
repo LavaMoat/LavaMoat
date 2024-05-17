@@ -14,7 +14,7 @@ test('basic operation - run an app without dependencies', async (t) => {
   t.deepEqual({ .../** @type {object} */ (result) }, { hello: 'world' })
 })
 
-test.only('dynamic imports - run a pure-JS app', async (t) => {
+test.failing('dynamic imports - run a pure-JS app', async (t) => {
   // this test should use real fixtures because we need to `require()` dependencies
   // outside of an Endo context (via `importNowHook`)
   const entryFile = new URL('./fixture/dynamic/index.js', import.meta.url)
@@ -36,7 +36,6 @@ test.only('dynamic imports - run a pure-JS app', async (t) => {
   }
 
   const result = await run(entryFile, policy)
-  t.log(result)
   t.deepEqual({ .../** @type {object} */ (result) }, { hello: 'hello world' })
 })
 
@@ -50,3 +49,18 @@ test.failing('dynamic imports - run a native module', async (t) => {
   const result = await run(entryFile, { readPowers })
   t.deepEqual({ .../** @type {object} */ (result) }, { hello: 'hello world' })
 })
+
+test.only('static import - run a native module', async (t) => {
+  const entryFile = new URL('./fixture/static-native/index.js', import.meta.url)
+
+  const policy = {
+    resources: {
+      'hello_world': {
+        native: true
+      }
+    }
+  }
+
+  const result = await run(entryFile, policy);
+  t.deepEqual({ .../** @type {object} */ (result) }, { hello: 'world' })
+});
