@@ -229,6 +229,7 @@ const lavamoatRuntimeWrapper = (resourceId, runtimeKit) => {
     policyRequire.nmd = (moduleReference) => {
       if (moduleReference === module) {
         module = __webpack_require__.nmd(module)
+        return module
       }
     }
 

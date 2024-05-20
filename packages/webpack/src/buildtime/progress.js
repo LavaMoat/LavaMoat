@@ -6,11 +6,14 @@ const diag = require('./diagnostics')
  *   matches expectedStep
  * @property {(expectedStep: string) => boolean} done - Checks if expectedStep
  *   was already reported.
- * @property {(expectedStep: string) => void} assertDone - Throws if
+ * @property {(expectedStep: string) => void} assertDone - Reports an error if
  *   expectedStep was not already reported.
  * @property {(step: string) => void} report - Moves progress forward if step
  *   passed is the next step. no-op if current step (reporting progress is
  *   idempotent)
+ * @property {(errors: Error[]) => void} reportErrorsTo - Wire up the array to
+ *   push errors to for compilation. Pass compilation.errors to it as soon as
+ *   possible.
  */
 
 /**
@@ -21,6 +24,14 @@ const diag = require('./diagnostics')
  * @returns {ProgressAPI}
  */
 module.exports = function progress({ steps }) {
+  /** @type {Error[]} */
+  let compilationErrors = []
+  /**
+   * @param {Error} e
+   */
+  const reportError = (e) => {
+    compilationErrors.push(e)
+  }
   const canRepeat = new Set()
 
   steps = steps.map((step) => {
@@ -47,10 +58,12 @@ module.exports = function progress({ steps }) {
     }
     done.add(step)
     if (steps[currentStep + 1] !== step) {
-      throw Error(
-        `LavaMoatPlugin Plugin: Progress reported '${step}' but the next step was expected to be '${
-          steps[currentStep + 1]
-        }'`
+      reportError(
+        Error(
+          `LavaMoatPlugin Plugin: Progress reported '${step}' but the next step was expected to be '${
+            steps[currentStep + 1]
+          }'`
+        )
       )
     } else {
       diag.rawDebug(1, `\n> progress ${steps[currentStep]}->${step}`)
@@ -81,9 +94,18 @@ module.exports = function progress({ steps }) {
     if (done.has(query)) {
       return
     }
-    throw Error(
-      `LavaMoatPlugin Plugin: Expected '${query}' to be done, but we're at '${steps[currentStep]}'`
+    reportError(
+      Error(
+        `LavaMoatPlugin Plugin: Expected '${query}' to be done, but we're at '${steps[currentStep]}'`
+      )
     )
+  }
+  /**
+   * @param {Error[]} errors
+   */
+  API.reportErrorsTo = (errors) => {
+    errors.push(...compilationErrors)
+    compilationErrors = errors
   }
   return API
 }
