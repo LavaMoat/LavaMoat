@@ -1,8 +1,9 @@
-/// <reference path="./runtime.d.ts" />
+/// <reference path="./lavamoat.d.ts" />
 /* global LAVAMOAT */
 /* global lockdown, harden, Compartment */
 
 const {
+  keys,
   create,
   freeze,
   assign,
@@ -24,7 +25,7 @@ if (LOCKDOWN_ON) {
   )
 }
 
-const { getEndowmentsForConfig, copyWrappedGlobals } =
+const { getEndowmentsForConfig, copyWrappedGlobals, getBuiltinForConfig } =
   LAVAMOAT.endowmentsToolkit()
 
 // These must match assumptions in the wrapper.js
@@ -48,30 +49,57 @@ const stricterScopeTerminator = freeze(
 /**
  * Enforces the policy for resource imports.
  *
- * @param {string | undefined} requestedResourceId - The ID of the requested
- *   resource.
+ * @template {object} T
+ * @param {string} specifier - The ID of the requested resource.
  * @param {string} referrerResourceId - The ID of the referrer resource.
+ * @param {() => T} wrappedRequire - The wrapped **webpack_require** function.
+ * @returns {Partial<T>} The result of the wrapped **webpack_require** function.
  * @throws {Error} Throws an error if the policy does not allow importing the
  *   requested resource from the referrer resource.
  */
-const enforcePolicy = (requestedResourceId, referrerResourceId) => {
-  if (typeof requestedResourceId === 'undefined') {
-    throw Error(`Requested resource ID is undefined`)
+const enforcePolicy = (specifier, referrerResourceId, wrappedRequire) => {
+  if (typeof specifier === 'undefined') {
+    throw Error(`Requested specifier is undefined`)
   }
-  requestedResourceId = '' + requestedResourceId
-  referrerResourceId = '' + referrerResourceId
-  // implicitly allow all for root and modules from the same package
+  // skip enforcing what we determined at build time we cannot
   if (
-    referrerResourceId === LAVAMOAT.root ||
-    requestedResourceId === referrerResourceId
+    LAVAMOAT.unenforceable.includes(specifier) ||
+    // implicitly allow all for root
+    referrerResourceId === LAVAMOAT.root
   ) {
-    return
+    return wrappedRequire()
   }
-  const myPolicy = LAVAMOAT.policy.resources[referrerResourceId] || {}
-  // @ts-expect-error - missing details in policy type, see TODO in types.js
-  if (myPolicy.packages && myPolicy.packages[requestedResourceId]) {
-    return
+  const referrerPolicy = LAVAMOAT.policy.resources[referrerResourceId] || {}
+  if (referrerPolicy.builtin) {
+    if (referrerPolicy.builtin[specifier]) {
+      return wrappedRequire()
+    }
+    if (
+      !specifier.includes('.') &&
+      keys(referrerPolicy.builtin).some((key) => key.startsWith(specifier))
+    ) {
+      // create minimal selection if it's a builtin and not allowed as a whole, but with subpaths
+      return getBuiltinForConfig(
+        wrappedRequire(),
+        specifier,
+        referrerPolicy.builtin
+      )
+    }
   }
+  const requestedResourceId = findResourceId(specifier)
+  if (!requestedResourceId) {
+    throw Error(
+      `Requested specifier ${specifier} is not allowed as a builtin and not a known dependency of ${referrerResourceId}. Regenerate policy or add it to policy-override.json.`
+    )
+  }
+  // allow imports internal to the package
+  if (requestedResourceId === referrerResourceId) {
+    return wrappedRequire()
+  }
+  if (referrerPolicy.packages?.[requestedResourceId]) {
+    return wrappedRequire()
+  }
+
   throw Error(
     `Policy does not allow importing ${requestedResourceId} from ${referrerResourceId}`
   )
@@ -149,13 +177,10 @@ const findResourceId = (moduleId) => {
  * @returns {WrappedRequire} - The wrapped **webpack_require** function.
  */
 const wrapRequireWithPolicy = (__webpack_require__, referrerResourceId) =>
-  function (specifier) {
-    if (!LAVAMOAT.unenforceable.includes(specifier)) {
-      const requestedResourceId = findResourceId(specifier)
-      enforcePolicy(requestedResourceId, referrerResourceId)
-    }
-    // @ts-ignore - unknown this is the point here
-    return __webpack_require__.apply(this, arguments)
+  /** @this {object} */
+  function (specifier, ...rest) {
+    const requireThat = __webpack_require__.bind(this, specifier, ...rest)
+    return enforcePolicy(specifier, referrerResourceId, requireThat)
   }
 
 /**
@@ -201,7 +226,7 @@ const lavamoatRuntimeWrapper = (resourceId, runtimeKit) => {
     // The following seem harmless and are used by default: ['O', 'n', 'd', 'o', 'r', 's']
     const supportedRuntimeItems = ['O', 'n', 'd', 'o', 'r', 's']
     for (const item of supportedRuntimeItems) {
-      // @ts-expect-error - I'm not gonna do webppack's minified runtime typing
+      // @ts-ignore - I'm not gonna do webppack's minified runtime typing
       policyRequire[item] = harden(__webpack_require__[item])
     }
 
@@ -222,6 +247,7 @@ const lavamoatRuntimeWrapper = (resourceId, runtimeKit) => {
     )
 
     // webpack rewrites regerences to `global` to `__webpack_require__.g` in the bundle
+    // @ts-expect-error - webpack runtime is not typed
     policyRequire.g = compartmentMap.get(resourceId).globalThis
 
     // override nmd to limit what it can mutate

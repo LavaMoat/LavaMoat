@@ -9,6 +9,7 @@
     "fetch-package": "1.0.0",
     "globals-package": "1.0.0",
     "loader-hack": "1.0.0",
+    "nodejs-package": "1.0.0",
     "prototype-poisoning-package": "1.0.0",
     "side-effects-package": "1.0.0",
     "typescript-package": "1.0.0",

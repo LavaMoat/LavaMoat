@@ -60,7 +60,7 @@ const crossReference = (neededIds, policyIds) => {
 /**
  * @param {object} options
  * @param {{ path: string; moduleId: string | number }[]} options.paths
- * @param {import('../types.js').Policy} options.policy
+ * @param {import('lavamoat-core').LavaMoatPolicy} options.policy
  * @param {import('@lavamoat/aa').CanonicalNameMap} options.canonicalNameMap
  * @param {(string | number)[]} options.unenforceableModuleIds
  * @param {boolean | undefined} options.readableResourceIds
@@ -90,7 +90,7 @@ exports.generateIdentifierLookup = ({
     return mapping
   }
 
-  const usedIdentifiers = Object.keys(policy.resources)
+  const usedIdentifiers = Object.keys(policy.resources || {})
   usedIdentifiers.unshift(ROOT_IDENTIFIER)
   const usedIdentifiersIndex = Object.fromEntries(
     usedIdentifiers.map((id, index) => [id, index])
@@ -164,7 +164,7 @@ exports.generateIdentifierLookup = ({
       const translatedPolicy = {
         ...policy,
         resources: Object.fromEntries(
-          Object.entries(policy.resources)
+          Object.entries(policy.resources || {})
             .filter(([id]) => identifiersWithKnownPaths.has(id)) // only saves resources that are actually used
             .map(([id, resource]) => [
               translate(id),
