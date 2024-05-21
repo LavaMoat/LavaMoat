@@ -1,4 +1,4 @@
-// ses@1.4.0
+// ses@1.5.0
 'use strict';
 (() => {
   const functors = [
@@ -138,6 +138,10 @@ const        { prototype: weakmapPrototype}=   WeakMap;$h‍_once.weakmapPrototy
 const        { prototype: weaksetPrototype}=   WeakSet;$h‍_once.weaksetPrototype(weaksetPrototype);
 const        { prototype: functionPrototype}=   Function;$h‍_once.functionPrototype(functionPrototype);
 const        { prototype: promisePrototype}=   Promise;$h‍_once.promisePrototype(promisePrototype);
+const        { prototype: generatorPrototype}=   getPrototypeOf(
+  // eslint-disable-next-line no-empty-function, func-names
+  function*()  { });$h‍_once.generatorPrototype(generatorPrototype);
+
 
 const        typedArrayPrototype=  getPrototypeOf(Uint8Array.prototype);$h‍_once.typedArrayPrototype(typedArrayPrototype);
 
@@ -195,13 +199,16 @@ const        matchAllRegExp=  uncurryThis(regexpPrototype[matchAllSymbol]);
 $h‍_once.matchAllRegExp(matchAllRegExp);const stringEndsWith=uncurryThis(stringPrototype.endsWith);$h‍_once.stringEndsWith(stringEndsWith);
 const        stringIncludes=  uncurryThis(stringPrototype.includes);$h‍_once.stringIncludes(stringIncludes);
 const        stringIndexOf=  uncurryThis(stringPrototype.indexOf);$h‍_once.stringIndexOf(stringIndexOf);
-const        stringMatch=  uncurryThis(stringPrototype.match);
+const        stringMatch=  uncurryThis(stringPrototype.match);$h‍_once.stringMatch(stringMatch);
+const        generatorNext=  uncurryThis(generatorPrototype.next);$h‍_once.generatorNext(generatorNext);
+const        generatorThrow=  uncurryThis(generatorPrototype.throw);
+
 /**
  * @type { &
  *   ((thisArg: string, searchValue: { [Symbol.replace](string: string, replaceValue: string): string; }, replaceValue: string) => string) &
  *   ((thisArg: string, searchValue: { [Symbol.replace](string: string, replacer: (substring: string, ...args: any[]) => string): string; }, replacer: (substring: string, ...args: any[]) => string) => string)
  * }
- */$h‍_once.stringMatch(stringMatch);
+ */$h‍_once.generatorThrow(generatorThrow);
 const        stringReplace=  /** @type {any} */
   uncurryThis(stringPrototype.replace);$h‍_once.stringReplace(stringReplace);
 
@@ -221,9 +228,10 @@ const        weakmapSet=  uncurryThis(weakmapPrototype.set);
 $h‍_once.weakmapSet(weakmapSet);const weaksetAdd=uncurryThis(weaksetPrototype.add);$h‍_once.weaksetAdd(weaksetAdd);
 const        weaksetHas=  uncurryThis(weaksetPrototype.has);
 //
-$h‍_once.weaksetHas(weaksetHas);const functionToString=uncurryThis(functionPrototype.toString);
+$h‍_once.weaksetHas(weaksetHas);const functionToString=uncurryThis(functionPrototype.toString);$h‍_once.functionToString(functionToString);
+const        functionBind=  uncurryThis(bind);
 //
-$h‍_once.functionToString(functionToString);const{all}=Promise;
+$h‍_once.functionBind(functionBind);const{all}=Promise;
 const        promiseAll=  (promises)=>apply(all, Promise, [promises]);$h‍_once.promiseAll(promiseAll);
 const        promiseCatch=  uncurryThis(promisePrototype.catch);
 /** @type {<T, TResult1 = T, TResult2 = never>(thisArg: T, onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null) => Promise<TResult1 | TResult2>} */$h‍_once.promiseCatch(promiseCatch);
@@ -298,7 +306,65 @@ $h‍_once.FERAL_EVAL(FERAL_EVAL);const FERAL_FUNCTION=Function;$h‍_once.FERAL
 const        noEvalEvaluate=  ()=>  {
   // See https://github.com/endojs/endo/blob/master/packages/ses/error-codes/SES_NO_EVAL.md
   throw TypeError('Cannot eval with evalTaming set to "noEval" (SES_NO_EVAL)');
- };$h‍_once.noEvalEvaluate(noEvalEvaluate);
+ };
+
+// ////////////////// FERAL_STACK_GETTER FERAL_STACK_SETTER ////////////////////
+$h‍_once.noEvalEvaluate(noEvalEvaluate);
+const er1StackDesc=  getOwnPropertyDescriptor(Error('er1'), 'stack');
+const er2StackDesc=  getOwnPropertyDescriptor(TypeError('er2'), 'stack');
+
+let feralStackGetter;
+let feralStackSetter;
+if( er1StackDesc&&  er2StackDesc&&  er1StackDesc.get) {
+  // We should only encounter this case on v8 because of its problematic
+  // error own stack accessor behavior.
+  // Note that FF/SpiderMonkey, Moddable/XS, and the error stack proposal
+  // all inherit a stack accessor property from Error.prototype, which is
+  // great. That case needs no heroics to secure.
+  if(
+    // In the v8 case as we understand it, all errors have an own stack
+    // accessor property, but within the same realm, all these accessor
+    // properties have the same getter and have the same setter.
+    // This is therefore the case that we repair.
+    typeof er1StackDesc.get===  'function'&&
+    er1StackDesc.get===  er2StackDesc.get&&
+    typeof er1StackDesc.set===  'function'&&
+    er1StackDesc.set===  er2StackDesc.set)
+    {
+    // Otherwise, we have own stack accessor properties that are outside
+    // our expectations, that therefore need to be understood better
+    // before we know how to repair them.
+    feralStackGetter=  freeze(er1StackDesc.get);
+    feralStackSetter=  freeze(er1StackDesc.set);
+   }else {
+    // See https://github.com/endojs/endo/blob/master/packages/ses/error-codes/SES_UNEXPECTED_ERROR_OWN_STACK_ACCESSOR.md
+    throw TypeError(
+      'Unexpected Error own stack accessor functions (SES_UNEXPECTED_ERROR_OWN_STACK_ACCESSOR)');
+
+   }
+ }
+
+/**
+ * If on a v8 with the problematic error own stack accessor behavior,
+ * `FERAL_STACK_GETTER` will be the shared getter of all those accessors
+ * and `FERAL_STACK_SETTER` will be the shared setter. On any platform
+ * without this problem, `FERAL_STACK_GETTER` and `FERAL_STACK_SETTER` are
+ * both `undefined`.
+ *
+ * @type {(() => any) | undefined}
+ */
+const        FERAL_STACK_GETTER=  feralStackGetter;
+
+/**
+ * If on a v8 with the problematic error own stack accessor behavior,
+ * `FERAL_STACK_GETTER` will be the shared getter of all those accessors
+ * and `FERAL_STACK_SETTER` will be the shared setter. On any platform
+ * without this problem, `FERAL_STACK_GETTER` and `FERAL_STACK_SETTER` are
+ * both `undefined`.
+ *
+ * @type {((newValue: any) => void) | undefined}
+ */$h‍_once.FERAL_STACK_GETTER(FERAL_STACK_GETTER);
+const        FERAL_STACK_SETTER=  feralStackSetter;$h‍_once.FERAL_STACK_SETTER(FERAL_STACK_SETTER);
 })()
 ,
 // === functors[1] ===
@@ -483,6 +549,8 @@ const        {
 
 
 
+/** @import {StringablePayload} from '../../types.js' */
+
 /**
  * Joins English terms with commas and an optional conjunction.
  *
@@ -657,371 +725,7 @@ freeze(bestEffortStringify);
 // === functors[5] ===
 ({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,   importMeta: $h‍____meta, }) => (function () { 'use strict';   $h‍_imports([]);   // @ts-check
 
-/**
- * TypeScript does not treat `AggregateErrorConstructor` as a subtype of
- * `ErrorConstructor`, which makes sense because their constructors
- * have incompatible signatures. However, we want to parameterize some
- * operations by any error constructor, including possible `AggregateError`.
- * So we introduce `GenericErrorConstructor` as a common supertype. Any call
- * to it to make an instance must therefore first case split on whether the
- * constructor is an AggregateErrorConstructor or a normal ErrorConstructor.
- *
- * @typedef {ErrorConstructor | AggregateErrorConstructor} GenericErrorConstructor
- */
-
-/**
- * @callback BaseAssert
- * The `assert` function itself.
- *
- * @param {any} flag The truthy/falsy value
- * @param {Details} [optDetails] The details to throw
- * @param {GenericErrorConstructor} [errConstructor]
- * An optional alternate error constructor to use.
- * @param {AssertMakeErrorOptions} [options]
- * @returns {asserts flag}
- */
-
-/**
- * @typedef {object} AssertMakeErrorOptions
- * @property {string} [errorName]
- * @property {Error} [cause]
- * @property {Error[]} [errors]
- *   Normally only used when the ErrorConstuctor is `AggregateError`
- */
-
-/**
- * @callback AssertMakeError
- *
- * The `assert.error` method, recording details for the console.
- *
- * The optional `optDetails` can be a string.
- * @param {Details} [optDetails] The details of what was asserted
- * @param {GenericErrorConstructor} [errConstructor]
- * An optional alternate error constructor to use.
- * @param {AssertMakeErrorOptions} [options]
- * @returns {Error}
- */
-
-/**
- * @callback AssertFail
- *
- * The `assert.fail` method.
- *
- * Fail an assertion, recording full details to the console and
- * raising an exception with a message in which `details` substitution values
- * have been redacted.
- *
- * The optional `optDetails` can be a string for backwards compatibility
- * with the nodejs assertion library.
- * @param {Details} [optDetails] The details of what was asserted
- * @param {GenericErrorConstructor} [errConstructor]
- * An optional alternate error constructor to use.
- * @param {AssertMakeErrorOptions} [options]
- * @returns {never}
- */
-
-/**
- * @callback AssertEqual
- * The `assert.equal` method
- *
- * Assert that two values must be `Object.is`.
- * @param {any} actual The value we received
- * @param {any} expected What we wanted
- * @param {Details} [optDetails] The details to throw
- * @param {GenericErrorConstructor} [errConstructor]
- * An optional alternate error constructor to use.
- * @param {AssertMakeErrorOptions} [options]
- * @returns {void}
- */
-
-// Type all the overloads of the assertTypeof function.
-// There may eventually be a better way to do this, but
-// thems the breaks with Typescript 4.0.
-/**
- * @callback AssertTypeofBigint
- * @param {any} specimen
- * @param {'bigint'} typename
- * @param {Details} [optDetails]
- * @returns {asserts specimen is bigint}
- */
-
-/**
- * @callback AssertTypeofBoolean
- * @param {any} specimen
- * @param {'boolean'} typename
- * @param {Details} [optDetails]
- * @returns {asserts specimen is boolean}
- */
-
-/**
- * @callback AssertTypeofFunction
- * @param {any} specimen
- * @param {'function'} typename
- * @param {Details} [optDetails]
- * @returns {asserts specimen is Function}
- */
-
-/**
- * @callback AssertTypeofNumber
- * @param {any} specimen
- * @param {'number'} typename
- * @param {Details} [optDetails]
- * @returns {asserts specimen is number}
- */
-
-/**
- * @callback AssertTypeofObject
- * @param {any} specimen
- * @param {'object'} typename
- * @param {Details} [optDetails]
- * @returns {asserts specimen is Record<any, any> | null}
- */
-
-/**
- * @callback AssertTypeofString
- * @param {any} specimen
- * @param {'string'} typename
- * @param {Details} [optDetails]
- * @returns {asserts specimen is string}
- */
-
-/**
- * @callback AssertTypeofSymbol
- * @param {any} specimen
- * @param {'symbol'} typename
- * @param {Details} [optDetails]
- * @returns {asserts specimen is symbol}
- */
-
-/**
- * @callback AssertTypeofUndefined
- * @param {any} specimen
- * @param {'undefined'} typename
- * @param {Details} [optDetails]
- * @returns {asserts specimen is undefined}
- */
-
-/**
- * The `assert.typeof` method
- *
- * @typedef {AssertTypeofBigint & AssertTypeofBoolean & AssertTypeofFunction & AssertTypeofNumber & AssertTypeofObject & AssertTypeofString & AssertTypeofSymbol & AssertTypeofUndefined} AssertTypeof
- */
-
-/**
- * @callback AssertString
- * The `assert.string` method.
- *
- * `assert.string(v)` is equivalent to `assert.typeof(v, 'string')`. We
- * special case this one because it is the most frequently used.
- *
- * Assert an expected typeof result.
- * @param {any} specimen The value to get the typeof
- * @param {Details} [optDetails] The details to throw
- * @returns {asserts specimen is string}
- */
-
-/**
- * @callback AssertNote
- * The `assert.note` method.
- *
- * Annotate an error with details, potentially to be used by an
- * augmented console such as the causal console of `console.js`, to
- * provide extra information associated with logged errors.
- *
- * @param {Error} error
- * @param {Details} detailsNote
- * @returns {void}
- */
-
-// /////////////////////////////////////////////////////////////////////////////
-
-/**
- * @typedef {{}} DetailsToken
- * A call to the `details` template literal makes and returns a fresh details
- * token, which is a frozen empty object associated with the arguments of that
- * `details` template literal expression.
- */
-
-/**
- * @typedef {string | DetailsToken} Details
- * Either a plain string, or made by the `details` template literal tag.
- */
-
-/**
- * @typedef {object} StringablePayload
- * Holds the payload passed to quote so that its printed form is visible.
- * @property {() => string} toString How to print the payload
- */
-
-/**
- * To "declassify" and quote a substitution value used in a
- * ``` details`...` ``` template literal, enclose that substitution expression
- * in a call to `quote`. This makes the value appear quoted
- * (as if with `JSON.stringify`) in the message of the thrown error. The
- * payload itself is still passed unquoted to the console as it would be
- * without `quote`.
- *
- * For example, the following will reveal the expected sky color, but not the
- * actual incorrect sky color, in the thrown error's message:
- * ```js
- * sky.color === expectedColor || Fail`${sky.color} should be ${quote(expectedColor)}`;
- * ```
- *
- * // TODO Update SES-shim to new convention, where `details` is
- * // renamed to `X` rather than `d`.
- * The normal convention is to locally rename `details` to `d` and `quote` to `q`
- * like `const { details: d, quote: q } = assert;`, so the above example would then be
- * ```js
- * sky.color === expectedColor || Fail`${sky.color} should be ${q(expectedColor)}`;
- * ```
- *
- * @callback AssertQuote
- * @param {any} payload What to declassify
- * @param {(string|number)} [spaces]
- * @returns {StringablePayload} The declassified payload
- */
-
-/**
- * @callback Raise
- *
- * To make an `assert` which terminates some larger unit of computation
- * like a transaction, vat, or process, call `makeAssert` with a `Raise`
- * callback, where that callback actually performs that larger termination.
- * If possible, the callback should also report its `reason` parameter as
- * the alleged reason for the termination.
- *
- * @param {Error} reason
- */
-
-/**
- * @callback MakeAssert
- *
- * Makes and returns an `assert` function object that shares the bookkeeping
- * state defined by this module with other `assert` function objects made by
- * `makeAssert`. This state is per-module-instance and is exposed by the
- * `loggedErrorHandler` above. We refer to `assert` as a "function object"
- * because it can be called directly as a function, but also has methods that
- * can be called.
- *
- * If `optRaise` is provided, the returned `assert` function object will call
- * `optRaise(reason)` before throwing the error. This enables `optRaise` to
- * engage in even more violent termination behavior, like terminating the vat,
- * that prevents execution from reaching the following throw. However, if
- * `optRaise` returns normally, which would be unusual, the throw following
- * `optRaise(reason)` would still happen.
- *
- * @param {Raise} [optRaise]
- * @param {boolean} [unredacted]
- * @returns {Assert}
- */
-
-/**
- * @typedef {(template: TemplateStringsArray | string[], ...args: any) => DetailsToken} DetailsTag
- *
- * Use the `details` function as a template literal tag to create
- * informative error messages. The assertion functions take such messages
- * as optional arguments:
- * ```js
- * assert(sky.isBlue(), details`${sky.color} should be "blue"`);
- * ```
- * // TODO Update SES-shim to new convention, where `details` is
- * // renamed to `X` rather than `d`.
- * or following the normal convention to locally rename `details` to `d`
- * and `quote` to `q` like `const { details: d, quote: q } = assert;`:
- * ```js
- * assert(sky.isBlue(), d`${sky.color} should be "blue"`);
- * ```
- * However, note that in most cases it is preferable to instead use the `Fail`
- * template literal tag (which has the same input signature as `details`
- * but automatically creates and throws an error):
- * ```js
- * sky.isBlue() || Fail`${sky.color} should be "blue"`;
- * ```
- *
- * The details template tag returns a `DetailsToken` object that can print
- * itself with the formatted message in two ways.
- * It will report full details to the console, but
- * mask embedded substitution values with their typeof information in the thrown error
- * to prevent revealing secrets up the exceptional path. In the example
- * above, the thrown error may reveal only that `sky.color` is a string,
- * whereas the same diagnostic printed to the console reveals that the
- * sky was green. This masking can be disabled for an individual substitution value
- * using `quote`.
- *
- * The `raw` property of an input template array is ignored, so a simple
- * array of strings may be provided directly.
- */
-
-/**
- * @typedef {(template: TemplateStringsArray | string[], ...args: any) => never} FailTag
- *
- * Use the `Fail` function as a template literal tag to efficiently
- * create and throw a `details`-style error only when a condition is not satisfied.
- * ```js
- * condition || Fail`...complaint...`;
- * ```
- * This avoids the overhead of creating usually-unnecessary errors like
- * ```js
- * assert(condition, details`...complaint...`);
- * ```
- * while improving readability over alternatives like
- * ```js
- * condition || assert.fail(details`...complaint...`);
- * ```
- *
- * However, due to current weakness in TypeScript, static reasoning
- * is less powerful with the `||` patterns than with an `assert` call.
- * Until/unless https://github.com/microsoft/TypeScript/issues/51426 is fixed,
- * for `||`-style assertions where this loss of static reasoning is a problem,
- * instead express the assertion as
- * ```js
- *   if (!condition) {
- *     Fail`...complaint...`;
- *   }
- * ```
- * or, if needed,
- * ```js
- *   if (!condition) {
- *     // `throw` is noop since `Fail` throws, but it improves static analysis
- *     throw Fail`...complaint...`;
- *   }
- * ```
- */
-
-/**
- * assert that expr is truthy, with an optional details to describe
- * the assertion. It is a tagged template literal like
- * ```js
- * assert(expr, details`....`);`
- * ```
- *
- * The literal portions of the template are assumed non-sensitive, as
- * are the `typeof` types of the substitution values. These are
- * assembled into the thrown error message. The actual contents of the
- * substitution values are assumed sensitive, to be revealed to
- * the console only. We assume only the virtual platform's owner can read
- * what is written to the console, where the owner is in a privileged
- * position over computation running on that platform.
- *
- * The optional `optDetails` can be a string for backwards compatibility
- * with the nodejs assertion library.
- *
- * @typedef { BaseAssert & {
- *   typeof: AssertTypeof,
- *   error: AssertMakeError,
- *   fail: AssertFail,
- *   equal: AssertEqual,
- *   string: AssertString,
- *   note: AssertNote,
- *   details: DetailsTag,
- *   Fail: FailTag,
- *   quote: AssertQuote,
- *   bare: AssertQuote,
- *   makeAssert: MakeAssert,
- * } } Assert
- */
-
-// /////////////////////////////////////////////////////////////////////////////
+/** @import {GenericErrorConstructor, AssertMakeErrorOptions, DetailsToken, StringablePayload} from '../../types.js' */
 
 /**
  * @typedef {object} VirtualConsole
@@ -1478,7 +1182,7 @@ freeze(makeNoteLogArgsArrayKit);
 })()
 ,
 // === functors[9] ===
-({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,   importMeta: $h‍____meta, }) => (function () { 'use strict';   let RangeError,TypeError,WeakMap,arrayJoin,arrayMap,arrayPop,arrayPush,assign,freeze,defineProperty,globalThis,is,isError,regexpTest,stringIndexOf,stringReplace,stringSlice,stringStartsWith,weakmapDelete,weakmapGet,weakmapHas,weakmapSet,AggregateError,an,bestEffortStringify,makeNoteLogArgsArrayKit;$h‍_imports([["../commons.js", [["RangeError", [$h‍_a => (RangeError = $h‍_a)]],["TypeError", [$h‍_a => (TypeError = $h‍_a)]],["WeakMap", [$h‍_a => (WeakMap = $h‍_a)]],["arrayJoin", [$h‍_a => (arrayJoin = $h‍_a)]],["arrayMap", [$h‍_a => (arrayMap = $h‍_a)]],["arrayPop", [$h‍_a => (arrayPop = $h‍_a)]],["arrayPush", [$h‍_a => (arrayPush = $h‍_a)]],["assign", [$h‍_a => (assign = $h‍_a)]],["freeze", [$h‍_a => (freeze = $h‍_a)]],["defineProperty", [$h‍_a => (defineProperty = $h‍_a)]],["globalThis", [$h‍_a => (globalThis = $h‍_a)]],["is", [$h‍_a => (is = $h‍_a)]],["isError", [$h‍_a => (isError = $h‍_a)]],["regexpTest", [$h‍_a => (regexpTest = $h‍_a)]],["stringIndexOf", [$h‍_a => (stringIndexOf = $h‍_a)]],["stringReplace", [$h‍_a => (stringReplace = $h‍_a)]],["stringSlice", [$h‍_a => (stringSlice = $h‍_a)]],["stringStartsWith", [$h‍_a => (stringStartsWith = $h‍_a)]],["weakmapDelete", [$h‍_a => (weakmapDelete = $h‍_a)]],["weakmapGet", [$h‍_a => (weakmapGet = $h‍_a)]],["weakmapHas", [$h‍_a => (weakmapHas = $h‍_a)]],["weakmapSet", [$h‍_a => (weakmapSet = $h‍_a)]],["AggregateError", [$h‍_a => (AggregateError = $h‍_a)]]]],["./stringify-utils.js", [["an", [$h‍_a => (an = $h‍_a)]],["bestEffortStringify", [$h‍_a => (bestEffortStringify = $h‍_a)]]]],["./types.js", []],["./internal-types.js", []],["./note-log-args.js", [["makeNoteLogArgsArrayKit", [$h‍_a => (makeNoteLogArgsArrayKit = $h‍_a)]]]]]);   
+({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,   importMeta: $h‍____meta, }) => (function () { 'use strict';   let RangeError,TypeError,WeakMap,arrayJoin,arrayMap,arrayPop,arrayPush,assign,freeze,defineProperty,globalThis,is,isError,regexpTest,stringIndexOf,stringReplace,stringSlice,stringStartsWith,weakmapDelete,weakmapGet,weakmapHas,weakmapSet,AggregateError,getOwnPropertyDescriptors,ownKeys,create,objectPrototype,objectHasOwnProperty,an,bestEffortStringify,makeNoteLogArgsArrayKit;$h‍_imports([["../commons.js", [["RangeError", [$h‍_a => (RangeError = $h‍_a)]],["TypeError", [$h‍_a => (TypeError = $h‍_a)]],["WeakMap", [$h‍_a => (WeakMap = $h‍_a)]],["arrayJoin", [$h‍_a => (arrayJoin = $h‍_a)]],["arrayMap", [$h‍_a => (arrayMap = $h‍_a)]],["arrayPop", [$h‍_a => (arrayPop = $h‍_a)]],["arrayPush", [$h‍_a => (arrayPush = $h‍_a)]],["assign", [$h‍_a => (assign = $h‍_a)]],["freeze", [$h‍_a => (freeze = $h‍_a)]],["defineProperty", [$h‍_a => (defineProperty = $h‍_a)]],["globalThis", [$h‍_a => (globalThis = $h‍_a)]],["is", [$h‍_a => (is = $h‍_a)]],["isError", [$h‍_a => (isError = $h‍_a)]],["regexpTest", [$h‍_a => (regexpTest = $h‍_a)]],["stringIndexOf", [$h‍_a => (stringIndexOf = $h‍_a)]],["stringReplace", [$h‍_a => (stringReplace = $h‍_a)]],["stringSlice", [$h‍_a => (stringSlice = $h‍_a)]],["stringStartsWith", [$h‍_a => (stringStartsWith = $h‍_a)]],["weakmapDelete", [$h‍_a => (weakmapDelete = $h‍_a)]],["weakmapGet", [$h‍_a => (weakmapGet = $h‍_a)]],["weakmapHas", [$h‍_a => (weakmapHas = $h‍_a)]],["weakmapSet", [$h‍_a => (weakmapSet = $h‍_a)]],["AggregateError", [$h‍_a => (AggregateError = $h‍_a)]],["getOwnPropertyDescriptors", [$h‍_a => (getOwnPropertyDescriptors = $h‍_a)]],["ownKeys", [$h‍_a => (ownKeys = $h‍_a)]],["create", [$h‍_a => (create = $h‍_a)]],["objectPrototype", [$h‍_a => (objectPrototype = $h‍_a)]],["objectHasOwnProperty", [$h‍_a => (objectHasOwnProperty = $h‍_a)]]]],["./stringify-utils.js", [["an", [$h‍_a => (an = $h‍_a)]],["bestEffortStringify", [$h‍_a => (bestEffortStringify = $h‍_a)]]]],["./types.js", []],["./internal-types.js", []],["./note-log-args.js", [["makeNoteLogArgsArrayKit", [$h‍_a => (makeNoteLogArgsArrayKit = $h‍_a)]]]]]);   
 
 
 
@@ -1520,6 +1224,15 @@ freeze(makeNoteLogArgsArrayKit);
 
 
 
+
+
+
+
+
+
+/**
+ * @import {BaseAssert, Assert, AssertionFunctions, AssertionUtilities, StringablePayload, DetailsToken, MakeAssert} from '../../types.js'
+ */
 
 // For our internal debugging purposes, uncomment
 // const internalDebugConsole = console;
@@ -1529,7 +1242,7 @@ freeze(makeNoteLogArgsArrayKit);
 /** @type {WeakMap<StringablePayload, any>} */
 const declassifiers=  new WeakMap();
 
-/** @type {AssertQuote} */
+/** @type {AssertionUtilities['quote']} */
 const quote=  (payload, spaces=  undefined)=>  {
   const result=  freeze({
     toString: freeze(()=>  bestEffortStringify(payload, spaces))});
@@ -1542,19 +1255,7 @@ freeze(quote);
 const canBeBare=  freeze(/^[\w:-]( ?[\w:-])*$/);
 
 /**
- * Embed a string directly into error details without wrapping punctuation.
- * To avoid injection attacks that exploit quoting confusion, this must NEVER
- * be used with data that is possibly attacker-controlled.
- * As a further safeguard, we fall back to quoting any input that is not a
- * string of sufficiently word-like parts separated by isolated spaces (rather
- * than throwing an exception, which could hide the original problem for which
- * explanatory details are being constructed---i.e., ``` assert.details`...` ```
- * should never be the source of a new exception, nor should an attempt to
- * render its output, although we _could_ instead decide to handle the latter
- * by inline replacement similar to that of `bestEffortStringify` for producing
- * rendered messages like `(an object) was tagged "[Unsafe bare string]"`).
- *
- * @type {AssertQuote}
+ * @type {AssertionUtilities['bare']}
  */
 const bare=  (payload, spaces=  undefined)=>  {
   if( typeof payload!==  'string'||  !regexpTest(canBeBare, payload)) {
@@ -1640,7 +1341,7 @@ freeze(DetailsTokenProto.toString);
  * of them should be uses where the template literal has no redacted
  * substitution values. In those cases, the two are equivalent.
  *
- * @type {DetailsTag}
+ * @type {AssertionUtilities['details']}
  */
 const redactedDetails=  (template, ...args)=>  {
   // Keep in mind that the vast majority of calls to `details` creates
@@ -1649,7 +1350,7 @@ const redactedDetails=  (template, ...args)=>  {
   // all the work to happen only if needed, for example, if an assertion fails.
   const detailsToken=  freeze({ __proto__: DetailsTokenProto});
   weakmapSet(hiddenDetailsMap, detailsToken, { template, args});
-  return detailsToken;
+  return (/** @type {DetailsToken} */ /** @type {unknown} */  detailsToken);
  };
 freeze(redactedDetails);
 
@@ -1664,7 +1365,7 @@ freeze(redactedDetails);
  * of safety. `unredactedDetails` also sacrifices the speed of `details`,
  * which is usually fine in debugging and testing.
  *
- * @type {DetailsTag}
+ * @type {AssertionUtilities['details']}
  */
 const unredactedDetails=  (template, ...args)=>  {
   args=  arrayMap(args, (arg)=>
@@ -1735,12 +1436,79 @@ const tagError=  (err, optErrorName=  err.name)=>  {
  };
 
 /**
- * @type {AssertMakeError}
+ * Make reasonable best efforts to make a `Passable` error.
+ *   - `sanitizeError` will remove any "extraneous" own properties already added
+ *     by the host,
+ *     such as `fileName`,`lineNumber` on FireFox or `line` on Safari.
+ *   - If any such "extraneous" properties were removed, `sanitizeError` will
+ *     annotate
+ *     the error with them, so they still appear on the causal console
+ *     log output for diagnostic purposes, but not be otherwise visible.
+ *   - `sanitizeError` will ensure that any expected properties already
+ *     added by the host are data
+ *     properties, converting accessor properties to data properties as needed,
+ *     such as `stack` on v8 (Chrome, Brave, Edge?)
+ *   - `sanitizeError` will freeze the error, preventing any correct engine from
+ *     adding or
+ *     altering any of the error's own properties `sanitizeError` is done.
+ *
+ * However, `sanitizeError` will not, for example, `harden`
+ * (i.e., deeply freeze)
+ * or ensure that the `cause` or `errors` property satisfy the `Passable`
+ * constraints. The purpose of `sanitizeError` is only to protect against
+ * mischief the host may have already added to the error as created,
+ * not to ensure that the error is actually Passable. For that,
+ * see `toPassableError` in `@endo/pass-style`.
+ *
+ * @param {Error} error
  */
+const        sanitizeError=  (error)=>{
+  const descs=  getOwnPropertyDescriptors(error);
+  const {
+    name: _nameDesc,
+    message: _messageDesc,
+    errors: _errorsDesc=  undefined,
+    cause: _causeDesc=  undefined,
+    stack: _stackDesc=  undefined,
+    ...restDescs}=
+      descs;
+
+  const restNames=  ownKeys(restDescs);
+  if( restNames.length>=  1) {
+    for( const name of restNames) {
+      delete error[name];
+     }
+    const droppedNote=  create(objectPrototype, restDescs);
+    // eslint-disable-next-line no-use-before-define
+    note(
+      error,
+      redactedDetails `originally with properties ${quote(droppedNote)}`);
+
+   }
+  for( const name of ownKeys(error)) {
+    // @ts-expect-error TS still confused by symbols as property names
+    const desc=  descs[name];
+    if( desc&&  objectHasOwnProperty(desc, 'get')) {
+      defineProperty(error, name, {
+        value: error[name]  // invoke the getter to convert to data property
+});
+     }
+   }
+  freeze(error);
+ };
+
+/**
+ * @type {AssertionUtilities['error']}
+ */$h‍_once.sanitizeError(sanitizeError);
 const makeError=  (
   optDetails=  redactedDetails `Assert failed`,
   errConstructor=  globalThis.Error,
-  { errorName=  undefined, cause=  undefined, errors=  undefined}=   {})=>
+  {
+    errorName=  undefined,
+    cause=  undefined,
+    errors=  undefined,
+    sanitize=  true}=
+      {})=>
      {
   if( typeof optDetails===  'string') {
     // If it is a string, use it as the literal part of the template so
@@ -1779,6 +1547,9 @@ const makeError=  (
   if( errorName!==  undefined) {
     tagError(error, errorName);
    }
+  if( sanitize) {
+    sanitizeError(error);
+   }
   // The next line is a particularly fruitful place to put a breakpoint.
   return error;
  };
@@ -1802,7 +1573,7 @@ const { addLogArgs, takeLogArgsArray}=   makeNoteLogArgsArrayKit();
  */
 const hiddenNoteCallbackArrays=  new WeakMap();
 
-/** @type {AssertNote} */
+/** @type {AssertionUtilities['note']} */
 const note=  (error, detailsNote)=>  {
   if( typeof detailsNote===  'string') {
     // If it is a string, use it as the literal part of the template so
@@ -1883,7 +1654,7 @@ const makeAssert=  (optRaise=  undefined, unredacted=  false)=>  {
   const details=  unredacted?  unredactedDetails:  redactedDetails;
   const assertFailedDetails=  details `Check failed`;
 
-  /** @type {AssertFail} */
+  /** @type {AssertionFunctions['fail']} */
   const fail=  (
     optDetails=  assertFailedDetails,
     errConstructor=  undefined,
@@ -1891,13 +1662,14 @@ const makeAssert=  (optRaise=  undefined, unredacted=  false)=>  {
        {
     const reason=  makeError(optDetails, errConstructor, options);
     if( optRaise!==  undefined) {
+      // @ts-ignore returns `never` doesn't mean it isn't callable
       optRaise(reason);
      }
     throw reason;
    };
   freeze(fail);
 
-  /** @type {FailTag} */
+  /** @type {AssertionUtilities['Fail']} */
   const Fail=  (template, ...args)=>  fail(details(template, ...args));
 
   // Don't freeze or export `baseAssert` until we add methods.
@@ -1913,7 +1685,7 @@ const makeAssert=  (optRaise=  undefined, unredacted=  false)=>  {
     flag||  fail(optDetails, errConstructor, options);
    }
 
-  /** @type {AssertEqual} */
+  /** @type {AssertionFunctions['equal']} */
   const equal=  (
     actual,
     expected,
@@ -1930,7 +1702,7 @@ const makeAssert=  (optRaise=  undefined, unredacted=  false)=>  {
    };
   freeze(equal);
 
-  /** @type {AssertTypeof} */
+  /** @type {AssertionFunctions['typeof']} */
   const assertTypeof=  (specimen, typename, optDetails)=>  {
     // This will safely fall through if typename is not a string,
     // which is what we want.
@@ -1949,7 +1721,7 @@ const makeAssert=  (optRaise=  undefined, unredacted=  false)=>  {
    };
   freeze(assertTypeof);
 
-  /** @type {AssertString} */
+  /** @type {AssertionFunctions['string']} */
   const assertString=  (specimen, optDetails=  undefined)=>
     assertTypeof(specimen, 'string', optDetails);
 
@@ -1978,7 +1750,7 @@ const assert=  makeAssert();$h‍_once.assert(assert);
 })()
 ,
 // === functors[10] ===
-({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,   importMeta: $h‍____meta, }) => (function () { 'use strict';   let Set,String,TypeError,WeakMap,WeakSet,globalThis,apply,arrayForEach,defineProperty,freeze,getOwnPropertyDescriptor,getOwnPropertyDescriptors,getPrototypeOf,isInteger,isObject,objectHasOwnProperty,ownKeys,preventExtensions,setAdd,setForEach,setHas,toStringTagSymbol,typedArrayPrototype,weakmapGet,weakmapSet,weaksetAdd,weaksetHas,assert;$h‍_imports([["./commons.js", [["Set", [$h‍_a => (Set = $h‍_a)]],["String", [$h‍_a => (String = $h‍_a)]],["TypeError", [$h‍_a => (TypeError = $h‍_a)]],["WeakMap", [$h‍_a => (WeakMap = $h‍_a)]],["WeakSet", [$h‍_a => (WeakSet = $h‍_a)]],["globalThis", [$h‍_a => (globalThis = $h‍_a)]],["apply", [$h‍_a => (apply = $h‍_a)]],["arrayForEach", [$h‍_a => (arrayForEach = $h‍_a)]],["defineProperty", [$h‍_a => (defineProperty = $h‍_a)]],["freeze", [$h‍_a => (freeze = $h‍_a)]],["getOwnPropertyDescriptor", [$h‍_a => (getOwnPropertyDescriptor = $h‍_a)]],["getOwnPropertyDescriptors", [$h‍_a => (getOwnPropertyDescriptors = $h‍_a)]],["getPrototypeOf", [$h‍_a => (getPrototypeOf = $h‍_a)]],["isInteger", [$h‍_a => (isInteger = $h‍_a)]],["isObject", [$h‍_a => (isObject = $h‍_a)]],["objectHasOwnProperty", [$h‍_a => (objectHasOwnProperty = $h‍_a)]],["ownKeys", [$h‍_a => (ownKeys = $h‍_a)]],["preventExtensions", [$h‍_a => (preventExtensions = $h‍_a)]],["setAdd", [$h‍_a => (setAdd = $h‍_a)]],["setForEach", [$h‍_a => (setForEach = $h‍_a)]],["setHas", [$h‍_a => (setHas = $h‍_a)]],["toStringTagSymbol", [$h‍_a => (toStringTagSymbol = $h‍_a)]],["typedArrayPrototype", [$h‍_a => (typedArrayPrototype = $h‍_a)]],["weakmapGet", [$h‍_a => (weakmapGet = $h‍_a)]],["weakmapSet", [$h‍_a => (weakmapSet = $h‍_a)]],["weaksetAdd", [$h‍_a => (weaksetAdd = $h‍_a)]],["weaksetHas", [$h‍_a => (weaksetHas = $h‍_a)]]]],["./error/assert.js", [["assert", [$h‍_a => (assert = $h‍_a)]]]]]);   
+({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,   importMeta: $h‍____meta, }) => (function () { 'use strict';   let Set,String,TypeError,WeakSet,globalThis,apply,arrayForEach,defineProperty,freeze,getOwnPropertyDescriptor,getOwnPropertyDescriptors,getPrototypeOf,isInteger,isObject,objectHasOwnProperty,ownKeys,preventExtensions,setAdd,setForEach,setHas,toStringTagSymbol,typedArrayPrototype,weaksetAdd,weaksetHas,FERAL_STACK_GETTER,FERAL_STACK_SETTER,isError,assert;$h‍_imports([["./commons.js", [["Set", [$h‍_a => (Set = $h‍_a)]],["String", [$h‍_a => (String = $h‍_a)]],["TypeError", [$h‍_a => (TypeError = $h‍_a)]],["WeakSet", [$h‍_a => (WeakSet = $h‍_a)]],["globalThis", [$h‍_a => (globalThis = $h‍_a)]],["apply", [$h‍_a => (apply = $h‍_a)]],["arrayForEach", [$h‍_a => (arrayForEach = $h‍_a)]],["defineProperty", [$h‍_a => (defineProperty = $h‍_a)]],["freeze", [$h‍_a => (freeze = $h‍_a)]],["getOwnPropertyDescriptor", [$h‍_a => (getOwnPropertyDescriptor = $h‍_a)]],["getOwnPropertyDescriptors", [$h‍_a => (getOwnPropertyDescriptors = $h‍_a)]],["getPrototypeOf", [$h‍_a => (getPrototypeOf = $h‍_a)]],["isInteger", [$h‍_a => (isInteger = $h‍_a)]],["isObject", [$h‍_a => (isObject = $h‍_a)]],["objectHasOwnProperty", [$h‍_a => (objectHasOwnProperty = $h‍_a)]],["ownKeys", [$h‍_a => (ownKeys = $h‍_a)]],["preventExtensions", [$h‍_a => (preventExtensions = $h‍_a)]],["setAdd", [$h‍_a => (setAdd = $h‍_a)]],["setForEach", [$h‍_a => (setForEach = $h‍_a)]],["setHas", [$h‍_a => (setHas = $h‍_a)]],["toStringTagSymbol", [$h‍_a => (toStringTagSymbol = $h‍_a)]],["typedArrayPrototype", [$h‍_a => (typedArrayPrototype = $h‍_a)]],["weaksetAdd", [$h‍_a => (weaksetAdd = $h‍_a)]],["weaksetHas", [$h‍_a => (weaksetHas = $h‍_a)]],["FERAL_STACK_GETTER", [$h‍_a => (FERAL_STACK_GETTER = $h‍_a)]],["FERAL_STACK_SETTER", [$h‍_a => (FERAL_STACK_SETTER = $h‍_a)]],["isError", [$h‍_a => (isError = $h‍_a)]]]],["./error/assert.js", [["assert", [$h‍_a => (assert = $h‍_a)]]]]]);   
 
 
 
@@ -2033,7 +1805,7 @@ const assert=  makeAssert();$h‍_once.assert(assert);
 
 
 /**
- * @typedef {import('../types.js').Harden} Harden
+ * @import {Harden} from '../types.js'
  */
 
 // Obtain the string tag accessor of of TypedArray so we can indirectly use the
@@ -2124,15 +1896,13 @@ const        makeHardener=  ()=>  {
      */
     harden(root) {
       const toFreeze=  new Set();
-      const paths=  new WeakMap();
 
       // If val is something we should be freezing but aren't yet,
       // add it to toFreeze.
       /**
        * @param {any} val
-       * @param {string} [path]
        */
-      function enqueue(val, path=  undefined) {
+      function enqueue(val) {
         if( !isObject(val)) {
           // ignore primitives
           return;
@@ -2148,13 +1918,12 @@ const        makeHardener=  ()=>  {
          }
         // console.warn(`adding ${val} to toFreeze`, val);
         setAdd(toFreeze, val);
-        weakmapSet(paths, val, path);
        }
 
       /**
        * @param {any} obj
        */
-      function freezeAndTraverse(obj) {
+      const baseFreezeAndTraverse=  (obj)=>{
         // Now freeze the object to ensure reactive
         // objects such as proxies won't add properties
         // during traversal, before they get frozen.
@@ -2173,13 +1942,11 @@ const        makeHardener=  ()=>  {
 
         // get stable/immutable outbound links before a Proxy has a chance to do
         // something sneaky.
-        const path=  weakmapGet(paths, obj)||  'unknown';
         const descs=  getOwnPropertyDescriptors(obj);
         const proto=  getPrototypeOf(obj);
-        enqueue(proto,  `${path}.__proto__`);
+        enqueue(proto);
 
         arrayForEach(ownKeys(descs), (/** @type {string | symbol} */ name)=>  {
-          const pathname=   `${path}.${String(name)}`;
           // The 'name' may be a symbol, and TypeScript doesn't like us to
           // index arbitrary symbols on objects, so we pretend they're just
           // strings.
@@ -2192,27 +1959,60 @@ const        makeHardener=  ()=>  {
           // whether 'value' is present or not, which tells us for sure that
           // this is a data property.
           if( objectHasOwnProperty(desc, 'value')) {
-            enqueue(desc.value,  `${pathname}`);
+            enqueue(desc.value);
            }else {
-            enqueue(desc.get,  `${pathname}(get)`);
-            enqueue(desc.set,  `${pathname}(set)`);
+            enqueue(desc.get);
+            enqueue(desc.set);
            }
          });
-       }
+       };
 
-      function dequeue() {
+      const freezeAndTraverse=
+        FERAL_STACK_GETTER===  undefined&&  FERAL_STACK_SETTER===  undefined?
+            // On platforms without v8's error own stack accessor problem,
+            // don't pay for any extra overhead.
+            baseFreezeAndTraverse:
+            (obj)=>{
+              if( isError(obj)) {
+                // Only pay the overhead if it first passes this cheap isError
+                // check. Otherwise, it will be unrepaired, but won't be judged
+                // to be a passable error anyway, so will not be unsafe.
+                const stackDesc=  getOwnPropertyDescriptor(obj, 'stack');
+                if(
+                  stackDesc&&
+                  stackDesc.get===  FERAL_STACK_GETTER&&
+                  stackDesc.configurable)
+                  {
+                  // Can only repair if it is configurable. Otherwise, leave
+                  // unrepaired, in which case it will not be judged passable,
+                  // avoiding a safety problem.
+                  defineProperty(obj, 'stack', {
+                    // NOTE: Calls getter during harden, which seems dangerous.
+                    // But we're only calling the problematic getter whose
+                    // hazards we think we understand.
+                    // @ts-expect-error TS should know FERAL_STACK_GETTER
+                    // cannot be `undefined` here.
+                    // See https://github.com/endojs/endo/pull/2232#discussion_r1575179471
+                    value: apply(FERAL_STACK_GETTER, obj, [])});
+
+                 }
+               }
+              return baseFreezeAndTraverse(obj);
+             };
+
+      const dequeue=  ()=>  {
         // New values added before forEach() has finished will be visited.
         setForEach(toFreeze, freezeAndTraverse);
-       }
+       };
 
       /** @param {any} value */
-      function markHardened(value) {
+      const markHardened=  (value)=>{
         weaksetAdd(hardened, value);
-       }
+       };
 
-      function commit() {
+      const commit=  ()=>  {
         setForEach(toFreeze, markHardened);
-       }
+       };
 
       enqueue(root);
       dequeue();
@@ -2232,6 +2032,8 @@ const        makeHardener=  ()=>  {
 
 
 
+
+/** @import {GenericErrorConstructor} from '../types.js' */
 
 /**
  * @file Exports {@code whitelist}, a recursively defined
@@ -7338,14 +7140,14 @@ const        tameConsole=  (
     typeof globalThis.console!==  'undefined'?
         globalThis.console:
         typeof globalThis.print===  'function'?
-        // Make a good-enough console for eshost (including only functions that
-        // log at a specific level with no special argument interpretation).
-        // https://console.spec.whatwg.org/#logging
-        ((p)=>freeze({ debug: p, log: p, info: p, warn: p, error: p}))(
-          // eslint-disable-next-line no-undef
-          wrapLogger(globalThis.print)):
+          // Make a good-enough console for eshost (including only functions that
+          // log at a specific level with no special argument interpretation).
+          // https://console.spec.whatwg.org/#logging
+          ((p)=>freeze({ debug: p, log: p, info: p, warn: p, error: p}))(
+            // eslint-disable-next-line no-undef
+            wrapLogger(globalThis.print)):
 
-        undefined;
+          undefined;
 
 
   // Upgrade a log-only console (as in `eshost -h SpiderMonkey`).
@@ -8070,7 +7872,9 @@ function                tameErrorConstructor(
 })()
 ,
 // === functors[39] ===
-({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,   importMeta: $h‍____meta, }) => (function () { 'use strict';   let ReferenceError,TypeError,Map,Set,arrayJoin,arrayMap,arrayPush,create,freeze,mapGet,mapHas,mapSet,setAdd,promiseCatch,promiseThen,values,weakmapGet,assert;$h‍_imports([["./commons.js", [["ReferenceError", [$h‍_a => (ReferenceError = $h‍_a)]],["TypeError", [$h‍_a => (TypeError = $h‍_a)]],["Map", [$h‍_a => (Map = $h‍_a)]],["Set", [$h‍_a => (Set = $h‍_a)]],["arrayJoin", [$h‍_a => (arrayJoin = $h‍_a)]],["arrayMap", [$h‍_a => (arrayMap = $h‍_a)]],["arrayPush", [$h‍_a => (arrayPush = $h‍_a)]],["create", [$h‍_a => (create = $h‍_a)]],["freeze", [$h‍_a => (freeze = $h‍_a)]],["mapGet", [$h‍_a => (mapGet = $h‍_a)]],["mapHas", [$h‍_a => (mapHas = $h‍_a)]],["mapSet", [$h‍_a => (mapSet = $h‍_a)]],["setAdd", [$h‍_a => (setAdd = $h‍_a)]],["promiseCatch", [$h‍_a => (promiseCatch = $h‍_a)]],["promiseThen", [$h‍_a => (promiseThen = $h‍_a)]],["values", [$h‍_a => (values = $h‍_a)]],["weakmapGet", [$h‍_a => (weakmapGet = $h‍_a)]]]],["./error/assert.js", [["assert", [$h‍_a => (assert = $h‍_a)]]]]]);   
+({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,   importMeta: $h‍____meta, }) => (function () { 'use strict';   let getenv,ReferenceError,TypeError,Map,Set,arrayJoin,arrayMap,arrayPush,create,freeze,mapGet,mapHas,mapSet,setAdd,promiseThen,values,weakmapGet,generatorNext,generatorThrow,assert;$h‍_imports([["@endo/env-options", [["getEnvironmentOption", [$h‍_a => (getenv = $h‍_a)]]]],["./commons.js", [["ReferenceError", [$h‍_a => (ReferenceError = $h‍_a)]],["TypeError", [$h‍_a => (TypeError = $h‍_a)]],["Map", [$h‍_a => (Map = $h‍_a)]],["Set", [$h‍_a => (Set = $h‍_a)]],["arrayJoin", [$h‍_a => (arrayJoin = $h‍_a)]],["arrayMap", [$h‍_a => (arrayMap = $h‍_a)]],["arrayPush", [$h‍_a => (arrayPush = $h‍_a)]],["create", [$h‍_a => (create = $h‍_a)]],["freeze", [$h‍_a => (freeze = $h‍_a)]],["mapGet", [$h‍_a => (mapGet = $h‍_a)]],["mapHas", [$h‍_a => (mapHas = $h‍_a)]],["mapSet", [$h‍_a => (mapSet = $h‍_a)]],["setAdd", [$h‍_a => (setAdd = $h‍_a)]],["promiseThen", [$h‍_a => (promiseThen = $h‍_a)]],["values", [$h‍_a => (values = $h‍_a)]],["weakmapGet", [$h‍_a => (weakmapGet = $h‍_a)]],["generatorNext", [$h‍_a => (generatorNext = $h‍_a)]],["generatorThrow", [$h‍_a => (generatorThrow = $h‍_a)]]]],["./error/assert.js", [["assert", [$h‍_a => (assert = $h‍_a)]]]]]);   
+
+
 
 
 
@@ -8103,6 +7907,33 @@ const { Fail, details: d, quote: q}=   assert;
 
 const noop=  ()=>  { };
 
+async function asyncTrampoline(generatorFunc, args, errorWrapper) {
+  const iterator=  generatorFunc(...args);
+  let result=  generatorNext(iterator);
+  while( !result.done) {
+    try {
+      // eslint-disable-next-line no-await-in-loop
+      const val=  await result.value;
+      result=  generatorNext(iterator, val);
+     }catch( error) {
+      result=  generatorThrow(iterator, errorWrapper(error));
+     }
+   }
+  return result.value;
+ }
+
+function syncTrampoline(generatorFunc, args) {
+  const iterator=  generatorFunc(...args);
+  let result=  generatorNext(iterator);
+  while( !result.done) {
+    try {
+      result=  generatorNext(iterator, result.value);
+     }catch( error) {
+      result=  generatorThrow(iterator, error);
+     }
+   }
+  return result.value;
+ }
 // `makeAlias` constructs compartment specifier tuples for the `aliases`
 // private field of compartments.
 // These aliases allow a compartment to alias an internal module specifier to a
@@ -8132,9 +7963,9 @@ const loadRecord=  (
   compartment,
   moduleSpecifier,
   staticModuleRecord,
-  pendingJobs,
+  enqueueJob,
+  selectImplementation,
   moduleLoads,
-  errors,
   importMeta)=>
      {
   const { resolveHook, moduleRecords}=   weakmapGet(
@@ -8160,20 +7991,14 @@ const loadRecord=  (
   for( const fullSpecifier of values(resolvedImports)) {
     // Behold: recursion.
     // eslint-disable-next-line no-use-before-define
-    const dependencyLoaded=  memoizedLoadWithErrorAnnotation(
+    enqueueJob(memoizedLoadWithErrorAnnotation, [
       compartmentPrivateFields,
       moduleAliases,
       compartment,
       fullSpecifier,
-      pendingJobs,
-      moduleLoads,
-      errors);
-
-    setAdd(
-      pendingJobs,
-      promiseThen(dependencyLoaded, noop, (error)=>{
-        arrayPush(errors, error);
-       }));
+      enqueueJob,
+      selectImplementation,
+      moduleLoads]);
 
    }
 
@@ -8182,19 +8007,17 @@ const loadRecord=  (
   return moduleRecord;
  };
 
-const loadWithoutErrorAnnotation=  async(
+function* loadWithoutErrorAnnotation(
   compartmentPrivateFields,
   moduleAliases,
   compartment,
   moduleSpecifier,
-  pendingJobs,
-  moduleLoads,
-  errors)=>
-     {
-  const { importHook, moduleMap, moduleMapHook, moduleRecords}=   weakmapGet(
-    compartmentPrivateFields,
-    compartment);
-
+  enqueueJob,
+  selectImplementation,
+  moduleLoads)
+  {
+  const { importHook, importNowHook, moduleMap, moduleMapHook, moduleRecords}=
+    weakmapGet(compartmentPrivateFields, compartment);
 
   // Follow moduleMap, or moduleMapHook if present.
   let aliasNamespace=  moduleMap[moduleSpecifier];
@@ -8222,14 +8045,14 @@ const loadWithoutErrorAnnotation=  async(
      }
     // Behold: recursion.
     // eslint-disable-next-line no-use-before-define
-    const aliasRecord=  await memoizedLoadWithErrorAnnotation(
+    const aliasRecord=  yield memoizedLoadWithErrorAnnotation(
       compartmentPrivateFields,
       moduleAliases,
       alias.compartment,
       alias.specifier,
-      pendingJobs,
-      moduleLoads,
-      errors);
+      enqueueJob,
+      selectImplementation,
+      moduleLoads);
 
     mapSet(moduleRecords, moduleSpecifier, aliasRecord);
     return aliasRecord;
@@ -8239,7 +8062,10 @@ const loadWithoutErrorAnnotation=  async(
     return mapGet(moduleRecords, moduleSpecifier);
    }
 
-  const staticModuleRecord=  await importHook(moduleSpecifier);
+  const staticModuleRecord=  yield selectImplementation(
+    importHook,
+    importNowHook)(
+    moduleSpecifier);
 
   if( staticModuleRecord===  null||  typeof staticModuleRecord!==  'object') {
     Fail `importHook must return a promise for an object, for module ${q(
@@ -8270,9 +8096,9 @@ const loadWithoutErrorAnnotation=  async(
         aliasCompartment,
         aliasSpecifier,
         aliasModuleRecord,
-        pendingJobs,
+        enqueueJob,
+        selectImplementation,
         moduleLoads,
-        errors,
         importMeta);
 
       mapSet(moduleRecords, moduleSpecifier, aliasRecord);
@@ -8289,14 +8115,14 @@ const loadWithoutErrorAnnotation=  async(
        }
       // Behold: recursion.
       // eslint-disable-next-line no-use-before-define
-      const aliasRecord=  await memoizedLoadWithErrorAnnotation(
+      const aliasRecord=  yield memoizedLoadWithErrorAnnotation(
         compartmentPrivateFields,
         moduleAliases,
         staticModuleRecord.compartment,
         staticModuleRecord.specifier,
-        pendingJobs,
-        moduleLoads,
-        errors);
+        enqueueJob,
+        selectImplementation,
+        moduleLoads);
 
       mapSet(moduleRecords, moduleSpecifier, aliasRecord);
       return aliasRecord;
@@ -8311,20 +8137,20 @@ const loadWithoutErrorAnnotation=  async(
     compartment,
     moduleSpecifier,
     staticModuleRecord,
-    pendingJobs,
-    moduleLoads,
-    errors);
+    enqueueJob,
+    selectImplementation,
+    moduleLoads);
 
- };
+ }
 
-const memoizedLoadWithErrorAnnotation=  async(
+const memoizedLoadWithErrorAnnotation=  (
   compartmentPrivateFields,
   moduleAliases,
   compartment,
   moduleSpecifier,
-  pendingJobs,
-  moduleLoads,
-  errors)=>
+  enqueueJob,
+  selectImplementation,
+  moduleLoads)=>
      {
   const { name: compartmentName}=   weakmapGet(
     compartmentPrivateFields,
@@ -8342,15 +8168,16 @@ const memoizedLoadWithErrorAnnotation=  async(
     return moduleLoading;
    }
 
-  moduleLoading=  promiseCatch(
-    loadWithoutErrorAnnotation(
+  moduleLoading=  selectImplementation(asyncTrampoline, syncTrampoline)(
+    loadWithoutErrorAnnotation,
+    [
       compartmentPrivateFields,
       moduleAliases,
       compartment,
       moduleSpecifier,
-      pendingJobs,
-      moduleLoads,
-      errors),
+      enqueueJob,
+      selectImplementation,
+      moduleLoads],
 
     (error)=>{
       // eslint-disable-next-line @endo/no-polymorphic-call
@@ -8368,6 +8195,64 @@ const memoizedLoadWithErrorAnnotation=  async(
 
   return moduleLoading;
  };
+
+function asyncJobQueue() {
+  /** @type {Set<Promise<undefined>>} */
+  const pendingJobs=  new Set();
+  /** @type {Array<Error>} */
+  const errors=  [];
+
+  /**
+   * Enqueues a job that starts immediately but won't be awaited until drainQueue is called.
+   *
+   * @template {any[]} T
+   * @param {(...args: T)=>Promise<*>} func
+   * @param {T} args
+   */
+  const enqueueJob=  (func, args)=>  {
+    setAdd(
+      pendingJobs,
+      promiseThen(func(...args), noop, (error)=>{
+        arrayPush(errors, error);
+       }));
+
+   };
+  /**
+   * Sequentially awaits pending jobs and returns an array of errors
+   *
+   * @returns {Promise<Array<Error>>}
+   */
+  const drainQueue=  async()=>   {
+    for( const job of pendingJobs) {
+      // eslint-disable-next-line no-await-in-loop
+      await job;
+     }
+    return errors;
+   };
+  return { enqueueJob, drainQueue};
+ }
+
+/**
+ * @param {object} options
+ * @param {Array<Error>} options.errors
+ * @param {string} options.errorPrefix
+ */
+function throwAggregateError({ errors, errorPrefix})  {
+  // Throw an aggregate error if there were any errors.
+  if( errors.length>  0) {
+    const verbose=
+      getenv('COMPARTMENT_LOAD_ERRORS', '', ['verbose'])===  'verbose';
+    throw TypeError(
+       `${errorPrefix} (${errors.length} underlying failures: ${arrayJoin(
+        arrayMap(errors, (error)=>error.message+(  verbose?  error.stack:  '')),
+        ', ')
+        }`);
+
+   }
+ }
+
+const preferSync=  (_asyncImpl, syncImpl)=>  syncImpl;
+const preferAsync=  (asyncImpl, _syncImpl)=>  asyncImpl;
 
 /*
  * `load` asynchronously gathers the `StaticModuleRecord`s for a module and its
@@ -8387,50 +8272,81 @@ const        load=  async(
     compartment);
 
 
-  /** @type {Set<Promise<undefined>>} */
-  const pendingJobs=  new Set();
   /** @type {Map<object, Map<string, Promise<Record<any, any>>>>} */
   const moduleLoads=  new Map();
-  /** @type {Array<Error>} */
-  const errors=  [];
 
-  const dependencyLoaded=  memoizedLoadWithErrorAnnotation(
+  const { enqueueJob, drainQueue}=   asyncJobQueue();
+
+  enqueueJob(memoizedLoadWithErrorAnnotation, [
     compartmentPrivateFields,
     moduleAliases,
     compartment,
     moduleSpecifier,
-    pendingJobs,
-    moduleLoads,
-    errors);
+    enqueueJob,
+    preferAsync,
+    moduleLoads]);
 
-  setAdd(
-    pendingJobs,
-    promiseThen(dependencyLoaded, noop, (error)=>{
+
+  // Drain pending jobs queue and throw an aggregate error
+  const errors=  await drainQueue();
+
+  throwAggregateError({
+    errors,
+    errorPrefix:  `Failed to load module ${q(moduleSpecifier)} in package ${q(
+      compartmentName)
+      }`});
+
+ };
+
+/*
+ * `loadNow` synchronously gathers the `StaticModuleRecord`s for a module and its
+ * transitive dependencies.
+ * The module records refer to each other by a reference to the dependency's
+ * compartment and the specifier of the module within its own compartment.
+ * This graph is then ready to be synchronously linked and executed.
+ */$h‍_once.load(load);
+const        loadNow=  (
+  compartmentPrivateFields,
+  moduleAliases,
+  compartment,
+  moduleSpecifier)=>
+     {
+  const { name: compartmentName}=   weakmapGet(
+    compartmentPrivateFields,
+    compartment);
+
+
+  /** @type {Map<object, Map<string, Promise<Record<any, any>>>>} */
+  const moduleLoads=  new Map();
+
+  /** @type {Array<Error>} */
+  const errors=  [];
+
+  const enqueueJob=  (func, args)=>  {
+    try {
+      func(...args);
+     }catch( error) {
       arrayPush(errors, error);
-     }));
+     }
+   };
+
+  enqueueJob(memoizedLoadWithErrorAnnotation, [
+    compartmentPrivateFields,
+    moduleAliases,
+    compartment,
+    moduleSpecifier,
+    enqueueJob,
+    preferSync,
+    moduleLoads]);
 
 
-  // Drain pending jobs queue.
-  // Each job is a promise for undefined, regardless of success or failure.
-  // Before we add a job to the queue, we catch any error and push it into the
-  // `errors` accumulator.
-  for( const job of pendingJobs) {
-    // eslint-disable-next-line no-await-in-loop
-    await job;
-   }
+  throwAggregateError({
+    errors,
+    errorPrefix:  `Failed to load module ${q(moduleSpecifier)} in package ${q(
+      compartmentName)
+      }`});
 
-  // Throw an aggregate error if there were any errors.
-  if( errors.length>  0) {
-    throw TypeError(
-       `Failed to load module ${q(moduleSpecifier)} in package ${q(
-        compartmentName)
-        } (${errors.length} underlying failures: ${arrayJoin(
-        arrayMap(errors, (error)=>error.message),
-        ', ')
-        }`);
-
-   }
- };$h‍_once.load(load);
+ };$h‍_once.loadNow(loadNow);
 })()
 ,
 // === functors[40] ===
@@ -9404,7 +9320,7 @@ const        instantiate=  (
 })()
 ,
 // === functors[44] ===
-({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,   importMeta: $h‍____meta, }) => (function () { 'use strict';   let Map,ReferenceError,TypeError,WeakMap,assign,defineProperties,entries,promiseThen,toStringTagSymbol,weakmapGet,weakmapSet,setGlobalObjectSymbolUnscopables,setGlobalObjectConstantProperties,setGlobalObjectMutableProperties,setGlobalObjectEvaluators,sharedGlobalPropertyNames,load,link,getDeferredExports,assert,compartmentEvaluate,makeSafeEvaluator;$h‍_imports([["./commons.js", [["Map", [$h‍_a => (Map = $h‍_a)]],["ReferenceError", [$h‍_a => (ReferenceError = $h‍_a)]],["TypeError", [$h‍_a => (TypeError = $h‍_a)]],["WeakMap", [$h‍_a => (WeakMap = $h‍_a)]],["assign", [$h‍_a => (assign = $h‍_a)]],["defineProperties", [$h‍_a => (defineProperties = $h‍_a)]],["entries", [$h‍_a => (entries = $h‍_a)]],["promiseThen", [$h‍_a => (promiseThen = $h‍_a)]],["toStringTagSymbol", [$h‍_a => (toStringTagSymbol = $h‍_a)]],["weakmapGet", [$h‍_a => (weakmapGet = $h‍_a)]],["weakmapSet", [$h‍_a => (weakmapSet = $h‍_a)]]]],["./global-object.js", [["setGlobalObjectSymbolUnscopables", [$h‍_a => (setGlobalObjectSymbolUnscopables = $h‍_a)]],["setGlobalObjectConstantProperties", [$h‍_a => (setGlobalObjectConstantProperties = $h‍_a)]],["setGlobalObjectMutableProperties", [$h‍_a => (setGlobalObjectMutableProperties = $h‍_a)]],["setGlobalObjectEvaluators", [$h‍_a => (setGlobalObjectEvaluators = $h‍_a)]]]],["./permits.js", [["sharedGlobalPropertyNames", [$h‍_a => (sharedGlobalPropertyNames = $h‍_a)]]]],["./module-load.js", [["load", [$h‍_a => (load = $h‍_a)]]]],["./module-link.js", [["link", [$h‍_a => (link = $h‍_a)]]]],["./module-proxy.js", [["getDeferredExports", [$h‍_a => (getDeferredExports = $h‍_a)]]]],["./error/assert.js", [["assert", [$h‍_a => (assert = $h‍_a)]]]],["./compartment-evaluate.js", [["compartmentEvaluate", [$h‍_a => (compartmentEvaluate = $h‍_a)]]]],["./make-safe-evaluator.js", [["makeSafeEvaluator", [$h‍_a => (makeSafeEvaluator = $h‍_a)]]]]]);   
+({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,   importMeta: $h‍____meta, }) => (function () { 'use strict';   let Map,ReferenceError,TypeError,WeakMap,assign,defineProperties,entries,promiseThen,toStringTagSymbol,weakmapGet,weakmapSet,setGlobalObjectSymbolUnscopables,setGlobalObjectConstantProperties,setGlobalObjectMutableProperties,setGlobalObjectEvaluators,sharedGlobalPropertyNames,load,loadNow,link,getDeferredExports,assert,compartmentEvaluate,makeSafeEvaluator;$h‍_imports([["./commons.js", [["Map", [$h‍_a => (Map = $h‍_a)]],["ReferenceError", [$h‍_a => (ReferenceError = $h‍_a)]],["TypeError", [$h‍_a => (TypeError = $h‍_a)]],["WeakMap", [$h‍_a => (WeakMap = $h‍_a)]],["assign", [$h‍_a => (assign = $h‍_a)]],["defineProperties", [$h‍_a => (defineProperties = $h‍_a)]],["entries", [$h‍_a => (entries = $h‍_a)]],["promiseThen", [$h‍_a => (promiseThen = $h‍_a)]],["toStringTagSymbol", [$h‍_a => (toStringTagSymbol = $h‍_a)]],["weakmapGet", [$h‍_a => (weakmapGet = $h‍_a)]],["weakmapSet", [$h‍_a => (weakmapSet = $h‍_a)]]]],["./global-object.js", [["setGlobalObjectSymbolUnscopables", [$h‍_a => (setGlobalObjectSymbolUnscopables = $h‍_a)]],["setGlobalObjectConstantProperties", [$h‍_a => (setGlobalObjectConstantProperties = $h‍_a)]],["setGlobalObjectMutableProperties", [$h‍_a => (setGlobalObjectMutableProperties = $h‍_a)]],["setGlobalObjectEvaluators", [$h‍_a => (setGlobalObjectEvaluators = $h‍_a)]]]],["./permits.js", [["sharedGlobalPropertyNames", [$h‍_a => (sharedGlobalPropertyNames = $h‍_a)]]]],["./module-load.js", [["load", [$h‍_a => (load = $h‍_a)]],["loadNow", [$h‍_a => (loadNow = $h‍_a)]]]],["./module-link.js", [["link", [$h‍_a => (link = $h‍_a)]]]],["./module-proxy.js", [["getDeferredExports", [$h‍_a => (getDeferredExports = $h‍_a)]]]],["./error/assert.js", [["assert", [$h‍_a => (assert = $h‍_a)]]]],["./compartment-evaluate.js", [["compartmentEvaluate", [$h‍_a => (compartmentEvaluate = $h‍_a)]]]],["./make-safe-evaluator.js", [["makeSafeEvaluator", [$h‍_a => (makeSafeEvaluator = $h‍_a)]]]]]);   
 
 
 
@@ -9566,7 +9482,7 @@ const        CompartmentPrototype=  {
      }
 
     assertModuleHooks(this);
-
+    loadNow(privateFields, moduleAliases, this, specifier);
     return compartmentImportNow(/** @type {Compartment} */  this,  specifier);
    }};
 
@@ -9615,6 +9531,7 @@ const        makeCompartmentConstructor=  (
       __shimTransforms__=  [],
       resolveHook,
       importHook,
+      importNowHook,
       moduleMapHook,
       importMetaHook}=
         options;
@@ -9691,6 +9608,7 @@ const        makeCompartmentConstructor=  (
       safeEvaluate,
       resolveHook,
       importHook,
+      importNowHook,
       moduleMap,
       moduleMapHook,
       importMetaHook,
@@ -9904,7 +9822,8 @@ freeze(tameHarden);
 })()
 ,
 // === functors[47] ===
-({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,   importMeta: $h‍____meta, }) => (function () { 'use strict';   let Symbol,entries,fromEntries,getOwnPropertyDescriptors,defineProperties,arrayMap;$h‍_imports([["./commons.js", [["Symbol", [$h‍_a => (Symbol = $h‍_a)]],["entries", [$h‍_a => (entries = $h‍_a)]],["fromEntries", [$h‍_a => (fromEntries = $h‍_a)]],["getOwnPropertyDescriptors", [$h‍_a => (getOwnPropertyDescriptors = $h‍_a)]],["defineProperties", [$h‍_a => (defineProperties = $h‍_a)]],["arrayMap", [$h‍_a => (arrayMap = $h‍_a)]]]]]);   
+({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,   importMeta: $h‍____meta, }) => (function () { 'use strict';   let Symbol,entries,fromEntries,getOwnPropertyDescriptors,defineProperties,arrayMap,functionBind;$h‍_imports([["./commons.js", [["Symbol", [$h‍_a => (Symbol = $h‍_a)]],["entries", [$h‍_a => (entries = $h‍_a)]],["fromEntries", [$h‍_a => (fromEntries = $h‍_a)]],["getOwnPropertyDescriptors", [$h‍_a => (getOwnPropertyDescriptors = $h‍_a)]],["defineProperties", [$h‍_a => (defineProperties = $h‍_a)]],["arrayMap", [$h‍_a => (arrayMap = $h‍_a)]],["functionBind", [$h‍_a => (functionBind = $h‍_a)]]]]]);   
+
 
 
 
@@ -9943,11 +9862,9 @@ const        tameSymbolConstructor=  ()=>  {
   const OriginalSymbol=  Symbol;
   const SymbolPrototype=  OriginalSymbol.prototype;
 
-  const SharedSymbol=  {
-    Symbol(description) {
-      return OriginalSymbol(description);
-     }}.
-    Symbol;
+  // Bypass Hermes bug, fixed in: https://github.com/facebook/hermes/commit/00f18c89c720e1c34592bb85a1a8d311e6e99599
+  // Make a "copy" of the primordial [Symbol "constructor"](https://tc39.es/ecma262/#sec-symbol-description) which maintains all observable behavior. The primordial explicitly throws on `[[Construct]]` and has a `[[Call]]` which ignores the receiver. Binding also maintains the `toString` source as a native function. The `name` is restored below when copying own properties.
+  const SharedSymbol=  functionBind(Symbol, undefined);
 
   defineProperties(SymbolPrototype, {
     constructor: {
@@ -10243,7 +10160,7 @@ const        tameFauxDataProperties=  (intrinsics)=>{
 
 
 
-/** @typedef {import('../types.js').LockdownOptions} LockdownOptions */
+/** @import {LockdownOptions} from '../types.js' */
 
 const { Fail, details: d, quote: q}=   assert;
 
@@ -10637,8 +10554,10 @@ const        repairIntrinsics=  (options=  {})=>  {
 
 
 
+/** @import {LockdownOptions} from '../types.js' */
+
 /**
- * @param {import('./lockdown.js').LockdownOptions} options
+ * @param {LockdownOptions} options
  */
 globalThis.lockdown=  (options)=>{
   const hardenIntrinsics=  repairIntrinsics(options);
@@ -10646,7 +10565,7 @@ globalThis.lockdown=  (options)=>{
  };
 
 /**
- * @param {import('./lockdown.js').LockdownOptions} options
+ * @param {LockdownOptions} options
  */
 globalThis.repairIntrinsics=  (options)=>{
   const hardenIntrinsics=  repairIntrinsics(options);
@@ -10845,6 +10764,7 @@ globalThis[MAKE_CAUSAL_CONSOLE_FROM_LOGGER_KEY_FOR_SES_AVA]=
       weaksetPrototype: cell("weaksetPrototype"),
       functionPrototype: cell("functionPrototype"),
       promisePrototype: cell("promisePrototype"),
+      generatorPrototype: cell("generatorPrototype"),
       typedArrayPrototype: cell("typedArrayPrototype"),
       uncurryThis: cell("uncurryThis"),
       objectHasOwnProperty: cell("objectHasOwnProperty"),
@@ -10878,6 +10798,8 @@ globalThis[MAKE_CAUSAL_CONSOLE_FROM_LOGGER_KEY_FOR_SES_AVA]=
       stringIncludes: cell("stringIncludes"),
       stringIndexOf: cell("stringIndexOf"),
       stringMatch: cell("stringMatch"),
+      generatorNext: cell("generatorNext"),
+      generatorThrow: cell("generatorThrow"),
       stringReplace: cell("stringReplace"),
       stringSearch: cell("stringSearch"),
       stringSlice: cell("stringSlice"),
@@ -10891,6 +10813,7 @@ globalThis[MAKE_CAUSAL_CONSOLE_FROM_LOGGER_KEY_FOR_SES_AVA]=
       weaksetAdd: cell("weaksetAdd"),
       weaksetHas: cell("weaksetHas"),
       functionToString: cell("functionToString"),
+      functionBind: cell("functionBind"),
       promiseAll: cell("promiseAll"),
       promiseCatch: cell("promiseCatch"),
       promiseThen: cell("promiseThen"),
@@ -10903,6 +10826,8 @@ globalThis[MAKE_CAUSAL_CONSOLE_FROM_LOGGER_KEY_FOR_SES_AVA]=
       FERAL_EVAL: cell("FERAL_EVAL"),
       FERAL_FUNCTION: cell("FERAL_FUNCTION"),
       noEvalEvaluate: cell("noEvalEvaluate"),
+      FERAL_STACK_GETTER: cell("FERAL_STACK_GETTER"),
+      FERAL_STACK_SETTER: cell("FERAL_STACK_SETTER"),
     },
     {
     },
@@ -10934,6 +10859,7 @@ globalThis[MAKE_CAUSAL_CONSOLE_FROM_LOGGER_KEY_FOR_SES_AVA]=
       loggedErrorHandler: cell("loggedErrorHandler"),
       makeAssert: cell("makeAssert"),
       assert: cell("assert"),
+      sanitizeError: cell("sanitizeError"),
     },
     {
       isTypedArray: cell("isTypedArray"),
@@ -11059,6 +10985,7 @@ globalThis[MAKE_CAUSAL_CONSOLE_FROM_LOGGER_KEY_FOR_SES_AVA]=
     {
       makeAlias: cell("makeAlias"),
       load: cell("load"),
+      loadNow: cell("loadNow"),
     },
     {
       deferExports: cell("deferExports"),
@@ -11221,6 +11148,7 @@ function observeImports(map, importName, importIndex) {
       weaksetPrototype: cells[0].weaksetPrototype.set,
       functionPrototype: cells[0].functionPrototype.set,
       promisePrototype: cells[0].promisePrototype.set,
+      generatorPrototype: cells[0].generatorPrototype.set,
       typedArrayPrototype: cells[0].typedArrayPrototype.set,
       uncurryThis: cells[0].uncurryThis.set,
       objectHasOwnProperty: cells[0].objectHasOwnProperty.set,
@@ -11254,6 +11182,8 @@ function observeImports(map, importName, importIndex) {
       stringIncludes: cells[0].stringIncludes.set,
       stringIndexOf: cells[0].stringIndexOf.set,
       stringMatch: cells[0].stringMatch.set,
+      generatorNext: cells[0].generatorNext.set,
+      generatorThrow: cells[0].generatorThrow.set,
       stringReplace: cells[0].stringReplace.set,
       stringSearch: cells[0].stringSearch.set,
       stringSlice: cells[0].stringSlice.set,
@@ -11267,6 +11197,7 @@ function observeImports(map, importName, importIndex) {
       weaksetAdd: cells[0].weaksetAdd.set,
       weaksetHas: cells[0].weaksetHas.set,
       functionToString: cells[0].functionToString.set,
+      functionBind: cells[0].functionBind.set,
       promiseAll: cells[0].promiseAll.set,
       promiseCatch: cells[0].promiseCatch.set,
       promiseThen: cells[0].promiseThen.set,
@@ -11279,6 +11210,8 @@ function observeImports(map, importName, importIndex) {
       FERAL_EVAL: cells[0].FERAL_EVAL.set,
       FERAL_FUNCTION: cells[0].FERAL_FUNCTION.set,
       noEvalEvaluate: cells[0].noEvalEvaluate.set,
+      FERAL_STACK_GETTER: cells[0].FERAL_STACK_GETTER.set,
+      FERAL_STACK_SETTER: cells[0].FERAL_STACK_SETTER.set,
     },
     importMeta: {},
   });
@@ -11392,6 +11325,7 @@ function observeImports(map, importName, importIndex) {
       loggedErrorHandler: cells[9].loggedErrorHandler.set,
       makeAssert: cells[9].makeAssert.set,
       assert: cells[9].assert.set,
+      sanitizeError: cells[9].sanitizeError.set,
     },
     importMeta: {},
   });
@@ -11808,6 +11742,7 @@ function observeImports(map, importName, importIndex) {
   functors[39]({
     imports(entries) {
       const map = new Map(entries);
+      observeImports(map, "@endo/env-options", 3);
       observeImports(map, "./commons.js", 0);
       observeImports(map, "./error/assert.js", 9);
     },
@@ -11816,6 +11751,7 @@ function observeImports(map, importName, importIndex) {
     onceVar: {
       makeAlias: cells[39].makeAlias.set,
       load: cells[39].load.set,
+      loadNow: cells[39].loadNow.set,
     },
     importMeta: {},
   });
