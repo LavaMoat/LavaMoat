@@ -1,5 +1,5 @@
 name: CI
-on: 
+on:
   push:
     branches:
       - main # limit to main, because pushes to pull-requested branches are triggered below
@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [16.x, 18.x, 20.x]
+        node-version: [16.x, 18.x, 20.x, 22.x]
     steps:
       - name: Checkout (PR)
         if: github.event_name == 'pull_request'
