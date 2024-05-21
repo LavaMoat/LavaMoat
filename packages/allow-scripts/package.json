@@ -11,7 +11,7 @@
   "author": "",
   "license": "MIT",
   "engines": {
-    "node": "^16.20.0 || ^18.0.0 || ^20.0.0"
+    "node": "^16.20.0 || ^18.0.0 || ^20.0.0 || ^22.0.0"
   },
   "bin": {
     "allow-scripts": "src/cli.js"
