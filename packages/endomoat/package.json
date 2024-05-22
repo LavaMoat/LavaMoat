@@ -40,12 +40,12 @@
     "update-policy": "node ./scripts/update-own-policy.js"
   },
   "dependencies": {
-    "@endo/compartment-mapper": "1.1.4",
-    "@endo/evasive-transform": "1.1.1",
+    "@endo/compartment-mapper": "1.1.5",
+    "@endo/evasive-transform": "1.1.2",
     "@types/node": "18.19.28",
     "json-stable-stringify": "1.1.1",
     "lavamoat-core": "^15.3.0",
-    "ses": "1.4.1",
+    "ses": "1.5.0",
     "type-fest": "4.14.0",
     "yargs": "17.7.2"
   },
