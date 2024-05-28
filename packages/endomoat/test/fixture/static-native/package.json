@@ -10,9 +10,5 @@
   },
   "dependencies": {
     "hello_world": "0.0.0"
-  },
-  "parsers": {
-    "node": "bytes",
-    "js": "mjs"
   }
 }

@@ -54,15 +54,23 @@ export type LavaMoatPackagePolicyItem = RootPolicy
  */
 export type LavaMoatPackagePolicy = PackagePolicy<
   LavaMoatPackagePolicyItem,
-  LavaMoatGlobalPolicyItem
+  LavaMoatGlobalPolicyItem,
+  void,
+  LavaMoatPackagePolicyOptions
 >
+
+export type LavaMoatPackagePolicyOptions = {
+  native?: boolean
+}
 
 /**
  * An Endo policy tailored to LavaMoat's default attenuator
  */
 export type LavaMoatEndoPolicy = Policy<
   LavaMoatPackagePolicyItem,
-  LavaMoatGlobalPolicyItem
+  LavaMoatGlobalPolicyItem,
+  void,
+  LavaMoatPackagePolicyOptions
 >
 
 /**

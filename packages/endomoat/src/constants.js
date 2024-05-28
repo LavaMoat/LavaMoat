@@ -61,6 +61,11 @@ export const RSRC_POLICY_BUILTINS = 'builtins'
 export const RSRC_POLICY_GLOBALS = 'globals'
 
 /**
+ * Name of the `options` property of a `LavaMoatPackagePolicy`
+ */
+export const RSRC_POLICY_OPTIONS = 'options'
+
+/**
  * `builtin` module type for a `LavamoatModuleRecord`
  */
 export const LMR_TYPE_BUILTIN = 'builtin'

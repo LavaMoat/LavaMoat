@@ -7,6 +7,7 @@ import {
   POLICY_ITEM_WILDCARD,
   RSRC_POLICY_BUILTINS,
   RSRC_POLICY_GLOBALS,
+  RSRC_POLICY_OPTIONS,
   RSRC_POLICY_PKGS,
 } from './constants.js'
 import { readPolicy } from './policy.js'
@@ -138,6 +139,7 @@ function toEndoRsrcPkgsPolicy(resources) {
     [RSRC_POLICY_PKGS]: toEndoRsrcPkgsPolicyPkgs(resources.packages),
     [RSRC_POLICY_GLOBALS]: toEndoRsrcPkgsPolicyGlobals(resources.globals),
     [RSRC_POLICY_BUILTINS]: toEndoRsrcPkgsPolicyBuiltins(resources.builtin),
+    [RSRC_POLICY_OPTIONS]: resources.native === true ? { native: true } : {},
   }
   return pkgPolicy
 }
