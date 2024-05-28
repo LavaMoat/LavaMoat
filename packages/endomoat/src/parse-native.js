@@ -1,17 +1,17 @@
-import { createRequire } from 'node:module';
-import { fileURLToPath } from 'node:url';
+import { createRequire } from 'node:module'
+import { fileURLToPath } from 'node:url'
 
-const { freeze, keys } = Object;
+const { freeze, keys } = Object
+const { quote: q } = assert
 
 /**
+ * Creates a custom `@endo/compartment-mapper` parser for native Node.js modules
+ * (having a `.node` extension)
  *
- * @param {import('lavamoat-core').LavaMoatPolicy} policy
  * @returns {import('@endo/compartment-mapper').ParserImplementation}
  */
-export function createNativeParser(policy) {
-  const require = createRequire(new URL('.', import.meta.url));
-
-  // todo: create a mapping such that execute() can look up the policy
+export function createNativeParser() {
+  const require = createRequire(new URL('.', import.meta.url))
 
   /** @type {import('@endo/compartment-mapper').ParseFn} */
   const parseNative = async (
@@ -19,39 +19,46 @@ export function createNativeParser(policy) {
     _specifier,
     location,
     _packageLocation,
+    { compartmentDescriptor } = {}
   ) => {
     /** @type {string[]} */
-    const imports = [];
+    const imports = []
     /** @type {string[]} */
-    const reexports = [];
+    const reexports = []
     /** @type {string[]} */
-    const exports = [];
+    const exports = ['default']
+
     /**
-     * @param {Record<string, any>} moduleEnvironmentRecord
-     * @param {Compartment} compartment
-     * @param {Record<string, string>} resolvedImports
+     * Enforces policy; the package policy must have `options.native` set to
+     * `true`
+     *
+     * @type {import('ses').ThirdPartyStaticModuleInterface['execute']}
      */
-    const execute = (moduleEnvironmentRecord, compartment, resolvedImports) => {
-      // TODO enforce policy here
+    const execute = (moduleEnvironmentRecord, compartment) => {
+      if (compartmentDescriptor?.policy?.options?.native !== true) {
+        throw new Error(
+          `Native modules are disallowed in compartment ${q(compartment.name)}`
+        )
+      }
 
       const finalExports = require(fileURLToPath(location))
-      moduleEnvironmentRecord.default = finalExports;
+      moduleEnvironmentRecord.default = finalExports
       for (const prop of keys(moduleEnvironmentRecord.default || {})) {
         if (prop !== 'default') {
-          moduleEnvironmentRecord[prop] = moduleEnvironmentRecord.default[prop];
+          moduleEnvironmentRecord[prop] = moduleEnvironmentRecord.default[prop]
         }
       }
-    };
+    }
 
     return {
       parser: 'native',
       bytes,
       record: freeze({ imports, exports, reexports, execute }),
-    };
-  };
+    }
+  }
 
   return {
     parse: parseNative,
     heuristicImports: false,
-  };
+  }
 }
