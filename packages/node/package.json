@@ -33,8 +33,8 @@
     "test:yarn1": "cross-env LAVAMOAT_PM=yarn@1 npm run test:prepare && ava"
   },
   "dependencies": {
-    "@babel/code-frame": "7.24.2",
-    "@babel/highlight": "7.24.5",
+    "@babel/code-frame": "7.24.6",
+    "@babel/highlight": "7.24.6",
     "@lavamoat/aa": "^4.2.0",
     "bindings": "1.5.0",
     "htmlescape": "1.1.1",
