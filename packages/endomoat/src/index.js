@@ -81,16 +81,16 @@ export async function run(entrypointPath, policyOrOpts = {}, opts = {}) {
       ? `${entrypointPath}`
       : `${pathToFileURL(entrypointPath)}`
 
-// look at lavamoat policy and see what is allowed a native module.
-// we will only get a file location,  package location.
-
-// implemetnt and push out
-
   const { namespace } = await importLocation(readPowers, url, {
     policy: endoPolicy,
     globals: globalThis,
     importHook,
-    parsers: [{languages: ['native'], parser: createNativeParser(policy), extensions: ['node']}]
+    parserForLanguage: {
+      native: createNativeParser(policy),
+    },
+    languageForExtension: {
+      node: 'native',
+    },
   })
 
   return namespace
