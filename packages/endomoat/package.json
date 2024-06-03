@@ -40,7 +40,7 @@
     "update-policy": "node ./scripts/update-own-policy.js"
   },
   "dependencies": {
-    "@endo/compartment-mapper": "1.1.4",
+    "@endo/compartment-mapper": "1.1.5",
     "@endo/evasive-transform": "1.1.1",
     "@types/node": "18.19.28",
     "json-stable-stringify": "1.1.1",
