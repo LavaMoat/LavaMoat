@@ -12,6 +12,8 @@ const {
   sources: { RawSource },
 } = require('webpack')
 
+const { isExcludedUnsafe } = require('./exclude.js')
+
 const POLICY_SNAPSHOT_FILENAME = 'policy-snapshot.json'
 
 module.exports = {
@@ -87,16 +89,18 @@ module.exports = {
        * @param {Iterable<import('webpack').ModuleGraphConnection>} connections
        */
       inspectWebpackModule: (module, connections) => {
+        if (isExcludedUnsafe(module)) return
         // process._rawDebug(module.originalSource().source())
+        const packageName = getPackageNameForModulePath(
+          canonicalNameMap,
+          module.userRequest
+        )
         const moduleRecord = new LavamoatModuleRecord({
           // Knowing the actual specifier is not relevant here, they're used as unique identifiers that match between here and dependencies
           specifier: module.userRequest,
           file: module.userRequest,
           type: 'js',
-          packageName: getPackageNameForModulePath(
-            canonicalNameMap,
-            module.userRequest
-          ),
+          packageName,
           content: module.originalSource()?.source()?.toString(),
           importMap: {
             // connections are a much better source of information than module.dependencies which contain
