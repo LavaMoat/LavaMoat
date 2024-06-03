@@ -53,7 +53,7 @@ module.exports = function progress({ steps }) {
    */
   API.report = (step) => {
     if (canRepeat.has(step) && steps[currentStep] === step) {
-      diag.rawDebug(2, `\n> Reporting ${step} again`)
+      diag.rawDebug(3, `\n> Reporting ${step} again`)
       return
     }
     done.add(step)
