@@ -48,9 +48,6 @@
   "devDependencies": {
     "@types/npmcli__promise-spawn": "6.0.3"
   },
-  "peerDependencies": {
-    "@lavamoat/preinstall-always-fail": "*"
-  },
   "publishConfig": {
     "access": "public"
   },
