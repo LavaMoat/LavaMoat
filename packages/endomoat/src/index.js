@@ -18,7 +18,7 @@ lockdown({
 import { importLocation } from '@endo/compartment-mapper'
 import { pathToFileURL } from 'node:url'
 import { importHook } from './import-hook.js'
-import { moduleTransforms } from './module-transforms.js'
+import { syncModuleTransforms } from './module-transforms.js'
 import { createNativeParser } from './parse-native.js'
 import { toEndoPolicy } from './policy-converter.js'
 import { generatePolicy } from './policy-gen/index.js'
@@ -86,7 +86,7 @@ export async function run(entrypointPath, policyOrOpts = {}, opts = {}) {
     policy: endoPolicy,
     globals: globalThis,
     importHook,
-    moduleTransforms,
+    syncModuleTransforms,
     parserForLanguage: {
       native: createNativeParser(),
     },

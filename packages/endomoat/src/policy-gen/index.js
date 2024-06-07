@@ -12,6 +12,7 @@ import path from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { DEFAULT_POLICY_DEBUG_PATH, DEFAULT_POLICY_PATH } from '../constants.js'
 import { importHook } from '../import-hook.js'
+import { syncModuleTransforms } from '../module-transforms.js'
 import { createNativeParser } from '../parse-native.js'
 import { defaultReadPowers, makeReadPowers } from '../power.js'
 import { writeJson } from '../util.js'
@@ -185,6 +186,7 @@ export async function loadCompartmentMap(
   } = await captureFromMap(readPowers, nodeCompartmentMap, {
     ...archiveOpts,
     importHook,
+    syncModuleTransforms,
     parserForLanguage: {
       ...defaultParserForLanguage,
       native: createNativeParser(),
@@ -193,18 +195,6 @@ export async function loadCompartmentMap(
       node: 'native',
     },
   })
-  // const { archiveCompartmentMap, archiveSources, compartmentRenames } =
-  //   await makeArchiveCompartmentMap({
-  //     dev: true,
-  //     ...archiveOpts,
-  //     readPowers,
-  //     moduleLocation,
-  //     importHook,
-  //     moduleTransforms: syncModuleTransforms,
-  //     fallbackLanguageForExtension: {
-  //       node: 'bytes',
-  //     },
-  //   })
 
   // `compartmentRenames` is a mapping of filepath to compartment name;
   // we need the reverse mapping.
