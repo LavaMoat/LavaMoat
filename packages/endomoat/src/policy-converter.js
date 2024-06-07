@@ -139,7 +139,8 @@ function toEndoRsrcPkgsPolicy(resources) {
     [RSRC_POLICY_PKGS]: toEndoRsrcPkgsPolicyPkgs(resources.packages),
     [RSRC_POLICY_GLOBALS]: toEndoRsrcPkgsPolicyGlobals(resources.globals),
     [RSRC_POLICY_BUILTINS]: toEndoRsrcPkgsPolicyBuiltins(resources.builtin),
-    [RSRC_POLICY_OPTIONS]: resources.native === true ? { native: true } : {},
+    [RSRC_POLICY_OPTIONS]:
+      resources.native === true ? { native: true } : undefined,
   }
   return pkgPolicy
 }

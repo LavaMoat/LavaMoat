@@ -18,14 +18,15 @@ lockdown({
 import { importLocation } from '@endo/compartment-mapper'
 import { pathToFileURL } from 'node:url'
 import { importHook } from './import-hook.js'
+import { moduleTransforms } from './module-transforms.js'
 import { createNativeParser } from './parse-native.js'
 import { toEndoPolicy } from './policy-converter.js'
-// import { generatePolicy } from './policy-gen/index.js'
+import { generatePolicy } from './policy-gen/index.js'
 import { isPolicy } from './policy.js'
 import { makeReadPowers } from './power.js'
 
 export * as constants from './constants.js'
-// export { generateAndWritePolicy, generatePolicy } from './policy-gen/index.js'
+export { generateAndWritePolicy, generatePolicy } from './policy-gen/index.js'
 export { loadPolicies } from './policy.js'
 export { toEndoPolicy }
 
@@ -68,9 +69,9 @@ export async function run(entrypointPath, policyOrOpts = {}, opts = {}) {
     policy = policyOrOpts
     runOpts = opts
   } else {
-    // const generateOpts = policyOrOpts
-    // runOpts = { readPowers: generateOpts.readPowers }
-    // policy = await generatePolicy(entrypointPath, generateOpts)
+    const generateOpts = policyOrOpts
+    runOpts = { readPowers: generateOpts.readPowers }
+    policy = await generatePolicy(entrypointPath, generateOpts)
   }
 
   const endoPolicy = await toEndoPolicy(policy)
@@ -85,8 +86,9 @@ export async function run(entrypointPath, policyOrOpts = {}, opts = {}) {
     policy: endoPolicy,
     globals: globalThis,
     importHook,
+    moduleTransforms,
     parserForLanguage: {
-      native: createNativeParser(policy),
+      native: createNativeParser(),
     },
     languageForExtension: {
       node: 'native',

@@ -44,6 +44,7 @@ test('toEndoPolicy - basic', async (t) => {
         },
         builtins: undefined,
         packages: undefined,
+        options: undefined,
       },
       '@lavamoat/endomoat': {
         packages: {
@@ -54,6 +55,7 @@ test('toEndoPolicy - basic', async (t) => {
           'node:console': true,
           'node:path': true,
         },
+        options: undefined,
       },
       a: {
         packages: { b: true },
@@ -64,6 +66,7 @@ test('toEndoPolicy - basic', async (t) => {
             params: ['readFile'],
           },
         },
+        options: undefined,
       },
     },
   }

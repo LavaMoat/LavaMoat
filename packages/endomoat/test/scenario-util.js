@@ -43,7 +43,7 @@ function dumpError(
   { lavamoatPolicy, endoPolicy, log = console.error.bind(console) } = {}
 ) {
   log()
-  log(err)
+  log(util.inspect(err, { depth: null }))
   if (endoPolicy) {
     log('Endo policy:')
     log(util.inspect(endoPolicy, { depth: null }))

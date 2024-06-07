@@ -50,17 +50,17 @@ test.failing('dynamic imports - run a native module', async (t) => {
   t.deepEqual({ .../** @type {object} */ (result) }, { hello: 'hello world' })
 })
 
-test.only('static import - run a native module', async (t) => {
+test('static import - run a native module', async (t) => {
   const entryFile = new URL('./fixture/static-native/index.js', import.meta.url)
 
   const policy = {
     resources: {
-      'hello_world': {
-        native: true
-      }
-    }
+      hello_world: {
+        native: true,
+      },
+    },
   }
 
-  const result = await run(entryFile, policy);
+  const result = await run(entryFile, policy)
   t.deepEqual({ .../** @type {object} */ (result) }, { hello: 'world' })
-});
+})

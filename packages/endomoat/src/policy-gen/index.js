@@ -3,14 +3,16 @@
  *
  * @packageDocumentation
  */
-import { loadCompartmentMapForArchive } from '@endo/compartment-mapper'
+import { captureFromMap } from '@endo/compartment-mapper/capture-lite.js'
+import { defaultParserForLanguage } from '@endo/compartment-mapper/import-parsers.js'
+import { mapNodeModules } from '@endo/compartment-mapper/node-modules.js'
 import assert from 'node:assert'
 import nodeFs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { DEFAULT_POLICY_DEBUG_PATH, DEFAULT_POLICY_PATH } from '../constants.js'
 import { importHook } from '../import-hook.js'
-import { syncModuleTransforms } from '../module-transforms.js'
+import { createNativeParser } from '../parse-native.js'
 import { defaultReadPowers, makeReadPowers } from '../power.js'
 import { writeJson } from '../util.js'
 import { PolicyGenerator } from './policy-generator.js'
@@ -172,18 +174,37 @@ export async function loadCompartmentMap(
       ? `${entrypointPath}`
       : `${pathToFileURL(entrypointPath)}`
 
-  const { archiveCompartmentMap, archiveSources, compartmentRenames } =
-    await loadCompartmentMapForArchive({
-      dev: true,
-      ...archiveOpts,
-      readPowers,
-      moduleLocation,
-      importHook,
-      moduleTransforms: syncModuleTransforms,
-      fallbackLanguageForExtension: {
-        node: 'bytes',
-      },
-    })
+  const nodeCompartmentMap = await mapNodeModules(readPowers, moduleLocation, {
+    dev: true,
+  })
+
+  const {
+    captureCompartmentMap: compartmentMap,
+    captureSources: sources,
+    compartmentRenames,
+  } = await captureFromMap(readPowers, nodeCompartmentMap, {
+    ...archiveOpts,
+    importHook,
+    parserForLanguage: {
+      ...defaultParserForLanguage,
+      native: createNativeParser(),
+    },
+    languageForExtension: {
+      node: 'native',
+    },
+  })
+  // const { archiveCompartmentMap, archiveSources, compartmentRenames } =
+  //   await makeArchiveCompartmentMap({
+  //     dev: true,
+  //     ...archiveOpts,
+  //     readPowers,
+  //     moduleLocation,
+  //     importHook,
+  //     moduleTransforms: syncModuleTransforms,
+  //     fallbackLanguageForExtension: {
+  //       node: 'bytes',
+  //     },
+  //   })
 
   // `compartmentRenames` is a mapping of filepath to compartment name;
   // we need the reverse mapping.
@@ -192,8 +213,8 @@ export async function loadCompartmentMap(
   )
 
   return {
-    compartmentMap: archiveCompartmentMap,
-    sources: archiveSources,
+    compartmentMap,
+    sources,
     renames,
   }
 }
