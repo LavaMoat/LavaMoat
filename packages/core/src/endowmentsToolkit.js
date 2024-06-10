@@ -45,13 +45,16 @@ function endowmentsToolkit({
    *   unwrapFrom, is replaced as unwrapTo
    * @param {object} unwrapFrom - For getters and setters, the this-value to
    *   replace (default: targetRef)
+   * @param {Set<string>} knownWritableFields - List of globals that can be
+   *   mutated later
    * @returns {object} - The targetRef
    */
   function getEndowmentsForConfig(
     sourceRef,
     packagePolicy,
     unwrapTo,
-    unwrapFrom
+    unwrapFrom,
+    knownWritableFields
   ) {
     if (!packagePolicy.globals) {
       return {}
@@ -95,7 +98,8 @@ function endowmentsToolkit({
       whitelistedReads,
       unwrapTo,
       unwrapFrom,
-      explicitlyBanned
+      explicitlyBanned,
+      knownWritableFields
     )
   }
 
@@ -105,6 +109,7 @@ function endowmentsToolkit({
    * @param {object} unwrapTo
    * @param {object} unwrapFrom
    * @param {string[]} explicitlyBanned
+   * @param {Set<string>} knownWritableFields
    * @returns {object}
    */
   function makeMinimalViewOfRef(
@@ -112,20 +117,31 @@ function endowmentsToolkit({
     paths,
     unwrapTo,
     unwrapFrom,
-    explicitlyBanned = []
+    explicitlyBanned = [],
+    knownWritableFields = new Set()
   ) {
     /** @type {object} */
     const targetRef = {}
     paths.forEach((path) => {
-      copyValueAtPath(
-        '',
-        path.split('.'),
-        explicitlyBanned,
-        sourceRef,
-        targetRef,
-        unwrapTo,
-        unwrapFrom
-      )
+      const pathParts = path.split('.')
+      if (knownWritableFields.has(pathParts[0])) {
+        instrumentDynamicValueAtPath(
+          pathParts,
+          explicitlyBanned,
+          sourceRef,
+          targetRef
+        )
+      } else {
+        copyValueAtPath(
+          '',
+          pathParts,
+          explicitlyBanned,
+          sourceRef,
+          targetRef,
+          unwrapTo,
+          unwrapFrom
+        )
+      }
     })
     return targetRef
   }
@@ -149,6 +165,58 @@ function endowmentsToolkit({
    */
   function isEmpty(value) {
     return !value
+  }
+
+  /**
+   * Puts a getter at the end of the path that returns the nested values from a
+   * top-level field that might change at runtime.
+   *
+   * @param {string[]} pathParts
+   * @param {string[]} explicitlyBanned
+   * @param {object} sourceRef
+   * @param {object} targetRef
+   */
+  function instrumentDynamicValueAtPath(
+    pathParts,
+    explicitlyBanned,
+    sourceRef,
+    targetRef
+  ) {
+    const dynamicGetterDesc = {
+      get: () => {
+        const dynamicValue = sourceRef[pathParts[0]]
+        let leaf = dynamicValue,
+          parent = sourceRef
+        for (let i = 1; i < pathParts.length; i++) {
+          parent = leaf
+          leaf = dynamicValue[pathParts[i]]
+        }
+        if (typeof leaf === 'function') {
+          leaf = leaf.bind(parent) // TODO: consider the risks, should not bdiffer from unwrapping
+        }
+        return leaf
+      },
+      writeable: false,
+      enumerable: true, // can't really know that upfront tho
+      configurable: false,
+    }
+    let currentTarget = targetRef
+    let currentPath = ''
+    for (let depth = 0; depth < pathParts.length - 1; depth++) {
+      currentPath = extendPath(currentPath, pathParts[depth])
+      const nextPart = pathParts[depth]
+      if (explicitlyBanned.includes(currentPath)) {
+        throw new Error(
+          `LavaMoat - conflicting rules exist for "${currentPath}"`
+        )
+      }
+      if (typeof currentTarget[nextPart] !== 'object') {
+        currentTarget[nextPart] = {}
+      }
+      currentTarget = currentTarget[nextPart]
+    }
+    const lastPart = pathParts[pathParts.length - 1]
+    Reflect.defineProperty(currentTarget, lastPart, dynamicGetterDesc)
   }
 
   /**

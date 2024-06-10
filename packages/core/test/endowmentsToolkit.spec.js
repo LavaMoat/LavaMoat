@@ -92,7 +92,43 @@ test('getEndowmentsForConfig - siblings', (t) => {
   }
 })
 
-test('getEndowmentsForConfig - getter', (t) => {
+test('getEndowmentsForConfig - knownWritableFields', (t) => {
+  const getEndowmentsForConfig = prepareTest()
+  const sourceGlobal = {
+    a: 1,
+    b: { c: 2 },
+    d: 3,
+  }
+  const config = {
+    globals: {
+      a: true,
+      'b.c': true,
+      d: true,
+    },
+  }
+  const knownWritable = new Set(['a', 'b', 'x'])
+  const resultGlobal = getEndowmentsForConfig(
+    sourceGlobal,
+    config,
+    undefined,
+    undefined,
+    knownWritable
+  )
+  {
+    t.is(resultGlobal.a, 1)
+    t.is(resultGlobal.b.c, 2)
+    t.is(resultGlobal.d, 3)
+    t.is(resultGlobal.x, undefined)
+    sourceGlobal.a = 11
+    sourceGlobal.b = { c: 22 }
+    sourceGlobal.d = 33
+    t.is(resultGlobal.a, 11)
+    t.is(resultGlobal.b.c, 22)
+    t.is(resultGlobal.d, 3)
+  }
+})
+
+test('getEndowmentsForConfig - basic getter', (t) => {
   const getEndowmentsForConfig = prepareTest()
   const sourceGlobal = {
     get abc() {
@@ -120,6 +156,66 @@ test('getEndowmentsForConfig - getter', (t) => {
       },
       'prop descriptor matches (except value)'
     )
+  }
+})
+
+test('getEndowmentsForConfig - traversing with getters', (t) => {
+  // getEndowmentsForConfig traverses intermediate getters and preserves the leaf getter
+  const getEndowmentsForConfig = prepareTest()
+  let dynamicValue = 42
+  const recur = (n) => () => {
+    if (n === 0) return dynamicValue
+    const obj = {}
+    Object.defineProperty(obj, 'zzz', {
+      get: recur(n - 1),
+      enumerable: true,
+    })
+    return obj
+  }
+
+  const sourceGlobal = recur(3)()
+
+  const config = {
+    globals: {
+      'zzz.zzz.zzz': true,
+    },
+  }
+  const configShallow = {
+    globals: {
+      'zzz.zzz': true,
+    },
+  }
+  const resultGlobal = getEndowmentsForConfig(sourceGlobal, config)
+  const resultGlobalShallow = getEndowmentsForConfig(
+    sourceGlobal,
+    configShallow
+  )
+
+  {
+    const getDescriptorKind = (obj, prop) => {
+      const descriptor = Object.getOwnPropertyDescriptor(obj, prop)
+      if (descriptor === undefined) return 'undefined'
+      if (descriptor.get !== undefined) return 'getter'
+      if (descriptor.value !== undefined) return 'value'
+      return 'unknown'
+    }
+    const descriptors = [
+      getDescriptorKind(resultGlobal, 'zzz'),
+      getDescriptorKind(resultGlobal.zzz, 'zzz'),
+      getDescriptorKind(resultGlobal.zzz.zzz, 'zzz'),
+    ]
+    const descriptorsShallow = [
+      getDescriptorKind(resultGlobalShallow, 'zzz'),
+      getDescriptorKind(resultGlobalShallow.zzz, 'zzz'),
+      getDescriptorKind(resultGlobalShallow.zzz.zzz, 'zzz'),
+    ]
+    t.deepEqual(descriptors, ['value', 'value', 'getter'])
+    t.deepEqual(descriptorsShallow, ['value', 'getter', 'getter'])
+    t.is(resultGlobal.zzz.zzz.zzz, 42)
+    t.is(resultGlobalShallow.zzz.zzz.zzz, 42)
+    dynamicValue = 3
+    t.is(resultGlobal.zzz.zzz.zzz, 3)
+    t.is(resultGlobalShallow.zzz.zzz.zzz, 3)
   }
 })
 
