@@ -1,3 +1,3 @@
 import 'polyfill-package'
 
-global.fancyCapability()
+global.fancyCapability.doSomething()

@@ -11,7 +11,7 @@
     },
     "polyfill-package>polyfill-user-package": {
       "globals": {
-        "fancyCapability": true
+        "fancyCapability.doSomething": true
       }
     }
   }
