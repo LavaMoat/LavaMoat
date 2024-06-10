@@ -11,7 +11,6 @@ const {
   getOwnPropertyDescriptors,
   fromEntries,
   keys,
-  hasOwnProperty,
 } = Object
 const warn = typeof console === 'object' ? console.warn : () => {}
 // Avoid running any wrapped code or using compartment if lockdown was not called.
@@ -103,28 +102,8 @@ const globalStore = (() => {
   })
 
   return {
+    globalsInStore,
     injectGetSet(STORE, resourceId, descriptors) {
-      console.log('-----',resourceId, descriptors)
-      // I wrote the getters and setters myself to collect some experience. planning to reuse the old ones.
-      keys(descriptors).forEach((key) => {
-        if (globalsInStore.has(key)) {
-          const { value } = descriptors[key]
-          delete descriptors[key].value
-          delete descriptors[key].writable
-          descriptors[key].get = function () {
-            if (STORE.hasOwnProperty(key)) {
-              return STORE[key]
-            } else {
-              return value
-            }
-          }
-          descriptors[key].set = function (newValue) {
-            warn(
-              `LavaMoat: attempted to set read-only global ${key} to ${newValue} in resource ${resourceId}`
-            )
-          }
-        }
-      })
       if (globalsWithWrite[resourceId]) {
         globalsWithWrite[resourceId].forEach((key) => {
           descriptors[key] = {
@@ -139,7 +118,6 @@ const globalStore = (() => {
           }
         })
       }
-
       return descriptors
     },
   }
@@ -170,7 +148,8 @@ const installGlobalsForPolicy = (resourceId, packageCompartmentGlobal) => {
       rootCompartmentGlobalThis,
       LAVAMOAT.policy.resources[resourceId] || {},
       globalThis,
-      packageCompartmentGlobal
+      packageCompartmentGlobal,
+      globalStore.globalsInStore
     )
 
     defineProperties(

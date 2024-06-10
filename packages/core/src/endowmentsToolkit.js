@@ -192,7 +192,7 @@ function endowmentsToolkit({
           leaf = dynamicValue[pathParts[i]]
         }
         if (typeof leaf === 'function') {
-          leaf = leaf.bind(parent) // TODO: consider the risks, should not bdiffer from unwrapping
+          leaf = leaf.bind(parent) // TODO: consider the risks, should not differ from unwrapping
         }
         return leaf
       },
