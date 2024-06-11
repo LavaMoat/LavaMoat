@@ -93,6 +93,8 @@ function endowmentsToolkit({
         whitelistedReads.push(path)
       }
     )
+    // sort by length to optimize further steps
+    whitelistedReads.sort((a, b) => a.length - b.length)
     return makeMinimalViewOfRef(
       sourceRef,
       whitelistedReads,
@@ -125,12 +127,7 @@ function endowmentsToolkit({
     paths.forEach((path) => {
       const pathParts = path.split('.')
       if (knownWritableFields.has(pathParts[0])) {
-        instrumentDynamicValueAtPath(
-          pathParts,
-          explicitlyBanned,
-          sourceRef,
-          targetRef
-        )
+        instrumentDynamicValueAtPath(pathParts, sourceRef, targetRef)
       } else {
         copyValueAtPath(
           '',
@@ -172,24 +169,23 @@ function endowmentsToolkit({
    * top-level field that might change at runtime.
    *
    * @param {string[]} pathParts
-   * @param {string[]} explicitlyBanned
    * @param {Record<string, any>} sourceRef
    * @param {Record<string, any>} targetRef
    */
-  function instrumentDynamicValueAtPath(
-    pathParts,
-    explicitlyBanned,
-    sourceRef,
-    targetRef
-  ) {
+  function instrumentDynamicValueAtPath(pathParts, sourceRef, targetRef) {
+    const enumerable = Reflect.getOwnPropertyDescriptor(
+      sourceRef,
+      pathParts[0]
+    )?.enumerable
     const dynamicGetterDesc = {
       get: () => {
         const dynamicValue = sourceRef[pathParts[0]]
         let leaf = dynamicValue,
           parent = sourceRef
+
         for (let i = 1; i < pathParts.length; i++) {
           parent = leaf
-          leaf = dynamicValue[pathParts[i]]
+          leaf = leaf[pathParts[i]]
         }
         if (typeof leaf === 'function') {
           leaf = leaf.bind(parent) // TODO: consider the risks, should not differ from unwrapping
@@ -197,7 +193,7 @@ function endowmentsToolkit({
         return leaf
       },
       writeable: false,
-      enumerable: true, // can't really know that upfront tho
+      enumerable, // Initial value will have to suffice. Change will not propagate dynamically.
       configurable: false,
     }
     let currentTarget = targetRef
@@ -205,9 +201,10 @@ function endowmentsToolkit({
     for (let depth = 0; depth < pathParts.length - 1; depth++) {
       currentPath = extendPath(currentPath, pathParts[depth])
       const nextPart = pathParts[depth]
-      if (explicitlyBanned.includes(currentPath)) {
-        throw new Error(
-          `LavaMoat - conflicting rules exist for "${currentPath}"`
+      if (Reflect.getOwnPropertyDescriptor(currentTarget, nextPart)?.get) {
+        // We could silently ignore this, but it could introduce a false sense of security in the policy file
+        throw Error(
+          `LavaMoat - "${pathParts[0]}" is writeable elsewhere and both "${currentPath}" and "${pathParts.join('.')}" are allowed for one package. One of these entries is redundant.`
         )
       }
       if (typeof currentTarget[nextPart] !== 'object') {
@@ -215,6 +212,7 @@ function endowmentsToolkit({
       }
       currentTarget = currentTarget[nextPart]
     }
+
     const lastPart = pathParts[pathParts.length - 1]
     Reflect.defineProperty(currentTarget, lastPart, dynamicGetterDesc)
   }

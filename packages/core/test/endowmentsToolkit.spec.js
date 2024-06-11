@@ -128,6 +128,64 @@ test('getEndowmentsForConfig - knownWritableFields', (t) => {
   }
 })
 
+test('getEndowmentsForConfig - knownWritable and tightening access with false', (t) => {
+  const getEndowmentsForConfig = prepareTest()
+  const sourceGlobal = {
+    a: { b: { c: 2, d: 3 }, q: 1 },
+  }
+
+  const config = {
+    globals: {
+      'a.b.c': true,
+      'a.b': false,
+      'a.q': true,
+    },
+  }
+
+  const knownWritable = new Set(['a'])
+  const resultGlobal = getEndowmentsForConfig(
+    sourceGlobal,
+    config,
+    undefined,
+    undefined,
+    knownWritable
+  )
+  {
+    t.is(typeof resultGlobal.a.b, 'object')
+    t.is(resultGlobal.a.b.c, 2)
+    t.is(resultGlobal.a.b.d, undefined)
+    t.is(resultGlobal.a.q, 1)
+    sourceGlobal.a.b = { c: 22 }
+    t.is(resultGlobal.a.b.c, 22)
+  }
+})
+
+test('getEndowmentsForConfig - knownWritable and invalid nesting', (t) => {
+  const getEndowmentsForConfig = prepareTest()
+  const sourceGlobal = {
+    a: { b: { c: 2, d: 3 }, q: 1 },
+  }
+
+  const config = {
+    globals: {
+      'a.b': true,
+      'a.b.c': true,
+      'a.q': true,
+    },
+  }
+
+  const knownWritable = new Set(['a'])
+  t.throws(() =>
+    getEndowmentsForConfig(
+      sourceGlobal,
+      config,
+      undefined,
+      undefined,
+      knownWritable
+    )
+  )
+})
+
 test('getEndowmentsForConfig - basic getter', (t) => {
   const getEndowmentsForConfig = prepareTest()
   const sourceGlobal = {
