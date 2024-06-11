@@ -84,6 +84,10 @@ export interface ResourcePolicy {
    * Allow native modules
    */
   native?: boolean
+  /**
+   * Allow dynamic requires
+   */
+  dynamic?: boolean
 }
 
 /**
@@ -107,7 +111,7 @@ export interface BuiltinPolicy {
  * `true` to allow and `false` to deny
  */
 export interface PackagePolicy {
-  [k: string]: PackagePolicyValue
+  [k: string]: boolean
 }
 
 /**
@@ -124,7 +128,3 @@ export interface Resolutions {
     [k: string]: string
   }
 }
-
-export type PackagePolicyValue = DynamicPkgPolicy | boolean
-
-export type DynamicPkgPolicy = 'dynamic'
