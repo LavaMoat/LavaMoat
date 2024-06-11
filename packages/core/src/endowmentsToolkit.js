@@ -173,8 +173,8 @@ function endowmentsToolkit({
    *
    * @param {string[]} pathParts
    * @param {string[]} explicitlyBanned
-   * @param {object} sourceRef
-   * @param {object} targetRef
+   * @param {Record<string, any>} sourceRef
+   * @param {Record<string, any>} targetRef
    */
   function instrumentDynamicValueAtPath(
     pathParts,
