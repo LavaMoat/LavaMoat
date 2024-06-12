@@ -8,11 +8,11 @@ import { isBuiltin as nodeIsBuiltin } from 'node:module'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import {
-  ENDO_PARSER_BYTES,
   LAVAMOAT_PKG_POLICY_ROOT,
   LMR_TYPE_BUILTIN,
   LMR_TYPE_NATIVE,
   LMR_TYPE_SOURCE,
+  NATIVE_PARSER_NAME,
 } from '../constants.js'
 import { defaultReadPowers } from '../power.js'
 
@@ -184,6 +184,11 @@ export class PolicyGeneratorContext {
     return undefined
   }
 
+  get canonicalName() {
+    const { compartment, packageName } = this
+    return compartment.path ? compartment.path.join('>') : packageName
+  }
+
   /**
    * Builds an import map for a {@link LavamoatModuleRecord} from a list of
    * import specifiers.
@@ -273,7 +278,7 @@ export class PolicyGeneratorContext {
           type: LMR_TYPE_BUILTIN,
           file: specifier,
           specifier,
-          packageName: specifier,
+          packageName: this.packageName,
         })
       )
   }
@@ -293,7 +298,7 @@ export class PolicyGeneratorContext {
    */
   async buildModuleRecordsForSource(
     specifier,
-    { parser, record, sourceLocation }
+    { parser, record, sourceLocation, bytes }
   ) {
     if (!sourceLocation) {
       // XXX: why would we not have a sourceLocation?
@@ -318,28 +323,7 @@ export class PolicyGeneratorContext {
       )
     }
 
-    /**
-     * The `ModuleSource.content` prop is already pre-processed by Endo, and we
-     * do not want that, since it befouls our AST crawling.
-     *
-     * This will not be run if the `parser` is `bytes`.
-     *
-     * @remarks
-     * Doing this first since it may be more likely to fail than the other
-     * operations below.
-     * @type {string | undefined}
-     * @todo Modify Endo to surface the original source
-     *
-     * @todo Add more exceptions to the parsers?
-     */
-    let content
-
-    await Promise.resolve()
-    if (parser !== ENDO_PARSER_BYTES) {
-      content = await this.#readPowers
-        .read(sourceLocation)
-        .then((buffer) => PolicyGeneratorContext.#decoder.decode(buffer))
-    }
+    const content = PolicyGeneratorContext.#decoder.decode(bytes)
 
     /**
      * The {@link LavamoatModuleRecord.file} prop
@@ -365,10 +349,10 @@ export class PolicyGeneratorContext {
       this.#lmrCache.get({
         specifier: file,
         file,
-        packageName: this.packageName,
+        packageName: this.canonicalName,
         importMap,
         content,
-        type: parser === ENDO_PARSER_BYTES ? LMR_TYPE_NATIVE : LMR_TYPE_SOURCE,
+        type: parser === NATIVE_PARSER_NAME ? LMR_TYPE_NATIVE : LMR_TYPE_SOURCE,
       }),
     ]
 

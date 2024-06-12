@@ -1,4 +1,5 @@
 import { generatePolicy } from '../../src/policy-gen/index.js'
+import { isPolicy } from '../../src/policy.js'
 import { loadJSONFixture, scaffoldFixture } from '../fixture-util.js'
 
 /**
@@ -23,6 +24,13 @@ const InlineSourceTypes = /** @type {const} */ ({
 
 /**
  * @typedef {import('type-fest').ValueOf<InlineSourceTypes>} InlineSourceType
+ */
+
+/**
+ * @typedef {import('type-fest').Except<
+ *   import('../../src/policy-gen/types.js').GeneratePolicyOptions,
+ *   'readPowers'
+ * >} TestPolicyForJSONOptions
  */
 
 /**
@@ -134,14 +142,25 @@ export function createGeneratePolicyMacros(test) {
     /**
      * @param {import('ava').ExecutionContext<Ctx>} t
      * @param {string} fixtureFilename
-     * @param {import('lavamoat-core').LavaMoatPolicy} [expectedPolicy]
+     * @param {import('lavamoat-core').LavaMoatPolicy
+     *   | TestPolicyForJSONOptions} [expectedPolicyOrOptions]
+     * @param {TestPolicyForJSONOptions} [options]
+     * @returns {Promise<void>}
      */
-    exec: async (t, fixtureFilename, expectedPolicy) => {
+    exec: async (t, fixtureFilename, expectedPolicyOrOptions, options = {}) => {
+      /** @type {import('lavamoat-core').LavaMoatPolicy | undefined} */
+      let expectedPolicy
+      if (isPolicy(expectedPolicyOrOptions)) {
+        expectedPolicy = expectedPolicyOrOptions
+      } else {
+        options = expectedPolicyOrOptions
+      }
       const { readPowers } = await loadJSONFixture(
         new URL(fixtureFilename, JSON_FIXTURE_DIR)
       )
 
       const actualPolicy = await generatePolicy('/index.js', {
+        ...options,
         readPowers,
       })
 

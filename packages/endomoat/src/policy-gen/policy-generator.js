@@ -4,7 +4,7 @@ import { defaultReadPowers } from '../power.js'
 import { LMRCache } from './lmr-cache.js'
 import { PolicyGeneratorContext } from './policy-generator-context.js'
 
-const { entries } = Object
+const { entries, freeze } = Object
 
 /**
  * Service which generates a LavaMoat policy from compartment map descriptors
@@ -83,9 +83,9 @@ export class PolicyGenerator {
     renames,
     { readPowers = defaultReadPowers, policyOverride } = {}
   ) {
-    this.sources = Object.freeze(sources)
-    this.compartmentMap = Object.freeze(compartmentMap)
-    this.policyOverride = Object.freeze(policyOverride)
+    this.sources = freeze(sources)
+    this.compartmentMap = freeze(compartmentMap)
+    this.policyOverride = freeze(policyOverride)
     this.#lmrCache = new LMRCache()
 
     const entryCompartment =
@@ -95,15 +95,13 @@ export class PolicyGenerator {
       throw new TypeError('Could not find entry compartment; this is a bug')
     }
 
-    const frozenRenames = Object.freeze(renames)
-
     this.#contexts = new Map(
       entries(compartmentMap.compartments).map(
         ([compartmentName, compartment]) => [
           compartmentName,
           PolicyGeneratorContext.create(
             compartment,
-            frozenRenames,
+            freeze(renames),
             this.#lmrCache,
             {
               isEntry: entryCompartment === compartment,
@@ -136,11 +134,11 @@ export class PolicyGenerator {
                   return
                 }
 
-                const compartment = /** @type {PolicyGeneratorContext} */ (
+                const context = /** @type {PolicyGeneratorContext} */ (
                   this.#contexts.get(compartmentName)
                 )
 
-                return compartment.buildModuleRecords(compartmentSources)
+                return context.buildModuleRecords(compartmentSources)
               }
             )
           )
@@ -159,13 +157,20 @@ export class PolicyGenerator {
   /**
    * Uses `inspector` to inspect a compartment map and sources.
    *
-   * @param {import('lavamoat-core').ModuleInspector} inspector Module inspector
    * @param {import('lavamoat-core').LavamoatModuleRecord[]} moduleRecords
    *   Module records
+   * @param {boolean} [debug=false] - If `true`, the inspector will include
+   *   debug ifnormation. Default is `false`
    * @returns {import('lavamoat-core').ModuleInspector} The inspector
    * @internal
    */
-  inspectModuleRecords(inspector, moduleRecords) {
+  inspectModuleRecords(moduleRecords, debug = false) {
+    const inspector = createModuleInspector({
+      isBuiltin: nodeIsBuiltin,
+      includeDebugInfo: debug,
+      allowDynamicRequires: true,
+    })
+
     // FIXME: should we sort here?
     for (const record of moduleRecords) {
       inspector.inspectModule(record)
@@ -217,7 +222,8 @@ export class PolicyGenerator {
    * 2. Inspect the module records using LavaMoat's `ModuleInspector`
    * 3. Generate the policy using the `ModuleInspector`
    *
-   * @param {boolean} [debug] - If `true`, the result will be a debug policy
+   * @param {boolean} [debug=false] - If `true`, the result will be a debug
+   *   policy. Default is `false`
    * @returns {Promise<
    *   | import('lavamoat-core').LavaMoatPolicy
    *   | import('lavamoat-core').LavaMoatPolicyDebug
@@ -228,12 +234,8 @@ export class PolicyGenerator {
   async generatePolicy(debug) {
     const moduleRecords = await this.buildModuleRecords()
 
-    const inspector = createModuleInspector({
-      isBuiltin: nodeIsBuiltin,
-      includeDebugInfo: debug,
-    })
-
-    return this.inspectModuleRecords(inspector, moduleRecords).generatePolicy({
+    const inspector = this.inspectModuleRecords(moduleRecords, debug)
+    return inspector.generatePolicy({
       policyOverride: this.policyOverride,
     })
   }
@@ -247,7 +249,7 @@ export class PolicyGenerator {
    * >} compartmentMap
    * @param {Readonly<import('@endo/compartment-mapper').Sources>} sources
    * @param {Readonly<Record<string, string>>} renames
-   * @param {import('./types.js').PolicyGeneratorOptions & { debug: true }} opts
+   * @param {import('./types.js').PolicyGeneratorOptions & { debug: true }} options
    * @returns {Promise<import('lavamoat-core').LavaMoatPolicyDebug>} Generated
    *   debug policy
    * @public
@@ -262,7 +264,7 @@ export class PolicyGenerator {
    * >} compartmentMap
    * @param {Readonly<import('@endo/compartment-mapper').Sources>} sources
    * @param {Readonly<Record<string, string>>} renames
-   * @param {import('./types.js').PolicyGeneratorOptions} [opts]
+   * @param {import('./types.js').PolicyGeneratorOptions} [options]
    * @returns {Promise<import('lavamoat-core').LavaMoatPolicy>} Generated policy
    */
 
@@ -276,17 +278,17 @@ export class PolicyGenerator {
    * @param {Readonly<Record<string, string>>} renames
    * @param {import('./types.js').PolicyGeneratorOptions & {
    *   debug?: boolean
-   * }} [opts]
+   * }} [options]
    * @returns {Promise<import('lavamoat-core').LavaMoatPolicy>} Generated policy
    * @public
    */
-  static async generatePolicy(compartmentMap, sources, renames, opts) {
-    const { debug, ...restOpts } = opts ?? {}
+  static async generatePolicy(compartmentMap, sources, renames, options) {
+    const { debug = false, ...policyGeneratorOptions } = options ?? {}
     const generator = PolicyGenerator.create(
       compartmentMap,
       sources,
       renames,
-      restOpts
+      policyGeneratorOptions
     )
     return generator.generatePolicy(debug)
   }

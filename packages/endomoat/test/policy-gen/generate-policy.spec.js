@@ -12,6 +12,8 @@ test(testPolicyForJSON, 'kitchen-sink.json')
 
 test(testPolicyForJSON, 'phony-native.json')
 
+// NOTE: this will not generate a "dynamic" prop because `require` is set to a
+// different identifier (`runtimeRequire`) in node-gyp-build
 test(testPolicyForJSON, 'native.json')
 
 test(testPolicyForJSON, 'dynamic.json')

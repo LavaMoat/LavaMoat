@@ -1,12 +1,14 @@
 import { mergePolicy } from 'lavamoat-core'
 import {
   LAVAMOAT_PKG_POLICY_ROOT,
-  LAVAMOAT_PKG_POLICY_VALUE_DYNAMIC,
-  POLICY_ITEM_DYNAMIC,
+  LAVAMOAT_RESOURCE_FLAG_DYNAMIC,
+  LAVAMOAT_RESOURCE_FLAG_NATIVE,
   POLICY_ITEM_ROOT,
   POLICY_ITEM_WILDCARD,
   RSRC_POLICY_BUILTINS,
   RSRC_POLICY_GLOBALS,
+  RSRC_POLICY_OPTION_DYNAMIC,
+  RSRC_POLICY_OPTION_NATIVE,
   RSRC_POLICY_OPTIONS,
   RSRC_POLICY_PKGS,
 } from './constants.js'
@@ -24,7 +26,7 @@ const DEFAULT_ATTENUATOR = '@lavamoat/endomoat/attenuator'
  * @param {Record<string, boolean>} [item] - A value in `ResourcePolicy`
  * @returns {import('./types.js').LavaMoatPackagePolicy['builtins']}
  */
-function toEndoRsrcPkgsPolicyBuiltins(item) {
+function convertEndoPackagePolicyBuiltins(item) {
   if (!item) {
     return undefined
   }
@@ -75,7 +77,7 @@ function toEndoRsrcPkgsPolicyBuiltins(item) {
  *   `ResourcePolicy`
  * @returns {import('./types.js').LavaMoatPackagePolicy['packages']}
  */
-function toEndoRsrcPkgsPolicyPkgs(item) {
+function convertEndoPackagePolicyPackages(item) {
   if (!item) {
     return undefined
   }
@@ -89,10 +91,7 @@ function toEndoRsrcPkgsPolicyPkgs(item) {
     if (key === LAVAMOAT_PKG_POLICY_ROOT) {
       throw new TypeError('Unexpected root package policy')
     } else {
-      policyItem[key] =
-        value === LAVAMOAT_PKG_POLICY_VALUE_DYNAMIC
-          ? POLICY_ITEM_DYNAMIC
-          : Boolean(value)
+      policyItem[key] = Boolean(value)
     }
   }
   return policyItem
@@ -105,7 +104,7 @@ function toEndoRsrcPkgsPolicyPkgs(item) {
  *   `ResourcePolicy`
  * @returns {import('./types.js').LavaMoatPackagePolicy['globals']}
  */
-function toEndoRsrcPkgsPolicyGlobals(item) {
+function convertEndoPackagePolicyGlobals(item) {
   if (!item) {
     return undefined
   }
@@ -128,21 +127,42 @@ function toEndoRsrcPkgsPolicyGlobals(item) {
 }
 
 /**
+ * Converts LavaMoat `ResourcePolicy` to Endo's `PackagePolicyOptions`
+ *
+ * @param {import('lavamoat-core').ResourcePolicy} [resources]
+ * @returns {import('./types.js').LavaMoatPackagePolicyOptions | undefined}
+ */
+function convertEndoPackagePolicyOptions(resources) {
+  if (!resources) {
+    return undefined
+  }
+  /** @type {import('./types.js').LavaMoatPackagePolicyOptions | undefined} */
+  let pkgPolicyOptions
+  if (resources[LAVAMOAT_RESOURCE_FLAG_NATIVE] === true) {
+    pkgPolicyOptions = { [RSRC_POLICY_OPTION_NATIVE]: true }
+  }
+  if (resources[LAVAMOAT_RESOURCE_FLAG_DYNAMIC] === true) {
+    pkgPolicyOptions = {
+      ...pkgPolicyOptions,
+      [RSRC_POLICY_OPTION_DYNAMIC]: true,
+    }
+  }
+  return pkgPolicyOptions
+}
+
+/**
  * Converters LavaMoat `ResourcePolicy` to Endo's `PackagePolicy`
  *
  * @param {import('lavamoat-core').ResourcePolicy} resources
  * @returns {import('./types.js').LavaMoatPackagePolicy}
  */
-function toEndoRsrcPkgsPolicy(resources) {
-  /** @type {import('./types.js').LavaMoatPackagePolicy} */
-  const pkgPolicy = {
-    [RSRC_POLICY_PKGS]: toEndoRsrcPkgsPolicyPkgs(resources.packages),
-    [RSRC_POLICY_GLOBALS]: toEndoRsrcPkgsPolicyGlobals(resources.globals),
-    [RSRC_POLICY_BUILTINS]: toEndoRsrcPkgsPolicyBuiltins(resources.builtin),
-    [RSRC_POLICY_OPTIONS]:
-      resources.native === true ? { native: true } : undefined,
+function convertEndoPackagePolicy(resources) {
+  return {
+    [RSRC_POLICY_PKGS]: convertEndoPackagePolicyPackages(resources.packages),
+    [RSRC_POLICY_GLOBALS]: convertEndoPackagePolicyGlobals(resources.globals),
+    [RSRC_POLICY_BUILTINS]: convertEndoPackagePolicyBuiltins(resources.builtin),
+    [RSRC_POLICY_OPTIONS]: convertEndoPackagePolicyOptions(resources),
   }
-  return pkgPolicy
 }
 
 /**
@@ -171,7 +191,7 @@ export async function toEndoPolicy(lmPolicy) {
     resources: fromEntries(
       entries(finalLMPolicy.resources ?? {}).map(([rsrcName, rsrcPolicy]) => [
         rsrcName,
-        toEndoRsrcPkgsPolicy(rsrcPolicy),
+        convertEndoPackagePolicy(rsrcPolicy),
       ])
     ),
   }

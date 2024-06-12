@@ -15,11 +15,7 @@ lockdown({
   localeTaming: 'unsafe',
 })
 
-import { importLocation } from '@endo/compartment-mapper'
-import { pathToFileURL } from 'node:url'
-import { importHook } from './import-hook.js'
-import { syncModuleTransforms } from './module-transforms.js'
-import { createNativeParser } from './parse-native.js'
+import { execute } from './compartment-map.js'
 import { toEndoPolicy } from './policy-converter.js'
 import { generatePolicy } from './policy-gen/index.js'
 import { isPolicy } from './policy.js'
@@ -31,34 +27,38 @@ export { loadPolicies } from './policy.js'
 export { toEndoPolicy }
 
 /**
- * Runs Endomoat with provided policy
+ * Runs a module or script with provided LavaMoat policy
  *
+ * @template [T=unknown] Exports of module, if known. Default is `unknown`
  * @overload
- * @param {string | URL} entryFile
+ * @param {string | URL} entrypointPath
  * @param {import('lavamoat-core').LavaMoatPolicy} policy
  * @param {import('./types.js').RunOptions} [opts]
- * @returns {Promise<unknown>}
+ * @returns {Promise<T>}
  */
 
 /**
- * Runs Endomoat with an auto-generated policy, optionally writing to disk
+ * Runs a module or script using an auto-generated policy, optionally writing to
+ * disk
  *
+ * @template [T=unknown] Exports of module, if known. Default is `unknown`
  * @overload
- * @param {string | URL} entryFile
+ * @param {string | URL} entrypointPath
  * @param {import('./types.js').GenerateAndRunOptions} [opts]
- * @returns {Promise<unknown>}
+ * @returns {Promise<T>}
  */
 
 /**
- * Runs a program in Endomoat
+ * Runs a module or script
  *
+ * @template [T=unknown] Exports of module, if known. Default is `unknown`
  * @param {string | URL} entrypointPath
  * @param {import('lavamoat-core').LavaMoatPolicy
  *   | import('./types.js').GenerateAndRunOptions} [policyOrOpts]
  * @param {import('./types.js').RunOptions} [opts]
- * @returns {Promise<unknown>}
+ * @returns {Promise<T>}
  */
-export async function run(entrypointPath, policyOrOpts = {}, opts = {}) {
+export async function run(entrypointPath, policyOrOpts, opts = {}) {
   await Promise.resolve()
   /** @type {import('lavamoat-core').LavaMoatPolicy} */
   let policy
@@ -69,31 +69,14 @@ export async function run(entrypointPath, policyOrOpts = {}, opts = {}) {
     policy = policyOrOpts
     runOpts = opts
   } else {
-    const generateOpts = policyOrOpts
+    const generateOpts =
+      policyOrOpts ??
+      /** @type {import('./types.js').GenerateAndRunOptions} */ ({})
     runOpts = { readPowers: generateOpts.readPowers }
     policy = await generatePolicy(entrypointPath, generateOpts)
   }
 
-  const endoPolicy = await toEndoPolicy(policy)
   const readPowers = makeReadPowers(runOpts.readPowers)
 
-  const url =
-    entrypointPath instanceof URL
-      ? `${entrypointPath}`
-      : `${pathToFileURL(entrypointPath)}`
-
-  const { namespace } = await importLocation(readPowers, url, {
-    policy: endoPolicy,
-    globals: globalThis,
-    importHook,
-    syncModuleTransforms,
-    parserForLanguage: {
-      native: createNativeParser(),
-    },
-    languageForExtension: {
-      node: 'native',
-    },
-  })
-
-  return namespace
+  return execute(readPowers, entrypointPath, policy)
 }

@@ -36,14 +36,20 @@ export const POLICY_ITEM_WRITE = 'write'
  */
 export const POLICY_ITEM_WILDCARD = 'any'
 
-export const POLICY_ITEM_DYNAMIC = 'dynamic'
+/**
+ * The `dynamic` flag on a LavaMoat `ResourcePolicy`
+ */
+export const LAVAMOAT_RESOURCE_FLAG_DYNAMIC = 'dynamic'
+
+/**
+ * The `native` flag on a LavaMoat `ResourcePolicy`
+ */
+export const LAVAMOAT_RESOURCE_FLAG_NATIVE = 'native'
 
 /**
  * Designator for the root policy item in a LavaMoat policy
  */
 export const LAVAMOAT_PKG_POLICY_ROOT = '$root$'
-
-export const LAVAMOAT_PKG_POLICY_VALUE_DYNAMIC = 'dynamic'
 
 /**
  * Name of the `packages` property of a `LavaMoatPackagePolicy`
@@ -66,6 +72,16 @@ export const RSRC_POLICY_GLOBALS = 'globals'
 export const RSRC_POLICY_OPTIONS = 'options'
 
 /**
+ * The `dynamic` option on a `LavaMoatPackagePolicy`
+ */
+export const RSRC_POLICY_OPTION_DYNAMIC = 'dynamic'
+
+/**
+ * The `native` option on a `LavaMoatPackagePolicy`
+ */
+export const RSRC_POLICY_OPTION_NATIVE = 'native'
+
+/**
  * `builtin` module type for a `LavamoatModuleRecord`
  */
 export const LMR_TYPE_BUILTIN = 'builtin'
@@ -81,6 +97,14 @@ export const LMR_TYPE_SOURCE = 'js'
 export const LMR_TYPE_NATIVE = 'native'
 
 /**
- * Name of Endo's `bytes` parser
+ * Name of our custom `native` parser
+ *
+ * @remarks
+ * Used by policy gen
  */
-export const ENDO_PARSER_BYTES = 'bytes'
+export const NATIVE_PARSER_NAME = 'native'
+
+/**
+ * Extension for native modules
+ */
+export const NATIVE_FILE_EXT = 'node'

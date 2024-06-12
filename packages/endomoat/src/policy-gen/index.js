@@ -3,22 +3,15 @@
  *
  * @packageDocumentation
  */
-import { captureFromMap } from '@endo/compartment-mapper/capture-lite.js'
-import { defaultParserForLanguage } from '@endo/compartment-mapper/import-parsers.js'
-import { mapNodeModules } from '@endo/compartment-mapper/node-modules.js'
 import assert from 'node:assert'
 import nodeFs from 'node:fs'
 import path from 'node:path'
-import { fileURLToPath, pathToFileURL } from 'node:url'
+import { fileURLToPath } from 'node:url'
+import { loadCompartmentMap } from '../compartment-map.js'
 import { DEFAULT_POLICY_DEBUG_PATH, DEFAULT_POLICY_PATH } from '../constants.js'
-import { importHook } from '../import-hook.js'
-import { syncModuleTransforms } from '../module-transforms.js'
-import { createNativeParser } from '../parse-native.js'
-import { defaultReadPowers, makeReadPowers } from '../power.js'
+import { makeReadPowers } from '../power.js'
 import { writeJson } from '../util.js'
 import { PolicyGenerator } from './policy-generator.js'
-
-const { fromEntries, entries } = Object
 
 /**
  * Generates a LavaMoat debug policy from a given entry point using
@@ -29,6 +22,7 @@ const { fromEntries, entries } = Object
  * @param {import('./types.js').GenerateOptions & { debug: true }} opts
  * @returns {Promise<import('lavamoat-core').LavaMoatPolicyDebug>}
  */
+
 /**
  * Generates a LavaMoat policy from a given entry point using
  * `@endo/compartment-mapper`
@@ -89,6 +83,16 @@ export async function generateAndWritePolicy(entrypointPath, opts = {}) {
 }
 
 /**
+ * Returns `true` if we should write a debug policy
+ *
+ * @param {import('./types.js').GeneratePolicyOptions} [opts]
+ * @returns {boolean}
+ */
+function shouldWriteDebugPolicy(opts = {}) {
+  return Boolean(opts.write && opts.debug)
+}
+
+/**
  * Generates a LavaMoat policy or debug policy from a given entry point using
  * `@endo/compartment-mapper`
  *
@@ -128,23 +132,30 @@ export async function generatePolicy(entrypointPath, opts = {}) {
 
   await Promise.resolve()
 
-  /** @type {import('lavamoat-core').LavaMoatPolicy} */
+  /**
+   * This value will be returned once populated
+   *
+   * @type {import('lavamoat-core').LavaMoatPolicy}
+   */
   let policy
 
-  // if the debug flag was true, then the result of generatePolicy
-  // will be a LavaMoatPolicyDebug.  we will write that entire thing to the debug policy,
-  // then extract everything except the `debugInfo` prop, and write _that_ to the actual policy
-  if (shouldWrite && generateOpts.debug) {
+  /**
+   * If the debug flag was true, then the result of generatePolicy will be a
+   * `LavaMoatPolicyDebug`. we will write that entire thing to the debug policy,
+   * then extract everything except the `debugInfo` prop, and write _that_ to
+   * {@link policy}
+   */
+  if (shouldWriteDebugPolicy(opts)) {
     const debugPolicy = await generate(entrypointPath, {
       ...generateOpts,
       debug: true,
     })
     await writeJson(policyDebugPath, debugPolicy, { fs })
 
-    // do not attempt to use the `delete` keyword with typescript. you have been warned!
-
+    // do not attempt to use the `delete` keyword with typescript. you have been
+    // warned!
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { debugInfo, ...corePolicy } =
+    const { debugInfo: _, ...corePolicy } =
       /** @type {import('lavamoat-core').LavaMoatPolicyDebug} */ (debugPolicy)
     policy = corePolicy
   } else {
@@ -157,54 +168,4 @@ export async function generatePolicy(entrypointPath, opts = {}) {
   }
 
   return policy
-}
-
-/**
- * Loads compartment map and associated sources.
- *
- * @param {string | URL} entrypointPath
- * @param {import('./types.js').LoadCompartmentMapOptions} opts
- * @internal
- */
-export async function loadCompartmentMap(
-  entrypointPath,
-  { readPowers = defaultReadPowers, ...archiveOpts } = {}
-) {
-  const moduleLocation =
-    entrypointPath instanceof URL
-      ? `${entrypointPath}`
-      : `${pathToFileURL(entrypointPath)}`
-
-  const nodeCompartmentMap = await mapNodeModules(readPowers, moduleLocation, {
-    dev: true,
-  })
-
-  const {
-    captureCompartmentMap: compartmentMap,
-    captureSources: sources,
-    compartmentRenames,
-  } = await captureFromMap(readPowers, nodeCompartmentMap, {
-    ...archiveOpts,
-    importHook,
-    syncModuleTransforms,
-    parserForLanguage: {
-      ...defaultParserForLanguage,
-      native: createNativeParser(),
-    },
-    languageForExtension: {
-      node: 'native',
-    },
-  })
-
-  // `compartmentRenames` is a mapping of filepath to compartment name;
-  // we need the reverse mapping.
-  const renames = fromEntries(
-    entries(compartmentRenames).map(([filepath, id]) => [id, filepath])
-  )
-
-  return {
-    compartmentMap,
-    sources,
-    renames,
-  }
 }

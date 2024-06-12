@@ -2,7 +2,7 @@ import 'ses'
 
 import test from 'ava'
 import stringify from 'json-stable-stringify'
-import { loadCompartmentMap } from '../../src/policy-gen/index.js'
+import { loadCompartmentMap } from '../../src/compartment-map.js'
 import { PolicyGenerator } from '../../src/policy-gen/policy-generator.js'
 import { loadJSONFixture } from '../fixture-util.js'
 

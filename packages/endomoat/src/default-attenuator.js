@@ -1,12 +1,10 @@
 import endowmentsToolkit from 'lavamoat-core/src/endowmentsToolkit.js'
 import { POLICY_ITEM_ROOT, POLICY_ITEM_WRITE } from './constants.js'
 // eslint-disable-next-line n/prefer-global/console
-import console from 'node:console'
 
 const { copyWrappedGlobals, getEndowmentsForConfig } = endowmentsToolkit()
 
-const { keys, fromEntries, defineProperties, getOwnPropertyDescriptors } =
-  Object
+const { fromEntries, defineProperties, getOwnPropertyDescriptors } = Object
 
 /** @type {object} */
 let rootCompartmentGlobalThis
@@ -59,13 +57,9 @@ export function attenuateGlobals(
  * Picks stuff in the policy out of the original object
  *
  * @type {import('@endo/compartment-mapper').ModuleAttenuatorFn<
- *   [import('./types.js').LavaMoatPackagePolicy['packages']]
+ *   [string, ...string[]]
  * >}
  */
 export function attenuateModule(params, originalObject) {
-  console.debug('attenuateModule called', params)
-  const ns = fromEntries(
-    keys(params).map((key) => [key, /** @type {any} */ (originalObject)[key]])
-  )
-  return ns
+  return fromEntries(params.map((key) => [key, originalObject[key]]))
 }

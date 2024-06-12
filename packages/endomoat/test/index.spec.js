@@ -2,7 +2,6 @@ import 'ses'
 
 import test from 'ava'
 import { run } from '../src/index.js'
-import { loadJSONFixture } from './fixture-util.js'
 
 test('basic operation - run an app without dependencies', async (t) => {
   const entryFile = new URL('./fixture/no-deps/app.js', import.meta.url)
@@ -14,7 +13,7 @@ test('basic operation - run an app without dependencies', async (t) => {
   t.deepEqual({ .../** @type {object} */ (result) }, { hello: 'world' })
 })
 
-test.failing('dynamic imports - run a pure-JS app', async (t) => {
+test('dynamic imports - run a pure-JS app', async (t) => {
   // this test should use real fixtures because we need to `require()` dependencies
   // outside of an Endo context (via `importNowHook`)
   const entryFile = new URL('./fixture/dynamic/index.js', import.meta.url)
@@ -24,7 +23,7 @@ test.failing('dynamic imports - run a pure-JS app', async (t) => {
     resources: {
       'dynamic-require': {
         packages: {
-          dummy: 'dynamic',
+          dummy: true,
         },
       },
       dummy: {
@@ -39,15 +38,47 @@ test.failing('dynamic imports - run a pure-JS app', async (t) => {
   t.deepEqual({ .../** @type {object} */ (result) }, { hello: 'hello world' })
 })
 
-test.failing('dynamic imports - run a native module', async (t) => {
-  const { readPowers } = await loadJSONFixture(
-    new URL('./fixture/json/native.json', import.meta.url)
-  )
+test('dynamic imports - run a native module', async (t) => {
+  // TODO: fix this snapshot
+  // const { readPowers } = await loadJSONFixture(
+  //   new URL('./fixture/json/native.json', import.meta.url)
+  // )
 
-  const entryFile = '/index.js'
-  // TODO: the runtime prints no warnings for `node-gyp-build`, which _conditionally_ contains a dynamic require. It should throw a TypeError
-  const result = await run(entryFile, { readPowers })
-  t.deepEqual({ .../** @type {object} */ (result) }, { hello: 'hello world' })
+  const entryFile = new URL('./fixture/native/index.js', import.meta.url)
+
+  /** @type {import('lavamoat-core').LavaMoatPolicy} */
+  const policy = {
+    resources: {
+      hello_world: {
+        packages: {
+          'node-gyp-build': true,
+        },
+        globals: {
+          __dirname: true,
+        },
+      },
+      'hello_world>node-gyp-build': {
+        globals: {
+          __webpack_require__: true,
+          __non_webpack_require__: true,
+          process: true,
+        },
+        builtin: {
+          'fs.existsSync': true,
+          'fs.readdirSync': true,
+          'os.arch': true,
+          'os.platform': true,
+          'path.dirname': true,
+          'path.join': true,
+          'path.resolve': true,
+        },
+        native: true,
+      },
+    },
+  }
+
+  const result = await run(entryFile, policy)
+  t.deepEqual({ .../** @type {object} */ (result) }, { hello: 'world' })
 })
 
 test('static import - run a native module', async (t) => {

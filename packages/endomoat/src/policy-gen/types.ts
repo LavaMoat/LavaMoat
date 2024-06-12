@@ -1,10 +1,10 @@
 import {
-  type ArchiveOptions as EndoArchiveOptions,
+  type CaptureOptions,
   type FsAPI,
   type ReadPowers,
 } from '@endo/compartment-mapper'
 import { type LavaMoatPolicyOverrides } from 'lavamoat-core'
-import { type Simplify } from 'type-fest'
+import { type Except, type Simplify } from 'type-fest'
 import { type WritableFsAPI } from '../types.js'
 
 /**
@@ -17,9 +17,9 @@ import { type WritableFsAPI } from '../types.js'
  * @remarks
  * Omitted properties cannot by overridden by the user.
  */
-export type ArchiveOptions = Omit<
-  EndoArchiveOptions,
-  'readPowers' | 'importHook' | 'moduleTransforms' | 'extraParsers'
+export type BaseLoadCompartmentMapOptions = Except<
+  CaptureOptions,
+  'importHook' | 'moduleTransforms'
 >
 
 /**
@@ -44,9 +44,9 @@ export interface WithReadPowersOrFsAPI {
 }
 
 /**
- * Options having a `debug` property.
+ * A subset of unique options for {@link GeneratePolicyOptions}
  */
-export interface WithDebug {
+export interface BaseGeneratePolicyOptions {
   /**
    * If `true`, generate a debug policy.
    */
@@ -67,10 +67,10 @@ export interface WithPolicyOverride {
  * Options for `generatePolicy`
  */
 export type GeneratePolicyOptions = Simplify<
-  ArchiveOptions &
+  BaseLoadCompartmentMapOptions &
+    BaseGeneratePolicyOptions &
     WithReadPowersOrFsAPI &
     WithPolicyOverride &
-    WithDebug &
     WritePolicyOptions
 >
 
@@ -79,20 +79,20 @@ export type GeneratePolicyOptions = Simplify<
  *
  * @internal
  */
-export type GenerateOptions = Omit<
+export type GenerateOptions = Except<
   GeneratePolicyOptions,
   keyof WritePolicyOptions
 >
 
+/**
+ * Options available when writing a policy
+ */
 export interface WritePolicyOptions {
   policyDebugPath?: string
   policyPath?: string
   fs?: WritableFsAPI
-
   write?: boolean
 }
-
-export type GenerateAndWritePolicyOptions = GeneratePolicyOptions
 
 /**
  * Options for `loadCompartmentMap`
@@ -100,7 +100,7 @@ export type GenerateAndWritePolicyOptions = GeneratePolicyOptions
  * @internal
  */
 export type LoadCompartmentMapOptions = Simplify<
-  ArchiveOptions & WithReadPowers
+  BaseLoadCompartmentMapOptions & WithReadPowers
 >
 
 /**

@@ -1,53 +1,15 @@
 import nodeFs from 'node:fs'
-import { Module } from 'node:module'
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
-
-/**
- * Resolves a module from a given directory
- *
- * @overload
- * @param {string} cwd - The directory to resolve from
- * @param {string} moduleId - The module to resolve
- * @returns {string} The resolved module
- */
-
-/**
- * Resolves a module from the current working directory
- *
- * @overload
- * @param {string} moduleId - The module to resolve
- * @returns {string} The resolved module
- */
-
-/**
- * Resolves a module from the given directory or from the current working
- * directory
- *
- * @param {string} cwdOrModuleId - The directory to resolve from or the module
- *   to resolve
- * @param {string} [allegedModuleId] - The module to resolve
- * @returns {string} The resolved module
- */
-export function resolveFrom(cwdOrModuleId, allegedModuleId) {
-  const moduleId = allegedModuleId ? allegedModuleId : cwdOrModuleId
-  let cwd = allegedModuleId ? cwdOrModuleId : process.cwd()
-
-  if (!path.isAbsolute(cwd)) {
-    cwd = path.resolve(cwd)
-  }
-
-  const require = Module.createRequire(path.join(cwd, 'dummy.js'))
-  return require.resolve(moduleId)
-}
+import { fileURLToPath, pathToFileURL } from 'node:url'
 
 /**
  * Reads a JSON file
  *
- * @template [T=unknown] Default is `unknown`
+ * @template {import('type-fest').JsonValue} [T=import('type-fest').JsonValue]
+ *   Default is `import('type-fest').JsonValue`
  * @param {string | URL} filepath
  * @param {{ fs?: import('@endo/compartment-mapper').FsAPI }} opts
- * @returns {Promise<T>}
+ * @returns {Promise<T>} JSON data
  */
 export async function readJsonFile(filepath, { fs = nodeFs } = {}) {
   if (filepath instanceof URL) {
@@ -60,9 +22,11 @@ export async function readJsonFile(filepath, { fs = nodeFs } = {}) {
 /**
  * Writes a JSON file
  *
- * @param {string} filepath
- * @param {import('type-fest').Jsonifiable} data
- * @param {{ fs?: import('./types.js').WritableFsAPI }} opts
+ * Creates the destination directory if it does not exist
+ *
+ * @param {string} filepath Path to write to
+ * @param {import('type-fest').Jsonifiable} data JSON data
+ * @param {{ fs?: import('./types.js').WritableFsAPI }} opts Options
  * @returns {Promise<void>}
  */
 export async function writeJson(filepath, data, { fs = nodeFs } = {}) {
@@ -71,8 +35,11 @@ export async function writeJson(filepath, data, { fs = nodeFs } = {}) {
 }
 
 /**
- * @param {unknown} value
- * @returns {value is import('@endo/compartment-mapper').FsAPI}
+ * Type guard for an `FsAPI` object
+ *
+ * @param {unknown} value Value to check
+ * @returns {value is import('@endo/compartment-mapper').FsAPI} `true` if
+ *   `value` is an `FsAPI`
  */
 export function isFsAPI(value) {
   return Boolean(
@@ -86,4 +53,18 @@ export function isFsAPI(value) {
       'realpath' in value.promises &&
       typeof value.promises.realpath === 'function'
   )
+}
+
+/**
+ * Converts a `URL` or `string` to a URL-like `string`.
+ *
+ * If `url` is a `string`, it is expected to be a path.
+ *
+ * @remarks
+ * This is the format that `@endo/compartment-mapper` often expects.
+ * @param {URL | string} url URL or path
+ * @returns {string} URL-like string
+ */
+export function toURLString(url) {
+  return url instanceof URL ? `${url}` : `${pathToFileURL(url)}`
 }
