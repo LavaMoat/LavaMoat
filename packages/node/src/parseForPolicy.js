@@ -13,13 +13,10 @@ const {
 const {
   parseForPolicy: coreParseForConfig,
   createModuleInspector,
+  codeSampleFromAstNode,
   LavamoatModuleRecord,
 } = require('lavamoat-core')
-const {
-  parse,
-  inspectImports,
-  codeSampleFromAstNode,
-} = require('lavamoat-tofu')
+const { parse, inspectImports } = require('lavamoat-tofu')
 const { checkForResolutionOverride } = require('./resolutions')
 
 // file extension omitted can be omitted, eg https://npmfs.com/package/yargs/17.0.1/yargs
