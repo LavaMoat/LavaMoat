@@ -2,7 +2,6 @@
 /** @typedef {import('webpack').NormalModule} NormalModule */
 /** @typedef {import('webpack').sources.Source} Source */
 
-const path = require('node:path')
 const {
   sources: { ConcatSource },
 } = require('webpack')
@@ -13,7 +12,7 @@ const diag = require('./diagnostics.js')
 const RUNTIME_GLOBALS = require('webpack/lib/RuntimeGlobals')
 const { RUNTIME_KEY } = require('../ENUM.json')
 
-const EXCLUDE_LOADER = path.join(__dirname, '../excludeLoader.js')
+const { isExcluded } = require('./exclude.js')
 
 // TODO: processing requirements needs to be a tiny bit more clever yet.
 // Look in JavascriptModulesPlugin for how it decides if module and exports are unused.
@@ -112,10 +111,7 @@ exports.wrapGeneratorMaker = ({
       // only accept exclude loader from config, not inline.
       // Inline loader definition uses a `!` character as a loader separator.
       // Defining what to exclude should only be possible in the config.
-      if (
-        module.loaders.some(({ loader }) => loader === EXCLUDE_LOADER) &&
-        !module.rawRequest.includes('!')
-      ) {
+      if (isExcluded(module)) {
         excludes.push(module.rawRequest)
         diag.rawDebug(3, `skipped wrapping ${module.rawRequest}`)
         return originalGeneratedSource
