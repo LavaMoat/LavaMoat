@@ -6,6 +6,15 @@
   * dependencies
     * @lavamoat/aa bumped from ^4.0.1 to ^4.1.0
 
+## [3.0.5](https://github.com/LavaMoat/LavaMoat/compare/allow-scripts-v3.0.4...allow-scripts-v3.0.5) (2024-06-17)
+
+
+### Bug Fixes
+
+* **allow-scripts:** indicate peerDependency on @lavamoat/preinstall-always-fail ([#1197](https://github.com/LavaMoat/LavaMoat/issues/1197)) ([aac5ce6](https://github.com/LavaMoat/LavaMoat/commit/aac5ce68a7773047b9ed26951b9414b80d79ff1d))
+* **allow-scripts:** Run automatic `node-gyp rebuild` for packages containing a `binding.gyp` ([62a2b4e](https://github.com/LavaMoat/LavaMoat/commit/62a2b4e11a35c2d9f6f91ae4a3030753f27519b1))
+* **deps:** update dependency bin-links to v4.0.4 ([2844646](https://github.com/LavaMoat/LavaMoat/commit/2844646907ffcf16c6785ba43c5d551d77fa369a))
+
 ## [3.0.4](https://github.com/LavaMoat/LavaMoat/compare/allow-scripts-v3.0.3...allow-scripts-v3.0.4) (2024-03-26)
 
 

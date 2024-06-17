@@ -33,6 +33,22 @@
     * @lavamoat/lavapack bumped from ^6.1.1 to ^6.1.2
     * lavamoat-core bumped from ^15.2.0 to ^15.2.1
 
+## [17.0.8](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-browserify-v17.0.7...lavamoat-browserify-v17.0.8) (2024-06-17)
+
+
+### Bug Fixes
+
+* **deps:** update babel monorepo ([246ec25](https://github.com/LavaMoat/LavaMoat/commit/246ec256790a0a2cb993d5895ae13a0b716da1c6))
+* **deps:** update babel monorepo to v7.24.6 ([f6d450f](https://github.com/LavaMoat/LavaMoat/commit/f6d450fa48c8f166dac72a2b606429dafa5a70c4))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @lavamoat/lavapack bumped from ^6.1.3 to ^6.1.4
+    * lavamoat-core bumped from ^15.3.0 to ^15.3.1
+
 ## [17.0.7](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-browserify-v17.0.6...lavamoat-browserify-v17.0.7) (2024-03-26)
 
 
