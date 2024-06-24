@@ -10,6 +10,8 @@ const {
   defineProperties,
   getOwnPropertyDescriptors,
   fromEntries,
+  entries,
+  values,
 } = Object
 const warn = typeof console === 'object' ? console.warn : () => {}
 // Avoid running any wrapped code or using compartment if lockdown was not called.
@@ -24,8 +26,23 @@ if (LOCKDOWN_ON) {
   )
 }
 
+const knownWritableFields = new Set()
+
+values(LAVAMOAT.policy.resources).forEach((resource) => {
+  if (resource.globals && typeof resource.globals === 'object') {
+    entries(resource.globals).forEach(([key, value]) => {
+      if (value === 'write') {
+        knownWritableFields.add(key)
+      }
+    })
+  }
+})
+
 const { getEndowmentsForConfig, copyWrappedGlobals } =
-  LAVAMOAT.endowmentsToolkit()
+  LAVAMOAT.endowmentsToolkit({
+    handleGlobalWrite: true,
+    knownWritableFields,
+  })
 
 // These must match assumptions in the wrapper.js
 // sharedKeys are included in the runtime

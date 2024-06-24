@@ -20,9 +20,14 @@ module.exports = endowmentsToolkit
 /**
  * @param {object} opts
  * @param {DefaultWrapperFn} [opts.createFunctionWrapper]
+ * @param {boolean} [opts.handleGlobalWrite]
+ * @param {Set<string>} [opts.knownWritableFields] - List of globals that can be
+ *   mutated later
  */
 function endowmentsToolkit({
   createFunctionWrapper = defaultCreateFunctionWrapper,
+  handleGlobalWrite = false,
+  knownWritableFields = new Set(),
 } = {}) {
   return {
     getEndowmentsForConfig,
@@ -59,8 +64,11 @@ function endowmentsToolkit({
     // validate read access from packagePolicy
     /** @type {string[]} */
     const whitelistedReads = []
+    /** @type {Set<string>} */
+    const allowedWriteFields = new Set()
     /** @type {string[]} */
     const explicitlyBanned = []
+
     Object.entries(packagePolicy.globals).forEach(
       ([path, packagePolicyValue]) => {
         const pathParts = path.split('.')
@@ -80,6 +88,16 @@ function endowmentsToolkit({
         }
         // write access handled elsewhere
         if (packagePolicyValue === 'write') {
+          if (!handleGlobalWrite) {
+            return
+          }
+          if (pathParts.length > 1) {
+            throw new Error(
+              `LavaMoat - write access is only allowed at the top level, saw "${path}"`
+            )
+          }
+          allowedWriteFields.add(path)
+          whitelistedReads.push(path)
           return
         }
         if (packagePolicyValue !== true) {
@@ -90,12 +108,15 @@ function endowmentsToolkit({
         whitelistedReads.push(path)
       }
     )
+    // sort by length to optimize further steps
+    whitelistedReads.sort((a, b) => a.length - b.length)
     return makeMinimalViewOfRef(
       sourceRef,
       whitelistedReads,
       unwrapTo,
       unwrapFrom,
-      explicitlyBanned
+      explicitlyBanned,
+      allowedWriteFields
     )
   }
 
@@ -105,6 +126,7 @@ function endowmentsToolkit({
    * @param {object} unwrapTo
    * @param {object} unwrapFrom
    * @param {string[]} explicitlyBanned
+   * @param {Set<string>} allowedWriteFields
    * @returns {object}
    */
   function makeMinimalViewOfRef(
@@ -112,20 +134,30 @@ function endowmentsToolkit({
     paths,
     unwrapTo,
     unwrapFrom,
-    explicitlyBanned = []
+    explicitlyBanned = [],
+    allowedWriteFields = new Set()
   ) {
     /** @type {object} */
     const targetRef = {}
     paths.forEach((path) => {
-      copyValueAtPath(
-        '',
-        path.split('.'),
-        explicitlyBanned,
-        sourceRef,
-        targetRef,
-        unwrapTo,
-        unwrapFrom
-      )
+      const pathParts = path.split('.')
+      if (knownWritableFields.has(pathParts[0])) {
+        if (allowedWriteFields.has(pathParts[0])) {
+          makeWritableValueAtPath(pathParts[0], sourceRef, targetRef)
+        } else {
+          instrumentDynamicValueAtPath(pathParts, sourceRef, targetRef)
+        }
+      } else {
+        copyValueAtPath(
+          '',
+          pathParts,
+          explicitlyBanned,
+          sourceRef,
+          targetRef,
+          unwrapTo,
+          unwrapFrom
+        )
+      }
     })
     return targetRef
   }
@@ -149,6 +181,81 @@ function endowmentsToolkit({
    */
   function isEmpty(value) {
     return !value
+  }
+
+  /**
+   * @param {string} key
+   * @param {Record<string, any>} sourceRef
+   * @param {Record<string, any>} targetRef
+   */
+  function makeWritableValueAtPath(key, sourceRef, targetRef) {
+    const enumerable = Reflect.getOwnPropertyDescriptor(
+      sourceRef,
+      key
+    )?.enumerable
+    Reflect.defineProperty(targetRef, key, {
+      configurable: false,
+      enumerable,
+      set(newValue) {
+        sourceRef[key] = newValue
+      },
+      get() {
+        return sourceRef[key]
+      },
+    })
+  }
+
+  /**
+   * Puts a getter at the end of the path that returns the nested values from a
+   * top-level field that might change at runtime.
+   *
+   * @param {string[]} pathParts
+   * @param {Record<string, any>} sourceRef
+   * @param {Record<string, any>} targetRef
+   */
+  function instrumentDynamicValueAtPath(pathParts, sourceRef, targetRef) {
+    const enumerable = Reflect.getOwnPropertyDescriptor(
+      sourceRef,
+      pathParts[0]
+    )?.enumerable
+    const dynamicGetterDesc = {
+      get: () => {
+        const dynamicValue = sourceRef[pathParts[0]]
+        let leaf = dynamicValue,
+          parent = sourceRef
+
+        for (let i = 1; i < pathParts.length; i++) {
+          parent = leaf
+          leaf = leaf[pathParts[i]]
+        }
+        if (typeof leaf === 'function') {
+          leaf = leaf.bind(parent) // TODO: consider the risks, should not differ from unwrapping
+        }
+        return leaf
+      },
+      writeable: false,
+      enumerable, // Initial value will have to suffice. Change will not propagate dynamically.
+      configurable: false,
+    }
+    let currentTarget = targetRef
+    let currentPath = ''
+    for (let depth = 0; depth < pathParts.length - 1; depth++) {
+      currentPath = extendPath(currentPath, pathParts[depth])
+      const nextPart = pathParts[depth]
+      if (Reflect.getOwnPropertyDescriptor(currentTarget, nextPart)?.get) {
+        // We could silently ignore this, but it could introduce a false sense of security in the policy file
+        throw Error(
+          `LavaMoat - "${pathParts[0]}" is writeable elsewhere and both "${currentPath}" and "${pathParts.join('.')}" are allowed for one package. One of these entries is redundant.`
+        )
+      }
+      if (typeof currentTarget[nextPart] !== 'object') {
+        currentTarget[nextPart] = {}
+      }
+      currentTarget = currentTarget[nextPart]
+    }
+
+    const lastPart = pathParts[pathParts.length - 1]
+    Reflect.defineProperty(currentTarget, lastPart, dynamicGetterDesc)
   }
 
   /**
