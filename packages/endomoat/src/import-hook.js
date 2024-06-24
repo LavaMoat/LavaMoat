@@ -23,7 +23,7 @@ export const importHook = async (specifier) => {
   )
 }
 
-/** @type {import('@endo/compartment-mapper').DynamicImportHook} */
+/** @type {import('@endo/compartment-mapper').ExitModuleImportNowHook} */
 export const importNowHook = (specifier, packageLocation) => {
   const require = Module.createRequire(fileURLToPath(packageLocation))
   /** @type {object} */

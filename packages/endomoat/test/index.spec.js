@@ -51,7 +51,7 @@ test('dynamic imports - run a native module', async (t) => {
     resources: {
       hello_world: {
         packages: {
-          'node-gyp-build': true,
+          'hello_world>node-gyp-build': true,
         },
         globals: {
           __dirname: true,
@@ -73,6 +73,7 @@ test('dynamic imports - run a native module', async (t) => {
           'path.resolve': true,
         },
         native: true,
+        dynamic: true,
       },
     },
   }

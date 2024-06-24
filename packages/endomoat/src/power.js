@@ -1,6 +1,7 @@
 import { makeReadPowers as endoMakeReadPowers } from '@endo/compartment-mapper/node-powers.js'
 import nodeCrypto from 'node:crypto'
 import nodeFs from 'node:fs'
+import nodePath from 'node:path'
 import nodeUrl from 'node:url'
 import { isFsAPI } from './util.js'
 
@@ -14,6 +15,7 @@ export const defaultReadPowers = endoMakeReadPowers({
   fs: nodeFs,
   url: nodeUrl,
   crypto: nodeCrypto,
+  path: nodePath,
 })
 
 /**
@@ -32,6 +34,7 @@ export const defaultReadPowers = endoMakeReadPowers({
  * @param {import('@endo/compartment-mapper').FsAPI} fs
  * @param {import('@endo/compartment-mapper').UrlAPI} [url]
  * @param {import('@endo/compartment-mapper').CryptoAPI} [crypto]
+ * @param {import('@endo/compartment-mapper').PathAPI} [path]
  * @returns {import('@endo/compartment-mapper').MaybeReadPowers &
  *   import('@endo/compartment-mapper').SyncReadPowers}
  */
@@ -53,6 +56,7 @@ export const defaultReadPowers = endoMakeReadPowers({
  *   | import('@endo/compartment-mapper').ReadPowers} [value]
  * @param {import('@endo/compartment-mapper').UrlAPI} [url]
  * @param {import('@endo/compartment-mapper').CryptoAPI} [crypto]
+ * @param {import('@endo/compartment-mapper').PathAPI} [path]
  * @returns {import('@endo/compartment-mapper').MaybeReadPowers &
  *   import('@endo/compartment-mapper').SyncReadPowers}
  */
@@ -65,9 +69,15 @@ export const defaultReadPowers = endoMakeReadPowers({
  *   | import('@endo/compartment-mapper').ReadPowers} [value]
  * @param {import('@endo/compartment-mapper').UrlAPI} [url]
  * @param {import('@endo/compartment-mapper').CryptoAPI} [crypto]
+ * @param {import('@endo/compartment-mapper').PathAPI} [path]
  * @returns {import('@endo/compartment-mapper').ReadPowers}
  */
-export function makeReadPowers(value, url = nodeUrl, crypto = nodeCrypto) {
+export function makeReadPowers(
+  value,
+  url = nodeUrl,
+  crypto = nodeCrypto,
+  path = nodePath
+) {
   if (isFsAPI(value)) {
     if (value === nodeFs) {
       return defaultReadPowers
@@ -76,6 +86,7 @@ export function makeReadPowers(value, url = nodeUrl, crypto = nodeCrypto) {
       fs: value,
       url,
       crypto,
+      path,
     })
   }
   if (typeof value === 'function') {

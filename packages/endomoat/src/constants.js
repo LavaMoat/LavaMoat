@@ -74,7 +74,7 @@ export const RSRC_POLICY_OPTIONS = 'options'
 /**
  * The `dynamic` option on a `LavaMoatPackagePolicy`
  */
-export const RSRC_POLICY_OPTION_DYNAMIC = 'dynamic'
+export const RSRC_POLICY_DYNAMIC = 'dynamic'
 
 /**
  * The `native` option on a `LavaMoatPackagePolicy`

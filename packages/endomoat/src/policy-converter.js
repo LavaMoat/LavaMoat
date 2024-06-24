@@ -1,13 +1,12 @@
 import { mergePolicy } from 'lavamoat-core'
 import {
   LAVAMOAT_PKG_POLICY_ROOT,
-  LAVAMOAT_RESOURCE_FLAG_DYNAMIC,
   LAVAMOAT_RESOURCE_FLAG_NATIVE,
   POLICY_ITEM_ROOT,
   POLICY_ITEM_WILDCARD,
   RSRC_POLICY_BUILTINS,
+  RSRC_POLICY_DYNAMIC,
   RSRC_POLICY_GLOBALS,
-  RSRC_POLICY_OPTION_DYNAMIC,
   RSRC_POLICY_OPTION_NATIVE,
   RSRC_POLICY_OPTIONS,
   RSRC_POLICY_PKGS,
@@ -141,12 +140,6 @@ function convertEndoPackagePolicyOptions(resources) {
   if (resources[LAVAMOAT_RESOURCE_FLAG_NATIVE] === true) {
     pkgPolicyOptions = { [RSRC_POLICY_OPTION_NATIVE]: true }
   }
-  if (resources[LAVAMOAT_RESOURCE_FLAG_DYNAMIC] === true) {
-    pkgPolicyOptions = {
-      ...pkgPolicyOptions,
-      [RSRC_POLICY_OPTION_DYNAMIC]: true,
-    }
-  }
   return pkgPolicyOptions
 }
 
@@ -162,6 +155,7 @@ function convertEndoPackagePolicy(resources) {
     [RSRC_POLICY_GLOBALS]: convertEndoPackagePolicyGlobals(resources.globals),
     [RSRC_POLICY_BUILTINS]: convertEndoPackagePolicyBuiltins(resources.builtin),
     [RSRC_POLICY_OPTIONS]: convertEndoPackagePolicyOptions(resources),
+    [RSRC_POLICY_DYNAMIC]: Boolean(resources.dynamic),
   }
 }
 

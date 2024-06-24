@@ -19,7 +19,7 @@ export const ENDO_OPTIONS = freeze(
   /** @type {const} */ ({
     globals: globalThis,
     importHook,
-    dynamicHook: importNowHook,
+    importNowHook,
     syncModuleTransforms,
     parserForLanguage: {
       /**
