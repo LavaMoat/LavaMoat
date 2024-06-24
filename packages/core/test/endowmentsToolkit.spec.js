@@ -1,8 +1,11 @@
 const test = require('ava')
 const endowmentsToolkit = require('../src/endowmentsToolkit.js')
 
-function prepareTest() {
-  const { getEndowmentsForConfig } = endowmentsToolkit()
+function prepareTest({ knownWritable } = {}) {
+  const { getEndowmentsForConfig } = endowmentsToolkit({
+    handleGlobalWrite: !!knownWritable,
+    knownWritableFields: knownWritable,
+  })
   return getEndowmentsForConfig
 }
 
@@ -93,7 +96,8 @@ test('getEndowmentsForConfig - siblings', (t) => {
 })
 
 test('getEndowmentsForConfig - knownWritableFields', (t) => {
-  const getEndowmentsForConfig = prepareTest()
+  const knownWritable = new Set(['a', 'b', 'x'])
+  const getEndowmentsForConfig = prepareTest({ knownWritable })
   const sourceGlobal = {
     a: 1,
     b: { c: 2 },
@@ -106,14 +110,7 @@ test('getEndowmentsForConfig - knownWritableFields', (t) => {
       d: true,
     },
   }
-  const knownWritable = new Set(['a', 'b', 'x'])
-  const resultGlobal = getEndowmentsForConfig(
-    sourceGlobal,
-    config,
-    undefined,
-    undefined,
-    knownWritable
-  )
+  const resultGlobal = getEndowmentsForConfig(sourceGlobal, config)
   {
     t.is(resultGlobal.a, 1)
     t.is(resultGlobal.b.c, 2)
@@ -129,7 +126,8 @@ test('getEndowmentsForConfig - knownWritableFields', (t) => {
 })
 
 test('getEndowmentsForConfig - knownWritable and tightening access with false', (t) => {
-  const getEndowmentsForConfig = prepareTest()
+  const knownWritable = new Set(['a'])
+  const getEndowmentsForConfig = prepareTest({ knownWritable })
   const sourceGlobal = {
     a: { b: { c: 2, d: 3 }, q: 1 },
   }
@@ -142,14 +140,7 @@ test('getEndowmentsForConfig - knownWritable and tightening access with false', 
     },
   }
 
-  const knownWritable = new Set(['a'])
-  const resultGlobal = getEndowmentsForConfig(
-    sourceGlobal,
-    config,
-    undefined,
-    undefined,
-    knownWritable
-  )
+  const resultGlobal = getEndowmentsForConfig(sourceGlobal, config)
   {
     t.is(typeof resultGlobal.a.b, 'object')
     t.is(resultGlobal.a.b.c, 2)
@@ -161,7 +152,8 @@ test('getEndowmentsForConfig - knownWritable and tightening access with false', 
 })
 
 test('getEndowmentsForConfig - knownWritable and invalid nesting', (t) => {
-  const getEndowmentsForConfig = prepareTest()
+  const knownWritable = new Set(['a'])
+  const getEndowmentsForConfig = prepareTest({ knownWritable })
   const sourceGlobal = {
     a: { b: { c: 2, d: 3 }, q: 1 },
   }
@@ -174,16 +166,44 @@ test('getEndowmentsForConfig - knownWritable and invalid nesting', (t) => {
     },
   }
 
-  const knownWritable = new Set(['a'])
-  t.throws(() =>
-    getEndowmentsForConfig(
-      sourceGlobal,
-      config,
-      undefined,
-      undefined,
-      knownWritable
-    )
-  )
+  t.throws(() => getEndowmentsForConfig(sourceGlobal, config))
+})
+
+test('getEndowmentsForConfig - read-write', (t) => {
+  const knownWritable = new Set(['a', 'b'])
+  const getEndowmentsForConfig = prepareTest({ knownWritable })
+  const sourceGlobal = {
+    a: 1,
+    b: { c: 2 },
+    d: 3,
+  }
+  const config1 = {
+    globals: {
+      a: true,
+      'b.c': true,
+      d: true,
+    },
+  }
+  const config2 = {
+    globals: {
+      a: 'write',
+      b: 'write',
+    },
+  }
+  const global1 = getEndowmentsForConfig(sourceGlobal, config1)
+  const global2 = getEndowmentsForConfig(sourceGlobal, config2)
+  {
+    t.is(global1.a, 1)
+    t.is(global1.b.c, 2)
+    t.is(global1.d, 3)
+    t.is(global1.x, undefined)
+    global2.a = 11
+    global2.b = { c: 22 }
+    global2.d = 33
+    t.is(global1.a, 11)
+    t.is(global1.b.c, 22)
+    t.is(global1.d, 3)
+  }
 })
 
 test('getEndowmentsForConfig - basic getter', (t) => {

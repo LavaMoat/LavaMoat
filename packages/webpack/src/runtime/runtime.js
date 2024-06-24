@@ -10,7 +10,8 @@ const {
   defineProperties,
   getOwnPropertyDescriptors,
   fromEntries,
-  keys,
+  entries,
+  values,
 } = Object
 const warn = typeof console === 'object' ? console.warn : () => {}
 // Avoid running any wrapped code or using compartment if lockdown was not called.
@@ -25,8 +26,23 @@ if (LOCKDOWN_ON) {
   )
 }
 
+const knownWritableFields = new Set()
+
+values(LAVAMOAT.policy.resources).forEach((resource) => {
+  if (resource.globals && typeof resource.globals === 'object') {
+    entries(resource.globals).forEach(([key, value]) => {
+      if (value === 'write') {
+        knownWritableFields.add(key)
+      }
+    })
+  }
+})
+
 const { getEndowmentsForConfig, copyWrappedGlobals } =
-  LAVAMOAT.endowmentsToolkit()
+  LAVAMOAT.endowmentsToolkit({
+    handleGlobalWrite: true,
+    knownWritableFields,
+  })
 
 // These must match assumptions in the wrapper.js
 // sharedKeys are included in the runtime
@@ -78,51 +94,6 @@ const enforcePolicy = (requestedResourceId, referrerResourceId) => {
   )
 }
 
-const globalStore = (() => {
-  // implementation to discuss in principle
-  const resources = LAVAMOAT.policy.resources
-
-  const globalsWithWrite = create(null)
-  const globalsInStore = new Set()
-
-  keys(resources).forEach((resourceId) => {
-    const resource = resources[resourceId]
-    if (resource.globals) {
-      keys(resource.globals).forEach((globalKey) => {
-        if (
-          typeof resource.globals === 'object' &&
-          resource.globals[globalKey] === 'write'
-        ) {
-          globalsInStore.add(globalKey)
-          globalsWithWrite[resourceId] || (globalsWithWrite[resourceId] = [])
-          globalsWithWrite[resourceId].push(globalKey)
-        }
-      })
-    }
-  })
-
-  return {
-    globalsInStore,
-    injectGetSet(STORE, resourceId, descriptors) {
-      if (globalsWithWrite[resourceId]) {
-        globalsWithWrite[resourceId].forEach((key) => {
-          descriptors[key] = {
-            configurable: false,
-            set(newValue) {
-              STORE[key] = newValue
-              return newValue
-            },
-            get() {
-              return STORE[key]
-            },
-          }
-        })
-      }
-      return descriptors
-    },
-  }
-})()
-
 const theRealGlobalThis = globalThis
 /** @type {any} */
 let rootCompartmentGlobalThis
@@ -148,8 +119,7 @@ const installGlobalsForPolicy = (resourceId, packageCompartmentGlobal) => {
       rootCompartmentGlobalThis,
       LAVAMOAT.policy.resources[resourceId] || {},
       globalThis,
-      packageCompartmentGlobal,
-      globalStore.globalsInStore
+      packageCompartmentGlobal
     )
 
     defineProperties(
@@ -163,11 +133,7 @@ const installGlobalsForPolicy = (resourceId, packageCompartmentGlobal) => {
     )
     defineProperties(
       packageCompartmentGlobal,
-      globalStore.injectGetSet(
-        rootCompartmentGlobalThis,
-        resourceId,
-        getOwnPropertyDescriptors(endowments)
-      )
+      getOwnPropertyDescriptors(endowments)
     )
   }
 }
