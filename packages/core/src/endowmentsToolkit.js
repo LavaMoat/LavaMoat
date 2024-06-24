@@ -20,9 +20,14 @@ module.exports = endowmentsToolkit
 /**
  * @param {object} opts
  * @param {DefaultWrapperFn} [opts.createFunctionWrapper]
+ * @param {boolean} [opts.handleGlobalWrite]
+ * @param {Set<string>} [opts.knownWritableFields] - List of globals that can be
+ *   mutated later
  */
 function endowmentsToolkit({
   createFunctionWrapper = defaultCreateFunctionWrapper,
+  handleGlobalWrite = false,
+  knownWritableFields = new Set(),
 } = {}) {
   return {
     getEndowmentsForConfig,
@@ -45,16 +50,13 @@ function endowmentsToolkit({
    *   unwrapFrom, is replaced as unwrapTo
    * @param {object} unwrapFrom - For getters and setters, the this-value to
    *   replace (default: targetRef)
-   * @param {Set<string>} knownWritableFields - List of globals that can be
-   *   mutated later
    * @returns {object} - The targetRef
    */
   function getEndowmentsForConfig(
     sourceRef,
     packagePolicy,
     unwrapTo,
-    unwrapFrom,
-    knownWritableFields
+    unwrapFrom
   ) {
     if (!packagePolicy.globals) {
       return {}
@@ -62,8 +64,11 @@ function endowmentsToolkit({
     // validate read access from packagePolicy
     /** @type {string[]} */
     const whitelistedReads = []
+    /** @type {Set<string>} */
+    const allowedWriteFields = new Set()
     /** @type {string[]} */
     const explicitlyBanned = []
+
     Object.entries(packagePolicy.globals).forEach(
       ([path, packagePolicyValue]) => {
         const pathParts = path.split('.')
@@ -83,6 +88,16 @@ function endowmentsToolkit({
         }
         // write access handled elsewhere
         if (packagePolicyValue === 'write') {
+          if (!handleGlobalWrite) {
+            return
+          }
+          if (pathParts.length > 1) {
+            throw new Error(
+              `LavaMoat - write access is only allowed at the top level, saw "${path}"`
+            )
+          }
+          allowedWriteFields.add(path)
+          whitelistedReads.push(path)
           return
         }
         if (packagePolicyValue !== true) {
@@ -101,7 +116,7 @@ function endowmentsToolkit({
       unwrapTo,
       unwrapFrom,
       explicitlyBanned,
-      knownWritableFields
+      allowedWriteFields
     )
   }
 
@@ -111,7 +126,7 @@ function endowmentsToolkit({
    * @param {object} unwrapTo
    * @param {object} unwrapFrom
    * @param {string[]} explicitlyBanned
-   * @param {Set<string>} knownWritableFields
+   * @param {Set<string>} allowedWriteFields
    * @returns {object}
    */
   function makeMinimalViewOfRef(
@@ -120,14 +135,18 @@ function endowmentsToolkit({
     unwrapTo,
     unwrapFrom,
     explicitlyBanned = [],
-    knownWritableFields = new Set()
+    allowedWriteFields = new Set()
   ) {
     /** @type {object} */
     const targetRef = {}
     paths.forEach((path) => {
       const pathParts = path.split('.')
       if (knownWritableFields.has(pathParts[0])) {
-        instrumentDynamicValueAtPath(pathParts, sourceRef, targetRef)
+        if (allowedWriteFields.has(pathParts[0])) {
+          makeWritableValueAtPath(pathParts[0], sourceRef, targetRef)
+        } else {
+          instrumentDynamicValueAtPath(pathParts, sourceRef, targetRef)
+        }
       } else {
         copyValueAtPath(
           '',
@@ -162,6 +181,28 @@ function endowmentsToolkit({
    */
   function isEmpty(value) {
     return !value
+  }
+
+  /**
+   * @param {string} key
+   * @param {Record<string, any>} sourceRef
+   * @param {Record<string, any>} targetRef
+   */
+  function makeWritableValueAtPath(key, sourceRef, targetRef) {
+    const enumerable = Reflect.getOwnPropertyDescriptor(
+      sourceRef,
+      key
+    )?.enumerable
+    Reflect.defineProperty(targetRef, key, {
+      configurable: false,
+      enumerable,
+      set(newValue) {
+        sourceRef[key] = newValue
+      },
+      get() {
+        return sourceRef[key]
+      },
+    })
   }
 
   /**
