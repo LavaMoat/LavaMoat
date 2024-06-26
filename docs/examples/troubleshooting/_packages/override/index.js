@@ -1,53 +1,34 @@
-// Base class for entities in the application
-class Entity {
-  constructor(name) {
-    this.name = name
-  }
-
-  greet() {
-    console.log(`Hello, my name is ${this.name}!`)
-  }
-}
-
-// Specific class for user profiles
-class UserProfile extends Entity {
-  constructor(name, age) {
-    super(name)
-    this.age = age
-  }
-
-  displayProfile() {
-    console.log(`Name: ${this.name}, Age: ${this.age}`)
-  }
-}
-
-// Simulating a deserialization function that assigns constructors based on type
-// This is a very naive implementation just to show an example, don't do that.
-function deserializeUser(serializedObject) {
-  let obj = JSON.parse(serializedObject)
-  switch (obj.type) {
-    case 'UserProfile':
-      // Directly setting the constructor property
-      obj.constructor = UserProfile
-      obj.__proto__ = UserProfile.prototype
-      delete obj.type
-      break
+// Function to perform a single mathematical operation
+function mathOperation(operation, a, b) {
+  console.log(operation, a, b)
+  switch (operation) {
+    case 'add':
+      return a + b
+    case 'subtract':
+      return a - b
+    case 'multiply':
+      return a * b
+    case 'divide':
+      return a / b
     default:
-      throw new Error('Unknown type for deserialization')
+      throw new Error('Invalid operation')
   }
-  return obj
 }
 
-const serializeUser = (user) => {
-  // check if user is UserProfile type
-  if (!(user instanceof UserProfile)) {
-    throw new Error('User must be an instance of UserProfile')
+function applyOp(operations, numbers) {
+  if (operations.length !== numbers.length - 1) {
+    throw new Error(
+      'The number of operations must be one less than the number of numbers'
+    )
   }
-  return JSON.stringify({ ...user, type: 'UserProfile' })
+
+  return operations.reduce((result, operation, index) => {
+    return mathOperation(operation, result, numbers[index + 1])
+  }, numbers[0])
 }
 
-module.exports = {
-  UserProfile,
-  deserializeUser,
-  serializeUser,
-}
+// Attempt to make a named export
+mathOperation.apply = applyOp
+
+// Export the mathOperation function
+module.exports = mathOperation
