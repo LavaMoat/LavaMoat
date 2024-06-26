@@ -10,7 +10,7 @@
     "1": "lavamoat src/poly.js",
     "2": "lavamoat src/cwd.js",
     "3": "lavamoat src/linting.js",
-    "4": "lavamoat src/serialize.js",
+    "4": "lavamoat src/maths.js",
     "policy": "lavamoat --autopolicy app.js",
     "start": "node app.js",
     "test": "lavamoat app.js"
