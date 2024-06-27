@@ -6,5 +6,5 @@
     "source.formatDocument": "explicit"
   },
   "prettier.useEditorConfig": true,
-  "files.insertFinalNewline": false
+  "editor.formatOnSave": true
 }
