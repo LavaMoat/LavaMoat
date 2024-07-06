@@ -42,8 +42,10 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
-      - name: Upgrade npm # for workspace support
-        run: npm i -g npm@9 # npm@9 supports our supported Node.js versions
+      - name: Set npm version
+        run: |
+          corepack enable
+          npm --version
       - name: Install Dependencies
         uses: bahmutov/npm-install@e5c7e14408aa6089501de32bd16123b41738047e # v1.10.2
         with:
@@ -95,6 +97,10 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: npm
+      - name: Set npm version
+        run: |
+          corepack enable
+          npm --version
       - name: Install Dependencies
         uses: bahmutov/npm-install@e5c7e14408aa6089501de32bd16123b41738047e # v1.10.2
         with:
@@ -121,6 +127,10 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: npm
+      - name: Set npm version
+        run: |
+          corepack enable
+          npm --version
       - name: Install Dependencies
         uses: bahmutov/npm-install@e5c7e14408aa6089501de32bd16123b41738047e # v1.10.2
         with:
