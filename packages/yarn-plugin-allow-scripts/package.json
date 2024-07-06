@@ -15,7 +15,7 @@
   },
   "main": "./src/index.ts",
   "scripts": {
-    "build": "builder build plugin",
+    "build": "./scripts/build.sh",
     "rebuild": "npm run build",
     "test": "ava"
   },
