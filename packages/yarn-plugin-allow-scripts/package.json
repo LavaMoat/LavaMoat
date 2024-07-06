@@ -24,10 +24,11 @@
   "dependencies": {
     "@lavamoat/allow-scripts": "3.0.4",
     "@lavamoat/preinstall-always-fail": "2.0.0",
-    "@yarnpkg/core": "3.7.0"
+    "@yarnpkg/core": "3.7.0",
+    "@yarnpkg/shell": "3.3.0"
   },
   "devDependencies": {
     "@yarnpkg/builder": "3.3.1",
-    "@yarnpkg/cli": "4.3.1"
+    "@yarnpkg/cli": "3.8.2"
   }
 }

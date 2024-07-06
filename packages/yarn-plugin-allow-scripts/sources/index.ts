@@ -1,5 +1,4 @@
 import { Plugin } from '@yarnpkg/core'
-// eslint-disable-next-line n/no-extraneous-import
 import { execute } from '@yarnpkg/shell'
 
 const plugin: Plugin = {
