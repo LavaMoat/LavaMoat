@@ -19,6 +19,8 @@
     "test": "exit 0"
   },
   "peerDependencies": {
+    "@lavamoat/allow-scripts": ">=3.0.4",
+    "@lavamoat/preinstall-always-fail": "*",
     "@yarnpkg/cli": "^3.8.2 || ^4.3.1"
   },
   "dependencies": {
