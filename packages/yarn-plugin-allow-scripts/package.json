@@ -19,13 +19,13 @@
     "test": "exit 0"
   },
   "peerDependencies": {
-    "@yarnpkg/cli": "3.8.2"
+    "@yarnpkg/cli": "^3.8.2 || ^4.3.1"
   },
   "dependencies": {
     "@yarnpkg/core": "3.7.0"
   },
   "devDependencies": {
     "@yarnpkg/builder": "3.3.1",
-    "@yarnpkg/cli": "3.8.2"
+    "@yarnpkg/cli": "4.3.1"
   }
 }
