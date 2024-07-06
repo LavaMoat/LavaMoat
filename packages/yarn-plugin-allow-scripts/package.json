@@ -19,8 +19,10 @@
     "test": "exit 0"
   },
   "dependencies": {
-    "@yarnpkg/builder": "3.3.1",
     "@yarnpkg/cli": "3.8.2",
     "@yarnpkg/core": "3.7.0"
+  },
+  "devDependencies": {
+    "@yarnpkg/builder": "3.3.1"
   }
 }
