@@ -11,7 +11,7 @@
   "private": true,
   "engines": {
     "node": "^16.20.0 || ^18.0.0 || ^20.0.0 || ^22.0.0",
-    "yarn": "^3.1.1"
+    "yarn": "^3.1.1 || ^4.3.1"
   },
   "main": "./sources/index.ts",
   "scripts": {
@@ -19,9 +19,17 @@
     "rebuild": "npm run build",
     "test": "exit 0"
   },
+  "peerDependencies": {
+    "@yarnpkg/cli": "^3.8.3 || ^4.3.1"
+  },
   "dependencies": {
+    "@lavamoat/allow-scripts": "3.2.0",
+    "@lavamoat/preinstall-always-fail": "2.1.0",
+    "@yarnpkg/core": "3.7.0",
+    "@yarnpkg/shell": "3.3.0"
+  },
+  "devDependencies": {
     "@yarnpkg/builder": "3.3.1",
-    "@yarnpkg/cli": "3.8.5",
-    "@yarnpkg/core": "3.7.0"
+    "@yarnpkg/cli": "3.8.5"
   }
 }
