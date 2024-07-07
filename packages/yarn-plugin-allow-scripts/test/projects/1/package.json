@@ -6,8 +6,6 @@
     "@lavamoat/preinstall-always-fail": "^2.0.0"
   },
   "lavamoat": {
-    "allowScripts": {
-      "@lavamoat/preinstall-always-fail": false
-    }
+    "allowScripts": {}
   }
 }

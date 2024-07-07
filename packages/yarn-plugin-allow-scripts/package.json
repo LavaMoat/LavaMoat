@@ -26,8 +26,7 @@
     "@yarnpkg/core": "4.1.1"
   },
   "dependencies": {
-    "@lavamoat/allow-scripts": ">=3.0.4",
-    "@lavamoat/preinstall-always-fail": "*"
+    "@lavamoat/allow-scripts": ">=3.0.4"
   },
   "devDependencies": {
     "@septh/ts-run": "1.2.5",
