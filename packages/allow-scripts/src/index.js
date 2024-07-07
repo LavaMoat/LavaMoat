@@ -16,6 +16,7 @@ const setup = require('./setup')
  * @property {ScriptsConfig} configs.lifecycle
  * @property {BinsConfig} configs.bin
  * @property {boolean} somePoliciesAreMissing
+ * @property {Map<string,string>} canonicalNamesByPath
  */
 
 /**
@@ -417,11 +418,11 @@ async function loadAllPackageConfigurations({ rootDir }) {
   /** @type {BinCandidates} */
   const binCandidates = new Map()
 
-  const dependencyMap = await loadCanonicalNameMap({
+  const canonicalNamesByPath = await loadCanonicalNameMap({
     rootDir,
     includeDevDeps: true,
   })
-  const sortedDepEntries = Array.from(dependencyMap.entries()).sort(
+  const sortedDepEntries = Array.from(canonicalNamesByPath.entries()).sort(
     sortBy(([, canonicalName]) => canonicalName)
   )
   const packageJson = /** @type {LavamoatPackageJson} */ (
@@ -526,6 +527,7 @@ async function loadAllPackageConfigurations({ rootDir }) {
     packageJson,
     configs,
     somePoliciesAreMissing,
+    canonicalNamesByPath,
   }
 }
 
