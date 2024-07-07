@@ -69,9 +69,11 @@ const setup = require('./setup')
 
 module.exports = {
   getOptionsForBin,
+  loadAllPackageConfigurations,
   runAllowedPackages,
   setDefaultConfiguration,
   printPackagesList,
+  printMissingPoliciesIfAny,
   setup,
 }
 
