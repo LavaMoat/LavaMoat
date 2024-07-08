@@ -30,7 +30,7 @@
     "test": "npm run test:npm && npm run test:yarn1",
     "test:npm": "npm run test:prepare && ava",
     "test:prepare": "node ./test/prepare.js",
-    "test:yarn1": "cross-env LAVAMOAT_PM=yarn@1 npm run test:prepare && ava"
+    "test:yarn1": "cross-env COREPACK_ENABLE_PROJECT_SPEC=0 LAVAMOAT_PM=yarn@1 npm run test:prepare && cross-env COREPACK_ENABLE_PROJECT_SPEC=0 ava"
   },
   "dependencies": {
     "@babel/code-frame": "7.24.7",
