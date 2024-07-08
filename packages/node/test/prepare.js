@@ -25,6 +25,14 @@ const LAVAMOAT_PM = process.env.LAVAMOAT_PM ?? 'npm@next-9'
 const PROJECTS_DIR = path.join(__dirname, 'projects')
 
 /**
+ * Environment variables for corepack support
+ */
+const COREPACK_ENV = {
+  // Corepack refuses to run package managers other than the one declared in packageManager by default
+  COREPACK_ENABLE_PROJECT_SPEC: '0',
+}
+
+/**
  * Path to `corepack` as installed in the workspace root
  */
 const COREPACK_PATH = path.dirname(require.resolve('corepack/package.json'))
@@ -111,6 +119,10 @@ async function setup(cwd) {
 }
 
 async function main() {
+  for (const [key, val] of Object.entries(COREPACK_ENV)) {
+    process.env[key] = val
+  }
+
   const dirents = await readdir(PROJECTS_DIR, { withFileTypes: true })
 
   for (const dirent of dirents) {
