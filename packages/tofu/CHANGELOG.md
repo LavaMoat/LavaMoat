@@ -1,5 +1,29 @@
 # Changelog
 
+## [7.3.0](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-tofu-v7.2.3...lavamoat-tofu-v7.3.0) (2024-07-11)
+
+
+### Features
+
+* **tofu:** support node.js 22.x ([d6c5e1f](https://github.com/LavaMoat/LavaMoat/commit/d6c5e1f26977dc84575c2e9a75667b6339ca7aec))
+
+
+### Bug Fixes
+
+* **deps:** update babel monorepo ([246ec25](https://github.com/LavaMoat/LavaMoat/commit/246ec256790a0a2cb993d5895ae13a0b716da1c6))
+* **deps:** update babel monorepo to v7.24.5 ([7e466bd](https://github.com/LavaMoat/LavaMoat/commit/7e466bd5718a0a1b92df24a2d023c0bb1f54b872))
+* **deps:** update babel monorepo to v7.24.6 ([f6d450f](https://github.com/LavaMoat/LavaMoat/commit/f6d450fa48c8f166dac72a2b606429dafa5a70c4))
+* **deps:** update definitelytyped ([a23d8be](https://github.com/LavaMoat/LavaMoat/commit/a23d8beb8a64ceed6417ac1eb48b866465fd784b))
+* **deps:** update dependency type-fest to v4.14.0 ([1321a58](https://github.com/LavaMoat/LavaMoat/commit/1321a58964f36af95b30a547154a060edb63d009))
+* **deps:** update dependency type-fest to v4.15.0 ([c48f8e3](https://github.com/LavaMoat/LavaMoat/commit/c48f8e31c2f0bfc5e8baff190ea7afeef11d205b))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * lavamoat-core bumped from ^15.3.0 to ^15.4.0
+
 ## [7.2.3](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-tofu-v7.2.2...lavamoat-tofu-v7.2.3) (2024-03-26)
 
 

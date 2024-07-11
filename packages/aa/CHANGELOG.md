@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.3.0](https://github.com/LavaMoat/LavaMoat/compare/aa-v4.2.0...aa-v4.3.0) (2024-07-11)
+
+
+### Features
+
+* **allow-scripts:** support Node.js v22 ([0c665ec](https://github.com/LavaMoat/LavaMoat/commit/0c665ec65b635c29f347369809680372c9b58b79))
+
 ## [4.2.0](https://github.com/LavaMoat/LavaMoat/compare/aa-v4.1.0...aa-v4.2.0) (2024-03-26)
 
 
