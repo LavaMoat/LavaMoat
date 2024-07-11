@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.2.0](https://github.com/LavaMoat/LavaMoat/compare/laverna-v1.1.0...laverna-v1.2.0) (2024-07-11)
+
+
+### Features
+
+* **allow-scripts:** support Node.js v22 ([0c665ec](https://github.com/LavaMoat/LavaMoat/commit/0c665ec65b635c29f347369809680372c9b58b79))
+
+
+### Bug Fixes
+
+* **deps:** update dependency glob to v10.3.12 ([92796ae](https://github.com/LavaMoat/LavaMoat/commit/92796ae014515e0303df6ce903ff683fe5c8ae4a))
+* **deps:** update dependency glob to v10.3.15 ([c7f1ef6](https://github.com/LavaMoat/LavaMoat/commit/c7f1ef6696aaeaeb623cf503a19f8ec6b1dffeb2))
+* **deps:** update dependency glob to v10.4.1 ([b411e13](https://github.com/LavaMoat/LavaMoat/commit/b411e138a215d1564135e0a547cac534d3f00bcd))
+* **deps:** update dependency type-fest to v4.14.0 ([1321a58](https://github.com/LavaMoat/LavaMoat/commit/1321a58964f36af95b30a547154a060edb63d009))
+* **deps:** update dependency type-fest to v4.15.0 ([c48f8e3](https://github.com/LavaMoat/LavaMoat/commit/c48f8e31c2f0bfc5e8baff190ea7afeef11d205b))
+
 ## [1.1.0](https://github.com/LavaMoat/LavaMoat/compare/laverna-v1.0.0...laverna-v1.1.0) (2024-03-26)
 
 

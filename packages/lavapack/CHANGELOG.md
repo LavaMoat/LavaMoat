@@ -24,6 +24,20 @@
   * dependencies
     * lavamoat-core bumped from ^15.2.0 to ^15.2.1
 
+## [6.1.4](https://github.com/LavaMoat/LavaMoat/compare/lavapack-v6.1.3...lavapack-v6.1.4) (2024-07-11)
+
+
+### Bug Fixes
+
+* **lavapack:** remove unused sourcemap logic, simplify clearing out sourcemaps from concatenated sources ([#1156](https://github.com/LavaMoat/LavaMoat/issues/1156)) ([c5b16cf](https://github.com/LavaMoat/LavaMoat/commit/c5b16cffe07f272368e087bf3424d2760c893f0f))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-core bumped from ^15.3.0 to ^15.4.0
+
 ## [6.1.3](https://github.com/LavaMoat/LavaMoat/compare/lavapack-v6.1.2...lavapack-v6.1.3) (2024-03-26)
 
 

@@ -18,6 +18,30 @@
   * dependencies
     * lavamoat-core bumped from ^15.2.0 to ^15.2.1
 
+## [0.4.0-beta.0](https://github.com/LavaMoat/LavaMoat/compare/webpack-v0.3.0-beta.0...webpack-v0.4.0-beta.0) (2024-07-11)
+
+
+### Features
+
+* **webpack:** lockdown inlining ([#1101](https://github.com/LavaMoat/LavaMoat/issues/1101)) ([7444b47](https://github.com/LavaMoat/LavaMoat/commit/7444b47bf2e9e1940f7fc37122f87d62a48488b7))
+
+
+### Bug Fixes
+
+* **deps:** update babel monorepo ([246ec25](https://github.com/LavaMoat/LavaMoat/commit/246ec256790a0a2cb993d5895ae13a0b716da1c6))
+* **deps:** update babel monorepo to v7.24.5 ([7e466bd](https://github.com/LavaMoat/LavaMoat/commit/7e466bd5718a0a1b92df24a2d023c0bb1f54b872))
+* **deps:** update babel monorepo to v7.24.6 ([f6d450f](https://github.com/LavaMoat/LavaMoat/commit/f6d450fa48c8f166dac72a2b606429dafa5a70c4))
+* **deps:** update dependency ses to v1.5.0 ([9b871f7](https://github.com/LavaMoat/LavaMoat/commit/9b871f7623474d8f626042a948a5efb082918d13))
+* **webpack:** fix progress order errors covering compilation errors, improve __webpack_require__.nmd compatibility ([#1172](https://github.com/LavaMoat/LavaMoat/issues/1172)) ([f3e53c8](https://github.com/LavaMoat/LavaMoat/commit/f3e53c8c44f063f000adc620b0aa3f7a41dda5c6))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @lavamoat/aa bumped from ^4.2.0 to ^4.3.0
+    * lavamoat-core bumped from ^15.3.0 to ^15.4.0
+
 ## [0.3.0-beta.0](https://github.com/LavaMoat/LavaMoat/compare/webpack-v0.2.1-beta.0...webpack-v0.3.0-beta.0) (2024-03-26)
 
 

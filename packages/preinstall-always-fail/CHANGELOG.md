@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.0](https://github.com/LavaMoat/LavaMoat/compare/preinstall-always-fail-v2.0.0...preinstall-always-fail-v2.1.0) (2024-07-11)
+
+
+### Features
+
+* **allow-scripts:** support Node.js v22 ([0c665ec](https://github.com/LavaMoat/LavaMoat/commit/0c665ec65b635c29f347369809680372c9b58b79))
+
 ## [2.0.0](https://github.com/LavaMoat/LavaMoat/compare/preinstall-always-fail-v1.0.3...preinstall-always-fail-v2.0.0) (2023-10-18)
 
 

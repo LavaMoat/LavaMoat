@@ -6,6 +6,26 @@
   * dependencies
     * @lavamoat/aa bumped from ^4.0.1 to ^4.1.0
 
+## [3.1.0](https://github.com/LavaMoat/LavaMoat/compare/allow-scripts-v3.0.4...allow-scripts-v3.1.0) (2024-07-11)
+
+
+### Features
+
+* **allow-scripts:** support Node.js v22 ([0c665ec](https://github.com/LavaMoat/LavaMoat/commit/0c665ec65b635c29f347369809680372c9b58b79))
+
+
+### Bug Fixes
+
+* **allow-scripts:** Run automatic `node-gyp rebuild` for packages containing a `binding.gyp` ([62a2b4e](https://github.com/LavaMoat/LavaMoat/commit/62a2b4e11a35c2d9f6f91ae4a3030753f27519b1))
+* **deps:** update dependency bin-links to v4.0.4 ([2844646](https://github.com/LavaMoat/LavaMoat/commit/2844646907ffcf16c6785ba43c5d551d77fa369a))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @lavamoat/aa bumped from ^4.2.0 to ^4.3.0
+
 ## [3.0.4](https://github.com/LavaMoat/LavaMoat/compare/allow-scripts-v3.0.3...allow-scripts-v3.0.4) (2024-03-26)
 
 
