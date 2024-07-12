@@ -2,7 +2,7 @@
   "name": "xxx",
   "packageManager": "yarn@4.3.1",
   "dependencies": {
-    "@lavamoat/allow-scripts": "^3.0.4",
+    "@lavamoat/allow-scripts": "^3.1.0",
     "@lavamoat/preinstall-always-fail": "^2.0.0"
   },
   "lavamoat": {
