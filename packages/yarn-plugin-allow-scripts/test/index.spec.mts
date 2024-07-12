@@ -4,8 +4,6 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { SpawnSyncOptions } from 'node:child_process'
 import { spawnSync } from 'node:child_process'
-import { getCli, runExit } from '@yarnpkg/cli';
-import type { type PortablePath} from '@yarnpkg/fslib';
 
 const isWindows = os.platform() === 'win32'
 const YARN_CMD = isWindows ? 'yarn.cmd' : 'yarn'
@@ -23,28 +21,38 @@ const PACKAGE_JSON = 'package.json'
  * @param cwd Working directory to execute command from
  * @returns Process result
  */
-const run = async (
+const run = (
   t: any,
   args: string[],
   cwd: string,
   //options: any = realisticEnvOptions(cwd),
-): Promise<void> => {
+): {exitCode: number|null, out: string, err: string} => {
   // const result = execute(process.execPath, [cmd, ...args], options)
   //const result = await execute(cmd, args, options)
   try {
     // await runExit([cmd, ...args], options)
+    //process.env = {};
+    /*
     const { defaultContext }  = await getCli({
       cwd: cwd as PortablePath,
     });
-    console.error({defaultContext})
-    await runExit(args, {
-      cwd: cwd as PortablePath,
-      selfPath: null,
-      pluginConfiguration: defaultContext.plugins,
-      //stderr: process.stderr,
-      //stdout: process.stderr,
-    })
+    */
+    const env = realisticEnvOptions(cwd);
+    console.log({cwd, env})
+    const result = spawnSync(
+      YARN_CMD,
+      args,
+      //'/bin/sh',
+      env,
+    )
+    console.log({result})
+    return {
+      exitCode: result.status,
+      out: result.stdout.toString().trim(),
+      err: result.stderr.toString().trim(),
+    }
   } catch(error) {
+    console.error(error);
     t.fail(
       `Failed calling '${args.join(' ')}': ${JSON.stringify(
         {
@@ -55,25 +63,37 @@ const run = async (
         2
       )}`
     )
+    return {
+      exitCode: null,
+      out: '',
+      err: '',
+    };
   }
 }
 
 test('cli - auto command', async (t: any) => {
   // set up the directories
-  let projectRoot = path.join(path.dirname(import.meta.url), 'projects', '1')
+  const projectRoot = path.join(path.dirname(import.meta.url.replace(/^file:/, '')), 'projects', 'uninitialized')
+  console.error({ projectRoot });
 
-  // delete any existing package.json
-  ////fs.rmSync(path.join(projectRoot, PACKAGE_JSON), { force: true })
+  // delete any leftover test artefacts
+  fs.rmSync(path.join(projectRoot, PACKAGE_JSON), { force: true })
 
-  // yarn init -y
-  await run(
-    t,
-    ['init', '-y'],
-    projectRoot,
-  )
+  // init project
+  const initRes = run(t, ['init', '-y'], projectRoot)
+  t.is(initRes.exitCode, 0);
 
-  // sttempt installing the plugin
-  await run(t, ['yarn', 'plugin', 'import', '../../../bundles/@yarnpkg/plugin-allow-scripts.js'], projectRoot)
+  // install the plugin
+  const importRes = run(t, ['plugin', 'import', '../../../bundles/@yarnpkg/plugin-allow-scripts.js'], projectRoot)
+  t.is(importRes.err, '');
+  t.regex(importRes.out, /YN0000: Saving the new plugin in .yarn\/plugins\/@yarnpkg\/plugin-allow-scripts.cjs/);
+  t.is(importRes.exitCode, 0);
+
+  // trigger the plugin
+  const installRes = run(t, ['install'], projectRoot)
+  t.is(installRes.err, '');
+  t.regex(installRes.out, /YN0000:.*Completed/);
+  t.is(installRes.exitCode, 0);
 
   /*
   // get the package.json
@@ -96,10 +116,19 @@ test('cli - auto command', async (t: any) => {
 })
 
 function realisticEnvOptions(projectRoot: string): SpawnSyncOptions {
+    // process.env.COREPACK_ENABLE_NETWORK='0'
+    // process.env.COREPACK_ENABLE_PROJECT_SPEC='0'
   return {
     cwd: projectRoot,
-    env: { ...process.env, INIT_CWD: projectRoot },
+    env: {
+      PATH: process.env.PATH,
+      COREPACK_ENABLE_NETWORK: '1',
+      COREPACK_DEFAULT_TO_LATEST: '0',
+      COREPACK_AUTO_PIN: '0',
+      COREPACK_ENABLE_PROJECT_SPEC: '0',
+      COREPACK_ENABLE_STRICT: '0',
+    },
     encoding: 'utf-8',
-    // stdio: [null, null],
+    shell: true,
   }
 }

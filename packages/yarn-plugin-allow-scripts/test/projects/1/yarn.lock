@@ -19,29 +19,29 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@lavamoat/aa@npm:^4.2.0":
-  version: 4.2.0
-  resolution: "@lavamoat/aa@npm:4.2.0"
+"@lavamoat/aa@npm:^4.3.0":
+  version: 4.3.0
+  resolution: "@lavamoat/aa@npm:4.3.0"
   dependencies:
     resolve: "npm:1.22.8"
   bin:
     lavamoat-ls: src/cli.js
-  checksum: 10c0/f4d6f643b22844cd09cbb932de237a0ffd735232a7b33c114c3b93c94f51bc3ecdab597041de9ae226092213fcff2f78a397ad86950d42e137f6e744c13ab82c
+  checksum: 10c0/772893d4a944bd24aa5c404a55db3755be5e2cbee1a95550f380d950b78add89a6e58c04b14a8db4049b6832ebb2dd9f1e8703fa7d3532043212f30b368236f6
   languageName: node
   linkType: hard
 
-"@lavamoat/allow-scripts@npm:^3.0.4":
-  version: 3.0.4
-  resolution: "@lavamoat/allow-scripts@npm:3.0.4"
+"@lavamoat/allow-scripts@npm:^3.1.0":
+  version: 3.1.0
+  resolution: "@lavamoat/allow-scripts@npm:3.1.0"
   dependencies:
-    "@lavamoat/aa": "npm:^4.2.0"
+    "@lavamoat/aa": "npm:^4.3.0"
     "@npmcli/run-script": "npm:7.0.4"
-    bin-links: "npm:4.0.3"
+    bin-links: "npm:4.0.4"
     npm-normalize-package-bin: "npm:3.0.1"
     yargs: "npm:17.7.2"
   bin:
     allow-scripts: src/cli.js
-  checksum: 10c0/f3ffe2647cac88084e59d4c3daea3d775098f28ab1ffe6e5db4a1fa5303896ab61c303a613360bff63f310367da5f73da66771985dbc5fb036252ac37a06b892
+  checksum: 10c0/21bb6853dd3e5ad4ae3d0e1ebe76d829e9bfcdfb9edc683d155b914571c657b13cfd70fce1a47ffc49b86755c895eae7ba883cbdedce60fe8d1b644574947dbe
   languageName: node
   linkType: hard
 
@@ -204,15 +204,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"bin-links@npm:4.0.3":
-  version: 4.0.3
-  resolution: "bin-links@npm:4.0.3"
+"bin-links@npm:4.0.4":
+  version: 4.0.4
+  resolution: "bin-links@npm:4.0.4"
   dependencies:
     cmd-shim: "npm:^6.0.0"
     npm-normalize-package-bin: "npm:^3.0.0"
     read-cmd-shim: "npm:^4.0.0"
     write-file-atomic: "npm:^5.0.0"
-  checksum: 10c0/66668e005743e7e8df2ecf3018c0f06c5a87043647280e334abb4577bdef124df2893cd0c61eb7261d24ed9a6a1dc35fd8c4f930c89200251974840b3286236f
+  checksum: 10c0/feb664e786429289d189c19c193b28d855c2898bc53b8391306cbad2273b59ccecb91fd31a433020019552c3bad3a1e0eeecca1c12e739a12ce2ca94f7553a17
   languageName: node
   linkType: hard
 
@@ -1195,7 +1195,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "xxx@workspace:."
   dependencies:
-    "@lavamoat/allow-scripts": "npm:^3.0.4"
+    "@lavamoat/allow-scripts": "npm:^3.1.0"
     "@lavamoat/preinstall-always-fail": "npm:^2.0.0"
   languageName: unknown
   linkType: soft

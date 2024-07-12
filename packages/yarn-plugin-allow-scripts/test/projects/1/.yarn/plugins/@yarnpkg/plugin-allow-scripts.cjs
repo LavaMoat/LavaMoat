@@ -12509,17 +12509,17 @@ ${polMsg}`;
     }
   });
 
-  // node_modules/bin-links/lib/is-windows.js
+  // ../../node_modules/bin-links/lib/is-windows.js
   var require_is_windows = __commonJS({
-    "node_modules/bin-links/lib/is-windows.js"(exports, module) {
+    "../../node_modules/bin-links/lib/is-windows.js"(exports, module) {
       var platform = process.env.__TESTING_BIN_LINKS_PLATFORM__ || process.platform;
       module.exports = platform === "win32";
     }
   });
 
-  // node_modules/bin-links/lib/get-node-modules.js
+  // ../../node_modules/bin-links/lib/get-node-modules.js
   var require_get_node_modules = __commonJS({
-    "node_modules/bin-links/lib/get-node-modules.js"(exports, module) {
+    "../../node_modules/bin-links/lib/get-node-modules.js"(exports, module) {
       var { dirname: dirname2, basename } = __require("path");
       var memo = /* @__PURE__ */ new Map();
       module.exports = (path) => {
@@ -12534,18 +12534,18 @@ ${polMsg}`;
     }
   });
 
-  // node_modules/bin-links/lib/get-prefix.js
+  // ../../node_modules/bin-links/lib/get-prefix.js
   var require_get_prefix = __commonJS({
-    "node_modules/bin-links/lib/get-prefix.js"(exports, module) {
+    "../../node_modules/bin-links/lib/get-prefix.js"(exports, module) {
       var { dirname: dirname2 } = __require("path");
       var getNodeModules = require_get_node_modules();
       module.exports = (path) => dirname2(getNodeModules(path));
     }
   });
 
-  // node_modules/bin-links/lib/bin-target.js
+  // ../../node_modules/bin-links/lib/bin-target.js
   var require_bin_target = __commonJS({
-    "node_modules/bin-links/lib/bin-target.js"(exports, module) {
+    "../../node_modules/bin-links/lib/bin-target.js"(exports, module) {
       var isWindows = require_is_windows();
       var getPrefix = require_get_prefix();
       var getNodeModules = require_get_node_modules();
@@ -13382,9 +13382,9 @@ exit $LASTEXITCODE
     }
   });
 
-  // node_modules/bin-links/lib/fix-bin.js
+  // ../../node_modules/bin-links/lib/fix-bin.js
   var require_fix_bin = __commonJS({
-    "node_modules/bin-links/lib/fix-bin.js"(exports, module) {
+    "../../node_modules/bin-links/lib/fix-bin.js"(exports, module) {
       var {
         chmod,
         open,
@@ -13412,9 +13412,9 @@ exit $LASTEXITCODE
     }
   });
 
-  // node_modules/bin-links/lib/shim-bin.js
+  // ../../node_modules/bin-links/lib/shim-bin.js
   var require_shim_bin = __commonJS({
-    "node_modules/bin-links/lib/shim-bin.js"(exports, module) {
+    "../../node_modules/bin-links/lib/shim-bin.js"(exports, module) {
       var { resolve, dirname: dirname2 } = __require("path");
       var { lstat } = __require("fs/promises");
       var throwNonEnoent = (er) => {
@@ -13426,7 +13426,7 @@ exit $LASTEXITCODE
       var readCmdShim = require_lib15();
       var fixBin = require_fix_bin();
       var seen = /* @__PURE__ */ new Set();
-      var failEEXIST = ({ path, to, from }) => Promise.reject(Object.assign(new Error("EEXIST: file already exists"), {
+      var failEEXIST = ({ to, from }) => Promise.reject(Object.assign(new Error("EEXIST: file already exists"), {
         path: to,
         dest: from,
         code: "EEXIST"
@@ -13480,9 +13480,9 @@ exit $LASTEXITCODE
     }
   });
 
-  // node_modules/bin-links/lib/link-gently.js
+  // ../../node_modules/bin-links/lib/link-gently.js
   var require_link_gently = __commonJS({
-    "node_modules/bin-links/lib/link-gently.js"(exports, module) {
+    "../../node_modules/bin-links/lib/link-gently.js"(exports, module) {
       var { resolve, dirname: dirname2 } = __require("path");
       var { lstat, mkdir, readlink, rm, symlink } = __require("fs/promises");
       var throwNonEnoent = (er) => {
@@ -13547,9 +13547,9 @@ exit $LASTEXITCODE
     }
   });
 
-  // node_modules/bin-links/lib/link-bin.js
+  // ../../node_modules/bin-links/lib/link-bin.js
   var require_link_bin = __commonJS({
-    "node_modules/bin-links/lib/link-bin.js"(exports, module) {
+    "../../node_modules/bin-links/lib/link-bin.js"(exports, module) {
       var linkGently = require_link_gently();
       var fixBin = require_fix_bin();
       var linkBin = ({ path, to, from, absFrom, force }) => linkGently({ path, to, from, absFrom, force }).then((linked) => linked && fixBin(absFrom));
@@ -13557,9 +13557,10 @@ exit $LASTEXITCODE
     }
   });
 
-  // node_modules/@lavamoat/allow-scripts/src/linker.js
+  // ../allow-scripts/src/linker.js
   var require_linker = __commonJS({
-    "node_modules/@lavamoat/allow-scripts/src/linker.js"(exports, module) {
+    "../allow-scripts/src/linker.js"(exports, module) {
+      "use strict";
       var binTarget = require_bin_target();
       var isWindows = require_is_windows();
       var linkBin = isWindows ? require_shim_bin() : require_link_bin();
@@ -13597,9 +13598,10 @@ exit $LASTEXITCODE
     }
   });
 
-  // node_modules/@lavamoat/allow-scripts/src/toggles.js
+  // ../allow-scripts/src/toggles.js
   var require_toggles = __commonJS({
-    "node_modules/@lavamoat/allow-scripts/src/toggles.js"(exports, module) {
+    "../allow-scripts/src/toggles.js"(exports, module) {
+      "use strict";
       module.exports = {
         FEATURE: Object.seal({
           bins: false
@@ -14713,9 +14715,10 @@ exit $LASTEXITCODE
     }
   });
 
-  // node_modules/@lavamoat/allow-scripts/src/setup.js
+  // ../allow-scripts/src/setup.js
   var require_setup = __commonJS({
-    "node_modules/@lavamoat/allow-scripts/src/setup.js"(exports, module) {
+    "../allow-scripts/src/setup.js"(exports, module) {
+      "use strict";
       var {
         existsSync,
         appendFileSync,
@@ -14861,10 +14864,10 @@ exit $LASTEXITCODE
     }
   });
 
-  // node_modules/@lavamoat/allow-scripts/src/index.js
+  // ../allow-scripts/src/index.js
   var require_src2 = __commonJS({
-    "node_modules/@lavamoat/allow-scripts/src/index.js"(exports, module) {
-      var { promises: fs } = __require("fs");
+    "../allow-scripts/src/index.js"(exports, module) {
+      var { promises: fs, existsSync } = __require("fs");
       var path = __require("path");
       var npmRunScript = require_run_script();
       var normalizeBin = require_lib8();
@@ -14874,9 +14877,11 @@ exit $LASTEXITCODE
       var setup = require_setup();
       module.exports = {
         getOptionsForBin,
+        loadAllPackageConfigurations: loadAllPackageConfigurations2,
         runAllowedPackages,
         setDefaultConfiguration,
         printPackagesList,
+        printMissingPoliciesIfAny: printMissingPoliciesIfAny2,
         setup
       };
       async function getOptionsForBin({ rootDir, name }) {
@@ -15105,11 +15110,11 @@ exit $LASTEXITCODE
       async function loadAllPackageConfigurations2({ rootDir }) {
         const packagesWithScriptsLifecycle = /* @__PURE__ */ new Map();
         const binCandidates = /* @__PURE__ */ new Map();
-        const dependencyMap = await loadCanonicalNameMap({
+        const canonicalNamesByPath = await loadCanonicalNameMap({
           rootDir,
           includeDevDeps: true
         });
-        const sortedDepEntries = Array.from(dependencyMap.entries()).sort(
+        const sortedDepEntries = Array.from(canonicalNamesByPath.entries()).sort(
           sortBy(([, canonicalName]) => canonicalName)
         );
         const packageJson = JSON.parse(await fs.readFile(path.join(rootDir, "package.json"), "utf8"));
@@ -15130,6 +15135,10 @@ exit $LASTEXITCODE
           const lifeCycleScripts = ["preinstall", "install", "postinstall"].filter(
             (name) => Object.prototype.hasOwnProperty.call(depScripts, name)
           );
+          if (!lifeCycleScripts.includes("preinstall") && !lifeCycleScripts.includes("install") && existsSync(path.join(filePath, "binding.gyp"))) {
+            lifeCycleScripts.unshift("install");
+            depScripts.install = "node-gyp rebuild";
+          }
           if (lifeCycleScripts.length) {
             const collection = packagesWithScriptsLifecycle.get(canonicalName) || [];
             collection.push({
@@ -15172,7 +15181,8 @@ exit $LASTEXITCODE
         return {
           packageJson,
           configs,
-          somePoliciesAreMissing
+          somePoliciesAreMissing,
+          canonicalNamesByPath
         };
       }
       function indexLifecycleConfiguration(config) {
