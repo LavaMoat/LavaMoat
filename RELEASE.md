@@ -22,6 +22,8 @@ LavaMoat follows [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.html
 
    In both cases, Artifacts will be rebuilt and the default set of tests will run. _Do not attempt to publish individual packages!_
 
+   An error 404 likely means you lack permissions to publish and require an invite to the [organisation](https://www.npmjs.com/org/lavamoat).
+
 8. **Check the output** of `npm pack` to ensure the correct files are being published.
 9. If prompted, **enter** your 2FA passcode or **visit** the URL `npm` provides you. Once authenticated, the publish will proceed.
 10. **Verify** the published package(s) on [npm](https://www.npmjs.com/search?q=lavamoat).
@@ -74,13 +76,17 @@ The publishing script is located in [`scripts/publish.js`](./scripts/publish.js)
 | browserify                | lavamoat-browserify                 | @lavamoat/aa, @lavamoat/lavapack, lavamoat-core |
 | core                      | lavamoat-core                       | lavamoat-tofu                                   |
 | lavapack                  | @lavamoat/lavapack                  | lavamoat-core                                   |
+| laverna                   | @lavamoat/laverna                   |                                                 |
 | node                      | lavamoat                            | @lavamoat/aa, lavamoat-core, lavamoat-tofu      |
-| perf                      | lavamoat-perf                       | lavamoat-browserify, lavamoat                   |
+| perf                      | lavamoat-perf                       |                                                 |
 | preinstall-always-fail    | @lavamoat/preinstall-always-fail    |                                                 |
-| survey                    | survey                              | lavamoat, lavamoat-tofu                         |
+| survey                    | survey                              | lavamoat, lavamoat-core, lavamoat-tofu          |
 | tofu                      | lavamoat-tofu                       |                                                 |
-| viz                       | lavamoat-viz                        | lavamoat-core                                   |
+| webpack                   | @lavamoat/webpack                   | @lavamoat/aa, lavamoat-core                     |
+| viz\*                     | lavamoat-viz                        | lavamoat-core                                   |
 | yarn-plugin-allow-scripts | @lavamoat/yarn-plugin-allow-scripts |                                                 |
+
+> [!WARNING] \*`lavamoat-viz` is currently unmaintained; we have tentative plans to resume development in the future.
 
 [Release Please]: https://github.com/google-github-actions/release-please-action
 [Conventional Commits]: https://www.conventionalcommits.org/en/v1.0.0/#summary
