@@ -15,7 +15,16 @@
  * @packageDocumentation
  */
 
+/**
+ * WARNING: This module is used directly by the runtime in webpack plugin which
+ * uses simple shimming to assemble modules. It doesn't bundle properly. This
+ * file cannot reqire any files or packages.
+ */
+
 module.exports = endowmentsToolkit
+
+// Exports for testing
+module.exports._test = { instrumentDynamicValueAtPath }
 
 /**
  * @param {object} opts
@@ -160,102 +169,6 @@ function endowmentsToolkit({
       }
     })
     return targetRef
-  }
-
-  /**
-   * @param {string} visited
-   * @param {string} next
-   */
-  function extendPath(visited, next) {
-    // FIXME: second part of this conditional should be unnecessary
-    if (!visited || visited.length === 0) {
-      return next
-    }
-    return `${visited}.${next}`
-  }
-
-  /**
-   * @template T
-   * @param {T | null} value
-   * @returns {value is null}
-   */
-  function isEmpty(value) {
-    return !value
-  }
-
-  /**
-   * @param {string} key
-   * @param {Record<string, any>} sourceRef
-   * @param {Record<string, any>} targetRef
-   */
-  function makeWritableValueAtPath(key, sourceRef, targetRef) {
-    const enumerable = Reflect.getOwnPropertyDescriptor(
-      sourceRef,
-      key
-    )?.enumerable
-    Reflect.defineProperty(targetRef, key, {
-      configurable: false,
-      enumerable,
-      set(newValue) {
-        sourceRef[key] = newValue
-      },
-      get() {
-        return sourceRef[key]
-      },
-    })
-  }
-
-  /**
-   * Puts a getter at the end of the path that returns the nested values from a
-   * top-level field that might change at runtime.
-   *
-   * @param {string[]} pathParts
-   * @param {Record<string, any>} sourceRef
-   * @param {Record<string, any>} targetRef
-   */
-  function instrumentDynamicValueAtPath(pathParts, sourceRef, targetRef) {
-    const enumerable = Reflect.getOwnPropertyDescriptor(
-      sourceRef,
-      pathParts[0]
-    )?.enumerable
-    const dynamicGetterDesc = {
-      get: () => {
-        const dynamicValue = sourceRef[pathParts[0]]
-        let leaf = dynamicValue,
-          parent = sourceRef
-
-        for (let i = 1; i < pathParts.length; i++) {
-          parent = leaf
-          leaf = leaf[pathParts[i]]
-        }
-        if (typeof leaf === 'function') {
-          leaf = leaf.bind(parent) // TODO: consider the risks, should not differ from unwrapping
-        }
-        return leaf
-      },
-      writeable: false,
-      enumerable, // Initial value will have to suffice. Change will not propagate dynamically.
-      configurable: false,
-    }
-    let currentTarget = targetRef
-    let currentPath = ''
-    for (let depth = 0; depth < pathParts.length - 1; depth++) {
-      currentPath = extendPath(currentPath, pathParts[depth])
-      const nextPart = pathParts[depth]
-      if (Reflect.getOwnPropertyDescriptor(currentTarget, nextPart)?.get) {
-        // We could silently ignore this, but it could introduce a false sense of security in the policy file
-        throw Error(
-          `LavaMoat - "${pathParts[0]}" is writeable elsewhere and both "${currentPath}" and "${pathParts.join('.')}" are allowed for one package. One of these entries is redundant.`
-        )
-      }
-      if (typeof currentTarget[nextPart] !== 'object') {
-        currentTarget[nextPart] = {}
-      }
-      currentTarget = currentTarget[nextPart]
-    }
-
-    const lastPart = pathParts[pathParts.length - 1]
-    Reflect.defineProperty(currentTarget, lastPart, dynamicGetterDesc)
   }
 
   /**
@@ -640,26 +553,121 @@ function endowmentsToolkit({
     }
     return target
   }
-
-  /**
-   * Util for getting the prototype chain as an array includes the provided
-   * value in the result
-   *
-   * @param {any} value
-   * @returns {any[]}
-   */
-  function getPrototypeChain(value) {
-    const protoChain = []
-    let current = value
-    while (
-      current &&
-      (typeof current === 'object' || typeof current === 'function')
-    ) {
-      protoChain.push(current)
-      current = Reflect.getPrototypeOf(current)
-    }
-    return protoChain
+}
+/**
+ * Util for getting the prototype chain as an array includes the provided value
+ * in the result
+ *
+ * @param {any} value
+ * @returns {any[]}
+ */
+function getPrototypeChain(value) {
+  const protoChain = []
+  let current = value
+  while (
+    current &&
+    (typeof current === 'object' || typeof current === 'function')
+  ) {
+    protoChain.push(current)
+    current = Reflect.getPrototypeOf(current)
   }
+  return protoChain
+}
+
+/**
+ * @param {string} visited
+ * @param {string} next
+ */
+function extendPath(visited, next) {
+  // FIXME: second part of this conditional should be unnecessary
+  if (!visited || visited.length === 0) {
+    return next
+  }
+  return `${visited}.${next}`
+}
+
+/**
+ * @template T
+ * @param {T | null} value
+ * @returns {value is null}
+ */
+function isEmpty(value) {
+  return !value
+}
+
+/**
+ * @param {string} key
+ * @param {Record<string, any>} sourceRef
+ * @param {Record<string, any>} targetRef
+ */
+function makeWritableValueAtPath(key, sourceRef, targetRef) {
+  const enumerable = Reflect.getOwnPropertyDescriptor(
+    sourceRef,
+    key
+  )?.enumerable
+  Reflect.defineProperty(targetRef, key, {
+    configurable: false,
+    enumerable,
+    set(newValue) {
+      sourceRef[key] = newValue
+    },
+    get() {
+      return sourceRef[key]
+    },
+  })
+}
+
+/**
+ * Puts a getter at the end of the path that returns the nested values from a
+ * top-level field that might change at runtime.
+ *
+ * @param {string[]} pathParts
+ * @param {Record<string, any>} sourceRef
+ * @param {Record<string, any>} targetRef
+ */
+function instrumentDynamicValueAtPath(pathParts, sourceRef, targetRef) {
+  const enumerable = Reflect.getOwnPropertyDescriptor(
+    sourceRef,
+    pathParts[0]
+  )?.enumerable
+  const dynamicGetterDesc = {
+    get: () => {
+      const dynamicValue = sourceRef[pathParts[0]]
+      let leaf = dynamicValue,
+        parent = sourceRef
+
+      for (let i = 1; i < pathParts.length; i++) {
+        parent = leaf
+        leaf = leaf[pathParts[i]]
+      }
+      if (typeof leaf === 'function') {
+        leaf = leaf.bind(parent) // TODO: consider the risks, should not differ from unwrapping
+      }
+      return leaf
+    },
+    writeable: false,
+    enumerable, // Initial value will have to suffice. Change will not propagate dynamically.
+    configurable: false,
+  }
+  let currentTarget = targetRef
+  let currentPath = ''
+  for (let depth = 0; depth < pathParts.length - 1; depth++) {
+    currentPath = extendPath(currentPath, pathParts[depth])
+    const nextPart = pathParts[depth]
+    if (Reflect.getOwnPropertyDescriptor(currentTarget, nextPart)?.get) {
+      // We could silently ignore this, but it could introduce a false sense of security in the policy file
+      throw Error(
+        `LavaMoat - "${pathParts[0]}" is writeable elsewhere and both "${currentPath}" and "${pathParts.join('.')}" are allowed for one package. One of these entries is redundant.`
+      )
+    }
+    if (typeof currentTarget[nextPart] !== 'object') {
+      currentTarget[nextPart] = {}
+    }
+    currentTarget = currentTarget[nextPart]
+  }
+
+  const lastPart = pathParts[pathParts.length - 1]
+  Reflect.defineProperty(currentTarget, lastPart, dynamicGetterDesc)
 }
 
 /**

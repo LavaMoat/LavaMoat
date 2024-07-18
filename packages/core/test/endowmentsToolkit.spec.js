@@ -95,7 +95,7 @@ test('getEndowmentsForConfig - siblings', (t) => {
   }
 })
 
-test('getEndowmentsForConfig - knownWritableFields', (t) => {
+test('getEndowmentsForConfig - knownWritable', (t) => {
   const knownWritable = new Set(['a', 'b', 'x'])
   const getEndowmentsForConfig = prepareTest({ knownWritable })
   const sourceGlobal = {
@@ -123,6 +123,25 @@ test('getEndowmentsForConfig - knownWritableFields', (t) => {
     t.is(resultGlobal.b.c, 22)
     t.is(resultGlobal.d, 3)
   }
+})
+
+test('instrumentDynamicValueAtPath puts a getter at path', (t) => {
+  const { instrumentDynamicValueAtPath } = endowmentsToolkit._test
+
+  const source = {
+    a: { b: { c: 1 } },
+  }
+  const target = {}
+
+  instrumentDynamicValueAtPath(['a', 'b', 'c'], source, target)
+
+  t.is(
+    typeof Object.getOwnPropertyDescriptor(target?.a?.b, 'c')?.get,
+    'function'
+  )
+  t.is(target.a.b.c, 1)
+  source.a.b.c = 2
+  t.is(target.a.b.c, 2)
 })
 
 test('getEndowmentsForConfig - knownWritable and tightening access with false', (t) => {
