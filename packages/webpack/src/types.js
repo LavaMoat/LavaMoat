@@ -57,6 +57,7 @@
 
 /**
  * @callback EndowmentsToolkitFactory
+ * @param {object} options - Options object
  * @returns {EndowmentsToolkit}
  */
 
