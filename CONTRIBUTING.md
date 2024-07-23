@@ -107,7 +107,11 @@ Don't have Node.js installed? You can [download and install Node.js from the off
 
 #### npm
 
-LavaMoat uses `npm` for package management. You should be using the latest version of [npm][] which will run on your version of Node.js.
+LavaMoat uses [npm][] for package management. You can ensure you are using a compatible version by enabling [corepack][]:
+
+   ```shell frame="none"
+   corepack enable
+   ```
 
 #### Editor
 
@@ -327,6 +331,7 @@ git push origin issue1234 -f
 The LavaMoat team thanks you for contributing! "You're welcome" is appreciated, but not necessary. 😄
 
 [coc]: /contributor/code-of-conduct
+[corepack]: https://github.com/nodejs/corepack
 [dco]: https://developercertificate.org
 [faq]: /about/faq
 [issues]: https://github.com/LavaMoat/LavaMoat/issues
