@@ -17,15 +17,76 @@ jobs:
     name: test
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
-        node-version:
-          - 16.x
-          - 18.x
-          # TODO: Resolve whttps://github.com/LavaMoat/LavaMoat/issues/1211 and enable v20.x, v22.x
-          - 20.14.x
-          - 22.5.x
-          #- 20.x
-          #- 22.x
+        inlude:
+          - node-version: 16.x
+            test-workspaces: >-
+              --workspace=packages/aa
+              --workspace=packages/allow-scripts
+              --workspace=packages/lavapack
+              --workspace=packages/preinstall-always-fail
+              --workspace=packages/tofu
+              --workspace=packages/yarn-plugin-allow-scripts
+          - node-version: 18.x
+            test-workspaces: >-
+              --workspace=packages/aa
+              --workspace=packages/allow-scripts
+              --workspace=packages/browserify
+              --workspace=packages/core
+              --workspace=packages/lavapack
+              --workspace=packages/laverna
+              --workspace=packages/node
+              --workspace=packages/perf
+              --workspace=packages/preinstall-always-fail
+              --workspace=packages/survey
+              --workspace=packages/tofu
+              --workspace=packages/webpack
+              --workspace=packages/yarn-plugin-allow-scripts
+
+          # TODO: Resolve https://github.com/LavaMoat/LavaMoat/issues/1211 and enable v20.x, v22.x
+          - node-version: 20.14.x
+            test-workspaces: >-
+              --workspace=packages/aa
+              --workspace=packages/browserify
+              --workspace=packages/core
+              --workspace=packages/node
+              --workspace=packages/tofu
+              --workspace=packages/webpack
+          # TODO: Resolve https://github.com/LavaMoat/LavaMoat/issues/1211 and enable v20.x, v22.x
+          - node-version: 22.1.x
+            test-workspaces: >-
+              --workspace=packages/aa
+              --workspace=packages/browserify
+              --workspace=packages/core
+              --workspace=packages/node
+              --workspace=packages/tofu
+              --workspace=packages/webpack
+
+          - node-version: 20.x
+            test-workspaces: >-
+              --workspace=packages/aa
+              --workspace=packages/allow-scripts
+              --workspace=packages/core
+              --workspace=packages/lavapack
+              --workspace=packages/laverna
+              --workspace=packages/perf
+              --workspace=packages/preinstall-always-fail
+              --workspace=packages/survey
+              --workspace=packages/tofu
+              --workspace=packages/yarn-plugin-allow-scripts
+          - node-version: 22.x
+            test-workspaces: >-
+              --workspace=packages/aa
+              --workspace=packages/allow-scripts
+              --workspace=packages/core
+              --workspace=packages/lavapack
+              --workspace=packages/laverna
+              --workspace=packages/perf
+              --workspace=packages/preinstall-always-fail
+              --workspace=packages/survey
+              --workspace=packages/tofu
+              --workspace=packages/yarn-plugin-allow-scripts
     steps:
       - name: Checkout (PR)
         if: github.event_name == 'pull_request'
@@ -53,7 +114,8 @@ jobs:
           useRollingCache: true
           install-command: npm ci --foreground-scripts
       - name: Test
-        run: npm test
+        run: |
+          npm run --if-present ${{ matrix.test-workspaces }} test
       - name: Dirty Check
         run: node ./scripts/dirty-check.js
 
@@ -107,7 +169,6 @@ jobs:
         with:
           useRollingCache: true
           install-command: npm ci --foreground-scripts
-      # Limit testing to packages supported to run under windows
       - name: Test
         run: |
           npm run --if-present ${{ env.TEST_WORKSPACES }} build
@@ -120,6 +181,20 @@ jobs:
     runs-on: macOS-latest
     env:
       FORCE_COLOR: 1
+      TEST_WORKSPACES: >-
+        --workspace=packages/aa
+        --workspace=packages/allow-scripts
+        --workspace=packages/browserify
+        --workspace=packages/core
+        --workspace=packages/lavapack
+        --workspace=packages/laverna
+        --workspace=packages/node
+        --workspace=packages/perf
+        --workspace=packages/preinstall-always-fail
+        --workspace=packages/survey
+        --workspace=packages/tofu
+        --workspace=packages/webpack
+        --workspace=packages/yarn-plugin-allow-scripts
     steps:
       - name: Checkout
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
@@ -138,4 +213,5 @@ jobs:
           useRollingCache: true
           install-command: npm ci --foreground-scripts
       - name: Test
-        run: npm test
+        run: |
+          npm run --if-present ${{ env.TEST_WORKSPACES }} test
