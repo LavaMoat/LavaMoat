@@ -42,7 +42,7 @@ const plugin: Plugin = {
       npm_lifecycle_event: string,
       {env:{npm_package_json, npm_package_name}} : { env: any },
     ): Promise<() => Promise<number>> => {
-      return new Promise((resolve, reject) =>
+      return new Promise((resolve, _reject) =>
         isPackageScriptAllowed(project, npm_package_json).then(isAllowed => {
           if (!isAllowed) {
             console.error(isAllowed === null

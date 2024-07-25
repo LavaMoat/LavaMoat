@@ -1,11 +1,11 @@
 import test from 'ava'
-import os from 'node:os'
-import fs from 'node:fs'
-import path from 'node:path'
+import { platform } from 'node:os'
+import { rmSync } from 'node:fs'
+import { dirname, join } from 'node:path'
 import { SpawnSyncOptions } from 'node:child_process'
 import { spawnSync } from 'node:child_process'
 
-const isWindows = os.platform() === 'win32'
+const isWindows = platform() === 'win32'
 const YARN_CMD = isWindows ? 'yarn.cmd' : 'yarn'
 
 /**
@@ -25,25 +25,18 @@ const run = (
   t: any,
   args: string[],
   cwd: string,
-  //options: any = realisticEnvOptions(cwd),
+  env: {} = {},
 ): {exitCode: number|null, out: string, err: string} => {
-  // const result = execute(process.execPath, [cmd, ...args], options)
-  //const result = await execute(cmd, args, options)
   try {
-    // await runExit([cmd, ...args], options)
-    //process.env = {};
-    /*
-    const { defaultContext }  = await getCli({
-      cwd: cwd as PortablePath,
-    });
-    */
-    const env = realisticEnvOptions(cwd);
     console.log({cwd, env})
     const result = spawnSync(
       YARN_CMD,
       args,
-      //'/bin/sh',
-      env,
+      {
+        ...process.env,
+        ...realisticEnvOptions(cwd),
+        ...env,
+      },
     )
     console.log({result})
     return {
@@ -73,11 +66,10 @@ const run = (
 
 test('cli - auto command', async (t: any) => {
   // set up the directories
-  const projectRoot = path.join(path.dirname(import.meta.url.replace(/^file:/, '')), 'projects', 'uninitialized')
-  console.error({ projectRoot });
+  const projectRoot = join(dirname(import.meta.url.replace(/^file:/, '')), 'projects', 'uninitialized')
 
   // delete any leftover test artefacts
-  fs.rmSync(path.join(projectRoot, PACKAGE_JSON), { force: true })
+  rmSync(join(projectRoot, PACKAGE_JSON), { force: true })
 
   // init project
   const initRes = run(t, ['init', '-y'], projectRoot)
@@ -89,18 +81,24 @@ test('cli - auto command', async (t: any) => {
   t.regex(importRes.out, /YN0000: Saving the new plugin in .yarn\/plugins\/@yarnpkg\/plugin-allow-scripts.cjs/);
   t.is(importRes.exitCode, 0);
 
+  const addRes = run(t, ['add', '@lavamoat/preinstall-always-fail'], projectRoot)
+  t.is(addRes.err, '');
+  t.regex(addRes.out, /YN0000:.*Completed/);
+  t.is(addRes.exitCode, 0);
+
   // trigger the plugin
   const installRes = run(t, ['install'], projectRoot)
   t.is(installRes.err, '');
-  t.regex(installRes.out, /YN0000:.*Completed/);
-  t.is(installRes.exitCode, 0);
+  t.regex(installRes.out, /allow-scripts detected attempted execution of unconfigured package script. {"npm_package_name":"@lavamoat\/preinstall-always-fail","npm_lifecycle_event":"preinstall"/);
+  t.is(installRes.exitCode, 1);
+
 
   /*
   // get the package.json
   const packageJsonContents = JSON.parse(
-    fs.readFileSync(
+    readFileSync(
       pathToFileURL(
-        path.join(projectRoot.replace(path.sep, '/'), PACKAGE_JSON),
+        join(projectRoot.replace(sep, '/'), PACKAGE_JSON),
         'utf8'
       )
     )
@@ -116,8 +114,6 @@ test('cli - auto command', async (t: any) => {
 })
 
 function realisticEnvOptions(projectRoot: string): SpawnSyncOptions {
-    // process.env.COREPACK_ENABLE_NETWORK='0'
-    // process.env.COREPACK_ENABLE_PROJECT_SPEC='0'
   return {
     cwd: projectRoot,
     env: {
