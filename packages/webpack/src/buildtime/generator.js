@@ -107,10 +107,7 @@ exports.wrapGeneratorMaker = ({
         return originalGeneratedSource
       }
 
-      // skip doing anything if marked as excluded by the excludeLoader,
-      // only accept exclude loader from config, not inline.
-      // Inline loader definition uses a `!` character as a loader separator.
-      // Defining what to exclude should only be possible in the config.
+      // skip doing anything if marked as excluded by the excludeLoader
       if (isExcluded(module)) {
         excludes.push(module.rawRequest)
         diag.rawDebug(3, `skipped wrapping ${module.rawRequest}`)

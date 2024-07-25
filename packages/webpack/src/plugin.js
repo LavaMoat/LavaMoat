@@ -1,4 +1,6 @@
 const path = require('node:path')
+const assert = require('node:assert')
+
 const { WebpackError, RuntimeModule } = require('webpack')
 const { Compilation } = require('webpack')
 const browserResolve = require('browser-resolve')
@@ -254,7 +256,6 @@ class LavaMoatPlugin {
             Array.from(chunks).forEach((chunk) => {
               chunkGraph.getChunkModules(chunk).forEach((module) => {
                 const moduleId = chunkGraph.getModuleId(module)
-                // TODO: potentially a place to hook into for policy generation
                 // Module policies can be merged into a per-package policy in a second pass or right away, depending on what we can pull off for the ID generation.
                 // Seems like it'd make sense to do it right away.
                 if (isNormalModule(module)) {
@@ -293,6 +294,11 @@ class LavaMoatPlugin {
             // getting the policy also writes all files where necessary
             const policyToApply = policyGenerator.getPolicy()
 
+            assert(
+              policyToApply !== undefined,
+              'Policy was not specified nor generated.'
+            )
+
             identifierLookup = generateIdentifierLookup({
               readableResourceIds: options.readableResourceIds,
               unenforceableModuleIds,
@@ -309,8 +315,8 @@ class LavaMoatPlugin {
               )
             }
             PROGRESS.report('pathsProcessed')
-          } catch (error) {
-            // Push the error to the compilation errors array
+          } catch (/** @type {any} */ error) {
+            // NOTE: Webpack is handling regular errors pushed to compilation.errors just fine despite the type being set to WebpackError[]. I'd be convinced to wrap them in WebpackError if it didn't lack support of `cause`.
             compilation.errors.push(error)
           }
         })
