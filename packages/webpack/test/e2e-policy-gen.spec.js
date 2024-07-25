@@ -2,6 +2,7 @@ const test = require('ava')
 const { scaffold, runScriptWithSES } = require('./scaffold.js')
 const { makeConfig } = require('./fixtures/main/webpack.config.js')
 const path = require('node:path')
+const LavaMoatPlugin = require('../src/plugin.js')
 
 test.before(async (t) => {
   const webpackConfig = makeConfig({
@@ -60,4 +61,50 @@ test('webpack/policy-gen - policy-overrides get applied on generated', async (t)
         'Policy does not allow importing umd-package from commonjs-package',
     }
   )
+})
+
+test('webpack/policy-gen - handles excludes', async (t) => {
+  const webpackConfig = makeConfig({
+    generatePolicy: true,
+    policyLocation: path.resolve(__dirname, 'fixtures/main/policy-excludes'),
+    diagnosticsVerbosity: 1,
+  })
+  webpackConfig.entry = path.resolve(__dirname, 'fixtures/main/excludes.js')
+  try {
+    await scaffold(webpackConfig)
+  } catch (e) {
+    t.truthy(
+      e.compilationErrors.some(
+        (err) =>
+          err.message.includes('Failed to inspect') &&
+          err.message.includes('exclude loader')
+      )
+    )
+    t.truthy(
+      e.compilationErrors.some((err) =>
+        err.message.includes('Module parse failed')
+      )
+    )
+  }
+
+  webpackConfig.module.rules.push({
+    test: /invalid\.js$/,
+    use: [LavaMoatPlugin.exclude],
+  })
+
+  try {
+    await scaffold(webpackConfig)
+  } catch (e) {
+    t.falsy(
+      e.compilationErrors.some((err) =>
+        err.message.includes('Failed to inspect')
+      )
+    )
+    t.truthy(
+      e.compilationErrors.some((err) =>
+        err.message.includes('Module parse failed')
+      )
+    )
+  }
+  t.pass()
 })

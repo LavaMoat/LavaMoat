@@ -47,7 +47,9 @@ exports.scaffold = async function runWebpackBuild(
 
       if (stats.hasErrors()) {
         console.error(stats.toString({ colors: true }))
-        reject(Error('webpack build reported errors'))
+        const err = Error('webpack build reported errors')
+        err.compilationErrors = stats.compilation.errors
+        reject(err)
       }
 
       let snapshot

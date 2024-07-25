@@ -60,7 +60,7 @@ module.exports = function progress({ steps }) {
     if (steps[currentStep + 1] !== step) {
       reportError(
         Error(
-          `LavaMoatPlugin Plugin: Progress reported '${step}' but the next step was expected to be '${
+          `LavaMoatPlugin: Progress reported '${step}' but the next step was expected to be '${
             steps[currentStep + 1]
           }'`
         )
@@ -96,7 +96,7 @@ module.exports = function progress({ steps }) {
     }
     reportError(
       Error(
-        `LavaMoatPlugin Plugin: Expected '${query}' to be done, but we're at '${steps[currentStep]}'`
+        `LavaMoatPlugin: Expected '${query}' to be done, but we're at '${steps[currentStep]}'`
       )
     )
   }
