@@ -115,6 +115,9 @@ jobs:
           install-command: npm ci --foreground-scripts
       - name: Test
         run: |
+          npm run --if-present ${{ matrix.test-workspaces }} build
+          npm run build:types
+          npm run --if-present ${{ matrix.test-workspaces }} test:prep
           npm run --if-present ${{ matrix.test-workspaces }} test
       - name: Dirty Check
         run: node ./scripts/dirty-check.js
@@ -214,4 +217,7 @@ jobs:
           install-command: npm ci --foreground-scripts
       - name: Test
         run: |
+          npm run --if-present ${{ env.TEST_WORKSPACES }} build
+          npm run build:types
+          npm run --if-present ${{ env.TEST_WORKSPACES }} test:prep
           npm run --if-present ${{ env.TEST_WORKSPACES }} test
