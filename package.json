@@ -36,9 +36,6 @@
     "test:workspaces": "npm run --workspaces --if-present test",
     "watch:types": "tsc -b --watch"
   },
-  "optionalDependencies": {
-    "corepack": "0.20.0"
-  },
   "devDependencies": {
     "@commitlint/cli": "19.3.0",
     "@commitlint/config-conventional": "19.2.2",
