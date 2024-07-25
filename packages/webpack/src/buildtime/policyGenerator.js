@@ -115,7 +115,14 @@ module.exports = {
           //ast: module._ast, - would have to translate to babel anyway
         })
 
-        moduleInspector.inspectModule(moduleRecord)
+        try {
+          moduleInspector.inspectModule(moduleRecord)
+        } catch (e) {
+          throw new Error(
+            `LavaMoatPlugin: Failed to inspect module ${module.userRequest} for policy generation. ${e.message} \n If the file is not intended to be valid JavaScript, consider excluding it using LavaMoat.exclude loader.`,
+            { cause: e }
+          )
+        }
       },
       getPolicy: () => {
         const policy = moduleInspector.generatePolicy({})

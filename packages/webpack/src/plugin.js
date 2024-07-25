@@ -248,66 +248,71 @@ class LavaMoatPlugin {
         //   PROGRESS.report("pathsCollected");
         // });
         compilation.hooks.afterOptimizeChunkIds.tap(PLUGIN_NAME, (chunks) => {
-          const chunkGraph = compilation.chunkGraph
+          try {
+            const chunkGraph = compilation.chunkGraph
 
-          Array.from(chunks).forEach((chunk) => {
-            chunkGraph.getChunkModules(chunk).forEach((module) => {
-              const moduleId = chunkGraph.getModuleId(module)
-              // TODO: potentially a place to hook into for policy generation
-              // Module policies can be merged into a per-package policy in a second pass or right away, depending on what we can pull off for the ID generation.
-              // Seems like it'd make sense to do it right away.
-              if (isNormalModule(module)) {
-                policyGenerator.inspectWebpackModule(
-                  module,
-                  compilation.moduleGraph.getOutgoingConnections(module)
-                )
-              }
+            Array.from(chunks).forEach((chunk) => {
+              chunkGraph.getChunkModules(chunk).forEach((module) => {
+                const moduleId = chunkGraph.getModuleId(module)
+                // TODO: potentially a place to hook into for policy generation
+                // Module policies can be merged into a per-package policy in a second pass or right away, depending on what we can pull off for the ID generation.
+                // Seems like it'd make sense to do it right away.
+                if (isNormalModule(module)) {
+                  policyGenerator.inspectWebpackModule(
+                    module,
+                    compilation.moduleGraph.getOutgoingConnections(module)
+                  )
+                }
 
-              if (
-                // Webpack has a concept of ignored modules
-                // When a module is ignored a carveout is necessary in policy enforcement for it because the ID that webpack creates for it is not exactly helpful.
-                // example outcome in the bundle: `const nodeCrypto = __webpack_require__(/*! crypto */ "?0b7d");`
-                // Sadly, even treeshaking doesn't eliminate that module. It's left there and failing to work when reached by runtime policy enforcement.
-                // Below is the most reliable way I've found to date to identify ignored modules.
-                (module.type === JAVASCRIPT_MODULE_TYPE_DYNAMIC &&
+                if (
+                  // Webpack has a concept of ignored modules
+                  // When a module is ignored a carveout is necessary in policy enforcement for it because the ID that webpack creates for it is not exactly helpful.
+                  // example outcome in the bundle: `const nodeCrypto = __webpack_require__(/*! crypto */ "?0b7d");`
+                  // Sadly, even treeshaking doesn't eliminate that module. It's left there and failing to work when reached by runtime policy enforcement.
+                  // Below is the most reliable way I've found to date to identify ignored modules.
+                  (module.type === JAVASCRIPT_MODULE_TYPE_DYNAMIC &&
+                    // @ts-expect-error BAD TYPES
+                    module.identifierStr?.startsWith('ignored')) ||
                   // @ts-expect-error BAD TYPES
-                  module.identifierStr?.startsWith('ignored')) ||
-                // @ts-expect-error BAD TYPES
-                module.resource === undefined // better to explicitly list it as unenforceable than let it fall through the cracks
-              ) {
-                unenforceableModuleIds.push(moduleId)
-              } else {
-                knownPaths.push({
-                  path: /** @type {any} */ (module).resource,
-                  moduleId,
-                }) // typescript is complaining about the use of `resource` here, but it's actually there.
-              }
+                  module.resource === undefined // better to explicitly list it as unenforceable than let it fall through the cracks
+                ) {
+                  unenforceableModuleIds.push(moduleId)
+                } else {
+                  knownPaths.push({
+                    path: /** @type {any} */ (module).resource,
+                    moduleId,
+                  }) // typescript is complaining about the use of `resource` here, but it's actually there.
+                }
+              })
             })
-          })
-          diag.rawDebug(4, { knownPaths })
-          PROGRESS.report('pathsCollected')
+            diag.rawDebug(4, { knownPaths })
+            PROGRESS.report('pathsCollected')
 
-          diag.rawDebug(2, 'writing policy')
-          // use the generated policy to save the user one additional pass
-          // getting the policy also writes all files where necessary
-          const policyToApply = policyGenerator.getPolicy()
+            diag.rawDebug(2, 'writing policy')
+            // use the generated policy to save the user one additional pass
+            // getting the policy also writes all files where necessary
+            const policyToApply = policyGenerator.getPolicy()
 
-          identifierLookup = generateIdentifierLookup({
-            readableResourceIds: options.readableResourceIds,
-            unenforceableModuleIds,
-            paths: knownPaths,
-            policy: policyToApply,
-            canonicalNameMap,
-          })
+            identifierLookup = generateIdentifierLookup({
+              readableResourceIds: options.readableResourceIds,
+              unenforceableModuleIds,
+              paths: knownPaths,
+              policy: policyToApply,
+              canonicalNameMap,
+            })
 
-          if (unenforceableModuleIds.length > 0) {
-            mainCompilationWarnings.push(
-              new WebpackError(
-                `LavaMoatPlugin: the following module ids can't be controlled by policy and must be ignored at runtime: \n  ${unenforceableModuleIds.join()}`
+            if (unenforceableModuleIds.length > 0) {
+              mainCompilationWarnings.push(
+                new WebpackError(
+                  `LavaMoatPlugin: the following module ids can't be controlled by policy and must be ignored at runtime: \n  ${unenforceableModuleIds.join()}`
+                )
               )
-            )
+            }
+            PROGRESS.report('pathsProcessed')
+          } catch (error) {
+            // Push the error to the compilation errors array
+            compilation.errors.push(error)
           }
-          PROGRESS.report('pathsProcessed')
         })
 
         // =================================================================
@@ -452,7 +457,9 @@ class LavaMoatPlugin {
              * @returns {plugin is import('webpack').WebpackPluginInstance}
              */
             (plugin) =>
-              !!plugin && typeof plugin === 'object' && plugin.constructor.name === 'HtmlWebpackPlugin'
+              !!plugin &&
+              typeof plugin === 'object' &&
+              plugin.constructor.name === 'HtmlWebpackPlugin'
           )
           compilation.hooks.processAssets.tap(
             {
