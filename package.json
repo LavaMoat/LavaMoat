@@ -67,7 +67,7 @@
     "prettier-plugin-pkg": "0.18.1",
     "ses": "1.5.0",
     "type-fest": "4.15.0",
-    "typescript": "5.4.5"
+    "typescript": "5.5.4"
   },
   "overrides": {
     "@types/node": "$@types/node",
