@@ -19,9 +19,9 @@ const POLICY_SNAPSHOT_FILENAME = 'policy-snapshot.json'
 module.exports = {
   /**
    * @param {Object} opts
-   * @param {import('../types.js').Policy} [opts.policyFromOptions] - The
-   *   hardcoded policy passed in options, takes precedence over reading from
-   *   files
+   * @param {import('lavamoat-core').LavaMoatPolicy} [opts.policyFromOptions] -
+   *   The hardcoded policy passed in options, takes precedence over reading
+   *   from files
    * @param {import('@lavamoat/aa').CanonicalNameMap} opts.canonicalNameMap -
    *   Generated from aa
    * @param {import('webpack').Compilation} opts.compilation - Webpack
@@ -89,8 +89,9 @@ module.exports = {
        * @param {Iterable<import('webpack').ModuleGraphConnection>} connections
        */
       inspectWebpackModule: (module, connections) => {
+        // Skip modules the user intentionally excludes.
+        // This is policy generation so we don't need to protect ourselves from an attack where the module has a loader defined in the specifier.
         if (isExcludedUnsafe(module)) return
-        // process._rawDebug(module.originalSource().source())
         const packageName = getPackageNameForModulePath(
           canonicalNameMap,
           module.userRequest
@@ -117,9 +118,9 @@ module.exports = {
 
         try {
           moduleInspector.inspectModule(moduleRecord)
-        } catch (e) {
+        } catch (/** @type any */ e) {
           throw new Error(
-            `LavaMoatPlugin: Failed to inspect module ${module.userRequest} for policy generation. ${e.message} \n If the file is not intended to be valid JavaScript, consider excluding it using LavaMoat.exclude loader.`,
+            `LavaMoatPlugin: Failed to inspect module ${module.userRequest} for policy generation:\n ${e.message}\n If the file is not intended to be valid JavaScript, consider excluding it using LavaMoat.exclude loader.`,
             { cause: e }
           )
         }
