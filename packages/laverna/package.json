@@ -44,7 +44,7 @@
     "test": "ava --config=ava.config.js"
   },
   "dependencies": {
-    "glob": "10.4.5",
+    "glob": "11.0.0",
     "kleur": "4.1.5",
     "type-fest": "4.23.0"
   },
