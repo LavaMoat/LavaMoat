@@ -23,7 +23,7 @@ jobs:
           - 18.x
           # TODO: Resolve whttps://github.com/LavaMoat/LavaMoat/issues/1211 and enable v20.x, v22.x
           - 20.14.x
-          - 22.1.x
+          - 22.5.x
           #- 20.x
           #- 22.x
     steps:
