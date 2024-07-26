@@ -1,84 +1,8 @@
 {
   "resources": {
-    "accepts": {
-      "packages": {
-        "mime-types": true,
-        "negotiator": true
-      }
-    },
     "bad-idea-express-backdoor": {
-      "builtin": {
-        "child_process.exec": true,
-        "crypto.createHash": true
-      }
-    },
-    "body-parser": {
-      "builtin": {
-        "querystring": true,
-        "zlib.createGunzip": true,
-        "zlib.createInflate": true
-      },
       "packages": {
-        "bytes": true,
-        "content-type": true,
-        "debug": true,
-        "depd": true,
-        "http-errors": true,
-        "iconv-lite": true,
-        "on-finished": true,
-        "qs": true,
-        "raw-body": true,
-        "type-is": true
-      }
-    },
-    "content-disposition": {
-      "builtin": {
-        "path.basename": true
-      },
-      "packages": {
-        "safe-buffer": true
-      }
-    },
-    "cookie-signature": {
-      "builtin": {
-        "crypto.createHash": true,
-        "crypto.createHmac": true
-      }
-    },
-    "debug": {
-      "builtin": {
-        "fs.SyncWriteStream": true,
-        "net.Socket": true,
-        "tty.WriteStream": true,
-        "tty.isatty": true,
-        "util": true
-      },
-      "globals": {
-        "chrome": true,
-        "console": true,
-        "document": true,
-        "localStorage": true,
-        "navigator": true,
-        "process": true
-      },
-      "packages": {
-        "ms": true
-      }
-    },
-    "destroy": {
-      "builtin": {
-        "fs.ReadStream": true,
-        "stream": true
-      }
-    },
-    "etag": {
-      "builtin": {
-        "crypto.createHash": true,
-        "fs.Stats": true
-      },
-      "globals": {
-        "Buffer.byteLength": true,
-        "Buffer.isBuffer": true
+        "child_process": false
       }
     },
     "express": {
@@ -102,65 +26,75 @@
         "setImmediate": true
       },
       "packages": {
-        "accepts": true,
-        "array-flatten": true,
-        "body-parser": true,
-        "content-disposition": true,
-        "content-type": true,
-        "cookie": true,
-        "cookie-signature": true,
-        "debug": true,
-        "depd": true,
-        "encodeurl": true,
-        "escape-html": true,
-        "etag": true,
-        "finalhandler": true,
-        "fresh": true,
-        "merge-descriptors": true,
-        "methods": true,
-        "on-finished": true,
-        "parseurl": true,
-        "path-to-regexp": true,
-        "proxy-addr": true,
-        "qs": true,
-        "range-parser": true,
-        "safe-buffer": true,
-        "send": true,
-        "serve-static": true,
-        "setprototypeof": true,
-        "statuses": true,
-        "type-is": true,
-        "utils-merge": true,
-        "vary": true
+        "express>accepts": true,
+        "express>array-flatten": true,
+        "express>body-parser": true,
+        "express>content-disposition": true,
+        "express>content-type": true,
+        "express>cookie": true,
+        "express>cookie-signature": true,
+        "express>debug": true,
+        "express>depd": true,
+        "express>encodeurl": true,
+        "express>escape-html": true,
+        "express>etag": true,
+        "express>finalhandler": true,
+        "express>fresh": true,
+        "express>http-errors": true,
+        "express>merge-descriptors": true,
+        "express>methods": true,
+        "express>on-finished": true,
+        "express>parseurl": true,
+        "express>path-to-regexp": true,
+        "express>proxy-addr": true,
+        "express>qs": true,
+        "express>range-parser": true,
+        "express>safe-buffer": true,
+        "express>send": true,
+        "express>serve-static": true,
+        "express>setprototypeof": true,
+        "express>statuses": true,
+        "express>type-is": true,
+        "express>utils-merge": true,
+        "express>vary": true
       }
     },
-    "finalhandler": {
-      "globals": {
-        "Buffer.byteLength": true,
-        "process.env.NODE_ENV": true,
-        "process.nextTick": true,
-        "setImmediate": true
+    "express>accepts": {
+      "packages": {
+        "express>accepts>mime-types": true,
+        "express>accepts>negotiator": true
+      }
+    },
+    "express>accepts>mime-types": {
+      "builtin": {
+        "path.extname": true
       },
       "packages": {
-        "debug": true,
-        "encodeurl": true,
-        "escape-html": true,
-        "on-finished": true,
-        "parseurl": true,
-        "statuses": true,
-        "unpipe": true
+        "express>accepts>mime-types>mime-db": true
       }
     },
-    "http-errors": {
+    "express>body-parser": {
+      "builtin": {
+        "querystring": true,
+        "zlib.createGunzip": true,
+        "zlib.createInflate": true
+      },
       "packages": {
-        "depd": true,
-        "inherits": true,
-        "setprototypeof": true,
-        "statuses": true,
-        "toidentifier": true
+        "express>body-parser>bytes": true,
+        "express>body-parser>iconv-lite": true,
+        "express>body-parser>raw-body": true,
+        "express>body-parser>unpipe": true,
+        "express>content-type": true,
+        "express>debug": true,
+        "express>depd": true,
+        "express>http-errors": true,
+        "express>on-finished": true,
+        "express>qs": true,
+        "express>send>destroy": true,
+        "express>type-is": true
       }
     },
-    "iconv-lite": {
+    "express>body-parser>iconv-lite": {
       "builtin": {
         "buffer.Buffer": true,
         "buffer.SlowBuffer.byteLength": true,
@@ -178,75 +112,10 @@
         "process": true
       },
       "packages": {
-        "safer-buffer": true
+        "express>body-parser>iconv-lite>safer-buffer": true
       }
     },
-    "inherits": {
-      "builtin": {
-        "util.inherits": true
-      }
-    },
-    "methods": {
-      "builtin": {
-        "http.METHODS": true
-      }
-    },
-    "mime": {
-      "builtin": {
-        "fs.readFileSync": true
-      },
-      "globals": {
-        "console.warn": true,
-        "process.env.DEBUG_MIME": true
-      }
-    },
-    "mime-types": {
-      "builtin": {
-        "path.extname": true
-      },
-      "packages": {
-        "mime-db": true
-      }
-    },
-    "on-finished": {
-      "globals": {
-        "process.nextTick": true,
-        "setImmediate": true
-      },
-      "packages": {
-        "ee-first": true
-      }
-    },
-    "parseurl": {
-      "builtin": {
-        "url.Url": true,
-        "url.parse": true
-      }
-    },
-    "proxy-addr": {
-      "packages": {
-        "forwarded": true,
-        "ipaddr.js": true
-      }
-    },
-    "raw-body": {
-      "globals": {
-        "Buffer.concat": true,
-        "process.nextTick": true
-      },
-      "packages": {
-        "bytes": true,
-        "http-errors": true,
-        "iconv-lite": true,
-        "unpipe": true
-      }
-    },
-    "safe-buffer": {
-      "builtin": {
-        "buffer": true
-      }
-    },
-    "safer-buffer": {
+    "express>body-parser>iconv-lite>safer-buffer": {
       "builtin": {
         "buffer": true
       },
@@ -254,7 +123,175 @@
         "process.binding": true
       }
     },
-    "send": {
+    "express>body-parser>raw-body": {
+      "builtin": {
+        "async_hooks": true
+      },
+      "globals": {
+        "Buffer.concat": true,
+        "process.nextTick": true
+      },
+      "packages": {
+        "express>body-parser>bytes": true,
+        "express>body-parser>iconv-lite": true,
+        "express>body-parser>unpipe": true,
+        "express>http-errors": true
+      }
+    },
+    "express>content-disposition": {
+      "builtin": {
+        "path.basename": true
+      },
+      "packages": {
+        "express>safe-buffer": true
+      }
+    },
+    "express>cookie-signature": {
+      "builtin": {
+        "crypto.createHash": true,
+        "crypto.createHmac": true
+      }
+    },
+    "express>debug": {
+      "builtin": {
+        "fs.SyncWriteStream": true,
+        "net.Socket": true,
+        "tty.WriteStream": true,
+        "tty.isatty": true,
+        "util": true
+      },
+      "globals": {
+        "chrome": true,
+        "console": true,
+        "document": true,
+        "localStorage": true,
+        "navigator": true,
+        "process": true
+      },
+      "packages": {
+        "express>debug>ms": true
+      }
+    },
+    "express>depd": {
+      "builtin": {
+        "path.relative": true
+      },
+      "globals": {
+        "process": true
+      }
+    },
+    "express>etag": {
+      "builtin": {
+        "crypto.createHash": true,
+        "fs.Stats": true
+      },
+      "globals": {
+        "Buffer.byteLength": true,
+        "Buffer.isBuffer": true
+      }
+    },
+    "express>finalhandler": {
+      "globals": {
+        "Buffer.byteLength": true,
+        "process.env.NODE_ENV": true,
+        "process.nextTick": true,
+        "setImmediate": true
+      },
+      "packages": {
+        "express>body-parser>unpipe": true,
+        "express>debug": true,
+        "express>encodeurl": true,
+        "express>escape-html": true,
+        "express>on-finished": true,
+        "express>parseurl": true,
+        "express>statuses": true
+      }
+    },
+    "express>http-errors": {
+      "packages": {
+        "express>depd": true,
+        "express>http-errors>inherits": true,
+        "express>http-errors>toidentifier": true,
+        "express>setprototypeof": true,
+        "express>statuses": true
+      }
+    },
+    "express>http-errors>inherits": {
+      "builtin": {
+        "util.inherits": true
+      }
+    },
+    "express>methods": {
+      "builtin": {
+        "http.METHODS": true
+      }
+    },
+    "express>on-finished": {
+      "builtin": {
+        "async_hooks": true
+      },
+      "globals": {
+        "process.nextTick": true,
+        "setImmediate": true
+      },
+      "packages": {
+        "express>on-finished>ee-first": true
+      }
+    },
+    "express>parseurl": {
+      "builtin": {
+        "url.Url": true,
+        "url.parse": true
+      }
+    },
+    "express>proxy-addr": {
+      "packages": {
+        "express>proxy-addr>forwarded": true,
+        "express>proxy-addr>ipaddr.js": true
+      }
+    },
+    "express>qs": {
+      "packages": {
+        "express>qs>side-channel": true
+      }
+    },
+    "express>qs>side-channel": {
+      "packages": {
+        "express>qs>side-channel>es-errors": true,
+        "express>qs>side-channel>get-intrinsic": true,
+        "express>qs>side-channel>object-inspect": true,
+        "lavamoat>json-stable-stringify>call-bind": true
+      }
+    },
+    "express>qs>side-channel>get-intrinsic": {
+      "globals": {
+        "AggregateError": true,
+        "FinalizationRegistry": true,
+        "WeakRef": true
+      },
+      "packages": {
+        "express>qs>side-channel>es-errors": true,
+        "express>qs>side-channel>get-intrinsic>has-proto": true,
+        "express>qs>side-channel>get-intrinsic>has-symbols": true,
+        "lavamoat>json-stable-stringify>call-bind>function-bind": true,
+        "lavamoat>resolve>is-core-module>hasown": true
+      }
+    },
+    "express>qs>side-channel>object-inspect": {
+      "builtin": {
+        "util.inspect": true
+      },
+      "globals": {
+        "HTMLElement": true,
+        "WeakRef": true
+      }
+    },
+    "express>safe-buffer": {
+      "builtin": {
+        "buffer": true
+      }
+    },
+    "express>send": {
       "builtin": {
         "fs.createReadStream": true,
         "fs.stat": true,
@@ -270,22 +307,46 @@
         "Buffer.byteLength": true
       },
       "packages": {
-        "debug": true,
-        "depd": true,
-        "destroy": true,
-        "encodeurl": true,
-        "escape-html": true,
-        "etag": true,
-        "fresh": true,
-        "http-errors": true,
-        "mime": true,
-        "ms": true,
-        "on-finished": true,
-        "range-parser": true,
-        "statuses": true
+        "express>debug": true,
+        "express>depd": true,
+        "express>encodeurl": true,
+        "express>escape-html": true,
+        "express>etag": true,
+        "express>fresh": true,
+        "express>http-errors": true,
+        "express>on-finished": true,
+        "express>range-parser": true,
+        "express>send>destroy": true,
+        "express>send>mime": true,
+        "express>send>ms": true,
+        "express>statuses": true
       }
     },
-    "serve-static": {
+    "express>send>destroy": {
+      "builtin": {
+        "events.EventEmitter": true,
+        "fs.ReadStream": true,
+        "stream": true,
+        "zlib.Deflate": true,
+        "zlib.DeflateRaw": true,
+        "zlib.Gunzip": true,
+        "zlib.Gzip": true,
+        "zlib.Inflate": true,
+        "zlib.InflateRaw": true,
+        "zlib.Unzip": true
+      }
+    },
+    "express>send>mime": {
+      "builtin": {
+        "fs.readFileSync": true,
+        "path": true
+      },
+      "globals": {
+        "console.warn": true,
+        "process.env.DEBUG_MIME": true
+      }
+    },
+    "express>serve-static": {
       "builtin": {
         "path.resolve": true,
         "url.format": true
@@ -294,16 +355,61 @@
         "Buffer.byteLength": true
       },
       "packages": {
-        "encodeurl": true,
-        "escape-html": true,
-        "parseurl": true,
-        "send": true
+        "express>encodeurl": true,
+        "express>escape-html": true,
+        "express>parseurl": true,
+        "express>send": true
       }
     },
-    "type-is": {
+    "express>type-is": {
       "packages": {
-        "media-typer": true,
-        "mime-types": true
+        "express>accepts>mime-types": true,
+        "express>type-is>media-typer": true
+      }
+    },
+    "lavamoat>json-stable-stringify>call-bind": {
+      "packages": {
+        "express>qs>side-channel>es-errors": true,
+        "express>qs>side-channel>get-intrinsic": true,
+        "lavamoat>json-stable-stringify>call-bind>es-define-property": true,
+        "lavamoat>json-stable-stringify>call-bind>function-bind": true,
+        "lavamoat>json-stable-stringify>call-bind>set-function-length": true
+      }
+    },
+    "lavamoat>json-stable-stringify>call-bind>es-define-property": {
+      "packages": {
+        "express>qs>side-channel>get-intrinsic": true
+      }
+    },
+    "lavamoat>json-stable-stringify>call-bind>set-function-length": {
+      "packages": {
+        "express>qs>side-channel>es-errors": true,
+        "express>qs>side-channel>get-intrinsic": true,
+        "lavamoat>json-stable-stringify>call-bind>set-function-length>define-data-property": true,
+        "lavamoat>json-stable-stringify>call-bind>set-function-length>gopd": true,
+        "lavamoat>json-stable-stringify>call-bind>set-function-length>has-property-descriptors": true
+      }
+    },
+    "lavamoat>json-stable-stringify>call-bind>set-function-length>define-data-property": {
+      "packages": {
+        "express>qs>side-channel>es-errors": true,
+        "lavamoat>json-stable-stringify>call-bind>es-define-property": true,
+        "lavamoat>json-stable-stringify>call-bind>set-function-length>gopd": true
+      }
+    },
+    "lavamoat>json-stable-stringify>call-bind>set-function-length>gopd": {
+      "packages": {
+        "express>qs>side-channel>get-intrinsic": true
+      }
+    },
+    "lavamoat>json-stable-stringify>call-bind>set-function-length>has-property-descriptors": {
+      "packages": {
+        "lavamoat>json-stable-stringify>call-bind>es-define-property": true
+      }
+    },
+    "lavamoat>resolve>is-core-module>hasown": {
+      "packages": {
+        "lavamoat>json-stable-stringify>call-bind>function-bind": true
       }
     }
   }
