@@ -8,7 +8,7 @@
   },
   "private": true,
   "engines": {
-    "node": "^16.20.0 || ^18.0.0 || ^20.0.0 <20.15.0 || ^22.0.0 <22.2.0"
+    "node": "^16.20.0 || ^18.0.0 || ^20.0.0 <20.15.0 || ^22.5.1"
   },
   "scripts": {
     "run:bify-simple": "(cd trials/bify-simple && npm install && npm start)",
