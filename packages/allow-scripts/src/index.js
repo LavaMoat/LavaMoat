@@ -287,11 +287,6 @@ async function runScript({ path, event }) {
     // optional, defaults to false
     // return stdout and stderr as strings rather than buffers
     stdioString: true,
-    // print the package id and script, and the command to be run, like:
-    // > somepackage@1.2.3 postinstall
-    // > make all-the-things
-    // Defaults true when stdio:'inherit', otherwise suppressed
-    banner: true,
   })
 }
 
