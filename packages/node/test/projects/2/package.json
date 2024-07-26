@@ -9,5 +9,6 @@
   "devDependencies": {
     "atob": "^2.1.2",
     "patch-package": "6.5.1"
-  }
+  },
+  "packageManager": "yarn@1.22.22"
 }
