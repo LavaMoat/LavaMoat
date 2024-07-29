@@ -83,10 +83,10 @@ The publishing script is located in [`scripts/publish.js`](./scripts/publish.js)
 | survey                    | survey                              | lavamoat, lavamoat-core, lavamoat-tofu          |
 | tofu                      | lavamoat-tofu                       |                                                 |
 | webpack                   | @lavamoat/webpack                   | @lavamoat/aa, lavamoat-core                     |
-| viz\*                     | lavamoat-viz                        | lavamoat-core                                   |
+| viz[^viz]                 | lavamoat-viz                        | lavamoat-core                                   |
 | yarn-plugin-allow-scripts | @lavamoat/yarn-plugin-allow-scripts |                                                 |
 
-> [!WARNING] \*`lavamoat-viz` is currently unmaintained; we have tentative plans to resume development in the future.
+[^viz]: `lavamoat-viz` is currently (un)maintained on the [`lavamoat-viz`](https://github.com/LavaMoat/LavaMoat/tree/lavamoat-viz) branch; there are tentative intentions to resume development in the future.
 
 [Release Please]: https://github.com/google-github-actions/release-please-action
 [Conventional Commits]: https://www.conventionalcommits.org/en/v1.0.0/#summary
