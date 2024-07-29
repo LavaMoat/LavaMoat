@@ -21,7 +21,7 @@ const exec = promisify(execFile)
 /**
  * @todo Change this to `npm@latest` when Node.js v16 support is dropped
  */
-const LAVAMOAT_PM = process.env.LAVAMOAT_PM ?? 'npm@next-9'
+const LAVAMOAT_PM = process.env.LAVAMOAT_PM ?? 'npm@9'
 const PROJECTS_DIR = path.join(__dirname, 'projects')
 
 /**
