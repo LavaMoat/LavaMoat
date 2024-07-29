@@ -37,7 +37,7 @@
     "watch:types": "tsc -b --watch"
   },
   "optionalDependencies": {
-    "corepack": "0.20.0"
+    "corepack": "0.29.3"
   },
   "devDependencies": {
     "@commitlint/cli": "19.3.0",
