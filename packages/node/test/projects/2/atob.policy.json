@@ -1,14 +1,14 @@
 {
   "resources": {
-    "keccak": {
-      "native": true
-    },
-    "patch-package>find-yarn-workspace-root>micromatch>snapdragon>source-map-resolve>atob": {
+    "atob": {
       "globals": {
         "Buffer.from": true,
         "console.log": true,
         "process.argv": true
       }
+    },
+    "keccak": {
+      "native": true
     }
   }
 }
