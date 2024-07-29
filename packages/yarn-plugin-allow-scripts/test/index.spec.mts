@@ -33,9 +33,11 @@ const run = (
       YARN_CMD,
       args,
       {
-        ...process.env,
-        ...realisticEnvOptions(cwd),
-        ...env,
+        env: {
+          ...process.env,
+          ...realisticEnvOptions(cwd),
+          ...env,
+        }
       },
     )
     console.log({result})
