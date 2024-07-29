@@ -2,6 +2,7 @@
   "extends": "../../.config/tsconfig.workspace.json",
   "include": ["src"],
   "compilerOptions": {
+    "lib": ["es2022"],
     "resolveJsonModule": true,
     "checkJs": true,
     "rootDir": "src",
