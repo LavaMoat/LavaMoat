@@ -119,8 +119,8 @@ function realisticEnvOptions(projectRoot: string): SpawnSyncOptions {
     env: {
       PATH: process.env.PATH,
       COREPACK_ENABLE_NETWORK: '1',
-      COREPACK_DEFAULT_TO_LATEST: '0',
-      COREPACK_AUTO_PIN: '0',
+      COREPACK_DEFAULT_TO_LATEST: '1',
+      COREPACK_AUTO_PIN: '1',
       COREPACK_ENABLE_PROJECT_SPEC: '0',
       COREPACK_ENABLE_STRICT: '0',
     },
