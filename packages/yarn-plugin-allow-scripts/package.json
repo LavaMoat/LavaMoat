@@ -17,7 +17,7 @@
   "scripts": {
     "build": "./scripts/build.sh",
     "rebuild": "npm run build",
-    "test": "ava"
+    "test": "npm run build && ava"
   },
   "peerDependencies": {
     "@lavamoat/allow-scripts": ">=3.0.4",
