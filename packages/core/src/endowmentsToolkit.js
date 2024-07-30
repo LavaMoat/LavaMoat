@@ -26,6 +26,15 @@ module.exports = endowmentsToolkit
 // Exports for testing
 module.exports._test = { instrumentDynamicValueAtPath }
 
+/**
+ * Returns a compy of endowmentsToolkit initialized on provided configuration.
+ *
+ * @param {object} opts
+ * @param {DefaultWrapperFn} [opts.createFunctionWrapper]
+ * @param {boolean} [opts.handleGlobalWrite]
+ * @param {Set<string>} [opts.knownWritableFields] - List of globals that can be
+ *   mutated later
+ */
 function endowmentsToolkit({
   createFunctionWrapper = defaultCreateFunctionWrapper,
   handleGlobalWrite = false,
@@ -46,6 +55,9 @@ function endowmentsToolkit({
   }
 
   /**
+   * Creates an object populated with only the deep properties specified in the
+   * packagePolicy
+   *
    * @template {object} T Deep properties specified in the packagePolicy
    * @param {T} sourceRef - Object from which to copy properties
    * @param {LMPolicy.PackagePolicy} packagePolicy - LavaMoat policy item
@@ -125,6 +137,9 @@ function endowmentsToolkit({
   }
 
   /**
+   * Creates an object populated with only the deep properties specified by the
+   * paths array.
+   *
    * @template {object} T
    * @param {T} sourceRef
    * @param {string[]} paths
@@ -168,6 +183,9 @@ function endowmentsToolkit({
   }
 
   /**
+   * Creates an object populated with only the deep properties specified in the
+   * packagePolicy for builtins.
+   *
    * @template {object} T
    * @param {T} moduleNamespace
    * @param {string} moduleId
@@ -202,26 +220,6 @@ function endowmentsToolkit({
       explicitlyBanned
     )
     return moduleNamespaceView
-  }
-
-  /**
-   * @param {string} visited
-   * @param {string} next
-   */
-  function extendPath(visited, next) {
-    // FIXME: second part of this conditional should be unnecessary
-    if (!visited || visited.length === 0) {
-      return next
-    }
-    return `${visited}.${next}`
-  }
-
-  /**
-   * @param {object|null} value
-   * @returns {value is null}
-   */
-  function isEmpty(value) {
-    return !value
   }
 
   /**
@@ -457,6 +455,8 @@ function endowmentsToolkit({
   }
 
   /**
+   * Utility function used by copyWrappedGlobals to wrap a function.
+   *
    * @param {PropertyDescriptor} propDesc
    * @param {object} unwrapFromCompartmentGlobalThis
    * @param {object} unwrapToGlobalThis
@@ -626,6 +626,18 @@ function extendPath(visited, next) {
 }
 
 /**
+ * @param {object | null} value
+ * @returns {value is null}
+ */
+function isEmpty(value) {
+  return !value
+}
+
+/**
+ * Sets up the getter and setter pair so that the specific targetRef field is
+ * effectively writeable and the value propagates to sourceRef. This implements
+ * the `'write'` permission for a global in a specific resource.
+ *
  * @param {string} key
  * @param {Record<string, any>} sourceRef
  * @param {Record<string, any>} targetRef
@@ -728,6 +740,9 @@ function defaultCreateFunctionWrapper(sourceValue, unwrapTest, unwrapTo) {
 }
 
 /**
+ * The default implementation of the utility for wrapping endowed function to
+ * set `this` to a correct reference.
+ *
  * @callback DefaultWrapperFn
  * @param {(...args: any[]) => any} sourceValue
  * @param {(value: any) => boolean} unwrapTest
@@ -736,14 +751,22 @@ function defaultCreateFunctionWrapper(sourceValue, unwrapTest, unwrapTo) {
  */
 
 /**
+ * Makes a copy of all globals from the global ref to a target and wraps them
+ * with the wrapper this endowmentsToolkit was configured to use. It also copies
+ * all circular references to the root package compartment globalThis.
+ *
  * @callback CopyWrappedGlobals
  * @param {object} globalRef
- * @param {Record<PropertyKey, any>} target
+ * @param {Record<PropertyKey, any>} target - The object to copy the properties
+ *   to, recursively (hence any not unknown type)
  * @param {string[]} globalThisRefs
  * @returns {Record<PropertyKey, any>}
  */
 
 /**
+ * A recursive function to copy a single (nested) property located at the
+ * provided path from a sourceRef to targetRef.
+ *
  * @callback CopyValueAtPath
  * @param {string} visitedPath
  * @param {string[]} pathParts
@@ -756,6 +779,9 @@ function defaultCreateFunctionWrapper(sourceValue, unwrapTest, unwrapTo) {
  */
 
 /**
+ * Utility function used by copyWrappedGlobals to wrap a property with a getter
+ * and/or setter.
+ *
  * @callback ApplyGetSetPropDescTransforms
  * @param {PropertyDescriptor} sourcePropDesc
  * @param {object} unwrapFromGlobalThis
@@ -764,6 +790,9 @@ function defaultCreateFunctionWrapper(sourceValue, unwrapTest, unwrapTo) {
  */
 
 /**
+ * Utility function used by copyWrappedGlobals to choose a wrapping strategy for
+ * a property.
+ *
  * @callback ApplyEndowmentPropDescTransforms
  * @param {PropertyDescriptor} propDesc
  * @param {object} unwrapFromCompartmentGlobalThis
