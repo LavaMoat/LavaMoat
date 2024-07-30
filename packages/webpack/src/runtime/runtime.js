@@ -93,7 +93,7 @@ const enforcePolicy = (specifier, referrerResourceId, wrappedRequire) => {
     }
     if (
       !specifier.includes('.') &&
-      keys(referrerPolicy.builtin).some((key) => key.startsWith(specifier))
+      keys(referrerPolicy.builtin).some((key) => key.startsWith(`${specifier}.`))
     ) {
       // create minimal selection if it's a builtin and not allowed as a whole, but with subpaths
       return getBuiltinForConfig(
@@ -186,7 +186,7 @@ const findResourceId = (moduleId) => {
  */
 
 /**
- * @typedef {WebpackRequire & Record<string, any>} WrappedRequire
+ * @typedef {WebpackRequire & Record<string, unknown>} WrappedRequire
  */
 
 /**

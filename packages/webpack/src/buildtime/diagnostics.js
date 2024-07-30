@@ -21,7 +21,7 @@ module.exports = {
    */
   rawDebug: (verbosity, content) => {
     if (level >= verbosity) {
-      // @ts-ignore - trust me, the method exists
+      // @ts-expect-error - trust me, the method exists
       process._rawDebug(content)
     }
   },

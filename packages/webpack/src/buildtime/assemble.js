@@ -54,7 +54,7 @@ const assembleRuntime = (KEY, runtimeModules) => {
 /**
  * @typedef RuntimeModule
  * @property {string} [file]
- * @property {any} [data]
+ * @property {unknown} [data]
  * @property {string} [name]
  * @property {boolean} [json]
  * @property {string} [shimRequire]

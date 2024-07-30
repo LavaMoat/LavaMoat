@@ -217,8 +217,7 @@ function endowmentsToolkit({
   }
 
   /**
-   * @template T
-   * @param {T | null} value
+   * @param {object|null} value
    * @returns {value is null}
    */
   function isEmpty(value) {
