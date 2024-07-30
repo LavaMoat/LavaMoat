@@ -243,15 +243,9 @@ class LavaMoatPlugin {
          * @returns {boolean}
          */
         const isIgnoredModule = (m) => {
-          if (
-            m.type === JAVASCRIPT_MODULE_TYPE_DYNAMIC &&
+          return Boolean(m.type === JAVASCRIPT_MODULE_TYPE_DYNAMIC &&
             // @ts-expect-error BAD TYPES
-            m.identifierStr?.startsWith('ignored')
-          ) {
-            return true
-          }
-          // This function must be very narrow, because it's gatekeeping policy generation too
-          return false
+            m.identifierStr?.startsWith('ignored'))
         }
 
         /**
