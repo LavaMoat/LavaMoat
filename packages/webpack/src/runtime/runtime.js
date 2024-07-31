@@ -93,7 +93,9 @@ const enforcePolicy = (specifier, referrerResourceId, wrappedRequire) => {
     }
     if (
       !specifier.includes('.') &&
-      keys(referrerPolicy.builtin).some((key) => key.startsWith(`${specifier}.`))
+      keys(referrerPolicy.builtin).some((key) =>
+        key.startsWith(`${specifier}.`)
+      )
     ) {
       // create minimal selection if it's a builtin and not allowed as a whole, but with subpaths
       return getBuiltinForConfig(
@@ -186,7 +188,7 @@ const findResourceId = (moduleId) => {
  */
 
 /**
- * @typedef {WebpackRequire & Record<string, unknown>} WrappedRequire
+ * @typedef {WebpackRequire & { [key: string]: any }} WrappedRequire
  */
 
 /**
@@ -267,8 +269,7 @@ const lavamoatRuntimeWrapper = (resourceId, runtimeKit) => {
     policyRequire.g = compartmentMap.get(resourceId).globalThis
 
     // override nmd to limit what it can mutate
-    // @ts-expect-error - webpack runtime is not typed
-    policyRequire.nmd = (moduleReference) => {
+    policyRequire.nmd = (/** @type {any} */ moduleReference) => {
       if (moduleReference === module) {
         module = __webpack_require__.nmd(module)
         return module

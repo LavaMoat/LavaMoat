@@ -15,6 +15,10 @@ const { isExcludedUnsafe } = require('./exclude.js')
 
 const POLICY_SNAPSHOT_FILENAME = 'policy-snapshot.json'
 
+/**
+ * @typedef {(specifier: string) => boolean} IsBuiltinFn
+ */
+
 module.exports = {
   /**
    * @param {Object} opts
@@ -29,9 +33,8 @@ module.exports = {
    * @param {string} opts.location - Where to read/write the policy files
    * @param {boolean} [opts.emit] - Whether to emit the policy snapshot as an
    *   asset
-   * @param {(specifier: string) => boolean} opts.isBuiltin - A function that
-   *   determines if the specifier is a builtin of the runtime platform e.g.
-   *   node:fs
+   * @param {IsBuiltinFn} opts.isBuiltin - A function that determines if the
+   *   specifier is a builtin of the runtime platform e.g. node:fs
    * @returns
    */
   createPolicyGenerator({
