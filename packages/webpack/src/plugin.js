@@ -233,19 +233,25 @@ class LavaMoatPlugin {
           JAVASCRIPT_MODULE_TYPE_ESM,
         ]
 
-        // Webpack has a concept of ignored modules
-        // When a module is ignored a carveout is necessary in policy enforcement for it because the ID that webpack creates for it is not exactly helpful.
-        // example outcome in the bundle: `const nodeCrypto = __webpack_require__(/*! crypto */ "?0b7d");`
-        // Sadly, even treeshaking doesn't eliminate that module. It's left there and failing to work when reached by runtime policy enforcement.
-        // Below is the most reliable way I've found to date to identify ignored modules.
         /**
+         * @remarks
+         * Webpack has a concept of ignored modules When a module is ignored a
+         * carveout is necessary in policy enforcement for it because the ID
+         * that webpack creates for it is not exactly helpful. example outcome
+         * in the bundle: `const nodeCrypto = __webpack_require__(/*! crypto *\/
+         * "?0b7d");` Sadly, even treeshaking doesn't eliminate that module.
+         * It's left there and failing to work when reached by runtime policy
+         * enforcement. Below is the most reliable way I've found to date to
+         * identify ignored modules.
          * @param {import('webpack').Module} m
          * @returns {boolean}
          */
         const isIgnoredModule = (m) => {
-          return Boolean(m.type === JAVASCRIPT_MODULE_TYPE_DYNAMIC &&
-            // @ts-expect-error BAD TYPES
-            m.identifierStr?.startsWith('ignored'))
+          return Boolean(
+            m.type === JAVASCRIPT_MODULE_TYPE_DYNAMIC &&
+              // @ts-expect-error BAD TYPES
+              m.identifierStr?.startsWith('ignored')
+          )
         }
 
         /**

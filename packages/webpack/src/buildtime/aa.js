@@ -161,10 +161,11 @@ exports.generateIdentifierLookup = ({
       if (readableResourceIds) {
         return policy
       }
+      const { resources = Object.create(null) } = policy
       const translatedPolicy = {
         ...policy,
         resources: Object.fromEntries(
-          Object.entries(policy.resources || {})
+          Object.entries(resources)
             .filter(([id]) => identifiersWithKnownPaths.has(id)) // only saves resources that are actually used
             .map(([id, resource]) => [
               translate(id),
