@@ -49,6 +49,7 @@ jobs:
               --workspace=packages/aa
               --workspace=packages/browserify
               --workspace=packages/core
+              --workspace=packages/lavapack
               --workspace=packages/node
               --workspace=packages/tofu
               --workspace=packages/webpack
@@ -58,6 +59,7 @@ jobs:
               --workspace=packages/aa
               --workspace=packages/browserify
               --workspace=packages/core
+              --workspace=packages/lavapack
               --workspace=packages/node
               --workspace=packages/tofu
               --workspace=packages/webpack
