@@ -651,7 +651,7 @@ module.exports = LavaMoatPlugin
  * @property {number} [diagnosticsVerbosity] - A number representing diagnostics
  *   output verbosity, the larger the more overwhelming
  * @property {LockdownOptions} lockdown - Options to pass to SES lockdown
- * @property {import('lavamoat-core').LavaMoatPolicy} [policy] - LavaMoat policy
+ * @property {import('@lavamoat/types').LavaMoatPolicy} [policy] - LavaMoat policy
  *   object - if programmatically created
  * @property {boolean} [runChecks] - Check resulting code with wrapping for
  *   correctness
