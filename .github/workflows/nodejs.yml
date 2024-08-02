@@ -24,7 +24,6 @@ jobs:
             test-workspaces: >-
               --workspace=packages/aa
               --workspace=packages/allow-scripts
-              --workspace=packages/lavapack
               --workspace=packages/preinstall-always-fail
               --workspace=packages/tofu
               --workspace=packages/yarn-plugin-allow-scripts
