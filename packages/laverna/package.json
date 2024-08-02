@@ -49,6 +49,7 @@
     "type-fest": "4.23.0"
   },
   "devDependencies": {
+    "@types/node": "^20.14.3",
     "memfs": "4.11.1"
   },
   "publishConfig": {

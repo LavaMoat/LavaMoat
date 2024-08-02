@@ -5,6 +5,7 @@
     "allowSyntheticDefaultImports": true,
     "allowJs": true,
     "checkJs": true,
+    "skipLibCheck": false,
     "types": ["node"]
   },
   "files": []

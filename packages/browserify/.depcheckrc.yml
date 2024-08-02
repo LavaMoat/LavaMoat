@@ -17,3 +17,4 @@ ignores:
 
   # types
   - '@lavamoat/types'
+  - '@types/tmp'
