@@ -1,4 +1,5 @@
-import type { LavaMoatPolicy, LavaMoatScuttleOpts } from 'lavamoat-core'
+import type { LavaMoatPolicy } from '@lavamoat/types'
+import type { LavaMoatScuttleOpts } from 'lavamoat-core'
 import type { LockdownOptions } from 'ses'
 
 export type ScuttlerConfig = LavaMoatScuttleOpts | boolean | undefined
