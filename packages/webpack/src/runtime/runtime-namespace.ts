@@ -1,5 +1,6 @@
-import { EndowmentsToolkitFactory, LavaMoatPolicy } from 'lavamoat-core'
-import { LavaMoatPluginOptions } from '../plugin'
+import { type LavaMoatPolicy } from '@lavamoat/types'
+import { type EndowmentsToolkitFactory } from 'lavamoat-core'
+import { type LavaMoatPluginOptions } from '../plugin'
 
 type RequiredProperty<T, K extends keyof T> = Omit<T, K> & Required<Pick<T, K>>
 export interface RuntimeNamespace {
