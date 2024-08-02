@@ -16,7 +16,6 @@
   "engines": {
     "node": "^16.20.0 || ^18.0.0 || ^20.0.0"
   },
-  "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "dependencies": {
     "@babel/types": "7.23.9",
