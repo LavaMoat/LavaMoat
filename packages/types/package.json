@@ -11,7 +11,7 @@
   "bugs": {
     "url": "https://github.com/LavaMoat/lavamoat/issues"
   },
-  "author": "boneskull",
+  "author": "LavaMoat Team",
   "license": "MIT",
   "engines": {
     "node": "^16.20.0 || ^18.0.0 || ^20.0.0"
