@@ -19,7 +19,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        inlude:
+        include:
           - node-version: 16.x
             test-workspaces: >-
               --workspace=packages/aa
