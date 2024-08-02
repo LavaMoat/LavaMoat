@@ -1,4 +1,4 @@
-import type { LavaMoatPolicy } from 'lavamoat-core'
+import type { LavaMoatPolicy } from '@lavamoat/types'
 import type { LockdownOptions } from 'ses'
 
 export interface ScuttlerObjectConfig {
