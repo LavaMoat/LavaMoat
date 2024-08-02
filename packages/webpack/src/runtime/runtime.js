@@ -147,6 +147,7 @@ const installGlobalsForPolicy = (resourceId, packageCompartmentGlobal) => {
     // TODO: getEndowmentsForConfig doesn't implement support for "write"
     const endowments = getEndowmentsForConfig(
       rootCompartmentGlobalThis,
+      // @ts-expect-error XXX: either this or getEndowmentsForConfig is wrong
       LAVAMOAT.policy.resources[resourceId] || {},
       globalThis,
       packageCompartmentGlobal
