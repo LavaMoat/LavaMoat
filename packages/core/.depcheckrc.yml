@@ -15,6 +15,7 @@ ignores:
   # types
   - '@types/json-stable-stringify'
   - '@types/merge-deep'
+  - '@types/tmp'
   - '@babel/types'
   - '@lavamoat/types'
   - 'type-fest'
