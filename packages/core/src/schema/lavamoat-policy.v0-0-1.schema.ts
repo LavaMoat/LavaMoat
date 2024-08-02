@@ -84,6 +84,10 @@ export interface ResourcePolicy {
    * Allow native modules
    */
   native?: boolean
+  /**
+   * Allow dynamic requires
+   */
+  dynamic?: boolean
 }
 
 /**
@@ -109,6 +113,7 @@ export interface BuiltinPolicy {
 export interface PackagePolicy {
   [k: string]: boolean
 }
+
 /**
  * Custom run-time module resolutions by direct dependency
  */
