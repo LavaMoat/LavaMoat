@@ -61,7 +61,7 @@ const crossReference = (neededIds, policyIds) => {
 /**
  * @param {object} options
  * @param {{ path: string; moduleId: string | number }[]} options.paths
- * @param {import('lavamoat-core').LavaMoatPolicy} options.policy
+ * @param {import('@lavamoat/types').LavaMoatPolicy} options.policy
  * @param {import('@lavamoat/aa').CanonicalNameMap} options.canonicalNameMap
  * @param {(string | number)[]} options.unenforceableModuleIds
  * @param {Record<string | number, string>} options.externals
