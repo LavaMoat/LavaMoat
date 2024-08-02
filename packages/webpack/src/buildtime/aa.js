@@ -47,7 +47,7 @@ const crossReference = (neededIds, policyIds) => {
 }
 
 /**
- * @import {LavaMoatPolicy} from 'lavamoat-core'
+ * @import {LavaMoatPolicy} from '@lavamoat/types'
  * @import {CanonicalNameMap} from '@lavamoat/aa'
  */
 
