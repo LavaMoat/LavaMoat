@@ -23,8 +23,7 @@
   },
   "scripts": {
     "build:ses": "(cd ./node_modules/ses && npm install && npm run build && cp ./dist/ses.umd.js ../../lib/)",
-    "lint:deps": "depcheck",
-    "test": "npm run test:prep && npm run test:ava",
+    "test": "npm run test:ava",
     "test:ava": "ava",
     "test:prep": "cross-env WRITE_AUTO_POLICY=1 node ./test/fixtures/secureBundling/run.js && cross-env WRITE_AUTO_POLICY=1 node ./test/fixtures/secureBundling/build.js >/dev/null"
   },
