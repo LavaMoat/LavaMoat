@@ -1,9 +1,0 @@
-{
-  "resources": {
-    "bad-idea-express-backdoor": {
-      "packages": {
-        "child_process": false
-      }
-    }
-  }
-}
