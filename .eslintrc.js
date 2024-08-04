@@ -108,7 +108,7 @@ module.exports = {
   },
   overrides: [
     {
-      files: ['**/*/*/test/**/*.js', '**/*/*/test/**/*.ts'],
+      files: ['**/*/*/test/**/*.{js,mjs,ts}'],
       extends: ['plugin:ava/recommended'],
       env: {
         browser: true,
