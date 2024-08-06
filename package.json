@@ -44,7 +44,7 @@
     "@commitlint/config-conventional": "19.2.2",
     "@tsconfig/node16": "16.1.3",
     "@types/node": "18.19.43",
-    "@types/yargs": "17.0.32",
+    "@types/yargs": "17.0.33",
     "@typescript-eslint/eslint-plugin": "7.18.0",
     "@typescript-eslint/parser": "7.18.0",
     "ava": "5.3.1",
