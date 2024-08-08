@@ -28,7 +28,7 @@ since we are worried about evil dependencies, we use lavamoat.
 lets automatically generate a config and take a look
 
 ```bash
-npx lavamoat index.js --writeAutoConfig
+npx lavamoat --writeAutoPolicy --policyPath lavamoat-config.json --policyOverride lavamoat-config-override.json index.js
 cat lavamoat-config.json | jq . -C | less
 ```
 
@@ -61,7 +61,7 @@ yarn add bad-idea-express-middleware@^2.0.0
 now lets start up the app again
 
 ```bash
-npx lavamoat index.js
+npx lavamoat --writeAutoPolicy --policyPath lavamoat-config.json --policyOverride lavamoat-config-override.json index.js
 # [Error: LavaMoat - required package not in whitelist: package "bad-idea-express-backdoor" requested "child_process" as "child_process"]
 ```
 
@@ -69,7 +69,7 @@ hmm, seems the new version changes its dependencies.
 we can easily regenerate the config
 
 ```
-npx lavamoat index.js --writeAutoConfig
+npx lavamoat --writeAutoPolicy -p lavamoat-config.json -o lavamoat-config-override.json index.js
 git diff lavamoat-config.json
 ```
 

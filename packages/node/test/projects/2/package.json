@@ -1,5 +1,6 @@
 {
   "name": "test-2",
+  "packageManager": "yarn@1.22.22",
   "scripts": {
     "setup": "patch-package"
   },
@@ -8,6 +9,6 @@
   },
   "devDependencies": {
     "atob": "^2.1.2",
-    "patch-package": "6.2.2"
+    "patch-package": "6.5.1"
   }
 }

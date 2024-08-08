@@ -5,12 +5,12 @@
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
-    "bad-idea-express-backdoor": "^2.0.0",
-    "express": "^4.17.3"
+    "bad-idea-express-backdoor": "*",
+    "express": "^4.19.2"
   },
   "devDependencies": {
-    "lavamoat": "^7.0.0",
-    "patch-package": "^6.2.1",
+    "lavamoat": "^8.0.7",
+    "patch-package": "^6.5.1",
     "postinstall-postinstall": "^2.1.0"
   },
   "scripts": {
