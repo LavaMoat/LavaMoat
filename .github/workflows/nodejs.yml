@@ -25,7 +25,6 @@ jobs:
               --workspace=packages/aa
               --workspace=packages/allow-scripts
               --workspace=packages/preinstall-always-fail
-              --workspace=packages/yarn-plugin-allow-scripts
           - node-version: 18.x
             test-workspaces: >-
               --workspace=packages/aa
