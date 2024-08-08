@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -x
+
 builder build plugin --no-minify $@
 
 # yarn berry does not recognize node: prefixed builtin references
