@@ -22,7 +22,7 @@ const POLICY_SNAPSHOT_FILENAME = 'policy-snapshot.json'
 module.exports = {
   /**
    * @param {Object} opts
-   * @param {import('lavamoat-core').LavaMoatPolicy} [opts.policyFromOptions] -
+   * @param {import('@lavamoat/types').LavaMoatPolicy} [opts.policyFromOptions] -
    *   The hardcoded policy passed in options, takes precedence over reading
    *   from files
    * @param {import('@lavamoat/aa').CanonicalNameMap} opts.canonicalNameMap -
@@ -56,7 +56,7 @@ module.exports = {
       return {
         inspectWebpackModule: () => {},
         getPolicy: () => {
-          /** @type {import('lavamoat-core').LavaMoatPolicy} */
+          /** @type {import('@lavamoat/types').LavaMoatPolicy} */
           let final = { resources: {} }
           if (policyFromOptions) {
             // TODO: avoid loading the policy file if policyFromOptions is present
