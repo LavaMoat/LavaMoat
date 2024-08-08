@@ -1388,10 +1388,11 @@ var plugin = (() => {
           for (let i = 0; i < globParts.length - 1; i++) {
             for (let j = i + 1; j < globParts.length; j++) {
               const matched = this.partsMatch(globParts[i], globParts[j], !this.preserveMultipleSlashes);
-              if (!matched)
-                continue;
-              globParts[i] = matched;
-              globParts[j] = [];
+              if (matched) {
+                globParts[i] = [];
+                globParts[j] = matched;
+                break;
+              }
             }
           }
           return globParts.filter((gs) => gs.length);
@@ -1788,6 +1789,7 @@ var plugin = (() => {
         #dispose;
         #disposeAfter;
         #fetchMethod;
+        #memoMethod;
         ttl;
         ttlResolution;
         ttlAutopurge;
@@ -1860,6 +1862,9 @@ var plugin = (() => {
         get fetchMethod() {
           return this.#fetchMethod;
         }
+        get memoMethod() {
+          return this.#memoMethod;
+        }
         get dispose() {
           return this.#dispose;
         }
@@ -1867,7 +1872,7 @@ var plugin = (() => {
           return this.#disposeAfter;
         }
         constructor(options) {
-          const { max = 0, ttl, ttlResolution = 1, ttlAutopurge, updateAgeOnGet, updateAgeOnHas, allowStale, dispose, disposeAfter, noDisposeOnSet, noUpdateTTL, maxSize = 0, maxEntrySize = 0, sizeCalculation, fetchMethod, noDeleteOnFetchRejection, noDeleteOnStaleGet, allowStaleOnFetchRejection, allowStaleOnFetchAbort, ignoreFetchAbort } = options;
+          const { max = 0, ttl, ttlResolution = 1, ttlAutopurge, updateAgeOnGet, updateAgeOnHas, allowStale, dispose, disposeAfter, noDisposeOnSet, noUpdateTTL, maxSize = 0, maxEntrySize = 0, sizeCalculation, fetchMethod, memoMethod, noDeleteOnFetchRejection, noDeleteOnStaleGet, allowStaleOnFetchRejection, allowStaleOnFetchAbort, ignoreFetchAbort } = options;
           if (max !== 0 && !isPosInt(max)) {
             throw new TypeError("max option must be a nonnegative integer");
           }
@@ -1887,6 +1892,10 @@ var plugin = (() => {
               throw new TypeError("sizeCalculation set to non-function");
             }
           }
+          if (memoMethod !== void 0 && typeof memoMethod !== "function") {
+            throw new TypeError("memoMethod must be a function if defined");
+          }
+          this.#memoMethod = memoMethod;
           if (fetchMethod !== void 0 && typeof fetchMethod !== "function") {
             throw new TypeError("fetchMethod must be a function if specified");
           }
@@ -1970,7 +1979,7 @@ var plugin = (() => {
             if (ttl !== 0 && this.ttlAutopurge) {
               const t = setTimeout(() => {
                 if (this.#isStale(index)) {
-                  this.delete(this.#keyList[index]);
+                  this.#delete(this.#keyList[index], "expire");
                 }
               }, ttl + 1);
               if (t.unref) {
@@ -2204,7 +2213,7 @@ var plugin = (() => {
           let deleted = false;
           for (const i of this.#rindexes({ allowStale: true })) {
             if (this.#isStale(i)) {
-              this.delete(this.#keyList[i]);
+              this.#delete(this.#keyList[i], "expire");
               deleted = true;
             }
           }
@@ -2277,7 +2286,7 @@ var plugin = (() => {
               status.set = "miss";
               status.maxEntrySizeExceeded = true;
             }
-            this.delete(k);
+            this.#delete(k, "set");
             return this;
           }
           let index = this.#size === 0 ? void 0 : this.#keyMap.get(k);
@@ -2474,7 +2483,7 @@ var plugin = (() => {
                 if (bf2.__staleWhileFetching) {
                   this.#valList[index] = bf2.__staleWhileFetching;
                 } else {
-                  this.delete(k);
+                  this.#delete(k, "fetch");
                 }
               } else {
                 if (options.status)
@@ -2500,7 +2509,7 @@ var plugin = (() => {
             if (this.#valList[index] === p) {
               const del = !noDelete || bf2.__staleWhileFetching === void 0;
               if (del) {
-                this.delete(k);
+                this.#delete(k, "fetch");
               } else if (!allowStaleAborted) {
                 this.#valList[index] = bf2.__staleWhileFetching;
               }
@@ -2635,6 +2644,28 @@ var plugin = (() => {
             return staleVal ? p.__staleWhileFetching : p.__returned = p;
           }
         }
+        async forceFetch(k, fetchOptions = {}) {
+          const v = await this.fetch(k, fetchOptions);
+          if (v === void 0)
+            throw new Error("fetch() returned undefined");
+          return v;
+        }
+        memo(k, memoOptions = {}) {
+          const memoMethod = this.#memoMethod;
+          if (!memoMethod) {
+            throw new Error("no memoMethod provided to constructor");
+          }
+          const { context, forceRefresh, ...options } = memoOptions;
+          const v = this.get(k, options);
+          if (!forceRefresh && v !== void 0)
+            return v;
+          const vv = memoMethod(k, v, {
+            options,
+            context
+          });
+          this.set(k, vv, options);
+          return vv;
+        }
         get(k, getOptions = {}) {
           const { allowStale = this.allowStale, updateAgeOnGet = this.updateAgeOnGet, noDeleteOnStaleGet = this.noDeleteOnStaleGet, status } = getOptions;
           const index = this.#keyMap.get(k);
@@ -2648,7 +2679,7 @@ var plugin = (() => {
                 status.get = "stale";
               if (!fetching) {
                 if (!noDeleteOnStaleGet) {
-                  this.delete(k);
+                  this.#delete(k, "expire");
                 }
                 if (status && allowStale)
                   status.returnedStale = true;
@@ -2691,13 +2722,16 @@ var plugin = (() => {
           }
         }
         delete(k) {
+          return this.#delete(k, "delete");
+        }
+        #delete(k, reason) {
           let deleted = false;
           if (this.#size !== 0) {
             const index = this.#keyMap.get(k);
             if (index !== void 0) {
               deleted = true;
               if (this.#size === 1) {
-                this.clear();
+                this.#clear(reason);
               } else {
                 this.#removeItemSize(index);
                 const v = this.#valList[index];
@@ -2705,10 +2739,10 @@ var plugin = (() => {
                   v.__abortController.abort(new Error("deleted"));
                 } else if (this.#hasDispose || this.#hasDisposeAfter) {
                   if (this.#hasDispose) {
-                    this.#dispose?.(v, k, "delete");
+                    this.#dispose?.(v, k, reason);
                   }
                   if (this.#hasDisposeAfter) {
-                    this.#disposed?.push([v, k, "delete"]);
+                    this.#disposed?.push([v, k, reason]);
                   }
                 }
                 this.#keyMap.delete(k);
@@ -2739,6 +2773,9 @@ var plugin = (() => {
           return deleted;
         }
         clear() {
+          return this.#clear("delete");
+        }
+        #clear(reason) {
           for (const index of this.#rindexes({ allowStale: true })) {
             const v = this.#valList[index];
             if (this.#isBackgroundFetch(v)) {
@@ -2746,10 +2783,10 @@ var plugin = (() => {
             } else {
               const k = this.#keyList[index];
               if (this.#hasDispose) {
-                this.#dispose?.(v, k, "delete");
+                this.#dispose?.(v, k, reason);
               }
               if (this.#hasDisposeAfter) {
-                this.#disposed?.push([v, k, "delete"]);
+                this.#disposed?.push([v, k, reason]);
               }
             }
           }
@@ -6168,7 +6205,7 @@ var plugin = (() => {
           do {
             const a = this.build[i];
             const b = other.build[i];
-            debug("prerelease compare", i, a, b);
+            debug("build compare", i, a, b);
             if (a === void 0 && b === void 0) {
               return 0;
             } else if (b === void 0) {
@@ -7656,9 +7693,9 @@ var plugin = (() => {
     }
   });
 
-  // ../../node_modules/@npmcli/package-json/node_modules/hosted-git-info/lib/hosts.js
+  // ../../node_modules/hosted-git-info/lib/hosts.js
   var require_hosts = __commonJS({
-    "../../node_modules/@npmcli/package-json/node_modules/hosted-git-info/lib/hosts.js"(exports, module) {
+    "../../node_modules/hosted-git-info/lib/hosts.js"(exports, module) {
       "use strict";
       var maybeJoin = (...args) => args.every((arg) => arg) ? args.join("") : "";
       var maybeEncode = (arg) => arg ? encodeURIComponent(arg) : "";
@@ -7799,7 +7836,7 @@ var plugin = (() => {
         filetemplate: ({ domain, user, project, committish, path }) => `https://${domain}/${user}/${project}/blob/${maybeEncode(committish) || "HEAD"}/${path}`,
         httpstemplate: ({ domain, user, project, committish }) => `https://${domain}/${user}/${project}.git${maybeJoin("#", committish)}`,
         tarballtemplate: ({ domain, user, project, committish }) => `https://${domain}/${user}/${project}/archive/${maybeEncode(committish) || "HEAD"}.tar.gz`,
-        bugstemplate: ({ user, project }) => null,
+        bugstemplate: () => null,
         extract: (url) => {
           let [, user, project, aux] = url.pathname.split("/", 4);
           if (["archive"].includes(aux)) {
@@ -7821,9 +7858,9 @@ var plugin = (() => {
     }
   });
 
-  // ../../node_modules/@npmcli/package-json/node_modules/hosted-git-info/lib/parse-url.js
+  // ../../node_modules/hosted-git-info/lib/parse-url.js
   var require_parse_url = __commonJS({
-    "../../node_modules/@npmcli/package-json/node_modules/hosted-git-info/lib/parse-url.js"(exports, module) {
+    "../../node_modules/hosted-git-info/lib/parse-url.js"(exports, module) {
       var url = __require("url");
       var lastIndexOfBefore = (str, char, beforeChar) => {
         const startPosition = str.indexOf(beforeChar);
@@ -7873,9 +7910,9 @@ var plugin = (() => {
     }
   });
 
-  // ../../node_modules/@npmcli/package-json/node_modules/hosted-git-info/lib/from-url.js
+  // ../../node_modules/hosted-git-info/lib/from-url.js
   var require_from_url = __commonJS({
-    "../../node_modules/@npmcli/package-json/node_modules/hosted-git-info/lib/from-url.js"(exports, module) {
+    "../../node_modules/hosted-git-info/lib/from-url.js"(exports, module) {
       "use strict";
       var parseUrl = require_parse_url();
       var isGitHubShorthand = (arg) => {
@@ -7967,9 +8004,9 @@ var plugin = (() => {
     }
   });
 
-  // ../../node_modules/@npmcli/package-json/node_modules/hosted-git-info/lib/index.js
+  // ../../node_modules/hosted-git-info/lib/index.js
   var require_lib = __commonJS({
-    "../../node_modules/@npmcli/package-json/node_modules/hosted-git-info/lib/index.js"(exports, module) {
+    "../../node_modules/hosted-git-info/lib/index.js"(exports, module) {
       "use strict";
       var { LRUCache } = require_commonjs2();
       var hosts = require_hosts();
@@ -10374,462 +10411,6 @@ var plugin = (() => {
     }
   });
 
-  // ../../node_modules/npm-package-arg/node_modules/hosted-git-info/lib/hosts.js
-  var require_hosts2 = __commonJS({
-    "../../node_modules/npm-package-arg/node_modules/hosted-git-info/lib/hosts.js"(exports, module) {
-      "use strict";
-      var maybeJoin = (...args) => args.every((arg) => arg) ? args.join("") : "";
-      var maybeEncode = (arg) => arg ? encodeURIComponent(arg) : "";
-      var formatHashFragment = (f) => f.toLowerCase().replace(/^\W+|\/|\W+$/g, "").replace(/\W+/g, "-");
-      var defaults = {
-        sshtemplate: ({ domain, user, project, committish }) => `git@${domain}:${user}/${project}.git${maybeJoin("#", committish)}`,
-        sshurltemplate: ({ domain, user, project, committish }) => `git+ssh://git@${domain}/${user}/${project}.git${maybeJoin("#", committish)}`,
-        edittemplate: ({ domain, user, project, committish, editpath, path }) => `https://${domain}/${user}/${project}${maybeJoin("/", editpath, "/", maybeEncode(committish || "HEAD"), "/", path)}`,
-        browsetemplate: ({ domain, user, project, committish, treepath }) => `https://${domain}/${user}/${project}${maybeJoin("/", treepath, "/", maybeEncode(committish))}`,
-        browsetreetemplate: ({ domain, user, project, committish, treepath, path, fragment, hashformat }) => `https://${domain}/${user}/${project}/${treepath}/${maybeEncode(committish || "HEAD")}/${path}${maybeJoin("#", hashformat(fragment || ""))}`,
-        browseblobtemplate: ({ domain, user, project, committish, blobpath, path, fragment, hashformat }) => `https://${domain}/${user}/${project}/${blobpath}/${maybeEncode(committish || "HEAD")}/${path}${maybeJoin("#", hashformat(fragment || ""))}`,
-        docstemplate: ({ domain, user, project, treepath, committish }) => `https://${domain}/${user}/${project}${maybeJoin("/", treepath, "/", maybeEncode(committish))}#readme`,
-        httpstemplate: ({ auth, domain, user, project, committish }) => `git+https://${maybeJoin(auth, "@")}${domain}/${user}/${project}.git${maybeJoin("#", committish)}`,
-        filetemplate: ({ domain, user, project, committish, path }) => `https://${domain}/${user}/${project}/raw/${maybeEncode(committish || "HEAD")}/${path}`,
-        shortcuttemplate: ({ type, user, project, committish }) => `${type}:${user}/${project}${maybeJoin("#", committish)}`,
-        pathtemplate: ({ user, project, committish }) => `${user}/${project}${maybeJoin("#", committish)}`,
-        bugstemplate: ({ domain, user, project }) => `https://${domain}/${user}/${project}/issues`,
-        hashformat: formatHashFragment
-      };
-      var hosts = {};
-      hosts.github = {
-        protocols: ["git:", "http:", "git+ssh:", "git+https:", "ssh:", "https:"],
-        domain: "github.com",
-        treepath: "tree",
-        blobpath: "blob",
-        editpath: "edit",
-        filetemplate: ({ auth, user, project, committish, path }) => `https://${maybeJoin(auth, "@")}raw.githubusercontent.com/${user}/${project}/${maybeEncode(committish || "HEAD")}/${path}`,
-        gittemplate: ({ auth, domain, user, project, committish }) => `git://${maybeJoin(auth, "@")}${domain}/${user}/${project}.git${maybeJoin("#", committish)}`,
-        tarballtemplate: ({ domain, user, project, committish }) => `https://codeload.${domain}/${user}/${project}/tar.gz/${maybeEncode(committish || "HEAD")}`,
-        extract: (url) => {
-          let [, user, project, type, committish] = url.pathname.split("/", 5);
-          if (type && type !== "tree") {
-            return;
-          }
-          if (!type) {
-            committish = url.hash.slice(1);
-          }
-          if (project && project.endsWith(".git")) {
-            project = project.slice(0, -4);
-          }
-          if (!user || !project) {
-            return;
-          }
-          return { user, project, committish };
-        }
-      };
-      hosts.bitbucket = {
-        protocols: ["git+ssh:", "git+https:", "ssh:", "https:"],
-        domain: "bitbucket.org",
-        treepath: "src",
-        blobpath: "src",
-        editpath: "?mode=edit",
-        edittemplate: ({ domain, user, project, committish, treepath, path, editpath }) => `https://${domain}/${user}/${project}${maybeJoin("/", treepath, "/", maybeEncode(committish || "HEAD"), "/", path, editpath)}`,
-        tarballtemplate: ({ domain, user, project, committish }) => `https://${domain}/${user}/${project}/get/${maybeEncode(committish || "HEAD")}.tar.gz`,
-        extract: (url) => {
-          let [, user, project, aux] = url.pathname.split("/", 4);
-          if (["get"].includes(aux)) {
-            return;
-          }
-          if (project && project.endsWith(".git")) {
-            project = project.slice(0, -4);
-          }
-          if (!user || !project) {
-            return;
-          }
-          return { user, project, committish: url.hash.slice(1) };
-        }
-      };
-      hosts.gitlab = {
-        protocols: ["git+ssh:", "git+https:", "ssh:", "https:"],
-        domain: "gitlab.com",
-        treepath: "tree",
-        blobpath: "tree",
-        editpath: "-/edit",
-        httpstemplate: ({ auth, domain, user, project, committish }) => `git+https://${maybeJoin(auth, "@")}${domain}/${user}/${project}.git${maybeJoin("#", committish)}`,
-        tarballtemplate: ({ domain, user, project, committish }) => `https://${domain}/${user}/${project}/repository/archive.tar.gz?ref=${maybeEncode(committish || "HEAD")}`,
-        extract: (url) => {
-          const path = url.pathname.slice(1);
-          if (path.includes("/-/") || path.includes("/archive.tar.gz")) {
-            return;
-          }
-          const segments = path.split("/");
-          let project = segments.pop();
-          if (project.endsWith(".git")) {
-            project = project.slice(0, -4);
-          }
-          const user = segments.join("/");
-          if (!user || !project) {
-            return;
-          }
-          return { user, project, committish: url.hash.slice(1) };
-        }
-      };
-      hosts.gist = {
-        protocols: ["git:", "git+ssh:", "git+https:", "ssh:", "https:"],
-        domain: "gist.github.com",
-        editpath: "edit",
-        sshtemplate: ({ domain, project, committish }) => `git@${domain}:${project}.git${maybeJoin("#", committish)}`,
-        sshurltemplate: ({ domain, project, committish }) => `git+ssh://git@${domain}/${project}.git${maybeJoin("#", committish)}`,
-        edittemplate: ({ domain, user, project, committish, editpath }) => `https://${domain}/${user}/${project}${maybeJoin("/", maybeEncode(committish))}/${editpath}`,
-        browsetemplate: ({ domain, project, committish }) => `https://${domain}/${project}${maybeJoin("/", maybeEncode(committish))}`,
-        browsetreetemplate: ({ domain, project, committish, path, hashformat }) => `https://${domain}/${project}${maybeJoin("/", maybeEncode(committish))}${maybeJoin("#", hashformat(path))}`,
-        browseblobtemplate: ({ domain, project, committish, path, hashformat }) => `https://${domain}/${project}${maybeJoin("/", maybeEncode(committish))}${maybeJoin("#", hashformat(path))}`,
-        docstemplate: ({ domain, project, committish }) => `https://${domain}/${project}${maybeJoin("/", maybeEncode(committish))}`,
-        httpstemplate: ({ domain, project, committish }) => `git+https://${domain}/${project}.git${maybeJoin("#", committish)}`,
-        filetemplate: ({ user, project, committish, path }) => `https://gist.githubusercontent.com/${user}/${project}/raw${maybeJoin("/", maybeEncode(committish))}/${path}`,
-        shortcuttemplate: ({ type, project, committish }) => `${type}:${project}${maybeJoin("#", committish)}`,
-        pathtemplate: ({ project, committish }) => `${project}${maybeJoin("#", committish)}`,
-        bugstemplate: ({ domain, project }) => `https://${domain}/${project}`,
-        gittemplate: ({ domain, project, committish }) => `git://${domain}/${project}.git${maybeJoin("#", committish)}`,
-        tarballtemplate: ({ project, committish }) => `https://codeload.github.com/gist/${project}/tar.gz/${maybeEncode(committish || "HEAD")}`,
-        extract: (url) => {
-          let [, user, project, aux] = url.pathname.split("/", 4);
-          if (aux === "raw") {
-            return;
-          }
-          if (!project) {
-            if (!user) {
-              return;
-            }
-            project = user;
-            user = null;
-          }
-          if (project.endsWith(".git")) {
-            project = project.slice(0, -4);
-          }
-          return { user, project, committish: url.hash.slice(1) };
-        },
-        hashformat: function(fragment) {
-          return fragment && "file-" + formatHashFragment(fragment);
-        }
-      };
-      hosts.sourcehut = {
-        protocols: ["git+ssh:", "https:"],
-        domain: "git.sr.ht",
-        treepath: "tree",
-        blobpath: "tree",
-        filetemplate: ({ domain, user, project, committish, path }) => `https://${domain}/${user}/${project}/blob/${maybeEncode(committish) || "HEAD"}/${path}`,
-        httpstemplate: ({ domain, user, project, committish }) => `https://${domain}/${user}/${project}.git${maybeJoin("#", committish)}`,
-        tarballtemplate: ({ domain, user, project, committish }) => `https://${domain}/${user}/${project}/archive/${maybeEncode(committish) || "HEAD"}.tar.gz`,
-        bugstemplate: ({ user, project }) => null,
-        extract: (url) => {
-          let [, user, project, aux] = url.pathname.split("/", 4);
-          if (["archive"].includes(aux)) {
-            return;
-          }
-          if (project && project.endsWith(".git")) {
-            project = project.slice(0, -4);
-          }
-          if (!user || !project) {
-            return;
-          }
-          return { user, project, committish: url.hash.slice(1) };
-        }
-      };
-      for (const [name, host] of Object.entries(hosts)) {
-        hosts[name] = Object.assign({}, defaults, host);
-      }
-      module.exports = hosts;
-    }
-  });
-
-  // ../../node_modules/npm-package-arg/node_modules/hosted-git-info/lib/parse-url.js
-  var require_parse_url2 = __commonJS({
-    "../../node_modules/npm-package-arg/node_modules/hosted-git-info/lib/parse-url.js"(exports, module) {
-      var url = __require("url");
-      var lastIndexOfBefore = (str, char, beforeChar) => {
-        const startPosition = str.indexOf(beforeChar);
-        return str.lastIndexOf(char, startPosition > -1 ? startPosition : Infinity);
-      };
-      var safeUrl = (u) => {
-        try {
-          return new url.URL(u);
-        } catch {
-        }
-      };
-      var correctProtocol = (arg, protocols) => {
-        const firstColon = arg.indexOf(":");
-        const proto = arg.slice(0, firstColon + 1);
-        if (Object.prototype.hasOwnProperty.call(protocols, proto)) {
-          return arg;
-        }
-        const firstAt = arg.indexOf("@");
-        if (firstAt > -1) {
-          if (firstAt > firstColon) {
-            return `git+ssh://${arg}`;
-          } else {
-            return arg;
-          }
-        }
-        const doubleSlash = arg.indexOf("//");
-        if (doubleSlash === firstColon + 1) {
-          return arg;
-        }
-        return `${arg.slice(0, firstColon + 1)}//${arg.slice(firstColon + 1)}`;
-      };
-      var correctUrl = (giturl) => {
-        const firstAt = lastIndexOfBefore(giturl, "@", "#");
-        const lastColonBeforeHash = lastIndexOfBefore(giturl, ":", "#");
-        if (lastColonBeforeHash > firstAt) {
-          giturl = giturl.slice(0, lastColonBeforeHash) + "/" + giturl.slice(lastColonBeforeHash + 1);
-        }
-        if (lastIndexOfBefore(giturl, ":", "#") === -1 && giturl.indexOf("//") === -1) {
-          giturl = `git+ssh://${giturl}`;
-        }
-        return giturl;
-      };
-      module.exports = (giturl, protocols) => {
-        const withProtocol = protocols ? correctProtocol(giturl, protocols) : giturl;
-        return safeUrl(withProtocol) || safeUrl(correctUrl(withProtocol));
-      };
-    }
-  });
-
-  // ../../node_modules/npm-package-arg/node_modules/hosted-git-info/lib/from-url.js
-  var require_from_url2 = __commonJS({
-    "../../node_modules/npm-package-arg/node_modules/hosted-git-info/lib/from-url.js"(exports, module) {
-      "use strict";
-      var parseUrl = require_parse_url2();
-      var isGitHubShorthand = (arg) => {
-        const firstHash = arg.indexOf("#");
-        const firstSlash = arg.indexOf("/");
-        const secondSlash = arg.indexOf("/", firstSlash + 1);
-        const firstColon = arg.indexOf(":");
-        const firstSpace = /\s/.exec(arg);
-        const firstAt = arg.indexOf("@");
-        const spaceOnlyAfterHash = !firstSpace || firstHash > -1 && firstSpace.index > firstHash;
-        const atOnlyAfterHash = firstAt === -1 || firstHash > -1 && firstAt > firstHash;
-        const colonOnlyAfterHash = firstColon === -1 || firstHash > -1 && firstColon > firstHash;
-        const secondSlashOnlyAfterHash = secondSlash === -1 || firstHash > -1 && secondSlash > firstHash;
-        const hasSlash = firstSlash > 0;
-        const doesNotEndWithSlash = firstHash > -1 ? arg[firstHash - 1] !== "/" : !arg.endsWith("/");
-        const doesNotStartWithDot = !arg.startsWith(".");
-        return spaceOnlyAfterHash && hasSlash && doesNotEndWithSlash && doesNotStartWithDot && atOnlyAfterHash && colonOnlyAfterHash && secondSlashOnlyAfterHash;
-      };
-      module.exports = (giturl, opts, { gitHosts, protocols }) => {
-        if (!giturl) {
-          return;
-        }
-        const correctedUrl = isGitHubShorthand(giturl) ? `github:${giturl}` : giturl;
-        const parsed = parseUrl(correctedUrl, protocols);
-        if (!parsed) {
-          return;
-        }
-        const gitHostShortcut = gitHosts.byShortcut[parsed.protocol];
-        const gitHostDomain = gitHosts.byDomain[parsed.hostname.startsWith("www.") ? parsed.hostname.slice(4) : parsed.hostname];
-        const gitHostName = gitHostShortcut || gitHostDomain;
-        if (!gitHostName) {
-          return;
-        }
-        const gitHostInfo = gitHosts[gitHostShortcut || gitHostDomain];
-        let auth = null;
-        if (protocols[parsed.protocol]?.auth && (parsed.username || parsed.password)) {
-          auth = `${parsed.username}${parsed.password ? ":" + parsed.password : ""}`;
-        }
-        let committish = null;
-        let user = null;
-        let project = null;
-        let defaultRepresentation = null;
-        try {
-          if (gitHostShortcut) {
-            let pathname = parsed.pathname.startsWith("/") ? parsed.pathname.slice(1) : parsed.pathname;
-            const firstAt = pathname.indexOf("@");
-            if (firstAt > -1) {
-              pathname = pathname.slice(firstAt + 1);
-            }
-            const lastSlash = pathname.lastIndexOf("/");
-            if (lastSlash > -1) {
-              user = decodeURIComponent(pathname.slice(0, lastSlash));
-              if (!user) {
-                user = null;
-              }
-              project = decodeURIComponent(pathname.slice(lastSlash + 1));
-            } else {
-              project = decodeURIComponent(pathname);
-            }
-            if (project.endsWith(".git")) {
-              project = project.slice(0, -4);
-            }
-            if (parsed.hash) {
-              committish = decodeURIComponent(parsed.hash.slice(1));
-            }
-            defaultRepresentation = "shortcut";
-          } else {
-            if (!gitHostInfo.protocols.includes(parsed.protocol)) {
-              return;
-            }
-            const segments = gitHostInfo.extract(parsed);
-            if (!segments) {
-              return;
-            }
-            user = segments.user && decodeURIComponent(segments.user);
-            project = decodeURIComponent(segments.project);
-            committish = decodeURIComponent(segments.committish);
-            defaultRepresentation = protocols[parsed.protocol]?.name || parsed.protocol.slice(0, -1);
-          }
-        } catch (err) {
-          if (err instanceof URIError) {
-            return;
-          } else {
-            throw err;
-          }
-        }
-        return [gitHostName, user, auth, project, committish, defaultRepresentation, opts];
-      };
-    }
-  });
-
-  // ../../node_modules/npm-package-arg/node_modules/hosted-git-info/lib/index.js
-  var require_lib6 = __commonJS({
-    "../../node_modules/npm-package-arg/node_modules/hosted-git-info/lib/index.js"(exports, module) {
-      "use strict";
-      var { LRUCache } = require_commonjs2();
-      var hosts = require_hosts2();
-      var fromUrl = require_from_url2();
-      var parseUrl = require_parse_url2();
-      var cache = new LRUCache({ max: 1e3 });
-      var _gitHosts, _protocols, _fill, fill_fn;
-      var _GitHost = class {
-        constructor(type, user, auth, project, committish, defaultRepresentation, opts = {}) {
-          __privateAdd(this, _fill);
-          Object.assign(this, __privateGet(_GitHost, _gitHosts)[type], {
-            type,
-            user,
-            auth,
-            project,
-            committish,
-            default: defaultRepresentation,
-            opts
-          });
-        }
-        static addHost(name, host) {
-          __privateGet(_GitHost, _gitHosts)[name] = host;
-          __privateGet(_GitHost, _gitHosts).byDomain[host.domain] = name;
-          __privateGet(_GitHost, _gitHosts).byShortcut[`${name}:`] = name;
-          __privateGet(_GitHost, _protocols)[`${name}:`] = { name };
-        }
-        static fromUrl(giturl, opts) {
-          if (typeof giturl !== "string") {
-            return;
-          }
-          const key = giturl + JSON.stringify(opts || {});
-          if (!cache.has(key)) {
-            const hostArgs = fromUrl(giturl, opts, {
-              gitHosts: __privateGet(_GitHost, _gitHosts),
-              protocols: __privateGet(_GitHost, _protocols)
-            });
-            cache.set(key, hostArgs ? new _GitHost(...hostArgs) : void 0);
-          }
-          return cache.get(key);
-        }
-        static parseUrl(url) {
-          return parseUrl(url);
-        }
-        hash() {
-          return this.committish ? `#${this.committish}` : "";
-        }
-        ssh(opts) {
-          return __privateMethod(this, _fill, fill_fn).call(this, this.sshtemplate, opts);
-        }
-        sshurl(opts) {
-          return __privateMethod(this, _fill, fill_fn).call(this, this.sshurltemplate, opts);
-        }
-        browse(path, ...args) {
-          if (typeof path !== "string") {
-            return __privateMethod(this, _fill, fill_fn).call(this, this.browsetemplate, path);
-          }
-          if (typeof args[0] !== "string") {
-            return __privateMethod(this, _fill, fill_fn).call(this, this.browsetreetemplate, { ...args[0], path });
-          }
-          return __privateMethod(this, _fill, fill_fn).call(this, this.browsetreetemplate, { ...args[1], fragment: args[0], path });
-        }
-        browseFile(path, ...args) {
-          if (typeof args[0] !== "string") {
-            return __privateMethod(this, _fill, fill_fn).call(this, this.browseblobtemplate, { ...args[0], path });
-          }
-          return __privateMethod(this, _fill, fill_fn).call(this, this.browseblobtemplate, { ...args[1], fragment: args[0], path });
-        }
-        docs(opts) {
-          return __privateMethod(this, _fill, fill_fn).call(this, this.docstemplate, opts);
-        }
-        bugs(opts) {
-          return __privateMethod(this, _fill, fill_fn).call(this, this.bugstemplate, opts);
-        }
-        https(opts) {
-          return __privateMethod(this, _fill, fill_fn).call(this, this.httpstemplate, opts);
-        }
-        git(opts) {
-          return __privateMethod(this, _fill, fill_fn).call(this, this.gittemplate, opts);
-        }
-        shortcut(opts) {
-          return __privateMethod(this, _fill, fill_fn).call(this, this.shortcuttemplate, opts);
-        }
-        path(opts) {
-          return __privateMethod(this, _fill, fill_fn).call(this, this.pathtemplate, opts);
-        }
-        tarball(opts) {
-          return __privateMethod(this, _fill, fill_fn).call(this, this.tarballtemplate, { ...opts, noCommittish: false });
-        }
-        file(path, opts) {
-          return __privateMethod(this, _fill, fill_fn).call(this, this.filetemplate, { ...opts, path });
-        }
-        edit(path, opts) {
-          return __privateMethod(this, _fill, fill_fn).call(this, this.edittemplate, { ...opts, path });
-        }
-        getDefaultRepresentation() {
-          return this.default;
-        }
-        toString(opts) {
-          if (this.default && typeof this[this.default] === "function") {
-            return this[this.default](opts);
-          }
-          return this.sshurl(opts);
-        }
-      };
-      var GitHost = _GitHost;
-      _gitHosts = new WeakMap();
-      _protocols = new WeakMap();
-      _fill = new WeakSet();
-      fill_fn = function(template, opts) {
-        if (typeof template !== "function") {
-          return null;
-        }
-        const options = { ...this, ...this.opts, ...opts };
-        if (!options.path) {
-          options.path = "";
-        }
-        if (options.path.startsWith("/")) {
-          options.path = options.path.slice(1);
-        }
-        if (options.noCommittish) {
-          options.committish = null;
-        }
-        const result = template(options);
-        return options.noGitPlus && result.startsWith("git+") ? result.slice(4) : result;
-      };
-      __privateAdd(GitHost, _gitHosts, { byShortcut: {}, byDomain: {} });
-      __privateAdd(GitHost, _protocols, {
-        "git+ssh:": { name: "sshurl" },
-        "ssh:": { name: "sshurl" },
-        "git+https:": { name: "https", auth: true },
-        "git:": { auth: true },
-        "http:": { auth: true },
-        "https:": { auth: true },
-        "git+http:": { auth: true }
-      });
-      for (const [name, host] of Object.entries(hosts)) {
-        GitHost.addHost(name, host);
-      }
-      module.exports = GitHost;
-    }
-  });
-
   // ../../node_modules/builtins/index.js
   var require_builtins = __commonJS({
     "../../node_modules/builtins/index.js"(exports, module) {
@@ -10906,7 +10487,7 @@ var plugin = (() => {
   });
 
   // ../../node_modules/validate-npm-package-name/lib/index.js
-  var require_lib7 = __commonJS({
+  var require_lib6 = __commonJS({
     "../../node_modules/validate-npm-package-name/lib/index.js"(exports, module) {
       "use strict";
       var scopedPackagePattern = new RegExp("^(?:@([^/]+?)[/])?([^/]+?)$");
@@ -11002,10 +10583,10 @@ var plugin = (() => {
       module.exports.toPurl = toPurl;
       module.exports.Result = Result;
       var { URL: URL2 } = __require("url");
-      var HostedGit = require_lib6();
+      var HostedGit = require_lib();
       var semver = __require("semver");
       var path = global.FAKE_WINDOWS ? __require("path").win32 : __require("path");
-      var validatePackageName = require_lib7();
+      var validatePackageName = require_lib6();
       var { homedir } = __require("os");
       var log = require_lib2();
       var isWindows = process.platform === "win32" || global.FAKE_WINDOWS;
@@ -11338,7 +10919,7 @@ var plugin = (() => {
   });
 
   // ../../node_modules/npm-install-checks/lib/index.js
-  var require_lib8 = __commonJS({
+  var require_lib7 = __commonJS({
     "../../node_modules/npm-install-checks/lib/index.js"(exports, module) {
       var semver = __require("semver");
       var checkEngine = (target, npmVer, nodeVer, force = false) => {
@@ -11433,7 +11014,7 @@ var plugin = (() => {
   });
 
   // ../../node_modules/npm-normalize-package-bin/lib/index.js
-  var require_lib9 = __commonJS({
+  var require_lib8 = __commonJS({
     "../../node_modules/npm-normalize-package-bin/lib/index.js"(exports, module) {
       var { join, basename } = __require("path");
       var normalize = (pkg) => !pkg.bin ? removeBin(pkg) : typeof pkg.bin === "string" ? normalizeString(pkg) : Array.isArray(pkg.bin) ? normalizeArray(pkg) : typeof pkg.bin === "object" ? normalizeObject(pkg) : removeBin(pkg);
@@ -11483,13 +11064,13 @@ var plugin = (() => {
   });
 
   // ../../node_modules/npm-pick-manifest/lib/index.js
-  var require_lib10 = __commonJS({
+  var require_lib9 = __commonJS({
     "../../node_modules/npm-pick-manifest/lib/index.js"(exports, module) {
       "use strict";
       var npa = require_npa();
       var semver = __require("semver");
-      var { checkEngine } = require_lib8();
-      var normalizeBin = require_lib9();
+      var { checkEngine } = require_lib7();
+      var normalizeBin = require_lib8();
       var engineOk = (manifest, npmVersion, nodeVersion) => {
         try {
           checkEngine(manifest, npmVersion, nodeVersion);
@@ -11652,7 +11233,7 @@ ${polMsg}`;
       var getRevs = require_revs();
       var spawn = require_spawn();
       var { isWindows } = require_utils();
-      var pickManifest = require_lib10();
+      var pickManifest = require_lib9();
       var fs = __require("fs/promises");
       module.exports = (repo, ref = "HEAD", target = null, opts = {}) => getRevs(repo, opts).then((revs) => clone(
         repo,
@@ -11800,7 +11381,7 @@ ${polMsg}`;
   });
 
   // ../../node_modules/@npmcli/git/lib/index.js
-  var require_lib11 = __commonJS({
+  var require_lib10 = __commonJS({
     "../../node_modules/@npmcli/git/lib/index.js"(exports, module) {
       module.exports = {
         clone: require_clone(),
@@ -11824,7 +11405,7 @@ ${polMsg}`;
       var legacyMakeWarning = require_make_warning();
       var path = __require("path");
       var log = require_lib2();
-      var git = require_lib11();
+      var git = require_lib10();
       var hostedGitInfo = require_lib();
       function normalizePackageBin(pkg, changes) {
         if (pkg.bin) {
@@ -12258,7 +11839,7 @@ ${polMsg}`;
   });
 
   // ../../node_modules/@npmcli/package-json/node_modules/json-parse-even-better-errors/lib/index.js
-  var require_lib12 = __commonJS({
+  var require_lib11 = __commonJS({
     "../../node_modules/@npmcli/package-json/node_modules/json-parse-even-better-errors/lib/index.js"(exports, module) {
       "use strict";
       var INDENT = Symbol.for("indent");
@@ -12363,7 +11944,7 @@ ${polMsg}`;
   });
 
   // ../../node_modules/@npmcli/package-json/lib/index.js
-  var require_lib13 = __commonJS({
+  var require_lib12 = __commonJS({
     "../../node_modules/@npmcli/package-json/lib/index.js"(exports, module) {
       var { readFile, writeFile } = __require("fs/promises");
       var { resolve } = __require("path");
@@ -12371,7 +11952,7 @@ ${polMsg}`;
       var updateScripts = require_update_scripts();
       var updateWorkspaces = require_update_workspaces();
       var normalize = require_normalize();
-      var parseJSON = require_lib12();
+      var parseJSON = require_lib11();
       var knownSteps = /* @__PURE__ */ new Set([
         updateDeps,
         updateScripts,
@@ -12700,7 +12281,7 @@ ${polMsg}`;
   });
 
   // ../../node_modules/@npmcli/node-gyp/lib/index.js
-  var require_lib14 = __commonJS({
+  var require_lib13 = __commonJS({
     "../../node_modules/@npmcli/node-gyp/lib/index.js"(exports, module) {
       var util = __require("util");
       var fs = __require("fs");
@@ -12778,7 +12359,7 @@ ${polMsg}`;
   });
 
   // ../../node_modules/@npmcli/run-script/node_modules/proc-log/lib/index.js
-  var require_lib15 = __commonJS({
+  var require_lib14 = __commonJS({
     "../../node_modules/@npmcli/run-script/node_modules/proc-log/lib/index.js"(exports, module) {
       var META = Symbol("proc-log.meta");
       module.exports = {
@@ -12942,7 +12523,7 @@ ${polMsg}`;
       var makeSpawnArgs = require_make_spawn_args();
       var promiseSpawn = require_lib4();
       var packageEnvs = require_package_envs();
-      var { isNodeGypPackage, defaultGypInstallScript } = require_lib14();
+      var { isNodeGypPackage, defaultGypInstallScript } = require_lib13();
       var signalManager = require_signal_manager();
       var isServerPackage = require_is_server_package();
       var runScriptPkg = async (options) => {
@@ -12990,7 +12571,7 @@ ${polMsg}`;
             banner += ` ${args.join(" ")}`;
           }
           banner += "\n";
-          const { output, input } = require_lib15();
+          const { output, input } = require_lib14();
           output.standard(banner);
           inputEnd = input.start();
         }
@@ -13076,7 +12657,7 @@ ${polMsg}`;
   // ../../node_modules/@npmcli/run-script/lib/run-script.js
   var require_run_script = __commonJS({
     "../../node_modules/@npmcli/run-script/lib/run-script.js"(exports, module) {
-      var PackageJson = require_lib13();
+      var PackageJson = require_lib12();
       var runScriptPkg = require_run_script_pkg();
       var validateOptions = require_validate_options();
       var isServerPackage = require_is_server_package();
@@ -13189,7 +12770,7 @@ ${polMsg}`;
   });
 
   // ../../node_modules/cmd-shim/lib/index.js
-  var require_lib16 = __commonJS({
+  var require_lib15 = __commonJS({
     "../../node_modules/cmd-shim/lib/index.js"(exports, module) {
       var {
         chmod,
@@ -13340,7 +12921,7 @@ exit $LASTEXITCODE
   });
 
   // ../../node_modules/read-cmd-shim/lib/index.js
-  var require_lib17 = __commonJS({
+  var require_lib16 = __commonJS({
     "../../node_modules/read-cmd-shim/lib/index.js"(exports, module) {
       var fs = __require("fs");
       var { promisify } = __require("util");
@@ -13743,7 +13324,7 @@ exit $LASTEXITCODE
   });
 
   // ../../node_modules/write-file-atomic/lib/index.js
-  var require_lib18 = __commonJS({
+  var require_lib17 = __commonJS({
     "../../node_modules/write-file-atomic/lib/index.js"(exports, module) {
       "use strict";
       module.exports = writeFile;
@@ -13974,7 +13555,7 @@ exit $LASTEXITCODE
         readFile
       } = __require("fs/promises");
       var execMode = 511 & ~process.umask();
-      var writeFileAtomic = require_lib18();
+      var writeFileAtomic = require_lib17();
       var isWindowsHashBang = (buf) => buf[0] === "#".charCodeAt(0) && buf[1] === "!".charCodeAt(0) && /^#![^\n]+\r\n/.test(buf.toString());
       var isWindowsHashbangFile = (file) => {
         const FALSE = () => false;
@@ -14005,8 +13586,8 @@ exit $LASTEXITCODE
           throw er;
         }
       };
-      var cmdShim = require_lib16();
-      var readCmdShim = require_lib17();
+      var cmdShim = require_lib15();
+      var readCmdShim = require_lib16();
       var fixBin = require_fix_bin();
       var seen = /* @__PURE__ */ new Set();
       var failEEXIST = ({ to, from }) => Promise.reject(Object.assign(new Error("EEXIST: file already exists"), {
@@ -15453,7 +15034,7 @@ exit $LASTEXITCODE
       var { promises: fs, existsSync } = __require("fs");
       var path = __require("path");
       var npmRunScript = require_run_script();
-      var normalizeBin = require_lib9();
+      var normalizeBin = require_lib8();
       var { linkBinAbsolute, linkBinRelative } = require_linker();
       var { FEATURE } = require_toggles();
       var { loadCanonicalNameMap } = require_src();
