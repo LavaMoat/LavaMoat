@@ -5837,12 +5837,7 @@ var plugin = (() => {
     "../../node_modules/glob/dist/commonjs/index.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
-      exports.glob = exports.sync = exports.iterate = exports.iterateSync = exports.stream = exports.streamSync = exports.Ignore = exports.hasMagic = exports.Glob = exports.unescape = exports.escape = void 0;
-      exports.globStreamSync = globStreamSync;
-      exports.globStream = globStream;
-      exports.globSync = globSync;
-      exports.globIterateSync = globIterateSync;
-      exports.globIterate = globIterate;
+      exports.glob = exports.sync = exports.iterate = exports.iterateSync = exports.stream = exports.streamSync = exports.globIterate = exports.globIterateSync = exports.globSync = exports.globStream = exports.globStreamSync = exports.Ignore = exports.hasMagic = exports.Glob = exports.unescape = exports.escape = void 0;
       var minimatch_1 = require_commonjs();
       var glob_js_1 = require_glob();
       var has_magic_js_1 = require_has_magic();
@@ -5868,21 +5863,26 @@ var plugin = (() => {
       function globStreamSync(pattern, options = {}) {
         return new glob_js_1.Glob(pattern, options).streamSync();
       }
+      exports.globStreamSync = globStreamSync;
       function globStream(pattern, options = {}) {
         return new glob_js_1.Glob(pattern, options).stream();
       }
+      exports.globStream = globStream;
       function globSync(pattern, options = {}) {
         return new glob_js_1.Glob(pattern, options).walkSync();
       }
+      exports.globSync = globSync;
       async function glob_(pattern, options = {}) {
         return new glob_js_1.Glob(pattern, options).walk();
       }
       function globIterateSync(pattern, options = {}) {
         return new glob_js_1.Glob(pattern, options).iterateSync();
       }
+      exports.globIterateSync = globIterateSync;
       function globIterate(pattern, options = {}) {
         return new glob_js_1.Glob(pattern, options).iterate();
       }
+      exports.globIterate = globIterate;
       exports.streamSync = globStreamSync;
       exports.stream = Object.assign(globStream, { sync: globStreamSync });
       exports.iterateSync = globIterateSync;
@@ -12358,165 +12358,6 @@ ${polMsg}`;
     }
   });
 
-  // ../../node_modules/@npmcli/run-script/node_modules/proc-log/lib/index.js
-  var require_lib14 = __commonJS({
-    "../../node_modules/@npmcli/run-script/node_modules/proc-log/lib/index.js"(exports, module) {
-      var META = Symbol("proc-log.meta");
-      module.exports = {
-        META,
-        output: {
-          LEVELS: [
-            "standard",
-            "error",
-            "buffer",
-            "flush"
-          ],
-          KEYS: {
-            standard: "standard",
-            error: "error",
-            buffer: "buffer",
-            flush: "flush"
-          },
-          standard: function(...args) {
-            return process.emit("output", "standard", ...args);
-          },
-          error: function(...args) {
-            return process.emit("output", "error", ...args);
-          },
-          buffer: function(...args) {
-            return process.emit("output", "buffer", ...args);
-          },
-          flush: function(...args) {
-            return process.emit("output", "flush", ...args);
-          }
-        },
-        log: {
-          LEVELS: [
-            "notice",
-            "error",
-            "warn",
-            "info",
-            "verbose",
-            "http",
-            "silly",
-            "timing",
-            "pause",
-            "resume"
-          ],
-          KEYS: {
-            notice: "notice",
-            error: "error",
-            warn: "warn",
-            info: "info",
-            verbose: "verbose",
-            http: "http",
-            silly: "silly",
-            timing: "timing",
-            pause: "pause",
-            resume: "resume"
-          },
-          error: function(...args) {
-            return process.emit("log", "error", ...args);
-          },
-          notice: function(...args) {
-            return process.emit("log", "notice", ...args);
-          },
-          warn: function(...args) {
-            return process.emit("log", "warn", ...args);
-          },
-          info: function(...args) {
-            return process.emit("log", "info", ...args);
-          },
-          verbose: function(...args) {
-            return process.emit("log", "verbose", ...args);
-          },
-          http: function(...args) {
-            return process.emit("log", "http", ...args);
-          },
-          silly: function(...args) {
-            return process.emit("log", "silly", ...args);
-          },
-          timing: function(...args) {
-            return process.emit("log", "timing", ...args);
-          },
-          pause: function() {
-            return process.emit("log", "pause");
-          },
-          resume: function() {
-            return process.emit("log", "resume");
-          }
-        },
-        time: {
-          LEVELS: [
-            "start",
-            "end"
-          ],
-          KEYS: {
-            start: "start",
-            end: "end"
-          },
-          start: function(name, fn) {
-            process.emit("time", "start", name);
-            function end() {
-              return process.emit("time", "end", name);
-            }
-            if (typeof fn === "function") {
-              const res = fn();
-              if (res && res.finally) {
-                return res.finally(end);
-              }
-              end();
-              return res;
-            }
-            return end;
-          },
-          end: function(name) {
-            return process.emit("time", "end", name);
-          }
-        },
-        input: {
-          LEVELS: [
-            "start",
-            "end",
-            "read"
-          ],
-          KEYS: {
-            start: "start",
-            end: "end",
-            read: "read"
-          },
-          start: function(fn) {
-            process.emit("input", "start");
-            function end() {
-              return process.emit("input", "end");
-            }
-            if (typeof fn === "function") {
-              const res = fn();
-              if (res && res.finally) {
-                return res.finally(end);
-              }
-              end();
-              return res;
-            }
-            return end;
-          },
-          end: function() {
-            return process.emit("input", "end");
-          },
-          read: function(...args) {
-            let resolve, reject;
-            const promise = new Promise((_resolve, _reject) => {
-              resolve = _resolve;
-              reject = _reject;
-            });
-            process.emit("input", "read", resolve, reject, ...args);
-            return promise;
-          }
-        }
-      };
-    }
-  });
-
   // ../../node_modules/@npmcli/run-script/lib/run-script-pkg.js
   var require_run_script_pkg = __commonJS({
     "../../node_modules/@npmcli/run-script/lib/run-script-pkg.js"(exports, module) {
@@ -12526,6 +12367,19 @@ ${polMsg}`;
       var { isNodeGypPackage, defaultGypInstallScript } = require_lib13();
       var signalManager = require_signal_manager();
       var isServerPackage = require_is_server_package();
+      var bruce = (id, event, cmd, args) => {
+        let banner = id ? `
+> ${id} ${event}
+` : `
+> ${event}
+`;
+        banner += `> ${cmd.trim().replace(/\n/g, "\n> ")}`;
+        if (args.length) {
+          banner += ` ${args.join(" ")}`;
+        }
+        banner += "\n";
+        return banner;
+      };
       var runScriptPkg = async (options) => {
         const {
           event,
@@ -12537,6 +12391,7 @@ ${polMsg}`;
           pkg,
           args = [],
           stdioString,
+          banner = true,
           signalTimeout = 500
         } = options;
         const { scripts = {}, gypfile } = pkg;
@@ -12553,27 +12408,8 @@ ${polMsg}`;
         if (!cmd) {
           return { code: 0, signal: null };
         }
-        let inputEnd = () => {
-        };
-        if (stdio === "inherit") {
-          let banner;
-          if (pkg._id) {
-            banner = `
-> ${pkg._id} ${event}
-`;
-          } else {
-            banner = `
-> ${event}
-`;
-          }
-          banner += `> ${cmd.trim().replace(/\n/g, "\n> ")}`;
-          if (args.length) {
-            banner += ` ${args.join(" ")}`;
-          }
-          banner += "\n";
-          const { output, input } = require_lib14();
-          output.standard(banner);
-          inputEnd = input.start();
+        if (stdio === "inherit" && banner !== false) {
+          console.log(bruce(pkg._id, event, cmd, args));
         }
         const [spawnShell, spawnArgs, spawnOpts] = makeSpawnArgs({
           event,
@@ -12606,7 +12442,7 @@ ${polMsg}`;
           } else {
             throw er;
           }
-        }).finally(inputEnd);
+        });
       };
       module.exports = runScriptPkg;
     }
@@ -12770,7 +12606,7 @@ ${polMsg}`;
   });
 
   // ../../node_modules/cmd-shim/lib/index.js
-  var require_lib15 = __commonJS({
+  var require_lib14 = __commonJS({
     "../../node_modules/cmd-shim/lib/index.js"(exports, module) {
       var {
         chmod,
@@ -12921,7 +12757,7 @@ exit $LASTEXITCODE
   });
 
   // ../../node_modules/read-cmd-shim/lib/index.js
-  var require_lib16 = __commonJS({
+  var require_lib15 = __commonJS({
     "../../node_modules/read-cmd-shim/lib/index.js"(exports, module) {
       var fs = __require("fs");
       var { promisify } = __require("util");
@@ -13324,7 +13160,7 @@ exit $LASTEXITCODE
   });
 
   // ../../node_modules/write-file-atomic/lib/index.js
-  var require_lib17 = __commonJS({
+  var require_lib16 = __commonJS({
     "../../node_modules/write-file-atomic/lib/index.js"(exports, module) {
       "use strict";
       module.exports = writeFile;
@@ -13555,7 +13391,7 @@ exit $LASTEXITCODE
         readFile
       } = __require("fs/promises");
       var execMode = 511 & ~process.umask();
-      var writeFileAtomic = require_lib17();
+      var writeFileAtomic = require_lib16();
       var isWindowsHashBang = (buf) => buf[0] === "#".charCodeAt(0) && buf[1] === "!".charCodeAt(0) && /^#![^\n]+\r\n/.test(buf.toString());
       var isWindowsHashbangFile = (file) => {
         const FALSE = () => false;
@@ -13586,8 +13422,8 @@ exit $LASTEXITCODE
           throw er;
         }
       };
-      var cmdShim = require_lib15();
-      var readCmdShim = require_lib16();
+      var cmdShim = require_lib14();
+      var readCmdShim = require_lib15();
       var fixBin = require_fix_bin();
       var seen = /* @__PURE__ */ new Set();
       var failEEXIST = ({ to, from }) => Promise.reject(Object.assign(new Error("EEXIST: file already exists"), {
@@ -15180,7 +15016,8 @@ exit $LASTEXITCODE
         await npmRunScript({
           event,
           path: path2,
-          stdioString: true
+          stdioString: true,
+          banner: true
         });
       }
       var bannedBins = /* @__PURE__ */ new Set(["corepack", "node", "npm", "pnpm", "yarn"]);
@@ -15428,7 +15265,7 @@ exit $LASTEXITCODE
     hooks: {
       wrapScriptExecution: (executor, project, _locator, npm_lifecycle_event, { env: { npm_package_json, npm_package_name } }) => {
         return new Promise(
-          (resolve, _reject) => isPackageScriptAllowed(project, npm_package_json).then((isAllowed) => {
+          (resolve, reject) => isPackageScriptAllowed(project, npm_package_json).then((isAllowed) => {
             if (!isAllowed) {
               console.error(
                 isAllowed === null ? `  allow-scripts blocking execution of unconfigured package script. ${JSON.stringify({ npm_package_name, npm_lifecycle_event, npm_package_json })}` : `  allow-scripts blocking execution of disallowed package script. ${JSON.stringify({ npm_package_name, npm_lifecycle_event, npm_package_json })}`

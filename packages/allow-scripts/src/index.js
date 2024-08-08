@@ -537,6 +537,7 @@ async function loadAllPackageConfigurations({ rootDir }) {
  * @returns {ScriptsConfig}
  */
 function indexLifecycleConfiguration(config) {
+  // TODO: Return Sets instead of arrays
   config.allowConfig = config.allowConfig || {}
   // packages with config
   const configuredPatterns = Object.keys(config.allowConfig)
