@@ -32,7 +32,7 @@ npx --no-install allow-scripts setup
 
 > **Warning** if @lavamoat/allow-scripts was not installed prior, npx will try to download and run allow-scripts (note no namespace prefix) which is a different package. We suggest adding --no-install to prevent accidents.
 
-Adds a `.yarnrc` or `.npmrc` (the latter if `package-lock.json` is present) to the package, populates this file with the line `ignore-scripts true`. Immediately after that, adds the dependency `@lavamoat/preinstall-always-fail`.
+Adds a `.yarnrc` or `.npmrc` (the latter if `package-lock.json` is present) to the package, populates this file with the line `ignore-scripts true`. Immediately after that, adds the devDependency `@lavamoat/preinstall-always-fail`.
 
 Adding this package to a project **mitigates** the likelihood of accidentally running any lifecycle scripts by throwing an error during the `preinstall` script execution.
 
