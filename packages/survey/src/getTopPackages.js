@@ -1,7 +1,7 @@
 const path = require('node:path')
 const { promises: fs } = require('node:fs')
 const fetch = require('node-fetch')
-const cheerio = require('cheerio')
+const { load: cheerioLoad } = require('cheerio')
 const pLimit = require('p-limit')
 
 const concurrencyLimit = pLimit(8)
@@ -107,7 +107,7 @@ function createScraper({
     if (res.status !== 200) {
       throw new Error(`Error fetching "${url}":\n${content}`)
     }
-    const $ = cheerio.load(content)
+    const $ = cheerioLoad(content)
     const rows = $(entrySelector)
     const packages = [].map.call(rows, (item) => $(item).text())
     return packages
