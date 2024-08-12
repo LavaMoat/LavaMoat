@@ -7,6 +7,8 @@ module.exports = {
     return level
   },
   /**
+   * Run the callback if verbosity is greater or equal given number
+   *
    * @param {number} verbosity
    * @param {function} cb
    */
