@@ -12,7 +12,7 @@ const diag = require('./diagnostics.js')
 const RUNTIME_GLOBALS = require('webpack/lib/RuntimeGlobals')
 const { RUNTIME_KEY } = require('../ENUM.json')
 
-const { isExcluded } = require('./exclude.js')
+const { isExcluded } = require('./exclude')
 
 // TODO: There's potential for a few more flags in runtimeFlags if we want to support all things webpack supports. Proceed with common sense.
 // Look in JavascriptModulesPlugin for how it decides if module and exports are unused.

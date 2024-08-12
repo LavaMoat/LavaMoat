@@ -11,7 +11,8 @@ const {
   sources: { RawSource },
 } = require('webpack')
 
-const { isExcludedUnsafe } = require('./exclude.js')
+const { isExcludedUnsafe } = require('./exclude')
+const diag = require('./diagnostics')
 
 const POLICY_SNAPSHOT_FILENAME = 'policy-snapshot.json'
 
@@ -103,6 +104,14 @@ module.exports = {
         // Skip modules the user intentionally excludes.
         // This is policy generation so we don't need to protect ourselves from an attack where the module has a loader defined in the specifier.
         if (isExcludedUnsafe(module)) return
+        if (module.userRequest === undefined) {
+          diag.rawDebug(
+            1,
+            `LavaMoatPlugin: Module ${module} has no userRequest`
+          )
+          diag.rawDebug(2, { skippingInspectingModule: module })
+          return
+        }
         const packageName = getPackageNameForModulePath(
           canonicalNameMap,
           module.userRequest
