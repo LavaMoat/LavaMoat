@@ -12,7 +12,7 @@ const diag = require('./diagnostics.js')
 const RUNTIME_GLOBALS = require('webpack/lib/RuntimeGlobals')
 const { RUNTIME_KEY } = require('../ENUM.json')
 
-const { isExcluded } = require('./exclude.js')
+const { isExcluded } = require('./exclude')
 
 // TODO: processing requirements needs to be a tiny bit more clever yet.
 // Look in JavascriptModulesPlugin for how it decides if module and exports are unused.
