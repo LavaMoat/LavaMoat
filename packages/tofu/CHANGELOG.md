@@ -1,5 +1,32 @@
 # Changelog
 
+## [8.0.0](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-tofu-v7.3.0...lavamoat-tofu-v8.0.0) (2024-08-15)
+
+
+### ⚠ BREAKING CHANGES
+
+* **tofu:** remove support for Node.js v16
+
+### Bug Fixes
+
+* **deps:** update babel monorepo ([0880e2e](https://github.com/LavaMoat/LavaMoat/commit/0880e2edde6e8f661e4fdebddcb47e585a43b469))
+* **deps:** update babel monorepo ([d9d40b4](https://github.com/LavaMoat/LavaMoat/commit/d9d40b4e5358734bd9fdd680a5b8048d9efbc55c))
+* **deps:** update babel monorepo ([b6aa714](https://github.com/LavaMoat/LavaMoat/commit/b6aa71446e00e9e201fad90abdc847d12b0d27a0))
+* **deps:** update dependency type-fest to v4.23.0 ([d04e1f3](https://github.com/LavaMoat/LavaMoat/commit/d04e1f33af0931598443cbbf102020906cbd9b92))
+* **deps:** update dependency type-fest to v4.24.0 ([c735909](https://github.com/LavaMoat/LavaMoat/commit/c73590938207181ccec21727a5f11b8df2f2b7c0))
+
+
+### Miscellaneous Chores
+
+* **tofu:** remove support for Node.js v16 ([61d4572](https://github.com/LavaMoat/LavaMoat/commit/61d457204fd5de0dec195e53e70c492175dab6e2))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * lavamoat-core bumped from ^15.4.0 to ^16.0.0
+
 ## [7.3.0](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-tofu-v7.2.3...lavamoat-tofu-v7.3.0) (2024-07-11)
 
 

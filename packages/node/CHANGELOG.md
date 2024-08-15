@@ -19,6 +19,42 @@
     * lavamoat-core bumped from ^15.2.0 to ^15.2.1
     * lavamoat-tofu bumped from ^7.2.1 to ^7.2.2
 
+## [9.0.0](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-v8.0.7...lavamoat-v9.0.0) (2024-08-15)
+
+
+### ⚠ BREAKING CHANGES
+
+* **node:** remove support for Node.js v16
+* **browserify:** remove support for Node.js v16
+* **perf:** remove support for Node.js v16
+* **tofu:** remove support for Node.js v16
+* **webpack:** remove support for Node.js v16
+* **core:** remove support for Node.js v16
+
+### Bug Fixes
+
+* **deps:** update babel monorepo ([b6aa714](https://github.com/LavaMoat/LavaMoat/commit/b6aa71446e00e9e201fad90abdc847d12b0d27a0))
+* **node:** support Node.js ^22.5.1 ([f631ae2](https://github.com/LavaMoat/LavaMoat/commit/f631ae25b8c6fb0c5a2eee49f973c6244eda3e28))
+* **perf:** support Node.js ^22.5.1 ([f631ae2](https://github.com/LavaMoat/LavaMoat/commit/f631ae25b8c6fb0c5a2eee49f973c6244eda3e28))
+
+
+### Miscellaneous Chores
+
+* **browserify:** remove support for Node.js v16 ([6ca05ba](https://github.com/LavaMoat/LavaMoat/commit/6ca05baa80bf7b022255b8ef476577343e514018))
+* **core:** remove support for Node.js v16 ([6ca05ba](https://github.com/LavaMoat/LavaMoat/commit/6ca05baa80bf7b022255b8ef476577343e514018))
+* **node:** remove support for Node.js v16 ([6ca05ba](https://github.com/LavaMoat/LavaMoat/commit/6ca05baa80bf7b022255b8ef476577343e514018))
+* **perf:** remove support for Node.js v16 ([6ca05ba](https://github.com/LavaMoat/LavaMoat/commit/6ca05baa80bf7b022255b8ef476577343e514018))
+* **tofu:** remove support for Node.js v16 ([6ca05ba](https://github.com/LavaMoat/LavaMoat/commit/6ca05baa80bf7b022255b8ef476577343e514018))
+* **webpack:** remove support for Node.js v16 ([6ca05ba](https://github.com/LavaMoat/LavaMoat/commit/6ca05baa80bf7b022255b8ef476577343e514018))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-core bumped from ^15.4.0 to ^16.0.0
+    * lavamoat-tofu bumped from ^7.3.0 to ^8.0.0
+
 ## [8.0.7](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-v8.0.6...lavamoat-v8.0.7) (2024-07-11)
 
 

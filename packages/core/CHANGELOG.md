@@ -6,6 +6,49 @@
   * dependencies
     * lavamoat-tofu bumped from ^7.2.1 to ^7.2.2
 
+## [16.0.0](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v15.4.0...lavamoat-core-v16.0.0) (2024-08-15)
+
+
+### ⚠ BREAKING CHANGES
+
+* **node:** remove support for Node.js v16
+* **browserify:** remove support for Node.js v16
+* **perf:** remove support for Node.js v16
+* **tofu:** remove support for Node.js v16
+* **webpack:** remove support for Node.js v16
+* **core:** remove support for Node.js v16
+
+### Features
+
+* **core:** make makeMinimalViewOfRef usage in builtin attenuation consistent with globals for negative policy overrides, moving implementation to endowmentsToolkit as a side-effect desireable for webpack plugin ([c0c91fc](https://github.com/LavaMoat/LavaMoat/commit/c0c91fc1b857ccd8d61891c342a080641edbbc86))
+* global store with attenuation support ([#1158](https://github.com/LavaMoat/LavaMoat/issues/1158)) ([f7175a6](https://github.com/LavaMoat/LavaMoat/commit/f7175a6de366cc975ab158c631dbef16cb346fde))
+
+
+### Bug Fixes
+
+* **deps:** update babel monorepo ([0880e2e](https://github.com/LavaMoat/LavaMoat/commit/0880e2edde6e8f661e4fdebddcb47e585a43b469))
+* **deps:** update babel monorepo ([d9d40b4](https://github.com/LavaMoat/LavaMoat/commit/d9d40b4e5358734bd9fdd680a5b8048d9efbc55c))
+* **deps:** update babel monorepo ([b6aa714](https://github.com/LavaMoat/LavaMoat/commit/b6aa71446e00e9e201fad90abdc847d12b0d27a0))
+* **deps:** update dependency type-fest to v4.23.0 ([d04e1f3](https://github.com/LavaMoat/LavaMoat/commit/d04e1f33af0931598443cbbf102020906cbd9b92))
+* **deps:** update dependency type-fest to v4.24.0 ([c735909](https://github.com/LavaMoat/LavaMoat/commit/c73590938207181ccec21727a5f11b8df2f2b7c0))
+
+
+### Miscellaneous Chores
+
+* **browserify:** remove support for Node.js v16 ([6ca05ba](https://github.com/LavaMoat/LavaMoat/commit/6ca05baa80bf7b022255b8ef476577343e514018))
+* **core:** remove support for Node.js v16 ([6ca05ba](https://github.com/LavaMoat/LavaMoat/commit/6ca05baa80bf7b022255b8ef476577343e514018))
+* **node:** remove support for Node.js v16 ([6ca05ba](https://github.com/LavaMoat/LavaMoat/commit/6ca05baa80bf7b022255b8ef476577343e514018))
+* **perf:** remove support for Node.js v16 ([6ca05ba](https://github.com/LavaMoat/LavaMoat/commit/6ca05baa80bf7b022255b8ef476577343e514018))
+* **tofu:** remove support for Node.js v16 ([6ca05ba](https://github.com/LavaMoat/LavaMoat/commit/6ca05baa80bf7b022255b8ef476577343e514018))
+* **webpack:** remove support for Node.js v16 ([6ca05ba](https://github.com/LavaMoat/LavaMoat/commit/6ca05baa80bf7b022255b8ef476577343e514018))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-tofu bumped from ^7.3.0 to ^8.0.0
+
 ## [15.4.0](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v15.3.0...lavamoat-core-v15.4.0) (2024-07-11)
 
 
