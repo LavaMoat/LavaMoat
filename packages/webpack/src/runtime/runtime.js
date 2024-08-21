@@ -1,5 +1,6 @@
 /// <reference path="./lavamoat.d.ts" />
 /* global LAVAMOAT */
+/* Compartment */
 const {
   keys,
   create,
@@ -15,7 +16,6 @@ const {
 
 const {
   lockdown,
-  Compartment,
   Proxy,
   Math, Date,
 } = globalThis
