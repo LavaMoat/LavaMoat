@@ -4,7 +4,7 @@ const { makeConfig } = require('./fixtures/main/webpack.config.js')
 
 test.before(async (t) => {
   const webpackConfig = makeConfig({
-    inlineLockdown: ['app.js'],
+    inlineLockdown: /app/,
   })
   await t.notThrowsAsync(async () => {
     t.context.build = await scaffold(webpackConfig)
