@@ -56,9 +56,9 @@ test('webpack/scuttled - hosting globalThis\'s "Function" is scuttled', (t) => {
 })
 
 test('webpack/scuttled - hosting globalThis\'s "JSON" is scuttled excepted', (t) => {
-  t.truthy(t.context.globalThis.JSON.stringify('a') === '"a"');
+  t.true(t.context.globalThis.JSON.stringify('a') === '"a"');
 })
 
 test('webpack/scuttled - provided scuttlerName successfully invoked defined scuttlerFunc', (t) => {
-  t.truthy(t.context.scuttler_func_called);
+  t.true(t.context.scuttler_func_called);
 })

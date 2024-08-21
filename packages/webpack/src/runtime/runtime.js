@@ -1,6 +1,5 @@
 /// <reference path="./lavamoat.d.ts" />
 /* global LAVAMOAT */
-/* global lockdown, harden, Compartment */
 const {
   keys,
   create,
