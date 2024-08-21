@@ -1,7 +1,6 @@
 /// <reference path="./lavamoat.d.ts" />
 /* global LAVAMOAT */
 /* global lockdown, harden, Compartment */
-
 const {
   keys,
   create,
@@ -14,7 +13,15 @@ const {
   entries,
   values,
 } = Object
+
+const {
+  lockdown,
+  Proxy,
+  Math, Date,
+} = globalThis
+
 const warn = typeof console === 'object' ? console.warn : () => {}
+
 // Avoid running any wrapped code or using compartment if lockdown was not called.
 // This is for when the bundle ends up running despite SES being missing.
 // It was previously useful for sub-compilations running an incomplete bundle as part of the build, but currently that is being skipped. We might go back to it for the sake of build time security if it's deemed worthwihile in absence of lockdown.
@@ -26,6 +33,11 @@ if (LOCKDOWN_ON) {
     'LavaMoat: runtime execution started without SES present, switching to no-op.'
   )
 }
+
+// harden appears on globalThis only after lockdown is called
+const {
+  harden,
+} = globalThis
 
 const knownWritableFields = new Set()
 
@@ -304,3 +316,5 @@ const lavamoatRuntimeWrapper = (resourceId, runtimeKit) => {
 
 // defaultExport is getting assigned to __webpack_require__._LM_
 LAVAMOAT.defaultExport = freeze(lavamoatRuntimeWrapper)
+
+LAVAMOAT.scuttle.scuttle(theRealGlobalThis, LAVAMOAT.options.scuttleGlobalThis)

@@ -26,6 +26,11 @@ module.exports = endowmentsToolkit
 // Exports for testing
 module.exports._test = { instrumentDynamicValueAtPath }
 
+const {
+  Reflect,
+  Object,
+} = globalThis
+
 /**
  * Returns a compy of endowmentsToolkit initialized on provided configuration.
  *

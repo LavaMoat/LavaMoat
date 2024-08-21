@@ -74,6 +74,10 @@ class LavaMoatPlugin {
    */
   constructor(options = {}) {
     /** @type {LavaMoatPluginOptions} */
+    if (options.scuttleGlobalThis === true) {
+      options.scuttleGlobalThis = { enabled: true }
+    }
+    options.scuttleGlobalThis = Object.assign({}, options.scuttleGlobalThis)
     this.options = {
       policyLocation: path.join('lavamoat', 'webpack'),
       lockdown: lockdownDefaults,
@@ -376,6 +380,7 @@ class LavaMoatPlugin {
 
         const onceForChunkSet = new WeakSet()
         const runtimeOptions = {
+          scuttleGlobalThis: options.scuttleGlobalThis,
           lockdown: options.lockdown,
         }
 
@@ -431,6 +436,10 @@ class LavaMoatPlugin {
                     json: true,
                   },
                   { name: 'options', data: runtimeOptions, json: true },
+                  {
+                    name: 'scuttle',
+                    shimRequire: 'lavamoat-core/src/scuttle.js',
+                  },
                   { name: 'policy', data: policyData, json: true },
                   {
                     name: 'ENUM',
