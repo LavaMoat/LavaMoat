@@ -1,6 +1,6 @@
 /// <reference path="./lavamoat.d.ts" />
 /* global LAVAMOAT */
-/* Compartment */
+/* global Compartment */
 const {
   keys,
   create,
