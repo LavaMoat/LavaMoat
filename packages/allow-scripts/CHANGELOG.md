@@ -6,6 +6,20 @@
   * dependencies
     * @lavamoat/aa bumped from ^4.0.1 to ^4.1.0
 
+## [3.2.0](https://github.com/LavaMoat/LavaMoat/compare/allow-scripts-v3.1.0...allow-scripts-v3.2.0) (2024-08-15)
+
+
+### Features
+
+* **allow-scripts:** export loadAllPackageConfigurations, printMissingPoliciesIfAny ([fa70124](https://github.com/LavaMoat/LavaMoat/commit/fa701246a261926e7f643aedf1678ccb05246989))
+* **allow-scripts:** expose canonical name map as canonicalNamesByPath in loadAllPackageContents ([de6ff77](https://github.com/LavaMoat/LavaMoat/commit/de6ff77141aa73d1cb63433bb166ebba2b3ed38e))
+
+
+### Bug Fixes
+
+* **allow-scripts:** indicate peerDependency on @lavamoat/preinstall-always-fail ([#1201](https://github.com/LavaMoat/LavaMoat/issues/1201)) ([ab8e89c](https://github.com/LavaMoat/LavaMoat/commit/ab8e89c8ce6087c3d62c00ce9fdb629cba54db1e))
+* **deps:** update dependency @npmcli/run-script to v8 ([dc9fae1](https://github.com/LavaMoat/LavaMoat/commit/dc9fae17ae69e6555a039c05ee3b0730850b944b))
+
 ## [3.1.0](https://github.com/LavaMoat/LavaMoat/compare/allow-scripts-v3.0.4...allow-scripts-v3.1.0) (2024-07-11)
 
 

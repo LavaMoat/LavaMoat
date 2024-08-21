@@ -18,6 +18,52 @@
   * dependencies
     * lavamoat-core bumped from ^15.2.0 to ^15.2.1
 
+## [0.5.0-beta.0](https://github.com/LavaMoat/LavaMoat/compare/webpack-v0.4.0-beta.0...webpack-v0.5.0-beta.0) (2024-08-15)
+
+
+### ⚠ BREAKING CHANGES
+
+* **node:** remove support for Node.js v16
+* **browserify:** remove support for Node.js v16
+* **perf:** remove support for Node.js v16
+* **tofu:** remove support for Node.js v16
+* **webpack:** remove support for Node.js v16
+* **core:** remove support for Node.js v16
+
+### Features
+
+* global store with attenuation support ([#1158](https://github.com/LavaMoat/LavaMoat/issues/1158)) ([f7175a6](https://github.com/LavaMoat/LavaMoat/commit/f7175a6de366cc975ab158c631dbef16cb346fde))
+* **webpack:** builtin support in plugin opt and buildtime ([494e1fb](https://github.com/LavaMoat/LavaMoat/commit/494e1fbf15dbed048383d18614af4ece3ab10b05))
+* **webpack:** builtin support in runtime ([92f30fb](https://github.com/LavaMoat/LavaMoat/commit/92f30fbd4abc176bbf6e3aa7e5a803879dccbe43))
+* **webpack:** implement builtins attenuation by policy ([7f79782](https://github.com/LavaMoat/LavaMoat/commit/7f7978264732cdcb5575304f4e317243c84a4db7))
+* **webpack:** support Node.js ^22.5.1 ([d743fb1](https://github.com/LavaMoat/LavaMoat/commit/d743fb11b7b757c08acaa8d96f17984f16fe1bd0))
+
+
+### Bug Fixes
+
+* **deps:** update babel monorepo ([0880e2e](https://github.com/LavaMoat/LavaMoat/commit/0880e2edde6e8f661e4fdebddcb47e585a43b469))
+* **deps:** update babel monorepo ([d9d40b4](https://github.com/LavaMoat/LavaMoat/commit/d9d40b4e5358734bd9fdd680a5b8048d9efbc55c))
+* **deps:** update babel monorepo ([b6aa714](https://github.com/LavaMoat/LavaMoat/commit/b6aa71446e00e9e201fad90abdc847d12b0d27a0))
+* **webpack:** fix policy generation builtins slipping into packages ([b8a4ebc](https://github.com/LavaMoat/LavaMoat/commit/b8a4ebce3ef6f64df4ba1f1b5a2cd4df2bb512f8))
+* **webpack:** handle excluding modules in policy generation ([5f51ae1](https://github.com/LavaMoat/LavaMoat/commit/5f51ae15d810b5ed2f1efb65b141575a66651a4e))
+
+
+### Miscellaneous Chores
+
+* **browserify:** remove support for Node.js v16 ([6ca05ba](https://github.com/LavaMoat/LavaMoat/commit/6ca05baa80bf7b022255b8ef476577343e514018))
+* **core:** remove support for Node.js v16 ([6ca05ba](https://github.com/LavaMoat/LavaMoat/commit/6ca05baa80bf7b022255b8ef476577343e514018))
+* **node:** remove support for Node.js v16 ([6ca05ba](https://github.com/LavaMoat/LavaMoat/commit/6ca05baa80bf7b022255b8ef476577343e514018))
+* **perf:** remove support for Node.js v16 ([6ca05ba](https://github.com/LavaMoat/LavaMoat/commit/6ca05baa80bf7b022255b8ef476577343e514018))
+* **tofu:** remove support for Node.js v16 ([6ca05ba](https://github.com/LavaMoat/LavaMoat/commit/6ca05baa80bf7b022255b8ef476577343e514018))
+* **webpack:** remove support for Node.js v16 ([6ca05ba](https://github.com/LavaMoat/LavaMoat/commit/6ca05baa80bf7b022255b8ef476577343e514018))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-core bumped from ^15.4.0 to ^16.0.0
+
 ## [0.4.0-beta.0](https://github.com/LavaMoat/LavaMoat/compare/webpack-v0.3.0-beta.0...webpack-v0.4.0-beta.0) (2024-07-11)
 
 

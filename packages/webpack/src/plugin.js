@@ -541,7 +541,7 @@ module.exports = LavaMoatPlugin
  *   turned into numbers - defaults to (mode==='development')
  * @property {boolean} [HtmlWebpackPluginInterop] - Add a script tag to the html
  *   output for lockdown.js if HtmlWebpackPlugin is in use
- * @property {string[]} [inlineLockdown] - Prefix the listed files with lockdown
+ * @property {RegExp} [inlineLockdown] - Prefix the matching files with lockdown
  * @property {number} [diagnosticsVerbosity] - A number representing diagnostics
  *   output verbosity, the larger the more overwhelming
  * @property {LockdownOptions} lockdown - Options to pass to SES lockdown

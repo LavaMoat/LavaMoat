@@ -24,6 +24,24 @@
   * dependencies
     * lavamoat-core bumped from ^15.2.0 to ^15.2.1
 
+## [7.0.0](https://github.com/LavaMoat/LavaMoat/compare/lavapack-v6.1.4...lavapack-v7.0.0) (2024-08-15)
+
+
+### ⚠ BREAKING CHANGES
+
+* **lavapack:** remove support for Node.js v16; support v22
+
+### Miscellaneous Chores
+
+* **lavapack:** remove support for Node.js v16; support v22 ([9adab79](https://github.com/LavaMoat/LavaMoat/commit/9adab792eb16e001dcb4f4a017d1fc2d06c804e9))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-core bumped from ^15.4.0 to ^16.0.0
+
 ## [6.1.4](https://github.com/LavaMoat/LavaMoat/compare/lavapack-v6.1.3...lavapack-v6.1.4) (2024-07-11)
 
 
