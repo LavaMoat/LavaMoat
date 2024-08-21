@@ -524,6 +524,13 @@ LavaMoatPlugin.exclude = EXCLUDE_LOADER
 module.exports = LavaMoatPlugin
 
 /**
+ * @typedef {Object} ScuttlerConfig
+ * @property {boolean} [enabled] - Indicates whether the feature is enabled
+ * @property {string[]} [exceptions] - A list of exceptions as strings
+ * @property {string} [scuttlerName] - The name of the scuttler
+ */
+
+/**
  * @typedef {Object} LavaMoatPluginOptions
  * @property {boolean} [generatePolicy] - Generate the policy file
  * @property {string} policyLocation - Directory containing policy files are
@@ -545,6 +552,7 @@ module.exports = LavaMoatPlugin
  * @property {(specifier: string) => boolean} isBuiltin - A function that
  *   determines if the specifier is a builtin of the runtime platform e.g.
  *   node:fs
+ * @property {ScuttlerConfig | boolean} [scuttleGlobalThis] - Configuration for enabling scuttling mode
  */
 
 // Provided inline because import('ses') won't work in jsdoc of a cjs module
