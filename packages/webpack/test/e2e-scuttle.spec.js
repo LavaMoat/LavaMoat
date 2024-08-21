@@ -49,7 +49,7 @@ test('webpack/scuttled - hosting globalThis\'s "Function" is scuttled', (t) => {
   try {
     t.context.globalThis.Function
   } catch (e) {
-    t.truthy(
+    t.true(
       e.message === err('Function')
     )
   }

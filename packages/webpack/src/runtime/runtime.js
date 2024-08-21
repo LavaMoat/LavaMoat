@@ -15,6 +15,7 @@ const {
 
 const {
   lockdown,
+  Compartment,
   Proxy,
   Math, Date,
 } = globalThis
