@@ -52,7 +52,7 @@ One important thing to note when using the LavaMoat plugin is that it disables t
 > [!WARNING]
 > This is an experimental feature and excluding may be configured differently in the future if this approach is proven insecure.
 
-The default way to define specific behaviors for webpack is creating module rules. To ensure exclude rules are applied on the same exact files that match certain rules (the same RegExp may be matched against different things at different times) we're providing the exclude functionality as a loader you can add to the list of existing loaders or use individually.  
+The default way to define specific behaviors for webpack is creating module rules. To ensure exclude rules are applied on the same exact files that match certain rules (the same RegExp may be matched against different things at different times) we're providing the exclude functionality as a loader you can add to the list of existing loaders or use individually.
 The loader is available as `LavaMoatPlugin.exclude` from the default export of the plugin. It doesn't do anything to the code, but its presence is detected and treated as a mark on the file. Any file that's been processed by `LavaMoatPlugin.exclude` will not be wrapped in a Compartment.
 
 > [!NOTE]
@@ -113,9 +113,7 @@ LavaMoat is not compatible with Hot Module Replacement (HMR). Disable LavaMoat f
 
 - [SES lockdown][] must be added to the page without any bundling or transforming for any security guarantees to be sustained.
   - The plugin is attempting to add it as an asset to the compilation for the sake of Developer Experience. `.js` extension is omitted to prevent minification.
-  - Optionally lockdown can be inlined into the bundle files. You need to declare which of the output files to inline lockdown runtime code to. These need to be the first file of the bundle that get loaded on the page.  
-    When you have a single bundle, you just configure a regex with one unique file name or a `.*`. It gets more complex with builds for multiple pages. The plugin doesn't attempt to guess where to inline lockdown.  
-    e.g. If you have 2 entries `user.js` and `admin.js` and a set up to suffix resulting bundles with commit id, you can use `/user\.[a-f0-9]+\.js|admin\.[a-f0-9]+\.js/` to match the files.
+  - Optionally lockdown can be inlined into the bundle files. You need to match the scripts that get to load as the first script on the page to apply lockdown only once when inlined. When you have a single bundle, you just configure a regex with one unique file name or a `.*`. It gets more complex with builds for multiple pages. The plugin doesn't attempt to guess where to inline lockdown.
 - Each javascript module resulting from the webpack build is scoped to its package's policy
 
 ## Threat Model
