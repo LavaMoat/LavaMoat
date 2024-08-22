@@ -144,7 +144,6 @@ const installGlobalsForPolicy = (resourceId, packageCompartmentGlobal) => {
       globalAliases
     )
   } else {
-    // TODO: getEndowmentsForConfig doesn't implement support for "write"
     const endowments = getEndowmentsForConfig(
       rootCompartmentGlobalThis,
       LAVAMOAT.policy.resources[resourceId] || {},
@@ -152,19 +151,16 @@ const installGlobalsForPolicy = (resourceId, packageCompartmentGlobal) => {
       packageCompartmentGlobal
     )
 
-    defineProperties(
-      packageCompartmentGlobal,
-      fromEntries(
+    defineProperties(packageCompartmentGlobal, {
+      ...getOwnPropertyDescriptors(endowments),
+      // preserve the correct global aliases even if endowments define them differently
+      ...fromEntries(
         globalAliases.map((alias) => [
           alias,
           { value: packageCompartmentGlobal },
         ])
-      )
-    )
-    defineProperties(
-      packageCompartmentGlobal,
-      getOwnPropertyDescriptors(endowments)
-    )
+      ),
+    })
   }
 }
 
