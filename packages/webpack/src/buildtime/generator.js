@@ -26,16 +26,16 @@ function processRequirements(requirements, module) {
   // It may be possible to do more at compile time to simplify the runtime.
   // Handling "thisAsExports" may require that.
   const runtimeKit = new Set()
+  const runtimeFlags = {}
+
   for (const requirement of requirements) {
     const chunks = requirement.split('.')
     if (chunks[0] === RUNTIME_GLOBALS.thisAsExports) {
-      // TODO: not sure what to do with it.
-      //github.com/webpack/webpack/blob/07ac43333654280c5bc6014a3a69eda4c3b80273/lib/javascript/JavascriptModulesPlugin.js#L560
+      runtimeFlags.thisAsExports = true
       continue
     }
     if (chunks[0] === RUNTIME_GLOBALS.returnExportsFromRuntime) {
-      // should be doable to introduce support elsewhere
-      // TODO: create an indicator of this requirement that our runtime would understand
+      // TODO: should be doable to introduce support in wrapper.js by conditionally adding a return statement. feels too niche to support
       continue
     }
     if (chunks[0] === '__webpack_exports__') {
@@ -50,7 +50,7 @@ function processRequirements(requirements, module) {
     runtimeKit.add(`/* ${Array.from(requirements).join()} */`)
   })
 
-  return runtimeKit
+  return { runtimeKit, runtimeFlags }
 }
 
 // Use a weakset to mark generatorInstance as wrapped,
@@ -143,6 +143,11 @@ exports.wrapGeneratorMaker = ({
         throw Error(`Failed to find a packageId for ${module.resource}`)
       }
 
+      const { runtimeKit, runtimeFlags } = processRequirements(
+        options.runtimeRequirements,
+        module
+      )
+
       let { before, after, source, sourceChanged } = wrapper({
         // There's probably a good reason why webpack stores source in those objects instead
         // of strings. Turning it into a string here might mean we're loosing some caching.
@@ -150,9 +155,10 @@ exports.wrapGeneratorMaker = ({
         // decide if we want to keep the original object representing it.
         source: originalGeneratedSource.source().toString(),
         id: packageId,
-        runtimeKit: processRequirements(options.runtimeRequirements, module),
+        runtimeKit,
         runChecks,
         evalKitFunctionName: `__webpack_require__.${RUNTIME_KEY}`,
+        runtimeFlags,
       })
 
       diag.rawDebug(3, {
