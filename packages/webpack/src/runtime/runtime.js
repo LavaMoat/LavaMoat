@@ -275,6 +275,8 @@ const lavamoatRuntimeWrapper = (resourceId, runtimeKit) => {
         return module
       }
     }
+    // override hmd to silently disable it
+    policyRequire.hmd = (/** @type {any} */ mo) => mo
 
     overrides.__webpack_require__ = policyRequire
   }
