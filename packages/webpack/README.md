@@ -105,7 +105,8 @@ This plugin will skip policy enforcement for such ignored modules.
 
 #### HMR
 
-LavaMoat is not compatible with Hot Module Replacement (HMR). Disable LavaMoat for development builds where HMR is required while keeping it enabled for production builds.
+LavaMoat is not compatible with Hot Module Replacement and any form of it would not make much sense with the security guarantees, so you're better off using lavamoat in your production build.
+It's not easy to spot when a tool or setting is enabling HMR though, so LavaMoat plugin will stub out some of the HMR functionality to do nothing.
 
 # Security
 
