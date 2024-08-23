@@ -4,6 +4,9 @@ const fs = require('node:fs')
 const q = JSON.stringify
 
 /**
+ * Flags enabling runtime features based on webpack's runtime requirements.
+ * Using this decouples the concept of runtime requirements from wrapper.
+ *
  * @typedef {object} RuntimeFlags
  * @property {boolean} [thisAsExports]
  */

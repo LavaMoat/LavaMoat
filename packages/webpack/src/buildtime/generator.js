@@ -14,7 +14,7 @@ const { RUNTIME_KEY } = require('../ENUM.json')
 
 const { isExcluded } = require('./exclude.js')
 
-// TODO: processing requirements needs to be a tiny bit more clever yet.
+// TODO: There's potential for a few more flags in runtimeFlags if we want to support all things webpack supports. Proceed with common sense.
 // Look in JavascriptModulesPlugin for how it decides if module and exports are unused.
 /**
  * @param {Set<string>} requirements
@@ -22,28 +22,26 @@ const { isExcluded } = require('./exclude.js')
  * @returns
  */
 function processRequirements(requirements, module) {
-  // TODO: the approach of passing a runtimneKit is a minimal solution.
-  // It may be possible to do more at compile time to simplify the runtime.
-  // Handling "thisAsExports" may require that.
   const runtimeKit = new Set()
   const runtimeFlags = {}
 
   for (const requirement of requirements) {
-    const chunks = requirement.split('.')
-    if (chunks[0] === RUNTIME_GLOBALS.thisAsExports) {
+    // requirements can be more precise than just `module` - webpck will list nested fields in requirements, meanwhile we're only interested in passing the top level references.
+    const requirementReferenceName = requirement.split('.')[0]
+    if (requirementReferenceName === RUNTIME_GLOBALS.thisAsExports) {
       runtimeFlags.thisAsExports = true
       continue
     }
-    if (chunks[0] === RUNTIME_GLOBALS.returnExportsFromRuntime) {
+    if (requirementReferenceName === RUNTIME_GLOBALS.returnExportsFromRuntime) {
       // TODO: should be doable to introduce support in wrapper.js by conditionally adding a return statement. feels too niche to support
       continue
     }
-    if (chunks[0] === '__webpack_exports__') {
+    if (requirementReferenceName === '__webpack_exports__') {
       runtimeKit.add(module.exportsArgument)
-    } else if (chunks[0] === 'module') {
+    } else if (requirementReferenceName === 'module') {
       runtimeKit.add(module.moduleArgument)
     } else {
-      runtimeKit.add(chunks[0])
+      runtimeKit.add(requirementReferenceName)
     }
   }
   diag.run(2, () => {
@@ -57,7 +55,6 @@ function processRequirements(requirements, module) {
 // this is to avoid wrapping the same instance twice
 const wrappedGeneratorInstances = new WeakSet()
 
-// TODO: this should probably be extracted to a separate file for easier navigation
 /**
  * @param {object} options
  * @param {string[]} options.excludes
@@ -79,6 +76,7 @@ exports.wrapGeneratorMaker = ({
     // Monkey-patching JavascriptGenerator. Yes, this could be nicer.
     // Using features of the generator itself we might be able to achieve the same
     // but it would be more suseptible to changes in webpack.
+    // And there aren't any official or private hooks that would give us access to runtime requirements that I could find.
 
     if (wrappedGeneratorInstances.has(generatorInstance)) {
       return generatorInstance
