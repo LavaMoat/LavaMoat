@@ -269,14 +269,15 @@ const lavamoatRuntimeWrapper = (resourceId, runtimeKit) => {
     policyRequire.g = compartmentMap.get(resourceId).globalThis
 
     // override nmd to limit what it can mutate
-    policyRequire.nmd = (/** @type {any} */ moduleReference) => {
-      if (moduleReference === module) {
-        module = __webpack_require__.nmd(module)
-        return module
-      }
-    }
-    // override hmd to silently disable it
-    policyRequire.hmd = (/** @type {any} */ mo) => mo
+    policyRequire.nmd = (/** @type {any} */ moduleReference) =>
+      moduleReference === module
+        ? __webpack_require__.nmd(module)
+        : moduleReference
+    // override hmd to limit what it can mutate
+    policyRequire.hmd = (/** @type {any} */ moduleReference) =>
+      moduleReference === module
+        ? __webpack_require__.hmd(module)
+        : moduleReference
 
     overrides.__webpack_require__ = policyRequire
   }
