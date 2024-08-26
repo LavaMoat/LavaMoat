@@ -1,4 +1,5 @@
 /** @typedef {import('webpack').NormalModule} NormalModule */
+/** @typedef {import('./policyGenerator').InspectableWebpackModule} InspectableWebpackModule */
 
 const path = require('node:path')
 const EXCLUDE_LOADER = path.join(__dirname, '../excludeLoader.js')
@@ -24,10 +25,13 @@ module.exports = {
    * Unsafe version of exclude lookup - does not check for the possibility of
    * injecting a loader chain. Intended use in policy generation.
    *
-   * @param {NormalModule} module
+   * @param {InspectableWebpackModule} module
    * @returns {boolean}
    */
   isExcludedUnsafe: (module) => {
-    return !!module.loaders?.some(({ loader }) => loader === EXCLUDE_LOADER)
+    return (
+      'loaders' in module &&
+      !!module.loaders?.some(({ loader }) => loader === EXCLUDE_LOADER)
+    )
   },
 }
