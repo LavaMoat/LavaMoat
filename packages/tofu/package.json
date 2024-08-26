@@ -33,7 +33,7 @@
     "@babel/traverse": "7.25.3",
     "@babel/types": "7.25.2",
     "@types/babel__traverse": "7.20.6",
-    "type-fest": "4.24.0"
+    "type-fest": "4.25.0"
   },
   "devDependencies": {
     "deep-equal": "2.2.3"
