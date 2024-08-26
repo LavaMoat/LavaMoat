@@ -19,6 +19,10 @@ const POLICY_SNAPSHOT_FILENAME = 'policy-snapshot.json'
  * @typedef {(specifier: string) => boolean} IsBuiltinFn
  */
 
+/**
+ * @typedef {import('webpack').NormalModule | import('webpack').ExternalModule} InspectableWebpackModule
+ */
+
 module.exports = {
   /**
    * @param {Object} opts
@@ -92,7 +96,7 @@ module.exports = {
 
     return {
       /**
-       * @param {import('webpack').NormalModule} module
+       * @param {InspectableWebpackModule} module
        * @param {Iterable<import('webpack').ModuleGraphConnection>} connections
        */
       inspectWebpackModule: (module, connections) => {
