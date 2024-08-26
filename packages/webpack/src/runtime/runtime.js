@@ -241,8 +241,8 @@ const lavamoatRuntimeWrapper = (resourceId, runtimeKit) => {
     // TODO: print a warning for other functions on the __webpack_require__ namespace that we're not supporting.
     //   It's probably best served at build time though - with runtimeRequirements or looking at the items in webpack runtime when adding lavamoat runtime.
 
-    // The following seem harmless and are used by default: ['O', 'n', 'd', 'o', 'r', 's']
-    const supportedRuntimeItems = ['O', 'n', 'd', 'o', 'r', 's']
+    // The following seem harmless and are used by default: ['O', 'n', 'd', 'o', 'r', 's', 't']
+    const supportedRuntimeItems = ['O', 'n', 'd', 'o', 'r', 's', 't']
     for (const item of supportedRuntimeItems) {
       policyRequire[item] = harden(__webpack_require__[item])
     }
