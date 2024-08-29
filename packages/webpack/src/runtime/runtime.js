@@ -155,6 +155,7 @@ const installGlobalsForPolicy = (resourceId, packageCompartmentGlobal) => {
       rootCompartmentGlobalThis,
       globalAliases
     )
+    LAVAMOAT.scuttle.scuttle(theRealGlobalThis, LAVAMOAT.options.scuttleGlobalThis)
   } else {
     // TODO: getEndowmentsForConfig doesn't implement support for "write"
     const endowments = getEndowmentsForConfig(
@@ -240,7 +241,7 @@ const lavamoatRuntimeWrapper = (resourceId, runtimeKit) => {
     compartmentMap.set(resourceId, c)
   }
 
-  let overrides = create(null)
+  const overrides = create(null)
 
   // modules may reference `require` dynamically, but that's something we don't want to allow
   const { __webpack_require__ } = runtimeKit
@@ -316,5 +317,3 @@ const lavamoatRuntimeWrapper = (resourceId, runtimeKit) => {
 
 // defaultExport is getting assigned to __webpack_require__._LM_
 LAVAMOAT.defaultExport = freeze(lavamoatRuntimeWrapper)
-
-LAVAMOAT.scuttle.scuttle(theRealGlobalThis, LAVAMOAT.options.scuttleGlobalThis)
