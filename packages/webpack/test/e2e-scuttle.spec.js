@@ -20,7 +20,7 @@ test.before(async (t) => {
     generatePolicy: true,
     emitPolicySnapshot: true,
     diagnosticsVerbosity: 1,
-    policyLocation: path.resolve(__dirname, 'fixtures/main/policy-write'),
+    policyLocation: path.resolve(__dirname, 'fixtures/main/policy-scuttling'),
   })
   const webpackConfig = {
     ...webpackConfigDefault,
