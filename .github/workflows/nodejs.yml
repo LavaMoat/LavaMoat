@@ -41,51 +41,35 @@ jobs:
               --workspace=packages/tofu
               --workspace=packages/webpack
               --workspace=packages/yarn-plugin-allow-scripts
-
-          # TODO: Resolve https://github.com/LavaMoat/LavaMoat/issues/1211 and enable v20.x, v22.x
-          - node-version: 20.14.x
-            test-workspaces: >-
-              --workspace=packages/aa
-              --workspace=packages/browserify
-              --workspace=packages/core
-              --workspace=packages/lavapack
-              --workspace=packages/node
-              --workspace=packages/tofu
-              --workspace=packages/webpack
-          # TODO: Resolve https://github.com/LavaMoat/LavaMoat/issues/1211 and enable v20.x, v22.x
-          - node-version: 22.1.x
-            test-workspaces: >-
-              --workspace=packages/aa
-              --workspace=packages/browserify
-              --workspace=packages/core
-              --workspace=packages/lavapack
-              --workspace=packages/node
-              --workspace=packages/tofu
-              --workspace=packages/webpack
-
           - node-version: 20.x
             test-workspaces: >-
               --workspace=packages/aa
               --workspace=packages/allow-scripts
+              --workspace=packages/browserify
               --workspace=packages/core
               --workspace=packages/lavapack
               --workspace=packages/laverna
+              --workspace=packages/node
               --workspace=packages/perf
               --workspace=packages/preinstall-always-fail
               --workspace=packages/survey
               --workspace=packages/tofu
+              --workspace=packages/webpack
               --workspace=packages/yarn-plugin-allow-scripts
           - node-version: 22.x
             test-workspaces: >-
               --workspace=packages/aa
               --workspace=packages/allow-scripts
+              --workspace=packages/browserify
               --workspace=packages/core
               --workspace=packages/lavapack
               --workspace=packages/laverna
+              --workspace=packages/node
               --workspace=packages/perf
               --workspace=packages/preinstall-always-fail
               --workspace=packages/survey
               --workspace=packages/tofu
+              --workspace=packages/webpack
               --workspace=packages/yarn-plugin-allow-scripts
     steps:
       - name: Checkout (PR)
