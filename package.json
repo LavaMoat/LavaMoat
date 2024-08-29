@@ -9,6 +9,7 @@
   "workspaces": [
     "packages/*"
   ],
+  "packageManager": "npm@9.9.3+sha512.67597eadc4399186f5ec5de11ed3bad356ab129bdd4589c22ed83cc68dc01adca3dc8b61c1aada10e7b123df74dee00d9227c56ea1c2f214f9dca22ba335a0f0",
   "engines": {
     "node": "^16.20.0 || ^18.0.0 || ^20.0.0 || ^22.0.0",
     "npm": ">=7.0.0"
@@ -35,9 +36,6 @@
     "test:prep": "npm run --workspaces --if-present test:prep",
     "test:workspaces": "npm run --workspaces --if-present test",
     "watch:types": "tsc -b --watch"
-  },
-  "optionalDependencies": {
-    "corepack": "0.29.3"
   },
   "devDependencies": {
     "@commitlint/cli": "19.4.0",
@@ -93,6 +91,5 @@
     "singleQuote": true,
     "trailingComma": "es5",
     "tsdoc": true
-  },
-  "packageManager": "npm@9.9.3+sha512.67597eadc4399186f5ec5de11ed3bad356ab129bdd4589c22ed83cc68dc01adca3dc8b61c1aada10e7b123df74dee00d9227c56ea1c2f214f9dca22ba335a0f0"
+  }
 }
