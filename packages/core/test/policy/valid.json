@@ -1,0 +1,66 @@
+{
+  "resources": {
+    "browserify>buffer": {
+      "globals": {
+        "console": true,
+        "stuff": "write",
+        "things": "read",
+        "mooooo": false
+      },
+      "packages": {
+        "browserify>buffer>base64-js": true,
+        "browserify>buffer>ieee754": true
+      }
+    },
+    "browserify>events": {
+      "globals": {
+        "console": true
+      }
+    },
+    "browserify>process": {
+      "globals": {
+        "clearTimeout": true,
+        "setTimeout": true
+      }
+    },
+    "browserify>string_decoder": {
+      "packages": {
+        "browserify>util>safe-buffer": true
+      }
+    },
+    "browserify>util>safe-buffer": {
+      "packages": {
+        "browserify>buffer": true
+      }
+    },
+    "keccak": {
+      "packages": {
+        "browserify>buffer": true,
+        "keccak>readable-stream": true
+      }
+    },
+    "keccak>readable-stream": {
+      "packages": {
+        "browserify>browser-resolve": true,
+        "browserify>buffer": true,
+        "browserify>events": true,
+        "browserify>inherits": true,
+        "browserify>process": true,
+        "browserify>string_decoder": true,
+        "keccak>readable-stream>util-deprecate": true
+      }
+    },
+    "keccak>readable-stream>util-deprecate": {
+      "globals": {
+        "console.trace": true,
+        "console.warn": true,
+        "localStorage": true
+      }
+    }
+  },
+  "resolutions": {
+    "some>package": {
+      "some>other>package": "./here"
+    }
+  }
+}

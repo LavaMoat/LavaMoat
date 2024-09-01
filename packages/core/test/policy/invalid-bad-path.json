@@ -1,0 +1,7 @@
+{
+  "resolutions": {
+    "some>package": {
+      "some>other>package": "/etc/passwd"
+    }
+  }
+}
