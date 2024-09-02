@@ -471,7 +471,7 @@ class LavaMoatPlugin {
                 // narrow down the policy and map to module identifiers
                 const policyData = identifierLookup.getTranslatedPolicy()
 
-                const lavaMoatRuntime = assembleRuntime(RUNTIME_KEY, [
+                const runtimeChunks = [
                   {
                     name: 'root',
                     data: identifierLookup.root || null,
@@ -507,7 +507,18 @@ class LavaMoatPlugin {
                     name: 'runtime',
                     file: path.join(__dirname, './runtime/runtime.js'),
                   },
-                ])
+                ]
+
+                if (options.debugRuntime) {
+                  runtimeChunks.push({
+                    name: 'debug',
+                    shimRequire: path.join(__dirname, './runtime/debug.js'),
+                  })
+                }
+                const lavaMoatRuntime = assembleRuntime(
+                  RUNTIME_KEY,
+                  runtimeChunks
+                )
 
                 // set.add(RuntimeGlobals.onChunksLoaded); // TODO: develop an understanding of what this line does and why it was a part of the runtime setup for module federation
 
@@ -600,6 +611,7 @@ module.exports = LavaMoatPlugin
  * @property {(specifier: string) => boolean} isBuiltin - A function that
  *   determines if the specifier is a builtin of the runtime platform e.g.
  *   node:fs
+ * @property {boolean} [debugRuntime] - Enable runtime debugging tools
  */
 
 // Provided inline because import('ses') won't work in jsdoc of a cjs module
