@@ -161,6 +161,14 @@ const installGlobalsForPolicy = (resourceId, packageCompartmentGlobal) => {
         ])
       ),
     })
+
+    if (LAVAMOAT.debug) {
+      LAVAMOAT.debug.debugProxy(
+        packageCompartmentGlobal,
+        rootCompartmentGlobalThis,
+        resourceId
+      )
+    }
   }
 }
 
