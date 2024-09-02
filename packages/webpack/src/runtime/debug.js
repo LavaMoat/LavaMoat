@@ -15,7 +15,6 @@ globalThis.LM_printPolicyDebug = printPolicyDebug
 let debounceTimer
 
 const PRINT_AFTER_NO_NEW_POLICY_DISCOVERED_MS = 3000
-
 /**
  * Adds a key to the incremental policy.
  *
@@ -66,7 +65,6 @@ function recursiveProxy(hint, path) {
 /**
  * Finds all non-symbol keys for an object and its prototype chain. Symbol keys
  * are not included to simplify the implementation of debugProxy.
- *
  * @param {object | null} obj
  */
 function getAllKeys(obj) {
