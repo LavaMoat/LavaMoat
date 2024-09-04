@@ -1,4 +1,4 @@
-// ses@1.7.0
+// ses@1.8.0
 'use strict';
 (functors => {
 
@@ -100,6 +100,7 @@
       functionPrototype: cell("functionPrototype"),
       promisePrototype: cell("promisePrototype"),
       generatorPrototype: cell("generatorPrototype"),
+      iteratorPrototype: cell("iteratorPrototype"),
       typedArrayPrototype: cell("typedArrayPrototype"),
       uncurryThis: cell("uncurryThis"),
       objectHasOwnProperty: cell("objectHasOwnProperty"),
@@ -363,6 +364,9 @@
       tameFauxDataProperties: cell("tameFauxDataProperties"),
     },
     {
+      tameRegeneratorRuntime: cell("tameRegeneratorRuntime"),
+    },
+    {
       repairIntrinsics: cell("repairIntrinsics"),
     },
     {
@@ -490,6 +494,7 @@ function observeImports(map, importName, importIndex) {
       functionPrototype: cells[0].functionPrototype.set,
       promisePrototype: cells[0].promisePrototype.set,
       generatorPrototype: cells[0].generatorPrototype.set,
+      iteratorPrototype: cells[0].iteratorPrototype.set,
       typedArrayPrototype: cells[0].typedArrayPrototype.set,
       uncurryThis: cells[0].uncurryThis.set,
       objectHasOwnProperty: cells[0].objectHasOwnProperty.set,
@@ -1238,6 +1243,18 @@ function observeImports(map, importName, importIndex) {
   functors[49]({
     imports(entries) {
       const map = new Map(entries);
+      observeImports(map, "./commons.js", 0);
+    },
+    liveVar: {
+    },
+    onceVar: {
+      tameRegeneratorRuntime: cells[49].tameRegeneratorRuntime.set,
+    },
+    importMeta: {},
+  });
+  functors[50]({
+    imports(entries) {
+      const map = new Map(entries);
       observeImports(map, "@endo/env-options", 3);
       observeImports(map, "./commons.js", 0);
       observeImports(map, "./make-hardener.js", 10);
@@ -1262,28 +1279,29 @@ function observeImports(map, importName, importIndex) {
       observeImports(map, "./tame-harden.js", 46);
       observeImports(map, "./tame-symbol-constructor.js", 47);
       observeImports(map, "./tame-faux-data-properties.js", 48);
+      observeImports(map, "./tame-regenerator-runtime.js", 49);
     },
     liveVar: {
     },
     onceVar: {
-      repairIntrinsics: cells[49].repairIntrinsics.set,
-    },
-    importMeta: {},
-  });
-  functors[50]({
-    imports(entries) {
-      const map = new Map(entries);
-      observeImports(map, "./assert-sloppy-mode.js", 1);
-      observeImports(map, "./commons.js", 0);
-      observeImports(map, "./lockdown.js", 49);
-    },
-    liveVar: {
-    },
-    onceVar: {
+      repairIntrinsics: cells[50].repairIntrinsics.set,
     },
     importMeta: {},
   });
   functors[51]({
+    imports(entries) {
+      const map = new Map(entries);
+      observeImports(map, "./assert-sloppy-mode.js", 1);
+      observeImports(map, "./commons.js", 0);
+      observeImports(map, "./lockdown.js", 50);
+    },
+    liveVar: {
+    },
+    onceVar: {
+    },
+    importMeta: {},
+  });
+  functors[52]({
     imports(entries) {
       const map = new Map(entries);
       observeImports(map, "./commons.js", 0);
@@ -1297,7 +1315,7 @@ function observeImports(map, importName, importIndex) {
     },
     importMeta: {},
   });
-  functors[52]({
+  functors[53]({
     imports(entries) {
       const map = new Map(entries);
       observeImports(map, "./commons.js", 0);
@@ -1309,7 +1327,7 @@ function observeImports(map, importName, importIndex) {
     },
     importMeta: {},
   });
-  functors[53]({
+  functors[54]({
     imports(entries) {
       const map = new Map(entries);
       observeImports(map, "./commons.js", 0);
@@ -1322,13 +1340,13 @@ function observeImports(map, importName, importIndex) {
     },
     importMeta: {},
   });
-  functors[54]({
+  functors[55]({
     imports(entries) {
       const map = new Map(entries);
-      observeImports(map, "./src/lockdown-shim.js", 50);
-      observeImports(map, "./src/compartment-shim.js", 51);
-      observeImports(map, "./src/assert-shim.js", 52);
-      observeImports(map, "./src/console-shim.js", 53);
+      observeImports(map, "./src/lockdown-shim.js", 51);
+      observeImports(map, "./src/compartment-shim.js", 52);
+      observeImports(map, "./src/assert-shim.js", 53);
+      observeImports(map, "./src/console-shim.js", 54);
     },
     liveVar: {
     },
@@ -1478,6 +1496,10 @@ const        { prototype: generatorPrototype}=   getPrototypeOf(
   // eslint-disable-next-line no-empty-function, func-names
   function*()  { });$h‍_once.generatorPrototype(generatorPrototype);
 
+const        iteratorPrototype=  getPrototypeOf(
+  // eslint-disable-next-line @endo/no-polymorphic-call
+  getPrototypeOf(arrayPrototype.values()));$h‍_once.iteratorPrototype(iteratorPrototype);
+
 
 const        typedArrayPrototype=  getPrototypeOf(Uint8Array.prototype);$h‍_once.typedArrayPrototype(typedArrayPrototype);
 
@@ -1549,9 +1571,11 @@ const        stringReplace=  /** @type {any} */
   uncurryThis(stringPrototype.replace);$h‍_once.stringReplace(stringReplace);
 
 const        stringSearch=  uncurryThis(stringPrototype.search);$h‍_once.stringSearch(stringSearch);
-const        stringSlice=  uncurryThis(stringPrototype.slice);
-/** @type {(thisArg: string, splitter: string | RegExp | { [Symbol.split](string: string, limit?: number): string[]; }, limit?: number) => string[]} */$h‍_once.stringSlice(stringSlice);
-const        stringSplit=  uncurryThis(stringPrototype.split);$h‍_once.stringSplit(stringSplit);
+const        stringSlice=  uncurryThis(stringPrototype.slice);$h‍_once.stringSlice(stringSlice);
+const        stringSplit=
+  /** @type {(thisArg: string, splitter: string | RegExp | { [Symbol.split](string: string, limit?: number): string[]; }, limit?: number) => string[]} */
+    uncurryThis(stringPrototype.split);$h‍_once.stringSplit(stringSplit);
+
 const        stringStartsWith=  uncurryThis(stringPrototype.startsWith);$h‍_once.stringStartsWith(stringStartsWith);
 const        iterateString=  uncurryThis(stringPrototype[iteratorSymbol]);
 //
@@ -8566,8 +8590,8 @@ const        tameConsole=  (
      }
 
     globalProcess.on('uncaughtException', (error)=>{
-      // causalConsole is born frozen so not vulnerable to method tampering.
-      ourConsole.error(error);
+      // See https://github.com/endojs/endo/blob/master/packages/ses/error-codes/SES_UNCAUGHT_EXCEPTION.md
+      ourConsole.error('SES_UNCAUGHT_EXCEPTION:', error);
       if( terminate) {
         terminate();
        }
@@ -8579,8 +8603,9 @@ const        tameConsole=  (
     typeof globalProcess.on===  'function')
     {
     const handleRejection=  (reason)=>{
-      // 'platform' and 'report' just log the reason.
+      // See https://github.com/endojs/endo/blob/master/packages/ses/error-codes/SES_UNHANDLED_REJECTION.md
       ourConsole.error('SES_UNHANDLED_REJECTION:', reason);
+      // 'platform' and 'report' just log the reason.
      };
     // Maybe track unhandled promise rejections.
     const h=  makeRejectionHandlers(handleRejection);
@@ -8601,8 +8626,9 @@ const        tameConsole=  (
     {
     globalWindow.addEventListener('error', (event)=>{
       event.preventDefault();
+      // See https://github.com/endojs/endo/blob/master/packages/ses/error-codes/SES_UNCAUGHT_EXCEPTION.md
+      ourConsole.error('SES_UNCAUGHT_EXCEPTION:', event.error);
       // 'platform' and 'report' just log the reason.
-      ourConsole.error(event.error);
       if( errorTrapping===  'exit'||  errorTrapping===  'abort') {
         globalWindow.location.href=   `about:blank`;
        }
@@ -8614,6 +8640,7 @@ const        tameConsole=  (
     typeof globalWindow.addEventListener===  'function')
     {
     const handleRejection=  (reason)=>{
+      // See https://github.com/endojs/endo/blob/master/packages/ses/error-codes/SES_UNHANDLED_REJECTION.md
       ourConsole.error('SES_UNHANDLED_REJECTION:', reason);
      };
 
@@ -11359,7 +11386,11 @@ const        getAnonymousIntrinsics=  ()=>  {
 
     intrinsics['%WrapForValidIteratorPrototype%']=  getPrototypeOf(
       // eslint-disable-next-line @endo/no-polymorphic-call
-      globalThis.Iterator.from({ next() { }}));
+      globalThis.Iterator.from({
+        next() {
+          return { value: undefined};
+         }}));
+
 
    }
 
@@ -11382,6 +11413,9 @@ const        getAnonymousIntrinsics=  ()=>  {
 ({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,   importMeta: $h‍____meta, }) => (function () { 'use strict';   let TypeError,freeze;$h‍_imports([["./commons.js", [["TypeError", [$h‍_a => (TypeError = $h‍_a)]],["freeze", [$h‍_a => (freeze = $h‍_a)]]]]]);   
 
 
+/** @import {Harden} from '../types.js'; */
+
+/** @type {(safeHarden: Harden, hardenTaming: 'safe' | 'unsafe') => Harden} */
 const        tameHarden=  (safeHarden, hardenTaming)=>  {
   if( hardenTaming!==  'safe'&&  hardenTaming!==  'unsafe') {
     throw TypeError( `unrecognized fakeHardenOption ${hardenTaming}`);
@@ -11397,6 +11431,7 @@ const        tameHarden=  (safeHarden, hardenTaming)=>  {
   Object.isSealed=  ()=>  true;
   Reflect.isExtensible=  ()=>  false;
 
+  // @ts-expect-error secret property
   if( safeHarden.isFake) {
     // The "safe" hardener is already a fake hardener.
     // Just use it.
@@ -11691,7 +11726,40 @@ const        tameFauxDataProperties=  (intrinsics)=>{
 })()
 ,
 // === functors[49] ===
-({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,   importMeta: $h‍____meta, }) => (function () { 'use strict';   let getenv,FERAL_FUNCTION,FERAL_EVAL,TypeError,arrayFilter,globalThis,is,ownKeys,stringSplit,noEvalEvaluate,getOwnPropertyNames,getPrototypeOf,makeHardener,makeIntrinsicsCollector,whitelistIntrinsics,tameFunctionConstructors,tameDateConstructor,tameMathObject,tameRegExpConstructor,enablePropertyOverrides,tameLocaleMethods,setGlobalObjectConstantProperties,setGlobalObjectMutableProperties,setGlobalObjectEvaluators,makeSafeEvaluator,initialGlobalPropertyNames,tameFunctionToString,tameDomains,tameConsole,tameErrorConstructor,assert,makeAssert,getAnonymousIntrinsics,makeCompartmentConstructor,tameHarden,tameSymbolConstructor,tameFauxDataProperties;$h‍_imports([["@endo/env-options", [["getEnvironmentOption", [$h‍_a => (getenv = $h‍_a)]]]],["./commons.js", [["FERAL_FUNCTION", [$h‍_a => (FERAL_FUNCTION = $h‍_a)]],["FERAL_EVAL", [$h‍_a => (FERAL_EVAL = $h‍_a)]],["TypeError", [$h‍_a => (TypeError = $h‍_a)]],["arrayFilter", [$h‍_a => (arrayFilter = $h‍_a)]],["globalThis", [$h‍_a => (globalThis = $h‍_a)]],["is", [$h‍_a => (is = $h‍_a)]],["ownKeys", [$h‍_a => (ownKeys = $h‍_a)]],["stringSplit", [$h‍_a => (stringSplit = $h‍_a)]],["noEvalEvaluate", [$h‍_a => (noEvalEvaluate = $h‍_a)]],["getOwnPropertyNames", [$h‍_a => (getOwnPropertyNames = $h‍_a)]],["getPrototypeOf", [$h‍_a => (getPrototypeOf = $h‍_a)]]]],["./make-hardener.js", [["makeHardener", [$h‍_a => (makeHardener = $h‍_a)]]]],["./intrinsics.js", [["makeIntrinsicsCollector", [$h‍_a => (makeIntrinsicsCollector = $h‍_a)]]]],["./permits-intrinsics.js", [["default", [$h‍_a => (whitelistIntrinsics = $h‍_a)]]]],["./tame-function-constructors.js", [["default", [$h‍_a => (tameFunctionConstructors = $h‍_a)]]]],["./tame-date-constructor.js", [["default", [$h‍_a => (tameDateConstructor = $h‍_a)]]]],["./tame-math-object.js", [["default", [$h‍_a => (tameMathObject = $h‍_a)]]]],["./tame-regexp-constructor.js", [["default", [$h‍_a => (tameRegExpConstructor = $h‍_a)]]]],["./enable-property-overrides.js", [["default", [$h‍_a => (enablePropertyOverrides = $h‍_a)]]]],["./tame-locale-methods.js", [["default", [$h‍_a => (tameLocaleMethods = $h‍_a)]]]],["./global-object.js", [["setGlobalObjectConstantProperties", [$h‍_a => (setGlobalObjectConstantProperties = $h‍_a)]],["setGlobalObjectMutableProperties", [$h‍_a => (setGlobalObjectMutableProperties = $h‍_a)]],["setGlobalObjectEvaluators", [$h‍_a => (setGlobalObjectEvaluators = $h‍_a)]]]],["./make-safe-evaluator.js", [["makeSafeEvaluator", [$h‍_a => (makeSafeEvaluator = $h‍_a)]]]],["./permits.js", [["initialGlobalPropertyNames", [$h‍_a => (initialGlobalPropertyNames = $h‍_a)]]]],["./tame-function-tostring.js", [["tameFunctionToString", [$h‍_a => (tameFunctionToString = $h‍_a)]]]],["./tame-domains.js", [["tameDomains", [$h‍_a => (tameDomains = $h‍_a)]]]],["./error/tame-console.js", [["tameConsole", [$h‍_a => (tameConsole = $h‍_a)]]]],["./error/tame-error-constructor.js", [["default", [$h‍_a => (tameErrorConstructor = $h‍_a)]]]],["./error/assert.js", [["assert", [$h‍_a => (assert = $h‍_a)]],["makeAssert", [$h‍_a => (makeAssert = $h‍_a)]]]],["./get-anonymous-intrinsics.js", [["getAnonymousIntrinsics", [$h‍_a => (getAnonymousIntrinsics = $h‍_a)]]]],["./compartment.js", [["makeCompartmentConstructor", [$h‍_a => (makeCompartmentConstructor = $h‍_a)]]]],["./tame-harden.js", [["tameHarden", [$h‍_a => (tameHarden = $h‍_a)]]]],["./tame-symbol-constructor.js", [["tameSymbolConstructor", [$h‍_a => (tameSymbolConstructor = $h‍_a)]]]],["./tame-faux-data-properties.js", [["tameFauxDataProperties", [$h‍_a => (tameFauxDataProperties = $h‍_a)]]]]]);   
+({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,   importMeta: $h‍____meta, }) => (function () { 'use strict';   let defineProperty,iteratorPrototype,iteratorSymbol,objectHasOwnProperty;$h‍_imports([["./commons.js", [["defineProperty", [$h‍_a => (defineProperty = $h‍_a)]],["iteratorPrototype", [$h‍_a => (iteratorPrototype = $h‍_a)]],["iteratorSymbol", [$h‍_a => (iteratorSymbol = $h‍_a)]],["objectHasOwnProperty", [$h‍_a => (objectHasOwnProperty = $h‍_a)]]]]]);   
+
+
+
+
+
+
+const        tameRegeneratorRuntime=  ()=>  {
+  const iter=  iteratorPrototype[iteratorSymbol];
+  defineProperty(iteratorPrototype, iteratorSymbol, {
+    configurable: true,
+    get() {
+      return iter;
+     },
+    set(value) {
+      // ignore the assignment on IteratorPrototype
+      if( this===  iteratorPrototype) return;
+      if( objectHasOwnProperty(this, iteratorSymbol)) {
+        this[iteratorSymbol]=  value;
+       }
+      defineProperty(this, iteratorSymbol, {
+        value,
+        writable: true,
+        enumerable: true,
+        configurable: true});
+
+     }});
+
+ };$h‍_once.tameRegeneratorRuntime(tameRegeneratorRuntime);
+})()
+,
+// === functors[50] ===
+({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,   importMeta: $h‍____meta, }) => (function () { 'use strict';   let getenv,FERAL_FUNCTION,FERAL_EVAL,TypeError,arrayFilter,globalThis,is,ownKeys,stringSplit,noEvalEvaluate,getOwnPropertyNames,getPrototypeOf,makeHardener,makeIntrinsicsCollector,whitelistIntrinsics,tameFunctionConstructors,tameDateConstructor,tameMathObject,tameRegExpConstructor,enablePropertyOverrides,tameLocaleMethods,setGlobalObjectConstantProperties,setGlobalObjectMutableProperties,setGlobalObjectEvaluators,makeSafeEvaluator,initialGlobalPropertyNames,tameFunctionToString,tameDomains,tameConsole,tameErrorConstructor,assert,makeAssert,getAnonymousIntrinsics,makeCompartmentConstructor,tameHarden,tameSymbolConstructor,tameFauxDataProperties,tameRegeneratorRuntime;$h‍_imports([["@endo/env-options", [["getEnvironmentOption", [$h‍_a => (getenv = $h‍_a)]]]],["./commons.js", [["FERAL_FUNCTION", [$h‍_a => (FERAL_FUNCTION = $h‍_a)]],["FERAL_EVAL", [$h‍_a => (FERAL_EVAL = $h‍_a)]],["TypeError", [$h‍_a => (TypeError = $h‍_a)]],["arrayFilter", [$h‍_a => (arrayFilter = $h‍_a)]],["globalThis", [$h‍_a => (globalThis = $h‍_a)]],["is", [$h‍_a => (is = $h‍_a)]],["ownKeys", [$h‍_a => (ownKeys = $h‍_a)]],["stringSplit", [$h‍_a => (stringSplit = $h‍_a)]],["noEvalEvaluate", [$h‍_a => (noEvalEvaluate = $h‍_a)]],["getOwnPropertyNames", [$h‍_a => (getOwnPropertyNames = $h‍_a)]],["getPrototypeOf", [$h‍_a => (getPrototypeOf = $h‍_a)]]]],["./make-hardener.js", [["makeHardener", [$h‍_a => (makeHardener = $h‍_a)]]]],["./intrinsics.js", [["makeIntrinsicsCollector", [$h‍_a => (makeIntrinsicsCollector = $h‍_a)]]]],["./permits-intrinsics.js", [["default", [$h‍_a => (whitelistIntrinsics = $h‍_a)]]]],["./tame-function-constructors.js", [["default", [$h‍_a => (tameFunctionConstructors = $h‍_a)]]]],["./tame-date-constructor.js", [["default", [$h‍_a => (tameDateConstructor = $h‍_a)]]]],["./tame-math-object.js", [["default", [$h‍_a => (tameMathObject = $h‍_a)]]]],["./tame-regexp-constructor.js", [["default", [$h‍_a => (tameRegExpConstructor = $h‍_a)]]]],["./enable-property-overrides.js", [["default", [$h‍_a => (enablePropertyOverrides = $h‍_a)]]]],["./tame-locale-methods.js", [["default", [$h‍_a => (tameLocaleMethods = $h‍_a)]]]],["./global-object.js", [["setGlobalObjectConstantProperties", [$h‍_a => (setGlobalObjectConstantProperties = $h‍_a)]],["setGlobalObjectMutableProperties", [$h‍_a => (setGlobalObjectMutableProperties = $h‍_a)]],["setGlobalObjectEvaluators", [$h‍_a => (setGlobalObjectEvaluators = $h‍_a)]]]],["./make-safe-evaluator.js", [["makeSafeEvaluator", [$h‍_a => (makeSafeEvaluator = $h‍_a)]]]],["./permits.js", [["initialGlobalPropertyNames", [$h‍_a => (initialGlobalPropertyNames = $h‍_a)]]]],["./tame-function-tostring.js", [["tameFunctionToString", [$h‍_a => (tameFunctionToString = $h‍_a)]]]],["./tame-domains.js", [["tameDomains", [$h‍_a => (tameDomains = $h‍_a)]]]],["./error/tame-console.js", [["tameConsole", [$h‍_a => (tameConsole = $h‍_a)]]]],["./error/tame-error-constructor.js", [["default", [$h‍_a => (tameErrorConstructor = $h‍_a)]]]],["./error/assert.js", [["assert", [$h‍_a => (assert = $h‍_a)]],["makeAssert", [$h‍_a => (makeAssert = $h‍_a)]]]],["./get-anonymous-intrinsics.js", [["getAnonymousIntrinsics", [$h‍_a => (getAnonymousIntrinsics = $h‍_a)]]]],["./compartment.js", [["makeCompartmentConstructor", [$h‍_a => (makeCompartmentConstructor = $h‍_a)]]]],["./tame-harden.js", [["tameHarden", [$h‍_a => (tameHarden = $h‍_a)]]]],["./tame-symbol-constructor.js", [["tameSymbolConstructor", [$h‍_a => (tameSymbolConstructor = $h‍_a)]]]],["./tame-faux-data-properties.js", [["tameFauxDataProperties", [$h‍_a => (tameFauxDataProperties = $h‍_a)]]]],["./tame-regenerator-runtime.js", [["tameRegeneratorRuntime", [$h‍_a => (tameRegeneratorRuntime = $h‍_a)]]]]]);   
+
 
 
 
@@ -11873,11 +11941,19 @@ const        repairIntrinsics=  (options=  {})=>  {
       /** @param {string} debugName */
       (debugName)=>debugName!==  ''),
 
+    legacyRegeneratorRuntimeTaming=  getenv(
+      'LOCKDOWN_LEGACY_REGENERATOR_RUNTIME_TAMING',
+      'safe'),
+
     __hardenTaming__=  getenv('LOCKDOWN_HARDEN_TAMING', 'safe'),
     dateTaming=  'safe', // deprecated
     mathTaming=  'safe', // deprecated
     ...extraOptions}=
       options;
+
+  legacyRegeneratorRuntimeTaming===  'safe'||
+    legacyRegeneratorRuntimeTaming===  'unsafe-ignore'||
+    Fail `lockdown(): non supported option legacyRegeneratorRuntimeTaming: ${q(legacyRegeneratorRuntimeTaming)}`;
 
   evalTaming===  'unsafeEval'||
     evalTaming===  'safeEval'||
@@ -11957,6 +12033,7 @@ const        repairIntrinsics=  (options=  {})=>  {
   const { addIntrinsics, completePrototypes, finalIntrinsics}=
     makeIntrinsicsCollector();
 
+  // @ts-expect-error __hardenTaming__ could be any string
   const tamedHarden=  tameHarden(safeHarden, __hardenTaming__);
   addIntrinsics({ harden: tamedHarden});
 
@@ -12105,6 +12182,9 @@ const        repairIntrinsics=  (options=  {})=>  {
     // clear yet which is better.
     // @ts-ignore enablePropertyOverrides does its own input validation
     enablePropertyOverrides(intrinsics, overrideTaming, overrideDebug);
+    if( legacyRegeneratorRuntimeTaming===  'unsafe-ignore') {
+      tameRegeneratorRuntime();
+     }
 
     // Finally register and optionally freeze all the intrinsics. This
     // must be the operation that modifies the intrinsics.
@@ -12137,7 +12217,7 @@ const        repairIntrinsics=  (options=  {})=>  {
  };$h‍_once.repairIntrinsics(repairIntrinsics);
 })()
 ,
-// === functors[50] ===
+// === functors[51] ===
 ({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,   importMeta: $h‍____meta, }) => (function () { 'use strict';   let globalThis,repairIntrinsics;$h‍_imports([["./assert-sloppy-mode.js", []],["./commons.js", [["globalThis", [$h‍_a => (globalThis = $h‍_a)]]]],["./lockdown.js", [["repairIntrinsics", [$h‍_a => (repairIntrinsics = $h‍_a)]]]]]);   
 
 
@@ -12150,7 +12230,7 @@ const        repairIntrinsics=  (options=  {})=>  {
 /** @import {LockdownOptions} from '../types.js' */
 
 /**
- * @param {LockdownOptions} options
+ * @param {LockdownOptions} [options]
  */
 globalThis.lockdown=  (options)=>{
   const hardenIntrinsics=  repairIntrinsics(options);
@@ -12158,7 +12238,7 @@ globalThis.lockdown=  (options)=>{
  };
 
 /**
- * @param {LockdownOptions} options
+ * @param {LockdownOptions} [options]
  */
 globalThis.repairIntrinsics=  (options)=>{
   const hardenIntrinsics=  repairIntrinsics(options);
@@ -12177,7 +12257,7 @@ globalThis.repairIntrinsics=  (options)=>{
  };
 })()
 ,
-// === functors[51] ===
+// === functors[52] ===
 ({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,   importMeta: $h‍____meta, }) => (function () { 'use strict';   let globalThis,makeCompartmentConstructor,tameFunctionToString,getGlobalIntrinsics;$h‍_imports([["./commons.js", [["globalThis", [$h‍_a => (globalThis = $h‍_a)]]]],["./compartment.js", [["makeCompartmentConstructor", [$h‍_a => (makeCompartmentConstructor = $h‍_a)]]]],["./tame-function-tostring.js", [["tameFunctionToString", [$h‍_a => (tameFunctionToString = $h‍_a)]]]],["./intrinsics.js", [["getGlobalIntrinsics", [$h‍_a => (getGlobalIntrinsics = $h‍_a)]]]]]);   
 
 
@@ -12194,14 +12274,14 @@ globalThis.Compartment=  makeCompartmentConstructor(
   markVirtualizedNativeFunction);
 })()
 ,
-// === functors[52] ===
+// === functors[53] ===
 ({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,   importMeta: $h‍____meta, }) => (function () { 'use strict';   let globalThis,assert;$h‍_imports([["./commons.js", [["globalThis", [$h‍_a => (globalThis = $h‍_a)]]]],["./error/assert.js", [["assert", [$h‍_a => (assert = $h‍_a)]]]]]);   
 
 
 globalThis.assert=  assert;
 })()
 ,
-// === functors[53] ===
+// === functors[54] ===
 ({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,   importMeta: $h‍____meta, }) => (function () { 'use strict';   let symbolFor,globalThis,defineCausalConsoleFromLogger,loggedErrorHandler;$h‍_imports([["./commons.js", [["symbolFor", [$h‍_a => (symbolFor = $h‍_a)]],["globalThis", [$h‍_a => (globalThis = $h‍_a)]]]],["./error/console.js", [["defineCausalConsoleFromLogger", [$h‍_a => (defineCausalConsoleFromLogger = $h‍_a)]]]],["./error/assert.js", [["loggedErrorHandler", [$h‍_a => (loggedErrorHandler = $h‍_a)]]]]]);   
 
 
@@ -12254,7 +12334,7 @@ globalThis[MAKE_CAUSAL_CONSOLE_FROM_LOGGER_KEY_FOR_SES_AVA]=
   makeCausalConsoleFromLoggerForSesAva;
 })()
 ,
-// === functors[54] ===
+// === functors[55] ===
 ({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,   importMeta: $h‍____meta, }) => (function () { 'use strict';   $h‍_imports([["./src/lockdown-shim.js", []],["./src/compartment-shim.js", []],["./src/assert-shim.js", []],["./src/console-shim.js", []]]);   
 })()
 ,
