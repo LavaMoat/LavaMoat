@@ -13,8 +13,8 @@
   "license": "MIT",
   "private": true,
   "engines": {
-    "node": "^16.20.0 || ^18.0.0 || ^20.0.0",
-    "npm": ">=7.0.0"
+    "node": "^18.0.0 || ^20.0.0 <20.16.1 || ^22.5.1",
+    "npm": ">=9.0.0"
   },
   "bin": {
     "endomoat": "./src/cli.js"
@@ -40,12 +40,12 @@
     "update-policy": "node ./scripts/update-own-policy.js"
   },
   "dependencies": {
-    "@endo/compartment-mapper": "1.1.5",
-    "@endo/evasive-transform": "1.1.2",
+    "@endo/compartment-mapper": "1.2.1",
+    "@endo/evasive-transform": "1.2.1",
     "@types/node": "18.19.28",
     "json-stable-stringify": "1.1.1",
-    "lavamoat-core": "^15.3.0",
-    "ses": "1.5.0",
+    "lavamoat-core": "^16.0.0",
+    "ses": "1.7.0",
     "type-fest": "4.14.0",
     "yargs": "17.7.2"
   },
