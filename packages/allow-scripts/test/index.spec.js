@@ -36,25 +36,24 @@ const run = (t, args, cwd) => {
     options
   )
 
-  if (
-    typeof result.stderr === 'undefined' ||
-    typeof result.status !== 'number'
-  ) {
+  if (result.error) {
+    t.log('Result from a failed spawnSync:', result)
+
     t.fail(
-      `Failed calling '${process.execPath} ${ALLOW_SCRIPTS_BIN} ${args.join(' ')}': ${JSON.stringify(
-        {
-          cwd,
-          options,
-          result,
-        },
-        undefined,
-        2
-      )}`
+      `Failed calling '${process.execPath} ${ALLOW_SCRIPTS_BIN} ${args.join(' ')}'`,
+      {
+        cwd,
+        options,
+        result,
+      }
     )
   }
 
   // forward error output for debugging
-  t.log(result.stderr.toString('utf-8'))
+  t.log(
+    `stderr from running allow-scripts with '${args.join(' ')}'`,
+    result.stderr.toString('utf-8')
+  )
 
   return {
     status: result.status,
