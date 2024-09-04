@@ -237,6 +237,16 @@ test('cli - run command - good dep as a sub dep', (t) => {
 
   // generate the bin link
   spawnSync(NPM_CMD, ['rebuild', 'good_dep'], realisticEnvOptions(projectRoot))
+  t.assert(
+    !fs.existsSync(path.join(projectRoot, 'node_modules', '.bin', 'good')),
+    'Expected good script to be installed'
+  )
+  t.assert(
+    !fs.existsSync(
+      path.join(projectRoot, 'node_modules', 'bbb', '.goodscriptworked')
+    ),
+    'Expected good script to be installed but not run upon install'
+  )
 
   // run the "run" command
   const result = run(t, ['run'], projectRoot)
@@ -251,6 +261,18 @@ test('cli - run command - good dep as a sub dep', (t) => {
     'running lifecycle scripts for top level package',
     '',
   ])
+  const stderr = result.stderr.toString()
+  if (stderr.length > 0) {
+    t.log(`stderr\n---\n${stderr}\n---`)
+  } else {
+    t.log('no stderr')
+  }
+  t.assert(
+    fs.existsSync(
+      path.join(projectRoot, 'node_modules', 'bbb', '.goodscriptworked')
+    ),
+    'Expected good script to produce a file'
+  )
 })
 
 skipOnWindows(
