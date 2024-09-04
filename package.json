@@ -9,6 +9,7 @@
   "workspaces": [
     "packages/*"
   ],
+  "packageManager": "npm@9.9.3+sha512.67597eadc4399186f5ec5de11ed3bad356ab129bdd4589c22ed83cc68dc01adca3dc8b61c1aada10e7b123df74dee00d9227c56ea1c2f214f9dca22ba335a0f0",
   "engines": {
     "node": "^16.20.0 || ^18.0.0 || ^20.0.0 || ^22.0.0",
     "npm": ">=7.0.0"
@@ -36,14 +37,11 @@
     "test:workspaces": "npm run --workspaces --if-present test",
     "watch:types": "tsc -b --watch"
   },
-  "optionalDependencies": {
-    "corepack": "0.29.3"
-  },
   "devDependencies": {
-    "@commitlint/cli": "19.4.0",
-    "@commitlint/config-conventional": "19.2.2",
+    "@commitlint/cli": "19.4.1",
+    "@commitlint/config-conventional": "19.4.1",
     "@tsconfig/node16": "16.1.3",
-    "@types/node": "18.19.45",
+    "@types/node": "18.19.47",
     "@types/yargs": "17.0.33",
     "@typescript-eslint/eslint-plugin": "7.18.0",
     "@typescript-eslint/parser": "7.18.0",
@@ -66,7 +64,7 @@
     "prettier-plugin-jsdoc": "1.3.0",
     "prettier-plugin-pkg": "0.18.1",
     "ses": "1.5.0",
-    "type-fest": "4.25.0",
+    "type-fest": "4.26.0",
     "typescript": "5.5.4"
   },
   "overrides": {
@@ -93,6 +91,5 @@
     "singleQuote": true,
     "trailingComma": "es5",
     "tsdoc": true
-  },
-  "packageManager": "npm@9.9.3+sha512.67597eadc4399186f5ec5de11ed3bad356ab129bdd4589c22ed83cc68dc01adca3dc8b61c1aada10e7b123df74dee00d9227c56ea1c2f214f9dca22ba335a0f0"
+  }
 }

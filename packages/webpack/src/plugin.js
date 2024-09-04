@@ -314,6 +314,15 @@ class LavaMoatPlugin {
                 const moduleClass =
                   Object.getPrototypeOf(module).constructor.name
 
+                if (moduleId === null) {
+                  diag.rawDebug(
+                    2,
+                    `LavaMoatPlugin: module ${module.identifier()} has no moduleId, cannot cover it with policy.`
+                  )
+                  diag.rawDebug(4, { module })
+                  return
+                }
+
                 if (
                   isIgnoredModule(module) ||
                   isContextModule(module, moduleClass)

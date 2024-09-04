@@ -35,11 +35,11 @@
     "test:ses": "diff -wq ../../node_modules/ses/dist/lockdown.umd.js ./lib/lockdown.umd.js"
   },
   "dependencies": {
-    "@babel/types": "7.25.2",
+    "@babel/types": "7.25.4",
     "json-stable-stringify": "1.1.1",
     "lavamoat-tofu": "^8.0.0",
     "merge-deep": "3.0.3",
-    "type-fest": "4.25.0"
+    "type-fest": "4.26.0"
   },
   "devDependencies": {
     "@types/json-stable-stringify": "1.0.36",
