@@ -77,10 +77,9 @@ test('cli - auto command', (t) => {
     realisticEnvOptions(projectRoot)
   )
 
-  // forward error output for debugging
-  if (typeof initResult.stderr !== 'undefined') {
-    t.log(initResult.stderr.toString('utf-8'))
-  } else {
+  if (initResult.error || initResult.status !== 0) {
+    t.log('initResult', initResult)
+
     t.fail(
       `Failed calling 'npm init -y': ${JSON.stringify(
         {
@@ -234,11 +233,27 @@ test('cli - run command - good dep as a sub dep', (t) => {
     recursive: true,
     force: true,
   })
+  fs.rmSync(
+    path.join(projectRoot, 'node_modules', 'bbb', 'node_modules', '.bin'),
+    {
+      recursive: true,
+      force: true,
+    }
+  )
 
   // generate the bin link
   spawnSync(NPM_CMD, ['rebuild', 'good_dep'], realisticEnvOptions(projectRoot))
   t.assert(
-    !fs.existsSync(path.join(projectRoot, 'node_modules', '.bin', 'good')),
+    fs.existsSync(
+      path.join(
+        projectRoot,
+        'node_modules',
+        'bbb',
+        'node_modules',
+        '.bin',
+        'good'
+      )
+    ),
     'Expected good script to be installed'
   )
   t.assert(
@@ -396,5 +411,6 @@ function realisticEnvOptions(projectRoot) {
     cwd: projectRoot,
     env: { ...process.env, INIT_CWD: projectRoot },
     encoding: 'utf-8',
+    shell: true, // required for running .cmd on Windows https://nodejs.org/en/blog/vulnerability/april-2024-security-releases-2  https://github.com/nodejs/node/issues/52554
   }
 }
