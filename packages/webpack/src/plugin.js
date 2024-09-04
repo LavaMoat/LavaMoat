@@ -102,6 +102,18 @@ class LavaMoatPlugin {
     })
 
     const options = this.options
+
+    diag.run(2, () => {
+      // Log stack traces for all errors on higher verbosity because webpack won't
+      compiler.hooks.done.tap(PLUGIN_NAME, (stats) => {
+        if (stats.hasErrors()) {
+          stats.compilation.errors.forEach((error) => {
+            console.error(error.stack || error)
+          })
+        }
+      })
+    })
+
     if (typeof options.readableResourceIds === 'undefined') {
       // default options.readableResourceIds to true if webpack configuration sets development mode
       options.readableResourceIds = compiler.options.mode !== 'production'
@@ -139,7 +151,7 @@ class LavaMoatPlugin {
     // run long asynchronous processing ahead of all compilations
     compiler.hooks.beforeRun.tapAsync(PLUGIN_NAME, (compilation, callback) =>
       loadCanonicalNameMap({
-        rootDir: compiler.context,
+        rootDir: options.rootDir || compiler.context,
         includeDevDeps: true, // even the most proper projects end up including devdeps in their bundles :()
         resolve: browserResolve,
       })
@@ -255,6 +267,17 @@ class LavaMoatPlugin {
         }
 
         /**
+         * Checks if a module is a context module.
+         *
+         * @param {any} m - The module to check.
+         * @param {string} moduleClass - The class of the module.
+         * @returns {boolean} - Returns true if the module is a context module,
+         *   otherwise false.
+         */
+        const isContextModule = (m, moduleClass) =>
+          moduleClass === 'ContextModule'
+
+        /**
          * @param {import('webpack').Module} m
          * @param {string} moduleClass
          * @returns {m is import('webpack').NormalModule} // TODO: this is not
@@ -300,7 +323,10 @@ class LavaMoatPlugin {
                   return
                 }
 
-                if (isIgnoredModule(module)) {
+                if (
+                  isIgnoredModule(module) ||
+                  isContextModule(module, moduleClass)
+                ) {
                   unenforceableModuleIds.push(moduleId)
                 } else {
                   if (isInspectableModule(module, moduleClass)) {
@@ -372,11 +398,13 @@ class LavaMoatPlugin {
         // This hook happens after all module generators have been executed.
         compilation.hooks.afterProcessAssets.tap(PLUGIN_NAME, () => {
           diag.rawDebug(3, '> afterProcessAssets')
-          mainCompilationWarnings.push(
-            new WebpackError(
-              `in LavaMoatPlugin: excluded modules \n  ${excludes.join('\n  ')}`
+          if (excludes.length > 0) {
+            mainCompilationWarnings.push(
+              new WebpackError(
+                `in LavaMoatPlugin: excluded modules \n  ${excludes.join('\n  ')}`
+              )
             )
-          )
+          }
         })
 
         // =================================================================
@@ -423,7 +451,7 @@ class LavaMoatPlugin {
                 // narrow down the policy and map to module identifiers
                 const policyData = identifierLookup.getTranslatedPolicy()
 
-                const lavaMoatRuntime = assembleRuntime(RUNTIME_KEY, [
+                const runtimeChunks = [
                   {
                     name: 'root',
                     data: identifierLookup.root || null,
@@ -454,7 +482,18 @@ class LavaMoatPlugin {
                     name: 'runtime',
                     file: path.join(__dirname, './runtime/runtime.js'),
                   },
-                ])
+                ]
+
+                if (options.debugRuntime) {
+                  runtimeChunks.push({
+                    name: 'debug',
+                    shimRequire: path.join(__dirname, './runtime/debug.js'),
+                  })
+                }
+                const lavaMoatRuntime = assembleRuntime(
+                  RUNTIME_KEY,
+                  runtimeChunks
+                )
 
                 // set.add(RuntimeGlobals.onChunksLoaded); // TODO: develop an understanding of what this line does and why it was a part of the runtime setup for module federation
 
@@ -526,6 +565,8 @@ module.exports = LavaMoatPlugin
 /**
  * @typedef {Object} LavaMoatPluginOptions
  * @property {boolean} [generatePolicy] - Generate the policy file
+ * @property {string} [rootDir] - Specify root directory for canonicalNames to
+ *   be resolved from if different than compiler.context
  * @property {string} policyLocation - Directory containing policy files are
  *   stored, defaults to './lavamoat/webpack'
  * @property {boolean} [emitPolicySnapshot] - Additionally put policy in dist of
@@ -534,7 +575,7 @@ module.exports = LavaMoatPlugin
  *   turned into numbers - defaults to (mode==='development')
  * @property {boolean} [HtmlWebpackPluginInterop] - Add a script tag to the html
  *   output for lockdown.js if HtmlWebpackPlugin is in use
- * @property {string[]} [inlineLockdown] - Prefix the listed files with lockdown
+ * @property {RegExp} [inlineLockdown] - Prefix the matching files with lockdown
  * @property {number} [diagnosticsVerbosity] - A number representing diagnostics
  *   output verbosity, the larger the more overwhelming
  * @property {LockdownOptions} lockdown - Options to pass to SES lockdown
@@ -545,6 +586,7 @@ module.exports = LavaMoatPlugin
  * @property {(specifier: string) => boolean} isBuiltin - A function that
  *   determines if the specifier is a builtin of the runtime platform e.g.
  *   node:fs
+ * @property {boolean} [debugRuntime] - Enable runtime debugging tools
  */
 
 // Provided inline because import('ses') won't work in jsdoc of a cjs module

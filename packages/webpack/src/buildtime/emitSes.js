@@ -5,30 +5,28 @@ const {
 } = require('webpack')
 
 const lockdownSource = readFileSync(
-  path.join(require.resolve('ses'), '../lockdown.umd.min.js'),
+  path.join(require.resolve('ses'), '../lockdown.umd.js'),
   'utf-8'
 )
-const lockdownSourcePrefix = `;(function(){\n${lockdownSource}\n})();\n`
+const lockdownSourcePrefix = `/* SES sources included by LavaMoat. Do not optimize or minify. */\n;\n${lockdownSource}\n;/* end SES */\n`
 
 module.exports = {
   /**
    * @param {object} options
    * @param {import('webpack').Compilation} options.compilation
-   * @param {string[]} options.inlineLockdown
+   * @param {RegExp} options.inlineLockdown
    * @returns {() => void}
    */
   sesPrefixFiles:
-    ({ compilation, inlineLockdown: files }) =>
+    ({ compilation, inlineLockdown }) =>
     () => {
-      files.forEach((file) => {
-        const asset = compilation.assets[file]
-        if (!asset) {
-          throw new Error(
-            `LavaMoatPlugin: file specified in inlineLockdown not found in compilation: ${file}`
-          )
+      for (const file in compilation.assets) {
+        if (!inlineLockdown.test(file)) {
+          continue
         }
+        const asset = compilation.assets[file]
         compilation.assets[file] = new ConcatSource(lockdownSourcePrefix, asset)
-      })
+      }
     },
   /**
    * @param {object} options
@@ -62,10 +60,7 @@ module.exports = {
               if (headTagRegex.test(data.html)) {
                 data.html = data.html.replace(headTagRegex, `$&${scriptTag}`)
               } else if (scriptTagRegex.test(data.html)) {
-                data.html = data.html.replace(
-                  scriptTagRegex,
-                  `${scriptTag}$&`
-                )
+                data.html = data.html.replace(scriptTagRegex, `${scriptTag}$&`)
               } else {
                 throw Error(
                   'LavaMoat: Could not insert lockdown script tag, no suitable location found in the html template'

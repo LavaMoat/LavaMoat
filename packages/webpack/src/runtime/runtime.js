@@ -144,7 +144,6 @@ const installGlobalsForPolicy = (resourceId, packageCompartmentGlobal) => {
       globalAliases
     )
   } else {
-    // TODO: getEndowmentsForConfig doesn't implement support for "write"
     const endowments = getEndowmentsForConfig(
       rootCompartmentGlobalThis,
       LAVAMOAT.policy.resources[resourceId] || {},
@@ -152,19 +151,24 @@ const installGlobalsForPolicy = (resourceId, packageCompartmentGlobal) => {
       packageCompartmentGlobal
     )
 
-    defineProperties(
-      packageCompartmentGlobal,
-      fromEntries(
+    defineProperties(packageCompartmentGlobal, {
+      ...getOwnPropertyDescriptors(endowments),
+      // preserve the correct global aliases even if endowments define them differently
+      ...fromEntries(
         globalAliases.map((alias) => [
           alias,
           { value: packageCompartmentGlobal },
         ])
+      ),
+    })
+
+    if (LAVAMOAT.debug) {
+      LAVAMOAT.debug.debugProxy(
+        packageCompartmentGlobal,
+        rootCompartmentGlobalThis,
+        resourceId
       )
-    )
-    defineProperties(
-      packageCompartmentGlobal,
-      getOwnPropertyDescriptors(endowments)
-    )
+    }
   }
 }
 
@@ -269,12 +273,15 @@ const lavamoatRuntimeWrapper = (resourceId, runtimeKit) => {
     policyRequire.g = compartmentMap.get(resourceId).globalThis
 
     // override nmd to limit what it can mutate
-    policyRequire.nmd = (/** @type {any} */ moduleReference) => {
-      if (moduleReference === module) {
-        module = __webpack_require__.nmd(module)
-        return module
-      }
-    }
+    policyRequire.nmd = (/** @type {any} */ moduleReference) =>
+      moduleReference === module
+        ? __webpack_require__.nmd(module)
+        : moduleReference
+    // override hmd to limit what it can mutate
+    policyRequire.hmd = (/** @type {any} */ moduleReference) =>
+      moduleReference === module
+        ? __webpack_require__.hmd(module)
+        : moduleReference
 
     overrides.__webpack_require__ = policyRequire
   }
