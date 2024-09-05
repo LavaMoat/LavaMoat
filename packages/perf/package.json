@@ -29,8 +29,8 @@
     "ses": "1.8.0"
   },
   "devDependencies": {
-    "lavamoat": "^8.0.0",
-    "lavamoat-browserify": "^17.0.0",
+    "lavamoat": "^9.0.0",
+    "lavamoat-browserify": "^18.0.0",
     "serve": "14.2.3"
   }
 }
