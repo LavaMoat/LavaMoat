@@ -108,7 +108,7 @@ class LavaMoatPlugin {
       compiler.hooks.done.tap(PLUGIN_NAME, (stats) => {
         if (stats.hasErrors()) {
           stats.compilation.errors.forEach((error) => {
-            console.error(error.stack || error)
+            console.error(error)
           })
         }
       })
