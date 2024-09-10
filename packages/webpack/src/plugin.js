@@ -255,6 +255,17 @@ class LavaMoatPlugin {
         }
 
         /**
+         * Checks if a module is a context module.
+         *
+         * @param {any} m - The module to check.
+         * @param {string} moduleClass - The class of the module.
+         * @returns {boolean} - Returns true if the module is a context module,
+         *   otherwise false.
+         */
+        const isContextModule = (m, moduleClass) =>
+          moduleClass === 'ContextModule'
+
+        /**
          * @param {import('webpack').Module} m
          * @param {string} moduleClass
          * @returns {m is import('webpack').NormalModule} // TODO: this is not
@@ -300,7 +311,10 @@ class LavaMoatPlugin {
                   return
                 }
 
-                if (isIgnoredModule(module)) {
+                if (
+                  isIgnoredModule(module) ||
+                  isContextModule(module, moduleClass)
+                ) {
                   unenforceableModuleIds.push(moduleId)
                 } else {
                   if (isInspectableModule(module, moduleClass)) {
