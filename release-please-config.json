@@ -5,7 +5,7 @@
     "packages/aa": {},
     "packages/allow-scripts": {},
     "packages/webpack": {
-      "release-as": "0.5.0-beta.0"
+      "release-as": "0.6.0-beta.0"
     },
     "packages/browserify": {},
     "packages/core": {},
