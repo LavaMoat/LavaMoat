@@ -23,7 +23,7 @@
     "test": "exit 0"
   },
   "dependencies": {
-    "@endo/compartment-mapper": "1.2.1",
+    "@endo/compartment-mapper": "1.2.2",
     "browserify": "17.0.0",
     "readable-stream": "4.5.2",
     "ses": "1.8.0"
