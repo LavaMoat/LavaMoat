@@ -102,6 +102,10 @@ Sadly, even treeshaking doesn't eliminate that module. It's left there and faili
 
 This plugin will skip policy enforcement for such ignored modules.
 
+#### HMR
+
+LavaMoat is not compatible with Hot Module Replacement (HMR). Disable LavaMoat for development builds where HMR is required while keeping it enabled for production builds.
+
 # Security
 
 **This is an experimental software. Use at your own risk!**
