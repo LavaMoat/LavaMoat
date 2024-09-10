@@ -8,7 +8,7 @@
   },
   "private": true,
   "engines": {
-    "node": "^18.0.0 || ^20.0.0 <20.16.1 || ^22.5.1"
+    "node": "^18.0.0 || ^20.0.0 <20.15.0 || ^20.17.0 || ^22.5.1"
   },
   "scripts": {
     "run:bify-simple": "(cd trials/bify-simple && npm install && npm start)",
@@ -23,10 +23,10 @@
     "test": "exit 0"
   },
   "dependencies": {
-    "@endo/compartment-mapper": "1.2.1",
+    "@endo/compartment-mapper": "1.2.2",
     "browserify": "17.0.0",
     "readable-stream": "4.5.2",
-    "ses": "1.5.0"
+    "ses": "1.8.0"
   },
   "devDependencies": {
     "lavamoat": "^8.0.0",

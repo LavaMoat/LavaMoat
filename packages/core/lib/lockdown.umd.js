@@ -1,8 +1,1362 @@
-// ses@1.5.0
+// ses@1.8.0
 'use strict';
-(() => {
-  const functors = [
-// === functors[0] ===
+(functors => {
+
+  const cell = (name, value = undefined) => {
+    const observers = [];
+    return Object.freeze({
+      get: Object.freeze(() => {
+        return value;
+      }),
+      set: Object.freeze((newValue) => {
+        value = newValue;
+        for (const observe of observers) {
+          observe(value);
+        }
+      }),
+      observe: Object.freeze((observe) => {
+        observers.push(observe);
+        observe(value);
+      }),
+      enumerable: true,
+    });
+  };
+
+  const cells = [
+    {
+      globalThis: cell("globalThis"),
+      Array: cell("Array"),
+      Date: cell("Date"),
+      FinalizationRegistry: cell("FinalizationRegistry"),
+      Float32Array: cell("Float32Array"),
+      JSON: cell("JSON"),
+      Map: cell("Map"),
+      Math: cell("Math"),
+      Number: cell("Number"),
+      Object: cell("Object"),
+      Promise: cell("Promise"),
+      Proxy: cell("Proxy"),
+      Reflect: cell("Reflect"),
+      FERAL_REG_EXP: cell("FERAL_REG_EXP"),
+      Set: cell("Set"),
+      String: cell("String"),
+      Symbol: cell("Symbol"),
+      WeakMap: cell("WeakMap"),
+      WeakSet: cell("WeakSet"),
+      FERAL_ERROR: cell("FERAL_ERROR"),
+      RangeError: cell("RangeError"),
+      ReferenceError: cell("ReferenceError"),
+      SyntaxError: cell("SyntaxError"),
+      TypeError: cell("TypeError"),
+      AggregateError: cell("AggregateError"),
+      assign: cell("assign"),
+      create: cell("create"),
+      defineProperties: cell("defineProperties"),
+      entries: cell("entries"),
+      freeze: cell("freeze"),
+      getOwnPropertyDescriptor: cell("getOwnPropertyDescriptor"),
+      getOwnPropertyDescriptors: cell("getOwnPropertyDescriptors"),
+      getOwnPropertyNames: cell("getOwnPropertyNames"),
+      getPrototypeOf: cell("getPrototypeOf"),
+      is: cell("is"),
+      isFrozen: cell("isFrozen"),
+      isSealed: cell("isSealed"),
+      isExtensible: cell("isExtensible"),
+      keys: cell("keys"),
+      objectPrototype: cell("objectPrototype"),
+      seal: cell("seal"),
+      preventExtensions: cell("preventExtensions"),
+      setPrototypeOf: cell("setPrototypeOf"),
+      values: cell("values"),
+      fromEntries: cell("fromEntries"),
+      speciesSymbol: cell("speciesSymbol"),
+      toStringTagSymbol: cell("toStringTagSymbol"),
+      iteratorSymbol: cell("iteratorSymbol"),
+      matchAllSymbol: cell("matchAllSymbol"),
+      unscopablesSymbol: cell("unscopablesSymbol"),
+      symbolKeyFor: cell("symbolKeyFor"),
+      symbolFor: cell("symbolFor"),
+      isInteger: cell("isInteger"),
+      stringifyJson: cell("stringifyJson"),
+      defineProperty: cell("defineProperty"),
+      apply: cell("apply"),
+      construct: cell("construct"),
+      reflectGet: cell("reflectGet"),
+      reflectGetOwnPropertyDescriptor: cell("reflectGetOwnPropertyDescriptor"),
+      reflectHas: cell("reflectHas"),
+      reflectIsExtensible: cell("reflectIsExtensible"),
+      ownKeys: cell("ownKeys"),
+      reflectPreventExtensions: cell("reflectPreventExtensions"),
+      reflectSet: cell("reflectSet"),
+      isArray: cell("isArray"),
+      arrayPrototype: cell("arrayPrototype"),
+      mapPrototype: cell("mapPrototype"),
+      proxyRevocable: cell("proxyRevocable"),
+      regexpPrototype: cell("regexpPrototype"),
+      setPrototype: cell("setPrototype"),
+      stringPrototype: cell("stringPrototype"),
+      weakmapPrototype: cell("weakmapPrototype"),
+      weaksetPrototype: cell("weaksetPrototype"),
+      functionPrototype: cell("functionPrototype"),
+      promisePrototype: cell("promisePrototype"),
+      generatorPrototype: cell("generatorPrototype"),
+      iteratorPrototype: cell("iteratorPrototype"),
+      typedArrayPrototype: cell("typedArrayPrototype"),
+      uncurryThis: cell("uncurryThis"),
+      objectHasOwnProperty: cell("objectHasOwnProperty"),
+      arrayFilter: cell("arrayFilter"),
+      arrayForEach: cell("arrayForEach"),
+      arrayIncludes: cell("arrayIncludes"),
+      arrayJoin: cell("arrayJoin"),
+      arrayMap: cell("arrayMap"),
+      arrayFlatMap: cell("arrayFlatMap"),
+      arrayPop: cell("arrayPop"),
+      arrayPush: cell("arrayPush"),
+      arraySlice: cell("arraySlice"),
+      arraySome: cell("arraySome"),
+      arraySort: cell("arraySort"),
+      iterateArray: cell("iterateArray"),
+      mapSet: cell("mapSet"),
+      mapGet: cell("mapGet"),
+      mapHas: cell("mapHas"),
+      mapDelete: cell("mapDelete"),
+      mapEntries: cell("mapEntries"),
+      iterateMap: cell("iterateMap"),
+      setAdd: cell("setAdd"),
+      setDelete: cell("setDelete"),
+      setForEach: cell("setForEach"),
+      setHas: cell("setHas"),
+      iterateSet: cell("iterateSet"),
+      regexpTest: cell("regexpTest"),
+      regexpExec: cell("regexpExec"),
+      matchAllRegExp: cell("matchAllRegExp"),
+      stringEndsWith: cell("stringEndsWith"),
+      stringIncludes: cell("stringIncludes"),
+      stringIndexOf: cell("stringIndexOf"),
+      stringMatch: cell("stringMatch"),
+      generatorNext: cell("generatorNext"),
+      generatorThrow: cell("generatorThrow"),
+      stringReplace: cell("stringReplace"),
+      stringSearch: cell("stringSearch"),
+      stringSlice: cell("stringSlice"),
+      stringSplit: cell("stringSplit"),
+      stringStartsWith: cell("stringStartsWith"),
+      iterateString: cell("iterateString"),
+      weakmapDelete: cell("weakmapDelete"),
+      weakmapGet: cell("weakmapGet"),
+      weakmapHas: cell("weakmapHas"),
+      weakmapSet: cell("weakmapSet"),
+      weaksetAdd: cell("weaksetAdd"),
+      weaksetHas: cell("weaksetHas"),
+      functionToString: cell("functionToString"),
+      functionBind: cell("functionBind"),
+      promiseAll: cell("promiseAll"),
+      promiseCatch: cell("promiseCatch"),
+      promiseThen: cell("promiseThen"),
+      finalizationRegistryRegister: cell("finalizationRegistryRegister"),
+      finalizationRegistryUnregister: cell("finalizationRegistryUnregister"),
+      getConstructorOf: cell("getConstructorOf"),
+      immutableObject: cell("immutableObject"),
+      isObject: cell("isObject"),
+      isError: cell("isError"),
+      FERAL_EVAL: cell("FERAL_EVAL"),
+      FERAL_FUNCTION: cell("FERAL_FUNCTION"),
+      noEvalEvaluate: cell("noEvalEvaluate"),
+      FERAL_STACK_GETTER: cell("FERAL_STACK_GETTER"),
+      FERAL_STACK_SETTER: cell("FERAL_STACK_SETTER"),
+    },
+    {
+    },
+    {
+      makeEnvironmentCaptor: cell("makeEnvironmentCaptor"),
+      getEnvironmentOption: cell("getEnvironmentOption"),
+      getEnvironmentOptionsList: cell("getEnvironmentOptionsList"),
+      environmentOptionsListHas: cell("environmentOptionsListHas"),
+    },
+    {
+    },
+    {
+      an: cell("an"),
+      bestEffortStringify: cell("bestEffortStringify"),
+      enJoin: cell("enJoin"),
+    },
+    {
+    },
+    {
+    },
+    {
+      makeLRUCacheMap: cell("makeLRUCacheMap"),
+    },
+    {
+      makeNoteLogArgsArrayKit: cell("makeNoteLogArgsArrayKit"),
+    },
+    {
+      q: cell("q"),
+      b: cell("b"),
+      X: cell("X"),
+      unredactedDetails: cell("unredactedDetails"),
+      makeError: cell("makeError"),
+      annotateError: cell("annotateError"),
+      loggedErrorHandler: cell("loggedErrorHandler"),
+      makeAssert: cell("makeAssert"),
+      assert: cell("assert"),
+      assertEqual: cell("assertEqual"),
+      sanitizeError: cell("sanitizeError"),
+    },
+    {
+      isTypedArray: cell("isTypedArray"),
+      makeHardener: cell("makeHardener"),
+    },
+    {
+      NativeErrors: cell("NativeErrors"),
+      constantProperties: cell("constantProperties"),
+      universalPropertyNames: cell("universalPropertyNames"),
+      initialGlobalPropertyNames: cell("initialGlobalPropertyNames"),
+      sharedGlobalPropertyNames: cell("sharedGlobalPropertyNames"),
+      uniqueGlobalPropertyNames: cell("uniqueGlobalPropertyNames"),
+      FunctionInstance: cell("FunctionInstance"),
+      AsyncFunctionInstance: cell("AsyncFunctionInstance"),
+      isAccessorPermit: cell("isAccessorPermit"),
+      permitted: cell("permitted"),
+    },
+    {
+      makeIntrinsicsCollector: cell("makeIntrinsicsCollector"),
+      getGlobalIntrinsics: cell("getGlobalIntrinsics"),
+    },
+    {
+      default: cell("default"),
+    },
+    {
+      default: cell("default"),
+    },
+    {
+      default: cell("default"),
+    },
+    {
+      default: cell("default"),
+    },
+    {
+      default: cell("default"),
+    },
+    {
+      minEnablements: cell("minEnablements"),
+      moderateEnablements: cell("moderateEnablements"),
+      severeEnablements: cell("severeEnablements"),
+    },
+    {
+      default: cell("default"),
+    },
+    {
+      default: cell("default"),
+    },
+    {
+      makeEvalFunction: cell("makeEvalFunction"),
+    },
+    {
+      makeFunctionConstructor: cell("makeFunctionConstructor"),
+    },
+    {
+      setGlobalObjectSymbolUnscopables: cell("setGlobalObjectSymbolUnscopables"),
+      setGlobalObjectConstantProperties: cell("setGlobalObjectConstantProperties"),
+      setGlobalObjectMutableProperties: cell("setGlobalObjectMutableProperties"),
+      setGlobalObjectEvaluators: cell("setGlobalObjectEvaluators"),
+    },
+    {
+      alwaysThrowHandler: cell("alwaysThrowHandler"),
+      strictScopeTerminatorHandler: cell("strictScopeTerminatorHandler"),
+      strictScopeTerminator: cell("strictScopeTerminator"),
+    },
+    {
+      createSloppyGlobalsScopeTerminator: cell("createSloppyGlobalsScopeTerminator"),
+    },
+    {
+      makeEvalScopeKit: cell("makeEvalScopeKit"),
+    },
+    {
+      getSourceURL: cell("getSourceURL"),
+    },
+    {
+      rejectHtmlComments: cell("rejectHtmlComments"),
+      evadeHtmlCommentTest: cell("evadeHtmlCommentTest"),
+      rejectImportExpressions: cell("rejectImportExpressions"),
+      evadeImportExpressionTest: cell("evadeImportExpressionTest"),
+      rejectSomeDirectEvalExpressions: cell("rejectSomeDirectEvalExpressions"),
+      mandatoryTransforms: cell("mandatoryTransforms"),
+      applyTransforms: cell("applyTransforms"),
+      transforms: cell("transforms"),
+    },
+    {
+      isValidIdentifierName: cell("isValidIdentifierName"),
+      getScopeConstants: cell("getScopeConstants"),
+    },
+    {
+      makeEvaluate: cell("makeEvaluate"),
+    },
+    {
+      makeSafeEvaluator: cell("makeSafeEvaluator"),
+    },
+    {
+      tameFunctionToString: cell("tameFunctionToString"),
+    },
+    {
+      tameDomains: cell("tameDomains"),
+    },
+    {
+      consoleLevelMethods: cell("consoleLevelMethods"),
+      consoleOtherMethods: cell("consoleOtherMethods"),
+      makeLoggingConsoleKit: cell("makeLoggingConsoleKit"),
+      pumpLogToConsole: cell("pumpLogToConsole"),
+      makeCausalConsole: cell("makeCausalConsole"),
+      defineCausalConsoleFromLogger: cell("defineCausalConsoleFromLogger"),
+      filterConsole: cell("filterConsole"),
+    },
+    {
+      makeRejectionHandlers: cell("makeRejectionHandlers"),
+    },
+    {
+      tameConsole: cell("tameConsole"),
+    },
+    {
+      filterFileName: cell("filterFileName"),
+      shortenCallSiteString: cell("shortenCallSiteString"),
+      tameV8ErrorConstructor: cell("tameV8ErrorConstructor"),
+    },
+    {
+      default: cell("default"),
+    },
+    {
+      makeAlias: cell("makeAlias"),
+      load: cell("load"),
+      loadNow: cell("loadNow"),
+    },
+    {
+      deferExports: cell("deferExports"),
+      getDeferredExports: cell("getDeferredExports"),
+    },
+    {
+      provideCompartmentEvaluator: cell("provideCompartmentEvaluator"),
+      compartmentEvaluate: cell("compartmentEvaluate"),
+    },
+    {
+      makeVirtualModuleInstance: cell("makeVirtualModuleInstance"),
+      makeModuleInstance: cell("makeModuleInstance"),
+    },
+    {
+      link: cell("link"),
+      instantiate: cell("instantiate"),
+    },
+    {
+      InertCompartment: cell("InertCompartment"),
+      CompartmentPrototype: cell("CompartmentPrototype"),
+      makeCompartmentConstructor: cell("makeCompartmentConstructor"),
+    },
+    {
+      getAnonymousIntrinsics: cell("getAnonymousIntrinsics"),
+    },
+    {
+      tameHarden: cell("tameHarden"),
+    },
+    {
+      tameSymbolConstructor: cell("tameSymbolConstructor"),
+    },
+    {
+      tameFauxDataProperty: cell("tameFauxDataProperty"),
+      tameFauxDataProperties: cell("tameFauxDataProperties"),
+    },
+    {
+      tameRegeneratorRuntime: cell("tameRegeneratorRuntime"),
+    },
+    {
+      repairIntrinsics: cell("repairIntrinsics"),
+    },
+    {
+    },
+    {
+    },
+    {
+    },
+    {
+    },
+    {
+    },
+  ];
+
+  Object.defineProperties(cells[3], Object.getOwnPropertyDescriptors(cells[2]));
+
+  const namespaces = cells.map(cells => Object.freeze(Object.create(null, {
+    ...cells,
+    // Make this appear like an ESM module namespace object.
+    [Symbol.toStringTag]: {
+      value: 'Module',
+      writable: false,
+      enumerable: false,
+      configurable: false,
+    },
+  })));
+
+  for (let index = 0; index < namespaces.length; index += 1) {
+    cells[index]['*'] = cell('*', namespaces[index]);
+  }
+
+function observeImports(map, importName, importIndex) {
+  for (const [name, observers] of map.get(importName)) {
+    const cell = cells[importIndex][name];
+    if (cell === undefined) {
+      throw new ReferenceError(`Cannot import name ${name}`);
+    }
+    for (const observer of observers) {
+      cell.observe(observer);
+    }
+  }
+}
+
+
+  functors[0]({
+    imports(entries) {
+      const map = new Map(entries);
+    },
+    liveVar: {
+    },
+    onceVar: {
+      universalThis: cells[0].globalThis.set,
+      Array: cells[0].Array.set,
+      Date: cells[0].Date.set,
+      FinalizationRegistry: cells[0].FinalizationRegistry.set,
+      Float32Array: cells[0].Float32Array.set,
+      JSON: cells[0].JSON.set,
+      Map: cells[0].Map.set,
+      Math: cells[0].Math.set,
+      Number: cells[0].Number.set,
+      Object: cells[0].Object.set,
+      Promise: cells[0].Promise.set,
+      Proxy: cells[0].Proxy.set,
+      Reflect: cells[0].Reflect.set,
+      FERAL_REG_EXP: cells[0].FERAL_REG_EXP.set,
+      Set: cells[0].Set.set,
+      String: cells[0].String.set,
+      Symbol: cells[0].Symbol.set,
+      WeakMap: cells[0].WeakMap.set,
+      WeakSet: cells[0].WeakSet.set,
+      FERAL_ERROR: cells[0].FERAL_ERROR.set,
+      RangeError: cells[0].RangeError.set,
+      ReferenceError: cells[0].ReferenceError.set,
+      SyntaxError: cells[0].SyntaxError.set,
+      TypeError: cells[0].TypeError.set,
+      AggregateError: cells[0].AggregateError.set,
+      assign: cells[0].assign.set,
+      create: cells[0].create.set,
+      defineProperties: cells[0].defineProperties.set,
+      entries: cells[0].entries.set,
+      freeze: cells[0].freeze.set,
+      getOwnPropertyDescriptor: cells[0].getOwnPropertyDescriptor.set,
+      getOwnPropertyDescriptors: cells[0].getOwnPropertyDescriptors.set,
+      getOwnPropertyNames: cells[0].getOwnPropertyNames.set,
+      getPrototypeOf: cells[0].getPrototypeOf.set,
+      is: cells[0].is.set,
+      isFrozen: cells[0].isFrozen.set,
+      isSealed: cells[0].isSealed.set,
+      isExtensible: cells[0].isExtensible.set,
+      keys: cells[0].keys.set,
+      objectPrototype: cells[0].objectPrototype.set,
+      seal: cells[0].seal.set,
+      preventExtensions: cells[0].preventExtensions.set,
+      setPrototypeOf: cells[0].setPrototypeOf.set,
+      values: cells[0].values.set,
+      fromEntries: cells[0].fromEntries.set,
+      speciesSymbol: cells[0].speciesSymbol.set,
+      toStringTagSymbol: cells[0].toStringTagSymbol.set,
+      iteratorSymbol: cells[0].iteratorSymbol.set,
+      matchAllSymbol: cells[0].matchAllSymbol.set,
+      unscopablesSymbol: cells[0].unscopablesSymbol.set,
+      symbolKeyFor: cells[0].symbolKeyFor.set,
+      symbolFor: cells[0].symbolFor.set,
+      isInteger: cells[0].isInteger.set,
+      stringifyJson: cells[0].stringifyJson.set,
+      defineProperty: cells[0].defineProperty.set,
+      apply: cells[0].apply.set,
+      construct: cells[0].construct.set,
+      reflectGet: cells[0].reflectGet.set,
+      reflectGetOwnPropertyDescriptor: cells[0].reflectGetOwnPropertyDescriptor.set,
+      reflectHas: cells[0].reflectHas.set,
+      reflectIsExtensible: cells[0].reflectIsExtensible.set,
+      ownKeys: cells[0].ownKeys.set,
+      reflectPreventExtensions: cells[0].reflectPreventExtensions.set,
+      reflectSet: cells[0].reflectSet.set,
+      isArray: cells[0].isArray.set,
+      arrayPrototype: cells[0].arrayPrototype.set,
+      mapPrototype: cells[0].mapPrototype.set,
+      proxyRevocable: cells[0].proxyRevocable.set,
+      regexpPrototype: cells[0].regexpPrototype.set,
+      setPrototype: cells[0].setPrototype.set,
+      stringPrototype: cells[0].stringPrototype.set,
+      weakmapPrototype: cells[0].weakmapPrototype.set,
+      weaksetPrototype: cells[0].weaksetPrototype.set,
+      functionPrototype: cells[0].functionPrototype.set,
+      promisePrototype: cells[0].promisePrototype.set,
+      generatorPrototype: cells[0].generatorPrototype.set,
+      iteratorPrototype: cells[0].iteratorPrototype.set,
+      typedArrayPrototype: cells[0].typedArrayPrototype.set,
+      uncurryThis: cells[0].uncurryThis.set,
+      objectHasOwnProperty: cells[0].objectHasOwnProperty.set,
+      arrayFilter: cells[0].arrayFilter.set,
+      arrayForEach: cells[0].arrayForEach.set,
+      arrayIncludes: cells[0].arrayIncludes.set,
+      arrayJoin: cells[0].arrayJoin.set,
+      arrayMap: cells[0].arrayMap.set,
+      arrayFlatMap: cells[0].arrayFlatMap.set,
+      arrayPop: cells[0].arrayPop.set,
+      arrayPush: cells[0].arrayPush.set,
+      arraySlice: cells[0].arraySlice.set,
+      arraySome: cells[0].arraySome.set,
+      arraySort: cells[0].arraySort.set,
+      iterateArray: cells[0].iterateArray.set,
+      mapSet: cells[0].mapSet.set,
+      mapGet: cells[0].mapGet.set,
+      mapHas: cells[0].mapHas.set,
+      mapDelete: cells[0].mapDelete.set,
+      mapEntries: cells[0].mapEntries.set,
+      iterateMap: cells[0].iterateMap.set,
+      setAdd: cells[0].setAdd.set,
+      setDelete: cells[0].setDelete.set,
+      setForEach: cells[0].setForEach.set,
+      setHas: cells[0].setHas.set,
+      iterateSet: cells[0].iterateSet.set,
+      regexpTest: cells[0].regexpTest.set,
+      regexpExec: cells[0].regexpExec.set,
+      matchAllRegExp: cells[0].matchAllRegExp.set,
+      stringEndsWith: cells[0].stringEndsWith.set,
+      stringIncludes: cells[0].stringIncludes.set,
+      stringIndexOf: cells[0].stringIndexOf.set,
+      stringMatch: cells[0].stringMatch.set,
+      generatorNext: cells[0].generatorNext.set,
+      generatorThrow: cells[0].generatorThrow.set,
+      stringReplace: cells[0].stringReplace.set,
+      stringSearch: cells[0].stringSearch.set,
+      stringSlice: cells[0].stringSlice.set,
+      stringSplit: cells[0].stringSplit.set,
+      stringStartsWith: cells[0].stringStartsWith.set,
+      iterateString: cells[0].iterateString.set,
+      weakmapDelete: cells[0].weakmapDelete.set,
+      weakmapGet: cells[0].weakmapGet.set,
+      weakmapHas: cells[0].weakmapHas.set,
+      weakmapSet: cells[0].weakmapSet.set,
+      weaksetAdd: cells[0].weaksetAdd.set,
+      weaksetHas: cells[0].weaksetHas.set,
+      functionToString: cells[0].functionToString.set,
+      functionBind: cells[0].functionBind.set,
+      promiseAll: cells[0].promiseAll.set,
+      promiseCatch: cells[0].promiseCatch.set,
+      promiseThen: cells[0].promiseThen.set,
+      finalizationRegistryRegister: cells[0].finalizationRegistryRegister.set,
+      finalizationRegistryUnregister: cells[0].finalizationRegistryUnregister.set,
+      getConstructorOf: cells[0].getConstructorOf.set,
+      immutableObject: cells[0].immutableObject.set,
+      isObject: cells[0].isObject.set,
+      isError: cells[0].isError.set,
+      FERAL_EVAL: cells[0].FERAL_EVAL.set,
+      FERAL_FUNCTION: cells[0].FERAL_FUNCTION.set,
+      noEvalEvaluate: cells[0].noEvalEvaluate.set,
+      FERAL_STACK_GETTER: cells[0].FERAL_STACK_GETTER.set,
+      FERAL_STACK_SETTER: cells[0].FERAL_STACK_SETTER.set,
+    },
+    importMeta: {},
+  });
+  functors[1]({
+    imports(entries) {
+      const map = new Map(entries);
+      observeImports(map, "./commons.js", 0);
+    },
+    liveVar: {
+    },
+    onceVar: {
+    },
+    importMeta: {},
+  });
+  functors[2]({
+    imports(entries) {
+      const map = new Map(entries);
+    },
+    liveVar: {
+    },
+    onceVar: {
+      makeEnvironmentCaptor: cells[2].makeEnvironmentCaptor.set,
+      getEnvironmentOption: cells[2].getEnvironmentOption.set,
+      getEnvironmentOptionsList: cells[2].getEnvironmentOptionsList.set,
+      environmentOptionsListHas: cells[2].environmentOptionsListHas.set,
+    },
+    importMeta: {},
+  });
+  functors[3]({
+    imports(entries) {
+      const map = new Map(entries);
+      observeImports(map, "./src/env-options.js", 2);
+    },
+    liveVar: {
+    },
+    onceVar: {
+    },
+    importMeta: {},
+  });
+  functors[4]({
+    imports(entries) {
+      const map = new Map(entries);
+      observeImports(map, "../commons.js", 0);
+    },
+    liveVar: {
+    },
+    onceVar: {
+      an: cells[4].an.set,
+      bestEffortStringify: cells[4].bestEffortStringify.set,
+      enJoin: cells[4].enJoin.set,
+    },
+    importMeta: {},
+  });
+  functors[5]({
+    imports(entries) {
+      const map = new Map(entries);
+    },
+    liveVar: {
+    },
+    onceVar: {
+    },
+    importMeta: {},
+  });
+  functors[6]({
+    imports(entries) {
+      const map = new Map(entries);
+    },
+    liveVar: {
+    },
+    onceVar: {
+    },
+    importMeta: {},
+  });
+  functors[7]({
+    imports(entries) {
+      const map = new Map(entries);
+    },
+    liveVar: {
+    },
+    onceVar: {
+      makeLRUCacheMap: cells[7].makeLRUCacheMap.set,
+    },
+    importMeta: {},
+  });
+  functors[8]({
+    imports(entries) {
+      const map = new Map(entries);
+      observeImports(map, "../make-lru-cachemap.js", 7);
+      observeImports(map, "./internal-types.js", 6);
+    },
+    liveVar: {
+    },
+    onceVar: {
+      makeNoteLogArgsArrayKit: cells[8].makeNoteLogArgsArrayKit.set,
+    },
+    importMeta: {},
+  });
+  functors[9]({
+    imports(entries) {
+      const map = new Map(entries);
+      observeImports(map, "../commons.js", 0);
+      observeImports(map, "./stringify-utils.js", 4);
+      observeImports(map, "./types.js", 5);
+      observeImports(map, "./internal-types.js", 6);
+      observeImports(map, "./note-log-args.js", 8);
+    },
+    liveVar: {
+    },
+    onceVar: {
+      quote: cells[9].q.set,
+      bare: cells[9].b.set,
+      redactedDetails: cells[9].X.set,
+      unredactedDetails: cells[9].unredactedDetails.set,
+      makeError: cells[9].makeError.set,
+      note: cells[9].annotateError.set,
+      loggedErrorHandler: cells[9].loggedErrorHandler.set,
+      makeAssert: cells[9].makeAssert.set,
+      assert: cells[9].assert.set,
+      assertEqual: cells[9].assertEqual.set,
+      sanitizeError: cells[9].sanitizeError.set,
+    },
+    importMeta: {},
+  });
+  functors[10]({
+    imports(entries) {
+      const map = new Map(entries);
+      observeImports(map, "./commons.js", 0);
+      observeImports(map, "./error/assert.js", 9);
+    },
+    liveVar: {
+    },
+    onceVar: {
+      isTypedArray: cells[10].isTypedArray.set,
+      makeHardener: cells[10].makeHardener.set,
+    },
+    importMeta: {},
+  });
+  functors[11]({
+    imports(entries) {
+      const map = new Map(entries);
+      observeImports(map, "./commons.js", 0);
+    },
+    liveVar: {
+    },
+    onceVar: {
+      NativeErrors: cells[11].NativeErrors.set,
+      constantProperties: cells[11].constantProperties.set,
+      universalPropertyNames: cells[11].universalPropertyNames.set,
+      initialGlobalPropertyNames: cells[11].initialGlobalPropertyNames.set,
+      sharedGlobalPropertyNames: cells[11].sharedGlobalPropertyNames.set,
+      uniqueGlobalPropertyNames: cells[11].uniqueGlobalPropertyNames.set,
+      FunctionInstance: cells[11].FunctionInstance.set,
+      AsyncFunctionInstance: cells[11].AsyncFunctionInstance.set,
+      isAccessorPermit: cells[11].isAccessorPermit.set,
+      permitted: cells[11].permitted.set,
+    },
+    importMeta: {},
+  });
+  functors[12]({
+    imports(entries) {
+      const map = new Map(entries);
+      observeImports(map, "./commons.js", 0);
+      observeImports(map, "./permits.js", 11);
+    },
+    liveVar: {
+    },
+    onceVar: {
+      makeIntrinsicsCollector: cells[12].makeIntrinsicsCollector.set,
+      getGlobalIntrinsics: cells[12].getGlobalIntrinsics.set,
+    },
+    importMeta: {},
+  });
+  functors[13]({
+    imports(entries) {
+      const map = new Map(entries);
+      observeImports(map, "./permits.js", 11);
+      observeImports(map, "./commons.js", 0);
+    },
+    liveVar: {
+    },
+    onceVar: {
+      default: cells[13].default.set,
+    },
+    importMeta: {},
+  });
+  functors[14]({
+    imports(entries) {
+      const map = new Map(entries);
+      observeImports(map, "./commons.js", 0);
+    },
+    liveVar: {
+    },
+    onceVar: {
+      default: cells[14].default.set,
+    },
+    importMeta: {},
+  });
+  functors[15]({
+    imports(entries) {
+      const map = new Map(entries);
+      observeImports(map, "./commons.js", 0);
+    },
+    liveVar: {
+    },
+    onceVar: {
+      default: cells[15].default.set,
+    },
+    importMeta: {},
+  });
+  functors[16]({
+    imports(entries) {
+      const map = new Map(entries);
+      observeImports(map, "./commons.js", 0);
+    },
+    liveVar: {
+    },
+    onceVar: {
+      default: cells[16].default.set,
+    },
+    importMeta: {},
+  });
+  functors[17]({
+    imports(entries) {
+      const map = new Map(entries);
+      observeImports(map, "./commons.js", 0);
+    },
+    liveVar: {
+    },
+    onceVar: {
+      default: cells[17].default.set,
+    },
+    importMeta: {},
+  });
+  functors[18]({
+    imports(entries) {
+      const map = new Map(entries);
+      observeImports(map, "./commons.js", 0);
+    },
+    liveVar: {
+    },
+    onceVar: {
+      minEnablements: cells[18].minEnablements.set,
+      moderateEnablements: cells[18].moderateEnablements.set,
+      severeEnablements: cells[18].severeEnablements.set,
+    },
+    importMeta: {},
+  });
+  functors[19]({
+    imports(entries) {
+      const map = new Map(entries);
+      observeImports(map, "./commons.js", 0);
+      observeImports(map, "./enablements.js", 18);
+    },
+    liveVar: {
+    },
+    onceVar: {
+      default: cells[19].default.set,
+    },
+    importMeta: {},
+  });
+  functors[20]({
+    imports(entries) {
+      const map = new Map(entries);
+      observeImports(map, "./commons.js", 0);
+      observeImports(map, "./error/assert.js", 9);
+    },
+    liveVar: {
+    },
+    onceVar: {
+      default: cells[20].default.set,
+    },
+    importMeta: {},
+  });
+  functors[21]({
+    imports(entries) {
+      const map = new Map(entries);
+    },
+    liveVar: {
+    },
+    onceVar: {
+      makeEvalFunction: cells[21].makeEvalFunction.set,
+    },
+    importMeta: {},
+  });
+  functors[22]({
+    imports(entries) {
+      const map = new Map(entries);
+      observeImports(map, "./commons.js", 0);
+      observeImports(map, "./error/assert.js", 9);
+    },
+    liveVar: {
+    },
+    onceVar: {
+      makeFunctionConstructor: cells[22].makeFunctionConstructor.set,
+    },
+    importMeta: {},
+  });
+  functors[23]({
+    imports(entries) {
+      const map = new Map(entries);
+      observeImports(map, "./commons.js", 0);
+      observeImports(map, "./make-eval-function.js", 21);
+      observeImports(map, "./make-function-constructor.js", 22);
+      observeImports(map, "./permits.js", 11);
+    },
+    liveVar: {
+    },
+    onceVar: {
+      setGlobalObjectSymbolUnscopables: cells[23].setGlobalObjectSymbolUnscopables.set,
+      setGlobalObjectConstantProperties: cells[23].setGlobalObjectConstantProperties.set,
+      setGlobalObjectMutableProperties: cells[23].setGlobalObjectMutableProperties.set,
+      setGlobalObjectEvaluators: cells[23].setGlobalObjectEvaluators.set,
+    },
+    importMeta: {},
+  });
+  functors[24]({
+    imports(entries) {
+      const map = new Map(entries);
+      observeImports(map, "./commons.js", 0);
+      observeImports(map, "./error/assert.js", 9);
+    },
+    liveVar: {
+    },
+    onceVar: {
+      alwaysThrowHandler: cells[24].alwaysThrowHandler.set,
+      strictScopeTerminatorHandler: cells[24].strictScopeTerminatorHandler.set,
+      strictScopeTerminator: cells[24].strictScopeTerminator.set,
+    },
+    importMeta: {},
+  });
+  functors[25]({
+    imports(entries) {
+      const map = new Map(entries);
+      observeImports(map, "./commons.js", 0);
+      observeImports(map, "./strict-scope-terminator.js", 24);
+    },
+    liveVar: {
+    },
+    onceVar: {
+      createSloppyGlobalsScopeTerminator: cells[25].createSloppyGlobalsScopeTerminator.set,
+    },
+    importMeta: {},
+  });
+  functors[26]({
+    imports(entries) {
+      const map = new Map(entries);
+      observeImports(map, "./commons.js", 0);
+      observeImports(map, "./error/assert.js", 9);
+    },
+    liveVar: {
+    },
+    onceVar: {
+      makeEvalScopeKit: cells[26].makeEvalScopeKit.set,
+    },
+    importMeta: {},
+  });
+  functors[27]({
+    imports(entries) {
+      const map = new Map(entries);
+      observeImports(map, "./commons.js", 0);
+    },
+    liveVar: {
+    },
+    onceVar: {
+      getSourceURL: cells[27].getSourceURL.set,
+    },
+    importMeta: {},
+  });
+  functors[28]({
+    imports(entries) {
+      const map = new Map(entries);
+      observeImports(map, "./commons.js", 0);
+      observeImports(map, "./get-source-url.js", 27);
+    },
+    liveVar: {
+    },
+    onceVar: {
+      rejectHtmlComments: cells[28].rejectHtmlComments.set,
+      evadeHtmlCommentTest: cells[28].evadeHtmlCommentTest.set,
+      rejectImportExpressions: cells[28].rejectImportExpressions.set,
+      evadeImportExpressionTest: cells[28].evadeImportExpressionTest.set,
+      rejectSomeDirectEvalExpressions: cells[28].rejectSomeDirectEvalExpressions.set,
+      mandatoryTransforms: cells[28].mandatoryTransforms.set,
+      applyTransforms: cells[28].applyTransforms.set,
+      transforms: cells[28].transforms.set,
+    },
+    importMeta: {},
+  });
+  functors[29]({
+    imports(entries) {
+      const map = new Map(entries);
+      observeImports(map, "./commons.js", 0);
+    },
+    liveVar: {
+    },
+    onceVar: {
+      isValidIdentifierName: cells[29].isValidIdentifierName.set,
+      getScopeConstants: cells[29].getScopeConstants.set,
+    },
+    importMeta: {},
+  });
+  functors[30]({
+    imports(entries) {
+      const map = new Map(entries);
+      observeImports(map, "./commons.js", 0);
+      observeImports(map, "./scope-constants.js", 29);
+    },
+    liveVar: {
+    },
+    onceVar: {
+      makeEvaluate: cells[30].makeEvaluate.set,
+    },
+    importMeta: {},
+  });
+  functors[31]({
+    imports(entries) {
+      const map = new Map(entries);
+      observeImports(map, "./commons.js", 0);
+      observeImports(map, "./strict-scope-terminator.js", 24);
+      observeImports(map, "./sloppy-globals-scope-terminator.js", 25);
+      observeImports(map, "./eval-scope.js", 26);
+      observeImports(map, "./transforms.js", 28);
+      observeImports(map, "./make-evaluate.js", 30);
+      observeImports(map, "./error/assert.js", 9);
+    },
+    liveVar: {
+    },
+    onceVar: {
+      makeSafeEvaluator: cells[31].makeSafeEvaluator.set,
+    },
+    importMeta: {},
+  });
+  functors[32]({
+    imports(entries) {
+      const map = new Map(entries);
+      observeImports(map, "./commons.js", 0);
+    },
+    liveVar: {
+    },
+    onceVar: {
+      tameFunctionToString: cells[32].tameFunctionToString.set,
+    },
+    importMeta: {},
+  });
+  functors[33]({
+    imports(entries) {
+      const map = new Map(entries);
+      observeImports(map, "./commons.js", 0);
+    },
+    liveVar: {
+    },
+    onceVar: {
+      tameDomains: cells[33].tameDomains.set,
+    },
+    importMeta: {},
+  });
+  functors[34]({
+    imports(entries) {
+      const map = new Map(entries);
+      observeImports(map, "../commons.js", 0);
+      observeImports(map, "./types.js", 5);
+      observeImports(map, "./internal-types.js", 6);
+    },
+    liveVar: {
+    },
+    onceVar: {
+      consoleLevelMethods: cells[34].consoleLevelMethods.set,
+      consoleOtherMethods: cells[34].consoleOtherMethods.set,
+      makeLoggingConsoleKit: cells[34].makeLoggingConsoleKit.set,
+      pumpLogToConsole: cells[34].pumpLogToConsole.set,
+      makeCausalConsole: cells[34].makeCausalConsole.set,
+      defineCausalConsoleFromLogger: cells[34].defineCausalConsoleFromLogger.set,
+      filterConsole: cells[34].filterConsole.set,
+    },
+    importMeta: {},
+  });
+  functors[35]({
+    imports(entries) {
+      const map = new Map(entries);
+      observeImports(map, "../commons.js", 0);
+    },
+    liveVar: {
+    },
+    onceVar: {
+      makeRejectionHandlers: cells[35].makeRejectionHandlers.set,
+    },
+    importMeta: {},
+  });
+  functors[36]({
+    imports(entries) {
+      const map = new Map(entries);
+      observeImports(map, "../commons.js", 0);
+      observeImports(map, "./assert.js", 9);
+      observeImports(map, "./console.js", 34);
+      observeImports(map, "./unhandled-rejection.js", 35);
+      observeImports(map, "./types.js", 5);
+      observeImports(map, "./internal-types.js", 6);
+    },
+    liveVar: {
+    },
+    onceVar: {
+      tameConsole: cells[36].tameConsole.set,
+    },
+    importMeta: {},
+  });
+  functors[37]({
+    imports(entries) {
+      const map = new Map(entries);
+      observeImports(map, "../commons.js", 0);
+    },
+    liveVar: {
+    },
+    onceVar: {
+      filterFileName: cells[37].filterFileName.set,
+      shortenCallSiteString: cells[37].shortenCallSiteString.set,
+      tameV8ErrorConstructor: cells[37].tameV8ErrorConstructor.set,
+    },
+    importMeta: {},
+  });
+  functors[38]({
+    imports(entries) {
+      const map = new Map(entries);
+      observeImports(map, "../commons.js", 0);
+      observeImports(map, "../permits.js", 11);
+      observeImports(map, "./tame-v8-error-constructor.js", 37);
+    },
+    liveVar: {
+    },
+    onceVar: {
+      default: cells[38].default.set,
+    },
+    importMeta: {},
+  });
+  functors[39]({
+    imports(entries) {
+      const map = new Map(entries);
+      observeImports(map, "@endo/env-options", 3);
+      observeImports(map, "./commons.js", 0);
+      observeImports(map, "./error/assert.js", 9);
+    },
+    liveVar: {
+    },
+    onceVar: {
+      makeAlias: cells[39].makeAlias.set,
+      load: cells[39].load.set,
+      loadNow: cells[39].loadNow.set,
+    },
+    importMeta: {},
+  });
+  functors[40]({
+    imports(entries) {
+      const map = new Map(entries);
+      observeImports(map, "./module-load.js", 39);
+      observeImports(map, "./commons.js", 0);
+      observeImports(map, "./error/assert.js", 9);
+    },
+    liveVar: {
+    },
+    onceVar: {
+      deferExports: cells[40].deferExports.set,
+      getDeferredExports: cells[40].getDeferredExports.set,
+    },
+    importMeta: {},
+  });
+  functors[41]({
+    imports(entries) {
+      const map = new Map(entries);
+      observeImports(map, "./commons.js", 0);
+      observeImports(map, "./transforms.js", 28);
+      observeImports(map, "./make-safe-evaluator.js", 31);
+    },
+    liveVar: {
+    },
+    onceVar: {
+      provideCompartmentEvaluator: cells[41].provideCompartmentEvaluator.set,
+      compartmentEvaluate: cells[41].compartmentEvaluate.set,
+    },
+    importMeta: {},
+  });
+  functors[42]({
+    imports(entries) {
+      const map = new Map(entries);
+      observeImports(map, "./error/assert.js", 9);
+      observeImports(map, "./module-proxy.js", 40);
+      observeImports(map, "./commons.js", 0);
+      observeImports(map, "./compartment-evaluate.js", 41);
+    },
+    liveVar: {
+    },
+    onceVar: {
+      makeVirtualModuleInstance: cells[42].makeVirtualModuleInstance.set,
+      makeModuleInstance: cells[42].makeModuleInstance.set,
+    },
+    importMeta: {},
+  });
+  functors[43]({
+    imports(entries) {
+      const map = new Map(entries);
+      observeImports(map, "./error/assert.js", 9);
+      observeImports(map, "./module-instance.js", 42);
+      observeImports(map, "./commons.js", 0);
+    },
+    liveVar: {
+    },
+    onceVar: {
+      link: cells[43].link.set,
+      instantiate: cells[43].instantiate.set,
+    },
+    importMeta: {},
+  });
+  functors[44]({
+    imports(entries) {
+      const map = new Map(entries);
+      observeImports(map, "./commons.js", 0);
+      observeImports(map, "./global-object.js", 23);
+      observeImports(map, "./error/assert.js", 9);
+      observeImports(map, "./permits.js", 11);
+      observeImports(map, "./module-load.js", 39);
+      observeImports(map, "./module-link.js", 43);
+      observeImports(map, "./module-proxy.js", 40);
+      observeImports(map, "./compartment-evaluate.js", 41);
+      observeImports(map, "./make-safe-evaluator.js", 31);
+    },
+    liveVar: {
+    },
+    onceVar: {
+      InertCompartment: cells[44].InertCompartment.set,
+      CompartmentPrototype: cells[44].CompartmentPrototype.set,
+      makeCompartmentConstructor: cells[44].makeCompartmentConstructor.set,
+    },
+    importMeta: {},
+  });
+  functors[45]({
+    imports(entries) {
+      const map = new Map(entries);
+      observeImports(map, "./commons.js", 0);
+      observeImports(map, "./compartment.js", 44);
+    },
+    liveVar: {
+    },
+    onceVar: {
+      getAnonymousIntrinsics: cells[45].getAnonymousIntrinsics.set,
+    },
+    importMeta: {},
+  });
+  functors[46]({
+    imports(entries) {
+      const map = new Map(entries);
+      observeImports(map, "./commons.js", 0);
+    },
+    liveVar: {
+    },
+    onceVar: {
+      tameHarden: cells[46].tameHarden.set,
+    },
+    importMeta: {},
+  });
+  functors[47]({
+    imports(entries) {
+      const map = new Map(entries);
+      observeImports(map, "./commons.js", 0);
+    },
+    liveVar: {
+    },
+    onceVar: {
+      tameSymbolConstructor: cells[47].tameSymbolConstructor.set,
+    },
+    importMeta: {},
+  });
+  functors[48]({
+    imports(entries) {
+      const map = new Map(entries);
+      observeImports(map, "./commons.js", 0);
+    },
+    liveVar: {
+    },
+    onceVar: {
+      tameFauxDataProperty: cells[48].tameFauxDataProperty.set,
+      tameFauxDataProperties: cells[48].tameFauxDataProperties.set,
+    },
+    importMeta: {},
+  });
+  functors[49]({
+    imports(entries) {
+      const map = new Map(entries);
+      observeImports(map, "./commons.js", 0);
+    },
+    liveVar: {
+    },
+    onceVar: {
+      tameRegeneratorRuntime: cells[49].tameRegeneratorRuntime.set,
+    },
+    importMeta: {},
+  });
+  functors[50]({
+    imports(entries) {
+      const map = new Map(entries);
+      observeImports(map, "@endo/env-options", 3);
+      observeImports(map, "./commons.js", 0);
+      observeImports(map, "./make-hardener.js", 10);
+      observeImports(map, "./intrinsics.js", 12);
+      observeImports(map, "./permits-intrinsics.js", 13);
+      observeImports(map, "./tame-function-constructors.js", 14);
+      observeImports(map, "./tame-date-constructor.js", 15);
+      observeImports(map, "./tame-math-object.js", 16);
+      observeImports(map, "./tame-regexp-constructor.js", 17);
+      observeImports(map, "./enable-property-overrides.js", 19);
+      observeImports(map, "./tame-locale-methods.js", 20);
+      observeImports(map, "./global-object.js", 23);
+      observeImports(map, "./make-safe-evaluator.js", 31);
+      observeImports(map, "./permits.js", 11);
+      observeImports(map, "./tame-function-tostring.js", 32);
+      observeImports(map, "./tame-domains.js", 33);
+      observeImports(map, "./error/tame-console.js", 36);
+      observeImports(map, "./error/tame-error-constructor.js", 38);
+      observeImports(map, "./error/assert.js", 9);
+      observeImports(map, "./get-anonymous-intrinsics.js", 45);
+      observeImports(map, "./compartment.js", 44);
+      observeImports(map, "./tame-harden.js", 46);
+      observeImports(map, "./tame-symbol-constructor.js", 47);
+      observeImports(map, "./tame-faux-data-properties.js", 48);
+      observeImports(map, "./tame-regenerator-runtime.js", 49);
+    },
+    liveVar: {
+    },
+    onceVar: {
+      repairIntrinsics: cells[50].repairIntrinsics.set,
+    },
+    importMeta: {},
+  });
+  functors[51]({
+    imports(entries) {
+      const map = new Map(entries);
+      observeImports(map, "./assert-sloppy-mode.js", 1);
+      observeImports(map, "./commons.js", 0);
+      observeImports(map, "./lockdown.js", 50);
+    },
+    liveVar: {
+    },
+    onceVar: {
+    },
+    importMeta: {},
+  });
+  functors[52]({
+    imports(entries) {
+      const map = new Map(entries);
+      observeImports(map, "./commons.js", 0);
+      observeImports(map, "./compartment.js", 44);
+      observeImports(map, "./tame-function-tostring.js", 32);
+      observeImports(map, "./intrinsics.js", 12);
+    },
+    liveVar: {
+    },
+    onceVar: {
+    },
+    importMeta: {},
+  });
+  functors[53]({
+    imports(entries) {
+      const map = new Map(entries);
+      observeImports(map, "./commons.js", 0);
+      observeImports(map, "./error/assert.js", 9);
+    },
+    liveVar: {
+    },
+    onceVar: {
+    },
+    importMeta: {},
+  });
+  functors[54]({
+    imports(entries) {
+      const map = new Map(entries);
+      observeImports(map, "./commons.js", 0);
+      observeImports(map, "./error/console.js", 34);
+      observeImports(map, "./error/assert.js", 9);
+    },
+    liveVar: {
+    },
+    onceVar: {
+    },
+    importMeta: {},
+  });
+  functors[55]({
+    imports(entries) {
+      const map = new Map(entries);
+      observeImports(map, "./src/lockdown-shim.js", 51);
+      observeImports(map, "./src/compartment-shim.js", 52);
+      observeImports(map, "./src/assert-shim.js", 53);
+      observeImports(map, "./src/console-shim.js", 54);
+    },
+    liveVar: {
+    },
+    onceVar: {
+    },
+    importMeta: {},
+  });
+
+  return cells[cells.length - 1]['*'].get();
+})([// === functors[0] ===
 ({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,   importMeta: $h‍____meta, }) => (function () { 'use strict';   $h‍_imports([]);   /* global globalThis */
 /* eslint-disable no-restricted-globals */
 
@@ -142,6 +1496,10 @@ const        { prototype: generatorPrototype}=   getPrototypeOf(
   // eslint-disable-next-line no-empty-function, func-names
   function*()  { });$h‍_once.generatorPrototype(generatorPrototype);
 
+const        iteratorPrototype=  getPrototypeOf(
+  // eslint-disable-next-line @endo/no-polymorphic-call
+  getPrototypeOf(arrayPrototype.values()));$h‍_once.iteratorPrototype(iteratorPrototype);
+
 
 const        typedArrayPrototype=  getPrototypeOf(Uint8Array.prototype);$h‍_once.typedArrayPrototype(typedArrayPrototype);
 
@@ -213,9 +1571,11 @@ const        stringReplace=  /** @type {any} */
   uncurryThis(stringPrototype.replace);$h‍_once.stringReplace(stringReplace);
 
 const        stringSearch=  uncurryThis(stringPrototype.search);$h‍_once.stringSearch(stringSearch);
-const        stringSlice=  uncurryThis(stringPrototype.slice);
-/** @type {(thisArg: string, splitter: string | RegExp | { [Symbol.split](string: string, limit?: number): string[]; }, limit?: number) => string[]} */$h‍_once.stringSlice(stringSlice);
-const        stringSplit=  uncurryThis(stringPrototype.split);$h‍_once.stringSplit(stringSplit);
+const        stringSlice=  uncurryThis(stringPrototype.slice);$h‍_once.stringSlice(stringSlice);
+const        stringSplit=
+  /** @type {(thisArg: string, splitter: string | RegExp | { [Symbol.split](string: string, limit?: number): string[]; }, limit?: number) => string[]} */
+    uncurryThis(stringPrototype.split);$h‍_once.stringSplit(stringSplit);
+
 const        stringStartsWith=  uncurryThis(stringPrototype.startsWith);$h‍_once.stringStartsWith(stringStartsWith);
 const        iterateString=  uncurryThis(stringPrototype[iteratorSymbol]);
 //
@@ -1249,7 +2609,7 @@ const quote=  (payload, spaces=  undefined)=>  {
 
   weakmapSet(declassifiers, result, payload);
   return result;
- };
+ };$h‍_once.quote(quote);
 freeze(quote);
 
 const canBeBare=  freeze(/^[\w:-]( ?[\w:-])*$/);
@@ -1266,7 +2626,7 @@ const bare=  (payload, spaces=  undefined)=>  {
 
   weakmapSet(declassifiers, result, payload);
   return result;
- };
+ };$h‍_once.bare(bare);
 freeze(bare);
 
 // /////////////////////////////////////////////////////////////////////////////
@@ -1334,8 +2694,9 @@ freeze(DetailsTokenProto.toString);
 
 /**
  * Normally this is the function exported as `assert.details` and often
- * spelled `d`. However, if the `{errorTaming: 'unsafe'}` option is given to
- * `lockdown`, then `unredactedDetails` is used instead.
+ * spelled `X`. However, if the `{errorTaming: 'unsafe'}` or
+ * `{errorTaming: 'unsafe-debug'}` option is
+ * given to `lockdown`, then `unredactedDetails` is used instead.
  *
  * There are some unconditional uses of `redactedDetails` in this module. All
  * of them should be uses where the template literal has no redacted
@@ -1351,14 +2712,15 @@ const redactedDetails=  (template, ...args)=>  {
   const detailsToken=  freeze({ __proto__: DetailsTokenProto});
   weakmapSet(hiddenDetailsMap, detailsToken, { template, args});
   return (/** @type {DetailsToken} */ /** @type {unknown} */  detailsToken);
- };
+ };$h‍_once.redactedDetails(redactedDetails);
 freeze(redactedDetails);
 
 /**
  * `unredactedDetails` is like `details` except that it does not redact
  * anything. It acts like `details` would act if all substitution values
  * were wrapped with the `quote` function above (the function normally
- * spelled `q`). If the `{errorTaming: 'unsafe'}` option is given to
+ * spelled `q`). If the `{errorTaming: 'unsafe'}`
+ * or `{errorTaming: 'unsafe-debug'}` option is given to
  * `lockdown`, then the lockdown-shim arranges for the global `assert` to be
  * one whose `details` property is `unredactedDetails`.
  * This setting optimizes the debugging and testing experience at the price
@@ -1552,7 +2914,7 @@ const makeError=  (
    }
   // The next line is a particularly fruitful place to put a breakpoint.
   return error;
- };
+ };$h‍_once.makeError(makeError);
 freeze(makeError);
 
 // /////////////////////////////////////////////////////////////////////////////
@@ -1593,7 +2955,7 @@ const note=  (error, detailsNote)=>  {
    }else {
     addLogArgs(error, logArgs);
    }
- };
+ };$h‍_once.note(note);
 freeze(note);
 
 /**
@@ -1747,6 +3109,13 @@ freeze(makeAssert);
 
 /** @type {Assert} */
 const assert=  makeAssert();$h‍_once.assert(assert);
+
+
+// Internal, to obviate polymorphic dispatch, but may become rigorously
+// consistent with @endo/error:
+
+/** @type {AssertionFunctions['equal']} */
+const assertEqual=  assert.equal;$h‍_once.assertEqual(assertEqual);
 })()
 ,
 // === functors[10] ===
@@ -3143,8 +4512,14 @@ const        permitted=  {
   Int8Array: TypedArray('%Int8ArrayPrototype%'),
   Uint16Array: TypedArray('%Uint16ArrayPrototype%'),
   Uint32Array: TypedArray('%Uint32ArrayPrototype%'),
-  Uint8Array: TypedArray('%Uint8ArrayPrototype%'),
   Uint8ClampedArray: TypedArray('%Uint8ClampedArrayPrototype%'),
+  Uint8Array: {
+    ...TypedArray('%Uint8ArrayPrototype%'),
+    // https://github.com/tc39/proposal-arraybuffer-base64
+    fromBase64: fn,
+    // https://github.com/tc39/proposal-arraybuffer-base64
+    fromHex: fn},
+
 
   '%BigInt64ArrayPrototype%': TypedArrayPrototype('BigInt64Array'),
   '%BigUint64ArrayPrototype%': TypedArrayPrototype('BigUint64Array'),
@@ -3157,8 +4532,18 @@ const        permitted=  {
   '%Int8ArrayPrototype%': TypedArrayPrototype('Int8Array'),
   '%Uint16ArrayPrototype%': TypedArrayPrototype('Uint16Array'),
   '%Uint32ArrayPrototype%': TypedArrayPrototype('Uint32Array'),
-  '%Uint8ArrayPrototype%': TypedArrayPrototype('Uint8Array'),
   '%Uint8ClampedArrayPrototype%': TypedArrayPrototype('Uint8ClampedArray'),
+  '%Uint8ArrayPrototype%': {
+    ...TypedArrayPrototype('Uint8Array'),
+    // https://github.com/tc39/proposal-arraybuffer-base64
+    setFromBase64: fn,
+    // https://github.com/tc39/proposal-arraybuffer-base64
+    setFromHex: fn,
+    // https://github.com/tc39/proposal-arraybuffer-base64
+    toBase64: fn,
+    // https://github.com/tc39/proposal-arraybuffer-base64
+    toHex: fn},
+
 
   // *** Keyed Collections
 
@@ -5253,11 +6638,12 @@ const        setGlobalObjectConstantProperties=  (globalObject)=>{
  * `sharedGlobalPropertyNames`.
  *
  * @param {object} globalObject
- * @param {object} param1
- * @param {object} param1.intrinsics
- * @param {object} param1.newGlobalPropertyNames
- * @param {Function} param1.makeCompartmentConstructor
- * @param {(object) => void} param1.markVirtualizedNativeFunction
+ * @param {object} args
+ * @param {object} args.intrinsics
+ * @param {object} args.newGlobalPropertyNames
+ * @param {Function} args.makeCompartmentConstructor
+ * @param {(object) => void} args.markVirtualizedNativeFunction
+ * @param {Compartment} [args.parentCompartment]
  */$h‍_once.setGlobalObjectConstantProperties(setGlobalObjectConstantProperties);
 const        setGlobalObjectMutableProperties=  (
   globalObject,
@@ -5265,7 +6651,8 @@ const        setGlobalObjectMutableProperties=  (
     intrinsics,
     newGlobalPropertyNames,
     makeCompartmentConstructor,
-    markVirtualizedNativeFunction})=>
+    markVirtualizedNativeFunction,
+    parentCompartment})=>
 
      {
   for( const [name, intrinsicName]of  entries(universalPropertyNames)) {
@@ -5298,7 +6685,8 @@ const        setGlobalObjectMutableProperties=  (
     makeCompartmentConstructor(
       makeCompartmentConstructor,
       intrinsics,
-      markVirtualizedNativeFunction));
+      markVirtualizedNativeFunction,
+      parentCompartment));
 
 
 
@@ -7202,8 +8590,8 @@ const        tameConsole=  (
      }
 
     globalProcess.on('uncaughtException', (error)=>{
-      // causalConsole is born frozen so not vulnerable to method tampering.
-      ourConsole.error(error);
+      // See https://github.com/endojs/endo/blob/master/packages/ses/error-codes/SES_UNCAUGHT_EXCEPTION.md
+      ourConsole.error('SES_UNCAUGHT_EXCEPTION:', error);
       if( terminate) {
         terminate();
        }
@@ -7215,8 +8603,9 @@ const        tameConsole=  (
     typeof globalProcess.on===  'function')
     {
     const handleRejection=  (reason)=>{
-      // 'platform' and 'report' just log the reason.
+      // See https://github.com/endojs/endo/blob/master/packages/ses/error-codes/SES_UNHANDLED_REJECTION.md
       ourConsole.error('SES_UNHANDLED_REJECTION:', reason);
+      // 'platform' and 'report' just log the reason.
      };
     // Maybe track unhandled promise rejections.
     const h=  makeRejectionHandlers(handleRejection);
@@ -7237,8 +8626,9 @@ const        tameConsole=  (
     {
     globalWindow.addEventListener('error', (event)=>{
       event.preventDefault();
+      // See https://github.com/endojs/endo/blob/master/packages/ses/error-codes/SES_UNCAUGHT_EXCEPTION.md
+      ourConsole.error('SES_UNCAUGHT_EXCEPTION:', event.error);
       // 'platform' and 'report' just log the reason.
-      ourConsole.error(event.error);
       if( errorTrapping===  'exit'||  errorTrapping===  'abort') {
         globalWindow.location.href=   `about:blank`;
        }
@@ -7250,6 +8640,7 @@ const        tameConsole=  (
     typeof globalWindow.addEventListener===  'function')
     {
     const handleRejection=  (reason)=>{
+      // See https://github.com/endojs/endo/blob/master/packages/ses/error-codes/SES_UNHANDLED_REJECTION.md
       ourConsole.error('SES_UNHANDLED_REJECTION:', reason);
      };
 
@@ -7278,7 +8669,8 @@ const        tameConsole=  (
 })()
 ,
 // === functors[37] ===
-({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,   importMeta: $h‍____meta, }) => (function () { 'use strict';   let WeakMap,WeakSet,apply,arrayFilter,arrayJoin,arrayMap,arraySlice,create,defineProperties,fromEntries,reflectSet,regexpExec,regexpTest,weakmapGet,weakmapSet,weaksetAdd,weaksetHas;$h‍_imports([["../commons.js", [["WeakMap", [$h‍_a => (WeakMap = $h‍_a)]],["WeakSet", [$h‍_a => (WeakSet = $h‍_a)]],["apply", [$h‍_a => (apply = $h‍_a)]],["arrayFilter", [$h‍_a => (arrayFilter = $h‍_a)]],["arrayJoin", [$h‍_a => (arrayJoin = $h‍_a)]],["arrayMap", [$h‍_a => (arrayMap = $h‍_a)]],["arraySlice", [$h‍_a => (arraySlice = $h‍_a)]],["create", [$h‍_a => (create = $h‍_a)]],["defineProperties", [$h‍_a => (defineProperties = $h‍_a)]],["fromEntries", [$h‍_a => (fromEntries = $h‍_a)]],["reflectSet", [$h‍_a => (reflectSet = $h‍_a)]],["regexpExec", [$h‍_a => (regexpExec = $h‍_a)]],["regexpTest", [$h‍_a => (regexpTest = $h‍_a)]],["weakmapGet", [$h‍_a => (weakmapGet = $h‍_a)]],["weakmapSet", [$h‍_a => (weakmapSet = $h‍_a)]],["weaksetAdd", [$h‍_a => (weaksetAdd = $h‍_a)]],["weaksetHas", [$h‍_a => (weaksetHas = $h‍_a)]]]]]);   
+({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,   importMeta: $h‍____meta, }) => (function () { 'use strict';   let WeakMap,WeakSet,apply,arrayFilter,arrayJoin,arrayMap,arraySlice,create,defineProperties,fromEntries,reflectSet,regexpExec,regexpTest,weakmapGet,weakmapSet,weaksetAdd,weaksetHas,TypeError;$h‍_imports([["../commons.js", [["WeakMap", [$h‍_a => (WeakMap = $h‍_a)]],["WeakSet", [$h‍_a => (WeakSet = $h‍_a)]],["apply", [$h‍_a => (apply = $h‍_a)]],["arrayFilter", [$h‍_a => (arrayFilter = $h‍_a)]],["arrayJoin", [$h‍_a => (arrayJoin = $h‍_a)]],["arrayMap", [$h‍_a => (arrayMap = $h‍_a)]],["arraySlice", [$h‍_a => (arraySlice = $h‍_a)]],["create", [$h‍_a => (create = $h‍_a)]],["defineProperties", [$h‍_a => (defineProperties = $h‍_a)]],["fromEntries", [$h‍_a => (fromEntries = $h‍_a)]],["reflectSet", [$h‍_a => (reflectSet = $h‍_a)]],["regexpExec", [$h‍_a => (regexpExec = $h‍_a)]],["regexpTest", [$h‍_a => (regexpTest = $h‍_a)]],["weakmapGet", [$h‍_a => (weakmapGet = $h‍_a)]],["weakmapSet", [$h‍_a => (weakmapSet = $h‍_a)]],["weaksetAdd", [$h‍_a => (weaksetAdd = $h‍_a)]],["weaksetHas", [$h‍_a => (weaksetHas = $h‍_a)]],["TypeError", [$h‍_a => (TypeError = $h‍_a)]]]]]);   
+
 
 
 
@@ -7444,6 +8836,11 @@ const        tameV8ErrorConstructor=  (
   errorTaming,
   stackFiltering)=>
      {
+  if( errorTaming===  'unsafe-debug') {
+    throw TypeError(
+      'internal: v8+unsafe-debug special case should already be done');
+
+   }
   // TODO: Proper CallSite types
   /** @typedef {{}} CallSite */
 
@@ -7618,7 +9015,8 @@ const        tameV8ErrorConstructor=  (
 })()
 ,
 // === functors[38] ===
-({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,   importMeta: $h‍____meta, }) => (function () { 'use strict';   let FERAL_ERROR,TypeError,apply,construct,defineProperties,setPrototypeOf,getOwnPropertyDescriptor,defineProperty,NativeErrors,tameV8ErrorConstructor;$h‍_imports([["../commons.js", [["FERAL_ERROR", [$h‍_a => (FERAL_ERROR = $h‍_a)]],["TypeError", [$h‍_a => (TypeError = $h‍_a)]],["apply", [$h‍_a => (apply = $h‍_a)]],["construct", [$h‍_a => (construct = $h‍_a)]],["defineProperties", [$h‍_a => (defineProperties = $h‍_a)]],["setPrototypeOf", [$h‍_a => (setPrototypeOf = $h‍_a)]],["getOwnPropertyDescriptor", [$h‍_a => (getOwnPropertyDescriptor = $h‍_a)]],["defineProperty", [$h‍_a => (defineProperty = $h‍_a)]]]],["../permits.js", [["NativeErrors", [$h‍_a => (NativeErrors = $h‍_a)]]]],["./tame-v8-error-constructor.js", [["tameV8ErrorConstructor", [$h‍_a => (tameV8ErrorConstructor = $h‍_a)]]]]]);   
+({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,   importMeta: $h‍____meta, }) => (function () { 'use strict';   let FERAL_ERROR,TypeError,apply,construct,defineProperties,setPrototypeOf,getOwnPropertyDescriptor,defineProperty,getOwnPropertyDescriptors,NativeErrors,tameV8ErrorConstructor;$h‍_imports([["../commons.js", [["FERAL_ERROR", [$h‍_a => (FERAL_ERROR = $h‍_a)]],["TypeError", [$h‍_a => (TypeError = $h‍_a)]],["apply", [$h‍_a => (apply = $h‍_a)]],["construct", [$h‍_a => (construct = $h‍_a)]],["defineProperties", [$h‍_a => (defineProperties = $h‍_a)]],["setPrototypeOf", [$h‍_a => (setPrototypeOf = $h‍_a)]],["getOwnPropertyDescriptor", [$h‍_a => (getOwnPropertyDescriptor = $h‍_a)]],["defineProperty", [$h‍_a => (defineProperty = $h‍_a)]],["getOwnPropertyDescriptors", [$h‍_a => (getOwnPropertyDescriptors = $h‍_a)]]]],["../permits.js", [["NativeErrors", [$h‍_a => (NativeErrors = $h‍_a)]]]],["./tame-v8-error-constructor.js", [["tameV8ErrorConstructor", [$h‍_a => (tameV8ErrorConstructor = $h‍_a)]]]]]);   
+
 
 
 
@@ -7649,12 +9047,17 @@ const tamedMethods=  {
     return '';
    }};
 
+let initialGetStackString=  tamedMethods.getStackString;
 
 function                tameErrorConstructor(
   errorTaming=  'safe',
   stackFiltering=  'concise')
   {
-  if( errorTaming!==  'safe'&&  errorTaming!==  'unsafe') {
+  if(
+    errorTaming!==  'safe'&&
+    errorTaming!==  'unsafe'&&
+    errorTaming!==  'unsafe-debug')
+    {
     throw TypeError( `unrecognized errorTaming ${errorTaming}`);
    }
   if( stackFiltering!==  'concise'&&  stackFiltering!==  'verbose') {
@@ -7662,9 +9065,9 @@ function                tameErrorConstructor(
    }
   const ErrorPrototype=  FERAL_ERROR.prototype;
 
-  const platform=
-    typeof FERAL_ERROR.captureStackTrace===  'function'?  'v8':  'unknown';
   const { captureStackTrace: originalCaptureStackTrace}=   FERAL_ERROR;
+  const platform=
+    typeof originalCaptureStackTrace===  'function'?  'v8':  'unknown';
 
   const makeErrorConstructor=  (_=  {})=>  {
     // eslint-disable-next-line no-shadow
@@ -7742,6 +9145,45 @@ function                tameErrorConstructor(
 
 
 
+  if( errorTaming===  'unsafe-debug'&&  platform===  'v8') {
+    // This case is a kludge to work around
+    // https://github.com/endojs/endo/issues/1798
+    // https://github.com/endojs/endo/issues/2348
+    // https://github.com/Agoric/agoric-sdk/issues/8662
+
+    defineProperties(InitialError, {
+      prepareStackTrace: {
+        get() {
+          return FERAL_ERROR.prepareStackTrace;
+         },
+        set(newPrepareStackTrace) {
+          FERAL_ERROR.prepareStackTrace=  newPrepareStackTrace;
+         },
+        enumerable: false,
+        configurable: true},
+
+      captureStackTrace: {
+        value: FERAL_ERROR.captureStackTrace,
+        writable: true,
+        enumerable: false,
+        configurable: true}});
+
+
+
+    const descs=  getOwnPropertyDescriptors(InitialError);
+    defineProperties(SharedError, {
+      stackTraceLimit: descs.stackTraceLimit,
+      prepareStackTrace: descs.prepareStackTrace,
+      captureStackTrace: descs.captureStackTrace});
+
+
+    return {
+      '%InitialGetStackString%': initialGetStackString,
+      '%InitialError%': InitialError,
+      '%SharedError%': SharedError};
+
+   }
+
   // The default SharedError much be completely powerless even on v8,
   // so the lenient `stackTraceLimit` accessor does nothing on all
   // platforms.
@@ -7791,7 +9233,6 @@ function                tameErrorConstructor(
 
    }
 
-  let initialGetStackString=  tamedMethods.getStackString;
   if( platform===  'v8') {
     initialGetStackString=  tameV8ErrorConstructor(
       FERAL_ERROR,
@@ -7799,7 +9240,7 @@ function                tameErrorConstructor(
       errorTaming,
       stackFiltering);
 
-   }else if( errorTaming===  'unsafe') {
+   }else if( errorTaming===  'unsafe'||  errorTaming===  'unsafe-debug') {
     // v8 has too much magic around their 'stack' own property for it to
     // coexist cleanly with this accessor. So only install it on non-v8
 
@@ -7872,7 +9313,7 @@ function                tameErrorConstructor(
 })()
 ,
 // === functors[39] ===
-({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,   importMeta: $h‍____meta, }) => (function () { 'use strict';   let getenv,ReferenceError,TypeError,Map,Set,arrayJoin,arrayMap,arrayPush,create,freeze,mapGet,mapHas,mapSet,setAdd,promiseThen,values,weakmapGet,generatorNext,generatorThrow,assert;$h‍_imports([["@endo/env-options", [["getEnvironmentOption", [$h‍_a => (getenv = $h‍_a)]]]],["./commons.js", [["ReferenceError", [$h‍_a => (ReferenceError = $h‍_a)]],["TypeError", [$h‍_a => (TypeError = $h‍_a)]],["Map", [$h‍_a => (Map = $h‍_a)]],["Set", [$h‍_a => (Set = $h‍_a)]],["arrayJoin", [$h‍_a => (arrayJoin = $h‍_a)]],["arrayMap", [$h‍_a => (arrayMap = $h‍_a)]],["arrayPush", [$h‍_a => (arrayPush = $h‍_a)]],["create", [$h‍_a => (create = $h‍_a)]],["freeze", [$h‍_a => (freeze = $h‍_a)]],["mapGet", [$h‍_a => (mapGet = $h‍_a)]],["mapHas", [$h‍_a => (mapHas = $h‍_a)]],["mapSet", [$h‍_a => (mapSet = $h‍_a)]],["setAdd", [$h‍_a => (setAdd = $h‍_a)]],["promiseThen", [$h‍_a => (promiseThen = $h‍_a)]],["values", [$h‍_a => (values = $h‍_a)]],["weakmapGet", [$h‍_a => (weakmapGet = $h‍_a)]],["generatorNext", [$h‍_a => (generatorNext = $h‍_a)]],["generatorThrow", [$h‍_a => (generatorThrow = $h‍_a)]]]],["./error/assert.js", [["assert", [$h‍_a => (assert = $h‍_a)]]]]]);   
+({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,   importMeta: $h‍____meta, }) => (function () { 'use strict';   let getenv,Map,Set,TypeError,arrayJoin,arrayMap,arrayPush,create,freeze,generatorNext,generatorThrow,getOwnPropertyNames,isObject,mapGet,mapHas,mapSet,promiseThen,setAdd,values,weakmapGet,weakmapHas,makeError,annotateError,q,b,X;$h‍_imports([["@endo/env-options", [["getEnvironmentOption", [$h‍_a => (getenv = $h‍_a)]]]],["./commons.js", [["Map", [$h‍_a => (Map = $h‍_a)]],["Set", [$h‍_a => (Set = $h‍_a)]],["TypeError", [$h‍_a => (TypeError = $h‍_a)]],["arrayJoin", [$h‍_a => (arrayJoin = $h‍_a)]],["arrayMap", [$h‍_a => (arrayMap = $h‍_a)]],["arrayPush", [$h‍_a => (arrayPush = $h‍_a)]],["create", [$h‍_a => (create = $h‍_a)]],["freeze", [$h‍_a => (freeze = $h‍_a)]],["generatorNext", [$h‍_a => (generatorNext = $h‍_a)]],["generatorThrow", [$h‍_a => (generatorThrow = $h‍_a)]],["getOwnPropertyNames", [$h‍_a => (getOwnPropertyNames = $h‍_a)]],["isObject", [$h‍_a => (isObject = $h‍_a)]],["mapGet", [$h‍_a => (mapGet = $h‍_a)]],["mapHas", [$h‍_a => (mapHas = $h‍_a)]],["mapSet", [$h‍_a => (mapSet = $h‍_a)]],["promiseThen", [$h‍_a => (promiseThen = $h‍_a)]],["setAdd", [$h‍_a => (setAdd = $h‍_a)]],["values", [$h‍_a => (values = $h‍_a)]],["weakmapGet", [$h‍_a => (weakmapGet = $h‍_a)]],["weakmapHas", [$h‍_a => (weakmapHas = $h‍_a)]]]],["./error/assert.js", [["makeError", [$h‍_a => (makeError = $h‍_a)]],["annotateError", [$h‍_a => (annotateError = $h‍_a)]],["q", [$h‍_a => (q = $h‍_a)]],["b", [$h‍_a => (b = $h‍_a)]],["X", [$h‍_a => (X = $h‍_a)]]]]]);   
 
 
 
@@ -7896,18 +9337,11 @@ function                tameErrorConstructor(
 
 
 
-
-
-
-
-
-
-
-const { Fail, details: d, quote: q}=   assert;
 
 const noop=  ()=>  { };
 
-async function asyncTrampoline(generatorFunc, args, errorWrapper) {
+const asyncTrampoline=  async( generatorFunc, args, errorWrapper)=>  {
+  await null;
   const iterator=  generatorFunc(...args);
   let result=  generatorNext(iterator);
   while( !result.done) {
@@ -7920,9 +9354,9 @@ async function asyncTrampoline(generatorFunc, args, errorWrapper) {
      }
    }
   return result.value;
- }
+ };
 
-function syncTrampoline(generatorFunc, args) {
+const syncTrampoline=  (generatorFunc, args)=>  {
   const iterator=  generatorFunc(...args);
   let result=  generatorNext(iterator);
   while( !result.done) {
@@ -7933,7 +9367,8 @@ function syncTrampoline(generatorFunc, args) {
      }
    }
   return result.value;
- }
+ };
+
 // `makeAlias` constructs compartment specifier tuples for the `aliases`
 // private field of compartments.
 // These aliases allow a compartment to alias an internal module specifier to a
@@ -7941,10 +9376,7 @@ function syncTrampoline(generatorFunc, args) {
 // aliases.
 // Both are facilitated by the moduleMap Compartment constructor option.
 const        makeAlias=  (compartment, specifier)=>
-  freeze({
-    compartment,
-    specifier});
-
+  freeze({ compartment, specifier});
 
 // `resolveAll` pre-computes resolutions of all imports within the compartment
 // in which a module was loaded.
@@ -7957,31 +9389,28 @@ $h‍_once.makeAlias(makeAlias);const resolveAll=(imports,resolveHook,fullReferr
   return freeze(resolvedImports);
  };
 
-const loadRecord=  (
+const loadModuleSource=  (
   compartmentPrivateFields,
   moduleAliases,
   compartment,
   moduleSpecifier,
-  staticModuleRecord,
+  moduleSource,
   enqueueJob,
   selectImplementation,
   moduleLoads,
   importMeta)=>
      {
-  const { resolveHook, moduleRecords}=   weakmapGet(
-    compartmentPrivateFields,
-    compartment);
-
+  const { resolveHook}=   weakmapGet(compartmentPrivateFields, compartment);
 
   // resolve all imports relative to this referrer module.
   const resolvedImports=  resolveAll(
-    staticModuleRecord.imports,
+    moduleSource.imports,
     resolveHook,
     moduleSpecifier);
 
   const moduleRecord=  freeze({
     compartment,
-    staticModuleRecord,
+    moduleSource,
     moduleSpecifier,
     resolvedImports,
     importMeta});
@@ -8002,8 +9431,6 @@ const loadRecord=  (
 
    }
 
-  // Memoize.
-  mapSet(moduleRecords, moduleSpecifier, moduleRecord);
   return moduleRecord;
  };
 
@@ -8016,101 +9443,279 @@ function* loadWithoutErrorAnnotation(
   selectImplementation,
   moduleLoads)
   {
-  const { importHook, importNowHook, moduleMap, moduleMapHook, moduleRecords}=
-    weakmapGet(compartmentPrivateFields, compartment);
-
-  // Follow moduleMap, or moduleMapHook if present.
-  let aliasNamespace=  moduleMap[moduleSpecifier];
-  if( aliasNamespace===  undefined&&  moduleMapHook!==  undefined) {
-    aliasNamespace=  moduleMapHook(moduleSpecifier);
-   }
-  if( typeof aliasNamespace===  'string') {
-    // eslint-disable-next-line @endo/no-polymorphic-call
-    assert.fail(
-      d `Cannot map module ${q(moduleSpecifier)} to ${q(
-        aliasNamespace)
-        } in parent compartment, not yet implemented`,
-      TypeError);
-
-   }else if( aliasNamespace!==  undefined) {
-    const alias=  weakmapGet(moduleAliases, aliasNamespace);
-    if( alias===  undefined) {
-      // eslint-disable-next-line @endo/no-polymorphic-call
-      assert.fail(
-        d `Cannot map module ${q(
-          moduleSpecifier)
-          } because the value is not a module exports namespace, or is from another realm`,
-        ReferenceError);
-
-     }
-    // Behold: recursion.
-    // eslint-disable-next-line no-use-before-define
-    const aliasRecord=  yield memoizedLoadWithErrorAnnotation(
-      compartmentPrivateFields,
-      moduleAliases,
-      alias.compartment,
-      alias.specifier,
-      enqueueJob,
-      selectImplementation,
-      moduleLoads);
-
-    mapSet(moduleRecords, moduleSpecifier, aliasRecord);
-    return aliasRecord;
-   }
+  const {
+    importHook,
+    importNowHook,
+    moduleMap,
+    moduleMapHook,
+    moduleRecords,
+    parentCompartment}=
+      weakmapGet(compartmentPrivateFields, compartment);
 
   if( mapHas(moduleRecords, moduleSpecifier)) {
     return mapGet(moduleRecords, moduleSpecifier);
    }
 
-  const staticModuleRecord=  yield selectImplementation(
-    importHook,
-    importNowHook)(
-    moduleSpecifier);
+  // Follow moduleMap, or moduleMapHook if present.
+  let moduleDescriptor=  moduleMap[moduleSpecifier];
+  if( moduleDescriptor===  undefined&&  moduleMapHook!==  undefined) {
+    moduleDescriptor=  moduleMapHook(moduleSpecifier);
+   }
+  if( moduleDescriptor===  undefined) {
+    const moduleHook=  selectImplementation(importHook, importNowHook);
+    if( moduleHook===  undefined) {
+      const moduleHookName=  selectImplementation(
+        'importHook',
+        'importNowHook');
 
-  if( staticModuleRecord===  null||  typeof staticModuleRecord!==  'object') {
-    Fail `importHook must return a promise for an object, for module ${q(
-      moduleSpecifier)
-      } in compartment ${q(compartment.name)}`;
+      throw makeError(
+        X `${b(moduleHookName)} needed to load module ${q(
+          moduleSpecifier)
+          } in compartment ${q(compartment.name)}`);
+
+     }
+    moduleDescriptor=  moduleHook(moduleSpecifier);
+    // Uninitialized module namespaces throw if we attempt to coerce them into
+    // promises.
+    if( !weakmapHas(moduleAliases, moduleDescriptor)) {
+      moduleDescriptor=  yield moduleDescriptor;
+     }
    }
 
-  // check if record is a RedirectStaticModuleInterface
-  if( staticModuleRecord.specifier!==  undefined) {
-    // check if this redirect with an explicit record
-    if( staticModuleRecord.record!==  undefined) {
-      // ensure expected record shape
-      if( staticModuleRecord.compartment!==  undefined) {
-        throw TypeError(
-          'Cannot redirect to an explicit record with a specified compartment');
+  if( typeof moduleDescriptor===  'string') {
+    // eslint-disable-next-line @endo/no-polymorphic-call
+    throw makeError(
+      X `Cannot map module ${q(moduleSpecifier)} to ${q(
+        moduleDescriptor)
+        } in parent compartment, use {source} module descriptor`,
+      TypeError);
+
+   }else if( isObject(moduleDescriptor)) {
+    // In this shim (and not in XS, and not in the standard we imagine), we
+    // allow a module namespace object to stand in for a module descriptor that
+    // describes its original {compartment, specifier} so that it can be used
+    // to create a link.
+    let aliasDescriptor=  weakmapGet(moduleAliases, moduleDescriptor);
+    if( aliasDescriptor!==  undefined) {
+      moduleDescriptor=  aliasDescriptor;
+     }
+
+    if( moduleDescriptor.namespace!==  undefined) {
+      // { namespace: string, compartment?: Compartment }
+      // Namespace module descriptors link to a module instance.
+
+      if( typeof moduleDescriptor.namespace===  'string') {
+        // The default compartment is the *parent*, not this child compartment.
+        // This is a difference from the legacy {specifier, compartment} module
+        // descriptor.
+        const {
+          compartment: aliasCompartment=  parentCompartment,
+          namespace: aliasSpecifier}=
+            moduleDescriptor;
+        if(
+          !isObject(aliasCompartment)||
+          !weakmapHas(compartmentPrivateFields, aliasCompartment))
+          {
+          throw makeError(
+            X `Invalid compartment in module descriptor for specifier ${q(moduleSpecifier)} in compartment ${q(compartment.name)}`);
+
+         }
+        // Behold: recursion.
+        // eslint-disable-next-line no-use-before-define
+        const aliasRecord=  yield memoizedLoadWithErrorAnnotation(
+          compartmentPrivateFields,
+          moduleAliases,
+          aliasCompartment,
+          aliasSpecifier,
+          enqueueJob,
+          selectImplementation,
+          moduleLoads);
+
+        mapSet(moduleRecords, moduleSpecifier, aliasRecord);
+        return aliasRecord;
+       }
+
+      // All remaining objects must either be a module namespace, or be
+      // promoted into a module namespace with a virtual module source.
+      if( isObject(moduleDescriptor.namespace)) {
+        const { namespace}=   moduleDescriptor;
+        // Brand-check SES shim module exports namespaces:
+        aliasDescriptor=  weakmapGet(moduleAliases, namespace);
+        if( aliasDescriptor!==  undefined) {
+          moduleDescriptor=  aliasDescriptor;
+          // Fall through to processing the resulting {compartment, specifier}
+          // alias.
+         }else {
+          // Promote an arbitrary object to a module namespace with a virtual
+          // module source.
+          // { namespace: Object }
+          const exports=  getOwnPropertyNames(namespace);
+          /** @type {import('../types.js').VirtualModuleSource} */
+          const moduleSource=  {
+            imports: [],
+            exports,
+            execute(env) {
+              for( const name of exports) {
+                env[name]=  namespace[name];
+               }
+             }};
+
+          const importMeta=  undefined;
+          const moduleRecord=  loadModuleSource(
+            compartmentPrivateFields,
+            moduleAliases,
+            compartment,
+            moduleSpecifier,
+            moduleSource,
+            enqueueJob,
+            selectImplementation,
+            moduleLoads,
+            importMeta);
+
+          mapSet(moduleRecords, moduleSpecifier, moduleRecord);
+          return moduleRecord;
+         }
+       }else {
+        throw makeError(
+          X `Invalid compartment in module descriptor for specifier ${q(moduleSpecifier)} in compartment ${q(compartment.name)}`);
 
        }
+     }
+
+    if( moduleDescriptor.source!==  undefined) {
+      // Module source descriptors create an instance from a module source.
+      // The descriptor may contain the module source, or refer to a source
+      // loaded in a particular compartment.
+
+      if( typeof moduleDescriptor.source===  'string') {
+        // { source: string, importMeta?, specifier?: string, compartment? }
+        // A string source is the specifier for a different module source.
+        // That source may come from this compartment's parent (default), or
+        // from a specified compartment, and the specified compartment may be
+        // this compartment to make a duplicate.
+
+        const {
+          source: loaderSpecifier,
+          specifier: instanceSpecifier=  moduleSpecifier,
+          compartment: loaderCompartment=  parentCompartment,
+          importMeta=  undefined}=
+            moduleDescriptor;
+
+        // Induce the compartment, possibly a different compartment
+        // to load a module source.
+
+        // Behold: recursion.
+        // eslint-disable-next-line no-use-before-define
+        const loaderRecord=  yield memoizedLoadWithErrorAnnotation(
+          compartmentPrivateFields,
+          moduleAliases,
+          loaderCompartment,
+          loaderSpecifier,
+          enqueueJob,
+          selectImplementation,
+          moduleLoads);
+
+
+        // Extract the source of the module from the loader compartment's
+        // record.
+        const { moduleSource}=   loaderRecord;
+
+        // Instantiate that source in our own compartment, possibly with a
+        // different specifier for resolving its own imports.
+        const moduleRecord=  loadModuleSource(
+          compartmentPrivateFields,
+          moduleAliases,
+          compartment,
+          instanceSpecifier,
+          moduleSource,
+          enqueueJob,
+          selectImplementation,
+          moduleLoads,
+          importMeta);
+
+        mapSet(moduleRecords, moduleSpecifier, moduleRecord);
+        return moduleRecord;
+       }else {
+        // { source: ModuleSource, importMeta?, specifier?: string }
+        // We assume all non-string module sources are any of the supported
+        // kinds of module source: PrecompiledModuleSource,
+        // VirtualModuleSource, or a native ModuleSource.
+
+        const {
+          source: moduleSource,
+          specifier: aliasSpecifier=  moduleSpecifier,
+          importMeta}=
+            moduleDescriptor;
+
+        const aliasRecord=  loadModuleSource(
+          compartmentPrivateFields,
+          moduleAliases,
+          compartment,
+          aliasSpecifier,
+          moduleSource,
+          enqueueJob,
+          selectImplementation,
+          moduleLoads,
+          importMeta);
+
+        mapSet(moduleRecords, moduleSpecifier, aliasRecord);
+        return aliasRecord;
+       }
+     }
+
+    if( moduleDescriptor.archive!==  undefined) {
+      // { archive: Archive, path: string }
+      // We do not support this XS-native module descriptor.
+      throw makeError(
+        X `Unsupported archive module descriptor for specifier ${q(moduleSpecifier)} in compartment ${q(compartment.name)}`);
+
+     }
+
+    // { record, specifier?, compartment?, importMeta? }
+    // A (legacy) module descriptor for when we find the module source (record)
+    // but at a different specifier than requested.
+    // Providing this {specifier, record} descriptor serves as an ergonomic
+    // short-hand for stashing the record, returning a {compartment, specifier}
+    // reference, bouncing the module hook, then producing the source (record)
+    // when module hook receives the response specifier.
+    if( moduleDescriptor.record!==  undefined) {
       const {
         compartment: aliasCompartment=  compartment,
         specifier: aliasSpecifier=  moduleSpecifier,
-        record: aliasModuleRecord,
+        record: moduleSource,
         importMeta}=
-          staticModuleRecord;
+          moduleDescriptor;
 
-      const aliasRecord=  loadRecord(
+      const aliasRecord=  loadModuleSource(
         compartmentPrivateFields,
         moduleAliases,
         aliasCompartment,
         aliasSpecifier,
-        aliasModuleRecord,
+        moduleSource,
         enqueueJob,
         selectImplementation,
         moduleLoads,
         importMeta);
 
       mapSet(moduleRecords, moduleSpecifier, aliasRecord);
+      mapSet(moduleRecords, aliasSpecifier, aliasRecord);
       return aliasRecord;
      }
 
-    // check if this redirect with an explicit compartment
-    if( staticModuleRecord.compartment!==  undefined) {
-      // ensure expected record shape
-      if( staticModuleRecord.importMeta!==  undefined) {
-        throw TypeError(
-          'Cannot redirect to an implicit record with a specified importMeta');
+    // { specifier: string, compartment: Compartment }
+    // A (legacy) module descriptor that describes a link to a module instance
+    // in a specified compartment.
+    if(
+      moduleDescriptor.compartment!==  undefined&&
+      moduleDescriptor.specifier!==  undefined)
+      {
+      if(
+        !isObject(moduleDescriptor.compartment)||
+        !weakmapHas(compartmentPrivateFields, moduleDescriptor.compartment)||
+        typeof moduleDescriptor.specifier!==  'string')
+        {
+        throw makeError(
+          X `Invalid compartment in module descriptor for specifier ${q(moduleSpecifier)} in compartment ${q(compartment.name)}`);
 
        }
       // Behold: recursion.
@@ -8118,8 +9723,8 @@ function* loadWithoutErrorAnnotation(
       const aliasRecord=  yield memoizedLoadWithErrorAnnotation(
         compartmentPrivateFields,
         moduleAliases,
-        staticModuleRecord.compartment,
-        staticModuleRecord.specifier,
+        moduleDescriptor.compartment,
+        moduleDescriptor.specifier,
         enqueueJob,
         selectImplementation,
         moduleLoads);
@@ -8128,19 +9733,29 @@ function* loadWithoutErrorAnnotation(
       return aliasRecord;
      }
 
-    throw TypeError('Unnexpected RedirectStaticModuleInterface record shape');
+    // A (legacy) behavior: If we do not recognize the module descriptor as a
+    // module descriptor, we assume that it is a module source (record):
+    const moduleSource=  moduleDescriptor;
+    const moduleRecord=  loadModuleSource(
+      compartmentPrivateFields,
+      moduleAliases,
+      compartment,
+      moduleSpecifier,
+      moduleSource,
+      enqueueJob,
+      selectImplementation,
+      moduleLoads);
+
+    // Memoize.
+    mapSet(moduleRecords, moduleSpecifier, moduleRecord);
+    return moduleRecord;
+   }else {
+    throw makeError(
+      X `module descriptor must be a string or object for specifier ${q(
+        moduleSpecifier)
+        } in compartment ${q(compartment.name)}`);
+
    }
-
-  return loadRecord(
-    compartmentPrivateFields,
-    moduleAliases,
-    compartment,
-    moduleSpecifier,
-    staticModuleRecord,
-    enqueueJob,
-    selectImplementation,
-    moduleLoads);
-
  }
 
 const memoizedLoadWithErrorAnnotation=  (
@@ -8181,9 +9796,9 @@ const memoizedLoadWithErrorAnnotation=  (
 
     (error)=>{
       // eslint-disable-next-line @endo/no-polymorphic-call
-      assert.note(
+      annotateError(
         error,
-        d `${error.message}, loading ${q(moduleSpecifier)} in compartment ${q(
+        X `${error.message}, loading ${q(moduleSpecifier)} in compartment ${q(
           compartmentName)
           }`);
 
@@ -8196,7 +9811,7 @@ const memoizedLoadWithErrorAnnotation=  (
   return moduleLoading;
  };
 
-function asyncJobQueue() {
+const asyncJobQueue=  ()=>  {
   /** @type {Set<Promise<undefined>>} */
   const pendingJobs=  new Set();
   /** @type {Array<Error>} */
@@ -8223,6 +9838,7 @@ function asyncJobQueue() {
    * @returns {Promise<Array<Error>>}
    */
   const drainQueue=  async()=>   {
+    await null;
     for( const job of pendingJobs) {
       // eslint-disable-next-line no-await-in-loop
       await job;
@@ -8230,14 +9846,14 @@ function asyncJobQueue() {
     return errors;
    };
   return { enqueueJob, drainQueue};
- }
+ };
 
 /**
  * @param {object} options
  * @param {Array<Error>} options.errors
  * @param {string} options.errorPrefix
  */
-function throwAggregateError({ errors, errorPrefix})  {
+const throwAggregateError=  ({ errors, errorPrefix})=>   {
   // Throw an aggregate error if there were any errors.
   if( errors.length>  0) {
     const verbose=
@@ -8249,13 +9865,13 @@ function throwAggregateError({ errors, errorPrefix})  {
         }`);
 
    }
- }
+ };
 
 const preferSync=  (_asyncImpl, syncImpl)=>  syncImpl;
 const preferAsync=  (asyncImpl, _syncImpl)=>  asyncImpl;
 
 /*
- * `load` asynchronously gathers the `StaticModuleRecord`s for a module and its
+ * `load` asynchronously gathers the module records for a module and its
  * transitive dependencies.
  * The module records refer to each other by a reference to the dependency's
  * compartment and the specifier of the module within its own compartment.
@@ -8299,8 +9915,8 @@ const        load=  async(
  };
 
 /*
- * `loadNow` synchronously gathers the `StaticModuleRecord`s for a module and its
- * transitive dependencies.
+ * `loadNow` synchronously gathers the module records for a specified module
+ * and its transitive dependencies.
  * The module records refer to each other by a reference to the dependency's
  * compartment and the specifier of the module within its own compartment.
  * This graph is then ready to be synchronously linked and executed.
@@ -8675,9 +10291,9 @@ const        compartmentEvaluate=  (compartmentFields, source, options)=>  {
 
 const { quote: q}=   assert;
 
-const        makeThirdPartyModuleInstance=  (
+const        makeVirtualModuleInstance=  (
   compartmentPrivateFields,
-  staticModuleRecord,
+  moduleSource,
   compartment,
   moduleAliases,
   moduleSpecifier,
@@ -8692,16 +10308,16 @@ const        makeThirdPartyModuleInstance=  (
 
   const notifiers=  create(null);
 
-  if( staticModuleRecord.exports) {
+  if( moduleSource.exports) {
     if(
-      !isArray(staticModuleRecord.exports)||
-      arraySome(staticModuleRecord.exports, (name)=>typeof name!==  'string'))
+      !isArray(moduleSource.exports)||
+      arraySome(moduleSource.exports, (name)=>typeof name!==  'string'))
       {
       throw TypeError(
-         `SES third-party static module record "exports" property must be an array of strings for module ${moduleSpecifier}`);
+         `SES virtual module source "exports" property must be an array of strings for module ${moduleSpecifier}`);
 
      }
-    arrayForEach(staticModuleRecord.exports, (name)=>{
+    arrayForEach(moduleSource.exports, (name)=>{
       let value=  exportsTarget[name];
       const updaters=  [];
 
@@ -8747,11 +10363,7 @@ const        makeThirdPartyModuleInstance=  (
         localState.activated=  true;
         try {
           // eslint-disable-next-line @endo/no-polymorphic-call
-          staticModuleRecord.execute(
-            exportsTarget,
-            compartment,
-            resolvedImports);
-
+          moduleSource.execute(exportsTarget, compartment, resolvedImports);
          }catch( err) {
           localState.errorFromExecute=  err;
           throw err;
@@ -8768,7 +10380,7 @@ const        makeThirdPartyModuleInstance=  (
 // an idempotent execute function.
 // The module exports namespace is a proxy to the proxied exports namespace
 // that the execution of the module instance populates.
-$h‍_once.makeThirdPartyModuleInstance(makeThirdPartyModuleInstance);const makeModuleInstance=(
+$h‍_once.makeVirtualModuleInstance(makeVirtualModuleInstance);const makeModuleInstance=(
   privateFields,
   moduleAliases,
   moduleRecord,
@@ -8777,7 +10389,7 @@ $h‍_once.makeThirdPartyModuleInstance(makeThirdPartyModuleInstance);const make
   const {
     compartment,
     moduleSpecifier,
-    staticModuleRecord,
+    moduleSource,
     importMeta: moduleRecordMeta}=
       moduleRecord;
   const {
@@ -8788,7 +10400,7 @@ $h‍_once.makeThirdPartyModuleInstance(makeThirdPartyModuleInstance);const make
     __reexportMap__: reexportMap=  {},
     __needsImportMeta__: needsImportMeta=  false,
     __syncModuleFunctor__}=
-      staticModuleRecord;
+      moduleSource;
 
   const compartmentFields=  weakmapGet(privateFields, compartment);
 
@@ -9140,15 +10752,7 @@ $h‍_once.makeThirdPartyModuleInstance(makeThirdPartyModuleInstance);const make
 })()
 ,
 // === functors[43] ===
-({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,   importMeta: $h‍____meta, }) => (function () { 'use strict';   let assert,makeModuleInstance,makeThirdPartyModuleInstance,Map,ReferenceError,TypeError,entries,isArray,isObject,mapGet,mapHas,mapSet,weakmapGet;$h‍_imports([["./error/assert.js", [["assert", [$h‍_a => (assert = $h‍_a)]]]],["./module-instance.js", [["makeModuleInstance", [$h‍_a => (makeModuleInstance = $h‍_a)]],["makeThirdPartyModuleInstance", [$h‍_a => (makeThirdPartyModuleInstance = $h‍_a)]]]],["./commons.js", [["Map", [$h‍_a => (Map = $h‍_a)]],["ReferenceError", [$h‍_a => (ReferenceError = $h‍_a)]],["TypeError", [$h‍_a => (TypeError = $h‍_a)]],["entries", [$h‍_a => (entries = $h‍_a)]],["isArray", [$h‍_a => (isArray = $h‍_a)]],["isObject", [$h‍_a => (isObject = $h‍_a)]],["mapGet", [$h‍_a => (mapGet = $h‍_a)]],["mapHas", [$h‍_a => (mapHas = $h‍_a)]],["mapSet", [$h‍_a => (mapSet = $h‍_a)]],["weakmapGet", [$h‍_a => (weakmapGet = $h‍_a)]]]]]);   
-
-
-
-
-
-
-
-
+({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,   importMeta: $h‍____meta, }) => (function () { 'use strict';   let assert,makeModuleInstance,makeVirtualModuleInstance,Map,ReferenceError,TypeError,entries,isArray,isObject,mapGet,mapHas,mapSet,weakmapGet;$h‍_imports([["./error/assert.js", [["assert", [$h‍_a => (assert = $h‍_a)]]]],["./module-instance.js", [["makeModuleInstance", [$h‍_a => (makeModuleInstance = $h‍_a)]],["makeVirtualModuleInstance", [$h‍_a => (makeVirtualModuleInstance = $h‍_a)]]]],["./commons.js", [["Map", [$h‍_a => (Map = $h‍_a)]],["ReferenceError", [$h‍_a => (ReferenceError = $h‍_a)]],["TypeError", [$h‍_a => (TypeError = $h‍_a)]],["entries", [$h‍_a => (entries = $h‍_a)]],["isArray", [$h‍_a => (isArray = $h‍_a)]],["isObject", [$h‍_a => (isObject = $h‍_a)]],["mapGet", [$h‍_a => (mapGet = $h‍_a)]],["mapHas", [$h‍_a => (mapHas = $h‍_a)]],["mapSet", [$h‍_a => (mapSet = $h‍_a)]],["weakmapGet", [$h‍_a => (weakmapGet = $h‍_a)]]]]]);   
 
 
 
@@ -9203,56 +10807,50 @@ const        link=  (
   return instantiate(compartmentPrivateFields, moduleAliases, moduleRecord);
  };$h‍_once.link(link);
 
-function isPrecompiled(staticModuleRecord) {
-  return typeof staticModuleRecord.__syncModuleProgram__===  'string';
+function mayBePrecompiledModuleSource(moduleSource) {
+  return typeof moduleSource.__syncModuleProgram__===  'string';
  }
 
-function validatePrecompiledStaticModuleRecord(
-  staticModuleRecord,
-  moduleSpecifier)
-  {
-  const { __fixedExportMap__, __liveExportMap__}=   staticModuleRecord;
+function validatePrecompiledModuleSource(moduleSource, moduleSpecifier) {
+  const { __fixedExportMap__, __liveExportMap__}=   moduleSource;
   isObject(__fixedExportMap__)||
-    Fail `Property '__fixedExportMap__' of a precompiled module record must be an object, got ${q(
+    Fail `Property '__fixedExportMap__' of a precompiled module source must be an object, got ${q(
       __fixedExportMap__)
       }, for module ${q(moduleSpecifier)}`;
   isObject(__liveExportMap__)||
-    Fail `Property '__liveExportMap__' of a precompiled module record must be an object, got ${q(
+    Fail `Property '__liveExportMap__' of a precompiled module source must be an object, got ${q(
       __liveExportMap__)
       }, for module ${q(moduleSpecifier)}`;
  }
 
-function isThirdParty(staticModuleRecord) {
-  return typeof staticModuleRecord.execute===  'function';
+function mayBeVirtualModuleSource(moduleSource) {
+  return typeof moduleSource.execute===  'function';
  }
 
-function validateThirdPartyStaticModuleRecord(
-  staticModuleRecord,
-  moduleSpecifier)
-  {
-  const { exports}=   staticModuleRecord;
+function validateVirtualModuleSource(moduleSource, moduleSpecifier) {
+  const { exports}=   moduleSource;
   isArray(exports)||
-    Fail `Property 'exports' of a third-party static module record must be an array, got ${q(
+    Fail `Property 'exports' of a third-party module source must be an array, got ${q(
       exports)
       }, for module ${q(moduleSpecifier)}`;
  }
 
-function validateStaticModuleRecord(staticModuleRecord, moduleSpecifier) {
-  isObject(staticModuleRecord)||
-    Fail `Static module records must be of type object, got ${q(
-      staticModuleRecord)
+function validateModuleSource(moduleSource, moduleSpecifier) {
+  isObject(moduleSource)||
+    Fail `Module sources must be of type object, got ${q(
+      moduleSource)
       }, for module ${q(moduleSpecifier)}`;
-  const { imports, exports, reexports=  []}=   staticModuleRecord;
+  const { imports, exports, reexports=  []}=   moduleSource;
   isArray(imports)||
-    Fail `Property 'imports' of a static module record must be an array, got ${q(
+    Fail `Property 'imports' of a module source must be an array, got ${q(
       imports)
       }, for module ${q(moduleSpecifier)}`;
   isArray(exports)||
-    Fail `Property 'exports' of a precompiled module record must be an array, got ${q(
+    Fail `Property 'exports' of a precompiled module source must be an array, got ${q(
       exports)
       }, for module ${q(moduleSpecifier)}`;
   isArray(reexports)||
-    Fail `Property 'reexports' of a precompiled module record must be an array if present, got ${q(
+    Fail `Property 'reexports' of a precompiled module source must be an array if present, got ${q(
       reexports)
       }, for module ${q(moduleSpecifier)}`;
  }
@@ -9262,7 +10860,7 @@ const        instantiate=  (
   moduleAliases,
   moduleRecord)=>
      {
-  const { compartment, moduleSpecifier, resolvedImports, staticModuleRecord}=
+  const { compartment, moduleSpecifier, resolvedImports, moduleSource}=
     moduleRecord;
   const { instances}=   weakmapGet(compartmentPrivateFields, compartment);
 
@@ -9271,23 +10869,23 @@ const        instantiate=  (
     return mapGet(instances, moduleSpecifier);
    }
 
-  validateStaticModuleRecord(staticModuleRecord, moduleSpecifier);
+  validateModuleSource(moduleSource, moduleSpecifier);
 
   const importedInstances=  new Map();
   let moduleInstance;
-  if( isPrecompiled(staticModuleRecord)) {
-    validatePrecompiledStaticModuleRecord(staticModuleRecord, moduleSpecifier);
+  if( mayBePrecompiledModuleSource(moduleSource)) {
+    validatePrecompiledModuleSource(moduleSource, moduleSpecifier);
     moduleInstance=  makeModuleInstance(
       compartmentPrivateFields,
       moduleAliases,
       moduleRecord,
       importedInstances);
 
-   }else if( isThirdParty(staticModuleRecord)) {
-    validateThirdPartyStaticModuleRecord(staticModuleRecord, moduleSpecifier);
-    moduleInstance=  makeThirdPartyModuleInstance(
+   }else if( mayBeVirtualModuleSource(moduleSource)) {
+    validateVirtualModuleSource(moduleSource, moduleSpecifier);
+    moduleInstance=  makeVirtualModuleInstance(
       compartmentPrivateFields,
-      staticModuleRecord,
+      moduleSource,
       compartment,
       moduleAliases,
       moduleSpecifier,
@@ -9295,9 +10893,7 @@ const        instantiate=  (
 
    }else {
     throw TypeError(
-       `importHook must return a static module record, got ${q(
-        staticModuleRecord)
-        }`);
+       `importHook must provide a module source, got ${q(moduleSource)}`);
 
    }
 
@@ -9320,7 +10916,7 @@ const        instantiate=  (
 })()
 ,
 // === functors[44] ===
-({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,   importMeta: $h‍____meta, }) => (function () { 'use strict';   let Map,ReferenceError,TypeError,WeakMap,assign,defineProperties,entries,promiseThen,toStringTagSymbol,weakmapGet,weakmapSet,setGlobalObjectSymbolUnscopables,setGlobalObjectConstantProperties,setGlobalObjectMutableProperties,setGlobalObjectEvaluators,sharedGlobalPropertyNames,load,loadNow,link,getDeferredExports,assert,compartmentEvaluate,makeSafeEvaluator;$h‍_imports([["./commons.js", [["Map", [$h‍_a => (Map = $h‍_a)]],["ReferenceError", [$h‍_a => (ReferenceError = $h‍_a)]],["TypeError", [$h‍_a => (TypeError = $h‍_a)]],["WeakMap", [$h‍_a => (WeakMap = $h‍_a)]],["assign", [$h‍_a => (assign = $h‍_a)]],["defineProperties", [$h‍_a => (defineProperties = $h‍_a)]],["entries", [$h‍_a => (entries = $h‍_a)]],["promiseThen", [$h‍_a => (promiseThen = $h‍_a)]],["toStringTagSymbol", [$h‍_a => (toStringTagSymbol = $h‍_a)]],["weakmapGet", [$h‍_a => (weakmapGet = $h‍_a)]],["weakmapSet", [$h‍_a => (weakmapSet = $h‍_a)]]]],["./global-object.js", [["setGlobalObjectSymbolUnscopables", [$h‍_a => (setGlobalObjectSymbolUnscopables = $h‍_a)]],["setGlobalObjectConstantProperties", [$h‍_a => (setGlobalObjectConstantProperties = $h‍_a)]],["setGlobalObjectMutableProperties", [$h‍_a => (setGlobalObjectMutableProperties = $h‍_a)]],["setGlobalObjectEvaluators", [$h‍_a => (setGlobalObjectEvaluators = $h‍_a)]]]],["./permits.js", [["sharedGlobalPropertyNames", [$h‍_a => (sharedGlobalPropertyNames = $h‍_a)]]]],["./module-load.js", [["load", [$h‍_a => (load = $h‍_a)]],["loadNow", [$h‍_a => (loadNow = $h‍_a)]]]],["./module-link.js", [["link", [$h‍_a => (link = $h‍_a)]]]],["./module-proxy.js", [["getDeferredExports", [$h‍_a => (getDeferredExports = $h‍_a)]]]],["./error/assert.js", [["assert", [$h‍_a => (assert = $h‍_a)]]]],["./compartment-evaluate.js", [["compartmentEvaluate", [$h‍_a => (compartmentEvaluate = $h‍_a)]]]],["./make-safe-evaluator.js", [["makeSafeEvaluator", [$h‍_a => (makeSafeEvaluator = $h‍_a)]]]]]);   
+({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,   importMeta: $h‍____meta, }) => (function () { 'use strict';   let Map,TypeError,WeakMap,assign,defineProperties,promiseThen,toStringTagSymbol,weakmapGet,weakmapSet,setGlobalObjectSymbolUnscopables,setGlobalObjectConstantProperties,setGlobalObjectMutableProperties,setGlobalObjectEvaluators,assertEqual,sharedGlobalPropertyNames,load,loadNow,link,getDeferredExports,compartmentEvaluate,makeSafeEvaluator;$h‍_imports([["./commons.js", [["Map", [$h‍_a => (Map = $h‍_a)]],["TypeError", [$h‍_a => (TypeError = $h‍_a)]],["WeakMap", [$h‍_a => (WeakMap = $h‍_a)]],["assign", [$h‍_a => (assign = $h‍_a)]],["defineProperties", [$h‍_a => (defineProperties = $h‍_a)]],["promiseThen", [$h‍_a => (promiseThen = $h‍_a)]],["toStringTagSymbol", [$h‍_a => (toStringTagSymbol = $h‍_a)]],["weakmapGet", [$h‍_a => (weakmapGet = $h‍_a)]],["weakmapSet", [$h‍_a => (weakmapSet = $h‍_a)]]]],["./global-object.js", [["setGlobalObjectSymbolUnscopables", [$h‍_a => (setGlobalObjectSymbolUnscopables = $h‍_a)]],["setGlobalObjectConstantProperties", [$h‍_a => (setGlobalObjectConstantProperties = $h‍_a)]],["setGlobalObjectMutableProperties", [$h‍_a => (setGlobalObjectMutableProperties = $h‍_a)]],["setGlobalObjectEvaluators", [$h‍_a => (setGlobalObjectEvaluators = $h‍_a)]]]],["./error/assert.js", [["assertEqual", [$h‍_a => (assertEqual = $h‍_a)]]]],["./permits.js", [["sharedGlobalPropertyNames", [$h‍_a => (sharedGlobalPropertyNames = $h‍_a)]]]],["./module-load.js", [["load", [$h‍_a => (load = $h‍_a)]],["loadNow", [$h‍_a => (loadNow = $h‍_a)]]]],["./module-link.js", [["link", [$h‍_a => (link = $h‍_a)]]]],["./module-proxy.js", [["getDeferredExports", [$h‍_a => (getDeferredExports = $h‍_a)]]]],["./compartment-evaluate.js", [["compartmentEvaluate", [$h‍_a => (compartmentEvaluate = $h‍_a)]]]],["./make-safe-evaluator.js", [["makeSafeEvaluator", [$h‍_a => (makeSafeEvaluator = $h‍_a)]]]]]);   
 
 
 
@@ -9349,9 +10945,7 @@ const        instantiate=  (
 
 
 
-
-
-const { quote: q}=   assert;
+/** @import {ModuleDescriptor} from '../types.js' */
 
 // moduleAliases associates every public module exports namespace with its
 // corresponding compartment and specifier so they can be used to link modules
@@ -9363,19 +10957,6 @@ const moduleAliases=  new WeakMap();
 
 // privateFields captures the private state for each compartment.
 const privateFields=  new WeakMap();
-
-// Compartments do not need an importHook or resolveHook to be useful
-// as a vessel for evaluating programs.
-// However, any method that operates the module system will throw an exception
-// if these hooks are not available.
-const assertModuleHooks=  (compartment)=>{
-  const { importHook, resolveHook}=   weakmapGet(privateFields, compartment);
-  if( typeof importHook!==  'function'||  typeof resolveHook!==  'function') {
-    throw TypeError(
-      'Compartment must be constructed with an importHook and a resolveHook for it to be able to load modules');
-
-   }
- };
 
 const        InertCompartment=  function Compartment(
   _endowments=  {},
@@ -9433,8 +11014,6 @@ const        CompartmentPrototype=  {
       throw TypeError('first argument of module() must be a string');
      }
 
-    assertModuleHooks(this);
-
     const { exportsProxy}=   getDeferredExports(
       this,
       weakmapGet(privateFields, this),
@@ -9446,11 +11025,11 @@ const        CompartmentPrototype=  {
    },
 
         async import(specifier){
+    const { noNamespaceBox}=   weakmapGet(privateFields, this);
+
     if( typeof specifier!==  'string') {
       throw TypeError('first argument of import() must be a string');
      }
-
-    assertModuleHooks(this);
 
     return promiseThen(
       load(privateFields, moduleAliases, this, specifier),
@@ -9461,6 +11040,11 @@ const        CompartmentPrototype=  {
           /** @type {Compartment} */  this,
           specifier);
 
+        if( noNamespaceBox) {
+          return namespace;
+         }
+        // Legacy behavior: box the namespace object so that thenable modules
+        // do not get coerced into a promise accidentally.
         return { namespace};
        });
 
@@ -9471,8 +11055,6 @@ const        CompartmentPrototype=  {
       throw TypeError('first argument of load() must be a string');
      }
 
-    assertModuleHooks(this);
-
     return load(privateFields, moduleAliases, this, specifier);
    },
 
@@ -9481,7 +11063,6 @@ const        CompartmentPrototype=  {
       throw TypeError('first argument of importNow() must be a string');
      }
 
-    assertModuleHooks(this);
     loadNow(privateFields, moduleAliases, this, specifier);
     return compartmentImportNow(/** @type {Compartment} */  this,  specifier);
    }};
@@ -9508,16 +11089,67 @@ defineProperties(InertCompartment, {
  * @param {MakeCompartmentConstructor} targetMakeCompartmentConstructor
  * @param {Record<string, any>} intrinsics
  * @param {(object: object) => void} markVirtualizedNativeFunction
+ * @param {Compartment} [parentCompartment]
  * @returns {Compartment['constructor']}
  */
+
+// In order to facilitate migration from the deprecated signature
+// of the compartment constructor,
+//   new Compartent(globals?, modules?, options?)
+// to the new signature:
+//   new Compartment(options?)
+// where globals and modules are expressed in the options bag instead of
+// positional arguments, this function detects the temporary sigil __options__
+// on the first argument and coerces compartments arguments into a single
+// compartments object.
+const compartmentOptions=  (...args)=>  {
+  if( args.length===  0) {
+    return {};
+   }
+  if(
+    args.length===  1&&
+    typeof args[0]===  'object'&&
+    args[0]!==  null&&
+    '__options__'in  args[0])
+    {
+    const { __options__, ...options}=   args[0];
+    assert(
+      __options__===  true,
+       `Compartment constructor only supports true __options__ sigil, got ${__options__}`);
+
+    return options;
+   }else {
+    const [
+      globals=  /** @type {Map<string, any>} */  {},
+      modules=  /** @type {Map<string, ModuleDescriptor>} */  {},
+      options=  {}]=
+        args;
+    assertEqual(
+      options.modules,
+      undefined,
+       `Compartment constructor must receive either a module map argument or modules option, not both`);
+
+    assertEqual(
+      options.globals,
+      undefined,
+       `Compartment constructor must receive either globals argument or option, not both`);
+
+    return {
+      ...options,
+      globals,
+      modules};
+
+   }
+ };
 
 /** @type {MakeCompartmentConstructor} */
 const        makeCompartmentConstructor=  (
   targetMakeCompartmentConstructor,
   intrinsics,
-  markVirtualizedNativeFunction)=>
+  markVirtualizedNativeFunction,
+  parentCompartment=  undefined)=>
      {
-  function Compartment(endowments=  {}, moduleMap=  {}, options=  {}) {
+  function Compartment(...args) {
     if( new.target===  undefined) {
       throw TypeError(
         "Class constructor Compartment cannot be invoked without 'new'");
@@ -9529,13 +11161,18 @@ const        makeCompartmentConstructor=  (
       name=  '<unknown>',
       transforms=  [],
       __shimTransforms__=  [],
+      globals: endowmentsOption=  {},
+      modules: moduleMapOption=  {},
       resolveHook,
       importHook,
       importNowHook,
       moduleMapHook,
-      importMetaHook}=
-        options;
+      importMetaHook,
+      __noNamespaceBox__: noNamespaceBox=  false}=
+        compartmentOptions(...args);
     const globalTransforms=  [...transforms, ...__shimTransforms__];
+    const endowments=  { __proto__: null, ...endowmentsOption};
+    const moduleMap=  { __proto__: null, ...moduleMapOption};
 
     // Map<FullSpecifier, ModuleCompartmentRecord>
     const moduleRecords=  new Map();
@@ -9543,30 +11180,6 @@ const        makeCompartmentConstructor=  (
     const instances=  new Map();
     // Map<FullSpecifier, {ExportsProxy, ProxiedExports, activate()}>
     const deferredExports=  new Map();
-
-    // Validate given moduleMap.
-    // The module map gets translated on-demand in module-load.js and the
-    // moduleMap can be invalid in ways that cannot be detected in the
-    // constructor, but these checks allow us to throw early for a better
-    // developer experience.
-    for( const [specifier, aliasNamespace]of  entries(moduleMap||  {})) {
-      if( typeof aliasNamespace===  'string') {
-        // TODO implement parent module record retrieval.
-        throw TypeError(
-           `Cannot map module ${q(specifier)} to ${q(
-            aliasNamespace)
-            } in parent compartment`);
-
-       }else if( weakmapGet(moduleAliases, aliasNamespace)===  undefined) {
-        // TODO create and link a synthetic module instance from the given
-        // namespace object.
-        throw ReferenceError(
-           `Cannot map module ${q(
-            specifier)
-            } because it has no known compartment in this realm`);
-
-       }
-     }
 
     const globalObject=  {};
 
@@ -9589,6 +11202,7 @@ const        makeCompartmentConstructor=  (
       intrinsics,
       newGlobalPropertyNames: sharedGlobalPropertyNames,
       makeCompartmentConstructor: targetMakeCompartmentConstructor,
+      parentCompartment: this,
       markVirtualizedNativeFunction});
 
 
@@ -9615,7 +11229,9 @@ const        makeCompartmentConstructor=  (
       moduleRecords,
       __shimTransforms__,
       deferredExports,
-      instances});
+      instances,
+      parentCompartment,
+      noNamespaceBox});
 
    }
 
@@ -9770,7 +11386,11 @@ const        getAnonymousIntrinsics=  ()=>  {
 
     intrinsics['%WrapForValidIteratorPrototype%']=  getPrototypeOf(
       // eslint-disable-next-line @endo/no-polymorphic-call
-      globalThis.Iterator.from({ next() { }}));
+      globalThis.Iterator.from({
+        next() {
+          return { value: undefined};
+         }}));
+
 
    }
 
@@ -9793,6 +11413,9 @@ const        getAnonymousIntrinsics=  ()=>  {
 ({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,   importMeta: $h‍____meta, }) => (function () { 'use strict';   let TypeError,freeze;$h‍_imports([["./commons.js", [["TypeError", [$h‍_a => (TypeError = $h‍_a)]],["freeze", [$h‍_a => (freeze = $h‍_a)]]]]]);   
 
 
+/** @import {Harden} from '../types.js'; */
+
+/** @type {(safeHarden: Harden, hardenTaming: 'safe' | 'unsafe') => Harden} */
 const        tameHarden=  (safeHarden, hardenTaming)=>  {
   if( hardenTaming!==  'safe'&&  hardenTaming!==  'unsafe') {
     throw TypeError( `unrecognized fakeHardenOption ${hardenTaming}`);
@@ -9808,6 +11431,7 @@ const        tameHarden=  (safeHarden, hardenTaming)=>  {
   Object.isSealed=  ()=>  true;
   Reflect.isExtensible=  ()=>  false;
 
+  // @ts-expect-error secret property
   if( safeHarden.isFake) {
     // The "safe" hardener is already a fake hardener.
     // Just use it.
@@ -10102,7 +11726,40 @@ const        tameFauxDataProperties=  (intrinsics)=>{
 })()
 ,
 // === functors[49] ===
-({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,   importMeta: $h‍____meta, }) => (function () { 'use strict';   let getenv,FERAL_FUNCTION,FERAL_EVAL,TypeError,arrayFilter,globalThis,is,ownKeys,stringSplit,noEvalEvaluate,getOwnPropertyNames,getPrototypeOf,makeHardener,makeIntrinsicsCollector,whitelistIntrinsics,tameFunctionConstructors,tameDateConstructor,tameMathObject,tameRegExpConstructor,enablePropertyOverrides,tameLocaleMethods,setGlobalObjectConstantProperties,setGlobalObjectMutableProperties,setGlobalObjectEvaluators,makeSafeEvaluator,initialGlobalPropertyNames,tameFunctionToString,tameDomains,tameConsole,tameErrorConstructor,assert,makeAssert,getAnonymousIntrinsics,makeCompartmentConstructor,tameHarden,tameSymbolConstructor,tameFauxDataProperties;$h‍_imports([["@endo/env-options", [["getEnvironmentOption", [$h‍_a => (getenv = $h‍_a)]]]],["./commons.js", [["FERAL_FUNCTION", [$h‍_a => (FERAL_FUNCTION = $h‍_a)]],["FERAL_EVAL", [$h‍_a => (FERAL_EVAL = $h‍_a)]],["TypeError", [$h‍_a => (TypeError = $h‍_a)]],["arrayFilter", [$h‍_a => (arrayFilter = $h‍_a)]],["globalThis", [$h‍_a => (globalThis = $h‍_a)]],["is", [$h‍_a => (is = $h‍_a)]],["ownKeys", [$h‍_a => (ownKeys = $h‍_a)]],["stringSplit", [$h‍_a => (stringSplit = $h‍_a)]],["noEvalEvaluate", [$h‍_a => (noEvalEvaluate = $h‍_a)]],["getOwnPropertyNames", [$h‍_a => (getOwnPropertyNames = $h‍_a)]],["getPrototypeOf", [$h‍_a => (getPrototypeOf = $h‍_a)]]]],["./make-hardener.js", [["makeHardener", [$h‍_a => (makeHardener = $h‍_a)]]]],["./intrinsics.js", [["makeIntrinsicsCollector", [$h‍_a => (makeIntrinsicsCollector = $h‍_a)]]]],["./permits-intrinsics.js", [["default", [$h‍_a => (whitelistIntrinsics = $h‍_a)]]]],["./tame-function-constructors.js", [["default", [$h‍_a => (tameFunctionConstructors = $h‍_a)]]]],["./tame-date-constructor.js", [["default", [$h‍_a => (tameDateConstructor = $h‍_a)]]]],["./tame-math-object.js", [["default", [$h‍_a => (tameMathObject = $h‍_a)]]]],["./tame-regexp-constructor.js", [["default", [$h‍_a => (tameRegExpConstructor = $h‍_a)]]]],["./enable-property-overrides.js", [["default", [$h‍_a => (enablePropertyOverrides = $h‍_a)]]]],["./tame-locale-methods.js", [["default", [$h‍_a => (tameLocaleMethods = $h‍_a)]]]],["./global-object.js", [["setGlobalObjectConstantProperties", [$h‍_a => (setGlobalObjectConstantProperties = $h‍_a)]],["setGlobalObjectMutableProperties", [$h‍_a => (setGlobalObjectMutableProperties = $h‍_a)]],["setGlobalObjectEvaluators", [$h‍_a => (setGlobalObjectEvaluators = $h‍_a)]]]],["./make-safe-evaluator.js", [["makeSafeEvaluator", [$h‍_a => (makeSafeEvaluator = $h‍_a)]]]],["./permits.js", [["initialGlobalPropertyNames", [$h‍_a => (initialGlobalPropertyNames = $h‍_a)]]]],["./tame-function-tostring.js", [["tameFunctionToString", [$h‍_a => (tameFunctionToString = $h‍_a)]]]],["./tame-domains.js", [["tameDomains", [$h‍_a => (tameDomains = $h‍_a)]]]],["./error/tame-console.js", [["tameConsole", [$h‍_a => (tameConsole = $h‍_a)]]]],["./error/tame-error-constructor.js", [["default", [$h‍_a => (tameErrorConstructor = $h‍_a)]]]],["./error/assert.js", [["assert", [$h‍_a => (assert = $h‍_a)]],["makeAssert", [$h‍_a => (makeAssert = $h‍_a)]]]],["./get-anonymous-intrinsics.js", [["getAnonymousIntrinsics", [$h‍_a => (getAnonymousIntrinsics = $h‍_a)]]]],["./compartment.js", [["makeCompartmentConstructor", [$h‍_a => (makeCompartmentConstructor = $h‍_a)]]]],["./tame-harden.js", [["tameHarden", [$h‍_a => (tameHarden = $h‍_a)]]]],["./tame-symbol-constructor.js", [["tameSymbolConstructor", [$h‍_a => (tameSymbolConstructor = $h‍_a)]]]],["./tame-faux-data-properties.js", [["tameFauxDataProperties", [$h‍_a => (tameFauxDataProperties = $h‍_a)]]]]]);   
+({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,   importMeta: $h‍____meta, }) => (function () { 'use strict';   let defineProperty,iteratorPrototype,iteratorSymbol,objectHasOwnProperty;$h‍_imports([["./commons.js", [["defineProperty", [$h‍_a => (defineProperty = $h‍_a)]],["iteratorPrototype", [$h‍_a => (iteratorPrototype = $h‍_a)]],["iteratorSymbol", [$h‍_a => (iteratorSymbol = $h‍_a)]],["objectHasOwnProperty", [$h‍_a => (objectHasOwnProperty = $h‍_a)]]]]]);   
+
+
+
+
+
+
+const        tameRegeneratorRuntime=  ()=>  {
+  const iter=  iteratorPrototype[iteratorSymbol];
+  defineProperty(iteratorPrototype, iteratorSymbol, {
+    configurable: true,
+    get() {
+      return iter;
+     },
+    set(value) {
+      // ignore the assignment on IteratorPrototype
+      if( this===  iteratorPrototype) return;
+      if( objectHasOwnProperty(this, iteratorSymbol)) {
+        this[iteratorSymbol]=  value;
+       }
+      defineProperty(this, iteratorSymbol, {
+        value,
+        writable: true,
+        enumerable: true,
+        configurable: true});
+
+     }});
+
+ };$h‍_once.tameRegeneratorRuntime(tameRegeneratorRuntime);
+})()
+,
+// === functors[50] ===
+({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,   importMeta: $h‍____meta, }) => (function () { 'use strict';   let getenv,FERAL_FUNCTION,FERAL_EVAL,TypeError,arrayFilter,globalThis,is,ownKeys,stringSplit,noEvalEvaluate,getOwnPropertyNames,getPrototypeOf,makeHardener,makeIntrinsicsCollector,whitelistIntrinsics,tameFunctionConstructors,tameDateConstructor,tameMathObject,tameRegExpConstructor,enablePropertyOverrides,tameLocaleMethods,setGlobalObjectConstantProperties,setGlobalObjectMutableProperties,setGlobalObjectEvaluators,makeSafeEvaluator,initialGlobalPropertyNames,tameFunctionToString,tameDomains,tameConsole,tameErrorConstructor,assert,makeAssert,getAnonymousIntrinsics,makeCompartmentConstructor,tameHarden,tameSymbolConstructor,tameFauxDataProperties,tameRegeneratorRuntime;$h‍_imports([["@endo/env-options", [["getEnvironmentOption", [$h‍_a => (getenv = $h‍_a)]]]],["./commons.js", [["FERAL_FUNCTION", [$h‍_a => (FERAL_FUNCTION = $h‍_a)]],["FERAL_EVAL", [$h‍_a => (FERAL_EVAL = $h‍_a)]],["TypeError", [$h‍_a => (TypeError = $h‍_a)]],["arrayFilter", [$h‍_a => (arrayFilter = $h‍_a)]],["globalThis", [$h‍_a => (globalThis = $h‍_a)]],["is", [$h‍_a => (is = $h‍_a)]],["ownKeys", [$h‍_a => (ownKeys = $h‍_a)]],["stringSplit", [$h‍_a => (stringSplit = $h‍_a)]],["noEvalEvaluate", [$h‍_a => (noEvalEvaluate = $h‍_a)]],["getOwnPropertyNames", [$h‍_a => (getOwnPropertyNames = $h‍_a)]],["getPrototypeOf", [$h‍_a => (getPrototypeOf = $h‍_a)]]]],["./make-hardener.js", [["makeHardener", [$h‍_a => (makeHardener = $h‍_a)]]]],["./intrinsics.js", [["makeIntrinsicsCollector", [$h‍_a => (makeIntrinsicsCollector = $h‍_a)]]]],["./permits-intrinsics.js", [["default", [$h‍_a => (whitelistIntrinsics = $h‍_a)]]]],["./tame-function-constructors.js", [["default", [$h‍_a => (tameFunctionConstructors = $h‍_a)]]]],["./tame-date-constructor.js", [["default", [$h‍_a => (tameDateConstructor = $h‍_a)]]]],["./tame-math-object.js", [["default", [$h‍_a => (tameMathObject = $h‍_a)]]]],["./tame-regexp-constructor.js", [["default", [$h‍_a => (tameRegExpConstructor = $h‍_a)]]]],["./enable-property-overrides.js", [["default", [$h‍_a => (enablePropertyOverrides = $h‍_a)]]]],["./tame-locale-methods.js", [["default", [$h‍_a => (tameLocaleMethods = $h‍_a)]]]],["./global-object.js", [["setGlobalObjectConstantProperties", [$h‍_a => (setGlobalObjectConstantProperties = $h‍_a)]],["setGlobalObjectMutableProperties", [$h‍_a => (setGlobalObjectMutableProperties = $h‍_a)]],["setGlobalObjectEvaluators", [$h‍_a => (setGlobalObjectEvaluators = $h‍_a)]]]],["./make-safe-evaluator.js", [["makeSafeEvaluator", [$h‍_a => (makeSafeEvaluator = $h‍_a)]]]],["./permits.js", [["initialGlobalPropertyNames", [$h‍_a => (initialGlobalPropertyNames = $h‍_a)]]]],["./tame-function-tostring.js", [["tameFunctionToString", [$h‍_a => (tameFunctionToString = $h‍_a)]]]],["./tame-domains.js", [["tameDomains", [$h‍_a => (tameDomains = $h‍_a)]]]],["./error/tame-console.js", [["tameConsole", [$h‍_a => (tameConsole = $h‍_a)]]]],["./error/tame-error-constructor.js", [["default", [$h‍_a => (tameErrorConstructor = $h‍_a)]]]],["./error/assert.js", [["assert", [$h‍_a => (assert = $h‍_a)]],["makeAssert", [$h‍_a => (makeAssert = $h‍_a)]]]],["./get-anonymous-intrinsics.js", [["getAnonymousIntrinsics", [$h‍_a => (getAnonymousIntrinsics = $h‍_a)]]]],["./compartment.js", [["makeCompartmentConstructor", [$h‍_a => (makeCompartmentConstructor = $h‍_a)]]]],["./tame-harden.js", [["tameHarden", [$h‍_a => (tameHarden = $h‍_a)]]]],["./tame-symbol-constructor.js", [["tameSymbolConstructor", [$h‍_a => (tameSymbolConstructor = $h‍_a)]]]],["./tame-faux-data-properties.js", [["tameFauxDataProperties", [$h‍_a => (tameFauxDataProperties = $h‍_a)]]]],["./tame-regenerator-runtime.js", [["tameRegeneratorRuntime", [$h‍_a => (tameRegeneratorRuntime = $h‍_a)]]]]]);   
+
 
 
 
@@ -10162,7 +11819,7 @@ const        tameFauxDataProperties=  (intrinsics)=>{
 
 /** @import {LockdownOptions} from '../types.js' */
 
-const { Fail, details: d, quote: q}=   assert;
+const { Fail, details: X, quote: q}=   assert;
 
 /** @type {Error=} */
 let priorRepairIntrinsics;
@@ -10284,11 +11941,19 @@ const        repairIntrinsics=  (options=  {})=>  {
       /** @param {string} debugName */
       (debugName)=>debugName!==  ''),
 
+    legacyRegeneratorRuntimeTaming=  getenv(
+      'LOCKDOWN_LEGACY_REGENERATOR_RUNTIME_TAMING',
+      'safe'),
+
     __hardenTaming__=  getenv('LOCKDOWN_HARDEN_TAMING', 'safe'),
     dateTaming=  'safe', // deprecated
     mathTaming=  'safe', // deprecated
     ...extraOptions}=
       options;
+
+  legacyRegeneratorRuntimeTaming===  'safe'||
+    legacyRegeneratorRuntimeTaming===  'unsafe-ignore'||
+    Fail `lockdown(): non supported option legacyRegeneratorRuntimeTaming: ${q(legacyRegeneratorRuntimeTaming)}`;
 
   evalTaming===  'unsafeEval'||
     evalTaming===  'safeEval'||
@@ -10304,7 +11969,7 @@ const        repairIntrinsics=  (options=  {})=>  {
   priorRepairIntrinsics===  undefined||
     // eslint-disable-next-line @endo/no-polymorphic-call
     assert.fail(
-      d `Already locked down at ${priorRepairIntrinsics} (SES_ALREADY_LOCKED_DOWN)`,
+      X `Already locked down at ${priorRepairIntrinsics} (SES_ALREADY_LOCKED_DOWN)`,
       TypeError);
 
   // See https://github.com/endojs/endo/blob/master/packages/ses/error-codes/SES_ALREADY_LOCKED_DOWN.md
@@ -10368,6 +12033,7 @@ const        repairIntrinsics=  (options=  {})=>  {
   const { addIntrinsics, completePrototypes, finalIntrinsics}=
     makeIntrinsicsCollector();
 
+  // @ts-expect-error __hardenTaming__ could be any string
   const tamedHarden=  tameHarden(safeHarden, __hardenTaming__);
   addIntrinsics({ harden: tamedHarden});
 
@@ -10402,7 +12068,7 @@ const        repairIntrinsics=  (options=  {})=>  {
    * @type {((error: any) => string | undefined) | undefined}
    */
   let optGetStackString;
-  if( errorTaming!==  'unsafe') {
+  if( errorTaming===  'safe') {
     optGetStackString=  intrinsics['%InitialGetStackString%'];
    }
   const consoleRecord=  tameConsole(
@@ -10427,8 +12093,12 @@ const        repairIntrinsics=  (options=  {})=>  {
    }
 
   // @ts-ignore assert is absent on globalThis type def.
-  if( errorTaming===  'unsafe'&&  globalThis.assert===  assert) {
-    // If errorTaming is 'unsafe' we replace the global assert with
+  if(
+    (errorTaming===  'unsafe'||  errorTaming===  'unsafe-debug')&&
+    globalThis.assert===  assert)
+    {
+    // If errorTaming is 'unsafe' or 'unsafe-debug' we replace the
+    // global assert with
     // one whose `details` template literal tag does not redact
     // unmarked substitution values. IOW, it blabs information that
     // was supposed to be secret from callers, as an aid to debugging
@@ -10495,7 +12165,7 @@ const        repairIntrinsics=  (options=  {})=>  {
     priorHardenIntrinsics===  undefined||
       // eslint-disable-next-line @endo/no-polymorphic-call
       assert.fail(
-        d `Already locked down at ${priorHardenIntrinsics} (SES_ALREADY_LOCKED_DOWN)`,
+        X `Already locked down at ${priorHardenIntrinsics} (SES_ALREADY_LOCKED_DOWN)`,
         TypeError);
 
     // See https://github.com/endojs/endo/blob/master/packages/ses/error-codes/SES_ALREADY_LOCKED_DOWN.md
@@ -10512,6 +12182,9 @@ const        repairIntrinsics=  (options=  {})=>  {
     // clear yet which is better.
     // @ts-ignore enablePropertyOverrides does its own input validation
     enablePropertyOverrides(intrinsics, overrideTaming, overrideDebug);
+    if( legacyRegeneratorRuntimeTaming===  'unsafe-ignore') {
+      tameRegeneratorRuntime();
+     }
 
     // Finally register and optionally freeze all the intrinsics. This
     // must be the operation that modifies the intrinsics.
@@ -10544,7 +12217,7 @@ const        repairIntrinsics=  (options=  {})=>  {
  };$h‍_once.repairIntrinsics(repairIntrinsics);
 })()
 ,
-// === functors[50] ===
+// === functors[51] ===
 ({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,   importMeta: $h‍____meta, }) => (function () { 'use strict';   let globalThis,repairIntrinsics;$h‍_imports([["./assert-sloppy-mode.js", []],["./commons.js", [["globalThis", [$h‍_a => (globalThis = $h‍_a)]]]],["./lockdown.js", [["repairIntrinsics", [$h‍_a => (repairIntrinsics = $h‍_a)]]]]]);   
 
 
@@ -10557,7 +12230,7 @@ const        repairIntrinsics=  (options=  {})=>  {
 /** @import {LockdownOptions} from '../types.js' */
 
 /**
- * @param {LockdownOptions} options
+ * @param {LockdownOptions} [options]
  */
 globalThis.lockdown=  (options)=>{
   const hardenIntrinsics=  repairIntrinsics(options);
@@ -10565,7 +12238,7 @@ globalThis.lockdown=  (options)=>{
  };
 
 /**
- * @param {LockdownOptions} options
+ * @param {LockdownOptions} [options]
  */
 globalThis.repairIntrinsics=  (options)=>{
   const hardenIntrinsics=  repairIntrinsics(options);
@@ -10584,7 +12257,7 @@ globalThis.repairIntrinsics=  (options)=>{
  };
 })()
 ,
-// === functors[51] ===
+// === functors[52] ===
 ({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,   importMeta: $h‍____meta, }) => (function () { 'use strict';   let globalThis,makeCompartmentConstructor,tameFunctionToString,getGlobalIntrinsics;$h‍_imports([["./commons.js", [["globalThis", [$h‍_a => (globalThis = $h‍_a)]]]],["./compartment.js", [["makeCompartmentConstructor", [$h‍_a => (makeCompartmentConstructor = $h‍_a)]]]],["./tame-function-tostring.js", [["tameFunctionToString", [$h‍_a => (tameFunctionToString = $h‍_a)]]]],["./intrinsics.js", [["getGlobalIntrinsics", [$h‍_a => (getGlobalIntrinsics = $h‍_a)]]]]]);   
 
 
@@ -10601,14 +12274,14 @@ globalThis.Compartment=  makeCompartmentConstructor(
   markVirtualizedNativeFunction);
 })()
 ,
-// === functors[52] ===
+// === functors[53] ===
 ({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,   importMeta: $h‍____meta, }) => (function () { 'use strict';   let globalThis,assert;$h‍_imports([["./commons.js", [["globalThis", [$h‍_a => (globalThis = $h‍_a)]]]],["./error/assert.js", [["assert", [$h‍_a => (assert = $h‍_a)]]]]]);   
 
 
 globalThis.assert=  assert;
 })()
 ,
-// === functors[53] ===
+// === functors[54] ===
 ({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,   importMeta: $h‍____meta, }) => (function () { 'use strict';   let symbolFor,globalThis,defineCausalConsoleFromLogger,loggedErrorHandler;$h‍_imports([["./commons.js", [["symbolFor", [$h‍_a => (symbolFor = $h‍_a)]],["globalThis", [$h‍_a => (globalThis = $h‍_a)]]]],["./error/console.js", [["defineCausalConsoleFromLogger", [$h‍_a => (defineCausalConsoleFromLogger = $h‍_a)]]]],["./error/assert.js", [["loggedErrorHandler", [$h‍_a => (loggedErrorHandler = $h‍_a)]]]]]);   
 
 
@@ -10661,1334 +12334,8 @@ globalThis[MAKE_CAUSAL_CONSOLE_FROM_LOGGER_KEY_FOR_SES_AVA]=
   makeCausalConsoleFromLoggerForSesAva;
 })()
 ,
-// === functors[54] ===
+// === functors[55] ===
 ({   imports: $h‍_imports,   liveVar: $h‍_live,   onceVar: $h‍_once,   importMeta: $h‍____meta, }) => (function () { 'use strict';   $h‍_imports([["./src/lockdown-shim.js", []],["./src/compartment-shim.js", []],["./src/assert-shim.js", []],["./src/console-shim.js", []]]);   
 })()
 ,
-]; // functors end
-
-  const cell = (name, value = undefined) => {
-    const observers = [];
-    return Object.freeze({
-      get: Object.freeze(() => {
-        return value;
-      }),
-      set: Object.freeze((newValue) => {
-        value = newValue;
-        for (const observe of observers) {
-          observe(value);
-        }
-      }),
-      observe: Object.freeze((observe) => {
-        observers.push(observe);
-        observe(value);
-      }),
-      enumerable: true,
-    });
-  };
-
-  const cells = [
-    {
-      globalThis: cell("globalThis"),
-      Array: cell("Array"),
-      Date: cell("Date"),
-      FinalizationRegistry: cell("FinalizationRegistry"),
-      Float32Array: cell("Float32Array"),
-      JSON: cell("JSON"),
-      Map: cell("Map"),
-      Math: cell("Math"),
-      Number: cell("Number"),
-      Object: cell("Object"),
-      Promise: cell("Promise"),
-      Proxy: cell("Proxy"),
-      Reflect: cell("Reflect"),
-      FERAL_REG_EXP: cell("FERAL_REG_EXP"),
-      Set: cell("Set"),
-      String: cell("String"),
-      Symbol: cell("Symbol"),
-      WeakMap: cell("WeakMap"),
-      WeakSet: cell("WeakSet"),
-      FERAL_ERROR: cell("FERAL_ERROR"),
-      RangeError: cell("RangeError"),
-      ReferenceError: cell("ReferenceError"),
-      SyntaxError: cell("SyntaxError"),
-      TypeError: cell("TypeError"),
-      AggregateError: cell("AggregateError"),
-      assign: cell("assign"),
-      create: cell("create"),
-      defineProperties: cell("defineProperties"),
-      entries: cell("entries"),
-      freeze: cell("freeze"),
-      getOwnPropertyDescriptor: cell("getOwnPropertyDescriptor"),
-      getOwnPropertyDescriptors: cell("getOwnPropertyDescriptors"),
-      getOwnPropertyNames: cell("getOwnPropertyNames"),
-      getPrototypeOf: cell("getPrototypeOf"),
-      is: cell("is"),
-      isFrozen: cell("isFrozen"),
-      isSealed: cell("isSealed"),
-      isExtensible: cell("isExtensible"),
-      keys: cell("keys"),
-      objectPrototype: cell("objectPrototype"),
-      seal: cell("seal"),
-      preventExtensions: cell("preventExtensions"),
-      setPrototypeOf: cell("setPrototypeOf"),
-      values: cell("values"),
-      fromEntries: cell("fromEntries"),
-      speciesSymbol: cell("speciesSymbol"),
-      toStringTagSymbol: cell("toStringTagSymbol"),
-      iteratorSymbol: cell("iteratorSymbol"),
-      matchAllSymbol: cell("matchAllSymbol"),
-      unscopablesSymbol: cell("unscopablesSymbol"),
-      symbolKeyFor: cell("symbolKeyFor"),
-      symbolFor: cell("symbolFor"),
-      isInteger: cell("isInteger"),
-      stringifyJson: cell("stringifyJson"),
-      defineProperty: cell("defineProperty"),
-      apply: cell("apply"),
-      construct: cell("construct"),
-      reflectGet: cell("reflectGet"),
-      reflectGetOwnPropertyDescriptor: cell("reflectGetOwnPropertyDescriptor"),
-      reflectHas: cell("reflectHas"),
-      reflectIsExtensible: cell("reflectIsExtensible"),
-      ownKeys: cell("ownKeys"),
-      reflectPreventExtensions: cell("reflectPreventExtensions"),
-      reflectSet: cell("reflectSet"),
-      isArray: cell("isArray"),
-      arrayPrototype: cell("arrayPrototype"),
-      mapPrototype: cell("mapPrototype"),
-      proxyRevocable: cell("proxyRevocable"),
-      regexpPrototype: cell("regexpPrototype"),
-      setPrototype: cell("setPrototype"),
-      stringPrototype: cell("stringPrototype"),
-      weakmapPrototype: cell("weakmapPrototype"),
-      weaksetPrototype: cell("weaksetPrototype"),
-      functionPrototype: cell("functionPrototype"),
-      promisePrototype: cell("promisePrototype"),
-      generatorPrototype: cell("generatorPrototype"),
-      typedArrayPrototype: cell("typedArrayPrototype"),
-      uncurryThis: cell("uncurryThis"),
-      objectHasOwnProperty: cell("objectHasOwnProperty"),
-      arrayFilter: cell("arrayFilter"),
-      arrayForEach: cell("arrayForEach"),
-      arrayIncludes: cell("arrayIncludes"),
-      arrayJoin: cell("arrayJoin"),
-      arrayMap: cell("arrayMap"),
-      arrayFlatMap: cell("arrayFlatMap"),
-      arrayPop: cell("arrayPop"),
-      arrayPush: cell("arrayPush"),
-      arraySlice: cell("arraySlice"),
-      arraySome: cell("arraySome"),
-      arraySort: cell("arraySort"),
-      iterateArray: cell("iterateArray"),
-      mapSet: cell("mapSet"),
-      mapGet: cell("mapGet"),
-      mapHas: cell("mapHas"),
-      mapDelete: cell("mapDelete"),
-      mapEntries: cell("mapEntries"),
-      iterateMap: cell("iterateMap"),
-      setAdd: cell("setAdd"),
-      setDelete: cell("setDelete"),
-      setForEach: cell("setForEach"),
-      setHas: cell("setHas"),
-      iterateSet: cell("iterateSet"),
-      regexpTest: cell("regexpTest"),
-      regexpExec: cell("regexpExec"),
-      matchAllRegExp: cell("matchAllRegExp"),
-      stringEndsWith: cell("stringEndsWith"),
-      stringIncludes: cell("stringIncludes"),
-      stringIndexOf: cell("stringIndexOf"),
-      stringMatch: cell("stringMatch"),
-      generatorNext: cell("generatorNext"),
-      generatorThrow: cell("generatorThrow"),
-      stringReplace: cell("stringReplace"),
-      stringSearch: cell("stringSearch"),
-      stringSlice: cell("stringSlice"),
-      stringSplit: cell("stringSplit"),
-      stringStartsWith: cell("stringStartsWith"),
-      iterateString: cell("iterateString"),
-      weakmapDelete: cell("weakmapDelete"),
-      weakmapGet: cell("weakmapGet"),
-      weakmapHas: cell("weakmapHas"),
-      weakmapSet: cell("weakmapSet"),
-      weaksetAdd: cell("weaksetAdd"),
-      weaksetHas: cell("weaksetHas"),
-      functionToString: cell("functionToString"),
-      functionBind: cell("functionBind"),
-      promiseAll: cell("promiseAll"),
-      promiseCatch: cell("promiseCatch"),
-      promiseThen: cell("promiseThen"),
-      finalizationRegistryRegister: cell("finalizationRegistryRegister"),
-      finalizationRegistryUnregister: cell("finalizationRegistryUnregister"),
-      getConstructorOf: cell("getConstructorOf"),
-      immutableObject: cell("immutableObject"),
-      isObject: cell("isObject"),
-      isError: cell("isError"),
-      FERAL_EVAL: cell("FERAL_EVAL"),
-      FERAL_FUNCTION: cell("FERAL_FUNCTION"),
-      noEvalEvaluate: cell("noEvalEvaluate"),
-      FERAL_STACK_GETTER: cell("FERAL_STACK_GETTER"),
-      FERAL_STACK_SETTER: cell("FERAL_STACK_SETTER"),
-    },
-    {
-    },
-    {
-      makeEnvironmentCaptor: cell("makeEnvironmentCaptor"),
-      getEnvironmentOption: cell("getEnvironmentOption"),
-      getEnvironmentOptionsList: cell("getEnvironmentOptionsList"),
-      environmentOptionsListHas: cell("environmentOptionsListHas"),
-    },
-    {
-    },
-    {
-      an: cell("an"),
-      bestEffortStringify: cell("bestEffortStringify"),
-      enJoin: cell("enJoin"),
-    },
-    {
-    },
-    {
-    },
-    {
-      makeLRUCacheMap: cell("makeLRUCacheMap"),
-    },
-    {
-      makeNoteLogArgsArrayKit: cell("makeNoteLogArgsArrayKit"),
-    },
-    {
-      unredactedDetails: cell("unredactedDetails"),
-      loggedErrorHandler: cell("loggedErrorHandler"),
-      makeAssert: cell("makeAssert"),
-      assert: cell("assert"),
-      sanitizeError: cell("sanitizeError"),
-    },
-    {
-      isTypedArray: cell("isTypedArray"),
-      makeHardener: cell("makeHardener"),
-    },
-    {
-      NativeErrors: cell("NativeErrors"),
-      constantProperties: cell("constantProperties"),
-      universalPropertyNames: cell("universalPropertyNames"),
-      initialGlobalPropertyNames: cell("initialGlobalPropertyNames"),
-      sharedGlobalPropertyNames: cell("sharedGlobalPropertyNames"),
-      uniqueGlobalPropertyNames: cell("uniqueGlobalPropertyNames"),
-      FunctionInstance: cell("FunctionInstance"),
-      AsyncFunctionInstance: cell("AsyncFunctionInstance"),
-      isAccessorPermit: cell("isAccessorPermit"),
-      permitted: cell("permitted"),
-    },
-    {
-      makeIntrinsicsCollector: cell("makeIntrinsicsCollector"),
-      getGlobalIntrinsics: cell("getGlobalIntrinsics"),
-    },
-    {
-      default: cell("default"),
-    },
-    {
-      default: cell("default"),
-    },
-    {
-      default: cell("default"),
-    },
-    {
-      default: cell("default"),
-    },
-    {
-      default: cell("default"),
-    },
-    {
-      minEnablements: cell("minEnablements"),
-      moderateEnablements: cell("moderateEnablements"),
-      severeEnablements: cell("severeEnablements"),
-    },
-    {
-      default: cell("default"),
-    },
-    {
-      default: cell("default"),
-    },
-    {
-      makeEvalFunction: cell("makeEvalFunction"),
-    },
-    {
-      makeFunctionConstructor: cell("makeFunctionConstructor"),
-    },
-    {
-      setGlobalObjectSymbolUnscopables: cell("setGlobalObjectSymbolUnscopables"),
-      setGlobalObjectConstantProperties: cell("setGlobalObjectConstantProperties"),
-      setGlobalObjectMutableProperties: cell("setGlobalObjectMutableProperties"),
-      setGlobalObjectEvaluators: cell("setGlobalObjectEvaluators"),
-    },
-    {
-      alwaysThrowHandler: cell("alwaysThrowHandler"),
-      strictScopeTerminatorHandler: cell("strictScopeTerminatorHandler"),
-      strictScopeTerminator: cell("strictScopeTerminator"),
-    },
-    {
-      createSloppyGlobalsScopeTerminator: cell("createSloppyGlobalsScopeTerminator"),
-    },
-    {
-      makeEvalScopeKit: cell("makeEvalScopeKit"),
-    },
-    {
-      getSourceURL: cell("getSourceURL"),
-    },
-    {
-      rejectHtmlComments: cell("rejectHtmlComments"),
-      evadeHtmlCommentTest: cell("evadeHtmlCommentTest"),
-      rejectImportExpressions: cell("rejectImportExpressions"),
-      evadeImportExpressionTest: cell("evadeImportExpressionTest"),
-      rejectSomeDirectEvalExpressions: cell("rejectSomeDirectEvalExpressions"),
-      mandatoryTransforms: cell("mandatoryTransforms"),
-      applyTransforms: cell("applyTransforms"),
-      transforms: cell("transforms"),
-    },
-    {
-      isValidIdentifierName: cell("isValidIdentifierName"),
-      getScopeConstants: cell("getScopeConstants"),
-    },
-    {
-      makeEvaluate: cell("makeEvaluate"),
-    },
-    {
-      makeSafeEvaluator: cell("makeSafeEvaluator"),
-    },
-    {
-      tameFunctionToString: cell("tameFunctionToString"),
-    },
-    {
-      tameDomains: cell("tameDomains"),
-    },
-    {
-      consoleLevelMethods: cell("consoleLevelMethods"),
-      consoleOtherMethods: cell("consoleOtherMethods"),
-      makeLoggingConsoleKit: cell("makeLoggingConsoleKit"),
-      pumpLogToConsole: cell("pumpLogToConsole"),
-      makeCausalConsole: cell("makeCausalConsole"),
-      defineCausalConsoleFromLogger: cell("defineCausalConsoleFromLogger"),
-      filterConsole: cell("filterConsole"),
-    },
-    {
-      makeRejectionHandlers: cell("makeRejectionHandlers"),
-    },
-    {
-      tameConsole: cell("tameConsole"),
-    },
-    {
-      filterFileName: cell("filterFileName"),
-      shortenCallSiteString: cell("shortenCallSiteString"),
-      tameV8ErrorConstructor: cell("tameV8ErrorConstructor"),
-    },
-    {
-      default: cell("default"),
-    },
-    {
-      makeAlias: cell("makeAlias"),
-      load: cell("load"),
-      loadNow: cell("loadNow"),
-    },
-    {
-      deferExports: cell("deferExports"),
-      getDeferredExports: cell("getDeferredExports"),
-    },
-    {
-      provideCompartmentEvaluator: cell("provideCompartmentEvaluator"),
-      compartmentEvaluate: cell("compartmentEvaluate"),
-    },
-    {
-      makeThirdPartyModuleInstance: cell("makeThirdPartyModuleInstance"),
-      makeModuleInstance: cell("makeModuleInstance"),
-    },
-    {
-      link: cell("link"),
-      instantiate: cell("instantiate"),
-    },
-    {
-      InertCompartment: cell("InertCompartment"),
-      CompartmentPrototype: cell("CompartmentPrototype"),
-      makeCompartmentConstructor: cell("makeCompartmentConstructor"),
-    },
-    {
-      getAnonymousIntrinsics: cell("getAnonymousIntrinsics"),
-    },
-    {
-      tameHarden: cell("tameHarden"),
-    },
-    {
-      tameSymbolConstructor: cell("tameSymbolConstructor"),
-    },
-    {
-      tameFauxDataProperty: cell("tameFauxDataProperty"),
-      tameFauxDataProperties: cell("tameFauxDataProperties"),
-    },
-    {
-      repairIntrinsics: cell("repairIntrinsics"),
-    },
-    {
-    },
-    {
-    },
-    {
-    },
-    {
-    },
-    {
-    },
-  ];
-
-  Object.defineProperties(cells[3], Object.getOwnPropertyDescriptors(cells[2]));
-
-const namespaces = cells.map(cells => Object.freeze(Object.create(null, {
-    ...cells,
-    // Make this appear like an ESM module namespace object.
-    [Symbol.toStringTag]: {
-      value: 'Module',
-      writable: false,
-      enumerable: false,
-      configurable: false,
-    },
-  })));
-
-  for (let index = 0; index < namespaces.length; index += 1) {
-    cells[index]['*'] = cell('*', namespaces[index]);
-  }
-
-function observeImports(map, importName, importIndex) {
-  for (const [name, observers] of map.get(importName)) {
-    const cell = cells[importIndex][name];
-    if (cell === undefined) {
-      throw new ReferenceError(`Cannot import name ${name}`);
-    }
-    for (const observer of observers) {
-      cell.observe(observer);
-    }
-  }
-}
-
-
-  functors[0]({
-    imports(entries) {
-      const map = new Map(entries);
-    },
-    liveVar: {
-    },
-    onceVar: {
-      universalThis: cells[0].globalThis.set,
-      Array: cells[0].Array.set,
-      Date: cells[0].Date.set,
-      FinalizationRegistry: cells[0].FinalizationRegistry.set,
-      Float32Array: cells[0].Float32Array.set,
-      JSON: cells[0].JSON.set,
-      Map: cells[0].Map.set,
-      Math: cells[0].Math.set,
-      Number: cells[0].Number.set,
-      Object: cells[0].Object.set,
-      Promise: cells[0].Promise.set,
-      Proxy: cells[0].Proxy.set,
-      Reflect: cells[0].Reflect.set,
-      FERAL_REG_EXP: cells[0].FERAL_REG_EXP.set,
-      Set: cells[0].Set.set,
-      String: cells[0].String.set,
-      Symbol: cells[0].Symbol.set,
-      WeakMap: cells[0].WeakMap.set,
-      WeakSet: cells[0].WeakSet.set,
-      FERAL_ERROR: cells[0].FERAL_ERROR.set,
-      RangeError: cells[0].RangeError.set,
-      ReferenceError: cells[0].ReferenceError.set,
-      SyntaxError: cells[0].SyntaxError.set,
-      TypeError: cells[0].TypeError.set,
-      AggregateError: cells[0].AggregateError.set,
-      assign: cells[0].assign.set,
-      create: cells[0].create.set,
-      defineProperties: cells[0].defineProperties.set,
-      entries: cells[0].entries.set,
-      freeze: cells[0].freeze.set,
-      getOwnPropertyDescriptor: cells[0].getOwnPropertyDescriptor.set,
-      getOwnPropertyDescriptors: cells[0].getOwnPropertyDescriptors.set,
-      getOwnPropertyNames: cells[0].getOwnPropertyNames.set,
-      getPrototypeOf: cells[0].getPrototypeOf.set,
-      is: cells[0].is.set,
-      isFrozen: cells[0].isFrozen.set,
-      isSealed: cells[0].isSealed.set,
-      isExtensible: cells[0].isExtensible.set,
-      keys: cells[0].keys.set,
-      objectPrototype: cells[0].objectPrototype.set,
-      seal: cells[0].seal.set,
-      preventExtensions: cells[0].preventExtensions.set,
-      setPrototypeOf: cells[0].setPrototypeOf.set,
-      values: cells[0].values.set,
-      fromEntries: cells[0].fromEntries.set,
-      speciesSymbol: cells[0].speciesSymbol.set,
-      toStringTagSymbol: cells[0].toStringTagSymbol.set,
-      iteratorSymbol: cells[0].iteratorSymbol.set,
-      matchAllSymbol: cells[0].matchAllSymbol.set,
-      unscopablesSymbol: cells[0].unscopablesSymbol.set,
-      symbolKeyFor: cells[0].symbolKeyFor.set,
-      symbolFor: cells[0].symbolFor.set,
-      isInteger: cells[0].isInteger.set,
-      stringifyJson: cells[0].stringifyJson.set,
-      defineProperty: cells[0].defineProperty.set,
-      apply: cells[0].apply.set,
-      construct: cells[0].construct.set,
-      reflectGet: cells[0].reflectGet.set,
-      reflectGetOwnPropertyDescriptor: cells[0].reflectGetOwnPropertyDescriptor.set,
-      reflectHas: cells[0].reflectHas.set,
-      reflectIsExtensible: cells[0].reflectIsExtensible.set,
-      ownKeys: cells[0].ownKeys.set,
-      reflectPreventExtensions: cells[0].reflectPreventExtensions.set,
-      reflectSet: cells[0].reflectSet.set,
-      isArray: cells[0].isArray.set,
-      arrayPrototype: cells[0].arrayPrototype.set,
-      mapPrototype: cells[0].mapPrototype.set,
-      proxyRevocable: cells[0].proxyRevocable.set,
-      regexpPrototype: cells[0].regexpPrototype.set,
-      setPrototype: cells[0].setPrototype.set,
-      stringPrototype: cells[0].stringPrototype.set,
-      weakmapPrototype: cells[0].weakmapPrototype.set,
-      weaksetPrototype: cells[0].weaksetPrototype.set,
-      functionPrototype: cells[0].functionPrototype.set,
-      promisePrototype: cells[0].promisePrototype.set,
-      generatorPrototype: cells[0].generatorPrototype.set,
-      typedArrayPrototype: cells[0].typedArrayPrototype.set,
-      uncurryThis: cells[0].uncurryThis.set,
-      objectHasOwnProperty: cells[0].objectHasOwnProperty.set,
-      arrayFilter: cells[0].arrayFilter.set,
-      arrayForEach: cells[0].arrayForEach.set,
-      arrayIncludes: cells[0].arrayIncludes.set,
-      arrayJoin: cells[0].arrayJoin.set,
-      arrayMap: cells[0].arrayMap.set,
-      arrayFlatMap: cells[0].arrayFlatMap.set,
-      arrayPop: cells[0].arrayPop.set,
-      arrayPush: cells[0].arrayPush.set,
-      arraySlice: cells[0].arraySlice.set,
-      arraySome: cells[0].arraySome.set,
-      arraySort: cells[0].arraySort.set,
-      iterateArray: cells[0].iterateArray.set,
-      mapSet: cells[0].mapSet.set,
-      mapGet: cells[0].mapGet.set,
-      mapHas: cells[0].mapHas.set,
-      mapDelete: cells[0].mapDelete.set,
-      mapEntries: cells[0].mapEntries.set,
-      iterateMap: cells[0].iterateMap.set,
-      setAdd: cells[0].setAdd.set,
-      setDelete: cells[0].setDelete.set,
-      setForEach: cells[0].setForEach.set,
-      setHas: cells[0].setHas.set,
-      iterateSet: cells[0].iterateSet.set,
-      regexpTest: cells[0].regexpTest.set,
-      regexpExec: cells[0].regexpExec.set,
-      matchAllRegExp: cells[0].matchAllRegExp.set,
-      stringEndsWith: cells[0].stringEndsWith.set,
-      stringIncludes: cells[0].stringIncludes.set,
-      stringIndexOf: cells[0].stringIndexOf.set,
-      stringMatch: cells[0].stringMatch.set,
-      generatorNext: cells[0].generatorNext.set,
-      generatorThrow: cells[0].generatorThrow.set,
-      stringReplace: cells[0].stringReplace.set,
-      stringSearch: cells[0].stringSearch.set,
-      stringSlice: cells[0].stringSlice.set,
-      stringSplit: cells[0].stringSplit.set,
-      stringStartsWith: cells[0].stringStartsWith.set,
-      iterateString: cells[0].iterateString.set,
-      weakmapDelete: cells[0].weakmapDelete.set,
-      weakmapGet: cells[0].weakmapGet.set,
-      weakmapHas: cells[0].weakmapHas.set,
-      weakmapSet: cells[0].weakmapSet.set,
-      weaksetAdd: cells[0].weaksetAdd.set,
-      weaksetHas: cells[0].weaksetHas.set,
-      functionToString: cells[0].functionToString.set,
-      functionBind: cells[0].functionBind.set,
-      promiseAll: cells[0].promiseAll.set,
-      promiseCatch: cells[0].promiseCatch.set,
-      promiseThen: cells[0].promiseThen.set,
-      finalizationRegistryRegister: cells[0].finalizationRegistryRegister.set,
-      finalizationRegistryUnregister: cells[0].finalizationRegistryUnregister.set,
-      getConstructorOf: cells[0].getConstructorOf.set,
-      immutableObject: cells[0].immutableObject.set,
-      isObject: cells[0].isObject.set,
-      isError: cells[0].isError.set,
-      FERAL_EVAL: cells[0].FERAL_EVAL.set,
-      FERAL_FUNCTION: cells[0].FERAL_FUNCTION.set,
-      noEvalEvaluate: cells[0].noEvalEvaluate.set,
-      FERAL_STACK_GETTER: cells[0].FERAL_STACK_GETTER.set,
-      FERAL_STACK_SETTER: cells[0].FERAL_STACK_SETTER.set,
-    },
-    importMeta: {},
-  });
-  functors[1]({
-    imports(entries) {
-      const map = new Map(entries);
-      observeImports(map, "./commons.js", 0);
-    },
-    liveVar: {
-    },
-    onceVar: {
-    },
-    importMeta: {},
-  });
-  functors[2]({
-    imports(entries) {
-      const map = new Map(entries);
-    },
-    liveVar: {
-    },
-    onceVar: {
-      makeEnvironmentCaptor: cells[2].makeEnvironmentCaptor.set,
-      getEnvironmentOption: cells[2].getEnvironmentOption.set,
-      getEnvironmentOptionsList: cells[2].getEnvironmentOptionsList.set,
-      environmentOptionsListHas: cells[2].environmentOptionsListHas.set,
-    },
-    importMeta: {},
-  });
-  functors[3]({
-    imports(entries) {
-      const map = new Map(entries);
-      observeImports(map, "./src/env-options.js", 2);
-    },
-    liveVar: {
-    },
-    onceVar: {
-    },
-    importMeta: {},
-  });
-  functors[4]({
-    imports(entries) {
-      const map = new Map(entries);
-      observeImports(map, "../commons.js", 0);
-    },
-    liveVar: {
-    },
-    onceVar: {
-      an: cells[4].an.set,
-      bestEffortStringify: cells[4].bestEffortStringify.set,
-      enJoin: cells[4].enJoin.set,
-    },
-    importMeta: {},
-  });
-  functors[5]({
-    imports(entries) {
-      const map = new Map(entries);
-    },
-    liveVar: {
-    },
-    onceVar: {
-    },
-    importMeta: {},
-  });
-  functors[6]({
-    imports(entries) {
-      const map = new Map(entries);
-    },
-    liveVar: {
-    },
-    onceVar: {
-    },
-    importMeta: {},
-  });
-  functors[7]({
-    imports(entries) {
-      const map = new Map(entries);
-    },
-    liveVar: {
-    },
-    onceVar: {
-      makeLRUCacheMap: cells[7].makeLRUCacheMap.set,
-    },
-    importMeta: {},
-  });
-  functors[8]({
-    imports(entries) {
-      const map = new Map(entries);
-      observeImports(map, "../make-lru-cachemap.js", 7);
-      observeImports(map, "./internal-types.js", 6);
-    },
-    liveVar: {
-    },
-    onceVar: {
-      makeNoteLogArgsArrayKit: cells[8].makeNoteLogArgsArrayKit.set,
-    },
-    importMeta: {},
-  });
-  functors[9]({
-    imports(entries) {
-      const map = new Map(entries);
-      observeImports(map, "../commons.js", 0);
-      observeImports(map, "./stringify-utils.js", 4);
-      observeImports(map, "./types.js", 5);
-      observeImports(map, "./internal-types.js", 6);
-      observeImports(map, "./note-log-args.js", 8);
-    },
-    liveVar: {
-    },
-    onceVar: {
-      unredactedDetails: cells[9].unredactedDetails.set,
-      loggedErrorHandler: cells[9].loggedErrorHandler.set,
-      makeAssert: cells[9].makeAssert.set,
-      assert: cells[9].assert.set,
-      sanitizeError: cells[9].sanitizeError.set,
-    },
-    importMeta: {},
-  });
-  functors[10]({
-    imports(entries) {
-      const map = new Map(entries);
-      observeImports(map, "./commons.js", 0);
-      observeImports(map, "./error/assert.js", 9);
-    },
-    liveVar: {
-    },
-    onceVar: {
-      isTypedArray: cells[10].isTypedArray.set,
-      makeHardener: cells[10].makeHardener.set,
-    },
-    importMeta: {},
-  });
-  functors[11]({
-    imports(entries) {
-      const map = new Map(entries);
-      observeImports(map, "./commons.js", 0);
-    },
-    liveVar: {
-    },
-    onceVar: {
-      NativeErrors: cells[11].NativeErrors.set,
-      constantProperties: cells[11].constantProperties.set,
-      universalPropertyNames: cells[11].universalPropertyNames.set,
-      initialGlobalPropertyNames: cells[11].initialGlobalPropertyNames.set,
-      sharedGlobalPropertyNames: cells[11].sharedGlobalPropertyNames.set,
-      uniqueGlobalPropertyNames: cells[11].uniqueGlobalPropertyNames.set,
-      FunctionInstance: cells[11].FunctionInstance.set,
-      AsyncFunctionInstance: cells[11].AsyncFunctionInstance.set,
-      isAccessorPermit: cells[11].isAccessorPermit.set,
-      permitted: cells[11].permitted.set,
-    },
-    importMeta: {},
-  });
-  functors[12]({
-    imports(entries) {
-      const map = new Map(entries);
-      observeImports(map, "./commons.js", 0);
-      observeImports(map, "./permits.js", 11);
-    },
-    liveVar: {
-    },
-    onceVar: {
-      makeIntrinsicsCollector: cells[12].makeIntrinsicsCollector.set,
-      getGlobalIntrinsics: cells[12].getGlobalIntrinsics.set,
-    },
-    importMeta: {},
-  });
-  functors[13]({
-    imports(entries) {
-      const map = new Map(entries);
-      observeImports(map, "./permits.js", 11);
-      observeImports(map, "./commons.js", 0);
-    },
-    liveVar: {
-    },
-    onceVar: {
-      default: cells[13].default.set,
-    },
-    importMeta: {},
-  });
-  functors[14]({
-    imports(entries) {
-      const map = new Map(entries);
-      observeImports(map, "./commons.js", 0);
-    },
-    liveVar: {
-    },
-    onceVar: {
-      default: cells[14].default.set,
-    },
-    importMeta: {},
-  });
-  functors[15]({
-    imports(entries) {
-      const map = new Map(entries);
-      observeImports(map, "./commons.js", 0);
-    },
-    liveVar: {
-    },
-    onceVar: {
-      default: cells[15].default.set,
-    },
-    importMeta: {},
-  });
-  functors[16]({
-    imports(entries) {
-      const map = new Map(entries);
-      observeImports(map, "./commons.js", 0);
-    },
-    liveVar: {
-    },
-    onceVar: {
-      default: cells[16].default.set,
-    },
-    importMeta: {},
-  });
-  functors[17]({
-    imports(entries) {
-      const map = new Map(entries);
-      observeImports(map, "./commons.js", 0);
-    },
-    liveVar: {
-    },
-    onceVar: {
-      default: cells[17].default.set,
-    },
-    importMeta: {},
-  });
-  functors[18]({
-    imports(entries) {
-      const map = new Map(entries);
-      observeImports(map, "./commons.js", 0);
-    },
-    liveVar: {
-    },
-    onceVar: {
-      minEnablements: cells[18].minEnablements.set,
-      moderateEnablements: cells[18].moderateEnablements.set,
-      severeEnablements: cells[18].severeEnablements.set,
-    },
-    importMeta: {},
-  });
-  functors[19]({
-    imports(entries) {
-      const map = new Map(entries);
-      observeImports(map, "./commons.js", 0);
-      observeImports(map, "./enablements.js", 18);
-    },
-    liveVar: {
-    },
-    onceVar: {
-      default: cells[19].default.set,
-    },
-    importMeta: {},
-  });
-  functors[20]({
-    imports(entries) {
-      const map = new Map(entries);
-      observeImports(map, "./commons.js", 0);
-      observeImports(map, "./error/assert.js", 9);
-    },
-    liveVar: {
-    },
-    onceVar: {
-      default: cells[20].default.set,
-    },
-    importMeta: {},
-  });
-  functors[21]({
-    imports(entries) {
-      const map = new Map(entries);
-    },
-    liveVar: {
-    },
-    onceVar: {
-      makeEvalFunction: cells[21].makeEvalFunction.set,
-    },
-    importMeta: {},
-  });
-  functors[22]({
-    imports(entries) {
-      const map = new Map(entries);
-      observeImports(map, "./commons.js", 0);
-      observeImports(map, "./error/assert.js", 9);
-    },
-    liveVar: {
-    },
-    onceVar: {
-      makeFunctionConstructor: cells[22].makeFunctionConstructor.set,
-    },
-    importMeta: {},
-  });
-  functors[23]({
-    imports(entries) {
-      const map = new Map(entries);
-      observeImports(map, "./commons.js", 0);
-      observeImports(map, "./make-eval-function.js", 21);
-      observeImports(map, "./make-function-constructor.js", 22);
-      observeImports(map, "./permits.js", 11);
-    },
-    liveVar: {
-    },
-    onceVar: {
-      setGlobalObjectSymbolUnscopables: cells[23].setGlobalObjectSymbolUnscopables.set,
-      setGlobalObjectConstantProperties: cells[23].setGlobalObjectConstantProperties.set,
-      setGlobalObjectMutableProperties: cells[23].setGlobalObjectMutableProperties.set,
-      setGlobalObjectEvaluators: cells[23].setGlobalObjectEvaluators.set,
-    },
-    importMeta: {},
-  });
-  functors[24]({
-    imports(entries) {
-      const map = new Map(entries);
-      observeImports(map, "./commons.js", 0);
-      observeImports(map, "./error/assert.js", 9);
-    },
-    liveVar: {
-    },
-    onceVar: {
-      alwaysThrowHandler: cells[24].alwaysThrowHandler.set,
-      strictScopeTerminatorHandler: cells[24].strictScopeTerminatorHandler.set,
-      strictScopeTerminator: cells[24].strictScopeTerminator.set,
-    },
-    importMeta: {},
-  });
-  functors[25]({
-    imports(entries) {
-      const map = new Map(entries);
-      observeImports(map, "./commons.js", 0);
-      observeImports(map, "./strict-scope-terminator.js", 24);
-    },
-    liveVar: {
-    },
-    onceVar: {
-      createSloppyGlobalsScopeTerminator: cells[25].createSloppyGlobalsScopeTerminator.set,
-    },
-    importMeta: {},
-  });
-  functors[26]({
-    imports(entries) {
-      const map = new Map(entries);
-      observeImports(map, "./commons.js", 0);
-      observeImports(map, "./error/assert.js", 9);
-    },
-    liveVar: {
-    },
-    onceVar: {
-      makeEvalScopeKit: cells[26].makeEvalScopeKit.set,
-    },
-    importMeta: {},
-  });
-  functors[27]({
-    imports(entries) {
-      const map = new Map(entries);
-      observeImports(map, "./commons.js", 0);
-    },
-    liveVar: {
-    },
-    onceVar: {
-      getSourceURL: cells[27].getSourceURL.set,
-    },
-    importMeta: {},
-  });
-  functors[28]({
-    imports(entries) {
-      const map = new Map(entries);
-      observeImports(map, "./commons.js", 0);
-      observeImports(map, "./get-source-url.js", 27);
-    },
-    liveVar: {
-    },
-    onceVar: {
-      rejectHtmlComments: cells[28].rejectHtmlComments.set,
-      evadeHtmlCommentTest: cells[28].evadeHtmlCommentTest.set,
-      rejectImportExpressions: cells[28].rejectImportExpressions.set,
-      evadeImportExpressionTest: cells[28].evadeImportExpressionTest.set,
-      rejectSomeDirectEvalExpressions: cells[28].rejectSomeDirectEvalExpressions.set,
-      mandatoryTransforms: cells[28].mandatoryTransforms.set,
-      applyTransforms: cells[28].applyTransforms.set,
-      transforms: cells[28].transforms.set,
-    },
-    importMeta: {},
-  });
-  functors[29]({
-    imports(entries) {
-      const map = new Map(entries);
-      observeImports(map, "./commons.js", 0);
-    },
-    liveVar: {
-    },
-    onceVar: {
-      isValidIdentifierName: cells[29].isValidIdentifierName.set,
-      getScopeConstants: cells[29].getScopeConstants.set,
-    },
-    importMeta: {},
-  });
-  functors[30]({
-    imports(entries) {
-      const map = new Map(entries);
-      observeImports(map, "./commons.js", 0);
-      observeImports(map, "./scope-constants.js", 29);
-    },
-    liveVar: {
-    },
-    onceVar: {
-      makeEvaluate: cells[30].makeEvaluate.set,
-    },
-    importMeta: {},
-  });
-  functors[31]({
-    imports(entries) {
-      const map = new Map(entries);
-      observeImports(map, "./commons.js", 0);
-      observeImports(map, "./strict-scope-terminator.js", 24);
-      observeImports(map, "./sloppy-globals-scope-terminator.js", 25);
-      observeImports(map, "./eval-scope.js", 26);
-      observeImports(map, "./transforms.js", 28);
-      observeImports(map, "./make-evaluate.js", 30);
-      observeImports(map, "./error/assert.js", 9);
-    },
-    liveVar: {
-    },
-    onceVar: {
-      makeSafeEvaluator: cells[31].makeSafeEvaluator.set,
-    },
-    importMeta: {},
-  });
-  functors[32]({
-    imports(entries) {
-      const map = new Map(entries);
-      observeImports(map, "./commons.js", 0);
-    },
-    liveVar: {
-    },
-    onceVar: {
-      tameFunctionToString: cells[32].tameFunctionToString.set,
-    },
-    importMeta: {},
-  });
-  functors[33]({
-    imports(entries) {
-      const map = new Map(entries);
-      observeImports(map, "./commons.js", 0);
-    },
-    liveVar: {
-    },
-    onceVar: {
-      tameDomains: cells[33].tameDomains.set,
-    },
-    importMeta: {},
-  });
-  functors[34]({
-    imports(entries) {
-      const map = new Map(entries);
-      observeImports(map, "../commons.js", 0);
-      observeImports(map, "./types.js", 5);
-      observeImports(map, "./internal-types.js", 6);
-    },
-    liveVar: {
-    },
-    onceVar: {
-      consoleLevelMethods: cells[34].consoleLevelMethods.set,
-      consoleOtherMethods: cells[34].consoleOtherMethods.set,
-      makeLoggingConsoleKit: cells[34].makeLoggingConsoleKit.set,
-      pumpLogToConsole: cells[34].pumpLogToConsole.set,
-      makeCausalConsole: cells[34].makeCausalConsole.set,
-      defineCausalConsoleFromLogger: cells[34].defineCausalConsoleFromLogger.set,
-      filterConsole: cells[34].filterConsole.set,
-    },
-    importMeta: {},
-  });
-  functors[35]({
-    imports(entries) {
-      const map = new Map(entries);
-      observeImports(map, "../commons.js", 0);
-    },
-    liveVar: {
-    },
-    onceVar: {
-      makeRejectionHandlers: cells[35].makeRejectionHandlers.set,
-    },
-    importMeta: {},
-  });
-  functors[36]({
-    imports(entries) {
-      const map = new Map(entries);
-      observeImports(map, "../commons.js", 0);
-      observeImports(map, "./assert.js", 9);
-      observeImports(map, "./console.js", 34);
-      observeImports(map, "./unhandled-rejection.js", 35);
-      observeImports(map, "./types.js", 5);
-      observeImports(map, "./internal-types.js", 6);
-    },
-    liveVar: {
-    },
-    onceVar: {
-      tameConsole: cells[36].tameConsole.set,
-    },
-    importMeta: {},
-  });
-  functors[37]({
-    imports(entries) {
-      const map = new Map(entries);
-      observeImports(map, "../commons.js", 0);
-    },
-    liveVar: {
-    },
-    onceVar: {
-      filterFileName: cells[37].filterFileName.set,
-      shortenCallSiteString: cells[37].shortenCallSiteString.set,
-      tameV8ErrorConstructor: cells[37].tameV8ErrorConstructor.set,
-    },
-    importMeta: {},
-  });
-  functors[38]({
-    imports(entries) {
-      const map = new Map(entries);
-      observeImports(map, "../commons.js", 0);
-      observeImports(map, "../permits.js", 11);
-      observeImports(map, "./tame-v8-error-constructor.js", 37);
-    },
-    liveVar: {
-    },
-    onceVar: {
-      default: cells[38].default.set,
-    },
-    importMeta: {},
-  });
-  functors[39]({
-    imports(entries) {
-      const map = new Map(entries);
-      observeImports(map, "@endo/env-options", 3);
-      observeImports(map, "./commons.js", 0);
-      observeImports(map, "./error/assert.js", 9);
-    },
-    liveVar: {
-    },
-    onceVar: {
-      makeAlias: cells[39].makeAlias.set,
-      load: cells[39].load.set,
-      loadNow: cells[39].loadNow.set,
-    },
-    importMeta: {},
-  });
-  functors[40]({
-    imports(entries) {
-      const map = new Map(entries);
-      observeImports(map, "./module-load.js", 39);
-      observeImports(map, "./commons.js", 0);
-      observeImports(map, "./error/assert.js", 9);
-    },
-    liveVar: {
-    },
-    onceVar: {
-      deferExports: cells[40].deferExports.set,
-      getDeferredExports: cells[40].getDeferredExports.set,
-    },
-    importMeta: {},
-  });
-  functors[41]({
-    imports(entries) {
-      const map = new Map(entries);
-      observeImports(map, "./commons.js", 0);
-      observeImports(map, "./transforms.js", 28);
-      observeImports(map, "./make-safe-evaluator.js", 31);
-    },
-    liveVar: {
-    },
-    onceVar: {
-      provideCompartmentEvaluator: cells[41].provideCompartmentEvaluator.set,
-      compartmentEvaluate: cells[41].compartmentEvaluate.set,
-    },
-    importMeta: {},
-  });
-  functors[42]({
-    imports(entries) {
-      const map = new Map(entries);
-      observeImports(map, "./error/assert.js", 9);
-      observeImports(map, "./module-proxy.js", 40);
-      observeImports(map, "./commons.js", 0);
-      observeImports(map, "./compartment-evaluate.js", 41);
-    },
-    liveVar: {
-    },
-    onceVar: {
-      makeThirdPartyModuleInstance: cells[42].makeThirdPartyModuleInstance.set,
-      makeModuleInstance: cells[42].makeModuleInstance.set,
-    },
-    importMeta: {},
-  });
-  functors[43]({
-    imports(entries) {
-      const map = new Map(entries);
-      observeImports(map, "./error/assert.js", 9);
-      observeImports(map, "./module-instance.js", 42);
-      observeImports(map, "./commons.js", 0);
-    },
-    liveVar: {
-    },
-    onceVar: {
-      link: cells[43].link.set,
-      instantiate: cells[43].instantiate.set,
-    },
-    importMeta: {},
-  });
-  functors[44]({
-    imports(entries) {
-      const map = new Map(entries);
-      observeImports(map, "./commons.js", 0);
-      observeImports(map, "./global-object.js", 23);
-      observeImports(map, "./permits.js", 11);
-      observeImports(map, "./module-load.js", 39);
-      observeImports(map, "./module-link.js", 43);
-      observeImports(map, "./module-proxy.js", 40);
-      observeImports(map, "./error/assert.js", 9);
-      observeImports(map, "./compartment-evaluate.js", 41);
-      observeImports(map, "./make-safe-evaluator.js", 31);
-    },
-    liveVar: {
-    },
-    onceVar: {
-      InertCompartment: cells[44].InertCompartment.set,
-      CompartmentPrototype: cells[44].CompartmentPrototype.set,
-      makeCompartmentConstructor: cells[44].makeCompartmentConstructor.set,
-    },
-    importMeta: {},
-  });
-  functors[45]({
-    imports(entries) {
-      const map = new Map(entries);
-      observeImports(map, "./commons.js", 0);
-      observeImports(map, "./compartment.js", 44);
-    },
-    liveVar: {
-    },
-    onceVar: {
-      getAnonymousIntrinsics: cells[45].getAnonymousIntrinsics.set,
-    },
-    importMeta: {},
-  });
-  functors[46]({
-    imports(entries) {
-      const map = new Map(entries);
-      observeImports(map, "./commons.js", 0);
-    },
-    liveVar: {
-    },
-    onceVar: {
-      tameHarden: cells[46].tameHarden.set,
-    },
-    importMeta: {},
-  });
-  functors[47]({
-    imports(entries) {
-      const map = new Map(entries);
-      observeImports(map, "./commons.js", 0);
-    },
-    liveVar: {
-    },
-    onceVar: {
-      tameSymbolConstructor: cells[47].tameSymbolConstructor.set,
-    },
-    importMeta: {},
-  });
-  functors[48]({
-    imports(entries) {
-      const map = new Map(entries);
-      observeImports(map, "./commons.js", 0);
-    },
-    liveVar: {
-    },
-    onceVar: {
-      tameFauxDataProperty: cells[48].tameFauxDataProperty.set,
-      tameFauxDataProperties: cells[48].tameFauxDataProperties.set,
-    },
-    importMeta: {},
-  });
-  functors[49]({
-    imports(entries) {
-      const map = new Map(entries);
-      observeImports(map, "@endo/env-options", 3);
-      observeImports(map, "./commons.js", 0);
-      observeImports(map, "./make-hardener.js", 10);
-      observeImports(map, "./intrinsics.js", 12);
-      observeImports(map, "./permits-intrinsics.js", 13);
-      observeImports(map, "./tame-function-constructors.js", 14);
-      observeImports(map, "./tame-date-constructor.js", 15);
-      observeImports(map, "./tame-math-object.js", 16);
-      observeImports(map, "./tame-regexp-constructor.js", 17);
-      observeImports(map, "./enable-property-overrides.js", 19);
-      observeImports(map, "./tame-locale-methods.js", 20);
-      observeImports(map, "./global-object.js", 23);
-      observeImports(map, "./make-safe-evaluator.js", 31);
-      observeImports(map, "./permits.js", 11);
-      observeImports(map, "./tame-function-tostring.js", 32);
-      observeImports(map, "./tame-domains.js", 33);
-      observeImports(map, "./error/tame-console.js", 36);
-      observeImports(map, "./error/tame-error-constructor.js", 38);
-      observeImports(map, "./error/assert.js", 9);
-      observeImports(map, "./get-anonymous-intrinsics.js", 45);
-      observeImports(map, "./compartment.js", 44);
-      observeImports(map, "./tame-harden.js", 46);
-      observeImports(map, "./tame-symbol-constructor.js", 47);
-      observeImports(map, "./tame-faux-data-properties.js", 48);
-    },
-    liveVar: {
-    },
-    onceVar: {
-      repairIntrinsics: cells[49].repairIntrinsics.set,
-    },
-    importMeta: {},
-  });
-  functors[50]({
-    imports(entries) {
-      const map = new Map(entries);
-      observeImports(map, "./assert-sloppy-mode.js", 1);
-      observeImports(map, "./commons.js", 0);
-      observeImports(map, "./lockdown.js", 49);
-    },
-    liveVar: {
-    },
-    onceVar: {
-    },
-    importMeta: {},
-  });
-  functors[51]({
-    imports(entries) {
-      const map = new Map(entries);
-      observeImports(map, "./commons.js", 0);
-      observeImports(map, "./compartment.js", 44);
-      observeImports(map, "./tame-function-tostring.js", 32);
-      observeImports(map, "./intrinsics.js", 12);
-    },
-    liveVar: {
-    },
-    onceVar: {
-    },
-    importMeta: {},
-  });
-  functors[52]({
-    imports(entries) {
-      const map = new Map(entries);
-      observeImports(map, "./commons.js", 0);
-      observeImports(map, "./error/assert.js", 9);
-    },
-    liveVar: {
-    },
-    onceVar: {
-    },
-    importMeta: {},
-  });
-  functors[53]({
-    imports(entries) {
-      const map = new Map(entries);
-      observeImports(map, "./commons.js", 0);
-      observeImports(map, "./error/console.js", 34);
-      observeImports(map, "./error/assert.js", 9);
-    },
-    liveVar: {
-    },
-    onceVar: {
-    },
-    importMeta: {},
-  });
-  functors[54]({
-    imports(entries) {
-      const map = new Map(entries);
-      observeImports(map, "./src/lockdown-shim.js", 50);
-      observeImports(map, "./src/compartment-shim.js", 51);
-      observeImports(map, "./src/assert-shim.js", 52);
-      observeImports(map, "./src/console-shim.js", 53);
-    },
-    liveVar: {
-    },
-    onceVar: {
-    },
-    importMeta: {},
-  });
-
-  return cells[cells.length - 1]['*'].get();
-})();
+]);

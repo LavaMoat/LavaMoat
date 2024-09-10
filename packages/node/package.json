@@ -14,7 +14,7 @@
   "author": "kumavis",
   "license": "MIT",
   "engines": {
-    "node": "^18.0.0 || ^20.0.0 <20.16.1 || ^22.5.1"
+    "node": "^18.0.0 || ^20.0.0 <20.15.0 || ^20.17.0 || ^22.5.1"
   },
   "bin": {
     "lavamoat": "src/cli.js",
@@ -37,11 +37,12 @@
     "@babel/highlight": "7.24.7",
     "@lavamoat/aa": "^4.3.0",
     "bindings": "1.5.0",
+    "corepack": "0.29.4",
     "htmlescape": "1.1.1",
     "json-stable-stringify": "1.1.1",
     "lavamoat-core": "^16.0.0",
     "lavamoat-tofu": "^8.0.0",
-    "node-gyp-build": "4.8.1",
+    "node-gyp-build": "4.8.2",
     "resolve": "1.22.8",
     "yargs": "17.7.2"
   },
