@@ -33,6 +33,24 @@
     * @lavamoat/lavapack bumped from ^6.1.1 to ^6.1.2
     * lavamoat-core bumped from ^15.2.0 to ^15.2.1
 
+## [18.0.1](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-browserify-v18.0.0...lavamoat-browserify-v18.0.1) (2024-09-11)
+
+
+### Bug Fixes
+
+* **browserify:** support Node.js ^20.17.0 ([a5a3949](https://github.com/LavaMoat/LavaMoat/commit/a5a3949438daded29420e4940e6ce6aa3ed12333))
+* **node:** support Node.js ^20.17.0 ([a5a3949](https://github.com/LavaMoat/LavaMoat/commit/a5a3949438daded29420e4940e6ce6aa3ed12333))
+* **perf:** support Node.js ^20.17.0 ([a5a3949](https://github.com/LavaMoat/LavaMoat/commit/a5a3949438daded29420e4940e6ce6aa3ed12333))
+* support Node.js ^20.17.0 ([a5a3949](https://github.com/LavaMoat/LavaMoat/commit/a5a3949438daded29420e4940e6ce6aa3ed12333))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @lavamoat/lavapack bumped from ^7.0.0 to ^7.0.1
+    * lavamoat-core bumped from ^16.0.0 to ^16.0.1
+
 ## [18.0.0](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-browserify-v17.0.8...lavamoat-browserify-v18.0.0) (2024-08-15)
 
 

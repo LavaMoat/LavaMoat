@@ -19,6 +19,26 @@
     * lavamoat-core bumped from ^15.2.0 to ^15.2.1
     * lavamoat-tofu bumped from ^7.2.1 to ^7.2.2
 
+## [9.0.1](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-v9.0.0...lavamoat-v9.0.1) (2024-09-11)
+
+
+### Bug Fixes
+
+* **browserify:** support Node.js ^20.17.0 ([a5a3949](https://github.com/LavaMoat/LavaMoat/commit/a5a3949438daded29420e4940e6ce6aa3ed12333))
+* **deps:** update dependency corepack to v0.29.4 ([a8d265b](https://github.com/LavaMoat/LavaMoat/commit/a8d265b722f6d4395b490e153c7608638b39b373))
+* **deps:** update dependency node-gyp-build to v4.8.2 ([59c26bd](https://github.com/LavaMoat/LavaMoat/commit/59c26bd0e91c0ffba911413c96c4be74e5e5f8fa))
+* **node:** support Node.js ^20.17.0 ([a5a3949](https://github.com/LavaMoat/LavaMoat/commit/a5a3949438daded29420e4940e6ce6aa3ed12333))
+* **perf:** support Node.js ^20.17.0 ([a5a3949](https://github.com/LavaMoat/LavaMoat/commit/a5a3949438daded29420e4940e6ce6aa3ed12333))
+* support Node.js ^20.17.0 ([a5a3949](https://github.com/LavaMoat/LavaMoat/commit/a5a3949438daded29420e4940e6ce6aa3ed12333))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-core bumped from ^16.0.0 to ^16.0.1
+    * lavamoat-tofu bumped from ^8.0.0 to ^8.0.1
+
 ## [9.0.0](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-v8.0.7...lavamoat-v9.0.0) (2024-08-15)
 
 
