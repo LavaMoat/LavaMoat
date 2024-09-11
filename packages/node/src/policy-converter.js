@@ -16,11 +16,11 @@ const { isArray } = Array
 const { entries, fromEntries } = Object
 
 /**
+ * @import {GlobalPolicy, PackagePolicy, LavaMoatPolicy, ResourcePolicy, LavaMoatPolicyOverrides} from 'lavamoat-core'
  * @import {LavaMoatPackagePolicy, LavaMoatPackagePolicyOptions, LavaMoatEndoPolicy} from './types.js'
- * @import {PackagePolicy, GlobalPolicy, ResourcePolicy, LavaMoatPolicy, LavaMoatPolicyOverrides} from 'lavamoat-core'
  */
 
-const DEFAULT_ATTENUATOR = '@lavamoat/node/attenuator'
+export const DEFAULT_ATTENUATOR = '@attennuator@' // If we wanted endo to load and execute the code in attenuators compartment, we could pass '@lavamoat/endomoat/attenuator' as default attenuator and have it loaded statelessly. We're using an impossible specifier to match with an external module instead.
 
 /**
  * Converts LavaMoat `ResourcePolicy.builtins` to Endo's
