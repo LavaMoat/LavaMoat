@@ -3,10 +3,11 @@ import { captureFromMap } from '@endo/compartment-mapper/capture-lite.js'
 import { defaultParserForLanguage } from '@endo/compartment-mapper/import-parsers.js'
 import { mapNodeModules } from '@endo/compartment-mapper/node-modules.js'
 import { NATIVE_FILE_EXT, NATIVE_PARSER_NAME } from './constants.js'
+import { makeGlobalsAttenuator } from './default-attenuator.js'
 import { importHook, importNowHook } from './import-hook.js'
 import { syncModuleTransforms } from './module-transforms.js'
 import parseNative from './parse-native.js'
-import { toEndoPolicy } from './policy-converter.js'
+import { DEFAULT_ATTENUATOR, toEndoPolicy } from './policy-converter.js'
 import { defaultReadPowers } from './power.js'
 import { toURLString } from './util.js'
 
@@ -104,6 +105,11 @@ export const execute = async (readPowers, entrypointPath, policy) => {
   const entryPoint = toURLString(entrypointPath)
   const { namespace } = await importLocation(readPowers, entryPoint, {
     ...ENDO_OPTIONS,
+    modules: {
+      [DEFAULT_ATTENUATOR]: {
+        attenuateGlobals: makeGlobalsAttenuator({ policy }),
+      },
+    },
     policy: endoPolicy,
   })
   return namespace
