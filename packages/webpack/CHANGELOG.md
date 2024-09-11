@@ -18,6 +18,32 @@
   * dependencies
     * lavamoat-core bumped from ^15.2.0 to ^15.2.1
 
+## [0.6.0-beta.0](https://github.com/LavaMoat/LavaMoat/compare/webpack-v0.5.0-beta.0...webpack-v0.6.0-beta.0) (2024-09-11)
+
+
+### Features
+
+* **webpack:** avoid errors when code is instrumented for HMR despite HMR not being enabled ([edea44c](https://github.com/LavaMoat/LavaMoat/commit/edea44c6977642a7e45e37fe3b0fe8aa402d54b8))
+* **webpack:** support ContextModule - skip enforcement of policy ([#1319](https://github.com/LavaMoat/LavaMoat/issues/1319)) ([b0dd461](https://github.com/LavaMoat/LavaMoat/commit/b0dd46104dd82561c0273224bdb47a49e17cb138))
+
+
+### Bug Fixes
+
+* **deps:** update babel monorepo to v7.25.4 ([6b59ee5](https://github.com/LavaMoat/LavaMoat/commit/6b59ee5fe7436ea8f2b84260b6fb3e4a02022657))
+* **deps:** update dependency ses to v1.7.0 ([#1262](https://github.com/LavaMoat/LavaMoat/issues/1262)) ([0209007](https://github.com/LavaMoat/LavaMoat/commit/0209007898d9d1a288832dc1b903720735d3558d))
+* **deps:** update dependency ses to v1.8.0 ([7e5bece](https://github.com/LavaMoat/LavaMoat/commit/7e5bece4a1c2cdaf7890c8750d26eadd495a1a52))
+* **webpack:** allow __webpack_require__.t in webpack runtime ([b3daf8b](https://github.com/LavaMoat/LavaMoat/commit/b3daf8be3f6aded6b637cb0e9090c035d8751678))
+* **webpack:** deny handling of a null-id module ([2ff8efc](https://github.com/LavaMoat/LavaMoat/commit/2ff8efc511e91309c76eebb4cfdca38c46397130))
+* **webpack:** overwrite global aliases even if endowed ([1044d4c](https://github.com/LavaMoat/LavaMoat/commit/1044d4c2bfa81d0bcc57be203862bf0ab268d88b))
+* **webpack:** wrap nmd and hmd wrappers equally ([01656b4](https://github.com/LavaMoat/LavaMoat/commit/01656b40b6ff7670362c9e2a28ecc84a8bb17a9c))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-core bumped from ^16.0.0 to ^16.0.1
+
 ## [0.5.0-beta.0](https://github.com/LavaMoat/LavaMoat/compare/webpack-v0.4.0-beta.0...webpack-v0.5.0-beta.0) (2024-08-15)
 
 

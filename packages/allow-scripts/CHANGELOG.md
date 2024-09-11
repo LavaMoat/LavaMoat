@@ -6,6 +6,14 @@
   * dependencies
     * @lavamoat/aa bumped from ^4.0.1 to ^4.1.0
 
+## [3.2.1](https://github.com/LavaMoat/LavaMoat/compare/allow-scripts-v3.2.0...allow-scripts-v3.2.1) (2024-09-11)
+
+
+### Bug Fixes
+
+* **allow-scripts:** fix spawn error diagnostics in run function in test ([727ce01](https://github.com/LavaMoat/LavaMoat/commit/727ce01f7705ae73b397f426acc380addfb7f1d1))
+* **allow-scripts:** fix test setup to continue spawning npm on windows post security fixes in Node.js ([416d018](https://github.com/LavaMoat/LavaMoat/commit/416d018da94cd603c7983f28bdfef88456522d3a))
+
 ## [3.2.0](https://github.com/LavaMoat/LavaMoat/compare/allow-scripts-v3.1.0...allow-scripts-v3.2.0) (2024-08-15)
 
 
