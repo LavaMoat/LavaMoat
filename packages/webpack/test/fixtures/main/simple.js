@@ -1,8 +1,3 @@
-function start(arr) {
-  arr.push(111)
-  return arr
-}
-
-if (start(new Array())[0] !== 111) {
-  throw new Error('Problem')
-}
+// this throws if we scuttled props of compartment globalThis instead of startCompartment globalThis by mistake
+const global = new Compartment().globalThis
+Object.getOwnPropertyNames(global).forEach(name => global[name])

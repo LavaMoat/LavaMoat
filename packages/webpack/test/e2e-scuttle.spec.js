@@ -10,13 +10,9 @@ const err = (intrinsic) =>
   '" of globalThis is inaccessible under ' +
   'scuttling mode. To learn more visit https://github.com/LavaMoat/LavaMoat/pull/360.'
 
-test.before(async (t) => {
+async function scuttle(t, scuttleGlobalThis, globals) {
   const webpackConfigDefault = makeConfig({
-    scuttleGlobalThis: {
-      enabled: true,
-      exceptions: ['JSON'],
-      scuttlerName: 'SCUTTLER',
-    },
+    scuttleGlobalThis,
     generatePolicy: true,
     emitPolicySnapshot: true,
     diagnosticsVerbosity: 1,
@@ -30,35 +26,63 @@ test.before(async (t) => {
   }
   await t.notThrowsAsync(async () => {
     t.context.build = await scaffold(webpackConfig)
+    t.context.bundle = t.context.build.snapshot['/dist/app.js']
+    t.context.globalThis = runScriptWithSES(t.context.bundle, globals).context
   }, 'Expected the build to succeed')
-  t.context.bundle = t.context.build.snapshot['/dist/app.js']
-  t.context.globalThis = runScriptWithSES(
-    t.context.bundle, { SCUTTLER: (globalRef, scuttle) => {
-        t.context.scuttler_func_called = true
-        scuttle(globalRef)
-      }
-    }
-  ).context
-})
+}
 
-test('webpack/scuttled - dist shape', (t) => {
+test(`webpack/scuttled - dist shape`, async (t) => {
+  await scuttle(t, true)
   t.snapshot(Object.keys(t.context.build.snapshot))
 })
 
-test('webpack/scuttled - hosting globalThis\'s "Function" is scuttled', (t) => {
+test(`webpack/scuttled - hosting globalThis's environment is not scuttled`, async (t) => {
+  await scuttle(t)
   try {
-    t.context.globalThis.Function
+    const global = t.context.globalThis
+    Object.getOwnPropertyNames(global).forEach(name => global[name])
   } catch (e) {
-    t.true(
-      e.message === err('Function')
-    )
+    t.fail(`Unexpected error in scenario: ${e.message}`)
   }
 })
 
-test('webpack/scuttled - hosting globalThis\'s "JSON" is scuttled excepted', (t) => {
-  t.true(t.context.globalThis.JSON.stringify('a') === '"a"');
+test(`webpack/scuttled - hosting globalThis's "Function" is not scuttled`, async (t) => {
+  await scuttle(t)
+  try {
+    t.is(new t.context.globalThis.Function('return 1')(), 1)
+  } catch (e) {
+    t.fail(`Unexpected error in scenario: ${e.message}`)
+  }
 })
 
-test('webpack/scuttled - provided scuttlerName successfully invoked defined scuttlerFunc', (t) => {
+test(`webpack/scuttled - hosting globalThis's "Function" is scuttled`, async (t) => {
+  await scuttle(t, true)
+  try {
+    new t.context.globalThis.Function('1')()
+  } catch (e) {
+    t.true(e.message === err('Function'))
+  }
+})
+
+test(`webpack/scuttled - hosting globalThis's "Function" is scuttled excepted`, async (t) => {
+  await scuttle(t, {enabled: true, exceptions: ['Function']})
+  try {
+    t.is(new t.context.globalThis.Function('return 1')(), 1)
+  } catch (e) {
+    t.fail(`Unexpected error in scenario: ${e.message}`)
+  }
+})
+
+test(`webpack/scuttled - provided scuttlerName successfully invoked defined scuttlerFunc`, async (t) => {
+  const scuttlerName = 'SCUTTLER';
+  await scuttle(t, {
+    enabled: true,
+    scuttlerName,
+  }, {
+    [scuttlerName]: (globalRef, scuttle) => {
+      t.context.scuttler_func_called = true
+      scuttle(globalRef)
+    }
+  })
   t.true(t.context.scuttler_func_called);
 })
