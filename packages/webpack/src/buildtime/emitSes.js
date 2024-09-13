@@ -5,7 +5,7 @@ const {
 } = require('webpack')
 
 const lockdownSource = readFileSync(
-  path.join(require.resolve('ses'), '../lockdown.umd.js'),
+  require.resolve('ses'),
   'utf-8'
 )
 const lockdownSourcePrefix = `/* SES sources included by LavaMoat. Do not optimize or minify. */\n;\n${lockdownSource}\n;/* end SES */\n`
