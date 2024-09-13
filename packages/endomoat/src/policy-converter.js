@@ -46,11 +46,6 @@ function convertEndoPackagePolicyBuiltins(item) {
           'Expected a FullAttenuationDefinition; got a boolean'
         )
       }
-      if (itemForBuiltin === 'dynamic') {
-        throw new TypeError(
-          'Expected a FullAttenuationDefinition; got "dynamic"'
-        )
-      }
       if (isArray(itemForBuiltin)) {
         throw new TypeError(
           'Expected a FullAttenuationDefinition; got an array'

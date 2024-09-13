@@ -5,8 +5,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url'
 /**
  * Reads a JSON file
  *
- * @template {import('type-fest').JsonValue} [T=import('type-fest').JsonValue]
- *   Default is `import('type-fest').JsonValue`
+ * @template [T=unknown] Default is `unknown`
  * @param {string | URL} filepath
  * @param {{ fs?: import('@endo/compartment-mapper').FsAPI }} opts
  * @returns {Promise<T>} JSON data

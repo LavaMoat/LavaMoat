@@ -28,7 +28,11 @@ const parseNative = (
    * @type {import('ses').ThirdPartyStaticModuleInterface['execute']}
    */
   const execute = (moduleEnvironmentRecord, compartment) => {
-    if (compartmentDescriptor?.policy?.options?.native !== true) {
+    if (
+      /** @type {import('./types.js').LavaMoatPackagePolicy} */ (
+        compartmentDescriptor?.policy
+      )?.options?.native !== true
+    ) {
       throw new Error(
         `Native modules are disallowed in compartment ${q(compartment.name)}`
       )

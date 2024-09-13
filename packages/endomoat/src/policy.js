@@ -4,10 +4,14 @@ import * as constants from './constants.js'
 import { readJsonFile } from './util.js'
 
 /**
+ * @import {LavaMoatPolicy, LavaMoatPolicyOverrides} from 'lavamoat-core'
+ */
+
+/**
  * Reads a `policy.json` from disk
  *
  * @param {string | URL} [filepath]
- * @returns {Promise<import('lavamoat-core').LavaMoatPolicy>}
+ * @returns {Promise<unknown>}
  */
 export async function readPolicy(filepath = constants.DEFAULT_POLICY_PATH) {
   return readJsonFile(
@@ -19,9 +23,7 @@ export async function readPolicy(filepath = constants.DEFAULT_POLICY_PATH) {
  * Reads a `policy-override.json` from disk
  *
  * @param {string | URL} [filepath]
- * @returns {Promise<
- *   import('lavamoat-core').LavaMoatPolicyOverrides | undefined
- * >}
+ * @returns {Promise<unknown>}
  */
 export async function readPolicyOverride(
   filepath = constants.DEFAULT_POLICY_OVERRIDE_PATH
@@ -42,7 +44,7 @@ export async function readPolicyOverride(
  *
  * @param {string} [policyPath]
  * @param {string} [policyOverridePath]
- * @returns {Promise<import('lavamoat-core').LavaMoatPolicy>}
+ * @returns {Promise<LavaMoatPolicy>}
  */
 export async function loadPolicies(
   policyPath = constants.DEFAULT_POLICY_PATH,
@@ -54,6 +56,7 @@ export async function loadPolicies(
       return allegedPolicy
     }),
     readPolicyOverride(policyOverridePath).then((allegedPolicy) => {
+      assertPolicyOverride(allegedPolicy)
       return allegedPolicy
     }),
   ])
@@ -65,7 +68,7 @@ export async function loadPolicies(
  * Type guard for a `LavaMoatPolicy`
  *
  * @param {unknown} value
- * @returns {value is import('lavamoat-core').LavaMoatPolicy}
+ * @returns {value is LavaMoatPolicy}
  */
 export function isPolicy(value) {
   return Boolean(
@@ -81,7 +84,7 @@ export function isPolicy(value) {
  * Type guard for a `LavaMoatPolicyOverrides`
  *
  * @param {unknown} value
- * @returns {value is import('lavamoat-core').LavaMoatPolicyOverrides}
+ * @returns {value is LavaMoatPolicyOverrides}
  */
 export function isPolicyOverride(value) {
   return isPolicy(value)
@@ -91,7 +94,7 @@ export function isPolicyOverride(value) {
  * Assertion for a `LavaMoatPolicy`
  *
  * @param {unknown} value
- * @returns {asserts value is import('lavamoat-core').LavaMoatPolicy}
+ * @returns {asserts value is LavaMoatPolicy}
  */
 export function assertPolicy(value) {
   if (!isPolicy(value)) {
@@ -104,7 +107,7 @@ export function assertPolicy(value) {
  * Assertion for a `LavaMoatPolicyOverrides`
  *
  * @param {unknown} value
- * @returns {asserts value is import('lavamoat-core').LavaMoatPolicyOverrides}
+ * @returns {asserts value is LavaMoatPolicyOverrides}
  */
 export function assertPolicyOverride(value) {
   if (!isPolicyOverride(value)) {

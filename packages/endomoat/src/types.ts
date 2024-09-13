@@ -68,11 +68,6 @@ export type LavaMoatPackagePolicyOptions = {
    * If this is `true`, then the package is allowed to run native modules
    */
   native?: boolean
-
-  /**
-   * If this is `true`, then the package is allowed to use dynamic require
-   */
-  dynamic?: boolean
 }
 
 /**
