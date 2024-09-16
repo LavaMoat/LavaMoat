@@ -16,13 +16,18 @@
   "engines": {
     "node": "^18.0.0 || ^20.0.0 || ^22.0.0 || ^24.0.0"
   },
-  "main": "./dist/index.js",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts"
     },
     "./policy": {
       "types": "./dist/policy-schema/index.d.ts"
+    },
+    "./package.json": "./package.json"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts"
     },
     "./package.json": "./package.json"
   },
