@@ -57,7 +57,7 @@
     "eslint-plugin-node-import": "1.0.4",
     "eslint-plugin-react": "7.35.2",
     "glob": "10.4.5",
-    "husky": "9.1.5",
+    "husky": "9.1.6",
     "lint-staged": "15.2.10",
     "memfs": "4.11.1",
     "prettier": "3.3.3",
