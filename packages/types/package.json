@@ -20,7 +20,7 @@
   "types": "./dist/index.d.ts",
   "dependencies": {
     "@babel/types": "7.23.9",
-    "type-fest": "4.10.2"
+    "type-fest": "4.26.1"
   },
   "publishConfig": {
     "access": "public"
