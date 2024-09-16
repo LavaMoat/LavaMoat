@@ -212,6 +212,13 @@ class LavaMoatPlugin {
          */
         const unenforceableModuleIds = []
         /**
+         * A record of module ids that are externals and need to be enforced as
+         * builtins.
+         *
+         * @type {Record<string | number, string>}
+         */
+        const externals = {}
+        /**
          * @type {import('./buildtime/aa.js').IdentifierLookup}
          */
         let identifierLookup
@@ -268,14 +275,23 @@ class LavaMoatPlugin {
         /**
          * @param {import('webpack').Module} m
          * @param {string} moduleClass
-         * @returns {m is import('webpack').NormalModule} // TODO: this is not
+         * @returns {m is import('webpack').ExternalModule} // TODO: this is not
          *   true anymore, but there's no superclass of all reasonable module
          *   types
+         */
+        const isExternalModule = (m, moduleClass) =>
+          ['ExternalModule'].includes(moduleClass) &&
+          'externalType' in m &&
+          m.externalType !== undefined
+        /**
+         * @param {import('webpack').Module} m
+         * @param {string} moduleClass
+         * @returns {m is import('./buildtime/policyGenerator.js').InspectableWebpackModule}
          */
         const isInspectableModule = (m, moduleClass) =>
           'userRequest' in m ||
           m.type?.startsWith('javascript') ||
-          ['ExternalModule'].includes(moduleClass)
+          isExternalModule(m, moduleClass)
 
         // Old: good for collecting all possible paths, but bad for matching them with module ids
         // collect all paths resolved for the bundle and transition afterwards
@@ -317,6 +333,9 @@ class LavaMoatPlugin {
                 ) {
                   unenforceableModuleIds.push(moduleId)
                 } else {
+                  if (isExternalModule(module, moduleClass)) {
+                    externals[moduleId] = module.userRequest
+                  }
                   if (isInspectableModule(module, moduleClass)) {
                     policyGenerator.inspectWebpackModule(
                       module,
@@ -348,6 +367,7 @@ class LavaMoatPlugin {
             identifierLookup = generateIdentifierLookup({
               readableResourceIds: options.readableResourceIds,
               unenforceableModuleIds,
+              externals,
               paths: knownPaths,
               policy: policyToApply,
               canonicalNameMap,
@@ -451,6 +471,11 @@ class LavaMoatPlugin {
                   {
                     name: 'unenforceable',
                     data: identifierLookup.unenforceableModuleIds || null,
+                    json: true,
+                  },
+                  {
+                    name: 'externals',
+                    data: identifierLookup.externals || null,
                     json: true,
                   },
                   { name: 'options', data: runtimeOptions, json: true },

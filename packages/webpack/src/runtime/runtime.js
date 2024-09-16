@@ -87,20 +87,21 @@ const enforcePolicy = (specifier, referrerResourceId, wrappedRequire) => {
     return wrappedRequire()
   }
   const referrerPolicy = LAVAMOAT.policy.resources[referrerResourceId] || {}
-  if (referrerPolicy.builtin) {
-    if (referrerPolicy.builtin[specifier]) {
+  if (referrerPolicy.builtin && LAVAMOAT.externals[specifier]) {
+    const builtinName = LAVAMOAT.externals[specifier]
+    if (referrerPolicy.builtin[builtinName]) {
       return wrappedRequire()
     }
     if (
-      !specifier.includes('.') &&
+      !builtinName.includes('.') &&
       keys(referrerPolicy.builtin).some((key) =>
-        key.startsWith(`${specifier}.`)
+        key.startsWith(`${builtinName}.`)
       )
     ) {
       // create minimal selection if it's a builtin and not allowed as a whole, but with subpaths
       return getBuiltinForConfig(
         wrappedRequire(),
-        specifier,
+        builtinName,
         referrerPolicy.builtin
       )
     }
