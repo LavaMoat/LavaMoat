@@ -436,10 +436,12 @@ class LavaMoatPlugin {
                     json: true,
                   },
                   { name: 'options', data: runtimeOptions, json: true },
+                  (typeof runtimeOptions?.scuttleGlobalThis === 'boolean' && runtimeOptions?.scuttleGlobalThis === true) ||
+                  (typeof runtimeOptions?.scuttleGlobalThis === 'object' && runtimeOptions?.scuttleGlobalThis?.enabled === true) ?
                   {
                     name: 'scuttle',
                     shimRequire: 'lavamoat-core/src/scuttle.js',
-                  },
+                  } : {},
                   { name: 'policy', data: policyData, json: true },
                   {
                     name: 'ENUM',
