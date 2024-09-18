@@ -4,12 +4,20 @@ const fs = require('node:fs')
 const q = JSON.stringify
 
 /**
+ * Flags enabling runtime features based on webpack's runtime requirements.
+ * Using this decouples the concept of runtime requirements from wrapper.
+ *
+ * @typedef {object} RuntimeFlags
+ * @property {boolean} [thisAsExports]
+ */
+/**
  * @typedef {object} WrappingInput
  * @property {string} source
  * @property {string} id
  * @property {string[] | Set<string>} runtimeKit
  * @property {string} evalKitFunctionName
  * @property {boolean} [runChecks]
+ * @property {RuntimeFlags} [runtimeFlags]
  */
 
 const {
@@ -33,12 +41,25 @@ exports.wrapper = function wrapper({
   runtimeKit,
   evalKitFunctionName,
   runChecks = true,
+  runtimeFlags = {},
 }) {
+  const runtimeKitArray = Array.from(runtimeKit)
   // validateSource(source);
 
   // No AST used in these transforms, so string cmparison should indicate if anything was changed.
   const sesCompatibleSource = applySourceTransforms(source)
   const sourceChanged = source !== sesCompatibleSource
+
+  // This adds support for mapping `this` to `exports` or `module.exports` if webpack detected it's necessary
+  let optionalBinding = ''
+
+  if (runtimeFlags.thisAsExports) {
+    if (runtimeKitArray.includes('exports')) {
+      optionalBinding = '.bind(exports)'
+    } else if (runtimeKitArray.includes('module')) {
+      optionalBinding = '.bind(module.exports)'
+    }
+  }
 
   // TODO: Consider: We could save some bytes by merging scopeTerminator and runtimeHandler, but then runtime calls would go through a proxy, which is slower. Merging runtimeKit with globalThis would also be problematic.
 
@@ -56,9 +77,9 @@ exports.wrapper = function wrapper({
       }
     }
     }
-}).call(${evalKitFunctionName}(${q(id)}, { ${Array.from(runtimeKit).join(
+}).call(${evalKitFunctionName}(${q(id)}, { ${runtimeKitArray.join(
     ','
-  )}}))()`
+  )}}))${optionalBinding}()`
   if (runChecks) {
     validateSource(before + sesCompatibleSource + after)
   }
