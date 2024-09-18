@@ -419,7 +419,7 @@ class LavaMoatPlugin {
                 // narrow down the policy and map to module identifiers
                 const policyData = identifierLookup.getTranslatedPolicy()
 
-                const lavaMoatRuntime = assembleRuntime(RUNTIME_KEY, [
+                const runtimeChunks = [
                   {
                     name: 'root',
                     data: identifierLookup.root || null,
@@ -456,7 +456,12 @@ class LavaMoatPlugin {
                     name: 'runtime',
                     file: path.join(__dirname, './runtime/runtime.js'),
                   },
-                ])
+                ]
+
+                const lavaMoatRuntime = assembleRuntime(
+                  RUNTIME_KEY,
+                  runtimeChunks
+                )
 
                 // set.add(RuntimeGlobals.onChunksLoaded); // TODO: develop an understanding of what this line does and why it was a part of the runtime setup for module federation
 
