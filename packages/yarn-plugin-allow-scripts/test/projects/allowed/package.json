@@ -1,0 +1,9 @@
+{
+  "name": "allowed",
+  "packageManager": "yarn@4.5.0",
+  "lavamoat": {
+    "allowScripts": {
+      "@lavamoat/preinstall-always-fail": false
+    }
+  }
+}

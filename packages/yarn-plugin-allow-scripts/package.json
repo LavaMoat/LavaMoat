@@ -11,27 +11,48 @@
   "private": true,
   "engines": {
     "node": "^16.20.0 || ^18.0.0 || ^20.0.0 || ^22.0.0",
-    "yarn": "^3.1.1 || ^4.3.1"
+    "yarn": "^4.4.1"
   },
   "main": "./src/index.ts",
   "scripts": {
-    "build": "builder build plugin",
+    "build": "node scripts/build.js",
     "rebuild": "npm run build",
-    "test": "exit 0"
+    "test": "npm run build && ava"
   },
   "peerDependencies": {
     "@lavamoat/allow-scripts": ">=3.0.4",
     "@lavamoat/preinstall-always-fail": "*",
-    "@yarnpkg/cli": "^3.8.3 || ^4.3.1"
+    "@yarnpkg/cli": "^4.4.1",
+    "@yarnpkg/core": "4.1.2"
   },
-  "dependencies": {
+  "dependencies": {},
+  "devDependencies": {
     "@lavamoat/allow-scripts": "3.2.0",
     "@lavamoat/preinstall-always-fail": "2.1.0",
-    "@yarnpkg/core": "3.7.0",
-    "@yarnpkg/shell": "3.3.0"
+    "@septh/ts-run": "1.2.6",
+    "@yarnpkg/builder": "4.2.0",
+    "@yarnpkg/cli": "4.4.1",
+    "@yarnpkg/core": "4.1.2",
+    "@yarnpkg/shell": "4.0.2",
+    "ava": "6.1.3",
+    "corepack": "0.29.4",
+    "npm-run-path": "6.0.0"
   },
-  "devDependencies": {
-    "@yarnpkg/builder": "3.3.1",
-    "@yarnpkg/cli": "3.8.5"
+  "ava": {
+    "files": [
+      "test/*.spec.mts"
+    ],
+    "timeout": "30s",
+    "environmentVariables": {
+      "YARN_ENABLE_HARDENED_MODE": "0"
+    },
+    "extensions": {
+      "ts": "module",
+      "mts": "module",
+      "cts": "commonjs"
+    },
+    "nodeArguments": [
+      "--import=@septh/ts-run/register"
+    ]
   }
 }
