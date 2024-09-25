@@ -1,11 +1,14 @@
 import test from 'ava'
-import { rmSync } from 'node:fs'
+import { existsSync, rmSync } from 'node:fs'
 import { dirname, join, normalize } from 'node:path'
 import { SpawnSyncOptions } from 'node:child_process'
 import { spawnSync } from 'node:child_process'
 import { npmRunPath } from 'npm-run-path';
 
 const isWindows = process.platform === 'win32';
+const portablePath = isWindows
+  ? (p) => p.replace(/^[\\]/, '')
+  : (p) => p
 
 /**
  * For fat fingers
@@ -22,6 +25,7 @@ const cleanup = (projectName: string) => {
       'exec',
       'rimraf',
       '.git',
+      '.yarn',
     ],
     {
       cwd: projectRoot,
@@ -171,6 +175,40 @@ test('install - allows adding and installing package with specified preinstall s
   }
 })
 
+test('install - allows execution of allowed yarn classic dependencies', async (t: any) => {
+  const projectName = 'protected-configured';
+  const projectRoot = join(dirname(import.meta.url.replace(/^file:/, '')), 'projects', projectName)
+
+  try {
+    run(t, ['plugin', 'import', normalize('../../../bundles/@yarnpkg/plugin-allow-scripts.js')], projectRoot)
+
+    // trigger the plugin
+    const installRes = run(t, ['install', '--inline-builds'], projectRoot, {YARN_IGNORE_SCRIPTS: 'false'})
+    t.is(installRes.exitCode, 0);
+    t.true(existsSync(portablePath(join(projectRoot, 'node_modules', 'allowed-dep', 'foo'))));
+  } finally {
+    cleanup(projectName);
+  }
+})
+
+test('install - blocks execution of unallowed yarn classic dependencies', async (t: any) => {
+  const projectName = 'protected-unconfigured';
+  const projectRoot = join(dirname(import.meta.url.replace(/^file:/, '')), 'projects', projectName)
+
+  try {
+    run(t, ['plugin', 'import', normalize('../../../bundles/@yarnpkg/plugin-allow-scripts.js')], projectRoot)
+    run(t, ['config', 'set', 'enableScripts', 'false'], projectRoot)
+
+    // trigger the plugin
+    const installRes = run(t, ['install', '--inline-builds'], projectRoot)
+    t.is(installRes.exitCode, 1);
+    t.false(existsSync(portablePath(join(projectRoot, 'node_modules', 'allowed-dep', 'foo'))));
+    t.false(existsSync(portablePath(join(projectRoot, 'node_modules', 'disallowed-dep', 'foo'))));
+  } finally {
+    cleanup(projectName);
+  }
+})
+
 function realisticEnvOptions(projectRoot: string): SpawnSyncOptions {
   return {
     cwd: isWindows ? projectRoot.replace(/^[\/\\]/, '') : projectRoot,
@@ -181,10 +219,16 @@ function realisticEnvOptions(projectRoot: string): SpawnSyncOptions {
       COREPACK_AUTO_PIN: '0',
       COREPACK_ENABLE_PROJECT_SPEC: '1',
       COREPACK_ENABLE_STRICT: '0',
-      YARN_ENABLE_COLORS: 'false',
+      YARN_ENABLE_COLORS: false.toString(),
+      // without this, yarn berry will error on env vars intended for yarn v1
+      YARN_ENABLE_STRICT_SETTINGS: false.toString(),
+
       YARN_NODE_LINKER: 'node-modules',
       // yarn ignores its own color settings only in GitHub Actions
       FORCE_COLOR: '0',
+      GITHUB_ACTIONS: undefined,
+      GITHUB_EVENT_PATH: undefined,
+      CI: false.toString(),
       INIT_CWD: projectRoot,
     },
     windowsVerbatimArguments: isWindows,

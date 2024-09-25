@@ -42,7 +42,7 @@
     "files": [
       "test/*.spec.mts"
     ],
-    "timeout": "30s",
+    "timeout": "60s",
     "environmentVariables": {
       "YARN_ENABLE_HARDENED_MODE": "0"
     },

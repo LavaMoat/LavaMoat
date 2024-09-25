@@ -1,0 +1,13 @@
+{
+  "name": "protected-configured",
+  "private": true,
+  "packageManager": "yarn@4.5.0",
+  "dependencies": {
+    "allowed-dep": "git+https://github.com/LavaMoat/foowriter#commit=47ff5e862e5cceb0116768cd5b660b82945fa61a"
+  },
+  "lavamoat": {
+    "allowScripts": {
+      "allowed-dep": true
+    }
+  }
+}
