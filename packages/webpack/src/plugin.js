@@ -525,59 +525,81 @@ class LavaMoatPlugin {
                   )
                   return
                 }
-                diag.rawDebug(
-                  1,
-                  '> adding runtime (additionalChunkRuntimeRequirements)'
-                )
-                // narrow down the policy and map to module identifiers
-                const policyData = identifierLookup.getTranslatedPolicy()
+                let runtimeChunks = []
+                if (
+                  chunk.name &&
+                  options.unlockedChunksUnsafe?.test(chunk.name)
+                ) {
+                  diag.rawDebug(
+                    1,
+                    `> adding UNLOCKED runtime for chunk ${chunk.name}`
+                  )
+                  runtimeChunks = [
+                    {
+                      name: 'ENUM',
+                      file: path.join(__dirname, './ENUM.json'),
+                      json: true,
+                    },
+                    {
+                      name: 'runtime',
+                      file: path.join(
+                        __dirname,
+                        './runtime/runtimeUnlocked.js'
+                      ),
+                    },
+                  ]
+                } else {
+                  diag.rawDebug(1, `> adding runtime for chunk ${chunk.name}`)
+                  // narrow down the policy and map to module identifiers
+                  const policyData = identifierLookup.getTranslatedPolicy()
 
-                const runtimeChunks = [
-                  {
-                    name: 'root',
-                    data: identifierLookup.root || null,
-                    json: true,
-                  },
-                  {
-                    name: 'idmap',
-                    data: identifierLookup.identifiersForModuleIds || null,
-                    json: true,
-                  },
-                  {
-                    name: 'unenforceable',
-                    data: identifierLookup.unenforceableModuleIds || null,
-                    json: true,
-                  },
-                  {
-                    name: 'externals',
-                    data: identifierLookup.externals || null,
-                    json: true,
-                  },
-                  { name: 'options', data: runtimeOptions, json: true },
-                  (typeof runtimeOptions?.scuttleGlobalThis === 'boolean' &&
-                    runtimeOptions.scuttleGlobalThis === true) ||
-                  (typeof runtimeOptions?.scuttleGlobalThis === 'object' &&
-                    runtimeOptions.scuttleGlobalThis.enabled === true)
-                    ? {
+                  runtimeChunks = [
+                    {
+                      name: 'root',
+                      data: identifierLookup.root || null,
+                      json: true,
+                    },
+                    {
+                      name: 'idmap',
+                      data: identifierLookup.identifiersForModuleIds || null,
+                      json: true,
+                    },
+                    {
+                      name: 'unenforceable',
+                      data: identifierLookup.unenforceableModuleIds || null,
+                      json: true,
+                    },
+                    {
+                      name: 'externals',
+                      data: identifierLookup.externals || null,
+                      json: true,
+                    },
+                    { name: 'options', data: runtimeOptions, json: true },
+                    (typeof runtimeOptions?.scuttleGlobalThis === 'boolean' &&
+                      runtimeOptions.scuttleGlobalThis === true) ||
+                    (typeof runtimeOptions?.scuttleGlobalThis === 'object' &&
+                      runtimeOptions.scuttleGlobalThis.enabled === true)
+                      ? {
                         name: 'scuttling',
                         shimRequire: 'lavamoat-core/src/scuttle.js',
                       }
-                    : {},
-                  { name: 'policy', data: policyData, json: true },
-                  {
-                    name: 'ENUM',
-                    file: path.join(__dirname, './ENUM.json'),
-                    json: true,
-                  },
-                  {
-                    name: 'endowmentsToolkit',
-                    shimRequire: 'lavamoat-core/src/endowmentsToolkit.js',
-                  },
-                  {
-                    name: 'runtime',
-                    file: path.join(__dirname, './runtime/runtime.js'),
-                  },
-                ]
+                      : {},
+                    {name: 'policy', data: policyData, json: true},
+                    {
+                      name: 'ENUM',
+                      file: path.join(__dirname, './ENUM.json'),
+                      json: true,
+                    },
+                    {
+                      name: 'endowmentsToolkit',
+                      shimRequire: 'lavamoat-core/src/endowmentsToolkit.js',
+                    },
+                    {
+                      name: 'runtime',
+                      file: path.join(__dirname, './runtime/runtime.js'),
+                    },
+                  ]
+                }
 
                 if (options.debugRuntime) {
                   runtimeChunks.push({
@@ -682,6 +704,8 @@ module.exports = LavaMoatPlugin
  * @property {boolean} [HtmlWebpackPluginInterop] - Add a script tag to the html
  *   output for lockdown.js if HtmlWebpackPlugin is in use
  * @property {RegExp} [inlineLockdown] - Prefix the matching files with lockdown
+ * @property {RegExp} [unlockedChunksUnsafe] - Give matching chunks an unsafe
+ *   runtime with no policy enforcement
  * @property {number} [diagnosticsVerbosity] - A number representing diagnostics
  *   output verbosity, the larger the more overwhelming
  * @property {LockdownOptions} lockdown - Options to pass to SES lockdown
