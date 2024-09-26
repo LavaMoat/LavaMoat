@@ -9,9 +9,14 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { loadCompartmentMap } from '../compartment-map.js'
 import { DEFAULT_POLICY_DEBUG_PATH, DEFAULT_POLICY_PATH } from '../constants.js'
-import { makeReadPowers } from '../power.js'
+import { defaultReadPowers } from '../power.js'
 import { writeJson } from '../util.js'
 import { PolicyGenerator } from './policy-generator.js'
+
+/**
+ * @import {GenerateOptions, GeneratePolicyOptions, PolicyGeneratorOptions} from '../types.js';
+ * @import {LavaMoatPolicy, LavaMoatPolicyDebug} from 'lavamoat-core';
+ */
 
 /**
  * Generates a LavaMoat debug policy from a given entry point using
@@ -19,8 +24,8 @@ import { PolicyGenerator } from './policy-generator.js'
  *
  * @overload
  * @param {string | URL} entrypointPath
- * @param {import('./types.js').GenerateOptions & { debug: true }} opts
- * @returns {Promise<import('lavamoat-core').LavaMoatPolicyDebug>}
+ * @param {GenerateOptions & { debug: true }} opts
+ * @returns {Promise<LavaMoatPolicyDebug>}
  */
 
 /**
@@ -29,8 +34,8 @@ import { PolicyGenerator } from './policy-generator.js'
  *
  * @overload
  * @param {string | URL} entrypointPath
- * @param {import('./types.js').GenerateOptions} [opts]
- * @returns {Promise<import('lavamoat-core').LavaMoatPolicy>}
+ * @param {GenerateOptions} [opts]
+ * @returns {Promise<LavaMoatPolicy>}
  */
 
 /**
@@ -38,15 +43,18 @@ import { PolicyGenerator } from './policy-generator.js'
  * `@endo/compartment-mapper`
  *
  * @param {string | URL} entrypointPath
- * @param {import('./types.js').GenerateOptions} [opts]
- * @returns {Promise<import('lavamoat-core').LavaMoatPolicy>}
+ * @param {GenerateOptions} [opts]
+ * @returns {Promise<LavaMoatPolicy>}
  */
 async function generate(
   entrypointPath,
-  { readPowers: powers, debug = false, policyOverride, ...archiveOpts } = {}
+  {
+    readPowers = defaultReadPowers,
+    debug = false,
+    policyOverride,
+    ...archiveOpts
+  } = {}
 ) {
-  const readPowers = makeReadPowers(powers)
-
   const { compartmentMap, sources, renames } = await loadCompartmentMap(
     entrypointPath,
     {
@@ -55,7 +63,7 @@ async function generate(
     }
   )
 
-  /** @type {import('./types.js').PolicyGeneratorOptions} */
+  /** @type {PolicyGeneratorOptions} */
   const baseOpts = { readPowers, policyOverride }
 
   // this weird thing is to make TS happy about the overload
@@ -74,8 +82,8 @@ async function generate(
  * `@endo/compartment-mapper` and writes the result to disk
  *
  * @param {string | URL} entrypointPath
- * @param {import('./types.js').GeneratePolicyOptions} [opts]
- * @returns {Promise<import('lavamoat-core').LavaMoatPolicy>}
+ * @param {GeneratePolicyOptions} [opts]
+ * @returns {Promise<LavaMoatPolicy>}
  * @public
  */
 export async function generateAndWritePolicy(entrypointPath, opts = {}) {
@@ -85,31 +93,37 @@ export async function generateAndWritePolicy(entrypointPath, opts = {}) {
 /**
  * Returns `true` if we should write a debug policy
  *
- * @param {import('./types.js').GeneratePolicyOptions} [opts]
+ * @param {Pick<GeneratePolicyOptions, 'write' | 'debug'>} [opts]
  * @returns {boolean}
  */
 function shouldWriteDebugPolicy(opts = {}) {
   return Boolean(opts.write && opts.debug)
 }
 
+const ABS_POLICY_DEBUG_PATH = path.resolve(DEFAULT_POLICY_DEBUG_PATH)
+const ABS_POLICY_PATH = path.resolve(DEFAULT_POLICY_PATH)
+
 /**
  * Generates a LavaMoat policy or debug policy from a given entry point using
  * `@endo/compartment-mapper`
  *
  * @param {string | URL} entrypointPath
- * @param {import('./types.js').GeneratePolicyOptions} [opts]
- * @returns {Promise<import('lavamoat-core').LavaMoatPolicy>}
+ * @param {GeneratePolicyOptions} [opts]
+ * @returns {Promise<LavaMoatPolicy>}
  * @public
  */
-export async function generatePolicy(entrypointPath, opts = {}) {
-  const {
-    policyDebugPath = path.resolve(DEFAULT_POLICY_DEBUG_PATH),
-    policyPath = path.resolve(DEFAULT_POLICY_PATH),
+export async function generatePolicy(
+  entrypointPath,
+  {
+    policyDebugPath = ABS_POLICY_DEBUG_PATH,
+    policyPath = ABS_POLICY_PATH,
     fs = nodeFs,
+    readPowers = defaultReadPowers,
     write: shouldWrite = false,
+    debug,
     ...generateOpts
-  } = opts
-
+  } = {}
+) {
   if (entrypointPath instanceof URL) {
     entrypointPath = fileURLToPath(entrypointPath)
   }
@@ -135,7 +149,7 @@ export async function generatePolicy(entrypointPath, opts = {}) {
   /**
    * This value will be returned once populated
    *
-   * @type {import('lavamoat-core').LavaMoatPolicy}
+   * @type {LavaMoatPolicy}
    */
   let policy
 
@@ -145,9 +159,10 @@ export async function generatePolicy(entrypointPath, opts = {}) {
    * then extract everything except the `debugInfo` prop, and write _that_ to
    * {@link policy}
    */
-  if (shouldWriteDebugPolicy(opts)) {
+  if (shouldWriteDebugPolicy({ write: shouldWrite, debug })) {
     const debugPolicy = await generate(entrypointPath, {
       ...generateOpts,
+      readPowers,
       debug: true,
     })
     await writeJson(policyDebugPath, debugPolicy, { fs })
@@ -155,11 +170,12 @@ export async function generatePolicy(entrypointPath, opts = {}) {
     // do not attempt to use the `delete` keyword with typescript. you have been
     // warned!
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { debugInfo: _, ...corePolicy } =
-      /** @type {import('lavamoat-core').LavaMoatPolicyDebug} */ (debugPolicy)
+    const { debugInfo: _, ...corePolicy } = /** @type {LavaMoatPolicyDebug} */ (
+      debugPolicy
+    )
     policy = corePolicy
   } else {
-    policy = await generate(entrypointPath, generateOpts)
+    policy = await generate(entrypointPath, { ...generateOpts, readPowers })
   }
 
   if (shouldWrite) {

@@ -23,7 +23,7 @@ export async function readPolicy(filepath = constants.DEFAULT_POLICY_PATH) {
  * Reads a `policy-override.json` from disk
  *
  * @param {string | URL} [filepath]
- * @returns {Promise<unknown>}
+ * @returns {Promise<unknown | undefined>}
  */
 export async function readPolicyOverride(
   filepath = constants.DEFAULT_POLICY_OVERRIDE_PATH
@@ -56,7 +56,7 @@ export async function loadPolicies(
       return allegedPolicy
     }),
     readPolicyOverride(policyOverridePath).then((allegedPolicy) => {
-      assertPolicyOverride(allegedPolicy)
+      assertPolicyOverrides(allegedPolicy)
       return allegedPolicy
     }),
   ])
@@ -109,8 +109,8 @@ export function assertPolicy(value) {
  * @param {unknown} value
  * @returns {asserts value is LavaMoatPolicyOverrides}
  */
-export function assertPolicyOverride(value) {
+export function assertPolicyOverrides(value) {
   if (!isPolicyOverride(value)) {
-    throw new TypeError('Invalid LavaMoat override policy')
+    throw new TypeError('Invalid LavaMoat policy overrides')
   }
 }

@@ -23,7 +23,13 @@ import {
   loadPolicies,
   run,
 } from './index.js'
+import { defaultReadPowers } from './power.js'
 import { readJsonFile } from './util.js'
+
+/**
+ * @import {PackageJson} from 'type-fest';
+ * @import {LavaMoatPolicy} from 'lavamoat-core';
+ */
 
 const BEHAVIOR_GROUP = 'Behavior Options:'
 
@@ -32,7 +38,7 @@ const BEHAVIOR_GROUP = 'Behavior Options:'
  */
 async function main(args = hideBin(process.argv)) {
   // see note below above the call to `.version()`
-  const { version } = /** @type {import('type-fest').PackageJson} */ (
+  const { version } = /** @type {PackageJson} */ (
     await readJsonFile(new URL('../package.json', import.meta.url))
   )
 
@@ -157,7 +163,7 @@ async function main(args = hideBin(process.argv)) {
        */
       async (argv) => {
         await Promise.resolve()
-        /** @type {import('lavamoat-core').LavaMoatPolicy} */
+        /** @type {LavaMoatPolicy} */
         let policy
         try {
           policy = await loadPolicies(argv.policy, argv['policy-override'])
@@ -227,6 +233,7 @@ async function main(args = hideBin(process.argv)) {
           debug,
           policyPath,
           policyDebugPath,
+          readPowers: defaultReadPowers,
         })
 
         if (debug) {

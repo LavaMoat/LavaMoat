@@ -28,7 +28,7 @@ const InlineSourceTypes = /** @type {const} */ ({
 
 /**
  * @typedef {import('type-fest').Except<
- *   import('../../src/policy-gen/types.js').GeneratePolicyOptions,
+ *   import('../../src/types.js').GeneratePolicyOptions,
  *   'readPowers'
  * >} TestPolicyForJSONOptions
  */

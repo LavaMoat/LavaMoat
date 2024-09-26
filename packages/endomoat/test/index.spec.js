@@ -73,7 +73,6 @@ test('dynamic imports - run a native module', async (t) => {
           'path.resolve': true,
         },
         native: true,
-        dynamic: true,
       },
     },
   }

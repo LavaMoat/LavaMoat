@@ -5,13 +5,12 @@ import {
   POLICY_ITEM_ROOT,
   POLICY_ITEM_WILDCARD,
   RSRC_POLICY_BUILTINS,
-  RSRC_POLICY_DYNAMIC,
   RSRC_POLICY_GLOBALS,
   RSRC_POLICY_OPTION_NATIVE,
   RSRC_POLICY_OPTIONS,
   RSRC_POLICY_PKGS,
 } from './constants.js'
-import { readPolicy } from './policy.js'
+import { assertPolicyOverrides, readPolicyOverride } from './policy.js'
 
 const { isArray } = Array
 const { entries, fromEntries } = Object
@@ -150,7 +149,6 @@ function convertEndoPackagePolicy(resources) {
     [RSRC_POLICY_GLOBALS]: convertEndoPackagePolicyGlobals(resources.globals),
     [RSRC_POLICY_BUILTINS]: convertEndoPackagePolicyBuiltins(resources.builtin),
     [RSRC_POLICY_OPTIONS]: convertEndoPackagePolicyOptions(resources),
-    [RSRC_POLICY_DYNAMIC]: Boolean(resources.dynamic),
   }
 }
 
@@ -162,9 +160,16 @@ function convertEndoPackagePolicy(resources) {
  */
 export async function toEndoPolicy(lmPolicy) {
   // policy for self; needed for attenuator
-  const overrides = await readPolicy(
+  /** @type {import('lavamoat-core').LavaMoatPolicyOverrides} */
+  let overrides = {}
+  const allegedOverrides = await readPolicyOverride(
     new URL('./policy-override.json', import.meta.url)
   )
+
+  if (allegedOverrides) {
+    assertPolicyOverrides(allegedOverrides)
+    overrides = allegedOverrides
+  }
 
   const finalLMPolicy = mergePolicy(lmPolicy, overrides)
 

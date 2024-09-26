@@ -10,6 +10,12 @@ import { toEndoPolicy } from './policy-converter.js'
 import { defaultReadPowers } from './power.js'
 import { toURLString } from './util.js'
 
+/**
+ * @import {SyncReadPowers} from '@endo/compartment-mapper';
+ * @import {LavaMoatPolicy} from 'lavamoat-core';
+ * @import {LoadCompartmentMapOptions} from './types.js';
+ */
+
 const { entries, fromEntries, freeze } = Object
 
 /**
@@ -42,7 +48,7 @@ export const ENDO_OPTIONS = freeze(
  * Loads compartment map and associated sources.
  *
  * @param {string | URL} entrypointPath
- * @param {import('./policy-gen/types.js').LoadCompartmentMapOptions} opts
+ * @param {LoadCompartmentMapOptions} opts
  * @internal
  */
 
@@ -87,9 +93,9 @@ export async function loadCompartmentMap(
  * Endo policy
  *
  * @template [T=unknown] Default is `unknown`
- * @param {import('@endo/compartment-mapper').ReadPowers} readPowers
+ * @param {SyncReadPowers} readPowers
  * @param {string | URL} entrypointPath
- * @param {import('lavamoat-core').LavaMoatPolicy} policy
+ * @param {LavaMoatPolicy} policy
  * @returns {Promise<T>}
  * @internal
  */

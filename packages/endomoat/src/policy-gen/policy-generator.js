@@ -74,7 +74,7 @@ export class PolicyGenerator {
    * @param {import('@endo/compartment-mapper').Sources} sources Sources
    * @param {Record<string, string>} renames Mapping of compartment name to
    *   filepath
-   * @param {import('./types.js').PolicyGeneratorOptions} opts Additional
+   * @param {import('../types.js').PolicyGeneratorOptions} opts Additional
    *   options
    */
   constructor(
@@ -249,7 +249,7 @@ export class PolicyGenerator {
    * >} compartmentMap
    * @param {Readonly<import('@endo/compartment-mapper').Sources>} sources
    * @param {Readonly<Record<string, string>>} renames
-   * @param {import('./types.js').PolicyGeneratorOptions & { debug: true }} options
+   * @param {import('../types.js').PolicyGeneratorOptions & { debug: true }} options
    * @returns {Promise<import('lavamoat-core').LavaMoatPolicyDebug>} Generated
    *   debug policy
    * @public
@@ -264,7 +264,7 @@ export class PolicyGenerator {
    * >} compartmentMap
    * @param {Readonly<import('@endo/compartment-mapper').Sources>} sources
    * @param {Readonly<Record<string, string>>} renames
-   * @param {import('./types.js').PolicyGeneratorOptions} [options]
+   * @param {import('../types.js').PolicyGeneratorOptions} [options]
    * @returns {Promise<import('lavamoat-core').LavaMoatPolicy>} Generated policy
    */
 
@@ -276,7 +276,7 @@ export class PolicyGenerator {
    * >} compartmentMap
    * @param {Readonly<import('@endo/compartment-mapper').Sources>} sources
    * @param {Readonly<Record<string, string>>} renames
-   * @param {import('./types.js').PolicyGeneratorOptions & {
+   * @param {import('../types.js').PolicyGeneratorOptions & {
    *   debug?: boolean
    * }} [options]
    * @returns {Promise<import('lavamoat-core').LavaMoatPolicy>} Generated policy
@@ -301,7 +301,7 @@ export class PolicyGenerator {
    * @param {import('@endo/compartment-mapper').Sources} sources Sources
    * @param {Record<string, string>} renames Mapping of compartment name to
    *   filepath
-   * @param {import('./types.js').PolicyGeneratorOptions} opts Additional
+   * @param {import('../types.js').PolicyGeneratorOptions} opts Additional
    *   options
    */
   static create(compartmentMap, sources, renames, opts = {}) {

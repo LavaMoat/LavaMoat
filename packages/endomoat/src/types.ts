@@ -1,27 +1,140 @@
 import {
+  CryptoAPI,
+  PathAPI,
+  SyncReadPowers,
+  UrlAPI,
+  type CaptureOptions,
   type FsAPI,
   type PackagePolicy,
   type Policy,
   type PropertyPolicy,
 } from '@endo/compartment-mapper'
-import { Merge, MergeDeep } from 'type-fest'
-import {
+import { type LavaMoatPolicyOverrides } from 'lavamoat-core'
+import { Merge, MergeDeep, type Except, type Simplify } from 'type-fest'
+
+/**
+ * Options to pass-through to Endo.
+ *
+ * Used by {@link GeneratePolicyOptions}.
+ *
+ * The {@link EndoArchiveOptions.dev dev} property defaults to `true`.
+ *
+ * @remarks
+ * Omitted properties cannot by overridden by the user.
+ */
+export type BaseLoadCompartmentMapOptions = Except<
+  CaptureOptions,
+  'importHook' | 'moduleTransforms'
+>
+
+/**
+ * A subset of unique options for {@link GeneratePolicyOptions}
+ */
+export interface BaseGeneratePolicyOptions {
+  /**
+   * If `true`, generate a debug policy.
+   */
+  debug?: boolean
+}
+
+/**
+ * Options having a `policyOverride` property.
+ */
+export interface WithPolicyOverride {
+  /**
+   * Policy overrides, if any
+   */
+  policyOverride?: LavaMoatPolicyOverrides
+}
+
+/**
+ * Options for `generatePolicy`
+ */
+export type GeneratePolicyOptions = Simplify<
+  BaseLoadCompartmentMapOptions &
+    BaseGeneratePolicyOptions &
+    WithReadPowers &
+    WithPolicyOverride &
+    WritePolicyOptions
+>
+
+/**
+ * Options having a `readPowers` property.
+ */
+export interface WithReadPowers {
+  /**
+   * Read powers to use when loading the compartment map.
+   */
+  readPowers?: SyncReadPowers
+  fs?: FsAPI
+  crypto?: CryptoAPI
+  path?: PathAPI
+  url?: UrlAPI
+}
+
+/**
+ * Options for internal `generate` function
+ *
+ * @internal
+ */
+export type GenerateOptions = Except<
   GeneratePolicyOptions,
-  WithReadPowersOrFsAPI,
-} from './policy-gen/types.js'
+  keyof WritePolicyOptions
+>
+
+/**
+ * Options available when writing a policy
+ */
+export interface WritePolicyOptions {
+  policyDebugPath?: string
+  policyPath?: string
+  fs?: WritableFsAPI
+  write?: boolean
+}
+
+/**
+ * Options for `loadCompartmentMap`
+ *
+ * @internal
+ */
+export type LoadCompartmentMapOptions = Simplify<
+  BaseLoadCompartmentMapOptions & WithReadPowers
+>
+
+/**
+ * Options for the `PolicyGeneratorContext` constructor
+ *
+ * @internal
+ */
+export type PolicyGeneratorContextOptions = Simplify<
+  WithReadPowers & {
+    /**
+     * If `true`, the `PolicyGeneratorContext` represents the entry compartment
+     */
+    isEntry?: boolean
+  }
+>
+
+/**
+ * Options for the `PolicyGenerator` constructor
+ *
+ * @internal
+ */
+export type PolicyGeneratorOptions = Simplify<
+  WithReadPowers & WithPolicyOverride
+>
 
 /**
  * Options for `run` w/o automatic policy generation
  */
-export type RunOptions = WithReadPowersOrFsAPI
+export type RunOptions = Merge<WithReadPowers, WithFsAPI>
+
+export type WithFsAPI = { fs?: FsAPI }
 
 /**
  * Options for `run` w/ automatic policy generation
  */
-export type GenerateAndRunOptions = Merge<
-  GeneratePolicyOptions,
-  WithReadPowersOrFsAPI
->
+export type GenerateAndRunOptions = Merge<RunOptions, GeneratePolicyOptions>
 
 /**
  * "Root" identifier for a LavaMoat global policy item in the context of an Endo

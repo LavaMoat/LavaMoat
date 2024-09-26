@@ -16,6 +16,10 @@ import {
 } from '../constants.js'
 import { defaultReadPowers } from '../power.js'
 
+/**
+ * @import {SyncReadPowers, CompartmentDescriptor, ModuleDescriptor, ModuleSource, CompartmentSources} from '@endo/compartment-mapper'
+ */
+
 const { entries, keys, fromEntries } = Object
 
 /**
@@ -41,7 +45,7 @@ export class PolicyGeneratorContext {
   /**
    * Read powers
    *
-   * @type {import('@endo/compartment-mapper').ReadPowers}
+   * @type {SyncReadPowers}
    */
   #readPowers
 
@@ -50,9 +54,7 @@ export class PolicyGeneratorContext {
    *
    * @remarks
    * Exposed for debugging
-   * @type {Readonly<
-   *   import('@endo/compartment-mapper').CompartmentDescriptor
-   * >}
+   * @type {Readonly<CompartmentDescriptor>}
    * @internal
    */
   compartment
@@ -81,12 +83,10 @@ export class PolicyGeneratorContext {
    * {@link PolicyGeneratorContext.create static factory method} of the same
    * class. This is intentional, since inheritance is undesirable in this case.
    * @private
-   * @param {Readonly<
-   *   import('@endo/compartment-mapper').CompartmentDescriptor
-   * >} compartment
+   * @param {Readonly<CompartmentDescriptor>} compartment
    * @param {Readonly<Record<string, string>>} renames
    * @param {Readonly<import('./lmr-cache.js').LMRCache>} lmrCache
-   * @param {Readonly<import('./types.js').PolicyGeneratorContextOptions>} opts
+   * @param {Readonly<import('../types.js').PolicyGeneratorContextOptions>} opts
    */
   constructor(
     compartment,
@@ -123,7 +123,7 @@ export class PolicyGeneratorContext {
    * form an absolute path.
    *
    * @overload
-   * @param {Required<import('@endo/compartment-mapper').ModuleDescriptor>} descriptor
+   * @param {Required<ModuleDescriptor>} descriptor
    * @returns {string}
    * @internal
    * @todo Evaluate windows compat
@@ -142,8 +142,7 @@ export class PolicyGeneratorContext {
    * @remarks
    * In Endo, the `compartment` is stored as a _string_ `file://` URL; hence the
    * conversion.
-   * @param {string
-   *   | Required<import('@endo/compartment-mapper').ModuleDescriptor>} descriptorOrLocation
+   * @param {string | Required<ModuleDescriptor>} descriptorOrLocation
    * @returns {string}
    * @internal
    * @todo There may be a safer way to do this conversion
@@ -235,7 +234,7 @@ export class PolicyGeneratorContext {
    * we need both.
    *
    * @param {unknown} descriptor
-   * @returns {descriptor is Required<import('@endo/compartment-mapper').ModuleDescriptor>}
+   * @returns {descriptor is Required<ModuleDescriptor>}
    * @this {void}
    * @internal
    */
@@ -251,12 +250,10 @@ export class PolicyGeneratorContext {
   /**
    * Factory to create a new {@link PolicyGeneratorContext}
    *
-   * @param {Readonly<
-   *   import('@endo/compartment-mapper').CompartmentDescriptor
-   * >} compartment
+   * @param {Readonly<CompartmentDescriptor>} compartment
    * @param {Readonly<Record<string, string>>} renames
    * @param {Readonly<import('./lmr-cache.js').LMRCache>} lmrCache
-   * @param {Readonly<import('./types.js').PolicyGeneratorContextOptions>} opts
+   * @param {Readonly<import('../types.js').PolicyGeneratorContextOptions>} opts
    */
   static create(compartment, renames, lmrCache, opts = {}) {
     return new PolicyGeneratorContext(compartment, renames, lmrCache, opts)
@@ -292,7 +289,7 @@ export class PolicyGeneratorContext {
    * references.
    *
    * @param {string} specifier
-   * @param {import('@endo/compartment-mapper').ModuleSource} source
+   * @param {ModuleSource} source
    * @returns {Promise<import('lavamoat-core').LavamoatModuleRecord[]>}
    * @internal
    */
@@ -362,7 +359,7 @@ export class PolicyGeneratorContext {
   /**
    * Creates {@link LavamoatModuleRecord}s from CompartmentSources.
    *
-   * @param {import('@endo/compartment-mapper').CompartmentSources} sources
+   * @param {CompartmentSources} sources
    * @returns {Promise<import('lavamoat-core').LavamoatModuleRecord[]>}
    */
   async buildModuleRecords(sources) {

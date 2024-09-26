@@ -15,11 +15,20 @@ lockdown({
   localeTaming: 'unsafe',
 })
 
+import nodeCrypto from 'node:crypto'
+import nodePath from 'node:path'
+import nodeUrl from 'node:url'
 import { execute } from './compartment-map.js'
 import { toEndoPolicy } from './policy-converter.js'
 import { generatePolicy } from './policy-gen/index.js'
 import { isPolicy } from './policy.js'
-import { makeReadPowers } from './power.js'
+import { defaultReadPowers, makeReadPowers } from './power.js'
+
+/**
+ * @import {LavaMoatPolicy} from 'lavamoat-core'
+ * @import {GenerateAndRunOptions, RunOptions} from './types.js';
+ * @import {SyncReadPowers} from '@endo/compartment-mapper';
+ */
 
 export * as constants from './constants.js'
 export { generateAndWritePolicy, generatePolicy } from './policy-gen/index.js'
@@ -32,8 +41,8 @@ export { toEndoPolicy }
  * @template [T=unknown] Exports of module, if known. Default is `unknown`
  * @overload
  * @param {string | URL} entrypointPath
- * @param {import('lavamoat-core').LavaMoatPolicy} policy
- * @param {import('./types.js').RunOptions} [opts]
+ * @param {LavaMoatPolicy} policy
+ * @param {RunOptions} [opts]
  * @returns {Promise<T>}
  */
 
@@ -44,7 +53,7 @@ export { toEndoPolicy }
  * @template [T=unknown] Exports of module, if known. Default is `unknown`
  * @overload
  * @param {string | URL} entrypointPath
- * @param {import('./types.js').GenerateAndRunOptions} [opts]
+ * @param {GenerateAndRunOptions} [opts]
  * @returns {Promise<T>}
  */
 
@@ -53,30 +62,38 @@ export { toEndoPolicy }
  *
  * @template [T=unknown] Exports of module, if known. Default is `unknown`
  * @param {string | URL} entrypointPath
- * @param {import('lavamoat-core').LavaMoatPolicy
- *   | import('./types.js').GenerateAndRunOptions} [policyOrOpts]
- * @param {import('./types.js').RunOptions} [opts]
+ * @param {LavaMoatPolicy | GenerateAndRunOptions} [policyOrOpts]
+ * @param {RunOptions} [options]
  * @returns {Promise<T>}
  */
-export async function run(entrypointPath, policyOrOpts, opts = {}) {
+export async function run(entrypointPath, policyOrOpts, options = {}) {
   await Promise.resolve()
-  /** @type {import('lavamoat-core').LavaMoatPolicy} */
+  /** @type {LavaMoatPolicy} */
   let policy
-  /** @type {import('./types.js').RunOptions} */
+  /** @type {RunOptions} */
   let runOpts
 
   if (isPolicy(policyOrOpts)) {
     policy = policyOrOpts
-    runOpts = opts
+    runOpts = options
   } else {
     const generateOpts =
-      policyOrOpts ??
-      /** @type {import('./types.js').GenerateAndRunOptions} */ ({})
+      policyOrOpts ?? /** @type {GenerateAndRunOptions} */ ({})
     runOpts = { readPowers: generateOpts.readPowers }
     policy = await generatePolicy(entrypointPath, generateOpts)
   }
 
-  const readPowers = makeReadPowers(runOpts.readPowers)
+  // 'fs' is the minimum required to create new read powers.
+  // if we didn't have at least that, then we could just use `defaultReadPowers`.
+  // also note: `fs` has precedence over `readPowers`
+  const readPowers = runOpts.fs
+    ? makeReadPowers(
+        runOpts.fs,
+        runOpts.url ?? nodeUrl,
+        runOpts.path ?? nodePath,
+        runOpts.crypto ?? nodeCrypto
+      )
+    : (runOpts.readPowers ?? defaultReadPowers)
 
   return execute(readPowers, entrypointPath, policy)
 }

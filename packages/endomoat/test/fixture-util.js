@@ -1,7 +1,15 @@
-import { memfs, Volume } from 'memfs'
+import { memfs } from 'memfs'
 import { fromJsonSnapshot } from 'memfs/lib/snapshot/index.js'
+import { Volume } from 'memfs/lib/volume.js'
 import fs from 'node:fs'
 import { makeReadPowers } from '../src/power.js'
+
+/**
+ * @import {SyncReadPowers, FsAPI} from '@endo/compartment-mapper'
+ * @import {DirectoryJSON} from 'memfs';
+ * @import {SnapshotNode} from 'memfs/lib/snapshot/types.js'
+ * @import {JsonUint8Array} from 'memfs/lib/snapshot/json.js'
+ */
 
 const { isArray } = Array
 
@@ -15,8 +23,8 @@ const { isArray } = Array
  * @param {string | Buffer} content
  * @param {{ sourceType?: 'module' | 'script' }} [options]
  * @returns {Promise<{
- *   vol: import('memfs').Volume
- *   readPowers: import('@endo/compartment-mapper').ReadPowers
+ *   vol: Volume
+ *   readPowers: SyncReadPowers
  * }>}
  */
 export async function scaffoldFixture(content, { sourceType = 'module' } = {}) {
@@ -40,15 +48,13 @@ export async function scaffoldFixture(content, { sourceType = 'module' } = {}) {
  * that it's an array and it's valid JSON.
  *
  * @param {import('type-fest').JsonArray} snapshotJson - "Compact JSON" snapshot
- * @returns {Promise<import('memfs').Volume>} New `Volume`
+ * @returns {Promise<Volume>} New `Volume`
  */
 async function createVolFromSnapshot(snapshotJson) {
   const { vol } = memfs()
 
   const uint8 = /**
-   * @type {import('memfs/lib/snapshot/json.js').JsonUint8Array<
-   *   import('memfs/lib/snapshot/types.js').SnapshotNode
-   * >}
+   * @type {JsonUint8Array<SnapshotNode>}
    */ (new TextEncoder().encode(JSON.stringify(snapshotJson)))
   await fromJsonSnapshot(uint8, { fs: vol.promises, path: '/' })
   return vol
@@ -63,17 +69,17 @@ async function createVolFromSnapshot(snapshotJson) {
  *
  * Caches any JSON loaded from disk.
  *
- * @param {string | URL | import('memfs').DirectoryJSON} pathOrJson - Path to
- *   fixture JSON or directory object
+ * @param {string | URL | DirectoryJSON} pathOrJson - Path to fixture JSON or
+ *   directory object
  * @returns {Promise<{
- *   vol: import('memfs').Volume
- *   readPowers: import('@endo/compartment-mapper').ReadPowers
+ *   vol: Volume
+ *   readPowers: SyncReadPowers
  * }>}
  * @see {@link https://jsonjoy.com/specs/compact-json}
  * @todo Standardize entry point filename and return the entry point path.
  */
 export async function loadJSONFixture(pathOrJson) {
-  /** @type {import('memfs').Volume} */
+  /** @type {Volume} */
   let vol
   await Promise.resolve()
   if (typeof pathOrJson === 'string' || pathOrJson instanceof URL) {
@@ -82,7 +88,7 @@ export async function loadJSONFixture(pathOrJson) {
       // TODO: type guard maybe
       vol = isArray(json)
         ? await createVolFromSnapshot(json)
-        : Volume.fromJSON(/** @type {import('memfs').DirectoryJSON} */ (json))
+        : Volume.fromJSON(/** @type {DirectoryJSON} */ (json))
     } else {
       const filepath = pathOrJson
       const rawJson = await fs.promises.readFile(filepath, 'utf-8')
@@ -99,9 +105,7 @@ export async function loadJSONFixture(pathOrJson) {
       : Volume.fromJSON(json)
   }
 
-  const readPowers = makeReadPowers(
-    /** @type {import('@endo/compartment-mapper').FsAPI} */ (vol)
-  )
+  const readPowers = makeReadPowers(/** @type {FsAPI} */ (vol))
   return { vol, readPowers }
 }
 /**

@@ -1,15 +1,19 @@
-import { makeReadPowers as endoMakeReadPowers } from '@endo/compartment-mapper/node-powers.js'
+import { makeSyncReadPowers as endoMakeReadPowers } from '@endo/compartment-mapper/node-powers.js'
 import nodeCrypto from 'node:crypto'
 import nodeFs from 'node:fs'
 import nodePath from 'node:path'
 import nodeUrl from 'node:url'
-import { isFsAPI } from './util.js'
+
+/**
+ * @import {SetRequired} from 'type-fest';
+ * @import {SyncReadPowers, FsAPI, UrlAPI, CryptoAPI, PathAPI} from '@endo/compartment-mapper'
+ * @import {WithReadPowers} from './types.js';
+ */
 
 /**
  * Default read powers for Endo
  *
- * @type {import('@endo/compartment-mapper').MaybeReadPowers &
- *   import('@endo/compartment-mapper').SyncReadPowers}
+ * @type {SyncReadPowers}
  */
 export const defaultReadPowers = endoMakeReadPowers({
   fs: nodeFs,
@@ -19,78 +23,28 @@ export const defaultReadPowers = endoMakeReadPowers({
 })
 
 /**
- * Creates a `ReadPowers` object from a `ReadFn` function
- *
- * @overload
- * @param {import('@endo/compartment-mapper').ReadFn} readFn
- * @returns {import('@endo/compartment-mapper').ReadPowers}
- */
-
-/**
- * Creates a `ReadPowers` object from a `FsAPI` object (and optionally other
+ * Creates a `SyncReadPowers` object from a `FsAPI` object (and optionally other
  * powers)
  *
- * @overload
- * @param {import('@endo/compartment-mapper').FsAPI} fs
- * @param {import('@endo/compartment-mapper').UrlAPI} [url]
- * @param {import('@endo/compartment-mapper').CryptoAPI} [crypto]
- * @param {import('@endo/compartment-mapper').PathAPI} [path]
- * @returns {import('@endo/compartment-mapper').MaybeReadPowers &
- *   import('@endo/compartment-mapper').SyncReadPowers}
- */
-
-/**
- * Returns default set of `ReadPowers` if none provided; otherwise returns the
- * identity
- *
- * @overload
- * @param {import('@endo/compartment-mapper').ReadPowers} [readPowers]
- * @returns {import('@endo/compartment-mapper').ReadPowers}
- */
-
-/**
- * Creates a `ReadPowers` object from various sources or nothing
- *
- * @overload
- * @param {import('@endo/compartment-mapper').FsAPI
- *   | import('@endo/compartment-mapper').ReadPowers} [value]
- * @param {import('@endo/compartment-mapper').UrlAPI} [url]
- * @param {import('@endo/compartment-mapper').CryptoAPI} [crypto]
- * @param {import('@endo/compartment-mapper').PathAPI} [path]
- * @returns {import('@endo/compartment-mapper').MaybeReadPowers &
- *   import('@endo/compartment-mapper').SyncReadPowers}
- */
-
-/**
- * Creates a `ReadPowers` object from various sources or nothing
- *
- * @param {import('@endo/compartment-mapper').FsAPI
- *   | import('@endo/compartment-mapper').ReadFn
- *   | import('@endo/compartment-mapper').ReadPowers} [value]
- * @param {import('@endo/compartment-mapper').UrlAPI} [url]
- * @param {import('@endo/compartment-mapper').CryptoAPI} [crypto]
- * @param {import('@endo/compartment-mapper').PathAPI} [path]
- * @returns {import('@endo/compartment-mapper').ReadPowers}
+ * @param {FsAPI} fs
+ * @param {UrlAPI} [url]
+ * @param {PathAPI} [path]
+ * @param {CryptoAPI} [crypto]
+ * @returns {SyncReadPowers}
  */
 export function makeReadPowers(
-  value,
+  fs,
   url = nodeUrl,
-  crypto = nodeCrypto,
-  path = nodePath
+  path = nodePath,
+  crypto = nodeCrypto
 ) {
-  if (isFsAPI(value)) {
-    if (value === nodeFs) {
-      return defaultReadPowers
-    }
-    return endoMakeReadPowers({
-      fs: value,
-      url,
-      crypto,
-      path,
-    })
+  if (fs === nodeFs) {
+    return defaultReadPowers
   }
-  if (typeof value === 'function') {
-    return { read: value, canonical: async (x) => x }
-  }
-  return value ?? defaultReadPowers
+  return endoMakeReadPowers({
+    fs,
+    url,
+    crypto,
+    path,
+  })
 }

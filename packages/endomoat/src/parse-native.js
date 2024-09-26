@@ -58,4 +58,5 @@ const parseNative = (
 export default {
   parse: parseNative,
   heuristicImports: false,
+  synchronous: true,
 }
