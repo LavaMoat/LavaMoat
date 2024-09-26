@@ -68,11 +68,11 @@ const plugin: Plugin = {
       return new Promise((resolve, _reject) =>
         isPackageScriptAllowed(project, npm_package_json).then((isAllowed) => {
           if (!isAllowed) {
-            console.error(
-              isAllowed === null
-                ? `  allow-scripts blocking execution of unconfigured package script. ${JSON.stringify([npm_package_name, npm_lifecycle_event, npm_package_json])}`
-                : `  allow-scripts blocking execution of disallowed package script. ${JSON.stringify([npm_package_name, npm_lifecycle_event, npm_package_json])}`
-            )
+            if (isAllowed == null) {
+              console.error(`  allow-scripts blocked execution of unconfigured package script. ${JSON.stringify([npm_package_name, npm_lifecycle_event, npm_package_json])}`)
+            } else if (process.env.ALLOWSCRIPTS_DEBUG) {
+              console.debug(`  allow-scripts blocked execution of disallowed package script. ${JSON.stringify([npm_package_name, npm_lifecycle_event, npm_package_json])}`)
+            }
             return resolve(() => Promise.resolve(0))
           }
           return resolve(executor)
