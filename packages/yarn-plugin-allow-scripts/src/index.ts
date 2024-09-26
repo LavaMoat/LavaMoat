@@ -79,20 +79,6 @@ const plugin: Plugin = {
         })
       )
     },
-    setupScriptEnvironment: (
-      project: ExtendedProject,
-      { npm_lifecycle_event, npm_package_json, npm_package_name }
-    ) => {
-      isPackageScriptAllowed(project, npm_package_json).then((isAllowed) => {
-        if (!isAllowed) {
-          console.error(
-            isAllowed === null
-              ? `  allow-scripts detected attempted execution of unconfigured package script. ${JSON.stringify([npm_package_name, npm_lifecycle_event, npm_package_json])}`
-              : `  allow-scripts detected attempted execution of disallowed package script. ${JSON.stringify([npm_package_name, npm_lifecycle_event, npm_package_json])}`
-          )
-        }
-      })
-    },
     afterAllInstalled: (project: ExtendedProject) => {
       loadAllPackageConfigurations({
         rootDir: yarnCwdToPath(project.cwd),
