@@ -42,7 +42,7 @@
     "@lavamoat/aa": "^4.3.0",
     "@npmcli/run-script": "8.1.0",
     "bin-links": "4.0.4",
-    "npm-normalize-package-bin": "3.0.1",
+    "npm-normalize-package-bin": "4.0.0",
     "yargs": "17.7.2"
   },
   "devDependencies": {
