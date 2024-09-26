@@ -1,5 +1,5 @@
 import test from 'ava'
-import { existsSync, rmSync } from 'node:fs'
+import { existsSync } from 'node:fs'
 import { dirname, join, normalize } from 'node:path'
 import { SpawnSyncOptions } from 'node:child_process'
 import { spawnSync } from 'node:child_process'
@@ -7,13 +7,8 @@ import { npmRunPath } from 'npm-run-path';
 
 const isWindows = process.platform === 'win32';
 const portablePath = isWindows
-  ? (p) => p.replace(/^[\\]/, '')
-  : (p) => p
-
-/**
- * For fat fingers
- */
-const PACKAGE_JSON = 'package.json'
+  ? (p: string) => p.replace(/^[\\]/, '')
+  : (p: string) => p
 
 const cleanup = (projectName: string) => {
   const projectRoot = join(dirname(import.meta.url.replace(/^file:/, '')), 'projects', projectName)
@@ -131,9 +126,6 @@ test('install - errors when adding dependency with unspecified preinstall script
   const projectRoot = join(dirname(import.meta.url.replace(/^file:/, '')), 'projects', projectName);
 
   try {
-    // delete any leftover test artifacts
-    rmSync(join(projectRoot, PACKAGE_JSON), { force: true })
-
     // init project
     const initRes = run(t, ['init', '-y'], projectRoot)
     t.is(initRes.exitCode, 0);
