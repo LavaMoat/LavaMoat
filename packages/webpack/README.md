@@ -108,7 +108,9 @@ This plugin will skip policy enforcement for such ignored modules.
 
 - [SES lockdown][] must be added to the page without any bundling or transforming for any security guarantees to be sustained.
   - The plugin is attempting to add it as an asset to the compilation for the sake of Developer Experience. `.js` extension is omitted to prevent minification.
-  - Optionally lockdown can be inlined into the bundle files. You need to match the scripts that get to load as the first script on the page to apply lockdown only once when inlined. When you have a single bundle, you just configure a regex with one unique file name or a `.*`. It gets more complex with builds for multiple pages. The plugin doesn't attempt to guess where to inline lockdown.
+  - Optionally lockdown can be inlined into the bundle files. You need to declare which of the output files to inline lockdown runtime code to. These need to be the first file of the bundle that get loaded on the page.  
+    When you have a single bundle, you just configure a regex with one unique file name or a `.*`. It gets more complex with builds for multiple pages. The plugin doesn't attempt to guess where to inline lockdown.  
+    e.g. If you have 2 entries `user.js` and `admin.js` and a set up to suffix resulting bundles with commit id, you can use `/user\.[a-f0-9]+\.js|admin\.[a-f0-9]+\.js/` to match the files.
 - Each javascript module resulting from the webpack build is scoped to its package's policy
 
 ## Threat Model

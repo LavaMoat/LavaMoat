@@ -1,13 +1,9 @@
 const { readFileSync } = require('node:fs')
-const path = require('node:path')
 const {
   sources: { RawSource, ConcatSource },
 } = require('webpack')
 
-const lockdownSource = readFileSync(
-  require.resolve('ses'),
-  'utf-8'
-)
+const lockdownSource = readFileSync(require.resolve('ses'), 'utf-8')
 const lockdownSourcePrefix = `/*! SES sources included by LavaMoat. Do not optimize or minify. */\n;\n${lockdownSource}\n;/*! end SES */\n`
 
 module.exports = {
