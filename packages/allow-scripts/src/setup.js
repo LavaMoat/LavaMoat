@@ -41,12 +41,7 @@ module.exports = {
 }
 
 /**
- * @typedef AreBinsBlockedOpts
- * @property {boolean} [noMemoization] Turn off memoization, make a fresh lookup
- */
-
-/**
- * @param {AreBinsBlockedOpts} args
+ * @param {AreBinsBlockedParams} args
  * @returns {boolean}
  */
 function areBinsBlocked({ noMemoization = false } = {}) {
@@ -178,13 +173,7 @@ function isEntryPresent(entry, file) {
 }
 
 /**
- * @typedef WriteRcFileContentOpts
- * @property {string} file
- * @property {string} entry
- */
-
-/**
- * @param {WriteRcFileContentOpts} param0
+ * @param {WriteRcFileContentParams} params
  */
 function writeRcFileContent({ file, entry }) {
   const rcPath = addInstallParentDir(file)
