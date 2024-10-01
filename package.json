@@ -55,7 +55,7 @@
     "eslint-plugin-jsonc": "2.16.0",
     "eslint-plugin-n": "16.6.2",
     "eslint-plugin-node-import": "1.0.4",
-    "eslint-plugin-react": "7.37.0",
+    "eslint-plugin-react": "7.37.1",
     "glob": "10.4.5",
     "husky": "9.1.6",
     "lint-staged": "15.2.10",
