@@ -1,7 +1,7 @@
 const { execSync } = require('node:child_process')
 const { existsSync, readdirSync } = require('node:fs')
 const { join, normalize } = require('node:path')
-const { isWindows, fixWindowsExecPath } = require('./utils.js')
+const { portableExecPath } = require('./utils.js')
 
 // Execute allow-scripts command inside each test project directory
 const baseDir = join(__dirname, '../test/projects/')
@@ -10,7 +10,7 @@ readdirSync(baseDir, { withFileTypes: true })
   .forEach((dir) => {
     execSync(
       [
-        isWindows ? fixWindowsExecPath(process.execPath) : process.execPath,
+        portableExecPath(process.execPath),
         normalize('../../../src/cli.js'), 'auto', '--experimental-bins'].join(' '),
       {
         cwd: join(baseDir, dir.name),
