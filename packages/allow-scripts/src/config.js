@@ -12,19 +12,6 @@ const { loadCanonicalNameMap } = require('@lavamoat/aa')
 const bannedBins = new Set(['corepack', 'node', 'npm', 'pnpm', 'yarn'])
 
 /**
- * @typedef PkgLavamoatConfig
- * @property {Record<string, any>} [allowScripts]
- * @property {Record<string, any>} [allowBins]
- * @property {Record<string, any>} [allowConfig]
- * @property {Record<string, any>} [allowedPatterns]
- * @property {Record<string, any>} [disallowedPatterns]
- * @property {Record<string, any>} [missingPolicies]
- * @property {Record<string, any>} [excessPolicies]
- */
-/**
- * @typedef {import('type-fest').PackageJson & { lavamoat: PkgLavamoatConfig }} LavamoatPackageJson
- */
-/**
  * @typedef {Object} PkgConfs
  * @property {LavamoatPackageJson} packageJson
  * @property {Object} configs
