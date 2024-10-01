@@ -6,18 +6,7 @@
 const { loadAllPackageConfigurations } = require('./config.js')
 
 /**
- * @typedef PrintPackagesListOpts
- * @property {string} rootDir
- */
-
-/**
- * @typedef PrintMissingPoliciesIfAnyOpts
- * @property {string[]} [missingPolicies]
- * @property {Map<string, unknown[]>} [packagesWithScripts]
- */
-
-/**
- * @param {PrintPackagesListOpts} param0
+ * @param {PrintPackagesListParams} params
  * @returns {Promise<void>}
  */
 async function printPackagesList({ rootDir }) {
@@ -30,7 +19,7 @@ async function printPackagesList({ rootDir }) {
 }
 
 /**
- * @param {PrintMissingPoliciesIfAnyOpts} param0
+ * @param {PrintMissingPoliciesIfAnyParams} params
  */
 function printMissingPoliciesIfAny({
   missingPolicies = [],
