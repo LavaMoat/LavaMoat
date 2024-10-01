@@ -12,15 +12,6 @@ const { loadCanonicalNameMap } = require('@lavamoat/aa')
 const bannedBins = new Set(['corepack', 'node', 'npm', 'pnpm', 'yarn'])
 
 /**
- * @typedef {Object} PkgConfs
- * @property {LavamoatPackageJson} packageJson
- * @property {Object} configs
- * @property {ScriptsConfig} configs.lifecycle
- * @property {BinsConfig} configs.bin
- * @property {boolean} somePoliciesAreMissing
- * @property {Map<string, string>} canonicalNamesByPath
- */
-/**
  * @param {Object} args
  * @param {string} args.rootDir
  * @returns {Promise<PkgConfs>}
@@ -144,13 +135,7 @@ async function loadAllPackageConfigurations({ rootDir }) {
 }
 
 /**
- * @typedef GetOptionsForBinOpts
- * @property {string} rootDir
- * @property {string} name
- */
-
-/**
- * @param {GetOptionsForBinOpts} param0
+ * @param {GetOptionsForBinParams} params
  * @returns {Promise<BinInfo[] | undefined>}
  */
 async function getOptionsForBin({ rootDir, name }) {
@@ -164,12 +149,7 @@ async function getOptionsForBin({ rootDir, name }) {
 }
 
 /**
- * @typedef SetDefaultConfigurationOpts
- * @property {string} rootDir
- */
-
-/**
- * @param {SetDefaultConfigurationOpts} param0
+ * @param {SetDefaultConfigurationParams} params
  */
 async function setDefaultConfiguration({ rootDir }) {
   const conf = await loadAllPackageConfigurations({ rootDir })
@@ -226,13 +206,7 @@ function prepareBinScriptsPolicy(binCandidates) {
 }
 
 /**
- * @typedef SavePackageConfigurationsOpts
- * @property {string} rootDir
- * @property {PkgConfs} conf
- */
-
-/**
- * @param {SavePackageConfigurationsOpts} param0
+ * @param {SavePackageConfigurationsParams} params
  * @returns {Promise<void>}
  */
 async function savePackageConfigurations({
