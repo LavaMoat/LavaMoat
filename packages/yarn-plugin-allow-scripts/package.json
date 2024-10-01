@@ -15,7 +15,7 @@
   },
   "main": "./src/index.ts",
   "scripts": {
-    "build": "node scripts/build.js",
+    "build": "builder build plugin --no-minify",
     "rebuild": "npm run build",
     "test": "npm run build && ava"
   },
@@ -38,7 +38,7 @@
     "corepack": "0.29.4",
     "npm-run-path": "6.0.0",
     "rimraf": "5.0.9",
-    "typescript": "5.6.2"
+    "typescript": "5.6.3"
   },
   "ava": {
     "files": [
