@@ -3,7 +3,7 @@ const fs = require('node:fs')
 const path = require('node:path')
 const { spawnSync } = require('node:child_process')
 const { pathToFileURL } = require('node:url')
-const { isWindows, fixWindowsExecPath } = require('./utils.js')
+const { isWindows, portableExecPath } = require('./utils.js')
 
 const NPM_CMD = isWindows ? 'npm.cmd' : 'npm'
 /* eslint-disable ava/no-skip-test */
@@ -29,8 +29,9 @@ const run = (t, args, cwd) => {
   // Path to the allow-scripts executable
   const ALLOW_SCRIPTS_BIN = require.resolve('../src/cli')
   const options = realisticEnvOptions(cwd)
+  const execPath = portableExecPath(process.execPath)
   const result = spawnSync(
-    isWindows ? fixWindowsExecPath(process.execPath) : process.execPath,
+    execPath,
     [ALLOW_SCRIPTS_BIN, ...args],
     options
   )
@@ -39,7 +40,7 @@ const run = (t, args, cwd) => {
     t.log('Result from a failed spawnSync:', result)
 
     t.fail(
-      `Failed calling '${process.execPath} ${ALLOW_SCRIPTS_BIN} ${args.join(' ')}'`,
+      `Failed calling '${execPath} ${ALLOW_SCRIPTS_BIN} ${args.join(' ')}'`,
       {
         cwd,
         options,
