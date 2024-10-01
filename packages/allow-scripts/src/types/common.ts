@@ -23,7 +23,7 @@ declare global {
    * Configuration for a type of scripts policies
    */
   export interface ScriptsConfig {
-    allowConfig: Record<string, any>;
+    allowConfig: JsonObject;
     packagesWithScripts: Map<string, [PkgInfo]>;
     allowedPatterns: string[];
     disallowedPatterns: string[];
@@ -95,4 +95,23 @@ declare global {
     entry: string;
   }
 
+  // runAllowedPackages.js
+  interface RunAllowedPackagesParams {
+    rootDir: string;
+  }
+
+  interface RunScriptParams {
+    event: string;
+    path: string;
+  }
+
+  // report.js
+  interface PrintPackagesListParams {
+    rootDir: string;
+  }
+
+  interface PrintMissingPoliciesIfAnyParams {
+    missingPolicies: string[];
+    packagesWithScripts: Map<string, unknown[]>;
+  }
 }
