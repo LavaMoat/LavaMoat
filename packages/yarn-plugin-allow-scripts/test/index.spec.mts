@@ -124,9 +124,12 @@ const run = (
   }
 }
 
+const getProjectRoot = (projectName: string): string =>
+  join(dirname(import.meta.url.replace(/^file:/, '')), 'projects', projectName);
+
 test('install - errors when adding dependency with unspecified preinstall script', async (t: any) => {
   t.context.projectName = 'uninitialized';
-  const projectRoot = join(dirname(import.meta.url.replace(/^file:/, '')), 'projects', t.context.projectName);
+  const projectRoot = getProjectRoot(t.context.projectName);
 
   // init project
   const initRes = run(t, ['init', '-y'], projectRoot)
@@ -151,7 +154,7 @@ test('install - errors when adding dependency with unspecified preinstall script
 
 test('install - allows adding and installing package with preconfigured preinstall script', async (t: any) => {
   t.context.projectName = 'allowed';
-  const projectRoot = join(dirname(import.meta.url.replace(/^file:/, '')), 'projects', t.context.projectName);
+  const projectRoot = getProjectRoot(t.context.projectName);
 
   run(t, ['plugin', 'import', normalize('../../../bundles/@yarnpkg/plugin-allow-scripts.js')], projectRoot)
 
@@ -171,7 +174,7 @@ test('install - allows adding and installing package with preconfigured preinsta
 
 test('install - blocks execution of disallowed scripts', async (t: any) => {
   t.context.projectName = 'blocked';
-  const projectRoot = join(dirname(import.meta.url.replace(/^file:/, '')), 'projects', t.context.projectName)
+  const projectRoot = getProjectRoot(t.context.projectName);
 
   run(t, ['plugin', 'import', normalize('../../../bundles/@yarnpkg/plugin-allow-scripts.js')], projectRoot)
   const addRes = run(t, ['add', '@lavamoat/preinstall-always-fail'], projectRoot)
@@ -184,7 +187,7 @@ test('install - blocks execution of disallowed scripts', async (t: any) => {
 // See README.md in protected-unconfigured test project for details
 test('install - allows execution of allowed yarn classic dependencies', async (t: any) => {
   t.context.projectName = 'protected-configured';
-  const projectRoot = join(dirname(import.meta.url.replace(/^file:/, '')), 'projects', t.context.projectName)
+  const projectRoot = getProjectRoot(t.context.projectName);
 
   run(t, ['plugin', 'import', normalize('../../../bundles/@yarnpkg/plugin-allow-scripts.js')], projectRoot)
 
@@ -197,7 +200,7 @@ test('install - allows execution of allowed yarn classic dependencies', async (t
 // See README.md in protected-unconfigured test project for details
 test('install - blocks execution of unallowed yarn classic dependencies', async (t: any) => {
   t.context.projectName = 'protected-unconfigured';
-  const projectRoot = join(dirname(import.meta.url.replace(/^file:/, '')), 'projects', t.context.projectName)
+  const projectRoot = getProjectRoot(t.context.projectName);
 
   run(t, ['plugin', 'import', normalize('../../../bundles/@yarnpkg/plugin-allow-scripts.js')], projectRoot)
   run(t, ['config', 'set', 'enableScripts', 'false'], projectRoot)
