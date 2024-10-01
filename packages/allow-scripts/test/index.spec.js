@@ -1,11 +1,10 @@
 const test = require('ava')
-const os = require('node:os')
 const fs = require('node:fs')
 const path = require('node:path')
 const { spawnSync } = require('node:child_process')
 const { pathToFileURL } = require('node:url')
+const { isWindows, fixWindowsExecPath } = require('./utils.js')
 
-const isWindows = os.platform() === 'win32'
 const NPM_CMD = isWindows ? 'npm.cmd' : 'npm'
 /* eslint-disable ava/no-skip-test */
 const skipOnWindows = isWindows
@@ -31,7 +30,7 @@ const run = (t, args, cwd) => {
   const ALLOW_SCRIPTS_BIN = require.resolve('../src/cli')
   const options = realisticEnvOptions(cwd)
   const result = spawnSync(
-    process.execPath,
+    isWindows ? fixWindowsExecPath(process.execPath) : process.execPath,
     [ALLOW_SCRIPTS_BIN, ...args],
     options
   )
