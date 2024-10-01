@@ -16,15 +16,6 @@ const bannedBins = new Set(['corepack', 'node', 'npm', 'pnpm', 'yarn'])
 const DEFAULT_LIFECYCLE_EVENTS = ['preinstall', 'install', 'postinstall']
 
 /**
- * @typedef {Object} PkgConfs
- * @property {LavamoatPackageJson} packageJson
- * @property {Object} configs
- * @property {ScriptsConfig} configs.lifecycle
- * @property {BinsConfig} configs.bin
- * @property {boolean} somePoliciesAreMissing
- * @property {Map<string, string>} canonicalNamesByPath
- */
-/**
  * @param {Object} args
  * @param {string} args.rootDir
  * @param {string[]=} args.lifecycleEvents - which script names to consider
@@ -149,14 +140,7 @@ async function loadAllPackageConfigurations({ rootDir, lifecycleEvents = DEFAULT
 }
 
 /**
- * @typedef GetOptionsForBinOpts
- * @property {string} rootDir
- * @property {string} name
- * @property {string[]=} lifecycleEvents
- */
-
-/**
- * @param {GetOptionsForBinOpts} param0
+ * @param {GetOptionsForBinParams} params
  * @returns {Promise<BinInfo[] | undefined>}
  */
 async function getOptionsForBin({ rootDir, name, lifecycleEvents = DEFAULT_LIFECYCLE_EVENTS }) {
@@ -170,13 +154,7 @@ async function getOptionsForBin({ rootDir, name, lifecycleEvents = DEFAULT_LIFEC
 }
 
 /**
- * @typedef SetDefaultConfigurationOpts
- * @property {string} rootDir
- * @property {string[]=} lifecycleEvents
- */
-
-/**
- * @param {SetDefaultConfigurationOpts} param0
+ * @param {SetDefaultConfigurationParams} params
  */
 async function setDefaultConfiguration({ rootDir, lifecycleEvents = DEFAULT_LIFECYCLE_EVENTS }) {
   const conf = await loadAllPackageConfigurations({ rootDir, lifecycleEvents })
@@ -233,13 +211,7 @@ function prepareBinScriptsPolicy(binCandidates) {
 }
 
 /**
- * @typedef SavePackageConfigurationsOpts
- * @property {string} rootDir
- * @property {PkgConfs} conf
- */
-
-/**
- * @param {SavePackageConfigurationsOpts} param0
+ * @param {SavePackageConfigurationsParams} params
  * @returns {Promise<void>}
  */
 async function savePackageConfigurations({

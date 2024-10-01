@@ -56,4 +56,43 @@ declare global {
      excessPolicies: string[];
      somePoliciesAreMissing: boolean;
   }
+
+  // config.js
+  interface SetDefaultConfigurationParams {
+    rootDir: string;
+    lifecycleEvents?: string[];
+  }
+
+  interface SavePackageConfigurationsParams {
+    rootDir: string;
+    conf: PkgConfs;
+  }
+
+  interface GetOptionsForBinParams {
+    rootDir: string;
+    name: string;
+    lifecycleEvents?: string[];
+  }
+
+  // setup.js
+  interface AreBinsBlockedParams {
+    /** Turn off memoization, make a fresh lookup */
+    noMemoization?: boolean;
+  }
+
+  interface PkgConfs {
+    packageJson: LavamoatPackageJson;
+    configs: {
+      lifecycle: ScriptsConfig;
+      bin: BinsConfig;
+    }
+    somePoliciesAreMissing: boolean;
+    canonicalNamesByPath: Map<string,string>;
+  }
+
+  interface WriteRcFileContentParams {
+    file: string;
+    entry: string;
+  }
+
 }
