@@ -1,7 +1,5 @@
-import {
-  loadAllPackageConfigurations,
-  printMissingPoliciesIfAny,
-} from '@lavamoat/allow-scripts'
+import { printMissingPoliciesIfAny } from '../../allow-scripts/src/report.js'
+import { loadAllPackageConfigurations } from '../../allow-scripts/src/config.js'
 import { Plugin, type Project, type Locator } from '@yarnpkg/core'
 import { dirname } from 'node:path'
 

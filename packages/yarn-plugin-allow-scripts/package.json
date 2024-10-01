@@ -15,7 +15,7 @@
   },
   "main": "./src/index.ts",
   "scripts": {
-    "build": "node scripts/build.js",
+    "build": "builder build plugin --no-minify",
     "rebuild": "npm run build",
     "test": "npm run build && ava"
   },
