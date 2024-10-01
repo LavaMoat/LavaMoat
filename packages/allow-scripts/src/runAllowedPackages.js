@@ -11,12 +11,7 @@ const { printMissingPoliciesIfAny } = require('./report.js')
 const { FEATURE } = require('./toggles.js')
 
 /**
- * @typedef RunAllowedPackagesOpts
- * @property {string} rootDir
- */
-
-/**
- * @param {RunAllowedPackagesOpts} param0
+ * @param {RunAllowedPackagesParams} params
  * @returns {Promise<void>}
  */
 async function runAllowedPackages({ rootDir }) {
@@ -131,13 +126,7 @@ async function installBinFirewall(firewalledBins, link) {
 }
 
 /**
- * @typedef RunScriptOpts
- * @property {string} event
- * @property {string} path
- */
-
-/**
- * @param {RunScriptOpts} param0
+ * @param {RunScriptParams} params
  * @returns {Promise<void>}
  */
 async function runScript({ path, event }) {
