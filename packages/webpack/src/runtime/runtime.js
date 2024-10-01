@@ -155,7 +155,7 @@ const installGlobalsForPolicy = (resourceId, packageCompartmentGlobal) => {
       rootCompartmentGlobalThis,
       globalAliases
     )
-    LAVAMOAT?.scuttle?.scuttle(theRealGlobalThis, LAVAMOAT.options.scuttleGlobalThis)
+    LAVAMOAT?.scuttling?.scuttle(theRealGlobalThis, LAVAMOAT.options.scuttleGlobalThis)
   } else {
     // TODO: getEndowmentsForConfig doesn't implement support for "write"
     const endowments = getEndowmentsForConfig(

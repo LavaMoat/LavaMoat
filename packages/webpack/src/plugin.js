@@ -439,7 +439,7 @@ class LavaMoatPlugin {
                   (typeof runtimeOptions?.scuttleGlobalThis === 'boolean' && runtimeOptions?.scuttleGlobalThis === true) ||
                   (typeof runtimeOptions?.scuttleGlobalThis === 'object' && runtimeOptions?.scuttleGlobalThis?.enabled === true) ?
                   {
-                    name: 'scuttle',
+                    name: 'scuttling',
                     shimRequire: 'lavamoat-core/src/scuttle.js',
                   } : {},
                   { name: 'policy', data: policyData, json: true },
