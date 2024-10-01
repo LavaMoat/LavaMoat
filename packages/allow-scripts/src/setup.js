@@ -168,6 +168,7 @@ function editPackageJson() {
 
 /**
  * @param {GetOptionsForBinOpts} param0
+ * @returns {Promise<BinInfo[] | undefined>}
  */
 async function getOptionsForBin({ rootDir, name }) {
   const {
