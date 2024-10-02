@@ -3,7 +3,7 @@
  *
  * @module
  */
-const { loadAllPackageConfigurations } = require('./setup.js')
+const { loadAllPackageConfigurations } = require('./config.js')
 
 /**
  * @typedef PrintPackagesListOpts

@@ -5,10 +5,10 @@
  */
 const path = require('node:path')
 const npmRunScript = require('@npmcli/run-script')
+const { loadAllPackageConfigurations } = require('./config.js')
 const { linkBinAbsolute, linkBinRelative } = require('./linker.js')
 const { printMissingPoliciesIfAny } = require('./report.js')
-const { loadAllPackageConfigurations } = require('./setup.js')
-const { FEATURE  } = require('./toggles.js')
+const { FEATURE } = require('./toggles.js')
 
 /**
  * @typedef RunAllowedPackagesOpts
@@ -154,4 +154,4 @@ async function runScript({ path, event }) {
   })
 }
 
-module.exports = runAllowedPackages;
+module.exports = runAllowedPackages
