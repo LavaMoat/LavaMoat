@@ -1812,6 +1812,9 @@ var plugin = (() => {
   if (typeof process.env["YARN_IGNORE_SCRIPTS"] === "undefined") {
     process.env["YARN_IGNORE_SCRIPTS"] = "true";
   }
+  if (typeof process.env["YARN_ENABLE_STRICT_SETTINGS"] === "undefined") {
+    process.env["YARN_ENABLE_STRICT_SETTINGS"] = "false";
+  }
   var yarnCwdToPath = (cwd) => (
     // eslint-disable-next-line no-useless-escape
     process.platform === "win32" ? cwd.replace(/^[\/]/, "") : cwd

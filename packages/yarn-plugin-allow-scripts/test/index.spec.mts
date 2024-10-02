@@ -226,8 +226,6 @@ function realisticEnvOptions(projectRoot: string, env: {} = {}): SpawnSyncOption
       YARN_ENABLE_COLORS: false.toString(),
       YARN_CLONE_CONCURRENCY: '1',
       YARN_ENABLE_IMMUTABLE_INSTALLS: '0',
-      // without this, yarn berry will error on env vars intended for yarn v1
-      YARN_ENABLE_STRICT_SETTINGS: false.toString(),
 
       YARN_NODE_LINKER: 'node-modules',
       // yarn ignores its own color settings only in GitHub Actions
