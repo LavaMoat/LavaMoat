@@ -3,9 +3,17 @@ import { loadAllPackageConfigurations } from '../../allow-scripts/src/config.js'
 import { Plugin, type Project, type Locator } from '@yarnpkg/core'
 import { dirname } from 'node:path'
 
-// Disable lifecycle scripts for transitive git deps with a yarn classic lockfile
+// Disable lifecycle scripts for transitive git deps with a yarn v1 lockfile
 if (typeof process.env['YARN_IGNORE_SCRIPTS'] === 'undefined') {
   process.env['YARN_IGNORE_SCRIPTS'] = 'true'
+}
+
+// Different yarn versions recognize different configuration options and exit with error on any they do not recognize.
+// Meanwhile, newer versions will install and call older versions.
+// Disable yarn erroring on unrecognized configuration options.
+// without this, yarn berry will error on env vars intended for yarn v1
+if (typeof process.env['YARN_ENABLE_STRICT_SETTINGS'] === 'undefined') {
+  process.env['YARN_ENABLE_STRICT_SETTINGS'] = 'false'
 }
 
 interface ExtendedProject extends Project {
