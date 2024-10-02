@@ -4,11 +4,8 @@ const yargs = require('yargs/yargs')
 const { hideBin } = require('yargs/helpers')
 const runAllowedPackages = require('./runAllowedPackages.js')
 const { printPackagesList } = require('./report.js')
-const {
-  editPackageJson,
-  setDefaultConfiguration,
-  writeRcFile,
-} = require('./setup.js')
+const { setDefaultConfiguration } = require('./config.js')
+const { editPackageJson, writeRcFile } = require('./setup.js')
 const { FEATURE } = require('./toggles.js')
 
 start().catch((err) => {
