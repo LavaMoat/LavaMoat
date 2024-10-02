@@ -33,8 +33,8 @@
     "test:yarn1": "cross-env COREPACK_ENABLE_PROJECT_SPEC=0 LAVAMOAT_PM=yarn@1 npm run test:prepare && cross-env COREPACK_ENABLE_PROJECT_SPEC=0 ava"
   },
   "dependencies": {
-    "@babel/code-frame": "7.24.7",
-    "@babel/highlight": "7.24.7",
+    "@babel/code-frame": "7.25.7",
+    "@babel/highlight": "7.25.7",
     "@lavamoat/aa": "^4.3.0",
     "bindings": "1.5.0",
     "corepack": "0.29.4",
