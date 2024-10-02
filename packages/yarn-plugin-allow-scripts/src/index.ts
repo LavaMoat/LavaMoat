@@ -25,10 +25,24 @@ const yarnCwdToPath = (cwd: string): string =>
   // eslint-disable-next-line no-useless-escape
   process.platform === 'win32' ? cwd.replace(/^[\/]/, '') : cwd
 
+// Only consider script executions trigered by the below lifecycle events
+const PROTECTED_LIFECYLE_SCRIPTS = new Set([
+  'install',
+  'postinstall', 'postinstallonly', 'preinstall', 'preinstallonly',
+  'preaudit', 'preauditonly', 'postaudit', 'postauditonly',
+  'prepack', 'prepackonly', 'postpack', 'postpackonly',
+  'preprepare', 'preprepareonly', 'postprepare', 'postprepareonly',
+  'prepublish', 'prepublishonly', 'postpublish', 'postpublishonly',
+]);
+
 const isPackageScriptAllowed = async (
   project: ExtendedProject,
-  npm_package_json: string
+  npm_package_json: string,
+  npm_lifecycle_event: string,
 ): Promise<boolean> => {
+  if (typeof npm_lifecycle_event === 'string' && !PROTECTED_LIFECYLE_SCRIPTS.has(npm_lifecycle_event.toLowerCase())) {
+    return true
+  }
   if (!project.allowScriptsConfig) {
     project.allowScriptsConfig = new Map<string, boolean>()
   }
@@ -72,7 +86,7 @@ const plugin: Plugin = {
       { env: { npm_package_json, npm_package_name } }: { env: any }
     ): Promise<() => Promise<number>> => {
       return new Promise((resolve, _reject) =>
-        isPackageScriptAllowed(project, npm_package_json).then((isAllowed) => {
+        isPackageScriptAllowed(project, npm_package_json, npm_lifecycle_event).then((isAllowed) => {
           if (!isAllowed) {
             if (isAllowed == null) {
               console.error(`  allow-scripts blocked execution of unconfigured package script. ${JSON.stringify([npm_package_name, npm_lifecycle_event, npm_package_json])}`)
