@@ -2,7 +2,7 @@
 
 const { readFileSync, realpathSync, lstatSync } = require('node:fs')
 const path = require('node:path')
-const nodeResolve = require('resolve')
+const nodeResolve = require('resolve/sync')
 
 module.exports = {
   loadCanonicalNameMap,
@@ -63,7 +63,7 @@ function createPerformantResolve() {
 
   return {
     sync: (path, { basedir }) =>
-      nodeResolve.sync(path, {
+      nodeResolve(path, {
         basedir,
         readPackageSync: readPackageWithout(path),
       }),
