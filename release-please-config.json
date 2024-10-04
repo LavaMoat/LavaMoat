@@ -11,7 +11,7 @@
     "packages/core": {},
     "packages/lavapack": {},
     "packages/laverna": {},
-    "packages/node": {},
+    "packages/lavamoat-node": {},
     "packages/preinstall-always-fail": {},
     "packages/tofu": {}
   },

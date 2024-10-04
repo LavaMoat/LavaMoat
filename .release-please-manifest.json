@@ -6,7 +6,7 @@
   "packages/core": "16.0.1",
   "packages/lavapack": "7.0.1",
   "packages/laverna": "1.2.2",
-  "packages/node": "9.0.1",
+  "packages/lavamoat-node": "9.0.1",
   "packages/preinstall-always-fail": "2.1.0",
   "packages/tofu": "8.0.1"
 }

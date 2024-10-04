@@ -34,7 +34,7 @@ jobs:
               --workspace=packages/core
               --workspace=packages/lavapack
               --workspace=packages/laverna
-              --workspace=packages/node
+              --workspace=packages/lavamoat-node
               --workspace=packages/perf
               --workspace=packages/preinstall-always-fail
               --workspace=packages/survey
@@ -49,7 +49,7 @@ jobs:
               --workspace=packages/core
               --workspace=packages/lavapack
               --workspace=packages/laverna
-              --workspace=packages/node
+              --workspace=packages/lavamoat-node
               --workspace=packages/perf
               --workspace=packages/preinstall-always-fail
               --workspace=packages/survey
@@ -64,7 +64,7 @@ jobs:
               --workspace=packages/core
               --workspace=packages/lavapack
               --workspace=packages/laverna
-              --workspace=packages/node
+              --workspace=packages/lavamoat-node
               --workspace=packages/perf
               --workspace=packages/preinstall-always-fail
               --workspace=packages/survey
@@ -175,7 +175,7 @@ jobs:
         --workspace=packages/core
         --workspace=packages/lavapack
         --workspace=packages/laverna
-        --workspace=packages/node
+        --workspace=packages/lavamoat-node
         --workspace=packages/perf
         --workspace=packages/preinstall-always-fail
         --workspace=packages/survey
