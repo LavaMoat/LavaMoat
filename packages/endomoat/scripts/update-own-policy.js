@@ -22,7 +22,7 @@ const POLICY_OVERRIDE_PATH = fileURLToPath(
   new URL('../src/policy-override.json', import.meta.url)
 )
 
-generateAndWritePolicy(PHONY_ENTRYPOINT, {
+void generateAndWritePolicy(PHONY_ENTRYPOINT, {
   policyPath: POLICY_OVERRIDE_PATH,
 }).then(() => {
   console.error('Wrote %s', POLICY_OVERRIDE_PATH)

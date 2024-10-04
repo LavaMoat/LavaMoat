@@ -5,12 +5,11 @@
         "console.warn": true
       }
     },
-    "@lavamoat/endomoat": {
+    "@lavamoat/node": {
       "packages": {
         "lavamoat-core": true
       },
       "builtin": {
-        "node:console": true,
         "node:path": true
       }
     }

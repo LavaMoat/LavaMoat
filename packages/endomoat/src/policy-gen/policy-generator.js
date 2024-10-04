@@ -7,8 +7,16 @@ import { PolicyGeneratorContext } from './policy-generator-context.js'
 const { entries, freeze } = Object
 
 /**
+ * @import {Sources, CompartmentMapDescriptor} from '@endo/compartment-mapper'
+ * @import {LavaMoatPolicy, LavaMoatPolicyDebug, LavaMoatPolicyOverrides, LavamoatModuleRecord, ModuleInspector} from 'lavamoat-core'
+ * @import {PolicyGeneratorOptions} from '../types.js'
+ */
+
+/**
  * Service which generates a LavaMoat policy from compartment map descriptors
  * and sources
+ *
+ * @internal
  */
 export class PolicyGenerator {
   /**
@@ -30,7 +38,7 @@ export class PolicyGenerator {
    *
    * @remarks
    * Exposed for debugging
-   * @type {Readonly<import('@endo/compartment-mapper').Sources>}
+   * @type {Readonly<Sources>}
    * @internal
    */
   sources
@@ -40,9 +48,7 @@ export class PolicyGenerator {
    *
    * @remarks
    * Exposed for debugging
-   * @type {Readonly<
-   *   import('@endo/compartment-mapper').CompartmentMapDescriptor
-   * >}
+   * @type {Readonly<CompartmentMapDescriptor>}
    * @internal
    */
   compartmentMap
@@ -52,9 +58,7 @@ export class PolicyGenerator {
    *
    * @remarks
    * Exposed for debugging
-   * @type {Readonly<
-   *   import('lavamoat-core').LavaMoatPolicyOverrides | undefined
-   * >}
+   * @type {Readonly<LavaMoatPolicyOverrides | undefined>}
    * @internal
    */
   policyOverride
@@ -69,13 +73,11 @@ export class PolicyGenerator {
    * the same class. This is intentional, since inheritance is undesirable in
    * this case.
    * @private
-   * @param {import('@endo/compartment-mapper').CompartmentMapDescriptor} compartmentMap
-   *   Compartment map descriptor
-   * @param {import('@endo/compartment-mapper').Sources} sources Sources
+   * @param {CompartmentMapDescriptor} compartmentMap Compartment map descriptor
+   * @param {Sources} sources Sources
    * @param {Record<string, string>} renames Mapping of compartment name to
    *   filepath
-   * @param {import('../types.js').PolicyGeneratorOptions} opts Additional
-   *   options
+   * @param {PolicyGeneratorOptions} opts Additional options
    */
   constructor(
     compartmentMap,
@@ -116,36 +118,34 @@ export class PolicyGenerator {
   /**
    * Builds `LavamoatModuleRecord` objects from the `CompartmentMapDescriptor`
    *
-   * @returns {Promise<import('lavamoat-core').LavamoatModuleRecord[]>} Module
-   *   records
+   * @returns {Promise<LavamoatModuleRecord[]>} Module records
    * @internal
    */
   async buildModuleRecords() {
     await Promise.resolve()
 
-    let moduleRecords =
-      /** @type {import('lavamoat-core').LavamoatModuleRecord[]} */ (
-        (
-          await Promise.all(
-            entries(this.sources).map(
-              async ([compartmentName, compartmentSources]) => {
-                if (!this.#contexts.has(compartmentName)) {
-                  // this means that the compartment with this name was not actually used
-                  return
-                }
-
-                const context = /** @type {PolicyGeneratorContext} */ (
-                  this.#contexts.get(compartmentName)
-                )
-
-                return context.buildModuleRecords(compartmentSources)
+    let moduleRecords = /** @type {LavamoatModuleRecord[]} */ (
+      (
+        await Promise.all(
+          entries(this.sources).map(
+            async ([compartmentName, compartmentSources]) => {
+              if (!this.#contexts.has(compartmentName)) {
+                // this means that the compartment with this name was not actually used
+                return
               }
-            )
+
+              const context = /** @type {PolicyGeneratorContext} */ (
+                this.#contexts.get(compartmentName)
+              )
+
+              return context.buildModuleRecords(compartmentSources)
+            }
           )
         )
-          .flat()
-          .filter(Boolean)
       )
+        .flat()
+        .filter(Boolean)
+    )
 
     moduleRecords = [...new Set(moduleRecords)]
 
@@ -157,11 +157,10 @@ export class PolicyGenerator {
   /**
    * Uses `inspector` to inspect a compartment map and sources.
    *
-   * @param {import('lavamoat-core').LavamoatModuleRecord[]} moduleRecords
-   *   Module records
+   * @param {LavamoatModuleRecord[]} moduleRecords Module records
    * @param {boolean} [debug=false] - If `true`, the inspector will include
    *   debug ifnormation. Default is `false`
-   * @returns {import('lavamoat-core').ModuleInspector} The inspector
+   * @returns {ModuleInspector} The inspector
    * @internal
    */
   inspectModuleRecords(moduleRecords, debug = false) {
@@ -191,8 +190,7 @@ export class PolicyGenerator {
    *
    * @overload
    * @param {true} debug - If `true`, the result will be a debug policy
-   * @returns {Promise<import('lavamoat-core').LavaMoatPolicyDebug>} Generated
-   *   policy
+   * @returns {Promise<LavaMoatPolicyDebug>} Generated policy
    * @internal
    */
 
@@ -208,7 +206,7 @@ export class PolicyGenerator {
    *
    * @overload
    * @param {boolean} [debug] - If `true`, the result will be a debug policy
-   * @returns {Promise<import('lavamoat-core').LavaMoatPolicy>} Generated policy
+   * @returns {Promise<LavaMoatPolicy>} Generated policy
    * @internal
    */
 
@@ -224,11 +222,7 @@ export class PolicyGenerator {
    *
    * @param {boolean} [debug=false] - If `true`, the result will be a debug
    *   policy. Default is `false`
-   * @returns {Promise<
-   *   | import('lavamoat-core').LavaMoatPolicy
-   *   | import('lavamoat-core').LavaMoatPolicyDebug
-   * >}
-   *   Generated policy
+   * @returns {Promise<LavaMoatPolicy | LavaMoatPolicyDebug>} Generated policy
    * @internal
    */
   async generatePolicy(debug) {
@@ -244,14 +238,11 @@ export class PolicyGenerator {
    * Instantiates a {@link PolicyGenerator} and generates a debug policy.
    *
    * @overload
-   * @param {Readonly<
-   *   import('@endo/compartment-mapper').CompartmentMapDescriptor
-   * >} compartmentMap
-   * @param {Readonly<import('@endo/compartment-mapper').Sources>} sources
+   * @param {Readonly<CompartmentMapDescriptor>} compartmentMap
+   * @param {Readonly<Sources>} sources
    * @param {Readonly<Record<string, string>>} renames
-   * @param {import('../types.js').PolicyGeneratorOptions & { debug: true }} options
-   * @returns {Promise<import('lavamoat-core').LavaMoatPolicyDebug>} Generated
-   *   debug policy
+   * @param {PolicyGeneratorOptions & { debug: true }} options
+   * @returns {Promise<LavaMoatPolicyDebug>} Generated debug policy
    * @public
    */
 
@@ -259,27 +250,23 @@ export class PolicyGenerator {
    * Instantiates a {@link PolicyGenerator} and generates a policy.
    *
    * @overload
-   * @param {Readonly<
-   *   import('@endo/compartment-mapper').CompartmentMapDescriptor
-   * >} compartmentMap
-   * @param {Readonly<import('@endo/compartment-mapper').Sources>} sources
+   * @param {Readonly<CompartmentMapDescriptor>} compartmentMap
+   * @param {Readonly<Sources>} sources
    * @param {Readonly<Record<string, string>>} renames
-   * @param {import('../types.js').PolicyGeneratorOptions} [options]
-   * @returns {Promise<import('lavamoat-core').LavaMoatPolicy>} Generated policy
+   * @param {PolicyGeneratorOptions} [options]
+   * @returns {Promise<LavaMoatPolicy>} Generated policy
    */
 
   /**
    * Instantiates a {@link PolicyGenerator} and generates a policy.
    *
-   * @param {Readonly<
-   *   import('@endo/compartment-mapper').CompartmentMapDescriptor
-   * >} compartmentMap
-   * @param {Readonly<import('@endo/compartment-mapper').Sources>} sources
+   * @param {Readonly<CompartmentMapDescriptor>} compartmentMap
+   * @param {Readonly<Sources>} sources
    * @param {Readonly<Record<string, string>>} renames
-   * @param {import('../types.js').PolicyGeneratorOptions & {
+   * @param {PolicyGeneratorOptions & {
    *   debug?: boolean
    * }} [options]
-   * @returns {Promise<import('lavamoat-core').LavaMoatPolicy>} Generated policy
+   * @returns {Promise<LavaMoatPolicy>} Generated policy
    * @public
    */
   static async generatePolicy(compartmentMap, sources, renames, options) {
@@ -296,13 +283,11 @@ export class PolicyGenerator {
   /**
    * Factory for {@link PolicyGenerator}
    *
-   * @param {import('@endo/compartment-mapper').CompartmentMapDescriptor} compartmentMap
-   *   Compartment map descriptor
-   * @param {import('@endo/compartment-mapper').Sources} sources Sources
+   * @param {CompartmentMapDescriptor} compartmentMap Compartment map descriptor
+   * @param {Sources} sources Sources
    * @param {Record<string, string>} renames Mapping of compartment name to
    *   filepath
-   * @param {import('../types.js').PolicyGeneratorOptions} opts Additional
-   *   options
+   * @param {PolicyGeneratorOptions} opts Additional options
    */
   static create(compartmentMap, sources, renames, opts = {}) {
     return new PolicyGenerator(compartmentMap, sources, renames, opts)

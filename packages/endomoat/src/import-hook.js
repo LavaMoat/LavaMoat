@@ -4,15 +4,19 @@ import { fileURLToPath } from 'node:url'
 const { freeze, keys, assign } = Object
 
 /**
- * Import hook which should handle builtins and native modules.
- *
- * @type {import('@endo/compartment-mapper').ExitModuleImportHook}
+ * @import {ExitModuleImportHook, ExitModuleImportNowHook} from '@endo/compartment-mapper'
+ * @import {ThirdPartyStaticModuleInterface} from 'ses'
+ */
+
+/**
+ * @type {ExitModuleImportHook}
+ * @internal
  */
 export const importHook = async (specifier) => {
   /** @type {object} */
   const ns = await import(specifier)
   return freeze(
-    /** @type {import('ses').ThirdPartyStaticModuleInterface} */ ({
+    /** @type {ThirdPartyStaticModuleInterface} */ ({
       imports: [],
       exports: keys(ns),
       execute: (moduleExports) => {
@@ -23,13 +27,16 @@ export const importHook = async (specifier) => {
   )
 }
 
-/** @type {import('@endo/compartment-mapper').ExitModuleImportNowHook} */
+/**
+ * @type {ExitModuleImportNowHook}
+ * @internal
+ */
 export const importNowHook = (specifier, packageLocation) => {
   const require = Module.createRequire(fileURLToPath(packageLocation))
   /** @type {object} */
   const ns = require(specifier)
   return freeze(
-    /** @type {import('ses').ThirdPartyStaticModuleInterface} */ ({
+    /** @type {ThirdPartyStaticModuleInterface} */ ({
       imports: [],
       exports: keys(ns),
       execute: (moduleExports) => {

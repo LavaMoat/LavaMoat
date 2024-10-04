@@ -5,7 +5,7 @@ import fs from 'node:fs'
 import { makeReadPowers } from '../src/power.js'
 
 /**
- * @import {SyncReadPowers, FsAPI} from '@endo/compartment-mapper'
+ * @import {ReadNowPowers, FsAPI} from '@endo/compartment-mapper'
  * @import {DirectoryJSON} from 'memfs';
  * @import {SnapshotNode} from 'memfs/lib/snapshot/types.js'
  * @import {JsonUint8Array} from 'memfs/lib/snapshot/json.js'
@@ -24,7 +24,7 @@ const { isArray } = Array
  * @param {{ sourceType?: 'module' | 'script' }} [options]
  * @returns {Promise<{
  *   vol: Volume
- *   readPowers: SyncReadPowers
+ *   readPowers: ReadNowPowers
  * }>}
  */
 export async function scaffoldFixture(content, { sourceType = 'module' } = {}) {
@@ -73,7 +73,7 @@ async function createVolFromSnapshot(snapshotJson) {
  *   directory object
  * @returns {Promise<{
  *   vol: Volume
- *   readPowers: SyncReadPowers
+ *   readPowers: ReadNowPowers
  * }>}
  * @see {@link https://jsonjoy.com/specs/compact-json}
  * @todo Standardize entry point filename and return the entry point path.

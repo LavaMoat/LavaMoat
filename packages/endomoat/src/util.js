@@ -3,14 +3,20 @@ import path from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 
 /**
+ * @import {FsInterface} from '@endo/compartment-mapper'
+ * @import {Jsonifiable} from 'type-fest'
+ * @import {WritableFsInterface} from './types.js'
+ */
+
+/**
  * Reads a JSON file
  *
  * @template [T=unknown] Default is `unknown`
  * @param {string | URL} filepath
- * @param {{ fs?: import('@endo/compartment-mapper').FsAPI }} opts
+ * @param {{ fs?: FsInterface }} opts
  * @returns {Promise<T>} JSON data
  */
-export async function readJsonFile(filepath, { fs = nodeFs } = {}) {
+export const readJsonFile = async (filepath, { fs = nodeFs } = {}) => {
   if (filepath instanceof URL) {
     filepath = fileURLToPath(filepath)
   }
@@ -24,34 +30,13 @@ export async function readJsonFile(filepath, { fs = nodeFs } = {}) {
  * Creates the destination directory if it does not exist
  *
  * @param {string} filepath Path to write to
- * @param {import('type-fest').Jsonifiable} data JSON data
- * @param {{ fs?: import('./types.js').WritableFsAPI }} opts Options
+ * @param {Jsonifiable} data JSON data
+ * @param {{ fs?: WritableFsInterface }} opts Options
  * @returns {Promise<void>}
  */
-export async function writeJson(filepath, data, { fs = nodeFs } = {}) {
+export const writeJson = async (filepath, data, { fs = nodeFs } = {}) => {
   await fs.promises.mkdir(path.dirname(filepath), { recursive: true })
   await fs.promises.writeFile(filepath, JSON.stringify(data, null, 2))
-}
-
-/**
- * Type guard for an `FsAPI` object
- *
- * @param {unknown} value Value to check
- * @returns {value is import('@endo/compartment-mapper').FsAPI} `true` if
- *   `value` is an `FsAPI`
- */
-export function isFsAPI(value) {
-  return Boolean(
-    value &&
-      typeof value === 'object' &&
-      'promises' in value &&
-      value.promises &&
-      typeof value.promises === 'object' &&
-      'readFile' in value.promises &&
-      typeof value.promises.readFile === 'function' &&
-      'realpath' in value.promises &&
-      typeof value.promises.realpath === 'function'
-  )
 }
 
 /**
@@ -64,6 +49,5 @@ export function isFsAPI(value) {
  * @param {URL | string} url URL or path
  * @returns {string} URL-like string
  */
-export function toURLString(url) {
-  return url instanceof URL ? `${url}` : `${pathToFileURL(url)}`
-}
+export const toURLString = (url) =>
+  url instanceof URL ? `${url}` : `${pathToFileURL(url)}`

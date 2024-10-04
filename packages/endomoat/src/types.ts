@@ -1,10 +1,10 @@
 import {
-  CryptoAPI,
-  PathAPI,
-  SyncReadPowers,
-  UrlAPI,
+  CryptoInterface,
+  PathInterface,
+  ReadNowPowers,
+  UrlInterface,
   type CaptureOptions,
-  type FsAPI,
+  type FsInterface,
   type PackagePolicy,
   type Policy,
   type PropertyPolicy,
@@ -65,11 +65,11 @@ export interface WithReadPowers {
   /**
    * Read powers to use when loading the compartment map.
    */
-  readPowers?: SyncReadPowers
-  fs?: FsAPI
-  crypto?: CryptoAPI
-  path?: PathAPI
-  url?: UrlAPI
+  readPowers?: ReadNowPowers
+  fs?: FsInterface
+  crypto?: CryptoInterface
+  path?: PathInterface
+  url?: UrlInterface
 }
 
 /**
@@ -88,7 +88,7 @@ export type GenerateOptions = Except<
 export interface WritePolicyOptions {
   policyDebugPath?: string
   policyPath?: string
-  fs?: WritableFsAPI
+  fs?: WritableFsInterface
   write?: boolean
 }
 
@@ -127,9 +127,9 @@ export type PolicyGeneratorOptions = Simplify<
 /**
  * Options for `run` w/o automatic policy generation
  */
-export type RunOptions = Merge<WithReadPowers, WithFsAPI>
+export type RunOptions = Merge<WithReadPowers, WithFsInterface>
 
-export type WithFsAPI = { fs?: FsAPI }
+export type WithFsInterface = { fs?: FsInterface }
 
 /**
  * Options for `run` w/ automatic policy generation
@@ -210,6 +210,9 @@ export interface WritePowers {
 }
 
 /**
- * Superset of {@link FsAPI} necessary to write a policy to disk
+ * Superset of {@link FsInterface} necessary to write a policy to disk
  */
-export type WritableFsAPI = MergeDeep<FsAPI, { promises: WritePowers }>
+export type WritableFsInterface = MergeDeep<
+  FsInterface,
+  { promises: WritePowers }
+>

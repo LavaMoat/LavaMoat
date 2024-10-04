@@ -17,7 +17,10 @@ import {
 import { defaultReadPowers } from '../power.js'
 
 /**
- * @import {SyncReadPowers, CompartmentDescriptor, ModuleDescriptor, ModuleSource, CompartmentSources} from '@endo/compartment-mapper'
+ * @import {ReadNowPowers, CompartmentDescriptor, ModuleDescriptor, ModuleSource, CompartmentSources} from '@endo/compartment-mapper'
+ * @import {LMRCache} from './lmr-cache.js'
+ * @import {PolicyGeneratorContextOptions} from '../types.js'
+ * @import {LavamoatModuleRecord} from 'lavamoat-core'
  */
 
 const { entries, keys, fromEntries } = Object
@@ -39,13 +42,13 @@ export class PolicyGeneratorContext {
   /**
    * Internal cache for {@link LavamoatModuleRecord} objects
    *
-   * @type {Readonly<import('./lmr-cache.js').LMRCache>}
+   * @type {Readonly<LMRCache>}
    */
   #lmrCache
   /**
    * Read powers
    *
-   * @type {SyncReadPowers}
+   * @type {ReadNowPowers}
    */
   #readPowers
 
@@ -85,7 +88,7 @@ export class PolicyGeneratorContext {
    * @private
    * @param {Readonly<CompartmentDescriptor>} compartment
    * @param {Readonly<Record<string, string>>} renames
-   * @param {Readonly<import('./lmr-cache.js').LMRCache>} lmrCache
+   * @param {Readonly<LMRCache>} lmrCache
    * @param {Readonly<import('../types.js').PolicyGeneratorContextOptions>} opts
    */
   constructor(
@@ -252,8 +255,8 @@ export class PolicyGeneratorContext {
    *
    * @param {Readonly<CompartmentDescriptor>} compartment
    * @param {Readonly<Record<string, string>>} renames
-   * @param {Readonly<import('./lmr-cache.js').LMRCache>} lmrCache
-   * @param {Readonly<import('../types.js').PolicyGeneratorContextOptions>} opts
+   * @param {Readonly<LMRCache>} lmrCache
+   * @param {Readonly<PolicyGeneratorContextOptions>} opts
    */
   static create(compartment, renames, lmrCache, opts = {}) {
     return new PolicyGeneratorContext(compartment, renames, lmrCache, opts)
@@ -263,8 +266,8 @@ export class PolicyGeneratorContext {
    * Given an import map, creates an array of {@link LavamoatModuleRecord}s for
    * each builtin found in there.
    *
-   * @param {import('lavamoat-core').LavamoatModuleRecord['importMap']} importMap
-   * @returns {import('lavamoat-core').LavamoatModuleRecord[]} Zero or more LMRs
+   * @param {LavamoatModuleRecord['importMap']} importMap
+   * @returns {LavamoatModuleRecord[]} Zero or more LMRs
    * @internal
    */
   buildModuleRecordsFromImportMap(importMap) {
@@ -290,7 +293,7 @@ export class PolicyGeneratorContext {
    *
    * @param {string} specifier
    * @param {ModuleSource} source
-   * @returns {Promise<import('lavamoat-core').LavamoatModuleRecord[]>}
+   * @returns {Promise<LavamoatModuleRecord[]>}
    * @internal
    */
   async buildModuleRecordsForSource(
@@ -325,14 +328,14 @@ export class PolicyGeneratorContext {
     /**
      * The {@link LavamoatModuleRecord.file} prop
      *
-     * @type {import('lavamoat-core').LavamoatModuleRecord['file']}
+     * @type {LavamoatModuleRecord['file']}
      */
     const file = fileURLToPath(new URL(sourceLocation))
 
     /**
      * The {@link LavamoatModuleRecord.importMap} prop
      *
-     * @type {import('lavamoat-core').LavamoatModuleRecord['importMap']}
+     * @type {LavamoatModuleRecord['importMap']}
      */
     const importMap = this.buildImportMap(record.imports)
 
@@ -360,7 +363,7 @@ export class PolicyGeneratorContext {
    * Creates {@link LavamoatModuleRecord}s from CompartmentSources.
    *
    * @param {CompartmentSources} sources
-   * @returns {Promise<import('lavamoat-core').LavamoatModuleRecord[]>}
+   * @returns {Promise<LavamoatModuleRecord[]>}
    */
   async buildModuleRecords(sources) {
     const lmrs = await Promise.all(

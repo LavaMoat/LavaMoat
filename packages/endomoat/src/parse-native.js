@@ -5,7 +5,13 @@ import { NATIVE_PARSER_NAME } from './constants.js'
 const { freeze, keys } = Object
 const { quote: q } = assert
 
-/** @type {import('@endo/compartment-mapper').ParseFn} */
+/**
+ * @import {ParseFn, ParserImplementation} from '@endo/compartment-mapper'
+ * @import {ThirdPartyStaticModuleInterface} from 'ses'
+ * @import {LavaMoatPackagePolicy} from './types.js'
+ */
+
+/** @type {ParseFn} */
 const parseNative = (
   bytes,
   _specifier,
@@ -25,13 +31,12 @@ const parseNative = (
    * Enforces policy; the package policy must have `options.native` set to
    * `true`
    *
-   * @type {import('ses').ThirdPartyStaticModuleInterface['execute']}
+   * @type {ThirdPartyStaticModuleInterface['execute']}
    */
   const execute = (moduleEnvironmentRecord, compartment) => {
     if (
-      /** @type {import('./types.js').LavaMoatPackagePolicy} */ (
-        compartmentDescriptor?.policy
-      )?.options?.native !== true
+      /** @type {LavaMoatPackagePolicy} */ (compartmentDescriptor?.policy)
+        ?.options?.native !== true
     ) {
       throw new Error(
         `Native modules are disallowed in compartment ${q(compartment.name)}`
@@ -54,7 +59,12 @@ const parseNative = (
   }
 }
 
-/** @type {import('@endo/compartment-mapper').ParserImplementation} */
+/**
+ * Parser for native Node.js modules
+ *
+ * @type {ParserImplementation}
+ * @internal
+ */
 export default {
   parse: parseNative,
   heuristicImports: false,

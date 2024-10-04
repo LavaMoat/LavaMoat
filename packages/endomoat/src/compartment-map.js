@@ -11,7 +11,7 @@ import { defaultReadPowers } from './power.js'
 import { toURLString } from './util.js'
 
 /**
- * @import {SyncReadPowers} from '@endo/compartment-mapper';
+ * @import {ReadNowPowers} from '@endo/compartment-mapper';
  * @import {LavaMoatPolicy} from 'lavamoat-core';
  * @import {LoadCompartmentMapOptions} from './types.js';
  */
@@ -21,7 +21,7 @@ const { entries, fromEntries, freeze } = Object
 /**
  * Common options for calling functions in `@endo/compartment-mapper`
  */
-export const ENDO_OPTIONS = freeze(
+const ENDO_OPTIONS = freeze(
   /** @type {const} */ ({
     globals: globalThis,
     importHook,
@@ -52,10 +52,10 @@ export const ENDO_OPTIONS = freeze(
  * @internal
  */
 
-export async function loadCompartmentMap(
+export const loadCompartmentMap = async (
   entrypointPath,
   { readPowers = defaultReadPowers, ...captureOpts } = {}
-) {
+) => {
   const entryPoint = toURLString(entrypointPath)
 
   const nodeCompartmentMap = await mapNodeModules(readPowers, entryPoint, {
@@ -93,13 +93,13 @@ export async function loadCompartmentMap(
  * Endo policy
  *
  * @template [T=unknown] Default is `unknown`
- * @param {SyncReadPowers} readPowers
+ * @param {ReadNowPowers} readPowers
  * @param {string | URL} entrypointPath
  * @param {LavaMoatPolicy} policy
  * @returns {Promise<T>}
  * @internal
  */
-export async function execute(readPowers, entrypointPath, policy) {
+export const execute = async (readPowers, entrypointPath, policy) => {
   const endoPolicy = await toEndoPolicy(policy)
   const entryPoint = toURLString(entrypointPath)
   const { namespace } = await importLocation(readPowers, entryPoint, {

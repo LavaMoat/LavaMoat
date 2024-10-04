@@ -10,28 +10,31 @@ import {
   RSRC_POLICY_OPTIONS,
   RSRC_POLICY_PKGS,
 } from './constants.js'
-import { assertPolicyOverrides, readPolicyOverride } from './policy.js'
+import { assertPolicyOverride, readPolicyOverride } from './policy.js'
 
 const { isArray } = Array
 const { entries, fromEntries } = Object
 
-const DEFAULT_ATTENUATOR = '@lavamoat/endomoat/attenuator'
+/**
+ * @import {LavaMoatPackagePolicy, LavaMoatPackagePolicyOptions, LavaMoatEndoPolicy} from './types.js'
+ * @import {PackagePolicy, GlobalPolicy, ResourcePolicy, LavaMoatPolicy, LavaMoatPolicyOverrides} from 'lavamoat-core'
+ */
+
+const DEFAULT_ATTENUATOR = '@lavamoat/node/attenuator'
 
 /**
  * Converts LavaMoat `ResourcePolicy.builtins` to Endo's
  * `PackagePolicy.builtins`
  *
  * @param {Record<string, boolean>} [item] - A value in `ResourcePolicy`
- * @returns {import('./types.js').LavaMoatPackagePolicy['builtins']}
+ * @returns {LavaMoatPackagePolicy['builtins']}
  */
-function convertEndoPackagePolicyBuiltins(item) {
+const convertEndoPackagePolicyBuiltins = (item) => {
   if (!item) {
     return undefined
   }
   /**
-   * @type {NonNullable<
-   *   import('./types.js').LavaMoatPackagePolicy['builtins']
-   * >}
+   * @type {NonNullable<LavaMoatPackagePolicy['builtins']>}
    */
   const policyItem = {}
 
@@ -66,18 +69,15 @@ function convertEndoPackagePolicyBuiltins(item) {
  * Converts LavaMoat `ResourcePolicy.packages` to Endo's
  * `PackagePolicy.packages`
  *
- * @param {import('lavamoat-core').PackagePolicy} [item] - A value in
- *   `ResourcePolicy`
- * @returns {import('./types.js').LavaMoatPackagePolicy['packages']}
+ * @param {PackagePolicy} [item] - A value in `ResourcePolicy`
+ * @returns {LavaMoatPackagePolicy['packages']}
  */
-function convertEndoPackagePolicyPackages(item) {
+const convertEndoPackagePolicyPackages = (item) => {
   if (!item) {
     return undefined
   }
   /**
-   * @type {NonNullable<
-   *   import('./types.js').LavaMoatPackagePolicy['packages']
-   * >}
+   * @type {NonNullable<LavaMoatPackagePolicy['packages']>}
    */
   const policyItem = {}
   for (const [key, value] of entries(item)) {
@@ -93,11 +93,10 @@ function convertEndoPackagePolicyPackages(item) {
 /**
  * Converts LavaMoat `ResourcePolicy.globals` to Endo's `PackagePolicy.globals`
  *
- * @param {import('lavamoat-core').GlobalPolicy} [item] - A value in
- *   `ResourcePolicy`
- * @returns {import('./types.js').LavaMoatPackagePolicy['globals']}
+ * @param {GlobalPolicy} [item] - A value in `ResourcePolicy`
+ * @returns {LavaMoatPackagePolicy['globals']}
  */
-function convertEndoPackagePolicyGlobals(item) {
+const convertEndoPackagePolicyGlobals = (item) => {
   if (!item) {
     return undefined
   }
@@ -122,14 +121,14 @@ function convertEndoPackagePolicyGlobals(item) {
 /**
  * Converts LavaMoat `ResourcePolicy` to Endo's `PackagePolicyOptions`
  *
- * @param {import('lavamoat-core').ResourcePolicy} [resources]
- * @returns {import('./types.js').LavaMoatPackagePolicyOptions | undefined}
+ * @param {ResourcePolicy} [resources]
+ * @returns {LavaMoatPackagePolicyOptions | undefined}
  */
-function convertEndoPackagePolicyOptions(resources) {
+const convertEndoPackagePolicyOptions = (resources) => {
   if (!resources) {
     return undefined
   }
-  /** @type {import('./types.js').LavaMoatPackagePolicyOptions | undefined} */
+  /** @type {LavaMoatPackagePolicyOptions | undefined} */
   let pkgPolicyOptions
   if (resources[LAVAMOAT_RESOURCE_FLAG_NATIVE] === true) {
     pkgPolicyOptions = { [RSRC_POLICY_OPTION_NATIVE]: true }
@@ -140,10 +139,10 @@ function convertEndoPackagePolicyOptions(resources) {
 /**
  * Converters LavaMoat `ResourcePolicy` to Endo's `PackagePolicy`
  *
- * @param {import('lavamoat-core').ResourcePolicy} resources
- * @returns {import('./types.js').LavaMoatPackagePolicy}
+ * @param {ResourcePolicy} resources
+ * @returns {LavaMoatPackagePolicy}
  */
-function convertEndoPackagePolicy(resources) {
+const convertEndoPackagePolicy = (resources) => {
   return {
     [RSRC_POLICY_PKGS]: convertEndoPackagePolicyPackages(resources.packages),
     [RSRC_POLICY_GLOBALS]: convertEndoPackagePolicyGlobals(resources.globals),
@@ -155,25 +154,26 @@ function convertEndoPackagePolicy(resources) {
 /**
  * Converts a LavaMoat policy to an Endo policy
  *
- * @param {import('lavamoat-core').LavaMoatPolicy} lmPolicy
- * @returns {Promise<import('./types.js').LavaMoatEndoPolicy>}
+ * @param {LavaMoatPolicy} lmPolicy
+ * @returns {Promise<LavaMoatEndoPolicy>}
+ * @public
  */
-export async function toEndoPolicy(lmPolicy) {
+export const toEndoPolicy = async (lmPolicy) => {
   // policy for self; needed for attenuator
-  /** @type {import('lavamoat-core').LavaMoatPolicyOverrides} */
+  /** @type {LavaMoatPolicyOverrides} */
   let overrides = {}
   const allegedOverrides = await readPolicyOverride(
     new URL('./policy-override.json', import.meta.url)
   )
 
   if (allegedOverrides) {
-    assertPolicyOverrides(allegedOverrides)
+    assertPolicyOverride(allegedOverrides)
     overrides = allegedOverrides
   }
 
   const finalLMPolicy = mergePolicy(lmPolicy, overrides)
 
-  /** @type {import('./types.js').LavaMoatEndoPolicy} */
+  /** @type {LavaMoatEndoPolicy} */
   const endoPolicy = {
     defaultAttenuator: DEFAULT_ATTENUATOR,
     entry: {
@@ -183,10 +183,12 @@ export async function toEndoPolicy(lmPolicy) {
       noGlobalFreeze: true,
     },
     resources: fromEntries(
-      entries(finalLMPolicy.resources ?? {}).map(([rsrcName, rsrcPolicy]) => [
-        rsrcName,
-        convertEndoPackagePolicy(rsrcPolicy),
-      ])
+      entries(finalLMPolicy.resources ?? {}).map(
+        ([resourceName, resourcePolicy]) => [
+          resourceName,
+          convertEndoPackagePolicy(resourcePolicy),
+        ]
+      )
     ),
   }
 

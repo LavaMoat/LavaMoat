@@ -30,7 +30,7 @@ test('toEndoPolicy - basic', async (t) => {
    * @type {import('@endo/compartment-mapper').Policy<LavaMoatPackagePolicyItem>}
    */
   const expected = {
-    defaultAttenuator: '@lavamoat/endomoat/attenuator',
+    defaultAttenuator: '@lavamoat/node/attenuator',
     entry: {
       globals: [POLICY_ITEM_ROOT],
       noGlobalFreeze: true,
@@ -46,13 +46,12 @@ test('toEndoPolicy - basic', async (t) => {
         packages: undefined,
         options: undefined,
       },
-      '@lavamoat/endomoat': {
+      '@lavamoat/node': {
         packages: {
           'lavamoat-core': true,
         },
         globals: undefined,
         builtins: {
-          'node:console': true,
           'node:path': true,
         },
         options: undefined,
@@ -62,7 +61,7 @@ test('toEndoPolicy - basic', async (t) => {
         globals: { console: true },
         builtins: {
           fs: {
-            attenuate: '@lavamoat/endomoat/attenuator',
+            attenuate: '@lavamoat/node/attenuator',
             params: ['readFile'],
           },
         },

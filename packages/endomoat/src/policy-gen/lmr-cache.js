@@ -7,11 +7,17 @@
 import { LavamoatModuleRecord } from 'lavamoat-core'
 
 /**
+ * @import {LavamoatModuleRecordOptions} from 'lavamoat-core'
+ */
+
+/**
  * This class represents a transient cache for
  * {@link LavamoatModuleRecord LavamoatModuleRecords}.
  *
  * It's a thin wrapper around a `Map`; it's used to ensure we don't create
  * duplicate `LavamoatModuleRecord` objects for the same specifiers.
+ *
+ * @internal
  */
 export class LMRCache {
   /** @type {Map<string, LavamoatModuleRecord>} */
@@ -24,8 +30,7 @@ export class LMRCache {
    * Computes the cache key for a given {@link LavamoatModuleRecord} or its
    * options.
    *
-   * @param {import('lavamoat-core').LavamoatModuleRecordOptions
-   *   | LavamoatModuleRecord} opts
+   * @param {LavamoatModuleRecordOptions | LavamoatModuleRecord} opts
    * @returns {string}
    * @todo Determine if this is appropriately unique
    */
@@ -36,7 +41,7 @@ export class LMRCache {
   /**
    * Gets or creates a new {@link LavamoatModuleRecord} for the given options.
    *
-   * @param {import('lavamoat-core').LavamoatModuleRecordOptions} opts
+   * @param {LavamoatModuleRecordOptions} opts
    */
   get(opts) {
     const key = LMRCache.keyFor(opts)

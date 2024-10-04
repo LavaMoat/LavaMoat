@@ -1,1 +1,1 @@
-import '@lavamoat/endomoat/attenuator'
+import '@lavamoat/node/attenuator'

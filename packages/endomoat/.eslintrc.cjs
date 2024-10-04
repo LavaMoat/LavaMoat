@@ -1,6 +1,4 @@
-// @ts-check
-
-/** @type {import('eslint').Linter.Config} */
+// TODO: use types when we determine what types to use
 module.exports = {
   extends: [
     'plugin:@endo/recommended',
@@ -19,16 +17,25 @@ module.exports = {
     // agoric-specific rules
     '@endo/no-nullish-coalescing': 'off',
     '@endo/no-optional-chaining': 'off',
+
+    // all of the functions in this module are declarations, so might as well enforce some consistency.
+    // this does not prevent a declaration from using the 'function' keyword, though
+    'func-style': ['error', 'declaration', { allowArrowFunctions: true }],
   },
   overrides: [
     {
-      files: ['./test/*.js'],
+      files: ['./test/*.js', './test/*.ts'],
       rules: {
+        // use t.log()
         'no-console': 'error',
+
         // of dubious value
         'ava/use-t-well': 'off',
+
+        // this plugin has trouble finding memfs
+        'n/no-unpublished-import': 'off',
       },
     },
   ],
-  ignorePatterns: ['./test/fixture/**/*'],
+  ignorePatterns: ['**/test/fixture/**/*'],
 }

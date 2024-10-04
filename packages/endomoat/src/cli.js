@@ -13,17 +13,18 @@
  * @packageDocumentation
  */
 
+import './preamble.js'
+
 import assert from 'node:assert'
 import path from 'node:path'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
-import {
-  constants,
-  generateAndWritePolicy,
-  loadPolicies,
-  run,
-} from './index.js'
+
+import * as constants from './constants.js'
+import { generateAndWritePolicy } from './policy-gen/index.js'
+import { loadPolicies } from './policy.js'
 import { defaultReadPowers } from './power.js'
+import { run } from './run.js'
 import { readJsonFile } from './util.js'
 
 /**
@@ -36,14 +37,14 @@ const BEHAVIOR_GROUP = 'Behavior Options:'
 /**
  * Main entry point to CLI
  */
-async function main(args = hideBin(process.argv)) {
+const main = async (args = hideBin(process.argv)) => {
   // see note below above the call to `.version()`
   const { version } = /** @type {PackageJson} */ (
     await readJsonFile(new URL('../package.json', import.meta.url))
   )
 
   yargs(args)
-    .scriptName('endomoat')
+    .scriptName('lavamoat2')
     /**
      * @remarks
      * `yargs` seems to return the version provided by the `package.json` at the

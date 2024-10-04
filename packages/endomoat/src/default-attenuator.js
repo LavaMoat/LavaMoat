@@ -1,6 +1,17 @@
+/**
+ * Provides the default global and module attenuator
+ *
+ * @packageDocumentation
+ */
+
 import endowmentsToolkit from 'lavamoat-core/src/endowmentsToolkit.js'
 import { POLICY_ITEM_ROOT, POLICY_ITEM_WRITE } from './constants.js'
 // eslint-disable-next-line n/prefer-global/console
+
+/**
+ * @import {GlobalAttenuatorFn, ModuleAttenuatorFn} from '@endo/compartment-mapper'
+ * @import {GlobalAttenuatorParams} from './types.js'
+ */
 
 const { copyWrappedGlobals, getEndowmentsForConfig } = endowmentsToolkit()
 
@@ -10,15 +21,13 @@ const { fromEntries, defineProperties, getOwnPropertyDescriptors } = Object
 let rootCompartmentGlobalThis
 
 /**
- * @type {import('@endo/compartment-mapper').GlobalAttenuatorFn<
- *   import('./types.js').GlobalAttenuatorParams
- * >}
+ * @type {GlobalAttenuatorFn<GlobalAttenuatorParams>}
  */
-export function attenuateGlobals(
+export const attenuateGlobals = (
   [policy],
   originalGlobalThis,
   packageCompartmentGlobalThis
-) {
+) => {
   if (!policy) {
     return
   }
@@ -56,10 +65,7 @@ export function attenuateGlobals(
 /**
  * Picks stuff in the policy out of the original object
  *
- * @type {import('@endo/compartment-mapper').ModuleAttenuatorFn<
- *   [string, ...string[]]
- * >}
+ * @type {ModuleAttenuatorFn<[string, ...string[]]>}
  */
-export function attenuateModule(params, originalObject) {
-  return fromEntries(params.map((key) => [key, originalObject[key]]))
-}
+export const attenuateModule = (params, originalObject) =>
+  fromEntries(params.map((key) => [key, originalObject[key]]))

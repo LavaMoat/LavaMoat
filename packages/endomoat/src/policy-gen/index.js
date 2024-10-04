@@ -1,6 +1,8 @@
 /**
  * Provides Lavamoat policy generation facilities via {@link generatePolicy}
  *
+ * **All exports in this module are considered part of the public API.**
+ *
  * @packageDocumentation
  */
 import assert from 'node:assert'
@@ -46,7 +48,7 @@ import { PolicyGenerator } from './policy-generator.js'
  * @param {GenerateOptions} [opts]
  * @returns {Promise<LavaMoatPolicy>}
  */
-async function generate(
+const generate = async (
   entrypointPath,
   {
     readPowers = defaultReadPowers,
@@ -54,7 +56,7 @@ async function generate(
     policyOverride,
     ...archiveOpts
   } = {}
-) {
+) => {
   const { compartmentMap, sources, renames } = await loadCompartmentMap(
     entrypointPath,
     {
@@ -86,9 +88,8 @@ async function generate(
  * @returns {Promise<LavaMoatPolicy>}
  * @public
  */
-export async function generateAndWritePolicy(entrypointPath, opts = {}) {
-  return generatePolicy(entrypointPath, { write: true, ...opts })
-}
+export const generateAndWritePolicy = async (entrypointPath, opts = {}) =>
+  generatePolicy(entrypointPath, { write: true, ...opts })
 
 /**
  * Returns `true` if we should write a debug policy
@@ -96,11 +97,16 @@ export async function generateAndWritePolicy(entrypointPath, opts = {}) {
  * @param {Pick<GeneratePolicyOptions, 'write' | 'debug'>} [opts]
  * @returns {boolean}
  */
-function shouldWriteDebugPolicy(opts = {}) {
-  return Boolean(opts.write && opts.debug)
-}
+const shouldWriteDebugPolicy = (opts = {}) => !!(opts.write && opts.debug)
 
+/**
+ * Absolute path to the default policy debug file
+ */
 const ABS_POLICY_DEBUG_PATH = path.resolve(DEFAULT_POLICY_DEBUG_PATH)
+
+/**
+ * Absolute path to the default policy file
+ */
 const ABS_POLICY_PATH = path.resolve(DEFAULT_POLICY_PATH)
 
 /**
@@ -112,7 +118,7 @@ const ABS_POLICY_PATH = path.resolve(DEFAULT_POLICY_PATH)
  * @returns {Promise<LavaMoatPolicy>}
  * @public
  */
-export async function generatePolicy(
+export const generatePolicy = async (
   entrypointPath,
   {
     policyDebugPath = ABS_POLICY_DEBUG_PATH,
@@ -123,7 +129,7 @@ export async function generatePolicy(
     debug,
     ...generateOpts
   } = {}
-) {
+) => {
   if (entrypointPath instanceof URL) {
     entrypointPath = fileURLToPath(entrypointPath)
   }

@@ -1,4 +1,4 @@
-import { makeSyncReadPowers as endoMakeReadPowers } from '@endo/compartment-mapper/node-powers.js'
+import { makeReadNowPowers } from '@endo/compartment-mapper/node-powers.js'
 import nodeCrypto from 'node:crypto'
 import nodeFs from 'node:fs'
 import nodePath from 'node:path'
@@ -6,16 +6,16 @@ import nodeUrl from 'node:url'
 
 /**
  * @import {SetRequired} from 'type-fest';
- * @import {SyncReadPowers, FsAPI, UrlAPI, CryptoAPI, PathAPI} from '@endo/compartment-mapper'
+ * @import {ReadNowPowers,  FsInterface,  UrlInterface,  CryptoInterface, PathInterface} from '@endo/compartment-mapper'
  * @import {WithReadPowers} from './types.js';
  */
 
 /**
  * Default read powers for Endo
  *
- * @type {SyncReadPowers}
+ * @type {ReadNowPowers}
  */
-export const defaultReadPowers = endoMakeReadPowers({
+export const defaultReadPowers = makeReadNowPowers({
   fs: nodeFs,
   url: nodeUrl,
   crypto: nodeCrypto,
@@ -23,25 +23,25 @@ export const defaultReadPowers = endoMakeReadPowers({
 })
 
 /**
- * Creates a `SyncReadPowers` object from a `FsAPI` object (and optionally other
- * powers)
+ * Creates a `ReadNowPowers` object from a `FsInterface` object (and optionally
+ * other powers)
  *
- * @param {FsAPI} fs
- * @param {UrlAPI} [url]
- * @param {PathAPI} [path]
- * @param {CryptoAPI} [crypto]
- * @returns {SyncReadPowers}
+ * @param {FsInterface} fs
+ * @param {UrlInterface} [url]
+ * @param {PathInterface} [path]
+ * @param {CryptoInterface} [crypto]
+ * @returns {ReadNowPowers}
  */
-export function makeReadPowers(
+export const makeReadPowers = (
   fs,
   url = nodeUrl,
   path = nodePath,
   crypto = nodeCrypto
-) {
+) => {
   if (fs === nodeFs) {
     return defaultReadPowers
   }
-  return endoMakeReadPowers({
+  return makeReadNowPowers({
     fs,
     url,
     crypto,
