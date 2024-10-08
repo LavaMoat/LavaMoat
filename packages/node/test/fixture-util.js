@@ -5,7 +5,7 @@ import fs from 'node:fs'
 import { makeReadPowers } from '../src/power.js'
 
 /**
- * @import {ReadNowPowers, FsAPI} from '@endo/compartment-mapper'
+ * @import {ReadNowPowers, FsInterface} from '@endo/compartment-mapper'
  * @import {DirectoryJSON} from 'memfs';
  * @import {SnapshotNode} from 'memfs/lib/snapshot/types.js'
  * @import {JsonUint8Array} from 'memfs/lib/snapshot/json.js'
@@ -105,7 +105,7 @@ export async function loadJSONFixture(pathOrJson) {
       : Volume.fromJSON(json)
   }
 
-  const readPowers = makeReadPowers(/** @type {FsAPI} */ (vol))
+  const readPowers = makeReadPowers(/** @type {FsInterface} */ (vol))
   return { vol, readPowers }
 }
 /**

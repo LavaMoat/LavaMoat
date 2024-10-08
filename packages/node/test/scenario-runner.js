@@ -18,7 +18,7 @@ const { entryPath, policy, opts, vol } =
 const { fs } = memfs(vol)
 
 const readPowers = makeReadPowers(
-  /** @type {import('@endo/compartment-mapper').FsAPI} */ (fs)
+  /** @type {import('@endo/compartment-mapper').FsInterface} */ (fs)
 )
 
 await run(entryPath, policy, { ...opts, readPowers })
