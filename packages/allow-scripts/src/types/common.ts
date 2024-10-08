@@ -58,27 +58,27 @@ declare global {
   }
 
   // config.js
-  interface SetDefaultConfigurationParams {
+  export interface SetDefaultConfigurationParams {
     rootDir: string;
   }
 
-  interface SavePackageConfigurationsParams {
+  export interface SavePackageConfigurationsParams {
     rootDir: string;
     conf: PkgConfs;
   }
 
-  interface GetOptionsForBinParams {
+  export interface GetOptionsForBinParams {
     rootDir: string;
     name: string;
   }
 
   // setup.js
-  interface AreBinsBlockedParams {
+  export interface AreBinsBlockedParams {
     /** Turn off memoization, make a fresh lookup */
     noMemoization?: boolean;
   }
 
-  interface PkgConfs {
+  export interface PkgConfs {
     packageJson: LavamoatPackageJson;
     configs: {
       lifecycle: ScriptsConfig;
@@ -88,27 +88,27 @@ declare global {
     canonicalNamesByPath: Map<string,string>;
   }
 
-  interface WriteRcFileContentParams {
+  export interface WriteRcFileContentParams {
     file: string;
     entry: string;
   }
 
   // runAllowedPackages.js
-  interface RunAllowedPackagesParams {
+  export interface RunAllowedPackagesParams {
     rootDir: string;
   }
 
-  interface RunScriptParams {
+  export interface RunScriptParams {
     event: string;
     path: string;
   }
 
   // report.js
-  interface PrintPackagesListParams {
+  export interface PrintPackagesListParams {
     rootDir: string;
   }
 
-  interface PrintMissingPoliciesIfAnyParams {
+  export interface PrintMissingPoliciesIfAnyParams {
     missingPolicies: string[];
     packagesWithScripts: Map<string, unknown[]>;
   }
