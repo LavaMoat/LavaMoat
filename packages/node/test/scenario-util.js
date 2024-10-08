@@ -17,7 +17,7 @@ const RUNNER_MODULE_PATH = (
         path.join(
           process.env.WALLABY_PROJECT_DIR,
           'packages',
-          'endomoat',
+          'node',
           'test',
           'scenario-runner.js'
         )
@@ -172,7 +172,7 @@ export function createScenarioRunner(log = console.error.bind(console)) {
       ;({ projectDir, policyDir } = await prepareScenarioOnDisk({
         fs: fs.promises,
         scenario,
-        policyName: 'endomoat',
+        policyName: 'lavamoat-node',
       }))
     } catch (e) {
       dumpError(e, vol, { log })
