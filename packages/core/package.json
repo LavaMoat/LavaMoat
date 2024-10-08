@@ -39,12 +39,12 @@
     "json-stable-stringify": "1.1.1",
     "lavamoat-tofu": "^8.0.2",
     "merge-deep": "3.0.3",
+    "ses": "1.9.0",
     "type-fest": "4.30.0"
   },
   "devDependencies": {
     "@types/json-stable-stringify": "1.1.0",
     "@types/merge-deep": "3.0.3",
-    "ses": "1.9.0",
     "tmp-promise": "3.0.3"
   },
   "ava": {
