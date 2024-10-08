@@ -4,13 +4,14 @@
     "outDir": "../types",
     "rootDir": "..",
     "paths": {
-      "lavamoat-core": ["../../core"]
+      "lavamoat-core": ["../../core/types/src/types.d.ts"]
     },
     "target": "esnext",
     "module": "NodeNext",
     "types": ["node", "ses"],
     "strict": true,
-    "stripInternal": true
+    "stripInternal": true,
+    "preserveSymlinks": true
   },
   "include": ["."],
   "references": [{ "path": "../../core/tsconfig.json" }]
