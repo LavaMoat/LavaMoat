@@ -2,13 +2,13 @@ import type { JsonObject, PackageJson } from 'type-fest';
 
 declare global {
   export interface PkgLavamoatConfig {
-    ['allowBins']?: JsonObject;
-    ['allowConfig']?: JsonObject;
-    ['allowScripts']?: JsonObject;
-    ['allowedPatterns']?: JsonObject;
-    ['disallowedPatterns']?: JsonObject;
-    ['excessPolicies']?: JsonObject;
-    ['missingPolicies']?: JsonObject;
+    allowBins?: JsonObject;
+    allowConfig?: JsonObject;
+    allowScripts?: JsonObject;
+    allowedPatterns?: JsonObject;
+    disallowedPatterns?: JsonObject;
+    excessPolicies?: JsonObject;
+    missingPolicies?: JsonObject;
   }
 
   export type LavamoatPackageJson = PackageJson & { lavamoat: PkgLavamoatConfig };
