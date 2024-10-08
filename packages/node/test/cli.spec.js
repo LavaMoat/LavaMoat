@@ -65,11 +65,11 @@ const BASIC_ENTRYPOINT_CWD = path.dirname(BASIC_ENTRYPOINT)
  *         stderr: string
  *         code?: ExitCode
  *       }
- *     ) => void | Promise<void>)} ExecEndomoatExpectation
+ *     ) => void | Promise<void>)} ExecLavamoatNodeExpectation
  */
 
 /**
- * Run the `endomoat` CLI with the provided arguments
+ * Run the `@lavamoat/node` CLI with the provided arguments
  *
  * @param {string[]} args CLI arguments
  * @returns {Promise<{ stdout: string; stderr: string; code: ExitCode }>}
@@ -102,8 +102,10 @@ async function runCli(args) {
 }
 
 /**
- * Macro to run the `endomoat` CLI with the provided arguments, and optionally
- * perform assertions on the output.
+ * Macro to run the `@lavamoat/node` CLI with the provided arguments, and
+ * optionally perform assertions on the output.
+ *
+ * If no assertions are provided, the output is snapshotted.
  *
  * @todo Could create a factory function so it could be generic for any CLI
  */
@@ -112,7 +114,7 @@ const testCLI = test.macro(
    * @template [Ctx=unknown] Default is `unknown`
    * @param {import('ava').ExecutionContext<Ctx>} t Exec context
    * @param {string[]} args CLI arguments
-   * @param {ExecEndomoatExpectation<Ctx>} [expected] Expected output or
+   * @param {ExecLavamoatNodeExpectation<Ctx>} [expected] Expected output or
    *   callback
    * @returns {Promise<void>}
    */
@@ -198,7 +200,9 @@ test(
 test('generate - --help prints help', testCLI, ['generate', '--help'])
 
 test('generate - basic policy generation', async (t) => {
-  const tempdir = await fs.mkdtemp(path.join(tmpdir(), 'endomoat-cli-test-'))
+  const tempdir = await fs.mkdtemp(
+    path.join(tmpdir(), 'lavamoat-node-cli-test-')
+  )
   const policyPath = path.join(tempdir, 'policy.json')
   try {
     await runCli(['generate', BASIC_ENTRYPOINT, '--policy', policyPath])
