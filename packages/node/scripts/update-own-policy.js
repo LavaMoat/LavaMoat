@@ -1,10 +1,10 @@
 /**
- * This script generates a policy for endomoat itself. This is needed to allow
- * the default attenuator to execute.
+ * This script generates a policy for `@lavamoat/node` itself. This is needed to
+ * allow the default attenuator to execute.
  *
  * The result of this is merged into the user-provided policy (or policies)
  * during conversion to an Endo policy. Because the Endo policy is not
- * persisted, making changes in endomoat won't break existing policies.
+ * persisted, making changes in `@lavamoat/node` won't break existing policies.
  *
  * By persisting the policy to disk, we tradeoff initial execution time for
  * needing to update the policy before release. Is this a good idea? I don't
