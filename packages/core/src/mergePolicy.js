@@ -5,19 +5,37 @@ const {
 } = require('lavamoat-tofu/src/util')
 const mergeDeep = require('merge-deep')
 
-module.exports = { mergePolicy }
-
+/**
+ * Merges two policies together.
+ *
+ * `policyB` overwrites `policyA` where concatenation is not possible
+ *
+ * @param {LavaMoatPolicy} policyA First policy
+ * @param {LavaMoatPolicy | LavaMoatPolicyOverrides} [policyB] Second policy or
+ *   policy override
+ * @returns {LavaMoatPolicy} Merged policy or `policyA` if `policyB` not
+ *   provided
+ */
 function mergePolicy(policyA, policyB) {
-  const mergedPolicy = mergeDeep(policyA, policyB)
-  Object.values(mergedPolicy.resources).forEach((packagePolicy) => {
-    if ('globals' in packagePolicy) {
-      packagePolicy.globals = dedupePolicyPaths(packagePolicy.globals)
-    }
-    if ('builtin' in packagePolicy) {
-      packagePolicy.builtin = dedupePolicyPaths(packagePolicy.builtin)
-    }
-  })
-  return mergedPolicy
+  if (policyB) {
+    const mergedPolicy = mergeDeep(policyA, policyB)
+    values(mergedPolicy.resources ?? {}).forEach((packagePolicy) => {
+      if (
+        objectPrototype.hasOwnProperty.call(packagePolicy, 'globals') &&
+        packagePolicy.globals
+      ) {
+        packagePolicy.globals = dedupePolicyPaths(packagePolicy.globals)
+      }
+      if (
+        objectPrototype.hasOwnProperty.call(packagePolicy, 'builtin') &&
+        packagePolicy.builtin
+      ) {
+        packagePolicy.builtin = dedupePolicyPaths(packagePolicy.builtin)
+      }
+    })
+    return /** @type {LavaMoatPolicy} */ (mergedPolicy)
+  }
+  return policyA
 }
 
 function dedupePolicyPaths(packagePolicy) {
@@ -25,3 +43,5 @@ function dedupePolicyPaths(packagePolicy) {
   reduceToTopmostApiCalls(itemMap)
   return mapToObj(itemMap)
 }
+
+module.exports = { mergePolicy }
