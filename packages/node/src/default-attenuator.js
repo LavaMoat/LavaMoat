@@ -4,7 +4,7 @@
  * @packageDocumentation
  */
 
-import endowmentsToolkit from 'lavamoat-core/src/endowmentsToolkit.js'
+import { endowmentsToolkit } from 'lavamoat-core'
 import { POLICY_ITEM_ROOT, POLICY_ITEM_WRITE } from './constants.js'
 // eslint-disable-next-line n/prefer-global/console
 
