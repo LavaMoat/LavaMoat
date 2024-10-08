@@ -5,7 +5,11 @@
     "target": "esnext",
     "module": "NodeNext",
     "types": ["node", "ses"],
-    "strict": true
+    "strict": true,
+    "paths": {
+      "lavamoat-core": ["../../core/types/src/types.d.ts"]
+    },
+    "preserveSymlinks": true
   },
   "include": ["."],
   "exclude": ["./fixture"],
