@@ -26,7 +26,7 @@
       "path": "./packages/webpack"
     },
     {
-      "path": "./packages/endomoat"
+      "path": "./packages/node"
     }
   ]
 }

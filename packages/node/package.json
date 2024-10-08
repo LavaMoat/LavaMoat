@@ -6,9 +6,9 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/LavaMoat/LavaMoat.git",
-    "directory": "packages/endomoat"
+    "directory": "packages/node"
   },
-  "homepage": "https://github.com/LavaMoat/LavaMoat/tree/main/packages/endomoat",
+  "homepage": "https://github.com/LavaMoat/LavaMoat/tree/main/packages/node",
   "author": "LavaMoat Project",
   "license": "MIT",
   "engines": {
