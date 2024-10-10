@@ -8,7 +8,10 @@
     "url": "https://github.com/LavaMoat/LavaMoat.git",
     "directory": "packages/node"
   },
-  "homepage": "https://github.com/LavaMoat/LavaMoat/tree/main/packages/node",
+  "homepage": "https://lavamoat.github.io",
+  "bugs": {
+    "url": "https://github.com/LavaMoat/LavaMoat/issues"
+  },
   "author": "LavaMoat Project",
   "license": "MIT",
   "engines": {
@@ -16,7 +19,7 @@
     "npm": ">=9.0.0"
   },
   "bin": {
-    "lavamoat2": "./src/cli.js"
+    "lavamoat": "./src/cli.js"
   },
   "exports": {
     ".": {
