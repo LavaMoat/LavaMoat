@@ -83,6 +83,8 @@ const generate = async (
  * Generates a LavaMoat policy or debug policy from a given entry point using
  * `@endo/compartment-mapper` and writes the result to disk
  *
+ * Writing may be disabled by setting `write` to `false` in `opts`
+ *
  * @param {string | URL} entrypointPath
  * @param {GeneratePolicyOptions} [opts]
  * @returns {Promise<LavaMoatPolicy>}
@@ -185,7 +187,6 @@ export const generatePolicy = async (
   }
 
   if (shouldWrite) {
-    // XXX: do we need to merge policies here?
     await writeJson(policyPath, policy, { fs })
   }
 
