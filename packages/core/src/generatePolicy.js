@@ -8,7 +8,6 @@ const {
   inspectGlobals,
   inspectImports,
   inspectSesCompat,
-  codeSampleFromAstNode,
   utils: {
     mergePolicy: mergeGlobalsPolicy,
     mapToObj,
@@ -19,6 +18,7 @@ const {
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore cycle causes this to be an error sometimes
 } = require('lavamoat-tofu')
+const { codeSampleFromAstNode } = require('./codeSampleFromAstNode')
 const { mergePolicy } = require('./mergePolicy')
 
 const rootSlug = '$root$'
@@ -45,7 +45,7 @@ function createModuleInspector(opts) {
   /** @type {Map<string, string[]>} */
   const packageToBuiltinImports = new Map()
   const packageToNativeModules = new Map()
-  /** @type {Record<string, import('./schema').DebugInfo>} */
+  /** @type {Record<string, import('@lavamoat/types').DebugInfo>} */
   const debugInfo = {}
 
   /** @type {ModuleInspector} */
@@ -63,7 +63,7 @@ function createModuleInspector(opts) {
   return inspector
 
   /**
-   * @param {import('./moduleRecord').LavamoatModuleRecord} moduleRecord
+   * @param {import('@lavamoat/types').LavamoatModuleRecord} moduleRecord
    * @param {ModuleInspectorOptions} opts
    */
   function inspectModule(
@@ -95,7 +95,7 @@ function createModuleInspector(opts) {
   }
 
   /**
-   * @param {import('./moduleRecord').LavamoatModuleRecord} moduleRecord
+   * @param {import('@lavamoat/types').LavamoatModuleRecord} moduleRecord
    * @param {Partial<ModuleInspectorOptions>} opts
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -105,7 +105,7 @@ function createModuleInspector(opts) {
   }
 
   /**
-   * @param {import('./moduleRecord').LavamoatModuleRecord} moduleRecord
+   * @param {import('@lavamoat/types').LavamoatModuleRecord} moduleRecord
    * @param {Partial<ModuleInspectorOptions>} opts
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -129,7 +129,7 @@ function createModuleInspector(opts) {
   }
 
   /**
-   * @param {import('./moduleRecord').LavamoatModuleRecord} moduleRecord
+   * @param {import('@lavamoat/types').LavamoatModuleRecord} moduleRecord
    * @param {ModuleInspectorOptions} opts
    */
   function inspectJsModule(
@@ -202,7 +202,7 @@ function createModuleInspector(opts) {
 
   /**
    * @param {AST} ast
-   * @param {import('./moduleRecord').LavamoatModuleRecord} moduleRecord
+   * @param {import('@lavamoat/types').LavamoatModuleRecord} moduleRecord
    * @param {boolean} includeDebugInfo
    * @returns
    */
@@ -213,7 +213,7 @@ function createModuleInspector(opts) {
 
     const { primordialMutations, strictModeViolations, dynamicRequires } =
       // @ts-expect-error `SesCompat` / `InspectSesCompatResult` mismatch
-      /** @type {import('./schema').SesCompat} */ (compatWarnings)
+      /** @type {import('@lavamoat/types').SesCompat} */ (compatWarnings)
     const hasResults =
       primordialMutations.length > 0 ||
       strictModeViolations.length > 0 ||
@@ -223,20 +223,23 @@ function createModuleInspector(opts) {
     }
     if (includeDebugInfo) {
       const moduleDebug = debugInfo[moduleRecord.specifier]
-      moduleDebug.sesCompat = {
-        // FIXME: I don't think this is needed, since it appears we overwrite all properties
-        ...compatWarnings,
-        // fix serialization
-        primordialMutations: primordialMutations.map(({ node: { loc } }) => ({
-          node: { loc },
-        })),
-        strictModeViolations: strictModeViolations.map(({ node: { loc } }) => ({
-          node: { loc },
-        })),
-        dynamicRequires: dynamicRequires.map(({ node: { loc } }) => ({
-          node: { loc },
-        })),
-      }
+      moduleDebug.sesCompat =
+        /** @type {import('@lavamoat/types').SesCompat} */ ({
+          // FIXME: I don't think this is needed, since it appears we overwrite all properties
+          ...compatWarnings,
+          // fix serialization
+          primordialMutations: primordialMutations.map(({ node: { loc } }) => ({
+            node: { loc },
+          })),
+          strictModeViolations: strictModeViolations.map(
+            ({ node: { loc } }) => ({
+              node: { loc },
+            })
+          ),
+          dynamicRequires: dynamicRequires.map(({ node: { loc } }) => ({
+            node: { loc },
+          })),
+        })
     } else {
       // warn if non-compatible code found
       if (inspector.listenerCount('compat-warning') > 0) {
@@ -252,7 +255,7 @@ function createModuleInspector(opts) {
             codeSampleFromAstNode(node, moduleRecord)
           ),
           dynamicRequires: dynamicRequires.map(({ node }) =>
-            // @ts-expect-error `SesCompatNode` / `Node.loc` mismatch
+            // @ts-expect-error mismatch between SesCompat and inspectSesCompat()
             codeSampleFromAstNode(node, moduleRecord)
           ),
         })
@@ -264,7 +267,7 @@ function createModuleInspector(opts) {
 
   /**
    * @param {AST} ast
-   * @param {import('./moduleRecord').LavamoatModuleRecord} moduleRecord
+   * @param {import('@lavamoat/types').LavamoatModuleRecord} moduleRecord
    * @param {string} packageName
    * @param {boolean} includeDebugInfo
    */
@@ -298,7 +301,7 @@ function createModuleInspector(opts) {
 
   /**
    * @param {AST} ast
-   * @param {import('./moduleRecord').LavamoatModuleRecord} moduleRecord
+   * @param {import('@lavamoat/types').LavamoatModuleRecord} moduleRecord
    * @param {string} packageName
    * @param {(value: string) => boolean} isBuiltin
    * @param {boolean} includeDebugInfo
@@ -353,22 +356,22 @@ function createModuleInspector(opts) {
     includeDebugInfo = false,
     moduleToPackageFallback,
   }) {
-    /** @type {import('./schema').Resources} */
+    /** @type {import('@lavamoat/types').Resources} */
     const resources = {}
     /**
-     * @type {import('./schema').LavaMoatPolicyDebug
-     *   | import('./schema').LavaMoatPolicy}
+     * @type {import('@lavamoat/types').LavaMoatPolicyDebug
+     *   | import('@lavamoat/types').LavaMoatPolicy}
      */
     const policy = { resources }
     packageToModules.forEach((packageModules, packageName) => {
       // the policy fields for each package
-      /** @type {import('./schema').ResourcePolicy['globals']} */
+      /** @type {import('@lavamoat/types').ResourcePolicy['globals']} */
       let globals
-      /** @type {import('./schema').ResourcePolicy['builtin']} */
+      /** @type {import('@lavamoat/types').ResourcePolicy['builtin']} */
       let builtin
-      /** @type {import('./schema').ResourcePolicy['packages']} */
+      /** @type {import('@lavamoat/types').ResourcePolicy['packages']} */
       let packages
-      /** @type {import('./schema').ResourcePolicy['native']} */
+      /** @type {import('@lavamoat/types').ResourcePolicy['native']} */
       let native
       // skip for root modules (modules not from deps)
       const isRootModule = packageName === rootSlug
@@ -439,7 +442,7 @@ function createModuleInspector(opts) {
     if (includeDebugInfo) {
       // this is here because we should be using semicolons :D
       // prettier-ignore
-      ;(/** @type {import('./schema').LavaMoatPolicyDebug} */(policy).debugInfo = debugInfo)
+      ;(/** @type {import('@lavamoat/types').LavaMoatPolicyDebug} */(policy).debugInfo = debugInfo)
     }
 
     // merge override policy
@@ -456,8 +459,8 @@ function createModuleInspector(opts) {
 
 /**
  * @typedef {Object} AggregateDepsOptions
- * @property {Record<string, import('./moduleRecord').LavamoatModuleRecord>} packageModules
- * @property {Map<string, import('./moduleRecord').LavamoatModuleRecord>} moduleIdToModuleRecord
+ * @property {Record<string, import('@lavamoat/types').LavamoatModuleRecord>} packageModules
+ * @property {Map<string, import('@lavamoat/types').LavamoatModuleRecord>} moduleIdToModuleRecord
  * @property {ModuleToPackageFallbackFn} [moduleToPackageFallback]
  */
 
@@ -542,17 +545,17 @@ function getDefaultPaths(policyName) {
 /**
  * @callback GeneratePolicyFn
  * @param {Partial<ModuleInspectorOptions> & {
- *   policyOverride?: import('./schema').LavaMoatPolicyOverrides
+ *   policyOverride?: import('@lavamoat/types').LavaMoatPolicyOverrides
  *   moduleToPackageFallback?: (value: string) => string | undefined
  * }} opts
  *
- * @returns {import('./schema').LavaMoatPolicy
- *   | import('./schema').LavaMoatPolicyDebug}
+ * @returns {import('@lavamoat/types').LavaMoatPolicy
+ *   | import('@lavamoat/types').LavaMoatPolicyDebug}
  */
 
 /**
  * @callback InspectModuleFn
- * @param {import('./moduleRecord').LavamoatModuleRecord} moduleRecord
+ * @param {import('@lavamoat/types').LavamoatModuleRecord} moduleRecord
  * @param {Partial<ModuleInspectorOptions>} [opts]
  */
 
