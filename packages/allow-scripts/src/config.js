@@ -88,8 +88,8 @@ async function loadAllPackageConfigurations({ rootDir, lifecycleEvents = DEFAULT
       throw err
     }
     const depScripts = depPackageJson.scripts || {}
-    const lifecycleScripts = lifecycleEvents.filter(
-      (name) => Object.prototype.hasOwnProperty.call(depScripts, name)
+    const lifecycleScripts = lifecycleEvents.map(eventName => eventName.toLowerCase()).filter(
+      (name) => Object.prototype.hasOwnProperty.call(depScripts, name.toLowerCase())
     )
 
     if (
