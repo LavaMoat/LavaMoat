@@ -5,11 +5,23 @@
  *
  * @remarks
  * As tempting as it may be to try to move stuff out of here, it _will_ break
- * type inference, and you'll need to sort that out yourself.
+ * type inference, and you'll need to sort that out yourself. It's possible, but
+ * it's probably not worth it.
  *
  * Regarding middleware: Any option which _does not_ either a) need other
  * options for postprocessing, or b) need to be asynchronous--should use
  * {@link yargs.coerce} instead.
+ *
+ * Finally, we deviate from yargs' default behavior by disabling
+ * {@link https://github.com/yargs/yargs-parser#camel-case-expansion camel case expansion}.
+ * This means an option such as `policy-override` will _not_ magically become
+ * `policyOverride` in the parsed arguments object. The reason is that we need
+ * to perform some post-processing of paths _in middleware_, and it's easy to
+ * screw up if we have to do it twice for each option. _Furthermore_, because
+ * `@types/yargs` expects camel-case expansion to be enabled, the types are
+ * incorrect for the parameter to middleware and handler (`argv`); it will
+ * include camel-cased properties where none exist. My advice: just pretend they
+ * aren't there.
  * @packageDocumentation
  */
 
@@ -31,28 +43,41 @@ import { readJsonFile } from './util.js'
  * @import {LavaMoatPolicy} from 'lavamoat-core';
  */
 
+/**
+ * "Behavior options" group name for `--help` output
+ */
 const BEHAVIOR_GROUP = 'Behavior Options:'
 
 /**
  * Main entry point to CLI
  */
 const main = async (args = hideBin(process.argv)) => {
-  // see note below above the call to `.version()`
-  const { version } = /** @type {PackageJson} */ (
+  // TODO: Node.js v20+ allows import attributes; use that instead of this.
+  // see https://nodejs.org/api/esm.html#import-attributes
+  const {
+    version,
+    homepage,
+    bugs: { url: bugs },
+  } = /** @type {PackageJson & { bugs: { url: string } }} */ (
     await readJsonFile(new URL('../package.json', import.meta.url))
   )
 
+  /**
+   * @remarks
+   * `yargs`' version guessing code seems to return the version provided by the
+   * `package.json` at the workspace root--not the `package.json` in this
+   * project. This is _probably_ not an issue anywhere other than in a dev
+   * environment, but I wanted to make sure.
+   */
   yargs(args)
-    .scriptName('lavamoat2')
-    /**
-     * @remarks
-     * `yargs` seems to return the version provided by the `package.json` at the
-     * workspace root--not the `package.json` in this project. This is
-     * _probably_ not an issue anywhere other than in a dev environment, but I
-     * wanted to make sure.
-     */
+    .parserConfiguration({
+      'camel-case-expansion': false,
+    })
+    .scriptName('lavamoat')
     .version(`${version}`)
+    .epilog(`📖 Read the docs at ${homepage}\n`)
     .options({
+      // the three policy options are used for both reading and writing
       policy: {
         alias: ['p'],
         describe: 'Filepath to a policy file',
@@ -93,33 +118,39 @@ const main = async (args = hideBin(process.argv)) => {
         global: true,
       },
     })
-    /**
-     * This resolves all paths from `cwd`.
-     *
-     * @remarks
-     * This runs _before_ validation.
-     *
-     * Note that this does _not_ change the properties named via aliases or
-     * camelcasing! Don't use them!!
-     */
-    .middleware((argv) => {
-      argv.policy = path.resolve(argv.cwd, argv.policy)
-      argv['policy-override'] = path.resolve(argv.cwd, argv['policy-override'])
-      argv['policy-debug'] = path.resolve(argv.cwd, argv['policy-debug'])
-    }, true)
-    /**
-     * This should not fail. If it does, there is a bug.
-     */
+    .middleware(
+      /**
+       * This resolves all paths from `cwd`.
+       *
+       * @remarks
+       * This runs _before_ validation (second parameter).
+       */
+      (argv) => {
+        argv.policy = path.resolve(argv.cwd, argv.policy)
+        argv['policy-override'] = path.resolve(
+          argv.cwd,
+          argv['policy-override']
+        )
+        argv['policy-debug'] = path.resolve(argv.cwd, argv['policy-debug'])
+      },
+      true
+    )
     .check((argv) => {
-      assert(path.isAbsolute(argv.cwd), 'cwd must be an absolute path')
-      assert(path.isAbsolute(argv.policy), 'policy must be an absolute path')
+      assert(
+        path.isAbsolute(argv.cwd),
+        `cwd must be an absolute path; please report this bug: ${bugs}`
+      )
+      assert(
+        path.isAbsolute(argv.policy),
+        `policy must be an absolute path; please report this bug: ${bugs}`
+      )
       assert(
         path.isAbsolute(argv['policy-override']),
-        'policy-override must be an absolute path'
+        `policy-override must be an absolute path; please report this bug: ${bugs}`
       )
       assert(
         path.isAbsolute(argv['policy-debug']),
-        'policy-debug must be an absolute path'
+        `policy-debug must be an absolute path; please report this bug: ${bugs}`
       )
       return true
     })
@@ -128,15 +159,45 @@ const main = async (args = hideBin(process.argv)) => {
      */
     .command(
       ['$0 <entrypoint>', 'run <entrypoint>'],
-      'Run an application',
+      'Run a Node.js application safely using LavaMoat',
       (yargs) =>
         yargs
           .positional('entrypoint', {
-            describe: 'Path to the application entry point',
+            describe: 'Path to the application entry point; relative to --cwd',
             type: 'string',
             normalize: true,
           })
           .demandOption('entrypoint')
+          /**
+           * These options are hidden because we don't want to encourage running
+           * without inspecting the policy.
+           *
+           * These are intended for use with tests.
+           */
+          .options({
+            generate: {
+              alias: ['g', 'gen'],
+              type: 'boolean',
+              describe: 'Generate policy file',
+              group: BEHAVIOR_GROUP,
+              default: false,
+              hidden: true,
+            },
+            write: {
+              type: 'boolean',
+              describe: 'Write policy file(s) to disk',
+              group: BEHAVIOR_GROUP,
+              implies: 'generate',
+              hidden: true,
+            },
+            debug: {
+              type: 'boolean',
+              describe: 'Additionally write a debug policy',
+              group: BEHAVIOR_GROUP,
+              implies: 'generate',
+              hidden: true,
+            },
+          })
           /**
            * Resolve entrypoint from `cwd`
            */
@@ -149,7 +210,7 @@ const main = async (args = hideBin(process.argv)) => {
           .check((argv) => {
             assert(
               path.isAbsolute(argv.entrypoint),
-              'entrypoint must be an absolute path'
+              `entrypoint must be an absolute path; please report this bug: ${bugs}`
             )
             return true
           }),
@@ -162,20 +223,41 @@ const main = async (args = hideBin(process.argv)) => {
        */
       async (argv) => {
         await Promise.resolve()
+        const {
+          generate,
+          entrypoint,
+          debug,
+          policy: policyPath,
+          'policy-debug': policyDebugPath,
+          'policy-override': policyOverridePath,
+          write,
+        } = argv
+
         /** @type {LavaMoatPolicy} */
         let policy
-        try {
-          policy = await loadPolicies(argv.policy, argv['policy-override'])
-        } catch (e) {
-          const err = /** @type {NodeJS.ErrnoException} */ (e)
-          if (err.code === 'ENOENT') {
-            console.error(
-              `Could not load policy from ${argv.policy}: ${err.message}`
-            )
-            process.exitCode = 1
-            return
+
+        if (generate) {
+          // let this reject since the failure mode is not obvious
+          policy = await generateAndWritePolicy(entrypoint, {
+            debug,
+            policyPath,
+            policyDebugPath,
+            write,
+          })
+        } else {
+          try {
+            policy = await loadPolicies(policyPath, policyOverridePath)
+          } catch (e) {
+            const err = /** @type {NodeJS.ErrnoException} */ (e)
+            if (err.code === 'ENOENT') {
+              console.error(
+                `Could not load policy from ${argv.policy}. Reason:\n\n${err}`
+              )
+              process.exitCode = 1
+              return
+            }
+            throw err
           }
-          throw err
         }
 
         await run(argv.entrypoint, policy)
@@ -183,15 +265,10 @@ const main = async (args = hideBin(process.argv)) => {
     )
     .command(
       ['gen <entrypoint>', 'generate <entrypoint>'],
-      'Generate policy files; overwrites existing policies',
+      'Generate & write policy; overwrites existing file(s)',
       (yargs) =>
         yargs
           .options({
-            run: {
-              describe: 'Run the application after policy generated',
-              type: 'boolean',
-              group: BEHAVIOR_GROUP,
-            },
             debug: {
               type: 'boolean',
               describe: 'Additionally write a debug policy',
@@ -205,30 +282,32 @@ const main = async (args = hideBin(process.argv)) => {
             coerce: path.resolve,
           })
           .demandOption('entrypoint')
-          /**
-           * Resolve entrypoint from `cwd`
-           */
-          .middleware((argv) => {
-            argv.entrypoint = path.resolve(argv.cwd, argv.entrypoint)
-          }, true)
-          /**
-           * This should not fail. If it does, there is a bug.
-           */
+          .middleware(
+            /**
+             * Resolve entrypoint from `cwd`
+             *
+             * @remarks
+             * This is run _before_ validation.
+             */
+            (argv) => {
+              argv.entrypoint = path.resolve(argv.cwd, argv.entrypoint)
+            },
+            true
+          )
           .check((argv) => {
             assert(
               path.isAbsolute(argv.entrypoint),
-              'entrypoint must be an absolute path'
+              `entrypoint must be an absolute path; please report this bug: ${bugs}`
             )
             return true
           }),
       async ({
         entrypoint,
         debug,
-        run: shouldRun,
         policy: policyPath,
         'policy-debug': policyDebugPath,
       }) => {
-        const policy = await generateAndWritePolicy(entrypoint, {
+        await generateAndWritePolicy(entrypoint, {
           debug,
           policyPath,
           policyDebugPath,
@@ -238,14 +317,11 @@ const main = async (args = hideBin(process.argv)) => {
           console.error(`Wrote debug policy to ${policyDebugPath}`)
         }
         console.error(`Wrote policy to ${policyPath}`)
-
-        if (shouldRun) {
-          await run(entrypoint, policy)
-        }
       }
     )
     .demandCommand(1)
     .parse()
 }
 
-main()
+// void here means "ignore the return value". it's a Promise, if you must know.
+void main()
