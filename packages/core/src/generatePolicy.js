@@ -44,6 +44,7 @@ function createModuleInspector(opts) {
   const packageToGlobals = new Map()
   /** @type {Map<string, string[]>} */
   const packageToBuiltinImports = new Map()
+  /** @type {Map<string, import('./moduleRecord').LavamoatModuleRecord[]>} */
   const packageToNativeModules = new Map()
   /** @type {Record<string, import('./schema').DebugInfo>} */
   const debugInfo = {}
@@ -68,7 +69,7 @@ function createModuleInspector(opts) {
    */
   function inspectModule(
     moduleRecord,
-    { isBuiltin, includeDebugInfo = false }
+    { isBuiltin, includeDebugInfo = false, allowDynamicRequires = false }
   ) {
     const { packageName, specifier, type } = moduleRecord
     // record the module
@@ -84,7 +85,11 @@ function createModuleInspector(opts) {
         return
       }
       case 'js': {
-        inspectJsModule(moduleRecord, { isBuiltin, includeDebugInfo })
+        inspectJsModule(moduleRecord, {
+          isBuiltin,
+          includeDebugInfo,
+          allowDynamicRequires,
+        })
         return
       }
       default: {
@@ -116,7 +121,10 @@ function createModuleInspector(opts) {
     if (!packageToNativeModules.has(packageName)) {
       packageToNativeModules.set(packageName, [])
     }
-    const packageNativeModules = packageToNativeModules.get(packageName)
+    const packageNativeModules =
+      /** @type {import('./moduleRecord').LavamoatModuleRecord[]} */ (
+        packageToNativeModules.get(packageName)
+      )
     packageNativeModules.push(moduleRecord)
   }
 
@@ -134,7 +142,7 @@ function createModuleInspector(opts) {
    */
   function inspectJsModule(
     moduleRecord,
-    { isBuiltin, includeDebugInfo = false }
+    { isBuiltin, includeDebugInfo = false, allowDynamicRequires = false }
   ) {
     const { packageName, specifier } = moduleRecord
     let moduleDebug
@@ -185,7 +193,10 @@ function createModuleInspector(opts) {
       moduleDebug.parseErrors = ast.errors
     }
     // ensure ses compatibility
-    inspectForEnvironment(ast, moduleRecord, includeDebugInfo)
+    inspectForEnvironment(ast, moduleRecord, {
+      includeDebugInfo,
+      allowDynamicRequires,
+    })
     // get global usage
     inspectForGlobals(ast, moduleRecord, packageName, includeDebugInfo)
     // get builtin package usage
@@ -203,10 +214,14 @@ function createModuleInspector(opts) {
   /**
    * @param {AST} ast
    * @param {import('./moduleRecord').LavamoatModuleRecord} moduleRecord
-   * @param {boolean} includeDebugInfo
+   * @param {Partial<ModuleInspectorOptions>} options
    * @returns
    */
-  function inspectForEnvironment(ast, moduleRecord, includeDebugInfo) {
+  function inspectForEnvironment(
+    ast,
+    moduleRecord,
+    { includeDebugInfo = false, allowDynamicRequires = false } = {}
+  ) {
     const { packageName } = moduleRecord
     // @ts-expect-error `ParseResult` / `AST` mismatch
     const compatWarnings = inspectSesCompat(ast)
@@ -214,6 +229,10 @@ function createModuleInspector(opts) {
     const { primordialMutations, strictModeViolations, dynamicRequires } =
       // @ts-expect-error `SesCompat` / `InspectSesCompatResult` mismatch
       /** @type {import('./schema').SesCompat} */ (compatWarnings)
+
+    if (allowDynamicRequires && dynamicRequires.length) {
+      dynamicRequires.length = 0
+    }
     const hasResults =
       primordialMutations.length > 0 ||
       strictModeViolations.length > 0 ||
@@ -414,7 +433,7 @@ function createModuleInspector(opts) {
       // get native modules
       native = packageToNativeModules.has(packageName)
       // skip package policy if there are no settings needed
-      if (!packages && !globals && !builtin) {
+      if (!packages && !globals && !builtin && !native) {
         return
       }
       // create minimal policy object
@@ -561,6 +580,7 @@ function getDefaultPaths(policyName) {
  * @property {(value: string) => boolean} isBuiltin
  * @property {boolean} [includeDebugInfo]
  * @property {(specifier: string) => string | undefined} [moduleToPackageFallback]
+ * @property {boolean} [allowDynamicRequires]
  */
 
 /**
