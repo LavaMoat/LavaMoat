@@ -102,6 +102,7 @@ const plugin: Plugin = {
     afterAllInstalled: (project: ExtendedProject) => {
       loadAllPackageConfigurations({
         rootDir: yarnCwdToPath(project.cwd),
+        lifecycleEvents: Array.from(PROTECTED_LIFECYLE_SCRIPTS),
       }).then((result) => {
         const {
           configs: { lifecycle },
