@@ -1510,7 +1510,8 @@ var plugin = (() => {
       var normalizeBin = require_lib();
       var { loadCanonicalNameMap } = require_src();
       var bannedBins = /* @__PURE__ */ new Set(["corepack", "node", "npm", "pnpm", "yarn"]);
-      async function loadAllPackageConfigurations2({ rootDir }) {
+      var DEFAULT_LIFECYCLE_EVENTS = ["preinstall", "install", "postinstall"];
+      async function loadAllPackageConfigurations2({ rootDir, lifecycleEvents = DEFAULT_LIFECYCLE_EVENTS }) {
         const packagesWithScriptsLifecycle = /* @__PURE__ */ new Map();
         const binCandidates = /* @__PURE__ */ new Map();
         const canonicalNamesByPath = await loadCanonicalNameMap({
@@ -1538,14 +1539,14 @@ var plugin = (() => {
             throw err;
           }
           const depScripts = depPackageJson.scripts || {};
-          const lifeCycleScripts = ["preinstall", "install", "postinstall"].filter(
+          const lifecycleScripts = lifecycleEvents.filter(
             (name) => Object.prototype.hasOwnProperty.call(depScripts, name)
           );
-          if (!lifeCycleScripts.includes("preinstall") && !lifeCycleScripts.includes("install") && existsSync(path.join(filePath, "binding.gyp"))) {
-            lifeCycleScripts.unshift("install");
+          if (!lifecycleScripts.includes("preinstall") && !lifecycleScripts.includes("install") && existsSync(path.join(filePath, "binding.gyp"))) {
+            lifecycleScripts.unshift("install");
             depScripts.install = "node-gyp rebuild";
           }
-          if (lifeCycleScripts.length) {
+          if (lifecycleScripts.length) {
             const collection = packagesWithScriptsLifecycle.get(canonicalName) || [];
             collection.push({
               canonicalName,
@@ -1595,16 +1596,16 @@ var plugin = (() => {
           canonicalNamesByPath
         };
       }
-      async function getOptionsForBin({ rootDir, name }) {
+      async function getOptionsForBin({ rootDir, name, lifecycleEvents = DEFAULT_LIFECYCLE_EVENTS }) {
         const {
           configs: {
             bin: { binCandidates }
           }
-        } = await loadAllPackageConfigurations2({ rootDir });
+        } = await loadAllPackageConfigurations2({ rootDir, lifecycleEvents });
         return binCandidates.get(name);
       }
-      async function setDefaultConfiguration({ rootDir }) {
-        const conf = await loadAllPackageConfigurations2({ rootDir });
+      async function setDefaultConfiguration({ rootDir, lifecycleEvents = DEFAULT_LIFECYCLE_EVENTS }) {
+        const conf = await loadAllPackageConfigurations2({ rootDir, lifecycleEvents });
         const {
           configs: { lifecycle, bin },
           somePoliciesAreMissing
@@ -1897,7 +1898,8 @@ var plugin = (() => {
       },
       afterAllInstalled: (project) => {
         (0, import_config.loadAllPackageConfigurations)({
-          rootDir: yarnCwdToPath(project.cwd)
+          rootDir: yarnCwdToPath(project.cwd),
+          lifecycleEvents: Array.from(PROTECTED_LIFECYLE_SCRIPTS)
         }).then((result) => {
           const {
             configs: { lifecycle },
