@@ -10,15 +10,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3
+        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871  # v4
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@4c0219f9ac95b02789c1075625400b2acbff50b1 # v2
+        uses: docker/setup-buildx-action@c47758b77c9736f4b2ef4073d4d51994fabfe349  # v3
         with:
           driver: docker-container
           driver-opts: |
-            image=docker.io/moby/buildkit:master@sha256:1b6abfd9bbfbf129245dc1f288aa38f064dfee8d608b8be9086936f5580c78f2
+            image=docker.io/moby/buildkit:master@sha256:c8029e1a3e837c6e3b3c7dc97114385e902a2a321306bd6aa5c86da3ab6414db
       - name: Build OCI image
-        uses: docker/build-push-action@4a13e500e55cf31b7a5d59a38ab2040ab0f42f56 #v5
+        uses: docker/build-push-action@4f58ea79222b3b9dc2c8bbdd6debcef730109a75  # v6
         with:
           # Use local cache dir when running using Act; gha cache otherwise
           cache-from: type=${{ env.ACT && 'local,src=/tmp/act-cache' || 'gha' }}
@@ -27,39 +27,21 @@ jobs:
           file: ./Dockerfile
           load: true
           push: false
-          tags: dev:latest
-      - name: lint
-        uses: addnab/docker-run-action@4f65fabd2431ebc8d299f8e5a018d79a769ae185 # v3
-        with:
-          image: dev:latest
-          run: 'npm run lint && npm run lint:fix'
-      - name: publish-dry-run
-        uses: addnab/docker-run-action@4f65fabd2431ebc8d299f8e5a018d79a769ae185 # v3
-        with:
-          image: dev:latest
-          run: |
-            # note: package scripts only seem to support maximum a single unpublished package present in the repository
-            newpkg_path=$(jq -r 'to_entries|map(select(.value=="0.0.0"))[0].key' .release-please-manifest.json)
-            export npm_config_newpkg=$(jq -r .name "${newpkg_path}/package.json")
-            echo "New package: ${npm_config_newpkg}"
-            # these two commands should be identical
-            npm run release:dry-run
-            npm run release:publish -- --dryRun
+          tags: 'dev:latest'
       - name: rebuild
-        uses: addnab/docker-run-action@4f65fabd2431ebc8d299f8e5a018d79a769ae185 # v3
+        uses: addnab/docker-run-action@4f65fabd2431ebc8d299f8e5a018d79a769ae185  # v3
         with:
-          image: dev:latest
-          run: npm run setup && npm run rebuild
-      - name: lint:git
-        uses: addnab/docker-run-action@4f65fabd2431ebc8d299f8e5a018d79a769ae185 # v3
+          image: 'dev:latest'
+          run: |
+            npm run setup && npm run rebuild
+      - name: lint
+        uses: addnab/docker-run-action@4f65fabd2431ebc8d299f8e5a018d79a769ae185  # v3
         with:
-          image: dev:latest
-          run: >
-            git init -b main &&
-              git add README.md && npm run lint:staged &&
-              git commit -m 'docs: Add README.md' && npm run lint:commit -- -e
+          image: 'dev:latest'
+          run: 'npm run lint'
       - name: test
-        uses: addnab/docker-run-action@4f65fabd2431ebc8d299f8e5a018d79a769ae185 # v3
+        uses: addnab/docker-run-action@4f65fabd2431ebc8d299f8e5a018d79a769ae185  # v3
         with:
-          image: dev:latest
-          run: npm run test:prep && npm run test
+          image: 'dev:latest'
+          run: |
+            npm run test:prep && npm run test
