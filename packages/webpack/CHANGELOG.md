@@ -18,6 +18,31 @@
   * dependencies
     * lavamoat-core bumped from ^15.2.0 to ^15.2.1
 
+## [0.7.0-beta.0](https://github.com/LavaMoat/LavaMoat/compare/webpack-v0.6.0-beta.0...webpack-v0.7.0-beta.0) (2024-10-11)
+
+
+### Features
+
+* **webpack:** change how inlining lockdown is configured  ([#1296](https://github.com/LavaMoat/LavaMoat/issues/1296)) ([54d12cb](https://github.com/LavaMoat/LavaMoat/commit/54d12cbfd1419cc32ed01a6e2d5e99856e1c23cb))
+* **webpack:** support thisAsExports runtime requirement ([#1301](https://github.com/LavaMoat/LavaMoat/issues/1301)) ([e057d23](https://github.com/LavaMoat/LavaMoat/commit/e057d236f723d4b922e75dc9f81ce8e0b153c0d9))
+
+
+### Bug Fixes
+
+* **deps:** update babel monorepo to v7.25.7 ([1ee84bf](https://github.com/LavaMoat/LavaMoat/commit/1ee84bf754b470781ee77bc299a797033b01d7ab))
+* **deps:** update babel monorepo to v7.25.8 ([1dcb35e](https://github.com/LavaMoat/LavaMoat/commit/1dcb35e023823710343b5f0a4ca589cdfe647e7d))
+* **webpack:** allow setting rootDir ([9641bb7](https://github.com/LavaMoat/LavaMoat/commit/9641bb770079db9dfa809c611c41a52db53ba7e5))
+* **webpack:** an implementation of builtins that actually works ([#1308](https://github.com/LavaMoat/LavaMoat/issues/1308)) ([2cc24cf](https://github.com/LavaMoat/LavaMoat/commit/2cc24cf1872a280fbdc562cace42fcceb9a938dd))
+* **webpack:** improve how error details are output in diagnostics ([a60c92e](https://github.com/LavaMoat/LavaMoat/commit/a60c92ebc0733a726339ec4998ec983fae9f6dbb))
+* **webpack:** skip inspecting modules lacking userRequest ([332679f](https://github.com/LavaMoat/LavaMoat/commit/332679f723583c6aa7c04bf0491723db3893e364))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-core bumped from ^16.0.1 to ^16.1.0
+
 ## [0.6.0-beta.0](https://github.com/LavaMoat/LavaMoat/compare/webpack-v0.5.0-beta.0...webpack-v0.6.0-beta.0) (2024-09-11)
 
 

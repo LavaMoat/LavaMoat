@@ -6,6 +6,13 @@
   * dependencies
     * @lavamoat/aa bumped from ^4.0.1 to ^4.1.0
 
+## [3.3.0](https://github.com/LavaMoat/LavaMoat/compare/allow-scripts-v3.2.1...allow-scripts-v3.3.0) (2024-10-11)
+
+
+### Features
+
+* **allow-scripts:** allow configuring lifecycleEvents for loadAllPackageConfigurations ([#1383](https://github.com/LavaMoat/LavaMoat/issues/1383)) ([b7b0115](https://github.com/LavaMoat/LavaMoat/commit/b7b011567d068a2bcddee4bb8497f04d74c6ae65))
+
 ## [3.2.1](https://github.com/LavaMoat/LavaMoat/compare/allow-scripts-v3.2.0...allow-scripts-v3.2.1) (2024-09-11)
 
 
