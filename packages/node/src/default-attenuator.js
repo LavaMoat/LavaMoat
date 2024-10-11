@@ -4,9 +4,20 @@
  * @packageDocumentation
  */
 
-import { endowmentsToolkit } from 'lavamoat-core'
+/**
+ * @privateRemarks
+ * We cannot pull `endowmentsToolkit` from `lavamoat-core`, because it will blow
+ * up our own policy generation; see `../scripts/update-own-policy.js`.
+ *
+ * We use a {@link endowmentsToolkit type assertion} instead to get our type
+ * information.
+ */
+// @ts-expect-error - types not exported from here
+import endowmentsToolkit_ from 'lavamoat-core/src/endowmentsToolkit.js'
 import { POLICY_ITEM_ROOT, POLICY_ITEM_WRITE } from './constants.js'
-// eslint-disable-next-line n/prefer-global/console
+
+/** @type {typeof import('lavamoat-core').endowmentsToolkit} */
+const endowmentsToolkit = endowmentsToolkit_
 
 /**
  * @import {GlobalAttenuatorFn, ModuleAttenuatorFn} from '@endo/compartment-mapper'
