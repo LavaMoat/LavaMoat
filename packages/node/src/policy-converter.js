@@ -18,6 +18,7 @@ const { entries, fromEntries } = Object
 /**
  * @import {GlobalPolicy, PackagePolicy, LavaMoatPolicy, ResourcePolicy, LavaMoatPolicyOverrides} from 'lavamoat-core'
  * @import {LavaMoatPackagePolicy, LavaMoatPackagePolicyOptions, LavaMoatEndoPolicy} from './types.js'
+ * @import {ImplicitAttenuationDefinition} from '@endo/compartment-mapper'
  */
 
 export const DEFAULT_ATTENUATOR = '@attennuator@' // If we wanted endo to load and execute the code in attenuators compartment, we could pass '@lavamoat/endomoat/attenuator' as default attenuator and have it loaded statelessly. We're using an impossible specifier to match with an external module instead.
@@ -84,7 +85,7 @@ const convertEndoPackagePolicyPackages = (item) => {
     if (key === LAVAMOAT_PKG_POLICY_ROOT) {
       throw new TypeError('Unexpected root package policy')
     } else {
-      policyItem[key] = Boolean(value)
+      policyItem[key] = !!value
     }
   }
   return policyItem
@@ -93,6 +94,9 @@ const convertEndoPackagePolicyPackages = (item) => {
 /**
  * Converts LavaMoat `ResourcePolicy.globals` to Endo's `PackagePolicy.globals`
  *
+ * By returning an array for a truthy value, we force Endo to use the default
+ * attenuator.
+ *
  * @param {GlobalPolicy} [item] - A value in `ResourcePolicy`
  * @returns {LavaMoatPackagePolicy['globals']}
  */
@@ -100,22 +104,7 @@ const convertEndoPackagePolicyGlobals = (item) => {
   if (!item) {
     return undefined
   }
-  return fromEntries(
-    entries(item).map(([key, value]) => {
-      switch (typeof value) {
-        case 'boolean':
-          return [key, value]
-        case 'string':
-          if (value === 'read') {
-            return [key, true]
-          }
-          // XXX: this is "write", which is currently unsupported
-          return [key, true]
-        default:
-          throw new TypeError(`Unexpected global policy value: ${value}`)
-      }
-    })
-  )
+  return [item]
 }
 
 /**
