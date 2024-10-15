@@ -49,13 +49,20 @@ export interface WithPolicyOverride {
 
 /**
  * Options for `generatePolicy`
+ *
+ * @remarks
+ * {@link Merge} is appropriate here since some of the prop types are overwritten
+ * by others (e.g., {@link WithReadPowers.fs} vs {@link WritePolicyOptions.fs},
+ * where the latter should overwrite the former).
+ * @privateRemarks
+ * Somebody feel free to create a `MergeMany` type.
  */
-export type GeneratePolicyOptions = Simplify<
-  BaseLoadCompartmentMapOptions &
-    BaseGeneratePolicyOptions &
-    WithReadPowers &
-    WithPolicyOverride &
-    WritePolicyOptions
+export type GeneratePolicyOptions = Merge<
+  BaseLoadCompartmentMapOptions,
+  Merge<
+    BaseGeneratePolicyOptions,
+    Merge<WithReadPowers, Merge<WithPolicyOverride, WritePolicyOptions>>
+  >
 >
 
 /**
