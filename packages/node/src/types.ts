@@ -224,3 +224,17 @@ export type WritableFsInterface = MergeDeep<
   FsInterface,
   { promises: WritePowers }
 >
+
+/**
+ * Options for `toEndoPolicy`
+ */
+export interface ToEndoPolicyOptions {
+  /**
+   * Path to a policy override file.
+   */
+  policyOverridePath?: string | URL
+  /**
+   * A policy override object.
+   */
+  policyOverride?: LavaMoatPolicyOverrides
+}
