@@ -13,7 +13,14 @@ const bannedBins = new Set(['corepack', 'node', 'npm', 'pnpm', 'yarn'])
 /**
  * Scripts with names other than these are ignored and unenforced by default.
  */
-const DEFAULT_LIFECYCLE_EVENTS = ['preinstall', 'install', 'postinstall']
+const DEFAULT_LIFECYCLE_EVENTS = [
+  'install',
+  'postinstall', 'postinstallonly', 'preinstall', 'preinstallonly',
+  'preaudit', 'preauditonly', 'postaudit', 'postauditonly',
+  'prepack', 'prepackonly', 'postpack', 'postpackonly',
+  'preprepare', 'preprepareonly', 'postprepare', 'postprepareonly',
+  'prepublish', 'prepublishonly', 'postpublish', 'postpublishonly',
+];
 
 /**
  * @typedef PkgLavamoatConfig
@@ -81,8 +88,9 @@ async function loadAllPackageConfigurations({ rootDir, lifecycleEvents = DEFAULT
       throw err
     }
     const depScripts = depPackageJson.scripts || {}
+    const packageScriptNames = new Set(Object.keys(depScripts).map(scriptName => scriptName.toLowerCase()))
     const lifecycleScripts = lifecycleEvents.filter(
-      (name) => Object.prototype.hasOwnProperty.call(depScripts, name)
+      (name) => packageScriptNames.has(name.toLowerCase())
     )
 
     if (
