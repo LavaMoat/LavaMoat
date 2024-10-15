@@ -7,6 +7,18 @@ import { once } from 'node:events'
 import path from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { Worker } from 'node:worker_threads'
+import {
+  DEFAULT_POLICY_FILENAME,
+  DEFAULT_POLICY_OVERRIDE_FILENAME,
+} from '../src/constants.js'
+
+/**
+ * @import {Volume} from 'memfs/lib/volume.js'
+ * @import {LavaMoatPolicy} from 'lavamoat-core'
+ * @import {LavaMoatEndoPolicy} from '../src/types.js'
+ * @import {ReadFn} from '@endo/compartment-mapper'
+ * @import {PlatformRunScenario} from 'lavamoat-core/test/util.js'
+ */
 
 /**
  * Path to `./runner.js`
@@ -30,10 +42,10 @@ const RUNNER_MODULE_PATH = (
  * Optionally, policies
  *
  * @param {unknown} err
- * @param {import('memfs').Volume} vol
+ * @param {Volume} vol
  * @param {object} options
- * @param {import('lavamoat-core').LavaMoatPolicy} [options.lavamoatPolicy]
- * @param {import('../src/types.js').LavaMoatEndoPolicy} [options.endoPolicy]
+ * @param {LavaMoatPolicy} [options.lavamoatPolicy]
+ * @param {LavaMoatEndoPolicy} [options.endoPolicy]
  * @param {(...args: any) => void} [options.log]
  */
 function dumpError(
@@ -60,25 +72,25 @@ function dumpError(
 /**
  * Reads a policy and policy overrides using a `ReadFn`, then merges the result.
  *
- * @param {import('@endo/compartment-mapper').ReadFn} readPower - File read
- *   power
+ * @param {ReadFn} readPower - File read power
  * @param {string} policyDir - Path to the policy directory. If relative, will
  *   be resolved to cwd
- * @returns {Promise<import('lavamoat-core').LavaMoatPolicy>}
+ * @returns {Promise<LavaMoatPolicy>}
  * @todo Make the stuff in `lavamoat-core`'s `loadPolicy` accept a `readPower`,
  *   and get rid of this.
  */
 async function readPolicy(readPower, policyDir) {
   let [lavamoatPolicy, lavamoatPolicyOverrides] = await Promise.all(
-    ['policy.json', 'policy-override.json'].map((filename) =>
-      readPower(path.resolve(policyDir, filename))
-        .then((bytes) => JSON.parse(`${bytes}`))
-        .catch((err) => {
-          if (err.code !== 'ENOENT') {
-            throw err
-          }
-          return undefined
-        })
+    [DEFAULT_POLICY_FILENAME, DEFAULT_POLICY_OVERRIDE_FILENAME].map(
+      (filename) =>
+        readPower(path.resolve(policyDir, filename))
+          .then((bytes) => JSON.parse(`${bytes}`))
+          .catch((err) => {
+            if (err.code !== 'ENOENT') {
+              throw err
+            }
+            return undefined
+          })
     )
   )
   if (!lavamoatPolicy) {
@@ -134,7 +146,7 @@ async function trapOutput(stdout, stderr) {
  *
  * @template [Result=unknown] Default is `unknown`
  * @param {(...args: any) => void} log Logger
- * @returns {import('lavamoat-core/test/util.js').PlatformRunScenario<Result>}
+ * @returns {PlatformRunScenario<Result>}
  */
 // eslint-disable-next-line no-console
 export function createScenarioRunner(log = console.error.bind(console)) {
@@ -156,9 +168,7 @@ export function createScenarioRunner(log = console.error.bind(console)) {
   return async ({ scenario }) => {
     const { fs, vol } = memfs()
 
-    const readFile = /** @type {import('@endo/compartment-mapper').ReadFn} */ (
-      fs.promises.readFile
-    )
+    const readFile = /** @type {ReadFn} */ (fs.promises.readFile)
 
     /** @type {string} */
     let projectDir
@@ -179,7 +189,7 @@ export function createScenarioRunner(log = console.error.bind(console)) {
       throw e
     }
 
-    /** @type {import('lavamoat-core').LavaMoatPolicy} */
+    /** @type {LavaMoatPolicy} */
     let lavamoatPolicy
     try {
       lavamoatPolicy = await readPolicy(readFile, policyDir)
@@ -205,9 +215,20 @@ export function createScenarioRunner(log = console.error.bind(console)) {
       outputPromise = trapOutput(worker.stdout, worker.stderr)
       const [code] = await once(worker, 'exit')
       if (code !== 0) {
-        throw new Error(
-          `Worker exited with code ${code} trying to run scenario ${scenario.name ?? '(unknown)'} `
-        )
+        try {
+          ;[stdout, stderr] = await outputPromise
+        } catch {
+          stdout = ''
+          stderr = ''
+        }
+        let msg = `Worker exited with code ${code} trying to run scenario ${scenario.name ?? '(unknown)'}`
+        if (stderr) {
+          msg += '\nSTDERR:\n' + stderr
+        }
+        if (stdout) {
+          msg += '\n\nSTDOUT:\n' + stdout
+        }
+        throw new Error(msg)
       }
       ;[stdout, stderr] = await outputPromise
     } catch (err) {
