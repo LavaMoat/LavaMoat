@@ -11,6 +11,7 @@ import {
 } from '@endo/compartment-mapper'
 import { type LavaMoatPolicyOverrides } from 'lavamoat-core'
 import { Merge, MergeDeep, type Except, type Simplify } from 'type-fest'
+import { POLICY_ITEM_ROOT, POLICY_ITEM_WRITE } from './constants.js'
 
 /**
  * Options to pass-through to Endo.
@@ -147,13 +148,13 @@ export type GenerateAndRunOptions = Merge<RunOptions, GeneratePolicyOptions>
  * "Root" identifier for a LavaMoat global policy item in the context of an Endo
  * policy
  */
-export type RootPolicy = 'root'
+export type RootPolicy = typeof POLICY_ITEM_ROOT
 
 /**
  * "Writable" identifier for a LavaMoat global policy item in the context of an
  * Endo policy
  */
-export type WritePolicy = 'write'
+export type WritePolicy = typeof POLICY_ITEM_WRITE
 
 /**
  * Extends Endo's `PolicyItem` with the special {@link RootPolicy} and
@@ -180,8 +181,8 @@ export type LavaMoatPackagePolicy = PackagePolicy<
 >
 
 /**
- * Custom data potentially assigned to the `options` prop of an Endo package
- * policy
+ * Custom data potentially assigned to the `options` prop of an
+ * {@link PackagePolicy.options Endo package policy}
  */
 export type LavaMoatPackagePolicyOptions = {
   /**
