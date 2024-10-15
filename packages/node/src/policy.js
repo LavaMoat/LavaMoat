@@ -22,7 +22,7 @@ import { readJsonFile } from './util.js'
  * @returns {Promise<unknown>}
  * @internal
  */
-const readPolicy = async (filepath = constants.DEFAULT_POLICY_PATH) => {
+export const readPolicy = async (filepath = constants.DEFAULT_POLICY_PATH) => {
   return readJsonFile(
     filepath instanceof URL ? fileURLToPath(filepath) : filepath
   )
@@ -38,8 +38,8 @@ const readPolicy = async (filepath = constants.DEFAULT_POLICY_PATH) => {
 export const readPolicyOverride = async (
   filepath = constants.DEFAULT_POLICY_OVERRIDE_PATH
 ) => {
-  await Promise.resolve() // eslint
   try {
+    // eslint-disable-next-line @jessie.js/safe-await-separator
     return await readPolicy(filepath)
   } catch (err) {
     if (/** @type {NodeJS.ErrnoException} */ (err).code !== 'ENOENT') {

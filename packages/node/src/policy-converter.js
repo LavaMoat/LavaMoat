@@ -1,5 +1,7 @@
 import { mergePolicy } from 'lavamoat-core'
 import {
+  DEFAULT_ATTENUATOR,
+  DEFAULT_POLICY_OVERRIDE_PATH,
   LAVAMOAT_PKG_POLICY_ROOT,
   LAVAMOAT_RESOURCE_FLAG_NATIVE,
   POLICY_ITEM_ROOT,
@@ -10,18 +12,36 @@ import {
   RSRC_POLICY_OPTIONS,
   RSRC_POLICY_PKGS,
 } from './constants.js'
-import { assertPolicyOverride, readPolicyOverride } from './policy.js'
+import {
+  assertPolicy,
+  assertPolicyOverride,
+  readPolicy,
+  readPolicyOverride,
+} from './policy.js'
 
 const { isArray } = Array
-const { entries, fromEntries } = Object
+const { create, entries, fromEntries } = Object
+
+/**
+ * Boilerplate for Endo policies.
+ *
+ * @satisfies {LavaMoatEndoPolicy}
+ */
+const ENDO_POLICY_BOILERPLATE = /** @type {const} */ ({
+  defaultAttenuator: DEFAULT_ATTENUATOR,
+  entry: {
+    [RSRC_POLICY_GLOBALS]: [POLICY_ITEM_ROOT],
+    [RSRC_POLICY_PKGS]: POLICY_ITEM_WILDCARD,
+    [RSRC_POLICY_BUILTINS]: POLICY_ITEM_WILDCARD,
+    noGlobalFreeze: true,
+  },
+  resources: {},
+})
 
 /**
  * @import {GlobalPolicy, PackagePolicy, LavaMoatPolicy, ResourcePolicy, LavaMoatPolicyOverrides} from 'lavamoat-core'
- * @import {LavaMoatPackagePolicy, LavaMoatPackagePolicyOptions, LavaMoatEndoPolicy} from './types.js'
- * @import {ImplicitAttenuationDefinition} from '@endo/compartment-mapper'
+ * @import {LavaMoatPackagePolicy, LavaMoatPackagePolicyOptions, LavaMoatEndoPolicy, ToEndoPolicyOptions} from './types.js'
  */
-
-export const DEFAULT_ATTENUATOR = '@attennuator@' // If we wanted endo to load and execute the code in attenuators compartment, we could pass '@lavamoat/endomoat/attenuator' as default attenuator and have it loaded statelessly. We're using an impossible specifier to match with an external module instead.
 
 /**
  * Converts LavaMoat `ResourcePolicy.builtins` to Endo's
@@ -141,44 +161,119 @@ const convertEndoPackagePolicy = (resources) => {
 }
 
 /**
+ * Returns policy override from a given path or URL.
+ *
+ * If no path or URL provided, will return an empty policy override.
+ *
+ * @param {string | URL} [policyOverridePath] Path to policy override file. If
+ *   relative, computed from cwd
+ * @returns {Promise<LavaMoatPolicyOverrides>}
+ */
+const getPolicyOverride = async (policyOverridePath) => {
+  await Promise.resolve()
+  if (policyOverridePath) {
+    const allegedOverride = await readPolicyOverride(policyOverridePath)
+
+    if (allegedOverride) {
+      assertPolicyOverride(allegedOverride)
+      return allegedOverride
+    }
+
+    throw new Error(
+      `Policy override at ${policyOverridePath} is unexpectedly a 0-byte file`
+    )
+  }
+  return {}
+}
+
+/**
  * Converts a LavaMoat policy to an Endo policy
  *
- * @param {LavaMoatPolicy} lmPolicy
+ * @overload
+ * @param {LavaMoatPolicy} policy LavaMoat policy to convert
+ * @param {ToEndoPolicyOptions} [options] Options for conversion
  * @returns {Promise<LavaMoatEndoPolicy>}
  * @public
  */
-export const toEndoPolicy = async (lmPolicy) => {
-  // policy for self; needed for attenuator
-  /** @type {LavaMoatPolicyOverrides} */
-  let overrides = {}
-  const allegedOverrides = await readPolicyOverride(
-    new URL('./policy-override.json', import.meta.url)
-  )
 
-  if (allegedOverrides) {
-    assertPolicyOverride(allegedOverrides)
-    overrides = allegedOverrides
+/**
+ * Converts a LavaMoat policy on disk to an Endo policy
+ *
+ * @overload
+ * @param {string | URL} policyPath Path to LavaMoat policy to convert
+ * @param {ToEndoPolicyOptions} [options] Options for conversion
+ * @returns {Promise<LavaMoatEndoPolicy>}
+ * @public
+ */
+
+/**
+ * Converts a LavaMoat policy to an Endo policy
+ *
+ * @param {LavaMoatPolicy | string | URL} policyOrPolicyPath LavaMoat policy to
+ *   convert
+ * @param {ToEndoPolicyOptions} [options] Options for conversion
+ * @returns {Promise<LavaMoatEndoPolicy>}
+ * @public
+ */
+export const toEndoPolicy = async (
+  policyOrPolicyPath,
+  {
+    policyOverride,
+    policyOverridePath = new URL(DEFAULT_POLICY_OVERRIDE_PATH, import.meta.url),
+  } = {}
+) => {
+  await Promise.resolve()
+
+  // read & validate policy if we have a path
+  /** @type {unknown} */
+  let allegedPolicy
+
+  /** @type {LavaMoatPolicy} */
+  let policy
+  if (
+    typeof policyOrPolicyPath === 'string' ||
+    policyOrPolicyPath instanceof URL
+  ) {
+    const policyPath = policyOrPolicyPath
+    allegedPolicy = await readPolicy(policyPath)
+  } else {
+    allegedPolicy = policyOrPolicyPath
   }
 
-  const finalLMPolicy = mergePolicy(lmPolicy, overrides)
+  assertPolicy(allegedPolicy)
+  policy = allegedPolicy
+
+  /**
+   * Policy for self; needed for default attenuator.
+   *
+   * @type {LavaMoatPolicyOverrides}
+   */
+  const override =
+    policyOverride ?? (await getPolicyOverride(policyOverridePath))
+
+  const lavaMoatPolicy = mergePolicy(policy, override)
+
+  /**
+   * Actual conversion starts here.
+   *
+   * This converts {@link LavaMoatPolicy.resources LavaMoat's resources property}
+   * to {@link LavaMoatEndoPolicy.resources Endo's resources property}.
+   *
+   * @type {LavaMoatEndoPolicy['resources']}
+   */
+  const resources = fromEntries(
+    entries(lavaMoatPolicy.resources ?? create(null)).map(
+      ([resourceName, resourcePolicy]) => [
+        resourceName,
+        convertEndoPackagePolicy(resourcePolicy),
+      ]
+    )
+  )
 
   /** @type {LavaMoatEndoPolicy} */
   const endoPolicy = {
-    defaultAttenuator: DEFAULT_ATTENUATOR,
-    entry: {
-      [RSRC_POLICY_GLOBALS]: [POLICY_ITEM_ROOT],
-      [RSRC_POLICY_PKGS]: POLICY_ITEM_WILDCARD,
-      [RSRC_POLICY_BUILTINS]: POLICY_ITEM_WILDCARD,
-      noGlobalFreeze: true,
-    },
-    resources: fromEntries(
-      entries(finalLMPolicy.resources ?? {}).map(
-        ([resourceName, resourcePolicy]) => [
-          resourceName,
-          convertEndoPackagePolicy(resourcePolicy),
-        ]
-      )
-    ),
+    ...ENDO_POLICY_BOILERPLATE,
+    resources,
   }
 
   return endoPolicy
