@@ -5,6 +5,7 @@ import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { promisify } from 'node:util'
+import { DEFAULT_POLICY_FILENAME } from '../src/constants.js'
 import { readJsonFile } from '../src/util.js'
 
 const execFileAsync = promisify(execFile)
@@ -203,7 +204,7 @@ test('generate - basic policy generation', async (t) => {
   const tempdir = await fs.mkdtemp(
     path.join(tmpdir(), 'lavamoat-node-cli-test-')
   )
-  const policyPath = path.join(tempdir, 'policy.json')
+  const policyPath = path.join(tempdir, DEFAULT_POLICY_FILENAME)
   try {
     await runCli(['generate', BASIC_ENTRYPOINT, '--policy', policyPath])
     const json = await fs.readFile(policyPath, 'utf8')
