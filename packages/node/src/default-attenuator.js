@@ -78,6 +78,10 @@ export const makeGlobalsAttenuator = ({ policy } = { policy: undefined }) => {
    * @type {GlobalAttenuatorFn<GlobalAttenuatorParams>}
    */
   return ([policy], originalGlobalThis, packageCompartmentGlobalThis) => {
+    // provide a working Date and Math to be nice.
+    packageCompartmentGlobalThis.Date = originalGlobalThis.Date
+    packageCompartmentGlobalThis.Math = originalGlobalThis.Math
+
     if (!policy) {
       return
     }
