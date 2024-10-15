@@ -125,3 +125,11 @@ export const NATIVE_PARSER_NAME = 'native'
  * Extension for native modules
  */
 export const NATIVE_FILE_EXT = 'node'
+
+/**
+ * If we wanted Endo to load and execute the code in attenuators compartment, we
+ * could pass `@lavamoat/endomoat/attenuator` as default attenuator and have it
+ * loaded statelessly. We're using an impossible specifier to match with an
+ * external module instead.
+ */
+export const DEFAULT_ATTENUATOR = '@attenuator@'
