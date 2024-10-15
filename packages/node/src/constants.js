@@ -8,22 +8,39 @@
 import path from 'node:path'
 
 /**
+ * Default policy filename
+ */
+export const DEFAULT_POLICY_FILENAME = 'policy.json'
+
+/**
+ * Default policy override filename
+ */
+export const DEFAULT_POLICY_OVERRIDE_FILENAME = 'policy-override.json'
+
+/**
+ * Default policy debug filename
+ */
+export const DEFAULT_POLICY_DEBUG_FILENAME = 'policy-debug.json'
+
+/**
  * Relative path to the default policy file
  */
-export const DEFAULT_POLICY_PATH = path.normalize('lavamoat/node/policy.json')
+export const DEFAULT_POLICY_PATH = path.normalize(
+  `lavamoat/node/${DEFAULT_POLICY_FILENAME}`
+)
 
 /**
  * Relative path to the default policy override file
  */
 export const DEFAULT_POLICY_OVERRIDE_PATH = path.normalize(
-  'lavamoat/node/policy-override.json'
+  `lavamoat/node/${DEFAULT_POLICY_OVERRIDE_FILENAME}`
 )
 
 /**
  * Relative path to the default policy debug file
  */
 export const DEFAULT_POLICY_DEBUG_PATH = path.normalize(
-  'lavamoat/node/policy-debug.json'
+  `lavamoat/node/${DEFAULT_POLICY_DEBUG_FILENAME}`
 )
 
 /**
