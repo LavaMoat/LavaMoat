@@ -14,7 +14,7 @@
  */
 // @ts-expect-error - types not exported from here
 import endowmentsToolkit_ from 'lavamoat-core/src/endowmentsToolkit.js'
-import { POLICY_ITEM_ROOT } from './constants.js'
+import { POLICY_ITEM_ROOT, POLICY_ITEM_WRITE } from './constants.js'
 
 /** @type {typeof import('lavamoat-core').endowmentsToolkit} */
 const endowmentsToolkit = endowmentsToolkit_
@@ -51,13 +51,14 @@ export const attenuateModule = (params, originalObject) => {
  * @internal
  */
 export const makeGlobalsAttenuator = ({ policy } = { policy: undefined }) => {
+  /** @type {Set<string>} */
   const knownWritableFields = new Set()
 
   if (policy) {
     values(policy.resources ?? {}).forEach((resource) => {
       if (resource.globals && typeof resource.globals === 'object') {
         entries(resource.globals).forEach(([key, value]) => {
-          if (value === 'write') {
+          if (value === POLICY_ITEM_WRITE) {
             knownWritableFields.add(key)
           }
         })
