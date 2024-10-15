@@ -14,7 +14,7 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@c47758b77c9736f4b2ef4073d4d51994fabfe349  # v3
         with:
-          driver: docker-container
+          driver: docker-container # for advanced features like build caching when running Act locally
           driver-opts: |
             image=docker.io/moby/buildkit:master@sha256:c8029e1a3e837c6e3b3c7dc97114385e902a2a321306bd6aa5c86da3ab6414db
       - name: Build OCI image
