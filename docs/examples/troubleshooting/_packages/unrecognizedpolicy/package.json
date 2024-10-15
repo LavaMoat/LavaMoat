@@ -1,0 +1,12 @@
+{
+  "name": "@example/unrecognizedpolicy",
+  "version": "1.0.0",
+  "description": "",
+  "author": "",
+  "license": "ISC",
+  "main": "index.js",
+  "keywords": [],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
