@@ -1,4 +1,4 @@
-# syntax=docker/dockerfile:1.2
+# syntax=docker/dockerfile:1.10
 
 # development and testing image
 # contains the entire built source-repository under /app
