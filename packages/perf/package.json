@@ -31,6 +31,6 @@
   "devDependencies": {
     "lavamoat": "^9.0.0",
     "lavamoat-browserify": "^18.0.0",
-    "serve": "14.2.3"
+    "serve": "14.2.4"
   }
 }
