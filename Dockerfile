@@ -4,7 +4,7 @@
 # contains the entire built source-repository under /app
 
 ARG NODE_VERSION=18
-ARG BASE_IMAGE_DIGEST=sha256:ea8e360a721d870337fe899c70ea7def62f2a72cf1b6f7beb8a3ccaac8b6049c # docker.io/library/node:18-alpine
+ARG BASE_IMAGE_DIGEST=sha256:02376a266c84acbf45bd19440e08e48b1c8b98037417334046029ab585de03e2 # docker.io/library/node:18-alpine
 FROM docker.io/library/node:${NODE_VERSION}-alpine@${BASE_IMAGE_DIGEST}
 
 WORKDIR /app
