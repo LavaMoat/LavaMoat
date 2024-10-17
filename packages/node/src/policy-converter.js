@@ -178,10 +178,6 @@ const getPolicyOverride = async (policyOverridePath) => {
       assertPolicyOverride(allegedOverride)
       return allegedOverride
     }
-
-    throw new Error(
-      `Policy override at ${policyOverridePath} is unexpectedly a 0-byte file`
-    )
   }
   return {}
 }
