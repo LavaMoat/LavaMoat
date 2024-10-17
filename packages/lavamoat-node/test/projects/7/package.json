@@ -1,0 +1,12 @@
+{
+  "name": "test-3",
+  "packageManager": "yarn@1.22.22",
+  "scripts": {
+    "setup": "exit 0"
+  },
+  "dependencies": {
+    "a": "file:./node-modules/a",
+    "b": "file:./node-modules/b",
+    "c": "file:./node-modules/c"
+  }
+}
