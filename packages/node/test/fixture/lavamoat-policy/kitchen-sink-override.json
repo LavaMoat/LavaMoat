@@ -1,0 +1,8 @@
+{
+  "resources": {
+    "a>b": {
+      "packages": { "c": true }
+    },
+    "c": { "builtin": { "node:fs": true } }
+  }
+}

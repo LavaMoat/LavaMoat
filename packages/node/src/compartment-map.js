@@ -4,10 +4,10 @@ import { defaultParserForLanguage } from '@endo/compartment-mapper/import-parser
 import { mapNodeModules } from '@endo/compartment-mapper/node-modules.js'
 import {
   DEFAULT_ATTENUATOR,
-  NATIVE_FILE_EXT,
+  NATIVE_PARSER_FILE_EXT,
   NATIVE_PARSER_NAME,
 } from './constants.js'
-import { makeGlobalsAttenuator } from './default-attenuator.js'
+import { attenuateModule, makeGlobalsAttenuator } from './default-attenuator.js'
 import { importHook, importNowHook } from './import-hook.js'
 import { syncModuleTransforms } from './module-transforms.js'
 import parseNative from './parse-native.js'
@@ -46,7 +46,7 @@ const ENDO_OPTIONS = freeze(
       [NATIVE_PARSER_NAME]: parseNative,
     },
     languageForExtension: {
-      [NATIVE_FILE_EXT]: NATIVE_PARSER_NAME,
+      [NATIVE_PARSER_FILE_EXT]: NATIVE_PARSER_NAME,
     },
     dev: true,
   })
@@ -83,6 +83,12 @@ export const loadCompartmentMap = async (
     ...captureOpts,
     ...ENDO_OPTIONS,
     Compartment: GreedyCompartment,
+    modules: {
+      [DEFAULT_ATTENUATOR]: {
+        attenuateGlobals: makeGlobalsAttenuator(),
+        attenuateModule,
+      },
+    },
   })
 
   /**
@@ -121,6 +127,7 @@ export const execute = async (readPowers, entrypointPath, policy) => {
     modules: {
       [DEFAULT_ATTENUATOR]: {
         attenuateGlobals: makeGlobalsAttenuator({ policy }),
+        attenuateModule,
       },
     },
     policy: endoPolicy,

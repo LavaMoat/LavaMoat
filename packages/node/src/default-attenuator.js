@@ -14,7 +14,10 @@
  */
 // @ts-expect-error - types not exported from here
 import endowmentsToolkit_ from 'lavamoat-core/src/endowmentsToolkit.js'
-import { POLICY_ITEM_ROOT, POLICY_ITEM_WRITE } from './constants.js'
+import {
+  ENDO_POLICY_ITEM_ROOT,
+  LAVAMOAT_POLICY_ITEM_WRITE,
+} from './constants.js'
 
 /** @type {typeof import('lavamoat-core').endowmentsToolkit} */
 const endowmentsToolkit = endowmentsToolkit_
@@ -47,24 +50,24 @@ export const attenuateModule = (params, originalObject) => {
 /**
  * @param {object} options
  * @param {LavaMoatPolicy} [options.policy]
- * @returns Attenuator
+ * @returns {GlobalAttenuatorFn<GlobalAttenuatorParams>}
  * @internal
  */
-export const makeGlobalsAttenuator = ({ policy } = { policy: undefined }) => {
+export const makeGlobalsAttenuator = (
+  { policy: lavaMoatPolicy } = { policy: undefined }
+) => {
   /** @type {Set<string>} */
   const knownWritableFields = new Set()
 
-  if (policy) {
-    values(policy.resources ?? {}).forEach((resource) => {
-      if (resource.globals && typeof resource.globals === 'object') {
-        entries(resource.globals).forEach(([key, value]) => {
-          if (value === POLICY_ITEM_WRITE) {
-            knownWritableFields.add(key)
-          }
-        })
-      }
-    })
-  }
+  values(lavaMoatPolicy?.resources ?? {}).forEach((resource) => {
+    if (resource.globals && typeof resource.globals === 'object') {
+      entries(resource.globals).forEach(([key, value]) => {
+        if (value === LAVAMOAT_POLICY_ITEM_WRITE) {
+          knownWritableFields.add(key)
+        }
+      })
+    }
+  })
 
   const { getEndowmentsForConfig, copyWrappedGlobals } = endowmentsToolkit({
     handleGlobalWrite: knownWritableFields.size > 0,
@@ -85,7 +88,7 @@ export const makeGlobalsAttenuator = ({ policy } = { policy: undefined }) => {
     if (!policy) {
       return
     }
-    if (policy === POLICY_ITEM_ROOT) {
+    if (policy === ENDO_POLICY_ITEM_ROOT) {
       rootCompartmentGlobalThis = packageCompartmentGlobalThis
       // ^ this is a little dumb, but only a little - assuming importLocation is called only once in parallel. The thing is - even if it isn't, the new one will have a new copy of this module anyway.
       // That is unless we decide to use `modules` for passing the attenuator, in which case we have an attenuator defined outside of Endo and we can scope it as we wish. Tempting. Slightly less secure, because if we have a prototype pollution or RCE in the attenuator, we're exposing the outside instead of the attenuators compartment.
@@ -96,8 +99,22 @@ export const makeGlobalsAttenuator = ({ policy } = { policy: undefined }) => {
     } else {
       const endowments = getEndowmentsForConfig(
         rootCompartmentGlobalThis,
-        policy,
-        // rootCompartmentGlobalThis, // Not sure if it works, but with this as a 3rd argument, in theory, each compartment would unwrap functions to the root conpartment's globalThis, where all copied functions are set up to unwrap to actual globalThis
+        /**
+         * **HAZARD**: In this block, `policy` is of type
+         * `Omit<GlobalAttenuatorParams, RootPolicy>` (a.k.a.
+         * `WritablePropertyPolicy`); the value comes _directly_ from an Endo
+         * `Policy`. `policy` _corresponds to_ LM's `GlobalPolicy`, but is _not_
+         * the same value from the original LavaMoat policy!
+         *
+         * `getEndowmentsForConfig()` accepts a LavaMoat `ResourcePolicy` having
+         * a `globals` prop (a `GlobalPolicy`). Since we control the types of
+         * the parameters provided to the attenuator (`GlobalAttenuatorParams`),
+         * we've made those parameters (the first of which is `policy`)
+         * structurally compatible with a `GlobalPolicy`. Below, we're creating
+         * a phony `ResourcePolicy` to make it fit.
+         */
+        { globals: policy },
+        // Not sure if it works, but with this as a 3rd argument, in theory, each compartment would unwrap functions to the root conpartment's globalThis, where all copied functions are set up to unwrap to actual globalThis
         // instead I'm opting for a single unwrap since we now have access to the actual globalThis
         originalGlobalThis,
         packageCompartmentGlobalThis
