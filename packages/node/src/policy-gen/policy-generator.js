@@ -108,6 +108,7 @@ export class PolicyGenerator {
             {
               isEntry: entryCompartment === compartment,
               readPowers,
+              policyOverride,
             }
           ),
         ]
