@@ -1,6 +1,11 @@
 import 'ses'
 
 import test from 'ava'
+import {
+  assertPolicyOverride,
+  generatePolicy,
+  readPolicyOverride,
+} from '../../src/index.js'
 import { createGeneratePolicyMacros } from './macros.js'
 
 const { testPolicyForModule, testPolicyForScript, testPolicyForJSON } =
@@ -113,3 +118,41 @@ test(
   'BigInt(123)',
   { resources: {} }
 )
+
+test('generatePolicy - handling unused dependencies', async (t) => {
+  const entryFile = new URL(
+    '../fixture/unused-dependency/app.js',
+    import.meta.url
+  )
+
+  const policy = await generatePolicy(entryFile)
+
+  t.deepEqual(policy, { resources: {} })
+})
+
+test('generatePolicy - use policy overrides', async (t) => {
+  const entryFile = new URL(
+    '../fixture/unused-dependency-override/app.js',
+    import.meta.url
+  )
+
+  const policyOverride = await readPolicyOverride(
+    new URL(
+      '../fixture/unused-dependency-override/lavamoat/node/policy-override.json',
+      import.meta.url
+    )
+  )
+  assertPolicyOverride(policyOverride)
+  const policy = await generatePolicy(entryFile, { policyOverride })
+
+  t.deepEqual(policy, {
+    resources: {
+      blurmph: {
+        builtin: {
+          'node:fs': true,
+          'node:path': true,
+        },
+      },
+    },
+  })
+})

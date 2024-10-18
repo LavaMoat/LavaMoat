@@ -1,0 +1,9 @@
+{
+  "resources": {
+    "blurmph": {
+      "builtin": {
+        "node:path": true
+      }
+    }
+  }
+}
