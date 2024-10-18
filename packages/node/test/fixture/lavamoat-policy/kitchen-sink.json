@@ -1,0 +1,10 @@
+{
+  "resources": {
+    "a": {
+      "packages": { "b": true },
+      "globals": { "console": true },
+      "builtin": { "fs.readFile": true }
+    },
+    "a>b": { "native": true, "globals": { "XMLHttpRequest": "write" } }
+  }
+}

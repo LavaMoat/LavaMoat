@@ -1,16 +1,19 @@
 import { mergePolicy } from 'lavamoat-core'
 import {
   DEFAULT_ATTENUATOR,
-  DEFAULT_POLICY_OVERRIDE_PATH,
+  ENDO_PKG_POLICY_BUILTINS,
+  ENDO_PKG_POLICY_GLOBALS,
+  ENDO_PKG_POLICY_NO_GLOBAL_FREEZE,
+  ENDO_PKG_POLICY_OPTION_NATIVE,
+  ENDO_PKG_POLICY_OPTIONS,
+  ENDO_PKG_POLICY_PACKAGES,
+  ENDO_POLICY_DEFAULT_ATTENUATOR,
+  ENDO_POLICY_ENTRY,
+  ENDO_POLICY_ITEM_ROOT,
+  ENDO_POLICY_ITEM_WILDCARD,
+  ENDO_POLICY_RESOURCES,
+  LAVAMOAT_PKG_POLICY_NATIVE,
   LAVAMOAT_PKG_POLICY_ROOT,
-  LAVAMOAT_RESOURCE_FLAG_NATIVE,
-  POLICY_ITEM_ROOT,
-  POLICY_ITEM_WILDCARD,
-  RSRC_POLICY_BUILTINS,
-  RSRC_POLICY_GLOBALS,
-  RSRC_POLICY_OPTION_NATIVE,
-  RSRC_POLICY_OPTIONS,
-  RSRC_POLICY_PKGS,
 } from './constants.js'
 import {
   assertPolicy,
@@ -23,25 +26,33 @@ const { isArray } = Array
 const { create, entries, fromEntries } = Object
 
 /**
+ * @import {GlobalPolicy,
+ *   PackagePolicy,
+ *   LavaMoatPolicy,
+ *   ResourcePolicy,
+ *   LavaMoatPolicyOverrides} from 'lavamoat-core'
+ * @import {LavaMoatPackagePolicy,
+ *   LavaMoatPackagePolicyOptions,
+ *   LavaMoatEndoPolicy,
+ *   ToEndoPolicyOptions} from './types.js'
+ */
+
+/**
  * Boilerplate for Endo policies.
  *
  * @satisfies {LavaMoatEndoPolicy}
+ * @internal
  */
-const ENDO_POLICY_BOILERPLATE = /** @type {const} */ ({
-  defaultAttenuator: DEFAULT_ATTENUATOR,
-  entry: {
-    [RSRC_POLICY_GLOBALS]: [POLICY_ITEM_ROOT],
-    [RSRC_POLICY_PKGS]: POLICY_ITEM_WILDCARD,
-    [RSRC_POLICY_BUILTINS]: POLICY_ITEM_WILDCARD,
-    noGlobalFreeze: true,
+export const ENDO_POLICY_BOILERPLATE = /** @type {const} */ ({
+  [ENDO_POLICY_DEFAULT_ATTENUATOR]: DEFAULT_ATTENUATOR,
+  [ENDO_POLICY_ENTRY]: {
+    [ENDO_PKG_POLICY_GLOBALS]: [ENDO_POLICY_ITEM_ROOT],
+    [ENDO_PKG_POLICY_PACKAGES]: ENDO_POLICY_ITEM_WILDCARD,
+    [ENDO_PKG_POLICY_BUILTINS]: ENDO_POLICY_ITEM_WILDCARD,
+    [ENDO_PKG_POLICY_NO_GLOBAL_FREEZE]: true,
   },
-  resources: {},
+  [ENDO_POLICY_RESOURCES]: {},
 })
-
-/**
- * @import {GlobalPolicy, PackagePolicy, LavaMoatPolicy, ResourcePolicy, LavaMoatPolicyOverrides} from 'lavamoat-core'
- * @import {LavaMoatPackagePolicy, LavaMoatPackagePolicyOptions, LavaMoatEndoPolicy, ToEndoPolicyOptions} from './types.js'
- */
 
 /**
  * Converts LavaMoat `ResourcePolicy.builtins` to Endo's
@@ -139,8 +150,10 @@ const convertEndoPackagePolicyOptions = (resources) => {
   }
   /** @type {LavaMoatPackagePolicyOptions | undefined} */
   let pkgPolicyOptions
-  if (resources[LAVAMOAT_RESOURCE_FLAG_NATIVE] === true) {
-    pkgPolicyOptions = { [RSRC_POLICY_OPTION_NATIVE]: true }
+  // the "native" prop of a LavaMoat package policy corresponds to the "native"
+  // prop of the "options" prop of an Endo package policy
+  if (resources[LAVAMOAT_PKG_POLICY_NATIVE] === true) {
+    pkgPolicyOptions = { [ENDO_PKG_POLICY_OPTION_NATIVE]: true }
   }
   return pkgPolicyOptions
 }
@@ -153,10 +166,16 @@ const convertEndoPackagePolicyOptions = (resources) => {
  */
 const convertEndoPackagePolicy = (resources) => {
   return {
-    [RSRC_POLICY_PKGS]: convertEndoPackagePolicyPackages(resources.packages),
-    [RSRC_POLICY_GLOBALS]: convertEndoPackagePolicyGlobals(resources.globals),
-    [RSRC_POLICY_BUILTINS]: convertEndoPackagePolicyBuiltins(resources.builtin),
-    [RSRC_POLICY_OPTIONS]: convertEndoPackagePolicyOptions(resources),
+    [ENDO_PKG_POLICY_PACKAGES]: convertEndoPackagePolicyPackages(
+      resources.packages
+    ),
+    [ENDO_PKG_POLICY_GLOBALS]: convertEndoPackagePolicyGlobals(
+      resources.globals
+    ),
+    [ENDO_PKG_POLICY_BUILTINS]: convertEndoPackagePolicyBuiltins(
+      resources.builtin
+    ),
+    [ENDO_PKG_POLICY_OPTIONS]: convertEndoPackagePolicyOptions(resources),
   }
 }
 
@@ -185,40 +204,18 @@ const getPolicyOverride = async (policyOverridePath) => {
 /**
  * Converts a LavaMoat policy to an Endo policy
  *
- * @overload
- * @param {LavaMoatPolicy} policy LavaMoat policy to convert
- * @param {ToEndoPolicyOptions} [options] Options for conversion
- * @returns {Promise<LavaMoatEndoPolicy>}
- * @public
- */
-
-/**
- * Converts a LavaMoat policy on disk to an Endo policy
- *
- * @overload
- * @param {string | URL} policyPath Path to LavaMoat policy to convert
- * @param {ToEndoPolicyOptions} [options] Options for conversion
- * @returns {Promise<LavaMoatEndoPolicy>}
- * @public
- */
-
-/**
- * Converts a LavaMoat policy to an Endo policy
- *
  * @param {LavaMoatPolicy | string | URL} policyOrPolicyPath LavaMoat policy to
- *   convert
+ *   convert (or path to policy file)
  * @param {ToEndoPolicyOptions} [options] Options for conversion
  * @returns {Promise<LavaMoatEndoPolicy>}
  * @public
  */
-export const toEndoPolicy = async (
-  policyOrPolicyPath,
-  {
-    policyOverride,
-    policyOverridePath = new URL(DEFAULT_POLICY_OVERRIDE_PATH, import.meta.url),
-  } = {}
-) => {
+export const toEndoPolicy = async (policyOrPolicyPath, options) => {
   await Promise.resolve()
+
+  if (!policyOrPolicyPath) {
+    throw new TypeError('Expected a policy or policy path')
+  }
 
   // read & validate policy if we have a path
   /** @type {unknown} */
@@ -239,15 +236,17 @@ export const toEndoPolicy = async (
   assertPolicy(allegedPolicy)
   policy = allegedPolicy
 
-  /**
-   * Policy for self; needed for default attenuator.
-   *
-   * @type {LavaMoatPolicyOverrides}
-   */
-  const override =
-    policyOverride ?? (await getPolicyOverride(policyOverridePath))
+  options ??= {}
 
-  const lavaMoatPolicy = mergePolicy(policy, override)
+  /** @type {LavaMoatPolicyOverrides | undefined} */
+  let policyOverride
+  if ('policyOverridePath' in options) {
+    policyOverride = await getPolicyOverride(options.policyOverridePath)
+  } else if ('policyOverride' in options) {
+    policyOverride = options.policyOverride
+  }
+
+  const lavaMoatPolicy = mergePolicy(policy, policyOverride)
 
   /**
    * Actual conversion starts here.
@@ -269,7 +268,7 @@ export const toEndoPolicy = async (
   /** @type {LavaMoatEndoPolicy} */
   const endoPolicy = {
     ...ENDO_POLICY_BOILERPLATE,
-    resources,
+    [ENDO_POLICY_RESOURCES]: resources,
   }
 
   return endoPolicy
