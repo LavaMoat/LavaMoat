@@ -62,6 +62,7 @@ const generate = async (
     {
       ...archiveOpts,
       readPowers,
+      policyOverride,
     }
   )
 
