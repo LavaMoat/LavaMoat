@@ -12,11 +12,12 @@ import { importHook, importNowHook } from './import-hook.js'
 import { syncModuleTransforms } from './module-transforms.js'
 import parseNative from './parse-native.js'
 import { toEndoPolicy } from './policy-converter.js'
+import { makeGreedyCompartment } from './policy-gen/greedy-compartment.js'
 import { defaultReadPowers } from './power.js'
 import { toURLString } from './util.js'
 
 /**
- * @import {ReadNowPowers} from '@endo/compartment-mapper';
+ * @import {ReadNowPowers, CaptureOptions} from '@endo/compartment-mapper';
  * @import {LavaMoatPolicy} from 'lavamoat-core';
  * @import {LoadCompartmentMapOptions} from './types.js';
  */
@@ -24,7 +25,9 @@ import { toURLString } from './util.js'
 const { entries, fromEntries, freeze } = Object
 
 /**
- * Common options for calling functions in `@endo/compartment-mapper`
+ * Common options for {@link captureFromMap}
+ *
+ * @satisfies {CaptureOptions}
  */
 const ENDO_OPTIONS = freeze(
   /** @type {const} */ ({
@@ -59,13 +62,18 @@ const ENDO_OPTIONS = freeze(
 
 export const loadCompartmentMap = async (
   entrypointPath,
-  { readPowers = defaultReadPowers, ...captureOpts } = {}
+  { readPowers = defaultReadPowers, policyOverride, ...captureOpts } = {}
 ) => {
   const entryPoint = toURLString(entrypointPath)
 
   const nodeCompartmentMap = await mapNodeModules(readPowers, entryPoint, {
     dev: true,
   })
+
+  const GreedyCompartment = makeGreedyCompartment(
+    nodeCompartmentMap,
+    policyOverride
+  )
 
   const {
     captureCompartmentMap: compartmentMap,
@@ -74,6 +82,7 @@ export const loadCompartmentMap = async (
   } = await captureFromMap(readPowers, nodeCompartmentMap, {
     ...captureOpts,
     ...ENDO_OPTIONS,
+    Compartment: GreedyCompartment,
   })
 
   /**

@@ -105,8 +105,9 @@ export interface WritePolicyOptions {
  *
  * @internal
  */
-export type LoadCompartmentMapOptions = Simplify<
-  BaseLoadCompartmentMapOptions & WithReadPowers
+export type LoadCompartmentMapOptions = Merge<
+  BaseLoadCompartmentMapOptions,
+  Merge<WithReadPowers, WithPolicyOverride>
 >
 
 /**

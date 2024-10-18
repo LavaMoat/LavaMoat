@@ -133,3 +133,10 @@ export const NATIVE_FILE_EXT = 'node'
  * external module instead.
  */
 export const DEFAULT_ATTENUATOR = '@attenuator@'
+
+/**
+ * Const string to identify the internal attenuators compartment
+ *
+ * Copied from `@endo/compartment-mapper`
+ */
+export const ATTENUATORS_COMPARTMENT = '<ATTENUATORS>'
