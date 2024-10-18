@@ -7,11 +7,13 @@ import {
   type FsInterface,
   type PackagePolicy,
   type Policy,
-  type PropertyPolicy,
 } from '@endo/compartment-mapper'
 import { type LavaMoatPolicyOverrides } from 'lavamoat-core'
 import { Merge, MergeDeep, type Except, type Simplify } from 'type-fest'
-import { POLICY_ITEM_ROOT, POLICY_ITEM_WRITE } from './constants.js'
+import {
+  ENDO_GLOBAL_POLICY_ITEM_WRITE,
+  ENDO_POLICY_ITEM_ROOT,
+} from './constants.js'
 
 /**
  * Options to pass-through to Endo.
@@ -149,19 +151,19 @@ export type GenerateAndRunOptions = Merge<RunOptions, GeneratePolicyOptions>
  * "Root" identifier for a LavaMoat global policy item in the context of an Endo
  * policy
  */
-export type RootPolicy = typeof POLICY_ITEM_ROOT
+export type RootPolicy = typeof ENDO_POLICY_ITEM_ROOT
 
 /**
  * "Writable" identifier for a LavaMoat global policy item in the context of an
  * Endo policy
  */
-export type WritePolicy = typeof POLICY_ITEM_WRITE
+export type WritePolicy = typeof ENDO_GLOBAL_POLICY_ITEM_WRITE
 
 /**
  * Extends Endo's `PolicyItem` with the special {@link RootPolicy} and
  * {@link WritePolicy}
  */
-export type LavaMoatGlobalPolicyItem = RootPolicy | WritePolicy
+export type LavaMoatGlobalPolicyItem = RootPolicy | WritablePropertyPolicy
 
 /**
  * Extends Endo's `PolicyItem` with the special {@link RootPolicy}
@@ -203,9 +205,17 @@ export type LavaMoatEndoPolicy = Policy<
 >
 
 /**
+ * Like Endo's `PropertyPolicy`, but can be a {@link WritePolicy} instead of just
+ * `boolean`.
+ */
+export interface WritablePropertyPolicy {
+  [k: string]: WritePolicy | boolean
+}
+
+/**
  * Params to LavaMoat's global attenuator
  */
-export type GlobalAttenuatorParams = [LavaMoatGlobalPolicyItem | PropertyPolicy]
+export type GlobalAttenuatorParams = [LavaMoatGlobalPolicyItem]
 
 /**
  * Powers necessary to write a policy to disk
@@ -229,13 +239,18 @@ export type WritableFsInterface = MergeDeep<
 /**
  * Options for `toEndoPolicy`
  */
-export interface ToEndoPolicyOptions {
-  /**
-   * Path to a policy override file.
-   */
-  policyOverridePath?: string | URL
-  /**
-   * A policy override object.
-   */
-  policyOverride?: LavaMoatPolicyOverrides
-}
+export type ToEndoPolicyOptions =
+  | {
+      /**
+       * Path to a policy override file.
+       */
+      policyOverridePath?: string | URL
+      policyOverride: never
+    }
+  | {
+      policyOverridePath: never
+      /**
+       * A policy override object.
+       */
+      policyOverride?: LavaMoatPolicyOverrides
+    }

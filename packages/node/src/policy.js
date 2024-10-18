@@ -49,36 +49,70 @@ export const readPolicyOverride = async (
 }
 
 /**
- * Reads a policy and policy override from disk and merges them into a single
- * policy.
+ * Reads a policy and policy override from object or disk and merges them into a
+ * single policy.
  *
  * @privateRemarks
- * The way this fails is not user-friendly; it will just throw a `TypeError`
- * saying that the policy is invalid. **We should use proper schema validation**
- * to provide a more helpful error message. TODO
- * @param {string} [policyPath] Path to `policy.json`
- * @param {string} [policyOverridePath] Path to `policy-override.json`
+ * TODO: The way this fails is not user-friendly; it will just throw a
+ * `TypeError` saying that the policy is invalid. **We should use proper schema
+ * validation** to provide a more helpful error message.
+ * @param {string | URL | LavaMoatPolicy} [policy] Path to `policy.json` or the
+ *   policy itself. Defaults to `./lavamoat/node/policy.json` relative to the
+ *   current working directory.
+ * @param {string | URL | LavaMoatPolicyOverrides} [policyOverride] Path to
+ *   `policy-override.json` or the policy override itself. Defaults to
+ *   `./lavamoat/node/policy-override.json` relative to the current working
+ *   directory.
  * @returns {Promise<LavaMoatPolicy>}
- * @throws If a policy is invalid _and/or_ if policy overrides were provided and
- *   are invalid
+ * @throws If a policy is invalid _and/or_ if policy overrides were provided
+ *   _and_ are invalid
  * @public
  */
 export const loadPolicies = async (
-  policyPath = constants.DEFAULT_POLICY_PATH,
-  policyOverridePath = constants.DEFAULT_POLICY_OVERRIDE_PATH
+  policy = constants.DEFAULT_POLICY_PATH,
+  policyOverride = constants.DEFAULT_POLICY_OVERRIDE_PATH
 ) => {
-  const policies = await Promise.all([
-    readPolicy(policyPath).then((allegedPolicy) => {
-      assertPolicy(allegedPolicy)
-      return allegedPolicy
-    }),
-    readPolicyOverride(policyOverridePath).then((allegedPolicyOverride) => {
-      if (allegedPolicyOverride) {
-        assertPolicyOverride(allegedPolicyOverride)
-        return allegedPolicyOverride
-      }
-    }),
-  ])
+  /**
+   * @type {[
+   *   Promise<LavaMoatPolicy>,
+   *   Promise<LavaMoatPolicyOverrides | undefined>,
+   * ]}
+   */
+  const promises = /** @type {any} */ ([])
+  if (typeof policy === 'object') {
+    promises.push(
+      Promise.resolve().then(() => {
+        assertPolicy(policy)
+        return policy
+      })
+    )
+  } else {
+    promises.push(
+      readPolicy(policy).then((allegedPolicy) => {
+        assertPolicy(allegedPolicy)
+        return allegedPolicy
+      })
+    )
+  }
+  if (typeof policyOverride === 'object') {
+    promises.push(
+      Promise.resolve().then(() => {
+        assertPolicyOverride(policyOverride)
+        return policyOverride
+      })
+    )
+  } else {
+    promises.push(
+      readPolicyOverride(policyOverride).then((allegedPolicyOverride) => {
+        if (allegedPolicyOverride) {
+          assertPolicyOverride(allegedPolicyOverride)
+          return allegedPolicyOverride
+        }
+      })
+    )
+  }
+
+  const policies = await Promise.all(promises)
 
   return mergePolicy(...policies)
 }
@@ -86,6 +120,9 @@ export const loadPolicies = async (
 /**
  * Type predicate for a {@link LavaMoatPolicy}
  *
+ * @remarks
+ * This is non-exhaustive and should eventually be replaced with a proper
+ * schema.
  * @param {unknown} value Value to check
  * @returns {value is LavaMoatPolicy} Whether the value is a `LavaMoatPolicy`
  * @public
@@ -101,8 +138,10 @@ export const isPolicy = (value) => {
 }
 
 /**
- * Type predicate for a {@link LavaMoatPolicyOverrides}
+ * Type predicate for a **non-empty** {@link LavaMoatPolicyOverrides}
  *
+ * @remarks
+ * See {@link isPolicy} for caveats
  * @param {unknown} value
  * @returns {value is LavaMoatPolicyOverrides}
  */
