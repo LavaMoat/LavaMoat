@@ -293,10 +293,10 @@ export class PolicyGeneratorContext {
    *
    * @param {string} specifier
    * @param {ModuleSource} source
-   * @returns {Promise<LavamoatModuleRecord[]>}
+   * @returns {LavamoatModuleRecord[]}
    * @internal
    */
-  async buildModuleRecordsForSource(
+  buildModuleRecordsForSource(
     specifier,
     { parser, record, sourceLocation, bytes }
   ) {
@@ -360,17 +360,14 @@ export class PolicyGeneratorContext {
   }
 
   /**
-   * Creates {@link LavamoatModuleRecord}s from CompartmentSources.
+   * Creates {@link LavamoatModuleRecord}s from {@link CompartmentSources}.
    *
    * @param {CompartmentSources} sources
-   * @returns {Promise<LavamoatModuleRecord[]>}
+   * @returns {LavamoatModuleRecord[]}
    */
-  async buildModuleRecords(sources) {
-    const lmrs = await Promise.all(
-      entries(sources).map((entry) =>
-        this.buildModuleRecordsForSource(...entry)
-      )
-    )
-    return lmrs.flat()
+  buildModuleRecords(sources) {
+    return entries(sources)
+      .map((entry) => this.buildModuleRecordsForSource(...entry))
+      .flat()
   }
 }
