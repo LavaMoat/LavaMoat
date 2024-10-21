@@ -13,10 +13,10 @@ import { loadCompartmentMap } from '../compartment-map.js'
 import { DEFAULT_POLICY_DEBUG_PATH, DEFAULT_POLICY_PATH } from '../constants.js'
 import { defaultReadPowers } from '../power.js'
 import { writeJson } from '../util.js'
-import { PolicyGenerator } from './policy-generator.js'
+import { compartmentMapToPolicy } from './to-policy.js'
 
 /**
- * @import {GenerateOptions, GeneratePolicyOptions, PolicyGeneratorOptions} from '../types.js';
+ * @import {GenerateOptions, GeneratePolicyOptions, CompartmentMapToPolicyOptions} from '../types.js';
  * @import {LavaMoatPolicy, LavaMoatPolicyDebug} from 'lavamoat-core';
  */
 
@@ -66,18 +66,13 @@ const generate = async (
     }
   )
 
-  /** @type {PolicyGeneratorOptions} */
+  /** @type {CompartmentMapToPolicyOptions} */
   const baseOpts = { readPowers, policyOverride }
 
   // this weird thing is to make TS happy about the overload
   const opts = debug ? { debug: true, ...baseOpts } : baseOpts
 
-  return await PolicyGenerator.generatePolicy(
-    compartmentMap,
-    sources,
-    renames,
-    opts
-  )
+  return compartmentMapToPolicy(compartmentMap, sources, renames, opts)
 }
 
 /**
