@@ -31,9 +31,9 @@ export type BaseLoadCompartmentMapOptions = Except<
 >
 
 /**
- * A subset of unique options for {@link GeneratePolicyOptions}
+ * A "create a debug policy" flag
  */
-export interface BaseGeneratePolicyOptions {
+export interface WithDebug {
   /**
    * If `true`, generate a debug policy.
    */
@@ -63,7 +63,7 @@ export interface WithPolicyOverride {
 export type GeneratePolicyOptions = Merge<
   BaseLoadCompartmentMapOptions,
   Merge<
-    BaseGeneratePolicyOptions,
+    WithDebug,
     Merge<WithReadPowers, Merge<WithPolicyOverride, WritePolicyOptions>>
   >
 >
@@ -127,12 +127,13 @@ export type PolicyGeneratorContextOptions = Simplify<
 >
 
 /**
- * Options for the `PolicyGenerator` constructor
+ * Options for `compartmentMapToPolicy()`
  *
  * @internal
  */
-export type PolicyGeneratorOptions = Simplify<
-  WithReadPowers & WithPolicyOverride
+export type CompartmentMapToPolicyOptions = Merge<
+  WithReadPowers,
+  Merge<WithPolicyOverride, WithDebug>
 >
 
 /**
