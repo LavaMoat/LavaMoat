@@ -7,8 +7,7 @@
  */
 import assert from 'node:assert'
 import nodeFs from 'node:fs'
-import path from 'node:path'
-import { fileURLToPath } from 'node:url'
+import nodePath from 'node:path'
 import { loadCompartmentMap } from '../compartment-map.js'
 import { DEFAULT_POLICY_DEBUG_PATH, DEFAULT_POLICY_PATH } from '../constants.js'
 import { defaultReadPowers } from '../power.js'
@@ -16,8 +15,9 @@ import { writeJson } from '../util.js'
 import { compartmentMapToPolicy } from './to-policy.js'
 
 /**
- * @import {GenerateOptions, GeneratePolicyOptions, CompartmentMapToPolicyOptions} from '../types.js';
- * @import {LavaMoatPolicy, LavaMoatPolicyDebug} from 'lavamoat-core';
+ * @import {GenerateOptions, GeneratePolicyOptions, CompartmentMapToPolicyOptions} from '../types.js'
+ * @import {LavaMoatPolicy, LavaMoatPolicyDebug} from 'lavamoat-core'
+ * @import {SetFieldType} from 'type-fest'
  */
 
 /**
@@ -26,7 +26,7 @@ import { compartmentMapToPolicy } from './to-policy.js'
  *
  * @overload
  * @param {string | URL} entrypointPath
- * @param {GenerateOptions & { debug: true }} opts
+ * @param {SetFieldType<GenerateOptions, 'debug', true>} opts
  * @returns {Promise<LavaMoatPolicyDebug>}
  */
 
@@ -54,6 +54,7 @@ const generate = async (
     readPowers = defaultReadPowers,
     debug = false,
     policyOverride,
+    isBuiltin,
     ...archiveOpts
   } = {}
 ) => {
@@ -67,7 +68,7 @@ const generate = async (
   )
 
   /** @type {CompartmentMapToPolicyOptions} */
-  const baseOpts = { readPowers, policyOverride }
+  const baseOpts = { readPowers, policyOverride, isBuiltin }
 
   // this weird thing is to make TS happy about the overload
   const opts = debug ? { debug: true, ...baseOpts } : baseOpts
@@ -100,12 +101,12 @@ const shouldWriteDebugPolicy = (opts = {}) => !!(opts.write && opts.debug)
 /**
  * Absolute path to the default policy debug file
  */
-const ABS_POLICY_DEBUG_PATH = path.resolve(DEFAULT_POLICY_DEBUG_PATH)
+const ABS_POLICY_DEBUG_PATH = nodePath.resolve(DEFAULT_POLICY_DEBUG_PATH)
 
 /**
  * Absolute path to the default policy file
  */
-const ABS_POLICY_PATH = path.resolve(DEFAULT_POLICY_PATH)
+const ABS_POLICY_PATH = nodePath.resolve(DEFAULT_POLICY_PATH)
 
 /**
  * Generates a LavaMoat policy or debug policy from a given entry point using
@@ -121,28 +122,29 @@ export const generatePolicy = async (
   {
     policyDebugPath = ABS_POLICY_DEBUG_PATH,
     policyPath = ABS_POLICY_PATH,
-    fs = nodeFs,
+    writableFs = nodeFs,
     readPowers = defaultReadPowers,
+    isAbsolute = nodePath.isAbsolute,
     write: shouldWrite = false,
     debug,
     ...generateOpts
   } = {}
 ) => {
   if (entrypointPath instanceof URL) {
-    entrypointPath = fileURLToPath(entrypointPath)
+    entrypointPath = readPowers.fileURLToPath(entrypointPath)
   }
   assert(
-    path.isAbsolute(entrypointPath),
+    isAbsolute(entrypointPath),
     `entrypointPath must be an absolute path; got ${entrypointPath}`
   )
   if (shouldWrite) {
     assert(
-      path.isAbsolute(policyPath),
+      isAbsolute(policyPath),
       `policyPath must be an absolute path; got ${policyPath}`
     )
     if (policyDebugPath) {
       assert(
-        path.isAbsolute(policyDebugPath),
+        isAbsolute(policyDebugPath),
         `policyDebugPath must be an absolute path; got ${policyDebugPath}`
       )
     }
@@ -169,7 +171,7 @@ export const generatePolicy = async (
       readPowers,
       debug: true,
     })
-    await writeJson(policyDebugPath, debugPolicy, { fs })
+    await writeJson(policyDebugPath, debugPolicy, { fs: writableFs })
 
     // do not attempt to use the `delete` keyword with typescript. you have been
     // warned!
@@ -183,7 +185,7 @@ export const generatePolicy = async (
   }
 
   if (shouldWrite) {
-    await writeJson(policyPath, policy, { fs })
+    await writeJson(policyPath, policy, { fs: writableFs })
   }
 
   return policy

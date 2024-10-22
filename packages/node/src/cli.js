@@ -28,6 +28,7 @@
 import './preamble.js'
 
 import assert from 'node:assert'
+import fs from 'node:fs'
 import path from 'node:path'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
@@ -246,6 +247,7 @@ const main = async (args = hideBin(process.argv)) => {
             policyDebugPath,
             readPowers: defaultReadPowers,
             write,
+            writableFs: fs,
           })
         } else {
           try {
@@ -313,6 +315,7 @@ const main = async (args = hideBin(process.argv)) => {
         await generateAndWritePolicy(entrypoint, {
           debug,
           policyPath,
+          writableFs: fs,
           policyDebugPath,
           readPowers: defaultReadPowers,
         })
