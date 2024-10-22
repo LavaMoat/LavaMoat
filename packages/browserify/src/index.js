@@ -10,7 +10,7 @@ const { loadCanonicalNameMap } = require('@lavamoat/aa')
 const browserResolve = require('browser-resolve')
 
 // these are the reccomended arguments for lavaMoat to work well with browserify
-const reccomendedArgs = {
+const recommendedArgs = {
   // this option helps with parsing global usage
   insertGlobalVars: {
     global: false,
@@ -20,13 +20,14 @@ const reccomendedArgs = {
   // are using each other for code deduplication
   // this also breaks bify-package-factor and related tools
   dedupe: false,
+  resolve: undefined,
 }
 
 // primary export is the Browserify plugin
 module.exports = plugin
 module.exports.createLavamoatPacker = createLavamoatPacker
 module.exports.loadPolicy = loadPolicyFromPluginOpts
-module.exports.args = reccomendedArgs
+module.exports.args = recommendedArgs
 
 function plugin(browserify, pluginOpts) {
   // pluginOpts.policy is policy path
