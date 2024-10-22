@@ -19,15 +19,13 @@ if (isMainThread) {
   throw new Error('This module is not meant to be run in the main thread')
 }
 
-const { entryPath, policy, opts, vol } = /** @type {RunnerWorkerData} */ (
-  workerData
-)
+const { entryPath, policy, vol } = /** @type {RunnerWorkerData} */ (workerData)
 
 const { fs } = memfs(vol)
 
 const readPowers = makeReadPowers(/** @type {FsInterface} */ (fs))
 
-void run(entryPath, policy, { ...opts, readPowers }).catch((err) => {
+void run(entryPath, policy, { readPowers }).catch((err) => {
   // eslint-disable-next-line no-console
   console.error(err)
   process.exitCode = 1

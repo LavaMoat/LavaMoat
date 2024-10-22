@@ -7,7 +7,7 @@ import nodeUrl from 'node:url'
 /**
  * @import {SetRequired} from 'type-fest';
  * @import {ReadNowPowers,  FsInterface,  UrlInterface,  CryptoInterface, PathInterface} from '@endo/compartment-mapper'
- * @import {WithReadPowers} from './types.js';
+ * @import {WithRawReadPowers} from './types.js';
  */
 
 /**

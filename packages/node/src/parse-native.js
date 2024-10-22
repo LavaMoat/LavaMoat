@@ -1,3 +1,12 @@
+/**
+ * Provides a "parser" for a native Node.js module (a.k.a a "Node.js addon")
+ *
+ * Any package wanting to load a native module must have a policy flag
+ * explicitly allowing the behavior.
+ *
+ * @packageDocumentation
+ */
+
 import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
 import { NATIVE_PARSER_NAME } from './constants.js'
@@ -44,6 +53,8 @@ const parseNative = (
     }
 
     const finalExports = require(fileURLToPath(location))
+
+    // copies the contents of `default` into the root of the module environment record
     moduleEnvironmentRecord.default = finalExports
     for (const prop of keys(moduleEnvironmentRecord.default || {})) {
       if (prop !== 'default') {

@@ -64,14 +64,21 @@ export const run = async (entrypointPath, policyOrOpts, options = {}) => {
   // 'fs' is the minimum required to create new read powers.
   // if we didn't have at least that, then we could just use `defaultReadPowers`.
   // also note: `fs` has precedence over `readPowers`
-  const readPowers = runOpts.fs
-    ? makeReadPowers(
-        runOpts.fs,
-        runOpts.url ?? nodeUrl,
-        runOpts.path ?? nodePath,
-        runOpts.crypto ?? nodeCrypto
-      )
-    : (runOpts.readPowers ?? defaultReadPowers)
+  /** @type {ReadNowPowers} */
+  let readPowers
 
+  if ('fs' in runOpts && runOpts.fs) {
+    readPowers = makeReadPowers(
+      runOpts.fs,
+      runOpts.url ?? nodeUrl,
+      runOpts.path ?? nodePath,
+      runOpts.crypto ?? nodeCrypto
+    )
+  } else {
+    readPowers =
+      'readPowers' in runOpts && runOpts.readPowers
+        ? runOpts.readPowers
+        : defaultReadPowers
+  }
   return execute(readPowers, entrypointPath, policy)
 }

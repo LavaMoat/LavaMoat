@@ -5,22 +5,20 @@
  */
 
 import { isBuiltin as nodeIsBuiltin } from 'node:module'
-import path from 'node:path'
-import { fileURLToPath } from 'node:url'
 import {
-  LAVAMOAT_PKG_POLICY_ROOT,
   LMR_TYPE_BUILTIN,
   LMR_TYPE_NATIVE,
   LMR_TYPE_SOURCE,
   NATIVE_PARSER_NAME,
 } from '../constants.js'
 import { defaultReadPowers } from '../power.js'
+import { getPackageName, isCompleteModuleDescriptor } from './util.js'
 
 /**
- * @import {ReadNowPowers, CompartmentDescriptor, ModuleDescriptor, ModuleSource, CompartmentSources} from '@endo/compartment-mapper'
+ * @import {ReadNowPowers, CompartmentDescriptor, ModuleDescriptor, ModuleSource, CompartmentSources, FileURLToPathFn} from '@endo/compartment-mapper'
  * @import {LMRCache} from './lmr-cache.js'
  * @import {PolicyGeneratorContextOptions} from '../types.js'
- * @import {LavamoatModuleRecord} from 'lavamoat-core'
+ * @import {LavamoatModuleRecord, IsBuiltinFn} from 'lavamoat-core'
  */
 
 const { entries, keys, fromEntries } = Object
@@ -28,6 +26,8 @@ const { entries, keys, fromEntries } = Object
 /**
  * Handles creation of {@link LavamoatModuleRecord} objects for individual
  * compartment descriptors.
+ *
+ * Can be thought of as a wrapper around a {@link CompartmentDescriptor}.
  *
  * @internal
  */
@@ -45,12 +45,6 @@ export class PolicyGeneratorContext {
    * @type {Readonly<LMRCache>}
    */
   #lmrCache
-  /**
-   * Read powers
-   *
-   * @type {ReadNowPowers}
-   */
-  #readPowers
 
   /**
    * Compartment descriptor
@@ -73,6 +67,20 @@ export class PolicyGeneratorContext {
   renames
 
   /**
+   * Read powers
+   *
+   * Specifically, we need a {@link FileURLToPathFn}
+   *
+   * @type {ReadNowPowers}
+   */
+  #readPowers
+
+  /**
+   * An {@link IsBuiltinFn}
+   */
+  #isBuiltin
+
+  /**
    * Used for reading source files
    */
   static #decoder = new TextDecoder()
@@ -89,27 +97,24 @@ export class PolicyGeneratorContext {
    * @param {Readonly<CompartmentDescriptor>} compartment
    * @param {Readonly<Record<string, string>>} renames
    * @param {Readonly<LMRCache>} lmrCache
-   * @param {Readonly<import('../types.js').PolicyGeneratorContextOptions>} opts
+   * @param {Readonly<PolicyGeneratorContextOptions>} opts
    */
   constructor(
     compartment,
     renames,
     lmrCache,
-    { readPowers = defaultReadPowers, isEntry = false } = {}
+    {
+      isEntry = false,
+      readPowers = defaultReadPowers,
+      isBuiltin = nodeIsBuiltin,
+    } = {}
   ) {
-    this.#readPowers = readPowers
     this.#isEntry = isEntry
     this.#lmrCache = lmrCache
+    this.#readPowers = readPowers
+    this.#isBuiltin = isBuiltin
     this.compartment = compartment
     this.renames = renames
-  }
-
-  /**
-   * The package name which will appear in the source's `LavamoatModuleRecord`
-   * and eventual policy
-   */
-  get packageName() {
-    return this.#isEntry ? LAVAMOAT_PKG_POLICY_ROOT : this.compartment.name
   }
 
   /**
@@ -118,41 +123,25 @@ export class PolicyGeneratorContext {
    * @param {string} specifier
    */
   isBuiltin(specifier) {
-    return !(specifier in this.compartment.modules) && nodeIsBuiltin(specifier)
+    return (
+      !(specifier in this.compartment.modules) && this.#isBuiltin(specifier)
+    )
   }
 
   /**
-   * A `ModuleDescriptor` has a compartment and module, which can be joined to
-   * form an absolute path.
+   * Converts a `string` `file://` URL to a path, or an absolute path derived
+   * from a given `ModuleDescriptor`
    *
-   * @overload
-   * @param {Required<ModuleDescriptor>} descriptor
-   * @returns {string}
-   * @internal
-   * @todo Evaluate windows compat
-   */
-
-  /**
-   * Converts a `string` `file://` URL to a path
-   *
-   * @overload
-   * @param {string} location
-   * @returns {string}
-   * @internal
-   */
-
-  /**
    * @remarks
    * In Endo, the `compartment` is stored as a _string_ `file://` URL; hence the
    * conversion.
    * @param {string | Required<ModuleDescriptor>} descriptorOrLocation
    * @returns {string}
-   * @internal
    * @todo There may be a safer way to do this conversion
    */
   toPath(descriptorOrLocation) {
     if (typeof descriptorOrLocation === 'string') {
-      return fileURLToPath(new URL(descriptorOrLocation))
+      return this.#readPowers.fileURLToPath(new URL(descriptorOrLocation))
     }
     const location = this.renames[descriptorOrLocation.compartment]
     if (!location) {
@@ -160,8 +149,8 @@ export class PolicyGeneratorContext {
         `Rename map missing location for compartment "${descriptorOrLocation.compartment}" in compartment ${this.compartment.name}`
       )
     }
-    return fileURLToPath(
-      new URL(path.join(location, descriptorOrLocation.module))
+    return this.#readPowers.fileURLToPath(
+      new URL(descriptorOrLocation.module, location)
     )
   }
 
@@ -172,23 +161,24 @@ export class PolicyGeneratorContext {
    * with trailing slashes
    *
    * @param {string} specifier
-   * @returns {string | undefined}
-   * @internal
+   * @returns {string}
+   * @throws If no module descriptor exists for the specifier within the
+   *   compartment's `ModuleDescriptor` map
    */
   getFilepath(specifier) {
     specifier = specifier.replace(/\/$/, '')
 
     const moduleDescriptor = this.compartment.modules[specifier]
-    if (PolicyGeneratorContext.isCompleteModuleDescriptor(moduleDescriptor)) {
-      return this.toPath(moduleDescriptor)
+    if (isCompleteModuleDescriptor(moduleDescriptor)) {
+      // FIXME: why doesn't this type narrow properly?
+      return this.toPath(
+        /** @type {Required<ModuleDescriptor>} */ (moduleDescriptor)
+      )
     }
 
-    return undefined
-  }
-
-  get canonicalName() {
-    const { compartment, packageName } = this
-    return compartment.path ? compartment.path.join('>') : packageName
+    throw new ReferenceError(
+      `Cannot find file for specifier "${specifier}" in compartment "${this.compartment.name}"`
+    )
   }
 
   /**
@@ -202,7 +192,6 @@ export class PolicyGeneratorContext {
    *
    * @param {string[]} imports
    * @returns {Record<string, string>}
-   * @internal
    */
   buildImportMap(imports = []) {
     return fromEntries(
@@ -213,40 +202,13 @@ export class PolicyGeneratorContext {
             return [specifier, specifier]
           }
 
-          /** @type {string | undefined} */
-          let file = this.getFilepath(specifier)
-
-          if (!file) {
-            throw new ReferenceError(
-              `Cannot find file for specifier "${specifier}" in compartment "${this.compartment.name}"`
-            )
-          }
+          const file = this.getFilepath(specifier)
 
           return /** @type {[specifier: string, file: string]} */ ([
             specifier,
             file,
           ])
         })
-    )
-  }
-
-  /**
-   * Type guard for a `Required<ModuleDescriptor>`.
-   *
-   * The `compartment` and `module` props are optional in the original type, but
-   * we need both.
-   *
-   * @param {unknown} descriptor
-   * @returns {descriptor is Required<ModuleDescriptor>}
-   * @this {void}
-   * @internal
-   */
-  static isCompleteModuleDescriptor(descriptor) {
-    return Boolean(
-      descriptor &&
-        typeof descriptor === 'object' &&
-        'compartment' in descriptor &&
-        'module' in descriptor
     )
   }
 
@@ -268,7 +230,6 @@ export class PolicyGeneratorContext {
    *
    * @param {LavamoatModuleRecord['importMap']} importMap
    * @returns {LavamoatModuleRecord[]} Zero or more LMRs
-   * @internal
    */
   buildModuleRecordsFromImportMap(importMap) {
     return keys(importMap)
@@ -278,7 +239,7 @@ export class PolicyGeneratorContext {
           type: LMR_TYPE_BUILTIN,
           file: specifier,
           specifier,
-          packageName: this.packageName,
+          packageName: getPackageName(this.compartment, this.#isEntry),
         })
       )
   }
@@ -294,7 +255,6 @@ export class PolicyGeneratorContext {
    * @param {string} specifier
    * @param {ModuleSource} source
    * @returns {LavamoatModuleRecord[]}
-   * @internal
    */
   buildModuleRecordsForSource(
     specifier,
@@ -330,7 +290,7 @@ export class PolicyGeneratorContext {
      *
      * @type {LavamoatModuleRecord['file']}
      */
-    const file = fileURLToPath(new URL(sourceLocation))
+    const file = this.#readPowers.fileURLToPath(new URL(sourceLocation))
 
     /**
      * The {@link LavamoatModuleRecord.importMap} prop
@@ -349,7 +309,7 @@ export class PolicyGeneratorContext {
       this.#lmrCache.get({
         specifier: file,
         file,
-        packageName: this.canonicalName,
+        packageName: getPackageName(this.compartment, this.#isEntry),
         importMap,
         content,
         type: parser === NATIVE_PARSER_NAME ? LMR_TYPE_NATIVE : LMR_TYPE_SOURCE,
@@ -366,8 +326,8 @@ export class PolicyGeneratorContext {
    * @returns {LavamoatModuleRecord[]}
    */
   buildModuleRecords(sources) {
-    return entries(sources)
-      .map((entry) => this.buildModuleRecordsForSource(...entry))
-      .flat()
+    return entries(sources).flatMap((entry) =>
+      this.buildModuleRecordsForSource(...entry)
+    )
   }
 }
