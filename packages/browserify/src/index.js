@@ -7,7 +7,6 @@ const { createPackageDataStream } = require('./createPackageDataStream.js')
 const createLavaPack = require('@lavamoat/lavapack')
 const { createSesWorkaroundsTransform } = require('./sesTransforms')
 const { loadCanonicalNameMap } = require('@lavamoat/aa')
-const browserResolve = require('browser-resolve')
 
 // these are the reccomended arguments for lavaMoat to work well with browserify
 const recommendedArgs = {
@@ -20,7 +19,6 @@ const recommendedArgs = {
   // are using each other for code deduplication
   // this also breaks bify-package-factor and related tools
   dedupe: false,
-  resolve: undefined,
 }
 
 // primary export is the Browserify plugin
@@ -46,7 +44,7 @@ function plugin(browserify, pluginOpts) {
           rootDir: configuration.projectRoot,
           // need this in order to walk browser builtin deps
           includeDevDeps: true,
-          resolve: browserResolve,
+          resolve: configuration.resolve,
         })
       }
       return canonicalNameMap
@@ -136,6 +134,7 @@ function getConfigurationFromPluginOpts(pluginOpts) {
     'bundleWithPrecompiledModules',
     'policyDebug',
     'projectRoot',
+    'resolve',
   ]
 
   const allowedKeys = new Set([
@@ -178,6 +177,10 @@ function getConfigurationFromPluginOpts(pluginOpts) {
       pluginOpts.scuttleGlobalThisExceptions
   }
 
+  if (!pluginOpts.resolve) {
+    pluginOpts.resolve = require('browser-resolve')
+  }
+
   const configuration = {
     projectRoot: pluginOpts.projectRoot,
     includePrelude:
@@ -197,6 +200,7 @@ function getConfigurationFromPluginOpts(pluginOpts) {
         ? Boolean(pluginOpts.bundleWithPrecompiledModules)
         : true,
     actionOverrides: {},
+    resolve: pluginOpts.resolve,
   }
 
   // check for action overrides
