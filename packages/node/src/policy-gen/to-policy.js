@@ -15,7 +15,7 @@ import { PolicyGeneratorContext } from './policy-generator-context.js'
 /**
  * @import {Sources, CompartmentMapDescriptor, ReadNowPowers} from '@endo/compartment-mapper'
  * @import {LavaMoatPolicy, LavaMoatPolicyDebug, LavaMoatPolicyOverrides, LavamoatModuleRecord, ModuleInspector} from 'lavamoat-core'
- * @import {CompartmentMapToPolicyOptions} from '../types.js'
+ * @import {BuildModuleRecordsOptions, CompartmentMapToPolicyOptions} from '../types.js'
  * @import {SetFieldType} from 'type-fest'
  */
 
@@ -52,7 +52,7 @@ const inspectModuleRecords = (moduleRecords, debug = false) => {
  * @param {Sources} sources Sources
  * @param {Record<string, string>} renames Mapping of compartment name to
  *   filepath
- * @param {ReadNowPowers} readPowers Read powers
+ * @param {BuildModuleRecordsOptions} options Options
  * @returns {LavamoatModuleRecord[]} Module records
  * @internal
  */
@@ -60,7 +60,7 @@ export const buildModuleRecords = (
   compartmentMap,
   sources,
   renames,
-  readPowers = defaultReadPowers
+  { readPowers = defaultReadPowers, isBuiltin } = {}
 ) => {
   const lmrCache = new LMRCache()
 
@@ -88,6 +88,7 @@ export const buildModuleRecords = (
             {
               isEntry: entryCompartment === compartment,
               readPowers,
+              isBuiltin,
             }
           ),
         ])
@@ -173,14 +174,12 @@ export function compartmentMapToPolicy(
   compartmentMap,
   sources,
   renames,
-  { readPowers = defaultReadPowers, policyOverride, debug = false } = {}
+  { readPowers, policyOverride, debug = false, isBuiltin } = {}
 ) {
-  const moduleRecords = buildModuleRecords(
-    compartmentMap,
-    sources,
-    renames,
-    readPowers
-  )
+  const moduleRecords = buildModuleRecords(compartmentMap, sources, renames, {
+    readPowers,
+    isBuiltin,
+  })
 
   const inspector = inspectModuleRecords(moduleRecords, debug)
 

@@ -1,15 +1,22 @@
+/**
+ * Provides {@link syncModuleTransforms}, which is a standard set of module
+ * transforms provided to `@endo/compartment-mapper`.
+ *
+ * @packageDocumentation
+ */
+
 import { evadeCensorSync } from '@endo/evasive-transform'
 import { applySourceTransforms } from 'lavamoat-core'
 
-export const decoder = new TextDecoder()
-export const encoder = new TextEncoder()
+const decoder = new TextDecoder()
+const encoder = new TextEncoder()
 
 /**
  * @import {SyncModuleTransform, Language} from '@endo/compartment-mapper'
  */
 
 /**
- * Create module transform which performs source transforms to evade SES
+ * Create a module transform which performs source transforms to evade SES
  * restrictions
  *
  * @param {Language} parser

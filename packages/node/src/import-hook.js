@@ -1,3 +1,9 @@
+/**
+ * Provides exit module hooks for Node.js builtins
+ *
+ * @packageDocumentation
+ */
+
 import { Module } from 'node:module'
 import { fileURLToPath } from 'node:url'
 
@@ -9,6 +15,9 @@ const { freeze, keys, assign } = Object
  */
 
 /**
+ * Import hook for exit modules, which are typically Node.js builtins in this
+ * case.
+ *
  * @type {ExitModuleImportHook}
  * @internal
  */
@@ -28,6 +37,8 @@ export const importHook = async (specifier) => {
 }
 
 /**
+ * Import "now" hook for exit modules, which are typically Node.js builtins.
+ *
  * @type {ExitModuleImportNowHook}
  * @internal
  */
