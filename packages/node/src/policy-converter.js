@@ -1,3 +1,16 @@
+/**
+ * Provides {@link toEndoPolicy}, which converts a LavaMoat policy into an Endo
+ * policy (compatible with `@lavamoat/node`).
+ *
+ * Policy _conversion_ is not the same as policy _generation_. Policy generation
+ * creates a new LavaMoat `policy.json`; policy conversion transforms this (or
+ * any) LavaMoat policy into an Endo policy.
+ *
+ * Policy conversion always occurs prior to execution of an app.
+ *
+ * @packageDocumentation
+ */
+
 import { mergePolicy } from 'lavamoat-core'
 import {
   DEFAULT_ATTENUATOR,
@@ -202,7 +215,9 @@ const getPolicyOverride = async (policyOverridePath) => {
 }
 
 /**
- * Converts a LavaMoat policy to an Endo policy
+ * Converts a LavaMoat policy to an Endo policy.
+ *
+ * Takes policy overrides into account, if provided.
  *
  * @param {LavaMoatPolicy | string | URL} policyOrPolicyPath LavaMoat policy to
  *   convert (or path to policy file)
