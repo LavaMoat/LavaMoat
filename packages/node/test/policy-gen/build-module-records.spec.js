@@ -15,12 +15,9 @@ test('buildModuleRecords() - result is deterministic', async (t) => {
     '/index.js',
     { readPowers }
   )
-  const moduleRecords = await buildModuleRecords(
-    compartmentMap,
-    sources,
-    renames,
-    readPowers
-  )
+  const moduleRecords = buildModuleRecords(compartmentMap, sources, renames, {
+    readPowers,
+  })
 
   t.snapshot(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
