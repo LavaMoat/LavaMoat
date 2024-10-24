@@ -2,15 +2,15 @@ const test = require('ava')
 const endowmentsToolkit = require('../src/endowmentsToolkit.js')
 
 function prepareTest({ knownWritable } = {}) {
-  const { getEndowmentsForConfig } = endowmentsToolkit({
+  const { getEndowmentsForConfig, copyWrappedGlobals } = endowmentsToolkit({
     handleGlobalWrite: !!knownWritable,
     knownWritableFields: knownWritable,
   })
-  return getEndowmentsForConfig
+  return { getEndowmentsForConfig, copyWrappedGlobals }
 }
 
 test('getEndowmentsForConfig', (t) => {
-  const getEndowmentsForConfig = prepareTest()
+  const { getEndowmentsForConfig } = prepareTest()
   const sourceGlobal = {
     namespace: {
       stringValue: 'yabbadabbadoo',
@@ -27,7 +27,7 @@ test('getEndowmentsForConfig', (t) => {
 })
 
 test('getEndowmentsForConfig - function on proto', (t) => {
-  const getEndowmentsForConfig = prepareTest()
+  const { getEndowmentsForConfig } = prepareTest()
   const assertMe = Symbol('assertMe')
   const appendChild = () => assertMe
   const theProto = {
@@ -46,7 +46,7 @@ test('getEndowmentsForConfig - function on proto', (t) => {
 })
 
 test('getEndowmentsForConfig - siblings', (t) => {
-  const getEndowmentsForConfig = prepareTest()
+  const { getEndowmentsForConfig } = prepareTest()
   const sourceGlobal = { Buffer }
   const config = {
     globals: {
@@ -97,7 +97,7 @@ test('getEndowmentsForConfig - siblings', (t) => {
 
 test('getEndowmentsForConfig - knownWritable', (t) => {
   const knownWritable = new Set(['a', 'b', 'x'])
-  const getEndowmentsForConfig = prepareTest({ knownWritable })
+  const { getEndowmentsForConfig } = prepareTest({ knownWritable })
   const sourceGlobal = {
     a: 1,
     b: { c: 2 },
@@ -146,7 +146,7 @@ test('instrumentDynamicValueAtPath puts a getter at path', (t) => {
 
 test('getEndowmentsForConfig - knownWritable and tightening access with false', (t) => {
   const knownWritable = new Set(['a'])
-  const getEndowmentsForConfig = prepareTest({ knownWritable })
+  const { getEndowmentsForConfig } = prepareTest({ knownWritable })
   const sourceGlobal = {
     a: { b: { c: 2, d: 3 }, q: 1 },
   }
@@ -172,7 +172,7 @@ test('getEndowmentsForConfig - knownWritable and tightening access with false', 
 
 test('getEndowmentsForConfig - knownWritable and invalid nesting', (t) => {
   const knownWritable = new Set(['a'])
-  const getEndowmentsForConfig = prepareTest({ knownWritable })
+  const { getEndowmentsForConfig } = prepareTest({ knownWritable })
   const sourceGlobal = {
     a: { b: { c: 2, d: 3 }, q: 1 },
   }
@@ -190,7 +190,7 @@ test('getEndowmentsForConfig - knownWritable and invalid nesting', (t) => {
 
 test('getEndowmentsForConfig - read-write', (t) => {
   const knownWritable = new Set(['a', 'b'])
-  const getEndowmentsForConfig = prepareTest({ knownWritable })
+  const { getEndowmentsForConfig } = prepareTest({ knownWritable })
   const sourceGlobal = {
     a: 1,
     b: { c: 2 },
@@ -226,7 +226,7 @@ test('getEndowmentsForConfig - read-write', (t) => {
 })
 
 test('getEndowmentsForConfig - basic getter', (t) => {
-  const getEndowmentsForConfig = prepareTest()
+  const { getEndowmentsForConfig } = prepareTest()
   const sourceGlobal = {
     get abc() {
       return { xyz: 42 }
@@ -258,7 +258,7 @@ test('getEndowmentsForConfig - basic getter', (t) => {
 
 test('getEndowmentsForConfig - traversing with getters', (t) => {
   // getEndowmentsForConfig traverses intermediate getters and preserves the leaf getter
-  const getEndowmentsForConfig = prepareTest()
+  const { getEndowmentsForConfig } = prepareTest()
   let dynamicValue = 42
   const recur = (n) => () => {
     if (n === 0) return dynamicValue
@@ -319,7 +319,7 @@ test('getEndowmentsForConfig - traversing with getters', (t) => {
 test('getEndowmentsForConfig - ensure window.document getter behavior support', (t) => {
   'use strict'
   // compartment.globalThis.document would error because 'this' value is not window
-  const getEndowmentsForConfig = prepareTest()
+  const { getEndowmentsForConfig } = prepareTest()
   const sourceGlobal = {
     get xyz() {
       return this
@@ -345,7 +345,7 @@ test('getEndowmentsForConfig - specify unwrap to', (t) => {
   'use strict'
   // compartment.globalThis.document would error because 'this' value is not window
   const unwrapTo = {}
-  const getEndowmentsForConfig = prepareTest()
+  const { getEndowmentsForConfig } = prepareTest()
   const sourceGlobal = {
     get xyz() {
       return this
@@ -372,7 +372,7 @@ test('getEndowmentsForConfig - specify unwrap from, unwrap to', (t) => {
   // compartment.globalThis.document would error because 'this' value is not window
   const unwrapTo = {}
   const unwrapFrom = {}
-  const getEndowmentsForConfig = prepareTest()
+  const { getEndowmentsForConfig } = prepareTest()
   const sourceGlobal = {
     get xyz() {
       return this
@@ -403,7 +403,7 @@ test('getEndowmentsForConfig - specify unwrap from, unwrap to', (t) => {
 // eslint-disable-next-line ava/no-async-fn-without-await
 test('getEndowmentsForConfig - endowing bind of a function', async (t) => {
   'use strict'
-  const getEndowmentsForConfig = prepareTest()
+  const { getEndowmentsForConfig } = prepareTest()
   const sourceGlobal = {
     abc: function () {
       return this
@@ -429,7 +429,7 @@ test('getEndowmentsForConfig - endowing bind of a function', async (t) => {
 test('getEndowmentsForConfig - ensure setTimeout calls dont trigger illegal invocation', (t) => {
   'use strict'
   // compartment.globalThis.document would error because 'this' value is not window
-  const getEndowmentsForConfig = prepareTest()
+  const { getEndowmentsForConfig } = prepareTest()
   const sourceGlobal = {
     setTimeout() {
       return this
@@ -442,4 +442,18 @@ test('getEndowmentsForConfig - ensure setTimeout calls dont trigger illegal invo
   }
   const resultGlobal = getEndowmentsForConfig(sourceGlobal, config)
   t.is(resultGlobal.setTimeout(), sourceGlobal)
+})
+
+test('copyWrappedGlobals - copy from prototype too', (t) => {
+  'use strict'
+  const { copyWrappedGlobals } = prepareTest()
+  const sourceProto = {
+    onTheProto: function () {},
+  }
+  const source = Object.create(sourceProto)
+  source.onTheObj = function () {}
+  const target = Object.create(null)
+  copyWrappedGlobals(source, target, ['window'])
+
+  t.is(Object.keys(target).sort().join(), 'onTheObj,onTheProto,window')
 })
