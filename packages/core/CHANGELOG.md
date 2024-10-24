@@ -6,6 +6,27 @@
   * dependencies
     * lavamoat-tofu bumped from ^7.2.1 to ^7.2.2
 
+## [16.2.0](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v16.1.0...lavamoat-core-v16.2.0) (2024-10-24)
+
+
+### Features
+
+* **core:** sort policy in a diff-friendly way ([#1350](https://github.com/LavaMoat/LavaMoat/issues/1350)) - sort order remains unchanged even if path to dependency changed. ([4af8ad7](https://github.com/LavaMoat/LavaMoat/commit/4af8ad7559e1ab12c541488cf537ecc18ce0d6dc))
+
+
+### Bug Fixes
+
+* **core:** update vendored lockdown.umd.js ([41a2d54](https://github.com/LavaMoat/LavaMoat/commit/41a2d541f80956b2623d6176d8580825df29b52d))
+* **deps:** update babel monorepo to v7.25.9 ([6d9d5a3](https://github.com/LavaMoat/LavaMoat/commit/6d9d5a3336444fada49e239756ffc3c207d3ff5d))
+* **deps:** update dependency ses to v1.9.0 ([75cae74](https://github.com/LavaMoat/LavaMoat/commit/75cae74063c444184fea3370bf9925bc7946846a))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-tofu bumped from ^8.0.2 to ^8.0.3
+
 ## [16.1.0](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v16.0.1...lavamoat-core-v16.1.0) (2024-10-11)
 
 
