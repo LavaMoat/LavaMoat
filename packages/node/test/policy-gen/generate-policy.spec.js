@@ -156,3 +156,72 @@ test('generatePolicy - use policy overrides', async (t) => {
     },
   })
 })
+
+test(
+  'evasions - the Gibson',
+  testPolicyForScript,
+  `
+let pos = 10;
+while (pos-- > 0) {
+  console.log(pos)
+}
+`,
+  {
+    resources: {
+      test: {
+        globals: {
+          'console.log': true,
+        },
+      },
+    },
+  }
+)
+
+test(
+  'evasions - import in string',
+  testPolicyForScript,
+  `
+console.log("you can use await import('fs') to import ESM from CJS");
+`,
+  {
+    resources: {
+      test: {
+        globals: {
+          'console.log': true,
+        },
+      },
+    },
+  }
+)
+
+test(
+  'global writables survive through policy overrides',
+  testPolicyForScript,
+  `
+globalThis.foo = 'bar'
+console.log(globalThis.foo)
+`,
+  {
+    policyOverride: {
+      resources: {
+        test: {
+          globals: {
+            // no such global, but it should persist
+            bar: 'write',
+          },
+        },
+      },
+    },
+    expected: {
+      resources: {
+        test: {
+          globals: {
+            foo: 'write',
+            bar: 'write',
+            'console.log': true,
+          },
+        },
+      },
+    },
+  }
+)

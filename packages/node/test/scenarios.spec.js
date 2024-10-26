@@ -7,23 +7,6 @@ import { loadScenarios } from 'lavamoat-core/test/scenarios/index.js'
 import { runAndTestScenario } from 'lavamoat-core/test/util.js'
 import { createScenarioRunner } from './scenario-util.js'
 
-const GLOBAL_WRITE_REGEX = /".+?":"write"/g
-
-/**
- * If the policy file contains a writable global we have to skip it until we've
- * implemented it
- *
- * @param {any} scenario
- * @returns
- * @todo Implement & remove
- */
-function policyHasWritableGlobal(scenario) {
-  return (
-    GLOBAL_WRITE_REGEX.test(JSON.stringify(scenario.config)) ||
-    GLOBAL_WRITE_REGEX.test(JSON.stringify(scenario.configOverride))
-  )
-}
-
 const FAILING_SCENARIOS = new Set([
   'globalRef - check default containment',
   'globalRef - Webpack code in the wild works',
@@ -64,12 +47,6 @@ for await (const scenario of loadScenarios()) {
   // TODO fix
   if (scenario.name && FAILING_SCENARIOS.has(scenario.name)) {
     test.failing(`${scenario.name} - `, testScenario, scenario)
-    continue
-  }
-
-  // TODO implement writable globals
-  if (policyHasWritableGlobal(scenario)) {
-    test.todo(`${scenario.name} - has writable global`)
     continue
   }
 

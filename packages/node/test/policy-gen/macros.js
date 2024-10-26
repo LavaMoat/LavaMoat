@@ -3,11 +3,17 @@ import { isPolicy } from '../../src/policy.js'
 import { loadJSONFixture, scaffoldFixture } from '../fixture-util.js'
 
 /**
+ * @import {ValueOf, Except} from 'type-fest'
+ * @import {GeneratePolicyOptions} from '../../src/types.js'
+ * @import {TestFn, MacroDeclarationOptions, ExecutionContext} from 'ava'
+ * @import {LavaMoatPolicy, LavaMoatPolicyOverrides} from 'lavamoat-core'
+ */
+
+/**
  * Path to `DirectoryJSON` fixtures.
  *
  * @remarks
  * The trailing slash is load-bearing.
- * @internal
  */
 const JSON_FIXTURE_DIR = new URL('../fixture/json/', import.meta.url)
 
@@ -17,20 +23,30 @@ const JSON_FIXTURE_DIR = new URL('../fixture/json/', import.meta.url)
  *
  * @internal
  */
-const InlineSourceTypes = /** @type {const} */ ({
+export const InlineSourceTypes = /** @type {const} */ ({
   Module: 'module',
   Script: 'script',
 })
 
 /**
- * @typedef {import('type-fest').ValueOf<InlineSourceTypes>} InlineSourceType
+ * @typedef TestPolicyMacroOptions
+ * @property {LavaMoatPolicy} [expected]
+ * @property {LavaMoatPolicyOverrides} [policyOverride]
  */
 
 /**
- * @typedef {import('type-fest').Except<
- *   import('../../src/types.js').GeneratePolicyOptions,
- *   'readPowers'
- * >} TestPolicyForJSONOptions
+ * Available inline source type
+ *
+ * @typedef {ValueOf<typeof InlineSourceTypes>} InlineSourceType
+ * @internal
+ * @see {@link InlineSourceTypes}
+ */
+
+/**
+ * Options for {@link testPolicyForJSON}
+ *
+ * @typedef {Except<GeneratePolicyOptions, 'readPowers'>} TestPolicyForJSONOptions
+ * @internal
  */
 
 /**
@@ -39,47 +55,55 @@ const InlineSourceTypes = /** @type {const} */ ({
  *
  * @template [Ctx=unknown] Custom execution context, if any. Default is
  *   `unknown`
- * @param {import('ava').TestFn<Ctx>} test - AVA test function
+ * @param {TestFn<Ctx>} test - AVA test function
+ * @internal
  */
 export function createGeneratePolicyMacros(test) {
   /**
-   * @type {import('ava').MacroDeclarationOptions<
+   * @type {MacroDeclarationOptions<
    *   [
    *     content: string | Buffer,
-   *     opts?: {
-   *       expectedPolicy?: import('lavamoat-core').LavaMoatPolicy
+   *     opts: {
+   *       expectedPolicy?: LavaMoatPolicy | TestPolicyMacroOptions
    *       sourceType?: InlineSourceType
    *     },
    *   ],
    *   Ctx
    * >}
-   * @internal
    */
   const testInlinePolicy = {
     exec: async (
       t,
       content,
-      { expectedPolicy, sourceType = InlineSourceTypes.Module } = {}
+      { expectedPolicy = {}, sourceType = InlineSourceTypes.Module } = {}
     ) => {
       const { readPowers } = await scaffoldFixture(content, { sourceType })
+
       const actualPolicy = await generatePolicy('/entry.js', {
         readPowers,
+        policyOverride:
+          'policyOverride' in expectedPolicy
+            ? expectedPolicy.policyOverride
+            : undefined,
       })
-      if (expectedPolicy) {
+
+      if (isPolicy(expectedPolicy)) {
         t.deepEqual(actualPolicy, expectedPolicy)
+      } else if ('expected' in expectedPolicy) {
+        t.deepEqual(actualPolicy, expectedPolicy.expected)
       } else {
         t.snapshot(actualPolicy)
       }
     },
     title: (
       title,
-      content,
-      { expectedPolicy, sourceType = InlineSourceTypes.Module } = {}
+      _content,
+      { expectedPolicy = {}, sourceType = InlineSourceTypes.Module } = {}
     ) => {
       return (
-        expectedPolicy
-          ? `${title ?? 'policy for inline ' + sourceType + ' matches expected policy'}`
-          : `${title ?? 'policy for ' + sourceType + ' fixture matches snapshot'}`
+        isPolicy(expectedPolicy) || 'expected' in expectedPolicy
+          ? `${title ?? `policy for inline ${sourceType} matches expected policy`}`
+          : `${title ?? `policy for ${sourceType} fixture matches snapshot`}`
       ).trim()
     },
   }
@@ -92,9 +116,9 @@ export function createGeneratePolicyMacros(test) {
    */
   const testPolicyForInlineModule = test.macro({
     /**
-     * @param {import('ava').ExecutionContext<Ctx>} t
+     * @param {ExecutionContext<Ctx>} t
      * @param {string | Buffer} content
-     * @param {import('lavamoat-core').LavaMoatPolicy} [expectedPolicy]
+     * @param {LavaMoatPolicy | TestPolicyMacroOptions} [expectedPolicy]
      */
     exec: async (t, content, expectedPolicy) =>
       testInlinePolicy.exec(t, content, {
@@ -116,9 +140,9 @@ export function createGeneratePolicyMacros(test) {
    */
   const testPolicyForInlineScript = test.macro({
     /**
-     * @param {import('ava').ExecutionContext<Ctx>} t
+     * @param {ExecutionContext<Ctx>} t
      * @param {string | Buffer} content
-     * @param {import('lavamoat-core').LavaMoatPolicy} [expectedPolicy]
+     * @param {LavaMoatPolicy | TestPolicyMacroOptions} [expectedPolicy]
      */
     exec: async (t, content, expectedPolicy) =>
       testInlinePolicy.exec(t, content, {
@@ -140,15 +164,14 @@ export function createGeneratePolicyMacros(test) {
    */
   const testPolicyForJSON = test.macro({
     /**
-     * @param {import('ava').ExecutionContext<Ctx>} t
+     * @param {ExecutionContext<Ctx>} t
      * @param {string} fixtureFilename
-     * @param {import('lavamoat-core').LavaMoatPolicy
-     *   | TestPolicyForJSONOptions} [expectedPolicyOrOptions]
+     * @param {LavaMoatPolicy | TestPolicyForJSONOptions} [expectedPolicyOrOptions]
      * @param {TestPolicyForJSONOptions} [options]
      * @returns {Promise<void>}
      */
     exec: async (t, fixtureFilename, expectedPolicyOrOptions, options = {}) => {
-      /** @type {import('lavamoat-core').LavaMoatPolicy | undefined} */
+      /** @type {LavaMoatPolicy | undefined} */
       let expectedPolicy
       if (isPolicy(expectedPolicyOrOptions)) {
         expectedPolicy = expectedPolicyOrOptions

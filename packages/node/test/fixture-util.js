@@ -1,16 +1,62 @@
 import { memfs } from 'memfs'
 import { fromJsonSnapshot } from 'memfs/lib/snapshot/index.js'
 import { Volume } from 'memfs/lib/volume.js'
+import { execFile } from 'node:child_process'
 import fs from 'node:fs'
+import { fileURLToPath } from 'node:url'
+import { promisify } from 'node:util'
 import { makeReadPowers } from '../src/power.js'
 
 /**
  * @import {ReadNowPowers, FsInterface} from '@endo/compartment-mapper'
- * @import {DirectoryJSON} from 'memfs';
+ * @import {DirectoryJSON} from 'memfs'
+ * @import {ExecutionContext} from 'ava'
  * @import {SnapshotNode} from 'memfs/lib/snapshot/types.js'
  * @import {JsonUint8Array} from 'memfs/lib/snapshot/json.js'
+ * @import {ExecFileException} from 'node:child_process'
  */
 
+/**
+ * Possible types for the `expected` argument of the {@link testCLI} macro.
+ *
+ * Execution output will be automatically trimmed and stripped of ANSI escape
+ * codes (colors).
+ *
+ * If a `string`, it is compared to `stdout`.
+ *
+ * @template [Ctx=unknown] Default is `unknown`
+ * @typedef {string
+ *   | { code: ExitCode }
+ *   | {
+ *       stdout: string
+ *       code?: ExitCode
+ *     }
+ *   | {
+ *       stderr: string
+ *       code?: ExitCode
+ *     }
+ *   | {
+ *       stdout: string
+ *       stderr: string
+ *       code?: ExitCode
+ *     }
+ *   | ((
+ *       t: ExecutionContext<Ctx>,
+ *       result: {
+ *         stdout: string
+ *         stderr: string
+ *         code?: ExitCode
+ *       }
+ *     ) => void | Promise<void>)} ExecLavamoatNodeExpectation
+ */
+
+/**
+ * Possible exit code values, as defined by Node.js
+ *
+ * @typedef {ExecFileException['code']} ExitCode
+ */
+
+const execFileAsync = promisify(execFile)
 const { isArray } = Array
 
 /**
@@ -108,9 +154,52 @@ export async function loadJSONFixture(pathOrJson) {
   const readPowers = makeReadPowers(/** @type {FsInterface} */ (vol))
   return { vol, readPowers }
 }
+
 /**
  * Parsed JSON cache. Can be a `DirectoryJSON` or CJSON snapshot
  *
  * @type {Map<string | URL, object>}
  */
 loadJSONFixture.cache = new Map()
+
+/**
+ * Run the `@lavamoat/node` CLI with the provided arguments
+ *
+ * @param {string[]} args CLI arguments
+ * @returns {Promise<{ stdout: string; stderr: string; code: ExitCode }>}
+ */
+export const runCli = async (args) => {
+  await Promise.resolve()
+
+  /** @type {string} */
+  let stdout
+  /** @type {string} */
+  let stderr
+  /** @type {ExecFileException['code']} */
+  let code
+
+  try {
+    ;({ stdout, stderr } = await execFileAsync(
+      process.execPath,
+      [CLI_PATH, ...args],
+      { encoding: 'utf8' }
+    ))
+  } catch (err) {
+    ;({ stdout, stderr, code } =
+      /**
+       * @type {ExecFileException & {
+       *   stdout: string
+       *   stderr: string
+       * }}
+       */
+
+      (err))
+  }
+  return { stdout, stderr, code }
+}
+
+/**
+ * Path to the CLI entry point
+ */
+
+export const CLI_PATH = fileURLToPath(new URL('../src/cli.js', import.meta.url))
