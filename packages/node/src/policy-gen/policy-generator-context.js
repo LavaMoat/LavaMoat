@@ -161,9 +161,7 @@ export class PolicyGeneratorContext {
    * with trailing slashes
    *
    * @param {string} specifier
-   * @returns {string}
-   * @throws If no module descriptor exists for the specifier within the
-   *   compartment's `ModuleDescriptor` map
+   * @returns {string | undefined}
    */
   getFilepath(specifier) {
     specifier = specifier.replace(/\/$/, '')
@@ -176,8 +174,8 @@ export class PolicyGeneratorContext {
       )
     }
 
-    throw new ReferenceError(
-      `Cannot find file for specifier "${specifier}" in compartment "${this.compartment.name}"`
+    console.warn(
+      `Unable to find module descriptor for specifier "${specifier}"; hope you didn't need it for anything!`
     )
   }
 
@@ -196,7 +194,12 @@ export class PolicyGeneratorContext {
   buildImportMap(imports = []) {
     return fromEntries(
       imports
-        .filter((specifier) => !specifier.startsWith('.'))
+        .filter(
+          (specifier) =>
+            !specifier.startsWith('.') &&
+            (this.isBuiltin(specifier) ||
+              (!this.isBuiltin(specifier) && this.getFilepath(specifier)))
+        )
         .map((specifier) => {
           if (this.isBuiltin(specifier)) {
             return [specifier, specifier]
@@ -261,10 +264,8 @@ export class PolicyGeneratorContext {
     { parser, record, sourceLocation, bytes }
   ) {
     if (!sourceLocation) {
-      // XXX: why would we not have a sourceLocation?
-      throw new TypeError(
-        `Source descriptor "${specifier}" missing "sourceLocation" prop in compartment "${this.compartment.name}"`
-      )
+      // XXX: under what circumstances does this occur?
+      return []
     }
 
     if (!record) {
