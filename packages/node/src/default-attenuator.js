@@ -49,7 +49,7 @@ export const attenuateModule = (params, originalObject) => {
 
 /**
  * @param {object} options
- * @param {LavaMoatPolicy} [options.policy]
+ * @param {Partial<LavaMoatPolicy>} [options.policy]
  * @returns {GlobalAttenuatorFn<GlobalAttenuatorParams>}
  * @internal
  */
