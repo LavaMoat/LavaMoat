@@ -43,7 +43,7 @@
     "through2": "4.0.2"
   },
   "devDependencies": {
-    "@babel/code-frame": "7.25.9",
+    "@babel/code-frame": "7.26.0",
     "browserify": "17.0.1",
     "keccak": "3.0.4",
     "source-map-explorer": "2.5.3",
