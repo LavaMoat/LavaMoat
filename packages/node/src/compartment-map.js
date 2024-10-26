@@ -1,6 +1,6 @@
-import { importLocation } from '@endo/compartment-mapper'
 import { captureFromMap } from '@endo/compartment-mapper/capture-lite.js'
 import { defaultParserForLanguage } from '@endo/compartment-mapper/import-parsers.js'
+import { importLocation } from '@endo/compartment-mapper/import.js'
 import { mapNodeModules } from '@endo/compartment-mapper/node-modules.js'
 import {
   DEFAULT_ATTENUATOR,
@@ -39,8 +39,9 @@ const ENDO_OPTIONS = freeze(
       /**
        * @remarks
        * The parsers from `@endo/compartment-mapper/import-parsers.js` do not
-       * precompile JS; this is necessary for `lavamoat-core` to parse sources
-       * correctly when generating a policy.
+       * precompile JS. This is intentional; if `@endo/compartment-mapper`
+       * compiles the sources, we will fail to generate a LavaMoat policy
+       * correctly. We must use the original sources (or distfiles).
        */
       ...defaultParserForLanguage,
       [NATIVE_PARSER_NAME]: parseNative,
@@ -70,6 +71,8 @@ export const loadCompartmentMap = async (
     dev: true,
   })
 
+  // we use this to inject missing imports from policy overrides into the module descriptor.
+  // TODO: Endo should allow us to hook into `importHook` directly instead
   const GreedyCompartment = makeGreedyCompartment(
     nodeCompartmentMap,
     policyOverride
@@ -83,12 +86,6 @@ export const loadCompartmentMap = async (
     ...captureOpts,
     ...ENDO_OPTIONS,
     Compartment: GreedyCompartment,
-    modules: {
-      [DEFAULT_ATTENUATOR]: {
-        attenuateGlobals: makeGlobalsAttenuator(),
-        attenuateModule,
-      },
-    },
   })
 
   /**
