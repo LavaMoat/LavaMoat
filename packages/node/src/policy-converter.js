@@ -263,6 +263,8 @@ export const toEndoPolicy = async (policyOrPolicyPath, options) => {
 
   const lavaMoatPolicy = mergePolicy(policy, policyOverride)
 
+  const lavamoatResources = lavaMoatPolicy.resources ?? create(null)
+
   /**
    * Actual conversion starts here.
    *
@@ -272,12 +274,10 @@ export const toEndoPolicy = async (policyOrPolicyPath, options) => {
    * @type {LavaMoatEndoPolicy['resources']}
    */
   const resources = fromEntries(
-    entries(lavaMoatPolicy.resources ?? create(null)).map(
-      ([resourceName, resourcePolicy]) => [
-        resourceName,
-        convertEndoPackagePolicy(resourcePolicy),
-      ]
-    )
+    entries(lavamoatResources).map(([resourceName, resourcePolicy]) => [
+      resourceName,
+      convertEndoPackagePolicy(resourcePolicy),
+    ])
   )
 
   /** @type {LavaMoatEndoPolicy} */
