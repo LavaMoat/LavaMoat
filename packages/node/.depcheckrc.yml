@@ -9,3 +9,4 @@ ignores:
   # types
   - '@types/capture-console'
   - 'type-fest'
+  - '@types/json-stable-stringify'
