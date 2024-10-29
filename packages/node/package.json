@@ -15,7 +15,7 @@
   "author": "LavaMoat Project",
   "license": "MIT",
   "engines": {
-    "node": "^18.0.0 || ^20.0.0 <20.16.1 || ^22.5.1",
+    "node": "^16.20.0 || ^18.0.0 || ^20.0.0 || ^22.0.0",
     "npm": ">=9.0.0"
   },
   "bin": {
@@ -23,12 +23,8 @@
   },
   "exports": {
     ".": {
-      "types": "./types/index.d.ts",
+      "types": "./types/src/index.d.ts",
       "import": "./src/index.js"
-    },
-    "./attenuator": {
-      "types": "./types/default-attenuator.d.ts",
-      "import": "./src/default-attenuator.js"
     },
     "./package.json": "./package.json"
   },
