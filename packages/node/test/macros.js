@@ -9,10 +9,11 @@
 /**
  * @import {TestFn, MacroDeclarationOptions} from 'ava'
  * @import {LavaMoatPolicy} from 'lavamoat-core'
- * @import {ExecLavamoatNodeExpectation} from './fixture-util.js'
+ * @import {ExecLavamoatNodeExpectation} from './types.js'
  */
 
 import { run } from '../src/run.js'
+import { isString } from '../src/util.js'
 import { CLI_PATH, runCli } from './fixture-util.js'
 
 /**
@@ -25,6 +26,13 @@ const ANSI_REGEX = new RegExp(
   '[\\u001B\\u009B][[\\]()#;?]*(?:(?:(?:(?:;[-a-zA-Z\\d\\/#&.:=?%@~_]+)*|[a-zA-Z\\d]+(?:;[-a-zA-Z\\d\\/#&.:=?%@~_]*)*)?\\u0007)|(?:(?:\\d{1,4}(?:;\\d{0,4})*)?[\\dA-PR-TZcf-nq-uy=><~]))',
   'g'
 )
+
+const { values } = Object
+
+/**
+ * Unique index for generic test titles (to avoid test title collisions)
+ */
+let genericTitleIndex = 0
 
 /**
  * Given an AVA test function, returns a set of macros for testing program
@@ -49,7 +57,8 @@ export function createMacros(test) {
       const result = await run(entryFile, policy)
       t.deepEqual({ .../** @type {any} */ (result) }, expected)
     },
-    title: (title) => `execution - ${title ?? 'output matches expected'}`,
+    title: (title) =>
+      title ?? `program output matches expected (${genericTitleIndex++}`,
   }
 
   /**
@@ -64,11 +73,14 @@ export function createMacros(test) {
    * >}
    */
   const testCLI = {
-    title: (title) => `cli - ${title ?? 'output matches expected'}`,
+    title: (title) =>
+      title ?? `program output matches expected (${genericTitleIndex++}`,
     exec: async (t, args, expected) => {
-      await Promise.resolve()
-
-      t.log(`executing: ${process.execPath} ${CLI_PATH} ${args.join(' ')}`)
+      /**
+       * For display purposes
+       */
+      const command = `${process.execPath} ${CLI_PATH} ${args.join(' ')}`
+      t.log(`executing: ${command}`)
 
       const { stdout, stderr, code } = await runCli(args)
 
@@ -77,38 +89,91 @@ export function createMacros(test) {
 
       switch (typeof expected) {
         case 'string':
-          t.is(trimmedStdout, expected, 'stdout does not match expected value')
+          t.plan(1)
+          t.is(
+            trimmedStdout,
+            expected,
+            `STDOUT of command "${command}" does not match expected value`
+          )
           break
         case 'function':
+          // the caller provided a function to perform custom assertions
           await expected(t, {
             stdout: trimmedStdout,
             stderr: trimmedStderr,
             code,
           })
           break
-        case 'object':
-          if ('stdout' in expected) {
-            t.is(
+        case 'object': {
+          // the caller provided an object with expected values for optionally each prop of the output of `runCli`
+
+          /**
+           * We're doing all this extra work here because we have a variable
+           * number of assertions to make. AVA recommends using {@link t.plan} in
+           * this case. We need to determine what we're going to do _up front_,
+           * call `t.plan()`, then make the assertion(s).
+           *
+           * The props of this type correspond to props in the object fulfilled
+           * by the {@link runCli} function. The values are a tuple of parameters
+           * for {@link t.is}.
+           *
+           * @remarks
+           * This would likely be better expressed with a generic type, but this
+           * type is _local_ to this function--and I don't want it escaping.
+           * @type {{
+           *   stdout?: [actual: string, expected: string, message: string]
+           *   stderr?: [actual: string, expected: string, message: string]
+           *   code?: [
+           *     actual: string | number | null | undefined,
+           *     expected: string | number | null | undefined,
+           *     message: string,
+           *   ]
+           * }}
+           */
+          const assertionPlans = {}
+
+          if ('stdout' in expected && isString(expected.stdout)) {
+            assertionPlans.stdout = [
               trimmedStdout,
               expected.stdout,
-              'stdout does not match expected value'
-            )
+              `STDOUT of command "${command}" does not match expected value`,
+            ]
           }
-          if ('stderr' in expected) {
-            t.is(
+          if ('stderr' in expected && isString(expected.stderr)) {
+            assertionPlans.stderr = [
               trimmedStderr,
               expected.stderr,
-              'stderr does not match expected value'
-            )
+              `STDERR of command "${command}" does not match expected value`,
+            ]
           }
           if ('code' in expected) {
-            t.is(code, expected.code, 'exit code does not match expected value')
+            assertionPlans.code = [
+              code,
+              expected.code,
+              `exit code of command "${command}" does not match expected value`,
+            ]
           }
+
+          const assertionArgs = values(assertionPlans)
+
+          // This is what we were trying to get
+          const plan = assertionArgs.filter(Boolean).length
+          t.plan(plan)
+
+          // note: typescript will complain if you attempt to spread over a
+          // union type (even if it's a union of tuples)--which is what
+          // `assertionArgs` is.
+          for (const [actual, expected, message] of assertionArgs) {
+            t.is(actual, expected, message)
+          }
+
           break
+        }
         default:
+          t.plan(1)
           t.snapshot(
             { trimmedStderr, trimmedStdout, code },
-            'execution output does not match expected snapshot'
+            `output of command "${command}" does not match expected snapshot`
           )
       }
     },

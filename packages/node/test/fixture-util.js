@@ -6,58 +6,21 @@ import fs from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { promisify } from 'node:util'
 import { makeReadPowers } from '../src/power.js'
+import { isString } from '../src/util.js'
 
 /**
  * @import {ReadNowPowers, FsInterface} from '@endo/compartment-mapper'
  * @import {DirectoryJSON} from 'memfs'
- * @import {ExecutionContext} from 'ava'
  * @import {SnapshotNode} from 'memfs/lib/snapshot/types.js'
  * @import {JsonUint8Array} from 'memfs/lib/snapshot/json.js'
  * @import {ExecFileException} from 'node:child_process'
- */
-
-/**
- * Possible types for the `expected` argument of the {@link testCLI} macro.
- *
- * Execution output will be automatically trimmed and stripped of ANSI escape
- * codes (colors).
- *
- * If a `string`, it is compared to `stdout`.
- *
- * @template [Ctx=unknown] Default is `unknown`
- * @typedef {string
- *   | { code: ExitCode }
- *   | {
- *       stdout: string
- *       code?: ExitCode
- *     }
- *   | {
- *       stderr: string
- *       code?: ExitCode
- *     }
- *   | {
- *       stdout: string
- *       stderr: string
- *       code?: ExitCode
- *     }
- *   | ((
- *       t: ExecutionContext<Ctx>,
- *       result: {
- *         stdout: string
- *         stderr: string
- *         code?: ExitCode
- *       }
- *     ) => void | Promise<void>)} ExecLavamoatNodeExpectation
- */
-
-/**
- * Possible exit code values, as defined by Node.js
- *
- * @typedef {ExecFileException['code']} ExitCode
+ * @import {CompactJSON, RunCliOutput} from './types.js'
  */
 
 const execFileAsync = promisify(execFile)
 const { isArray } = Array
+
+const encoder = new TextEncoder()
 
 /**
  * Populates a fixture with `content` as the file content of the entry point of
@@ -88,50 +51,55 @@ export async function scaffoldFixture(content, { sourceType = 'module' } = {}) {
 }
 
 /**
- * Creats a `Volume` from a "Compact JSON" snapshot.
+ * Creates a `Volume` from a "Compact JSON" snapshot.
  *
- * Note: We don't have an actual type for "Compact JSON", _but_ I can tell you
- * that it's an array and it's valid JSON.
- *
- * @param {import('type-fest').JsonArray} snapshotJson - "Compact JSON" snapshot
+ * @param {CompactJSON | JsonUint8Array<SnapshotNode>} snapshotJson - "Compact
+ *   JSON" snapshot
  * @returns {Promise<Volume>} New `Volume`
  */
 async function createVolFromSnapshot(snapshotJson) {
   const { vol } = memfs()
 
-  const uint8 = /**
-   * @type {JsonUint8Array<SnapshotNode>}
-   */ (new TextEncoder().encode(JSON.stringify(snapshotJson)))
-  await fromJsonSnapshot(uint8, { fs: vol.promises, path: '/' })
+  // XXX: something makes me think I'm doing something wrong here, because
+  // shouldn't I just be able to create a snapshot from the JSON itself--instead
+  // of a `Uint8Array`?
+  const buf = /** @type {JsonUint8Array<SnapshotNode>} */ (
+    snapshotJson instanceof Uint8Array
+      ? snapshotJson
+      : encoder.encode(JSON.stringify(snapshotJson))
+  )
+
+  await fromJsonSnapshot(buf, { fs: vol.promises, path: '/' })
   return vol
 }
 
 /**
- * Loads a fixture JSON file or `DirectoryJSON` object (_not_ a "Compact JSON"
- * object) and resolves w/ a `Volume` and `ReadFn`.
+ * Loads a fixture JSON file or `DirectoryJSON` object or a "Compact JSON" value
+ * and resolves w/ a `Volume` and `ReadFn`.
  *
- * The fixture JSON should be a `DirectoryJSON` object or a "Compact JSON"
- * object.
+ * If a "Compact JSON" value, it can be raw JSON or an encoded buffer thereof.
  *
  * Caches any JSON loaded from disk.
  *
- * @param {string | URL | DirectoryJSON} pathOrJson - Path to fixture JSON or
- *   directory object
+ * @param {string
+ *   | URL
+ *   | DirectoryJSON
+ *   | CompactJSON
+ *   | JsonUint8Array<SnapshotNode>} pathOrJson
+ *   Path to fixture JSON or directory object
  * @returns {Promise<{
  *   vol: Volume
  *   readPowers: ReadNowPowers
  * }>}
- * @see {@link https://jsonjoy.com/specs/compact-json}
  * @todo Standardize entry point filename and return the entry point path.
  */
 export async function loadJSONFixture(pathOrJson) {
   /** @type {Volume} */
   let vol
   await Promise.resolve()
-  if (typeof pathOrJson === 'string' || pathOrJson instanceof URL) {
+  if (isString(pathOrJson) || pathOrJson instanceof URL) {
     if (loadJSONFixture.cache.has(pathOrJson)) {
       const json = loadJSONFixture.cache.get(pathOrJson)
-      // TODO: type guard maybe
       vol = isArray(json)
         ? await createVolFromSnapshot(json)
         : Volume.fromJSON(/** @type {DirectoryJSON} */ (json))
@@ -148,7 +116,7 @@ export async function loadJSONFixture(pathOrJson) {
     const json = pathOrJson
     vol = isArray(json)
       ? await createVolFromSnapshot(json)
-      : Volume.fromJSON(json)
+      : Volume.fromJSON(/** @type {DirectoryJSON} */ (json))
   }
 
   const readPowers = makeReadPowers(/** @type {FsInterface} */ (vol))
@@ -166,7 +134,7 @@ loadJSONFixture.cache = new Map()
  * Run the `@lavamoat/node` CLI with the provided arguments
  *
  * @param {string[]} args CLI arguments
- * @returns {Promise<{ stdout: string; stderr: string; code: ExitCode }>}
+ * @returns {Promise<RunCliOutput>}
  */
 export const runCli = async (args) => {
   await Promise.resolve()
@@ -187,12 +155,15 @@ export const runCli = async (args) => {
   } catch (err) {
     ;({ stdout, stderr, code } =
       /**
+       * You'd think this type would be somewhere in `@types/node`, but it's
+       * not. Why? There's no place in `Promise<T>` to define the rejection
+       * type.
+       *
        * @type {ExecFileException & {
        *   stdout: string
        *   stderr: string
        * }}
        */
-
       (err))
   }
   return { stdout, stderr, code }
