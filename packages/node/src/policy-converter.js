@@ -34,8 +34,8 @@ import {
   readPolicy,
   readPolicyOverride,
 } from './policy.js'
+import { hasValue, isArray, isBoolean, isString } from './util.js'
 
-const { isArray } = Array
 const { create, entries, fromEntries } = Object
 
 /**
@@ -88,7 +88,7 @@ const convertEndoPackagePolicyBuiltins = (item) => {
       let [builtinName, ...rest] = key.split('.')
       let propName = rest.join('.')
       const itemForBuiltin = policyItem[builtinName]
-      if (typeof itemForBuiltin === 'boolean') {
+      if (isBoolean(itemForBuiltin)) {
         throw new TypeError(
           'Expected a FullAttenuationDefinition; got a boolean'
         )
@@ -238,10 +238,7 @@ export const toEndoPolicy = async (policyOrPolicyPath, options) => {
 
   /** @type {LavaMoatPolicy} */
   let policy
-  if (
-    typeof policyOrPolicyPath === 'string' ||
-    policyOrPolicyPath instanceof URL
-  ) {
+  if (isString(policyOrPolicyPath) || policyOrPolicyPath instanceof URL) {
     const policyPath = policyOrPolicyPath
     allegedPolicy = await readPolicy(policyPath)
   } else {
@@ -255,9 +252,9 @@ export const toEndoPolicy = async (policyOrPolicyPath, options) => {
 
   /** @type {LavaMoatPolicyOverrides | undefined} */
   let policyOverride
-  if ('policyOverridePath' in options) {
+  if (hasValue(options, 'policyOverridePath')) {
     policyOverride = await getPolicyOverride(options.policyOverridePath)
-  } else if ('policyOverride' in options) {
+  } else if (hasValue(options, 'policyOverride')) {
     policyOverride = options.policyOverride
   }
 
