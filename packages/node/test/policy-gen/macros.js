@@ -3,8 +3,8 @@ import { isPolicy } from '../../src/policy.js'
 import { loadJSONFixture, scaffoldFixture } from '../fixture-util.js'
 
 /**
- * @import {ValueOf, Except} from 'type-fest'
- * @import {GeneratePolicyOptions} from '../../src/types.js'
+ * @import {ValueOf} from 'type-fest'
+ * @import {TestPolicyMacroOptions, TestPolicyForJSONOptions} from './types.js'
  * @import {TestFn, MacroDeclarationOptions, ExecutionContext} from 'ava'
  * @import {LavaMoatPolicy, LavaMoatPolicyOverrides} from 'lavamoat-core'
  */
@@ -29,30 +29,23 @@ export const InlineSourceTypes = /** @type {const} */ ({
 })
 
 /**
- * @typedef TestPolicyMacroOptions
- * @property {LavaMoatPolicy} [expected]
- * @property {LavaMoatPolicyOverrides} [policyOverride]
- */
-
-/**
  * Available inline source type
  *
+ * @remarks
+ * This typedef should stay here instead of in `types.ts` otherwise it would
+ * create a cycle.
  * @typedef {ValueOf<typeof InlineSourceTypes>} InlineSourceType
  * @internal
  * @see {@link InlineSourceTypes}
  */
 
 /**
- * Options for {@link testPolicyForJSON}
- *
- * @typedef {Except<GeneratePolicyOptions, 'readPowers'>} TestPolicyForJSONOptions
- * @internal
- */
-
-/**
  * Given an AVA test function, returns a set of macros for testing policy
- * generation in various contexts
+ * generation using various types of fixtures.
  *
+ * @remarks
+ * People seem to dig being able to define sources inline, so here are some
+ * macros to do it.
  * @template [Ctx=unknown] Custom execution context, if any. Default is
  *   `unknown`
  * @param {TestFn<Ctx>} test - AVA test function
@@ -60,6 +53,10 @@ export const InlineSourceTypes = /** @type {const} */ ({
  */
 export function createGeneratePolicyMacros(test) {
   /**
+   * Generic macro definition for testing policy generation.
+   *
+   * This is _not_ a macro; it's just the {@link MacroDeclarationOptions} object.
+   *
    * @type {MacroDeclarationOptions<
    *   [
    *     content: string | Buffer,
@@ -99,17 +96,15 @@ export function createGeneratePolicyMacros(test) {
       title,
       _content,
       { expectedPolicy = {}, sourceType = InlineSourceTypes.Module } = {}
-    ) => {
-      return (
-        isPolicy(expectedPolicy) || 'expected' in expectedPolicy
-          ? `${title ?? `policy for inline ${sourceType} matches expected policy`}`
-          : `${title ?? `policy for ${sourceType} fixture matches snapshot`}`
-      ).trim()
-    },
+    ) =>
+      (isPolicy(expectedPolicy) || 'expected' in expectedPolicy
+        ? `${title ?? `policy for inline ${sourceType} matches expected policy`}`
+        : `${title ?? `policy for ${sourceType} fixture matches snapshot`}`
+      ).trim(),
   }
 
   /**
-   * Test policy generation for ESM module content provided inline.
+   * Macro to test policy generation for inline ESM module content
    *
    * If `expectedPolicy` is provided, the actual policy is compared to it;
    * otherwise a snapshot is taken.
@@ -133,7 +128,7 @@ export function createGeneratePolicyMacros(test) {
   })
 
   /**
-   * Test policy generation for ESM module content
+   * Macro to test policy generation for inline CJS module content
    *
    * If `expectedPolicy` is provided, the actual policy is compared to it;
    * otherwise a snapshot is taken.
@@ -157,7 +152,7 @@ export function createGeneratePolicyMacros(test) {
   })
 
   /**
-   * Test policy generation for a given DirectoryJSON fixture
+   * Macro to test policy generation for a given {@link DirectoryJSON}- fixture
    *
    * If `expectedPolicy` is provided, the actual policy is compared to it;
    * otherwise a snapshot is taken.
