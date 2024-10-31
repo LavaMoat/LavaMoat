@@ -12,6 +12,7 @@ import {
   NATIVE_PARSER_NAME,
 } from '../constants.js'
 import { defaultReadPowers } from '../power.js'
+import { isString } from '../util.js'
 import { getPackageName, isCompleteModuleDescriptor } from './util.js'
 
 /**
@@ -140,7 +141,7 @@ export class PolicyGeneratorContext {
    * @todo There may be a safer way to do this conversion
    */
   toPath(descriptorOrLocation) {
-    if (typeof descriptorOrLocation === 'string') {
+    if (isString(descriptorOrLocation)) {
       return this.#readPowers.fileURLToPath(new URL(descriptorOrLocation))
     }
     const location = this.renames[descriptorOrLocation.compartment]
