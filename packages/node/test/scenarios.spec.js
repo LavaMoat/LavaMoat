@@ -7,11 +7,6 @@ import { loadScenarios } from 'lavamoat-core/test/scenarios/index.js'
 import { runAndTestScenario } from 'lavamoat-core/test/util.js'
 import { createScenarioRunner } from './scenario-util.js'
 
-const FAILING_SCENARIOS = new Set([
-  'globalRef - check default containment',
-  'globalRef - Webpack code in the wild works',
-])
-
 /**
  * Macro to test a scenario
  */
@@ -41,12 +36,6 @@ for await (const scenario of loadScenarios()) {
       testScenario,
       scenario
     )
-    continue
-  }
-
-  // TODO fix
-  if (scenario.name && FAILING_SCENARIOS.has(scenario.name)) {
-    test.failing(`${scenario.name} - `, testScenario, scenario)
     continue
   }
 
