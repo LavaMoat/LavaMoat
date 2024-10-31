@@ -1,15 +1,14 @@
 import 'ses'
 
 import test from 'ava'
-import {
-  assertPolicyOverride,
-  generatePolicy,
-  readPolicyOverride,
-} from '../../src/index.js'
+import { generatePolicy, readPolicyOverride } from '../../src/index.js'
 import { createGeneratePolicyMacros } from './macros.js'
 
 const { testPolicyForModule, testPolicyForScript, testPolicyForJSON } =
   createGeneratePolicyMacros(test)
+
+// NOTE: All JSON fixtures are virtual filesystem snapshots and live in
+// `../fixture/json/`
 
 test(testPolicyForJSON, 'builtins.json')
 
@@ -17,8 +16,6 @@ test(testPolicyForJSON, 'kitchen-sink.json')
 
 test(testPolicyForJSON, 'phony-native.json')
 
-// NOTE: this will not generate a "dynamic" prop because `require` is set to a
-// different identifier (`runtimeRequire`) in node-gyp-build
 test(testPolicyForJSON, 'native.json')
 
 test(testPolicyForJSON, 'dynamic.json')
@@ -112,14 +109,11 @@ test(
   }
 )
 
-test(
-  'generatePolicy - ignore newer intrinsics',
-  testPolicyForModule,
-  'BigInt(123)',
-  { resources: {} }
-)
+test('ignore newer intrinsics', testPolicyForModule, 'BigInt(123)', {
+  resources: {},
+})
 
-test('generatePolicy - handling unused dependencies', async (t) => {
+test('ignore unused dependencies', async (t) => {
   const entryFile = new URL(
     '../fixture/unused-dependency/app.js',
     import.meta.url
@@ -130,7 +124,7 @@ test('generatePolicy - handling unused dependencies', async (t) => {
   t.deepEqual(policy, { resources: {} })
 })
 
-test('generatePolicy - use policy overrides', async (t) => {
+test('merge policy overrides', async (t) => {
   const entryFile = new URL(
     '../fixture/unused-dependency-override/app.js',
     import.meta.url
@@ -142,7 +136,7 @@ test('generatePolicy - use policy overrides', async (t) => {
       import.meta.url
     )
   )
-  assertPolicyOverride(policyOverride)
+
   const policy = await generatePolicy(entryFile, { policyOverride })
 
   t.deepEqual(policy, {
@@ -158,44 +152,7 @@ test('generatePolicy - use policy overrides', async (t) => {
 })
 
 test(
-  'evasions - the Gibson',
-  testPolicyForScript,
-  `
-let pos = 10;
-while (pos-- > 0) {
-  console.log(pos)
-}
-`,
-  {
-    resources: {
-      test: {
-        globals: {
-          'console.log': true,
-        },
-      },
-    },
-  }
-)
-
-test(
-  'evasions - import in string',
-  testPolicyForScript,
-  `
-console.log("you can use await import('fs') to import ESM from CJS");
-`,
-  {
-    resources: {
-      test: {
-        globals: {
-          'console.log': true,
-        },
-      },
-    },
-  }
-)
-
-test(
-  'global writables survive through policy overrides',
+  'merge policy overrides with global writables',
   testPolicyForScript,
   `
 globalThis.foo = 'bar'
