@@ -4,23 +4,19 @@
  * @packageDocumentation
  */
 
-/**
- * @privateRemarks
- * We cannot pull `endowmentsToolkit` from `lavamoat-core`, because it will blow
- * up our own policy generation; see `../scripts/update-own-policy.js`.
- *
- * We use a {@link endowmentsToolkit type assertion} instead to get our type
- * information.
- */
-// @ts-expect-error - types not exported from here
-import endowmentsToolkit_ from 'lavamoat-core/src/endowmentsToolkit.js'
+import { endowmentsToolkit } from 'lavamoat-core'
 import {
   ENDO_POLICY_ITEM_ROOT,
   LAVAMOAT_POLICY_ITEM_WRITE,
 } from './constants.js'
+import { isObject } from './util.js'
 
-/** @type {typeof import('lavamoat-core').endowmentsToolkit} */
-const endowmentsToolkit = endowmentsToolkit_
+/**
+ * @import {GlobalAttenuatorFn, ModuleAttenuatorFn} from '@endo/compartment-mapper'
+ * @import {GlobalAttenuatorParams} from './types.js'
+ * @import {LavaMoatPolicy} from 'lavamoat-core'
+ */
+
 const {
   values,
   entries,
@@ -30,24 +26,23 @@ const {
 } = Object
 
 /**
- * @import {GlobalAttenuatorFn, ModuleAttenuatorFn} from '@endo/compartment-mapper'
- * @import {GlobalAttenuatorParams} from './types.js'
- * @import {LavaMoatPolicy} from 'lavamoat-core'
- */
-
-/**
  * Picks stuff in the policy out of the original object
  *
  * @type {ModuleAttenuatorFn<
  *   [string, ...string[]],
  *   Record<string, unknown>
  * >}
+ * @internal
  */
 export const attenuateModule = (params, originalObject) => {
   return fromEntries(params.map((key) => [key, originalObject[key]]))
 }
 
 /**
+ * Creates a global attenuator
+ *
+ * **REMEMBER: The attenuator is _not applied_ to packages without policy!**
+ *
  * @param {object} options
  * @param {Partial<LavaMoatPolicy>} [options.policy]
  * @returns {GlobalAttenuatorFn<GlobalAttenuatorParams>}
@@ -59,15 +54,18 @@ export const makeGlobalsAttenuator = (
   /** @type {Set<string>} */
   const knownWritableFields = new Set()
 
-  values(lavaMoatPolicy?.resources ?? {}).forEach((resource) => {
-    if (resource.globals && typeof resource.globals === 'object') {
-      entries(resource.globals).forEach(([key, value]) => {
-        if (value === LAVAMOAT_POLICY_ITEM_WRITE) {
-          knownWritableFields.add(key)
+  // gather writable fields from policy. this is needed by `endowmentsToolkit`
+  if (lavaMoatPolicy?.resources) {
+    for (const resource of values(lavaMoatPolicy.resources)) {
+      if (isObject(resource.globals)) {
+        for (const [key, value] of entries(resource.globals)) {
+          if (value === LAVAMOAT_POLICY_ITEM_WRITE) {
+            knownWritableFields.add(key)
+          }
         }
-      })
+      }
     }
-  })
+  }
 
   const { getEndowmentsForConfig, copyWrappedGlobals } = endowmentsToolkit({
     handleGlobalWrite: knownWritableFields.size > 0,
@@ -97,6 +95,8 @@ export const makeGlobalsAttenuator = (
         'global',
       ])
     } else {
+      const OldFunction = packageCompartmentGlobalThis.Function
+
       const endowments = getEndowmentsForConfig(
         rootCompartmentGlobalThis,
         /**
@@ -124,7 +124,23 @@ export const makeGlobalsAttenuator = (
         packageCompartmentGlobalThis,
         getOwnPropertyDescriptors(endowments)
       )
+
+      // `this` in the context of source code provided to the `new
+      // Function(src)` constructor, when executed, should reference the package
+      // compartment's `globalThis`.
+      /** @param {string} src */
+      packageCompartmentGlobalThis.Function = function (src) {
+        // prettier-ignore
+        return (new OldFunction(src)).bind(packageCompartmentGlobalThis)
+      }
     }
   }
 }
+
+/**
+ * Default global attenuator.
+ *
+ * @type {GlobalAttenuatorFn<GlobalAttenuatorParams>}
+ * @internal
+ */
 export const attenuateGlobals = makeGlobalsAttenuator()
