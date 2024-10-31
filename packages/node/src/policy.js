@@ -7,9 +7,8 @@
  */
 
 import { mergePolicy } from 'lavamoat-core'
-import { fileURLToPath } from 'node:url'
 import * as constants from './constants.js'
-import { readJsonFile } from './util.js'
+import { hasValue, isArray, isObject, readJsonFile } from './util.js'
 
 /**
  * @import {LavaMoatPolicy, LavaMoatPolicyOverrides} from 'lavamoat-core'
@@ -19,20 +18,20 @@ import { readJsonFile } from './util.js'
  * Reads a `policy.json` from disk
  *
  * @param {string | URL} [filepath]
- * @returns {Promise<unknown>}
+ * @returns {Promise<LavaMoatPolicy>}
  * @internal
  */
 export const readPolicy = async (filepath = constants.DEFAULT_POLICY_PATH) => {
-  return readJsonFile(
-    filepath instanceof URL ? fileURLToPath(filepath) : filepath
-  )
+  const allegedPolicy = await readJsonFile(filepath)
+  assertPolicy(allegedPolicy)
+  return allegedPolicy
 }
 
 /**
  * Reads a `policy-override.json` from disk, if any.
  *
  * @param {string | URL} [filepath]
- * @returns {Promise<unknown | undefined>}
+ * @returns {Promise<LavaMoatPolicyOverrides | undefined>}
  * @throws If reading the policy fails in a way other than the file not existing
  */
 export const readPolicyOverride = async (
@@ -40,7 +39,9 @@ export const readPolicyOverride = async (
 ) => {
   try {
     // eslint-disable-next-line @jessie.js/safe-await-separator
-    return await readPolicy(filepath)
+    const allegedPolicy = await readJsonFile(filepath)
+    assertPolicyOverride(allegedPolicy)
+    return allegedPolicy
   } catch (err) {
     if (/** @type {NodeJS.ErrnoException} */ (err).code !== 'ENOENT') {
       throw err
@@ -79,7 +80,7 @@ export const loadPolicies = async (
    * ]}
    */
   const promises = /** @type {any} */ ([])
-  if (typeof policy === 'object') {
+  if (isObject(policy)) {
     promises.push(
       Promise.resolve().then(() => {
         assertPolicy(policy)
@@ -87,14 +88,9 @@ export const loadPolicies = async (
       })
     )
   } else {
-    promises.push(
-      readPolicy(policy).then((allegedPolicy) => {
-        assertPolicy(allegedPolicy)
-        return allegedPolicy
-      })
-    )
+    promises.push(readPolicy(policy))
   }
-  if (typeof policyOverride === 'object') {
+  if (isObject(policyOverride)) {
     promises.push(
       Promise.resolve().then(() => {
         assertPolicyOverride(policyOverride)
@@ -102,16 +98,14 @@ export const loadPolicies = async (
       })
     )
   } else {
-    promises.push(
-      readPolicyOverride(policyOverride).then((allegedPolicyOverride) => {
-        if (allegedPolicyOverride) {
-          assertPolicyOverride(allegedPolicyOverride)
-          return allegedPolicyOverride
-        }
-      })
-    )
+    promises.push(readPolicyOverride(policyOverride))
   }
 
+  /**
+   * This type is only here for documentation purposes and is not needed
+   *
+   * @type {[LavaMoatPolicy, LavaMoatPolicyOverrides | undefined]}
+   */
   const policies = await Promise.all(promises)
 
   return mergePolicy(...policies)
@@ -128,12 +122,10 @@ export const loadPolicies = async (
  * @public
  */
 export const isPolicy = (value) => {
-  return !!(
-    value &&
-    typeof value === 'object' &&
-    !Array.isArray(value) &&
-    (('resources' in value && value.resources) ||
-      ('resolutions' in value && value.resolutions))
+  return (
+    isObject(value) &&
+    !isArray(value) &&
+    (hasValue(value, 'resources') || hasValue(value, 'resolutions'))
   )
 }
 
