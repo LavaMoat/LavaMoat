@@ -5,6 +5,7 @@ import { execute } from './compartment-map.js'
 import { generatePolicy } from './policy-gen/index.js'
 import { isPolicy } from './policy.js'
 import { defaultReadPowers, makeReadPowers } from './power.js'
+import { hasValue } from './util.js'
 
 /**
  * @import {LavaMoatPolicy} from 'lavamoat-core'
@@ -67,7 +68,7 @@ export const run = async (entrypointPath, policyOrOpts, options = {}) => {
   /** @type {ReadNowPowers} */
   let readPowers
 
-  if ('fs' in runOpts && runOpts.fs) {
+  if (hasValue(runOpts, 'fs')) {
     readPowers = makeReadPowers(
       runOpts.fs,
       runOpts.url ?? nodeUrl,
@@ -75,10 +76,9 @@ export const run = async (entrypointPath, policyOrOpts, options = {}) => {
       runOpts.crypto ?? nodeCrypto
     )
   } else {
-    readPowers =
-      'readPowers' in runOpts && runOpts.readPowers
-        ? runOpts.readPowers
-        : defaultReadPowers
+    readPowers = hasValue(runOpts, 'readPowers')
+      ? runOpts.readPowers
+      : defaultReadPowers
   }
   return execute(readPowers, entrypointPath, policy)
 }

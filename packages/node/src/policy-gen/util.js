@@ -2,6 +2,7 @@ import {
   ATTENUATORS_COMPARTMENT,
   LAVAMOAT_PKG_POLICY_ROOT,
 } from '../constants.js'
+import { hasValue, isObject } from '../util.js'
 
 /**
  * @import {CompartmentDescriptor} from '@endo/compartment-mapper'
@@ -67,9 +68,8 @@ export const getPackageName = (compartment, isEntry = false) => {
  */
 export const isCompleteModuleDescriptor = (descriptor) => {
   return !!(
-    descriptor &&
-    typeof descriptor === 'object' &&
-    'compartment' in descriptor &&
-    'module' in descriptor
+    isObject(descriptor) &&
+    hasValue(descriptor, 'compartment') &&
+    hasValue(descriptor, 'module')
   )
 }

@@ -9,6 +9,7 @@
  * @packageDocumentation
  */
 
+import { hasValue, isObject } from '../util.js'
 import { getCanonicalName } from './util.js'
 
 /**
@@ -28,9 +29,9 @@ const { entries, isFrozen } = Object
  * @returns {moduleDescriptor is Merge<RecordModuleDescriptor, {record: ModuleSource}>}
  */
 const isRecordModuleDescriptor = (moduleDescriptor) =>
-  typeof moduleDescriptor === 'object' &&
-  'record' in moduleDescriptor &&
-  moduleDescriptor.record
+  isObject(moduleDescriptor) &&
+  hasValue(moduleDescriptor, 'record') &&
+  isObject(moduleDescriptor.record)
 
 /**
  * Type guard for a {@link SourceModuleDescriptor} containing a
@@ -40,10 +41,9 @@ const isRecordModuleDescriptor = (moduleDescriptor) =>
  * @returns {moduleDescriptor is Merge<SourceModuleDescriptor, {source: ModuleSource}>}
  */
 const isSourceModuleDescriptor = (moduleDescriptor) =>
-  typeof moduleDescriptor === 'object' &&
-  'source' in moduleDescriptor &&
-  typeof moduleDescriptor.source === 'object' &&
-  moduleDescriptor.source
+  isObject(moduleDescriptor) &&
+  hasValue(moduleDescriptor, 'source') &&
+  isObject(moduleDescriptor.source)
 
 /**
  * Append `canonicalName` to the {@link ModuleSource.imports} field within a
