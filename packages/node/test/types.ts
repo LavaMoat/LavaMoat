@@ -3,7 +3,6 @@ import type { LavaMoatPolicy } from 'lavamoat-core'
 import type { NestedDirectoryJSON } from 'memfs'
 import { ExecFileException } from 'node:child_process'
 import type { JsonArray, RequireAtLeastOne } from 'type-fest'
-import type { ExitCode } from './fixture-util.js'
 
 export interface RunnerWorkerData {
   entryPath: string
