@@ -10,12 +10,13 @@ import nodeFs from 'node:fs'
 import nodePath from 'node:path'
 import { loadCompartmentMap } from '../compartment-map.js'
 import { DEFAULT_POLICY_DEBUG_PATH, DEFAULT_POLICY_PATH } from '../constants.js'
+import { log as defaultLog } from '../log.js'
 import { defaultReadPowers } from '../power.js'
 import { writeJson } from '../util.js'
 import { compartmentMapToPolicy } from './to-policy.js'
 
 /**
- * @import {GenerateOptions, GeneratePolicyOptions, CompartmentMapToPolicyOptions} from '../types.js'
+ * @import {GenerateOptions, GeneratePolicyOptions, CompartmentMapToPolicyOptions, LoadCompartmentMapOptions} from '../types.js'
  * @import {LavaMoatPolicy, LavaMoatPolicyDebug} from 'lavamoat-core'
  * @import {SetFieldType} from 'type-fest'
  */
@@ -55,20 +56,24 @@ const generate = async (
     debug = false,
     policyOverride,
     isBuiltin,
+    log = defaultLog,
     ...archiveOpts
   } = {}
 ) => {
+  /** @type {LoadCompartmentMapOptions} */
+  const loadCompartmentMapOptions = {
+    ...archiveOpts,
+    log,
+    readPowers,
+    policyOverride,
+  }
   const { compartmentMap, sources, renames } = await loadCompartmentMap(
     entrypointPath,
-    {
-      ...archiveOpts,
-      readPowers,
-      policyOverride,
-    }
+    loadCompartmentMapOptions
   )
 
   /** @type {CompartmentMapToPolicyOptions} */
-  const baseOpts = { readPowers, policyOverride, isBuiltin }
+  const baseOpts = { readPowers, policyOverride, isBuiltin, log }
 
   // this weird thing is to make TS happy about the overload
   const opts = debug ? { debug: true, ...baseOpts } : baseOpts
@@ -127,6 +132,7 @@ export const generatePolicy = async (
     isAbsolute = nodePath.isAbsolute,
     write: shouldWrite = false,
     debug,
+    log = defaultLog,
     ...generateOpts
   } = {}
 ) => {
@@ -166,13 +172,14 @@ export const generatePolicy = async (
    * {@link policy}
    */
   if (shouldWriteDebugPolicy({ write: shouldWrite, debug })) {
+    log.info(`Generating "debug" LavaMoat policy from ${entrypointPath}`)
     const debugPolicy = await generate(entrypointPath, {
       ...generateOpts,
       readPowers,
       debug: true,
     })
     await writeJson(policyDebugPath, debugPolicy, { fs: writableFs })
-
+    log.info(`Wrote debug policy to ${policyDebugPath} successfully`)
     // do not attempt to use the `delete` keyword with typescript. you have been
     // warned!
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -181,6 +188,7 @@ export const generatePolicy = async (
     )
     policy = corePolicy
   } else {
+    log.info(`Generating LavaMoat policy from ${entrypointPath}`)
     policy = await generate(entrypointPath, { ...generateOpts, readPowers })
   }
 

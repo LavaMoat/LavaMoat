@@ -12,6 +12,6 @@ import './preamble.js'
 
 export * as constants from './constants.js'
 export { toEndoPolicy } from './policy-converter.js'
-export * from './policy-gen/index.js'
+export { generatePolicy } from './policy-gen/index.js'
 export * from './policy.js'
 export { run } from './run.js'
