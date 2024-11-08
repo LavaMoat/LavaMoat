@@ -7,6 +7,7 @@ import '../src/preamble.js'
 
 import { memfs } from 'memfs'
 import { isMainThread, workerData } from 'node:worker_threads'
+import { log } from '../src/log.js'
 import { makeReadPowers } from '../src/power.js'
 import { run } from '../src/run.js'
 
@@ -27,6 +28,6 @@ const readPowers = makeReadPowers(/** @type {FsInterface} */ (fs))
 
 void run(entryPath, policy, { readPowers }).catch((err) => {
   // eslint-disable-next-line no-console
-  console.error(err)
+  log.error(err)
   process.exitCode = 1
 })
