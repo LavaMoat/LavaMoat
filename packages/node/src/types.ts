@@ -4,12 +4,13 @@ import {
   PathInterface,
   ReadNowPowers,
   UrlInterface,
-  type CaptureOptions,
+  type CaptureLiteOptions,
   type FsInterface,
   type PackagePolicy,
   type Policy,
 } from '@endo/compartment-mapper'
 import { IsBuiltinFn, type LavaMoatPolicyOverrides } from 'lavamoat-core'
+import { Loggerr } from 'loggerr'
 import { Merge, MergeDeep, type Except } from 'type-fest'
 import {
   ENDO_GLOBAL_POLICY_ITEM_WRITE,
@@ -26,15 +27,21 @@ import {
  * @remarks
  * Omitted properties cannot by overridden by the user.
  */
-export type BaseLoadCompartmentMapOptions = Except<
-  CaptureOptions,
-  'importHook' | 'moduleTransforms'
+export type BaseLoadCompartmentMapOptions = Merge<
+  Merge<
+    Except<CaptureLiteOptions, 'importHook' | 'moduleTransforms'>,
+    { conditions?: Set<string> }
+  >,
+  WithLog
 >
 
 /**
  * Options for `buildModuleRecords()`
  */
-export type BuildModuleRecordsOptions = Merge<WithReadPowers, WithIsBuiltin>
+export type BuildModuleRecordsOptions = Merge<
+  WithReadPowers,
+  Merge<WithIsBuiltin, WithLog>
+>
 
 /**
  * Options for `compartmentMapToPolicy()`
@@ -61,13 +68,20 @@ export type GenerateOptions = Except<
   keyof WritePolicyOptions | 'isAbsolute'
 >
 
+export type WithLog = {
+  /**
+   * `Loggerr` instance for logging
+   */
+  log?: Loggerr
+}
+
 /**
  * Options for `generatePolicy()`
  *
  * @remarks
  * {@link Merge} is appropriate here since some of the prop types are overwritten
- * by others (e.g., {@link WithRawReadPowers.fs} vs {@link WritePolicyOptions.fs},
- * where the latter should overwrite the former).
+ * by others (e.g., {@link RawPowers.fs} vs {@link WritePolicyOptions.fs}, where
+ * the latter should overwrite the former).
  * @privateRemarks
  * Somebody feel free to create a `MergeMany` type.
  */
@@ -161,15 +175,33 @@ export type PolicyGeneratorContextOptions = Merge<
   WithReadPowers,
   Merge<
     WithIsBuiltin,
-    {
-      /**
-       * If `true`, the `PolicyGeneratorContext` represents the entry
-       * compartment
-       */
-      isEntry?: boolean
-    }
+    Merge<
+      WithLog,
+      {
+        /**
+         * If `true`, the `PolicyGeneratorContext` represents the entry
+         * compartment
+         */
+        isEntry?: boolean
+
+        /**
+         * If missing modules are to be tracked and summarized, this should be
+         * the same `Map` passed into every call to
+         * `PolicyGeneratorContext.create()`.
+         *
+         * `PolicyGeneratorContext` will populate this data structure with the
+         * names of missing modules per compartment.
+         */
+        missingModules?: MissingModule[]
+      }
+    >
   >
 >
+
+export interface MissingModule {
+  compartment: string
+  specifier: string
+}
 
 /**
  * "Root" identifier for a LavaMoat global policy item in the context of an Endo

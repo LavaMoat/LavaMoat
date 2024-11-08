@@ -21,10 +21,12 @@ module.exports = {
     // all of the functions in this module are declarations, so might as well enforce some consistency.
     // this does not prevent a declaration from using the 'function' keyword, though
     'func-style': ['error', 'declaration', { allowArrowFunctions: true }],
+
+    'no-console': 'error',
   },
   overrides: [
     {
-      files: ['./test/*.js', './test/*.ts'],
+      files: ['./test/**/*.js', './test/**/*.ts'],
       rules: {
         // use t.log()
         'no-console': 'error',

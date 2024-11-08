@@ -13,7 +13,12 @@ import { hasValue, isObject } from '../util.js'
 import { getCanonicalName } from './util.js'
 
 /**
- * @import {CompartmentOptions, ImportHook, ModuleDescriptor, RecordModuleDescriptor, SourceModuleDescriptor, ModuleSource} from 'ses'
+ * @import {CompartmentOptions,
+ *   ImportHook,
+ *   ModuleDescriptor,
+ *   RecordModuleDescriptor,
+ *   SourceModuleDescriptor,
+ *   ModuleSource} from 'ses'
  * @import {Merge} from 'type-fest'
  * @import {CompartmentMapDescriptor} from '@endo/compartment-mapper'
  * @import {LavaMoatPolicyOverrides} from 'lavamoat-core'
@@ -140,7 +145,7 @@ export const makeGreedyCompartment = (compartmentMap, policyOverride) => {
       }
 
       if (!(name in compartmentMap.compartments)) {
-        throw new Error(`Unknown compartment: ${name}; this is a bug`)
+        throw new ReferenceError(`Unknown compartment: ${name}; this is a bug`)
       }
 
       const compartmentDescriptor = compartmentMap.compartments[name]
@@ -196,7 +201,7 @@ export const makeGreedyCompartment = (compartmentMap, policyOverride) => {
             // compartment cannot have a canonical name, and we need a canonical
             // name to apply policy
             throw new Error(
-              'Unexpected entry compartment encountered; this is a bug'
+              `Unexpected entry compartment encountered in ${moduleDescriptorCompartment.label}; this is a bug`
             )
           }
 

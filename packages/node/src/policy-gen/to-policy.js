@@ -8,14 +8,23 @@
 
 import { createModuleInspector } from 'lavamoat-core'
 import { isBuiltin as nodeIsBuiltin } from 'node:module'
+import { log as fallbackLog } from '../log.js'
 import { defaultReadPowers } from '../power.js'
 import { LMRCache } from './lmr-cache.js'
 import { PolicyGeneratorContext } from './policy-generator-context.js'
 
 /**
- * @import {Sources, CompartmentMapDescriptor, ReadNowPowers} from '@endo/compartment-mapper'
- * @import {LavaMoatPolicy, LavaMoatPolicyDebug, LavaMoatPolicyOverrides, LavamoatModuleRecord, ModuleInspector} from 'lavamoat-core'
- * @import {BuildModuleRecordsOptions, CompartmentMapToPolicyOptions} from '../types.js'
+ * @import {Sources,
+ *   CompartmentMapDescriptor,
+ *   ReadNowPowers} from '@endo/compartment-mapper'
+ * @import {LavaMoatPolicy,
+ *   LavaMoatPolicyDebug,
+ *   LavaMoatPolicyOverrides,
+ *   LavamoatModuleRecord,
+ *   ModuleInspector} from 'lavamoat-core'
+ * @import {BuildModuleRecordsOptions,
+ *   CompartmentMapToPolicyOptions,
+ *   MissingModule} from '../types.js'
  * @import {SetFieldType} from 'type-fest'
  */
 
@@ -60,7 +69,7 @@ export const buildModuleRecords = (
   compartmentMap,
   sources,
   renames,
-  { readPowers = defaultReadPowers, isBuiltin } = {}
+  { readPowers = defaultReadPowers, isBuiltin, log = fallbackLog } = {}
 ) => {
   const lmrCache = new LMRCache()
 
@@ -73,6 +82,8 @@ export const buildModuleRecords = (
 
   const compartmentRenames = freeze(renames)
 
+  /** @type {MissingModule[]} */
+  const missingModules = []
   const contexts = entries(compartmentMap.compartments)
     // TODO: warn about this? how frequently does this occur?
     // likewise: can something be in sources but not in the compartment map?
@@ -89,6 +100,8 @@ export const buildModuleRecords = (
               isEntry: entryCompartment === compartment,
               readPowers,
               isBuiltin,
+              missingModules,
+              log,
             }
           ),
         ])
@@ -111,6 +124,14 @@ export const buildModuleRecords = (
     .filter(Boolean)
 
   moduleRecords = [...new Set(moduleRecords)]
+
+  if (missingModules.length) {
+    log.warning(
+      'The following packages reference unknown dependencies. These may be "peer" or "optional" dependencies (or something else). Execution will mostly like fail unless these are accounted for in policy overrides.'
+    )
+    // eslint-disable-next-line no-console
+    console.table(missingModules)
+  }
 
   return moduleRecords
 }
@@ -174,11 +195,18 @@ export function compartmentMapToPolicy(
   compartmentMap,
   sources,
   renames,
-  { readPowers, policyOverride, debug = false, isBuiltin } = {}
+  {
+    readPowers,
+    policyOverride,
+    debug = false,
+    isBuiltin,
+    log = fallbackLog,
+  } = {}
 ) {
   const moduleRecords = buildModuleRecords(compartmentMap, sources, renames, {
     readPowers,
     isBuiltin,
+    log,
   })
 
   const inspector = inspectModuleRecords(moduleRecords, debug)

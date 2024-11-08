@@ -11,14 +11,20 @@ import {
   LMR_TYPE_SOURCE,
   NATIVE_PARSER_NAME,
 } from '../constants.js'
+import { log as fallbackLog } from '../log.js'
 import { defaultReadPowers } from '../power.js'
 import { isString } from '../util.js'
 import { getPackageName, isCompleteModuleDescriptor } from './util.js'
 
 /**
- * @import {ReadNowPowers, CompartmentDescriptor, ModuleDescriptor, ModuleSource, CompartmentSources, FileURLToPathFn} from '@endo/compartment-mapper'
+ * @import {ReadNowPowers,
+ *   CompartmentDescriptor,
+ *   ModuleDescriptor,
+ *   ModuleSource,
+ *   CompartmentSources,
+ *   FileURLToPathFn} from '@endo/compartment-mapper'
  * @import {LMRCache} from './lmr-cache.js'
- * @import {PolicyGeneratorContextOptions} from '../types.js'
+ * @import {MissingModule, PolicyGeneratorContextOptions} from '../types.js'
  * @import {LavamoatModuleRecord, IsBuiltinFn} from 'lavamoat-core'
  */
 
@@ -82,6 +88,18 @@ export class PolicyGeneratorContext {
   #isBuiltin
 
   /**
+   * A mapping of compartment names to missing module specifiers encountered
+   * during the policy generation process.
+   *
+   * @type {MissingModule[] | undefined}
+   */
+
+  #missingModules
+
+  /** @type {Loggerr} */
+  #log
+
+  /**
    * Used for reading source files
    */
   static #decoder = new TextDecoder()
@@ -108,6 +126,8 @@ export class PolicyGeneratorContext {
       isEntry = false,
       readPowers = defaultReadPowers,
       isBuiltin = nodeIsBuiltin,
+      missingModules,
+      log = fallbackLog,
     } = {}
   ) {
     this.#isEntry = isEntry
@@ -116,6 +136,8 @@ export class PolicyGeneratorContext {
     this.#isBuiltin = isBuiltin
     this.compartment = compartment
     this.renames = renames
+    this.#missingModules = missingModules
+    this.#log = log
   }
 
   /**
@@ -175,9 +197,16 @@ export class PolicyGeneratorContext {
       )
     }
 
-    console.warn(
-      `Unable to find module descriptor for specifier "${specifier}"; hope you didn't need it for anything!`
-    )
+    if (this.#missingModules) {
+      this.#missingModules.push({
+        compartment: this.compartment.label,
+        specifier,
+      })
+    } else {
+      this.#log.warning(
+        `Missing module descriptor for specifier "${specifier}" in compartment "${this.compartment.label}"`
+      )
+    }
   }
 
   /**
