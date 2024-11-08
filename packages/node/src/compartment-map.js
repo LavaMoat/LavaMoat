@@ -17,7 +17,7 @@ import { defaultReadPowers } from './power.js'
 import { toURLString } from './util.js'
 
 /**
- * @import {ReadNowPowers, CaptureOptions} from '@endo/compartment-mapper';
+ * @import {ReadNowPowers, CaptureLiteOptions} from '@endo/compartment-mapper';
  * @import {LavaMoatPolicy} from 'lavamoat-core';
  * @import {LoadCompartmentMapOptions} from './types.js';
  */
@@ -27,7 +27,7 @@ const { entries, fromEntries, freeze } = Object
 /**
  * Common options for {@link captureFromMap}
  *
- * @satisfies {CaptureOptions}
+ * @satisfies {CaptureLiteOptions}
  */
 const ENDO_OPTIONS = freeze(
   /** @type {const} */ ({
@@ -49,7 +49,7 @@ const ENDO_OPTIONS = freeze(
     languageForExtension: {
       [NATIVE_PARSER_FILE_EXT]: NATIVE_PARSER_NAME,
     },
-    dev: true,
+    conditions: new Set(['development']),
   })
 )
 
@@ -68,7 +68,10 @@ export const loadCompartmentMap = async (
   const entryPoint = toURLString(entrypointPath)
 
   const nodeCompartmentMap = await mapNodeModules(readPowers, entryPoint, {
-    dev: true,
+    conditions: captureOpts.conditions,
+    languageForExtension: {
+      [NATIVE_PARSER_FILE_EXT]: NATIVE_PARSER_NAME,
+    },
   })
 
   // we use this to inject missing imports from policy overrides into the module descriptor.

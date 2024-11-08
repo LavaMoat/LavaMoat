@@ -11,6 +11,7 @@ import {
   DEFAULT_POLICY_FILENAME,
   DEFAULT_POLICY_OVERRIDE_FILENAME,
 } from '../src/constants.js'
+import { log as fallbackLog } from '../src/log.js'
 
 /**
  * @import {Volume} from 'memfs/lib/volume.js'
@@ -51,8 +52,7 @@ const RUNNER_MODULE_PATH = (
 function dumpError(
   err,
   vol,
-  // eslint-disable-next-line no-console
-  { lavamoatPolicy, endoPolicy, log = console.error.bind(console) } = {}
+  { lavamoatPolicy, endoPolicy, log = fallbackLog.error.bind(fallbackLog) } = {}
 ) {
   log()
   log(util.inspect(err, { depth: null }))
@@ -148,8 +148,7 @@ async function trapOutput(stdout, stderr) {
  * @param {(...args: any) => void} log Logger
  * @returns {PlatformRunScenario<Result>}
  */
-// eslint-disable-next-line no-console
-export function createScenarioRunner(log = console.error.bind(console)) {
+export function createScenarioRunner(log = fallbackLog.error.bind(console)) {
   /**
    * Runs a scenario from `lavamoat-core`.
    *

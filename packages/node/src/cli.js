@@ -27,13 +27,15 @@
 
 import './preamble.js'
 
+import { yellow } from 'chalk'
 import assert from 'node:assert'
 import fs from 'node:fs'
 import path from 'node:path'
+import terminalLink from 'terminal-link'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
-
 import * as constants from './constants.js'
+import { log } from './log.js'
 import { generateAndWritePolicy } from './policy-gen/index.js'
 import { loadPolicies } from './policy.js'
 import { run } from './run.js'
@@ -50,11 +52,16 @@ import { readJsonFile } from './util.js'
 const BEHAVIOR_GROUP = 'Behavior Options:'
 
 /**
+ * Use this to give emphasis to words in error messages
+ */
+const em = yellow
+
+/**
  * Main entry point to CLI
  */
 const main = async (args = hideBin(process.argv)) => {
-  // TODO: Node.js v20+ allows import attributes; use that instead of this.
-  // see https://nodejs.org/api/esm.html#import-attributes
+  // TODO: In Node.js v23, import attributes are no longer flagged as experimental.
+  // use that instead of this. see https://nodejs.org/api/esm.html#import-attributes
   const {
     version,
     homepage,
@@ -62,6 +69,11 @@ const main = async (args = hideBin(process.argv)) => {
   } = /** @type {PackageJson & { bugs: { url: string } }} */ (
     await readJsonFile(new URL('../package.json', import.meta.url))
   )
+
+  /**
+   * Bug-reporting link for truly unexpected error messages
+   */
+  const reportThisBug = `please ${terminalLink('report this bug', bugs)}`
 
   /**
    * @remarks
@@ -139,19 +151,19 @@ const main = async (args = hideBin(process.argv)) => {
     .check((argv) => {
       assert(
         path.isAbsolute(argv.cwd),
-        `cwd must be an absolute path; please report this bug: ${bugs}`
+        `${em('cwd')} must be an absolute path; ${reportThisBug}`
       )
       assert(
         path.isAbsolute(argv.policy),
-        `policy must be an absolute path; please report this bug: ${bugs}`
+        `${em('policy')} must be an absolute path; ${reportThisBug}`
       )
       assert(
         path.isAbsolute(argv['policy-override']),
-        `policy-override must be an absolute path; please report this bug: ${bugs}`
+        `${em('policy-override')} must be an absolute path; ${reportThisBug}`
       )
       assert(
         path.isAbsolute(argv['policy-debug']),
-        `policy-debug must be an absolute path; please report this bug: ${bugs}`
+        `${em('policy-debug')} must be an absolute path; ${reportThisBug}`
       )
       return true
     })
@@ -205,13 +217,14 @@ const main = async (args = hideBin(process.argv)) => {
           .middleware((argv) => {
             argv.entrypoint = path.resolve(argv.cwd, argv.entrypoint)
           }, true)
-          /**
-           * This should not fail. If it does, there is a bug.
-           */
           .check((argv) => {
             assert(
               path.isAbsolute(argv.entrypoint),
-              `entrypoint must be an absolute path; please report this bug: ${bugs}`
+              `${em('entrypoint')} must be an absolute path; ${reportThisBug}`
+            )
+            assert(
+              fs.accessSync(argv.entrypoint, fs.constants.R_OK),
+              `File ${argv.entrypoint} is not does not exist or is not readable`
             )
             return true
           }),
@@ -251,11 +264,9 @@ const main = async (args = hideBin(process.argv)) => {
           } catch (e) {
             const err = /** @type {NodeJS.ErrnoException} */ (e)
             if (err.code === 'ENOENT') {
-              console.error(
-                `Could not load policy from ${argv.policy}. Reason:\n\n${err}`
+              throw new Error(
+                `Could not load policy from ${em(argv.policy)} and/or ${em(argv['policy-override'])}; reason:\n${err.message}`
               )
-              process.exitCode = 1
-              return
             }
             throw err
           }
@@ -298,7 +309,11 @@ const main = async (args = hideBin(process.argv)) => {
           .check((argv) => {
             assert(
               path.isAbsolute(argv.entrypoint),
-              `entrypoint must be an absolute path; please report this bug: ${bugs}`
+              `${em('entrypoint')} must be an absolute path; ${reportThisBug}`
+            )
+            assert(
+              fs.accessSync(argv.entrypoint, fs.constants.R_OK),
+              `File ${argv.entrypoint} is not does not exist or is not readable`
             )
             return true
           }),
@@ -315,12 +330,32 @@ const main = async (args = hideBin(process.argv)) => {
         })
 
         if (debug) {
-          console.error(`Wrote debug policy to ${policyDebugPath}`)
+          log.info(`Wrote debug policy to ${policyDebugPath}`)
         }
-        console.error(`Wrote policy to ${policyPath}`)
+        log.info(`Wrote policy to ${policyPath}`)
       }
     )
+    .fail((msg, err, yargs) => {
+      // `msg` is from yargs. if it's from yargs, we should probably just print
+      // the help, because it is likely an invalid flag. `err` is from our code,
+      // but that will only remain true as long as we keep throwing errors out
+      // of `check` callbacks.
+      if (err) {
+        log.error(err)
+      } else {
+        yargs.showHelp()
+        // if `msg` is undefined, then idk--might be a yargs bug?
+        log.notice(msg ?? `unknown error - ${reportThisBug}`)
+      }
+      // this is recommended by the yargs docs, because `fail()` can be used to
+      // salvage the process if failure happened before the command handler. if
+      // I try really hard, I bet I can imagine a use-case, even. anyway, they
+      // can't change it now.
+      process.exit(1)
+    })
+    .showHelpOnFail(false)
     .demandCommand(1)
+    .strict(true)
     .parse()
 }
 
