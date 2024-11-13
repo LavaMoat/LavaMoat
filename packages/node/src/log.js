@@ -7,7 +7,9 @@
 import { Loggerr } from 'loggerr'
 
 /**
- * This array is used to overwrite the stream used for each log level with
+ * This is a logger object.
+ *
+ * The `streams` is used to overwrite the stream used for each log level with
  * {@link process.stderr}.
  *
  * {@link Loggerr `loggerr`'s} default behavior is to use `stdout` for `notice`,
@@ -17,12 +19,20 @@ import { Loggerr } from 'loggerr'
  * the program being executed; thus `@lavamoat/node` should not use `stdout` for
  * its own output.
  *
- * @type {NodeJS.WritableStream[]}
+ * Because the value is handled as a tuple, we cannot generate it via
+ * {@link Array.fill}
  */
-const streams = new Array(8).fill(process.stderr)
-
 export const log = new Loggerr({
   formatter: 'cli',
-  streams,
+  streams: [
+    process.stderr,
+    process.stderr,
+    process.stderr,
+    process.stderr,
+    process.stderr,
+    process.stderr,
+    process.stderr,
+    process.stderr,
+  ],
   level: Loggerr.INFO,
 })

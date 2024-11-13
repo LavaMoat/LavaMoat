@@ -192,16 +192,13 @@ export type PolicyGeneratorContextOptions = Merge<
          * `PolicyGeneratorContext` will populate this data structure with the
          * names of missing modules per compartment.
          */
-        missingModules?: MissingModule[]
+        missingModules?: MissingModuleMap
       }
     >
   >
 >
 
-export interface MissingModule {
-  compartment: string
-  specifier: string
-}
+export type MissingModuleMap = Map<string, Set<string>>
 
 /**
  * "Root" identifier for a LavaMoat global policy item in the context of an Endo

@@ -6,13 +6,13 @@
  * @packageDocumentation
  */
 
+import chalk from 'chalk'
 import { createModuleInspector } from 'lavamoat-core'
 import { isBuiltin as nodeIsBuiltin } from 'node:module'
 import { log as fallbackLog } from '../log.js'
 import { defaultReadPowers } from '../power.js'
 import { LMRCache } from './lmr-cache.js'
 import { PolicyGeneratorContext } from './policy-generator-context.js'
-
 /**
  * @import {Sources,
  *   CompartmentMapDescriptor,
@@ -21,11 +21,14 @@ import { PolicyGeneratorContext } from './policy-generator-context.js'
  *   LavaMoatPolicyDebug,
  *   LavaMoatPolicyOverrides,
  *   LavamoatModuleRecord,
+ *   SesCompat,
+ *   SesCompatObj,
  *   ModuleInspector} from 'lavamoat-core'
  * @import {BuildModuleRecordsOptions,
  *   CompartmentMapToPolicyOptions,
- *   MissingModule} from '../types.js'
- * @import {SetFieldType} from 'type-fest'
+ *   MissingModuleMap} from '../types.js'
+ * @import {Loggerr} from 'loggerr'
+ * @import {SetFieldType, ValueOf} from 'type-fest'
  */
 
 const { entries, freeze } = Object
@@ -33,16 +36,65 @@ const { entries, freeze } = Object
 /**
  * Uses `inspector` to inspect a compartment map and sources.
  *
+ * If the `debug` option is `true`, the inspector will include debug
+ * information.
+ *
  * @param {LavamoatModuleRecord[]} moduleRecords Module records
- * @param {boolean} [debug=false] - If `true`, the inspector will include debug
- *   information. Default is `false`
+ * @param {{ debug?: boolean; log?: Loggerr }} [options] Options
  * @returns {ModuleInspector} The inspector
  */
-const inspectModuleRecords = (moduleRecords, debug = false) => {
+const inspectModuleRecords = (
+  moduleRecords,
+  { debug = false, log = fallbackLog } = {}
+) => {
   const inspector = createModuleInspector({
     isBuiltin: nodeIsBuiltin,
     includeDebugInfo: debug,
-    allowDynamicRequires: true,
+  })
+
+  inspector.on('compat-warning', (data) => {
+    const { moduleRecord, compatWarnings } = /**
+     * @type {{
+     *   moduleRecord: LavamoatModuleRecord
+     *   compatWarnings: SesCompat
+     * }}
+     */ (data)
+
+    const { primordialMutations, strictModeViolations, dynamicRequires } =
+      compatWarnings
+    if (primordialMutations.length) {
+      log.warning(
+        `Package "${moduleRecord.packageName}" contains potential SES incompatibilities (primordial mutations) at the following location(s):\n${primordialMutations
+          .map(({ node }) =>
+            chalk.yellow(
+              `- ${moduleRecord.file}:${node.loc.start.line}:${node.loc.start.column}`
+            )
+          )
+          .join('\n')}`
+      )
+    }
+    if (strictModeViolations.length) {
+      log.warning(
+        `Package "${moduleRecord.packageName}" contains potential SES incompatibilities (strict mode violations) at the following location(s):\n${strictModeViolations
+          .map(({ node }) =>
+            chalk.yellow(
+              `- ${moduleRecord.file}:${node.loc.start.line}:${node.loc.start.column}`
+            )
+          )
+          .join('\n')}`
+      )
+    }
+    if (dynamicRequires.length) {
+      log.warning(
+        `Package "${moduleRecord.packageName}" contains potential SES incompatibilities (dynamic requires) at the following location(s):\n${dynamicRequires
+          .map(({ node }) =>
+            chalk.yellow(
+              `- ${moduleRecord.file}:${node.loc.start.line}:${node.loc.start.column}`
+            )
+          )
+          .join('\n')}`
+      )
+    }
   })
 
   // FIXME: should we sort here?
@@ -82,8 +134,8 @@ export const buildModuleRecords = (
 
   const compartmentRenames = freeze(renames)
 
-  /** @type {MissingModule[]} */
-  const missingModules = []
+  /** @type {MissingModuleMap} */
+  const missingModules = new Map()
   const contexts = entries(compartmentMap.compartments)
     // TODO: warn about this? how frequently does this occur?
     // likewise: can something be in sources but not in the compartment map?
@@ -124,12 +176,16 @@ export const buildModuleRecords = (
 
   moduleRecords = [...new Set(moduleRecords)]
 
-  if (missingModules.length) {
+  if (missingModules.size) {
     log.warning(
       'The following packages reference unknown dependencies. These may be "peer" or "optional" dependencies (or something else). Execution will mostly like fail unless these are accounted for in policy overrides.'
     )
+    const tabular = [...missingModules].map(([compartment, missing]) => ({
+      Name: compartment,
+      'Missing Package(s)': [...missing],
+    }))
     // eslint-disable-next-line no-console
-    console.table(missingModules)
+    console.table(tabular)
   }
 
   return moduleRecords
@@ -208,7 +264,7 @@ export function compartmentMapToPolicy(
     log,
   })
 
-  const inspector = inspectModuleRecords(moduleRecords, debug)
+  const inspector = inspectModuleRecords(moduleRecords, { debug, log })
 
   return inspector.generatePolicy({
     policyOverride,
