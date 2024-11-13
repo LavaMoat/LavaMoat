@@ -27,7 +27,7 @@
 
 import './preamble.js'
 
-import { yellow } from 'chalk'
+import chalk from 'chalk'
 import assert from 'node:assert'
 import fs from 'node:fs'
 import path from 'node:path'
@@ -55,7 +55,7 @@ const BEHAVIOR_GROUP = 'Behavior Options:'
 /**
  * Use this to give emphasis to words in error messages
  */
-const em = yellow
+const em = chalk.yellow
 
 /**
  * Main entry point to CLI
@@ -67,7 +67,7 @@ const main = async (args = hideBin(process.argv)) => {
     version,
     homepage,
     bugs: { url: bugs },
-  } = /** @type {PackageJson & { bugs: { url: string } }} */ (
+  } = /** @type {PackageJson & { homepage: string; bugs: { url: string } }} */ (
     await readJsonFile(new URL('../package.json', import.meta.url))
   )
 
@@ -89,7 +89,9 @@ const main = async (args = hideBin(process.argv)) => {
     })
     .scriptName('lavamoat')
     .version(`${version}`)
-    .epilog(`📖 Read the docs at ${homepage}\n`)
+    .epilog(
+      `📖 Read the docs at ${terminalLink(homepage, homepage, { fallback: false })}\n`
+    )
     .options({
       // the three policy options are used for both reading and writing
       policy: {
@@ -224,10 +226,8 @@ const main = async (args = hideBin(process.argv)) => {
               path.isAbsolute(argv.entrypoint),
               `${em('entrypoint')} must be an absolute path; ${reportThisBug}`
             )
-            assert(
-              fs.accessSync(argv.entrypoint, fs.constants.R_OK),
-              `File ${argv.entrypoint} is not does not exist or is not readable`
-            )
+            fs.accessSync(argv.entrypoint, fs.constants.R_OK),
+              `File ${argv.entrypoint} does not exist or is not readable`
             return true
           }),
       /**
@@ -315,10 +315,7 @@ const main = async (args = hideBin(process.argv)) => {
               path.isAbsolute(argv.entrypoint),
               `${em('entrypoint')} must be an absolute path; ${reportThisBug}`
             )
-            assert(
-              fs.accessSync(argv.entrypoint, fs.constants.R_OK),
-              `File ${argv.entrypoint} is not does not exist or is not readable`
-            )
+            fs.accessSync(argv.entrypoint, fs.constants.R_OK)
             return true
           }),
       async ({
