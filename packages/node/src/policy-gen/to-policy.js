@@ -108,7 +108,7 @@ export const buildModuleRecords = (
     )
 
   let moduleRecords = contexts
-    .map(([compartmentName, context]) => {
+    .flatMap(([compartmentName, context]) => {
       if (!(compartmentName in sources)) {
         // "should never happen"™
         throw new ReferenceError(
@@ -120,7 +120,6 @@ export const buildModuleRecords = (
 
       return context.buildModuleRecords(compartmentSources)
     })
-    .flat()
     .filter(Boolean)
 
   moduleRecords = [...new Set(moduleRecords)]
