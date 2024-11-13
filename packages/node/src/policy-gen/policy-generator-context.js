@@ -23,8 +23,9 @@ import { getPackageName, isCompleteModuleDescriptor } from './util.js'
  *   ModuleSource,
  *   CompartmentSources,
  *   FileURLToPathFn} from '@endo/compartment-mapper'
+ * @import {Loggerr} from 'loggerr'
  * @import {LMRCache} from './lmr-cache.js'
- * @import {MissingModule, PolicyGeneratorContextOptions} from '../types.js'
+ * @import {MissingModuleMap, PolicyGeneratorContextOptions} from '../types.js'
  * @import {LavamoatModuleRecord, IsBuiltinFn} from 'lavamoat-core'
  */
 
@@ -91,7 +92,7 @@ export class PolicyGeneratorContext {
    * A mapping of compartment names to missing module specifiers encountered
    * during the policy generation process.
    *
-   * @type {MissingModule[] | undefined}
+   * @type {MissingModuleMap | undefined}
    */
 
   #missingModules
@@ -198,10 +199,10 @@ export class PolicyGeneratorContext {
     }
 
     if (this.#missingModules) {
-      this.#missingModules.push({
-        compartment: this.compartment.label,
-        specifier,
-      })
+      const { label } = this.compartment
+      const missingModules = this.#missingModules.get(label) ?? new Set()
+      missingModules.add(specifier)
+      this.#missingModules.set(label, missingModules)
     } else {
       this.#log.warning(
         `Missing module descriptor for specifier "${specifier}" in compartment "${this.compartment.label}"`
