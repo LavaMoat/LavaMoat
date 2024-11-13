@@ -1,9 +1,17 @@
+// @ts-check
+
 const {
   reduceToTopmostApiCalls,
   objToMap,
   mapToObj,
 } = require('lavamoat-tofu/src/util')
 const mergeDeep = require('merge-deep')
+
+const { values, prototype: objectPrototype } = Object
+
+/**
+ * @import {LavaMoatPolicy, LavaMoatPolicyOverrides, GlobalPolicy, BuiltinPolicy, GlobalPolicyValue} from './schema'
+ */
 
 /**
  * Merges two policies together.
@@ -38,10 +46,17 @@ function mergePolicy(policyA, policyB) {
   return policyA
 }
 
+/**
+ * @template {BuiltinPolicy | GlobalPolicy} T
+ * @param {T} packagePolicy
+ * @returns {T}
+ */
 function dedupePolicyPaths(packagePolicy) {
-  const itemMap = objToMap(packagePolicy)
+  const itemMap = /** @type {Map<string, GlobalPolicyValue>} */ (
+    objToMap(packagePolicy)
+  )
   reduceToTopmostApiCalls(itemMap)
-  return mapToObj(itemMap)
+  return /** @type {T} */ (mapToObj(itemMap))
 }
 
 module.exports = { mergePolicy }
