@@ -43,7 +43,7 @@
     "chalk": "4.1.2",
     "json-stable-stringify": "1.2.0",
     "lavamoat-core": "^16.0.0",
-    "loggerr": "4.1.0",
+    "loggerr": "4.2.0",
     "ses": "1.9.0",
     "terminal-link": "3.0.0",
     "type-fest": "4.30.0",
