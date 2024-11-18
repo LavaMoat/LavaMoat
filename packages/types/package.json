@@ -18,7 +18,7 @@
   },
   "types": "./dist/index.d.ts",
   "dependencies": {
-    "@babel/types": "7.23.9",
+    "@babel/types": "7.26.0",
     "type-fest": "4.30.0"
   },
   "publishConfig": {
