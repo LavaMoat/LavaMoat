@@ -8,6 +8,9 @@
   // be first in this list
   "references": [
     {
+      "path": "packages/types"
+    },
+    {
       "path": "packages/allow-scripts"
     },
     {
@@ -17,13 +20,10 @@
       "path": "packages/core"
     },
     {
-      "path": "packages/laverna"
-    },
-    {
       "path": "packages/tofu"
     },
     {
-      "path": "packages/types"
+      "path": "packages/laverna"
     },
     {
       "path": "packages/webpack"
