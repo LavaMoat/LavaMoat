@@ -455,7 +455,7 @@ function createModuleInspector(opts) {
 }
 
 /**
- * @param {import('./schema').LavaMoatPolicy} policy
+ * @param {import('@lavamoat/types').LavaMoatPolicy} policy
  * @returns {void}
  */
 function diffFriendlySort(policy) {
