@@ -17,12 +17,6 @@
     "node": "^18.0.0 || ^20.0.0 || ^22.0.0"
   },
   "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts"
-    },
-    "./package.json": "./package.json"
-  },
   "dependencies": {
     "@babel/types": "7.23.9",
     "type-fest": "4.30.0"
