@@ -7,7 +7,7 @@ const {
 } = require('lavamoat-tofu/src/util')
 const mergeDeep = require('merge-deep')
 
-const { values, prototype: objectPrototype } = Object
+const { values, hasOwn } = Object
 
 /**
  * @import {LavaMoatPolicy, LavaMoatPolicyOverrides, GlobalPolicy, BuiltinPolicy, GlobalPolicyValue} from './schema'
@@ -28,16 +28,10 @@ function mergePolicy(policyA, policyB) {
   if (policyB) {
     const mergedPolicy = mergeDeep(policyA, policyB)
     values(mergedPolicy.resources ?? {}).forEach((packagePolicy) => {
-      if (
-        objectPrototype.hasOwnProperty.call(packagePolicy, 'globals') &&
-        packagePolicy.globals
-      ) {
+      if (hasOwn(packagePolicy, 'globals') && packagePolicy.globals) {
         packagePolicy.globals = dedupePolicyPaths(packagePolicy.globals)
       }
-      if (
-        objectPrototype.hasOwnProperty.call(packagePolicy, 'builtin') &&
-        packagePolicy.builtin
-      ) {
+      if (hasOwn(packagePolicy, 'builtin') && packagePolicy.builtin) {
         packagePolicy.builtin = dedupePolicyPaths(packagePolicy.builtin)
       }
     })
