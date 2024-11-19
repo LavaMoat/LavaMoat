@@ -1,12 +1,9 @@
 # adds everybody as a reviewer on all the PRs
 * @LavaMoat/devs
 
-*eslint*                @boneskull @LavaMoat/devs
-*release-please*        @boneskull @LavaMoat/devs
-.config/README.md       @boneskull @LavaMoat/devs
-.husky/**/*             @boneskull @LavaMoat/devs
-package.json            @legobeat  @LavaMoat/devs
-packages/*/package.json @legobeat  @LavaMoat/devs
-renovate*               @boneskull @LavaMoat/devs
-tsconfig*.json          @boneskull @legobeat @LavaMoat/devs
-yarn.lock               @legobeat  @LavaMoat/devs
+*eslint*                @boneskull
+*release-please*        @boneskull
+.config/README.md       @boneskull
+.husky/**/*             @boneskull
+renovate*               @boneskull
+tsconfig*.json          @boneskull
