@@ -33,6 +33,7 @@ function makeConfig(lmOptions = {}) {
     output: {
       filename: '[name].js',
       path: '/dist',
+      publicPath: '', // running bundles under node errors out when webpack attempts to figure out relative paths at runtime if this is not set
     },
     devtool: false,
     plugins: [
@@ -72,6 +73,18 @@ function makeConfig(lmOptions = {}) {
             LavaMoatPlugin.exclude,
           ],
           sideEffects: true,
+        },
+        {
+          // this explicitly allows svg assets to be emited from dependencies
+          test: /\.svg$/,
+          use: [
+            {
+              loader: 'file-loader',
+              options: {
+                name: '[name].[ext]',
+              },
+            },
+          ],
         },
       ],
     },

@@ -16,6 +16,12 @@
         "self": true
       }
     },
+    "resource-hack": {
+      "globals": {
+        "URL": true,
+        "console.log": true
+      }
+    },
     "umd-package": {
       "globals": {
         "define": true
