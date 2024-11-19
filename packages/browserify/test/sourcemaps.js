@@ -1,5 +1,5 @@
 const { SourceMapConsumer } = require('source-map')
-const validate = require('sourcemap-validator')
+const validate = require('@lavamoat/sourcemap-validator')
 const { fromSource: extractSourceMap } = require('convert-source-map')
 const { explore } = require('source-map-explorer')
 const { codeFrameColumns } = require('@babel/code-frame')
