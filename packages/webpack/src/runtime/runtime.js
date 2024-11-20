@@ -179,6 +179,28 @@ const findResourceId = (moduleId) => {
   }
 }
 
+const getterWall = (/** @type {any} */ namespace) => {
+  if (typeof namespace !== 'object' && typeof namespace !== 'function') {
+    return namespace
+  }
+  let wall = create(null)
+  //if namespace is a function, return it directly
+  if (typeof namespace === 'function') {
+    wall = namespace.bind(namespace)
+  }
+  defineProperties(
+    wall,
+    fromEntries(
+      entries(namespace).map(([key, value]) => [
+        key,
+        { get: () => value, set() {}, configurable: false },
+      ])
+    )
+  )
+
+  return wall
+}
+
 /**
  * @callback WebpackRequire
  * @param {string} specifier
@@ -200,7 +222,8 @@ const wrapRequireWithPolicy = (__webpack_require__, referrerResourceId) =>
   /** @this {object} */
   function (specifier, ...rest) {
     const requireThat = __webpack_require__.bind(this, specifier, ...rest)
-    return enforcePolicy(specifier, referrerResourceId, requireThat)
+    const namespace = enforcePolicy(specifier, referrerResourceId, requireThat)
+    return getterWall(namespace)
   }
 
 /**

@@ -9,6 +9,11 @@
     "fetch-package": "1.0.0",
     "globals-package": "1.0.0",
     "loader-hack": "1.0.0",
+<<<<<<< Updated upstream
+=======
+    "tampering-hack": "1.0.0",
+    "nodejs-package": "1.0.0",
+>>>>>>> Stashed changes
     "polyfill-package": "1.0.0",
     "nodejs-package": "1.0.0",
     "prototype-poisoning-package": "1.0.0",

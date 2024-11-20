@@ -1,5 +1,6 @@
 import { hello as helloCommonJS } from 'commonjs-package'
 import { re } from 'commonjs-quirks'
+import { hello as helloGetter } from 'commonjs-quirks/gottalovegetters.js'
 import { hello as helloES6 } from 'es6-module-package'
 import globals from 'globals-package'
 import 'side-effects-package/styles.css'
@@ -15,6 +16,7 @@ function run() {
   console.log(
     helloCommonJS(),
     JSON.stringify(re),
+    helloGetter(),
     helloES6(),
     helloTypeScript(),
     helloUMD(),

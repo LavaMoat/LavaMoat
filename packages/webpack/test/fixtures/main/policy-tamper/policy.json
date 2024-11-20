@@ -1,0 +1,27 @@
+{
+  "resources": {
+    "commonjs-package": {
+      "packages": {
+        "umd-package": true
+      }
+    },
+    "es6-module-package": {
+      "packages": {
+        "umd-package": true
+      }
+    },
+    "tampering-hack": {
+      "packages": {
+        "commonjs-package": true,
+        "es6-module-package": true,
+        "typescript-package": true,
+        "umd-package": true
+      }
+    },
+    "umd-package": {
+      "globals": {
+        "define": true
+      }
+    }
+  }
+}
