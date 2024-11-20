@@ -14,23 +14,31 @@ function makePrepareRealmGlobalFromConfig({ createFunctionWrapper }) {
     getTopLevelWriteAccessFromPackageConfig,
   }
 
+  /**
+   * Should never return an array containing `'Function'`
+   */
   function getTopLevelReadAccessFromPackageConfig(globalsConfig) {
     const result = Object.entries(globalsConfig)
       .filter(
         ([key, value]) =>
-          value === 'read' ||
-          value === true ||
-          (value === 'write' && key.split('.').length > 1)
+          (value === 'read' ||
+            value === true ||
+            (value === 'write' && key.split('.').length > 1)) &&
+          key !== 'Function'
       )
       .map(([key]) => key.split('.')[0])
     // return unique array
     return Array.from(new Set(result))
   }
 
+  /**
+   * Should never return an array containing `'Function'`
+   */
   function getTopLevelWriteAccessFromPackageConfig(globalsConfig) {
     const result = Object.entries(globalsConfig)
       .filter(
-        ([key, value]) => value === 'write' && key.split('.').length === 1
+        ([key, value]) =>
+          value === 'write' && key.split('.').length === 1 && key !== 'Function'
       )
       .map(([key]) => key)
     return result
