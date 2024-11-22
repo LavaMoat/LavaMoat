@@ -1,10 +1,5 @@
 /**
- * Provides {@link GreedyCompartment}, which you can just pretend doesn't exist.
- *
- * The purpose of this is to expand the compartment map with resources mentioned
- * in policy overrides when generating policy. The goal is to reduce the chance
- * that a policy override author would need to hand-craft a large policy
- * override for any given resource.
+ * Provides {@link PolicyGenCompartment} which is hopefully temporary.
  *
  * @packageDocumentation
  */
@@ -100,9 +95,9 @@ const updateModuleSource = (moduleDescriptor, canonicalName) => {
 }
 
 /**
- * Returns a constructor for a subclass of `ses`' `Compartment` which injects
- * package from policy overrides into compartment `imports` if not already
- * present.
+ * Returns a constructor for a subclass of `ses`' `Compartment` which injects a
+ * package (defined in policy overrides) into the instance's
+ * {@link ModuleDescriptor ModuleDescriptors}.
  *
  * This causes the new imports to be resolved and expanded as if their usage was
  * detected. The aim is to cause a generated policy to reflect the state of the
@@ -115,7 +110,7 @@ const updateModuleSource = (moduleDescriptor, canonicalName) => {
  * @returns {typeof Compartment}
  * @internal
  */
-export const makeGreedyCompartment = (compartmentMap, policyOverride) => {
+export const makePolicyGenCompartment = (compartmentMap, policyOverride) => {
   if (!policyOverride || !policyOverride.resources) {
     return Compartment
   }
@@ -127,9 +122,9 @@ export const makeGreedyCompartment = (compartmentMap, policyOverride) => {
    */
   const entryCompartmentName = compartmentMap.entry.compartment
 
-  return class GreedyCompartment extends Compartment {
+  return class PolicyGenCompartment extends Compartment {
     /**
-     * Creates a "greedy" import hook if we can.
+     * Creates a "lavamoat" import hook if we can.
      *
      * @param {CompartmentOptions} [options]
      */

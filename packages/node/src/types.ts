@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   CryptoInterface,
   IsAbsoluteFn,
@@ -377,3 +378,51 @@ export interface WritePowers {
   ) => Promise<string | undefined>
   writeFile: (path: string, data: string) => Promise<void>
 }
+
+/**
+ * A `globalThis` object with unknown properties.
+ *
+ * This is basically just an object with anything in it, since we cannot be sure
+ * that any given global property is present (or what its type is) in the
+ * current compartment at any given time.
+ */
+export type SomeGlobalThis = Record<PropertyKey, unknown>
+
+/**
+ * A function _or_ a constructor.
+ *
+ * @privateRemarks
+ * I'm not entirely sure why `Function` does not satify one of the first two
+ * union members, but it has to be here.
+ * @internal
+ */
+export type SomeFunction =
+  | (new (...args: any[]) => any)
+  | ((...args: any[]) => any)
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  | Function
+
+/**
+ * The parameters of a {@link SomeFunction}
+ *
+ * @template T Function or constructor
+ * @internal
+ */
+export type SomeParameters<T extends SomeFunction> = T extends new (
+  ...args: any[]
+) => any
+  ? ConstructorParameters<T>
+  : T extends (...args: any[]) => any
+    ? Parameters<T>
+    : never
+
+/**
+ * Callback used by `wrapFunctionConstructor`.
+ *
+ * Given context object `context`, returns `true` if a function being wrapped
+ * (not shown) should be called with a provided context (also not shown).
+ *
+ * @param context Usually a `globalThis`
+ * @internal
+ */
+export type ContextTestFn = (context: object) => boolean
