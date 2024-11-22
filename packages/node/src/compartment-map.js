@@ -8,11 +8,12 @@ import {
   NATIVE_PARSER_NAME,
 } from './constants.js'
 import { attenuateModule, makeGlobalsAttenuator } from './default-attenuator.js'
+import { makeExecutionCompartment } from './execution-compartment.js'
 import { importHook, importNowHook } from './import-hook.js'
 import { syncModuleTransforms } from './module-transforms.js'
 import parseNative from './parse-native.js'
 import { toEndoPolicy } from './policy-converter.js'
-import { makeGreedyCompartment } from './policy-gen/greedy-compartment.js'
+import { makePolicyGenCompartment } from './policy-gen/policy-gen-compartment.js'
 import { defaultReadPowers } from './power.js'
 import { toURLString } from './util.js'
 
@@ -88,7 +89,7 @@ export const loadCompartmentMap = async (
 
   // we use this to inject missing imports from policy overrides into the module descriptor.
   // TODO: Endo should allow us to hook into `importHook` directly instead
-  const GreedyCompartment = makeGreedyCompartment(
+  const LavaMoatCompartment = makePolicyGenCompartment(
     nodeCompartmentMap,
     policyOverride
   )
@@ -100,7 +101,7 @@ export const loadCompartmentMap = async (
   } = await captureFromMap(readPowers, nodeCompartmentMap, {
     ...captureOpts,
     ...ENDO_OPTIONS,
-    Compartment: GreedyCompartment,
+    Compartment: LavaMoatCompartment,
   })
 
   /**
@@ -143,6 +144,7 @@ export const execute = async (
   const conditions = devToConditions(dev)
   const { namespace } = await importLocation(readPowers, entryPoint, {
     ...ENDO_OPTIONS,
+    Compartment: makeExecutionCompartment(globalThis),
     modules: {
       [DEFAULT_ATTENUATOR]: {
         attenuateGlobals: makeGlobalsAttenuator({ policy }),

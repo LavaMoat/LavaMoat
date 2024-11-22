@@ -79,10 +79,6 @@ export const makeGlobalsAttenuator = (
    * @type {GlobalAttenuatorFn<GlobalAttenuatorParams>}
    */
   return ([policy], originalGlobalThis, packageCompartmentGlobalThis) => {
-    // provide a working Date and Math to be nice.
-    packageCompartmentGlobalThis.Date = originalGlobalThis.Date
-    packageCompartmentGlobalThis.Math = originalGlobalThis.Math
-
     if (!policy) {
       return
     }
@@ -95,8 +91,6 @@ export const makeGlobalsAttenuator = (
         'global',
       ])
     } else {
-      const OldFunction = packageCompartmentGlobalThis.Function
-
       const endowments = getEndowmentsForConfig(
         rootCompartmentGlobalThis,
         /**
@@ -124,15 +118,6 @@ export const makeGlobalsAttenuator = (
         packageCompartmentGlobalThis,
         getOwnPropertyDescriptors(endowments)
       )
-
-      // `this` in the context of source code provided to the `new
-      // Function(src)` constructor, when executed, should reference the package
-      // compartment's `globalThis`.
-      /** @param {string} src */
-      packageCompartmentGlobalThis.Function = function (src) {
-        // prettier-ignore
-        return (new OldFunction(src)).bind(packageCompartmentGlobalThis)
-      }
     }
   }
 }
