@@ -22,21 +22,31 @@ import {
  *
  * Used by {@link GeneratePolicyOptions}.
  *
- * The {@link EndoArchiveOptions.dev dev} property defaults to `true`.
+ * The {@link CaptureLiteOptions.dev dev} property defaults to `true`.
  *
  * @remarks
  * Omitted properties cannot by overridden by the user.
  */
 export type BaseLoadCompartmentMapOptions = Merge<
-  Merge<
-    Except<CaptureLiteOptions, 'importHook' | 'moduleTransforms'>,
-    { conditions?: Set<string> }
-  >,
-  WithLog
+  Except<CaptureLiteOptions, 'importHook' | 'moduleTransforms'>,
+  Merge<WithLog, WithDev>
 >
 
 /**
+ * If `dev` is `true`, `@endo/compartment-mapper` will receive a `conditions`
+ * option of type `Set(['development'])`.
+ *
+ * If present in some options supporting `conditions`, `conditions` will take
+ * precedence.
+ */
+export interface WithDev {
+  dev?: boolean
+}
+
+/**
  * Options for `buildModuleRecords()`
+ *
+ * @internal
  */
 export type BuildModuleRecordsOptions = Merge<
   WithReadPowers,
@@ -68,7 +78,7 @@ export type GenerateOptions = Except<
   keyof WritePolicyOptions | 'isAbsolute'
 >
 
-export type WithLog = {
+export interface WithLog {
   /**
    * `Loggerr` instance for logging
    */
@@ -80,8 +90,8 @@ export type WithLog = {
  *
  * @remarks
  * {@link Merge} is appropriate here since some of the prop types are overwritten
- * by others (e.g., {@link RawPowers.fs} vs {@link WritePolicyOptions.fs}, where
- * the latter should overwrite the former).
+ * by others (e.g., {@link WithRawPowers.fs} vs {@link WritePolicyOptions.fs},
+ * where the latter should overwrite the former).
  * @privateRemarks
  * Somebody feel free to create a `MergeMany` type.
  */
@@ -149,7 +159,7 @@ export type LavaMoatPackagePolicyItem = RootPolicy
  * Custom data potentially assigned to the `options` prop of an
  * {@link PackagePolicy.options Endo package policy}
  */
-export type LavaMoatPackagePolicyOptions = {
+export interface LavaMoatPackagePolicyOptions {
   /**
    * If this is `true`, then the package is allowed to run native modules
    */
@@ -210,7 +220,7 @@ export type RootPolicy = typeof ENDO_POLICY_ITEM_ROOT
  * Options for `run()` w/o automatic policy generation
  */
 
-export type RunOptions = WithRawReadPowers
+export type RunOptions = Merge<WithRawReadPowers, WithDev>
 
 /**
  * Options for `toEndoPolicy()`
@@ -241,7 +251,7 @@ export type ToEndoPolicyOptions =
 /**
  * Options having an {@link IsBuiltinFn}
  */
-export type WithIsBuiltin = {
+export interface WithIsBuiltin {
   /**
    * A function which returns `true` if the given specfifier references a
    * builtin module.
@@ -252,18 +262,18 @@ export type WithIsBuiltin = {
 }
 
 /**
- * Options which may either {@link WithReadPowers} or {@link RawPowers} but not
- * both.
+ * Options which may either {@link WithReadPowers} or {@link WithRawPowers} but
+ * not both.
  */
-export type WithRawReadPowers = WithReadPowers | RawPowers
+export type WithRawReadPowers = WithReadPowers | WithRawPowers
 
 /**
  * Raw powers which can be converted to a {@link ReadNowPowers} object.
  *
- * For this to work, {@link RawPowers.fs} must be defined. It cannot contain a
- * `readPowers` property.
+ * For this to work, {@link WithRawPowers.fs} must be defined. It cannot contain
+ * a `readPowers` property.
  */
-export type RawPowers = {
+export interface WithRawPowers {
   readPowers?: never
   fs?: FsInterface
   crypto?: CryptoInterface
@@ -274,7 +284,7 @@ export type RawPowers = {
 /**
  * Options having a `readPowers` property.
  */
-export type WithReadPowers = {
+export interface WithReadPowers {
   /**
    * Read powers to use when loading the compartment map.
    */

@@ -49,9 +49,16 @@ const ENDO_OPTIONS = freeze(
     languageForExtension: {
       [NATIVE_PARSER_FILE_EXT]: NATIVE_PARSER_NAME,
     },
-    conditions: new Set(['development']),
   })
 )
+
+/**
+ * Converts a boolean `dev` to a set of conditions
+ *
+ * @param {boolean} [dev]
+ * @returns {Set<string>}
+ */
+const devToConditions = (dev) => (dev ? new Set(['development']) : new Set())
 
 /**
  * Loads compartment map and associated sources.
@@ -63,12 +70,17 @@ const ENDO_OPTIONS = freeze(
 
 export const loadCompartmentMap = async (
   entrypointPath,
-  { readPowers = defaultReadPowers, policyOverride, ...captureOpts } = {}
+  {
+    readPowers = defaultReadPowers,
+    policyOverride,
+    dev = false,
+    ...captureOpts
+  } = {}
 ) => {
   const entryPoint = toURLString(entrypointPath)
-
+  const conditions = devToConditions(dev)
   const nodeCompartmentMap = await mapNodeModules(readPowers, entryPoint, {
-    conditions: captureOpts.conditions,
+    conditions,
     languageForExtension: {
       [NATIVE_PARSER_FILE_EXT]: NATIVE_PARSER_NAME,
     },
@@ -109,19 +121,26 @@ export const loadCompartmentMap = async (
 }
 
 /**
- * Wrapper around `importLocation` which first converts a LavaMoat policy to an
- * Endo policy
+ * Wrapper around {@link importLocation} which first converts a LavaMoat policy
+ * to an Endo policy.
  *
  * @template [T=unknown] Default is `unknown`
  * @param {ReadNowPowers} readPowers
  * @param {string | URL} entrypointPath
  * @param {LavaMoatPolicy} policy
- * @returns {Promise<T>}
+ * @param {{ dev?: boolean }} [options]
+ * @returns {Promise<T>} Contents of imported module
  * @internal
  */
-export const execute = async (readPowers, entrypointPath, policy) => {
+export const execute = async (
+  readPowers,
+  entrypointPath,
+  policy,
+  { dev = false } = {}
+) => {
   const endoPolicy = await toEndoPolicy(policy)
   const entryPoint = toURLString(entrypointPath)
+  const conditions = devToConditions(dev)
   const { namespace } = await importLocation(readPowers, entryPoint, {
     ...ENDO_OPTIONS,
     modules: {
@@ -131,6 +150,7 @@ export const execute = async (readPowers, entrypointPath, policy) => {
       },
     },
     policy: endoPolicy,
+    conditions,
   })
   return namespace
 }
