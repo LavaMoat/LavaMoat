@@ -58,7 +58,7 @@ export const run = async (entrypointPath, policyOrOpts, options = {}) => {
   } else {
     const generateOpts =
       policyOrOpts ?? /** @type {GenerateAndRunOptions} */ ({})
-    runOpts = { readPowers: generateOpts.readPowers }
+    runOpts = { readPowers: generateOpts.readPowers, dev: generateOpts.dev }
     policy = await generatePolicy(entrypointPath, generateOpts)
   }
 
@@ -80,5 +80,5 @@ export const run = async (entrypointPath, policyOrOpts, options = {}) => {
       ? runOpts.readPowers
       : defaultReadPowers
   }
-  return execute(readPowers, entrypointPath, policy)
+  return execute(readPowers, entrypointPath, policy, { dev: runOpts.dev })
 }

@@ -132,6 +132,14 @@ const main = async (args = hideBin(process.argv)) => {
         coerce: path.resolve,
         global: true,
       },
+      dev: {
+        describe: 'Include development dependencies',
+        type: 'boolean',
+        global: true,
+        default: true,
+        coerce: Boolean,
+        group: BEHAVIOR_GROUP,
+      },
     })
     .middleware(
       /**
@@ -245,6 +253,7 @@ const main = async (args = hideBin(process.argv)) => {
           'policy-debug': policyDebugPath,
           'policy-override': policyOverridePath,
           write,
+          dev,
         } = argv
 
         /** @type {LavaMoatPolicy} */
@@ -257,6 +266,7 @@ const main = async (args = hideBin(process.argv)) => {
             policyPath,
             policyDebugPath,
             write,
+            dev,
           })
         } else {
           try {
@@ -285,6 +295,7 @@ const main = async (args = hideBin(process.argv)) => {
               type: 'boolean',
               describe: 'Additionally write a debug policy',
               group: BEHAVIOR_GROUP,
+              coerce: Boolean,
             },
           })
           .positional('entrypoint', {
@@ -319,11 +330,13 @@ const main = async (args = hideBin(process.argv)) => {
         debug,
         policy: policyPath,
         'policy-debug': policyDebugPath,
+        dev,
       }) => {
         await generateAndWritePolicy(entrypoint, {
           debug,
           policyPath,
           policyDebugPath,
+          dev,
         })
 
         if (debug) {
