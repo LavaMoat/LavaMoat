@@ -73,6 +73,10 @@ const main = async (args = hideBin(process.argv)) => {
 
   /**
    * Bug-reporting link for truly unexpected error messages
+   *
+   * @privateRemarks
+   * TODO: Once we sort out the `Error` types, we can add a field so any `Error`
+   * could opt-in to the "click here to report this bug" behavior.
    */
   const reportThisBug = `please ${terminalLink('report this bug', bugs)}`
 
@@ -199,10 +203,9 @@ const main = async (args = hideBin(process.argv)) => {
            * These are intended for use with tests.
            */
           .options({
-            generate: {
-              alias: ['g', 'gen'],
+            'generate-recklessly': {
               type: 'boolean',
-              describe: 'Generate policy file',
+              describe: `Generate a policy file on-the-fly; dangerous`,
               group: BEHAVIOR_GROUP,
               default: false,
               hidden: true,
@@ -247,7 +250,7 @@ const main = async (args = hideBin(process.argv)) => {
       async (argv) => {
         await Promise.resolve()
         const {
-          generate,
+          'generate-recklessly': generate,
           entrypoint,
           debug,
           policy: policyPath,
