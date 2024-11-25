@@ -93,6 +93,7 @@ const enforcePolicy = (specifier, referrerResourceId, wrappedRequire) => {
       return wrappedRequire()
     }
     if (
+      builtinName &&
       !builtinName.includes('.') &&
       keys(referrerPolicy.builtin).some((key) =>
         key.startsWith(`${builtinName}.`)
@@ -199,6 +200,10 @@ const findResourceId = (moduleId) => {
 const wrapRequireWithPolicy = (__webpack_require__, referrerResourceId) =>
   /** @this {object} */
   function (specifier, ...rest) {
+    // not collapsing to string if it's a production bundle optimized down to numbers
+    if (typeof specifier !== 'number') {
+      specifier = `${specifier}`
+    }
     const requireThat = __webpack_require__.bind(this, specifier, ...rest)
     return enforcePolicy(specifier, referrerResourceId, requireThat)
   }
