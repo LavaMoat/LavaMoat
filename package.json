@@ -69,6 +69,7 @@
   },
   "overrides": {
     "@types/node": "$@types/node",
+    "cross-spawn": "7.0.6",
     "ses": "$ses",
     "type-fest": "$type-fest",
     "util": "0.12.5"
