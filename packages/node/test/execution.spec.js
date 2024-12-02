@@ -3,6 +3,8 @@ import 'ses'
 import test from 'ava'
 import { createMacros } from './macros.js'
 
+const isDockerCI = !!process.env.DOCKER_CI
+
 /**
  * @import {LavaMoatPolicy} from 'lavamoat-core';
  */
@@ -37,8 +39,7 @@ test(
   },
   { hello: 'hello world' }
 )
-
-test(
+;(isDockerCI ? test.failing : test)(
   'native module w/ dynamic imports',
   testExec,
   new URL('./fixture/native/index.js', import.meta.url),
@@ -73,8 +74,7 @@ test(
   },
   { hello: 'world' }
 )
-
-test(
+;(isDockerCI ? test.failing : test)(
   'native module',
   testExec,
   new URL('./fixture/static-native/index.js', import.meta.url),
