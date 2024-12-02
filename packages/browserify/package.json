@@ -31,6 +31,7 @@
   "dependencies": {
     "@lavamoat/aa": "^4.3.0",
     "@lavamoat/lavapack": "^7.0.2",
+    "@lavamoat/sourcemap-validator": "2.1.1",
     "browser-resolve": "2.0.0",
     "concat-stream": "2.0.0",
     "convert-source-map": "2.0.0",
@@ -43,11 +44,10 @@
     "through2": "4.0.2"
   },
   "devDependencies": {
-    "@babel/code-frame": "7.25.9",
+    "@babel/code-frame": "7.26.2",
     "browserify": "17.0.1",
     "keccak": "3.0.4",
     "source-map-explorer": "2.5.3",
-    "sourcemap-validator": "2.1.0",
     "tmp-promise": "3.0.3",
     "watchify": "4.0.0"
   },

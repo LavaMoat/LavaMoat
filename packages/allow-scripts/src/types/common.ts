@@ -1,15 +1,29 @@
+import type { JsonObject, PackageJson } from 'type-fest';
+
 declare global {
+  export interface PkgLavamoatConfig {
+    allowBins?: JsonObject;
+    allowConfig?: JsonObject;
+    allowScripts?: JsonObject;
+    allowedPatterns?: JsonObject;
+    disallowedPatterns?: JsonObject;
+    excessPolicies?: JsonObject;
+    missingPolicies?: JsonObject;
+  }
+
+  export type LavamoatPackageJson = PackageJson & { lavamoat: PkgLavamoatConfig };
+
   export interface PkgInfo {
     canonicalName: string;
     path: string;
-    scripts: Object;
+    scripts: JsonObject;
   }
 
   /**
    * Configuration for a type of scripts policies
    */
   export interface ScriptsConfig {
-    allowConfig: Record<string, any>;
+    allowConfig: JsonObject;
     packagesWithScripts: Map<string, [PkgInfo]>;
     allowedPatterns: string[];
     disallowedPatterns: string[];
@@ -41,5 +55,63 @@ declare global {
      firewalledBins: BinInfo[];
      excessPolicies: string[];
      somePoliciesAreMissing: boolean;
+  }
+
+  // config.js
+  export interface SetDefaultConfigurationParams {
+    rootDir: string;
+    lifecycleEvents?: string[];
+  }
+
+  export interface SavePackageConfigurationsParams {
+    rootDir: string;
+    conf: PkgConfs;
+  }
+
+  export interface GetOptionsForBinParams {
+    rootDir: string;
+    name: string;
+    lifecycleEvents?: string[];
+  }
+
+  // setup.js
+  export interface AreBinsBlockedParams {
+    /** Turn off memoization, make a fresh lookup */
+    noMemoization?: boolean;
+  }
+
+  export interface PkgConfs {
+    packageJson: LavamoatPackageJson;
+    configs: {
+      lifecycle: ScriptsConfig;
+      bin: BinsConfig;
+    }
+    somePoliciesAreMissing: boolean;
+    canonicalNamesByPath: Map<string,string>;
+  }
+
+  export interface WriteRcFileContentParams {
+    file: string;
+    entry: string;
+  }
+
+  // runAllowedPackages.js
+  export interface RunAllowedPackagesParams {
+    rootDir: string;
+  }
+
+  export interface RunScriptParams {
+    event: string;
+    path: string;
+  }
+
+  // report.js
+  export interface PrintPackagesListParams {
+    rootDir: string;
+  }
+
+  export interface PrintMissingPoliciesIfAnyParams {
+    missingPolicies: string[];
+    packagesWithScripts: Map<string, unknown[]>;
   }
 }
