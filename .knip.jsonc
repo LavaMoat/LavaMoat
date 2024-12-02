@@ -1,0 +1,83 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "ava": {
+    "entry": ["packages/*/test/**/*.spec.js"],
+  },
+  "eslint": {
+    "config": ["**/.eslintrc.js", ".config/eslintrc.typed-workspace.js"],
+    "entry": ["**/.eslintrc.js"],
+  },
+  "typescript": {
+    "config": ["**/tsconfig*.json"],
+  },
+  "workspaces": {
+    ".": {
+      "entry": ["scripts/*.js"],
+      "project": ["scripts/**/*"],
+    },
+    "packages/aa": {
+      "entry": ["src/cli.js", "src/index.js"],
+      "project": ["src/**/*"],
+    },
+    "packages/allow-scripts": {
+      "entry": [
+        "src/cli.js",
+        "src/index.js",
+        "src/whichbin.js",
+        "test/prepare.js",
+      ],
+      "project": ["src/**/*", "test/utils.js"],
+    },
+    "packages/browserify": {
+      "entry": [
+        "src/index.js",
+        "test/fixtures/secureBundling/build.js",
+        "test/fixtures/secureBundling/run.js",
+        "test/fixtures/exampleApp/bundleEntry.js",
+      ],
+      "project": ["src/**/*", "test/prepare.js"],
+    },
+    "packages/core": {
+      "entry": ["src/index.js", "src/types.ts"],
+      "ignore": [
+        "src/kernelCoreTemplate.js",
+        "src/kernelTemplate.js",
+        "src/makeGeneralUtils.js",
+        "src/makePrepareRealmGlobalFromConfig.js",
+        "src/schema/ambient.ts",
+      ],
+      "project": ["src/**/*", "test/util.js"],
+    },
+    "packages/lavapack": {
+      "entry": ["src/index.js", "src/build-runtime.js"],
+      "ignore": ["src/runtime-template.js", "src/runtime-cjs-template.js"],
+      "project": ["src/**/*"],
+    },
+    "packages/perf": {
+      "entry": ["*.js"],
+      "project": ["*.js", "trials/**/*"],
+      "ignore": ["trials/**/*"],
+    },
+    "packages/survey": {
+      "entry": ["src/index.js", "src/execTest.js"],
+      "project": ["src/**/*"],
+    },
+    "packages/webpack": {
+      "entry": ["src/index.js"],
+      "ignore": ["src/runtime/runtime.js"],
+      "project": ["src/**/*"],
+    },
+    "packages/yarn-plugin-allow-scripts": {
+      "entry": ["sources/index.ts"],
+      "project": ["sources/**/*", "bundles/**/*"],
+    },
+    "packages/{laverna,lavamoat-node}": {
+      "entry": ["src/index.js"],
+      "project": ["src/**/*"],
+    },
+    "packages/tofu": {
+      "entry": ["src/index.js", "src/referenceTracker.js"],
+      "project": ["src/**/*"],
+    },
+  },
+}
