@@ -1,40 +1,9 @@
 {
-  "name": "lavamoat-monorepo",
-  "version": "0.0.0",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/lavamoat/lavamoat.git"
-  },
-  "private": true,
-  "workspaces": [
-    "packages/*"
-  ],
-  "engines": {
-    "node": "^16.20.0 || ^18.0.0 || ^20.0.0 || ^22.0.0 || ^24.0.0",
-    "npm": ">=7.0.0"
-  },
-  "scripts": {
-    "build": "npm run --workspaces --if-present build && npm run build:types",
-    "build:types": "tsc -b",
-    "clean:types": "git clean -fx -e \"**/node_modules/**\" \"packages/*/types/*.d.ts*\" \"*.tsbuildinfo\" || tsc -b --clean",
-    "lint": "npm run lint:eslint && npm run lint:deps && npm run lint:lockfile",
-    "lint:commit": "commitlint",
-    "lint:deps": "npm run --workspaces --if-present lint:deps",
-    "lint:eslint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "lint:lockfile": "node scripts/lint-lockfile.js",
-    "lint:staged": "lint-staged --config ./.config/lint-staged.config.js",
-    "rebuild": "npm run --workspaces --if-present rebuild && npm run rebuild:types",
-    "rebuild:types": "npm run clean:types && npm run build:types",
-    "release": "npm run release:rebuild && npm run release:publish --newPkg=${npm_config_newpkg}",
-    "release:dry-run": "laverna --dryRun --newPkg=${npm_config_newpkg}",
-    "release:publish": "laverna --newPkg=${npm_config_newpkg}",
-    "release:rebuild": "npm run rebuild && npm run test:prep && npm run test:workspaces",
-    "setup": "husky; npm run rebuild",
-    "test": "npm run build && npm run test:prep && npm run test:workspaces",
-    "test:prep": "npm run --workspaces --if-present test:prep",
-    "test:workspaces": "npm run --workspaces --if-present test",
-    "watch:types": "tsc -b --watch"
+  "ava": {
+    "files": [
+      "packages/*/test/*.spec.js"
+    ],
+    "timeout": "2m"
   },
   "devDependencies": {
     "@babel/types": "7.27.3",
@@ -60,6 +29,7 @@
     "expect-type": "1.2.2",
     "glob": "10.4.5",
     "husky": "9.1.7",
+    "knip": "5.46.0",
     "lint-staged": "16.1.6",
     "memfs": "4.17.2",
     "prettier": "3.6.2",
@@ -69,6 +39,11 @@
     "type-fest": "4.41.0",
     "typescript": "5.8.3"
   },
+  "engines": {
+    "node": "^16.20.0 || ^18.0.0 || ^20.0.0 || ^22.0.0 || ^24.0.0",
+    "npm": ">=7.0.0"
+  },
+  "name": "lavamoat-monorepo",
   "overrides": {
     "@babel/types": "$@babel/types",
     "@endo/compartment-mapper": "$@endo/compartment-mapper",
@@ -77,12 +52,6 @@
     "ses": "$ses",
     "type-fest": "$type-fest",
     "util": "0.12.5"
-  },
-  "ava": {
-    "files": [
-      "packages/*/test/*.spec.js"
-    ],
-    "timeout": "2m"
   },
   "prettier": {
     "jsdocCommentLineStrategy": "keep",
@@ -96,5 +65,38 @@
     "singleQuote": true,
     "trailingComma": "es5",
     "tsdoc": true
-  }
+  },
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lavamoat/lavamoat.git"
+  },
+  "scripts": {
+    "build": "npm run --workspaces --if-present build && npm run build:types",
+    "build:types": "tsc -b",
+    "clean:types": "git clean -fx -e \"**/node_modules/**\" \"packages/*/types/*.d.ts*\" \"*.tsbuildinfo\" || tsc -b --clean",
+    "knip": "knip",
+    "lint": "npm run lint:eslint && npm run lint:deps && npm run lint:lockfile",
+    "lint:commit": "commitlint",
+    "lint:deps": "npm run --workspaces --if-present lint:deps",
+    "lint:eslint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "lint:lockfile": "node scripts/lint-lockfile.js",
+    "lint:staged": "lint-staged --config ./.config/lint-staged.config.js",
+    "rebuild": "npm run --workspaces --if-present rebuild && npm run rebuild:types",
+    "rebuild:types": "npm run clean:types && npm run build:types",
+    "release": "npm run release:rebuild && npm run release:publish --newPkg=${npm_config_newpkg}",
+    "release:dry-run": "laverna --dryRun --newPkg=${npm_config_newpkg}",
+    "release:publish": "laverna --newPkg=${npm_config_newpkg}",
+    "release:rebuild": "npm run rebuild && npm run test:prep && npm run test:workspaces",
+    "setup": "husky; npm run rebuild",
+    "test": "npm run build && npm run test:prep && npm run test:workspaces",
+    "test:prep": "npm run --workspaces --if-present test:prep",
+    "test:workspaces": "npm run --workspaces --if-present test",
+    "watch:types": "tsc -b --watch"
+  },
+  "version": "0.0.0",
+  "workspaces": [
+    "packages/*"
+  ]
 }
