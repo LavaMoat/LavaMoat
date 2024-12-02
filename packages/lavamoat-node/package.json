@@ -42,7 +42,7 @@
     "json-stable-stringify": "1.1.1",
     "lavamoat-core": "^16.1.0",
     "lavamoat-tofu": "^8.0.2",
-    "node-gyp-build": "4.8.2",
+    "node-gyp-build": "4.8.4",
     "resolve": "1.22.8",
     "yargs": "17.7.2"
   },
