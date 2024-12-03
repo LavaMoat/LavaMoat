@@ -55,6 +55,7 @@ function parseArgs() {
     .command('run', 'run the allowed scripts')
     .command('auto', 'generate scripts policy in package.json')
     .command('setup', 'configure local repository to use allow-scripts')
+    .command('list', 'output allowed and disallowed packages')
     .option('experimental-bins', {
       alias: 'bin',
       describe:

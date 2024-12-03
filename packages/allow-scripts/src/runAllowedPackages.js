@@ -1,5 +1,5 @@
 /**
- * runAllowedPackages function
+ * RunAllowedPackages function
  *
  * @module
  */
@@ -25,7 +25,7 @@ async function runAllowedPackages({ rootDir }) {
       '\n@lavamoat/allow-scripts has detected dependencies without configuration. explicit configuration required.'
     )
     console.log(
-      'run "allow-scripts auto" to automatically populate the configuration.\n'
+      `run "allow-scripts auto${FEATURE.bins && ' --experimental-bins'}" to automatically populate the configuration.\n`
     )
 
     printMissingPoliciesIfAny(lifecycle)
