@@ -10,7 +10,7 @@ const mergeDeep = require('merge-deep')
 const { values, hasOwn } = Object
 
 /**
- * @import {LavaMoatPolicy, LavaMoatPolicyOverrides, GlobalPolicy, BuiltinPolicy, GlobalPolicyValue} from './schema'
+ * @import {LavaMoatPolicy, LavaMoatPolicyOverrides, GlobalPolicy, BuiltinPolicy, GlobalPolicyValue} from '@lavamoat/types'
  */
 
 /**
