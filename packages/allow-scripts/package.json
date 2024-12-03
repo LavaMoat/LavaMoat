@@ -50,7 +50,9 @@
     "yargs": "17.7.2"
   },
   "devDependencies": {
-    "@types/npmcli__promise-spawn": "6.0.3"
+    "@types/npmcli__promise-spawn": "6.0.3",
+    "@yarnpkg/core": "4.1.6",
+    "@yarnpkg/shell": "4.1.1"
   },
   "publishConfig": {
     "access": "public"

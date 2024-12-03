@@ -7,3 +7,4 @@ ignores:
   # only types (from @types/npmcli__promise-spawn) are referenced
   - '@npmcli/promise-spawn'
   - 'type-fest'
+  - '@yarnpkg/core'
