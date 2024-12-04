@@ -18,6 +18,24 @@
   * dependencies
     * lavamoat-core bumped from ^15.2.0 to ^15.2.1
 
+## [0.7.0-beta.0](https://github.com/LavaMoat/LavaMoat/compare/webpack-v0.7.0-beta.0...webpack-v0.7.0-beta.0) (2024-12-04)
+
+
+### Bug Fixes
+
+* **deps:** update babel monorepo ([e6f4e70](https://github.com/LavaMoat/LavaMoat/commit/e6f4e70cffe8237c27126046bb0cfa5515c2d138))
+* **deps:** update babel monorepo to v7.25.9 ([6d9d5a3](https://github.com/LavaMoat/LavaMoat/commit/6d9d5a3336444fada49e239756ffc3c207d3ff5d))
+* **deps:** update dependency ses to v1.9.0 ([75cae74](https://github.com/LavaMoat/LavaMoat/commit/75cae74063c444184fea3370bf9925bc7946846a))
+* **webpack:** prevent toString manipulation on a specifier ([1163085](https://github.com/LavaMoat/LavaMoat/commit/1163085b29bcc5a78f08b840393bf1edbe099045))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @lavamoat/aa bumped from ^4.3.0 to ^4.3.1
+    * lavamoat-core bumped from ^16.1.0 to ^16.2.0
+
 ## [0.7.0-beta.0](https://github.com/LavaMoat/LavaMoat/compare/webpack-v0.6.0-beta.0...webpack-v0.7.0-beta.0) (2024-10-11)
 
 

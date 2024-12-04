@@ -6,6 +6,33 @@
   * dependencies
     * lavamoat-tofu bumped from ^7.2.1 to ^7.2.2
 
+## [16.2.0](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v16.1.0...lavamoat-core-v16.2.0) (2024-12-04)
+
+
+### Features
+
+* **core:** policy sorting cli for cleaner sort order migration ([#1467](https://github.com/LavaMoat/LavaMoat/issues/1467)) ([b2cf7c3](https://github.com/LavaMoat/LavaMoat/commit/b2cf7c33fe59adcab888c72164818bd590cf11c7))
+* **core:** second param to mergePolicy is now explicitly optional ([f2302aa](https://github.com/LavaMoat/LavaMoat/commit/f2302aa1e805456e17bf966193676c1466bb98ca))
+* **core:** sort policy in a diff-friendly way ([#1350](https://github.com/LavaMoat/LavaMoat/issues/1350)) - sort order remains unchanged even if path to dependency changed. ([4af8ad7](https://github.com/LavaMoat/LavaMoat/commit/4af8ad7559e1ab12c541488cf537ecc18ce0d6dc))
+
+
+### Bug Fixes
+
+* **core:** fix broken references, type checking for mergePolicy.js ([b08adef](https://github.com/LavaMoat/LavaMoat/commit/b08adef9bdfaf19e3e5951cfe2019271d689124a))
+* **core:** move ses to production dependencies ([27c0e8b](https://github.com/LavaMoat/LavaMoat/commit/27c0e8b191c8a8145e90dd5487cd09cad75500de))
+* **core:** update vendored lockdown.umd.js ([41a2d54](https://github.com/LavaMoat/LavaMoat/commit/41a2d541f80956b2623d6176d8580825df29b52d))
+* **deps:** update babel monorepo ([e6f4e70](https://github.com/LavaMoat/LavaMoat/commit/e6f4e70cffe8237c27126046bb0cfa5515c2d138))
+* **deps:** update babel monorepo to v7.25.9 ([6d9d5a3](https://github.com/LavaMoat/LavaMoat/commit/6d9d5a3336444fada49e239756ffc3c207d3ff5d))
+* **deps:** update dependency ses to v1.9.0 ([75cae74](https://github.com/LavaMoat/LavaMoat/commit/75cae74063c444184fea3370bf9925bc7946846a))
+* **deps:** update dependency type-fest to v4.30.0 ([6528665](https://github.com/LavaMoat/LavaMoat/commit/6528665e2e99221366444c23a0e52be447e04071))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-tofu bumped from ^8.0.2 to ^8.0.3
+
 ## [16.1.0](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v16.0.1...lavamoat-core-v16.1.0) (2024-10-11)
 
 

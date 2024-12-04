@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.3](https://github.com/LavaMoat/LavaMoat/compare/laverna-v1.2.2...laverna-v1.2.3) (2024-12-04)
+
+
+### Bug Fixes
+
+* **deps:** update dependency type-fest to v4.30.0 ([6528665](https://github.com/LavaMoat/LavaMoat/commit/6528665e2e99221366444c23a0e52be447e04071))
+
 ## [1.2.2](https://github.com/LavaMoat/LavaMoat/compare/laverna-v1.2.1...laverna-v1.2.2) (2024-09-11)
 
 
