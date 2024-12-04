@@ -19,6 +19,26 @@
     * lavamoat-core bumped from ^15.2.0 to ^15.2.1
     * lavamoat-tofu bumped from ^7.2.1 to ^7.2.2
 
+## [9.0.3](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-v9.0.2...lavamoat-v9.0.3) (2024-12-04)
+
+
+### Bug Fixes
+
+* **deps:** update babel monorepo ([e6f4e70](https://github.com/LavaMoat/LavaMoat/commit/e6f4e70cffe8237c27126046bb0cfa5515c2d138))
+* **deps:** update babel monorepo to v7.25.9 ([6d9d5a3](https://github.com/LavaMoat/LavaMoat/commit/6d9d5a3336444fada49e239756ffc3c207d3ff5d))
+* **deps:** update babel monorepo to v7.26.2 ([9bac12a](https://github.com/LavaMoat/LavaMoat/commit/9bac12abd602632a6bd0ad3af5026cc627bf2b31))
+* **deps:** update dependency node-gyp-build to v4.8.4 ([1c21367](https://github.com/LavaMoat/LavaMoat/commit/1c21367dff7d83bc94cdcfb8b0245a27d3e32bd0))
+* **lavamoat-node:** fix the bug that prevented following dependency relationships listed in policy overrides ([61df9ed](https://github.com/LavaMoat/LavaMoat/commit/61df9edc47bca3c47d2975032d7db30de833b458))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @lavamoat/aa bumped from ^4.3.0 to ^4.3.1
+    * lavamoat-core bumped from ^16.1.0 to ^16.2.0
+    * lavamoat-tofu bumped from ^8.0.2 to ^8.0.3
+
 ## [9.0.2](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-v9.0.1...lavamoat-v9.0.2) (2024-10-11)
 
 

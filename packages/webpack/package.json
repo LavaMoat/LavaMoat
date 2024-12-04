@@ -37,10 +37,10 @@
     "webpack": "^5.80.2"
   },
   "dependencies": {
-    "@lavamoat/aa": "^4.3.0",
+    "@lavamoat/aa": "^4.3.1",
     "browser-resolve": "2.0.0",
     "json-stable-stringify": "1.1.1",
-    "lavamoat-core": "^16.1.0",
+    "lavamoat-core": "^16.2.0",
     "ses": "1.9.0"
   },
   "devDependencies": {
