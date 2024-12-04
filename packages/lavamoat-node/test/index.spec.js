@@ -151,3 +151,13 @@ test('execute - core modules and buffers', async (t) => {
     'should not have any standard output'
   )
 })
+
+test('execute - static require downstream from dynamic require', async (t) => {
+  const projectRoot = path.join(__dirname, 'projects', '7')
+  const entryId = path.join(projectRoot, 'index.js')
+  const { output } = await runLavamoat({
+    cwd: projectRoot,
+    args: [entryId],
+  })
+  t.is(output.stdout, '{"b":42,"c":42}\n')
+})

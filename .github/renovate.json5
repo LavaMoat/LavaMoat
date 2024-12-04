@@ -8,6 +8,7 @@
     ':enableVulnerabilityAlerts', // enables GitHub vulnerability alerts
     ':semanticCommits', // use semantic commits
     'group:linters', // group lint-related packages together
+    'workarounds:typesNodeVersioning', // tracks node versions from engines field in package.json for @types/node
   ],
   packageRules: [
     {

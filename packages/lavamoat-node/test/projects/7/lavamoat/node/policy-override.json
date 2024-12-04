@@ -1,0 +1,9 @@
+{
+  "resources": {
+    "a": {
+      "packages": {
+        "b": true
+      }
+    }
+  }
+}

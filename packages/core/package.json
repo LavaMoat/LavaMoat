@@ -38,16 +38,16 @@
     "test:ses": "bash ./test/ses.sh"
   },
   "dependencies": {
-    "@babel/types": "7.25.9",
+    "@babel/types": "7.26.0",
     "json-stable-stringify": "1.1.1",
     "lavamoat-tofu": "^8.0.2",
     "merge-deep": "3.0.3",
-    "type-fest": "4.26.1"
+    "ses": "1.9.0",
+    "type-fest": "4.30.0"
   },
   "devDependencies": {
-    "@types/json-stable-stringify": "1.0.36",
+    "@types/json-stable-stringify": "1.1.0",
     "@types/merge-deep": "3.0.3",
-    "ses": "1.9.0",
     "tmp-promise": "3.0.3"
   },
   "ava": {

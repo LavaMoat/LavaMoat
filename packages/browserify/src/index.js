@@ -7,10 +7,9 @@ const { createPackageDataStream } = require('./createPackageDataStream.js')
 const createLavaPack = require('@lavamoat/lavapack')
 const { createSesWorkaroundsTransform } = require('./sesTransforms')
 const { loadCanonicalNameMap } = require('@lavamoat/aa')
-const browserResolve = require('browser-resolve')
 
 // these are the reccomended arguments for lavaMoat to work well with browserify
-const reccomendedArgs = {
+const recommendedArgs = {
   // this option helps with parsing global usage
   insertGlobalVars: {
     global: false,
@@ -26,7 +25,7 @@ const reccomendedArgs = {
 module.exports = plugin
 module.exports.createLavamoatPacker = createLavamoatPacker
 module.exports.loadPolicy = loadPolicyFromPluginOpts
-module.exports.args = reccomendedArgs
+module.exports.args = recommendedArgs
 
 function plugin(browserify, pluginOpts) {
   // pluginOpts.policy is policy path
@@ -45,7 +44,7 @@ function plugin(browserify, pluginOpts) {
           rootDir: configuration.projectRoot,
           // need this in order to walk browser builtin deps
           includeDevDeps: true,
-          resolve: browserResolve,
+          resolve: configuration.resolve,
         })
       }
       return canonicalNameMap
@@ -135,6 +134,7 @@ function getConfigurationFromPluginOpts(pluginOpts) {
     'bundleWithPrecompiledModules',
     'policyDebug',
     'projectRoot',
+    'resolve',
   ]
 
   const allowedKeys = new Set([
@@ -177,6 +177,10 @@ function getConfigurationFromPluginOpts(pluginOpts) {
       pluginOpts.scuttleGlobalThisExceptions
   }
 
+  if (!pluginOpts.resolve) {
+    pluginOpts.resolve = require('browser-resolve')
+  }
+
   const configuration = {
     projectRoot: pluginOpts.projectRoot,
     includePrelude:
@@ -196,6 +200,7 @@ function getConfigurationFromPluginOpts(pluginOpts) {
         ? Boolean(pluginOpts.bundleWithPrecompiledModules)
         : true,
     actionOverrides: {},
+    resolve: pluginOpts.resolve,
   }
 
   // check for action overrides

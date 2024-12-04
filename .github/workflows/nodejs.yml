@@ -74,17 +74,17 @@ jobs:
     steps:
       - name: Checkout (PR)
         if: github.event_name == 'pull_request'
-        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       # fetch-depth: 0 looks like it has a perf impact, so let's not do that if we don't have to.
       # see https://github.com/actions/checkout/blob/main/README.md#usage
       - name: Checkout (Push)
         if: github.event_name != 'pull_request'
-        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           fetch-depth: 0 # needed for dirty check
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@0a44ba7841725637a19e28fa30b79a866c81b0a6 # v4
+        uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
@@ -93,7 +93,7 @@ jobs:
           corepack enable
           npm --version
       - name: Install Dependencies
-        uses: bahmutov/npm-install@dc9579d3dfb9c0e7a1f56c194eefcb8e2c9f0da5 # v1.10.3
+        uses: bahmutov/npm-install@438a933ce1059e4e2b39e3d2a42c5067070dd444 # v1.10.4
         with:
           useRollingCache: true
           install-command: npm ci --foreground-scripts
@@ -110,9 +110,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
       - name: Install Dependencies
-        uses: bahmutov/npm-install@dc9579d3dfb9c0e7a1f56c194eefcb8e2c9f0da5 # v1.10.3
+        uses: bahmutov/npm-install@438a933ce1059e4e2b39e3d2a42c5067070dd444 # v1.10.4
         with:
           useRollingCache: true
           install-command: npm ci --foreground-scripts
@@ -141,9 +141,9 @@ jobs:
         --workspace=packages/yarn-plugin-allow-scripts
     steps:
       - name: Checkout
-        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@0a44ba7841725637a19e28fa30b79a866c81b0a6 # v4
+        uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4
         with:
           node-version-file: .nvmrc
           cache: npm
@@ -152,7 +152,7 @@ jobs:
           corepack enable
           npm --version
       - name: Install Dependencies
-        uses: bahmutov/npm-install@dc9579d3dfb9c0e7a1f56c194eefcb8e2c9f0da5 # v1.10.3
+        uses: bahmutov/npm-install@438a933ce1059e4e2b39e3d2a42c5067070dd444 # v1.10.4
         with:
           useRollingCache: true
           install-command: npm ci --foreground-scripts
@@ -184,9 +184,9 @@ jobs:
         --workspace=packages/yarn-plugin-allow-scripts
     steps:
       - name: Checkout
-        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@0a44ba7841725637a19e28fa30b79a866c81b0a6 # v4
+        uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4
         with:
           node-version-file: .nvmrc
           cache: npm
@@ -195,7 +195,7 @@ jobs:
           corepack enable
           npm --version
       - name: Install Dependencies
-        uses: bahmutov/npm-install@dc9579d3dfb9c0e7a1f56c194eefcb8e2c9f0da5 # v1.10.3
+        uses: bahmutov/npm-install@438a933ce1059e4e2b39e3d2a42c5067070dd444 # v1.10.4
         with:
           useRollingCache: true
           install-command: npm ci --foreground-scripts

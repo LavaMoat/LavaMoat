@@ -80,7 +80,6 @@ module.exports = {
  */
 
 /**
- *
  * @param {ParseForPolicyOpts} opts
  * @returns {Promise<import('lavamoat-core').LavaMoatPolicy>}
  */
@@ -111,6 +110,7 @@ async function parseForPolicy({
     isBuiltin,
     resolveHook,
     canonicalNameMap,
+    policyOverride,
   })
   const moduleSpecifier = resolveHook(
     entryId,
@@ -261,7 +261,7 @@ function makeImportHook({
     await Promise.all(
       policyOverrideImports.map(async (packageName) => {
         // skip if there is already an entry for the name
-        if (packageName in importMap[packageName]) {
+        if (packageName in importMap) {
           return
         }
         // resolve and add package main in override
