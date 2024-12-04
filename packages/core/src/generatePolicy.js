@@ -31,7 +31,12 @@ const MODULE_REFS = /** @type {const} */ ({
   script: ['arguments', 'require', 'module', 'exports'],
 })
 
-module.exports = { rootSlug, createModuleInspector, getDefaultPaths }
+module.exports = {
+  rootSlug,
+  createModuleInspector,
+  getDefaultPaths,
+  diffFriendlySort,
+}
 
 /**
  * @param {ModuleInspectorOptions} opts
