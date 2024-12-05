@@ -6,6 +6,20 @@
   * dependencies
     * lavamoat-tofu bumped from ^7.2.1 to ^7.2.2
 
+## [16.2.1](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v16.2.0...lavamoat-core-v16.2.1) (2024-12-05)
+
+
+### Bug Fixes
+
+* make policy ordering consistntly manifest itself in json files produced ([a149a7d](https://github.com/LavaMoat/LavaMoat/commit/a149a7d16d65bc4255cf32211a671823356565da))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-tofu bumped from ^8.0.3 to ^8.0.4
+
 ## [16.2.0](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v16.1.0...lavamoat-core-v16.2.0) (2024-12-04)
 
 

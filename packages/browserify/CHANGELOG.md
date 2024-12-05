@@ -33,6 +33,23 @@
     * @lavamoat/lavapack bumped from ^6.1.1 to ^6.1.2
     * lavamoat-core bumped from ^15.2.0 to ^15.2.1
 
+## [18.1.1](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-browserify-v18.1.0...lavamoat-browserify-v18.1.1) (2024-12-05)
+
+
+### Bug Fixes
+
+* make policy ordering consistntly manifest itself in json files produced ([a149a7d](https://github.com/LavaMoat/LavaMoat/commit/a149a7d16d65bc4255cf32211a671823356565da))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @lavamoat/lavapack bumped from ^7.0.3 to ^7.0.4
+    * lavamoat-core bumped from ^16.2.0 to ^16.2.1
+  * devDependencies
+    * lavamoat bumped from 9.0.3 to 9.0.4
+
 ## [18.1.0](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-browserify-v18.0.2...lavamoat-browserify-v18.1.0) (2024-12-04)
 
 
