@@ -56,6 +56,9 @@ async function* eachNodeInTree({
 }) {
   // walk next record
   const moduleRecord = await importHook(moduleSpecifier)
+  if (moduleRecord === undefined) {
+    return
+  }
   yield moduleRecord
 
   // walk children specified in importMap and policyOverride

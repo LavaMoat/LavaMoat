@@ -74,6 +74,9 @@ function createModuleInspector(opts) {
     moduleRecord,
     { isBuiltin, includeDebugInfo = false }
   ) {
+    if (moduleRecord === undefined) {
+      return
+    }
     const { packageName, specifier, type } = moduleRecord
     // record the module
     moduleIdToModuleRecord.set(specifier, moduleRecord)
