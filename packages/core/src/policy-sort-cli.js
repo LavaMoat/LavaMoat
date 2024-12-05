@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 const fs = require('node:fs')
 const path = require('node:path')
-const { diffFriendlySort } = require('./generatePolicy')
+const { jsonStringifySortedPolicy } = require('./stringifyPolicy')
 
 const policyArg = process.argv[2]
 
@@ -18,8 +18,7 @@ if (!fs.existsSync(policyPath)) {
 
 try {
   const policy = JSON.parse(fs.readFileSync(policyPath, 'utf8'))
-  diffFriendlySort(policy)
-  fs.writeFileSync(policyPath, JSON.stringify(policy, null, 2))
+  fs.writeFileSync(policyPath, jsonStringifySortedPolicy(policy))
 } catch (e) {
   console.error(`Error: Unable to process file at path ${policyPath}`)
   console.error(e)

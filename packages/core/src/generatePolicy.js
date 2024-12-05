@@ -35,7 +35,6 @@ module.exports = {
   rootSlug,
   createModuleInspector,
   getDefaultPaths,
-  diffFriendlySort,
 }
 
 /**
@@ -450,47 +449,8 @@ function createModuleInspector(opts) {
     // merge override policy
     const mergedPolicy = mergePolicy(policy, policyOverride)
 
-    diffFriendlySort(mergedPolicy)
-
     return mergedPolicy
   }
-}
-
-/**
- * @param {import('./schema').LavaMoatPolicy} policy
- * @returns {void}
- */
-function diffFriendlySort(policy) {
-  if (!policy.resources) {
-    return
-  }
-  policy.resources = sortEntriesByReversedKey(policy.resources)
-  Object.values(policy.resources).forEach((resource) => {
-    if (!resource.packages) {
-      return
-    }
-    resource.packages = sortEntriesByReversedKey(resource.packages)
-  })
-}
-
-/**
- * @param {Record<string, any>} obj
- * @returns {Record<string, any>}
- */
-function sortEntriesByReversedKey(obj) {
-  return Object.fromEntries(
-    Object.entries(obj).sort((a, b) =>
-      reverseKey(a[0]).localeCompare(reverseKey(b[0]))
-    )
-  )
-}
-
-/**
- * @param {string} key
- * @returns {string}
- */
-function reverseKey(key) {
-  return key.split('>').reverse().join('<')
 }
 
 /**

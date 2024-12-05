@@ -2,8 +2,11 @@
 
 const path = require('node:path')
 const fs = require('node:fs')
-const jsonStringify = require('json-stable-stringify')
-const { loadPolicy, loadPolicyAndApplyOverrides } = require('lavamoat-core')
+const {
+  loadPolicy,
+  loadPolicyAndApplyOverrides,
+  jsonStringifySortedPolicy,
+} = require('lavamoat-core')
 const { loadCanonicalNameMap } = require('@lavamoat/aa')
 const { parseForPolicy } = require('./parseForPolicy')
 const { createKernel } = require('./kernel')
@@ -60,14 +63,14 @@ async function runLava(options) {
     // write policy debug file
     if (includeDebugInfo) {
       fs.mkdirSync(path.dirname(policyDebugPath), { recursive: true })
-      fs.writeFileSync(policyDebugPath, jsonStringify(policy, { space: 2 }))
+      fs.writeFileSync(policyDebugPath, jsonStringifySortedPolicy(policy))
       console.warn(`LavaMoat wrote policy debug to "${policyDebugPath}"`)
     }
     // cleanup debug info
     delete policy.debugInfo
     // write policy file
     fs.mkdirSync(path.dirname(policyPath), { recursive: true })
-    fs.writeFileSync(policyPath, jsonStringify(policy, { space: 2 }))
+    fs.writeFileSync(policyPath, jsonStringifySortedPolicy(policy))
     console.warn(`LavaMoat wrote policy to "${policyPath}"`)
   }
   if (shouldRunApplication) {

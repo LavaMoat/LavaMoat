@@ -1,7 +1,6 @@
 const fs = require('node:fs')
 const path = require('node:path')
-const { getDefaultPaths } = require('lavamoat-core')
-const jsonStringify = require('json-stable-stringify')
+const { getDefaultPaths, jsonStringifySortedPolicy } = require('lavamoat-core')
 const { createModuleInspectorSpy } = require('./createModuleInspectorSpy.js')
 const { createPackageDataStream } = require('./createPackageDataStream.js')
 const createLavaPack = require('@lavamoat/lavapack')
@@ -232,7 +231,7 @@ function writeAutoPolicy(policy, configuration) {
     })
     fs.writeFileSync(
       configuration.policyPaths.debug,
-      jsonStringify(policy, { space: 2 })
+      jsonStringifySortedPolicy(policy)
     )
     console.warn(
       `LavaMoat wrote policy debug to "${configuration.policyPaths.debug}"`
@@ -245,16 +244,13 @@ function writeAutoPolicy(policy, configuration) {
   if (!fs.existsSync(policyOverridePath)) {
     const basicPolicy = { resources: {} }
     fs.mkdirSync(path.dirname(policyOverridePath), { recursive: true })
-    fs.writeFileSync(
-      policyOverridePath,
-      jsonStringify(basicPolicy, { space: 2 })
-    )
+    fs.writeFileSync(policyOverridePath, jsonStringifySortedPolicy(basicPolicy))
     console.warn(`LavaMoat Override Policy - wrote to "${policyOverridePath}"`)
   }
   // write policy file
   const policyPath = configuration.policyPaths.primary
   fs.mkdirSync(path.dirname(policyPath), { recursive: true })
-  fs.writeFileSync(policyPath, jsonStringify(policy, { space: 2 }))
+  fs.writeFileSync(policyPath, jsonStringifySortedPolicy(policy))
   console.warn(`LavaMoat Policy - wrote to "${policyPath}"`)
 }
 

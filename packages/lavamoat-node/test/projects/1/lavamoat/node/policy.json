@@ -6,9 +6,15 @@
     }
   },
   "resources": {
+    "a>0zero": {
+      "builtin": {
+        "fs.createReadStream": true
+      }
+    },
     "a": {
       "packages": {
-        "$root$": true
+        "$root$": true,
+        "a>0zero": true
       }
     }
   }

@@ -38,6 +38,18 @@ testInspect(
 )
 
 testInspect(
+  'cjs - nesting works off of a variable',
+  {},
+  () => {
+    const fs = require('node:fs')
+    fs.readFileSync
+  },
+  {
+    cjsImports: ['node:fs.readFileSync'],
+  }
+)
+
+testInspect(
   'cjs - include even if declared var is unused',
   {},
   () => {
