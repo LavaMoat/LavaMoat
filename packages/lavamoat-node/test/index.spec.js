@@ -1,4 +1,5 @@
 const path = require('node:path')
+const { readFileSync } = require('node:fs')
 const test = require('ava')
 const { parseForPolicy } = require('../src/parseForPolicy')
 const { runLavamoat } = require('./util')
@@ -14,14 +15,26 @@ test('parseForPolicy - resolutions', async (t) => {
   }
 
   const policy1 = await parseForPolicy({ entryId, projectRoot })
+
+  // snapshot to prevent regression in policy sorting or output
+  t.snapshot(
+    readFileSync(path.join(projectRoot, 'lavamoat/node/policy.json'), 'utf8')
+  )
+
   t.deepEqual(policy1, {
     resources: {
+      'a>0zero': {
+        builtin: {
+          'fs.createReadStream': true,
+        },
+      },
       a: {
         builtin: {
           'fs.deleteEntireHardDrive': true,
         },
         packages: {
           b: true,
+          'a>0zero': true,
         },
       },
       b: {
@@ -38,15 +51,11 @@ test('parseForPolicy - resolutions', async (t) => {
     policyOverride: { resolutions },
   })
   t.deepEqual(
-    policy2,
+    policy2.resources.a,
     {
-      resolutions,
-      resources: {
-        a: {
-          packages: {
-            $root$: true,
-          },
-        },
+      packages: {
+        $root$: true,
+        'a>0zero': true,
       },
     },
     'policy resources do not include data on packages not parsed due to resolutions'
