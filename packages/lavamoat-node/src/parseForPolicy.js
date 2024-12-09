@@ -186,14 +186,22 @@ function makeImportHook({
     const extension = path.extname(filename)
     const packageName = getPackageNameForModulePath(canonicalNameMap, filename)
 
-    if (commonjsExtensions.includes(extension)) {
-      return makeJsModuleRecord(specifier, filename, packageName)
-    }
     if (extension === '.node') {
       return makeNativeModuleRecord(specifier, filename, packageName)
     }
+    try {
+      var content = await fs.readFile(filename, 'utf8')
+    } catch (err) {
+      console.warn(
+        `lavamoat-node/makeImportHook - could not read file "${filename}"`
+      )
+      return undefined
+    }
+    if (commonjsExtensions.includes(extension)) {
+      return makeJsModuleRecord(specifier, content, filename, packageName)
+    }
     if (extension === '.json') {
-      return makeJsonModuleRecord(specifier, filename, packageName)
+      return makeJsonModuleRecord(specifier, content, filename, packageName)
     }
     throw new Error(
       `lavamoat-node/makeImportHook - unknown module file extension "${extension}" in filename "${filename}"`
@@ -226,9 +234,7 @@ function makeImportHook({
     })
   }
 
-  async function makeJsModuleRecord(specifier, filename, packageName) {
-    // load src
-    const content = await fs.readFile(filename, 'utf8')
+  async function makeJsModuleRecord(specifier, content, filename, packageName) {
     // parse
     const ast = parseModule(content, specifier)
     // get imports
@@ -264,8 +270,18 @@ function makeImportHook({
         if (packageName in importMap) {
           return
         }
+        // do not pursue root as a dependency to scan
+        if (packageName === '$root$') {
+          return
+        }
         // resolve and add package main in override
         const packageRoot = getMapKeyForValue(canonicalNameMap, packageName)
+        if (!packageRoot) {
+          console.warn(
+            `lavamoat could not find package's entry script for ${packageName} as found in policy-override`
+          )
+          return
+        }
         const packageJson = JSON.parse(
           await fs.readFile(path.join(packageRoot, 'package.json'), 'utf8')
         )
@@ -318,9 +334,12 @@ function makeImportHook({
     })
   }
 
-  async function makeJsonModuleRecord(specifier, filename, packageName) {
-    // load src
-    const rawContent = await fs.readFile(filename, 'utf8')
+  async function makeJsonModuleRecord(
+    specifier,
+    rawContent,
+    filename,
+    packageName
+  ) {
     // validate json
     JSON.parse(rawContent)
     // wrap as commonjs module
