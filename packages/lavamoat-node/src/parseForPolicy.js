@@ -278,7 +278,7 @@ function makeImportHook({
         const packageRoot = getMapKeyForValue(canonicalNameMap, packageName)
         if (!packageRoot) {
           console.warn(
-            `could not find package root for ${packageName} as found in policy-override`
+            `lavamoat could not find package's entry script for ${packageName} as found in policy-override`
           )
           return
         }
