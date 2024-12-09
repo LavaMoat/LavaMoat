@@ -19,6 +19,20 @@
     * lavamoat-core bumped from ^15.2.0 to ^15.2.1
     * lavamoat-tofu bumped from ^7.2.1 to ^7.2.2
 
+## [9.0.5](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-v9.0.4...lavamoat-v9.0.5) (2024-12-09)
+
+
+### Bug Fixes
+
+* 2 bugs manifested in walking content from policy-overrides ([#1471](https://github.com/LavaMoat/LavaMoat/issues/1471)) ([7599146](https://github.com/LavaMoat/LavaMoat/commit/7599146f6412777dd13d681283e1b5344297d0eb))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-core bumped from ^16.2.1 to ^16.2.2
+
 ## [9.0.4](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-v9.0.3...lavamoat-v9.0.4) (2024-12-05)
 
 

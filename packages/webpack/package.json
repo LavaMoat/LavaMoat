@@ -40,7 +40,7 @@
     "@lavamoat/aa": "^4.3.1",
     "browser-resolve": "2.0.0",
     "json-stable-stringify": "1.1.1",
-    "lavamoat-core": "^16.2.1",
+    "lavamoat-core": "^16.2.2",
     "ses": "1.9.0"
   },
   "devDependencies": {
