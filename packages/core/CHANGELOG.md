@@ -6,6 +6,13 @@
   * dependencies
     * lavamoat-tofu bumped from ^7.2.1 to ^7.2.2
 
+## [16.2.2](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v16.2.1...lavamoat-core-v16.2.2) (2024-12-09)
+
+
+### Bug Fixes
+
+* 2 bugs manifested in walking content from policy-overrides ([#1471](https://github.com/LavaMoat/LavaMoat/issues/1471)) ([7599146](https://github.com/LavaMoat/LavaMoat/commit/7599146f6412777dd13d681283e1b5344297d0eb))
+
 ## [16.2.1](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v16.2.0...lavamoat-core-v16.2.1) (2024-12-05)
 
 
