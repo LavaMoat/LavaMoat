@@ -74,6 +74,10 @@ class LavaMoatPlugin {
    */
   constructor(options = {}) {
     /** @type {LavaMoatPluginOptions} */
+    if (options.scuttleGlobalThis === true) {
+      options.scuttleGlobalThis = { enabled: true }
+    }
+    options.scuttleGlobalThis = Object.assign({}, options.scuttleGlobalThis)
     this.options = {
       policyLocation: path.join('lavamoat', 'webpack'),
       lockdown: lockdownDefaults,
@@ -433,6 +437,7 @@ class LavaMoatPlugin {
 
         const onceForChunkSet = new WeakSet()
         const runtimeOptions = {
+          scuttleGlobalThis: options.scuttleGlobalThis,
           lockdown: options.lockdown,
         }
 
@@ -471,7 +476,7 @@ class LavaMoatPlugin {
                 // narrow down the policy and map to module identifiers
                 const policyData = identifierLookup.getTranslatedPolicy()
 
-                const lavaMoatRuntime = assembleRuntime(RUNTIME_KEY, [
+                const runtimeChunks = [
                   {
                     name: 'root',
                     data: identifierLookup.root || null,
@@ -493,6 +498,12 @@ class LavaMoatPlugin {
                     json: true,
                   },
                   { name: 'options', data: runtimeOptions, json: true },
+                  (typeof runtimeOptions?.scuttleGlobalThis === 'boolean' && runtimeOptions?.scuttleGlobalThis === true) ||
+                  (typeof runtimeOptions?.scuttleGlobalThis === 'object' && runtimeOptions?.scuttleGlobalThis?.enabled === true) ?
+                  {
+                    name: 'scuttling',
+                    shimRequire: 'lavamoat-core/src/scuttle.js',
+                  } : {},
                   { name: 'policy', data: policyData, json: true },
                   {
                     name: 'ENUM',
@@ -507,7 +518,12 @@ class LavaMoatPlugin {
                     name: 'runtime',
                     file: path.join(__dirname, './runtime/runtime.js'),
                   },
-                ])
+                ]
+
+                const lavaMoatRuntime = assembleRuntime(
+                  RUNTIME_KEY,
+                  runtimeChunks
+                )
 
                 // set.add(RuntimeGlobals.onChunksLoaded); // TODO: develop an understanding of what this line does and why it was a part of the runtime setup for module federation
 
@@ -577,6 +593,13 @@ LavaMoatPlugin.exclude = EXCLUDE_LOADER
 module.exports = LavaMoatPlugin
 
 /**
+ * @typedef {Object} ScuttlerConfig
+ * @property {boolean} [enabled] - Indicates whether the feature is enabled
+ * @property {string[]} [exceptions] - A list of exceptions as strings
+ * @property {string} [scuttlerName] - The name of the scuttler
+ */
+
+/**
  * @typedef {Object} LavaMoatPluginOptions
  * @property {boolean} [generatePolicy] - Generate the policy file
  * @property {string} [rootDir] - Specify root directory for canonicalNames to
@@ -600,6 +623,7 @@ module.exports = LavaMoatPlugin
  * @property {(specifier: string) => boolean} isBuiltin - A function that
  *   determines if the specifier is a builtin of the runtime platform e.g.
  *   node:fs
+ * @property {ScuttlerConfig | boolean} [scuttleGlobalThis] - Configuration for enabling scuttling mode
  */
 
 // Provided inline because import('ses') won't work in jsdoc of a cjs module
