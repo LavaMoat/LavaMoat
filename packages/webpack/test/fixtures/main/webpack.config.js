@@ -26,6 +26,7 @@ Object.defineProperty(module.exports, 'makeConfig', {
 
 function makeConfig(lmOptions = {}) {
   return {
+    cache: false,
     entry: {
       app: './main.js',
     },
