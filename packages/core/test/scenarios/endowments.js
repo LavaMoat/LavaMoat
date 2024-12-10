@@ -46,6 +46,15 @@ module.exports = [
   async () => {
     const scenario = createScenarioFromScaffold({
       name: 'endowments - Date.now works in root and non-root',
+      configOverride: {
+        resources: {
+          one: {
+            globals: {
+              Date: true,
+            },
+          },
+        },
+      },
       defineEntry: () => {
         const testResult = {
           root: Date.now(),
