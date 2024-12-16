@@ -26,6 +26,10 @@
       "types": "./types/src/index.d.ts",
       "import": "./src/index.js"
     },
+    "./cli": {
+      "types": "./types/src/cli.d.ts",
+      "import": "./src/cli.js"
+    },
     "./package.json": "./package.json"
   },
   "directories": {
