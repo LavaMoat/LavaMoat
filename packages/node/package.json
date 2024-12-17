@@ -5,13 +5,11 @@
   "description": "Next-gen LavaMoat for Node.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/LavaMoat/LavaMoat.git",
+    "url": "git+https://github.com/LavaMoat/LavaMoat.git",
     "directory": "packages/node"
   },
   "homepage": "https://lavamoat.github.io",
-  "bugs": {
-    "url": "https://github.com/LavaMoat/LavaMoat/issues"
-  },
+  "bugs": "https://github.com/LavaMoat/LavaMoat/issues",
   "author": "LavaMoat Project",
   "license": "MIT",
   "engines": {
@@ -19,7 +17,7 @@
     "npm": ">=9.0.0"
   },
   "bin": {
-    "lavamoat": "./src/cli.js"
+    "lavamoat": "src/cli.js"
   },
   "exports": {
     ".": {
