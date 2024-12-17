@@ -28,6 +28,7 @@
 import './preamble.js'
 
 import chalk from 'chalk'
+import stringify from 'json-stable-stringify'
 import assert from 'node:assert'
 import fs from 'node:fs'
 import path from 'node:path'
@@ -36,7 +37,7 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 import * as constants from './constants.js'
 import { log } from './log.js'
-import { generateAndWritePolicy } from './policy-gen/index.js'
+import { generatePolicy } from './policy-gen/index.js'
 import { loadPolicies } from './policy.js'
 import { run } from './run.js'
 import { readJsonFile } from './util.js'
@@ -52,6 +53,11 @@ import { readJsonFile } from './util.js'
 const BEHAVIOR_GROUP = 'Behavior Options:'
 
 /**
+ * "Path options" group name for `--help` output
+ */
+const PATH_GROUP = 'Path Options:'
+
+/**
  * Use this to give emphasis to words in error messages
  */
 const em = chalk.yellow
@@ -60,15 +66,22 @@ const em = chalk.yellow
  * Main entry point to CLI
  */
 const main = async (args = hideBin(process.argv)) => {
-  // TODO: In Node.js v23, import attributes are no longer flagged as experimental.
-  // use that instead of this. see https://nodejs.org/api/esm.html#import-attributes
-  const {
-    version,
-    homepage,
-    bugs: { url: bugs },
-  } = /** @type {PackageJson & { homepage: string; bugs: { url: string } }} */ (
+  // In Node.js v23, import attributes are no longer flagged as experimental.
+  // See https://nodejs.org/api/esm.html#import-attributes
+  // TODO: Use import attributes instead
+  // #region use import attributes instead
+  const pkgJson = /** @type {PackageJson} */ (
     await readJsonFile(new URL('../package.json', import.meta.url))
   )
+  const version = `${pkgJson.version}`
+  const homepage = `${pkgJson.homepage}`
+  // strip the `git+` prefix from protocol and `.git` suffix
+  const repository = `${/** @type {any} */ (pkgJson.repository).url}`.slice(
+    4,
+    -4
+  )
+  const bugs = `${pkgJson.bugs}`
+  // #endregion
 
   /**
    * Bug-reporting link for truly unexpected error messages
@@ -78,6 +91,28 @@ const main = async (args = hideBin(process.argv)) => {
    * could opt-in to the "click here to report this bug" behavior.
    */
   const reportThisBug = `please ${terminalLink('report this bug', bugs)}`
+
+  /**
+   * Asserts that an entrypoint path is both a) an absolute path and b)
+   * readable.
+   *
+   * Returns `true` upon success; otherwise throws.
+   *
+   * @remarks
+   * Returns `true` because yargs expects a boolean return value from `check()`.
+   * @param {string} entrypoint
+   * @returns {true}
+   */
+  const validateEntrypoint = (entrypoint) => {
+    assert(
+      path.isAbsolute(entrypoint),
+      `${em('entrypoint')} must be an absolute path; ${reportThisBug}`
+    )
+    // TODO: suppress stack trace and print nicer message
+    fs.accessSync(entrypoint, fs.constants.R_OK),
+      `File ${entrypoint} does not exist or is not readable`
+    return true
+  }
 
   /**
    * @remarks
@@ -93,7 +128,15 @@ const main = async (args = hideBin(process.argv)) => {
     .scriptName('lavamoat')
     .version(`${version}`)
     .epilog(
-      `📖 Read the docs at ${terminalLink(homepage, homepage, { fallback: false })}\n`
+      // Careful with this string. yargs wants to word-wrap, and it uses a naïve
+      // string length check instead of the functional ANSI width. In other
+      // words: keep it short
+      `Resources:
+
+  🌋 ${terminalLink('LavaMoat on GitHub', repository)}
+  🐛 Bugs? ${terminalLink('Issue tracker', bugs)}
+  📖 Read ${terminalLink(`the LavaMoat docs`, homepage)}
+`
     )
     .options({
       // the three policy options are used for both reading and writing
@@ -106,6 +149,7 @@ const main = async (args = hideBin(process.argv)) => {
         nargs: 1,
         requiresArg: true,
         global: true,
+        group: PATH_GROUP,
       },
       'policy-override': {
         alias: ['o'],
@@ -116,6 +160,7 @@ const main = async (args = hideBin(process.argv)) => {
         nargs: 1,
         requiresArg: true,
         global: true,
+        group: PATH_GROUP,
       },
       'policy-debug': {
         describe: 'Filepath to a policy debug file',
@@ -124,6 +169,7 @@ const main = async (args = hideBin(process.argv)) => {
         type: 'string',
         requiresArg: true,
         global: true,
+        group: PATH_GROUP,
       },
       cwd: {
         describe: 'Path to application root directory',
@@ -135,6 +181,7 @@ const main = async (args = hideBin(process.argv)) => {
         defaultDescription: '(current directory)',
         coerce: path.resolve,
         global: true,
+        group: PATH_GROUP,
       },
       dev: {
         describe: 'Include development dependencies',
@@ -160,51 +207,62 @@ const main = async (args = hideBin(process.argv)) => {
         )
         argv['policy-debug'] = path.resolve(argv.cwd, argv['policy-debug'])
       },
-      true
+      true // RUN BEFORE CHECK FN
     )
-    .check((argv) => {
-      assert(
-        path.isAbsolute(argv.cwd),
-        `${em('cwd')} must be an absolute path; ${reportThisBug}`
-      )
-      assert(
-        path.isAbsolute(argv.policy),
-        `${em('policy')} must be an absolute path; ${reportThisBug}`
-      )
-      assert(
-        path.isAbsolute(argv['policy-override']),
-        `${em('policy-override')} must be an absolute path; ${reportThisBug}`
-      )
-      assert(
-        path.isAbsolute(argv['policy-debug']),
-        `${em('policy-debug')} must be an absolute path; ${reportThisBug}`
-      )
-      return true
-    })
+    .check(
+      /**
+       * This validator is _global_ and runs before command-specific validators
+       * (I think)
+       */
+      (argv) => {
+        assert(
+          path.isAbsolute(argv.cwd),
+          `${em('cwd')} must be an absolute path; ${reportThisBug}`
+        )
+        assert(
+          path.isAbsolute(argv.policy),
+          `${em('policy')} must be an absolute path; ${reportThisBug}`
+        )
+        assert(
+          path.isAbsolute(argv['policy-override']),
+          `${em('policy-override')} must be an absolute path; ${reportThisBug}`
+        )
+        assert(
+          path.isAbsolute(argv['policy-debug']),
+          `${em('policy-debug')} must be an absolute path; ${reportThisBug}`
+        )
+        return true
+      }
+    )
     /**
      * Default command (no command)
      */
     .command(
       ['$0 <entrypoint>', 'run <entrypoint>'],
-      'Run a Node.js application safely using LavaMoat',
+      'Run a Node.js application safely',
       (yargs) =>
         yargs
           .positional('entrypoint', {
             describe: 'Path to the application entry point; relative to --cwd',
             type: 'string',
             normalize: true,
+            demandOption: true,
           })
-          .demandOption('entrypoint')
           /**
            * These options are hidden because we don't want to encourage running
            * without inspecting the policy.
            *
            * These are intended for use with tests.
+           *
+           * @remarks
+           * This call to `options()` is just a logical grouping to keep these
+           * separate from the non-hidden options; i.e., it could have been just
+           * a single call to `options()`.
            */
           .options({
             'generate-recklessly': {
               type: 'boolean',
-              describe: `Generate a policy file on-the-fly; dangerous`,
+              describe: 'Generate & write a policy file on-the-fly',
               group: BEHAVIOR_GROUP,
               default: false,
               hidden: true,
@@ -213,38 +271,33 @@ const main = async (args = hideBin(process.argv)) => {
               type: 'boolean',
               describe: 'Write policy file(s) to disk',
               group: BEHAVIOR_GROUP,
-              implies: 'generate',
+              implies: 'generate-recklessly',
               hidden: true,
             },
             debug: {
               type: 'boolean',
               describe: 'Additionally write a debug policy',
               group: BEHAVIOR_GROUP,
-              implies: 'generate',
+              implies: 'generate-recklessly',
               hidden: true,
             },
           })
           /**
            * Resolve entrypoint from `cwd`
            */
-          .middleware((argv) => {
-            argv.entrypoint = path.resolve(argv.cwd, argv.entrypoint)
-          }, true)
-          .check((argv) => {
-            assert(
-              path.isAbsolute(argv.entrypoint),
-              `${em('entrypoint')} must be an absolute path; ${reportThisBug}`
-            )
-            fs.accessSync(argv.entrypoint, fs.constants.R_OK),
-              `File ${argv.entrypoint} does not exist or is not readable`
-            return true
-          }),
+          .middleware(
+            (argv) => {
+              argv.entrypoint = path.resolve(argv.cwd, argv.entrypoint)
+            },
+            true // RUN BEFORE CHECK FN
+          )
+          .check(({ entrypoint }) => validateEntrypoint(entrypoint)),
       /**
        * Default command handler.
        *
        * @remarks
-       * (That's "handler for the default command"--_not_ "default handler for a
-       * command").
+       * This is the "handler for the default command"—_not_ the "default
+       * handler for a command" (there is no such beast)
        */
       async (argv) => {
         await Promise.resolve()
@@ -255,16 +308,21 @@ const main = async (args = hideBin(process.argv)) => {
           policy: policyPath,
           'policy-debug': policyDebugPath,
           'policy-override': policyOverridePath,
-          write,
           dev,
+          write,
         } = argv
 
-        /** @type {LavaMoatPolicy} */
+        /**
+         * This will be the policy merged with overrides, if present
+         *
+         * @type {LavaMoatPolicy}
+         */
         let policy
 
         if (generate) {
-          // let this reject since the failure mode is not obvious
-          policy = await generateAndWritePolicy(entrypoint, {
+          // let this reject since the failure mode could be any number of
+          // terrible things
+          policy = await generatePolicy(entrypoint, {
             debug,
             policyPath,
             policyDebugPath,
@@ -281,6 +339,12 @@ const main = async (args = hideBin(process.argv)) => {
                 `Could not load policy from ${em(argv.policy)} and/or ${em(argv['policy-override'])}; reason:\n${err.message}`
               )
             }
+            if (err.code === 'EISDIR') {
+              // TODO: actually allow a directory and apply a default filename
+              throw new Error(
+                `Could not load policy from ${em(argv.policy)} and/or ${em(argv['policy-override'])}; specify a filepath instead of a directory`
+              )
+            }
             throw err
           }
         }
@@ -289,8 +353,8 @@ const main = async (args = hideBin(process.argv)) => {
       }
     )
     .command(
-      ['gen <entrypoint>', 'generate <entrypoint>'],
-      'Generate & write policy; overwrites existing file(s)',
+      ['generate <entrypoint>', 'gen <entrypoint>'],
+      'Generate a policy',
       (yargs) =>
         yargs
           .options({
@@ -300,14 +364,22 @@ const main = async (args = hideBin(process.argv)) => {
               group: BEHAVIOR_GROUP,
               coerce: Boolean,
             },
+            write: {
+              describe:
+                'Write policy file(s) to disk; if false, print to stdout',
+              type: 'boolean',
+              coerce: Boolean,
+              default: true,
+              group: BEHAVIOR_GROUP,
+            },
           })
           .positional('entrypoint', {
+            demandOption: true,
             describe: 'Path to the application entry point',
             type: 'string',
             normalize: true,
             coerce: path.resolve,
           })
-          .demandOption('entrypoint')
           .middleware(
             /**
              * Resolve entrypoint from `cwd`
@@ -320,23 +392,18 @@ const main = async (args = hideBin(process.argv)) => {
             },
             true
           )
-          .check((argv) => {
-            assert(
-              path.isAbsolute(argv.entrypoint),
-              `${em('entrypoint')} must be an absolute path; ${reportThisBug}`
-            )
-            fs.accessSync(argv.entrypoint, fs.constants.R_OK)
-            return true
-          }),
+          .check(({ entrypoint }) => validateEntrypoint(entrypoint)),
       async ({
         entrypoint,
         debug,
         policy: policyPath,
         'policy-debug': policyDebugPath,
         dev,
+        write,
       }) => {
-        await generateAndWritePolicy(entrypoint, {
+        const policy = await generatePolicy(entrypoint, {
           debug,
+          write,
           policyPath,
           policyDebugPath,
           dev,
@@ -345,7 +412,12 @@ const main = async (args = hideBin(process.argv)) => {
         if (debug) {
           log.info(`Wrote debug policy to ${policyDebugPath}`)
         }
-        log.info(`Wrote policy to ${policyPath}`)
+        if (write) {
+          log.info(`Wrote policy to ${policyPath}`)
+        } else {
+          // eslint-disable-next-line no-console
+          console.log(`\n${stringify(policy, { space: 2 })}`)
+        }
       }
     )
     .fail((msg, err, yargs) => {
