@@ -1,0 +1,45 @@
+{
+  "name": "@lavamoat/lockfile-lint",
+  "version": "0.1.0",
+  "description": "Opinionated lockfile linter based on lockfile-lint-api",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LavaMoat/LavaMoat.git",
+    "directory": "packages/lockfile-lint"
+  },
+  "homepage": "https://github.com/LavaMoat/LavaMoat/blob/main/packages/lockfile-lint/README.md",
+  "bugs": {
+    "url": "https://github.com/LavaMoat/LavaMoat/issues"
+  },
+  "author": "naugtur",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "bin": {
+    "lockfile-lint": "src/cli.js"
+  },
+  "directories": {
+    "test": "test"
+  },
+  "files": [
+    "CHANGELOG.md",
+    "src/*.js",
+    "!*.tsbuildinfo"
+  ],
+  "keywords": [
+    "lockfile",
+    "security",
+    "dependencies",
+    "supply-chain"
+  ],
+  "scripts": {
+    "test": "ava"
+  },
+  "dependencies": {
+    "lockfile-lint-api": "^5.9.1"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
