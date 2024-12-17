@@ -1,5 +1,7 @@
 # lockfile-lint
 
+> WARNING: This is an early version. The opinions are still forming and anything can change at any time.
+
 Validate your lockfile against an opinionated set of rules coming from LavaMoat.  
 No configuration, no excuses.
 
