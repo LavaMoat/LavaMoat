@@ -27,6 +27,8 @@ const validatePackages = async (packages) => {
       'npm:',
       'https:',
       'git+https:',
+      'git+ssh:',
+      'git:',
       'patch:',
       'workspace:',
     ]),

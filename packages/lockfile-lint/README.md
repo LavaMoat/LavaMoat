@@ -24,5 +24,5 @@ lavamoat-lockfile-lint yarn.lock
 
 ## Options
 
-- `--type=npm|yarn` - Specify the type of lockfile to lint if it's not obvious from the file name. Supported values are dictated by `lockfile-lint` package, currently:`npm` and `yarn`.
-- `--ignore=file.json` - Specify a JSON file with a list of problem IDs to ignore. Keep the file version controlled to track who ignored what and why
+- `--type=npm|yarn` - Specify the type of lockfile to lint if it's not obvious from the file name. Supported values are dictated by `lockfile-lint` package.
+- `--ignore=file.json` - Specify a JSON file with a list of problem IDs to ignore. Keep the file version controlled to track who ignored what and why.
