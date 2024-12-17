@@ -1,0 +1,27 @@
+{
+  "name": "@lavamoat/types",
+  "version": "0.0.0",
+  "description": "Common types for LavaMoat packages",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LavaMoat/lavamoat.git",
+    "directory": "packages/types"
+  },
+  "homepage": "https://github.com/LavaMoat/LavaMoat/blob/main/packages/types/README.md",
+  "bugs": {
+    "url": "https://github.com/LavaMoat/lavamoat/issues"
+  },
+  "author": "boneskull",
+  "license": "MIT",
+  "engines": {
+    "node": "^18.0.0 || ^20.0.0 || ^22.0.0"
+  },
+  "types": "./dist/index.d.ts",
+  "dependencies": {
+    "@babel/types": "7.26.0",
+    "type-fest": "4.30.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
