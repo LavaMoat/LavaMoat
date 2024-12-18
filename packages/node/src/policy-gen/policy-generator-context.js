@@ -25,7 +25,7 @@ import { getPackageName, isCompleteModuleDescriptor } from './util.js'
  *   FileURLToPathFn} from '@endo/compartment-mapper'
  * @import {Loggerr} from 'loggerr'
  * @import {LMRCache} from './lmr-cache.js'
- * @import {MissingModuleMap, PolicyGeneratorContextOptions} from '../types.js'
+ * @import {MissingModuleMap, PolicyGeneratorContextOptions} from '../internal.js'
  * @import {LavamoatModuleRecord, IsBuiltinFn} from 'lavamoat-core'
  */
 
