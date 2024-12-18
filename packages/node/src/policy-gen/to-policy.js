@@ -22,13 +22,12 @@ import { PolicyGeneratorContext } from './policy-generator-context.js'
  *   LavaMoatPolicyOverrides,
  *   LavamoatModuleRecord,
  *   SesCompat,
- *   SesCompatObj,
  *   ModuleInspector} from 'lavamoat-core'
  * @import {BuildModuleRecordsOptions,
  *   CompartmentMapToPolicyOptions,
- *   MissingModuleMap} from '../types.js'
+ *   MissingModuleMap} from '../internal.js'
  * @import {Loggerr} from 'loggerr'
- * @import {SetFieldType, ValueOf} from 'type-fest'
+ * @import {SetFieldType} from 'type-fest'
  */
 
 const { entries, freeze } = Object

@@ -6,7 +6,7 @@
  */
 
 /**
- * @import {SomeFunction, ContextTestFn, SomeParameters} from './types.js';
+ * @import {SomeFunction, ContextTestFn, SomeParameters} from './internal.js';
  */
 
 /**
