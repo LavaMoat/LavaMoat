@@ -16,7 +16,8 @@ import { writePolicy } from '../util.js'
 import { compartmentMapToPolicy } from './to-policy.js'
 
 /**
- * @import {GenerateOptions, GeneratePolicyOptions, CompartmentMapToPolicyOptions, LoadCompartmentMapOptions} from '../types.js'
+ * @import {GenerateOptions, CompartmentMapToPolicyOptions, LoadCompartmentMapOptions} from '../internal.js'
+ * @import {GeneratePolicyOptions} from '../types.js'
  * @import {LavaMoatPolicy, LavaMoatPolicyDebug} from 'lavamoat-core'
  * @import {SetFieldType} from 'type-fest'
  */

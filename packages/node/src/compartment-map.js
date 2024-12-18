@@ -20,7 +20,7 @@ import { toURLString } from './util.js'
 /**
  * @import {ReadNowPowers, CaptureLiteOptions} from '@endo/compartment-mapper';
  * @import {LavaMoatPolicy} from 'lavamoat-core';
- * @import {LoadCompartmentMapOptions} from './types.js';
+ * @import {LoadCompartmentMapOptions} from './internal.js';
  */
 
 const { entries, fromEntries, freeze } = Object
