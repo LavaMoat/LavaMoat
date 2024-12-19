@@ -19,9 +19,7 @@ const runAllValidations = async ({ cwd, type }) => {
   const errors = []
   try {
     const direct = await scanDirectGitDependencies(cwd)
-    if (direct.errors) {
-      return sortErrors(direct.errors)
-    }
+    errors.push(...direct.errors)
     dependencies = direct.dependencies
   } catch (e) {
     errors.push({
