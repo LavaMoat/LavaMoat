@@ -1,25 +1,38 @@
 const { isGitUrl, gitInfo } = require('./isgit')
 
+let belongCache = new Map()
+
+// TODO: this might be slow. Would be nice to indicate progress somehow. Maybe some concurrency too if we're careful not to trip up API limits
 const belongs = async (user, project, commit) => {
-  return await fetch(
-    `https://github.com/${user}/${project}/branch_commits/${commit}`,
-    {
-      headers: {
-        Accept: 'application/json',
-      },
-    }
-  )
+  const url = `https://github.com/${user}/${project}/branch_commits/${commit}`
+
+  if (belongCache.has(url)) {
+    return belongCache.get(url)
+  }
+  return await fetch(url, {
+    headers: {
+      Accept: 'application/json',
+    },
+  })
     .then((res) => {
       if (!res.ok) {
-        return {}
+        if (res.status === 404) {
+          return {} // 404 is equivalent to "not there"
+        }
+        throw new Error(`[${res.status}] Failed to look up ${user}/${project}`)
       }
       return res.json()
     })
-    .then((data) => data?.branches?.length > 0 || data?.tags?.length > 0)
+    .then((data) => {
+      const result = data?.branches?.length > 0 || data?.tags?.length > 0
+      belongCache.set(url, result)
+      return result
+    })
 }
 
 class ValidateGitUrl {
   constructor({ packages }) {
+    belongCache = new Map() // TODO: instantiate properly, this is a temporary cludge to minimize memory leaks in case it's used programatically.
     this.packages = packages
   }
 
@@ -71,23 +84,6 @@ class ValidateGitUrl {
             })
             continue
           }
-          if (info && info.type === 'github') {
-            const isFound = await belongs(
-              info.user,
-              info.project,
-              info.committish
-            )
-            if (!isFound) {
-              errors.push({
-                message: `The specified commit hash for ${packageName} does not exist in the repository. It might exist on a fork, but you should not trust that.
-    specifier: ${specifier}
-    url: ${url}
-    `,
-                package: packageName,
-              })
-            }
-            continue
-          }
         } else {
           if (info.type !== 'github') {
             errors.push({
@@ -99,6 +95,24 @@ class ValidateGitUrl {
             })
             continue
           }
+        }
+
+        if (info.type === 'github') {
+          const isFound = await belongs(
+            info.user,
+            info.project,
+            info.committish
+          )
+          if (!isFound) {
+            errors.push({
+              message: `The specified commit hash for ${packageName} does not exist in the repository. It might exist on a fork, but you should not trust that.
+  specifier: ${specifier}
+  url: ${url}
+  `,
+              package: packageName,
+            })
+          }
+          continue
         }
       }
     }
