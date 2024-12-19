@@ -1,32 +1,38 @@
 #!/usr/bin/env node
-const path = require('node:path')
 const { parseArgs } = require('node:util')
-const { validateLockfile } = require('./lockfile-lint')
+const { runAllValidations } = require('./index')
 const { readFileSync } = require('node:fs')
+const path = require('node:path')
+
 const options = {
+  projectRoot: {
+    type: 'string',
+    default: process.cwd(),
+  },
   type: {
     type: 'string',
   },
   ignore: {
     type: 'string',
   },
+  help: {
+    type: 'boolean',
+  },
 }
 const {
-  values: { type, ignore },
-  positionals,
-} = parseArgs({ options, allowPositionals: true })
+  values: { type, ignore, help, projectRoot },
+} = parseArgs({ options })
 
-if (!positionals || positionals.length !== 1) {
+if (help) {
   console.error(
-    'Usage: lockfile-lint <lockfile> [--type=yarn|npm] [--ignore=file.json]'
+    'Usage: git-safe-dependencies [--type=yarn|npm] [--ignore=file.json] [--projectRoot=path]'
   )
   process.exit(2)
 }
+const cwd = path.resolve(projectRoot)
 
-const lockfilePath = path.resolve(process.argv[2])
-
-console.error(`[lockfile-lint] Validating: ${lockfilePath}`)
-validateLockfile({ lockfilePath, type })
+console.error(`[lockfile-lint] Validating: package.json and lockfile at ${cwd}`)
+runAllValidations({ cwd, type })
   .then((errors) => {
     if (ignore) {
       const ignores = JSON.parse(readFileSync(ignore, 'utf8'))
@@ -51,7 +57,9 @@ validateLockfile({ lockfilePath, type })
       errors
         .map(
           (e) =>
-            ` ${e.package}: [${e.validator}] ${e.message}    // problem id: ${e.id}`
+            ` ${e.package}:
+  [${e.validator}] ${e.message}    // problem id: ${e.id}
+`
         )
         .sort()
         .join('\n')

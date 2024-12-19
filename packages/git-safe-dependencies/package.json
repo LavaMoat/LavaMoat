@@ -1,5 +1,5 @@
 {
-  "name": "@lavamoat/lockfile-lint",
+  "name": "@lavamoat/git-safe-dependencies",
   "version": "0.1.0",
   "description": "Opinionated lockfile linter based on lockfile-lint-api",
   "repository": {
@@ -17,8 +17,9 @@
     "node": ">=20.0.0"
   },
   "bin": {
-    "lockfile-lint": "src/cli.js"
+    "git-safe-dependencies": "src/cli.js"
   },
+  "main": "src/index.js",
   "directories": {
     "test": "test"
   },
@@ -37,6 +38,7 @@
     "test": "ava"
   },
   "dependencies": {
+    "glob": "11.0.0",
     "hosted-git-info": "8.0.2",
     "lockfile-lint-api": "^5.9.1"
   },

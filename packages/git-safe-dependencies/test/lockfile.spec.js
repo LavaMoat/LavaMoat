@@ -1,5 +1,5 @@
 const test = require('ava')
-const { validatePackages } = require('../src/lockfile-lint.js')
+const { validatePackages } = require('../src/lockfile.js')
 
 test('validatePackages - valid', async (t) => {
   const packages = {
