@@ -45,26 +45,6 @@ class ValidateGitUrl {
 
     for (const dep of dependencies) {
       const { url, packageName, specifier } = dep
-      const validHosts = [
-        'https://registry.yarnpkg.com/',
-        'https://registry.npmjs.org/',
-        'git+ssh://git@github.com/',
-        'git+http://github.com/',
-        'git+https://github.com/',
-        'https://github.com/',
-      ]
-
-      const startsWithAnyValidHost = validHosts.some((host) =>
-        url.startsWith(host)
-      )
-
-      if (!startsWithAnyValidHost) {
-        errors.push({
-          message: `invalid host`,
-          package: packageName,
-        })
-        continue
-      }
 
       if (isGitUrl(url)) {
         const info = gitInfo(url)
