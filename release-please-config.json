@@ -9,6 +9,7 @@
     },
     "packages/browserify": {},
     "packages/core": {},
+    "packages/git-safe-dependencies": {},
     "packages/lavapack": {},
     "packages/laverna": {},
     "packages/lavamoat-node": {},
