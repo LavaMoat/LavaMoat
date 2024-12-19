@@ -8,7 +8,7 @@ test('gitInfo should return correct info for codeload URL', (t) => {
   t.is(result.type, 'github')
   t.is(result.user, 'naugtur')
   t.is(result.project, 'not-really-a-package')
-  t.is(result.committish, '98fbc801f0586297f16730b2f4c75eef15dfabcd')
+  t.is(result.committish, '05ba7b1263a4ba5b98eaf5c103432297962c4719')
 })
 
 test('gitInfo should return correct info for https URL', (t) => {
