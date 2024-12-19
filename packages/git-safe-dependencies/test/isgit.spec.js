@@ -20,7 +20,7 @@ test('gitInfo should return correct info for https URL', (t) => {
   t.is(result.committish, '')
 })
 
-test.failing('gitInfo should return correct info for git+http URL', (t) => {
+test('gitInfo should return correct info for git+http URL', (t) => {
   const url = 'git+http://github.com/naugtur/not-really-a-package'
   const result = gitInfo(url)
   t.is(result.type, 'github')
