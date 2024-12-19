@@ -53,7 +53,7 @@ class ValidateGitUrl {
 
           if (info.committish !== directInfo.committish) {
             errors.push({
-              message: `There's a mismatch between the specified git hash and URL to be fetched. Was the lockfile tampered with?
+              message: `There's a mismatch between the specified git hash and URL to be fetched.
     specifier: ${specifier}
     url: ${url}
     `,
