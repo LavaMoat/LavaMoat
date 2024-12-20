@@ -1,0 +1,7 @@
+{
+  "/package.json": "{\n  \"name\": \"unused-dependency\",\n  \"version\": \"1.0.0\",\n  \"type\": \"module\",\n  \"license\": \"ISC\",\n  \"private\": true,\n  \"main\": \"index.js\",\n  \"scripts\": {\n    \"start\": \"npx snapshot-fs . ../json/unused-dependency.json\"\n  },\n  \"dependencies\": {\n    \"blurmph\": \"^1.0.0\"\n  }\n}\n",
+  "/index.js": "export const hello = 'world'\n\nconsole.log(`hello ${hello}`)\n",
+  "/README.md": "This is an example of an app which has a dependency but does not use it in any way. We use it to assert that \"extra\" policy for such packages is not generated.\n",
+  "/node_modules/blurmph/package.json": "{\n  \"name\": \"blurmph\",\n  \"version\": \"1.0.0\",\n  \"main\": \"index.js\"\n}\n",
+  "/node_modules/blurmph/index.js": "module.exports = require('node:fs')\n"
+}
