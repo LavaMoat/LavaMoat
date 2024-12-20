@@ -52,7 +52,7 @@
   },
   "ava": {
     "files": [
-      "test/*.spec.js"
+      "test/*.spec.*js"
     ],
     "timeout": "30s"
   }
