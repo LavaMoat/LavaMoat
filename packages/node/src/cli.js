@@ -260,23 +260,33 @@ const main = async (args = hideBin(process.argv)) => {
            * a single call to `options()`.
            */
           .options({
+            /**
+             * @experimental
+             */
             'generate-recklessly': {
               type: 'boolean',
-              describe: 'Generate & write a policy file on-the-fly',
+              describe:
+                'Generate & write a policy file on-the-fly [EXPERIMENTAL]',
               group: BEHAVIOR_GROUP,
               default: false,
               hidden: true,
             },
+            /**
+             * @experimental
+             */
             write: {
               type: 'boolean',
-              describe: 'Write policy file(s) to disk',
+              describe: 'Write policy file(s) to disk [EXPERIMENTAL]',
               group: BEHAVIOR_GROUP,
               implies: 'generate-recklessly',
               hidden: true,
             },
+            /**
+             * @experimental
+             */
             debug: {
               type: 'boolean',
-              describe: 'Additionally write a debug policy',
+              describe: 'Additionally write a debug policy [EXPERIMENTAL]',
               group: BEHAVIOR_GROUP,
               implies: 'generate-recklessly',
               hidden: true,
