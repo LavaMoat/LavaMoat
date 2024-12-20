@@ -4,9 +4,7 @@
   "packages": {
     "packages/aa": {},
     "packages/allow-scripts": {},
-    "packages/webpack": {
-      "release-as": "0.7.0-beta.0"
-    },
+    "packages/webpack": {},
     "packages/browserify": {},
     "packages/core": {},
     "packages/lavapack": {},
