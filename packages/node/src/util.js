@@ -4,6 +4,7 @@
  * @packageDocumentation
  */
 
+import { jsonStringifySortedPolicy } from 'lavamoat-core'
 import nodeFs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
@@ -12,8 +13,8 @@ const { isArray: isArray_ } = Array
 
 /**
  * @import {FsInterface} from '@endo/compartment-mapper'
- * @import {Jsonifiable, SetNonNullable} from 'type-fest'
- * @import {WritableFsInterface} from './types.js'
+ * @import {SetNonNullable} from 'type-fest'
+ * @import {LavaMoatPolicy, LavaMoatPolicyDebug, LavaMoatPolicyOverrides, WritableFsInterface} from './types.js'
  */
 
 /**
@@ -34,19 +35,20 @@ export const readJsonFile = async (filepath, { fs = nodeFs } = {}) => {
 }
 
 /**
- * Writes a JSON file
+ * Writes a diff-friendly LavaMoat policy to file
  *
  * Creates the destination directory if it does not exist
  *
  * @param {string} filepath Path to write to
- * @param {Jsonifiable} data JSON data
+ * @param {LavaMoatPolicy | LavaMoatPolicyDebug | LavaMoatPolicyOverrides} policy
+ *   Any policy
  * @param {{ fs?: WritableFsInterface }} opts Options
  * @returns {Promise<void>}
  * @internal
  */
-export const writeJson = async (filepath, data, { fs = nodeFs } = {}) => {
+export const writePolicy = async (filepath, policy, { fs = nodeFs } = {}) => {
   await fs.promises.mkdir(path.dirname(filepath), { recursive: true })
-  await fs.promises.writeFile(filepath, JSON.stringify(data, null, 2))
+  await fs.promises.writeFile(filepath, jsonStringifySortedPolicy(policy))
 }
 
 /**

@@ -28,7 +28,7 @@
 import './preamble.js'
 
 import chalk from 'chalk'
-import stringify from 'json-stable-stringify'
+import { jsonStringifySortedPolicy } from 'lavamoat-core'
 import assert from 'node:assert'
 import fs from 'node:fs'
 import path from 'node:path'
@@ -416,7 +416,7 @@ const main = async (args = hideBin(process.argv)) => {
           log.info(`Wrote policy to ${policyPath}`)
         } else {
           // eslint-disable-next-line no-console
-          console.log(`\n${stringify(policy, { space: 2 })}`)
+          console.log(jsonStringifySortedPolicy(policy))
         }
       }
     )
