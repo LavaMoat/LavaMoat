@@ -12,6 +12,6 @@
     "preserveSymlinks": true
   },
   "include": ["."],
-  "exclude": ["./fixture"],
+  "exclude": ["unit/fixture"],
   "references": [{ "path": "../src/tsconfig.json" }]
 }

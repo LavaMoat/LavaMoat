@@ -1,0 +1,4 @@
+{
+  "/package.json": "{\n  \"name\": \"no-deps\",\n  \"version\": \"1.0.0\",\n  \"type\": \"module\",\n  \"license\": \"ISC\",\n  \"private\": true,\n  \"main\": \"app.js\"\n}\n",
+  "/app.js": "export const hello = 'world'\n"
+}
