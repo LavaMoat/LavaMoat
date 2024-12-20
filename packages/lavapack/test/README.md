@@ -1,18 +1,24 @@
+# Testing the Source Map Wrapper
+
+The following code was moved from `lavamoat-browserify` to `@lavamoat/lavapack`. It is not functional, but provides an example of how to test the source map wrapper.
+
+> TODO: Make this work
+
+```js
 /* eslint-disable ava/no-skip-test, no-undef, n/no-missing-require */
 // to be migrated into lavapack from lavamoat-browserify
 
 const test = require('ava')
-// const UglifyJS = require('uglify-js')
-// const { SourceMapConsumer } = require('source-map')
+const UglifyJS = require('uglify-js')
+const { SourceMapConsumer } = require('source-map')
 
-test.skip('sourcemaps - adjust maps for wrapper', async (t) => {
+test('sourcemaps - adjust maps for wrapper', async (t) => {
   const { wrapIntoModuleInitializer } = require('../src/sourcemaps')
   const fooSource = `
-  var two = 1 + 1
-  throw new Error('Boom')
-  var three = two + 1
-  `
-
+var two = 1 + 1
+throw new Error('Boom')
+var three = two + 1
+`
   // eslint-disable-next-line no-undef
   const result = UglifyJS.minify(
     { './foo.js': fooSource },
@@ -27,15 +33,12 @@ test.skip('sourcemaps - adjust maps for wrapper', async (t) => {
       },
     }
   )
-
   if (result.error) {
     t.ifError(result.error)
   }
-
   // ensure minification worked
   t.true(indicesOf('\n', fooSource).length > 1)
   t.is(indicesOf('\n', result.code).length, 1)
-
   // wrap into bundle with external sourcemaps
   const wrappedSourceMeta = wrapIntoModuleInitializer(result.code)
   await validateSourcemaps(t, wrappedSourceMeta)
@@ -87,3 +90,4 @@ async function validateSourcemaps(t, sourceMeta) {
 function contentForPosition(sourceLines, position) {
   return sourceLines[position.line - 1].slice(position.column)
 }
+```
