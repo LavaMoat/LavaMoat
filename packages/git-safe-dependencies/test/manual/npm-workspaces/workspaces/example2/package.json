@@ -1,0 +1,16 @@
+{
+  "name": "yo2",
+  "version": "1.0.0",
+  "description": "",
+  "author": "",
+  "license": "ISC",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "git-http": "git+http://github.com/naugtur/not-really-a-package",
+    "git-https": "git+https://github.com/naugtur/not-really-a-package",
+    "git-https-hash-short": "git+https://github.com/naugtur/not-really-a-package#107f4ad"
+  }
+}
