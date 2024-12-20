@@ -114,10 +114,12 @@ test('toEndoPolicy() - invalid policy override', async (t) => {
   /** @type {LavaMoatPolicyOverrides} */
   const lmPolicyOverride = /** @type {any} */ ([1, 2, 3])
 
-  const actual = await toEndoPolicy(lmPolicy, {
-    policyOverride: lmPolicyOverride,
-  })
-  t.deepEqual(actual, ENDO_POLICY_BOILERPLATE)
+  await t.throwsAsync(
+    toEndoPolicy(lmPolicy, {
+      policyOverride: lmPolicyOverride,
+    }),
+    { message: 'Invalid LavaMoat policy overrides' }
+  )
 })
 
 test('toEndoPolicy() - path to invalid policy override', async (t) => {

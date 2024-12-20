@@ -24,7 +24,7 @@ const { entryPath, policy, vol } = /** @type {RunnerWorkerData} */ (workerData)
 
 const { fs } = memfs(vol)
 
-const readPowers = makeReadPowers(/** @type {FsInterface} */ (fs))
+const readPowers = makeReadPowers({ fs: /** @type {FsInterface} */ (fs) })
 
 void run(entryPath, policy, { readPowers }).catch((err) => {
   // eslint-disable-next-line no-console

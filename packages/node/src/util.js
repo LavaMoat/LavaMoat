@@ -3,10 +3,9 @@
  *
  * @packageDocumentation
  */
-
 import { jsonStringifySortedPolicy } from 'lavamoat-core'
 import nodeFs from 'node:fs'
-import path from 'node:path'
+import { default as path } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 
 const { isArray: isArray_ } = Array
