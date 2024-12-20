@@ -14,7 +14,8 @@
     "packages/laverna": {},
     "packages/lavamoat-node": {},
     "packages/preinstall-always-fail": {},
-    "packages/tofu": {}
+    "packages/tofu": {},
+    "packages/types": {}
   },
   "plugins": ["node-workspace"]
 }
