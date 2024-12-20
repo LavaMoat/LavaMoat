@@ -2,7 +2,7 @@ import type { ExecutionContext } from 'ava'
 import type { LavaMoatPolicy } from 'lavamoat-core'
 import type { NestedDirectoryJSON } from 'memfs'
 import { ExecFileException } from 'node:child_process'
-import type { JsonArray, RequireAtLeastOne } from 'type-fest'
+import type { RequireAtLeastOne } from 'type-fest'
 
 export interface RunnerWorkerData {
   entryPath: string
@@ -56,14 +56,3 @@ export interface RunCliOutput {
  * Node.js
  */
 export type ExitCode = ExecFileException['code']
-
-/**
- * CompactJson is a JSON-compatible type used by `memfs` to create and load
- * virtual FS snapshots.
- *
- * We don't have/need the actual type, but I can tell you that it's an array.
- * And it is JSON-compatible.
- *
- * @see {@link https://jsonjoy.com/specs/compact-json}
- */
-export type CompactJSON = JsonArray
