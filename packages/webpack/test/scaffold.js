@@ -99,6 +99,10 @@ const defaultGlobals = () => ({
   console: {
     log: () => {},
   },
+  // these are necessary for webpack's runtime
+  document: {},
+  self: { location: { href: 'https://localhost/' } },
+  URL,
 })
 
 /**
