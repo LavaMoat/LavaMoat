@@ -193,71 +193,14 @@ const convertEndoPackagePolicy = (resources) => {
 }
 
 /**
- * Returns policy override from a given path or URL.
+ * Performs actual conversion of LavaMoat policy and optional override to Endo
+ * policy
  *
- * If no path or URL provided, will return an empty policy override.
- *
- * @param {string | URL} [policyOverridePath] Path to policy override file. If
- *   relative, computed from cwd
- * @returns {Promise<LavaMoatPolicyOverrides>}
+ * @param {LavaMoatPolicy} policy
+ * @param {LavaMoatPolicyOverrides} [policyOverride]
+ * @returns {LavaMoatEndoPolicy} Endo policy
  */
-const getPolicyOverride = async (policyOverridePath) => {
-  await Promise.resolve()
-  if (policyOverridePath) {
-    const allegedOverride = await readPolicyOverride(policyOverridePath)
-
-    if (allegedOverride) {
-      assertPolicyOverride(allegedOverride)
-      return allegedOverride
-    }
-  }
-  return {}
-}
-
-/**
- * Converts a LavaMoat policy to an Endo policy.
- *
- * Takes policy overrides into account, if provided.
- *
- * @param {LavaMoatPolicy | string | URL} policyOrPolicyPath LavaMoat policy to
- *   convert (or path to policy file)
- * @param {ToEndoPolicyOptions} [options] Options for conversion
- * @returns {Promise<LavaMoatEndoPolicy>}
- * @public
- */
-export const toEndoPolicy = async (policyOrPolicyPath, options) => {
-  await Promise.resolve()
-
-  if (!policyOrPolicyPath) {
-    throw new TypeError('Expected a policy or policy path')
-  }
-
-  // read & validate policy if we have a path
-  /** @type {unknown} */
-  let allegedPolicy
-
-  /** @type {LavaMoatPolicy} */
-  let policy
-  if (isString(policyOrPolicyPath) || policyOrPolicyPath instanceof URL) {
-    const policyPath = policyOrPolicyPath
-    allegedPolicy = await readPolicy(policyPath)
-  } else {
-    allegedPolicy = policyOrPolicyPath
-  }
-
-  assertPolicy(allegedPolicy)
-  policy = allegedPolicy
-
-  options ??= {}
-
-  /** @type {LavaMoatPolicyOverrides | undefined} */
-  let policyOverride
-  if (hasValue(options, 'policyOverridePath')) {
-    policyOverride = await getPolicyOverride(options.policyOverridePath)
-  } else if (hasValue(options, 'policyOverride')) {
-    policyOverride = options.policyOverride
-  }
-
+const convert = (policy, policyOverride) => {
   const lavaMoatPolicy = mergePolicy(policy, policyOverride)
 
   const lavamoatResources = lavaMoatPolicy.resources ?? create(null)
@@ -284,4 +227,98 @@ export const toEndoPolicy = async (policyOrPolicyPath, options) => {
   }
 
   return endoPolicy
+}
+
+/**
+ * Converts a LavaMoat policy to an Endo policy.
+ *
+ * Use if you've already read the policy and/or policy override from disk.
+ *
+ * @param {LavaMoatPolicy} policy
+ * @param {LavaMoatPolicyOverrides} [policyOverride]
+ * @returns {LavaMoatEndoPolicy} Endo Policy
+ * @public
+ */
+export const toEndoPolicySync = (policy, policyOverride) => {
+  assertPolicy(policy)
+  if (policyOverride) {
+    assertPolicyOverride(policyOverride)
+  }
+  return convert(policy, policyOverride)
+}
+
+/**
+ * Converts a LavaMoat policy to an Endo policy.
+ *
+ * Takes policy overrides into account, if provided.
+ *
+ * Performs validation of policy and policy overrides.
+ *
+ * @overload
+ * @param {LavaMoatPolicy} policy LavaMoat policy to convert
+ * @param {ToEndoPolicyOptions} [options] Options for conversion
+ * @returns {Promise<LavaMoatEndoPolicy>}
+ * @public
+ * @see {@link toEndoPolicySync}
+ */
+
+/**
+ * Given a path to a policy, converts a LavaMoat policy to an Endo policy.
+ *
+ * Takes policy overrides into account, if provided.
+ *
+ * Performs validation of policy and policy overrides.
+ *
+ * @overload
+ * @param {string | URL} policyPath Path or URL to policy file)
+ * @param {ToEndoPolicyOptions} [options] Options for conversion
+ * @returns {Promise<LavaMoatEndoPolicy>}
+ * @public
+ */
+
+/**
+ * Converts a LavaMoat policy to an Endo policy.
+ *
+ * Takes policy overrides into account, if provided.
+ *
+ * Performs validation of policy and policy overrides.
+ *
+ * @privateRemarks
+ * The overloads aren't strictly necessary, but they're a little nicer to
+ * understand for consumers.
+ * @param {LavaMoatPolicy | string | URL} policyOrPolicyPath LavaMoat policy to
+ *   convert (or path to policy file)
+ * @param {ToEndoPolicyOptions} [options] Options for conversion
+ * @returns {Promise<LavaMoatEndoPolicy>}
+ * @public
+ */
+export const toEndoPolicy = async (policyOrPolicyPath, options = {}) => {
+  await Promise.resolve()
+
+  if (!policyOrPolicyPath) {
+    throw new TypeError('Expected a policy or policy path')
+  }
+
+  /** @type {LavaMoatPolicy} */
+  let policy
+  if (isString(policyOrPolicyPath) || policyOrPolicyPath instanceof URL) {
+    const policyPath = policyOrPolicyPath
+    policy = await readPolicy(policyPath)
+  } else {
+    const allegedPolicy = policyOrPolicyPath
+    assertPolicy(allegedPolicy)
+    policy = allegedPolicy
+  }
+
+  /** @type {LavaMoatPolicyOverrides | undefined} */
+  let policyOverride
+  if (hasValue(options, 'policyOverridePath')) {
+    policyOverride = await readPolicyOverride(options.policyOverridePath)
+  } else if (hasValue(options, 'policyOverride')) {
+    const allegedPolicyOverride = options.policyOverride
+    assertPolicyOverride(allegedPolicyOverride)
+    policyOverride = allegedPolicyOverride
+  }
+
+  return convert(policy, policyOverride)
 }
