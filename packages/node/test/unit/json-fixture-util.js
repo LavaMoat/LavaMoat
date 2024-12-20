@@ -102,7 +102,7 @@ export async function loadJSONFixture(pathOrJson) {
       : Volume.fromJSON(json)
   }
 
-  const readPowers = makeReadPowers(/** @type {FsInterface} */ (vol))
+  const readPowers = makeReadPowers({ fs: /** @type {FsInterface} */ (vol) })
   return { vol, readPowers }
 }
 

@@ -7,7 +7,7 @@ import nodeUrl from 'node:url'
 /**
  * @import {SetRequired} from 'type-fest';
  * @import {ReadNowPowers,  FsInterface,  UrlInterface,  CryptoInterface, PathInterface} from '@endo/compartment-mapper'
- * @import {WithRawReadPowers} from './types.js';
+ * @import {MakeReadPowersOptions, WithRawReadPowers} from './types.js';
  */
 
 /**
@@ -23,28 +23,26 @@ export const defaultReadPowers = makeReadNowPowers({
 })
 
 /**
- * Creates a `ReadNowPowers` object from a `FsInterface` object (and optionally
- * other powers)
+ * Creates a {@link ReadNowPowers} object from raw powers.
  *
- * @param {FsInterface} fs
- * @param {UrlInterface} [url]
- * @param {PathInterface} [path]
- * @param {CryptoInterface} [crypto]
+ * If option `fs` is present, it takes precedence over `readPowers`.
+ *
+ * @param {MakeReadPowersOptions} options
  * @returns {ReadNowPowers}
  */
-export const makeReadPowers = (
-  fs,
-  url = nodeUrl,
-  path = nodePath,
-  crypto = nodeCrypto
-) => {
-  if (fs === nodeFs) {
-    return defaultReadPowers
+export const makeReadPowers = (options) => {
+  const { readPowers } = options
+  const { fs, url = nodeUrl, path = nodePath, crypto = nodeCrypto } = options
+  if (fs) {
+    return makeReadNowPowers({
+      fs,
+      url,
+      crypto,
+      path,
+    })
   }
-  return makeReadNowPowers({
-    fs,
-    url,
-    crypto,
-    path,
-  })
+  if (readPowers) {
+    return readPowers
+  }
+  return defaultReadPowers
 }

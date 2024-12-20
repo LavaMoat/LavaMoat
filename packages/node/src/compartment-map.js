@@ -12,7 +12,7 @@ import { makeExecutionCompartment } from './execution-compartment.js'
 import { importHook, importNowHook } from './import-hook.js'
 import { syncModuleTransforms } from './module-transforms.js'
 import parseNative from './parse-native.js'
-import { toEndoPolicy } from './policy-converter.js'
+import { toEndoPolicySync } from './policy-converter.js'
 import { makePolicyGenCompartment } from './policy-gen/policy-gen-compartment.js'
 import { defaultReadPowers } from './power.js'
 import { toURLString } from './util.js'
@@ -21,6 +21,7 @@ import { toURLString } from './util.js'
  * @import {ReadNowPowers, CaptureLiteOptions} from '@endo/compartment-mapper';
  * @import {LavaMoatPolicy} from 'lavamoat-core';
  * @import {LoadCompartmentMapOptions} from './internal.js';
+ * @import {ExecuteOptions} from './types.js'
  */
 
 const { entries, fromEntries, freeze } = Object
@@ -125,21 +126,22 @@ export const loadCompartmentMap = async (
  * Wrapper around {@link importLocation} which first converts a LavaMoat policy
  * to an Endo policy.
  *
- * @template [T=unknown] Default is `unknown`
- * @param {ReadNowPowers} readPowers
- * @param {string | URL} entrypointPath
- * @param {LavaMoatPolicy} policy
- * @param {{ dev?: boolean }} [options]
- * @returns {Promise<T>} Contents of imported module
+ * @template [T=unknown] Exports of module, if known. Default is `unknown`
+ * @param {ReadNowPowers} readPowers Read powers
+ * @param {string | URL} entrypointPath Entry point of application
+ * @param {LavaMoatPolicy} policy Policy
+ * @param {ExecuteOptions} [options] Options, including `dev` and
+ *   `policyOverride`
+ * @returns {Promise<T>} Exports of executed module
  * @internal
  */
 export const execute = async (
   readPowers,
   entrypointPath,
   policy,
-  { dev = false } = {}
+  { dev = true, policyOverride } = {}
 ) => {
-  const endoPolicy = await toEndoPolicy(policy)
+  const endoPolicy = toEndoPolicySync(policy, policyOverride)
   const entryPoint = toURLString(entrypointPath)
   const conditions = devToConditions(dev)
   const { namespace } = await importLocation(readPowers, entryPoint, {

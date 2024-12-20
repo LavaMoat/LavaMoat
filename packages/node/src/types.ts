@@ -56,11 +56,6 @@ export interface WithDev {
   dev?: boolean
 }
 
-/**
- * Options for `run()` w/ automatic policy generation enabled
- */
-export type GenerateAndRunOptions = Merge<RunOptions, GeneratePolicyOptions>
-
 export interface WithLog {
   /**
    * `Loggerr` instance for logging
@@ -156,10 +151,20 @@ export interface LavaMoatPackagePolicyOptions {
 export type RootPolicy = typeof ENDO_POLICY_ITEM_ROOT
 
 /**
- * Options for `run()` w/o automatic policy generation
+ * Options for `run()`
  */
 
-export type RunOptions = Merge<WithRawReadPowers, WithDev>
+export type RunOptions = Merge<
+  WithRawReadPowers,
+  Merge<WithPolicyOverride, WithDev>
+>
+
+/**
+ * Options for `execute()`
+ *
+ * @internal
+ */
+export type ExecuteOptions = Merge<WithPolicyOverride, WithDev>
 
 /**
  * Options for `toEndoPolicy()`
@@ -214,11 +219,16 @@ export type WithRawReadPowers = WithReadPowers | WithRawPowers
  */
 export interface WithRawPowers {
   crypto?: CryptoInterface
-  fs?: FsInterface
+  fs: FsInterface
   path?: PathInterface
   readPowers?: never
   url?: UrlInterface
 }
+
+/**
+ * Options for _our_ `makeReadPowers()` function
+ */
+export type MakeReadPowersOptions = WithRawReadPowers
 
 /**
  * Options having a `readPowers` property.
