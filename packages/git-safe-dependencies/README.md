@@ -2,7 +2,7 @@
 
 > WARNING: This is an alpha version. The opinions are still forming and anything can change at any time. Test coverage is incomplete. Use at your own risk.
 
-Validate your package.json and lockfile against an opinionated set of rules around using git dependencies that we at LavaMoat recommend.  
+Validate your `package.json` and lockfile (NPM, Yarn classic or Yarn Berry) against an opinionated set of rules around using git dependencies that we at LavaMoat recommend.  
 No configuration, no excuses.
 
 ## Installation
