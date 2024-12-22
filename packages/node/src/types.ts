@@ -6,9 +6,11 @@
 
 import {
   CryptoInterface,
+  ImportLocationOptions,
   IsAbsoluteFn,
   PathInterface,
   ReadNowPowers,
+  SyncImportLocationOptions,
   UrlInterface,
   type FsInterface,
   type PackagePolicy,
@@ -16,7 +18,7 @@ import {
 } from '@endo/compartment-mapper'
 import { IsBuiltinFn, type LavaMoatPolicyOverrides } from 'lavamoat-core'
 import { Loggerr } from 'loggerr'
-import { Merge, MergeDeep } from 'type-fest'
+import { Merge, MergeDeep, Simplify } from 'type-fest'
 import {
   ENDO_GLOBAL_POLICY_ITEM_WRITE,
   ENDO_POLICY_ITEM_ROOT,
@@ -161,10 +163,10 @@ export type RunOptions = Merge<
 
 /**
  * Options for `execute()`
- *
- * @internal
  */
-export type ExecuteOptions = Merge<WithPolicyOverride, WithDev>
+export type ExecuteOptions = Simplify<
+  ImportLocationOptions | SyncImportLocationOptions
+>
 
 /**
  * Options for `toEndoPolicy()`

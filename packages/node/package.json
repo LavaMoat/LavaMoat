@@ -28,6 +28,10 @@
       "types": "./types/src/cli.d.ts",
       "import": "./src/cli.js"
     },
+    "./execute": {
+      "types": "./types/src/execute.d.ts",
+      "import": "./src/execute.js"
+    },
     "./package.json": "./package.json"
   },
   "directories": {

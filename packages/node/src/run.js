@@ -4,8 +4,12 @@
  * @packageDocumentation
  */
 
-import { execute } from './compartment-map.js'
+import { DEFAULT_ATTENUATOR } from './constants.js'
+import { attenuateModule, makeGlobalsAttenuator } from './default-attenuator.js'
+import { execute } from './execute.js'
+import { toEndoPolicySync } from './policy-converter.js'
 import { makeReadPowers } from './power.js'
+import { devToConditions } from './util.js'
 
 /**
  * @import {LavaMoatPolicy} from 'lavamoat-core'
@@ -32,8 +36,17 @@ export const run = async (
   { dev = true, policyOverride, ...options } = {}
 ) => {
   await Promise.resolve()
-
   const readPowers = makeReadPowers(options)
+  const endoPolicy = toEndoPolicySync(policy, policyOverride)
 
-  return execute(readPowers, entrypointPath, policy, { dev, policyOverride })
+  return execute(entrypointPath, readPowers, {
+    policy: endoPolicy,
+    conditions: devToConditions(dev),
+    modules: {
+      [DEFAULT_ATTENUATOR]: {
+        attenuateGlobals: makeGlobalsAttenuator({ policy }),
+        attenuateModule,
+      },
+    },
+  })
 }

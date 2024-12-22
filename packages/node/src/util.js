@@ -129,3 +129,12 @@ export const hasValue = (value, prop) => {
     value[prop] !== null
   )
 }
+
+/**
+ * Converts a boolean `dev` to a set of conditions (Endo option)
+ *
+ * @param {boolean} [dev]
+ * @returns {Set<string>}
+ */
+export const devToConditions = (dev) =>
+  dev ? new Set(['development']) : new Set()
