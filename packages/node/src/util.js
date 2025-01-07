@@ -9,9 +9,10 @@ import { default as path } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 
 const { isArray: isArray_ } = Array
+const { freeze } = Object
 
 /**
- * @import {FsInterface} from '@endo/compartment-mapper'
+ * @import {FsInterface, ReadFn, ReadNowPowers, ReadNowPowersProp, ReadPowers} from '@endo/compartment-mapper'
  * @import {SetNonNullable} from 'type-fest'
  * @import {LavaMoatPolicy, LavaMoatPolicyDebug, LavaMoatPolicyOverrides, WritableFsInterface} from './types.js'
  */
@@ -63,7 +64,11 @@ export const writePolicy = async (filepath, policy, { fs = nodeFs } = {}) => {
  * @internal
  */
 export const toURLString = (url) =>
-  url instanceof URL ? url.href : pathToFileURL(url).href
+  url instanceof URL
+    ? url.href
+    : url.startsWith('file:')
+      ? url
+      : pathToFileURL(url).href
 
 /**
  * Type guard for an object.
@@ -86,6 +91,9 @@ export const isString = (value) => typeof value === 'string'
 /**
  * Type guard for an array
  *
+ * @remarks
+ * This exists so that `isArray` needn't be dereferenced from the global
+ * `Array`.
  * @param {unknown} value
  * @returns {value is any[]}
  * @internal
@@ -105,28 +113,39 @@ export const isBoolean = (value) => typeof value === 'boolean'
  * Type guard for an object having a property which is not `null` nor
  * `undefined`.
  *
- * @remarks
  * If trying to perform the opposite assertion, use `!(prop in value)` instead
  * of `!has(value, prop)`
  *
- * TODO:
- *
- * - [ ] Use `Object.hasOwn`; this type def should eventually live in
- *   `@lavamoat/types` (it's currently a declaration in core and not exported)
- *   while it does not exist in TypeScript libs.
- *
- * @template {object} [T=object] Default is `object`
- * @template {string} [const K=string] Default is `string`
- * @param {T} value
- * @param {K} prop
- * @returns {value is Omit<T, K> & {[key in K]: SetNonNullable<T, K>}}
+ * @template {object} [T=object] Some object. Default is `object`
+ * @template {string} [const K=string] Some property which might be in `T`.
+ *   Default is `string`
+ * @param {T} obj Some object
+ * @param {K} prop Some property which might be in `obj`
+ * @returns {obj is Omit<T, K> & {[key in K]: SetNonNullable<T, K>}}
  * @see {@link https://github.com/microsoft/TypeScript/issues/44253}
  */
-export const hasValue = (value, prop) => {
+export const hasValue = (obj, prop) => {
   return (
-    prop in value &&
-    /** @type {T & Record<K, unknown>} */ (value)[prop] !== undefined &&
-    value[prop] !== null
+    /**
+     * TODO:
+     *
+     * - [ ] Use `Object.hasOwn`; this type def should eventually live in
+     *   `@lavamoat/types` (it's currently a declaration in core and not
+     *   exported) while it does not exist in TypeScript libs.
+     */
+
+    prop in obj &&
+    /**
+     * @privateRemarks
+     * I'm not sure exactly why this is needed. `prop in obj` does not imply
+     * `obj[prop]` here, so you'd get a "`K` cannot be used to index `T`" error.
+     * There's no relationship between type args `T` and `K`, but it's
+     * surprising to me that `prop in obj` does not establish the relationship.
+     * `obj[prop]` can be `undefined` even if `prop in obj` is `true`, which
+     * might be the reason?
+     * @type {any}
+     */ (obj)[prop] !== undefined &&
+    obj[prop] !== null
   )
 }
 
@@ -138,3 +157,33 @@ export const hasValue = (value, prop) => {
  */
 export const devToConditions = (dev) =>
   dev ? new Set(['development']) : new Set()
+
+/**
+ * Ordered array of every property in {@link ReadNowPowers} which is _required_.
+ *
+ * @satisfies {Readonly<
+ *   {
+ *     [K in ReadNowPowersProp]-?: {} extends Pick<ReadNowPowers, K> ? never : K
+ *   }[ReadNowPowersProp][]
+ * >}
+ */
+const requiredReadNowPowersProps = freeze(
+  /** @type {const} */ (['fileURLToPath', 'isAbsolute', 'maybeReadNow'])
+)
+
+/**
+ * Returns `true` if `value` is a {@link ReadNowPowers}
+ *
+ * @param {unknown} value
+ * @returns {value is ReadNowPowers}
+ */
+export const isReadNowPowers = (value) =>
+  !!(
+    value &&
+    typeof value === 'object' &&
+    requiredReadNowPowersProps.every(
+      (prop) =>
+        prop in value &&
+        typeof (/** @type {any} */ (value)[prop]) === 'function'
+    )
+  )

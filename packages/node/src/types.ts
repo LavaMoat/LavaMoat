@@ -324,3 +324,22 @@ export interface WritePowers {
   ) => Promise<string | undefined>
   writeFile: (path: string, data: string) => Promise<void>
 }
+
+/**
+ * A loaded application which has not yet been executed
+ */
+export interface ApplicationLoader<T = unknown> {
+  /**
+   * The hash of the compartment map
+   *
+   * Present only if {@link ReadNowPowers.computeSha512} was provided
+   */
+  sha512?: string
+
+  /**
+   * Imports the application (executing it)
+   *
+   * @returns Whatever it exports under `namespace` prop
+   */
+  import: () => Promise<{ namespace: T }>
+}
