@@ -1,13 +1,13 @@
-import { DEFAULT_ENDO_OPTIONS } from '#compartment/options'
-import { defaultReadPowers } from '#compartment/power'
-import { NATIVE_PARSER_FILE_EXT, NATIVE_PARSER_NAME } from '#constants'
-import { toURLString } from '#util'
 import { captureFromMap } from '@endo/compartment-mapper/capture-lite.js'
 import { mapNodeModules } from '@endo/compartment-mapper/node-modules.js'
+import { DEFAULT_ENDO_OPTIONS } from '../compartment/options.js'
+import { defaultReadPowers } from '../compartment/power.js'
+import { NATIVE_PARSER_FILE_EXT, NATIVE_PARSER_NAME } from '../constants.js'
+import { toURLString } from '../util.js'
 import { makePolicyGenCompartment } from './policy-gen-compartment-class.js'
 
 /**
- * @import {LoadCompartmentMapOptions} from '#internal';
+ * @import {LoadCompartmentMapOptions} from '../internal.js';
  */
 
 const { entries, fromEntries } = Object

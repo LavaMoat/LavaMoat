@@ -19,40 +19,6 @@
   "bin": {
     "lavamoat": "src/cli.js"
   },
-  "imports": {
-    "#compartment/*": {
-      "types": "./types/src/compartment/*.d.ts",
-      "import": "./src/compartment/*.js"
-    },
-    "#exec/*": {
-      "types": "./types/src/exec/*.d.ts",
-      "import": "./src/exec/*.js"
-    },
-    "#policy-gen/*": {
-      "types": "./types/src/policy-gen/*.d.ts",
-      "import": "./src/policy-gen/*.js"
-    },
-    "#constants": {
-      "types": "./types/src/constants.d.ts",
-      "import": "./src/constants.js"
-    },
-    "#util": {
-      "types": "./types/src/util.d.ts",
-      "import": "./src/util.js"
-    },
-    "#policy-util": {
-      "types": "./types/src/policy-util.d.ts",
-      "import": "./src/policy-util.js"
-    },
-    "#log": {
-      "types": "./types/src/log.d.ts",
-      "import": "./src/log.js"
-    },
-    "#types": {
-      "types": "./types/src/types.d.ts",
-      "import": "./src/types.js"
-    }
-  },
   "exports": {
     ".": {
       "types": "./types/src/index.d.ts",

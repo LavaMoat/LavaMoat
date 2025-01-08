@@ -5,20 +5,20 @@
  *
  * @packageDocumentation
  */
-import { defaultReadPowers } from '#compartment/power'
-import { DEFAULT_POLICY_DEBUG_PATH, DEFAULT_POLICY_PATH } from '#constants'
-import { log as defaultLog } from '#log'
-import { writePolicy } from '#policy-util'
-import { devToConditions } from '#util'
 import assert from 'node:assert'
 import nodeFs from 'node:fs'
 import nodePath from 'node:path'
+import { defaultReadPowers } from '../compartment/power.js'
+import { DEFAULT_POLICY_DEBUG_PATH, DEFAULT_POLICY_PATH } from '../constants.js'
+import { log as defaultLog } from '../log.js'
+import { writePolicy } from '../policy-util.js'
+import { devToConditions } from '../util.js'
 import { loadCompartmentMap } from './policy-gen-compartment-map.js'
 import { compartmentMapToPolicy } from './to-policy.js'
 
 /**
- * @import {GenerateOptions, CompartmentMapToPolicyOptions, LoadCompartmentMapOptions} from '#internal'
- * @import {GeneratePolicyOptions} from '#types'
+ * @import {GenerateOptions, LoadCompartmentMapOptions} from '../internal.js'
+ * @import {GeneratePolicyOptions, CompartmentMapToPolicyOptions} from '../types.js'
  * @import {LavaMoatPolicy, LavaMoatPolicyDebug} from 'lavamoat-core'
  * @import {SetFieldType} from 'type-fest'
  */

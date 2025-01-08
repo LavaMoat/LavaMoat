@@ -4,16 +4,7 @@
     "outDir": "../types",
     "rootDir": "..",
     "paths": {
-      "lavamoat-core": ["../../core/types/src/types.d.ts"],
-      "#compartment/*": ["./compartment/*.js"],
-      "#exec/*": ["./exec/*.js"],
-      "#policy-gen/*": ["./policy-gen/*.js"],
-      "#constants": ["./constants.js"],
-      "#util": ["./util.js"],
-      "#log": ["./log.js"],
-      "#policy-util": ["./policy-util.js"],
-      "#types": ["./types.ts"],
-      "#internal": ["./internal.js"]
+      "lavamoat-core": ["../../core/types/src/types.d.ts"]
     },
     "target": "esnext",
     "module": "NodeNext",

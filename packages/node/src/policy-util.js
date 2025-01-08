@@ -6,15 +6,15 @@
  * @packageDocumentation
  */
 
-import * as constants from '#constants'
-import { hasValue, isArray, isObject, readJsonFile } from '#util'
 import { jsonStringifySortedPolicy, mergePolicy } from 'lavamoat-core'
 import nodeFs from 'node:fs'
 import nodePath from 'node:path'
+import * as constants from './constants.js'
+import { hasValue, isArray, isObject, readJsonFile } from './util.js'
 
 /**
  * @import {LavaMoatPolicy, LavaMoatPolicyOverrides, LavaMoatPolicyDebug} from 'lavamoat-core'
- * @import {WritableFsInterface} from '#types'
+ * @import {WritableFsInterface} from './types.js'
  */
 
 /**

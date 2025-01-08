@@ -5,15 +5,15 @@
  * @internal
  */
 
-import { NATIVE_PARSER_FILE_EXT, NATIVE_PARSER_NAME } from '#constants'
 import { defaultParserForLanguage } from '@endo/compartment-mapper/import-parsers.js'
+import { NATIVE_PARSER_FILE_EXT, NATIVE_PARSER_NAME } from '../constants.js'
 import { importHook, importNowHook } from './import-hook.js'
 import { syncModuleTransforms } from './module-transforms.js'
 import parseNative from './parse-native.js'
 
 /**
  * @import {CaptureLiteOptions} from '@endo/compartment-mapper';
- * @import {ExecuteOptions} from '#types'
+ * @import {ExecuteOptions} from '../types.js'
  */
 
 const { freeze } = Object

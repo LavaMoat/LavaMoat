@@ -7,21 +7,19 @@
  * @packageDocumentation
  */
 
-import { DEFAULT_ENDO_OPTIONS } from '#compartment/options'
-import { defaultReadPowers } from '#compartment/power'
-import { DEFAULT_ATTENUATOR } from '#constants'
-import { toURLString } from '#util'
 import { loadLocation } from '@endo/compartment-mapper'
-import { attenuateModule, makeGlobalsAttenuator } from './default-attenuator.js'
-import { makeExecutionCompartment } from './exec-compartment-class.js'
+import { DEFAULT_ENDO_OPTIONS } from '../compartment/options.js'
+import { defaultReadPowers } from '../compartment/power.js'
+import { toURLString } from '../util.js'
 
 /**
- * @import {ReadNowPowers} from '@endo/compartment-mapper'
- * @import {ApplicationLoader, ExecuteOptions} from '#types'
+ * @import {ReadNowPowers, LoadLocationOptions} from '@endo/compartment-mapper'
+ * @import {ApplicationLoader, ExecuteOptions} from '../types.js'
  */
 
 /**
- * Loads an application without executing it.
+ * Low-level API for loading a compartment map for an application without
+ * executing it.
  *
  * Use cases:
  *
@@ -40,23 +38,22 @@ export const load = async (
   readPowers = defaultReadPowers,
   options = {}
 ) => {
+  await Promise.resolve()
+
   const entrypoint = toURLString(entrypointPath)
+
+  /** @type {LoadLocationOptions} */
   const opts = {
     ...DEFAULT_ENDO_OPTIONS,
-    Compartment: makeExecutionCompartment(globalThis),
-    modules: {
-      [DEFAULT_ATTENUATOR]: {
-        attenuateGlobals: makeGlobalsAttenuator({ policy: options.policy }),
-        attenuateModule,
-      },
-    },
     ...options,
   }
+
   const { import: importApp, sha512 } = await loadLocation(
     readPowers,
     entrypoint,
     opts
   )
+
   return {
     // TODO: update Endo's type here
     import: () => /** @type {Promise<{ namespace: T }>} */ (importApp(opts)),

@@ -3,59 +3,20 @@
  * Internal types used by `@lavamoat/node`.
  *
  * @packageDocumentation
+ * @internal
  */
 
-import {
+import type { MapNodeModulesOptions } from '@endo/compartment-mapper'
+import type { Except, Merge } from 'type-fest'
+import type {
+  BaseLoadCompartmentMapOptions,
   GeneratePolicyOptions,
-  WithDebug,
-  WithDev,
   WithIsBuiltin,
   WithLog,
   WithPolicyOverride,
   WithReadPowers,
   WritePolicyOptions,
-} from '#types'
-import type {
-  CaptureLiteOptions,
-  MapNodeModulesOptions,
-} from '@endo/compartment-mapper'
-import { Merge, type Except } from 'type-fest'
-
-/**
- * Options to pass-through to Endo.
- *
- * Used by {@link GeneratePolicyOptions}.
- *
- * The {@link CaptureLiteOptions.dev dev} property defaults to `true`.
- *
- * @remarks
- * Omitted properties cannot by overridden by the user.
- * @internal
- */
-export type BaseLoadCompartmentMapOptions = Merge<
-  Except<CaptureLiteOptions, 'importHook' | 'moduleTransforms'>,
-  Merge<WithLog, WithDev>
->
-
-/**
- * Options for `buildModuleRecords()`
- *
- * @internal
- */
-export type BuildModuleRecordsOptions = Merge<
-  WithReadPowers,
-  Merge<WithIsBuiltin, WithLog>
->
-
-/**
- * Options for `compartmentMapToPolicy()`
- *
- * @internal
- */
-export type CompartmentMapToPolicyOptions = Merge<
-  BuildModuleRecordsOptions,
-  Merge<WithPolicyOverride, WithDebug>
->
+} from './types.js'
 
 /**
  * Callback used by `wrapFunctionConstructor`.

@@ -4,15 +4,8 @@
  * @packageDocumentation
  */
 
-import {
-  ENDO_GLOBAL_POLICY_ITEM_WRITE,
-  ENDO_POLICY_ITEM_ROOT,
-} from '#constants'
 import type {
-  BaseLoadCompartmentMapOptions,
-  CompartmentMapToPolicyOptions,
-} from '#internal'
-import type {
+  CaptureLiteOptions,
   CryptoInterface,
   FsInterface,
   ImportLocationOptions,
@@ -25,8 +18,51 @@ import type {
   UrlInterface,
 } from '@endo/compartment-mapper'
 import type { IsBuiltinFn, LavaMoatPolicyOverrides } from 'lavamoat-core'
-import { type Loggerr } from 'loggerr'
-import type { Merge, MergeDeep, Simplify } from 'type-fest'
+import type { Loggerr } from 'loggerr'
+import type { Except, Merge, MergeDeep, Simplify } from 'type-fest'
+import {
+  ENDO_GLOBAL_POLICY_ITEM_WRITE,
+  ENDO_POLICY_ITEM_ROOT,
+} from './constants.js'
+
+/**
+ * Options for `compartmentMapToPolicy()`
+ *
+ * @remarks
+ * Exported due to use within {@link BaseLoadCompartmentMapOptions}
+ */
+export type CompartmentMapToPolicyOptions = Merge<
+  BuildModuleRecordsOptions,
+  Merge<WithPolicyOverride, WithDebug>
+>
+
+/**
+ * Options to pass-through to Endo.
+ *
+ * Used by {@link GeneratePolicyOptions}.
+ *
+ * The {@link CaptureLiteOptions.dev dev} property defaults to `true`.
+ *
+ * @remarks
+ * Omitted properties cannot by overridden by the user. Exported due to use
+ * within {@link GeneratePolicyOptions}.
+ */
+
+export type BaseLoadCompartmentMapOptions = Merge<
+  Except<CaptureLiteOptions, 'importHook' | 'moduleTransforms'>,
+  Merge<WithLog, WithDev>
+>
+
+/**
+ * Options for `buildModuleRecords()`
+ *
+ * @remarks
+ * Exported due to use within {@link CompartmentMapToPolicyOptions}
+ */
+export type BuildModuleRecordsOptions = Merge<
+  WithReadPowers,
+  Merge<WithIsBuiltin, WithLog>
+>
 
 // re-export schema
 // TODO: make this less bad
@@ -330,16 +366,15 @@ export interface WritePowers {
  */
 export interface ApplicationLoader<T = unknown> {
   /**
-   * The hash of the compartment map
-   *
-   * Present only if {@link ReadNowPowers.computeSha512} was provided
-   */
-  sha512?: string
-
-  /**
    * Imports the application (executing it)
    *
    * @returns Whatever it exports under `namespace` prop
    */
   import: () => Promise<{ namespace: T }>
+  /**
+   * The hash of the compartment map
+   *
+   * Present only if {@link ReadNowPowers.computeSha512} was provided
+   */
+  sha512?: string
 }

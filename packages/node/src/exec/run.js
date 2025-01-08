@@ -5,14 +5,17 @@
  * @packageDocumentation
  */
 
-import { makeReadPowers } from '#compartment/power'
-import { execute } from '#exec/execute'
-import { devToConditions } from '#util'
-import { toEndoPolicySync } from './policy-converter.js'
+import { makeReadPowers } from '../compartment/power.js'
+import { DEFAULT_ATTENUATOR } from '../constants.js'
+import { toEndoPolicySync } from '../policy-converter.js'
+import { devToConditions } from '../util.js'
+import { attenuateModule, makeGlobalsAttenuator } from './default-attenuator.js'
+import { makeExecutionCompartment } from './exec-compartment-class.js'
+import { execute } from './execute.js'
 
 /**
  * @import {LavaMoatPolicy} from 'lavamoat-core'
- * @import {RunOptions} from '#types';
+ * @import {RunOptions} from '../types.js';
  */
 
 /**
@@ -39,6 +42,13 @@ export const run = async (
   const endoPolicy = toEndoPolicySync(policy, policyOverride)
 
   return execute(entrypointPath, readPowers, {
+    Compartment: makeExecutionCompartment(globalThis),
+    modules: {
+      [DEFAULT_ATTENUATOR]: {
+        attenuateGlobals: makeGlobalsAttenuator({ policy }),
+        attenuateModule,
+      },
+    },
     policy: endoPolicy,
     conditions: devToConditions(dev),
   })

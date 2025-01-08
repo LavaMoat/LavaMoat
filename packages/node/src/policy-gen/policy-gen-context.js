@@ -4,16 +4,16 @@
  * @packageDocumentation
  */
 
-import { defaultReadPowers } from '#compartment/power'
+import { isBuiltin as nodeIsBuiltin } from 'node:module'
+import { defaultReadPowers } from '../compartment/power.js'
 import {
   LMR_TYPE_BUILTIN,
   LMR_TYPE_NATIVE,
   LMR_TYPE_SOURCE,
   NATIVE_PARSER_NAME,
-} from '#constants'
-import { log as fallbackLog } from '#log'
-import { isString } from '#util'
-import { isBuiltin as nodeIsBuiltin } from 'node:module'
+} from '../constants.js'
+import { log as fallbackLog } from '../log.js'
+import { isString } from '../util.js'
 import {
   getPackageName,
   isCompleteModuleDescriptor,
@@ -28,7 +28,7 @@ import {
  *   FileURLToPathFn} from '@endo/compartment-mapper'
  * @import {Loggerr} from 'loggerr'
  * @import {LMRCache} from './lmr-cache.js'
- * @import {MissingModuleMap, PolicyGeneratorContextOptions} from '#internal'
+ * @import {MissingModuleMap, PolicyGeneratorContextOptions} from '../internal.js'
  * @import {LavamoatModuleRecord, IsBuiltinFn} from 'lavamoat-core'
  */
 

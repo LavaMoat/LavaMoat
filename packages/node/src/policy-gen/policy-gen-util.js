@@ -5,8 +5,11 @@
  * @internal
  */
 
-import { ATTENUATORS_COMPARTMENT, LAVAMOAT_PKG_POLICY_ROOT } from '#constants'
-import { hasValue, isObject } from '#util'
+import {
+  ATTENUATORS_COMPARTMENT,
+  LAVAMOAT_PKG_POLICY_ROOT,
+} from '../constants.js'
+import { hasValue, isObject } from '../util.js'
 
 /**
  * @import {CompartmentDescriptor} from '@endo/compartment-mapper'

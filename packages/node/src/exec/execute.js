@@ -8,13 +8,13 @@
  * @packageDocumentation
  */
 
-import { defaultReadPowers } from '#compartment/power'
-import { isReadNowPowers } from '#util'
+import { defaultReadPowers } from '../compartment/power.js'
+import { isReadNowPowers } from '../util.js'
 import { load } from './load.js'
 
 /**
  * @import {ReadNowPowers} from '@endo/compartment-mapper'
- * @import {ApplicationLoader, ExecuteOptions} from '#types'
+ * @import {ApplicationLoader, ExecuteOptions} from '../types.js'
  */
 
 /**
@@ -43,8 +43,6 @@ import { load } from './load.js'
  *
  * - Knows nothing about LavaMoat policy (bring your own attenuator!)
  * - Supports native modules, Node.js builtins
- * - Applies corrections to compartment `globalThis` values, including `Date` and
- *   `Math` globals
  * - Evasive transforms applied by default
  * - Consumer has full control over `importLocation` options
  *
@@ -63,8 +61,6 @@ import { load } from './load.js'
  *
  * - Knows nothing about LavaMoat policy (bring your own attenuator!)
  * - Supports native modules, Node.js builtins
- * - Applies corrections to compartment `globalThis` values, including `Date` and
- *   `Math` globals
  * - Evasive transforms applied by default
  * - Consumer has full control over `importLocation` options
  *

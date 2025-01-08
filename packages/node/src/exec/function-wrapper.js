@@ -7,7 +7,7 @@
  */
 
 /**
- * @import {SomeFunction, ContextTestFn, SomeParameters} from '#internal';
+ * @import {SomeFunction, ContextTestFn, SomeParameters} from '../internal.js';
  */
 
 /**

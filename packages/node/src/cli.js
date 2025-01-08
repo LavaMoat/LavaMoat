@@ -27,10 +27,6 @@
 
 import './preamble.js'
 
-import * as constants from '#constants'
-import { log } from '#log'
-import { generatePolicy } from '#policy-gen/generate'
-import { readJsonFile } from '#util'
 import chalk from 'chalk'
 import { jsonStringifySortedPolicy } from 'lavamoat-core'
 import assert from 'node:assert'
@@ -39,8 +35,12 @@ import path from 'node:path'
 import terminalLink from 'terminal-link'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
+import * as constants from './constants.js'
+import { run } from './exec/run.js'
+import { log } from './log.js'
+import { generatePolicy } from './policy-gen/generate.js'
 import { loadPolicies } from './policy-util.js'
-import { run } from './run.js'
+import { readJsonFile } from './util.js'
 
 /**
  * @import {PackageJson} from 'type-fest';
