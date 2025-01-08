@@ -5,28 +5,28 @@
  */
 
 import {
+  ENDO_GLOBAL_POLICY_ITEM_WRITE,
+  ENDO_POLICY_ITEM_ROOT,
+} from '#constants'
+import type {
+  BaseLoadCompartmentMapOptions,
+  CompartmentMapToPolicyOptions,
+} from '#internal'
+import type {
   CryptoInterface,
+  FsInterface,
   ImportLocationOptions,
   IsAbsoluteFn,
+  PackagePolicy,
   PathInterface,
+  Policy,
   ReadNowPowers,
   SyncImportLocationOptions,
   UrlInterface,
-  type FsInterface,
-  type PackagePolicy,
-  type Policy,
 } from '@endo/compartment-mapper'
-import { IsBuiltinFn, type LavaMoatPolicyOverrides } from 'lavamoat-core'
-import { Loggerr } from 'loggerr'
-import { Merge, MergeDeep, Simplify } from 'type-fest'
-import {
-  ENDO_GLOBAL_POLICY_ITEM_WRITE,
-  ENDO_POLICY_ITEM_ROOT,
-} from './constants.js'
-import {
-  BaseLoadCompartmentMapOptions,
-  CompartmentMapToPolicyOptions,
-} from './internal.js'
+import type { IsBuiltinFn, LavaMoatPolicyOverrides } from 'lavamoat-core'
+import { type Loggerr } from 'loggerr'
+import type { Merge, MergeDeep, Simplify } from 'type-fest'
 
 // re-export schema
 // TODO: make this less bad

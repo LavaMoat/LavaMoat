@@ -8,7 +8,7 @@
 import { wrapFunctionConstructor } from './function-wrapper.js'
 
 /**
- * @import {SomeGlobalThis, ContextTestFn} from './internal.js'
+ * @import {SomeGlobalThis, ContextTestFn} from '#internal'
  * @import {CompartmentOptions} from 'ses'
  */
 

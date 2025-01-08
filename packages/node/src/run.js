@@ -1,19 +1,18 @@
 /**
- * Provides {@link run}, which is the public API for code execution.
+ * Provides {@link run}, which is the highest-level public API for code
+ * execution.
  *
  * @packageDocumentation
  */
 
-import { DEFAULT_ATTENUATOR } from './constants.js'
-import { attenuateModule, makeGlobalsAttenuator } from './default-attenuator.js'
-import { execute } from './execute.js'
+import { makeReadPowers } from '#compartment/power'
+import { execute } from '#exec/execute'
+import { devToConditions } from '#util'
 import { toEndoPolicySync } from './policy-converter.js'
-import { makeReadPowers } from './power.js'
-import { devToConditions } from './util.js'
 
 /**
  * @import {LavaMoatPolicy} from 'lavamoat-core'
- * @import {RunOptions} from './types.js';
+ * @import {RunOptions} from '#types';
  */
 
 /**
@@ -42,11 +41,5 @@ export const run = async (
   return execute(entrypointPath, readPowers, {
     policy: endoPolicy,
     conditions: devToConditions(dev),
-    modules: {
-      [DEFAULT_ATTENUATOR]: {
-        attenuateGlobals: makeGlobalsAttenuator({ policy }),
-        attenuateModule,
-      },
-    },
   })
 }

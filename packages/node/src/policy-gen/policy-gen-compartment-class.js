@@ -4,8 +4,8 @@
  * @packageDocumentation
  */
 
-import { hasValue, isObject } from '../util.js'
-import { getCanonicalName } from './util.js'
+import { hasValue, isObject } from '#util'
+import { getCanonicalName } from './policy-gen-util.js'
 
 /**
  * @import {CompartmentOptions,

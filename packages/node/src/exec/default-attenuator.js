@@ -2,18 +2,16 @@
  * Provides the default global and module attenuator
  *
  * @packageDocumentation
+ * @internal
  */
 
+import { ENDO_POLICY_ITEM_ROOT, LAVAMOAT_POLICY_ITEM_WRITE } from '#constants'
+import { isObject } from '#util'
 import { endowmentsToolkit } from 'lavamoat-core'
-import {
-  ENDO_POLICY_ITEM_ROOT,
-  LAVAMOAT_POLICY_ITEM_WRITE,
-} from './constants.js'
-import { isObject } from './util.js'
 
 /**
  * @import {GlobalAttenuatorFn, ModuleAttenuatorFn} from '@endo/compartment-mapper'
- * @import {GlobalAttenuatorParams} from './types.js'
+ * @import {GlobalAttenuatorParams} from '#types'
  * @import {LavaMoatPolicy} from 'lavamoat-core'
  */
 

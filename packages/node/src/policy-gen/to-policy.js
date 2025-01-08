@@ -6,13 +6,14 @@
  * @packageDocumentation
  */
 
+import { defaultReadPowers } from '#compartment/power'
+import { log as fallbackLog } from '#log'
 import chalk from 'chalk'
 import { createModuleInspector } from 'lavamoat-core'
 import { isBuiltin as nodeIsBuiltin } from 'node:module'
-import { log as fallbackLog } from '../log.js'
-import { defaultReadPowers } from '../power.js'
 import { LMRCache } from './lmr-cache.js'
-import { PolicyGeneratorContext } from './policy-generator-context.js'
+import { PolicyGeneratorContext } from './policy-gen-context.js'
+
 /**
  * @import {Sources,
  *   CompartmentMapDescriptor,
@@ -25,7 +26,7 @@ import { PolicyGeneratorContext } from './policy-generator-context.js'
  *   ModuleInspector} from 'lavamoat-core'
  * @import {BuildModuleRecordsOptions,
  *   CompartmentMapToPolicyOptions,
- *   MissingModuleMap} from '../internal.js'
+ *   MissingModuleMap} from '#internal'
  * @import {Loggerr} from 'loggerr'
  * @import {SetFieldType} from 'type-fest'
  */

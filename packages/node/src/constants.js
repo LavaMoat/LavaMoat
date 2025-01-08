@@ -28,7 +28,7 @@ export const ATTENUATORS_COMPARTMENT = '<ATTENUATORS>'
 export const DEFAULT_ATTENUATOR = '@attenuator@'
 
 /**
- * Default policy filename
+ * Default policy debug filename
  */
 export const DEFAULT_POLICY_DEBUG_FILENAME = 'policy-debug.json'
 

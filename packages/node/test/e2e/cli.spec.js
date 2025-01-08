@@ -6,7 +6,7 @@ import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { DEFAULT_POLICY_FILENAME } from '../../src/constants.js'
-import { isPolicy, readPolicy } from '../../src/policy.js'
+import { isPolicy, readPolicy } from '../../src/policy-util.js'
 import { isString, readJsonFile } from '../../src/util.js'
 import { CLI_PATH, runCli } from './cli-util.js'
 

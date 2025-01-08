@@ -2,7 +2,7 @@ import { memfs } from 'memfs'
 import { fromJsonSnapshot } from 'memfs/lib/snapshot/index.js'
 import { Volume } from 'memfs/lib/volume.js'
 import fs from 'node:fs'
-import { makeReadPowers } from '../../src/power.js'
+import { makeReadPowers } from '../../src/compartment/power.js'
 import { isString } from '../../src/util.js'
 
 /**

@@ -5,9 +5,8 @@ import nodePath from 'node:path'
 import nodeUrl from 'node:url'
 
 /**
- * @import {SetRequired} from 'type-fest';
- * @import {ReadNowPowers,  FsInterface,  UrlInterface,  CryptoInterface, PathInterface} from '@endo/compartment-mapper'
- * @import {MakeReadPowersOptions, WithRawReadPowers} from './types.js';
+ * @import {ReadNowPowers} from '@endo/compartment-mapper'
+ * @import {MakeReadPowersOptions} from '#types';
  */
 
 /**

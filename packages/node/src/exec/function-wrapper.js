@@ -3,10 +3,11 @@
  * with a specific context.
  *
  * @packageDocumentation
+ * @internal
  */
 
 /**
- * @import {SomeFunction, ContextTestFn, SomeParameters} from './internal.js';
+ * @import {SomeFunction, ContextTestFn, SomeParameters} from '#internal';
  */
 
 /**

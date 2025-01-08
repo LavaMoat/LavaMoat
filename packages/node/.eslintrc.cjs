@@ -38,6 +38,12 @@ module.exports = {
         'n/no-unpublished-import': 'off',
       },
     },
+    {
+      files: '*.ts',
+      rules: {
+        'n/no-unpublished-import': 'off',
+      },
+    },
   ],
   ignorePatterns: ['**/test/fixture/**/*', 'src/types.js'],
 }

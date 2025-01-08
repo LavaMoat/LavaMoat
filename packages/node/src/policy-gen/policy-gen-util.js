@@ -1,8 +1,12 @@
-import {
-  ATTENUATORS_COMPARTMENT,
-  LAVAMOAT_PKG_POLICY_ROOT,
-} from '../constants.js'
-import { hasValue, isObject } from '../util.js'
+/**
+ * Utilties for the policy generation
+ *
+ * @packageDocumentation
+ * @internal
+ */
+
+import { ATTENUATORS_COMPARTMENT, LAVAMOAT_PKG_POLICY_ROOT } from '#constants'
+import { hasValue, isObject } from '#util'
 
 /**
  * @import {CompartmentDescriptor} from '@endo/compartment-mapper'

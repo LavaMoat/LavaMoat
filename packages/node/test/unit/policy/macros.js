@@ -1,5 +1,5 @@
-import { generatePolicy } from '../../../src/policy-gen/index.js'
-import { isPolicy } from '../../../src/policy.js'
+import { generatePolicy } from '../../../src/policy-gen/generate.js'
+import { isPolicy } from '../../../src/policy-util.js'
 import { JSON_FIXTURE_DIR_URL, loadJSONFixture } from '../json-fixture-util.js'
 
 /**

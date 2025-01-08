@@ -5,8 +5,6 @@
  * @packageDocumentation
  */
 
-import type { CaptureLiteOptions } from '@endo/compartment-mapper'
-import { Merge, type Except } from 'type-fest'
 import {
   GeneratePolicyOptions,
   WithDebug,
@@ -16,7 +14,12 @@ import {
   WithPolicyOverride,
   WithReadPowers,
   WritePolicyOptions,
-} from './types.js'
+} from '#types'
+import type {
+  CaptureLiteOptions,
+  MapNodeModulesOptions,
+} from '@endo/compartment-mapper'
+import { Merge, type Except } from 'type-fest'
 
 /**
  * Options to pass-through to Endo.
@@ -81,7 +84,10 @@ export type GenerateOptions = Except<
  * @internal
  */
 export type LoadCompartmentMapOptions = Merge<
-  BaseLoadCompartmentMapOptions,
+  Merge<
+    Omit<BaseLoadCompartmentMapOptions, 'dev'>,
+    Pick<MapNodeModulesOptions, 'conditions'>
+  >,
   Merge<WithReadPowers, WithPolicyOverride>
 >
 

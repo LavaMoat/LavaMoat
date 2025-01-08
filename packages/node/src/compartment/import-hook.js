@@ -2,6 +2,7 @@
  * Provides exit module hooks for Node.js builtins
  *
  * @packageDocumentation
+ * @internal
  */
 
 import { Module } from 'node:module'

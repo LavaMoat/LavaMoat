@@ -7,8 +7,8 @@ import '../../src/preamble.js'
 
 import { memfs } from 'memfs'
 import { isMainThread, workerData } from 'node:worker_threads'
+import { makeReadPowers } from '../../src/compartment/power.js'
 import { log } from '../../src/log.js'
-import { makeReadPowers } from '../../src/power.js'
 import { run } from '../../src/run.js'
 
 /**

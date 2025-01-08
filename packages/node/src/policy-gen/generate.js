@@ -5,19 +5,20 @@
  *
  * @packageDocumentation
  */
+import { defaultReadPowers } from '#compartment/power'
+import { DEFAULT_POLICY_DEBUG_PATH, DEFAULT_POLICY_PATH } from '#constants'
+import { log as defaultLog } from '#log'
+import { writePolicy } from '#policy-util'
+import { devToConditions } from '#util'
 import assert from 'node:assert'
 import nodeFs from 'node:fs'
 import nodePath from 'node:path'
-import { loadCompartmentMap } from '../compartment-map.js'
-import { DEFAULT_POLICY_DEBUG_PATH, DEFAULT_POLICY_PATH } from '../constants.js'
-import { log as defaultLog } from '../log.js'
-import { defaultReadPowers } from '../power.js'
-import { writePolicy } from '../util.js'
+import { loadCompartmentMap } from './policy-gen-compartment-map.js'
 import { compartmentMapToPolicy } from './to-policy.js'
 
 /**
- * @import {GenerateOptions, CompartmentMapToPolicyOptions, LoadCompartmentMapOptions} from '../internal.js'
- * @import {GeneratePolicyOptions} from '../types.js'
+ * @import {GenerateOptions, CompartmentMapToPolicyOptions, LoadCompartmentMapOptions} from '#internal'
+ * @import {GeneratePolicyOptions} from '#types'
  * @import {LavaMoatPolicy, LavaMoatPolicyDebug} from 'lavamoat-core'
  * @import {SetFieldType} from 'type-fest'
  */
@@ -58,14 +59,18 @@ const generate = async (
     policyOverride,
     isBuiltin,
     log = defaultLog,
+    dev = true,
     ...archiveOpts
   } = {}
 ) => {
+  const conditions = devToConditions(dev)
+
   /** @type {LoadCompartmentMapOptions} */
   const loadCompartmentMapOptions = {
     ...archiveOpts,
     log,
     readPowers,
+    conditions,
     policyOverride,
   }
   const { compartmentMap, sources, renames } = await loadCompartmentMap(

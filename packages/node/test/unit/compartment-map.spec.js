@@ -1,7 +1,7 @@
 import '../../src/preamble.js'
 
 import test from 'ava'
-import { loadCompartmentMap } from '../../src/compartment-map.js'
+import { loadCompartmentMap } from '../../src/policy-gen/policy-gen-compartment-map.js'
 import { JSON_FIXTURE_DIR_URL, loadJSONFixture } from './json-fixture-util.js'
 
 test('compartment map is deterministic', async (t) => {

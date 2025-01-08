@@ -2,7 +2,7 @@ import '../../../src/preamble.js'
 
 import test from 'ava'
 import stringify from 'json-stable-stringify'
-import { loadCompartmentMap } from '../../../src/compartment-map.js'
+import { loadCompartmentMap } from '../../../src/policy-gen/policy-gen-compartment-map.js'
 import { buildModuleRecords } from '../../../src/policy-gen/to-policy.js'
 import { JSON_FIXTURE_DIR_URL, loadJSONFixture } from '../json-fixture-util.js'
 

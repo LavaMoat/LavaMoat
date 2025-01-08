@@ -6,12 +6,15 @@
  * @packageDocumentation
  */
 
-import { mergePolicy } from 'lavamoat-core'
-import * as constants from './constants.js'
-import { hasValue, isArray, isObject, readJsonFile } from './util.js'
+import * as constants from '#constants'
+import { hasValue, isArray, isObject, readJsonFile } from '#util'
+import { jsonStringifySortedPolicy, mergePolicy } from 'lavamoat-core'
+import nodeFs from 'node:fs'
+import nodePath from 'node:path'
 
 /**
- * @import {LavaMoatPolicy, LavaMoatPolicyOverrides} from 'lavamoat-core'
+ * @import {LavaMoatPolicy, LavaMoatPolicyOverrides, LavaMoatPolicyDebug} from 'lavamoat-core'
+ * @import {WritableFsInterface} from '#types'
  */
 
 /**
@@ -164,4 +167,21 @@ export const assertPolicyOverride = (value) => {
   if (!isPolicyOverride(value)) {
     throw new TypeError('Invalid LavaMoat policy overrides')
   }
+}
+
+/**
+ * Writes a diff-friendly LavaMoat policy to file
+ *
+ * Creates the destination directory if it does not exist
+ *
+ * @param {string} filepath Path to write to
+ * @param {LavaMoatPolicy | LavaMoatPolicyDebug | LavaMoatPolicyOverrides} policy
+ *   Any policy
+ * @param {{ fs?: WritableFsInterface }} opts Options
+ * @returns {Promise<void>}
+ * @internal
+ */
+export const writePolicy = async (filepath, policy, { fs = nodeFs } = {}) => {
+  await fs.promises.mkdir(nodePath.dirname(filepath), { recursive: true })
+  await fs.promises.writeFile(filepath, jsonStringifySortedPolicy(policy))
 }

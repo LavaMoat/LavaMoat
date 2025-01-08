@@ -3,6 +3,7 @@
  * transforms provided to `@endo/compartment-mapper`.
  *
  * @packageDocumentation
+ * @internal
  */
 
 import { evadeCensorSync } from '@endo/evasive-transform'

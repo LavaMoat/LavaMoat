@@ -10,10 +10,11 @@
 
 import './preamble.js'
 
-export * as constants from './constants.js'
-export { execute } from './execute.js'
+export * as constants from '#constants'
+export { execute } from '#exec/execute'
+export { load } from '#exec/load'
+export { generatePolicy } from '#policy-gen/generate'
+export * from '#policy-util'
+export * from '#types'
 export { toEndoPolicy } from './policy-converter.js'
-export { generatePolicy } from './policy-gen/index.js'
-export * from './policy.js'
 export { run } from './run.js'
-export * from './types.js'

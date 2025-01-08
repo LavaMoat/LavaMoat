@@ -7,9 +7,9 @@
  * @packageDocumentation
  */
 
+import { NATIVE_PARSER_NAME } from '#constants'
 import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
-import { NATIVE_PARSER_NAME } from './constants.js'
 
 const { freeze, keys } = Object
 const { quote: q } = assert
@@ -17,7 +17,7 @@ const { quote: q } = assert
 /**
  * @import {ParseFn, ParserImplementation} from '@endo/compartment-mapper'
  * @import {ThirdPartyStaticModuleInterface} from 'ses'
- * @import {LavaMoatPackagePolicy} from './types.js'
+ * @import {LavaMoatPackagePolicy} from '#types'
  */
 
 /** @type {ParseFn} */

@@ -11,7 +11,6 @@
  * @packageDocumentation
  */
 
-import { mergePolicy } from 'lavamoat-core'
 import {
   DEFAULT_ATTENUATOR,
   ENDO_PKG_POLICY_BUILTINS,
@@ -27,14 +26,15 @@ import {
   ENDO_POLICY_RESOURCES,
   LAVAMOAT_PKG_POLICY_NATIVE,
   LAVAMOAT_PKG_POLICY_ROOT,
-} from './constants.js'
+} from '#constants'
 import {
   assertPolicy,
   assertPolicyOverride,
   readPolicy,
   readPolicyOverride,
-} from './policy.js'
-import { hasValue, isArray, isBoolean, isString } from './util.js'
+} from '#policy-util'
+import { hasValue, isArray, isBoolean, isString } from '#util'
+import { mergePolicy } from 'lavamoat-core'
 
 const { create, entries, fromEntries } = Object
 
@@ -47,7 +47,7 @@ const { create, entries, fromEntries } = Object
  * @import {LavaMoatPackagePolicy,
  *   LavaMoatPackagePolicyOptions,
  *   LavaMoatEndoPolicy,
- *   ToEndoPolicyOptions} from './types.js'
+ *   ToEndoPolicyOptions} from '#types'
  */
 
 /**
