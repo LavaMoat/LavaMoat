@@ -1,0 +1,14 @@
+{
+  "name": "hello",
+  "version": "0.0.0",
+  "type": "module",
+  "description": "this code actually runs",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "start": "npx snapshot-fs --binary . ../json/native.json"
+  },
+  "dependencies": {
+    "hello_world": "0.0.0"
+  }
+}
