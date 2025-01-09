@@ -171,7 +171,7 @@ const main = async (args = hideBin(process.argv)) => {
         global: true,
         group: PATH_GROUP,
       },
-      cwd: {
+      root: {
         describe: 'Path to application root directory',
         type: 'string',
         nargs: 1,
@@ -200,12 +200,12 @@ const main = async (args = hideBin(process.argv)) => {
        * This runs _before_ validation (second parameter).
        */
       (argv) => {
-        argv.policy = path.resolve(argv.cwd, argv.policy)
+        argv.policy = path.resolve(argv.root, argv.policy)
         argv['policy-override'] = path.resolve(
-          argv.cwd,
+          argv.root,
           argv['policy-override']
         )
-        argv['policy-debug'] = path.resolve(argv.cwd, argv['policy-debug'])
+        argv['policy-debug'] = path.resolve(argv.root, argv['policy-debug'])
       },
       true // RUN BEFORE CHECK FN
     )
@@ -216,7 +216,7 @@ const main = async (args = hideBin(process.argv)) => {
        */
       (argv) => {
         assert(
-          path.isAbsolute(argv.cwd),
+          path.isAbsolute(argv.root),
           `${em('cwd')} must be an absolute path; ${reportThisBug}`
         )
         assert(
@@ -243,7 +243,7 @@ const main = async (args = hideBin(process.argv)) => {
       (yargs) =>
         yargs
           .positional('entrypoint', {
-            describe: 'Path to the application entry point; relative to --cwd',
+            describe: 'Path to the application entry point; relative to --root',
             type: 'string',
             normalize: true,
             demandOption: true,
@@ -293,11 +293,11 @@ const main = async (args = hideBin(process.argv)) => {
             },
           })
           /**
-           * Resolve entrypoint from `cwd`
+           * Resolve entrypoint from `root`
            */
           .middleware(
             (argv) => {
-              argv.entrypoint = path.resolve(argv.cwd, argv.entrypoint)
+              argv.entrypoint = path.resolve(argv.root, argv.entrypoint)
             },
             true // RUN BEFORE CHECK FN
           )
@@ -392,13 +392,13 @@ const main = async (args = hideBin(process.argv)) => {
           })
           .middleware(
             /**
-             * Resolve entrypoint from `cwd`
+             * Resolve entrypoint from `root`
              *
              * @remarks
              * This is run _before_ validation.
              */
             (argv) => {
-              argv.entrypoint = path.resolve(argv.cwd, argv.entrypoint)
+              argv.entrypoint = path.resolve(argv.root, argv.entrypoint)
             },
             true
           )

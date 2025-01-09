@@ -89,28 +89,29 @@ Commands:
   lavamoat run <entrypoint>       Run a Node.js application safely     [default]
   lavamoat generate <entrypoint>  Generate a policy               [aliases: gen]
 
-Positionals:
-  entrypoint  Path to the application entry point; relative to --cwd
-                                                             [string] [required]
+Path Options:
+  -p, --policy           Filepath to a policy file
+                                 [string] [default: "lavamoat/node/policy.json"]
+  -o, --policy-override  Filepath to a policy override file
+                        [string] [default: "lavamoat/node/policy-override.json"]
+      --policy-debug     Filepath to a policy debug file
+                           [string] [default: "lavamoat/node/policy-debug.json"]
+      --root             Path to application root directory
+                                         [string] [default: (current directory)]
 
 Behavior Options:
-      --dev  Include development dependencies                          [boolean]
+      --dev  Include development dependencies          [boolean] [default: true]
+
+Positionals:
+  entrypoint  Path to the application entry point; relative to --root   [string]
 
 Options:
-      --help                         Show help                         [boolean]
-      --version                      Show version number               [boolean]
-  -p, --policy                       Filepath to a policy file
-                                 [string] [default: "lavamoat/node/policy.json"]
-  -o, --policy-override, --override  Filepath to a policy override file
-                        [string] [default: "lavamoat/node/policy-override.json"]
-      --policy-debug, --pd           Filepath to a policy debug file
-                           [string] [default: "lavamoat/node/policy-debug.json"]
-      --cwd                          Path to application root directory
-                                         [string] [default: (current directory)]
+      --help     Show help                                             [boolean]
+      --version  Show version number                                   [boolean]
 
 Resources:
 
-  🌋 LavaMoat on GitHub (​https://github.com/LavaMoat/LavaMoat.git​)
+  🌋 LavaMoat on GitHub (​https://github.com/LavaMoat/LavaMoat​)
   🐛 Bugs? Issue tracker (​https://github.com/LavaMoat/LavaMoat/issues​)
   📖 Read the LavaMoat docs (​https://lavamoat.github.io​)
 ```

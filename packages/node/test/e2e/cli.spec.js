@@ -164,7 +164,7 @@ const BASIC_ENTRYPOINT = fileURLToPath(
 /**
  * The "basic" fixture's directory
  */
-const BASIC_ENTRYPOINT_CWD = path.dirname(BASIC_ENTRYPOINT)
+const BASIC_ENTRYPOINT_ROOT = path.dirname(BASIC_ENTRYPOINT)
 
 test('"--help" prints help', testCLI, ['--help'])
 
@@ -197,7 +197,7 @@ test(
 test(
   'run - basic execution',
   testCLI,
-  ['run', BASIC_ENTRYPOINT, '--cwd', BASIC_ENTRYPOINT_CWD],
+  ['run', BASIC_ENTRYPOINT, '--root', BASIC_ENTRYPOINT_ROOT],
   'hello world'
 )
 
