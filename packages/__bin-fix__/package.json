@@ -1,0 +1,13 @@
+{
+  "name": "@lavamoat/__bin-fix__",
+  "version": "0.0.0",
+  "private": true,
+  "bin": {
+    "lavamoat2": "lavamoat2.mjs",
+    "lavamoat-node": "lavamoat-node.js"
+  },
+  "peerDependencies": {
+    "@lavamoat/node": "*",
+    "lavamoat": "*"
+  }
+}
