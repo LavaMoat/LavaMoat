@@ -1,0 +1,5 @@
+{
+  "/package.json": "{\n  \"name\": \"scaffold\",\n  \"version\": \"1.0.0\",\n  \"type\": \"module\",\n  \"license\": \"ISC\",\n  \"private\": true,\n  \"main\": \"entry.js\",\n  \"dependencies\": {\"test\": \"*\"}\n}\n",
+  "/entry.js": "import 'test'",
+  "/node_modules/test/package.json": "{\n  \"name\": \"test\",\n  \"version\": \"1.0.0\",\n  \"type\": \"module\",\n  \"license\": \"ISC\",\n  \"private\": true,\n  \"main\": \"index.js\"\n}\n"
+}
