@@ -1,0 +1,8 @@
+{
+  "/package.json": "{\n  \"name\": \"unused-dependency-override\",\n  \"version\": \"1.0.0\",\n  \"type\": \"module\",\n  \"license\": \"ISC\",\n  \"private\": true,\n  \"main\": \"index.js\",\n  \"scripts\": {\n    \"start\": \"npx snapshot-fs . ../json/unused-dependency-override.json\"\n  },\n  \"dependencies\": {\n    \"blurmph\": \"^1.0.0\"\n  }\n}\n",
+  "/index.js": "export const hello = 'world'\n\nconsole.log(`hello ${hello}`)\n",
+  "/README.md": "This is an example of an app which has a dependency but does not use it in any way. However, `policy-override.json` is present and refers to the package. The policy overrides include builtins _not explicitly used by the package_, which should not appear in auto-generation in any other case. This policy should ultimately be merged into the generated policy.\n",
+  "/node_modules/blurmph/package.json": "{\n  \"name\": \"blurmph\",\n  \"version\": \"1.0.0\",\n  \"main\": \"index.js\"\n}\n",
+  "/node_modules/blurmph/index.js": "module.exports = require('node:fs')\n",
+  "/lavamoat/node/policy-override.json": "{\n  \"resources\": {\n    \"blurmph\": {\n      \"builtin\": {\n        \"node:path\": true\n      }\n    }\n  }\n}\n"
+}

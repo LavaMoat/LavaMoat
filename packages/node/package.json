@@ -1,0 +1,77 @@
+{
+  "name": "@lavamoat/node",
+  "version": "0.0.1",
+  "type": "module",
+  "description": "Next-gen LavaMoat for Node.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LavaMoat/LavaMoat.git",
+    "directory": "packages/node"
+  },
+  "homepage": "https://lavamoat.github.io",
+  "bugs": "https://github.com/LavaMoat/LavaMoat/issues",
+  "author": "LavaMoat Project",
+  "license": "MIT",
+  "engines": {
+    "node": "^18.0.0 || ^20.0.0 || ^22.0.0",
+    "npm": ">=9.0.0"
+  },
+  "bin": {
+    "lavamoat": "src/cli.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./types/src/index.d.ts",
+      "import": "./src/index.js"
+    },
+    "./cli": {
+      "types": "./types/src/cli.d.ts",
+      "import": "./src/cli.js"
+    },
+    "./execute": {
+      "types": "./types/src/exec/execute.d.ts",
+      "import": "./src/exec/execute.js"
+    },
+    "./load": {
+      "types": "./types/src/exec/load.d.ts",
+      "import": "./src/exec/load.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "lint:deps": "depcheck",
+    "test": "npm run test:run",
+    "test:run": "ava"
+  },
+  "dependencies": {
+    "@endo/compartment-mapper": "1.4.0",
+    "@endo/evasive-transform": "1.3.0",
+    "@types/node": "18.19.67",
+    "chalk": "4.1.2",
+    "lavamoat-core": "^16.0.0",
+    "loggerr": "4.2.0",
+    "ses": "1.9.0",
+    "terminal-link": "3.0.0",
+    "type-fest": "4.30.0",
+    "yargs": "17.7.2"
+  },
+  "devDependencies": {
+    "@endo/eslint-plugin": "2.1.0",
+    "@jessie.js/eslint-plugin": "0.4.0",
+    "@types/json-stable-stringify": "1.0.36",
+    "json-stable-stringify": "1.2.0",
+    "memfs": "4.8.1"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "ava": {
+    "files": [
+      "test/**/*.spec.js"
+    ],
+    "timeout": "10s"
+  }
+}

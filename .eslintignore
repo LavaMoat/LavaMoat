@@ -3,6 +3,7 @@
 docs/**/*
 packages/*/examples/**/*
 packages/*/test/**/fixtures/**/*
+packages/*/test/**/fixture/**/*
 packages/*/test/projects/**/*
 packages/core/lib/*.umd.js
 packages/lavapack/bundle.js
