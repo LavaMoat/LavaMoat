@@ -255,4 +255,34 @@ module.exports = [
     })
     return scenario
   },
+  async () => {
+    const scenario = createScenarioFromScaffold({
+      name: 'config - global Function read policy ignored',
+      configOverride: {
+        resources: {
+          one: {
+            globals: {
+              Function: true,
+            },
+          },
+        },
+      },
+    })
+    return scenario
+  },
+  async () => {
+    const scenario = createScenarioFromScaffold({
+      name: 'config - global Function write policy ignored',
+      configOverride: {
+        resources: {
+          one: {
+            globals: {
+              Function: 'write',
+            },
+          },
+        },
+      },
+    })
+    return scenario
+  },
 ]
