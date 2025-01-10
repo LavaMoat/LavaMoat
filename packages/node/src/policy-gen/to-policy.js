@@ -26,8 +26,8 @@ import { PolicyGeneratorContext } from './policy-gen-context.js'
  *   LavaMoatPolicyDebug,
  *   LavamoatModuleRecord,
  *   SesCompat,
- *   SesCompatObj,
- *   ModuleInspector} from 'lavamoat-core'
+ *   SesCompatObj} from '@lavamoat/types'
+ * @import {ModuleInspector} from 'lavamoat-core'
  * @import {BuildModuleRecordsOptions,
  * CompartmentMapToDebugPolicyOptions,} from '../types.js'
  * @import {InspectModuleRecordsOptions, CompartmentMapToPolicyOptions} from '../internal.js'

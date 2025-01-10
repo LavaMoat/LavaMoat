@@ -180,7 +180,11 @@ const installGlobalsForPolicy = (resourceId, packageCompartmentGlobal) => {
     const packagePolicy = LAVAMOAT.policy.resources[resourceId] || {}
     const endowments = getEndowmentsForConfig(
       rootCompartmentGlobalThis,
+<<<<<<< HEAD
       packagePolicy,
+=======
+      LAVAMOAT.policy.resources[resourceId] || {},
+>>>>>>> 80a6e4e2c (fix(core,node): updates post-merge of @lavamoat/node)
       globalThis,
       packageCompartmentGlobal
     )

@@ -13,7 +13,7 @@ import {
 /**
  * @import {Policy} from '@endo/compartment-mapper'
  * @import {LavaMoatEndoPackagePolicyItem} from '../../../src/types.js'
- * @import {LavaMoatPolicy} from 'lavamoat-core'
+ * @import {LavaMoatPolicy} from '@lavamoat/types'
  */
 
 const KS_POLICY_URL = new URL(

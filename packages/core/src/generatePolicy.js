@@ -66,7 +66,7 @@ function createModuleInspector(opts) {
   /**
    * The module record for the root package. May not be used
    *
-   * @type {import('./moduleRecord').LavamoatModuleRecord | undefined}
+   * @type {import('@lavamoat/types').LavamoatModuleRecord | undefined}
    */
   let root
 
