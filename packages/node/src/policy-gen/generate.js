@@ -19,7 +19,7 @@ import { compartmentMapToPolicy } from './to-policy.js'
 /**
  * @import {GenerateOptions, LoadCompartmentMapOptions} from '../internal.js'
  * @import {GeneratePolicyOptions, CompartmentMapToPolicyOptions} from '../types.js'
- * @import {LavaMoatPolicy, LavaMoatPolicyDebug} from 'lavamoat-core'
+ * @import {LavaMoatPolicy, LavaMoatPolicyDebug} from '@lavamoat/types'
  * @import {SetFieldType} from 'type-fest'
  */
 
