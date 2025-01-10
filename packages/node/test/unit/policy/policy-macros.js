@@ -12,7 +12,7 @@ import {
  * @import {ValueOf} from 'type-fest'
  * @import {TestPolicyMacroOptions, TestPolicyForJSONOptions, ScaffoldFixtureResult, ScaffoldFixtureOptions} from './types.js'
  * @import {TestFn, MacroDeclarationOptions} from 'ava'
- * @import {LavaMoatPolicy, LavaMoatPolicyOverrides} from 'lavamoat-core'
+ * @import {LavaMoatPolicy, LavaMoatPolicyOverrides} from '@lavamoat/types'
  */
 
 /**
