@@ -13,7 +13,7 @@ import * as constants from './constants.js'
 import { hasValue, isArray, isObject, readJsonFile } from './util.js'
 
 /**
- * @import {LavaMoatPolicy, LavaMoatPolicyOverrides, LavaMoatPolicyDebug} from 'lavamoat-core'
+ * @import {LavaMoatPolicy, LavaMoatPolicyOverrides, LavaMoatPolicyDebug} from '@lavamoat/types'
  * @import {WritableFsInterface} from './types.js'
  */
 
