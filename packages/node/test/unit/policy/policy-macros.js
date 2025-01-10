@@ -10,7 +10,7 @@ import {
  * @import {ValueOf} from 'type-fest'
  * @import {TestPolicyMacroOptions, TestPolicyForJSONOptions} from './types.js'
  * @import {TestFn, MacroDeclarationOptions, ExecutionContext} from 'ava'
- * @import {LavaMoatPolicy, LavaMoatPolicyOverrides} from 'lavamoat-core'
+ * @import {LavaMoatPolicy, LavaMoatPolicyOverrides} from '@lavamoat/types'
  * @import {Volume} from 'memfs/lib/volume.js'
  * @import {ReadNowPowers} from '@endo/compartment-mapper'
  */

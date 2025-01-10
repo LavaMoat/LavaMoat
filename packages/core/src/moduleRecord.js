@@ -1,38 +1,27 @@
 // @ts-check
 
 /**
- * Do not import this; use `import('@lavamoat/types').LavamoatModuleRecord`
- * instead.
- *
- * @remarks
- * Unfortunately, one cannot implement something imported directly via JSDoc
- * @template {any[]} [InitArgs=DefaultInitArgs] Default is `DefaultInitArgs`
- * @typedef {import('@lavamoat/types').LavamoatModuleRecord<InitArgs>} LMR
- */
-
-/**
- * Do not import this; use `import('@lavamoat/types').DefaultModuleInitArgs`
- * instead.
- *
- * @remarks
- * This is here due to
- * https://github.com/hosseinmd/prettier-plugin-jsdoc/issues/229
- * @typedef {import('@lavamoat/types').DefaultModuleInitArgs} DefaultInitArgs
+ * @import {LavamoatModuleRecord as LMR,
+ *   DefaultModuleInitArgs,
+ *   ModuleInitializer,
+ *   ModuleRecordType} from '@lavamoat/types'
+ * @import {SetOptional} from 'type-fest'
+ * @import {File} from '@babel/types'
  */
 
 /**
  * A module record
  *
- * @template {any[]} [InitArgs=DefaultInitArgs] - Arguments for
+ * @template {any[]} [InitArgs=DefaultModuleInitArgs] - Arguments for
  *   {@link LavamoatModuleRecord.moduleInitializer}. Default is
- *   `DefaultInitArgs`
+ *   `DefaultModuleInitArgs`
  * @implements {LMR<InitArgs>}
  */
 class LavamoatModuleRecord {
   /**
    * Assigns properties!
    *
-   * @param {LMR<InitArgs>} params
+   * @param {LavamoatModuleRecordOptions<InitArgs>} params
    */
   constructor({
     specifier,
@@ -60,7 +49,7 @@ class LavamoatModuleRecord {
     /**
      * The type of module
      *
-     * @type {import('@lavamoat/types').ModuleRecordType}
+     * @type {ModuleRecordType}
      */
     this.type = type
     /**
@@ -87,14 +76,13 @@ class LavamoatModuleRecord {
     /**
      * Parsed AST, if any
      *
-     * @type {import('@babel/types').File | undefined}
+     * @type {File | undefined}
      */
     this.ast = ast
     /**
      * Module initializer function
      *
-     * @type {import('@lavamoat/types').ModuleInitializer<InitArgs>
-     *   | undefined}
+     * @type {ModuleInitializer<InitArgs> | undefined}
      */
     this.moduleInitializer = moduleInitializer
   }
@@ -109,11 +97,8 @@ module.exports = { LavamoatModuleRecord }
  * {@link LMR LavamoatModuleRecord interface} is that `importMap` is optional
  * here.
  *
- * @template {any[]} [InitArgs=DefaultInitArgs] - Arguments for
+ * @template {any[]} [InitArgs=DefaultModuleInitArgs] - Arguments for
  *   {@link LavamoatModuleRecordOptions.moduleInitializer}. Default is
- *   `DefaultInitArgs`
- * @typedef {import('type-fest').SetOptional<
- *   import('@lavamoat/types').LavamoatModuleRecord<InitArgs>,
- *   'importMap'
- * >} LavamoatModuleRecordOptions
+ *   `DefaultModuleInitArgs`
+ * @typedef {SetOptional<LMR<InitArgs>, 'importMap'>} LavamoatModuleRecordOptions
  */

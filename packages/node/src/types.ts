@@ -17,7 +17,8 @@ import type {
   SyncImportLocationOptions,
   UrlInterface,
 } from '@endo/compartment-mapper'
-import type { IsBuiltinFn, LavaMoatPolicyOverrides } from 'lavamoat-core'
+import type { LavaMoatPolicyOverrides } from '@lavamoat/types'
+import type { IsBuiltinFn } from 'lavamoat-core'
 import type { Loggerr } from 'loggerr'
 import type { Except, Merge, MergeDeep, Simplify } from 'type-fest'
 import {
@@ -81,7 +82,7 @@ export {
   Resolutions,
   ResourcePolicy,
   Resources,
-} from 'lavamoat-core'
+} from '@lavamoat/types'
 
 /**
  * If `dev` is `true`, `@endo/compartment-mapper` will receive a `conditions`
