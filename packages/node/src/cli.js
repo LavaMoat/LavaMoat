@@ -32,7 +32,7 @@ import { resolveBinScript, resolveEntrypoint } from './resolve.js'
 
 /**
  * @import {PackageJson} from 'type-fest';
- * @import {LavaMoatPolicy} from 'lavamoat-core';
+ * @import {LavaMoatPolicy} from '@lavamoat/types';
  */
 
 /**
