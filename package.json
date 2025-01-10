@@ -38,7 +38,7 @@
     "watch:types": "tsc -b --watch"
   },
   "devDependencies": {
-    "@commitlint/cli": "19.6.0",
+    "@commitlint/cli": "19.6.1",
     "@commitlint/config-conventional": "19.6.0",
     "@endo/compartment-mapper": "1.4.0",
     "@tsconfig/node18": "18.2.4",
