@@ -148,7 +148,6 @@ const installGlobalsForPolicy = (resourceId, packageCompartmentGlobal) => {
   } else {
     const endowments = getEndowmentsForConfig(
       rootCompartmentGlobalThis,
-      // @ts-expect-error XXX: either this or getEndowmentsForConfig is wrong
       LAVAMOAT.policy.resources[resourceId] || {},
       globalThis,
       packageCompartmentGlobal
