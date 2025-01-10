@@ -18,8 +18,8 @@
   },
   "types": "./dist/index.d.ts",
   "dependencies": {
-    "@babel/types": "7.26.0",
-    "type-fest": "4.30.0"
+    "@babel/types": "7.26.10",
+    "type-fest": "4.40.1"
   },
   "publishConfig": {
     "access": "public"
