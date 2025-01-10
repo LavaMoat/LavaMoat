@@ -16,7 +16,7 @@ import { hasValue, isObject } from '../util.js'
  *   ModuleSource} from 'ses'
  * @import {Merge} from 'type-fest'
  * @import {CompartmentDescriptor, CompartmentMapDescriptor} from '@endo/compartment-mapper'
- * @import {LavaMoatPolicy} from 'lavamoat-core'
+ * @import {LavaMoatPolicy} from '@lavamoat/types'
  */
 
 const { entries, isFrozen } = Object
