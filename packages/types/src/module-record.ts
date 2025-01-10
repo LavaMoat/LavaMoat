@@ -1,3 +1,5 @@
+import { File } from '@babel/types'
+
 /**
  * Possible value of {@link LavamoatModuleRecord.type}.
  *
@@ -11,7 +13,7 @@ export type ModuleRecordType = 'builtin' | 'native' | 'js'
  * @template InitArgs - Arguments to pass to the module initializer
  */
 export interface LavamoatModuleRecord<
-  InitArgs extends any[] = DefaultModuleInitArgs,
+  InitArgs extends readonly any[] = DefaultModuleInitArgs,
 > {
   /**
    * Module specifier
@@ -50,12 +52,14 @@ export interface LavamoatModuleRecord<
   /**
    * Parsed AST of {@link content}
    */
-  ast?: import('@babel/types').File
+  ast?: File
 
   /**
    * Module initializer function
    */
   moduleInitializer?: ModuleInitializer<InitArgs>
+
+  isRoot?: boolean
 }
 
 /**
@@ -63,8 +67,9 @@ export interface LavamoatModuleRecord<
  *
  * @template InitArgs - Arguments to pass to the module initializer
  */
-export type ModuleInitializer<InitArgs extends any[] = DefaultModuleInitArgs> =
-  (...args: InitArgs) => void
+export type ModuleInitializer<
+  InitArgs extends readonly any[] = DefaultModuleInitArgs,
+> = (...args: InitArgs) => void
 
 /**
  * Default {@link ModuleInitializer} arguments

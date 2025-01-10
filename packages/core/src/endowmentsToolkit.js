@@ -60,7 +60,7 @@ function endowmentsToolkit({
    *
    * @template {object} T Deep properties specified in the packagePolicy
    * @param {T} sourceRef - Object from which to copy properties
-   * @param {LMPolicy.PackagePolicy} packagePolicy - LavaMoat policy item
+   * @param {LMPolicy.ResourcePolicy} packagePolicy - LavaMoat policy item
    *   representing a package
    * @param {object} unwrapTo - For getters and setters, when the this-value is
    *   unwrapFrom, is replaced as unwrapTo
