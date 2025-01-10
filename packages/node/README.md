@@ -1,34 +1,38 @@
 # @lavamoat/node
 
-> Nether-age secure runtime for Node.js
+> Warning: You are looking at an early version of this packages. Breaking changes and bugs are to be expected.
 
-**`@lavamoat/node` is a [Hardened JavaScript][] runtime for Node.js v18.0.0+.**
+**`@lavamoat/node` is a [Hardened JavaScript][] runtime for Node.js v18.0.0+ that provides per-package security policy enfocement**
 
 `@lavamoat/node`:
 
 - Uses [`lockdown`][lockdown] to prevent tampering with the execution environment:
-  - User code cannot meddle with global objects or shared intrinsics (i.e. "the
+  - User code cannot meddle with JavaScript's global objects or shared intrinsics (i.e. "the
     stuff in the prototype chain")
-  - Neutralizes prototype pollution attacks
+  - Neutralizes most prototype pollution attacks
 - Isolates dependencies _within the same process_:
   - By default, packages do not share references to any global objects
   - Access to resources (global objects, other packages, Node.js builtins,
     native modules) is controlled by user-defined policy
-- Secures your supply chain by generating and maintaining (with your help) policies
+- Provides tools for generating and maintaining the policy without the need to manually create all of it.
 
-LavaMoat is built on top of [SES][].
+LavaMoat can protect your Node.js application, but it can _also_ protect your development environment (e.g., build scripts) — you can run your tools with [the `lavamoat` CLI](#usage).
 
 ## Supply Chain Security
 
-Over time, your application's dependencies will change. When they do, LavaMoat detects any changes to resource access. For example, if an upgraded transitive dependency now uses the `left-pad` package, this will be evident from an auto-generated policy file. You can then choose to allow or deny this access (or stop using `left-pad`).
+Over time, your application's dependencies will get updated. It's easy to update to a version of a package that introduces malicious code or a new dependency on a malicious package.
 
-In this way, LavaMoat is a little like [Socket][], which alerts you to dubious changes in a package's behavior (among other things). LavaMoat, however, surfaces _all_ such changes; it's _up to you_ to decide whether or not they're reasonable.
+`@lavamoat/node` provides a runtime that should work just as before, but with protection against most supply chain attacks.
+
+Powerful APIs and Node builtins are available globally or through imports without restriction despite only very few dependencies of your application actually need to use them. LavaMoat can stop packages trying to abuse these resources without blocking their intended use.
+
+Each package can only access resources that are explicitly allowed by the policy. If a resource is not allowed for a package, the environment will behave as if that resource doesn't even exist. This is a powerful way to prevent malicious packages from doing harm.
 
 ## Runtime Security
 
-LavaMoat also guards against deceptive packages. If a package obfuscates its intentions to the degree that LavaMoat's own policy generation didn't detect it, the existing policy will prevent naughty behavior.
+If a package obfuscates its intentions to the degree that LavaMoat's own policy generation didn't detect what it's using, the existing policy will prevent naughty behavior because LavaMoat doesn't rely on reading the code for the protections it provides. It makes sure resources not allowed by the policy for the package simply don't exist in the package's execution scope. (thanks to [Hardened JavaScript][] Compartments)
 
-LavaMoat can protect your Node.js application, but it can _also_ protect your development environment (e.g., build tooling)—you can run your tools with [the `lavamoat` CLI](#usage).
+The only time LavaMoat reads the code is when generating a policy. Policy generation is there to provide a starting point for customization and it allows every resource it detects. You can use policy-overrides to restrict resources that are allowed for a package. And you need to review the policy you generate. (More on policy review in the [LavaMoat docs](https://lavamoat.github.io/guides/policy-diff/))
 
 ## Differences from [lavamoat][]
 
