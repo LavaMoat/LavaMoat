@@ -1,8 +1,8 @@
 # @lavamoat/node
 
-> Warning: You are looking at an early version of this packages. Breaking changes and bugs are to be expected.
+> Warning: This software is _alpha_ quality. Expect bugs and breaking changes!
 
-**`@lavamoat/node` is a [Hardened JavaScript][] runtime for Node.js v18.0.0+ that provides per-package security policy enfocement**
+**`@lavamoat/node` is a [Hardened JavaScript][] runtime** for Node.js v18.0.0+ that provides _per-package_ security policy enforcement.
 
 `@lavamoat/node`:
 
@@ -14,25 +14,29 @@
   - By default, packages do not share references to any global objects
   - Access to resources (global objects, other packages, Node.js builtins,
     native modules) is controlled by user-defined policy
-- Provides tools for generating and maintaining the policy without the need to manually create all of it.
+- Provides tooling to _generate_ and _maintain_ the policy
 
 LavaMoat can protect your Node.js application, but it can _also_ protect your development environment (e.g., build scripts) — you can run your tools with [the `lavamoat` CLI](#usage).
 
 ## Supply Chain Security
 
-Over time, your application's dependencies will get updated. It's easy to update to a version of a package that introduces malicious code or a new dependency on a malicious package.
+Over time, your application's dependencies will need updating. How can you ensure a new version of a package—or newly-added dependencies—aren't doing something malicious?
 
 `@lavamoat/node` provides a runtime that should work just as before, but with protection against most supply chain attacks.
 
-Powerful APIs and Node builtins are available globally or through imports without restriction despite only very few dependencies of your application actually need to use them. LavaMoat can stop packages trying to abuse these resources without blocking their intended use.
+Nodes.js provides powerful global APIs and builtins without restriction—but most of your app's dependencies _don't need them_. LavaMoat can stop packages from abusing these resources _without_ blocking legitimate use.
 
-Each package can only access resources that are explicitly allowed by the policy. If a resource is not allowed for a package, the environment will behave as if that resource doesn't even exist. This is a powerful way to prevent malicious packages from doing harm.
+Each package can only access resources that are explicitly allowed by the policy. _If a package is disallowed access to a resource, the environment will behave as if that resource does not exist._ This is a powerful way to prevent malicious packages from doing harm.
 
 ## Runtime Security
 
-If a package obfuscates its intentions to the degree that LavaMoat's own policy generation didn't detect what it's using, the existing policy will prevent naughty behavior because LavaMoat doesn't rely on reading the code for the protections it provides. It makes sure resources not allowed by the policy for the package simply don't exist in the package's execution scope. (thanks to [Hardened JavaScript][] Compartments)
+If a package obfuscates its intentions to the degree that LavaMoat's own policy generation cannot detect what resources it needs, the generated policy will _still_ prevent naughty behavior. This is because LavaMoat operates using the [principle of least privilege](https://en.wikipedia.org/wiki/Principle_of_least_privilege). Resources **not explicitly allowed by the policy do not exist** in the package's execution scope—thanks to the `Compartment` provided by [Hardened JavaScript][].
 
-The only time LavaMoat reads the code is when generating a policy. Policy generation is there to provide a starting point for customization and it allows every resource it detects. You can use policy-overrides to restrict resources that are allowed for a package. And you need to review the policy you generate. (More on policy review in the [LavaMoat docs](https://lavamoat.github.io/guides/policy-diff/))
+LavaMoat parses code _only_ during policy generation—never at runtime. Policy generation provides a _starting point_ for customization by creating a policy which allows _every resource_ it detects. While reviewing the policy, you can choose to create **policy overrides** to restrict or grant access to resources.  
+
+> [!TIP]
+>
+> Read more about reviewing policy files in the [LavaMoat docs](https://lavamoat.github.io/guides/policy-diff/).
 
 ## Differences from [lavamoat][]
 
