@@ -362,14 +362,15 @@ class LavaMoatPlugin {
                   // add a warning about removing the asset
                   mainCompilationWarnings.push(
                     new WebpackError(
-                      `LavaMoatPlugin: the following resource was being silently emitted to the dist and LavaMoat has prevented it: '${module.resource}'. If you want to add this resource, explicitly define a file-loader for it in your webpack configuration.`
+                      `LavaMoatPlugin: the following resource was being silently emitted to the dist directory and LavaMoat has prevented it: '${module.resource}'. If you want to add this resource, explicitly define a file-loader for it in your webpack configuration.`
                     )
                   )
 
-                  // chunkGraph.disconnectChunkAndModule(chunk, module) // can't use this, the require statement remains and errors out
+                  // We can't use `chunkGraph.disconnectChunkAndModule` here
+                  // because the require statement remains and errors out
 
                   if (module.generatorOptions) {
-                    // genertorOptions was not present in testnig, but types indicate it might be there
+                    // generatorOptions was not present in testing, but types indicate it might be there
                     module.generatorOptions.emit = false
                   }
                   if (module.generator) {
