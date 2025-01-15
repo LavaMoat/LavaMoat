@@ -26,13 +26,13 @@ Over time, your application's dependencies will need updating. How can you ensur
 
 Nodes.js provides powerful global APIs and builtins without restriction—but most of your app's dependencies _don't need them_. LavaMoat can stop packages from abusing these resources _without_ blocking legitimate use.
 
-Each package can only access resources that are explicitly allowed by the policy. _If a package is disallowed access to a resource, the environment will behave as if that resource does not exist._ This is a powerful way to prevent malicious packages from doing harm.
+Each package can only access resources that are explicitly allowed by the policy. _If a package disallows access to a resource, the environment will behave as if that resource does not exist._ This is a powerful way to prevent malicious packages from doing harm.
 
 ## Runtime Security
 
 If a package obfuscates its intentions to the degree that LavaMoat's own policy generation cannot detect what resources it needs, the generated policy will _still_ prevent naughty behavior. This is because LavaMoat operates using the [principle of least privilege](https://en.wikipedia.org/wiki/Principle_of_least_privilege). Resources **not explicitly allowed by the policy do not exist** in the package's execution scope—thanks to the `Compartment` provided by [Hardened JavaScript][].
 
-LavaMoat parses code _only_ during policy generation—never at runtime. Policy generation provides a _starting point_ for customization by creating a policy which allows _every resource_ it detects. While reviewing the policy, you can choose to create **policy overrides** to restrict or grant access to resources.  
+LavaMoat parses code _only_ during policy generation—never at runtime. Policy generation provides a _starting point_ for customization by creating a policy which allows _every resource_ it detects. While reviewing the policy, you can choose to create **policy overrides** to restrict or grant access to resources.
 
 > [!TIP]
 >
@@ -152,11 +152,9 @@ The following issues (or missing features) are _intended to be resolved_:
 
 ©️ 2023 Consensys Software. Licensed MIT
 
-[SES]: https://npm.im/ses
 [Hardened JavaScript]: https://hardenedjs.org
 [lockdown]: https://hardenedjs.org/#lockdown
 [lavamoat]: https://npm.im/lavamoat
 [@endo/compartment-mapper]: https://npm.im/@endo/compartment-mapper
-[Socket]: https://socket.dev
 [policy-guide]: https://lavamoat.github.io/guides/policy/
 [docs]: https://lavamoat.github.io
