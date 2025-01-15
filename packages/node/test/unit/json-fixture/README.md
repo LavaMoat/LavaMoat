@@ -8,7 +8,7 @@ This contains test fixtures in either [DirectoryJSON][] or [Compact JSON][] form
 
 > [!NOTE]
 >
-> [`snapshot-fs`][snapshot-fs] requires Node.js v22 or newer.
+> [`snapshot-fs`][snapshot-fs] requires Node.js v22.13.0 or newer.
 
 To create a fixture, you can use [`snapshot-fs`][snapshot-fs].
 
