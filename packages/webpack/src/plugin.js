@@ -341,7 +341,8 @@ class LavaMoatPlugin {
 
                 if (
                   isIgnoredModule(module) ||
-                  isContextModule(module, moduleClass)
+                  (options.__unsafeAllowContextModules &&
+                    isContextModule(module, moduleClass))
                 ) {
                   unenforceableModuleIds.push(moduleId)
                 } else {
@@ -612,6 +613,10 @@ module.exports = LavaMoatPlugin
  *   determines if the specifier is a builtin of the runtime platform e.g.
  *   node:fs
  * @property {boolean} [debugRuntime] - Enable runtime debugging tools
+ * @property {boolean} [__unsafeAllowContextModules] - Skips enforcement of
+ *   policies on ContextModule usage. This is only safe if you can guarantee
+ *   that webpack only uses the missing module stub ContextModule and no actual
+ *   modules get loaded through it.
  */
 
 // Provided inline because import('ses') won't work in jsdoc of a cjs module
