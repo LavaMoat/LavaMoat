@@ -24,6 +24,15 @@
   * dependencies
     * lavamoat-core bumped from ^15.2.0 to ^15.2.1
 
+## [7.0.6](https://github.com/LavaMoat/LavaMoat/compare/lavapack-v7.0.5...lavapack-v7.0.6) (2025-01-15)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-core bumped from ^16.2.2 to ^16.3.0
+
 ## [7.0.5](https://github.com/LavaMoat/LavaMoat/compare/lavapack-v7.0.4...lavapack-v7.0.5) (2024-12-09)
 
 
