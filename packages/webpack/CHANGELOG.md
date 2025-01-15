@@ -18,6 +18,22 @@
   * dependencies
     * lavamoat-core bumped from ^15.2.0 to ^15.2.1
 
+## [0.8.0-beta.0](https://github.com/LavaMoat/LavaMoat/compare/webpack-v0.7.1-beta.0...webpack-v0.8.0-beta.0) (2025-01-15)
+
+
+### Features
+
+* **webpack:** add undocumented __unsafeAllowContextModules flag to allow experimenting with contextmodules without leaving them vulnerable by default ([8eca7f1](https://github.com/LavaMoat/LavaMoat/commit/8eca7f16dc0270875f99e329b46fd5555c8e1e9d))
+* **webpack:** avoid emiting resource assets from packages by default ([#1451](https://github.com/LavaMoat/LavaMoat/issues/1451)) ([325bf2a](https://github.com/LavaMoat/LavaMoat/commit/325bf2a1dc5c9c048ef36148d5611a2a5112ec0d))
+* **webpack:** policy debugging capabilities and tighter tests ([20b12ad](https://github.com/LavaMoat/LavaMoat/commit/20b12ad38a78678c8291b4841e8c4d00b349c1aa))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-core bumped from ^16.2.2 to ^16.3.0
+
 ## [0.7.1-beta.0](https://github.com/LavaMoat/LavaMoat/compare/webpack-v0.7.0-beta.0...webpack-v0.7.1-beta.0) (2024-12-20)
 
 
