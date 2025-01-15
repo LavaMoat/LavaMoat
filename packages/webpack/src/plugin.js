@@ -106,6 +106,18 @@ class LavaMoatPlugin {
     })
 
     const options = this.options
+
+    diag.run(2, () => {
+      // Log stack traces for all errors on higher verbosity because webpack won't
+      compiler.hooks.done.tap(PLUGIN_NAME, (stats) => {
+        if (stats.hasErrors()) {
+          stats.compilation.errors.forEach((error) => {
+            console.error(error)
+          })
+        }
+      })
+    })
+
     if (typeof options.readableResourceIds === 'undefined') {
       // default options.readableResourceIds to true if webpack configuration sets development mode
       options.readableResourceIds = compiler.options.mode !== 'production'
@@ -143,7 +155,7 @@ class LavaMoatPlugin {
     // run long asynchronous processing ahead of all compilations
     compiler.hooks.beforeRun.tapAsync(PLUGIN_NAME, (compilation, callback) =>
       loadCanonicalNameMap({
-        rootDir: compiler.context,
+        rootDir: options.rootDir || compiler.context,
         includeDevDeps: true, // even the most proper projects end up including devdeps in their bundles :()
         resolve: browserResolve,
       })
@@ -216,6 +228,13 @@ class LavaMoatPlugin {
          */
         const unenforceableModuleIds = []
         /**
+         * A record of module ids that are externals and need to be enforced as
+         * builtins.
+         *
+         * @type {Record<string | number, string>}
+         */
+        const externals = {}
+        /**
          * @type {import('./buildtime/aa.js').IdentifierLookup}
          */
         let identifierLookup
@@ -259,16 +278,36 @@ class LavaMoatPlugin {
         }
 
         /**
+         * Checks if a module is a context module.
+         *
+         * @param {any} m - The module to check.
+         * @param {string} moduleClass - The class of the module.
+         * @returns {boolean} - Returns true if the module is a context module,
+         *   otherwise false.
+         */
+        const isContextModule = (m, moduleClass) =>
+          moduleClass === 'ContextModule'
+
+        /**
          * @param {import('webpack').Module} m
          * @param {string} moduleClass
-         * @returns {m is import('webpack').NormalModule} // TODO: this is not
+         * @returns {m is import('webpack').ExternalModule} // TODO: this is not
          *   true anymore, but there's no superclass of all reasonable module
          *   types
+         */
+        const isExternalModule = (m, moduleClass) =>
+          ['ExternalModule'].includes(moduleClass) &&
+          'externalType' in m &&
+          m.externalType !== undefined
+        /**
+         * @param {import('webpack').Module} m
+         * @param {string} moduleClass
+         * @returns {m is import('./buildtime/policyGenerator.js').InspectableWebpackModule}
          */
         const isInspectableModule = (m, moduleClass) =>
           'userRequest' in m ||
           m.type?.startsWith('javascript') ||
-          ['ExternalModule'].includes(moduleClass)
+          isExternalModule(m, moduleClass)
 
         // Old: good for collecting all possible paths, but bad for matching them with module ids
         // collect all paths resolved for the bundle and transition afterwards
@@ -295,9 +334,24 @@ class LavaMoatPlugin {
                 const moduleClass =
                   Object.getPrototypeOf(module).constructor.name
 
-                if (isIgnoredModule(module)) {
+                if (moduleId === null) {
+                  diag.rawDebug(
+                    2,
+                    `LavaMoatPlugin: module ${module.identifier()} has no moduleId, cannot cover it with policy.`
+                  )
+                  diag.rawDebug(4, { module })
+                  return
+                }
+
+                if (
+                  isIgnoredModule(module) ||
+                  isContextModule(module, moduleClass)
+                ) {
                   unenforceableModuleIds.push(moduleId)
                 } else {
+                  if (isExternalModule(module, moduleClass)) {
+                    externals[moduleId] = module.userRequest
+                  }
                   if (isInspectableModule(module, moduleClass)) {
                     policyGenerator.inspectWebpackModule(
                       module,
@@ -329,6 +383,7 @@ class LavaMoatPlugin {
             identifierLookup = generateIdentifierLookup({
               readableResourceIds: options.readableResourceIds,
               unenforceableModuleIds,
+              externals,
               paths: knownPaths,
               policy: policyToApply,
               canonicalNameMap,
@@ -367,11 +422,13 @@ class LavaMoatPlugin {
         // This hook happens after all module generators have been executed.
         compilation.hooks.afterProcessAssets.tap(PLUGIN_NAME, () => {
           diag.rawDebug(3, '> afterProcessAssets')
-          mainCompilationWarnings.push(
-            new WebpackError(
-              `in LavaMoatPlugin: excluded modules \n  ${excludes.join('\n  ')}`
+          if (excludes.length > 0) {
+            mainCompilationWarnings.push(
+              new WebpackError(
+                `in LavaMoatPlugin: excluded modules \n  ${excludes.join('\n  ')}`
+              )
             )
-          )
+          }
         })
 
         // =================================================================
@@ -435,6 +492,11 @@ class LavaMoatPlugin {
                     data: identifierLookup.unenforceableModuleIds || null,
                     json: true,
                   },
+                  {
+                    name: 'externals',
+                    data: identifierLookup.externals || null,
+                    json: true,
+                  },
                   { name: 'options', data: runtimeOptions, json: true },
                   (typeof runtimeOptions?.scuttleGlobalThis === 'boolean' && runtimeOptions?.scuttleGlobalThis === true) ||
                   (typeof runtimeOptions?.scuttleGlobalThis === 'object' && runtimeOptions?.scuttleGlobalThis?.enabled === true) ?
@@ -458,6 +520,12 @@ class LavaMoatPlugin {
                   },
                 ]
 
+                if (options.debugRuntime) {
+                  runtimeChunks.push({
+                    name: 'debug',
+                    shimRequire: path.join(__dirname, './runtime/debug.js'),
+                  })
+                }
                 const lavaMoatRuntime = assembleRuntime(
                   RUNTIME_KEY,
                   runtimeChunks
@@ -540,6 +608,8 @@ module.exports = LavaMoatPlugin
 /**
  * @typedef {Object} LavaMoatPluginOptions
  * @property {boolean} [generatePolicy] - Generate the policy file
+ * @property {string} [rootDir] - Specify root directory for canonicalNames to
+ *   be resolved from if different than compiler.context
  * @property {string} policyLocation - Directory containing policy files are
  *   stored, defaults to './lavamoat/webpack'
  * @property {boolean} [emitPolicySnapshot] - Additionally put policy in dist of
@@ -548,7 +618,7 @@ module.exports = LavaMoatPlugin
  *   turned into numbers - defaults to (mode==='development')
  * @property {boolean} [HtmlWebpackPluginInterop] - Add a script tag to the html
  *   output for lockdown.js if HtmlWebpackPlugin is in use
- * @property {string[]} [inlineLockdown] - Prefix the listed files with lockdown
+ * @property {RegExp} [inlineLockdown] - Prefix the matching files with lockdown
  * @property {number} [diagnosticsVerbosity] - A number representing diagnostics
  *   output verbosity, the larger the more overwhelming
  * @property {LockdownOptions} lockdown - Options to pass to SES lockdown
@@ -560,6 +630,7 @@ module.exports = LavaMoatPlugin
  *   determines if the specifier is a builtin of the runtime platform e.g.
  *   node:fs
  * @property {ScuttlerConfig | boolean} [scuttleGlobalThis] - Configuration for enabling scuttling mode
+ * @property {boolean} [debugRuntime] - Enable runtime debugging tools
  */
 
 // Provided inline because import('ses') won't work in jsdoc of a cjs module

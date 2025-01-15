@@ -12,7 +12,8 @@
     },
     "globals-package": {
       "globals": {
-        "console": true
+        "console": true,
+        "self": true
       }
     },
     "umd-package": {

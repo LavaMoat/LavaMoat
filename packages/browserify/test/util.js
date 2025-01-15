@@ -22,7 +22,7 @@ const WORKSPACE_ROOT = path.resolve(__dirname, '..', '..', '..')
 const localLavaMoatDeps = {
   lavapack: '@lavamoat/lavapack',
   browserify: 'lavamoat-browserify',
-  node: 'lavamoat',
+  'lavamoat-node': 'lavamoat',
   core: 'lavamoat-core',
 }
 

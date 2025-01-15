@@ -6,6 +6,94 @@
   * dependencies
     * lavamoat-tofu bumped from ^7.2.1 to ^7.2.2
 
+## [16.2.2](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v16.2.1...lavamoat-core-v16.2.2) (2024-12-09)
+
+
+### Bug Fixes
+
+* 2 bugs manifested in walking content from policy-overrides ([#1471](https://github.com/LavaMoat/LavaMoat/issues/1471)) ([7599146](https://github.com/LavaMoat/LavaMoat/commit/7599146f6412777dd13d681283e1b5344297d0eb))
+
+## [16.2.1](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v16.2.0...lavamoat-core-v16.2.1) (2024-12-05)
+
+
+### Bug Fixes
+
+* make policy ordering consistntly manifest itself in json files produced ([a149a7d](https://github.com/LavaMoat/LavaMoat/commit/a149a7d16d65bc4255cf32211a671823356565da))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-tofu bumped from ^8.0.3 to ^8.0.4
+
+## [16.2.0](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v16.1.0...lavamoat-core-v16.2.0) (2024-12-04)
+
+
+### Features
+
+* **core:** policy sorting cli for cleaner sort order migration ([#1467](https://github.com/LavaMoat/LavaMoat/issues/1467)) ([b2cf7c3](https://github.com/LavaMoat/LavaMoat/commit/b2cf7c33fe59adcab888c72164818bd590cf11c7))
+* **core:** second param to mergePolicy is now explicitly optional ([f2302aa](https://github.com/LavaMoat/LavaMoat/commit/f2302aa1e805456e17bf966193676c1466bb98ca))
+* **core:** sort policy in a diff-friendly way ([#1350](https://github.com/LavaMoat/LavaMoat/issues/1350)) - sort order remains unchanged even if path to dependency changed. ([4af8ad7](https://github.com/LavaMoat/LavaMoat/commit/4af8ad7559e1ab12c541488cf537ecc18ce0d6dc))
+
+
+### Bug Fixes
+
+* **core:** fix broken references, type checking for mergePolicy.js ([b08adef](https://github.com/LavaMoat/LavaMoat/commit/b08adef9bdfaf19e3e5951cfe2019271d689124a))
+* **core:** move ses to production dependencies ([27c0e8b](https://github.com/LavaMoat/LavaMoat/commit/27c0e8b191c8a8145e90dd5487cd09cad75500de))
+* **core:** update vendored lockdown.umd.js ([41a2d54](https://github.com/LavaMoat/LavaMoat/commit/41a2d541f80956b2623d6176d8580825df29b52d))
+* **deps:** update babel monorepo ([e6f4e70](https://github.com/LavaMoat/LavaMoat/commit/e6f4e70cffe8237c27126046bb0cfa5515c2d138))
+* **deps:** update babel monorepo to v7.25.9 ([6d9d5a3](https://github.com/LavaMoat/LavaMoat/commit/6d9d5a3336444fada49e239756ffc3c207d3ff5d))
+* **deps:** update dependency ses to v1.9.0 ([75cae74](https://github.com/LavaMoat/LavaMoat/commit/75cae74063c444184fea3370bf9925bc7946846a))
+* **deps:** update dependency type-fest to v4.30.0 ([6528665](https://github.com/LavaMoat/LavaMoat/commit/6528665e2e99221366444c23a0e52be447e04071))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-tofu bumped from ^8.0.2 to ^8.0.3
+
+## [16.1.0](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v16.0.1...lavamoat-core-v16.1.0) (2024-10-11)
+
+
+### Features
+
+* **core:** export endowmentsToolkit from the root ([4abfade](https://github.com/LavaMoat/LavaMoat/commit/4abfade71ca4f7473ead3d2c48426dd4a7293f76))
+
+
+### Bug Fixes
+
+* **deps:** update babel monorepo to v7.25.7 ([1ee84bf](https://github.com/LavaMoat/LavaMoat/commit/1ee84bf754b470781ee77bc299a797033b01d7ab))
+* **deps:** update babel monorepo to v7.25.8 ([1dcb35e](https://github.com/LavaMoat/LavaMoat/commit/1dcb35e023823710343b5f0a4ca589cdfe647e7d))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-tofu bumped from ^8.0.1 to ^8.0.2
+
+## [16.0.1](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v16.0.0...lavamoat-core-v16.0.1) (2024-09-11)
+
+
+### Bug Fixes
+
+* **deps:** update babel monorepo to v7.25.4 ([6b59ee5](https://github.com/LavaMoat/LavaMoat/commit/6b59ee5fe7436ea8f2b84260b6fb3e4a02022657))
+* **deps:** update babel monorepo to v7.25.6 ([6a42125](https://github.com/LavaMoat/LavaMoat/commit/6a4212562b7e2e8f62af99d0a3f504c13e6f8283))
+* **deps:** update dependency ses to v1.7.0 ([#1262](https://github.com/LavaMoat/LavaMoat/issues/1262)) ([0209007](https://github.com/LavaMoat/LavaMoat/commit/0209007898d9d1a288832dc1b903720735d3558d))
+* **deps:** update dependency ses to v1.8.0 ([7e5bece](https://github.com/LavaMoat/LavaMoat/commit/7e5bece4a1c2cdaf7890c8750d26eadd495a1a52))
+* **deps:** update dependency type-fest to v4.25.0 ([a5c8d3e](https://github.com/LavaMoat/LavaMoat/commit/a5c8d3e2c34fa9ecfaf94c5f8daa3d8e626fd7d2))
+* **deps:** update dependency type-fest to v4.26.0 ([f4051f9](https://github.com/LavaMoat/LavaMoat/commit/f4051f9332c9cb4a9d457faacf4a2905ad3e869e))
+* **deps:** update dependency type-fest to v4.26.1 ([6172f93](https://github.com/LavaMoat/LavaMoat/commit/6172f935be3f00bff84d4f458c7f98b6ca89db40))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-tofu bumped from ^8.0.0 to ^8.0.1
+
 ## [16.0.0](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v15.4.0...lavamoat-core-v16.0.0) (2024-08-15)
 
 

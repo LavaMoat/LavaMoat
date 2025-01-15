@@ -33,6 +33,94 @@
     * @lavamoat/lavapack bumped from ^6.1.1 to ^6.1.2
     * lavamoat-core bumped from ^15.2.0 to ^15.2.1
 
+## [18.1.2](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-browserify-v18.1.1...lavamoat-browserify-v18.1.2) (2024-12-09)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @lavamoat/lavapack bumped from ^7.0.4 to ^7.0.5
+    * lavamoat-core bumped from ^16.2.1 to ^16.2.2
+  * devDependencies
+    * lavamoat bumped from 9.0.4 to 9.0.5
+
+## [18.1.1](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-browserify-v18.1.0...lavamoat-browserify-v18.1.1) (2024-12-05)
+
+
+### Bug Fixes
+
+* make policy ordering consistntly manifest itself in json files produced ([a149a7d](https://github.com/LavaMoat/LavaMoat/commit/a149a7d16d65bc4255cf32211a671823356565da))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @lavamoat/lavapack bumped from ^7.0.3 to ^7.0.4
+    * lavamoat-core bumped from ^16.2.0 to ^16.2.1
+  * devDependencies
+    * lavamoat bumped from 9.0.3 to 9.0.4
+
+## [18.1.0](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-browserify-v18.0.2...lavamoat-browserify-v18.1.0) (2024-12-04)
+
+
+### Features
+
+* **browserify:** allow overriding resolve implementation ([7ad954f](https://github.com/LavaMoat/LavaMoat/commit/7ad954f00ffd95a45fee3ddb4b38c9c0a64be0d0))
+
+
+### Bug Fixes
+
+* **browserify:** use @lavamoat/sourcemap-validator ([9ad3373](https://github.com/LavaMoat/LavaMoat/commit/9ad3373ca766a103946b4beaf05a3dbc756440bc))
+* **deps:** update babel monorepo ([e6f4e70](https://github.com/LavaMoat/LavaMoat/commit/e6f4e70cffe8237c27126046bb0cfa5515c2d138))
+* **deps:** update babel monorepo to v7.25.9 ([6d9d5a3](https://github.com/LavaMoat/LavaMoat/commit/6d9d5a3336444fada49e239756ffc3c207d3ff5d))
+* **deps:** update babel monorepo to v7.26.2 ([9bac12a](https://github.com/LavaMoat/LavaMoat/commit/9bac12abd602632a6bd0ad3af5026cc627bf2b31))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @lavamoat/aa bumped from ^4.3.0 to ^4.3.1
+    * @lavamoat/lavapack bumped from ^7.0.2 to ^7.0.3
+    * lavamoat-core bumped from ^16.1.0 to ^16.2.0
+  * devDependencies
+    * lavamoat bumped from 9.0.2 to 9.0.3
+
+## [18.0.2](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-browserify-v18.0.1...lavamoat-browserify-v18.0.2) (2024-10-11)
+
+
+### Bug Fixes
+
+* **deps:** update babel monorepo to v7.25.7 ([1ee84bf](https://github.com/LavaMoat/LavaMoat/commit/1ee84bf754b470781ee77bc299a797033b01d7ab))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @lavamoat/lavapack bumped from ^7.0.1 to ^7.0.2
+    * lavamoat-core bumped from ^16.0.1 to ^16.1.0
+
+## [18.0.1](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-browserify-v18.0.0...lavamoat-browserify-v18.0.1) (2024-09-11)
+
+
+### Bug Fixes
+
+* **browserify:** support Node.js ^20.17.0 ([a5a3949](https://github.com/LavaMoat/LavaMoat/commit/a5a3949438daded29420e4940e6ce6aa3ed12333))
+* **node:** support Node.js ^20.17.0 ([a5a3949](https://github.com/LavaMoat/LavaMoat/commit/a5a3949438daded29420e4940e6ce6aa3ed12333))
+* **perf:** support Node.js ^20.17.0 ([a5a3949](https://github.com/LavaMoat/LavaMoat/commit/a5a3949438daded29420e4940e6ce6aa3ed12333))
+* support Node.js ^20.17.0 ([a5a3949](https://github.com/LavaMoat/LavaMoat/commit/a5a3949438daded29420e4940e6ce6aa3ed12333))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @lavamoat/lavapack bumped from ^7.0.0 to ^7.0.1
+    * lavamoat-core bumped from ^16.0.0 to ^16.0.1
+
 ## [18.0.0](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-browserify-v17.0.8...lavamoat-browserify-v18.0.0) (2024-08-15)
 
 

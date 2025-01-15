@@ -1,6 +1,6 @@
 {
   "name": "@lavamoat/webpack",
-  "version": "0.5.0-beta.0",
+  "version": "0.7.1-beta.0",
   "description": "LavaMoat Webpack plugin for running dependencies in Compartments without eval",
   "repository": {
     "type": "git",
@@ -37,22 +37,22 @@
     "webpack": "^5.80.2"
   },
   "dependencies": {
-    "@lavamoat/aa": "^4.3.0",
+    "@lavamoat/aa": "^4.3.1",
     "browser-resolve": "2.0.0",
     "json-stable-stringify": "1.1.1",
-    "lavamoat-core": "^16.0.0",
-    "ses": "1.5.0"
+    "lavamoat-core": "^16.2.2",
+    "ses": "1.9.0"
   },
   "devDependencies": {
-    "@babel/preset-env": "7.25.3",
-    "@babel/preset-typescript": "7.24.7",
+    "@babel/preset-env": "7.26.0",
+    "@babel/preset-typescript": "7.26.0",
     "@types/browser-resolve": "2.0.4",
-    "babel-loader": "9.1.3",
+    "babel-loader": "9.2.1",
     "css-loader": "7.1.2",
-    "html-webpack-plugin": "5.6.0",
-    "memfs": "4.11.1",
-    "mini-css-extract-plugin": "2.9.1",
-    "webpack": "5.93.0"
+    "html-webpack-plugin": "5.6.3",
+    "memfs": "4.14.1",
+    "mini-css-extract-plugin": "2.9.2",
+    "webpack": "5.95.0"
   },
   "ava": {
     "files": [

@@ -24,9 +24,10 @@ The LavaMoat plugin takes an options object with the following properties (all o
 | `readableResourceIds`      | Boolean to decide whether to keep resource IDs human readable (possibly regardless of production/development mode). If `false`, they are replaced with a sequence of numbers. Keeping them readable may be useful for debugging when a policy violation error is thrown. By default, follows the Webpack config mode. | `(mode==='development')` |
 | `lockdown`                 | Configuration for [SES lockdown][]. Setting the option replaces defaults from LavaMoat.                                                                                                                                                                                                                               | reasonable defaults      |
 | `HtmlWebpackPluginInterop` | Boolean to add a script tag to the HTML output for `./lockdown` file if `HtmlWebpackPlugin` is in use.                                                                                                                                                                                                                | `false`                  |
-| `inlineLockdown`           | Array of output filenames in which to inline lockdown (instead of adding it as a file to the output directory).                                                                                                                                                                                                       |
+| `inlineLockdown`           | A RegExp for matching files to be prepended with lockdown (instead of adding it as a file to the output directory).                                                                                                                                                                                                   |
 | `runChecks`                | Boolean property to indicate whether to check resulting code with wrapping for correctness.                                                                                                                                                                                                                           | `false`                  |
 | `diagnosticsVerbosity`     | Number property to represent diagnostics output verbosity. A larger number means more overwhelming diagnostics output. Setting a positive verbosity will enable `runChecks`.                                                                                                                                          | `0`                      |
+| `debugRuntime`             | Only for local debugging use - Enables debugging tools that help detect gaps in generated policy and add missing entries to overrides                                                                                                                                                                                 | `false`                  |
 | `policy`                   | The LavaMoat policy object (if not loading from file; see `policyLocation`)                                                                                                                                                                                                                                           | `undefined`              |
 
 ```js
@@ -102,13 +103,19 @@ Sadly, even treeshaking doesn't eliminate that module. It's left there and faili
 
 This plugin will skip policy enforcement for such ignored modules.
 
+#### HMR
+
+LavaMoat is not compatible with Hot Module Replacement (HMR). Disable LavaMoat for development builds where HMR is required while keeping it enabled for production builds.
+
 # Security
 
 **This is an experimental software. Use at your own risk!**
 
 - [SES lockdown][] must be added to the page without any bundling or transforming for any security guarantees to be sustained.
   - The plugin is attempting to add it as an asset to the compilation for the sake of Developer Experience. `.js` extension is omitted to prevent minification.
-  - Optionally lockdown can be inlined into the bundle files. You need to list the scripts that get to load as the first script on the page to apply lockdown only once when inlined. When you have a single bundle, you just configure a list with one element. It gets more complex with builds for multiple pages. The plugin doesn't attempt to guess where to inline lockdown.
+  - Optionally lockdown can be inlined into the bundle files. You need to declare which of the output files to inline lockdown runtime code to. These need to be the first file of the bundle that get loaded on the page.  
+    When you have a single bundle, you just configure a regex with one unique file name or a `.*`. It gets more complex with builds for multiple pages. The plugin doesn't attempt to guess where to inline lockdown.  
+    e.g. If you have 2 entries `user.js` and `admin.js` and a set up to suffix resulting bundles with commit id, you can use `/user\.[a-f0-9]+\.js|admin\.[a-f0-9]+\.js/` to match the files.
 - Each javascript module resulting from the webpack build is scoped to its package's policy
 
 ## Threat Model

@@ -31,6 +31,7 @@ Object.defineProperty(module.exports, 'makeConfig', {
 
 function makeConfig(lmOptions = {}) {
   return {
+    cache: false,
     entry: {
       app: './main.js',
     },
@@ -51,8 +52,9 @@ function makeConfig(lmOptions = {}) {
       }),
       new HtmlWebpackPlugin(),
     ],
-    resolve:{
-      fallback: { "crypto": false }
+    optimization: {},
+    resolve: {
+      fallback: { crypto: false },
     },
     module: {
       rules: [
@@ -62,10 +64,7 @@ function makeConfig(lmOptions = {}) {
             {
               loader: 'babel-loader',
               options: {
-                presets: [
-                  '@babel/preset-env',
-                  '@babel/preset-typescript',
-                ],
+                presets: ['@babel/preset-env', '@babel/preset-typescript'],
               },
             },
           ],

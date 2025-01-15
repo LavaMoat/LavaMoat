@@ -1,0 +1,38 @@
+{
+  "resources": {
+    "@example/dynamicre": {
+      "globals": {
+        "console.log": true
+      }
+    },
+    "@example/override": {
+      "globals": {
+        "console.log": true
+      }
+    },
+    "@example/polyfill": {
+      "globals": {
+        "console.log": true
+      }
+    },
+    "@example/unrecognizedpolicy": {
+      "globals": {
+        "console.log": true
+      }
+    },
+    "eslint-plugin-security": {
+      "packages": {
+        "eslint-plugin-security>safe-regex": true
+      }
+    },
+    "eslint-plugin-security>safe-regex": {
+      "globals": {
+        "regexpTree.parse": true,
+        "regexpTree.traverse": true
+      },
+      "packages": {
+        "eslint-plugin-security>safe-regex>regexp-tree": true
+      }
+    }
+  }
+}

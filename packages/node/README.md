@@ -1,152 +1,154 @@
-# LavaMoat Node - a runtime for running LavaMoat-protected NodeJS applications
+# @lavamoat/node
 
-`lavamoat` is a NodeJS runtime where modules are defined in [SES][SesGithub] Compartments. It aims to reduce the risk of malicious code in the app dependency graph, known as "software supply chain attacks".
+> Nether-age secure runtime for Node.js
 
-## LavaMoat Runtime
+**`@lavamoat/node` is a [Hardened JavaScript][] runtime for Node.js v18.0.0+.**
 
-LavaMoat differs from the standard node runtime in that it:
+`@lavamoat/node`:
 
-1. Uses `lockdown()` from [SES][SesGithub] to prevent tampering with the execution environment.
-   Thanks to lockdown, prototype-pollution attacks are neutralized. It's also a prerequisite to code isolation.
-2. Uses SES Compartments to isolate each package's execution.
-   Packages don't share references to anything unless explicitly passed in or allowed by policy. Custom `require` and linking implementation is provided for the purpose of loading allowed dependencies.
-3. Enforces the app-specified LavaMoat policy.
-   The policy specifies what execution environment each package should run with, which means: what global/built-in APIs should it be exposed to, and what other packages can it require/import.
+- Uses [`lockdown`][lockdown] to prevent tampering with the execution environment:
+  - User code cannot meddle with global objects or shared intrinsics (i.e. "the
+    stuff in the prototype chain")
+  - Neutralizes prototype pollution attacks
+- Isolates dependencies _within the same process_:
+  - By default, packages do not share references to any global objects
+  - Access to resources (global objects, other packages, Node.js builtins,
+    native modules) is controlled by user-defined policy
+- Secures your supply chain by generating and maintaining (with your help) policies
 
-The result is a runtime that should work just as before, but provides some protection against supply chain attacks.
+LavaMoat is built on top of [SES][].
 
-> For an overview of LavaMoat tools see [the main README](https://github.com/LavaMoat/LavaMoat/tree/main/README.md)
+## Supply Chain Security
 
-## Install
+Over time, your application's dependencies will change. When they do, LavaMoat detects any changes to resource access. For example, if an upgraded transitive dependency now uses the `left-pad` package, this will be evident from an auto-generated policy file. You can then choose to allow or deny this access (or stop using `left-pad`).
 
-_Before you use lavamoat runtime protections, make sure you've set up allow-scripts and install dependencies using that setup._
+In this way, LavaMoat is a little like [Socket][], which alerts you to dubious changes in a package's behavior (among other things). LavaMoat, however, surfaces _all_ such changes; it's _up to you_ to decide whether or not they're reasonable.
 
-Use one of:
+## Runtime Security
 
-```
-npm i lavamoat
-yarn add lavamoat
+LavaMoat also guards against deceptive packages. If a package obfuscates its intentions to the degree that LavaMoat's own policy generation didn't detect it, the existing policy will prevent naughty behavior.
+
+LavaMoat can protect your Node.js application, but it can _also_ protect your development environment (e.g., build tooling)—you can run your tools with [the `lavamoat` CLI](#usage).
+
+## Differences from [lavamoat][]
+
+`@lavamoat/node` is intended to be a _replacement_ for `lavamoat`.
+
+- Leverages [@endo/compartment-mapper][] instead of a custom kernel, and thus
+  **supports ECMAScript modules** out-of-the-box
+- The `lavamoat` CLI differs in its commands and options
+
+## Installation
+
+`@lavamoat/node` requires Node.js v18.0.0 or newer.
+
+```sh
+npm install @lavamoat/node
 ```
 
 ## Usage
 
-### Recommended usage
-
-1. Install
-2. Run your application once with `lavamoat app.js --autopolicy`
-3. Inspect the `./lavamoat/node/policy.json` file it generated
-4. Run your application with `lavamoat app.js`
-5. If you find you need to change the policy in step 2 or 3 create a `./lavamoat/node/policy-override.json` file and introduce changes there. You can both expand and trim the permissions.
-
-> **Note**
-> You can regenerate the main policy file on updates (and review for unexpected new permissions) while the modifications you needed to make remain in a separate overrides file. It makes reviewing and maintaining both files easier.
+> [!IMPORTANT]
 >
-> See also: [Policy file explained](https://github.com/LavaMoat/LavaMoat/tree/main/docs/policy.md)
+> Before proceeding, it's recommended to [check out LavaMoat's docs][docs].
+> Understanding LavaMoat's concepts will help you cross the LavaMoat Drawbridge
+> of Success™.
 
-### All options
+### Setup
 
-```
-lavamoat <entryPath> [Options]
+1. [Install `@lavamoat/node`](#installation)
+2. Generate a policy file:
+
+   ```sh
+   npx exec lavamoat generate <your-app-entrypoint>
+   ```
+
+   This will create a `lavamoat/node/policy.json` file in your project root.
+
+3. Run your application with `@lavamoat/node`:
+
+   ```sh
+   npx exec lavamoat <your-app-entrypoint>
+   ```
+
+   This will run your application with the generated policy.
+
+4. If step 3 failed, you may need to [manually override policy][policy-guide].
+5. If you're still having trouble, [the LavaMoat docs][docs] can help.
+
+### `lavamoat` CLI Usage
+
+`lavamoat` has two commands: `run` (the default) and `generate`.
+
+```text
+lavamoat <entrypoint>
+
+Run a Node.js application safely
+
+Commands:
+  lavamoat run <entrypoint>       Run a Node.js application safely     [default]
+  lavamoat generate <entrypoint>  Generate a policy               [aliases: gen]
+
+Path Options:
+  -p, --policy           Filepath to a policy file
+                                 [string] [default: "lavamoat/node/policy.json"]
+  -o, --policy-override  Filepath to a policy override file
+                        [string] [default: "lavamoat/node/policy-override.json"]
+      --policy-debug     Filepath to a policy debug file
+                           [string] [default: "lavamoat/node/policy-debug.json"]
+      --root             Path to application root directory
+                                         [string] [default: (current directory)]
+
+Behavior Options:
+      --dev  Include development dependencies          [boolean] [default: true]
 
 Positionals:
-  entryPath  the path to the entry file for your application. same as node.js
-                                                                        [string]
+  entrypoint  Path to the application entry point; relative to --root   [string]
 
 Options:
-      --version                             Show version number        [boolean]
-      --help                                Show help                  [boolean]
-  -p, --policy, --policyPath                Pass in policy. Accepts a filepath
-                                            string to the existing policy. When
-                                            used in conjunction with
-                                            --autopolicy, specifies where to
-                                            write the policy. Default:
-                                            ./lavamoat/node/policy.json
-                                 [string] [default: "lavamoat/node/policy.json"]
-  -o, --policyOverride, --override,         Pass in override policy. Accepts a
-  --policyOverridePath                      filepath string to the existing
-                                            override policy. Default:
-                                            ./lavamoat/node/policy-override.json
-                        [string] [default: "lavamoat/node/policy-override.json"]
-      --policyDebug, --pd, --policydebug,   Pass in debug policy. Accepts a
-      --policyDebugPath                     filepath string to the existing
-                                            debug policy. Default:
-                                            ./lavamoat/node/policy-debug.json
-                           [string] [default: "lavamoat/node/policy-debug.json"]
-  -a, --writeAutoPolicy, --autopolicy       Generate a "policy.json" and
-                                            "policy-override.json" in the
-                                            current working         directory.
-                                            Overwrites any existing policy
-                                            files. The override policy is for
-                                            making manual policy changes and
-                                            always takes precedence over the
-                                            automatically generated policy.
-                                                      [boolean] [default: false]
-      --writeAutoPolicyAndRun, --ar,        parse + generate a LavaMoat policy
-      --autorun                             file then execute with the new
-                                            policy.   [boolean] [default: false]
-      --writeAutoPolicyDebug, --dp,         when writeAutoPolicy is enabled,
-      --debugpolicy                         write policy debug info to specified
-                                            or default path
-                                                      [boolean] [default: false]
-      --projectRoot                         specify the director from where
-                                            packages should be resolved
-            [string] [default: "/home/naugtur/work/metamask/metamask-extension"]
-  -d, --debugMode, --debug                  Disable some protections and extra
-                                            logging for easier debugging.
-                                                      [boolean] [default: false]
-      --statsMode, --stats                  enable writing and logging of stats
-                                                      [boolean] [default: false]
+      --help     Show help                                             [boolean]
+      --version  Show version number                                   [boolean]
 
+Resources:
+
+  🌋 LavaMoat on GitHub (https://github.com/LavaMoat/LavaMoat)
+  🐛 Bugs? Issue tracker (https://github.com/LavaMoat/LavaMoat/issues)
+  📖 Read the LavaMoat docs (https://lavamoat.github.io)
 ```
 
-## More Examples
+To print the above text, execute:
 
-### Run with Policy in default location
-
-This uses the existing policy and policy-override files to run your app.
-
-```bash
-lavamoat index.js
+```sh
+npx exec lavamoat --help
 ```
 
-Automatically searches for policy files inside `./lavamoat/node/`.
+To see help for the `generate` command, execute:
 
-### Policy Override with Relative Path
-
-This uses the override policy specified at `./policies/policy-override.json`.
-
-```
-$ lavamoat index.js --override './policies/policy-override.json'
+```sh
+npx exec lavamoat generate --help
 ```
 
-## Tips
+## Known Issues
 
-- Having trouble reading thrown Errors? try running with the `--debugMode` flag. **Warning:** not safe for production runs.
+The following issues (or missing features) are _intended to be resolved_:
 
-- For more information on the lavamoat policy file, check [Policy file explained](https://github.com/LavaMoat/LavaMoat/tree/main/docs/policy.md) in documentation.
+- `await import()` is not yet supported in CommonJS scripts
+- _Scuttling_ (i.e. "deletion" of unused objects from the execution environment)
+  is not yet supported
 
-- Got a dependency that wont quite work under LavaMoat? try [patch-package](https://www.npmjs.com/package/patch-package)
+### Out of Scope
 
-## Programmatic usage
+- Tools which heavily malign the runtime environment (e.g., `jest`) are unsupported.
 
-Programmatic usage is almost identical to the commandline and its arguments.
+## License
 
-```js
-const { runLava } = require('lavamoat')
+©️ 2023 Consensys Software. Licensed MIT
 
-runLava({
-  entryPath: './app.js',
-  // Optional:
-  writeAutoPolicy: false,
-  writeAutoPolicyDebug: false,
-  writeAutoPolicyAndRun: false,
-  policyPath: 'path to file',
-  policyDebugPath: 'path to file',
-  policyOverridePath: 'path to file',
-  projectRoot: process.cwd(),
-  debugMode: false,
-  statsMode: false,
-})
-```
-
-[SesGithub]: https://github.com/endojs/endo/tree/master/packages/ses
+[SES]: https://npm.im/ses
+[Hardened JavaScript]: https://hardenedjs.org
+[lockdown]: https://hardenedjs.org/#lockdown
+[lavamoat]: https://npm.im/lavamoat
+[@endo/compartment-mapper]: https://npm.im/@endo/compartment-mapper
+[Socket]: https://socket.dev
+[policy-guide]: https://lavamoat.github.io/guides/policy/
+[docs]: https://lavamoat.github.io

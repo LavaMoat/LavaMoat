@@ -1,5 +1,69 @@
 # Changelog
 
+## [8.0.4](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-tofu-v8.0.3...lavamoat-tofu-v8.0.4) (2024-12-05)
+
+
+### Bug Fixes
+
+* make policy ordering consistntly manifest itself in json files produced ([a149a7d](https://github.com/LavaMoat/LavaMoat/commit/a149a7d16d65bc4255cf32211a671823356565da))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * lavamoat-core bumped from >15.4.0 to >16.2.1
+
+## [8.0.3](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-tofu-v8.0.2...lavamoat-tofu-v8.0.3) (2024-12-04)
+
+
+### Bug Fixes
+
+* **deps:** update babel monorepo ([e6f4e70](https://github.com/LavaMoat/LavaMoat/commit/e6f4e70cffe8237c27126046bb0cfa5515c2d138))
+* **deps:** update babel monorepo to v7.25.9 ([6d9d5a3](https://github.com/LavaMoat/LavaMoat/commit/6d9d5a3336444fada49e239756ffc3c207d3ff5d))
+* **deps:** update babel monorepo to v7.26.2 ([9bac12a](https://github.com/LavaMoat/LavaMoat/commit/9bac12abd602632a6bd0ad3af5026cc627bf2b31))
+* **deps:** update dependency type-fest to v4.30.0 ([6528665](https://github.com/LavaMoat/LavaMoat/commit/6528665e2e99221366444c23a0e52be447e04071))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * lavamoat-core bumped from >15.4.0 to >16.2.0
+
+## [8.0.2](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-tofu-v8.0.1...lavamoat-tofu-v8.0.2) (2024-10-11)
+
+
+### Bug Fixes
+
+* **deps:** update babel monorepo to v7.25.7 ([1ee84bf](https://github.com/LavaMoat/LavaMoat/commit/1ee84bf754b470781ee77bc299a797033b01d7ab))
+* **deps:** update babel monorepo to v7.25.8 ([1dcb35e](https://github.com/LavaMoat/LavaMoat/commit/1dcb35e023823710343b5f0a4ca589cdfe647e7d))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * lavamoat-core bumped from >15.4.0 to >16.1.0
+
+## [8.0.1](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-tofu-v8.0.0...lavamoat-tofu-v8.0.1) (2024-09-11)
+
+
+### Bug Fixes
+
+* **deps:** update babel monorepo to v7.25.4 ([6b59ee5](https://github.com/LavaMoat/LavaMoat/commit/6b59ee5fe7436ea8f2b84260b6fb3e4a02022657))
+* **deps:** update babel monorepo to v7.25.6 ([6a42125](https://github.com/LavaMoat/LavaMoat/commit/6a4212562b7e2e8f62af99d0a3f504c13e6f8283))
+* **deps:** update dependency type-fest to v4.25.0 ([a5c8d3e](https://github.com/LavaMoat/LavaMoat/commit/a5c8d3e2c34fa9ecfaf94c5f8daa3d8e626fd7d2))
+* **deps:** update dependency type-fest to v4.26.0 ([f4051f9](https://github.com/LavaMoat/LavaMoat/commit/f4051f9332c9cb4a9d457faacf4a2905ad3e869e))
+* **deps:** update dependency type-fest to v4.26.1 ([6172f93](https://github.com/LavaMoat/LavaMoat/commit/6172f935be3f00bff84d4f458c7f98b6ca89db40))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * lavamoat-core bumped from >15.4.0 to >16.0.1
+
 ## [8.0.0](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-tofu-v7.3.0...lavamoat-tofu-v8.0.0) (2024-08-15)
 
 

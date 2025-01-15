@@ -108,6 +108,6 @@ Runs on [Agoric](https://github.com/agoric/)
 [SesComputingGuide]: https://github.com/endojs/endo/blob/master/packages/ses/docs/secure-coding-guide.md
 [PolicyDoc]: ./docs/policy.md
 [ScuttlingDoc]: ./docs/scuttling.md
-[LavamoatNode]: ./packages/node
+[LavamoatNode]: ./packages/lavamoat-node
 [LavamoatBrowserify]: ./packages/browserify
 [LavamoatAllowScripts]: ./packages/allow-scripts

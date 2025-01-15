@@ -2,7 +2,7 @@
 const { EOL } = require('node:os')
 const test = require('ava')
 
-const { createConfigForTest } = require('./util')
+const { createConfigForTest, generateConfigFromFiles } = require('./util')
 
 test('generatePolicy - basic config', async (t) => {
   const config = await createConfigForTest(function () {

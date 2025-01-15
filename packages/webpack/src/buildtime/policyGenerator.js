@@ -2,21 +2,26 @@ const {
   createModuleInspector,
   LavamoatModuleRecord,
   loadPoliciesSync,
+  jsonStringifySortedPolicy,
 } = require('lavamoat-core')
 const { getPackageNameForModulePath } = require('@lavamoat/aa')
 const { writeFileSync, mkdirSync } = require('node:fs')
 const path = require('node:path')
-const stringify = require('json-stable-stringify')
 const {
   sources: { RawSource },
 } = require('webpack')
 
-const { isExcludedUnsafe } = require('./exclude.js')
+const { isExcludedUnsafe } = require('./exclude')
+const diag = require('./diagnostics')
 
 const POLICY_SNAPSHOT_FILENAME = 'policy-snapshot.json'
 
 /**
  * @typedef {(specifier: string) => boolean} IsBuiltinFn
+ */
+
+/**
+ * @typedef {import('webpack').NormalModule | import('webpack').ExternalModule} InspectableWebpackModule
  */
 
 module.exports = {
@@ -67,7 +72,7 @@ module.exports = {
           if (emit) {
             compilation.emitAsset(
               POLICY_SNAPSHOT_FILENAME,
-              new RawSource(stringify(final, { space: 2 }))
+              new RawSource(jsonStringifySortedPolicy(final))
             )
           }
           return final
@@ -92,13 +97,21 @@ module.exports = {
 
     return {
       /**
-       * @param {import('webpack').NormalModule} module
+       * @param {InspectableWebpackModule} module
        * @param {Iterable<import('webpack').ModuleGraphConnection>} connections
        */
       inspectWebpackModule: (module, connections) => {
         // Skip modules the user intentionally excludes.
         // This is policy generation so we don't need to protect ourselves from an attack where the module has a loader defined in the specifier.
         if (isExcludedUnsafe(module)) return
+        if (module.userRequest === undefined) {
+          diag.rawDebug(
+            1,
+            `LavaMoatPlugin: Module ${module} has no userRequest`
+          )
+          diag.rawDebug(2, { skippingInspectingModule: module })
+          return
+        }
         const packageName = getPackageNameForModulePath(
           canonicalNameMap,
           module.userRequest
@@ -137,14 +150,14 @@ module.exports = {
         mkdirSync(location, { recursive: true })
         writeFileSync(
           path.join(location, 'policy.json'),
-          stringify(policy, { space: 2 }),
+          jsonStringifySortedPolicy(policy),
           'utf8'
         )
         const final = applyOverride(policy)
         if (emit) {
           compilation.emitAsset(
             POLICY_SNAPSHOT_FILENAME,
-            new RawSource(stringify(final, { space: 2 }))
+            new RawSource(jsonStringifySortedPolicy(final))
           )
         }
         return final

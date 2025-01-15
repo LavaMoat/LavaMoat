@@ -1,0 +1,21 @@
+{
+  "name": "yo",
+  "version": "1.0.0",
+  "description": "",
+  "author": "",
+  "license": "ISC",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "fork-branch": "naugtur/not-really-a-package#testbranch",
+    "fork-full-hash": "naugtur/not-really-a-package#05ba7b1263a4ba5b98eaf5c103432297962c4719",
+    "fork-longer-hash": "naugtur/not-really-a-package#05ba7b1263a4ba5b98",
+    "fork-merge-hash": "naugtur/not-really-a-package#2a0d442b8a68a802b72f6a4a8240d2ae8ef950aa",
+    "fork-short-hash": "naugtur/not-really-a-package#05ba7b1",
+    "git-http": "git+http://github.com/naugtur/not-really-a-package",
+    "git-https": "git+https://github.com/naugtur/not-really-a-package",
+    "git-https-hash-short": "git+https://github.com/naugtur/not-really-a-package#107f4ad"
+  }
+}

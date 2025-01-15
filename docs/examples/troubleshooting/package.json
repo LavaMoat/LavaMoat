@@ -1,0 +1,31 @@
+{
+  "name": "troubleshooting",
+  "version": "1.0.0",
+  "description": "",
+  "author": "",
+  "license": "ISC",
+  "main": "index.js",
+  "keywords": [],
+  "scripts": {
+    "1": "lavamoat src/poly.js",
+    "2": "lavamoat src/cwd.js",
+    "3": "lavamoat src/linting.js",
+    "4": "lavamoat src/maths.js",
+    "policy": "lavamoat --autopolicy app.js",
+    "start": "node app.js",
+    "test": "lavamoat app.js"
+  },
+  "dependencies": {
+    "@example/dynamicre": "file:_packages/dynamicre",
+    "@example/override": "file:_packages/override",
+    "@example/polyfill": "file:_packages/polyfill",
+    "@example/unrecognizedpolicy": "file:_packages/unrecognizedpolicy",
+    "eslint-plugin-security": "^3.0.0",
+    "override": "^0.0.1",
+    "polyfill": "^0.1.0"
+  },
+  "devDependencies": {
+    "lavamoat": "^8.0.6",
+    "ses": "^1.5.0"
+  }
+}

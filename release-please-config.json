@@ -1,19 +1,23 @@
 {
   "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
-  "bootstrap-sha": "2108f25d223576f8a01067ae2113ceccbc5e58ee",
+  "bootstrap-sha": "b7b011567d068a2bcddee4bb8497f04d74c6ae65",
   "packages": {
     "packages/aa": {},
     "packages/allow-scripts": {},
-    "packages/webpack": {
-      "release-as": "0.5.0-beta.0"
-    },
+    "packages/webpack": {},
     "packages/browserify": {},
     "packages/core": {},
+    "packages/git-safe-dependencies": {
+      "initial-version": "0.0.1"
+    },
     "packages/lavapack": {},
     "packages/laverna": {},
-    "packages/node": {},
+    "packages/lavamoat-node": {},
     "packages/preinstall-always-fail": {},
-    "packages/tofu": {}
+    "packages/tofu": {},
+    "packages/node": {
+      "initial-version": "0.0.1"
+    }
   },
   "plugins": ["node-workspace"]
 }

@@ -99,20 +99,22 @@ const enforcePolicy = (specifier, referrerResourceId, wrappedRequire) => {
     return wrappedRequire()
   }
   const referrerPolicy = LAVAMOAT.policy.resources[referrerResourceId] || {}
-  if (referrerPolicy.builtin) {
-    if (referrerPolicy.builtin[specifier]) {
+  if (referrerPolicy.builtin && LAVAMOAT.externals[specifier]) {
+    const builtinName = LAVAMOAT.externals[specifier]
+    if (referrerPolicy.builtin[builtinName]) {
       return wrappedRequire()
     }
     if (
-      !specifier.includes('.') &&
+      builtinName &&
+      !builtinName.includes('.') &&
       keys(referrerPolicy.builtin).some((key) =>
-        key.startsWith(`${specifier}.`)
+        key.startsWith(`${builtinName}.`)
       )
     ) {
       // create minimal selection if it's a builtin and not allowed as a whole, but with subpaths
       return getBuiltinForConfig(
         wrappedRequire(),
-        specifier,
+        builtinName,
         referrerPolicy.builtin
       )
     }
@@ -157,7 +159,6 @@ const installGlobalsForPolicy = (resourceId, packageCompartmentGlobal) => {
     )
     LAVAMOAT?.scuttling?.scuttle(theRealGlobalThis, LAVAMOAT.options.scuttleGlobalThis)
   } else {
-    // TODO: getEndowmentsForConfig doesn't implement support for "write"
     const endowments = getEndowmentsForConfig(
       rootCompartmentGlobalThis,
       LAVAMOAT.policy.resources[resourceId] || {},
@@ -165,19 +166,24 @@ const installGlobalsForPolicy = (resourceId, packageCompartmentGlobal) => {
       packageCompartmentGlobal
     )
 
-    defineProperties(
-      packageCompartmentGlobal,
-      fromEntries(
+    defineProperties(packageCompartmentGlobal, {
+      ...getOwnPropertyDescriptors(endowments),
+      // preserve the correct global aliases even if endowments define them differently
+      ...fromEntries(
         globalAliases.map((alias) => [
           alias,
           { value: packageCompartmentGlobal },
         ])
+      ),
+    })
+
+    if (LAVAMOAT.debug) {
+      LAVAMOAT.debug.debugProxy(
+        packageCompartmentGlobal,
+        rootCompartmentGlobalThis,
+        resourceId
       )
-    )
-    defineProperties(
-      packageCompartmentGlobal,
-      getOwnPropertyDescriptors(endowments)
-    )
+    }
   }
 }
 
@@ -215,6 +221,10 @@ const findResourceId = (moduleId) => {
 const wrapRequireWithPolicy = (__webpack_require__, referrerResourceId) =>
   /** @this {object} */
   function (specifier, ...rest) {
+    // not collapsing to string if it's a production bundle optimized down to numbers
+    if (typeof specifier !== 'number') {
+      specifier = `${specifier}`
+    }
     const requireThat = __webpack_require__.bind(this, specifier, ...rest)
     return enforcePolicy(specifier, referrerResourceId, requireThat)
   }
@@ -258,8 +268,8 @@ const lavamoatRuntimeWrapper = (resourceId, runtimeKit) => {
     // TODO: print a warning for other functions on the __webpack_require__ namespace that we're not supporting.
     //   It's probably best served at build time though - with runtimeRequirements or looking at the items in webpack runtime when adding lavamoat runtime.
 
-    // The following seem harmless and are used by default: ['O', 'n', 'd', 'o', 'r', 's']
-    const supportedRuntimeItems = ['O', 'n', 'd', 'o', 'r', 's']
+    // The following seem harmless and are used by default: ['O', 'n', 'd', 'o', 'r', 's', 't']
+    const supportedRuntimeItems = ['O', 'n', 'd', 'o', 'r', 's', 't']
     for (const item of supportedRuntimeItems) {
       policyRequire[item] = harden(__webpack_require__[item])
     }
@@ -282,12 +292,15 @@ const lavamoatRuntimeWrapper = (resourceId, runtimeKit) => {
     policyRequire.g = compartmentMap.get(resourceId).globalThis
 
     // override nmd to limit what it can mutate
-    policyRequire.nmd = (/** @type {any} */ moduleReference) => {
-      if (moduleReference === module) {
-        module = __webpack_require__.nmd(module)
-        return module
-      }
-    }
+    policyRequire.nmd = (/** @type {any} */ moduleReference) =>
+      moduleReference === module
+        ? __webpack_require__.nmd(module)
+        : moduleReference
+    // override hmd to limit what it can mutate
+    policyRequire.hmd = (/** @type {any} */ moduleReference) =>
+      moduleReference === module
+        ? __webpack_require__.hmd(module)
+        : moduleReference
 
     overrides.__webpack_require__ = policyRequire
   }

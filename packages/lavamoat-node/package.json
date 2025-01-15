@@ -1,0 +1,54 @@
+{
+  "name": "lavamoat",
+  "version": "9.0.5",
+  "description": "",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LavaMoat/lavamoat.git",
+    "directory": "packages/lavamoat-node"
+  },
+  "homepage": "https://github.com/LavaMoat/lavamoat#readme",
+  "bugs": {
+    "url": "https://github.com/LavaMoat/lavamoat/issues"
+  },
+  "author": "kumavis",
+  "license": "MIT",
+  "engines": {
+    "node": "^18.0.0 || ^20.0.0 <20.15.0 || ^20.17.0 || ^22.5.1"
+  },
+  "bin": {
+    "lavamoat": "src/cli.js",
+    "lavamoat-run-command": "src/run-command.js"
+  },
+  "main": "src/index.js",
+  "directories": {
+    "example": "examples",
+    "test": "test"
+  },
+  "scripts": {
+    "lint:deps": "depcheck",
+    "test": "npm run test:npm && npm run test:yarn1",
+    "test:npm": "npm run test:prepare && ava",
+    "test:prepare": "node ./test/prepare.js",
+    "test:yarn1": "cross-env COREPACK_ENABLE_PROJECT_SPEC=0 LAVAMOAT_PM=yarn@1 npm run test:prepare && cross-env COREPACK_ENABLE_PROJECT_SPEC=0 ava"
+  },
+  "dependencies": {
+    "@babel/code-frame": "7.26.2",
+    "@babel/highlight": "7.25.9",
+    "@lavamoat/aa": "^4.3.1",
+    "bindings": "1.5.0",
+    "corepack": "0.30.0",
+    "htmlescape": "1.1.1",
+    "lavamoat-core": "^16.2.2",
+    "lavamoat-tofu": "^8.0.4",
+    "node-gyp-build": "4.8.4",
+    "resolve": "1.22.8",
+    "yargs": "17.7.2"
+  },
+  "ava": {
+    "files": [
+      "test/*.spec.js"
+    ],
+    "timeout": "1m"
+  }
+}

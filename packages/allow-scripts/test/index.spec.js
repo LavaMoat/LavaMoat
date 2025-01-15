@@ -1,11 +1,10 @@
 const test = require('ava')
-const os = require('node:os')
 const fs = require('node:fs')
 const path = require('node:path')
 const { spawnSync } = require('node:child_process')
 const { pathToFileURL } = require('node:url')
+const { isWindows, portableExecPath } = require('./utils.js')
 
-const isWindows = os.platform() === 'win32'
 const NPM_CMD = isWindows ? 'npm.cmd' : 'npm'
 /* eslint-disable ava/no-skip-test */
 const skipOnWindows = isWindows
@@ -30,31 +29,31 @@ const run = (t, args, cwd) => {
   // Path to the allow-scripts executable
   const ALLOW_SCRIPTS_BIN = require.resolve('../src/cli')
   const options = realisticEnvOptions(cwd)
+  const execPath = portableExecPath(process.execPath)
   const result = spawnSync(
-    process.execPath,
+    execPath,
     [ALLOW_SCRIPTS_BIN, ...args],
     options
   )
 
-  if (
-    typeof result.stderr === 'undefined' ||
-    typeof result.status !== 'number'
-  ) {
+  if (result.error) {
+    t.log('Result from a failed spawnSync:', result)
+
     t.fail(
-      `Failed calling '${process.execPath} ${ALLOW_SCRIPTS_BIN} ${args.join(' ')}': ${JSON.stringify(
-        {
-          cwd,
-          options,
-          result,
-        },
-        undefined,
-        2
-      )}`
+      `Failed calling '${execPath} ${ALLOW_SCRIPTS_BIN} ${args.join(' ')}'`,
+      {
+        cwd,
+        options,
+        result,
+      }
     )
   }
 
   // forward error output for debugging
-  t.log(result.stderr.toString('utf-8'))
+  t.log(
+    `stderr from running allow-scripts with '${args.join(' ')}'`,
+    result.stderr.toString('utf-8')
+  )
 
   return {
     status: result.status,
@@ -77,10 +76,9 @@ test('cli - auto command', (t) => {
     realisticEnvOptions(projectRoot)
   )
 
-  // forward error output for debugging
-  if (typeof initResult.stderr !== 'undefined') {
-    t.log(initResult.stderr.toString('utf-8'))
-  } else {
+  if (initResult.error || initResult.status !== 0) {
+    t.log('initResult', initResult)
+
     t.fail(
       `Failed calling 'npm init -y': ${JSON.stringify(
         {
@@ -234,9 +232,35 @@ test('cli - run command - good dep as a sub dep', (t) => {
     recursive: true,
     force: true,
   })
+  fs.rmSync(
+    path.join(projectRoot, 'node_modules', 'bbb', 'node_modules', '.bin'),
+    {
+      recursive: true,
+      force: true,
+    }
+  )
 
   // generate the bin link
   spawnSync(NPM_CMD, ['rebuild', 'good_dep'], realisticEnvOptions(projectRoot))
+  t.assert(
+    fs.existsSync(
+      path.join(
+        projectRoot,
+        'node_modules',
+        'bbb',
+        'node_modules',
+        '.bin',
+        'good'
+      )
+    ),
+    'Expected good script to be installed'
+  )
+  t.assert(
+    !fs.existsSync(
+      path.join(projectRoot, 'node_modules', 'bbb', '.goodscriptworked')
+    ),
+    'Expected good script to be installed but not run upon install'
+  )
 
   // run the "run" command
   const result = run(t, ['run'], projectRoot)
@@ -251,6 +275,18 @@ test('cli - run command - good dep as a sub dep', (t) => {
     'running lifecycle scripts for top level package',
     '',
   ])
+  const stderr = result.stderr.toString()
+  if (stderr.length > 0) {
+    t.log(`stderr\n---\n${stderr}\n---`)
+  } else {
+    t.log('no stderr')
+  }
+  t.assert(
+    fs.existsSync(
+      path.join(projectRoot, 'node_modules', 'bbb', '.goodscriptworked')
+    ),
+    'Expected good script to produce a file'
+  )
 })
 
 skipOnWindows(
@@ -374,5 +410,6 @@ function realisticEnvOptions(projectRoot) {
     cwd: projectRoot,
     env: { ...process.env, INIT_CWD: projectRoot },
     encoding: 'utf-8',
+    shell: true, // required for running .cmd on Windows https://nodejs.org/en/blog/vulnerability/april-2024-security-releases-2  https://github.com/nodejs/node/issues/52554
   }
 }

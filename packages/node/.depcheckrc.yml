@@ -1,8 +1,12 @@
 ignores:
   # monorepo deps
   - 'ava'
-  # tests - fake packages
-  - 'two'
 
-  # invoked as executable
-  - 'corepack'
+  # eslint plugin
+  - '@jessie.js/eslint-plugin'
+  - '@typescript-eslint/parser'
+
+  # types
+  - '@types/capture-console'
+  - 'type-fest'
+  - '@types/json-stable-stringify'

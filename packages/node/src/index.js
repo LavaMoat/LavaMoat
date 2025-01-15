@@ -1,98 +1,20 @@
-/* eslint-disable no-eval */
+/**
+ * Entry point for the programmable API.
+ *
+ * @privateRemarks
+ * Other source modules in this package _should never_ import this module
+ * directly, since a) it will most certainly cause a cycle, and b) it loads the
+ * preamble.
+ * @packageDocumentation
+ */
 
-const path = require('node:path')
-const fs = require('node:fs')
-const jsonStringify = require('json-stable-stringify')
-const { loadPolicy, loadPolicyAndApplyOverrides } = require('lavamoat-core')
-const { loadCanonicalNameMap } = require('@lavamoat/aa')
-const { parseForPolicy } = require('./parseForPolicy')
-const { createKernel } = require('./kernel')
+import './preamble.js'
 
-const defaults = require('./defaults')
-
-async function runLava(options) {
-  options = Object.assign({}, defaults, options)
-
-  options.projectRoot = path.resolve(options.projectRoot)
-  options.entryPath = path.resolve(options.projectRoot, options.entryPath)
-  options.policyPath = path.resolve(options.projectRoot, options.policyPath)
-  options.policyOverridePath = path.resolve(
-    options.projectRoot,
-    options.policyOverridePath
-  )
-  options.policyDebugPath = path.resolve(
-    options.projectRoot,
-    options.policyDebugPath
-  )
-
-  const {
-    entryPath: entryId,
-    writeAutoPolicy,
-    writeAutoPolicyDebug,
-    writeAutoPolicyAndRun,
-    policyPath,
-    policyDebugPath,
-    policyOverridePath,
-    projectRoot,
-    scuttleGlobalThis,
-    debugMode,
-    statsMode,
-  } = options
-  const shouldParseApplication =
-    writeAutoPolicy || writeAutoPolicyDebug || writeAutoPolicyAndRun
-  const shouldRunApplication =
-    (!writeAutoPolicy && !writeAutoPolicyDebug) || writeAutoPolicyAndRun
-
-  if (shouldParseApplication) {
-    // parse mode
-    const includeDebugInfo = Boolean(writeAutoPolicyDebug)
-    const policyOverride = await loadPolicy({
-      debugMode,
-      policyPath: policyOverridePath,
-    })
-    console.warn(`LavaMoat generating policy from entry "${entryId}"...`)
-    const policy = await parseForPolicy({
-      projectRoot,
-      entryId,
-      policyOverride,
-      includeDebugInfo,
-    })
-    // write policy debug file
-    if (includeDebugInfo) {
-      fs.mkdirSync(path.dirname(policyDebugPath), { recursive: true })
-      fs.writeFileSync(policyDebugPath, jsonStringify(policy, { space: 2 }))
-      console.warn(`LavaMoat wrote policy debug to "${policyDebugPath}"`)
-    }
-    // cleanup debug info
-    delete policy.debugInfo
-    // write policy file
-    fs.mkdirSync(path.dirname(policyPath), { recursive: true })
-    fs.writeFileSync(policyPath, jsonStringify(policy, { space: 2 }))
-    console.warn(`LavaMoat wrote policy to "${policyPath}"`)
-  }
-  if (shouldRunApplication) {
-    // execution mode
-    const lavamoatPolicy = await loadPolicyAndApplyOverrides({
-      debugMode,
-      policyPath,
-      policyOverridePath,
-    })
-    const canonicalNameMap = await loadCanonicalNameMap({
-      rootDir: projectRoot,
-      includeDevDeps: true,
-    })
-    const kernel = createKernel({
-      projectRoot,
-      lavamoatPolicy,
-      canonicalNameMap,
-      scuttleGlobalThis,
-      debugMode,
-      statsMode,
-    })
-
-    // run entrypoint
-    kernel.internalRequire(entryId)
-  }
-}
-
-module.exports = { runLava }
+export * as constants from './constants.js'
+export { execute } from './exec/execute.js'
+export { load } from './exec/load.js'
+export { run } from './exec/run.js'
+export { toEndoPolicy } from './policy-converter.js'
+export { generatePolicy } from './policy-gen/generate.js'
+export * from './policy-util.js'
+export * from './types.js'

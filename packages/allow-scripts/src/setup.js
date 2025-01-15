@@ -1,6 +1,6 @@
 const {
-  existsSync,
   appendFileSync,
+  existsSync,
   readFileSync,
   writeFileSync,
 } = require('node:fs')
@@ -29,58 +29,19 @@ const YARN3 = {
   },
 }
 
-module.exports = {
-  writeRcFile,
-  areBinsBlocked,
-  editPackageJson,
-}
-
-/**
- * @param {string} filename
- * @returns {string}
- */
-function addInstallParentDir(filename) {
-  const rootDir = process.env.INIT_CWD || process.cwd()
-  return path.join(rootDir, filename)
-}
-
-/**
- * @param {string} entry
- * @param {string} file
- * @returns {boolean}
- */
-function isEntryPresent(entry, file) {
-  const rcPath = addInstallParentDir(file)
-  if (!existsSync(rcPath)) {
-    return false
-  }
-  const rcFileContents = readFileSync(rcPath, 'utf8')
-  return rcFileContents.includes(entry)
-}
-
-/**
- * @param {WriteRcFileContentOpts} param0
- */
-function writeRcFileContent({ file, entry }) {
-  const rcPath = addInstallParentDir(file)
-
-  if (isEntryPresent(entry, file)) {
-    console.log(
-      `@lavamoat/allow-scripts: file ${rcPath} already exists with entry: ${entry}.`
-    )
-  } else {
-    appendFileSync(rcPath, entry + '\n')
-    console.log(`@lavamoat/allow-scripts: added entry to ${rcPath}: ${entry}.`)
-  }
-}
-
 /**
  * @type {boolean}
  */
 let binsBlockedMemo
 
+module.exports = {
+  areBinsBlocked,
+  editPackageJson,
+  writeRcFile,
+}
+
 /**
- * @param {AreBinsBlockedOpts} args
+ * @param {AreBinsBlockedParams} args
  * @returns {boolean}
  */
 function areBinsBlocked({ noMemoization = false } = {}) {
@@ -186,13 +147,43 @@ function editPackageJson() {
   }
 }
 
-/**
- * @typedef WriteRcFileContentOpts
- * @property {string} file
- * @property {string} entry
- */
+// internals
 
 /**
- * @typedef AreBinsBlockedOpts
- * @property {boolean} [noMemoization] Turn off memoization, make a fresh lookup
+ * @param {string} filename
+ * @returns {string}
  */
+function addInstallParentDir(filename) {
+  const rootDir = process.env.INIT_CWD || process.cwd()
+  return path.join(rootDir, filename)
+}
+
+/**
+ * @param {string} entry
+ * @param {string} file
+ * @returns {boolean}
+ */
+function isEntryPresent(entry, file) {
+  const rcPath = addInstallParentDir(file)
+  if (!existsSync(rcPath)) {
+    return false
+  }
+  const rcFileContents = readFileSync(rcPath, 'utf8')
+  return rcFileContents.includes(entry)
+}
+
+/**
+ * @param {WriteRcFileContentParams} params
+ */
+function writeRcFileContent({ file, entry }) {
+  const rcPath = addInstallParentDir(file)
+
+  if (isEntryPresent(entry, file)) {
+    console.log(
+      `@lavamoat/allow-scripts: file ${rcPath} already exists with entry: ${entry}.`
+    )
+  } else {
+    appendFileSync(rcPath, entry + '\n')
+    console.log(`@lavamoat/allow-scripts: added entry to ${rcPath}: ${entry}.`)
+  }
+}

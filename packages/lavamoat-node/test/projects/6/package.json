@@ -1,0 +1,10 @@
+{
+  "name": "test-6",
+  "scripts": {
+    "setup": "npm install"
+  },
+  "dependencies": {
+    "a": "file:./node-modules/a"
+  },
+  "packageManager": "yarn@1.22.22"
+}

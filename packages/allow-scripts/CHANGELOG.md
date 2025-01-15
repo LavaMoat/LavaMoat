@@ -6,6 +6,36 @@
   * dependencies
     * @lavamoat/aa bumped from ^4.0.1 to ^4.1.0
 
+## [3.3.1](https://github.com/LavaMoat/LavaMoat/compare/allow-scripts-v3.3.0...allow-scripts-v3.3.1) (2024-12-04)
+
+
+### Bug Fixes
+
+* **allow-scripts:** include type-fest as prod dep ([10d67f7](https://github.com/LavaMoat/LavaMoat/commit/10d67f79b08f2bb14b7056be7f964c5e16195407))
+* **deps:** update dependency type-fest to v4.30.0 ([6528665](https://github.com/LavaMoat/LavaMoat/commit/6528665e2e99221366444c23a0e52be447e04071))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @lavamoat/aa bumped from ^4.3.0 to ^4.3.1
+
+## [3.3.0](https://github.com/LavaMoat/LavaMoat/compare/allow-scripts-v3.2.1...allow-scripts-v3.3.0) (2024-10-11)
+
+
+### Features
+
+* **allow-scripts:** allow configuring lifecycleEvents for loadAllPackageConfigurations ([#1383](https://github.com/LavaMoat/LavaMoat/issues/1383)) ([b7b0115](https://github.com/LavaMoat/LavaMoat/commit/b7b011567d068a2bcddee4bb8497f04d74c6ae65))
+
+## [3.2.1](https://github.com/LavaMoat/LavaMoat/compare/allow-scripts-v3.2.0...allow-scripts-v3.2.1) (2024-09-11)
+
+
+### Bug Fixes
+
+* **allow-scripts:** fix spawn error diagnostics in run function in test ([727ce01](https://github.com/LavaMoat/LavaMoat/commit/727ce01f7705ae73b397f426acc380addfb7f1d1))
+* **allow-scripts:** fix test setup to continue spawning npm on windows post security fixes in Node.js ([416d018](https://github.com/LavaMoat/LavaMoat/commit/416d018da94cd603c7983f28bdfef88456522d3a))
+
 ## [3.2.0](https://github.com/LavaMoat/LavaMoat/compare/allow-scripts-v3.1.0...allow-scripts-v3.2.0) (2024-08-15)
 
 

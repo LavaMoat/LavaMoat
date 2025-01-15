@@ -12,9 +12,9 @@ const diag = require('./diagnostics.js')
 const RUNTIME_GLOBALS = require('webpack/lib/RuntimeGlobals')
 const { RUNTIME_KEY } = require('../ENUM.json')
 
-const { isExcluded } = require('./exclude.js')
+const { isExcluded } = require('./exclude')
 
-// TODO: processing requirements needs to be a tiny bit more clever yet.
+// TODO: There's potential for a few more flags in runtimeFlags if we want to support all things webpack supports. Proceed with common sense.
 // Look in JavascriptModulesPlugin for how it decides if module and exports are unused.
 /**
  * @param {Set<string>} requirements
@@ -22,42 +22,39 @@ const { isExcluded } = require('./exclude.js')
  * @returns
  */
 function processRequirements(requirements, module) {
-  // TODO: the approach of passing a runtimneKit is a minimal solution.
-  // It may be possible to do more at compile time to simplify the runtime.
-  // Handling "thisAsExports" may require that.
   const runtimeKit = new Set()
+  const runtimeFlags = {}
+
   for (const requirement of requirements) {
-    const chunks = requirement.split('.')
-    if (chunks[0] === RUNTIME_GLOBALS.thisAsExports) {
-      // TODO: not sure what to do with it.
-      //github.com/webpack/webpack/blob/07ac43333654280c5bc6014a3a69eda4c3b80273/lib/javascript/JavascriptModulesPlugin.js#L560
+    // requirements can be more precise than just `module` - webpck will list nested fields in requirements, meanwhile we're only interested in passing the top level references.
+    const requirementReferenceName = requirement.split('.')[0]
+    if (requirementReferenceName === RUNTIME_GLOBALS.thisAsExports) {
+      runtimeFlags.thisAsExports = true
       continue
     }
-    if (chunks[0] === RUNTIME_GLOBALS.returnExportsFromRuntime) {
-      // should be doable to introduce support elsewhere
-      // TODO: create an indicator of this requirement that our runtime would understand
+    if (requirementReferenceName === RUNTIME_GLOBALS.returnExportsFromRuntime) {
+      // TODO: should be doable to introduce support in wrapper.js by conditionally adding a return statement. feels too niche to support
       continue
     }
-    if (chunks[0] === '__webpack_exports__') {
+    if (requirementReferenceName === '__webpack_exports__') {
       runtimeKit.add(module.exportsArgument)
-    } else if (chunks[0] === 'module') {
+    } else if (requirementReferenceName === 'module') {
       runtimeKit.add(module.moduleArgument)
     } else {
-      runtimeKit.add(chunks[0])
+      runtimeKit.add(requirementReferenceName)
     }
   }
   diag.run(2, () => {
     runtimeKit.add(`/* ${Array.from(requirements).join()} */`)
   })
 
-  return runtimeKit
+  return { runtimeKit, runtimeFlags }
 }
 
 // Use a weakset to mark generatorInstance as wrapped,
 // this is to avoid wrapping the same instance twice
 const wrappedGeneratorInstances = new WeakSet()
 
-// TODO: this should probably be extracted to a separate file for easier navigation
 /**
  * @param {object} options
  * @param {string[]} options.excludes
@@ -79,6 +76,7 @@ exports.wrapGeneratorMaker = ({
     // Monkey-patching JavascriptGenerator. Yes, this could be nicer.
     // Using features of the generator itself we might be able to achieve the same
     // but it would be more suseptible to changes in webpack.
+    // And there aren't any official or private hooks that would give us access to runtime requirements that I could find.
 
     if (wrappedGeneratorInstances.has(generatorInstance)) {
       return generatorInstance
@@ -143,6 +141,11 @@ exports.wrapGeneratorMaker = ({
         throw Error(`Failed to find a packageId for ${module.resource}`)
       }
 
+      const { runtimeKit, runtimeFlags } = processRequirements(
+        options.runtimeRequirements,
+        module
+      )
+
       let { before, after, source, sourceChanged } = wrapper({
         // There's probably a good reason why webpack stores source in those objects instead
         // of strings. Turning it into a string here might mean we're loosing some caching.
@@ -150,9 +153,10 @@ exports.wrapGeneratorMaker = ({
         // decide if we want to keep the original object representing it.
         source: originalGeneratedSource.source().toString(),
         id: packageId,
-        runtimeKit: processRequirements(options.runtimeRequirements, module),
+        runtimeKit,
         runChecks,
         evalKitFunctionName: `__webpack_require__.${RUNTIME_KEY}`,
+        runtimeFlags,
       })
 
       diag.rawDebug(3, {
