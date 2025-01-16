@@ -6,17 +6,22 @@
 module.exports = { walk, eachNodeInTree }
 
 /**
+ * @import {LavamoatModuleRecord} from '@lavamoat/types'
+ * @import {ImportHookFn, ShouldImportFn} from './parseForPolicy'
+ */
+
+/**
  * @callback VisitorFn
- * @param {import('@lavamoat/types').LavamoatModuleRecord} moduleRecord
+ * @param {LavamoatModuleRecord} moduleRecord
  * @returns {void}
  */
 
 /**
  * @param {object} options
  * @param {string} options.moduleSpecifier
- * @param {import('./parseForPolicy').ImportHookFn} options.importHook
+ * @param {ImportHookFn} options.importHook
  * @param {VisitorFn} options.visitorFn
- * @param {import('./parseForPolicy').ShouldImportFn} options.shouldImport
+ * @param {ShouldImportFn} options.shouldImport
  * @param {Set<string>} [options.visitedSpecifiers]
  */
 async function walk({
@@ -40,12 +45,10 @@ async function walk({
 /**
  * @param {object} options
  * @param {string} options.moduleSpecifier
- * @param {import('./parseForPolicy').ImportHookFn} options.importHook
- * @param {import('./parseForPolicy').ShouldImportFn} [options.shouldImport]
+ * @param {ImportHookFn} options.importHook
+ * @param {ShouldImportFn} [options.shouldImport]
  * @param {Set<string>} [options.visitedSpecifiers]
- * @returns {AsyncIterableIterator<
- *   import('@lavamoat/types').LavamoatModuleRecord
- * >}
+ * @returns {AsyncIterableIterator<LavamoatModuleRecord>}
  */
 // NOTE: i think this is depth first in a way that doesnt take advantage of concurrency
 async function* eachNodeInTree({

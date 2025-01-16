@@ -8,10 +8,14 @@ const { jsonStringifySortedPolicy } = require('./stringifyPolicy')
 module.exports = { loadPolicy, loadPolicyAndApplyOverrides, loadPoliciesSync }
 
 /**
+ * @import {LavaMoatPolicy, LavaMoatPolicyOverrides} from '@lavamoat/types'
+ */
+
+/**
  * Reads a policy file from disk, if present
  *
  * @param {PolicyOpts} opts
- * @returns {import('@lavamoat/types').LavaMoatPolicy | undefined}
+ * @returns {LavaMoatPolicy | undefined}
  */
 function readPolicyFileSync({ debugMode, policyPath }) {
   if (debugMode) {
@@ -49,14 +53,14 @@ function readPolicyFileSync({ debugMode, policyPath }) {
  * Loads a policy from disk, returning a default empty policy if not found.
  *
  * @param {PolicyOpts} opts
- * @returns {Promise<import('@lavamoat/types').LavaMoatPolicy>}
+ * @returns {Promise<LavaMoatPolicy>}
  * @todo Because there is no validation taking place, the resulting value could
  *   be literally anything `JSON.parse()` could return. Also note that this
  *   returns a `LavaMoatPolicy` when we could be asking for a
  *   `LavaMoatPolicyOverrides`; make your type assertions accordingly!
  */
 async function loadPolicy({ debugMode, policyPath }) {
-  /** @type {import('@lavamoat/types').LavaMoatPolicy} */
+  /** @type {LavaMoatPolicy} */
   let policy = { resources: {} }
   try {
     const rawPolicy = readPolicyFileSync({ debugMode, policyPath })
@@ -77,7 +81,7 @@ async function loadPolicy({ debugMode, policyPath }) {
  * If overrides exist, writes the overrides _back_ into the policy file.
  *
  * @param {PolicyOpts & { policyOverridePath: string }} opts
- * @returns {Promise<import('@lavamoat/types').LavaMoatPolicy>}
+ * @returns {Promise<LavaMoatPolicy>}
  */
 async function loadPolicyAndApplyOverrides({
   debugMode,
@@ -86,10 +90,9 @@ async function loadPolicyAndApplyOverrides({
 }) {
   const policy = await loadPolicy({ debugMode, policyPath })
 
-  const policyOverride =
-    /** @type {import('@lavamoat/types').LavaMoatPolicyOverrides | undefined} */ (
-      readPolicyFileSync({ debugMode, policyPath: policyOverridePath })
-    )
+  const policyOverride = /** @type {LavaMoatPolicyOverrides | undefined} */ (
+    readPolicyFileSync({ debugMode, policyPath: policyOverridePath })
+  )
 
   if (!policyOverride) {
     return policy
@@ -116,10 +119,8 @@ async function loadPolicyAndApplyOverrides({
  *
  * @param {PolicyOpts & { policyOverridePath: string }} opts
  * @returns {{
- *   policy: import('@lavamoat/types').LavaMoatPolicy | undefined
- *   applyOverride: (
- *     main: import('@lavamoat/types').LavaMoatPolicy
- *   ) => import('@lavamoat/types').LavaMoatPolicy
+ *   policy: LavaMoatPolicy | undefined
+ *   applyOverride: (main: LavaMoatPolicy) => LavaMoatPolicy
  * }}
  */
 function loadPoliciesSync({ debugMode, policyPath, policyOverridePath }) {
