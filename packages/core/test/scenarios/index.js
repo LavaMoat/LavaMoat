@@ -10,7 +10,11 @@ const transforms = require('./transforms')
 const globalRef = require('./globalRef')
 const scuttle = require('./scuttle')
 
-/** @type {import('./scenario').ScenarioFactory[]} */
+/**
+ * @import {ScenarioFactory} from './scenario'
+ */
+
+/** @type {ScenarioFactory[]} */
 const scenarios = [
   ...autogen,
   ...security,

@@ -6,8 +6,13 @@ const { eachNodeInTree } = require('./walk')
 module.exports = { parseForPolicy }
 
 /**
+ * @import {LavaMoatPolicy, DefaultModuleInitArgs, LavaMoatPolicyOverrides, LavamoatModuleRecord} from '@lavamoat/types'
+ * @import {ModuleInspector} from './generatePolicy'
+ */
+
+/**
  * @param {ParseForPolicyOpts} opts
- * @returns {Promise<import('@lavamoat/types').LavaMoatPolicy>} Policy object
+ * @returns {Promise<LavaMoatPolicy>} Policy object
  */
 async function parseForPolicy({
   moduleSpecifier,
@@ -32,11 +37,11 @@ async function parseForPolicy({
 }
 
 /**
- * @template {any[]} [InitArgs=import('@lavamoat/types').DefaultModuleInitArgs]
- *   Default is `import('@lavamoat/types').DefaultModuleInitArgs`
+ * @template {any[]} [InitArgs=DefaultModuleInitArgs] Default is
+ *   `DefaultModuleInitArgs`
  * @callback ImportHookFn
  * @param {string} address
- * @returns {Promise<import('@lavamoat/types').LavamoatModuleRecord<InitArgs>>}
+ * @returns {Promise<LavamoatModuleRecord<InitArgs>>}
  */
 
 /**
@@ -60,21 +65,20 @@ async function parseForPolicy({
  */
 
 /**
- * @template {any[]} [InitArgs=import('@lavamoat/types').DefaultModuleInitArgs]
- *   Default is `import('@lavamoat/types').DefaultModuleInitArgs`
+ * @template {any[]} [InitArgs=DefaultModuleInitArgs] Default is
+ *   `DefaultModuleInitArgs`
  * @typedef ParseForPolicyOpts
  * @property {string} moduleSpecifier
  * @property {ImportHookFn<InitArgs>} importHook
  * @property {IsBuiltinFn} isBuiltin
  * @property {ShouldImportFn} [shouldImport]
  * @property {ResolveFn} [resolveHook]
- * @property {import('@lavamoat/types').LavaMoatPolicyOverrides} [policyOverride]
+ * @property {LavaMoatPolicyOverrides} [policyOverride]
  * @property {boolean} [includeDebugInfo]
- * @property {import('./generatePolicy').ModuleInspector} [inspector]
+ * @property {ModuleInspector} [inspector]
  */
 
 /**
  * @param {ParseForPolicyOpts} opts
- * @returns {Promise<import('@lavamoat/types').LavaMoatPolicySchema>} Policy
- *   object
+ * @returns {Promise<LavaMoatPolicySchema>} Policy object
  */

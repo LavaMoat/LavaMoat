@@ -1,10 +1,14 @@
 // @ts-check
 
 module.exports = { codeSampleFromAstNode }
+/**
+ * @import {NodeWithLocation} from 'lavamoat-tofu'
+ * @import {LavamoatModuleRecord} from '@lavamoat/types'
+ */
 
 /**
- * @param {import('lavamoat-tofu').NodeWithLocation} node
- * @param {import('@lavamoat/types').LavamoatModuleRecord} moduleRecord
+ * @param {NodeWithLocation} node
+ * @param {LavamoatModuleRecord} moduleRecord
  * @returns {{ range: string; sample: string }}
  */
 function codeSampleFromAstNode(node, moduleRecord) {
