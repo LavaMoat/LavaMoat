@@ -6,12 +6,12 @@
     "outDir": "../types",
     "paths": {
       "@lavamoat/types": ["../../types"],
-      "lavamoat-tofu": ["../../tofu"],
-    },
+      "lavamoat-tofu": ["../../tofu"]
+    }
   },
-  "include": ["../lib/transforms.umd.js", "."],
+  "include": ["../lib/transforms.umd.js", ".", "../../types/src/has-own.ts"],
   "references": [
     { "path": "../../types/src/tsconfig.json" },
-    { "path": "../../tofu/src/tsconfig.json" },
-  ],
+    { "path": "../../tofu/src/tsconfig.json" }
+  ]
 }
