@@ -95,10 +95,13 @@ function convertToMap(input, path = '') {
   return result
 }
 
+const silentConsole = Object.keys(console).reduce((acc, key) => {
+  acc[key] = () => {}
+  return acc
+}, {})
+
 const defaultGlobals = () => ({
-  console: {
-    log: () => {},
-  },
+  console: silentConsole,
   // these are necessary for webpack's runtime
   document: {},
   self: { location: { href: 'https://localhost/' } },

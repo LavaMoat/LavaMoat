@@ -54,7 +54,7 @@ test('webpack/policy-errors - denies globals', async (t) => {
   t.throws(
     () => {
       runScriptWithSES(build.snapshot['/dist/app.js'], {
-        console: { warn: console.warn, log: console.log },
+        console: { ...console },
         fetch: () => {},
       })
     },
