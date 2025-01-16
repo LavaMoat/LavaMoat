@@ -41,7 +41,7 @@
     "browser-resolve": "2.0.0",
     "json-stable-stringify": "1.1.1",
     "lavamoat-core": "^16.3.0",
-    "ses": "1.9.0"
+    "ses": "1.10.0"
   },
   "devDependencies": {
     "@babel/preset-env": "7.26.0",
