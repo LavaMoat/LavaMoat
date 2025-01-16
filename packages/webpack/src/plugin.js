@@ -289,6 +289,20 @@ class LavaMoatPlugin {
           moduleClass === 'ContextModule'
 
         /**
+         * Identifies an asset that webpack includes in dist by default without
+         * setting any loaders explicitly.
+         *
+         * @param {import('webpack').Module} m
+         * @returns {m is import('webpack').NormalModule}
+         */
+        const isAmbientAsset = (m) =>
+          m.type === 'asset/resource' &&
+          'resource' in m &&
+          'loaders' in m &&
+          Array.isArray(m.loaders) &&
+          m.loaders.length === 0
+
+        /**
          * @param {import('webpack').Module} m
          * @param {string} moduleClass
          * @returns {m is import('webpack').ExternalModule} // TODO: this is not
@@ -343,9 +357,42 @@ class LavaMoatPlugin {
                   return
                 }
 
+                // Fixes the issue with assets being emitted to dist without a loader
+                // TODO: refactor to move random hardening of the build somewhere it's easier to track.
+                if (
+                  isAmbientAsset(module) &&
+                  module.resource.includes('node_modules') // FIXME: would be better to use canonicalName lookup and match with root
+                ) {
+                  // add a warning about removing the asset
+                  mainCompilationWarnings.push(
+                    new WebpackError(
+                      `LavaMoatPlugin: the following resource was being silently emitted to the dist directory and LavaMoat has prevented it: '${module.resource}'. If you want to add this resource, explicitly define a file-loader for it in your webpack configuration.`
+                    )
+                  )
+
+                  // We can't use `chunkGraph.disconnectChunkAndModule` here
+                  // because the require statement remains and errors out
+
+                  if (module.generatorOptions) {
+                    // generatorOptions was not present in testing, but types indicate it might be there
+                    module.generatorOptions.emit = false
+                  }
+                  if (module.generator) {
+                    module.generator = Object.create(module.generator, {
+                      emit: {
+                        value: false,
+                        writable: false,
+                        configurable: false,
+                        enumerable: true,
+                      },
+                    })
+                  }
+                }
+
                 if (
                   isIgnoredModule(module) ||
-                  isContextModule(module, moduleClass)
+                  (options.__unsafeAllowContextModules &&
+                    isContextModule(module, moduleClass))
                 ) {
                   unenforceableModuleIds.push(moduleId)
                 } else {
@@ -631,6 +678,10 @@ module.exports = LavaMoatPlugin
  *   node:fs
  * @property {ScuttlerConfig | boolean} [scuttleGlobalThis] - Configuration for enabling scuttling mode
  * @property {boolean} [debugRuntime] - Enable runtime debugging tools
+ * @property {boolean} [__unsafeAllowContextModules] - Skips enforcement of
+ *   policies on ContextModule usage. This is only safe if you can guarantee
+ *   that webpack only uses the missing module stub ContextModule and no actual
+ *   modules get loaded through it.
  */
 
 // Provided inline because import('ses') won't work in jsdoc of a cjs module

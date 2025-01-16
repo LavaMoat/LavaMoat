@@ -6,6 +6,18 @@
   * dependencies
     * lavamoat-tofu bumped from ^7.2.1 to ^7.2.2
 
+## [16.3.0](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v16.2.2...lavamoat-core-v16.3.0) (2025-01-15)
+
+
+### Features
+
+* **webpack:** policy debugging capabilities and tighter tests ([20b12ad](https://github.com/LavaMoat/LavaMoat/commit/20b12ad38a78678c8291b4841e8c4d00b349c1aa))
+
+
+### Bug Fixes
+
+* **core:** ignore global Function in policy ([55f8c7b](https://github.com/LavaMoat/LavaMoat/commit/55f8c7bd07de7f51fc2db81972f6f7d447f33e9e))
+
 ## [16.2.2](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v16.2.1...lavamoat-core-v16.2.2) (2024-12-09)
 
 
