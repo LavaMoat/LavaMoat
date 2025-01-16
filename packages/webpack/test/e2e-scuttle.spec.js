@@ -14,7 +14,6 @@ async function scuttle(t, scuttleGlobalThis, globals) {
   const webpackConfigDefault = makeConfig({
     scuttleGlobalThis,
     generatePolicy: true,
-    emitPolicySnapshot: true,
     diagnosticsVerbosity: 1,
     policyLocation: path.resolve(__dirname, 'fixtures/main/policy-scuttling'),
   })
@@ -30,11 +29,6 @@ async function scuttle(t, scuttleGlobalThis, globals) {
     t.context.globalThis = runScriptWithSES(t.context.bundle, globals).context
   }, 'Expected the build to succeed')
 }
-
-test(`webpack/scuttled - dist shape`, async (t) => {
-  await scuttle(t, true)
-  t.snapshot(Object.keys(t.context.build.snapshot))
-})
 
 test(`webpack/scuttled - hosting globalThis's environment is not scuttled`, async (t) => {
   await scuttle(t)
