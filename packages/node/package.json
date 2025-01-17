@@ -60,7 +60,7 @@
   },
   "devDependencies": {
     "@endo/eslint-plugin": "2.1.0",
-    "@jessie.js/eslint-plugin": "0.4.1",
+    "@jessie.js/eslint-plugin": "0.4.2",
     "@types/json-stable-stringify": "1.0.36",
     "json-stable-stringify": "1.2.0",
     "memfs": "4.8.1"
