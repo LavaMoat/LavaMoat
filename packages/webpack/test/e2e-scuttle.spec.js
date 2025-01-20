@@ -45,21 +45,17 @@ async function scuttle(t, scuttleGlobalThis, globals) {
 
 test(`webpack/scuttled - hosting globalThis's environment is not scuttled`, async (t) => {
   await scuttle(t)
-  try {
+  t.notThrows(() => {
     const global = t.context.globalThis
     Object.getOwnPropertyNames(global).forEach(name => global[name])
-  } catch (e) {
-    t.fail(`Unexpected error in scenario: ${e.message}`)
-  }
+  }, 'Unexpected error in scenario')
 })
 
 test(`webpack/scuttled - hosting globalThis's "Function" is not scuttled`, async (t) => {
   await scuttle(t)
-  try {
+  t.notThrows(() => {
     t.is(new t.context.globalThis.Function('return 1')(), 1)
-  } catch (e) {
-    t.fail(`Unexpected error in scenario: ${e.message}`)
-  }
+  }, 'Unexpected error in scenario')
 })
 
 test(`webpack/scuttled - hosting globalThis's "Function" is scuttled`, async (t) => {
@@ -73,11 +69,9 @@ test(`webpack/scuttled - hosting globalThis's "Function" is scuttled`, async (t)
 
 test(`webpack/scuttled - hosting globalThis's "Function" is scuttled excepted`, async (t) => {
   await scuttle(t, {enabled: true, exceptions: ['Function']})
-  try {
+  t.notThrows(() => {
     t.is(new t.context.globalThis.Function('return 1')(), 1)
-  } catch (e) {
-    t.fail(`Unexpected error in scenario: ${e.message}`)
-  }
+  }, 'Unexpected error in scenario')
 })
 
 test(`webpack/scuttled - provided scuttlerName successfully invoked defined scuttlerFunc`, async (t) => {
