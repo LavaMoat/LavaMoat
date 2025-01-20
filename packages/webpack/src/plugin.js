@@ -545,8 +545,8 @@ class LavaMoatPlugin {
                     json: true,
                   },
                   { name: 'options', data: runtimeOptions, json: true },
-                  (typeof runtimeOptions?.scuttleGlobalThis === 'boolean' && runtimeOptions?.scuttleGlobalThis === true) ||
-                  (typeof runtimeOptions?.scuttleGlobalThis === 'object' && runtimeOptions?.scuttleGlobalThis?.enabled === true) ?
+                  (typeof runtimeOptions?.scuttleGlobalThis === 'boolean' && runtimeOptions.scuttleGlobalThis === true) ||
+                  (typeof runtimeOptions?.scuttleGlobalThis === 'object' && runtimeOptions.scuttleGlobalThis.enabled === true) ?
                   {
                     name: 'scuttling',
                     shimRequire: 'lavamoat-core/src/scuttle.js',
