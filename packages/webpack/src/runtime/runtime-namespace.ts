@@ -7,7 +7,7 @@ type DebugTools = {
 
 type RequiredProperty<T, K extends keyof T> = Omit<T, K> & Required<Pick<T, K>>
 export interface RuntimeNamespace {
-  scuttling: {scuttle: <T, U>(arg1: T, arg2: U) => {}}
+  scuttling: {scuttle: (globalThis: any, scuttleGlobalThis: LavaMoatPluginOptions["scuttleGlobalThis"]) => {}}
   root: string
   idmap: [string, string[]][]
   unenforceable: (string | number)[]
