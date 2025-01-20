@@ -77,7 +77,7 @@ class LavaMoatPlugin {
     if (options.scuttleGlobalThis === true) {
       options.scuttleGlobalThis = { enabled: true }
     }
-    options.scuttleGlobalThis = Object.assign({}, options.scuttleGlobalThis)
+    options.scuttleGlobalThis = {...options.scuttleGlobalThis}
     this.options = {
       policyLocation: path.join('lavamoat', 'webpack'),
       lockdown: lockdownDefaults,
