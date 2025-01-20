@@ -1,4 +1,17 @@
-const test = require('ava')
+// eslint-disable-next-line ava/use-test
+const { default: ava } = require('ava')
+
+/**
+ * Test context object for our tests
+ *
+ * @typedef ScuttlingTestContext
+ * @property {string} build
+ * @property {string} bundle
+ * @property {object} globalThis
+ * @property {boolean} scuttler_func_called
+ */
+
+const test = /** @type {import('ava').TestFn<ScuttlingTestContext>} */(ava)
 const path = require('node:path')
 // eslint-disable-next-line ava/no-import-test-files
 const { scaffold, runScriptWithSES } = require('./scaffold.js')
