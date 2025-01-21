@@ -317,6 +317,60 @@ test('globals - nested property true.false.true', async (t) => {
   t.is(testResult.a_b_notOk, false)
 })
 
+test('globals - window-like accessors taming', async (t) => {
+  'use strict'
+  const shared = {
+    context: Object.defineProperties(
+      Object.create(null), {
+        top: {get: () => ({})},
+        window: {get: () => ({})},
+        frames: {get: () => ({})},
+        parent: {get: () => ({})},
+        self: {get: () => ({})},
+      }),
+    config: {
+      resources: {
+        one: {
+          globals: {
+            top: true,
+            window: true,
+            frames: true,
+            parent: true,
+            globalThis: true,
+            self: true,
+            "console.warn": true,
+          },
+        },
+      },
+    },
+  }
+  const handlesAccess = createScenarioFromScaffold({
+    defineOne: () => {
+      module.exports = {
+        top: globalThis === globalThis.top,
+        window: globalThis === globalThis.window,
+        frames: globalThis === globalThis.frames,
+        parent: globalThis === globalThis.parent,
+        globalThis: globalThis === globalThis.globalThis,
+        self: globalThis === globalThis.self,
+        warn: typeof globalThis.top.window.frames.parent.self.console.warn,
+        URL: typeof globalThis.top.window.frames.parent.self.URL
+      }
+    },
+    ...shared,
+  })
+
+  const testResult = await runScenario({ scenario: handlesAccess })
+  t.is(testResult.top, true)
+  t.is(testResult.window, true)
+  t.is(testResult.frames, true)
+  t.is(testResult.parent, true)
+  t.is(testResult.globalThis, true)
+  t.is(testResult.self, true)
+  t.is(testResult.warn, 'function')
+  t.is(testResult.URL, 'undefined')
+})
+
 test('globals - nested property false.true', async (t) => {
   'use strict'
   const shared = {

@@ -283,7 +283,7 @@ function createModuleInspector(opts) {
       // browserify commonjs scope
       ignoredRefs: [...moduleRefs, ...globalObjPrototypeRefs],
       // browser global refs + browserify global
-      globalRefs: ['globalThis', 'self', 'window', 'global'],
+      globalRefs: ['window', 'self', 'global', 'globalThis', 'top', 'frames', 'parent'],
     })
     // skip if no results
     if (!foundGlobals.size) {

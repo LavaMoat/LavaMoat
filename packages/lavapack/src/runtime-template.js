@@ -31,7 +31,7 @@
     loadModuleData,
     getRelativeModuleId,
     prepareModuleInitializerArgs,
-    globalThisRefs: ['window', 'self', 'global', 'globalThis'],
+    globalThisRefs: ['window', 'self', 'global', 'globalThis', 'top', 'frames', 'parent'],
     debugMode,
     reportStatsHook,
   })
