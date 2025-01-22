@@ -2,7 +2,7 @@ import type { ExecutionContext } from 'ava'
 import type { LavaMoatPolicy } from 'lavamoat-core'
 import type { NestedDirectoryJSON } from 'memfs'
 import { ExecFileException } from 'node:child_process'
-import type { RequireAtLeastOne } from 'type-fest'
+import type { Merge, RequireAtLeastOne, Simplify } from 'type-fest'
 
 export interface RunnerWorkerData {
   entryPath: string
@@ -37,9 +37,11 @@ export type ExecLavamoatNodeExpectation<Ctx = unknown> =
 /**
  * Properties to match against the resolved value of the `runCli` function.
  */
-export type ExecLavamoatNodeExpectationProps = RequireAtLeastOne<
-  RunCliOutput,
-  keyof RunCliOutput
+export type ExecLavamoatNodeExpectationProps = Simplify<
+  RequireAtLeastOne<
+    Merge<RunCliOutput, { stdout: string | RegExp; stderr: string | RegExp }>,
+    keyof RunCliOutput
+  >
 >
 
 /**
