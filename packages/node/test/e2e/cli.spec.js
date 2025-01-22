@@ -1,3 +1,4 @@
+/* eslint-disable ava/assertion-arguments */
 import '../../src/preamble.js'
 
 import test from 'ava'
@@ -5,9 +6,10 @@ import fs from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { stripVTControlCharacters } from 'node:util'
 import { DEFAULT_POLICY_FILENAME } from '../../src/constants.js'
 import { isPolicy, readPolicy } from '../../src/policy-util.js'
-import { isString, readJsonFile } from '../../src/util.js'
+import { readJsonFile } from '../../src/util.js'
 import { CLI_PATH, runCli } from './cli-util.js'
 
 /**
@@ -15,17 +17,6 @@ import { CLI_PATH, runCli } from './cli-util.js'
  * @import {MacroDeclarationOptions} from 'ava'
  * @import {ExecLavamoatNodeExpectation} from '../types.js'
  */
-
-/**
- * RegExp to match ANSI escape codes
- *
- * @see {@link https://github.com/chalk/ansi-regex}
- */
-const ANSI_REGEX = new RegExp(
-  // eslint-disable-next-line no-control-regex
-  '[\\u001B\\u009B][[\\]()#;?]*(?:(?:(?:(?:;[-a-zA-Z\\d\\/#&.:=?%@~_]+)*|[a-zA-Z\\d]+(?:;[-a-zA-Z\\d\\/#&.:=?%@~_]*)*)?\\u0007)|(?:(?:\\d{1,4}(?:;\\d{0,4})*)?[\\dA-PR-TZcf-nq-uy=><~]))',
-  'g'
-)
 
 const { values } = Object
 
@@ -57,8 +48,8 @@ const testCLI = test.macro(
 
       const { stdout, stderr, code } = await runCli(args)
 
-      const trimmedStdout = stdout.trim().replace(ANSI_REGEX, '')
-      const trimmedStderr = stderr.trim().replace(ANSI_REGEX, '')
+      const trimmedStdout = stripVTControlCharacters(stdout.trim())
+      const trimmedStderr = stripVTControlCharacters(stderr.trim())
 
       switch (typeof expected) {
         case 'string':
@@ -94,8 +85,16 @@ const testCLI = test.macro(
            * This would likely be better expressed with a generic type, but this
            * type is _local_ to this function--and I don't want it escaping.
            * @type {{
-           *   stdout?: [actual: string, expected: string, message: string]
-           *   stderr?: [actual: string, expected: string, message: string]
+           *   stdout?: [
+           *     actual: string,
+           *     expected: string | RegExp,
+           *     message: string,
+           *   ]
+           *   stderr?: [
+           *     actual: string,
+           *     expected: string | RegExp,
+           *     message: string,
+           *   ]
            *   code?: [
            *     actual: string | number | null | undefined,
            *     expected: string | number | null | undefined,
@@ -105,21 +104,21 @@ const testCLI = test.macro(
            */
           const assertionPlans = {}
 
-          if ('stdout' in expected && isString(expected.stdout)) {
+          if (expected.stdout) {
             assertionPlans.stdout = [
               trimmedStdout,
               expected.stdout,
               `STDOUT of command "${command}" does not match expected value`,
             ]
           }
-          if ('stderr' in expected && isString(expected.stderr)) {
+          if (expected.stderr) {
             assertionPlans.stderr = [
               trimmedStderr,
               expected.stderr,
               `STDERR of command "${command}" does not match expected value`,
             ]
           }
-          if ('code' in expected) {
+          if (expected.code) {
             assertionPlans.code = [
               code,
               expected.code,
@@ -133,12 +132,12 @@ const testCLI = test.macro(
           const plan = assertionArgs.filter(Boolean).length
           t.plan(plan)
 
-          // note: typescript will complain if you attempt to spread over a
-          // union type (even if it's a union of tuples)--which is what
-          // `assertionArgs` is.
           for (const [actual, expected, message] of assertionArgs) {
-            // eslint-disable-next-line ava/assertion-arguments
-            t.is(actual, expected, message)
+            if (expected instanceof RegExp) {
+              t.regex(`${actual}`, expected, message)
+            } else {
+              t.is(actual, expected, message)
+            }
           }
 
           break
@@ -199,6 +198,35 @@ test(
   testCLI,
   ['run', BASIC_ENTRYPOINT, '--root', BASIC_ENTRYPOINT_ROOT],
   'hello world'
+)
+
+test(
+  'run - execution with extra positionals',
+  testCLI,
+  ['run', BASIC_ENTRYPOINT, '--root', BASIC_ENTRYPOINT_ROOT, 'howdy'],
+  { code: 1, stderr: /unknown argument/i }
+)
+
+test(
+  'run - execution with extra non-option arguments (positionals only)',
+  testCLI,
+  ['run', BASIC_ENTRYPOINT, '--root', BASIC_ENTRYPOINT_ROOT, '--', 'howdy'],
+  'howdy world'
+)
+
+test(
+  'run - execution with extra non-option arguments (positionals and options)',
+  testCLI,
+  [
+    'run',
+    BASIC_ENTRYPOINT,
+    '--root',
+    BASIC_ENTRYPOINT_ROOT,
+    '--',
+    'howdy',
+    '--yelling',
+  ],
+  'HOWDY WORLD'
 )
 
 test('generate - "generate --help" prints help', testCLI, [
