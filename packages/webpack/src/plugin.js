@@ -646,10 +646,14 @@ LavaMoatPlugin.exclude = EXCLUDE_LOADER
 module.exports = LavaMoatPlugin
 
 /**
- * @typedef {Object} ScuttlerConfig
+ * @typedef {Object} ScuttlerObjectConfig
  * @property {boolean} [enabled] - Indicates whether the feature is enabled
  * @property {string[]} [exceptions] - A list of exceptions as strings
  * @property {string} [scuttlerName] - The name of the scuttler
+ */
+
+/**
+ * @typedef {ScuttlerObjectConfig | boolean | undefined} ScuttlerConfig
  */
 
 /**
@@ -676,7 +680,7 @@ module.exports = LavaMoatPlugin
  * @property {(specifier: string) => boolean} isBuiltin - A function that
  *   determines if the specifier is a builtin of the runtime platform e.g.
  *   node:fs
- * @property {ScuttlerConfig | boolean} [scuttleGlobalThis] - Configuration for enabling scuttling mode
+ * @property {ScuttlerConfig} [scuttleGlobalThis] - Configuration for enabling scuttling mode
  * @property {boolean} [debugRuntime] - Enable runtime debugging tools
  * @property {boolean} [__unsafeAllowContextModules] - Skips enforcement of
  *   policies on ContextModule usage. This is only safe if you can guarantee
