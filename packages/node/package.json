@@ -53,7 +53,7 @@
     "chalk": "4.1.2",
     "lavamoat-core": "^16.3.0",
     "loggerr": "4.2.0",
-    "ses": "1.9.0",
+    "ses": "1.10.0",
     "terminal-link": "3.0.0",
     "type-fest": "4.30.0",
     "yargs": "17.7.2"
