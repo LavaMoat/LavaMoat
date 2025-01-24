@@ -39,3 +39,9 @@ const gitSafeDependencies = require('@lavamoat/git-safe-dependencies')
 ```
 
 TODO: design a more granular programmatic API
+
+## FAQ
+
+#### Why is this not a plugin/rule for one of the many linters?
+
+- It makes http requests and that's unlikely to vibe with any linter.
