@@ -1,0 +1,30 @@
+name: Notify 
+
+on:
+  pull_request_target:
+    branches:
+      - main
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - labeled
+
+jobs:
+  process-label:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      contents: write
+    steps:
+      - name: Notify 
+        if: contains(github.event.pull_request.labels.*.name, 'team')
+        uses: slackapi/slack-github-action@007b2c3c751a190b6f0f040e47ed024deaa72844
+        with:
+          status: custom
+      - name: Notify 
+        if: contains(github.event.pull_request.labels.*.name, 'team')
+        uses: slackapi/slack-github-action@668b3bf830883fa342766b1dc84973b45f00395d
+        with:
+          status: custom
+          
