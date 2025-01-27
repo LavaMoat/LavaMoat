@@ -4,11 +4,6 @@ const HtmlWebpackPlugin = require('html-webpack-plugin')
 const path = require('path')
 
 const defaultLmOptions = {
-  scuttleGlobalThis: {
-    enabled: false,
-    exceptions: [],
-    scuttlerName: '',
-  },
   lockdown: {
     errorTaming: 'unsafe',
     mathTaming: 'unsafe',
