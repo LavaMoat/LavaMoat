@@ -17,7 +17,8 @@
     "node": ">=20.0.0"
   },
   "bin": {
-    "git-safe-dependencies": "src/cli.js"
+    "git-safe-dependencies": "src/cli.js",
+    "git-safe-actions": "src/cli-actions.js"
   },
   "main": "src/index.js",
   "directories": {
@@ -41,6 +42,7 @@
   "dependencies": {
     "glob": "11.0.0",
     "hosted-git-info": "8.0.2",
+    "js-yaml": "4.1.0",
     "lockfile-lint-api": "5.9.1"
   },
   "publishConfig": {

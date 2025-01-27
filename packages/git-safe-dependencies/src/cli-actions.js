@@ -1,16 +1,14 @@
 #!/usr/bin/env node
 const { parseArgs } = require('node:util')
-const { runAllValidations } = require('./index')
 const { filterIgnores } = require('./ignore')
 const path = require('node:path')
 
+const { validateWorkflows } = require('./workflow')
+
 const options = {
-  projectRoot: {
+  workflows: {
     type: 'string',
-    default: process.cwd(),
-  },
-  type: {
-    type: 'string',
+    default: path.join(process.cwd(), '.github'),
   },
   ignore: {
     type: 'string',
@@ -20,20 +18,20 @@ const options = {
   },
 }
 const {
-  values: { type, ignore, help, projectRoot },
+  values: { ignore, help, workflows },
 } = parseArgs({ options })
 
 if (help) {
   console.error(
-    'Usage: git-safe-dependencies [--type=yarn|npm] [--ignore=file.json] [--projectRoot=path]'
+    'Usage: git-safe-actions [--ignore=file.json] [--workflows=path]'
   )
   process.exit(2)
 }
-const cwd = path.resolve(projectRoot)
 
-console.error(`[git-safe] Validating: package.json and lockfile at ${cwd}`)
-runAllValidations({ cwd, type })
-  .then((errors) => {
+console.error(`[git-safe] Validating workflows at ${workflows}`)
+validateWorkflows(workflows)
+  .then(({ errors, info }) => {
+    console.error(`[git-safe] `, ...info)
     if (ignore) {
       errors = filterIgnores(errors, ignore)
     }
@@ -46,8 +44,9 @@ runAllValidations({ cwd, type })
       errors
         .map(
           (e) =>
-            ` ${e.package}:
-  [${e.validator}] ${e.message}    // problem id: ${e.id}
+            ` ${e.action}:
+  in ${e.files.join(', ')}
+  ${e.message}    // problem id: ${e.id}
 `
         )
         .sort()

@@ -2,6 +2,7 @@ const gitinfo = require('hosted-git-info')
 
 const gitUrlRegex =
   /^(git\+https?:\/\/|github:|git:\/\/|https:\/\/([a-z]+\.)*github\.com|git\+ssh:\/\/git@|git@)/i
+const commitRegEx = /^[0-9a-f]{40}$/
 
 // yarn classic uses these in lockfiles
 const isCodeloadUrl = (url) => url.startsWith('https://codeload.github.com/')
@@ -11,6 +12,8 @@ const isUnsafeUrl = (url) =>
 const isGitUrl = (url) => gitUrlRegex.test(url)
 const isGHRepoSpecifier = (specifier) =>
   specifier.startsWith('github:') || specifier.match(/^[^/]+\/[^/]+/)
+
+exports.isCommitHash = (c) => commitRegEx.test(c)
 
 exports.isGitUrl = isGitUrl
 exports.isGitSpecifier = (specifier) =>
