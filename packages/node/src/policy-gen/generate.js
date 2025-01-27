@@ -59,7 +59,7 @@ const generate = async (
     policyOverride,
     isBuiltin,
     log = defaultLog,
-    dev = true,
+    dev = false,
     ...archiveOpts
   } = {}
 ) => {

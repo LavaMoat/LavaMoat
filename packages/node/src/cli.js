@@ -241,8 +241,6 @@ const main = async (args = hideBin(process.argv)) => {
         describe: 'Include development dependencies',
         type: 'boolean',
         global: true,
-        default: true,
-        coerce: Boolean,
         group: BEHAVIOR_GROUP,
       },
     })
