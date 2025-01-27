@@ -1,13 +1,13 @@
 import '../../../src/preamble.js'
 
 import test from 'ava'
-import { createGeneratePolicyMacros } from './macros.js'
+import { createGeneratePolicyMacros } from './policy-macros.js'
 
 const { testPolicyForModule, testPolicyForScript, testPolicyForJSON } =
   createGeneratePolicyMacros(test)
 
 // NOTE: All JSON fixtures are virtual filesystem snapshots and live in
-// `../fixture/json/`
+// `../json-fixture/`
 
 test('Node.js builtins', testPolicyForJSON, 'builtins.json')
 

@@ -44,7 +44,8 @@
   "scripts": {
     "lint:deps": "depcheck",
     "test": "npm run test:run",
-    "test:run": "ava"
+    "test:run": "ava",
+    "test:update-snapshots": "ava -u"
   },
   "dependencies": {
     "@endo/compartment-mapper": "1.4.0",
