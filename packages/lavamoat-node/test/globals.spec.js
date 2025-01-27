@@ -11,7 +11,7 @@ test('globals - has only the expected global circular refs', async (t) => {
       })
       module.exports = circularKeys
     },
-    expectedResult: ['window', 'self', 'global', 'globalThis', 'top', 'frames', 'parent'],
+    expectedResult: ['global', 'globalThis'],
   })
   const testResult = await runScenario({ scenario })
   t.is(Array.isArray(testResult), true)

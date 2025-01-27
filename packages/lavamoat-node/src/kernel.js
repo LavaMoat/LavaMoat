@@ -55,7 +55,7 @@ function createKernel({
     getRelativeModuleId,
     prepareModuleInitializerArgs,
     getExternalCompartment,
-    globalThisRefs: ['window', 'self', 'global', 'globalThis', 'top', 'frames', 'parent'],
+    globalThisRefs: ['global', 'globalThis'],
     reportStatsHook,
   })
   return kernel
