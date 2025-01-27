@@ -361,14 +361,16 @@ test('globals - window-like accessors taming', async (t) => {
   })
 
   const testResult = await runScenario({ scenario: handlesAccess })
-  t.is(testResult.top, true)
-  t.is(testResult.window, true)
-  t.is(testResult.frames, true)
-  t.is(testResult.parent, true)
-  t.is(testResult.globalThis, true)
-  t.is(testResult.self, true)
-  t.is(testResult.warn, 'function')
-  t.is(testResult.URL, 'undefined')
+  t.deepEqual(testResult, {
+    top: true,
+    window: true,
+    frames: true,
+    parent: true,
+    globalThis: true,
+    self:  true,
+    warn:  'function',
+    URL: 'undefined',
+  })
 })
 
 test('globals - nested property false.true', async (t) => {
