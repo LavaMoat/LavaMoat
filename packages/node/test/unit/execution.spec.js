@@ -12,7 +12,7 @@ let genericTitleIndex = 0
 
 /**
  * @import {MacroDeclarationOptions} from 'ava'
- * @import {LavaMoatPolicy} from 'lavamoat-core';
+ * @import {LavaMoatPolicy} from '@lavamoat/types';
  */
 
 const testExec = test.macro(
