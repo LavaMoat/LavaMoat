@@ -525,7 +525,7 @@ function endowmentsToolkit({
   function copyWrappedGlobals(
     globalRef,
     target,
-    globalThisRefs = ['window', 'self', 'global', 'globalThis', 'top', 'frames', 'parent']
+    globalThisRefs = ['globalThis']
   ) {
     // find the relevant endowment sources
     const globalProtoChain = getPrototypeChain(globalRef)
