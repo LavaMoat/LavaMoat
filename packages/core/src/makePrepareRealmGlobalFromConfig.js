@@ -64,9 +64,10 @@ function makePrepareRealmGlobalFromConfig({ createFunctionWrapper }) {
     // If you're looking at this for the purpose of moving the code to the new core toolkit for endowments building, there's likely a copy of this functionality already
 
     // define accessors
-
+debugger
     // allow read access via globalStore or packageCompartmentGlobal
     topLevelReadAccessKeys.forEach((key) => {
+      if (globalThisRefs.includes(key)) return
       Object.defineProperty(packageCompartmentGlobal, key, {
         get() {
           if (globalStore.has(key)) {
@@ -87,6 +88,7 @@ function makePrepareRealmGlobalFromConfig({ createFunctionWrapper }) {
     // allow write access to globalStore
     // read access via globalStore or packageCompartmentGlobal
     topLevelWriteAccessKeys.forEach((key) => {
+      if (globalThisRefs.includes(key)) return
       Object.defineProperty(packageCompartmentGlobal, key, {
         get() {
           if (globalStore.has(key)) {

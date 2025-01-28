@@ -19,7 +19,7 @@ test('globals - has only the expected global circular refs', async (t) => {
   scenario.checkResult(t, testResult.sort(), scenario)
 })
 
-test.only('globals - circular refs taming', async (t) => {
+test('globals - circular refs taming', async (t) => {
   'use strict'
   const shared = {
     context: Object.defineProperties(
