@@ -337,7 +337,7 @@ test('globals - window-like accessors taming', async (t) => {
       module.exports = {
         globalThis: globalThis === globalThis.globalThis,
         warn: typeof globalThis.console.warn,
-        URL: typeof globalThis.URL
+        info: typeof globalThis.console.info,
       }
     },
     ...shared,
@@ -347,7 +347,7 @@ test('globals - window-like accessors taming', async (t) => {
   t.deepEqual(testResult, {
     globalThis: true,
     warn:  'function',
-    URL: 'undefined',
+    info: 'undefined',
   })
 })
 

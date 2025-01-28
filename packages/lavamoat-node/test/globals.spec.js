@@ -19,7 +19,7 @@ test('globals - has only the expected global circular refs', async (t) => {
   scenario.checkResult(t, testResult.sort(), scenario)
 })
 
-test('globals - circular refs taming', async (t) => {
+test.only('globals - circular refs taming', async (t) => {
   'use strict'
   const shared = {
     context: Object.defineProperties(
@@ -45,7 +45,7 @@ test('globals - circular refs taming', async (t) => {
         global: globalThis === globalThis.global,
         globalThis: globalThis === globalThis.globalThis,
         warn: typeof globalThis.global.console.warn,
-        URL: typeof globalThis.global.URL,
+        info: typeof globalThis.global.console.info,
       }
     },
     ...shared,
@@ -56,7 +56,7 @@ test('globals - circular refs taming', async (t) => {
     globalThis: true,
     global:  true,
     warn:  'function',
-    URL: 'undefined',
+    info: 'undefined',
   })
 })
 

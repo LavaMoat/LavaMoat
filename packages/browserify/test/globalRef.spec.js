@@ -63,7 +63,7 @@ test('globals - circular refs taming', async (t) => {
         globalThis: globalThis === globalThis.globalThis,
         self: globalThis === globalThis.self,
         warn: typeof globalThis.top.window.frames.parent.self.console.warn,
-        URL: typeof globalThis.top.window.frames.parent.self.URL
+        info: typeof globalThis.top.window.frames.parent.self.console.info,
       }
     },
     ...shared,
@@ -78,7 +78,7 @@ test('globals - circular refs taming', async (t) => {
     globalThis: true,
     self:  true,
     warn:  'function',
-    URL: 'undefined',
+    info: 'undefined',
   })
 })
 
