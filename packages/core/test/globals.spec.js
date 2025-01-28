@@ -317,27 +317,15 @@ test('globals - nested property true.false.true', async (t) => {
   t.is(testResult.a_b_notOk, false)
 })
 
-test('globals - window-like accessors taming', async (t) => {
+test('globals - circular refs taming', async (t) => {
   'use strict'
   const shared = {
-    context: Object.defineProperties(
-      Object.create(null), {
-        top: {get: () => ({})},
-        window: {get: () => ({})},
-        frames: {get: () => ({})},
-        parent: {get: () => ({})},
-        self: {get: () => ({})},
-      }),
+    context: Object.create(null),
     config: {
       resources: {
         one: {
           globals: {
-            top: true,
-            window: true,
-            frames: true,
-            parent: true,
             globalThis: true,
-            self: true,
             "console.warn": true,
           },
         },
@@ -347,14 +335,9 @@ test('globals - window-like accessors taming', async (t) => {
   const handlesAccess = createScenarioFromScaffold({
     defineOne: () => {
       module.exports = {
-        top: globalThis === globalThis.top,
-        window: globalThis === globalThis.window,
-        frames: globalThis === globalThis.frames,
-        parent: globalThis === globalThis.parent,
         globalThis: globalThis === globalThis.globalThis,
-        self: globalThis === globalThis.self,
-        warn: typeof globalThis.top.window.frames.parent.self.console.warn,
-        URL: typeof globalThis.top.window.frames.parent.self.URL
+        warn: typeof globalThis.console.warn,
+        info: typeof globalThis.console.info,
       }
     },
     ...shared,
@@ -362,14 +345,9 @@ test('globals - window-like accessors taming', async (t) => {
 
   const testResult = await runScenario({ scenario: handlesAccess })
   t.deepEqual(testResult, {
-    top: true,
-    window: true,
-    frames: true,
-    parent: true,
     globalThis: true,
-    self:  true,
     warn:  'function',
-    URL: 'undefined',
+    info: 'undefined',
   })
 })
 
