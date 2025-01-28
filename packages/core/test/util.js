@@ -28,6 +28,8 @@ module.exports = {
   runAndTestScenario,
 }
 
+const {hasOwn} = Object
+
 /**
  * @typedef {Partial<import('../src/parseForPolicy').ParseForPolicyOpts> & {
  *   files: import('./scenario').NormalizedScenarioJSFile[]
@@ -285,7 +287,7 @@ function createScenarioFromScaffold({
     configOverride
   )
 
-  if (!opts.hasOwnProperty('scuttleGlobalThis')) {
+  if (!hasOwn(opts, 'scuttleGlobalThis')) {
     opts.scuttleGlobalThis = {}
   }
 
