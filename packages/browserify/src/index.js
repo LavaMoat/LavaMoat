@@ -131,6 +131,7 @@ function getConfigurationFromPluginOpts(pluginOpts) {
     'scuttleGlobalThis',
     'scuttleGlobalThisExceptions',
     'bundleWithPrecompiledModules',
+    'globalThisRefs',
     'policyDebug',
     'projectRoot',
     'resolve',
