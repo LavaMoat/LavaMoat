@@ -20,6 +20,10 @@ project
 └── package.json
 ```
 
+> [!IMPORTANT]
+>
+> **The entry point must be named `index.js`**. This is per convention.
+
 <!-- prettier-ignore-start -->
 > For this example, `project/package.json` was created by `npm init -y`. `project/index.js` contains:
 >

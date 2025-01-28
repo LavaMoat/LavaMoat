@@ -1,4 +1,4 @@
-# Snapshot report for `test/compartment-map.spec.js`
+# Snapshot report for `test/unit/compartment-map.spec.js`
 
 The actual snapshot is saved in `compartment-map.spec.js.snap`.
 

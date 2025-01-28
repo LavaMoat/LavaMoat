@@ -35,7 +35,7 @@ import { execute } from './execute.js'
 export const run = async (
   entrypointPath,
   policy,
-  { dev = true, policyOverride, ...options } = {}
+  { dev = false, policyOverride, ...options } = {}
 ) => {
   await Promise.resolve()
   const readPowers = makeReadPowers(options)
