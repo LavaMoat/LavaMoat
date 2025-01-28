@@ -317,7 +317,7 @@ test('globals - nested property true.false.true', async (t) => {
   t.is(testResult.a_b_notOk, false)
 })
 
-test('globals - window-like accessors taming', async (t) => {
+test('globals - circular refs taming', async (t) => {
   'use strict'
   const shared = {
     context: Object.create(null),
