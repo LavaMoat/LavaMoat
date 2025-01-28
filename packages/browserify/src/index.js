@@ -165,6 +165,10 @@ function getConfigurationFromPluginOpts(pluginOpts) {
     pluginOpts.projectRoot = process.cwd()
   }
 
+  if (!pluginOpts.globalThisRefs) {
+    pluginOpts.globalThisRefs = ['window', 'self', 'global', 'globalThis', 'top', 'frames', 'parent']
+  }
+
   if (pluginOpts.scuttleGlobalThisExceptions) {
     console.warn(
       'Lavamoat - "scuttleGlobalThisExceptions" is deprecated. Use "scuttleGlobalThis.exceptions" instead.'
