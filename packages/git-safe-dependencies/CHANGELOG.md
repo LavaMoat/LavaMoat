@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.0](https://github.com/LavaMoat/LavaMoat/compare/git-safe-dependencies-v0.1.1...git-safe-dependencies-v0.2.0) (2025-01-28)
+
+
+### Features
+
+* **git-safe-dependencies:** git-safe-actions GH Actions validator ([#1508](https://github.com/LavaMoat/LavaMoat/issues/1508)) ([8f2d074](https://github.com/LavaMoat/LavaMoat/commit/8f2d0740ce45fc62b6d0e87b5578f69e98b11480))
+
 ## [0.1.1](https://github.com/LavaMoat/LavaMoat/compare/git-safe-dependencies-v0.1.0...git-safe-dependencies-v0.1.1) (2025-01-15)
 
 

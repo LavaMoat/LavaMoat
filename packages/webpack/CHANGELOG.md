@@ -18,6 +18,20 @@
   * dependencies
     * lavamoat-core bumped from ^15.2.0 to ^15.2.1
 
+## [0.8.1-beta.0](https://github.com/LavaMoat/LavaMoat/compare/webpack-v0.8.0-beta.0...webpack-v0.8.1-beta.0) (2025-01-28)
+
+
+### Bug Fixes
+
+* **deps:** update dependency ses to v1.10.0 ([#1422](https://github.com/LavaMoat/LavaMoat/issues/1422)) ([b6f0589](https://github.com/LavaMoat/LavaMoat/commit/b6f0589cf9730fac8173a3fca0c4a031bd64f12f))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-core bumped from ^16.3.0 to ^16.3.1
+
 ## [0.8.0-beta.0](https://github.com/LavaMoat/LavaMoat/compare/webpack-v0.7.1-beta.0...webpack-v0.8.0-beta.0) (2025-01-15)
 
 
