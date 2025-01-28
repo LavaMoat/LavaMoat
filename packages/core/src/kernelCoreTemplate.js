@@ -59,7 +59,7 @@
     getRelativeModuleId,
     prepareModuleInitializerArgs,
     getExternalCompartment,
-    globalThisRefs = ['globalThis'],
+    globalThisRefs = ['window', 'self', 'global', 'globalThis', 'top', 'frames', 'parent'],
     scuttleGlobalThis = {},
     debugMode = false,
     runWithPrecompiledModules = false,

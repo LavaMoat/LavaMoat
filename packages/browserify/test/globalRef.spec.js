@@ -18,7 +18,7 @@ test('globalRef - has only the expected global circular refs', async (t) => {
       })
       module.exports = circularKeys.sort()
     },
-    expectedResult: ['window', 'self', 'global', 'globalThis'].sort(),
+    expectedResult: ['window', 'self', 'global', 'globalThis', 'top', 'frames', 'parent'].sort(),
   })
   await runAndTestScenario(t, scenario, runScenario)
 })

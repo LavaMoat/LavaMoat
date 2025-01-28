@@ -104,17 +104,7 @@ function makePrepareRealmGlobalFromConfig({ createFunctionWrapper }) {
     })
 
     // set circular globalRefs
-    globalThisRefs.forEach((key) => {
-      // if globalRef is actually an endowment, ignore
-      if (topLevelReadAccessKeys.includes(key)) {
-        return
-      }
-      if (topLevelWriteAccessKeys.includes(key)) {
-        return
-      }
-      // set circular ref to global
-      packageCompartmentGlobal[key] = packageCompartmentGlobal
-    })
+    globalThisRefs.forEach((key) => packageCompartmentGlobal[key] = packageCompartmentGlobal)
 
     // bind Function constructor this value to globalThis
     // legacy globalThis shim
