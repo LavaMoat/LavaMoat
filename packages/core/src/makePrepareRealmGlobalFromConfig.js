@@ -67,6 +67,7 @@ function makePrepareRealmGlobalFromConfig({ createFunctionWrapper }) {
 
     // allow read access via globalStore or packageCompartmentGlobal
     topLevelReadAccessKeys.forEach((key) => {
+      if (globalThisRefs.includes(key)) return
       Object.defineProperty(packageCompartmentGlobal, key, {
         get() {
           if (globalStore.has(key)) {
@@ -87,6 +88,7 @@ function makePrepareRealmGlobalFromConfig({ createFunctionWrapper }) {
     // allow write access to globalStore
     // read access via globalStore or packageCompartmentGlobal
     topLevelWriteAccessKeys.forEach((key) => {
+      if (globalThisRefs.includes(key)) return
       Object.defineProperty(packageCompartmentGlobal, key, {
         get() {
           if (globalStore.has(key)) {
