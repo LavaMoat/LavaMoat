@@ -346,6 +346,7 @@ test('globals - window-like accessors taming', async (t) => {
   }
   const handlesAccess = createScenarioFromScaffold({
     opts: {
+      scuttleGlobalThis: {},
       globalThisRefs: ['window', 'self', 'global', 'globalThis', 'top', 'frames', 'parent'],
     },
     defineOne: () => {
