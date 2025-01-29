@@ -122,11 +122,7 @@ Don't have Node.js installed? You can [download and install Node.js from the off
 
 #### npm
 
-LavaMoat uses [npm][] for package management. You can ensure you are using a compatible version by enabling [corepack][]:
-
-   ```shell frame="none"
-   corepack enable
-   ```
+LavaMoat uses [npm][] for package management. Please refer to the `engines.npm` field of `package.json` for supported versions.
 
 #### Editor
 
@@ -346,7 +342,6 @@ git push origin issue1234 -f
 The LavaMoat team thanks you for contributing! "You're welcome" is appreciated, but not necessary. 😄
 
 [coc]: /contributor/code-of-conduct
-[corepack]: https://github.com/nodejs/corepack
 [dco]: https://developercertificate.org
 [faq]: /about/faq
 [issues]: https://github.com/LavaMoat/LavaMoat/issues
@@ -358,7 +353,6 @@ The LavaMoat team thanks you for contributing! "You're welcome" is appreciated, 
 [node-download]: https://nodejs.org/en/download
 [node]: https://nodejs.org
 [npm]: https://www.npmjs.com/package/npm
-[nvm]: https://github.com/nvm-sh/nvm
 [release-schedule]: https://github.com/nodejs/Release#release-schedule
 [lavamoat]: https://github.com/lavamoat/lavamoat
 [github-pr]: https://help.github.com/articles/creating-a-pull-request

@@ -9,7 +9,6 @@
   "workspaces": [
     "packages/*"
   ],
-  "packageManager": "npm@9.9.3+sha512.67597eadc4399186f5ec5de11ed3bad356ab129bdd4589c22ed83cc68dc01adca3dc8b61c1aada10e7b123df74dee00d9227c56ea1c2f214f9dca22ba335a0f0",
   "engines": {
     "node": "^16.20.0 || ^18.0.0 || ^20.0.0 || ^22.0.0",
     "npm": ">=7.0.0"
@@ -43,7 +42,7 @@
     "@endo/compartment-mapper": "1.4.0",
     "@tsconfig/node18": "18.2.4",
     "@types/lint-staged": "13.3.0",
-    "@types/node": "18.19.67",
+    "@types/node": "18.19.74",
     "@types/yargs": "17.0.33",
     "@typescript-eslint/eslint-plugin": "7.18.0",
     "@typescript-eslint/parser": "7.18.0",

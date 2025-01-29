@@ -1,11 +1,8 @@
 const { validateLockfile } = require('./lockfile')
 const { scanDirectGitDependencies } = require('./package')
-const crypto = require('node:crypto')
+const { checksum } = require('./ignore')
 const { existsSync } = require('node:fs')
 const path = require('node:path')
-
-const checksum = (input) =>
-  crypto.createHash('md5').update(input).digest('hex').substring(0, 8)
 
 const sortErrors = (errors) => {
   errors.forEach((result) => {
