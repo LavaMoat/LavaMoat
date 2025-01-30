@@ -1,0 +1,10 @@
+{
+  "/.npmrc": "package-lock = false\n",
+  "/README.md": "This is similar to the fixture in `../bin-entry`, except the source bin script has no file extension.\n",
+  "/app.js": "export const hello = 'world'\n",
+  "/lard-o-matic/bin": "console.log(require('util').format('scripty %s', 'test'));\n",
+  "/lard-o-matic/index.js": "module.exports = 'lard'\n",
+  "/lard-o-matic/package.json": "{\n  \"name\": \"lard-o-matic\",\n  \"version\": \"1.0.0\",\n  \"license\": \"ISC\",\n  \"private\": true,\n  \"bin\": \"bin\"\n}\n",
+  "/node_modules/.package-lock.json": "{\n  \"name\": \"binscript\",\n  \"version\": \"1.0.0\",\n  \"lockfileVersion\": 3,\n  \"requires\": true,\n  \"packages\": {\n    \"lard-o-matic\": {\n      \"version\": \"1.0.0\",\n      \"license\": \"ISC\",\n      \"bin\": {\n        \"lard-o-matic\": \"bin\"\n      }\n    },\n    \"node_modules/lard-o-matic\": {\n      \"resolved\": \"lard-o-matic\",\n      \"link\": true\n    }\n  }\n}\n",
+  "/package.json": "{\n  \"name\": \"extensionless\",\n  \"version\": \"1.0.0\",\n  \"type\": \"module\",\n  \"license\": \"ISC\",\n  \"private\": true,\n  \"main\": \"app.js\",\n  \"scripts\": {\n    \"start\": \"npx snapshot-fs ../../../unit/json-fixture/extensionless.json\"\n  },\n  \"dependencies\": {\n    \"lard-o-matic\": \"file://./lard-o-matic\"\n  }\n}\n"
+}
