@@ -18,18 +18,17 @@ import './preamble.js'
 
 import chalk from 'chalk'
 import { jsonStringifySortedPolicy } from 'lavamoat-core'
-import assert from 'node:assert'
-import fs from 'node:fs'
 import path from 'node:path'
 import terminalLink from 'terminal-link'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 import * as constants from './constants.js'
 import { run } from './exec/run.js'
+import { assertAbsolutePath, readJsonFile } from './fs.js'
 import { log } from './log.js'
 import { generatePolicy } from './policy-gen/generate.js'
 import { loadPolicies } from './policy-util.js'
-import { readJsonFile } from './util.js'
+import { resolveBinScript, resolveEntrypoint } from './resolve.js'
 
 /**
  * @import {PackageJson} from 'type-fest';
@@ -128,25 +127,32 @@ const main = async (args = hideBin(process.argv)) => {
   const reportThisBug = `please ${terminalLink('report this bug', bugs)}`
 
   /**
-   * Asserts that an entrypoint path is both a) an absolute path and b)
-   * readable.
-   *
-   * Returns `true` upon success; otherwise throws.
+   * A middleware shared between `run` and `generate` commands.
    *
    * @remarks
-   * Returns `true` because yargs expects a boolean return value from `check()`.
-   * @param {string} entrypoint
-   * @returns {true}
+   * It is too painful to use `yargs`'s types to determine the shape of the
+   * expected options, so it needs to be done manually and kept in sync.
+   * `entrypoint` is the only property here which is specific to a command; it
+   * just so happens that both commands have idential `entrypoint` arguments
+   * (positionals). All _other_ properties are defined as global options; if
+   * _all_ properties were global, this could just live in global middleware.
+   * @param {{
+   *   entrypoint: string
+   *   bin?: boolean
+   *   root: string
+   * }} argv
+   * @returns {void}
    */
-  const validateEntrypoint = (entrypoint) => {
-    assert(
-      path.isAbsolute(entrypoint),
-      `${em('entrypoint')} must be an absolute path; ${reportThisBug}`
-    )
-    // TODO: suppress stack trace and print nicer message
-    fs.accessSync(entrypoint, fs.constants.R_OK),
-      `File ${entrypoint} does not exist or is not readable`
-    return true
+  const processEntrypointMiddleware = (argv) => {
+    const { entrypoint } = argv
+    argv.entrypoint = argv.bin
+      ? resolveBinScript(argv.entrypoint, { from: argv.root })
+      : resolveEntrypoint(argv.entrypoint, argv.root)
+    if (entrypoint !== argv.entrypoint) {
+      // note: this will print if the original entrypoint is a relative path; we
+      // may or may not want to continue displaying it for that specific case.
+      log.warning(`Resolved ${entrypoint} to ${argv.entrypoint}`)
+    }
   }
 
   /**
@@ -193,6 +199,13 @@ const main = async (args = hideBin(process.argv)) => {
 `
     )
     .options({
+      bin: {
+        alias: ['b'],
+        type: 'boolean',
+        description: 'Resolve entrypoint as a bin script',
+        global: true,
+        group: BEHAVIOR_GROUP,
+      },
       // the three policy options are used for both reading and writing
       policy: {
         alias: ['p'],
@@ -267,20 +280,20 @@ const main = async (args = hideBin(process.argv)) => {
        * (I think)
        */
       (argv) => {
-        assert(
-          path.isAbsolute(argv.root),
-          `${em('cwd')} must be an absolute path; ${reportThisBug}`
+        assertAbsolutePath(
+          argv.root,
+          `${em('root')} must be an absolute path; ${reportThisBug}`
         )
-        assert(
-          path.isAbsolute(argv.policy),
+        assertAbsolutePath(
+          argv.policy,
           `${em('policy')} must be an absolute path; ${reportThisBug}`
         )
-        assert(
-          path.isAbsolute(argv['policy-override']),
+        assertAbsolutePath(
+          argv['policy-override'],
           `${em('policy-override')} must be an absolute path; ${reportThisBug}`
         )
-        assert(
-          path.isAbsolute(argv['policy-debug']),
+        assertAbsolutePath(
+          argv['policy-debug'],
           `${em('policy-debug')} must be an absolute path; ${reportThisBug}`
         )
         return true
@@ -297,7 +310,6 @@ const main = async (args = hideBin(process.argv)) => {
           .positional('entrypoint', {
             describe: 'Path to the application entry point; relative to --root',
             type: 'string',
-            normalize: true,
             demandOption: true,
           })
           /**
@@ -348,12 +360,9 @@ const main = async (args = hideBin(process.argv)) => {
            * Resolve entrypoint from `root`
            */
           .middleware(
-            (argv) => {
-              argv.entrypoint = path.resolve(argv.root, argv.entrypoint)
-            },
+            processEntrypointMiddleware,
             true // RUN BEFORE CHECK FN
-          )
-          .check(({ entrypoint }) => validateEntrypoint(entrypoint)),
+          ),
       /**
        * Default command handler.
        *
@@ -446,24 +455,10 @@ const main = async (args = hideBin(process.argv)) => {
           })
           .positional('entrypoint', {
             demandOption: true,
-            describe: 'Path to the application entry point',
+            describe: 'Application entry point',
             type: 'string',
-            normalize: true,
-            coerce: path.resolve,
           })
-          .middleware(
-            /**
-             * Resolve entrypoint from `root`
-             *
-             * @remarks
-             * This is run _before_ validation.
-             */
-            (argv) => {
-              argv.entrypoint = path.resolve(argv.root, argv.entrypoint)
-            },
-            true
-          )
-          .check(({ entrypoint }) => validateEntrypoint(entrypoint)),
+          .middleware(processEntrypointMiddleware, true),
       async ({
         entrypoint,
         debug,

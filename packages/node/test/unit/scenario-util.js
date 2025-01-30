@@ -246,7 +246,7 @@ export function createScenarioRunner(log = fallbackLog.error.bind(console)) {
     }
     try {
       return JSON.parse(stdout)
-    } catch (err) {
+    } catch {
       throw new Error(`Unexpected output in standard out: \n${stdout}`)
     }
   }
