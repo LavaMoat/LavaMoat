@@ -1,14 +1,23 @@
 /**
  * @import {TestFn, MacroDeclarationOptions} from 'ava'
  * @import {LavaMoatPolicy} from 'lavamoat-core'
+ * @import {TestExecForJSONMacroOptions, TestExecMacroOptions} from '../types.js'
  */
 
+import chalk from 'chalk'
 import { run } from '../../src/exec/run.js'
 import {
+  DEFAULT_JSON_FIXTURE_ENTRY_POINT,
   JSON_FIXTURE_DIR_URL,
-  JSON_FIXTURE_ENTRY_POINT,
   loadJSONFixture,
 } from './json-fixture-util.js'
+
+/**
+ * @satisfies {LavaMoatPolicy}
+ */
+const DEFAULT_POLICY = Object.freeze({
+  resources: {},
+})
 
 /**
  * Given an AVA test function, returns a set of macros for testing policy
@@ -31,17 +40,34 @@ export const createExecMacros = (test) => {
   const testExecForJSON = test.macro(
     /**
      * @type {MacroDeclarationOptions<
-     *   [fixtureFilename: string, policy: LavaMoatPolicy, expected: unknown]
+     *   [
+     *     fixtureFilename: string,
+     *     expected: unknown,
+     *     options?: TestExecForJSONMacroOptions,
+     *   ]
      * >}
      */ ({
-      exec: async (t, fixtureFilename, policy, expected) => {
-        const { readPowers } = await loadJSONFixture(
+      exec: async (
+        t,
+        fixtureFilename,
+        expected,
+        {
+          policy = DEFAULT_POLICY,
+          jsonEntrypoint = DEFAULT_JSON_FIXTURE_ENTRY_POINT,
+        } = {}
+      ) => {
+        const { readPowers, vol } = await loadJSONFixture(
           new URL(fixtureFilename, JSON_FIXTURE_DIR_URL)
         )
-        const result = await run(JSON_FIXTURE_ENTRY_POINT, policy, {
-          readPowers,
-        })
-        t.deepEqual({ .../** @type {any} */ (result) }, expected)
+        try {
+          const result = await run(jsonEntrypoint, policy, {
+            readPowers,
+          })
+          t.deepEqual({ .../** @type {any} */ (result) }, expected)
+        } catch (err) {
+          t.log(`Volume tree:\n${chalk.yellow(vol.toTree())}`)
+          throw err
+        }
       },
       title: (title) =>
         title ?? `program output matches expected (${genericTitleIndex++}`,
@@ -51,11 +77,20 @@ export const createExecMacros = (test) => {
   const testExec = test.macro(
     /**
      * @type {MacroDeclarationOptions<
-     *   [entry: string | URL, policy: LavaMoatPolicy, expected: unknown]
+     *   [
+     *     entrypoint: string | URL,
+     *     expected: unknown,
+     *     options?: TestExecMacroOptions,
+     *   ]
      * >}
      */ ({
-      exec: async (t, entryFile, policy, expected) => {
-        const result = await run(entryFile, policy)
+      exec: async (
+        t,
+        entrypoint,
+        expected,
+        { policy = DEFAULT_POLICY } = {}
+      ) => {
+        const result = await run(entrypoint, policy)
         t.deepEqual({ .../** @type {any} */ (result) }, expected)
       },
       title: (title) =>

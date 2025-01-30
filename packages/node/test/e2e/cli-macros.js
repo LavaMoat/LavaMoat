@@ -38,6 +38,18 @@ export const createCLIMacros = (test) => {
       exec: async (t, args, expected) => {
         const { stdout, stderr, code, hrCommand } = await runCLI(args, t)
 
+        /**
+         * Human-readable command
+         *
+         * This value will appear in the Markdown snapshot as the assertion
+         * failure message.
+         *
+         * ANSI escapes are obviously not rendered correctly in Markdown, so
+         * they must be stripped.
+         *
+         * @type {string}
+         */
+        const command = stripVTControlCharacters(hrCommand)
         const trimmedStdout = stripVTControlCharacters(stdout.trim())
         const trimmedStderr = stripVTControlCharacters(stderr.trim())
 
@@ -47,7 +59,7 @@ export const createCLIMacros = (test) => {
             t.is(
               trimmedStdout,
               expected,
-              `STDOUT of command "${hrCommand}" does not match expected value`
+              `STDOUT of command "${command}" does not match expected value`
             )
             break
           case 'function':
@@ -99,21 +111,21 @@ export const createCLIMacros = (test) => {
               assertionPlans.stdout = [
                 trimmedStdout,
                 expected.stdout,
-                `STDOUT of command "${hrCommand}" does not match expected value`,
+                `STDOUT of command "${command}" does not match expected value`,
               ]
             }
             if (expected.stderr) {
               assertionPlans.stderr = [
                 trimmedStderr,
                 expected.stderr,
-                `STDERR of command "${hrCommand}" does not match expected value`,
+                `STDERR of command "${command}" does not match expected value`,
               ]
             }
             if (expected.code) {
               assertionPlans.code = [
                 code,
                 expected.code,
-                `exit code of command "${hrCommand}" does not match expected value`,
+                `exit code of command "${command}" does not match expected value`,
               ]
             }
 
@@ -137,7 +149,7 @@ export const createCLIMacros = (test) => {
             t.plan(1)
             t.snapshot(
               { trimmedStderr, trimmedStdout, code },
-              `output of command "${hrCommand}" does not match expected snapshot`
+              `output of command "${command}" does not match expected snapshot`
             )
         }
       },

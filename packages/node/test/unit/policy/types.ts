@@ -37,6 +37,15 @@ export type TestPolicyForJSONOptions<Context = unknown> = Simplify<
      * function.
      */
     expected?: LavaMoatPolicy | TestPolicyExpectationFn<Context>
+
+    /**
+     * Path to entrypoint _within the fixture_. This must be an absolute path
+     * or URL.
+     *
+     * The default is `/index.js`.
+     */
+
+    jsonEntrypoint?: string | URL
   }
 >
 

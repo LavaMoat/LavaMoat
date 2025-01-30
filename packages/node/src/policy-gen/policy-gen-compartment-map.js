@@ -1,3 +1,8 @@
+/**
+ * Provides {@link loadCompartmentMap}, which returns a compartment map
+ * descriptor for a given entrypoint.
+ */
+
 import { captureFromMap } from '@endo/compartment-mapper/capture-lite.js'
 import { mapNodeModules } from '@endo/compartment-mapper/node-modules.js'
 import { DEFAULT_ENDO_OPTIONS } from '../compartment/options.js'
@@ -9,15 +14,23 @@ import { getCanonicalName } from './policy-gen-util.js'
 
 /**
  * @import {LoadCompartmentMapOptions} from '../internal.js'
+ * @import {CompartmentMapDescriptor, Sources} from '@endo/compartment-mapper'
  */
 
-const { values, fromEntries, entries } = Object
+const { values } = Object
 
 /**
  * Loads compartment map and associated sources.
  *
+ * This is _only_ for policy gen.
+ *
  * @param {string | URL} entrypointPath
  * @param {LoadCompartmentMapOptions} opts
+ * @returns {Promise<{
+ *   compartmentMap: CompartmentMapDescriptor
+ *   sources: Sources
+ *   renames: Record<string, string>
+ * }>}
  * @internal
  */
 export const loadCompartmentMap = async (
@@ -34,6 +47,7 @@ export const loadCompartmentMap = async (
     conditions,
     languageForExtension: {
       [NATIVE_PARSER_FILE_EXT]: NATIVE_PARSER_NAME,
+      '': 'cjs',
     },
   })
 
@@ -58,22 +72,12 @@ export const loadCompartmentMap = async (
   const {
     captureCompartmentMap: compartmentMap,
     captureSources: sources,
-    compartmentRenames,
+    compartmentRenames: renames,
   } = await captureFromMap(readPowers, nodeCompartmentMap, {
     ...captureOpts,
     ...DEFAULT_ENDO_OPTIONS,
     Compartment: LavaMoatCompartment,
   })
-
-  /**
-   * `compartmentRenames` is a mapping of _compartment name_ to _filepath_; we
-   * need the reverse mapping
-   *
-   * @type {Record<string, string>}
-   */
-  const renames = fromEntries(
-    entries(compartmentRenames).map(([filepath, id]) => [id, filepath])
-  )
 
   return {
     compartmentMap,

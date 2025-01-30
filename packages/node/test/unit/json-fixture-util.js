@@ -128,6 +128,6 @@ loadJSONFixture.snapshotCache = new Map()
 export const JSON_FIXTURE_DIR_URL = new URL('./json-fixture/', import.meta.url)
 
 /**
- * The entry point for all JSON fixtures
+ * The default entry point for all JSON fixtures
  */
-export const JSON_FIXTURE_ENTRY_POINT = '/index.js'
+export const DEFAULT_JSON_FIXTURE_ENTRY_POINT = '/index.js'
