@@ -7,6 +7,8 @@
  */
 
 import type { MapNodeModulesOptions } from '@endo/compartment-mapper'
+import type nodeFs from 'node:fs'
+import { PathLike, Stats } from 'node:fs'
 import type { Except, Merge } from 'type-fest'
 import type {
   BaseLoadCompartmentMapOptions,
@@ -129,3 +131,46 @@ export type SomeParameters<T extends SomeFunction> = T extends new (
   : T extends (...args: any[]) => any
     ? Parameters<T>
     : never
+
+/**
+ * Extra bits of the `fs` module that we need for internal utilities.
+ */
+export interface FsUtilInterface {
+  lstatSync: (
+    path: PathLike,
+    options?: {
+      throwIfNoEntry?: boolean
+    }
+  ) => Pick<Stats, 'isFile' | 'isSymbolicLink'>
+  statSync: (
+    path: PathLike,
+    options?: {
+      throwIfNoEntry?: boolean
+    }
+  ) => Pick<Stats, 'isFile' | 'isSymbolicLink'>
+  accessSync: (path: PathLike, mode?: number) => void
+  constants: Pick<typeof nodeFs.constants, 'R_OK' | 'X_OK'>
+  promises: {
+    readFile: (path: PathLike) => Promise<string | Buffer>
+  }
+  realpathSync: (path: PathLike, encoding?: BufferEncoding) => Buffer | string
+}
+
+/**
+ * Options bucket containing an `fs` prop.
+ */
+export interface WithFs {
+  fs?: FsUtilInterface
+}
+
+export type ResolveBinScriptOptions = Merge<
+  WithFs,
+  {
+    /**
+     * Directory to begin looking for the script in
+     */
+    from?: string
+  }
+>
+
+export type ResolveWorkspaceOptions = ResolveBinScriptOptions

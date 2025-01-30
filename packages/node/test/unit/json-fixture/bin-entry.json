@@ -1,0 +1,10 @@
+{
+  "/.npmrc": "package-lock = false\n",
+  "/README.md": "This fixture provides an app with a dependency providing an executable (`bin`) which has an extension (`.js`). We use this to test using a script in `node_modules/.bin` as an entrypoint.\n\nThe `bin` script is defined using the shorthand \"string\" syntax in `package.json`:\n\n```json\n{\n  \"bin\": \"bin.js\"\n}\n```\n\nThis causes the symlink in `node_modules/.bin` to have the same name as the package itself (`lard-o-matic`).\n",
+  "/app.js": "export const hello = 'world'\n",
+  "/lard-o-matic/bin.js": "console.log(require('util').format('scripty %s', 'test'));\n",
+  "/lard-o-matic/index.js": "module.exports = 'lard'\n",
+  "/lard-o-matic/package.json": "{\n  \"name\": \"lard-o-matic\",\n  \"version\": \"1.0.0\",\n  \"license\": \"ISC\",\n  \"private\": true,\n  \"bin\": \"bin.js\"\n}\n",
+  "/node_modules/.package-lock.json": "{\n  \"lockfileVersion\": 3,\n  \"requires\": true,\n  \"packages\": {\n    \"lard-o-matic\": {\n      \"version\": \"1.0.0\",\n      \"license\": \"ISC\",\n      \"bin\": {\n        \"lard-o-matic\": \"bin.js\"\n      }\n    },\n    \"node_modules/lard-o-matic\": {\n      \"resolved\": \"lard-o-matic\",\n      \"link\": true\n    }\n  }\n}\n",
+  "/package.json": "{\n  \"name\": \"bin-entry\",\n  \"version\": \"1.0.0\",\n  \"type\": \"module\",\n  \"license\": \"ISC\",\n  \"private\": true,\n  \"main\": \"app.js\",\n  \"scripts\": {\n    \"start\": \"npx snapshot-fs ../../../unit/json-fixture/bin-entry.json\"\n  },\n  \"dependencies\": {\n    \"lard-o-matic\": \"file://./lard-o-matic\"\n  }\n}\n"
+}

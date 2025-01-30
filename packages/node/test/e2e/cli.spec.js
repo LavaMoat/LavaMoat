@@ -8,8 +8,8 @@ import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { DEFAULT_POLICY_FILENAME } from '../../src/constants.js'
+import { readJsonFile } from '../../src/fs.js'
 import { isPolicy, readPolicy } from '../../src/policy-util.js'
-import { readJsonFile } from '../../src/util.js'
 import { createCLIMacros } from './cli-macros.js'
 import { runCli } from './cli-util.js'
 
@@ -28,6 +28,26 @@ const { testCLI } = createCLIMacros(test)
 const BASIC_FIXTURE_ENTRYPOINT = fileURLToPath(
   new URL('./fixture/basic/app.js', import.meta.url)
 )
+
+/**
+ * Path to the "extensionless" fixture dir
+ */
+const EXTENSIONLESS_FIXTURE_DIR = fileURLToPath(
+  new URL('./fixture/extensionless/', import.meta.url)
+)
+
+/**
+ * Path to the "bin-entry" fixture dir
+ */
+const BIN_ENTRY_FIXTURE_DIR = fileURLToPath(
+  new URL('./fixture/bin-entry/', import.meta.url)
+)
+
+/**
+ * Name of the executable to use as the entrypoint within the "extensionless"
+ * fixture
+ */
+const BIN_ENTRY = 'lard-o-matic'
 
 /**
  * The "basic" fixture's directory
@@ -98,7 +118,7 @@ test(
 )
 
 test(
-  'run - execution with extra non-option arguments (positionals only)',
+  'run - execution with extra non-option arguments (positionals)',
   testCLI,
   [
     'run',
@@ -132,9 +152,74 @@ test('generate - "generate --help" prints help', testCLI, [
 ])
 
 test('generate - basic policy generation', async (t) => {
-  const policyPath = path.join(t.context.tempdir, DEFAULT_POLICY_FILENAME)
+  const policyPath = path.join(
+    t.context.tempdir,
+    `basic-${DEFAULT_POLICY_FILENAME}`
+  )
 
   await runCli(['generate', BASIC_FIXTURE_ENTRYPOINT, '--policy', policyPath])
   const policy = await readPolicy(policyPath)
   t.true(isPolicy(policy))
+})
+
+test('generate - extensionless bin script handling', async (t) => {
+  t.plan(2)
+
+  const policyPath = path.join(
+    t.context.tempdir,
+    `extensionless-${DEFAULT_POLICY_FILENAME}`
+  )
+  const result = await runCli(
+    ['generate', '--bin', '--policy', policyPath, BIN_ENTRY],
+    {
+      cwd: EXTENSIONLESS_FIXTURE_DIR,
+    }
+  )
+  t.is(result.code, undefined)
+
+  const policy = await readPolicy(policyPath)
+  t.true(isPolicy(policy))
+})
+
+test('generate - bin script handling', async (t) => {
+  t.plan(3)
+
+  const policyPath = path.join(
+    t.context.tempdir,
+    `bin-entry-${DEFAULT_POLICY_FILENAME}`
+  )
+  const result = await runCli(
+    ['generate', '--bin', '--policy', policyPath, BIN_ENTRY],
+    {
+      cwd: BIN_ENTRY_FIXTURE_DIR,
+      executionContext: t,
+    }
+  )
+  t.is(result.code, undefined)
+
+  const policy = await readPolicy(policyPath)
+  t.true(isPolicy(policy))
+
+  // XXX: the entrypoint has access to everything and probably shouldn't
+  t.is(Object.keys(policy.resources ?? {}).length, 0)
+})
+
+test('generate - module resolution', async (t) => {
+  t.plan(3)
+
+  const policyPath = path.join(
+    t.context.tempdir,
+    `module-resolution-${DEFAULT_POLICY_FILENAME}`
+  )
+  const result = await runCli(['generate', '--policy', policyPath, BIN_ENTRY], {
+    cwd: BIN_ENTRY_FIXTURE_DIR,
+    executionContext: t,
+  })
+  t.is(result.code, undefined)
+
+  const policy = await readPolicy(policyPath)
+  t.true(isPolicy(policy))
+
+  // XXX: the entrypoint has access to everything and probably shouldn't
+  t.is(Object.keys(policy.resources ?? {}).length, 0)
 })
