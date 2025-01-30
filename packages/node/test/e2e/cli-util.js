@@ -20,16 +20,22 @@ export const CLI_PATH = fileURLToPath(
 /**
  * @import {ExecFileException} from 'node:child_process'
  * @import {RunCliOutput} from '../types.js'
+ * @import {ExecutionContext} from 'ava'
  */
 
 /**
  * Run the `@lavamoat/node` CLI with the provided arguments
  *
  * @param {string[]} args CLI arguments
+ * @param {{ cwd?: string; executionContext?: ExecutionContext }} [options]
+ *   Options
  * @returns {Promise<RunCliOutput>}
  */
 
-export const runCli = async (args) => {
+export const runCli = async (
+  args,
+  { executionContext, cwd = process.cwd() } = {}
+) => {
   await Promise.resolve()
 
   /** @type {string} */
@@ -40,10 +46,15 @@ export const runCli = async (args) => {
   let code
 
   try {
+    if (executionContext) {
+      executionContext.log(
+        `Executing: ${process.execPath} ${[CLI_PATH, ...args].join(' ')} in ${cwd}`
+      )
+    }
     ;({ stdout, stderr } = await execFileAsync(
       process.execPath,
       [CLI_PATH, ...args],
-      { encoding: 'utf8' }
+      { encoding: 'utf8', cwd }
     ))
   } catch (err) {
     ;({ stdout, stderr, code } =
