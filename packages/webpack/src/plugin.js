@@ -74,6 +74,10 @@ class LavaMoatPlugin {
    */
   constructor(options = {}) {
     /** @type {LavaMoatPluginOptions} */
+    if (options.scuttleGlobalThis === true) {
+      options.scuttleGlobalThis = { enabled: true }
+    }
+    options.scuttleGlobalThis = {...options.scuttleGlobalThis}
     this.options = {
       policyLocation: path.join('lavamoat', 'webpack'),
       lockdown: lockdownDefaults,
@@ -480,6 +484,7 @@ class LavaMoatPlugin {
 
         const onceForChunkSet = new WeakSet()
         const runtimeOptions = {
+          scuttleGlobalThis: options.scuttleGlobalThis,
           lockdown: options.lockdown,
         }
 
@@ -540,6 +545,12 @@ class LavaMoatPlugin {
                     json: true,
                   },
                   { name: 'options', data: runtimeOptions, json: true },
+                  (typeof runtimeOptions?.scuttleGlobalThis === 'boolean' && runtimeOptions.scuttleGlobalThis === true) ||
+                  (typeof runtimeOptions?.scuttleGlobalThis === 'object' && runtimeOptions.scuttleGlobalThis.enabled === true) ?
+                  {
+                    name: 'scuttling',
+                    shimRequire: 'lavamoat-core/src/scuttle.js',
+                  } : {},
                   { name: 'policy', data: policyData, json: true },
                   {
                     name: 'ENUM',
@@ -635,6 +646,17 @@ LavaMoatPlugin.exclude = EXCLUDE_LOADER
 module.exports = LavaMoatPlugin
 
 /**
+ * @typedef {Object} ScuttlerObjectConfig
+ * @property {boolean} [enabled] - Indicates whether the feature is enabled
+ * @property {string[]} [exceptions] - A list of exceptions as strings
+ * @property {string} [scuttlerName] - The name of the scuttler
+ */
+
+/**
+ * @typedef {ScuttlerObjectConfig | boolean | undefined} ScuttlerConfig
+ */
+
+/**
  * @typedef {Object} LavaMoatPluginOptions
  * @property {boolean} [generatePolicy] - Generate the policy file
  * @property {string} [rootDir] - Specify root directory for canonicalNames to
@@ -658,6 +680,7 @@ module.exports = LavaMoatPlugin
  * @property {(specifier: string) => boolean} isBuiltin - A function that
  *   determines if the specifier is a builtin of the runtime platform e.g.
  *   node:fs
+ * @property {ScuttlerConfig} [scuttleGlobalThis] - Configuration for enabling scuttling mode
  * @property {boolean} [debugRuntime] - Enable runtime debugging tools
  * @property {boolean} [__unsafeAllowContextModules] - Skips enforcement of
  *   policies on ContextModule usage. This is only safe if you can guarantee

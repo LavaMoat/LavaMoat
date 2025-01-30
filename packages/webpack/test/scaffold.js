@@ -120,7 +120,10 @@ function runScript(code, globals = defaultGlobals()) {
     throw new Error('runScript requires a bundle string as the first argument')
   }
   const context = createContext(globals)
-  return runInNewContext(code, context)
+  return {
+    context,
+    result: runInNewContext(code, context),
+  }
 }
 exports.runScript = runScript
 
