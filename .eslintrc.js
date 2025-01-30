@@ -128,7 +128,7 @@ module.exports = {
         // eslint-plugin-n does not understand typescript imports
         'n/no-missing-import': 'off',
         // eslint doesn't understand typescript
-        'no-unused-vars': 'off'
+        'no-unused-vars': 'off',
       },
       parser: '@typescript-eslint/parser',
     },
@@ -139,7 +139,7 @@ module.exports = {
   ],
   ignorePatterns: [
     '**/types/**/*',
-    '**/test/**/fixtures/**/*',
+    '**/test/**/fixture*/**/*',
     '**/examples/**/*',
   ],
 }
