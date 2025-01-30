@@ -3,33 +3,15 @@
  *
  * @packageDocumentation
  */
-import nodeFs from 'node:fs'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 
 const { isArray: isArray_ } = Array
 const { freeze } = Object
 
 /**
- * @import {FsInterface, ReadNowPowers, ReadNowPowersProp} from '@endo/compartment-mapper'
+ * @import {ReadNowPowers, ReadNowPowersProp} from '@endo/compartment-mapper'
  * @import {SetNonNullable} from 'type-fest'
  */
-
-/**
- * Reads a JSON file
- *
- * @template [T=unknown] Default is `unknown`
- * @param {string | URL} filepath
- * @param {{ fs?: FsInterface }} opts
- * @returns {Promise<T>} JSON data
- * @internal
- */
-export const readJsonFile = async (filepath, { fs = nodeFs } = {}) => {
-  if (filepath instanceof URL) {
-    filepath = fileURLToPath(filepath)
-  }
-  const json = await fs.promises.readFile(filepath)
-  return JSON.parse(`${json}`)
-}
 
 /**
  * Converts a {@link URL} or `string` to a URL-like `string` starting with the
