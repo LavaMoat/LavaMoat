@@ -147,3 +147,27 @@ test('generate - policy generation - canonical names', async (t) => {
   )
   t.snapshot(policy)
 })
+
+test('--quiet is quiet', async (t) => {
+  const tempdir = await mkdtemp(
+    path.join(tmpdir(), t.title.replace(/\s+/g, '-'))
+  )
+
+  try {
+    const policyPath = path.join(tempdir, `quiet-${DEFAULT_POLICY_FILENAME}`)
+
+    const { code, stdout, stderr } = await runCLI(
+      ['generate', BASIC_FIXTURE_ENTRYPOINT, '--policy', policyPath, '--quiet'],
+      t,
+      {
+        cwd: BASIC_FIXTURE_DIR,
+      }
+    )
+    t.deepEqual(
+      { code, stdout, stderr },
+      { code: undefined, stdout: '', stderr: '' }
+    )
+  } finally {
+    await rm(tempdir, { recursive: true, force: true })
+  }
+})
