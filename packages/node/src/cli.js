@@ -274,7 +274,20 @@ const main = async (args = hideBin(process.argv)) => {
         global: true,
         group: BEHAVIOR_GROUP,
       },
+      verbose: {
+        describe: 'Enable verbose logging',
+        type: 'boolean',
+        global: true,
+        group: BEHAVIOR_GROUP,
+      },
+      quiet: {
+        describe: 'Disable all logging',
+        type: 'boolean',
+        global: true,
+        group: BEHAVIOR_GROUP,
+      },
     })
+    .conflicts('quiet', 'verbose')
     .middleware(
       /**
        * This resolves all paths from `cwd`.
@@ -289,6 +302,12 @@ const main = async (args = hideBin(process.argv)) => {
           argv['policy-override']
         )
         argv['policy-debug'] = path.resolve(argv.root, argv['policy-debug'])
+
+        if (argv.verbose) {
+          log.setLevel('debug')
+        } else if (argv.quiet) {
+          log.setLevel('emergency')
+        }
       },
       true // RUN BEFORE CHECK FN
     )
