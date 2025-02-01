@@ -107,3 +107,5 @@ test(
   },
   { hello: 'world' }
 )
+
+test.todo('dynamic import of builtin module')
