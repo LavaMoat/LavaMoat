@@ -6,7 +6,7 @@
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { stripVTControlCharacters } from 'node:util'
-import { CLI_PATH, runCli } from './cli-util.js'
+import { CLI_PATH, runCLI } from './cli-util.js'
 
 const { values } = Object
 
@@ -39,16 +39,17 @@ export const createCLIMacros = (test) => {
         title ?? `program output matches expected (${genericTitleIndex++}`,
       exec: async (t, args, expected) => {
         /**
-         * Full command; for display purposes only.
+         * Full command for storing in snapshot `.md` file.
          *
-         * This value is saved in the snapshot `.md` file (it's in the assertion
-         * failure message), so we should strip absolute paths since they will
-         * differ between dev envrionments.
+         * Converts absolute paths to relative (and rewrites the path to `node`)
+         * so the result is deterministic. I don't _think_ it affects the
+         * snapshot equality itself
          */
         const command = `node ${path.relative(fileURLToPath(import.meta.url), CLI_PATH)} ${args.join(' ')}`
-        t.log(`executing: ${command}`)
 
-        const { stdout, stderr, code } = await runCli(args)
+        const { stdout, stderr, code } = await runCLI(args, {
+          t: t,
+        })
 
         const trimmedStdout = stripVTControlCharacters(stdout.trim())
         const trimmedStderr = stripVTControlCharacters(stderr.trim())
@@ -80,7 +81,7 @@ export const createCLIMacros = (test) => {
              * front_, call `t.plan()`, then make the assertion(s).
              *
              * The props of this type correspond to props in the object
-             * fulfilled by the {@link runCli} function. The values are a tuple
+             * fulfilled by the {@link runCLI} function. The values are a tuple
              * of parameters for {@link t.is}.
              *
              * @remarks
