@@ -39,18 +39,26 @@ export type ExecLavamoatNodeExpectation<Ctx = unknown> =
  */
 export type ExecLavamoatNodeExpectationProps = Simplify<
   RequireAtLeastOne<
-    Merge<RunCliOutput, { stdout: string | RegExp; stderr: string | RegExp }>,
-    keyof RunCliOutput
+    Merge<RunCLIOutput, { stdout: string | RegExp; stderr: string | RegExp }>,
+    keyof RunCLIOutput
   >
 >
 
 /**
- * Output of the `runCli` function
+ * Output of the `runCLI()` function
  */
-export interface RunCliOutput {
+export interface RunCLIOutput {
   stdout: string
   stderr: string
   code: ExitCode
+}
+
+/**
+ * Options for `runCLI()`
+ */
+export interface RunCLIOptions {
+  cwd?: string
+  t?: ExecutionContext
 }
 
 /**
