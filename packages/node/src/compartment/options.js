@@ -43,6 +43,7 @@ export const DEFAULT_ENDO_OPTIONS = freeze(
     },
     languageForExtension: {
       [NATIVE_PARSER_FILE_EXT]: NATIVE_PARSER_NAME,
+      '': 'cjs',
     },
   })
 )
