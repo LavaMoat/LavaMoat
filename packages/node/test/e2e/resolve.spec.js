@@ -6,7 +6,7 @@ import path from 'node:path'
 import { resolveEntrypoint } from '../../src/resolve.js'
 
 /**
- * @import {TestFn} from 'ava';
+ * @import {TestFn} from 'ava'
  */
 
 /**
@@ -17,7 +17,9 @@ import { resolveEntrypoint } from '../../src/resolve.js'
 const test = /** @type {TestFn<ResolveEntrypointContext>} */ (anyTest)
 
 test.beforeEach(async (t) => {
-  t.context.tempdir = await mkdtemp(path.join(tmpdir(), 'lavamoat-'))
+  t.context.tempdir = await mkdtemp(
+    path.join(tmpdir(), 'lavamoat-node-e2e-resolve')
+  )
 })
 
 test.afterEach(async (t) => {
