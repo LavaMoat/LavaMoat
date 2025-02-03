@@ -20,6 +20,13 @@ exports.scaffold = async function runWebpackBuild(
 ) {
   // Resolve the root directory
   webpackConfig.context = path.resolve(__dirname, 'fixtures/main/')
+  if (writeFS) {
+    // make sure dist is relative to context
+    webpackConfig.output.path = path.join(
+      webpackConfig.context,
+      webpackConfig.output.path
+    )
+  }
 
   // Create a compiler instance
   const compiler = webpack(webpackConfig)
