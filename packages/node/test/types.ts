@@ -66,3 +66,26 @@ export interface RunCLIOptions {
  * Node.js
  */
 export type ExitCode = ExecFileException['code']
+
+/**
+ * Options for the `testExec` macro
+ */
+export interface TestExecMacroOptions {
+  /**
+   * Policy to use when executing
+   */
+  policy?: LavaMoatPolicy
+}
+
+/**
+ * Options for the `testExecForJSON` macro
+ */
+export interface TestExecForJSONMacroOptions extends TestExecMacroOptions {
+  /**
+   * Path to entrypoint _within the fixture_. This must be an absolute path or
+   * URL.
+   *
+   * The default is `/index.js`.
+   */
+  jsonEntrypoint?: string | URL
+}
