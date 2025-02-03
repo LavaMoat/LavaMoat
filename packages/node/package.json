@@ -64,7 +64,7 @@
     "@jessie.js/eslint-plugin": "0.4.2",
     "@types/json-stable-stringify": "1.1.0",
     "json-stable-stringify": "1.2.0",
-    "memfs": "4.8.1"
+    "memfs": "4.17.0"
   },
   "publishConfig": {
     "access": "public"
