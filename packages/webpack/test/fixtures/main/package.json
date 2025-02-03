@@ -5,8 +5,12 @@
   "dependencies": {
     "commonjs-package": "1.0.0",
     "commonjs-quirks": "1.0.0",
+    "dynamic-importer": "1.0.0",
+    "dynamic-stealer": "1.0.0",
+    "dynamic-target": "1.0.0",
     "es6-module-package": "1.0.0",
     "fetch-package": "1.0.0",
+    "flag-package": "1.0.0",
     "globals-package": "1.0.0",
     "loader-hack": "1.0.0",
     "nodejs-package": "1.0.0",
