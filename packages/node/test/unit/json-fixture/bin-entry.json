@@ -1,10 +1,64 @@
-{
-  "/.npmrc": "package-lock = false\n",
-  "/README.md": "This fixture provides an app with a dependency providing an executable (`bin`) which has an extension (`.js`). We use this to test using a script in `node_modules/.bin` as an entrypoint.\n\nThe `bin` script is defined using the shorthand \"string\" syntax in `package.json`:\n\n```json\n{\n  \"bin\": \"bin.js\"\n}\n```\n\nThis causes the symlink in `node_modules/.bin` to have the same name as the package itself (`lard-o-matic`).\n",
-  "/app.js": "export const hello = 'world'\n",
-  "/lard-o-matic/bin.js": "console.log(require('util').format('scripty %s', 'test'));\n",
-  "/lard-o-matic/index.js": "module.exports = 'lard'\n",
-  "/lard-o-matic/package.json": "{\n  \"name\": \"lard-o-matic\",\n  \"version\": \"1.0.0\",\n  \"license\": \"ISC\",\n  \"private\": true,\n  \"bin\": \"bin.js\"\n}\n",
-  "/node_modules/.package-lock.json": "{\n  \"lockfileVersion\": 3,\n  \"requires\": true,\n  \"packages\": {\n    \"lard-o-matic\": {\n      \"version\": \"1.0.0\",\n      \"license\": \"ISC\",\n      \"bin\": {\n        \"lard-o-matic\": \"bin.js\"\n      }\n    },\n    \"node_modules/lard-o-matic\": {\n      \"resolved\": \"lard-o-matic\",\n      \"link\": true\n    }\n  }\n}\n",
-  "/package.json": "{\n  \"name\": \"bin-entry\",\n  \"version\": \"1.0.0\",\n  \"type\": \"module\",\n  \"license\": \"ISC\",\n  \"private\": true,\n  \"main\": \"app.js\",\n  \"scripts\": {\n    \"start\": \"npx snapshot-fs ../../../unit/json-fixture/bin-entry.json\"\n  },\n  \"dependencies\": {\n    \"lard-o-matic\": \"file://./lard-o-matic\"\n  }\n}\n"
-}
+[
+  0,
+  {},
+  {
+    ".npmrc": [
+      1,
+      {},
+      "data:application/octet-stream;base64,cGFja2FnZS1sb2NrID0gZmFsc2UK"
+    ],
+    "README.md": [
+      1,
+      {},
+      "data:application/octet-stream;base64,VGhpcyBmaXh0dXJlIHByb3ZpZGVzIGFuIGFwcCB3aXRoIGEgZGVwZW5kZW5jeSBwcm92aWRpbmcgYW4gZXhlY3V0YWJsZSAoYGJpbmApIHdoaWNoIGhhcyBhbiBleHRlbnNpb24gKGAuanNgKS4gV2UgdXNlIHRoaXMgdG8gdGVzdCB1c2luZyBhIHNjcmlwdCBpbiBgbm9kZV9tb2R1bGVzLy5iaW5gIGFzIGFuIGVudHJ5cG9pbnQuCgpUaGUgYGJpbmAgc2NyaXB0IGlzIGRlZmluZWQgdXNpbmcgdGhlIHNob3J0aGFuZCAic3RyaW5nIiBzeW50YXggaW4gYHBhY2thZ2UuanNvbmA6CgpgYGBqc29uCnsKICAiYmluIjogImJpbi5qcyIKfQpgYGAKClRoaXMgY2F1c2VzIHRoZSBzeW1saW5rIGluIGBub2RlX21vZHVsZXMvLmJpbmAgdG8gaGF2ZSB0aGUgc2FtZSBuYW1lIGFzIHRoZSBwYWNrYWdlIGl0c2VsZiAoYGxhcmQtby1tYXRpY2ApLgo="
+    ],
+    "app.js": [
+      1,
+      {},
+      "data:application/octet-stream;base64,ZXhwb3J0IGNvbnN0IGhlbGxvID0gJ3dvcmxkJwo="
+    ],
+    "lard-o-matic": [
+      0,
+      {},
+      {
+        "bin.js": [
+          1,
+          {},
+          "data:application/octet-stream;base64,Y29uc29sZS5sb2cocmVxdWlyZSgndXRpbCcpLmZvcm1hdCgnc2NyaXB0eSAlcycsICd0ZXN0JykpCg=="
+        ],
+        "index.js": [
+          1,
+          {},
+          "data:application/octet-stream;base64,bW9kdWxlLmV4cG9ydHMgPSAnbGFyZCcK"
+        ],
+        "package.json": [
+          1,
+          {},
+          "data:application/octet-stream;base64,ewogICJuYW1lIjogImxhcmQtby1tYXRpYyIsCiAgInZlcnNpb24iOiAiMS4wLjAiLAogICJsaWNlbnNlIjogIklTQyIsCiAgInByaXZhdGUiOiB0cnVlLAogICJiaW4iOiAiYmluLmpzIgp9Cg=="
+        ]
+      }
+    ],
+    "node_modules": [
+      0,
+      {},
+      {
+        ".bin": [
+          0,
+          {},
+          { "lard-o-matic": [2, { "target": "../lard-o-matic/bin.js" }] }
+        ],
+        ".package-lock.json": [
+          1,
+          {},
+          "data:application/octet-stream;base64,ewogICJsb2NrZmlsZVZlcnNpb24iOiAzLAogICJyZXF1aXJlcyI6IHRydWUsCiAgInBhY2thZ2VzIjogewogICAgImxhcmQtby1tYXRpYyI6IHsKICAgICAgInZlcnNpb24iOiAiMS4wLjAiLAogICAgICAibGljZW5zZSI6ICJJU0MiLAogICAgICAiYmluIjogewogICAgICAgICJsYXJkLW8tbWF0aWMiOiAiYmluLmpzIgogICAgICB9CiAgICB9LAogICAgIm5vZGVfbW9kdWxlcy9sYXJkLW8tbWF0aWMiOiB7CiAgICAgICJyZXNvbHZlZCI6ICJsYXJkLW8tbWF0aWMiLAogICAgICAibGluayI6IHRydWUKICAgIH0KICB9Cn0K"
+        ],
+        "lard-o-matic": [2, { "target": "../lard-o-matic" }]
+      }
+    ],
+    "package.json": [
+      1,
+      {},
+      "data:application/octet-stream;base64,ewogICJuYW1lIjogImJpbi1lbnRyeSIsCiAgInZlcnNpb24iOiAiMS4wLjAiLAogICJ0eXBlIjogIm1vZHVsZSIsCiAgImxpY2Vuc2UiOiAiSVNDIiwKICAicHJpdmF0ZSI6IHRydWUsCiAgIm1haW4iOiAiYXBwLmpzIiwKICAic2NyaXB0cyI6IHsKICAgICJzdGFydCI6ICJucHggc25hcHNob3QtZnMgLi4vLi4vLi4vdW5pdC9qc29uLWZpeHR1cmUvYmluLWVudHJ5Lmpzb24iCiAgfSwKICAiZGVwZW5kZW5jaWVzIjogewogICAgImxhcmQtby1tYXRpYyI6ICJmaWxlOi8vLi9sYXJkLW8tbWF0aWMiCiAgfQp9Cg=="
+    ]
+  }
+]
