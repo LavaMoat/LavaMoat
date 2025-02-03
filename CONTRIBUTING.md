@@ -93,25 +93,36 @@ This section describes how to configure your development environment to hack on 
 
 #### Platform
 
-LavaMoat can comfortably be developed using Linux, macOS, or Windows (but we recommend using WSL on Windows).
+LavaMoat officially supports building on the following operating systems and architectures:
+
+- Latest Ubuntu LTS [`x86_64`]
+- Debian Stable [`x86_64`]
+- Latest Alpine Linux Stable [`x86_64`]
+
+On a best-effort basis, development should also be expected to work on:
+
+- macOS 13.5+ [`x86_64` / `aarch64`]
+- Windows Subsystem for Linux 1 [`x86_64`]
+- Windows Subsystem for Linux 2 [`x86_64` / `aarch64`]
+- Latest Ubuntu LTS [`aarch64`]
+- Debian Stable [`aarch64`]
+- Latest Alpine Linux Stable [`aarch64`]
+
+Developer experience reports for supported and unsupported platforms and compatibility fixes are welcome.
 
 #### Node.js
 
-LavaMoat is distributed as a [Node.js][node] command-line tool. You'll want to install the latest LTS version (see the [Node.js release schedule][release-schedule] for more information).
+LavaMoat is distributed as a [Node.js][node] command-line tool. You'll want to install the active LTS version (see the [Node.js release schedule][release-schedule] for more information).
 
 :::tip
 
-Don't have Node.js installed? You can [download and install Node.js from the official site][node-download], but we recommend using a Node.js version manager (e.g., [nvm][]).
+Don't have Node.js installed? You can [download and install Node.js from the official site][node-download].
 
 :::
 
 #### npm
 
-LavaMoat uses [npm][] for package management. You can ensure you are using a compatible version by enabling [corepack][]:
-
-   ```shell frame="none"
-   corepack enable
-   ```
+LavaMoat uses [npm][] for package management. Please refer to the `engines.npm` field of `package.json` for supported versions.
 
 #### Editor
 
@@ -331,7 +342,6 @@ git push origin issue1234 -f
 The LavaMoat team thanks you for contributing! "You're welcome" is appreciated, but not necessary. 😄
 
 [coc]: /contributor/code-of-conduct
-[corepack]: https://github.com/nodejs/corepack
 [dco]: https://developercertificate.org
 [faq]: /about/faq
 [issues]: https://github.com/LavaMoat/LavaMoat/issues
@@ -343,7 +353,6 @@ The LavaMoat team thanks you for contributing! "You're welcome" is appreciated, 
 [node-download]: https://nodejs.org/en/download
 [node]: https://nodejs.org
 [npm]: https://www.npmjs.com/package/npm
-[nvm]: https://github.com/nvm-sh/nvm
 [release-schedule]: https://github.com/nodejs/Release#release-schedule
 [lavamoat]: https://github.com/lavamoat/lavamoat
 [github-pr]: https://help.github.com/articles/creating-a-pull-request

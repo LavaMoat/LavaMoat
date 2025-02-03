@@ -3,7 +3,7 @@
 
 // @ts-check
 const path = require('node:path')
-const { getOptionsForBin } = require('./index.js')
+const { getOptionsForBin } = require('./config.js')
 const { FEATURE } = require('./toggles.js')
 
 start().catch((err) => {

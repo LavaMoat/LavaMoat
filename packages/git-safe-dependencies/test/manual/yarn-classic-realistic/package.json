@@ -1,0 +1,14 @@
+{
+  "name": "yo",
+  "version": "1.0.0",
+  "description": "",
+  "author": "",
+  "license": "ISC",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "react-native-tcp": "aprock/react-native-tcp#11/head"
+  }
+}

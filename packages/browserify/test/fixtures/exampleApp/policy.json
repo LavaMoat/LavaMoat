@@ -18,16 +18,16 @@
         "console": true
       }
     },
-    "browserify>process": {
-      "globals": {
-        "clearTimeout": true,
-        "setTimeout": true
-      }
-    },
     "keccak": {
       "packages": {
         "browserify>buffer": true,
         "keccak>readable-stream": true
+      }
+    },
+    "browserify>process": {
+      "globals": {
+        "clearTimeout": true,
+        "setTimeout": true
       }
     },
     "keccak>readable-stream": {
@@ -41,14 +41,14 @@
         "keccak>readable-stream>util-deprecate": true
       }
     },
-    "keccak>readable-stream>string_decoder": {
-      "packages": {
-        "keccak>readable-stream>string_decoder>safe-buffer": true
-      }
-    },
     "keccak>readable-stream>string_decoder>safe-buffer": {
       "packages": {
         "browserify>buffer": true
+      }
+    },
+    "keccak>readable-stream>string_decoder": {
+      "packages": {
+        "keccak>readable-stream>string_decoder>safe-buffer": true
       }
     },
     "keccak>readable-stream>util-deprecate": {

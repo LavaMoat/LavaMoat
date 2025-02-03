@@ -10,6 +10,8 @@ const {
 const { mergePolicy } = require('./mergePolicy')
 const { applySourceTransforms } = require('./sourceTransforms')
 const { makeInitStatsHook } = require('./makeInitStatsHook')
+const endowmentsToolkit = require('./endowmentsToolkit')
+const { jsonStringifySortedPolicy } = require('./stringifyPolicy')
 
 module.exports = {
   // generating the kernel
@@ -21,10 +23,12 @@ module.exports = {
   mergePolicy,
   loadPolicyAndApplyOverrides,
   loadPoliciesSync,
+  jsonStringifySortedPolicy,
   getDefaultPaths,
   applySourceTransforms,
   // module record class
   LavamoatModuleRecord,
   // utils
   makeInitStatsHook,
+  endowmentsToolkit,
 }

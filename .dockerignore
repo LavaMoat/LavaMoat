@@ -1,0 +1,11 @@
+.git/
+.github/
+Dockerfile
+Dockerfile-*
+.dockerignore
+.vscode/
+.husky/
+.editorconfig
+*.log
+node_modules/
+docs/

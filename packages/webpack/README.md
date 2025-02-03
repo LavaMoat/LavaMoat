@@ -27,6 +27,7 @@ The LavaMoat plugin takes an options object with the following properties (all o
 | `inlineLockdown`           | A RegExp for matching files to be prepended with lockdown (instead of adding it as a file to the output directory).                                                                                                                                                                                                   |
 | `runChecks`                | Boolean property to indicate whether to check resulting code with wrapping for correctness.                                                                                                                                                                                                                           | `false`                  |
 | `diagnosticsVerbosity`     | Number property to represent diagnostics output verbosity. A larger number means more overwhelming diagnostics output. Setting a positive verbosity will enable `runChecks`.                                                                                                                                          | `0`                      |
+| `debugRuntime`             | Only for local debugging use - Enables debugging tools that help detect gaps in generated policy and add missing entries to overrides                                                                                                                                                                                 | `false`                  |
 | `policy`                   | The LavaMoat policy object (if not loading from file; see `policyLocation`)                                                                                                                                                                                                                                           | `undefined`              |
 
 ```js
@@ -51,7 +52,7 @@ One important thing to note when using the LavaMoat plugin is that it disables t
 > [!WARNING]
 > This is an experimental feature and excluding may be configured differently in the future if this approach is proven insecure.
 
-The default way to define specific behaviors for webpack is creating module rules. To ensure exclude rules are applied on the same exact files that match certain rules (the same RegExp may be matched against different things at different times) we're providing the exclude functionality as a loader you can add to the list of existing loaders or use individually.  
+The default way to define specific behaviors for webpack is creating module rules. To ensure exclude rules are applied on the same exact files that match certain rules (the same RegExp may be matched against different things at different times) we're providing the exclude functionality as a loader you can add to the list of existing loaders or use individually.
 The loader is available as `LavaMoatPlugin.exclude` from the default export of the plugin. It doesn't do anything to the code, but its presence is detected and treated as a mark on the file. Any file that's been processed by `LavaMoatPlugin.exclude` will not be wrapped in a Compartment.
 
 > [!NOTE]
@@ -104,7 +105,7 @@ This plugin will skip policy enforcement for such ignored modules.
 
 #### HMR
 
-LavaMoat is not compatible with Hot Module Replacement (HMR) and any form of it would not make much sense with the security guarantees, so you're better off disabling LavaMoat for development builds where HMR is required.
+LavaMoat is not compatible with Hot Module Replacement (HMR). Disable LavaMoat for development builds where HMR is required while keeping it enabled for production builds.
 
 # Security
 
@@ -112,7 +113,9 @@ LavaMoat is not compatible with Hot Module Replacement (HMR) and any form of it 
 
 - [SES lockdown][] must be added to the page without any bundling or transforming for any security guarantees to be sustained.
   - The plugin is attempting to add it as an asset to the compilation for the sake of Developer Experience. `.js` extension is omitted to prevent minification.
-  - Optionally lockdown can be inlined into the bundle files. You need to match the scripts that get to load as the first script on the page to apply lockdown only once when inlined. When you have a single bundle, you just configure a regex with one unique file name or a `.*`. It gets more complex with builds for multiple pages. The plugin doesn't attempt to guess where to inline lockdown.
+- Optionally lockdown can be inlined into the bundle files. You need to declare which of the output files to inline lockdown runtime code to. These need to be the first file of the bundle that get loaded on the page.
+  When you have a single bundle, you just configure a regex with one unique file name or a `.*`. It gets more complex with builds for multiple pages. The plugin doesn't attempt to guess where to inline lockdown.
+  e.g. If you have 2 entries `user.js` and `admin.js` and a set up to suffix resulting bundles with commit id, you can use `/user\.[a-f0-9]+\.js|admin\.[a-f0-9]+\.js/` to match the files.
 - Each javascript module resulting from the webpack build is scoped to its package's policy
 
 ## Threat Model

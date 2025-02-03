@@ -51,6 +51,7 @@ const crossReference = (neededIds, policyIds) => {
  * @typedef {Object} IdentifierLookup
  * @property {string} root
  * @property {(string | number)[]} unenforceableModuleIds
+ * @property {Record<string | number, string>} externals
  * @property {[string, (string | number)[]][]} identifiersForModuleIds
  * @property {(path: string) => string | undefined} pathToResourceId
  * @property {(id: string) => string} policyIdentifierToResourceId
@@ -63,6 +64,7 @@ const crossReference = (neededIds, policyIds) => {
  * @param {import('lavamoat-core').LavaMoatPolicy} options.policy
  * @param {import('@lavamoat/aa').CanonicalNameMap} options.canonicalNameMap
  * @param {(string | number)[]} options.unenforceableModuleIds
+ * @param {Record<string | number, string>} options.externals
  * @param {boolean | undefined} options.readableResourceIds
  * @returns {IdentifierLookup}
  */
@@ -71,6 +73,7 @@ exports.generateIdentifierLookup = ({
   policy,
   canonicalNameMap,
   unenforceableModuleIds,
+  externals,
   readableResourceIds,
 }) => {
   /**
@@ -148,6 +151,7 @@ exports.generateIdentifierLookup = ({
   return {
     root: translate(ROOT_IDENTIFIER),
     unenforceableModuleIds,
+    externals,
     identifiersForModuleIds,
     pathToResourceId: (path) => {
       const pathInfo = lookUp(path, pathLookup)

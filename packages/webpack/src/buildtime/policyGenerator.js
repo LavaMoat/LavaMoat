@@ -2,11 +2,11 @@ const {
   createModuleInspector,
   LavamoatModuleRecord,
   loadPoliciesSync,
+  jsonStringifySortedPolicy,
 } = require('lavamoat-core')
 const { getPackageNameForModulePath } = require('@lavamoat/aa')
 const { writeFileSync, mkdirSync } = require('node:fs')
 const path = require('node:path')
-const stringify = require('json-stable-stringify')
 const {
   sources: { RawSource },
 } = require('webpack')
@@ -18,6 +18,10 @@ const POLICY_SNAPSHOT_FILENAME = 'policy-snapshot.json'
 
 /**
  * @typedef {(specifier: string) => boolean} IsBuiltinFn
+ */
+
+/**
+ * @typedef {import('webpack').NormalModule | import('webpack').ExternalModule} InspectableWebpackModule
  */
 
 module.exports = {
@@ -68,7 +72,7 @@ module.exports = {
           if (emit) {
             compilation.emitAsset(
               POLICY_SNAPSHOT_FILENAME,
-              new RawSource(stringify(final, { space: 2 }))
+              new RawSource(jsonStringifySortedPolicy(final))
             )
           }
           return final
@@ -93,7 +97,7 @@ module.exports = {
 
     return {
       /**
-       * @param {import('webpack').NormalModule} module
+       * @param {InspectableWebpackModule} module
        * @param {Iterable<import('webpack').ModuleGraphConnection>} connections
        */
       inspectWebpackModule: (module, connections) => {
@@ -146,14 +150,14 @@ module.exports = {
         mkdirSync(location, { recursive: true })
         writeFileSync(
           path.join(location, 'policy.json'),
-          stringify(policy, { space: 2 }),
+          jsonStringifySortedPolicy(policy),
           'utf8'
         )
         const final = applyOverride(policy)
         if (emit) {
           compilation.emitAsset(
             POLICY_SNAPSHOT_FILENAME,
-            new RawSource(stringify(final, { space: 2 }))
+            new RawSource(jsonStringifySortedPolicy(final))
           )
         }
         return final

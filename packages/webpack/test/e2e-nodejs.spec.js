@@ -13,7 +13,7 @@ test.before(async (t) => {
     policyLocation: path.resolve(__dirname, 'fixtures/main/policy-node'),
   })
   webpackConfig.target = 'node'
-  webpackConfig.mode = 'development'
+  webpackConfig.optimization.minimize = false
   webpackConfig.entry = {
     app: './node.js',
   }

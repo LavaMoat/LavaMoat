@@ -1,7 +1,6 @@
 /// <reference path="./lavamoat.d.ts" />
 /* global LAVAMOAT */
-/* global lockdown, harden, Compartment */
-
+/* global Compartment */
 const {
   keys,
   create,
@@ -14,7 +13,15 @@ const {
   entries,
   values,
 } = Object
+
+const {
+  lockdown,
+  Proxy,
+  Math, Date,
+} = globalThis
+
 const warn = typeof console === 'object' ? console.warn : () => {}
+
 // Avoid running any wrapped code or using compartment if lockdown was not called.
 // This is for when the bundle ends up running despite SES being missing.
 // It was previously useful for sub-compilations running an incomplete bundle as part of the build, but currently that is being skipped. We might go back to it for the sake of build time security if it's deemed worthwihile in absence of lockdown.
@@ -26,6 +33,11 @@ if (LOCKDOWN_ON) {
     'LavaMoat: runtime execution started without SES present, switching to no-op.'
   )
 }
+
+// harden appears on globalThis only after lockdown is called
+const {
+  harden,
+} = globalThis
 
 const knownWritableFields = new Set()
 
@@ -87,20 +99,22 @@ const enforcePolicy = (specifier, referrerResourceId, wrappedRequire) => {
     return wrappedRequire()
   }
   const referrerPolicy = LAVAMOAT.policy.resources[referrerResourceId] || {}
-  if (referrerPolicy.builtin) {
-    if (referrerPolicy.builtin[specifier]) {
+  if (referrerPolicy.builtin && LAVAMOAT.externals[specifier]) {
+    const builtinName = LAVAMOAT.externals[specifier]
+    if (referrerPolicy.builtin[builtinName]) {
       return wrappedRequire()
     }
     if (
-      !specifier.includes('.') &&
+      builtinName &&
+      !builtinName.includes('.') &&
       keys(referrerPolicy.builtin).some((key) =>
-        key.startsWith(`${specifier}.`)
+        key.startsWith(`${builtinName}.`)
       )
     ) {
       // create minimal selection if it's a builtin and not allowed as a whole, but with subpaths
       return getBuiltinForConfig(
         wrappedRequire(),
-        specifier,
+        builtinName,
         referrerPolicy.builtin
       )
     }
@@ -143,6 +157,7 @@ const installGlobalsForPolicy = (resourceId, packageCompartmentGlobal) => {
       rootCompartmentGlobalThis,
       globalAliases
     )
+    LAVAMOAT?.scuttling?.scuttle(theRealGlobalThis, LAVAMOAT.options.scuttleGlobalThis)
   } else {
     const endowments = getEndowmentsForConfig(
       rootCompartmentGlobalThis,
@@ -206,6 +221,10 @@ const findResourceId = (moduleId) => {
 const wrapRequireWithPolicy = (__webpack_require__, referrerResourceId) =>
   /** @this {object} */
   function (specifier, ...rest) {
+    // not collapsing to string if it's a production bundle optimized down to numbers
+    if (typeof specifier !== 'number') {
+      specifier = `${specifier}`
+    }
     const requireThat = __webpack_require__.bind(this, specifier, ...rest)
     return enforcePolicy(specifier, referrerResourceId, requireThat)
   }
@@ -232,7 +251,7 @@ const lavamoatRuntimeWrapper = (resourceId, runtimeKit) => {
     compartmentMap.set(resourceId, c)
   }
 
-  let overrides = create(null)
+  const overrides = create(null)
 
   // modules may reference `require` dynamically, but that's something we don't want to allow
   const { __webpack_require__ } = runtimeKit
@@ -244,13 +263,15 @@ const lavamoatRuntimeWrapper = (resourceId, runtimeKit) => {
 
     // TODO: It's possible most of the work here could be done once instead of for each wrapping
 
-    // Webpack has built-in plugins that add more runtime functions. We might need to support them eventually.
+    // Webpack has a few one-letter functions in the runtime and built-in plugins that add more runtime functions. We might need to support them eventually.
     // It's a case-by-case basis decision.
     // TODO: print a warning for other functions on the __webpack_require__ namespace that we're not supporting.
     //   It's probably best served at build time though - with runtimeRequirements or looking at the items in webpack runtime when adding lavamoat runtime.
+    // The following seem harmless and are used by default: ['O', 'n', 'd', 'o', 'r', 's', 't', 'b']
+    // To discover more, go to https://github.com/webpack/webpack/blob/main/lib/RuntimeGlobals.js and/or look at implementations here https://github.com/webpack/webpack/tree/main/lib/runtime/
+    // Looking at the runtime chunk in the built bundle is probably the fastest way to learn what these do.
 
-    // The following seem harmless and are used by default: ['O', 'n', 'd', 'o', 'r', 's', 't']
-    const supportedRuntimeItems = ['O', 'n', 'd', 'o', 'r', 's', 't']
+    const supportedRuntimeItems = ['O', 'n', 'd', 'o', 'r', 's', 't', 'b']
     for (const item of supportedRuntimeItems) {
       policyRequire[item] = harden(__webpack_require__[item])
     }

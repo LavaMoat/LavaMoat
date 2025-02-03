@@ -17,7 +17,7 @@ const WRITE_AUTO_POLICY = Boolean(process.env.WRITE_AUTO_POLICY)
 /**
  * Path to `browserify` workspace
  */
-const CWD = path.join(__dirname, '..', '..')
+const CWD = path.join(__dirname, '..', '..', '..')
 
 /**
  * Path to policy
@@ -29,19 +29,14 @@ const POLICY_PATH = path.join(__dirname, 'lavamoat', 'node', 'policy.json')
  */
 const BUILD_PATH = path.join(__dirname, 'build.js')
 
-const spawnArgs = [
-  'exec',
-  'lavamoat',
-  '--',
-  BUILD_PATH,
-  '--policyPath',
-  POLICY_PATH,
-]
+const LAVAMOAT_PATH = require.resolve('lavamoat/src/cli.js')
+
+const spawnArgs = [LAVAMOAT_PATH, BUILD_PATH, '--policyPath', POLICY_PATH]
 
 if (WRITE_AUTO_POLICY) {
   spawnArgs.push('--writeAutoPolicy')
 }
 
-console.error('npm', spawnArgs.join(' '))
+console.error(`Running ${(process.execPath, spawnArgs.join(' '))} in ${CWD}`)
 
-spawnSync('npm', spawnArgs, { stdio: 'inherit', cwd: CWD })
+spawnSync(process.execPath, spawnArgs, { stdio: 'inherit', cwd: CWD })

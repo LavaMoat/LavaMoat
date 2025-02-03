@@ -1,0 +1,12 @@
+{
+  "/package.json": "{\n  \"name\": \"hello\",\n  \"version\": \"0.0.0\",\n  \"type\": \"module\",\n  \"description\": \"this code actually runs\",\n  \"private\": true,\n  \"main\": \"index.js\",\n  \"scripts\": {\n    \"start\": \"npx snapshot-fs ../json-fixture/dynamic.json\"\n  },\n  \"dependencies\": {\n    \"dummy\": \"0.0.0\",\n    \"dynamic-require\": \"0.0.0\"\n  }\n}\n",
+  "/index.js": "import { hello as otherHello } from 'dynamic-require'\nexport const hello = 'hello ' + otherHello\n",
+  "/README.md": "This fixture is not used directly; it's only here in order to create a snapshot:\n\n```bash\nnpm run start\n```\n",
+  "/node_modules/muddy/package.json": "{\n  \"name\": \"muddy\",\n  \"version\": \"0.0.0\"\n}\n",
+  "/node_modules/muddy/index.js": "module.exports = \"world\"\n",
+  "/node_modules/dynamic-require/world.js": "module.exports = 'world'\n",
+  "/node_modules/dynamic-require/package.json": "{\n  \"name\": \"dynamic-require\",\n  \"version\": \"1.0.0\",\n  \"license\": \"ISC\",\n  \"private\": true,\n  \"main\": \"index.js\",\n  \"dependencies\": {\n    \"dummy\": \"0.0.0\"\n  }\n}\n",
+  "/node_modules/dynamic-require/index.js": "function dynamic (value) {\n  return require(value)\n}\n\nexports.hello = dynamic('dummy')\n",
+  "/node_modules/dummy/package.json": "{\n  \"name\": \"dummy\",\n  \"version\": \"0.0.0\",\n  \"dependencies\": {\"muddy\": \"0.0.0\"}\n}\n",
+  "/node_modules/dummy/index.js": "module.exports = require('muddy')\n\n// module.exports = 'world'\n"
+}
