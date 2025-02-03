@@ -22,7 +22,8 @@ project
 
 > [!IMPORTANT]
 >
-> **The entry point must be named `index.js`**. This is per convention.
+> The convention is to use `index.js` as the entry point, but this may be
+> overridden by macros — see the `jsonEntrypoint` option (where available).
 
 <!-- prettier-ignore-start -->
 > For this example, `project/package.json` was created by `npm init -y`. `project/index.js` contains:
@@ -62,9 +63,9 @@ Now that you have a snapshot, you can use it in a test case:
 >
 > Commit `project.json`, but not the `project` directory. See the [Modifying a Fixture][] section for why not!
 
-### Fixtures with Binary Data
+### Fixtures with Binary Data and/or Symlinks
 
-If you need to create a fixture containing binary data (_use case: native modules_), provide the `--binary` flag to [snapshot-fs][]:
+If you need to create a fixture containing binary data (_use case: native modules_) or symlinks (_use case: `node_modules/.bin/*`_) provide the `--binary` flag to [snapshot-fs][]:
 
 ```sh
 npx snapshot-fs project.json --dir project --binary
