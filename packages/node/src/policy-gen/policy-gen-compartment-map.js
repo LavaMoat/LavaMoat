@@ -10,8 +10,6 @@ import { makePolicyGenCompartment } from './policy-gen-compartment-class.js'
  * @import {LoadCompartmentMapOptions} from '../internal.js';
  */
 
-const { entries, fromEntries } = Object
-
 /**
  * Loads compartment map and associated sources.
  *
@@ -33,6 +31,7 @@ export const loadCompartmentMap = async (
     conditions,
     languageForExtension: {
       [NATIVE_PARSER_FILE_EXT]: NATIVE_PARSER_NAME,
+      '': 'cjs',
     },
   })
 
@@ -46,22 +45,12 @@ export const loadCompartmentMap = async (
   const {
     captureCompartmentMap: compartmentMap,
     captureSources: sources,
-    compartmentRenames,
+    compartmentRenames: renames,
   } = await captureFromMap(readPowers, nodeCompartmentMap, {
     ...captureOpts,
     ...DEFAULT_ENDO_OPTIONS,
     Compartment: LavaMoatCompartment,
   })
-
-  /**
-   * `compartmentRenames` is a mapping of _compartment name_ to _filepath_; we
-   * need the reverse mapping
-   *
-   * @type {Record<string, string>}
-   */
-  const renames = fromEntries(
-    entries(compartmentRenames).map(([filepath, id]) => [id, filepath])
-  )
 
   return {
     compartmentMap,
