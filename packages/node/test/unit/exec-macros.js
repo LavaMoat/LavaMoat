@@ -1,6 +1,6 @@
 /**
  * @import {TestFn, MacroDeclarationOptions} from 'ava'
- * @import {LavaMoatPolicy} from 'lavamoat-core'
+ * @import {LavaMoatPolicy} from '@lavamoat/types'
  */
 
 import { run } from '../../src/exec/run.js'

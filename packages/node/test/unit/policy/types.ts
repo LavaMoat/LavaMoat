@@ -1,4 +1,4 @@
-import { LavaMoatPolicy, LavaMoatPolicyOverrides } from 'lavamoat-core'
+import { LavaMoatPolicy, LavaMoatPolicyOverrides } from '@lavamoat/types'
 import { Except } from 'type-fest'
 import { GeneratePolicyOptions } from '../../../src/types.js'
 
