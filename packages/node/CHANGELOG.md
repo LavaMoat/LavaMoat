@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.3](https://github.com/LavaMoat/LavaMoat/compare/node-v0.0.2...node-v0.0.3) (2025-02-04)
+
+
+### Bug Fixes
+
+* **node:** disable "dev" mode by default ([5d59529](https://github.com/LavaMoat/LavaMoat/commit/5d59529b2428752a478590f6ad86a5eef35c770d)), closes [#1503](https://github.com/LavaMoat/LavaMoat/issues/1503)
+
 ## [0.0.2](https://github.com/LavaMoat/LavaMoat/compare/node-v0.0.1...node-v0.0.2) (2025-01-28)
 
 

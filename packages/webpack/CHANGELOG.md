@@ -18,6 +18,13 @@
   * dependencies
     * lavamoat-core bumped from ^15.2.0 to ^15.2.1
 
+## [0.9.0-beta.0](https://github.com/LavaMoat/LavaMoat/compare/webpack-v0.8.1-beta.0...webpack-v0.9.0-beta.0) (2025-02-04)
+
+
+### Features
+
+* **webpack:** support scuttling ([#1298](https://github.com/LavaMoat/LavaMoat/issues/1298)) ([9630600](https://github.com/LavaMoat/LavaMoat/commit/963060078d16fab80f24d49ea945a08fc51b9384))
+
 ## [0.8.1-beta.0](https://github.com/LavaMoat/LavaMoat/compare/webpack-v0.8.0-beta.0...webpack-v0.8.1-beta.0) (2025-01-28)
 
 
