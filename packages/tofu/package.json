@@ -22,14 +22,13 @@
     "test": "test"
   },
   "scripts": {
-    "lint:deps": "depcheck",
     "test": "ava"
   },
   "peerDependencies": {
     "lavamoat-core": ">15.4.0"
   },
   "dependencies": {
-    "@babel/parser": "7.26.5",
+    "@babel/parser": "7.26.2",
     "@babel/traverse": "7.26.5",
     "@babel/types": "7.26.5",
     "@types/babel__traverse": "7.20.6",
