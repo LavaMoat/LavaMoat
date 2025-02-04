@@ -483,6 +483,8 @@ class LavaMoatPlugin {
         // I stole the idea from Zach of module federation fame
 
         const onceForChunkSet = new WeakSet()
+
+        options?.scuttleGlobalThis?.exceptions?.forEach((n, i, a) => a[i] = n.toString())
         const runtimeOptions = {
           scuttleGlobalThis: options.scuttleGlobalThis,
           lockdown: options.lockdown,
