@@ -3,7 +3,7 @@
 const fs = require('node:fs/promises')
 const { readFileSync } = require('node:fs')
 const { mergePolicy } = require('./mergePolicy')
-const jsonStringify = require('json-stable-stringify')
+const { jsonStringifySortedPolicy } = require('./stringifyPolicy')
 
 module.exports = { loadPolicy, loadPolicyAndApplyOverrides, loadPoliciesSync }
 
@@ -104,7 +104,7 @@ async function loadPolicyAndApplyOverrides({
   // TODO: Only write if merge results in changes.
   // Would have to make a deep equal check on whole policy, which is a waste of time.
   // mergePolicy() should be able to do it in one pass.
-  await fs.writeFile(policyPath, jsonStringify(finalPolicy, { space: 2 }))
+  await fs.writeFile(policyPath, jsonStringifySortedPolicy(finalPolicy))
 
   return finalPolicy
 }

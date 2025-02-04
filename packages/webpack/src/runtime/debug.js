@@ -3,9 +3,34 @@
  */
 const incrementalPolicy = {}
 
+const {
+  Error,
+  clearTimeout,
+  setTimeout,
+  Proxy,
+} = globalThis
+
+const {
+  stringify
+} = JSON
+
+const {
+  dir,
+  log
+} = console
+
+const {
+  hasOwn,
+  create,
+  getPrototypeOf,
+  getOwnPropertyNames,
+  prototype,
+  defineProperty
+} = Object
+
 const printPolicyDebug = () => {
-  const policy = JSON.stringify(incrementalPolicy, null, 2)
-  console.dir(policy)
+  const policy = stringify(incrementalPolicy, null, 2)
+  dir(policy)
 }
 globalThis.LM_printPolicyDebug = printPolicyDebug
 
@@ -14,6 +39,7 @@ globalThis.LM_printPolicyDebug = printPolicyDebug
  */
 let debounceTimer
 
+const PRINT_AFTER_NO_NEW_POLICY_DISCOVERED_MS = 3000
 /**
  * Adds a key to the incremental policy.
  *
@@ -22,20 +48,24 @@ let debounceTimer
  * @returns {void}
  */
 function addToPolicy(hint, key) {
-  if (!incrementalPolicy[hint]) {
-    incrementalPolicy[hint] = { globals: Object.create(null) }
+  if (!hasOwn(incrementalPolicy, hint)) {
+    incrementalPolicy[hint] = { globals: create(null) }
   }
-  if (!incrementalPolicy[hint].globals[key]) {
+  if (!hasOwn(incrementalPolicy[hint].globals, key)) {
     incrementalPolicy[hint].globals[key] = true
     const informativeStack =
       '\n' + (Error().stack || '').split('\n').slice(2).join('\n')
-    console.log(`-- missing ${key} from ${hint}`, informativeStack)
+    log(`-- missing ${key} from ${hint}`, informativeStack)
     clearTimeout(debounceTimer)
-    debounceTimer = setTimeout(printPolicyDebug, 3000)
+    debounceTimer = setTimeout(
+      printPolicyDebug,
+      PRINT_AFTER_NO_NEW_POLICY_DISCOVERED_MS
+    )
   }
 }
 /**
- * Creates a recursive proxy object.
+ Creates a recursive proxy object that lets us tap into nested field lookups
+ at runtime.
  *
  * @param {string} hint - The hint for missing properties.
  * @param {string[]} path - The path to the missing property.
@@ -58,37 +88,40 @@ function recursiveProxy(hint, path) {
 }
 
 /**
+ * Finds all non-symbol keys for an object and its prototype chain. Symbol keys
+ * are not included to simplify the implementation of debugProxy.
  * @param {object | null} obj
  */
 function getAllKeys(obj) {
   const keys = []
-  for (; obj != null; obj = Object.getPrototypeOf(obj)) {
-    keys.push(...Object.getOwnPropertyNames(obj))
+  for (; obj != null; obj = getPrototypeOf(obj)) {
+    keys.push(...getOwnPropertyNames(obj))
   }
   return keys
 }
 
 /**
- * Creates a debug proxy for a target object.
+ Creates a debug proxy for a target object by replacing all own keys and
+ overshadowing the ones from the prototype chain.
  *
  * @param {any} target - The target object to create a debug proxy for.
  * @param {object} source - The keys to check for in the target object.
  * @param {string} hint - The hint to identify the source of the missing key.
  */
 const debugProxy = (target, source, hint) => {
-  const inheritedFromObj = Object.getOwnPropertyNames(Object.prototype)
+  const inheritedFromObj = getOwnPropertyNames(prototype)
 
   const keys = getAllKeys(source)
-  keys.forEach((key) => {
-    if (!Object.hasOwn(target, key) && !inheritedFromObj.includes(key)) {
-      Object.defineProperty(target, key, {
+  for (const key of keys) {
+    if (!hasOwn(target, key) && !inheritedFromObj.includes(key)) {
+      defineProperty(target, key, {
         get() {
           addToPolicy(hint, key)
           return recursiveProxy(hint, [key])
         },
       })
     }
-  })
+  }
 }
 
 module.exports = {

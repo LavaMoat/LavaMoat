@@ -31,7 +31,11 @@ const MODULE_REFS = /** @type {const} */ ({
   script: ['arguments', 'require', 'module', 'exports'],
 })
 
-module.exports = { rootSlug, createModuleInspector, getDefaultPaths }
+module.exports = {
+  rootSlug,
+  createModuleInspector,
+  getDefaultPaths,
+}
 
 /**
  * @param {ModuleInspectorOptions} opts
@@ -70,6 +74,9 @@ function createModuleInspector(opts) {
     moduleRecord,
     { isBuiltin, includeDebugInfo = false }
   ) {
+    if (moduleRecord === undefined) {
+      return
+    }
     const { packageName, specifier, type } = moduleRecord
     // record the module
     moduleIdToModuleRecord.set(specifier, moduleRecord)
@@ -444,6 +451,7 @@ function createModuleInspector(opts) {
 
     // merge override policy
     const mergedPolicy = mergePolicy(policy, policyOverride)
+
     return mergedPolicy
   }
 }

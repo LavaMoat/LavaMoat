@@ -1,16 +1,14 @@
 const fs = require('node:fs')
 const path = require('node:path')
-const { getDefaultPaths } = require('lavamoat-core')
-const jsonStringify = require('json-stable-stringify')
+const { getDefaultPaths, jsonStringifySortedPolicy } = require('lavamoat-core')
 const { createModuleInspectorSpy } = require('./createModuleInspectorSpy.js')
 const { createPackageDataStream } = require('./createPackageDataStream.js')
 const createLavaPack = require('@lavamoat/lavapack')
 const { createSesWorkaroundsTransform } = require('./sesTransforms')
 const { loadCanonicalNameMap } = require('@lavamoat/aa')
-const browserResolve = require('browser-resolve')
 
 // these are the reccomended arguments for lavaMoat to work well with browserify
-const reccomendedArgs = {
+const recommendedArgs = {
   // this option helps with parsing global usage
   insertGlobalVars: {
     global: false,
@@ -26,7 +24,7 @@ const reccomendedArgs = {
 module.exports = plugin
 module.exports.createLavamoatPacker = createLavamoatPacker
 module.exports.loadPolicy = loadPolicyFromPluginOpts
-module.exports.args = reccomendedArgs
+module.exports.args = recommendedArgs
 
 function plugin(browserify, pluginOpts) {
   // pluginOpts.policy is policy path
@@ -45,7 +43,7 @@ function plugin(browserify, pluginOpts) {
           rootDir: configuration.projectRoot,
           // need this in order to walk browser builtin deps
           includeDevDeps: true,
-          resolve: browserResolve,
+          resolve: configuration.resolve,
         })
       }
       return canonicalNameMap
@@ -135,6 +133,7 @@ function getConfigurationFromPluginOpts(pluginOpts) {
     'bundleWithPrecompiledModules',
     'policyDebug',
     'projectRoot',
+    'resolve',
   ]
 
   const allowedKeys = new Set([
@@ -177,6 +176,10 @@ function getConfigurationFromPluginOpts(pluginOpts) {
       pluginOpts.scuttleGlobalThisExceptions
   }
 
+  if (!pluginOpts.resolve) {
+    pluginOpts.resolve = require('browser-resolve')
+  }
+
   const configuration = {
     projectRoot: pluginOpts.projectRoot,
     includePrelude:
@@ -196,6 +199,7 @@ function getConfigurationFromPluginOpts(pluginOpts) {
         ? Boolean(pluginOpts.bundleWithPrecompiledModules)
         : true,
     actionOverrides: {},
+    resolve: pluginOpts.resolve,
   }
 
   // check for action overrides
@@ -227,7 +231,7 @@ function writeAutoPolicy(policy, configuration) {
     })
     fs.writeFileSync(
       configuration.policyPaths.debug,
-      jsonStringify(policy, { space: 2 })
+      jsonStringifySortedPolicy(policy)
     )
     console.warn(
       `LavaMoat wrote policy debug to "${configuration.policyPaths.debug}"`
@@ -240,16 +244,13 @@ function writeAutoPolicy(policy, configuration) {
   if (!fs.existsSync(policyOverridePath)) {
     const basicPolicy = { resources: {} }
     fs.mkdirSync(path.dirname(policyOverridePath), { recursive: true })
-    fs.writeFileSync(
-      policyOverridePath,
-      jsonStringify(basicPolicy, { space: 2 })
-    )
+    fs.writeFileSync(policyOverridePath, jsonStringifySortedPolicy(basicPolicy))
     console.warn(`LavaMoat Override Policy - wrote to "${policyOverridePath}"`)
   }
   // write policy file
   const policyPath = configuration.policyPaths.primary
   fs.mkdirSync(path.dirname(policyPath), { recursive: true })
-  fs.writeFileSync(policyPath, jsonStringify(policy, { space: 2 }))
+  fs.writeFileSync(policyPath, jsonStringifySortedPolicy(policy))
   console.warn(`LavaMoat Policy - wrote to "${policyPath}"`)
 }
 

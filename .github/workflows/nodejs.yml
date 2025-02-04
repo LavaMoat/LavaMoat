@@ -34,7 +34,7 @@ jobs:
               --workspace=packages/core
               --workspace=packages/lavapack
               --workspace=packages/laverna
-              --workspace=packages/node
+              --workspace=packages/lavamoat-node
               --workspace=packages/perf
               --workspace=packages/preinstall-always-fail
               --workspace=packages/survey
@@ -49,7 +49,7 @@ jobs:
               --workspace=packages/core
               --workspace=packages/lavapack
               --workspace=packages/laverna
-              --workspace=packages/node
+              --workspace=packages/lavamoat-node
               --workspace=packages/perf
               --workspace=packages/preinstall-always-fail
               --workspace=packages/survey
@@ -64,7 +64,7 @@ jobs:
               --workspace=packages/core
               --workspace=packages/lavapack
               --workspace=packages/laverna
-              --workspace=packages/node
+              --workspace=packages/lavamoat-node
               --workspace=packages/perf
               --workspace=packages/preinstall-always-fail
               --workspace=packages/survey
@@ -74,17 +74,17 @@ jobs:
     steps:
       - name: Checkout (PR)
         if: github.event_name == 'pull_request'
-        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       # fetch-depth: 0 looks like it has a perf impact, so let's not do that if we don't have to.
       # see https://github.com/actions/checkout/blob/main/README.md#usage
       - name: Checkout (Push)
         if: github.event_name != 'pull_request'
-        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           fetch-depth: 0 # needed for dirty check
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@1e60f620b9541d16bece96c5465dc8ee9832be0b # v4
+        uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
@@ -93,7 +93,7 @@ jobs:
           corepack enable
           npm --version
       - name: Install Dependencies
-        uses: bahmutov/npm-install@e5c7e14408aa6089501de32bd16123b41738047e # v1.10.2
+        uses: bahmutov/npm-install@ec9e87262db2a1be2ca3ceb2d506c413a220542c # v1.10.5
         with:
           useRollingCache: true
           install-command: npm ci --foreground-scripts
@@ -110,9 +110,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
       - name: Install Dependencies
-        uses: bahmutov/npm-install@e5c7e14408aa6089501de32bd16123b41738047e # v1.10.2
+        uses: bahmutov/npm-install@ec9e87262db2a1be2ca3ceb2d506c413a220542c # v1.10.5
         with:
           useRollingCache: true
           install-command: npm ci --foreground-scripts
@@ -141,9 +141,9 @@ jobs:
         --workspace=packages/yarn-plugin-allow-scripts
     steps:
       - name: Checkout
-        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@1e60f620b9541d16bece96c5465dc8ee9832be0b # v4
+        uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4
         with:
           node-version-file: .nvmrc
           cache: npm
@@ -152,7 +152,7 @@ jobs:
           corepack enable
           npm --version
       - name: Install Dependencies
-        uses: bahmutov/npm-install@e5c7e14408aa6089501de32bd16123b41738047e # v1.10.2
+        uses: bahmutov/npm-install@ec9e87262db2a1be2ca3ceb2d506c413a220542c # v1.10.5
         with:
           useRollingCache: true
           install-command: npm ci --foreground-scripts
@@ -175,7 +175,7 @@ jobs:
         --workspace=packages/core
         --workspace=packages/lavapack
         --workspace=packages/laverna
-        --workspace=packages/node
+        --workspace=packages/lavamoat-node
         --workspace=packages/perf
         --workspace=packages/preinstall-always-fail
         --workspace=packages/survey
@@ -184,9 +184,9 @@ jobs:
         --workspace=packages/yarn-plugin-allow-scripts
     steps:
       - name: Checkout
-        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@1e60f620b9541d16bece96c5465dc8ee9832be0b # v4
+        uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4
         with:
           node-version-file: .nvmrc
           cache: npm
@@ -195,7 +195,7 @@ jobs:
           corepack enable
           npm --version
       - name: Install Dependencies
-        uses: bahmutov/npm-install@e5c7e14408aa6089501de32bd16123b41738047e # v1.10.2
+        uses: bahmutov/npm-install@ec9e87262db2a1be2ca3ceb2d506c413a220542c # v1.10.5
         with:
           useRollingCache: true
           install-command: npm ci --foreground-scripts
