@@ -484,7 +484,10 @@ class LavaMoatPlugin {
 
         const onceForChunkSet = new WeakSet()
 
-        options?.scuttleGlobalThis?.exceptions?.forEach((n, i, a) => a[i] = n.toString())
+        options?.scuttleGlobalThis?.exceptions?.forEach((exception, i, exceptions) => {
+          exceptions[i] = exception.toString()
+        })
+
         const runtimeOptions = {
           scuttleGlobalThis: options.scuttleGlobalThis,
           lockdown: options.lockdown,
