@@ -106,7 +106,9 @@ function makePrepareRealmGlobalFromConfig({ createFunctionWrapper }) {
     })
 
     // set circular globalRefs
-    globalThisRefs.forEach((key) => packageCompartmentGlobal[key] = packageCompartmentGlobal)
+    globalThisRefs.forEach((key) => {
+      packageCompartmentGlobal[key] = packageCompartmentGlobal
+    })
 
     // bind Function constructor this value to globalThis
     // legacy globalThis shim
