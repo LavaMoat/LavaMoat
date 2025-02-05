@@ -77,7 +77,7 @@ class LavaMoatPlugin {
     if (options.scuttleGlobalThis === true) {
       options.scuttleGlobalThis = { enabled: true }
     }
-    options.scuttleGlobalThis = {...options.scuttleGlobalThis}
+    options.scuttleGlobalThis = { ...options.scuttleGlobalThis }
     this.options = {
       policyLocation: path.join('lavamoat', 'webpack'),
       lockdown: lockdownDefaults,
@@ -485,11 +485,11 @@ class LavaMoatPlugin {
         const onceForChunkSet = new WeakSet()
 
         if (typeof options.scuttleGlobalThis === 'object') {
-          if (typeof options.scuttleGlobalThis.exceptions === 'object') {
-            options.scuttleGlobalThis.exceptions.forEach((exception, i, exceptions) => {
+          options.scuttleGlobalThis.exceptions?.forEach(
+            (exception, i, exceptions) => {
               exceptions[i] = exception.toString()
-            })
-          }
+            }
+          )
         }
 
         const runtimeOptions = {
@@ -554,12 +554,15 @@ class LavaMoatPlugin {
                     json: true,
                   },
                   { name: 'options', data: runtimeOptions, json: true },
-                  (typeof runtimeOptions?.scuttleGlobalThis === 'boolean' && runtimeOptions.scuttleGlobalThis === true) ||
-                  (typeof runtimeOptions?.scuttleGlobalThis === 'object' && runtimeOptions.scuttleGlobalThis.enabled === true) ?
-                  {
-                    name: 'scuttling',
-                    shimRequire: 'lavamoat-core/src/scuttle.js',
-                  } : {},
+                  (typeof runtimeOptions?.scuttleGlobalThis === 'boolean' &&
+                    runtimeOptions.scuttleGlobalThis === true) ||
+                  (typeof runtimeOptions?.scuttleGlobalThis === 'object' &&
+                    runtimeOptions.scuttleGlobalThis.enabled === true)
+                    ? {
+                        name: 'scuttling',
+                        shimRequire: 'lavamoat-core/src/scuttle.js',
+                      }
+                    : {},
                   { name: 'policy', data: policyData, json: true },
                   {
                     name: 'ENUM',
@@ -689,7 +692,8 @@ module.exports = LavaMoatPlugin
  * @property {(specifier: string) => boolean} isBuiltin - A function that
  *   determines if the specifier is a builtin of the runtime platform e.g.
  *   node:fs
- * @property {ScuttlerConfig} [scuttleGlobalThis] - Configuration for enabling scuttling mode
+ * @property {ScuttlerConfig} [scuttleGlobalThis] - Configuration for enabling
+ *   scuttling mode
  * @property {boolean} [debugRuntime] - Enable runtime debugging tools
  * @property {boolean} [__unsafeAllowContextModules] - Skips enforcement of
  *   policies on ContextModule usage. This is only safe if you can guarantee
