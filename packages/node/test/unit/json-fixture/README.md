@@ -6,9 +6,11 @@ This contains test fixtures in either [DirectoryJSON][] or [Compact JSON][] form
 
 ## Creating a Fixture
 
-> [!NOTE]
+> [!IMPORTANT]
 >
 > [`snapshot-fs`][snapshot-fs] requires Node.js v22.13.0 or newer.
+>
+> **This documentation assumes `snapshot-fs` @ v5.0.0 or newer.**
 
 To create a fixture, you can use [`snapshot-fs`][snapshot-fs].
 
@@ -22,7 +24,8 @@ project
 
 > [!IMPORTANT]
 >
-> **The entry point must be named `index.js`**. This is per convention.
+> The convention is to use `index.js` as the entry point, but this may be
+> overridden by macros — see the `jsonEntrypoint` option (where available).
 
 <!-- prettier-ignore-start -->
 > For this example, `project/package.json` was created by `npm init -y`. `project/index.js` contains:
@@ -41,17 +44,15 @@ npx snapshot-fs project.json --dir project
 It should print:
 
 ```text
-[INFO] Wrote DirectoryJSON of /path/to/project to project.json
+[INFO] Wrote CJSON snapshot of /path/to/project to project.json
 ```
 
-`project.json` is in [DirectoryJSON][] format, and looks like this:
+> [!IMPORTANT]
+>
+> [CJSON/Compact JSON][Compact JSON] is the default import/export format for [`snapshot-fs`][snapshot-fs] v5.0.0 and newer; previously it was [DirectoryJSON][].
+> It is **not recommended** to use [DirectoryJSON][] for new fixtures since the format cannot represent all relevant filesystem features (e.g., symlinks).
 
-```json
-{
-  "/package.json": "{\n  \"name\": \"project\",\n  \"version\": \"1.0.0\",\n  \"main\": \"index.js\",\n  \"scripts\": {\n    \"test\": \"echo \\\"Error: no test specified\\\" && exit 1\"\n  },\n  \"keywords\": [],\n  \"author\": \"\",\n  \"license\": \"ISC\",\n  \"type\": \"commonjs\",\n  \"description\": \"\"\n}\n",
-  "/index.js": "module.exports = \"hello world\";\n"
-}
-```
+This is a _less-human-readable-than-usual_ JSON subformat (and I'm not going to show it here).
 
 Now that you have a snapshot, you can use it in a test case:
 
@@ -70,8 +71,6 @@ If you need to create a fixture containing binary data (_use case: native module
 npx snapshot-fs project.json --dir project --binary
 ```
 
-This will create a fixture in [Compact JSON][] format, which is not intended to be human-readable. LavaMoat's test harnesses ([`testPolicyForJSON`][testPolicyForJSON], [`loadJSONFixture`][loadJSONFixture]) can work with either format.
-
 ## Modifying a Fixture
 
 > New in [`snapshot-fs`][snapshot-fs] v3.1.0
@@ -81,16 +80,16 @@ How can we make changes to a JSON fixture without the original `project` directo
 1. Use the `export` subcommand of [`snapshot-fs`][snapshot-fs] to re-create the `project` directory:
 
    ```sh
-   npx snapshot-fs export project.json --dir project
+   npx snapshot-fs export project.json --source project --dry-run
    ```
 
-   This will re-create the `project` directory from the snapshot. Careful; this can be destructive!
+   This will _print a tree_ of what would change; once satisfied, omit `--dry-run` and continue.
 
 2. Make your changes in the `project` directory
 3. Use [`snapshot-fs`][snapshot-fs] to replace the existing snapshot:
 
    ```sh
-   npx snapshot-fs project.json --dir project
+   npx snapshot-fs project.json --source project
    ```
 
 [snapshot-fs]: https://npm.im/snapshot-fs
