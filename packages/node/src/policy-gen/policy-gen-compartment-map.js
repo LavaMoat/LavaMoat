@@ -2,7 +2,6 @@ import { captureFromMap } from '@endo/compartment-mapper/capture-lite.js'
 import { mapNodeModules } from '@endo/compartment-mapper/node-modules.js'
 import { DEFAULT_ENDO_OPTIONS } from '../compartment/options.js'
 import { defaultReadPowers } from '../compartment/power.js'
-import { NATIVE_PARSER_FILE_EXT, NATIVE_PARSER_NAME } from '../constants.js'
 import { toURLString } from '../util.js'
 import { makePolicyGenCompartment } from './policy-gen-compartment-class.js'
 
@@ -29,10 +28,7 @@ export const loadCompartmentMap = async (
   const entryPoint = toURLString(entrypointPath)
   const nodeCompartmentMap = await mapNodeModules(readPowers, entryPoint, {
     conditions,
-    languageForExtension: {
-      [NATIVE_PARSER_FILE_EXT]: NATIVE_PARSER_NAME,
-      '': 'cjs',
-    },
+    languageForExtension: DEFAULT_ENDO_OPTIONS.languageForExtension,
   })
 
   // we use this to inject missing imports from policy overrides into the module descriptor.
@@ -45,7 +41,7 @@ export const loadCompartmentMap = async (
   const {
     captureCompartmentMap: compartmentMap,
     captureSources: sources,
-    compartmentRenames: renames,
+    newToOldCompartmentNames: renames,
   } = await captureFromMap(readPowers, nodeCompartmentMap, {
     ...captureOpts,
     ...DEFAULT_ENDO_OPTIONS,

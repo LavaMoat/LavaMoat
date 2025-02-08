@@ -4,7 +4,6 @@
  *
  * @packageDocumentation
  */
-
 import { makeReadPowers } from '../compartment/power.js'
 import { DEFAULT_ATTENUATOR } from '../constants.js'
 import { toEndoPolicySync } from '../policy-converter.js'
@@ -26,22 +25,22 @@ import { execute } from './execute.js'
  * @privateRemarks
  * Mainly a wrapper around {@link execute}
  * @template [T=unknown] Exports of module, if known. Default is `unknown`
- * @param {string | URL} entrypointPath Entry point of application
+ * @param {string | URL} entrypoint Entry point of application
  * @param {LavaMoatPolicy} policy LavaMoat policy
  * @param {RunOptions} [options] Options
  * @returns {Promise<T>} Exports of executed module
  */
 
 export const run = async (
-  entrypointPath,
+  entrypoint,
   policy,
-  { dev = false, policyOverride, ...options } = {}
+  { dev = false, policyOverride, trustEntrypoint, ...options } = {}
 ) => {
   await Promise.resolve()
   const readPowers = makeReadPowers(options)
-  const endoPolicy = toEndoPolicySync(policy, policyOverride)
+  const endoPolicy = toEndoPolicySync(policy, policyOverride, trustEntrypoint)
 
-  return execute(entrypointPath, readPowers, {
+  return execute(entrypoint, readPowers, {
     Compartment: makeExecutionCompartment(globalThis),
     modules: {
       [DEFAULT_ATTENUATOR]: {

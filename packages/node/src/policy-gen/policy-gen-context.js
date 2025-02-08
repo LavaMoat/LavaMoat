@@ -276,7 +276,7 @@ export class PolicyGeneratorContext {
           type: LMR_TYPE_BUILTIN,
           file: specifier,
           specifier,
-          packageName: getPackageName(this.compartment, this.#isEntry),
+          packageName: specifier,
         })
       )
   }

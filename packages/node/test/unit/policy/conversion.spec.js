@@ -14,7 +14,7 @@ import {
   ENDO_POLICY_RESOURCES,
 } from '../../../src/constants.js'
 import {
-  ENDO_POLICY_BOILERPLATE,
+  ENDO_POLICY_TRUSTED_BOILERPLATE,
   toEndoPolicy,
 } from '../../../src/policy-converter.js'
 
@@ -36,7 +36,7 @@ test('toEndoPolicy() - kitchen sink', async (t) => {
    * @type {Policy<LavaMoatPackagePolicyItem>}
    */
   const expected = {
-    ...ENDO_POLICY_BOILERPLATE,
+    ...ENDO_POLICY_TRUSTED_BOILERPLATE,
     [ENDO_POLICY_RESOURCES]: {
       a: {
         [ENDO_PKG_POLICY_PACKAGES]: { b: true },
@@ -79,7 +79,7 @@ test('toEndoPolicy() - empty policy', async (t) => {
   const lmPolicy = { resources: {} }
 
   const actual = await toEndoPolicy(lmPolicy)
-  t.deepEqual(actual, ENDO_POLICY_BOILERPLATE)
+  t.deepEqual(actual, ENDO_POLICY_TRUSTED_BOILERPLATE)
 })
 
 test('toEndoPolicy() - policy path as URL', async (t) => {
@@ -89,7 +89,7 @@ test('toEndoPolicy() - policy path as URL', async (t) => {
   )
 
   const actual = await toEndoPolicy(lmPolicyUrl)
-  t.deepEqual(actual, ENDO_POLICY_BOILERPLATE)
+  t.deepEqual(actual, ENDO_POLICY_TRUSTED_BOILERPLATE)
 })
 
 test('toEndoPolicy() - policy path as string', async (t) => {
@@ -98,7 +98,7 @@ test('toEndoPolicy() - policy path as string', async (t) => {
   )
 
   const actual = await toEndoPolicy(lmPolicyPath)
-  t.deepEqual(actual, ENDO_POLICY_BOILERPLATE)
+  t.deepEqual(actual, ENDO_POLICY_TRUSTED_BOILERPLATE)
 })
 
 test('toEndoPolicy() - invalid policy', async (t) => {
@@ -157,7 +157,7 @@ test('toEndoPolicy() - merging', async (t) => {
    * @type {Policy<LavaMoatPackagePolicyItem>}
    */
   const expected = {
-    ...ENDO_POLICY_BOILERPLATE,
+    ...ENDO_POLICY_TRUSTED_BOILERPLATE,
     [ENDO_POLICY_RESOURCES]: {
       a: {
         [ENDO_PKG_POLICY_PACKAGES]: { b: true },

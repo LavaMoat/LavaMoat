@@ -1,10 +1,8 @@
-/**
- * Public-facing types for `@lavamoat/node`
- *
- * @packageDocumentation
- */
+import { IsBuiltinFn, LavaMoatPolicyOverrides } from 'lavamoat-core'
+import { Loggerr } from 'loggerr'
+import { Except, MergeDeep, Simplify } from 'type-fest'
 
-import type {
+import {
   CaptureLiteOptions,
   CryptoInterface,
   FsInterface,
@@ -17,24 +15,175 @@ import type {
   SyncImportLocationOptions,
   UrlInterface,
 } from '@endo/compartment-mapper'
-import type { IsBuiltinFn, LavaMoatPolicyOverrides } from 'lavamoat-core'
-import type { Loggerr } from 'loggerr'
-import type { Except, Merge, MergeDeep, Simplify } from 'type-fest'
 import {
   ENDO_GLOBAL_POLICY_ITEM_WRITE,
   ENDO_POLICY_ITEM_ROOT,
 } from './constants.js'
 
 /**
- * Options for `compartmentMapToPolicy()`
- *
- * @remarks
- * Exported due to use within {@link BaseLoadCompartmentMapOptions}
+ * A loaded application which has not yet been executed
  */
-export type CompartmentMapToPolicyOptions = Merge<
-  BuildModuleRecordsOptions,
-  Merge<WithPolicyOverride, WithDebug>
->
+export interface ApplicationLoader<T = unknown> {
+  /**
+   * Imports the application (executing it)
+   *
+   * @returns Whatever it exports under `namespace` prop
+   */
+  import: () => Promise<{ namespace: T }>
+
+  /**
+   * The hash of the compartment map
+   *
+   * Present only if {@link ReadNowPowers.computeSha512} was provided
+   */
+  sha512?: string
+}
+
+/**
+ * Custom data potentially assigned to the `options` prop of an
+ * {@link PackagePolicy.options Endo package policy}
+ */
+export interface LavaMoatPackagePolicyOptions {
+  /**
+   * If this is `true`, then the package is allowed to run native modules
+   */
+  native?: boolean
+}
+
+export interface WithAbsoluteFn {
+  /**
+   * A function like Node's `path.isAbsolute()`.
+   *
+   * This is _not_ the same as {@link ReadNowPowers.isAbsolute}; it is only used
+   * for finding the entry point and does not affect runtime operation.
+   */
+  isAbsolute?: IsAbsoluteFn
+}
+
+/**
+ * A "create a debug policy" flag
+ */
+export interface WithDebug {
+  /**
+   * If `true`, generate a debug policy.
+   */
+  debug?: boolean
+}
+
+/**
+ * If `dev` is `true`, `@endo/compartment-mapper` will receive a `conditions`
+ * option of type `Set(['development'])`.
+ *
+ * If present in some options supporting `conditions`, `conditions` will take
+ * precedence.
+ */
+export interface WithDev {
+  dev?: boolean
+}
+
+/**
+ * Options having an {@link IsBuiltinFn}
+ */
+export interface WithIsBuiltin {
+  /**
+   * A function which returns `true` if the given specfifier references a
+   * builtin module.
+   *
+   * Used during policy generation.
+   */
+  isBuiltin?: IsBuiltinFn
+}
+
+export interface WithLog {
+  /**
+   * `Loggerr` instance for logging
+   */
+  log?: Loggerr
+}
+
+/**
+ * Options having a `policyOverride` property.
+ */
+export interface WithPolicyOverride {
+  /**
+   * Policy overrides, if any
+   */
+  policyOverride?: LavaMoatPolicyOverrides
+}
+
+/**
+ * Raw powers which can be converted to a {@link ReadNowPowers} object.
+ *
+ * For this to work, {@link WithRawPowers.fs} must be defined. It cannot contain
+ * a `readPowers` property.
+ */
+export interface WithRawPowers {
+  crypto?: CryptoInterface
+  fs: FsInterface
+  path?: PathInterface
+  readPowers?: never
+  url?: UrlInterface
+}
+
+/**
+ * Options having a `readPowers` property.
+ */
+export interface WithReadPowers {
+  crypto?: never
+  fs?: never
+  path?: never
+
+  /**
+   * Read powers to use when loading the compartment map.
+   */
+  readPowers?: ReadNowPowers
+  url?: never
+}
+
+export interface WithTrustEntrypoint {
+  trustEntrypoint?: boolean
+}
+
+/**
+ * Options available when writing a policy
+ */
+export interface WritePolicyOptions {
+  /**
+   * Path to a {@link LavaMoatPolicyDebug} file
+   */
+  policyDebugPath?: string
+
+  /**
+   * Path to a {@link LavaMoatPolicy} file
+   */
+  policyPath?: string
+
+  /**
+   * `fs` interface to write policy to disk.
+   *
+   * This is _only_ used to read and write policy to disk and does not affect
+   * runtime operation.
+   */
+  writableFs?: WritableFsInterface
+
+  /**
+   * Whether or not to actually perform the write operation.
+   *
+   * @defaultValue false
+   */
+  write?: boolean
+}
+
+/**
+ * Powers necessary to write a policy to disk
+ */
+export interface WritePowers {
+  mkdir: (
+    path: string,
+    { recursive }: { recursive: true }
+  ) => Promise<string | undefined>
+  writeFile: (path: string, data: string) => Promise<void>
+}
 
 /**
  * Options to pass-through to Endo.
@@ -48,9 +197,10 @@ export type CompartmentMapToPolicyOptions = Merge<
  * within {@link GeneratePolicyOptions}.
  */
 
-export type BaseLoadCompartmentMapOptions = Merge<
-  Except<CaptureLiteOptions, 'importHook' | 'moduleTransforms'>,
-  Merge<WithLog, WithDev>
+export type BaseLoadCompartmentMapOptions = Simplify<
+  Except<CaptureLiteOptions, 'importHook' | 'moduleTransforms'> &
+    WithLog &
+    WithDev
 >
 
 /**
@@ -59,76 +209,39 @@ export type BaseLoadCompartmentMapOptions = Merge<
  * @remarks
  * Exported due to use within {@link CompartmentMapToPolicyOptions}
  */
-export type BuildModuleRecordsOptions = Merge<
-  WithReadPowers,
-  Merge<WithIsBuiltin, WithLog>
+export type BuildModuleRecordsOptions = Simplify<
+  WithReadPowers & WithIsBuiltin & WithLog & WithTrustEntrypoint
 >
 
-// re-export schema
-// TODO: make this less bad
-export {
-  BuiltinPolicy,
-  DebugInfo,
-  GlobalPolicy,
-  GlobalPolicyRead,
-  GlobalPolicyValue,
-  GlobalPolicyWrite,
-  LavaMoatPolicy,
-  LavaMoatPolicyDebug,
-  LavaMoatPolicyOverrides,
-  PackagePolicy,
-  PartialLavaMoatPolicy,
-  Resolutions,
-  ResourcePolicy,
-  Resources,
-} from 'lavamoat-core'
+/**
+ * Options for `compartmentMapToPolicy()`
+ *
+ * @remarks
+ * Exported due to use within {@link BaseLoadCompartmentMapOptions}
+ */
+export type CompartmentMapToPolicyOptions = Simplify<
+  BuildModuleRecordsOptions &
+    WithPolicyOverride &
+    WithDebug &
+    WithTrustEntrypoint
+>
 
 /**
- * If `dev` is `true`, `@endo/compartment-mapper` will receive a `conditions`
- * option of type `Set(['development'])`.
- *
- * If present in some options supporting `conditions`, `conditions` will take
- * precedence.
+ * Options for `execute()`
  */
-export interface WithDev {
-  dev?: boolean
-}
-
-export interface WithLog {
-  /**
-   * `Loggerr` instance for logging
-   */
-  log?: Loggerr
-}
+export type ExecuteOptions = Simplify<
+  ImportLocationOptions | SyncImportLocationOptions
+>
 
 /**
  * Options for `generatePolicy()`
- *
- * @remarks
- * {@link Merge} is appropriate here since some of the prop types are overwritten
- * by others (e.g., {@link WithRawPowers.fs} vs {@link WritePolicyOptions.fs},
- * where the latter should overwrite the former).
- * @privateRemarks
- * Somebody feel free to create a `MergeMany` type.
  */
-export type GeneratePolicyOptions = Merge<
-  BaseLoadCompartmentMapOptions,
-  Merge<
-    CompartmentMapToPolicyOptions,
-    Merge<
-      WritePolicyOptions,
-      {
-        /**
-         * A function like Node's `path.isAbsolute()`.
-         *
-         * This is _not_ the same as {@link ReadNowPowers.isAbsolute}; it is only
-         * used for finding the entry point and does not affect runtime
-         * operation.
-         */
-        isAbsolute?: IsAbsoluteFn
-      }
-    >
-  >
+export type GeneratePolicyOptions = Simplify<
+  BaseLoadCompartmentMapOptions &
+    CompartmentMapToPolicyOptions &
+    WritePolicyOptions &
+    WithTrustEntrypoint &
+    WithAbsoluteFn
 >
 
 /**
@@ -172,15 +285,9 @@ export type LavaMoatPackagePolicy = PackagePolicy<
 export type LavaMoatPackagePolicyItem = RootPolicy
 
 /**
- * Custom data potentially assigned to the `options` prop of an
- * {@link PackagePolicy.options Endo package policy}
+ * Options for _our_ `makeReadPowers()` function
  */
-export interface LavaMoatPackagePolicyOptions {
-  /**
-   * If this is `true`, then the package is allowed to run native modules
-   */
-  native?: boolean
-}
+export type MakeReadPowersOptions = WithRawReadPowers
 
 /**
  * "Root" identifier for a LavaMoat global policy item in the context of an Endo
@@ -192,56 +299,38 @@ export type RootPolicy = typeof ENDO_POLICY_ITEM_ROOT
  * Options for `run()`
  */
 
-export type RunOptions = Merge<
-  WithRawReadPowers,
-  Merge<WithPolicyOverride, WithDev>
->
-
-/**
- * Options for `execute()`
- */
-export type ExecuteOptions = Simplify<
-  ImportLocationOptions | SyncImportLocationOptions
+export type RunOptions = Simplify<
+  WithRawReadPowers & WithPolicyOverride & WithDev & WithTrustEntrypoint
 >
 
 /**
  * Options for `toEndoPolicy()`
  */
-export type ToEndoPolicyOptions =
-  | {
-      /**
-       * Path to a policy override file.
-       */
-      policyOverridePath?: string | URL
+export type ToEndoPolicyOptions = WithTrustEntrypoint & {
+  entrypoint?: string | URL
+} & (
+    | {
+        /**
+         * Path to a policy override file.
+         */
+        policyOverridePath?: string | URL
 
-      /**
-       * Disallowed in lieu of {@link policyOverridePath}
-       */
-      policyOverride?: never
-    }
-  | {
-      /**
-       * Disallowed in lieu of {@link policyOverride}
-       */
-      policyOverridePath?: never
-      /**
-       * A policy override object.
-       */
-      policyOverride?: LavaMoatPolicyOverrides
-    }
-
-/**
- * Options having an {@link IsBuiltinFn}
- */
-export interface WithIsBuiltin {
-  /**
-   * A function which returns `true` if the given specfifier references a
-   * builtin module.
-   *
-   * Used during policy generation.
-   */
-  isBuiltin?: IsBuiltinFn
-}
+        /**
+         * Disallowed in lieu of {@link policyOverridePath}
+         */
+        policyOverride?: never
+      }
+    | {
+        /**
+         * Disallowed in lieu of {@link policyOverride}
+         */
+        policyOverridePath?: never
+        /**
+         * A policy override object.
+         */
+        policyOverride?: LavaMoatPolicyOverrides
+      }
+  )
 
 /**
  * Options which may either {@link WithReadPowers} or {@link WithRawPowers} but
@@ -250,131 +339,42 @@ export interface WithIsBuiltin {
 export type WithRawReadPowers = WithReadPowers | WithRawPowers
 
 /**
- * Raw powers which can be converted to a {@link ReadNowPowers} object.
- *
- * For this to work, {@link WithRawPowers.fs} must be defined. It cannot contain
- * a `readPowers` property.
- */
-export interface WithRawPowers {
-  crypto?: CryptoInterface
-  fs: FsInterface
-  path?: PathInterface
-  readPowers?: never
-  url?: UrlInterface
-}
-
-/**
- * Options for _our_ `makeReadPowers()` function
- */
-export type MakeReadPowersOptions = WithRawReadPowers
-
-/**
- * Options having a `readPowers` property.
- */
-export interface WithReadPowers {
-  crypto?: never
-  fs?: never
-  path?: never
-  /**
-   * Read powers to use when loading the compartment map.
-   */
-  readPowers?: ReadNowPowers
-  url?: never
-}
-
-/**
  * Superset of {@link FsInterface} necessary to write a policy to disk
  */
 export type WritableFsInterface = MergeDeep<
   FsInterface,
   { promises: WritePowers }
 >
+
+/**
+ * Like Endo's `PropertyPolicy`, but can be a {@link WritePolicy} instead of just
+ * `boolean`.
+ */
+export type WritablePropertyPolicy = Record<string, WritePolicy | boolean>
+
 /**
  * "Writable" identifier for a LavaMoat global policy item in the context of an
  * Endo policy
  */
 export type WritePolicy = typeof ENDO_GLOBAL_POLICY_ITEM_WRITE
 
-/**
- * A "create a debug policy" flag
- */
-export interface WithDebug {
-  /**
-   * If `true`, generate a debug policy.
-   */
-  debug?: boolean
-}
+export { IsAbsoluteFn }
 
-/**
- * Options having a `policyOverride` property.
- */
-export interface WithPolicyOverride {
-  /**
-   * Policy overrides, if any
-   */
-  policyOverride?: LavaMoatPolicyOverrides
-}
-
-/**
- * Like Endo's `PropertyPolicy`, but can be a {@link WritePolicy} instead of just
- * `boolean`.
- */
-export interface WritablePropertyPolicy {
-  [k: string]: WritePolicy | boolean
-}
-
-/**
- * Options available when writing a policy
- */
-export interface WritePolicyOptions {
-  /**
-   * Path to a {@link LavaMoatPolicyDebug} file
-   */
-  policyDebugPath?: string
-  /**
-   * Path to a {@link LavaMoatPolicy} file
-   */
-  policyPath?: string
-  /**
-   * `fs` interface to write policy to disk.
-   *
-   * This is _only_ used to read and write policy to disk and does not affect
-   * runtime operation.
-   */
-  writableFs?: WritableFsInterface
-  /**
-   * Whether or not to actually perform the write operation.
-   *
-   * @defaultValue false
-   */
-  write?: boolean
-}
-
-/**
- * Powers necessary to write a policy to disk
- */
-export interface WritePowers {
-  mkdir: (
-    path: string,
-    { recursive }: { recursive: true }
-  ) => Promise<string | undefined>
-  writeFile: (path: string, data: string) => Promise<void>
-}
-
-/**
- * A loaded application which has not yet been executed
- */
-export interface ApplicationLoader<T = unknown> {
-  /**
-   * Imports the application (executing it)
-   *
-   * @returns Whatever it exports under `namespace` prop
-   */
-  import: () => Promise<{ namespace: T }>
-  /**
-   * The hash of the compartment map
-   *
-   * Present only if {@link ReadNowPowers.computeSha512} was provided
-   */
-  sha512?: string
-}
+// re-export schema
+// TODO: make this less bad
+export {
+  BuiltinPolicy,
+  DebugInfo,
+  GlobalPolicy,
+  GlobalPolicyRead,
+  GlobalPolicyValue,
+  GlobalPolicyWrite,
+  LavaMoatPolicy,
+  LavaMoatPolicyDebug,
+  LavaMoatPolicyOverrides,
+  PackagePolicy,
+  PartialLavaMoatPolicy,
+  Resolutions,
+  ResourcePolicy,
+  Resources,
+} from 'lavamoat-core'
