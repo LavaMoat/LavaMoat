@@ -100,7 +100,7 @@ export const resolveBinScript = (
     if (isExecutableSymlink(maybeBinPath, { fs })) {
       const realBinPath = realpathSync(maybeBinPath, { fs })
       log.debug(`Found bin script ${name} in ${maybeBinPath} => ${realBinPath}`)
-      return maybeBinPath
+      return realBinPath
     }
     log.debug(`No such bin script ${name} in ${maybeBinDir}`)
     try {

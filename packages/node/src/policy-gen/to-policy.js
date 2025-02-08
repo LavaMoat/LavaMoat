@@ -8,9 +8,10 @@
 
 import chalk from 'chalk'
 import { createModuleInspector } from 'lavamoat-core'
-import { isBuiltin as nodeIsBuiltin } from 'node:module'
+import { isBuiltin as defaultIsBuiltin } from 'node:module'
 import { defaultReadPowers } from '../compartment/power.js'
-import { log as fallbackLog } from '../log.js'
+import { DEFAULT_TRUST_ENTRYPOINT } from '../constants.js'
+import { log as defaultLog } from '../log.js'
 import { LMRCache } from './lmr-cache.js'
 import { PolicyGeneratorContext } from './policy-gen-context.js'
 
@@ -25,8 +26,9 @@ import { PolicyGeneratorContext } from './policy-gen-context.js'
  *   SesCompat,
  *   ModuleInspector} from 'lavamoat-core'
  * @import {BuildModuleRecordsOptions,
- *   CompartmentMapToPolicyOptions} from '../types.js'
- * @import {MissingModuleMap} from '../internal.js'
+ *   CompartmentMapToPolicyOptions,
+ *   TrustEntrypointFn} from '../types.js'
+ * @import {InspectModuleRecordsOptions, MissingModuleMap} from '../internal.js'
  * @import {Loggerr} from 'loggerr'
  * @import {SetFieldType} from 'type-fest'
  */
@@ -40,16 +42,17 @@ const { entries, freeze } = Object
  * information.
  *
  * @param {LavamoatModuleRecord[]} moduleRecords Module records
- * @param {{ debug?: boolean; log?: Loggerr }} [options] Options
+ * @param {InspectModuleRecordsOptions} [options] Options
  * @returns {ModuleInspector} The inspector
  */
 const inspectModuleRecords = (
   moduleRecords,
-  { debug = false, log = fallbackLog } = {}
+  { debug = false, log = defaultLog, trustEntrypoint = true } = {}
 ) => {
   const inspector = createModuleInspector({
-    isBuiltin: nodeIsBuiltin,
+    isBuiltin: defaultIsBuiltin,
     includeDebugInfo: debug,
+    trustRoot: trustEntrypoint,
   })
 
   inspector.on('compat-warning', (data) => {
@@ -121,7 +124,12 @@ export const buildModuleRecords = (
   compartmentMap,
   sources,
   renames,
-  { readPowers = defaultReadPowers, isBuiltin, log = fallbackLog } = {}
+  {
+    readPowers = defaultReadPowers,
+    isBuiltin,
+    log = defaultLog,
+    trustEntrypoint = true,
+  } = {}
 ) => {
   const lmrCache = new LMRCache()
 
@@ -149,7 +157,11 @@ export const buildModuleRecords = (
             compartmentRenames,
             lmrCache,
             {
-              isEntry: entryCompartment === compartment,
+              // isEntry only makes sense if we trust the entrypoint, since its
+              // name will be replaced with the root slug, which means resources
+              // for the root slug would be written to the policy instead of the
+              // canonical pkg name of the entrypoint
+              isEntry: trustEntrypoint && entryCompartment === compartment,
               readPowers,
               isBuiltin,
               missingModules,
@@ -255,16 +267,23 @@ export function compartmentMapToPolicy(
     policyOverride,
     debug = false,
     isBuiltin,
-    log = fallbackLog,
+    log = defaultLog,
+    trustEntrypoint = DEFAULT_TRUST_ENTRYPOINT,
   } = {}
 ) {
   const moduleRecords = buildModuleRecords(compartmentMap, sources, renames, {
     readPowers,
     isBuiltin,
     log,
+    trustEntrypoint,
   })
 
-  const inspector = inspectModuleRecords(moduleRecords, { debug, log })
+  log.debug(`Trust entrypoint? ${trustEntrypoint}`)
+  const inspector = inspectModuleRecords(moduleRecords, {
+    debug,
+    log,
+    trustEntrypoint,
+  })
 
   return inspector.generatePolicy({
     policyOverride,

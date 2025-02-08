@@ -362,6 +362,8 @@ const main = async (args = hideBin(process.argv)) => {
           write,
         } = argv
 
+        const trustEntrypoint = !entrypoint.includes('node_modules')
+
         /**
          * This will be the policy merged with overrides, if present
          *
@@ -408,7 +410,7 @@ const main = async (args = hideBin(process.argv)) => {
            */ (argv['--'])
         )
 
-        await run(entrypoint, policy)
+        await run(entrypoint, policy, { trustEntrypoint })
       }
     )
     .command(
@@ -454,12 +456,21 @@ const main = async (args = hideBin(process.argv)) => {
         dev,
         write,
       }) => {
+        const trustEntrypoint = !entrypoint.includes('node_modules')
+
+        if (!trustEntrypoint) {
+          log.info(
+            'Entrypoint is in a node_modules/ directory and is considered untrusted'
+          )
+        }
+
         const policy = await generatePolicy(entrypoint, {
           debug,
           write,
           policyPath,
           policyDebugPath,
           dev,
+          trustEntrypoint,
         })
 
         if (debug) {

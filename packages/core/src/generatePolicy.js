@@ -72,7 +72,7 @@ function createModuleInspector(opts) {
    */
   function inspectModule(
     moduleRecord,
-    { isBuiltin, includeDebugInfo = false }
+    { isBuiltin, includeDebugInfo = false, trustRoot = true }
   ) {
     if (moduleRecord === undefined) {
       return
@@ -83,15 +83,19 @@ function createModuleInspector(opts) {
     // call the correct analyzer for the module type
     switch (type) {
       case 'builtin': {
-        inspectBuiltinModule(moduleRecord, { includeDebugInfo })
+        inspectBuiltinModule(moduleRecord, { includeDebugInfo, trustRoot })
         return
       }
       case 'native': {
-        inspectNativeModule(moduleRecord, { includeDebugInfo })
+        inspectNativeModule(moduleRecord, { includeDebugInfo, trustRoot })
         return
       }
       case 'js': {
-        inspectJsModule(moduleRecord, { isBuiltin, includeDebugInfo })
+        inspectJsModule(moduleRecord, {
+          isBuiltin,
+          includeDebugInfo,
+          trustRoot,
+        })
         return
       }
       default: {
@@ -141,7 +145,7 @@ function createModuleInspector(opts) {
    */
   function inspectJsModule(
     moduleRecord,
-    { isBuiltin, includeDebugInfo = false }
+    { isBuiltin, includeDebugInfo = false, trustRoot = true }
   ) {
     const { packageName, specifier } = moduleRecord
     let moduleDebug
@@ -165,7 +169,7 @@ function createModuleInspector(opts) {
     }
     // skip for root modules (modules not from deps)
     const isRootModule = packageName === rootSlug
-    if (isRootModule) {
+    if (trustRoot && isRootModule) {
       return
     }
     // skip json files
@@ -359,6 +363,7 @@ function createModuleInspector(opts) {
     policyOverride,
     includeDebugInfo = false,
     moduleToPackageFallback,
+    trustRoot = true,
   }) {
     /** @type {import('./schema').Resources} */
     const resources = {}
@@ -379,7 +384,7 @@ function createModuleInspector(opts) {
       let native
       // skip for root modules (modules not from deps)
       const isRootModule = packageName === rootSlug
-      if (isRootModule) {
+      if (trustRoot && isRootModule) {
         return
       }
       // get dependencies, ignoring builtins
@@ -567,6 +572,7 @@ function getDefaultPaths(policyName) {
 /**
  * @typedef ModuleInspectorOptions
  * @property {(value: string) => boolean} isBuiltin
+ * @property {boolean} [trustRoot] If `true`, trust the root package
  * @property {boolean} [includeDebugInfo]
  * @property {(specifier: string) => string | undefined} [moduleToPackageFallback]
  */

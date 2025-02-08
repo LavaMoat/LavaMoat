@@ -9,14 +9,16 @@
 import type { MapNodeModulesOptions } from '@endo/compartment-mapper'
 import type nodeFs from 'node:fs'
 import { PathLike, Stats } from 'node:fs'
-import type { Except, Merge } from 'type-fest'
+import type { Except, Merge, Simplify } from 'type-fest'
 import type {
   BaseLoadCompartmentMapOptions,
   GeneratePolicyOptions,
+  WithDebug,
   WithIsBuiltin,
   WithLog,
   WithPolicyOverride,
   WithReadPowers,
+  WithTrustEntrypoint,
   WritePolicyOptions,
 } from './types.js'
 
@@ -67,32 +69,28 @@ export type MissingModuleMap = Map<string, Set<string>>
  *
  * @internal
  */
-export type PolicyGeneratorContextOptions = Merge<
-  WithReadPowers,
-  Merge<
-    WithIsBuiltin,
-    Merge<
-      WithLog,
-      {
-        /**
-         * If `true`, the `PolicyGeneratorContext` represents the entry
-         * compartment
-         */
-        isEntry?: boolean
+export type PolicyGeneratorContextOptions = Simplify<
+  WithReadPowers &
+    WithIsBuiltin &
+    WithLog & {
+      /**
+       * If `true`, the `PolicyGeneratorContext` represents the entry
+       * compartment
+       */
+      isEntry?: boolean
 
-        /**
-         * If missing modules are to be tracked and summarized, this should be
-         * the same `Map` passed into every call to
-         * `PolicyGeneratorContext.create()`.
-         *
-         * `PolicyGeneratorContext` will populate this data structure with the
-         * names of missing modules per compartment.
-         */
-        missingModules?: MissingModuleMap
-      }
-    >
-  >
+      /**
+       * If missing modules are to be tracked and summarized, this should be the
+       * same `Map` passed into every call to
+       * `PolicyGeneratorContext.create()`.
+       *
+       * `PolicyGeneratorContext` will populate this data structure with the
+       * names of missing modules per compartment.
+       */
+      missingModules?: MissingModuleMap
+    }
 >
+
 /**
  * A function _or_ a constructor.
  *
@@ -163,9 +161,11 @@ export interface WithFs {
   fs?: FsUtilInterface
 }
 
-export type ResolveBinScriptOptions = Merge<
-  WithFs,
-  {
+/**
+ * Options for `resolveBinScript()`
+ */
+export type ResolveBinScriptOptions = Simplify<
+  WithFs & {
     /**
      * Directory to begin looking for the script in
      */
@@ -173,4 +173,14 @@ export type ResolveBinScriptOptions = Merge<
   }
 >
 
+/**
+ * Options for `resolveWorkspace()`
+ */
 export type ResolveWorkspaceOptions = ResolveBinScriptOptions
+
+/**
+ * Options for `inspectModuleRecords()`
+ */
+export type InspectModuleRecordsOptions = Simplify<
+  WithLog & WithDebug & WithTrustEntrypoint
+>

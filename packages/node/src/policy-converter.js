@@ -56,7 +56,7 @@ const { create, entries, fromEntries } = Object
  * @satisfies {LavaMoatEndoPolicy}
  * @internal
  */
-export const ENDO_POLICY_BOILERPLATE = /** @type {const} */ ({
+export const ENDO_POLICY_TRUSTED_BOILERPLATE = /** @type {const} */ ({
   [ENDO_POLICY_DEFAULT_ATTENUATOR]: DEFAULT_ATTENUATOR,
   [ENDO_POLICY_ENTRY]: {
     [ENDO_PKG_POLICY_GLOBALS]: [ENDO_POLICY_ITEM_ROOT],
@@ -64,6 +64,12 @@ export const ENDO_POLICY_BOILERPLATE = /** @type {const} */ ({
     [ENDO_PKG_POLICY_BUILTINS]: ENDO_POLICY_ITEM_WILDCARD,
     [ENDO_PKG_POLICY_NO_GLOBAL_FREEZE]: true,
   },
+  [ENDO_POLICY_RESOURCES]: {},
+})
+
+export const ENDO_POLICY_UNTRUSTED_BOILERPLATE = /** @type {const} */ ({
+  [ENDO_POLICY_DEFAULT_ATTENUATOR]: DEFAULT_ATTENUATOR,
+  [ENDO_POLICY_ENTRY]: {},
   [ENDO_POLICY_RESOURCES]: {},
 })
 
@@ -197,10 +203,10 @@ const convertEndoPackagePolicy = (resources) => {
  * policy
  *
  * @param {LavaMoatPolicy} policy
- * @param {LavaMoatPolicyOverrides} [policyOverride]
+ * @param {ToEndoPolicyOptions} [options] Options for conversion
  * @returns {LavaMoatEndoPolicy} Endo policy
  */
-const convert = (policy, policyOverride) => {
+const convert = (policy, {policyOverride, trustEntrypoint = true}={}) => {
   const lavaMoatPolicy = mergePolicy(policy, policyOverride)
 
   const lavamoatResources = lavaMoatPolicy.resources ?? create(null)
@@ -221,9 +227,18 @@ const convert = (policy, policyOverride) => {
   )
 
   /** @type {LavaMoatEndoPolicy} */
-  const endoPolicy = {
-    ...ENDO_POLICY_BOILERPLATE,
-    [ENDO_POLICY_RESOURCES]: resources,
+  let endoPolicy
+  if (trustEntrypoint) {
+    endoPolicy = {
+      ...ENDO_POLICY_TRUSTED_BOILERPLATE,
+      [ENDO_POLICY_RESOURCES]: resources,
+    }
+  } else {
+    endoPolicy = {
+      ...ENDO_POLICY_UNTRUSTED_BOILERPLATE,
+      [ENDO_POLICY_ENTRY]:
+      [ENDO_POLICY_RESOURCES]: resources,
+    }
   }
 
   return endoPolicy
@@ -236,15 +251,20 @@ const convert = (policy, policyOverride) => {
  *
  * @param {LavaMoatPolicy} policy
  * @param {LavaMoatPolicyOverrides} [policyOverride]
+ * @param {boolean} [trustEntrypoint] If true, trust the entry point
  * @returns {LavaMoatEndoPolicy} Endo Policy
  * @public
  */
-export const toEndoPolicySync = (policy, policyOverride) => {
+export const toEndoPolicySync = (
+  policy,
+  policyOverride,
+  trustEntrypoint = true
+) => {
   assertPolicy(policy)
   if (policyOverride) {
     assertPolicyOverride(policyOverride)
   }
-  return convert(policy, policyOverride)
+  return convert(policy, policyOverride, trustEntrypoint)
 }
 
 /**
@@ -320,5 +340,5 @@ export const toEndoPolicy = async (policyOrPolicyPath, options = {}) => {
     policyOverride = allegedPolicyOverride
   }
 
-  return convert(policy, policyOverride)
+  return convert(policy, policyOverride, options.trustEntrypoint)
 }

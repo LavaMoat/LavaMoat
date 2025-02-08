@@ -175,3 +175,5 @@ export const NATIVE_PARSER_FILE_EXT = 'node'
  * Used by policy gen
  */
 export const NATIVE_PARSER_NAME = 'native'
+
+export const DEFAULT_TRUST_ENTRYPOINT = true

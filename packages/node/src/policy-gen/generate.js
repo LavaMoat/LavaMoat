@@ -9,7 +9,11 @@ import assert from 'node:assert'
 import nodeFs from 'node:fs'
 import nodePath from 'node:path'
 import { defaultReadPowers } from '../compartment/power.js'
-import { DEFAULT_POLICY_DEBUG_PATH, DEFAULT_POLICY_PATH } from '../constants.js'
+import {
+  DEFAULT_POLICY_DEBUG_PATH,
+  DEFAULT_POLICY_PATH,
+  DEFAULT_TRUST_ENTRYPOINT,
+} from '../constants.js'
 import { log as defaultLog } from '../log.js'
 import { writePolicy } from '../policy-util.js'
 import { devToConditions } from '../util.js'
@@ -18,10 +22,13 @@ import { compartmentMapToPolicy } from './to-policy.js'
 
 /**
  * @import {GenerateOptions, LoadCompartmentMapOptions} from '../internal.js'
- * @import {GeneratePolicyOptions, CompartmentMapToPolicyOptions} from '../types.js'
+ * @import {GeneratePolicyOptions, CompartmentMapToPolicyOptions, IsAbsoluteFn} from '../types.js'
  * @import {LavaMoatPolicy, LavaMoatPolicyDebug} from 'lavamoat-core'
  * @import {SetFieldType} from 'type-fest'
  */
+
+/** @type {IsAbsoluteFn} */
+const defaultIsAbsolute = nodePath.isAbsolute
 
 /**
  * Generates a LavaMoat debug policy from a given entry point using
@@ -60,6 +67,7 @@ const generate = async (
     isBuiltin,
     log = defaultLog,
     dev = false,
+    trustEntrypoint = DEFAULT_TRUST_ENTRYPOINT,
     ...archiveOpts
   } = {}
 ) => {
@@ -79,7 +87,13 @@ const generate = async (
   )
 
   /** @type {CompartmentMapToPolicyOptions} */
-  const baseOpts = { readPowers, policyOverride, isBuiltin, log }
+  const baseOpts = {
+    readPowers,
+    policyOverride,
+    isBuiltin,
+    log,
+    trustEntrypoint,
+  }
 
   // this weird thing is to make TS happy about the overload
   const opts = debug ? { debug: true, ...baseOpts } : baseOpts
@@ -121,10 +135,11 @@ export const generatePolicy = async (
     policyPath = ABS_POLICY_PATH,
     writableFs = nodeFs,
     readPowers = defaultReadPowers,
-    isAbsolute = nodePath.isAbsolute,
+    isAbsolute = defaultIsAbsolute,
     write: shouldWrite = false,
     debug,
     log = defaultLog,
+    trustEntrypoint = DEFAULT_TRUST_ENTRYPOINT,
     ...generateOpts
   } = {}
 ) => {
@@ -168,6 +183,7 @@ export const generatePolicy = async (
     const debugPolicy = await generate(entrypointPath, {
       ...generateOpts,
       readPowers,
+      trustEntrypoint,
       debug: true,
     })
     await writePolicy(policyDebugPath, debugPolicy, { fs: writableFs })
@@ -181,7 +197,11 @@ export const generatePolicy = async (
     policy = corePolicy
   } else {
     log.info(`Generating LavaMoat policy from ${entrypointPath}`)
-    policy = await generate(entrypointPath, { ...generateOpts, readPowers })
+    policy = await generate(entrypointPath, {
+      ...generateOpts,
+      trustEntrypoint,
+      readPowers,
+    })
   }
 
   if (shouldWrite) {

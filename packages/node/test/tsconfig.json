@@ -11,7 +11,7 @@
     },
     "preserveSymlinks": true
   },
-  "include": ["."],
+  "include": [".", "e2e/fixture/bin-entry/node_modules/lard-o-matic"],
   "exclude": ["unit/fixture"],
   "references": [{ "path": "../src/tsconfig.json" }]
 }

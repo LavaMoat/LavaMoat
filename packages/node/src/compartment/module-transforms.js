@@ -30,6 +30,13 @@ const DIRECT_EVAL_REPLACE_FN = (_, p1) => '(0,eval)' + p1
 const evadeDirectEvalExpressions = (source) => {
   return source.replace(/\beval(\s*\()/g, DIRECT_EVAL_REPLACE_FN)
 }
+/**
+ * @param {string} source
+ * @returns {string}
+ */
+const decapitateHashbang = (source) => {
+  return source.replace(/^#!.+\r?\n/, '')
+}
 
 /**
  * Evade things that look like HTML comments but are actually decrement
@@ -70,6 +77,7 @@ const evadeImportString = (source) => {
 const createModuleTransform = (parser) => {
   return (sourceBytes, specifier, location, _packageLocation, opts) => {
     let source = decoder.decode(sourceBytes)
+    source = decapitateHashbang(source)
     // FIXME: this function calls stuff we could get in `ses/tools.js`
     // except `evadeDirectEvalExpressions`. unclear if we should be using this from `lavamoat-core`
     source = applySourceTransforms(source)
