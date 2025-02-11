@@ -46,6 +46,10 @@
     "@types/yargs": "17.0.33",
     "@typescript-eslint/eslint-plugin": "7.18.0",
     "@typescript-eslint/parser": "7.18.0",
+    "@typespec/compiler": "0.64.0",
+    "@typespec/json-schema": "0.64.0",
+    "@typespec/prettier-plugin-typespec": "0.64.0",
+    "@typespec/versioning": "0.64.0",
     "ava": "5.3.1",
     "cross-env": "7.0.3",
     "depcheck": "1.4.7",
@@ -65,11 +69,13 @@
     "prettier-plugin-pkg": "0.18.1",
     "ses": "1.10.0",
     "type-fest": "4.30.0",
-    "typescript": "5.6.3"
+    "typescript": "5.6.3",
+    "typespec-typescript-emitter": "0.3.4"
   },
   "overrides": {
     "@endo/compartment-mapper": "$@endo/compartment-mapper",
     "@types/node": "$@types/node",
+    "@typespec/compiler": "$@typespec/compiler",
     "cross-spawn": "7.0.6",
     "ses": "$ses",
     "type-fest": "$type-fest",
@@ -87,7 +93,16 @@
     "jsdocTagsOrder": "{\"template\": 24.5}",
     "plugins": [
       "prettier-plugin-jsdoc",
-      "prettier-plugin-pkg"
+      "prettier-plugin-pkg",
+      "@typespec/prettier-plugin-typespec"
+    ],
+    "overrides": [
+      {
+        "files": "*.tsp",
+        "options": {
+          "parser": "typespec"
+        }
+      }
     ],
     "semi": false,
     "singleQuote": true,

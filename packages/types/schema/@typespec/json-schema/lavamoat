@@ -1,0 +1,313 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "lavamoat",
+    "$defs": {
+        "PackageResourcePolicy": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "PackageResourcePolicy.json",
+            "type": "object",
+            "properties": {
+                "builtin": {
+                    "$ref": "RecordBoolean.json"
+                },
+                "package": {
+                    "$ref": "RecordBoolean.json"
+                },
+                "global": {
+                    "type": "object",
+                    "properties": {},
+                    "additionalProperties": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "const": "read"
+                            },
+                            {
+                                "type": "string",
+                                "const": "write"
+                            },
+                            {
+                                "type": "boolean"
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        "RecordBoolean": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "RecordBoolean.json",
+            "type": "object",
+            "properties": {},
+            "additionalProperties": {
+                "type": "boolean"
+            }
+        },
+        "LavaMoatPolicy": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "LavaMoatPolicy.json",
+            "type": "object",
+            "properties": {
+                "resources": {
+                    "$ref": "RecordPackageResourcePolicy.json"
+                },
+                "resolutions": {
+                    "$ref": "RecordRecordString.json"
+                }
+            }
+        },
+        "RecordPackageResourcePolicy": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "RecordPackageResourcePolicy.json",
+            "type": "object",
+            "properties": {},
+            "additionalProperties": {
+                "$ref": "PackageResourcePolicy.json"
+            }
+        },
+        "RecordRecordString": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "RecordRecordString.json",
+            "type": "object",
+            "properties": {},
+            "additionalProperties": {
+                "$ref": "RecordString.json"
+            }
+        },
+        "RecordString": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "RecordString.json",
+            "type": "object",
+            "properties": {},
+            "additionalProperties": {
+                "type": "string"
+            }
+        },
+        "LavaMoatPolicyDebug": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "LavaMoatPolicyDebug.json",
+            "type": "object",
+            "properties": {
+                "debugInfo": {
+                    "$ref": "RecordDebugInfo.json"
+                }
+            },
+            "required": [
+                "debugInfo"
+            ],
+            "allOf": [
+                {
+                    "$ref": "LavaMoatPolicy.json"
+                }
+            ]
+        },
+        "RecordDebugInfo": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "RecordDebugInfo.json",
+            "type": "object",
+            "properties": {},
+            "additionalProperties": {
+                "$ref": "DebugInfo.json"
+            }
+        },
+        "DebugInfo": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "DebugInfo.json",
+            "type": "object",
+            "properties": {
+                "parseErrors": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "ParseError.json"
+                    }
+                },
+                "moduleRecord": {
+                    "$ref": "LavaMoatModuleRecord.json"
+                },
+                "sesCompat": {
+                    "$ref": "SesCompat.json"
+                },
+                "globals": {
+                    "$ref": "RecordBoolean.json"
+                },
+                "builtin": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            },
+            "required": [
+                "moduleRecord",
+                "sesCompat",
+                "globals",
+                "builtin"
+            ]
+        },
+        "ParseError": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "ParseError.json",
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "reasonCode": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "code",
+                "reasonCode"
+            ]
+        },
+        "LavaMoatModuleRecord": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "LavaMoatModuleRecord.json",
+            "type": "object",
+            "properties": {
+                "specifier": {
+                    "type": "string",
+                    "description": "Module specifier"
+                },
+                "file": {
+                    "type": "string",
+                    "description": "Path to module file.\n\nIf a builtin, this is the same as `specifier`"
+                },
+                "type": {
+                    "$ref": "ModuleRecordType.json",
+                    "description": "Module type"
+                },
+                "packageName": {
+                    "type": "string",
+                    "description": "Package name\n\nIf a builtin, this is the same as `specifier`"
+                },
+                "content": {
+                    "type": "string",
+                    "description": "Content of the module file (raw source code)"
+                },
+                "importMap": {
+                    "$ref": "RecordString.json",
+                    "description": "Import map"
+                }
+            },
+            "required": [
+                "specifier",
+                "file",
+                "type",
+                "packageName",
+                "importMap"
+            ]
+        },
+        "ModuleRecordType": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "ModuleRecordType.json",
+            "type": "string",
+            "enum": [
+                "builtin",
+                "native",
+                "js"
+            ]
+        },
+        "SesCompat": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "SesCompat.json",
+            "type": "object",
+            "properties": {
+                "dynamicRequires": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "SesCompatObj.json"
+                    }
+                },
+                "primordialMutations": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "SesCompatObj.json"
+                    }
+                },
+                "strictModeViolations": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "SesCompatObj.json"
+                    }
+                }
+            },
+            "required": [
+                "dynamicRequires",
+                "primordialMutations",
+                "strictModeViolations"
+            ]
+        },
+        "SesCompatObj": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "SesCompatObj.json",
+            "type": "object",
+            "properties": {
+                "node": {
+                    "$ref": "SesCompatNode.json"
+                }
+            },
+            "required": [
+                "node"
+            ]
+        },
+        "SesCompatNode": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "SesCompatNode.json",
+            "type": "object",
+            "properties": {
+                "loc": {
+                    "$ref": "SesCompatNodeLocation.json"
+                }
+            },
+            "required": [
+                "loc"
+            ]
+        },
+        "SesCompatNodeLocation": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "SesCompatNodeLocation.json",
+            "type": "object",
+            "properties": {
+                "start": {
+                    "$ref": "NodeLocation.json"
+                },
+                "end": {
+                    "$ref": "NodeLocation.json"
+                }
+            },
+            "required": [
+                "start",
+                "end"
+            ]
+        },
+        "NodeLocation": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "NodeLocation.json",
+            "type": "object",
+            "properties": {
+                "column": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 4294967295
+                },
+                "index": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 4294967295
+                },
+                "line": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 4294967295
+                }
+            },
+            "required": [
+                "column",
+                "index",
+                "line"
+            ]
+        }
+    }
+}

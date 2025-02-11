@@ -1,0 +1,15 @@
+emit:
+  - '@typespec/json-schema'
+  - 'typespec-typescript-emitter'
+output-dir: '{project-root}/schema'
+options:
+  '@typespec/json-schema':
+    file-type: 'json'
+    bundleId: 'lavamoat'
+    emitAllModels: true
+  'typespec-typescript-emitter':
+    root-namespace: 'LavaMoat'
+    out-dir: '{project-root}/schema'
+    enable-types: true
+    enable-typeguards: false
+    enable-routes: false

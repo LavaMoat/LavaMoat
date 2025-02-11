@@ -1,5 +1,17 @@
 {
-  "extends": "../../.config/tsconfig.workspace.json",
-  "files": [],
-  "references": [{ "path": "./src/tsconfig.json" }],
+  "compilerOptions": {
+    "target": "ES2022",
+    "useDefineForClassFields": true,
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "lib": ["ES2022"],
+    "rootDir": ".",
+    "outDir": "dist",
+    "sourceMap": true,
+    "declaration": true,
+
+    /* Linting */
+    "strict": true
+  },
+  "include": ["src", "test"]
 }
