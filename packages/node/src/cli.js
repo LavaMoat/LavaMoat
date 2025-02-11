@@ -11,17 +11,6 @@
  * Regarding middleware: Any option which _does not_ either a) need other
  * options for postprocessing, or b) need to be asynchronous--should use
  * {@link yargs.coerce} instead.
- *
- * Finally, we deviate from yargs' default behavior by disabling
- * {@link https://github.com/yargs/yargs-parser#camel-case-expansion camel case expansion}.
- * This means an option such as `policy-override` will _not_ magically become
- * `policyOverride` in the parsed arguments object. The reason is that we need
- * to perform some post-processing of paths _in middleware_, and it's easy to
- * screw up if we have to do it twice for each option. _Furthermore_, because
- * `@types/yargs` expects camel-case expansion to be enabled, the types are
- * incorrect for the parameter to middleware and handler (`argv`); it will
- * include camel-cased properties where none exist. My advice: just pretend they
- * aren't there.
  * @packageDocumentation
  */
 
@@ -61,6 +50,52 @@ const PATH_GROUP = 'Path Options:'
  * Use this to give emphasis to words in error messages
  */
 const em = chalk.yellow
+
+/**
+ * Strip out all `lavamoat` CLI args from `process.argv` so that the entrypoint
+ * receives a `process.argv` like it would if it were executed directly with
+ * `node`.
+ *
+ * Used for execution only.
+ *
+ * For this to work, we _must_ mutate `process.argv` _in place_.
+ *
+ * @param {string} entrypoint Entry module
+ * @param {(string | number)[]} nonOptionArguments Array of stuff passed after
+ *   `--` on the command-line. Note that Yargs parses numbers, and we have to
+ *   convert them back to strings.
+ * @returns {void}
+ */
+const stripProcessArgv = (entrypoint, nonOptionArguments = []) => {
+  /**
+   * This module could be executed in myriad ways (`lavamoat`, `node
+   * /path/to/lavamoat`, `npx lavamoat2`, etc.), so we are just going to
+   * recreate the args from scratch
+   */
+  const start = 0
+
+  /**
+   * If the user provided `--` we want everything after that, but if they
+   * didn't, the entire rest of the array is lavamoat args, so it can be
+   * removed.
+   */
+  const deleteCount = process.argv.includes('--')
+    ? process.argv.indexOf('--')
+    : process.argv.length
+
+  /**
+   * Path to `node`, any args to `node`, the path to the entrypoint, then
+   * whatever was in {@link nonOptionArguments}. Hope this works!
+   */
+  const items = [
+    process.execPath,
+    ...process.execArgv,
+    entrypoint,
+    ...nonOptionArguments.map(String),
+  ]
+
+  process.argv.splice(start, deleteCount, ...items)
+}
 
 /**
  * Main entry point to CLI
@@ -123,7 +158,26 @@ const main = async (args = hideBin(process.argv)) => {
    */
   yargs(args)
     .parserConfiguration({
+      /**
+       * We deviate from yargs' default behavior by disabling
+       * {@link https://github.com/yargs/yargs-parser#camel-case-expansion camel case expansion}.
+       * This means an option such as `policy-override` will _not_ magically
+       * become `policyOverride` in the parsed arguments object. The reason is
+       * that we need to perform some post-processing of paths _in middleware_,
+       * and it's easy to screw up if we have to do it twice for each option.
+       * _Furthermore_, because `@types/yargs` expects camel-case expansion to
+       * be enabled, the types are incorrect for the parameter to middleware and
+       * handler (`argv`); it will include camel-cased properties where none
+       * exist. My advice: just pretend they aren't there.
+       */
       'camel-case-expansion': false,
+
+      /**
+       * This stuffs everything after the first `--` into its own array (in the
+       * `--` prop of yargs' parsed arguments object). We will use this to
+       * provide a "clean" `process.argv` for entrypoints.
+       */
+      'populate--': true,
     })
     .scriptName('lavamoat')
     .version(`${version}`)
@@ -187,8 +241,6 @@ const main = async (args = hideBin(process.argv)) => {
         describe: 'Include development dependencies',
         type: 'boolean',
         global: true,
-        default: true,
-        coerce: Boolean,
         group: BEHAVIOR_GROUP,
       },
     })
@@ -359,7 +411,16 @@ const main = async (args = hideBin(process.argv)) => {
           }
         }
 
-        await run(argv.entrypoint, policy)
+        stripProcessArgv(
+          entrypoint,
+          /**
+           * `@types/yargs` doesn't know about this
+           *
+           * @type {(string | number)[]}
+           */ (argv['--'])
+        )
+
+        await run(entrypoint, policy)
       }
     )
     .command(

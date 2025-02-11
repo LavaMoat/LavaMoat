@@ -43,7 +43,9 @@ const assembleRuntime = (KEY, runtimeModules) => {
         LAVAMOAT['${name}'] = module.exports;
       })();`
     }
-    assembly += `\n;/*${name}*/;\n${sourceString}`
+    if (sourceString) {
+      assembly += `\n;/*${name}*/;\n${sourceString}`
+    }
   })
   assembly += `;
   __webpack_require__.${KEY} = LAVAMOAT.defaultExport;

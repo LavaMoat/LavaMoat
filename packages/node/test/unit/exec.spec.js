@@ -1,34 +1,11 @@
 import '../../src/preamble.js'
 
 import test from 'ava'
-import { run } from '../../src/exec/run.js'
+import { createExecMacros } from './exec-macros.js'
 
 const isDockerCI = !!process.env.DOCKER_CI
 
-/**
- * Unique index for generic test titles (to avoid test title collisions)
- */
-let genericTitleIndex = 0
-
-/**
- * @import {MacroDeclarationOptions} from 'ava'
- * @import {LavaMoatPolicy} from 'lavamoat-core';
- */
-
-const testExec = test.macro(
-  /**
-   * @type {MacroDeclarationOptions<
-   *   [entry: string | URL, policy: LavaMoatPolicy, expected: unknown]
-   * >}
-   */ ({
-    exec: async (t, entryFile, policy, expected) => {
-      const result = await run(entryFile, policy)
-      t.deepEqual({ .../** @type {any} */ (result) }, expected)
-    },
-    title: (title) =>
-      title ?? `program output matches expected (${genericTitleIndex++}`,
-  })
-)
+const { testExec, testExecForJSON } = createExecMacros(test)
 
 test(
   'app without dependencies',
@@ -36,6 +13,27 @@ test(
   new URL('./fixture/no-deps/app.js', import.meta.url),
   { resources: {} },
   { hello: 'world' }
+)
+
+test(
+  'dynamic imports (JSON)',
+  testExecForJSON,
+  'dynamic.json',
+  {
+    resources: {
+      'dynamic-require': {
+        packages: {
+          dummy: true,
+        },
+      },
+      dummy: {
+        packages: {
+          muddy: true,
+        },
+      },
+    },
+  },
+  { hello: 'hello world' }
 )
 
 test(

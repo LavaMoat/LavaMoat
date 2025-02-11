@@ -63,6 +63,16 @@
       - any-glob-to-any-file:
           - 'packages/laverna/**'
 
+'pkg:@lavamoat/node':
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'packages/node/**'
+
+'pkg:lavamoat-node':
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'packages/lavamoat-node/**'
+
 'dependencies':
   - changed-files:
       - any-glob-to-any-file:

@@ -108,7 +108,7 @@ Path Options:
                                          [string] [default: (current directory)]
 
 Behavior Options:
-      --dev  Include development dependencies          [boolean] [default: true]
+      --dev  Include development dependencies          [boolean]
 
 Positionals:
   entrypoint  Path to the application entry point; relative to --root   [string]
