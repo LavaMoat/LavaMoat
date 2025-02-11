@@ -279,6 +279,13 @@ const lavamoatRuntimeWrapper = (resourceId, runtimeKit) => {
       policyRequire[item] = harden(__webpack_require__[item])
     }
 
+    policyRequire.e = (chunkId) => {
+      return Promise.all(Object.keys(__webpack_require__.f).reduce((promises, key) => {
+        __webpack_require__.f[key](chunkId, promises);
+        return promises;
+      }, []));
+    };
+
     policyRequire.m = new Proxy(
       {},
       {
