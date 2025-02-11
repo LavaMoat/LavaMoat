@@ -2,7 +2,7 @@ const path = require('node:path')
 const assert = require('node:assert')
 
 const { WebpackError, RuntimeModule } = require('webpack')
-const { Compilation } = require('webpack')
+const { Compilation, sources } = require('webpack')
 const browserResolve = require('browser-resolve')
 
 const { generateIdentifierLookup } = require('./buildtime/aa.js')
@@ -667,6 +667,34 @@ class LavaMoatPlugin {
             })
           )
         }
+
+        compiler.hooks.compilation.tap("ScuttlingAdjustmentPlugin", (compilation) => {
+          compilation.hooks.processAssets.tap(
+            {
+              name: "ScuttlingAdjustmentPlugin",
+              stage: Compilation.PROCESS_ASSETS_STAGE_OPTIMIZE_SIZE,
+            },
+            (assets) => {
+              for (const assetName in assets) {
+                if (assetName.includes("runtime")) {
+                  const originalSource = assets[assetName].source();
+                  const wrappedSource = `
+                  /* SCUTTLING ADJUSTMENT START */
+                  (function(){
+                    const {setTimeout, clearTimeout, webpackChunk} = globalThis;
+                    ${originalSource}
+                  })();
+                  /* SCUTTLING ADJUSTMENT END */
+                  `;
+
+                  // Replace asset with the modified content
+                  compilation.updateAsset(assetName,
+                    new sources.RawSource(wrappedSource));
+                }
+              }
+            }
+          );
+        });
 
         // TODO: add later hooks to optionally verify correctness and totality
         // of wrapping for the paranoid mode.
