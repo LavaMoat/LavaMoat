@@ -553,84 +553,84 @@ class LavaMoatPlugin {
                   // narrow down the policy and map to module identifiers
                   const policyData = identifierLookup.getTranslatedPolicy()
 
-                const runtimeChunks = [
-                  {
-                    name: 'root',
-                    data: identifierLookup.root || null,
-                    json: true,
-                  },
-                  {
-                    name: 'idmap',
-                    data: identifierLookup.identifiersForModuleIds || null,
-                    json: true,
-                  },
-                  {
-                    name: 'unenforceable',
-                    data: identifierLookup.unenforceableModuleIds || null,
-                    json: true,
-                  },
-                  {
-                    name: 'externals',
-                    data: identifierLookup.externals || null,
-                    json: true,
-                  },
-                  { name: 'options', data: runtimeOptions, json: true },
-                  (typeof runtimeOptions?.scuttleGlobalThis === 'boolean' &&
-                    runtimeOptions.scuttleGlobalThis === true) ||
-                  (typeof runtimeOptions?.scuttleGlobalThis === 'object' &&
-                    runtimeOptions.scuttleGlobalThis.enabled === true)
-                    ? {
+                  const runtimeChunks = [
+                    {
+                      name: 'root',
+                      data: identifierLookup.root || null,
+                      json: true,
+                    },
+                    {
+                      name: 'idmap',
+                      data: identifierLookup.identifiersForModuleIds || null,
+                      json: true,
+                    },
+                    {
+                      name: 'unenforceable',
+                      data: identifierLookup.unenforceableModuleIds || null,
+                      json: true,
+                    },
+                    {
+                      name: 'externals',
+                      data: identifierLookup.externals || null,
+                      json: true,
+                    },
+                    {name: 'options', data: runtimeOptions, json: true},
+                    (typeof runtimeOptions?.scuttleGlobalThis === 'boolean' &&
+                      runtimeOptions.scuttleGlobalThis === true) ||
+                    (typeof runtimeOptions?.scuttleGlobalThis === 'object' &&
+                      runtimeOptions.scuttleGlobalThis.enabled === true)
+                      ? {
                         name: 'scuttling',
                         shimRequire: 'lavamoat-core/src/scuttle.js',
                       }
-                    : {},
-                  { name: 'policy', data: policyData, json: true },
-                  {
-                    name: 'ENUM',
-                    file: path.join(__dirname, './ENUM.json'),
-                    json: true,
-                  },
-                  {
-                    name: 'endowmentsToolkit',
-                    shimRequire: 'lavamoat-core/src/endowmentsToolkit.js',
-                  },
-                  {
-                    name: 'runtime',
-                    file: path.join(__dirname, './runtime/runtime.js'),
-                  },
-                ]
+                      : {},
+                    {name: 'policy', data: policyData, json: true},
+                    {
+                      name: 'ENUM',
+                      file: path.join(__dirname, './ENUM.json'),
+                      json: true,
+                    },
+                    {
+                      name: 'endowmentsToolkit',
+                      shimRequire: 'lavamoat-core/src/endowmentsToolkit.js',
+                    },
+                    {
+                      name: 'runtime',
+                      file: path.join(__dirname, './runtime/runtime.js'),
+                    },
+                  ]
 
-                if (options.debugRuntime) {
-                  runtimeChunks.push({
-                    name: 'debug',
-                    shimRequire: path.join(__dirname, './runtime/debug.js'),
-                  })
+                  if (options.debugRuntime) {
+                    runtimeChunks.push({
+                      name: 'debug',
+                      shimRequire: path.join(__dirname, './runtime/debug.js'),
+                    })
+                  }
+                  const lavaMoatRuntime = assembleRuntime(
+                    RUNTIME_KEY,
+                    runtimeChunks
+                  )
+
+                  // set.add(RuntimeGlobals.onChunksLoaded); // TODO: develop an understanding of what this line does and why it was a part of the runtime setup for module federation
+
+                  // Mark the chunk as processed by adding it to the WeakSet.
+                  onceForChunkSet.add(chunk)
+
+                  // Add the runtime modules to the chunk, which handles
+                  // the runtime logic for wrapping with lavamoat.
+                  compilation.addRuntimeModule(
+                    chunk,
+                    new VirtualRuntimeModule({
+                      name: 'LavaMoat/runtime',
+                      source: lavaMoatRuntime,
+                    })
+                  )
+
+                  PROGRESS.report('runtimeAdded')
                 }
-                const lavaMoatRuntime = assembleRuntime(
-                  RUNTIME_KEY,
-                  runtimeChunks
-                )
-
-                // set.add(RuntimeGlobals.onChunksLoaded); // TODO: develop an understanding of what this line does and why it was a part of the runtime setup for module federation
-
-                // Mark the chunk as processed by adding it to the WeakSet.
-                onceForChunkSet.add(chunk)
-
-                // Add the runtime modules to the chunk, which handles
-                // the runtime logic for wrapping with lavamoat.
-                compilation.addRuntimeModule(
-                  chunk,
-                  new VirtualRuntimeModule({
-                    name: 'LavaMoat/runtime',
-                    source: lavaMoatRuntime,
-                  })
-                )
-
-                PROGRESS.report('runtimeAdded')
               }
             }
-          }
-        )
+          })
 
         if (options.inlineLockdown) {
           compilation.hooks.processAssets.tap(

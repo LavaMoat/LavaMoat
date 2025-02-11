@@ -176,10 +176,7 @@ const installGlobalsForPolicy = (resourceId, packageCompartmentGlobal) => {
         ])
       ),
     })
-<<<<<<< HEAD
-=======
 
->>>>>>> 1ea1ba978 (feat(webpack): policy debugging capabilities and tighter tests)
     if (LAVAMOAT.debug) {
       LAVAMOAT.debug.debugProxy(
         packageCompartmentGlobal,
