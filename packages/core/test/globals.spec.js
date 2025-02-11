@@ -317,6 +317,40 @@ test('globals - nested property true.false.true', async (t) => {
   t.is(testResult.a_b_notOk, false)
 })
 
+test('globals - circular refs taming', async (t) => {
+  'use strict'
+  const shared = {
+    context: Object.create(null),
+    config: {
+      resources: {
+        one: {
+          globals: {
+            globalThis: true,
+            "console.warn": true,
+          },
+        },
+      },
+    },
+  }
+  const handlesAccess = createScenarioFromScaffold({
+    defineOne: () => {
+      module.exports = {
+        globalThis: globalThis === globalThis.globalThis,
+        warn: typeof globalThis.console.warn,
+        info: typeof globalThis.console.info,
+      }
+    },
+    ...shared,
+  })
+
+  const testResult = await runScenario({ scenario: handlesAccess })
+  t.deepEqual(testResult, {
+    globalThis: true,
+    warn:  'function',
+    info: 'undefined',
+  })
+})
+
 test('globals - nested property false.true', async (t) => {
   'use strict'
   const shared = {

@@ -131,6 +131,7 @@ function getConfigurationFromPluginOpts(pluginOpts) {
     'scuttleGlobalThis',
     'scuttleGlobalThisExceptions',
     'bundleWithPrecompiledModules',
+    'globalThisRefs',
     'policyDebug',
     'projectRoot',
     'resolve',
@@ -162,6 +163,10 @@ function getConfigurationFromPluginOpts(pluginOpts) {
 
   if (!pluginOpts.projectRoot) {
     pluginOpts.projectRoot = process.cwd()
+  }
+
+  if (!pluginOpts.globalThisRefs) {
+    pluginOpts.globalThisRefs = ['window', 'self', 'global', 'globalThis', 'top', 'frames', 'parent']
   }
 
   if (pluginOpts.scuttleGlobalThisExceptions) {
