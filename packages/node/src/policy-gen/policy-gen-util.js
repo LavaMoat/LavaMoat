@@ -5,10 +5,7 @@
  * @internal
  */
 
-import {
-  ATTENUATORS_COMPARTMENT,
-  LAVAMOAT_PKG_POLICY_ROOT,
-} from '../constants.js'
+import { ATTENUATORS_COMPARTMENT } from '../constants.js'
 import { hasValue, isObject } from '../util.js'
 
 /**
@@ -43,27 +40,6 @@ export const getCanonicalName = (compartment, isEntry = false) => {
 }
 
 /**
- * Determine the package name for a compartment descriptor
- *
- * @param {CompartmentDescriptor} compartment Compartment descriptor
- * @param {boolean} isEntry Whether or not the compartment is the entry
- *   compartment
- * @returns {string} Package name
- * @internal
- */
-export const getPackageName = (compartment, isEntry = false) => {
-  if (compartment.name.startsWith('file://')) {
-    throw new TypeError(
-      'Invalid compartment; did you call captureFromMap() yet?'
-    )
-  }
-  if (isEntry) {
-    return LAVAMOAT_PKG_POLICY_ROOT
-  }
-  return compartment.name
-}
-
-/**
  * Type guard for a `Required<ModuleDescriptor>`.
  *
  * The `compartment` and `module` props are optional in the original type, but
@@ -80,3 +56,11 @@ export const isCompleteModuleDescriptor = (descriptor) => {
     hasValue(descriptor, 'module')
   )
 }
+
+/**
+ * Returns `true` if `specifier` is a relative path
+ *
+ * @param {string} specifier Specifier to check
+ * @returns {boolean}
+ */
+export const isRelativeSpecifier = (specifier) => specifier.startsWith('.')

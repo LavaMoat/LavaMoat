@@ -23,6 +23,21 @@ module.exports = {
     'func-style': ['error', 'declaration', { allowArrowFunctions: true }],
 
     'no-console': 'error',
+
+    // TODO: this needs to be changed to `@typescript-eslint/no-restricted-types` once tseslint is upgraded to v8+
+    // unfortunately, this does not apply to js files
+    '@typescript-eslint/ban-types': [
+      'error',
+      {
+        types: {
+          LavamoatModuleRecordOptions: {
+            message: 'Use SimpleLavamoatModuleRecordOptions instead',
+            fixWith: 'SimpleLavamoatModuleRecordOptions',
+            suggest: ['SimpleLavamoatModuleRecordOptions'],
+          },
+        },
+      },
+    ],
   },
   overrides: [
     {

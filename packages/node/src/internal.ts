@@ -7,6 +7,7 @@
  */
 
 import type { MapNodeModulesOptions } from '@endo/compartment-mapper'
+import { LavamoatModuleRecordOptions } from 'lavamoat-core'
 import type nodeFs from 'node:fs'
 import { PathLike, Stats } from 'node:fs'
 import type { Except, Merge, Simplify } from 'type-fest'
@@ -74,10 +75,10 @@ export type PolicyGeneratorContextOptions = Simplify<
     WithIsBuiltin &
     WithLog & {
       /**
-       * If `true`, the `PolicyGeneratorContext` represents the entry
-       * compartment
+       * If `true`, the `PolicyGeneratorContext` is associated with the root
+       * (entry point) of the application
        */
-      isEntry?: boolean
+      isRoot?: boolean
 
       /**
        * If missing modules are to be tracked and summarized, this should be the
@@ -183,4 +184,18 @@ export type ResolveWorkspaceOptions = ResolveBinScriptOptions
  */
 export type InspectModuleRecordsOptions = Simplify<
   WithLog & WithDebug & WithTrustEntrypoint
+>
+
+/**
+ * Possible options for creating a `LavamoatModuleRecord` within the context of
+ * this package.
+ *
+ * - `moduleInitializer` is only used by the `lavamoat-core` kernel;
+ *   `@endo/compartment-mapper`'s parsers handle this for us
+ * - `ast` is created internally by the module inspector and we needn't provide it
+ */
+export type SimpleLavamoatModuleRecordOptions = Omit<
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  LavamoatModuleRecordOptions,
+  'ast' | 'moduleInitializer'
 >

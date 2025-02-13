@@ -161,7 +161,7 @@ export const buildModuleRecords = (
               // name will be replaced with the root slug, which means resources
               // for the root slug would be written to the policy instead of the
               // canonical pkg name of the entrypoint
-              isEntry: trustEntrypoint && entryCompartment === compartment,
+              isRoot: trustEntrypoint && entryCompartment === compartment,
               readPowers,
               isBuiltin,
               missingModules,
