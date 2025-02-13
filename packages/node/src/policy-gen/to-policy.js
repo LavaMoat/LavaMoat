@@ -12,6 +12,7 @@ import { isBuiltin as defaultIsBuiltin } from 'node:module'
 import { defaultReadPowers } from '../compartment/power.js'
 import { DEFAULT_TRUST_ENTRYPOINT } from '../constants.js'
 import { log as defaultLog } from '../log.js'
+import { hrPath } from '../util.js'
 import { LMRCache } from './lmr-cache.js'
 import { PolicyGeneratorContext } from './policy-gen-context.js'
 
@@ -24,10 +25,10 @@ import { PolicyGeneratorContext } from './policy-gen-context.js'
  *   LavaMoatPolicyOverrides,
  *   LavamoatModuleRecord,
  *   SesCompat,
+ *   SesCompatObj,
  *   ModuleInspector} from 'lavamoat-core'
  * @import {BuildModuleRecordsOptions,
- *   CompartmentMapToPolicyOptions,
- *   TrustEntrypointFn} from '../types.js'
+ *   CompartmentMapToPolicyOptions} from '../types.js'
  * @import {InspectModuleRecordsOptions, MissingModuleMap} from '../internal.js'
  * @import {Loggerr} from 'loggerr'
  * @import {SetFieldType} from 'type-fest'
@@ -55,6 +56,9 @@ const inspectModuleRecords = (
     trustRoot: trustEntrypoint,
   })
 
+  /** @type {Map<string, string[]>} */
+  const perModuleWarnings = new Map()
+
   inspector.on('compat-warning', (data) => {
     const { moduleRecord, compatWarnings } = /**
      * @type {{
@@ -65,44 +69,58 @@ const inspectModuleRecords = (
 
     const { primordialMutations, strictModeViolations, dynamicRequires } =
       compatWarnings
-    if (primordialMutations.length) {
-      log.warning(
-        `Package "${moduleRecord.packageName}" contains potential SES incompatibilities (primordial mutations) at the following location(s):\n${primordialMutations
-          .map(({ node }) =>
-            chalk.yellow(
-              `- ${moduleRecord.file}:${node.loc.start.line}:${node.loc.start.column}`
-            )
+    const nicePath = hrPath(moduleRecord.file)
+
+    /** @type {string[]} */
+    const warnings = perModuleWarnings.get(moduleRecord.packageName) || []
+
+    /**
+     * Adds SES compat issues to {@link warnings}
+     *
+     * @param {SesCompatObj[]} sesCompatObjs
+     * @param {string} type
+     */
+    const addWarnings = (sesCompatObjs, type) => {
+      if (sesCompatObjs.length) {
+        warnings.push(
+          ...sesCompatObjs.map(
+            ({
+              node: {
+                loc: {
+                  start: { line, column },
+                },
+              },
+            }) => `- ${chalk.yellow(`${nicePath}:${line}:${column}`)} (${type})`
           )
-          .join('\n')}`
-      )
+        )
+      }
     }
-    if (strictModeViolations.length) {
-      log.warning(
-        `Package "${moduleRecord.packageName}" contains potential SES incompatibilities (strict mode violations) at the following location(s):\n${strictModeViolations
-          .map(({ node }) =>
-            chalk.yellow(
-              `- ${moduleRecord.file}:${node.loc.start.line}:${node.loc.start.column}`
-            )
-          )
-          .join('\n')}`
-      )
+
+    addWarnings(primordialMutations, 'primordial mutation')
+    addWarnings(strictModeViolations, 'strict-mode violation')
+    addWarnings(dynamicRequires, 'dynamic require')
+
+    /* c8 ignore next */
+    if (!warnings.length) {
+      // unlikely, but just in case
+      log.warning('empty "compat-warning" event received from module inspector')
+      return
     }
-    if (dynamicRequires.length) {
-      log.warning(
-        `Package "${moduleRecord.packageName}" contains potential SES incompatibilities (dynamic requires) at the following location(s):\n${dynamicRequires
-          .map(({ node }) =>
-            chalk.yellow(
-              `- ${moduleRecord.file}:${node.loc.start.line}:${node.loc.start.column}`
-            )
-          )
-          .join('\n')}`
-      )
-    }
+
+    perModuleWarnings.set(moduleRecord.packageName, warnings)
   })
 
   // FIXME: should we sort here?
   for (const record of moduleRecords) {
     inspector.inspectModule(record)
+  }
+
+  if (perModuleWarnings.size) {
+    for (const [packageName, warnings] of perModuleWarnings) {
+      log.warning(
+        `Package ${chalk.magenta(packageName)} contains potential SES incompatibilities at the following locations:\n${warnings.join('\n')}`
+      )
+    }
   }
 
   return inspector
