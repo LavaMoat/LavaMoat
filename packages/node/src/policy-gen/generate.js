@@ -16,7 +16,7 @@ import {
 } from '../constants.js'
 import { log as defaultLog } from '../log.js'
 import { writePolicy } from '../policy-util.js'
-import { devToConditions } from '../util.js'
+import { devToConditions, hrPath } from '../util.js'
 import { loadCompartmentMap } from './policy-gen-compartment-map.js'
 import { compartmentMapToPolicy } from './to-policy.js'
 
@@ -172,6 +172,8 @@ export const generatePolicy = async (
    */
   let policy
 
+  const niceEntrypointPath = hrPath(entrypointPath)
+
   /**
    * If the debug flag was true, then the result of generatePolicy will be a
    * `LavaMoatPolicyDebug`. we will write that entire thing to the debug policy,
@@ -179,7 +181,7 @@ export const generatePolicy = async (
    * {@link policy}
    */
   if (shouldWriteDebugPolicy({ write: shouldWrite, debug })) {
-    log.info(`Generating "debug" LavaMoat policy from ${entrypointPath}`)
+    log.info(`Generating "debug" LavaMoat policy from ${niceEntrypointPath}`)
     const debugPolicy = await generate(entrypointPath, {
       ...generateOpts,
       readPowers,
@@ -187,7 +189,8 @@ export const generatePolicy = async (
       debug: true,
     })
     await writePolicy(policyDebugPath, debugPolicy, { fs: writableFs })
-    log.info(`Wrote debug policy to ${policyDebugPath} successfully`)
+    const nicePolicyDebugPath = hrPath(policyDebugPath)
+    log.info(`Wrote debug policy to ${nicePolicyDebugPath} successfully`)
     // do not attempt to use the `delete` keyword with typescript. you have been
     // warned!
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -196,7 +199,7 @@ export const generatePolicy = async (
     )
     policy = corePolicy
   } else {
-    log.info(`Generating LavaMoat policy from ${entrypointPath}`)
+    log.info(`Generating LavaMoat policy from ${niceEntrypointPath}`)
     policy = await generate(entrypointPath, {
       ...generateOpts,
       trustEntrypoint,

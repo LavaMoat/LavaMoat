@@ -29,6 +29,7 @@ import { log } from './log.js'
 import { generatePolicy } from './policy-gen/generate.js'
 import { loadPolicies } from './policy-util.js'
 import { resolveBinScript, resolveEntrypoint } from './resolve.js'
+import { hrPath } from './util.js'
 
 /**
  * @import {PackageJson} from 'type-fest';
@@ -474,10 +475,10 @@ const main = async (args = hideBin(process.argv)) => {
         })
 
         if (debug) {
-          log.info(`Wrote debug policy to ${policyDebugPath}`)
+          log.info(`Wrote debug policy to ${hrPath(policyDebugPath)}`)
         }
         if (write) {
-          log.info(`Wrote policy to ${policyPath}`)
+          log.info(`Wrote policy to ${hrPath(policyPath)}`)
         } else {
           // eslint-disable-next-line no-console
           console.log(jsonStringifySortedPolicy(policy))

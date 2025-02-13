@@ -3,6 +3,7 @@
  *
  * @packageDocumentation
  */
+import path from 'node:path'
 import { pathToFileURL } from 'node:url'
 
 const { isArray: isArray_ } = Array
@@ -149,3 +150,25 @@ export const isReadNowPowers = (value) =>
         typeof (/** @type {any} */ (value)[prop]) === 'function'
     )
   )
+
+/**
+ * Given a filepath, displays it as relative or absolute depending on which is
+ * fewer characters. Ergo, the "human-readable" path.
+ *
+ * @param {string} filepath
+ * @returns {string}
+ */
+export const hrPath = (filepath) => {
+  if (path.isAbsolute(filepath)) {
+    const relativePath = path.relative(process.cwd(), filepath)
+    if (relativePath.length < filepath.length) {
+      return relativePath
+    }
+  } else {
+    const absolutePath = path.resolve(filepath)
+    if (absolutePath.length < filepath.length) {
+      return absolutePath
+    }
+  }
+  return filepath
+}
