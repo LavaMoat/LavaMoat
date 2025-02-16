@@ -1,4 +1,4 @@
-const DEFAULT_GLOBAL_THIS_REFS = Object.freeze(/** @type {const} */({
+const DEFAULT_GLOBAL_THIS_REFS = Object.freeze(/** @type {readonly string[]} */({
   WINDOW: 'window',
   SELF: 'self',
   GLOBAL: 'global',
