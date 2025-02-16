@@ -19,7 +19,7 @@ test('globalRef - has only the expected global circular refs', async (t) => {
       })
       module.exports = circularKeys.sort()
     },
-    expectedResult: DEFAULT_GLOBAL_THIS_REFS.sort(),
+    expectedResult: DEFAULT_GLOBAL_THIS_REFS.slice().sort(),
   })
   await runAndTestScenario(t, scenario, runScenario)
 })
