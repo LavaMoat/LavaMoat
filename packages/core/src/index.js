@@ -12,7 +12,7 @@ const { applySourceTransforms } = require('./sourceTransforms')
 const { makeInitStatsHook } = require('./makeInitStatsHook')
 const endowmentsToolkit = require('./endowmentsToolkit')
 const { jsonStringifySortedPolicy } = require('./stringifyPolicy')
-const { DEFAULT_GLOBAL_THIS_REFS } = require('./constants.ts')
+const { DEFAULT_GLOBAL_THIS_REFS } = require('./constants')
 
 module.exports = {
   DEFAULT_GLOBAL_THIS_REFS,

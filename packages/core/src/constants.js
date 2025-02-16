@@ -1,4 +1,4 @@
-export const DEFAULT_GLOBAL_THIS_REFS = Object.freeze(/** @type {const} */({
+const DEFAULT_GLOBAL_THIS_REFS = Object.freeze(/** @type {const} */({
   WINDOW: 'window',
   SELF: 'self',
   GLOBAL: 'global',
@@ -7,3 +7,5 @@ export const DEFAULT_GLOBAL_THIS_REFS = Object.freeze(/** @type {const} */({
   FRAMES: 'frames',
   PARENT: 'parent',
 }));
+
+module.exports = {DEFAULT_GLOBAL_THIS_REFS}
