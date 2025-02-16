@@ -20,7 +20,7 @@ const {
   // @ts-ignore cycle causes this to be an error sometimes
 } = require('lavamoat-tofu')
 const { mergePolicy } = require('./mergePolicy')
-const { DEFAULT_GLOBAL_THIS_REFS } = require('./constants')
+const { DEFAULT_GLOBAL_THIS_REFS } = require('./constants.ts')
 
 const rootSlug = '$root$'
 
