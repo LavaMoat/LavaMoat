@@ -553,7 +553,7 @@ class LavaMoatPlugin {
                   // narrow down the policy and map to module identifiers
                   const policyData = identifierLookup.getTranslatedPolicy()
 
-                  const runtimeChunks = [
+                  runtimeChunks = [
                     {
                       name: 'root',
                       data: identifierLookup.root || null,
@@ -599,35 +599,34 @@ class LavaMoatPlugin {
                       file: path.join(__dirname, './runtime/runtime.js'),
                     },
                   ]
-
-                  if (options.debugRuntime) {
-                    runtimeChunks.push({
-                      name: 'debug',
-                      shimRequire: path.join(__dirname, './runtime/debug.js'),
-                    })
-                  }
-                  const lavaMoatRuntime = assembleRuntime(
-                    RUNTIME_KEY,
-                    runtimeChunks
-                  )
-
-                  // set.add(RuntimeGlobals.onChunksLoaded); // TODO: develop an understanding of what this line does and why it was a part of the runtime setup for module federation
-
-                  // Mark the chunk as processed by adding it to the WeakSet.
-                  onceForChunkSet.add(chunk)
-
-                  // Add the runtime modules to the chunk, which handles
-                  // the runtime logic for wrapping with lavamoat.
-                  compilation.addRuntimeModule(
-                    chunk,
-                    new VirtualRuntimeModule({
-                      name: 'LavaMoat/runtime',
-                      source: lavaMoatRuntime,
-                    })
-                  )
-
-                  PROGRESS.report('runtimeAdded')
                 }
+                if (options.debugRuntime) {
+                  runtimeChunks.push({
+                    name: 'debug',
+                    shimRequire: path.join(__dirname, './runtime/debug.js'),
+                  })
+                }
+                const lavaMoatRuntime = assembleRuntime(
+                  RUNTIME_KEY,
+                  runtimeChunks
+                )
+
+                // set.add(RuntimeGlobals.onChunksLoaded); // TODO: develop an understanding of what this line does and why it was a part of the runtime setup for module federation
+
+                // Mark the chunk as processed by adding it to the WeakSet.
+                onceForChunkSet.add(chunk)
+
+                // Add the runtime modules to the chunk, which handles
+                // the runtime logic for wrapping with lavamoat.
+                compilation.addRuntimeModule(
+                  chunk,
+                  new VirtualRuntimeModule({
+                    name: 'LavaMoat/runtime',
+                    source: lavaMoatRuntime,
+                  })
+                )
+
+                PROGRESS.report('runtimeAdded')
               }
             }
           })
