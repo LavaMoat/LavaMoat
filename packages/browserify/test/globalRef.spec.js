@@ -3,6 +3,7 @@
 
 const test = require('ava')
 const { runScenario } = require('./util')
+const { DEFAULT_GLOBAL_THIS_REFS } = require('lavamoat-core')
 const {
   createScenarioFromScaffold,
   runAndTestScenario,
@@ -18,7 +19,7 @@ test('globalRef - has only the expected global circular refs', async (t) => {
       })
       module.exports = circularKeys.sort()
     },
-    expectedResult: ['window', 'self', 'global', 'globalThis', 'top', 'frames', 'parent'].sort(),
+    expectedResult: DEFAULT_GLOBAL_THIS_REFS.slice().sort(),
   })
   await runAndTestScenario(t, scenario, runScenario)
 })

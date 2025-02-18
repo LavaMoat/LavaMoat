@@ -1,6 +1,6 @@
 const fs = require('node:fs')
 const path = require('node:path')
-const { getDefaultPaths, jsonStringifySortedPolicy } = require('lavamoat-core')
+const { getDefaultPaths, jsonStringifySortedPolicy, DEFAULT_GLOBAL_THIS_REFS } = require('lavamoat-core')
 const { createModuleInspectorSpy } = require('./createModuleInspectorSpy.js')
 const { createPackageDataStream } = require('./createPackageDataStream.js')
 const createLavaPack = require('@lavamoat/lavapack')
@@ -166,7 +166,7 @@ function getConfigurationFromPluginOpts(pluginOpts) {
   }
 
   if (!pluginOpts.globalThisRefs) {
-    pluginOpts.globalThisRefs = ['window', 'self', 'global', 'globalThis', 'top', 'frames', 'parent']
+    pluginOpts.globalThisRefs = DEFAULT_GLOBAL_THIS_REFS
   }
 
   if (pluginOpts.scuttleGlobalThisExceptions) {
