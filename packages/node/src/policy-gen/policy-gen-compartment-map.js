@@ -39,12 +39,19 @@ export const loadCompartmentMap = async (
   )
 
   const {
+    // importHook: _importHook,
+    // importNowHook: _importNowHook,
+    ...endoOptions
+  } = DEFAULT_ENDO_OPTIONS
+
+  const {
     captureCompartmentMap: compartmentMap,
     captureSources: sources,
     newToOldCompartmentNames: renames,
   } = await captureFromMap(readPowers, nodeCompartmentMap, {
     ...captureOpts,
-    ...DEFAULT_ENDO_OPTIONS,
+    ...endoOptions,
+    // importHook: nullImportHook,
     Compartment: LavaMoatCompartment,
   })
 

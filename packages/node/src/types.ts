@@ -1,6 +1,6 @@
 import { IsBuiltinFn, LavaMoatPolicyOverrides } from 'lavamoat-core'
 import { Loggerr } from 'loggerr'
-import { Except, MergeDeep, Simplify } from 'type-fest'
+import { MergeDeep, Simplify } from 'type-fest'
 
 import {
   CaptureLiteOptions,
@@ -198,7 +198,7 @@ export interface WritePowers {
  */
 
 export type BaseLoadCompartmentMapOptions = Simplify<
-  Except<CaptureLiteOptions, 'importHook' | 'moduleTransforms'> &
+  Omit<CaptureLiteOptions, 'importHook' | 'moduleTransforms' | 'log'> &
     WithLog &
     WithDev
 >
@@ -307,7 +307,7 @@ export type RunOptions = Simplify<
  * Options for `toEndoPolicy()`
  */
 export type ToEndoPolicyOptions = WithTrustEntrypoint & {
-  entrypoint?: string | URL
+  entryPackage?: string
 } & (
     | {
         /**

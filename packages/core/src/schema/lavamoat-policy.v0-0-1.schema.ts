@@ -17,6 +17,8 @@ export type LavaMoatPolicyDebug = LavaMoatPolicy & {
 export interface PartialLavaMoatPolicy {
   resources?: Resources
   resolutions?: Resolutions
+
+  entryPackage?: string
 }
 
 export interface DebugInfo {

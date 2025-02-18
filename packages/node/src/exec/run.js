@@ -6,7 +6,7 @@
  */
 import { makeReadPowers } from '../compartment/power.js'
 import { DEFAULT_ATTENUATOR } from '../constants.js'
-import { toEndoPolicySync } from '../policy-converter.js'
+import { toEndoPolicy } from '../policy-converter.js'
 import { devToConditions } from '../util.js'
 import { attenuateModule, makeGlobalsAttenuator } from './default-attenuator.js'
 import { makeExecutionCompartment } from './exec-compartment-class.js'
@@ -38,7 +38,10 @@ export const run = async (
 ) => {
   await Promise.resolve()
   const readPowers = makeReadPowers(options)
-  const endoPolicy = toEndoPolicySync(policy, policyOverride, trustEntrypoint)
+  const endoPolicy = await toEndoPolicy(policy, {
+    policyOverride,
+    trustEntrypoint,
+  })
 
   return execute(entrypoint, readPowers, {
     Compartment: makeExecutionCompartment(globalThis),

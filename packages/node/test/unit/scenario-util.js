@@ -32,6 +32,7 @@ const RUNNER_MODULE_PATH = (
           'packages',
           'node',
           'test',
+          'unit',
           'scenario-runner.js'
         )
       )
@@ -246,7 +247,7 @@ export function createScenarioRunner(log = fallbackLog.error.bind(console)) {
     }
     try {
       return JSON.parse(stdout)
-    } catch (err) {
+    } catch {
       throw new Error(`Unexpected output in standard out: \n${stdout}`)
     }
   }

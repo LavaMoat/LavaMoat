@@ -56,11 +56,3 @@ export const isCompleteModuleDescriptor = (descriptor) => {
     hasValue(descriptor, 'module')
   )
 }
-
-/**
- * Returns `true` if `specifier` is a relative path
- *
- * @param {string} specifier Specifier to check
- * @returns {boolean}
- */
-export const isRelativeSpecifier = (specifier) => specifier.startsWith('.')

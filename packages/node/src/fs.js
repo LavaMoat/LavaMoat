@@ -54,7 +54,7 @@ export const isReadablePathSync = (filepath, { fs = nodeFs } = {}) => {
   try {
     fs.accessSync(filepath, fs.constants.R_OK)
     return true
-  } catch (err) {
+  } catch {
     return false
   }
 }
@@ -70,7 +70,7 @@ export const isExecutablePathSync = (filepath, { fs = nodeFs } = {}) => {
   try {
     fs.accessSync(filepath, fs.constants.X_OK & fs.constants.R_OK)
     return true
-  } catch (err) {
+  } catch {
     return false
   }
 }

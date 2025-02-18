@@ -66,7 +66,7 @@ test('basic policy generation', async (t) => {
   }
 })
 
-test('extensionless bin script handling', async (t) => {
+test('bin script handling (extensionless)', async (t) => {
   t.plan(2)
 
   const tempdir = await mkdtemp(
@@ -117,38 +117,7 @@ test('bin script handling', async (t) => {
     const policy = await readPolicy(policyPath)
     t.true(isPolicy(policy))
 
-    // XXX: the entrypoint has access to everything and probably shouldn't
-    t.is(Object.keys(policy.resources ?? {}).length, 0)
-  } finally {
-    await rm(tempdir, { recursive: true, force: true })
-  }
-})
-
-test('generate - module resolution', async (t) => {
-  t.plan(3)
-
-  const tempdir = await mkdtemp(
-    path.join(tmpdir(), t.title.replace(/\s+/g, '-'))
-  )
-  try {
-    const policyPath = path.join(
-      tempdir,
-      `module-resolution-${DEFAULT_POLICY_FILENAME}`
-    )
-    const result = await runCLI(
-      ['generate', '--policy', policyPath, BIN_ENTRY],
-      {
-        cwd: BIN_ENTRY_FIXTURE_DIR,
-        t: t,
-      }
-    )
-    t.is(result.code, undefined)
-
-    const policy = await readPolicy(policyPath)
-    t.true(isPolicy(policy))
-
-    // XXX: the entrypoint has access to everything and probably shouldn't
-    t.is(Object.keys(policy.resources ?? {}).length, 0)
+    t.snapshot(policy)
   } finally {
     await rm(tempdir, { recursive: true, force: true })
   }

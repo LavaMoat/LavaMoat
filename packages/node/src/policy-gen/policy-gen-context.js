@@ -15,10 +15,7 @@ import {
 } from '../constants.js'
 import { log as fallbackLog } from '../log.js'
 import { isString } from '../util.js'
-import {
-  isCompleteModuleDescriptor,
-  isRelativeSpecifier,
-} from './policy-gen-util.js'
+import { isCompleteModuleDescriptor } from './policy-gen-util.js'
 
 /**
  * @import {ReadNowPowers,
@@ -27,6 +24,7 @@ import {
  *   ModuleSource,
  *   CompartmentSources,
  *   FileURLToPathFn} from '@endo/compartment-mapper'
+ * @import {VirtualModuleSource} from 'ses'
  * @import {LiteralUnion} from 'type-fest'
  * @import {Loggerr} from 'loggerr'
  * @import {LMRCache} from './lmr-cache.js'
@@ -36,7 +34,13 @@ import {
  * @import {LavamoatModuleRecord, IsBuiltinFn} from 'lavamoat-core'
  */
 
-const { entries, keys } = Object
+const { entries, keys, hasOwn } = Object
+
+/**
+ * Anything matching this is a specifier within some non-relative package. e.g.,
+ * `@foo/bar/baz.js`, `foo/baz.js` or `./foo/bar.js`
+ */
+const SUBPATH_REGEX = /^(?:\.|@(?:.+?\/){2,}|^[^@].+\/).+$/
 
 /**
  * Handles creation of {@link LavamoatModuleRecord} objects for individual
@@ -163,10 +167,11 @@ export class PolicyGeneratorContext {
    * Ensures a specifier is not just a package with the same name as a builtin
    *
    * @param {string} specifier
+   * @returns {boolean}
    */
   isBuiltin(specifier) {
     return (
-      !(specifier in this.compartment.modules) && this.#isBuiltin(specifier)
+      !hasOwn(this.compartment.modules, specifier) && this.#isBuiltin(specifier)
     )
   }
 
@@ -194,6 +199,17 @@ export class PolicyGeneratorContext {
     return this.#readPowers.fileURLToPath(
       new URL(descriptorOrLocation.module, location)
     )
+  }
+
+  /**
+   * Returns `true` if `specifier` should have an entry in a
+   * {@link LavamoatModuleRecord.importMap}.
+   *
+   * @param {string} specifier
+   * @returns {boolean}
+   */
+  wantsImportMap(specifier) {
+    return !this.isBuiltin(specifier) && !SUBPATH_REGEX.test(specifier)
   }
 
   /**
@@ -244,19 +260,21 @@ export class PolicyGeneratorContext {
    * These specifiers can come from either `StaticModuleType` (as found in
    * `Sources`) or `ModuleDescriptor` objects.
    *
-   * Relative-path specifiers do not need an import map entry
+   * Relative-path specifiers do not need an import map entry.
    *
    * @param {string[]} imports
-   * @returns {Record<string, string>}
+   * @returns {LavamoatModuleRecord['importMap']}
    */
   buildImportMap(imports = []) {
     return imports.reduce((acc, specifier) => {
-      const filepath = this.getFilepath(specifier)
-      if (!isRelativeSpecifier(specifier) && filepath) {
-        acc[specifier] = filepath
+      if (this.wantsImportMap(specifier)) {
+        const filepath = this.getFilepath(specifier)
+        if (filepath) {
+          acc[specifier] = filepath
+        }
       }
       return acc
-    }, /** @type {Record<string, string>} */ ({}))
+    }, /** @type {LavamoatModuleRecord['importMap']} */ ({}))
   }
 
   /**
@@ -329,7 +347,7 @@ export class PolicyGeneratorContext {
 
     // `record` can be several different types, but for our purposes,
     // we can use `imports` as the discriminator
-    if (!('imports' in record)) {
+    if (!hasOwn(record, 'imports')) {
       // XXX: under what circumstances does this occur?
       throw new TypeError(
         `StaticModuleType for source descriptor "${specifier}" in compartment "${this.compartment.name} missing prop: imports`
@@ -349,10 +367,10 @@ export class PolicyGeneratorContext {
 
     /**
      * The {@link LavamoatModuleRecord.importMap} prop
-     *
-     * @type {LavamoatModuleRecord['importMap']}
      */
-    const importMap = this.buildImportMap(record.imports)
+    const importMap = this.buildImportMap(
+      /** @type {VirtualModuleSource} */ (record).imports
+    )
 
     /** @type {SimpleLavamoatModuleRecordOptions} */
     const lmrOptions = {

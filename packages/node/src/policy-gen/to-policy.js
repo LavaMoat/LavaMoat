@@ -208,12 +208,14 @@ export const buildModuleRecords = (
 
   if (missingModules.size) {
     log.warning(
-      'The following packages reference unknown dependencies. These may be "peer" or "optional" dependencies (or something else). Execution will mostly like fail unless these are accounted for in policy overrides.'
+      'The following packages reference unknown modules. These may be "peer" or "optional" dependencies (or something else). Execution will mostly like fail unless these are accounted for in policy overrides.'
     )
-    const tabular = [...missingModules].map(([compartment, missing]) => ({
-      Name: compartment,
-      'Missing Package(s)': [...missing],
-    }))
+    const tabular = [...missingModules].flatMap(([compartment, missing]) =>
+      [...missing].map((specifier) => ({
+        Package: compartment,
+        Requested: specifier,
+      }))
+    )
     // eslint-disable-next-line no-console
     console.table(tabular)
   }

@@ -206,7 +206,10 @@ const convertEndoPackagePolicy = (resources) => {
  * @param {ToEndoPolicyOptions} [options] Options for conversion
  * @returns {LavaMoatEndoPolicy} Endo policy
  */
-const convert = (policy, {policyOverride, trustEntrypoint = true}={}) => {
+const convert = (
+  policy,
+  { policyOverride, trustEntrypoint = true, entryPackage } = {}
+) => {
   const lavaMoatPolicy = mergePolicy(policy, policyOverride)
 
   const lavamoatResources = lavaMoatPolicy.resources ?? create(null)
@@ -234,9 +237,10 @@ const convert = (policy, {policyOverride, trustEntrypoint = true}={}) => {
       [ENDO_POLICY_RESOURCES]: resources,
     }
   } else {
+    const entry = entryPackage ?? lavaMoatPolicy.entryPackage
     endoPolicy = {
       ...ENDO_POLICY_UNTRUSTED_BOILERPLATE,
-      [ENDO_POLICY_ENTRY]:
+      [ENDO_POLICY_ENTRY]: entry && entry in resources ? resources[entry] : {},
       [ENDO_POLICY_RESOURCES]: resources,
     }
   }
@@ -264,7 +268,7 @@ export const toEndoPolicySync = (
   if (policyOverride) {
     assertPolicyOverride(policyOverride)
   }
-  return convert(policy, policyOverride, trustEntrypoint)
+  return convert(policy, { policyOverride, trustEntrypoint })
 }
 
 /**
@@ -312,7 +316,10 @@ export const toEndoPolicySync = (
  * @returns {Promise<LavaMoatEndoPolicy>}
  * @public
  */
-export const toEndoPolicy = async (policyOrPolicyPath, options = {}) => {
+export const toEndoPolicy = async (
+  policyOrPolicyPath,
+  { trustEntrypoint = true, entryPackage, ...options } = {}
+) => {
   await Promise.resolve()
 
   if (!policyOrPolicyPath) {
@@ -340,5 +347,9 @@ export const toEndoPolicy = async (policyOrPolicyPath, options = {}) => {
     policyOverride = allegedPolicyOverride
   }
 
-  return convert(policy, policyOverride, options.trustEntrypoint)
+  return convert(policy, {
+    policyOverride,
+    trustEntrypoint,
+    entryPackage: entryPackage,
+  })
 }
