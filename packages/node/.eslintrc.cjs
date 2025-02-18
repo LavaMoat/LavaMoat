@@ -60,5 +60,5 @@ module.exports = {
       },
     },
   ],
-  ignorePatterns: ['**/test/fixture/**/*', 'src/types.js'],
+  ignorePatterns: ['**/test/**/fixture/**/*', 'src/types.js'],
 }
