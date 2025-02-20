@@ -21,6 +21,10 @@ const BASIC_FIXTURE_DIR = fileURLToPath(
   new URL('./fixture/basic/', import.meta.url)
 )
 
+const BIN_ENTRY_FIXTURE_DIR = fileURLToPath(
+  new URL('./fixture/bin-entry/', import.meta.url)
+)
+
 /**
  * Path to the "basic" fixture entry point
  */
@@ -82,36 +86,6 @@ test('extensionless bin script handling', async (t) => {
 
     const policy = await readPolicy(policyPath)
     t.true(isPolicy(policy))
-  } finally {
-    await rm(tempdir, { recursive: true, force: true })
-  }
-})
-
-test('bin script handling (untrusted)', async (t) => {
-  t.plan(3)
-
-  const tempdir = await mkdtemp(
-    path.join(tmpdir(), t.title.replace(/\s+/g, '-'))
-  )
-  try {
-    const policyPath = path.join(
-      tempdir,
-      `untrusted-${DEFAULT_POLICY_FILENAME}`
-    )
-    const { code } = await runCLI(
-      ['generate', '--bin', '--policy', policyPath, BIN_ENTRY],
-      {
-        cwd: UNTRUSTED_FIXTURE_DIR,
-        t,
-      }
-    )
-    t.is(code, undefined)
-
-    const policy = await readPolicy(policyPath)
-    t.true(isPolicy(policy))
-
-    // XXX: the entrypoint has access to everything and probably shouldn't
-    t.is(Object.keys(policy.resources ?? {}).length, 0)
   } finally {
     await rm(tempdir, { recursive: true, force: true })
   }

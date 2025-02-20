@@ -3,7 +3,7 @@
  *
  * @packageDocumentation
  */
-import { fileURLToPath, pathToFileURL } from 'node:url'
+import { pathToFileURL } from 'node:url'
 
 const { isArray: isArray_ } = Array
 const { freeze } = Object
