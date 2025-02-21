@@ -4,19 +4,46 @@ import { LavamoatModuleRecord } from '../moduleRecord'
 /**
  * Schema for LavaMoat policy files
  */
-export type LavaMoatPolicy = RequireAtLeastOne<
-  PartialLavaMoatPolicy,
+export type LavaMoatPolicy<T extends Resources = Resources> = RequireAtLeastOne<
+  PartialLavaMoatPolicy<T>,
   'resources' | 'resolutions'
 >
-export type LavaMoatPolicyOverrides = PartialLavaMoatPolicy
 
-export type LavaMoatPolicyDebug = LavaMoatPolicy & {
-  debugInfo: Record<string, DebugInfo>
+/**
+ * Schema for LavaMoat policy override files
+ */
+export type LavaMoatPolicyOverrides<T extends Resources = Resources> =
+  PartialLavaMoatPolicy<T>
+
+/**
+ * Schema for LavaMoat "debug" policy files
+ */
+export type LavaMoatPolicyDebug<T extends Resources = Resources> =
+  LavaMoatPolicy<T> & {
+    debugInfo: Record<string, DebugInfo>
+  }
+
+/**
+ * Alias of {@link LavaMoatPolicyOverrides}
+ */
+export interface PartialLavaMoatPolicy<T extends Resources = Resources> {
+  resources?: T
+  resolutions?: Resolutions
+  root?: RootPolicy<T>
 }
 
-export interface PartialLavaMoatPolicy {
-  resources?: Resources
-  resolutions?: Resolutions
+/**
+ * Root configuration
+ *
+ * @template T The value of {@link LavaMoatPolicy.resources}
+ */
+export interface RootPolicy<T extends Resources = Resources> {
+  /**
+   * Reference to a package name in {@link LavaMoatPolicy.resources}.
+   *
+   * The root will inherit policy from this package.
+   */
+  usePolicy?: keyof T
 }
 
 export interface DebugInfo {

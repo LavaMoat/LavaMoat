@@ -17,6 +17,12 @@ const BASIC_FIXTURE_ENTRYPOINT = fileURLToPath(
  */
 const BASIC_FIXTURE_ENTRYPOINT_DIR = path.dirname(BASIC_FIXTURE_ENTRYPOINT)
 
+const UNTRUSTED_FIXTURE_ENTRYPOINT = 'lard-o-matic'
+
+const UNTRUSTED_FIXTURE_DIR = fileURLToPath(
+  new URL('./fixture/extensionless/', import.meta.url)
+)
+
 const { testCLI } = createCLIMacros(test)
 
 test('"run --help" prints help', testCLI, ['run', '--help'])
@@ -80,4 +86,17 @@ test(
     '--yelling',
   ],
   'HOWDY WORLD'
+)
+
+test(
+  'untrusted entrypoint',
+  testCLI,
+  [
+    'run',
+    UNTRUSTED_FIXTURE_ENTRYPOINT,
+    '--bin',
+    '--root',
+    UNTRUSTED_FIXTURE_DIR,
+  ],
+  'scripty test'
 )
