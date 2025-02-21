@@ -175,3 +175,8 @@ export const NATIVE_PARSER_FILE_EXT = 'node'
  * Used by policy gen
  */
 export const NATIVE_PARSER_NAME = 'native'
+
+/**
+ * Whether we should trust the entry package by default
+ */
+export const DEFAULT_TRUST_ENTRYPOINT = true

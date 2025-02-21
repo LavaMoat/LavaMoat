@@ -206,7 +206,17 @@ const main = async (args = hideBin(process.argv)) => {
         global: true,
         group: BEHAVIOR_GROUP,
       },
-      // the three policy options are used for both reading and writing
+
+      // #region path args
+
+      /**
+       * The three `policy*` options below are used for both reading and
+       * writing.
+       *
+       * Note that `coerce: path.resolve` is _only_ appropriate for the `root`
+       * option, as the others are computed from it!
+       */
+
       policy: {
         alias: ['p'],
         describe: 'Filepath to a policy file',
@@ -250,11 +260,31 @@ const main = async (args = hideBin(process.argv)) => {
         global: true,
         group: PATH_GROUP,
       },
+      // #endregion
+
       dev: {
         describe: 'Include development dependencies',
         type: 'boolean',
         global: true,
         group: BEHAVIOR_GROUP,
+      },
+
+      /**
+       * The value of `trust-entrypoint` is computed in
+       * {@link processEntrypointMiddleware}.
+       *
+       * **This should not be exposed to the end-user**. It's mostly here for
+       * type fidelity.
+       *
+       * @internal
+       */
+      'trust-entrypoint': {
+        describe: 'Trust the entrypoint module',
+        type: 'boolean',
+        default: true,
+        hidden: true,
+        group: BEHAVIOR_GROUP,
+        global: true,
       },
     })
     .middleware(
@@ -276,6 +306,8 @@ const main = async (args = hideBin(process.argv)) => {
     )
     .check(
       /**
+       * Ensures all global paths are absolute.
+       *
        * This validator is _global_ and runs before command-specific validators
        * (I think)
        */
@@ -379,6 +411,7 @@ const main = async (args = hideBin(process.argv)) => {
           policy: policyPath,
           'policy-debug': policyDebugPath,
           'policy-override': policyOverridePath,
+          'trust-entrypoint': trustEntrypoint,
           dev,
           write,
         } = argv
@@ -399,6 +432,7 @@ const main = async (args = hideBin(process.argv)) => {
             policyDebugPath,
             write,
             dev,
+            trustEntrypoint,
           })
         } else {
           try {
@@ -464,6 +498,7 @@ const main = async (args = hideBin(process.argv)) => {
         debug,
         policy: policyPath,
         'policy-debug': policyDebugPath,
+        'trust-entrypoint': trustEntrypoint,
         dev,
         write,
       }) => {
@@ -473,6 +508,7 @@ const main = async (args = hideBin(process.argv)) => {
           policyPath,
           policyDebugPath,
           dev,
+          trustEntrypoint,
         })
 
         if (debug) {
@@ -481,6 +517,7 @@ const main = async (args = hideBin(process.argv)) => {
         if (write) {
           log.info(`Wrote policy to ${policyPath}`)
         } else {
+          // console used here since the logger only uses stderr
           // eslint-disable-next-line no-console
           console.log(jsonStringifySortedPolicy(policy))
         }

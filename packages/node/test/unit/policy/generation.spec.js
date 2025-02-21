@@ -40,6 +40,7 @@ test(
       },
     },
     expected: {
+      entry: 'all',
       resources: {
         blurmph: {
           builtin: {
@@ -136,9 +137,7 @@ test(
   'ignored global refs accessed w/ whitelist items',
   testPolicyForModule,
   `window.Object === Object`,
-  {
-    resources: {},
-  }
+  { resources: {} }
 )
 
 test('ignore newer intrinsics', testPolicyForModule, 'BigInt(123)', {
@@ -218,3 +217,7 @@ console.log("you can use await import` +
     },
   }
 )
+
+test.todo('hashbang in module')
+
+test.todo('exit modules are not imported')

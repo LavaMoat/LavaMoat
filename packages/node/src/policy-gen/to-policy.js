@@ -8,9 +8,11 @@
 
 import chalk from 'chalk'
 import { createModuleInspector } from 'lavamoat-core'
-import { isBuiltin as nodeIsBuiltin } from 'node:module'
+import { isBuiltin as defaultIsBuiltin } from 'node:module'
 import { defaultReadPowers } from '../compartment/power.js'
-import { log as fallbackLog } from '../log.js'
+import { DEFAULT_TRUST_ENTRYPOINT } from '../constants.js'
+import { log as defaultLog } from '../log.js'
+import { hrPath } from '../util.js'
 import { LMRCache } from './lmr-cache.js'
 import { PolicyGeneratorContext } from './policy-gen-context.js'
 
@@ -23,10 +25,11 @@ import { PolicyGeneratorContext } from './policy-gen-context.js'
  *   LavaMoatPolicyOverrides,
  *   LavamoatModuleRecord,
  *   SesCompat,
+ *   SesCompatObj,
  *   ModuleInspector} from 'lavamoat-core'
  * @import {BuildModuleRecordsOptions,
  *   CompartmentMapToPolicyOptions} from '../types.js'
- * @import {MissingModuleMap} from '../internal.js'
+ * @import {InspectModuleRecordsOptions, MissingModuleMap} from '../internal.js'
  * @import {Loggerr} from 'loggerr'
  * @import {SetFieldType} from 'type-fest'
  */
@@ -40,17 +43,21 @@ const { entries, freeze } = Object
  * information.
  *
  * @param {LavamoatModuleRecord[]} moduleRecords Module records
- * @param {{ debug?: boolean; log?: Loggerr }} [options] Options
+ * @param {InspectModuleRecordsOptions} [options] Options
  * @returns {ModuleInspector} The inspector
  */
 const inspectModuleRecords = (
   moduleRecords,
-  { debug = false, log = fallbackLog } = {}
+  { debug = false, log = defaultLog, trustEntrypoint = true } = {}
 ) => {
   const inspector = createModuleInspector({
-    isBuiltin: nodeIsBuiltin,
+    isBuiltin: defaultIsBuiltin,
     includeDebugInfo: debug,
+    trustRoot: trustEntrypoint,
   })
+
+  /** @type {Map<string, string[]>} */
+  const perModuleWarnings = new Map()
 
   inspector.on('compat-warning', (data) => {
     const { moduleRecord, compatWarnings } = /**
@@ -62,44 +69,58 @@ const inspectModuleRecords = (
 
     const { primordialMutations, strictModeViolations, dynamicRequires } =
       compatWarnings
-    if (primordialMutations.length) {
-      log.warning(
-        `Package "${moduleRecord.packageName}" contains potential SES incompatibilities (primordial mutations) at the following location(s):\n${primordialMutations
-          .map(({ node }) =>
-            chalk.yellow(
-              `- ${moduleRecord.file}:${node.loc.start.line}:${node.loc.start.column}`
-            )
+    const nicePath = hrPath(moduleRecord.file)
+
+    /** @type {string[]} */
+    const warnings = perModuleWarnings.get(moduleRecord.packageName) || []
+
+    /**
+     * Adds SES compat issues to {@link warnings}
+     *
+     * @param {SesCompatObj[]} sesCompatObjs
+     * @param {string} type
+     */
+    const addWarnings = (sesCompatObjs, type) => {
+      if (sesCompatObjs.length) {
+        warnings.push(
+          ...sesCompatObjs.map(
+            ({
+              node: {
+                loc: {
+                  start: { line, column },
+                },
+              },
+            }) => `- ${chalk.yellow(`${nicePath}:${line}:${column}`)} (${type})`
           )
-          .join('\n')}`
-      )
+        )
+      }
     }
-    if (strictModeViolations.length) {
-      log.warning(
-        `Package "${moduleRecord.packageName}" contains potential SES incompatibilities (strict mode violations) at the following location(s):\n${strictModeViolations
-          .map(({ node }) =>
-            chalk.yellow(
-              `- ${moduleRecord.file}:${node.loc.start.line}:${node.loc.start.column}`
-            )
-          )
-          .join('\n')}`
-      )
+
+    addWarnings(primordialMutations, 'primordial mutation')
+    addWarnings(strictModeViolations, 'strict-mode violation')
+    addWarnings(dynamicRequires, 'dynamic require')
+
+    /* c8 ignore next */
+    if (!warnings.length) {
+      // unlikely, but just in case
+      log.warning('empty "compat-warning" event received from module inspector')
+      return
     }
-    if (dynamicRequires.length) {
-      log.warning(
-        `Package "${moduleRecord.packageName}" contains potential SES incompatibilities (dynamic requires) at the following location(s):\n${dynamicRequires
-          .map(({ node }) =>
-            chalk.yellow(
-              `- ${moduleRecord.file}:${node.loc.start.line}:${node.loc.start.column}`
-            )
-          )
-          .join('\n')}`
-      )
-    }
+
+    perModuleWarnings.set(moduleRecord.packageName, warnings)
   })
 
   // FIXME: should we sort here?
   for (const record of moduleRecords) {
     inspector.inspectModule(record)
+  }
+
+  if (perModuleWarnings.size) {
+    for (const [packageName, warnings] of perModuleWarnings) {
+      log.warning(
+        `Package ${chalk.magenta(packageName)} contains potential SES incompatibilities at the following locations:\n${warnings.join('\n')}`
+      )
+    }
   }
 
   return inspector
@@ -121,7 +142,12 @@ export const buildModuleRecords = (
   compartmentMap,
   sources,
   renames,
-  { readPowers = defaultReadPowers, isBuiltin, log = fallbackLog } = {}
+  {
+    readPowers = defaultReadPowers,
+    isBuiltin,
+    log = defaultLog,
+    trustEntrypoint = true,
+  } = {}
 ) => {
   const lmrCache = new LMRCache()
 
@@ -149,7 +175,8 @@ export const buildModuleRecords = (
             compartmentRenames,
             lmrCache,
             {
-              isEntry: entryCompartment === compartment,
+              isRoot: entryCompartment === compartment,
+              trustEntrypoint,
               readPowers,
               isBuiltin,
               missingModules,
@@ -178,12 +205,14 @@ export const buildModuleRecords = (
 
   if (missingModules.size) {
     log.warning(
-      'The following packages reference unknown dependencies. These may be "peer" or "optional" dependencies (or something else). Execution will mostly like fail unless these are accounted for in policy overrides.'
+      'The following packages reference unknown modules. These may be "peer" or "optional" dependencies (or something else). Execution will mostly like fail unless these are accounted for in policy overrides.'
     )
-    const tabular = [...missingModules].map(([compartment, missing]) => ({
-      Name: compartment,
-      'Missing Package(s)': [...missing],
-    }))
+    const tabular = [...missingModules].flatMap(([compartment, missing]) =>
+      [...missing].map((specifier) => ({
+        Package: compartment,
+        Requested: specifier,
+      }))
+    )
     // eslint-disable-next-line no-console
     console.table(tabular)
   }
@@ -255,16 +284,22 @@ export function compartmentMapToPolicy(
     policyOverride,
     debug = false,
     isBuiltin,
-    log = fallbackLog,
+    log = defaultLog,
+    trustEntrypoint = DEFAULT_TRUST_ENTRYPOINT,
   } = {}
 ) {
   const moduleRecords = buildModuleRecords(compartmentMap, sources, renames, {
     readPowers,
     isBuiltin,
     log,
+    trustEntrypoint,
   })
 
-  const inspector = inspectModuleRecords(moduleRecords, { debug, log })
+  const inspector = inspectModuleRecords(moduleRecords, {
+    debug,
+    log,
+    trustEntrypoint,
+  })
 
   return inspector.generatePolicy({
     policyOverride,
