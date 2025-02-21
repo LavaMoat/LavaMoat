@@ -13,8 +13,8 @@
  * `parserOptions.project` settings here will **break stuff** because of how
  * `@typescript-eslint/parser` reads `tsconfig.json` files. Caution is advised!
  *
- * @see {@link https://typescript-eslint.io/linting/typed-linting/monorepos}
  * @packageDocumentation
+ * @see {@link https://typescript-eslint.io/linting/typed-linting/monorepos}
  */
 
 const path = require('node:path')

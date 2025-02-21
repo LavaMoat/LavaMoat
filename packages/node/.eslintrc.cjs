@@ -23,6 +23,19 @@ module.exports = {
     'func-style': ['error', 'declaration', { allowArrowFunctions: true }],
 
     'no-console': 'error',
+
+    '@typescript-eslint/no-unused-vars': [
+      'error',
+      {
+        args: 'all',
+        argsIgnorePattern: '^_',
+        caughtErrors: 'all',
+        caughtErrorsIgnorePattern: '^_',
+        destructuredArrayIgnorePattern: '^_',
+        varsIgnorePattern: '^_',
+        ignoreRestSiblings: true,
+      },
+    ],
   },
   overrides: [
     {
@@ -45,5 +58,5 @@ module.exports = {
       },
     },
   ],
-  ignorePatterns: ['**/test/fixture/**/*', 'src/types.js'],
+  ignorePatterns: ['**/test/**/fixture/**/*', 'src/types.js'],
 }
