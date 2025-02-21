@@ -51,7 +51,10 @@ export const createCLIMacros = (test) => {
          */
         const command = stripVTControlCharacters(hrCommand)
         const trimmedStdout = stripVTControlCharacters(stdout.trim())
-        const trimmedStderr = stripVTControlCharacters(stderr.trim())
+        // toss out debugger message
+        const trimmedStderr = stripVTControlCharacters(
+          stderr.trim().replace(/^Debugger attached\.(?:\r?\n)+/, '')
+        )
 
         switch (typeof expected) {
           case 'string':

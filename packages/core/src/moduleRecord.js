@@ -1,10 +1,19 @@
 // @ts-check
 
 /**
+ * @import {File} from '@babel/types'
+ */
+
+/**
+ * @todo Move to constants module / consolidate
+ */
+const ROOT_SLUG = '$root$'
+
+/**
  * A module record
  *
- * @template {any[]} [InitArgs=DefaultModuleInitArgs] - Arguments for
- *   {@link LavamoatModuleRecord.moduleInitializer}. Default is
+ * @template {readonly [any, ...any[]]} [InitArgs=DefaultModuleInitArgs] -
+ *   Arguments for {@link LavamoatModuleRecord.moduleInitializer}. Default is
  *   `DefaultModuleInitArgs`
  */
 class LavamoatModuleRecord {
@@ -57,7 +66,7 @@ class LavamoatModuleRecord {
   /**
    * Parsed AST, if any
    *
-   * @type {import('@babel/types').File | undefined}
+   * @type {File | undefined}
    */
   ast
 
@@ -67,6 +76,10 @@ class LavamoatModuleRecord {
    * @type {ModuleInitializer<InitArgs> | undefined}
    */
   moduleInitializer
+  /**
+   * @type {Readonly<boolean>}
+   */
+  isRoot
 
   /**
    * Assigns properties!
@@ -82,6 +95,7 @@ class LavamoatModuleRecord {
     importMap = {},
     ast,
     moduleInitializer,
+    isRoot = false,
   }) {
     this.specifier = specifier
     this.file = file
@@ -91,6 +105,7 @@ class LavamoatModuleRecord {
     this.importMap = importMap
     this.ast = ast
     this.moduleInitializer = moduleInitializer
+    this.isRoot = isRoot || this.packageName === ROOT_SLUG
   }
 }
 
@@ -99,9 +114,9 @@ module.exports = { LavamoatModuleRecord }
 /**
  * Options for {@link LavamoatModuleRecord} constructor.
  *
- * @template {any[]} [InitArgs=DefaultModuleInitArgs] - Arguments for
- *   {@link LavamoatModuleRecordOptions.moduleInitializer}. Default is
- *   `DefaultModuleInitArgs`
+ * @template {readonly [any, ...any[]]} [InitArgs=DefaultModuleInitArgs] -
+ *   Arguments for {@link LavamoatModuleRecordOptions.moduleInitializer}. Default
+ *   is `DefaultModuleInitArgs`
  * @typedef LavamoatModuleRecordOptions
  * @property {string} specifier - Module specifier
  * @property {string} file - Path to module file (or specifier)
@@ -109,9 +124,10 @@ module.exports = { LavamoatModuleRecord }
  * @property {string} packageName - Package containing module (or specifier)
  * @property {string} [content] - Content of module (source)
  * @property {Record<string, string>} [importMap] - Import map
- * @property {import('@babel/types').File} [ast] - Parsed AST
+ * @property {File} [ast] - Parsed AST
  * @property {ModuleInitializer<InitArgs>} [moduleInitializer] - Module
  *   initializer function
+ * @property {boolean} [isRoot] - Whether the module is a root module
  */
 
 /**
@@ -126,16 +142,16 @@ module.exports = { LavamoatModuleRecord }
  * Default {@link ModuleInitializer} arguments
  *
  * @typedef {[
- *   exports: Record<string, any>,
- *   require: (id: string) => unknown,
- *   module: Record<string, any>,
+ *   exports: Record<string, unknown>,
+ *   require: (specifier: string) => unknown,
+ *   module: Record<string, unknown>,
  * ]} DefaultModuleInitArgs
  */
 
 /**
  * Module initializer function; provides non-global variables to module scope
  *
- * @template {any[]} [InitArgs=DefaultModuleInitArgs] - Arguments for the
- *   function. Default is `DefaultModuleInitArgs`
+ * @template {readonly [any, ...any[]]} [InitArgs=DefaultModuleInitArgs] -
+ *   Arguments for the function. Default is `DefaultModuleInitArgs`
  * @typedef {(...args: InitArgs) => void} ModuleInitializer
  */
