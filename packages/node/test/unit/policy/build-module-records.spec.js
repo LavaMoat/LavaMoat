@@ -15,9 +15,15 @@ test('buildModuleRecords() is deterministic', async (t) => {
     '/index.js',
     { readPowers }
   )
-  const moduleRecords = buildModuleRecords(compartmentMap, sources, renames, {
-    readPowers,
-  })
+  const moduleRecords = buildModuleRecords(
+    '/index.js',
+    compartmentMap,
+    sources,
+    renames,
+    {
+      readPowers,
+    }
+  )
 
   // strip content
   t.snapshot(

@@ -6,7 +6,9 @@
  *
  * @packageDocumentation
  */
-import { pathToFileURL } from 'node:url'
+import chalk from 'chalk'
+import path from 'node:path'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 
 const { isArray: isArray_ } = Array
 const { freeze, keys } = Object
@@ -45,6 +47,15 @@ export const toURLString = (url) =>
 export const isObject = (value) => value !== null && typeof value === 'object'
 
 /**
+ * Type guard for a non-array object
+ *
+ * @param {unknown} value
+ * @returns {value is object & {length?: never}}
+ * @internal
+ */
+export const isObjectyObject = (value) => isObject(value) && !isArray(value)
+
+/**
  * Type guard for a string
  *
  * @param {unknown} value
@@ -80,6 +91,8 @@ export const isBoolean = (value) => typeof value === 'boolean'
  *
  * If trying to perform the opposite assertion, use `!(prop in value)` instead
  * of `!has(value, prop)`
+ *
+ * Don't try to use this with union types.
  *
  * @template {object} [T=object] Some object. Default is `object`
  * @template {string} [const K=string] Some property which might be in `T`.
@@ -146,9 +159,9 @@ const REQUIRED_READ_NOW_POWERS = freeze(
  * @internal
  */
 export const isReadNowPowers = (value) =>
-  isObject(value) &&
+  isObjectyObject(value) &&
   REQUIRED_READ_NOW_POWERS.every(
-    (prop) => hasValue(value, prop) && typeof value[prop] === 'function'
+    (prop) => hasValue(value, prop) && isFunction(value[prop])
   )
 
 /**
@@ -171,3 +184,42 @@ export const keysOr = (value, defaultKeys = []) =>
  * @returns {value is (...args: any[]) => any}
  */
 export const isFunction = (value) => typeof value === 'function'
+
+/**
+ * Given a filepath, displays it as relative or absolute depending on which is
+ * fewer characters. Ergo, the "human-readable" path.
+ *
+ * @param {string | URL} filepath
+ * @returns {string}
+ * @internal
+ */
+export const hrPath = (filepath) => {
+  if (!isString(filepath) || filepath.startsWith('file://')) {
+    filepath = fileURLToPath(filepath)
+  }
+  if (path.isAbsolute(filepath)) {
+    const relativePath = path.relative(process.cwd(), filepath)
+    if (relativePath && relativePath.length < filepath.length) {
+      filepath = relativePath
+    }
+  } else {
+    const absolutePath = path.resolve(filepath)
+    if (absolutePath.length < filepath.length) {
+      filepath = absolutePath
+    }
+  }
+  return chalk.greenBright(filepath)
+}
+
+/**
+ * For display of package names or canonical names.
+ *
+ * @param {string} name
+ * @returns {string}
+ * @internal
+ */
+export const hrLabel = (name) => {
+  return name.includes('>')
+    ? name.split('>').map(hrLabel).join(chalk.magenta('>'))
+    : chalk.magentaBright(name)
+}

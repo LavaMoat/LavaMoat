@@ -45,6 +45,11 @@ test(
   { jsonEntrypoint: '/node_modules/.bin/lard-o-matic' }
 )
 
+test('hashbang evasion', testExecForJSON, 'hashbang.json', {
+  default: { hello: 'world' },
+  hello: 'world',
+})
+
 test(
   'dynamic imports',
   testExec,
@@ -124,3 +129,5 @@ test(
 )
 
 test.todo('dynamic import of builtin module')
+
+test.todo('hashbang in module')

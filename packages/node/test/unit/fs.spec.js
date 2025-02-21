@@ -1,3 +1,5 @@
+import '../../src/preamble.js'
+
 import test from 'ava'
 import { memfs } from 'memfs'
 import {
