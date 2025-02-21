@@ -1,3 +1,5 @@
+import '../../../src/preamble.js'
+
 import { fileURLToPath } from 'node:url'
 import { generatePolicy } from '../../../src/policy-gen/generate.js'
 import { isPolicy } from '../../../src/policy-util.js'
@@ -201,12 +203,13 @@ export function createGeneratePolicyMacros(test) {
           new URL(fixtureFilename, JSON_FIXTURE_DIR_URL)
         )
 
-      const actualPolicy = await generatePolicy(
-        options?.jsonEntrypoint ?? DEFAULT_JSON_FIXTURE_ENTRY_POINT,
-        {
-          ...options,
-          readPowers,
-        })
+        const actualPolicy = await generatePolicy(
+          options?.jsonEntrypoint ?? DEFAULT_JSON_FIXTURE_ENTRY_POINT,
+          {
+            ...options,
+            readPowers,
+          }
+        )
 
         if (isPolicy(expected)) {
           t.deepEqual(actualPolicy, expected)

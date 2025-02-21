@@ -1,6 +1,7 @@
 /* eslint-disable no-undef, @typescript-eslint/no-unused-vars, no-unused-expressions, no-extend-native */
 const { EOL } = require('node:os')
 const test = require('ava')
+const { createModuleInspector } = require('../src/generatePolicy')
 
 const { createConfigForTest, generateConfigFromFiles } = require('./util')
 
@@ -42,6 +43,7 @@ test('generatePolicy - config with debugInfo', async (t) => {
         specifier: testModuleFile,
         file: testModuleFile,
         type: 'js',
+        isRoot: false,
         // this is brittle
         content: `(function () {${EOL}      location.href${EOL}    })()`,
         importMap: {},
@@ -106,13 +108,7 @@ test('generatePolicy - config ignores global refs when properties are not access
     typeof window !== 'undefined'
   })
 
-  t.deepEqual(
-    config,
-    {
-      resources: {},
-    },
-    'config matches expected'
-  )
+  t.deepEqual(config, { resources: {} }, 'config matches expected')
 })
 
 test('generatePolicy - config ignores global refs accessed with whitelist items', async (t) => {
@@ -120,13 +116,7 @@ test('generatePolicy - config ignores global refs accessed with whitelist items'
     window.Object === Object
   })
 
-  t.deepEqual(
-    config,
-    {
-      resources: {},
-    },
-    'config matches expected'
-  )
+  t.deepEqual(config, { resources: {} }, 'config matches expected')
 })
 
 test('generatePolicy - config ignores newer intrinsics', async (t) => {
@@ -134,13 +124,7 @@ test('generatePolicy - config ignores newer intrinsics', async (t) => {
     BigInt(123)
   })
 
-  t.deepEqual(
-    config,
-    {
-      resources: {},
-    },
-    'config matches expected'
-  )
+  t.deepEqual(config, { resources: {} }, 'config matches expected')
 })
 
 test('generatePolicy - CJS should flag import/export as global', async (t) => {
@@ -191,15 +175,50 @@ test('generatePolicy - ESM should flag require/module/exports as global', async 
   )
 })
 
-// we no longer throw an error, we log a warning
-// test('generatePolicy - primordial modification', async (t) => {
-//   try {
-//     const config = await createConfigForTest(function () {
-//       const href = window.location.href
-//       Array.prototype.bogosort = () => 'yolo'
-//     })
-//     t.fail('expected to throw an error')
-//   } catch (err) {
-//     t.pass()
-//   }
-// })
+test('generatePolicy - trusted root', async (t) => {
+  const config = await createConfigForTest(`console.log('hello world')`, {
+    inspector: createModuleInspector({
+      isBuiltin: () => false,
+      includeDebugInfo: false,
+      trustRoot: true,
+    }),
+  })
+
+  t.deepEqual(config, {
+    resources: {
+      test: {
+        globals: {
+          'console.log': true,
+        },
+      },
+    },
+  })
+})
+
+test('generatePolicy - untrusted root', async (t) => {
+  const config = await createConfigForTest(`console.log('hello world')`, {
+    inspector: createModuleInspector({
+      isBuiltin: () => false,
+      includeDebugInfo: false,
+      trustRoot: false,
+    }),
+  })
+
+  t.deepEqual(config, {
+    root: {
+      usePolicy: '$root$',
+    },
+    resources: {
+      $root$: {
+        packages: {
+          test: true,
+        },
+      },
+      test: {
+        globals: {
+          'console.log': true,
+        },
+      },
+    },
+  })
+})

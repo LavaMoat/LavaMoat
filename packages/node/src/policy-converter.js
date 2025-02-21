@@ -44,42 +44,61 @@ const { create, entries, fromEntries } = Object
  *   LavaMoatPolicy,
  *   ResourcePolicy,
  *   LavaMoatPolicyOverrides} from 'lavamoat-core'
- * @import {LavaMoatPackagePolicy,
- *   LavaMoatPackagePolicyOptions,
+ * @import {LavaMoatEndoPackagePolicy,
+ *   LavaMoatEndoPackagePolicyOptions,
  *   LavaMoatEndoPolicy,
- *   ToEndoPolicyOptions} from './types.js'
+ *   ToEndoPolicyOptions,
+ * Resources} from './types.js'
  */
 
 /**
  * Boilerplate for Endo policies.
  *
- * @satisfies {LavaMoatEndoPolicy}
  * @internal
  */
-export const ENDO_POLICY_BOILERPLATE = /** @type {const} */ ({
-  [ENDO_POLICY_DEFAULT_ATTENUATOR]: DEFAULT_ATTENUATOR,
-  [ENDO_POLICY_ENTRY]: {
+export const ENDO_POLICY_BOILERPLATE = Object.freeze(
+  /**
+   * @type {const}
+   * @satisfies {LavaMoatEndoPolicy}
+   */ ({
+    [ENDO_POLICY_DEFAULT_ATTENUATOR]: DEFAULT_ATTENUATOR,
+    [ENDO_POLICY_ENTRY]: {},
+    [ENDO_POLICY_RESOURCES]: {},
+  })
+)
+
+/**
+ * The contents of {@link LavaMoatEndoPolicy.entry} when the entry is trusted
+ * (`all`)
+ *
+ * @internal
+ */
+export const ENDO_POLICY_ENTRY_TRUSTED = Object.freeze(
+  /**
+   * @type {const}
+   * @satisfies {LavaMoatEndoPolicy['entry']}
+   */
+  ({
     [ENDO_PKG_POLICY_GLOBALS]: [ENDO_POLICY_ITEM_ROOT],
     [ENDO_PKG_POLICY_PACKAGES]: ENDO_POLICY_ITEM_WILDCARD,
     [ENDO_PKG_POLICY_BUILTINS]: ENDO_POLICY_ITEM_WILDCARD,
     [ENDO_PKG_POLICY_NO_GLOBAL_FREEZE]: true,
-  },
-  [ENDO_POLICY_RESOURCES]: {},
-})
+  })
+)
 
 /**
  * Converts LavaMoat `ResourcePolicy.builtins` to Endo's
  * `PackagePolicy.builtins`
  *
  * @param {Record<string, boolean>} [item] - A value in `ResourcePolicy`
- * @returns {LavaMoatPackagePolicy['builtins']}
+ * @returns {LavaMoatEndoPackagePolicy['builtins']}
  */
 const convertEndoPackagePolicyBuiltins = (item) => {
   if (!item) {
     return undefined
   }
   /**
-   * @type {NonNullable<LavaMoatPackagePolicy['builtins']>}
+   * @type {NonNullable<LavaMoatEndoPackagePolicy['builtins']>}
    */
   const policyItem = {}
 
@@ -115,14 +134,14 @@ const convertEndoPackagePolicyBuiltins = (item) => {
  * `PackagePolicy.packages`
  *
  * @param {PackagePolicy} [item] - A value in `ResourcePolicy`
- * @returns {LavaMoatPackagePolicy['packages']}
+ * @returns {LavaMoatEndoPackagePolicy['packages']}
  */
 const convertEndoPackagePolicyPackages = (item) => {
   if (!item) {
     return undefined
   }
   /**
-   * @type {NonNullable<LavaMoatPackagePolicy['packages']>}
+   * @type {NonNullable<LavaMoatEndoPackagePolicy['packages']>}
    */
   const policyItem = {}
   for (const [key, value] of entries(item)) {
@@ -142,7 +161,7 @@ const convertEndoPackagePolicyPackages = (item) => {
  * attenuator.
  *
  * @param {GlobalPolicy} [item] - A value in `ResourcePolicy`
- * @returns {LavaMoatPackagePolicy['globals']}
+ * @returns {LavaMoatEndoPackagePolicy['globals']}
  */
 const convertEndoPackagePolicyGlobals = (item) => {
   if (!item) {
@@ -155,13 +174,13 @@ const convertEndoPackagePolicyGlobals = (item) => {
  * Converts LavaMoat `ResourcePolicy` to Endo's `PackagePolicyOptions`
  *
  * @param {ResourcePolicy} [resources]
- * @returns {LavaMoatPackagePolicyOptions | undefined}
+ * @returns {LavaMoatEndoPackagePolicyOptions | undefined}
  */
 const convertEndoPackagePolicyOptions = (resources) => {
   if (!resources) {
     return undefined
   }
-  /** @type {LavaMoatPackagePolicyOptions | undefined} */
+  /** @type {LavaMoatEndoPackagePolicyOptions | undefined} */
   let pkgPolicyOptions
   // the "native" prop of a LavaMoat package policy corresponds to the "native"
   // prop of the "options" prop of an Endo package policy
@@ -172,24 +191,38 @@ const convertEndoPackagePolicyOptions = (resources) => {
 }
 
 /**
- * Converters LavaMoat `ResourcePolicy` to Endo's `PackagePolicy`
+ * Converts a {@link ResourcePolicy} object to a {@link LavaMoatEndoPackagePolicy}
+ * object
  *
- * @param {ResourcePolicy} resources
- * @returns {LavaMoatPackagePolicy}
+ * @param {ResourcePolicy} [resources]
+ * @param {boolean} [isRoot]
+ * @returns {LavaMoatEndoPackagePolicy | undefined}
  */
-const convertEndoPackagePolicy = (resources) => {
-  return {
-    [ENDO_PKG_POLICY_PACKAGES]: convertEndoPackagePolicyPackages(
-      resources.packages
-    ),
-    [ENDO_PKG_POLICY_GLOBALS]: convertEndoPackagePolicyGlobals(
-      resources.globals
-    ),
-    [ENDO_PKG_POLICY_BUILTINS]: convertEndoPackagePolicyBuiltins(
-      resources.builtin
-    ),
-    [ENDO_PKG_POLICY_OPTIONS]: convertEndoPackagePolicyOptions(resources),
+const convertEndoPackagePolicy = (resources, isRoot = false) => {
+  if (!resources) {
+    return isRoot ? {} : undefined
   }
+  const pkgPolicy = create(null)
+  if (resources.packages) {
+    pkgPolicy[ENDO_PKG_POLICY_PACKAGES] = convertEndoPackagePolicyPackages(
+      resources.packages
+    )
+  }
+  if (resources.globals) {
+    pkgPolicy[ENDO_PKG_POLICY_GLOBALS] = convertEndoPackagePolicyGlobals(
+      resources.globals
+    )
+  }
+  if (resources.builtin) {
+    pkgPolicy[ENDO_PKG_POLICY_BUILTINS] = convertEndoPackagePolicyBuiltins(
+      resources.builtin
+    )
+  }
+  const pkgPolicyOptions = convertEndoPackagePolicyOptions(resources)
+  if (pkgPolicyOptions) {
+    pkgPolicy[ENDO_PKG_POLICY_OPTIONS] = pkgPolicyOptions
+  }
+  return pkgPolicy
 }
 
 /**
@@ -197,13 +230,17 @@ const convertEndoPackagePolicy = (resources) => {
  * policy
  *
  * @param {LavaMoatPolicy} policy
- * @param {LavaMoatPolicyOverrides} [policyOverride]
+ * @param {ToEndoPolicyOptions} [options] Options for conversion
  * @returns {LavaMoatEndoPolicy} Endo policy
  */
-const convert = (policy, policyOverride) => {
+const convert = (policy, { policyOverride } = {}) => {
   const lavaMoatPolicy = mergePolicy(policy, policyOverride)
 
-  const lavamoatResources = lavaMoatPolicy.resources ?? create(null)
+  const lavamoatResources = /** @type {Resources} */ (
+    lavaMoatPolicy.resources ?? create(null)
+  )
+
+  const rootPolicyRef = lavaMoatPolicy.root?.usePolicy
 
   /**
    * Actual conversion starts here.
@@ -214,16 +251,27 @@ const convert = (policy, policyOverride) => {
    * @type {LavaMoatEndoPolicy['resources']}
    */
   const resources = fromEntries(
-    entries(lavamoatResources).map(([resourceName, resourcePolicy]) => [
-      resourceName,
-      convertEndoPackagePolicy(resourcePolicy),
-    ])
+    entries(lavamoatResources).reduce((acc, [resourceName, resourcePolicy]) => {
+      const pkgPolicy = convertEndoPackagePolicy(
+        resourcePolicy,
+        resourceName === rootPolicyRef
+      )
+      if (pkgPolicy) {
+        return [...acc, [resourceName, pkgPolicy]]
+      }
+      return acc
+    }, /** @type {[resourceName: string, endoPolicy: LavaMoatEndoPackagePolicy][]} */ ([]))
   )
+
+  const entry = rootPolicyRef
+    ? resources[rootPolicyRef]
+    : ENDO_POLICY_ENTRY_TRUSTED
 
   /** @type {LavaMoatEndoPolicy} */
   const endoPolicy = {
     ...ENDO_POLICY_BOILERPLATE,
     [ENDO_POLICY_RESOURCES]: resources,
+    [ENDO_POLICY_ENTRY]: entry,
   }
 
   return endoPolicy
@@ -244,7 +292,7 @@ export const toEndoPolicySync = (policy, policyOverride) => {
   if (policyOverride) {
     assertPolicyOverride(policyOverride)
   }
-  return convert(policy, policyOverride)
+  return convert(policy, { policyOverride })
 }
 
 /**
@@ -320,5 +368,7 @@ export const toEndoPolicy = async (policyOrPolicyPath, options = {}) => {
     policyOverride = allegedPolicyOverride
   }
 
-  return convert(policy, policyOverride)
+  return convert(policy, {
+    policyOverride,
+  })
 }
