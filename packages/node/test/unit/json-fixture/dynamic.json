@@ -1,12 +1,80 @@
-{
-  "/package.json": "{\n  \"name\": \"hello\",\n  \"version\": \"0.0.0\",\n  \"type\": \"module\",\n  \"description\": \"this code actually runs\",\n  \"private\": true,\n  \"main\": \"index.js\",\n  \"scripts\": {\n    \"start\": \"npx snapshot-fs ../json-fixture/dynamic.json\"\n  },\n  \"dependencies\": {\n    \"dummy\": \"0.0.0\",\n    \"dynamic-require\": \"0.0.0\"\n  }\n}\n",
-  "/index.js": "import { hello as otherHello } from 'dynamic-require'\nexport const hello = 'hello ' + otherHello\n",
-  "/README.md": "This fixture is not used directly; it's only here in order to create a snapshot:\n\n```bash\nnpm run start\n```\n",
-  "/node_modules/muddy/package.json": "{\n  \"name\": \"muddy\",\n  \"version\": \"0.0.0\"\n}\n",
-  "/node_modules/muddy/index.js": "module.exports = \"world\"\n",
-  "/node_modules/dynamic-require/world.js": "module.exports = 'world'\n",
-  "/node_modules/dynamic-require/package.json": "{\n  \"name\": \"dynamic-require\",\n  \"version\": \"1.0.0\",\n  \"license\": \"ISC\",\n  \"private\": true,\n  \"main\": \"index.js\",\n  \"dependencies\": {\n    \"dummy\": \"0.0.0\"\n  }\n}\n",
-  "/node_modules/dynamic-require/index.js": "function dynamic (value) {\n  return require(value)\n}\n\nexports.hello = dynamic('dummy')\n",
-  "/node_modules/dummy/package.json": "{\n  \"name\": \"dummy\",\n  \"version\": \"0.0.0\",\n  \"dependencies\": {\"muddy\": \"0.0.0\"}\n}\n",
-  "/node_modules/dummy/index.js": "module.exports = require('muddy')\n\n// module.exports = 'world'\n"
-}
+[
+  0,
+  {},
+  {
+    "README.md": [
+      1,
+      {},
+      "data:application/octet-stream;base64,VGhpcyBmaXh0dXJlIGlzIG5vdCB1c2VkIGRpcmVjdGx5OyBpdCdzIG9ubHkgaGVyZSBpbiBvcmRlciB0byBjcmVhdGUgYSBzbmFwc2hvdDoKCmBgYGJhc2gKbnBtIHJ1biBzdGFydApgYGAK"
+    ],
+    "index.js": [
+      1,
+      {},
+      "data:application/octet-stream;base64,aW1wb3J0IHsgaGVsbG8gYXMgb3RoZXJIZWxsbyB9IGZyb20gJ2R5bmFtaWMtcmVxdWlyZScKZXhwb3J0IGNvbnN0IGhlbGxvID0gJ2hlbGxvICcgKyBvdGhlckhlbGxvCg=="
+    ],
+    "node_modules": [
+      0,
+      {},
+      {
+        "dummy": [
+          0,
+          {},
+          {
+            "index.js": [
+              1,
+              {},
+              "data:application/octet-stream;base64,bW9kdWxlLmV4cG9ydHMgPSByZXF1aXJlKCdtdWRkeScpCgovLyBtb2R1bGUuZXhwb3J0cyA9ICd3b3JsZCcK"
+            ],
+            "package.json": [
+              1,
+              {},
+              "data:application/octet-stream;base64,ewogICJuYW1lIjogImR1bW15IiwKICAidmVyc2lvbiI6ICIwLjAuMCIsCiAgImRlcGVuZGVuY2llcyI6IHsibXVkZHkiOiAiMC4wLjAifQp9Cg=="
+            ]
+          }
+        ],
+        "dynamic-require": [
+          0,
+          {},
+          {
+            "index.js": [
+              1,
+              {},
+              "data:application/octet-stream;base64,ZnVuY3Rpb24gZHluYW1pYyAodmFsdWUpIHsKICByZXR1cm4gcmVxdWlyZSh2YWx1ZSkKfQoKZXhwb3J0cy5oZWxsbyA9IGR5bmFtaWMoJ2R1bW15JykK"
+            ],
+            "package.json": [
+              1,
+              {},
+              "data:application/octet-stream;base64,ewogICJuYW1lIjogImR5bmFtaWMtcmVxdWlyZSIsCiAgInZlcnNpb24iOiAiMS4wLjAiLAogICJsaWNlbnNlIjogIklTQyIsCiAgInByaXZhdGUiOiB0cnVlLAogICJtYWluIjogImluZGV4LmpzIiwKICAiZGVwZW5kZW5jaWVzIjogewogICAgImR1bW15IjogIjAuMC4wIgogIH0KfQo="
+            ],
+            "world.js": [
+              1,
+              {},
+              "data:application/octet-stream;base64,bW9kdWxlLmV4cG9ydHMgPSAnd29ybGQnCg=="
+            ]
+          }
+        ],
+        "muddy": [
+          0,
+          {},
+          {
+            "index.js": [
+              1,
+              {},
+              "data:application/octet-stream;base64,bW9kdWxlLmV4cG9ydHMgPSAid29ybGQiCg=="
+            ],
+            "package.json": [
+              1,
+              {},
+              "data:application/octet-stream;base64,ewogICJuYW1lIjogIm11ZGR5IiwKICAidmVyc2lvbiI6ICIwLjAuMCIKfQo="
+            ]
+          }
+        ]
+      }
+    ],
+    "package.json": [
+      1,
+      {},
+      "data:application/octet-stream;base64,ewogICJuYW1lIjogImhlbGxvIiwKICAidmVyc2lvbiI6ICIwLjAuMCIsCiAgInR5cGUiOiAibW9kdWxlIiwKICAiZGVzY3JpcHRpb24iOiAidGhpcyBjb2RlIGFjdHVhbGx5IHJ1bnMiLAogICJwcml2YXRlIjogdHJ1ZSwKICAibWFpbiI6ICJpbmRleC5qcyIsCiAgInNjcmlwdHMiOiB7CiAgICAic3RhcnQiOiAibnB4IHNuYXBzaG90LWZzIC4uLy4uL2pzb24tZml4dHVyZS9keW5hbWljLmpzb24iCiAgfSwKICAiZGVwZW5kZW5jaWVzIjogewogICAgImR1bW15IjogIjAuMC4wIiwKICAgICJkeW5hbWljLXJlcXVpcmUiOiAiMC4wLjAiCiAgfQp9Cg=="
+    ]
+  }
+]

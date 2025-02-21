@@ -6,7 +6,7 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "start": "npx snapshot-fs . ../json/unused-dependency-override.json"
+    "start": "npx snapshot-fs ../../json-fixture/unused-dependency-override.json"
   },
   "dependencies": {
     "blurmph": "^1.0.0"

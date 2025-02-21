@@ -1,0 +1,45 @@
+{
+  "defaultAttenuator": "@attenuator@",
+  "entry": {
+    "globals": ["root"],
+    "packages": "any",
+    "builtins": "any",
+    "noGlobalFreeze": true
+  },
+  "resources": {
+    "a": {
+      "packages": {
+        "b": true
+      },
+      "globals": [
+        {
+          "console": true
+        }
+      ],
+      "builtins": {
+        "fs": {
+          "attenuate": "@attenuator@",
+          "params": ["readFile"]
+        }
+      }
+    },
+    "a>b": {
+      "packages": {
+        "c": true
+      },
+      "globals": [
+        {
+          "XMLHttpRequest": "write"
+        }
+      ],
+      "options": {
+        "native": true
+      }
+    },
+    "c": {
+      "builtins": {
+        "node:fs": true
+      }
+    }
+  }
+}
