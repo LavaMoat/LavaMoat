@@ -12,7 +12,7 @@ import { isBuiltin as defaultIsBuiltin } from 'node:module'
 import { defaultReadPowers } from '../compartment/power.js'
 import { DEFAULT_TRUST_ENTRYPOINT } from '../constants.js'
 import { log as defaultLog } from '../log.js'
-import { hrPath } from '../util.js'
+import { hrPath, isObjectyObject, isString } from '../util.js'
 import { LMRCache } from './lmr-cache.js'
 import { PolicyGeneratorContext } from './policy-gen-context.js'
 
@@ -130,6 +130,7 @@ const inspectModuleRecords = (
  * Creates {@link LavamoatModuleRecord LavamoatModuleRecords} from a compartment
  * map descriptor and sources.
  *
+ * @param {string | URL} entrypoint
  * @param {CompartmentMapDescriptor} compartmentMap Compartment map descriptor
  * @param {Sources} sources Sources
  * @param {Record<string, string>} renames Mapping of compartment name to
@@ -139,6 +140,7 @@ const inspectModuleRecords = (
  * @internal
  */
 export const buildModuleRecords = (
+  entrypoint,
   compartmentMap,
   sources,
   renames,
@@ -158,24 +160,30 @@ export const buildModuleRecords = (
     throw new TypeError('Could not find entry compartment; this is a bug')
   }
 
-  const compartmentRenames = freeze(renames)
+  const compartmentRenames = freeze({ ...renames })
 
   /** @type {MissingModuleMap} */
   const missingModules = new Map()
-  const contexts = entries(compartmentMap.compartments)
-    // TODO: warn about this? how frequently does this occur?
-    // likewise: can something be in sources but not in the compartment map?
-    .filter(([compartmentName]) => compartmentName in sources)
-    .map(
-      ([compartmentName, compartment]) =>
-        /** @type {[string, PolicyGeneratorContext]} */ ([
+
+  const entrypointPath = isString(entrypoint)
+    ? entrypoint
+    : isObjectyObject(entrypoint)
+      ? readPowers.fileURLToPath(entrypoint)
+      : undefined
+
+  const contexts = entries(compartmentMap.compartments).reduce(
+    (acc, [compartmentName, compartment]) => {
+      if (compartmentName in sources) {
+        const rootModule =
+          compartment === entryCompartment ? entrypointPath : undefined
+        acc.push([
           compartmentName,
           PolicyGeneratorContext.create(
             compartment,
             compartmentRenames,
             lmrCache,
             {
-              isRoot: entryCompartment === compartment,
+              rootModule: rootModule,
               trustEntrypoint,
               readPowers,
               isBuiltin,
@@ -184,22 +192,34 @@ export const buildModuleRecords = (
             }
           ),
         ])
-    )
-
-  let moduleRecords = contexts
-    .flatMap(([compartmentName, context]) => {
-      if (!(compartmentName in sources)) {
-        // "should never happen"™
-        throw new ReferenceError(
-          `Could not find corresponding source for ${compartmentName}; this is a bug`
-        )
       }
+      return acc
+    },
+    /**
+     * @type {[
+     *   compartmentName: string,
+     *   context: PolicyGeneratorContext<any>,
+     * ][]}
+     */ ([])
+  )
 
-      const compartmentSources = sources[compartmentName]
+  let moduleRecords = contexts.reduce((acc, [compartmentName, context]) => {
+    if (!(compartmentName in sources)) {
+      // "should never happen"™
+      throw new ReferenceError(
+        `Could not find corresponding source for ${compartmentName}; this is a bug`
+      )
+    }
 
-      return context.buildModuleRecords(compartmentSources)
-    })
-    .filter(Boolean)
+    const compartmentSources = sources[compartmentName]
+    const records = context.buildModuleRecords(compartmentSources)
+
+    if (records) {
+      acc.push(...records)
+    }
+
+    return acc
+  }, /** @type {LavamoatModuleRecord[]} */ ([]))
 
   moduleRecords = [...new Set(moduleRecords)]
 
@@ -231,6 +251,7 @@ export const buildModuleRecords = (
  * 3. Generate the policy using the `ModuleInspector`
  *
  * @overload
+ * @param {string | URL} entrypoint
  * @param {Readonly<CompartmentMapDescriptor>} compartmentMap
  * @param {Readonly<Sources>} sources
  * @param {Readonly<Record<string, string>>} renames
@@ -250,6 +271,7 @@ export const buildModuleRecords = (
  * 3. Generate the policy using the `ModuleInspector`
  *
  * @overload
+ * @param {string | URL} entrypoint
  * @param {Readonly<CompartmentMapDescriptor>} compartmentMap
  * @param {Readonly<Sources>} sources
  * @param {Readonly<Record<string, string>>} renames
@@ -268,6 +290,7 @@ export const buildModuleRecords = (
  * 2. Inspect the module records using LavaMoat's `ModuleInspector`
  * 3. Generate the policy using the `ModuleInspector`
  *
+ * @param {string | URL} entrypoint
  * @param {Readonly<CompartmentMapDescriptor>} compartmentMap
  * @param {Readonly<Sources>} sources
  * @param {Readonly<Record<string, string>>} renames
@@ -276,6 +299,7 @@ export const buildModuleRecords = (
  * @public
  */
 export function compartmentMapToPolicy(
+  entrypoint,
   compartmentMap,
   sources,
   renames,
@@ -288,12 +312,18 @@ export function compartmentMapToPolicy(
     trustEntrypoint = DEFAULT_TRUST_ENTRYPOINT,
   } = {}
 ) {
-  const moduleRecords = buildModuleRecords(compartmentMap, sources, renames, {
-    readPowers,
-    isBuiltin,
-    log,
-    trustEntrypoint,
-  })
+  const moduleRecords = buildModuleRecords(
+    entrypoint,
+    compartmentMap,
+    sources,
+    renames,
+    {
+      readPowers,
+      isBuiltin,
+      log,
+      trustEntrypoint,
+    }
+  )
 
   const inspector = inspectModuleRecords(moduleRecords, {
     debug,

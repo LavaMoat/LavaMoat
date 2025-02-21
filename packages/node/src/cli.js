@@ -140,6 +140,7 @@ const main = async (args = hideBin(process.argv)) => {
    *   entrypoint: string
    *   bin?: boolean
    *   root: string
+   *   'trust-entrypoint'?: boolean
    * }} argv
    * @returns {void}
    */
@@ -152,6 +153,15 @@ const main = async (args = hideBin(process.argv)) => {
       // note: this will print if the original entrypoint is a relative path; we
       // may or may not want to continue displaying it for that specific case.
       log.warning(`Resolved ${entrypoint} to ${argv.entrypoint}`)
+    }
+
+    // TODO: determine if checking `root` for `node_modules` is necessary
+    argv['trust-entrypoint'] = !argv.entrypoint.includes('node_modules')
+    argv['trust-entrypoint'] = false
+    if (!argv['trust-entrypoint']) {
+      log.info(
+        'Entrypoint is in a node_modules/ directory and is considered untrusted'
+      )
     }
   }
 
@@ -463,7 +473,7 @@ const main = async (args = hideBin(process.argv)) => {
            */ (argv['--'])
         )
 
-        await run(entrypoint, policy)
+        await run(entrypoint, policy, { trustEntrypoint })
       }
     )
     .command(

@@ -70,16 +70,18 @@ export type MissingModuleMap = Map<string, Set<string>>
  *
  * @internal
  */
-export type PolicyGeneratorContextOptions = Simplify<
+export type PolicyGeneratorContextOptions<
+  RootModule extends string | void = void,
+> = Simplify<
   WithReadPowers &
     WithIsBuiltin &
     WithTrustEntrypoint &
     WithLog & {
       /**
-       * If `true`, the `PolicyGeneratorContext` is associated with the root
-       * (entry point) of the application
+       * If set, this implies the associated {@link CompartmentDescriptor} is the
+       * entry descriptor.
        */
-      isRoot?: boolean
+      rootModule?: RootModule
 
       /**
        * If missing modules are to be tracked and summarized, this should be the

@@ -54,12 +54,12 @@ const defaultIsAbsolute = nodePath.isAbsolute
  * Generates a LavaMoat policy or debug policy from a given entry point using
  * `@endo/compartment-mapper`
  *
- * @param {string | URL} entrypointPath
+ * @param {string | URL} entrypoint
  * @param {GenerateOptions} [opts]
  * @returns {Promise<LavaMoatPolicy>}
  */
 const generate = async (
-  entrypointPath,
+  entrypoint,
   {
     readPowers = defaultReadPowers,
     debug = false,
@@ -82,7 +82,7 @@ const generate = async (
     policyOverride,
   }
   const { compartmentMap, sources, renames } = await loadCompartmentMap(
-    entrypointPath,
+    entrypoint,
     loadCompartmentMapOptions
   )
 
@@ -98,7 +98,13 @@ const generate = async (
   // this weird thing is to make TS happy about the overload
   const opts = debug ? { debug: true, ...baseOpts } : baseOpts
 
-  return compartmentMapToPolicy(compartmentMap, sources, renames, opts)
+  return compartmentMapToPolicy(
+    entrypoint,
+    compartmentMap,
+    sources,
+    renames,
+    opts
+  )
 }
 
 /**
@@ -123,13 +129,13 @@ const ABS_POLICY_PATH = nodePath.resolve(DEFAULT_POLICY_PATH)
  * Generates a LavaMoat policy or debug policy from a given entry point using
  * `@endo/compartment-mapper`
  *
- * @param {string | URL} entrypointPath
+ * @param {string | URL} entrypoint
  * @param {GeneratePolicyOptions} [opts]
  * @returns {Promise<LavaMoatPolicy>}
  * @public
  */
 export const generatePolicy = async (
-  entrypointPath,
+  entrypoint,
   {
     policyDebugPath = ABS_POLICY_DEBUG_PATH,
     policyPath = ABS_POLICY_PATH,
@@ -145,12 +151,12 @@ export const generatePolicy = async (
 ) => {
   await Promise.resolve()
 
-  if (entrypointPath instanceof URL) {
-    entrypointPath = readPowers.fileURLToPath(entrypointPath)
+  if (entrypoint instanceof URL) {
+    entrypoint = readPowers.fileURLToPath(entrypoint)
   }
   assert(
-    isAbsolute(entrypointPath),
-    `entrypointPath must be an absolute path; got ${entrypointPath}`
+    isAbsolute(entrypoint),
+    `entrypointPath must be an absolute path; got ${entrypoint}`
   )
   if (shouldWrite) {
     assert(
@@ -172,7 +178,7 @@ export const generatePolicy = async (
    */
   let policy
 
-  const niceEntrypointPath = hrPath(entrypointPath)
+  const niceEntrypointPath = hrPath(entrypoint)
 
   /**
    * If the debug flag was true, then the result of generatePolicy will be a
@@ -182,7 +188,7 @@ export const generatePolicy = async (
    */
   if (shouldWriteDebugPolicy({ write: shouldWrite, debug })) {
     log.info(`Generating "debug" LavaMoat policy from ${niceEntrypointPath}`)
-    const debugPolicy = await generate(entrypointPath, {
+    const debugPolicy = await generate(entrypoint, {
       ...generateOpts,
       readPowers,
       trustEntrypoint,
@@ -200,7 +206,7 @@ export const generatePolicy = async (
     policy = corePolicy
   } else {
     log.info(`Generating LavaMoat policy from ${niceEntrypointPath}`)
-    policy = await generate(entrypointPath, {
+    policy = await generate(entrypoint, {
       ...generateOpts,
       trustEntrypoint,
       readPowers,

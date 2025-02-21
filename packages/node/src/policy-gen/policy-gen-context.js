@@ -48,6 +48,7 @@ const SUBPATH_REGEX = /^(?:@(?:.+?\/){2,}|^[^@.].*\/).+$/
  *
  * Can be thought of as a wrapper around a {@link CompartmentDescriptor}.
  *
+ * @template {string | void} [RootModule=void] Default is `void`
  * @internal
  */
 export class PolicyGeneratorContext {
@@ -56,7 +57,7 @@ export class PolicyGeneratorContext {
    *
    * @type {Readonly<boolean>}
    */
-  #isRoot
+  #isRootCompartment
 
   /**
    * Internal cache for {@link LavamoatModuleRecord} objects
@@ -131,6 +132,11 @@ export class PolicyGeneratorContext {
   #trustEntrypoint
 
   /**
+   * @type {RootModule | undefined}
+   */
+  #entrypoint
+
+  /**
    * Sets some properties
    *
    * @remarks
@@ -142,14 +148,14 @@ export class PolicyGeneratorContext {
    * @param {Readonly<CompartmentDescriptor>} compartment
    * @param {Readonly<Record<string, string>>} renames
    * @param {Readonly<LMRCache>} lmrCache
-   * @param {Readonly<PolicyGeneratorContextOptions>} opts
+   * @param {Readonly<PolicyGeneratorContextOptions<RootModule>>} opts
    */
   constructor(
     compartment,
     renames,
     lmrCache,
     {
-      isRoot = false,
+      rootModule: entrypoint,
       readPowers = defaultReadPowers,
       isBuiltin = nodeIsBuiltin,
       missingModules = new Map(),
@@ -157,7 +163,7 @@ export class PolicyGeneratorContext {
       trustEntrypoint = DEFAULT_TRUST_ENTRYPOINT,
     } = {}
   ) {
-    this.#isRoot = isRoot
+    this.#isRootCompartment = !!entrypoint
     this.#lmrCache = lmrCache
     this.#readPowers = readPowers
     this.#isBuiltin = isBuiltin
@@ -166,6 +172,7 @@ export class PolicyGeneratorContext {
     this.#missingModules = missingModules
     this.#log = log
     this.#trustEntrypoint = trustEntrypoint
+    this.#entrypoint = entrypoint
   }
 
   /**
@@ -291,10 +298,12 @@ export class PolicyGeneratorContext {
   /**
    * Factory to create a new {@link PolicyGeneratorContext}
    *
+   * @template {string | void} [RootModule=void] Default is `void`
    * @param {Readonly<CompartmentDescriptor>} compartment
    * @param {Readonly<Record<string, string>>} renames
    * @param {Readonly<LMRCache>} lmrCache
-   * @param {Readonly<PolicyGeneratorContextOptions>} opts
+   * @param {Readonly<PolicyGeneratorContextOptions<RootModule>>} opts
+   * @returns {PolicyGeneratorContext<RootModule>}
    */
   static create(compartment, renames, lmrCache, opts = {}) {
     return new PolicyGeneratorContext(compartment, renames, lmrCache, opts)
@@ -374,7 +383,8 @@ export class PolicyGeneratorContext {
      */
     const file = this.#readPowers.fileURLToPath(new URL(sourceLocation))
 
-    this.#log.debug(`Building module record for "${specifier}" (${file})`)
+    // TODO: add a "trace" loglevel
+    // this.#log.debug(`Building module record for "${specifier}" (${file})`)
 
     /**
      * The {@link LavamoatModuleRecord.importMap} prop
@@ -382,6 +392,9 @@ export class PolicyGeneratorContext {
     const importMap = this.buildImportMap(
       /** @type {VirtualModuleSource} */ (record).imports
     )
+
+    // careful with the distinction between the root MODULE and the root COMPARTMENT
+    const isRoot = this.isRootModule(file)
 
     /** @type {SimpleLavamoatModuleRecordOptions} */
     const lmrOptions = {
@@ -391,7 +404,11 @@ export class PolicyGeneratorContext {
       importMap,
       content,
       type: parser === NATIVE_PARSER_NAME ? LMR_TYPE_NATIVE : LMR_TYPE_SOURCE,
-      isRoot: this.#isRoot,
+      isRoot,
+    }
+
+    if (isRoot) {
+      this.#log.debug(`Found root module: ${file}`)
     }
 
     if (!this.#lmrCache.has(lmrOptions)) {
@@ -408,13 +425,23 @@ export class PolicyGeneratorContext {
   }
 
   /**
+   * Returns `true` if this module is the entrypoint
+   *
+   * @param {string} filepath
+   * @returns {filepath is RootModule}
+   */
+  isRootModule(filepath) {
+    return this.#isRootCompartment && filepath === this.#entrypoint
+  }
+
+  /**
    * Determine the package name for this context's compartment descriptor
    *
    * @returns {LiteralUnion<typeof LAVAMOAT_PKG_POLICY_ROOT, string>} Package
    *   name or special name for entrypoint
    */
   get packageName() {
-    return this.#isRoot && this.#trustEntrypoint
+    return this.#isRootCompartment && this.#trustEntrypoint
       ? LAVAMOAT_PKG_POLICY_ROOT
       : this.compartment.name
   }
