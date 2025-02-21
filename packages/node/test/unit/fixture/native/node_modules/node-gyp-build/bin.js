@@ -16,7 +16,9 @@ if (!buildFromSource()) {
 }
 
 function build () {
-  var args = [os.platform() === 'win32' ? 'node-gyp.cmd' : 'node-gyp', 'rebuild']
+  var win32 = os.platform() === 'win32'
+  var shell = win32
+  var args = [win32 ? 'node-gyp.cmd' : 'node-gyp', 'rebuild']
 
   try {
     var pkg = require('node-gyp/package.json')
@@ -25,9 +27,10 @@ function build () {
       path.join(require.resolve('node-gyp/package.json'), '..', typeof pkg.bin === 'string' ? pkg.bin : pkg.bin['node-gyp']),
       'rebuild'
     ]
+    shell = false
   } catch (_) {}
 
-  proc.spawn(args[0], args.slice(1), { stdio: 'inherit' }).on('exit', function (code) {
+  proc.spawn(args[0], args.slice(1), { stdio: 'inherit', shell, windowsHide: true }).on('exit', function (code) {
     if (code || !process.argv[3]) process.exit(code)
     exec(process.argv[3]).on('exit', function (code) {
       process.exit(code)
@@ -45,15 +48,18 @@ function preinstall () {
 
 function exec (cmd) {
   if (process.platform !== 'win32') {
-    var shell = os.platform() === 'android' ? 'sh' : '/bin/sh'
-    return proc.spawn(shell, ['-c', '--', cmd], {
+    var shell = os.platform() === 'android' ? 'sh' : true
+    return proc.spawn(cmd, [], {
+      shell,
       stdio: 'inherit'
     })
   }
 
-  return proc.spawn(process.env.comspec || 'cmd.exe', ['/s', '/c', '"' + cmd + '"'], {
+  return proc.spawn(cmd, [], {
     windowsVerbatimArguments: true,
-    stdio: 'inherit'
+    stdio: 'inherit',
+    shell: true,
+    windowsHide: true
   })
 }
 
