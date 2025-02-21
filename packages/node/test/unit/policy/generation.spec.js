@@ -21,8 +21,6 @@ test('kitchen sink', testPolicyForJSON, 'kitchen-sink.json', {
   },
 })
 
-test('native-like module', testPolicyForJSON, 'phony-native.json')
-
 test('native module', testPolicyForJSON, 'native.json')
 
 test('native module w/ dynamic requires', testPolicyForJSON, 'dynamic.json')
@@ -59,6 +57,8 @@ test(
     },
   }
 )
+
+test('hashbang evasion', testPolicyForJSON, 'hashbang.json')
 
 test('basic nested global access', testPolicyForModule, 'location.href', {
   resources: {
@@ -144,9 +144,7 @@ test(
   'ignored global refs accessed w/ whitelist items',
   testPolicyForModule,
   `window.Object === Object`,
-  {
-    resources: {},
-  }
+  { resources: {} }
 )
 
 test('ignore newer intrinsics', testPolicyForModule, 'BigInt(123)', {
@@ -226,3 +224,5 @@ console.log("you can use await import` +
     },
   }
 )
+
+test.todo('exit modules are not imported')

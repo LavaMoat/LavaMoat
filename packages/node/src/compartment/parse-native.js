@@ -17,7 +17,7 @@ const { quote: q } = assert
 /**
  * @import {ParseFn, ParserImplementation} from '@endo/compartment-mapper'
  * @import {ThirdPartyStaticModuleInterface} from 'ses'
- * @import {LavaMoatPackagePolicy} from '../types.js'
+ * @import {LavaMoatEndoPackagePolicy} from '../types.js'
  */
 
 /** @type {ParseFn} */
@@ -44,7 +44,7 @@ const parseNative = (
    */
   const execute = (moduleEnvironmentRecord, compartment) => {
     if (
-      /** @type {LavaMoatPackagePolicy} */ (compartmentDescriptor?.policy)
+      /** @type {LavaMoatEndoPackagePolicy} */ (compartmentDescriptor?.policy)
         ?.options?.native !== true
     ) {
       throw new Error(

@@ -45,8 +45,9 @@ export const importHook = async (specifier) => {
  */
 export const importNowHook = (specifier, packageLocation) => {
   const require = Module.createRequire(fileURLToPath(packageLocation))
-  /** @type {object} */
-  const ns = require(specifier)
+
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  const ns = /** @type {object} */ (require(specifier))
   return freeze(
     /** @type {ThirdPartyStaticModuleInterface} */ ({
       imports: [],
@@ -57,4 +58,21 @@ export const importNowHook = (specifier, packageLocation) => {
       },
     })
   )
+}
+
+/**
+ * The "null" import hook is for use during policy generation; it prevents
+ * importing of exit modules and is the recommended way to handle exit modules
+ * when using `captureFromMap()`
+ *
+ * @type {ExitModuleImportHook}
+ * @internal
+ */
+export const nullImportHook = async () => {
+  /** @type {object} */
+  return freeze({
+    imports: [],
+    exports: [],
+    execute: () => {},
+  })
 }
