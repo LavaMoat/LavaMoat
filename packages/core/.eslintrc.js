@@ -1,7 +1,11 @@
 // @ts-check
 
 /**
- * @type {import('eslint').Linter.Config}
+ * @import {Linter} from 'eslint'
+ */
+
+/**
+ * @type {Linter.Config}
  */
 module.exports = {
   extends: '../../.config/eslintrc.typed-workspace',

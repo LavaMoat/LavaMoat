@@ -16,7 +16,7 @@ import { getCanonicalName } from './policy-gen-util.js'
  *   ModuleSource} from 'ses'
  * @import {Merge} from 'type-fest'
  * @import {CompartmentDescriptor, CompartmentMapDescriptor} from '@endo/compartment-mapper'
- * @import {LavaMoatPolicyOverrides, Resources} from 'lavamoat-core'
+ * @import {LavaMoatPolicyOverrides, Resources} from '@lavamoat/types'
  */
 
 const { entries, isFrozen } = Object
