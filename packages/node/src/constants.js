@@ -175,3 +175,13 @@ export const NATIVE_PARSER_FILE_EXT = 'node'
  * Used by policy gen
  */
 export const NATIVE_PARSER_NAME = 'native'
+
+/**
+ * Whether we should trust the root compartment _by default_
+ */
+export const DEFAULT_TRUST_ROOT_COMPARTMENT = true
+
+/**
+ * The `package.json` filename, naturally
+ */
+export const PACKAGE_JSON = 'package.json'

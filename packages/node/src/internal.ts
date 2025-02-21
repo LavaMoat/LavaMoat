@@ -7,16 +7,19 @@
  */
 
 import type { MapNodeModulesOptions } from '@endo/compartment-mapper'
+import { LavamoatModuleRecordOptions } from 'lavamoat-core'
 import type nodeFs from 'node:fs'
 import { PathLike, Stats } from 'node:fs'
-import type { Except, Merge } from 'type-fest'
+import type { Except, LiteralUnion, Simplify } from 'type-fest'
 import type {
   BaseLoadCompartmentMapOptions,
   GeneratePolicyOptions,
+  WithDebug,
   WithIsBuiltin,
   WithLog,
   WithPolicyOverride,
   WithReadPowers,
+  WithTrustRoot,
   WritePolicyOptions,
 } from './types.js'
 
@@ -46,53 +49,38 @@ export type GenerateOptions = Except<
  *
  * @internal
  */
-export type LoadCompartmentMapOptions = Merge<
-  Merge<
-    Omit<BaseLoadCompartmentMapOptions, 'dev'>,
-    Pick<MapNodeModulesOptions, 'conditions'>
-  >,
-  Merge<WithReadPowers, WithPolicyOverride>
+export type LoadCompartmentMapOptions = Simplify<
+  Omit<BaseLoadCompartmentMapOptions, 'dev'> &
+    Pick<MapNodeModulesOptions, 'conditions'> &
+    WithReadPowers &
+    WithPolicyOverride &
+    WithTrustRoot
 >
-
-/**
- * Mapping of compartment name to missing module names
- *
- * @internal
- * @see {@link PolicyGeneratorContextOptions.missingModules}
- */
-export type MissingModuleMap = Map<string, Set<string>>
 
 /**
  * Options for the `PolicyGeneratorContext` constructor
  *
+ * @template RootModule If a `string`, then this is the name of the root module,
+ *   which lives in the root compartment. We can use this to distinguish
+ *   `PolicyGeneratorContext` instances in which the associated compartment is
+ *   _not_ the entry compartment (if needed). Generally, this can be ignored.
  * @internal
  */
-export type PolicyGeneratorContextOptions = Merge<
-  WithReadPowers,
-  Merge<
-    WithIsBuiltin,
-    Merge<
-      WithLog,
-      {
-        /**
-         * If `true`, the `PolicyGeneratorContext` represents the entry
-         * compartment
-         */
-        isEntry?: boolean
-
-        /**
-         * If missing modules are to be tracked and summarized, this should be
-         * the same `Map` passed into every call to
-         * `PolicyGeneratorContext.create()`.
-         *
-         * `PolicyGeneratorContext` will populate this data structure with the
-         * names of missing modules per compartment.
-         */
-        missingModules?: MissingModuleMap
-      }
-    >
-  >
+export type PolicyGeneratorContextOptions<
+  RootModule extends string | void = void,
+> = Simplify<
+  WithReadPowers &
+    WithIsBuiltin &
+    WithTrustRoot &
+    WithLog & {
+      /**
+       * If set, this implies the associated {@link CompartmentDescriptor} is the
+       * entry descriptor.
+       */
+      rootModule?: RootModule
+    }
 >
+
 /**
  * A function _or_ a constructor.
  *
@@ -163,9 +151,11 @@ export interface WithFs {
   fs?: FsUtilInterface
 }
 
-export type ResolveBinScriptOptions = Merge<
-  WithFs,
-  {
+/**
+ * Options for `resolveBinScript()`
+ */
+export type ResolveBinScriptOptions = Simplify<
+  WithFs & {
     /**
      * Directory to begin looking for the script in
      */
@@ -173,4 +163,35 @@ export type ResolveBinScriptOptions = Merge<
   }
 >
 
+/**
+ * Options for `resolveWorkspace()`
+ */
 export type ResolveWorkspaceOptions = ResolveBinScriptOptions
+
+/**
+ * Options for `inspectModuleRecords()`
+ */
+export type InspectModuleRecordsOptions = Simplify<
+  WithLog & WithDebug & WithTrustRoot
+>
+
+/**
+ * Possible options for creating a `LavamoatModuleRecord` within the context of
+ * this package.
+ *
+ * - `moduleInitializer` is only used by the `lavamoat-core` kernel;
+ *   `@endo/compartment-mapper`'s parsers handle this for us
+ * - `ast` is created internally by the module inspector and we needn't provide it
+ */
+export type SimpleLavamoatModuleRecordOptions = Omit<
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  LavamoatModuleRecordOptions,
+  'ast' | 'moduleInitializer'
+>
+
+/**
+ * The canonical name of a package as used in policy
+ *
+ * `<ATTENUATORS>` does not appear in policy and is an Endo-ism.
+ */
+export type CanonicalName = LiteralUnion<'$root' | '<ATTENUATORS>', string>

@@ -11,22 +11,56 @@ import nodeFs from 'node:fs'
 import nodePath from 'node:path'
 import * as constants from './constants.js'
 import { readJsonFile } from './fs.js'
-import { hasValue, isArray, isObject } from './util.js'
+import { hasValue, isObject, isObjectyObject, isString } from './util.js'
 
 /**
- * @import {LavaMoatPolicy, LavaMoatPolicyOverrides, LavaMoatPolicyDebug} from 'lavamoat-core'
+ * @import {RootPolicy, LavaMoatPolicy, LavaMoatPolicyOverrides, LavaMoatPolicyDebug} from 'lavamoat-core'
  * @import {WritableFsInterface} from './types.js'
+ * @import {WithFs} from './internal.js'
+ */
+
+const { create } = Object
+
+/**
+ * Reads a `policy.json` from disk
+ *
+ * @overload
+ * @param {string | URL} filepath Path to policy
+ * @param {WithFs} [options] Options
+ * @returns {Promise<LavaMoatPolicy>}
+ * @internal
+ */
+
+/**
+ * Reads a `policy.json` at the default policy path from disk
+ *
+ * @overload
+ * @param {WithFs} [options] Options
+ * @returns {Promise<LavaMoatPolicy>}
+ * @internal
  */
 
 /**
  * Reads a `policy.json` from disk
  *
- * @param {string | URL} [filepath]
+ * @param {string | URL | WithFs} [filepath] Path to policy
+ * @param {WithFs} [options] Options
  * @returns {Promise<LavaMoatPolicy>}
  * @internal
  */
-export const readPolicy = async (filepath = constants.DEFAULT_POLICY_PATH) => {
-  const allegedPolicy = await readJsonFile(filepath)
+export const readPolicy = async (
+  filepath = constants.DEFAULT_POLICY_PATH,
+  { fs = nodeFs } = {}
+) => {
+  /** @type {string | URL} */
+  let policyPath
+  if (!isString(filepath) && !(filepath instanceof URL)) {
+    ;({ fs = nodeFs } = filepath)
+    policyPath = constants.DEFAULT_POLICY_PATH
+  } else {
+    policyPath = filepath
+  }
+  const allegedPolicy = await readJsonFile(policyPath, { fs })
   assertPolicy(allegedPolicy)
   return allegedPolicy
 }
@@ -34,16 +68,45 @@ export const readPolicy = async (filepath = constants.DEFAULT_POLICY_PATH) => {
 /**
  * Reads a `policy-override.json` from disk, if any.
  *
+ * @overload
+ * @param {string | URL} filepath Path to policy override
+ * @param {WithFs} [options] Options
+ * @returns {Promise<LavaMoatPolicyOverrides | undefined>}
+ * @throws If reading the policy fails in a way other than the file not existing
+ */
+
+/**
+ * Reads a `policy-override.json` from disk at the default path, if any.
+ *
+ * @overload
+ * @param {WithFs} [options] Options
+ * @returns {Promise<LavaMoatPolicyOverrides | undefined>}
+ * @throws If reading the policy fails in a way other than the file not existing
+ */
+
+/**
+ * Reads a `policy-override.json` from disk, if any.
+ *
  * @param {string | URL} [filepath]
+ * @param {WithFs} [options]
  * @returns {Promise<LavaMoatPolicyOverrides | undefined>}
  * @throws If reading the policy fails in a way other than the file not existing
  */
 export const readPolicyOverride = async (
-  filepath = constants.DEFAULT_POLICY_OVERRIDE_PATH
+  filepath = constants.DEFAULT_POLICY_OVERRIDE_PATH,
+  { fs = nodeFs } = {}
 ) => {
+  /** @type {string | URL} */
+  let policyOverridePath
+  if (!isString(filepath) && !(filepath instanceof URL)) {
+    ;({ fs = nodeFs } = filepath)
+    policyOverridePath = constants.DEFAULT_POLICY_OVERRIDE_PATH
+  } else {
+    policyOverridePath = filepath
+  }
   try {
     // eslint-disable-next-line @jessie.js/safe-await-separator
-    const allegedPolicy = await readJsonFile(filepath)
+    const allegedPolicy = await readJsonFile(policyOverridePath, { fs })
     assertPolicyOverride(allegedPolicy)
     return allegedPolicy
   } catch (err) {
@@ -68,6 +131,7 @@ export const readPolicyOverride = async (
  *   `policy-override.json` or the policy override itself. Defaults to
  *   `./lavamoat/node/policy-override.json` relative to the current working
  *   directory.
+ * @param {WithFs} [options] Options
  * @returns {Promise<LavaMoatPolicy>}
  * @throws If a policy is invalid _and/or_ if policy overrides were provided
  *   _and_ are invalid
@@ -75,7 +139,8 @@ export const readPolicyOverride = async (
  */
 export const loadPolicies = async (
   policy = constants.DEFAULT_POLICY_PATH,
-  policyOverride = constants.DEFAULT_POLICY_OVERRIDE_PATH
+  policyOverride = constants.DEFAULT_POLICY_OVERRIDE_PATH,
+  { fs = nodeFs } = {}
 ) => {
   /**
    * @type {[
@@ -92,7 +157,7 @@ export const loadPolicies = async (
       })
     )
   } else {
-    promises.push(readPolicy(policy))
+    promises.push(readPolicy(policy, { fs }))
   }
   if (isObject(policyOverride)) {
     promises.push(
@@ -102,7 +167,7 @@ export const loadPolicies = async (
       })
     )
   } else {
-    promises.push(readPolicyOverride(policyOverride))
+    promises.push(readPolicyOverride(policyOverride, { fs }))
   }
 
   /**
@@ -127,14 +192,14 @@ export const loadPolicies = async (
  */
 export const isPolicy = (value) => {
   return (
-    isObject(value) &&
-    !isArray(value) &&
-    (hasValue(value, 'resources') || hasValue(value, 'resolutions'))
+    isObjectyObject(value) &&
+    (hasValue(value, 'resources') || hasValue(value, 'resolutions')) &&
+    (!('root' in value) || isObjectyObject(value.root))
   )
 }
 
 /**
- * Type predicate for a **non-empty** {@link LavaMoatPolicyOverrides}
+ * Type predicate for a {@link LavaMoatPolicyOverrides}
  *
  * @remarks
  * See {@link isPolicy} for caveats
@@ -142,7 +207,10 @@ export const isPolicy = (value) => {
  * @returns {value is LavaMoatPolicyOverrides}
  */
 export const isPolicyOverride = (value) => {
-  return isPolicy(value)
+  if (isObjectyObject(value)) {
+    return isPolicy({ resources: create(null), ...value })
+  }
+  return false
 }
 
 /**
@@ -185,4 +253,16 @@ export const assertPolicyOverride = (value) => {
 export const writePolicy = async (filepath, policy, { fs = nodeFs } = {}) => {
   await fs.promises.mkdir(nodePath.dirname(filepath), { recursive: true })
   await fs.promises.writeFile(filepath, jsonStringifySortedPolicy(policy))
+}
+
+/**
+ * Returns `true` if there is no such
+ * {@link RootPolicy.usePolicy `root.usePolicy`} field.
+ *
+ * @param {LavaMoatPolicy} policy
+ * @returns {boolean}
+ * @internal
+ */
+export const isTrusted = (policy) => {
+  return !policy.root?.usePolicy
 }
