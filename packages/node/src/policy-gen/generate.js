@@ -12,7 +12,7 @@ import { defaultReadPowers } from '../compartment/power.js'
 import {
   DEFAULT_POLICY_DEBUG_PATH,
   DEFAULT_POLICY_PATH,
-  DEFAULT_TRUST_ENTRYPOINT,
+  DEFAULT_TRUST_ROOT_COMPARTMENT,
 } from '../constants.js'
 import { log as defaultLog } from '../log.js'
 import { writePolicy } from '../policy-util.js'
@@ -67,7 +67,7 @@ const generate = async (
     isBuiltin,
     log = defaultLog,
     dev = false,
-    trustEntrypoint = DEFAULT_TRUST_ENTRYPOINT,
+    trustRoot = DEFAULT_TRUST_ROOT_COMPARTMENT,
     ...archiveOpts
   } = {}
 ) => {
@@ -92,7 +92,7 @@ const generate = async (
     policyOverride,
     isBuiltin,
     log,
-    trustEntrypoint,
+    trustRoot,
   }
 
   // this weird thing is to make TS happy about the overload
@@ -145,7 +145,7 @@ export const generatePolicy = async (
     write: shouldWrite = false,
     debug,
     log = defaultLog,
-    trustEntrypoint = DEFAULT_TRUST_ENTRYPOINT,
+    trustRoot = DEFAULT_TRUST_ROOT_COMPARTMENT,
     ...generateOpts
   } = {}
 ) => {
@@ -191,7 +191,7 @@ export const generatePolicy = async (
     const debugPolicy = await generate(entrypoint, {
       ...generateOpts,
       readPowers,
-      trustEntrypoint,
+      trustRoot: trustRoot,
       debug: true,
     })
     await writePolicy(policyDebugPath, debugPolicy, { fs: writableFs })
@@ -208,7 +208,7 @@ export const generatePolicy = async (
     log.info(`Generating LavaMoat policy from ${niceEntrypointPath}`)
     policy = await generate(entrypoint, {
       ...generateOpts,
-      trustEntrypoint,
+      trustRoot: trustRoot,
       readPowers,
     })
   }

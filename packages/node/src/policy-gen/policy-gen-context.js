@@ -3,11 +3,11 @@
  *
  * @packageDocumentation
  */
-
+import chalk from 'chalk'
 import { isBuiltin as nodeIsBuiltin } from 'node:module'
 import { defaultReadPowers } from '../compartment/power.js'
 import {
-  DEFAULT_TRUST_ENTRYPOINT,
+  DEFAULT_TRUST_ROOT_COMPARTMENT,
   LAVAMOAT_PKG_POLICY_ROOT,
   LMR_TYPE_BUILTIN,
   LMR_TYPE_NATIVE,
@@ -15,7 +15,7 @@ import {
   NATIVE_PARSER_NAME,
 } from '../constants.js'
 import { log as fallbackLog } from '../log.js'
-import { hasValue } from '../util.js'
+import { hasValue, hrPath } from '../util.js'
 
 /**
  * @import {ReadNowPowers,
@@ -28,8 +28,7 @@ import { hasValue } from '../util.js'
  * @import {LiteralUnion} from 'type-fest'
  * @import {Loggerr} from 'loggerr'
  * @import {LMRCache} from './lmr-cache.js'
- * @import {MissingModuleMap,
- *   PolicyGeneratorContextOptions,
+ * @import {PolicyGeneratorContextOptions,
  *   SimpleLavamoatModuleRecordOptions} from '../internal.js'
  * @import {LavamoatModuleRecord, IsBuiltinFn} from 'lavamoat-core'
  */
@@ -37,10 +36,32 @@ import { hasValue } from '../util.js'
 const { entries, keys, hasOwn } = Object
 
 /**
- * Anything matching this is a specifier within some non-relative package. e.g.,
- * `@foo/bar/baz.js`, `foo/baz.js`
+ * Anything matching this is a specifier matching a package or a package and its
+ * subpath.
+ *
+ * Example _matching_ strings:
+ *
+ * - `foo`
+ * - `foo/bar`
+ * - `@foo/bar`
+ * - `@foo/bar/baz`
+ *
+ * Example _non-matching_ strings:
+ *
+ * - `./foo`
+ * - `./foo/bar`
+ * - `../foo/bar`
+ * - `../foo/bar/baz`
+ *
+ * The match is grouped into two groups; `pkg` for the package name and
+ * `subpath` for anything after (which may be `undefined`)
+ *
+ * @remarks
+ * Anything matching this is a specifier which should have an entry in the
+ * {@link LavamoatModuleRecord.importMap} record.
  */
-const SUBPATH_REGEX = /^(?:@(?:.+?\/){2,}|^[^@.].*\/).+$/
+const PACKAGE_REGEX =
+  /^(?<pkg>(?:@[^/\s]+?\/[^/\s]+?)|[^@/\s.]+?)(?:(?:\/)(?<subpath>(?:[^/\s]+?(?:\/)?)*))?$/
 
 /**
  * Handles creation of {@link LavamoatModuleRecord} objects for individual
@@ -104,7 +125,7 @@ export class PolicyGeneratorContext {
    * A mapping of compartment names to missing module specifiers encountered
    * during the policy generation process.
    *
-   * @type {Readonly<MissingModuleMap>}
+   * @type {Readonly<Set<string>>}
    */
 
   #missingModules
@@ -126,15 +147,15 @@ export class PolicyGeneratorContext {
    * @type {Readonly<Map<string, string | null | undefined>>}
    */
 
-  #filepaths = new Map()
+  #filepaths
 
   /** @type {Readonly<boolean>} */
-  #trustEntrypoint
+  #trustRoot
 
   /**
    * @type {RootModule | undefined}
    */
-  #entrypoint
+  #rootModule
 
   /**
    * Sets some properties
@@ -145,7 +166,8 @@ export class PolicyGeneratorContext {
    * {@link PolicyGeneratorContext.create static factory method} of the same
    * class. This is intentional, since inheritance is undesirable in this case.
    * @private
-   * @param {Readonly<CompartmentDescriptor>} compartment
+   * @param {Readonly<CompartmentDescriptor>} compartment The associated
+   *   compartment
    * @param {Readonly<Record<string, string>>} renames
    * @param {Readonly<LMRCache>} lmrCache
    * @param {Readonly<PolicyGeneratorContextOptions<RootModule>>} opts
@@ -155,24 +177,24 @@ export class PolicyGeneratorContext {
     renames,
     lmrCache,
     {
-      rootModule: entrypoint,
+      rootModule,
       readPowers = defaultReadPowers,
       isBuiltin = nodeIsBuiltin,
-      missingModules = new Map(),
       log = fallbackLog,
-      trustEntrypoint = DEFAULT_TRUST_ENTRYPOINT,
+      trustRoot: trustRoot = DEFAULT_TRUST_ROOT_COMPARTMENT,
     } = {}
   ) {
-    this.#isRootCompartment = !!entrypoint
+    this.#isRootCompartment = !!rootModule
     this.#lmrCache = lmrCache
     this.#readPowers = readPowers
     this.#isBuiltin = isBuiltin
     this.compartment = compartment
     this.renames = renames
-    this.#missingModules = missingModules
     this.#log = log
-    this.#trustEntrypoint = trustEntrypoint
-    this.#entrypoint = entrypoint
+    this.#trustRoot = trustRoot
+    this.#rootModule = rootModule
+    this.#missingModules = new Set()
+    this.#filepaths = new Map()
   }
 
   /**
@@ -221,53 +243,57 @@ export class PolicyGeneratorContext {
   }
 
   /**
-   * Returns `true` if `specifier` should have an entry in a
-   * {@link LavamoatModuleRecord.importMap}.
-   *
-   * @param {string} specifier
-   * @returns {boolean}
-   */
-  wantsImportMap(specifier) {
-    return this.isBuiltin(specifier) || SUBPATH_REGEX.test(specifier)
-  }
-
-  /**
-   * Attempts to find the filepath of a specifier
+   * Attempts to resolve the filepath of `specifier` using the current
+   * compartment descriptor's
+   * {@link CompartmentDescriptor.modules module descriptors}.
    *
    * Strips trailing slashes from specifiers, since Endo does not store them
    * with trailing slashes
    *
    * @param {string} specifier
-   * @returns {string | null} Filepath, name of builtin, or if `null`, then the
-   *   module is missing.
+   * @returns {string | null} Filepath, name of builtin, or if `null`, then
+   *   either the module is missing or we just don't need an import map entry
+   *   for it.
    */
-  getFilepath(specifier) {
+  resolve(specifier) {
     specifier = specifier.replace(/\/$/, '')
 
     if (this.#filepaths.has(specifier)) {
       return /** @type {string | null} */ (this.#filepaths.get(specifier))
     }
 
-    if (this.isBuiltin(specifier)) {
-      this.#filepaths.set(specifier, specifier)
-      return specifier
-    }
-
-    const moduleDescriptor = this.compartment.modules[specifier]
-    if (moduleDescriptor) {
-      const filepath = this.toPath(moduleDescriptor)
-      if (filepath) {
-        this.#filepaths.set(specifier, filepath)
-        return filepath
+    if (PACKAGE_REGEX.test(specifier)) {
+      if (this.isBuiltin(specifier)) {
+        this.#filepaths.set(specifier, specifier)
+        return specifier
       }
+
+      const moduleDescriptor = this.compartment.modules[specifier]
+      if (moduleDescriptor) {
+        const filepath = this.toPath(moduleDescriptor)
+        if (filepath) {
+          this.#filepaths.set(specifier, filepath)
+          return filepath
+          /* c8 ignore next */
+        } else {
+          this.#log.error(
+            `Unable to determine filepath for "${specifier}"; this is a bug`
+          )
+        }
+      } else {
+        this.#log.debug(
+          `Compartment ${this.compartment.label}: unknown module "${specifier}"`
+        )
+      }
+    } else {
+      // likely a relative path
+      this.#filepaths.set(specifier, null)
+      return null
     }
 
-    const { label } = this.compartment
-    const missingModules = this.#missingModules.get(label) ?? new Set()
-    missingModules.add(specifier)
-    this.#missingModules.set(label, missingModules)
-
+    this.#missingModules.add(specifier)
     this.#filepaths.set(specifier, null)
+
     return null
   }
 
@@ -285,11 +311,9 @@ export class PolicyGeneratorContext {
    */
   buildImportMap(imports = []) {
     return imports.reduce((acc, specifier) => {
-      if (this.wantsImportMap(specifier)) {
-        const filepath = this.getFilepath(specifier)
-        if (filepath) {
-          acc[specifier] = filepath
-        }
+      const filepath = this.resolve(specifier)
+      if (filepath) {
+        acc[specifier] = filepath
       }
       return acc
     }, /** @type {LavamoatModuleRecord['importMap']} */ ({}))
@@ -431,7 +455,7 @@ export class PolicyGeneratorContext {
    * @returns {filepath is RootModule}
    */
   isRootModule(filepath) {
-    return this.#isRootCompartment && filepath === this.#entrypoint
+    return this.#isRootCompartment && filepath === this.#rootModule
   }
 
   /**
@@ -441,7 +465,7 @@ export class PolicyGeneratorContext {
    *   name or special name for entrypoint
    */
   get packageName() {
-    return this.#isRootCompartment && this.#trustEntrypoint
+    return this.#isRootCompartment && this.#trustRoot
       ? LAVAMOAT_PKG_POLICY_ROOT
       : this.compartment.name
   }
@@ -453,8 +477,19 @@ export class PolicyGeneratorContext {
    * @returns {LavamoatModuleRecord[]}
    */
   buildModuleRecords(sources) {
-    return entries(sources).flatMap((entry) =>
+    const records = entries(sources).flatMap((entry) =>
       this.buildModuleRecordsForSource(...entry)
     )
+
+    if (this.#missingModules.size) {
+      const nicePath = hrPath(this.renames[this.compartment.location])
+      let msg = `Package ${chalk.magenta(this.compartment.label)} (${nicePath})  references modules which could not be resolved. These may be "optional" or dependencies unlisted in package.json. ${chalk.italic('Execution will most likely fail')} unless these are accounted for in policy overrides:`
+      for (const missingModule of this.#missingModules) {
+        msg += `\n- ${chalk.yellow(missingModule)}`
+      }
+      this.#log.warning(msg)
+    }
+
+    return records
   }
 }

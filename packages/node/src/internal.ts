@@ -19,7 +19,7 @@ import type {
   WithLog,
   WithPolicyOverride,
   WithReadPowers,
-  WithTrustEntrypoint,
+  WithTrustRoot,
   WritePolicyOptions,
 } from './types.js'
 
@@ -58,16 +58,12 @@ export type LoadCompartmentMapOptions = Merge<
 >
 
 /**
- * Mapping of compartment name to missing module names
- *
- * @internal
- * @see {@link PolicyGeneratorContextOptions.missingModules}
- */
-export type MissingModuleMap = Map<string, Set<string>>
-
-/**
  * Options for the `PolicyGeneratorContext` constructor
  *
+ * @template RootModule If a `string`, then this is the name of the root module,
+ *   which lives in the root compartment. We can use this to distinguish
+ *   `PolicyGeneratorContext` instances in which the associated compartment is
+ *   _not_ the entry compartment (if needed). Generally, this can be ignored.
  * @internal
  */
 export type PolicyGeneratorContextOptions<
@@ -75,23 +71,13 @@ export type PolicyGeneratorContextOptions<
 > = Simplify<
   WithReadPowers &
     WithIsBuiltin &
-    WithTrustEntrypoint &
+    WithTrustRoot &
     WithLog & {
       /**
        * If set, this implies the associated {@link CompartmentDescriptor} is the
        * entry descriptor.
        */
       rootModule?: RootModule
-
-      /**
-       * If missing modules are to be tracked and summarized, this should be the
-       * same `Map` passed into every call to
-       * `PolicyGeneratorContext.create()`.
-       *
-       * `PolicyGeneratorContext` will populate this data structure with the
-       * names of missing modules per compartment.
-       */
-      missingModules?: MissingModuleMap
     }
 >
 
@@ -186,7 +172,7 @@ export type ResolveWorkspaceOptions = ResolveBinScriptOptions
  * Options for `inspectModuleRecords()`
  */
 export type InspectModuleRecordsOptions = Simplify<
-  WithLog & WithDebug & WithTrustEntrypoint
+  WithLog & WithDebug & WithTrustRoot
 >
 
 /**

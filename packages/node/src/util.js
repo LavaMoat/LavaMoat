@@ -3,6 +3,7 @@
  *
  * @packageDocumentation
  */
+import chalk from 'chalk'
 import path from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 
@@ -171,19 +172,19 @@ export const isReadNowPowers = (value) =>
  * @internal
  */
 export const hrPath = (filepath) => {
-  if (!isString(filepath)) {
+  if (!isString(filepath) || filepath.startsWith('file://')) {
     filepath = fileURLToPath(filepath)
   }
   if (path.isAbsolute(filepath)) {
     const relativePath = path.relative(process.cwd(), filepath)
     if (relativePath && relativePath.length < filepath.length) {
-      return relativePath
+      return chalk.green(relativePath)
     }
   } else {
     const absolutePath = path.resolve(filepath)
     if (absolutePath.length < filepath.length) {
-      return absolutePath
+      return chalk.green(absolutePath)
     }
   }
-  return filepath
+  return chalk.green(filepath)
 }

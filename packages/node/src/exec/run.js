@@ -35,10 +35,10 @@ import { execute } from './execute.js'
 export const run = async (
   entrypoint,
   policy,
-  { dev = false, policyOverride, trustEntrypoint, ...options } = {}
+  { dev = false, policyOverride, trustRoot, ...options } = {}
 ) => {
   await Promise.resolve()
-  if (trustEntrypoint && !isTrusted(policy)) {
+  if (trustRoot && !isTrusted(policy)) {
     throw new Error(
       `Attempted to run entrypoint ${hrPath(entrypoint)} with full privileges, but entry policy is untrusted. Aborting`
     )

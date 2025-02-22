@@ -5,7 +5,7 @@
  */
 import { IsBuiltinFn, LavaMoatPolicyOverrides } from 'lavamoat-core'
 import { Loggerr } from 'loggerr'
-import { Simplify } from 'type-fest'
+import { SetFieldType, Simplify } from 'type-fest'
 
 import {
   CaptureLiteOptions,
@@ -145,8 +145,8 @@ export interface WithReadPowers {
   url?: never
 }
 
-export interface WithTrustEntrypoint {
-  trustEntrypoint?: boolean
+export interface WithTrustRoot {
+  trustRoot?: boolean
 }
 
 /**
@@ -222,7 +222,7 @@ export type BaseLoadCompartmentMapOptions = Simplify<
  * Exported due to use within {@link CompartmentMapToPolicyOptions}
  */
 export type BuildModuleRecordsOptions = Simplify<
-  WithReadPowers & WithIsBuiltin & WithLog & WithTrustEntrypoint
+  WithReadPowers & WithIsBuiltin & WithLog & WithTrustRoot
 >
 
 /**
@@ -232,10 +232,17 @@ export type BuildModuleRecordsOptions = Simplify<
  * Exported due to use within {@link BaseLoadCompartmentMapOptions}
  */
 export type CompartmentMapToPolicyOptions = Simplify<
-  BuildModuleRecordsOptions &
-    WithPolicyOverride &
-    WithDebug &
-    WithTrustEntrypoint
+  BuildModuleRecordsOptions & WithPolicyOverride & WithDebug & WithTrustRoot
+>
+
+/**
+ * Options for `compartmentMapToPolicy()` wherein a `LavaMoatDebugPolicy` will
+ * be generated
+ */
+export type CompartmentMapToDebugPolicyOptions = SetFieldType<
+  CompartmentMapToPolicyOptions,
+  'debug',
+  true
 >
 
 /**
@@ -258,7 +265,7 @@ export type GeneratePolicyOptions = Simplify<
   BaseLoadCompartmentMapOptions &
     CompartmentMapToPolicyOptions &
     WritePolicyOptions &
-    WithTrustEntrypoint &
+    WithTrustRoot &
     WithAbsoluteFn
 >
 
@@ -329,11 +336,7 @@ export type MakeReadPowersOptions = WithRawReadPowers
  */
 
 export type RunOptions = Simplify<
-  WithRawReadPowers &
-    WithPolicyOverride &
-    WithDev &
-    WithTrustEntrypoint &
-    WithLog
+  WithRawReadPowers & WithPolicyOverride & WithDev & WithTrustRoot & WithLog
 >
 
 /**

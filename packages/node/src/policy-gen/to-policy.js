@@ -9,8 +9,9 @@
 import chalk from 'chalk'
 import { createModuleInspector } from 'lavamoat-core'
 import { isBuiltin as defaultIsBuiltin } from 'node:module'
+import { stripVTControlCharacters } from 'node:util'
 import { defaultReadPowers } from '../compartment/power.js'
-import { DEFAULT_TRUST_ENTRYPOINT } from '../constants.js'
+import { DEFAULT_TRUST_ROOT_COMPARTMENT } from '../constants.js'
 import { log as defaultLog } from '../log.js'
 import { hrPath, isObjectyObject, isString } from '../util.js'
 import { LMRCache } from './lmr-cache.js'
@@ -28,10 +29,10 @@ import { PolicyGeneratorContext } from './policy-gen-context.js'
  *   SesCompatObj,
  *   ModuleInspector} from 'lavamoat-core'
  * @import {BuildModuleRecordsOptions,
+ * CompartmentMapToDebugPolicyOptions,
  *   CompartmentMapToPolicyOptions} from '../types.js'
- * @import {InspectModuleRecordsOptions, MissingModuleMap} from '../internal.js'
+ * @import {InspectModuleRecordsOptions} from '../internal.js'
  * @import {Loggerr} from 'loggerr'
- * @import {SetFieldType} from 'type-fest'
  */
 
 const { entries, freeze } = Object
@@ -48,16 +49,16 @@ const { entries, freeze } = Object
  */
 const inspectModuleRecords = (
   moduleRecords,
-  { debug = false, log = defaultLog, trustEntrypoint = true } = {}
+  { debug = false, log = defaultLog, trustRoot = true } = {}
 ) => {
   const inspector = createModuleInspector({
     isBuiltin: defaultIsBuiltin,
     includeDebugInfo: debug,
-    trustRoot: trustEntrypoint,
+    trustRoot,
   })
 
   /** @type {Map<string, string[]>} */
-  const perModuleWarnings = new Map()
+  const perPackageWarnings = new Map()
 
   inspector.on('compat-warning', (data) => {
     const { moduleRecord, compatWarnings } = /**
@@ -72,7 +73,7 @@ const inspectModuleRecords = (
     const nicePath = hrPath(moduleRecord.file)
 
     /** @type {string[]} */
-    const warnings = perModuleWarnings.get(moduleRecord.packageName) || []
+    const warnings = perPackageWarnings.get(moduleRecord.packageName) || []
 
     /**
      * Adds SES compat issues to {@link warnings}
@@ -90,7 +91,8 @@ const inspectModuleRecords = (
                   start: { line, column },
                 },
               },
-            }) => `- ${chalk.yellow(`${nicePath}:${line}:${column}`)} (${type})`
+            }) =>
+              `- ${chalk.yellow(`${stripVTControlCharacters(nicePath)}:${line}:${column}`)} (${type})`
           )
         )
       }
@@ -103,20 +105,21 @@ const inspectModuleRecords = (
     /* c8 ignore next */
     if (!warnings.length) {
       // unlikely, but just in case
-      log.warning('empty "compat-warning" event received from module inspector')
+      log.warning(
+        'empty "compat-warning" event received from module inspector; this is a bug'
+      )
       return
     }
 
-    perModuleWarnings.set(moduleRecord.packageName, warnings)
+    perPackageWarnings.set(moduleRecord.packageName, warnings)
   })
 
-  // FIXME: should we sort here?
   for (const record of moduleRecords) {
     inspector.inspectModule(record)
   }
 
-  if (perModuleWarnings.size) {
-    for (const [packageName, warnings] of perModuleWarnings) {
+  if (perPackageWarnings.size) {
+    for (const [packageName, warnings] of perPackageWarnings) {
       log.warning(
         `Package ${chalk.magenta(packageName)} contains potential SES incompatibilities at the following locations:\n${warnings.join('\n')}`
       )
@@ -146,9 +149,9 @@ export const buildModuleRecords = (
   renames,
   {
     readPowers = defaultReadPowers,
-    isBuiltin,
+    isBuiltin = defaultIsBuiltin,
     log = defaultLog,
-    trustEntrypoint = true,
+    trustRoot = true,
   } = {}
 ) => {
   const lmrCache = new LMRCache()
@@ -161,9 +164,6 @@ export const buildModuleRecords = (
   }
 
   const compartmentRenames = freeze({ ...renames })
-
-  /** @type {MissingModuleMap} */
-  const missingModules = new Map()
 
   const entrypointPath = isString(entrypoint)
     ? entrypoint
@@ -184,10 +184,9 @@ export const buildModuleRecords = (
             lmrCache,
             {
               rootModule: rootModule,
-              trustEntrypoint,
+              trustRoot: trustRoot,
               readPowers,
               isBuiltin,
-              missingModules,
               log,
             }
           ),
@@ -223,20 +222,6 @@ export const buildModuleRecords = (
 
   moduleRecords = [...new Set(moduleRecords)]
 
-  if (missingModules.size) {
-    log.warning(
-      'The following packages reference unknown modules. These may be "peer" or "optional" dependencies (or something else). Execution will mostly like fail unless these are accounted for in policy overrides.'
-    )
-    const tabular = [...missingModules].flatMap(([compartment, missing]) =>
-      [...missing].map((specifier) => ({
-        Package: compartment,
-        Requested: specifier,
-      }))
-    )
-    // eslint-disable-next-line no-console
-    console.table(tabular)
-  }
-
   return moduleRecords
 }
 
@@ -251,11 +236,14 @@ export const buildModuleRecords = (
  * 3. Generate the policy using the `ModuleInspector`
  *
  * @overload
- * @param {string | URL} entrypoint
- * @param {Readonly<CompartmentMapDescriptor>} compartmentMap
- * @param {Readonly<Sources>} sources
- * @param {Readonly<Record<string, string>>} renames
- * @param {SetFieldType<CompartmentMapToPolicyOptions, 'debug', true>} options
+ * @param {string | URL} entrypoint Path to the entry module
+ * @param {Readonly<CompartmentMapDescriptor>} compartmentMap The whole
+ *   compartment map
+ * @param {Readonly<Sources>} sources The sources for each compartment
+ * @param {Readonly<Record<string, string>>} renames Mapping of compartment name
+ *   back to filepath
+ * @param {CompartmentMapToDebugPolicyOptions} options Options where `debug` is
+ *   `true` (required)
  * @returns {LavaMoatPolicyDebug} Generated debug policy
  * @public
  */
@@ -271,11 +259,13 @@ export const buildModuleRecords = (
  * 3. Generate the policy using the `ModuleInspector`
  *
  * @overload
- * @param {string | URL} entrypoint
- * @param {Readonly<CompartmentMapDescriptor>} compartmentMap
- * @param {Readonly<Sources>} sources
- * @param {Readonly<Record<string, string>>} renames
- * @param {CompartmentMapToPolicyOptions} [options]
+ * @param {string | URL} entrypoint Path to the entry module
+ * @param {Readonly<CompartmentMapDescriptor>} compartmentMap The whole
+ *   compartment map
+ * @param {Readonly<Sources>} sources The sources for each compartment
+ * @param {Readonly<Record<string, string>>} renames Mapping of compartment name
+ *   back to filepath
+ * @param {CompartmentMapToPolicyOptions} [options] Options
  * @returns {LavaMoatPolicy} Generated policy
  * @public
  */
@@ -290,11 +280,13 @@ export const buildModuleRecords = (
  * 2. Inspect the module records using LavaMoat's `ModuleInspector`
  * 3. Generate the policy using the `ModuleInspector`
  *
- * @param {string | URL} entrypoint
- * @param {Readonly<CompartmentMapDescriptor>} compartmentMap
- * @param {Readonly<Sources>} sources
- * @param {Readonly<Record<string, string>>} renames
- * @param {CompartmentMapToPolicyOptions} [options]
+ * @param {string | URL} entrypoint Path to the entry module
+ * @param {Readonly<CompartmentMapDescriptor>} compartmentMap The whole
+ *   compartment map
+ * @param {Readonly<Sources>} sources The sources for each compartment
+ * @param {Readonly<Record<string, string>>} renames Mapping of compartment name
+ *   back to filepath
+ * @param {CompartmentMapToPolicyOptions} [options] Options
  * @returns {LavaMoatPolicy | LavaMoatPolicyDebug} Generated policy
  * @public
  */
@@ -309,7 +301,7 @@ export function compartmentMapToPolicy(
     debug = false,
     isBuiltin,
     log = defaultLog,
-    trustEntrypoint = DEFAULT_TRUST_ENTRYPOINT,
+    trustRoot = DEFAULT_TRUST_ROOT_COMPARTMENT,
   } = {}
 ) {
   const moduleRecords = buildModuleRecords(
@@ -321,14 +313,14 @@ export function compartmentMapToPolicy(
       readPowers,
       isBuiltin,
       log,
-      trustEntrypoint,
+      trustRoot,
     }
   )
 
   const inspector = inspectModuleRecords(moduleRecords, {
     debug,
     log,
-    trustEntrypoint,
+    trustRoot,
   })
 
   return inspector.generatePolicy({

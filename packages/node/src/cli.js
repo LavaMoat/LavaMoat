@@ -29,6 +29,7 @@ import { log } from './log.js'
 import { generatePolicy } from './policy-gen/generate.js'
 import { loadPolicies } from './policy-util.js'
 import { resolveBinScript, resolveEntrypoint } from './resolve.js'
+import { hrPath } from './util.js'
 
 /**
  * @import {PackageJson} from 'type-fest';
@@ -140,7 +141,7 @@ const main = async (args = hideBin(process.argv)) => {
    *   entrypoint: string
    *   bin?: boolean
    *   root: string
-   *   'trust-entrypoint'?: boolean
+   *   'trust-root'?: boolean
    * }} argv
    * @returns {void}
    */
@@ -156,9 +157,9 @@ const main = async (args = hideBin(process.argv)) => {
     }
 
     // TODO: determine if checking `root` for `node_modules` is necessary
-    argv['trust-entrypoint'] = !argv.entrypoint.includes('node_modules')
-    argv['trust-entrypoint'] = false
-    if (!argv['trust-entrypoint']) {
+    argv['trust-root'] = !argv.entrypoint.includes('node_modules')
+    argv['trust-root'] = false
+    if (!argv['trust-root']) {
       log.info(
         'Entrypoint is in a node_modules/ directory and is considered untrusted'
       )
@@ -280,7 +281,7 @@ const main = async (args = hideBin(process.argv)) => {
       },
 
       /**
-       * The value of `trust-entrypoint` is computed in
+       * The value of `trust-root` is computed in
        * {@link processEntrypointMiddleware}.
        *
        * **This should not be exposed to the end-user**. It's mostly here for
@@ -288,7 +289,7 @@ const main = async (args = hideBin(process.argv)) => {
        *
        * @internal
        */
-      'trust-entrypoint': {
+      'trust-root': {
         describe: 'Trust the entrypoint module',
         type: 'boolean',
         default: true,
@@ -421,7 +422,7 @@ const main = async (args = hideBin(process.argv)) => {
           policy: policyPath,
           'policy-debug': policyDebugPath,
           'policy-override': policyOverridePath,
-          'trust-entrypoint': trustEntrypoint,
+          'trust-root': trustRoot,
           dev,
           write,
         } = argv
@@ -442,7 +443,7 @@ const main = async (args = hideBin(process.argv)) => {
             policyDebugPath,
             write,
             dev,
-            trustEntrypoint,
+            trustRoot,
           })
         } else {
           try {
@@ -473,7 +474,7 @@ const main = async (args = hideBin(process.argv)) => {
            */ (argv['--'])
         )
 
-        await run(entrypoint, policy, { trustEntrypoint })
+        await run(entrypoint, policy, { trustRoot })
       }
     )
     .command(
@@ -508,7 +509,7 @@ const main = async (args = hideBin(process.argv)) => {
         debug,
         policy: policyPath,
         'policy-debug': policyDebugPath,
-        'trust-entrypoint': trustEntrypoint,
+        'trust-root': trustRoot,
         dev,
         write,
       }) => {
@@ -518,14 +519,14 @@ const main = async (args = hideBin(process.argv)) => {
           policyPath,
           policyDebugPath,
           dev,
-          trustEntrypoint,
+          trustRoot,
         })
 
         if (debug) {
-          log.info(`Wrote debug policy to ${policyDebugPath}`)
+          log.info(`Wrote debug policy to ${hrPath(policyDebugPath)}`)
         }
         if (write) {
-          log.info(`Wrote policy to ${policyPath}`)
+          log.info(`Wrote policy to ${hrPath(policyPath)}`)
         } else {
           // console used here since the logger only uses stderr
           // eslint-disable-next-line no-console

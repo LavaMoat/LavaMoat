@@ -15,17 +15,16 @@ import { LavamoatModuleRecord } from 'lavamoat-core'
  * {@link LavamoatModuleRecord LavamoatModuleRecords}.
  *
  * It's a thin wrapper around a `Map` and behaves like a _write-once_ `Set`. The
- * keys are {@link LMRCache.keyFor computed}, and it is not possible to add the
- * same key twice. It is not possible to delete items.
+ * keys are {@link LMRCache.keyFor computed}.
+ *
+ * - It is not possible to "set" the same key multiple times.
+ * - It is not possible to delete items.
  *
  * @internal
  */
 export class LMRCache {
   /** @type {Map<string, LavamoatModuleRecord>} */
-  #cache
-  constructor() {
-    this.#cache = new Map()
-  }
+  #cache = new Map()
 
   /**
    * Computes the cache key for a given {@link LavamoatModuleRecord} or its
@@ -55,7 +54,7 @@ export class LMRCache {
     const key = LMRCache.keyFor(moduleRecord)
     if (this.has(moduleRecord)) {
       throw new ReferenceError(
-        `Module record with key "${key}" already exists in cache`
+        `Module record with key "${key}" already exists in cache; this is a bug`
       )
     }
     const newModuleRecord =
@@ -75,12 +74,5 @@ export class LMRCache {
   get(opts) {
     const key = LMRCache.keyFor(opts)
     return this.#cache.get(key)
-  }
-
-  /**
-   * Clears the cache
-   */
-  clear() {
-    this.#cache.clear()
   }
 }
