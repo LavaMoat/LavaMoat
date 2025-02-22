@@ -21,8 +21,8 @@ const BASIC_FIXTURE_DIR = fileURLToPath(
   new URL('./fixture/basic/', import.meta.url)
 )
 
-const BIN_ENTRY_FIXTURE_DIR = fileURLToPath(
-  new URL('./fixture/bin-entry/', import.meta.url)
+const UNTRUSTED_FIXTURE_DIR = fileURLToPath(
+  new URL('./fixture/untrusted/', import.meta.url)
 )
 
 /**
@@ -63,11 +63,11 @@ test('basic policy generation', async (t) => {
   }
 })
 
-test('extensionless bin script handling', async (t) => {
-  t.plan(2)
+test('bin script handling (extensionless; trusted)', async (t) => {
+  t.plan(3)
 
   const tempdir = await mkdtemp(
-    path.join(tmpdir(), t.title.replace(/\s+/g, '-'))
+    path.join(tmpdir(), t.title.replace(/[^\w]+/g, '-'))
   )
 
   try {
@@ -86,12 +86,14 @@ test('extensionless bin script handling', async (t) => {
 
     const policy = await readPolicy(policyPath)
     t.true(isPolicy(policy))
+
+    t.snapshot(policy)
   } finally {
     await rm(tempdir, { recursive: true, force: true })
   }
 })
 
-test('generate - module resolution', async (t) => {
+test('bin script handling (untrusted)', async (t) => {
   t.plan(3)
 
   const tempdir = await mkdtemp(
@@ -100,16 +102,16 @@ test('generate - module resolution', async (t) => {
   try {
     const policyPath = path.join(
       tempdir,
-      `module-resolution-${DEFAULT_POLICY_FILENAME}`
+      `untrusted-${DEFAULT_POLICY_FILENAME}`
     )
-    const result = await runCLI(
-      ['generate', '--policy', policyPath, BIN_ENTRY],
+    const { code } = await runCLI(
+      ['generate', '--bin', '--policy', policyPath, BIN_ENTRY],
       {
-        cwd: BIN_ENTRY_FIXTURE_DIR,
-        t: t,
+        cwd: UNTRUSTED_FIXTURE_DIR,
+        t,
       }
     )
-    t.is(result.code, undefined)
+    t.is(code, undefined)
 
     const policy = await readPolicy(policyPath)
     t.true(isPolicy(policy))

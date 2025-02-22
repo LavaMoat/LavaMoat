@@ -1,6 +1,11 @@
 // @ts-check
 
 /**
+ * @todo Move to constants module / consolidate
+ */
+const ROOT_SLUG = '$root$'
+
+/**
  * A module record
  *
  * @template {any[]} [InitArgs=DefaultModuleInitArgs] - Arguments for
@@ -67,6 +72,10 @@ class LavamoatModuleRecord {
    * @type {ModuleInitializer<InitArgs> | undefined}
    */
   moduleInitializer
+  /**
+   * @type {Readonly<boolean>}
+   */
+  isRoot
 
   /**
    * Assigns properties!
@@ -82,6 +91,7 @@ class LavamoatModuleRecord {
     importMap = {},
     ast,
     moduleInitializer,
+    isRoot = false,
   }) {
     this.specifier = specifier
     this.file = file
@@ -91,6 +101,7 @@ class LavamoatModuleRecord {
     this.importMap = importMap
     this.ast = ast
     this.moduleInitializer = moduleInitializer
+    this.isRoot = isRoot || this.packageName === ROOT_SLUG
   }
 }
 
@@ -112,6 +123,7 @@ module.exports = { LavamoatModuleRecord }
  * @property {import('@babel/types').File} [ast] - Parsed AST
  * @property {ModuleInitializer<InitArgs>} [moduleInitializer] - Module
  *   initializer function
+ * @property {boolean} [isRoot] - Whether the module is a root module
  */
 
 /**

@@ -3,7 +3,9 @@
  *
  * @packageDocumentation
  */
-import { pathToFileURL } from 'node:url'
+import chalk from 'chalk'
+import path from 'node:path'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 
 const { isArray: isArray_ } = Array
 const { freeze } = Object
@@ -42,6 +44,15 @@ export const toURLString = (url) =>
 export const isObject = (value) => value !== null && typeof value === 'object'
 
 /**
+ * Type guard for a non-array object
+ *
+ * @param {unknown} value
+ * @returns {value is object & {length?: never}}
+ * @internal
+ */
+export const isObjectyObject = (value) => isObject(value) && !isArray(value)
+
+/**
  * Type guard for a string
  *
  * @param {unknown} value
@@ -77,6 +88,8 @@ export const isBoolean = (value) => typeof value === 'boolean'
  *
  * If trying to perform the opposite assertion, use `!(prop in value)` instead
  * of `!has(value, prop)`
+ *
+ * Don't try to use this with union types.
  *
  * @template {object} [T=object] Some object. Default is `object`
  * @template {string} [const K=string] Some property which might be in `T`.
@@ -142,10 +155,36 @@ const requiredReadNowPowersProps = freeze(
 export const isReadNowPowers = (value) =>
   !!(
     value &&
-    typeof value === 'object' &&
+    isObjectyObject(value) &&
     requiredReadNowPowersProps.every(
       (prop) =>
         prop in value &&
         typeof (/** @type {any} */ (value)[prop]) === 'function'
     )
   )
+
+/**
+ * Given a filepath, displays it as relative or absolute depending on which is
+ * fewer characters. Ergo, the "human-readable" path.
+ *
+ * @param {string | URL} filepath
+ * @returns {string}
+ * @internal
+ */
+export const hrPath = (filepath) => {
+  if (!isString(filepath) || filepath.startsWith('file://')) {
+    filepath = fileURLToPath(filepath)
+  }
+  if (path.isAbsolute(filepath)) {
+    const relativePath = path.relative(process.cwd(), filepath)
+    if (relativePath && relativePath.length < filepath.length) {
+      return chalk.green(relativePath)
+    }
+  } else {
+    const absolutePath = path.resolve(filepath)
+    if (absolutePath.length < filepath.length) {
+      return chalk.green(absolutePath)
+    }
+  }
+  return chalk.green(filepath)
+}

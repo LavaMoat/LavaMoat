@@ -32,6 +32,7 @@ const RUNNER_MODULE_PATH = (
           'packages',
           'node',
           'test',
+          'unit',
           'scenario-runner.js'
         )
       )

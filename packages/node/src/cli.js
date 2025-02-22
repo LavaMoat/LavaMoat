@@ -29,6 +29,7 @@ import { log } from './log.js'
 import { generatePolicy } from './policy-gen/generate.js'
 import { loadPolicies } from './policy-util.js'
 import { resolveBinScript, resolveEntrypoint } from './resolve.js'
+import { hrPath } from './util.js'
 
 /**
  * @import {PackageJson} from 'type-fest';
@@ -140,6 +141,7 @@ const main = async (args = hideBin(process.argv)) => {
    *   entrypoint: string
    *   bin?: boolean
    *   root: string
+   *   'trust-root'?: boolean
    * }} argv
    * @returns {void}
    */
@@ -152,6 +154,15 @@ const main = async (args = hideBin(process.argv)) => {
       // note: this will print if the original entrypoint is a relative path; we
       // may or may not want to continue displaying it for that specific case.
       log.warning(`Resolved ${entrypoint} to ${argv.entrypoint}`)
+    }
+
+    // TODO: determine if checking `root` for `node_modules` is necessary
+    argv['trust-root'] = !argv.entrypoint.includes('node_modules')
+    argv['trust-root'] = false
+    if (!argv['trust-root']) {
+      log.info(
+        'Entrypoint is in a node_modules/ directory and is considered untrusted'
+      )
     }
   }
 
@@ -206,7 +217,17 @@ const main = async (args = hideBin(process.argv)) => {
         global: true,
         group: BEHAVIOR_GROUP,
       },
-      // the three policy options are used for both reading and writing
+
+      // #region path args
+
+      /**
+       * The three `policy*` options below are used for both reading and
+       * writing.
+       *
+       * Note that `coerce: path.resolve` is _only_ appropriate for the `root`
+       * option, as the others are computed from it!
+       */
+
       policy: {
         alias: ['p'],
         describe: 'Filepath to a policy file',
@@ -250,11 +271,31 @@ const main = async (args = hideBin(process.argv)) => {
         global: true,
         group: PATH_GROUP,
       },
+      // #endregion
+
       dev: {
         describe: 'Include development dependencies',
         type: 'boolean',
         global: true,
         group: BEHAVIOR_GROUP,
+      },
+
+      /**
+       * The value of `trust-root` is computed in
+       * {@link processEntrypointMiddleware}.
+       *
+       * **This should not be exposed to the end-user**. It's mostly here for
+       * type fidelity.
+       *
+       * @internal
+       */
+      'trust-root': {
+        describe: 'Trust the entrypoint module',
+        type: 'boolean',
+        default: true,
+        hidden: true,
+        group: BEHAVIOR_GROUP,
+        global: true,
       },
     })
     .middleware(
@@ -276,6 +317,8 @@ const main = async (args = hideBin(process.argv)) => {
     )
     .check(
       /**
+       * Ensures all global paths are absolute.
+       *
        * This validator is _global_ and runs before command-specific validators
        * (I think)
        */
@@ -379,6 +422,7 @@ const main = async (args = hideBin(process.argv)) => {
           policy: policyPath,
           'policy-debug': policyDebugPath,
           'policy-override': policyOverridePath,
+          'trust-root': trustRoot,
           dev,
           write,
         } = argv
@@ -399,6 +443,7 @@ const main = async (args = hideBin(process.argv)) => {
             policyDebugPath,
             write,
             dev,
+            trustRoot,
           })
         } else {
           try {
@@ -429,7 +474,7 @@ const main = async (args = hideBin(process.argv)) => {
            */ (argv['--'])
         )
 
-        await run(entrypoint, policy)
+        await run(entrypoint, policy, { trustRoot })
       }
     )
     .command(
@@ -464,6 +509,7 @@ const main = async (args = hideBin(process.argv)) => {
         debug,
         policy: policyPath,
         'policy-debug': policyDebugPath,
+        'trust-root': trustRoot,
         dev,
         write,
       }) => {
@@ -473,14 +519,16 @@ const main = async (args = hideBin(process.argv)) => {
           policyPath,
           policyDebugPath,
           dev,
+          trustRoot,
         })
 
         if (debug) {
-          log.info(`Wrote debug policy to ${policyDebugPath}`)
+          log.info(`Wrote debug policy to ${hrPath(policyDebugPath)}`)
         }
         if (write) {
-          log.info(`Wrote policy to ${policyPath}`)
+          log.info(`Wrote policy to ${hrPath(policyPath)}`)
         } else {
+          // console used here since the logger only uses stderr
           // eslint-disable-next-line no-console
           console.log(jsonStringifySortedPolicy(policy))
         }

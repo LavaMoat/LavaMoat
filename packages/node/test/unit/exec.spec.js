@@ -124,3 +124,5 @@ test(
 )
 
 test.todo('dynamic import of builtin module')
+
+test.todo('hashbang in module')

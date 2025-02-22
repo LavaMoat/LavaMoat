@@ -9,6 +9,7 @@ import Module from 'node:module'
 import path from 'node:path'
 import { isExecutableSymlink, isReadableFileSync, realpathSync } from './fs.js'
 import { log } from './log.js'
+import { hrPath } from './util.js'
 
 /**
  * @import {ResolveBinScriptOptions, ResolveWorkspaceOptions} from './internal.js'
@@ -33,14 +34,15 @@ export const resolveWorkspace = ({
   let current = from
   // eslint-disable-next-line no-constant-condition
   while (true) {
-    log.debug(`Searching for workspace in ${current}`)
+    const nicePath = hrPath(current)
+    log.debug(`Searching for workspace in ${nicePath}`)
     if (isReadableFileSync(path.join(current, 'package.json'), { fs })) {
-      log.debug(`Found workspace in ${current}`)
+      log.debug(`Found workspace in ${nicePath}`)
       return current
     }
     const parent = path.join(current, '..')
     if (parent === current) {
-      throw new Error(`Could not find a workspace from ${from}`)
+      throw new Error(`Could not find a workspace from ${hrPath(from)}`)
     }
     current = parent
   }
@@ -73,7 +75,7 @@ export const resolveEntrypoint = (specifier, from = process.cwd()) => {
  *
  * @remarks
  * This is not recursive due to the potential for stack overflows (though
- * unlikely).
+ * unlikely). TODO: refactor to be async
  * @param {string} name Bin script name
  * @param {ResolveBinScriptOptions} [options]
  * @returns {string} Path to the bin script
@@ -84,37 +86,41 @@ export const resolveBinScript = (
 ) => {
   /** @type {string} */
   let workspace
+  const niceFrom = hrPath(from)
   try {
     workspace = resolveWorkspace({ from, fs })
   } catch {
     throw new Error(
-      `Could not find a workspace from ${from} while resolving bin script for ${name}`
+      `Could not find a workspace from ${niceFrom} while resolving bin script for "${name}"`
     )
   }
   let current = workspace
   // eslint-disable-next-line no-constant-condition
   while (true) {
     const maybeBinDir = path.join(current, 'node_modules', '.bin')
-    log.debug(`Searching for ${name} in ${maybeBinDir}`)
+    const niceBinDir = hrPath(maybeBinDir)
+    log.debug(`Searching for "${name}" in ${niceBinDir}`)
     const maybeBinPath = path.join(maybeBinDir, name)
     if (isExecutableSymlink(maybeBinPath, { fs })) {
       const realBinPath = realpathSync(maybeBinPath, { fs })
-      log.debug(`Found bin script ${name} in ${maybeBinPath} => ${realBinPath}`)
-      return maybeBinPath
-    }
-    log.debug(`No such bin script ${name} in ${maybeBinDir}`)
-    try {
-      const next = resolveWorkspace({ from: path.join(current, '..'), fs })
-      if (next === current) {
-        throw new Error(
-          `Could not find a workspace from ${from} while resolving bin script for ${name}`
-        )
-      }
-      current = next
-    } catch {
-      throw new Error(
-        `Could not find a workspace from ${from} while resolving bin script for ${name}`
+      const niceRealBinPath = hrPath(realBinPath)
+      log.debug(
+        `Found bin script "${name}" in ${niceBinDir} => ${niceRealBinPath}`
       )
+      return realBinPath
     }
+    log.debug(`No such bin script "${name}" in ${niceBinDir}`)
+
+    /** @type {string} */
+    let next
+    try {
+      next = resolveWorkspace({ from: path.join(current, '..'), fs })
+    } catch {
+      throw new Error(`Could not find bin script "${name}" from ${niceFrom}`)
+    }
+    if (next === current) {
+      throw new Error(`Could not find bin script "${name}" from ${niceFrom}`)
+    }
+    current = next
   }
 }
