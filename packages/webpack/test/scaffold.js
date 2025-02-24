@@ -111,7 +111,7 @@ const defaultGlobals = () => ({
   console: silentConsole,
   // these are necessary for webpack's runtime
   document: {},
-  self: { location: { href: 'https://localhost/' } },
+  location: { href: 'https://localhost/' }, // necessary for webpack's runtime
   URL,
 })
 
@@ -127,6 +127,7 @@ function runScript(code, globals = defaultGlobals()) {
     throw new Error('runScript requires a bundle string as the first argument')
   }
   const context = createContext(globals)
+  context.self = context // minimal browser emulation
   return {
     context,
     result: runInNewContext(code, context),
