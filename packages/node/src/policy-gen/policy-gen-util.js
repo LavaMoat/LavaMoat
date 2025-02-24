@@ -20,24 +20,22 @@ import { hasValue, isObject } from '../util.js'
  * Determine the canonical name for a compartment descriptor
  *
  * @param {CompartmentDescriptor} compartment Compartment descriptor
- * @param {boolean} isEntry Whether or not the compartment is the entry
- *   compartment
  * @returns {string} Canonical name
  * @throws {TypeError} If compartment has no path
- * @throws {TypeError} If `isEntry` is truthy
  * @internal
  */
-export const getCanonicalName = (compartment, isEntry = false) => {
-  if (isEntry) {
-    throw new TypeError('Entry compartment cannot have a canonical name')
-  }
+export const getCanonicalName = (compartment) => {
+  // NOTE: the algorithm creating paths happens to be identical to the one in @lavamoat/aa package. Not that it matters because policies cannot be reused between this and other lavamoat tools.
   if (compartment.name === ATTENUATORS_COMPARTMENT) {
     return ATTENUATORS_COMPARTMENT
   }
-  if (!compartment.path?.length) {
-    throw new TypeError(
-      `Compartment ${compartment.name} has no path; cannot determine canonical name`
+  if (!compartment.path) {
+    throw new ReferenceError(
+      `Computing canonical name failed: compartment "${compartment.name}" (${compartment.location}) has no "path" property; this is a bug`
     )
+  }
+  if (compartment.path.length === 0) {
+    return LAVAMOAT_PKG_POLICY_ROOT
   }
   return compartment.path.join('>')
 }
