@@ -23,10 +23,13 @@ const test = /** @type {TestFn<CLITestContext>} */ (anyTest)
 const { testCLI } = createCLIMacros(test)
 
 /**
- * Path to the "basic" fixture entry point
+ * Paths to fixture entry point
  */
 const BASIC_FIXTURE_ENTRYPOINT = fileURLToPath(
   new URL('./fixture/basic/app.js', import.meta.url)
+)
+const DEP_FIXTURE_ENTRYPOINT = fileURLToPath(
+  new URL('./fixture/deptree/app.js', import.meta.url)
 )
 
 /**
@@ -136,5 +139,15 @@ test('generate - basic policy generation', async (t) => {
 
   await runCli(['generate', BASIC_FIXTURE_ENTRYPOINT, '--policy', policyPath])
   const policy = await readPolicy(policyPath)
+  t.true(isPolicy(policy))
+})
+
+test('generate - policy generation - canonical names', async (t) => {
+  const policyPath = path.join(t.context.tempdir, DEFAULT_POLICY_FILENAME)
+
+  await runCli(['generate', DEP_FIXTURE_ENTRYPOINT, '--policy', policyPath])
+  const policy = await readPolicy(policyPath)
+  t.deepEqual(typeof policy.resources, 'object')
+  t.true(Object.keys(policy.resources).includes('another-pkg>shared-pkg'), 'policy.resources should include "another-pkg>shared-pkg"')
   t.true(isPolicy(policy))
 })
