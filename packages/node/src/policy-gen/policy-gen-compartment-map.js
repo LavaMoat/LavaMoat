@@ -36,6 +36,24 @@ export const loadCompartmentMap = async (
     },
   })
 
+  // In lavamoat the canonical name is what we present to the end user as a resource key in policy. We have no use for Endo's label field, so we replace labels with canonicalNames derived from path.
+  // NOTE: the algorithm creating paths happens to be identical to the one in @lavamoat/aa package. Not that it matters because policies cannot be reused between this and other lavamoat tools.
+  Object.values(nodeCompartmentMap.compartments).map(
+    (compartmentDescriptor) => {
+      if (!compartmentDescriptor.path) {
+        // this should never happen and is not recoverable
+        throw new Error(
+          `compartmentDescriptor.path is not defined for the compartment ${compartmentDescriptor.name} ${compartmentDescriptor.location}`
+        )
+      }
+      if (compartmentDescriptor.path.length === 0) {
+        compartmentDescriptor.label = '$root$'
+      } else {
+        compartmentDescriptor.label = compartmentDescriptor.path.join('>')
+      }
+    }
+  )
+
   // we use this to inject missing imports from policy overrides into the module descriptor.
   // TODO: Endo should allow us to hook into `importHook` directly instead
   const LavaMoatCompartment = makePolicyGenCompartment(
