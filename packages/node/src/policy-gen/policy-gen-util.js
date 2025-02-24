@@ -60,7 +60,7 @@ export const getPackageName = (compartment, isEntry = false) => {
   if (isEntry) {
     return LAVAMOAT_PKG_POLICY_ROOT
   }
-  return compartment.name
+  return compartment.location
 }
 
 /**
