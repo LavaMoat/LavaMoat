@@ -3,9 +3,34 @@
  */
 const incrementalPolicy = {}
 
+const {
+  Error,
+  clearTimeout,
+  setTimeout,
+  Proxy,
+} = globalThis
+
+const {
+  stringify
+} = JSON
+
+const {
+  dir,
+  log
+} = console
+
+const {
+  hasOwn,
+  create,
+  getPrototypeOf,
+  getOwnPropertyNames,
+  prototype,
+  defineProperty
+} = Object
+
 const printPolicyDebug = () => {
-  const policy = JSON.stringify(incrementalPolicy, null, 2)
-  console.dir(policy)
+  const policy = stringify(incrementalPolicy, null, 2)
+  dir(policy)
 }
 globalThis.LM_printPolicyDebug = printPolicyDebug
 
@@ -23,14 +48,14 @@ const PRINT_AFTER_NO_NEW_POLICY_DISCOVERED_MS = 3000
  * @returns {void}
  */
 function addToPolicy(hint, key) {
-  if (!Object.hasOwn(incrementalPolicy, hint)) {
-    incrementalPolicy[hint] = { globals: Object.create(null) }
+  if (!hasOwn(incrementalPolicy, hint)) {
+    incrementalPolicy[hint] = { globals: create(null) }
   }
-  if (!Object.hasOwn(incrementalPolicy[hint].globals, key)) {
+  if (!hasOwn(incrementalPolicy[hint].globals, key)) {
     incrementalPolicy[hint].globals[key] = true
     const informativeStack =
       '\n' + (Error().stack || '').split('\n').slice(2).join('\n')
-    console.log(`-- missing ${key} from ${hint}`, informativeStack)
+    log(`-- missing ${key} from ${hint}`, informativeStack)
     clearTimeout(debounceTimer)
     debounceTimer = setTimeout(
       printPolicyDebug,
@@ -69,8 +94,8 @@ function recursiveProxy(hint, path) {
  */
 function getAllKeys(obj) {
   const keys = []
-  for (; obj != null; obj = Object.getPrototypeOf(obj)) {
-    keys.push(...Object.getOwnPropertyNames(obj))
+  for (; obj != null; obj = getPrototypeOf(obj)) {
+    keys.push(...getOwnPropertyNames(obj))
   }
   return keys
 }
@@ -84,12 +109,12 @@ function getAllKeys(obj) {
  * @param {string} hint - The hint to identify the source of the missing key.
  */
 const debugProxy = (target, source, hint) => {
-  const inheritedFromObj = Object.getOwnPropertyNames(Object.prototype)
+  const inheritedFromObj = getOwnPropertyNames(prototype)
 
   const keys = getAllKeys(source)
   for (const key of keys) {
-    if (!Object.hasOwn(target, key) && !inheritedFromObj.includes(key)) {
-      Object.defineProperty(target, key, {
+    if (!hasOwn(target, key) && !inheritedFromObj.includes(key)) {
+      defineProperty(target, key, {
         get() {
           addToPolicy(hint, key)
           return recursiveProxy(hint, [key])
