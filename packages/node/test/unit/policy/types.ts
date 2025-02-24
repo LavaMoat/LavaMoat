@@ -1,17 +1,21 @@
-import { LavaMoatPolicy, LavaMoatPolicyOverrides } from 'lavamoat-core'
-import { Except } from 'type-fest'
-import { GeneratePolicyOptions } from '../../../src/types.js'
+import { ReadNowPowers } from '@endo/compartment-mapper'
+import type { ExecutionContext } from 'ava'
+import type { LavaMoatPolicy, LavaMoatPolicyOverrides } from 'lavamoat-core'
+import { Volume } from 'memfs/lib/volume.js'
+import type { Simplify } from 'type-fest'
+import type { GeneratePolicyOptions } from '../../../src/types.js'
 
 /**
  * Options for `testPolicyFor*` macros
  *
  * @internal
  */
-export interface TestPolicyMacroOptions {
+export type TestPolicyMacroOptions = {
   /**
    * Expected policy result
    */
   expected?: LavaMoatPolicy
+
   /**
    * Overrides to apply to policy generation
    */
@@ -23,7 +27,40 @@ export interface TestPolicyMacroOptions {
  *
  * @internal
  */
-export type TestPolicyForJSONOptions = Except<
-  GeneratePolicyOptions,
-  'readPowers'
+export type TestPolicyForJSONOptions<Context = unknown> = Simplify<
+  Omit<GeneratePolicyOptions, 'readPowers'> & {
+    /**
+     * Expected policy or a function receiving the policy or an assertion
+     * function.
+     */
+    expected?: LavaMoatPolicy | TestPolicyExpectationFn<Context>
+  }
 >
+
+/**
+ * Expectation function for {@link TestPolicyForJSONOptions}
+ */
+export type TestPolicyExpectationFn<Context = unknown> = (
+  t: ExecutionContext<Context>,
+  policy: LavaMoatPolicy
+) => void | Promise<void>
+
+/**
+ * Return type of `scaffoldFixture` in `policy-macros.js`
+ */
+export type ScaffoldFixtureResult = {
+  vol: Volume
+  readPowers: ReadNowPowers
+}
+
+/**
+ * Options for `scaffoldFixture` in `policy-macros.js`
+ */
+export type ScaffoldFixtureOptions = {
+  /**
+   * The type of fixture to generate
+   *
+   * @defaultValue 'module'
+   */
+  sourceType?: 'module' | 'script'
+}

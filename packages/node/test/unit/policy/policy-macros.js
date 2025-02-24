@@ -1,5 +1,7 @@
+import { fileURLToPath } from 'node:url'
 import { generatePolicy } from '../../../src/policy-gen/generate.js'
 import { isPolicy } from '../../../src/policy-util.js'
+import { isFunction } from '../../../src/util.js'
 import {
   JSON_FIXTURE_DIR_URL,
   JSON_FIXTURE_ENTRY_POINT,
@@ -8,11 +10,9 @@ import {
 
 /**
  * @import {ValueOf} from 'type-fest'
- * @import {TestPolicyMacroOptions, TestPolicyForJSONOptions} from './types.js'
- * @import {TestFn, MacroDeclarationOptions, ExecutionContext} from 'ava'
+ * @import {TestPolicyMacroOptions, TestPolicyForJSONOptions, ScaffoldFixtureResult, ScaffoldFixtureOptions} from './types.js'
+ * @import {TestFn, MacroDeclarationOptions} from 'ava'
  * @import {LavaMoatPolicy, LavaMoatPolicyOverrides} from 'lavamoat-core'
- * @import {Volume} from 'memfs/lib/volume.js'
- * @import {ReadNowPowers} from '@endo/compartment-mapper'
  */
 
 /**
@@ -51,13 +51,14 @@ export const InlineSourceTypes = /** @type {const} */ ({
  */
 export function createGeneratePolicyMacros(test) {
   /**
-   * Generic macro definition for testing policy generation.
+   * Generic macro _declaration_ (not macro itself) for testing policy
+   * generation against source code provided inline.
    *
-   * This is _not_ a macro; it's just the {@link MacroDeclarationOptions} object.
+   * Used only for macro composition
    *
    * @type {MacroDeclarationOptions<
    *   [
-   *     content: string | Buffer,
+   *     content: string,
    *     opts: {
    *       expectedPolicy?: LavaMoatPolicy | TestPolicyMacroOptions
    *       sourceType?: InlineSourceType
@@ -66,7 +67,7 @@ export function createGeneratePolicyMacros(test) {
    *   Ctx
    * >}
    */
-  const testInlinePolicy = {
+  const testInlinePolicyDeclaration = {
     exec: async (
       t,
       content,
@@ -107,23 +108,29 @@ export function createGeneratePolicyMacros(test) {
    * If `expectedPolicy` is provided, the actual policy is compared to it;
    * otherwise a snapshot is taken.
    */
-  const testPolicyForInlineModule = test.macro({
+  const testPolicyForInlineModule = test.macro(
     /**
-     * @param {ExecutionContext<Ctx>} t
-     * @param {string | Buffer} content
-     * @param {LavaMoatPolicy | TestPolicyMacroOptions} [expectedPolicy]
+     * @type {MacroDeclarationOptions<
+     *   [
+     *     content: string,
+     *     expectedPolicy?: LavaMoatPolicy | TestPolicyMacroOptions,
+     *   ],
+     *   Ctx
+     * >}
      */
-    exec: async (t, content, expectedPolicy) =>
-      testInlinePolicy.exec(t, content, {
-        expectedPolicy,
-        sourceType: InlineSourceTypes.Module,
-      }),
-    title: (title, content, expectedPolicy) =>
-      testInlinePolicy.title(title, content, {
-        expectedPolicy,
-        sourceType: InlineSourceTypes.Module,
-      }),
-  })
+    ({
+      exec: async (t, content, expectedPolicy) =>
+        testInlinePolicyDeclaration.exec(t, content, {
+          expectedPolicy,
+          sourceType: InlineSourceTypes.Module,
+        }),
+      title: (title, content, expectedPolicy) =>
+        testInlinePolicyDeclaration.title(title, content, {
+          expectedPolicy,
+          sourceType: InlineSourceTypes.Module,
+        }),
+    })
+  )
 
   /**
    * Macro to test policy generation for inline CJS module content
@@ -131,67 +138,113 @@ export function createGeneratePolicyMacros(test) {
    * If `expectedPolicy` is provided, the actual policy is compared to it;
    * otherwise a snapshot is taken.
    */
-  const testPolicyForInlineScript = test.macro({
+  const testPolicyForInlineScript = test.macro(
     /**
-     * @param {ExecutionContext<Ctx>} t
-     * @param {string | Buffer} content
-     * @param {LavaMoatPolicy | TestPolicyMacroOptions} [expectedPolicy]
-     */
-    exec: async (t, content, expectedPolicy) =>
-      testInlinePolicy.exec(t, content, {
-        expectedPolicy,
-        sourceType: InlineSourceTypes.Script,
-      }),
-    title: (title, content, expectedPolicy) =>
-      testInlinePolicy.title(title, content, {
-        expectedPolicy,
-        sourceType: InlineSourceTypes.Script,
-      }),
-  })
+     * @type {MacroDeclarationOptions<
+     *   [
+     *     content: string,
+     *     expectedPolicy?: LavaMoatPolicy | TestPolicyMacroOptions,
+     *   ],
+     *   Ctx
+     * >}
+     */ ({
+      exec: async (t, content, expectedPolicy) =>
+        testInlinePolicyDeclaration.exec(t, content, {
+          expectedPolicy,
+          sourceType: InlineSourceTypes.Script,
+        }),
+      title: (title, content, expectedPolicy) =>
+        testInlinePolicyDeclaration.title(title, content, {
+          expectedPolicy,
+          sourceType: InlineSourceTypes.Script,
+        }),
+    })
+  )
 
   /**
-   * Macro to test policy generation for a given {@link DirectoryJSON}- fixture
+   * Macro to test policy generation for a given JSON snapshot fixture.
    *
    * If `expectedPolicy` is provided, the actual policy is compared to it;
    * otherwise a snapshot is taken.
+   *
+   * @see {@link file://./../json-fixture/README.md}
    */
-  const testPolicyForJSON = test.macro({
+  const testPolicyForJSON = test.macro(
     /**
-     * @param {ExecutionContext<Ctx>} t
-     * @param {string} fixtureFilename
-     * @param {LavaMoatPolicy | TestPolicyForJSONOptions} [expectedPolicyOrOptions]
-     * @param {TestPolicyForJSONOptions} [options]
-     * @returns {Promise<void>}
-     */
-    exec: async (t, fixtureFilename, expectedPolicyOrOptions, options = {}) => {
-      /** @type {LavaMoatPolicy | undefined} */
-      let expectedPolicy
-      if (isPolicy(expectedPolicyOrOptions)) {
-        expectedPolicy = expectedPolicyOrOptions
-      } else {
-        options = expectedPolicyOrOptions
-      }
-      const { readPowers } = await loadJSONFixture(
-        new URL(fixtureFilename, JSON_FIXTURE_DIR_URL)
-      )
+     * @type {MacroDeclarationOptions<
+     *   [
+     *     fixtureFilename: string,
+     *     expectedPolicyOrOptions?: LavaMoatPolicy | TestPolicyForJSONOptions,
+     *     options?: TestPolicyForJSONOptions,
+     *   ],
+     *   Ctx
+     * >}
+     */ ({
+      exec: async (
+        t,
+        fixtureFilename,
+        expectedPolicyOrOptions,
+        options = {}
+      ) => {
+        /** @type {TestPolicyForJSONOptions['expected']} */
+        let expected
+        if (isPolicy(expectedPolicyOrOptions)) {
+          expected = expectedPolicyOrOptions
+        } else {
+          options = /** @type {TestPolicyForJSONOptions} */ (
+            expectedPolicyOrOptions ?? {}
+          )
+          ;({ expected, ...options } = options)
+        }
 
-      const actualPolicy = await generatePolicy(JSON_FIXTURE_ENTRY_POINT, {
-        ...options,
-        readPowers,
-      })
+        const { readPowers } = await loadJSONFixture(
+          new URL(fixtureFilename, JSON_FIXTURE_DIR_URL)
+        )
 
-      if (expectedPolicy) {
-        t.deepEqual(actualPolicy, expectedPolicy)
-      } else {
-        t.snapshot(actualPolicy)
-      }
-    },
-    title: (title, fixtureFilename, expectedPolicy) =>
-      (expectedPolicy
-        ? `${title ?? 'policy for fixture matches expected policy'}`
-        : `${title ?? 'policy for fixture matches snapshot'}`
-      ).trim() + ` (${fixtureFilename})`,
-  })
+        const actualPolicy = await generatePolicy(JSON_FIXTURE_ENTRY_POINT, {
+          ...options,
+          readPowers,
+        })
+
+        if (isPolicy(expected)) {
+          t.deepEqual(actualPolicy, expected)
+        } else if (isFunction(expected)) {
+          await expected(t, actualPolicy)
+        } else {
+          t.snapshot(actualPolicy)
+        }
+      },
+
+      title: (
+        title,
+        fixtureFilename,
+        expectedPolicyOrOptions,
+        options = {}
+      ) => {
+        if (title) {
+          return title
+        }
+        /** @type {TestPolicyForJSONOptions['expected']} */
+        let expected
+        if (isPolicy(expectedPolicyOrOptions)) {
+          expected = expectedPolicyOrOptions
+        } else {
+          options = /** @type {TestPolicyForJSONOptions} */ (
+            expectedPolicyOrOptions ?? {}
+          )
+          ;({ expected, ...options } = options)
+        }
+
+        if (isPolicy(expected)) {
+          return `policy for fixture matches expected policy (${fixtureFilename})`
+        } else if (isFunction(expected)) {
+          return `policy for fixture passes assertions (${fixtureFilename})`
+        } else {
+          return `policy for fixture matches snapshot (${fixtureFilename})`
+        }
+      },
+    })
+  )
 
   return {
     testPolicyForJSON,
@@ -201,30 +254,56 @@ export function createGeneratePolicyMacros(test) {
 }
 
 /**
+ * The entry point of a generated scaffold for inline sources
+ *
+ * This is always a POSIX path since it is only used in a virtual filesystem
+ * (and we never need to use phony win32 paths).
+ */
+const SCAFFOLD_ENTRY_POINT = '/node_modules/test/index.js'
+
+/**
+ * Path to scaffold fixture for ESM
+ */
+const SCAFFOLD_MODULE_FIXTURE = fileURLToPath(
+  new URL('./scaffold/scaffold-module.json', import.meta.url)
+)
+
+/**
+ * Path to scaffold fixture for CJS
+ */
+const SCAFFOLD_SCRIPT_FIXTURE = fileURLToPath(
+  new URL('./scaffold/scaffold-script.json', import.meta.url)
+)
+
+/**
  * Populates a fixture with `content` as the file content of the entry point of
  * a dependency.
  *
- * Works similarly to `lavamoat-core/test/util`'s `createConfigForTest`--except
+ * Used for testing policy generation against inline sources.
+ *
+ * - The entry point is _always_ {@link SCAFFOLD_ENTRY_POINT}
+ * - The scaffold fixture is—depending on `options.sourceType`—
+ *   [scaffold-module.json](./scaffold/scaffold-module.json) or
+ *   [scaffold-script.json](./scaffold/scaffold-script.json)
+ *
+ * Works similarly to `lavamoat-core/test/util`'s `createConfigForTest`—except
  * `content` cannot be a function.
  *
- * @param {string | Buffer} content
- * @param {{ sourceType?: 'module' | 'script' }} [options]
- * @returns {Promise<{
- *   vol: Volume
- *   readPowers: ReadNowPowers
- * }>}
+ * @param {string} content Inline content
+ * @param {ScaffoldFixtureOptions} [options] Options
+ * @returns {Promise<ScaffoldFixtureResult>} `Volume` and associated read powers
  */
 
 async function scaffoldFixture(content, { sourceType = 'module' } = {}) {
   const fixture =
-    sourceType === 'module'
-      ? './scaffold/scaffold-module.json'
-      : './scaffold/scaffold-script.json'
+    sourceType === 'module' ? SCAFFOLD_MODULE_FIXTURE : SCAFFOLD_SCRIPT_FIXTURE
   const { vol, readPowers } = await loadJSONFixture(
     new URL(fixture, import.meta.url)
   )
 
-  vol.fromJSON({ '/node_modules/test/index.js': content })
+  await vol.promises.writeFile(SCAFFOLD_ENTRY_POINT, content, {
+    encoding: 'utf8',
+  })
 
   return { vol, readPowers }
 }
