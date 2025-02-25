@@ -9,10 +9,9 @@ import { getCanonicalName } from './policy-gen-util.js'
 
 /**
  * @import {LoadCompartmentMapOptions} from '../internal.js'
- * @import {CompartmentMapDescriptor, Sources} from '@endo/compartment-mapper'
  */
 
-const { values } = Object
+const { values, fromEntries, entries } = Object
 
 /**
  * Loads compartment map and associated sources.
