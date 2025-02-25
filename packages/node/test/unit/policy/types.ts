@@ -1,3 +1,6 @@
+// FIXME: why did I have to add this? failing in CI
+/* eslint-disable @typescript-eslint/no-redundant-type-constituents */
+
 import { ReadNowPowers } from '@endo/compartment-mapper'
 import type { ExecutionContext } from 'ava'
 import type { LavaMoatPolicy, LavaMoatPolicyOverrides } from 'lavamoat-core'
