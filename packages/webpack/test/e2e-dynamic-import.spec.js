@@ -54,7 +54,7 @@ test.before(async (t) => {
     app1: './dynamic.js',
     app2: './dynamic-chunk.js',
   }
-  // webpackConfig1.mode = 'development'
+  webpackConfig2.mode = 'development'
 
   await t.notThrowsAsync(async () => {
     t.context.build1 = await scaffold(webpackConfig1)
@@ -62,7 +62,7 @@ test.before(async (t) => {
   t.context.bundle1 = t.context.build1.snapshot['/dist/hack.js']
 
   await t.notThrowsAsync(async () => {
-    t.context.build2 = await scaffold(webpackConfig2)
+    t.context.build2 = await scaffold(webpackConfig2, { writeFS: true })
   }, 'Expected the build2 to succeed')
 })
 

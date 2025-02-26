@@ -170,7 +170,7 @@ class LavaMoatPlugin {
 
     compiler.hooks.thisCompilation.tap(
       PLUGIN_NAME,
-      (compilation, { normalModuleFactory }) => {
+      (compilation, { normalModuleFactory, contextModuleFactory }) => {
         PROGRESS.reportErrorsTo(compilation.errors)
         compilation.hooks.optimizeAssets.tap(PLUGIN_NAME, () => {
           // By the time assets are being optimized we should have finished.
@@ -223,6 +223,20 @@ class LavaMoatPlugin {
          * @type {(string | number)[]}
          */
         const unenforceableModuleIds = []
+        /**
+         * Array of module ids that are context modules and need to be
+         * double-wrapped.
+         *
+         * @type {(string | number)[]}
+         */
+        const contextModules = []
+
+        /**
+         * Array of chunk ids that have been processed.
+         *
+         * @type {number[]}
+         */
+        const chunkIds = []
         /**
          * A record of module ids that are externals and need to be enforced as
          * builtins.
@@ -339,6 +353,11 @@ class LavaMoatPlugin {
             const chunkGraph = compilation.chunkGraph
 
             Array.from(chunks).forEach((chunk) => {
+              // Collect chunk IDs and info while we're here
+              if (chunk.id !== null) {
+                chunkIds.push(chunk.id)
+              }
+
               chunkGraph.getChunkModules(chunk).forEach((module) => {
                 const moduleId = chunkGraph.getModuleId(module)
                 const moduleClass =
@@ -385,10 +404,15 @@ class LavaMoatPlugin {
                   }
                 }
 
+                if (isContextModule(module, moduleClass)) {
+                  console.dir(module)
+                  contextModules.push({moduleId, context: module.context})
+                }
                 if (
-                  isIgnoredModule(module) ||
-                  (options.__unsafeAllowContextModules &&
-                    isContextModule(module, moduleClass))
+                  isIgnoredModule(module)
+                  //  ||
+                  // (options.__unsafeAllowContextModules &&
+                  //   isContextModule(module, moduleClass))
                 ) {
                   unenforceableModuleIds.push(moduleId)
                 } else {
@@ -426,11 +450,30 @@ class LavaMoatPlugin {
             identifierLookup = generateIdentifierLookup({
               readableResourceIds: options.readableResourceIds,
               unenforceableModuleIds,
+              contextModules,
               externals,
               paths: knownPaths,
               policy: policyToApply,
               canonicalNameMap,
             })
+
+            // // =================================================================
+
+            // contextModuleFactory.hooks.beforeResolve.tap(
+            //   'ContextModulePathPlugin',
+            //   (result) => {
+            //     console.log(111111111111111, result, result.__proto__)
+            //     if (!result) return
+            //     console.log(2222222222222)
+
+            //     if (result.context.includes('dynamic-importer2')) {
+            //       return false
+            //     }
+
+            //     return result
+            //   }
+            // )
+            // // =================================================================
 
             if (unenforceableModuleIds.length > 0) {
               mainCompilationWarnings.push(
@@ -532,6 +575,17 @@ class LavaMoatPlugin {
                   {
                     name: 'unenforceable',
                     data: identifierLookup.unenforceableModuleIds || null,
+                    json: true,
+                  },
+                  {
+                    name: 'ctxm',
+                    data: identifierLookup.contextModuleIds || null,
+                    json: true,
+                  },
+                  {
+                    // known chunk ids
+                    name: 'kch',
+                    data: chunkIds,
                     json: true,
                   },
                   {
