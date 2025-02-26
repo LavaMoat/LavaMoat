@@ -6,6 +6,7 @@
     "commonjs-package": "1.0.0",
     "commonjs-quirks": "1.0.0",
     "dynamic-importer": "1.0.0",
+    "dynamic-importer2": "1.0.0",
     "dynamic-stealer": "1.0.0",
     "dynamic-target": "1.0.0",
     "es6-module-package": "1.0.0",

@@ -75,6 +75,7 @@ const stricterScopeTerminator = freeze(
   )
 )
 
+console.error(' LAVAMOAT.ctxm', LAVAMOAT.ctxm)
 /**
  * Enforces the policy for resource imports.
  *
@@ -90,6 +91,7 @@ const enforcePolicy = (specifier, referrerResourceId, wrappedRequire) => {
   if (typeof specifier === 'undefined') {
     throw Error(`Requested specifier is undefined`)
   }
+  console.error('spec', specifier)
   // skip enforcing what we determined at build time we cannot
   if (
     LAVAMOAT.unenforceable.includes(specifier) ||
@@ -98,6 +100,21 @@ const enforcePolicy = (specifier, referrerResourceId, wrappedRequire) => {
   ) {
     return wrappedRequire()
   }
+  // if (LAVAMOAT.ctxm[specifier]) {
+  //   console.error('ctxm', specifier,LAVAMOAT.ctxm[specifier])
+
+  //   // TODO: this approach will not work for allowing resources present in the policy, because we're missing context to look up the specifier. A rewrite of the context module internal implementation will be necessary. Unless we can collect the canonicalName of the package that context module is wrapping and enforce that
+
+  //   // wrappedRequire is expected to have the specifier bound to it.
+  //   const ctxModuleRequire = wrappedRequire().bind(null, specifier)
+  //   return (actualSpecifier) => {
+  //     return enforcePolicy(
+  //       actualSpecifier,
+  //       referrerResourceId,
+  //       ctxModuleRequire
+  //     )
+  //   }
+  // }
   const referrerPolicy = LAVAMOAT.policy.resources[referrerResourceId] || {}
   if (referrerPolicy.builtin && LAVAMOAT.externals[specifier]) {
     const builtinName = LAVAMOAT.externals[specifier]
@@ -189,6 +206,8 @@ const installGlobalsForPolicy = (resourceId, packageCompartmentGlobal) => {
 
 const compartmentMap = new Map()
 /**
+ * Finds the resource ID for a given module ID.
+ * 
  * @param {string} moduleId
  * @returns {string | undefined}
  */
@@ -225,6 +244,7 @@ const wrapRequireWithPolicy = (__webpack_require__, referrerResourceId) =>
     if (typeof specifier !== 'number') {
       specifier = `${specifier}`
     }
+    console.error('req', specifier)
     const requireThat = __webpack_require__.bind(this, specifier, ...rest)
     return enforcePolicy(specifier, referrerResourceId, requireThat)
   }
@@ -261,6 +281,15 @@ const lavamoatRuntimeWrapper = (resourceId, runtimeKit) => {
     // wrap webpack runtime for policy check and hardening
     const policyRequire = wrapRequireWithPolicy(__webpack_require__, resourceId)
 
+    // WIP: wrap what .e uses for loading chunks with policy to allow known chunks only?
+    policyRequire.e = (chunkId) => {
+      // Chunk resolution at runtime may be a lookup table or a string concatenation. In the latter case it can be fooled into loading any file from under publicPath.
+      if(!LAVAMOAT.kch.includes(chunkId)) {
+        throw Error(`Attempt to load a chunk that was not known at compile time: ${chunkId} from ${resourceId}`)
+      }
+      console.error({ chunkId, resourceId })
+      return __webpack_require__.e(chunkId)
+    }
     // TODO: It's possible most of the work here could be done once instead of for each wrapping
 
     // Webpack has a few one-letter functions in the runtime and built-in plugins that add more runtime functions. We might need to support them eventually.
