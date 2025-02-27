@@ -417,6 +417,8 @@ export type {
   RootPolicy,
 } from 'lavamoat-core'
 
+export type * from './errors.js'
+
 /**
  * Options for `loadPolicies()`
  */
