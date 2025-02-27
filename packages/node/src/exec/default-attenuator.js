@@ -11,6 +11,7 @@ import {
   GLOBAL_THIS_REFS,
   LAVAMOAT_POLICY_ITEM_WRITE,
 } from '../constants.js'
+import { AttenuationError } from '../error.js'
 import { isObjectyObject } from '../util.js'
 
 /**
@@ -87,7 +88,7 @@ export const makeGlobalsAttenuator = (
 
     if (policy === ENDO_POLICY_ITEM_ROOT) {
       if (rootCompartmentGlobalThis) {
-        throw new ReferenceError(
+        throw new AttenuationError(
           'Root compartment globalThis already initialized; this is a bug'
         )
       }

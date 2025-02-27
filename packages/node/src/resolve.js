@@ -8,6 +8,7 @@ import nodeFs from 'node:fs'
 import Module from 'node:module'
 import path from 'node:path'
 import { PACKAGE_JSON } from './constants.js'
+import { NoExecutableError, NoWorkspaceError } from './error.js'
 import { isExecutableSymlink, isReadableFileSync, realpathSync } from './fs.js'
 import { log } from './log.js'
 import { hrLabel, hrPath } from './util.js'
@@ -43,7 +44,9 @@ export const resolveWorkspace = ({
     }
     const parent = path.join(current, '..')
     if (parent === current) {
-      throw new Error(`Could not find a workspace from ${hrPath(from)}`)
+      throw new NoWorkspaceError(
+        `Could not find a workspace from ${hrPath(from)}`
+      )
     }
     current = parent
   }
@@ -93,8 +96,8 @@ export const resolveBinScript = (
   try {
     workspace = resolveWorkspace({ from, fs })
   } catch {
-    throw new Error(
-      `Could not find a workspace from ${niceFrom}; ensure you are in your project directory`
+    throw new NoWorkspaceError(
+      `Could not find a workspace from ${niceFrom}; are in your project directory?`
     )
   }
   let current = workspace
@@ -118,11 +121,15 @@ export const resolveBinScript = (
     try {
       next = resolveWorkspace({ from: path.join(current, '..'), fs })
     } catch {
-      throw new Error(`Could not find executable ${niceBin} from ${niceFrom}`)
+      throw new NoExecutableError(
+        `Could not find executable ${niceBin} from ${niceFrom}`
+      )
     }
     if (next === current) {
       log.debug(`Reached filesystem root; stopping search`)
-      throw new Error(`Could not find executable ${niceBin} from ${niceFrom}`)
+      throw new NoExecutableError(
+        `Could not find executable ${niceBin} from ${niceFrom}`
+      )
     }
     log.debug(`No such executable ${niceBin} in ${niceBinDir}; continuing…`)
     current = next
