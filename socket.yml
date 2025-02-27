@@ -1,0 +1,6 @@
+# top level version field is required
+version: 2
+
+projectIgnorePaths:
+  - "**/test/**/fixture/**"
+  - "**/test/**/fixtures/**"
