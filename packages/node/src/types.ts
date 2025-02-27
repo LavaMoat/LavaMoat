@@ -393,3 +393,5 @@ export {
   Resources,
   RootPolicy,
 } from 'lavamoat-core'
+
+export type * from './errors.js'
