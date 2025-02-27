@@ -12,6 +12,7 @@ import { isBuiltin as defaultIsBuiltin } from 'node:module'
 import { stripVTControlCharacters } from 'node:util'
 import { defaultReadPowers } from '../compartment/power.js'
 import { DEFAULT_TRUST_ROOT_COMPARTMENT } from '../constants.js'
+import { GenerationError } from '../error.js'
 import { log as defaultLog } from '../log.js'
 import { hrLabel, hrPath, toPath } from '../util.js'
 import { LMRCache } from './lmr-cache.js'
@@ -159,7 +160,7 @@ export const buildModuleRecords = (
     compartmentMap.compartments[compartmentMap.entry.compartment]
 
   if (!entryCompartment) {
-    throw new TypeError('Could not find entry compartment; this is a bug')
+    throw new GenerationError('Could not find entry compartment; this is a bug')
   }
 
   const compartmentRenames = freeze({ ...renames })
@@ -199,7 +200,7 @@ export const buildModuleRecords = (
     /* c8 ignore next */
     if (!(compartmentName in sources)) {
       // "should never happen"™
-      throw new ReferenceError(
+      throw new GenerationError(
         `Could not find corresponding source for ${compartmentName}; this is a bug`
       )
     }
