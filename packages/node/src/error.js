@@ -79,20 +79,15 @@ export const InvalidPolicyError = createLavaMoatError(
     /** @type {Readonly<string | undefined>} */
     filepath
 
-    /** @type {Readonly<'policy' | 'policy-override'>} */
-    type
-
     /**
      * @param {string} message
      * @param {Object} options
      * @param {unknown} [options.cause]
      * @param {string} [options.filepath]
-     * @param {'policy' | 'policy-override'} options.type
      */
-    constructor(message, { cause, filepath, type }) {
+    constructor(message, { cause, filepath } = {}) {
       super(message, { cause })
       this.filepath = filepath
-      this.type = type
     }
   }
 )
