@@ -10,6 +10,7 @@ import { jsonStringifySortedPolicy, mergePolicy } from 'lavamoat-core'
 import nodeFs from 'node:fs'
 import nodePath from 'node:path'
 import * as constants from './constants.js'
+import { InvalidPolicyError } from './error.js'
 import { readJsonFile } from './fs.js'
 import { hasValue, isObject, isObjectyObject, isString } from './util.js'
 
@@ -221,8 +222,7 @@ export const isPolicyOverride = (value) => {
  */
 export const assertPolicy = (value) => {
   if (!isPolicy(value)) {
-    // TODO: need an object validator lib
-    throw new TypeError('Invalid LavaMoat policy')
+    throw new InvalidPolicyError('Invalid LavaMoat policy', { type: 'policy' })
   }
 }
 
@@ -234,7 +234,9 @@ export const assertPolicy = (value) => {
  */
 export const assertPolicyOverride = (value) => {
   if (!isPolicyOverride(value)) {
-    throw new TypeError('Invalid LavaMoat policy overrides')
+    throw new InvalidPolicyError('Invalid LavaMoat policy overrides', {
+      type: 'policy-override',
+    })
   }
 }
 

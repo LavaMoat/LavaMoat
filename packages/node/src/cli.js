@@ -23,6 +23,7 @@ import terminalLink from 'terminal-link'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 import * as constants from './constants.js'
+import { NoPolicyError } from './error.js'
 import { run } from './exec/run.js'
 import { assertAbsolutePath, readJsonFile } from './fs.js'
 import { log } from './log.js'
@@ -468,17 +469,22 @@ const main = async (args = hideBin(process.argv)) => {
           } catch (e) {
             const err = /** @type {NodeJS.ErrnoException} */ (e)
             if (err.code === 'ENOENT') {
-              throw new Error(
-                `Could not load policy from ${em(argv.policy)} and/or ${em(argv['policy-override'])}; reason:\n${err.message}`
+              throw new NoPolicyError(
+                `Could not load policy from ${hrPath(argv.policy)} and/or ${hrPath(argv['policy-override'])}; file(s) not found`,
+                { cause: err }
               )
             }
             if (err.code === 'EISDIR') {
               // TODO: actually allow a directory and apply a default filename
-              throw new Error(
-                `Could not load policy from ${em(argv.policy)} and/or ${em(argv['policy-override'])}; specify a filepath instead of a directory`
+              throw new NoPolicyError(
+                `Could not load policy from ${hrPath(argv.policy)} and/or ${hrPath(argv['policy-override'])}; specify a filepath instead of a directory`,
+                { cause: err }
               )
             }
-            throw err
+            throw new NoPolicyError(
+              `Could not load policy from ${hrPath(argv.policy)} and/or ${hrPath(argv['policy-override'])}; reason: ${err.message} (${err.code})`,
+              { cause: err }
+            )
           }
         }
 

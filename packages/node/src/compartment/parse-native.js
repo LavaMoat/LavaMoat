@@ -10,9 +10,10 @@
 import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
 import { NATIVE_PARSER_NAME } from '../constants.js'
+import { PermissionDeniedError } from '../error.js'
+import { hrLabel } from '../util.js'
 
 const { freeze, keys } = Object
-const { quote: q } = assert
 
 /**
  * @import {ParseFn, ParserImplementation} from '@endo/compartment-mapper'
@@ -47,8 +48,9 @@ const parseNative = (
       /** @type {LavaMoatEndoPackagePolicy} */ (compartmentDescriptor?.policy)
         ?.options?.native !== true
     ) {
-      throw new Error(
-        `Native modules are disallowed in compartment ${q(compartment.name)}`
+      // TODO: we may be guaranteed a compartmentDescriptor. find out!
+      throw new PermissionDeniedError(
+        `Native modules are disallowed in package ${hrLabel(compartmentDescriptor?.label ?? compartment.name)}`
       )
     }
 

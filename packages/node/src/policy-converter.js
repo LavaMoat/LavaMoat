@@ -28,6 +28,7 @@ import {
   LAVAMOAT_PKG_POLICY_NATIVE,
   LAVAMOAT_PKG_POLICY_ROOT,
 } from './constants.js'
+import { ConversionError, InvalidArgumentsError } from './error.js'
 import {
   assertPolicy,
   assertPolicyOverride,
@@ -108,12 +109,12 @@ const convertEndoPackagePolicyBuiltins = (item) => {
       let propName = rest.join('.')
       const itemForBuiltin = policyItem[builtinName]
       if (isBoolean(itemForBuiltin)) {
-        throw new TypeError(
+        throw new ConversionError(
           'Expected a FullAttenuationDefinition; got a boolean'
         )
       }
       if (isArray(itemForBuiltin)) {
-        throw new TypeError(
+        throw new ConversionError(
           'Expected a FullAttenuationDefinition; got an array'
         )
       }
@@ -146,7 +147,9 @@ const convertEndoPackagePolicyPackages = (item) => {
   const policyItem = {}
   for (const [key, value] of entries(item)) {
     if (key === LAVAMOAT_PKG_POLICY_ROOT) {
-      throw new TypeError('Unexpected root package policy')
+      throw new ConversionError(
+        `Unexpected root package (${LAVAMOAT_PKG_POLICY_ROOT}) referenced in package policy`
+      )
     } else {
       policyItem[key] = !!value
     }
@@ -344,7 +347,9 @@ export const toEndoPolicy = async (policyOrPolicyPath, options = {}) => {
   await Promise.resolve()
 
   if (!policyOrPolicyPath) {
-    throw new TypeError('Expected a policy or policy path')
+    throw new InvalidArgumentsError(
+      'Expected a policy or path to policy as first argument'
+    )
   }
 
   /** @type {LavaMoatPolicy} */

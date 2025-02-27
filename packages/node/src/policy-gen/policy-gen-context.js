@@ -14,6 +14,7 @@ import {
   NATIVE_PARSER_NAME,
   PACKAGE_JSON,
 } from '../constants.js'
+import { GenerationError } from '../error.js'
 import { log as fallbackLog } from '../log.js'
 import { hasValue, hrLabel, hrPath } from '../util.js'
 
@@ -227,7 +228,7 @@ export class PolicyGeneratorContext {
     if (hasValue(descriptor, 'compartment') && hasValue(descriptor, 'module')) {
       const location = this.renames[descriptor.compartment]
       if (!location) {
-        throw new TypeError(
+        throw new GenerationError(
           `Rename map missing location for compartment "${descriptor.compartment}" in compartment ${this.compartment.name}`
         )
       }
@@ -386,7 +387,7 @@ export class PolicyGeneratorContext {
 
     if (!record) {
       // XXX: under what circumstances does this occur?
-      throw new TypeError(
+      throw new GenerationError(
         `Source descriptor "${specifier}" in compartment "${this.compartment.name}" missing prop: record`
       )
     }
@@ -395,7 +396,7 @@ export class PolicyGeneratorContext {
     // we can use `imports` as the discriminator
     if (!hasOwn(record, 'imports')) {
       // XXX: under what circumstances does this occur?
-      throw new TypeError(
+      throw new GenerationError(
         `StaticModuleType for source descriptor "${specifier}" in compartment "${this.compartment.name} missing prop: imports`
       )
     }
