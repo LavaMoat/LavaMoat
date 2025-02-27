@@ -9,6 +9,7 @@ import { nullImportHook } from '../compartment/import-hook.js'
 import { DEFAULT_ENDO_OPTIONS } from '../compartment/options.js'
 import { defaultReadPowers } from '../compartment/power.js'
 import { ATTENUATORS_COMPARTMENT } from '../constants.js'
+import { GenerationError } from '../error.js'
 import { log as defaultLog } from '../log.js'
 import { toEndoURL } from '../util.js'
 import { makePolicyGenCompartment } from './policy-gen-compartment-class.js'
@@ -64,7 +65,7 @@ export const loadCompartmentMap = async (
    */
   values(nodeCompartmentMap.compartments).forEach((compartmentDescriptor) => {
     if (compartmentDescriptor.name === ATTENUATORS_COMPARTMENT) {
-      throw new TypeError(
+      throw new GenerationError(
         `Unexpected attenuator compartment found when computing canonical package name in ${compartmentDescriptor.label} (${compartmentDescriptor.location})`
       )
     }
