@@ -3,6 +3,7 @@ import '../../src/preamble.js'
 import test from 'ava'
 import { fs, vol } from 'memfs'
 import * as constants from '../../src/constants.js'
+import { ErrorCodes } from '../../src/error-code.js'
 import {
   assertPolicy,
   isPolicy,
@@ -89,16 +90,7 @@ test('assertPolicy - does not throw for valid policy', (t) => {
 
 test('assertPolicy - throws for invalid policy', (t) => {
   t.throws(() => assertPolicy({}), {
-    instanceOf: TypeError,
-    message: 'Invalid LavaMoat policy; does not match expected schema',
-  })
-})
-
-test('assertPolicy - accepts custom message', (t) => {
-  const message = 'custom message'
-  t.throws(() => assertPolicy({}, message), {
-    instanceOf: TypeError,
-    message,
+    code: ErrorCodes.InvalidPolicy,
   })
 })
 

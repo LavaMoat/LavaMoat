@@ -12,6 +12,7 @@ import { jsonStringifySortedPolicy, mergePolicy } from 'lavamoat-core'
 import nodeFs from 'node:fs'
 import nodePath from 'node:path'
 import * as constants from './constants.js'
+import { InvalidPolicyError, NoPolicyError } from './error.js'
 import { readJsonFile } from './fs.js'
 import { log } from './log.js'
 import {
@@ -47,18 +48,18 @@ export const readPolicy = async (
     allegedPolicy = await readJsonFile(policyPath, { readFile })
   } catch (err) {
     if (err instanceof SyntaxError) {
-      throw new Error(
+      throw new InvalidPolicyError(
         `Invalid LavaMoat policy at ${hrPath(policyPath)}; failed to parse JSON`,
         { cause: err }
       )
     }
     if (/** @type {NodeJS.ErrnoException} */ (err).code === 'ENOENT') {
-      throw new Error(
+      throw new NoPolicyError(
         `LavaMoat policy file not found at ${hrPath(policyPath)}`,
         { cause: err }
       )
     } else {
-      throw new Error(
+      throw new NoPolicyError(
         `Failed to read LavaMoat policy file at ${hrPath(policyPath)}`,
         {
           cause: err,
@@ -70,7 +71,7 @@ export const readPolicy = async (
     assertPolicy(allegedPolicy)
     return allegedPolicy
   } catch (err) {
-    throw new Error(
+    throw new InvalidPolicyError(
       `Invalid LavaMoat policy at ${hrPath(policyPath)}; does not match expected schema`,
       { cause: err }
     )
@@ -95,7 +96,7 @@ export const maybeReadPolicyOverride = async (
     allegedPolicy = await readJsonFile(policyOverridePath, { readFile })
   } catch (err) {
     if (err instanceof SyntaxError) {
-      throw new Error(
+      throw new InvalidPolicyError(
         `Invalid LavaMoat policy overrides at ${hrPath(policyOverridePath)}; failed to parse JSON`,
         { cause: err }
       )
@@ -108,11 +109,9 @@ export const maybeReadPolicyOverride = async (
     }
 
     if (/** @type {NodeJS.ErrnoException} */ (err).code !== 'ENOENT') {
-      throw new Error(
+      throw new InvalidPolicyError(
         `Failed to read LavaMoat policy overrides file at ${hrPath(policyOverridePath)}`,
-        {
-          cause: err,
-        }
+        { cause: err }
       )
     }
   }
@@ -121,7 +120,7 @@ export const maybeReadPolicyOverride = async (
     assertPolicy(allegedPolicy)
     return allegedPolicy
   } catch (err) {
-    throw new Error(
+    throw new InvalidPolicyError(
       `Invalid LavaMoat policy overrides at ${hrPath(policyOverridePath)}; does not match expected schema`,
       { cause: err }
     )
@@ -290,7 +289,7 @@ export const assertPolicy = (
   message = 'Invalid LavaMoat policy; does not match expected schema'
 ) => {
   if (!isPolicy(allegedPolicy)) {
-    throw new TypeError(message)
+    throw new InvalidPolicyError(message)
   }
 }
 

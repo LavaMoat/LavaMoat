@@ -6,6 +6,7 @@
  */
 
 import { LAVAMOAT_PKG_POLICY_ROOT } from '../constants.js'
+import { GenerationError } from '../error.js'
 import { hasValue, isObjectyObject } from '../util.js'
 
 /**
@@ -27,7 +28,7 @@ import { hasValue, isObjectyObject } from '../util.js'
 export const getCanonicalName = (compartment, trustRoot = true) => {
   // NOTE: the algorithm creating paths happens to be identical to the one in @lavamoat/aa package. Not that it matters because policies cannot be reused between this and other lavamoat tools.
   if (!compartment.path) {
-    throw new ReferenceError(
+    throw new GenerationError(
       `Computing canonical name failed: compartment "${compartment.name}" (${compartment.location}) has no "path" property; this is a bug`
     )
   }
