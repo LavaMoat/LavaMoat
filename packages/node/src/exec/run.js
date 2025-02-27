@@ -6,6 +6,7 @@
  */
 import { makeReadPowers } from '../compartment/power.js'
 import { DEFAULT_ATTENUATOR } from '../constants.js'
+import { TrustMismatchError } from '../error.js'
 import { toEndoPolicy } from '../policy-converter.js'
 import { isTrusted } from '../policy-util.js'
 import { devToConditions, hrPath } from '../util.js'
@@ -39,7 +40,7 @@ export const run = async (
 ) => {
   await Promise.resolve()
   if (trustRoot && !isTrusted(policy)) {
-    throw new Error(
+    throw new TrustMismatchError(
       `Attempted to run entrypoint ${hrPath(entrypoint)} with full privileges, but entry policy is untrusted. Aborting`
     )
   }
