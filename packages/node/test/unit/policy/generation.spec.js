@@ -1,6 +1,7 @@
 import '../../../src/preamble.js'
 
 import test from 'ava'
+import { keysOr } from '../../../src/util.js'
 import { createGeneratePolicyMacros } from './policy-macros.js'
 
 const { testPolicyForModule, testPolicyForScript, testPolicyForJSON } =
@@ -11,7 +12,14 @@ const { testPolicyForModule, testPolicyForScript, testPolicyForJSON } =
 
 test('Node.js builtins', testPolicyForJSON, 'builtins.json')
 
-test('kitchen sink', testPolicyForJSON, 'kitchen-sink.json')
+test('kitchen sink', testPolicyForJSON, 'kitchen-sink.json', {
+  expected: (t, policy) => {
+    t.plan(2)
+
+    t.assert(keysOr(policy.resources).some((key) => key.includes('>')))
+    t.snapshot(policy)
+  },
+})
 
 test('native-like module', testPolicyForJSON, 'phony-native.json')
 

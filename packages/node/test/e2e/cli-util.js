@@ -1,10 +1,11 @@
 /**
- * Provides {@link runCli} for use in E2E tests
+ * Provides {@link runCLI} for use in E2E tests
  *
  * @packageDocumentation
  */
 
 import { execFile } from 'node:child_process'
+import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { promisify } from 'node:util'
 export const execFileAsync = promisify(execFile)
@@ -19,17 +20,20 @@ export const CLI_PATH = fileURLToPath(
 
 /**
  * @import {ExecFileException} from 'node:child_process'
- * @import {RunCliOutput} from '../types.js'
+ * @import {RunCLIOutput} from '../types.js'
+ * @import {ExecutionContext} from 'ava'
  */
 
 /**
  * Run the `@lavamoat/node` CLI with the provided arguments
  *
+ * @template [Context=unknown] Default is `unknown`
  * @param {string[]} args CLI arguments
- * @returns {Promise<RunCliOutput>}
+ * @param {ExecutionContext<Context>} [t] AVA test context
+ * @returns {Promise<RunCLIOutput>}
  */
 
-export const runCli = async (args) => {
+export const runCLI = async (args, t) => {
   await Promise.resolve()
 
   /** @type {string} */
@@ -38,6 +42,17 @@ export const runCli = async (args) => {
   let stderr
   /** @type {ExecFileException['code']} */
   let code
+
+  /**
+   * Full command; for display purposes only.
+   *
+   * This value is saved in the snapshot `.md` file (it's in the assertion
+   * failure message), so we should strip absolute paths since they will differ
+   * between dev envrionments.
+   */
+  const hrCommand = `node ${path.relative(fileURLToPath(import.meta.url), CLI_PATH)} ${args.join(' ')}`
+
+  t?.log(`executing: ${hrCommand}`)
 
   try {
     ;({ stdout, stderr } = await execFileAsync(
@@ -59,5 +74,5 @@ export const runCli = async (args) => {
        */
       (err))
   }
-  return { stdout, stderr, code }
+  return { stdout, stderr, code, hrCommand }
 }

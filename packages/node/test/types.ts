@@ -10,7 +10,7 @@ export interface RunnerWorkerData {
   vol: NestedDirectoryJSON
 }
 
-export type ExecLavamoatNodeExpectationFn<Ctx = unknown> = (
+export type TestCLIExpectationFn<Ctx = unknown> = (
   t: ExecutionContext<Ctx>,
   result: {
     stdout: string
@@ -29,28 +29,29 @@ export type ExecLavamoatNodeExpectationFn<Ctx = unknown> = (
  *
  * @template Ctx Test execution context object
  */
-export type ExecLavamoatNodeExpectation<Ctx = unknown> =
+export type TestCLIExpectation<Ctx = unknown> =
   | string
-  | ExecLavamoatNodeExpectationProps
-  | ExecLavamoatNodeExpectationFn<Ctx>
+  | TestCLIExpectationProps
+  | TestCLIExpectationFn<Ctx>
 
 /**
  * Properties to match against the resolved value of the `runCli` function.
  */
-export type ExecLavamoatNodeExpectationProps = Simplify<
+export type TestCLIExpectationProps = Simplify<
   RequireAtLeastOne<
-    Merge<RunCliOutput, { stdout: string | RegExp; stderr: string | RegExp }>,
-    keyof RunCliOutput
+    Merge<RunCLIOutput, { stdout: string | RegExp; stderr: string | RegExp }>,
+    keyof RunCLIOutput
   >
 >
 
 /**
  * Output of the `runCli` function
  */
-export interface RunCliOutput {
+export interface RunCLIOutput {
   stdout: string
   stderr: string
   code: ExitCode
+  hrCommand: string
 }
 
 /**

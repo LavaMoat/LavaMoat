@@ -1,0 +1,11 @@
+{
+  "name": "deptree",
+  "version": "1.0.0",
+  "type": "module",
+  "license": "ISC",
+  "private": true,
+  "dependencies": {
+    "shared-pkg": "^2.0.0",
+    "another-pkg": "^1.0.0"
+  }
+}

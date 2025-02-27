@@ -9,9 +9,9 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { DEFAULT_POLICY_FILENAME } from '../../src/constants.js'
 import { isPolicy, readPolicy } from '../../src/policy-util.js'
-import { readJsonFile } from '../../src/util.js'
+import { keysOr, readJsonFile } from '../../src/util.js'
 import { createCLIMacros } from './cli-macros.js'
-import { runCli } from './cli-util.js'
+import { runCLI } from './cli-util.js'
 
 const test = /** @type {TestFn<CLITestContext>} */ (anyTest)
 
@@ -23,29 +23,41 @@ const test = /** @type {TestFn<CLITestContext>} */ (anyTest)
 const { testCLI } = createCLIMacros(test)
 
 /**
- * Path to the "basic" fixture entry point
+ * Path to `basic` fixture entry point
  */
 const BASIC_FIXTURE_ENTRYPOINT = fileURLToPath(
   new URL('./fixture/basic/app.js', import.meta.url)
 )
 
 /**
- * The "basic" fixture's directory
+ * Path to `deptree` fixture entry point
+ */
+const DEP_FIXTURE_ENTRYPOINT = fileURLToPath(
+  new URL('./fixture/deptree/app.js', import.meta.url)
+)
+
+/**
+ * The `basic` fixture's directory
  */
 const BASIC_FIXTURE_ENTRYPOINT_DIR = path.dirname(BASIC_FIXTURE_ENTRYPOINT)
+
+/**
+ * The `deptree` fixture's directory
+ */
+const DEP_FIXTURE_ENTRYPOINT_DIR = path.dirname(DEP_FIXTURE_ENTRYPOINT)
 
 /**
  * @typedef CLITestContext
  * @property {string} tempdir
  */
 
-test.before('setup temp dir', async (t) => {
+test.beforeEach('setup temp dir', async (t) => {
   t.context.tempdir = await fs.mkdtemp(
     path.join(tmpdir(), 'lavamoat-node-cli-test-')
   )
 })
 
-test.after('cleanup temp dir', async (t) => {
+test.afterEach('cleanup temp dir', async (t) => {
   await fs.rm(t.context.tempdir, { recursive: true, force: true })
 })
 
@@ -132,9 +144,49 @@ test('generate - "generate --help" prints help', testCLI, [
 ])
 
 test('generate - basic policy generation', async (t) => {
+  t.plan(2)
   const policyPath = path.join(t.context.tempdir, DEFAULT_POLICY_FILENAME)
 
-  await runCli(['generate', BASIC_FIXTURE_ENTRYPOINT, '--policy', policyPath])
+  await runCLI(
+    [
+      'generate',
+      BASIC_FIXTURE_ENTRYPOINT,
+      '--policy',
+      policyPath,
+      '--root',
+      BASIC_FIXTURE_ENTRYPOINT_DIR,
+    ],
+    t
+  )
   const policy = await readPolicy(policyPath)
   t.true(isPolicy(policy))
+  t.snapshot(policy)
+})
+
+test('generate - policy generation - canonical names', async (t) => {
+  t.plan(3)
+
+  const policyPath = path.join(t.context.tempdir, DEFAULT_POLICY_FILENAME)
+
+  await runCLI(
+    [
+      'generate',
+      DEP_FIXTURE_ENTRYPOINT,
+      '--policy',
+      policyPath,
+      '--root',
+      DEP_FIXTURE_ENTRYPOINT_DIR,
+    ],
+    t
+  )
+
+  const policy = await readPolicy(policyPath)
+  t.true(isPolicy(policy))
+
+  t.true(
+    keysOr(policy.resources).includes('another-pkg>shared-pkg'),
+    'policy.resources should include "another-pkg>shared-pkg": ' +
+      policy.resources
+  )
+  t.snapshot(policy)
 })

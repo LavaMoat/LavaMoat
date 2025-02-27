@@ -1,13 +1,16 @@
 /**
  * The obligatory junk drawer of utilities.
  *
+ * @remraks
+ * This is an anti-pattern. Or so I've heard.
+ *
  * @packageDocumentation
  */
 import nodeFs from 'node:fs'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 
 const { isArray: isArray_ } = Array
-const { freeze } = Object
+const { freeze, keys } = Object
 
 /**
  * @import {FsInterface, ReadNowPowers, ReadNowPowersProp} from '@endo/compartment-mapper'
@@ -132,8 +135,9 @@ export const hasValue = (obj, prop) => {
 /**
  * Converts a boolean `dev` to a set of conditions (Endo option)
  *
- * @param {boolean} [dev]
+ * @param {boolean} [dev=false] Default is `false`
  * @returns {Set<string>}
+ * @internal
  */
 export const devToConditions = (dev) =>
   dev ? new Set(['development']) : new Set()
@@ -146,8 +150,9 @@ export const devToConditions = (dev) =>
  *     [K in ReadNowPowersProp]-?: {} extends Pick<ReadNowPowers, K> ? never : K
  *   }[ReadNowPowersProp][]
  * >}
+ * @internal
  */
-const requiredReadNowPowersProps = freeze(
+const REQUIRED_READ_NOW_POWERS = freeze(
   /** @type {const} */ (['fileURLToPath', 'isAbsolute', 'maybeReadNow'])
 )
 
@@ -156,14 +161,31 @@ const requiredReadNowPowersProps = freeze(
  *
  * @param {unknown} value
  * @returns {value is ReadNowPowers}
+ * @internal
  */
 export const isReadNowPowers = (value) =>
-  !!(
-    value &&
-    typeof value === 'object' &&
-    requiredReadNowPowersProps.every(
-      (prop) =>
-        prop in value &&
-        typeof (/** @type {any} */ (value)[prop]) === 'function'
-    )
+  isObject(value) &&
+  REQUIRED_READ_NOW_POWERS.every(
+    (prop) => hasValue(value, prop) && typeof value[prop] === 'function'
   )
+
+/**
+ * A forgiving {@link Object.keys} returning `defaultKeys` if `value` is falsy.
+ *
+ * @param {object} [value] Object value to get keys of
+ * @param {string[]} [defaultKeys=[]] Default is `[]`
+ * @returns {string[]}
+ * @internal
+ */
+export const keysOr = (value, defaultKeys = []) =>
+  value ? keys(value) : defaultKeys
+
+/**
+ * Type guard for a function
+ *
+ * Note: This is _not_ suitable for use with constructors.
+ *
+ * @param {unknown} value
+ * @returns {value is (...args: any[]) => any}
+ */
+export const isFunction = (value) => typeof value === 'function'
