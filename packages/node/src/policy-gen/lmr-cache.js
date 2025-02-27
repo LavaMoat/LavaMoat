@@ -5,6 +5,7 @@
  */
 
 import { LavamoatModuleRecord } from 'lavamoat-core'
+import { GenerationError } from '../error.js'
 
 /** @type {unique symbol} */
 const kCtor = Symbol('LMRCache.ctor')
@@ -85,7 +86,7 @@ export class LMRCache {
   add(moduleRecord) {
     const key = LMRCache.#keyFor(moduleRecord)
     if (this.has(moduleRecord)) {
-      throw new ReferenceError(
+      throw new GenerationError(
         `Module record with key "${key}" already exists in cache; this is a bug`
       )
     }

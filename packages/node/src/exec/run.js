@@ -10,6 +10,7 @@ import {
   DEFAULT_ATTENUATOR,
   DEFAULT_TRUST_ROOT_COMPARTMENT,
 } from '../constants.js'
+import { TrustMismatchError } from '../error.js'
 import { log as defaultLog } from '../log.js'
 import { toEndoPolicy } from '../policy-converter.js'
 import { isTrusted, loadPolicies } from '../policy-util.js'
@@ -137,11 +138,11 @@ const assertTrustRootMatchesPolicy = (
   trustRoot = DEFAULT_TRUST_ROOT_COMPARTMENT
 ) => {
   if (trustRoot && !isTrusted(policy)) {
-    throw new Error(
+    throw new TrustMismatchError(
       `Attempted to execute entrypoint ${hrPath(entrypoint)} as trusted, but policy expects an untrusted root. Either call ${hrCode('run()')} with option ${hrCode('{trustRoot: true}')} or provide a policy which trusts the root (without ${hrCode('root.usePolicy')}). Aborting`
     )
   } else if (!trustRoot && isTrusted(policy)) {
-    throw new Error(
+    throw new TrustMismatchError(
       `Attempted to execute entrypoint ${hrPath(entrypoint)} as untrusted, but policy expects a trusted root. Either call ${hrCode('run()')} with option ${hrCode('{trustRoot: false}')} or provide a policy which does not trust the root. Aborting`
     )
   }

@@ -2,6 +2,7 @@ import '../../src/preamble.js'
 
 import test from 'ava'
 import { memfs } from 'memfs'
+import { ErrorCodes } from '../../src/error-code.js'
 import { resolveBinScript, resolveWorkspace } from '../../src/resolve.js'
 
 test('resolveBinScript - resolves real bin script path', (t) => {
@@ -29,7 +30,7 @@ test('resolveBinScript - throws error if workspace not found', (t) => {
     () => {
       resolveBinScript('test-bin', { from: '/nonexistent', fs })
     },
-    { message: /Could not find a workspace/ }
+    { code: ErrorCodes.NoWorkspace }
   )
 })
 
@@ -48,6 +49,6 @@ test('resolveWorkspace - throws error if workspace not found', (t) => {
     () => {
       resolveWorkspace({ from: '/nonexistent', fs })
     },
-    { message: /Could not find a workspace/ }
+    { code: ErrorCodes.NoWorkspace }
   )
 })
