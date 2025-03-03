@@ -14,7 +14,7 @@
  * `@typescript-eslint/parser` reads `tsconfig.json` files. Caution is advised!
  *
  * @packageDocumentation
- * @see {@link https://typescript-eslint.io/linting/typed-linting/monorepos}
+ * @see {@link https://typescript-eslint.io/linting/typed-linting}
  */
 
 const path = require('node:path')
