@@ -21,7 +21,7 @@ import {
 /**
  * @import {Policy} from '@endo/compartment-mapper'
  * @import {LavaMoatPackagePolicyItem} from '../../../src/types.js'
- * @import {LavaMoatPolicy, LavaMoatPolicyOverrides} from 'lavamoat-core'
+ * @import {LavaMoatPolicy, LavaMoatPolicyOverrides} from '@lavamoat/types'
  */
 
 test('toEndoPolicy() - kitchen sink', async (t) => {
