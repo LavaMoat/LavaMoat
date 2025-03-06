@@ -188,7 +188,7 @@ function createModuleInspector(opts) {
         allowReturnOutsideFunction: true,
         errorRecovery: true,
       })
-    if (includeDebugInfo && isParsedAST(ast) && ast.errors.length) {
+    if (includeDebugInfo && isParsedAST(ast) && ast.errors?.length) {
       moduleDebug.parseErrors = ast.errors
     }
     // ensure ses compatibility
