@@ -3,6 +3,7 @@ import '../../src/preamble.js'
 import test from 'ava'
 import { fs, vol } from 'memfs'
 import * as constants from '../../src/constants.js'
+import { ErrorCodes } from '../../src/error-code.js'
 import {
   assertPolicy,
   assertPolicyOverride,
@@ -88,8 +89,7 @@ test('assertPolicy - does not throw for valid policy', (t) => {
 
 test('assertPolicy - throws for invalid policy', (t) => {
   t.throws(() => assertPolicy({}), {
-    instanceOf: TypeError,
-    message: 'Invalid LavaMoat policy',
+    code: ErrorCodes.InvalidPolicy,
   })
 })
 
@@ -99,8 +99,7 @@ test('assertPolicyOverride - does not throw for valid policy override', (t) => {
 
 test('assertPolicyOverride - throws for invalid policy override', (t) => {
   t.throws(() => assertPolicyOverride([]), {
-    instanceOf: TypeError,
-    message: 'Invalid LavaMoat policy overrides',
+    code: ErrorCodes.InvalidPolicy,
   })
 })
 

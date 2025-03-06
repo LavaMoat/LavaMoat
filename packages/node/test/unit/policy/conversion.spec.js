@@ -2,6 +2,7 @@ import '../../../src/preamble.js'
 
 import test from 'ava'
 import stringify from 'json-stable-stringify'
+import { ErrorCodes } from '../../../src/error-code.js'
 import { readJsonFile } from '../../../src/fs.js'
 import {
   ENDO_POLICY_BOILERPLATE,
@@ -77,7 +78,7 @@ test('toEndoPolicy() - no policy', async (t) => {
 
   // @ts-expect-error invalid type
   await t.throwsAsync(toEndoPolicy(lmPolicy), {
-    message: 'Expected a policy or policy path',
+    code: ErrorCodes.InvalidArguments,
   })
 })
 
@@ -104,13 +105,13 @@ test('toEndoPolicy() - policy path as string', async (t) => {
 test('toEndoPolicy() - invalid policy', async (t) => {
   // @ts-expect-error invalid type
   await t.throwsAsync(toEndoPolicy([1, 2, 3]), {
-    message: 'Invalid LavaMoat policy',
+    code: ErrorCodes.InvalidPolicy,
   })
 })
 
 test('toEndoPolicy() - invalid policy (by path)', async (t) => {
   await t.throwsAsync(toEndoPolicy(INVALID_POLICY_URL), {
-    message: 'Invalid LavaMoat policy',
+    code: ErrorCodes.InvalidPolicy,
   })
 })
 
@@ -122,7 +123,7 @@ test('toEndoPolicy() - invalid policy override', async (t) => {
     toEndoPolicy(DEFAULT_POLICY, {
       policyOverride: lmPolicyOverride,
     }),
-    { message: 'Invalid LavaMoat policy overrides' }
+    { code: ErrorCodes.InvalidPolicy }
   )
 })
 
@@ -131,7 +132,7 @@ test('toEndoPolicy() - invalid policy override (by path)', async (t) => {
     toEndoPolicy(DEFAULT_POLICY, {
       policyOverridePath: INVALID_POLICY_URL,
     }),
-    { message: 'Invalid LavaMoat policy overrides' }
+    { code: ErrorCodes.InvalidPolicy }
   )
 })
 

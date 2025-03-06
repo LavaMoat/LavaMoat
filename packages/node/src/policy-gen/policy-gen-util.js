@@ -9,6 +9,7 @@ import {
   ATTENUATORS_COMPARTMENT,
   LAVAMOAT_PKG_POLICY_ROOT,
 } from '../constants.js'
+import { GenerationError } from '../error.js'
 import { hasValue, isObjectyObject } from '../util.js'
 
 /**
@@ -33,7 +34,7 @@ export const getCanonicalName = (compartment, trustRoot = true) => {
     return ATTENUATORS_COMPARTMENT
   }
   if (!compartment.path) {
-    throw new ReferenceError(
+    throw new GenerationError(
       `Computing canonical name failed: compartment "${compartment.name}" (${compartment.location}) has no "path" property; this is a bug`
     )
   }
