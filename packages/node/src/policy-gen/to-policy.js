@@ -312,7 +312,6 @@ export function compartmentMapToPolicy(
       readPowers,
       isBuiltin,
       log,
-      trustRoot,
     }
   )
 
