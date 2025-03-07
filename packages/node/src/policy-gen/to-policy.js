@@ -315,7 +315,6 @@ export function compartmentMapToPolicy(
       readPowers,
       isBuiltin,
       log,
-      trustRoot,
     }
   )
   log.debug('Inspecting module records…')
