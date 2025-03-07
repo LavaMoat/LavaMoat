@@ -23,7 +23,6 @@ import { PolicyGeneratorContext } from './policy-gen-context.js'
  *   ReadNowPowers} from '@endo/compartment-mapper'
  * @import {LavaMoatPolicy,
  *   LavaMoatPolicyDebug,
- *   LavaMoatPolicyOverrides,
  *   LavamoatModuleRecord,
  *   SesCompat,
  *   SesCompatObj,
