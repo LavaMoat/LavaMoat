@@ -59,16 +59,16 @@ export const loadCompartmentMap = async (
    * resource key in policy. We have no use for Endo's label field, so we
    * replace labels with canonicalNames derived from path.
    */
-  values(nodeCompartmentMap.compartments).map((compartmentDescriptor) => {
-    const canonicalName = getCanonicalName(compartmentDescriptor, trustRoot)
-    /* c8 ignore next */
-    if (canonicalName === ATTENUATORS_COMPARTMENT) {
-      // "should never happen"
+  values(nodeCompartmentMap.compartments).forEach((compartmentDescriptor) => {
+    if (compartmentDescriptor.name === ATTENUATORS_COMPARTMENT) {
       throw new TypeError(
         `Unexpected attenuator compartment found when computing canonical package name in ${compartmentDescriptor.label} (${compartmentDescriptor.location})`
       )
     }
-    compartmentDescriptor.label = canonicalName
+    compartmentDescriptor.label = getCanonicalName(
+      compartmentDescriptor,
+      trustRoot
+    )
   })
 
   // we use this to inject missing imports from policy overrides into the module descriptor.
