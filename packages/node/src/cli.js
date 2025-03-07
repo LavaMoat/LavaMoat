@@ -441,6 +441,7 @@ const main = async (args = hideBin(process.argv)) => {
           'policy-override': policyOverridePath,
           'trust-root': trustRoot,
           dev,
+          root: projectRoot,
           write,
         } = argv
 
@@ -463,23 +464,10 @@ const main = async (args = hideBin(process.argv)) => {
             trustRoot,
           })
         } else {
-          try {
-            policy = await loadPolicies(policyPath, policyOverridePath)
-          } catch (e) {
-            const err = /** @type {NodeJS.ErrnoException} */ (e)
-            if (err.code === 'ENOENT') {
-              throw new Error(
-                `Could not load policy from ${em(argv.policy)} and/or ${em(argv['policy-override'])}; reason:\n${err.message}`
-              )
-            }
-            if (err.code === 'EISDIR') {
-              // TODO: actually allow a directory and apply a default filename
-              throw new Error(
-                `Could not load policy from ${em(argv.policy)} and/or ${em(argv['policy-override'])}; specify a filepath instead of a directory`
-              )
-            }
-            throw err
-          }
+          policy = await loadPolicies(policyPath, {
+            policyOverridePath,
+            projectRoot,
+          })
         }
 
         stripProcessArgv(
@@ -491,7 +479,11 @@ const main = async (args = hideBin(process.argv)) => {
            */ (argv['--'])
         )
 
-        await run(entrypoint, policy, { trustRoot })
+        await run(entrypoint, policy, {
+          policyOverridePath,
+          trustRoot,
+          projectRoot,
+        })
       }
     )
     .command(

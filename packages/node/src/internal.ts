@@ -8,13 +8,12 @@
 
 import type { MapNodeModulesOptions } from '@endo/compartment-mapper'
 import { LavamoatModuleRecordOptions } from 'lavamoat-core'
-import type nodeFs from 'node:fs'
-import { PathLike, Stats } from 'node:fs'
 import type { Except, LiteralUnion, Simplify } from 'type-fest'
 import type {
   BaseLoadCompartmentMapOptions,
   GeneratePolicyOptions,
   WithDebug,
+  WithFs,
   WithIsBuiltin,
   WithLog,
   WithPolicyOverride,
@@ -120,36 +119,16 @@ export type SomeParameters<T extends SomeFunction> = T extends new (
     ? Parameters<T>
     : never
 
-/**
- * Extra bits of the `fs` module that we need for internal utilities.
- */
-export interface FsUtilInterface {
-  lstatSync: (
-    path: PathLike,
-    options?: {
-      throwIfNoEntry?: boolean
-    }
-  ) => Pick<Stats, 'isFile' | 'isSymbolicLink'>
-  statSync: (
-    path: PathLike,
-    options?: {
-      throwIfNoEntry?: boolean
-    }
-  ) => Pick<Stats, 'isFile' | 'isSymbolicLink'>
-  accessSync: (path: PathLike, mode?: number) => void
-  constants: Pick<typeof nodeFs.constants, 'R_OK' | 'X_OK'>
-  promises: {
-    readFile: (path: PathLike) => Promise<string | Buffer>
-  }
-  realpathSync: (path: PathLike, encoding?: BufferEncoding) => Buffer | string
-}
+export type ReadPolicyOptions = WithFs
 
-/**
- * Options bucket containing an `fs` prop.
- */
-export interface WithFs {
-  fs?: FsUtilInterface
-}
+export type ReadPolicyOverrideOptions = Simplify<
+  WithFs & {
+    /**
+     * If `true`, throw if file not found
+     */
+    strict?: boolean
+  }
+>
 
 /**
  * Options for `resolveBinScript()`
