@@ -16,7 +16,7 @@ import { getCanonicalName } from './policy-gen-util.js'
  *   ModuleSource} from 'ses'
  * @import {Merge} from 'type-fest'
  * @import {CompartmentDescriptor, CompartmentMapDescriptor} from '@endo/compartment-mapper'
- * @import {LavaMoatPolicyOverrides, Resources} from 'lavamoat-core'
+ * @import {LavaMoatPolicy, Resources} from 'lavamoat-core'
  */
 
 const { entries, isFrozen } = Object
@@ -178,7 +178,7 @@ const makeGetOverriddenResourceNames = (compartmentMap, resources) => {
     }
 
     /**
-     * A set of keys from {@link LavaMoatPolicyOverrides.resources} matching
+     * A set of keys from {@link LavaMoatPolicy.resources} matching
      * {@link CompartmentDescriptor.modules the current `CompartmentDescriptor`'s `modules`}.
      * These will be updated by {@link updateModuleSource}.
      *
@@ -224,7 +224,7 @@ const makeGetOverriddenResourceNames = (compartmentMap, resources) => {
  * to hand-craft a giant policy override.
  *
  * @param {CompartmentMapDescriptor} compartmentMap
- * @param {LavaMoatPolicyOverrides} [policyOverride]
+ * @param {LavaMoatPolicy} [policyOverride]
  * @returns {typeof Compartment} Either the original `Compartment` or a
  *   `PolicyGenCompartment`
  * @internal

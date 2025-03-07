@@ -11,7 +11,6 @@
  * @packageDocumentation
  */
 
-import { mergePolicy } from 'lavamoat-core'
 import {
   DEFAULT_ATTENUATOR,
   ENDO_PKG_POLICY_BUILTINS,
@@ -28,22 +27,16 @@ import {
   LAVAMOAT_PKG_POLICY_NATIVE,
   LAVAMOAT_PKG_POLICY_ROOT,
 } from './constants.js'
-import {
-  assertPolicy,
-  assertPolicyOverride,
-  readPolicy,
-  readPolicyOverride,
-} from './policy-util.js'
-import { hasValue, isArray, isBoolean, isString } from './util.js'
+import { loadPolicies } from './policy-util.js'
+import { isArray, isBoolean } from './util.js'
 
 const { create, entries, fromEntries } = Object
 
 /**
  * @import {GlobalPolicy,
  *   PackagePolicy,
- *   LavaMoatPolicy,
  *   ResourcePolicy,
- *   LavaMoatPolicyOverrides} from 'lavamoat-core'
+ *   LavaMoatPolicy} from 'lavamoat-core'
  * @import {LavaMoatEndoPackagePolicy,
  *   LavaMoatEndoPackagePolicyOptions,
  *   LavaMoatEndoPolicy,
@@ -226,21 +219,59 @@ const convertEndoPackagePolicy = (resources, isRoot = false) => {
 }
 
 /**
- * Performs actual conversion of LavaMoat policy and optional override to Endo
- * policy
+ * Converts a LavaMoat policy to an Endo policy.
  *
- * @param {LavaMoatPolicy} policy
+ * Takes policy overrides into account, if provided.
+ *
+ * Performs validation of policy and policy overrides.
+ *
+ * @overload
+ * @param {LavaMoatPolicy} policy LavaMoat policy to convert
  * @param {ToEndoPolicyOptions} [options] Options for conversion
- * @returns {LavaMoatEndoPolicy} Endo policy
+ * @returns {Promise<LavaMoatEndoPolicy>}
+ * @public
  */
-const convert = (policy, { policyOverride } = {}) => {
-  const lavaMoatPolicy = mergePolicy(policy, policyOverride)
+
+/**
+ * Given a path to a policy, converts a LavaMoat policy to an Endo policy.
+ *
+ * Takes policy overrides into account, if provided.
+ *
+ * Performs validation of policy and policy overrides.
+ *
+ * @overload
+ * @param {string | URL} policyPath Path or URL to policy file)
+ * @param {ToEndoPolicyOptions} [options] Options for conversion
+ * @returns {Promise<LavaMoatEndoPolicy>}
+ * @public
+ */
+
+/**
+ * Converts a LavaMoat policy to an Endo policy.
+ *
+ * Takes policy overrides into account, if provided.
+ *
+ * Performs validation of policy and policy overrides.
+ *
+ * @privateRemarks
+ * The overloads aren't strictly necessary, but they're a little nicer to
+ * understand for consumers.
+ * @param {LavaMoatPolicy | string | URL} [policyOrPolicyPath] LavaMoat policy
+ *   to convert (or path to policy file)
+ * @param {ToEndoPolicyOptions} [options] Options for conversion
+ * @returns {Promise<LavaMoatEndoPolicy>}
+ * @public
+ */
+export const toEndoPolicy = async (policyOrPolicyPath, options = {}) => {
+  await Promise.resolve()
+
+  const policy = await loadPolicies(policyOrPolicyPath, options)
 
   const lavamoatResources = /** @type {Resources} */ (
-    lavaMoatPolicy.resources ?? create(null)
+    policy.resources ?? create(null)
   )
 
-  const rootPolicyRef = lavaMoatPolicy.root?.usePolicy
+  const rootPolicyRef = policy.root?.usePolicy
 
   /**
    * Actual conversion starts here.
@@ -275,100 +306,4 @@ const convert = (policy, { policyOverride } = {}) => {
   }
 
   return endoPolicy
-}
-
-/**
- * Converts a LavaMoat policy to an Endo policy.
- *
- * Use if you've already read the policy and/or policy override from disk.
- *
- * @param {LavaMoatPolicy} policy
- * @param {LavaMoatPolicyOverrides} [policyOverride]
- * @returns {LavaMoatEndoPolicy} Endo Policy
- * @public
- */
-export const toEndoPolicySync = (policy, policyOverride) => {
-  assertPolicy(policy)
-  if (policyOverride) {
-    assertPolicyOverride(policyOverride)
-  }
-  return convert(policy, { policyOverride })
-}
-
-/**
- * Converts a LavaMoat policy to an Endo policy.
- *
- * Takes policy overrides into account, if provided.
- *
- * Performs validation of policy and policy overrides.
- *
- * @overload
- * @param {LavaMoatPolicy} policy LavaMoat policy to convert
- * @param {ToEndoPolicyOptions} [options] Options for conversion
- * @returns {Promise<LavaMoatEndoPolicy>}
- * @public
- * @see {@link toEndoPolicySync}
- */
-
-/**
- * Given a path to a policy, converts a LavaMoat policy to an Endo policy.
- *
- * Takes policy overrides into account, if provided.
- *
- * Performs validation of policy and policy overrides.
- *
- * @overload
- * @param {string | URL} policyPath Path or URL to policy file)
- * @param {ToEndoPolicyOptions} [options] Options for conversion
- * @returns {Promise<LavaMoatEndoPolicy>}
- * @public
- */
-
-/**
- * Converts a LavaMoat policy to an Endo policy.
- *
- * Takes policy overrides into account, if provided.
- *
- * Performs validation of policy and policy overrides.
- *
- * @privateRemarks
- * The overloads aren't strictly necessary, but they're a little nicer to
- * understand for consumers.
- * @param {LavaMoatPolicy | string | URL} policyOrPolicyPath LavaMoat policy to
- *   convert (or path to policy file)
- * @param {ToEndoPolicyOptions} [options] Options for conversion
- * @returns {Promise<LavaMoatEndoPolicy>}
- * @public
- */
-export const toEndoPolicy = async (policyOrPolicyPath, options = {}) => {
-  await Promise.resolve()
-
-  if (!policyOrPolicyPath) {
-    throw new TypeError('Expected a policy or policy path')
-  }
-
-  /** @type {LavaMoatPolicy} */
-  let policy
-  if (isString(policyOrPolicyPath) || policyOrPolicyPath instanceof URL) {
-    const policyPath = policyOrPolicyPath
-    policy = await readPolicy(policyPath)
-  } else {
-    const allegedPolicy = policyOrPolicyPath
-    assertPolicy(allegedPolicy)
-    policy = allegedPolicy
-  }
-
-  /** @type {LavaMoatPolicyOverrides | undefined} */
-  let policyOverride
-  if (hasValue(options, 'policyOverridePath')) {
-    policyOverride = await readPolicyOverride(options.policyOverridePath)
-  } else if (hasValue(options, 'policyOverride')) {
-    const allegedPolicyOverride = options.policyOverride
-    assertPolicyOverride(allegedPolicyOverride)
-    policyOverride = allegedPolicyOverride
-  }
-
-  return convert(policy, {
-    policyOverride,
-  })
 }

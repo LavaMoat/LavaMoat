@@ -3,11 +3,12 @@
  *
  * @packageDocumentation
  */
-import { IsBuiltinFn, LavaMoatPolicyOverrides } from 'lavamoat-core'
-import { Loggerr } from 'loggerr'
-import { SetFieldType, Simplify } from 'type-fest'
+import type { IsBuiltinFn, LavaMoatPolicy } from 'lavamoat-core'
+import type { Loggerr } from 'loggerr'
+import type nodeFs from 'node:fs'
+import type { SetFieldType, Simplify } from 'type-fest'
 
-import {
+import type {
   CaptureLiteOptions,
   CryptoInterface,
   FsInterface,
@@ -20,7 +21,8 @@ import {
   SyncImportLocationOptions,
   UrlInterface,
 } from '@endo/compartment-mapper'
-import {
+import type { PathLike, Stats } from 'node:fs'
+import type {
   ENDO_GLOBAL_POLICY_ITEM_WRITE,
   ENDO_POLICY_ITEM_ROOT,
 } from './constants.js'
@@ -107,13 +109,38 @@ export interface WithLog {
 }
 
 /**
- * Options having a `policyOverride` property.
+ * Options having a `policyOverride` or `policyOverridePath` property (not both
+ * at once!)
  */
+export type WithPolicyOverrideOrPath =
+  | {
+      /**
+       * Path to a policy override file.
+       */
+      policyOverridePath?: string | URL
+
+      /**
+       * Disallowed in lieu of {@link policyOverridePath}
+       */
+      policyOverride?: never
+    }
+  | {
+      /**
+       * Disallowed in lieu of {@link policyOverride}
+       */
+      policyOverridePath?: never
+      /**
+       * A policy override object.
+       */
+      policyOverride?: LavaMoatPolicy
+    }
+
 export interface WithPolicyOverride {
-  /**
-   * Policy overrides, if any
-   */
-  policyOverride?: LavaMoatPolicyOverrides
+  policyOverride?: LavaMoatPolicy
+}
+
+export interface WithPolicyOverridePath {
+  policyOverridePath?: string | URL
 }
 
 /**
@@ -195,6 +222,8 @@ export interface WritePowers {
     { recursive }: { recursive: true }
   ) => Promise<string | undefined>
   writeFile: (path: string, data: string) => Promise<void>
+
+  rm: (path: string, { recursive }: { recursive: true }) => Promise<void>
 }
 
 /**
@@ -336,46 +365,41 @@ export type MakeReadPowersOptions = WithRawReadPowers
  */
 
 export type RunOptions = Simplify<
-  WithRawReadPowers & WithPolicyOverride & WithDev & WithTrustRoot & WithLog
+  WithRawReadPowers &
+    WithDev &
+    WithTrustRoot &
+    WithLog &
+    WithProjectRoot &
+    WithPolicyOverridePath
 >
+
+/**
+ * Options containing a `cwd` property
+ */
+export interface WithProjectRoot {
+  /**
+   * Project root directory
+   *
+   * @defaultValue `process.cwd()`
+   */
+  projectRoot?: string
+}
 
 /**
  * Options for `toEndoPolicy()`
  */
-export type ToEndoPolicyOptions =
-  | {
-      /**
-       * Path to a policy override file.
-       */
-      policyOverridePath?: string | URL
-
-      /**
-       * Disallowed in lieu of {@link policyOverridePath}
-       */
-      policyOverride?: never
-    }
-  | {
-      /**
-       * Disallowed in lieu of {@link policyOverride}
-       */
-      policyOverridePath?: never
-      /**
-       * A policy override object.
-       */
-      policyOverride?: LavaMoatPolicyOverrides
-    }
-
+export type ToEndoPolicyOptions = Simplify<
+  WithProjectRoot & WithPolicyOverrideOrPath
+>
 /**
  * Options which may either {@link WithReadPowers} or {@link WithRawPowers} but
  * not both.
  */
 export type WithRawReadPowers = WithReadPowers | WithRawPowers
 
-export { IsAbsoluteFn }
-
 // re-export schema
 // TODO: make this less bad
-export {
+export type {
   BuiltinPolicy,
   DebugInfo,
   GlobalPolicy,
@@ -384,12 +408,47 @@ export {
   GlobalPolicyWrite,
   LavaMoatPolicy,
   LavaMoatPolicyDebug,
-  LavaMoatPolicyOverrides,
   PackagePolicy,
-  PartialLavaMoatPolicy,
   Resolutions,
   ResourcePolicy,
   Resources as ResourcePolicyRecord,
   Resources,
   RootPolicy,
 } from 'lavamoat-core'
+
+export type { IsAbsoluteFn }
+
+export type LoadPoliciesOptions = Simplify<
+  WithProjectRoot & WithFs & WithPolicyOverrideOrPath
+>
+
+/**
+ * Extra bits of the `fs` module that we need for internal utilities.
+ */
+export interface FsUtilInterface {
+  lstatSync: (
+    path: PathLike,
+    options?: {
+      throwIfNoEntry?: boolean
+    }
+  ) => Pick<Stats, 'isFile' | 'isSymbolicLink'>
+  statSync: (
+    path: PathLike,
+    options?: {
+      throwIfNoEntry?: boolean
+    }
+  ) => Pick<Stats, 'isFile' | 'isSymbolicLink'>
+  accessSync: (path: PathLike, mode?: number) => void
+  constants: Pick<typeof nodeFs.constants, 'R_OK' | 'X_OK'>
+  promises: {
+    readFile: (path: PathLike) => Promise<string | Buffer>
+  }
+  realpathSync: (path: PathLike, encoding?: BufferEncoding) => Buffer | string
+}
+
+/**
+ * Options bucket containing an `fs` prop.
+ */
+export interface WithFs {
+  fs?: FsUtilInterface
+}
