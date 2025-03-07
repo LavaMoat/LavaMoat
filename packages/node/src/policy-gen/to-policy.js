@@ -152,7 +152,6 @@ export const buildModuleRecords = (
     readPowers = defaultReadPowers,
     isBuiltin = defaultIsBuiltin,
     log = defaultLog,
-    trustRoot = true,
   } = {}
 ) => {
   const lmrCache = new LMRCache()
@@ -184,8 +183,7 @@ export const buildModuleRecords = (
             compartmentRenames,
             lmrCache,
             {
-              rootModule: rootModule,
-              trustRoot: trustRoot,
+              rootModule,
               readPowers,
               isBuiltin,
               log,
