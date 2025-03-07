@@ -251,7 +251,7 @@ export type BaseLoadCompartmentMapOptions = Simplify<
  * Exported due to use within {@link CompartmentMapToPolicyOptions}
  */
 export type BuildModuleRecordsOptions = Simplify<
-  WithReadPowers & WithIsBuiltin & WithLog & WithTrustRoot
+  WithReadPowers & WithIsBuiltin & WithLog
 >
 
 /**
