@@ -3,15 +3,15 @@ const { EOL } = require('node:os')
 const test = require('ava')
 const { createModuleInspector } = require('../src/generatePolicy')
 
-const { createConfigForTest, generateConfigFromFiles } = require('./util')
+const { createPolicyForTest, generatePolicyFromFiles } = require('./util')
 
-test('generatePolicy - basic config', async (t) => {
-  const config = await createConfigForTest(function () {
+test('basic policy', async (t) => {
+  const policy = await createPolicyForTest(function () {
     location.href
   })
 
   t.deepEqual(
-    config,
+    policy,
     {
       resources: {
         test: {
@@ -21,12 +21,12 @@ test('generatePolicy - basic config', async (t) => {
         },
       },
     },
-    'config matched expected'
+    'policy matched expected'
   )
 })
 
-test('generatePolicy - config with debugInfo', async (t) => {
-  const config = await createConfigForTest(
+test('policy with debugInfo', async (t) => {
+  const policy = await createPolicyForTest(
     function () {
       location.href
     },
@@ -34,10 +34,10 @@ test('generatePolicy - config with debugInfo', async (t) => {
   )
 
   const testModuleFile = './node_modules/test/index.js'
-  const testPackageConfigDebugInfo = config.debugInfo[testModuleFile]
+  const testPackagePolicyDebugInfo = policy.debugInfo[testModuleFile]
 
   t.deepEqual(
-    testPackageConfigDebugInfo,
+    testPackagePolicyDebugInfo,
     {
       moduleRecord: {
         specifier: testModuleFile,
@@ -54,12 +54,12 @@ test('generatePolicy - config with debugInfo', async (t) => {
         'location.href': 'read',
       },
     },
-    'config matched expected'
+    'policy matched expected'
   )
 })
 
-test('generatePolicy - ignore various refs', async (t) => {
-  const config = await createConfigForTest(function () {
+test('ignore various refs', async (t) => {
+  const policy = await createPolicyForTest(function () {
     const js = [this]
     const ignored = [global, require, module, exports, arguments]
     const globalRefs = [typeof globalThis, typeof self, typeof window]
@@ -67,7 +67,7 @@ test('generatePolicy - ignore various refs', async (t) => {
   })
 
   t.deepEqual(
-    config,
+    policy,
     {
       resources: {
         test: {
@@ -77,18 +77,18 @@ test('generatePolicy - ignore various refs', async (t) => {
         },
       },
     },
-    'config matched expected'
+    'policy matched expected'
   )
 })
 
-test('generatePolicy - config ignores global refs', async (t) => {
-  const config = await createConfigForTest(function () {
+test('policy ignores global refs', async (t) => {
+  const policy = await createPolicyForTest(function () {
     const href = window.location.href
     const xhr = new window.XMLHttpRequest()
   })
 
   t.deepEqual(
-    config,
+    policy,
     {
       resources: {
         test: {
@@ -99,43 +99,43 @@ test('generatePolicy - config ignores global refs', async (t) => {
         },
       },
     },
-    'config matches expected'
+    'policy matches expected'
   )
 })
 
-test('generatePolicy - config ignores global refs when properties are not accessed', async (t) => {
-  const config = await createConfigForTest(function () {
+test('policy ignores global refs when properties are not accessed', async (t) => {
+  const policy = await createPolicyForTest(function () {
     typeof window !== 'undefined'
   })
 
-  t.deepEqual(config, { resources: {} }, 'config matches expected')
+  t.deepEqual(policy, { resources: {} }, 'policy matches expected')
 })
 
-test('generatePolicy - config ignores global refs accessed with whitelist items', async (t) => {
-  const config = await createConfigForTest(function () {
+test('policy ignores global refs accessed with whitelist items', async (t) => {
+  const policy = await createPolicyForTest(function () {
     window.Object === Object
   })
 
-  t.deepEqual(config, { resources: {} }, 'config matches expected')
+  t.deepEqual(policy, { resources: {} }, 'policy matches expected')
 })
 
-test('generatePolicy - config ignores newer intrinsics', async (t) => {
-  const config = await createConfigForTest(function () {
+test('policy ignores newer intrinsics', async (t) => {
+  const policy = await createPolicyForTest(function () {
     BigInt(123)
   })
 
-  t.deepEqual(config, { resources: {} }, 'config matches expected')
+  t.deepEqual(policy, { resources: {} }, 'policy matches expected')
 })
 
-test('generatePolicy - CJS should flag import/export as global', async (t) => {
-  const config = await createConfigForTest(function () {
+test('CJS should flag import/export as global', async (t) => {
+  const policy = await createPolicyForTest(function () {
     globalThis.import
     globalThis.export
     require('node:util')
   })
 
   t.deepEqual(
-    config,
+    policy,
     {
       resources: {
         test: {
@@ -146,12 +146,12 @@ test('generatePolicy - CJS should flag import/export as global', async (t) => {
         },
       },
     },
-    'config matches expected'
+    'policy matches expected'
   )
 })
 
-test('generatePolicy - ESM should flag require/module/exports as global', async (t) => {
-  const config = await createConfigForTest(`
+test('ESM should flag require/module/exports as global', async (t) => {
+  const policy = await createPolicyForTest(`
   require('node:util');
   let e = exports
   let m = module.exports
@@ -159,7 +159,7 @@ test('generatePolicy - ESM should flag require/module/exports as global', async 
 `)
 
   t.deepEqual(
-    config,
+    policy,
     {
       resources: {
         test: {
@@ -171,12 +171,12 @@ test('generatePolicy - ESM should flag require/module/exports as global', async 
         },
       },
     },
-    'config matches expected'
+    'policy matches expected'
   )
 })
 
-test('generatePolicy - trusted root', async (t) => {
-  const config = await createConfigForTest(`console.log('hello world')`, {
+test('trusted root', async (t) => {
+  const policy = await createPolicyForTest(`console.log('hello world')`, {
     inspector: createModuleInspector({
       isBuiltin: () => false,
       includeDebugInfo: false,
@@ -184,7 +184,7 @@ test('generatePolicy - trusted root', async (t) => {
     }),
   })
 
-  t.deepEqual(config, {
+  t.deepEqual(policy, {
     resources: {
       test: {
         globals: {
@@ -195,8 +195,8 @@ test('generatePolicy - trusted root', async (t) => {
   })
 })
 
-test('generatePolicy - untrusted root', async (t) => {
-  const config = await createConfigForTest(`console.log('hello world')`, {
+test('untrusted root', async (t) => {
+  const policy = await createPolicyForTest(`console.log('hello world')`, {
     inspector: createModuleInspector({
       isBuiltin: () => false,
       includeDebugInfo: false,
@@ -204,7 +204,7 @@ test('generatePolicy - untrusted root', async (t) => {
     }),
   })
 
-  t.deepEqual(config, {
+  t.deepEqual(policy, {
     root: {
       usePolicy: '$root$',
     },
@@ -221,4 +221,36 @@ test('generatePolicy - untrusted root', async (t) => {
       },
     },
   })
+})
+
+test('unsupported extensionless file', async (t) => {
+  await t.throwsAsync(
+    generatePolicyFromFiles({
+      files: [
+        {
+          type: 'js',
+          specifier: './entry.js',
+          file: './entry.js',
+          packageName: '$root$',
+          importMap: {
+            test: './node_modules/test/index',
+          },
+          content: 'require("test")',
+          entry: true,
+        },
+        {
+          // non-entry
+          type: 'js',
+          specifier: './node_modules/test/index',
+          file: './node_modules/test/index',
+          packageName: 'test',
+          importMap: {},
+          content: '<anarchist cookbook>',
+        },
+      ],
+    }),
+    {
+      message: `LavaMoat - failed to parse extensionless file of unknown format: ./node_modules/test/index`,
+    }
+  )
 })
