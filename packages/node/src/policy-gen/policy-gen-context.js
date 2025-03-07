@@ -23,9 +23,7 @@ import { hasValue, hrLabel, hrPath } from '../util.js'
  *   ModuleSource,
  *   CompartmentSources,
  *   FileURLToPathFn} from '@endo/compartment-mapper'
- * @import {ATTENUATORS_COMPARTMENT, LAVAMOAT_PKG_POLICY_ROOT} from '../constants.js'
  * @import {VirtualModuleSource} from 'ses'
- * @import {LiteralUnion} from 'type-fest'
  * @import {Loggerr} from 'loggerr'
  * @import {LMRCache} from './lmr-cache.js'
  * @import {CanonicalName, PolicyGeneratorContextOptions,
@@ -229,13 +227,6 @@ export class PolicyGeneratorContext {
         new URL(descriptor.module, location)
       )
     }
-    // it might have `location` instead
-    if (hasValue(descriptor, 'location')) {
-      return this.#readPowers.fileURLToPath(
-        new URL(descriptor.location, this.renames[this.compartment.location])
-      )
-    }
-    // can't find it!
   }
 
   /**
