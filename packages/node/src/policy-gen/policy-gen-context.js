@@ -7,7 +7,6 @@ import chalk from 'chalk'
 import { isBuiltin as nodeIsBuiltin } from 'node:module'
 import { defaultReadPowers } from '../compartment/power.js'
 import {
-  DEFAULT_TRUST_ROOT_COMPARTMENT,
   LMR_TYPE_BUILTIN,
   LMR_TYPE_NATIVE,
   LMR_TYPE_SOURCE,
@@ -151,9 +150,6 @@ export class PolicyGeneratorContext {
 
   #filepaths
 
-  /** @type {Readonly<boolean>} */
-  #trustRoot
-
   /**
    * @type {RootModule | undefined}
    */
@@ -183,7 +179,6 @@ export class PolicyGeneratorContext {
       readPowers = defaultReadPowers,
       isBuiltin = nodeIsBuiltin,
       log = fallbackLog,
-      trustRoot: trustRoot = DEFAULT_TRUST_ROOT_COMPARTMENT,
     } = {}
   ) {
     this.#isRootCompartment = !!rootModule
@@ -193,7 +188,6 @@ export class PolicyGeneratorContext {
     this.compartment = compartment
     this.renames = renames
     this.#log = log
-    this.#trustRoot = trustRoot
     this.#rootModule = rootModule
     this.#missingModules = new Set()
     this.#filepaths = new Map()
