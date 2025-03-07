@@ -70,7 +70,6 @@ export type PolicyGeneratorContextOptions<
 > = Simplify<
   WithReadPowers &
     WithIsBuiltin &
-    WithTrustRoot &
     WithLog & {
       /**
        * If set, this implies the associated {@link CompartmentDescriptor} is the
