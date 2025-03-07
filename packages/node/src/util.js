@@ -223,3 +223,11 @@ export const hrLabel = (name) => {
     ? name.split('>').map(hrLabel).join(chalk.magenta('>'))
     : chalk.magentaBright(name)
 }
+
+/**
+ * Type guard for a "path-like" value
+ *
+ * @param {unknown} value
+ * @returns {value is string | URL}
+ */
+export const isPathLike = (value) => isString(value) || value instanceof URL

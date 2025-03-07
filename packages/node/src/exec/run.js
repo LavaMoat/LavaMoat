@@ -35,7 +35,7 @@ import { execute } from './execute.js'
 export const run = async (
   entrypoint,
   policy,
-  { dev = false, policyOverride, trustRoot, ...options } = {}
+  { dev = false, policyOverridePath, trustRoot, projectRoot, ...options } = {}
 ) => {
   await Promise.resolve()
   if (trustRoot && !isTrusted(policy)) {
@@ -46,7 +46,8 @@ export const run = async (
   const readPowers = makeReadPowers(options)
 
   const endoPolicy = await toEndoPolicy(policy, {
-    policyOverride,
+    projectRoot,
+    policyOverridePath,
   })
 
   return execute(entrypoint, readPowers, {

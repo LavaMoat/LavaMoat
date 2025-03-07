@@ -5,9 +5,7 @@ import { fs, vol } from 'memfs'
 import * as constants from '../../src/constants.js'
 import {
   assertPolicy,
-  assertPolicyOverride,
   isPolicy,
-  isPolicyOverride,
   isTrusted,
   loadPolicies,
   readPolicy,
@@ -31,7 +29,7 @@ test('readPolicy - reads and validates policy from disk (default path)', async (
   vol.fromJSON({
     [constants.DEFAULT_POLICY_PATH]: JSON.stringify({ resources: {} }),
   })
-  const policy = await readPolicy({ fs: fs })
+  const policy = await readPolicy(constants.DEFAULT_POLICY_PATH, { fs: fs })
   t.deepEqual(policy, { resources: {} })
 })
 
@@ -49,9 +47,12 @@ test('readPolicyOverride - reads and validates policy override from disk (defaul
   vol.fromJSON({
     [constants.DEFAULT_POLICY_OVERRIDE_PATH]: JSON.stringify({ resources: {} }),
   })
-  const policyOverride = await readPolicyOverride({
-    fs: fs,
-  })
+  const policyOverride = await readPolicyOverride(
+    constants.DEFAULT_POLICY_OVERRIDE_PATH,
+    {
+      fs: fs,
+    }
+  )
   t.deepEqual(policyOverride, { resources: {} })
 })
 
@@ -60,7 +61,8 @@ test('loadPolicies - loads and merges policies from disk', async (t) => {
     '/policy.json': JSON.stringify({ resources: {} }),
     '/policy-override.json': JSON.stringify({ resources: {} }),
   })
-  const policy = await loadPolicies('/policy.json', '/policy-override.json', {
+  const policy = await loadPolicies('/policy.json', {
+    policyOverridePath: '/policy-override.json',
     fs,
   })
   t.deepEqual(policy, { resources: {} })
@@ -74,14 +76,6 @@ test('isPolicy - returns false for invalid policy', (t) => {
   t.false(isPolicy({}))
 })
 
-test('isPolicyOverride - returns true for valid policy override', (t) => {
-  t.true(isPolicyOverride({ resources: {} }))
-})
-
-test('isPolicyOverride - returns false for invalid policy override', (t) => {
-  t.false(isPolicyOverride([]))
-})
-
 test('assertPolicy - does not throw for valid policy', (t) => {
   t.notThrows(() => assertPolicy({ resources: {} }))
 })
@@ -90,17 +84,6 @@ test('assertPolicy - throws for invalid policy', (t) => {
   t.throws(() => assertPolicy({}), {
     instanceOf: TypeError,
     message: 'Invalid LavaMoat policy',
-  })
-})
-
-test('assertPolicyOverride - does not throw for valid policy override', (t) => {
-  t.notThrows(() => assertPolicyOverride({ resources: {} }))
-})
-
-test('assertPolicyOverride - throws for invalid policy override', (t) => {
-  t.throws(() => assertPolicyOverride([]), {
-    instanceOf: TypeError,
-    message: 'Invalid LavaMoat policy overrides',
   })
 })
 

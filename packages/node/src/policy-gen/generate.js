@@ -21,7 +21,7 @@ import { loadCompartmentMap } from './policy-gen-compartment-map.js'
 import { compartmentMapToPolicy } from './to-policy.js'
 
 /**
- * @import {GenerateOptions, LoadCompartmentMapOptions} from '../internal.js'
+ * @import {GenerateOptions} from '../internal.js'
  * @import {GeneratePolicyOptions, CompartmentMapToPolicyOptions, IsAbsoluteFn} from '../types.js'
  * @import {LavaMoatPolicy, LavaMoatPolicyDebug} from 'lavamoat-core'
  * @import {SetFieldType} from 'type-fest'
@@ -190,7 +190,7 @@ export const generatePolicy = async (
     const debugPolicy = await generate(entrypoint, {
       ...generateOpts,
       readPowers,
-      trustRoot: trustRoot,
+      trustRoot,
       debug: true,
     })
     await writePolicy(policyDebugPath, debugPolicy, { fs: writableFs })
@@ -207,7 +207,7 @@ export const generatePolicy = async (
     log.info(`Generating LavaMoat policy from ${niceEntrypointPath}`)
     policy = await generate(entrypoint, {
       ...generateOpts,
-      trustRoot: trustRoot,
+      trustRoot,
       readPowers,
     })
   }

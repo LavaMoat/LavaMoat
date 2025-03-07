@@ -11,7 +11,7 @@ import { fileURLToPath } from 'node:url'
 
 /**
  * @import {PathLike} from 'node:fs'
- * @import {WithFs} from './internal.js'
+ * @import {WithFs} from './types.js'
  */
 
 /**
