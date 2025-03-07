@@ -1,19 +1,13 @@
-import { RequireAtLeastOne } from 'type-fest'
 import { LavamoatModuleRecord } from '../moduleRecord'
 
 /**
- * Schema for LavaMoat policy files
- */
-export type LavaMoatPolicy<T extends Resources = Resources> = RequireAtLeastOne<
-  PartialLavaMoatPolicy<T>,
-  'resources' | 'resolutions'
->
-
-/**
  * Schema for LavaMoat policy override files
+ *
+ * Alias of {@link LavaMoatPolicy}
+ *
+ * @deprecated Use {@link LavaMoatPolicy} instead
  */
-export type LavaMoatPolicyOverrides<T extends Resources = Resources> =
-  PartialLavaMoatPolicy<T>
+export type LavaMoatPolicyOverrides = LavaMoatPolicy
 
 /**
  * Schema for LavaMoat "debug" policy files
@@ -24,11 +18,26 @@ export type LavaMoatPolicyDebug<T extends Resources = Resources> =
   }
 
 /**
- * Alias of {@link LavaMoatPolicyOverrides}
+ * Schema for LavaMoat policy files
  */
-export interface PartialLavaMoatPolicy<T extends Resources = Resources> {
-  resources?: T
+export interface LavaMoatPolicy<T extends Resources = Resources> {
+  /**
+   * Resource policy for all packages in the application
+   */
+  resources: T
+
+  /**
+   * Module resolution mapping
+   *
+   * @deprecated Resolutions are better handled by package managers. A future
+   *   version will remove support for this field.
+   */
   resolutions?: Resolutions
+
+  /**
+   * If this is set, then the root package is considered untrusted and will have
+   * a matching policy in {@link LavaMoatPolicy.resources}
+   */
   root?: RootPolicy<T>
 }
 
