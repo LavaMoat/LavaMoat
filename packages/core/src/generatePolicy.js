@@ -199,15 +199,26 @@ function createModuleInspector(opts) {
      * @type {AST}
      * @todo - Put this in `LavamoatModuleRecord` instead
      */
-    const ast =
-      moduleRecord.ast ||
-      parse(/** @type {string} */ (moduleRecord.content), {
-        // esm support
-        sourceType: 'unambiguous',
-        // someone must have been doing this
-        allowReturnOutsideFunction: true,
-        errorRecovery: true,
-      })
+    let ast
+    try {
+      ast =
+        moduleRecord.ast ||
+        parse(/** @type {string} */ (moduleRecord.content), {
+          // esm support
+          sourceType: 'unambiguous',
+          // someone must have been doing this
+          allowReturnOutsideFunction: true,
+          errorRecovery: true,
+        })
+    } catch (err) {
+      if (fileExtension === '') {
+        throw new Error(
+          `LavaMoat - failed to parse extensionless file of unknown format: ${moduleRecord.file}`,
+          { cause: err }
+        )
+      }
+      throw err
+    }
     if (includeDebugInfo && isParsedAST(ast) && ast.errors?.length) {
       moduleDebug.parseErrors = ast.errors
     }
