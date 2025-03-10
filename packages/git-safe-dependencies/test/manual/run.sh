@@ -1,20 +1,22 @@
 #!/bin/bash
 
-time node ../../src/cli.js --projectRoot=./npm
+node ../../src/cli.js --projectRoot=./npm
 echo "_________________________________________________________ exit" $?
-time node ../../src/cli.js --projectRoot=./npm-workspaces
+node ../../src/cli.js --projectRoot=./npm-workspaces
 echo "_________________________________________________________ exit" $?
-time node ../../src/cli.js --projectRoot=./npm-realistic
+node ../../src/cli.js --projectRoot=./npm-realistic
 echo "_________________________________________________________ exit" $?
-time node ../../src/cli.js --projectRoot=./yarn-berry
+node ../../src/cli.js --projectRoot=./yarn-berry
 echo "_________________________________________________________ exit" $?
-time node ../../src/cli.js --projectRoot=./yarn-berry-realistic
+node ../../src/cli.js --projectRoot=./yarn-berry-realistic
 echo "_________________________________________________________ exit" $?
-time node ../../src/cli.js --projectRoot=./yarn-classic
+node ../../src/cli.js --projectRoot=./yarn-classic
 echo "_________________________________________________________ exit" $?
-time node ../../src/cli.js --projectRoot=./yarn-classic-nopackage
+node ../../src/cli.js --projectRoot=./yarn-classic-nopackage
 echo "_________________________________________________________ exit" $?
-time node ../../src/cli.js --projectRoot=./yarn-classic-realistic
+node ../../src/cli.js --projectRoot=./yarn-classic-realistic
 echo "_________________________________________________________ exit" $?
-time node ../../src/cli.js --projectRoot=./yarn-classic-realistic --ignore=./yarn-classic-realistic/yarn.lock.ignore.json
+node ../../src/cli.js --projectRoot=./yarn-classic-realistic --ignore=./yarn-classic-realistic/yarn.lock.ignore.json
+echo "_________________________________________________________ exit" $?
+node ../../src/cli.js --projectRoot=./yarn-mmm
 echo "_________________________________________________________ exit" $?
