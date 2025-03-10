@@ -18,7 +18,7 @@ const lookUp = (needle, haystack) => {
     // When using the resolve-related hooks for finding out paths we'd get paths not included in the bundle trigger this case. Now it should not happen unless policy is incomplete.
     // This needs more observation/investigation
     console.trace(`Cannot find a match for ${needle} in policy`)
-    console.log(needle, haystack);
+    console.log(needle, haystack)
   }
   return value
 }
@@ -52,7 +52,7 @@ const crossReference = (neededIds, policyIds) => {
  * @property {string} root
  * @property {(string | number)[]} unenforceableModuleIds
  * @property {Record<string | number, string>} externals
- * @property {Record<string | number, string>} contextModuleIds
+ * @property {(string | number)[]} contextModuleIds
  * @property {[string, (string | number)[]][]} identifiersForModuleIds
  * @property {(path: string) => string | undefined} pathToResourceId
  * @property {(id: string) => string} policyIdentifierToResourceId
@@ -65,7 +65,7 @@ const crossReference = (neededIds, policyIds) => {
  * @param {import('lavamoat-core').LavaMoatPolicy} options.policy
  * @param {import('@lavamoat/aa').CanonicalNameMap} options.canonicalNameMap
  * @param {(string | number)[]} options.unenforceableModuleIds
- * @param {Array<{moduleId:string|number, context:string}>} options.contextModules
+ * @param {{ moduleId: string | number; context: string }[]} options.contextModules
  * @param {Record<string | number, string>} options.externals
  * @param {boolean | undefined} options.readableResourceIds
  * @returns {IdentifierLookup}
@@ -93,12 +93,15 @@ exports.generateIdentifierLookup = ({
         }
       }
     }
-    for( const c of contextModules) {
-      const resourceId = getPackageNameForModulePath(canonicalNameMap, c.context)
-      if(!mapping[c.context]) {
+    for (const c of contextModules) {
+      const resourceId = getPackageNameForModulePath(
+        canonicalNameMap,
+        c.context
+      )
+      if (!mapping[c.context]) {
         mapping[c.context] = {
           aa: resourceId,
-          moduleId: c.moduleId
+          moduleId: c.moduleId,
         }
       }
     }
@@ -160,17 +163,13 @@ exports.generateIdentifierLookup = ({
       ),
   })
 
-  
-  // const contextModuleIds = Object.fromEntries(contextModules.map(({ moduleId, context }) => {
-  //   const pathInfo = lookUp(context, pathLookup)
-  //   const resourceId = pathInfo ? translate(pathInfo.aa) : ''
-  //   return [moduleId, resourceId]
-  // }))
+  const contextModuleIds = contextModules.map(({ moduleId }) => moduleId)
 
   return {
     root: translate(ROOT_IDENTIFIER),
     unenforceableModuleIds,
     externals,
+    contextModuleIds,
     identifiersForModuleIds,
     pathToResourceId: (path) => {
       const pathInfo = lookUp(path, pathLookup)

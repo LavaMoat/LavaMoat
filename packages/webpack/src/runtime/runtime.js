@@ -75,6 +75,20 @@ const stricterScopeTerminator = freeze(
   )
 )
 
+/**
+ * @param {Error} error
+ * @param {boolean} shouldDefer
+ * @returns {() => () => never}
+ */
+const throwOrDefer = (error, shouldDefer) => {
+  if (shouldDefer) {
+    return () => {
+      throw error
+    }
+  }
+  throw error
+}
+
 console.error(' LAVAMOAT.ctxm', LAVAMOAT.ctxm)
 /**
  * Enforces the policy for resource imports.
@@ -100,21 +114,7 @@ const enforcePolicy = (specifier, referrerResourceId, wrappedRequire) => {
   ) {
     return wrappedRequire()
   }
-  // if (LAVAMOAT.ctxm[specifier]) {
-  //   console.error('ctxm', specifier,LAVAMOAT.ctxm[specifier])
 
-  //   // TODO: this approach will not work for allowing resources present in the policy, because we're missing context to look up the specifier. A rewrite of the context module internal implementation will be necessary. Unless we can collect the canonicalName of the package that context module is wrapping and enforce that
-
-  //   // wrappedRequire is expected to have the specifier bound to it.
-  //   const ctxModuleRequire = wrappedRequire().bind(null, specifier)
-  //   return (actualSpecifier) => {
-  //     return enforcePolicy(
-  //       actualSpecifier,
-  //       referrerResourceId,
-  //       ctxModuleRequire
-  //     )
-  //   }
-  // }
   const referrerPolicy = LAVAMOAT.policy.resources[referrerResourceId] || {}
   if (referrerPolicy.builtin && LAVAMOAT.externals[specifier]) {
     const builtinName = LAVAMOAT.externals[specifier]
@@ -138,8 +138,11 @@ const enforcePolicy = (specifier, referrerResourceId, wrappedRequire) => {
   }
   const requestedResourceId = findResourceId(specifier)
   if (!requestedResourceId) {
-    throw Error(
-      `Requested specifier ${specifier} is not allowed as a builtin and not a known dependency of ${referrerResourceId}. Regenerate policy or add it to policy-override.json.`
+    return throwOrDefer(
+      Error(
+        `Requested specifier ${specifier} is not allowed as a builtin and not a known dependency of ${referrerResourceId}. Regenerate policy or add it to policy-override.json.`
+      ),
+      LAVAMOAT.ctxm[specifier]
     )
   }
   // allow imports internal to the package
@@ -207,7 +210,7 @@ const installGlobalsForPolicy = (resourceId, packageCompartmentGlobal) => {
 const compartmentMap = new Map()
 /**
  * Finds the resource ID for a given module ID.
- * 
+ *
  * @param {string} moduleId
  * @returns {string | undefined}
  */
@@ -284,8 +287,10 @@ const lavamoatRuntimeWrapper = (resourceId, runtimeKit) => {
     // WIP: wrap what .e uses for loading chunks with policy to allow known chunks only?
     policyRequire.e = (chunkId) => {
       // Chunk resolution at runtime may be a lookup table or a string concatenation. In the latter case it can be fooled into loading any file from under publicPath.
-      if(!LAVAMOAT.kch.includes(chunkId)) {
-        throw Error(`Attempt to load a chunk that was not known at compile time: ${chunkId} from ${resourceId}`)
+      if (!LAVAMOAT.kch.includes(chunkId)) {
+        throw Error(
+          `Attempt to load a chunk that was not known at compile time: ${chunkId} from ${resourceId}`
+        )
       }
       console.error({ chunkId, resourceId })
       return __webpack_require__.e(chunkId)
