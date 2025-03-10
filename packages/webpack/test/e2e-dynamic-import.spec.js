@@ -34,6 +34,38 @@ test.before(async (t) => {
           'dynamic-target': true,
         },
       },
+      'dynamic-importer2': {
+        globals: {
+          console: true,
+        },
+        packages: {
+          'dynamic-target': true,
+        },
+      },
+    },
+  }
+  const policy3 = {
+    resources: {
+      ...policy1.resources,
+      'dynamic-target': {
+        globals: {
+          console: true,
+        },
+      },
+      'dynamic-importer': {
+        globals: {
+          console: true,
+        },
+        packages: {
+          'dynamic-target': true,
+        },
+      },
+      'dynamic-importer2': {
+        globals: {
+          console: true,
+        },
+        packages: {},
+      },
     },
   }
 
@@ -45,6 +77,10 @@ test.before(async (t) => {
     generatePolicy: false,
     policy: policy2,
   })
+  const webpackConfig3 = makeConfig({
+    generatePolicy: false,
+    policy: policy3,
+  })
   webpackConfig1.entry = {
     hack: './hack-dynamic.js',
     app1: './dynamic.js',
@@ -54,7 +90,9 @@ test.before(async (t) => {
     app1: './dynamic.js',
     app2: './dynamic-chunk.js',
   }
-  webpackConfig2.mode = 'development'
+  webpackConfig3.entry = {
+    app1: './dynamic.js',
+  }
 
   await t.notThrowsAsync(async () => {
     t.context.build1 = await scaffold(webpackConfig1)
@@ -62,13 +100,20 @@ test.before(async (t) => {
   t.context.bundle1 = t.context.build1.snapshot['/dist/hack.js']
 
   await t.notThrowsAsync(async () => {
-    t.context.build2 = await scaffold(webpackConfig2, { writeFS: true })
+    t.context.build2 = await scaffold(webpackConfig2)
   }, 'Expected the build2 to succeed')
+  await t.notThrowsAsync(async () => {
+    t.context.build3 = await scaffold(webpackConfig3)
+  }, 'Expected the build3 to succeed')
 })
 
-// test('webpack/hack-dynamic - dist shape', (t) => {
-//   t.snapshot(Object.keys(t.context.build1.snapshot))
-// })
+test('webpack/dynamic - dist shape', (t) => {
+  t.snapshot({
+    build1: Object.keys(t.context.build1.snapshot),
+    build2: Object.keys(t.context.build2.snapshot),
+    build3: Object.keys(t.context.build3.snapshot),
+  })
+})
 
 test('webpack/hack-dynamic - bundle1 contains context module entry for the hack import to resolve', (t) => {
   // If this fails and the bundle contains an array of numbers for hack.js instead, it means webpack created a chunk for the dynamic import, which we're trying to avoid because while it'd work seamlessly in the browser, it won't work in our node.js setup.
@@ -93,7 +138,7 @@ test('webpack/hack-dynamic - stealer uses dynamic import with context module to 
   )
 })
 
-test('webpack/dynamic - valid dynamic import capabilities work', async (t) => {
+test('webpack/dynamic - valid dynamic import capabilities work with chunks', async (t) => {
   const logs = []
   const global = {
     ...globalWithDocumentOnWhichDynamicchunkScriptExists(),
@@ -127,13 +172,25 @@ test('webpack/dynamic - valid dynamic import capabilities work through context m
       },
     },
   }
+  t.assert(
+    t.context.build2.snapshot['/dist/dynamicchunk.js'].includes(
+      'dynamic-target'
+    )
+  )
+  t.assert(
+    !t.context.build2.snapshot['/dist/app1.js'].includes(
+      'Dynamic module loaded successfully'
+    )
+  )
+
   const appWithDynamicChunkPreloaded =
-    t.context.build2.snapshot['/dist/app1.js'] +
+    t.context.build2.snapshot['/dist/dynamicchunk.js'] +
     ';;' +
-    t.context.build2.snapshot['/dist/dynamicchunk.js']
+    t.context.build2.snapshot['/dist/app1.js']
+
   runScriptWithSES(appWithDynamicChunkPreloaded, global)
 
-  await new Promise((resolve) => setTimeout(resolve, 0))
+  await new Promise((resolve) => setTimeout(resolve, 0)) // there's an async gap in chunk loading even if chunk is already there
   t.assert(logs.includes('Dynamic module loaded successfully'))
 })
 
@@ -143,22 +200,13 @@ test('webpack/dynamic - policy enforcement on dependency from chunk', async (t) 
   const global = globalWithDocumentOnWhichDynamicchunkScriptExists()
 
   const appWithDynamicChunkPreloaded =
-    buildWithStricterPolicy['/dist/app2.js'] +
+    buildWithStricterPolicy['/dist/dynamicchunk.js'] +
     ';;' +
-    buildWithStricterPolicy['/dist/dynamicchunk.js']
+    buildWithStricterPolicy['/dist/app2.js']
 
   await t.throwsAsync(
-    withUnhandledRejectionTemporarilyDisabled(async () => {
-      let captured = new Promise((_resolve, reject) => {
-        process.on('unhandledRejection', (error) => {
-          console.error('unhandledRejection', error.message)
-          reject(error)
-        })
-      })
-
+    withUnhandledRejectionCaptured(() => {
       runScriptWithSES(appWithDynamicChunkPreloaded, global)
-
-      return captured
     }),
     {
       message:
@@ -171,26 +219,35 @@ test('webpack/dynamic - policy enforcement on dependency from context module', a
 
   const global = globalWithDocumentOnWhichDynamicchunkScriptExists()
   const appWithDynamicChunkPreloaded =
-    buildWithStricterPolicy['/dist/app1.js'] +
+    buildWithStricterPolicy['/dist/dynamicchunk.js'] +
     ';;' +
-    buildWithStricterPolicy['/dist/dynamicchunk.js']
+    buildWithStricterPolicy['/dist/app1.js']
 
   await t.throwsAsync(
-    withUnhandledRejectionTemporarilyDisabled(async () => {
-      let captured = new Promise((_resolve, reject) => {
-        process.on('unhandledRejection', (error) => {
-          console.error('unhandledRejection', error.message)
-          reject(error)
-        })
-      })
-
+    withUnhandledRejectionCaptured(() => {
       runScriptWithSES(appWithDynamicChunkPreloaded, global)
-
-      return captured
     }),
     {
       message:
         /Policy does not allow importing dynamic-target from dynamic-importer/,
+    }
+  )
+})
+test('webpack/dynamic - policy enforcement on dependency from context module when allowed elsewhere', async (t) => {
+  const buildWithSelectivePolicy = t.context.build3.snapshot
+
+  const appWithDynamicChunkPreloaded =
+    buildWithSelectivePolicy['/dist/dynamicchunk0.js'] +
+    ';;' +
+    buildWithSelectivePolicy['/dist/app1.js']
+
+  await t.throwsAsync(
+    withUnhandledRejectionCaptured(() => {
+      runScriptWithSES(appWithDynamicChunkPreloaded)
+    }),
+    {
+      message:
+        /Policy does not allow importing dynamic-target from dynamic-importer2/,
     }
   )
 })
@@ -219,28 +276,41 @@ function globalWithDocumentOnWhichDynamicchunkScriptExists() {
   }
 }
 
+const rejectionTestsQueueHandle = { promise: Promise.resolve() }
 /**
  * Disables the unhandledRejection listener temporarily to avoid AVA's global
  * listener from catching the rejection.
  *
  * I'll regret this.
  *
+ * I had to avoid overlapping execution from different tests
+ *
  * @param {async function} asyncFn
  */
-function withUnhandledRejectionTemporarilyDisabled(asyncFn) {
-  return async () => {
+function withUnhandledRejectionCaptured(asyncFn) {
+  const next = rejectionTestsQueueHandle.promise.then(() => {
     const originalHandlers = process.listeners('unhandledRejection')
     process.removeAllListeners('unhandledRejection')
-    try {
-      return await asyncFn()
-    } finally {
-      console.error(2)
-
+    const repair = () => {
       process.removeAllListeners('unhandledRejection')
-
       originalHandlers.forEach((handler) => {
         process.on('unhandledRejection', handler)
       })
     }
-  }
+    return new Promise((resolve, reject) => {
+      process.on('unhandledRejection', (error) => {
+        console.error('unhandledRejection', error.message)
+        repair()
+        reject(error)
+      })
+      setTimeout(() => {
+        repair()
+        resolve('Timed out without unhandledRejection.')
+      }, 5000)
+
+      asyncFn()
+    })
+  })
+  rejectionTestsQueueHandle.promise = next.catch(() => {}) // don't pollute current test with errors from previous
+  return next
 }
