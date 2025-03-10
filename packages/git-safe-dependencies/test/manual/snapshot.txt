@@ -1,0 +1,411 @@
+[git-safe] Validating: package.json and lockfile at /home/naugtur/repo/LavaMoat/packages/git-safe-dependencies/test/manual/npm
+[git-safe] Validation failed:
+ fork-branch:
+  [ValidateGitUrl] There's a mismatch between the specified git hash and URL to be fetched.
+    specifier: 1.0.0-b1ca696214ae2a10c8969640736a90257137a327
+    url: git+ssh://git@github.com/naugtur/not-really-a-package.git#107f4adf7fa588b3c6cd6487502bb8e8d144e5e0
+        // problem id: fork-branch:cd5192fd
+
+ fork-branch:
+  [packageJson] GIT URLs must use a commit hash.
+    expected: naugtur/not-really-a-package#COMMITHASH_40_CHARACTERS_LONG
+    actual: naugtur/not-really-a-package#testbranch
+        // problem id: fork-branch:6ac069d9
+
+ fork-full-hash:
+  [ValidateGitUrl] The specified commit hash for fork-full-hash does not exist in the repository. It might exist on a fork, but you should not trust that.
+  specifier: 1.0.1-2b03769d6b176d711917ffef46d83a26f273a5e2
+  url: git+ssh://git@github.com/naugtur/not-really-a-package.git#05ba7b1263a4ba5b98eaf5c103432297962c4719
+      // problem id: fork-full-hash:541066f6
+
+ fork-longer-hash:
+  [ValidateGitUrl] There's a mismatch between the specified git hash and URL to be fetched.
+    specifier: 1.0.1-145c1ad78f18adeec07f38057deadf76e466313d
+    url: git+ssh://git@github.com/naugtur/not-really-a-package.git#05ba7b1263a4ba5b98eaf5c103432297962c4719
+        // problem id: fork-longer-hash:ea34e0b9
+
+ fork-longer-hash:
+  [packageJson] GIT URLs in package.json dependencies must use a full-length commit hash.
+    expected: naugtur/not-really-a-package#COMMITHASH_40_CHARACTERS_LONG
+    actual: naugtur/not-really-a-package#05ba7b1263a4ba5b98
+        // problem id: fork-longer-hash:2561615b
+
+ fork-merge-hash:
+  [ValidateGitUrl] The specified commit hash for fork-merge-hash does not exist in the repository. It might exist on a fork, but you should not trust that.
+  specifier: 1.0.1-a9841ef9a1268a3f489f916eda24046aead52a30
+  url: git+ssh://git@github.com/naugtur/not-really-a-package.git#2a0d442b8a68a802b72f6a4a8240d2ae8ef950aa
+      // problem id: fork-merge-hash:240c870d
+
+ fork-short-hash:
+  [ValidateGitUrl] There's a mismatch between the specified git hash and URL to be fetched.
+    specifier: 1.0.1-145c1ad78f18adeec07f38057deadf76e466313d
+    url: git+ssh://git@github.com/naugtur/not-really-a-package.git#05ba7b1263a4ba5b98eaf5c103432297962c4719
+        // problem id: fork-short-hash:ea34e0b9
+
+ fork-short-hash:
+  [packageJson] GIT URLs in package.json dependencies must use a full-length commit hash.
+    expected: naugtur/not-really-a-package#COMMITHASH_40_CHARACTERS_LONG
+    actual: naugtur/not-really-a-package#05ba7b1
+        // problem id: fork-short-hash:bacaa7ef
+
+ git-http:
+  [ValidateGitUrl] There's a mismatch between the specified git hash and URL to be fetched.
+    specifier: 1.0.0-362b77e18229185fb0b86ff4fbe2c9ff7b7c8309
+    url: git+http://github.com/naugtur/not-really-a-package#107f4adf7fa588b3c6cd6487502bb8e8d144e5e0
+        // problem id: git-http:9163594c
+
+ git-http:
+  [packageJson] GIT URLs must use HTTPS.
+    expected: git+https://github.com/naugtur/not-really-a-package
+    actual: git+http://github.com/naugtur/not-really-a-package
+        // problem id: git-http:a3f8fd02
+
+ git-http@1.0.0-362b77e18229185fb0b86ff4fbe2c9ff7b7c8309:
+  [ValidateProtocol] detected invalid scheme(s) for package: git-http@1.0.0-362b77e18229185fb0b86ff4fbe2c9ff7b7c8309
+    expected: npm:,https:,git+https:,git+ssh:,git:,patch:,workspace:
+    actual: git+http:
+    // problem id: git-http@1.0.0-362b77e18229185fb0b86ff4fbe2c9ff7b7c8309:4178c36b
+
+ git-https-hash-short:
+  [ValidateGitUrl] There's a mismatch between the specified git hash and URL to be fetched.
+    specifier: 1.0.0-b1ca696214ae2a10c8969640736a90257137a327
+    url: git+ssh://git@github.com/naugtur/not-really-a-package.git#107f4adf7fa588b3c6cd6487502bb8e8d144e5e0
+        // problem id: git-https-hash-short:cd5192fd
+
+ git-https-hash-short:
+  [packageJson] GIT URLs in package.json dependencies must use a full-length commit hash.
+    expected: git+https://github.com/naugtur/not-really-a-package#COMMITHASH_40_CHARACTERS_LONG
+    actual: git+https://github.com/naugtur/not-really-a-package#107f4ad
+        // problem id: git-https-hash-short:a4e09fd2
+
+ git-https:
+  [ValidateGitUrl] There's a mismatch between the specified git hash and URL to be fetched.
+    specifier: 1.0.0-b1ca696214ae2a10c8969640736a90257137a327
+    url: git+ssh://git@github.com/naugtur/not-really-a-package.git#107f4adf7fa588b3c6cd6487502bb8e8d144e5e0
+        // problem id: git-https:cd5192fd
+
+ git-https:
+  [packageJson] GIT URLs must use a commit hash.
+    expected: git+https://github.com/naugtur/not-really-a-package#COMMITHASH_40_CHARACTERS_LONG
+    actual: git+https://github.com/naugtur/not-really-a-package
+        // problem id: git-https:5ed36998
+
+_________________________________________________________ exit 1
+[git-safe] Validating: package.json and lockfile at /home/naugtur/repo/LavaMoat/packages/git-safe-dependencies/test/manual/npm-workspaces
+[git-safe] Validation failed:
+ fork-branch:
+  [ValidateGitUrl] There's a mismatch between the specified git hash and URL to be fetched.
+    specifier: 1.0.0-b1ca696214ae2a10c8969640736a90257137a327
+    url: git+ssh://git@github.com/naugtur/not-really-a-package.git#107f4adf7fa588b3c6cd6487502bb8e8d144e5e0
+        // problem id: fork-branch:cd5192fd
+
+ fork-branch:
+  [packageJson] GIT URLs must use a commit hash.
+    expected: naugtur/not-really-a-package#COMMITHASH_40_CHARACTERS_LONG
+    actual: naugtur/not-really-a-package#testbranch
+        // problem id: fork-branch:6ac069d9
+
+ fork-full-hash:
+  [ValidateGitUrl] The specified commit hash for fork-full-hash does not exist in the repository. It might exist on a fork, but you should not trust that.
+  specifier: 1.0.1-2b03769d6b176d711917ffef46d83a26f273a5e2
+  url: git+ssh://git@github.com/naugtur/not-really-a-package.git#05ba7b1263a4ba5b98eaf5c103432297962c4719
+      // problem id: fork-full-hash:541066f6
+
+ fork-longer-hash:
+  [ValidateGitUrl] There's a mismatch between the specified git hash and URL to be fetched.
+    specifier: 1.0.1-145c1ad78f18adeec07f38057deadf76e466313d
+    url: git+ssh://git@github.com/naugtur/not-really-a-package.git#05ba7b1263a4ba5b98eaf5c103432297962c4719
+        // problem id: fork-longer-hash:ea34e0b9
+
+ fork-longer-hash:
+  [packageJson] GIT URLs in package.json dependencies must use a full-length commit hash.
+    expected: naugtur/not-really-a-package#COMMITHASH_40_CHARACTERS_LONG
+    actual: naugtur/not-really-a-package#05ba7b1263a4ba5b98
+        // problem id: fork-longer-hash:2561615b
+
+ fork-merge-hash:
+  [ValidateGitUrl] The specified commit hash for fork-merge-hash does not exist in the repository. It might exist on a fork, but you should not trust that.
+  specifier: 1.0.1-a9841ef9a1268a3f489f916eda24046aead52a30
+  url: git+ssh://git@github.com/naugtur/not-really-a-package.git#2a0d442b8a68a802b72f6a4a8240d2ae8ef950aa
+      // problem id: fork-merge-hash:240c870d
+
+ fork-short-hash:
+  [ValidateGitUrl] There's a mismatch between the specified git hash and URL to be fetched.
+    specifier: 1.0.1-145c1ad78f18adeec07f38057deadf76e466313d
+    url: git+ssh://git@github.com/naugtur/not-really-a-package.git#05ba7b1263a4ba5b98eaf5c103432297962c4719
+        // problem id: fork-short-hash:ea34e0b9
+
+ fork-short-hash:
+  [packageJson] GIT URLs in package.json dependencies must use a full-length commit hash.
+    expected: naugtur/not-really-a-package#COMMITHASH_40_CHARACTERS_LONG
+    actual: naugtur/not-really-a-package#05ba7b1
+        // problem id: fork-short-hash:bacaa7ef
+
+ git-http:
+  [ValidateGitUrl] There's a mismatch between the specified git hash and URL to be fetched.
+    specifier: 1.0.0-362b77e18229185fb0b86ff4fbe2c9ff7b7c8309
+    url: git+http://github.com/naugtur/not-really-a-package#107f4adf7fa588b3c6cd6487502bb8e8d144e5e0
+        // problem id: git-http:9163594c
+
+ git-http:
+  [packageJson] GIT URLs must use HTTPS.
+    expected: git+https://github.com/naugtur/not-really-a-package
+    actual: git+http://github.com/naugtur/not-really-a-package
+        // problem id: git-http:a3f8fd02
+
+ git-http@1.0.0-362b77e18229185fb0b86ff4fbe2c9ff7b7c8309:
+  [ValidateProtocol] detected invalid scheme(s) for package: git-http@1.0.0-362b77e18229185fb0b86ff4fbe2c9ff7b7c8309
+    expected: npm:,https:,git+https:,git+ssh:,git:,patch:,workspace:
+    actual: git+http:
+    // problem id: git-http@1.0.0-362b77e18229185fb0b86ff4fbe2c9ff7b7c8309:4178c36b
+
+ git-https-hash-short:
+  [ValidateGitUrl] There's a mismatch between the specified git hash and URL to be fetched.
+    specifier: 1.0.0-b1ca696214ae2a10c8969640736a90257137a327
+    url: git+ssh://git@github.com/naugtur/not-really-a-package.git#107f4adf7fa588b3c6cd6487502bb8e8d144e5e0
+        // problem id: git-https-hash-short:cd5192fd
+
+ git-https-hash-short:
+  [packageJson] GIT URLs in package.json dependencies must use a full-length commit hash.
+    expected: git+https://github.com/naugtur/not-really-a-package#COMMITHASH_40_CHARACTERS_LONG
+    actual: git+https://github.com/naugtur/not-really-a-package#107f4ad
+        // problem id: git-https-hash-short:a4e09fd2
+
+ git-https:
+  [ValidateGitUrl] There's a mismatch between the specified git hash and URL to be fetched.
+    specifier: 1.0.0-b1ca696214ae2a10c8969640736a90257137a327
+    url: git+ssh://git@github.com/naugtur/not-really-a-package.git#107f4adf7fa588b3c6cd6487502bb8e8d144e5e0
+        // problem id: git-https:cd5192fd
+
+ git-https:
+  [packageJson] GIT URLs must use a commit hash.
+    expected: git+https://github.com/naugtur/not-really-a-package#COMMITHASH_40_CHARACTERS_LONG
+    actual: git+https://github.com/naugtur/not-really-a-package
+        // problem id: git-https:5ed36998
+
+_________________________________________________________ exit 1
+[git-safe] Validating: package.json and lockfile at /home/naugtur/repo/LavaMoat/packages/git-safe-dependencies/test/manual/npm-realistic
+[git-safe] Validation successful
+_________________________________________________________ exit 0
+[git-safe] Validating: package.json and lockfile at /home/naugtur/repo/LavaMoat/packages/git-safe-dependencies/test/manual/yarn-berry
+[git-safe] Validation failed:
+ fork-branch:
+  [ValidateGitUrl] There's a mismatch between the specified git hash and URL to be fetched.
+    specifier: naugtur/not-really-a-package#testbranch
+    url: https://github.com/naugtur/not-really-a-package.git#commit=107f4adf7fa588b3c6cd6487502bb8e8d144e5e0
+        // problem id: fork-branch:72d5ad9e
+
+ fork-branch:
+  [packageJson] GIT URLs must use a commit hash.
+    expected: naugtur/not-really-a-package#COMMITHASH_40_CHARACTERS_LONG
+    actual: naugtur/not-really-a-package#testbranch
+        // problem id: fork-branch:6ac069d9
+
+ fork-full-hash:
+  [ValidateGitUrl] There's a mismatch between the specified git hash and URL to be fetched.
+    specifier: naugtur/not-really-a-package#05ba7b1263a4ba5b98eaf5c103432297962c4719
+    url: https://github.com/naugtur/not-really-a-package.git#commit=05ba7b1263a4ba5b98eaf5c103432297962c4719
+        // problem id: fork-full-hash:8d865152
+
+ fork-merge-hash:
+  [ValidateGitUrl] There's a mismatch between the specified git hash and URL to be fetched.
+    specifier: naugtur/not-really-a-package#2a0d442b8a68a802b72f6a4a8240d2ae8ef950aa
+    url: https://github.com/naugtur/not-really-a-package.git#commit=2a0d442b8a68a802b72f6a4a8240d2ae8ef950aa
+        // problem id: fork-merge-hash:0f48a70a
+
+ git-http:
+  [ValidateGitUrl] There's a mismatch between the specified git hash and URL to be fetched.
+    specifier: git+http://github.com/naugtur/not-really-a-package
+    url: git+http://github.com/naugtur/not-really-a-package#commit=107f4adf7fa588b3c6cd6487502bb8e8d144e5e0
+        // problem id: git-http:e5621f5d
+
+ git-http:
+  [packageJson] GIT URLs must use HTTPS.
+    expected: git+https://github.com/naugtur/not-really-a-package
+    actual: git+http://github.com/naugtur/not-really-a-package
+        // problem id: git-http:a3f8fd02
+
+ git-http@git+http://github.com/naugtur/not-really-a-package:
+  [ValidateProtocol] detected invalid scheme(s) for package: git-http@git+http://github.com/naugtur/not-really-a-package
+    expected: npm:,https:,git+https:,git+ssh:,git:,patch:,workspace:
+    actual: git+http:
+    // problem id: git-http@git+http://github.com/naugtur/not-really-a-package:43a0a9c8
+
+ git-https:
+  [ValidateGitUrl] There's a mismatch between the specified git hash and URL to be fetched.
+    specifier: git+https://github.com/naugtur/not-really-a-package
+    url: https://github.com/naugtur/not-really-a-package.git#commit=107f4adf7fa588b3c6cd6487502bb8e8d144e5e0
+        // problem id: git-https:9e03a547
+
+ git-https:
+  [packageJson] GIT URLs must use a commit hash.
+    expected: git+https://github.com/naugtur/not-really-a-package#COMMITHASH_40_CHARACTERS_LONG
+    actual: git+https://github.com/naugtur/not-really-a-package
+        // problem id: git-https:5ed36998
+
+_________________________________________________________ exit 1
+[git-safe] Validating: package.json and lockfile at /home/naugtur/repo/LavaMoat/packages/git-safe-dependencies/test/manual/yarn-berry-realistic
+[git-safe] Validation successful
+_________________________________________________________ exit 0
+[git-safe] Validating: package.json and lockfile at /home/naugtur/repo/LavaMoat/packages/git-safe-dependencies/test/manual/yarn-classic
+[git-safe] Validation failed:
+ fork-branch:
+  [ValidateGitUrl] There's a mismatch between the specified git hash and URL to be fetched.
+    specifier: naugtur/not-really-a-package#testbranch
+    url: https://codeload.github.com/naugtur/not-really-a-package/tar.gz/107f4adf7fa588b3c6cd6487502bb8e8d144e5e0
+        // problem id: fork-branch:ac40c554
+
+ fork-branch:
+  [packageJson] GIT URLs must use a commit hash.
+    expected: naugtur/not-really-a-package#COMMITHASH_40_CHARACTERS_LONG
+    actual: naugtur/not-really-a-package#testbranch
+        // problem id: fork-branch:6ac069d9
+
+ fork-full-hash:
+  [ValidateGitUrl] The specified commit hash for fork-full-hash does not exist in the repository. It might exist on a fork, but you should not trust that.
+  specifier: naugtur/not-really-a-package#05ba7b1263a4ba5b98eaf5c103432297962c4719
+  url: https://codeload.github.com/naugtur/not-really-a-package/tar.gz/05ba7b1263a4ba5b98eaf5c103432297962c4719
+      // problem id: fork-full-hash:ffc32a3c
+
+ fork-longer-hash:
+  [ValidateGitUrl] There's a mismatch between the specified git hash and URL to be fetched.
+    specifier: naugtur/not-really-a-package#05ba7b1263a4ba5b98
+    url: https://codeload.github.com/naugtur/not-really-a-package/tar.gz/05ba7b1263a4ba5b98eaf5c103432297962c4719
+        // problem id: fork-longer-hash:ddcbb59c
+
+ fork-longer-hash:
+  [packageJson] GIT URLs in package.json dependencies must use a full-length commit hash.
+    expected: naugtur/not-really-a-package#COMMITHASH_40_CHARACTERS_LONG
+    actual: naugtur/not-really-a-package#05ba7b1263a4ba5b98
+        // problem id: fork-longer-hash:2561615b
+
+ fork-merge-hash:
+  [ValidateGitUrl] The specified commit hash for fork-merge-hash does not exist in the repository. It might exist on a fork, but you should not trust that.
+  specifier: naugtur/not-really-a-package#2a0d442b8a68a802b72f6a4a8240d2ae8ef950aa
+  url: https://codeload.github.com/naugtur/not-really-a-package/tar.gz/2a0d442b8a68a802b72f6a4a8240d2ae8ef950aa
+      // problem id: fork-merge-hash:d393bd08
+
+ fork-short-hash:
+  [ValidateGitUrl] There's a mismatch between the specified git hash and URL to be fetched.
+    specifier: naugtur/not-really-a-package#05ba7b1
+    url: https://codeload.github.com/naugtur/not-really-a-package/tar.gz/05ba7b1263a4ba5b98eaf5c103432297962c4719
+        // problem id: fork-short-hash:dfcf0900
+
+ fork-short-hash:
+  [packageJson] GIT URLs in package.json dependencies must use a full-length commit hash.
+    expected: naugtur/not-really-a-package#COMMITHASH_40_CHARACTERS_LONG
+    actual: naugtur/not-really-a-package#05ba7b1
+        // problem id: fork-short-hash:bacaa7ef
+
+ fork-short-head:
+  [ValidateGitUrl] The specified commit hash for fork-short-head does not exist in the repository. It might exist on a fork, but you should not trust that.
+  specifier: naugtur/not-really-a-package#1/head
+  url: https://codeload.github.com/naugtur/not-really-a-package/tar.gz/05ba7b1263a4ba5b98eaf5c103432297962c4719
+      // problem id: fork-short-head:e1be28b4
+
+ fork-short-merge:
+  [ValidateGitUrl] The specified commit hash for fork-short-merge does not exist in the repository. It might exist on a fork, but you should not trust that.
+  specifier: naugtur/not-really-a-package#1/merge
+  url: https://codeload.github.com/naugtur/not-really-a-package/tar.gz/2a0d442b8a68a802b72f6a4a8240d2ae8ef950aa
+      // problem id: fork-short-merge:cf613cb8
+
+ git-http:
+  [ValidateGitUrl] There's a mismatch between the specified git hash and URL to be fetched.
+    specifier: git+http://github.com/naugtur/not-really-a-package
+    url: git+http://github.com/naugtur/not-really-a-package#107f4adf7fa588b3c6cd6487502bb8e8d144e5e0
+        // problem id: git-http:9be68a55
+
+ git-http:
+  [packageJson] GIT URLs must use HTTPS.
+    expected: git+https://github.com/naugtur/not-really-a-package
+    actual: git+http://github.com/naugtur/not-really-a-package
+        // problem id: git-http:a3f8fd02
+
+ git-http@git+http://github.com/naugtur/not-really-a-package:
+  [ValidateProtocol] detected invalid scheme(s) for package: git-http@git+http://github.com/naugtur/not-really-a-package
+    expected: npm:,https:,git+https:,git+ssh:,git:,patch:,workspace:
+    actual: git+http:
+    // problem id: git-http@git+http://github.com/naugtur/not-really-a-package:43a0a9c8
+
+ git-https-hash-short:
+  [ValidateGitUrl] There's a mismatch between the specified git hash and URL to be fetched.
+    specifier: git+https://github.com/naugtur/not-really-a-package#107f4ad
+    url: git+https://github.com/naugtur/not-really-a-package#107f4adf7fa588b3c6cd6487502bb8e8d144e5e0
+        // problem id: git-https-hash-short:d9af28bb
+
+ git-https-hash-short:
+  [packageJson] GIT URLs in package.json dependencies must use a full-length commit hash.
+    expected: git+https://github.com/naugtur/not-really-a-package#COMMITHASH_40_CHARACTERS_LONG
+    actual: git+https://github.com/naugtur/not-really-a-package#107f4ad
+        // problem id: git-https-hash-short:a4e09fd2
+
+ git-https:
+  [ValidateGitUrl] There's a mismatch between the specified git hash and URL to be fetched.
+    specifier: git+https://github.com/naugtur/not-really-a-package
+    url: git+https://github.com/naugtur/not-really-a-package#107f4adf7fa588b3c6cd6487502bb8e8d144e5e0
+        // problem id: git-https:95fbd7b9
+
+ git-https:
+  [packageJson] GIT URLs must use a commit hash.
+    expected: git+https://github.com/naugtur/not-really-a-package#COMMITHASH_40_CHARACTERS_LONG
+    actual: git+https://github.com/naugtur/not-really-a-package
+        // problem id: git-https:5ed36998
+
+_________________________________________________________ exit 1
+[git-safe] Validating: package.json and lockfile at /home/naugtur/repo/LavaMoat/packages/git-safe-dependencies/test/manual/yarn-classic-nopackage
+[git-safe] Validation failed:
+ fork-full-hash:
+  [ValidateGitUrl] The specified commit hash for fork-full-hash does not exist in the repository. It might exist on a fork, but you should not trust that.
+  specifier: naugtur/not-really-a-package#05ba7b1263a4ba5b98eaf5c103432297962c4719
+  url: https://codeload.github.com/naugtur/not-really-a-package/tar.gz/05ba7b1263a4ba5b98eaf5c103432297962c4719
+      // problem id: fork-full-hash:ffc32a3c
+
+ fork-longer-hash:
+  [ValidateGitUrl] The specified commit hash for fork-longer-hash does not exist in the repository. It might exist on a fork, but you should not trust that.
+  specifier: naugtur/not-really-a-package#05ba7b1263a4ba5b98
+  url: https://codeload.github.com/naugtur/not-really-a-package/tar.gz/05ba7b1263a4ba5b98eaf5c103432297962c4719
+      // problem id: fork-longer-hash:e6c92841
+
+ fork-merge-hash:
+  [ValidateGitUrl] The specified commit hash for fork-merge-hash does not exist in the repository. It might exist on a fork, but you should not trust that.
+  specifier: naugtur/not-really-a-package#2a0d442b8a68a802b72f6a4a8240d2ae8ef950aa
+  url: https://codeload.github.com/naugtur/not-really-a-package/tar.gz/2a0d442b8a68a802b72f6a4a8240d2ae8ef950aa
+      // problem id: fork-merge-hash:d393bd08
+
+ fork-short-hash:
+  [ValidateGitUrl] The specified commit hash for fork-short-hash does not exist in the repository. It might exist on a fork, but you should not trust that.
+  specifier: naugtur/not-really-a-package#05ba7b1
+  url: https://codeload.github.com/naugtur/not-really-a-package/tar.gz/05ba7b1263a4ba5b98eaf5c103432297962c4719
+      // problem id: fork-short-hash:4f5de789
+
+ fork-short-head:
+  [ValidateGitUrl] The specified commit hash for fork-short-head does not exist in the repository. It might exist on a fork, but you should not trust that.
+  specifier: naugtur/not-really-a-package#1/head
+  url: https://codeload.github.com/naugtur/not-really-a-package/tar.gz/05ba7b1263a4ba5b98eaf5c103432297962c4719
+      // problem id: fork-short-head:e1be28b4
+
+ fork-short-merge:
+  [ValidateGitUrl] The specified commit hash for fork-short-merge does not exist in the repository. It might exist on a fork, but you should not trust that.
+  specifier: naugtur/not-really-a-package#1/merge
+  url: https://codeload.github.com/naugtur/not-really-a-package/tar.gz/2a0d442b8a68a802b72f6a4a8240d2ae8ef950aa
+      // problem id: fork-short-merge:cf613cb8
+
+ git-http@git+http://github.com/naugtur/not-really-a-package:
+  [ValidateProtocol] detected invalid scheme(s) for package: git-http@git+http://github.com/naugtur/not-really-a-package
+    expected: npm:,https:,git+https:,git+ssh:,git:,patch:,workspace:
+    actual: git+http:
+    // problem id: git-http@git+http://github.com/naugtur/not-really-a-package:43a0a9c8
+
+ package.json:
+  [packageJson] Project's package.json not found    // problem id: package.json:d4d78e21
+
+_________________________________________________________ exit 1
+[git-safe] Validating: package.json and lockfile at /home/naugtur/repo/LavaMoat/packages/git-safe-dependencies/test/manual/yarn-classic-realistic
+[git-safe] Validation successful
+_________________________________________________________ exit 0
+[git-safe] Validating: package.json and lockfile at /home/naugtur/repo/LavaMoat/packages/git-safe-dependencies/test/manual/yarn-classic-realistic
+[git-safe] Validation successful
+_________________________________________________________ exit 0
+[git-safe] Validating: package.json and lockfile at /home/naugtur/repo/LavaMoat/packages/git-safe-dependencies/test/manual/yarn-mmm
+[git-safe] Validation successful
+_________________________________________________________ exit 0

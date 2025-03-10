@@ -11,7 +11,8 @@ const isUnsafeUrl = (url) =>
 
 const isGitUrl = (url) => gitUrlRegex.test(url)
 const isGHRepoSpecifier = (specifier) =>
-  specifier.startsWith('github:') || specifier.match(/^[^/]+\/[^/]+/)
+  !!(specifier.startsWith('github:') || specifier.match(/^[^/@]+\/[^/]+$/)) &&
+  !specifier.startsWith('npm:')
 
 exports.isCommitHash = (c) => commitRegEx.test(c)
 
@@ -32,6 +33,12 @@ exports.gitInfo = (url) => {
       .replace('/tar.gz/', '.git#')
   }
   const info = gitinfo.fromUrl(url)
+  if (!info) {
+    throw new Error(`Invalid git url: ${url}`)
+  }
+  if (!Object.hasOwn(info, 'committish')) {
+    info.committish = null
+  }
 
   return info
 }
