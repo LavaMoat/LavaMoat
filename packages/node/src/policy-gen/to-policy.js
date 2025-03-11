@@ -121,7 +121,7 @@ const inspectModuleRecords = (
 
   if (perPackageWarnings.size) {
     for (const [packageName, warnings] of perPackageWarnings) {
-      log.warning(
+      log.debug(
         `Package ${hrLabel(packageName)} contains potential SES incompatibilities at the following locations:\n${warnings.join('\n')}`
       )
     }
