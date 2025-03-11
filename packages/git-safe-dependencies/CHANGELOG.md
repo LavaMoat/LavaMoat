@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/LavaMoat/LavaMoat/compare/git-safe-dependencies-v0.2.0...git-safe-dependencies-v0.2.1) (2025-03-11)
+
+
+### Bug Fixes
+
+* **git-safe:** improve git specifier detection and tests ([#1556](https://github.com/LavaMoat/LavaMoat/issues/1556)) ([aa36b50](https://github.com/LavaMoat/LavaMoat/commit/aa36b507fcdc8eda6326bb243a36ae1b7611e6cd))
+
 ## [0.2.0](https://github.com/LavaMoat/LavaMoat/compare/git-safe-dependencies-v0.1.1...git-safe-dependencies-v0.2.0) (2025-01-28)
 
 

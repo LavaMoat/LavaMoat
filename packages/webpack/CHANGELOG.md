@@ -18,6 +18,28 @@
   * dependencies
     * lavamoat-core bumped from ^15.2.0 to ^15.2.1
 
+## [0.9.0-beta.0](https://github.com/LavaMoat/LavaMoat/compare/webpack-v0.8.1-beta.0...webpack-v0.9.0-beta.0) (2025-03-11)
+
+
+### Features
+
+* **webpack:** support scuttling ([#1298](https://github.com/LavaMoat/LavaMoat/issues/1298)) ([9630600](https://github.com/LavaMoat/LavaMoat/commit/963060078d16fab80f24d49ea945a08fc51b9384))
+
+
+### Bug Fixes
+
+* **deps:** update babel monorepo to v7.26.7 ([#1524](https://github.com/LavaMoat/LavaMoat/issues/1524)) ([7285fdf](https://github.com/LavaMoat/LavaMoat/commit/7285fdf6ce5c337443840525b79c7653708b541f))
+* **deps:** update babel monorepo to v7.26.9 ([6a9dc73](https://github.com/LavaMoat/LavaMoat/commit/6a9dc735f18a5b95e82b86ec2bd466ee4433172f))
+* **webpack:** support regex in scuttling exceptions ([#1529](https://github.com/LavaMoat/LavaMoat/issues/1529)) ([45c0308](https://github.com/LavaMoat/LavaMoat/commit/45c0308c655c9903f9bdfa17a30460b10f22a219))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @lavamoat/aa bumped from ^4.3.1 to ^4.3.2
+    * lavamoat-core bumped from ^16.3.1 to ^16.3.2
+
 ## [0.8.1-beta.0](https://github.com/LavaMoat/LavaMoat/compare/webpack-v0.8.0-beta.0...webpack-v0.8.1-beta.0) (2025-01-28)
 
 
