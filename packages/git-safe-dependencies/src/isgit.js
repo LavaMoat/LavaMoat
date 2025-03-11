@@ -11,8 +11,7 @@ const isUnsafeUrl = (url) =>
 
 const isGitUrl = (url) => gitUrlRegex.test(url)
 const isGHRepoSpecifier = (specifier) =>
-  !!(specifier.startsWith('github:') || specifier.match(/^[^/@]+\/[^/]+$/)) &&
-  !specifier.startsWith('npm:')
+  !specifier.startsWith('npm:') && (specifier.startsWith('github:') || /^[^/@]+\/[^/]+$/.test(specifier))  
 
 exports.isCommitHash = (c) => commitRegEx.test(c)
 
