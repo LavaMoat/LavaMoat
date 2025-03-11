@@ -2,6 +2,7 @@ const test = require('ava')
 const { gitInfo, isGitUrl, isGitSpecifier } = require('../src/isgit')
 
 test('isGitUrl should identify git URLs correctly', (t) => {
+  t.plan(9)
   t.true(isGitUrl('git+https://github.com/user/repo'))
   t.true(isGitUrl('github:user/repo'))
   t.true(isGitUrl('git://github.com/user/repo'))
@@ -14,6 +15,7 @@ test('isGitUrl should identify git URLs correctly', (t) => {
 })
 
 test('isGitSpecifier should identify git specifiers correctly', (t) => {
+  t.plan(7)
   t.true(isGitSpecifier('git+https://github.com/user/repo'))
   t.true(isGitSpecifier('github:user/repo'))
   t.true(isGitSpecifier('user/repo'))
@@ -24,6 +26,7 @@ test('isGitSpecifier should identify git specifiers correctly', (t) => {
 })
 
 test('isGitSpecifier should handle various formats', (t) => {
+  t.plan(5)
   t.true(isGitSpecifier('user/repo#branch'))
   t.true(isGitSpecifier('user/repo#commit-hash'))
   t.true(isGitSpecifier('github:user/repo#tag'))
