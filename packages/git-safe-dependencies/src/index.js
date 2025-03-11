@@ -21,7 +21,7 @@ const runAllValidations = async ({ cwd, type }) => {
   } catch (e) {
     errors.push({
       message: e.message,
-      package: 'packae.json',
+      package: 'package.json',
       validator: 'packageJson',
     })
   }

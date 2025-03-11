@@ -1,5 +1,38 @@
 const test = require('ava')
-const { gitInfo } = require('../src/isgit')
+const { gitInfo, isGitUrl, isGitSpecifier } = require('../src/isgit')
+
+test('isGitUrl should identify git URLs correctly', (t) => {
+  t.plan(9)
+  t.true(isGitUrl('git+https://github.com/user/repo'))
+  t.true(isGitUrl('github:user/repo'))
+  t.true(isGitUrl('git://github.com/user/repo'))
+  t.true(isGitUrl('https://github.com/user/repo'))
+  t.true(isGitUrl('git+ssh://git@github.com/user/repo'))
+  t.true(isGitUrl('git@github.com:user/repo'))
+  t.false(isGitUrl('not-a-git-url'))
+  t.false(isGitUrl('npm:@types/bn.js@^4.11.6'))
+  t.false(isGitUrl('user/repo'))
+})
+
+test('isGitSpecifier should identify git specifiers correctly', (t) => {
+  t.plan(7)
+  t.true(isGitSpecifier('git+https://github.com/user/repo'))
+  t.true(isGitSpecifier('github:user/repo'))
+  t.true(isGitSpecifier('user/repo'))
+  t.true(isGitSpecifier('organization/repo-name'))
+  t.false(isGitSpecifier('not/a/valid/repo/path'))
+  t.false(isGitSpecifier('npm:@types/bn.js@^4.11.6'))
+  t.false(isGitSpecifier('just-package-name'))
+})
+
+test('isGitSpecifier should handle various formats', (t) => {
+  t.plan(5)
+  t.true(isGitSpecifier('user/repo#branch'))
+  t.true(isGitSpecifier('user/repo#commit-hash'))
+  t.true(isGitSpecifier('github:user/repo#tag'))
+  t.true(isGitSpecifier('git+https://github.com/user/repo.git'))
+  t.false(isGitSpecifier('https://not-github.com/user/repo'))
+})
 
 test('gitInfo should return correct info for codeload URL', (t) => {
   const url =
