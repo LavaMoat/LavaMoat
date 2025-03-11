@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.3.2](https://github.com/LavaMoat/LavaMoat/compare/aa-v4.3.1...aa-v4.3.2) (2025-03-11)
+
+
+### Bug Fixes
+
+* **deps:** update dependency resolve to v1.22.10 ([#1535](https://github.com/LavaMoat/LavaMoat/issues/1535)) ([17bee26](https://github.com/LavaMoat/LavaMoat/commit/17bee26ef5d24f8bcc48d4aac0a7e066a8bbf7af))
+
 ## [4.3.1](https://github.com/LavaMoat/LavaMoat/compare/aa-v4.3.0...aa-v4.3.1) (2024-12-04)
 
 
