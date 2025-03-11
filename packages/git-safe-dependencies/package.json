@@ -37,8 +37,7 @@
     "supply-chain"
   ],
   "scripts": {
-    "test": "ava",
-    "test-manual": "cd test/manual && bash run.sh > snapshot.txt 2>&1"
+    "test": "ava"
   },
   "dependencies": {
     "glob": "11.0.0",
