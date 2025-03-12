@@ -20,6 +20,7 @@ const {
   // @ts-ignore cycle causes this to be an error sometimes
 } = require('lavamoat-tofu')
 const { mergePolicy } = require('./mergePolicy')
+const { DEFAULT_GLOBAL_THIS_REFS } = require('./constants')
 
 const rootSlug = '$root$'
 
@@ -283,7 +284,7 @@ function createModuleInspector(opts) {
       // browserify commonjs scope
       ignoredRefs: [...moduleRefs, ...globalObjPrototypeRefs],
       // browser global refs + browserify global
-      globalRefs: ['globalThis', 'self', 'window', 'global'],
+      globalRefs: DEFAULT_GLOBAL_THIS_REFS,
     })
     // skip if no results
     if (!foundGlobals.size) {
