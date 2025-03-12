@@ -416,6 +416,8 @@ export type {
   RootPolicy,
 } from 'lavamoat-core'
 
+export type * from './errors.js'
+
 export type { IsAbsoluteFn }
 
 export type LoadPoliciesOptions = Simplify<
