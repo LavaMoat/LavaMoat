@@ -37,7 +37,9 @@
     "supply-chain"
   ],
   "scripts": {
-    "test": "ava"
+    "test": "npm run test:run",
+    "test:run": "ava",
+    "test:update": "ava --update-snapshots"
   },
   "dependencies": {
     "glob": "11.0.0",

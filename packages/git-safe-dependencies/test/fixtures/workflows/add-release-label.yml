@@ -18,6 +18,6 @@ jobs:
           fetch-depth: 0 # This is needed to checkout all branches
 
       - name: Setup environment
-        uses: metamask/github-tools/.github/actions/setup-environment@main
+        uses: metamask/github-tools/.github/actions/setup-environment@point-in-history-20250312 ## used to be master, but for testing had to be changed to a branch that won't get new commits
 
      

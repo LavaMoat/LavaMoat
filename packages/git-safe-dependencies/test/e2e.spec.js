@@ -23,7 +23,15 @@ const runCliTest = test.macro(async (t, { args, cli = 'cli.js' } = {}) => {
   } = await execAsync(command, {
     shell: true,
   }).catch((error) => error)
-  t.snapshot({ command, stdout, stderr, code })
+  t.snapshot({
+    command,
+    stdout,
+    stderr: stderr.replace(
+      process.cwd(),
+      '/LavaMoat/packages/git-safe-dependencies'
+    ),
+    code,
+  })
 })
 
 test('npm project', runCliTest, { args: { projectRoot: 'npm' } })
