@@ -39,7 +39,7 @@
   "scripts": {
     "test": "npm run test:run",
     "test:run": "ava",
-    "test:update-snapshots": "ava -u"
+    "test:update": "ava --update-snapshots"
   },
   "dependencies": {
     "glob": "11.0.0",
