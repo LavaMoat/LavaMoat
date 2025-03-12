@@ -18,7 +18,6 @@ const lookUp = (needle, haystack) => {
     // When using the resolve-related hooks for finding out paths we'd get paths not included in the bundle trigger this case. Now it should not happen unless policy is incomplete.
     // This needs more observation/investigation
     console.trace(`Cannot find a match for ${needle} in policy`)
-    console.log(needle, haystack)
   }
   return value
 }
@@ -98,7 +97,9 @@ exports.generateIdentifierLookup = ({
         canonicalNameMap,
         c.context
       )
-      if (!mapping[c.context]) {
+      // The context in Context Module represents a package the CM is capable of loading from.
+      // If the context can't be resolved to a package, the CM won't be usable.
+      if (resourceId && !mapping[c.context]) {
         mapping[c.context] = {
           aa: resourceId,
           moduleId: c.moduleId,

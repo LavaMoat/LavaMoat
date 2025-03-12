@@ -10,6 +10,8 @@ export interface RuntimeNamespace {
   scuttling: {scuttle: (globalThis: Record<string, unknown>, scuttleGlobalThis: ScuttlerConfig) => {}}
   root: string
   idmap: [string, string[]][]
+  ctxm: (string | number)[]
+  kch: (string | number)[]
   unenforceable: (string | number)[]
   externals: Record<string | number, string>
   options: LavaMoatPluginOptions

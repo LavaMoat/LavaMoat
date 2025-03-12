@@ -53,7 +53,8 @@ exports.scaffold = async function runWebpackBuild(
       }
 
       if (stats.hasErrors()) {
-        console.error(stats.toString({ colors: true }))
+        // Print what webpack would have printed:
+        // console.error(stats.toString({ colors: true }))
         const err = Error('webpack build reported errors')
         err.compilationErrors = stats.compilation.errors
         reject(err)

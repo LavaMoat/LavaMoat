@@ -76,21 +76,6 @@ const stricterScopeTerminator = freeze(
 )
 
 /**
- * @param {Error} error
- * @param {boolean} shouldDefer
- * @returns {() => () => never}
- */
-const throwOrDefer = (error, shouldDefer) => {
-  if (shouldDefer) {
-    return () => {
-      throw error
-    }
-  }
-  throw error
-}
-
-console.error(' LAVAMOAT.ctxm', LAVAMOAT.ctxm)
-/**
  * Enforces the policy for resource imports.
  *
  * @template {object} T
@@ -105,7 +90,6 @@ const enforcePolicy = (specifier, referrerResourceId, wrappedRequire) => {
   if (typeof specifier === 'undefined') {
     throw Error(`Requested specifier is undefined`)
   }
-  console.error('spec', specifier)
   // skip enforcing what we determined at build time we cannot
   if (
     LAVAMOAT.unenforceable.includes(specifier) ||
@@ -138,11 +122,13 @@ const enforcePolicy = (specifier, referrerResourceId, wrappedRequire) => {
   }
   const requestedResourceId = findResourceId(specifier)
   if (!requestedResourceId) {
-    return throwOrDefer(
-      Error(
-        `Requested specifier ${specifier} is not allowed as a builtin and not a known dependency of ${referrerResourceId}. Regenerate policy or add it to policy-override.json.`
-      ),
-      LAVAMOAT.ctxm[specifier]
+    if (LAVAMOAT.ctxm.includes(specifier)) {
+      throw Error(
+        `'${referrerResourceId}' is trying to load a module dynamically from a dependency it has not been allowed using the following Webpack Context Module: '${specifier}'`
+      )
+    }
+    throw Error(
+      `Requested specifier '${specifier}' is not allowed as a builtin and not a known dependency of '${referrerResourceId}'. Regenerate policy or add it to policy-override.json.`
     )
   }
   // allow imports internal to the package
@@ -153,6 +139,7 @@ const enforcePolicy = (specifier, referrerResourceId, wrappedRequire) => {
     return wrappedRequire()
   }
 
+  // This error message does not refer to specifier directly so it won't be confusing for a ContextModule either.
   throw Error(
     `Policy does not allow importing ${requestedResourceId} from ${referrerResourceId}`
   )
@@ -247,7 +234,6 @@ const wrapRequireWithPolicy = (__webpack_require__, referrerResourceId) =>
     if (typeof specifier !== 'number') {
       specifier = `${specifier}`
     }
-    console.error('req', specifier)
     const requireThat = __webpack_require__.bind(this, specifier, ...rest)
     return enforcePolicy(specifier, referrerResourceId, requireThat)
   }
@@ -284,15 +270,18 @@ const lavamoatRuntimeWrapper = (resourceId, runtimeKit) => {
     // wrap webpack runtime for policy check and hardening
     const policyRequire = wrapRequireWithPolicy(__webpack_require__, resourceId)
 
-    // WIP: wrap what .e uses for loading chunks with policy to allow known chunks only?
+    /**
+     * Wrapped chunk loader
+     *
+     * @param {string | number} chunkId
+     */
     policyRequire.e = (chunkId) => {
-      // Chunk resolution at runtime may be a lookup table or a string concatenation. In the latter case it can be fooled into loading any file from under publicPath.
+      // Chunk resolution at runtime may be a lookup table or a string concatenation. In the latter case it can be fooled into loading any file from under publicPath. That's why we only want to accept known chunks.
       if (!LAVAMOAT.kch.includes(chunkId)) {
         throw Error(
           `Attempt to load a chunk that was not known at compile time: ${chunkId} from ${resourceId}`
         )
       }
-      console.error({ chunkId, resourceId })
       return __webpack_require__.e(chunkId)
     }
     // TODO: It's possible most of the work here could be done once instead of for each wrapping

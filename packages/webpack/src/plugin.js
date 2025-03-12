@@ -174,7 +174,7 @@ class LavaMoatPlugin {
 
     compiler.hooks.thisCompilation.tap(
       PLUGIN_NAME,
-      (compilation, { normalModuleFactory, contextModuleFactory }) => {
+      (compilation, { normalModuleFactory }) => {
         PROGRESS.reportErrorsTo(compilation.errors)
         compilation.hooks.optimizeAssets.tap(PLUGIN_NAME, () => {
           // By the time assets are being optimized we should have finished.
@@ -231,14 +231,14 @@ class LavaMoatPlugin {
          * Array of module ids that are context modules and need to be
          * double-wrapped.
          *
-         * @type {(string | number)[]}
+         * @type {{ moduleId: string | number; context: string }[]}
          */
         const contextModules = []
 
         /**
          * Array of chunk ids that have been processed.
          *
-         * @type {number[]}
+         * @type {(string | number)[]}
          */
         const chunkIds = []
         /**
@@ -408,16 +408,29 @@ class LavaMoatPlugin {
                   }
                 }
 
+                // Note: module.context on an empty context module when no context information was guessable from code is going to point to the module that loads it.
                 if (isContextModule(module, moduleClass)) {
-                  console.dir(module)
-                  contextModules.push({moduleId, context: module.context})
+                  diag.rawDebug(3, {
+                    contextModule: {
+                      moduleId,
+                      context: module.context,
+                      // @ts-expect-error we want to see it if available
+                      request: module?.options?.request,
+                      // @ts-expect-error we want to see it if available
+                      _identifier: module?._identifier,
+                    },
+                  })
+                  if (!module.context) {
+                    mainCompilationWarnings.push(
+                      new WebpackError(
+                        `LavaMoatPlugin: context module ${moduleId} has no context information. It cannot be allowed to work if it's reached at runtime.`
+                      )
+                    )
+                  } else {
+                    contextModules.push({ moduleId, context: module.context })
+                  }
                 }
-                if (
-                  isIgnoredModule(module)
-                  //  ||
-                  // (options.__unsafeAllowContextModules &&
-                  //   isContextModule(module, moduleClass))
-                ) {
+                if (isIgnoredModule(module)) {
                   unenforceableModuleIds.push(moduleId)
                 } else {
                   if (isExternalModule(module, moduleClass)) {
@@ -461,23 +474,7 @@ class LavaMoatPlugin {
               canonicalNameMap,
             })
 
-            // // =================================================================
-
-            // contextModuleFactory.hooks.beforeResolve.tap(
-            //   'ContextModulePathPlugin',
-            //   (result) => {
-            //     console.log(111111111111111, result, result.__proto__)
-            //     if (!result) return
-            //     console.log(2222222222222)
-
-            //     if (result.context.includes('dynamic-importer2')) {
-            //       return false
-            //     }
-
-            //     return result
-            //   }
-            // )
-            // // =================================================================
+            // =================================================================
 
             if (unenforceableModuleIds.length > 0) {
               mainCompilationWarnings.push(
