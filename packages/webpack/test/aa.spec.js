@@ -59,23 +59,26 @@ test('aa - generateIdentifierLookup', (t) => {
         },
       },
     },
-    canonicalNameMap: new Map(Object.entries({
-      '/home/user/app': '$root$',
-      '/home/user/app/node_modules/leftpad/': 'leftpad',
-      '/home/user/app/node_modules/fast-json-patch': 'fast-json-patch',
-      '/home/user/app/node_modules/fast-json-patch/module': 'fast-json-patch',
-      '/home/user/app/node_modules/@ethereumjs/util/dist/': '@ethereumjs/util',
-      '/home/user/app/node_modules/@ethereumjs/util/node_modules/ethereum-cryptography/dist/':
-        '@ethereumjs/util>ethereum-cryptography',
-    })),
+    canonicalNameMap: new Map(
+      Object.entries({
+        '/home/user/app': '$root$',
+        '/home/user/app/node_modules/leftpad/': 'leftpad',
+        '/home/user/app/node_modules/fast-json-patch': 'fast-json-patch',
+        '/home/user/app/node_modules/fast-json-patch/module': 'fast-json-patch',
+        '/home/user/app/node_modules/@ethereumjs/util/dist/':
+          '@ethereumjs/util',
+        '/home/user/app/node_modules/@ethereumjs/util/node_modules/ethereum-cryptography/dist/':
+          '@ethereumjs/util>ethereum-cryptography',
+      })
+    ),
     unenforceableModuleIds: [],
     readableResourceIds: true,
+    contextModules: [],
   })
 
   const translatedPolicy = lookupTools.getTranslatedPolicy()
-  
+
   // TODO: modify the input and assert that filtering works in policy translation
   t.is(Object.keys(translatedPolicy.resources).length, 9)
   // TODO: assert on packages translations
-
 })

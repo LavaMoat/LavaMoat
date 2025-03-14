@@ -8,7 +8,6 @@ test.before(async (t) => {
   const webpackConfig = makeConfig({
     generatePolicy: true,
     emitPolicySnapshot: true,
-    diagnosticsVerbosity: 1,
     isBuiltin,
     policyLocation: path.resolve(__dirname, 'fixtures/main/policy-node'),
   })
@@ -28,7 +27,21 @@ test('webpack/node.js - policy shape', (t) => {
 })
 
 test('webpack/node.js - bundle runs without throwing', (t) => {
+  let capture
   t.notThrows(() => {
-    runScriptWithSES(t.context.bundle, { console, require })
+    runScriptWithSES(t.context.bundle, {
+      console: {
+        ...console,
+        log: (dir) => {
+          capture = dir
+        },
+      },
+      require,
+    })
   })
+  t.true(Array.isArray(capture), 'expected captured object to be an array')
+  t.true(
+    capture.includes('README.md'),
+    'expected captured array to include some actual files'
+  )
 })

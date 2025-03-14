@@ -20,6 +20,13 @@ exports.scaffold = async function runWebpackBuild(
 ) {
   // Resolve the root directory
   webpackConfig.context = path.resolve(__dirname, 'fixtures/main/')
+  if (writeFS) {
+    // make sure dist is relative to context
+    webpackConfig.output.path = path.join(
+      webpackConfig.context,
+      webpackConfig.output.path
+    )
+  }
 
   // Create a compiler instance
   const compiler = webpack(webpackConfig)
@@ -46,7 +53,8 @@ exports.scaffold = async function runWebpackBuild(
       }
 
       if (stats.hasErrors()) {
-        console.error(stats.toString({ colors: true }))
+        // Print what webpack would have printed:
+        // console.error(stats.toString({ colors: true }))
         const err = Error('webpack build reported errors')
         err.compilationErrors = stats.compilation.errors
         reject(err)
@@ -104,7 +112,7 @@ const defaultGlobals = () => ({
   console: silentConsole,
   // these are necessary for webpack's runtime
   document: {},
-  self: { location: { href: 'https://localhost/' } },
+  location: { href: 'https://localhost/' }, // necessary for webpack's runtime
   URL,
 })
 
@@ -120,6 +128,7 @@ function runScript(code, globals = defaultGlobals()) {
     throw new Error('runScript requires a bundle string as the first argument')
   }
   const context = createContext(globals)
+  context.self = context // minimal browser emulation
   return {
     context,
     result: runInNewContext(code, context),
