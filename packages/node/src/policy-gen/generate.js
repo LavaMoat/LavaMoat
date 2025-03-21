@@ -10,13 +10,14 @@ import nodeFs from 'node:fs'
 import nodePath from 'node:path'
 import { defaultReadPowers } from '../compartment/power.js'
 import {
-  DEFAULT_POLICY_DEBUG_PATH,
+  DEFAULT_POLICY_DEBUG_FILENAME,
+  DEFAULT_POLICY_OVERRIDE_FILENAME,
   DEFAULT_POLICY_PATH,
   DEFAULT_TRUST_ROOT_COMPARTMENT,
 } from '../constants.js'
 import { log as defaultLog } from '../log.js'
-import { writePolicy } from '../policy-util.js'
-import { devToConditions, hrPath } from '../util.js'
+import { readPolicyOverride, writePolicy } from '../policy-util.js'
+import { devToConditions, hrPath, toPath } from '../util.js'
 import { loadCompartmentMap } from './policy-gen-compartment-map.js'
 import { compartmentMapToPolicy } from './to-policy.js'
 
@@ -29,6 +30,19 @@ import { compartmentMapToPolicy } from './to-policy.js'
 
 /** @type {IsAbsoluteFn} */
 const defaultIsAbsolute = nodePath.isAbsolute
+
+/**
+ * Returns `true` if a debug policy should be written
+ *
+ * Moonlights as a type guard for `policyDebugPath`
+ *
+ * @param {boolean} [shouldWrite] The "write" flag
+ * @param {boolean} [debug] The "debug" flag
+ * @param {string} [policyDebugPath] A path to the debug policy
+ * @returns {policyDebugPath is string}
+ */
+const shouldWriteDebugPolicy = (shouldWrite, debug, policyDebugPath) =>
+  !!(shouldWrite && debug && policyDebugPath)
 
 /**
  * Generates a LavaMoat debug policy from a given entry point using
@@ -107,19 +121,6 @@ const generate = async (
 }
 
 /**
- * Returns `true` if we should write a debug policy
- *
- * @param {Pick<GeneratePolicyOptions, 'write' | 'debug'>} [opts]
- * @returns {boolean}
- */
-const shouldWriteDebugPolicy = (opts = {}) => !!(opts.write && opts.debug)
-
-/**
- * Absolute path to the default policy debug file
- */
-const ABS_POLICY_DEBUG_PATH = nodePath.resolve(DEFAULT_POLICY_DEBUG_PATH)
-
-/**
  * Absolute path to the default policy file
  */
 const ABS_POLICY_PATH = nodePath.resolve(DEFAULT_POLICY_PATH)
@@ -136,13 +137,16 @@ const ABS_POLICY_PATH = nodePath.resolve(DEFAULT_POLICY_PATH)
 export const generatePolicy = async (
   entrypoint,
   {
-    policyDebugPath = ABS_POLICY_DEBUG_PATH,
-    policyPath = ABS_POLICY_PATH,
+    policyDebugPath: rawPolicyDebugPath,
+    policyPath: rawPolicyPath = ABS_POLICY_PATH,
+    policyOverridePath: rawPolicyOverridePath,
+    policyOverride,
     writableFs = nodeFs,
     readPowers = defaultReadPowers,
     isAbsolute = defaultIsAbsolute,
     write: shouldWrite = false,
     debug,
+    readFile = nodeFs.promises.readFile,
     log = defaultLog,
     trustRoot = DEFAULT_TRUST_ROOT_COMPARTMENT,
     ...generateOpts
@@ -150,23 +154,55 @@ export const generatePolicy = async (
 ) => {
   await Promise.resolve()
 
-  if (entrypoint instanceof URL) {
-    entrypoint = readPowers.fileURLToPath(entrypoint)
-  }
+  const entrypointPath = toPath(entrypoint)
+
   assert(
-    isAbsolute(entrypoint),
-    `entrypointPath must be an absolute path; got ${entrypoint}`
+    isAbsolute(entrypointPath),
+    `entrypoint must be an absolute path; got ${entrypointPath}`
   )
-  if (shouldWrite) {
-    assert(
-      isAbsolute(policyPath),
-      `policyPath must be an absolute path; got ${policyPath}`
-    )
-    if (policyDebugPath) {
+
+  const policyPath = toPath(rawPolicyPath)
+  const policyDir = nodePath.dirname(policyPath)
+
+  assert(
+    isAbsolute(policyPath),
+    `policyPath must be an absolute path; got ${policyPath}`
+  )
+
+  // the user may specify a policy override or a path to a policy override.
+  // in this case, we handle the path.
+  if (!policyOverride) {
+    /** @type {string} */
+    let policyOverridePath
+    if (rawPolicyOverridePath) {
+      policyOverridePath = toPath(rawPolicyOverridePath)
+      assert(
+        isAbsolute(policyOverridePath),
+        `policyOverridePath must be an absolute path; got ${policyOverridePath}`
+      )
+    } else {
+      policyOverridePath = nodePath.join(
+        policyDir,
+        DEFAULT_POLICY_OVERRIDE_FILENAME
+      )
+    }
+    policyOverride = await readPolicyOverride(policyOverridePath, {
+      readFile,
+    })
+  }
+
+  /** @type {string | undefined} */
+  let policyDebugPath
+
+  if (shouldWrite && debug) {
+    if (rawPolicyDebugPath) {
+      policyDebugPath = toPath(rawPolicyDebugPath)
       assert(
         isAbsolute(policyDebugPath),
         `policyDebugPath must be an absolute path; got ${policyDebugPath}`
       )
+    } else {
+      policyDebugPath = nodePath.join(policyDir, DEFAULT_POLICY_DEBUG_FILENAME)
     }
   }
 
@@ -185,13 +221,14 @@ export const generatePolicy = async (
    * then extract everything except the `debugInfo` prop, and write _that_ to
    * {@link policy}
    */
-  if (shouldWriteDebugPolicy({ write: shouldWrite, debug })) {
+  if (shouldWriteDebugPolicy(shouldWrite, debug, policyDebugPath)) {
     log.info(`Generating "debug" LavaMoat policy from ${niceEntrypointPath}`)
     const debugPolicy = await generate(entrypoint, {
       ...generateOpts,
       readPowers,
       trustRoot,
       debug: true,
+      policyOverride,
     })
     await writePolicy(policyDebugPath, debugPolicy, { fs: writableFs })
     const nicePolicyDebugPath = hrPath(policyDebugPath)
@@ -209,6 +246,7 @@ export const generatePolicy = async (
       ...generateOpts,
       trustRoot,
       readPowers,
+      policyOverride,
     })
   }
 

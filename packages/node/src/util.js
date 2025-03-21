@@ -4,17 +4,19 @@
  * @remraks
  * This is an anti-pattern. Or so I've heard.
  *
+ * TODO: Everything here should support capabilities in one form or another
+ *
  * @packageDocumentation
  */
 import chalk from 'chalk'
-import path from 'node:path'
-import { fileURLToPath, pathToFileURL } from 'node:url'
+import nodePath from 'node:path'
+import nodeUrl from 'node:url'
 
 const { isArray: isArray_ } = Array
 const { freeze, keys } = Object
 
 /**
- * @import {ReadNowPowers, ReadNowPowersProp} from '@endo/compartment-mapper'
+ * @import {FileURLToPathFn, ReadNowPowers, ReadNowPowersProp} from '@endo/compartment-mapper'
  * @import {SetNonNullable} from 'type-fest'
  */
 
@@ -35,7 +37,7 @@ export const toURLString = (url) =>
     ? url.href
     : url.startsWith('file:')
       ? url
-      : pathToFileURL(url).href
+      : nodeUrl.pathToFileURL(url).href
 
 /**
  * Type guard for an object.
@@ -195,15 +197,15 @@ export const isFunction = (value) => typeof value === 'function'
  */
 export const hrPath = (filepath) => {
   if (!isString(filepath) || filepath.startsWith('file://')) {
-    filepath = fileURLToPath(filepath)
+    filepath = nodeUrl.fileURLToPath(filepath)
   }
-  if (path.isAbsolute(filepath)) {
-    const relativePath = path.relative(process.cwd(), filepath)
+  if (nodePath.isAbsolute(filepath)) {
+    const relativePath = nodePath.relative(process.cwd(), filepath)
     if (relativePath && relativePath.length < filepath.length) {
       filepath = relativePath
     }
   } else {
-    const absolutePath = path.resolve(filepath)
+    const absolutePath = nodePath.resolve(filepath)
     if (absolutePath.length < filepath.length) {
       filepath = absolutePath
     }
@@ -231,3 +233,14 @@ export const hrLabel = (name) => {
  * @returns {value is string | URL}
  */
 export const isPathLike = (value) => isString(value) || value instanceof URL
+
+/**
+ * Converts a path-like value to a string
+ *
+ * @param {string | URL} value Path-like value
+ * @param {FileURLToPathFn} [fileURLToPath] `fileURLToPath` implementation
+ * @returns {string}
+ */
+export const toPath = (value, fileURLToPath = nodeUrl.fileURLToPath) => {
+  return value instanceof URL ? fileURLToPath(value) : value
+}

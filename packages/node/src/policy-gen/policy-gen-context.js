@@ -34,35 +34,6 @@ import { hasValue, hrLabel, hrPath } from '../util.js'
 const { entries, keys, hasOwn } = Object
 
 /**
- * Anything matching this is a specifier matching a package or a package and its
- * subpath.
- *
- * Example _matching_ strings:
- *
- * - `foo`
- * - `foo/bar`
- * - `@foo/bar`
- * - `@foo/bar/baz`
- *
- * Example _non-matching_ strings:
- *
- * - `./foo`
- * - `./foo/bar`
- * - `../foo/bar`
- * - `../foo/bar/baz`
- *
- * The match is grouped into two groups; `pkg` for the package name and
- * `subpath` for anything after (which may be `undefined`)
- *
- * @remarks
- * Anything matching this is a specifier which should have an entry in the
- * {@link LavamoatModuleRecord.importMap} record.
- * @see {@link https://regexr.com/8crtf Regexr test}
- */
-const PACKAGE_REGEX =
-  /^(?<pkg>(?:@[^/\s]+\/[^/\s]+)|[^@/\s.]+)(?:(?:\/)(?<subpath>(?:[^/\s/]+(?:\/[^/\s/]+)*)?))?$/
-
-/**
  * Handles creation of {@link LavamoatModuleRecord} objects for individual
  * compartment descriptors.
  *
@@ -72,13 +43,6 @@ const PACKAGE_REGEX =
  * @internal
  */
 export class PolicyGeneratorContext {
-  /**
-   * If `true`, this is the entry compartment
-   *
-   * @type {Readonly<boolean>}
-   */
-  #isRootCompartment
-
   /**
    * Internal cache for {@link LavamoatModuleRecord} objects
    *
@@ -179,7 +143,6 @@ export class PolicyGeneratorContext {
       log = fallbackLog,
     } = {}
   ) {
-    this.#isRootCompartment = !!rootModule
     this.#lmrCache = lmrCache
     this.#readPowers = readPowers
     this.#isBuiltin = isBuiltin
@@ -243,43 +206,50 @@ export class PolicyGeneratorContext {
    *   for it.
    */
   resolve(specifier) {
+    const [filepaths, log, compartment] = [
+      this.#filepaths,
+      this.#log,
+      this.compartment,
+    ]
     specifier = specifier.replace(/\/$/, '')
 
-    if (this.#filepaths.has(specifier)) {
-      return /** @type {string | null} */ (this.#filepaths.get(specifier))
+    if (filepaths.has(specifier)) {
+      return /** @type {string | null} */ (filepaths.get(specifier))
     }
 
-    if (PACKAGE_REGEX.test(specifier)) {
+    if (specifier.startsWith('./')) {
+      // relative path
+      filepaths.set(specifier, null)
+      return null
+    } else {
       if (this.isBuiltin(specifier)) {
-        this.#filepaths.set(specifier, specifier)
+        filepaths.set(specifier, specifier)
         return specifier
       }
 
-      const moduleDescriptor = this.compartment.modules[specifier]
+      /** @type {ModuleDescriptor | undefined} */
+      const moduleDescriptor = compartment.modules[specifier]
+
       if (moduleDescriptor) {
         const filepath = this.toPath(moduleDescriptor)
         if (filepath) {
-          this.#filepaths.set(specifier, filepath)
+          filepaths.set(specifier, filepath)
           return filepath
           /* c8 ignore next */
         } else {
-          this.#log.error(
+          log.error(
             `Unable to determine filepath for "${specifier}"; this is a bug`
           )
         }
       } else {
-        this.#log.debug(
-          `Compartment ${hrLabel(this.compartment.label)}: unknown module ${hrPath(specifier)}`
+        log.debug(
+          `Compartment ${hrLabel(compartment.label)}: unknown module ${hrPath(specifier)}`
         )
       }
-    } else {
-      // likely a relative path
-      this.#filepaths.set(specifier, null)
-      return null
     }
 
     this.#missingModules.add(specifier)
-    this.#filepaths.set(specifier, null)
+    filepaths.set(specifier, null)
 
     return null
   }
@@ -405,7 +375,7 @@ export class PolicyGeneratorContext {
     )
 
     // careful with the distinction between the root MODULE and the root COMPARTMENT
-    const isRoot = this.isRootModule(file)
+    const isRoot = file === this.#rootModule
 
     /** @type {SimpleLavamoatModuleRecordOptions} */
     const lmrOptions = {
@@ -436,16 +406,6 @@ export class PolicyGeneratorContext {
   }
 
   /**
-   * Returns `true` if this module is the entrypoint
-   *
-   * @param {string} filepath
-   * @returns {filepath is RootModule}
-   */
-  isRootModule(filepath) {
-    return this.#isRootCompartment && filepath === this.#rootModule
-  }
-
-  /**
    * Determine the canonical name for this context's compartment descriptor
    *
    * @returns {CanonicalName} Package name or special name for entrypoint
@@ -467,7 +427,7 @@ export class PolicyGeneratorContext {
 
     if (this.#missingModules.size) {
       const nicePath = hrPath(this.renames[this.compartment.location])
-      let msg = `Package ${hrLabel(this.compartment.label)} (${nicePath}) references unresolvable module(s); are all packages installed? Unresolvable modules may be "optional" or otherwise unlisted in ${hrPath(PACKAGE_JSON)}. ${chalk.italic('Execution will most likely fail')} unless accounted for in policy overrides:`
+      let msg = `Ensure all dependencies are properly installed. Package ${hrLabel(this.compartment.label)} (${nicePath}) references unresolvable module(s). Unresolvable modules may be "optional" or otherwise unlisted in ${hrPath(PACKAGE_JSON)}. ${chalk.italic('Execution will most likely fail')} unless accounted for in policy overrides:`
       for (const missingModule of this.#missingModules) {
         msg += `\n- ${chalk.yellow(missingModule)}`
       }
