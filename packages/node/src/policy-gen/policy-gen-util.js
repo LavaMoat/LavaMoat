@@ -31,13 +31,23 @@ export const getCanonicalName = (compartment, trustRoot = true) => {
       `Computing canonical name failed: compartment "${compartment.name}" (${compartment.location}) has no "path" property; this is a bug`
     )
   }
-  if (compartment.path.length === 0) {
+  if (isEntryCompartment(compartment)) {
     if (trustRoot) {
       return LAVAMOAT_PKG_POLICY_ROOT
     }
     return compartment.name
   }
   return compartment.path.join('>')
+}
+
+/**
+ * Returns `true` if the compartment descriptor is the entry compartment
+ *
+ * @param {CompartmentDescriptor} compartment
+ * @returns {boolean}
+ */
+export const isEntryCompartment = (compartment) => {
+  return compartment.path?.length === 0
 }
 
 /**

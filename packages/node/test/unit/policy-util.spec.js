@@ -21,7 +21,9 @@ test('readPolicy - reads and validates policy from disk', async (t) => {
   vol.fromJSON({
     '/policy.json': JSON.stringify({ resources: {} }),
   })
-  const policy = await readPolicy('/policy.json', { fs: fs })
+  const policy = await readPolicy('/policy.json', {
+    readFile: /** @type {any} */ (fs.promises.readFile),
+  })
   t.deepEqual(policy, { resources: {} })
 })
 
@@ -29,7 +31,9 @@ test('readPolicy - reads and validates policy from disk (default path)', async (
   vol.fromJSON({
     [constants.DEFAULT_POLICY_PATH]: JSON.stringify({ resources: {} }),
   })
-  const policy = await readPolicy(constants.DEFAULT_POLICY_PATH, { fs: fs })
+  const policy = await readPolicy(constants.DEFAULT_POLICY_PATH, {
+    readFile: /** @type {any} */ (fs.promises.readFile),
+  })
   t.deepEqual(policy, { resources: {} })
 })
 
@@ -38,7 +42,7 @@ test('readPolicyOverride - reads and validates policy override from disk', async
     '/policy-override.json': JSON.stringify({ resources: {} }),
   })
   const policyOverride = await readPolicyOverride('/policy-override.json', {
-    fs: fs,
+    readFile: /** @type {any} */ (fs.promises.readFile),
   })
   t.deepEqual(policyOverride, { resources: {} })
 })
@@ -50,7 +54,7 @@ test('readPolicyOverride - reads and validates policy override from disk (defaul
   const policyOverride = await readPolicyOverride(
     constants.DEFAULT_POLICY_OVERRIDE_PATH,
     {
-      fs: fs,
+      readFile: /** @type {any} */ (fs.promises.readFile),
     }
   )
   t.deepEqual(policyOverride, { resources: {} })
@@ -63,7 +67,7 @@ test('loadPolicies - loads and merges policies from disk', async (t) => {
   })
   const policy = await loadPolicies('/policy.json', {
     policyOverridePath: '/policy-override.json',
-    fs,
+    readFile: /** @type {any} */ (fs.promises.readFile),
   })
   t.deepEqual(policy, { resources: {} })
 })

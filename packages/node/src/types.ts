@@ -6,7 +6,7 @@
 import type { IsBuiltinFn, LavaMoatPolicy } from 'lavamoat-core'
 import type { Loggerr } from 'loggerr'
 import type nodeFs from 'node:fs'
-import type { SetFieldType, Simplify } from 'type-fest'
+import type { SetFieldType, Simplify, SimplifyDeep } from 'type-fest'
 
 import type {
   CaptureLiteOptions,
@@ -190,12 +190,12 @@ export interface WritePolicyOptions {
   /**
    * Path to a {@link LavaMoatPolicyDebug} file
    */
-  policyDebugPath?: string
+  policyDebugPath?: string | URL
 
   /**
    * Path to a {@link LavaMoatPolicy} file
    */
-  policyPath?: string
+  policyPath?: string | URL
 
   /**
    * `fs` interface to write policy to disk.
@@ -295,7 +295,9 @@ export type GeneratePolicyOptions = Simplify<
     CompartmentMapToPolicyOptions &
     WritePolicyOptions &
     WithTrustRoot &
-    WithAbsoluteFn
+    WithAbsoluteFn &
+    WithPolicyOverridePath &
+    WithRead
 >
 
 /**
@@ -419,8 +421,20 @@ export type {
 export type { IsAbsoluteFn }
 
 export type LoadPoliciesOptions = Simplify<
-  WithProjectRoot & WithFs & WithPolicyOverrideOrPath
+  WithProjectRoot & WithRead & WithPolicyOverrideOrPath
 >
+
+/**
+ * Options bucket containing a `read` prop
+ */
+export type WithRead = SimplifyDeep<{
+  readFile?: ReadFileFn
+}>
+
+/**
+ * This is ever-so-slightly different than `ReadFn`.
+ */
+export type ReadFileFn = (path: PathLike) => Promise<string | Buffer>
 
 /**
  * Extra bits of the `fs` module that we need for internal utilities.
@@ -441,7 +455,7 @@ export interface FsUtilInterface {
   accessSync: (path: PathLike, mode?: number) => void
   constants: Pick<typeof nodeFs.constants, 'R_OK' | 'X_OK'>
   promises: {
-    readFile: (path: PathLike) => Promise<string | Buffer>
+    readFile: ReadFileFn
   }
   realpathSync: (path: PathLike, encoding?: BufferEncoding) => Buffer | string
 }
