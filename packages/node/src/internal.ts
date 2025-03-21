@@ -17,6 +17,7 @@ import type {
   WithIsBuiltin,
   WithLog,
   WithPolicyOverride,
+  WithRead,
   WithReadPowers,
   WithTrustRoot,
   WritePolicyOptions,
@@ -118,16 +119,9 @@ export type SomeParameters<T extends SomeFunction> = T extends new (
     ? Parameters<T>
     : never
 
-export type ReadPolicyOptions = WithFs
+export type ReadPolicyOptions = WithRead
 
-export type ReadPolicyOverrideOptions = Simplify<
-  WithFs & {
-    /**
-     * If `true`, throw if file not found
-     */
-    strict?: boolean
-  }
->
+export type ReadPolicyOverrideOptions = WithRead
 
 /**
  * Options for `resolveBinScript()`

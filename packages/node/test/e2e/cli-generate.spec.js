@@ -101,7 +101,7 @@ test('extensionless bin script handling', async (t) => {
   }
 })
 
-test('generate - policy generation - canonical names', async (t) => {
+test('canonical names', async (t) => {
   t.plan(3)
 
   const tempdir = await mkdtemp(

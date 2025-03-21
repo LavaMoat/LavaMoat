@@ -60,6 +60,22 @@ test(
 
 test('hashbang evasion', testPolicyForJSON, 'hashbang.json')
 
+test(
+  'package imported via relative path',
+  testPolicyForJSON,
+  'relative-package.json',
+  {
+    expected: (t, policy) => {
+      t.plan(2)
+      t.true(
+        policy.resources.winken?.packages?.['winken>blinken'] === undefined,
+        'winken should have no policy for blinken'
+      )
+      t.snapshot(policy)
+    },
+  }
+)
+
 test('basic nested global access', testPolicyForModule, 'location.href', {
   resources: {
     test: {

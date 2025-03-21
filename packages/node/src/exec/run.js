@@ -25,6 +25,8 @@ import { execute } from './execute.js'
  *
  * @privateRemarks
  * Mainly a wrapper around {@link execute}
+ *
+ * TODO: Should accept `policy` or `policyPath`.
  * @template [T=unknown] Exports of module, if known. Default is `unknown`
  * @param {string | URL} entrypoint Entry point of application
  * @param {LavaMoatPolicy} policy LavaMoat policy
