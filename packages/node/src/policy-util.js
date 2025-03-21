@@ -3,16 +3,25 @@
  *
  * **All exports in this module are considered part of the public API.**
  *
+ * TODO: Capabilities are inconsistent
+ *
  * @packageDocumentation
  */
 
 import { jsonStringifySortedPolicy, mergePolicy } from 'lavamoat-core'
 import nodeFs from 'node:fs'
-import { default as nodePath, default as path } from 'node:path'
+import nodePath from 'node:path'
 import * as constants from './constants.js'
 import { readJsonFile } from './fs.js'
 import { log } from './log.js'
-import { hasValue, hrPath, isObjectyObject, isPathLike } from './util.js'
+import {
+  hasValue,
+  hrPath,
+  isObjectyObject,
+  isPathLike,
+  isString,
+  toPath,
+} from './util.js'
 
 /**
  * @import {RootPolicy, LavaMoatPolicy, LavaMoatPolicyDebug} from 'lavamoat-core'
@@ -28,12 +37,15 @@ import { hasValue, hrPath, isObjectyObject, isPathLike } from './util.js'
  * @returns {Promise<LavaMoatPolicy>}
  * @internal
  */
-export const readPolicy = async (policyPath, { fs = nodeFs } = {}) => {
+export const readPolicy = async (
+  policyPath,
+  { readFile = nodeFs.promises.readFile } = {}
+) => {
   /** @type {unknown} */
   let allegedPolicy
   try {
     // eslint-disable-next-line @jessie.js/safe-await-separator
-    allegedPolicy = await readJsonFile(policyPath, { fs })
+    allegedPolicy = await readJsonFile(policyPath, { readFile })
   } catch (err) {
     if (err instanceof SyntaxError) {
       throw new Error(
@@ -75,13 +87,13 @@ export const readPolicy = async (policyPath, { fs = nodeFs } = {}) => {
  */
 export const readPolicyOverride = async (
   policyOverridePath,
-  { fs = nodeFs, strict = false } = {}
+  { readFile = nodeFs.promises.readFile } = {}
 ) => {
   /** @type {unknown} */
   let allegedPolicy
   try {
     // eslint-disable-next-line @jessie.js/safe-await-separator
-    allegedPolicy = await readJsonFile(policyOverridePath, { fs })
+    allegedPolicy = await readJsonFile(policyOverridePath, { readFile })
   } catch (err) {
     if (err instanceof SyntaxError) {
       throw new Error(
@@ -90,12 +102,6 @@ export const readPolicyOverride = async (
       )
     }
     if (/** @type {NodeJS.ErrnoException} */ (err).code === 'ENOENT') {
-      if (strict) {
-        throw new Error(
-          `LavaMoat policy overrides file not found at ${hrPath(policyOverridePath)}`,
-          { cause: err }
-        )
-      }
       log.debug(
         `No LavaMoat policy overrides found at ${hrPath(policyOverridePath)}`
       )
@@ -137,32 +143,21 @@ export const readPolicyOverride = async (
  *   {@link LoadPoliciesOptions.projectRoot}
  * @param {LoadPoliciesOptions} [options] Options
  * @returns {Promise<LavaMoatPolicy>}
- * @throws If a policy is invalid _and/or_ if policy overrides were provided
- *   _and_ are invalid
+ * @throws If a policy is invalid
  * @public
  */
 export const loadPolicies = async (
   policyOrPolicyPath,
-  { fs = nodeFs, projectRoot = process.cwd(), ...options } = {}
+  {
+    readFile = nodeFs.promises.readFile,
+    projectRoot = process.cwd(),
+    ...options
+  } = {}
 ) => {
-  policyOrPolicyPath ??= path.resolve(
+  policyOrPolicyPath ??= nodePath.resolve(
     projectRoot,
     constants.DEFAULT_POLICY_PATH
   )
-
-  const defaultPolicyOverridePath = path.resolve(
-    projectRoot,
-    constants.DEFAULT_POLICY_OVERRIDE_PATH
-  )
-  /**
-   * This flag determines whether or not we will throw if the policy override
-   * file is not found. We will throw if and only if the policy override path
-   * was provided and is _not_ the default path. Ideally, we would throw if a
-   * policy override path was provided _at all_—by presuming it was explicitly
-   * provided by the end-user—but that's kind of painful to thread through the
-   * whole program flow.
-   */
-  let strict = false
 
   /** @type {LavaMoatPolicy | string | URL} */
   let policyOverrideOrPolicyOverridePath
@@ -170,9 +165,21 @@ export const loadPolicies = async (
     policyOverrideOrPolicyOverridePath = options.policyOverride
   } else if (hasValue(options, 'policyOverridePath')) {
     policyOverrideOrPolicyOverridePath = options.policyOverridePath
-    strict = policyOverrideOrPolicyOverridePath !== defaultPolicyOverridePath
   } else {
-    policyOverrideOrPolicyOverridePath = defaultPolicyOverridePath
+    // _if_ we have a policy path, we should compute the policy override path as its sibling.
+    // if not, then we just have to guess.
+    if (isString(policyOrPolicyPath) || policyOrPolicyPath instanceof URL) {
+      const policyPath = toPath(policyOrPolicyPath)
+      policyOverrideOrPolicyOverridePath = nodePath.join(
+        nodePath.dirname(policyPath),
+        constants.DEFAULT_POLICY_OVERRIDE_FILENAME
+      )
+    } else {
+      policyOverrideOrPolicyOverridePath = nodePath.resolve(
+        projectRoot,
+        constants.DEFAULT_POLICY_OVERRIDE_PATH
+      )
+    }
   }
 
   /**
@@ -180,7 +187,7 @@ export const loadPolicies = async (
    */
   const promises = /** @type {any} */ ([])
   if (isPathLike(policyOrPolicyPath)) {
-    promises.push(readPolicy(policyOrPolicyPath, { fs }))
+    promises.push(readPolicy(policyOrPolicyPath, { readFile }))
   } else {
     promises.push(
       Promise.resolve().then(() => {
@@ -191,7 +198,9 @@ export const loadPolicies = async (
   }
   if (isPathLike(policyOverrideOrPolicyOverridePath)) {
     promises.push(
-      readPolicyOverride(policyOverrideOrPolicyOverridePath, { fs, strict })
+      readPolicyOverride(policyOverrideOrPolicyOverridePath, {
+        readFile,
+      })
     )
   } else {
     promises.push(
