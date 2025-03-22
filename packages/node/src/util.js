@@ -16,7 +16,8 @@ const { isArray: isArray_ } = Array
 const { freeze, keys } = Object
 
 /**
- * @import {FileURLToPathFn, ReadNowPowers, ReadNowPowersProp} from '@endo/compartment-mapper'
+ * @import {FileURLToPathFn, ReadNowPowers} from '@endo/compartment-mapper'
+ * @import {RequiredReadNowPowers} from './internal.js'
  * @import {SetNonNullable} from 'type-fest'
  */
 
@@ -142,11 +143,7 @@ export const devToConditions = (dev) =>
 /**
  * Ordered array of every property in {@link ReadNowPowers} which is _required_.
  *
- * @satisfies {Readonly<
- *   {
- *     [K in ReadNowPowersProp]-?: {} extends Pick<ReadNowPowers, K> ? never : K
- *   }[ReadNowPowersProp][]
- * >}
+ * @satisfies {RequiredReadNowPowers}
  * @internal
  */
 const REQUIRED_READ_NOW_POWERS = freeze(
