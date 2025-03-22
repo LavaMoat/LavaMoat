@@ -214,13 +214,31 @@ export class PolicyGeneratorContext {
     specifier = specifier.replace(/\/$/, '')
 
     if (filepaths.has(specifier)) {
-      return /** @type {string | null} */ (filepaths.get(specifier))
+      const cachedFilepath = /** @type {string | null} */ (
+        filepaths.get(specifier)
+      )
+      if (this.isBuiltin(specifier)) {
+        /* c8 ignore next */
+        if (cachedFilepath !== specifier) {
+          log.warning(
+            `Compartment ${hrLabel(compartment.label)}: builtin specifier ${hrLabel(specifier)} previously ` +
+              (cachedFilepath === null
+                ? `considered missing; this is a bug`
+                : `resolved as package at ${hrPath(cachedFilepath)}; manual remediation may be necessary`)
+          )
+        }
+      }
+      return cachedFilepath
     }
 
     if (specifier.startsWith('./')) {
       // relative path
       filepaths.set(specifier, null)
       return null
+    } else if (specifier.startsWith('../')) {
+      log.warning(
+        `Compartment ${hrLabel(compartment.label)}: attempting to resolve relative path ${hrPath(specifier)} beyond its boundary; manual remediation necessary`
+      )
     } else {
       if (this.isBuiltin(specifier)) {
         filepaths.set(specifier, specifier)
@@ -238,16 +256,15 @@ export class PolicyGeneratorContext {
           /* c8 ignore next */
         } else {
           log.error(
-            `Unable to determine filepath for "${specifier}"; this is a bug`
+            `Compartment ${hrLabel(compartment.label)}: unable to determine filepath for "${specifier}"; this is a bug`
           )
         }
-      } else {
-        log.debug(
-          `Compartment ${hrLabel(compartment.label)}: unknown module ${hrPath(specifier)}`
-        )
       }
     }
 
+    log.debug(
+      `Compartment ${hrLabel(compartment.label)}: recording module specified as ${hrPath(specifier)} as missing`
+    )
     this.#missingModules.add(specifier)
     filepaths.set(specifier, null)
 
