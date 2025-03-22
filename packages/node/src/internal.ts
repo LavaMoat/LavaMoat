@@ -6,8 +6,12 @@
  * @internal
  */
 
-import type { MapNodeModulesOptions } from '@endo/compartment-mapper'
-import { LavamoatModuleRecordOptions } from 'lavamoat-core'
+import type {
+  MapNodeModulesOptions,
+  ReadNowPowers,
+  ReadNowPowersProp,
+} from '@endo/compartment-mapper'
+import type { LavamoatModuleRecordOptions } from 'lavamoat-core'
 import type { Except, LiteralUnion, Simplify } from 'type-fest'
 import type {
   BaseLoadCompartmentMapOptions,
@@ -167,3 +171,12 @@ export type SimpleLavamoatModuleRecordOptions = Omit<
  * `<ATTENUATORS>` does not appear in policy and is an Endo-ism.
  */
 export type CanonicalName = LiteralUnion<'$root' | '<ATTENUATORS>', string>
+
+/**
+ * An array of required properties for {@link ReadNowPowers}
+ */
+export type RequiredReadNowPowers = ReadonlyArray<
+  {
+    [K in ReadNowPowersProp]-?: {} extends Pick<ReadNowPowers, K> ? never : K
+  }[ReadNowPowersProp]
+>
