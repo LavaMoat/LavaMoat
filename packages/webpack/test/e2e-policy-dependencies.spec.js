@@ -10,7 +10,6 @@ test.before(async (t) => {
     generatePolicy: false,
     isBuiltin,
     emitPolicySnapshot: true,
-    diagnosticsVerbosity: 1,
     policyLocation: path.resolve(
       __dirname,
       'fixtures/main/policy-dependencies'
