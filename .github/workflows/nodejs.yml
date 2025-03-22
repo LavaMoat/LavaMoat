@@ -93,7 +93,7 @@ jobs:
           corepack enable
           npm --version
       - name: Install Dependencies
-        uses: bahmutov/npm-install@7639f1c46981fc8c8d64ec6be729b7ddbd7ddc52 # v1.10.7
+        uses: bahmutov/npm-install@6cee6086f1bf4467050e9a51e94bfb71b44cbc39 # v1.10.8
         with:
           useRollingCache: true
           install-command: npm ci --foreground-scripts
@@ -112,7 +112,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
       - name: Install Dependencies
-        uses: bahmutov/npm-install@7639f1c46981fc8c8d64ec6be729b7ddbd7ddc52 # v1.10.7
+        uses: bahmutov/npm-install@6cee6086f1bf4467050e9a51e94bfb71b44cbc39 # v1.10.8
         with:
           useRollingCache: true
           install-command: npm ci --foreground-scripts
@@ -152,7 +152,7 @@ jobs:
           corepack enable
           npm --version
       - name: Install Dependencies
-        uses: bahmutov/npm-install@7639f1c46981fc8c8d64ec6be729b7ddbd7ddc52 # v1.10.7
+        uses: bahmutov/npm-install@6cee6086f1bf4467050e9a51e94bfb71b44cbc39 # v1.10.8
         with:
           useRollingCache: true
           install-command: npm ci --foreground-scripts
@@ -195,7 +195,7 @@ jobs:
           corepack enable
           npm --version
       - name: Install Dependencies
-        uses: bahmutov/npm-install@7639f1c46981fc8c8d64ec6be729b7ddbd7ddc52 # v1.10.7
+        uses: bahmutov/npm-install@6cee6086f1bf4467050e9a51e94bfb71b44cbc39 # v1.10.8
         with:
           useRollingCache: true
           install-command: npm ci --foreground-scripts
