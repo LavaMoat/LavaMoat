@@ -499,7 +499,7 @@ async function prepareScenarioOnDisk({
         : defaultPaths.primary
     filesToWrite.push({
       file: primaryPath,
-      content: stringify(scenario.config),
+      content: `${stringify(scenario.config ?? {})}`,
     })
     if (scenario.configOverride) {
       const overridePath =
@@ -508,7 +508,7 @@ async function prepareScenarioOnDisk({
           : defaultPaths.override
       filesToWrite.push({
         file: overridePath,
-        content: stringify(scenario.configOverride),
+        content: `${stringify(scenario.configOverride ?? {})}`,
       })
     }
   }
