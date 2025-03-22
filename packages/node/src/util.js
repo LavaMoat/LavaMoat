@@ -32,10 +32,10 @@ const { freeze, keys } = Object
  * @returns {string} URL-like string
  * @internal
  */
-export const toURLString = (url) =>
+export const toEndoURL = (url) =>
   url instanceof URL
     ? url.href
-    : url.startsWith('file:')
+    : url.startsWith('file://')
       ? url
       : nodeUrl.pathToFileURL(url).href
 
