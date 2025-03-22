@@ -253,7 +253,7 @@ export const generatePolicy = async (
 
   if (shouldWrite) {
     await writePolicy(policyPath, policy, { fs: writableFs })
+    log.info(`Wrote policy to ${hrPath(policyPath)}`)
   }
-  log.info(`Wrote policy to ${hrPath(policyPath)}`)
   return policy
 }
