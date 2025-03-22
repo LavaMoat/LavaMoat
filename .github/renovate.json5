@@ -52,6 +52,27 @@
       matchUpdateTypes: ['major'],
       enabled: false,
     },
+    {
+      // Disable frequent updates for dev tooling
+      // These can be updated manually but we still want to be notified about new majors
+      extends: ['packages:linters'],
+      matchPackagePrefixes: ['@commitlint'],
+      matchPackageNames: [
+        'husky',
+        'lint-staged'
+      ],
+      matchUpdateTypes: ['minor', 'patch'],
+      enabled: false,
+    },
+    {
+      // @types/node should be bumped to major only alongside `engines.node` in package.json
+      // We don't care about every patch release so only notify onnew minors
+      matchPackageNames: [
+        '@types/node',
+      ],
+      matchUpdateTypes: ['major', 'patch'],
+      enabled: false,
+    }
   ],
   transitiveRemediation: true,
 }
