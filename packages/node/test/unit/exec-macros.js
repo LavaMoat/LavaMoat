@@ -1,8 +1,4 @@
-/**
- * @import {TestFn, MacroDeclarationOptions} from 'ava'
- * @import {LavaMoatPolicy} from 'lavamoat-core'
- * @import {TestExecForJSONMacroOptions, TestExecMacroOptions} from '../types.js'
- */
+import '../../src/preamble.js'
 
 import chalk from 'chalk'
 import { run } from '../../src/exec/run.js'
@@ -11,6 +7,12 @@ import {
   JSON_FIXTURE_DIR_URL,
   loadJSONFixture,
 } from './json-fixture-util.js'
+
+/**
+ * @import {TestFn, MacroDeclarationOptions} from 'ava'
+ * @import {LavaMoatPolicy} from 'lavamoat-core'
+ * @import {TestExecForJSONMacroOptions, TestExecMacroOptions} from '../types.js'
+ */
 
 /**
  * @satisfies {LavaMoatPolicy}
@@ -63,7 +65,11 @@ export const createExecMacros = (test) => {
           const result = await run(jsonEntrypoint, policy, {
             readPowers,
           })
-          t.deepEqual({ .../** @type {any} */ (result) }, expected)
+          t.deepEqual(
+            { .../** @type {any} */ (result) },
+            expected,
+            'program output did not match expected value'
+          )
         } catch (err) {
           t.log(`Volume tree:\n${chalk.yellow(vol.toTree())}`)
           throw err

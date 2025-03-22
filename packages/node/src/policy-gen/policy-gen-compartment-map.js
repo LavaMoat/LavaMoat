@@ -5,10 +5,11 @@
 
 import { captureFromMap } from '@endo/compartment-mapper/capture-lite.js'
 import { mapNodeModules } from '@endo/compartment-mapper/node-modules.js'
+import { nullImportHook } from '../compartment/import-hook.js'
 import { DEFAULT_ENDO_OPTIONS } from '../compartment/options.js'
 import { defaultReadPowers } from '../compartment/power.js'
-import { NATIVE_PARSER_FILE_EXT, NATIVE_PARSER_NAME } from '../constants.js'
-import { toURLString } from '../util.js'
+import { ATTENUATORS_COMPARTMENT } from '../constants.js'
+import { toEndoURL } from '../util.js'
 import { makePolicyGenCompartment } from './policy-gen-compartment-class.js'
 import { getCanonicalName } from './policy-gen-util.js'
 
@@ -39,16 +40,15 @@ export const loadCompartmentMap = async (
     readPowers = defaultReadPowers,
     policyOverride,
     conditions,
+    trustRoot,
+    log,
     ...captureOpts
   } = {}
 ) => {
-  const entryPoint = toURLString(entrypointPath)
+  const entryPoint = toEndoURL(entrypointPath)
   const nodeCompartmentMap = await mapNodeModules(readPowers, entryPoint, {
     conditions,
-    languageForExtension: {
-      [NATIVE_PARSER_FILE_EXT]: NATIVE_PARSER_NAME,
-      '': 'cjs',
-    },
+    languageForExtension: DEFAULT_ENDO_OPTIONS.languageForExtension,
   })
 
   /**
@@ -58,8 +58,16 @@ export const loadCompartmentMap = async (
    * resource key in policy. We have no use for Endo's label field, so we
    * replace labels with canonicalNames derived from path.
    */
-  values(nodeCompartmentMap.compartments).map((compartmentDescriptor) => {
-    compartmentDescriptor.label = getCanonicalName(compartmentDescriptor)
+  values(nodeCompartmentMap.compartments).forEach((compartmentDescriptor) => {
+    if (compartmentDescriptor.name === ATTENUATORS_COMPARTMENT) {
+      throw new TypeError(
+        `Unexpected attenuator compartment found when computing canonical package name in ${compartmentDescriptor.label} (${compartmentDescriptor.location})`
+      )
+    }
+    compartmentDescriptor.label = getCanonicalName(
+      compartmentDescriptor,
+      trustRoot
+    )
   })
 
   // we use this to inject missing imports from policy overrides into the module descriptor.
@@ -72,11 +80,12 @@ export const loadCompartmentMap = async (
   const {
     captureCompartmentMap: compartmentMap,
     captureSources: sources,
-    compartmentRenames: renames,
+    newToOldCompartmentNames: renames,
   } = await captureFromMap(readPowers, nodeCompartmentMap, {
-    ...captureOpts,
     ...DEFAULT_ENDO_OPTIONS,
+    importHook: nullImportHook,
     Compartment: LavaMoatCompartment,
+    ...captureOpts,
   })
 
   return {

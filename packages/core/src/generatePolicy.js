@@ -51,6 +51,12 @@ function createModuleInspector(opts) {
   const packageToNativeModules = new Map()
   /** @type {Record<string, import('./schema').DebugInfo>} */
   const debugInfo = {}
+  /**
+   * The module record for the root package. May not be used
+   *
+   * @type {import('./moduleRecord').LavamoatModuleRecord | undefined}
+   */
+  let root
 
   /** @type {ModuleInspector} */
   const inspector = Object.assign(new EventEmitter(), {
@@ -72,9 +78,10 @@ function createModuleInspector(opts) {
    */
   function inspectModule(
     moduleRecord,
-    { isBuiltin, includeDebugInfo = false }
+    { isBuiltin, includeDebugInfo = false, trustRoot = true }
   ) {
     if (moduleRecord === undefined) {
+      // XXX: when does this happen?
       return
     }
     const { packageName, specifier, type } = moduleRecord
@@ -83,15 +90,19 @@ function createModuleInspector(opts) {
     // call the correct analyzer for the module type
     switch (type) {
       case 'builtin': {
-        inspectBuiltinModule(moduleRecord, { includeDebugInfo })
+        inspectBuiltinModule(moduleRecord, { includeDebugInfo, trustRoot })
         return
       }
       case 'native': {
-        inspectNativeModule(moduleRecord, { includeDebugInfo })
+        inspectNativeModule(moduleRecord, { includeDebugInfo, trustRoot })
         return
       }
       case 'js': {
-        inspectJsModule(moduleRecord, { isBuiltin, includeDebugInfo })
+        inspectJsModule(moduleRecord, {
+          isBuiltin,
+          includeDebugInfo,
+          trustRoot,
+        })
         return
       }
       default: {
@@ -141,15 +152,24 @@ function createModuleInspector(opts) {
    */
   function inspectJsModule(
     moduleRecord,
-    { isBuiltin, includeDebugInfo = false }
+    { isBuiltin, includeDebugInfo = false, trustRoot = true }
   ) {
-    const { packageName, specifier } = moduleRecord
+    const { packageName, specifier, isRoot } = moduleRecord
+    if (isRoot) {
+      if (root && root.packageName !== moduleRecord.packageName) {
+        // TODO: may be better just to warn & skip
+        throw new TypeError(
+          `LavaMoat - multiple root modules detected (${packageName})`
+        )
+      }
+      root = moduleRecord
+    }
     let moduleDebug
     // record the module
     moduleIdToModuleRecord.set(specifier, moduleRecord)
     // initialize mapping from package to module
     if (!packageToModules.has(packageName)) {
-      packageToModules.set(packageName, new Map())
+      packageToModules.set(packageName, Object.create(null))
     }
     const packageModules = packageToModules.get(packageName)
     packageModules[specifier] = moduleRecord
@@ -164,14 +184,14 @@ function createModuleInspector(opts) {
       moduleDebug.moduleRecord = debugData
     }
     // skip for root modules (modules not from deps)
-    const isRootModule = packageName === rootSlug
-    if (isRootModule) {
+    if (trustRoot && isRoot) {
       return
     }
     // skip json files
     const filename = moduleRecord.file || 'unknown'
     const fileExtension = path.extname(filename)
-    if (!fileExtension.match(/^\.([cm]?js|ts)$/)) {
+    // explicitly allow extensionless files
+    if (fileExtension && !fileExtension.match(/^\.([cm]?js|ts)$/)) {
       return
     }
     // get ast (parse or use cached)
@@ -179,15 +199,26 @@ function createModuleInspector(opts) {
      * @type {AST}
      * @todo - Put this in `LavamoatModuleRecord` instead
      */
-    const ast =
-      moduleRecord.ast ||
-      parse(/** @type {string} */ (moduleRecord.content), {
-        // esm support
-        sourceType: 'unambiguous',
-        // someone must have been doing this
-        allowReturnOutsideFunction: true,
-        errorRecovery: true,
-      })
+    let ast
+    try {
+      ast =
+        moduleRecord.ast ||
+        parse(/** @type {string} */ (moduleRecord.content), {
+          // esm support
+          sourceType: 'unambiguous',
+          // someone must have been doing this
+          allowReturnOutsideFunction: true,
+          errorRecovery: true,
+        })
+    } catch (err) {
+      if (fileExtension === '') {
+        throw new Error(
+          `LavaMoat - failed to parse extensionless file of unknown format: ${moduleRecord.file}`,
+          { cause: err }
+        )
+      }
+      throw err
+    }
     if (includeDebugInfo && isParsedAST(ast) && ast.errors?.length) {
       moduleDebug.parseErrors = ast.errors
     }
@@ -359,6 +390,7 @@ function createModuleInspector(opts) {
     policyOverride,
     includeDebugInfo = false,
     moduleToPackageFallback,
+    trustRoot = true,
   }) {
     /** @type {import('./schema').Resources} */
     const resources = {}
@@ -378,8 +410,8 @@ function createModuleInspector(opts) {
       /** @type {import('./schema').ResourcePolicy['native']} */
       let native
       // skip for root modules (modules not from deps)
-      const isRootModule = packageName === rootSlug
-      if (isRootModule) {
+      const isRootModule = root && packageName === root.packageName
+      if (isRootModule && trustRoot) {
         return
       }
       // get dependencies, ignoring builtins
@@ -421,7 +453,9 @@ function createModuleInspector(opts) {
       // get native modules
       native = packageToNativeModules.has(packageName)
       // skip package policy if there are no settings needed
-      if (!packages && !globals && !builtin) {
+      // create empty resources object for the root module
+      // to use as a proper reference (otherwise it'd be undefined)
+      if (!isRootModule && !packages && !globals && !builtin) {
         return
       }
       // create minimal policy object
@@ -437,6 +471,11 @@ function createModuleInspector(opts) {
       }
       if (native) {
         packagePolicy.native = native
+      }
+      if (root && isRootModule) {
+        policy.root = {
+          usePolicy: root.packageName,
+        }
       }
       // set policy for package
       resources[packageName] = packagePolicy
@@ -567,6 +606,7 @@ function getDefaultPaths(policyName) {
 /**
  * @typedef ModuleInspectorOptions
  * @property {(value: string) => boolean} isBuiltin
+ * @property {boolean} [trustRoot] If `true`, trust the root package
  * @property {boolean} [includeDebugInfo]
  * @property {(specifier: string) => string | undefined} [moduleToPackageFallback]
  */

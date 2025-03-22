@@ -4,11 +4,11 @@
  *
  * @packageDocumentation
  */
-
 import { makeReadPowers } from '../compartment/power.js'
 import { DEFAULT_ATTENUATOR } from '../constants.js'
-import { toEndoPolicySync } from '../policy-converter.js'
-import { devToConditions } from '../util.js'
+import { toEndoPolicy } from '../policy-converter.js'
+import { isTrusted } from '../policy-util.js'
+import { devToConditions, hrPath } from '../util.js'
 import { attenuateModule, makeGlobalsAttenuator } from './default-attenuator.js'
 import { makeExecutionCompartment } from './exec-compartment-class.js'
 import { execute } from './execute.js'
@@ -25,23 +25,34 @@ import { execute } from './execute.js'
  *
  * @privateRemarks
  * Mainly a wrapper around {@link execute}
+ *
+ * TODO: Should accept `policy` or `policyPath`.
  * @template [T=unknown] Exports of module, if known. Default is `unknown`
- * @param {string | URL} entrypointPath Entry point of application
+ * @param {string | URL} entrypoint Entry point of application
  * @param {LavaMoatPolicy} policy LavaMoat policy
  * @param {RunOptions} [options] Options
  * @returns {Promise<T>} Exports of executed module
  */
 
 export const run = async (
-  entrypointPath,
+  entrypoint,
   policy,
-  { dev = false, policyOverride, ...options } = {}
+  { dev = false, policyOverridePath, trustRoot, projectRoot, ...options } = {}
 ) => {
   await Promise.resolve()
+  if (trustRoot && !isTrusted(policy)) {
+    throw new Error(
+      `Attempted to run entrypoint ${hrPath(entrypoint)} with full privileges, but entry policy is untrusted. Aborting`
+    )
+  }
   const readPowers = makeReadPowers(options)
-  const endoPolicy = toEndoPolicySync(policy, policyOverride)
 
-  return execute(entrypointPath, readPowers, {
+  const endoPolicy = await toEndoPolicy(policy, {
+    projectRoot,
+    policyOverridePath,
+  })
+
+  return execute(entrypoint, readPowers, {
     Compartment: makeExecutionCompartment(globalThis),
     modules: {
       [DEFAULT_ATTENUATOR]: {

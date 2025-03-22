@@ -13,21 +13,6 @@ const tmp = require('tmp-promise')
 const stringify = require('json-stable-stringify')
 const { applySourceTransforms } = require('../src/sourceTransforms.js')
 
-module.exports = {
-  generateConfigFromFiles: generatePolicyFromFiles,
-  createScenarioFromScaffold,
-  runScenario,
-  createConfigForTest,
-  autoConfigForScenario,
-  prepareScenarioOnDisk,
-  convertOptsToArgs,
-  evaluateWithSourceUrl,
-  createHookedConsole,
-  fillInFileDetails,
-  functionToString,
-  runAndTestScenario,
-}
-
 /**
  * @typedef {Partial<import('../src/parseForPolicy').ParseForPolicyOpts> & {
  *   files: import('./scenario').NormalizedScenarioJSFile[]
@@ -507,7 +492,7 @@ async function prepareScenarioOnDisk({
         : defaultPaths.primary
     filesToWrite.push({
       file: primaryPath,
-      content: stringify(scenario.config),
+      content: `${stringify(scenario.config ?? {})}`,
     })
     if (scenario.configOverride) {
       const overridePath =
@@ -516,7 +501,7 @@ async function prepareScenarioOnDisk({
           : defaultPaths.override
       filesToWrite.push({
         file: overridePath,
-        content: stringify(scenario.configOverride),
+        content: `${stringify(scenario.configOverride ?? {})}`,
       })
     }
   }
@@ -646,7 +631,7 @@ function evaluateWithSourceUrl(filename, content, context) {
  * @param {Partial<GeneratePolicyFromFilesOpts>} [opts]
  * @returns {Promise<import('../src/schema').LavaMoatPolicy>}
  */
-async function createConfigForTest(testFn, opts = {}) {
+async function createPolicyForTest(testFn, opts = {}) {
   /** @type {import('./scenario').NormalizedScenarioJSFile[]} */
   const files = [
     {
@@ -727,4 +712,31 @@ async function runAndTestScenario(t, scenario, platformRunScenario) {
   }
   await scenario.checkPostRun(t, result, err, scenario)
   return result
+}
+
+/**
+ * @deprecated Use `createPolicyForTest`
+ */
+const createConfigForTest = createPolicyForTest
+
+/**
+ * @deprecated Use `generatePolicyFromFiles`
+ */
+const generateConfigFromFiles = generatePolicyFromFiles
+
+module.exports = {
+  generateConfigFromFiles,
+  generatePolicyFromFiles,
+  createScenarioFromScaffold,
+  runScenario,
+  createConfigForTest,
+  createPolicyForTest,
+  autoConfigForScenario,
+  prepareScenarioOnDisk,
+  convertOptsToArgs,
+  evaluateWithSourceUrl,
+  createHookedConsole,
+  fillInFileDetails,
+  functionToString,
+  runAndTestScenario,
 }
