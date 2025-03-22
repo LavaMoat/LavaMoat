@@ -46,7 +46,7 @@ export const toEndoURL = (url) =>
  * @returns {value is object}
  * @internal
  */
-export const isObject = (value) => value !== null && typeof value === 'object'
+export const isObject = (value) => Object(value) === value
 
 /**
  * Type guard for a non-array object
