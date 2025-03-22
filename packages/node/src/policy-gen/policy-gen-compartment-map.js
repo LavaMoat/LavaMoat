@@ -41,6 +41,7 @@ export const loadCompartmentMap = async (
     policyOverride,
     conditions,
     trustRoot,
+    log,
     ...captureOpts
   } = {}
 ) => {
