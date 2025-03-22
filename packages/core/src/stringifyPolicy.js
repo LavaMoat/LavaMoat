@@ -1,11 +1,21 @@
 const jsonStringify = require('json-stable-stringify')
 
+/**
+ * @import {LavaMoatPolicy} from './types.js'
+ */
+
 module.exports = {
+  /**
+   * @param {LavaMoatPolicy} policy
+   * @returns {string}
+   */
   jsonStringifySortedPolicy(policy) {
-    return jsonStringify(policy, {
-      space: 2,
-      cmp: diffFriendlyPolicyKeysComparator,
-    })
+    return /** @type {string} */ (
+      jsonStringify(policy, {
+        space: 2,
+        cmp: diffFriendlyPolicyKeysComparator,
+      })
+    )
   },
 }
 
