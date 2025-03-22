@@ -11,18 +11,18 @@ import {
   isObjectyObject,
   isReadNowPowers,
   isString,
-  toURLString,
+  toEndoURL,
 } from '../../src/util.js'
 
 test('toURLString - converts URL to URL-like string', (t) => {
   const url = new URL('file:///test/path')
-  t.is(toURLString(url), 'file:///test/path')
+  t.is(toEndoURL(url), 'file:///test/path')
 })
 
 test('toURLString - converts path to URL-like string', (t) => {
   const filepath = '/test/path'
   const expected = 'file:///test/path'
-  t.is(toURLString(filepath), expected)
+  t.is(toEndoURL(filepath), expected)
 })
 
 test('isObject - returns true for objects', (t) => {
