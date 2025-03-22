@@ -4,6 +4,7 @@
  * @packageDocumentation
  */
 
+import { GenerationError } from '../error.js'
 import { hasValue, isObject } from '../util.js'
 import { getCanonicalName } from './policy-gen-util.js'
 
@@ -71,7 +72,9 @@ const updateModuleSource = (moduleDescriptor, canonicalName) => {
       : undefined
 
   if (!moduleSource) {
-    throw new TypeError(`Unsupported module descriptor type; this is a bug`)
+    throw new GenerationError(
+      `Unsupported module descriptor type; this is a bug`
+    )
   }
 
   if (isFrozen(moduleSource)) {
@@ -90,7 +93,9 @@ const updateModuleSource = (moduleDescriptor, canonicalName) => {
   } else if (isSourceModuleDescriptor(moduleDescriptor)) {
     moduleDescriptor.source = moduleSource
   } else {
-    throw new TypeError(`Unsupported module descriptor type; this is a bug`)
+    throw new GenerationError(
+      `Unsupported module descriptor type; this is a bug`
+    )
   }
 }
 
@@ -169,7 +174,7 @@ const makeGetOverriddenResourceNames = (compartmentMap, resources) => {
         // not be importing the entry compartment. Also, the entry
         // compartment cannot have a canonical name, and we need a canonical
         // name to apply policy
-        throw new ReferenceError(
+        throw new GenerationError(
           `Unexpected entry compartment encountered in ${moduleDescriptorCompartment.label}; this is a bug`
         )
       }
