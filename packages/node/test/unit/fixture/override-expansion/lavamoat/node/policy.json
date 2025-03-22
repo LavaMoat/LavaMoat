@@ -1,0 +1,9 @@
+{
+  "resources": {
+    "winken": {
+      "builtin": {
+        "node:util.format": true
+      }
+    }
+  }
+}
