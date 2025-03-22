@@ -155,7 +155,7 @@ const main = async (args = hideBin(process.argv)) => {
     argv.entrypoint = argv.bin
       ? resolveExecutable(argv.entrypoint, { from: argv.root })
       : resolveEntrypoint(argv.entrypoint, argv.root)
-    if (entrypoint !== argv.entrypoint) {
+    if (hrPath(entrypoint) !== hrPath(argv.entrypoint)) {
       log.warning(`Resolved ${hrPath(entrypoint)} → ${hrPath(argv.entrypoint)}`)
     }
   }
