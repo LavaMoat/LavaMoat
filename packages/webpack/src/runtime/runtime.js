@@ -141,7 +141,7 @@ const enforcePolicy = (specifier, referrerResourceId, wrappedRequire) => {
 const theRealGlobalThis = globalThis
 /** @type {any} */
 let rootCompartmentGlobalThis
-const globalAliases = ['globalThis', 'window', 'self']
+const globalAliases = ['window', 'self', 'global', 'globalThis', 'top', 'frames', 'parent']
 /**
  * Installs globals for a specific policy resource.
  *

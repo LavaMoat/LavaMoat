@@ -1,6 +1,6 @@
 const fs = require('node:fs')
 const path = require('node:path')
-const { getDefaultPaths, jsonStringifySortedPolicy } = require('lavamoat-core')
+const { getDefaultPaths, jsonStringifySortedPolicy, DEFAULT_GLOBAL_THIS_REFS } = require('lavamoat-core')
 const { createModuleInspectorSpy } = require('./createModuleInspectorSpy.js')
 const { createPackageDataStream } = require('./createPackageDataStream.js')
 const createLavaPack = require('@lavamoat/lavapack')
@@ -131,6 +131,7 @@ function getConfigurationFromPluginOpts(pluginOpts) {
     'scuttleGlobalThis',
     'scuttleGlobalThisExceptions',
     'bundleWithPrecompiledModules',
+    'globalThisRefs',
     'policyDebug',
     'projectRoot',
     'resolve',
@@ -162,6 +163,10 @@ function getConfigurationFromPluginOpts(pluginOpts) {
 
   if (!pluginOpts.projectRoot) {
     pluginOpts.projectRoot = process.cwd()
+  }
+
+  if (!pluginOpts.globalThisRefs) {
+    pluginOpts.globalThisRefs = DEFAULT_GLOBAL_THIS_REFS
   }
 
   if (pluginOpts.scuttleGlobalThisExceptions) {

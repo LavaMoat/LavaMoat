@@ -28,6 +28,8 @@ module.exports = {
   runAndTestScenario,
 }
 
+const {hasOwn} = Object
+
 /**
  * @typedef {Partial<import('../src/parseForPolicy').ParseForPolicyOpts> & {
  *   files: import('./scenario').NormalizedScenarioJSFile[]
@@ -126,7 +128,7 @@ function createScenarioFromScaffold({
   files = {},
   builtin = {},
   context = {},
-  opts = { scuttleGlobalThis: {} },
+  opts = {},
   config,
   configOverride,
   defineEntry,
@@ -285,6 +287,10 @@ function createScenarioFromScaffold({
     configOverride
   )
 
+  if (!hasOwn(opts, 'scuttleGlobalThis')) {
+    opts.scuttleGlobalThis = {}
+  }
+
   return {
     ...extraArgs,
     name: name,
@@ -402,6 +408,7 @@ async function runScenario({ scenario, runWithPrecompiledModules = false }) {
   beforeCreateKernel(scenario)
   // create kernel
   const kernel = createKernel({
+    ...opts,
     runWithPrecompiledModules,
     lavamoatConfig,
     /** @param {string} id */

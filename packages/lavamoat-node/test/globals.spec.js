@@ -19,6 +19,47 @@ test('globals - has only the expected global circular refs', async (t) => {
   scenario.checkResult(t, testResult.sort(), scenario)
 })
 
+test('globals - circular refs taming', async (t) => {
+  'use strict'
+  const shared = {
+    context: Object.defineProperties(
+      Object.create(null), {
+        global: {get: () => ({})},
+      }),
+    config: {
+      resources: {
+        one: {
+          globals: {
+            global: true,
+            globalThis: true,
+            "console.warn": true,
+          },
+        },
+      },
+    },
+  }
+
+  const handlesAccess = createScenarioFromScaffold({
+    defineOne: () => {
+      module.exports = {
+        global: globalThis === globalThis.global,
+        globalThis: globalThis === globalThis.globalThis,
+        warn: typeof globalThis.global.console.warn,
+        info: typeof globalThis.global.console.info,
+      }
+    },
+    ...shared,
+  })
+
+  const testResult = await runScenario({ scenario: handlesAccess })
+  t.deepEqual(testResult, {
+    globalThis: true,
+    global:  true,
+    warn:  'function',
+    info: 'undefined',
+  })
+})
+
 test('globalRef - globalRef - check default containment', async (t) => {
   const scenario = createScenarioFromScaffold({
     name: 'globalRef - check default containment',
