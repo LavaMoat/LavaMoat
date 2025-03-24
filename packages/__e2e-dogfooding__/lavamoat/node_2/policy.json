@@ -1,0 +1,864 @@
+{
+  "resources": {
+    "@lavamoat/node>@endo/evasive-transform>@babel/traverse>@babel/code-frame": {
+      "globals": {
+        "console.warn": true,
+        "process": true
+      },
+      "packages": {
+        "@lavamoat/node>lavamoat-core>@babel/types>@babel/helper-validator-identifier": true,
+        "@lavamoat/node>@endo/evasive-transform>@babel/traverse>@babel/code-frame>js-tokens": true,
+        "@lavamoat/webpack>webpack>browserslist>update-browserslist-db>picocolors": true
+      }
+    },
+    "@lavamoat/node>@endo/evasive-transform>@babel/traverse>@babel/generator": {
+      "globals": {
+        "console.error": true,
+        "console.warn": true
+      },
+      "packages": {
+        "@lavamoat/node>lavamoat-core>@babel/types": true,
+        "@lavamoat/node>@endo/evasive-transform>@babel/traverse>@babel/generator>@jridgewell/gen-mapping": true,
+        "@lavamoat/webpack>webpack>terser-webpack-plugin>@jridgewell/trace-mapping": true,
+        "@lavamoat/node>@endo/evasive-transform>@babel/traverse>@babel/generator>jsesc": true
+      }
+    },
+    "@lavamoat/node>@endo/evasive-transform>@babel/traverse>@babel/template": {
+      "packages": {
+        "@lavamoat/node>@endo/evasive-transform>@babel/traverse>@babel/code-frame": true,
+        "@lavamoat/node>@endo/evasive-transform>@babel/parser": true,
+        "@lavamoat/node>lavamoat-core>@babel/types": true
+      }
+    },
+    "@lavamoat/node>@endo/evasive-transform>@babel/traverse": {
+      "globals": {
+        "console.log": true
+      },
+      "packages": {
+        "@lavamoat/node>@endo/evasive-transform>@babel/traverse>@babel/code-frame": true,
+        "@lavamoat/node>@endo/evasive-transform>@babel/traverse>@babel/generator": true,
+        "@lavamoat/node>@endo/evasive-transform>@babel/parser": true,
+        "@lavamoat/node>@endo/evasive-transform>@babel/traverse>@babel/template": true,
+        "@lavamoat/node>lavamoat-core>@babel/types": true,
+        "@lavamoat/node>@endo/evasive-transform>@babel/traverse>debug": true,
+        "@lavamoat/node>@endo/evasive-transform>@babel/traverse>globals": true
+      }
+    },
+    "@lavamoat/node>lavamoat-core>@babel/types": {
+      "globals": {
+        "console.warn": true,
+        "process.env": true
+      },
+      "packages": {
+        "@lavamoat/node>lavamoat-core>@babel/types>@babel/helper-string-parser": true,
+        "@lavamoat/node>lavamoat-core>@babel/types>@babel/helper-validator-identifier": true
+      }
+    },
+    "@lavamoat/node>@endo/evasive-transform>@babel/traverse>@babel/generator>@jridgewell/gen-mapping": {
+      "packages": {
+        "@lavamoat/node>@endo/evasive-transform>@babel/traverse>@babel/generator>@jridgewell/gen-mapping>@jridgewell/set-array": true,
+        "@lavamoat/webpack>webpack>terser-webpack-plugin>@jridgewell/trace-mapping>@jridgewell/sourcemap-codec": true,
+        "@lavamoat/webpack>webpack>terser-webpack-plugin>@jridgewell/trace-mapping": true
+      }
+    },
+    "@lavamoat/webpack>webpack>terser-webpack-plugin>terser>@jridgewell/source-map": {
+      "packages": {
+        "@lavamoat/node>@endo/evasive-transform>@babel/traverse>@babel/generator>@jridgewell/gen-mapping": true,
+        "@lavamoat/webpack>webpack>terser-webpack-plugin>@jridgewell/trace-mapping": true
+      }
+    },
+    "@lavamoat/webpack>webpack>terser-webpack-plugin>@jridgewell/trace-mapping>@jridgewell/sourcemap-codec": {
+      "globals": {
+        "Buffer": true,
+        "TextDecoder": true
+      }
+    },
+    "@lavamoat/webpack>webpack>terser-webpack-plugin>@jridgewell/trace-mapping": {
+      "packages": {
+        "@lavamoat/webpack>webpack>terser-webpack-plugin>@jridgewell/trace-mapping>@jridgewell/resolve-uri": true,
+        "@lavamoat/webpack>webpack>terser-webpack-plugin>@jridgewell/trace-mapping>@jridgewell/sourcemap-codec": true
+      }
+    },
+    "@lavamoat/webpack>@lavamoat/aa": {
+      "builtin": {
+        "node:fs.lstatSync": true,
+        "node:fs.readFileSync": true,
+        "node:fs.realpathSync": true,
+        "node:path.dirname": true,
+        "node:path.join": true,
+        "node:path.relative": true
+      },
+      "packages": {
+        "resolve": true
+      }
+    },
+    "@lavamoat/webpack": {
+      "builtin": {
+        "node:assert": true,
+        "node:fs.mkdirSync": true,
+        "node:fs.readFileSync": true,
+        "node:fs.writeFileSync": true,
+        "node:path.join": true
+      },
+      "globals": {
+        "__dirname": true,
+        "console.error": true,
+        "console.trace": true,
+        "console.warn": true,
+        "process._rawDebug": true
+      },
+      "packages": {
+        "@lavamoat/webpack>@lavamoat/aa": true,
+        "@lavamoat/webpack>browser-resolve": true,
+        "@lavamoat/node>lavamoat-core": true,
+        "webpack": true,
+        "@lavamoat/webpack>webpack": true
+      }
+    },
+    "@lavamoat/webpack>webpack>@webassemblyjs/ast": {
+      "globals": {
+        "console.warn": true
+      },
+      "packages": {
+        "@lavamoat/webpack>webpack>@webassemblyjs/ast>@webassemblyjs/helper-numbers": true,
+        "@lavamoat/webpack>webpack>@webassemblyjs/ast>@webassemblyjs/helper-wasm-bytecode": true
+      }
+    },
+    "@lavamoat/webpack>webpack>@webassemblyjs/ast>@webassemblyjs/helper-numbers": {
+      "packages": {
+        "@lavamoat/webpack>webpack>@webassemblyjs/ast>@webassemblyjs/helper-numbers>@webassemblyjs/floating-point-hex-parser": true,
+        "@lavamoat/webpack>webpack>@webassemblyjs/wasm-parser>@webassemblyjs/helper-api-error": true,
+        "@lavamoat/webpack>webpack>@webassemblyjs/ast>@webassemblyjs/helper-numbers>@xtuc/long": true
+      }
+    },
+    "@lavamoat/webpack>webpack>@webassemblyjs/wasm-edit>@webassemblyjs/helper-wasm-section": {
+      "packages": {
+        "@lavamoat/webpack>webpack>@webassemblyjs/ast": true,
+        "@lavamoat/webpack>webpack>@webassemblyjs/wasm-edit>@webassemblyjs/helper-buffer": true,
+        "@lavamoat/webpack>webpack>@webassemblyjs/ast>@webassemblyjs/helper-wasm-bytecode": true,
+        "@lavamoat/webpack>webpack>@webassemblyjs/wasm-edit>@webassemblyjs/wasm-gen": true
+      }
+    },
+    "@lavamoat/webpack>webpack>@webassemblyjs/wasm-parser>@webassemblyjs/ieee754": {
+      "packages": {
+        "@lavamoat/webpack>webpack>@webassemblyjs/wasm-parser>@webassemblyjs/ieee754>@xtuc/ieee754": true
+      }
+    },
+    "@lavamoat/webpack>webpack>@webassemblyjs/wasm-parser>@webassemblyjs/leb128": {
+      "packages": {
+        "@lavamoat/webpack>webpack>@webassemblyjs/ast>@webassemblyjs/helper-numbers>@xtuc/long": true
+      }
+    },
+    "@lavamoat/webpack>webpack>@webassemblyjs/wasm-edit": {
+      "packages": {
+        "@webassemblyjs/ast": true,
+        "@lavamoat/webpack>webpack>@webassemblyjs/ast": true,
+        "@lavamoat/webpack>webpack>@webassemblyjs/wasm-edit>@webassemblyjs/helper-buffer": true,
+        "@lavamoat/webpack>webpack>@webassemblyjs/ast>@webassemblyjs/helper-wasm-bytecode": true,
+        "@lavamoat/webpack>webpack>@webassemblyjs/wasm-edit>@webassemblyjs/helper-wasm-section": true,
+        "@webassemblyjs/wasm-gen": true,
+        "@lavamoat/webpack>webpack>@webassemblyjs/wasm-edit>@webassemblyjs/wasm-gen": true,
+        "@lavamoat/webpack>webpack>@webassemblyjs/wasm-edit>@webassemblyjs/wasm-opt": true,
+        "@lavamoat/webpack>webpack>@webassemblyjs/wasm-parser": true
+      }
+    },
+    "@lavamoat/webpack>webpack>@webassemblyjs/wasm-edit>@webassemblyjs/wasm-gen": {
+      "packages": {
+        "@lavamoat/webpack>webpack>@webassemblyjs/ast>@webassemblyjs/helper-wasm-bytecode": true,
+        "@lavamoat/webpack>webpack>@webassemblyjs/wasm-parser>@webassemblyjs/ieee754": true,
+        "@lavamoat/webpack>webpack>@webassemblyjs/wasm-parser>@webassemblyjs/leb128": true,
+        "@lavamoat/webpack>webpack>@webassemblyjs/wasm-parser>@webassemblyjs/utf8": true
+      }
+    },
+    "@lavamoat/webpack>webpack>@webassemblyjs/wasm-edit>@webassemblyjs/wasm-opt": {
+      "packages": {
+        "@lavamoat/webpack>webpack>@webassemblyjs/ast": true,
+        "@lavamoat/webpack>webpack>@webassemblyjs/wasm-edit>@webassemblyjs/helper-buffer": true,
+        "@webassemblyjs/wasm-gen": true,
+        "@lavamoat/webpack>webpack>@webassemblyjs/wasm-parser": true
+      }
+    },
+    "@lavamoat/webpack>webpack>@webassemblyjs/wasm-parser": {
+      "globals": {
+        "console.log": true,
+        "console.warn": true
+      },
+      "packages": {
+        "@lavamoat/webpack>webpack>@webassemblyjs/ast": true,
+        "@lavamoat/webpack>webpack>@webassemblyjs/wasm-parser>@webassemblyjs/helper-api-error": true,
+        "@lavamoat/webpack>webpack>@webassemblyjs/ast>@webassemblyjs/helper-wasm-bytecode": true,
+        "@lavamoat/webpack>webpack>@webassemblyjs/wasm-parser>@webassemblyjs/ieee754": true,
+        "@lavamoat/webpack>webpack>@webassemblyjs/wasm-parser>@webassemblyjs/leb128": true,
+        "@lavamoat/webpack>webpack>@webassemblyjs/wasm-parser>@webassemblyjs/utf8": true
+      }
+    },
+    "@lavamoat/webpack>webpack>@webassemblyjs/ast>@webassemblyjs/helper-numbers>@xtuc/long": {
+      "globals": {
+        "WebAssembly.Instance": true,
+        "WebAssembly.Module": true
+      }
+    },
+    "@lavamoat/webpack>webpack>acorn": {
+      "globals": {
+        "console": true
+      }
+    },
+    "@lavamoat/webpack>webpack>terser-webpack-plugin>schema-utils>ajv-formats": {
+      "packages": {
+        "ajv": true,
+        "@lavamoat/webpack>webpack>terser-webpack-plugin>schema-utils>ajv": true
+      }
+    },
+    "@lavamoat/webpack>webpack>terser-webpack-plugin>schema-utils>ajv-keywords": {
+      "globals": {
+        "Buffer": true
+      },
+      "packages": {
+        "ajv": true,
+        "@lavamoat/webpack>webpack>schema-utils>ajv>fast-deep-equal": true
+      }
+    },
+    "@lavamoat/webpack>webpack>schema-utils>ajv-keywords": {
+      "globals": {
+        "Buffer": true,
+        "console.error": true,
+        "console.warn": true
+      }
+    },
+    "@lavamoat/webpack>webpack>terser-webpack-plugin>schema-utils>ajv": {
+      "globals": {
+        "console": true
+      },
+      "packages": {
+        "@lavamoat/webpack>webpack>schema-utils>ajv>fast-deep-equal": true,
+        "@lavamoat/webpack>webpack>terser-webpack-plugin>schema-utils>ajv>fast-uri": true,
+        "@lavamoat/webpack>webpack>terser-webpack-plugin>schema-utils>ajv>json-schema-traverse": true
+      }
+    },
+    "@lavamoat/webpack>webpack>schema-utils>ajv": {
+      "globals": {
+        "console": true
+      },
+      "packages": {
+        "@lavamoat/webpack>webpack>schema-utils>ajv>fast-deep-equal": true,
+        "@lavamoat/webpack>webpack>schema-utils>ajv>fast-json-stable-stringify": true,
+        "@lavamoat/webpack>webpack>schema-utils>ajv>json-schema-traverse": true,
+        "@lavamoat/webpack>webpack>schema-utils>ajv>uri-js": true
+      }
+    },
+    "@lavamoat/webpack>browser-resolve": {
+      "builtin": {
+        "fs.readFile": true,
+        "fs.readFileSync": true,
+        "path": true
+      },
+      "globals": {
+        "__dirname": true,
+        "process.platform": true
+      },
+      "packages": {
+        "@lavamoat/webpack>@lavamoat/aa>resolve": true
+      }
+    },
+    "@lavamoat/webpack>webpack>browserslist": {
+      "builtin": {
+        "fs.existsSync": true,
+        "fs.readFileSync": true,
+        "fs.statSync": true,
+        "path.basename": true,
+        "path.dirname": true,
+        "path.join": true,
+        "path.relative": true,
+        "path.resolve": true
+      },
+      "globals": {
+        "console.warn": true,
+        "process.env": true,
+        "process.versions.node": true
+      },
+      "packages": {
+        "caniuse-lite": true,
+        "electron-to-chromium": true,
+        "@lavamoat/webpack>webpack>browserslist>node-releases": true
+      }
+    },
+    "@lavamoat/webpack>json-stable-stringify>call-bind>call-bind-apply-helpers": {
+      "packages": {
+        "@lavamoat/webpack>json-stable-stringify>call-bind>call-bind-apply-helpers>es-errors": true,
+        "function-bind": true
+      }
+    },
+    "@lavamoat/webpack>json-stable-stringify>call-bind": {
+      "packages": {
+        "@lavamoat/webpack>json-stable-stringify>call-bind>call-bind-apply-helpers": true,
+        "@lavamoat/webpack>json-stable-stringify>call-bind>es-define-property": true,
+        "@lavamoat/webpack>json-stable-stringify>call-bind>get-intrinsic": true,
+        "@lavamoat/webpack>json-stable-stringify>call-bind>set-function-length": true
+      }
+    },
+    "@lavamoat/webpack>webpack>chrome-trace-event": {
+      "builtin": {
+        "stream.Readable": true
+      },
+      "globals": {
+        "process.hrtime": true,
+        "process.pid": true
+      }
+    },
+    "@lavamoat/node>lavamoat-core>merge-deep>clone-deep": {
+      "packages": {
+        "@lavamoat/node>lavamoat-core>merge-deep>clone-deep>for-own": true,
+        "@lavamoat/node>lavamoat-core>merge-deep>clone-deep>lazy-cache": true
+      }
+    },
+    "@lavamoat/node>@endo/evasive-transform>@babel/traverse>debug": {
+      "builtin": {
+        "tty.isatty": true,
+        "util.deprecate": true,
+        "util.formatWithOptions": true,
+        "util.inspect": true
+      },
+      "globals": {
+        "console": true,
+        "document": true,
+        "localStorage": true,
+        "navigator": true,
+        "process": true
+      },
+      "packages": {
+        "ms": true
+      }
+    },
+    "@lavamoat/webpack>json-stable-stringify>call-bind>set-function-length>define-data-property": {
+      "packages": {
+        "@lavamoat/webpack>json-stable-stringify>call-bind>es-define-property": true,
+        "@lavamoat/webpack>json-stable-stringify>call-bind>call-bind-apply-helpers>es-errors": true,
+        "@lavamoat/webpack>json-stable-stringify>call-bind>get-intrinsic>gopd": true
+      }
+    },
+    "@lavamoat/webpack>json-stable-stringify>call-bind>get-intrinsic>get-proto>dunder-proto": {
+      "packages": {
+        "@lavamoat/webpack>json-stable-stringify>call-bind>call-bind-apply-helpers": true,
+        "@lavamoat/webpack>json-stable-stringify>call-bind>get-intrinsic>gopd": true
+      }
+    },
+    "@lavamoat/webpack>webpack>enhanced-resolve": {
+      "builtin": {
+        "module.findPnpApi": true,
+        "path.basename": true,
+        "path.posix.normalize": true,
+        "path.win32.normalize": true,
+        "process.nextTick": true,
+        "process.versions.pnp": true
+      },
+      "globals": {
+        "Buffer.isBuffer": true,
+        "URL": true,
+        "clearTimeout": true,
+        "setTimeout": true
+      },
+      "packages": {
+        "@lavamoat/webpack>webpack>graceful-fs": true,
+        "@lavamoat/webpack>webpack>tapable": true
+      }
+    },
+    "@lavamoat/webpack>webpack>es-module-lexer": {
+      "globals": {
+        "Buffer": true,
+        "WebAssembly.Instance": true,
+        "WebAssembly.Module": true,
+        "WebAssembly.compile": true,
+        "WebAssembly.instantiate": true,
+        "atob": true
+      }
+    },
+    "@lavamoat/webpack>webpack>eslint-scope": {
+      "builtin": {
+        "assert": true
+      },
+      "packages": {
+        "@lavamoat/webpack>webpack>eslint-scope>esrecurse": true,
+        "@lavamoat/webpack>webpack>eslint-scope>estraverse": true
+      }
+    },
+    "@lavamoat/webpack>webpack>eslint-scope>esrecurse": {
+      "packages": {
+        "@lavamoat/webpack>webpack>eslint-scope>esrecurse>estraverse": true
+      }
+    },
+    "@lavamoat/webpack>webpack>events": {
+      "globals": {
+        "console": true
+      }
+    },
+    "@lavamoat/webpack>webpack>terser-webpack-plugin>schema-utils>ajv>fast-uri": {
+      "globals": {
+        "URL.domainToASCII": true
+      }
+    },
+    "@lavamoat/node>lavamoat-core>merge-deep>clone-deep>for-own": {
+      "packages": {
+        "@lavamoat/node>lavamoat-core>merge-deep>clone-deep>for-own>for-in": true
+      }
+    },
+    "@lavamoat/webpack>json-stable-stringify>call-bind>get-intrinsic": {
+      "globals": {
+        "AggregateError": true,
+        "FinalizationRegistry": true,
+        "Float16Array": true,
+        "WeakRef": true
+      },
+      "packages": {
+        "@lavamoat/webpack>json-stable-stringify>call-bind>call-bind-apply-helpers": true,
+        "@lavamoat/webpack>json-stable-stringify>call-bind>es-define-property": true,
+        "@lavamoat/webpack>json-stable-stringify>call-bind>call-bind-apply-helpers>es-errors": true,
+        "@lavamoat/webpack>json-stable-stringify>call-bind>get-intrinsic>es-object-atoms": true,
+        "function-bind": true,
+        "@lavamoat/webpack>json-stable-stringify>call-bind>get-intrinsic>get-proto": true,
+        "@lavamoat/webpack>json-stable-stringify>call-bind>get-intrinsic>gopd": true,
+        "@lavamoat/webpack>json-stable-stringify>call-bind>get-intrinsic>has-symbols": true,
+        "@lavamoat/webpack>@lavamoat/aa>resolve>is-core-module>hasown": true,
+        "@lavamoat/webpack>json-stable-stringify>call-bind>get-intrinsic>math-intrinsics": true
+      }
+    },
+    "@lavamoat/webpack>json-stable-stringify>call-bind>get-intrinsic>get-proto": {
+      "packages": {
+        "@lavamoat/webpack>json-stable-stringify>call-bind>get-intrinsic>get-proto>dunder-proto": true,
+        "@lavamoat/webpack>json-stable-stringify>call-bind>get-intrinsic>es-object-atoms": true
+      }
+    },
+    "@lavamoat/webpack>webpack>graceful-fs": {
+      "builtin": {
+        "assert.equal": true,
+        "constants.O_SYMLINK": true,
+        "constants.O_WRONLY": true,
+        "constants.hasOwnProperty": true,
+        "fs": true,
+        "stream.Stream.call": true,
+        "util": true
+      },
+      "globals": {
+        "clearTimeout": true,
+        "console.error": true,
+        "process": true,
+        "setTimeout": true
+      }
+    },
+    "@lavamoat/webpack>json-stable-stringify>call-bind>set-function-length>has-property-descriptors": {
+      "packages": {
+        "@lavamoat/webpack>json-stable-stringify>call-bind>es-define-property": true
+      }
+    },
+    "@lavamoat/webpack>@lavamoat/aa>resolve>is-core-module>hasown": {
+      "packages": {
+        "function-bind": true
+      }
+    },
+    "@lavamoat/webpack>@lavamoat/aa>resolve>is-core-module": {
+      "globals": {
+        "process.versions": true
+      },
+      "packages": {
+        "@lavamoat/webpack>@lavamoat/aa>resolve>is-core-module>hasown": true
+      }
+    },
+    "@lavamoat/webpack>webpack>terser-webpack-plugin>jest-worker": {
+      "builtin": {
+        "child_process": true,
+        "os": true,
+        "path": true,
+        "stream": true,
+        "worker_threads": true
+      },
+      "globals": {
+        "__dirname": true,
+        "clearTimeout": true,
+        "process": true,
+        "setTimeout": true
+      },
+      "packages": {
+        "@lavamoat/webpack>webpack>terser-webpack-plugin>jest-worker>merge-stream": true,
+        "@lavamoat/webpack>webpack>terser-webpack-plugin>jest-worker>supports-color": true
+      }
+    },
+    "@lavamoat/node>@endo/evasive-transform>@babel/traverse>@babel/generator>jsesc": {
+      "globals": {
+        "Buffer": true
+      }
+    },
+    "@lavamoat/webpack>webpack>json-parse-even-better-errors": {
+      "globals": {
+        "Buffer.isBuffer": true
+      }
+    },
+    "@lavamoat/node>lavamoat-core>json-stable-stringify": {
+      "packages": {
+        "@lavamoat/webpack>json-stable-stringify>call-bind": true,
+        "@lavamoat/webpack>json-stable-stringify>isarray": true,
+        "@lavamoat/webpack>json-stable-stringify>jsonify": true,
+        "@lavamoat/webpack>json-stable-stringify>object-keys": true
+      }
+    },
+    "@lavamoat/node>lavamoat-core>merge-deep>kind-of": {
+      "packages": {
+        "@lavamoat/node>lavamoat-core>merge-deep>kind-of>is-buffer": true
+      }
+    },
+    "@lavamoat/node>lavamoat-core": {
+      "builtin": {
+        "node:events": true,
+        "node:fs.readFileSync": true,
+        "node:fs/promises.writeFile": true,
+        "node:path.extname": true,
+        "node:path.join": true
+      },
+      "globals": {
+        "__dirname": true,
+        "console.error": true,
+        "console.warn": true,
+        "define": true
+      },
+      "packages": {
+        "@lavamoat/node>lavamoat-core>json-stable-stringify": true,
+        "lavamoat-tofu": true,
+        "@lavamoat/node>lavamoat-core>lavamoat-tofu": true,
+        "@lavamoat/node>lavamoat-core>merge-deep": true
+      }
+    },
+    "@lavamoat/node>lavamoat-core>lavamoat-tofu": {
+      "globals": {
+        "console.log": true
+      },
+      "packages": {
+        "@lavamoat/node>@endo/evasive-transform>@babel/parser": true,
+        "@lavamoat/node>@endo/evasive-transform>@babel/traverse": true
+      }
+    },
+    "@lavamoat/node>lavamoat-core>merge-deep>clone-deep>lazy-cache": {
+      "globals": {
+        "process.env.TRAVIS": true,
+        "process.env.UNLAZY": true
+      }
+    },
+    "@lavamoat/webpack>webpack>loader-runner": {
+      "builtin": {
+        "fs": true,
+        "url": true
+      },
+      "globals": {
+        "Buffer.from": true,
+        "Buffer.isBuffer": true,
+        "console.error": true,
+        "process.nextTick": true,
+        "setImmediate": true
+      }
+    },
+    "@lavamoat/node>lavamoat-core>merge-deep": {
+      "packages": {
+        "@lavamoat/node>lavamoat-core>merge-deep>arr-union": true,
+        "@lavamoat/node>lavamoat-core>merge-deep>clone-deep": true,
+        "@lavamoat/node>lavamoat-core>merge-deep>kind-of": true
+      }
+    },
+    "@lavamoat/webpack>webpack>terser-webpack-plugin>jest-worker>merge-stream": {
+      "builtin": {
+        "stream.PassThrough": true
+      }
+    },
+    "@lavamoat/webpack>webpack>mime-types": {
+      "builtin": {
+        "path.extname": true
+      },
+      "packages": {
+        "@lavamoat/webpack>webpack>mime-types>mime-db": true
+      }
+    },
+    "@lavamoat/webpack>webpack>neo-async": {
+      "globals": {
+        "clearTimeout": true,
+        "console": true,
+        "define": true,
+        "process": true,
+        "setImmediate": true,
+        "setTimeout": true
+      }
+    },
+    "@lavamoat/webpack>@lavamoat/aa>resolve>path-parse": {
+      "globals": {
+        "process.platform": true
+      }
+    },
+    "@lavamoat/webpack>webpack>browserslist>update-browserslist-db>picocolors": {
+      "globals": {
+        "process": true
+      }
+    },
+    "@lavamoat/webpack>webpack>terser-webpack-plugin>serialize-javascript>randombytes": {
+      "builtin": {
+        "crypto.randomBytes": true
+      }
+    },
+    "@lavamoat/webpack>@lavamoat/aa>resolve": {
+      "builtin": {
+        "fs.readFile": true,
+        "fs.readFileSync": true,
+        "fs.realpath": true,
+        "fs.realpathSync": true,
+        "fs.stat": true,
+        "fs.statSync": true,
+        "os.homedir": true,
+        "path.dirname": true,
+        "path.join": true,
+        "path.parse": true,
+        "path.relative": true,
+        "path.resolve": true
+      },
+      "globals": {
+        "process.env.HOME": true,
+        "process.env.HOMEDRIVE": true,
+        "process.env.HOMEPATH": true,
+        "process.env.LNAME": true,
+        "process.env.LOGNAME": true,
+        "process.env.USER": true,
+        "process.env.USERNAME": true,
+        "process.env.USERPROFILE": true,
+        "process.getuid": true,
+        "process.nextTick": true,
+        "process.platform": true
+      },
+      "packages": {
+        "@lavamoat/webpack>@lavamoat/aa>resolve>is-core-module": true,
+        "@lavamoat/webpack>@lavamoat/aa>resolve>path-parse": true
+      }
+    },
+    "@lavamoat/webpack>webpack>terser-webpack-plugin>schema-utils": {
+      "globals": {
+        "process": true
+      },
+      "packages": {
+        "@lavamoat/webpack>webpack>terser-webpack-plugin>schema-utils>ajv-formats": true,
+        "@lavamoat/webpack>webpack>terser-webpack-plugin>schema-utils>ajv-keywords": true,
+        "@lavamoat/webpack>webpack>terser-webpack-plugin>schema-utils>ajv": true
+      }
+    },
+    "@lavamoat/webpack>webpack>schema-utils": {
+      "globals": {
+        "process": true
+      },
+      "packages": {
+        "ajv": true,
+        "@lavamoat/webpack>webpack>schema-utils>ajv-keywords": true,
+        "@lavamoat/webpack>webpack>schema-utils>ajv": true
+      }
+    },
+    "@lavamoat/webpack>webpack>terser-webpack-plugin>serialize-javascript": {
+      "globals": {
+        "URL": true
+      },
+      "packages": {
+        "@lavamoat/webpack>webpack>terser-webpack-plugin>serialize-javascript>randombytes": true
+      }
+    },
+    "@lavamoat/webpack>json-stable-stringify>call-bind>set-function-length": {
+      "packages": {
+        "@lavamoat/webpack>json-stable-stringify>call-bind>set-function-length>define-data-property": true,
+        "@lavamoat/webpack>json-stable-stringify>call-bind>call-bind-apply-helpers>es-errors": true,
+        "@lavamoat/webpack>json-stable-stringify>call-bind>get-intrinsic": true,
+        "@lavamoat/webpack>json-stable-stringify>call-bind>get-intrinsic>gopd": true,
+        "@lavamoat/webpack>json-stable-stringify>call-bind>set-function-length>has-property-descriptors": true
+      }
+    },
+    "@lavamoat/webpack>webpack>terser-webpack-plugin>jest-worker>supports-color": {
+      "globals": {
+        "navigator.userAgent": true
+      }
+    },
+    "@lavamoat/webpack>webpack>tapable": {
+      "builtin": {
+        "util.deprecate": true
+      }
+    },
+    "@lavamoat/webpack>webpack>terser-webpack-plugin": {
+      "builtin": {
+        "os.availableParallelism": true,
+        "os.cpus": true,
+        "path.dirname": true,
+        "path.relative": true
+      },
+      "globals": {
+        "Buffer.isBuffer": true,
+        "__dirname": true,
+        "__filename": true,
+        "process.stderr.write": true,
+        "process.stdout.write": true
+      },
+      "packages": {
+        "@lavamoat/webpack>webpack>terser-webpack-plugin>@jridgewell/trace-mapping": true,
+        "@lavamoat/webpack>webpack>terser-webpack-plugin>jest-worker": true,
+        "@lavamoat/webpack>webpack>terser-webpack-plugin>schema-utils": true,
+        "@lavamoat/webpack>webpack>terser-webpack-plugin>serialize-javascript": true,
+        "@lavamoat/webpack>webpack>terser-webpack-plugin>terser": true
+      }
+    },
+    "@lavamoat/webpack>webpack>terser-webpack-plugin>terser": {
+      "globals": {
+        "Buffer": true,
+        "atob": true,
+        "btoa": true,
+        "console.log": true,
+        "console.warn": true,
+        "process": true,
+        "require": true
+      },
+      "packages": {
+        "@lavamoat/webpack>webpack>terser-webpack-plugin>terser>@jridgewell/source-map": true
+      }
+    },
+    "@lavamoat/webpack>webpack>schema-utils>ajv>uri-js": {
+      "globals": {
+        "define": true
+      }
+    },
+    "@lavamoat/webpack>webpack>watchpack": {
+      "builtin": {
+        "events.EventEmitter": true,
+        "fs.readlinkSync": true,
+        "fs.watch": true,
+        "os.platform": true,
+        "path.basename": true,
+        "path.dirname": true,
+        "path.join": true,
+        "path.resolve": true
+      },
+      "globals": {
+        "clearTimeout": true,
+        "console.error": true,
+        "process.env.WATCHPACK_POLLING": true,
+        "process.env.WATCHPACK_RECURSIVE_WATCHER_LOGGING": true,
+        "process.env.WATCHPACK_WATCHER_LIMIT": true,
+        "process.nextTick": true,
+        "process.platform": true,
+        "process.stderr.write": true,
+        "setTimeout": true
+      },
+      "packages": {
+        "@lavamoat/webpack>webpack>glob-to-regexp": true,
+        "@lavamoat/webpack>webpack>graceful-fs": true
+      }
+    },
+    "@lavamoat/webpack>webpack>webpack-sources": {
+      "globals": {
+        "Buffer.byteLength": true,
+        "Buffer.concat": true,
+        "Buffer.from": true,
+        "Buffer.isBuffer": true,
+        "process": true
+      }
+    },
+    "@lavamoat/webpack>webpack": {
+      "builtin": {
+        "buffer.constants.MAX_LENGTH": true,
+        "crypto": true,
+        "fs.readFileSync": true,
+        "fs.statSync": true,
+        "http": true,
+        "https": true,
+        "inspector": true,
+        "module.builtinModules": true,
+        "path.basename": true,
+        "path.dirname": true,
+        "path.extname": true,
+        "path.isAbsolute": true,
+        "path.join": true,
+        "path.posix.dirname": true,
+        "path.posix.isAbsolute": true,
+        "path.posix.join": true,
+        "path.posix.relative": true,
+        "path.resolve": true,
+        "path.sep": true,
+        "path.win32.dirname": true,
+        "path.win32.isAbsolute": true,
+        "path.win32.join": true,
+        "path.win32.relative": true,
+        "querystring.parse": true,
+        "stream.pipeline": true,
+        "url.URL": true,
+        "url.fileURLToPath": true,
+        "url.pathToFileURL": true,
+        "util.deprecate": true,
+        "util.format": true,
+        "util.inspect.custom": true,
+        "vm.createContext": true,
+        "vm.runInContext": true,
+        "vm.runInThisContext": true,
+        "zlib.constants.BROTLI_MODE_TEXT": true,
+        "zlib.constants.BROTLI_PARAM_DISABLE_LITERAL_CONTEXT_MODELING": true,
+        "zlib.constants.BROTLI_PARAM_MODE": true,
+        "zlib.constants.BROTLI_PARAM_QUALITY": true,
+        "zlib.constants.BROTLI_PARAM_SIZE_HINT": true,
+        "zlib.constants.Z_BEST_SPEED": true,
+        "zlib.createBrotliCompress": true,
+        "zlib.createBrotliDecompress": true,
+        "zlib.createGunzip": true,
+        "zlib.createGzip": true,
+        "zlib.createInflate": true
+      },
+      "globals": {
+        "Buffer.allocUnsafe": true,
+        "Buffer.allocUnsafeSlow": true,
+        "Buffer.byteLength": true,
+        "Buffer.concat": true,
+        "Buffer.from": true,
+        "Buffer.isBuffer": true,
+        "Buffer.prototype.readBigUInt64LE": true,
+        "Buffer.prototype.writeBigUInt64LE": true,
+        "URL": true,
+        "WebAssembly.Instance": true,
+        "WebAssembly.Module": true,
+        "__dirname": true,
+        "__webpack_require__": true,
+        "clearTimeout": true,
+        "console.clear": true,
+        "console.error": true,
+        "console.log": true,
+        "console.profile": true,
+        "console.profileEnd": true,
+        "console.warn": true,
+        "process.cwd": true,
+        "process.env": true,
+        "process.hrtime": true,
+        "process.nextTick": true,
+        "process.stderr": true,
+        "process.versions.modules": true,
+        "process.versions.pnp": true,
+        "setImmediate": true,
+        "setTimeout": true
+      },
+      "packages": {
+        "@lavamoat/webpack>webpack>@webassemblyjs/ast": true,
+        "@lavamoat/webpack>webpack>@webassemblyjs/wasm-edit": true,
+        "@lavamoat/webpack>webpack>@webassemblyjs/wasm-parser": true,
+        "acorn-import-attributes": true,
+        "@lavamoat/webpack>webpack>acorn": true,
+        "@lavamoat/webpack>webpack>browserslist": true,
+        "@lavamoat/webpack>webpack>chrome-trace-event": true,
+        "@lavamoat/webpack>webpack>enhanced-resolve": true,
+        "@lavamoat/webpack>webpack>es-module-lexer": true,
+        "eslint-scope": true,
+        "@lavamoat/webpack>webpack>eslint-scope": true,
+        "@lavamoat/webpack>webpack>events": true,
+        "@lavamoat/webpack>webpack>glob-to-regexp": true,
+        "@lavamoat/webpack>webpack>graceful-fs": true,
+        "@lavamoat/webpack>webpack>json-parse-even-better-errors": true,
+        "@lavamoat/webpack>webpack>loader-runner": true,
+        "@lavamoat/webpack>webpack>mime-types": true,
+        "@lavamoat/webpack>webpack>neo-async": true,
+        "@lavamoat/webpack>webpack>schema-utils": true,
+        "@lavamoat/webpack>webpack>tapable": true,
+        "@lavamoat/webpack>webpack>terser-webpack-plugin": true,
+        "@lavamoat/webpack>webpack>watchpack": true,
+        "@lavamoat/webpack>webpack>webpack-sources": true
+      }
+    }
+  }
+}
