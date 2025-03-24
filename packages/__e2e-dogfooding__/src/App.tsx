@@ -1,5 +1,5 @@
 /** @jsx h */
-import { Fragment, h } from 'preact';
+import { FunctionComponent, h } from 'preact';
 
 interface ButtonProps {
   onClick?: () => void;
@@ -14,7 +14,7 @@ const App = () => {
   return (
     <div>
       <h1>Hello, Preact with TypeScript!</h1>
-      <button onClick={() => console.log('clicked')}>Click Me</button>
+      <Button onClick={() => alert('Gotcha!')}>Click Me</Button>
     </div>
   );
 };
