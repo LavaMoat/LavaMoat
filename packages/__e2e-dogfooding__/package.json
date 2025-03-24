@@ -3,8 +3,12 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "webpack --mode production",
-    "test": "echo run the webpack setup here and assert it actually worked"
+    "lavamoat": "lavamoat --dev --bin webpack",
+    "lavamoat:generate": "lavamoat generate --dev --bin webpack",
+    "start": "npm run lavamoat && echo 'open ./dist/index.html'",
+    "test": "npm run lavamoat && echo '[Build succeeded] \n TODO: validate bundle runs'",
+    "test:prep": "npm run lavamoat:generate || echo 'prep failed'",
+    "webpack": "webpack --mode production"
   },
   "peerDependencies": {
     "@lavamoat/node": "*",
@@ -17,6 +21,7 @@
     "@babel/preset-typescript": "7.26.0",
     "babel-loader": "9.2.1",
     "css-loader": "7.1.2",
+    "graceful-fs": "4.2.11",
     "html-webpack-plugin": "5.6.3",
     "mini-css-extract-plugin": "2.9.2",
     "preact": "^10.5.14",
