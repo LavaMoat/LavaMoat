@@ -1,6 +1,7 @@
 const path = require('node:path')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+const LavaMoatPlugin = require('@lavamoat/webpack')
 
 module.exports = {
   entry: './src/index.tsx',
@@ -36,7 +37,11 @@ module.exports = {
       },
       {
         test: /\.css$/,
-        use: [MiniCssExtractPlugin.loader, 'css-loader'],
+        use: [
+          MiniCssExtractPlugin.loader,
+          'css-loader',
+          LavaMoatPlugin.exclude, // Exclude CSS from being wrapped in Compartments
+        ],
       },
     ],
   },
@@ -47,6 +52,15 @@ module.exports = {
       'react-dom': 'preact/compat',
     },
   },
-  plugins: [new HtmlWebpackPlugin(), new MiniCssExtractPlugin()],
+  plugins: [
+    new LavaMoatPlugin({
+      policyLocation: path.resolve(__dirname, 'lavamoat/webpack'),
+      generatePolicy: false,
+      HtmlWebpackPluginInterop: true, // Automatically add lockdown script tag
+      runChecks: true,
+    }),
+    new HtmlWebpackPlugin(),
+    new MiniCssExtractPlugin(),
+  ],
   devtool: 'source-map',
 }
