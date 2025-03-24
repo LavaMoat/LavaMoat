@@ -5,10 +5,12 @@
   "scripts": {
     "lavamoat": "lavamoat --dev --bin webpack",
     "lavamoat:generate": "lavamoat generate --dev --bin webpack",
+    "lavamoat_2": "lavamoat --policy ./lavamoat/node_2/policy.json build.js",
+    "lavamoat_2:generate": "lavamoat generate --policy ./lavamoat/node_2/policy.json build.js",
     "start": "npm run lavamoat && echo 'open ./dist/index.html'",
     "test": "npm run lavamoat && echo '[Build succeeded] \n TODO: validate bundle runs'",
     "test:prep": "npm run lavamoat:generate || echo 'prep failed'",
-    "webpack": "webpack --mode production"
+    "webpack": "webpack"
   },
   "peerDependencies": {
     "@lavamoat/node": "*",
