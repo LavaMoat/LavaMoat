@@ -6,6 +6,21 @@
   * dependencies
     * lavamoat-tofu bumped from ^7.2.1 to ^7.2.2
 
+## [16.3.3](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v16.3.2...lavamoat-core-v16.3.3) (2025-03-25)
+
+
+### Bug Fixes
+
+* **core:** block circular global object endowments ([#1505](https://github.com/LavaMoat/LavaMoat/issues/1505)) ([6745a0e](https://github.com/LavaMoat/LavaMoat/commit/6745a0edee85171e4062aaec31d7f25bf3a97e46))
+* **deps:** update babel monorepo to v7.26.10 ([#1561](https://github.com/LavaMoat/LavaMoat/issues/1561)) ([2757717](https://github.com/LavaMoat/LavaMoat/commit/275771754578647346da1ece0f86afaabdd5de36))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-tofu bumped from ^8.0.6 to ^8.0.7
+
 ## [16.3.2](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v16.3.1...lavamoat-core-v16.3.2) (2025-03-11)
 
 
