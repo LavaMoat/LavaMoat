@@ -1,9 +1,0 @@
-{
-  "resources": {
-    "winken": {
-      "packages": {
-        "blinken": true
-      }
-    }
-  }
-}
