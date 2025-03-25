@@ -18,6 +18,20 @@
   * dependencies
     * lavamoat-core bumped from ^15.2.0 to ^15.2.1
 
+## [0.9.1-beta.0](https://github.com/LavaMoat/LavaMoat/compare/webpack-v0.9.0-beta.0...webpack-v0.9.1-beta.0) (2025-03-25)
+
+
+### Bug Fixes
+
+* **core:** block circular global object endowments ([#1505](https://github.com/LavaMoat/LavaMoat/issues/1505)) ([6745a0e](https://github.com/LavaMoat/LavaMoat/commit/6745a0edee85171e4062aaec31d7f25bf3a97e46))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-core bumped from ^16.3.2 to ^16.3.3
+
 ## [0.9.0-beta.0](https://github.com/LavaMoat/LavaMoat/compare/webpack-v0.8.1-beta.0...webpack-v0.9.0-beta.0) (2025-03-11)
 
 
