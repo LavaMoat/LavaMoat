@@ -20,9 +20,20 @@ const {
   // @ts-ignore cycle causes this to be an error sometimes
 } = require('lavamoat-tofu')
 const { mergePolicy } = require('./mergePolicy')
-const { DEFAULT_GLOBAL_THIS_REFS } = require('./constants')
+const { DEFAULT_GLOBAL_THIS_REFS, POLICY_WRITE } = require('./constants')
 
 const rootSlug = '$root$'
+
+const {
+  entries,
+  fromEntries,
+  keys,
+  values,
+  getOwnPropertyNames,
+  prototype: objectPrototype,
+  assign,
+  create,
+} = Object
 
 /**
  * Symbols that look like globals but aren't; indexed by source type.
@@ -60,7 +71,7 @@ function createModuleInspector(opts) {
   let root
 
   /** @type {ModuleInspector} */
-  const inspector = Object.assign(new EventEmitter(), {
+  const inspector = assign(new EventEmitter(), {
     /** @type {InspectModuleFn} */
     inspectModule: (moduleRecord, opts2) => {
       inspectModule(moduleRecord, { ...opts, ...opts2 })
@@ -170,7 +181,7 @@ function createModuleInspector(opts) {
     moduleIdToModuleRecord.set(specifier, moduleRecord)
     // initialize mapping from package to module
     if (!packageToModules.has(packageName)) {
-      packageToModules.set(packageName, Object.create(null))
+      packageToModules.set(packageName, create(null))
     }
     const packageModules = packageToModules.get(packageName)
     packageModules[specifier] = moduleRecord
@@ -310,7 +321,7 @@ function createModuleInspector(opts) {
   function inspectForGlobals(ast, moduleRecord, packageName, includeDebugInfo) {
     const moduleRefs = MODULE_REFS[ast.program.sourceType]
 
-    const globalObjPrototypeRefs = Object.getOwnPropertyNames(Object.prototype)
+    const globalObjPrototypeRefs = getOwnPropertyNames(objectPrototype)
     const foundGlobals = inspectGlobals(ast, {
       // browserify commonjs scope
       ignoredRefs: [...moduleRefs, ...globalObjPrototypeRefs],
@@ -328,9 +339,20 @@ function createModuleInspector(opts) {
     }
     // agregate globals
     if (!packageToGlobals.has(packageName)) {
-      packageToGlobals.set(packageName, [])
+      packageToGlobals.set(packageName, new Map())
     }
     let packageGlobals = packageToGlobals.get(packageName)
+
+    // XXX temporary fix while we do not have writable global property
+    // support at runtime
+    // https://github.com/LavaMoat/LavaMoat/issues/1554
+    for (const [path, value] of [...packageGlobals, ...foundGlobals]) {
+      const pathParts = path.split('.')
+      if (pathParts.length > 1 && value === POLICY_WRITE) {
+        packageGlobals.set(pathParts[0], true)
+      }
+    }
+
     packageGlobals = mergeGlobalsPolicy(packageGlobals, foundGlobals)
     packageToGlobals.set(packageName, packageGlobals)
   }
@@ -351,7 +373,7 @@ function createModuleInspector(opts) {
     includeDebugInfo
   ) {
     // get all requested names that resolve to isBuiltin
-    const namesForBuiltins = Object.entries(moduleRecord.importMap)
+    const namesForBuiltins = entries(moduleRecord.importMap)
       .filter(([, resolvedName]) => isBuiltin(resolvedName))
       .map(([requestedName]) => requestedName)
     const esmModuleBuiltins = inspectEsmImports(ast, namesForBuiltins)
@@ -422,7 +444,7 @@ function createModuleInspector(opts) {
         moduleToPackageFallback,
       })
       if (packageDeps.length) {
-        packages = Object.fromEntries(
+        packages = fromEntries(
           packageDeps.map((depPackageName) => [depPackageName, true])
         )
       }
@@ -431,7 +453,7 @@ function createModuleInspector(opts) {
         const globalMap = mapToObj(packageToGlobals.get(packageName))
         // prefer "true" over "read" for clearer difference between
         // read/write syntax highlighting
-        Object.keys(globalMap).forEach((key) => {
+        keys(globalMap).forEach((key) => {
           if (globalMap[key] === 'read') {
             globalMap[key] = true
           }
@@ -520,29 +542,27 @@ function aggregateDeps({
 }) {
   const deps = new Set()
   // get all dep package from the "packageModules" collection of modules
-  Object.values(packageModules).forEach((moduleRecord) => {
-    Object.entries(moduleRecord.importMap).forEach(
-      ([requestedName, specifier]) => {
-        // skip entries where resolution was skipped
-        if (!specifier) {
-          return
-        }
-        // get packageName from module record, or guess
-        const moduleRecord = moduleIdToModuleRecord.get(specifier)
-        if (moduleRecord) {
-          // builtin modules are ignored here, handled elsewhere
-          if (moduleRecord.type === 'builtin') {
-            return
-          }
-          deps.add(moduleRecord.packageName)
-          return
-        }
-        // moduleRecord missing, guess package name
-        const packageName =
-          moduleToPackageFallback(requestedName) || `<unknown:${requestedName}>`
-        deps.add(packageName)
+  values(packageModules).forEach((moduleRecord) => {
+    entries(moduleRecord.importMap).forEach(([requestedName, specifier]) => {
+      // skip entries where resolution was skipped
+      if (!specifier) {
+        return
       }
-    )
+      // get packageName from module record, or guess
+      const moduleRecord = moduleIdToModuleRecord.get(specifier)
+      if (moduleRecord) {
+        // builtin modules are ignored here, handled elsewhere
+        if (moduleRecord.type === 'builtin') {
+          return
+        }
+        deps.add(moduleRecord.packageName)
+        return
+      }
+      // moduleRecord missing, guess package name
+      const packageName =
+        moduleToPackageFallback(requestedName) || `<unknown:${requestedName}>`
+      deps.add(packageName)
+    })
     // ensure the package is not listed as its own dependency
     deps.delete(moduleRecord.packageName)
   })
