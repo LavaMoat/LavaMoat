@@ -52,10 +52,6 @@
     ;templateRequire('ses')
 
     const lockdownOptions = {
-      // gives a semi-high resolution timer
-      dateTaming: 'unsafe',
-      // this is introduces non-determinism, but is otherwise safe
-      mathTaming: 'unsafe',
       // lets code observe call stack, but easier debuggability
       errorTaming: 'unsafe',
       // shows the full call stack
