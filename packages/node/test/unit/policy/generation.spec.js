@@ -58,6 +58,50 @@ test(
   }
 )
 
+test('override expansion', testPolicyForJSON, 'override-expansion.json', {
+  policyOverride: {
+    resources: {
+      winken: {
+        packages: {
+          // is dynamically required by winken
+          'winken>blinken': true,
+          // is not required by anything at all, but is present in the fixture's package.json
+          fugs: true,
+        },
+      },
+    },
+  },
+  expected: {
+    resources: {
+      'winken>blinken': {
+        builtin: {
+          'node:util.format': true,
+        },
+      },
+      'winken>fred': {
+        builtin: {
+          'node:util.format': true,
+        },
+      },
+      fugs: {
+        builtin: {
+          'node:util.format': true,
+        },
+      },
+      winken: {
+        builtin: {
+          'node:util.format': true,
+        },
+        packages: {
+          fugs: true,
+          'winken>blinken': true,
+          'winken>fred': true,
+        },
+      },
+    },
+  },
+})
+
 test('hashbang evasion', testPolicyForJSON, 'hashbang.json')
 
 test(
