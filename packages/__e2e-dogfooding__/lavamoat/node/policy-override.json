@@ -1,0 +1,14 @@
+{
+  "resources": {
+    "graceful-fs": {
+      "globals": {
+        "___graceful-fs_queue": "write",
+        "___graceful-fs_previous": "write"
+      },
+      "builtin": {
+        "fs.___graceful-fs_queue": "write",
+        "fs.___graceful-fs_previous": "write"
+      }
+    }
+  }
+}
