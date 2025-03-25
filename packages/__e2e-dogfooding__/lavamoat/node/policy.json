@@ -16,6 +16,29 @@
         "process": true,
         "setTimeout": true
       }
+    },
+    "webpack": {
+      "builtin": {
+        "child_process.spawn": true,
+        "module.globalPaths": true,
+        "path.dirname": true,
+        "path.join": true,
+        "path.resolve": true,
+        "readline.createInterface": true
+      },
+      "globals": {
+        "__dirname": true,
+        "__import__": true,
+        "console.error": true,
+        "console.log": true,
+        "process": true
+      },
+      "packages": {
+        "graceful-fs": true
+      }
     }
+  },
+  "root": {
+    "usePolicy": "webpack"
   }
 }
