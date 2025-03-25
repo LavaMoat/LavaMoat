@@ -177,6 +177,7 @@ export type CanonicalName = LiteralUnion<'$root' | '<ATTENUATORS>', string>
  */
 export type RequiredReadNowPowers = ReadonlyArray<
   {
+    // eslint-disable-next-line @typescript-eslint/ban-types
     [K in ReadNowPowersProp]-?: {} extends Pick<ReadNowPowers, K> ? never : K
   }[ReadNowPowersProp]
 >
