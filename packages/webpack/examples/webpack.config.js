@@ -33,8 +33,6 @@ module.exports = {
     new LavaMoat({
       lockdown: {
         errorTaming: 'unsafe',
-        mathTaming: 'unsafe',
-        dateTaming: 'unsafe',
         consoleTaming: 'unsafe',
       },
       generatePolicy: true,
