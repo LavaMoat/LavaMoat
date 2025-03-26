@@ -6,8 +6,6 @@ const path = require('path')
 const defaultLmOptions = {
   lockdown: {
     errorTaming: 'unsafe',
-    mathTaming: 'unsafe',
-    dateTaming: 'unsafe',
     consoleTaming: 'unsafe',
   },
   policyLocation: path.resolve(__dirname, 'policy'),
