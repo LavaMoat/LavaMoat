@@ -65,9 +65,26 @@ export interface NodeLocation {
  * @deprecated - Use `true` instead
  */
 export type GlobalPolicyRead = 'read'
+
+/**
+ * A writable global property
+ */
 export type GlobalPolicyWrite = 'write'
 
-export type GlobalPolicyValue = GlobalPolicyRead | GlobalPolicyWrite | boolean
+/**
+ * A property which can be defined via {@link Object.defineProperty} and/or
+ * {@link Object.defineProperties}
+ */
+export type GlobalPolicyRedefine = 'redefine'
+
+/**
+ * Possible values for global policy
+ */
+export type GlobalPolicyValue =
+  | boolean
+  | GlobalPolicyRead
+  | GlobalPolicyRedefine
+  | GlobalPolicyWrite
 
 /**
  * Describe the resources available to your application and direct dependencies
