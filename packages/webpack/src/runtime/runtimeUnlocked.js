@@ -1,7 +1,7 @@
 /// <reference path="./lavamoat.d.ts" />
 /* global LAVAMOAT */
 
-const { create, freeze, defineProperty } = Object
+const { create, assign, freeze, defineProperty } = Object
 const warn = typeof console === 'object' ? console.warn : () => {}
 warn('LavaMoat: using unlocked runtime')
 
@@ -12,10 +12,21 @@ const { NAME_globalThis, NAME_scopeTerminator, NAME_runtimeHandler } =
  * Wraps the webpack runtime with Lavamoat security features.
  *
  * @param {string} resourceId - The identifier of the resource.
- * @param {any} runtimeKit - The runtime kit containing bits from the webpack
+ * @param {object} runtimeKit - The runtime kit containing bits from the webpack
  *   runtime.
- * @returns {Object} - An object containing the wrapped runtime and other
- *   related properties.
+ * @param {any} [runtimeKit.__webpack_require__] - The webpack require function.
+ * @param {object} [runtimeKit.module] - The module object.
+ * @param {any} [runtimeKit.exports] - The exports object.
+ * @returns {{
+ *   [NAME_scopeTerminator]: Object
+ *   [NAME_runtimeHandler]: Object
+ *   [NAME_globalThis]: Object
+ * }}
+ *   An object containing:
+ *
+ *   - [NAME_scopeTerminator]: nothing
+ *   - [NAME_runtimeHandler]: The frozen runtime handler, unchanged
+ *   - [NAME_globalThis]: unprotected globals
  */
 const lavamoatRuntimeWrapper = (resourceId, runtimeKit) => {
   let { module } = runtimeKit
@@ -36,11 +47,13 @@ const lavamoatRuntimeWrapper = (resourceId, runtimeKit) => {
   })
   freeze(runtimeHandler)
 
-  return {
-    [NAME_scopeTerminator]: create(null),
-    [NAME_runtimeHandler]: runtimeHandler,
-    [NAME_globalThis]: globalThis, // TODO: apply some defensive coding to the global here to give at least some benefits to the user
-  }
+  return freeze(
+    assign(create(null), {
+      [NAME_scopeTerminator]: create(null),
+      [NAME_runtimeHandler]: runtimeHandler,
+      [NAME_globalThis]: globalThis, // TODO: apply some defensive coding to the global here to give at least some benefits to the user
+    })
+  )
 }
 
 // defaultExport is getting assigned to __webpack_require__._LM_

@@ -577,7 +577,7 @@ class LavaMoatPlugin {
                   runtimeChunks = [
                     {
                       name: 'ENUM',
-                      file: path.join(__dirname, './ENUM.json'),
+                      file: require.resolve('./ENUM.json'),
                       json: true,
                     },
                     {
@@ -593,17 +593,17 @@ class LavaMoatPlugin {
                   runtimeChunks = [
                     {
                       name: 'root',
-                      data: identifierLookup.root || null,
+                      data: identifierLookup.root,
                       json: true,
                     },
                     {
                       name: 'idmap',
-                      data: identifierLookup.identifiersForModuleIds || null,
+                      data: identifierLookup.identifiersForModuleIds,
                       json: true,
                     },
                     {
                       name: 'unenforceable',
-                      data: identifierLookup.unenforceableModuleIds || null,
+                      data: identifierLookup.unenforceableModuleIds,
                       json: true,
                     },
                     {
@@ -635,7 +635,7 @@ class LavaMoatPlugin {
                     { name: 'policy', data: policyData, json: true },
                     {
                       name: 'ENUM',
-                      file: path.join(__dirname, './ENUM.json'),
+                      file: require.resolve('./ENUM.json'),
                       json: true,
                     },
                     {
@@ -644,7 +644,7 @@ class LavaMoatPlugin {
                     },
                     {
                       name: 'runtime',
-                      file: path.join(__dirname, './runtime/runtime.js'),
+                      file: require.resolve('./runtime/runtime.js'),
                     },
                   ]
   
