@@ -481,10 +481,7 @@ class LavaMoatPlugin {
                     },
                     {
                       name: 'runtime',
-                      file: path.join(
-                        __dirname,
-                        './runtime/runtimeUnlocked.js'
-                      ),
+                      file: require.resolve('./runtime/runtimeUnlocked.js'),
                     },
                   ]
                 } else {
@@ -512,7 +509,7 @@ class LavaMoatPlugin {
                     { name: 'policy', data: policyData, json: true },
                     {
                       name: 'ENUM',
-                      file: path.join(__dirname, './ENUM.json'),
+                      file: path.join(__dirname, 'ENUM.json'),
                       json: true,
                     },
                     {
@@ -521,7 +518,7 @@ class LavaMoatPlugin {
                     },
                     {
                       name: 'runtime',
-                      file: path.join(__dirname, './runtime/runtime.js'),
+                      file: path.join(__dirname, 'runtime', 'runtime.js'),
                     },
                   ]
                 }
