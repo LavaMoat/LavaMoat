@@ -128,7 +128,7 @@ const enforcePolicy = (specifier, referrerResourceId, wrappedRequire) => {
       )
     }
     throw Error(
-      `Requested specifier '${specifier}' is not allowed as a builtin and not a known dependency of '${referrerResourceId}'. Regenerate policy or add it to policy-override.json.`
+      `Requested specifier '${specifier}' is not allowed as a builtin and is not a known dependency of '${referrerResourceId}'; regenerate policy or add it to policy-override.json.`
     )
   }
   // allow imports internal to the package

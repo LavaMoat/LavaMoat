@@ -28,6 +28,7 @@ test('webpack/node.js - policy shape', (t) => {
 
 test('webpack/node.js - bundle runs without throwing', (t) => {
   let capture
+  t.plan(3)
   t.notThrows(() => {
     runScriptWithSES(t.context.bundle, {
       console: {
