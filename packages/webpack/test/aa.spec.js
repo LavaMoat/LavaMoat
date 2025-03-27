@@ -1,15 +1,15 @@
-const test = require('ava')
+const test = /** @type {import('ava').TestFn} */ (require('ava'))
 const { generateIdentifierLookup } = require('../src/buildtime/aa')
 
 test('aa - generateIdentifierLookup', (t) => {
   const lookupTools = generateIdentifierLookup({
     paths: [
-      '/home/user/app/app.js',
-      '/home/user/app/node_modules/leftpad/index.js',
-      '/home/user/app/node_modules/fast-json-patch/index.mjs',
-      '/home/user/app/node_modules/@ethereumjs/util/dist/index.js',
-      '/home/user/app/node_modules/@ethereumjs/util/node_modules/ethereum-cryptography/dist/index.js',
-      '/home/user/app/node_modules/fast-json-patch/module/duplex.mjs',
+      '/app.js',
+      '/node_modules/leftpad/index.js',
+      '/node_modules/fast-json-patch/index.mjs',
+      '/node_modules/@ethereumjs/util/dist/index.js',
+      '/node_modules/@ethereumjs/util/node_modules/ethereum-cryptography/dist/index.js',
+      '/node_modules/fast-json-patch/module/duplex.mjs',
     ],
     policy: {
       resources: {
@@ -61,13 +61,12 @@ test('aa - generateIdentifierLookup', (t) => {
     },
     canonicalNameMap: new Map(
       Object.entries({
-        '/home/user/app': '$root$',
-        '/home/user/app/node_modules/leftpad/': 'leftpad',
-        '/home/user/app/node_modules/fast-json-patch': 'fast-json-patch',
-        '/home/user/app/node_modules/fast-json-patch/module': 'fast-json-patch',
-        '/home/user/app/node_modules/@ethereumjs/util/dist/':
-          '@ethereumjs/util',
-        '/home/user/app/node_modules/@ethereumjs/util/node_modules/ethereum-cryptography/dist/':
+        '/': '$root$',
+        '/node_modules/leftpad/': 'leftpad',
+        '/node_modules/fast-json-patch': 'fast-json-patch',
+        '/node_modules/fast-json-patch/module': 'fast-json-patch',
+        '/node_modules/@ethereumjs/util/dist/': '@ethereumjs/util',
+        '/node_modules/@ethereumjs/util/node_modules/ethereum-cryptography/dist/':
           '@ethereumjs/util>ethereum-cryptography',
       })
     ),

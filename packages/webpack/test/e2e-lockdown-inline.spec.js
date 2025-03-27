@@ -1,4 +1,4 @@
-const test = require('ava')
+const test = /** @type {import('ava').TestFn} */ (require('ava'))
 const { scaffold, runScript } = require('./scaffold.js')
 const { makeConfig } = require('./fixtures/main/webpack.config.js')
 

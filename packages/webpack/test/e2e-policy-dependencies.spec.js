@@ -1,4 +1,4 @@
-const test = require('ava')
+const test = /** @type {import('ava').TestFn} */ (require('ava'))
 const path = require('node:path')
 // eslint-disable-next-line ava/no-import-test-files
 const { scaffold, runScriptWithSES } = require('./scaffold.js')
