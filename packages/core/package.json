@@ -46,7 +46,7 @@
     "type-fest": "4.30.0"
   },
   "devDependencies": {
-    "@types/json-stable-stringify": "1.1.0",
+    "@types/json-stable-stringify": "1.2.0",
     "@types/merge-deep": "3.0.3",
     "tmp-promise": "3.0.3"
   },
