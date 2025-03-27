@@ -1,8 +1,8 @@
 diff --git a/node_modules/graceful-fs/graceful-fs.js b/node_modules/graceful-fs/graceful-fs.js
-index 8d5b89e..67c6a67 100644
+index 8d5b89e..f6ed3a6 100644
 --- a/node_modules/graceful-fs/graceful-fs.js
 +++ b/node_modules/graceful-fs/graceful-fs.js
-@@ -5,44 +5,29 @@ var clone = require('./clone.js')
+@@ -5,44 +5,25 @@ var clone = require('./clone.js')
  
  var util = require('util')
  
@@ -26,12 +26,10 @@ index 8d5b89e..67c6a67 100644
  function publishQueue(context, queue) {
 -  Object.defineProperty(context, gracefulQueue, {
 -    get: function() {
-+  Object.defineProperty(context, '___graceful-fs_queue', {
-+    get: function () {
-       return queue
+-      return queue
 -    }
-+    },
-   })
+-  })
++  context['___graceful-fs_queue'] = queue
  }
  
  var debug = noop
@@ -55,7 +53,7 @@ index 8d5b89e..67c6a67 100644
    publishQueue(fs, queue)
  
    // Patch fs.close/closeSync to shared queue version, because we need
-@@ -50,56 +35,55 @@ if (!fs[gracefulQueue]) {
+@@ -50,56 +31,55 @@ if (!fs[gracefulQueue]) {
    // This is essential when multiple graceful-fs instances are
    // in play at the same time.
    fs.close = (function (fs$close) {
@@ -127,7 +125,7 @@ index 8d5b89e..67c6a67 100644
    // Everything that references the open() function needs to be in here
    polyfills(fs)
    fs.gracefulify = patch
-@@ -108,19 +92,23 @@ function patch (fs) {
+@@ -108,19 +88,23 @@ function patch (fs) {
    fs.createWriteStream = createWriteStream
    var fs$readFile = fs.readFile
    fs.readFile = readFile
@@ -158,7 +156,7 @@ index 8d5b89e..67c6a67 100644
          }
        })
      }
-@@ -128,62 +116,73 @@ function patch (fs) {
+@@ -128,62 +112,73 @@ function patch (fs) {
  
    var fs$writeFile = fs.writeFile
    fs.writeFile = writeFile
@@ -255,7 +253,7 @@ index 8d5b89e..67c6a67 100644
          }
        })
      }
-@@ -192,25 +191,27 @@ function patch (fs) {
+@@ -192,25 +187,27 @@ function patch (fs) {
    var fs$readdir = fs.readdir
    fs.readdir = readdir
    var noReaddirOptionVersions = /^v[0-5]\./
@@ -297,7 +295,7 @@ index 8d5b89e..67c6a67 100644
        return function (err, files) {
          if (err && (err.code === 'EMFILE' || err.code === 'ENFILE'))
            enqueue([
-@@ -218,14 +219,12 @@ function patch (fs) {
+@@ -218,14 +215,12 @@ function patch (fs) {
              [path, options, cb],
              err,
              startTime || Date.now(),
@@ -315,7 +313,7 @@ index 8d5b89e..67c6a67 100644
          }
        }
      }
-@@ -257,7 +256,7 @@ function patch (fs) {
+@@ -257,7 +252,7 @@ function patch (fs) {
        ReadStream = val
      },
      enumerable: true,
@@ -324,7 +322,7 @@ index 8d5b89e..67c6a67 100644
    })
    Object.defineProperty(fs, 'WriteStream', {
      get: function () {
-@@ -267,7 +266,7 @@ function patch (fs) {
+@@ -267,7 +262,7 @@ function patch (fs) {
        WriteStream = val
      },
      enumerable: true,
@@ -333,7 +331,7 @@ index 8d5b89e..67c6a67 100644
    })
  
    // legacy names
-@@ -280,7 +279,7 @@ function patch (fs) {
+@@ -280,7 +275,7 @@ function patch (fs) {
        FileReadStream = val
      },
      enumerable: true,
@@ -342,7 +340,7 @@ index 8d5b89e..67c6a67 100644
    })
    var FileWriteStream = WriteStream
    Object.defineProperty(fs, 'FileWriteStream', {
-@@ -291,22 +290,20 @@ function patch (fs) {
+@@ -291,22 +286,20 @@ function patch (fs) {
        FileWriteStream = val
      },
      enumerable: true,
@@ -370,7 +368,7 @@ index 8d5b89e..67c6a67 100644
  
          that.emit('error', err)
        } else {
-@@ -317,14 +314,14 @@ function patch (fs) {
+@@ -317,14 +310,14 @@ function patch (fs) {
      })
    }
  
@@ -387,7 +385,7 @@ index 8d5b89e..67c6a67 100644
      var that = this
      open(that.path, that.flags, that.mode, function (err, fd) {
        if (err) {
-@@ -337,29 +334,33 @@ function patch (fs) {
+@@ -337,29 +330,33 @@ function patch (fs) {
      })
    }
  
@@ -430,7 +428,7 @@ index 8d5b89e..67c6a67 100644
          }
        })
      }
-@@ -368,9 +369,9 @@ function patch (fs) {
+@@ -368,9 +365,9 @@ function patch (fs) {
    return fs
  }
  
@@ -442,7 +440,7 @@ index 8d5b89e..67c6a67 100644
    retry()
  }
  
-@@ -380,29 +381,28 @@ var retryTimer
+@@ -380,29 +377,28 @@ var retryTimer
  // reset the startTime and lastTime to now
  // this resets the start of the 60 second overall timeout as well as the
  // delay between attempts so that we'll retry these jobs sooner
@@ -480,7 +478,7 @@ index 8d5b89e..67c6a67 100644
    var fn = elem[0]
    var args = elem[1]
    // these items may be unset if they were added by an older graceful-fs
-@@ -419,8 +419,7 @@ function retry () {
+@@ -419,8 +415,7 @@ function retry () {
      // it's been more than 60 seconds total, bail now
      debug('TIMEOUT', fn.name, args)
      var cb = args.pop()
@@ -490,7 +488,7 @@ index 8d5b89e..67c6a67 100644
    } else {
      // the amount of time between the last attempt and right now
      var sinceAttempt = Date.now() - lastTime
-@@ -437,7 +436,7 @@ function retry () {
+@@ -437,7 +432,7 @@ function retry () {
      } else {
        // if we can't do this job yet, push it to the end of the queue
        // and let the next iteration check again
