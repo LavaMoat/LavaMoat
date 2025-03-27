@@ -1,11 +1,25 @@
 const jsonStringify = require('json-stable-stringify')
 
+/**
+ * @import {LavaMoatPolicy, LavaMoatPolicyOverrides, LavaMoatPolicyDebug} from './schema'
+ */
+
 module.exports = {
+  /**
+   * Stringifies a policy, sorting the keys in a diff-friendly way.
+   *
+   * @param {LavaMoatPolicy | LavaMoatPolicyOverrides | LavaMoatPolicyDebug} policy
+   * @returns {string}
+   */
   jsonStringifySortedPolicy(policy) {
-    return jsonStringify(policy, {
+    const result = jsonStringify(policy, {
       space: 2,
       cmp: diffFriendlyPolicyKeysComparator,
     })
+    if (result === undefined) {
+      throw new TypeError('Failed to stringify policy')
+    }
+    return result
   },
 }
 
