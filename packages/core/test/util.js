@@ -5,12 +5,12 @@ const {
   LavamoatModuleRecord,
   generateKernel,
   getDefaultPaths,
+  jsonStringifySortedPolicy,
 } = require('../src')
 const mergeDeep = require('merge-deep')
 const { runInContext, createContext } = require('node:vm')
 const path = require('node:path')
 const tmp = require('tmp-promise')
-const stringify = require('json-stable-stringify')
 const { applySourceTransforms } = require('../src/sourceTransforms.js')
 
 module.exports = {
@@ -28,7 +28,7 @@ module.exports = {
   runAndTestScenario,
 }
 
-const {hasOwn} = Object
+const { hasOwn } = Object
 
 /**
  * @typedef {Partial<import('../src/parseForPolicy').ParseForPolicyOpts> & {
@@ -506,7 +506,7 @@ async function prepareScenarioOnDisk({
     ;({ path: projectDir } = await tmp.dir())
   }
   const filesToWrite = Object.values(scenario.files ?? {})
-  if (!scenario.opts?.writeAutoPolicy) {
+  if (!scenario.opts?.writeAutoPolicy && scenario.config) {
     const defaultPaths = getDefaultPaths(policyName)
     const primaryPath =
       typeof scenario.opts?.policyPath === 'string'
@@ -514,7 +514,7 @@ async function prepareScenarioOnDisk({
         : defaultPaths.primary
     filesToWrite.push({
       file: primaryPath,
-      content: stringify(scenario.config),
+      content: jsonStringifySortedPolicy(scenario.config),
     })
     if (scenario.configOverride) {
       const overridePath =
@@ -523,7 +523,7 @@ async function prepareScenarioOnDisk({
           : defaultPaths.override
       filesToWrite.push({
         file: overridePath,
-        content: stringify(scenario.configOverride),
+        content: jsonStringifySortedPolicy(scenario.configOverride),
       })
     }
   }
