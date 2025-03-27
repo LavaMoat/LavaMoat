@@ -1,4 +1,4 @@
-const test = require('ava')
+const test = /** @type {import('ava').TestFn} */ (require('ava'))
 const { scaffold, runScriptWithSES } = require('./scaffold.js')
 const { makeConfig } = require('./fixtures/main/webpack.config.js')
 const path = require('node:path')
@@ -7,7 +7,6 @@ test('webpack/policy-errors - policy-overrides get applied', async (t) => {
   const webpackConfig = makeConfig({
     emitPolicySnapshot: true,
     policyLocation: path.resolve(__dirname, 'fixtures/main/policy-broken'),
-    diagnosticsVerbosity: 1,
   })
   const build = await scaffold(webpackConfig)
   t.throws(
@@ -26,7 +25,6 @@ test('webpack/policy-errors - policy-overrides get applied on generated', async 
     generatePolicy: true,
     emitPolicySnapshot: true,
     policyLocation: path.resolve(__dirname, 'fixtures/main/policy-broken'),
-    diagnosticsVerbosity: 1,
   })
   const build = await scaffold(webpackConfig)
   t.throws(
@@ -45,7 +43,6 @@ test('webpack/policy-errors - denies globals', async (t) => {
     generatePolicy: false,
     emitPolicySnapshot: true,
     policyLocation: path.resolve(__dirname, 'fixtures/main/policy-deny'),
-    diagnosticsVerbosity: 1,
   })
   webpackConfig.entry = {
     app: './hack2.js',

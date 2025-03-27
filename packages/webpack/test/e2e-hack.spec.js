@@ -1,4 +1,4 @@
-const test = require('ava')
+const test = /** @type {import('ava').TestFn} */ (require('ava'))
 // eslint-disable-next-line ava/no-import-test-files
 const { scaffold, runScriptWithSES } = require('./scaffold.js')
 const webpackConfigDefault = require('./fixtures/main/webpack.config.js')

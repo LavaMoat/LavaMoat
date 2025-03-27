@@ -1,4 +1,4 @@
-const test = require('ava')
+const test = /** @type {import('ava').TestFn} */ (require('ava'))
 const path = require('node:path')
 // eslint-disable-next-line ava/no-import-test-files
 const { scaffold, runScriptWithSES } = require('./scaffold.js')
@@ -10,7 +10,6 @@ test.before(async (t) => {
     generatePolicy: false,
     isBuiltin,
     emitPolicySnapshot: true,
-    diagnosticsVerbosity: 1,
     policyLocation: path.resolve(
       __dirname,
       'fixtures/main/policy-dependencies'
