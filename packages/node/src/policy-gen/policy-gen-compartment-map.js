@@ -40,12 +40,14 @@ export const loadCompartmentMap = async (
   {
     readPowers = defaultReadPowers,
     policyOverride,
-    conditions,
+    conditions = new Set(),
     trustRoot,
     log = defaultLog,
     ...captureOpts
   } = {}
 ) => {
+  conditions.add('node')
+
   const entryPoint = toEndoURL(entrypointPath)
   const nodeCompartmentMap = await mapNodeModules(readPowers, entryPoint, {
     conditions,
