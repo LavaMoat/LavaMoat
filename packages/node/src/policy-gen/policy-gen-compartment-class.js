@@ -4,6 +4,7 @@
  * @packageDocumentation
  */
 
+import { GenerationError } from '../error.js'
 import { hasValue, isObject } from '../util.js'
 import { getCanonicalName } from './policy-gen-util.js'
 
@@ -71,7 +72,9 @@ const updateModuleSource = (moduleDescriptor, canonicalName) => {
       : undefined
 
   if (!moduleSource) {
-    throw new TypeError(`Unsupported module descriptor type; this is a bug`)
+    throw new GenerationError(
+      `Unsupported module descriptor type; this is a bug`
+    )
   }
 
   // this just avoids adding duplicates. shouldn't happen, but who knows
@@ -95,7 +98,9 @@ const updateModuleSource = (moduleDescriptor, canonicalName) => {
   } else if (isSourceModuleDescriptor(moduleDescriptor)) {
     moduleDescriptor.source = moduleSource
   } else {
-    throw new TypeError(`Unsupported module descriptor type; this is a bug`)
+    throw new GenerationError(
+      `Unsupported module descriptor type; this is a bug`
+    )
   }
 }
 
