@@ -10,7 +10,7 @@ import { DEFAULT_ENDO_OPTIONS } from '../compartment/options.js'
 import { defaultReadPowers } from '../compartment/power.js'
 import { ATTENUATORS_COMPARTMENT } from '../constants.js'
 import { log as defaultLog } from '../log.js'
-import { hrLabel, toEndoURL } from '../util.js'
+import { toEndoURL } from '../util.js'
 import { makePolicyGenCompartment } from './policy-gen-compartment-class.js'
 import { getCanonicalName } from './policy-gen-util.js'
 
@@ -42,7 +42,7 @@ export const loadCompartmentMap = async (
     policyOverride,
     conditions = new Set(),
     trustRoot,
-    log = defaultLog,
+    log: _log = defaultLog,
     ...captureOpts
   } = {}
 ) => {
