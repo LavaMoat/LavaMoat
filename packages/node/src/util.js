@@ -4,15 +4,20 @@
  * @remraks
  * This is an anti-pattern. Or so I've heard.
  *
+ * TODO: Everything here should support capabilities in one form or another
+ *
  * @packageDocumentation
  */
-import { pathToFileURL } from 'node:url'
+import chalk from 'chalk'
+import nodePath from 'node:path'
+import nodeUrl from 'node:url'
 
 const { isArray: isArray_ } = Array
 const { freeze, keys } = Object
 
 /**
- * @import {ReadNowPowers, ReadNowPowersProp} from '@endo/compartment-mapper'
+ * @import {FileURLToPathFn, ReadNowPowers} from '@endo/compartment-mapper'
+ * @import {RequiredReadNowPowers} from './internal.js'
  * @import {SetNonNullable} from 'type-fest'
  */
 
@@ -28,12 +33,12 @@ const { freeze, keys } = Object
  * @returns {string} URL-like string
  * @internal
  */
-export const toURLString = (url) =>
+export const toEndoURL = (url) =>
   url instanceof URL
     ? url.href
-    : url.startsWith('file:')
+    : url.startsWith('file://')
       ? url
-      : pathToFileURL(url).href
+      : nodeUrl.pathToFileURL(url).href
 
 /**
  * Type guard for an object.
@@ -42,7 +47,16 @@ export const toURLString = (url) =>
  * @returns {value is object}
  * @internal
  */
-export const isObject = (value) => value !== null && typeof value === 'object'
+export const isObject = (value) => Object(value) === value
+
+/**
+ * Type guard for a non-array object
+ *
+ * @param {unknown} value
+ * @returns {value is object & {length?: never}}
+ * @internal
+ */
+export const isObjectyObject = (value) => isObject(value) && !isArray(value)
 
 /**
  * Type guard for a string
@@ -80,6 +94,8 @@ export const isBoolean = (value) => typeof value === 'boolean'
  *
  * If trying to perform the opposite assertion, use `!(prop in value)` instead
  * of `!has(value, prop)`
+ *
+ * Don't try to use this with union types.
  *
  * @template {object} [T=object] Some object. Default is `object`
  * @template {string} [const K=string] Some property which might be in `T`.
@@ -127,11 +143,7 @@ export const devToConditions = (dev) =>
 /**
  * Ordered array of every property in {@link ReadNowPowers} which is _required_.
  *
- * @satisfies {Readonly<
- *   {
- *     [K in ReadNowPowersProp]-?: {} extends Pick<ReadNowPowers, K> ? never : K
- *   }[ReadNowPowersProp][]
- * >}
+ * @satisfies {RequiredReadNowPowers}
  * @internal
  */
 const REQUIRED_READ_NOW_POWERS = freeze(
@@ -146,9 +158,9 @@ const REQUIRED_READ_NOW_POWERS = freeze(
  * @internal
  */
 export const isReadNowPowers = (value) =>
-  isObject(value) &&
+  isObjectyObject(value) &&
   REQUIRED_READ_NOW_POWERS.every(
-    (prop) => hasValue(value, prop) && typeof value[prop] === 'function'
+    (prop) => hasValue(value, prop) && isFunction(value[prop])
   )
 
 /**
@@ -171,3 +183,61 @@ export const keysOr = (value, defaultKeys = []) =>
  * @returns {value is (...args: any[]) => any}
  */
 export const isFunction = (value) => typeof value === 'function'
+
+/**
+ * Given a filepath, displays it as relative or absolute depending on which is
+ * fewer characters. Ergo, the "human-readable" path.
+ *
+ * @param {string | URL} filepath
+ * @returns {string}
+ * @internal
+ */
+export const hrPath = (filepath) => {
+  if (!isString(filepath) || filepath.startsWith('file://')) {
+    filepath = nodeUrl.fileURLToPath(filepath)
+  }
+  if (nodePath.isAbsolute(filepath)) {
+    const relativePath = nodePath.relative(process.cwd(), filepath)
+    if (relativePath && relativePath.length < filepath.length) {
+      filepath = relativePath
+    }
+  } else {
+    const absolutePath = nodePath.resolve(filepath)
+    if (absolutePath.length < filepath.length) {
+      filepath = absolutePath
+    }
+  }
+  return chalk.greenBright(filepath)
+}
+
+/**
+ * For display of package names or canonical names.
+ *
+ * @param {string} name
+ * @returns {string}
+ * @internal
+ */
+export const hrLabel = (name) => {
+  return name.includes('>')
+    ? name.split('>').map(hrLabel).join(chalk.magenta('>'))
+    : chalk.magentaBright(name)
+}
+
+/**
+ * Type guard for a "path-like" value
+ *
+ * @param {unknown} value
+ * @returns {value is string | URL}
+ */
+export const isPathLike = (value) => isString(value) || value instanceof URL
+
+/**
+ * Converts a path-like value to a string
+ *
+ * @param {string | URL} value Path-like value
+ * @param {FileURLToPathFn} [fileURLToPath] `fileURLToPath` implementation
+ * @returns {string}
+ */
+export const toPath = (value, fileURLToPath = nodeUrl.fileURLToPath) => {
+  return value instanceof URL ? fileURLToPath(value) : value
+}

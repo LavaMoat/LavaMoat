@@ -8,9 +8,10 @@
 import { endowmentsToolkit } from 'lavamoat-core'
 import {
   ENDO_POLICY_ITEM_ROOT,
+  GLOBAL_THIS_REFS,
   LAVAMOAT_POLICY_ITEM_WRITE,
 } from '../constants.js'
-import { isObject } from '../util.js'
+import { isObjectyObject } from '../util.js'
 
 /**
  * @import {GlobalAttenuatorFn, ModuleAttenuatorFn} from '@endo/compartment-mapper'
@@ -50,15 +51,15 @@ export const attenuateModule = (params, originalObject) => {
  * @internal
  */
 export const makeGlobalsAttenuator = (
-  { policy: lavaMoatPolicy } = { policy: undefined }
+  { policy: { resources } = {} } = { policy: {} }
 ) => {
   /** @type {Set<string>} */
   const knownWritableFields = new Set()
 
   // gather writable fields from policy. this is needed by `endowmentsToolkit`
-  if (lavaMoatPolicy?.resources) {
-    for (const resource of values(lavaMoatPolicy.resources)) {
-      if (isObject(resource.globals)) {
+  if (resources) {
+    for (const resource of values(resources)) {
+      if (isObjectyObject(resource.globals)) {
         for (const [key, value] of entries(resource.globals)) {
           if (value === LAVAMOAT_POLICY_ITEM_WRITE) {
             knownWritableFields.add(key)
@@ -83,15 +84,34 @@ export const makeGlobalsAttenuator = (
     if (!policy) {
       return
     }
+
     if (policy === ENDO_POLICY_ITEM_ROOT) {
+      if (rootCompartmentGlobalThis) {
+        throw new ReferenceError(
+          'Root compartment globalThis already initialized; this is a bug'
+        )
+      }
       rootCompartmentGlobalThis = packageCompartmentGlobalThis
-      // ^ this is a little dumb, but only a little - assuming importLocation is called only once in parallel. The thing is - even if it isn't, the new one will have a new copy of this module anyway.
-      // That is unless we decide to use `modules` for passing the attenuator, in which case we have an attenuator defined outside of Endo and we can scope it as we wish. Tempting. Slightly less secure, because if we have a prototype pollution or RCE in the attenuator, we're exposing the outside instead of the attenuators compartment.
+      // ^ this is a little dumb, but only a little - assuming importLocation is
+      // called only once in parallel. The thing is - even if it isn't, the new
+      // one will have a new copy of this module anyway. That is unless we
+      // decide to use `modules` for passing the attenuator, in which case we
+      // have an attenuator defined outside of Endo and we can scope it as we
+      // wish. Tempting. Slightly less secure, because if we have a prototype
+      // pollution or RCE in the attenuator, we're exposing the outside instead
+      // of the attenuators compartment.
       copyWrappedGlobals(originalGlobalThis, packageCompartmentGlobalThis, [
         'globalThis',
         'global',
       ])
     } else {
+      if (!rootCompartmentGlobalThis) {
+        rootCompartmentGlobalThis = new Compartment().globalThis
+        copyWrappedGlobals(originalGlobalThis, rootCompartmentGlobalThis, [
+          'globalThis',
+          'global',
+        ])
+      }
       const endowments = getEndowmentsForConfig(
         rootCompartmentGlobalThis,
         /**
@@ -109,16 +129,25 @@ export const makeGlobalsAttenuator = (
          * a phony `ResourcePolicy` to make it fit.
          */
         { globals: policy },
-        // Not sure if it works, but with this as a 3rd argument, in theory, each compartment would unwrap functions to the root conpartment's globalThis, where all copied functions are set up to unwrap to actual globalThis
-        // instead I'm opting for a single unwrap since we now have access to the actual globalThis
+        // Not sure if it works, but with this as a 3rd argument, in theory,
+        // each compartment would unwrap functions to the root compartment's
+        // globalThis, where all copied functions are set up to unwrap to actual
+        // globalThis instead I'm opting for a single unwrap since we now have
+        // access to the actual globalThis
         originalGlobalThis,
         packageCompartmentGlobalThis
       )
 
-      defineProperties(
-        packageCompartmentGlobalThis,
-        getOwnPropertyDescriptors(endowments)
-      )
+      defineProperties(packageCompartmentGlobalThis, {
+        ...getOwnPropertyDescriptors(endowments),
+        // preserve the correct global aliases even if endowments define them differently
+        ...fromEntries(
+          GLOBAL_THIS_REFS.map((ref) => [
+            ref,
+            { value: packageCompartmentGlobalThis },
+          ])
+        ),
+      })
     }
   }
 }

@@ -1,0 +1,15 @@
+{
+  "name": "override-expansion",
+  "version": "0.0.0",
+  "type": "module",
+  "description": "Example of using policy override to expand policy gen on second pass",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "start": "npx snapshot-fs ../../json-fixture/override-expansion.json"
+  },
+  "dependencies": {
+    "fugs": "0.0.0",
+    "winken": "0.0.0"
+  }
+}

@@ -16,10 +16,10 @@ import { getCanonicalName } from './policy-gen-util.js'
  *   ModuleSource} from 'ses'
  * @import {Merge} from 'type-fest'
  * @import {CompartmentDescriptor, CompartmentMapDescriptor} from '@endo/compartment-mapper'
- * @import {LavaMoatPolicyOverrides, Resources} from 'lavamoat-core'
+ * @import {LavaMoatPolicy} from 'lavamoat-core'
  */
 
-const { entries, isFrozen } = Object
+const { entries, isFrozen, fromEntries } = Object
 
 /**
  * Type guard for a {@link RecordModuleDescriptor} containing a
@@ -74,6 +74,11 @@ const updateModuleSource = (moduleDescriptor, canonicalName) => {
     throw new TypeError(`Unsupported module descriptor type; this is a bug`)
   }
 
+  // this just avoids adding duplicates. shouldn't happen, but who knows
+  if (moduleSource.imports.includes(canonicalName)) {
+    return
+  }
+
   if (isFrozen(moduleSource)) {
     moduleSource = { ...moduleSource }
   }
@@ -101,10 +106,15 @@ const updateModuleSource = (moduleDescriptor, canonicalName) => {
  * need to be updated.
  *
  * @param {CompartmentMapDescriptor} compartmentMap Compartment map descriptor
- * @param {Resources} resources `resources` of LavaMoat policy
+ * @param {Record<string, CompartmentDescriptor>} compartmentsByLabel
+ * @param {LavaMoatPolicy} policyOverride LavaMoat policy override
  * @returns {(compartmentDescriptor: CompartmentDescriptor) => Set<string>}
  */
-const makeGetOverriddenResourceNames = (compartmentMap, resources) => {
+const makeGetOverriddenResourceNames = (
+  compartmentMap,
+  compartmentsByLabel,
+  policyOverride
+) => {
   /**
    * A cache of {@link CompartmentDescriptor} to a list of module names present
    * in policy resources.
@@ -163,48 +173,63 @@ const makeGetOverriddenResourceNames = (compartmentMap, resources) => {
         return
       }
 
-      /* c8 ignore next */
-      if (compartmentMap.entry.compartment === compartmentName) {
-        // This also "should never happen", as a foreign compartment should
-        // not be importing the entry compartment. Also, the entry
-        // compartment cannot have a canonical name, and we need a canonical
-        // name to apply policy
-        throw new ReferenceError(
-          `Unexpected entry compartment encountered in ${moduleDescriptorCompartment.label}; this is a bug`
-        )
-      }
-
       return moduleDescriptorCompartment
     }
+    const canonicalName = getCanonicalName(compartmentDescriptor)
+    const packagePolicy =
+      policyOverride.resources[canonicalName]?.packages ?? {}
 
     /**
-     * A set of keys from {@link LavaMoatPolicyOverrides.resources} matching
+     * A set of keys from {@link LavaMoatPolicy.resources} matching
      * {@link CompartmentDescriptor.modules the current `CompartmentDescriptor`'s `modules`}.
      * These will be updated by {@link updateModuleSource}.
      *
      * Cached on {@link compartmentDescriptor}.
-     *
-     * @type {Set<string>}
      */
     const overriddenResources = entries(compartmentDescriptor.modules).reduce(
       (
         overriddenResources,
         [moduleDescriptorName, { compartment: moduleDescriptorCompartmentName }]
       ) => {
+        if (!moduleDescriptorCompartmentName) {
+          return overriddenResources
+        }
         const otherCompartmentDescriptor = getValidCompartmentDescriptor(
           moduleDescriptorCompartmentName
         )
-        if (!otherCompartmentDescriptor) {
+        if (
+          !otherCompartmentDescriptor ||
+          otherCompartmentDescriptor === compartmentDescriptor
+        ) {
           return overriddenResources
         }
-        const canonicalName = getCanonicalName(otherCompartmentDescriptor)
-        if (hasValue(resources, canonicalName)) {
-          overriddenResources.add(moduleDescriptorName)
+
+        const otherCanonicalName = getCanonicalName(otherCompartmentDescriptor)
+
+        if (!(otherCanonicalName in packagePolicy)) {
+          return overriddenResources
         }
+
+        // this is _not_ the canonical name, but the compartment.name field,
+        // which is kinda-sorta like a package name
+        overriddenResources.add(moduleDescriptorName)
+
         return overriddenResources
       },
-      new Set()
+      /** @type {Set<string>} */ (new Set())
     )
+
+    for (const [otherCanonicalName, otherPackagePolicyEntry] of entries(
+      packagePolicy
+    )) {
+      if (otherPackagePolicyEntry === true) {
+        const otherCompartmentDescriptor =
+          compartmentsByLabel[otherCanonicalName]
+        if (otherCompartmentDescriptor) {
+          overriddenResources.add(otherCompartmentDescriptor.name)
+        }
+      }
+    }
     overriddenResourcesCache.set(compartmentDescriptor, overriddenResources)
 
     return overriddenResources
@@ -224,21 +249,27 @@ const makeGetOverriddenResourceNames = (compartmentMap, resources) => {
  * to hand-craft a giant policy override.
  *
  * @param {CompartmentMapDescriptor} compartmentMap
- * @param {LavaMoatPolicyOverrides} [policyOverride]
+ * @param {LavaMoatPolicy} [policyOverride]
  * @returns {typeof Compartment} Either the original `Compartment` or a
  *   `PolicyGenCompartment`
  * @internal
  */
 export const makePolicyGenCompartment = (compartmentMap, policyOverride) => {
-  if (!policyOverride || !policyOverride.resources) {
+  if (!policyOverride?.resources) {
     return Compartment
   }
 
-  // only create this function and resulting `Compartment` if we have resources
-  // in the policy override
+  const compartmentsByLabel = fromEntries(
+    entries(compartmentMap.compartments).map(([, compartment]) => [
+      compartment.label,
+      compartment,
+    ])
+  )
+
   const getOverriddenResourceNames = makeGetOverriddenResourceNames(
     compartmentMap,
-    policyOverride.resources
+    compartmentsByLabel,
+    policyOverride
   )
 
   /**

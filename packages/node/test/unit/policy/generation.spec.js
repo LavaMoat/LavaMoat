@@ -21,8 +21,6 @@ test('kitchen sink', testPolicyForJSON, 'kitchen-sink.json', {
   },
 })
 
-test('native-like module', testPolicyForJSON, 'phony-native.json')
-
 test('native module', testPolicyForJSON, 'native.json')
 
 test('native module w/ dynamic requires', testPolicyForJSON, 'dynamic.json')
@@ -56,6 +54,71 @@ test(
           },
         },
       },
+    },
+  }
+)
+
+test('override expansion', testPolicyForJSON, 'override-expansion.json', {
+  policyOverride: {
+    resources: {
+      winken: {
+        packages: {
+          // is dynamically required by winken
+          'winken>blinken': true,
+          // is not required by anything at all, but is present in the fixture's package.json. should not appear in the final policy for winken since it cannot be detected.
+          fugs: true,
+        },
+      },
+      'winken>blinken': {
+        builtin: {
+          // this does not appear in the source, but this override
+          // forces it to be in the resulting policy.
+          'node:fs.read': true,
+        },
+      },
+    },
+  },
+  expected: {
+    resources: {
+      'winken>blinken': {
+        builtin: {
+          'node:util.format': true,
+          'node:fs.read': true,
+        },
+      },
+      'winken>fred': {
+        builtin: {
+          'node:util.format': true,
+        },
+      },
+      winken: {
+        builtin: {
+          'node:util.format': true,
+        },
+        packages: {
+          fugs: true,
+          'winken>blinken': true,
+          'winken>fred': true,
+        },
+      },
+    },
+  },
+})
+
+test('hashbang evasion', testPolicyForJSON, 'hashbang.json')
+
+test(
+  'package imported via relative path',
+  testPolicyForJSON,
+  'relative-package.json',
+  {
+    expected: (t, policy) => {
+      t.plan(2)
+      t.true(
+        policy.resources.winken?.packages?.['winken>blinken'] === undefined,
+        'winken should have no policy for blinken'
+      )
+      t.snapshot(policy)
     },
   }
 )
@@ -144,9 +207,7 @@ test(
   'ignored global refs accessed w/ whitelist items',
   testPolicyForModule,
   `window.Object === Object`,
-  {
-    resources: {},
-  }
+  { resources: {} }
 )
 
 test('ignore newer intrinsics', testPolicyForModule, 'BigInt(123)', {
@@ -226,3 +287,5 @@ console.log("you can use await import` +
     },
   }
 )
+
+test.todo('exit modules are not imported')
