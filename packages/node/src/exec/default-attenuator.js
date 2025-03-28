@@ -8,6 +8,7 @@
 import { endowmentsToolkit } from 'lavamoat-core'
 import {
   ENDO_POLICY_ITEM_ROOT,
+  GLOBAL_THIS_REFS,
   LAVAMOAT_POLICY_ITEM_WRITE,
 } from '../constants.js'
 import { isObjectyObject } from '../util.js'
@@ -137,10 +138,16 @@ export const makeGlobalsAttenuator = (
         packageCompartmentGlobalThis
       )
 
-      defineProperties(
-        packageCompartmentGlobalThis,
-        getOwnPropertyDescriptors(endowments)
-      )
+      defineProperties(packageCompartmentGlobalThis, {
+        ...getOwnPropertyDescriptors(endowments),
+        // preserve the correct global aliases even if endowments define them differently
+        ...fromEntries(
+          GLOBAL_THIS_REFS.map((ref) => [
+            ref,
+            { value: packageCompartmentGlobalThis },
+          ])
+        ),
+      })
     }
   }
 }

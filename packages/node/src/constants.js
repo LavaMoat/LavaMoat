@@ -185,3 +185,7 @@ export const DEFAULT_TRUST_ROOT_COMPARTMENT = true
  * The `package.json` filename, naturally
  */
 export const PACKAGE_JSON = 'package.json'
+
+export const GLOBAL_THIS_REFS = Object.freeze(
+  /** @type {const} */ (['global', 'globalThis'])
+)
