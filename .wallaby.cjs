@@ -56,6 +56,7 @@ module.exports = {
       // --experimental-vm-modules required for AVA + ESM
       // --no-warnings needed to suppress stderr, which is evaluated during scenario execution
       runner: '--experimental-vm-modules --no-warnings',
+      env: 'LAVAMOAT_DEBUG=',
     },
   },
   // required for hoisted dev deps, apparently

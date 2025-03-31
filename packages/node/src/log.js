@@ -34,5 +34,5 @@ export const log = new Loggerr({
     process.stderr,
     process.stderr,
   ],
-  level: process.env.DEBUG ? Loggerr.DEBUG : Loggerr.INFO,
+  level: process.env.LAVAMOAT_DEBUG ? Loggerr.DEBUG : Loggerr.INFO,
 })
