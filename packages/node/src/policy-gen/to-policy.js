@@ -154,7 +154,7 @@ export const buildModuleRecords = (
     log = defaultLog,
   } = {}
 ) => {
-  const lmrCache = new LMRCache()
+  const lmrCache = LMRCache.create()
 
   const entryCompartment =
     compartmentMap.compartments[compartmentMap.entry.compartment]
