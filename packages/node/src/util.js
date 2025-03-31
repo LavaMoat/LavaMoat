@@ -239,5 +239,7 @@ export const isPathLike = (value) => isString(value) || value instanceof URL
  * @returns {string}
  */
 export const toPath = (value, fileURLToPath = nodeUrl.fileURLToPath) => {
-  return value instanceof URL ? fileURLToPath(value) : value
+  return value instanceof URL || value.startsWith('file://')
+    ? fileURLToPath(value)
+    : value
 }

@@ -13,7 +13,7 @@ import { stripVTControlCharacters } from 'node:util'
 import { defaultReadPowers } from '../compartment/power.js'
 import { DEFAULT_TRUST_ROOT_COMPARTMENT } from '../constants.js'
 import { log as defaultLog } from '../log.js'
-import { hrLabel, hrPath, isObjectyObject, isString } from '../util.js'
+import { hrLabel, hrPath, toPath } from '../util.js'
 import { LMRCache } from './lmr-cache.js'
 import { PolicyGeneratorContext } from './policy-gen-context.js'
 
@@ -165,17 +165,11 @@ export const buildModuleRecords = (
 
   const compartmentRenames = freeze({ ...renames })
 
-  const entrypointPath = isString(entrypoint)
-    ? entrypoint
-    : isObjectyObject(entrypoint)
-      ? readPowers.fileURLToPath(entrypoint)
-      : undefined
+  const entrypointPath = toPath(entrypoint)
 
   const contexts = entries(compartmentMap.compartments).reduce(
     (acc, [compartmentName, compartment]) => {
       if (compartmentName in sources) {
-        const rootModule =
-          compartment === entryCompartment ? entrypointPath : undefined
         acc.push([
           compartmentName,
           PolicyGeneratorContext.create(
@@ -183,7 +177,8 @@ export const buildModuleRecords = (
             compartmentRenames,
             lmrCache,
             {
-              rootModule,
+              rootModule:
+                compartment === entryCompartment ? entrypointPath : undefined,
               readPowers,
               isBuiltin,
               log,
@@ -201,7 +196,8 @@ export const buildModuleRecords = (
      */ ([])
   )
 
-  let moduleRecords = contexts.reduce((acc, [compartmentName, context]) => {
+  const moduleRecords = contexts.reduce((acc, [compartmentName, context]) => {
+    /* c8 ignore next */
     if (!(compartmentName in sources)) {
       // "should never happen"™
       throw new ReferenceError(
@@ -215,16 +211,14 @@ export const buildModuleRecords = (
     )
     const records = context.buildModuleRecords(compartmentSources)
 
-    if (records) {
-      acc.push(...records)
+    for (const record of records) {
+      acc.add(record)
     }
 
     return acc
-  }, /** @type {LavamoatModuleRecord[]} */ ([]))
+  }, /** @type {Set<LavamoatModuleRecord>} */ (new Set()))
 
-  moduleRecords = [...new Set(moduleRecords)]
-
-  return moduleRecords
+  return [...moduleRecords]
 }
 
 /**

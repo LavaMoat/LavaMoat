@@ -46,6 +46,7 @@ export const loadCompartmentMap = async (
     ...captureOpts
   } = {}
 ) => {
+  // some packages use "node" as a condition (as opposed to "browser")
   conditions.add('node')
 
   const entryPoint = toEndoURL(entrypointPath)
