@@ -1,5 +1,58 @@
 {
   "resources": {
+    "webpack-cli>@discoveryjs/json-ext": {
+      "builtin": {
+        "stream.Readable": true,
+        "util.TextDecoder": true
+      }
+    },
+    "webpack-cli>webpack-merge>clone-deep": {
+      "packages": {
+        "webpack-cli>webpack-merge>clone-deep>is-plain-object": true,
+        "webpack-cli>webpack-merge>clone-deep>kind-of": true,
+        "webpack-cli>webpack-merge>clone-deep>shallow-clone": true
+      }
+    },
+    "webpack-cli>commander": {
+      "builtin": {
+        "child_process.spawn": true,
+        "events.EventEmitter": true,
+        "fs.existsSync": true,
+        "fs.realpathSync": true,
+        "path.basename": true,
+        "path.dirname": true,
+        "path.extname": true,
+        "path.join": true
+      },
+      "globals": {
+        "Buffer.isBuffer": true,
+        "process": true
+      }
+    },
+    "eslint>cross-spawn": {
+      "builtin": {
+        "child_process.spawn": true,
+        "child_process.spawnSync": true,
+        "fs.closeSync": true,
+        "fs.openSync": true,
+        "fs.readSync": true,
+        "path.delimiter": true,
+        "path.normalize": true,
+        "path.resolve": true
+      },
+      "globals": {
+        "Buffer.alloc": true,
+        "process.chdir": true,
+        "process.cwd": true,
+        "process.env": true,
+        "process.platform": true
+      },
+      "packages": {
+        "eslint>cross-spawn>path-key": true,
+        "eslint>cross-spawn>shebang-command": true,
+        "eslint>cross-spawn>which": true
+      }
+    },
     "graceful-fs": {
       "builtin": {
         "assert.equal": true,
@@ -11,10 +64,121 @@
         "util": true
       },
       "globals": {
+        "___graceful-fs_previous": "write",
+        "___graceful-fs_queue": "write",
         "clearTimeout": true,
         "console.error": true,
         "process": true,
         "setTimeout": true
+      }
+    },
+    "eslint-plugin-n>is-core-module>hasown": {
+      "packages": {
+        "function-bind": true
+      }
+    },
+    "webpack-cli>interpret": {
+      "builtin": {
+        "path.join": true,
+        "path.relative": true,
+        "path.sep": true
+      },
+      "globals": {
+        "__dirname": true,
+        "process.cwd": true
+      }
+    },
+    "eslint-plugin-n>is-core-module": {
+      "globals": {
+        "process.versions": true
+      },
+      "packages": {
+        "eslint-plugin-n>is-core-module>hasown": true
+      }
+    },
+    "webpack-cli>webpack-merge>clone-deep>is-plain-object": {
+      "packages": {
+        "webpack-cli>webpack-merge>clone-deep>is-plain-object>isobject": true
+      }
+    },
+    "eslint>cross-spawn>which>isexe": {
+      "builtin": {
+        "fs": true
+      },
+      "globals": {
+        "TESTING_WINDOWS": true,
+        "process.env.PATHEXT": true,
+        "process.getgid": true,
+        "process.getuid": true,
+        "process.platform": true
+      }
+    },
+    "eslint>cross-spawn>path-key": {
+      "globals": {
+        "process.env": true,
+        "process.platform": true
+      }
+    },
+    "eslint-plugin-n>resolve>path-parse": {
+      "globals": {
+        "process.platform": true
+      }
+    },
+    "webpack-cli>rechoir": {
+      "builtin": {
+        "path.basename": true,
+        "path.dirname": true,
+        "path.resolve": true
+      },
+      "packages": {
+        "eslint-plugin-n>resolve": true
+      }
+    },
+    "eslint-plugin-n>resolve": {
+      "builtin": {
+        "fs.readFile": true,
+        "fs.readFileSync": true,
+        "fs.realpath": true,
+        "fs.realpathSync": true,
+        "fs.stat": true,
+        "fs.statSync": true,
+        "os.homedir": true,
+        "path.dirname": true,
+        "path.join": true,
+        "path.parse": true,
+        "path.relative": true,
+        "path.resolve": true
+      },
+      "globals": {
+        "process.env.HOME": true,
+        "process.env.HOMEDRIVE": true,
+        "process.env.HOMEPATH": true,
+        "process.env.LNAME": true,
+        "process.env.LOGNAME": true,
+        "process.env.USER": true,
+        "process.env.USERNAME": true,
+        "process.env.USERPROFILE": true,
+        "process.getuid": true,
+        "process.nextTick": true,
+        "process.platform": true
+      },
+      "packages": {
+        "eslint-plugin-n>is-core-module": true,
+        "eslint-plugin-n>resolve>path-parse": true
+      }
+    },
+    "webpack-cli>webpack-merge>clone-deep>shallow-clone": {
+      "globals": {
+        "Buffer.allocUnsafe": true,
+        "Buffer.from": true
+      },
+      "packages": {
+        "webpack-cli>webpack-merge>clone-deep>kind-of": true
+      }
+    },
+    "eslint>cross-spawn>shebang-command": {
+      "packages": {
+        "eslint>cross-spawn>shebang-command>shebang-regex": true
       }
     },
     "webpack": {
@@ -34,7 +198,61 @@
         "process": true
       },
       "packages": {
-        "graceful-fs": true
+        "graceful-fs": true,
+        "webpack-cli": true
+      }
+    },
+    "webpack-cli": {
+      "builtin": {
+        "fs.createWriteStream": true,
+        "fs.existsSync": true,
+        "fs.statSync": true,
+        "path.dirname": true,
+        "path.extname": true,
+        "path.join": true,
+        "path.resolve": true,
+        "readline.createInterface": true,
+        "url.pathToFileURL": true,
+        "util.format": true
+      },
+      "globals": {
+        "__dirname": true,
+        "console": true,
+        "process": true
+      },
+      "packages": {
+        "@discoveryjs/json-ext": true,
+        "webpack-cli>@discoveryjs/json-ext": true,
+        "colorette": true,
+        "webpack-cli>commander": true,
+        "eslint>cross-spawn": true,
+        "webpack-cli>fastest-levenshtein": true,
+        "webpack-cli>interpret": true,
+        "webpack-cli>rechoir": true,
+        "webpack-cli>webpack-merge": true,
+        "webpack-cli>webpack": true
+      }
+    },
+    "webpack-cli>webpack-merge": {
+      "packages": {
+        "webpack-cli>webpack-merge>clone-deep": true,
+        "webpack-cli>webpack-merge>flat": true,
+        "webpack-cli>webpack-merge>wildcard": true
+      }
+    },
+    "eslint>cross-spawn>which": {
+      "builtin": {
+        "path.join": true
+      },
+      "globals": {
+        "process.cwd": true,
+        "process.env.OSTYPE": true,
+        "process.env.PATH": true,
+        "process.env.PATHEXT": true,
+        "process.platform": true
+      },
+      "packages": {
+        "eslint>cross-spawn>which>isexe": true
       }
     }
   },

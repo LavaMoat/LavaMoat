@@ -9,6 +9,18 @@
         "fs.___graceful-fs_queue": "write",
         "fs.___graceful-fs_previous": "write"
       }
+    },
+    "webpack": {
+      "packages": {
+        "webpack-cli": true
+      }
+    },
+    "webpack-cli": {
+      "packages": {
+        "webpack-cli>webpack": true,
+        "webpack-cli>webpack-merge": true,
+        "webpack-cli>@discoveryjs/json-ext": true
+      }
     }
   }
 }
