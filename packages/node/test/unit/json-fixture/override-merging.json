@@ -10,7 +10,7 @@
     "index.js": [
       1,
       {},
-      "data:application/octet-stream;base64,ZXhwb3J0IGNvbnN0IGhlbGxvID0gJ3dvcmxkJwoKY29uc29sZS5sb2coYGhlbGxvICR7aGVsbG99YCkK"
+      "data:application/octet-stream;base64,aW1wb3J0ICdibHVybXBoJwoKZXhwb3J0IGNvbnN0IGhlbGxvID0gJ3dvcmxkJwoKY29uc29sZS5sb2coYGhlbGxvICR7aGVsbG99YCkK"
     ],
     "lavamoat": [
       0,
@@ -54,7 +54,7 @@
     "package.json": [
       1,
       {},
-      "data:application/octet-stream;base64,ewogICJuYW1lIjogInVudXNlZC1kZXBlbmRlbmN5LW92ZXJyaWRlIiwKICAidmVyc2lvbiI6ICIxLjAuMCIsCiAgInR5cGUiOiAibW9kdWxlIiwKICAibGljZW5zZSI6ICJJU0MiLAogICJwcml2YXRlIjogdHJ1ZSwKICAibWFpbiI6ICJpbmRleC5qcyIsCiAgInNjcmlwdHMiOiB7CiAgICAic3RhcnQiOiAibnB4IHNuYXBzaG90LWZzIC4uLy4uL2pzb24tZml4dHVyZS91bnVzZWQtZGVwZW5kZW5jeS1vdmVycmlkZS5qc29uIgogIH0sCiAgImRlcGVuZGVuY2llcyI6IHsKICAgICJibHVybXBoIjogIl4xLjAuMCIKICB9Cn0K"
+      "data:application/octet-stream;base64,ewogICJuYW1lIjogIm92ZXJyaWRlLW1lcmdpbmciLAogICJ2ZXJzaW9uIjogIjEuMC4wIiwKICAidHlwZSI6ICJtb2R1bGUiLAogICJsaWNlbnNlIjogIklTQyIsCiAgInByaXZhdGUiOiB0cnVlLAogICJtYWluIjogImluZGV4LmpzIiwKICAic2NyaXB0cyI6IHsKICAgICJzdGFydCI6ICJucHggc25hcHNob3QtZnMgLi4vLi4vanNvbi1maXh0dXJlL292ZXJyaWRlLW1lcmdpbmcuanNvbiIKICB9LAogICJkZXBlbmRlbmNpZXMiOiB7CiAgICAiYmx1cm1waCI6ICJeMS4wLjAiCiAgfQp9Cg=="
     ]
   }
 ]

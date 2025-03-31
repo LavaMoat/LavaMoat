@@ -5,7 +5,6 @@
  */
 
 import { hasValue, isObject } from '../util.js'
-import { getCanonicalName } from './policy-gen-util.js'
 
 /**
  * @import {CompartmentOptions,
@@ -19,7 +18,7 @@ import { getCanonicalName } from './policy-gen-util.js'
  * @import {LavaMoatPolicy} from 'lavamoat-core'
  */
 
-const { entries, isFrozen, fromEntries } = Object
+const { entries, isFrozen } = Object
 
 /**
  * Type guard for a {@link RecordModuleDescriptor} containing a
@@ -111,21 +110,6 @@ const updateModuleSource = (moduleDescriptor, canonicalName) => {
  */
 const makeGetOverriddenResourceNames = (compartmentMap, policyOverride) => {
   /**
-   * A map of canonical names to their {@link CompartmentDescriptor}s.
-   *
-   * `label` field contains the canonical name provided by the caller of
-   * makePolicyGenCompartment not by @endo/compartment-mapper.
-   *
-   * @type {Record<string, CompartmentDescriptor>}
-   */
-  const compartmentsByLabel = fromEntries(
-    entries(compartmentMap.compartments).map(([, compartment]) => [
-      compartment.label,
-      compartment,
-    ])
-  )
-
-  /**
    * A cache of {@link CompartmentDescriptor} to a list of module names present
    * in policy resources.
    *
@@ -188,8 +172,7 @@ const makeGetOverriddenResourceNames = (compartmentMap, policyOverride) => {
       return moduleDescriptorCompartment
     }
 
-    // TODO: consider using `label` field instead
-    const canonicalName = getCanonicalName(compartmentDescriptor)
+    const { label: canonicalName } = compartmentDescriptor
     const packagePolicy =
       policyOverride.resources[canonicalName]?.packages ?? {}
 
@@ -218,8 +201,7 @@ const makeGetOverriddenResourceNames = (compartmentMap, policyOverride) => {
           return overriddenResources
         }
 
-        // TODO: consider using `label` field instead
-        const otherCanonicalName = getCanonicalName(otherCompartmentDescriptor)
+        const { label: otherCanonicalName } = otherCompartmentDescriptor
 
         if (!(otherCanonicalName in packagePolicy)) {
           return overriddenResources
@@ -235,19 +217,6 @@ const makeGetOverriddenResourceNames = (compartmentMap, policyOverride) => {
       },
       /** @type {Set<string>} */ (new Set())
     )
-
-    for (const [otherCanonicalName, otherPackagePolicyEntry] of entries(
-      packagePolicy
-    )) {
-      if (otherPackagePolicyEntry === true) {
-        const otherCompartmentDescriptor =
-          compartmentsByLabel[otherCanonicalName]
-        if (otherCompartmentDescriptor) {
-          overriddenResources.add(otherCompartmentDescriptor.name)
-        }
-      }
-    }
-    overriddenResourcesCache.set(compartmentDescriptor, overriddenResources)
 
     return overriddenResources
   }

@@ -211,12 +211,28 @@ export function createGeneratePolicyMacros(test) {
           }
         )
 
+        // if overrides provided, then we will make a second check that
+        // asserts `actualPolicy` is a superset of the override
+        t.plan(options?.policyOverride ? 2 : 1)
+
         if (isPolicy(expected)) {
-          t.deepEqual(actualPolicy, expected)
+          t.deepEqual(
+            actualPolicy,
+            expected,
+            'policy does not deeply equal expected'
+          )
         } else if (isFunction(expected)) {
           await expected(t, actualPolicy)
         } else {
-          t.snapshot(actualPolicy)
+          t.snapshot(actualPolicy, 'policy does not match snapshot')
+        }
+
+        if (options?.policyOverride) {
+          t.like(
+            actualPolicy,
+            options.policyOverride,
+            'policy is not a superset of overrides'
+          )
         }
       },
 

@@ -31,32 +31,27 @@ test(
   'unused-dependency.json'
 )
 
-test(
-  'policy override merging',
-  testPolicyForJSON,
-  'unused-dependency-override.json',
-  {
-    policyOverride: {
-      resources: {
-        blurmph: {
-          builtin: {
-            'node:path': true,
-          },
+test('policy override merging', testPolicyForJSON, 'override-merging.json', {
+  policyOverride: {
+    resources: {
+      blurmph: {
+        builtin: {
+          'node:path': true,
         },
       },
     },
-    expected: {
-      resources: {
-        blurmph: {
-          builtin: {
-            'node:fs': true,
-            'node:path': true,
-          },
+  },
+  expected: {
+    resources: {
+      blurmph: {
+        builtin: {
+          'node:fs': true,
+          'node:path': true,
         },
       },
     },
-  }
-)
+  },
+})
 
 test('override expansion', testPolicyForJSON, 'override-expansion.json', {
   policyOverride: {
