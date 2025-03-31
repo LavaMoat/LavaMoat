@@ -39,6 +39,11 @@ test('policy override merging', testPolicyForJSON, 'override-merging.json', {
           'node:path': true,
         },
       },
+      blurgh: {
+        globals: {
+          console: true,
+        },
+      },
     },
   },
   expected: {
@@ -47,6 +52,11 @@ test('policy override merging', testPolicyForJSON, 'override-merging.json', {
         builtin: {
           'node:fs': true,
           'node:path': true,
+        },
+      },
+      blurgh: {
+        globals: {
+          console: true,
         },
       },
     },

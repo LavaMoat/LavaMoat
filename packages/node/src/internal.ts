@@ -21,6 +21,7 @@ import type {
   WithIsBuiltin,
   WithLog,
   WithPolicyOverride,
+  WithPolicyOverridePath,
   WithRead,
   WithReadPowers,
   WithTrustRoot,
@@ -181,3 +182,7 @@ export type RequiredReadNowPowers = ReadonlyArray<
     [K in ReadNowPowersProp]-?: {} extends Pick<ReadNowPowers, K> ? never : K
   }[ReadNowPowersProp]
 >
+
+export type ReportInvalidOverridesOptions = WithPolicyOverride &
+  WithPolicyOverridePath &
+  WithLog

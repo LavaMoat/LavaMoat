@@ -17,15 +17,18 @@ import {
 } from '../constants.js'
 import { log as defaultLog } from '../log.js'
 import { readPolicyOverride, writePolicy } from '../policy-util.js'
-import { devToConditions, hrPath, toPath } from '../util.js'
+import { devToConditions, hrLabel, hrPath, toPath } from '../util.js'
 import { loadCompartmentMap } from './policy-gen-compartment-map.js'
 import { compartmentMapToPolicy } from './to-policy.js'
 
+const { keys, values } = Object
+
 /**
- * @import {GenerateOptions} from '../internal.js'
+ * @import {GenerateOptions, ReportInvalidOverridesOptions} from '../internal.js'
  * @import {GeneratePolicyOptions, CompartmentMapToPolicyOptions, IsAbsoluteFn} from '../types.js'
  * @import {LavaMoatPolicy, LavaMoatPolicyDebug} from 'lavamoat-core'
  * @import {SetFieldType} from 'type-fest'
+ * @import {CompartmentMapDescriptor} from '@endo/compartment-mapper'
  */
 
 /** @type {IsAbsoluteFn} */
@@ -51,7 +54,10 @@ const shouldWriteDebugPolicy = (shouldWrite, debug, policyDebugPath) =>
  * @overload
  * @param {string | URL} entrypointPath
  * @param {SetFieldType<GenerateOptions, 'debug', true>} opts
- * @returns {Promise<LavaMoatPolicyDebug>}
+ * @returns {Promise<{
+ *   policy: LavaMoatPolicyDebug
+ *   compartmentMap: CompartmentMapDescriptor
+ * }>}
  */
 
 /**
@@ -61,7 +67,10 @@ const shouldWriteDebugPolicy = (shouldWrite, debug, policyDebugPath) =>
  * @overload
  * @param {string | URL} entrypointPath
  * @param {GenerateOptions} [opts]
- * @returns {Promise<LavaMoatPolicy>}
+ * @returns {Promise<{
+ *   policy: LavaMoatPolicy
+ *   compartmentMap: CompartmentMapDescriptor
+ * }>}
  */
 
 /**
@@ -70,7 +79,10 @@ const shouldWriteDebugPolicy = (shouldWrite, debug, policyDebugPath) =>
  *
  * @param {string | URL} entrypoint
  * @param {GenerateOptions} [opts]
- * @returns {Promise<LavaMoatPolicy>}
+ * @returns {Promise<{
+ *   policy: LavaMoatPolicy
+ *   compartmentMap: CompartmentMapDescriptor
+ * }>}
  */
 const generate = async (
   entrypoint,
@@ -112,13 +124,49 @@ const generate = async (
   // this weird thing is to make TS happy about the overload
   const opts = debug ? { debug: true, ...baseOpts } : baseOpts
 
-  return compartmentMapToPolicy(
+  const policy = compartmentMapToPolicy(
     entrypoint,
     compartmentMap,
     sources,
     renames,
     opts
   )
+  return { policy, compartmentMap }
+}
+
+/**
+ * Reports policy override resources which weren't found on disk and are thus
+ * not in the compartment map descriptor.
+ *
+ * @param {CompartmentMapDescriptor} compartmentMap
+ * @param {ReportInvalidOverridesOptions} options
+ * @returns {void}
+ */
+const reportInvalidOverrides = (
+  compartmentMap,
+  { policyOverride, policyOverridePath, log = defaultLog }
+) => {
+  if (!policyOverride) {
+    return
+  }
+
+  const canonicalNames = new Set(
+    values(compartmentMap.compartments).map(({ label }) => label)
+  )
+  // TODO: use `Set.prototype.difference` once widely available
+  const invalidOverrides = keys(policyOverride.resources).filter(
+    (key) => !canonicalNames.has(key)
+  )
+
+  if (invalidOverrides.length) {
+    let msg = `The following resource(s) provided in policy overrides`
+    msg += policyOverridePath ? ` (${hrPath(policyOverridePath)})` : ''
+    msg += ` were not found and may be invalid:\n`
+    msg += invalidOverrides
+      .map((invalidOverride) => `  - ${hrLabel(invalidOverride)}`)
+      .join('\n')
+    log.warning(msg)
+  }
 }
 
 /**
@@ -170,11 +218,11 @@ export const generatePolicy = async (
     `policyPath must be an absolute path; got ${policyPath}`
   )
 
+  /** @type {string | undefined} */
+  let policyOverridePath
   // the user may specify a policy override or a path to a policy override.
   // in this case, we handle the path.
   if (!policyOverride) {
-    /** @type {string} */
-    let policyOverridePath
     if (rawPolicyOverridePath) {
       policyOverridePath = toPath(rawPolicyOverridePath)
       assert(
@@ -213,6 +261,8 @@ export const generatePolicy = async (
    * @type {LavaMoatPolicy}
    */
   let policy
+  /** @type {CompartmentMapDescriptor} */
+  let compartmentMap
 
   const niceEntrypointPath = hrPath(entrypoint)
 
@@ -224,13 +274,15 @@ export const generatePolicy = async (
    */
   if (shouldWriteDebugPolicy(shouldWrite, debug, policyDebugPath)) {
     log.info(`Generating "debug" LavaMoat policy from ${niceEntrypointPath}`)
-    const debugPolicy = await generate(entrypoint, {
+    /** @type {LavaMoatPolicyDebug} */
+    let debugPolicy
+    ;({ policy: debugPolicy, compartmentMap } = await generate(entrypoint, {
       ...generateOpts,
       readPowers,
       trustRoot,
       debug: true,
       policyOverride,
-    })
+    }))
     await writePolicy(policyDebugPath, debugPolicy, { fs: writableFs })
     const nicePolicyDebugPath = hrPath(policyDebugPath)
     log.info(`Wrote debug policy to ${nicePolicyDebugPath}`)
@@ -243,13 +295,15 @@ export const generatePolicy = async (
     policy = corePolicy
   } else {
     log.info(`Generating LavaMoat policy from ${niceEntrypointPath}…`)
-    policy = await generate(entrypoint, {
+    ;({ policy, compartmentMap } = await generate(entrypoint, {
       ...generateOpts,
       trustRoot,
       readPowers,
       policyOverride,
-    })
+    }))
   }
+
+  reportInvalidOverrides(compartmentMap, { policyOverride, policyOverridePath })
 
   if (shouldWrite) {
     await writePolicy(policyPath, policy, { fs: writableFs })
