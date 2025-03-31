@@ -98,6 +98,7 @@ const enforcePolicy = (specifier, referrerResourceId, wrappedRequire) => {
   ) {
     return wrappedRequire()
   }
+
   const referrerPolicy = LAVAMOAT.policy.resources[referrerResourceId] || {}
   if (referrerPolicy.builtin && LAVAMOAT.externals[specifier]) {
     const builtinName = LAVAMOAT.externals[specifier]
@@ -121,8 +122,13 @@ const enforcePolicy = (specifier, referrerResourceId, wrappedRequire) => {
   }
   const requestedResourceId = findResourceId(specifier)
   if (!requestedResourceId) {
+    if (LAVAMOAT.ctxm.includes(specifier)) {
+      throw Error(
+        `'${referrerResourceId}' is trying to load a module dynamically from a dependency it has not been allowed using the following Webpack Context Module: '${specifier}'`
+      )
+    }
     throw Error(
-      `Requested specifier ${specifier} is not allowed as a builtin and not a known dependency of ${referrerResourceId}. Regenerate policy or add it to policy-override.json.`
+      `Requested specifier '${specifier}' is not allowed as a builtin and is not a known dependency of '${referrerResourceId}'; regenerate policy or add it to policy-override.json.`
     )
   }
   // allow imports internal to the package
@@ -133,6 +139,7 @@ const enforcePolicy = (specifier, referrerResourceId, wrappedRequire) => {
     return wrappedRequire()
   }
 
+  // This error message does not refer to specifier directly so it won't be confusing for a ContextModule either.
   throw Error(
     `Policy does not allow importing ${requestedResourceId} from ${referrerResourceId}`
   )
@@ -189,6 +196,8 @@ const installGlobalsForPolicy = (resourceId, packageCompartmentGlobal) => {
 
 const compartmentMap = new Map()
 /**
+ * Finds the resource ID for a given module ID.
+ *
  * @param {string} moduleId
  * @returns {string | undefined}
  */
@@ -261,6 +270,20 @@ const lavamoatRuntimeWrapper = (resourceId, runtimeKit) => {
     // wrap webpack runtime for policy check and hardening
     const policyRequire = wrapRequireWithPolicy(__webpack_require__, resourceId)
 
+    /**
+     * Wrapped chunk loader
+     *
+     * @param {string | number} chunkId
+     */
+    policyRequire.e = (chunkId) => {
+      // Chunk resolution at runtime may be a lookup table or a string concatenation. In the latter case it can be fooled into loading any file from under publicPath. That's why we only want to accept known chunks.
+      if (!LAVAMOAT.kch.includes(chunkId)) {
+        throw Error(
+          `Attempt to load a chunk that was not known at compile time: ${chunkId} from ${resourceId}`
+        )
+      }
+      return __webpack_require__.e(chunkId)
+    }
     // TODO: It's possible most of the work here could be done once instead of for each wrapping
 
     // Webpack has a few one-letter functions in the runtime and built-in plugins that add more runtime functions. We might need to support them eventually.

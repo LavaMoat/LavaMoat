@@ -1,4 +1,4 @@
-const test = require('ava')
+const test = /** @type {import('ava').TestFn} */ (require('ava'))
 const { scaffold, runScriptWithSES } = require('./scaffold.js')
 const { makeConfig } = require('./fixtures/main/webpack.config.js')
 const path = require('node:path')
@@ -8,7 +8,6 @@ test.before(async (t) => {
   const webpackConfig = makeConfig({
     generatePolicy: true,
     emitPolicySnapshot: true,
-    diagnosticsVerbosity: 1,
   })
   await t.notThrowsAsync(async () => {
     t.context.build = await scaffold(webpackConfig)
@@ -30,7 +29,6 @@ test('webpack/policy-gen - handles excludes', async (t) => {
   const webpackConfig = makeConfig({
     generatePolicy: true,
     policyLocation: path.resolve(__dirname, 'fixtures/main/policy-excludes'),
-    diagnosticsVerbosity: 1,
   })
   webpackConfig.entry = path.resolve(__dirname, 'fixtures/main/excludes.js')
   try {

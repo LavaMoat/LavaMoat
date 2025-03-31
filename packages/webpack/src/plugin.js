@@ -228,6 +228,20 @@ class LavaMoatPlugin {
          */
         const unenforceableModuleIds = []
         /**
+         * Array of module ids that are context modules and need to be
+         * double-wrapped.
+         *
+         * @type {{ moduleId: string | number; context: string }[]}
+         */
+        const contextModules = []
+
+        /**
+         * Array of chunk ids that have been processed.
+         *
+         * @type {(string | number)[]}
+         */
+        const chunkIds = []
+        /**
          * A record of module ids that are externals and need to be enforced as
          * builtins.
          *
@@ -343,6 +357,11 @@ class LavaMoatPlugin {
             const chunkGraph = compilation.chunkGraph
 
             Array.from(chunks).forEach((chunk) => {
+              // Collect chunk IDs and info while we're here
+              if (chunk.id !== null) {
+                chunkIds.push(chunk.id)
+              }
+
               chunkGraph.getChunkModules(chunk).forEach((module) => {
                 const moduleId = chunkGraph.getModuleId(module)
                 const moduleClass =
@@ -389,11 +408,29 @@ class LavaMoatPlugin {
                   }
                 }
 
-                if (
-                  isIgnoredModule(module) ||
-                  (options.__unsafeAllowContextModules &&
-                    isContextModule(module, moduleClass))
-                ) {
+                // Note: module.context on an empty context module when no context information was guessable from code is going to point to the module that loads it.
+                if (isContextModule(module, moduleClass)) {
+                  diag.rawDebug(3, {
+                    contextModule: {
+                      moduleId,
+                      context: module.context,
+                      // @ts-expect-error we want to see it if available
+                      request: module?.options?.request,
+                      // @ts-expect-error we want to see it if available
+                      _identifier: module?._identifier,
+                    },
+                  })
+                  if (!module.context) {
+                    mainCompilationWarnings.push(
+                      new WebpackError(
+                        `LavaMoatPlugin: context module ${moduleId} has no context information. It cannot be allowed to work if it's reached at runtime.`
+                      )
+                    )
+                  } else {
+                    contextModules.push({ moduleId, context: module.context })
+                  }
+                }
+                if (isIgnoredModule(module)) {
                   unenforceableModuleIds.push(moduleId)
                 } else {
                   if (isExternalModule(module, moduleClass)) {
@@ -430,11 +467,14 @@ class LavaMoatPlugin {
             identifierLookup = generateIdentifierLookup({
               readableResourceIds: options.readableResourceIds,
               unenforceableModuleIds,
+              contextModules,
               externals,
               paths: knownPaths,
               policy: policyToApply,
               canonicalNameMap,
             })
+
+            // =================================================================
 
             if (unenforceableModuleIds.length > 0) {
               mainCompilationWarnings.push(
@@ -546,6 +586,17 @@ class LavaMoatPlugin {
                   {
                     name: 'unenforceable',
                     data: identifierLookup.unenforceableModuleIds || null,
+                    json: true,
+                  },
+                  {
+                    name: 'ctxm',
+                    data: identifierLookup.contextModuleIds || null,
+                    json: true,
+                  },
+                  {
+                    // known chunk ids
+                    name: 'kch',
+                    data: chunkIds,
                     json: true,
                   },
                   {
