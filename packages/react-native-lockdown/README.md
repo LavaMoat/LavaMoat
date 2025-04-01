@@ -15,7 +15,7 @@ which runs `lockdown` JS before React Native sets up global variables typical in
 ```js
 // metro.config.js
 const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config')
-const makeGetPolyfills = require('@lavamoat/react-native-lockdown')
+const { lockdownSerializer } = require('@lavamoat/react-native-lockdown')
 
 /**
  * Metro configuration https://reactnative.dev/docs/metro
@@ -23,65 +23,16 @@ const makeGetPolyfills = require('@lavamoat/react-native-lockdown')
  * @type {import('@react-native/metro-config').MetroConfig}
  */
 const config = {
-  serializer: {
-    getPolyfills: () => makeGetPolyfills({ engine: 'hermes' }),
-  },
+  // your other config
+  serializer: lockdownSerializer(
+    {
+      hermesRuntime: true,
+    },
+    {
+      // your previous serializer config if any
+    }
+  ),
 }
 
 module.exports = mergeConfig(getDefaultConfig(__dirname), config)
 ```
-
-Under the hood, this runs the Hermes transform of the SES shim.
-
-### Hermes with vetted shim
-
-```js
-// metro.config.js
-const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config')
-const makeGetPolyfills = require('@lavamoat/react-native-lockdown')
-
-/**
- * Metro configuration https://reactnative.dev/docs/metro
- *
- * @type {import('@react-native/metro-config').MetroConfig}
- */
-const config = {
-  serializer: {
-    getPolyfills: () =>
-      makeGetPolyfills({
-        engine: 'hermes',
-        polyfills: [require.resolve('reflect-metadata')],
-      }),
-  },
-}
-
-module.exports = mergeConfig(getDefaultConfig(__dirname), config)
-```
-
-In this example you may have pre-vetted `reflect-metadata` as a safe polyfill to include in your Hardened JS setup.
-
-### Android on Hermes, iOS on JSC
-
-```js
-// metro.config.js
-const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config')
-const makeGetPolyfills = require('@lavamoat/react-native-lockdown')
-
-/**
- * Metro configuration https://reactnative.dev/docs/metro
- *
- * @type {import('@react-native/metro-config').MetroConfig}
- */
-const config = {
-  serializer: {
-    getPolyfills: ({platform}) =>
-      makeGetPolyfills({
-        engine: platform === 'android' ? 'hermes' : 'jsc',
-      }),
-  },
-};
-
-module.exports = mergeConfig(getDefaultConfig(__dirname), config)
-```
-
-Under the hood this runs the Hermes transform of the SES shim on Android, otherwise the vanilla SES shim on iOS.

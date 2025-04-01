@@ -16,12 +16,11 @@
   "engines": {
     "node": ">18.0.0"
   },
-  "main": "./src/makeGetPolyfills.js",
+  "main": "./src/index.js",
   "exports": {
-    ".": "./src/makeGetPolyfills.js",
+    ".": "./src/index.js",
     "./repair": "./src/repair.js",
-    "./harden": "./src/harden.js",
-    "./makeGetPolyfills": "./src/makeGetPolyfills.js"
+    "./harden": "./src/harden.js"
   },
   "types": "./types/src/types.d.ts",
   "files": [
@@ -33,8 +32,10 @@
   "scripts": {
     "test": "ava"
   },
+  "peerDependencies": {
+    "@react-native/js-polyfills": "^0.78.1"
+  },
   "dependencies": {
-    "@react-native/js-polyfills": "^0.78.1",
     "ses": "^1.12.0"
   },
   "ava": {
