@@ -29,7 +29,8 @@ const config = {
       hermesRuntime: true,
     },
     {
-      // your previous serializer config if any
+      // your previous serializer config if any, for example:
+      // getPolyfills: () => [require.resolve('reflect-metadata')],
     }
   ),
 }
