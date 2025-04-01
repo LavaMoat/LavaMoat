@@ -589,7 +589,7 @@ class LavaMoatPlugin {
                   diag.rawDebug(1, `> adding runtime for chunk ${chunk.name}`)
                   // narrow down the policy and map to module identifiers
                   const policyData = identifierLookup.getTranslatedPolicy()
-  
+
                   runtimeChunks = [
                     {
                       name: 'root',
@@ -647,7 +647,7 @@ class LavaMoatPlugin {
                       file: require.resolve('./runtime/runtime.js'),
                     },
                   ]
-  
+
                   if (options.debugRuntime) {
                     runtimeChunks.push({
                       name: 'debug',
@@ -765,10 +765,10 @@ module.exports = LavaMoatPlugin
  * @property {ScuttlerConfig} [scuttleGlobalThis] - Configuration for enabling
  *   scuttling mode
  * @property {boolean} [debugRuntime] - Enable runtime debugging tools
- * @property {boolean} [__unsafeAllowContextModules] - Skips enforcement of
- *   policies on ContextModule usage. This is only safe if you can guarantee
- *   that webpack only uses the missing module stub ContextModule and no actual
- *   modules get loaded through it.
+ * @property {RegExp} [unlockedChunksUnsafe] - A regex to match chunk names that
+ *   should be running without enforcement. This is unsafe and should only be
+ *   used when a part of the app is running in an environment that can't be
+ *   locked down..
  */
 
 // Provided inline because import('ses') won't work in jsdoc of a cjs module
