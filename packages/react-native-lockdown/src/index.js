@@ -65,6 +65,7 @@ module.exports = {
       validatePolyfills(polyfills)
       return [ses, repair, ...polyfills, harden]
     }
+    return config;
   },
   // more elaborate version that hooks into react-native InitializeCore
   // moduleId to make sure it runs first
@@ -142,5 +143,6 @@ module.exports = {
       validatePolyfills(polyfills)
       return [ses, repair, ...polyfills, harden]
     }
+    return config;
   },
 }
