@@ -61,7 +61,8 @@ module.exports = {
     const harden = require.resolve('./harden.js')
 
     config.getPolyfills = () => {
-      const polyfills = config.getPolyfills()
+      // const polyfills = config.getPolyfills() // RangeError: Maximum call stack size exceeded
+      const polyfills = require('@react-native/js-polyfills')() // TODO: respect originalConfig.getPolyfills
       validatePolyfills(polyfills)
       return [ses, repair, ...polyfills, harden]
     }
