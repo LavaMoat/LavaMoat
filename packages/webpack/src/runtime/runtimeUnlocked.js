@@ -30,7 +30,7 @@ const { NAME_globalThis, NAME_scopeTerminator, NAME_runtimeHandler } =
  */
 const lavamoatRuntimeWrapper = (resourceId, runtimeKit) => {
   let { module } = runtimeKit
-  const runtimeHandler = runtimeKit
+  const runtimeHandler = assign(create(null), runtimeKit)
 
   // allow setting, but ignore value for /* module decorator */ module = __webpack_require__.nmd(module)
   defineProperty(runtimeHandler, 'module', {
