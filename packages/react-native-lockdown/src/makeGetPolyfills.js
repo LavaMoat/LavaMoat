@@ -7,14 +7,6 @@ const path = require('node:path')
  *
  * @example See README.md for usage
  *
- * TODO: ({platform: ?string})
- * https://metrobundler.dev/docs/configuration/#getpolyfills
- *
- * TODO: De-duplicate polyfills if '@react-native/polyfills' provided.
- *
- * NB: Since we override the default React Native polyfills, we slot them in as
- * SES vetted shims here.
- *
  * @param {Object} options - An object containing the following properties:
  * @param {string} options.engine - The JavaScript engine to secure. If not
  *   'hermes', vanilla flavoured SES will be used.
