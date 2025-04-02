@@ -33,7 +33,7 @@
     "test": "ava"
   },
   "peerDependencies": {
-    "@react-native/js-polyfills": "^0.78.1"
+    "@react-native/js-polyfills": "*"
   },
   "dependencies": {
     "ses": "^1.12.0"
