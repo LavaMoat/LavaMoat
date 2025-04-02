@@ -43,5 +43,8 @@
       "test/*.spec.js"
     ],
     "timeout": "30s"
+  },
+  "devDependencies": {
+    "@react-native/js-polyfills": "0.78.2"
   }
 }
