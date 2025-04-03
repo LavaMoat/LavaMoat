@@ -22,6 +22,17 @@ yarn add @lavamoat/react-native-lockdown
 
 ## Usage
 
+```js
+// babel.config.js
+module.exports = {
+  ignore: [
+    /ses\.cjs/,
+    /ses-hermes\.cjs/
+  ],
+  presets: ['module:metro-react-native-babel-preset']
+}
+```
+
 ### Hermes
 
 ```js
