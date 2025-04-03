@@ -22,6 +22,8 @@ yarn add @lavamoat/react-native-lockdown
 
 ## Usage
 
+### Babel config
+
 ```js
 // babel.config.js
 module.exports = {
@@ -60,3 +62,49 @@ const config = {
 
 module.exports = mergeConfig(getDefaultConfig(__dirname), config)
 ```
+
+## Troubleshooting
+
+### ReferenceError: Property 'require' doesn't exist
+
+<img width="466" alt="Screenshot 2025-04-03 at 1 25 08 pm" src="https://github.com/user-attachments/assets/1beb4f08-e1a1-45a2-9d3c-7187fe47540b" />
+
+Upon inspecting the bundle, the reference error is throwing early when evaluating the SES shim.
+
+It is clear Babel is preparing it to be transformed:
+
+```js
+// http://localhost:8081/index.bundle//&platform=android
+// ...
+(function (global) {
+  var _asyncToGenerator = require("@babel/runtime/helpers/asyncToGenerator");
+  var _toArray = require("@babel/runtime/helpers/toArray");
+  var _objectWithoutProperties = require("@babel/runtime/helpers/objectWithoutProperties");
+  var _toConsumableArray = require("@babel/runtime/helpers/toConsumableArray");
+  var _slicedToArray = require("@babel/runtime/helpers/slicedToArray");
+  var _defineProperty = require("@babel/runtime/helpers/defineProperty");
+  var _objectDestructuringEmpty = require("@babel/runtime/helpers/objectDestructuringEmpty");
+  var _excluded = ["name", "message", "errors", "cause", "stack"],
+    _excluded2 = ["random"],
+    _excluded3 = ["__options__"],
+    _excluded4 = ["errorTaming", "errorTrapping", "reporting", "unhandledRejectionTrapping", "regExpTaming", "localeTaming", "consoleTaming", "overrideTaming", "stackFiltering", "domainTaming", "evalTaming", "overrideDebug", "legacyRegeneratorRuntimeTaming", "__hardenTaming__", "dateTaming", "mathTaming"];
+  function _defineAccessor(e, r, n, t) { var c = { configurable: !0, enumerable: !0 }; return c[e] = t, Object.defineProperty(r, n, c); }
+  // ses@1.12.0
+  (function (functors) {
+// ...
+```
+
+Simply ensure Babel is configured to ignore your flavour of SES shim like in the [babel config][babel-config] example.
+
+Now it should look much cleaner:
+
+```js
+// http://localhost:8081/index.bundle//&platform=android
+// ...
+(function (global) {
+  // ses@1.12.0
+  (functors => options => {
+// ...
+```
+
+[babel-config]: #babel-config
