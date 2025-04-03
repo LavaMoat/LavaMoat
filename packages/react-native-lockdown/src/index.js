@@ -58,13 +58,12 @@ module.exports = {
       ? require.resolve('ses/hermes')
       : require.resolve('ses')
     const repair = require.resolve('./repair.js')
-    const harden = require.resolve('./harden.js')
 
     config.getPolyfills = () => {
       // const polyfills = config.getPolyfills() // RangeError: Maximum call stack size exceeded
       const polyfills = require('@react-native/js-polyfills')() // TODO: respect originalConfig.getPolyfills
       validatePolyfills(polyfills)
-      return [ses, repair, ...polyfills, harden]
+      return [ses, repair, ...polyfills]
     }
     return config;
   },
@@ -137,12 +136,11 @@ module.exports = {
       ? require.resolve('ses/hermes')
       : require.resolve('ses')
     const repair = require.resolve('./repair.js')
-    const harden = require.resolve('./harden.js')
 
     config.getPolyfills = () => {
       const polyfills = config.getPolyfills()
       validatePolyfills(polyfills)
-      return [ses, repair, ...polyfills, harden]
+      return [ses, repair, ...polyfills]
     }
     return config;
   },
