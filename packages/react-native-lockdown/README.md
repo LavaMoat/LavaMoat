@@ -8,6 +8,18 @@ This is done by hooking into Metro's serializer option _getPolyfills_:
 
 which runs `lockdown` JS before React Native sets up global variables typical in most JavaScript environments in [InitializeCore.js](https://github.com/facebook/react-native/blob/main/packages/react-native/Libraries/Core/InitializeCore.js).
 
+## Install
+
+```shell
+npm i @lavamoat/react-native-lockdown
+```
+
+or
+
+```shell
+yarn add @lavamoat/react-native-lockdown
+```
+
 ## Examples
 
 ### Hermes
