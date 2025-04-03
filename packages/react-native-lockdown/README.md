@@ -76,7 +76,7 @@ module.exports = mergeConfig(getDefaultConfig(__dirname), config)
 
 Upon inspecting the bundle, the reference error is throwing early when evaluating the SES shim.
 
-It is clear Babel is preparing it to be transformed:
+It is clear Babel is preparing it to be [transformed](https://github.com/endojs/endo/issues/662):
 
 ```js
 // http://localhost:8081/index.bundle//&platform=android
@@ -113,3 +113,4 @@ Now it should look much cleaner:
 ```
 
 [babel-config]: #babel-config
+<!-- [ses-transformed-ext]: https://github.com/endojs/endo/issues/662 -->
