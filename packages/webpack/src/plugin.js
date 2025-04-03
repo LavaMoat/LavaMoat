@@ -13,6 +13,10 @@ const { assembleRuntime } = require('./buildtime/assemble.js')
 
 const { loadCanonicalNameMap } = require('@lavamoat/aa')
 
+/**
+ * @import {LockdownOptions} from 'ses'
+ */
+
 // TODO: upcoming version of webpack may expose these constants, but we want to support more versions
 // https://github.com/webpack/webpack/blob/07ac43333654280c5bc6014a3a69eda4c3b80273/lib/ModuleTypeConstants.js
 // const {
@@ -746,22 +750,4 @@ module.exports = LavaMoatPlugin
  *   policies on ContextModule usage. This is only safe if you can guarantee
  *   that webpack only uses the missing module stub ContextModule and no actual
  *   modules get loaded through it.
- */
-
-// Provided inline because import('ses') won't work in jsdoc of a cjs module
-/**
- * @typedef {Object} LockdownOptions
- * @property {'safe' | 'unsafe'} [regExpTaming]
- * @property {'safe' | 'unsafe'} [localeTaming]
- * @property {'safe' | 'unsafe'} [consoleTaming]
- * @property {'platform' | 'exit' | 'abort' | 'report' | 'none'} [errorTrapping]
- * @property {'report' | 'none'} [unhandledRejectionTrapping]
- * @property {'safe' | 'unsafe'} [errorTaming]
- * @property {'safe' | 'unsafe'} [dateTaming]
- * @property {'safe' | 'unsafe'} [mathTaming]
- * @property {'safeEval' | 'unsafeEval' | 'noEval'} [evalTaming]
- * @property {'concise' | 'verbose'} [stackFiltering]
- * @property {'moderate' | 'min' | 'severe'} [overrideTaming]
- * @property {string[]} [overrideDebug]
- * @property {'safe' | 'unsafe'} [domainTaming]
  */
