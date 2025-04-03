@@ -20,7 +20,7 @@ or
 yarn add @lavamoat/react-native-lockdown
 ```
 
-## Examples
+## Usage
 
 ### Hermes
 
