@@ -94,7 +94,7 @@ It is clear Babel is preparing it to be [transformed](https://github.com/endojs/
     _excluded3 = ["__options__"],
     _excluded4 = ["errorTaming", "errorTrapping", "reporting", "unhandledRejectionTrapping", "regExpTaming", "localeTaming", "consoleTaming", "overrideTaming", "stackFiltering", "domainTaming", "evalTaming", "overrideDebug", "legacyRegeneratorRuntimeTaming", "__hardenTaming__", "dateTaming", "mathTaming"];
   function _defineAccessor(e, r, n, t) { var c = { configurable: !0, enumerable: !0 }; return c[e] = t, Object.defineProperty(r, n, c); }
-  // ses@1.12.0
+  // ses@1.13.0
   (function (functors) {
 // ...
 ```
@@ -107,7 +107,7 @@ Now it should look much cleaner:
 // http://localhost:8081/index.bundle//&platform=android
 // ...
 (function (global) {
-  // ses@1.12.0
+  // ses@1.13.0
   (functors => options => {
 // ...
 ```
