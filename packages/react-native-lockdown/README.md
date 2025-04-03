@@ -65,6 +65,11 @@ module.exports = mergeConfig(getDefaultConfig(__dirname), config)
 
 ## Troubleshooting
 
+> [!IMPORTANT]
+>
+> Remember to `react-native start --reset-cache` or `react-native bundle --reset-cache` after Babel or Metro config changes to removed cached files (default: false).
+> This will ensure a fresh build/bundle with your configuration changes, rather than relying on hot-reload or hot/cold starts.
+
 ### ReferenceError: Property 'require' doesn't exist
 
 <img width="466" alt="Screenshot 2025-04-03 at 1 25 08 pm" src="https://github.com/user-attachments/assets/1beb4f08-e1a1-45a2-9d3c-7187fe47540b" />
