@@ -242,10 +242,24 @@ const wrapRequireWithPolicy = (__webpack_require__, referrerResourceId) =>
  * Wraps the webpack runtime with Lavamoat security features.
  *
  * @param {string} resourceId - The identifier of the resource.
- * @param {any} runtimeKit - The runtime kit containing bits from the webpack
+ * @param {object} runtimeKit - The runtime kit containing bits from the webpack
  *   runtime.
- * @returns {Object} - An object containing the wrapped runtime and other
- *   related properties.
+ * @param {any} [runtimeKit.__webpack_require__] - The webpack require function.
+ * @param {object} [runtimeKit.module] - The module object.
+ * @param {any} [runtimeKit.exports] - The exports object.
+ * @returns {{
+ *   [NAME_scopeTerminator]: Object
+ *   [NAME_runtimeHandler]: Object
+ *   [NAME_globalThis]: Object
+ * }}
+ *   An object containing:
+ *
+ *   - [NAME_scopeTerminator]: The stricter scope terminator proxy that prevents
+ *       access to bundler scope
+ *   - [NAME_runtimeHandler]: The frozen runtime handler with wrapped webpack
+ *       functions and security checks
+ *   - [NAME_globalThis]: The compartment's isolated globalThis object for the
+ *       module
  */
 const lavamoatRuntimeWrapper = (resourceId, runtimeKit) => {
   if (!LOCKDOWN_ON) {
@@ -346,11 +360,13 @@ const lavamoatRuntimeWrapper = (resourceId, runtimeKit) => {
   })
   freeze(runtimeHandler)
 
-  return {
-    [NAME_scopeTerminator]: stricterScopeTerminator,
-    [NAME_runtimeHandler]: runtimeHandler,
-    [NAME_globalThis]: compartmentMap.get(resourceId).globalThis,
-  }
+  return freeze(
+    assign(create(null), {
+      [NAME_scopeTerminator]: stricterScopeTerminator,
+      [NAME_runtimeHandler]: runtimeHandler,
+      [NAME_globalThis]: compartmentMap.get(resourceId).globalThis,
+    })
+  )
 }
 
 // defaultExport is getting assigned to __webpack_require__._LM_
