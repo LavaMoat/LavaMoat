@@ -1,5 +1,5 @@
-import { RequireAtLeastOne } from 'type-fest'
-import { LavamoatModuleRecord } from '../moduleRecord'
+import { type RequireAtLeastOne } from 'type-fest'
+import { type LavamoatModuleRecord } from '../module-record'
 
 /**
  * Schema for LavaMoat policy files
@@ -21,9 +21,7 @@ export interface PartialLavaMoatPolicy {
 
 export interface DebugInfo {
   /**
-   * @todo This is an array of `@babel/parser`'s `ParseError`. To use it
-   *   directly we'd need to add `@babel/parser` as a production dependency of
-   *   `lavamoat-tofu`, and I don't want to do that right now.
+   * @todo This is an array of `@babel/parser`'s `ParseError`.
    */
   parseErrors?: { code: string; reasonCode: string }[]
   moduleRecord: Omit<LavamoatModuleRecord, 'ast'>
