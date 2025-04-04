@@ -136,10 +136,16 @@ module.exports = {
       files: ['**/tsconfig*.json', '**/*.json5', '**/*.jsonc'],
       extends: ['plugin:jsonc/prettier'],
     },
+    {
+      files: ['*.json', '*.json5', '*.jsonc', '*.yaml', '*.yml'],
+      extends: ['plugin:json-schema-validator/recommended'],
+    },
   ],
   ignorePatterns: [
     '**/types/**/*',
     '**/test/**/fixture*/**/*',
     '**/examples/**/*',
+    '**/node_modules/**/*',
+    '**/coverage/**/*',
   ],
 }
