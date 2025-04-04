@@ -1,6 +1,6 @@
 {
   "name": "lavamoat-core",
-  "version": "16.3.2",
+  "version": "16.4.0",
   "description": "LavaMoat kernel and utils",
   "repository": {
     "type": "git",
@@ -40,7 +40,7 @@
   "dependencies": {
     "@babel/types": "7.26.10",
     "json-stable-stringify": "1.1.1",
-    "lavamoat-tofu": "^8.0.6",
+    "lavamoat-tofu": "^8.0.7",
     "merge-deep": "3.0.3",
     "ses": "1.11.0",
     "type-fest": "4.30.0"

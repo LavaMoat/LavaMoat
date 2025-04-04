@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.1.1](https://github.com/LavaMoat/LavaMoat/compare/node-v0.1.0...node-v0.1.1) (2025-04-04)
+
+
+### Bug Fixes
+
+* upgrade ses to v1.11.0 ([a12dae1](https://github.com/LavaMoat/LavaMoat/commit/a12dae13e8c7f70082199ba186659ea413e82ded))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-core bumped from ^16.3.2 to ^16.4.0
+
 ## [0.1.0](https://github.com/LavaMoat/LavaMoat/compare/node-v0.0.2...node-v0.1.0) (2025-03-11)
 
 
