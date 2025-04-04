@@ -6,6 +6,28 @@
   * dependencies
     * lavamoat-tofu bumped from ^7.2.1 to ^7.2.2
 
+## [16.4.0](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v16.3.2...lavamoat-core-v16.4.0) (2025-04-04)
+
+
+### Features
+
+* **core:** add "redefine" global policy value to schema ([09d78ba](https://github.com/LavaMoat/LavaMoat/commit/09d78badd3b3cc2e982ce690e84133d9959f43b2)), closes [#1583](https://github.com/LavaMoat/LavaMoat/issues/1583)
+
+
+### Bug Fixes
+
+* **core,webpack:** remove deprecated lockdown options ([efec539](https://github.com/LavaMoat/LavaMoat/commit/efec5391eec838689ce2426de617571d0f276f2c)), closes [#1578](https://github.com/LavaMoat/LavaMoat/issues/1578)
+* **core:** block circular global object endowments ([#1505](https://github.com/LavaMoat/LavaMoat/issues/1505)) ([6745a0e](https://github.com/LavaMoat/LavaMoat/commit/6745a0edee85171e4062aaec31d7f25bf3a97e46))
+* **deps:** update babel monorepo to v7.26.10 ([#1561](https://github.com/LavaMoat/LavaMoat/issues/1561)) ([2757717](https://github.com/LavaMoat/LavaMoat/commit/275771754578647346da1ece0f86afaabdd5de36))
+* upgrade ses to v1.11.0 ([a12dae1](https://github.com/LavaMoat/LavaMoat/commit/a12dae13e8c7f70082199ba186659ea413e82ded))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-tofu bumped from ^8.0.6 to ^8.0.7
+
 ## [16.3.2](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v16.3.1...lavamoat-core-v16.3.2) (2025-03-11)
 
 
