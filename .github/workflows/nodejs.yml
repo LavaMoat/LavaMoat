@@ -127,8 +127,6 @@ jobs:
   compatibility-test-windows:
     name: Test Windows compatibility
     runs-on: windows-latest
-    strategy:
-      fail-fast: false
     env:
       FORCE_COLOR: 1
       TEST_WORKSPACES: >-
@@ -142,7 +140,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
-      - name: Use Node.js ${{ matrix.node-version }}
+      - name: Use Node.js from .nvmrc
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version-file: .nvmrc
@@ -168,24 +166,10 @@ jobs:
     runs-on: macOS-latest
     env:
       FORCE_COLOR: 1
-      TEST_WORKSPACES: >-
-        --workspace=packages/aa
-        --workspace=packages/allow-scripts
-        --workspace=packages/browserify
-        --workspace=packages/core
-        --workspace=packages/lavapack
-        --workspace=packages/laverna
-        --workspace=packages/lavamoat-node
-        --workspace=packages/perf
-        --workspace=packages/preinstall-always-fail
-        --workspace=packages/survey
-        --workspace=packages/tofu
-        --workspace=packages/webpack
-        --workspace=packages/yarn-plugin-allow-scripts
     steps:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
-      - name: Use Node.js ${{ matrix.node-version }}
+      - name: Use Node.js from .nvmrc
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version-file: .nvmrc
@@ -201,7 +185,7 @@ jobs:
           install-command: npm ci --foreground-scripts
       - name: Test
         run: |
-          npm run --if-present ${{ env.TEST_WORKSPACES }} build
-          npm run build:types
-          npm run --if-present ${{ env.TEST_WORKSPACES }} test:prep
-          npm run --if-present ${{ env.TEST_WORKSPACES }} test
+          npm run rebuild:types
+          npm run --if-present --workspaces build
+          npm run --if-present --workspaces test:prep
+          npm run --if-present --workspaces test
