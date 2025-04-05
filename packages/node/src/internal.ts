@@ -7,11 +7,12 @@
  */
 
 import type {
+  CompartmentMapDescriptor,
   MapNodeModulesOptions,
   ReadNowPowers,
   ReadNowPowersProp,
 } from '@endo/compartment-mapper'
-import type { LavamoatModuleRecordOptions } from 'lavamoat-core'
+import type { LavamoatModuleRecordOptions, LavaMoatPolicy } from 'lavamoat-core'
 import type { Except, LiteralUnion, Simplify } from 'type-fest'
 import type {
   BaseLoadCompartmentMapOptions,
@@ -22,7 +23,7 @@ import type {
   WithLog,
   WithPolicyOverride,
   WithPolicyOverridePath,
-  WithRead,
+  WithReadFile,
   WithReadPowers,
   WithTrustRoot,
   WritePolicyOptions,
@@ -46,7 +47,7 @@ export type ContextTestFn = (context: object) => boolean
  */
 export type GenerateOptions = Except<
   GeneratePolicyOptions,
-  keyof WritePolicyOptions | 'isAbsolute'
+  keyof WritePolicyOptions
 >
 
 /**
@@ -124,9 +125,9 @@ export type SomeParameters<T extends SomeFunction> = T extends new (
     ? Parameters<T>
     : never
 
-export type ReadPolicyOptions = WithRead
+export type ReadPolicyOptions = WithReadFile
 
-export type ReadPolicyOverrideOptions = WithRead
+export type ReadPolicyOverrideOptions = WithReadFile
 
 /**
  * Options for `resolveBinScript()`
@@ -186,3 +187,8 @@ export type RequiredReadNowPowers = ReadonlyArray<
 export type ReportInvalidOverridesOptions = WithPolicyOverride &
   WithPolicyOverridePath &
   WithLog
+
+export type GenerateResult<T extends LavaMoatPolicy = LavaMoatPolicy> = {
+  policy: T
+  compartmentMap: CompartmentMapDescriptor
+}

@@ -5,18 +5,18 @@
  *
  * @packageDocumentation
  */
-import assert from 'node:assert'
 import nodeFs from 'node:fs'
 import nodePath from 'node:path'
 import { defaultReadPowers } from '../compartment/power.js'
 import {
   DEFAULT_POLICY_DEBUG_FILENAME,
+  DEFAULT_POLICY_FILENAME,
   DEFAULT_POLICY_OVERRIDE_FILENAME,
-  DEFAULT_POLICY_PATH,
   DEFAULT_TRUST_ROOT_COMPARTMENT,
 } from '../constants.js'
+import { assertAbsolutePath } from '../fs.js'
 import { log as defaultLog } from '../log.js'
-import { readPolicyOverride, writePolicy } from '../policy-util.js'
+import { maybeReadPolicyOverride, writePolicy } from '../policy-util.js'
 import { devToConditions, hrLabel, hrPath, toPath } from '../util.js'
 import { loadCompartmentMap } from './policy-gen-compartment-map.js'
 import { compartmentMapToPolicy } from './to-policy.js'
@@ -24,15 +24,12 @@ import { compartmentMapToPolicy } from './to-policy.js'
 const { keys, values } = Object
 
 /**
- * @import {GenerateOptions, ReportInvalidOverridesOptions} from '../internal.js'
- * @import {GeneratePolicyOptions, CompartmentMapToPolicyOptions, IsAbsoluteFn} from '../types.js'
+ * @import {GenerateOptions, GenerateResult, ReportInvalidOverridesOptions} from '../internal.js'
+ * @import {GeneratePolicyOptions, CompartmentMapToPolicyOptions} from '../types.js'
  * @import {LavaMoatPolicy, LavaMoatPolicyDebug} from 'lavamoat-core'
  * @import {SetFieldType} from 'type-fest'
  * @import {CompartmentMapDescriptor} from '@endo/compartment-mapper'
  */
-
-/** @type {IsAbsoluteFn} */
-const defaultIsAbsolute = nodePath.isAbsolute
 
 /**
  * Returns `true` if a debug policy should be written
@@ -79,10 +76,7 @@ const shouldWriteDebugPolicy = (shouldWrite, debug, policyDebugPath) =>
  *
  * @param {string | URL} entrypoint
  * @param {GenerateOptions} [opts]
- * @returns {Promise<{
- *   policy: LavaMoatPolicy
- *   compartmentMap: CompartmentMapDescriptor
- * }>}
+ * @returns {Promise<GenerateResult>}
  */
 const generate = async (
   entrypoint,
@@ -170,11 +164,6 @@ const reportInvalidOverrides = (
 }
 
 /**
- * Absolute path to the default policy file
- */
-const ABS_POLICY_PATH = nodePath.resolve(DEFAULT_POLICY_PATH)
-
-/**
  * Generates a LavaMoat policy or debug policy from a given entry point using
  * `@endo/compartment-mapper`
  *
@@ -187,37 +176,44 @@ export const generatePolicy = async (
   entrypoint,
   {
     policyDebugPath: rawPolicyDebugPath,
-    policyPath: rawPolicyPath = ABS_POLICY_PATH,
+    policyPath: rawPolicyPath,
     policyOverridePath: rawPolicyOverridePath,
     policyOverride,
     writableFs = nodeFs,
     readPowers = defaultReadPowers,
-    isAbsolute = defaultIsAbsolute,
     write: shouldWrite = false,
     debug,
     readFile = nodeFs.promises.readFile,
     log = defaultLog,
     trustRoot = DEFAULT_TRUST_ROOT_COMPARTMENT,
+    projectRoot = process.cwd(),
     ...generateOpts
   } = {}
 ) => {
   await Promise.resolve()
 
   const entrypointPath = toPath(entrypoint)
+  const projectRootPath = toPath(projectRoot)
+  const policyPath = toPath(
+    rawPolicyPath ?? nodePath.join(projectRoot, DEFAULT_POLICY_FILENAME)
+  )
 
-  assert(
-    isAbsolute(entrypointPath),
+  assertAbsolutePath(
+    entrypointPath,
     `entrypoint must be an absolute path; got ${entrypointPath}`
   )
 
-  const policyPath = toPath(rawPolicyPath)
-  const policyDir = nodePath.dirname(policyPath)
+  assertAbsolutePath(
+    projectRootPath,
+    `projectRoot must be an absolute path; got ${projectRootPath}`
+  )
 
-  assert(
-    isAbsolute(policyPath),
+  assertAbsolutePath(
+    policyPath,
     `policyPath must be an absolute path; got ${policyPath}`
   )
 
+  const policyDir = nodePath.dirname(policyPath)
   /** @type {string | undefined} */
   let policyOverridePath
   // the user may specify a policy override or a path to a policy override.
@@ -225,8 +221,8 @@ export const generatePolicy = async (
   if (!policyOverride) {
     if (rawPolicyOverridePath) {
       policyOverridePath = toPath(rawPolicyOverridePath)
-      assert(
-        isAbsolute(policyOverridePath),
+      assertAbsolutePath(
+        policyOverridePath,
         `policyOverridePath must be an absolute path; got ${policyOverridePath}`
       )
     } else {
@@ -235,7 +231,7 @@ export const generatePolicy = async (
         DEFAULT_POLICY_OVERRIDE_FILENAME
       )
     }
-    policyOverride = await readPolicyOverride(policyOverridePath, {
+    policyOverride = await maybeReadPolicyOverride(policyOverridePath, {
       readFile,
     })
   }
@@ -246,8 +242,8 @@ export const generatePolicy = async (
   if (shouldWrite && debug) {
     if (rawPolicyDebugPath) {
       policyDebugPath = toPath(rawPolicyDebugPath)
-      assert(
-        isAbsolute(policyDebugPath),
+      assertAbsolutePath(
+        policyDebugPath,
         `policyDebugPath must be an absolute path; got ${policyDebugPath}`
       )
     } else {

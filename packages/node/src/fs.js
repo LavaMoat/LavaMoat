@@ -10,7 +10,7 @@ import nodePath from 'node:path'
 
 /**
  * @import {PathLike} from 'node:fs'
- * @import {WithFs, WithRead} from './types.js'
+ * @import {WithFs, WithReadFile} from './types.js'
  */
 
 /**
@@ -18,7 +18,7 @@ import nodePath from 'node:path'
  *
  * @template [T=unknown] Default is `unknown`
  * @param {string | URL} filepath
- * @param {WithRead} opts
+ * @param {WithReadFile} opts
  * @returns {Promise<T>} JSON data
  * @internal
  */

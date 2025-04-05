@@ -11,6 +11,11 @@
 import chalk from 'chalk'
 import nodePath from 'node:path'
 import nodeUrl from 'node:url'
+import {
+  DEFAULT_POLICY_DEBUG_FILENAME,
+  DEFAULT_POLICY_OVERRIDE_FILENAME,
+} from './constants.js'
+import { assertAbsolutePath } from './fs.js'
 
 const { isArray: isArray_ } = Array
 const { freeze, keys } = Object
@@ -193,9 +198,7 @@ export const isFunction = (value) => typeof value === 'function'
  * @internal
  */
 export const hrPath = (filepath) => {
-  if (!isString(filepath) || filepath.startsWith('file://')) {
-    filepath = nodeUrl.fileURLToPath(filepath)
-  }
+  filepath = toPath(filepath)
   if (nodePath.isAbsolute(filepath)) {
     const relativePath = nodePath.relative(process.cwd(), filepath)
     if (relativePath && relativePath.length < filepath.length) {
@@ -234,12 +237,57 @@ export const isPathLike = (value) => isString(value) || value instanceof URL
 /**
  * Converts a path-like value to a string
  *
- * @param {string | URL} value Path-like value
+ * @param {string | URL} value Path-like value. If a string, should have a
+ *   `file://` scheme
  * @param {FileURLToPathFn} [fileURLToPath] `fileURLToPath` implementation
- * @returns {string}
+ * @returns {string} A filepath
  */
 export const toPath = (value, fileURLToPath = nodeUrl.fileURLToPath) => {
   return value instanceof URL || value.startsWith('file://')
     ? fileURLToPath(value)
     : value
+}
+
+/**
+ * Formats "code"; use when referring to code or configuration
+ *
+ * @param {string} value
+ * @returns {string}
+ */
+export const hrCode = (value) => {
+  return chalk.bgGrey.whiteBright(value)
+}
+
+/**
+ * Given path to a policy file, returns the sibling path to the policy override
+ * file
+ *
+ * @param {string | URL} policyPath
+ * @returns {string}
+ */
+export const makeDefaultPolicyOverridePath = (policyPath) => {
+  const path = toPath(policyPath)
+  assertAbsolutePath(
+    path,
+    `${hrCode('policyPath')} must be an absolute path; got ${path}`
+  )
+  const policyDir = nodePath.dirname(path)
+  return nodePath.join(policyDir, DEFAULT_POLICY_OVERRIDE_FILENAME)
+}
+
+/**
+ * Given path to a policy file, returns the sibling path to the policy debug
+ * file
+ *
+ * @param {string | URL} policyPath
+ * @returns {string}
+ */
+export const makeDefaultPolicyDebugPath = (policyPath) => {
+  const path = toPath(policyPath)
+  assertAbsolutePath(
+    path,
+    `${hrCode('policyPath')} must be an absolute path; got ${path}`
+  )
+  const policyDir = nodePath.dirname(path)
+  return nodePath.join(policyDir, DEFAULT_POLICY_DEBUG_FILENAME)
 }

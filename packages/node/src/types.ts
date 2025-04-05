@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Public types for `@lavamoat/node`
  *
@@ -13,7 +14,6 @@ import type {
   CryptoInterface,
   FsInterface,
   ImportLocationOptions,
-  IsAbsoluteFn,
   PackagePolicy,
   PathInterface,
   Policy,
@@ -55,16 +55,6 @@ export interface LavaMoatEndoPackagePolicyOptions {
    * If this is `true`, then the package is allowed to run native modules
    */
   native?: boolean
-}
-
-export interface WithAbsoluteFn {
-  /**
-   * A function like Node's `path.isAbsolute()`.
-   *
-   * This is _not_ the same as {@link ReadNowPowers.isAbsolute}; it is only used
-   * for finding the entry point and does not affect runtime operation.
-   */
-  isAbsolute?: IsAbsoluteFn
 }
 
 /**
@@ -284,7 +274,9 @@ export type EndoWritePolicy = typeof ENDO_GLOBAL_POLICY_ITEM_WRITE
  * Options for `execute()`
  */
 export type ExecuteOptions = Simplify<
-  ImportLocationOptions | SyncImportLocationOptions
+  Omit<ImportLocationOptions | SyncImportLocationOptions, 'log'> &
+    WithLog &
+    WithReadPowers
 >
 
 /**
@@ -295,9 +287,9 @@ export type GeneratePolicyOptions = Simplify<
     CompartmentMapToPolicyOptions &
     WritePolicyOptions &
     WithTrustRoot &
-    WithAbsoluteFn &
     WithPolicyOverridePath &
-    WithRead
+    WithReadFile &
+    WithProjectRoot
 >
 
 /**
@@ -372,7 +364,8 @@ export type RunOptions = Simplify<
     WithTrustRoot &
     WithLog &
     WithProjectRoot &
-    WithPolicyOverridePath
+    WithPolicyOverrideOrPath &
+    WithReadFile
 >
 
 /**
@@ -391,7 +384,7 @@ export interface WithProjectRoot {
  * Options for `toEndoPolicy()`
  */
 export type ToEndoPolicyOptions = Simplify<
-  WithProjectRoot & WithPolicyOverrideOrPath
+  WithProjectRoot & WithPolicyOverrideOrPath & WithLog
 >
 /**
  * Options which may either {@link WithReadPowers} or {@link WithRawPowers} but
@@ -418,16 +411,14 @@ export type {
   RootPolicy,
 } from 'lavamoat-core'
 
-export type { IsAbsoluteFn }
-
 export type LoadPoliciesOptions = Simplify<
-  WithProjectRoot & WithRead & WithPolicyOverrideOrPath
+  WithProjectRoot & WithReadFile & WithPolicyOverrideOrPath
 >
 
 /**
- * Options bucket containing a `read` prop
+ * Options bucket containing a `readFile` prop
  */
-export type WithRead = SimplifyDeep<{
+export type WithReadFile = SimplifyDeep<{
   readFile?: ReadFileFn
 }>
 

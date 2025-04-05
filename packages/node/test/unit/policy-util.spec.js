@@ -8,8 +8,8 @@ import {
   isPolicy,
   isTrusted,
   loadPolicies,
+  maybeReadPolicyOverride,
   readPolicy,
-  readPolicyOverride,
   writePolicy,
 } from '../../src/policy-util.js'
 
@@ -41,9 +41,12 @@ test('readPolicyOverride - reads and validates policy override from disk', async
   vol.fromJSON({
     '/policy-override.json': JSON.stringify({ resources: {} }),
   })
-  const policyOverride = await readPolicyOverride('/policy-override.json', {
-    readFile: /** @type {any} */ (fs.promises.readFile),
-  })
+  const policyOverride = await maybeReadPolicyOverride(
+    '/policy-override.json',
+    {
+      readFile: /** @type {any} */ (fs.promises.readFile),
+    }
+  )
   t.deepEqual(policyOverride, { resources: {} })
 })
 
@@ -51,7 +54,7 @@ test('readPolicyOverride - reads and validates policy override from disk (defaul
   vol.fromJSON({
     [constants.DEFAULT_POLICY_OVERRIDE_PATH]: JSON.stringify({ resources: {} }),
   })
-  const policyOverride = await readPolicyOverride(
+  const policyOverride = await maybeReadPolicyOverride(
     constants.DEFAULT_POLICY_OVERRIDE_PATH,
     {
       readFile: /** @type {any} */ (fs.promises.readFile),

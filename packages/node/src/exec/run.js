@@ -4,18 +4,46 @@
  *
  * @packageDocumentation
  */
+import nodeFs from 'node:fs'
 import { makeReadPowers } from '../compartment/power.js'
 import { DEFAULT_ATTENUATOR } from '../constants.js'
+import { log as defaultLog } from '../log.js'
 import { toEndoPolicy } from '../policy-converter.js'
-import { isTrusted } from '../policy-util.js'
-import { devToConditions, hrPath } from '../util.js'
+import { loadPolicies } from '../policy-util.js'
+import { devToConditions } from '../util.js'
 import { attenuateModule, makeGlobalsAttenuator } from './default-attenuator.js'
 import { makeExecutionCompartment } from './exec-compartment-class.js'
 import { execute } from './execute.js'
 
 /**
  * @import {LavaMoatPolicy} from 'lavamoat-core'
- * @import {RunOptions} from '../types.js';
+ * @import {ExecuteOptions, LoadPoliciesOptions, RunOptions} from '../types.js';
+ */
+
+/**
+ * Runs a module or script with provided LavaMoat policy
+ *
+ * Allows creation of read powers from raw interfaces; see {@link makeReadPowers}
+ *
+ * @template [T=unknown] Exports of module, if known. Default is `unknown`
+ * @overload
+ * @param {string | URL} entrypoint Entry point of application
+ * @param {LavaMoatPolicy} policy LavaMoat policy
+ * @param {RunOptions} [options] Options
+ * @returns {Promise<T>} Exports of executed module
+ */
+
+/**
+ * Runs a module or script with provided LavaMoat policy from a path
+ *
+ * Allows creation of read powers from raw interfaces; see {@link makeReadPowers}
+ *
+ * @template [T=unknown] Exports of module, if known. Default is `unknown`
+ * @overload
+ * @param {string | URL} entrypoint Entry point of application
+ * @param {string | URL} policyPath Path to LavaMoat policy
+ * @param {RunOptions} [options] Options
+ * @returns {Promise<T>} Exports of executed module
  */
 
 /**
@@ -25,34 +53,50 @@ import { execute } from './execute.js'
  *
  * @privateRemarks
  * Mainly a wrapper around {@link execute}
- *
- * TODO: Should accept `policy` or `policyPath`.
  * @template [T=unknown] Exports of module, if known. Default is `unknown`
  * @param {string | URL} entrypoint Entry point of application
- * @param {LavaMoatPolicy} policy LavaMoat policy
+ * @param {LavaMoatPolicy | string | URL} policyOrPolicyPath LavaMoat policy
  * @param {RunOptions} [options] Options
  * @returns {Promise<T>} Exports of executed module
  */
-
 export const run = async (
   entrypoint,
-  policy,
-  { dev = false, policyOverridePath, trustRoot, projectRoot, ...options } = {}
+  policyOrPolicyPath,
+  {
+    dev = false,
+    trustRoot,
+    projectRoot,
+    readFile = nodeFs.promises.readFile,
+    log = defaultLog,
+    ...options
+  } = {}
 ) => {
   await Promise.resolve()
-  if (trustRoot && !isTrusted(policy)) {
-    throw new Error(
-      `Attempted to run entrypoint ${hrPath(entrypoint)} with full privileges, but entry policy is untrusted. Aborting`
-    )
-  }
-  const readPowers = makeReadPowers(options)
 
-  const endoPolicy = await toEndoPolicy(policy, {
+  /**
+   * @remarks
+   * This is a typescript-ism.
+   * @type {LoadPoliciesOptions}
+   */
+  const loadPoliciesOptions = {
+    readFile,
     projectRoot,
-    policyOverridePath,
-  })
+    ...('policyOverride' in options
+      ? {
+          policyOverride: options.policyOverride,
+        }
+      : {
+          policyOverridePath: options.policyOverridePath,
+        }),
+  }
 
-  return execute(entrypoint, readPowers, {
+  const policy = await loadPolicies(policyOrPolicyPath, loadPoliciesOptions)
+
+  // because we have a merged policy, we don't need to provide overrides to `toEndoPolicy`
+  const endoPolicy = await toEndoPolicy(policy, { projectRoot })
+
+  /** @type {ExecuteOptions} */
+  const executeOptions = {
     Compartment: makeExecutionCompartment(globalThis),
     modules: {
       [DEFAULT_ATTENUATOR]: {
@@ -62,5 +106,9 @@ export const run = async (
     },
     policy: endoPolicy,
     conditions: devToConditions(dev),
-  })
+    log,
+    readPowers: makeReadPowers(options),
+  }
+
+  return execute(entrypoint, executeOptions)
 }

@@ -10,6 +10,7 @@
 import { loadLocation } from '@endo/compartment-mapper'
 import { DEFAULT_ENDO_OPTIONS } from '../compartment/options.js'
 import { defaultReadPowers } from '../compartment/power.js'
+import { log as defaultLog } from '../log.js'
 import { toEndoURL } from '../util.js'
 
 /**
@@ -36,7 +37,7 @@ import { toEndoURL } from '../util.js'
 export const load = async (
   entrypointPath,
   readPowers = defaultReadPowers,
-  options = {}
+  { log = defaultLog, ...options } = {}
 ) => {
   await Promise.resolve()
 
@@ -46,6 +47,7 @@ export const load = async (
   const opts = {
     ...DEFAULT_ENDO_OPTIONS,
     ...options,
+    log: log.debug.bind(log),
   }
 
   const { import: importApp, sha512 } = await loadLocation(

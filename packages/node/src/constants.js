@@ -44,6 +44,8 @@ export const DEFAULT_POLICY_DEBUG_PATH = path.normalize(
  */
 export const DEFAULT_POLICY_FILENAME = 'policy.json'
 
+export const DEFAULT_POLICY_DIR = path.normalize('lavamoat/node')
+
 /**
  * Relative path to the default policy file
  */

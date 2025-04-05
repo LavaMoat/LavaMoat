@@ -183,7 +183,7 @@ export class PolicyGeneratorContext {
       const location = this.renames[descriptor.compartment]
       if (!location) {
         throw new TypeError(
-          `Rename map missing location for compartment "${descriptor.compartment}" in compartment ${this.compartment.name}`
+          `Compartment ${hrLabel(this.canonicalName)}: Rename map missing location for referenced compartment ${hrPath(descriptor.compartment)}`
         )
       }
       return this.#readPowers.fileURLToPath(
@@ -359,7 +359,7 @@ export class PolicyGeneratorContext {
     if (!record) {
       // XXX: under what circumstances does this occur?
       throw new TypeError(
-        `Source descriptor "${specifier}" in compartment "${this.compartment.name}" missing prop: record`
+        `Source descriptor "${specifier}" in compartment "${this.canonicalName}" missing prop: record`
       )
     }
 
@@ -368,7 +368,7 @@ export class PolicyGeneratorContext {
     if (!hasOwn(record, 'imports')) {
       // XXX: under what circumstances does this occur?
       throw new TypeError(
-        `StaticModuleType for source descriptor "${specifier}" in compartment "${this.compartment.name} missing prop: imports`
+        `StaticModuleType for source descriptor "${specifier}" in compartment "${this.canonicalName} missing prop: imports`
       )
     }
 
@@ -444,7 +444,7 @@ export class PolicyGeneratorContext {
 
     if (this.#missingModules.size) {
       const nicePath = hrPath(this.renames[this.compartment.location])
-      let msg = `Ensure all dependencies are properly installed. Package ${hrLabel(this.compartment.label)} (${nicePath}) references unresolvable module(s). Unresolvable modules may be "optional" or otherwise unlisted in ${hrPath(PACKAGE_JSON)}. ${chalk.italic('Execution will most likely fail')} unless accounted for in policy overrides:`
+      let msg = `Ensure all dependencies are properly installed. Package ${hrLabel(this.canonicalName)} (${nicePath}) references unresolvable module(s). Unresolvable modules may be "optional" or otherwise unlisted in ${hrPath(PACKAGE_JSON)}. ${chalk.italic('Execution will most likely fail')} unless accounted for in policy overrides:`
       for (const missingModule of this.#missingModules) {
         msg += `\n- ${chalk.yellow(missingModule)}`
       }

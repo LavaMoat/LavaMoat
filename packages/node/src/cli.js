@@ -458,6 +458,7 @@ const main = async (args = hideBin(process.argv)) => {
             write,
             dev,
             trustRoot,
+            projectRoot,
           })
         } else {
           policy = await loadPolicies(policyPath, {

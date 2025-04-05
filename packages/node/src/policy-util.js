@@ -85,7 +85,7 @@ export const readPolicy = async (
  * @param {ReadPolicyOverrideOptions} [options] Options
  * @returns {Promise<LavaMoatPolicy | undefined>}
  */
-export const readPolicyOverride = async (
+export const maybeReadPolicyOverride = async (
   policyOverridePath,
   { readFile = nodeFs.promises.readFile } = {}
 ) => {
@@ -198,7 +198,7 @@ export const loadPolicies = async (
   }
   if (isPathLike(policyOverrideOrPolicyOverridePath)) {
     promises.push(
-      readPolicyOverride(policyOverrideOrPolicyOverridePath, {
+      maybeReadPolicyOverride(policyOverrideOrPolicyOverridePath, {
         readFile,
       })
     )
@@ -246,14 +246,15 @@ export const assertPolicy = (value) => {
  *
  * Creates the destination directory if it does not exist
  *
- * @param {string} filepath Path to write to
+ * @param {string | URL} file Path to write to
  * @param {LavaMoatPolicy | LavaMoatPolicyDebug | LavaMoatPolicy} policy Any
  *   policy
  * @param {{ fs?: WritableFsInterface }} opts Options
  * @returns {Promise<void>}
  * @internal
  */
-export const writePolicy = async (filepath, policy, { fs = nodeFs } = {}) => {
+export const writePolicy = async (file, policy, { fs = nodeFs } = {}) => {
+  const filepath = toPath(file)
   const policyDir = nodePath.dirname(filepath)
   /**
    * @type {string | undefined}
