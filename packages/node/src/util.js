@@ -138,6 +138,8 @@ export const hasValue = (obj, prop) => {
 /**
  * Converts a boolean `dev` to a set of conditions (Endo option)
  *
+ * TODO: Evaluate if this is needed. `dev` option should be un-deprecated
+ *
  * @param {boolean} [dev=false] Default is `false`
  * @returns {Set<string>}
  * @internal

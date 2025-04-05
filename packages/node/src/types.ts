@@ -14,6 +14,7 @@ import type {
   CryptoInterface,
   FsInterface,
   ImportLocationOptions,
+  MapNodeModulesOptions,
   PackagePolicy,
   PathInterface,
   Policy,
@@ -67,16 +68,11 @@ export interface WithDebug {
   debug?: boolean
 }
 
-/**
- * If `dev` is `true`, `@endo/compartment-mapper` will receive a `conditions`
- * option of type `Set(['development'])`.
- *
- * If present in some options supporting `conditions`, `conditions` will take
- * precedence.
- */
 export interface WithDev {
   dev?: boolean
 }
+
+export type WithConditions = Pick<MapNodeModulesOptions, 'conditions'>
 
 /**
  * Options having an {@link IsBuiltinFn}
@@ -289,7 +285,8 @@ export type GeneratePolicyOptions = Simplify<
     WithTrustRoot &
     WithPolicyOverridePath &
     WithReadFile &
-    WithProjectRoot
+    WithProjectRoot &
+    WithConditions
 >
 
 /**

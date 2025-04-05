@@ -479,6 +479,7 @@ const main = async (args = hideBin(process.argv)) => {
         await run(entrypoint, policy, {
           policyOverridePath,
           trustRoot,
+          dev,
           projectRoot,
         })
       }

@@ -17,7 +17,7 @@ import {
 import { assertAbsolutePath } from '../fs.js'
 import { log as defaultLog } from '../log.js'
 import { maybeReadPolicyOverride, writePolicy } from '../policy-util.js'
-import { devToConditions, hrLabel, hrPath, toPath } from '../util.js'
+import { hrLabel, hrPath, toPath } from '../util.js'
 import { loadCompartmentMap } from './policy-gen-compartment-map.js'
 import { compartmentMapToPolicy } from './to-policy.js'
 
@@ -88,17 +88,17 @@ const generate = async (
     log = defaultLog,
     dev = false,
     trustRoot = DEFAULT_TRUST_ROOT_COMPARTMENT,
+    conditions = new Set(),
     ...archiveOpts
   } = {}
 ) => {
-  const conditions = devToConditions(dev)
-
   log.debug('Loading compartment map…')
   const { compartmentMap, sources, renames } = await loadCompartmentMap(
     entrypoint,
     {
       ...archiveOpts,
       log,
+      dev,
       readPowers,
       conditions,
       policyOverride,

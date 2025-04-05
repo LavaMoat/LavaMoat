@@ -56,7 +56,7 @@ export type GenerateOptions = Except<
  * @internal
  */
 export type LoadCompartmentMapOptions = Simplify<
-  Omit<BaseLoadCompartmentMapOptions, 'dev'> &
+  BaseLoadCompartmentMapOptions &
     Pick<MapNodeModulesOptions, 'conditions'> &
     WithReadPowers &
     WithPolicyOverride &

@@ -13,7 +13,7 @@ import {
 import { log as defaultLog } from '../log.js'
 import { toEndoPolicy } from '../policy-converter.js'
 import { isTrusted, loadPolicies } from '../policy-util.js'
-import { devToConditions, hrCode, hrPath } from '../util.js'
+import { hrCode, hrPath } from '../util.js'
 import { attenuateModule, makeGlobalsAttenuator } from './default-attenuator.js'
 import { makeExecutionCompartment } from './exec-compartment-class.js'
 import { execute } from './execute.js'
@@ -110,7 +110,7 @@ export const run = async (
       },
     },
     policy: endoPolicy,
-    conditions: devToConditions(dev),
+    dev,
     log,
     readPowers: makeReadPowers(options),
   }
