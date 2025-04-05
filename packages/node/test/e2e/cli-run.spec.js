@@ -100,3 +100,16 @@ test(
   ],
   'scripty test'
 )
+
+test.todo('--dev flag')
+
+test.todo('package missing from all package descriptors')
+
+test.todo('package missing from disk')
+
+test.todo('package only present in policy override')
+
+test.todo('entry module is depended upon by a descendant')
+
+// needs impl
+test.todo('writing policy.json to disk w/ contents of policy override')
