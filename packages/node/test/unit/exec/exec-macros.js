@@ -1,17 +1,17 @@
-import '../../src/preamble.js'
+import '../../../src/preamble.js'
 
 import chalk from 'chalk'
-import { run } from '../../src/exec/run.js'
+import { run } from '../../../src/exec/run.js'
 import {
   DEFAULT_JSON_FIXTURE_ENTRY_POINT,
   JSON_FIXTURE_DIR_URL,
   loadJSONFixture,
-} from './json-fixture-util.js'
+} from '../json-fixture-util.js'
 
 /**
  * @import {TestFn, MacroDeclarationOptions} from 'ava'
  * @import {LavaMoatPolicy} from 'lavamoat-core'
- * @import {TestExecForJSONMacroOptions, TestExecMacroOptions} from '../types.js'
+ * @import {TestExecForJSONMacroOptions, TestExecMacroOptions} from '../../types.js'
  */
 
 /**

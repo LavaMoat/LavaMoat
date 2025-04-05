@@ -1,4 +1,4 @@
-import '../../src/preamble.js'
+import '../../../src/preamble.js'
 
 import test from 'ava'
 import { createExecMacros } from './exec-macros.js'
@@ -10,12 +10,12 @@ const { testExec, testExecForJSON } = createExecMacros(test)
 test(
   'app without dependencies',
   testExec,
-  new URL('./fixture/no-deps/app.js', import.meta.url),
+  new URL('../fixture/no-deps/app.js', import.meta.url),
   { hello: 'world' }
 )
 
 test(
-  'dynamic imports (JSON)',
+  'dynamic require (JSON)',
   testExecForJSON,
   'dynamic.json',
   { hello: 'hello world' },
@@ -50,23 +50,17 @@ test('hashbang evasion', testExecForJSON, 'hashbang.json', {
   hello: 'world',
 })
 
-test(
-  'dynamic imports',
-  testExec,
-  new URL('./fixture/dynamic/index.js', import.meta.url),
+// Ref: https://github.com/endojs/endo/pull/2755
+test.failing(
+  'dynamic require of a node:-namespaced builtin module',
+  testExecForJSON,
+  'dynamic-builtin.json',
   { hello: 'hello world' },
   {
     policy: {
       resources: {
         'dynamic-require': {
-          packages: {
-            dummy: true,
-          },
-        },
-        dummy: {
-          packages: {
-            muddy: true,
-          },
+          builtin: { 'node:fs': true },
         },
       },
     },
@@ -75,7 +69,7 @@ test(
 ;(isDockerCI ? test.failing : test)(
   'native module w/ dynamic imports',
   testExec,
-  new URL('./fixture/native/index.js', import.meta.url),
+  new URL('../fixture/native/index.js', import.meta.url),
   { hello: 'world' },
   {
     policy: {
@@ -112,7 +106,7 @@ test(
 ;(isDockerCI ? test.failing : test)(
   'native module',
   testExec,
-  new URL('./fixture/static-native/index.js', import.meta.url),
+  new URL('../fixture/static-native/index.js', import.meta.url),
   { hello: 'world' },
   {
     policy: {
@@ -127,7 +121,5 @@ test(
     },
   }
 )
-
-test.todo('dynamic import of builtin module')
 
 test.todo('hashbang in module')
