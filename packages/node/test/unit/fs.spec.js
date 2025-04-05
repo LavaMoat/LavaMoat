@@ -1,3 +1,5 @@
+import '../../src/preamble.js'
+
 import test from 'ava'
 import { memfs } from 'memfs'
 import {
@@ -16,7 +18,9 @@ import {
 test('readJsonFile() - reads and parses JSON file', async (t) => {
   const { vol, fs } = memfs()
   vol.fromJSON({ '/test.json': '{"key": "value"}' })
-  const data = await readJsonFile('/test.json', { fs })
+  const data = await readJsonFile('/test.json', {
+    readFile: /** @type {any} */ (fs.promises.readFile),
+  })
   t.deepEqual(data, { key: 'value' })
 })
 

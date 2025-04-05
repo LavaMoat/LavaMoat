@@ -1,0 +1,60 @@
+[
+  0,
+  {},
+  {
+    "README.md": [
+      1,
+      {},
+      "data:application/octet-stream;base64,VGhpcyBpcyBhbiBleGFtcGxlIG9mIGFuIGFwcCB3aGljaCBoYXMgYSBkZXBlbmRlbmN5IGJ1dCBkb2VzIG5vdCB1c2UgaXQgaW4gYW55IHdheS4gSG93ZXZlciwgYHBvbGljeS1vdmVycmlkZS5qc29uYCBpcyBwcmVzZW50IGFuZCByZWZlcnMgdG8gdGhlIHBhY2thZ2UuIFRoZSBwb2xpY3kgb3ZlcnJpZGVzIGluY2x1ZGUgYnVpbHRpbnMgX25vdCBleHBsaWNpdGx5IHVzZWQgYnkgdGhlIHBhY2thZ2VfLCB3aGljaCBzaG91bGQgbm90IGFwcGVhciBpbiBhdXRvLWdlbmVyYXRpb24gaW4gYW55IG90aGVyIGNhc2UuIFRoaXMgcG9saWN5IHNob3VsZCB1bHRpbWF0ZWx5IGJlIG1lcmdlZCBpbnRvIHRoZSBnZW5lcmF0ZWQgcG9saWN5Lgo="
+    ],
+    "index.js": [
+      1,
+      {},
+      "data:application/octet-stream;base64,aW1wb3J0ICdibHVybXBoJwoKZXhwb3J0IGNvbnN0IGhlbGxvID0gJ3dvcmxkJwoKY29uc29sZS5sb2coYGhlbGxvICR7aGVsbG99YCkK"
+    ],
+    "lavamoat": [
+      0,
+      {},
+      {
+        "node": [
+          0,
+          {},
+          {
+            "policy-override.json": [
+              1,
+              {},
+              "data:application/octet-stream;base64,ewogICJyZXNvdXJjZXMiOiB7CiAgICAiYmx1cm1waCI6IHsKICAgICAgImJ1aWx0aW4iOiB7CiAgICAgICAgIm5vZGU6cGF0aCI6IHRydWUKICAgICAgfQogICAgfQogIH0KfQo="
+            ]
+          }
+        ]
+      }
+    ],
+    "node_modules": [
+      0,
+      {},
+      {
+        "blurmph": [
+          0,
+          {},
+          {
+            "index.js": [
+              1,
+              {},
+              "data:application/octet-stream;base64,bW9kdWxlLmV4cG9ydHMgPSByZXF1aXJlKCdub2RlOmZzJykK"
+            ],
+            "package.json": [
+              1,
+              {},
+              "data:application/octet-stream;base64,ewogICJuYW1lIjogImJsdXJtcGgiLAogICJ2ZXJzaW9uIjogIjEuMC4wIiwKICAibWFpbiI6ICJpbmRleC5qcyIKfQo="
+            ]
+          }
+        ]
+      }
+    ],
+    "package.json": [
+      1,
+      {},
+      "data:application/octet-stream;base64,ewogICJuYW1lIjogIm92ZXJyaWRlLW1lcmdpbmciLAogICJ2ZXJzaW9uIjogIjEuMC4wIiwKICAidHlwZSI6ICJtb2R1bGUiLAogICJsaWNlbnNlIjogIklTQyIsCiAgInByaXZhdGUiOiB0cnVlLAogICJtYWluIjogImluZGV4LmpzIiwKICAic2NyaXB0cyI6IHsKICAgICJzdGFydCI6ICJucHggc25hcHNob3QtZnMgLi4vLi4vanNvbi1maXh0dXJlL292ZXJyaWRlLW1lcmdpbmcuanNvbiIKICB9LAogICJkZXBlbmRlbmNpZXMiOiB7CiAgICAiYmx1cm1waCI6ICJeMS4wLjAiCiAgfQp9Cg=="
+    ]
+  }
+]

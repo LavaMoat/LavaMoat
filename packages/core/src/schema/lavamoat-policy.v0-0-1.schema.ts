@@ -1,22 +1,58 @@
-import { RequireAtLeastOne } from 'type-fest'
 import { LavamoatModuleRecord } from '../moduleRecord'
+
+/**
+ * Schema for LavaMoat policy override files
+ *
+ * Alias of {@link LavaMoatPolicy}
+ *
+ * @deprecated Use {@link LavaMoatPolicy} instead
+ */
+export type LavaMoatPolicyOverrides = LavaMoatPolicy
+
+/**
+ * Schema for LavaMoat "debug" policy files
+ */
+export type LavaMoatPolicyDebug<T extends Resources = Resources> =
+  LavaMoatPolicy<T> & {
+    debugInfo: Record<string, DebugInfo>
+  }
 
 /**
  * Schema for LavaMoat policy files
  */
-export type LavaMoatPolicy = RequireAtLeastOne<
-  PartialLavaMoatPolicy,
-  'resources' | 'resolutions'
->
-export type LavaMoatPolicyOverrides = PartialLavaMoatPolicy
+export interface LavaMoatPolicy<T extends Resources = Resources> {
+  /**
+   * Resource policy for all packages in the application
+   */
+  resources: T
 
-export type LavaMoatPolicyDebug = LavaMoatPolicy & {
-  debugInfo: Record<string, DebugInfo>
+  /**
+   * Module resolution mapping
+   *
+   * @deprecated Resolutions are better handled by package managers. A future
+   *   version will remove support for this field.
+   */
+  resolutions?: Resolutions
+
+  /**
+   * If this is set, then the root package is considered untrusted and will have
+   * a matching policy in {@link LavaMoatPolicy.resources}
+   */
+  root?: RootPolicy<T>
 }
 
-export interface PartialLavaMoatPolicy {
-  resources?: Resources
-  resolutions?: Resolutions
+/**
+ * Root configuration
+ *
+ * @template T The value of {@link LavaMoatPolicy.resources}
+ */
+export interface RootPolicy<T extends Resources = Resources> {
+  /**
+   * Reference to a package name in {@link LavaMoatPolicy.resources}.
+   *
+   * The root will inherit policy from this package.
+   */
+  usePolicy?: keyof T
 }
 
 export interface DebugInfo {

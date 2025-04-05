@@ -5,60 +5,49 @@
  * @internal
  */
 
-import {
-  ATTENUATORS_COMPARTMENT,
-  LAVAMOAT_PKG_POLICY_ROOT,
-} from '../constants.js'
-import { hasValue, isObject } from '../util.js'
+import { LAVAMOAT_PKG_POLICY_ROOT } from '../constants.js'
+import { hasValue, isObjectyObject } from '../util.js'
 
 /**
  * @import {CompartmentDescriptor} from '@endo/compartment-mapper'
  * @import {ModuleDescriptor} from 'ses'
+ * @import {CanonicalName} from '../internal.js'
  */
 
 /**
  * Determine the canonical name for a compartment descriptor
  *
  * @param {CompartmentDescriptor} compartment Compartment descriptor
- * @returns {string} Canonical name
- * @throws {TypeError} If compartment has no path
+ * @param {boolean} [trustRoot=true] If `false`, never return a canonical name
+ *   of {@link LAVAMOAT_PKG_POLICY_ROOT}. Default is `true`
+ * @returns {CanonicalName} Canonical name
+ * @throws {ReferenceError} If compartment has no path
  * @internal
  */
-export const getCanonicalName = (compartment) => {
+export const getCanonicalName = (compartment, trustRoot = true) => {
   // NOTE: the algorithm creating paths happens to be identical to the one in @lavamoat/aa package. Not that it matters because policies cannot be reused between this and other lavamoat tools.
-  if (compartment.name === ATTENUATORS_COMPARTMENT) {
-    return ATTENUATORS_COMPARTMENT
-  }
   if (!compartment.path) {
     throw new ReferenceError(
       `Computing canonical name failed: compartment "${compartment.name}" (${compartment.location}) has no "path" property; this is a bug`
     )
   }
-  if (compartment.path.length === 0) {
-    return LAVAMOAT_PKG_POLICY_ROOT
+  if (isEntryCompartment(compartment)) {
+    if (trustRoot) {
+      return LAVAMOAT_PKG_POLICY_ROOT
+    }
+    return compartment.name
   }
   return compartment.path.join('>')
 }
 
 /**
- * Determine the package name for a compartment descriptor
+ * Returns `true` if the compartment descriptor is the entry compartment
  *
- * @param {CompartmentDescriptor} compartment Compartment descriptor
- * @param {boolean} isEntry Whether or not the compartment is the entry
- *   compartment
- * @returns {string} Package name
- * @internal
+ * @param {CompartmentDescriptor} compartment
+ * @returns {boolean}
  */
-export const getPackageName = (compartment, isEntry = false) => {
-  if (compartment.name.startsWith('file://')) {
-    throw new TypeError(
-      'Invalid compartment; did you call captureFromMap() yet?'
-    )
-  }
-  if (isEntry) {
-    return LAVAMOAT_PKG_POLICY_ROOT
-  }
-  return compartment.label
+export const isEntryCompartment = (compartment) => {
+  return compartment.path?.length === 0
 }
 
 /**
@@ -73,7 +62,7 @@ export const getPackageName = (compartment, isEntry = false) => {
  */
 export const isCompleteModuleDescriptor = (descriptor) => {
   return !!(
-    isObject(descriptor) &&
+    isObjectyObject(descriptor) &&
     hasValue(descriptor, 'compartment') &&
     hasValue(descriptor, 'module')
   )

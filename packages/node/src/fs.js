@@ -6,12 +6,11 @@
 
 import assert from 'node:assert'
 import nodeFs from 'node:fs'
-import path from 'node:path'
-import { fileURLToPath } from 'node:url'
+import nodePath from 'node:path'
 
 /**
  * @import {PathLike} from 'node:fs'
- * @import {WithFs} from './internal.js'
+ * @import {WithFs, WithReadFile} from './types.js'
  */
 
 /**
@@ -19,15 +18,15 @@ import { fileURLToPath } from 'node:url'
  *
  * @template [T=unknown] Default is `unknown`
  * @param {string | URL} filepath
- * @param {WithFs} opts
+ * @param {WithReadFile} opts
  * @returns {Promise<T>} JSON data
  * @internal
  */
-export const readJsonFile = async (filepath, { fs = nodeFs } = {}) => {
-  if (filepath instanceof URL) {
-    filepath = fileURLToPath(filepath)
-  }
-  const json = await fs.promises.readFile(filepath)
+export const readJsonFile = async (
+  filepath,
+  { readFile: read = nodeFs.promises.readFile } = {}
+) => {
+  const json = await read(filepath)
   return JSON.parse(`${json}`)
 }
 
@@ -117,14 +116,14 @@ export const isSymlinkSync = (filepath, { fs = nodeFs } = {}) => {
 /**
  * Asserts a path is absolute
  *
- * @param {string} filepath Path to check
+ * @param {string} [filepath] Path to check
  * @param {string} [failureMessage] Message to include in the error if the path
  *   is not absolute
  * @returns {void}
  * @throws `AssertionError`
  */
 export const assertAbsolutePath = (filepath, failureMessage) => {
-  assert(isAbsolutePath(filepath), failureMessage)
+  assert(filepath ? isAbsolutePath(filepath) : false, failureMessage)
 }
 
 /**
@@ -134,7 +133,7 @@ export const assertAbsolutePath = (filepath, failureMessage) => {
  * @returns {boolean} `true` if the path is absolute
  */
 export const isAbsolutePath = (filepath) => {
-  return path.isAbsolute(filepath)
+  return nodePath.isAbsolute(filepath)
 }
 
 /**

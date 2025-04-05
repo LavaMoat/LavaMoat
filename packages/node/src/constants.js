@@ -44,6 +44,8 @@ export const DEFAULT_POLICY_DEBUG_PATH = path.normalize(
  */
 export const DEFAULT_POLICY_FILENAME = 'policy.json'
 
+export const DEFAULT_POLICY_DIR = path.normalize('lavamoat/node')
+
 /**
  * Relative path to the default policy file
  */
@@ -175,3 +177,17 @@ export const NATIVE_PARSER_FILE_EXT = 'node'
  * Used by policy gen
  */
 export const NATIVE_PARSER_NAME = 'native'
+
+/**
+ * Whether we should trust the root compartment _by default_
+ */
+export const DEFAULT_TRUST_ROOT_COMPARTMENT = true
+
+/**
+ * The `package.json` filename, naturally
+ */
+export const PACKAGE_JSON = 'package.json'
+
+export const GLOBAL_THIS_REFS = Object.freeze(
+  /** @type {const} */ (['global', 'globalThis'])
+)

@@ -17,6 +17,12 @@ const BASIC_FIXTURE_ENTRYPOINT = fileURLToPath(
  */
 const BASIC_FIXTURE_ENTRYPOINT_DIR = path.dirname(BASIC_FIXTURE_ENTRYPOINT)
 
+const UNTRUSTED_FIXTURE_ENTRYPOINT = 'lard-o-matic'
+
+const UNTRUSTED_FIXTURE_DIR = fileURLToPath(
+  new URL('./fixture/extensionless/', import.meta.url)
+)
+
 const { testCLI } = createCLIMacros(test)
 
 test('"run --help" prints help', testCLI, ['run', '--help'])
@@ -81,3 +87,29 @@ test(
   ],
   'HOWDY WORLD'
 )
+
+test(
+  'untrusted entrypoint',
+  testCLI,
+  [
+    'run',
+    UNTRUSTED_FIXTURE_ENTRYPOINT,
+    '--bin',
+    '--root',
+    UNTRUSTED_FIXTURE_DIR,
+  ],
+  'scripty test'
+)
+
+test.todo('--dev flag')
+
+test.todo('package missing from all package descriptors')
+
+test.todo('package missing from disk')
+
+test.todo('package only present in policy override')
+
+test.todo('entry module is depended upon by a descendant')
+
+// needs impl
+test.todo('writing policy.json to disk w/ contents of policy override')

@@ -2,6 +2,7 @@ import '../../../src/preamble.js'
 
 import test from 'ava'
 import stringify from 'json-stable-stringify'
+import { DEFAULT_TRUST_ROOT_COMPARTMENT } from '../../../src/constants.js'
 import { loadCompartmentMap } from '../../../src/policy-gen/policy-gen-compartment-map.js'
 import { buildModuleRecords } from '../../../src/policy-gen/to-policy.js'
 import { JSON_FIXTURE_DIR_URL, loadJSONFixture } from '../json-fixture-util.js'
@@ -13,15 +14,27 @@ test('buildModuleRecords() is deterministic', async (t) => {
 
   const { compartmentMap, sources, renames } = await loadCompartmentMap(
     '/index.js',
-    { readPowers }
+    { readPowers, trustRoot: DEFAULT_TRUST_ROOT_COMPARTMENT }
   )
-  const moduleRecords = buildModuleRecords(compartmentMap, sources, renames, {
-    readPowers,
-  })
+
+  const moduleRecords = buildModuleRecords(
+    '/index.js',
+    compartmentMap,
+    sources,
+    renames,
+    {
+      readPowers,
+    }
+  )
 
   // strip content
   t.snapshot(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    stringify(moduleRecords.map(({ content, ...record }) => record))
+    JSON.parse(
+      /** @type {string} */ (
+        stringify(
+          moduleRecords.map(({ content: _content, ...record }) => record)
+        )
+      )
+    )
   )
 })
