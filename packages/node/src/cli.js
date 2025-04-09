@@ -146,17 +146,22 @@ const main = async (args = hideBin(process.argv)) => {
    * @param {{
    *   entrypoint: string
    *   bin?: boolean
-   *   root: string
+   *   'project-root': string
    * }} argv
+   *   Subset of arguments
    * @returns {void}
    */
   const processEntrypointMiddleware = (argv) => {
-    const { entrypoint } = argv
+    const { entrypoint, 'project-root': projectRoot } = argv
     argv.entrypoint = argv.bin
-      ? resolveBinScript(argv.entrypoint, { from: argv.root })
-      : resolveEntrypoint(argv.entrypoint, argv.root)
-    if (hrPath(entrypoint) !== hrPath(argv.entrypoint)) {
-      log.warning(`Resolved ${hrPath(entrypoint)} → ${hrPath(argv.entrypoint)}`)
+      ? resolveBinScript(argv.entrypoint, { from: projectRoot })
+      : resolveEntrypoint(argv.entrypoint, projectRoot)
+    const niceOriginalEntrypoint = hrPath(argv.entrypoint)
+    const niceResolvedEntrypoint = hrPath(entrypoint)
+    if (niceResolvedEntrypoint !== niceOriginalEntrypoint) {
+      log.warning(
+        `Resolved ${niceResolvedEntrypoint} → ${niceResolvedEntrypoint}`
+      )
     }
   }
 
@@ -238,7 +243,7 @@ const main = async (args = hideBin(process.argv)) => {
         describe: 'Filepath to a policy override file',
         type: 'string',
         normalize: true,
-        defaultDescription: constants.DEFAULT_POLICY_OVERRIDE_PATH,
+        defaultDescription: `"${constants.DEFAULT_POLICY_OVERRIDE_PATH}"`,
         nargs: 1,
         requiresArg: true,
         global: true,
@@ -246,14 +251,15 @@ const main = async (args = hideBin(process.argv)) => {
       },
       'policy-debug': {
         describe: 'Filepath to a policy debug file',
-        defaultDescription: constants.DEFAULT_POLICY_DEBUG_PATH,
+        defaultDescription: `"${constants.DEFAULT_POLICY_DEBUG_PATH}"`,
         nargs: 1,
         type: 'string',
         requiresArg: true,
         global: true,
         group: PATH_GROUP,
       },
-      root: {
+      'project-root': {
+        alias: ['root'],
         describe: 'Path to application root directory',
         type: 'string',
         nargs: 1,
@@ -304,23 +310,26 @@ const main = async (args = hideBin(process.argv)) => {
       async (argv) => {
         await Promise.resolve()
 
-        argv.policy = path.resolve(argv.root, argv.policy)
+        // this is absolute
+        const projectRoot = argv['project-root']
 
         // TODO: this mini-algorithm should be extracted to a function since it's used elsewhere too
         argv['policy-debug'] = argv['policy-debug']
-          ? path.resolve(argv.root, argv['policy-debug'])
+          ? path.resolve(projectRoot, argv['policy-debug'])
           : path.join(
               path.dirname(argv.policy),
               constants.DEFAULT_POLICY_DEBUG_FILENAME
             )
+        argv.policy = path.resolve(projectRoot, argv.policy)
 
         if (argv['policy-override']) {
-          argv['policy-override'] = path.resolve(
-            argv.root,
+          const policyOverridePath = path.resolve(
+            projectRoot,
             argv['policy-override']
           )
           try {
-            await fs.promises.access(argv['policy-override'], fs.constants.R_OK)
+            await fs.promises.access(policyOverridePath, fs.constants.R_OK)
+            argv['policy-override'] = policyOverridePath
           } catch (err) {
             throw new Error(
               `Cannot read specified policy override file: ${argv['policy-override']}`,
@@ -405,7 +414,7 @@ const main = async (args = hideBin(process.argv)) => {
             },
           })
           /**
-           * Resolve entrypoint from `root`
+           * Resolve entrypoint from `project-root`
            */
           .middleware(processEntrypointMiddleware),
       /**
@@ -425,7 +434,7 @@ const main = async (args = hideBin(process.argv)) => {
           'policy-debug': policyDebugPath,
           'policy-override': policyOverridePath,
           dev,
-          root: projectRoot,
+          'project-root': projectRoot,
           scuttle: scuttleGlobalThis,
           write,
         } = argv
