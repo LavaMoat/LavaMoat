@@ -155,7 +155,7 @@ const main = async (args = hideBin(process.argv)) => {
     const { entrypoint, 'project-root': projectRoot } = argv
     argv.entrypoint = argv.bin
       ? resolveBinScript(argv.entrypoint, { from: projectRoot })
-      : resolveEntrypoint(argv.entrypoint, projectRoot)
+      : resolveEntrypoint(argv.entrypoint, { from: projectRoot })
     const niceOriginalEntrypoint = hrPath(argv.entrypoint)
     const niceResolvedEntrypoint = hrPath(entrypoint)
     if (niceResolvedEntrypoint !== niceOriginalEntrypoint) {
@@ -297,15 +297,18 @@ const main = async (args = hideBin(process.argv)) => {
       /**
        * This _global_ middleware:
        *
-       * - Ensures `policy`, `policy-debug` and `policy-override` paths are
-       *   absolute
-       * - If necessary, calculates default path(s) for `policy-debug` and
-       *   `policy-override` (relative to `policy`) and sets it
-       * - Configures the global logger based on `verbose` and `quiet` flags
-       *
-       * It will throw an exception if the user _explicitly_ provided a path to
-       * a policy override file and that file is unreadable (since this is
-       * really the only time it is feasible to do so).
+       * - Resolves `policy` from `project-root`
+       * - If `policy-override` was provided, resolve it from `project-root` and
+       *   asserts it is readable. It's appropriate to do so here because it is
+       *   impossible to answer "did the user provide an explicit policy
+       *   override path?" _after_ this point. We throw an exception if the
+       *   explicitly-provide policy override path is not readable. This applies
+       *   to both `run` and `generate` commands; both will read the policy
+       *   override file, if present.
+       * - Configures the global logger based on `verbose` and `quiet` flags (this
+       *   overrides the `LAVAMOAT_DEBUG` environment variable, if present; the
+       *   environment variable can be used when consuming `@lavamoat/node`
+       *   programmatically)
        */
       async (argv) => {
         await Promise.resolve()
@@ -332,15 +335,10 @@ const main = async (args = hideBin(process.argv)) => {
             argv['policy-override'] = policyOverridePath
           } catch (err) {
             throw new Error(
-              `Cannot read specified policy override file: ${argv['policy-override']}`,
+              `Cannot read specified policy override file at path ${hrPath(policyOverridePath)}`,
               { cause: err }
             )
           }
-        } else {
-          argv['policy-override'] = path.join(
-            path.dirname(argv.policy),
-            constants.DEFAULT_POLICY_OVERRIDE_FILENAME
-          )
         }
         if (argv.verbose) {
           log.setLevel('debug')
@@ -359,7 +357,8 @@ const main = async (args = hideBin(process.argv)) => {
       (yargs) =>
         yargs
           .positional('entrypoint', {
-            describe: 'Path to the application entry point; relative to --root',
+            describe:
+              'Path to the application entry point; relative to --project-root',
             type: 'string',
             demandOption: true,
           })
@@ -442,7 +441,7 @@ const main = async (args = hideBin(process.argv)) => {
         const trustRoot = shouldTrustRoot(entrypoint)
         if (!trustRoot) {
           log.info(
-            `Entrypoint is in a ${hrPath('node_modules/')} directory and is considered untrusted`
+            `Real path of the entrypoint is in a ${hrPath('node_modules/')} directory and is considered untrusted; expecting a policy containing an untrusted root`
           )
         }
 
@@ -530,7 +529,7 @@ const main = async (args = hideBin(process.argv)) => {
         const trustRoot = shouldTrustRoot(entrypoint)
         if (!trustRoot) {
           log.info(
-            `Entrypoint is in a ${hrPath('node_modules/')} directory and is considered untrusted`
+            `Real path of the entrypoint is in a ${hrPath('node_modules/')} directory and is considered untrusted; an policy containing an untrusted root will be generated`
           )
         }
 
