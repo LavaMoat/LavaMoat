@@ -42,7 +42,12 @@ test(
 test(
   'basic',
   testCLI,
-  ['run', BASIC_FIXTURE_ENTRYPOINT, '--root', BASIC_FIXTURE_ENTRYPOINT_DIR],
+  [
+    'run',
+    BASIC_FIXTURE_ENTRYPOINT,
+    '--project-root',
+    BASIC_FIXTURE_ENTRYPOINT_DIR,
+  ],
   'hello world'
 )
 
@@ -52,7 +57,7 @@ test(
   [
     'run',
     BASIC_FIXTURE_ENTRYPOINT,
-    '--root',
+    '--project-root',
     BASIC_FIXTURE_ENTRYPOINT_DIR,
     'howdy',
   ],
@@ -65,7 +70,7 @@ test(
   [
     'run',
     BASIC_FIXTURE_ENTRYPOINT,
-    '--root',
+    '--project-root',
     BASIC_FIXTURE_ENTRYPOINT_DIR,
     '--',
     'howdy',
@@ -79,7 +84,7 @@ test(
   [
     'run',
     BASIC_FIXTURE_ENTRYPOINT,
-    '--root',
+    '--project-root',
     BASIC_FIXTURE_ENTRYPOINT_DIR,
     '--',
     'howdy',
@@ -95,7 +100,7 @@ test(
     'run',
     UNTRUSTED_FIXTURE_ENTRYPOINT,
     '--bin',
-    '--root',
+    '--project-root',
     UNTRUSTED_FIXTURE_DIR,
   ],
   'scripty test'
