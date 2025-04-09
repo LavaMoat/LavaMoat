@@ -23,6 +23,8 @@
 
 module.exports = endowmentsToolkit
 
+const { assign, create, defineProperty } = Object
+
 // Exports for testing
 module.exports._test = { instrumentDynamicValueAtPath }
 
@@ -84,6 +86,8 @@ function endowmentsToolkit({
     const allowedWriteFields = new Set()
     /** @type {string[]} */
     const explicitlyBanned = []
+    /** @type {string[]} */
+    const allowRedefine = []
 
     Object.entries(packagePolicy.globals).forEach(
       ([path, packagePolicyValue]) => {
@@ -103,7 +107,10 @@ function endowmentsToolkit({
           return
         }
         // write access handled elsewhere
-        if (packagePolicyValue === 'write') {
+        if (
+          typeof packagePolicyValue === 'string' &&
+          packagePolicyValue.startsWith('write')
+        ) {
           if (!handleGlobalWrite) {
             return
           }
@@ -114,6 +121,14 @@ function endowmentsToolkit({
           }
           allowedWriteFields.add(path)
           whitelistedReads.push(path)
+          if (packagePolicyValue === 'write+define') {
+            if (!unwrapFrom) {
+              throw Error(
+                'LavaMoat - write+define value in policy requires unwrapFrom to be set when generating endowments'
+              )
+            }
+            allowRedefine.push(path)
+          }
           return
         }
         if (packagePolicyValue !== true) {
@@ -126,7 +141,7 @@ function endowmentsToolkit({
     )
     // sort by length to optimize further steps
     whitelistedReads.sort((a, b) => a.length - b.length)
-    return makeMinimalViewOfRef(
+    const endowments = makeMinimalViewOfRef(
       sourceRef,
       whitelistedReads,
       unwrapTo,
@@ -134,6 +149,41 @@ function endowmentsToolkit({
       explicitlyBanned,
       allowedWriteFields
     )
+
+    if (allowRedefine.length > 0 && unwrapFrom && unwrapTo) {
+      const expectedTarget = unwrapTo || endowments
+      const originalDefineProperty = unwrapFrom.Object.defineProperty
+      /**
+       * @param {any} target
+       * @param {PropertyKey} key
+       * @param {PropertyDescriptor} descriptor
+       * @returns {boolean}
+       */
+      const redefine = (target, key, descriptor) => {
+        if (
+          target === expectedTarget &&
+          typeof key !== 'symbol' &&
+          allowRedefine.includes(`${key}`)
+        ) {
+          target[key] = descriptor.value
+          return true
+        }
+        originalDefineProperty(target, key, descriptor)
+        return true
+      }
+      endowments.Object = assign(
+        create(unwrapFrom.Object.prototype),
+        unwrapFrom.Object
+      )
+      defineProperty(endowments.Object, 'defineProperty', {
+        value: redefine,
+        writable: false,
+        configurable: false,
+        enumerable: true,
+      })
+    }
+
+    return endowments
   }
 
   /**

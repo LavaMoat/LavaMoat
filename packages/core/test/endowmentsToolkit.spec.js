@@ -457,3 +457,76 @@ test('copyWrappedGlobals - copy from prototype too', (t) => {
 
   t.is(Object.keys(target).sort().join(), 'onTheObj,onTheProto,window')
 })
+
+test('getEndowmentsForConfig - allow redefine on properties', (t) => {
+  'use strict'
+  const knownWritable = new Set(['x', 'y'])
+  const { getEndowmentsForConfig } = prepareTest({ knownWritable })
+  const sourceGlobal = {
+    x: 1,
+    y: 2,
+    z: 3,
+  }
+  const config = {
+    globals: {
+      x: 'write+define',
+      y: 'write',
+      z: true,
+    },
+  }
+  const derivedGlobal = {}
+  const endowments = getEndowmentsForConfig(
+    sourceGlobal,
+    config,
+    derivedGlobal,
+    globalThis
+  )
+  Object.defineProperties(
+    derivedGlobal,
+    Object.getOwnPropertyDescriptors(endowments)
+  )
+  t.is(typeof derivedGlobal.Object, 'object')
+  Object.freeze(derivedGlobal)
+
+  // Regular property access works
+  t.is(derivedGlobal.x, 1)
+  t.is(derivedGlobal.y, 2)
+  t.is(derivedGlobal.z, 3)
+
+  // Regular write works for both 'write' and 'redefine'
+  derivedGlobal.x = 10
+  derivedGlobal.y = 20
+  t.is(derivedGlobal.x, 10)
+  t.is(derivedGlobal.y, 20)
+  t.is(sourceGlobal.x, 10, 'source value updated for redefine property')
+  t.is(sourceGlobal.y, 20, 'source value updated for write property')
+
+  // defineProperty works for 'write+define' but not for others
+  derivedGlobal.Object.defineProperty(derivedGlobal, 'x', {
+    value: 100,
+    // writable, configurable, and enumerable are not applied
+  })
+
+  t.is(derivedGlobal.x, 100, 'value updated after defineProperty')
+  t.is(sourceGlobal.x, 100, 'source value updated after defineProperty')
+
+  // Trying to defineProperty on a 'write' property should throw
+  t.throws(
+    () => {
+      derivedGlobal.Object.defineProperty(derivedGlobal, 'y', {
+        value: 200,
+      })
+    },
+    { message: /Cannot redefine property/ }
+  )
+
+  // Trying to defineProperty on a read-only property should throw
+  t.throws(
+    () => {
+      derivedGlobal.Object.defineProperty(derivedGlobal, 'z', {
+        value: 300,
+      })
+    },
+    { message: /Cannot redefine property/ }
+  )
+})
