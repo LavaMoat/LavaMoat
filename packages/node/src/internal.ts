@@ -66,6 +66,11 @@ export type LoadCompartmentMapOptions = Simplify<
     WithReadPowers &
     WithPolicyOverride &
     WithTrustRoot & {
+      /**
+       * List of transforms which will be applied to each compartment descriptor
+       * within the initial compartment map descriptor (via
+       * `mapNodeModules()`).
+       */
       compartmentDescriptorTransforms?: CompartmentDescriptorTransform[]
     }
 >
@@ -137,28 +142,38 @@ export type SomeParameters<T extends SomeFunction> = T extends new (
  *
  * @interal
  */
-export type ReadPolicyOptions = WithReadFile
+export type ReadPolicyOptions = Simplify<WithReadFile>
 
 /**
- * Options for `readPolicyoverride()`
+ * Options for `readPolicyOverride()`
  *
  * @interal
  */
-export type ReadPolicyOverrideOptions = WithReadFile
+export type ReadPolicyOverrideOptions = Simplify<WithReadFile>
 
 /**
  * Options for `resolveBinScript()`
  *
  * @interal
  */
-export type ResolveBinScriptOptions = Simplify<
-  WithFs & {
-    /**
-     * Directory to begin looking for the script in
-     */
-    from?: string
-  }
->
+export type ResolveBinScriptOptions = Simplify<WithFs & WithFrom>
+
+/**
+ * Options containing a `from` property; used for path resolution
+ *
+ * @internal
+ */
+export interface WithFrom {
+  /**
+   * Where to resolve from
+   */
+  from?: string | URL
+}
+
+/**
+ * Options for `resolveEntrypoint()`
+ */
+export type ResolveEntrypointOptions = Simplify<WithFrom>
 
 /**
  * Options for `resolveWorkspace()`
@@ -221,9 +236,9 @@ export type RequiredReadNowPowers = ReadonlyArray<
  *
  * @interal
  */
-export type ReportInvalidOverridesOptions = WithPolicyOverride &
-  WithPolicyOverridePath &
-  WithLog
+export type ReportInvalidOverridesOptions = Simplify<
+  WithPolicyOverride & WithPolicyOverridePath & WithLog
+>
 
 /**
  * Result of `generatePolicy()`
@@ -250,16 +265,41 @@ export type CompartmentMapToPolicyOptions = Simplify<
  * @internal
  */
 export interface LoadCompartmentMapResult {
+  /**
+   * The final compartment map descriptor, having been run through
+   * `captureFromMap()`.
+   */
   compartmentMap: CompartmentMapDescriptor
+  /**
+   * The final mapping of compartment name to `CompartmentSources`, having been
+   * run through `captureFromMap()`
+   */
   sources: Sources
+  /**
+   * Mapping of original compartment names (from `mapNodeModules()`) to
+   * normalized compartment names (from `captureFromMap()`)
+   */
   renames: Record<string, string>
 }
 
+/**
+ * A function which transforms a {@link CompartmentDescriptor} in some way.
+ *
+ * This is used to modify the compartment map descriptor before prior to a call
+ * to `captureFromMap()`.
+ *
+ * @privateRemarks
+ * This could also support returning `Promise<void>`, if necessary in the
+ * future.
+ */
 export type CompartmentDescriptorTransform = (
   compartmentDescriptor: CompartmentDescriptor,
   options?: CompartmentDescriptorTransformOptions
 ) => void
 
+/**
+ * Options for a {@link CompartmentDescriptorTransform}
+ */
 export type CompartmentDescriptorTransformOptions = Simplify<
   WithTrustRoot & WithLog
 >
