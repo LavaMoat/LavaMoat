@@ -150,8 +150,8 @@ function endowmentsToolkit({
       allowedWriteFields
     )
 
-    if (allowRedefine.length > 0 && unwrapFrom && unwrapTo) {
-      const expectedTarget = unwrapTo || endowments
+    if (allowRedefine.length > 0 && unwrapFrom) {
+      const expectedTarget = unwrapFrom || endowments
       const originalDefineProperty = unwrapFrom.Object.defineProperty
       /**
        * @param {any} target
