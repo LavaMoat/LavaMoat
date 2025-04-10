@@ -123,7 +123,7 @@ function endowmentsToolkit({
           whitelistedReads.push(path)
           if (packagePolicyValue === 'write+define') {
             if (!unwrapFrom) {
-              throw Error(
+              throw ReferenceError(
                 'LavaMoat - write+define value in policy requires unwrapFrom to be set when generating endowments'
               )
             }
@@ -154,7 +154,7 @@ function endowmentsToolkit({
       const expectedTarget = unwrapFrom || endowments
       const originalDefineProperty = unwrapFrom.Object.defineProperty
       /**
-       * @param {any} target
+       * @param {Record<PropertyKey, any>} target
        * @param {PropertyKey} key
        * @param {PropertyDescriptor} descriptor
        * @returns {boolean}
