@@ -8,6 +8,7 @@ import { mapNodeModules } from '@endo/compartment-mapper/node-modules.js'
 import { DEFAULT_ENDO_OPTIONS } from '../compartment/options.js'
 import { defaultReadPowers } from '../compartment/power.js'
 import { NATIVE_PARSER_FILE_EXT, NATIVE_PARSER_NAME } from '../constants.js'
+import { log as defaultLog } from '../log.js'
 import { toURLString } from '../util.js'
 import { makePolicyGenCompartment } from './policy-gen-compartment-class.js'
 import { getCanonicalName } from './policy-gen-util.js'
@@ -39,6 +40,7 @@ export const loadCompartmentMap = async (
     readPowers = defaultReadPowers,
     policyOverride,
     conditions,
+    log: _log = defaultLog,
     ...captureOpts
   } = {}
 ) => {
