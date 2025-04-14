@@ -9,6 +9,12 @@ on:
   pull_request:
     types:
       - ready_for_review
+  workflow_dispatch:
+    inputs:
+      project-url:
+        description: 'Project URL to add PRs to'
+        required: true
+        default: https://github.com/orgs/LavaMoat/projects/7
 
 jobs:
   add-to-project:
