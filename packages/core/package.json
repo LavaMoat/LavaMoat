@@ -42,8 +42,7 @@
     "json-stable-stringify": "1.1.1",
     "lavamoat-tofu": "^8.0.6",
     "merge-deep": "3.0.3",
-    "ses": "1.11.0",
-    "type-fest": "4.30.0"
+    "ses": "1.11.0"
   },
   "devDependencies": {
     "@types/json-stable-stringify": "1.1.0",

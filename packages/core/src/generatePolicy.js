@@ -20,9 +20,20 @@ const {
   // @ts-ignore cycle causes this to be an error sometimes
 } = require('lavamoat-tofu')
 const { mergePolicy } = require('./mergePolicy')
-const { DEFAULT_GLOBAL_THIS_REFS } = require('./constants')
+const { DEFAULT_GLOBAL_THIS_REFS, POLICY_WRITE } = require('./constants')
 
 const rootSlug = '$root$'
+
+const {
+  entries,
+  fromEntries,
+  keys,
+  values,
+  getOwnPropertyNames,
+  prototype: objectPrototype,
+  assign,
+  create,
+} = Object
 
 /**
  * Symbols that look like globals but aren't; indexed by source type.
@@ -52,9 +63,15 @@ function createModuleInspector(opts) {
   const packageToNativeModules = new Map()
   /** @type {Record<string, import('./schema').DebugInfo>} */
   const debugInfo = {}
+  /**
+   * The module record for the root package. May not be used
+   *
+   * @type {import('./moduleRecord').LavamoatModuleRecord | undefined}
+   */
+  let root
 
   /** @type {ModuleInspector} */
-  const inspector = Object.assign(new EventEmitter(), {
+  const inspector = assign(new EventEmitter(), {
     /** @type {InspectModuleFn} */
     inspectModule: (moduleRecord, opts2) => {
       inspectModule(moduleRecord, { ...opts, ...opts2 })
@@ -73,26 +90,31 @@ function createModuleInspector(opts) {
    */
   function inspectModule(
     moduleRecord,
-    { isBuiltin, includeDebugInfo = false }
+    { isBuiltin, includeDebugInfo = false, trustRoot = true }
   ) {
-    if (moduleRecord === undefined) {
+    if (moduleRecord === undefined)
+      // see https://github.com/LavaMoat/LavaMoat/pull/1471 for when this happens
       return
-    }
+
     const { packageName, specifier, type } = moduleRecord
     // record the module
     moduleIdToModuleRecord.set(specifier, moduleRecord)
     // call the correct analyzer for the module type
     switch (type) {
       case 'builtin': {
-        inspectBuiltinModule(moduleRecord, { includeDebugInfo })
+        inspectBuiltinModule(moduleRecord, { includeDebugInfo, trustRoot })
         return
       }
       case 'native': {
-        inspectNativeModule(moduleRecord, { includeDebugInfo })
+        inspectNativeModule(moduleRecord, { includeDebugInfo, trustRoot })
         return
       }
       case 'js': {
-        inspectJsModule(moduleRecord, { isBuiltin, includeDebugInfo })
+        inspectJsModule(moduleRecord, {
+          isBuiltin,
+          includeDebugInfo,
+          trustRoot,
+        })
         return
       }
       default: {
@@ -142,15 +164,24 @@ function createModuleInspector(opts) {
    */
   function inspectJsModule(
     moduleRecord,
-    { isBuiltin, includeDebugInfo = false }
+    { isBuiltin, includeDebugInfo = false, trustRoot = true }
   ) {
-    const { packageName, specifier } = moduleRecord
+    const { packageName, specifier, isRoot } = moduleRecord
+    if (isRoot) {
+      if (root && root.packageName !== moduleRecord.packageName) {
+        // TODO: may be better just to warn & skip
+        throw new TypeError(
+          `LavaMoat - multiple root modules detected (${packageName} and ${root.packageName}). If this is intentional and not an error - report an issue and we will downgrade this to a warning.`
+        )
+      }
+      root = moduleRecord
+    }
     let moduleDebug
     // record the module
     moduleIdToModuleRecord.set(specifier, moduleRecord)
     // initialize mapping from package to module
     if (!packageToModules.has(packageName)) {
-      packageToModules.set(packageName, new Map())
+      packageToModules.set(packageName, create(null))
     }
     const packageModules = packageToModules.get(packageName)
     packageModules[specifier] = moduleRecord
@@ -165,14 +196,14 @@ function createModuleInspector(opts) {
       moduleDebug.moduleRecord = debugData
     }
     // skip for root modules (modules not from deps)
-    const isRootModule = packageName === rootSlug
-    if (isRootModule) {
+    if (trustRoot && isRoot) {
       return
     }
     // skip json files
     const filename = moduleRecord.file || 'unknown'
     const fileExtension = path.extname(filename)
-    if (!fileExtension.match(/^\.([cm]?js|ts)$/)) {
+    // explicitly allow extensionless files
+    if (fileExtension && !fileExtension.match(/^\.([cm]?js|ts)$/)) {
       return
     }
     // get ast (parse or use cached)
@@ -180,15 +211,26 @@ function createModuleInspector(opts) {
      * @type {AST}
      * @todo - Put this in `LavamoatModuleRecord` instead
      */
-    const ast =
-      moduleRecord.ast ||
-      parse(/** @type {string} */ (moduleRecord.content), {
-        // esm support
-        sourceType: 'unambiguous',
-        // someone must have been doing this
-        allowReturnOutsideFunction: true,
-        errorRecovery: true,
-      })
+    let ast
+    try {
+      ast =
+        moduleRecord.ast ||
+        parse(/** @type {string} */ (moduleRecord.content), {
+          // esm support
+          sourceType: 'unambiguous',
+          // someone must have been doing this
+          allowReturnOutsideFunction: true,
+          errorRecovery: true,
+        })
+    } catch (err) {
+      if (fileExtension === '') {
+        throw new Error(
+          `LavaMoat - failed to parse extensionless file of unknown format: ${moduleRecord.file}`,
+          { cause: err }
+        )
+      }
+      throw err
+    }
     if (includeDebugInfo && isParsedAST(ast) && ast.errors?.length) {
       moduleDebug.parseErrors = ast.errors
     }
@@ -279,7 +321,7 @@ function createModuleInspector(opts) {
   function inspectForGlobals(ast, moduleRecord, packageName, includeDebugInfo) {
     const moduleRefs = MODULE_REFS[ast.program.sourceType]
 
-    const globalObjPrototypeRefs = Object.getOwnPropertyNames(Object.prototype)
+    const globalObjPrototypeRefs = getOwnPropertyNames(objectPrototype)
     const foundGlobals = inspectGlobals(ast, {
       // browserify commonjs scope
       ignoredRefs: [...moduleRefs, ...globalObjPrototypeRefs],
@@ -297,9 +339,20 @@ function createModuleInspector(opts) {
     }
     // agregate globals
     if (!packageToGlobals.has(packageName)) {
-      packageToGlobals.set(packageName, [])
+      packageToGlobals.set(packageName, new Map())
     }
     let packageGlobals = packageToGlobals.get(packageName)
+
+    // XXX temporary fix while we do not have writable global property
+    // support at runtime
+    // https://github.com/LavaMoat/LavaMoat/issues/1554
+    for (const [path, value] of [...packageGlobals, ...foundGlobals]) {
+      const pathParts = path.split('.')
+      if (pathParts.length > 1 && value === POLICY_WRITE) {
+        packageGlobals.set(pathParts[0], true)
+      }
+    }
+
     packageGlobals = mergeGlobalsPolicy(packageGlobals, foundGlobals)
     packageToGlobals.set(packageName, packageGlobals)
   }
@@ -320,7 +373,7 @@ function createModuleInspector(opts) {
     includeDebugInfo
   ) {
     // get all requested names that resolve to isBuiltin
-    const namesForBuiltins = Object.entries(moduleRecord.importMap)
+    const namesForBuiltins = entries(moduleRecord.importMap)
       .filter(([, resolvedName]) => isBuiltin(resolvedName))
       .map(([requestedName]) => requestedName)
     const esmModuleBuiltins = inspectEsmImports(ast, namesForBuiltins)
@@ -360,6 +413,7 @@ function createModuleInspector(opts) {
     policyOverride,
     includeDebugInfo = false,
     moduleToPackageFallback,
+    trustRoot = true,
   }) {
     /** @type {import('./schema').Resources} */
     const resources = {}
@@ -379,8 +433,8 @@ function createModuleInspector(opts) {
       /** @type {import('./schema').ResourcePolicy['native']} */
       let native
       // skip for root modules (modules not from deps)
-      const isRootModule = packageName === rootSlug
-      if (isRootModule) {
+      const isRootModule = root && packageName === root.packageName
+      if (isRootModule && trustRoot) {
         return
       }
       // get dependencies, ignoring builtins
@@ -390,7 +444,7 @@ function createModuleInspector(opts) {
         moduleToPackageFallback,
       })
       if (packageDeps.length) {
-        packages = Object.fromEntries(
+        packages = fromEntries(
           packageDeps.map((depPackageName) => [depPackageName, true])
         )
       }
@@ -399,7 +453,7 @@ function createModuleInspector(opts) {
         const globalMap = mapToObj(packageToGlobals.get(packageName))
         // prefer "true" over "read" for clearer difference between
         // read/write syntax highlighting
-        Object.keys(globalMap).forEach((key) => {
+        keys(globalMap).forEach((key) => {
           if (globalMap[key] === 'read') {
             globalMap[key] = true
           }
@@ -422,7 +476,9 @@ function createModuleInspector(opts) {
       // get native modules
       native = packageToNativeModules.has(packageName)
       // skip package policy if there are no settings needed
-      if (!packages && !globals && !builtin) {
+      // create empty resources object for the root module
+      // to use as a proper reference (otherwise it'd be undefined)
+      if (!isRootModule && !packages && !globals && !builtin) {
         return
       }
       // create minimal policy object
@@ -438,6 +494,11 @@ function createModuleInspector(opts) {
       }
       if (native) {
         packagePolicy.native = native
+      }
+      if (root && isRootModule) {
+        policy.root = {
+          usePolicy: root.packageName,
+        }
       }
       // set policy for package
       resources[packageName] = packagePolicy
@@ -481,29 +542,27 @@ function aggregateDeps({
 }) {
   const deps = new Set()
   // get all dep package from the "packageModules" collection of modules
-  Object.values(packageModules).forEach((moduleRecord) => {
-    Object.entries(moduleRecord.importMap).forEach(
-      ([requestedName, specifier]) => {
-        // skip entries where resolution was skipped
-        if (!specifier) {
-          return
-        }
-        // get packageName from module record, or guess
-        const moduleRecord = moduleIdToModuleRecord.get(specifier)
-        if (moduleRecord) {
-          // builtin modules are ignored here, handled elsewhere
-          if (moduleRecord.type === 'builtin') {
-            return
-          }
-          deps.add(moduleRecord.packageName)
-          return
-        }
-        // moduleRecord missing, guess package name
-        const packageName =
-          moduleToPackageFallback(requestedName) || `<unknown:${requestedName}>`
-        deps.add(packageName)
+  values(packageModules).forEach((moduleRecord) => {
+    entries(moduleRecord.importMap).forEach(([requestedName, specifier]) => {
+      // skip entries where resolution was skipped
+      if (!specifier) {
+        return
       }
-    )
+      // get packageName from module record, or guess
+      const moduleRecord = moduleIdToModuleRecord.get(specifier)
+      if (moduleRecord) {
+        // builtin modules are ignored here, handled elsewhere
+        if (moduleRecord.type === 'builtin') {
+          return
+        }
+        deps.add(moduleRecord.packageName)
+        return
+      }
+      // moduleRecord missing, guess package name
+      const packageName =
+        moduleToPackageFallback(requestedName) || `<unknown:${requestedName}>`
+      deps.add(packageName)
+    })
     // ensure the package is not listed as its own dependency
     deps.delete(moduleRecord.packageName)
   })
@@ -568,6 +627,7 @@ function getDefaultPaths(policyName) {
 /**
  * @typedef ModuleInspectorOptions
  * @property {(value: string) => boolean} isBuiltin
+ * @property {boolean} [trustRoot] If `true`, trust the root package
  * @property {boolean} [includeDebugInfo]
  * @property {(specifier: string) => string | undefined} [moduleToPackageFallback]
  */
