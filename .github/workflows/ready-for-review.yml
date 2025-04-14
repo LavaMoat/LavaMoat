@@ -9,6 +9,8 @@ on:
   pull_request:
     types:
       - ready_for_review
+      - synchronize # remove this
+
   workflow_dispatch:
     inputs:
       project-url:
