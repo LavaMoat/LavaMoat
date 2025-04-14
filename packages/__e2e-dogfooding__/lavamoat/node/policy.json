@@ -1,0 +1,21 @@
+{
+  "resources": {
+    "graceful-fs": {
+      "builtin": {
+        "assert.equal": true,
+        "constants.O_SYMLINK": true,
+        "constants.O_WRONLY": true,
+        "constants.hasOwnProperty": true,
+        "fs": true,
+        "stream.Stream.call": true,
+        "util": true
+      },
+      "globals": {
+        "clearTimeout": true,
+        "console.error": true,
+        "process": true,
+        "setTimeout": true
+      }
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "resources": {
+    "preact": {
+      "globals": {
+        "document": true,
+        "setTimeout": true
+      }
+    }
+  }
+}
