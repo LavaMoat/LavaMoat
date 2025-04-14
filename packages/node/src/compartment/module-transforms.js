@@ -32,6 +32,17 @@ const evadeDirectEvalExpressions = (source) => {
 }
 
 /**
+ * Hashbangs seem to offend SES.
+ *
+ * @param {string} source
+ * @returns {string}
+ */
+const decapitateHashbang = (source) => {
+  // careful with the source map
+  return source.replace(/^#!(.+?)(?=\r?\n)/, '// $1')
+}
+
+/**
  * Evade things that look like HTML comments but are actually decrement
  * operators used in boolean "less than" expressions
  *
@@ -70,6 +81,7 @@ const evadeImportString = (source) => {
 const createModuleTransform = (parser) => {
   return (sourceBytes, specifier, location, _packageLocation, opts) => {
     let source = decoder.decode(sourceBytes)
+    source = decapitateHashbang(source)
     // FIXME: this function calls stuff we could get in `ses/tools.js`
     // except `evadeDirectEvalExpressions`. unclear if we should be using this from `lavamoat-core`
     source = applySourceTransforms(source)
@@ -79,7 +91,7 @@ const createModuleTransform = (parser) => {
     const { code, map } = evadeCensorSync(source, {
       sourceMap: opts?.sourceMap,
       sourceUrl: new URL(specifier, location).href,
-      sourceType: 'module',
+      sourceType: parser === 'mjs' ? 'module' : 'script',
     })
     const objectBytes = encoder.encode(code)
     return { bytes: objectBytes, parser, map }

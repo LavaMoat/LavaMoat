@@ -1,0 +1,22 @@
+{
+  "defaultAttenuator": "@attenuator@",
+  "entry": {
+    "builtins": "any",
+    "globals": ["root"],
+    "noGlobalFreeze": true,
+    "packages": "any"
+  },
+  "resources": {
+    "a": {
+      "builtins": {
+        "fs": { "attenuate": "@attenuator@", "params": ["readFile"] }
+      },
+      "globals": [{ "console": true }],
+      "packages": { "b": true }
+    },
+    "a>b": {
+      "globals": [{ "XMLHttpRequest": "write" }],
+      "options": { "native": true }
+    }
+  }
+}

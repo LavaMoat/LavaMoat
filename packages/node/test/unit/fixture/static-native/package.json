@@ -6,7 +6,7 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "start": "npx snapshot-fs --binary . ../json/native.json"
+    "start": "npx snapshot-fs ../../json-fixture/static-native.json"
   },
   "dependencies": {
     "hello_world": "0.0.0"

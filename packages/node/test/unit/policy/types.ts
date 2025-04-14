@@ -3,7 +3,7 @@
 
 import { ReadNowPowers } from '@endo/compartment-mapper'
 import type { ExecutionContext } from 'ava'
-import type { LavaMoatPolicy, LavaMoatPolicyOverrides } from 'lavamoat-core'
+import type { LavaMoatPolicy } from 'lavamoat-core'
 import { Volume } from 'memfs/lib/volume.js'
 import type { Simplify } from 'type-fest'
 import type { GeneratePolicyOptions } from '../../../src/types.js'
@@ -22,7 +22,7 @@ export type TestPolicyMacroOptions = {
   /**
    * Overrides to apply to policy generation
    */
-  policyOverride?: LavaMoatPolicyOverrides
+  policyOverride?: LavaMoatPolicy
 }
 
 /**
@@ -39,8 +39,8 @@ export type TestPolicyForJSONOptions<Context = unknown> = Simplify<
     expected?: LavaMoatPolicy | TestPolicyExpectationFn<Context>
 
     /**
-     * Path to entrypoint _within the fixture_. This must be an absolute path
-     * or URL.
+     * Path to entrypoint _within the fixture_. This must be an absolute path or
+     * URL.
      *
      * The default is `/index.js`.
      */

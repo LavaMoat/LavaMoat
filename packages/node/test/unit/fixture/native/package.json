@@ -5,7 +5,7 @@
   "description": "this code actually runs",
   "private": true,
   "scripts": {
-    "start": "npx snapshot-fs --binary ../../json-fixture/native.json"
+    "start": "npx snapshot-fs ../../json-fixture/native.json"
   },
   "dependencies": {
     "hello_world": "0.0.0"

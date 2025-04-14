@@ -1,0 +1,21 @@
+[
+  0,
+  {},
+  {
+    "README.md": [
+      1,
+      {},
+      "data:application/octet-stream;base64,RW5zdXJpbmcgZXZhc2l2ZSB0cmFuc2Zvcm1zIG9mIGhhc2hiYW5ncyB3b3JrCg=="
+    ],
+    "index.js": [
+      1,
+      {},
+      "data:application/octet-stream;base64,IyEvdXNyL2Jpbi9lbnYgbm9kZQoKZXhwb3J0cy5oZWxsbyA9ICd3b3JsZCcK"
+    ],
+    "package.json": [
+      1,
+      {},
+      "data:application/octet-stream;base64,ewogICJuYW1lIjogImhhc2hiYW5nIiwKICAidmVyc2lvbiI6ICIxLjAuMCIsCiAgImJpbiI6ICJpbmRleC5qcyIsCiAgInNjcmlwdHMiOiB7CiAgICAic3RhcnQiOiAibnB4IHNuYXBzaG90LWZzIC4uLy4uL2pzb24tZml4dHVyZS9oYXNoYmFuZy5qc29uIgogIH0KfQo="
+    ]
+  }
+]

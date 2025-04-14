@@ -7,6 +7,7 @@
 
 import { Module } from 'node:module'
 import { fileURLToPath } from 'node:url'
+import { isObject } from '../util.js'
 
 const { freeze, keys, assign } = Object
 
@@ -16,25 +17,37 @@ const { freeze, keys, assign } = Object
  */
 
 /**
- * Import hook for exit modules, which are typically Node.js builtins in this
- * case.
+ * Given some `ns`, create a {@link ThirdPartyStaticModuleInterface}
  *
- * @type {ExitModuleImportHook}
- * @internal
+ * @param {unknown} ns Namespace
+ * @returns {Readonly<ThirdPartyStaticModuleInterface>}
  */
-export const importHook = async (specifier) => {
-  /** @type {object} */
-  const ns = await import(specifier)
+const makeStaticModuleInterface = (ns) => {
   return freeze(
     /** @type {ThirdPartyStaticModuleInterface} */ ({
+      // builtins have no imports (as far as we're concerned)
       imports: [],
-      exports: keys(ns),
+      exports: isObject(ns) ? keys(ns) : [],
       execute: (moduleExports) => {
+        // this is a no-op if `ns` is a non-object
         moduleExports.default = ns
         assign(moduleExports, ns)
       },
     })
   )
+}
+
+/**
+ * Import hook for exit modules, which are typically Node.js builtins
+ *
+ * @type {ExitModuleImportHook}
+ * @internal
+ */
+export const importHook = async (specifier) => {
+  /** @type {unknown} */
+  const ns = await import(specifier)
+
+  return makeStaticModuleInterface(ns)
 }
 
 /**
@@ -45,16 +58,26 @@ export const importHook = async (specifier) => {
  */
 export const importNowHook = (specifier, packageLocation) => {
   const require = Module.createRequire(fileURLToPath(packageLocation))
-  /** @type {object} */
+
+  /** @type {unknown} */
   const ns = require(specifier)
-  return freeze(
-    /** @type {ThirdPartyStaticModuleInterface} */ ({
-      imports: [],
-      exports: keys(ns),
-      execute: (moduleExports) => {
-        moduleExports.default = ns
-        assign(moduleExports, ns)
-      },
-    })
-  )
+  return makeStaticModuleInterface(ns)
+}
+
+/**
+ * The "null" import hook is for use during policy generation; it prevents
+ * importing of exit modules and is the recommended way to handle exit modules
+ * when using `captureFromMap()` (the reason, in a nutshell: different use-cases
+ * are sharing the same internal `importHook` implementation in
+ * `@endo/compartment-mapper`)
+ *
+ * @type {ExitModuleImportHook}
+ * @internal
+ */
+export const nullImportHook = async () => {
+  return freeze({
+    imports: [],
+    exports: [],
+    execute: () => {},
+  })
 }

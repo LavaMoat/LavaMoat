@@ -1,0 +1,14 @@
+{
+  "name": "relative-package",
+  "version": "0.0.0",
+  "type": "module",
+  "description": "Examples of package import via relativer paths",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "start": "npx snapshot-fs ../../json-fixture/relative-package.json"
+  },
+  "dependencies": {
+    "winken": "0.0.0"
+  }
+}

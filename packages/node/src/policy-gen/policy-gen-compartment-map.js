@@ -5,20 +5,60 @@
 
 import { captureFromMap } from '@endo/compartment-mapper/capture-lite.js'
 import { mapNodeModules } from '@endo/compartment-mapper/node-modules.js'
+import { nullImportHook } from '../compartment/import-hook.js'
 import { DEFAULT_ENDO_OPTIONS } from '../compartment/options.js'
 import { defaultReadPowers } from '../compartment/power.js'
-import { NATIVE_PARSER_FILE_EXT, NATIVE_PARSER_NAME } from '../constants.js'
+import { ATTENUATORS_COMPARTMENT } from '../constants.js'
 import { log as defaultLog } from '../log.js'
-import { toURLString } from '../util.js'
+import { hrLabel, toEndoURL } from '../util.js'
 import { makePolicyGenCompartment } from './policy-gen-compartment-class.js'
 import { getCanonicalName } from './policy-gen-util.js'
 
 /**
- * @import {LoadCompartmentMapOptions} from '../internal.js'
- * @import {CompartmentMapDescriptor, Sources} from '@endo/compartment-mapper'
+ * @import {CompartmentDescriptorTransform, LoadCompartmentMapOptions, LoadCompartmentMapResult} from '../internal.js'
  */
 
 const { values } = Object
+
+/**
+ * This compartment descriptor transform replaces the `label` field of the
+ * compartment descriptor with the canonical name of the package.
+ *
+ * We have no use for Endo's own `label` field, which is only used for debugging
+ * and/or display purposes.
+ *
+ * It is intended to be executed _last_ in the list of transforms.
+ *
+ * @privateRemarks
+ * It may become necessary to keep a mapping from old to new labels in the
+ * future. Why? Because stuff like that keeps being necessary.
+ *
+ * We may want to consider adding an option to `mapNodeModules()` which is a
+ * callback to generate the `label` field.
+ * @type {CompartmentDescriptorTransform}
+ */
+const finalCompartmentDescriptorTransform = (
+  compartmentDescriptor,
+  { trustRoot = true, log = defaultLog } = {}
+) => {
+  /* c8 ignore next */
+  if (compartmentDescriptor.name === ATTENUATORS_COMPARTMENT) {
+    // should be impossible
+    throw new TypeError(
+      `Unexpected attenuator compartment found when computing canonical package name in ${compartmentDescriptor.label} (${compartmentDescriptor.location})`
+    )
+  }
+
+  const { label } = compartmentDescriptor
+  compartmentDescriptor.label = getCanonicalName(
+    compartmentDescriptor,
+    trustRoot
+  )
+
+  log.debug(
+    `Replaced compartment label ${hrLabel(label)} with canonical name ${hrLabel(compartmentDescriptor.label)}`
+  )
+}
 
 /**
  * Loads compartment map and associated sources.
@@ -27,11 +67,7 @@ const { values } = Object
  *
  * @param {string | URL} entrypointPath
  * @param {LoadCompartmentMapOptions} opts
- * @returns {Promise<{
- *   compartmentMap: CompartmentMapDescriptor
- *   sources: Sources
- *   renames: Record<string, string>
- * }>}
+ * @returns {Promise<LoadCompartmentMapResult>}
  * @internal
  */
 export const loadCompartmentMap = async (
@@ -39,34 +75,35 @@ export const loadCompartmentMap = async (
   {
     readPowers = defaultReadPowers,
     policyOverride,
-    conditions,
-    log: _log = defaultLog,
+    trustRoot,
+    log = defaultLog,
+    compartmentDescriptorTransforms = [],
+    dev,
     ...captureOpts
   } = {}
 ) => {
-  const entryPoint = toURLString(entrypointPath)
-  const nodeCompartmentMap = await mapNodeModules(readPowers, entryPoint, {
+  // some packages use "node" as a condition (as opposed to "browser")
+  const conditions = new Set(['node'])
+
+  const entrypoint = toEndoURL(entrypointPath)
+
+  const nodeCompartmentMap = await mapNodeModules(readPowers, entrypoint, {
     conditions,
-    languageForExtension: {
-      [NATIVE_PARSER_FILE_EXT]: NATIVE_PARSER_NAME,
-      '': 'cjs',
-    },
+    dev,
+    languageForExtension: DEFAULT_ENDO_OPTIONS.languageForExtension,
   })
 
-  /**
-   * Replace the `label` field with the canonical name
-   *
-   * In lavamoat, the canonical name is what we present to the end user as a
-   * resource key in policy. We have no use for Endo's label field, so we
-   * replace labels with canonicalNames derived from path.
-   */
-  values(nodeCompartmentMap.compartments).map((compartmentDescriptor) => {
-    compartmentDescriptor.label = getCanonicalName(compartmentDescriptor)
-  })
+  compartmentDescriptorTransforms.push(finalCompartmentDescriptorTransform)
+
+  values(nodeCompartmentMap.compartments).forEach((compartmentDescriptor) =>
+    compartmentDescriptorTransforms.forEach((transform) =>
+      transform(compartmentDescriptor, { trustRoot, log })
+    )
+  )
 
   // we use this to inject missing imports from policy overrides into the module descriptor.
   // TODO: Endo should allow us to hook into `importHook` directly instead
-  const LavaMoatCompartment = makePolicyGenCompartment(
+  const PolicyGenCompartment = makePolicyGenCompartment(
     nodeCompartmentMap,
     policyOverride
   )
@@ -74,11 +111,12 @@ export const loadCompartmentMap = async (
   const {
     captureCompartmentMap: compartmentMap,
     captureSources: sources,
-    compartmentRenames: renames,
+    newToOldCompartmentNames: renames,
   } = await captureFromMap(readPowers, nodeCompartmentMap, {
-    ...captureOpts,
     ...DEFAULT_ENDO_OPTIONS,
-    Compartment: LavaMoatCompartment,
+    importHook: nullImportHook,
+    Compartment: PolicyGenCompartment,
+    ...captureOpts,
   })
 
   return {

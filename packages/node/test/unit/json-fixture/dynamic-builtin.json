@@ -1,0 +1,64 @@
+[
+  0,
+  {},
+  {
+    "README.md": [
+      1,
+      {},
+      "data:application/octet-stream;base64,VGhpcyBmaXh0dXJlIGlzIG5vdCB1c2VkIGRpcmVjdGx5OyBpdCdzIG9ubHkgaGVyZSBpbiBvcmRlciB0byBjcmVhdGUgYSBzbmFwc2hvdDoKCmBgYGJhc2gKbnBtIHJ1biBzdGFydApgYGAK"
+    ],
+    "index.js": [
+      1,
+      {},
+      "data:application/octet-stream;base64,aW1wb3J0IHsgaGVsbG8gYXMgb3RoZXJIZWxsbyB9IGZyb20gJ2R5bmFtaWMtcmVxdWlyZScKZXhwb3J0IGNvbnN0IGhlbGxvID0gJ2hlbGxvICcgKyBvdGhlckhlbGxvCg=="
+    ],
+    "node_modules": [
+      0,
+      {},
+      {
+        "dynamic-require": [
+          0,
+          {},
+          {
+            "index.js": [
+              1,
+              {},
+              "data:application/octet-stream;base64,ZnVuY3Rpb24gZHluYW1pYyAodmFsdWUpIHsKICByZXR1cm4gcmVxdWlyZSh2YWx1ZSkKfQoKZHluYW1pYygnbm9kZTpmcycpCgpleHBvcnRzLmhlbGxvID0gJ3dvcmxkJwo="
+            ],
+            "package.json": [
+              1,
+              {},
+              "data:application/octet-stream;base64,ewogICJuYW1lIjogImR5bmFtaWMtcmVxdWlyZSIsCiAgInZlcnNpb24iOiAiMS4wLjAiLAogICJsaWNlbnNlIjogIklTQyIsCiAgInByaXZhdGUiOiB0cnVlLAogICJtYWluIjogImluZGV4LmpzIiwKICAiZGVwZW5kZW5jaWVzIjogewogICAgImR1bW15IjogIjAuMC4wIgogIH0KfQo="
+            ],
+            "world.js": [
+              1,
+              {},
+              "data:application/octet-stream;base64,bW9kdWxlLmV4cG9ydHMgPSAnd29ybGQnCg=="
+            ]
+          }
+        ],
+        "muddy": [
+          0,
+          {},
+          {
+            "index.js": [
+              1,
+              {},
+              "data:application/octet-stream;base64,bW9kdWxlLmV4cG9ydHMgPSAid29ybGQiCg=="
+            ],
+            "package.json": [
+              1,
+              {},
+              "data:application/octet-stream;base64,ewogICJuYW1lIjogIm11ZGR5IiwKICAidmVyc2lvbiI6ICIwLjAuMCIKfQo="
+            ]
+          }
+        ]
+      }
+    ],
+    "package.json": [
+      1,
+      {},
+      "data:application/octet-stream;base64,ewogICJuYW1lIjogImR5bmFtaWMtYnVpbHRpbiIsCiAgInZlcnNpb24iOiAiMC4wLjAiLAogICJ0eXBlIjogIm1vZHVsZSIsCiAgImRlc2NyaXB0aW9uIjogIkR5bmFtaWMgcmVxdWlyZSBvZiBhIGJ1aWx0aW4gbW9kdWxlIiwKICAicHJpdmF0ZSI6IHRydWUsCiAgIm1haW4iOiAiaW5kZXguanMiLAogICJzY3JpcHRzIjogewogICAgInN0YXJ0IjogIm5weCBzbmFwc2hvdC1mcyAuLi8uLi9qc29uLWZpeHR1cmUvZHluYW1pYy1idWlsdGluLmpzb24iCiAgfSwKICAiZGVwZW5kZW5jaWVzIjogewogICAgImR5bmFtaWMtcmVxdWlyZSI6ICIwLjAuMCIKICB9Cn0K"
+    ]
+  }
+]

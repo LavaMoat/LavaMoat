@@ -1,7 +1,43 @@
-{
-  "/package.json": "{\n  \"name\": \"unused-dependency\",\n  \"version\": \"1.0.0\",\n  \"type\": \"module\",\n  \"license\": \"ISC\",\n  \"private\": true,\n  \"main\": \"index.js\",\n  \"scripts\": {\n    \"start\": \"npx snapshot-fs . ../json/unused-dependency.json\"\n  },\n  \"dependencies\": {\n    \"blurmph\": \"^1.0.0\"\n  }\n}\n",
-  "/index.js": "export const hello = 'world'\n\nconsole.log(`hello ${hello}`)\n",
-  "/README.md": "This is an example of an app which has a dependency but does not use it in any way. We use it to assert that \"extra\" policy for such packages is not generated.\n",
-  "/node_modules/blurmph/package.json": "{\n  \"name\": \"blurmph\",\n  \"version\": \"1.0.0\",\n  \"main\": \"index.js\"\n}\n",
-  "/node_modules/blurmph/index.js": "module.exports = require('node:fs')\n"
-}
+[
+  0,
+  {},
+  {
+    "README.md": [
+      1,
+      {},
+      "data:application/octet-stream;base64,VGhpcyBpcyBhbiBleGFtcGxlIG9mIGFuIGFwcCB3aGljaCBoYXMgYSBkZXBlbmRlbmN5IGJ1dCBkb2VzIG5vdCB1c2UgaXQgaW4gYW55IHdheS4gV2UgdXNlIGl0IHRvIGFzc2VydCB0aGF0ICJleHRyYSIgcG9saWN5IGZvciBzdWNoIHBhY2thZ2VzIGlzIG5vdCBnZW5lcmF0ZWQuCg=="
+    ],
+    "index.js": [
+      1,
+      {},
+      "data:application/octet-stream;base64,ZXhwb3J0IGNvbnN0IGhlbGxvID0gJ3dvcmxkJwoKY29uc29sZS5sb2coYGhlbGxvICR7aGVsbG99YCkK"
+    ],
+    "node_modules": [
+      0,
+      {},
+      {
+        "blurmph": [
+          0,
+          {},
+          {
+            "index.js": [
+              1,
+              {},
+              "data:application/octet-stream;base64,bW9kdWxlLmV4cG9ydHMgPSByZXF1aXJlKCdub2RlOmZzJykK"
+            ],
+            "package.json": [
+              1,
+              {},
+              "data:application/octet-stream;base64,ewogICJuYW1lIjogImJsdXJtcGgiLAogICJ2ZXJzaW9uIjogIjEuMC4wIiwKICAibWFpbiI6ICJpbmRleC5qcyIKfQo="
+            ]
+          }
+        ]
+      }
+    ],
+    "package.json": [
+      1,
+      {},
+      "data:application/octet-stream;base64,ewogICJuYW1lIjogInVudXNlZC1kZXBlbmRlbmN5IiwKICAidmVyc2lvbiI6ICIxLjAuMCIsCiAgInR5cGUiOiAibW9kdWxlIiwKICAibGljZW5zZSI6ICJJU0MiLAogICJwcml2YXRlIjogdHJ1ZSwKICAibWFpbiI6ICJpbmRleC5qcyIsCiAgInNjcmlwdHMiOiB7CiAgICAic3RhcnQiOiAibnB4IHNuYXBzaG90LWZzIC4uLy4uL2pzb24tZml4dHVyZS91bnVzZWQtZGVwZW5kZW5jeS5qc29uIgogIH0sCiAgImRlcGVuZGVuY2llcyI6IHsKICAgICJibHVybXBoIjogIl4xLjAuMCIKICB9Cn0K"
+    ]
+  }
+]

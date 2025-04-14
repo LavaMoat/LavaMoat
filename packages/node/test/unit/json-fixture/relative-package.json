@@ -1,0 +1,59 @@
+[
+  0,
+  {},
+  {
+    "README.md": [
+      1,
+      {},
+      "data:application/octet-stream;base64,VGhpcyBmaXh0dXJlIGlzIG5vdCB1c2VkIGRpcmVjdGx5OyBpdCdzIG9ubHkgaGVyZSBpbiBvcmRlciB0byBjcmVhdGUgYSBzbmFwc2hvdDoKCmBgYGJhc2gKbnBtIHJ1biBzdGFydApgYGAK"
+    ],
+    "index.js": [
+      1,
+      {},
+      "data:application/octet-stream;base64,aW1wb3J0IG5vZCBmcm9tICd3aW5rZW4nCmV4cG9ydCBjb25zdCBoZWxsbyA9IGB3aW5rZW4sIGJsaW5rZW4gJiAke25vZH1gCg=="
+    ],
+    "node_modules": [
+      0,
+      {},
+      {
+        "blinken": [
+          0,
+          {},
+          {
+            "index.js": [
+              1,
+              {},
+              "data:application/octet-stream;base64,Y29uc3Qge2Zvcm1hdH0gPSByZXF1aXJlKCdub2RlOnV0aWwnKQoKbW9kdWxlLmV4cG9ydHMgPSBmb3JtYXQoJyVzJywgJ25vZCcpCg=="
+            ],
+            "package.json": [
+              1,
+              {},
+              "data:application/octet-stream;base64,ewogICJuYW1lIjogImJsaW5rZW4iLAogICJ2ZXJzaW9uIjogIjAuMC4wIiwKICAiZGVzY3JpcHRpb24iOiAibmVlZHMgcG9saWN5Igp9Cg=="
+            ]
+          }
+        ],
+        "winken": [
+          0,
+          {},
+          {
+            "index.js": [
+              1,
+              {},
+              "data:application/octet-stream;base64,bW9kdWxlLmV4cG9ydHMgPSByZXF1aXJlKCcuLi9ibGlua2VuJyk7Cg=="
+            ],
+            "package.json": [
+              1,
+              {},
+              "data:application/octet-stream;base64,ewogICJuYW1lIjogIndpbmtlbiIsCiAgInZlcnNpb24iOiAiMC4wLjAiLAogICJkZXBlbmRlbmNpZXMiOiB7CiAgICAiYmxpbmtlbiI6ICIwLjAuMCIKICB9LAogICJkZXNjcmlwdGlvbiI6ICJyZXF1aXJlcyBibGlua2VuIHZpYSByZWxhdGl2ZSBwYXRoIgp9Cg=="
+            ]
+          }
+        ]
+      }
+    ],
+    "package.json": [
+      1,
+      {},
+      "data:application/octet-stream;base64,ewogICJuYW1lIjogInJlbGF0aXZlLXBhY2thZ2UiLAogICJ2ZXJzaW9uIjogIjAuMC4wIiwKICAidHlwZSI6ICJtb2R1bGUiLAogICJkZXNjcmlwdGlvbiI6ICJFeGFtcGxlcyBvZiBwYWNrYWdlIGltcG9ydCB2aWEgcmVsYXRpdmVyIHBhdGhzIiwKICAicHJpdmF0ZSI6IHRydWUsCiAgIm1haW4iOiAiaW5kZXguanMiLAogICJzY3JpcHRzIjogewogICAgInN0YXJ0IjogIm5weCBzbmFwc2hvdC1mcyAuLi8uLi9qc29uLWZpeHR1cmUvcmVsYXRpdmUtcGFja2FnZS5qc29uIgogIH0sCiAgImRlcGVuZGVuY2llcyI6IHsKICAgICJ3aW5rZW4iOiAiMC4wLjAiCiAgfQp9Cg=="
+    ]
+  }
+]
