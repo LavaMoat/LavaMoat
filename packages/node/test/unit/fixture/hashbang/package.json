@@ -1,0 +1,8 @@
+{
+  "name": "hashbang",
+  "version": "1.0.0",
+  "bin": "index.js",
+  "scripts": {
+    "start": "npx snapshot-fs ../../json-fixture/hashbang.json"
+  }
+}

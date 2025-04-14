@@ -8,9 +8,12 @@
 
 import chalk from 'chalk'
 import { createModuleInspector } from 'lavamoat-core'
-import { isBuiltin as nodeIsBuiltin } from 'node:module'
+import { isBuiltin as defaultIsBuiltin } from 'node:module'
+import { stripVTControlCharacters } from 'node:util'
 import { defaultReadPowers } from '../compartment/power.js'
-import { log as fallbackLog } from '../log.js'
+import { DEFAULT_TRUST_ROOT_COMPARTMENT } from '../constants.js'
+import { log as defaultLog } from '../log.js'
+import { hrLabel, hrPath, toPath } from '../util.js'
 import { LMRCache } from './lmr-cache.js'
 import { PolicyGeneratorContext } from './policy-gen-context.js'
 
@@ -20,15 +23,14 @@ import { PolicyGeneratorContext } from './policy-gen-context.js'
  *   ReadNowPowers} from '@endo/compartment-mapper'
  * @import {LavaMoatPolicy,
  *   LavaMoatPolicyDebug,
- *   LavaMoatPolicyOverrides,
  *   LavamoatModuleRecord,
  *   SesCompat,
+ *   SesCompatObj,
  *   ModuleInspector} from 'lavamoat-core'
  * @import {BuildModuleRecordsOptions,
- *   CompartmentMapToPolicyOptions} from '../types.js'
- * @import {MissingModuleMap} from '../internal.js'
+ * CompartmentMapToDebugPolicyOptions,} from '../types.js'
+ * @import {InspectModuleRecordsOptions, CompartmentMapToPolicyOptions} from '../internal.js'
  * @import {Loggerr} from 'loggerr'
- * @import {SetFieldType} from 'type-fest'
  */
 
 const { entries, freeze } = Object
@@ -40,17 +42,21 @@ const { entries, freeze } = Object
  * information.
  *
  * @param {LavamoatModuleRecord[]} moduleRecords Module records
- * @param {{ debug?: boolean; log?: Loggerr }} [options] Options
+ * @param {InspectModuleRecordsOptions} [options] Options
  * @returns {ModuleInspector} The inspector
  */
 const inspectModuleRecords = (
   moduleRecords,
-  { debug = false, log = fallbackLog } = {}
+  { debug = false, log = defaultLog, trustRoot = true } = {}
 ) => {
   const inspector = createModuleInspector({
-    isBuiltin: nodeIsBuiltin,
+    isBuiltin: defaultIsBuiltin,
     includeDebugInfo: debug,
+    trustRoot,
   })
+
+  /** @type {Map<string, string[]>} */
+  const perPackageWarnings = new Map()
 
   inspector.on('compat-warning', (data) => {
     const { moduleRecord, compatWarnings } = /**
@@ -62,44 +68,62 @@ const inspectModuleRecords = (
 
     const { primordialMutations, strictModeViolations, dynamicRequires } =
       compatWarnings
-    if (primordialMutations.length) {
-      log.warning(
-        `Package "${moduleRecord.packageName}" contains potential SES incompatibilities (primordial mutations) at the following location(s):\n${primordialMutations
-          .map(({ node }) =>
-            chalk.yellow(
-              `- ${moduleRecord.file}:${node.loc.start.line}:${node.loc.start.column}`
-            )
+    const nicePath = hrPath(moduleRecord.file)
+
+    /** @type {string[]} */
+    const warnings = perPackageWarnings.get(moduleRecord.packageName) || []
+
+    /**
+     * Adds SES compat issues to {@link warnings}
+     *
+     * @param {SesCompatObj[]} sesCompatObjs
+     * @param {string} type
+     */
+    const addWarnings = (sesCompatObjs, type) => {
+      if (sesCompatObjs.length) {
+        warnings.push(
+          ...sesCompatObjs.map(
+            ({
+              node: {
+                loc: {
+                  start: { line, column },
+                },
+              },
+            }) => {
+              const plainPath = stripVTControlCharacters(nicePath)
+              return `- ${chalk.yellowBright([plainPath, line, column].join(chalk.yellow(':')))} ${chalk.cyan(`(${type})`)}`
+            }
           )
-          .join('\n')}`
-      )
+        )
+      }
     }
-    if (strictModeViolations.length) {
+
+    addWarnings(primordialMutations, 'primordial mutation')
+    addWarnings(strictModeViolations, 'strict-mode violation')
+    addWarnings(dynamicRequires, 'dynamic require')
+
+    /* c8 ignore next */
+    if (!warnings.length) {
+      // unlikely, but just in case
       log.warning(
-        `Package "${moduleRecord.packageName}" contains potential SES incompatibilities (strict mode violations) at the following location(s):\n${strictModeViolations
-          .map(({ node }) =>
-            chalk.yellow(
-              `- ${moduleRecord.file}:${node.loc.start.line}:${node.loc.start.column}`
-            )
-          )
-          .join('\n')}`
+        'empty "compat-warning" event received from module inspector; this is a bug'
       )
+      return
     }
-    if (dynamicRequires.length) {
-      log.warning(
-        `Package "${moduleRecord.packageName}" contains potential SES incompatibilities (dynamic requires) at the following location(s):\n${dynamicRequires
-          .map(({ node }) =>
-            chalk.yellow(
-              `- ${moduleRecord.file}:${node.loc.start.line}:${node.loc.start.column}`
-            )
-          )
-          .join('\n')}`
-      )
-    }
+
+    perPackageWarnings.set(moduleRecord.packageName, warnings)
   })
 
-  // FIXME: should we sort here?
   for (const record of moduleRecords) {
     inspector.inspectModule(record)
+  }
+
+  if (perPackageWarnings.size) {
+    for (const [packageName, warnings] of perPackageWarnings) {
+      log.warning(
+        `Package ${hrLabel(packageName)} contains potential SES incompatibilities at the following locations:\n${warnings.join('\n')}`
+      )
+    }
   }
 
   return inspector
@@ -109,6 +133,7 @@ const inspectModuleRecords = (
  * Creates {@link LavamoatModuleRecord LavamoatModuleRecords} from a compartment
  * map descriptor and sources.
  *
+ * @param {string | URL} entrypoint
  * @param {CompartmentMapDescriptor} compartmentMap Compartment map descriptor
  * @param {Sources} sources Sources
  * @param {Record<string, string>} renames Mapping of compartment name to
@@ -118,12 +143,17 @@ const inspectModuleRecords = (
  * @internal
  */
 export const buildModuleRecords = (
+  entrypoint,
   compartmentMap,
   sources,
   renames,
-  { readPowers = defaultReadPowers, isBuiltin, log = fallbackLog } = {}
+  {
+    readPowers = defaultReadPowers,
+    isBuiltin = defaultIsBuiltin,
+    log = defaultLog,
+  } = {}
 ) => {
-  const lmrCache = new LMRCache()
+  const lmrCache = LMRCache.create()
 
   const entryCompartment =
     compartmentMap.compartments[compartmentMap.entry.compartment]
@@ -132,63 +162,62 @@ export const buildModuleRecords = (
     throw new TypeError('Could not find entry compartment; this is a bug')
   }
 
-  const compartmentRenames = freeze(renames)
+  const compartmentRenames = freeze({ ...renames })
 
-  /** @type {MissingModuleMap} */
-  const missingModules = new Map()
-  const contexts = entries(compartmentMap.compartments)
-    // TODO: warn about this? how frequently does this occur?
-    // likewise: can something be in sources but not in the compartment map?
-    .filter(([compartmentName]) => compartmentName in sources)
-    .map(
-      ([compartmentName, compartment]) =>
-        /** @type {[string, PolicyGeneratorContext]} */ ([
+  const entrypointPath = toPath(entrypoint)
+
+  const contexts = entries(compartmentMap.compartments).reduce(
+    (acc, [compartmentName, compartment]) => {
+      if (compartmentName in sources) {
+        acc.push([
           compartmentName,
           PolicyGeneratorContext.create(
             compartment,
             compartmentRenames,
             lmrCache,
             {
-              isEntry: entryCompartment === compartment,
+              rootModule:
+                compartment === entryCompartment ? entrypointPath : undefined,
               readPowers,
               isBuiltin,
-              missingModules,
               log,
             }
           ),
         ])
-    )
-
-  let moduleRecords = contexts
-    .flatMap(([compartmentName, context]) => {
-      if (!(compartmentName in sources)) {
-        // "should never happen"™
-        throw new ReferenceError(
-          `Could not find corresponding source for ${compartmentName}; this is a bug`
-        )
       }
+      return acc
+    },
+    /**
+     * @type {[
+     *   compartmentName: string,
+     *   context: PolicyGeneratorContext<any>,
+     * ][]}
+     */ ([])
+  )
 
-      const compartmentSources = sources[compartmentName]
+  const moduleRecords = contexts.reduce((acc, [compartmentName, context]) => {
+    /* c8 ignore next */
+    if (!(compartmentName in sources)) {
+      // "should never happen"™
+      throw new ReferenceError(
+        `Could not find corresponding source for ${compartmentName}; this is a bug`
+      )
+    }
 
-      return context.buildModuleRecords(compartmentSources)
-    })
-    .filter(Boolean)
-
-  moduleRecords = [...new Set(moduleRecords)]
-
-  if (missingModules.size) {
-    log.warning(
-      'The following packages reference unknown dependencies. These may be "peer" or "optional" dependencies (or something else). Execution will mostly like fail unless these are accounted for in policy overrides.'
+    const compartmentSources = sources[compartmentName]
+    log.debug(
+      `${hrLabel(compartmentMap.compartments[compartmentName].label)}: building module records…`
     )
-    const tabular = [...missingModules].map(([compartment, missing]) => ({
-      Name: compartment,
-      'Missing Package(s)': [...missing],
-    }))
-    // eslint-disable-next-line no-console
-    console.table(tabular)
-  }
+    const records = context.buildModuleRecords(compartmentSources)
 
-  return moduleRecords
+    for (const record of records) {
+      acc.add(record)
+    }
+
+    return acc
+  }, /** @type {Set<LavamoatModuleRecord>} */ (new Set()))
+
+  return [...moduleRecords]
 }
 
 /**
@@ -202,10 +231,14 @@ export const buildModuleRecords = (
  * 3. Generate the policy using the `ModuleInspector`
  *
  * @overload
- * @param {Readonly<CompartmentMapDescriptor>} compartmentMap
- * @param {Readonly<Sources>} sources
- * @param {Readonly<Record<string, string>>} renames
- * @param {SetFieldType<CompartmentMapToPolicyOptions, 'debug', true>} options
+ * @param {string | URL} entrypoint Path to the entry module
+ * @param {Readonly<CompartmentMapDescriptor>} compartmentMap The whole
+ *   compartment map
+ * @param {Readonly<Sources>} sources The sources for each compartment
+ * @param {Readonly<Record<string, string>>} renames Mapping of compartment name
+ *   back to filepath
+ * @param {CompartmentMapToDebugPolicyOptions} options Options where `debug` is
+ *   `true` (required)
  * @returns {LavaMoatPolicyDebug} Generated debug policy
  * @public
  */
@@ -221,10 +254,13 @@ export const buildModuleRecords = (
  * 3. Generate the policy using the `ModuleInspector`
  *
  * @overload
- * @param {Readonly<CompartmentMapDescriptor>} compartmentMap
- * @param {Readonly<Sources>} sources
- * @param {Readonly<Record<string, string>>} renames
- * @param {CompartmentMapToPolicyOptions} [options]
+ * @param {string | URL} entrypoint Path to the entry module
+ * @param {Readonly<CompartmentMapDescriptor>} compartmentMap The whole
+ *   compartment map
+ * @param {Readonly<Sources>} sources The sources for each compartment
+ * @param {Readonly<Record<string, string>>} renames Mapping of compartment name
+ *   back to filepath
+ * @param {CompartmentMapToPolicyOptions} [options] Options
  * @returns {LavaMoatPolicy} Generated policy
  * @public
  */
@@ -239,14 +275,18 @@ export const buildModuleRecords = (
  * 2. Inspect the module records using LavaMoat's `ModuleInspector`
  * 3. Generate the policy using the `ModuleInspector`
  *
- * @param {Readonly<CompartmentMapDescriptor>} compartmentMap
- * @param {Readonly<Sources>} sources
- * @param {Readonly<Record<string, string>>} renames
- * @param {CompartmentMapToPolicyOptions} [options]
+ * @param {string | URL} entrypoint Path to the entry module
+ * @param {Readonly<CompartmentMapDescriptor>} compartmentMap The whole
+ *   compartment map
+ * @param {Readonly<Sources>} sources The sources for each compartment
+ * @param {Readonly<Record<string, string>>} renames Mapping of compartment name
+ *   back to filepath
+ * @param {CompartmentMapToPolicyOptions} [options] Options
  * @returns {LavaMoatPolicy | LavaMoatPolicyDebug} Generated policy
  * @public
  */
 export function compartmentMapToPolicy(
+  entrypoint,
   compartmentMap,
   sources,
   renames,
@@ -255,16 +295,27 @@ export function compartmentMapToPolicy(
     policyOverride,
     debug = false,
     isBuiltin,
-    log = fallbackLog,
+    log = defaultLog,
+    trustRoot = DEFAULT_TRUST_ROOT_COMPARTMENT,
   } = {}
 ) {
-  const moduleRecords = buildModuleRecords(compartmentMap, sources, renames, {
-    readPowers,
-    isBuiltin,
+  const moduleRecords = buildModuleRecords(
+    entrypoint,
+    compartmentMap,
+    sources,
+    renames,
+    {
+      readPowers,
+      isBuiltin,
+      log,
+    }
+  )
+  log.debug('Inspecting module records…')
+  const inspector = inspectModuleRecords(moduleRecords, {
+    debug,
     log,
+    trustRoot,
   })
-
-  const inspector = inspectModuleRecords(moduleRecords, { debug, log })
 
   return inspector.generatePolicy({
     policyOverride,

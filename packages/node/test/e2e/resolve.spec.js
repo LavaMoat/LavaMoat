@@ -1,3 +1,5 @@
+import '../../src/preamble.js'
+
 // eslint-disable-next-line ava/use-test
 import anyTest from 'ava'
 import { mkdtemp, realpath, rm, writeFile } from 'node:fs/promises'

@@ -5,7 +5,6 @@
  */
 
 import { hasValue, isObject } from '../util.js'
-import { getCanonicalName } from './policy-gen-util.js'
 
 /**
  * @import {CompartmentOptions,
@@ -16,7 +15,7 @@ import { getCanonicalName } from './policy-gen-util.js'
  *   ModuleSource} from 'ses'
  * @import {Merge} from 'type-fest'
  * @import {CompartmentDescriptor, CompartmentMapDescriptor} from '@endo/compartment-mapper'
- * @import {LavaMoatPolicyOverrides, Resources} from 'lavamoat-core'
+ * @import {LavaMoatPolicy} from 'lavamoat-core'
  */
 
 const { entries, isFrozen } = Object
@@ -74,6 +73,11 @@ const updateModuleSource = (moduleDescriptor, canonicalName) => {
     throw new TypeError(`Unsupported module descriptor type; this is a bug`)
   }
 
+  // this just avoids adding duplicates. shouldn't happen, but who knows
+  if (moduleSource.imports.includes(canonicalName)) {
+    return
+  }
+
   if (isFrozen(moduleSource)) {
     moduleSource = { ...moduleSource }
   }
@@ -97,14 +101,14 @@ const updateModuleSource = (moduleDescriptor, canonicalName) => {
 /**
  * Factory function for a thing which Accepts a {@link CompartmentDescriptor}
  * (presumably one present in {@link CompartmentMapDescriptor.compartments}) and
- * returns a list of module names present in LavaMoat policy resources which
- * need to be updated.
+ * returns a set of module names present in LavaMoat policy resources which need
+ * to be updated.
  *
  * @param {CompartmentMapDescriptor} compartmentMap Compartment map descriptor
- * @param {Resources} resources `resources` of LavaMoat policy
+ * @param {LavaMoatPolicy} policyOverride LavaMoat policy override
  * @returns {(compartmentDescriptor: CompartmentDescriptor) => Set<string>}
  */
-const makeGetOverriddenResourceNames = (compartmentMap, resources) => {
+const makeGetOverriddenResourceNames = (compartmentMap, policyOverride) => {
   /**
    * A cache of {@link CompartmentDescriptor} to a list of module names present
    * in policy resources.
@@ -115,8 +119,10 @@ const makeGetOverriddenResourceNames = (compartmentMap, resources) => {
 
   /**
    * Accepts a {@link CompartmentDescriptor} (presumably one present in
-   * {@link CompartmentMapDescriptor.compartments}) and returns a list of module
-   * names present in LavaMoat policy resources which need to be updated.
+   * {@link CompartmentMapDescriptor.compartments}) and returns a set of module
+   * names present in LavaMoat policy resources because it's possible that
+   * policy-override contains package references that were added by the user
+   * when not detected by policy generator on previous pass.
    *
    * Memoized on `CompartmentMapDescriptor`
    *
@@ -163,49 +169,54 @@ const makeGetOverriddenResourceNames = (compartmentMap, resources) => {
         return
       }
 
-      /* c8 ignore next */
-      if (compartmentMap.entry.compartment === compartmentName) {
-        // This also "should never happen", as a foreign compartment should
-        // not be importing the entry compartment. Also, the entry
-        // compartment cannot have a canonical name, and we need a canonical
-        // name to apply policy
-        throw new ReferenceError(
-          `Unexpected entry compartment encountered in ${moduleDescriptorCompartment.label}; this is a bug`
-        )
-      }
-
       return moduleDescriptorCompartment
     }
 
+    const { label: canonicalName } = compartmentDescriptor
+    const packagePolicy =
+      policyOverride.resources[canonicalName]?.packages ?? {}
+
     /**
-     * A set of keys from {@link LavaMoatPolicyOverrides.resources} matching
+     * A set of keys from {@link LavaMoatPolicy.resources} matching
      * {@link CompartmentDescriptor.modules the current `CompartmentDescriptor`'s `modules`}.
      * These will be updated by {@link updateModuleSource}.
      *
      * Cached on {@link compartmentDescriptor}.
-     *
-     * @type {Set<string>}
      */
     const overriddenResources = entries(compartmentDescriptor.modules).reduce(
       (
         overriddenResources,
         [moduleDescriptorName, { compartment: moduleDescriptorCompartmentName }]
       ) => {
+        if (!moduleDescriptorCompartmentName) {
+          return overriddenResources
+        }
         const otherCompartmentDescriptor = getValidCompartmentDescriptor(
           moduleDescriptorCompartmentName
         )
-        if (!otherCompartmentDescriptor) {
+        if (
+          !otherCompartmentDescriptor ||
+          otherCompartmentDescriptor === compartmentDescriptor
+        ) {
           return overriddenResources
         }
-        const canonicalName = getCanonicalName(otherCompartmentDescriptor)
-        if (hasValue(resources, canonicalName)) {
-          overriddenResources.add(moduleDescriptorName)
+
+        const { label: otherCanonicalName } = otherCompartmentDescriptor
+
+        if (!(otherCanonicalName in packagePolicy)) {
+          return overriddenResources
         }
+
+        // this is _not_ the canonical name, but the compartment.name field,
+        // which is different, but remains in a 1:1 relationship with the
+        // canonical name. It's what @endo/compartment-mapper uses internally
+        // for linking and finding compartments
+        overriddenResources.add(moduleDescriptorName)
+
         return overriddenResources
       },
-      new Set()
+      /** @type {Set<string>} */ (new Set())
     )
-    overriddenResourcesCache.set(compartmentDescriptor, overriddenResources)
 
     return overriddenResources
   }
@@ -224,21 +235,19 @@ const makeGetOverriddenResourceNames = (compartmentMap, resources) => {
  * to hand-craft a giant policy override.
  *
  * @param {CompartmentMapDescriptor} compartmentMap
- * @param {LavaMoatPolicyOverrides} [policyOverride]
+ * @param {LavaMoatPolicy} [policyOverride]
  * @returns {typeof Compartment} Either the original `Compartment` or a
  *   `PolicyGenCompartment`
  * @internal
  */
 export const makePolicyGenCompartment = (compartmentMap, policyOverride) => {
-  if (!policyOverride || !policyOverride.resources) {
+  if (!policyOverride?.resources) {
     return Compartment
   }
 
-  // only create this function and resulting `Compartment` if we have resources
-  // in the policy override
   const getOverriddenResourceNames = makeGetOverriddenResourceNames(
     compartmentMap,
-    policyOverride.resources
+    policyOverride
   )
 
   /**
@@ -256,8 +265,11 @@ export const makePolicyGenCompartment = (compartmentMap, policyOverride) => {
     constructor(options = {}) {
       const { importHook, name: compartmentName } = options
 
-      // the following block may never be executed, but it's here because
-      // these properties are not guaranteed to be present in the options, per typings
+      // Compartment can be created without `importHook` or `name` but
+      // @endo/compartment-mapper always provides them. This block should
+      // never be reached - it's provided to avoid breaking the API if
+      // the extended Compartment constructor is ever used to create a detached
+      // compartment internally in compartment-mapper in the future.
       /* c8 ignore next */
       if (!importHook || !compartmentName) {
         super(options)
@@ -266,26 +278,31 @@ export const makePolicyGenCompartment = (compartmentMap, policyOverride) => {
 
       /* c8 ignore next */
       if (!(compartmentName in compartmentMap.compartments)) {
-        // I don't know if this will ever happen
+        // We should not witness creation of compartmentswith impotHook
+        // which are not present in the compartment map.
+        // The only reason this doesn't throw is we're in policy generation and
+        // the preferred outcome is an incomplete policy.
+        // TODO: consider printing a warning
         super(options)
         return
       }
 
       /**
        * ImportHook which wraps the original `importHook` to potentially inject
-       * names into {@link CompartmentDescriptor.modules}
+       * names into {@link CompartmentDescriptor.modules}. The additional names
+       * come from policy-overrides and supplement what @endo/compartment-mapper
+       * was able to detect.
        *
        * @type {ImportHook}
        */
       const wrappedImportHook = async (specifier) => {
         const moduleDescriptor = await importHook(specifier)
 
-        /* c8 ignore next */
         if (
           !isRecordModuleDescriptor(moduleDescriptor) &&
           !isSourceModuleDescriptor(moduleDescriptor)
         ) {
-          // unknown if this ever happens
+          // probably a builtin
           return moduleDescriptor
         }
 
@@ -294,10 +311,14 @@ export const makePolicyGenCompartment = (compartmentMap, policyOverride) => {
 
         /* c8 ignore next */
         if (!compartmentDescriptor) {
-          // "should never happen". might want to throw
+          // See comment for unknown compartmentName in the constructor body.
+          // Allowing a Compartment with an unknown name to work requires a
+          // pass-through in this custom importHook.
           return moduleDescriptor
         }
 
+        // Adds missing imports to the module descriptor from the
+        // policy-override.
         for (const overriddenResourceName of getOverriddenResourceNames(
           compartmentDescriptor
         )) {

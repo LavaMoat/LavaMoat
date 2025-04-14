@@ -1,7 +1,6 @@
 import '../../src/preamble.js'
 
-// eslint-disable-next-line ava/use-test
-import anyTest from 'ava'
+import test from 'ava'
 import { mkdtemp, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
@@ -11,17 +10,6 @@ import { isPolicy, readPolicy } from '../../src/policy-util.js'
 import { keysOr } from '../../src/util.js'
 import { createCLIMacros } from './cli-macros.js'
 import { runCLI } from './cli-util.js'
-
-/**
- * @import {TestFn} from 'ava'
- */
-
-/**
- * @typedef CLITestContext
- * @property {string} tempdir
- */
-
-const test = /** @type {TestFn<CLITestContext>} */ (anyTest)
 
 /**
  * Path to the "extensionless" fixture dir
@@ -60,16 +48,6 @@ const DEP_FIXTURE_ENTRYPOINT = fileURLToPath(
 const DEP_FIXTURE_ENTRYPOINT_DIR = path.dirname(DEP_FIXTURE_ENTRYPOINT)
 
 const { testCLI } = createCLIMacros(test)
-
-test.beforeEach('setup temp dir', async (t) => {
-  t.context.tempdir = await mkdtemp(
-    path.join(tmpdir(), 'lavamoat-node-cli-test-')
-  )
-})
-
-test.afterEach('cleanup temp dir', async (t) => {
-  await rm(t.context.tempdir, { recursive: true, force: true })
-})
 
 test('"generate --help" prints help', testCLI, ['generate', '--help'])
 
@@ -123,13 +101,14 @@ test('extensionless bin script handling', async (t) => {
   }
 })
 
-test('generate - policy generation - canonical names', async (t) => {
+test('canonical names are used in policy', async (t) => {
   t.plan(3)
 
-  const policyPath = path.join(
-    t.context.tempdir,
-    `canonical-${DEFAULT_POLICY_FILENAME}`
+  const tempdir = await mkdtemp(
+    path.join(tmpdir(), t.title.replace(/\s+/g, '-'))
   )
+
+  const policyPath = path.join(tempdir, `canonical-${DEFAULT_POLICY_FILENAME}`)
 
   await runCLI(
     ['generate', DEP_FIXTURE_ENTRYPOINT, '--policy', policyPath],
@@ -142,8 +121,7 @@ test('generate - policy generation - canonical names', async (t) => {
 
   t.true(
     keysOr(policy.resources).includes('another-pkg>shared-pkg'),
-    'policy.resources should include "another-pkg>shared-pkg": ' +
-      policy.resources
+    `policy.resources should include "another-pkg>shared-pkg": ${JSON.stringify(policy.resources)}`
   )
   t.snapshot(policy)
 })

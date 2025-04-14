@@ -4,7 +4,7 @@ import test from 'ava'
 import { memfs } from 'memfs'
 import { resolveBinScript, resolveWorkspace } from '../../src/resolve.js'
 
-test('resolveBinScript - resolves bin script path', (t) => {
+test('resolveBinScript - resolves real bin script path', (t) => {
   const { vol, fs } = memfs()
   vol.fromJSON({
     '/workspace/package.json': JSON.stringify({ name: 'test-app' }),
@@ -14,12 +14,13 @@ test('resolveBinScript - resolves bin script path', (t) => {
     }),
     '/workspace/node_modules/.bin': null,
   })
+  // not possible to use fromJSON to create a symlink
   fs.symlinkSync(
     '/workspace/node_modules/test-package/test-bin',
     '/workspace/node_modules/.bin/test-bin'
   )
   const binPath = resolveBinScript('test-bin', { from: '/workspace', fs })
-  t.is(binPath, '/workspace/node_modules/.bin/test-bin')
+  t.is(binPath, '/workspace/node_modules/test-package/test-bin')
 })
 
 test('resolveBinScript - throws error if workspace not found', (t) => {

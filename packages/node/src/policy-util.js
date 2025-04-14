@@ -3,6 +3,8 @@
  *
  * **All exports in this module are considered part of the public API.**
  *
+ * TODO: Capabilities are inconsistent
+ *
  * @packageDocumentation
  */
 
@@ -11,45 +13,118 @@ import nodeFs from 'node:fs'
 import nodePath from 'node:path'
 import * as constants from './constants.js'
 import { readJsonFile } from './fs.js'
-import { hasValue, isArray, isObject } from './util.js'
+import { log } from './log.js'
+import {
+  hasValue,
+  hrPath,
+  isObjectyObject,
+  isPathLike,
+  toPath,
+} from './util.js'
 
 /**
- * @import {LavaMoatPolicy, LavaMoatPolicyOverrides, LavaMoatPolicyDebug} from 'lavamoat-core'
- * @import {WritableFsInterface} from './types.js'
+ * @import {RootPolicy, LavaMoatPolicy} from 'lavamoat-core'
+ * @import {LavaMoatPolicyDebug, LoadPoliciesOptions, WritableFsInterface} from './types.js'
+ * @import {ReadPolicyOptions, ReadPolicyOverrideOptions} from './internal.js'
  */
 
 /**
  * Reads a `policy.json` from disk
  *
- * @param {string | URL} [filepath]
+ * @param {string | URL} policyPath Path to policy
+ * @param {ReadPolicyOptions} [options] Options
  * @returns {Promise<LavaMoatPolicy>}
  * @internal
  */
-export const readPolicy = async (filepath = constants.DEFAULT_POLICY_PATH) => {
-  const allegedPolicy = await readJsonFile(filepath)
-  assertPolicy(allegedPolicy)
-  return allegedPolicy
+export const readPolicy = async (
+  policyPath,
+  { readFile = nodeFs.promises.readFile } = {}
+) => {
+  /** @type {unknown} */
+  let allegedPolicy
+  try {
+    // eslint-disable-next-line @jessie.js/safe-await-separator
+    allegedPolicy = await readJsonFile(policyPath, { readFile })
+  } catch (err) {
+    if (err instanceof SyntaxError) {
+      throw new Error(
+        `Invalid LavaMoat policy at ${hrPath(policyPath)}; failed to parse JSON`,
+        { cause: err }
+      )
+    }
+    if (/** @type {NodeJS.ErrnoException} */ (err).code === 'ENOENT') {
+      throw new Error(
+        `LavaMoat policy file not found at ${hrPath(policyPath)}`,
+        { cause: err }
+      )
+    } else {
+      throw new Error(
+        `Failed to read LavaMoat policy file at ${hrPath(policyPath)}`,
+        {
+          cause: err,
+        }
+      )
+    }
+  }
+  try {
+    assertPolicy(allegedPolicy)
+    return allegedPolicy
+  } catch (err) {
+    throw new Error(
+      `Invalid LavaMoat policy at ${hrPath(policyPath)}; does not match expected schema`,
+      { cause: err }
+    )
+  }
 }
 
 /**
  * Reads a `policy-override.json` from disk, if any.
  *
- * @param {string | URL} [filepath]
- * @returns {Promise<LavaMoatPolicyOverrides | undefined>}
- * @throws If reading the policy fails in a way other than the file not existing
+ * @param {string | URL} policyOverridePath Path to policy override
+ * @param {ReadPolicyOverrideOptions} [options] Options
+ * @returns {Promise<LavaMoatPolicy | undefined>}
  */
-export const readPolicyOverride = async (
-  filepath = constants.DEFAULT_POLICY_OVERRIDE_PATH
+export const maybeReadPolicyOverride = async (
+  policyOverridePath,
+  { readFile = nodeFs.promises.readFile } = {}
 ) => {
+  /** @type {unknown} */
+  let allegedPolicy
   try {
     // eslint-disable-next-line @jessie.js/safe-await-separator
-    const allegedPolicy = await readJsonFile(filepath)
-    assertPolicyOverride(allegedPolicy)
+    allegedPolicy = await readJsonFile(policyOverridePath, { readFile })
+  } catch (err) {
+    if (err instanceof SyntaxError) {
+      throw new Error(
+        `Invalid LavaMoat policy overrides at ${hrPath(policyOverridePath)}; failed to parse JSON`,
+        { cause: err }
+      )
+    }
+    if (/** @type {NodeJS.ErrnoException} */ (err).code === 'ENOENT') {
+      log.debug(
+        `No LavaMoat policy overrides found at ${hrPath(policyOverridePath)}`
+      )
+      return
+    }
+
+    if (/** @type {NodeJS.ErrnoException} */ (err).code !== 'ENOENT') {
+      throw new Error(
+        `Failed to read LavaMoat policy overrides file at ${hrPath(policyOverridePath)}`,
+        {
+          cause: err,
+        }
+      )
+    }
+  }
+
+  try {
+    assertPolicy(allegedPolicy)
     return allegedPolicy
   } catch (err) {
-    if (/** @type {NodeJS.ErrnoException} */ (err).code !== 'ENOENT') {
-      throw err
-    }
+    throw new Error(
+      `Invalid LavaMoat policy overrides at ${hrPath(policyOverridePath)}; does not match expected schema`,
+      { cause: err }
+    )
   }
 }
 
@@ -61,58 +136,209 @@ export const readPolicyOverride = async (
  * TODO: The way this fails is not user-friendly; it will just throw a
  * `TypeError` saying that the policy is invalid. **We should use proper schema
  * validation** to provide a more helpful error message.
- * @param {string | URL | LavaMoatPolicy} [policy] Path to `policy.json` or the
- *   policy itself. Defaults to `./lavamoat/node/policy.json` relative to the
- *   current working directory.
- * @param {string | URL | LavaMoatPolicyOverrides} [policyOverride] Path to
- *   `policy-override.json` or the policy override itself. Defaults to
- *   `./lavamoat/node/policy-override.json` relative to the current working
- *   directory.
+ * @param {string | URL | LavaMoatPolicy} [policyOrPolicyPath] Path to
+ *   `policy.json` or the policy itself. Defaults to
+ *   `./lavamoat/node/policy.json` relative to
+ *   {@link LoadPoliciesOptions.projectRoot}
+ * @param {LoadPoliciesOptions} [options] Options
  * @returns {Promise<LavaMoatPolicy>}
- * @throws If a policy is invalid _and/or_ if policy overrides were provided
- *   _and_ are invalid
+ * @throws If a policy is invalid
  * @public
  */
 export const loadPolicies = async (
-  policy = constants.DEFAULT_POLICY_PATH,
-  policyOverride = constants.DEFAULT_POLICY_OVERRIDE_PATH
+  policyOrPolicyPath,
+  {
+    readFile = nodeFs.promises.readFile,
+    projectRoot = process.cwd(),
+    ...options
+  } = {}
 ) => {
+  policyOrPolicyPath ??= nodePath.resolve(
+    projectRoot,
+    constants.DEFAULT_POLICY_PATH
+  )
+
   /**
+   * Path to policy
+   *
+   * `undefined` if {@link policyOrPolicyPath} is a policy. Mutually exclusive
+   * with {@link allgedPolicy}
+   *
+   * @type {string | undefined}
+   */
+  let policyPath
+  /**
+   * Path to policy override
+   *
+   * `undefined` if {@link options.policyOverride} is a policy. Mutually
+   * exclusive with {@link allegedPolicyOverride}
+   *
+   * @type {string | undefined}
+   */
+  let policyOverridePath
+
+  /**
+   * Policy prior to validation
+   *
+   * `undefined` if {@link policyOrPolicyPath} is a pathlike value. Truthy values
+   * mutually exclusive with {@link policyPath}
+   *
+   * @type {unknown | undefined}
+   */
+  let allegedPolicy
+
+  /**
+   * Policy override prior to validation
+   *
+   * `undefined` if {@link options.policyOverridePath} is a pathlike value, or no
+   * such file exists on disk. Truthy values mutually exclusive with
+   * {@link policyOverridePath}
+   *
+   * @type {unknown | undefined}
+   */
+  let allegedPolicyOverride
+
+  // either / or
+  if (isPathLike(policyOrPolicyPath)) {
+    policyPath = toPath(policyOrPolicyPath)
+  } else {
+    allegedPolicy = policyOrPolicyPath
+  }
+
+  // either / or / or nothing at all
+  if (hasValue(options, 'policyOverridePath')) {
+    policyOverridePath = toPath(options.policyOverridePath)
+  } else if (hasValue(options, 'policyOverride')) {
+    allegedPolicyOverride = options.policyOverride
+  } else {
+    // if the user specified a policy path, resolve as its sibling;
+    // otherwise resolve from `projectRoot` since that's about all we can do.
+    policyOverridePath = policyPath
+      ? nodePath.join(
+          nodePath.dirname(policyPath),
+          constants.DEFAULT_POLICY_OVERRIDE_FILENAME
+        )
+      : nodePath.resolve(projectRoot, constants.DEFAULT_POLICY_OVERRIDE_PATH)
+  }
+
+  /**
+   * An tuple of `Promise`s; each performs either a file read & a validation
+   * _or_ just a validation.
+   *
+   * @privateRemarks
+   * The fact that we either have a path _xor_ an alleged policy—combined with
+   * the every-so-slightly different signatures of {@link readPolicy} and
+   * {@link maybeReadPolicyOverride}—make these following conditionals painful to
+   * abstract into a type-safe function. So I didn't.
    * @type {[
-   *   Promise<LavaMoatPolicy>,
-   *   Promise<LavaMoatPolicyOverrides | undefined>,
+   *   policy: Promise<LavaMoatPolicy>,
+   *   policyOverride: Promise<LavaMoatPolicy | undefined>,
    * ]}
    */
   const promises = /** @type {any} */ ([])
-  if (isObject(policy)) {
+  if (policyPath) {
+    promises.push(readPolicy(policyPath, { readFile }))
+  } else {
     promises.push(
       Promise.resolve().then(() => {
-        assertPolicy(policy)
-        return policy
+        assertPolicy(
+          allegedPolicy,
+          `Invalid LavaMoat policy; does not match expected schema`
+        )
+
+        return allegedPolicy
       })
     )
-  } else {
-    promises.push(readPolicy(policy))
   }
-  if (isObject(policyOverride)) {
+  if (policyOverridePath) {
     promises.push(
-      Promise.resolve().then(() => {
-        assertPolicyOverride(policyOverride)
-        return policyOverride
+      maybeReadPolicyOverride(policyOverridePath, {
+        readFile,
       })
     )
   } else {
-    promises.push(readPolicyOverride(policyOverride))
+    promises.push(
+      Promise.resolve().then(() => {
+        assertPolicy(
+          allegedPolicyOverride,
+          `Invalid LavaMoat policy overrides; does not match expected schema`
+        )
+        return allegedPolicyOverride
+      })
+    )
   }
 
   /**
    * This type is only here for documentation purposes and is not needed
    *
-   * @type {[LavaMoatPolicy, LavaMoatPolicyOverrides | undefined]}
+   * @type {[LavaMoatPolicy, LavaMoatPolicy | undefined]}
    */
   const policies = await Promise.all(promises)
 
   return mergePolicy(...policies)
+}
+
+/**
+ * Assertion for a {@link LavaMoatPolicy}
+ *
+ * @param {unknown} allegedPolicy
+ * @param {string} [message] Assertion failure message
+ * @returns {asserts allegedPolicy is LavaMoatPolicy}
+ */
+export const assertPolicy = (
+  allegedPolicy,
+  message = 'Invalid LavaMoat policy; does not match expected schema'
+) => {
+  if (!isPolicy(allegedPolicy)) {
+    throw new TypeError(message)
+  }
+}
+
+/**
+ * Writes a diff-friendly LavaMoat policy to file
+ *
+ * Creates the destination directory if it does not exist
+ *
+ * @param {string | URL} file Path to write to
+ * @param {LavaMoatPolicy | LavaMoatPolicyDebug | LavaMoatPolicy} policy Any
+ *   policy
+ * @param {{ fs?: WritableFsInterface }} opts Options
+ * @returns {Promise<void>}
+ * @internal
+ */
+export const writePolicy = async (file, policy, { fs = nodeFs } = {}) => {
+  const filepath = toPath(file)
+  const policyDir = nodePath.dirname(filepath)
+  /**
+   * @type {string | undefined}
+   */
+  let createdDir
+  try {
+    // eslint-disable-next-line @jessie.js/safe-await-separator
+    createdDir = await fs.promises.mkdir(policyDir, {
+      recursive: true,
+    })
+  } catch (err) {
+    throw new Error(`Failed to create policy directory ${hrPath(policyDir)}`, {
+      cause: err,
+    })
+  }
+  try {
+    await fs.promises.writeFile(filepath, jsonStringifySortedPolicy(policy))
+  } catch (err) {
+    if (createdDir) {
+      try {
+        await fs.promises.rm(createdDir, { recursive: true })
+      } catch (err) {
+        const rmErr = new Error(
+          `Failed to remove created directory ${hrPath(createdDir)}`,
+          { cause: err }
+        )
+        throw new AggregateError([err, rmErr])
+      }
+    }
+    throw err
+  }
 }
 
 /**
@@ -127,62 +353,21 @@ export const loadPolicies = async (
  */
 export const isPolicy = (value) => {
   return (
-    isObject(value) &&
-    !isArray(value) &&
-    (hasValue(value, 'resources') || hasValue(value, 'resolutions'))
+    isObjectyObject(value) &&
+    hasValue(value, 'resources') &&
+    isObjectyObject(value.resources) &&
+    (!('root' in value) || isObjectyObject(value.root))
   )
 }
 
 /**
- * Type predicate for a **non-empty** {@link LavaMoatPolicyOverrides}
+ * Returns `true` if there is no such
+ * {@link RootPolicy.usePolicy `root.usePolicy`} field.
  *
- * @remarks
- * See {@link isPolicy} for caveats
- * @param {unknown} value
- * @returns {value is LavaMoatPolicyOverrides}
- */
-export const isPolicyOverride = (value) => {
-  return isPolicy(value)
-}
-
-/**
- * Assertion for a {@link LavaMoatPolicy}
- *
- * @param {unknown} value
- * @returns {asserts value is LavaMoatPolicy}
- */
-export const assertPolicy = (value) => {
-  if (!isPolicy(value)) {
-    // TODO: need an object validator lib
-    throw new TypeError('Invalid LavaMoat policy')
-  }
-}
-
-/**
- * Assertion for a {@link LavaMoatPolicyOverrides}
- *
- * @param {unknown} value
- * @returns {asserts value is LavaMoatPolicyOverrides}
- */
-export const assertPolicyOverride = (value) => {
-  if (!isPolicyOverride(value)) {
-    throw new TypeError('Invalid LavaMoat policy overrides')
-  }
-}
-
-/**
- * Writes a diff-friendly LavaMoat policy to file
- *
- * Creates the destination directory if it does not exist
- *
- * @param {string} filepath Path to write to
- * @param {LavaMoatPolicy | LavaMoatPolicyDebug | LavaMoatPolicyOverrides} policy
- *   Any policy
- * @param {{ fs?: WritableFsInterface }} opts Options
- * @returns {Promise<void>}
+ * @param {LavaMoatPolicy} policy
+ * @returns {boolean}
  * @internal
  */
-export const writePolicy = async (filepath, policy, { fs = nodeFs } = {}) => {
-  await fs.promises.mkdir(nodePath.dirname(filepath), { recursive: true })
-  await fs.promises.writeFile(filepath, jsonStringifySortedPolicy(policy))
+export const isTrusted = (policy) => {
+  return !policy.root?.usePolicy
 }

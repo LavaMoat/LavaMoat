@@ -16,19 +16,20 @@
 
 import './preamble.js'
 
-import chalk from 'chalk'
 import { jsonStringifySortedPolicy } from 'lavamoat-core'
+import fs from 'node:fs'
 import path from 'node:path'
 import terminalLink from 'terminal-link'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 import * as constants from './constants.js'
 import { run } from './exec/run.js'
-import { assertAbsolutePath, readJsonFile } from './fs.js'
+import { readJsonFile } from './fs.js'
 import { log } from './log.js'
 import { generatePolicy } from './policy-gen/generate.js'
 import { loadPolicies } from './policy-util.js'
 import { resolveBinScript, resolveEntrypoint } from './resolve.js'
+import { hrPath, toPath } from './util.js'
 
 /**
  * @import {PackageJson} from 'type-fest';
@@ -44,11 +45,6 @@ const BEHAVIOR_GROUP = 'Behavior Options:'
  * "Path options" group name for `--help` output
  */
 const PATH_GROUP = 'Path Options:'
-
-/**
- * Use this to give emphasis to words in error messages
- */
-const em = chalk.yellow
 
 /**
  * Strip out all `lavamoat` CLI args from `process.argv` so that the entrypoint
@@ -97,6 +93,14 @@ const stripProcessArgv = (entrypoint, nonOptionArguments = []) => {
 }
 
 /**
+ * @param {string} entrypoint
+ * @returns {boolean}
+ */
+const shouldTrustRoot = (entrypoint) => {
+  return !entrypoint.includes('node_modules')
+}
+
+/**
  * Main entry point to CLI
  */
 const main = async (args = hideBin(process.argv)) => {
@@ -105,7 +109,7 @@ const main = async (args = hideBin(process.argv)) => {
   // TODO: Use import attributes instead
   // #region use import attributes instead
   const pkgJson = /** @type {PackageJson} */ (
-    await readJsonFile(new URL('../package.json', import.meta.url))
+    await readJsonFile(toPath(new URL('../package.json', import.meta.url)))
   )
   const version = `${pkgJson.version}`
   const homepage = `${pkgJson.homepage}`
@@ -136,6 +140,9 @@ const main = async (args = hideBin(process.argv)) => {
    * just so happens that both commands have idential `entrypoint` arguments
    * (positionals). All _other_ properties are defined as global options; if
    * _all_ properties were global, this could just live in global middleware.
+   *
+   * In other words, this is here to avoid the inevitable future bug when a new
+   * command is added.
    * @param {{
    *   entrypoint: string
    *   bin?: boolean
@@ -148,10 +155,8 @@ const main = async (args = hideBin(process.argv)) => {
     argv.entrypoint = argv.bin
       ? resolveBinScript(argv.entrypoint, { from: argv.root })
       : resolveEntrypoint(argv.entrypoint, argv.root)
-    if (entrypoint !== argv.entrypoint) {
-      // note: this will print if the original entrypoint is a relative path; we
-      // may or may not want to continue displaying it for that specific case.
-      log.warning(`Resolved ${entrypoint} to ${argv.entrypoint}`)
+    if (hrPath(entrypoint) !== hrPath(argv.entrypoint)) {
+      log.warning(`Resolved ${hrPath(entrypoint)} → ${hrPath(argv.entrypoint)}`)
     }
   }
 
@@ -162,7 +167,7 @@ const main = async (args = hideBin(process.argv)) => {
    * project. This is _probably_ not an issue anywhere other than in a dev
    * environment, but I wanted to make sure.
    */
-  yargs(args)
+  await yargs(args)
     .parserConfiguration({
       /**
        * We deviate from yargs' default behavior by disabling
@@ -206,7 +211,17 @@ const main = async (args = hideBin(process.argv)) => {
         global: true,
         group: BEHAVIOR_GROUP,
       },
-      // the three policy options are used for both reading and writing
+
+      // #region path args
+
+      /**
+       * The three `policy*` options below are used for both reading and
+       * writing.
+       *
+       * Note that `coerce: path.resolve` is _only_ appropriate for the `root`
+       * option, as the others are computed from it!
+       */
+
       policy: {
         alias: ['p'],
         describe: 'Filepath to a policy file',
@@ -223,7 +238,7 @@ const main = async (args = hideBin(process.argv)) => {
         describe: 'Filepath to a policy override file',
         type: 'string',
         normalize: true,
-        default: constants.DEFAULT_POLICY_OVERRIDE_PATH,
+        defaultDescription: constants.DEFAULT_POLICY_OVERRIDE_PATH,
         nargs: 1,
         requiresArg: true,
         global: true,
@@ -231,7 +246,7 @@ const main = async (args = hideBin(process.argv)) => {
       },
       'policy-debug': {
         describe: 'Filepath to a policy debug file',
-        default: constants.DEFAULT_POLICY_DEBUG_PATH,
+        defaultDescription: constants.DEFAULT_POLICY_DEBUG_PATH,
         nargs: 1,
         type: 'string',
         requiresArg: true,
@@ -250,6 +265,8 @@ const main = async (args = hideBin(process.argv)) => {
         global: true,
         group: PATH_GROUP,
       },
+      // #endregion
+
       dev: {
         describe: 'Include development dependencies',
         type: 'boolean',
@@ -272,50 +289,56 @@ const main = async (args = hideBin(process.argv)) => {
     .conflicts('quiet', 'verbose')
     .middleware(
       /**
-       * This resolves all paths from `cwd`.
+       * This _global_ middleware:
        *
-       * @remarks
-       * This runs _before_ validation (second parameter).
+       * - Ensures `policy`, `policy-debug` and `policy-override` paths are
+       *   absolute
+       * - If necessary, calculates default path(s) for `policy-debug` and
+       *   `policy-override` (relative to `policy`) and sets it
+       * - Configures the global logger based on `verbose` and `quiet` flags
+       *
+       * It will throw an exception if the user _explicitly_ provided a path to
+       * a policy override file and that file is unreadable (since this is
+       * really the only time it is feasible to do so).
        */
-      (argv) => {
-        argv.policy = path.resolve(argv.root, argv.policy)
-        argv['policy-override'] = path.resolve(
-          argv.root,
-          argv['policy-override']
-        )
-        argv['policy-debug'] = path.resolve(argv.root, argv['policy-debug'])
+      async (argv) => {
+        await Promise.resolve()
 
+        argv.policy = path.resolve(argv.root, argv.policy)
+
+        // TODO: this mini-algorithm should be extracted to a function since it's used elsewhere too
+        argv['policy-debug'] = argv['policy-debug']
+          ? path.resolve(argv.root, argv['policy-debug'])
+          : path.join(
+              path.dirname(argv.policy),
+              constants.DEFAULT_POLICY_DEBUG_FILENAME
+            )
+
+        if (argv['policy-override']) {
+          argv['policy-override'] = path.resolve(
+            argv.root,
+            argv['policy-override']
+          )
+          try {
+            await fs.promises.access(argv['policy-override'], fs.constants.R_OK)
+          } catch (err) {
+            throw new Error(
+              `Cannot read specified policy override file: ${argv['policy-override']}`,
+              { cause: err }
+            )
+          }
+        } else {
+          argv['policy-override'] = path.join(
+            path.dirname(argv.policy),
+            constants.DEFAULT_POLICY_OVERRIDE_FILENAME
+          )
+        }
         if (argv.verbose) {
           log.setLevel('debug')
         } else if (argv.quiet) {
+          // This assumes that we will never use the "emergency" log level!
           log.setLevel('emergency')
         }
-      },
-      true // RUN BEFORE CHECK FN
-    )
-    .check(
-      /**
-       * This validator is _global_ and runs before command-specific validators
-       * (I think)
-       */
-      (argv) => {
-        assertAbsolutePath(
-          argv.root,
-          `${em('root')} must be an absolute path; ${reportThisBug}`
-        )
-        assertAbsolutePath(
-          argv.policy,
-          `${em('policy')} must be an absolute path; ${reportThisBug}`
-        )
-        assertAbsolutePath(
-          argv['policy-override'],
-          `${em('policy-override')} must be an absolute path; ${reportThisBug}`
-        )
-        assertAbsolutePath(
-          argv['policy-debug'],
-          `${em('policy-debug')} must be an absolute path; ${reportThisBug}`
-        )
-        return true
       }
     )
     /**
@@ -378,10 +401,7 @@ const main = async (args = hideBin(process.argv)) => {
           /**
            * Resolve entrypoint from `root`
            */
-          .middleware(
-            processEntrypointMiddleware,
-            true // RUN BEFORE CHECK FN
-          ),
+          .middleware(processEntrypointMiddleware),
       /**
        * Default command handler.
        *
@@ -399,8 +419,16 @@ const main = async (args = hideBin(process.argv)) => {
           'policy-debug': policyDebugPath,
           'policy-override': policyOverridePath,
           dev,
+          root: projectRoot,
           write,
         } = argv
+
+        const trustRoot = shouldTrustRoot(entrypoint)
+        if (!trustRoot) {
+          log.info(
+            `Entrypoint is in a ${hrPath('node_modules/')} directory and is considered untrusted`
+          )
+        }
 
         /**
          * This will be the policy merged with overrides, if present
@@ -416,27 +444,17 @@ const main = async (args = hideBin(process.argv)) => {
             debug,
             policyPath,
             policyDebugPath,
+            policyOverridePath,
             write,
             dev,
+            trustRoot,
+            projectRoot,
           })
         } else {
-          try {
-            policy = await loadPolicies(policyPath, policyOverridePath)
-          } catch (e) {
-            const err = /** @type {NodeJS.ErrnoException} */ (e)
-            if (err.code === 'ENOENT') {
-              throw new Error(
-                `Could not load policy from ${em(argv.policy)} and/or ${em(argv['policy-override'])}; reason:\n${err.message}`
-              )
-            }
-            if (err.code === 'EISDIR') {
-              // TODO: actually allow a directory and apply a default filename
-              throw new Error(
-                `Could not load policy from ${em(argv.policy)} and/or ${em(argv['policy-override'])}; specify a filepath instead of a directory`
-              )
-            }
-            throw err
-          }
+          policy = await loadPolicies(policyPath, {
+            policyOverridePath,
+            projectRoot,
+          })
         }
 
         stripProcessArgv(
@@ -448,7 +466,12 @@ const main = async (args = hideBin(process.argv)) => {
            */ (argv['--'])
         )
 
-        await run(entrypoint, policy)
+        await run(entrypoint, policy, {
+          policyOverridePath,
+          trustRoot,
+          dev,
+          projectRoot,
+        })
       }
     )
     .command(
@@ -477,29 +500,35 @@ const main = async (args = hideBin(process.argv)) => {
             describe: 'Application entry point',
             type: 'string',
           })
-          .middleware(processEntrypointMiddleware, true),
+          .middleware(processEntrypointMiddleware),
       async ({
         entrypoint,
         debug,
         policy: policyPath,
         'policy-debug': policyDebugPath,
+        'policy-override': policyOverridePath,
         dev,
         write,
       }) => {
+        const trustRoot = shouldTrustRoot(entrypoint)
+        if (!trustRoot) {
+          log.info(
+            `Entrypoint is in a ${hrPath('node_modules/')} directory and is considered untrusted`
+          )
+        }
+
         const policy = await generatePolicy(entrypoint, {
           debug,
           write,
           policyPath,
           policyDebugPath,
+          policyOverridePath,
           dev,
+          trustRoot,
         })
 
-        if (debug) {
-          log.info(`Wrote debug policy to ${policyDebugPath}`)
-        }
-        if (write) {
-          log.info(`Wrote policy to ${policyPath}`)
-        } else {
+        if (!write) {
+          // console used here since the logger only uses stderr
           // eslint-disable-next-line no-console
           console.log(jsonStringifySortedPolicy(policy))
         }
@@ -526,7 +555,7 @@ const main = async (args = hideBin(process.argv)) => {
     .showHelpOnFail(false)
     .demandCommand(1)
     .strict(true)
-    .parse()
+    .parseAsync()
 }
 
 // void here means "ignore the return value". it's a Promise, if you must know.
