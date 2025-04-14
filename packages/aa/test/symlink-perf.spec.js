@@ -27,43 +27,46 @@ if (process.platform === 'darwin' && process.env.CI) {
     '[bench] isSymlink is significantly faster than realpathSync in a naive microbenchmark [darwin]'
   )
 } else {
-  test('[bench] isSymlink is significantly faster than realpathSync in a naive microbenchmark', async (t) => {
-    await createProject4Symlink()
-    const results = {
-      ...simpleBench(() => {
-        isSymlink(symlink)
-      }, 'isSymlink(symlink)').current,
-      ...simpleBench(() => {
-        isSymlink(notsymlink)
-      }, 'isSymlink(notsymlink)').current,
-      ...simpleBench(() => {
-        realpathSync(symlink)
-      }, 'realpathSync(symlink)').current,
-      ...simpleBench(() => {
-        realpathSync(notsymlink)
-      }, 'realpathSync(notsymlink)').current,
-    }
+  ;(process.env.CI ? test.skip : test)(
+    '[bench] isSymlink is significantly faster than realpathSync in a naive microbenchmark',
+    async (t) => {
+      await createProject4Symlink()
+      const results = {
+        ...simpleBench(() => {
+          isSymlink(symlink)
+        }, 'isSymlink(symlink)').current,
+        ...simpleBench(() => {
+          isSymlink(notsymlink)
+        }, 'isSymlink(notsymlink)').current,
+        ...simpleBench(() => {
+          realpathSync(symlink)
+        }, 'realpathSync(symlink)').current,
+        ...simpleBench(() => {
+          realpathSync(notsymlink)
+        }, 'realpathSync(notsymlink)').current,
+      }
 
-    t.log({ results })
-    t.assert(
-      ratioIsBelow(
-        results['isSymlink(symlink)'],
-        results['realpathSync(symlink)'],
-        0.5 // the tradeoff is worth it up until close to 1, so this number can be increased.
-        // The ratio is under 0.2 on linux and windows, slihtly above that on mac in GH actions
-        // Setting to 0.5 to avoid flakiness
-      ),
-      'expected isSymlink(symlink) to be much faster than realpathSync(symlink)'
-    )
-    t.assert(
-      ratioIsBelow(
-        results['isSymlink(notsymlink)'],
-        results['realpathSync(notsymlink)'],
-        0.5 // the tradeoff is worth it up until close to 1, so this number can be increased.
-        // The ratio is under 0.2 on linux and windows, slihtly above that on mac in GH actions
-        // Setting to 0.5 to avoid flakiness
-      ),
-      'expected isSymlink(notsymlink) to be much faster than realpathSync(notsymlink)'
-    )
-  })
+      t.log({ results })
+      t.assert(
+        ratioIsBelow(
+          results['isSymlink(symlink)'],
+          results['realpathSync(symlink)'],
+          0.5 // the tradeoff is worth it up until close to 1, so this number can be increased.
+          // The ratio is under 0.2 on linux and windows, slihtly above that on mac in GH actions
+          // Setting to 0.5 to avoid flakiness
+        ),
+        'expected isSymlink(symlink) to be much faster than realpathSync(symlink)'
+      )
+      t.assert(
+        ratioIsBelow(
+          results['isSymlink(notsymlink)'],
+          results['realpathSync(notsymlink)'],
+          0.5 // the tradeoff is worth it up until close to 1, so this number can be increased.
+          // The ratio is under 0.2 on linux and windows, slihtly above that on mac in GH actions
+          // Setting to 0.5 to avoid flakiness
+        ),
+        'expected isSymlink(notsymlink) to be much faster than realpathSync(notsymlink)'
+      )
+    }
+  )
 }
