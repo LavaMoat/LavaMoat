@@ -57,6 +57,7 @@
     "eslint-plugin-jsonc": "2.20.0",
     "eslint-plugin-n": "16.6.2",
     "eslint-plugin-node-import": "1.0.4",
+    "expect-type": "1.1.0",
     "glob": "10.4.5",
     "husky": "9.1.7",
     "lint-staged": "15.5.0",
