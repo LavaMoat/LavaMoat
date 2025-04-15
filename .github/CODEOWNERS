@@ -1,9 +1,3 @@
-# adds everybody as a reviewer on all the PRs
-* @LavaMoat/devs
+# Reference: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
 
-*eslint*                @boneskull
-*release-please*        @boneskull
-.config/README.md       @boneskull
-.husky/**/*             @boneskull
-renovate*               @boneskull
-tsconfig*.json          @boneskull
+* @naugtur @boneskull @leotm @weizman
