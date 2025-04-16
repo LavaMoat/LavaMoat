@@ -9,7 +9,7 @@
  * @packageDocumentation
  */
 import chalk from 'chalk'
-import nodePath from 'node:path'
+import { default as nodePath } from 'node:path'
 import nodeUrl from 'node:url'
 import {
   DEFAULT_POLICY_DEBUG_FILENAME,
@@ -195,16 +195,20 @@ export const isFunction = (value) => typeof value === 'function'
  * Given a filepath, displays it as relative or absolute depending on which is
  * fewer characters. Ergo, the "human-readable" path.
  *
- * @param {string | URL} filepath
- * @returns {string}
+ * If relative to the current directory, it will be prefixed with `./`.
+ *
+ * @param {string | URL} filepath Path to display
+ * @returns {string} Human-readable path
  * @internal
  */
 export const hrPath = (filepath) => {
   filepath = toPath(filepath)
   if (nodePath.isAbsolute(filepath)) {
     const relativePath = nodePath.relative(process.cwd(), filepath)
-    if (relativePath && relativePath.length < filepath.length) {
-      filepath = relativePath
+    if (relativePath.length < filepath.length) {
+      filepath = relativePath.startsWith('..')
+        ? relativePath
+        : `./${relativePath}`
     }
   } else {
     const absolutePath = nodePath.resolve(filepath)
