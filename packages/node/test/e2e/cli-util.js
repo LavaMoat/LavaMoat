@@ -5,8 +5,12 @@
  */
 import chalk from 'chalk'
 import { execFile } from 'node:child_process'
+import { mkdtemp, rm } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
+import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { promisify } from 'node:util'
+import { hrPath } from '../../src/util.js'
 
 export const execFileAsync = promisify(execFile)
 
@@ -105,9 +109,9 @@ export const runCLI = async (
    *
    * @type {string}
    */
-  const hrCommand = chalk.whiteBright(`lavamoat ${args.join(' ')}`)
+  const hrCommand = chalk.blueBright(`lavamoat ${args.join(' ')}`)
 
-  t?.log(`Executing: ${hrCommand} in ${chalk.white(cwd)}`)
+  t?.log(`Executing: ${hrCommand} in ${hrPath(cwd)}`)
 
   try {
     ;({ stdout, stderr } = await execFileAsync(
@@ -134,3 +138,68 @@ export const runCLI = async (
   }
   return { stdout, stderr, code, hrCommand }
 }
+
+/**
+ * A wrapper around a temporary directory that cleans up after itself once
+ * disposed.
+ *
+ * For eventual use with the `using` keyword. Until then, just call the
+ * `[Symbol.asyncDispose]` method manually.
+ *
+ * @implements {AsyncDisposable}
+ * @see {@link https://github.com/tc39/proposal-explicit-resource-management}
+ */
+export class Tempdir {
+  /** @type {string} */
+  #dir
+
+  /**
+   * Use {@link Tempdir.create} to create a new instance.
+   *
+   * @private
+   * @param {string} dir
+   */
+  constructor(dir) {
+    this.#dir = dir
+  }
+
+  /**
+   * Deletes the temporary directory and all its contents.
+   */
+  async [Symbol.asyncDispose]() {
+    await rm(this.#dir, { recursive: true, force: true })
+  }
+
+  [Symbol.toStringTag]() {
+    return this.#dir
+  }
+
+  /**
+   * Convenience wrapper around `path.join()` to join the temp directory
+   *
+   * @param {...string} paths
+   * @returns {string}
+   */
+  join(...paths) {
+    return path.join(this.#dir, ...paths)
+  }
+
+  /**
+   * Creates a new temp directory unique to the execution context `t`.
+   *
+   * Slugifies the test title to create a unique directory name.
+   *
+   * @param {ExecutionContext} t AVA test execution context
+   * @returns {Promise<Tempdir>} A new `Tempdir` instance
+   */
+  static async create(t) {
+    const slug = t.title.replace(/[^a-zA-Z0-9]/g, '-')
+    const dir = await mkdtemp(path.join(tmpdir(), slug))
+    return new Tempdir(dir)
+  }
+}
+
+/**
+ * Alias for {@link Tempdir.create} factory
+ */
+export const makeTempdir = Tempdir.create
