@@ -1,0 +1,11 @@
+{
+  "name": "dev",
+  "version": "1.0.0",
+  "type": "module",
+  "license": "ISC",
+  "private": true,
+  "devDependencies": {
+    "another-pkg": "^1.0.0",
+    "shared-pkg": "^2.0.0"
+  }
+}
