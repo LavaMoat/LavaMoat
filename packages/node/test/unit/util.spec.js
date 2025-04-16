@@ -149,7 +149,7 @@ test('isReadNowPowers - returns false for invalid ReadNowPowers', (t) => {
 test('hrPath - returns relative path if shorter than absolute path', (t) => {
   const absPath = path.resolve('test/path')
   const relativePath = path.relative(process.cwd(), absPath)
-  t.is(stripVTControlCharacters(hrPath(absPath)), relativePath)
+  t.is(stripVTControlCharacters(hrPath(absPath)), `./${relativePath}`)
 })
 
 test('hrPath - returns absolute path if shorter than relative path', (t) => {
