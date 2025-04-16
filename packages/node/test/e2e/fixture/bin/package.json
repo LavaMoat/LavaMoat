@@ -4,7 +4,7 @@
   "type": "module",
   "license": "ISC",
   "private": true,
-  "main": "app.js",
+  "main": "index.js",
   "scripts": {
     "start": "npx snapshot-fs ../../../unit/json-fixture/extensionless.json"
   },
