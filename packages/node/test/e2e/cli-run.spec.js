@@ -1,27 +1,17 @@
 import '../../src/preamble.js'
 
 import test from 'ava'
-import path from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { DEFAULT_POLICY_FILENAME } from '../../src/constants.js'
+import { isPolicy, readPolicy } from '../../src/policy-util.js'
+import { fixtureFinder } from '../test-util.js'
 import { createCLIMacros } from './cli-macros.js'
+import { makeTempdir, runCLI } from './cli-util.js'
 
-/**
- * Path to the "basic" fixture entry point
- */
-const BASIC_FIXTURE_ENTRYPOINT = fileURLToPath(
-  new URL('./fixture/basic/app.js', import.meta.url)
-)
+const fixture = fixtureFinder(import.meta.url)
 
-/**
- * The "basic" fixture's directory
- */
-const BASIC_FIXTURE_ENTRYPOINT_DIR = path.dirname(BASIC_FIXTURE_ENTRYPOINT)
-
-const UNTRUSTED_FIXTURE_ENTRYPOINT = 'lard-o-matic'
-
-const UNTRUSTED_FIXTURE_DIR = fileURLToPath(
-  new URL('./fixture/extensionless/', import.meta.url)
-)
+const basic = fixture('basic')
+const bin = fixture('bin', { entrypoint: 'lard-o-matic' })
+const deptree = fixture('deptree')
 
 const { testCLI } = createCLIMacros(test)
 
@@ -42,39 +32,21 @@ test(
 test(
   'basic',
   testCLI,
-  [
-    'run',
-    BASIC_FIXTURE_ENTRYPOINT,
-    '--project-root',
-    BASIC_FIXTURE_ENTRYPOINT_DIR,
-  ],
+  ['run', basic.entrypoint, '--project-root', basic.dir],
   'hello world'
 )
 
 test(
   'extra positionals',
   testCLI,
-  [
-    'run',
-    BASIC_FIXTURE_ENTRYPOINT,
-    '--project-root',
-    BASIC_FIXTURE_ENTRYPOINT_DIR,
-    'howdy',
-  ],
+  ['run', basic.entrypoint, '--project-root', basic.dir, 'howdy'],
   { code: 1, stderr: /unknown argument/i }
 )
 
 test(
   'extra non-option arguments (positionals)',
   testCLI,
-  [
-    'run',
-    BASIC_FIXTURE_ENTRYPOINT,
-    '--project-root',
-    BASIC_FIXTURE_ENTRYPOINT_DIR,
-    '--',
-    'howdy',
-  ],
+  ['run', basic.entrypoint, '--project-root', basic.dir, '--', 'howdy'],
   'howdy world'
 )
 
@@ -83,9 +55,9 @@ test(
   testCLI,
   [
     'run',
-    BASIC_FIXTURE_ENTRYPOINT,
+    basic.entrypoint,
     '--project-root',
-    BASIC_FIXTURE_ENTRYPOINT_DIR,
+    basic.dir,
     '--',
     'howdy',
     '--yelling',
@@ -96,13 +68,7 @@ test(
 test(
   'untrusted entrypoint',
   testCLI,
-  [
-    'run',
-    UNTRUSTED_FIXTURE_ENTRYPOINT,
-    '--bin',
-    '--project-root',
-    UNTRUSTED_FIXTURE_DIR,
-  ],
+  ['run', bin.entrypoint, '--bin', '--project-root', bin.dir],
   'scripty test'
 )
 
@@ -116,5 +82,44 @@ test.todo('package only present in policy override')
 
 test.todo('entry module is depended upon by a descendant')
 
-// needs impl
-test.todo('writing policy.json to disk w/ contents of policy override')
+test('overrides merged back into policy', async (t) => {
+  t.plan(2)
+
+  const tempdir = await makeTempdir(t)
+
+  try {
+    const policyPath = tempdir.join(
+      `run-override-merge-${DEFAULT_POLICY_FILENAME}`
+    )
+
+    await runCLI(
+      [
+        deptree.entrypoint,
+        '--policy',
+        policyPath,
+        '--policy-override',
+        deptree.policyOverridePath,
+        '--generate-recklessly',
+        '--write',
+      ],
+      t,
+      { cwd: deptree.dir }
+    )
+
+    const policy = await readPolicy(policyPath)
+    t.true(isPolicy(policy))
+
+    t.like(policy, {
+      resources: {
+        'another-pkg': {
+          globals: {
+            'console.error': true,
+            'console.log': true,
+          },
+        },
+      },
+    })
+  } finally {
+    await tempdir[Symbol.asyncDispose]()
+  }
+})
