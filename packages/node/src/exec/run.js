@@ -105,7 +105,7 @@ export const run = async (
     Compartment: makeExecutionCompartment(globalThis),
     modules: {
       [DEFAULT_ATTENUATOR]: {
-        attenuateGlobals: makeGlobalsAttenuator({ policy }),
+        attenuateGlobals: makeGlobalsAttenuator({ policy, scuttleGlobalThis:options.scuttleGlobalThis }),
         attenuateModule,
       },
     },
