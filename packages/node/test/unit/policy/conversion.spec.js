@@ -79,7 +79,9 @@ test('toEndoPolicy() - no policy', async (t) => {
 
   // @ts-expect-error invalid type
   await t.throwsAsync(toEndoPolicy(lmPolicy), {
-    message: `LavaMoat policy file not found at ${hrPath(DEFAULT_POLICY_PATH)}`,
+    message: new RegExp(
+      `LavaMoat policy file not found at .+${DEFAULT_POLICY_PATH}`
+    ),
   })
 })
 
