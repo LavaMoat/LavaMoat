@@ -1,0 +1,28 @@
+name: Add non-draft PRs to PR review board
+
+permissions:
+  issues: read
+  pull-requests: read
+  repository-projects: write
+
+on:
+  pull_request:
+    types:
+      - ready_for_review
+
+  workflow_dispatch:
+    inputs:
+      project-url:
+        description: 'Project URL to add PRs to'
+        required: true
+        default: https://github.com/orgs/LavaMoat/projects/7
+
+jobs:
+  add-to-project:
+    name: Add non-draft PRs to PR review board
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/add-to-project@244f685bbc3b7adfa8466e08b698b5577571133e # v1
+        with:
+          project-url: https://github.com/orgs/LavaMoat/projects/7
+          github-token: ${{ secrets.PR_QUEUE_PAT }}
