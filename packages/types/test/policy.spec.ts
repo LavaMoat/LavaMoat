@@ -9,7 +9,7 @@
 
 import test from 'ava'
 import { expectTypeOf } from 'expect-type'
-import { LavaMoatPolicy, Resources } from '../../src/schema'
+import { LavaMoatPolicy, Resources } from '../src'
 
 /**
  * Given an object that looks like a policy, infer its type.

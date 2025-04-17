@@ -33,7 +33,7 @@ import { hrPath, toPath } from './util.js'
 
 /**
  * @import {PackageJson} from 'type-fest';
- * @import {LavaMoatPolicy} from 'lavamoat-core';
+ * @import {LavaMoatPolicy} from '@lavamoat/types';
  */
 
 /**
