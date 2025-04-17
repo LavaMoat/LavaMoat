@@ -27,6 +27,7 @@ import {
   LAVAMOAT_PKG_POLICY_NATIVE,
   LAVAMOAT_PKG_POLICY_ROOT,
 } from './constants.js'
+import { ConversionError } from './error.js'
 import { loadPolicies } from './policy-util.js'
 import { isArray, isBoolean } from './util.js'
 
@@ -101,12 +102,12 @@ const convertToEndoPackagePolicyBuiltins = (item) => {
       let propName = rest.join('.')
       const itemForBuiltin = policyItem[builtinName]
       if (isBoolean(itemForBuiltin)) {
-        throw new TypeError(
+        throw new ConversionError(
           'Expected a FullAttenuationDefinition; got a boolean'
         )
       }
       if (isArray(itemForBuiltin)) {
-        throw new TypeError(
+        throw new ConversionError(
           'Expected a FullAttenuationDefinition; got an array'
         )
       }
@@ -139,7 +140,9 @@ const convertToEndoPackagePolicyPackages = (item) => {
   const policyItem = {}
   for (const [key, value] of entries(item)) {
     if (key === LAVAMOAT_PKG_POLICY_ROOT) {
-      throw new TypeError('Unexpected root package policy')
+      throw new ConversionError(
+        `Unexpected root package (${LAVAMOAT_PKG_POLICY_ROOT}) referenced in package policy`
+      )
     } else {
       policyItem[key] = !!value
     }
