@@ -12,6 +12,9 @@ import {
   LAVAMOAT_POLICY_ITEM_WRITE,
 } from '../constants.js'
 import { isObjectyObject } from '../util.js'
+import {createRequire} from "node:module";
+const require = createRequire(new URL('.', import.meta.url))
+const {scuttle} = require("lavamoat-core/src/scuttle.js");
 
 /**
  * @import {GlobalAttenuatorFn, ModuleAttenuatorFn} from '@endo/compartment-mapper'
@@ -51,7 +54,7 @@ export const attenuateModule = (params, originalObject) => {
  * @internal
  */
 export const makeGlobalsAttenuator = (
-  { policy: { resources } = {} } = { policy: {} }
+  { policy: { resources } = {}, scuttleGlobalThis = {enabled: false} } = { policy: {} }
 ) => {
   /** @type {Set<string>} */
   const knownWritableFields = new Set()
@@ -104,6 +107,7 @@ export const makeGlobalsAttenuator = (
         'globalThis',
         'global',
       ])
+      scuttle(originalGlobalThis, scuttleGlobalThis)
     } else {
       if (!rootCompartmentGlobalThis) {
         rootCompartmentGlobalThis = new Compartment().globalThis
@@ -111,6 +115,7 @@ export const makeGlobalsAttenuator = (
           'globalThis',
           'global',
         ])
+        scuttle(originalGlobalThis, scuttleGlobalThis)
       }
       const endowments = getEndowmentsForConfig(
         rootCompartmentGlobalThis,

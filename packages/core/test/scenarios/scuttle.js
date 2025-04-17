@@ -64,3 +64,38 @@ module.exports = [
     return scenario
   },
 ]
+
+// TODO when these aren't scuttled-exempt, endo-node and/or its testing infra breaks
+const NEEDED_EXCEPTIONS = [
+  "Object",
+  "Function",
+  "Array",
+  "Number",
+  "parseFloat",
+  "Boolean",
+  "String",
+  "Symbol",
+  "Error",
+  "EvalError",
+  "RangeError",
+  "ReferenceError",
+  "SyntaxError",
+  "TypeError",
+  "Date",
+  "Promise",
+  "JSON",
+  "Math",
+  "console",
+  "Uint8Array",
+  "Map",
+  "WebAssembly",
+  "isNaN",
+  "process",
+  "Set",
+  "WeakMap",
+  "URL",
+  "assert",
+  "Reflect",
+  "WeakSet",
+  "Proxy",
+]
