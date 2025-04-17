@@ -1,4 +1,4 @@
-name: Add non-draft PRs to PR review board
+name: Add new PR to review board
 
 permissions:
   issues: read
@@ -8,11 +8,12 @@ permissions:
 on:
   pull_request:
     types:
-      - ready_for_review
+      - opened
 
 jobs:
   add-to-project:
-    name: Add non-draft PRs to PR review board
+    name: Add new PR to review board
+    if: github.event.pull_request.user.login != 'renovate[bot]'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/add-to-project@244f685bbc3b7adfa8466e08b698b5577571133e # v1
