@@ -12,6 +12,7 @@ import {
   LAVAMOAT_POLICY_ITEM_WRITE,
 } from '../constants.js'
 import { isObjectyObject } from '../util.js'
+import {scuttle} from "lavamoat-core/src/scuttle.js";
 
 /**
  * @import {GlobalAttenuatorFn, ModuleAttenuatorFn} from '@endo/compartment-mapper'
@@ -51,7 +52,7 @@ export const attenuateModule = (params, originalObject) => {
  * @internal
  */
 export const makeGlobalsAttenuator = (
-  { policy: { resources } = {} } = { policy: {} }
+  { policy: { resources } = {}, scuttleGlobalThis = {enabled: false} } = { policy: {} }
 ) => {
   /** @type {Set<string>} */
   const knownWritableFields = new Set()
@@ -67,6 +68,16 @@ export const makeGlobalsAttenuator = (
         }
       }
     }
+  }
+
+  if (typeof scuttleGlobalThis === 'boolean') {
+    scuttleGlobalThis = {enabled: scuttleGlobalThis}
+  }
+  if (scuttleGlobalThis?.enabled) {
+    if (!Array.isArray(scuttleGlobalThis?.exceptions)) {
+      scuttleGlobalThis.exceptions = []
+    }
+    scuttleGlobalThis.exceptions.push('Map', 'parseFloat', 'WeakMap', 'WeakSet', 'Boolean', 'Number', 'Promise', 'String', 'isNaN')
   }
 
   const { getEndowmentsForConfig, copyWrappedGlobals } = endowmentsToolkit({
@@ -104,6 +115,7 @@ export const makeGlobalsAttenuator = (
         'globalThis',
         'global',
       ])
+      scuttle(originalGlobalThis, scuttleGlobalThis)
     } else {
       if (!rootCompartmentGlobalThis) {
         rootCompartmentGlobalThis = new Compartment().globalThis
@@ -111,6 +123,7 @@ export const makeGlobalsAttenuator = (
           'globalThis',
           'global',
         ])
+        scuttle(originalGlobalThis, scuttleGlobalThis)
       }
       const endowments = getEndowmentsForConfig(
         rootCompartmentGlobalThis,

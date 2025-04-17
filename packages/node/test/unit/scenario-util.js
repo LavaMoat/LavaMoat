@@ -210,7 +210,7 @@ export function createScenarioRunner(log = fallbackLog.error.bind(console)) {
       const worker = new Worker(RUNNER_MODULE_PATH, {
         stdout: true,
         stderr: true,
-        workerData: { entryPath, policy: lavamoatPolicy, vol: vol.toJSON() },
+        workerData: { scuttleGlobalThis:scenario?.opts?.scuttleGlobalThis, entryPath, policy: lavamoatPolicy, vol: vol.toJSON() },
       })
       outputPromise = trapOutput(worker.stdout, worker.stderr)
       const [code] = await once(worker, 'exit')

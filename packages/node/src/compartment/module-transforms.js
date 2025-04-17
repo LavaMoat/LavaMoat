@@ -6,11 +6,13 @@
  * @internal
  */
 
-import { evadeCensorSync } from '@endo/evasive-transform'
-import { applySourceTransforms } from 'lavamoat-core'
+import { evadeCensorSync } from '@endo/evasive-transform';
+import { applySourceTransforms } from 'lavamoat-core';
 
 const decoder = new TextDecoder()
 const encoder = new TextEncoder()
+
+const { URL } = globalThis;
 
 /**
  * @import {SyncModuleTransform, Language} from '@endo/compartment-mapper'

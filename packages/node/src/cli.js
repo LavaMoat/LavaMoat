@@ -420,6 +420,7 @@ const main = async (args = hideBin(process.argv)) => {
           'policy-override': policyOverridePath,
           dev,
           root: projectRoot,
+          scuttleGlobalThis,
           write,
         } = argv
 
@@ -471,6 +472,7 @@ const main = async (args = hideBin(process.argv)) => {
           trustRoot,
           dev,
           projectRoot,
+          scuttleGlobalThis,
         })
       }
     )

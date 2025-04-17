@@ -8,6 +8,7 @@ export interface RunnerWorkerData {
   entryPath: string
   policy: LavaMoatPolicy
   vol: NestedDirectoryJSON
+  scuttleGlobalThis: any
 }
 
 export type TestCLIExpectationFn<Ctx = unknown> = (
