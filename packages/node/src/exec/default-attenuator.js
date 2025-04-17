@@ -6,6 +6,7 @@
  */
 
 import { endowmentsToolkit } from 'lavamoat-core'
+import { scuttle } from "lavamoat-core/src/scuttle.js"
 import {
   ENDO_POLICY_ITEM_ROOT,
   GLOBAL_THIS_REFS,
@@ -45,13 +46,12 @@ export const attenuateModule = (params, originalObject) => {
  *
  * **REMEMBER: The attenuator is _not applied_ to packages without policy!**
  *
- * @param {object} options
- * @param {Partial<LavaMoatPolicy>} [options.policy]
+ * @param {import('../types.js').MakeGlobalsAttenuatorOptions} [options]
  * @returns {GlobalAttenuatorFn<GlobalAttenuatorParams>}
  * @internal
  */
 export const makeGlobalsAttenuator = (
-  { policy: { resources } = {} } = { policy: {} }
+  { policy: { resources } = {}, scuttleGlobalThis = {enabled: false} } = {}
 ) => {
   /** @type {Set<string>} */
   const knownWritableFields = new Set()
@@ -67,6 +67,16 @@ export const makeGlobalsAttenuator = (
         }
       }
     }
+  }
+
+  if (typeof scuttleGlobalThis === 'boolean') {
+    scuttleGlobalThis = {enabled: scuttleGlobalThis}
+  }
+  if (scuttleGlobalThis?.enabled) {
+    if (!Array.isArray(scuttleGlobalThis?.exceptions)) {
+      scuttleGlobalThis.exceptions = []
+    }
+    scuttleGlobalThis.exceptions.push('Map', 'parseFloat', 'WeakMap', 'WeakSet', 'Boolean', 'Number', 'Promise', 'String', 'isNaN')
   }
 
   const { getEndowmentsForConfig, copyWrappedGlobals } = endowmentsToolkit({
@@ -104,6 +114,7 @@ export const makeGlobalsAttenuator = (
         'globalThis',
         'global',
       ])
+      scuttle(originalGlobalThis, { ...scuttleGlobalThis, enabled: scuttleGlobalThis.enabled ?? false })
     } else {
       if (!rootCompartmentGlobalThis) {
         rootCompartmentGlobalThis = new Compartment().globalThis
@@ -111,6 +122,7 @@ export const makeGlobalsAttenuator = (
           'globalThis',
           'global',
         ])
+        scuttle(originalGlobalThis, { ...scuttleGlobalThis, enabled: scuttleGlobalThis.enabled ?? false })
       }
       const endowments = getEndowmentsForConfig(
         rootCompartmentGlobalThis,
