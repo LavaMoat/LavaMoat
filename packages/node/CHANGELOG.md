@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.2.0](https://github.com/LavaMoat/LavaMoat/compare/node-v0.1.0...node-v0.2.0) (2025-04-17)
+
+
+### Features
+
+* **node:** support untrusted entrypoints ([fa2b46e](https://github.com/LavaMoat/LavaMoat/commit/fa2b46e2a66fdf45e5f1868d6fdfb76fbcc2ca0e))
+
+
+### Bug Fixes
+
+* **deps:** upgrade @endo/compartment-mapper, @endo/evasive-transform ([#1588](https://github.com/LavaMoat/LavaMoat/issues/1588)) ([81fa130](https://github.com/LavaMoat/LavaMoat/commit/81fa130089e3e6f48d8b6c639392c58fa14fd338))
+* upgrade ses to v1.11.0 ([a12dae1](https://github.com/LavaMoat/LavaMoat/commit/a12dae13e8c7f70082199ba186659ea413e82ded))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-core bumped from ^16.3.2 to ^16.4.0
+
 ## [0.1.0](https://github.com/LavaMoat/LavaMoat/compare/node-v0.0.2...node-v0.1.0) (2025-03-11)
 
 
