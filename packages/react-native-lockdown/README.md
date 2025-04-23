@@ -47,6 +47,19 @@ module.exports = {
 }
 ```
 
+or
+
+```js
+// babel.config.js
+module.exports = function (api) {
+  api.cache(true)
+  return {
+    ignore: [/\/ses\.cjs$/, /\/ses-hermes\.cjs$/],
+    presets: ['babel-preset-expo'],
+  }
+}
+```
+
 > [!WARNING]
 > Ensure your Babel config [ignore](https://babeljs.io/docs/options#ignore) `Array<MatchPattern>` ([MatchPattern](https://babeljs.io/docs/options#matchpattern)) `RegExp` is correct for both SES shims to avoid Babel transforming SES and ignoring more than necessary
 
