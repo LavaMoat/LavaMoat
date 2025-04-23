@@ -47,6 +47,9 @@ module.exports = {
 }
 ```
 
+> [!WARNING]
+> Ensure your Babel config [ignore](https://babeljs.io/docs/options#ignore) `Array<MatchPattern>` ([MatchPattern](https://babeljs.io/docs/options#matchpattern)) `RegExp` is correct for both SES shims to avoid Babel transforming SES and ignoring more than necessary
+
 ### Metro config
 
 #### Hermes
