@@ -47,6 +47,9 @@ module.exports = {
 }
 ```
 
+> [!NOTE]
+> If you're still on unsupported React Native <=0.72.x, use the old `'module:metro-react-native-babel-preset'` preset instead
+
 or
 
 ```js
