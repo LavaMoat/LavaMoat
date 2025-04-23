@@ -19,8 +19,7 @@
   "main": "./src/index.js",
   "exports": {
     ".": "./src/index.js",
-    "./repair": "./src/repair.js",
-    "./harden": "./src/harden.js"
+    "./repair": "./src/repair.js"
   },
   "types": "./types/src/types.d.ts",
   "files": [
