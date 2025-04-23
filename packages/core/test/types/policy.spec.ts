@@ -36,7 +36,7 @@ test('use of default type arguments does not validate root.usePolicy', (t) => {
     },
   }
 
-  expectTypeOf(policy).toMatchTypeOf<LavaMoatPolicy>()
+  expectTypeOf(policy).toExtend<LavaMoatPolicy>()
 })
 
 test('root usePolicy reference matches resource name', (t) => {
@@ -55,7 +55,7 @@ test('root usePolicy reference matches resource name', (t) => {
     },
   }
 
-  expectTypeOf(badPolicy).toMatchTypeOf<
+  expectTypeOf(badPolicy).toExtend<
     // @ts-expect-error usePolicy must match a resource name
     LavaMoatPolicy<{ foo: { globals: { 'console.log': true } } }>
   >()
@@ -104,7 +104,7 @@ test('resources is Resources', (t) => {
       },
     },
   })
-  expectTypeOf<typeof policy.resources>().toMatchTypeOf<Resources | undefined>()
+  expectTypeOf<typeof policy.resources>().toExtend<Resources | undefined>()
 })
 
 test('root usePolicy reference may be omitted', (t) => {
