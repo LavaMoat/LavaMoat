@@ -62,7 +62,6 @@
   "devDependencies": {
     "@endo/eslint-plugin": "2.3.0",
     "@jessie.js/eslint-plugin": "0.4.2",
-    "@types/json-stable-stringify": "1.2.0",
     "json-stable-stringify": "1.2.0",
     "memfs": "4.17.0"
   },
