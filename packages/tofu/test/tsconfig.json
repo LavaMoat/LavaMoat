@@ -4,6 +4,6 @@
     "checkJs": false
   },
   "include": ["."],
-  "exclude": ["./projects"],
+  "exclude": ["./projects", "./fixtures"],
   "references": [{ "path": "../src/tsconfig.json" }]
 }
