@@ -43,7 +43,7 @@
   },
   "dependencies": {
     "glob": "11.0.0",
-    "hosted-git-info": "8.0.2",
+    "hosted-git-info": "8.1.0",
     "js-yaml": "4.1.0",
     "lockfile-lint-api": "5.9.1"
   },
