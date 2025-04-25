@@ -12,9 +12,11 @@ import { jsonStringifySortedPolicy, mergePolicy } from 'lavamoat-core'
 import nodeFs from 'node:fs'
 import nodePath from 'node:path'
 import * as constants from './constants.js'
+import { LAVAMOAT_PKG_POLICY_ROOT } from './constants.js'
 import { InvalidPolicyError, NoPolicyError } from './error.js'
 import { readJsonFile } from './fs.js'
 import { log } from './log.js'
+import { isEntryCompartment } from './policy-gen/policy-gen-util.js'
 import {
   hasValue,
   hrPath,
@@ -24,9 +26,11 @@ import {
 } from './util.js'
 
 /**
+ * @import {CompartmentDescriptor} from '@endo/compartment-mapper'
+ * @import {ModuleDescriptor} from 'ses'
  * @import {RootPolicy, LavaMoatPolicy} from 'lavamoat-core'
  * @import {LavaMoatPolicyDebug, LoadPoliciesOptions, WritableFsInterface} from './types.js'
- * @import {ReadPolicyOptions, ReadPolicyOverrideOptions} from './internal.js'
+ * @import {CanonicalName, ReadPolicyOptions, ReadPolicyOverrideOptions} from './internal.js'
  */
 
 /**
@@ -369,4 +373,33 @@ export const isPolicy = (value) => {
  */
 export const isTrusted = (policy) => {
   return !policy.root?.usePolicy
+}
+
+/**
+ * Determine the canonical name for a compartment descriptor
+ *
+ * @param {CompartmentDescriptor} compartment Compartment descriptor
+ * @param {boolean} [trustRoot=true] If `false`, never return a canonical name
+ *   of {@link LAVAMOAT_PKG_POLICY_ROOT}. Default is `true`
+ * @returns {CanonicalName} Canonical name
+ * @throws {ReferenceError} If compartment has no path
+ * @internal
+ */
+export const getCanonicalName = (
+  compartment,
+  trustRoot = constants.DEFAULT_TRUST_ROOT_COMPARTMENT
+) => {
+  // NOTE: the algorithm creating paths happens to be identical to the one in @lavamoat/aa package. Not that it matters because policies cannot be reused between this and other lavamoat tools.
+  if (!compartment.path) {
+    throw new ReferenceError(
+      `Computing canonical name failed: compartment "${compartment.name}" (${compartment.location}) has no "path" property; this is a bug`
+    )
+  }
+  if (isEntryCompartment(compartment)) {
+    if (trustRoot) {
+      return LAVAMOAT_PKG_POLICY_ROOT
+    }
+    return compartment.name
+  }
+  return compartment.path.join('>')
 }
