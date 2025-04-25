@@ -153,14 +153,15 @@ const main = async (args = hideBin(process.argv)) => {
    */
   const processEntrypointMiddleware = (argv) => {
     const { entrypoint, 'project-root': projectRoot } = argv
-    argv.entrypoint = argv.bin
+    const resolvedEntrypoint = argv.bin
       ? resolveBinScript(argv.entrypoint, { from: projectRoot })
       : resolveEntrypoint(argv.entrypoint, { from: projectRoot })
-    const niceOriginalEntrypoint = hrPath(argv.entrypoint)
-    const niceResolvedEntrypoint = hrPath(entrypoint)
+    const niceOriginalEntrypoint = hrPath(entrypoint)
+    const niceResolvedEntrypoint = hrPath(resolvedEntrypoint)
+    argv.entrypoint = resolvedEntrypoint
     if (niceResolvedEntrypoint !== niceOriginalEntrypoint) {
       log.warning(
-        `Resolved ${niceResolvedEntrypoint} → ${niceResolvedEntrypoint}`
+        `Resolved ${niceOriginalEntrypoint} → ${niceResolvedEntrypoint}`
       )
     }
   }
