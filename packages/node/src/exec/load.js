@@ -7,14 +7,19 @@
  * @packageDocumentation
  */
 
-import { loadLocation } from '@endo/compartment-mapper'
+import { loadFromMap } from '@endo/compartment-mapper/import-lite.js'
+import { mapNodeModules } from '@endo/compartment-mapper/node-modules.js'
+import {
+  applyTransforms,
+  finalCompartmentDescriptorTransform,
+} from '../compartment/compartment-descriptor-transform.js'
 import { DEFAULT_ENDO_OPTIONS } from '../compartment/options.js'
 import { defaultReadPowers } from '../compartment/power.js'
 import { log as defaultLog } from '../log.js'
 import { toEndoURL } from '../util.js'
 
 /**
- * @import {ReadNowPowers, LoadLocationOptions} from '@endo/compartment-mapper'
+ * @import {ReadNowPowers, LoadLocationOptions, ImportLocationOptions, SyncImportLocationOptions} from '@endo/compartment-mapper'
  * @import {ApplicationLoader, ExecuteOptions} from '../types.js'
  */
 
@@ -37,22 +42,46 @@ import { toEndoURL } from '../util.js'
 export const load = async (
   entrypointPath,
   readPowers = defaultReadPowers,
-  { log = defaultLog, ...options } = {}
+  {
+    log = defaultLog,
+    dev,
+    compartmentDescriptorTransforms = [],
+    trustRoot,
+    policy,
+    ...options
+  } = {}
 ) => {
+  const conditions = new Set(['node'])
   await Promise.resolve()
 
   const entrypoint = toEndoURL(entrypointPath)
 
-  /** @type {LoadLocationOptions} */
+  const compartmentMap = await mapNodeModules(readPowers, entrypoint, {
+    conditions,
+    dev,
+    policy,
+    languageForExtension: DEFAULT_ENDO_OPTIONS.languageForExtension,
+  })
+
+  compartmentDescriptorTransforms.push(finalCompartmentDescriptorTransform)
+
+  applyTransforms(compartmentDescriptorTransforms, compartmentMap, {
+    trustRoot,
+    log,
+  })
+
+  /** @type {ImportLocationOptions | SyncImportLocationOptions} */
   const opts = {
     ...DEFAULT_ENDO_OPTIONS,
     ...options,
+    dev,
+    policy,
     log: log.debug.bind(log),
   }
 
-  const { import: importApp, sha512 } = await loadLocation(
+  const { import: importApp, sha512 } = await loadFromMap(
     readPowers,
-    entrypoint,
+    compartmentMap,
     opts
   )
 
