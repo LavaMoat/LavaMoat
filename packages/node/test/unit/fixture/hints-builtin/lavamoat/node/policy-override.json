@@ -1,0 +1,12 @@
+{
+  "resources": {
+    "winken>blinken": {
+      "builtin": {
+        "node:fs.read": true
+      }
+    }
+  },
+  "hints": {
+    "winken": ["node:net"]
+  }
+}
