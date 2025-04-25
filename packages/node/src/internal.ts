@@ -23,6 +23,7 @@ import type {
   BaseLoadCompartmentMapOptions,
   BuildModuleRecordsOptions,
   GeneratePolicyOptions,
+  WithCompartmentDescriptorTransforms,
   WithDebug,
   WithFs,
   WithIsBuiltin,
@@ -65,14 +66,8 @@ export type LoadCompartmentMapOptions = Simplify<
   BaseLoadCompartmentMapOptions &
     WithReadPowers &
     WithPolicyOverride &
-    WithTrustRoot & {
-      /**
-       * List of transforms which will be applied to each compartment descriptor
-       * within the initial compartment map descriptor (via
-       * `mapNodeModules()`).
-       */
-      compartmentDescriptorTransforms?: CompartmentDescriptorTransform[]
-    }
+    WithTrustRoot &
+    WithCompartmentDescriptorTransforms
 >
 
 /**
@@ -283,23 +278,28 @@ export interface LoadCompartmentMapResult {
 }
 
 /**
- * A function which transforms a {@link CompartmentDescriptor} in some way.
+ * Proper names of SES violation types
  *
- * This is used to modify the compartment map descriptor before prior to a call
- * to `captureFromMap()`.
- *
- * @privateRemarks
- * This could also support returning `Promise<void>`, if necessary in the
- * future.
+ * @internal
  */
-export type CompartmentDescriptorTransform = (
-  compartmentDescriptor: CompartmentDescriptor,
-  options?: CompartmentDescriptorTransformOptions
-) => void
+export type SesViolationType = ValueOf<typeof SES_VIOLATION_TYPES>
 
 /**
- * Options for a {@link CompartmentDescriptorTransform}
+ * Options for `makeGlobalsAttenuator()`
+ *
+ * @internal
  */
-export type CompartmentDescriptorTransformOptions = Simplify<
-  WithTrustRoot & WithLog
+export type MakeGlobalsAttenuatorOptions = Simplify<
+  WithPolicy & WithScuttleGlobalThis
 >
+
+/**
+ * Options containing a `policy` prop
+ *
+ * @template T The type of the resources in the policy
+ * @internal
+ */
+
+export interface WithPolicy<T extends Resources = Resources> {
+  policy?: LavaMoatPolicy<T>
+}
