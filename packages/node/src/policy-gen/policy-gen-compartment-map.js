@@ -5,21 +5,22 @@
 
 import { captureFromMap } from '@endo/compartment-mapper/capture-lite.js'
 import { mapNodeModules } from '@endo/compartment-mapper/node-modules.js'
+import {
+  applyTransforms,
+  finalCompartmentDescriptorTransform,
+} from '../compartment/compartment-descriptor-transform.js'
 import { nullImportHook } from '../compartment/import-hook.js'
 import { DEFAULT_ENDO_OPTIONS } from '../compartment/options.js'
 import { defaultReadPowers } from '../compartment/power.js'
-import { ATTENUATORS_COMPARTMENT } from '../constants.js'
+import { DEFAULT_TRUST_ROOT_COMPARTMENT } from '../constants.js'
 import { GenerationError } from '../error.js'
 import { log as defaultLog } from '../log.js'
-import { hrLabel, toEndoURL } from '../util.js'
+import { toEndoURL } from '../util.js'
 import { makePolicyGenCompartment } from './policy-gen-compartment-class.js'
-import { getCanonicalName } from './policy-gen-util.js'
 
 /**
- * @import {CompartmentDescriptorTransform, LoadCompartmentMapOptions, LoadCompartmentMapResult} from '../internal.js'
+ * @import {LoadCompartmentMapForPolicyOptions, LoadCompartmentMapResult} from '../internal.js'
  */
-
-const { values } = Object
 
 /**
  * This compartment descriptor transform replaces the `label` field of the
@@ -96,11 +97,10 @@ export const loadCompartmentMap = async (
 
   compartmentDescriptorTransforms.push(finalCompartmentDescriptorTransform)
 
-  values(nodeCompartmentMap.compartments).forEach((compartmentDescriptor) =>
-    compartmentDescriptorTransforms.forEach((transform) =>
-      transform(compartmentDescriptor, { trustRoot, log })
-    )
-  )
+  applyTransforms(compartmentDescriptorTransforms, nodeCompartmentMap, {
+    trustRoot,
+    log,
+  })
 
   // we use this to inject missing imports from policy overrides into the module descriptor.
   // TODO: Endo should allow us to hook into `importHook` directly instead
