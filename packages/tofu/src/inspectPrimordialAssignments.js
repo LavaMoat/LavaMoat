@@ -10,7 +10,8 @@ module.exports = { inspectPrimordialAssignments }
  * @typedef {import('type-fest').SetFieldType<
  *   import('@babel/types').Node,
  *   'loc',
- *   import('@babel/types').SourceLocation
+ *   import('@babel/types').SourceLocation,
+ *   { preservePropertyModifiers: false }
  * >} NodeWithLocation
  */
 
