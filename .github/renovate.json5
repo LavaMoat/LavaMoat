@@ -10,6 +10,7 @@
     'group:linters', // group lint-related packages together
     'workarounds:typesNodeVersioning', // tracks node versions from engines field in package.json for @types/node
   ],
+  ignorePaths: ['packages/perf/trials/**/*'],
   packageRules: [
     {
       // as long as we use CJS, everything owned by @sindresorhus should be in this list
