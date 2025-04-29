@@ -1,3 +1,5 @@
+// @ts-check
+
 /**
  * @typedef {object} ScuttleOpts
  * @property {boolean} enabled - Whether scuttling is enabled or not.
