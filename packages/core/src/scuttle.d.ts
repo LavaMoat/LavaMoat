@@ -11,7 +11,7 @@ export interface ScuttleOpts {
  * Reference to the global object
  */
 export interface GlobalRef {
-  globalThis?: Record<string, any>;
+  globalThis?: Record<string, unknown>;
 }
 
 /**
@@ -19,4 +19,4 @@ export interface GlobalRef {
  * @param globalRef The global object to scuttle
  * @param opts Options for scuttling
  */
-export function scuttle(globalRef: GlobalRef, opts: ScuttleOpts | boolean): void; 
+export function scuttle(globalRef: GlobalRef, opts: ScuttleOpts | boolean): void;
