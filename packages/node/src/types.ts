@@ -170,6 +170,16 @@ export interface WithTrustRoot {
   trustRoot?: boolean
 }
 
+interface ScuttleGlobalThis {
+  enabled?: boolean
+  exceptions?: []
+  scuttlerName?: string
+}
+
+export interface WithScuttleGlobalThis {
+  enabled?: boolean | ScuttleGlobalThis
+}
+
 /**
  * Superset of {@link FsInterface} necessary to write a policy to disk
  */
@@ -281,6 +291,7 @@ export type GeneratePolicyOptions = Simplify<
     CompartmentMapToPolicyOptions &
     WritePolicyOptions &
     WithTrustRoot &
+    WithScuttleGlobalThis &
     WithPolicyOverridePath &
     WithReadFile &
     WithProjectRoot
@@ -356,6 +367,7 @@ export type RunOptions = Simplify<
   WithRawReadPowers &
     WithDev &
     WithTrustRoot &
+    WithScuttleGlobalThis &
     WithLog &
     WithProjectRoot &
     WithPolicyOverrideOrPath &
