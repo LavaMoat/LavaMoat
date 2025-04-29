@@ -50,20 +50,19 @@
   "dependencies": {
     "@endo/compartment-mapper": "1.6.0",
     "@endo/evasive-transform": "1.4.0",
-    "@types/node": "18.19.74",
+    "@types/node": "18.19.87",
     "chalk": "4.1.2",
     "lavamoat-core": "^16.3.2",
     "loggerr": "4.2.0",
-    "ses": "1.11.0",
+    "ses": "1.12.0",
     "terminal-link": "3.0.0",
-    "type-fest": "4.30.0",
+    "type-fest": "4.40.0",
     "yargs": "17.7.2"
   },
   "devDependencies": {
     "@endo/eslint-plugin": "2.3.0",
     "@jessie.js/eslint-plugin": "0.4.2",
-    "@types/json-stable-stringify": "1.1.0",
-    "json-stable-stringify": "1.2.0",
+    "json-stable-stringify": "1.3.0",
     "memfs": "4.17.0"
   },
   "publishConfig": {
