@@ -5,14 +5,14 @@
  * @internal
  */
 
-import { endowmentsToolkit } from 'lavamoat-core';
-import { scuttle } from "lavamoat-core/src/scuttle.js";
+import { endowmentsToolkit } from 'lavamoat-core'
+import { scuttle } from "lavamoat-core/src/scuttle.js"
 import {
   ENDO_POLICY_ITEM_ROOT,
   GLOBAL_THIS_REFS,
   LAVAMOAT_POLICY_ITEM_WRITE,
-} from '../constants.js';
-import { isObjectyObject } from '../util.js';
+} from '../constants.js'
+import { isObjectyObject } from '../util.js'
 
 /**
  * @import {GlobalAttenuatorFn, ModuleAttenuatorFn} from '@endo/compartment-mapper'
