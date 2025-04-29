@@ -3,7 +3,7 @@ import type { LavaMoatPolicy } from 'lavamoat-core'
 import type { NestedDirectoryJSON } from 'memfs'
 import { ExecFileException } from 'node:child_process'
 import type { Merge, RequireAtLeastOne, Simplify } from 'type-fest'
-import type { ScuttleGlobalThis } from '../src'
+import type { ScuttleGlobalThis } from '../src/types.ts'
 
 export interface RunnerWorkerData {
   entryPath: string
