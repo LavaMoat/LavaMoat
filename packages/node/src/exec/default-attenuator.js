@@ -114,7 +114,7 @@ export const makeGlobalsAttenuator = (
         'globalThis',
         'global',
       ])
-      scuttle(originalGlobalThis, scuttleGlobalThis)
+      scuttle(originalGlobalThis, { ...scuttleGlobalThis, enabled: scuttleGlobalThis.enabled ?? false })
     } else {
       if (!rootCompartmentGlobalThis) {
         rootCompartmentGlobalThis = new Compartment().globalThis
@@ -122,7 +122,7 @@ export const makeGlobalsAttenuator = (
           'globalThis',
           'global',
         ])
-        scuttle(originalGlobalThis, scuttleGlobalThis)
+        scuttle(originalGlobalThis, { ...scuttleGlobalThis, enabled: scuttleGlobalThis.enabled ?? false })
       }
       const endowments = getEndowmentsForConfig(
         rootCompartmentGlobalThis,
