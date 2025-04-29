@@ -4,7 +4,7 @@
  *
  * @packageDocumentation
  */
-import type { IsBuiltinFn, LavaMoatPolicy } from 'lavamoat-core'
+import type { IsBuiltinFn, LavaMoatPolicy, Resources } from 'lavamoat-core'
 import type { Loggerr } from 'loggerr'
 import type nodeFs from 'node:fs'
 import type { SetFieldType, Simplify } from 'type-fest'
@@ -170,14 +170,14 @@ export interface WithTrustRoot {
   trustRoot?: boolean
 }
 
-interface ScuttleGlobalThis {
+export interface ScuttleGlobalThis {
   enabled?: boolean
-  exceptions?: []
+  exceptions?: string[]
   scuttlerName?: string
 }
 
 export interface WithScuttleGlobalThis {
-  enabled?: boolean | ScuttleGlobalThis
+  scuttleGlobalThis?: boolean | ScuttleGlobalThis
 }
 
 /**
@@ -414,7 +414,7 @@ export type {
   ResourcePolicy,
   Resources as ResourcePolicyRecord,
   Resources,
-  RootPolicy,
+  RootPolicy
 } from 'lavamoat-core'
 
 /**
@@ -467,3 +467,9 @@ export interface FsUtilInterface {
 export interface WithFs {
   fs?: FsUtilInterface
 }
+
+export interface WithPolicy {
+  policy?: Partial<LavaMoatPolicy<Resources>>
+}
+
+export type MakeGlobalsAttenuatorOptions = WithPolicy & WithScuttleGlobalThis

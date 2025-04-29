@@ -5,14 +5,14 @@
  * @internal
  */
 
-import { endowmentsToolkit } from 'lavamoat-core'
+import { endowmentsToolkit } from 'lavamoat-core';
+import { scuttle } from "lavamoat-core/src/scuttle.js";
 import {
   ENDO_POLICY_ITEM_ROOT,
   GLOBAL_THIS_REFS,
   LAVAMOAT_POLICY_ITEM_WRITE,
-} from '../constants.js'
-import { isObjectyObject } from '../util.js'
-import {scuttle} from "lavamoat-core/src/scuttle.js";
+} from '../constants.js';
+import { isObjectyObject } from '../util.js';
 
 /**
  * @import {GlobalAttenuatorFn, ModuleAttenuatorFn} from '@endo/compartment-mapper'
@@ -46,13 +46,12 @@ export const attenuateModule = (params, originalObject) => {
  *
  * **REMEMBER: The attenuator is _not applied_ to packages without policy!**
  *
- * @param {object} options
- * @param {Partial<LavaMoatPolicy>} [options.policy]
+ * @param {import('../types.js').MakeGlobalsAttenuatorOptions} [options]
  * @returns {GlobalAttenuatorFn<GlobalAttenuatorParams>}
  * @internal
  */
 export const makeGlobalsAttenuator = (
-  { policy: { resources } = {}, scuttleGlobalThis = {enabled: false} } = { policy: {} }
+  { policy: { resources } = {}, scuttleGlobalThis = {enabled: false} } = {}
 ) => {
   /** @type {Set<string>} */
   const knownWritableFields = new Set()
