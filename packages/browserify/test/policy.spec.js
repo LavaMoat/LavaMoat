@@ -99,12 +99,21 @@ test('Policy - watchify listens for policy file changes', async (t) => {
   bundler.on('file', (file) => {
     watchedFiles.push(file)
   })
-  // need to wait a tick to get file events
-  await new Promise((resolve) => setTimeout(resolve))
-  const relativeFiles = watchedFiles
-    .map((file) => path.relative(policyDir, file))
-    .sort()
-  t.deepEqual(relativeFiles, ['policy-override.json', 'policy.json'])
+  try {
+    // need to wait a tick to get file events
+    await new Promise((resolve) => setTimeout(resolve))
+    const relativeFiles = watchedFiles
+      .map((file) => path.relative(policyDir, file))
+      .sort()
+    t.deepEqual(relativeFiles, ['policy-override.json', 'policy.json'])
+  } finally {
+    try {
+      // @ts-expect-error this is a "Watchify" object with a close method
+      await bundler.close()
+    } catch {
+      t.log('Failed to close watchify object')
+    }
+  }
 })
 
 // this test is not written correctly, im disabling it for now
