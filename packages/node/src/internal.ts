@@ -7,7 +7,6 @@
  */
 
 import type {
-  CompartmentDescriptor,
   CompartmentMapDescriptor,
   ReadNowPowers,
   ReadNowPowersProp,
