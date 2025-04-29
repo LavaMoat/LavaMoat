@@ -4,7 +4,7 @@ import { getCanonicalName } from '../policy-util.js'
 import { hrLabel } from '../util.js'
 /**
  * @import {CompartmentDescriptorTransform, CompartmentDescriptorTransformOptions} from '../types.js'
- * @import {CompartmentMapDescriptor} from '@endo/compartment-mapper
+ * @import {CompartmentMapDescriptor} from '@endo/compartment-mapper'
  */
 
 const { values } = Object
