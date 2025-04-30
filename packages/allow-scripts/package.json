@@ -38,9 +38,6 @@
     "test:prep": "node test/prepare.js",
     "test:run": "ava"
   },
-  "peerDependencies": {
-    "@lavamoat/preinstall-always-fail": "*"
-  },
   "dependencies": {
     "@lavamoat/aa": "^4.3.2",
     "@npmcli/run-script": "8.1.0",
