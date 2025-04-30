@@ -9,6 +9,6 @@
   },
   "devDependencies": {
     "atob": "^2.1.2",
-    "patch-package": "6.5.1"
+    "patch-package": "8.0.0"
   }
 }
