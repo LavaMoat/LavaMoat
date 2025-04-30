@@ -56,7 +56,7 @@
     "loggerr": "4.2.0",
     "ses": "1.12.0",
     "terminal-link": "3.0.0",
-    "type-fest": "4.40.0",
+    "type-fest": "4.40.1",
     "yargs": "17.7.2"
   },
   "devDependencies": {
