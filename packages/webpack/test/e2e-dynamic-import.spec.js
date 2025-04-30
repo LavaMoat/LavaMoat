@@ -261,6 +261,7 @@ function globalWithDocumentOnWhichDynamicchunkScriptExists() {
   return {
     console,
     setTimeout: (fn, ms) => {
+      // avoid leaving the test runner hanging 
       return setTimeout(fn, ms).unref()
     },
     clearTimeout,
