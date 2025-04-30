@@ -8,7 +8,7 @@
     "keccak": "3.0.0"
   },
   "devDependencies": {
-    "atob": "^2.1.2",
+    "atob": "2.1.2",
     "patch-package": "6.5.1"
   }
 }
