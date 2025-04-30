@@ -20,7 +20,7 @@
     "@example/override": "file:_packages/override",
     "@example/polyfill": "file:_packages/polyfill",
     "@example/unrecognizedpolicy": "file:_packages/unrecognizedpolicy",
-    "eslint-plugin-security": "^3.0.0",
+    "eslint-plugin-security": "3.0.0",
     "override": "^0.0.1",
     "polyfill": "^0.1.0"
   },
