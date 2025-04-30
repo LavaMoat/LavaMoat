@@ -317,7 +317,6 @@ test('getEndowmentsForConfig - traversing with getters', (t) => {
 })
 
 test('getEndowmentsForConfig - ensure window.document getter behavior support', (t) => {
-  'use strict'
   // compartment.globalThis.document would error because 'this' value is not window
   const { getEndowmentsForConfig } = prepareTest()
   const sourceGlobal = {
@@ -342,7 +341,6 @@ test('getEndowmentsForConfig - ensure window.document getter behavior support', 
 })
 
 test('getEndowmentsForConfig - specify unwrap to', (t) => {
-  'use strict'
   // compartment.globalThis.document would error because 'this' value is not window
   const unwrapTo = {}
   const { getEndowmentsForConfig } = prepareTest()
@@ -368,7 +366,6 @@ test('getEndowmentsForConfig - specify unwrap to', (t) => {
 })
 
 test('getEndowmentsForConfig - specify unwrap from, unwrap to', (t) => {
-  'use strict'
   // compartment.globalThis.document would error because 'this' value is not window
   const unwrapTo = {}
   const unwrapFrom = {}
@@ -402,7 +399,6 @@ test('getEndowmentsForConfig - specify unwrap from, unwrap to', (t) => {
 
 // eslint-disable-next-line ava/no-async-fn-without-await
 test('getEndowmentsForConfig - endowing bind of a function', async (t) => {
-  'use strict'
   const { getEndowmentsForConfig } = prepareTest()
   const sourceGlobal = {
     abc: function () {
@@ -427,7 +423,6 @@ test('getEndowmentsForConfig - endowing bind of a function', async (t) => {
 })
 
 test('getEndowmentsForConfig - ensure setTimeout calls dont trigger illegal invocation', (t) => {
-  'use strict'
   // compartment.globalThis.document would error because 'this' value is not window
   const { getEndowmentsForConfig } = prepareTest()
   const sourceGlobal = {
@@ -445,7 +440,6 @@ test('getEndowmentsForConfig - ensure setTimeout calls dont trigger illegal invo
 })
 
 test('copyWrappedGlobals - copy from prototype too', (t) => {
-  'use strict'
   const { copyWrappedGlobals } = prepareTest()
   const sourceProto = {
     onTheProto: function () {},
@@ -459,7 +453,6 @@ test('copyWrappedGlobals - copy from prototype too', (t) => {
 })
 
 test('getEndowmentsForConfig - allow redefine on properties', (t) => {
-  'use strict'
   const knownWritable = new Set(['x', 'y'])
   const { getEndowmentsForConfig } = prepareTest({ knownWritable })
   const sourceGlobal = {
