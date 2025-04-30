@@ -5,7 +5,7 @@
     "setup": "patch-package"
   },
   "dependencies": {
-    "keccak": "3.0.0"
+    "keccak": "3.0.4"
   },
   "devDependencies": {
     "atob": "^2.1.2",
