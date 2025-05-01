@@ -19,6 +19,22 @@
     * lavamoat-core bumped from ^15.2.0 to ^15.2.1
     * lavamoat-tofu bumped from ^7.2.1 to ^7.2.2
 
+## [9.0.9](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-v9.0.8...lavamoat-v9.0.9) (2025-05-01)
+
+
+### Bug Fixes
+
+* **core:** block circular global object endowments ([#1505](https://github.com/LavaMoat/LavaMoat/issues/1505)) ([6745a0e](https://github.com/LavaMoat/LavaMoat/commit/6745a0edee85171e4062aaec31d7f25bf3a97e46))
+* **deps:** update dependency corepack to v0.32.0 ([#1611](https://github.com/LavaMoat/LavaMoat/issues/1611)) ([854bf40](https://github.com/LavaMoat/LavaMoat/commit/854bf40c464686bf866542dd2278d3121def064f))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-core bumped from ^16.3.2 to ^16.4.0
+    * lavamoat-tofu bumped from ^8.0.6 to ^8.0.7
+
 ## [9.0.8](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-v9.0.7...lavamoat-v9.0.8) (2025-03-11)
 
 

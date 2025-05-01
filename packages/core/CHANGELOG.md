@@ -6,6 +6,33 @@
   * dependencies
     * lavamoat-tofu bumped from ^7.2.1 to ^7.2.2
 
+## [16.4.0](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v16.3.2...lavamoat-core-v16.4.0) (2025-05-01)
+
+
+### Features
+
+* **core:** add "redefine" global policy value to schema ([09d78ba](https://github.com/LavaMoat/LavaMoat/commit/09d78badd3b3cc2e982ce690e84133d9959f43b2)), closes [#1583](https://github.com/LavaMoat/LavaMoat/issues/1583)
+* **core:** support untrusted entrypoints ([36018de](https://github.com/LavaMoat/LavaMoat/commit/36018dea2bbe9b7d16588e0333974dd98ee2d02d))
+
+
+### Bug Fixes
+
+* **core,webpack:** remove deprecated lockdown options ([efec539](https://github.com/LavaMoat/LavaMoat/commit/efec5391eec838689ce2426de617571d0f276f2c)), closes [#1578](https://github.com/LavaMoat/LavaMoat/issues/1578)
+* **core:** block circular global object endowments ([#1505](https://github.com/LavaMoat/LavaMoat/issues/1505)) ([6745a0e](https://github.com/LavaMoat/LavaMoat/commit/6745a0edee85171e4062aaec31d7f25bf3a97e46))
+* **deps:** update babel monorepo to v7.26.10 ([#1561](https://github.com/LavaMoat/LavaMoat/issues/1561)) ([2757717](https://github.com/LavaMoat/LavaMoat/commit/275771754578647346da1ece0f86afaabdd5de36))
+* **deps:** update babel monorepo to v7.27.0 ([#1589](https://github.com/LavaMoat/LavaMoat/issues/1589)) ([efd83d7](https://github.com/LavaMoat/LavaMoat/commit/efd83d7ea7a5f5f9d2157248d4e2f8b7f9c48c56))
+* **deps:** update definitelytyped ([#1574](https://github.com/LavaMoat/LavaMoat/issues/1574)) ([6c2d54e](https://github.com/LavaMoat/LavaMoat/commit/6c2d54e851ea24a9482a52018b5e0d84716f87b6))
+* **deps:** update dependency json-stable-stringify to v1.3.0 ([#1613](https://github.com/LavaMoat/LavaMoat/issues/1613)) ([f9314d1](https://github.com/LavaMoat/LavaMoat/commit/f9314d1a238d31a0164356c1c6bd6f6e36246d56))
+* **deps:** update dependency ses to v1.12.0 [security] ([#1605](https://github.com/LavaMoat/LavaMoat/issues/1605)) ([881ae86](https://github.com/LavaMoat/LavaMoat/commit/881ae86b9a4c27ab60a3c76a4a69f5de246eb2ed))
+* upgrade ses to v1.11.0 ([a12dae1](https://github.com/LavaMoat/LavaMoat/commit/a12dae13e8c7f70082199ba186659ea413e82ded))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-tofu bumped from ^8.0.6 to ^8.0.7
+
 ## [16.3.2](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v16.3.1...lavamoat-core-v16.3.2) (2025-03-11)
 
 

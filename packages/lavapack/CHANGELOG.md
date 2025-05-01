@@ -24,6 +24,22 @@
   * dependencies
     * lavamoat-core bumped from ^15.2.0 to ^15.2.1
 
+## [7.0.9](https://github.com/LavaMoat/LavaMoat/compare/lavapack-v7.0.8...lavapack-v7.0.9) (2025-05-01)
+
+
+### Bug Fixes
+
+* **core:** block circular global object endowments ([#1505](https://github.com/LavaMoat/LavaMoat/issues/1505)) ([6745a0e](https://github.com/LavaMoat/LavaMoat/commit/6745a0edee85171e4062aaec31d7f25bf3a97e46))
+* **deps:** update dependency json-stable-stringify to v1.3.0 ([#1613](https://github.com/LavaMoat/LavaMoat/issues/1613)) ([f9314d1](https://github.com/LavaMoat/LavaMoat/commit/f9314d1a238d31a0164356c1c6bd6f6e36246d56))
+* **deps:** update dependency readable-stream to v4.7.0 ([#1617](https://github.com/LavaMoat/LavaMoat/issues/1617)) ([9cb1e4b](https://github.com/LavaMoat/LavaMoat/commit/9cb1e4be3547de0763be5055ac50eb211d658af5))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-core bumped from ^16.3.2 to ^16.4.0
+
 ## [7.0.8](https://github.com/LavaMoat/LavaMoat/compare/lavapack-v7.0.7...lavapack-v7.0.8) (2025-03-11)
 
 

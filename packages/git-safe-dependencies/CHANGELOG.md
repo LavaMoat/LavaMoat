@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.2](https://github.com/LavaMoat/LavaMoat/compare/git-safe-dependencies-v0.2.1...git-safe-dependencies-v0.2.2) (2025-05-01)
+
+
+### Bug Fixes
+
+* **deps:** update dependency hosted-git-info to v8.1.0 ([#1612](https://github.com/LavaMoat/LavaMoat/issues/1612)) ([9bc9538](https://github.com/LavaMoat/LavaMoat/commit/9bc9538fd4dce1141583e57bddd0f05d2e377188))
+* **deps:** update dependency lockfile-lint-api to v5.9.2 ([#1625](https://github.com/LavaMoat/LavaMoat/issues/1625)) ([5f57d23](https://github.com/LavaMoat/LavaMoat/commit/5f57d236b09ef86129e63565d1f599bd27aefeb2))
+
 ## [0.2.1](https://github.com/LavaMoat/LavaMoat/compare/git-safe-dependencies-v0.2.0...git-safe-dependencies-v0.2.1) (2025-03-11)
 
 

@@ -18,6 +18,31 @@
   * dependencies
     * lavamoat-core bumped from ^15.2.0 to ^15.2.1
 
+## [0.10.0-beta.0](https://github.com/LavaMoat/LavaMoat/compare/webpack-v0.9.0-beta.0...webpack-v0.10.0-beta.0) (2025-05-01)
+
+
+### Features
+
+* **webpack:** webpack context modules and chunk lazy loading support ([#1553](https://github.com/LavaMoat/LavaMoat/issues/1553)) ([3602f65](https://github.com/LavaMoat/LavaMoat/commit/3602f6598196ec99287fe239aa1708d9f80c0e0c))
+
+
+### Bug Fixes
+
+* **core,webpack:** remove deprecated lockdown options ([efec539](https://github.com/LavaMoat/LavaMoat/commit/efec5391eec838689ce2426de617571d0f276f2c)), closes [#1578](https://github.com/LavaMoat/LavaMoat/issues/1578)
+* **core:** block circular global object endowments ([#1505](https://github.com/LavaMoat/LavaMoat/issues/1505)) ([6745a0e](https://github.com/LavaMoat/LavaMoat/commit/6745a0edee85171e4062aaec31d7f25bf3a97e46))
+* **deps:** update babel monorepo to v7.27.0 ([#1589](https://github.com/LavaMoat/LavaMoat/issues/1589)) ([efd83d7](https://github.com/LavaMoat/LavaMoat/commit/efd83d7ea7a5f5f9d2157248d4e2f8b7f9c48c56))
+* **deps:** update dependency json-stable-stringify to v1.3.0 ([#1613](https://github.com/LavaMoat/LavaMoat/issues/1613)) ([f9314d1](https://github.com/LavaMoat/LavaMoat/commit/f9314d1a238d31a0164356c1c6bd6f6e36246d56))
+* **deps:** update dependency ses to v1.12.0 [security] ([#1605](https://github.com/LavaMoat/LavaMoat/issues/1605)) ([881ae86](https://github.com/LavaMoat/LavaMoat/commit/881ae86b9a4c27ab60a3c76a4a69f5de246eb2ed))
+* upgrade ses to v1.11.0 ([a12dae1](https://github.com/LavaMoat/LavaMoat/commit/a12dae13e8c7f70082199ba186659ea413e82ded))
+* **webpack:** import types from ses ([78aca55](https://github.com/LavaMoat/LavaMoat/commit/78aca5583adc5366c8717fd196b72bdd828b38ed))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-core bumped from ^16.3.2 to ^16.4.0
+
 ## [0.9.0-beta.0](https://github.com/LavaMoat/LavaMoat/compare/webpack-v0.8.1-beta.0...webpack-v0.9.0-beta.0) (2025-03-11)
 
 
