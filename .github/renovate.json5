@@ -16,6 +16,7 @@
     '**/node_modules/**',
     '**/example*/**',
     '**/fixture*/**',
+    'packages/*/test/**',
   ],
   packageRules: [
     {
