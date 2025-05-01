@@ -1,4 +1,5 @@
 const { realpathSync, lstatSync } = require('node:fs')
+const { unlink } = require('node:fs/promises')
 const path = require('node:path')
 const test = /** @type {import('ava').TestFn} */ (require('ava'))
 const { createProject4Symlink } = require('./utils')
@@ -21,6 +22,22 @@ const ratioIsBelow = (a, b, expected) => {
   return ratio < expected
 }
 
+/** @type {string} */
+let symlinkPath
+
+test.after(async (t) => {
+  await Promise.resolve()
+  if (symlinkPath) {
+    try {
+      await unlink(symlinkPath)
+    } catch (err) {
+      if (/** @type {NodeJS.ErrnoException} */ (err).code !== 'ENOENT') {
+        t.log(`Failed to unlink symlinked path ${symlinkPath}: ${err}`)
+      }
+    }
+  }
+})
+
 // FIXME: this test fails on darwin running in GH actions; diagnose and fix
 if (process.platform === 'darwin' && process.env.CI) {
   test.todo(
@@ -30,7 +47,7 @@ if (process.platform === 'darwin' && process.env.CI) {
   ;(process.env.CI ? test.skip : test)(
     '[bench] isSymlink is significantly faster than realpathSync in a naive microbenchmark',
     async (t) => {
-      await createProject4Symlink()
+      symlinkPath = await createProject4Symlink()
       const results = {
         ...simpleBench(() => {
           isSymlink(symlink)
