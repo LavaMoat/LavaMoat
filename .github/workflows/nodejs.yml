@@ -27,50 +27,11 @@ jobs:
               --workspace=packages/preinstall-always-fail
               --workspace=packages/yarn-plugin-allow-scripts
           - node-version: 18.x
-            test-workspaces: >-
-              --workspace=packages/aa
-              --workspace=packages/allow-scripts
-              --workspace=packages/browserify
-              --workspace=packages/core
-              --workspace=packages/lavapack
-              --workspace=packages/laverna
-              --workspace=packages/lavamoat-node
-              --workspace=packages/perf
-              --workspace=packages/preinstall-always-fail
-              --workspace=packages/survey
-              --workspace=packages/tofu
-              --workspace=packages/webpack
-              --workspace=packages/yarn-plugin-allow-scripts
+            test-workspaces: --workspaces
           - node-version: 20.x
-            test-workspaces: >-
-              --workspace=packages/aa
-              --workspace=packages/allow-scripts
-              --workspace=packages/browserify
-              --workspace=packages/core
-              --workspace=packages/lavapack
-              --workspace=packages/laverna
-              --workspace=packages/lavamoat-node
-              --workspace=packages/perf
-              --workspace=packages/preinstall-always-fail
-              --workspace=packages/survey
-              --workspace=packages/tofu
-              --workspace=packages/webpack
-              --workspace=packages/yarn-plugin-allow-scripts
+            test-workspaces: --workspaces
           - node-version: 22.x
-            test-workspaces: >-
-              --workspace=packages/aa
-              --workspace=packages/allow-scripts
-              --workspace=packages/browserify
-              --workspace=packages/core
-              --workspace=packages/lavapack
-              --workspace=packages/laverna
-              --workspace=packages/lavamoat-node
-              --workspace=packages/perf
-              --workspace=packages/preinstall-always-fail
-              --workspace=packages/survey
-              --workspace=packages/tofu
-              --workspace=packages/webpack
-              --workspace=packages/yarn-plugin-allow-scripts
+            test-workspaces: --workspaces
     steps:
       - name: Checkout (PR)
         if: github.event_name == 'pull_request'
