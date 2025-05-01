@@ -1,0 +1,41 @@
+name: macOS Tests
+on:
+  push:
+    branches:
+      - main # limit to main, because pushes to pull-requested branches are triggered below
+  pull_request:
+    # any pull request
+
+permissions:
+  contents: read
+
+jobs:
+  compatibility-test-macos:
+    name: Test macOS compatibility
+    runs-on: macOS-latest
+    env:
+      FORCE_COLOR: '1'
+      TEST_WORKSPACES: --workspaces
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - name: Use Node.js from .nvmrc
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - name: Set npm version
+        run: |
+          corepack enable
+          npm --version
+      - name: Install Dependencies
+        uses: bahmutov/npm-install@6bbff949458c1dd99b20e185cee8c4d6fcf1212a # v1.10.9
+        with:
+          useRollingCache: true
+          install-command: npm ci --foreground-scripts
+      - name: Test
+        run: |
+          npm run --if-present ${{ env.TEST_WORKSPACES }} build
+          npm run build:types
+          npm run --if-present ${{ env.TEST_WORKSPACES }} test:prep
+          npm run --if-present ${{ env.TEST_WORKSPACES }} test
