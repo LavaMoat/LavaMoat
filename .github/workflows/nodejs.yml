@@ -21,17 +21,14 @@ jobs:
       matrix:
         include:
           - node-version: 16.x
-            test-workspaces: >-
+            workspaces: >-
               --workspace=packages/aa
               --workspace=packages/allow-scripts
               --workspace=packages/preinstall-always-fail
               --workspace=packages/yarn-plugin-allow-scripts
           - node-version: 18.x
-            test-workspaces: --workspaces
           - node-version: 20.x
-            test-workspaces: --workspaces
           - node-version: 22.x
-            test-workspaces: --workspaces
     steps:
       - name: Checkout (PR)
         if: github.event_name == 'pull_request'
@@ -44,26 +41,15 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           fetch-depth: 0 # needed for dirty check
+
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        uses: ./.github/actions/prepare
         with:
           node-version: ${{ matrix.node-version }}
-          cache: 'npm'
-      - name: Set npm version
-        run: |
-          corepack enable
-          npm --version
-      - name: Install Dependencies
-        uses: bahmutov/npm-install@6bbff949458c1dd99b20e185cee8c4d6fcf1212a # v1.10.9
+      - name: Build & Test
+        uses: ./.github/actions/test
         with:
-          useRollingCache: true
-          install-command: npm ci --foreground-scripts
-      - name: Test Workspaces
-        run: |
-          npm run --if-present ${{ matrix.test-workspaces }} build
-          npm run build:types
-          npm run --if-present ${{ matrix.test-workspaces }} test:prep
-          npm run --if-present ${{ matrix.test-workspaces }} test
+          workspaces: ${{ matrix.workspaces }}
       - name: Dirty Check
         run: node ./scripts/dirty-check.js
 
@@ -72,11 +58,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
-      - name: Install Dependencies
-        uses: bahmutov/npm-install@6bbff949458c1dd99b20e185cee8c4d6fcf1212a # v1.10.9
-        with:
-          useRollingCache: true
-          install-command: npm ci --foreground-scripts
+      - name: Use Node.js from .nvmrc
+        uses: ./.github/actions/prepare
       # the same thing could be accomplished via `npm lint` but this is helpful for organizing job output
       - name: Lint Sources
         run: npm run lint:eslint
