@@ -1,0 +1,32 @@
+description: Prepares the repo for a typical CI job
+
+name: Prepare
+inputs:
+  node-version: # id of input
+    description: 'Node.js version'
+    required: false
+    default: '22.x'
+  shell:
+    description: 'Shell to use'
+    required: false
+    default: 'bash'
+
+runs:
+  steps:
+    - name: Setup Node.js v${{ inputs.node-version }}
+      uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+      with:
+        node-version: ${{ inputs.node-version }}
+        node-version-file: .nvmrc
+        cache: npm
+    - name: Set npm version
+      run: |
+        corepack enable
+        npm --version
+      shell: ${{ inputs.shell }}
+    - name: Install dependencies
+      uses: bahmutov/npm-install@6bbff949458c1dd99b20e185cee8c4d6fcf1212a # v1.10.9
+      with:
+        useRollingCache: true
+        install-command: npm ci --foreground-scripts
+  using: composite
