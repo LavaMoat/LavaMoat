@@ -5,7 +5,7 @@ inputs:
   node-version: # id of input
     description: 'Node.js version'
     required: false
-    default: '22.x'
+    default: ''
   shell:
     description: 'Shell to use'
     required: false
@@ -14,9 +14,15 @@ inputs:
 runs:
   steps:
     - name: Setup Node.js v${{ inputs.node-version }}
+      if: ${{ inputs.node-version != '' }}
       uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
       with:
         node-version: ${{ inputs.node-version }}
+        cache: npm
+    - name: Setup Node.js via .nvmrc
+      if: ${{ inputs.node-version == '' }}
+      uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+      with:
         node-version-file: .nvmrc
         cache: npm
     - name: Set npm version
