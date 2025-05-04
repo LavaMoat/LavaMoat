@@ -29,6 +29,8 @@ const {
   getOwnPropertyDescriptors,
 } = Object
 
+const { isArray } = Array
+
 /**
  * Picks stuff in the policy out of the original object
  *
@@ -74,7 +76,7 @@ export const makeGlobalsAttenuator = (
     scuttleGlobalThis = {enabled: scuttleGlobalThis}
   }
   if (scuttleGlobalThis?.enabled) {
-    if (!Array.isArray(scuttleGlobalThis?.exceptions)) {
+    if (!isArray(scuttleGlobalThis?.exceptions)) {
       scuttleGlobalThis.exceptions = []
     }
     scuttleGlobalThis.exceptions.push('Map', 'parseFloat', 'WeakMap', 'WeakSet', 'Boolean', 'Number', 'Promise', 'String', 'isNaN')
