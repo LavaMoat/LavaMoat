@@ -285,7 +285,7 @@ const main = async (args = hideBin(process.argv)) => {
         global: true,
         group: BEHAVIOR_GROUP,
       },
-      'scuttle-global-this': {
+      scuttle: {
         describe: 'Enable scuttling of globalThis',
         type: 'boolean',
         global: true,
@@ -427,7 +427,7 @@ const main = async (args = hideBin(process.argv)) => {
           'policy-override': policyOverridePath,
           dev,
           root: projectRoot,
-          'scuttle-global-this': scuttleGlobalThis,
+          scuttle: scuttleGlobalThis,
           write,
         } = argv
 
