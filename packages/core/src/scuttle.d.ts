@@ -17,6 +17,6 @@ export interface GlobalRef {
 /**
  * Scuttles (disables or restricts) certain global properties
  * @param globalRef The global object to scuttle
- * @param opts Options for scuttling
+ * @param [opts] Options for scuttling
  */
-export function scuttle(globalRef: GlobalRef, opts: ScuttleOpts | boolean): void;
+export function scuttle(globalRef: GlobalRef, opts?: ScuttleOpts | boolean): void;
