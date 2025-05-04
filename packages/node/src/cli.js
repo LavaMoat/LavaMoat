@@ -285,13 +285,6 @@ const main = async (args = hideBin(process.argv)) => {
         global: true,
         group: BEHAVIOR_GROUP,
       },
-      scuttle: {
-        describe: 'Enable scuttling of globalThis',
-        type: 'boolean',
-        global: true,
-        group: BEHAVIOR_GROUP,
-        coerce: (value) => value === true ? {enabled: true} : value,
-      },
     })
     .conflicts('quiet', 'verbose')
     .middleware(
@@ -403,6 +396,13 @@ const main = async (args = hideBin(process.argv)) => {
               group: BEHAVIOR_GROUP,
               implies: 'generate-recklessly',
               hidden: true,
+            },
+            scuttle: {
+              type: 'boolean',
+              describe: 'Enable scuttling of globalThis',
+              group: BEHAVIOR_GROUP,
+              hidden: true,
+              coerce: Boolean,
             },
           })
           /**
