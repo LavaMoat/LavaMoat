@@ -15,6 +15,7 @@ import {
 import { isObjectyObject } from '../util.js'
 
 /**
+ * @import {MakeGlobalsAttenuatorOptions} from '../types.js'
  * @import {GlobalAttenuatorFn, ModuleAttenuatorFn} from '@endo/compartment-mapper'
  * @import {GlobalAttenuatorParams} from '../types.js'
  * @import {LavaMoatPolicy} from 'lavamoat-core'
@@ -46,7 +47,7 @@ export const attenuateModule = (params, originalObject) => {
  *
  * **REMEMBER: The attenuator is _not applied_ to packages without policy!**
  *
- * @param {import('../types.js').MakeGlobalsAttenuatorOptions} [options]
+ * @param {MakeGlobalsAttenuatorOptions} [options]
  * @returns {GlobalAttenuatorFn<GlobalAttenuatorParams>}
  * @internal
  */
