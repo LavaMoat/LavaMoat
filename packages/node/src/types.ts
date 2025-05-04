@@ -472,4 +472,4 @@ export interface WithPolicy {
   policy?: Partial<LavaMoatPolicy<Resources>>
 }
 
-export type MakeGlobalsAttenuatorOptions = WithPolicy & WithScuttleGlobalThis
+export type MakeGlobalsAttenuatorOptions = Simplify<WithPolicy & WithScuttleGlobalThis>
