@@ -11,6 +11,7 @@ import {
   ENDO_POLICY_ITEM_ROOT,
   GLOBAL_THIS_REFS,
   LAVAMOAT_POLICY_ITEM_WRITE,
+  SCUTTLE_EXCEPTIONS,
 } from '../constants.js'
 import { isObjectyObject } from '../util.js'
 
@@ -79,7 +80,7 @@ export const makeGlobalsAttenuator = (
     if (!isArray(scuttleGlobalThis?.exceptions)) {
       scuttleGlobalThis.exceptions = []
     }
-    scuttleGlobalThis.exceptions.push('Map', 'parseFloat', 'WeakMap', 'WeakSet', 'Boolean', 'Number', 'Promise', 'String', 'isNaN')
+    scuttleGlobalThis.exceptions.push(...SCUTTLE_EXCEPTIONS)
   }
 
   const { getEndowmentsForConfig, copyWrappedGlobals } = endowmentsToolkit({

@@ -191,3 +191,10 @@ export const PACKAGE_JSON = 'package.json'
 export const GLOBAL_THIS_REFS = Object.freeze(
   /** @type {const} */ (['global', 'globalThis'])
 )
+
+/**
+ * globalThis own props to avoid scuttling to prevent clash with core functionality
+ */
+export const SCUTTLE_EXCEPTIONS = Object.freeze(/** @type {const} */([
+  'Map', 'parseFloat', 'WeakMap', 'WeakSet', 'Boolean', 'Number', 'Promise',
+    'String', 'isNaN']))
