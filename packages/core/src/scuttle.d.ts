@@ -11,7 +11,7 @@ export interface ScuttleOpts {
  * Reference to the global object
  */
 export interface GlobalRef {
-  globalThis?: Record<string, unknown>;
+  globalThis?: Record<PropertyKey, unknown>;
 }
 
 /**
