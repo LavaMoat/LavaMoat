@@ -170,14 +170,14 @@ export interface WithTrustRoot {
   trustRoot?: boolean
 }
 
-export interface ScuttleGlobalThis {
+export interface ScuttleGlobalThisOptions {
   enabled?: boolean
   exceptions?: string[]
   scuttlerName?: string
 }
 
 export interface WithScuttleGlobalThis {
-  scuttleGlobalThis?: boolean | ScuttleGlobalThis
+  scuttleGlobalThis?: boolean | ScuttleGlobalThisOptions
 }
 
 /**
