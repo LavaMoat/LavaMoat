@@ -22,6 +22,14 @@ const {
   defineProperty,
 } = Object
 
+const preserveLanguageIntrinsics = (function(cg, g) {
+  return Object.getOwnPropertyNames(cg)
+    // skip all intrinsics that a Compartment already grants
+    .filter(a => cg[a] === g[a])
+    // support LM,SES exported APIs and polyfills that LM counts on
+    .concat(['Compartment', 'Error', 'globalThis'])
+}(new Compartment().globalThis, globalThis))
+
 const { isArray, from } = Array
 
 const { getPrototypeOf } = Reflect
@@ -128,10 +136,8 @@ function performScuttleGlobalThis(globalRef, extraPropsToAvoid = []) {
     props.push(...getOwnPropertyNames(proto))
   )
 
-  // support LM,SES exported APIs and polyfills
-  const avoidForLavaMoatCompatibility = ['Compartment', 'Error', 'globalThis']
   const propsToAvoid = new Set([
-    ...avoidForLavaMoatCompatibility,
+    ...preserveLanguageIntrinsics,
     ...extraPropsToAvoid,
   ])
 

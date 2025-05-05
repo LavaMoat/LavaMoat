@@ -8,9 +8,9 @@ const one = () => {
   if (globalThis.getTrueGlobalThisForTestsOnly) {
     globalObject = globalThis.getTrueGlobalThisForTestsOnly()
   }
-  // this will throw if regex scuttling fails
-  if (globalObject.Float32Array) {
-    module.exports = globalObject.Math.PI
+  // this will throw if scuttling fails
+  if (globalObject.AAA) {
+    module.exports = globalObject.AAA
   }
 }
 
@@ -18,23 +18,19 @@ module.exports = [
   async (log = console.error.bind(console)) => {
     const scenario = createScenarioFromScaffold({
       name: 'scuttle - host env global object is scuttled to work',
+      context: { AAA: '111' },
       defineOne: one,
-      expectedResult: Math.PI,
+      expectedResult: '111',
       opts: {
         scuttleGlobalThis: {
           enabled: true,
           exceptions: [
             'WebAssembly',
             'process',
-            '/[0-9]+/',
-            'Set',
-            'Reflect',
-            'Object',
             'console',
-            'Array',
-            'RegExp',
-            'Date',
             'Math',
+            'Date',
+            'AAA',
           ],
         },
       },
@@ -45,6 +41,7 @@ module.exports = [
   async (log = console.error.bind(console)) => {
     const scenario = createScenarioFromScaffold({
       name: 'scuttle - host env global object is too scuttled to work',
+      context: { AAA: '111' },
       defineOne: one,
       opts: {
         scuttleGlobalThis: {
@@ -52,7 +49,10 @@ module.exports = [
           exceptions: [
             'WebAssembly',
             'process',
-            '/[0-9]+/' /*'Set', 'Reflect', 'Object', 'console', 'Array', 'RegExp', 'Date', 'Math'*/,
+            'console',
+            'Math',
+            'Date',
+            // 'AAA',
           ],
         },
       },
