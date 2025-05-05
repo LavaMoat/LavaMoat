@@ -6,6 +6,14 @@
   * dependencies
     * @lavamoat/aa bumped from ^4.0.1 to ^4.1.0
 
+## [3.3.3](https://github.com/LavaMoat/LavaMoat/compare/allow-scripts-v3.3.2...allow-scripts-v3.3.3) (2025-05-01)
+
+
+### Bug Fixes
+
+* **deps:** update dependency type-fest to v4.40.0 ([#1619](https://github.com/LavaMoat/LavaMoat/issues/1619)) ([4e20306](https://github.com/LavaMoat/LavaMoat/commit/4e20306371ae605fc414dd645b8e422a68c71b93))
+* **deps:** update dependency type-fest to v4.40.1 ([#1624](https://github.com/LavaMoat/LavaMoat/issues/1624)) ([b918dcc](https://github.com/LavaMoat/LavaMoat/commit/b918dcc7d7ea2b0a4779eecaa7a853c73ecc5246))
+
 ## [3.3.2](https://github.com/LavaMoat/LavaMoat/compare/allow-scripts-v3.3.1...allow-scripts-v3.3.2) (2025-03-11)
 
 
