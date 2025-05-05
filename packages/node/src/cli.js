@@ -401,7 +401,6 @@ const main = async (args = hideBin(process.argv)) => {
               type: 'boolean',
               describe: 'Enable scuttling of globalThis',
               group: BEHAVIOR_GROUP,
-              hidden: true,
               coerce: Boolean,
             },
           })
