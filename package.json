@@ -32,6 +32,7 @@
     "release:rebuild": "npm run rebuild && npm run test:prep && npm run test:workspaces",
     "setup": "husky; npm run rebuild",
     "test": "npm run build && npm run test:prep && npm run test:workspaces",
+    "test:all": "npm run rebuild && npm run test:prep && ava",
     "test:prep": "npm run --workspaces --if-present test:prep",
     "test:workspaces": "npm run --workspaces --if-present test",
     "watch:types": "tsc -b --watch"
