@@ -1,7 +1,5 @@
 # This is a fixture for testing the prebuilt native modules
 
-This fixture is not used directly.
-
 ## Create Snapshot
 
 Run the following to create/update a snapshot in `../json-fixture`:

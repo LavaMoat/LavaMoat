@@ -3,8 +3,6 @@ import '../../../src/preamble.js'
 import test from 'ava'
 import { createExecMacros } from './exec-macros.js'
 
-const isDockerCI = !!process.env.DOCKER_CI
-
 const { testExec, testExecForJSON } = createExecMacros(test)
 
 test(
@@ -66,7 +64,8 @@ test.failing(
     },
   }
 )
-;(isDockerCI ? test.failing : test)(
+
+test(
   'native module w/ dynamic imports',
   testExec,
   new URL('../fixture/native/index.js', import.meta.url),
@@ -103,8 +102,8 @@ test.failing(
     },
   }
 )
-;(isDockerCI ? test.failing : test)(
-  'native module',
+;(process.platform === 'linux' && process.arch === 'x64' ? test : test.skip)(
+  'native module loaded statically (linux-x64 only)',
   testExec,
   new URL('../fixture/static-native/index.js', import.meta.url),
   { hello: 'world' },
