@@ -31,8 +31,6 @@ runs:
         npm --version
       shell: ${{ inputs.shell }}
     - name: Install dependencies
-      uses: bahmutov/npm-install@6bbff949458c1dd99b20e185cee8c4d6fcf1212a # v1.10.9
-      with:
-        useRollingCache: true
-        install-command: npm ci --foreground-scripts
+      run: npm ci --foreground-scripts
+      shell: ${{ inputs.shell }}
   using: composite
