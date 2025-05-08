@@ -1,4 +1,4 @@
-This fixture is not used directly; it's only here in order to create a snapshot:
+Update the snapshot of this fixture by running the following command:
 
 ```bash
 npm run start
