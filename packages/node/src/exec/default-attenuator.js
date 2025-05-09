@@ -6,14 +6,17 @@
  */
 
 import { endowmentsToolkit } from 'lavamoat-core'
+import { scuttle } from "lavamoat-core/src/scuttle.js"
 import {
   ENDO_POLICY_ITEM_ROOT,
   GLOBAL_THIS_REFS,
   LAVAMOAT_POLICY_ITEM_WRITE,
+  SCUTTLE_EXCEPTIONS,
 } from '../constants.js'
 import { isObjectyObject } from '../util.js'
 
 /**
+ * @import {MakeGlobalsAttenuatorOptions} from '../types.js'
  * @import {GlobalAttenuatorFn, ModuleAttenuatorFn} from '@endo/compartment-mapper'
  * @import {GlobalAttenuatorParams} from '../types.js'
  * @import {LavaMoatPolicy} from 'lavamoat-core'
@@ -26,6 +29,8 @@ const {
   defineProperties,
   getOwnPropertyDescriptors,
 } = Object
+
+const { isArray } = Array
 
 /**
  * Picks stuff in the policy out of the original object
@@ -45,13 +50,12 @@ export const attenuateModule = (params, originalObject) => {
  *
  * **REMEMBER: The attenuator is _not applied_ to packages without policy!**
  *
- * @param {object} options
- * @param {Partial<LavaMoatPolicy>} [options.policy]
+ * @param {MakeGlobalsAttenuatorOptions} [options]
  * @returns {GlobalAttenuatorFn<GlobalAttenuatorParams>}
  * @internal
  */
 export const makeGlobalsAttenuator = (
-  { policy: { resources } = {} } = { policy: {} }
+  { policy: { resources } = {}, scuttleGlobalThis = {enabled: false} } = {}
 ) => {
   /** @type {Set<string>} */
   const knownWritableFields = new Set()
@@ -67,6 +71,16 @@ export const makeGlobalsAttenuator = (
         }
       }
     }
+  }
+
+  if (typeof scuttleGlobalThis === 'boolean') {
+    scuttleGlobalThis = {enabled: scuttleGlobalThis}
+  }
+  if (scuttleGlobalThis?.enabled) {
+    if (!isArray(scuttleGlobalThis?.exceptions)) {
+      scuttleGlobalThis.exceptions = []
+    }
+    scuttleGlobalThis.exceptions.push(...SCUTTLE_EXCEPTIONS)
   }
 
   const { getEndowmentsForConfig, copyWrappedGlobals } = endowmentsToolkit({
@@ -104,6 +118,7 @@ export const makeGlobalsAttenuator = (
         'globalThis',
         'global',
       ])
+      scuttle(originalGlobalThis, { ...scuttleGlobalThis, enabled: scuttleGlobalThis.enabled ?? false })
     } else {
       if (!rootCompartmentGlobalThis) {
         rootCompartmentGlobalThis = new Compartment().globalThis
@@ -111,6 +126,7 @@ export const makeGlobalsAttenuator = (
           'globalThis',
           'global',
         ])
+        scuttle(originalGlobalThis, { ...scuttleGlobalThis, enabled: scuttleGlobalThis.enabled ?? false })
       }
       const endowments = getEndowmentsForConfig(
         rootCompartmentGlobalThis,

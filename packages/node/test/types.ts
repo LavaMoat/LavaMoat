@@ -3,11 +3,13 @@ import type { LavaMoatPolicy } from 'lavamoat-core'
 import type { NestedDirectoryJSON } from 'memfs'
 import { ExecFileException } from 'node:child_process'
 import type { Merge, RequireAtLeastOne, Simplify } from 'type-fest'
+import type { ScuttleGlobalThisOptions } from '../src/types.ts'
 
 export interface RunnerWorkerData {
   entryPath: string
   policy: LavaMoatPolicy
   vol: NestedDirectoryJSON
+  scuttleGlobalThis: ScuttleGlobalThisOptions
 }
 
 export type TestCLIExpectationFn<Ctx = unknown> = (
