@@ -1,6 +1,8 @@
 import '../../../src/preamble.js'
 
 import test from 'ava'
+import { run } from '../../../src/exec/run.js'
+import { JSON_FIXTURE_DIR_URL, loadJSONFixture } from '../json-fixture-util.js'
 import { createExecMacros } from './exec-macros.js'
 
 const { testExec, testExecForJSON } = createExecMacros(test)
@@ -46,6 +48,41 @@ test(
 test('hashbang evasion', testExecForJSON, 'hashbang.json', {
   default: { hello: 'world' },
   hello: 'world',
+})
+
+test('policy enforcement - untrusted root', async (t) => {
+  const { readPowers } = await loadJSONFixture(
+    new URL('policy-enforcement.json', JSON_FIXTURE_DIR_URL)
+  )
+  await t.throwsAsync(
+    run(
+      '/node_modules/app/app.js',
+      {
+        resources: {
+          app: {
+            packages: {
+              pid: true,
+            },
+          },
+          pid: {
+            globals: {
+              'process.pid': false,
+            },
+          },
+        },
+        root: {
+          usePolicy: 'app',
+        },
+      },
+      {
+        readPowers,
+        trustRoot: false,
+      }
+    ),
+    {
+      message: `Cannot read properties of undefined (reading 'pid')`,
+    }
+  )
 })
 
 test(
