@@ -27,12 +27,13 @@ import { hasValue, hrLabel, hrPath } from '../util.js'
  * @import {VirtualModuleSource} from 'ses'
  * @import {Loggerr} from 'loggerr'
  * @import {LMRCache} from './lmr-cache.js'
- * @import {CanonicalName, PolicyGeneratorContextOptions,
+ * @import {PolicyGeneratorContextOptions,
  *   SimpleLavamoatModuleRecordOptions} from '../internal.js'
+ * @import {CanonicalName, CompartmentDescriptorData} from '../types.js'
  * @import {LavamoatModuleRecord, IsBuiltinFn} from 'lavamoat-core'
  */
 
-const { entries, keys, hasOwn } = Object
+const { entries, keys, hasOwn, freeze } = Object
 
 /**
  * Handles creation of {@link LavamoatModuleRecord} objects for individual
@@ -59,7 +60,7 @@ export class PolicyGeneratorContext {
    * @type {Readonly<CompartmentDescriptor>}
    * @internal
    */
-  compartment
+  compartmentDescriptor
 
   /**
    * Mapping of renamed compartments
@@ -120,6 +121,13 @@ export class PolicyGeneratorContext {
   #rootModule
 
   /**
+   * Metadata associated with {@link compartmentDescriptor}
+   *
+   * @type {Readonly<CompartmentDescriptorData>}
+   */
+  #data
+
+  /**
    * Sets some properties
    *
    * @remarks
@@ -128,14 +136,17 @@ export class PolicyGeneratorContext {
    * {@link PolicyGeneratorContext.create static factory method} of the same
    * class. This is intentional, since inheritance is undesirable in this case.
    * @private
-   * @param {Readonly<CompartmentDescriptor>} compartment The associated
-   *   compartment
+   * @param {Readonly<CompartmentDescriptor>} compartmentDescriptor The
+   *   associated {@link CompartmentDescriptor}
+   * @param {Readonly<CompartmentDescriptorData>} data Data associated with the
+   *   `CompartmentDescriptor`
    * @param {Readonly<Record<string, string>>} renames
    * @param {Readonly<LMRCache>} lmrCache
-   * @param {Readonly<PolicyGeneratorContextOptions<RootModule>>} opts
+   * @param {Readonly<PolicyGeneratorContextOptions<RootModule>>} options
    */
   constructor(
-    compartment,
+    compartmentDescriptor,
+    data,
     renames,
     lmrCache,
     {
@@ -148,12 +159,13 @@ export class PolicyGeneratorContext {
     this.#lmrCache = lmrCache
     this.#readPowers = readPowers
     this.#isBuiltin = isBuiltin
-    this.compartment = compartment
+    this.compartmentDescriptor = compartmentDescriptor
     this.renames = renames
     this.#log = log
     this.#rootModule = rootModule
     this.#missingModules = new Set()
     this.#filepaths = new Map()
+    this.#data = freeze(data)
   }
 
   /**
@@ -164,7 +176,8 @@ export class PolicyGeneratorContext {
    */
   isBuiltin(specifier) {
     return (
-      !hasOwn(this.compartment.modules, specifier) && this.#isBuiltin(specifier)
+      !hasOwn(this.compartmentDescriptor.modules, specifier) &&
+      this.#isBuiltin(specifier)
     )
   }
 
@@ -211,7 +224,7 @@ export class PolicyGeneratorContext {
     const [filepaths, log, compartment] = [
       this.#filepaths,
       this.#log,
-      this.compartment,
+      this.compartmentDescriptor,
     ]
     specifier = specifier.replace(/\/$/, '')
 
@@ -242,13 +255,13 @@ export class PolicyGeneratorContext {
         return filepath
       } else {
         log.error(
-          `Compartment ${hrLabel(compartment.label)}: unable to determine filepath for "${specifier}"; this is a bug`
+          `Compartment ${hrLabel(this.canonicalName)}: unable to determine filepath for "${specifier}"; this is a bug`
         )
       }
     }
 
     log.debug(
-      `Compartment ${hrLabel(compartment.label)}: recording module specified as ${hrPath(specifier)} as missing`
+      `Compartment ${hrLabel(this.canonicalName)}: recording module specified as ${hrPath(specifier)} as missing`
     )
     this.#missingModules.add(specifier)
     filepaths.set(specifier, null)
@@ -282,14 +295,21 @@ export class PolicyGeneratorContext {
    * Factory to create a new {@link PolicyGeneratorContext}
    *
    * @template {string | void} [RootModule=void] Default is `void`
-   * @param {Readonly<CompartmentDescriptor>} compartment
+   * @param {Readonly<CompartmentDescriptor>} compartmentDescriptor
+   * @param {Readonly<CompartmentDescriptorData>} data
    * @param {Readonly<Record<string, string>>} renames
    * @param {Readonly<LMRCache>} lmrCache
    * @param {Readonly<PolicyGeneratorContextOptions<RootModule>>} opts
    * @returns {PolicyGeneratorContext<RootModule>}
    */
-  static create(compartment, renames, lmrCache, opts = {}) {
-    return new PolicyGeneratorContext(compartment, renames, lmrCache, opts)
+  static create(compartmentDescriptor, data, renames, lmrCache, opts = {}) {
+    return new PolicyGeneratorContext(
+      compartmentDescriptor,
+      data,
+      renames,
+      lmrCache,
+      opts
+    )
   }
 
   /**
@@ -413,7 +433,7 @@ export class PolicyGeneratorContext {
    * @returns {CanonicalName} Package name or special name for entrypoint
    */
   get canonicalName() {
-    return this.compartment.label
+    return this.#data.canonicalName
   }
 
   /**
@@ -428,7 +448,7 @@ export class PolicyGeneratorContext {
     )
 
     if (this.#missingModules.size) {
-      const nicePath = hrPath(this.renames[this.compartment.location])
+      const nicePath = hrPath(this.renames[this.compartmentDescriptor.location])
       let msg = `Ensure all dependencies are properly installed. Package ${hrLabel(this.canonicalName)} (${nicePath}) references unresolvable module(s). Unresolvable modules may be "optional" or otherwise unlisted in ${hrPath(PACKAGE_JSON)}. ${chalk.italic('Execution will most likely fail')} unless accounted for in policy overrides:`
       for (const missingModule of this.#missingModules) {
         msg += `\n- ${chalk.yellow(missingModule)}`

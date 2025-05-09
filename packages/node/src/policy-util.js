@@ -29,8 +29,8 @@ import {
  * @import {CompartmentDescriptor} from '@endo/compartment-mapper'
  * @import {ModuleDescriptor} from 'ses'
  * @import {RootPolicy, LavaMoatPolicy} from 'lavamoat-core'
- * @import {LavaMoatPolicyDebug, LoadPoliciesOptions, WritableFsInterface} from './types.js'
- * @import {CanonicalName, ReadPolicyOptions, ReadPolicyOverrideOptions} from './internal.js'
+ * @import {CanonicalName, LavaMoatPolicyDebug, LoadPoliciesOptions, WritableFsInterface} from './types.js'
+ * @import {ReadPolicyOptions, ReadPolicyOverrideOptions} from './internal.js'
  */
 
 /**

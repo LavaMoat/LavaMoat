@@ -29,8 +29,10 @@ import { PolicyGeneratorContext } from './policy-gen-context.js'
  *   SesCompatObj,
  *   ModuleInspector} from 'lavamoat-core'
  * @import {BuildModuleRecordsOptions,
- * CompartmentMapToDebugPolicyOptions,} from '../types.js'
- * @import {InspectModuleRecordsOptions, CompartmentMapToPolicyOptions} from '../internal.js'
+ *   CompartmentMapToDebugPolicyOptions,
+ *   CompartmentMapToPolicyOptions,
+ * CompleteCompartmentDescriptorDataMap} from '../types.js'
+ * @import {ModuleRecordsToDebugPolicyOptions, ModuleRecordsToPolicyOptions, SesViolationType} from '../internal.js'
  * @import {Loggerr} from 'loggerr'
  */
 
@@ -134,8 +136,11 @@ const inspectModuleRecords = (
  * Creates {@link LavamoatModuleRecord LavamoatModuleRecords} from a compartment
  * map descriptor and sources.
  *
+ * @template {CompartmentMapDescriptor} T
  * @param {string | URL} entrypoint
- * @param {CompartmentMapDescriptor} compartmentMap Compartment map descriptor
+ * @param {T} compartmentMap Compartment map descriptor
+ * @param {CompleteCompartmentDescriptorDataMap<T>} dataMap Map of compartment
+ *   descriptors to
  * @param {Sources} sources Sources
  * @param {Record<string, string>} renames Mapping of compartment name to
  *   filepath
@@ -146,6 +151,7 @@ const inspectModuleRecords = (
 export const buildModuleRecords = (
   entrypoint,
   compartmentMap,
+  dataMap,
   sources,
   renames,
   {
@@ -168,23 +174,37 @@ export const buildModuleRecords = (
   const entrypointPath = toPath(entrypoint)
 
   const contexts = entries(compartmentMap.compartments).reduce(
-    (acc, [compartmentName, compartment]) => {
+    (acc, [compartmentName, compartmentDescriptor]) => {
       if (compartmentName in sources) {
-        acc.push([
-          compartmentName,
-          PolicyGeneratorContext.create(
-            compartment,
-            compartmentRenames,
-            lmrCache,
-            {
-              rootModule:
-                compartment === entryCompartment ? entrypointPath : undefined,
-              readPowers,
-              isBuiltin,
-              log,
-            }
-          ),
-        ])
+        const data = dataMap.get(compartmentName)
+        if (!data) {
+          throw new ReferenceError(
+            `Could not find data for compartment ${compartmentName}; this is a bug`
+          )
+        }
+        const rootModule =
+          compartmentDescriptor === entryCompartment
+            ? entrypointPath
+            : undefined
+
+        const context = PolicyGeneratorContext.create(
+          compartmentDescriptor,
+          data,
+          compartmentRenames,
+          lmrCache,
+          {
+            rootModule,
+            readPowers,
+            isBuiltin,
+            log,
+          }
+        )
+
+        acc.push([compartmentName, context])
+      } else {
+        log.debug(
+          `${hrLabel(compartmentMap.compartments[compartmentName].label)}: skipping compartment; no sources`
+        )
       }
       return acc
     },
@@ -231,10 +251,12 @@ export const buildModuleRecords = (
  * 2. Inspect the module records using LavaMoat's `ModuleInspector`
  * 3. Generate the policy using the `ModuleInspector`
  *
+ * @template {CompartmentMapDescriptor} T
  * @overload
  * @param {string | URL} entrypoint Path to the entry module
- * @param {Readonly<CompartmentMapDescriptor>} compartmentMap The whole
- *   compartment map
+ * @param {Readonly<T>} compartmentMap The whole compartment map
+ * @param {Readonly<CompleteCompartmentDescriptorDataMap<T>>} dataMap The data
+ *   map
  * @param {Readonly<Sources>} sources The sources for each compartment
  * @param {Readonly<Record<string, string>>} renames Mapping of compartment name
  *   back to filepath
@@ -254,10 +276,12 @@ export const buildModuleRecords = (
  * 2. Inspect the module records using LavaMoat's `ModuleInspector`
  * 3. Generate the policy using the `ModuleInspector`
  *
+ * @template {CompartmentMapDescriptor} T
  * @overload
  * @param {string | URL} entrypoint Path to the entry module
- * @param {Readonly<CompartmentMapDescriptor>} compartmentMap The whole
- *   compartment map
+ * @param {Readonly<T>} compartmentMap The whole compartment map
+ * @param {Readonly<CompleteCompartmentDescriptorDataMap<T>>} dataMap The data
+ *   map
  * @param {Readonly<Sources>} sources The sources for each compartment
  * @param {Readonly<Record<string, string>>} renames Mapping of compartment name
  *   back to filepath
@@ -276,9 +300,11 @@ export const buildModuleRecords = (
  * 2. Inspect the module records using LavaMoat's `ModuleInspector`
  * 3. Generate the policy using the `ModuleInspector`
  *
+ * @template {CompartmentMapDescriptor} T
  * @param {string | URL} entrypoint Path to the entry module
- * @param {Readonly<CompartmentMapDescriptor>} compartmentMap The whole
- *   compartment map
+ * @param {Readonly<T>} compartmentMap The whole compartment map
+ * @param {Readonly<CompleteCompartmentDescriptorDataMap<T>>} dataMap The data
+ *   map
  * @param {Readonly<Sources>} sources The sources for each compartment
  * @param {Readonly<Record<string, string>>} renames Mapping of compartment name
  *   back to filepath
@@ -289,6 +315,7 @@ export const buildModuleRecords = (
 export function compartmentMapToPolicy(
   entrypoint,
   compartmentMap,
+  dataMap,
   sources,
   renames,
   {
@@ -303,6 +330,7 @@ export function compartmentMapToPolicy(
   const moduleRecords = buildModuleRecords(
     entrypoint,
     compartmentMap,
+    dataMap,
     sources,
     renames,
     {
