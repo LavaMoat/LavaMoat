@@ -4,7 +4,8 @@
  *
  * @packageDocumentation
  */
-import type { IsBuiltinFn, LavaMoatPolicy } from 'lavamoat-core'
+import type { LavaMoatPolicy } from '@lavamoat/types'
+import type { IsBuiltinFn } from 'lavamoat-core'
 import type { Loggerr } from 'loggerr'
 import type nodeFs from 'node:fs'
 import type { SetFieldType, Simplify } from 'type-fest'
@@ -386,24 +387,7 @@ export type ToEndoPolicyOptions = Simplify<
  */
 export type WithRawReadPowers = WithReadPowers | WithRawPowers
 
-// re-export schema
-// TODO: make this less bad
-export type {
-  BuiltinPolicy,
-  DebugInfo,
-  GlobalPolicy,
-  GlobalPolicyRead,
-  GlobalPolicyValue,
-  GlobalPolicyWrite,
-  LavaMoatPolicy,
-  LavaMoatPolicyDebug,
-  PackagePolicy,
-  Resolutions,
-  ResourcePolicy,
-  Resources as ResourcePolicyRecord,
-  Resources,
-  RootPolicy,
-} from 'lavamoat-core'
+export type * from '@lavamoat/types'
 
 /**
  * Options for `loadPolicies()`
