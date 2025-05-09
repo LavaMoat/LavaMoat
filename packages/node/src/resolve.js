@@ -10,10 +10,10 @@ import path from 'node:path'
 import { PACKAGE_JSON } from './constants.js'
 import { isExecutableSymlink, isReadableFileSync, realpathSync } from './fs.js'
 import { log } from './log.js'
-import { hrLabel, hrPath } from './util.js'
+import { hrLabel, hrPath, toPath } from './util.js'
 
 /**
- * @import {ResolveBinScriptOptions, ResolveWorkspaceOptions} from './internal.js'
+ * @import {ResolveBinScriptOptions, ResolveEntrypointOptions, ResolveWorkspaceOptions} from './internal.js'
  */
 
 /**
@@ -32,7 +32,7 @@ export const resolveWorkspace = ({
   from = process.cwd(),
   fs = nodeFs,
 } = {}) => {
-  let current = from
+  let current = toPath(from)
   // eslint-disable-next-line no-constant-condition
   while (true) {
     const nicePath = hrPath(current)
@@ -60,10 +60,11 @@ export const resolveWorkspace = ({
  * This function cannot accept an alternative `fs` implementation since there is
  * no way to provide it to {@link Module.createRequire}.
  * @param {string} specifier Absolute path to a resolvable module
- * @param {string} [from] Directory to resolve from
+ * @param {ResolveEntrypointOptions} [options] Options
  * @returns {string} Resolved path
  */
-export const resolveEntrypoint = (specifier, from = process.cwd()) => {
+export const resolveEntrypoint = (specifier, { from = process.cwd() } = {}) => {
+  from = toPath(from)
   const abs = path.normalize(path.resolve(from, specifier))
   // the param to `createRequire` should be useless since we're guaranteed an
   // absolute path; this is used to resolve files like `index.js`
@@ -86,6 +87,7 @@ export const resolveBinScript = (
   name,
   { from = process.cwd(), fs = nodeFs } = {}
 ) => {
+  from = toPath(from)
   /** @type {string} */
   let workspace
   const niceFrom = hrPath(from)

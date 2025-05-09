@@ -1,0 +1,10 @@
+{
+  "name": "policy-enforcement",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "start": "npx snapshot-fs ../../json-fixture/policy-enforcement.json"
+  }
+}
