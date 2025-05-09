@@ -15,6 +15,7 @@ import { hasValue, isObject } from '../util.js'
  *   SourceModuleDescriptor,
  *   ModuleSource} from 'ses'
  * @import {Merge} from 'type-fest'
+ * @import {CompartmentDescriptorData, CompartmentDescriptorDataMap, CompleteCompartmentDescriptorDataMap} from '../types.js'
  * @import {CompartmentDescriptor, CompartmentMapDescriptor} from '@endo/compartment-mapper'
  * @import {LavaMoatPolicy} from 'lavamoat-core'
  */
@@ -109,11 +110,18 @@ const updateModuleSource = (moduleDescriptor, canonicalName) => {
  * returns a set of module names present in LavaMoat policy resources which need
  * to be updated.
  *
- * @param {CompartmentMapDescriptor} compartmentMap Compartment map descriptor
+ * @template {CompartmentMapDescriptor} T
+ * @param {T} compartmentMap Compartment map descriptor
+ * @param {CompleteCompartmentDescriptorDataMap<T>} dataMap Compartment
+ *   descriptor data
  * @param {LavaMoatPolicy} policyOverride LavaMoat policy override
  * @returns {(compartmentDescriptor: CompartmentDescriptor) => Set<string>}
  */
-const makeGetOverriddenResourceNames = (compartmentMap, policyOverride) => {
+const makeGetOverriddenResourceNames = (
+  compartmentMap,
+  dataMap,
+  policyOverride
+) => {
   /**
    * A cache of {@link CompartmentDescriptor} to a list of module names present
    * in policy resources.
@@ -177,7 +185,20 @@ const makeGetOverriddenResourceNames = (compartmentMap, policyOverride) => {
       return moduleDescriptorCompartment
     }
 
-    const { label: canonicalName } = compartmentDescriptor
+    if (!dataMap.has(compartmentDescriptor.location)) {
+      throw new ReferenceError(
+        `Compartment descriptor ${compartmentDescriptor.location} not found in data map`
+      )
+    }
+
+    const { canonicalName } = dataMap.get(compartmentDescriptor.location) ?? {}
+
+    if (!canonicalName) {
+      throw new ReferenceError(
+        `Compartment descriptor ${compartmentDescriptor.location} has no canonical name`
+      )
+    }
+
     const packagePolicy =
       policyOverride.resources[canonicalName]?.packages ?? {}
 
@@ -206,7 +227,20 @@ const makeGetOverriddenResourceNames = (compartmentMap, policyOverride) => {
           return overriddenResources
         }
 
-        const { label: otherCanonicalName } = otherCompartmentDescriptor
+        if (!dataMap.has(otherCompartmentDescriptor.location)) {
+          throw new ReferenceError(
+            `Compartment descriptor ${otherCompartmentDescriptor.name} not found in data map`
+          )
+        }
+
+        const { canonicalName: otherCanonicalName } =
+          dataMap.get(otherCompartmentDescriptor.location) ?? {}
+
+        if (!otherCanonicalName) {
+          throw new ReferenceError(
+            `Compartment descriptor ${otherCompartmentDescriptor.name} has no canonical name`
+          )
+        }
 
         if (!(otherCanonicalName in packagePolicy)) {
           return overriddenResources
@@ -239,19 +273,26 @@ const makeGetOverriddenResourceNames = (compartmentMap, policyOverride) => {
  * we merged them verbatim). This hopefully prevents the end-user from needing
  * to hand-craft a giant policy override.
  *
- * @param {CompartmentMapDescriptor} compartmentMap
+ * @template {CompartmentMapDescriptor} T
+ * @param {T} compartmentMap
+ * @param {CompleteCompartmentDescriptorDataMap<T>} dataMap
  * @param {LavaMoatPolicy} [policyOverride]
  * @returns {typeof Compartment} Either the original `Compartment` or a
  *   `PolicyGenCompartment`
  * @internal
  */
-export const makePolicyGenCompartment = (compartmentMap, policyOverride) => {
+export const makePolicyGenCompartment = (
+  compartmentMap,
+  dataMap,
+  policyOverride
+) => {
   if (!policyOverride?.resources) {
     return Compartment
   }
 
   const getOverriddenResourceNames = makeGetOverriddenResourceNames(
     compartmentMap,
+    dataMap,
     policyOverride
   )
 
