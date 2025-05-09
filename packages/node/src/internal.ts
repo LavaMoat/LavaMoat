@@ -12,18 +12,22 @@ import type {
   ReadNowPowersProp,
   Sources,
 } from '@endo/compartment-mapper'
-import type { LavamoatModuleRecordOptions, LavaMoatPolicy } from 'lavamoat-core'
-import type { Except, LiteralUnion, Simplify } from 'type-fest'
 import type {
-  ATTENUATORS_COMPARTMENT,
-  LAVAMOAT_PKG_POLICY_ROOT,
-} from './constants.js'
+  LavamoatModuleRecordOptions,
+  LavaMoatPolicy,
+  Resources,
+} from 'lavamoat-core'
+import type { Except, SetFieldType, Simplify, ValueOf } from 'type-fest'
+import type { SES_VIOLATION_TYPES } from './constants.js'
 import type {
   BaseLoadCompartmentMapOptions,
-  BuildModuleRecordsOptions,
+  CompartmentDescriptorDecoratorOptions,
+  CompleteCompartmentDescriptorDataMap,
   GeneratePolicyOptions,
-  WithCompartmentDescriptorTransforms,
+  WithCompartmentDescriptorDecorators,
+  WithDataMap,
   WithDebug,
+  WithDev,
   WithFs,
   WithIsBuiltin,
   WithLog,
@@ -66,7 +70,7 @@ export type LoadCompartmentMapOptions = Simplify<
     WithReadPowers &
     WithPolicyOverride &
     WithTrustRoot &
-    WithCompartmentDescriptorTransforms
+    WithCompartmentDescriptorDecorators
 >
 
 /**
@@ -202,18 +206,6 @@ export type SimpleLavamoatModuleRecordOptions = Omit<
 >
 
 /**
- * The canonical name of a package as used in policy
- *
- * {@link ATTENUATORS_COMPARTMENT} does not appear in policy and is an Endo-ism.
- *
- * @interal
- */
-export type CanonicalName = LiteralUnion<
-  typeof LAVAMOAT_PKG_POLICY_ROOT | typeof ATTENUATORS_COMPARTMENT,
-  string
->
-
-/**
  * N array of required properties for {@link ReadNowPowers}
  *
  * @interal
@@ -239,31 +231,28 @@ export type ReportInvalidOverridesOptions = Simplify<
  *
  * @interal
  */
-export type GenerateResult<T extends LavaMoatPolicy = LavaMoatPolicy> = {
+export type GenerateResult<
+  T extends MergedLavaMoatPolicy = MergedLavaMoatPolicy,
+  U extends CompartmentMapDescriptor = CompartmentMapDescriptor,
+> = {
   policy: T
-  compartmentMap: CompartmentMapDescriptor
+  compartmentMap: U
+  dataMap: CompleteCompartmentDescriptorDataMap<U>
 }
-
-/**
- * Options for `compartmentMapToPolicy()`
- *
- * @interal
- */
-export type CompartmentMapToPolicyOptions = Simplify<
-  BuildModuleRecordsOptions & WithPolicyOverride & WithDebug & WithTrustRoot
->
 
 /**
  * Result of `loadCompartmentMap()`
  *
  * @internal
  */
-export interface LoadCompartmentMapResult {
+export interface LoadCompartmentMapResult<
+  T extends CompartmentMapDescriptor = CompartmentMapDescriptor,
+> {
   /**
    * The final compartment map descriptor, having been run through
    * `captureFromMap()`.
    */
-  compartmentMap: CompartmentMapDescriptor
+  compartmentMap: T
   /**
    * The final mapping of compartment name to `CompartmentSources`, having been
    * run through `captureFromMap()`
@@ -274,6 +263,41 @@ export interface LoadCompartmentMapResult {
    * normalized compartment names (from `captureFromMap()`)
    */
   renames: Record<string, string>
+
+  dataMap: CompleteCompartmentDescriptorDataMap<T>
+}
+
+/**
+ * Options for `makeNodeCompartmentMap()`
+ *
+ * @internal
+ */
+export type MakeNodeCompartmentMapOptions = Simplify<
+  WithLog &
+    WithCompartmentDescriptorDecorators &
+    WithReadPowers &
+    WithDev &
+    WithTrustRoot &
+    Pick<BaseLoadCompartmentMapOptions, 'policy'>
+>
+
+/**
+ * Options for `decorateCompartmentMap()`
+ *
+ * @internal
+ */
+export type DecorateCompartmentMapOptions = Simplify<
+  WithDataMap & CompartmentDescriptorDecoratorOptions
+>
+
+/**
+ * Result of `makeNodeCompartmentMap()`
+ */
+export type MakeNodeCompartmentMapResult<
+  T extends CompartmentMapDescriptor = CompartmentMapDescriptor,
+> = {
+  nodeCompartmentMap: T
+  nodeDataMap: CompleteCompartmentDescriptorDataMap<T>
 }
 
 /**

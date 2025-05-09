@@ -8,18 +8,14 @@
  */
 
 import { loadFromMap } from '@endo/compartment-mapper/import-lite.js'
-import { mapNodeModules } from '@endo/compartment-mapper/node-modules.js'
-import {
-  applyTransforms,
-  finalCompartmentDescriptorTransform,
-} from '../compartment/compartment-descriptor-transform.js'
+import { makeNodeCompartmentMap } from '../compartment/node-compartment-map.js'
 import { DEFAULT_ENDO_OPTIONS } from '../compartment/options.js'
 import { defaultReadPowers } from '../compartment/power.js'
 import { log as defaultLog } from '../log.js'
-import { toEndoURL } from '../util.js'
+import { noop } from '../util.js'
 
 /**
- * @import {ReadNowPowers, LoadLocationOptions, ImportLocationOptions, SyncImportLocationOptions} from '@endo/compartment-mapper'
+ * @import {ReadNowPowers, ImportLocationOptions, SyncImportLocationOptions} from '@endo/compartment-mapper'
  * @import {ApplicationLoader, ExecuteOptions} from '../types.js'
  */
 
@@ -41,33 +37,24 @@ import { toEndoURL } from '../util.js'
  */
 export const load = async (
   entrypointPath,
-  readPowers = defaultReadPowers,
   {
     log = defaultLog,
     dev,
-    compartmentDescriptorTransforms = [],
+    decorators = [],
     trustRoot,
     policy,
-    ...options
+    readPowers = defaultReadPowers,
+    onNodeModulesMapped = noop,
+    ...otherOptions
   } = {}
 ) => {
-  const conditions = new Set(['node'])
-  await Promise.resolve()
-
-  const entrypoint = toEndoURL(entrypointPath)
-
-  const compartmentMap = await mapNodeModules(readPowers, entrypoint, {
-    conditions,
+  const { nodeCompartmentMap } = await makeNodeCompartmentMap(entrypointPath, {
+    readPowers,
     dev,
-    policy,
-    languageForExtension: DEFAULT_ENDO_OPTIONS.languageForExtension,
-  })
-
-  compartmentDescriptorTransforms.push(finalCompartmentDescriptorTransform)
-
-  applyTransforms(compartmentDescriptorTransforms, compartmentMap, {
-    trustRoot,
     log,
+    trustRoot,
+    decorators: decorators,
+    policy,
   })
 
   try {
@@ -80,7 +67,7 @@ export const load = async (
   }
 
   /** @type {ImportLocationOptions | SyncImportLocationOptions} */
-  const opts = {
+  const loadFromMapOptions = {
     ...DEFAULT_ENDO_OPTIONS,
     ...options,
     dev,
@@ -90,13 +77,14 @@ export const load = async (
 
   const { import: importApp, sha512 } = await loadFromMap(
     readPowers,
-    compartmentMap,
-    opts
+    nodeCompartmentMap,
+    loadFromMapOptions
   )
 
   return {
     // TODO: update Endo's type here
-    import: () => /** @type {Promise<{ namespace: T }>} */ (importApp(opts)),
+    import: () =>
+      /** @type {Promise<{ namespace: T }>} */ (importApp(loadFromMapOptions)),
     sha512,
   }
 }
