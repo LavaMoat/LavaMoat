@@ -1,0 +1,37 @@
+name: Windows Tests
+on:
+  push:
+    branches:
+      - main # limit to main, because pushes to pull-requested branches are triggered below
+  pull_request:
+    # any pull request
+
+permissions:
+  contents: read
+
+jobs:
+  compatibility-test-windows:
+    name: Test Windows compatibility
+    runs-on: windows-latest
+    env:
+      FORCE_COLOR: '1'
+      TEST_WORKSPACES: >-
+        --workspace=packages/aa
+        --workspace=packages/allow-scripts
+        --workspace=packages/core
+        --workspace=packages/lavapack
+        --workspace=packages/preinstall-always-fail
+        --workspace=packages/tofu
+        --workspace=packages/yarn-plugin-allow-scripts
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - name: Use Node.js
+        uses: ./.github/actions/prepare
+        with:
+          shell: pwsh
+      - name: Build & Test
+        uses: ./.github/actions/test
+        with:
+          shell: pwsh
+          workspaces: ${{ env.TEST_WORKSPACES }}

@@ -1,4 +1,5 @@
 const path = require('node:path')
+const { unlink } = require('node:fs/promises')
 const test = require('ava')
 const { loadCanonicalNameMap } = require('../src/index.js')
 const { Module } = require('node:module')
@@ -15,6 +16,22 @@ function normalizeEntries(map) {
       canonicalName,
     ])
 }
+
+/** @type {string} */
+let symlinkPath
+
+test.after(async (t) => {
+  await Promise.resolve()
+  if (symlinkPath) {
+    try {
+      await unlink(symlinkPath)
+    } catch (err) {
+      if (/** @type {NodeJS.ErrnoException} */ (err).code !== 'ENOENT') {
+        t.log(`Failed to unlink symlinked path ${symlinkPath}: ${err}`)
+      }
+    }
+  }
+})
 
 test('project 1', async (t) => {
   const canonicalNameMap = await loadCanonicalNameMap({
@@ -64,8 +81,7 @@ test('project 3', async (t) => {
 })
 
 test('project 4 - workspace symlink', async (t) => {
-  await createProject4Symlink()
-
+  symlinkPath = await createProject4Symlink()
   const canonicalNameMap = await loadCanonicalNameMap({
     rootDir: path.join(__dirname, 'projects', '4', 'packages', 'stuff'),
   })
