@@ -55,3 +55,20 @@ test('webpack/hack/fetch - cannot pollute prototypes', (t) => {
     { message: /Cannot add property polluted, object is not extensible/ }
   )
 })
+
+test('webpack/hack/mismatched-curlies', async (t) => {
+  t.plan(1)
+  try {
+    t.context.build = await scaffold({
+      ...webpackConfigDefault,
+      entry: {
+        hack4: './hack4.js',
+      },
+    })
+  } catch (err) {
+    t.assert(
+      err.compilationErrors[0].message.startsWith('E_VALIDATION'),
+      'Expected a validation error from erapper check'
+    )
+  }
+})
