@@ -82,6 +82,7 @@ class LavaMoatPlugin {
       policyLocation: path.join('lavamoat', 'webpack'),
       lockdown: lockdownDefaults,
       isBuiltin: () => false,
+      runChecks: true,
       ...options,
     }
 
@@ -252,7 +253,7 @@ class LavaMoatPlugin {
          * @type {import('./buildtime/aa.js').IdentifierLookup}
          */
         let identifierLookup
-        const runChecks = this.options.runChecks || diag.level > 0
+        const runChecks = this.options.runChecks
 
         // Caveat: this might be called before the lookup map is ready if a plugin is running a child compilation or alike.
         // Note that in those cases wrapped code is not meant to run and policy will be empty.

@@ -15,3 +15,6 @@ packages/viz/src/example-policies/**/*
 .yarn/**/*
 package-lock.json
 yarn.lock
+
+# ignore without the necessity to modify the file with ignore comments
+packages/webpack/test/fixtures/main/hack4.js
