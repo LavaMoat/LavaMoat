@@ -1,14 +1,17 @@
 /**
  * @typedef {object} ScuttleOpts
  * @property {boolean} enabled - Whether scuttling is enabled or not.
- * @property {Array<string|RegExp>} exceptions - List of properties to exclude from scuttling.
- * @property {string} scuttlerName - Name of the scuttler function to use which is expected to be found as a
- * property on the global object (e.g. if scuttlerName is 'x', scuttler function is obtained from globalThis['x']).
+ * @property {(string | RegExp)[]} exceptions - List of properties to exclude
+ *   from scuttling.
+ * @property {string} scuttlerName - Name of the scuttler function to use which
+ *   is expected to be found as a property on the global object (e.g. if
+ *   scuttlerName is 'x', scuttler function is obtained from globalThis['x']).
  */
 
 /**
  * @typedef {object} GlobalRef
- * @property {Record<string, any>} [globalThis] - Reference to the global object.
+ * @property {Record<string, any>} [globalThis] - Reference to the global
+ *   object.
  */
 
 const { Object, Array, Error, RegExp, Set, console, Proxy, Reflect } =
@@ -21,6 +24,19 @@ const {
   create,
   defineProperty,
 } = Object
+
+const preserveLanguageIntrinsics = (function (
+  globalThisCompartment,
+  globalThis
+) {
+  return (
+    Object.getOwnPropertyNames(globalThisCompartment)
+      // skip all intrinsics that a Compartment already grants
+      .filter((a) => globalThisCompartment[a] === globalThis[a])
+      // support LM,SES exported APIs and polyfills that LM counts on
+      .concat(['Compartment', 'Error', 'globalThis'])
+  )
+})(new Compartment().globalThis, globalThis)
 
 const { isArray, from } = Array
 
@@ -45,8 +61,9 @@ function generateInvokers(prop) {
 }
 
 /**
- * Applies scuttling, with the default set of options, including using Snow if passed in as scuttlerFunc.
- * Scuttle globalThis right after we used it to create the root package compartment.
+ * Applies scuttling, with the default set of options, including using Snow if
+ * passed in as scuttlerFunc. Scuttle globalThis right after we used it to
+ * create the root package compartment.
  *
  * @param {GlobalRef} globalRef - Reference to the global object.
  * @param {ScuttleOpts} opts - Scuttling options.
@@ -68,7 +85,8 @@ function scuttle(globalRef, opts) {
 
 /**
  * @param {GlobalRef} globalRef - Reference to the global object.
- * @param {ScuttleOpts|boolean} originalOpts - Scuttling options. Accepts `true` for backwards compatibility.
+ * @param {ScuttleOpts | boolean} originalOpts - Scuttling options. Accepts
+ *   `true` for backwards compatibility.
  * @returns {ScuttleOpts} - Final scuttling options.
  */
 function generateScuttleOpts(globalRef, originalOpts = create(null)) {
@@ -101,8 +119,8 @@ function generateScuttleOpts(globalRef, originalOpts = create(null)) {
   return opts
 
   /**
-   * @param {string|RegExp} except - Exception to convert to RegExp.
-   * @returns {string|RegExp} - Converted exception.
+   * @param {string | RegExp} except - Exception to convert to RegExp.
+   * @returns {string | RegExp} - Converted exception.
    */
   function toRE(except) {
     // turn scuttleGlobalThis.exceptions regexes strings to actual regexes
@@ -117,10 +135,12 @@ function generateScuttleOpts(globalRef, originalOpts = create(null)) {
 }
 
 /**
- * Runs scuttling on the globalRef. Use applyDefaultScuttling for full scope of options.
+ * Runs scuttling on the globalRef. Use applyDefaultScuttling for full scope of
+ * options.
  *
  * @param {GlobalRef} globalRef - Reference to the global object.
- * @param {Array<string|RegExp>} extraPropsToAvoid - List of additional properties to exclude from scuttling beyond the default ones.
+ * @param {(string | RegExp)[]} extraPropsToAvoid - List of additional
+ *   properties to exclude from scuttling beyond the default ones.
  */
 function performScuttleGlobalThis(globalRef, extraPropsToAvoid = []) {
   const props = []
@@ -128,10 +148,8 @@ function performScuttleGlobalThis(globalRef, extraPropsToAvoid = []) {
     props.push(...getOwnPropertyNames(proto))
   )
 
-  // support LM,SES exported APIs and polyfills
-  const avoidForLavaMoatCompatibility = ['Compartment', 'Error', 'globalThis']
   const propsToAvoid = new Set([
-    ...avoidForLavaMoatCompatibility,
+    ...preserveLanguageIntrinsics,
     ...extraPropsToAvoid,
   ])
 
@@ -155,7 +173,8 @@ function performScuttleGlobalThis(globalRef, extraPropsToAvoid = []) {
 }
 
 /**
- * @param {Set<string|RegExp>} propsToAvoid - List of properties to exclude from scuttling.
+ * @param {Set<string | RegExp>} propsToAvoid - List of properties to exclude
+ *   from scuttling.
  * @param {string} prop - Property to check.
  * @returns {boolean} - Whether the property should be avoided or not.
  */
@@ -167,8 +186,8 @@ const shouldAvoidProp = (propsToAvoid, prop) =>
   )
 
 /**
- * @param {object} value - object to get the prototype chain from.
- * @returns {Array<object>} - Prototype chain as an array.
+ * @param {object} value - Object to get the prototype chain from.
+ * @returns {object[]} - Prototype chain as an array.
  */
 function getPrototypeChain(value) {
   const protoChain = []
