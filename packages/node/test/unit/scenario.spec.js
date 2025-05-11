@@ -41,11 +41,5 @@ for await (const scenario of loadScenarios()) {
     continue
   }
 
-  // TODO implement scuttling
-  if (scenario.name?.startsWith('scuttle')) {
-    test.todo(`${scenario.name} - scuttling unsupported`)
-    continue
-  }
-
   test(scenario.name ?? '(unknown scenario)', testScenario, scenario)
 }

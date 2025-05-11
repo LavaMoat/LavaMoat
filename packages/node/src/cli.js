@@ -397,6 +397,12 @@ const main = async (args = hideBin(process.argv)) => {
               implies: 'generate-recklessly',
               hidden: true,
             },
+            scuttle: {
+              type: 'boolean',
+              describe: 'Enable scuttling of globalThis',
+              group: BEHAVIOR_GROUP,
+              coerce: Boolean,
+            },
           })
           /**
            * Resolve entrypoint from `root`
@@ -420,6 +426,7 @@ const main = async (args = hideBin(process.argv)) => {
           'policy-override': policyOverridePath,
           dev,
           root: projectRoot,
+          scuttle: scuttleGlobalThis,
           write,
         } = argv
 
@@ -471,6 +478,7 @@ const main = async (args = hideBin(process.argv)) => {
           trustRoot,
           dev,
           projectRoot,
+          scuttleGlobalThis,
         })
       }
     )
