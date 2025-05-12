@@ -82,7 +82,10 @@ module.exports = {
     'n/no-process-exit': 'off', // should not be used with async code
 
     // require node: prefix for builtin modules
-    'node-import/prefer-node-protocol': 'error',
+    // FIXME: see https://github.com/kytta/eslint-plugin-node-import/issues/10
+    'node-import/prefer-node-protocol': process.versions.node.startsWith('24.')
+      ? 'off'
+      : 'error',
   },
   settings: {
     node: {
