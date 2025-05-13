@@ -10,11 +10,15 @@ import { runAndTestScenario } from 'lavamoat-core/test/util.js'
 import { createScenarioRunner } from './scenario-util.js'
 
 /**
+ * @import {ExecutionContext} from 'ava'
+ */
+
+/**
  * Macro to test a scenario
  */
 const testScenario = test.macro(
   /**
-   * @param {import('ava').ExecutionContext} t
+   * @param {ExecutionContext} t
    * @param {any} scenario
    */
   async (t, scenario) => {
@@ -41,5 +45,5 @@ for await (const scenario of loadScenarios()) {
     continue
   }
 
-  test(scenario.name ?? '(unknown scenario)', testScenario, scenario)
+  test.serial(scenario.name ?? '(unknown scenario)', testScenario, scenario)
 }
