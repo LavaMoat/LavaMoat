@@ -12,14 +12,26 @@
     },
     "webpack": {
       "packages": {
-        "webpack-cli": true
+        "webpack-cli": true,
+        "terser-webpack-plugin": true
+      },
+      "builtins": {
+        "path": true,
+        "url": true,
+        "fs": true
       }
     },
     "webpack-cli": {
       "packages": {
-        "webpack-cli>webpack": true,
+        "webpack": true,
         "webpack-cli>webpack-merge": true,
-        "webpack-cli>@discoveryjs/json-ext": true
+        "webpack-cli>@discoveryjs/json-ext": true,
+        "webpack-cli>import-local": true
+      },
+      "builtins": {
+        "path": true,
+        "url": true,
+        "fs": true
       }
     }
   }
