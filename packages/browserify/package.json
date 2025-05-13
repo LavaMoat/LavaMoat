@@ -43,7 +43,7 @@
     "through2": "4.0.2"
   },
   "devDependencies": {
-    "@babel/code-frame": "7.26.2",
+    "@babel/code-frame": "7.27.1",
     "browserify": "17.0.1",
     "keccak": "3.0.4",
     "lavamoat": "9.0.9",
