@@ -12,7 +12,7 @@ permissions:
 jobs:
   compatibility-test-macos:
     name: Test macOS compatibility
-    runs-on: macOS-latest
+    runs-on: macos-15
     env:
       FORCE_COLOR: '1'
     steps:
