@@ -19,6 +19,23 @@
     * lavamoat-core bumped from ^15.2.0 to ^15.2.1
     * lavamoat-tofu bumped from ^7.2.1 to ^7.2.2
 
+## [9.0.10](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-v9.0.9...lavamoat-v9.0.10) (2025-05-14)
+
+
+### Bug Fixes
+
+* add Node.js v24.0.0 to supported engines ([ad9cdcd](https://github.com/LavaMoat/LavaMoat/commit/ad9cdcdf83ccbda8bf2eba427d0c80f761f47a0a))
+* **deps:** update babel monorepo ([afc9fe5](https://github.com/LavaMoat/LavaMoat/commit/afc9fe5fef98c53abe014ff657a1d4f59883abe8))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @lavamoat/aa bumped from ^4.3.2 to ^4.3.3
+    * lavamoat-core bumped from ^16.4.0 to ^16.5.0
+    * lavamoat-tofu bumped from ^8.0.7 to ^8.0.8
+
 ## [9.0.9](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-v9.0.8...lavamoat-v9.0.9) (2025-05-01)
 
 

@@ -1,6 +1,6 @@
 {
   "name": "@lavamoat/allow-scripts",
-  "version": "3.3.3",
+  "version": "3.3.4",
   "description": "A tool for running only the dependency lifecycle hooks specified in an allowlist.",
   "repository": {
     "type": "git",
@@ -39,7 +39,7 @@
     "test:run": "ava"
   },
   "dependencies": {
-    "@lavamoat/aa": "^4.3.2",
+    "@lavamoat/aa": "^4.3.3",
     "@npmcli/run-script": "8.1.0",
     "bin-links": "4.0.4",
     "npm-normalize-package-bin": "3.0.1",
