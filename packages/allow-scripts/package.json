@@ -43,7 +43,7 @@
     "@npmcli/run-script": "8.1.0",
     "bin-links": "4.0.4",
     "npm-normalize-package-bin": "3.0.1",
-    "type-fest": "4.40.1",
+    "type-fest": "4.41.0",
     "yargs": "17.7.2"
   },
   "devDependencies": {
