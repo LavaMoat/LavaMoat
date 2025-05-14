@@ -45,5 +45,5 @@ for await (const scenario of loadScenarios()) {
     continue
   }
 
-  test.serial(scenario.name ?? '(unknown scenario)', testScenario, scenario)
+  test(scenario.name ?? '(unknown scenario)', testScenario, scenario)
 }
