@@ -1,0 +1,1 @@
+node --watch-path=./lavamoat --watch-path=../../../src --watch-path=../../fixtures test.js
