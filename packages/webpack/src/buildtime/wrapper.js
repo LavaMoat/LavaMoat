@@ -81,7 +81,7 @@ exports.wrapper = function wrapper({
     ','
   )}}))${optionalBinding}()`
   if (runChecks) {
-    validateSource(before + sesCompatibleSource + after)
+    validateSource(sesCompatibleSource)
   }
   return {
     before,
