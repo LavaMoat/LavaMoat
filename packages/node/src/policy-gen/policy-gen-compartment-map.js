@@ -67,7 +67,7 @@ export const loadCompartmentMapForPolicy = async (
   {
     readPowers = defaultReadPowers,
     policyOverride,
-    trustRoot,
+    trustRoot = DEFAULT_TRUST_ROOT_COMPARTMENT,
     log = defaultLog,
     decorators = [],
     dev,
