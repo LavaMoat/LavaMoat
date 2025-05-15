@@ -260,7 +260,10 @@ test('webpack/dynamic - policy enforcement on dependency from context module whe
 function globalWithDocumentOnWhichDynamicchunkScriptExists() {
   return {
     console,
-    setTimeout,
+    setTimeout: (fn, ms) => {
+      // avoid leaving the test runner hanging 
+      return setTimeout(fn, ms).unref()
+    },
     clearTimeout,
     document: {
       getElementsByTagName: () => [
