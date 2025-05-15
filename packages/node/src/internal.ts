@@ -35,6 +35,7 @@ import type {
   WithPolicyOverridePath,
   WithReadFile,
   WithReadPowers,
+  WithScuttleGlobalThis,
   WithTrustRoot,
   WritePolicyOptions,
 } from './types.js'
@@ -61,11 +62,11 @@ export type GenerateOptions = Except<
 >
 
 /**
- * Options for `loadCompartmentMap()`
+ * Options for `loadCompartmentMapForPolicy()`
  *
  * @internal
  */
-export type LoadCompartmentMapOptions = Simplify<
+export type LoadCompartmentMapForPolicyOptions = Simplify<
   BaseLoadCompartmentMapOptions &
     WithReadPowers &
     WithPolicyOverride &
@@ -138,21 +139,21 @@ export type SomeParameters<T extends SomeFunction> = T extends new (
 /**
  * Options for `readPolicy()`
  *
- * @interal
+ * @internal
  */
 export type ReadPolicyOptions = Simplify<WithReadFile>
 
 /**
  * Options for `readPolicyOverride()`
  *
- * @interal
+ * @internal
  */
 export type ReadPolicyOverrideOptions = Simplify<WithReadFile>
 
 /**
  * Options for `resolveBinScript()`
  *
- * @interal
+ * @internal
  */
 export type ResolveBinScriptOptions = Simplify<WithFs & WithFrom>
 
@@ -176,17 +177,28 @@ export type ResolveEntrypointOptions = Simplify<WithFrom>
 /**
  * Options for `resolveWorkspace()`
  *
- * @interal
+ * @internal
  */
 export type ResolveWorkspaceOptions = ResolveBinScriptOptions
 
 /**
  * Options for `inspectModuleRecords()`
  *
- * @interal
+ * @internal
  */
-export type InspectModuleRecordsOptions = Simplify<
-  WithLog & WithDebug & WithTrustRoot
+export type ModuleRecordsToPolicyOptions = Simplify<
+  WithLog & WithDebug & WithTrustRoot & WithPolicyOverride & WithIsBuiltin
+>
+
+/**
+ * Options for `inspectModuleRecords()` with `debug` set to `true`
+ *
+ * @internal
+ */
+export type ModuleRecordsToDebugPolicyOptions = SetFieldType<
+  ModuleRecordsToPolicyOptions,
+  'debug',
+  true
 >
 
 /**
@@ -196,8 +208,6 @@ export type InspectModuleRecordsOptions = Simplify<
  * - `moduleInitializer` is only used by the `lavamoat-core` kernel;
  *   `@endo/compartment-mapper`'s parsers handle this for us
  * - `ast` is created internally by the module inspector and we needn't provide it
- *
- * @interal
  */
 export type SimpleLavamoatModuleRecordOptions = Omit<
   // eslint-disable-next-line @typescript-eslint/ban-types
@@ -208,7 +218,7 @@ export type SimpleLavamoatModuleRecordOptions = Omit<
 /**
  * N array of required properties for {@link ReadNowPowers}
  *
- * @interal
+ * @internal
  */
 export type RequiredReadNowPowers = ReadonlyArray<
   {
@@ -220,7 +230,7 @@ export type RequiredReadNowPowers = ReadonlyArray<
 /**
  * Options for `reportInvalidOverrides()`
  *
- * @interal
+ * @internal
  */
 export type ReportInvalidOverridesOptions = Simplify<
   WithPolicyOverride & WithPolicyOverridePath & WithLog
@@ -229,7 +239,7 @@ export type ReportInvalidOverridesOptions = Simplify<
 /**
  * Result of `generatePolicy()`
  *
- * @interal
+ * @internal
  */
 export type GenerateResult<
   T extends MergedLavaMoatPolicy = MergedLavaMoatPolicy,

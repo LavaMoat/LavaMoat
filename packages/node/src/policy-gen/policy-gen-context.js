@@ -449,7 +449,7 @@ export class PolicyGeneratorContext {
 
     if (this.#missingModules.size) {
       const nicePath = hrPath(this.renames[this.compartmentDescriptor.location])
-      let msg = `Ensure all dependencies are properly installed. Package ${hrLabel(this.canonicalName)} (${nicePath}) references unresolvable module(s). Unresolvable modules may be "optional" or otherwise unlisted in ${hrPath(PACKAGE_JSON)}. ${chalk.italic('Execution will most likely fail')} unless accounted for in policy overrides:`
+      let msg = `Package ${hrLabel(this.canonicalName)} (${nicePath}) references unresolvable module(s). This may be due to the module(s) not being installed, "optional" dependencies, or implcit dependencies unreferenced in ${hrPath(PACKAGE_JSON)}. ${chalk.italic('Execution will most likely fail')} unless accounted for in policy overrides:`
       for (const missingModule of this.#missingModules) {
         msg += `\n- ${chalk.yellow(missingModule)}`
       }

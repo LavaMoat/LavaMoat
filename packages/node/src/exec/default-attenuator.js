@@ -16,10 +16,9 @@ import { AttenuationError } from '../error.js'
 import { isObjectyObject } from '../util.js'
 
 /**
- * @import {MakeGlobalsAttenuatorOptions} from '../types.js'
+ * @import {MakeGlobalsAttenuatorOptions} from '../internal.js'
  * @import {GlobalAttenuatorFn, ModuleAttenuatorFn} from '@endo/compartment-mapper'
  * @import {GlobalAttenuatorParams} from '../types.js'
- * @import {LavaMoatPolicy} from 'lavamoat-core'
  */
 
 const {
@@ -53,7 +52,7 @@ export const attenuateModule = (params, originalObject) => {
  * @internal
  */
 export const makeGlobalsAttenuator = ({
-  policy: { resources } = {},
+  policy: { resources } = { resources: {} },
   scuttleGlobalThis = { enabled: false },
 } = {}) => {
   /** @type {Set<string>} */

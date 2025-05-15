@@ -512,7 +512,6 @@ export type {
   PackagePolicy,
   Resolutions,
   ResourcePolicy,
-  Resources as ResourcePolicyRecord,
   Resources,
   RootPolicy,
 } from 'lavamoat-core'
@@ -570,13 +569,6 @@ export interface WithFs {
   fs?: FsUtilInterface
 }
 
-export interface WithPolicy {
-  policy?: Partial<LavaMoatPolicy<Resources>>
-}
-
-export type MakeGlobalsAttenuatorOptions = Simplify<
-  WithPolicy & WithScuttleGlobalThis
->
 /**
  * A function which "decorates" a {@link CompartmentDescriptor}. It is provided a
  * `data` object, which it can then modify and return.
