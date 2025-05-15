@@ -7,6 +7,8 @@
  */
 import path from 'node:path'
 
+const { freeze } = Object
+
 /**
  * Const string to identify the internal attenuators compartment
  *
@@ -188,6 +190,17 @@ export const DEFAULT_TRUST_ROOT_COMPARTMENT = true
  */
 export const PACKAGE_JSON = 'package.json'
 
-export const GLOBAL_THIS_REFS = Object.freeze(
+export const GLOBAL_THIS_REFS = freeze(
   /** @type {const} */ (['global', 'globalThis'])
+)
+
+/**
+ * The variations of SES compatibility problems
+ */
+export const SES_VIOLATION_TYPES = freeze(
+  /** @type {const} */ ({
+    DynamicRequires: 'dynamic requires',
+    PrimordialMutation: 'primordial mutation',
+    StrictModeViolation: 'strict-mode violation',
+  })
 )
