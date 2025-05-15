@@ -7,14 +7,14 @@
  * @packageDocumentation
  */
 
-import { loadLocation } from '@endo/compartment-mapper'
+import { loadFromMap } from '@endo/compartment-mapper/import-lite.js'
+import { makeNodeCompartmentMap } from '../compartment/node-compartment-map.js'
 import { DEFAULT_ENDO_OPTIONS } from '../compartment/options.js'
 import { defaultReadPowers } from '../compartment/power.js'
 import { log as defaultLog } from '../log.js'
-import { toEndoURL } from '../util.js'
 
 /**
- * @import {ReadNowPowers, LoadLocationOptions} from '@endo/compartment-mapper'
+ * @import {ReadNowPowers, ImportLocationOptions, SyncImportLocationOptions} from '@endo/compartment-mapper'
  * @import {ApplicationLoader, ExecuteOptions} from '../types.js'
  */
 
@@ -37,28 +37,36 @@ import { toEndoURL } from '../util.js'
 export const load = async (
   entrypointPath,
   readPowers = defaultReadPowers,
-  { log = defaultLog, ...options } = {}
+  { log = defaultLog, dev, decorators = [], trustRoot, policy, ...options } = {}
 ) => {
-  await Promise.resolve()
+  const { nodeCompartmentMap } = await makeNodeCompartmentMap(entrypointPath, {
+    readPowers,
+    dev,
+    log,
+    trustRoot,
+    decorators: decorators,
+    policy,
+  })
 
-  const entrypoint = toEndoURL(entrypointPath)
-
-  /** @type {LoadLocationOptions} */
-  const opts = {
+  /** @type {ImportLocationOptions | SyncImportLocationOptions} */
+  const loadFromMapOptions = {
     ...DEFAULT_ENDO_OPTIONS,
     ...options,
+    dev,
+    policy,
     log: log.debug.bind(log),
   }
 
-  const { import: importApp, sha512 } = await loadLocation(
+  const { import: importApp, sha512 } = await loadFromMap(
     readPowers,
-    entrypoint,
-    opts
+    nodeCompartmentMap,
+    loadFromMapOptions
   )
 
   return {
     // TODO: update Endo's type here
-    import: () => /** @type {Promise<{ namespace: T }>} */ (importApp(opts)),
+    import: () =>
+      /** @type {Promise<{ namespace: T }>} */ (importApp(loadFromMapOptions)),
     sha512,
   }
 }
