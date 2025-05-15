@@ -30,7 +30,7 @@ const { keys, values } = Object
 /**
  * @import {GenerateOptions, GenerateResult, ReportInvalidOverridesOptions, CompartmentMapToPolicyOptions} from '../internal.js'
  * @import {GeneratePolicyOptions} from '../types.js'
- * @import {LavaMoatPolicy, LavaMoatPolicyDebug} from 'lavamoat-core'
+ * @import {LavaMoatPolicy, LavaMoatPolicyDebug} from '@lavamoat/types'
  * @import {SetFieldType} from 'type-fest'
  * @import {CompartmentMapDescriptor} from '@endo/compartment-mapper'
  */
