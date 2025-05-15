@@ -2,14 +2,13 @@ import '../../../src/preamble.js'
 
 import test from 'ava'
 import stringify from 'json-stable-stringify'
-import { DEFAULT_POLICY_PATH } from '../../../src/constants.js'
+import { ErrorCodes } from '../../../src/error-code.js'
 import { readJsonFile } from '../../../src/fs.js'
 import {
   ENDO_POLICY_BOILERPLATE,
   ENDO_POLICY_ENTRY_TRUSTED,
   toEndoPolicy,
 } from '../../../src/policy-converter.js'
-import { hrPath } from '../../../src/util.js'
 
 /**
  * @import {Policy} from '@endo/compartment-mapper'
@@ -79,7 +78,7 @@ test('toEndoPolicy() - no policy', async (t) => {
 
   // @ts-expect-error invalid type
   await t.throwsAsync(toEndoPolicy(lmPolicy), {
-    message: `LavaMoat policy file not found at ${hrPath(DEFAULT_POLICY_PATH)}`,
+    code: ErrorCodes.NoPolicy,
   })
 })
 
@@ -106,13 +105,13 @@ test('toEndoPolicy() - policy path as string', async (t) => {
 test('toEndoPolicy() - invalid policy', async (t) => {
   // @ts-expect-error invalid type
   await t.throwsAsync(toEndoPolicy([1, 2, 3]), {
-    message: 'Invalid LavaMoat policy; does not match expected schema',
+    code: ErrorCodes.InvalidPolicy,
   })
 })
 
 test('toEndoPolicy() - invalid policy (by path)', async (t) => {
   await t.throwsAsync(toEndoPolicy(INVALID_POLICY_URL), {
-    message: `Invalid LavaMoat policy at ${hrPath(INVALID_POLICY_URL)}; does not match expected schema`,
+    code: ErrorCodes.InvalidPolicy,
   })
 })
 
@@ -124,10 +123,7 @@ test('toEndoPolicy() - invalid policy override', async (t) => {
     toEndoPolicy(DEFAULT_POLICY, {
       policyOverride: lmPolicyOverride,
     }),
-    {
-      message:
-        'Invalid LavaMoat policy overrides; does not match expected schema',
-    }
+    { code: ErrorCodes.InvalidPolicy }
   )
 })
 
@@ -136,9 +132,7 @@ test('toEndoPolicy() - invalid policy override (by path)', async (t) => {
     toEndoPolicy(DEFAULT_POLICY, {
       policyOverridePath: INVALID_POLICY_URL,
     }),
-    {
-      message: `Invalid LavaMoat policy overrides at ${hrPath(INVALID_POLICY_URL)}; does not match expected schema`,
-    }
+    { code: ErrorCodes.InvalidPolicy }
   )
 })
 
