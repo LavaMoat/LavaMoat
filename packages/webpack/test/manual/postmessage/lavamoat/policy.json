@@ -1,0 +1,12 @@
+{
+  "resources": {
+    "postmessage-lib": {
+      "globals": {
+        "console.error": true,
+        "opener": true,
+        "parent": true,
+        "top": true
+      }
+    }
+  }
+}

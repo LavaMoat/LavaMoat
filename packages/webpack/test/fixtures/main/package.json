@@ -16,6 +16,7 @@
     "loader-hack": "1.0.0",
     "nodejs-package": "1.0.0",
     "polyfill-package": "1.0.0",
+    "postmessage-lib": "1.0.0",
     "prototype-poisoning-package": "1.0.0",
     "resource-hack": "1.0.0",
     "side-effects-package": "1.0.0",
