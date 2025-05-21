@@ -26,7 +26,7 @@ function processRequirements(requirements, module) {
   const runtimeFlags = {}
 
   for (const requirement of requirements) {
-    // requirements can be more precise than just `module` - webpck will list nested fields in requirements, meanwhile we're only interested in passing the top level references.
+    // requirements can be more precise than just `module` - webpack will list nested fields in requirements, meanwhile we're only interested in passing the top level references.
     const requirementReferenceName = requirement.split('.')[0]
     if (requirementReferenceName === RUNTIME_GLOBALS.thisAsExports) {
       runtimeFlags.thisAsExports = true
@@ -75,7 +75,7 @@ exports.wrapGeneratorMaker = ({
   return function wrapGenerator(generatorInstance) {
     // Monkey-patching JavascriptGenerator. Yes, this could be nicer.
     // Using features of the generator itself we might be able to achieve the same
-    // but it would be more suseptible to changes in webpack.
+    // but it would be more susceptible to changes in webpack.
     // And there aren't any official or private hooks that would give us access to runtime requirements that I could find.
 
     if (wrappedGeneratorInstances.has(generatorInstance)) {
@@ -84,7 +84,7 @@ exports.wrapGeneratorMaker = ({
     const originalGenerate = generatorInstance.generate
     /**
      * @param {NormalModule} module
-     * @param {any} options - GeneratorOptions type not exported fromw ebpack
+     * @param {any} options - GeneratorOptions type not exported from webpack
      * @returns {Source}
      */
     generatorInstance.generate = function (module, options) {

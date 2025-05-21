@@ -46,7 +46,7 @@ exports.wrapper = function wrapper({
   const runtimeKitArray = Array.from(runtimeKit)
   // validateSource(source);
 
-  // No AST used in these transforms, so string cmparison should indicate if anything was changed.
+  // No AST used in these transforms, so string comparison should indicate if anything was changed.
   const sesCompatibleSource = applySourceTransforms(source)
   const sourceChanged = source !== sesCompatibleSource
 

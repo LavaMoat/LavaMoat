@@ -157,7 +157,7 @@ class LavaMoatPlugin {
     compiler.hooks.beforeRun.tapAsync(PLUGIN_NAME, (compilation, callback) =>
       loadCanonicalNameMap({
         rootDir: options.rootDir || compiler.context,
-        includeDevDeps: true, // even the most proper projects end up including devdeps in their bundles :()
+        includeDevDeps: true, // even the most proper projects end up including devDeps in their bundles :()
         resolve: browserResolve,
       })
         .then((map) => {
@@ -206,7 +206,7 @@ class LavaMoatPlugin {
         })
 
         // =================================================================
-        // processin of the paths involved in the bundle and cross-check with policy
+        // processing of the paths involved in the bundle and cross-check with policy
 
         /**
          * Array of strings representing the excludes found in the generation
@@ -273,8 +273,8 @@ class LavaMoatPlugin {
 
         /**
          * @remarks
-         * Webpack has a concept of ignored modules When a module is ignored a
-         * carveout is necessary in policy enforcement for it because the ID
+         * Webpack has a concept of ignored modules. When a module is ignored, a
+         * carve-out is necessary in policy enforcement for it because the ID
          * that webpack creates for it is not exactly helpful. example outcome
          * in the bundle: `const nodeCrypto = __webpack_require__(/*! crypto *\/
          * "?0b7d");` Sadly, even treeshaking doesn't eliminate that module.
@@ -554,7 +554,7 @@ class LavaMoatPlugin {
                   '> skipped adding runtime (additionalChunkRuntimeRequirements)'
                 )
                 // It's possible to generate the runtime with an empty policy to make the wrapped code work.
-                // It's no longer necessasry now that `generate` function is only wrapping anything if paths were processed,
+                // It's no longer necessary now that `generate` function is only wrapping anything if paths were processed,
                 // which corresponds to it being the main compilation. But plugins may exist that conflict with that assumption;
                 // in which case we're gonna have to bring back the runtime with empty policy
               } else {
