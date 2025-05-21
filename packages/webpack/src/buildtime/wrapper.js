@@ -64,6 +64,10 @@ exports.wrapper = function wrapper({
   // TODO: Consider: We could save some bytes by merging scopeTerminator and runtimeHandler, but then runtime calls would go through a proxy, which is slower. Merging runtimeKit with globalThis would also be problematic.
 
   // return NO-OP if runtime didn't produce a scope terminator
+
+  // Here we triple backflip using `with` statements to create a restricted scope chain to construct an isolated strict fn that wraps the module source.
+  // In similar manner to: https://github.com/endojs/endo/blob/master/packages/ses/src/make-evaluate.js#L92-L107
+
   const before = `(function(){
      if (!this.${NAME_scopeTerminator}) return ()=>{};
      with (this.${NAME_scopeTerminator}) {
