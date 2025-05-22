@@ -14,11 +14,7 @@ const {
   values,
 } = Object
 
-const {
-  lockdown,
-  Proxy,
-  Math, Date,
-} = globalThis
+const { lockdown, Proxy, Math, Date } = globalThis
 
 const warn = typeof console === 'object' ? console.warn : () => {}
 
@@ -35,9 +31,7 @@ if (LOCKDOWN_ON) {
 }
 
 // harden appears on globalThis only after lockdown is called
-const {
-  harden,
-} = globalThis
+const { harden } = globalThis
 
 const knownWritableFields = new Set()
 
@@ -148,7 +142,7 @@ const enforcePolicy = (specifier, referrerResourceId, wrappedRequire) => {
 const theRealGlobalThis = globalThis
 /** @type {any} */
 let rootCompartmentGlobalThis
-const globalAliases = ['window', 'self', 'global', 'globalThis', 'top', 'frames', 'parent']
+const globalAliases = ['window', 'self', 'global', 'globalThis', 'frames']
 /**
  * Installs globals for a specific policy resource.
  *
@@ -164,7 +158,10 @@ const installGlobalsForPolicy = (resourceId, packageCompartmentGlobal) => {
       rootCompartmentGlobalThis,
       globalAliases
     )
-    LAVAMOAT?.scuttling?.scuttle(theRealGlobalThis, LAVAMOAT.options.scuttleGlobalThis)
+    LAVAMOAT?.scuttling?.scuttle(
+      theRealGlobalThis,
+      LAVAMOAT.options.scuttleGlobalThis
+    )
   } else {
     const endowments = getEndowmentsForConfig(
       rootCompartmentGlobalThis,
