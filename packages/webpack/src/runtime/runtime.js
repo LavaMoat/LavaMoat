@@ -14,11 +14,7 @@ const {
   values,
 } = Object
 
-const {
-  lockdown,
-  Proxy,
-  Math, Date,
-} = globalThis
+const { lockdown, Proxy, Math, Date } = globalThis
 
 const warn = typeof console === 'object' ? console.warn : () => {}
 
@@ -35,9 +31,7 @@ if (LOCKDOWN_ON) {
 }
 
 // harden appears on globalThis only after lockdown is called
-const {
-  harden,
-} = globalThis
+const { harden } = globalThis
 
 const knownWritableFields = new Set()
 
@@ -51,11 +45,15 @@ values(LAVAMOAT.policy.resources).forEach((resource) => {
   }
 })
 
-const { getEndowmentsForConfig, copyWrappedGlobals, getBuiltinForConfig } =
-  LAVAMOAT.endowmentsToolkit({
-    handleGlobalWrite: true,
-    knownWritableFields,
-  })
+const {
+  getEndowmentsForConfig,
+  copyWrappedGlobals,
+  getBuiltinForConfig,
+  applyEndowmentPropDescTransforms,
+} = LAVAMOAT.endowmentsToolkit({
+  handleGlobalWrite: true,
+  knownWritableFields,
+})
 
 // These must match assumptions in the wrapper.js
 // sharedKeys are included in the runtime
@@ -148,7 +146,91 @@ const enforcePolicy = (specifier, referrerResourceId, wrappedRequire) => {
 const theRealGlobalThis = globalThis
 /** @type {any} */
 let rootCompartmentGlobalThis
-const globalAliases = ['window', 'self', 'global', 'globalThis', 'top', 'frames', 'parent']
+const globalAliases = [
+  'window',
+  'self',
+  'global',
+  'globalThis',
+  'frames',
+  // NOTE: omitting other windows: 'top', 'parent', 'opener'
+]
+
+/**
+ * Creates a mock reference to another realm that exposes none of the global
+ * powers, but offers a working wrapped postMessage
+ *
+ * @param {typeof globalThis} realm
+ * @param {any} compartmentGlobalThis
+ * @param {PropertyDescriptor} postMessageDescriptor
+ * @returns
+ */
+const makeMessageableTamedRealm = (
+  realm,
+  compartmentGlobalThis,
+  postMessageDescriptor
+) => {
+  // NOTE: if you think of cachng those in a weakmap keyed on `realm` - I already wrote that and removed - the cache would leak capabilities across Compartments.
+  const wrappedRealm = {
+    ...compartmentGlobalThis,
+    parent: undefined,
+    top: undefined,
+    opener: undefined,
+  } // assuming window.parent.top or window.parent.parent are not usecases we support
+
+  const wrappedPostMessage = applyEndowmentPropDescTransforms(
+    postMessageDescriptor,
+    wrappedRealm,
+    realm
+  )
+
+  wrappedRealm.postMessage = wrappedPostMessage.value
+  return wrappedRealm
+}
+
+const wellKnownRealmReferences = ['parent', 'top', 'opener']
+/**
+ * Creates a property descriptors for global references to other realms without
+ * exposing their powers beyond the postMessage API wrapped to resolve to the
+ * right window internally.
+ *
+ * @param {typeof globalThis} globalThis - The global object of the main realm
+ * @param {Object} compartmentGlobalThis - The global object of the compartment
+ *   realm
+ * @param {Object} endowments - Object containing references to allowed
+ *   communication targets
+ */
+const patchThroughRealmsCommunication = (
+  globalThis,
+  compartmentGlobalThis,
+  endowments
+) => {
+  // get postmessage function property descriptor
+  const postMessageDescriptor = Reflect.getOwnPropertyDescriptor(
+    globalThis,
+    'postMessage'
+  )
+  if (!postMessageDescriptor) {
+    return {}
+  }
+  return fromEntries(
+    wellKnownRealmReferences
+      .filter((key) => key in endowments)
+      .map((key) => [
+        key,
+        {
+          value: makeMessageableTamedRealm(
+            globalThis[/** @type {keyof typeof globalThis} */ (key)],
+            compartmentGlobalThis,
+            postMessageDescriptor
+          ),
+          writable: false,
+          enumerable: true,
+          configurable: false,
+        },
+      ])
+  )
+}
+
 /**
  * Installs globals for a specific policy resource.
  *
@@ -164,7 +246,10 @@ const installGlobalsForPolicy = (resourceId, packageCompartmentGlobal) => {
       rootCompartmentGlobalThis,
       globalAliases
     )
-    LAVAMOAT?.scuttling?.scuttle(theRealGlobalThis, LAVAMOAT.options.scuttleGlobalThis)
+    LAVAMOAT?.scuttling?.scuttle(
+      theRealGlobalThis,
+      LAVAMOAT.options.scuttleGlobalThis
+    )
   } else {
     const endowments = getEndowmentsForConfig(
       rootCompartmentGlobalThis,
@@ -181,6 +266,11 @@ const installGlobalsForPolicy = (resourceId, packageCompartmentGlobal) => {
           alias,
           { value: packageCompartmentGlobal },
         ])
+      ),
+      ...patchThroughRealmsCommunication(
+        theRealGlobalThis,
+        packageCompartmentGlobal,
+        endowments
       ),
     })
 

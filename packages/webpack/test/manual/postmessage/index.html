@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <ul id="log"></ul>
+    <script>
+        window.addEventListener('message', function (e) {
+            console.log(e)
+            const li = document.createElement('li')
+            li.innerText = e.data;
+            document.getElementById('log').appendChild(li);
+        });
+
+        const w = window.open("./dist/index.html", "foo", "width=400,height=200");
+        setTimeout(() => {
+            w.close();
+        }, 10000);
+
+    </script>
+    <iframe id="iframe" src="./dist/index.html"></iframe>
+
+</body>
+
+</html>
