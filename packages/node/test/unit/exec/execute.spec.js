@@ -158,3 +158,11 @@ test(
 )
 
 test.todo('hashbang in module')
+
+test(
+  'do not fail if missing optional dependencies',
+  testExec,
+  new URL('../fixture/optional/node_modules/app/index.js', import.meta.url),
+  { value: 'hello world', default: { value: 'hello world' } },
+  {}
+)
