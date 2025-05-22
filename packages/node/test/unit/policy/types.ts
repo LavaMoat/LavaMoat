@@ -2,8 +2,8 @@
 /* eslint-disable @typescript-eslint/no-redundant-type-constituents */
 
 import { ReadNowPowers } from '@endo/compartment-mapper'
+import type { LavaMoatPolicy } from '@lavamoat/types'
 import type { ExecutionContext } from 'ava'
-import type { LavaMoatPolicy } from 'lavamoat-core'
 import { Volume } from 'memfs/lib/volume.js'
 import type { Simplify } from 'type-fest'
 import type { GeneratePolicyOptions } from '../../../src/types.js'
