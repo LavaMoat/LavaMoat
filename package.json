@@ -47,7 +47,7 @@
     "@types/yargs": "17.0.33",
     "@typescript-eslint/eslint-plugin": "7.18.0",
     "@typescript-eslint/parser": "7.18.0",
-    "ava": "5.3.1",
+    "ava": "6.2.0",
     "cross-env": "7.0.3",
     "depcheck": "1.4.7",
     "eslint": "8.57.1",
