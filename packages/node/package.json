@@ -36,6 +36,10 @@
       "types": "./types/src/exec/load.d.ts",
       "import": "./src/exec/load.js"
     },
+    "./schema": {
+      "types": "./types/src/policy-schema.d.ts",
+      "import": "./src/policy-schema.js"
+    },
     "./package.json": "./package.json"
   },
   "directories": {
@@ -57,7 +61,8 @@
     "ses": "1.12.0",
     "terminal-link": "3.0.0",
     "type-fest": "4.41.0",
-    "yargs": "17.7.2"
+    "yargs": "17.7.2",
+    "zod": "3.25.23"
   },
   "devDependencies": {
     "@endo/eslint-plugin": "2.3.0",

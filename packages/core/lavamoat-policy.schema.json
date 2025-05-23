@@ -1,0 +1,122 @@
+{
+  "$defs": {
+    "builtinPolicy": {
+      "description": "Node.js builtins (including properties using dot notation); `true` to allow and `false` to deny",
+      "id": "builtinPolicy",
+      "type": "boolean"
+    },
+    "canonicalName": {
+      "description": "Canonical name of a package representing the shortest path via the dependency tree",
+      "id": "canonicalName",
+      "type": "string"
+    },
+    "globalPolicy": {
+      "additionalProperties": {
+        "$ref": "#/$defs/globalPolicyValue"
+      },
+      "description": "Globals (including properties using dot notation) accessible to the resource; `true` to allow and `false` to deny",
+      "id": "globalPolicy",
+      "propertyNames": {
+        "type": "string"
+      },
+      "type": "object"
+    },
+    "globalPolicyValue": {
+      "anyOf": [
+        {
+          "description": "true for read capability; false for none",
+          "type": "boolean"
+        },
+        {
+          "const": "write",
+          "description": "write capability"
+        },
+        {
+          "const": "redefine",
+          "description": "redefine capability"
+        }
+      ],
+      "description": "Global policy value",
+      "id": "globalPolicyValue"
+    },
+    "nativePolicy": {
+      "description": "true for native capability; false for none",
+      "id": "nativePolicy",
+      "type": "boolean"
+    },
+    "packagePolicy": {
+      "description": "Additional external packages (in their entirety) accessible to the module; `true` to allow and `false` to deny",
+      "id": "packagePolicy",
+      "type": "boolean"
+    },
+    "resourcePolicy": {
+      "description": "Policy for a given resource",
+      "id": "resourcePolicy",
+      "properties": {
+        "builtin": {
+          "additionalProperties": {
+            "$ref": "#/$defs/builtinPolicy"
+          },
+          "description": "Mapping of builtin module to builtin policy value",
+          "propertyNames": {
+            "type": "string"
+          },
+          "type": "object"
+        },
+        "globals": {
+          "$ref": "#/$defs/globalPolicy"
+        },
+        "native": {
+          "$ref": "#/$defs/nativePolicy"
+        },
+        "packages": {
+          "additionalProperties": {
+            "$ref": "#/$defs/packagePolicy"
+          },
+          "description": "Mapping of canonical package name to package policy value",
+          "propertyNames": {
+            "$ref": "#/$defs/canonicalName"
+          },
+          "type": "object"
+        }
+      },
+      "required": [],
+      "type": "object"
+    },
+    "resources": {
+      "additionalProperties": {
+        "$ref": "#/$defs/resourcePolicy"
+      },
+      "description": "Mapping of canonical package name to resource policy value",
+      "id": "resources",
+      "propertyNames": {
+        "$ref": "#/$defs/canonicalName"
+      },
+      "type": "object"
+    },
+    "root": {
+      "description": "Root policy configuration",
+      "id": "root",
+      "properties": {
+        "usePolicy": {
+          "$ref": "#/$defs/canonicalName",
+          "description": "Reference to resource policy to use for the application root"
+        }
+      },
+      "required": [],
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "LavaMoat policy",
+  "properties": {
+    "resources": {
+      "$ref": "#/$defs/resources"
+    },
+    "root": {
+      "$ref": "#/$defs/root"
+    }
+  },
+  "required": ["resources"],
+  "type": "object"
+}
