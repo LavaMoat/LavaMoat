@@ -44,6 +44,7 @@
   "scripts": {
     "lint:deps": "depcheck",
     "test": "npm run test:run",
+    "test:cover": "c8 --check-coverage ava",
     "test:run": "ava",
     "test:update-snapshots": "ava -u"
   },
