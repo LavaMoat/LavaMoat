@@ -160,7 +160,7 @@ const installGlobalsForPolicy = (resourceId, packageCompartmentGlobal) => {
     )
     LAVAMOAT?.scuttling?.scuttle(
       theRealGlobalThis,
-      LAVAMOAT.options.scuttleGlobalThis
+      LAVAMOAT.options?.scuttleGlobalThis
     )
   } else {
     const endowments = getEndowmentsForConfig(
