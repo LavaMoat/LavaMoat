@@ -10,6 +10,10 @@
  * polyfills before hardening (e.g. RN JS polyfills).
  */
 
+const dumbPolyfillExposedInternals = Object.entries(Promise).filter(
+  ([k, v]) => !!v && k.startsWith('_')
+)
+
 // eslint-disable-next-line no-undef
 repairIntrinsics({
   errorTaming: 'unsafe',
@@ -27,4 +31,4 @@ repairIntrinsics({
  */
 
 // Hermes built-in implementation of Promise is using this global field internally to hold on to a noop function :|
-Promise._D = function () {}
+Object.assign(Promise, Object.fromEntries(dumbPolyfillExposedInternals))
