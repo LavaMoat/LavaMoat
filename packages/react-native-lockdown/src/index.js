@@ -5,41 +5,71 @@ const path = require('node:path')
 
 const defaultGetRunModuleStatement = (moduleId) => `__r(${moduleId})`
 
+const ENTRY_FILE_MODULE_ID = 0
+
+const warnAboutAnomalies = () => {
+  const deferredWarnings = {
+    calledOnceOnly:
+      'LavaMoat: getRunModuleStatement was only called once instead of at least twice in quick succession, with react-native InitializeCore first and bundle entry second. This is suspicious. Lockdown might not be in effect.',
+    neverCalledWithEntryModule:
+      'LavaMoat: getRunModuleStatement was not called with moduleId 0. Lockdown was not applied.',
+  }
+  // This is to ensure that we warn about anomalies after all work is done
+  process.on('exit', () => {
+    Object.values(deferredWarnings).forEach((message) => {
+      if (message) warn(message)
+    })
+  })
+
+  return function inspectCallLog(callLog) {
+    if (callLog.length > 1) {
+      deferredWarnings['calledOnceOnly'] = false
+    }
+    if (callLog.includes(ENTRY_FILE_MODULE_ID)) {
+      deferredWarnings['neverCalledWithEntryModule'] = false
+    }
+
+    if (callLog[0] === ENTRY_FILE_MODULE_ID) {
+      warn(
+        'LavaMoat: getRunModuleStatement was called with moduleId 0 first. That should represent the bundle entrypoint but react-native InitializeCore should run first. This is suspicious. Lockdown might not be in effect or might be breaking react-native core polyfills.'
+      )
+    }
+
+    if (new Set(callLog).size !== callLog.length) {
+      warn(
+        `LavaMoat: getRunModuleStatement was called with the same moduleId multiple times. It might be because some build is running twice with the same config instance. [${callLog.join(', ')}]`
+      )
+    }
+  }
+}
+
 module.exports = {
   lockdownSerializer: ({ hermesRuntime = false } = {}, originalConfig) => {
     if (originalConfig.getRunModuleStatement) {
       warn(
-        'LavaMoat: You are using getRunModuleStatement in serializer config. Lavamoat will attempt to wrap it without breaking it, but if you are doing something unusual, we might affect how it works'
+        'LavaMoat: You are using getRunModuleStatement in serializer config. Lavamoat will attempt to wrap it without breaking it, but if you are doing something unusual, we might affect how it works.'
       )
     }
 
     const config = assign({}, originalConfig)
 
-    // getRunModuleStatement
-    let firstCallGetRunModuleStatement = true
-    let warningTimer
+    const callLog = []
+
     const previousGetRunModuleStatement =
       originalConfig.getRunModuleStatement ?? defaultGetRunModuleStatement
 
+    const inspectCallLog = warnAboutAnomalies()
+
     config.getRunModuleStatement = (moduleId) => {
+      callLog.push(moduleId)
+      inspectCallLog(callLog)
       // assumes react-native InitializeCore is the first thing that gets required.
       const runModuleStatement = previousGetRunModuleStatement(moduleId)
-      if (firstCallGetRunModuleStatement) {
-        firstCallGetRunModuleStatement = false
-        warningTimer = setTimeout(() => {
-          warn(
-            'LavaMoat: getRunModuleStatement was only called once instead of at least twice, with react-native InitializeCore first and bundle entry second. This is suspicious. Lockdown might not be in effect.'
-          )
-        }, 50)
-        if (moduleId === 0) {
-          warn(
-            'LavaMoat: getRunModuleStatement was called with moduleId 0 first. That tends to represent the bundle entrypoint but react-native InitializeCore should run first. This is suspicious. Lockdown might not be in effect.'
-          )
-          return `hardenIntrinsics();__r(${moduleId});`
-        }
-        return runModuleStatement + ';hardenIntrinsics();'
+
+      if (moduleId === ENTRY_FILE_MODULE_ID) {
+        return `hardenIntrinsics();${runModuleStatement}`
       }
-      clearTimeout(warningTimer)
+
       return runModuleStatement
     }
 
