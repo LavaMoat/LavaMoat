@@ -35,6 +35,7 @@ module.exports = {
           warn(
             'LavaMoat: getRunModuleStatement was called with moduleId 0 first. That tends to represent the bundle entrypoint but react-native InitializeCore should run first. This is suspicious. Lockdown might not be in effect.'
           )
+          return `hardenIntrinsics();__r(${moduleId});`
         }
         return runModuleStatement + ';hardenIntrinsics();'
       }
@@ -60,7 +61,7 @@ module.exports = {
     config.getPolyfills = () => {
       const polyfills = originalPolyfills()
       // polyfills = polyfills.flat() // if user forgets to spread an array from e.g. RN js polyfills
-      this.validatePolyfills(polyfills)
+      module.exports.validatePolyfills(polyfills)
       return [ses, repair, ...polyfills]
     }
     return config
