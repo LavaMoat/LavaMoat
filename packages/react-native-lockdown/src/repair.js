@@ -20,3 +20,11 @@ repairIntrinsics({
   stackFiltering: 'verbose',
   evalTaming: 'unsafe-eval',
 })
+
+/**
+ * Hermes specific repairs or shims that need to exist before everything is
+ * frozen
+ */
+
+// Hermes built-in implementation of Promise is using this global field internally to hold on to a noop function :|
+Promise._D = function () {}
