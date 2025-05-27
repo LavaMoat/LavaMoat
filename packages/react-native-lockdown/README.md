@@ -2,15 +2,7 @@
 
 LavaMoat React Native lockdown sets up [Hardened JavaScript][hardened-js-ext] in React Native apps.
 
-This is done by repairing Hermes (or JSC) intrinsics at Metro's serializer option _getPolyfills_:
-
-> An optional list of polyfills to include in the bundle. The list defaults to a set of common polyfills for Number, String, Array, Object...
-
-with appropriate [lockdown options][lockdown-options] for React Native, then hardening the intrinsics at Metro's first serializer option _getRunModuleStatement_:
-
-> Specify the format of the initial require statements that are appended at the end of the bundle. By default is `\_\_r(${moduleId});`.
-
-without patching React Native [Core][init-core-ext] where global variables typical in most JavaScript environments are set up.
+This is done by repairing Hermes (or JSC) intrinsics. LavaMoat React Native lockdown integrates with Metro through serializer options.
 
 ## Install
 
@@ -24,20 +16,17 @@ or
 yarn add @lavamoat/react-native-lockdown
 ```
 
-> [!NOTE]
-> @react-native/js-polyfills is a peer dependency, likely stemming from your React Native version (example):
->
-> ```log
-> project@0.0.1
-> ├─┬ @react-native/metro-config@0.72.12 (devDependencies)
-> │ └── @react-native/js-polyfills@0.72.1
-> └─┬ react-native@0.72.15 (dependencies)
->   └── @react-native/js-polyfills@0.72.1 deduped
-> ```
-
 ## Usage
 
 ### Babel config
+
+Add the following to your Babel config:
+
+```js
+ignore: [/\/ses\.cjs$/, /\/ses-hermes\.cjs$/],
+```
+
+_Examples:_
 
 ```js
 // babel.config.js
@@ -68,6 +57,8 @@ module.exports = function (api) {
 
 ### Metro config
 
+Use `lockdownSerializer` for serializer config.
+
 #### Hermes
 
 ```js
@@ -75,16 +66,24 @@ module.exports = function (api) {
 const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config')
 const { lockdownSerializer } = require('@lavamoat/react-native')
 
-/**
- * Metro configuration https://reactnative.dev/docs/metro
- *
- * @type {import('@react-native/metro-config').MetroConfig}
- */
+const config = {
+  serializer: lockdownSerializer({ hermesRuntime: true }),
+}
+
+module.exports = mergeConfig(getDefaultConfig(__dirname), config)
+```
+
+If you already used a serializer configuration, you can pass it as second argument.
+`lockdownSerializer` will provide the `@react-native/js-polyfills` by default, but if you specified your own `getPolyfills` function, metro is expecting you to provide the polyfills and `lockdownSerializer` follows that behavior too.
+
+```js
+// metro.config.js
+const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config')
+const { lockdownSerializer } = require('@lavamoat/react-native')
+
 const config = {
   serializer: lockdownSerializer(
-    {
-      hermesRuntime: true,
-    },
+    { hermesRuntime: true },
     {
       // your previous serializer config if any, for example:
       getPolyfills: () => {
@@ -100,6 +99,17 @@ const config = {
 module.exports = mergeConfig(getDefaultConfig(__dirname), config)
 ```
 
+> [!NOTE]
+> @react-native/js-polyfills is a peer dependency, likely stemming from your React Native version (example):
+>
+> ```log
+> project@0.0.1
+> ├─┬ @react-native/metro-config@0.72.12 (devDependencies)
+> │ └── @react-native/js-polyfills@0.72.1
+> └─┬ react-native@0.72.15 (dependencies)
+>   └── @react-native/js-polyfills@0.72.1 deduped
+> ```
+
 #### JSC
 
 ```js
@@ -107,15 +117,8 @@ module.exports = mergeConfig(getDefaultConfig(__dirname), config)
 const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config')
 const { lockdownSerializer } = require('@lavamoat/react-native')
 
-/**
- * Metro configuration https://reactnative.dev/docs/metro
- *
- * @type {import('@react-native/metro-config').MetroConfig}
- */
 const config = {
-  serializer: lockdownSerializer({
-    hermesRuntime: false,
-  }),
+  serializer: lockdownSerializer({ hermesRuntime: false }),
 }
 
 module.exports = mergeConfig(getDefaultConfig(__dirname), config)
