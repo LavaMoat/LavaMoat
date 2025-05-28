@@ -307,7 +307,7 @@ function createScenarioFromScaffold({
     entries: ['entry.js'],
     files: _files,
     config: /** @type {LavaMoatPolicy} */ (_config),
-    configOverride: /** @type {LavaMoatPolicyOverrides} */ (_configOverride),
+    configOverride: /** @type {LavaMoatPolicy} */ (_configOverride),
     context,
     opts,
     dir,
