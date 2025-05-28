@@ -1,5 +1,29 @@
 # Changelog
 
+## [0.3.0](https://github.com/LavaMoat/LavaMoat/compare/node-v0.2.0...node-v0.3.0) (2025-05-28)
+
+
+### Features
+
+* **node:** add custom errors ([255aef2](https://github.com/LavaMoat/LavaMoat/commit/255aef20ff51a041430c5409704e93c6b1c8f6cd))
+* **node:** add support in scuttling ([#1627](https://github.com/LavaMoat/LavaMoat/issues/1627)) ([587644f](https://github.com/LavaMoat/LavaMoat/commit/587644fb8ec59499b181d0e8c8d2660257d04015))
+
+
+### Bug Fixes
+
+* add Node.js v24.0.0 to supported engines ([ad9cdcd](https://github.com/LavaMoat/LavaMoat/commit/ad9cdcdf83ccbda8bf2eba427d0c80f761f47a0a))
+* **deps:** update dependency @types/node to v18.19.100 ([#1646](https://github.com/LavaMoat/LavaMoat/issues/1646)) ([90c25d3](https://github.com/LavaMoat/LavaMoat/commit/90c25d38be61911ea3056756046eafa456236d76))
+* **deps:** update dependency @types/node to v18.19.104 ([#1669](https://github.com/LavaMoat/LavaMoat/issues/1669)) ([0b3461b](https://github.com/LavaMoat/LavaMoat/commit/0b3461bc265cd543d7255d81283e9ecf59fac765))
+* **deps:** update dependency @types/node to v18.19.105 ([#1675](https://github.com/LavaMoat/LavaMoat/issues/1675)) ([45b9cff](https://github.com/LavaMoat/LavaMoat/commit/45b9cff7ebec1e7c5875ffe51a511ab699b6ab64))
+* **deps:** update dependency type-fest to v4.41.0 ([#1657](https://github.com/LavaMoat/LavaMoat/issues/1657)) ([19e9bf1](https://github.com/LavaMoat/LavaMoat/commit/19e9bf144c8c43f530501bc500480fed16f995ac))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-core bumped from ^16.4.0 to ^16.5.0
+
 ## [0.2.0](https://github.com/LavaMoat/LavaMoat/compare/node-v0.1.0...node-v0.2.0) (2025-05-01)
 
 
