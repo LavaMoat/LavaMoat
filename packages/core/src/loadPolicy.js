@@ -8,7 +8,7 @@ const { jsonStringifySortedPolicy } = require('./stringifyPolicy')
 module.exports = { loadPolicy, loadPolicyAndApplyOverrides, loadPoliciesSync }
 
 /**
- * @import {LavaMoatPolicy, LavaMoatPolicyOverrides} from '@lavamoat/types'
+ * @import {LavaMoatPolicy} from '@lavamoat/types'
  */
 
 /**
@@ -55,9 +55,8 @@ function readPolicyFileSync({ debugMode, policyPath }) {
  * @param {PolicyOpts} opts
  * @returns {Promise<LavaMoatPolicy>}
  * @todo Because there is no validation taking place, the resulting value could
- *   be literally anything `JSON.parse()` could return. Also note that this
- *   returns a `LavaMoatPolicy` when we could be asking for a
- *   `LavaMoatPolicyOverrides`; make your type assertions accordingly!
+ *   be literally anything `JSON.parse()` could return. We do no validation
+ *   here, and we should.
  */
 async function loadPolicy({ debugMode, policyPath }) {
   /** @type {LavaMoatPolicy} */
@@ -90,9 +89,10 @@ async function loadPolicyAndApplyOverrides({
 }) {
   const policy = await loadPolicy({ debugMode, policyPath })
 
-  const policyOverride = /** @type {LavaMoatPolicyOverrides | undefined} */ (
-    readPolicyFileSync({ debugMode, policyPath: policyOverridePath })
-  )
+  const policyOverride = readPolicyFileSync({
+    debugMode,
+    policyPath: policyOverridePath,
+  })
 
   if (!policyOverride) {
     return policy

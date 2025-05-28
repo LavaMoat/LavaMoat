@@ -10,7 +10,7 @@ const mergeDeep = require('merge-deep')
 const { values, hasOwn } = Object
 
 /**
- * @import {LavaMoatPolicy, LavaMoatPolicyOverrides, GlobalPolicy, BuiltinPolicy, GlobalPolicyValue} from '@lavamoat/types'
+ * @import {LavaMoatPolicy, GlobalPolicy, BuiltinPolicy, GlobalPolicyValue} from '@lavamoat/types'
  */
 
 /**
@@ -19,8 +19,7 @@ const { values, hasOwn } = Object
  * `policyB` overwrites `policyA` where concatenation is not possible
  *
  * @param {LavaMoatPolicy} policyA First policy
- * @param {LavaMoatPolicy | LavaMoatPolicyOverrides} [policyB] Second policy or
- *   policy override
+ * @param {LavaMoatPolicy} [policyB] Second policy or policy override
  * @returns {LavaMoatPolicy} Merged policy or `policyA` if `policyB` not
  *   provided
  */

@@ -1,11 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // @ts-check
 
-import type {
-  DefaultModuleInitArgs,
-  LavaMoatPolicy,
-  LavaMoatPolicyOverrides,
-  ModuleInitializer,
+import {
+  type DefaultModuleInitArgs,
+  type LavaMoatPolicy,
+  type ModuleInitializer,
 } from '@lavamoat/types'
 import type { ExecutionContext } from 'ava'
 import { type SetRequired } from 'type-fest'
@@ -69,7 +68,7 @@ export type ScenarioSourceFn = () => void
 export interface Scenario<Result = unknown> {
   name?: string
   config?: LavaMoatPolicy
-  configOverride?: LavaMoatPolicyOverrides
+  configOverride?: LavaMoatPolicy
   expectedFailure?: boolean
   expectedResult?: Result
   defineEntry?: ScenarioSourceFn
