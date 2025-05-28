@@ -40,7 +40,7 @@ module.exports = {
 ```
 
 > [!NOTE]
-> If you're still on unsupported React Native <= 0.72.x, use the old `'module:metro-react-native-babel-preset'` preset instead
+> If you're still on [unsupported](https://github.com/reactwg/react-native-releases/blob/main/docs/support.md) React Native <= 0.72.x, stick to the old `'module:metro-react-native-babel-preset'` preset instead
 
 or
 
