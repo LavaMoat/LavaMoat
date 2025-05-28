@@ -47,19 +47,19 @@ const warnAboutAnomalies = () => {
 
 module.exports = {
   // lockdownSerializer
-  lockdownSerializer: ({ hermesRuntime = true } = {}, originalConfig) => {
-    if (originalConfig.getRunModuleStatement) {
+  lockdownSerializer: ({ hermesRuntime = true } = {}, userConfig) => {
+    if (userConfig.getRunModuleStatement) {
       warn(
         'LavaMoat: You are using getRunModuleStatement in serializer config. Lavamoat will attempt to wrap it without breaking it, but if you are doing something unusual, we might affect how it works.'
       )
     }
 
-    const config = assign({}, originalConfig)
+    const config = assign({}, userConfig)
 
     const callLog = []
 
     const previousGetRunModuleStatement =
-      originalConfig.getRunModuleStatement ?? defaultGetRunModuleStatement
+      userConfig.getRunModuleStatement ?? defaultGetRunModuleStatement
 
     const inspectCallLog = warnAboutAnomalies()
 
