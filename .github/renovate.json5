@@ -8,7 +8,8 @@
     ':enableVulnerabilityAlerts', // enables GitHub vulnerability alerts
     ':semanticCommits', // use semantic commits
     'group:linters', // group lint-related packages together
-    'workarounds:typesNodeVersioning', // tracks node versions from engines field in package.json for @types/node
+    'workarounds:typesNodeVersioning', // tracks node versions from engines field in package.json for @types/node,
+    'helpers:disableTypesNodeMajor', // disable major updates for @types/node. TODO: we will need to do this manually when dropping v18
   ],
   // providing this overrides `:ignoreModulesAndTests` which comes in thru `config:js-app` via `config:recommended`
   ignorePaths: [
