@@ -19,9 +19,9 @@ import { noop } from '../util.js'
 import { makePolicyGenCompartment } from './policy-gen-compartment-class.js'
 
 /**
- * @import {CompartmentDescriptorData, CompartmentDescriptorDataMap} from '../types.js'
+ * @import {CompartmentDescriptorData, CompartmentDescriptorDataMap, CompleteCompartmentDescriptorDataMap} from '../types.js'
  * @import {LoadCompartmentMapForPolicyOptions, LoadCompartmentMapResult} from '../internal.js'
- * @import {CaptureLiteOptions} from '@endo/compartment-mapper'
+ * @import {CaptureLiteOptions, CompartmentMapDescriptor} from '@endo/compartment-mapper'
  */
 
 const { entries } = Object
@@ -55,46 +55,6 @@ const remapDataMap = (dataMap, oldToNewCompartmentNames) => {
 }
 
 /**
- * This compartment descriptor transform replaces the `label` field of the
- * compartment descriptor with the canonical name of the package.
- *
- * We have no use for Endo's own `label` field, which is only used for debugging
- * and/or display purposes.
- *
- * It is intended to be executed _last_ in the list of transforms.
- *
- * @privateRemarks
- * It may become necessary to keep a mapping from old to new labels in the
- * future. Why? Because stuff like that keeps being necessary.
- *
- * We may want to consider adding an option to `mapNodeModules()` which is a
- * callback to generate the `label` field.
- * @type {CompartmentDescriptorTransform}
- */
-const finalCompartmentDescriptorTransform = (
-  compartmentDescriptor,
-  { trustRoot = true, log = defaultLog } = {}
-) => {
-  /* c8 ignore next */
-  if (compartmentDescriptor.name === ATTENUATORS_COMPARTMENT) {
-    // should be impossible
-    throw new GenerationError(
-      `Unexpected attenuator compartment found when computing canonical package name in ${compartmentDescriptor.label} (${compartmentDescriptor.location})`
-    )
-  }
-
-  const { label } = compartmentDescriptor
-  compartmentDescriptor.label = getCanonicalName(
-    compartmentDescriptor,
-    trustRoot
-  )
-
-  log.debug(
-    `Replaced compartment label ${hrLabel(label)} with canonical name ${hrLabel(compartmentDescriptor.label)}`
-  )
-}
-
-/**
  * Loads compartment map and associated sources.
  *
  * This is _only_ for policy gen.
@@ -116,17 +76,29 @@ export const loadCompartmentMapForPolicy = async (
     ...captureOpts
   } = {}
 ) => {
-  const { nodeCompartmentMap, nodeDataMap } = await makeNodeCompartmentMap(
-    entrypointPath,
-    {
-      readPowers,
-      dev,
-      decorators,
-      log,
-      trustRoot,
-    }
-  )
+  /** @type {CompartmentMapDescriptor} */
+  let nodeCompartmentMap
+  /** @type {CompleteCompartmentDescriptorDataMap} */
+  let nodeDataMap
 
+  try {
+    // eslint-disable-next-line @jessie.js/safe-await-separator
+    ;({ nodeCompartmentMap, nodeDataMap } = await makeNodeCompartmentMap(
+      entrypointPath,
+      {
+        readPowers,
+        dev,
+        decorators,
+        log,
+        trustRoot,
+      }
+    ))
+  } catch (err) {
+    throw new GenerationError(
+      `Failed to create compartment map for policy generation`,
+      { cause: err }
+    )
+  }
   // we use this to inject missing imports from policy overrides into the module descriptor.
   // TODO: Endo should allow us to hook into `importHook` directly instead
   const PolicyGenCompartment = makePolicyGenCompartment(
