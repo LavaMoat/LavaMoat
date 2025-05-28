@@ -14,6 +14,7 @@ const warnAboutAnomalies = () => {
     neverCalledWithEntryModule:
       'LavaMoat: getRunModuleStatement was not called with moduleId 0. Lockdown was not applied.',
   }
+
   // Emit warnings only after Metro finishes bundling
   process.on('exit', () => {
     Object.values(deferredWarnings).forEach((message) => {
@@ -25,6 +26,7 @@ const warnAboutAnomalies = () => {
     if (callLog.length > 1) {
       deferredWarnings['calledOnceOnly'] = false
     }
+
     if (callLog.includes(ENTRY_FILE_MODULE_ID)) {
       deferredWarnings['neverCalledWithEntryModule'] = false
     }
