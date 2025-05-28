@@ -38,6 +38,25 @@ module.exports = {
         {
           files: `./{src,test}/**/*.ts`,
           extends: ['plugin:@typescript-eslint/recommended-type-checked'],
+          rules: {
+            // this rule makes it so that when we export a type from a .ts file,
+            // we use the "export type" syntax
+            '@typescript-eslint/consistent-type-exports': [
+              'error',
+              { fixMixedExportsWithInlineTypeSpecifier: true },
+            ],
+
+            // this rule makes it so that when we import a type from a .ts file,
+            // we use the "import type" syntax
+            '@typescript-eslint/consistent-type-imports': [
+              'error',
+              {
+                disallowTypeAnnotations: true,
+                fixStyle: 'inline-type-imports',
+                prefer: 'type-imports',
+              },
+            ],
+          },
         },
         {
           files: `./{src,test}/**/*.js`,

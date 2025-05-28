@@ -26,7 +26,7 @@ import type {
   ENDO_GLOBAL_POLICY_ITEM_WRITE,
   ENDO_POLICY_ITEM_ROOT,
 } from './constants.js'
-import { CompartmentMapToPolicyOptions } from './internal.js'
+import { type CompartmentMapToPolicyOptions } from './internal.js'
 
 /**
  * A loaded application which has not yet been executed

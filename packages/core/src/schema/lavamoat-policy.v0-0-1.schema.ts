@@ -1,4 +1,4 @@
-import { LavamoatModuleRecord } from '../moduleRecord'
+import { type LavamoatModuleRecord } from '../moduleRecord'
 
 /**
  * Schema for LavaMoat policy override files

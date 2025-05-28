@@ -1,7 +1,10 @@
 import type { ExecutionContext } from 'ava'
-import { ModuleInitializer } from '../src/moduleRecord'
+import { type ModuleInitializer } from '../src/moduleRecord'
 import type { LavaMoatOpts } from '../src/options'
-import { LavaMoatPolicy, LavaMoatPolicyOverrides } from '../src/schema'
+import {
+  type LavaMoatPolicy,
+  type LavaMoatPolicyOverrides,
+} from '../src/schema'
 
 export type ScenarioType = 'truthy' | 'falsy' | 'deepEqual'
 
