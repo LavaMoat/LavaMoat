@@ -3,7 +3,7 @@
   "compilerOptions": {
     "rootDir": "..",
     "module": "NodeNext",
-    "types": ["node", "ses"],
+    "types": ["node"],
     "strict": true
   },
   "include": ["."],
