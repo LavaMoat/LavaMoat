@@ -8,7 +8,7 @@ import nodeFs from 'node:fs'
 import Module from 'node:module'
 import path from 'node:path'
 import { PACKAGE_JSON } from './constants.js'
-import { NoExecutableError, NoWorkspaceError } from './error.js'
+import { NoBinScriptError, NoWorkspaceError } from './error.js'
 import { isExecutableSymlink, isReadableFileSync, realpathSync } from './fs.js'
 import { log } from './log.js'
 import { hrLabel, hrPath, toPath } from './util.js'
@@ -123,13 +123,13 @@ export const resolveBinScript = (
     try {
       next = resolveWorkspace({ from: path.join(current, '..'), fs })
     } catch {
-      throw new NoExecutableError(
+      throw new NoBinScriptError(
         `Could not find executable ${niceBin} from ${niceFrom}`
       )
     }
     if (next === current) {
       log.debug(`Reached filesystem root; stopping search`)
-      throw new NoExecutableError(
+      throw new NoBinScriptError(
         `Could not find executable ${niceBin} from ${niceFrom}`
       )
     }
