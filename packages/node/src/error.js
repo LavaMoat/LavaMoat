@@ -92,9 +92,12 @@ export const InvalidPolicyError = createLavaMoatError(
   }
 )
 
-export const NoExecutableError = createLavaMoatError(
-  'NoExecutableError',
-  ErrorCodes.NoExecutable,
+/**
+ * Error thrown if no bin script entrypoint could found
+ */
+export const NoBinScriptError = createLavaMoatError(
+  'NoBinScriptError',
+  ErrorCodes.NoBinScript,
   class extends Error {}
 )
 
