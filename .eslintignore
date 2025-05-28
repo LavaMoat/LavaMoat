@@ -15,4 +15,5 @@ packages/viz/dist/**/*
 packages/viz/src/example-policies/**/*
 packages/yarn-plugin-allow-scripts/bundles
 packages/*/types
+packages/*/dist
 !/.github
