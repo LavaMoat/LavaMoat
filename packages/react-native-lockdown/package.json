@@ -1,6 +1,6 @@
 {
   "name": "@lavamoat/react-native-lockdown",
-  "version": "0.0.1",
+  "version": "0.0.1-beta.0",
   "description": "LavaMoat React Native lockdown provides Hardened JavaScript in React Native apps via Metro",
   "repository": {
     "type": "git",
