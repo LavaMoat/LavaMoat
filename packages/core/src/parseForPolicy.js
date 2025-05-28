@@ -6,7 +6,7 @@ const { eachNodeInTree } = require('./walk')
 module.exports = { parseForPolicy }
 
 /**
- * @import {LavaMoatPolicy, DefaultModuleInitArgs, LavaMoatPolicyOverrides, LavamoatModuleRecord} from '@lavamoat/types'
+ * @import {LavaMoatPolicy, DefaultModuleInitArgs, LavamoatModuleRecord} from '@lavamoat/types'
  * @import {ModuleInspector} from './generatePolicy'
  */
 
@@ -73,7 +73,7 @@ async function parseForPolicy({
  * @property {IsBuiltinFn} isBuiltin
  * @property {ShouldImportFn} [shouldImport]
  * @property {ResolveFn} [resolveHook]
- * @property {LavaMoatPolicyOverrides} [policyOverride]
+ * @property {LavaMoatPolicy} [policyOverride]
  * @property {boolean} [includeDebugInfo]
  * @property {ModuleInspector} [inspector]
  */
