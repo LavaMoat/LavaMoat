@@ -45,7 +45,7 @@ const warnAboutAnomalies = () => {
 
 module.exports = {
   // lockdownSerializer
-  lockdownSerializer: ({ hermesRuntime = false } = {}, originalConfig) => {
+  lockdownSerializer: ({ hermesRuntime = true } = {}, originalConfig) => {
     if (originalConfig.getRunModuleStatement) {
       warn(
         'LavaMoat: You are using getRunModuleStatement in serializer config. Lavamoat will attempt to wrap it without breaking it, but if you are doing something unusual, we might affect how it works.'
