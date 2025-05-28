@@ -14,7 +14,7 @@ const warnAboutAnomalies = () => {
     neverCalledWithEntryModule:
       'LavaMoat: getRunModuleStatement was not called with moduleId 0. Lockdown was not applied.',
   }
-  // This is to ensure that we warn about anomalies after all work is done
+  // Emit warnings only after Metro finishes bundling
   process.on('exit', () => {
     Object.values(deferredWarnings).forEach((message) => {
       if (message) warn(message)
@@ -44,6 +44,7 @@ const warnAboutAnomalies = () => {
 }
 
 module.exports = {
+  // lockdownSerializer
   lockdownSerializer: ({ hermesRuntime = false } = {}, originalConfig) => {
     if (originalConfig.getRunModuleStatement) {
       warn(
@@ -60,10 +61,10 @@ module.exports = {
 
     const inspectCallLog = warnAboutAnomalies()
 
+    // getRunModuleStatement
     config.getRunModuleStatement = (moduleId) => {
       callLog.push(moduleId)
       inspectCallLog(callLog)
-      // assumes react-native InitializeCore is the first thing that gets required.
       const runModuleStatement = previousGetRunModuleStatement(moduleId)
 
       if (moduleId === ENTRY_FILE_MODULE_ID) {
@@ -73,20 +74,18 @@ module.exports = {
       return runModuleStatement
     }
 
-    // Default RN JS polyfills
     if (!config.getPolyfills) {
       config.getPolyfills = require('@react-native/js-polyfills')
     } else if (typeof config.getPolyfills !== 'function') {
       throw new Error('serializer.getPolyfills must be a function')
     }
 
-    // SES
     const ses = hermesRuntime
       ? require.resolve('ses/hermes')
       : require.resolve('ses')
     const repair = require.resolve('./repair.js')
 
-    // getRunModuleStatement
+    // getPolyfills
     const originalPolyfills = config.getPolyfills
     config.getPolyfills = () => {
       const polyfills = originalPolyfills()
@@ -96,6 +95,7 @@ module.exports = {
     }
     return config
   },
+  // validatePolyfills
   validatePolyfills: function validatePolyfills(polyfills) {
     for (const polyfill of polyfills) {
       if (!Array.isArray(polyfills)) {
