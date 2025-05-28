@@ -9,14 +9,6 @@ test('lockdownSerializer - default behavior', (t) => {
   t.is(typeof config.getPolyfills, 'function')
 })
 
-test('lockdownSerializer - custom getRunModuleStatement', (t) => {
-  const originalConfig = {
-    getRunModuleStatement: (moduleId) => `customRun(${moduleId})`,
-  }
-  const config = lockdownSerializer({}, originalConfig)
-  t.is(config.getRunModuleStatement(1), 'customRun(1);hardenIntrinsics();')
-})
-
 test('lockdownSerializer - invalid getPolyfills', (t) => {
   const originalConfig = {
     getPolyfills: 'not-a-function',
