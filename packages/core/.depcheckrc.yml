@@ -4,7 +4,6 @@ ignores:
   # monorepo deps
   - 'ava'
   - '@typescript-eslint/parser'
-  - 'expect-type'
   # tests - fake packages
   - 'abc'
   - 'xyz'
