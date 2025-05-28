@@ -17,6 +17,9 @@
     "node": "^18.0.0 || ^20.0.0 || ^22.0.0 || ^24.0.0"
   },
   "types": "./dist/index.d.ts",
+  "scripts": {
+    "lint:deps": "depcheck"
+  },
   "dependencies": {
     "@babel/types": "7.27.3",
     "type-fest": "4.40.1"
