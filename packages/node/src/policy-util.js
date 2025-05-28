@@ -16,7 +16,6 @@ import { LAVAMOAT_PKG_POLICY_ROOT } from './constants.js'
 import { InvalidPolicyError, NoPolicyError } from './error.js'
 import { readJsonFile } from './fs.js'
 import { log } from './log.js'
-import { isEntryCompartment } from './policy-gen/policy-gen-util.js'
 import {
   hasValue,
   hrPath,
@@ -31,6 +30,16 @@ import {
  * @import {CanonicalName, LavaMoatPolicyDebug, LoadPoliciesOptions, WritableFsInterface} from './types.js'
  * @import {ReadPolicyOptions, ReadPolicyOverrideOptions} from './internal.js'
  */
+
+/**
+ * Returns `true` if the compartment descriptor is the entry compartment
+ *
+ * By definition, this is a `CompartmentDescriptor` with an empty `path`.
+ *
+ * @param {CompartmentDescriptor} compartment
+ * @returns {boolean}
+ */
+const isEntryCompartment = (compartment) => compartment.path?.length === 0
 
 /**
  * Reads a `policy.json` from disk
