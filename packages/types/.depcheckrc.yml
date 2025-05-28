@@ -1,0 +1,6 @@
+ignores:
+  # monorepo deps
+  - 'ava'
+  - 'expect-type'
+  # types
+  - '@types/node'
