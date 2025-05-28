@@ -25,6 +25,9 @@
     },
     "./package.json": "./package.json"
   },
+  "scripts": {
+    "lint:deps": "depcheck"
+  },
   "dependencies": {
     "@babel/types": "7.27.3",
     "type-fest": "4.41.0"
