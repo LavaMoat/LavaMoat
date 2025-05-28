@@ -11,10 +11,11 @@ import { loadFromMap } from '@endo/compartment-mapper/import-lite.js'
 import { makeNodeCompartmentMap } from '../compartment/node-compartment-map.js'
 import { DEFAULT_ENDO_OPTIONS } from '../compartment/options.js'
 import { defaultReadPowers } from '../compartment/power.js'
+import { ExecutionError } from '../error.js'
 import { log as defaultLog } from '../log.js'
 
 /**
- * @import {ReadNowPowers, ImportLocationOptions, SyncImportLocationOptions} from '@endo/compartment-mapper'
+ * @import {ReadNowPowers, ImportLocationOptions, SyncImportLocationOptions, CompartmentMapDescriptor} from '@endo/compartment-mapper'
  * @import {ApplicationLoader, ExecuteOptions} from '../types.js'
  */
 
@@ -39,14 +40,24 @@ export const load = async (
   readPowers = defaultReadPowers,
   { log = defaultLog, dev, decorators = [], trustRoot, policy, ...options } = {}
 ) => {
-  const { nodeCompartmentMap } = await makeNodeCompartmentMap(entrypointPath, {
-    readPowers,
-    dev,
-    log,
-    trustRoot,
-    decorators: decorators,
-    policy,
-  })
+  /** @type {CompartmentMapDescriptor} */
+  let nodeCompartmentMap
+  try {
+    // eslint-disable-next-line @jessie.js/safe-await-separator
+    ;({ nodeCompartmentMap } = await makeNodeCompartmentMap(entrypointPath, {
+      readPowers,
+      dev,
+      log,
+      trustRoot,
+      decorators: decorators,
+      policy,
+    }))
+  } catch (err) {
+    throw new ExecutionError(
+      `Failed to create compartment map for ${entrypointPath}`,
+      { cause: err }
+    )
+  }
 
   /** @type {ImportLocationOptions | SyncImportLocationOptions} */
   const loadFromMapOptions = {
