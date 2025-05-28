@@ -27,7 +27,6 @@ const { DEFAULT_GLOBAL_THIS_REFS, POLICY_WRITE } = require('./constants')
  *   LavamoatModuleRecord,
  *   LavaMoatPolicy,
  *   LavaMoatPolicyDebug,
- *   LavaMoatPolicyOverrides,
  *   ResourcePolicy,
  *   Resources,
  *   SesCompat} from '@lavamoat/types'
@@ -622,7 +621,7 @@ function getDefaultPaths(policyName) {
 /**
  * @callback GeneratePolicyFn
  * @param {Partial<ModuleInspectorOptions> & {
- *   policyOverride?: LavaMoatPolicyOverrides
+ *   policyOverride?: LavaMoatPolicy
  *   moduleToPackageFallback?: (value: string) => string | undefined
  * }} opts
  *
