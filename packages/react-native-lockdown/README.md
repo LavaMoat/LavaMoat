@@ -77,7 +77,7 @@ module.exports = mergeConfig(getDefaultConfig(__dirname), config)
 ```
 
 If you already used a serializer configuration, you can pass it as second argument.
-`lockdownSerializer` will provide the `@react-native/js-polyfills` by default, but if you specified your own `getPolyfills` function, metro is expecting you to provide the polyfills and `lockdownSerializer` follows that behavior too.
+`lockdownSerializer` will provide the `@react-native/js-polyfills` by default, but if you specified your own `getPolyfills` function, Metro is expecting you to provide the polyfills and `lockdownSerializer` follows that behavior too.
 
 ```js
 // metro.config.js
