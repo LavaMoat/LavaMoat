@@ -133,6 +133,11 @@ module.exports = mergeConfig(getDefaultConfig(__dirname), config)
 > [!NOTE]
 > JSC is [moving to a Community Package][jsc-moving-to-community-package] available starting with React Native 0.79
 
+#### V8
+
+Untested on [react-native-v8][react-native-v8-ext], an opt-in V8 runtime for React Native Android only.
+
 [hardened-js-ext]: https://hardenedjs.org
 [jsc-moving-to-community-package]: https://reactnative.dev/blog/2025/04/08/react-native-0.79#jsc-moving-to-community-package
 [vetted-shims-ext]: https://github.com/endojs/endo/blob/master/packages/ses/docs/guide.md#using-hardened-javascript-with-vetted-shims
+[react-native-v8-ext]: https://github.com/Kudo/react-native-v8
