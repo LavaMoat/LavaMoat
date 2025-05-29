@@ -88,8 +88,9 @@ module.exports = {
     const repair = require.resolve('./repair.js')
 
     // getPolyfills
+    const userPolyfills = config.getPolyfills
     config.getPolyfills = () => {
-      let polyfills = config.getPolyfills()
+      let polyfills = userPolyfills()
       polyfills = polyfills.flat()
       module.exports.validatePolyfills(polyfills)
       return [ses, repair, ...polyfills]
