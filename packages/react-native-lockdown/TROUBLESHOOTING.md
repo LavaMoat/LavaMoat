@@ -11,7 +11,7 @@
 
 Upon inspecting the bundle, the reference error is throwing early when evaluating the SES shim.
 
-It is clear Babel is preparing it to be [transformed](https://github.com/endojs/endo/issues/662):
+It is clear Babel is preparing it to be [transformed][ses-transformed-ext]:
 
 ```js
 // http://localhost:8081/index.bundle//&platform=android
@@ -60,5 +60,4 @@ Did you remember to include the React Native JS polyfills in your custom Metro c
 [rn-js-polyfills-error-guard-ext]: https://github.com/facebook/react-native/blob/c50f3e5f668887bfb0c7080155c066a4fdcc092c/packages/polyfills/error-guard.js#L38-L40
 [readme-babel-config]: README.md#babel-config
 [hermes-metro-config]: README.md#hermes
-
-<!-- [ses-transformed-ext]: https://github.com/endojs/endo/issues/662 -->
+[ses-transformed-ext]: https://github.com/endojs/endo/issues/662
