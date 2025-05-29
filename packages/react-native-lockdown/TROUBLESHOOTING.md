@@ -2,7 +2,7 @@
 
 > [!IMPORTANT]
 >
-> Remember to `react-native start --reset-cache` or `react-native bundle --reset-cache` after Babel or Metro config changes to remove cached files (default: false).
+> Remember to `react-native start --reset-cache` or `react-native bundle --reset-cache` after Babel or Metro config changes to remove cached files (_default: false_ in both CLI commands).
 > This will ensure a fresh build/bundle with your configuration changes, rather than relying on hot-reload or hot/cold starts.
 
 ## ReferenceError: Property 'require' doesn't exist
