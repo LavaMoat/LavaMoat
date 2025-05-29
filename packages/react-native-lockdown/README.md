@@ -67,7 +67,7 @@ Use `lockdownSerializer` for serializer config.
 ```js
 // metro.config.js
 const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config')
-const { lockdownSerializer } = require('@lavamoat/react-native')
+const { lockdownSerializer } = require('@lavamoat/react-native-lockdown')
 
 const config = {
   serializer: lockdownSerializer({ hermesRuntime: true }),
