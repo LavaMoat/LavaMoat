@@ -7,14 +7,11 @@ const {
 const { getPackageNameForModulePath } = require('@lavamoat/aa')
 const { writeFileSync, mkdirSync } = require('node:fs')
 const path = require('node:path')
-const {
-  sources: { RawSource },
-} = require('webpack')
+
 
 const { isExcludedUnsafe } = require('./exclude')
 const diag = require('./diagnostics')
 
-const POLICY_SNAPSHOT_FILENAME = 'policy-snapshot.json'
 
 /**
  * @typedef {(specifier: string) => boolean} IsBuiltinFn
@@ -25,59 +22,43 @@ const POLICY_SNAPSHOT_FILENAME = 'policy-snapshot.json'
  */
 
 module.exports = {
-  /**
-   * @param {Object} opts
-   * @param {import('lavamoat-core').LavaMoatPolicy} [opts.policyFromOptions] -
-   *   The hardcoded policy passed in options, takes precedence over reading
-   *   from files
-   * @param {import('@lavamoat/aa').CanonicalNameMap} opts.canonicalNameMap -
-   *   Generated from aa
-   * @param {import('webpack').Compilation} opts.compilation - Webpack
-   *   compilation reference (for emitting assets)
-   * @param {boolean} opts.enabled - Whether to generate a policy
-   * @param {string} opts.location - Where to read/write the policy files
-   * @param {boolean} [opts.emit] - Whether to emit the policy snapshot as an
-   *   asset
-   * @param {IsBuiltinFn} opts.isBuiltin - A function that determines if the
-   *   specifier is a builtin of the runtime platform e.g. node:fs
-   * @returns
-   */
-  createPolicyGenerator({
-    policyFromOptions,
-    canonicalNameMap,
-    compilation,
-    enabled,
-    location,
-    emit = false,
-    isBuiltin,
-  }) {
+  stringifyPolicyReliably: jsonStringifySortedPolicy,
+  loadPolicy({ policyFromOptions, location }) {
     const { policy, applyOverride } = loadPoliciesSync({
       policyPath: path.join(location, 'policy.json'),
       policyOverridePath: path.join(location, 'policy-override.json'),
       debugMode: false,
     })
 
-    if (!enabled)
-      return {
-        inspectWebpackModule: () => {},
-        getPolicy: () => {
-          /** @type {import('lavamoat-core').LavaMoatPolicy} */
-          let final = { resources: {} }
-          if (policyFromOptions) {
-            // TODO: avoid loading the policy file if policyFromOptions is present
-            final = policyFromOptions
-          } else if (policy) {
-            final = applyOverride(policy)
-          }
-          if (emit) {
-            compilation.emitAsset(
-              POLICY_SNAPSHOT_FILENAME,
-              new RawSource(jsonStringifySortedPolicy(final))
-            )
-          }
-          return final
-        },
-      }
+    /** @type {import('lavamoat-core').LavaMoatPolicy} */
+    let final = { resources: {} }
+    if (policyFromOptions) {
+      // TODO: avoid loading the policy file if policyFromOptions is present
+      final = policyFromOptions
+    } else if (policy) {
+      final = applyOverride(policy)
+    }
+    return final
+  },
+  /**
+   * @param {Object} opts
+   * @param {import('@lavamoat/aa').CanonicalNameMap} opts.canonicalNameMap -
+   *   Generated from aa
+   * @param {string} opts.location - Where to read/write the policy files
+   * @param {IsBuiltinFn} opts.isBuiltin - A function that determines if the
+   *   specifier is a builtin of the runtime platform e.g. node:fs
+   * @returns
+   */
+  createPolicyGenerator({
+    canonicalNameMap,
+    location,
+    isBuiltin,
+  }) {
+    const { applyOverride } = loadPoliciesSync({
+      policyPath: path.join(location, 'policy.json'),
+      policyOverridePath: path.join(location, 'policy-override.json'),
+      debugMode: false,
+    })
 
     // load policy file
     // load overrides
@@ -154,12 +135,6 @@ module.exports = {
           'utf8'
         )
         const final = applyOverride(policy)
-        if (emit) {
-          compilation.emitAsset(
-            POLICY_SNAPSHOT_FILENAME,
-            new RawSource(jsonStringifySortedPolicy(final))
-          )
-        }
         return final
       },
     }
