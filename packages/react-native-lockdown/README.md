@@ -92,7 +92,7 @@ const config = {
       getPolyfills: () => {
         return [
           ...require('@react-native/js-polyfills')(),
-          require.resolve('reflect-metadata'),
+          require.resolve('vetted-shim'),
         ]
       },
     }
@@ -101,6 +101,9 @@ const config = {
 
 module.exports = mergeConfig(getDefaultConfig(__dirname), config)
 ```
+
+Some modules depend on language features that may not be present in the underlying platform.
+Shims (other programs that alter JavaScript) may be added, but are obliged to maintain the object capability safety invariants provided by Lockdown and must be carefully reviewed. We call these ["vetted shims"][vetted-shims-ext].
 
 > [!NOTE]
 > @react-native/js-polyfills is a peer dependency, likely stemming from your React Native version (example):
@@ -132,3 +135,4 @@ module.exports = mergeConfig(getDefaultConfig(__dirname), config)
 
 [hardened-js-ext]: https://hardenedjs.org
 [jsc-moving-to-community-package]: https://reactnative.dev/blog/2025/04/08/react-native-0.79#jsc-moving-to-community-package
+[vetted-shims-ext]: https://github.com/endojs/endo/blob/master/packages/ses/docs/guide.md#using-hardened-javascript-with-vetted-shims
