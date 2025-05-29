@@ -89,8 +89,8 @@ module.exports = {
 
     // getPolyfills
     config.getPolyfills = () => {
-      const polyfills = config.getPolyfills()
-      // polyfills = polyfills.flat() // if user forgets to spread an array from e.g. RN js polyfills
+      let polyfills = config.getPolyfills()
+      polyfills = polyfills.flat()
       module.exports.validatePolyfills(polyfills)
       return [ses, repair, ...polyfills]
     }
