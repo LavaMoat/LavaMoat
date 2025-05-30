@@ -26,24 +26,45 @@ module.exports = {
       lockdown: options.lockdown,
     }
 
-    if (
-      typeof options.scuttleGlobalThis === 'object' &&
-      Array.isArray(runtimeOptions.scuttleGlobalThis.exceptions)
-    ) {
-      runtimeOptions.scuttleGlobalThis.exceptions =
-        runtimeOptions.scuttleGlobalThis.exceptions.map((e) => e.toString())
-    }
-
     return {
+      /**
+       * Generates the LavaMoat runtime source code based on chunk configuration
+       *
+       * @param {Object} params - The parameters object
+       * @param {string | undefined} params.currentChunkName - The webpack chunk
+       *   object
+       * @param {(string | number)[]} params.chunkIds - Array of chunk
+       *   identifiers
+       * @param {Object} params.policyData - LavaMoat security policy
+       *   configuration
+       * @param {Object} params.identifierLookup - Object containing module
+       *   identifier mappings
+       * @param {string} params.identifierLookup.root - Root identifier
+       * @param {Object} params.identifierLookup.identifiersForModuleIds -
+       *   Module ID to identifier mappings
+       * @param {any} params.identifierLookup.unenforceableModuleIds - IDs of
+       *   modules that cannot be enforced
+       * @param {any} [params.identifierLookup.contextModuleIds] - Context
+       *   module IDs
+       * @param {Object} [params.identifierLookup.externals] - External module
+       *   configurations
+       * @returns {string} The assembled runtime source code
+       */
       getLavaMoatRuntimeSource({
-        chunk,
+        currentChunkName,
         chunkIds,
         policyData,
         identifierLookup,
       }) {
         let runtimeChunks = []
-        if (chunk.name && options.unlockedChunksUnsafe?.test(chunk.name)) {
-          diag.rawDebug(1, `> adding UNLOCKED runtime for chunk ${chunk.name}`)
+        if (
+          currentChunkName &&
+          options.unlockedChunksUnsafe?.test(currentChunkName)
+        ) {
+          diag.rawDebug(
+            1,
+            `> adding UNLOCKED runtime for chunk ${currentChunkName}`
+          )
           runtimeChunks = [
             {
               name: 'ENUM',
@@ -56,7 +77,7 @@ module.exports = {
             },
           ]
         } else {
-          diag.rawDebug(1, `> adding runtime for chunk ${chunk.name}`)
+          diag.rawDebug(1, `> adding runtime for chunk ${currentChunkName}`)
 
           runtimeChunks = [
             {
