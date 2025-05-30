@@ -20,7 +20,6 @@ test('lockdownSerializer - invalid getPolyfills', (t) => {
   t.is(error.message, 'serializer.getPolyfills must be a function')
 })
 
-// Snapshot test for lockdownSerializer
 test('lockdownSerializer - snapshot', (t) => {
   const originalConfig = {
     getRunModuleStatement: (moduleId) => `customRun(${moduleId})`,
