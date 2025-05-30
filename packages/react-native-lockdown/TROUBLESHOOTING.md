@@ -55,6 +55,10 @@ It looks like React Native is having trouble [initializing][init-core-ext] when 
 
 Did you remember to include the React Native JS polyfills in your custom Metro config? See ReadMe Hermes [example][hermes-metro-config].
 
+## License
+
+Copyright © 2024 Consensys, Inc. Licensed MIT
+
 [hermes-metro-config]: README.md#hermes
 [init-core-ext]: https://github.com/facebook/react-native/blob/main/packages/react-native/Libraries/Core/InitializeCore.js
 [readme-babel-config]: README.md#babel-config
