@@ -19,7 +19,7 @@ const progress = require('./buildtime/progress.js')
 const { assertFields } = require('./buildtime/utils.js')
 
 const {
-  createPolicyGenerator,
+  generatePolicy,
   loadPolicy,
   stringifyPolicyReliably,
 } = require('./buildtime/policyGenerator.js')
@@ -89,8 +89,14 @@ class LavaMoatPlugin {
     /** @type {LavaMoatPluginOptions} */
     if (options.scuttleGlobalThis === true) {
       options.scuttleGlobalThis = { enabled: true }
+    } else if (typeof options.scuttleGlobalThis === 'object') {
+      options.scuttleGlobalThis = { ...options.scuttleGlobalThis }
+      if (Array.isArray(options.scuttleGlobalThis.exceptions)) {
+        options.scuttleGlobalThis.exceptions =
+          options.scuttleGlobalThis.exceptions.map((e) => e.toString())
+      }
     }
-    options.scuttleGlobalThis = { ...options.scuttleGlobalThis }
+
     this.options = {
       policyLocation: path.join('lavamoat', 'webpack'),
       lockdown: lockdownDefaults,
@@ -230,7 +236,7 @@ class LavaMoatPlugin {
         // afterOptimizeChunkIds hook for processing all identified modules
         compilation.hooks.afterOptimizeChunkIds.tap(PLUGIN_NAME, (chunks) => {
           try {
-            const S = assertFields(STORE, [
+            assertFields(STORE, [
               'options',
               'mainCompilationWarnings',
               'chunkIds',
@@ -249,7 +255,7 @@ class LavaMoatPlugin {
             Array.from(chunks).forEach((chunk) => {
               // Collect chunk IDs and info while we're here
               if (chunk.id !== null) {
-                S.chunkIds.push(chunk.id)
+                STORE.chunkIds.push(chunk.id)
               }
 
               chunkGraph.getChunkModules(chunk).forEach((module) => {
@@ -259,7 +265,7 @@ class LavaMoatPlugin {
             })
 
             const moduleData = analyzeModules({
-              mainCompilationWarnings: S.mainCompilationWarnings,
+              mainCompilationWarnings: STORE.mainCompilationWarnings,
               allIdentifiedModules,
             })
             diag.rawDebug(4, { knownPaths: moduleData.knownPaths })
@@ -268,32 +274,25 @@ class LavaMoatPlugin {
             diag.rawDebug(2, 'writing policy')
 
             let policyToApply
-            if (S.options.generatePolicy) {
-              const policyGenerator = createPolicyGenerator({
-                location: S.options.policyLocation,
-                canonicalNameMap: S.canonicalNameMap,
-                isBuiltin: S.options.isBuiltin,
+            if (STORE.options.generatePolicy) {
+              policyToApply = generatePolicy({
+                location: STORE.options.policyLocation,
+                canonicalNameMap: STORE.canonicalNameMap,
+                isBuiltin: STORE.options.isBuiltin,
+                modulesToInspect: moduleData.inspectable.map((module) => ({
+                  module,
+                  connections:
+                    compilation.moduleGraph.getOutgoingConnections(module),
+                })),
               })
-
-              for (const moduleToInspect of moduleData.inspectable) {
-                policyGenerator.inspectWebpackModule(
-                  moduleToInspect,
-                  compilation.moduleGraph.getOutgoingConnections(
-                    moduleToInspect
-                  )
-                )
-              }
-              // use the generated policy to save the user one additional pass
-              // getting the policy also writes all files where necessary
-              policyToApply = policyGenerator.getPolicy()
             } else {
               policyToApply = loadPolicy({
-                policyFromOptions: S.options.policy,
-                location: S.options.policyLocation,
+                policyFromOptions: STORE.options.policy,
+                location: STORE.options.policyLocation,
               })
             }
 
-            if (S.options.emitPolicySnapshot) {
+            if (STORE.options.emitPolicySnapshot) {
               compilation.emitAsset(
                 POLICY_SNAPSHOT_FILENAME,
                 new RawSource(stringifyPolicyReliably(policyToApply))
@@ -307,19 +306,19 @@ class LavaMoatPlugin {
 
             // TODO: decouple further
             STORE.identifierLookup = generateIdentifierLookup({
-              readableResourceIds: S.options.readableResourceIds,
+              readableResourceIds: STORE.options.readableResourceIds,
               unenforceableModuleIds: moduleData.unenforceableModuleIds,
               contextModules: moduleData.contextModules,
               externals: moduleData.externals,
               paths: moduleData.knownPaths,
               policy: policyToApply,
-              canonicalNameMap: S.canonicalNameMap,
+              canonicalNameMap: STORE.canonicalNameMap,
             })
 
             // =================================================================
 
             if (moduleData.unenforceableModuleIds.length > 0) {
-              S.mainCompilationWarnings.push(
+              STORE.mainCompilationWarnings.push(
                 new WebpackError(
                   `LavaMoatPlugin: the following module ids can't be controlled by policy and must be ignored at runtime: \n  ${moduleData.unenforceableModuleIds.join()}`
                 )
@@ -351,8 +350,8 @@ class LavaMoatPlugin {
         const getIdentifierForPath = (p) => {
           PROGRESS.assertDone('pathsProcessed')
           // TODO: this doesn't make sense, identifierLookup needs to be partially dismantled and rewrapped
-          const S = assertFields(STORE, ['identifierLookup'])
-          return S.identifierLookup.pathToResourceId(p)
+          assertFields(STORE, ['identifierLookup'])
+          return STORE.identifierLookup.pathToResourceId(p)
         }
 
         for (const moduleType of coveredModuleTypes) {
@@ -370,12 +369,12 @@ class LavaMoatPlugin {
         // Report on excluded modules as late as possible.
         // This hook happens after all module generators have been executed.
         compilation.hooks.afterProcessAssets.tap(PLUGIN_NAME, () => {
-          const S = assertFields(STORE, ['excludes', 'mainCompilationWarnings'])
+          assertFields(STORE, ['excludes', 'mainCompilationWarnings'])
           diag.rawDebug(3, '> afterProcessAssets')
-          if (S.excludes.length > 0) {
-            S.mainCompilationWarnings.push(
+          if (STORE.excludes.length > 0) {
+            STORE.mainCompilationWarnings.push(
               new WebpackError(
-                `in LavaMoatPlugin: excluded modules \n  ${S.excludes.join('\n  ')}`
+                `in LavaMoatPlugin: excluded modules \n  ${STORE.excludes.join('\n  ')}`
               )
             )
           }
@@ -398,12 +397,12 @@ class LavaMoatPlugin {
           (chunk /*, set*/) => {
             if (chunk.hasRuntime()) {
               if (!PROGRESS.done('generatorCalled')) {
-                const S = assertFields(STORE, [
+                assertFields(STORE, [
                   'options',
                   'mainCompilationWarnings',
                   // 'identifierLookup', // TODO: sometimes runtime chunks are generated as part of plugins running and they're the useless/dummy ones. As a result we need to figure out a good condition for early exit from this hook maybe
                 ])
-                S.mainCompilationWarnings.push(
+                STORE.mainCompilationWarnings.push(
                   new WebpackError(
                     'LavaMoatPlugin: Something was generating runtime before all modules were identified. This might be part of a sub-compilation of a plugin. Please check for any unwanted interference between plugins.'
                   )
@@ -426,18 +425,18 @@ class LavaMoatPlugin {
                   return
                 }
 
-                const S = assertFields(STORE, [
+                assertFields(STORE, [
                   'options',
                   'mainCompilationWarnings',
                   'identifierLookup',
                 ])
 
                 // narrow down the policy and map to module identifiers
-                const policyData = S.identifierLookup.getTranslatedPolicy()
+                const policyData = STORE.identifierLookup.getTranslatedPolicy()
 
                 const lavaMoatRuntime = getLavaMoatRuntimeSource({
-                  chunk,
-                  chunkIds: S.chunkIds,
+                  currentChunkName: chunk.name,
+                  chunkIds: STORE.chunkIds,
                   policyData,
                   identifierLookup: STORE.identifierLookup,
                 })
