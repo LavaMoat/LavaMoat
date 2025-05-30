@@ -1,0 +1,14 @@
+{
+  "extends": "../../../.config/tsconfig.src.json",
+  "compilerOptions": {
+    "module": "NodeNext",
+    "strict": true,
+    "stripInternal": true,
+    "preserveSymlinks": true,
+    "erasableSyntaxOnly": true,
+    "noEmit": true,
+    "checkJs": true
+  },
+  "include": ["."],
+  "references": [{ "path": "../src/tsconfig.json" }]
+}
