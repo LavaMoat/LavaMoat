@@ -1,0 +1,145 @@
+exports[`createLavaMoatPolicyJSONSchema() > returns a valid JSON schema (snapshot) 1`] = `
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "LavaMoat policy",
+  "type": "object",
+  "properties": {
+    "resources": {
+      "$ref": "#/$defs/resources"
+    },
+    "root": {
+      "$ref": "#/$defs/root"
+    }
+  },
+  "required": [
+    "resources"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "resources": {
+      "description": "Mapping of canonical package name to resource policy value",
+      "id": "resources",
+      "type": "object",
+      "propertyNames": {
+        "$ref": "#/$defs/canonicalName"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/resourcePolicy"
+      }
+    },
+    "canonicalName": {
+      "id": "canonicalName",
+      "description": "Canonical name of a package representing the shortest path via the dependency tree (or \`$root$\` for a trusted root package)",
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^(?:(?:@[a-z0-9-~][a-z0-9-._~]*\\\\/)?[a-z0-9-~][a-z0-9-._~]*)(?:>(?:@[a-z0-9-~][a-z0-9-._~]*\\\\/)?[a-z0-9-~][a-z0-9-._~]*)*$"
+        },
+        {
+          "const": "$root$"
+        }
+      ]
+    },
+    "resourcePolicy": {
+      "description": "Policy for a given resource",
+      "id": "resourcePolicy",
+      "type": "object",
+      "properties": {
+        "globals": {
+          "$ref": "#/$defs/globalPolicy"
+        },
+        "builtin": {
+          "description": "Mapping of builtin module name to builtin policy value",
+          "type": "object",
+          "propertyNames": {
+            "$ref": "#/$defs/builtinName"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/builtinPolicy"
+          }
+        },
+        "packages": {
+          "description": "Mapping of canonical package name to package policy value",
+          "type": "object",
+          "propertyNames": {
+            "$ref": "#/$defs/canonicalName"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/packagePolicy"
+          }
+        },
+        "native": {
+          "$ref": "#/$defs/nativePolicy"
+        }
+      },
+      "additionalProperties": false
+    },
+    "globalPolicy": {
+      "description": "Globals (including properties using dot notation) accessible to the resource; \`true\` to allow and \`false\` to deny",
+      "id": "globalPolicy",
+      "type": "object",
+      "propertyNames": {
+        "$ref": "#/$defs/globalProperty"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/globalPolicyValue"
+      }
+    },
+    "globalProperty": {
+      "description": "Global property key or property thereof; dot notation allowed",
+      "id": "globalProperty",
+      "type": "string"
+    },
+    "globalPolicyValue": {
+      "id": "globalPolicyValue",
+      "description": "Global policy value",
+      "anyOf": [
+        {
+          "description": "\`true\` for read capability; \`false\` for none",
+          "type": "boolean"
+        },
+        {
+          "description": "write capability",
+          "const": "write"
+        },
+        {
+          "description": "redefine capability",
+          "const": "redefine"
+        }
+      ]
+    },
+    "builtinName": {
+      "description": "Name of a builtin module or property thereof; dot notation allowed",
+      "id": "builtinName",
+      "type": "string"
+    },
+    "builtinPolicy": {
+      "description": "\`true\` to allow access and \`false\` to deny access",
+      "id": "builtinPolicy",
+      "type": "boolean"
+    },
+    "packagePolicy": {
+      "id": "packagePolicy",
+      "description": "Additional external packages (in their entirety) accessible to the module; \`true\` to allow and \`false\` to deny",
+      "type": "boolean"
+    },
+    "nativePolicy": {
+      "id": "nativePolicy",
+      "description": "\`true\` to allow loading of native modules; \`false\` for none",
+      "type": "boolean"
+    },
+    "root": {
+      "description": "Root policy configuration",
+      "id": "root",
+      "type": "object",
+      "properties": {
+        "usePolicy": {
+          "description": "Reference to resource policy to use for the application root",
+          "$ref": "#/$defs/canonicalName"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}
+`;
