@@ -61,7 +61,9 @@ jobs:
         uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
       - name: Use Node.js from .nvmrc
         uses: ./.github/actions/prepare
-      # the same thing could be accomplished via `npm lint` but this is helpful for organizing job output
+      - name: Rebuild Types
+        run: npm run build:types
+        # the same thing could be accomplished via `npm lint` but this is helpful for organizing job output
       - name: Lint Sources
         run: npm run lint:eslint
       - name: Lint Dependencies
