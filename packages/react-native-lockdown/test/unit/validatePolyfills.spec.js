@@ -17,15 +17,11 @@ test('validatePolyfills - invalid polyfills (not an array)', (t) => {
 
 test('validatePolyfills - invalid polyfill (not a string)', (t) => {
   const polyfills = [path.resolve('polyfill1.js'), 123]
-  const error = t.throws(() => validatePolyfills(polyfills), {
+  t.throws(() => validatePolyfills(polyfills), {
     instanceOf: Error,
     message:
       'Expected polyfills to be an array of strings, but received number',
   })
-  t.is(
-    error.message,
-    'Expected polyfills to be an array of strings, but received number'
-  )
 })
 
 test('validatePolyfills - invalid polyfill (function)', (t) => {
