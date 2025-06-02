@@ -34,13 +34,9 @@ test('validatePolyfills - invalid polyfill (function)', (t) => {
 
 test('validatePolyfills - invalid polyfill (not a resolved path)', (t) => {
   const polyfills = [path.resolve('polyfill1.js'), 'polyfill2']
-  const error = t.throws(() => validatePolyfills(polyfills), {
+  t.throws(() => validatePolyfills(polyfills), {
     instanceOf: Error,
     message:
       'Polyfill must be a resolved path, not just a package name: polyfill2',
   })
-  t.is(
-    error.message,
-    'Polyfill must be a resolved path, not just a package name: polyfill2'
-  )
 })
