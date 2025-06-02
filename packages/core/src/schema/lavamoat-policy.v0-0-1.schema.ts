@@ -39,6 +39,11 @@ export interface LavaMoatPolicy<T extends Resources = Resources> {
    * a matching policy in {@link LavaMoatPolicy.resources}
    */
   root?: RootPolicy<T>
+
+  /**
+   * Additional per-resource policy hints
+   */
+  hints?: PolicyHints<T>
 }
 
 /**
@@ -137,6 +142,18 @@ export interface ResourcePolicy {
    * Allow native modules
    */
   native?: boolean
+}
+
+/**
+ * Per-resource hints which tell policy gen to examine an explicit list of
+ * module specifiers for a given resource (since presumably it could not
+ * discover those resources by itself).
+ *
+ * @template T The value of {@link LavaMoatPolicy.resources}; the keys of this
+ *   object must be present here
+ */
+export type PolicyHints<T extends Resources = Resources> = {
+  [k in keyof T]?: string[]
 }
 
 /**
