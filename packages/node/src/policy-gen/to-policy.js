@@ -88,19 +88,19 @@ const moduleRecordsToPolicy = (
     perPackageWarnings,
     foundViolationTypes,
     { log }
-        )
+  )
 
   inspector.on('compat-warning', compatWarningListener)
 
   for (const moduleRecord of moduleRecords) {
     inspector.inspectModule(moduleRecord)
-    }
+  }
 
   inspector.off('compat-warning', compatWarningListener)
 
   if (perPackageWarnings.size) {
     reportSesViolations(perPackageWarnings, foundViolationTypes, { log })
-    }
+  }
 
   return inspector.generatePolicy({ policyOverride })
 }
