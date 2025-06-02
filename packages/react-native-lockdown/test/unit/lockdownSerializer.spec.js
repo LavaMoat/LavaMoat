@@ -13,11 +13,10 @@ test('lockdownSerializer - invalid getPolyfills', (t) => {
   const originalConfig = {
     getPolyfills: 'not-a-function',
   }
-  const error = t.throws(() => lockdownSerializer({}, originalConfig), {
+  t.throws(() => lockdownSerializer({}, originalConfig), {
     instanceOf: Error,
     message: 'serializer.getPolyfills must be a function',
   })
-  t.is(error.message, 'serializer.getPolyfills must be a function')
 })
 
 test('lockdownSerializer - snapshot', (t) => {
