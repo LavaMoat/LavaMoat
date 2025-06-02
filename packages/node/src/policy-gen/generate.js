@@ -286,6 +286,7 @@ export const generatePolicy = async (
       readPowers,
       trustRoot,
       debug: true,
+      log,
       policyOverride,
     }))
     await writePolicy(policyDebugPath, debugPolicy, { fs: writableFs })
@@ -302,6 +303,7 @@ export const generatePolicy = async (
     log.info(`Generating LavaMoat policy from ${niceEntrypointPath}…`)
     ;({ policy, compartmentMap, dataMap } = await generate(entrypoint, {
       ...generateOpts,
+      log,
       trustRoot,
       readPowers,
       policyOverride,
