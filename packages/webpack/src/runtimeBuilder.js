@@ -4,21 +4,15 @@ const diag = require('./buildtime/diagnostics.js')
 const { assembleRuntime } = require('./buildtime/assemble.js')
 const path = require('node:path')
 
-/**
- * @typedef {Object} RuntimeOptions
- * @property {boolean | Object} scuttleGlobalThis - Scuttle global this
- *   configuration
- * @property {boolean} lockdown - Lockdown configuration
- * @property {RegExp} [unlockedChunksUnsafe] - Unlocked chunks pattern
- * @property {boolean} [debugRuntime] - Debug runtime flag
- */
+/** @typedef {import('./buildtime/types').LavaMoatPluginOptions} LavaMoatPluginOptions */
 
 module.exports = {
   /**
    * Builds the LavaMoat runtime configuration and generates runtime source code
    *
    * @param {Object} params - The parameters object
-   * @param {RuntimeOptions} params.options - Runtime configuration options
+   * @param {LavaMoatPluginOptions} params.options - Runtime configuration
+   *   options
    */
   runtimeBuilder({ options }) {
     const runtimeOptions = {
@@ -54,7 +48,13 @@ module.exports = {
         currentChunkName,
         chunkIds,
         policyData,
-        identifierLookup,
+        identifierLookup: {
+          root,
+          identifiersForModuleIds,
+          unenforceableModuleIds,
+          contextModuleIds,
+          externals,
+        },
       }) {
         let runtimeChunks = []
         if (
@@ -82,22 +82,22 @@ module.exports = {
           runtimeChunks = [
             {
               name: 'root',
-              data: identifierLookup.root,
+              data: root,
               json: true,
             },
             {
               name: 'idmap',
-              data: identifierLookup.identifiersForModuleIds,
+              data: identifiersForModuleIds,
               json: true,
             },
             {
               name: 'unenforceable',
-              data: identifierLookup.unenforceableModuleIds,
+              data: unenforceableModuleIds,
               json: true,
             },
             {
               name: 'ctxm',
-              data: identifierLookup.contextModuleIds || null,
+              data: contextModuleIds || null,
               json: true,
             },
             {
@@ -108,7 +108,7 @@ module.exports = {
             },
             {
               name: 'externals',
-              data: identifierLookup.externals || null,
+              data: externals || null,
               json: true,
             },
             { name: 'options', data: runtimeOptions, json: true },

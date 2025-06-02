@@ -218,7 +218,7 @@ exports.analyzeModules = ({
 
       // typescript is complaining about the use of `resource` here, but it's actually there.
       knownPaths.push({
-        path: /** @type {any} */ (module).resource,
+        path: /** @type {any} */ (module).resource, // TODO: use actual type so that we enforce the right string being compared everywhere
         moduleId,
       })
     }

@@ -43,7 +43,7 @@ const JAVASCRIPT_MODULE_TYPE_ESM = 'javascript/esm'
 
 const POLICY_SNAPSHOT_FILENAME = 'policy-snapshot.json'
 
-const { wrapGeneratorMaker } = require('./buildtime/generator.js')
+const { wrapGenerator } = require('./buildtime/generator.js')
 const { sesEmitHook, sesPrefixFiles } = require('./buildtime/emitSes.js')
 const EXCLUDE_LOADER = path.join(__dirname, './excludeLoader.js')
 
@@ -62,6 +62,9 @@ class VirtualRuntimeModule extends RuntimeModule {
     return this.virtualSource
   }
 }
+
+/** @typedef {import('./buildtime/types').LavaMoatPluginOptions} LavaMoatPluginOptions */
+/** @typedef {import('./buildtime/types').ScuttlerConfig} ScuttlerConfig */
 
 // =================================================================
 // Plugin code
@@ -120,9 +123,16 @@ class LavaMoatPlugin {
      *   been processed.
      * @property {string[]} excludes Array of module rawResource names that were
      *   excluded from wrapping
+     * @property {string[]} tooEarly Array of module rawResource names that were
+     *   not wrapped because they were generated before chunks were known
      * @property {import('@lavamoat/aa').CanonicalNameMap} [canonicalNameMap]
-     * @property {import('./buildtime/aa.js').IdentifierLookup} [identifierLookup]
-     *   TODO: unpack into more fields
+     * @property {import('lavamoat-core').LavaMoatPolicy} [runtimeOptimizedPolicy]
+     * @property {string} [root]
+     * @property {[string, (string | number)[]][]} [identifiersForModuleIds]
+     * @property {any[]} [unenforceableModuleIds]
+     * @property {any[]} [contextModuleIds]
+     * @property {(path: string) => string | undefined} [pathToResourceId]
+     * @property {Record<string, any>} [externals]
      */
 
     /** @type {Store} */
@@ -130,6 +140,7 @@ class LavaMoatPlugin {
       options: this.options,
       chunkIds: [],
       excludes: [],
+      tooEarly: [],
     }
 
     const PROGRESS = progress({
@@ -233,6 +244,43 @@ class LavaMoatPlugin {
         })
 
         // =================================================================
+        // javascript modules generator tweaks installation
+
+        const coveredModuleTypes = [
+          JAVASCRIPT_MODULE_TYPE_AUTO,
+          JAVASCRIPT_MODULE_TYPE_DYNAMIC,
+          JAVASCRIPT_MODULE_TYPE_ESM,
+        ]
+
+        const generatorWrapper = wrapGenerator({
+          excludes: STORE.excludes,
+          runChecks: STORE.options.runChecks,
+          PROGRESS,
+        })
+
+        for (const moduleType of coveredModuleTypes) {
+          normalModuleFactory.hooks.generator
+            .for(moduleType)
+            .tap(PLUGIN_NAME, generatorWrapper.generatorHookHandler)
+        }
+
+        // Report on excluded modules as late as possible.
+        // This hook happens after all module generators have been executed.
+        compilation.hooks.afterProcessAssets.tap(PLUGIN_NAME, () => {
+          assertFields(STORE, ['excludes', 'mainCompilationWarnings'])
+          diag.rawDebug(3, '> afterProcessAssets')
+          if (STORE.excludes.length > 0) {
+            STORE.mainCompilationWarnings.push(
+              new WebpackError(
+                `LavaMoatPlugin: Following modules were excluded by use of excludeLoader: \n  ${STORE.excludes.join('\n  ')}`
+              )
+            )
+          }
+        })
+        // =================================================================
+        // END OF javascript modules generator tweaks installation
+
+        // =================================================================
         // afterOptimizeChunkIds hook for processing all identified modules
         compilation.hooks.afterOptimizeChunkIds.tap(PLUGIN_NAME, (chunks) => {
           try {
@@ -271,26 +319,21 @@ class LavaMoatPlugin {
             diag.rawDebug(4, { knownPaths: moduleData.knownPaths })
             PROGRESS.report('pathsCollected')
 
-            diag.rawDebug(2, 'writing policy')
-
-            let policyToApply
-            if (STORE.options.generatePolicy) {
-              policyToApply = generatePolicy({
-                location: STORE.options.policyLocation,
-                canonicalNameMap: STORE.canonicalNameMap,
-                isBuiltin: STORE.options.isBuiltin,
-                modulesToInspect: moduleData.inspectable.map((module) => ({
-                  module,
-                  connections:
-                    compilation.moduleGraph.getOutgoingConnections(module),
-                })),
-              })
-            } else {
-              policyToApply = loadPolicy({
-                policyFromOptions: STORE.options.policy,
-                location: STORE.options.policyLocation,
-              })
-            }
+            const policyToApply = STORE.options.generatePolicy
+              ? generatePolicy({
+                  location: STORE.options.policyLocation,
+                  canonicalNameMap: STORE.canonicalNameMap,
+                  isBuiltin: STORE.options.isBuiltin,
+                  modulesToInspect: moduleData.inspectable.map((module) => ({
+                    module,
+                    connections:
+                      compilation.moduleGraph.getOutgoingConnections(module),
+                  })),
+                })
+              : loadPolicy({
+                  policyFromOptions: STORE.options.policy,
+                  location: STORE.options.policyLocation,
+                })
 
             if (STORE.options.emitPolicySnapshot) {
               compilation.emitAsset(
@@ -305,7 +348,7 @@ class LavaMoatPlugin {
             )
 
             // TODO: decouple further
-            STORE.identifierLookup = generateIdentifierLookup({
+            const identifierLookup = generateIdentifierLookup({
               readableResourceIds: STORE.options.readableResourceIds,
               unenforceableModuleIds: moduleData.unenforceableModuleIds,
               contextModules: moduleData.contextModules,
@@ -314,6 +357,43 @@ class LavaMoatPlugin {
               policy: policyToApply,
               canonicalNameMap: STORE.canonicalNameMap,
             })
+
+            const { tooEarly } = generatorWrapper.enableGeneratorWrapping({
+              getIdentifierForPath: identifierLookup.pathToResourceId,
+            })
+
+            const suspiciousTooEarly = tooEarly.filter(
+              identifierLookup.isKnownPath
+            )
+
+            if (suspiciousTooEarly.length > 0) {
+              STORE.mainCompilationWarnings.push(
+                new WebpackError(
+                  `in LavaMoatPlugin: sources generated for modules before all paths were known \n  ${suspiciousTooEarly.join('\n  ')}`
+                )
+              )
+            }
+            diag.run(1, () => {
+              if (tooEarly.length > 0) {
+                STORE.mainCompilationWarnings.push(
+                  new WebpackError(
+                    `in LavaMoatPlugin: other generated modules which were never recognized as part of the bundle \n  ${tooEarly.join('\n  ')}`
+                  )
+                )
+              }
+            })
+
+            // STORE.identifierLookup = identifierLookup
+            STORE.root = identifierLookup.root
+            // storing a translation function
+            STORE.identifiersForModuleIds =
+              identifierLookup.identifiersForModuleIds
+            STORE.unenforceableModuleIds = moduleData.unenforceableModuleIds
+            STORE.contextModuleIds = moduleData.contextModules
+            STORE.externals = moduleData.externals
+            // narrow down the policy and map to module identifiers
+            STORE.runtimeOptimizedPolicy =
+              identifierLookup.getTranslatedPolicy()
 
             // =================================================================
 
@@ -334,58 +414,10 @@ class LavaMoatPlugin {
         // END OF afterOptimizeChunkIds hook for processing all identified modules
 
         // =================================================================
-        // javascript modules generator tweaks installation
-
-        const coveredModuleTypes = [
-          JAVASCRIPT_MODULE_TYPE_AUTO,
-          JAVASCRIPT_MODULE_TYPE_DYNAMIC,
-          JAVASCRIPT_MODULE_TYPE_ESM,
-        ]
-
-        // Caveat: this might be called before the lookup map is ready if a plugin is running a child compilation or alike.
-        // Note that in those cases wrapped code is not meant to run and policy will be empty.
-        /**
-         * @param {string} p
-         */
-        const getIdentifierForPath = (p) => {
-          PROGRESS.assertDone('pathsProcessed')
-          // TODO: this doesn't make sense, identifierLookup needs to be partially dismantled and rewrapped
-          assertFields(STORE, ['identifierLookup'])
-          return STORE.identifierLookup.pathToResourceId(p)
-        }
-
-        for (const moduleType of coveredModuleTypes) {
-          normalModuleFactory.hooks.generator.for(moduleType).tap(
-            PLUGIN_NAME,
-            wrapGeneratorMaker({
-              excludes: STORE.excludes,
-              runChecks: STORE.options.runChecks,
-              getIdentifierForPath,
-              PROGRESS,
-            })
-          )
-        }
-
-        // Report on excluded modules as late as possible.
-        // This hook happens after all module generators have been executed.
-        compilation.hooks.afterProcessAssets.tap(PLUGIN_NAME, () => {
-          assertFields(STORE, ['excludes', 'mainCompilationWarnings'])
-          diag.rawDebug(3, '> afterProcessAssets')
-          if (STORE.excludes.length > 0) {
-            STORE.mainCompilationWarnings.push(
-              new WebpackError(
-                `in LavaMoatPlugin: excluded modules \n  ${STORE.excludes.join('\n  ')}`
-              )
-            )
-          }
-        })
-        // =================================================================
-        // END OF javascript modules generator tweaks installation
-
-        // =================================================================
         // This part adds LavaMoat runtime to webpack runtime for every chunk that needs runtime.
 
         const onceForChunkSet = new WeakSet()
+        const chunkRuntimeWarningsDedupe = new Set()
 
         const { getLavaMoatRuntimeSource } = runtimeBuilder({
           options: STORE.options,
@@ -397,22 +429,21 @@ class LavaMoatPlugin {
           (chunk /*, set*/) => {
             if (chunk.hasRuntime()) {
               if (!PROGRESS.done('generatorCalled')) {
-                assertFields(STORE, [
-                  'options',
-                  'mainCompilationWarnings',
-                  // 'identifierLookup', // TODO: sometimes runtime chunks are generated as part of plugins running and they're the useless/dummy ones. As a result we need to figure out a good condition for early exit from this hook maybe
-                ])
-                STORE.mainCompilationWarnings.push(
-                  new WebpackError(
-                    'LavaMoatPlugin: Something was generating runtime before all modules were identified. This might be part of a sub-compilation of a plugin. Please check for any unwanted interference between plugins.'
+                assertFields(STORE, ['options', 'mainCompilationWarnings'])
+                if (!chunkRuntimeWarningsDedupe.has(chunk.id)) {
+                  STORE.mainCompilationWarnings.push(
+                    new WebpackError(
+                      `LavaMoatPlugin: Something was generating runtime before all modules were identified. This might be part of a sub-compilation of a plugin. Please check for any unwanted interference between plugins. [chunk name: '${chunk.name}']`
+                    )
                   )
-                )
+                  chunkRuntimeWarningsDedupe.add(chunk.id)
+                }
                 diag.rawDebug(
                   1,
                   '> skipped adding runtime (additionalChunkRuntimeRequirements)'
                 )
                 // It's possible to generate the runtime with an empty policy to make the wrapped code work.
-                // It's no longer necessary now that `generate` function is only wrapping anything if paths were processed,
+                // It's no longer necessary now that `generate` function is only wrapping anything if paths were processed - which is when generator wrapping gets enabled,
                 // which corresponds to it being the main compilation. But plugins may exist that conflict with that assumption;
                 // in which case we're gonna have to bring back the runtime with empty policy
               } else {
@@ -420,7 +451,7 @@ class LavaMoatPlugin {
                 if (onceForChunkSet.has(chunk)) {
                   diag.rawDebug(
                     1,
-                    '> skipped adding runtime (additionalChunkRuntimeRequirements)'
+                    '> skipped adding runtime again to the same chunk(additionalChunkRuntimeRequirements)'
                   )
                   return
                 }
@@ -428,17 +459,25 @@ class LavaMoatPlugin {
                 assertFields(STORE, [
                   'options',
                   'mainCompilationWarnings',
-                  'identifierLookup',
+                  'root',
+                  'identifiersForModuleIds',
+                  'unenforceableModuleIds',
+                  'contextModuleIds',
+                  'externals',
+                  'runtimeOptimizedPolicy',
                 ])
-
-                // narrow down the policy and map to module identifiers
-                const policyData = STORE.identifierLookup.getTranslatedPolicy()
 
                 const lavaMoatRuntime = getLavaMoatRuntimeSource({
                   currentChunkName: chunk.name,
                   chunkIds: STORE.chunkIds,
-                  policyData,
-                  identifierLookup: STORE.identifierLookup,
+                  policyData: STORE.runtimeOptimizedPolicy,
+                  identifierLookup: {
+                    root: STORE.root,
+                    identifiersForModuleIds: STORE.identifiersForModuleIds,
+                    unenforceableModuleIds: STORE.unenforceableModuleIds,
+                    contextModuleIds: STORE.contextModuleIds,
+                    externals: STORE.externals,
+                  },
                 })
 
                 // Add the runtime modules to the chunk, which handles
@@ -508,47 +547,3 @@ class LavaMoatPlugin {
 LavaMoatPlugin.exclude = EXCLUDE_LOADER
 
 module.exports = LavaMoatPlugin
-
-/**
- * @typedef {Object} ScuttlerObjectConfig
- * @property {boolean} [enabled] - Indicates whether the feature is enabled
- * @property {string[]} [exceptions] - A list of exceptions as strings
- * @property {string} [scuttlerName] - The name of the scuttler
- */
-
-/**
- * @typedef {ScuttlerObjectConfig | boolean | undefined} ScuttlerConfig
- */
-
-/**
- * @typedef {Object} LavaMoatPluginOptions
- * @property {boolean} [generatePolicy] - Generate the policy file
- * @property {string} [rootDir] - Specify root directory for canonicalNames to
- *   be resolved from if different than compiler.context
- * @property {string} policyLocation - Directory containing policy files are
- *   stored, defaults to './lavamoat/webpack'
- * @property {boolean} [emitPolicySnapshot] - Additionally put policy in dist of
- *   webpack compilation
- * @property {boolean} [readableResourceIds] - Should resourceIds be readable or
- *   turned into numbers - defaults to (mode==='development')
- * @property {boolean} [HtmlWebpackPluginInterop] - Add a script tag to the html
- *   output for lockdown.js if HtmlWebpackPlugin is in use
- * @property {RegExp} [inlineLockdown] - Prefix the matching files with lockdown
- * @property {number} [diagnosticsVerbosity] - A number representing diagnostics
- *   output verbosity, the larger the more overwhelming
- * @property {LockdownOptions} lockdown - Options to pass to SES lockdown
- * @property {import('lavamoat-core').LavaMoatPolicy} [policy] - LavaMoat policy
- *   object - if programmatically created
- * @property {boolean} [runChecks] - Check resulting code with wrapping for
- *   correctness
- * @property {(specifier: string) => boolean} isBuiltin - A function that
- *   determines if the specifier is a builtin of the runtime platform e.g.
- *   node:fs
- * @property {ScuttlerConfig} [scuttleGlobalThis] - Configuration for enabling
- *   scuttling mode
- * @property {boolean} [debugRuntime] - Enable runtime debugging tools
- * @property {RegExp} [unlockedChunksUnsafe] - A regex to match chunk names that
- *   should be running without enforcement. This is unsafe and should only be
- *   used when a part of the app is running in an environment that can't be
- *   locked down..
- */
