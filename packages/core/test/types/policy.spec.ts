@@ -127,3 +127,16 @@ test('root may be omitted', (t) => {
 
   expectTypeOf(policy).toEqualTypeOf<LavaMoatPolicy<{ foo: {} }>>()
 })
+
+test('hints are allowed', (t) => {
+  const policy = infer({
+    resources: {
+      foo: {},
+    },
+    hints: {
+      foo: ['../bar.js'],
+    },
+  })
+
+  expectTypeOf(policy).toEqualTypeOf<LavaMoatPolicy<{ foo: {} }>>()
+})
