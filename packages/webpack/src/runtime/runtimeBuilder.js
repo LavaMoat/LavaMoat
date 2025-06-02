@@ -1,10 +1,10 @@
 // @ts-ignore
-const { RUNTIME_KEY } = require('./ENUM.json')
-const diag = require('./buildtime/diagnostics.js')
-const { assembleRuntime } = require('./buildtime/assemble.js')
+const { RUNTIME_KEY } = require('../ENUM.json')
+const diag = require('../buildtime/diagnostics.js')
+const { assembleRuntime } = require('./assemble.js')
 const path = require('node:path')
 
-/** @typedef {import('./buildtime/types').LavaMoatPluginOptions} LavaMoatPluginOptions */
+/** @typedef {import('../buildtime/types').LavaMoatPluginOptions} LavaMoatPluginOptions */
 
 module.exports = {
   /**
@@ -31,16 +31,15 @@ module.exports = {
        *   identifiers
        * @param {Object} params.policyData - LavaMoat security policy
        *   configuration
-       * @param {Object} params.identifierLookup - Object containing module
+       * @param {Object} params.identifiers - Object containing module
        *   identifier mappings
-       * @param {string} params.identifierLookup.root - Root identifier
-       * @param {Object} params.identifierLookup.identifiersForModuleIds -
-       *   Module ID to identifier mappings
-       * @param {any} params.identifierLookup.unenforceableModuleIds - IDs of
-       *   modules that cannot be enforced
-       * @param {any} [params.identifierLookup.contextModuleIds] - Context
-       *   module IDs
-       * @param {Object} [params.identifierLookup.externals] - External module
+       * @param {string} params.identifiers.root - Root identifier
+       * @param {Object} params.identifiers.identifiersForModuleIds - Module ID
+       *   to identifier mappings
+       * @param {any} params.identifiers.unenforceableModuleIds - IDs of modules
+       *   that cannot be enforced
+       * @param {any} [params.identifiers.contextModuleIds] - Context module IDs
+       * @param {Object} [params.identifiers.externals] - External module
        *   configurations
        * @returns {string} The assembled runtime source code
        */
@@ -48,7 +47,7 @@ module.exports = {
         currentChunkName,
         chunkIds,
         policyData,
-        identifierLookup: {
+        identifiers: {
           root,
           identifiersForModuleIds,
           unenforceableModuleIds,
@@ -68,12 +67,12 @@ module.exports = {
           runtimeChunks = [
             {
               name: 'ENUM',
-              file: require.resolve('./ENUM.json'),
+              file: require.resolve('../ENUM.json'),
               json: true,
             },
             {
               name: 'runtime',
-              file: require.resolve('./runtime/runtimeUnlocked.js'),
+              file: require.resolve('./runtimeUnlocked.js'),
             },
           ]
         } else {
@@ -124,7 +123,7 @@ module.exports = {
             { name: 'policy', data: policyData, json: true },
             {
               name: 'ENUM',
-              file: require.resolve('./ENUM.json'),
+              file: require.resolve('../ENUM.json'),
               json: true,
             },
             {
@@ -133,14 +132,14 @@ module.exports = {
             },
             {
               name: 'runtime',
-              file: require.resolve('./runtime/runtime.js'),
+              file: require.resolve('./runtime.js'),
             },
           ]
 
           if (options.debugRuntime) {
             runtimeChunks.push({
               name: 'debug',
-              shimRequire: path.join(__dirname, './runtime/debug.js'),
+              shimRequire: path.join(__dirname, 'debug.js'),
             })
           }
         }

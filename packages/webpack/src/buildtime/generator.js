@@ -59,7 +59,7 @@ const wrappedGeneratorInstances = new WeakSet()
  * @param {object} options
  * @param {string[]} options.excludes
  * @param {boolean | undefined} options.runChecks
- * @param {import('./progress').ProgressAPI} options.PROGRESS
+ * @param {import('./utils.js').ProgressAPI} options.PROGRESS
  */
 exports.wrapGenerator = ({ excludes, runChecks, PROGRESS }) => {
   /** @type {string[]} */
