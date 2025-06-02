@@ -1,4 +1,4 @@
-const { runtimeBuilder } = require('./runtimeBuilder.js')
+const { runtimeBuilder } = require('./runtime/runtimeBuilder.js')
 
 const { analyzeModules } = require('./buildtime/modulesData.js')
 
@@ -15,8 +15,7 @@ const browserResolve = require('browser-resolve')
 
 const { generateIdentifierLookup } = require('./buildtime/aa.js')
 const diag = require('./buildtime/diagnostics.js')
-const progress = require('./buildtime/progress.js')
-const { assertFields } = require('./buildtime/utils.js')
+const { assertFields, progress } = require('./buildtime/utils.js')
 
 const {
   generatePolicy,
@@ -264,18 +263,19 @@ class LavaMoatPlugin {
             .tap(PLUGIN_NAME, generatorWrapper.generatorHookHandler)
         }
 
-        // Report on excluded modules as late as possible.
-        // This hook happens after all module generators have been executed.
-        compilation.hooks.afterProcessAssets.tap(PLUGIN_NAME, () => {
-          assertFields(STORE, ['excludes', 'mainCompilationWarnings'])
-          diag.rawDebug(3, '> afterProcessAssets')
-          if (STORE.excludes.length > 0) {
-            STORE.mainCompilationWarnings.push(
-              new WebpackError(
-                `LavaMoatPlugin: Following modules were excluded by use of excludeLoader: \n  ${STORE.excludes.join('\n  ')}`
+        diag.run(1, () => {
+          // Report on excluded modules as late as possible.
+          // This hook happens after all module generators have been executed.
+          compilation.hooks.afterProcessAssets.tap(PLUGIN_NAME, () => {
+            assertFields(STORE, ['excludes', 'mainCompilationWarnings'])
+            if (STORE.excludes.length > 0) {
+              STORE.mainCompilationWarnings.push(
+                new WebpackError(
+                  `LavaMoatPlugin: Following modules were excluded by use of excludeLoader: \n  ${STORE.excludes.join('\n  ')}`
+                )
               )
-            )
-          }
+            }
+          })
         })
         // =================================================================
         // END OF javascript modules generator tweaks installation
@@ -316,7 +316,7 @@ class LavaMoatPlugin {
               mainCompilationWarnings: STORE.mainCompilationWarnings,
               allIdentifiedModules,
             })
-            diag.rawDebug(4, { knownPaths: moduleData.knownPaths })
+            diag.rawDebug(3, { knownPaths: moduleData.knownPaths })
             PROGRESS.report('pathsCollected')
 
             const policyToApply = STORE.options.generatePolicy
@@ -350,7 +350,6 @@ class LavaMoatPlugin {
             // TODO: decouple further
             const identifierLookup = generateIdentifierLookup({
               readableResourceIds: STORE.options.readableResourceIds,
-              unenforceableModuleIds: moduleData.unenforceableModuleIds,
               contextModules: moduleData.contextModules,
               externals: moduleData.externals,
               paths: moduleData.knownPaths,
@@ -369,7 +368,7 @@ class LavaMoatPlugin {
             if (suspiciousTooEarly.length > 0) {
               STORE.mainCompilationWarnings.push(
                 new WebpackError(
-                  `in LavaMoatPlugin: sources generated for modules before all paths were known \n  ${suspiciousTooEarly.join('\n  ')}`
+                  `in LavaMoatPlugin: sources generated for modules before all paths were known. The following modules in the bundle might not be wrapped in a Compartment: \n  ${suspiciousTooEarly.join('\n  ')}`
                 )
               )
             }
@@ -377,7 +376,7 @@ class LavaMoatPlugin {
               if (tooEarly.length > 0) {
                 STORE.mainCompilationWarnings.push(
                   new WebpackError(
-                    `in LavaMoatPlugin: other generated modules which were never recognized as part of the bundle \n  ${tooEarly.join('\n  ')}`
+                    `in LavaMoatPlugin: All modules with 'generate' step executed before all paths were known \n  ${tooEarly.join('\n  ')}`
                   )
                 )
               }
@@ -385,11 +384,12 @@ class LavaMoatPlugin {
 
             // STORE.identifierLookup = identifierLookup
             STORE.root = identifierLookup.root
-            // storing a translation function
             STORE.identifiersForModuleIds =
               identifierLookup.identifiersForModuleIds
             STORE.unenforceableModuleIds = moduleData.unenforceableModuleIds
-            STORE.contextModuleIds = moduleData.contextModules
+            STORE.contextModuleIds = moduleData.contextModules.map(
+              ({ moduleId }) => moduleId
+            )
             STORE.externals = moduleData.externals
             // narrow down the policy and map to module identifiers
             STORE.runtimeOptimizedPolicy =
@@ -439,7 +439,7 @@ class LavaMoatPlugin {
                   chunkRuntimeWarningsDedupe.add(chunk.id)
                 }
                 diag.rawDebug(
-                  1,
+                  2,
                   '> skipped adding runtime (additionalChunkRuntimeRequirements)'
                 )
                 // It's possible to generate the runtime with an empty policy to make the wrapped code work.
@@ -449,9 +449,10 @@ class LavaMoatPlugin {
               } else {
                 // If the chunk has already been processed, skip it.
                 if (onceForChunkSet.has(chunk)) {
-                  diag.rawDebug(
-                    1,
-                    '> skipped adding runtime again to the same chunk(additionalChunkRuntimeRequirements)'
+                  STORE.mainCompilationWarnings.push(
+                    new WebpackError(
+                      `LavaMoatPlugin: Skipped adding runtime again to the same chunk [chunk name: '${chunk.name}']`
+                    )
                   )
                   return
                 }
@@ -471,7 +472,7 @@ class LavaMoatPlugin {
                   currentChunkName: chunk.name,
                   chunkIds: STORE.chunkIds,
                   policyData: STORE.runtimeOptimizedPolicy,
-                  identifierLookup: {
+                  identifiers: {
                     root: STORE.root,
                     identifiersForModuleIds: STORE.identifiersForModuleIds,
                     unenforceableModuleIds: STORE.unenforceableModuleIds,

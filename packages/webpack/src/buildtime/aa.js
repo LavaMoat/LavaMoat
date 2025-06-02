@@ -49,9 +49,6 @@ const crossReference = (neededIds, policyIds) => {
 /**
  * @typedef {Object} IdentifierLookup
  * @property {string} root
- * @property {(string | number)[]} unenforceableModuleIds
- * @property {Record<string | number, string>} externals
- * @property {(string | number)[]} contextModuleIds
  * @property {[string, (string | number)[]][]} identifiersForModuleIds
  * @property {(path: string) => string | undefined} pathToResourceId
  * @property {(path: string) => boolean} isKnownPath
@@ -64,7 +61,6 @@ const crossReference = (neededIds, policyIds) => {
  * @param {{ path: string; moduleId: string | number }[]} options.paths
  * @param {import('lavamoat-core').LavaMoatPolicy} options.policy
  * @param {import('@lavamoat/aa').CanonicalNameMap} options.canonicalNameMap
- * @param {(string | number)[]} options.unenforceableModuleIds
  * @param {{ moduleId: string | number; context: string }[]} options.contextModules
  * @param {Record<string | number, string>} options.externals
  * @param {boolean | undefined} options.readableResourceIds
@@ -74,9 +70,7 @@ exports.generateIdentifierLookup = ({
   paths,
   policy,
   canonicalNameMap,
-  unenforceableModuleIds,
   contextModules,
-  externals,
   readableResourceIds,
 }) => {
   /**
@@ -165,13 +159,8 @@ exports.generateIdentifierLookup = ({
       ),
   })
 
-  const contextModuleIds = contextModules.map(({ moduleId }) => moduleId)
-
   return {
     root: translate(ROOT_IDENTIFIER),
-    unenforceableModuleIds,
-    externals,
-    contextModuleIds,
     identifiersForModuleIds,
     isKnownPath: (path) => {
       return !!pathLookup[path]
