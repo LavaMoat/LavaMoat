@@ -29,7 +29,7 @@ Add the following to your Babel config:
 ignore: [/\/ses\.cjs$/, /\/ses-hermes\.cjs$/],
 ```
 
-_Examples:_
+### Babel Config Examples
 
 ```js
 // babel.config.js
