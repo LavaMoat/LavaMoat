@@ -34,7 +34,7 @@ It is clear Babel is preparing it to be [transformed][ses-transformed-ext]:
 // ...
 ```
 
-Simply ensure Babel is configured to ignore your flavour of SES shim like in the ReadMe Babel config [examples][readme-babel-config].
+Simply ensure Babel is configured to ignore your flavour of SES shim like in the ReadMe Babel config [examples][readme-babel-config-examples].
 
 Now it should look much cleaner:
 
@@ -61,7 +61,7 @@ Copyright © 2025 Consensys, Inc. Licensed MIT
 
 [hermes-metro-config]: README.md#hermes
 [init-core-ext]: https://github.com/facebook/react-native/blob/main/packages/react-native/Libraries/Core/InitializeCore.js
-[readme-babel-config]: README.md#babel-config
+[readme-babel-config-examples]: README.md#babel-config-examples
 [rn-js-polyfills-error-guard-ext]: https://github.com/facebook/react-native/blob/c50f3e5f668887bfb0c7080155c066a4fdcc092c/packages/polyfills/error-guard.js#L38-L40
 [ses-transformed-ext]: https://github.com/endojs/endo/issues/662
 [set-up-error-handling-ext]: https://github.com/facebook/react-native/blob/c50f3e5f668887bfb0c7080155c066a4fdcc092c/packages/react-native/Libraries/Core/setUpErrorHandling.js#L33
