@@ -54,8 +54,9 @@ const crossReference = (neededIds, policyIds) => {
  * @property {(string | number)[]} contextModuleIds
  * @property {[string, (string | number)[]][]} identifiersForModuleIds
  * @property {(path: string) => string | undefined} pathToResourceId
+ * @property {(path: string) => boolean} isKnownPath
  * @property {(id: string) => string} policyIdentifierToResourceId
- * @property {() => object} getTranslatedPolicy
+ * @property {() => import('lavamoat-core').LavaMoatPolicy} getTranslatedPolicy
  */
 
 /**
@@ -172,6 +173,9 @@ exports.generateIdentifierLookup = ({
     externals,
     contextModuleIds,
     identifiersForModuleIds,
+    isKnownPath: (path) => {
+      return !!pathLookup[path]
+    },
     pathToResourceId: (path) => {
       const pathInfo = lookUp(path, pathLookup)
       if (!pathInfo) {
@@ -186,7 +190,6 @@ exports.generateIdentifierLookup = ({
       }
       const { resources = Object.create(null) } = policy
       const translatedPolicy = {
-        ...policy,
         resources: Object.fromEntries(
           Object.entries(resources)
             .filter(([id]) => identifiersWithKnownPaths.has(id)) // only saves resources that are actually used
