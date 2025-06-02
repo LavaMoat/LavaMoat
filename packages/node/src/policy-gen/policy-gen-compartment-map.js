@@ -103,7 +103,7 @@ export const loadCompartmentMapForPolicy = async (
   const PolicyGenCompartment = makePolicyGenCompartment(
     nodeCompartmentMap,
     nodeDataMap,
-    policyOverride
+    { policyOverride, log }
   )
 
   /** @type {CaptureLiteOptions} */
