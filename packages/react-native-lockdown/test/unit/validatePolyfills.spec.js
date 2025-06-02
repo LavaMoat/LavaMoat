@@ -26,14 +26,10 @@ test('validatePolyfills - invalid polyfill (not a string)', (t) => {
 
 test('validatePolyfills - invalid polyfill (function)', (t) => {
   const polyfills = [path.resolve('polyfill1.js'), () => {}]
-  const error = t.throws(() => validatePolyfills(polyfills), {
+  t.throws(() => validatePolyfills(polyfills), {
     instanceOf: Error,
     message: `Expected polyfills to be an array of strings, but found a function. Looks like you're passing react-native/js-polyfills but not calling the function they export. Yes, it's not very intuitive, but it is what it is.`,
   })
-  t.is(
-    error.message,
-    `Expected polyfills to be an array of strings, but found a function. Looks like you're passing react-native/js-polyfills but not calling the function they export. Yes, it's not very intuitive, but it is what it is.`
-  )
 })
 
 test('validatePolyfills - invalid polyfill (not a resolved path)', (t) => {
