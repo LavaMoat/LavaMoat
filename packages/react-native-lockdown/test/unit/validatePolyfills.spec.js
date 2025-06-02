@@ -8,15 +8,11 @@ test('validatePolyfills - valid polyfills', (t) => {
 })
 
 test('validatePolyfills - invalid polyfills (not an array)', (t) => {
-  const error = t.throws(() => validatePolyfills('not-an-array'), {
+  t.throws(() => validatePolyfills('not-an-array'), {
     instanceOf: Error,
     message:
       'Expected polyfills to be an array of strings, but received string',
   })
-  t.is(
-    error.message,
-    'Expected polyfills to be an array of strings, but received string'
-  )
 })
 
 test('validatePolyfills - invalid polyfill (not a string)', (t) => {
