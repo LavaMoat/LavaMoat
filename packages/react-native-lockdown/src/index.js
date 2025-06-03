@@ -1,3 +1,5 @@
+'use strict'
+
 const { warn } = console
 const { assign } = Object
 
