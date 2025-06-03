@@ -2,7 +2,7 @@
 
 LavaMoat React Native lockdown sets up [Hardened JavaScript][hardened-js-ext] in React Native apps.
 
-This is done by repairing Hermes (or JSC) intrinsics. LavaMoat React Native lockdown integrates with Metro through serializer options.
+This is done by repairing Hermes (or JavaScriptCore) intrinsics. LavaMoat React Native lockdown integrates with Metro through serializer options.
 
 > [!WARNING]
 > This has not been tested on Static Hermes _yet_! Only on default side-by-side versions of Hermes that shipped with React Native.
@@ -116,7 +116,7 @@ Shims (other programs that alter JavaScript) may be added, but are obliged to ma
 >   └── @react-native/js-polyfills@0.72.1 deduped
 > ```
 
-#### JSC
+#### JavaScriptCore (JSC)
 
 ```js
 // metro.config.js
