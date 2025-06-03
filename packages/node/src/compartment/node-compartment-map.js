@@ -16,9 +16,11 @@ import { DEFAULT_ENDO_OPTIONS } from './options.js'
 import { defaultReadPowers } from './power.js'
 
 /**
- * @import {CompartmentMapDescriptor} from '@endo/compartment-mapper'
+ * @import {CompartmentMapDescriptor, CompartmentDescriptor} from '@endo/compartment-mapper'
  * @import {MakeNodeCompartmentMapOptions, MakeNodeCompartmentMapResult} from '../internal.js'
  */
+
+const { entries } = Object
 
 const DEFAULT_CONDITIONS = /** @type {const} */ (['node'])
 
@@ -44,6 +46,7 @@ export const makeNodeCompartmentMap = async (
     dev,
     decorators = [],
     log = defaultLog,
+    policyOverride,
     policy,
     trustRoot = DEFAULT_TRUST_ROOT_COMPARTMENT,
   } = {}
@@ -72,6 +75,41 @@ export const makeNodeCompartmentMap = async (
     trustRoot,
     log,
   })
+
+  // if (policyOverride?.hints) {
+  //   for (const name of dataMap.keys()) {
+  //     const descriptor = nodeCompartmentMap.compartments[name]
+  //     if (!descriptor) {
+  //       throw new Error(
+  //         `Compartment map is missing compartment for ${name} after decoration`
+  //       )
+  //     }
+  //     const data = dataMap.get(name)
+  //     if (!data) {
+  //       throw new Error(`Data map is missing data for ${name} after decoration`)
+  //     }
+  //     const hints = policyOverride.hints
+  //     const hintsForName = hints[data.canonicalName] || []
+  //     if (hintsForName.length > 0) {
+  //       const nonPackageHints = hintsForName.filter(
+  //         (value) => value.startsWith('.') || value.startsWith('/')
+  //       )
+  //       const results = await Promise.all(
+  //         nonPackageHints.map(async (hint) =>
+  //           search(readPowers, pathToFileURL(hint).href)
+  //         )
+  //       )
+  //       for (const {packageLocation, moduleSpecifier} of results) {
+  //         /** @type {CompartmentDescriptor} */
+  //         const descriptor = nodeCompartmentMap.compartments[packageLocation] ?? {};
+  //         if (nodeCompartmentMap.compartments[packageLocation]) {
+  //           nodeCompartmentMap.compartments[packageLocation].modules.push()
+  //         }
+  //       }
+  //       console.log(result)
+  //     }
+  //   }
+  // }
 
   assertCompleteDataMap(nodeCompartmentMap, dataMap)
 

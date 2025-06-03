@@ -4,6 +4,8 @@
  * @packageDocumentation
  */
 
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { GenerationError } from '../error.js'
 import { log as defaultLog } from '../log.js'
 import { hasValue, hrLabel, isObject } from '../util.js'
@@ -98,6 +100,12 @@ const applyHint = (moduleDescriptor, hint) => {
   const imports = isFrozen(moduleSource.imports)
     ? [...moduleSource.imports]
     : moduleSource.imports
+
+  if (path.isAbsolute(hint) && moduleDescriptor.importMeta) {
+    const { url } = moduleDescriptor.importMeta
+    hint = path.relative(fileURLToPath(url), hint)
+    hint
+  }
   imports.push(hint)
 
   moduleSource.imports = imports

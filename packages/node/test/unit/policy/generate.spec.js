@@ -199,6 +199,17 @@ test(
   }
 )
 
+test('hints - external resources', testPolicyForJSON, 'hints-ext.json', {
+  jsonEntrypoint: '/node_modules/tool/index.js',
+  trustRoot: false,
+  policyOverride: {
+    resources: {},
+    hints: {
+      tool: ['/tool.config.js'],
+    },
+  },
+})
+
 test('basic nested global access', testPolicyForModule, 'location.href', {
   resources: {
     test: {

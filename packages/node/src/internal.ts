@@ -19,7 +19,7 @@ import type {
   Resources,
 } from 'lavamoat-core'
 import type { Except, SetFieldType, Simplify, ValueOf } from 'type-fest'
-import { SES_VIOLATION_TYPES } from './constants.js'
+import { type SES_VIOLATION_TYPES } from './constants.js'
 import type {
   BaseLoadCompartmentMapOptions,
   CompartmentDescriptorDecoratorOptions,
@@ -290,7 +290,8 @@ export type MakeNodeCompartmentMapOptions = Simplify<
     WithReadPowers &
     WithDev &
     WithTrustRoot &
-    Pick<BaseLoadCompartmentMapOptions, 'policy'>
+    Pick<BaseLoadCompartmentMapOptions, 'policy'> &
+    WithPolicyOverrideOnly
 >
 
 /**

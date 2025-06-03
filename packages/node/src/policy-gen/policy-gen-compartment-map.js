@@ -90,6 +90,7 @@ export const loadCompartmentMapForPolicy = async (
         decorators,
         log,
         trustRoot,
+        policyOverride,
       }
     ))
   } catch (err) {
