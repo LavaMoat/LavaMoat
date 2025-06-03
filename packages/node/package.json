@@ -48,7 +48,7 @@
     "test:update-snapshots": "ava -u"
   },
   "dependencies": {
-    "@endo/compartment-mapper": "1.6.0",
+    "@endo/compartment-mapper": "1.6.1",
     "@endo/evasive-transform": "1.4.0",
     "@types/node": "18.19.105",
     "chalk": "4.1.2",
