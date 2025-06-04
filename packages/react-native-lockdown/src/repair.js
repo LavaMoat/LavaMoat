@@ -9,10 +9,17 @@
  * {@link lockdown} itself is not called to allow for vetted shims as Metro
  * polyfills before hardening (e.g. RN JS polyfills).
  *
+ * ES5 is required, otherwise Babel transforms using
+ * require("@babel/runtime/helpers/slicedToArray"), which breaks React Native
+ * runtime: `ReferenceError: Property 'require' doesn't exist` when the bundle
+ * is executed.
+ *
+ * Alternatively, ES6 (arrow fn, destructured array params, etc) can be used
+ * here instead, only if 'repair.js' is also added to Babel ignore along with
+ * both SES shims.
+ *
  * @packageDocumentation
  */
-
-// NB: ES5
 
 const dumbPolyfillExposedInternals = Object.entries(Promise).filter(
   function (entry) {
