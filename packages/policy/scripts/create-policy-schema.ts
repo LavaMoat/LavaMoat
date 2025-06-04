@@ -1,4 +1,5 @@
 import stringify from 'json-stable-stringify'
+import { execSync } from 'node:child_process'
 import { writeFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { createLavaMoatPolicyJSONSchema } from '../src/index.js'
@@ -12,5 +13,7 @@ if (!json) {
 }
 
 writeFileSync(DEST, json, 'utf-8')
+
+execSync(`npx prettier --write ${fileURLToPath(DEST)}`)
 
 console.error('Wrote schema to', fileURLToPath(DEST))
