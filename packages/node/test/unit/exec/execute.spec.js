@@ -48,8 +48,7 @@ test('hashbang evasion', testExecForJSON, 'hashbang.json', {
   hello: 'world',
 })
 
-// Ref: https://github.com/endojs/endo/pull/2755
-test.failing(
+test(
   'dynamic require of a node:-namespaced builtin module',
   testExecForJSON,
   'dynamic-builtin.json',
