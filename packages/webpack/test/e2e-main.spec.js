@@ -18,7 +18,7 @@ test('webpack/main - dist shape', (t) => {
     'Warnings sample: \n',
     t.context.build.stdout
       .split('\n')
-      .filter((str) => str.includes('WARNING in LavaMoat'))
+      .filter((str) => str.includes('WARNING in LavaMoatPlugin'))
   )
 })
 

@@ -41,10 +41,14 @@ const crossReference = (neededIds, policyIds) => {
   if (missingIds.length > 0) {
     diag.rawDebug(
       1,
-      `Policy is missing the following resources: ${missingIds.join(', ')}`
+      `Policy is missing for the following resources (disallow all by default): \n  ${missingIds.join(', ')}`
     )
   }
 }
+
+/**
+ * @import {LavaMoatPolicy} from 'lavamoat-core'
+ */
 
 /**
  * @typedef {Object} IdentifierLookup
@@ -53,13 +57,13 @@ const crossReference = (neededIds, policyIds) => {
  * @property {(path: string) => string | undefined} pathToResourceId
  * @property {(path: string) => boolean} isKnownPath
  * @property {(id: string) => string} policyIdentifierToResourceId
- * @property {() => import('lavamoat-core').LavaMoatPolicy} getTranslatedPolicy
+ * @property {() => LavaMoatPolicy} getTranslatedPolicy
  */
 
 /**
  * @param {object} options
  * @param {{ path: string; moduleId: string | number }[]} options.paths
- * @param {import('lavamoat-core').LavaMoatPolicy} options.policy
+ * @param {LavaMoatPolicy} options.policy
  * @param {import('@lavamoat/aa').CanonicalNameMap} options.canonicalNameMap
  * @param {{ moduleId: string | number; context: string }[]} options.contextModules
  * @param {Record<string | number, string>} options.externals
