@@ -68,7 +68,7 @@ exports.wrapGenerator = ({ excludes, runChecks, PROGRESS }) => {
   /** @type {(path: string) => string | undefined} */
   let identifierResolver = () => {
     throw Error(
-      'LavaMoat: generator wrapping tried to resolve a path to an identifier before all paths from bundle were known.'
+      'LavaMoatPlugin: generator wrapping tried to resolve a path to an identifier before all paths from bundle were known.'
     )
   }
 
@@ -131,7 +131,7 @@ exports.wrapGenerator = ({ excludes, runChecks, PROGRESS }) => {
           return originalGeneratedSource
         } else if (!PROGRESS.done('pathsProcessed')) {
           throw Error(
-            'LavaMoat: attempting to wrap generated module before all paths from bundle were known.'
+            'LavaMoatPlugin: attempting to wrap generated module before all paths from bundle were known.'
           )
         }
 
@@ -182,7 +182,7 @@ exports.wrapGenerator = ({ excludes, runChecks, PROGRESS }) => {
           runtimeFlags,
         })
 
-        diag.rawDebug(3, {
+        diag.rawDebug(4, {
           packageId,
           requirements: options.runtimeRequirements,
           sourceChanged,

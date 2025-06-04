@@ -53,7 +53,7 @@ function progress({ steps }) {
    */
   API.report = (step) => {
     if (canRepeat.has(step) && steps[currentStep] === step) {
-      diag.rawDebug(3, `\n> Reporting ${step} again`)
+      diag.rawDebug(4, `  progress  Reporting ${step} again`)
       return
     }
     done.add(step)
@@ -66,7 +66,7 @@ function progress({ steps }) {
         )
       )
     } else {
-      diag.rawDebug(2, `\n> progress ${steps[currentStep]}->${step}`)
+      diag.rawDebug(2, `  progress  ${steps[currentStep]}->${step}`)
       currentStep += 1
     }
   }
@@ -75,7 +75,7 @@ function progress({ steps }) {
    */
   API.is = (query) => {
     const current = steps[currentStep]
-    diag.rawDebug(3, `\n> Checking (${current}).is(${query})`)
+    diag.rawDebug(3, `  progress  Checking (${current}).is(${query})`)
     return current === query
   }
   API.get = () => {
@@ -107,6 +107,8 @@ function progress({ steps }) {
     errors.push(...compilationErrors)
     compilationErrors = errors
   }
+  diag.rawDebug(2, `  progress  ${steps[currentStep]}`)
+
   return API
 }
 
