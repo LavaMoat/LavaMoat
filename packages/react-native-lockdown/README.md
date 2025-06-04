@@ -40,7 +40,7 @@ module.exports = {
 ```
 
 > [!NOTE]
-> If you're still on [unsupported](https://github.com/reactwg/react-native-releases/blob/main/docs/support.md) React Native <= 0.72.x, stick to the old `'module:metro-react-native-babel-preset'` preset instead
+> If you're still on [unsupported](https://github.com/reactwg/react-native-releases/blob/main/docs/support.md) React Native <= 0.72.x, stick to the old `'module:metro-react-native-babel-preset'` preset instead.
 
 or
 
@@ -56,7 +56,7 @@ module.exports = function (api) {
 ```
 
 > [!WARNING]
-> Ensure your Babel config [ignore](https://babeljs.io/docs/options#ignore) `Array<MatchPattern>` ([MatchPattern](https://babeljs.io/docs/options#matchpattern)) `RegExp` is correct for both SES shims to avoid Babel transforming SES and ignoring more than necessary
+> Ensure your Babel config [ignore](https://babeljs.io/docs/options#ignore) `Array<MatchPattern>` ([MatchPattern](https://babeljs.io/docs/options#matchpattern)) `RegExp` is correct for both SES shims to avoid Babel transforming SES and ignoring more than necessary.
 
 ### Metro config
 
@@ -131,7 +131,7 @@ module.exports = mergeConfig(getDefaultConfig(__dirname), config)
 ```
 
 > [!NOTE]
-> JSC is [moving to a Community Package][jsc-moving-to-community-package] available starting with React Native 0.79
+> JSC is [moving to a Community Package][jsc-moving-to-community-package] available starting with React Native 0.79.
 
 #### V8
 
