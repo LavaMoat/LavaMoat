@@ -14,7 +14,7 @@
 
 // NB: ES5
 
-var dumbPolyfillExposedInternals = Object.entries(Promise).filter(
+const dumbPolyfillExposedInternals = Object.entries(Promise).filter(
   function (entry) {
     return !!entry[1] && entry[0].startsWith('_')
   }
