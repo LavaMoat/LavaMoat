@@ -14,9 +14,7 @@
 
 // NB: ES5
 
-// eslint-disable-next-line no-var
 var dumbPolyfillExposedInternals = Object.entries(Promise).filter(
-  // eslint-disable-next-line prefer-arrow-callback
   function (entry) {
     return !!entry[1] && entry[0].startsWith('_')
   }
