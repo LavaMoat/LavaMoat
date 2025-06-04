@@ -8,6 +8,8 @@
  *
  * {@link lockdown} itself is not called to allow for vetted shims as Metro
  * polyfills before hardening (e.g. RN JS polyfills).
+ *
+ * @packageDocumentation
  */
 
 // NB: ES5
