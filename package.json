@@ -14,7 +14,7 @@
     "npm": ">=7.0.0"
   },
   "scripts": {
-    "build": "npm run --workspaces --if-present build && npm run build:types",
+    "build": "npm run build:types && npm run --workspaces --if-present build",
     "build:types": "tsc -b",
     "clean:types": "git clean -fx -e \"**/node_modules/**\" \"packages/*/types/*.d.ts*\" \"*.tsbuildinfo\" || tsc -b --clean",
     "lint": "npm run lint:eslint && npm run lint:deps && npm run lint:lockfile",
