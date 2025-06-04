@@ -62,5 +62,4 @@
       enabled: false,
     },
   ],
-  transitiveRemediation: true,
 }
