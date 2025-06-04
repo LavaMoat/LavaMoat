@@ -204,17 +204,15 @@ class LavaMoatPlugin {
 
     // =================================================================
     // run long asynchronous processing ahead of all compilations
-    compiler.hooks.beforeRun.tapAsync(PLUGIN_NAME, (compilation, callback) => {
+    compiler.hooks.beforeRun.tapAsync(PLUGIN_NAME, (_, callback) => {
       assertFields(STORE, ['options'])
       loadCanonicalNameMap({
         rootDir: STORE.options.rootDir || compiler.context,
-        includeDevDeps: true, // even the most proper projects end up including devDeps in their bundles :()
+        includeDevDeps: true, // even the most proper projects end up including devDeps in their bundles :(
         resolve: browserResolve,
       })
         .then((map) => {
           STORE.canonicalNameMap = map
-          assertFields(STORE, ['canonicalNameMap'])
-
           PROGRESS.report('canonicalNameMap')
           callback()
         })
@@ -316,7 +314,10 @@ class LavaMoatPlugin {
               mainCompilationWarnings: STORE.mainCompilationWarnings,
               allIdentifiedModules,
             })
-            diag.rawDebug(3, { knownPaths: moduleData.knownPaths })
+            diag.rawDebug(
+              3,
+              JSON.stringify({ knownPaths: moduleData.knownPaths })
+            )
             PROGRESS.report('pathsCollected')
 
             const policyToApply = STORE.options.generatePolicy
@@ -347,7 +348,6 @@ class LavaMoatPlugin {
               'Policy was not specified nor generated.'
             )
 
-            // TODO: decouple further
             const identifierLookup = generateIdentifierLookup({
               readableResourceIds: STORE.options.readableResourceIds,
               contextModules: moduleData.contextModules,
@@ -368,7 +368,7 @@ class LavaMoatPlugin {
             if (suspiciousTooEarly.length > 0) {
               STORE.mainCompilationWarnings.push(
                 new WebpackError(
-                  `in LavaMoatPlugin: sources generated for modules before all paths were known. The following modules in the bundle might not be wrapped in a Compartment: \n  ${suspiciousTooEarly.join('\n  ')}`
+                  `LavaMoatPlugin: sources generated for modules before all paths were known. The following modules in the bundle might not be wrapped in a Compartment: \n  ${suspiciousTooEarly.join('\n  ')}`
                 )
               )
             }
@@ -376,13 +376,12 @@ class LavaMoatPlugin {
               if (tooEarly.length > 0) {
                 STORE.mainCompilationWarnings.push(
                   new WebpackError(
-                    `in LavaMoatPlugin: All modules with 'generate' step executed before all paths were known \n  ${tooEarly.join('\n  ')}`
+                    `LavaMoatPlugin: All modules with 'generate' step executed before all paths were known \n  ${tooEarly.join('\n  ')}`
                   )
                 )
               }
             })
 
-            // STORE.identifierLookup = identifierLookup
             STORE.root = identifierLookup.root
             STORE.identifiersForModuleIds =
               identifierLookup.identifiersForModuleIds
@@ -392,8 +391,30 @@ class LavaMoatPlugin {
             )
             STORE.externals = moduleData.externals
             // narrow down the policy and map to module identifiers
+            // TODO: theoretically policy could be optimized per chunk, but configuring webpack to emit a runtime chunk or have separate builds seems better for most usecases.
             STORE.runtimeOptimizedPolicy =
               identifierLookup.getTranslatedPolicy()
+
+            diag.run(1, () => {
+              assertFields(STORE, ['runtimeOptimizedPolicy'])
+              const originalKeys = Object.keys(policyToApply.resources)
+              const optimizedKeys = Object.keys(
+                STORE.runtimeOptimizedPolicy?.resources
+              )
+              const policyKeyDiff = originalKeys.filter(
+                (k) => !optimizedKeys.includes(k)
+              )
+              if (policyKeyDiff.length > 0) {
+                diag.rawDebug(
+                  1,
+                  `policy.json contained ${policyKeyDiff.length} resources that did not match anything in the bundle. `
+                )
+                diag.rawDebug(
+                  2,
+                  `policy.json unused resources: \n${policyKeyDiff.join(', ')}`
+                )
+              }
+            })
 
             // =================================================================
 
@@ -440,7 +461,7 @@ class LavaMoatPlugin {
                 }
                 diag.rawDebug(
                   2,
-                  '> skipped adding runtime (additionalChunkRuntimeRequirements)'
+                  'skipped adding runtime (additionalChunkRuntimeRequirements)'
                 )
                 // It's possible to generate the runtime with an empty policy to make the wrapped code work.
                 // It's no longer necessary now that `generate` function is only wrapping anything if paths were processed - which is when generator wrapping gets enabled,

@@ -62,7 +62,7 @@ module.exports = {
         ) {
           diag.rawDebug(
             1,
-            `> adding UNLOCKED runtime for chunk ${currentChunkName}`
+            `adding UNLOCKED runtime for chunk ${currentChunkName}`
           )
           runtimeChunks = [
             {
@@ -76,7 +76,7 @@ module.exports = {
             },
           ]
         } else {
-          diag.rawDebug(1, `> adding runtime for chunk ${currentChunkName}`)
+          diag.rawDebug(2, `adding runtime for chunk ${currentChunkName}`)
 
           runtimeChunks = [
             {
@@ -144,6 +144,11 @@ module.exports = {
           }
         }
         const lavaMoatRuntime = assembleRuntime(RUNTIME_KEY, runtimeChunks)
+        const size = lavaMoatRuntime.length / 1024
+        diag.rawDebug(
+          2,
+          `Total LavaMoat runtime and policy data size: ${size.toFixed(0)}KB (before minification)`
+        )
 
         return lavaMoatRuntime
       },

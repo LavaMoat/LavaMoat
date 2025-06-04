@@ -41,7 +41,7 @@ const crossReference = (neededIds, policyIds) => {
   if (missingIds.length > 0) {
     diag.rawDebug(
       1,
-      `Policy is missing the following resources: ${missingIds.join(', ')}`
+      `Policy is missing for the following resources (disallow all by default): \n  ${missingIds.join(', ')}`
     )
   }
 }
