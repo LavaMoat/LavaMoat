@@ -30,9 +30,9 @@ import { makeSesCompatListener } from './ses-compat.js'
  * @import {BuildModuleRecordsOptions,
  *   CompartmentMapToDebugPolicyOptions,
  *   CompartmentMapToPolicyOptions,
- * CompleteCompartmentDescriptorDataMap} from '../types.js'
+ *   CompleteCompartmentDescriptorDataMap,
+ *   Logger} from '../types.js'
  * @import {ModuleRecordsToDebugPolicyOptions, ModuleRecordsToPolicyOptions, SesViolationType} from '../internal.js'
- * @import {Loggerr} from 'loggerr'
  */
 
 const { entries, freeze } = Object
@@ -219,7 +219,7 @@ export const buildModuleRecords = (
  *
  * @param {Map<string, Partial<Record<SesViolationType, string[]>>>} perPackageWarnings
  * @param {Set<SesViolationType>} foundViolationTypes
- * @param {{ log?: Loggerr }} [options]
+ * @param {{ log?: Logger }} [options]
  * @returns {void}
  * @internal
  */

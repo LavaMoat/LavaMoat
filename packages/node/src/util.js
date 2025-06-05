@@ -8,7 +8,7 @@
  *
  * @packageDocumentation
  */
-import chalk from 'chalk'
+import { colors } from 'consola/utils'
 import { default as nodePath } from 'node:path'
 import nodeUrl from 'node:url'
 import {
@@ -214,9 +214,11 @@ export const hrPath = (filepath) => {
     const absolutePath = nodePath.resolve(filepath)
     if (absolutePath.length < filepath.length) {
       filepath = absolutePath
+    } else {
+      filepath = filepath.startsWith('..') ? filepath : `./${filepath}`
     }
   }
-  return chalk.greenBright(filepath)
+  return colors.greenBright(filepath)
 }
 
 /**
@@ -228,8 +230,8 @@ export const hrPath = (filepath) => {
  */
 export const hrLabel = (name) => {
   return name.includes('>')
-    ? name.split('>').map(hrLabel).join(chalk.magenta('>'))
-    : chalk.magentaBright(name)
+    ? name.split('>').map(hrLabel).join(colors.magenta('>'))
+    : colors.magentaBright(name)
 }
 
 /**
@@ -260,9 +262,7 @@ export const toPath = (value, fileURLToPath = nodeUrl.fileURLToPath) => {
  * @param {string} value
  * @returns {string}
  */
-export const hrCode = (value) => {
-  return chalk.bgGrey.whiteBright(value)
-}
+export const hrCode = (value) => colors.bgBlackBright(colors.whiteBright(value))
 
 /**
  * Given path to a policy file, returns the sibling path to the policy override
@@ -297,3 +297,5 @@ export const makeDefaultPolicyDebugPath = (policyPath) => {
   const policyDir = nodePath.dirname(path)
   return nodePath.join(policyDir, DEFAULT_POLICY_DEBUG_FILENAME)
 }
+
+export { colors }

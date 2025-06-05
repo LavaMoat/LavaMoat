@@ -9,14 +9,13 @@
 /**
  * @import {SesViolationType} from '../internal.js'
  * @import {LavamoatModuleRecord, SesCompat, SesCompatObj} from 'lavamoat-core'
- * @import {Loggerr} from 'loggerr'
+ * @import {Logger} from '../types.js'
  */
 
-import chalk from 'chalk'
 import { stripVTControlCharacters } from 'node:util'
 import { SES_VIOLATION_TYPES } from '../constants.js'
 import { log as defaultLog } from '../log.js'
-import { hrPath } from '../util.js'
+import { colors, hrPath } from '../util.js'
 const { keys } = Object
 
 /**
@@ -25,7 +24,7 @@ const { keys } = Object
  *
  * @param {Map<string, Partial<Record<SesViolationType, string[]>>>} perPackageWarnings
  * @param {Set<SesViolationType>} foundViolationTypes
- * @param {{ log?: Loggerr }} [options]
+ * @param {{ log?: Logger }} [options]
  * @returns {(data: {
  *   moduleRecord: LavamoatModuleRecord
  *   compatWarnings: SesCompat
@@ -68,7 +67,7 @@ export const makeSesCompatListener =
               },
             }) => {
               const plainPath = stripVTControlCharacters(nicePath)
-              return `- ${chalk.yellowBright([plainPath, line, column].join(chalk.yellow(':')))} ${chalk.cyan(`(${type})`)}`
+              return `- ${colors.yellowBright([plainPath, line, column].join(colors.yellow(':')))} ${colors.cyan(`(${type})`)}`
             }
           )
         )
@@ -83,7 +82,7 @@ export const makeSesCompatListener =
     /* c8 ignore next */
     if (!keys(warnings).length) {
       // unlikely, but just in case
-      log.warning(
+      log.warn(
         'empty "compat-warning" event received from module inspector; this is a bug'
       )
       return

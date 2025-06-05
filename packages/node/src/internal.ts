@@ -18,7 +18,7 @@ import type {
   Resources,
 } from 'lavamoat-core'
 import type { Except, SetFieldType, Simplify, ValueOf } from 'type-fest'
-import { SES_VIOLATION_TYPES } from './constants.js'
+import { type SES_VIOLATION_TYPES } from './constants.js'
 import type {
   BaseLoadCompartmentMapOptions,
   CompartmentDescriptorDecoratorOptions,
@@ -172,7 +172,11 @@ export interface WithFrom {
 /**
  * Options for `resolveEntrypoint()`
  */
-export type ResolveEntrypointOptions = Simplify<WithFrom>
+export type ResolveEntrypointOptions = Simplify<
+  WithFrom & {
+    projectRoot?: string
+  }
+>
 
 /**
  * Options for `resolveWorkspace()`

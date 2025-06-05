@@ -18,8 +18,8 @@ import type {
   SyncImportLocationOptions,
   UrlInterface,
 } from '@endo/compartment-mapper'
+import type { ConsolaInstance } from 'consola'
 import type { IsBuiltinFn, LavaMoatPolicy } from 'lavamoat-core'
-import type { Loggerr } from 'loggerr'
 import type nodeFs from 'node:fs'
 import type { PathLike, Stats } from 'node:fs'
 import type { LiteralUnion, SetFieldType, Simplify } from 'type-fest'
@@ -88,10 +88,7 @@ export interface WithIsBuiltin {
 }
 
 export interface WithLog {
-  /**
-   * `Loggerr` instance for logging
-   */
-  log?: Loggerr
+  log?: Logger
 }
 
 /**
@@ -475,7 +472,6 @@ export type CanonicalName = LiteralUnion<
  * Options for `compartmentMapToPolicy()`
  */
 export type CompartmentMapToPolicyOptions = Simplify<
-
   BuildModuleRecordsOptions & WithPolicyOverride & WithDebug & WithTrustRoot
 >
 
@@ -590,7 +586,7 @@ export type CompartmentDescriptorDecorator<
   /**
    * Options for the decorator, including the entire
    * `CompartmentDescriptorDataMap`
- */
+   */
   options?: CompartmentDescriptorDecoratorOptions
 ) => Out
 
@@ -611,3 +607,7 @@ export type WithCompartmentDescriptorDecorators = {
    */
   decorators?: CompartmentDescriptorDecorator[]
 }
+
+export type Logger = ConsolaInstance
+
+export type { LogLevels } from 'consola'

@@ -166,7 +166,7 @@ const reportInvalidOverrides = (
     msg += invalidOverrides
       .map((invalidOverride) => `  - ${hrLabel(invalidOverride)}`)
       .join('\n')
-    log.warning(msg)
+    log.warn(msg)
   }
 }
 
