@@ -79,6 +79,9 @@ module.exports = mergeConfig(getDefaultConfig(__dirname), config)
 If you already used a serializer configuration, you can pass it as second argument.
 `lockdownSerializer` will provide the `@react-native/js-polyfills` by default, but if you specified your own `getPolyfills` function, Metro is expecting you to provide the polyfills and `lockdownSerializer` follows that behavior too.
 
+Some modules depend on language features that may not be present in the underlying platform.
+Shims (other programs that alter JavaScript) may be added, but are obliged to maintain the object capability safety invariants provided by Lockdown and must be carefully reviewed. We call these ["vetted shims"][vetted-shims-ext].
+
 ```js
 // metro.config.js
 const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config')
@@ -101,9 +104,6 @@ const config = {
 
 module.exports = mergeConfig(getDefaultConfig(__dirname), config)
 ```
-
-Some modules depend on language features that may not be present in the underlying platform.
-Shims (other programs that alter JavaScript) may be added, but are obliged to maintain the object capability safety invariants provided by Lockdown and must be carefully reviewed. We call these ["vetted shims"][vetted-shims-ext].
 
 > [!NOTE]
 > @react-native/js-polyfills is a peer dependency, likely stemming from your React Native version (example):
