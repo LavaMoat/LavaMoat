@@ -50,7 +50,7 @@
   "dependencies": {
     "@endo/compartment-mapper": "1.6.1",
     "@endo/evasive-transform": "2.0.0",
-    "@types/node": "18.19.110",
+    "@types/node": "18.19.111",
     "chalk": "4.1.2",
     "lavamoat-core": "^16.4.0",
     "loggerr": "4.2.0",
