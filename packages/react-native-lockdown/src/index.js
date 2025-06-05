@@ -1,14 +1,21 @@
 'use strict'
 
 /**
- * @typedef {import('@react-native/metro-config').MetroConfig} MetroConfig
+ * React Native lockdown entry point.
  *
+ * @packageDocumentation
+ */
+
+/**
  * @typedef {import('@react-native/metro-config').SerializerConfig} SerializerConfig
  *
  *
  * @typedef {(moduleId: number | string) => string} GetRunModuleStatement
+ * @see {@link https://metrobundler.dev/docs/configuration/#getrunmodulestatement}
+ *
  *
  * @typedef {(options: { platform?: string }) => ReadonlyArray<string>} GetPolyfills
+ * @see {@link https://metrobundler.dev/docs/configuration/#getpolyfills}
  */
 
 const { warn } = console
@@ -17,7 +24,7 @@ const { assign } = Object
 const path = require('node:path')
 
 /**
- * Default implementation of getRunModuleStatement
+ * Default implementation of Metro serializer option 'getRunModuleStatement'.
  *
  * @type {GetRunModuleStatement}
  */
@@ -26,7 +33,8 @@ const defaultGetRunModuleStatement = (moduleId) => `__r(${moduleId})`
 const ENTRY_FILE_MODULE_ID = 0
 
 /**
- * Creates a function to inspect and warn about anomalies in module loading
+ * Creates a function to inspect for anomalies during module loading, then warns
+ * when complete.
  *
  * @returns {(callLog: (number | string)[]) => void} Function to inspect the
  *   call log
@@ -47,9 +55,9 @@ const warnAboutAnomalies = () => {
   })
 
   /**
-   * Inspects the call log for anomalies
+   * Inspects the call log for anomalies.
    *
-   * @param {(number | string)[]} callLog - Array of module IDs that were called
+   * @param {(number | string)[]} callLog - Array of module IDs that were loaded
    * @returns {void}
    */
   return function inspectCallLog(callLog) {
@@ -78,11 +86,11 @@ const warnAboutAnomalies = () => {
 /**
  * @typedef {Object} LockdownSerializerOptions
  * @property {boolean} [hermesRuntime=true] - Whether to enable Hermes runtime
- *   support. Default is `true`
+ *   support (otherwise JavaScript Core). Default is `true`
  */
 
 /**
- * Creates a Metro serializer configuration with LavaMoat lockdown
+ * Creates a Metro serializer configuration with Hardened JavaScript.
  *
  * @param {LockdownSerializerOptions} [options={}] - Configuration options.
  *   Default is `{}`
@@ -110,7 +118,7 @@ const lockdownSerializer = ({ hermesRuntime = true } = {}, userConfig = {}) => {
 
   const inspectCallLog = warnAboutAnomalies()
 
-  // getRunModuleStatement
+  /** @type {GetRunModuleStatement} */
   config.getRunModuleStatement = (moduleId) => {
     callLog.push(moduleId)
     inspectCallLog(callLog)
@@ -129,7 +137,6 @@ const lockdownSerializer = ({ hermesRuntime = true } = {}, userConfig = {}) => {
     throw new Error('getPolyfills must be a function')
   }
 
-  // Store the original getPolyfills function
   const originalGetPolyfills = config.getPolyfills
 
   /** @type {GetPolyfills} */
@@ -151,11 +158,11 @@ const lockdownSerializer = ({ hermesRuntime = true } = {}, userConfig = {}) => {
 }
 
 /**
- * Validates that required polyfills are included
+ * Validates that required polyfills are correct.
  *
  * @param {ReadonlyArray<string>} polyfills - Array of polyfill paths
  * @returns {void}
- * @throws {Error} If required polyfills are missing or invalid
+ * @throws {Error} If required polyfills are invalid
  */
 const validatePolyfills = (polyfills) => {
   if (!Array.isArray(polyfills)) {
@@ -176,7 +183,7 @@ const validatePolyfills = (polyfills) => {
       )
     }
 
-    // Make sure the polyfill is a resolved path not just a package name
+    // Ensure the polyfill is a resolved path, not just a package name
     if (!path.isAbsolute(polyfill) && !polyfill.startsWith('.')) {
       throw new Error(
         `Polyfill must be a resolved path, not just a package name: ${polyfill}`
