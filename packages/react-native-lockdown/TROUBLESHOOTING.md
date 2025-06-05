@@ -35,7 +35,7 @@ It is clear Babel is preparing it to be [transformed][ses-transformed-ext]:
 // ...
 ```
 
-Assert Babel is configured to ignore your flavour(s) of SES shim (see ReadMe Babel config [examples][readme-babel-config-examples]).
+Assert Babel is configured to ignore your flavour(s) of SES shim (see ReadMe Babel config [examples][readme-babel-config-examples]), then re-run React Native CLI with the `--reset-cache` flag.
 
 Now it should look much cleaner:
 
