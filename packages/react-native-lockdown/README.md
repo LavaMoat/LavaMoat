@@ -29,7 +29,7 @@ Add the following to your Babel config:
 ignore: [/\/ses\.cjs$/, /\/ses-hermes\.cjs$/],
 ```
 
-### Babel Config Examples
+#### React Native
 
 ```js
 // babel.config.js
@@ -39,10 +39,20 @@ module.exports = {
 }
 ```
 
-> [!NOTE]
-> If you're still on [unsupported][react-native-releases-support-ext] React Native <= 0.72.x, stick to the old `'module:metro-react-native-babel-preset'` preset instead.
+#### React Native <= 0.72.x
 
-or
+```js
+// babel.config.js
+module.exports = {
+  ignore: [/\/ses\.cjs$/, /\/ses-hermes\.cjs$/],
+  presets: ['module:metro-react-native-babel-preset'],
+}
+```
+
+> [!NOTE]
+> React Native <= 0.76.x (old minor series) are [unsupported][react-native-releases-support-ext]
+
+#### Expo
 
 ```js
 // babel.config.js
@@ -64,6 +74,8 @@ This section describes how to use `lockdownSerializer` to configure Metro.
 
 #### Hermes
 
+##### New config
+
 ```js
 // metro.config.js
 const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config')
@@ -75,6 +87,8 @@ const config = {
 
 module.exports = mergeConfig(getDefaultConfig(__dirname), config)
 ```
+
+##### Existing config
 
 If you already used a serializer configuration, you can pass it as second argument.
 `lockdownSerializer` will provide the `@react-native/js-polyfills` by default, but if you specified your own `getPolyfills` function, Metro is expecting you to provide the polyfills and `lockdownSerializer` follows that behavior too.
@@ -135,7 +149,7 @@ module.exports = mergeConfig(getDefaultConfig(__dirname), config)
 
 #### V8
 
-Untested on [react-native-v8][react-native-v8-ext], an opt-in V8 runtime for React Native Android only.
+Untested on [react-native-v8][react-native-v8-ext], an opt-in V8 runtime for Android only.
 
 [babel-ignore-ext]: https://babeljs.io/docs/options#ignore
 [babel-matchpattern-ext]: https://babeljs.io/docs/options#matchpattern

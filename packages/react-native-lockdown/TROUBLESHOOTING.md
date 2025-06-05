@@ -35,7 +35,7 @@ It is clear Babel is preparing it to be [transformed][ses-transformed-ext]:
 // ...
 ```
 
-Assert Babel is configured to ignore your flavour(s) of SES shim (see ReadMe Babel config [examples][readme-babel-config-examples]), then re-run React Native CLI with the `--reset-cache` flag.
+Assert Babel is configured to ignore your flavour(s) of SES shim (see the [ReadMe Babel config][readme-babel-config]) examples, then re-run React Native CLI with the `--reset-cache` flag.
 
 Now it should look much cleaner:
 
@@ -54,15 +54,15 @@ Now it should look much cleaner:
 
 It looks like React Native is having trouble [initializing][init-core-ext] when setting up [error handling][set-up-error-handling-ext], due to the missing [error guard][rn-js-polyfills-error-guard-ext] polyfill.
 
-Did you remember to include the React Native JS polyfills in your custom Metro config? See ReadMe Hermes [example][hermes-metro-config].
+Did you remember to include the React Native JS polyfills in your custom Metro config? See the [ReadMe Metro Existing config][readme-metro-config] example.
 
 ## License
 
 Copyright © 2025 Consensys, Inc. Licensed MIT
 
-[hermes-metro-config]: README.md#hermes
 [init-core-ext]: https://github.com/facebook/react-native/blob/main/packages/react-native/Libraries/Core/InitializeCore.js
-[readme-babel-config-examples]: README.md#babel-config-examples
+[readme-babel-config]: README.md#babel-config
+[readme-metro-config]: README.md#existing-config
 [rn-js-polyfills-error-guard-ext]: https://github.com/facebook/react-native/blob/c50f3e5f668887bfb0c7080155c066a4fdcc092c/packages/polyfills/error-guard.js#L38-L40
 [ses-transformed-ext]: https://github.com/endojs/endo/issues/662
 [set-up-error-handling-ext]: https://github.com/facebook/react-native/blob/c50f3e5f668887bfb0c7080155c066a4fdcc092c/packages/react-native/Libraries/Core/setUpErrorHandling.js#L33
