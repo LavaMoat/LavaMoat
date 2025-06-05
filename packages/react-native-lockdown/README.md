@@ -56,7 +56,7 @@ module.exports = function (api) {
 ```
 
 > [!WARNING]
-> Ensure your Babel config [ignore][babel-ignore-ext] `Array<MatchPattern>` ([MatchPattern](https://babeljs.io/docs/options#matchpattern)) `RegExp` is correct for both SES shims to avoid Babel transforming SES and ignoring more than necessary.
+> Ensure your Babel config [ignore][babel-ignore-ext] `Array<MatchPattern>` ([MatchPattern][babel-matchpattern-ext]) `RegExp` is correct for both SES shims to avoid Babel transforming SES and ignoring more than necessary.
 
 ### Metro config
 
@@ -138,6 +138,7 @@ module.exports = mergeConfig(getDefaultConfig(__dirname), config)
 Untested on [react-native-v8][react-native-v8-ext], an opt-in V8 runtime for React Native Android only.
 
 [babel-ignore-ext]: https://babeljs.io/docs/options#ignore
+[babel-matchpattern-ext]: https://babeljs.io/docs/options#matchpattern
 [hardened-js-ext]: https://hardenedjs.org
 [jsc-moving-to-community-package]: https://reactnative.dev/blog/2025/04/08/react-native-0.79#jsc-moving-to-community-package
 [react-native-releases-support-ext]: https://github.com/reactwg/react-native-releases/blob/main/docs/support.md
