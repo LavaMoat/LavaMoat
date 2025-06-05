@@ -8,13 +8,14 @@
 
 /**
  * @typedef {import('@react-native/metro-config').SerializerConfig} SerializerConfig
- *
- *
+ */
+
+/**
  * @typedef {(moduleId: number | string) => string} GetRunModuleStatement
  * @see {@link https://metrobundler.dev/docs/configuration/#getrunmodulestatement}
- *
- *
- *
+ */
+
+/**
  * @typedef {(options: { platform?: string }) => ReadonlyArray<string>} GetPolyfills
  * @see {@link https://metrobundler.dev/docs/configuration/#getpolyfills}
  */
