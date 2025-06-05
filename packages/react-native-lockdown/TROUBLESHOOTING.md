@@ -35,7 +35,7 @@ It is clear Babel is preparing it to be [transformed][ses-transformed-ext]:
 // ...
 ```
 
-Simply ensure Babel is configured to ignore your flavour of SES shim like in the ReadMe Babel config [examples][readme-babel-config-examples].
+Assert Babel is configured to ignore your flavour(s) of SES shim (see ReadMe Babel config [examples][readme-babel-config-examples]).
 
 Now it should look much cleaner:
 
