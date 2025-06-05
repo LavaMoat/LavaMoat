@@ -1,12 +1,15 @@
 {
-  "extends": "@tsconfig/node18/tsconfig.json",
-  "files": [],
   "compilerOptions": {
     "allowJs": true
   },
+  "extends": "@tsconfig/node18/tsconfig.json",
+  "files": [],
   // the workspaces which are consumed as libraries by other workspaces should
   // be first in this list
   "references": [
+    {
+      "path": "packages/vog"
+    },
     {
       "path": "packages/types"
     },
@@ -32,7 +35,7 @@
       "path": "packages/node"
     },
     {
-      "path": "./packages/react-native-lockdown"
+      "path": "packages/react-native-lockdown"
     }
   ]
 }

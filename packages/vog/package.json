@@ -1,0 +1,60 @@
+{
+  "name": "@lavamoat/vog",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "CLI utilities for LavaMoat",
+  "repository": {
+    "directory": "packages/vog",
+    "type": "git",
+    "url": "git+https://github.com/LavaMoat/LavaMoat.git"
+  },
+  "homepage": "https://lavamoat.github.io",
+  "bugs": "https://github.com/LavaMoat/LavaMoat/issues",
+  "author": "LavaMoat Project",
+  "license": "MIT",
+  "engines": {
+    "node": "^18.13.0 || ^20.0.0 || ^22.0.0 || ^24.0.0",
+    "npm": ">=9.0.0"
+  },
+  "exports": {
+    ".": {
+      "default": "./src/index.js",
+      "types": "./src/index.d.ts"
+    },
+    "./log": {
+      "default": "./src/log.js",
+      "types": "./src/log.d.ts"
+    },
+    "./package.json": "./package.json",
+    "./progress": {
+      "default": "./src/progress.js",
+      "types": "./src/progress.d.ts"
+    },
+    "./spinner": {
+      "default": "./src/spinner.js",
+      "types": "./src/spinner.d.ts"
+    }
+  },
+  "directories": {
+    "test": "test"
+  },
+  "files": [
+    "CHANGELOG.md",
+    "src/**/*",
+    "!*.tsbuildinfo",
+    "!tsconfig.json"
+  ],
+  "scripts": {
+    "lint:deps": "depcheck",
+    "test": "node --test --experimental-strip-types",
+    "test:cover": "c8 npm test"
+  },
+  "dependencies": {
+    "consola": "3.4.2",
+    "ora": "8.2.0",
+    "progress-estimator": "0.3.1"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
