@@ -15,8 +15,8 @@
  * is executed.
  *
  * Alternatively, ES6 (arrow fn, destructured array params, etc) can be used
- * here instead, only if 'repair.js' is also added to Babel ignore along with
- * both SES shims.
+ * here instead, only if this file ('repair.js') is also added to Babel ignore
+ * along with both SES shims.
  *
  * @packageDocumentation
  */
