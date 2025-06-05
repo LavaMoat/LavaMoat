@@ -40,7 +40,7 @@ module.exports = {
 ```
 
 > [!NOTE]
-> If you're still on [unsupported](https://github.com/reactwg/react-native-releases/blob/main/docs/support.md) React Native <= 0.72.x, stick to the old `'module:metro-react-native-babel-preset'` preset instead.
+> If you're still on [unsupported][react-native-releases-support-ext] React Native <= 0.72.x, stick to the old `'module:metro-react-native-babel-preset'` preset instead.
 
 or
 
@@ -139,5 +139,6 @@ Untested on [react-native-v8][react-native-v8-ext], an opt-in V8 runtime for Rea
 
 [hardened-js-ext]: https://hardenedjs.org
 [jsc-moving-to-community-package]: https://reactnative.dev/blog/2025/04/08/react-native-0.79#jsc-moving-to-community-package
+[react-native-releases-support-ext]: https://github.com/reactwg/react-native-releases/blob/main/docs/support.md
 [react-native-v8-ext]: https://github.com/Kudo/react-native-v8
 [vetted-shims-ext]: https://github.com/endojs/endo/blob/master/packages/ses/docs/guide.md#using-hardened-javascript-with-vetted-shims
