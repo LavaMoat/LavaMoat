@@ -50,7 +50,7 @@ const warnAboutAnomalies = () => {
   }
 
   // Emit warnings only after Metro finishes bundling
-  process.on('exit', () => {
+  process.on('beforeExit', () => {
     Object.values(deferredWarnings).forEach((message) => {
       if (message) warn(message)
     })
