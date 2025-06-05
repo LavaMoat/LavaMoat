@@ -19,7 +19,8 @@
   "main": "./src/index.js",
   "exports": {
     ".": "./src/index.js",
-    "./repair": "./src/repair.js"
+    "./repair": "./src/repair.js",
+    "./package.json": "./package.json"
   },
   "types": "./types/src/types.d.ts",
   "files": [
