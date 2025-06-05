@@ -1,7 +1,7 @@
 import '../../../src/preamble.js'
 
-import chalk from 'chalk'
 import { run } from '../../../src/exec/run.js'
+import { colors } from '../../../src/util.js'
 import {
   DEFAULT_JSON_FIXTURE_ENTRY_POINT,
   JSON_FIXTURE_DIR_URL,
@@ -69,7 +69,7 @@ export const createExecMacros = (test) => {
             'program output did not match expected value'
           )
         } catch (err) {
-          t.log(`Volume tree:\n${chalk.yellow(vol.toTree())}`)
+          t.log(`Volume tree:\n${colors.yellow(vol.toTree())}`)
           throw err
         }
       },

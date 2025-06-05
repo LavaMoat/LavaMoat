@@ -11,13 +11,19 @@ import { PACKAGE_JSON } from './constants.js'
 import { NoBinScriptError, NoWorkspaceError } from './error.js'
 import { hrLabel, hrPath } from './format.js'
 import { isExecutableSymlink, isReadableFileSync, realpathSync } from './fs.js'
-import { log } from './log.js'
+import { log as defaultLog } from './log.js'
 import { toPath } from './util.js'
 
 /**
  * @import {ResolveBinScriptOptions, ResolveEntrypointOptions, ResolveWorkspaceOptions} from './internal.js'
  */
 
+export class Resolver {
+  /** @type {import('./types.js').Logger} */
+  #log
+  constructor({ log = defaultLog } = {}) {
+    this.#log = log
+  }
 /**
  * Resolves a workspace directory from the given directory.
  *
@@ -30,17 +36,14 @@ import { toPath } from './util.js'
  * @param {ResolveWorkspaceOptions} options Options
  * @returns {string} Path to workspace directory
  */
-export const resolveWorkspace = ({
-  from = process.cwd(),
-  fs = nodeFs,
-} = {}) => {
+  resolveWorkspace({ from = process.cwd(), fs = nodeFs } = {}) {
   let current = toPath(from)
   // eslint-disable-next-line no-constant-condition
   while (true) {
-    const nicePath = hrPath(current)
-    log.debug(`Searching for workspace in ${nicePath}`)
+      const hrCurrentPath = hrPath(current)
+      this.#log.debug(`Searching for workspace in ${hrCurrentPath}`)
     if (isReadableFileSync(path.join(current, PACKAGE_JSON), { fs })) {
-      log.debug(`Found workspace in ${nicePath}`)
+        this.#log.debug(`Found workspace in ${hrCurrentPath}`)
       return current
     }
     const parent = path.join(current, '..')
@@ -57,23 +60,27 @@ export const resolveWorkspace = ({
  * Resolves a specifier to an absolute path, using Node.js module resolution;
  * you can provide a directory or omit a file extension.
  *
- * This works with bare specifiers, though that likely will not be what you want
- * if you're trying to run a bin script.
+   * This works with bare specifiers, though that likely will not be what you
+   * want if you're trying to run a bin script.
  *
  * @remarks
- * This function cannot accept an alternative `fs` implementation since there is
- * no way to provide it to {@link Module.createRequire}.
+   * This function cannot accept an alternative `fs` implementation since there
+   * is no way to provide it to {@link Module.createRequire}.
  * @param {string} specifier Absolute path to a resolvable module
  * @param {ResolveEntrypointOptions} [options] Options
  * @returns {string} Resolved path
  */
-export const resolveEntrypoint = (specifier, { from = process.cwd() } = {}) => {
+  resolveEntrypoint(specifier, { from = process.cwd() } = {}) {
   from = toPath(from)
   const abs = path.normalize(path.resolve(from, specifier))
   // the param to `createRequire` should be useless since we're guaranteed an
   // absolute path; this is used to resolve files like `index.js`
   const { resolve } = Module.createRequire(import.meta.url)
-  return resolve(abs)
+    const entrypoint = resolve(abs)
+    this.#log.debug(
+      `Resolved entrypoint ${hrPath(abs)} to ${hrPath(entrypoint)}`
+    )
+    return entrypoint
 }
 
 /**
@@ -87,34 +94,31 @@ export const resolveEntrypoint = (specifier, { from = process.cwd() } = {}) => {
  * @param {ResolveBinScriptOptions} [options]
  * @returns {string} Path to the bin script
  */
-export const resolveBinScript = (
-  name,
-  { from = process.cwd(), fs = nodeFs } = {}
-) => {
+  resolveBinScript(name, { from = process.cwd(), fs = nodeFs } = {}) {
   from = toPath(from)
   /** @type {string} */
   let workspace
-  const niceFrom = hrPath(from)
-  const niceBin = hrLabel(name)
+    const hrFrom = hrPath(from)
+    const hrBin = hrLabel(name)
   try {
-    workspace = resolveWorkspace({ from, fs })
+      workspace = this.resolveWorkspace({ from, fs })
   } catch {
     throw new NoWorkspaceError(
-      `Could not find a workspace from ${niceFrom}; are in your project directory?`
+        `Could not find a workspace from ${hrFrom}; are in your project directory?`
     )
   }
   let current = workspace
   // eslint-disable-next-line no-constant-condition
   while (true) {
     const maybeBinDir = path.join(current, 'node_modules', '.bin')
-    const niceBinDir = hrPath(maybeBinDir)
-    log.debug(`Searching for ${niceBin} in ${niceBinDir}`)
+      const hrBinDir = hrPath(maybeBinDir)
+      this.#log.debug(`Searching for ${hrBin} in ${hrBinDir}`)
     const maybeBinPath = path.join(maybeBinDir, name)
     if (isExecutableSymlink(maybeBinPath, { fs })) {
       const realBinPath = realpathSync(maybeBinPath, { fs })
-      const niceRealBinPath = hrPath(realBinPath)
-      log.debug(
-        `Found executable ${niceBin} in ${niceBinDir} linked from ${niceRealBinPath}`
+        const hrRealBinPath = hrPath(realBinPath)
+        this.#log.debug(
+          `Found executable ${hrBin} in ${hrBinDir} linked from ${hrRealBinPath}`
       )
       return realBinPath
     }
@@ -122,19 +126,20 @@ export const resolveBinScript = (
     /** @type {string} */
     let next
     try {
-      next = resolveWorkspace({ from: path.join(current, '..'), fs })
+        next = this.resolveWorkspace({ from: path.join(current, '..'), fs })
     } catch {
       throw new NoBinScriptError(
-        `Could not find executable ${niceBin} from ${niceFrom}`
+          `Could not find executable ${hrBin} from ${hrFrom}`
       )
     }
     if (next === current) {
-      log.debug(`Reached filesystem root; stopping search`)
+        this.#log.debug(`Reached filesystem root; stopping search`)
       throw new NoBinScriptError(
-        `Could not find executable ${niceBin} from ${niceFrom}`
+          `Could not find executable ${hrBin} from ${hrFrom}`
       )
     }
-    log.debug(`No such executable ${niceBin} in ${niceBinDir}; continuing…`)
+      this.#log.debug(`No such executable ${hrBin} in ${hrBinDir}; continuing…`)
     current = next
+    }
   }
 }

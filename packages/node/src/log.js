@@ -4,7 +4,11 @@
  * @packageDocumentation
  */
 
-import { Loggerr } from 'loggerr'
+import { createConsola, LogLevels } from 'consola'
+
+/**
+ * @import {ConsolaInstance} from 'consola'
+ */
 
 /**
  * This is a logger object.
@@ -21,18 +25,16 @@ import { Loggerr } from 'loggerr'
  *
  * Because the value is handled as a tuple, we cannot generate it via
  * {@link Array.fill}
+ *
+ * @type {ConsolaInstance}
  */
-export const log = new Loggerr({
-  formatter: 'cli',
-  streams: [
-    process.stderr,
-    process.stderr,
-    process.stderr,
-    process.stderr,
-    process.stderr,
-    process.stderr,
-    process.stderr,
-    process.stderr,
-  ],
-  level: process.env.LAVAMOAT_DEBUG ? Loggerr.DEBUG : Loggerr.INFO,
+export const log = createConsola({
+  level: process.env.LAVAMOAT_DEBUG ? LogLevels.debug : LogLevels.info,
+  fancy: true,
+  formatOptions: {
+    timestamp: false,
+    date: false,
+  },
 })
+
+export { LogLevels }
