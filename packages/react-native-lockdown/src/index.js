@@ -14,6 +14,7 @@
  * @see {@link https://metrobundler.dev/docs/configuration/#getrunmodulestatement}
  *
  *
+ *
  * @typedef {(options: { platform?: string }) => ReadonlyArray<string>} GetPolyfills
  * @see {@link https://metrobundler.dev/docs/configuration/#getpolyfills}
  */
@@ -134,7 +135,7 @@ const lockdownSerializer = ({ hermesRuntime = true } = {}, userConfig = {}) => {
   if (!config.getPolyfills) {
     config.getPolyfills = require('@react-native/js-polyfills')
   } else if (typeof config.getPolyfills !== 'function') {
-    throw new Error('getPolyfills must be a function')
+    throw new Error('serializer.getPolyfills must be a function')
   }
 
   const originalGetPolyfills = config.getPolyfills
@@ -166,14 +167,17 @@ const lockdownSerializer = ({ hermesRuntime = true } = {}, userConfig = {}) => {
  */
 const validatePolyfills = (polyfills) => {
   if (!Array.isArray(polyfills)) {
-    throw new Error('getPolyfills must return an array')
+    throw new Error(
+      `Expected polyfills to be an array of strings, but received ${typeof polyfills}`
+    )
   }
 
   for (const polyfill of polyfills) {
     if (typeof polyfill === 'function') {
       throw new Error(
         'Expected polyfills to be an array of strings, but found a function. ' +
-          "Looks like you're passing react-native/js-polyfills but not calling the function they export."
+          "Looks like you're passing react-native/js-polyfills but not calling the function they export. " +
+          "Yes, it's not very intuitive, but it is what it is."
       )
     }
 
