@@ -136,7 +136,7 @@ const lockdownSerializer = ({ hermesRuntime = true } = {}, userConfig = {}) => {
   if (!config.getPolyfills) {
     config.getPolyfills = require('@react-native/js-polyfills')
   } else if (typeof config.getPolyfills !== 'function') {
-    throw Error('serializer.getPolyfills must be a function')
+    throw Error('Invalid options: getPolyfills must be a function')
   }
 
   const originalGetPolyfills = config.getPolyfills

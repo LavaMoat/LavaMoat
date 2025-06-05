@@ -72,7 +72,7 @@ test('lockdownSerializer - invalid getPolyfills', (t) => {
   }
   t.throws(() => lockdownSerializer({}, originalConfig), {
     instanceOf: Error,
-    message: 'serializer.getPolyfills must be a function',
+    message: 'Invalid options: getPolyfills must be a function',
   })
 })
 
