@@ -18,7 +18,7 @@ It is clear Babel is preparing it to be [transformed][ses-transformed-ext]:
 // http://localhost:8081/index.bundle//&platform=android
 // ...
 (function (global) {
-  var _asyncToGenerator = require("@babel/runtime/helpers/asyncToGenerator");
+  var _asyncToGenerator = require("@babel/runtime/helpers/asyncToGenerator"); // <----- ERROR HERE
   var _toArray = require("@babel/runtime/helpers/toArray");
   var _objectWithoutProperties = require("@babel/runtime/helpers/objectWithoutProperties");
   var _toConsumableArray = require("@babel/runtime/helpers/toConsumableArray");
