@@ -1,14 +1,36 @@
 'use strict'
 
+/**
+ * @typedef {import('@react-native/metro-config').MetroConfig} MetroConfig
+ *
+ * @typedef {import('@react-native/metro-config').SerializerConfig} SerializerConfig
+ *
+ *
+ * @typedef {(moduleId: number | string) => string} GetRunModuleStatement
+ *
+ * @typedef {(options: { platform?: string }) => ReadonlyArray<string>} GetPolyfills
+ */
+
 const { warn } = console
 const { assign } = Object
 
 const path = require('node:path')
 
+/**
+ * Default implementation of getRunModuleStatement
+ *
+ * @type {GetRunModuleStatement}
+ */
 const defaultGetRunModuleStatement = (moduleId) => `__r(${moduleId})`
 
 const ENTRY_FILE_MODULE_ID = 0
 
+/**
+ * Creates a function to inspect and warn about anomalies in module loading
+ *
+ * @returns {(callLog: (number | string)[]) => void} Function to inspect the
+ *   call log
+ */
 const warnAboutAnomalies = () => {
   const deferredWarnings = {
     calledOnceOnly:
@@ -24,6 +46,12 @@ const warnAboutAnomalies = () => {
     })
   })
 
+  /**
+   * Inspects the call log for anomalies
+   *
+   * @param {(number | string)[]} callLog - Array of module IDs that were called
+   * @returns {void}
+   */
   return function inspectCallLog(callLog) {
     if (callLog.length > 1) {
       deferredWarnings.calledOnceOnly = false
@@ -47,83 +75,117 @@ const warnAboutAnomalies = () => {
   }
 }
 
-module.exports = {
-  // lockdownSerializer
-  lockdownSerializer: ({ hermesRuntime = true } = {}, userConfig) => {
-    if (userConfig.getRunModuleStatement) {
-      warn(
-        'LavaMoat: You are using getRunModuleStatement in serializer config. Lavamoat will attempt to wrap it without breaking it, but if you are doing something unusual, we might affect how it works.'
-      )
+/**
+ * @typedef {Object} LockdownSerializerOptions
+ * @property {boolean} [hermesRuntime=true] - Whether to enable Hermes runtime
+ *   support. Default is `true`
+ */
+
+/**
+ * Creates a Metro serializer configuration with LavaMoat lockdown
+ *
+ * @param {LockdownSerializerOptions} [options={}] - Configuration options.
+ *   Default is `{}`
+ * @param {SerializerConfig} [userConfig={}] - User-provided serializer
+ *   configuration. Default is `{}`
+ * @returns {SerializerConfig} Configured serializer options with LavaMoat
+ *   lockdown
+ */
+const lockdownSerializer = ({ hermesRuntime = true } = {}, userConfig = {}) => {
+  if (userConfig.getRunModuleStatement) {
+    warn(
+      'LavaMoat: You are using getRunModuleStatement in serializer config. Lavamoat will attempt to wrap it without breaking it, but if you are doing something unusual, we might affect how it works.'
+    )
+  }
+
+  /** @type {SerializerConfig} */
+  const config = assign({}, userConfig)
+
+  /** @type {(number | string)[]} */
+  const callLog = []
+
+  /** @type {GetRunModuleStatement} */
+  const previousGetRunModuleStatement =
+    userConfig.getRunModuleStatement ?? defaultGetRunModuleStatement
+
+  const inspectCallLog = warnAboutAnomalies()
+
+  // getRunModuleStatement
+  config.getRunModuleStatement = (moduleId) => {
+    callLog.push(moduleId)
+    inspectCallLog(callLog)
+    const runModuleStatement = previousGetRunModuleStatement(moduleId)
+
+    if (moduleId === ENTRY_FILE_MODULE_ID) {
+      return `hardenIntrinsics();${runModuleStatement}`
     }
 
-    const config = assign({}, userConfig)
+    return runModuleStatement
+  }
 
-    const callLog = []
+  if (!config.getPolyfills) {
+    config.getPolyfills = require('@react-native/js-polyfills')
+  } else if (typeof config.getPolyfills !== 'function') {
+    throw new Error('getPolyfills must be a function')
+  }
 
-    const previousGetRunModuleStatement =
-      userConfig.getRunModuleStatement ?? defaultGetRunModuleStatement
+  // Store the original getPolyfills function
+  const originalGetPolyfills = config.getPolyfills
 
-    const inspectCallLog = warnAboutAnomalies()
+  /** @type {GetPolyfills} */
+  config.getPolyfills = (options) => {
+    let polyfills = originalGetPolyfills(options)
+    polyfills = Array.isArray(polyfills) ? polyfills.flat() : []
+    validatePolyfills(polyfills)
 
-    // getRunModuleStatement
-    config.getRunModuleStatement = (moduleId) => {
-      callLog.push(moduleId)
-      inspectCallLog(callLog)
-      const runModuleStatement = previousGetRunModuleStatement(moduleId)
-
-      if (moduleId === ENTRY_FILE_MODULE_ID) {
-        return `hardenIntrinsics();${runModuleStatement}`
-      }
-
-      return runModuleStatement
-    }
-
-    if (!config.getPolyfills) {
-      config.getPolyfills = require('@react-native/js-polyfills')
-    } else if (typeof config.getPolyfills !== 'function') {
-      throw new Error('serializer.getPolyfills must be a function')
-    }
-
+    // Add SES and repair polyfills
     const ses = hermesRuntime
       ? require.resolve('ses/hermes')
       : require.resolve('ses')
     const repair = require.resolve('./repair.js')
 
-    // getPolyfills
-    const userPolyfills = config.getPolyfills
-    config.getPolyfills = () => {
-      let polyfills = userPolyfills()
-      polyfills = polyfills.flat()
-      module.exports.validatePolyfills(polyfills)
-      return [ses, repair, ...polyfills]
+    return [ses, repair, ...polyfills]
+  }
+
+  return config
+}
+
+/**
+ * Validates that required polyfills are included
+ *
+ * @param {ReadonlyArray<string>} polyfills - Array of polyfill paths
+ * @returns {void}
+ * @throws {Error} If required polyfills are missing or invalid
+ */
+const validatePolyfills = (polyfills) => {
+  if (!Array.isArray(polyfills)) {
+    throw new Error('getPolyfills must return an array')
+  }
+
+  for (const polyfill of polyfills) {
+    if (typeof polyfill === 'function') {
+      throw new Error(
+        'Expected polyfills to be an array of strings, but found a function. ' +
+          "Looks like you're passing react-native/js-polyfills but not calling the function they export."
+      )
     }
-    return config
-  },
-  // validatePolyfills
-  validatePolyfills: function validatePolyfills(polyfills) {
-    for (const polyfill of polyfills) {
-      if (!Array.isArray(polyfills)) {
-        throw new Error(
-          `Expected polyfills to be an array of strings, but received ${typeof polyfills}`
-        )
-      }
-      if (typeof polyfill !== 'string') {
-        if (typeof polyfill === 'function') {
-          throw new Error(
-            `Expected polyfills to be an array of strings, but found a function. Looks like you're passing react-native/js-polyfills but not calling the function they export. Yes, it's not very intuitive, but it is what it is.`
-          )
-        }
-        throw new Error(
-          `Expected polyfills to be an array of strings, but received ${typeof polyfill}`
-        )
-      } else {
-        // make sure the polyfill is a resolved path not just a package name
-        if (!path.isAbsolute(polyfill) && !polyfill.startsWith('.')) {
-          throw new Error(
-            `Polyfill must be a resolved path, not just a package name: ${polyfill}`
-          )
-        }
-      }
+
+    if (typeof polyfill !== 'string') {
+      throw new Error(
+        `Expected polyfills to be an array of strings, but received ${typeof polyfill}`
+      )
     }
-  },
+
+    // Make sure the polyfill is a resolved path not just a package name
+    if (!path.isAbsolute(polyfill) && !polyfill.startsWith('.')) {
+      throw new Error(
+        `Polyfill must be a resolved path, not just a package name: ${polyfill}`
+      )
+    }
+  }
+}
+
+module.exports = {
+  lockdownSerializer,
+  validatePolyfills,
 }
