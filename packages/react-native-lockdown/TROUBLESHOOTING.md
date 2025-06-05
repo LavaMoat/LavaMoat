@@ -8,7 +8,7 @@
 
 ## `ReferenceError: Property 'require' doesn't exist`
 
-<img width="467" alt="Screenshot 2025-04-11 at 3 33 22 pm" src="https://github.com/user-attachments/assets/3ebbd6f3-965f-40f5-8427-9775b9c172d5" />
+![ReferenceError: Property 'require' doesn't exist](assets/ReferenceError-Property-require-doesnt-exist.png)
 
 Upon inspecting the bundle, the reference error is throwing early when evaluating the SES shim.
 
@@ -48,9 +48,9 @@ Now it should look much cleaner:
 // ...
 ```
 
-## Cannot read property 'setGlobalHandler' of undefined
+## `Cannot read property 'setGlobalHandler' of undefined`
 
-<img width="467" alt="Screenshot 2025-04-11 at 3 32 14 pm" src="https://github.com/user-attachments/assets/2bf45dd3-85b5-4e71-b76d-20961530df9f" />
+![Cannot read property 'setGlobalHandler' of undefined](assets/Cannot-read-property-setGlobalHandler-of-undefined.png)
 
 It looks like React Native is having trouble [initializing][init-core-ext] when setting up [error handling][set-up-error-handling-ext], due to the missing [error guard][rn-js-polyfills-error-guard-ext] polyfill.
 
