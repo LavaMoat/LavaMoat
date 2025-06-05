@@ -147,7 +147,6 @@ const lockdownSerializer = ({ hermesRuntime = true } = {}, userConfig = {}) => {
     polyfills = Array.isArray(polyfills) ? polyfills.flat() : []
     validatePolyfills(polyfills)
 
-    // Add SES and repair polyfills
     const ses = hermesRuntime
       ? require.resolve('ses/hermes')
       : require.resolve('ses')
