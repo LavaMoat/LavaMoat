@@ -42,7 +42,7 @@
     "json-stable-stringify": "1.3.0",
     "lavamoat-tofu": "^8.0.7",
     "merge-deep": "3.0.3",
-    "ses": "1.12.0"
+    "ses": "1.13.0"
   },
   "devDependencies": {
     "@types/merge-deep": "3.0.3",
