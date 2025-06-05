@@ -8,6 +8,7 @@
  *
  * @packageDocumentation
  */
+import { colors } from 'consola/utils'
 import { default as nodePath } from 'node:path'
 import nodeUrl from 'node:url'
 import {
@@ -252,3 +253,5 @@ export const makeDefaultPolicyDebugPath = (policyPath) => {
   const policyDir = nodePath.dirname(path)
   return nodePath.join(policyDir, DEFAULT_POLICY_DEBUG_FILENAME)
 }
+
+export { colors }

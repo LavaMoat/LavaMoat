@@ -3,7 +3,6 @@
  *
  * @packageDocumentation
  */
-import chalk from 'chalk'
 import { isBuiltin as nodeIsBuiltin } from 'node:module'
 import { defaultReadPowers } from '../compartment/power.js'
 import {
@@ -16,6 +15,7 @@ import {
 import { GenerationError } from '../error.js'
 import { hrLabel, hrPath } from '../format.js'
 import { log as fallbackLog } from '../log.js'
+import { colors } from '../util.js'
 
 /**
  * @import {ReadNowPowers,
@@ -25,13 +25,12 @@ import { log as fallbackLog } from '../log.js'
  *   CompartmentSources,
  *   FileURLToPathFn} from '@endo/compartment-mapper'
  * @import {StaticModuleType, ModuleSource} from 'ses'
- * @import {Loggerr} from 'loggerr'
  * @import {LMRCache} from './lmr-cache.js'
  * @import {ModuleResolver, PolicyGeneratorContextOptions,
  * ResolveCompartmentFn,
  * ResolveModuleDescriptorFn,
  *   SimpleLavamoatModuleRecordOptions} from '../internal.js'
- * @import {CanonicalName, CompartmentDescriptorData} from '../types.js'
+ * @import {CanonicalName, CompartmentDescriptorData, Logger} from '../types.js'
  * @import {LavamoatModuleRecord, IsBuiltinFn} from 'lavamoat-core'
  */
 
@@ -94,7 +93,7 @@ export class PolicyGeneratorContext {
 
   #missingModules
 
-  /** @type {Readonly<Loggerr>} */
+  /** @type {Logger} */
   #log
 
   /**
@@ -436,11 +435,11 @@ export class PolicyGeneratorContext {
       const nicePath = hrPath(
         `${this.#resolveCompartment(this.compartmentDescriptor.location)}`
       )
-      let msg = `Package ${hrLabel(this.canonicalName)} (${nicePath}) references unresolvable module(s). This may be due to the module(s) not being installed, "optional" dependencies, or implcit dependencies unreferenced in ${hrPath(PACKAGE_JSON)}. ${chalk.italic('Execution will most likely fail')} unless accounted for in policy overrides:`
+      let msg = `Package ${hrLabel(this.canonicalName)} (${nicePath}) references unresolvable module(s). This may be due to the module(s) not being installed, "optional" dependencies, or implcit dependencies unreferenced in ${hrPath(PACKAGE_JSON)}. ${colors.italic('Execution will most likely fail')} unless accounted for in policy overrides:`
       for (const missingModule of this.#missingModules) {
-        msg += `\n- ${chalk.yellow(missingModule)}`
+        msg += `\n- ${colors.yellow(missingModule)}`
       }
-      this.#log.warning(msg)
+      this.#log.warn(msg)
     }
 
     return records
