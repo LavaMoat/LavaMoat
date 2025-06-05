@@ -95,7 +95,7 @@ const config = {
       getPolyfills: () => {
         return [
           ...require('@react-native/js-polyfills')(),
-          require.resolve('vetted-shim'),
+          require.resolve('path-to-shim'),
         ]
       },
     }
