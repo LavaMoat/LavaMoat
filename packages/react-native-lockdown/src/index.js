@@ -104,7 +104,7 @@ const warnAboutAnomalies = () => {
 const lockdownSerializer = ({ hermesRuntime = true } = {}, userConfig = {}) => {
   if (userConfig.getRunModuleStatement) {
     warn(
-      'LavaMoat: You are using getRunModuleStatement in serializer config. Lavamoat will attempt to wrap it without breaking it, but if you are doing something unusual, we might affect how it works.'
+      'LavaMoat: You are using getRunModuleStatement in your serializer config. Lavamoat will attempt to wrap it without breaking it, but if you are doing something unusual, it may be affected.'
     )
   }
 
