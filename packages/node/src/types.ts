@@ -21,12 +21,12 @@ import type {
   SyncImportLocationOptions,
   UrlInterface,
 } from '@endo/compartment-mapper'
+import type { ConsolaInstance } from 'consola'
 import type {
   IsBuiltinFn,
   LavaMoatPolicy,
   LavaMoatPolicyDebug,
 } from 'lavamoat-core'
-import type { Loggerr } from 'loggerr'
 import type nodeFs from 'node:fs'
 import type { PathLike, Stats } from 'node:fs'
 import type { LiteralUnion, Simplify } from 'type-fest'
@@ -99,7 +99,7 @@ export interface WithLog {
   /**
    * `Loggerr` instance for logging
    */
-  log?: Loggerr
+  log?: Logger
 }
 
 export interface WithPolicyOnly {
@@ -631,3 +631,7 @@ export type UnmergedLavaMoatPolicy = LavaMoatPolicy & {
 export type MergedLavaMoatPolicyDebug = LavaMoatPolicyDebug & {
   [MERGED_POLICY_FIELD]: true
 }
+
+export type Logger = ConsolaInstance
+
+export type { LogLevels } from 'consola'

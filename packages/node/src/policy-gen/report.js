@@ -5,11 +5,10 @@
  * @packageDocumentation
  */
 
-import chalk from 'chalk'
 import { Searcher, sortKind } from 'fast-fuzzy'
 import { toKeypath } from 'to-keypath'
 import { SES_VIOLATION_TYPES } from '../constants.js'
-import { hrCode, hrLabel, hrPath } from '../format.js'
+import { colors, hrCode, hrLabel, hrPath } from '../format.js'
 import { log as defaultLog } from '../log.js'
 /**
  * @import {ReportInvalidOverridesOptions, ReportSesViolationsOptions, SesViolationType} from '../internal.js'
@@ -149,7 +148,7 @@ export const reportInvalidOverrides = (
         return `  - ${hrCode(source)}`
       })
       .join('\n')
-    log.warning(msg)
+    log.warn(msg)
   }
 }
 
@@ -171,7 +170,7 @@ export const reportSesViolations = (
   let hasPrimordialMutationViolations = false
   for (const [packageName, warningsByType] of perPackageWarnings) {
     for (const [type, warnings] of entries(warningsByType)) {
-      log.warning(
+      log.warn(
         `Package ${hrLabel(packageName)} contains potential SES incompatibilities at the following locations:\n${warnings.join('\n')}`
       )
       switch (type) {
@@ -187,11 +186,11 @@ export const reportSesViolations = (
     }
   }
 
-  const bold = chalk.yellowBright.bold
+  const bold = colors.yellowBright
   // we only want to display these next two "summary" messages if we found
   // violations of these specific type, and only once
   if (hasDynamicRequireViolations) {
-    log.warning(
+    log.warn(
       `${bold('Dynamic requires')} inhibit policy generation; determine any required packages, edit policy overrides, then re-run policy generation.`
     )
   }
@@ -199,12 +198,12 @@ export const reportSesViolations = (
   if (hasStrictModeViolations || hasPrimordialMutationViolations) {
     let typeMsg = ''
     if (hasStrictModeViolations) {
-      typeMsg = chalk.yellowBright.bold('Strict-mode violations')
+      typeMsg = bold('Strict-mode violations')
     }
     if (hasPrimordialMutationViolations) {
-      typeMsg += ` and ${chalk.yellowBright.bold('primordial mutations')}`
+      typeMsg += ` and ${bold('primordial mutations')}`
     }
-    log.warning(
+    log.warn(
       `${typeMsg} will likely fail at runtime under LavaMoat; patching is advised.`
     )
   }

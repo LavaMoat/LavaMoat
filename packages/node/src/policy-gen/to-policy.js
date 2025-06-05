@@ -31,14 +31,14 @@ import { makeSesCompatListener } from './ses-compat.js'
  * @import {LavaMoatPolicy,
  *   LavaMoatPolicyDebug,
  *   LavamoatModuleRecord} from 'lavamoat-core'
- * @import {PackageJson} from 'type-fest'
+ * @import {PackageJson,
+ *   Logger} from 'type-fest'
  * @import {ModuleRecordsToDebugPolicyOptions,
  *   ModuleRecordsToPolicyOptions,
  *   BuildModuleRecordsOptions,
  *   CompartmentMapToDebugPolicyOptions,
  *   CompartmentMapToPolicyOptions,
  *   SesViolationType} from '../internal.js'
- * @import {Loggerr} from 'loggerr'
  */
 
 const { entries, freeze, keys } = Object
