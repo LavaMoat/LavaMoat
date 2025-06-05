@@ -26,11 +26,11 @@ const warnAboutAnomalies = () => {
 
   return function inspectCallLog(callLog) {
     if (callLog.length > 1) {
-      deferredWarnings['calledOnceOnly'] = false
+      deferredWarnings.calledOnceOnly = false
     }
 
     if (callLog.includes(ENTRY_FILE_MODULE_ID)) {
-      deferredWarnings['neverCalledWithEntryModule'] = false
+      deferredWarnings.neverCalledWithEntryModule = false
     }
 
     if (callLog[0] === ENTRY_FILE_MODULE_ID) {
