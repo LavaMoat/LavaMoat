@@ -22,7 +22,6 @@
     "./repair": "./src/repair.js",
     "./package.json": "./package.json"
   },
-  "types": "./types/src/types.d.ts",
   "files": [
     "CHANGELOG.md",
     "src",
