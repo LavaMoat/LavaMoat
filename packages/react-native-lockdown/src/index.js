@@ -136,7 +136,7 @@ const lockdownSerializer = ({ hermesRuntime = true } = {}, userConfig = {}) => {
   if (!config.getPolyfills) {
     config.getPolyfills = require('@react-native/js-polyfills')
   } else if (typeof config.getPolyfills !== 'function') {
-    throw new Error('serializer.getPolyfills must be a function')
+    throw Error('serializer.getPolyfills must be a function')
   }
 
   const originalGetPolyfills = config.getPolyfills
@@ -167,14 +167,14 @@ const lockdownSerializer = ({ hermesRuntime = true } = {}, userConfig = {}) => {
  */
 const validatePolyfills = (polyfills) => {
   if (!Array.isArray(polyfills)) {
-    throw new Error(
+    throw Error(
       `Expected polyfills to be an array of strings, but received ${typeof polyfills}`
     )
   }
 
   for (const polyfill of polyfills) {
     if (typeof polyfill === 'function') {
-      throw new Error(
+      throw Error(
         'Expected polyfills to be an array of strings, but found a function. ' +
           "Looks like you're passing react-native/js-polyfills but not calling the function they export. " +
           "Yes, it's not very intuitive, but it is what it is."
@@ -182,14 +182,14 @@ const validatePolyfills = (polyfills) => {
     }
 
     if (typeof polyfill !== 'string') {
-      throw new Error(
+      throw Error(
         `Expected polyfills to be an array of strings, but received ${typeof polyfill}`
       )
     }
 
     // Ensure the polyfill is a resolved path, not just a package name
     if (!path.isAbsolute(polyfill) && !polyfill.startsWith('.')) {
-      throw new Error(
+      throw Error(
         `Polyfill must be a resolved path, not just a package name: ${polyfill}`
       )
     }
