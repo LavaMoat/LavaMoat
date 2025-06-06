@@ -186,7 +186,6 @@ const validatePolyfills = (polyfills) => {
       )
     }
 
-    // Ensure the polyfill is a resolved path, not just a package name
     if (!path.isAbsolute(polyfill) && !polyfill.startsWith('.')) {
       throw TypeError(
         `Polyfill must be a resolved path, not just a package name: ${polyfill}`
