@@ -2,15 +2,15 @@
   "name": "app",
   "version": "1.0.0",
   "description": "",
-  "main": "app.js",
-  "scripts": {
-    "test": "webpack --stats-error-details --config webpack.config.js"
-  },
-  "keywords": [],
   "author": "",
   "license": "ISC",
+  "main": "app.js",
+  "keywords": [],
+  "scripts": {
+    "test": "webpack --config webpack.config.js"
+  },
   "dependencies": {
-    "@ethereumjs/util": "^8.0.5",
+    "@ethereumjs/util": "^10.0.0",
     "buffer": "^6.0.3",
     "events": "^3.3.0",
     "fast-json-patch": "^3.1.1",
