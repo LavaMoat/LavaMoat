@@ -7,6 +7,7 @@
  */
 
 import { captureFromMap } from '@endo/compartment-mapper/capture-lite.js'
+import { defaultLog } from '@lavamoat/vog'
 import { assertCompleteDataMap } from '../compartment/data-map.js'
 import { nullImportHook } from '../compartment/import-hook.js'
 import { makeNodeCompartmentMap } from '../compartment/node-compartment-map.js'
@@ -14,7 +15,6 @@ import { DEFAULT_ENDO_OPTIONS } from '../compartment/options.js'
 import { defaultReadPowers } from '../compartment/power.js'
 import { DEFAULT_TRUST_ROOT_COMPARTMENT } from '../constants.js'
 import { GenerationError } from '../error.js'
-import { log as defaultLog } from '../log.js'
 import { makePolicyGenCompartment } from './policy-gen-compartment-class.js'
 
 /**

@@ -3,6 +3,7 @@
  *
  * @packageDocumentation
  */
+import { colors } from '@lavamoat/vog'
 import { execFile } from 'node:child_process'
 import { mkdtemp, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
@@ -10,7 +11,6 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { promisify } from 'node:util'
 import { hrPath } from '../../src/format.js'
-import { colors } from '../../src/util.js'
 
 export const execFileAsync = promisify(execFile)
 

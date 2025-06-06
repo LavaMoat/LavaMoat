@@ -16,6 +16,7 @@
 
 import './preamble.js'
 
+import { colors, log, LogLevels } from '@lavamoat/vog'
 import { jsonStringifySortedPolicy } from 'lavamoat-core'
 import fs from 'node:fs'
 import path from 'node:path'
@@ -26,7 +27,6 @@ import * as constants from './constants.js'
 import { run } from './exec/run.js'
 import { hrPath } from './format.js'
 import { readJsonFile } from './fs.js'
-import { log, LogLevels } from './log.js'
 import { generatePolicy } from './policy-gen/generate.js'
 import { loadPolicies } from './policy-util.js'
 import { Resolver } from './resolve.js'
@@ -122,7 +122,8 @@ const main = async (args = hideBin(process.argv)) => {
   const bugs = `${pkgJson.bugs}`
   // #endregion
 
-  const title = `${colors.redBright('@lava')}${colors.red('moat')}${colors.dim('/')}${colors.yellow('node')} v${version}`
+  const title = `${colors.greenBright('@lavamoat')}${colors.green('/')}${colors.greenBright('node')} ${colors.gray('v')}${colors.white(version)}`
+
   /**
    * Bug-reporting link for truly unexpected error messages
    *
@@ -153,7 +154,7 @@ const main = async (args = hideBin(process.argv)) => {
    *   Subset of arguments
    * @returns {void}
    */
-  const processEntrypointMiddleware = (argv) => {
+  const resolveEntrypointMiddleware = (argv) => {
     const resolver = new Resolver()
     const { entrypoint, 'project-root': projectRoot } = argv
     const resolvedEntrypoint = argv.bin
@@ -167,34 +168,37 @@ const main = async (args = hideBin(process.argv)) => {
     }
   }
 
-  const middleware = [
-    () => {
+  /**
+   * Prints the title/preface/header thing.
+   */
+  const printTitleMiddleware = () => {
       log.log(title)
-    },
+  }
     /**
+   * This sets the log level based on the `verbose` and `quiet` flags.
+   *
+   * Note that this takes precedence over the `LAVAMOAT_DEBUG` env var, if set.
+   *
      * @param {{ verbose?: boolean; quiet?: boolean }} argv
      * @returns {void}
      */
-    (argv) => {
+  const setLogLevelMiddleware = (argv) => {
       if (argv.verbose) {
         log.level = LogLevels.verbose
       } else if (argv.quiet) {
         // This assumes that we will never use the "emergency" log level!
         log.level = LogLevels.silent
+    }
       }
-    },
-    processEntrypointMiddleware,
     /**
-     * This _global_ middleware:
-     *
      * - Resolves `policy` from `project-root`
      * - If `policy-override` was provided, resolve it from `project-root` and
      *   asserts it is readable. It's appropriate to do so here because it is
      *   impossible to answer "did the user provide an explicit policy override
      *   path?" _after_ this point. We throw an exception if the
-     *   explicitly-provide policy override path is not readable. This applies
-     *   to both `run` and `generate` commands; both will read the policy
-     *   override file, if present.
+   *   explicitly-provide policy override path is not readable. This applies to
+   *   both `run` and `generate` commands; both will read the policy override
+   *   file, if present.
      * - Configures the global logger based on `verbose` and `quiet` flags (this
      *   overrides the `LAVAMOAT_DEBUG` environment variable, if present; the
      *   environment variable can be used when consuming `@lavamoat/node`
@@ -208,7 +212,7 @@ const main = async (args = hideBin(process.argv)) => {
      * }} argv
      * @returns {Promise<void>}
      */
-    async (argv) => {
+  const resolvePolicyPathsMiddleware = async (argv) => {
       await Promise.resolve()
 
       // this is absolute
@@ -238,7 +242,21 @@ const main = async (args = hideBin(process.argv)) => {
       )
     }
   }
-    },
+
+  /**
+   * Middleware that each command should use.
+   *
+   * Ideally, we'd split this up and run some middleware globally, but it seems
+   * that global middleware runs _after_ command-specific middleware; due to the
+   * expectations of {@link resolveEntrypointMiddleware}, it cannot be global
+   * (since `entrypoint` is not a global option), and we want
+   * {@link printTitleMiddleware} to run _first_, so here we are.
+   */
+  const middleware = [
+    setLogLevelMiddleware,
+    printTitleMiddleware,
+    resolveEntrypointMiddleware,
+    resolvePolicyPathsMiddleware,
   ]
 
   /**

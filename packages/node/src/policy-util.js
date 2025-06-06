@@ -8,6 +8,7 @@
  * @packageDocumentation
  */
 
+import { log } from '@lavamoat/vog'
 import { jsonStringifySortedPolicy, mergePolicy } from 'lavamoat-core'
 import nodeFs from 'node:fs'
 import nodePath from 'node:path'
@@ -16,7 +17,6 @@ import { LAVAMOAT_PKG_POLICY_ROOT } from './constants.js'
 import { InvalidPolicyError, NoPolicyError } from './error.js'
 import { hrPath } from './format.js'
 import { readJsonFile } from './fs.js'
-import { log } from './log.js'
 import { hasValue, isObjectyObject, isPathLike, toPath } from './util.js'
 
 /**

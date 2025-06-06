@@ -7,8 +7,8 @@
  */
 
 import { mapNodeModules } from '@endo/compartment-mapper/node-modules.js'
+import { defaultLog } from '@lavamoat/vog'
 import { DEFAULT_TRUST_ROOT_COMPARTMENT } from '../constants.js'
-import { log as defaultLog } from '../log.js'
 import { toEndoURL } from '../util.js'
 import { assertCompleteDataMap } from './data-map.js'
 import { canonicalNameDecorator, decorateCompartmentMap } from './decorate.js'

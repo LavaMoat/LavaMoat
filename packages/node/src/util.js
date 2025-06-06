@@ -8,7 +8,7 @@
  *
  * @packageDocumentation
  */
-import { colors } from 'consola/utils'
+import { colors } from '@lavamoat/vog'
 import { default as nodePath } from 'node:path'
 import nodeUrl from 'node:url'
 import {
@@ -17,7 +17,6 @@ import {
 } from './constants.js'
 import { hrCode } from './format.js'
 import { assertAbsolutePath } from './fs.js'
-
 const { isArray: isArray_ } = Array
 const { freeze, keys } = Object
 
@@ -253,5 +252,3 @@ export const makeDefaultPolicyDebugPath = (policyPath) => {
   const policyDir = nodePath.dirname(path)
   return nodePath.join(policyDir, DEFAULT_POLICY_DEBUG_FILENAME)
 }
-
-export { colors }
