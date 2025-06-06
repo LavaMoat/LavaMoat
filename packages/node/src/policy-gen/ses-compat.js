@@ -9,13 +9,14 @@
 /**
  * @import {SesViolationType} from '../internal.js'
  * @import {LavamoatModuleRecord, SesCompat, SesCompatObj} from 'lavamoat-core'
- * @import {Logger} from '../types.js'
+ * @import {Logger} from '@lavamoat/vog'
  */
 
+import { colors, defaultLog } from '@lavamoat/vog'
 import { stripVTControlCharacters } from 'node:util'
 import { SES_VIOLATION_TYPES } from '../constants.js'
-import { log as defaultLog } from '../log.js'
-import { colors, hrPath } from '../util.js'
+import { hrPath } from '../util.js'
+
 const { keys } = Object
 
 /**

@@ -5,6 +5,7 @@
  *
  * @packageDocumentation
  */
+import { defaultLog } from '@lavamoat/vog'
 import nodeFs from 'node:fs'
 import nodePath from 'node:path'
 import { defaultReadPowers } from '../compartment/power.js'
@@ -13,7 +14,6 @@ import {
   DEFAULT_TRUST_ROOT_COMPARTMENT,
 } from '../constants.js'
 import { assertAbsolutePath } from '../fs.js'
-import { log as defaultLog } from '../log.js'
 import { maybeReadPolicyOverride, writePolicy } from '../policy-util.js'
 import {
   hrLabel,

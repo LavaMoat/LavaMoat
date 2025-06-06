@@ -5,11 +5,11 @@
  * @packageDocumentation
  */
 
+import { defaultLog } from '@lavamoat/vog'
 import {
   ATTENUATORS_COMPARTMENT,
   DEFAULT_TRUST_ROOT_COMPARTMENT,
 } from '../constants.js'
-import { log as defaultLog } from '../log.js'
 import { getCanonicalName } from '../policy-util.js'
 import { hrLabel } from '../util.js'
 /**

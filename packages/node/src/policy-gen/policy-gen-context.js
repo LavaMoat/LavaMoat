@@ -3,6 +3,7 @@
  *
  * @packageDocumentation
  */
+import { colors, defaultLog } from '@lavamoat/vog'
 import { isBuiltin as nodeIsBuiltin } from 'node:module'
 import { defaultReadPowers } from '../compartment/power.js'
 import {
@@ -13,8 +14,7 @@ import {
   PACKAGE_JSON,
 } from '../constants.js'
 import { GenerationError } from '../error.js'
-import { log as fallbackLog } from '../log.js'
-import { colors, hasValue, hrLabel, hrPath } from '../util.js'
+import { hasValue, hrLabel, hrPath } from '../util.js'
 
 /**
  * @import {ReadNowPowers,
@@ -27,8 +27,9 @@ import { colors, hasValue, hrLabel, hrPath } from '../util.js'
  * @import {LMRCache} from './lmr-cache.js'
  * @import {PolicyGeneratorContextOptions,
  *   SimpleLavamoatModuleRecordOptions} from '../internal.js'
- * @import {CanonicalName, CompartmentDescriptorData, Logger} from '../types.js'
+ * @import {CanonicalName, CompartmentDescriptorData} from '../types.js'
  * @import {LavamoatModuleRecord, IsBuiltinFn} from 'lavamoat-core'
+ * @import {Logger} from '@lavamoat/vog'
  */
 
 const { entries, keys, hasOwn, freeze } = Object
@@ -151,7 +152,7 @@ export class PolicyGeneratorContext {
       rootModule,
       readPowers = defaultReadPowers,
       isBuiltin = nodeIsBuiltin,
-      log = fallbackLog,
+      log = defaultLog,
     } = {}
   ) {
     this.#lmrCache = lmrCache

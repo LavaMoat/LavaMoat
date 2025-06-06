@@ -1,7 +1,7 @@
 import '../../../src/preamble.js'
 
+import { colors } from '@lavamoat/vog'
 import { run } from '../../../src/exec/run.js'
-import { colors } from '../../../src/util.js'
 import {
   DEFAULT_JSON_FIXTURE_ENTRY_POINT,
   JSON_FIXTURE_DIR_URL,

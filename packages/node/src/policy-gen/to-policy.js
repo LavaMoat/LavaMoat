@@ -6,6 +6,7 @@
  * @packageDocumentation
  */
 
+import { defaultLog } from '@lavamoat/vog'
 import { createModuleInspector } from 'lavamoat-core'
 import { isBuiltin as defaultIsBuiltin } from 'node:module'
 import { defaultReadPowers } from '../compartment/power.js'
@@ -14,7 +15,6 @@ import {
   SES_VIOLATION_TYPES,
 } from '../constants.js'
 import { GenerationError } from '../error.js'
-import { log as defaultLog } from '../log.js'
 import { hrLabel, toPath } from '../util.js'
 import { LMRCache } from './lmr-cache.js'
 import { PolicyGeneratorContext } from './policy-gen-context.js'
@@ -30,9 +30,9 @@ import { makeSesCompatListener } from './ses-compat.js'
  * @import {BuildModuleRecordsOptions,
  *   CompartmentMapToDebugPolicyOptions,
  *   CompartmentMapToPolicyOptions,
- *   CompleteCompartmentDescriptorDataMap,
- *   Logger} from '../types.js'
+ *   CompleteCompartmentDescriptorDataMap} from '../types.js'
  * @import {ModuleRecordsToDebugPolicyOptions, ModuleRecordsToPolicyOptions, SesViolationType} from '../internal.js'
+ * @import {Logger} from '@lavamoat/vog'
  */
 
 const { entries, freeze } = Object
@@ -230,18 +230,18 @@ const reportSesViolations = (
 ) => {
   for (const [packageName, warningsByType] of perPackageWarnings) {
     for (const [, warnings] of entries(warningsByType)) {
-      log.warning(
+      log.warn(
         `Package ${hrLabel(packageName)} contains potential SES incompatibilities at the following locations:\n${warnings.join('\n')}`
       )
     }
   }
   if (foundViolationTypes.has(SES_VIOLATION_TYPES.DynamicRequires)) {
-    log.warning(
+    log.warn(
       'Dynamic requires inhibit policy generation; determine the required packages, edit policy overrides and re-run policy generation.'
     )
   }
   if (foundViolationTypes.has(SES_VIOLATION_TYPES.StrictModeViolation)) {
-    log.warning(
+    log.warn(
       'Strict-mode violations will cause runtime errors under LavaMoat; patching is advised.'
     )
   }

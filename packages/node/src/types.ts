@@ -18,7 +18,7 @@ import type {
   SyncImportLocationOptions,
   UrlInterface,
 } from '@endo/compartment-mapper'
-import type { ConsolaInstance } from 'consola'
+import { type Logger } from '@lavamoat/vog'
 import type { IsBuiltinFn, LavaMoatPolicy } from 'lavamoat-core'
 import type nodeFs from 'node:fs'
 import type { PathLike, Stats } from 'node:fs'
@@ -607,7 +607,3 @@ export type WithCompartmentDescriptorDecorators = {
    */
   decorators?: CompartmentDescriptorDecorator[]
 }
-
-export type Logger = ConsolaInstance
-
-export type { LogLevels } from 'consola'

@@ -4,6 +4,7 @@
  *
  * @packageDocumentation
  */
+import { defaultLog } from '@lavamoat/vog'
 import nodeFs from 'node:fs'
 import { makeReadPowers } from '../compartment/power.js'
 import {
@@ -11,7 +12,6 @@ import {
   DEFAULT_TRUST_ROOT_COMPARTMENT,
 } from '../constants.js'
 import { TrustMismatchError } from '../error.js'
-import { log as defaultLog } from '../log.js'
 import { toEndoPolicy } from '../policy-converter.js'
 import { isTrusted, loadPolicies } from '../policy-util.js'
 import { hrCode, hrPath } from '../util.js'
