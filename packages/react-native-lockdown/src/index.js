@@ -167,28 +167,28 @@ const lockdownSerializer = ({ hermesRuntime = true } = {}, userConfig = {}) => {
 const validatePolyfills = (polyfills) => {
   if (!Array.isArray(polyfills)) {
     throw TypeError(
-      `Expected polyfills to be an array of strings, but received ${typeof polyfills}`
+      `Expected polyfills to be an array of strings, but received: ${typeof polyfills}`
     )
   }
 
   for (const polyfill of polyfills) {
     if (typeof polyfill === 'function') {
       throw TypeError(
-        'Expected polyfills to be an array of strings, but found a function. ' +
-          "Looks like you're passing react-native/js-polyfills but not calling the function they export. " +
+        `Expected polyfill to be a string, but received a ${typeof polyfill}. ` +
+          "Looks like you're passing @react-native/js-polyfills, but not calling the function they export. " +
           "Yes, it's not very intuitive, but it is what it is."
       )
     }
 
     if (typeof polyfill !== 'string') {
       throw TypeError(
-        `Expected polyfills to be an array of strings, but received ${typeof polyfill}`
+        `Expected polyfill to be a string, but received: ${typeof polyfill}`
       )
     }
 
     if (!path.isAbsolute(polyfill) && !polyfill.startsWith('.')) {
       throw TypeError(
-        `Polyfill must be a resolved path, not just a package name: ${polyfill}`
+        `Expected polyfill to be a resolved path, not just a package name: ${polyfill}`
       )
     }
   }
