@@ -158,3 +158,7 @@ Untested on [react-native-v8][react-native-v8-ext], an opt-in V8 runtime for And
 [react-native-releases-support-ext]: https://github.com/reactwg/react-native-releases/blob/main/docs/support.md
 [react-native-v8-ext]: https://github.com/Kudo/react-native-v8
 [vetted-shims-ext]: https://github.com/endojs/endo/blob/master/packages/ses/docs/guide.md#using-hardened-javascript-with-vetted-shims
+
+## License
+
+Copyright (c) 2025 Consensys Software Inc. Licensed MIT
