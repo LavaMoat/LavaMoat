@@ -23,7 +23,7 @@ const diag = require('./diagnostics')
  * @param {string[]} options.steps
  * @returns {ProgressAPI}
  */
-module.exports = function progress({ steps }) {
+function progress({ steps }) {
   /** @type {Error[]} */
   let compilationErrors = []
   /**
@@ -53,7 +53,7 @@ module.exports = function progress({ steps }) {
    */
   API.report = (step) => {
     if (canRepeat.has(step) && steps[currentStep] === step) {
-      diag.rawDebug(3, `\n> Reporting ${step} again`)
+      diag.rawDebug(4, `  progress  Reporting ${step} again`)
       return
     }
     done.add(step)
@@ -66,7 +66,7 @@ module.exports = function progress({ steps }) {
         )
       )
     } else {
-      diag.rawDebug(1, `\n> progress ${steps[currentStep]}->${step}`)
+      diag.rawDebug(2, `  progress  ${steps[currentStep]}->${step}`)
       currentStep += 1
     }
   }
@@ -75,7 +75,7 @@ module.exports = function progress({ steps }) {
    */
   API.is = (query) => {
     const current = steps[currentStep]
-    diag.rawDebug(2, `\n> Checking (${current}).is(${query})`)
+    diag.rawDebug(3, `  progress  Checking (${current}).is(${query})`)
     return current === query
   }
   API.get = () => {
@@ -107,5 +107,33 @@ module.exports = function progress({ steps }) {
     errors.push(...compilationErrors)
     compilationErrors = errors
   }
+  diag.rawDebug(2, `  progress  ${steps[currentStep]}`)
+
   return API
+}
+
+/**
+ * @template T
+ * @template {keyof T} K
+ * @typedef {T & Required<Pick<T, K>>} RequireFields
+ */
+
+/**
+ * @template {Record<string, any>} T
+ * @template {keyof T} K
+ * @param {T} storeObj
+ * @param {readonly K[]} fields
+ * @returns {asserts storeObj is RequireFields<T, K>}
+ */
+const assertFields = (storeObj, fields) => {
+  const missingFields = fields.filter((field) => storeObj[field] === undefined)
+
+  if (missingFields.length > 0) {
+    throw new Error(`Missing required fields: ${missingFields.join(', ')}`)
+  }
+}
+
+module.exports = {
+  assertFields,
+  progress,
 }
