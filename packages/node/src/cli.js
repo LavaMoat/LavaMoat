@@ -177,8 +177,7 @@ const main = async (args = hideBin(process.argv)) => {
   /**
    * This sets the log level based on the `verbose` and `quiet` flags.
    *
-   * Note that this takes precedence over the `LAVAMOAT_DEBUG` env var, if
-   * set.
+   * Note that this takes precedence over the `LAVAMOAT_DEBUG` env var, if set.
    *
    * @param {{ verbose?: boolean; quiet?: boolean }} argv
    * @returns {void}
@@ -197,9 +196,9 @@ const main = async (args = hideBin(process.argv)) => {
    *   asserts it is readable. It's appropriate to do so here because it is
    *   impossible to answer "did the user provide an explicit policy override
    *   path?" _after_ this point. We throw an exception if the
-   *   explicitly-provide policy override path is not readable. This applies
-   *   to both `run` and `generate` commands; both will read the policy
-   *   override file, if present.
+   *   explicitly-provide policy override path is not readable. This applies to
+   *   both `run` and `generate` commands; both will read the policy override
+   *   file, if present.
    * - Configures the global logger based on `verbose` and `quiet` flags (this
    *   overrides the `LAVAMOAT_DEBUG` environment variable, if present; the
    *   environment variable can be used when consuming `@lavamoat/node`
