@@ -8,7 +8,6 @@
  *
  * @packageDocumentation
  */
-import { colors } from '@lavamoat/vog'
 import { default as nodePath } from 'node:path'
 import nodeUrl from 'node:url'
 import {

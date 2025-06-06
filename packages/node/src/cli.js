@@ -30,7 +30,7 @@ import { readJsonFile } from './fs.js'
 import { generatePolicy } from './policy-gen/generate.js'
 import { loadPolicies } from './policy-util.js'
 import { Resolver } from './resolve.js'
-import { colors } from './util.js'
+import { toPath } from './util.js'
 
 /**
  * @import {PackageJson} from 'type-fest';
@@ -172,74 +172,76 @@ const main = async (args = hideBin(process.argv)) => {
    * Prints the title/preface/header thing.
    */
   const printTitleMiddleware = () => {
-      log.log(title)
+    log.log(title)
   }
-    /**
+  /**
    * This sets the log level based on the `verbose` and `quiet` flags.
    *
    * Note that this takes precedence over the `LAVAMOAT_DEBUG` env var, if set.
    *
-     * @param {{ verbose?: boolean; quiet?: boolean }} argv
-     * @returns {void}
-     */
+   * @param {{ verbose?: boolean; quiet?: boolean }} argv
+   * @returns {void}
+   */
   const setLogLevelMiddleware = (argv) => {
-      if (argv.verbose) {
-        log.level = LogLevels.verbose
-      } else if (argv.quiet) {
-        // This assumes that we will never use the "emergency" log level!
-        log.level = LogLevels.silent
+    if (argv.verbose) {
+      log.level = LogLevels.verbose
+    } else if (argv.quiet) {
+      // This assumes that we will never use the "emergency" log level!
+      log.level = LogLevels.silent
     }
-      }
-    /**
-     * - Resolves `policy` from `project-root`
-     * - If `policy-override` was provided, resolve it from `project-root` and
-     *   asserts it is readable. It's appropriate to do so here because it is
-     *   impossible to answer "did the user provide an explicit policy override
-     *   path?" _after_ this point. We throw an exception if the
+  }
+
+  /**
+   * - Resolves `policy` from `project-root`
+   * - If `policy-override` was provided, resolve it from `project-root` and
+   *   asserts it is readable. It's appropriate to do so here because it is
+   *   impossible to answer "did the user provide an explicit policy override
+   *   path?" _after_ this point. We throw an exception if the
    *   explicitly-provide policy override path is not readable. This applies to
    *   both `run` and `generate` commands; both will read the policy override
    *   file, if present.
-     * - Configures the global logger based on `verbose` and `quiet` flags (this
-     *   overrides the `LAVAMOAT_DEBUG` environment variable, if present; the
-     *   environment variable can be used when consuming `@lavamoat/node`
-     *   programmatically)
-     *
-     * @param {{
-     *   'project-root': string
-     *   'policy-override'?: string
-     *   'policy-debug'?: string
-     *   policy: string
-     * }} argv
-     * @returns {Promise<void>}
-     */
+   * - Configures the global logger based on `verbose` and `quiet` flags (this
+   *   overrides the `LAVAMOAT_DEBUG` environment variable, if present; the
+   *   environment variable can be used when consuming `@lavamoat/node`
+   *   programmatically)
+   *
+   * @param {{
+   *   'project-root': string
+   *   'policy-override'?: string
+   *   'policy-debug'?: string
+   *   policy: string
+   * }} argv
+   * @returns {Promise<void>}
+   */
   const resolvePolicyPathsMiddleware = async (argv) => {
-      await Promise.resolve()
+    await Promise.resolve()
 
-      // this is absolute
-      const projectRoot = argv['project-root']
+    // this is absolute
+    const projectRoot = argv['project-root']
 
-      // TODO: this mini-algorithm should be extracted to a function since it's used elsewhere too
-      argv['policy-debug'] = argv['policy-debug']
-        ? path.resolve(projectRoot, argv['policy-debug'])
-        : path.join(
-            path.dirname(argv.policy),
-            constants.DEFAULT_POLICY_DEBUG_FILENAME
-          )
-      argv.policy = path.resolve(projectRoot, argv.policy)
-
-      if (argv['policy-override']) {
-        const policyOverridePath = path.resolve(
-          projectRoot,
-          argv['policy-override']
+    // TODO: this mini-algorithm should be extracted to a function since it's used elsewhere too
+    argv['policy-debug'] = argv['policy-debug']
+      ? path.resolve(projectRoot, argv['policy-debug'])
+      : path.join(
+          path.dirname(argv.policy),
+          constants.DEFAULT_POLICY_DEBUG_FILENAME
         )
-        try {
-          await fs.promises.access(policyOverridePath, fs.constants.R_OK)
-          argv['policy-override'] = policyOverridePath
-        } catch (err) {
-          throw new Error(
-            `Cannot read specified policy override file at path ${hrPath(policyOverridePath)}`,
-            { cause: err }
+    argv.policy = path.resolve(projectRoot, argv.policy)
+
+    if (argv['policy-override']) {
+      const policyOverridePath = path.resolve(
+        projectRoot,
+        argv['policy-override']
       )
+      try {
+        await fs.promises.access(policyOverridePath, fs.constants.R_OK)
+        argv['policy-override'] = policyOverridePath
+      } catch (err) {
+        throw new Error(
+          `Cannot read specified policy override file at path ${hrPath(policyOverridePath)}`,
+          { cause: err }
+        )
+      }
     }
   }
 
@@ -387,7 +389,7 @@ const main = async (args = hideBin(process.argv)) => {
       },
     })
     .conflicts('quiet', 'verbose')
-      /**
+    /**
      * Default command (no command)
      */
     .command(
@@ -452,7 +454,7 @@ const main = async (args = hideBin(process.argv)) => {
             },
           })
           .middleware(middleware),
-          /**
+      /**
        * Default command handler.
        *
        * @remarks
