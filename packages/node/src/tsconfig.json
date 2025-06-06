@@ -5,7 +5,7 @@
     "rootDir": "..",
     "paths": {
       "lavamoat-core": ["../../core/types/src/types.d.ts"],
-      "@lavamoat/vog": ["../../vog"]
+      "@lavamoat/vog": ["../../vog/dist/index.d.ts"]
     },
     "target": "esnext",
     "module": "NodeNext",

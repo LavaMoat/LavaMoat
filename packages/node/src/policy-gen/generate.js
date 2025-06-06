@@ -90,22 +90,18 @@ const generate = async (
     ...archiveOpts
   } = {}
 ) => {
-  log.debug('Loading compartment map…')
-  const {
-    compartmentMap,
-    sources,
-    renames,
-    canonicalNameMap,
-    packageJsonMap: packageDescriptorMap,
-  } = await loadCompartmentMapForPolicy(entrypoint, {
-    ...archiveOpts,
-    log,
-    dev,
-    readPowers,
-    policyOverride,
-    trustRoot,
-    projectRoot,
-  })
+  const { compartmentMap, sources, renames, dataMap } =
+    await loadCompartmentMapForPolicy(entrypoint, {
+      ...archiveOpts,
+      log,
+      dev,
+      readPowers,
+      policyOverride,
+      trustRoot,
+      projectRoot,
+      decorators,
+      onNodeModulesMapped,
+    })
 
   /** @type {CompartmentMapToPolicyOptions} */
   const baseOpts = {
@@ -119,7 +115,7 @@ const generate = async (
   // this weird thing is to make TS happy about the overload
   const opts = debug ? { debug: true, ...baseOpts } : baseOpts
 
-  const policy = compartmentMapToPolicy(
+  const policy = await compartmentMapToPolicy(
     entrypoint,
     compartmentMap,
     canonicalNameMap,
