@@ -7,13 +7,13 @@
  */
 
 import { captureFromMap } from '@endo/compartment-mapper/capture-lite.js'
+import { defaultLog } from '@lavamoat/vog'
 import { nullImportHook } from '../compartment/import-hook.js'
 import { makeNodeCompartmentMap } from '../compartment/node-compartment-map.js'
 import { DEFAULT_ENDO_OPTIONS } from '../compartment/options.js'
 import { defaultReadPowers } from '../compartment/power.js'
 import { DEFAULT_TRUST_ROOT_COMPARTMENT } from '../constants.js'
 import { GenerationError } from '../error.js'
-import { log as defaultLog } from '../log.js'
 import { toEndoPolicy } from '../policy-converter.js'
 import { mergePolicies } from '../policy-util.js'
 import { makePolicyGenCompartment } from './policy-gen-compartment-class.js'

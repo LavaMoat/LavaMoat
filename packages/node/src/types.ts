@@ -21,7 +21,7 @@ import type {
   SyncImportLocationOptions,
   UrlInterface,
 } from '@endo/compartment-mapper'
-import type { ConsolaInstance } from 'consola'
+import { type Logger } from '@lavamoat/vog'
 import type {
   IsBuiltinFn,
   LavaMoatPolicy,

@@ -51,8 +51,8 @@
   "dependencies": {
     "@endo/compartment-mapper": "1.6.3",
     "@endo/evasive-transform": "2.0.0",
+    "@lavamoat/vog": "0.1.0",
     "@types/node": "18.19.112",
-    "consola": "3.4.2",
     "fast-fuzzy": "1.12.0",
     "lavamoat-core": "^16.5.0",
     "ses": "1.14.0",
