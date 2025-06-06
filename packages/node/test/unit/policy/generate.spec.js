@@ -128,6 +128,88 @@ test(
   }
 )
 
+test('hints', testPolicyForJSON, 'hints.json', {
+  jsonEntrypoint: '/node_modules/tool/index.js',
+  policyOverride: {
+    resources: {},
+    hints: {
+      winken: ['blinken'],
+    },
+  },
+  expected: {
+    hints: {
+      winken: ['blinken'],
+    },
+    resources: {
+      winken: {
+        builtin: {
+          'node:util.format': true,
+        },
+        packages: {
+          'winken>fred': true,
+          'winken>blinken': true,
+        },
+      },
+      'winken>blinken': {
+        builtin: {
+          'node:util.format': true,
+        },
+      },
+      'winken>fred': {
+        builtin: {
+          'node:util.format': true,
+        },
+      },
+    },
+  },
+})
+
+test(
+  'hints - no support for builtins',
+  testPolicyForJSON,
+  'hints-builtin.json',
+  {
+    jsonEntrypoint: '/node_modules/tool/index.js',
+    policyOverride: {
+      resources: {},
+      hints: {
+        winken: ['node:net'],
+      },
+    },
+    expected: {
+      hints: {
+        winken: ['node:net'],
+      },
+      resources: {
+        winken: {
+          builtin: {
+            'node:util.format': true,
+          },
+          packages: {
+            'winken>fred': true,
+          },
+        },
+        'winken>fred': {
+          builtin: {
+            'node:util.format': true,
+          },
+        },
+      },
+    },
+  }
+)
+
+test('hints - external resources', testPolicyForJSON, 'hints-ext.json', {
+  jsonEntrypoint: '/node_modules/tool/index.js',
+  trustRoot: false,
+  policyOverride: {
+    resources: {},
+    hints: {
+      tool: ['/tool.config.js'],
+    },
+  },
+})
+
 test('basic nested global access', testPolicyForModule, 'location.href', {
   resources: {
     test: {

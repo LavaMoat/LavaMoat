@@ -49,7 +49,7 @@ export const load = async (
       dev,
       log,
       trustRoot,
-      decorators: decorators,
+      decorators,
       policy,
     }))
   } catch (err) {

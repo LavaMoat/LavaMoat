@@ -367,7 +367,8 @@ export const isPolicy = (value) => {
     isObjectyObject(value) &&
     hasValue(value, 'resources') &&
     isObjectyObject(value.resources) &&
-    (!('root' in value) || isObjectyObject(value.root))
+    (!('root' in value) || isObjectyObject(value.root)) &&
+    (!('hints' in value) || isObjectyObject(value.hints))
   )
 }
 

@@ -6,24 +6,26 @@ import type { ExecutionContext } from 'ava'
 import type { LavaMoatPolicy } from 'lavamoat-core'
 import { type Volume } from 'memfs/lib/volume.js'
 import type { Simplify } from 'type-fest'
-import type { GeneratePolicyOptions } from '../../../src/types.js'
+import type {
+  GeneratePolicyOptions,
+  WithLog,
+  WithPolicyOverrideOnly,
+} from '../../../src/types.js'
 
 /**
  * Options for `testPolicyFor*` macros
  *
  * @internal
  */
-export type TestPolicyMacroOptions = {
-  /**
-   * Expected policy result
-   */
-  expected?: LavaMoatPolicy
-
-  /**
-   * Overrides to apply to policy generation
-   */
-  policyOverride?: LavaMoatPolicy
-}
+export type TestPolicyMacroOptions = Simplify<
+  {
+    /**
+     * Expected policy result
+     */
+    expected?: LavaMoatPolicy
+  } & WithPolicyOverrideOnly &
+    WithLog
+>
 
 /**
  * Options for the `testPolicyForJSON` macro
@@ -31,7 +33,7 @@ export type TestPolicyMacroOptions = {
  * @internal
  */
 export type TestPolicyForJSONOptions<Context = unknown> = Simplify<
-  Omit<GeneratePolicyOptions, 'readPowers'> & {
+  Omit<GeneratePolicyOptions, 'readPowers' | 'policyOverridePath'> & {
     /**
      * Expected policy or a function receiving the policy or an assertion
      * function.
@@ -40,13 +42,13 @@ export type TestPolicyForJSONOptions<Context = unknown> = Simplify<
 
     /**
      * Path to entrypoint _within the fixture_. This must be an absolute path or
-     * URL.
+     * URL. It must begin with the virtual filesystem root, which is `/`.
      *
      * The default is `/index.js`.
      */
 
     jsonEntrypoint?: string | URL
-  }
+  } & WithPolicyOverrideOnly
 >
 
 /**

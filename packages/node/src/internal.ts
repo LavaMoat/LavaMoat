@@ -7,6 +7,7 @@
  */
 
 import type {
+  CompartmentDescriptor,
   CompartmentMapDescriptor,
   ReadNowPowers,
   ReadNowPowersProp,
@@ -18,7 +19,7 @@ import type {
   Resources,
 } from 'lavamoat-core'
 import type { Except, SetFieldType, Simplify, ValueOf } from 'type-fest'
-import { SES_VIOLATION_TYPES } from './constants.js'
+import { type SES_VIOLATION_TYPES } from './constants.js'
 import type {
   BaseLoadCompartmentMapOptions,
   CompartmentDescriptorDecoratorOptions,
@@ -32,6 +33,7 @@ import type {
   WithIsBuiltin,
   WithLog,
   WithPolicyOverride,
+  WithPolicyOverrideOnly,
   WithPolicyOverridePath,
   WithReadFile,
   WithReadPowers,
@@ -288,7 +290,8 @@ export type MakeNodeCompartmentMapOptions = Simplify<
     WithReadPowers &
     WithDev &
     WithTrustRoot &
-    Pick<BaseLoadCompartmentMapOptions, 'policy'>
+    Pick<BaseLoadCompartmentMapOptions, 'policy'> &
+    WithPolicyOverrideOnly
 >
 
 /**
@@ -336,3 +339,30 @@ export type MakeGlobalsAttenuatorOptions = Simplify<
 export interface WithPolicy<T extends Resources = Resources> {
   policy?: LavaMoatPolicy<T>
 }
+
+/**
+ * A function which attempts to get a related comaprtment descriptor by name
+ * (from a given compartment descriptor).
+ *
+ * @internal
+ */
+export type GetValidCompartmentDescriptorFn = (
+  currentCompartmentDescriptor: CompartmentDescriptor,
+  compartmentName: string
+) => CompartmentDescriptor | undefined
+
+/**
+ * Options for `makePolicyGenCompartment()`
+ *
+ * @internal
+ */
+export type MakePolicyGenCompartmentOptions = Simplify<
+  WithPolicyOverrideOnly & WithLog
+>
+
+/**
+ * Options for `makeGetHints()`
+ *
+ * @internal
+ */
+export type MakeGetHintsOptions = Simplify<WithPolicyOverrideOnly & WithLog>
