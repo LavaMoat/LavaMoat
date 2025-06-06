@@ -9,7 +9,7 @@ test('validatePolyfills - valid polyfills', (t) => {
 
 test('validatePolyfills - invalid polyfills (not an array)', (t) => {
   t.throws(() => validatePolyfills('not-an-array'), {
-    instanceOf: Error,
+    instanceOf: TypeError,
     message:
       'Expected polyfills to be an array of strings, but received string',
   })
@@ -18,7 +18,7 @@ test('validatePolyfills - invalid polyfills (not an array)', (t) => {
 test('validatePolyfills - invalid polyfill (not a string)', (t) => {
   const polyfills = [path.resolve('polyfill1.js'), 123]
   t.throws(() => validatePolyfills(polyfills), {
-    instanceOf: Error,
+    instanceOf: TypeError,
     message:
       'Expected polyfills to be an array of strings, but received number',
   })
@@ -27,7 +27,7 @@ test('validatePolyfills - invalid polyfill (not a string)', (t) => {
 test('validatePolyfills - invalid polyfill (function)', (t) => {
   const polyfills = [path.resolve('polyfill1.js'), () => {}]
   t.throws(() => validatePolyfills(polyfills), {
-    instanceOf: Error,
+    instanceOf: TypeError,
     message: `Expected polyfills to be an array of strings, but found a function. Looks like you're passing react-native/js-polyfills but not calling the function they export. Yes, it's not very intuitive, but it is what it is.`,
   })
 })
@@ -35,7 +35,7 @@ test('validatePolyfills - invalid polyfill (function)', (t) => {
 test('validatePolyfills - invalid polyfill (not a resolved path)', (t) => {
   const polyfills = [path.resolve('polyfill1.js'), 'polyfill2']
   t.throws(() => validatePolyfills(polyfills), {
-    instanceOf: Error,
+    instanceOf: TypeError,
     message:
       'Polyfill must be a resolved path, not just a package name: polyfill2',
   })
