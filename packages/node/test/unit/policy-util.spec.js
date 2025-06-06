@@ -6,6 +6,7 @@ import * as constants from '../../src/constants.js'
 import { ErrorCodes } from '../../src/error-code.js'
 import {
   assertPolicy,
+  getCanonicalName,
   isPolicy,
   isTrusted,
   loadPolicies,
@@ -112,4 +113,46 @@ test('isTrusted - returns true for empty root policy', (t) => {
 
 test('isTrusted - returns false for root policy w/ usePolicy', (t) => {
   t.false(isTrusted({ root: { usePolicy: 'foo' }, resources: {} }))
+})
+
+test('getCanonicalName - returns canonical name for entry compartment with trustRoot=true', (t) => {
+  const compartment = /** @type {any} */ ({
+    name: 'entry',
+    location: '/path/to/entry',
+    path: [],
+  })
+  const result = getCanonicalName(compartment, true)
+  t.is(result, constants.LAVAMOAT_PKG_POLICY_ROOT)
+})
+
+test('getCanonicalName - returns compartment name for entry compartment with trustRoot=false', (t) => {
+  const compartment = /** @type {any} */ ({
+    name: 'entry-compartment',
+    location: '/path/to/entry',
+    path: [],
+  })
+  const result = getCanonicalName(compartment, false)
+  t.is(result, 'entry-compartment')
+})
+
+test('getCanonicalName - returns joined path for non-entry compartment', (t) => {
+  const compartment = /** @type {any} */ ({
+    name: 'non-entry-compartment',
+    location: '/path/to/non-entry',
+    path: ['non', 'entry'],
+  })
+  const result = getCanonicalName(compartment)
+  t.is(result, 'non>entry')
+})
+
+test('getCanonicalName - throws ReferenceError if compartment has no path', (t) => {
+  const compartment = /** @type {any} */ ({
+    name: 'invalid-compartment',
+    location: '/path/to/invalid',
+  })
+  t.throws(() => getCanonicalName(compartment), {
+    instanceOf: ReferenceError,
+    message:
+      'Computing canonical name failed: compartment "invalid-compartment" (/path/to/invalid) has no "path" property; this is a bug',
+  })
 })
