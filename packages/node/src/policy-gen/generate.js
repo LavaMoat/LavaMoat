@@ -5,11 +5,11 @@
  *
  * @packageDocumentation
  */
+import { defaultLog } from '@lavamoat/vog'
 import nodeFs from 'node:fs'
 import { defaultReadPowers } from '../compartment/power.js'
 import { DEFAULT_TRUST_ROOT_COMPARTMENT } from '../constants.js'
 import { hrCode, hrPath } from '../format.js'
-import { log as defaultLog } from '../log.js'
 import {
   makeDefaultPolicyDebugPath,
   makeDefaultPolicyOverridePath,

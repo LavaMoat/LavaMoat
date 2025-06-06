@@ -6,13 +6,13 @@
  * @packageDocumentation
  */
 
+import { defaultLog } from '@lavamoat/vog'
 import { createModuleInspector } from 'lavamoat-core'
 import { isBuiltin as defaultIsBuiltin } from 'node:module'
 import { defaultReadPowers } from '../compartment/power.js'
 import { DEFAULT_TRUST_ROOT_COMPARTMENT } from '../constants.js'
 import { GenerationError } from '../error.js'
 import { hrLabel } from '../format.js'
-import { log as defaultLog } from '../log.js'
 import { toPath } from '../util.js'
 import { LMRCache } from './lmr-cache.js'
 import { makeModuleResolver } from './module-resolver.js'
@@ -34,7 +34,9 @@ import { makeSesCompatListener } from './ses-compat.js'
  *   BuildModuleRecordsOptions,
  *   CompartmentMapToDebugPolicyOptions,
  *   CompartmentMapToPolicyOptions,
- *   SesViolationType} from '../internal.js'
+ *   CompleteCompartmentDescriptorDataMap} from '../types.js'
+ * @import {ModuleRecordsToDebugPolicyOptions, ModuleRecordsToPolicyOptions, SesViolationType} from '../internal.js'
+ * @import {Logger} from '@lavamoat/vog'
  */
 
 const { entries, freeze, keys } = Object

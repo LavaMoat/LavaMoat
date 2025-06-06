@@ -1,9 +1,13 @@
 import '../../src/preamble.js'
 
+import { log, LogLevels } from '@lavamoat/vog'
 import test from 'ava'
 import { memfs } from 'memfs'
 import { ErrorCodes } from '../../src/error-code.js'
-import { resolveBinScript, resolveWorkspace } from '../../src/resolve.js'
+import { Resolver } from '../../src/resolve.js'
+
+log.level = LogLevels.silent
+const resolver = new Resolver({ log })
 
 test('resolveBinScript - resolves real bin script path', (t) => {
   const { vol, fs } = memfs()
@@ -20,7 +24,10 @@ test('resolveBinScript - resolves real bin script path', (t) => {
     '/workspace/node_modules/test-package/test-bin',
     '/workspace/node_modules/.bin/test-bin'
   )
-  const binPath = resolveBinScript('test-bin', { from: '/workspace', fs })
+  const binPath = resolver.resolveBinScript('test-bin', {
+    from: '/workspace',
+    fs,
+  })
   t.is(binPath, '/workspace/node_modules/test-package/test-bin')
 })
 
@@ -28,7 +35,7 @@ test('resolveBinScript - throws error if workspace not found', (t) => {
   const { fs } = memfs()
   t.throws(
     () => {
-      resolveBinScript('test-bin', { from: '/nonexistent', fs })
+      resolver.resolveBinScript('test-bin', { from: '/nonexistent', fs })
     },
     { code: ErrorCodes.NoWorkspace }
   )
@@ -39,7 +46,7 @@ test('resolveWorkspace - resolves workspace path', (t) => {
   vol.fromJSON({
     '/workspace/package.json': JSON.stringify({}),
   })
-  const workspacePath = resolveWorkspace({ from: '/workspace', fs })
+  const workspacePath = resolver.resolveWorkspace({ from: '/workspace', fs })
   t.is(workspacePath, '/workspace')
 })
 
@@ -47,7 +54,7 @@ test('resolveWorkspace - throws error if workspace not found', (t) => {
   const { fs } = memfs()
   t.throws(
     () => {
-      resolveWorkspace({ from: '/nonexistent', fs })
+      resolver.resolveWorkspace({ from: '/nonexistent', fs })
     },
     { code: ErrorCodes.NoWorkspace }
   )
