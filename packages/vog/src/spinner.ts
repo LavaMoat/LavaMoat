@@ -1,1 +1,1 @@
-export { default as spinner } from 'ora'
+export { default as createSpinner } from 'ora'

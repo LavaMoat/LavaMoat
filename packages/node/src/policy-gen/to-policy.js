@@ -6,7 +6,7 @@
  * @packageDocumentation
  */
 
-import { defaultLog } from '@lavamoat/vog'
+import { colors, defaultLog, SingleBar } from '@lavamoat/vog'
 import { createModuleInspector } from 'lavamoat-core'
 import { isBuiltin as defaultIsBuiltin } from 'node:module'
 import { defaultReadPowers } from '../compartment/power.js'
@@ -35,7 +35,7 @@ import { makeSesCompatListener } from './ses-compat.js'
  * @import {Logger} from '@lavamoat/vog'
  */
 
-const { entries, freeze } = Object
+const { entries, freeze, keys } = Object
 
 /**
  * Generate a LavaMoat debug policy from `LavamoatModuleRecord` objects.
@@ -118,10 +118,10 @@ const moduleRecordsToPolicy = (
  * @param {Record<string, string>} renames Mapping of compartment name to
  *   filepath
  * @param {BuildModuleRecordsOptions} options Options
- * @returns {LavamoatModuleRecord[]} Module records
+ * @returns {Promise<LavamoatModuleRecord[]>} Module records
  * @internal
  */
-export const buildModuleRecords = (
+export const buildModuleRecords = async (
   entrypoint,
   compartmentMap,
   dataMap,
@@ -145,73 +145,54 @@ export const buildModuleRecords = (
   const compartmentRenames = freeze({ ...renames })
 
   const entrypointPath = toPath(entrypoint)
-
-  const contexts = entries(compartmentMap.compartments).reduce(
-    (acc, [compartmentName, compartmentDescriptor]) => {
-      if (compartmentName in sources) {
-        const data = dataMap.get(compartmentName)
-        if (!data) {
-          throw new ReferenceError(
-            `Could not find data for compartment ${compartmentName}; this is a bug`
-          )
-        }
-        const rootModule =
-          compartmentDescriptor === entryCompartment
-            ? entrypointPath
-            : undefined
-
-        const context = PolicyGeneratorContext.create(
-          compartmentDescriptor,
-          data,
-          compartmentRenames,
-          lmrCache,
-          {
-            rootModule,
-            readPowers,
-            isBuiltin,
-            log,
-          }
-        )
-
-        acc.push([compartmentName, context])
-      } else {
-        log.debug(
-          `${hrLabel(compartmentMap.compartments[compartmentName].label)}: skipping compartment; no sources`
+  const progressBar = new SingleBar({
+    format:
+      'CLI Progress |' +
+      colors.cyan('{bar}') +
+      '| {percentage}% || {value}/{total} Chunks || Speed: {speed}',
+    barCompleteChar: '\u2588',
+    fps: 60,
+    barIncompleteChar: '\u2591',
+    hideCursor: true,
+  })
+  const compartmentEntries = entries(compartmentMap.compartments)
+  progressBar.start(compartmentEntries.length, 0)
+  const moduleRecords = await Promise.all(
+    compartmentEntries.map(async ([compartmentName, compartmentDescriptor]) => {
+      const data = dataMap.get(compartmentName)
+      if (!data) {
+        throw new ReferenceError(
+          `Could not find data for compartment ${compartmentName}; this is a bug`
         )
       }
-      return acc
-    },
-    /**
-     * @type {[
-     *   compartmentName: string,
-     *   context: PolicyGeneratorContext<any>,
-     * ][]}
-     */ ([])
+      const rootModule =
+        compartmentDescriptor === entryCompartment ? entrypointPath : undefined
+
+      const context = PolicyGeneratorContext.create(
+        compartmentDescriptor,
+        data,
+        compartmentRenames,
+        lmrCache,
+        {
+          rootModule,
+          readPowers,
+          isBuiltin,
+          log,
+        }
+      )
+
+      const compartmentSources = sources[compartmentName]
+      log.debug(
+        `${hrLabel(compartmentMap.compartments[compartmentName].label)}: building module records…`
+      )
+      const records = context.buildModuleRecords(compartmentSources)
+      progressBar.increment()
+      return records
+    })
   )
 
-  const moduleRecords = contexts.reduce((acc, [compartmentName, context]) => {
-    /* c8 ignore next */
-    if (!(compartmentName in sources)) {
-      // "should never happen"™
-      throw new GenerationError(
-        `Could not find corresponding source for ${compartmentName}; this is a bug`
-      )
-    }
-
-    const compartmentSources = sources[compartmentName]
-    log.debug(
-      `${hrLabel(compartmentMap.compartments[compartmentName].label)}: building module records…`
-    )
-    const records = context.buildModuleRecords(compartmentSources)
-
-    for (const record of records) {
-      acc.add(record)
-    }
-
-    return acc
-  }, /** @type {Set<LavamoatModuleRecord>} */ (new Set()))
-
-  return [...moduleRecords]
+  progressBar.stop()
+  return [...moduleRecords.flat()]
 }
 
 /**
@@ -315,10 +296,10 @@ const reportSesViolations = (
  * @param {Readonly<Record<string, string>>} renames Mapping of compartment name
  *   back to filepath
  * @param {CompartmentMapToPolicyOptions} [options] Options
- * @returns {LavaMoatPolicy | LavaMoatPolicyDebug} Generated policy
+ * @returns {Promise<LavaMoatPolicy | LavaMoatPolicyDebug>} Generated policy
  * @public
  */
-export function compartmentMapToPolicy(
+export const compartmentMapToPolicy = async (
   entrypoint,
   compartmentMap,
   dataMap,
@@ -332,8 +313,8 @@ export function compartmentMapToPolicy(
     log = defaultLog,
     trustRoot = DEFAULT_TRUST_ROOT_COMPARTMENT,
   } = {}
-) {
-  const moduleRecords = buildModuleRecords(
+) => {
+  const moduleRecords = await buildModuleRecords(
     entrypoint,
     compartmentMap,
     dataMap,

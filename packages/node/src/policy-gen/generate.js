@@ -91,7 +91,6 @@ const generate = async (
     ...archiveOpts
   } = {}
 ) => {
-  log.debug('Loading compartment map…')
   const { compartmentMap, sources, renames, dataMap } =
     await loadCompartmentMapForPolicy(entrypoint, {
       ...archiveOpts,
@@ -114,7 +113,7 @@ const generate = async (
   // this weird thing is to make TS happy about the overload
   const opts = debug ? { debug: true, ...baseOpts } : baseOpts
 
-  const policy = compartmentMapToPolicy(
+  const policy = await compartmentMapToPolicy(
     entrypoint,
     compartmentMap,
     dataMap,

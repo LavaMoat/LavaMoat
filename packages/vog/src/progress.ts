@@ -1,1 +1,1 @@
-export { default as progress } from 'progress-estimator'
+export * from 'cli-progress'
