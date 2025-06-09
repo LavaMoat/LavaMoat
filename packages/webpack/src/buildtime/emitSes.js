@@ -2,6 +2,7 @@ const { readFileSync } = require('node:fs')
 const {
   sources: { RawSource, ConcatSource },
 } = require('webpack')
+const diag = require('./diagnostics')
 
 const lockdownSource = readFileSync(require.resolve('ses'), 'utf-8')
 const lockdownSourcePrefix = `/*! SES sources included by LavaMoat. Do not optimize or minify. */\n;\n${lockdownSource}\n;/*! end SES */\n`
@@ -16,6 +17,8 @@ module.exports = {
   sesPrefixFiles:
     ({ compilation, inlineLockdown }) =>
     () => {
+      diag.recordHook('processAssets')
+      diag.recordWork('inline lockdown')
       for (const file in compilation.assets) {
         if (!inlineLockdown.test(file)) {
           continue
@@ -34,6 +37,9 @@ module.exports = {
   sesEmitHook:
     ({ compilation, HtmlWebpackPluginInUse, HtmlWebpackPluginInterop }) =>
     () => {
+      diag.recordHook('processAssets')
+      diag.recordWork('emit lockdown')
+
       // TODO: to consider: instead manually copy to compiler.options.output.path
       const asset = new RawSource(lockdownSource)
 
@@ -49,6 +55,8 @@ module.exports = {
               /** @type {{ html: string }} */ data,
               /** @type {(arg0: null, arg1: any) => void} */ cb
             ) => {
+              diag.recordHook('beforeEmit')
+              diag.recordWork('insert lockdown script tag')
               const scriptTag = '<script src="./lockdown"></script>'
               const headTagRegex = /<head[^>]*>/iu
               const scriptTagRegex = /<script/iu

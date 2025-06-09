@@ -127,6 +127,7 @@ exports.wrapGenerator = ({ excludes, runChecks, PROGRESS }) => {
         }
 
         if (!wrappingEnabed) {
+          diag.recordWork('generator.generate (too early)')
           tooEarly.push(module.request || module.rawRequest)
           return originalGeneratedSource
         } else if (!PROGRESS.done('pathsProcessed')) {
@@ -134,6 +135,7 @@ exports.wrapGenerator = ({ excludes, runChecks, PROGRESS }) => {
             'LavaMoatPlugin: attempting to wrap generated module before all paths from bundle were known.'
           )
         }
+        diag.recordWork('generator.generate')
 
         // originalGenerate adds requirements to options.runtimeRequirements. runtimeKit needs to be derived from those.
         // We also depend on __webpack_require__ being there, so let's add it

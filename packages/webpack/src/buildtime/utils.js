@@ -57,6 +57,7 @@ function progress({ steps }) {
       return
     }
     done.add(step)
+    diag.recordProgress(step)
     if (steps[currentStep + 1] !== step) {
       reportError(
         Error(
@@ -66,7 +67,7 @@ function progress({ steps }) {
         )
       )
     } else {
-      diag.rawDebug(2, `  progress  ${steps[currentStep]}->${step}`)
+      diag.rawDebug(2, `  progress:  ${steps[currentStep]}->${step}`)
       currentStep += 1
     }
   }
@@ -131,6 +132,7 @@ const assertFields = (storeObj, fields) => {
   if (missingFields.length > 0) {
     throw new Error(`Missing required fields: ${missingFields.join(', ')}`)
   }
+  diag.recordFields(/** @type {readonly string[]} */ (fields))
 }
 
 module.exports = {
