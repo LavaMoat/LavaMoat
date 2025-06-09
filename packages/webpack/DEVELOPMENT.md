@@ -31,58 +31,7 @@ NOTE: A setup might exist where some steps get revisited with multiple chunks or
 
 ### diagram
 
-> STORAGE.options omitted for clarity
-
-```mermaid
-sequenceDiagram
-  participant w as webpack
-  participant p as LM plugin
-  participant l as logic
-
-
-  w->>p: plugin apply()
-  create participant S as STORE
-  p->>S: create
-  create participant P as PROGRESS
-  p->>P: create
-  Note over P: start
-  p->>p: process options
-  p-->>w: hookup beforeRun
-  p-->>w: hookup thisCompilation
-
- w->>p: beforeRun hook
- p->>l: loadCanonicalNameMap
- l-->>S: canonicalNameMap
- Note over S: canonicalNameMap
-
- Note over P: canonicalNameMap
-
- w->>p: thisCompilation hook
- p-->>w: hookup optimizeAssets
- create participant g as generatorWrapper
- p->>g: create
- p->>w: install generatorWrapper
- p-->>w: hookup afterOptimizeChunkIds
- p-->>w: hookup additionalChunkRuntimeRequirements
- p-->>w: hookup processAssets
-
- w->>g: generate (some plugins may trigger premature calls to generator)
- g->>g: record 'tooEarly' <br>and don't wrap
- w->>p: additionalChunkRuntimeRequirements hook
- p-->>P: check done: generatorCalled (no)
- p->>p: skip creating runtime
- w->>p: afterOptimizeChunkIds hook
- p->>p: collect modules
- p-->>S: chunkIds
- Note over S: canonicalNameMap<br>chunkIds
- p->>l: analyze modules
- l-->>S: moduleData
- Note over S: canonicalNameMap<br>chunkIds<br>moduleData
- Note over P: pathsCollected
- p->>l: generate or load policy
- S-->>l: canonicalNameMap<br>moduleData
-
-```
+The diagram is generated from sources: (diagram.md)[diagram.md]
 
 ## Testing improvements
 

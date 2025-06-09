@@ -135,12 +135,12 @@ class LavaMoatPlugin {
      */
 
     /** @type {Store} */
-    const STORE = {
+    const STORE = diag.recordStore({
       options: this.options,
       chunkIds: [],
       excludes: [],
       tooEarly: [],
-    }
+    })
 
     const PROGRESS = progress({
       steps: [
@@ -157,6 +157,7 @@ class LavaMoatPlugin {
     diag.run(2, () => {
       // Log stack traces for all errors on higher verbosity because webpack won't
       compiler.hooks.done.tap(PLUGIN_NAME, (stats) => {
+        diag.recordHook('done')
         if (stats.hasErrors()) {
           stats.compilation.errors.forEach((error) => {
             console.error(error)
@@ -205,8 +206,9 @@ class LavaMoatPlugin {
     // =================================================================
     // run long asynchronous processing ahead of all compilations
     compiler.hooks.beforeRun.tapAsync(PLUGIN_NAME, (_, callback) => {
+      diag.recordHook('beforeRun')
       assertFields(STORE, ['options'])
-      loadCanonicalNameMap({
+      const loadPromise = loadCanonicalNameMap({
         rootDir: STORE.options.rootDir || compiler.context,
         includeDevDeps: true, // even the most proper projects end up including devDeps in their bundles :(
         resolve: browserResolve,
@@ -219,11 +221,13 @@ class LavaMoatPlugin {
         .catch((err) => {
           callback(err)
         })
+      diag.recordWorkAsync('loadCanonicalNameMap', loadPromise)
     })
 
     compiler.hooks.thisCompilation.tap(
       PLUGIN_NAME,
       (compilation, { normalModuleFactory }) => {
+        diag.recordHook('thisCompilation')
         // Wire up error and warning collection
         PROGRESS.reportErrorsTo(compilation.errors)
         STORE.mainCompilationWarnings = compilation.warnings
@@ -235,9 +239,11 @@ class LavaMoatPlugin {
         )
 
         compilation.hooks.optimizeAssets.tap(PLUGIN_NAME, () => {
+          diag.recordHook('optimizeAssets')
           // By the time assets are being optimized we should have finished.
           // This will ensure all previous steps have been done.
           PROGRESS.report('finish')
+          diag.endRecording()
         })
 
         // =================================================================
@@ -254,17 +260,20 @@ class LavaMoatPlugin {
           runChecks: STORE.options.runChecks,
           PROGRESS,
         })
-
         for (const moduleType of coveredModuleTypes) {
           normalModuleFactory.hooks.generator
             .for(moduleType)
-            .tap(PLUGIN_NAME, generatorWrapper.generatorHookHandler)
+            .tap(PLUGIN_NAME, (generator) => {
+              diag.recordHook('generator')
+              return generatorWrapper.generatorHookHandler(generator)
+            })
         }
 
         diag.run(1, () => {
           // Report on excluded modules as late as possible.
           // This hook happens after all module generators have been executed.
           compilation.hooks.afterProcessAssets.tap(PLUGIN_NAME, () => {
+            diag.recordHook('afterProcessAssets')
             assertFields(STORE, ['excludes', 'mainCompilationWarnings'])
             if (STORE.excludes.length > 0) {
               STORE.mainCompilationWarnings.push(
@@ -281,6 +290,7 @@ class LavaMoatPlugin {
         // =================================================================
         // afterOptimizeChunkIds hook for processing all identified modules
         compilation.hooks.afterOptimizeChunkIds.tap(PLUGIN_NAME, (chunks) => {
+          diag.recordHook('afterOptimizeChunkIds')
           try {
             assertFields(STORE, [
               'options',
@@ -310,10 +320,12 @@ class LavaMoatPlugin {
               })
             })
 
-            const moduleData = analyzeModules({
-              mainCompilationWarnings: STORE.mainCompilationWarnings,
-              allIdentifiedModules,
-            })
+            const moduleData = diag.recordWorkSync('analyzeModules', () =>
+              analyzeModules({
+                mainCompilationWarnings: STORE.mainCompilationWarnings,
+                allIdentifiedModules,
+              })
+            )
             diag.rawDebug(
               3,
               JSON.stringify({ knownPaths: moduleData.knownPaths })
@@ -321,20 +333,24 @@ class LavaMoatPlugin {
             PROGRESS.report('pathsCollected')
 
             const policyToApply = STORE.options.generatePolicy
-              ? generatePolicy({
-                  location: STORE.options.policyLocation,
-                  canonicalNameMap: STORE.canonicalNameMap,
-                  isBuiltin: STORE.options.isBuiltin,
-                  modulesToInspect: moduleData.inspectable.map((module) => ({
-                    module,
-                    connections:
-                      compilation.moduleGraph.getOutgoingConnections(module),
-                  })),
-                })
-              : loadPolicy({
-                  policyFromOptions: STORE.options.policy,
-                  location: STORE.options.policyLocation,
-                })
+              ? diag.recordWorkSync('generatePolicy', () =>
+                  generatePolicy({
+                    location: STORE.options.policyLocation,
+                    canonicalNameMap: STORE.canonicalNameMap,
+                    isBuiltin: STORE.options.isBuiltin,
+                    modulesToInspect: moduleData.inspectable.map((module) => ({
+                      module,
+                      connections:
+                        compilation.moduleGraph.getOutgoingConnections(module),
+                    })),
+                  })
+                )
+              : diag.recordWorkSync('loadPolicy', () =>
+                  loadPolicy({
+                    policyFromOptions: STORE.options.policy,
+                    location: STORE.options.policyLocation,
+                  })
+                )
 
             if (STORE.options.emitPolicySnapshot) {
               compilation.emitAsset(
@@ -357,6 +373,7 @@ class LavaMoatPlugin {
               canonicalNameMap: STORE.canonicalNameMap,
             })
 
+            diag.recordWork('enableGeneratorWrapping')
             const { tooEarly } = generatorWrapper.enableGeneratorWrapping({
               getIdentifierForPath: identifierLookup.pathToResourceId,
             })
@@ -448,8 +465,11 @@ class LavaMoatPlugin {
         compilation.hooks.additionalChunkRuntimeRequirements.tap(
           PLUGIN_NAME + '_runtime',
           (chunk /*, set*/) => {
+            diag.recordHook('additionalChunkRuntimeRequirements')
             if (chunk.hasRuntime()) {
+              // TODO: depend on generator enabled, error if progress not reached?
               if (!PROGRESS.done('generatorCalled')) {
+                diag.recordWork('skipped adding runtime')
                 assertFields(STORE, ['options', 'mainCompilationWarnings'])
                 if (!chunkRuntimeWarningsDedupe.has(chunk.id)) {
                   STORE.mainCompilationWarnings.push(
@@ -477,6 +497,7 @@ class LavaMoatPlugin {
                   )
                   return
                 }
+                diag.recordWork('adding runtime')
 
                 assertFields(STORE, [
                   'options',
