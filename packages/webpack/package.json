@@ -14,7 +14,7 @@
   "author": "LavaMoat Team",
   "license": "Apache-2.0",
   "engines": {
-    "node": "^18.0.0 || ^20.0.0 || ^22.5.1 || ^24.0.0",
+    "node": "^18.20.0 || ^20.10.0 || ^22.5.1 || ^24.0.0",
     "npm": ">=7.0.0"
   },
   "main": "src/plugin.js",
@@ -47,7 +47,7 @@
     "@babel/preset-env": "7.27.2",
     "@babel/preset-typescript": "7.27.1",
     "@types/browser-resolve": "2.0.4",
-    "babel-loader": "9.2.1",
+    "babel-loader": "10.0.0",
     "css-loader": "7.1.2",
     "file-loader": "6.2.0",
     "html-webpack-plugin": "5.6.3",
