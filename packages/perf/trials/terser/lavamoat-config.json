@@ -1,9 +1,0 @@
-{
-  "resources": {
-    "pull-stream": {
-      "globals": {
-        "console.log": true
-      }
-    }
-  }
-}
