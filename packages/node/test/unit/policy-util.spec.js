@@ -6,14 +6,12 @@ import * as constants from '../../src/constants.js'
 import { ErrorCodes } from '../../src/error-code.js'
 import {
   assertPolicy,
-  isPolicy,
   isTrusted,
   loadPolicies,
   maybeReadPolicyOverride,
   readPolicy,
   writePolicy,
 } from '../../src/policy-util.js'
-
 test.beforeEach(() => {
   vol.reset()
 })
@@ -74,14 +72,6 @@ test('loadPolicies - loads and merges policies from disk', async (t) => {
     readFile: /** @type {any} */ (fs.promises.readFile),
   })
   t.deepEqual(policy, { resources: {} })
-})
-
-test('isPolicy - returns true for valid policy', (t) => {
-  t.true(isPolicy({ resources: {} }))
-})
-
-test('isPolicy - returns false for invalid policy', (t) => {
-  t.false(isPolicy({}))
 })
 
 test('assertPolicy - does not throw for valid policy', (t) => {
