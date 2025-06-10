@@ -15,11 +15,14 @@
 
 import '../preamble.js'
 
+import { validateLavaMoatPolicy } from '@lavamoat/policy'
 import { jsonStringifySortedPolicy } from 'lavamoat-core'
 import path from 'node:path'
 import terminalLink from 'terminal-link'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
+import * as constants from '../constants.js'
+import { InvalidPolicyError, NoPolicyError } from '../error.js'
 import { run } from '../exec/run.js'
 import { hrPath } from '../format.js'
 import { readJsonFile } from '../fs.js'
@@ -384,6 +387,42 @@ const main = async (args = hideBin(process.argv)) => {
           // eslint-disable-next-line no-console
           console.log(jsonStringifySortedPolicy(policy))
         }
+      }
+    )
+    .command(
+      'validate [policy]',
+      'Validate a LavaMoat policy file',
+      (yargs) =>
+        yargs.positional('policy', {
+          describe: 'Path to a policy or policy override file',
+          default: constants.DEFAULT_POLICY_PATH,
+          coerce: path.resolve,
+        }),
+      async (argv) => {
+        await Promise.resolve()
+
+        const { policy: policyPath } = argv
+
+        /** @type {unknown} */
+        let policy
+        try {
+          policy = await readJsonFile(policyPath)
+        } catch (err) {
+          throw new NoPolicyError(
+            `Could not read policy file at ${hrPath(policyPath)}`,
+            { cause: err }
+          )
+        }
+
+        const result = validateLavaMoatPolicy(policy)
+
+        if (!result.success) {
+          throw new InvalidPolicyError(
+            `Policy at ${hrPath(policyPath)} is invalid`
+          )
+        }
+
+        log.info(`Policy at ${hrPath(policyPath)} is valid`)
       }
     )
     .fail((msg, err, yargs) => {
