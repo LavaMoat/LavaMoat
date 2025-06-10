@@ -13,15 +13,10 @@ import nodeFs from 'node:fs'
 import nodePath from 'node:path'
 import * as constants from './constants.js'
 import { InvalidPolicyError, NoPolicyError } from './error.js'
+import { hrPath } from './format.js'
 import { readJsonFile } from './fs.js'
 import { log } from './log.js'
-import {
-  hasValue,
-  hrPath,
-  isObjectyObject,
-  isPathLike,
-  toPath,
-} from './util.js'
+import { hasValue, isPathLike, toPath } from './util.js'
 
 /**
  * @import {RootPolicy, LavaMoatPolicy} from '@lavamoat/types'
