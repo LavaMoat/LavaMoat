@@ -1,12 +1,13 @@
 import '../../src/preamble.js'
 
+import { isLavaMoatPolicy } from '@lavamoat/policy'
 import test from 'ava'
 import { mkdtemp, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { DEFAULT_POLICY_FILENAME } from '../../src/constants.js'
-import { isPolicy, readPolicy } from '../../src/policy-util.js'
+import { readPolicy } from '../../src/policy-util.js'
 import { keysOr } from '../../src/util.js'
 import { createCLIMacros } from './cli-macros.js'
 import { runCLI } from './cli-util.js'
@@ -67,7 +68,7 @@ test('basic policy generation', async (t) => {
     )
     t.is(code, undefined)
     const policy = await readPolicy(policyPath)
-    t.true(isPolicy(policy))
+    t.true(isLavaMoatPolicy(policy))
   } finally {
     await rm(tempdir, { recursive: true, force: true })
   }
@@ -95,7 +96,7 @@ test('extensionless bin script handling', async (t) => {
     t.is(code, undefined)
 
     const policy = await readPolicy(policyPath)
-    t.true(isPolicy(policy))
+    t.true(isLavaMoatPolicy(policy))
   } finally {
     await rm(tempdir, { recursive: true, force: true })
   }
@@ -117,7 +118,7 @@ test('canonical names are used in policy', async (t) => {
   )
 
   const policy = await readPolicy(policyPath)
-  t.true(isPolicy(policy))
+  t.true(isLavaMoatPolicy(policy))
 
   t.true(
     keysOr(policy.resources).includes('another-pkg>shared-pkg'),
