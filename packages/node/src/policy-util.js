@@ -8,6 +8,7 @@
  * @packageDocumentation
  */
 
+import { validateLavaMoatPolicy } from '@lavamoat/policy'
 import { jsonStringifySortedPolicy, mergePolicy } from 'lavamoat-core'
 import nodeFs from 'node:fs'
 import nodePath from 'node:path'
@@ -62,15 +63,8 @@ export const readPolicy = async (
       )
     }
   }
-  try {
-    assertPolicy(allegedPolicy)
-    return allegedPolicy
-  } catch (err) {
-    throw new InvalidPolicyError(
-      `Invalid LavaMoat policy at ${hrPath(policyPath)}; does not match expected schema`,
-      { cause: err }
-    )
-  }
+  assertPolicy(allegedPolicy)
+  return allegedPolicy
 }
 
 /**
@@ -111,15 +105,8 @@ export const maybeReadPolicyOverride = async (
     }
   }
 
-  try {
-    assertPolicy(allegedPolicy)
-    return allegedPolicy
-  } catch (err) {
-    throw new InvalidPolicyError(
-      `Invalid LavaMoat policy overrides at ${hrPath(policyOverridePath)}; does not match expected schema`,
-      { cause: err }
-    )
-  }
+  assertPolicy(allegedPolicy)
+  return allegedPolicy
 }
 
 /**
@@ -235,10 +222,7 @@ export const loadPolicies = async (
   } else {
     promises.push(
       Promise.resolve().then(() => {
-        assertPolicy(
-          allegedPolicy,
-          `Invalid LavaMoat policy; does not match expected schema`
-        )
+        assertPolicy(allegedPolicy)
 
         return allegedPolicy
       })
@@ -253,10 +237,7 @@ export const loadPolicies = async (
   } else {
     promises.push(
       Promise.resolve().then(() => {
-        assertPolicy(
-          allegedPolicyOverride,
-          `Invalid LavaMoat policy overrides; does not match expected schema`
-        )
+        assertPolicy(allegedPolicyOverride)
         return allegedPolicyOverride
       })
     )
@@ -276,15 +257,13 @@ export const loadPolicies = async (
  * Assertion for a {@link LavaMoatPolicy}
  *
  * @param {unknown} allegedPolicy
- * @param {string} [message] Assertion failure message
  * @returns {asserts allegedPolicy is LavaMoatPolicy}
+ * @public
  */
-export const assertPolicy = (
-  allegedPolicy,
-  message = 'Invalid LavaMoat policy; does not match expected schema'
-) => {
-  if (!isPolicy(allegedPolicy)) {
-    throw new InvalidPolicyError(message)
+export const assertPolicy = (allegedPolicy) => {
+  const result = validateLavaMoatPolicy(allegedPolicy)
+  if (!result.success) {
+    throw new InvalidPolicyError(result.message, { cause: result.cause })
   }
 }
 
@@ -333,25 +312,6 @@ export const writePolicy = async (file, policy, { fs = nodeFs } = {}) => {
     }
     throw err
   }
-}
-
-/**
- * Type predicate for a {@link LavaMoatPolicy}
- *
- * @remarks
- * This is non-exhaustive and should eventually be replaced with a proper
- * schema.
- * @param {unknown} value Value to check
- * @returns {value is LavaMoatPolicy} Whether the value is a `LavaMoatPolicy`
- * @public
- */
-export const isPolicy = (value) => {
-  return (
-    isObjectyObject(value) &&
-    hasValue(value, 'resources') &&
-    isObjectyObject(value.resources) &&
-    (!('root' in value) || isObjectyObject(value.root))
-  )
 }
 
 /**

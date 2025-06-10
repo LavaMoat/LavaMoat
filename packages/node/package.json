@@ -4,9 +4,9 @@
   "type": "module",
   "description": "Next-gen LavaMoat for Node.js",
   "repository": {
+    "directory": "packages/node",
     "type": "git",
-    "url": "git+https://github.com/LavaMoat/LavaMoat.git",
-    "directory": "packages/node"
+    "url": "git+https://github.com/LavaMoat/LavaMoat.git"
   },
   "homepage": "https://lavamoat.github.io",
   "bugs": "https://github.com/LavaMoat/LavaMoat/issues",
@@ -21,20 +21,20 @@
   },
   "exports": {
     ".": {
-      "types": "./types/src/index.d.ts",
-      "import": "./src/index.js"
+      "import": "./src/index.js",
+      "types": "./types/src/index.d.ts"
     },
     "./cli": {
-      "types": "./types/src/cli/cli.d.ts",
-      "import": "./src/cli/cli.js"
+      "import": "./src/cli/cli.js",
+      "types": "./types/src/cli/cli.d.ts"
     },
     "./execute": {
-      "types": "./types/src/exec/execute.d.ts",
-      "import": "./src/exec/execute.js"
+      "import": "./src/exec/execute.js",
+      "types": "./types/src/exec/execute.d.ts"
     },
     "./load": {
-      "types": "./types/src/exec/load.d.ts",
-      "import": "./src/exec/load.js"
+      "import": "./src/exec/load.js",
+      "types": "./types/src/exec/load.d.ts"
     },
     "./package.json": "./package.json"
   },
@@ -50,6 +50,7 @@
   "dependencies": {
     "@endo/compartment-mapper": "1.6.3",
     "@endo/evasive-transform": "2.0.2",
+    "@lavamoat/policy": "0.0.0",
     "@lavamoat/types": "0.0.0",
     "@types/node": "18.19.112",
     "chalk": "4.1.2",
