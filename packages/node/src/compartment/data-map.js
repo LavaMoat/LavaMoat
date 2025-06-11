@@ -6,7 +6,8 @@
  */
 
 import { ATTENUATORS_COMPARTMENT } from '../constants.js'
-import { hasValue, hrPath } from '../util.js'
+import { hrPath } from '../format.js'
+import { hasValue } from '../util.js'
 
 /**
  * @import {CompartmentMapDescriptor} from '@endo/compartment-mapper'
