@@ -9,9 +9,10 @@ import Module from 'node:module'
 import path from 'node:path'
 import { PACKAGE_JSON } from './constants.js'
 import { NoBinScriptError, NoWorkspaceError } from './error.js'
+import { hrLabel, hrPath } from './format.js'
 import { isExecutableSymlink, isReadableFileSync, realpathSync } from './fs.js'
 import { log } from './log.js'
-import { hrLabel, hrPath, toPath } from './util.js'
+import { toPath } from './util.js'
 
 /**
  * @import {ResolveBinScriptOptions, ResolveEntrypointOptions, ResolveWorkspaceOptions} from './internal.js'

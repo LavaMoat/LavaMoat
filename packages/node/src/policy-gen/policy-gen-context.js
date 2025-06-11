@@ -14,8 +14,9 @@ import {
   PACKAGE_JSON,
 } from '../constants.js'
 import { GenerationError } from '../error.js'
+import { hrLabel, hrPath } from '../format.js'
 import { log as fallbackLog } from '../log.js'
-import { hasValue, hrLabel, hrPath } from '../util.js'
+import { hasValue } from '../util.js'
 
 /**
  * @import {ReadNowPowers,

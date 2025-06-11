@@ -10,7 +10,7 @@ import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { promisify } from 'node:util'
-import { hrPath } from '../../src/util.js'
+import { hrPath } from '../../src/format.js'
 
 export const execFileAsync = promisify(execFile)
 

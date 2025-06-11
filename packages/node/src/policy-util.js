@@ -14,15 +14,10 @@ import nodePath from 'node:path'
 import * as constants from './constants.js'
 import { LAVAMOAT_PKG_POLICY_ROOT } from './constants.js'
 import { InvalidPolicyError, NoPolicyError } from './error.js'
+import { hrPath } from './format.js'
 import { readJsonFile } from './fs.js'
 import { log } from './log.js'
-import {
-  hasValue,
-  hrPath,
-  isObjectyObject,
-  isPathLike,
-  toPath,
-} from './util.js'
+import { hasValue, isObjectyObject, isPathLike, toPath } from './util.js'
 
 /**
  * @import {CompartmentDescriptor} from '@endo/compartment-mapper'
