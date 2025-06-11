@@ -1,4 +1,10 @@
-const test = require('ava')
+'use strict'
+
+/**
+ * @import {TestFn} from 'ava'
+ */
+
+const test = /** @type {TestFn} */ (/** @type {unknown} */ (require('ava')))
 const path = require('node:path')
 const { assertPolyfills } = require('../../src/index')
 

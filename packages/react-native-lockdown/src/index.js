@@ -7,17 +7,11 @@
  */
 
 /**
- * @import {SerializerConfig} from '@react-native/metro-config'
- */
-
-/**
- * @typedef {(moduleId: number | string) => string} GetRunModuleStatement
- * @see {@link https://metrobundler.dev/docs/configuration/#getrunmodulestatement}
- */
-
-/**
- * @typedef {(options: { platform?: string }) => ReadonlyArray<string>} GetPolyfills
- * @see {@link https://metrobundler.dev/docs/configuration/#getpolyfills}
+ * @import {GetRunModuleStatementFn,
+ *  GetPolyfillsFn,
+ *  LockedDownSerializerConfig,
+ *  LockdownSerializerOptions,
+ *  LockdownSerializerConfig} from './lockdown-serializer.js'
  */
 
 const { warn } = console
@@ -28,7 +22,7 @@ const path = require('node:path')
 /**
  * Default implementation of Metro serializer option 'getRunModuleStatement'.
  *
- * @type {GetRunModuleStatement}
+ * @type {GetRunModuleStatementFn}
  */
 const defaultGetRunModuleStatement = (moduleId) => `__r(${moduleId})`
 
@@ -42,6 +36,12 @@ const ENTRY_FILE_MODULE_ID = 0
  *   call log
  */
 const warnAboutAnomalies = () => {
+  /**
+   * @type {{
+   *   calledOnceOnly: string | false
+   *   neverCalledWithEntryModule: string | false
+   * }}
+   */
   const deferredWarnings = {
     calledOnceOnly:
       'LavaMoat: getRunModuleStatement was only called once instead of at least twice in quick succession, with react-native InitializeCore first and bundle entry second. This is suspicious. Lockdown might not be in effect.',
@@ -90,26 +90,14 @@ const warnAboutAnomalies = () => {
 }
 
 /**
- * @typedef {Object} LockdownSerializerOptions
- * @property {boolean} [hermesRuntime=true] - Whether to enable Hermes runtime
- *   support (otherwise JavaScript Core). Default is `true`
- */
-
-/**
  * Creates a Metro serializer configuration with Hardened JavaScript.
  *
  * @param {LockdownSerializerOptions} [options={}] - Configuration options.
  *   Default is `{}`
- * @param {SerializerConfig} [userConfig={}] - User-provided serializer
+ * @param {LockdownSerializerConfig} [userConfig={}] - User-provided serializer
  *   configuration. Default is `{}`
- * @returns {Omit<
- *   SerializerConfig,
- *   'getRunModuleStatement' | 'getPolyfills'
- * > & {
- *   getRunModuleStatement: GetRunModuleStatement
- *   getPolyfills: GetPolyfills
- * }}
- *   Lockdown
+ * @returns {LockedDownSerializerConfig} Serializer configuration with Hardened
+ *   JavaScript.
  */
 const lockdownSerializer = ({ hermesRuntime = true } = {}, userConfig = {}) => {
   if (userConfig.getRunModuleStatement) {
@@ -118,19 +106,19 @@ const lockdownSerializer = ({ hermesRuntime = true } = {}, userConfig = {}) => {
     )
   }
 
-  /** @type {SerializerConfig} */
-  const config = assign({}, userConfig)
+  /** @type {LockedDownSerializerConfig} */
+  const config = /** @type {any} */ (assign({}, userConfig))
 
   /** @type {(number | string)[]} */
   const callLog = []
 
-  /** @type {GetRunModuleStatement} */
+  /** @type {GetRunModuleStatementFn} */
   const previousGetRunModuleStatement =
     userConfig.getRunModuleStatement ?? defaultGetRunModuleStatement
 
   const inspectCallLog = warnAboutAnomalies()
 
-  /** @type {GetRunModuleStatement} */
+  /** @type {GetRunModuleStatementFn} */
   config.getRunModuleStatement = (moduleId) => {
     callLog.push(moduleId)
     inspectCallLog(callLog)
@@ -144,14 +132,17 @@ const lockdownSerializer = ({ hermesRuntime = true } = {}, userConfig = {}) => {
   }
 
   if (!config.getPolyfills) {
-    config.getPolyfills = require('@react-native/js-polyfills')
+    config.getPolyfills = /** @type {GetPolyfillsFn} */ (
+      // @ts-expect-error no typedefs
+      require('@react-native/js-polyfills')
+    )
   } else if (typeof config.getPolyfills !== 'function') {
     throw Error('Invalid options: getPolyfills must be a function')
   }
 
   const originalGetPolyfills = config.getPolyfills
 
-  /** @type {GetPolyfills} */
+  /** @type {GetPolyfillsFn} */
   config.getPolyfills = (options) => {
     let polyfills = originalGetPolyfills(options)
     assertPolyfills(polyfills)

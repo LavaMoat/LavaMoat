@@ -18,8 +18,14 @@
   },
   "main": "./src/index.js",
   "exports": {
-    ".": "./src/index.js",
-    "./repair": "./src/repair.js",
+    ".": {
+      "types": "./types/types.d.ts",
+      "default": "./src/index.js"
+    },
+    "./repair": {
+      "types": "./types/repair.d.ts",
+      "default": "./src/repair.js"
+    },
     "./package.json": "./package.json"
   },
   "files": [
