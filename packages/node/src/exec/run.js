@@ -11,10 +11,10 @@ import {
   DEFAULT_TRUST_ROOT_COMPARTMENT,
 } from '../constants.js'
 import { TrustMismatchError } from '../error.js'
+import { hrCode, hrPath } from '../format.js'
 import { log as defaultLog } from '../log.js'
 import { toEndoPolicy } from '../policy-converter.js'
 import { isTrusted, loadPolicies } from '../policy-util.js'
-import { hrCode, hrPath } from '../util.js'
 import { attenuateModule, makeGlobalsAttenuator } from './default-attenuator.js'
 import { makeExecutionCompartment } from './exec-compartment-class.js'
 import { execute } from './execute.js'

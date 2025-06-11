@@ -15,8 +15,8 @@
 import chalk from 'chalk'
 import { stripVTControlCharacters } from 'node:util'
 import { SES_VIOLATION_TYPES } from '../constants.js'
+import { hrPath } from '../format.js'
 import { log as defaultLog } from '../log.js'
-import { hrPath } from '../util.js'
 const { keys } = Object
 
 /**

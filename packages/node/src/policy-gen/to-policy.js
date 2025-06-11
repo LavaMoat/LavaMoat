@@ -14,8 +14,9 @@ import {
   SES_VIOLATION_TYPES,
 } from '../constants.js'
 import { GenerationError } from '../error.js'
+import { hrLabel } from '../format.js'
 import { log as defaultLog } from '../log.js'
-import { hrLabel, toPath } from '../util.js'
+import { toPath } from '../util.js'
 import { LMRCache } from './lmr-cache.js'
 import { PolicyGeneratorContext } from './policy-gen-context.js'
 import { makeSesCompatListener } from './ses-compat.js'
@@ -30,8 +31,10 @@ import { makeSesCompatListener } from './ses-compat.js'
  * @import {BuildModuleRecordsOptions,
  *   CompartmentMapToDebugPolicyOptions,
  *   CompartmentMapToPolicyOptions,
- * CompleteCompartmentDescriptorDataMap} from '../types.js'
- * @import {ModuleRecordsToDebugPolicyOptions, ModuleRecordsToPolicyOptions, SesViolationType} from '../internal.js'
+ *   CompleteCompartmentDescriptorDataMap} from '../types.js'
+ * @import {ModuleRecordsToDebugPolicyOptions,
+ *   ModuleRecordsToPolicyOptions,
+ *   SesViolationType} from '../internal.js'
  * @import {Loggerr} from 'loggerr'
  */
 

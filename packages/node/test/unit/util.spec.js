@@ -1,10 +1,7 @@
 import test from 'ava'
-import path from 'node:path'
-import { stripVTControlCharacters } from 'node:util'
 import {
   devToConditions,
   hasValue,
-  hrPath,
   isArray,
   isBoolean,
   isObject,
@@ -144,24 +141,4 @@ test('isReadNowPowers - returns false for invalid ReadNowPowers', (t) => {
     isAbsolute: () => {},
   }
   t.false(isReadNowPowers(invalidReadNowPowers))
-})
-
-test('hrPath - returns relative path if shorter than absolute path', (t) => {
-  const absPath = path.resolve('test/path')
-  const relativePath = path.relative(process.cwd(), absPath)
-  t.is(stripVTControlCharacters(hrPath(absPath)), `./${relativePath}`)
-})
-
-test('hrPath - returns absolute path if shorter than relative path', (t) => {
-  let relativePath = 'test/path'
-  const cwd = process.cwd()
-  while (relativePath.length < cwd.length) {
-    relativePath = path.join('..', relativePath)
-  }
-  const absPath = path.resolve(cwd, relativePath)
-  t.is(
-    stripVTControlCharacters(hrPath(relativePath)),
-    absPath,
-    `${absPath} should be a shorter string than ${relativePath}`
-  )
 })
