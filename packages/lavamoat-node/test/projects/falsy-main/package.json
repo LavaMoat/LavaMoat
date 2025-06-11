@@ -1,0 +1,11 @@
+{
+  "name": "falsy-main",
+  "scripts": {
+    "setup": "exit 0"
+  },
+  "dependencies": {
+    "a": "file:./node-modules/a",
+    "b": "file:./node-modules/b",
+    "events": "^3.2.0"
+  }
+}
