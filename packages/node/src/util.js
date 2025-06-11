@@ -8,13 +8,13 @@
  *
  * @packageDocumentation
  */
-import chalk from 'chalk'
 import { default as nodePath } from 'node:path'
 import nodeUrl from 'node:url'
 import {
   DEFAULT_POLICY_DEBUG_FILENAME,
   DEFAULT_POLICY_OVERRIDE_FILENAME,
 } from './constants.js'
+import { hrCode } from './format.js'
 import { assertAbsolutePath } from './fs.js'
 
 const { isArray: isArray_ } = Array
@@ -47,6 +47,8 @@ export const toEndoURL = (url) =>
 
 /**
  * Type guard for an object.
+ *
+ * This includes functions and arrays, but not `null`.
  *
  * @param {unknown} value
  * @returns {value is object}
@@ -192,51 +194,11 @@ export const keysOr = (value, defaultKeys = []) =>
 export const isFunction = (value) => typeof value === 'function'
 
 /**
- * Given a filepath, displays it as relative or absolute depending on which is
- * fewer characters. Ergo, the "human-readable" path.
- *
- * If relative to the current directory, it will be prefixed with `./`.
- *
- * @param {string | URL} filepath Path to display
- * @returns {string} Human-readable path
- * @internal
- */
-export const hrPath = (filepath) => {
-  filepath = toPath(filepath)
-  if (nodePath.isAbsolute(filepath)) {
-    const relativePath = nodePath.relative(process.cwd(), filepath)
-    if (relativePath.length < filepath.length) {
-      filepath = relativePath.startsWith('..')
-        ? relativePath
-        : `./${relativePath}`
-    }
-  } else {
-    const absolutePath = nodePath.resolve(filepath)
-    if (absolutePath.length < filepath.length) {
-      filepath = absolutePath
-    }
-  }
-  return chalk.greenBright(filepath)
-}
-
-/**
- * For display of package names or canonical names.
- *
- * @param {string} name
- * @returns {string}
- * @internal
- */
-export const hrLabel = (name) => {
-  return name.includes('>')
-    ? name.split('>').map(hrLabel).join(chalk.magenta('>'))
-    : chalk.magentaBright(name)
-}
-
-/**
  * Type guard for a "path-like" value
  *
  * @param {unknown} value
  * @returns {value is string | URL}
+ * @internal
  */
 export const isPathLike = (value) => isString(value) || value instanceof URL
 
@@ -247,6 +209,7 @@ export const isPathLike = (value) => isString(value) || value instanceof URL
  *   `file://` scheme
  * @param {FileURLToPathFn} [fileURLToPath] `fileURLToPath` implementation
  * @returns {string} A filepath
+ * @internal
  */
 export const toPath = (value, fileURLToPath = nodeUrl.fileURLToPath) => {
   return value instanceof URL || value.startsWith('file://')
@@ -255,21 +218,12 @@ export const toPath = (value, fileURLToPath = nodeUrl.fileURLToPath) => {
 }
 
 /**
- * Formats "code"; use when referring to code or configuration
- *
- * @param {string} value
- * @returns {string}
- */
-export const hrCode = (value) => {
-  return chalk.bgGrey.whiteBright(value)
-}
-
-/**
  * Given path to a policy file, returns the sibling path to the policy override
  * file
  *
  * @param {string | URL} policyPath
  * @returns {string}
+ * @internal
  */
 export const makeDefaultPolicyOverridePath = (policyPath) => {
   const path = toPath(policyPath)
@@ -287,6 +241,7 @@ export const makeDefaultPolicyOverridePath = (policyPath) => {
  *
  * @param {string | URL} policyPath
  * @returns {string}
+ * @internal
  */
 export const makeDefaultPolicyDebugPath = (policyPath) => {
   const path = toPath(policyPath)

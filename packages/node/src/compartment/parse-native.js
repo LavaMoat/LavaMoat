@@ -11,7 +11,7 @@ import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
 import { NATIVE_PARSER_NAME } from '../constants.js'
 import { PermissionDeniedError } from '../error.js'
-import { hrLabel } from '../util.js'
+import { hrLabel } from '../format.js'
 
 const { freeze, keys } = Object
 

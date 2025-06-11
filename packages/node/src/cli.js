@@ -24,12 +24,13 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 import * as constants from './constants.js'
 import { run } from './exec/run.js'
+import { hrPath } from './format.js'
 import { readJsonFile } from './fs.js'
 import { log } from './log.js'
 import { generatePolicy } from './policy-gen/generate.js'
 import { loadPolicies } from './policy-util.js'
 import { resolveBinScript, resolveEntrypoint } from './resolve.js'
-import { hrPath, toPath } from './util.js'
+import { toPath } from './util.js'
 
 /**
  * @import {PackageJson} from 'type-fest';
