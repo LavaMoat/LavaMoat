@@ -20,7 +20,7 @@ import { makePolicyGenCompartment } from './policy-gen-compartment-class.js'
 /**
  * @import {CompartmentDescriptorData, CompartmentDescriptorDataMap, CompleteCompartmentDescriptorDataMap} from '../types.js'
  * @import {LoadCompartmentMapForPolicyOptions, LoadCompartmentMapResult} from '../internal.js'
- * @import {CaptureLiteOptions, CompartmentMapDescriptor} from '@endo/compartment-mapper'
+ * @import {AdditionalPackageDetailsMap, CaptureLiteOptions, CompartmentMapDescriptor} from '@endo/compartment-mapper'
  */
 
 const { entries } = Object
@@ -72,6 +72,7 @@ export const loadCompartmentMapForPolicy = async (
     log = defaultLog,
     decorators = [],
     dev,
+    projectRoot = process.cwd(),
     ...captureOpts
   } = {}
 ) => {
@@ -79,19 +80,21 @@ export const loadCompartmentMapForPolicy = async (
   let nodeCompartmentMap
   /** @type {CompleteCompartmentDescriptorDataMap} */
   let nodeDataMap
+  /** @type {AdditionalPackageDetailsMap} */
+  let additionalPackageDetails
 
   try {
-    // eslint-disable-next-line @jessie.js/safe-await-separator
-    ;({ nodeCompartmentMap, nodeDataMap } = await makeNodeCompartmentMap(
-      entrypointPath,
-      {
+    ;({ nodeCompartmentMap, nodeDataMap, additionalPackageDetails } =
+      // eslint-disable-next-line @jessie.js/safe-await-separator
+      await makeNodeCompartmentMap(entrypointPath, {
+        projectRoot,
         readPowers,
         dev,
         decorators,
         log,
         trustRoot,
-      }
-    ))
+        policyOverride,
+      }))
   } catch (err) {
     throw new GenerationError(
       `Failed to create compartment map for policy generation`,
@@ -103,7 +106,7 @@ export const loadCompartmentMapForPolicy = async (
   const PolicyGenCompartment = makePolicyGenCompartment(
     nodeCompartmentMap,
     nodeDataMap,
-    policyOverride
+    { policyOverride, log }
   )
 
   /** @type {CaptureLiteOptions} */
@@ -111,6 +114,7 @@ export const loadCompartmentMapForPolicy = async (
     ...DEFAULT_ENDO_OPTIONS,
     importHook: nullImportHook,
     Compartment: PolicyGenCompartment,
+    additionalPackageDetails,
     ...captureOpts,
   }
 

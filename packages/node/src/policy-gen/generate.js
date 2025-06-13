@@ -27,8 +27,10 @@ import { compartmentMapToPolicy } from './to-policy.js'
 const { keys, values } = Object
 
 /**
- * @import {GenerateOptions, GenerateResult, ReportInvalidOverridesOptions} from '../internal.js'
- * @import {GeneratePolicyOptions, CompartmentMapToPolicyOptions, CompleteCompartmentDescriptorDataMap, CompartmentDescriptorData} from '../types.js'
+ * @import {GenerateOptions, GenerateResult, ReportInvalidOverridesOptions,
+ *   CompartmentMapToPolicyOptions} from '../internal.js'
+ * @import {GeneratePolicyOptions, CompleteCompartmentDescriptorDataMap,
+ *   CompartmentDescriptorData} from '../types.js'
  * @import {LavaMoatPolicy, LavaMoatPolicyDebug} from 'lavamoat-core'
  * @import {SetFieldType} from 'type-fest'
  * @import {CompartmentMapDescriptor} from '@endo/compartment-mapper'
@@ -58,6 +60,7 @@ const shouldWriteDebugPolicy = (
  * @param {string | URL} entrypointPath
  * @param {SetFieldType<GenerateOptions, 'debug', true>} opts
  * @returns {Promise<GenerateResult<LavaMoatPolicyDebug>>}
+ * @internal
  */
 
 /**
@@ -68,6 +71,7 @@ const shouldWriteDebugPolicy = (
  * @param {string | URL} entrypointPath
  * @param {GenerateOptions} [opts]
  * @returns {Promise<GenerateResult>}
+ * @internal
  */
 
 /**
@@ -75,7 +79,8 @@ const shouldWriteDebugPolicy = (
  * `@endo/compartment-mapper`
  *
  * @param {string | URL} entrypoint
- * @param {GenerateOptions} [opts]
+ * @param {GenerateOptions} [options] Options
+ * @internal
  */
 const generate = async (
   entrypoint,
@@ -87,6 +92,7 @@ const generate = async (
     log = defaultLog,
     dev = false,
     trustRoot = DEFAULT_TRUST_ROOT_COMPARTMENT,
+    projectRoot = process.cwd(),
     ...archiveOpts
   } = {}
 ) => {
@@ -99,6 +105,7 @@ const generate = async (
       readPowers,
       policyOverride,
       trustRoot,
+      projectRoot,
     })
 
   /** @type {CompartmentMapToPolicyOptions} */
@@ -285,8 +292,8 @@ export const generatePolicy = async (
       readPowers,
       trustRoot,
       debug: true,
-      log,
       policyOverride,
+      projectRoot,
     }))
     await writePolicy(policyDebugPath, debugPolicy, { fs: writableFs })
     const nicePolicyDebugPath = hrPath(policyDebugPath)
@@ -302,13 +309,14 @@ export const generatePolicy = async (
     log.info(`Generating LavaMoat policy from ${niceEntrypointPath}…`)
     ;({ policy, compartmentMap, dataMap } = await generate(entrypoint, {
       ...generateOpts,
-      log,
       trustRoot,
       readPowers,
       policyOverride,
+      projectRoot,
     }))
   }
 
+  // TODO: May want to also report invalid hints here instead of at time of processing
   reportInvalidOverrides(compartmentMap, dataMap, {
     log,
     policyOverride,
@@ -319,5 +327,6 @@ export const generatePolicy = async (
     await writePolicy(policyPath, policy, { fs: writableFs })
     log.info(`Wrote policy to ${hrPath(policyPath)}`)
   }
+
   return policy
 }
