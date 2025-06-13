@@ -20,7 +20,7 @@ import { makeExecutionCompartment } from './exec-compartment-class.js'
 import { execute } from './execute.js'
 
 /**
- * @import {LavaMoatPolicy} from 'lavamoat-core'
+ * @import {LavaMoatPolicy} from '@lavamoat/types'
  * @import {ExecuteOptions, LoadPoliciesOptions, RunOptions} from '../types.js';
  */
 
