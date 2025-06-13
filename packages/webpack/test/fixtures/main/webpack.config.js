@@ -11,7 +11,7 @@ const defaultLmOptions = {
   policyLocation: path.resolve(__dirname, 'policy'),
   readableResourceIds: true,
   runChecks: true,
-  diagnosticsVerbosity: 0,
+  diagnosticsVerbosity: 1,
   HtmlWebpackPluginInterop: true,
 }
 

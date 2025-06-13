@@ -3,7 +3,7 @@
 
 const { create, assign, freeze, defineProperty } = Object
 const warn = typeof console === 'object' ? console.warn : () => {}
-warn('LavaMoat: using unlocked runtime')
+warn('LavaMoatPlugin: using unlocked runtime')
 
 const { NAME_globalThis, NAME_scopeTerminator, NAME_runtimeHandler } =
   LAVAMOAT.ENUM

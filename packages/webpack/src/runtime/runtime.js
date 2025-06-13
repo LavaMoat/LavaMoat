@@ -26,7 +26,7 @@ if (LOCKDOWN_ON) {
   lockdown(LAVAMOAT.options.lockdown)
 } else {
   warn(
-    'LavaMoat: runtime execution started without SES present, switching to no-op.'
+    'LavaMoatPlugin: runtime execution started without SES present, switching to no-op.'
   )
 }
 

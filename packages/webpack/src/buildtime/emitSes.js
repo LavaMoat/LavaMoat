@@ -59,7 +59,7 @@ module.exports = {
                 data.html = data.html.replace(scriptTagRegex, `${scriptTag}$&`)
               } else {
                 throw Error(
-                  'LavaMoat: Could not insert lockdown script tag, no suitable location found in the html template'
+                  'LavaMoatPlugin: Could not insert lockdown script tag, no suitable location found in the html template'
                 )
               }
               cb(null, data)
