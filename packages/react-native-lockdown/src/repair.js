@@ -1,3 +1,5 @@
+/// <reference types="ses" />
+
 /**
  * Repair JS intrinsics
  *
