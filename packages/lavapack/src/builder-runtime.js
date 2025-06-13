@@ -19,7 +19,7 @@ function markAsGenerated(output, file) {
   )
 }
 
-const ECMA_VERSION_2020 = 2020
+const MAX_ECMA_VERSION = 2022
 
 function assertEcmaVersion(code, ecmaVersion) {
   try {
@@ -45,7 +45,7 @@ async function buildRuntimeCJS() {
     getStrictScopeTerminatorShimSrc()
   )
   output = markAsGenerated(output, 'runtime-cjs-template.js')
-  assertEcmaVersion(output, ECMA_VERSION_2020)
+  assertEcmaVersion(output, MAX_ECMA_VERSION)
   await writeFile(pathJoin(__dirname, 'runtime-cjs.js'), output)
 }
 
@@ -62,7 +62,7 @@ async function buildRuntimeES(opts) {
   const statsCode = `(${makeInitStatsHook})({ onStatsReady })`
   output = stringReplace(output, '__reportStatsHook__', statsCode)
   output = markAsGenerated(output, 'runtime-template.js')
-  assertEcmaVersion(output, ECMA_VERSION_2020)
+  assertEcmaVersion(output, MAX_ECMA_VERSION)
   await writeFile(pathJoin(__dirname, 'runtime.js'), output)
 }
 
