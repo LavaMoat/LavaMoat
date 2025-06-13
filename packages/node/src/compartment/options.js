@@ -43,6 +43,9 @@ export const DEFAULT_ENDO_OPTIONS = freeze(
     },
     languageForExtension: {
       [NATIVE_PARSER_FILE_EXT]: NATIVE_PARSER_NAME,
+      /**
+       * This makes extensionless files default to CommonJS.
+       */
       '': 'cjs',
     },
   })

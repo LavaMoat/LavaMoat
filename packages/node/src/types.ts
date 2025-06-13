@@ -4,13 +4,10 @@
  *
  * @packageDocumentation
  */
-import type { IsBuiltinFn, LavaMoatPolicy, Resources } from 'lavamoat-core'
-import type { Loggerr } from 'loggerr'
-import type nodeFs from 'node:fs'
-import type { SetFieldType, Simplify } from 'type-fest'
-
 import type {
   CaptureLiteOptions,
+  CompartmentDescriptor,
+  CompartmentMapDescriptor,
   CryptoInterface,
   FsInterface,
   ImportLocationOptions,
@@ -21,12 +18,17 @@ import type {
   SyncImportLocationOptions,
   UrlInterface,
 } from '@endo/compartment-mapper'
+import type { IsBuiltinFn, LavaMoatPolicy } from 'lavamoat-core'
+import type { Loggerr } from 'loggerr'
+import type nodeFs from 'node:fs'
 import type { PathLike, Stats } from 'node:fs'
+import type { LiteralUnion, SetFieldType, Simplify } from 'type-fest'
 import type {
+  ATTENUATORS_COMPARTMENT,
   ENDO_GLOBAL_POLICY_ITEM_WRITE,
   ENDO_POLICY_ITEM_ROOT,
+  LAVAMOAT_PKG_POLICY_ROOT,
 } from './constants.js'
-import { type CompartmentMapToPolicyOptions } from './internal.js'
 
 /**
  * A loaded application which has not yet been executed
@@ -278,9 +280,12 @@ export type EndoWritePolicy = typeof ENDO_GLOBAL_POLICY_ITEM_WRITE
  * Options for `execute()`
  */
 export type ExecuteOptions = Simplify<
-  Omit<ImportLocationOptions | SyncImportLocationOptions, 'log'> &
+  Omit<ImportLocationOptions | SyncImportLocationOptions, 'log' | 'dev'> &
     WithLog &
-    WithReadPowers
+    WithReadPowers &
+    WithDev &
+    WithCompartmentDescriptorDecorators &
+    WithTrustRoot
 >
 
 /**
@@ -398,6 +403,97 @@ export type ToEndoPolicyOptions = Simplify<
  */
 export type WithRawReadPowers = WithReadPowers | WithRawPowers
 
+/**
+ * Metadata associated with a {@link CompartmentDescriptor}.
+ *
+ * This is intended to include any data we want to associate with a particular
+ * `CompartmentDescriptor` when we do want to avoid mutating the descriptor
+ * itself.
+ *
+ * We generally _do not_ want to mutate the compartment descriptors, as
+ * `@endo/compartment-mapper` owns these objects.
+ */
+export interface CompartmentDescriptorData {
+  /**
+   * The canonical name of the compartment descriptor, computed by the value of
+   * {@link CompartmentDescriptor.path}. See `getCanonicalName()`
+   */
+  canonicalName: CanonicalName
+}
+
+/**
+ * Map of compartment descriptor locations to metadata
+ *
+ * The "location" may or may not be a `file://` URL; once the
+ * `CompartmentMapDescriptor` has been "digested" (see `digestCompartmentMap()`
+ * in `@endo/compartment-mapper`), it becomes name and version string
+ * representing the package.
+ *
+ * If multiple such packages exist in the compartment map, then the "location"
+ * will contain a suffix `-<n>` where `<n>` is an incrementing integer starting
+ * at 0.
+ *
+ * For this reason, when used with Endo's `captureFromMap()` (which calls
+ * `digestCompartmentMap()`) this object must be recreated using the "renames"
+ * data.
+ *
+ * Note: this map cannot be a `WeakMap` on the `CompartmentDescriptor` itself,
+ * as the original `CompartmentDescriptor` (created by `mapNodeModules()`) is
+ * not retained through `captureFromMap()`.
+ */
+export type CompartmentDescriptorDataMap<
+  K = string,
+  T extends
+    Partial<CompartmentDescriptorData> = Partial<CompartmentDescriptorData>,
+> = Map<K, T>
+
+/**
+ * A mapping of compartment descriptor metadata which is guaranteed to include
+ * metadata for all compartment descriptors (excepting the attenuator
+ * compartment).
+ *
+ * @template T The compartment map descriptor
+ * @template U The type of the metadata
+ */
+export type CompleteCompartmentDescriptorDataMap<
+  T extends CompartmentMapDescriptor = CompartmentMapDescriptor,
+  U extends CompartmentDescriptorData = CompartmentDescriptorData,
+> = CompartmentDescriptorDataMap<keyof T['compartments'], U>
+
+/**
+ * The canonical name of a package as used in policy
+ *
+ * {@link ATTENUATORS_COMPARTMENT} does not appear in policy and is an Endo-ism.
+ */
+
+export type CanonicalName = LiteralUnion<
+  typeof LAVAMOAT_PKG_POLICY_ROOT | typeof ATTENUATORS_COMPARTMENT,
+  string
+>
+
+/**
+ * Options for `compartmentMapToPolicy()`
+ */
+export type CompartmentMapToPolicyOptions = Simplify<
+
+  BuildModuleRecordsOptions & WithPolicyOverride & WithDebug & WithTrustRoot
+>
+
+/**
+ * Options containing a `dataMap` property
+ *
+ * @template K Type of the keys in the data map
+ * @template T A potentially-incomplete data map
+ */
+
+export type WithDataMap<
+  K = string,
+  T extends
+    Partial<CompartmentDescriptorData> = Partial<CompartmentDescriptorData>,
+> = {
+  dataMap?: CompartmentDescriptorDataMap<K, T>
+}
+
 // re-export schema
 // TODO: make this less bad
 export type {
@@ -412,7 +508,6 @@ export type {
   PackagePolicy,
   Resolutions,
   ResourcePolicy,
-  Resources as ResourcePolicyRecord,
   Resources,
   RootPolicy,
 } from 'lavamoat-core'
@@ -470,10 +565,49 @@ export interface WithFs {
   fs?: FsUtilInterface
 }
 
-export interface WithPolicy {
-  policy?: Partial<LavaMoatPolicy<Resources>>
-}
+/**
+ * A function which "decorates" a {@link CompartmentDescriptor}. It is provided a
+ * `data` object, which it can then modify and return.
+ *
+ * It does not and cannot modify the descriptor itself.
+ *
+ * @template In Incoming metadata
+ * @template Out Outgoing metadata
+ */
+export type CompartmentDescriptorDecorator<
+  In extends
+    Partial<CompartmentDescriptorData> = Partial<CompartmentDescriptorData>,
+  Out extends In = In,
+> = (
+  /**
+   * The compartment descriptor to decorate; considered readonly
+   */
+  compartmentDescriptor: Readonly<CompartmentDescriptor>,
+  /**
+   * The current data associated with `compartmentDescriptor` (if any)
+   */
+  data?: In,
+  /**
+   * Options for the decorator, including the entire
+   * `CompartmentDescriptorDataMap`
+ */
+  options?: CompartmentDescriptorDecoratorOptions
+) => Out
 
-export type MakeGlobalsAttenuatorOptions = Simplify<
-  WithPolicy & WithScuttleGlobalThis
+/**
+ * Options for a {@link CompartmentDescriptorDecorator}
+ */
+export type CompartmentDescriptorDecoratorOptions = Simplify<
+  WithTrustRoot & WithLog & WithDataMap
 >
+
+/**
+ * Options containing a `compartmentDescriptorDecorators` prop
+ */
+export type WithCompartmentDescriptorDecorators = {
+  /**
+   * List of decorators which will be applied to each compartment descriptor
+   * within the initial compartment map descriptor (via `mapNodeModules()`).
+   */
+  decorators?: CompartmentDescriptorDecorator[]
+}
