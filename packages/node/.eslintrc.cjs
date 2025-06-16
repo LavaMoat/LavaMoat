@@ -1,56 +1,28 @@
 // TODO: use types when we determine what types to use
 module.exports = {
-  extends: [
-    'plugin:@endo/recommended',
-    '../../.config/eslintrc.typed-workspace',
-  ],
-  parserOptions: {
-    sourceType: 'module',
-    ecmaVersion: 2021,
-  },
   env: {
     browser: false,
     es6: false,
     node: true,
   },
-  rules: {
-    // agoric-specific rules
-    '@endo/no-nullish-coalescing': 'off',
-    '@endo/no-optional-chaining': 'off',
-
-    // all of the functions in this module are declarations, so might as well enforce some consistency.
-    // this does not prevent a declaration from using the 'function' keyword, though
-    'func-style': ['error', 'declaration', { allowArrowFunctions: true }],
-
-    'no-console': 'error',
-
-    '@typescript-eslint/no-unused-vars': [
-      'error',
-      {
-        args: 'all',
-        argsIgnorePattern: '^_',
-        caughtErrors: 'all',
-        caughtErrorsIgnorePattern: '^_',
-        destructuredArrayIgnorePattern: '^_',
-        varsIgnorePattern: '^_',
-        ignoreRestSiblings: true,
-      },
-    ],
-  },
+  extends: [
+    'plugin:@endo/recommended',
+    '../../.config/eslintrc.typed-workspace',
+    'plugin:perfectionist/recommended-natural-legacy',
+  ],
+  ignorePatterns: ['**/test/**/fixture/**/*', 'src/types.js'],
   overrides: [
     {
       files: ['./test/**/*.js', './test/**/*.ts'],
       rules: {
-        // use t.log()
-        'no-console': 'error',
-
         // of dubious value
         'ava/use-t-well': 'off',
 
         // this plugin has trouble finding memfs
         'n/no-unpublished-import': 'off',
-        // this is wonky too
-        'n/no-missing-import': 'off'
+
+        // use t.log()
+        'no-console': 'error',
       },
     },
     {
@@ -60,5 +32,69 @@ module.exports = {
       },
     },
   ],
-  ignorePatterns: ['**/test/**/fixture/**/*', 'src/types.js'],
+  parserOptions: {
+    ecmaVersion: 2021,
+    sourceType: 'module',
+  },
+  plugins: ['@stylistic'],
+  rules: {
+    // agoric-specific rules
+    '@endo/no-nullish-coalescing': 'off',
+    '@endo/no-optional-chaining': 'off',
+
+    '@stylistic/lines-around-comment': [
+      'warn',
+      {
+        allowArrayStart: true,
+        allowBlockStart: true,
+        allowClassStart: true,
+        allowInterfaceStart: true,
+        // these conflict with prettier, so we must allow them
+        allowObjectStart: true,
+        allowTypeStart: true,
+        beforeBlockComment: true,
+      },
+    ],
+
+    '@stylistic/lines-between-class-members': 'error',
+
+    '@stylistic/padding-line-between-statements': [
+      'error',
+      { blankLine: 'always', next: 'export', prev: '*' },
+    ],
+
+    '@stylistic/quotes': [
+      'error',
+      'single',
+      { allowTemplateLiterals: 'avoidEscape', avoidEscape: true },
+    ],
+    '@stylistic/semi': ['error', 'never'],
+
+    '@typescript-eslint/no-unused-vars': [
+      'error',
+      {
+        args: 'all',
+        argsIgnorePattern: '^_',
+        caughtErrors: 'all',
+        caughtErrorsIgnorePattern: '^_',
+        destructuredArrayIgnorePattern: '^_',
+        ignoreRestSiblings: true,
+        varsIgnorePattern: '^_',
+      },
+    ],
+
+    // all of the functions in this module are declarations, so might as well enforce some consistency.
+    // this does not prevent a declaration from using the 'function' keyword, though
+    'func-style': ['error', 'declaration', { allowArrowFunctions: true }],
+
+    'no-console': 'error',
+
+    'perfectionist/sort-named-exports': [
+      'error',
+        // this is wonky too
+        { groupKind: 'values-first' },
+      ],
+
+    'n/no-missing-import': 'off'
+  }
 }
