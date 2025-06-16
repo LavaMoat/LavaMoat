@@ -1,29 +1,42 @@
 // FIXME: why did I have to add this? failing in CI
 /* eslint-disable @typescript-eslint/no-redundant-type-constituents */
 
-import { type ReadNowPowers } from '@endo/compartment-mapper'
 import type { ExecutionContext } from 'ava'
 import type { LavaMoatPolicy } from 'lavamoat-core'
-import { type Volume } from 'memfs/lib/volume.js'
 import type { Simplify } from 'type-fest'
+
+import { type ReadNowPowers } from '@endo/compartment-mapper'
+import { type Volume } from 'memfs/lib/volume.js'
+
 import type { GeneratePolicyOptions } from '../../../src/types.js'
 
 /**
- * Options for `testPolicyFor*` macros
- *
- * @internal
+ * Options for `scaffoldFixture` in `policy-macros.js`
  */
-export type TestPolicyMacroOptions = {
+export type ScaffoldFixtureOptions = {
   /**
-   * Expected policy result
+   * The type of fixture to generate
+   *
+   * @defaultValue 'module'
    */
-  expected?: LavaMoatPolicy
-
-  /**
-   * Overrides to apply to policy generation
-   */
-  policyOverride?: LavaMoatPolicy
+  sourceType?: 'module' | 'script'
 }
+
+/**
+ * Return type of `scaffoldFixture` in `policy-macros.js`
+ */
+export type ScaffoldFixtureResult = {
+  readPowers: ReadNowPowers
+  vol: Volume
+}
+
+/**
+ * Expectation function for {@link TestPolicyForJSONOptions}
+ */
+export type TestPolicyExpectationFn<Context = unknown> = (
+  t: ExecutionContext<Context>,
+  policy: LavaMoatPolicy
+) => Promise<void> | void
 
 /**
  * Options for the `testPolicyForJSON` macro
@@ -50,29 +63,18 @@ export type TestPolicyForJSONOptions<Context = unknown> = Simplify<
 >
 
 /**
- * Expectation function for {@link TestPolicyForJSONOptions}
+ * Options for `testPolicyFor*` macros
+ *
+ * @internal
  */
-export type TestPolicyExpectationFn<Context = unknown> = (
-  t: ExecutionContext<Context>,
-  policy: LavaMoatPolicy
-) => void | Promise<void>
-
-/**
- * Return type of `scaffoldFixture` in `policy-macros.js`
- */
-export type ScaffoldFixtureResult = {
-  vol: Volume
-  readPowers: ReadNowPowers
-}
-
-/**
- * Options for `scaffoldFixture` in `policy-macros.js`
- */
-export type ScaffoldFixtureOptions = {
+export type TestPolicyMacroOptions = {
   /**
-   * The type of fixture to generate
-   *
-   * @defaultValue 'module'
+   * Expected policy result
    */
-  sourceType?: 'module' | 'script'
+  expected?: LavaMoatPolicy
+
+  /**
+   * Overrides to apply to policy generation
+   */
+  policyOverride?: LavaMoatPolicy
 }

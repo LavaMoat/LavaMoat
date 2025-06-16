@@ -7,9 +7,10 @@
 
 import { Module } from 'node:module'
 import { fileURLToPath } from 'node:url'
+
 import { isObject } from '../util.js'
 
-const { freeze, keys, assign } = Object
+const { assign, freeze, keys } = Object
 
 /**
  * @import {ExitModuleImportHook, ExitModuleImportNowHook} from '@endo/compartment-mapper'
@@ -25,14 +26,14 @@ const { freeze, keys, assign } = Object
 const makeStaticModuleInterface = (ns) => {
   return freeze(
     /** @type {ThirdPartyStaticModuleInterface} */ ({
-      // builtins have no imports (as far as we're concerned)
-      imports: [],
-      exports: isObject(ns) ? keys(ns) : [],
       execute: (moduleExports) => {
         // this is a no-op if `ns` is a non-object
         moduleExports.default = ns
         assign(moduleExports, ns)
       },
+      exports: isObject(ns) ? keys(ns) : [],
+      // builtins have no imports (as far as we're concerned)
+      imports: [],
     })
   )
 }
@@ -76,8 +77,8 @@ export const importNowHook = (specifier, packageLocation) => {
  */
 export const nullImportHook = async () => {
   return freeze({
-    imports: [],
-    exports: [],
     execute: () => {},
+    exports: [],
+    imports: [],
   })
 }

@@ -12,11 +12,19 @@ import * as constants from './constants.js'
 import './preamble.js'
 
 export * from './error-code.js'
+
 export { execute } from './exec/execute.js'
+
 export { load } from './exec/load.js'
+
 export { run } from './exec/run.js'
+
 export { toEndoPolicy } from './policy-converter.js'
+
 export { generatePolicy } from './policy-gen/generate.js'
+
 export * from './policy-util.js'
+
 export * from './types.js'
+
 export { constants }

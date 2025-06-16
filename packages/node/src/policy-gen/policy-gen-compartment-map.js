@@ -7,6 +7,7 @@
  */
 
 import { captureFromMap } from '@endo/compartment-mapper/capture-lite.js'
+
 import { assertCompleteDataMap } from '../compartment/data-map.js'
 import { nullImportHook } from '../compartment/import-hook.js'
 import { makeNodeCompartmentMap } from '../compartment/node-compartment-map.js'
@@ -66,17 +67,18 @@ const remapDataMap = (dataMap, oldToNewCompartmentNames) => {
 export const loadCompartmentMapForPolicy = async (
   entrypointPath,
   {
-    readPowers = defaultReadPowers,
-    policyOverride,
-    trustRoot = DEFAULT_TRUST_ROOT_COMPARTMENT,
-    log = defaultLog,
     decorators = [],
     dev,
+    log = defaultLog,
+    policyOverride,
+    readPowers = defaultReadPowers,
+    trustRoot = DEFAULT_TRUST_ROOT_COMPARTMENT,
     ...captureOpts
   } = {}
 ) => {
   /** @type {CompartmentMapDescriptor} */
   let nodeCompartmentMap
+
   /** @type {CompleteCompartmentDescriptorDataMap} */
   let nodeDataMap
 
@@ -84,15 +86,15 @@ export const loadCompartmentMapForPolicy = async (
     ;({ nodeCompartmentMap, nodeDataMap } =
       // eslint-disable-next-line @jessie.js/safe-await-separator
       await makeNodeCompartmentMap(entrypointPath, {
-        readPowers,
-        dev,
         decorators,
+        dev,
         log,
+        readPowers,
         trustRoot,
       }))
   } catch (err) {
     throw new GenerationError(
-      `Failed to create compartment map for policy generation`,
+      'Failed to create compartment map for policy generation',
       { cause: err }
     )
   }
@@ -101,14 +103,14 @@ export const loadCompartmentMapForPolicy = async (
   const PolicyGenCompartment = makePolicyGenCompartment(
     nodeCompartmentMap,
     nodeDataMap,
-    { policyOverride, log }
+    { log, policyOverride }
   )
 
   /** @type {CaptureLiteOptions} */
   const captureLiteOptions = {
     ...DEFAULT_ENDO_OPTIONS,
-    importHook: nullImportHook,
     Compartment: PolicyGenCompartment,
+    importHook: nullImportHook,
     ...captureOpts,
   }
 
@@ -132,8 +134,8 @@ export const loadCompartmentMapForPolicy = async (
 
   return {
     compartmentMap,
-    sources,
-    renames,
     dataMap,
+    renames,
+    sources,
   }
 }

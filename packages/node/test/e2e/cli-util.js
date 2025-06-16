@@ -10,6 +10,7 @@ import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { promisify } from 'node:util'
+
 import { hrPath } from '../../src/format.js'
 
 export const execFileAsync = promisify(execFile)
@@ -79,8 +80,10 @@ export const runCLI = async (
 
   /** @type {string} */
   let stdout
+
   /** @type {string} */
   let stderr
+
   /**
    * It's the exit code!
    *
@@ -114,16 +117,17 @@ export const runCLI = async (
   t?.log(`Executing: ${hrCommand} in ${hrPath(cwd)}`)
 
   try {
-    ;({ stdout, stderr } = await execFileAsync(
+    ;({ stderr, stdout } = await execFileAsync(
       process.execPath,
       [CLI_PATH, ...args],
       {
-        encoding: 'utf8',
         cwd,
+        encoding: 'utf8',
       }
     ))
   } catch (err) {
-    ;({ stdout, stderr, code } =
+    ;({ code, stderr, stdout } =
+      //
       /**
        * You'd think this type would be somewhere in `@types/node`, but it's
        * not. Why? There's no place in `Promise<T>` to define the rejection
@@ -136,7 +140,7 @@ export const runCLI = async (
        */
       (err))
   }
-  return { stdout, stderr, code, hrCommand }
+  return { code, hrCommand, stderr, stdout }
 }
 
 /**
@@ -164,14 +168,17 @@ export class Tempdir {
   }
 
   /**
-   * Deletes the temporary directory and all its contents.
+   * Creates a new temp directory unique to the execution context `t`.
+   *
+   * Slugifies the test title to create a unique directory name.
+   *
+   * @param {ExecutionContext} t AVA test execution context
+   * @returns {Promise<Tempdir>} A new `Tempdir` instance
    */
-  async [Symbol.asyncDispose]() {
-    await rm(this.#dir, { recursive: true, force: true })
-  }
-
-  [Symbol.toStringTag]() {
-    return this.#dir
+  static async create(t) {
+    const slug = t.title.replace(/[^a-zA-Z0-9]/g, '-')
+    const dir = await mkdtemp(path.join(tmpdir(), slug))
+    return new Tempdir(dir)
   }
 
   /**
@@ -185,17 +192,14 @@ export class Tempdir {
   }
 
   /**
-   * Creates a new temp directory unique to the execution context `t`.
-   *
-   * Slugifies the test title to create a unique directory name.
-   *
-   * @param {ExecutionContext} t AVA test execution context
-   * @returns {Promise<Tempdir>} A new `Tempdir` instance
+   * Deletes the temporary directory and all its contents.
    */
-  static async create(t) {
-    const slug = t.title.replace(/[^a-zA-Z0-9]/g, '-')
-    const dir = await mkdtemp(path.join(tmpdir(), slug))
-    return new Tempdir(dir)
+  async [Symbol.asyncDispose]() {
+    await rm(this.#dir, { force: true, recursive: true })
+  }
+
+  [Symbol.toStringTag]() {
+    return this.#dir
   }
 }
 

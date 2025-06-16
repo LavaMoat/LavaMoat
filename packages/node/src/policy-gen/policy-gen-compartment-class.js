@@ -6,6 +6,7 @@
 
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+
 import { GenerationError } from '../error.js'
 import { log as defaultLog } from '../log.js'
 import { hasValue, isObject } from '../util.js'
@@ -80,7 +81,7 @@ const applyHint = (moduleDescriptor, hint) => {
 
   if (!moduleSource) {
     throw new GenerationError(
-      `Unsupported module descriptor type; this is a bug`
+      'Unsupported module descriptor type; this is a bug'
     )
   }
 
@@ -116,7 +117,7 @@ const applyHint = (moduleDescriptor, hint) => {
     moduleDescriptor.source = moduleSource
   } else {
     throw new GenerationError(
-      `Unsupported module descriptor type; this is a bug`
+      'Unsupported module descriptor type; this is a bug'
     )
   }
 }
@@ -182,11 +183,12 @@ const makeGetValidCompartmentDescriptor = (compartmentMap) => {
 const makeGetOverrideHints = (
   dataMap,
   getValidCompartmentDescriptor,
-  { policyOverride, log: _log = defaultLog } = {}
+  { log: _log = defaultLog, policyOverride } = {}
 ) => {
   if (!policyOverride) {
     return () => new Set()
   }
+
   /**
    * A cache of {@link CompartmentDescriptor} to a list of module names present
    * in policy resources.
@@ -311,7 +313,7 @@ const makeGetOverrideHints = (
 export const makePolicyGenCompartment = (
   compartmentMap,
   dataMap,
-  { policyOverride, log = defaultLog } = {}
+  { log = defaultLog, policyOverride } = {}
 ) => {
   if (!policyOverride?.resources) {
     return Compartment
@@ -394,7 +396,7 @@ export const makePolicyGenCompartment = (
         getOverrideHints ??= makeGetOverrideHints(
           dataMap,
           makeGetValidCompartmentDescriptor(compartmentMap),
-          { policyOverride, log }
+          { log, policyOverride }
         )
 
         const hints = getOverrideHints(compartmentDescriptor)

@@ -32,7 +32,7 @@ const { values } = Object
 export const canonicalNameDecorator = (
   compartmentDescriptor,
   data,
-  { trustRoot = DEFAULT_TRUST_ROOT_COMPARTMENT, log = defaultLog } = {}
+  { log = defaultLog, trustRoot = DEFAULT_TRUST_ROOT_COMPARTMENT } = {}
 ) => {
   const canonicalName = getCanonicalName(compartmentDescriptor, trustRoot)
   log.debug(

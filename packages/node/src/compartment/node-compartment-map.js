@@ -7,6 +7,7 @@
  */
 
 import { mapNodeModules } from '@endo/compartment-mapper/node-modules.js'
+
 import { DEFAULT_TRUST_ROOT_COMPARTMENT } from '../constants.js'
 import { log as defaultLog } from '../log.js'
 import { toEndoURL } from '../util.js'
@@ -40,11 +41,11 @@ const DEFAULT_CONDITIONS = /** @type {const} */ (['node'])
 export const makeNodeCompartmentMap = async (
   entrypointPath,
   {
-    readPowers = defaultReadPowers,
-    dev,
     decorators = [],
+    dev,
     log = defaultLog,
     policy,
+    readPowers = defaultReadPowers,
     trustRoot = DEFAULT_TRUST_ROOT_COMPARTMENT,
   } = {}
 ) => {
@@ -60,8 +61,8 @@ export const makeNodeCompartmentMap = async (
     conditions,
     dev,
     languageForExtension: DEFAULT_ENDO_OPTIONS.languageForExtension,
-    policy,
     log: log.debug.bind(log),
+    policy,
   })
 
   decorators = decorators.includes(canonicalNameDecorator)
@@ -69,8 +70,8 @@ export const makeNodeCompartmentMap = async (
     : [canonicalNameDecorator, ...decorators]
 
   const dataMap = decorateCompartmentMap(nodeCompartmentMap, decorators, {
-    trustRoot,
     log,
+    trustRoot,
   })
 
   assertCompleteDataMap(nodeCompartmentMap, dataMap)

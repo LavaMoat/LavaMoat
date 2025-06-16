@@ -22,6 +22,7 @@ import path from 'node:path'
 import terminalLink from 'terminal-link'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
+
 import * as constants from './constants.js'
 import { run } from './exec/run.js'
 import { hrPath } from './format.js'
@@ -207,16 +208,16 @@ const main = async (args = hideBin(process.argv)) => {
 
   🌋 ${terminalLink('LavaMoat on GitHub', repository)}
   🐛 Bugs? ${terminalLink('Issue tracker', bugs)}
-  📖 Read ${terminalLink(`the LavaMoat docs`, homepage)}
+  📖 Read ${terminalLink('the LavaMoat docs', homepage)}
 `
     )
     .options({
       bin: {
         alias: ['b'],
-        type: 'boolean',
         description: 'Resolve entrypoint as a bin script',
         global: true,
         group: BEHAVIOR_GROUP,
+        type: 'boolean',
       },
 
       // #region path args
@@ -229,73 +230,74 @@ const main = async (args = hideBin(process.argv)) => {
        * option, as the others are computed from it!
        */
 
+      dev: {
+        describe: 'Include development dependencies',
+        global: true,
+        group: BEHAVIOR_GROUP,
+        type: 'boolean',
+      },
       policy: {
         alias: ['p'],
-        describe: 'Filepath to a policy file',
-        type: 'string',
-        normalize: true,
         default: constants.DEFAULT_POLICY_PATH,
-        nargs: 1,
-        requiresArg: true,
+        describe: 'Filepath to a policy file',
         global: true,
         group: PATH_GROUP,
+        nargs: 1,
+        normalize: true,
+        requiresArg: true,
+        type: 'string',
+      },
+      'policy-debug': {
+        defaultDescription: `"${constants.DEFAULT_POLICY_DEBUG_PATH}"`,
+        describe: 'Filepath to a policy debug file',
+        global: true,
+        group: PATH_GROUP,
+        nargs: 1,
+        requiresArg: true,
+        type: 'string',
       },
       'policy-override': {
         alias: ['o'],
-        describe: 'Filepath to a policy override file',
-        type: 'string',
-        normalize: true,
         defaultDescription: `"${constants.DEFAULT_POLICY_OVERRIDE_PATH}"`,
-        nargs: 1,
-        requiresArg: true,
+        describe: 'Filepath to a policy override file',
         global: true,
         group: PATH_GROUP,
-      },
-      'policy-debug': {
-        describe: 'Filepath to a policy debug file',
-        defaultDescription: `"${constants.DEFAULT_POLICY_DEBUG_PATH}"`,
         nargs: 1,
-        type: 'string',
-        requiresArg: true,
-        global: true,
-        group: PATH_GROUP,
-      },
-      'project-root': {
-        alias: ['root'],
-        describe: 'Path to application root directory',
-        type: 'string',
-        nargs: 1,
-        requiresArg: true,
         normalize: true,
-        default: process.cwd(),
-        defaultDescription: '(current directory)',
-        coerce: path.resolve,
-        global: true,
-        group: PATH_GROUP,
+        requiresArg: true,
+        type: 'string',
       },
       // #endregion
 
-      dev: {
-        describe: 'Include development dependencies',
-        type: 'boolean',
+      'project-root': {
+        alias: ['root'],
+        coerce: path.resolve,
+        default: process.cwd(),
+        defaultDescription: '(current directory)',
+        describe: 'Path to application root directory',
         global: true,
-        group: BEHAVIOR_GROUP,
-      },
-      verbose: {
-        describe: 'Enable verbose logging',
-        type: 'boolean',
-        global: true,
-        group: BEHAVIOR_GROUP,
+        group: PATH_GROUP,
+        nargs: 1,
+        normalize: true,
+        requiresArg: true,
+        type: 'string',
       },
       quiet: {
         describe: 'Disable all logging',
-        type: 'boolean',
         global: true,
         group: BEHAVIOR_GROUP,
+        type: 'boolean',
+      },
+      verbose: {
+        describe: 'Enable verbose logging',
+        global: true,
+        group: BEHAVIOR_GROUP,
+        type: 'boolean',
       },
     })
     .conflicts('quiet', 'verbose')
     .middleware(
+      //
       /**
        * This _global_ middleware:
        *
@@ -350,6 +352,7 @@ const main = async (args = hideBin(process.argv)) => {
         }
       }
     )
+
     /**
      * Default command (no command)
      */
@@ -359,11 +362,12 @@ const main = async (args = hideBin(process.argv)) => {
       (yargs) =>
         yargs
           .positional('entrypoint', {
+            demandOption: true,
             describe:
               'Path to the application entry point; relative to --project-root',
             type: 'string',
-            demandOption: true,
           })
+
           /**
            * These options are hidden because we don't want to encourage running
            * without inspecting the policy.
@@ -379,45 +383,49 @@ const main = async (args = hideBin(process.argv)) => {
             /**
              * @experimental
              */
-            'generate-recklessly': {
+            debug: {
+              describe: 'Additionally write a debug policy [EXPERIMENTAL]',
+              group: BEHAVIOR_GROUP,
+              hidden: true,
+              implies: 'generate-recklessly',
               type: 'boolean',
+            },
+
+            /**
+             * @experimental
+             */
+            'generate-recklessly': {
+              default: false,
               describe:
                 'Generate & write a policy file on-the-fly [EXPERIMENTAL]',
               group: BEHAVIOR_GROUP,
-              default: false,
               hidden: true,
+              type: 'boolean',
             },
+            scuttle: {
+              coerce: Boolean,
+              describe: 'Enable scuttling of globalThis',
+              group: BEHAVIOR_GROUP,
+              type: 'boolean',
+            },
+
             /**
              * @experimental
              */
             write: {
-              type: 'boolean',
               describe: 'Write policy file(s) to disk [EXPERIMENTAL]',
               group: BEHAVIOR_GROUP,
-              implies: 'generate-recklessly',
               hidden: true,
-            },
-            /**
-             * @experimental
-             */
-            debug: {
-              type: 'boolean',
-              describe: 'Additionally write a debug policy [EXPERIMENTAL]',
-              group: BEHAVIOR_GROUP,
               implies: 'generate-recklessly',
-              hidden: true,
-            },
-            scuttle: {
               type: 'boolean',
-              describe: 'Enable scuttling of globalThis',
-              group: BEHAVIOR_GROUP,
-              coerce: Boolean,
             },
           })
+
           /**
            * Resolve entrypoint from `project-root`
            */
           .middleware(processEntrypointMiddleware),
+
       /**
        * Default command handler.
        *
@@ -428,13 +436,13 @@ const main = async (args = hideBin(process.argv)) => {
       async (argv) => {
         await Promise.resolve()
         const {
-          'generate-recklessly': generate,
-          entrypoint,
           debug,
+          dev,
+          entrypoint,
+          'generate-recklessly': generate,
           policy: policyPath,
           'policy-debug': policyDebugPath,
           'policy-override': policyOverridePath,
-          dev,
           'project-root': projectRoot,
           scuttle: scuttleGlobalThis,
           write,
@@ -459,13 +467,13 @@ const main = async (args = hideBin(process.argv)) => {
           // terrible things
           policy = await generatePolicy(entrypoint, {
             debug,
-            policyPath,
+            dev,
             policyDebugPath,
             policyOverridePath,
-            write,
-            dev,
-            trustRoot,
+            policyPath,
             projectRoot,
+            trustRoot,
+            write,
           })
         } else {
           policy = await loadPolicies(policyPath, {
@@ -484,11 +492,11 @@ const main = async (args = hideBin(process.argv)) => {
         )
 
         await run(entrypoint, policy, {
-          policyOverridePath,
-          trustRoot,
           dev,
+          policyOverridePath,
           projectRoot,
           scuttleGlobalThis,
+          trustRoot,
         })
       }
     )
@@ -499,18 +507,18 @@ const main = async (args = hideBin(process.argv)) => {
         yargs
           .options({
             debug: {
-              type: 'boolean',
+              coerce: Boolean,
               describe: 'Additionally write a debug policy',
               group: BEHAVIOR_GROUP,
-              coerce: Boolean,
+              type: 'boolean',
             },
             write: {
-              describe:
-                'Write policy file(s) to disk; if false, print to stdout',
-              type: 'boolean',
               coerce: Boolean,
               default: true,
+              describe:
+                'Write policy file(s) to disk; if false, print to stdout',
               group: BEHAVIOR_GROUP,
+              type: 'boolean',
             },
           })
           .positional('entrypoint', {
@@ -520,12 +528,12 @@ const main = async (args = hideBin(process.argv)) => {
           })
           .middleware(processEntrypointMiddleware),
       async ({
-        entrypoint,
         debug,
+        dev,
+        entrypoint,
         policy: policyPath,
         'policy-debug': policyDebugPath,
         'policy-override': policyOverridePath,
-        dev,
         write,
       }) => {
         const trustRoot = shouldTrustRoot(entrypoint)
@@ -537,12 +545,12 @@ const main = async (args = hideBin(process.argv)) => {
 
         const policy = await generatePolicy(entrypoint, {
           debug,
-          write,
-          policyPath,
+          dev,
           policyDebugPath,
           policyOverridePath,
-          dev,
+          policyPath,
           trustRoot,
+          write,
         })
 
         if (!write) {
