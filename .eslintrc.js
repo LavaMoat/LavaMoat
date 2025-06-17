@@ -144,5 +144,7 @@ module.exports = {
     '**/types/**/*',
     '**/test/**/fixture*/**/*',
     '**/examples/**/*',
+    'ses.cjs',
+    'ses-hermes.cjs',
   ],
 }
