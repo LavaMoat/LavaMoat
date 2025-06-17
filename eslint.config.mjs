@@ -1,5 +1,5 @@
 // @ts-check
-import jsPlugin from '@eslint/js'
+import eslint from '@eslint/js'
 import avaPlugin from 'eslint-plugin-ava'
 import jsoncPlugin from 'eslint-plugin-jsonc'
 import nodePlugin from 'eslint-plugin-n'
@@ -8,7 +8,7 @@ import globals from 'globals'
 import tseslint from 'typescript-eslint'
 
 export default tseslint.config(
-  jsPlugin.configs.recommended,
+  eslint.configs.recommended,
   {
     plugins: {
       unicorn: unicornPlugin,
@@ -36,10 +36,27 @@ export default tseslint.config(
         tsconfigRootDir: import.meta.dirname,
       },
     },
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
+    },
   },
   {
     files: ['**/*.{cjs,js}'],
-    ...nodePlugin.configs['flat/recommended-script'],
+    extends: [
+      tseslint.configs.recommended,
+      nodePlugin.configs['flat/recommended-script'],
+    ],
+    // https://github.com/eslint-community/eslint-plugin-n/issues/209
+    rules: {
+      'n/no-extraneous-import': 'off',
+      'n/no-extraneous-require': 'off',
+
+      '@typescript-eslint/no-require-imports': 'off',
+    },
+  },
+  {
+    files: ['**/*.{mjs,mts}', './packages/node/**/*.js'],
+    extends: [nodePlugin.configs['flat/recommended-module']],
     // https://github.com/eslint-community/eslint-plugin-n/issues/209
     rules: {
       'n/no-extraneous-import': 'off',
@@ -47,17 +64,14 @@ export default tseslint.config(
     },
   },
   {
-    files: ['**/*.mjs', './packages/node/**/*.js'],
-    ...nodePlugin.configs['flat/recommended-module'],
-    // https://github.com/eslint-community/eslint-plugin-n/issues/209
-    rules: {
-      'n/no-extraneous-import': 'off',
-      'n/no-extraneous-require': 'off',
-    },
+    files: ['**/test/**/*.spec.{cjs,js,mjs,ts,mts,cts}'],
+    extends: [avaPlugin.configs['flat/recommended']],
   },
   {
-    ...avaPlugin.configs['flat/recommended'],
-    files: ['**/test/**/*.spec.{ts,mts,cts,js,cjs,mjs'],
+    files: ['**/test/**.spec.{cjs,js}'],
+    rules: {
+      '@typescript-eslint/no-require-imports': 'off',
+    },
   },
   {
     files: ['./packages/browserify/test/**/*.js'],
@@ -127,6 +141,7 @@ export default tseslint.config(
       '.yarn/**/*',
       '**/node_modules/**/*',
       'docs/**/*',
+      'packages/*/dist/**/*',
       'packages/*/examples/**/*',
       'packages/*/test/**/fixtures/**/*',
       'packages/*/test/**/fixture/**/*',
