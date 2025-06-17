@@ -148,8 +148,8 @@ const lockdownSerializer = ({ hermesRuntime = true } = {}, userConfig = {}) => {
     assertPolyfills(polyfills)
 
     const ses = hermesRuntime
-      ? require.resolve('ses/hermes')
-      : require.resolve('ses')
+      ? require.resolve('../vendor/ses-hermes.cjs') // TODO: replace with 'ses/hermes'
+      : require.resolve('../vendor/ses.cjs') // TODO: replace with 'ses/hermes'
     const repair = require.resolve('./repair.js')
 
     return [ses, repair, ...polyfills]
