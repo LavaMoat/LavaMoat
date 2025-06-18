@@ -19,13 +19,17 @@ const diag = require('./diagnostics')
  * @typedef {import('webpack').NormalModule | import('webpack').ExternalModule} InspectableWebpackModule
  */
 
+/**
+ * @import {LavaMoatPolicy} from 'lavamoat-core'
+ */
+
 module.exports = {
   stringifyPolicyReliably: jsonStringifySortedPolicy,
   /**
    * @param {Object} opts
-   * @param {import('lavamoat-core').LavaMoatPolicy | undefined} opts.policyFromOptions
+   * @param {LavaMoatPolicy | undefined} opts.policyFromOptions
    * @param {string} opts.location
-   * @returns {import('lavamoat-core').LavaMoatPolicy}
+   * @returns {LavaMoatPolicy}
    */
   loadPolicy({ policyFromOptions, location }) {
     const { policy, applyOverride } = loadPoliciesSync({
@@ -34,7 +38,7 @@ module.exports = {
       debugMode: false,
     })
 
-    /** @type {import('lavamoat-core').LavaMoatPolicy} */
+    /** @type {LavaMoatPolicy} */
     let final = { resources: {} }
     if (policyFromOptions) {
       // TODO: avoid loading the policy file if policyFromOptions is present
@@ -66,7 +70,7 @@ module.exports = {
    * @param {string} opts.location
    * @param {IsBuiltinFn} opts.isBuiltin
    * @param {ModuleWithConnections[]} opts.modulesToInspect
-   * @returns {import('lavamoat-core').LavaMoatPolicy}
+   * @returns {LavaMoatPolicy}
    */
   generatePolicy({ canonicalNameMap, location, isBuiltin, modulesToInspect }) {
     const { applyOverride } = loadPoliciesSync({

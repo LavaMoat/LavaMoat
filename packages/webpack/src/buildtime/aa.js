@@ -47,19 +47,23 @@ const crossReference = (neededIds, policyIds) => {
 }
 
 /**
+ * @import {LavaMoatPolicy} from 'lavamoat-core'
+ */
+
+/**
  * @typedef {Object} IdentifierLookup
  * @property {string} root
  * @property {[string, (string | number)[]][]} identifiersForModuleIds
  * @property {(path: string) => string | undefined} pathToResourceId
  * @property {(path: string) => boolean} isKnownPath
  * @property {(id: string) => string} policyIdentifierToResourceId
- * @property {() => import('lavamoat-core').LavaMoatPolicy} getTranslatedPolicy
+ * @property {() => LavaMoatPolicy} getTranslatedPolicy
  */
 
 /**
  * @param {object} options
  * @param {{ path: string; moduleId: string | number }[]} options.paths
- * @param {import('lavamoat-core').LavaMoatPolicy} options.policy
+ * @param {LavaMoatPolicy} options.policy
  * @param {import('@lavamoat/aa').CanonicalNameMap} options.canonicalNameMap
  * @param {{ moduleId: string | number; context: string }[]} options.contextModules
  * @param {Record<string | number, string>} options.externals
