@@ -144,5 +144,6 @@ module.exports = {
     '**/types/**/*',
     '**/test/**/fixture*/**/*',
     '**/examples/**/*',
+    '**/vendor/**/*',
   ],
 }

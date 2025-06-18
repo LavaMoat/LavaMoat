@@ -42,9 +42,6 @@
   "peerDependencies": {
     "@react-native/js-polyfills": "*"
   },
-  "dependencies": {
-    "ses": "1.13.0"
-  },
   "devDependencies": {
     "@react-native/js-polyfills": "0.79.3"
   },

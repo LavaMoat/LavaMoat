@@ -15,7 +15,7 @@ test('lockdownSerializer - default', (t) => {
   const originalConfig = {}
   const config = lockdownSerializer({}, originalConfig)
   const polyfills = config.getPolyfills({ platform: null })
-  const sesPath = require.resolve('ses/hermes')
+  const sesPath = require.resolve('../../vendor/ses-hermes.cjs') // TODO: replace with 'ses/hermes'
   t.is(typeof config.getRunModuleStatement, 'function')
   t.is(typeof config.getPolyfills, 'function')
   t.true(polyfills.length > 1)
@@ -29,7 +29,7 @@ test('lockdownSerializer - hermes true', (t) => {
   }
   const config = lockdownSerializer({ hermesRuntime: true }, originalConfig)
   const polyfills = config.getPolyfills({ platform: null })
-  const sesPath = require.resolve('ses/hermes')
+  const sesPath = require.resolve('../../vendor/ses-hermes.cjs') // TODO: replace with 'ses/hermes'
   t.true(polyfills.length > 1)
   t.true(polyfills.some((p) => p === sesPath))
   t.true(polyfills.some((p) => p.endsWith('repair.js')))
@@ -42,7 +42,7 @@ test('lockdownSerializer - hermes false', (t) => {
   }
   const config = lockdownSerializer({ hermesRuntime: false }, originalConfig)
   const polyfills = config.getPolyfills({ platform: null })
-  const sesPath = require.resolve('ses')
+  const sesPath = require.resolve('../../vendor/ses.cjs') // TODO: replace with 'ses'
   t.true(polyfills.length > 1)
   t.true(polyfills.some((p) => p === sesPath && !p.includes('hermes')))
   t.true(polyfills.some((p) => p.endsWith('repair.js')))
@@ -55,7 +55,7 @@ test('lockdownSerializer - with custom polyfills', (t) => {
   }
   const config = lockdownSerializer({}, originalConfig)
   const polyfills = config.getPolyfills({ platform: null })
-  const sesPath = require.resolve('ses/hermes')
+  const sesPath = require.resolve('../../vendor/ses-hermes.cjs') // TODO: replace with 'ses/hermes'
   t.true(polyfills.includes(customPolyfill))
   t.true(polyfills.length > 1)
   t.true(polyfills.some((p) => p === sesPath))
