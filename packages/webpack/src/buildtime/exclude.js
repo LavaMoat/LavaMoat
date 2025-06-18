@@ -2,7 +2,7 @@
 /** @typedef {import('./policyGenerator').InspectableWebpackModule} InspectableWebpackModule */
 
 const path = require('node:path')
-const EXCLUDE_LOADER = path.join(__dirname, '../excludeLoader.js')
+const EXCLUDE_LOADER = path.resolve(path.join(__dirname, '../excludeLoader.js'))
 
 module.exports = {
   /**
