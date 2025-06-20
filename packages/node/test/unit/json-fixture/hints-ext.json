@@ -1,0 +1,64 @@
+[
+  0,
+  {},
+  {
+    "README.md": [
+      1,
+      {},
+      "data:application/octet-stream;base64,VGhpcyBpcyBsaWtlIGBoaW50c2AgZXhjZXB0IHdlIGFkZCBhIGhpbnQgZm9yIGFuIGV4dGVybmFsIG1vZHVsZS4K"
+    ],
+    "index.js": [
+      1,
+      {},
+      "data:application/octet-stream;base64,bW9kdWxlLmV4cG9ydHMgPSB7fQo="
+    ],
+    "node_modules": [
+      0,
+      {},
+      {
+        "fugs": [
+          0,
+          {},
+          {
+            "index.js": [
+              1,
+              {},
+              "data:application/octet-stream;base64,Y29uc3Qge2Zvcm1hdH0gPSByZXF1aXJlKCdub2RlOnV0aWwnKQoKbW9kdWxlLmV4cG9ydHMgPSBmb3JtYXQoJyVzJywgJ2ZyZWQnKQo="
+            ],
+            "package.json": [
+              1,
+              {},
+              "data:application/octet-stream;base64,ewogICJuYW1lIjogImZ1Z3MiLAogICJ2ZXJzaW9uIjogIjAuMC4wIiwKICAiZGVzY3JpcHRpb24iOiAianVzdCBzb21ldGhpbmcgdG8gcmVxdWlyZSIKfQo="
+            ]
+          }
+        ],
+        "tool": [
+          0,
+          {},
+          {
+            "index.js": [
+              1,
+              {},
+              "data:application/octet-stream;base64,Y29uc3QgY29uZmlnUGF0aCA9IHJlcXVpcmUucmVzb2x2ZSgnLi4vLi4vdG9vbC5jb25maWcuanMnKQoKY29uc3QgY29uZmlnID0gcmVxdWlyZShjb25maWdQYXRoKQoKbW9kdWxlLmV4cG9ydHMgPSB7CiAgaGVsbG86IGB3aW5rZW4sIGJsaW5rZW4gJiAke2NvbmZpZy52YWx1ZX1gCn0K"
+            ],
+            "package.json": [
+              1,
+              {},
+              "data:application/octet-stream;base64,ewogICJuYW1lIjogInRvb2wiLAogICJ2ZXJzaW9uIjogIjAuMC4wIiwKICAiZGVzY3JpcHRpb24iOiAiIiwKICAicHJpdmF0ZSI6IHRydWUsCiAgIm1haW4iOiAiaW5kZXguanMiCn0K"
+            ]
+          }
+        ]
+      }
+    ],
+    "package.json": [
+      1,
+      {},
+      "data:application/octet-stream;base64,ewogICJuYW1lIjogImhpbnRzLWV4dCIsCiAgInZlcnNpb24iOiAiMC4wLjAiLAogICJkZXNjcmlwdGlvbiI6ICIiLAogICJwcml2YXRlIjogdHJ1ZSwKICAic2NyaXB0cyI6IHsKICAgICJzdGFydCI6ICJucHggc25hcHNob3QtZnMgXCIkbnBtX2NvbmZpZ19sb2NhbF9wcmVmaXgvLi4vanNvbi1maXh0dXJlLyRucG1fcGFja2FnZV9uYW1lLmpzb25cIiIKICB9LAogICJkZXZEZXBlbmRlbmNpZXMiOiB7CiAgICAidG9vbCI6ICIwLjAuMCIsCiAgICAiZnVncyI6ICIwLjAuMCIKICB9Cn0K"
+    ],
+    "tool.config.js": [
+      1,
+      {},
+      "data:application/octet-stream;base64,bW9kdWxlLmV4cG9ydHMgPSB7CiAgdmFsdWU6IHJlcXVpcmUoJ2Z1Z3MnKSwKfQo="
+    ]
+  }
+]
