@@ -8,6 +8,7 @@
  */
 
 import { loadFromMap } from '@endo/compartment-mapper/import-lite.js'
+
 import { makeNodeCompartmentMap } from '../compartment/node-compartment-map.js'
 import { DEFAULT_ENDO_OPTIONS } from '../compartment/options.js'
 import { defaultReadPowers } from '../compartment/power.js'
@@ -38,19 +39,19 @@ import { log as defaultLog } from '../log.js'
 export const load = async (
   entrypointPath,
   readPowers = defaultReadPowers,
-  { log = defaultLog, dev, decorators = [], trustRoot, policy, ...options } = {}
+  { decorators = [], dev, log = defaultLog, policy, trustRoot, ...options } = {}
 ) => {
   /** @type {CompartmentMapDescriptor} */
   let nodeCompartmentMap
   try {
     // eslint-disable-next-line @jessie.js/safe-await-separator
     ;({ nodeCompartmentMap } = await makeNodeCompartmentMap(entrypointPath, {
-      readPowers,
+      decorators,
       dev,
       log,
-      trustRoot,
-      decorators,
       policy,
+      readPowers,
+      trustRoot,
     }))
   } catch (err) {
     throw new ExecutionError(
@@ -64,8 +65,8 @@ export const load = async (
     ...DEFAULT_ENDO_OPTIONS,
     ...options,
     dev,
-    policy,
     log: log.debug.bind(log),
+    policy,
   }
 
   const { import: importApp, sha512 } = await loadFromMap(

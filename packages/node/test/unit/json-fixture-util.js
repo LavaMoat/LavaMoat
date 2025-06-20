@@ -2,6 +2,7 @@ import { memfs } from 'memfs'
 import { fromJsonSnapshot } from 'memfs/lib/snapshot/index.js'
 import { Volume } from 'memfs/lib/volume.js'
 import fs from 'node:fs'
+
 import { makeReadPowers } from '../../src/compartment/power.js'
 import { isString } from '../../src/util.js'
 
@@ -26,18 +27,6 @@ import { isString } from '../../src/util.js'
  */
 const isCompactJson = (value) => {
   return ArrayBuffer.isView(value) && value.subarray(0, 1).toString() === '['
-}
-
-/**
- * Creates a `Volume` from a "Compact JSON" snapshot.
- *
- * @param {JsonUint8Array<SnapshotNode>} snapshotJson - "Compact JSON" snapshot
- * @returns {Promise<Volume>} New `Volume`
- */
-async function createVolFromSnapshot(snapshotJson) {
-  const { vol } = memfs()
-  await fromJsonSnapshot(snapshotJson, { fs: vol.promises, path: '/' })
-  return vol
 }
 
 /**
@@ -103,7 +92,19 @@ export async function loadJSONFixture(pathOrJson) {
   }
 
   const readPowers = makeReadPowers({ fs: /** @type {FsInterface} */ (vol) })
-  return { vol, readPowers }
+  return { readPowers, vol }
+}
+
+/**
+ * Creates a `Volume` from a "Compact JSON" snapshot.
+ *
+ * @param {JsonUint8Array<SnapshotNode>} snapshotJson - "Compact JSON" snapshot
+ * @returns {Promise<Volume>} New `Volume`
+ */
+async function createVolFromSnapshot(snapshotJson) {
+  const { vol } = memfs()
+  await fromJsonSnapshot(snapshotJson, { fs: vol.promises, path: '/' })
+  return vol
 }
 
 /**
@@ -112,6 +113,7 @@ export async function loadJSONFixture(pathOrJson) {
  * @type {Map<string | URL, DirectoryJSON>}
  */
 loadJSONFixture.dirJsonCache = new Map()
+
 /**
  * Cache of filepath/URL to {@link JsonUint8Array} (for snapshots).
  *

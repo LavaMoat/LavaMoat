@@ -25,7 +25,7 @@ import { hasValue } from '../util.js'
 export const makeModuleResolver = (
   compartmentMap,
   compartmentLocationMap,
-  { readPowers = defaultReadPowers, log = defaultLog } = {}
+  { log = defaultLog, readPowers = defaultReadPowers } = {}
 ) => {
   const { compartments } = compartmentMap
   const { fileURLToPath } = readPowers
@@ -58,6 +58,7 @@ export const makeModuleResolver = (
               return
             }
             seen.add(moduleDescriptor)
+
             /** @type {string} */
             let module
             ;({ compartment: label, module } = moduleDescriptor)
@@ -93,5 +94,5 @@ export const makeModuleResolver = (
     }
   }
 
-  return { resolveModuleDescriptor, resolveCompartment }
+  return { resolveCompartment, resolveModuleDescriptor }
 }

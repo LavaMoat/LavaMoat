@@ -10,6 +10,7 @@
  */
 import { default as nodePath } from 'node:path'
 import nodeUrl from 'node:url'
+
 import {
   DEFAULT_POLICY_DEBUG_FILENAME,
   DEFAULT_POLICY_OVERRIDE_FILENAME,
@@ -113,15 +114,14 @@ export const isBoolean = (value) => typeof value === 'boolean'
  * @see {@link https://github.com/microsoft/TypeScript/issues/44253}
  */
 export const hasValue = (obj, prop) => {
+  /**
+   * TODO:
+   *
+   * - [ ] Use `Object.hasOwn`; this type def should eventually live in
+   *   `@lavamoat/types` (it's currently a declaration in core and not exported)
+   *   while it does not exist in TypeScript libs.
+   */
   return (
-    /**
-     * TODO:
-     *
-     * - [ ] Use `Object.hasOwn`; this type def should eventually live in
-     *   `@lavamoat/types` (it's currently a declaration in core and not
-     *   exported) while it does not exist in TypeScript libs.
-     */
-
     prop in obj &&
     /**
      * @privateRemarks

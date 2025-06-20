@@ -14,6 +14,7 @@
 
 import chalk from 'chalk'
 import { stripVTControlCharacters } from 'node:util'
+
 import { SES_VIOLATION_TYPES } from '../constants.js'
 import { hrPath } from '../format.js'
 import { log as defaultLog } from '../log.js'
@@ -34,14 +35,14 @@ const { keys } = Object
 export const makeSesCompatListener =
   (perPackageWarnings, foundViolationTypes, { log = defaultLog } = {}) =>
   (data) => {
-    const { moduleRecord, compatWarnings } = /**
+    const { compatWarnings, moduleRecord } = /**
      * @type {{
      *   moduleRecord: LavamoatModuleRecord
      *   compatWarnings: SesCompat
      * }}
      */ (data)
 
-    const { primordialMutations, strictModeViolations, dynamicRequires } =
+    const { dynamicRequires, primordialMutations, strictModeViolations } =
       compatWarnings
     const nicePath = hrPath(moduleRecord.file)
 
@@ -63,7 +64,7 @@ export const makeSesCompatListener =
             ({
               node: {
                 loc: {
-                  start: { line, column },
+                  start: { column, line },
                 },
               },
             }) => {

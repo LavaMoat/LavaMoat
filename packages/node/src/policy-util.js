@@ -11,6 +11,7 @@
 import { jsonStringifySortedPolicy, mergePolicy } from 'lavamoat-core'
 import nodeFs from 'node:fs'
 import nodePath from 'node:path'
+
 import * as constants from './constants.js'
 import { LAVAMOAT_PKG_POLICY_ROOT } from './constants.js'
 import { InvalidPolicyError, NoPolicyError } from './error.js'
@@ -154,8 +155,8 @@ export const maybeReadPolicyOverride = async (
 export const loadPolicies = async (
   policyOrPolicyPath,
   {
-    readFile = nodeFs.promises.readFile,
     projectRoot = process.cwd(),
+    readFile = nodeFs.promises.readFile,
     ...options
   } = {}
 ) => {
@@ -173,6 +174,7 @@ export const loadPolicies = async (
    * @type {string | undefined}
    */
   let policyPath
+
   /**
    * Path to policy override
    *
@@ -249,7 +251,7 @@ export const loadPolicies = async (
       Promise.resolve().then(() => {
         assertPolicy(
           allegedPolicy,
-          `Invalid LavaMoat policy; does not match expected schema`
+          'Invalid LavaMoat policy; does not match expected schema'
         )
 
         return allegedPolicy
@@ -267,7 +269,7 @@ export const loadPolicies = async (
       Promise.resolve().then(() => {
         assertPolicy(
           allegedPolicyOverride,
-          `Invalid LavaMoat policy overrides; does not match expected schema`
+          'Invalid LavaMoat policy overrides; does not match expected schema'
         )
         return allegedPolicyOverride
       })
@@ -315,6 +317,7 @@ export const assertPolicy = (
 export const writePolicy = async (file, policy, { fs = nodeFs } = {}) => {
   const filepath = toPath(file)
   const policyDir = nodePath.dirname(filepath)
+
   /**
    * @type {string | undefined}
    */

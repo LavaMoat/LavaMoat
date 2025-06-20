@@ -7,10 +7,12 @@
 
 import chalk from 'chalk'
 import { Searcher } from 'fast-fuzzy'
+
 import { SES_VIOLATION_TYPES } from '../constants.js'
 import { GenerationError } from '../error.js'
 import { hrLabel, hrPath } from '../format.js'
 import { log as defaultLog } from '../log.js'
+
 /**
  * @import {ReportInvalidOverridesOptions, ReportSesViolationsOptions, SesViolationType} from '../internal.js'
  * @import {CompleteCompartmentDescriptorDataMap} from '../types.js'
@@ -18,7 +20,7 @@ import { log as defaultLog } from '../log.js'
  * @import {CompartmentMapDescriptor} from '@endo/compartment-mapper'
  */
 
-const { keys, values, entries } = Object
+const { entries, keys, values } = Object
 
 /**
  * Default number of suggestions to make when reporting invalid overrides
@@ -42,10 +44,10 @@ export const reportInvalidOverrides = (
   compartmentMap,
   dataMap,
   {
-    policyOverride,
-    policyOverridePath,
     log = defaultLog,
     maxSuggestions = DEFAULT_MAX_OVERRIDE_SUGGESTIONS,
+    policyOverride,
+    policyOverridePath,
   }
 ) => {
   if (!policyOverride) {
@@ -58,6 +60,7 @@ export const reportInvalidOverrides = (
   const canonicalNames = new Set(
     values(compartmentMap.compartments).map((compartmentDescriptor) => {
       const data = dataMap.get(compartmentDescriptor.location)
+
       /* c8 ignore next */
       if (!data) {
         throw new GenerationError(
@@ -87,8 +90,8 @@ export const reportInvalidOverrides = (
    * Deduped `Set` of all canonical names found in policy overrides
    */
   const policyCanonicalNames = new Set([
-    ...resourceCanonicalNames,
     ...packagePolicyCanonicalNames,
+    ...resourceCanonicalNames,
   ])
 
   /**
@@ -105,6 +108,7 @@ export const reportInvalidOverrides = (
   // if we have any invalid overrides, we will search through the canonical names from the compartment map and make suggestions for the user to fix them
   if (invalidOverrides.length) {
     const searcher = new Searcher([...canonicalNames])
+
     /** @type {Map<string, string[]>} */
     const suggestions = new Map()
     for (const invalidOverride of invalidOverrides) {
@@ -114,9 +118,9 @@ export const reportInvalidOverrides = (
       }
     }
 
-    let msg = `The following resource(s) provided in policy overrides`
+    let msg = 'The following resource(s) provided in policy overrides'
     msg += policyOverridePath ? ` (${hrPath(policyOverridePath)})` : ''
-    msg += ` were not found and may be invalid:\n`
+    msg += ' were not found and may be invalid:\n'
     msg += invalidOverrides
       .map((invalidOverride) => {
         if (suggestions.has(invalidOverride)) {

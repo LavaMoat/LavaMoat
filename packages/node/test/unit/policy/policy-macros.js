@@ -1,6 +1,7 @@
 import '../../../src/preamble.js'
 
 import { fileURLToPath } from 'node:url'
+
 import { generatePolicy } from '../../../src/policy-gen/generate.js'
 import { isPolicy } from '../../../src/policy-util.js'
 import { isFunction } from '../../../src/util.js'
@@ -78,11 +79,11 @@ export function createGeneratePolicyMacros(test) {
       const { readPowers } = await scaffoldFixture(content, { sourceType })
 
       const actualPolicy = await generatePolicy('/entry.js', {
-        readPowers,
         policyOverride:
           'policyOverride' in expectedPolicy
             ? expectedPolicy.policyOverride
             : undefined,
+        readPowers,
       })
 
       if (isPolicy(expectedPolicy)) {
@@ -111,6 +112,7 @@ export function createGeneratePolicyMacros(test) {
    * otherwise a snapshot is taken.
    */
   const testPolicyForInlineModule = test.macro(
+    //
     /**
      * @type {MacroDeclarationOptions<
      *   [
@@ -245,6 +247,7 @@ export function createGeneratePolicyMacros(test) {
         if (title) {
           return title
         }
+
         /** @type {TestPolicyForJSONOptions['expected']} */
         let expected
         if (isPolicy(expectedPolicyOrOptions)) {
@@ -318,7 +321,7 @@ const SCAFFOLD_SCRIPT_FIXTURE = fileURLToPath(
 async function scaffoldFixture(content, { sourceType = 'module' } = {}) {
   const fixture =
     sourceType === 'module' ? SCAFFOLD_MODULE_FIXTURE : SCAFFOLD_SCRIPT_FIXTURE
-  const { vol, readPowers } = await loadJSONFixture(
+  const { readPowers, vol } = await loadJSONFixture(
     new URL(fixture, import.meta.url)
   )
 
@@ -326,5 +329,5 @@ async function scaffoldFixture(content, { sourceType = 'module' } = {}) {
     encoding: 'utf8',
   })
 
-  return { vol, readPowers }
+  return { readPowers, vol }
 }

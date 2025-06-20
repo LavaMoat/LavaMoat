@@ -7,6 +7,7 @@
  */
 import nodeFs from 'node:fs'
 import nodePath from 'node:path'
+
 import { defaultReadPowers } from '../compartment/power.js'
 import {
   DEFAULT_POLICY_FILENAME,
@@ -46,7 +47,7 @@ import { compartmentMapToPolicy } from './to-policy.js'
  */
 const shouldWriteDebugPolicy = (
   policyDebugPath,
-  { shouldWrite = false, debug = false } = {}
+  { debug = false, shouldWrite = false } = {}
 ) => !!(shouldWrite && debug && policyDebugPath)
 
 /**
@@ -82,35 +83,35 @@ const shouldWriteDebugPolicy = (
 const generate = async (
   entrypoint,
   {
-    readPowers = defaultReadPowers,
     debug = false,
-    policyOverride,
+    dev = false,
     isBuiltin,
     log = defaultLog,
-    dev = false,
-    trustRoot = DEFAULT_TRUST_ROOT_COMPARTMENT,
+    policyOverride,
     projectRoot = process.cwd(),
+    readPowers = defaultReadPowers,
+    trustRoot = DEFAULT_TRUST_ROOT_COMPARTMENT,
     ...archiveOpts
   } = {}
 ) => {
   log.debug('Loading compartment map…')
-  const { compartmentMap, sources, renames, dataMap } =
+  const { compartmentMap, dataMap, renames, sources } =
     await loadCompartmentMapForPolicy(entrypoint, {
       ...archiveOpts,
-      log,
       dev,
-      readPowers,
+      log,
       policyOverride,
-      trustRoot,
       projectRoot,
+      readPowers,
+      trustRoot,
     })
 
   /** @type {CompartmentMapToPolicyOptions} */
   const baseOpts = {
-    readPowers,
-    policyOverride,
     isBuiltin,
     log,
+    policyOverride,
+    readPowers,
     trustRoot,
   }
 
@@ -126,7 +127,7 @@ const generate = async (
     opts
   )
 
-  return { policy, compartmentMap, dataMap }
+  return { compartmentMap, dataMap, policy }
 }
 
 /**
@@ -141,18 +142,18 @@ const generate = async (
 export const generatePolicy = async (
   entrypoint,
   {
-    policyDebugPath: rawPolicyDebugPath,
-    policyPath: rawPolicyPath,
-    policyOverridePath: rawPolicyOverridePath,
-    policyOverride,
-    writableFs = nodeFs,
-    readPowers = defaultReadPowers,
-    write: shouldWrite = false,
     debug,
-    readFile = nodeFs.promises.readFile,
     log = defaultLog,
-    trustRoot = DEFAULT_TRUST_ROOT_COMPARTMENT,
+    policyDebugPath: rawPolicyDebugPath,
+    policyOverride,
+    policyOverridePath: rawPolicyOverridePath,
+    policyPath: rawPolicyPath,
     projectRoot = process.cwd(),
+    readFile = nodeFs.promises.readFile,
+    readPowers = defaultReadPowers,
+    trustRoot = DEFAULT_TRUST_ROOT_COMPARTMENT,
+    writableFs = nodeFs,
+    write: shouldWrite = false,
     ...generateOpts
   } = {}
 ) => {
@@ -219,8 +220,10 @@ export const generatePolicy = async (
    * @type {LavaMoatPolicy}
    */
   let policy
+
   /** @type {CompartmentMapDescriptor} */
   let compartmentMap
+
   /** @type {CompleteCompartmentDescriptorDataMap} */
   let dataMap
 
@@ -232,21 +235,22 @@ export const generatePolicy = async (
    * then extract everything except the `debugInfo` prop, and write _that_ to
    * {@link policy}
    */
-  if (shouldWriteDebugPolicy(policyDebugPath, { shouldWrite, debug })) {
+  if (shouldWriteDebugPolicy(policyDebugPath, { debug, shouldWrite })) {
     log.info(`Generating "debug" LavaMoat policy from ${niceEntrypointPath}`)
+
     /** @type {LavaMoatPolicyDebug} */
     let debugPolicy
     ;({
-      policy: debugPolicy,
       compartmentMap,
       dataMap,
+      policy: debugPolicy,
     } = await generate(entrypoint, {
       ...generateOpts,
-      readPowers,
-      trustRoot,
       debug: true,
       policyOverride,
       projectRoot,
+      readPowers,
+      trustRoot,
     }))
     await writePolicy(policyDebugPath, debugPolicy, { fs: writableFs })
     const nicePolicyDebugPath = hrPath(policyDebugPath)
@@ -260,12 +264,12 @@ export const generatePolicy = async (
     policy = corePolicy
   } else {
     log.info(`Generating LavaMoat policy from ${niceEntrypointPath}…`)
-    ;({ policy, compartmentMap, dataMap } = await generate(entrypoint, {
+    ;({ compartmentMap, dataMap, policy } = await generate(entrypoint, {
       ...generateOpts,
-      trustRoot,
-      readPowers,
       policyOverride,
       projectRoot,
+      readPowers,
+      trustRoot,
     }))
   }
 

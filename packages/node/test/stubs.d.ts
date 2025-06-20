@@ -3,12 +3,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 declare module 'lavamoat-core/test/util.js' {
   export interface PlatformRunScenarioOpts {
+    log?: (...args: any[]) => void
+    runWithPrecompiledModules?: boolean
     // NOTE: this loads scenario.d.ts!
     // ALSO: it cannot be replaced with an import statement because reasons
     // eslint-disable-next-line @typescript-eslint/consistent-type-imports
     scenario: import('lavamoat-core/test/scenarios/scenario.js').NormalizedScenario<Result>
-    runWithPrecompiledModules?: boolean
-    log?: (...args: any[]) => void
   }
 
   export type PlatformRunScenario<Result = unknown> = (
