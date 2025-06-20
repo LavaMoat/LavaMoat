@@ -243,8 +243,26 @@ export type RequiredReadNowPowers = ReadonlyArray<
  * @internal
  */
 export type ReportInvalidOverridesOptions = ComposeOptions<
-  [WithPolicyOverride, WithPolicyOverridePath, WithLog]
+  [
+    WithPolicyOverride,
+    /**
+     * `policyOverridePath` is used only for display purposes; we do not
+     * actually attempt to read the policy override file
+     */
+    WithPolicyOverridePath,
+    WithLog,
+    {
+      maxSuggestions?: number
+    },
+  ]
 >
+
+/**
+ * Options for `reportSesViolations()`
+ *
+ * @internal
+ */
+export type ReportSesViolationsOptions = ComposeOptions<[WithLog]>
 
 /**
  * Result of `generatePolicy()`
@@ -391,6 +409,7 @@ export type MakeGetHintsOptions = ComposeOptions<
  *
  * @remarks
  * Exported due to use within {@link CompartmentMapToPolicyOptions}
+ * @internal
  */
 
 export type BuildModuleRecordsOptions = ComposeOptions<
@@ -399,6 +418,8 @@ export type BuildModuleRecordsOptions = ComposeOptions<
 
 /**
  * Options for `compartmentMapToPolicy()`
+ *
+ * @internal
  */
 export type CompartmentMapToPolicyOptions = ComposeOptions<
   [BuildModuleRecordsOptions, WithPolicyOverride, WithDebug, WithTrustRoot]
@@ -407,6 +428,8 @@ export type CompartmentMapToPolicyOptions = ComposeOptions<
 /**
  * Options for `compartmentMapToPolicy()` wherein a `LavaMoatDebugPolicy` will
  * be generated
+ *
+ * @internal
  */
 export type CompartmentMapToDebugPolicyOptions = SetFieldType<
   CompartmentMapToPolicyOptions,
@@ -414,6 +437,11 @@ export type CompartmentMapToDebugPolicyOptions = SetFieldType<
   true
 >
 
+/**
+ * Options for `makeModuleResolver()`
+ *
+ * @internal
+ */
 export type MakeModuleResolverOptions = ComposeOptions<
   [WithLog, WithReadPowers]
 >
@@ -421,6 +449,8 @@ export type MakeModuleResolverOptions = ComposeOptions<
 /**
  * A function which accepts a `ModuleDescriptor` and returns an absolute path to
  * the module it represents
+ *
+ * @internal
  */
 export type ResolveModuleDescriptorFn = (
   descriptor: ModuleDescriptor
@@ -429,9 +459,17 @@ export type ResolveModuleDescriptorFn = (
 /**
  * A function which accepts a compartment label and returns an absolute path to
  * the compartment
+ *
+ * @internal
  */
 export type ResolveCompartmentFn = (label: string) => string | undefined
 
+/**
+ * Object used by `PolicyGeneratorContext` to resolve modules for translation
+ * into `LavamoatModuleRecord`s `importMap`s
+ *
+ * @internal
+ */
 export interface ModuleResolver {
   resolveModuleDescriptor: ResolveModuleDescriptorFn
   resolveCompartment: ResolveCompartmentFn
