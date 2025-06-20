@@ -1,0 +1,12 @@
+{
+  "name": "fixture",
+  "version": "0.0.0",
+  "private": true,
+  "workspaces": [
+    "*"
+  ],
+  "scripts": {
+    "install": "echo \"Do not install fixures!\"; exit 1",
+    "start": "npm run --workspaces start"
+  }
+}

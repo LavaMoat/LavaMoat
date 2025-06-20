@@ -6,7 +6,7 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "start": "npx snapshot-fs ../../json-fixture/dynamic.json"
+    "start": "npx snapshot-fs \"$npm_config_local_prefix/../json-fixture/$npm_package_name.json\""
   },
   "dependencies": {
     "dummy": "0.0.0",

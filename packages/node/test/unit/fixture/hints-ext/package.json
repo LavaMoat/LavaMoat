@@ -1,0 +1,13 @@
+{
+  "name": "hints-ext",
+  "version": "0.0.0",
+  "description": "",
+  "private": true,
+  "scripts": {
+    "start": "npx snapshot-fs \"$npm_config_local_prefix/../json-fixture/$npm_package_name.json\""
+  },
+  "devDependencies": {
+    "fugs": "0.0.0",
+    "tool": "0.0.0"
+  }
+}

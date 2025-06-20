@@ -1,12 +1,12 @@
 {
-  "name": "hello",
+  "name": "static-native",
   "version": "0.0.0",
   "type": "module",
   "description": "this code actually runs",
   "private": true,
   "main": "index.js",
   "scripts": {
-    "start": "npx snapshot-fs ../../json-fixture/static-native.json"
+    "start": "npx snapshot-fs \"$npm_config_local_prefix/../json-fixture/$npm_package_name.json\""
   },
   "dependencies": {
     "hello_world": "0.0.0"

@@ -1,0 +1,102 @@
+[
+  0,
+  {},
+  {
+    "README.md": [
+      1,
+      {},
+      "data:application/octet-stream;base64,VGhpcyBpcyBsaWtlIGBoaW50c2AgZXhjZXB0IHdlIGFkZCBhIGhpbnQgZm9yIGEgYnVpbHRpbiBfd2hpY2ggc2hvdWxkIG5vdCB3b3JrXy4K"
+    ],
+    "node_modules": [
+      0,
+      {},
+      {
+        "blinken": [
+          0,
+          {},
+          {
+            "index.js": [
+              1,
+              {},
+              "data:application/octet-stream;base64,Y29uc3Qge2Zvcm1hdH0gPSByZXF1aXJlKCdub2RlOnV0aWwnKQoKbW9kdWxlLmV4cG9ydHMgPSBmb3JtYXQoJyVzJywgJ25vZCcpCg=="
+            ],
+            "package.json": [
+              1,
+              {},
+              "data:application/octet-stream;base64,ewogICJuYW1lIjogImJsaW5rZW4iLAogICJ2ZXJzaW9uIjogIjAuMC4wIiwKICAiZGVzY3JpcHRpb24iOiAibmVlZHMgcG9saWN5Igp9Cg=="
+            ]
+          }
+        ],
+        "fred": [
+          0,
+          {},
+          {
+            "index.js": [
+              1,
+              {},
+              "data:application/octet-stream;base64,Y29uc3Qge2Zvcm1hdH0gPSByZXF1aXJlKCdub2RlOnV0aWwnKQoKbW9kdWxlLmV4cG9ydHMgPSBmb3JtYXQoJyVzJywgJ2ZyZWQnKQo="
+            ],
+            "package.json": [
+              1,
+              {},
+              "data:application/octet-stream;base64,ewogICJuYW1lIjogImZyZWQiLAogICJ2ZXJzaW9uIjogIjAuMC4wIiwKICAiZGVzY3JpcHRpb24iOiAibm90aGluZyBzcGVjaWFsIGhlcmUiCn0K"
+            ]
+          }
+        ],
+        "fugs": [
+          0,
+          {},
+          {
+            "index.js": [
+              1,
+              {},
+              "data:application/octet-stream;base64,Y29uc3Qge2Zvcm1hdH0gPSByZXF1aXJlKCdub2RlOnV0aWwnKQoKbW9kdWxlLmV4cG9ydHMgPSBmb3JtYXQoJyVzJywgJ2ZyZWQnKQo="
+            ],
+            "package.json": [
+              1,
+              {},
+              "data:application/octet-stream;base64,ewogICJuYW1lIjogImZ1Z3MiLAogICJ2ZXJzaW9uIjogIjAuMC4wIiwKICAiZGVzY3JpcHRpb24iOiAib25seSByZWZlcmVuY2VkIGluIHBvbGljeSBvdmVycmlkZSIKfQo="
+            ]
+          }
+        ],
+        "tool": [
+          0,
+          {},
+          {
+            "index.js": [
+              1,
+              {},
+              "data:application/octet-stream;base64,aW1wb3J0IG5vZCBmcm9tICd3aW5rZW4nCmV4cG9ydCBjb25zdCBoZWxsbyA9IGB3aW5rZW4sIGJsaW5rZW4gJiAke25vZH1gCg=="
+            ],
+            "package.json": [
+              1,
+              {},
+              "data:application/octet-stream;base64,ewogICJuYW1lIjogInRvb2wiLAogICJ2ZXJzaW9uIjogIjAuMC4wIiwKICAidHlwZSI6ICJtb2R1bGUiLAogICJkZXNjcmlwdGlvbiI6ICIiLAogICJwcml2YXRlIjogdHJ1ZSwKICAibWFpbiI6ICJpbmRleC5qcyIsCiAgImRlcGVuZGVuY2llcyI6IHsKICAgICJmdWdzIjogIjAuMC4wIiwKICAgICJ3aW5rZW4iOiAiMC4wLjAiCiAgfQp9Cg=="
+            ]
+          }
+        ],
+        "winken": [
+          0,
+          {},
+          {
+            "index.js": [
+              1,
+              {},
+              "data:application/octet-stream;base64,Y29uc3Qge2Zvcm1hdH0gPSByZXF1aXJlKCdub2RlOnV0aWwnKQpjb25zdCBibGlua2VuID0gJ2JsaW5rZW4nCnJlcXVpcmUoJ2ZyZWQnKQptb2R1bGUuZXhwb3J0cyA9IGZvcm1hdCgnJXMnLCByZXF1aXJlKGJsaW5rZW4pKTsK"
+            ],
+            "package.json": [
+              1,
+              {},
+              "data:application/octet-stream;base64,ewogICJuYW1lIjogIndpbmtlbiIsCiAgInZlcnNpb24iOiAiMC4wLjAiLAogICJkZXBlbmRlbmNpZXMiOiB7CiAgICAiYmxpbmtlbiI6ICIwLjAuMCIsCiAgICAiZnJlZCI6ICIwLjAuMCIKICB9LAogICJkZXNjcmlwdGlvbiI6ICJyZXF1aXJlcyBibGlua2VuIHZpYSByZWxhdGl2ZSBwYXRoIgp9Cg=="
+            ]
+          }
+        ]
+      }
+    ],
+    "package.json": [
+      1,
+      {},
+      "data:application/octet-stream;base64,ewogICJuYW1lIjogImhpbnRzIiwKICAidmVyc2lvbiI6ICIwLjAuMCIsCiAgInR5cGUiOiAibW9kdWxlIiwKICAiZGVzY3JpcHRpb24iOiAiIiwKICAicHJpdmF0ZSI6IHRydWUsCiAgImRldkRlcGVuZGVuY2llcyI6IHsKICAgICJ0b29sIjogIjAuMC4wIgogIH0sCiAgInNjcmlwdHMiOiB7CiAgICAic3RhcnQiOiAibnB4IHNuYXBzaG90LWZzIFwiJG5wbV9jb25maWdfbG9jYWxfcHJlZml4Ly4uL2pzb24tZml4dHVyZS8kbnBtX3BhY2thZ2VfbmFtZS5qc29uXCIiCiAgfQp9Cg=="
+    ]
+  }
+]

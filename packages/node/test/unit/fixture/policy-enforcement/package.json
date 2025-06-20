@@ -5,6 +5,6 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "start": "npx snapshot-fs ../../json-fixture/policy-enforcement.json"
+    "start": "npx snapshot-fs \"$npm_config_local_prefix/../json-fixture/$npm_package_name.json\""
   }
 }
