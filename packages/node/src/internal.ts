@@ -7,6 +7,7 @@
  */
 
 import type {
+  AdditionalPackageDetailsMap,
   CompartmentDescriptor,
   CompartmentMapDescriptor,
   ModuleDescriptor,
@@ -318,6 +319,8 @@ export type MakeNodeCompartmentMapOptions = ComposeOptions<
     WithDev,
     WithTrustRoot,
     WithPolicy,
+    WithPolicyOverrideOnly,
+    WithProjectRoot,
   ]
 >
 
@@ -347,6 +350,12 @@ export type MakeNodeCompartmentMapResult<
    * Extra metadata about the `CompartmentMapDescriptor`
    */
   nodeDataMap: CompleteCompartmentDescriptorDataMap<T>
+  /**
+   * Details for "hints" to provide to `captureFromMap()`
+   *
+   * Will be an empty object if no `PolicyHints` appear in policy overrides
+   */
+  additionalPackageDetails: AdditionalPackageDetailsMap
 }
 
 /**
