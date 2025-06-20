@@ -9,10 +9,7 @@
 import { createModuleInspector } from 'lavamoat-core'
 import { isBuiltin as defaultIsBuiltin } from 'node:module'
 import { defaultReadPowers } from '../compartment/power.js'
-import {
-  DEFAULT_TRUST_ROOT_COMPARTMENT,
-  SES_VIOLATION_TYPES,
-} from '../constants.js'
+import { DEFAULT_TRUST_ROOT_COMPARTMENT } from '../constants.js'
 import { GenerationError } from '../error.js'
 import { hrLabel } from '../format.js'
 import { log as defaultLog } from '../log.js'
@@ -20,6 +17,7 @@ import { toPath } from '../util.js'
 import { LMRCache } from './lmr-cache.js'
 import { makeModuleResolver } from './module-resolver.js'
 import { PolicyGeneratorContext } from './policy-gen-context.js'
+import { reportSesViolations } from './report.js'
 import { makeSesCompatListener } from './ses-compat.js'
 
 /**
@@ -103,7 +101,7 @@ const moduleRecordsToPolicy = (
   inspector.off('compat-warning', compatWarningListener)
 
   if (perPackageWarnings.size) {
-    reportSesViolations(perPackageWarnings, foundViolationTypes, { log })
+    reportSesViolations(perPackageWarnings, { log })
   }
 
   return inspector.generatePolicy({ policyOverride })
@@ -225,39 +223,6 @@ export const buildModuleRecords = (
   }, /** @type {Set<LavamoatModuleRecord>} */ (new Set()))
 
   return [...moduleRecords]
-}
-
-/**
- * Logs SES violation warnings and suggested action items
- *
- * @param {Map<string, Partial<Record<SesViolationType, string[]>>>} perPackageWarnings
- * @param {Set<SesViolationType>} foundViolationTypes
- * @param {{ log?: Loggerr }} [options]
- * @returns {void}
- * @internal
- */
-const reportSesViolations = (
-  perPackageWarnings,
-  foundViolationTypes,
-  { log = defaultLog } = {}
-) => {
-  for (const [packageName, warningsByType] of perPackageWarnings) {
-    for (const [, warnings] of entries(warningsByType)) {
-      log.warning(
-        `Package ${hrLabel(packageName)} contains potential SES incompatibilities at the following locations:\n${warnings.join('\n')}`
-      )
-    }
-  }
-  if (foundViolationTypes.has(SES_VIOLATION_TYPES.DynamicRequires)) {
-    log.warning(
-      'Dynamic requires inhibit policy generation; determine the required packages, edit policy overrides and re-run policy generation.'
-    )
-  }
-  if (foundViolationTypes.has(SES_VIOLATION_TYPES.StrictModeViolation)) {
-    log.warning(
-      'Strict-mode violations will cause runtime errors under LavaMoat; patching is advised.'
-    )
-  }
 }
 
 /**
