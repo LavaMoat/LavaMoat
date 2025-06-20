@@ -9,6 +9,7 @@
 import type {
   CompartmentDescriptor,
   CompartmentMapDescriptor,
+  ModuleDescriptor,
   ReadNowPowers,
   ReadNowPowersProp,
   Sources,
@@ -413,3 +414,26 @@ export type CompartmentMapToDebugPolicyOptions = SetFieldType<
   'debug',
   true
 >
+
+export type MakeModuleResolverOptions = ComposeOptions<
+  [WithLog, WithReadPowers]
+>
+
+/**
+ * A function which accepts a `ModuleDescriptor` and returns an absolute path to
+ * the module it represents
+ */
+export type ResolveModuleDescriptorFn = (
+  descriptor: ModuleDescriptor
+) => string | undefined
+
+/**
+ * A function which accepts a compartment label and returns an absolute path to
+ * the compartment
+ */
+export type ResolveCompartmentFn = (label: string) => string | undefined
+
+export interface ModuleResolver {
+  resolveModuleDescriptor: ResolveModuleDescriptorFn
+  resolveCompartment: ResolveCompartmentFn
+}

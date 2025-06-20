@@ -16,25 +16,33 @@ import {
 import { GenerationError } from '../error.js'
 import { hrLabel, hrPath } from '../format.js'
 import { log as fallbackLog } from '../log.js'
-import { hasValue } from '../util.js'
 
 /**
  * @import {ReadNowPowers,
  *   CompartmentDescriptor,
  *   ModuleDescriptor,
- *   ModuleSource,
+ *   ModuleSource as ModuleSourceWrapper,
  *   CompartmentSources,
  *   FileURLToPathFn} from '@endo/compartment-mapper'
- * @import {VirtualModuleSource} from 'ses'
+ * @import {StaticModuleType, ModuleSource} from 'ses'
  * @import {Loggerr} from 'loggerr'
  * @import {LMRCache} from './lmr-cache.js'
- * @import {PolicyGeneratorContextOptions,
+ * @import {ModuleResolver, PolicyGeneratorContextOptions,
+ * ResolveCompartmentFn,
+ * ResolveModuleDescriptorFn,
  *   SimpleLavamoatModuleRecordOptions} from '../internal.js'
  * @import {CanonicalName, CompartmentDescriptorData} from '../types.js'
  * @import {LavamoatModuleRecord, IsBuiltinFn} from 'lavamoat-core'
  */
 
 const { entries, keys, hasOwn, freeze } = Object
+
+/**
+ * @param {StaticModuleType} value
+ * @returns {value is ModuleSource}
+ */
+const isModuleSource = (value) =>
+  hasOwn(value, 'imports') && hasOwn(value, 'exports')
 
 /**
  * Handles creation of {@link LavamoatModuleRecord} objects for individual
@@ -62,16 +70,6 @@ export class PolicyGeneratorContext {
    * @internal
    */
   compartmentDescriptor
-
-  /**
-   * Mapping of renamed compartments
-   *
-   * @remarks
-   * Exposed for debugging
-   * @type {Readonly<Record<string, string>>}
-   * @internal
-   */
-  renames
 
   /**
    * Read powers
@@ -128,6 +126,13 @@ export class PolicyGeneratorContext {
    */
   #data
 
+  /** @type {ResolveModuleDescriptorFn} */
+  #resolveModuleDescriptor
+
+  /**
+   * @type {ResolveCompartmentFn}
+   */
+  #resolveCompartment
   /**
    * Sets some properties
    *
@@ -141,14 +146,14 @@ export class PolicyGeneratorContext {
    *   associated {@link CompartmentDescriptor}
    * @param {Readonly<CompartmentDescriptorData>} data Data associated with the
    *   `CompartmentDescriptor`
-   * @param {Readonly<Record<string, string>>} renames
+   * @param {ModuleResolver} moduleResolver
    * @param {Readonly<LMRCache>} lmrCache
    * @param {Readonly<PolicyGeneratorContextOptions<RootModule>>} options
    */
   constructor(
     compartmentDescriptor,
     data,
-    renames,
+    { resolveModuleDescriptor, resolveCompartment },
     lmrCache,
     {
       rootModule,
@@ -161,12 +166,13 @@ export class PolicyGeneratorContext {
     this.#readPowers = readPowers
     this.#isBuiltin = isBuiltin
     this.compartmentDescriptor = compartmentDescriptor
-    this.renames = renames
     this.#log = log
     this.#rootModule = rootModule
     this.#missingModules = new Set()
     this.#filepaths = new Map()
     this.#data = freeze(data)
+    this.#resolveModuleDescriptor = resolveModuleDescriptor
+    this.#resolveCompartment = resolveCompartment
   }
 
   /**
@@ -180,32 +186,6 @@ export class PolicyGeneratorContext {
       !hasOwn(this.compartmentDescriptor.modules, specifier) &&
       this.#isBuiltin(specifier)
     )
-  }
-
-  /**
-   * Converts a `string` `file://` URL to a path, or an absolute path derived
-   * from a given `ModuleDescriptor`
-   *
-   * @remarks
-   * In Endo, the `compartment` is stored as a _string_ `file://` URL; hence the
-   * conversion.
-   * @param {ModuleDescriptor} descriptor Module descriptor
-   * @returns {string | undefined}
-   * @todo There may be a safer way to do this conversion
-   */
-  toPath(descriptor) {
-    // it might have a `compartment` and `module`
-    if (hasValue(descriptor, 'compartment') && hasValue(descriptor, 'module')) {
-      const location = this.renames[descriptor.compartment]
-      if (!location) {
-        throw new GenerationError(
-          `Compartment ${hrLabel(this.canonicalName)}: Rename map missing location for referenced compartment ${hrPath(descriptor.compartment)}`
-        )
-      }
-      return this.#readPowers.fileURLToPath(
-        new URL(descriptor.module, location)
-      )
-    }
   }
 
   /**
@@ -250,7 +230,7 @@ export class PolicyGeneratorContext {
     const moduleDescriptor = compartment.modules[specifier]
 
     if (moduleDescriptor) {
-      const filepath = this.toPath(moduleDescriptor)
+      const filepath = this.#resolveModuleDescriptor(moduleDescriptor)
       if (filepath) {
         filepaths.set(specifier, filepath)
         return filepath
@@ -298,18 +278,24 @@ export class PolicyGeneratorContext {
    * @template {string | void} [RootModule=void] Default is `void`
    * @param {Readonly<CompartmentDescriptor>} compartmentDescriptor
    * @param {Readonly<CompartmentDescriptorData>} data
-   * @param {Readonly<Record<string, string>>} renames
+   * @param {ModuleResolver} moduleResolver
    * @param {Readonly<LMRCache>} lmrCache
-   * @param {Readonly<PolicyGeneratorContextOptions<RootModule>>} opts
+   * @param {Readonly<PolicyGeneratorContextOptions<RootModule>>} options
    * @returns {PolicyGeneratorContext<RootModule>}
    */
-  static create(compartmentDescriptor, data, renames, lmrCache, opts = {}) {
+  static create(
+    compartmentDescriptor,
+    data,
+    moduleResolver,
+    lmrCache,
+    options = {}
+  ) {
     return new PolicyGeneratorContext(
       compartmentDescriptor,
       data,
-      renames,
+      moduleResolver,
       lmrCache,
-      opts
+      options
     )
   }
 
@@ -350,7 +336,7 @@ export class PolicyGeneratorContext {
    * references.
    *
    * @param {string} specifier
-   * @param {ModuleSource} source
+   * @param {ModuleSourceWrapper} source
    * @returns {LavamoatModuleRecord[]}
    */
   buildModuleRecordsForSource(
@@ -371,7 +357,7 @@ export class PolicyGeneratorContext {
 
     // `record` can be several different types, but for our purposes,
     // we can use `imports` as the discriminator
-    if (!hasOwn(record, 'imports')) {
+    if (!isModuleSource(record)) {
       // XXX: under what circumstances does this occur?
       throw new GenerationError(
         `StaticModuleType for source descriptor "${specifier}" in compartment "${this.canonicalName} missing prop: imports`
@@ -393,9 +379,7 @@ export class PolicyGeneratorContext {
     /**
      * The {@link LavamoatModuleRecord.importMap} prop
      */
-    const importMap = this.buildImportMap(
-      /** @type {VirtualModuleSource} */ (record).imports
-    )
+    const importMap = this.buildImportMap(record.imports)
 
     // careful with the distinction between the root MODULE and the root COMPARTMENT
     const isRoot = file === this.#rootModule
@@ -449,7 +433,9 @@ export class PolicyGeneratorContext {
     )
 
     if (this.#missingModules.size) {
-      const nicePath = hrPath(this.renames[this.compartmentDescriptor.location])
+      const nicePath = hrPath(
+        `${this.#resolveCompartment(this.compartmentDescriptor.location)}`
+      )
       let msg = `Package ${hrLabel(this.canonicalName)} (${nicePath}) references unresolvable module(s). This may be due to the module(s) not being installed, "optional" dependencies, or implcit dependencies unreferenced in ${hrPath(PACKAGE_JSON)}. ${chalk.italic('Execution will most likely fail')} unless accounted for in policy overrides:`
       for (const missingModule of this.#missingModules) {
         msg += `\n- ${chalk.yellow(missingModule)}`
