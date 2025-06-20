@@ -1,5 +1,5 @@
+import type { LavaMoatPolicy } from '@lavamoat/types'
 import type { ExecutionContext } from 'ava'
-import type { LavaMoatPolicy } from 'lavamoat-core'
 import type { NestedDirectoryJSON } from 'memfs'
 import { type ExecFileException } from 'node:child_process'
 import type { Merge, RequireAtLeastOne, Simplify } from 'type-fest'

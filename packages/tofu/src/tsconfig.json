@@ -3,9 +3,9 @@
   "compilerOptions": {
     "outDir": "../types",
     "paths": {
-      "lavamoat-core": ["../../core"]
-    }
+      "@lavamoat/types": ["../../types"],
+    },
   },
   "include": ["."],
-  "references": [{ "path": "../../core/tsconfig.json" }]
+  "references": [{ "path": "../../types/src/tsconfig.json" }],
 }
