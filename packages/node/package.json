@@ -53,6 +53,7 @@
     "@endo/evasive-transform": "2.0.0",
     "@types/node": "18.19.112",
     "chalk": "4.1.2",
+    "fast-fuzzy": "1.12.0",
     "lavamoat-core": "^16.5.0",
     "loggerr": "4.2.0",
     "ses": "1.14.0",

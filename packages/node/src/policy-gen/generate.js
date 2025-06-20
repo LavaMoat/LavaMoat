@@ -12,7 +12,7 @@ import {
   DEFAULT_POLICY_FILENAME,
   DEFAULT_TRUST_ROOT_COMPARTMENT,
 } from '../constants.js'
-import { hrLabel, hrPath } from '../format.js'
+import { hrPath } from '../format.js'
 import { assertAbsolutePath } from '../fs.js'
 import { log as defaultLog } from '../log.js'
 import { maybeReadPolicyOverride, writePolicy } from '../policy-util.js'
@@ -22,15 +22,12 @@ import {
   toPath,
 } from '../util.js'
 import { loadCompartmentMapForPolicy } from './policy-gen-compartment-map.js'
+import { reportInvalidOverrides } from './report.js'
 import { compartmentMapToPolicy } from './to-policy.js'
 
-const { keys, values } = Object
-
 /**
- * @import {GenerateOptions, GenerateResult, ReportInvalidOverridesOptions,
- *   CompartmentMapToPolicyOptions} from '../internal.js'
- * @import {GeneratePolicyOptions, CompleteCompartmentDescriptorDataMap,
- *   CompartmentDescriptorData} from '../types.js'
+ * @import {GenerateOptions, GenerateResult, CompartmentMapToPolicyOptions} from '../internal.js'
+ * @import {GeneratePolicyOptions, CompleteCompartmentDescriptorDataMap, MergedLavaMoatPolicy, MergedLavaMoatPolicyDebug} from '../types.js'
  * @import {LavaMoatPolicy, LavaMoatPolicyDebug} from 'lavamoat-core'
  * @import {SetFieldType} from 'type-fest'
  * @import {CompartmentMapDescriptor} from '@endo/compartment-mapper'
@@ -130,50 +127,6 @@ const generate = async (
   )
 
   return { policy, compartmentMap, dataMap }
-}
-
-/**
- * Reports policy override resources which weren't found on disk and are thus
- * not in the compartment map descriptor.
- *
- * @template {CompartmentMapDescriptor} T
- * @param {T} compartmentMap
- * @param {CompleteCompartmentDescriptorDataMap<T>} dataMap
- * @param {ReportInvalidOverridesOptions} options
- * @returns {void}
- */
-const reportInvalidOverrides = (
-  compartmentMap,
-  dataMap,
-  { policyOverride, policyOverridePath, log = defaultLog }
-) => {
-  if (!policyOverride) {
-    return
-  }
-
-  const canonicalNames = new Set(
-    values(compartmentMap.compartments).map(
-      (compartmentDescriptor) =>
-        /** @type {CompartmentDescriptorData} */ (
-          dataMap.get(compartmentDescriptor.location)
-        ).canonicalName
-    )
-  )
-
-  // TODO: use `Set.prototype.difference` once widely available
-  const invalidOverrides = keys(policyOverride.resources).filter(
-    (key) => !canonicalNames.has(key)
-  )
-
-  if (invalidOverrides.length) {
-    let msg = `The following resource(s) provided in policy overrides`
-    msg += policyOverridePath ? ` (${hrPath(policyOverridePath)})` : ''
-    msg += ` were not found and may be invalid:\n`
-    msg += invalidOverrides
-      .map((invalidOverride) => `  - ${hrLabel(invalidOverride)}`)
-      .join('\n')
-    log.warning(msg)
-  }
 }
 
 /**
