@@ -18,6 +18,7 @@ import { hrLabel } from '../format.js'
 import { log as defaultLog } from '../log.js'
 import { toPath } from '../util.js'
 import { LMRCache } from './lmr-cache.js'
+import { makeModuleResolver } from './module-resolver.js'
 import { PolicyGeneratorContext } from './policy-gen-context.js'
 import { makeSesCompatListener } from './ses-compat.js'
 
@@ -38,7 +39,7 @@ import { makeSesCompatListener } from './ses-compat.js'
  * @import {Loggerr} from 'loggerr'
  */
 
-const { entries, freeze } = Object
+const { entries, freeze, keys } = Object
 
 /**
  * Generate a LavaMoat debug policy from `LavamoatModuleRecord` objects.
@@ -91,19 +92,19 @@ const moduleRecordsToPolicy = (
     perPackageWarnings,
     foundViolationTypes,
     { log }
-        )
+  )
 
   inspector.on('compat-warning', compatWarningListener)
 
   for (const moduleRecord of moduleRecords) {
     inspector.inspectModule(moduleRecord)
-    }
+  }
 
   inspector.off('compat-warning', compatWarningListener)
 
   if (perPackageWarnings.size) {
     reportSesViolations(perPackageWarnings, foundViolationTypes, { log })
-    }
+  }
 
   return inspector.generatePolicy({ policyOverride })
 }
@@ -138,24 +139,35 @@ export const buildModuleRecords = (
 ) => {
   const lmrCache = LMRCache.create()
 
-  const entryCompartment =
-    compartmentMap.compartments[compartmentMap.entry.compartment]
+  const { compartments, entry } = compartmentMap
+  const entryCompartment = compartments[entry.compartment]
 
+  /* c8 ignore next */
   if (!entryCompartment) {
-    throw new GenerationError('Could not find entry compartment; this is a bug')
+    throw new GenerationError(
+      'Could not find entry compartment descriptor; this is a bug'
+    )
   }
 
   const compartmentRenames = freeze({ ...renames })
 
   const entrypointPath = toPath(entrypoint)
 
-  const contexts = entries(compartmentMap.compartments).reduce(
+  const moduleResolver = makeModuleResolver(
+    compartmentMap,
+    compartmentRenames,
+    { readPowers, log }
+  )
+  log.debug(
+    `Building building records for ${keys(compartments.length)} compartments…`
+  )
+  const contexts = entries(compartments).reduce(
     (acc, [compartmentName, compartmentDescriptor]) => {
       if (compartmentName in sources) {
         const data = dataMap.get(compartmentName)
         if (!data) {
           throw new ReferenceError(
-            `Could not find data for compartment ${compartmentName}; this is a bug`
+            `Could not find data for compartment descriptor ${hrLabel(compartmentName)}; this is a bug`
           )
         }
         const rootModule =
@@ -166,7 +178,7 @@ export const buildModuleRecords = (
         const context = PolicyGeneratorContext.create(
           compartmentDescriptor,
           data,
-          compartmentRenames,
+          moduleResolver,
           lmrCache,
           {
             rootModule,
@@ -202,9 +214,7 @@ export const buildModuleRecords = (
     }
 
     const compartmentSources = sources[compartmentName]
-    log.debug(
-      `${hrLabel(compartmentMap.compartments[compartmentName].label)}: building module records…`
-    )
+
     const records = context.buildModuleRecords(compartmentSources)
 
     for (const record of records) {

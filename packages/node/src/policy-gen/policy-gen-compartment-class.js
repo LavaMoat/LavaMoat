@@ -7,7 +7,6 @@
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { GenerationError } from '../error.js'
-import { hrLabel } from '../format.js'
 import { log as defaultLog } from '../log.js'
 import { hasValue, isObject } from '../util.js'
 
@@ -183,7 +182,7 @@ const makeGetValidCompartmentDescriptor = (compartmentMap) => {
 const makeGetOverrideHints = (
   dataMap,
   getValidCompartmentDescriptor,
-  { policyOverride, log = defaultLog } = {}
+  { policyOverride, log: _log = defaultLog } = {}
 ) => {
   if (!policyOverride) {
     return () => new Set()
@@ -282,10 +281,6 @@ const makeGetOverrideHints = (
         // for linking and finding compartments
         hints.add(moduleDescriptorName)
       }
-    }
-
-    if (hints.size) {
-      log.debug(`${hrLabel(canonicalName)} - ${hints.size} hint(s) enqueued`)
     }
 
     return hints
