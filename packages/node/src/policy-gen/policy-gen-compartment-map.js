@@ -82,17 +82,15 @@ export const loadCompartmentMapForPolicy = async (
   let nodeDataMap
 
   try {
-    // eslint-disable-next-line @jessie.js/safe-await-separator
-    ;({ nodeCompartmentMap, nodeDataMap } = await makeNodeCompartmentMap(
-      entrypointPath,
-      {
+    ;({ nodeCompartmentMap, nodeDataMap } =
+      // eslint-disable-next-line @jessie.js/safe-await-separator
+      await makeNodeCompartmentMap(entrypointPath, {
         readPowers,
         dev,
         decorators,
         log,
         trustRoot,
-      }
-    ))
+      }))
   } catch (err) {
     throw new GenerationError(
       `Failed to create compartment map for policy generation`,
@@ -104,7 +102,7 @@ export const loadCompartmentMapForPolicy = async (
   const PolicyGenCompartment = makePolicyGenCompartment(
     nodeCompartmentMap,
     nodeDataMap,
-    policyOverride
+    { policyOverride, log }
   )
 
   /** @type {CaptureLiteOptions} */
