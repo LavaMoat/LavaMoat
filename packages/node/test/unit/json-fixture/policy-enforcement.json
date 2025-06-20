@@ -53,7 +53,7 @@
     "package.json": [
       1,
       {},
-      "data:application/octet-stream;base64,ewogICJuYW1lIjogInBvbGljeS1lbmZvcmNlbWVudCIsCiAgInZlcnNpb24iOiAiMS4wLjAiLAogICJ0eXBlIjogIm1vZHVsZSIsCiAgInByaXZhdGUiOiB0cnVlLAogICJtYWluIjogImluZGV4LmpzIiwKICAic2NyaXB0cyI6IHsKICAgICJzdGFydCI6ICJucHggc25hcHNob3QtZnMgLi4vLi4vanNvbi1maXh0dXJlL3BvbGljeS1lbmZvcmNlbWVudC5qc29uIgogIH0KfQo="
+      "data:application/octet-stream;base64,ewogICJuYW1lIjogInBvbGljeS1lbmZvcmNlbWVudCIsCiAgInZlcnNpb24iOiAiMS4wLjAiLAogICJ0eXBlIjogIm1vZHVsZSIsCiAgInByaXZhdGUiOiB0cnVlLAogICJtYWluIjogImluZGV4LmpzIiwKICAic2NyaXB0cyI6IHsKICAgICJzdGFydCI6ICJucHggc25hcHNob3QtZnMgXCIkbnBtX2NvbmZpZ19sb2NhbF9wcmVmaXgvLi4vanNvbi1maXh0dXJlLyRucG1fcGFja2FnZV9uYW1lLmpzb25cIiIKICB9Cn0K"
     ]
   }
 ]

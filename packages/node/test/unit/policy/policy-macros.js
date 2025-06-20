@@ -1,5 +1,6 @@
 import '../../../src/preamble.js'
 
+import { Loggerr } from 'loggerr'
 import { fileURLToPath } from 'node:url'
 import { generatePolicy } from '../../../src/policy-gen/generate.js'
 import { isPolicy } from '../../../src/policy-util.js'
@@ -9,7 +10,6 @@ import {
   JSON_FIXTURE_DIR_URL,
   loadJSONFixture,
 } from '../json-fixture-util.js'
-
 /**
  * @import {ValueOf} from 'type-fest'
  * @import {TestPolicyMacroOptions, TestPolicyForJSONOptions, ScaffoldFixtureResult, ScaffoldFixtureOptions} from './types.js'
@@ -17,6 +17,7 @@ import {
  * @import {LavaMoatPolicy} from 'lavamoat-core'
  */
 
+const { keys } = Object
 /**
  * Used by inner function in {@link createGeneratePolicyMacros} to determine
  * which scaffold to use
@@ -52,6 +53,22 @@ export const InlineSourceTypes = /** @type {const} */ ({
  * @internal
  */
 export function createGeneratePolicyMacros(test) {
+  // suppress all logging by default
+  const defaultLogger = new Loggerr({
+    formatter: 'cli',
+    streams: [
+      process.stderr,
+      process.stderr,
+      process.stderr,
+      process.stderr,
+      process.stderr,
+      process.stderr,
+      process.stderr,
+      process.stderr,
+    ],
+    level: process.env.LAVAMOAT_DEBUG ? Loggerr.DEBUG : Loggerr.EMERGENCY,
+  })
+
   /**
    * Generic macro _declaration_ (not macro itself) for testing policy
    * generation against source code provided inline.
@@ -78,6 +95,7 @@ export function createGeneratePolicyMacros(test) {
       const { readPowers } = await scaffoldFixture(content, { sourceType })
 
       const actualPolicy = await generatePolicy('/entry.js', {
+        log: 'log' in expectedPolicy ? expectedPolicy.log : defaultLogger,
         readPowers,
         policyOverride:
           'policyOverride' in expectedPolicy
@@ -207,13 +225,20 @@ export function createGeneratePolicyMacros(test) {
           options?.jsonEntrypoint ?? DEFAULT_JSON_FIXTURE_ENTRY_POINT,
           {
             ...options,
+            log: options?.log ?? defaultLogger,
             readPowers,
+            projectRoot: '/',
           }
+        )
+
+        const hasNonEmptyOverride = !!(
+          options?.policyOverride &&
+          keys(options.policyOverride.resources).length
         )
 
         // if overrides provided, then we will make a second check that
         // asserts `actualPolicy` is a superset of the override
-        t.plan(options?.policyOverride ? 2 : 1)
+        t.plan(hasNonEmptyOverride ? 2 : 1)
 
         if (isPolicy(expected)) {
           t.deepEqual(
@@ -227,10 +252,12 @@ export function createGeneratePolicyMacros(test) {
           t.snapshot(actualPolicy, 'policy does not match snapshot')
         }
 
-        if (options?.policyOverride) {
+        if (hasNonEmptyOverride) {
           t.like(
-            actualPolicy,
-            options.policyOverride,
+            actualPolicy.resources,
+            /** @type {LavaMoatPolicy} */ (
+              /** @type {TestPolicyForJSONOptions} */ (options).policyOverride
+            ).resources,
             'policy is not a superset of overrides'
           )
         }
