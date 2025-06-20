@@ -12,24 +12,22 @@ import {
   DEFAULT_POLICY_FILENAME,
   DEFAULT_TRUST_ROOT_COMPARTMENT,
 } from '../constants.js'
+import { hrPath } from '../format.js'
 import { assertAbsolutePath } from '../fs.js'
 import { log as defaultLog } from '../log.js'
 import { maybeReadPolicyOverride, writePolicy } from '../policy-util.js'
 import {
-  hrLabel,
-  hrPath,
   makeDefaultPolicyDebugPath,
   makeDefaultPolicyOverridePath,
   toPath,
 } from '../util.js'
-import { loadCompartmentMap } from './policy-gen-compartment-map.js'
+import { loadCompartmentMapForPolicy } from './policy-gen-compartment-map.js'
+import { reportInvalidOverrides } from './report.js'
 import { compartmentMapToPolicy } from './to-policy.js'
 
-const { keys, values } = Object
-
 /**
- * @import {GenerateOptions, GenerateResult, ReportInvalidOverridesOptions, CompartmentMapToPolicyOptions} from '../internal.js'
- * @import {GeneratePolicyOptions} from '../types.js'
+ * @import {GenerateOptions, GenerateResult, CompartmentMapToPolicyOptions} from '../internal.js'
+ * @import {GeneratePolicyOptions, CompleteCompartmentDescriptorDataMap} from '../types.js'
  * @import {LavaMoatPolicy, LavaMoatPolicyDebug} from 'lavamoat-core'
  * @import {SetFieldType} from 'type-fest'
  * @import {CompartmentMapDescriptor} from '@endo/compartment-mapper'
@@ -58,10 +56,8 @@ const shouldWriteDebugPolicy = (
  * @overload
  * @param {string | URL} entrypointPath
  * @param {SetFieldType<GenerateOptions, 'debug', true>} opts
- * @returns {Promise<{
- *   policy: LavaMoatPolicyDebug
- *   compartmentMap: CompartmentMapDescriptor
- * }>}
+ * @returns {Promise<GenerateResult<LavaMoatPolicyDebug>>}
+ * @internal
  */
 
 /**
@@ -71,10 +67,8 @@ const shouldWriteDebugPolicy = (
  * @overload
  * @param {string | URL} entrypointPath
  * @param {GenerateOptions} [opts]
- * @returns {Promise<{
- *   policy: LavaMoatPolicy
- *   compartmentMap: CompartmentMapDescriptor
- * }>}
+ * @returns {Promise<GenerateResult>}
+ * @internal
  */
 
 /**
@@ -82,8 +76,8 @@ const shouldWriteDebugPolicy = (
  * `@endo/compartment-mapper`
  *
  * @param {string | URL} entrypoint
- * @param {GenerateOptions} [opts]
- * @returns {Promise<GenerateResult>}
+ * @param {GenerateOptions} [options] Options
+ * @internal
  */
 const generate = async (
   entrypoint,
@@ -95,21 +89,21 @@ const generate = async (
     log = defaultLog,
     dev = false,
     trustRoot = DEFAULT_TRUST_ROOT_COMPARTMENT,
+    projectRoot = process.cwd(),
     ...archiveOpts
   } = {}
 ) => {
   log.debug('Loading compartment map…')
-  const { compartmentMap, sources, renames } = await loadCompartmentMap(
-    entrypoint,
-    {
+  const { compartmentMap, sources, renames, dataMap } =
+    await loadCompartmentMapForPolicy(entrypoint, {
       ...archiveOpts,
       log,
       dev,
       readPowers,
       policyOverride,
       trustRoot,
-    }
-  )
+      projectRoot,
+    })
 
   /** @type {CompartmentMapToPolicyOptions} */
   const baseOpts = {
@@ -126,46 +120,13 @@ const generate = async (
   const policy = compartmentMapToPolicy(
     entrypoint,
     compartmentMap,
+    dataMap,
     sources,
     renames,
     opts
   )
-  return { policy, compartmentMap }
-}
 
-/**
- * Reports policy override resources which weren't found on disk and are thus
- * not in the compartment map descriptor.
- *
- * @param {CompartmentMapDescriptor} compartmentMap
- * @param {ReportInvalidOverridesOptions} options
- * @returns {void}
- */
-const reportInvalidOverrides = (
-  compartmentMap,
-  { policyOverride, policyOverridePath, log = defaultLog }
-) => {
-  if (!policyOverride) {
-    return
-  }
-
-  const canonicalNames = new Set(
-    values(compartmentMap.compartments).map(({ label }) => label)
-  )
-  // TODO: use `Set.prototype.difference` once widely available
-  const invalidOverrides = keys(policyOverride.resources).filter(
-    (key) => !canonicalNames.has(key)
-  )
-
-  if (invalidOverrides.length) {
-    let msg = `The following resource(s) provided in policy overrides`
-    msg += policyOverridePath ? ` (${hrPath(policyOverridePath)})` : ''
-    msg += ` were not found and may be invalid:\n`
-    msg += invalidOverrides
-      .map((invalidOverride) => `  - ${hrLabel(invalidOverride)}`)
-      .join('\n')
-    log.warning(msg)
-  }
+  return { policy, compartmentMap, dataMap }
 }
 
 /**
@@ -260,6 +221,8 @@ export const generatePolicy = async (
   let policy
   /** @type {CompartmentMapDescriptor} */
   let compartmentMap
+  /** @type {CompleteCompartmentDescriptorDataMap} */
+  let dataMap
 
   const niceEntrypointPath = hrPath(entrypoint)
 
@@ -273,12 +236,17 @@ export const generatePolicy = async (
     log.info(`Generating "debug" LavaMoat policy from ${niceEntrypointPath}`)
     /** @type {LavaMoatPolicyDebug} */
     let debugPolicy
-    ;({ policy: debugPolicy, compartmentMap } = await generate(entrypoint, {
+    ;({
+      policy: debugPolicy,
+      compartmentMap,
+      dataMap,
+    } = await generate(entrypoint, {
       ...generateOpts,
       readPowers,
       trustRoot,
       debug: true,
       policyOverride,
+      projectRoot,
     }))
     await writePolicy(policyDebugPath, debugPolicy, { fs: writableFs })
     const nicePolicyDebugPath = hrPath(policyDebugPath)
@@ -292,19 +260,26 @@ export const generatePolicy = async (
     policy = corePolicy
   } else {
     log.info(`Generating LavaMoat policy from ${niceEntrypointPath}…`)
-    ;({ policy, compartmentMap } = await generate(entrypoint, {
+    ;({ policy, compartmentMap, dataMap } = await generate(entrypoint, {
       ...generateOpts,
       trustRoot,
       readPowers,
       policyOverride,
+      projectRoot,
     }))
   }
 
-  reportInvalidOverrides(compartmentMap, { policyOverride, policyOverridePath })
+  // TODO: May want to also report invalid hints here instead of at time of processing
+  reportInvalidOverrides(compartmentMap, dataMap, {
+    log,
+    policyOverride,
+    policyOverridePath,
+  })
 
   if (shouldWrite) {
     await writePolicy(policyPath, policy, { fs: writableFs })
     log.info(`Wrote policy to ${hrPath(policyPath)}`)
   }
+
   return policy
 }

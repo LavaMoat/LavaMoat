@@ -4,7 +4,10 @@
  * @packageDocumentation
  */
 
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { GenerationError } from '../error.js'
+import { log as defaultLog } from '../log.js'
 import { hasValue, isObject } from '../util.js'
 
 /**
@@ -15,6 +18,8 @@ import { hasValue, isObject } from '../util.js'
  *   SourceModuleDescriptor,
  *   ModuleSource} from 'ses'
  * @import {Merge} from 'type-fest'
+ * @import {CompleteCompartmentDescriptorDataMap} from '../types.js'
+ * @import {GetValidCompartmentDescriptorFn, MakeGetHintsOptions, MakePolicyGenCompartmentOptions} from '../internal.js'
  * @import {CompartmentDescriptor, CompartmentMapDescriptor} from '@endo/compartment-mapper'
  * @import {LavaMoatPolicy} from 'lavamoat-core'
  */
@@ -46,10 +51,13 @@ const isSourceModuleDescriptor = (moduleDescriptor) =>
   isObject(moduleDescriptor.source)
 
 /**
- * Append `canonicalName` to the {@link ModuleSource.imports} field within a
+ * Append `hint` to the {@link ModuleSource.imports} field within a
  * {@link ModuleDescriptor}.
  *
- * This mutates `moduleDescriptor` by overwriting its `ModuleSource` object
+ * `hint` may be a canonical name or a specifier, depending on whether it came
+ * in via resource policy or `hints` proper.
+ *
+ * **This mutates `moduleDescriptor`** by overwriting its `ModuleSource` object
  * (which could be in either `source` or the deprecated `record` prop). It also
  * overwrites the `ModuleSource.imports` array. Overwritten objects are
  * originally non-extensible (frozen), so we must replace them outright.
@@ -58,12 +66,12 @@ const isSourceModuleDescriptor = (moduleDescriptor) =>
  * instead, mutate them in-place to avoid potentially losing object references
  * elsewhere in `@endo/compartment-mapper`. This is a precautionary measure.
  *
- * @template {SourceModuleDescriptor | RecordModuleDescriptor} T
- * @param {T} moduleDescriptor - Module descriptor to update
- * @param {string} canonicalName - Canonical name to append to
- *   {@link ModuleSource.imports}
+ * @param {SourceModuleDescriptor | RecordModuleDescriptor} moduleDescriptor
+ *   Module descriptor to update
+ * @param {string} hint Canonical name, specifier, etc.
+ * @returns {void}
  */
-const updateModuleSource = (moduleDescriptor, canonicalName) => {
+const applyHint = (moduleDescriptor, hint) => {
   let moduleSource = isRecordModuleDescriptor(moduleDescriptor)
     ? moduleDescriptor.record
     : isSourceModuleDescriptor(moduleDescriptor)
@@ -76,8 +84,12 @@ const updateModuleSource = (moduleDescriptor, canonicalName) => {
     )
   }
 
-  // this just avoids adding duplicates. shouldn't happen, but who knows
-  if (moduleSource.imports.includes(canonicalName)) {
+  // this just avoids adding duplicates. shouldn't happen, but who knows note
+  // that it's theoretically possible that both a hint (e.g., `foo`) and a
+  // canonical name (e.g., `bar>foo`) could be present in the imports list
+  // (which refers to the same module). this should get sorted out either way,
+  // though.
+  if (moduleSource.imports.includes(hint)) {
     return
   }
 
@@ -88,7 +100,13 @@ const updateModuleSource = (moduleDescriptor, canonicalName) => {
   const imports = isFrozen(moduleSource.imports)
     ? [...moduleSource.imports]
     : moduleSource.imports
-  imports.push(canonicalName)
+
+  if (path.isAbsolute(hint) && moduleDescriptor.importMeta) {
+    const { url } = moduleDescriptor.importMeta
+    hint = path.relative(fileURLToPath(url), hint)
+    hint
+  }
+  imports.push(hint)
 
   moduleSource.imports = imports
 
@@ -104,16 +122,71 @@ const updateModuleSource = (moduleDescriptor, canonicalName) => {
 }
 
 /**
- * Factory function for a thing which Accepts a {@link CompartmentDescriptor}
+ * Creates a {@link GetValidCompartmentDescriptorFn} for this
+ * {@link CompartmentMapDescriptor}.
+ *
+ * @param {CompartmentMapDescriptor} compartmentMap
+ * @returns {GetValidCompartmentDescriptorFn}
+ */
+const makeGetValidCompartmentDescriptor = (compartmentMap) => {
+  /**
+   * Gets a {@link CompartmentDescriptor} based a compartment name, but only if
+   * it's not the entry compartment or `currentCompartmentDescriptor` itself.
+   *
+   * @type {GetValidCompartmentDescriptorFn}
+   */
+  const getValidCompartmentDescriptor = (
+    currentCompartmentDescriptor,
+    compartmentName
+  ) => {
+    const moduleDescriptorCompartment =
+      compartmentMap.compartments[compartmentName]
+
+    /* c8 ignore next */
+    if (!moduleDescriptorCompartment) {
+      // "should never happen". maybe throw instead
+      return
+    }
+
+    // All compartment descriptors will have a module descriptor which
+    // refers to itself. We can safely ignore the module descriptor for
+    // the current compartment, since we only wish to consider _other_
+    // imports.
+    if (moduleDescriptorCompartment === currentCompartmentDescriptor) {
+      return
+    }
+
+    return moduleDescriptorCompartment
+  }
+  return getValidCompartmentDescriptor
+}
+
+/**
+ * Factory function for a thing which accepts a {@link CompartmentDescriptor}
  * (presumably one present in {@link CompartmentMapDescriptor.compartments}) and
  * returns a set of module names present in LavaMoat policy resources which need
  * to be updated.
  *
- * @param {CompartmentMapDescriptor} compartmentMap Compartment map descriptor
- * @param {LavaMoatPolicy} policyOverride LavaMoat policy override
+ * This does _not_ consider {@link LavaMoatPolicy.hints}; those need to be
+ * handled during the initial `node_modules` crawl (see
+ * `makeNodeCompartmentMap()`).
+ *
+ * @template {CompartmentMapDescriptor} [T=CompartmentMapDescriptor] Default is
+ *   `CompartmentMapDescriptor`
+ * @param {CompleteCompartmentDescriptorDataMap<T>} dataMap Compartment
+ *   descriptor data
+ * @param {GetValidCompartmentDescriptorFn} getValidCompartmentDescriptor
+ * @param {MakeGetHintsOptions} [options] LavaMoat policy override
  * @returns {(compartmentDescriptor: CompartmentDescriptor) => Set<string>}
  */
-const makeGetOverriddenResourceNames = (compartmentMap, policyOverride) => {
+const makeGetOverrideHints = (
+  dataMap,
+  getValidCompartmentDescriptor,
+  { policyOverride, log: _log = defaultLog } = {}
+) => {
+  if (!policyOverride) {
+    return () => new Set()
+  }
   /**
    * A cache of {@link CompartmentDescriptor} to a list of module names present
    * in policy resources.
@@ -134,98 +207,86 @@ const makeGetOverriddenResourceNames = (compartmentMap, policyOverride) => {
    * @param {CompartmentDescriptor} compartmentDescriptor Compartment to check
    * @returns {Set<string>} Keys in policy resources which need updating
    */
-  const getOverriddenResources = (compartmentDescriptor) => {
+  const getHints = (compartmentDescriptor) => {
     if (overriddenResourcesCache.has(compartmentDescriptor)) {
       return /** @type {Set<string>} */ (
         overriddenResourcesCache.get(compartmentDescriptor)
       )
     }
 
-    /**
-     * Gets a valid {@link CompartmentDescriptor} from a compartment name, but
-     * only if it's not the entry compartment or the
-     * {@link compartmentDescriptor current one}.
-     *
-     * @param {string} [compartmentName] Compartment name
-     * @returns {CompartmentDescriptor | undefined}
-     */
-    const getValidCompartmentDescriptor = (compartmentName) => {
-      /* c8 ignore next */
-      if (!compartmentName) {
-        // The `compartment` prop can be `undefined` per the typings, though
-        // I'm not sure if this will ever occur in practice.
-        return
-      }
-
-      const moduleDescriptorCompartment =
-        compartmentMap.compartments[compartmentName]
-
-      /* c8 ignore next */
-      if (!moduleDescriptorCompartment) {
-        // "should never happen". maybe throw instead
-        return
-      }
-
-      // All compartment descriptors will have a module descriptor which
-      // refers to itself. We can safely ignore the module descriptor for
-      // the current compartment, since we only wish to consider _other_
-      // imports.
-      if (moduleDescriptorCompartment === compartmentDescriptor) {
-        return
-      }
-
-      return moduleDescriptorCompartment
+    if (!dataMap.has(compartmentDescriptor.location)) {
+      throw new ReferenceError(
+        `Compartment descriptor ${compartmentDescriptor.location} not found in data map`
+      )
     }
 
-    const { label: canonicalName } = compartmentDescriptor
-    const packagePolicy =
-      policyOverride.resources[canonicalName]?.packages ?? {}
+    const { canonicalName } = dataMap.get(compartmentDescriptor.location) ?? {}
 
-    /**
-     * A set of keys from {@link LavaMoatPolicy.resources} matching
-     * {@link CompartmentDescriptor.modules the current `CompartmentDescriptor`'s `modules`}.
-     * These will be updated by {@link updateModuleSource}.
-     *
-     * Cached on {@link compartmentDescriptor}.
-     */
-    const overriddenResources = entries(compartmentDescriptor.modules).reduce(
-      (
-        overriddenResources,
-        [moduleDescriptorName, { compartment: moduleDescriptorCompartmentName }]
-      ) => {
+    if (!canonicalName) {
+      throw new ReferenceError(
+        `Compartment descriptor ${compartmentDescriptor.location} has no canonical name`
+      )
+    }
+
+    /** @type {Set<string>} */
+    let hints = new Set()
+
+    const packagePolicy = policyOverride.resources?.[canonicalName]?.packages
+    if (packagePolicy) {
+      /**
+       * A set of keys from {@link LavaMoatPolicy.resources} matching
+       * {@link CompartmentDescriptor.modules the current `CompartmentDescriptor`'s `modules`}.
+       * These will be updated by {@link applyHint}.
+       *
+       * Cached on {@link compartmentDescriptor}.
+       */
+      for (const [
+        moduleDescriptorName,
+        { compartment: moduleDescriptorCompartmentName },
+      ] of entries(compartmentDescriptor.modules)) {
         if (!moduleDescriptorCompartmentName) {
-          return overriddenResources
+          continue
         }
         const otherCompartmentDescriptor = getValidCompartmentDescriptor(
+          compartmentDescriptor,
           moduleDescriptorCompartmentName
         )
-        if (
-          !otherCompartmentDescriptor ||
-          otherCompartmentDescriptor === compartmentDescriptor
-        ) {
-          return overriddenResources
+
+        if (!otherCompartmentDescriptor) {
+          continue
         }
 
-        const { label: otherCanonicalName } = otherCompartmentDescriptor
+        if (!dataMap.has(otherCompartmentDescriptor.location)) {
+          throw new ReferenceError(
+            `Compartment descriptor ${otherCompartmentDescriptor.name} not found in data map`
+          )
+        }
+
+        const { canonicalName: otherCanonicalName } =
+          dataMap.get(otherCompartmentDescriptor.location) ?? {}
+
+        if (!otherCanonicalName) {
+          throw new ReferenceError(
+            `Compartment descriptor ${otherCompartmentDescriptor.name} has no canonical name`
+          )
+        }
 
         if (!(otherCanonicalName in packagePolicy)) {
-          return overriddenResources
+          continue
         }
 
         // this is _not_ the canonical name, but the compartment.name field,
         // which is different, but remains in a 1:1 relationship with the
         // canonical name. It's what @endo/compartment-mapper uses internally
         // for linking and finding compartments
-        overriddenResources.add(moduleDescriptorName)
+        hints.add(moduleDescriptorName)
+      }
+    }
 
-        return overriddenResources
-      },
-      /** @type {Set<string>} */ (new Set())
-    )
-
-    return overriddenResources
+    return hints
   }
-  return getOverriddenResources
+
+  return getHints
 }
 
 /**
@@ -239,21 +300,29 @@ const makeGetOverriddenResourceNames = (compartmentMap, policyOverride) => {
  * we merged them verbatim). This hopefully prevents the end-user from needing
  * to hand-craft a giant policy override.
  *
- * @param {CompartmentMapDescriptor} compartmentMap
- * @param {LavaMoatPolicy} [policyOverride]
+ * @template {CompartmentMapDescriptor} T
+ * @param {T} compartmentMap
+ * @param {CompleteCompartmentDescriptorDataMap<T>} dataMap
+ * @param {MakePolicyGenCompartmentOptions} [options]
  * @returns {typeof Compartment} Either the original `Compartment` or a
  *   `PolicyGenCompartment`
  * @internal
  */
-export const makePolicyGenCompartment = (compartmentMap, policyOverride) => {
+export const makePolicyGenCompartment = (
+  compartmentMap,
+  dataMap,
+  { policyOverride, log = defaultLog } = {}
+) => {
   if (!policyOverride?.resources) {
     return Compartment
   }
 
-  const getOverriddenResourceNames = makeGetOverriddenResourceNames(
-    compartmentMap,
-    policyOverride
-  )
+  /**
+   * Lazily-created function to find hints for a given resource
+   *
+   * @type {(compartmentDescriptor: CompartmentDescriptor) => Set<string>}
+   */
+  let getOverrideHints
 
   /**
    * A subclass of `Compartment` which injects a package (defined in policy
@@ -322,13 +391,24 @@ export const makePolicyGenCompartment = (compartmentMap, policyOverride) => {
           return moduleDescriptor
         }
 
+        getOverrideHints ??= makeGetOverrideHints(
+          dataMap,
+          makeGetValidCompartmentDescriptor(compartmentMap),
+          { policyOverride, log }
+        )
+
+        const hints = getOverrideHints(compartmentDescriptor)
+
+        if (hints.size === 0) {
+          // no hints to apply, so we can return the module descriptor as-is
+          return moduleDescriptor
+        }
+
         // Adds missing imports to the module descriptor from the
         // policy-override.
-        for (const overriddenResourceName of getOverriddenResourceNames(
-          compartmentDescriptor
-        )) {
+        for (const hint of hints) {
           // mutates `moduleDescriptor`!!
-          updateModuleSource(moduleDescriptor, overriddenResourceName)
+          applyHint(moduleDescriptor, hint)
         }
 
         return moduleDescriptor

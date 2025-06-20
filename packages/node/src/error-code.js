@@ -19,7 +19,7 @@ export const ErrorCodes = Object.freeze(
     InvalidArguments: 'LMN_INVALID_ARGUMENTS',
     InvalidCompartment: 'LMN_INVALID_COMPARTMENT',
     InvalidPolicy: 'LMN_INVALID_POLICY',
-    NoExecutable: 'LMN_NO_EXECUTABLE',
+    NoBinScript: 'LMN_NO_BIN_SCRIPT',
     NoPolicy: 'LMN_NO_POLICY',
     NoWorkspace: 'LMN_NO_WORKSPACE',
     PermissionDenied: 'LMN_PERMISSION_DENIED',
