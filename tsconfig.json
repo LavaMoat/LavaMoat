@@ -8,6 +8,9 @@
   // be first in this list
   "references": [
     {
+      "path": "./packages/vog"
+    },
+    {
       "path": "./packages/allow-scripts"
     },
     {

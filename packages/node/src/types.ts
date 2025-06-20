@@ -22,8 +22,8 @@ import type {
   SyncImportLocationOptions,
   UrlInterface,
 } from '@endo/compartment-mapper'
+import { type Logger } from '@lavamoat/vog'
 import type { IsBuiltinFn, LavaMoatPolicy } from 'lavamoat-core'
-import type { Loggerr } from 'loggerr'
 import type nodeFs from 'node:fs'
 import type { PathLike, Stats } from 'node:fs'
 import type { LiteralUnion, Simplify } from 'type-fest'
@@ -92,10 +92,7 @@ export interface WithIsBuiltin {
 }
 
 export interface WithLog {
-  /**
-   * `Loggerr` instance for logging
-   */
-  log?: Loggerr
+  log?: Logger
 }
 
 /**
@@ -620,3 +617,7 @@ export type ComposeOptions<T extends object[]> = Simplify<
       : never
     : object
 >
+
+export type Logger = ConsolaInstance
+
+export type { LogLevels } from 'consola'

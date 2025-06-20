@@ -5,6 +5,7 @@
  *
  * @packageDocumentation
  */
+import { defaultLog } from '@lavamoat/vog'
 import nodeFs from 'node:fs'
 import nodePath from 'node:path'
 import { defaultReadPowers } from '../compartment/power.js'
@@ -14,7 +15,6 @@ import {
 } from '../constants.js'
 import { hrPath } from '../format.js'
 import { assertAbsolutePath } from '../fs.js'
-import { log as defaultLog } from '../log.js'
 import { maybeReadPolicyOverride, writePolicy } from '../policy-util.js'
 import {
   makeDefaultPolicyDebugPath,
@@ -93,7 +93,6 @@ const generate = async (
     ...archiveOpts
   } = {}
 ) => {
-  log.debug('Loading compartment map…')
   const { compartmentMap, sources, renames, dataMap } =
     await loadCompartmentMapForPolicy(entrypoint, {
       ...archiveOpts,
@@ -117,7 +116,7 @@ const generate = async (
   // this weird thing is to make TS happy about the overload
   const opts = debug ? { debug: true, ...baseOpts } : baseOpts
 
-  const policy = compartmentMapToPolicy(
+  const policy = await compartmentMapToPolicy(
     entrypoint,
     compartmentMap,
     dataMap,

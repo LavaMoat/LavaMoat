@@ -16,7 +16,6 @@ import {
 } from './constants.js'
 import { hrCode } from './format.js'
 import { assertAbsolutePath } from './fs.js'
-
 const { isArray: isArray_ } = Array
 const { freeze, keys } = Object
 
