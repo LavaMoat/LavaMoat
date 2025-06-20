@@ -55,14 +55,17 @@ export const load = async (
   let nodeDataMap
   try {
     // eslint-disable-next-line @jessie.js/safe-await-separator
-    ;({ nodeCompartmentMap } = await makeNodeCompartmentMap(entrypointPath, {
-      readPowers,
-      dev,
-      log,
-      trustRoot,
-      decorators: decorators,
-      policy,
-    }))
+    ;({ nodeCompartmentMap, nodeDataMap } = await makeNodeCompartmentMap(
+      entrypointPath,
+      {
+        readPowers,
+        dev,
+        log,
+        trustRoot,
+        decorators,
+        policy,
+      }
+    ))
   } catch (err) {
     throw new ExecutionError(
       `Failed to create compartment map for ${entrypointPath}`,

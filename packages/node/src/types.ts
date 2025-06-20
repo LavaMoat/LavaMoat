@@ -2,6 +2,10 @@
 /**
  * Public types for `@lavamoat/node`
  *
+ * Any type name prefixed with `With` is a type used to compose options buckets
+ * for public APIs. `With`-prefixed types are _expected to be interfaces_ unless
+ * they cannot be due to having dynamic properties.
+ *
  * @packageDocumentation
  */
 import type {
@@ -26,7 +30,7 @@ import type {
 import type { Loggerr } from 'loggerr'
 import type nodeFs from 'node:fs'
 import type { PathLike, Stats } from 'node:fs'
-import type { LiteralUnion, SetFieldType, Simplify } from 'type-fest'
+import type { LiteralUnion, Simplify } from 'type-fest'
 import type {
   ATTENUATORS_COMPARTMENT,
   ENDO_GLOBAL_POLICY_ITEM_WRITE,
@@ -196,7 +200,7 @@ export interface WritableFsInterface {
 /**
  * Options available when writing a policy
  */
-export interface WritePolicyOptions {
+export interface WithWritePolicyOptions {
   /**
    * Path to a {@link LavaMoatPolicyDebug} file
    */
@@ -242,36 +246,14 @@ export interface WritePowers {
  * Used by {@link GeneratePolicyOptions}.
  *
  * The {@link CaptureLiteOptions.dev dev} property defaults to `true`.
- *
- * @remarks
- * Omitted properties cannot by overridden by the user. Exported due to use
- * within {@link GeneratePolicyOptions}.
  */
 
-export type BaseLoadCompartmentMapOptions = Simplify<
-  Omit<CaptureLiteOptions, 'importHook' | 'moduleTransforms' | 'log'> &
-    WithLog &
-    WithDev
->
-
-/**
- * Options for `buildModuleRecords()`
- *
- * @remarks
- * Exported due to use within {@link CompartmentMapToPolicyOptions}
- */
-export type BuildModuleRecordsOptions = Simplify<
-  WithReadPowers & WithIsBuiltin & WithLog
->
-
-/**
- * Options for `compartmentMapToPolicy()` wherein a `LavaMoatDebugPolicy` will
- * be generated
- */
-export type CompartmentMapToDebugPolicyOptions = SetFieldType<
-  CompartmentMapToPolicyOptions,
-  'debug',
-  true
+export type WithCaptureLiteOptions = ComposeOptions<
+  [
+    Omit<CaptureLiteOptions, 'importHook' | 'moduleTransforms' | 'log'>,
+    WithLog,
+    WithDev,
+  ]
 >
 
 /**
@@ -283,27 +265,41 @@ export type EndoWritePolicy = typeof ENDO_GLOBAL_POLICY_ITEM_WRITE
 /**
  * Options for `execute()`
  */
-export type ExecuteOptions = Simplify<
-  Omit<ImportLocationOptions | SyncImportLocationOptions, 'log' | 'dev'> &
-    WithLog &
-    WithReadPowers &
-    WithDev &
-    WithCompartmentDescriptorDecorators &
-    WithTrustRoot
+export type ExecuteOptions = ComposeOptions<
+  [
+    Omit<ImportLocationOptions | SyncImportLocationOptions, 'log' | 'dev'>,
+    WithLog,
+    WithReadPowers,
+    WithDev,
+    WithCompartmentDescriptorDecorators,
+    WithTrustRoot,
+    WithOnNodeModulesMapped,
+  ]
 >
 
 /**
  * Options for `generatePolicy()`
+ *
+ * @remarks
+ * If testing with a virtual filesystem, `projectRoot` _must_ be provided, since
+ * it defaults to `process.cwd()`, which references not-your-filesystem.
  */
-export type GeneratePolicyOptions = Simplify<
-  BaseLoadCompartmentMapOptions &
-    CompartmentMapToPolicyOptions &
-    WritePolicyOptions &
-    WithTrustRoot &
-    WithScuttleGlobalThis &
-    WithPolicyOverridePath &
-    WithReadFile &
-    WithProjectRoot
+export type GeneratePolicyOptions = ComposeOptions<
+  [
+    WithReadPowers,
+    WithIsBuiltin,
+    WithCaptureLiteOptions,
+    WithWritePolicyOptions,
+    WithPolicyOverride,
+    WithDebug,
+    WithTrustRoot,
+    WithScuttleGlobalThis,
+    WithPolicyOverridePath,
+    WithReadFile,
+    WithProjectRoot,
+    WithCompartmentDescriptorDecorators,
+    WithOnNodeModulesMapped,
+  ]
 >
 
 /**
@@ -372,15 +368,17 @@ export type MakeReadPowersOptions = WithRawReadPowers
  * Options for `run()`
  */
 
-export type RunOptions = Simplify<
-  WithRawReadPowers &
-    WithDev &
-    WithTrustRoot &
-    WithScuttleGlobalThis &
-    WithLog &
-    WithProjectRoot &
-    WithPolicyOverrideOrPath &
-    WithReadFile
+export type RunOptions = ComposeOptions<
+  [
+    WithRawReadPowers,
+    WithDev,
+    WithTrustRoot,
+    WithScuttleGlobalThis,
+    WithLog,
+    WithProjectRoot,
+    WithPolicyOverrideOrPath,
+    WithReadFile,
+  ]
 >
 
 /**
@@ -398,8 +396,8 @@ export interface WithProjectRoot {
 /**
  * Options for `toEndoPolicy()`
  */
-export type ToEndoPolicyOptions = Simplify<
-  WithProjectRoot & WithPolicyOverrideOrPath & WithLog
+export type ToEndoPolicyOptions = ComposeOptions<
+  [WithProjectRoot, WithPolicyOverrideOrPath, WithLog]
 >
 /**
  * Options which may either {@link WithReadPowers} or {@link WithRawPowers} but
@@ -476,14 +474,6 @@ export type CanonicalName = LiteralUnion<
 >
 
 /**
- * Options for `compartmentMapToPolicy()`
- */
-export type CompartmentMapToPolicyOptions = Simplify<
-
-  BuildModuleRecordsOptions & WithPolicyOverride & WithDebug & WithTrustRoot
->
-
-/**
  * Options containing a `dataMap` property
  *
  * @template K Type of the keys in the data map
@@ -521,16 +511,16 @@ export type * from './errors.js'
 /**
  * Options for `loadPolicies()`
  */
-export type LoadPoliciesOptions = Simplify<
-  WithProjectRoot & WithReadFile & WithPolicyOverrideOrPath
+export type LoadPoliciesOptions = ComposeOptions<
+  [WithProjectRoot, WithReadFile, WithPolicyOverrideOrPath]
 >
 
 /**
  * Options bucket containing a `readFile` prop
  */
-export type WithReadFile = Simplify<{
+export interface WithReadFile {
   readFile?: ReadFileFn
-}>
+}
 
 /**
  * This is ever-so-slightly different than `ReadFn`.
@@ -594,16 +584,18 @@ export type CompartmentDescriptorDecorator<
   /**
    * Options for the decorator, including the entire
    * `CompartmentDescriptorDataMap`
- */
+   */
   options?: CompartmentDescriptorDecoratorOptions
 ) => Out
 
 /**
  * Options for a {@link CompartmentDescriptorDecorator}
  */
-export type CompartmentDescriptorDecoratorOptions = Simplify<
-  WithTrustRoot & WithLog & WithDataMap
->
+export type CompartmentDescriptorDecoratorOptions<
+  K = string,
+  T extends
+    Partial<CompartmentDescriptorData> = Partial<CompartmentDescriptorData>,
+> = ComposeOptions<[WithTrustRoot, WithLog, WithDataMap<K, T>]>
 
 /**
  * Options containing a `compartmentDescriptorDecorators` prop
@@ -615,3 +607,23 @@ export type WithCompartmentDescriptorDecorators = {
    */
   decorators?: CompartmentDescriptorDecorator[]
 }
+
+/**
+ * Safely composes properties from each object in `T` into a single, simplified
+ * type.
+ *
+ * Guards against non-exclusive keys, which intersections do not do. Does not
+ * check if the key's value extends the previous object's key's value (like the
+ * way extending an interface would).
+ */
+export type ComposeOptions<T extends object[]> = Simplify<
+  T extends [infer First, ...infer Rest]
+    ? First extends object
+      ? Rest extends object[]
+        ? keyof First extends keyof ComposeOptions<Rest>
+          ? never
+          : First & ComposeOptions<Rest>
+        : never
+      : never
+    : object
+>

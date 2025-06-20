@@ -1,5 +1,5 @@
 /**
- * @import {ErrorCode, LavaMoatErrorClass, LavaMoatErrorClassParams} from './errors.js'
+ * @import {ErrorCode, LavaMoatErrorClass, LavaMoatErrorClassParams, LavaMoatErrorOptions} from './errors.js'
  * @import {Class} from 'type-fest'
  */
 import { ErrorCodes } from './error-code.js'
@@ -81,9 +81,7 @@ export const InvalidPolicyError = createLavaMoatError(
 
     /**
      * @param {string} message
-     * @param {Object} options
-     * @param {unknown} [options.cause]
-     * @param {string} [options.filepath]
+     * @param {LavaMoatErrorOptions<{ filepath?: string }>} options
      */
     constructor(message, { cause, filepath } = {}) {
       super(message, { cause })

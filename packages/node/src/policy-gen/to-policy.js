@@ -28,12 +28,12 @@ import { makeSesCompatListener } from './ses-compat.js'
  * @import {LavaMoatPolicy,
  *   LavaMoatPolicyDebug,
  *   LavamoatModuleRecord} from 'lavamoat-core'
- * @import {BuildModuleRecordsOptions,
- *   CompartmentMapToDebugPolicyOptions,
- *   CompartmentMapToPolicyOptions,
- *   CompleteCompartmentDescriptorDataMap} from '../types.js'
+ * @import {CompleteCompartmentDescriptorDataMap} from '../types.js'
  * @import {ModuleRecordsToDebugPolicyOptions,
  *   ModuleRecordsToPolicyOptions,
+ *   BuildModuleRecordsOptions,
+ *   CompartmentMapToDebugPolicyOptions,
+ *   CompartmentMapToPolicyOptions,
  *   SesViolationType} from '../internal.js'
  * @import {Loggerr} from 'loggerr'
  */
@@ -91,19 +91,19 @@ const moduleRecordsToPolicy = (
     perPackageWarnings,
     foundViolationTypes,
     { log }
-  )
+        )
 
   inspector.on('compat-warning', compatWarningListener)
 
   for (const moduleRecord of moduleRecords) {
     inspector.inspectModule(moduleRecord)
-  }
+    }
 
   inspector.off('compat-warning', compatWarningListener)
 
   if (perPackageWarnings.size) {
     reportSesViolations(perPackageWarnings, foundViolationTypes, { log })
-  }
+    }
 
   return inspector.generatePolicy({ policyOverride })
 }
