@@ -401,8 +401,9 @@ class LavaMoatPlugin {
               const optimizedKeys = Object.keys(
                 STORE.runtimeOptimizedPolicy?.resources
               )
+              const optimizedKeysSet = new Set(optimizedKeys)
               const policyKeyDiff = originalKeys.filter(
-                (k) => !optimizedKeys.includes(k)
+                (k) => !optimizedKeysSet.has(k)
               )
               if (policyKeyDiff.length > 0) {
                 diag.rawDebug(
