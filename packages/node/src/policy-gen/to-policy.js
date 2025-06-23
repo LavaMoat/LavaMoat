@@ -157,7 +157,7 @@ export const buildModuleRecords = (
     { readPowers, log }
   )
   log.debug(
-    `Building building records for ${keys(compartments.length)} compartments…`
+    `Building building records for ${keys(compartments).length} compartments…`
   )
   const contexts = entries(compartments).reduce(
     (acc, [compartmentName, compartmentDescriptor]) => {
