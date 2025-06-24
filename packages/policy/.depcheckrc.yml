@@ -1,0 +1,6 @@
+ignores:
+  # types
+  - '@types/node'
+
+  # from monorepo
+  - '@typescript-eslint/parser'
