@@ -4,15 +4,14 @@
  * @packageDocumentation
  */
 
-import chalk from 'chalk'
+import { colors, stripAnsi } from '@lavamoat/vog'
 import nodePath from 'node:path'
-import { stripVTControlCharacters as stripAnsi } from 'node:util'
 import { toPath } from './util.js'
 
 export { stripAnsi }
 
 /**
- * @import {ChalkFunction} from 'chalk'
+ * @import {ColorFunction} from '@lavamoat/vog'
  */
 
 /**
@@ -23,8 +22,8 @@ export { stripAnsi }
  * @param {string} value
  * @param {{
  *   delimiter?: string
- *   color?: ChalkFunction
- *   delimiterColor?: ChalkFunction
+ *   color?: ColorFunction
+ *   delimiterColor?: ColorFunction
  * }} [options]
  * @returns {string} Colorized string
  * @internal
@@ -34,8 +33,8 @@ export const colorSplit = (
   value,
   {
     delimiter = '>',
-    color = chalk.whiteBright,
-    delimiterColor = chalk.gray,
+    color = colors.whiteBright,
+    delimiterColor = colors.gray,
   } = {}
 ) =>
   stripAnsi(value)
@@ -76,8 +75,8 @@ export const hrPath = (filepath) => {
   }
   return colorSplit(filepath, {
     delimiter: nodePath.sep,
-    color: chalk.greenBright,
-    delimiterColor: chalk.green,
+    color: colors.greenBright,
+    delimiterColor: colors.green,
   })
 }
 
@@ -91,8 +90,8 @@ export const hrPath = (filepath) => {
 export const hrLabel = (name) =>
   colorSplit(name, {
     delimiter: '>',
-    color: chalk.magentaBright,
-    delimiterColor: chalk.magenta,
+    color: colors.magentaBright,
+    delimiterColor: colors.magenta,
   })
 
 /**
@@ -102,4 +101,4 @@ export const hrLabel = (name) =>
  * @returns {string}
  * @internal
  */
-export const hrCode = chalk.bgGrey.whiteBright
+export const hrCode = (value) => colors.bgBlackBright(colors.whiteBright(value))

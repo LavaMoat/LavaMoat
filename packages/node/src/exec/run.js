@@ -4,6 +4,7 @@
  *
  * @packageDocumentation
  */
+import { defaultLog } from '@lavamoat/vog'
 import nodeFs from 'node:fs'
 import { makeReadPowers } from '../compartment/power.js'
 import {
@@ -12,7 +13,6 @@ import {
 } from '../constants.js'
 import { TrustMismatchError } from '../error.js'
 import { hrCode, hrPath } from '../format.js'
-import { log as defaultLog } from '../log.js'
 import { toEndoPolicy } from '../policy-converter.js'
 import { isTrusted, loadPolicies } from '../policy-util.js'
 import { attenuateModule, makeGlobalsAttenuator } from './default-attenuator.js'

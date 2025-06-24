@@ -1,3 +1,4 @@
+import { defaultLog } from '@lavamoat/vog'
 import { mergePolicy } from 'lavamoat-core'
 import util from 'node:util'
 // @ts-expect-error - needs types
@@ -11,7 +12,6 @@ import {
   DEFAULT_POLICY_FILENAME,
   DEFAULT_POLICY_OVERRIDE_FILENAME,
 } from '../../src/constants.js'
-import { log as fallbackLog } from '../../src/log.js'
 
 /**
  * @import {Volume} from 'memfs/lib/volume.js'
@@ -53,7 +53,7 @@ const RUNNER_MODULE_PATH = (
 function dumpError(
   err,
   vol,
-  { lavamoatPolicy, endoPolicy, log = fallbackLog.error.bind(fallbackLog) } = {}
+  { lavamoatPolicy, endoPolicy, log = defaultLog.error.bind(defaultLog) } = {}
 ) {
   log()
   log(util.inspect(err, { depth: null }))
@@ -149,7 +149,7 @@ async function trapOutput(stdout, stderr) {
  * @param {(...args: any) => void} log Logger
  * @returns {PlatformRunScenario<Result>}
  */
-export function createScenarioRunner(log = fallbackLog.error.bind(console)) {
+export function createScenarioRunner(log = defaultLog.error.bind(console)) {
   /**
    * Runs a scenario from `lavamoat-core`.
    *
