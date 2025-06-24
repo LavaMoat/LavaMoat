@@ -6,6 +6,28 @@
   * dependencies
     * lavamoat-tofu bumped from ^7.2.1 to ^7.2.2
 
+## [16.5.0](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v16.4.0...lavamoat-core-v16.5.0) (2025-06-24)
+
+
+### Features
+
+* **core:** relax scuttling by skipping intrinsics ([#1645](https://github.com/LavaMoat/LavaMoat/issues/1645)) ([5040521](https://github.com/LavaMoat/LavaMoat/commit/5040521a089e10a03dcb882d37b0129b8d64a2c3))
+* **node:** add support in scuttling ([#1627](https://github.com/LavaMoat/LavaMoat/issues/1627)) ([587644f](https://github.com/LavaMoat/LavaMoat/commit/587644fb8ec59499b181d0e8c8d2660257d04015))
+
+
+### Bug Fixes
+
+* add Node.js v24.0.0 to supported engines ([ad9cdcd](https://github.com/LavaMoat/LavaMoat/commit/ad9cdcdf83ccbda8bf2eba427d0c80f761f47a0a))
+* **deps:** update babel monorepo ([afc9fe5](https://github.com/LavaMoat/LavaMoat/commit/afc9fe5fef98c53abe014ff657a1d4f59883abe8))
+* **deps:** update babel monorepo to v7.27.3 ([#1672](https://github.com/LavaMoat/LavaMoat/issues/1672)) ([72cb642](https://github.com/LavaMoat/LavaMoat/commit/72cb6424bb5acb16655562deaefff8ef2cf2168e))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-tofu bumped from ^8.0.7 to ^8.0.8
+
 ## [16.4.0](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v16.3.2...lavamoat-core-v16.4.0) (2025-05-01)
 
 
