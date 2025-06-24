@@ -9,9 +9,9 @@
     "packages/git-safe-dependencies": {
       "initial-version": "0.0.1"
     },
+    "packages/lavamoat-node": {},
     "packages/lavapack": {},
     "packages/laverna": {},
-    "packages/lavamoat-node": {},
     "packages/node": {
       "initial-version": "0.0.1"
     },
@@ -20,6 +20,7 @@
       "release-as": "0.0.1"
     },
     "packages/tofu": {},
+    "packages/types": {},
     "packages/webpack": {
       "release-as": "1.0.0"
     }

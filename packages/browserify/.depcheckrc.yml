@@ -16,3 +16,5 @@ ignores:
   - 'c'
   # invoked as executable only
   - 'lavamoat'
+  # types
+  - '@lavamoat/types'
