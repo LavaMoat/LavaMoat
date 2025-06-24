@@ -18,6 +18,51 @@
   * dependencies
     * lavamoat-core bumped from ^15.2.0 to ^15.2.1
 
+## [1.0.0](https://github.com/LavaMoat/LavaMoat/compare/webpack-v1.0.0...webpack-v1.0.0) (2025-06-24)
+
+
+### Features
+
+* **webpack:** add undocumented __unsafeAllowContextModules flag to allow experimenting with contextmodules without leaving them vulnerable by default ([8eca7f1](https://github.com/LavaMoat/LavaMoat/commit/8eca7f16dc0270875f99e329b46fd5555c8e1e9d))
+* **webpack:** avoid emiting resource assets from packages by default ([#1451](https://github.com/LavaMoat/LavaMoat/issues/1451)) ([325bf2a](https://github.com/LavaMoat/LavaMoat/commit/325bf2a1dc5c9c048ef36148d5611a2a5112ec0d))
+* **webpack:** enable syntax checks by default, check prior to concatenation. ([e74a55b](https://github.com/LavaMoat/LavaMoat/commit/e74a55bdc7f83739d8d1fec0b3c5f6852470c6cc))
+* **webpack:** policy debugging capabilities and tighter tests ([20b12ad](https://github.com/LavaMoat/LavaMoat/commit/20b12ad38a78678c8291b4841e8c4d00b349c1aa))
+* **webpack:** support scuttling ([#1298](https://github.com/LavaMoat/LavaMoat/issues/1298)) ([9630600](https://github.com/LavaMoat/LavaMoat/commit/963060078d16fab80f24d49ea945a08fc51b9384))
+* **webpack:** unlockedChunksUnsafe option to refrain from protecting selected chunks ([#1375](https://github.com/LavaMoat/LavaMoat/issues/1375)) ([1f24683](https://github.com/LavaMoat/LavaMoat/commit/1f24683e2e6cddefbc492c0925d0d7d5e3b995c0))
+* **webpack:** webpack context modules and chunk lazy loading support ([#1553](https://github.com/LavaMoat/LavaMoat/issues/1553)) ([3602f65](https://github.com/LavaMoat/LavaMoat/commit/3602f6598196ec99287fe239aa1708d9f80c0e0c))
+
+
+### Bug Fixes
+
+* add Node.js v24.0.0 to supported engines ([ad9cdcd](https://github.com/LavaMoat/LavaMoat/commit/ad9cdcdf83ccbda8bf2eba427d0c80f761f47a0a))
+* **core,webpack:** remove deprecated lockdown options ([efec539](https://github.com/LavaMoat/LavaMoat/commit/efec5391eec838689ce2426de617571d0f276f2c)), closes [#1578](https://github.com/LavaMoat/LavaMoat/issues/1578)
+* **core:** block circular global object endowments ([#1505](https://github.com/LavaMoat/LavaMoat/issues/1505)) ([6745a0e](https://github.com/LavaMoat/LavaMoat/commit/6745a0edee85171e4062aaec31d7f25bf3a97e46))
+* **deps:** update babel monorepo ([afc9fe5](https://github.com/LavaMoat/LavaMoat/commit/afc9fe5fef98c53abe014ff657a1d4f59883abe8))
+* **deps:** update babel monorepo ([e6f4e70](https://github.com/LavaMoat/LavaMoat/commit/e6f4e70cffe8237c27126046bb0cfa5515c2d138))
+* **deps:** update babel monorepo to v7.25.8 ([1dcb35e](https://github.com/LavaMoat/LavaMoat/commit/1dcb35e023823710343b5f0a4ca589cdfe647e7d))
+* **deps:** update babel monorepo to v7.25.9 ([6d9d5a3](https://github.com/LavaMoat/LavaMoat/commit/6d9d5a3336444fada49e239756ffc3c207d3ff5d))
+* **deps:** update babel monorepo to v7.26.7 ([#1524](https://github.com/LavaMoat/LavaMoat/issues/1524)) ([7285fdf](https://github.com/LavaMoat/LavaMoat/commit/7285fdf6ce5c337443840525b79c7653708b541f))
+* **deps:** update babel monorepo to v7.26.9 ([6a9dc73](https://github.com/LavaMoat/LavaMoat/commit/6a9dc735f18a5b95e82b86ec2bd466ee4433172f))
+* **deps:** update babel monorepo to v7.27.0 ([#1589](https://github.com/LavaMoat/LavaMoat/issues/1589)) ([efd83d7](https://github.com/LavaMoat/LavaMoat/commit/efd83d7ea7a5f5f9d2157248d4e2f8b7f9c48c56))
+* **deps:** update dependency json-stable-stringify to v1.3.0 ([#1613](https://github.com/LavaMoat/LavaMoat/issues/1613)) ([f9314d1](https://github.com/LavaMoat/LavaMoat/commit/f9314d1a238d31a0164356c1c6bd6f6e36246d56))
+* **deps:** update dependency ses to v1.10.0 ([#1422](https://github.com/LavaMoat/LavaMoat/issues/1422)) ([b6f0589](https://github.com/LavaMoat/LavaMoat/commit/b6f0589cf9730fac8173a3fca0c4a031bd64f12f))
+* **deps:** update dependency ses to v1.12.0 [security] ([#1605](https://github.com/LavaMoat/LavaMoat/issues/1605)) ([881ae86](https://github.com/LavaMoat/LavaMoat/commit/881ae86b9a4c27ab60a3c76a4a69f5de246eb2ed))
+* **deps:** update dependency ses to v1.9.0 ([75cae74](https://github.com/LavaMoat/LavaMoat/commit/75cae74063c444184fea3370bf9925bc7946846a))
+* make policy ordering consistntly manifest itself in json files produced ([a149a7d](https://github.com/LavaMoat/LavaMoat/commit/a149a7d16d65bc4255cf32211a671823356565da))
+* upgrade ses to v1.11.0 ([a12dae1](https://github.com/LavaMoat/LavaMoat/commit/a12dae13e8c7f70082199ba186659ea413e82ded))
+* **webpack:** import types from ses ([78aca55](https://github.com/LavaMoat/LavaMoat/commit/78aca5583adc5366c8717fd196b72bdd828b38ed))
+* **webpack:** prevent toString manipulation on a specifier ([1163085](https://github.com/LavaMoat/LavaMoat/commit/1163085b29bcc5a78f08b840393bf1edbe099045))
+* **webpack:** support regex in scuttling exceptions ([#1529](https://github.com/LavaMoat/LavaMoat/issues/1529)) ([45c0308](https://github.com/LavaMoat/LavaMoat/commit/45c0308c655c9903f9bdfa17a30460b10f22a219))
+* **webpack:** undo the forced overwrite of parent and top references ([#1666](https://github.com/LavaMoat/LavaMoat/issues/1666)) ([adec627](https://github.com/LavaMoat/LavaMoat/commit/adec627069e201a7353a89876d0964dd54e1fa9b))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @lavamoat/aa bumped from ^4.3.2 to ^4.3.3
+    * lavamoat-core bumped from ^16.4.0 to ^16.5.0
+
 ## [0.10.0-beta.0](https://github.com/LavaMoat/LavaMoat/compare/webpack-v0.9.0-beta.0...webpack-v0.10.0-beta.0) (2025-05-01)
 
 

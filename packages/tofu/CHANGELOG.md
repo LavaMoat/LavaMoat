@@ -1,5 +1,22 @@
 # Changelog
 
+## [8.0.8](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-tofu-v8.0.7...lavamoat-tofu-v8.0.8) (2025-06-24)
+
+
+### Bug Fixes
+
+* add Node.js v24.0.0 to supported engines ([ad9cdcd](https://github.com/LavaMoat/LavaMoat/commit/ad9cdcdf83ccbda8bf2eba427d0c80f761f47a0a))
+* **deps:** update babel monorepo ([afc9fe5](https://github.com/LavaMoat/LavaMoat/commit/afc9fe5fef98c53abe014ff657a1d4f59883abe8))
+* **deps:** update babel monorepo to v7.27.3 ([#1672](https://github.com/LavaMoat/LavaMoat/issues/1672)) ([72cb642](https://github.com/LavaMoat/LavaMoat/commit/72cb6424bb5acb16655562deaefff8ef2cf2168e))
+* **deps:** update dependency type-fest to v4.41.0 ([#1657](https://github.com/LavaMoat/LavaMoat/issues/1657)) ([19e9bf1](https://github.com/LavaMoat/LavaMoat/commit/19e9bf144c8c43f530501bc500480fed16f995ac))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * lavamoat-core bumped from >15.4.0 to >16.5.0
+
 ## [8.0.7](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-tofu-v8.0.6...lavamoat-tofu-v8.0.7) (2025-05-01)
 
 
