@@ -142,11 +142,15 @@ Elements of the Webpack runtime (e.g., `__webpack_require__.*`) are currently mo
 
 Module Federation depends on extending runtime in ways we would not expose to modules. We're open to contributions or collaboration on carefully enabling it.
 
-# Testing
+# Contributing
+
+See [DEVELOPMENT.md](./DEVELOPMENT.md) for notes on plans and roadmap. Refer to the main CONTRIBUTING.md for general guidelines on how to contribute.
+
+## Testing
 
 Run `npm test` to start the automated tests.
 
-## Manual testing
+### Manual testing
 
 - Navigate to `example/`
 - Run `npm ci` and `npm test`
