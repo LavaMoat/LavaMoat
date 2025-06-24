@@ -204,3 +204,5 @@ export const SES_VIOLATION_TYPES = freeze(
     StrictModeViolation: 'strict-mode violation',
   })
 )
+
+export const MERGED_POLICY_FIELD = Symbol.for('@lavamoat/core/mergedPolicy')

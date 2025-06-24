@@ -74,7 +74,7 @@ test('loadPolicies - loads and merges policies from disk', async (t) => {
     policyOverridePath: '/policy-override.json',
     readFile: /** @type {any} */ (fs.promises.readFile),
   })
-  t.deepEqual(policy, { resources: {} })
+  t.deepEqual(policy, { resources: {}, [constants.MERGED_POLICY_FIELD]: true })
 })
 
 test('isPolicy - returns true for valid policy', (t) => {

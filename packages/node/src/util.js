@@ -8,23 +8,16 @@
  *
  * @packageDocumentation
  */
-import { default as nodePath } from 'node:path'
 import nodeUrl from 'node:url'
-import {
-  DEFAULT_POLICY_DEBUG_FILENAME,
-  DEFAULT_POLICY_OVERRIDE_FILENAME,
-} from './constants.js'
-import { hrCode } from './format.js'
 import { assertAbsolutePath } from './fs.js'
-
-const { isArray: isArray_ } = Array
-const { freeze, keys } = Object
 
 /**
  * @import {FileURLToPathFn, ReadNowPowers} from '@endo/compartment-mapper'
  * @import {RequiredReadNowPowers} from './internal.js'
  * @import {SetNonNullable} from 'type-fest'
  */
+const { isArray: isArray_ } = Array
+const { freeze, keys } = Object
 
 /**
  * Converts a {@link URL} or `string` to a URL-like `string` starting with the
@@ -110,6 +103,7 @@ export const isBoolean = (value) => typeof value === 'boolean'
  * @param {T} obj Some object
  * @param {K} prop Some property which might be in `obj`
  * @returns {obj is Omit<T, K> & {[key in K]: SetNonNullable<T, K>}}
+ * @internal
  * @see {@link https://github.com/microsoft/TypeScript/issues/44253}
  */
 export const hasValue = (obj, prop) => {
@@ -190,6 +184,7 @@ export const keysOr = (value, defaultKeys = []) =>
  *
  * @param {unknown} value
  * @returns {value is (...args: any[]) => any}
+ * @internal
  */
 export const isFunction = (value) => typeof value === 'function'
 
@@ -218,37 +213,20 @@ export const toPath = (value, fileURLToPath = nodeUrl.fileURLToPath) => {
 }
 
 /**
- * Given path to a policy file, returns the sibling path to the policy override
- * file
+ * Converts a path-like value to an absolute path, asserting that it is
+ * absolute.
  *
- * @param {string | URL} policyPath
- * @returns {string}
+ * @param {string | URL} pathLike Path-like value to convert to an absolute
+ *   path.
+ * @param {string} [assertionMessage] Custom assertion message
+ * @returns {string} Absolute path
  * @internal
  */
-export const makeDefaultPolicyOverridePath = (policyPath) => {
-  const path = toPath(policyPath)
+export const toAbsolutePath = (pathLike, assertionMessage) => {
+  const path = toPath(pathLike)
   assertAbsolutePath(
     path,
-    `${hrCode('policyPath')} must be an absolute path; got ${path}`
+    assertionMessage ?? `Expected an absolute path; got ${path}`
   )
-  const policyDir = nodePath.dirname(path)
-  return nodePath.join(policyDir, DEFAULT_POLICY_OVERRIDE_FILENAME)
-}
-
-/**
- * Given path to a policy file, returns the sibling path to the policy debug
- * file
- *
- * @param {string | URL} policyPath
- * @returns {string}
- * @internal
- */
-export const makeDefaultPolicyDebugPath = (policyPath) => {
-  const path = toPath(policyPath)
-  assertAbsolutePath(
-    path,
-    `${hrCode('policyPath')} must be an absolute path; got ${path}`
-  )
-  const policyDir = nodePath.dirname(path)
-  return nodePath.join(policyDir, DEFAULT_POLICY_DEBUG_FILENAME)
+  return path
 }

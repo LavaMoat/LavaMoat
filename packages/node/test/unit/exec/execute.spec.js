@@ -57,24 +57,25 @@ test('policy enforcement - untrusted root', async (t) => {
   await t.throwsAsync(
     run(
       '/node_modules/app/app.js',
+
       {
-        resources: {
-          app: {
-            packages: {
-              pid: true,
+        policy: {
+          resources: {
+            app: {
+              packages: {
+                pid: true,
+              },
+            },
+            pid: {
+              globals: {
+                'process.pid': false,
+              },
             },
           },
-          pid: {
-            globals: {
-              'process.pid': false,
-            },
+          root: {
+            usePolicy: 'app',
           },
         },
-        root: {
-          usePolicy: 'app',
-        },
-      },
-      {
         readPowers,
         trustRoot: false,
       }
