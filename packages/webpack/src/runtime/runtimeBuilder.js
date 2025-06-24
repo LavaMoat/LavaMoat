@@ -4,7 +4,7 @@ const { assembleRuntime } = require('./assemble.js')
 const path = require('node:path')
 
 /** @import {LavaMoatPluginOptions} from '../buildtime/types' */
-/** @import {LavaMoatPolicy} from 'lavamoat-core' */
+/** @import {LavaMoatPolicy} from '@lavamoat/types' */
 
 module.exports = {
   /**
