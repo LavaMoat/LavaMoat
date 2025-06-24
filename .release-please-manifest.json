@@ -1,14 +1,15 @@
 {
   "packages/aa": "4.3.2",
   "packages/allow-scripts": "3.3.3",
-  "packages/webpack": "0.10.0-beta.0",
   "packages/browserify": "18.1.6",
   "packages/core": "16.4.0",
   "packages/git-safe-dependencies": "0.2.2",
   "packages/lavapack": "7.0.9",
   "packages/laverna": "1.2.4",
   "packages/lavamoat-node": "9.0.9",
+  "packages/node": "0.2.0",
   "packages/preinstall-always-fail": "2.1.0",
+  "packages/react-native-lockdown": "0.0.1",
   "packages/tofu": "8.0.7",
-  "packages/node": "0.2.0"
+  "packages/webpack": "1.0.0"
 }
