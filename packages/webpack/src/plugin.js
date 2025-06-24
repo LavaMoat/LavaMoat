@@ -27,6 +27,9 @@ const { loadCanonicalNameMap } = require('@lavamoat/aa')
 
 /**
  * @import {LockdownOptions} from 'ses'
+ * @import {LavaMoatPluginOptions, ScuttlerConfig} from './buildtime/types'
+ * @import {CanonicalNameMap} from '@lavamoat/aa'
+ * @import {LavaMoatPolicy} from 'lavamoat-core'
  */
 
 // TODO: upcoming version of webpack may expose these constants, but we want to support more versions
@@ -62,8 +65,11 @@ class VirtualRuntimeModule extends RuntimeModule {
   }
 }
 
-/** @typedef {import('./buildtime/types').LavaMoatPluginOptions} LavaMoatPluginOptions */
-/** @typedef {import('./buildtime/types').ScuttlerConfig} ScuttlerConfig */
+/**
+ * @typedef {LavaMoatPluginOptions} LavaMoatPluginOptions
+ *
+ * @typedef {ScuttlerConfig} ScuttlerConfig
+ */
 
 // =================================================================
 // Plugin code
@@ -124,12 +130,12 @@ class LavaMoatPlugin {
      *   excluded from wrapping
      * @property {string[]} tooEarly Array of module rawResource names that were
      *   not wrapped because they were generated before chunks were known
-     * @property {import('@lavamoat/aa').CanonicalNameMap} [canonicalNameMap]
-     * @property {import('lavamoat-core').LavaMoatPolicy} [runtimeOptimizedPolicy]
+     * @property {CanonicalNameMap} [canonicalNameMap]
+     * @property {LavaMoatPolicy} [runtimeOptimizedPolicy]
      * @property {string} [root]
      * @property {[string, (string | number)[]][]} [identifiersForModuleIds]
-     * @property {any[]} [unenforceableModuleIds]
-     * @property {any[]} [contextModuleIds]
+     * @property {(string | number)[]} [unenforceableModuleIds]
+     * @property {(string | number)[]} [contextModuleIds]
      * @property {(path: string) => string | undefined} [pathToResourceId]
      * @property {Record<string, any>} [externals]
      */

@@ -1,12 +1,11 @@
 const diag = require('./diagnostics.js')
 const { WebpackError } = require('webpack')
 
+/** @import {Module, NormalModule, ExternalModule} from 'webpack' */
+/** @import {InspectableWebpackModule} from './policyGenerator.js' */
+
 // TODO: move into an enum file along with the other
 const JAVASCRIPT_MODULE_TYPE_DYNAMIC = 'javascript/dynamic'
-
-/**
- * @import WebPack from 'webpack'
- */
 
 /**
  * @remarks
@@ -17,7 +16,7 @@ const JAVASCRIPT_MODULE_TYPE_DYNAMIC = 'javascript/dynamic'
  * treeshaking doesn't eliminate that module. It's left there and failing to
  * work when reached by runtime policy enforcement. Below is the most reliable
  * way I've found to date to identify ignored modules.
- * @param {WebPack.Module} m
+ * @param {Module} m
  * @returns {boolean}
  */
 const isIgnoredModule = (m) => {
@@ -42,8 +41,8 @@ const isContextModule = (m, moduleClass) => moduleClass === 'ContextModule'
  * Identifies an asset that webpack includes in dist by default without setting
  * any loaders explicitly.
  *
- * @param {WebPack.Module} m
- * @returns {m is WebPack.NormalModule}
+ * @param {Module} m
+ * @returns {m is NormalModule}
  */
 const isAmbientAsset = (m) =>
   m.type === 'asset/resource' &&
@@ -53,19 +52,18 @@ const isAmbientAsset = (m) =>
   m.loaders.length === 0
 
 /**
- * @param {WebPack.Module} m
+ * @param {Module} m
  * @param {string} moduleClass
- * @returns {m is WebPack.ExternalModule} // TODO: this is not true anymore, but
- *   there's no superclass of all reasonable module types
+ * @returns {m is ExternalModule}
  */
 const isExternalModule = (m, moduleClass) =>
   ['ExternalModule'].includes(moduleClass) &&
   'externalType' in m &&
   m.externalType !== undefined
 /**
- * @param {WebPack.Module} m
+ * @param {Module} m
  * @param {string} moduleClass
- * @returns {m is import('./policyGenerator.js').InspectableWebpackModule}
+ * @returns {m is InspectableWebpackModule}
  */
 const isInspectableModule = (m, moduleClass) =>
   'userRequest' in m ||
@@ -74,7 +72,7 @@ const isInspectableModule = (m, moduleClass) =>
 
 /**
  * @typedef {{
- *   module: WebPack.Module
+ *   module: Module
  *   moduleId: string | number | null
  * }} IdentifiedModule
  */
@@ -84,11 +82,11 @@ const isInspectableModule = (m, moduleClass) =>
  * their properties
  *
  * @param {Object} opts
- * @param {WebPack.WebpackError[]} opts.mainCompilationWarnings - Array to store
+ * @param {WebpackError[]} opts.mainCompilationWarnings - Array to store
  *   compilation warnings
  * @param {IdentifiedModule[]} opts.allIdentifiedModules
  * @returns {{
- *   inspectable: import('./policyGenerator.js').InspectableWebpackModule[]
+ *   inspectable: InspectableWebpackModule[]
  *   contextModules: { moduleId: string | number; context: string }[]
  *   knownPaths: { path: string; moduleId: string | number }[]
  *   unenforceableModuleIds: (string | number)[]
@@ -122,7 +120,7 @@ exports.analyzeModules = ({
   /**
    * An array of modules deemed fit for inspecting for policy
    *
-   * @type {import('./policyGenerator.js').InspectableWebpackModule[]}
+   * @type {InspectableWebpackModule[]}
    */
   const inspectable = []
 

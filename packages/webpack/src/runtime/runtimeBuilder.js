@@ -4,6 +4,7 @@ const { assembleRuntime } = require('./assemble.js')
 const path = require('node:path')
 
 /** @import {LavaMoatPluginOptions} from '../buildtime/types' */
+/** @import {LavaMoatPolicy} from 'lavamoat-core' */
 
 module.exports = {
   /**
@@ -28,18 +29,22 @@ module.exports = {
        *   object
        * @param {(string | number)[]} params.chunkIds - Array of chunk
        *   identifiers
-       * @param {Object} params.policyData - LavaMoat security policy
+       * @param {LavaMoatPolicy} params.policyData - LavaMoat security policy
        *   configuration
        * @param {Object} params.identifiers - Object containing module
        *   identifier mappings
        * @param {string} params.identifiers.root - Root identifier
-       * @param {Object} params.identifiers.identifiersForModuleIds - Module ID
-       *   to identifier mappings
-       * @param {any} params.identifiers.unenforceableModuleIds - IDs of modules
-       *   that cannot be enforced
-       * @param {any} [params.identifiers.contextModuleIds] - Context module IDs
-       * @param {Object} [params.identifiers.externals] - External module
-       *   configurations
+       * @param {[string, (string | number)[]][]} params.identifiers.identifiersForModuleIds
+       *   - Module ID to identifier mappings
+       *
+       * @param {(string | number)[]} params.identifiers.unenforceableModuleIds
+       *   - IDs of modules that cannot be enforced
+       *
+       * @param {(string | number)[]} [params.identifiers.contextModuleIds] -
+       *   Context module IDs
+       * @param {Record<string | number, string>} [params.identifiers.externals]
+       *   - External module configurations
+       *
        * @returns {string} The assembled runtime source code
        */
       getLavaMoatRuntimeSource({
@@ -78,38 +83,45 @@ module.exports = {
           diag.rawDebug(2, `adding runtime for chunk ${currentChunkName}`)
 
           runtimeChunks = [
+            // the string used to indicate root resource id
             {
               name: 'root',
               data: root,
               json: true,
             },
+            // a mapping used to look up resource ids by module id
             {
               name: 'idmap',
               data: identifiersForModuleIds,
               json: true,
             },
+            // list of ids of modules to skip in policy enforcement
             {
               name: 'unenforceable',
               data: unenforceableModuleIds,
               json: true,
             },
+            // list of known context modules
             {
               name: 'ctxm',
               data: contextModuleIds || null,
               json: true,
             },
+            // known chunk ids
             {
-              // known chunk ids
               name: 'kch',
               data: chunkIds,
               json: true,
             },
+            // a record of module ids that are externals and need to be enforced as builtins
             {
               name: 'externals',
               data: externals || null,
               json: true,
             },
+            // options to turn on scuttling
             { name: 'options', data: runtimeOptions, json: true },
+            // scuttling module, if needed
             (typeof runtimeOptions?.scuttleGlobalThis === 'boolean' &&
               runtimeOptions.scuttleGlobalThis === true) ||
             (typeof runtimeOptions?.scuttleGlobalThis === 'object' &&
@@ -119,16 +131,20 @@ module.exports = {
                   shimRequire: 'lavamoat-core/src/scuttle.js',
                 }
               : {},
+            // the policy itself
             { name: 'policy', data: policyData, json: true },
+            // enum for keys to match the generated ones in wrapper
             {
               name: 'ENUM',
               file: require.resolve('../ENUM.json'),
               json: true,
             },
+            // endowments module
             {
               name: 'endowmentsToolkit',
               shimRequire: 'lavamoat-core/src/endowmentsToolkit.js',
             },
+            // main lavamoat runtime
             {
               name: 'runtime',
               file: require.resolve('./runtime.js'),
@@ -136,6 +152,7 @@ module.exports = {
           ]
 
           if (options.debugRuntime) {
+            // optional debug helpers
             runtimeChunks.push({
               name: 'debug',
               shimRequire: path.join(__dirname, 'debug.js'),
