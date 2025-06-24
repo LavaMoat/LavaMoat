@@ -113,7 +113,7 @@ This plugin will skip policy enforcement for such ignored modules.
 
 #### HMR
 
-LavaMoat is not compatible with Hot Module Replacement (HMR) and is highly unlikely to ever be - they're the antithesis of sandboxing. If you wish to use HMR for development, disable LavaMoat in your dev configuration while keeping it enabled for production builds.
+LavaMoat is not compatible with Hot Module Replacement (HMR) and is highly unlikely to ever be; HMR is the antithesis of sandboxing. If you wish to use HMR for development, disable LavaMoat in your dev configuration while keeping it enabled for production builds.
 You could keep lockdown added to the page if you wish to detect incompatibilities with the hardened environment early.
 
 # Security

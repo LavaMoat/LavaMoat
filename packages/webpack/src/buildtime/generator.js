@@ -150,10 +150,9 @@ exports.wrapGenerator = ({ excludes, runChecks, PROGRESS }) => {
             get: () => false,
             set: () => {
               // TODO: make the error more informative - explaining why the attempt to strict mode had to be skipped here but is applied anyway
-              console.warn(
+              console.trace(
                 'Attempted to set strict mode on module',
-                module.rawRequest,
-                Error().stack
+                module.rawRequest)
               )
             },
           })
@@ -169,7 +168,7 @@ exports.wrapGenerator = ({ excludes, runChecks, PROGRESS }) => {
           module
         )
 
-        let { before, after, source, sourceChanged } = wrapper({
+        const { before, after, source, sourceChanged } = wrapper({
           // There's probably a good reason why webpack stores source in those objects instead
           // of strings. Turning it into a string here might mean we're loosing some caching.
           // Wrapper checks if transforms changed the source and indicates it, so that we can

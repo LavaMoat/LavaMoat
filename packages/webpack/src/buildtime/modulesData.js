@@ -177,8 +177,6 @@ exports.analyzeModules = ({
         module.generator = Object.create(module.generator, {
           emit: {
             value: false,
-            writable: false,
-            configurable: false,
             enumerable: true,
           },
         })
