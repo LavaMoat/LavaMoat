@@ -17,10 +17,12 @@
     },
     "packages/preinstall-always-fail": {},
     "packages/react-native-lockdown": {
-      "initial-version": "0.0.1"
+      "release-as": "0.0.1"
     },
     "packages/tofu": {},
-    "packages/webpack": {}
+    "packages/webpack": {
+      "release-as": "1.0.0"
+    }
   },
   "plugins": ["node-workspace"]
 }
