@@ -6,21 +6,18 @@
  * @packageDocumentation
  */
 import nodeFs from 'node:fs'
-import nodePath from 'node:path'
 import { defaultReadPowers } from '../compartment/power.js'
-import {
-  DEFAULT_POLICY_FILENAME,
-  DEFAULT_TRUST_ROOT_COMPARTMENT,
-} from '../constants.js'
-import { hrPath } from '../format.js'
-import { assertAbsolutePath } from '../fs.js'
+import { DEFAULT_TRUST_ROOT_COMPARTMENT } from '../constants.js'
+import { hrCode, hrPath } from '../format.js'
 import { log as defaultLog } from '../log.js'
-import { maybeReadPolicyOverride, writePolicy } from '../policy-util.js'
 import {
   makeDefaultPolicyDebugPath,
   makeDefaultPolicyOverridePath,
-  toPath,
-} from '../util.js'
+  makeDefaultPolicyPath,
+  maybeReadPolicyOverride,
+  writePolicy,
+} from '../policy-util.js'
+import { noop, toAbsolutePath } from '../util.js'
 import { loadCompartmentMapForPolicy } from './policy-gen-compartment-map.js'
 import { reportInvalidOverrides } from './report.js'
 import { compartmentMapToPolicy } from './to-policy.js'
@@ -152,32 +149,32 @@ export const generatePolicy = async (
     readFile = nodeFs.promises.readFile,
     log = defaultLog,
     trustRoot = DEFAULT_TRUST_ROOT_COMPARTMENT,
-    projectRoot = process.cwd(),
+    projectRoot: rawProjectRootPath = process.cwd(),
     ...generateOpts
   } = {}
 ) => {
   await Promise.resolve()
 
-  const entrypointPath = toPath(entrypoint)
-  const projectRootPath = toPath(projectRoot)
-  const policyPath = toPath(
-    rawPolicyPath ?? nodePath.join(projectRoot, DEFAULT_POLICY_FILENAME)
+  const entrypointPath = toAbsolutePath(
+    entrypoint,
+    `Entrypoint must be an absolute path; got ${hrCode(entrypoint)}`
+  )
+  const projectRoot = toAbsolutePath(
+    rawProjectRootPath,
+    `Project root must be an absolute path; got ${hrCode(rawProjectRootPath)}`
   )
 
-  assertAbsolutePath(
-    entrypointPath,
-    `entrypoint must be an absolute path; got ${entrypointPath}`
-  )
-
-  assertAbsolutePath(
-    projectRootPath,
-    `projectRoot must be an absolute path; got ${projectRootPath}`
-  )
-
-  assertAbsolutePath(
-    policyPath,
-    `policyPath must be an absolute path; got ${policyPath}`
-  )
+  /** @type {string} */
+  let policyPath
+  if (rawPolicyPath) {
+    policyPath = toAbsolutePath(
+      rawPolicyPath,
+      `Policy path must be an absolute path; got ${hrCode(rawPolicyPath)}`
+    )
+    log.debug(`User-provided policy path: ${policyPath}`)
+  } else {
+    policyPath = makeDefaultPolicyPath(projectRoot)
+  }
 
   /** @type {string | undefined} */
   let policyOverridePath
@@ -185,17 +182,24 @@ export const generatePolicy = async (
   // in this case, we handle the path.
   if (!policyOverride) {
     if (rawPolicyOverridePath) {
-      policyOverridePath = toPath(rawPolicyOverridePath)
-      assertAbsolutePath(
-        policyOverridePath,
-        `policyOverridePath must be an absolute path; got ${policyOverridePath}`
+      policyOverridePath = toAbsolutePath(
+        rawPolicyOverridePath,
+        `Policy override path must be an absolute path; got ${hrCode(rawPolicyOverridePath)}`
       )
+      log.debug(`User-provided policy override path: ${policyOverridePath}`)
     } else {
-      policyOverridePath = makeDefaultPolicyOverridePath(policyPath)
+      policyOverridePath = makeDefaultPolicyOverridePath({
+        policyPath,
+        projectRoot,
+      })
     }
     policyOverride = await maybeReadPolicyOverride(policyOverridePath, {
       readFile,
     })
+  } else if (rawPolicyOverridePath) {
+    log.warning(
+      `Ignoring user-provided policy override path ${hrPath(rawPolicyOverridePath)} because a policy override object was provided`
+    )
   }
 
   /** @type {string | undefined} */
@@ -203,13 +207,12 @@ export const generatePolicy = async (
 
   if (shouldWrite && debug) {
     if (rawPolicyDebugPath) {
-      policyDebugPath = toPath(rawPolicyDebugPath)
-      assertAbsolutePath(
-        policyDebugPath,
-        `policyDebugPath must be an absolute path; got ${policyDebugPath}`
+      policyDebugPath = toAbsolutePath(
+        rawPolicyDebugPath,
+        `policyDebugPath must be an absolute path; got ${hrCode(rawPolicyDebugPath)}`
       )
     } else {
-      policyDebugPath = makeDefaultPolicyDebugPath(policyPath)
+      policyDebugPath = makeDefaultPolicyDebugPath({ policyPath, projectRoot })
     }
   }
 
@@ -224,7 +227,7 @@ export const generatePolicy = async (
   /** @type {CompleteCompartmentDescriptorDataMap} */
   let dataMap
 
-  const niceEntrypointPath = hrPath(entrypoint)
+  const niceEntrypointPath = hrPath(entrypointPath)
 
   /**
    * If the debug flag was true, then the result of generatePolicy will be a
@@ -240,7 +243,7 @@ export const generatePolicy = async (
       policy: debugPolicy,
       compartmentMap,
       dataMap,
-    } = await generate(entrypoint, {
+    } = await generate(entrypointPath, {
       ...generateOpts,
       readPowers,
       trustRoot,
@@ -260,7 +263,7 @@ export const generatePolicy = async (
     policy = corePolicy
   } else {
     log.info(`Generating LavaMoat policy from ${niceEntrypointPath}…`)
-    ;({ policy, compartmentMap, dataMap } = await generate(entrypoint, {
+    ;({ policy, compartmentMap, dataMap } = await generate(entrypointPath, {
       ...generateOpts,
       trustRoot,
       readPowers,

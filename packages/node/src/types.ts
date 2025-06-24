@@ -36,6 +36,7 @@ import type {
   ENDO_GLOBAL_POLICY_ITEM_WRITE,
   ENDO_POLICY_ITEM_ROOT,
   LAVAMOAT_PKG_POLICY_ROOT,
+  MERGED_POLICY_FIELD,
 } from './constants.js'
 
 /**
@@ -102,13 +103,29 @@ export interface WithLog {
   log?: Loggerr
 }
 
-/**
- * Options having a `policyOverride` or `policyOverridePath` property (not both
- * at once!)
- */
-export type WithPolicyOverrideOrPath =
-  | WithPolicyOverrideOnly
-  | WithPolicyOverridePathOnly
+export interface WithPolicyOnly {
+  /**
+   * A {@link LavaMoatPolicy} object.
+   */
+  policy?: LavaMoatPolicy
+  /**
+   * Disallowed in lieu of {@link policy}
+   */
+  policyPath?: never
+}
+
+export interface WithPolicyPathOnly {
+  /**
+   * Disallowed in lieu of {@link policy}
+   */
+  policy?: never
+  /**
+   * Path to a policy file.
+   */
+  policyPath?: string | URL
+}
+
+export type WithPolicyOrPath = WithPolicyOnly | WithPolicyPathOnly
 
 /**
  * Options having a `policyOverride` property and _not_ a `policyOverridePath`
@@ -138,6 +155,14 @@ export type WithPolicyOverridePathOnly = {
    */
   policyOverride?: never
 }
+
+/**
+ * Options having a `policyOverride` or `policyOverridePath` property (not both
+ * at once!)
+ */
+export type WithPolicyOverrideOrPath =
+  | WithPolicyOverrideOnly
+  | WithPolicyOverridePathOnly
 
 export interface WithPolicyOverride {
   policyOverride?: LavaMoatPolicy
@@ -290,11 +315,10 @@ export type GeneratePolicyOptions = ComposeOptions<
     WithIsBuiltin,
     WithCaptureLiteOptions,
     WithWritePolicyOptions,
-    WithPolicyOverride,
+    WithPolicyOverrideOrPath,
     WithDebug,
     WithTrustRoot,
     WithScuttleGlobalThis,
-    WithPolicyOverridePath,
     WithReadFile,
     WithProjectRoot,
     WithCompartmentDescriptorDecorators,
@@ -377,6 +401,7 @@ export type RunOptions = ComposeOptions<
     WithLog,
     WithProjectRoot,
     WithPolicyOverrideOrPath,
+    WithPolicyOrPath,
     WithReadFile,
   ]
 >
@@ -399,6 +424,18 @@ export interface WithProjectRoot {
 export type ToEndoPolicyOptions = ComposeOptions<
   [WithProjectRoot, WithPolicyOverrideOrPath, WithLog]
 >
+
+/**
+ * Used when the first parameter to `toEndoPolicy()` is a
+ * {@link MergedLavaMoatPolicy}
+ */
+export type ToEndoPolicyOptionsWithoutPolicyOverride = ComposeOptions<
+  [
+    Omit<ToEndoPolicyOptions, 'policyOverridePath' | 'policyOverride'>,
+    { policyOverride?: never; policyOverridePath?: never },
+  ]
+>
+
 /**
  * Options which may either {@link WithReadPowers} or {@link WithRawPowers} but
  * not both.
@@ -627,3 +664,11 @@ export type ComposeOptions<T extends object[]> = Simplify<
       : never
     : object
 >
+
+export type MergedLavaMoatPolicy = LavaMoatPolicy & {
+  [MERGED_POLICY_FIELD]: true
+}
+
+export type UnmergedLavaMoatPolicy = LavaMoatPolicy & {
+  [MERGED_POLICY_FIELD]?: never
+}
