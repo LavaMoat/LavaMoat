@@ -45,6 +45,9 @@
   "devDependencies": {
     "@react-native/js-polyfills": "0.79.3"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "ava": {
     "files": [
       "test/**/*.spec.js"
