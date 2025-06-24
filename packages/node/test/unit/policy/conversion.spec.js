@@ -2,6 +2,7 @@ import '../../../src/preamble.js'
 
 import test from 'ava'
 import stringify from 'json-stable-stringify'
+import { MERGED_POLICY_FIELD } from '../../../src/constants.js'
 import { ErrorCodes } from '../../../src/error-code.js'
 import { readJsonFile } from '../../../src/fs.js'
 import {
@@ -9,10 +10,11 @@ import {
   ENDO_POLICY_ENTRY_TRUSTED,
   toEndoPolicy,
 } from '../../../src/policy-converter.js'
+import { mergePolicies, readPolicy } from '../../../src/policy-util.js'
 
 /**
  * @import {Policy} from '@endo/compartment-mapper'
- * @import {LavaMoatEndoPackagePolicyItem} from '../../../src/types.js'
+ * @import {LavaMoatEndoPackagePolicyItem, MergedLavaMoatPolicy} from '../../../src/types.js'
  * @import {LavaMoatPolicy} from 'lavamoat-core'
  */
 
@@ -42,7 +44,18 @@ const ENDO_POLICY_TRUSTED = /** @type {const} */ ({
 })
 
 /** @satisfies {LavaMoatPolicy} */
-const DEFAULT_POLICY = Object.freeze({ resources: {} })
+const DEFAULT_POLICY = Object.freeze(
+  /** @type {const} */ ({
+    resources: {},
+  })
+)
+/** @satisfies {MergedLavaMoatPolicy} */
+const DEFAULT_MERGED_POLICY = Object.freeze(
+  /** @type {const} */ ({
+    resources: {},
+    [MERGED_POLICY_FIELD]: true,
+  })
+)
 
 /**
  * Round-trips an object through JSON to strip `undefined` and unserializable
@@ -83,7 +96,7 @@ test('toEndoPolicy() - no policy', async (t) => {
 })
 
 test('toEndoPolicy() - empty policy', async (t) => {
-  const actual = await toEndoPolicy(DEFAULT_POLICY)
+  const actual = await toEndoPolicy(DEFAULT_MERGED_POLICY)
   t.deepEqual(actual, ENDO_POLICY_TRUSTED)
 })
 
@@ -142,12 +155,29 @@ test('toEndoPolicy() - override merging', async (t) => {
   })
   const actual = compactJSON(policy)
 
-  const expected = /** @type {Policy<LavaMoatEndoPackagePolicyItem>} */ (
-    await readJsonFile(
-      new URL(
-        './conversion-fixture/kitchen-sink/endo-policy-overrides.json',
-        import.meta.url
-      )
+  const expected = await readJsonFile(
+    new URL(
+      './conversion-fixture/kitchen-sink/endo-policy-overrides.json',
+      import.meta.url
+    )
+  )
+
+  t.deepEqual(actual, expected)
+})
+
+test('toEndoPolicy() - no override merging', async (t) => {
+  const lavamoatPolicy = await readPolicy(KS_POLICY_URL)
+  const mergedPolicy = mergePolicies(lavamoatPolicy)
+  // @ts-expect-error invalid type
+  const endoPolicy = await toEndoPolicy(mergedPolicy, {
+    policyOverridePath: KS_POLICY_OVERRIDES_URL,
+  })
+  const actual = compactJSON(endoPolicy)
+
+  const expected = await readJsonFile(
+    new URL(
+      './conversion-fixture/kitchen-sink/endo-policy.json',
+      import.meta.url
     )
   )
 

@@ -13,6 +13,7 @@ import {
 /**
  * @import {ValueOf} from 'type-fest'
  * @import {TestPolicyMacroOptions, TestPolicyForJSONOptions, ScaffoldFixtureResult, ScaffoldFixtureOptions} from './types.js'
+ * @import {GeneratePolicyOptions} from '../../../src/types.js'
  * @import {TestFn, MacroDeclarationOptions} from 'ava'
  * @import {LavaMoatPolicy} from 'lavamoat-core'
  */
@@ -205,10 +206,10 @@ export function createGeneratePolicyMacros(test) {
 
         const actualPolicy = await generatePolicy(
           options?.jsonEntrypoint ?? DEFAULT_JSON_FIXTURE_ENTRY_POINT,
-          {
+          /** @type {GeneratePolicyOptions} */ ({
             ...options,
             readPowers,
-          }
+          })
         )
 
         // if overrides provided, then we will make a second check that

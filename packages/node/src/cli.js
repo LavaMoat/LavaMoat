@@ -28,12 +28,12 @@ import { hrPath } from './format.js'
 import { readJsonFile } from './fs.js'
 import { log } from './log.js'
 import { generatePolicy } from './policy-gen/generate.js'
-import { loadPolicies } from './policy-util.js'
 import { resolveBinScript, resolveEntrypoint } from './resolve.js'
 import { toPath } from './util.js'
 
 /**
  * @import {PackageJson} from 'type-fest';
+ * @import {RunOptions} from './types.js'
  * @import {LavaMoatPolicy} from 'lavamoat-core';
  */
 
@@ -450,7 +450,7 @@ const main = async (args = hideBin(process.argv)) => {
         /**
          * This will be the policy merged with overrides, if present
          *
-         * @type {LavaMoatPolicy}
+         * @type {LavaMoatPolicy | undefined}
          */
         let policy
 
@@ -467,11 +467,6 @@ const main = async (args = hideBin(process.argv)) => {
             trustRoot,
             projectRoot,
           })
-        } else {
-          policy = await loadPolicies(policyPath, {
-            policyOverridePath,
-            projectRoot,
-          })
         }
 
         stripProcessArgv(
@@ -483,12 +478,13 @@ const main = async (args = hideBin(process.argv)) => {
            */ (argv['--'])
         )
 
-        await run(entrypoint, policy, {
+        await run(entrypoint, {
           policyOverridePath,
           trustRoot,
           dev,
           projectRoot,
           scuttleGlobalThis,
+          ...(policy ? { policy } : { policyPath }),
         })
       }
     )
