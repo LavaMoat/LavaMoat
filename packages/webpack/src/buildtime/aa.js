@@ -48,6 +48,7 @@ const crossReference = (neededIds, policyIds) => {
 
 /**
  * @import {LavaMoatPolicy} from 'lavamoat-core'
+ * @import {CanonicalNameMap} from '@lavamoat/aa'
  */
 
 /**
@@ -64,7 +65,7 @@ const crossReference = (neededIds, policyIds) => {
  * @param {object} options
  * @param {{ path: string; moduleId: string | number }[]} options.paths
  * @param {LavaMoatPolicy} options.policy
- * @param {import('@lavamoat/aa').CanonicalNameMap} options.canonicalNameMap
+ * @param {CanonicalNameMap} options.canonicalNameMap
  * @param {{ moduleId: string | number; context: string }[]} options.contextModules
  * @param {Record<string | number, string>} options.externals
  * @param {boolean | undefined} options.readableResourceIds

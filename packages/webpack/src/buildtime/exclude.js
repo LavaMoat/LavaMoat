@@ -1,5 +1,5 @@
-/** @typedef {import('webpack').NormalModule} NormalModule */
-/** @typedef {import('./policyGenerator').InspectableWebpackModule} InspectableWebpackModule */
+/** @import {NormalModule} from 'webpack' */
+/** @import {InspectableWebpackModule} from './policyGenerator' */
 
 const path = require('node:path')
 const EXCLUDE_LOADER = path.join(__dirname, '../excludeLoader.js')

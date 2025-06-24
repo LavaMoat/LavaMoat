@@ -19,9 +19,8 @@ const diag = require('./diagnostics')
  * @typedef {import('webpack').NormalModule | import('webpack').ExternalModule} InspectableWebpackModule
  */
 
-/**
- * @import {LavaMoatPolicy} from 'lavamoat-core'
- */
+/** @import {LavaMoatPolicy} from 'lavamoat-core' */
+/** @import {CanonicalNameMap} from '@lavamoat/aa' */
 
 module.exports = {
   stringifyPolicyReliably: jsonStringifySortedPolicy,
@@ -50,8 +49,7 @@ module.exports = {
   },
   /**
    * @param {Object} opts
-   * @param {import('@lavamoat/aa').CanonicalNameMap} opts.canonicalNameMap -
-   *   Generated from aa
+   * @param {CanonicalNameMap} opts.canonicalNameMap - Generated from aa
    * @param {string} opts.location - Where to read/write the policy files
    * @param {IsBuiltinFn} opts.isBuiltin - A function that determines if the
    *   specifier is a builtin of the runtime platform e.g. node:fs
@@ -66,7 +64,7 @@ module.exports = {
 
   /**
    * @param {Object} opts
-   * @param {import('@lavamoat/aa').CanonicalNameMap} opts.canonicalNameMap
+   * @param {CanonicalNameMap} opts.canonicalNameMap
    * @param {string} opts.location
    * @param {IsBuiltinFn} opts.isBuiltin
    * @param {ModuleWithConnections[]} opts.modulesToInspect

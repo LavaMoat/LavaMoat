@@ -1,5 +1,5 @@
-/** @typedef {import('webpack').Generator} Generator */
-/** @typedef {import('webpack').NormalModule} NormalModule */
+/** @import {Generator, NormalModule} from 'webpack' */
+/** @import {ProgressAPI} from './utils.js' */
 /** @typedef {import('webpack').sources.Source} Source */
 
 const {
@@ -59,7 +59,7 @@ const wrappedGeneratorInstances = new WeakSet()
  * @param {object} options
  * @param {string[]} options.excludes
  * @param {boolean | undefined} options.runChecks
- * @param {import('./utils.js').ProgressAPI} options.PROGRESS
+ * @param {ProgressAPI} options.PROGRESS
  */
 exports.wrapGenerator = ({ excludes, runChecks, PROGRESS }) => {
   /** @type {string[]} */
@@ -152,7 +152,7 @@ exports.wrapGenerator = ({ excludes, runChecks, PROGRESS }) => {
               // TODO: make the error more informative - explaining why the attempt to strict mode had to be skipped here but is applied anyway
               console.trace(
                 'Attempted to set strict mode on module',
-                module.rawRequest)
+                module.rawRequest
               )
             },
           })
