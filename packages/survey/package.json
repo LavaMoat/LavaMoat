@@ -14,7 +14,7 @@
     "zzz": "node zzz.js"
   },
   "dependencies": {
-    "cheerio": "1.0.0",
+    "cheerio": "1.1.0",
     "lavamoat": "^9.0.0",
     "lavamoat-core": "^16.0.0",
     "lavamoat-tofu": "^8.0.0",
