@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.2](https://github.com/LavaMoat/LavaMoat/compare/react-native-lockdown-v0.0.1...react-native-lockdown-v0.0.2) (2025-06-25)
+
+
+### Bug Fixes
+
+* **react-native-lockdown:** add vendor directory when creating tarball ([#1728](https://github.com/LavaMoat/LavaMoat/issues/1728)) ([47d542e](https://github.com/LavaMoat/LavaMoat/commit/47d542e069253c059d27182d683653f73a9bafd4))
+
 ## [0.0.1](https://github.com/LavaMoat/LavaMoat/compare/react-native-lockdown-v0.0.1...react-native-lockdown-v0.0.1) (2025-06-24)
 
 
