@@ -43,7 +43,7 @@
     "@react-native/js-polyfills": "*"
   },
   "devDependencies": {
-    "@react-native/js-polyfills": "0.79.3"
+    "@react-native/js-polyfills": "0.80.0"
   },
   "publishConfig": {
     "access": "public"
