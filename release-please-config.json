@@ -35,15 +35,13 @@
       "package-name": "@lavamoat/preinstall-always-fail"
     },
     "packages/react-native-lockdown": {
-      "package-name": "@lavamoat/react-native-lockdown",
-      "release-as": "0.0.1"
+      "package-name": "@lavamoat/react-native-lockdown"
     },
     "packages/tofu": {
       "package-name": "lavamoat-tofu"
     },
     "packages/webpack": {
-      "package-name": "@lavamoat/webpack",
-      "release-as": "1.0.0"
+      "package-name": "@lavamoat/webpack"
     }
   },
   "plugins": ["node-workspace"]
