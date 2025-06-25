@@ -39,7 +39,7 @@
   "devDependencies": {
     "@commitlint/cli": "19.8.1",
     "@commitlint/config-conventional": "19.8.1",
-    "@endo/compartment-mapper": "1.6.1",
+    "@endo/compartment-mapper": "1.6.2",
     "@tsconfig/node18": "18.2.4",
     "@types/lint-staged": "13.3.0",
     "@types/node": "18.19.112",
