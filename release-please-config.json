@@ -2,25 +2,47 @@
   "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
   "bootstrap-sha": "b7b011567d068a2bcddee4bb8497f04d74c6ae65",
   "packages": {
-    "packages/aa": {},
-    "packages/allow-scripts": {},
-    "packages/browserify": {},
-    "packages/core": {},
+    "packages/aa": {
+      "package-name": "@lavamoat/aa"
+    },
+    "packages/allow-scripts": {
+      "package-name": "@lavamoat/allow-scripts"
+    },
+    "packages/browserify": {
+      "package-name": "lavamoat-browserify"
+    },
+    "packages/core": {
+      "package-name": "lavamoat-core"
+    },
     "packages/git-safe-dependencies": {
-      "initial-version": "0.0.1"
+      "initial-version": "0.0.1",
+      "package-name": "@lavamoat/git-safe-dependencies"
     },
-    "packages/lavapack": {},
-    "packages/laverna": {},
-    "packages/lavamoat-node": {},
+    "packages/lavapack": {
+      "package-name": "@lavamoat/lavapack"
+    },
+    "packages/laverna": {
+      "package-name": "@lavamoat/laverna"
+    },
+    "packages/lavamoat-node": {
+      "package-name": "lavamoat"
+    },
     "packages/node": {
+      "package-name": "@lavamoat/node",
       "initial-version": "0.0.1"
     },
-    "packages/preinstall-always-fail": {},
+    "packages/preinstall-always-fail": {
+      "package-name": "@lavamoat/preinstall-always-fail"
+    },
     "packages/react-native-lockdown": {
+      "package-name": "@lavamoat/react-native-lockdown",
       "release-as": "0.0.1"
     },
-    "packages/tofu": {},
+    "packages/tofu": {
+      "package-name": "lavamoat-tofu"
+    },
     "packages/webpack": {
+      "package-name": "@lavamoat/webpack",
       "release-as": "1.0.0"
     }
   },
