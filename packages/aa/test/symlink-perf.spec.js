@@ -39,7 +39,7 @@ test.after(async (t) => {
 })
 
 // FIXME: this test fails on darwin running in GH actions; diagnose and fix
-if (process.platform === 'darwin' && process.env.CI) {
+if (process.platform === 'darwin') {
   test.todo(
     '[bench] isSymlink is significantly faster than realpathSync in a naive microbenchmark [darwin]'
   )
