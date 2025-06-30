@@ -1,8 +1,8 @@
 import '../../../src/preamble.js'
 
+import { isLavaMoatPolicy } from '@lavamoat/policy'
 import { fileURLToPath } from 'node:url'
 import { generatePolicy } from '../../../src/policy-gen/generate.js'
-import { isPolicy } from '../../../src/policy-util.js'
 import { isFunction } from '../../../src/util.js'
 import {
   DEFAULT_JSON_FIXTURE_ENTRY_POINT,
@@ -85,7 +85,7 @@ export function createGeneratePolicyMacros(test) {
             : undefined,
       })
 
-      if (isPolicy(expectedPolicy)) {
+      if (isLavaMoatPolicy(expectedPolicy)) {
         t.deepEqual(actualPolicy, expectedPolicy)
       } else if ('expected' in expectedPolicy) {
         t.deepEqual(actualPolicy, expectedPolicy.expected)
@@ -98,7 +98,7 @@ export function createGeneratePolicyMacros(test) {
       _content,
       { expectedPolicy = {}, sourceType = InlineSourceTypes.Module } = {}
     ) =>
-      (isPolicy(expectedPolicy) || 'expected' in expectedPolicy
+      (isLavaMoatPolicy(expectedPolicy) || 'expected' in expectedPolicy
         ? `${title ?? `policy for inline ${sourceType} matches expected policy`}`
         : `${title ?? `policy for ${sourceType} fixture matches snapshot`}`
       ).trim(),
@@ -190,7 +190,7 @@ export function createGeneratePolicyMacros(test) {
       ) => {
         /** @type {TestPolicyForJSONOptions['expected']} */
         let expected
-        if (isPolicy(expectedPolicyOrOptions)) {
+        if (isLavaMoatPolicy(expectedPolicyOrOptions)) {
           expected = expectedPolicyOrOptions
         } else {
           options = /** @type {TestPolicyForJSONOptions} */ (
@@ -215,7 +215,7 @@ export function createGeneratePolicyMacros(test) {
         // asserts `actualPolicy` is a superset of the override
         t.plan(options?.policyOverride ? 2 : 1)
 
-        if (isPolicy(expected)) {
+        if (isLavaMoatPolicy(expected)) {
           t.deepEqual(
             actualPolicy,
             expected,
@@ -247,7 +247,7 @@ export function createGeneratePolicyMacros(test) {
         }
         /** @type {TestPolicyForJSONOptions['expected']} */
         let expected
-        if (isPolicy(expectedPolicyOrOptions)) {
+        if (isLavaMoatPolicy(expectedPolicyOrOptions)) {
           expected = expectedPolicyOrOptions
         } else {
           options = /** @type {TestPolicyForJSONOptions} */ (
@@ -256,7 +256,7 @@ export function createGeneratePolicyMacros(test) {
           ;({ expected, ...options } = options)
         }
 
-        if (isPolicy(expected)) {
+        if (isLavaMoatPolicy(expected)) {
           return `policy for fixture matches expected policy (${fixtureFilename})`
         } else if (isFunction(expected)) {
           return `policy for fixture passes assertions (${fixtureFilename})`
