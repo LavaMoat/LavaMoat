@@ -16,8 +16,8 @@ import { log as defaultLog } from '../log.js'
 import { noop } from '../util.js'
 
 /**
- * @import {ReadNowPowers, ImportLocationOptions, SyncImportLocationOptions, CompartmentMapDescriptor} from '@endo/compartment-mapper'
- * @import {ApplicationLoader, ExecuteOptions} from '../types.js'
+ * @import {ImportLocationOptions, SyncImportLocationOptions, CompartmentMapDescriptor} from '@endo/compartment-mapper'
+ * @import {ApplicationLoader, CompleteCompartmentDescriptorDataMap, ExecuteOptions} from '../types.js'
  */
 
 /**
@@ -31,7 +31,6 @@ import { noop } from '../util.js'
  *
  * @template [T=unknown] Exports of module, if known. Default is `unknown`
  * @param {string | URL} entrypointPath Entry point of application
- * @param {ReadNowPowers} [readPowers] Read powers
  * @param {ExecuteOptions} [options] Options
  * @returns {Promise<ApplicationLoader<T>>} Object with `import()` method
  * @public
@@ -76,7 +75,6 @@ export const load = async (
   try {
     onNodeModulesMapped(nodeCompartmentMap, nodeDataMap)
   } catch (err) {
-    log.error(`${err.message}:\n${err.stack}`)
     throw new ExecutionError(`onNodeModulesMapped callback failed`, {
       cause: err,
     })
@@ -85,7 +83,7 @@ export const load = async (
   /** @type {ImportLocationOptions | SyncImportLocationOptions} */
   const loadFromMapOptions = {
     ...DEFAULT_ENDO_OPTIONS,
-    ...options,
+    ...otherOptions,
     dev,
     policy,
     log: log.debug.bind(log),

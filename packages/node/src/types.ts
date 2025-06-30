@@ -672,3 +672,16 @@ export type MergedLavaMoatPolicy = LavaMoatPolicy & {
 export type UnmergedLavaMoatPolicy = LavaMoatPolicy & {
   [MERGED_POLICY_FIELD]?: never
 }
+
+export type OnNodeModulesMappedFn = (
+  compartmentMap: CompartmentMapDescriptor,
+  dataMap: CompleteCompartmentDescriptorDataMap
+) => void
+
+export interface WithOnNodeModulesMapped {
+  onNodeModulesMapped?: OnNodeModulesMappedFn
+}
+
+export type MergedLavaMoatPolicyDebug = LavaMoatPolicyDebug & {
+  [MERGED_POLICY_FIELD]: true
+}

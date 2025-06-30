@@ -87,6 +87,8 @@ const generate = async (
     dev = false,
     trustRoot = DEFAULT_TRUST_ROOT_COMPARTMENT,
     projectRoot = process.cwd(),
+    decorators = [],
+    onNodeModulesMapped = noop,
     ...archiveOpts
   } = {}
 ) => {
@@ -100,6 +102,8 @@ const generate = async (
       policyOverride,
       trustRoot,
       projectRoot,
+      decorators,
+      onNodeModulesMapped,
     })
 
   /** @type {CompartmentMapToPolicyOptions} */
@@ -132,7 +136,7 @@ const generate = async (
  *
  * @param {string | URL} entrypoint
  * @param {GeneratePolicyOptions} [opts]
- * @returns {Promise<LavaMoatPolicy>}
+ * @returns {Promise<MergedLavaMoatPolicy>}
  * @public
  */
 export const generatePolicy = async (
@@ -219,7 +223,7 @@ export const generatePolicy = async (
   /**
    * This value will be returned once populated
    *
-   * @type {LavaMoatPolicy}
+   * @type {MergedLavaMoatPolicy}
    */
   let policy
   /** @type {CompartmentMapDescriptor} */
@@ -237,7 +241,7 @@ export const generatePolicy = async (
    */
   if (shouldWriteDebugPolicy(policyDebugPath, { shouldWrite, debug })) {
     log.info(`Generating "debug" LavaMoat policy from ${niceEntrypointPath}`)
-    /** @type {LavaMoatPolicyDebug} */
+    /** @type {MergedLavaMoatPolicyDebug} */
     let debugPolicy
     ;({
       policy: debugPolicy,
@@ -256,10 +260,7 @@ export const generatePolicy = async (
     log.info(`Wrote debug policy to ${nicePolicyDebugPath}`)
     // do not attempt to use the `delete` keyword with typescript. you have been
     // warned!
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { debugInfo: _, ...corePolicy } = /** @type {LavaMoatPolicyDebug} */ (
-      debugPolicy
-    )
+    const { debugInfo: _, ...corePolicy } = debugPolicy
     policy = corePolicy
   } else {
     log.info(`Generating LavaMoat policy from ${niceEntrypointPath}…`)

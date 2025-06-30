@@ -73,6 +73,7 @@ export const loadCompartmentMapForPolicy = async (
     log = defaultLog,
     decorators = [],
     dev,
+    onNodeModulesMapped = noop,
     ...captureOpts
   } = {}
 ) => {
@@ -97,6 +98,15 @@ export const loadCompartmentMapForPolicy = async (
       { cause: err }
     )
   }
+
+  try {
+    onNodeModulesMapped(nodeCompartmentMap, nodeDataMap)
+  } catch (err) {
+    throw new GenerationError(`onNodeModulesMapped callback failed`, {
+      cause: err,
+    })
+  }
+
   // we use this to inject missing imports from policy overrides into the module descriptor.
   // TODO: Endo should allow us to hook into `importHook` directly instead
   const PolicyGenCompartment = makePolicyGenCompartment(
