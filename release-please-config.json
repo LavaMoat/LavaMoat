@@ -40,6 +40,10 @@
     "packages/tofu": {
       "package-name": "lavamoat-tofu"
     },
+    "packages/types": {
+      "package-name": "@lavamoat/types",
+      "initial-version": "0.0.1"
+    },
     "packages/webpack": {
       "package-name": "@lavamoat/webpack"
     }

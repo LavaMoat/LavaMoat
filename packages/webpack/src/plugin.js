@@ -29,7 +29,7 @@ const { loadCanonicalNameMap } = require('@lavamoat/aa')
  * @import {LockdownOptions} from 'ses'
  * @import {LavaMoatPluginOptions, ScuttlerConfig} from './buildtime/types'
  * @import {CanonicalNameMap} from '@lavamoat/aa'
- * @import {LavaMoatPolicy} from 'lavamoat-core'
+ * @import {LavaMoatPolicy} from '@lavamoat/types'
  */
 
 // TODO: upcoming version of webpack may expose these constants, but we want to support more versions
