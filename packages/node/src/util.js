@@ -230,3 +230,8 @@ export const toAbsolutePath = (pathLike, assertionMessage) => {
   )
   return path
 }
+
+/**
+ * A no-operation function.
+ */
+export const noop = () => {}
