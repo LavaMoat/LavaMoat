@@ -32,6 +32,11 @@ export type TestPolicyMacroOptions = ComposeOptions<
   ]
 >
 
+/**
+ * Options bag containing `expected` policy or an expectation function
+ *
+ * @internal
+ */
 export type WithExpected<Context = unknown> = {
   /**
    * Expected policy or a function receiving the policy or an assertion
@@ -75,6 +80,8 @@ export type TestPolicyForJSONOptions<Context = unknown> = ComposeOptions<
 
 /**
  * Expectation function for {@link TestPolicyForJSONOptions}
+ *
+ * @internal
  */
 export type TestPolicyExpectationFn<Context = unknown> = (
   t: ExecutionContext<Context>,
@@ -83,6 +90,8 @@ export type TestPolicyExpectationFn<Context = unknown> = (
 
 /**
  * Return type of `scaffoldFixture` in `policy-macros.js`
+ *
+ * @internal
  */
 export type ScaffoldFixtureResult = {
   vol: Volume
@@ -91,6 +100,8 @@ export type ScaffoldFixtureResult = {
 
 /**
  * Options for `scaffoldFixture` in `policy-macros.js`
+ *
+ * @internal
  */
 export type ScaffoldFixtureOptions = {
   /**
