@@ -1,0 +1,59 @@
+[
+  0,
+  {},
+  {
+    "README.md": [
+      1,
+      {},
+      "data:application/octet-stream;base64,VGhpcyBmaXh0dXJlIGlzIGludGVuZGVkIHRvIGJlIHJ1biBhZ2FpbnN0IGEgcG9saWN5IHdoZXJlaW4gYWNjZXNzIHRvIGdsb2JhbCBgcHJvY2Vzc2AgaXMgbm90IGFsbG93ZWQuCgpUaGUgZW50cnkgcG9pbnQgaXMgYG5vZGVfbW9kdWxlcy9hcHAvYXBwLmpzYC4K"
+    ],
+    "index.js": [
+      1,
+      {},
+      "data:application/octet-stream;base64,dGhyb3cgbmV3IEVycm9yKCdUaGlzIGlzIG5vdCB0aGUgZW50cnkgcG9pbnQnKQo="
+    ],
+    "node_modules": [
+      0,
+      {},
+      {
+        "app": [
+          0,
+          {},
+          {
+            "app.js": [
+              1,
+              {},
+              "data:application/octet-stream;base64,aW1wb3J0IHsgcGlkIH0gZnJvbSAncGlkJzsKCmV4cG9ydCBkZWZhdWx0IHBpZDsK"
+            ],
+            "package.json": [
+              1,
+              {},
+              "data:application/octet-stream;base64,ewogICJuYW1lIjogInBvbGljeS1lbmZvcmNlbWVudCIsCiAgInZlcnNpb24iOiAiMS4wLjAiLAogICJ0eXBlIjogIm1vZHVsZSIsCiAgInByaXZhdGUiOiB0cnVlLAogICJtYWluIjogImFwcC5qcyIsCiAgImRlcGVuZGVuY2llcyI6IHsKICAgICJwaWQiOiAiMS4wLjAiCiAgfQp9Cg=="
+            ]
+          }
+        ],
+        "pid": [
+          0,
+          {},
+          {
+            "index.js": [
+              1,
+              {},
+              "data:application/octet-stream;base64,ZXhwb3J0IGNvbnN0IHBpZCA9IHByb2Nlc3MucGlkCg=="
+            ],
+            "package.json": [
+              1,
+              {},
+              "data:application/octet-stream;base64,ewogICJuYW1lIjogInBpZCIsCiAgInZlcnNpb24iOiAiMS4wLjAiLAogICJ0eXBlIjogIm1vZHVsZSIsCiAgInByaXZhdGUiOiB0cnVlLAogICJtYWluIjogImluZGV4LmpzIgp9Cg=="
+            ]
+          }
+        ]
+      }
+    ],
+    "package.json": [
+      1,
+      {},
+      "data:application/octet-stream;base64,ewogICJuYW1lIjogInBvbGljeS1lbmZvcmNlbWVudCIsCiAgInZlcnNpb24iOiAiMS4wLjAiLAogICJ0eXBlIjogIm1vZHVsZSIsCiAgInByaXZhdGUiOiB0cnVlLAogICJtYWluIjogImluZGV4LmpzIiwKICAic2NyaXB0cyI6IHsKICAgICJzdGFydCI6ICJucHggc25hcHNob3QtZnMgLi4vLi4vanNvbi1maXh0dXJlL3BvbGljeS1lbmZvcmNlbWVudC5qc29uIgogIH0KfQo="
+    ]
+  }
+]

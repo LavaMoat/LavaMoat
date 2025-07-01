@@ -2,15 +2,16 @@
 /**
  * Public types for `@lavamoat/node`
  *
+ * Any type name prefixed with `With` is a type used to compose options buckets
+ * for public APIs. `With`-prefixed types are _expected to be interfaces_ unless
+ * they cannot be due to having dynamic properties.
+ *
  * @packageDocumentation
  */
-import type { IsBuiltinFn, LavaMoatPolicy, Resources } from 'lavamoat-core'
-import type { Loggerr } from 'loggerr'
-import type nodeFs from 'node:fs'
-import type { SetFieldType, Simplify } from 'type-fest'
-
 import type {
   CaptureLiteOptions,
+  CompartmentDescriptor,
+  CompartmentMapDescriptor,
   CryptoInterface,
   FsInterface,
   ImportLocationOptions,
@@ -21,12 +22,22 @@ import type {
   SyncImportLocationOptions,
   UrlInterface,
 } from '@endo/compartment-mapper'
-import type { PathLike, Stats } from 'node:fs'
 import type {
+  IsBuiltinFn,
+  LavaMoatPolicy,
+  LavaMoatPolicyDebug,
+} from 'lavamoat-core'
+import type { Loggerr } from 'loggerr'
+import type nodeFs from 'node:fs'
+import type { PathLike, Stats } from 'node:fs'
+import type { LiteralUnion, Simplify } from 'type-fest'
+import type {
+  ATTENUATORS_COMPARTMENT,
   ENDO_GLOBAL_POLICY_ITEM_WRITE,
   ENDO_POLICY_ITEM_ROOT,
+  LAVAMOAT_PKG_POLICY_ROOT,
+  MERGED_POLICY_FIELD,
 } from './constants.js'
-import { type CompartmentMapToPolicyOptions } from './internal.js'
 
 /**
  * A loaded application which has not yet been executed
@@ -92,13 +103,29 @@ export interface WithLog {
   log?: Loggerr
 }
 
-/**
- * Options having a `policyOverride` or `policyOverridePath` property (not both
- * at once!)
- */
-export type WithPolicyOverrideOrPath =
-  | WithPolicyOverrideOnly
-  | WithPolicyOverridePathOnly
+export interface WithPolicyOnly {
+  /**
+   * A {@link LavaMoatPolicy} object.
+   */
+  policy?: LavaMoatPolicy
+  /**
+   * Disallowed in lieu of {@link policy}
+   */
+  policyPath?: never
+}
+
+export interface WithPolicyPathOnly {
+  /**
+   * Disallowed in lieu of {@link policy}
+   */
+  policy?: never
+  /**
+   * Path to a policy file.
+   */
+  policyPath?: string | URL
+}
+
+export type WithPolicyOrPath = WithPolicyOnly | WithPolicyPathOnly
 
 /**
  * Options having a `policyOverride` property and _not_ a `policyOverridePath`
@@ -128,6 +155,14 @@ export type WithPolicyOverridePathOnly = {
    */
   policyOverride?: never
 }
+
+/**
+ * Options having a `policyOverride` or `policyOverridePath` property (not both
+ * at once!)
+ */
+export type WithPolicyOverrideOrPath =
+  | WithPolicyOverrideOnly
+  | WithPolicyOverridePathOnly
 
 export interface WithPolicyOverride {
   policyOverride?: LavaMoatPolicy
@@ -190,7 +225,7 @@ export interface WritableFsInterface {
 /**
  * Options available when writing a policy
  */
-export interface WritePolicyOptions {
+export interface WithWritePolicyOptions {
   /**
    * Path to a {@link LavaMoatPolicyDebug} file
    */
@@ -236,36 +271,14 @@ export interface WritePowers {
  * Used by {@link GeneratePolicyOptions}.
  *
  * The {@link CaptureLiteOptions.dev dev} property defaults to `true`.
- *
- * @remarks
- * Omitted properties cannot by overridden by the user. Exported due to use
- * within {@link GeneratePolicyOptions}.
  */
 
-export type BaseLoadCompartmentMapOptions = Simplify<
-  Omit<CaptureLiteOptions, 'importHook' | 'moduleTransforms' | 'log'> &
-    WithLog &
-    WithDev
->
-
-/**
- * Options for `buildModuleRecords()`
- *
- * @remarks
- * Exported due to use within {@link CompartmentMapToPolicyOptions}
- */
-export type BuildModuleRecordsOptions = Simplify<
-  WithReadPowers & WithIsBuiltin & WithLog
->
-
-/**
- * Options for `compartmentMapToPolicy()` wherein a `LavaMoatDebugPolicy` will
- * be generated
- */
-export type CompartmentMapToDebugPolicyOptions = SetFieldType<
-  CompartmentMapToPolicyOptions,
-  'debug',
-  true
+export type WithCaptureLiteOptions = ComposeOptions<
+  [
+    Omit<CaptureLiteOptions, 'importHook' | 'moduleTransforms' | 'log'>,
+    WithLog,
+    WithDev,
+  ]
 >
 
 /**
@@ -277,24 +290,40 @@ export type EndoWritePolicy = typeof ENDO_GLOBAL_POLICY_ITEM_WRITE
 /**
  * Options for `execute()`
  */
-export type ExecuteOptions = Simplify<
-  Omit<ImportLocationOptions | SyncImportLocationOptions, 'log'> &
-    WithLog &
-    WithReadPowers
+export type ExecuteOptions = ComposeOptions<
+  [
+    Omit<ImportLocationOptions | SyncImportLocationOptions, 'log' | 'dev'>,
+    WithLog,
+    WithReadPowers,
+    WithDev,
+    WithCompartmentDescriptorDecorators,
+    WithTrustRoot,
+    WithOnNodeModulesMapped,
+  ]
 >
 
 /**
  * Options for `generatePolicy()`
+ *
+ * @remarks
+ * If testing with a virtual filesystem, `projectRoot` _must_ be provided, since
+ * it defaults to `process.cwd()`, which references not-your-filesystem.
  */
-export type GeneratePolicyOptions = Simplify<
-  BaseLoadCompartmentMapOptions &
-    CompartmentMapToPolicyOptions &
-    WritePolicyOptions &
-    WithTrustRoot &
-    WithScuttleGlobalThis &
-    WithPolicyOverridePath &
-    WithReadFile &
-    WithProjectRoot
+export type GeneratePolicyOptions = ComposeOptions<
+  [
+    WithReadPowers,
+    WithIsBuiltin,
+    WithCaptureLiteOptions,
+    WithWritePolicyOptions,
+    WithPolicyOverrideOrPath,
+    WithDebug,
+    WithTrustRoot,
+    WithScuttleGlobalThis,
+    WithReadFile,
+    WithProjectRoot,
+    WithCompartmentDescriptorDecorators,
+    WithOnNodeModulesMapped,
+  ]
 >
 
 /**
@@ -363,15 +392,18 @@ export type MakeReadPowersOptions = WithRawReadPowers
  * Options for `run()`
  */
 
-export type RunOptions = Simplify<
-  WithRawReadPowers &
-    WithDev &
-    WithTrustRoot &
-    WithScuttleGlobalThis &
-    WithLog &
-    WithProjectRoot &
-    WithPolicyOverrideOrPath &
-    WithReadFile
+export type RunOptions = ComposeOptions<
+  [
+    WithRawReadPowers,
+    WithDev,
+    WithTrustRoot,
+    WithScuttleGlobalThis,
+    WithLog,
+    WithProjectRoot,
+    WithPolicyOverrideOrPath,
+    WithPolicyOrPath,
+    WithReadFile,
+  ]
 >
 
 /**
@@ -389,14 +421,109 @@ export interface WithProjectRoot {
 /**
  * Options for `toEndoPolicy()`
  */
-export type ToEndoPolicyOptions = Simplify<
-  WithProjectRoot & WithPolicyOverrideOrPath & WithLog
+export type ToEndoPolicyOptions = ComposeOptions<
+  [WithProjectRoot, WithPolicyOverrideOrPath, WithLog]
 >
+
+/**
+ * Used when the first parameter to `toEndoPolicy()` is a
+ * {@link MergedLavaMoatPolicy}
+ */
+export type ToEndoPolicyOptionsWithoutPolicyOverride = ComposeOptions<
+  [
+    Omit<ToEndoPolicyOptions, 'policyOverridePath' | 'policyOverride'>,
+    { policyOverride?: never; policyOverridePath?: never },
+  ]
+>
+
 /**
  * Options which may either {@link WithReadPowers} or {@link WithRawPowers} but
  * not both.
  */
 export type WithRawReadPowers = WithReadPowers | WithRawPowers
+
+/**
+ * Metadata associated with a {@link CompartmentDescriptor}.
+ *
+ * This is intended to include any data we want to associate with a particular
+ * `CompartmentDescriptor` when we do want to avoid mutating the descriptor
+ * itself.
+ *
+ * We generally _do not_ want to mutate the compartment descriptors, as
+ * `@endo/compartment-mapper` owns these objects.
+ */
+export interface CompartmentDescriptorData {
+  /**
+   * The canonical name of the compartment descriptor, computed by the value of
+   * {@link CompartmentDescriptor.path}. See `getCanonicalName()`
+   */
+  canonicalName: CanonicalName
+}
+
+/**
+ * Map of compartment descriptor locations to metadata
+ *
+ * The "location" may or may not be a `file://` URL; once the
+ * `CompartmentMapDescriptor` has been "digested" (see `digestCompartmentMap()`
+ * in `@endo/compartment-mapper`), it becomes name and version string
+ * representing the package.
+ *
+ * If multiple such packages exist in the compartment map, then the "location"
+ * will contain a suffix `-<n>` where `<n>` is an incrementing integer starting
+ * at 0.
+ *
+ * For this reason, when used with Endo's `captureFromMap()` (which calls
+ * `digestCompartmentMap()`) this object must be recreated using the "renames"
+ * data.
+ *
+ * Note: this map cannot be a `WeakMap` on the `CompartmentDescriptor` itself,
+ * as the original `CompartmentDescriptor` (created by `mapNodeModules()`) is
+ * not retained through `captureFromMap()`.
+ */
+export type CompartmentDescriptorDataMap<
+  K = string,
+  T extends
+    Partial<CompartmentDescriptorData> = Partial<CompartmentDescriptorData>,
+> = Map<K, T>
+
+/**
+ * A mapping of compartment descriptor metadata which is guaranteed to include
+ * metadata for all compartment descriptors (excepting the attenuator
+ * compartment).
+ *
+ * @template T The compartment map descriptor
+ * @template U The type of the metadata
+ */
+export type CompleteCompartmentDescriptorDataMap<
+  T extends CompartmentMapDescriptor = CompartmentMapDescriptor,
+  U extends CompartmentDescriptorData = CompartmentDescriptorData,
+> = CompartmentDescriptorDataMap<keyof T['compartments'], U>
+
+/**
+ * The canonical name of a package as used in policy
+ *
+ * {@link ATTENUATORS_COMPARTMENT} does not appear in policy and is an Endo-ism.
+ */
+
+export type CanonicalName = LiteralUnion<
+  typeof LAVAMOAT_PKG_POLICY_ROOT | typeof ATTENUATORS_COMPARTMENT,
+  string
+>
+
+/**
+ * Options containing a `dataMap` property
+ *
+ * @template K Type of the keys in the data map
+ * @template T A potentially-incomplete data map
+ */
+
+export type WithDataMap<
+  K = string,
+  T extends
+    Partial<CompartmentDescriptorData> = Partial<CompartmentDescriptorData>,
+> = {
+  dataMap?: CompartmentDescriptorDataMap<K, T>
+}
 
 // re-export schema
 // TODO: make this less bad
@@ -412,7 +539,6 @@ export type {
   PackagePolicy,
   Resolutions,
   ResourcePolicy,
-  Resources as ResourcePolicyRecord,
   Resources,
   RootPolicy,
 } from 'lavamoat-core'
@@ -422,16 +548,16 @@ export type * from './errors.js'
 /**
  * Options for `loadPolicies()`
  */
-export type LoadPoliciesOptions = Simplify<
-  WithProjectRoot & WithReadFile & WithPolicyOverrideOrPath
+export type LoadPoliciesOptions = ComposeOptions<
+  [WithProjectRoot, WithReadFile, WithPolicyOverrideOrPath]
 >
 
 /**
  * Options bucket containing a `readFile` prop
  */
-export type WithReadFile = Simplify<{
+export interface WithReadFile {
   readFile?: ReadFileFn
-}>
+}
 
 /**
  * This is ever-so-slightly different than `ReadFn`.
@@ -470,10 +596,92 @@ export interface WithFs {
   fs?: FsUtilInterface
 }
 
-export interface WithPolicy {
-  policy?: Partial<LavaMoatPolicy<Resources>>
+/**
+ * A function which "decorates" a {@link CompartmentDescriptor}. It is provided a
+ * `data` object, which it can then modify and return.
+ *
+ * It does not and cannot modify the descriptor itself.
+ *
+ * @template In Incoming metadata
+ * @template Out Outgoing metadata
+ */
+export type CompartmentDescriptorDecorator<
+  In extends
+    Partial<CompartmentDescriptorData> = Partial<CompartmentDescriptorData>,
+  Out extends In = In,
+> = (
+  /**
+   * The compartment descriptor to decorate; considered readonly
+   */
+  compartmentDescriptor: Readonly<CompartmentDescriptor>,
+  /**
+   * The current data associated with `compartmentDescriptor` (if any)
+   */
+  data?: In,
+  /**
+   * Options for the decorator, including the entire
+   * `CompartmentDescriptorDataMap`
+   */
+  options?: CompartmentDescriptorDecoratorOptions
+) => Out
+
+/**
+ * Options for a {@link CompartmentDescriptorDecorator}
+ */
+export type CompartmentDescriptorDecoratorOptions<
+  K = string,
+  T extends
+    Partial<CompartmentDescriptorData> = Partial<CompartmentDescriptorData>,
+> = ComposeOptions<[WithTrustRoot, WithLog, WithDataMap<K, T>]>
+
+/**
+ * Options containing a `compartmentDescriptorDecorators` prop
+ */
+export type WithCompartmentDescriptorDecorators = {
+  /**
+   * List of decorators which will be applied to each compartment descriptor
+   * within the initial compartment map descriptor (via `mapNodeModules()`).
+   */
+  decorators?: CompartmentDescriptorDecorator[]
 }
 
-export type MakeGlobalsAttenuatorOptions = Simplify<
-  WithPolicy & WithScuttleGlobalThis
+/**
+ * Safely composes properties from each object in `T` into a single, simplified
+ * type.
+ *
+ * Guards against non-exclusive keys, which intersections do not do. Does not
+ * check if the key's value extends the previous object's key's value (like the
+ * way extending an interface would).
+ */
+export type ComposeOptions<T extends object[]> = Simplify<
+  T extends [infer First, ...infer Rest]
+    ? First extends object
+      ? Rest extends object[]
+        ? keyof First extends keyof ComposeOptions<Rest>
+          ? never
+          : First & ComposeOptions<Rest>
+        : never
+      : never
+    : object
 >
+
+export type MergedLavaMoatPolicy = LavaMoatPolicy & {
+  [MERGED_POLICY_FIELD]: true
+}
+
+export type UnmergedLavaMoatPolicy = LavaMoatPolicy & {
+  [MERGED_POLICY_FIELD]?: never
+}
+
+export type OnNodeModulesMappedFn = (
+  compartmentMap: CompartmentMapDescriptor,
+  dataMap: CompleteCompartmentDescriptorDataMap
+) => void
+
+export interface WithOnNodeModulesMapped {
+  onNodeModulesMapped?: OnNodeModulesMappedFn
+}
+
+export type MergedLavaMoatPolicyDebug = LavaMoatPolicyDebug & {
+  [MERGED_POLICY_FIELD]: true
+}

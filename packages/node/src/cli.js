@@ -24,15 +24,16 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 import * as constants from './constants.js'
 import { run } from './exec/run.js'
+import { hrPath } from './format.js'
 import { readJsonFile } from './fs.js'
 import { log } from './log.js'
 import { generatePolicy } from './policy-gen/generate.js'
-import { loadPolicies } from './policy-util.js'
 import { resolveBinScript, resolveEntrypoint } from './resolve.js'
-import { hrPath, toPath } from './util.js'
+import { toPath } from './util.js'
 
 /**
  * @import {PackageJson} from 'type-fest';
+ * @import {RunOptions} from './types.js'
  * @import {LavaMoatPolicy} from 'lavamoat-core';
  */
 
@@ -146,17 +147,23 @@ const main = async (args = hideBin(process.argv)) => {
    * @param {{
    *   entrypoint: string
    *   bin?: boolean
-   *   root: string
+   *   'project-root': string
    * }} argv
+   *   Subset of arguments
    * @returns {void}
    */
   const processEntrypointMiddleware = (argv) => {
-    const { entrypoint } = argv
-    argv.entrypoint = argv.bin
-      ? resolveBinScript(argv.entrypoint, { from: argv.root })
-      : resolveEntrypoint(argv.entrypoint, argv.root)
-    if (hrPath(entrypoint) !== hrPath(argv.entrypoint)) {
-      log.warning(`Resolved ${hrPath(entrypoint)} → ${hrPath(argv.entrypoint)}`)
+    const { entrypoint, 'project-root': projectRoot } = argv
+    const resolvedEntrypoint = argv.bin
+      ? resolveBinScript(argv.entrypoint, { from: projectRoot })
+      : resolveEntrypoint(argv.entrypoint, { from: projectRoot })
+    const niceOriginalEntrypoint = hrPath(entrypoint)
+    const niceResolvedEntrypoint = hrPath(resolvedEntrypoint)
+    argv.entrypoint = resolvedEntrypoint
+    if (niceResolvedEntrypoint !== niceOriginalEntrypoint) {
+      log.warning(
+        `Resolved ${niceOriginalEntrypoint} → ${niceResolvedEntrypoint}`
+      )
     }
   }
 
@@ -238,7 +245,7 @@ const main = async (args = hideBin(process.argv)) => {
         describe: 'Filepath to a policy override file',
         type: 'string',
         normalize: true,
-        defaultDescription: constants.DEFAULT_POLICY_OVERRIDE_PATH,
+        defaultDescription: `"${constants.DEFAULT_POLICY_OVERRIDE_PATH}"`,
         nargs: 1,
         requiresArg: true,
         global: true,
@@ -246,14 +253,15 @@ const main = async (args = hideBin(process.argv)) => {
       },
       'policy-debug': {
         describe: 'Filepath to a policy debug file',
-        defaultDescription: constants.DEFAULT_POLICY_DEBUG_PATH,
+        defaultDescription: `"${constants.DEFAULT_POLICY_DEBUG_PATH}"`,
         nargs: 1,
         type: 'string',
         requiresArg: true,
         global: true,
         group: PATH_GROUP,
       },
-      root: {
+      'project-root': {
+        alias: ['root'],
         describe: 'Path to application root directory',
         type: 'string',
         nargs: 1,
@@ -291,47 +299,48 @@ const main = async (args = hideBin(process.argv)) => {
       /**
        * This _global_ middleware:
        *
-       * - Ensures `policy`, `policy-debug` and `policy-override` paths are
-       *   absolute
-       * - If necessary, calculates default path(s) for `policy-debug` and
-       *   `policy-override` (relative to `policy`) and sets it
-       * - Configures the global logger based on `verbose` and `quiet` flags
-       *
-       * It will throw an exception if the user _explicitly_ provided a path to
-       * a policy override file and that file is unreadable (since this is
-       * really the only time it is feasible to do so).
+       * - Resolves `policy` from `project-root`
+       * - If `policy-override` was provided, resolve it from `project-root` and
+       *   asserts it is readable. It's appropriate to do so here because it is
+       *   impossible to answer "did the user provide an explicit policy
+       *   override path?" _after_ this point. We throw an exception if the
+       *   explicitly-provide policy override path is not readable. This applies
+       *   to both `run` and `generate` commands; both will read the policy
+       *   override file, if present.
+       * - Configures the global logger based on `verbose` and `quiet` flags (this
+       *   overrides the `LAVAMOAT_DEBUG` environment variable, if present; the
+       *   environment variable can be used when consuming `@lavamoat/node`
+       *   programmatically)
        */
       async (argv) => {
         await Promise.resolve()
 
-        argv.policy = path.resolve(argv.root, argv.policy)
+        // this is absolute
+        const projectRoot = argv['project-root']
 
         // TODO: this mini-algorithm should be extracted to a function since it's used elsewhere too
         argv['policy-debug'] = argv['policy-debug']
-          ? path.resolve(argv.root, argv['policy-debug'])
+          ? path.resolve(projectRoot, argv['policy-debug'])
           : path.join(
               path.dirname(argv.policy),
               constants.DEFAULT_POLICY_DEBUG_FILENAME
             )
+        argv.policy = path.resolve(projectRoot, argv.policy)
 
         if (argv['policy-override']) {
-          argv['policy-override'] = path.resolve(
-            argv.root,
+          const policyOverridePath = path.resolve(
+            projectRoot,
             argv['policy-override']
           )
           try {
-            await fs.promises.access(argv['policy-override'], fs.constants.R_OK)
+            await fs.promises.access(policyOverridePath, fs.constants.R_OK)
+            argv['policy-override'] = policyOverridePath
           } catch (err) {
             throw new Error(
-              `Cannot read specified policy override file: ${argv['policy-override']}`,
+              `Cannot read specified policy override file at path ${hrPath(policyOverridePath)}`,
               { cause: err }
             )
           }
-        } else {
-          argv['policy-override'] = path.join(
-            path.dirname(argv.policy),
-            constants.DEFAULT_POLICY_OVERRIDE_FILENAME
-          )
         }
         if (argv.verbose) {
           log.setLevel('debug')
@@ -350,7 +359,8 @@ const main = async (args = hideBin(process.argv)) => {
       (yargs) =>
         yargs
           .positional('entrypoint', {
-            describe: 'Path to the application entry point; relative to --root',
+            describe:
+              'Path to the application entry point; relative to --project-root',
             type: 'string',
             demandOption: true,
           })
@@ -405,7 +415,7 @@ const main = async (args = hideBin(process.argv)) => {
             },
           })
           /**
-           * Resolve entrypoint from `root`
+           * Resolve entrypoint from `project-root`
            */
           .middleware(processEntrypointMiddleware),
       /**
@@ -425,7 +435,7 @@ const main = async (args = hideBin(process.argv)) => {
           'policy-debug': policyDebugPath,
           'policy-override': policyOverridePath,
           dev,
-          root: projectRoot,
+          'project-root': projectRoot,
           scuttle: scuttleGlobalThis,
           write,
         } = argv
@@ -433,14 +443,14 @@ const main = async (args = hideBin(process.argv)) => {
         const trustRoot = shouldTrustRoot(entrypoint)
         if (!trustRoot) {
           log.info(
-            `Entrypoint is in a ${hrPath('node_modules/')} directory and is considered untrusted`
+            `Real path of the entrypoint is in a ${hrPath('node_modules/')} directory and is considered untrusted; expecting a policy containing an untrusted root`
           )
         }
 
         /**
          * This will be the policy merged with overrides, if present
          *
-         * @type {LavaMoatPolicy}
+         * @type {LavaMoatPolicy | undefined}
          */
         let policy
 
@@ -457,11 +467,6 @@ const main = async (args = hideBin(process.argv)) => {
             trustRoot,
             projectRoot,
           })
-        } else {
-          policy = await loadPolicies(policyPath, {
-            policyOverridePath,
-            projectRoot,
-          })
         }
 
         stripProcessArgv(
@@ -473,12 +478,13 @@ const main = async (args = hideBin(process.argv)) => {
            */ (argv['--'])
         )
 
-        await run(entrypoint, policy, {
+        await run(entrypoint, {
           policyOverridePath,
           trustRoot,
           dev,
           projectRoot,
           scuttleGlobalThis,
+          ...(policy ? { policy } : { policyPath }),
         })
       }
     )
@@ -521,7 +527,7 @@ const main = async (args = hideBin(process.argv)) => {
         const trustRoot = shouldTrustRoot(entrypoint)
         if (!trustRoot) {
           log.info(
-            `Entrypoint is in a ${hrPath('node_modules/')} directory and is considered untrusted`
+            `Real path of the entrypoint is in a ${hrPath('node_modules/')} directory and is considered untrusted; an policy containing an untrusted root will be generated`
           )
         }
 
