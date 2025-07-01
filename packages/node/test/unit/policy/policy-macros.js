@@ -1,9 +1,13 @@
 import '../../../src/preamble.js'
 
+import { Loggerr } from 'loggerr'
 import { fileURLToPath } from 'node:url'
+import { defaultReadPowers } from '../../../src/compartment/power.js'
+import { log as defaultLog } from '../../../src/log.js'
 import { generatePolicy } from '../../../src/policy-gen/generate.js'
 import { isPolicy } from '../../../src/policy-util.js'
 import { isFunction } from '../../../src/util.js'
+import { fixtureFinder } from '../../test-util.js'
 import {
   DEFAULT_JSON_FIXTURE_ENTRY_POINT,
   JSON_FIXTURE_DIR_URL,
@@ -12,11 +16,12 @@ import {
 
 /**
  * @import {ValueOf} from 'type-fest'
- * @import {TestPolicyMacroOptions, TestPolicyForJSONOptions, ScaffoldFixtureResult, ScaffoldFixtureOptions} from './types.js'
- * @import {GeneratePolicyOptions} from '../../../src/types.js'
+ * @import {TestPolicyMacroOptions, TestPolicyForJSONOptions, ScaffoldFixtureResult, ScaffoldFixtureOptions, TestPolicyForFixtureOptions} from './types.js'
  * @import {TestFn, MacroDeclarationOptions} from 'ava'
  * @import {LavaMoatPolicy} from 'lavamoat-core'
  */
+
+const fixture = fixtureFinder(new URL('..', import.meta.url))
 
 /**
  * Used by inner function in {@link createGeneratePolicyMacros} to determine
@@ -77,8 +82,19 @@ export function createGeneratePolicyMacros(test) {
       { expectedPolicy = {}, sourceType = InlineSourceTypes.Module } = {}
     ) => {
       const { readPowers } = await scaffoldFixture(content, { sourceType })
+      /** @type {Loggerr} */
+      let log
+      if (!isPolicy(expectedPolicy) && expectedPolicy.log) {
+        log = expectedPolicy.log
+      } else {
+        log = defaultLog
+        if (process.env.LAVAMOAT_DEBUG === undefined) {
+          log.setLevel(Loggerr.EMERGENCY)
+        }
+      }
 
       const actualPolicy = await generatePolicy('/entry.js', {
+        log,
         readPowers,
         policyOverride:
           'policyOverride' in expectedPolicy
@@ -200,17 +216,27 @@ export function createGeneratePolicyMacros(test) {
           ;({ expected, ...options } = options)
         }
 
+        const {
+          jsonEntrypoint = DEFAULT_JSON_FIXTURE_ENTRY_POINT,
+          randomDelay = false,
+          ...otherOptions
+        } = options ?? {}
+
         const { readPowers } = await loadJSONFixture(
-          new URL(fixtureFilename, JSON_FIXTURE_DIR_URL)
+          new URL(fixtureFilename, JSON_FIXTURE_DIR_URL),
+          { randomDelay }
         )
 
-        const actualPolicy = await generatePolicy(
-          options?.jsonEntrypoint ?? DEFAULT_JSON_FIXTURE_ENTRY_POINT,
-          /** @type {GeneratePolicyOptions} */ ({
-            ...options,
-            readPowers,
-          })
-        )
+        let { log } = otherOptions
+        if (!log && process.env.LAVAMOAT_DEBUG === undefined) {
+          log = defaultLog
+          log.setLevel(Loggerr.EMERGENCY)
+        }
+
+        const actualPolicy = await generatePolicy(jsonEntrypoint, {
+          ...otherOptions,
+          readPowers,
+        })
 
         // if overrides provided, then we will make a second check that
         // asserts `actualPolicy` is a superset of the override
@@ -268,7 +294,119 @@ export function createGeneratePolicyMacros(test) {
     })
   )
 
+  /**
+   * Macro to test policy generation for a given fixture file.
+   *
+   * **This should be avoided in favor of `testPolicyForJSON`**; it is useful
+   * for building out fixtures before snapshotting them into JSON.
+   */
+  const testPolicyForFixture = test.macro(
+    /**
+     * @type {MacroDeclarationOptions<
+     *   [
+     *     name: string,
+     *     expectedPolicyOrOptions?:
+     *       | LavaMoatPolicy
+     *       | TestPolicyForFixtureOptions,
+     *     options?: TestPolicyForFixtureOptions,
+     *   ],
+     *   Ctx
+     * >}
+     */ ({
+      exec: async (t, name, expectedPolicyOrOptions, options = {}) => {
+        /** @type {TestPolicyForFixtureOptions['expected']} */
+        let expected
+        if (isPolicy(expectedPolicyOrOptions)) {
+          expected = expectedPolicyOrOptions
+        } else {
+          options = /** @type {TestPolicyForFixtureOptions} */ (
+            expectedPolicyOrOptions ?? {}
+          )
+          ;({ expected, ...options } = options)
+        }
+
+        const {
+          entrypoint,
+          entrypointFilename,
+          readPowers = defaultReadPowers,
+          ...otherOptions
+        } = options ?? {}
+
+        let { log } = otherOptions
+        if (!log && process.env.LAVAMOAT_DEBUG === undefined) {
+          log = defaultLog
+          log.setLevel(Loggerr.EMERGENCY)
+        }
+
+        const { entrypoint: entrypointPath, dir: projectRoot } = fixture(name, {
+          entrypoint,
+          entrypointFilename,
+        })
+        const actualPolicy = await generatePolicy(entrypointPath, {
+          ...otherOptions,
+          projectRoot,
+          readPowers,
+          log,
+        })
+
+        // if overrides provided, then we will make a second check that
+        // asserts `actualPolicy` is a superset of the override
+        t.plan(options?.policyOverride ? 2 : 1)
+
+        if (isPolicy(expected)) {
+          t.deepEqual(
+            actualPolicy,
+            expected,
+            'policy does not deeply equal expected'
+          )
+        } else if (isFunction(expected)) {
+          await expected(t, actualPolicy)
+        } else {
+          t.snapshot(actualPolicy, 'policy does not match snapshot')
+        }
+
+        if (options?.policyOverride) {
+          t.like(
+            actualPolicy,
+            options.policyOverride,
+            'policy is not a superset of overrides'
+          )
+        }
+      },
+
+      title: (
+        title,
+        fixtureFilename,
+        expectedPolicyOrOptions,
+        options = {}
+      ) => {
+        if (title) {
+          return title
+        }
+        /** @type {TestPolicyForFixtureOptions['expected']} */
+        let expected
+        if (isPolicy(expectedPolicyOrOptions)) {
+          expected = expectedPolicyOrOptions
+        } else {
+          options = /** @type {TestPolicyForFixtureOptions} */ (
+            expectedPolicyOrOptions ?? {}
+          )
+          ;({ expected, ...options } = options)
+        }
+
+        if (isPolicy(expected)) {
+          return `policy for fixture matches expected policy (${fixtureFilename})`
+        } else if (isFunction(expected)) {
+          return `policy for fixture passes assertions (${fixtureFilename})`
+        } else {
+          return `policy for fixture matches snapshot (${fixtureFilename})`
+        }
+      },
+    })
+  )
+
   return {
+    testPolicyForFixture,
     testPolicyForJSON,
     testPolicyForModule: testPolicyForInlineModule,
     testPolicyForScript: testPolicyForInlineScript,
@@ -317,10 +455,10 @@ const SCAFFOLD_SCRIPT_FIXTURE = fileURLToPath(
  */
 
 async function scaffoldFixture(content, { sourceType = 'module' } = {}) {
-  const fixture =
+  const fixturePath =
     sourceType === 'module' ? SCAFFOLD_MODULE_FIXTURE : SCAFFOLD_SCRIPT_FIXTURE
   const { vol, readPowers } = await loadJSONFixture(
-    new URL(fixture, import.meta.url)
+    new URL(fixturePath, import.meta.url)
   )
 
   await vol.promises.writeFile(SCAFFOLD_ENTRY_POINT, content, {

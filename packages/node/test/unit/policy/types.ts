@@ -5,48 +5,72 @@ import { type ReadNowPowers } from '@endo/compartment-mapper'
 import type { ExecutionContext } from 'ava'
 import type { LavaMoatPolicy } from 'lavamoat-core'
 import { type Volume } from 'memfs/lib/volume.js'
-import type { Simplify } from 'type-fest'
-import type { GeneratePolicyOptions } from '../../../src/types.js'
+import type {
+  ComposeOptions,
+  GeneratePolicyOptions,
+  MergedLavaMoatPolicy,
+  WithLog,
+  WithPolicyOverrideOnly,
+} from '../../../src/types.js'
+import { type FixtureOptions } from '../../types.js'
 
 /**
- * Options for `testPolicyFor*` macros
+ * Options for `testPolicyFoModule` and `testPolicyForScript`
  *
  * @internal
  */
-export type TestPolicyMacroOptions = {
-  /**
-   * Expected policy result
-   */
-  expected?: LavaMoatPolicy
+export type TestPolicyMacroOptions = ComposeOptions<
+  [
+    WithPolicyOverrideOnly,
+    WithLog,
+    {
+      /**
+       * Expected policy result
+       */
+      expected?: LavaMoatPolicy
+    },
+  ]
+>
 
+export type WithExpected<Context = unknown> = {
   /**
-   * Overrides to apply to policy generation
+   * Expected policy or a function receiving the policy or an assertion
+   * function.
    */
-  policyOverride?: LavaMoatPolicy
+  expected?: LavaMoatPolicy | TestPolicyExpectationFn<Context>
 }
+
+/**
+ * Options for the `testPolicyForFixture` macro
+ *
+ * @internal
+ */
+export type TestPolicyForFixtureOptions<Context = unknown> = ComposeOptions<
+  [GeneratePolicyOptions, WithExpected<Context>, FixtureOptions]
+>
 
 /**
  * Options for the `testPolicyForJSON` macro
  *
  * @internal
  */
-export type TestPolicyForJSONOptions<Context = unknown> = Simplify<
-  Omit<GeneratePolicyOptions, 'readPowers'> & {
-    /**
-     * Expected policy or a function receiving the policy or an assertion
-     * function.
-     */
-    expected?: LavaMoatPolicy | TestPolicyExpectationFn<Context>
+export type TestPolicyForJSONOptions<Context = unknown> = ComposeOptions<
+  [
+    Omit<GeneratePolicyOptions, 'readPowers' | 'policyOverridePath'>,
+    WithExpected<Context>,
+    {
+      /**
+       * Path to entrypoint _within the fixture_. This must be an absolute path
+       * or URL.
+       *
+       * The default is `/index.js`.
+       */
 
-    /**
-     * Path to entrypoint _within the fixture_. This must be an absolute path or
-     * URL.
-     *
-     * The default is `/index.js`.
-     */
+      jsonEntrypoint?: string | URL
 
-    jsonEntrypoint?: string | URL
-  }
+      randomDelay?: boolean
+    },
+  ]
 >
 
 /**
@@ -54,7 +78,7 @@ export type TestPolicyForJSONOptions<Context = unknown> = Simplify<
  */
 export type TestPolicyExpectationFn<Context = unknown> = (
   t: ExecutionContext<Context>,
-  policy: LavaMoatPolicy
+  policy: MergedLavaMoatPolicy
 ) => void | Promise<void>
 
 /**
