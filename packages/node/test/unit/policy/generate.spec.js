@@ -1,7 +1,9 @@
 import '../../../src/preamble.js'
 
 import test from 'ava'
+import { generatePolicy } from '../../../src/policy-gen/generate.js'
 import { keysOr } from '../../../src/util.js'
+import { JSON_FIXTURE_DIR_URL, loadJSONFixture } from '../json-fixture-util.js'
 import { createGeneratePolicyMacros } from './policy-macros.js'
 
 const { testPolicyForModule, testPolicyForScript, testPolicyForJSON } =
@@ -127,6 +129,37 @@ test(
     },
   }
 )
+
+test.failing('path stability', async (t) => {
+  // no plan; this should fail on the first assertion failure
+
+  const maxIterations = 20
+  const { readPowers } = await loadJSONFixture(
+    new URL('canonical-name.json', JSON_FIXTURE_DIR_URL),
+    { randomDelay: true }
+  )
+  const expectedCanonicalName = 'paperino>topoino>goofy'
+  for (let i = 0; i < maxIterations; i++) {
+    const policy = await generatePolicy('/node_modules/app/index.js', {
+      readPowers,
+    })
+
+    // this will fail if we get the wrong canonical name for goofy
+    t.like(
+      policy,
+      {
+        resources: {
+          [expectedCanonicalName]: {
+            globals: {
+              'console.log': true,
+            },
+          },
+        },
+      },
+      `failed on iteration ${i}`
+    )
+  }
+})
 
 test('basic nested global access', testPolicyForModule, 'location.href', {
   resources: {
