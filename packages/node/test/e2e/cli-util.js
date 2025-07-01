@@ -3,7 +3,7 @@
  *
  * @packageDocumentation
  */
-import chalk from 'chalk'
+import { colors } from '@lavamoat/vog'
 import { execFile } from 'node:child_process'
 import { mkdtemp, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
@@ -109,7 +109,7 @@ export const runCLI = async (
    *
    * @type {string}
    */
-  const hrCommand = chalk.blueBright(`lavamoat ${args.join(' ')}`)
+  const hrCommand = colors.blueBright(`lavamoat ${args.join(' ')}`)
 
   t?.log(`Executing: ${hrCommand} in ${hrPath(cwd)}`)
 
