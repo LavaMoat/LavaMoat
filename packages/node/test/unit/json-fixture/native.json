@@ -7,11 +7,6 @@
       {},
       "data:application/octet-stream;base64,IW5vZGVfbW9kdWxlcy8Kbm9kZV9tb2R1bGVzLy4qCm5vZGVfbW9kdWxlcy8qKi9idWlsZC8KCg=="
     ],
-    ".npmrc": [
-      1,
-      {},
-      "data:application/octet-stream;base64,cGFja2FnZS1sb2NrID0gZmFsc2UK"
-    ],
     "README.md": [
       1,
       {},
@@ -71,7 +66,6 @@
                     ]
                   }
                 ],
-                "linux-arm64": [0, {}, {}],
                 "linux-x64": [
                   0,
                   {},
@@ -154,7 +148,7 @@
     "package.json": [
       1,
       {},
-      "data:application/octet-stream;base64,ewogICJuYW1lIjogImhlbGxvIiwKICAidmVyc2lvbiI6ICIwLjAuMCIsCiAgInR5cGUiOiAibW9kdWxlIiwKICAiZGVzY3JpcHRpb24iOiAidGhpcyBjb2RlIGFjdHVhbGx5IHJ1bnMiLAogICJwcml2YXRlIjogdHJ1ZSwKICAic2NyaXB0cyI6IHsKICAgICJzdGFydCI6ICJucHggc25hcHNob3QtZnMgLi4vLi4vanNvbi1maXh0dXJlL25hdGl2ZS5qc29uIgogIH0sCiAgImRlcGVuZGVuY2llcyI6IHsKICAgICJoZWxsb193b3JsZCI6ICIwLjAuMCIKICB9Cn0K"
+      "data:application/octet-stream;base64,ewogICJuYW1lIjogIm5hdGl2ZSIsCiAgInZlcnNpb24iOiAiMC4wLjAiLAogICJ0eXBlIjogIm1vZHVsZSIsCiAgImRlc2NyaXB0aW9uIjogInRoaXMgY29kZSBhY3R1YWxseSBydW5zIiwKICAicHJpdmF0ZSI6IHRydWUsCiAgInNjcmlwdHMiOiB7CiAgICAic3RhcnQiOiAibnB4IHNuYXBzaG90LWZzIFwiJG5wbV9jb25maWdfbG9jYWxfcHJlZml4Ly4uL2pzb24tZml4dHVyZS8kbnBtX3BhY2thZ2VfbmFtZS5qc29uXCIiCiAgfSwKICAiZGVwZW5kZW5jaWVzIjogewogICAgImhlbGxvX3dvcmxkIjogIjAuMC4wIgogIH0KfQo="
     ]
   }
 ]

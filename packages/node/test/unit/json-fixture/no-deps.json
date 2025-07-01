@@ -7,11 +7,10 @@
       {},
       "data:application/octet-stream;base64,ZXhwb3J0IGNvbnN0IGhlbGxvID0gJ3dvcmxkJwo="
     ],
-    "lavamoat": [0, {}, { "node": [0, {}, {}] }],
     "package.json": [
       1,
       {},
-      "data:application/octet-stream;base64,ewogICJuYW1lIjogIm5vLWRlcHMiLAogICJ2ZXJzaW9uIjogIjEuMC4wIiwKICAidHlwZSI6ICJtb2R1bGUiLAogICJwcml2YXRlIjogdHJ1ZSwKICAibWFpbiI6ICJhcHAuanMiLAogICJzY3JpcHRzIjogewogICAgInN0YXJ0IjogIm5weCBzbmFwc2hvdC1mcyAuLi8uLi9qc29uLWZpeHR1cmUvbm8tZGVwcy5qc29uIgogIH0KfQo="
+      "data:application/octet-stream;base64,ewogICJuYW1lIjogIm5vLWRlcHMiLAogICJ2ZXJzaW9uIjogIjEuMC4wIiwKICAidHlwZSI6ICJtb2R1bGUiLAogICJwcml2YXRlIjogdHJ1ZSwKICAibWFpbiI6ICJhcHAuanMiLAogICJzY3JpcHRzIjogewogICAgInN0YXJ0IjogIm5weCBzbmFwc2hvdC1mcyBcIiRucG1fY29uZmlnX2xvY2FsX3ByZWZpeC8uLi9qc29uLWZpeHR1cmUvJG5wbV9wYWNrYWdlX25hbWUuanNvblwiIgogIH0KfQo="
     ]
   }
 ]
