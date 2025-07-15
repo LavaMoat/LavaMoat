@@ -1,3 +1,4 @@
+'use strict'
 // Function to perform a single mathematical operation
 function mathOperation(operation, a, b) {
   console.log(operation, a, b)
