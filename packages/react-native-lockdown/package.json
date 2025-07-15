@@ -54,5 +54,8 @@
       "test/**/*.spec.js"
     ],
     "timeout": "30s"
+  },
+  "dependencies": {
+    "ses": "1.14.0"
   }
 }
