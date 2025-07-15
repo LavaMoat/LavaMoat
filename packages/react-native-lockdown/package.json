@@ -31,7 +31,6 @@
   "files": [
     "CHANGELOG.md",
     "src",
-    "vendor",
     "types",
     "!*.tsbuildinfo"
   ],
