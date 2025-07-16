@@ -29,13 +29,16 @@ module.exports = {
        * @returns {string}
        */
       getDefensiveCodingPreamble() {
-        return `
-const {
-  setTimeout, clearTimeout,
-  setInterval, clearInterval,
-  document, self, location
-} = globalThis
-`
+        const globals = [
+          'setTimeout',
+          'clearTimeout',
+          'setInterval',
+          'clearInterval',
+          'document',
+          'self',
+          'location',
+        ]
+        return `var ${globals.map((g) => `${g} = globalThis.${g}`).join(',')};`
       },
       /**
        * Generates the LavaMoat runtime source code based on chunk configuration
