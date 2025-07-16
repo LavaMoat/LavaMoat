@@ -74,7 +74,7 @@ function makeConfig(lmOptions = {}) {
           sideEffects: true,
         },
         {
-          // this explicitly allows svg assets to be emited from dependencies
+          // when a loader is explicitly used to emit assets they are allowed for backwards compatibility
           test: /\.svg$/,
           use: [
             {
