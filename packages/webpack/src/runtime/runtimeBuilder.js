@@ -30,13 +30,11 @@ module.exports = {
        */
       getDefensiveCodingPreamble() {
         const globals = [
-          'setTimeout',
-          'clearTimeout',
-          'setInterval',
-          'clearInterval',
-          'document',
+          'location', // AutoPublicPathRuntimeModule.js
+          'setTimeout', // LoadScriptRuntimeModule.js
+          'clearTimeout', // LoadScriptRuntimeModule.js
+          'document', // LoadScriptRuntimeModule.js, AutoPublicPathRuntimeModule.js
           'self',
-          'location',
         ]
         return `var ${globals.map((g) => `${g} = globalThis.${g}`).join(',')};`
       },
