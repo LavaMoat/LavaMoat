@@ -56,7 +56,7 @@ const isAmbientAsset = (m) =>
  */
 
 /**
- *
+ * Recognize an AssetParser bu constructor name for the lack of ability to get the type from Webpack
  *
  * @param {Parser} parser
  * @returns {parser is AssetParser}
