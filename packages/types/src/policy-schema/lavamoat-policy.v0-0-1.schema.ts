@@ -1,4 +1,4 @@
-import { type LavamoatModuleRecord } from '../moduleRecord'
+import { LavamoatModuleRecord } from '../module-record'
 
 /**
  * Schema for LavaMoat policy override files
@@ -57,9 +57,7 @@ export interface RootPolicy<T extends Resources = Resources> {
 
 export interface DebugInfo {
   /**
-   * @todo This is an array of `@babel/parser`'s `ParseError`. To use it
-   *   directly we'd need to add `@babel/parser` as a production dependency of
-   *   `lavamoat-tofu`, and I don't want to do that right now.
+   * @todo This is an array of `@babel/parser`'s `ParseError`.
    */
   parseErrors?: { code: string; reasonCode: string }[]
   moduleRecord: Omit<LavamoatModuleRecord, 'ast'>
@@ -176,3 +174,8 @@ export interface Resolutions {
     [k: string]: string
   }
 }
+
+/**
+ * For use with type-narrowing
+ */
+export type SomeLavaMoatPolicy = LavaMoatPolicy<any>

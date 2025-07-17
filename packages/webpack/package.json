@@ -38,6 +38,7 @@
   },
   "dependencies": {
     "@lavamoat/aa": "^4.3.3",
+    "@lavamoat/types": "^0.0.0",
     "browser-resolve": "2.0.0",
     "json-stable-stringify": "1.3.0",
     "lavamoat-core": "^16.5.0",
