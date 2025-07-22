@@ -1,15 +1,9 @@
-import type { LavaMoatPolicy } from 'lavamoat-core'
+import type { LavaMoatPolicy, LavaMoatScuttleOpts } from 'lavamoat-core'
 import type { LockdownOptions } from 'ses'
 
-export interface ScuttlerObjectConfig {
-  enabled?: boolean
-  exceptions?: string[]
-  scuttlerName?: string
-}
+export type ScuttlerConfig = LavaMoatScuttleOpts | boolean | undefined
 
-export type ScuttlerConfig = ScuttlerObjectConfig | boolean | undefined
-
-export interface LavaMoatPluginOptions {
+export interface CompleteLavaMoatPluginOptions {
   generatePolicy?: boolean
   rootDir?: string
   policyLocation: string
@@ -26,3 +20,5 @@ export interface LavaMoatPluginOptions {
   debugRuntime?: boolean
   unlockedChunksUnsafe?: RegExp
 }
+
+export type LavaMoatPluginOptions = Partial<CompleteLavaMoatPluginOptions>
