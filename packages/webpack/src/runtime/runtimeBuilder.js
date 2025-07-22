@@ -34,6 +34,7 @@ module.exports = {
           'setTimeout', // LoadScriptRuntimeModule.js
           'clearTimeout', // LoadScriptRuntimeModule.js
           'document', // LoadScriptRuntimeModule.js, AutoPublicPathRuntimeModule.js
+          'trustedTypes', // GetTrustedTypesPolicyRuntimeModule.js
           'self',
         ]
         return `var ${globals.map((g) => `${g} = globalThis.${g}`).join(',')};`
