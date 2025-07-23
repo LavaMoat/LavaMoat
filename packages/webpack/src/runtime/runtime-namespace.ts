@@ -1,5 +1,5 @@
-import { EndowmentsToolkitFactory, LavaMoatPolicy } from 'lavamoat-core'
-import { LavaMoatPluginOptions, ScuttlerConfig } from '../buildtime/types'
+import type { EndowmentsToolkitFactory, LavaMoatPolicy } from 'lavamoat-core'
+import type { LavaMoatPluginOptions, ScuttlerConfig } from '../buildtime/types'
 
 type DebugTools = {
   debugProxy: (target: any, source: object, hint: string) => void

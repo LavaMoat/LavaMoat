@@ -96,7 +96,6 @@ class LavaMoatPlugin {
    * @param {LavaMoatPluginOptions} [options]
    */
   constructor(options = {}) {
-    /** @type {CompleteLavaMoatPluginOptions} */
     if (options.scuttleGlobalThis === true) {
       options.scuttleGlobalThis = { enabled: true }
     } else if (typeof options.scuttleGlobalThis === 'object') {
@@ -107,6 +106,7 @@ class LavaMoatPlugin {
       }
     }
 
+    /** @type {CompleteLavaMoatPluginOptions} */
     this.options = {
       policyLocation: path.join('lavamoat', 'webpack'),
       lockdown: lockdownDefaults,
