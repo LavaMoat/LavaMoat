@@ -54,10 +54,23 @@ class VirtualRuntimeModule extends RuntimeModule {
    * @param {Object} options - The options for the VirtualRuntimeModule.
    * @param {string} options.name - The name of the module.
    * @param {string} options.source - The source code of the module.
+   * @param {number} [options.stage] - The stage of runtime. One of
+   *   RuntimeModule.STAGE_*.
+   * @param {boolean} [options.withoutClosure] - Make the source code run
+   *   outside the closure for a runtime module
    */
-  constructor({ name, source }) {
-    super(name)
-    this.virtualSource = source
+  constructor({
+    name,
+    source,
+    stage = RuntimeModule.STAGE_NORMAL,
+    withoutClosure = false,
+  }) {
+    super(name, stage)
+    this.withoutClosure = withoutClosure
+    this.virtualSource = `;${source};`
+  }
+  shouldIsolate() {
+    return !this.withoutClosure
   }
 
   generate() {
@@ -447,9 +460,10 @@ class LavaMoatPlugin {
         const onceForChunkSet = new WeakSet()
         const chunkRuntimeWarningsDedupe = new Set()
 
-        const { getLavaMoatRuntimeSource } = runtimeBuilder({
-          options: STORE.options,
-        })
+        const { getLavaMoatRuntimeSource, getDefensiveCodingPreamble } =
+          runtimeBuilder({
+            options: STORE.options,
+          })
 
         // Define a handler function to be called for each chunk in the compilation.
         compilation.hooks.additionalChunkRuntimeRequirements.tap(
@@ -509,6 +523,8 @@ class LavaMoatPlugin {
                   },
                 })
 
+                const defensivePreamble = getDefensiveCodingPreamble()
+
                 // Add the runtime modules to the chunk, which handles
                 // the runtime logic for wrapping with lavamoat.
                 compilation.addRuntimeModule(
@@ -516,6 +532,17 @@ class LavaMoatPlugin {
                   new VirtualRuntimeModule({
                     name: 'LavaMoat/runtime',
                     source: lavaMoatRuntime,
+                    stage: RuntimeModule.STAGE_TRIGGER, // after all other stages
+                  })
+                )
+
+                compilation.addRuntimeModule(
+                  chunk,
+                  new VirtualRuntimeModule({
+                    name: 'LavaMoat/defensive',
+                    source: defensivePreamble,
+                    stage: RuntimeModule.STAGE_BASIC, // before all other runtime modules
+                    withoutClosure: true, // run in the scope of the runtime closure
                   })
                 )
 

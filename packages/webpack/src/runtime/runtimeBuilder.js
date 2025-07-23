@@ -22,6 +22,24 @@ module.exports = {
 
     return {
       /**
+       * Generates the preamble that caches selected globals to protect runtime
+       * from scuttling. The set of cached globals is limited to ones known to
+       * be used by runtime modules for the sake of bundle size.
+       *
+       * @returns {string}
+       */
+      getDefensiveCodingPreamble() {
+        const globals = [
+          'location', // AutoPublicPathRuntimeModule.js
+          'setTimeout', // LoadScriptRuntimeModule.js
+          'clearTimeout', // LoadScriptRuntimeModule.js
+          'document', // LoadScriptRuntimeModule.js, AutoPublicPathRuntimeModule.js
+          'trustedTypes', // GetTrustedTypesPolicyRuntimeModule.js
+          'self',
+        ]
+        return `var ${globals.map((g) => `${g} = globalThis.${g}`).join(',')};`
+      },
+      /**
        * Generates the LavaMoat runtime source code based on chunk configuration
        *
        * @param {Object} params - The parameters object
