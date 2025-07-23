@@ -26,8 +26,16 @@ const {
 const { loadCanonicalNameMap } = require('@lavamoat/aa')
 
 /**
+ * This is jsdoc for reexport
+ *
+ * @typedef {import('./buildtime/types').LavaMoatPluginOptions} LavaMoatPluginOptions
+ */
+
+/**
+ * Just import
+ *
  * @import {LockdownOptions} from 'ses'
- * @import {LavaMoatPluginOptions, ScuttlerConfig} from './buildtime/types'
+ * @import {CompleteLavaMoatPluginOptions} from './buildtime/types'
  * @import {CanonicalNameMap} from '@lavamoat/aa'
  * @import {LavaMoatPolicy} from 'lavamoat-core'
  */
@@ -78,12 +86,6 @@ class VirtualRuntimeModule extends RuntimeModule {
   }
 }
 
-/**
- * @typedef {LavaMoatPluginOptions} LavaMoatPluginOptions
- *
- * @typedef {ScuttlerConfig} ScuttlerConfig
- */
-
 // =================================================================
 // Plugin code
 // =================================================================
@@ -104,10 +106,9 @@ const lockdownDefaults = /** @type {const} */ ({
 
 class LavaMoatPlugin {
   /**
-   * @param {Partial<LavaMoatPluginOptions>} [options]
+   * @param {LavaMoatPluginOptions} [options]
    */
   constructor(options = {}) {
-    /** @type {LavaMoatPluginOptions} */
     if (options.scuttleGlobalThis === true) {
       options.scuttleGlobalThis = { enabled: true }
     } else if (typeof options.scuttleGlobalThis === 'object') {
@@ -118,6 +119,7 @@ class LavaMoatPlugin {
       }
     }
 
+    /** @type {CompleteLavaMoatPluginOptions} */
     this.options = {
       policyLocation: path.join('lavamoat', 'webpack'),
       lockdown: lockdownDefaults,
@@ -135,7 +137,7 @@ class LavaMoatPlugin {
   apply(compiler) {
     /**
      * @typedef {Object} Store
-     * @property {LavaMoatPluginOptions} options
+     * @property {CompleteLavaMoatPluginOptions} options
      * @property {WebpackError[]} [mainCompilationWarnings]
      * @property {(string | number)[]} chunkIds Array of chunk ids that have
      *   been processed.
@@ -599,7 +601,7 @@ class LavaMoatPlugin {
     )
   }
 }
-
-LavaMoatPlugin.exclude = EXCLUDE_LOADER
-
 module.exports = LavaMoatPlugin
+
+module.exports.LavaMoatPlugin = LavaMoatPlugin
+module.exports.exclude = EXCLUDE_LOADER

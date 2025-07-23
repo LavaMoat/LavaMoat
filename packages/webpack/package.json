@@ -18,8 +18,16 @@
     "npm": ">=7.0.0"
   },
   "main": "src/plugin.js",
+  "types": "types/plugin.d.ts",
+  "exports": {
+    ".": {
+      "types": "./types/plugin.d.ts",
+      "default": "./src/plugin.js"
+    }
+  },
   "files": [
-    "src"
+    "src",
+    "types"
   ],
   "keywords": [
     "webpack",
