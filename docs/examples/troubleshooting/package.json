@@ -12,6 +12,7 @@
     "3": "lavamoat src/linting.js",
     "4": "lavamoat src/maths.js",
     "policy": "lavamoat --autopolicy app.js",
+    "ses-example": "node onlySES.js",
     "start": "node app.js",
     "test": "lavamoat app.js"
   },
@@ -25,7 +26,7 @@
     "polyfill": "^0.1.0"
   },
   "devDependencies": {
-    "lavamoat": "^8.0.6",
-    "ses": "^1.5.0"
+    "lavamoat": "^9.0.10",
+    "ses": "^1.14.0"
   }
 }
