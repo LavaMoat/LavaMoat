@@ -13,7 +13,7 @@ test.before(async (t) => {
 
 test('webpack/main - dist shape', (t) => {
   // Note: The fixture contains a few cases of resources that are emitted by default. This test is to ensure that the default behavior is not changed for the main app (hence the oddly named html file and the svg file from a dependency are emitted). resources from dependencies are prevented from getting emitted, so the other html resource is not showing up in dist. For the svg to be there a loader had to be added to the webpack config.
-  t.snapshot(Object.keys(t.context.build.snapshot))
+  t.snapshot(Object.keys(t.context.build.snapshot).sort())
   t.log(
     'Warnings sample: \n',
     t.context.build.stdout
@@ -51,6 +51,10 @@ test('webpack/main - modules were included', (t) => {
   t.regex(t.context.bundle, /side-effects-package/)
   t.regex(t.context.bundle, /typescript-package/)
   t.regex(t.context.bundle, /umd-package/)
+})
+
+test('webpack/main - asset inlining works', (t) => {
+  t.regex(t.context.bundle, /data:image\/gif;base64,R0lGODlhAQABAAD/)
 })
 
 test('webpack/main - treeshaking works', (t) => {

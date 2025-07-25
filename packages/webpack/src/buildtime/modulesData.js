@@ -1,7 +1,7 @@
 const diag = require('./diagnostics.js')
 const { WebpackError } = require('webpack')
 
-/** @import {Module, NormalModule, ExternalModule} from 'webpack' */
+/** @import {Module, NormalModule, ExternalModule, Parser} from 'webpack' */
 /** @import {InspectableWebpackModule} from './policyGenerator.js' */
 
 // TODO: move into an enum file along with the other
@@ -38,8 +38,8 @@ const isIgnoredModule = (m) => {
 const isContextModule = (m, moduleClass) => moduleClass === 'ContextModule'
 
 /**
- * Identifies an asset that webpack includes in dist by default without setting
- * any loaders explicitly.
+ * Identifies an asset that webpack includes in dist by default without a loader
+ * being defined for it explicitly.
  *
  * @param {Module} m
  * @returns {m is NormalModule}
@@ -50,6 +50,18 @@ const isAmbientAsset = (m) =>
   'loaders' in m &&
   Array.isArray(m.loaders) &&
   m.loaders.length === 0
+
+/**
+ * @typedef {Parser & { dataUrlCondition: boolean }} AssetParser
+ */
+
+/**
+ * Recognize an AssetParser bu constructor name for the lack of ability to get the type from Webpack
+ *
+ * @param {Parser} parser
+ * @returns {parser is AssetParser}
+ */
+const isAssetParser = (parser) => parser.constructor.name === 'AssetParser'
 
 /**
  * @param {Module} m
@@ -151,21 +163,35 @@ exports.analyzeModules = ({
     // ==================================================
     // Fixing bad modules
 
-    // Fixes the issue with assets being emitted to dist without a loader
+    // Fixes the issue with assets being emitted to dist without the user knowing
     // TODO: refactor to move random hardening of the build somewhere it's easier to track.
     if (
       isAmbientAsset(module) &&
-      module.resource.includes('node_modules') // FIXME: would be better to use canonicalName lookup and match with root
+      (module?.resourceResolveData?.context?.issuer
+        ? module.resourceResolveData.context.issuer.includes('node_modules') // resourceResolveData.context.issuer is the module that requested the asset to be present (eg. contained a `new URL(asset)`)
+        : module.resource.includes('node_modules'))
+      // FIXME: would be better to use canonicalName lookup and match with root
     ) {
-      // add a warning about removing the asset
+      // TODO: design a capability that would represent a permission to emit an asset from a dependency when custom capabilities in policy.json arrive.
+
+      if (
+        module.parser &&
+        isAssetParser(module.parser) &&
+        module.parser.dataUrlCondition === true
+      ) {
+        // skip work for items configured to be inlined as data URLs
+        return
+      }
+
       mainCompilationWarnings.push(
         new WebpackError(
-          `LavaMoatPlugin: the following resource was being silently emitted to the dist directory and LavaMoat has prevented it: '${module.resource}'. If you want to add this resource, explicitly define a file-loader for it in your webpack configuration.`
+          `LavaMoatPlugin: the following resource was being silently emitted to the dist directory and LavaMoat has prevented it: '${module.resource}'.`
         )
       )
 
       // We can't use `chunkGraph.disconnectChunkAndModule` here
-      // because the require statement remains and errors out
+      // because the require statement remains in the generated bundle code
+      // and errors out
 
       if (module.generatorOptions) {
         // generatorOptions was not present in testing, but types indicate it might be there
