@@ -85,6 +85,16 @@ function makeConfig(lmOptions = {}) {
             },
           ],
         },
+        {
+          test: /\.gif$/,
+          type: 'asset',
+          // This explicit configuration is here so that the setting could be found. Webpack applies a default threshold if not stated
+          parser: {
+            dataUrlCondition: {
+              maxSize: Infinity,
+            },
+          },
+        },
       ],
     },
   }
