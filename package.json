@@ -37,6 +37,7 @@
     "watch:types": "tsc -b --watch"
   },
   "devDependencies": {
+    "@babel/types": "7.27.3",
     "@commitlint/cli": "19.8.1",
     "@commitlint/config-conventional": "19.8.1",
     "@endo/compartment-mapper": "1.6.2",
@@ -70,6 +71,7 @@
     "typescript": "5.8.3"
   },
   "overrides": {
+    "@babel/types": "$@babel/types",
     "@endo/compartment-mapper": "$@endo/compartment-mapper",
     "@types/node": "$@types/node",
     "cross-spawn": "7.0.6",
