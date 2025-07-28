@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.0](https://github.com/LavaMoat/LavaMoat/compare/react-native-lockdown-v0.0.2...react-native-lockdown-v0.1.0) (2025-07-28)
+
+
+### Features
+
+* **react-native-lockdown:** ses@1.14.0 ([#1737](https://github.com/LavaMoat/LavaMoat/issues/1737)) ([3926718](https://github.com/LavaMoat/LavaMoat/commit/3926718ee5b8fc935158d0ad766247c954e89a82))
+
 ## [0.0.2](https://github.com/LavaMoat/LavaMoat/compare/react-native-lockdown-v0.0.1...react-native-lockdown-v0.0.2) (2025-06-25)
 
 
