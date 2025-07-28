@@ -1,0 +1,60 @@
+{
+  "name": "@lavamoat/react-native-lockdown",
+  "version": "0.0.2",
+  "description": "LavaMoat React Native lockdown for running Hardened JavaScript in React Native apps",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LavaMoat/lavamoat.git",
+    "directory": "packages/react-native-lockdown"
+  },
+  "homepage": "https://github.com/LavaMoat/lavamoat#readme",
+  "bugs": {
+    "url": "https://github.com/LavaMoat/lavamoat/issues"
+  },
+  "author": "LavaMoat Team",
+  "license": "MIT",
+  "engines": {
+    "node": "^18.0.0 || ^20.0.0 || ^22.0.0 || ^24.0.0"
+  },
+  "main": "./src/index.js",
+  "exports": {
+    ".": {
+      "types": "./types/types.d.ts",
+      "default": "./src/index.js"
+    },
+    "./repair": {
+      "types": "./types/repair.d.ts",
+      "default": "./src/repair.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "CHANGELOG.md",
+    "src",
+    "types",
+    "!*.tsbuildinfo"
+  ],
+  "scripts": {
+    "test": "npm run test:run",
+    "test:run": "ava",
+    "test:update-snapshots": "ava -u"
+  },
+  "peerDependencies": {
+    "@react-native/js-polyfills": "*"
+  },
+  "devDependencies": {
+    "@react-native/js-polyfills": "0.80.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "ava": {
+    "files": [
+      "test/**/*.spec.js"
+    ],
+    "timeout": "30s"
+  },
+  "dependencies": {
+    "ses": "1.14.0"
+  }
+}

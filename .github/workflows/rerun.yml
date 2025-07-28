@@ -1,0 +1,22 @@
+on:
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: 'The ID of the workflow run to rerun'
+        required: true
+      runner:
+        description: 'The runner to use for the rerun'
+        required: true
+
+jobs:
+  rerun:
+    runs-on: ${{ inputs.runner }}
+    steps:
+      - name: rerun ${{ inputs.run_id }}
+        env:
+          GH_REPO: ${{ github.repository }}
+          GH_TOKEN: ${{ github.token }}
+          GH_DEBUG: api
+        run: |
+          gh run watch ${{ inputs.run_id }}
+          gh run rerun ${{ inputs.run_id }} --failed

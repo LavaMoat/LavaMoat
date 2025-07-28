@@ -1,6 +1,6 @@
 {
-  "extends": "../../.config/tsconfig.workspace.json",
-  "include": ["src"],
+  "extends": "../../.config/tsconfig.src.json",
+  "include": ["src", "src/ENUM.json"],
   "compilerOptions": {
     "lib": ["es2022"],
     "resolveJsonModule": true,

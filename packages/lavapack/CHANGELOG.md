@@ -24,6 +24,20 @@
   * dependencies
     * lavamoat-core bumped from ^15.2.0 to ^15.2.1
 
+## [7.0.10](https://github.com/LavaMoat/LavaMoat/compare/lavapack-v7.0.9...lavapack-v7.0.10) (2025-06-24)
+
+
+### Bug Fixes
+
+* add Node.js v24.0.0 to supported engines ([ad9cdcd](https://github.com/LavaMoat/LavaMoat/commit/ad9cdcdf83ccbda8bf2eba427d0c80f761f47a0a))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-core bumped from ^16.4.0 to ^16.5.0
+
 ## [7.0.9](https://github.com/LavaMoat/LavaMoat/compare/lavapack-v7.0.8...lavapack-v7.0.9) (2025-05-01)
 
 

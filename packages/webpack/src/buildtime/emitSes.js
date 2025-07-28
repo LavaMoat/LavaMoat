@@ -1,3 +1,5 @@
+/** @import {Compilation, WebpackPluginInstance} from 'webpack' */
+
 const { readFileSync } = require('node:fs')
 const {
   sources: { RawSource, ConcatSource },
@@ -9,7 +11,7 @@ const lockdownSourcePrefix = `/*! SES sources included by LavaMoat. Do not optim
 module.exports = {
   /**
    * @param {object} options
-   * @param {import('webpack').Compilation} options.compilation
+   * @param {Compilation} options.compilation
    * @param {RegExp} options.inlineLockdown
    * @returns {() => void}
    */
@@ -26,8 +28,8 @@ module.exports = {
     },
   /**
    * @param {object} options
-   * @param {import('webpack').Compilation} options.compilation
-   * @param {import('webpack').WebpackPluginInstance} [options.HtmlWebpackPluginInUse]
+   * @param {Compilation} options.compilation
+   * @param {WebpackPluginInstance} [options.HtmlWebpackPluginInUse]
    * @param {boolean} [options.HtmlWebpackPluginInterop]
    * @returns {() => void}
    */
@@ -59,7 +61,7 @@ module.exports = {
                 data.html = data.html.replace(scriptTagRegex, `${scriptTag}$&`)
               } else {
                 throw Error(
-                  'LavaMoat: Could not insert lockdown script tag, no suitable location found in the html template'
+                  'LavaMoatPlugin: Could not insert lockdown script tag, no suitable location found in the html template'
                 )
               }
               cb(null, data)

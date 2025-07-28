@@ -170,3 +170,29 @@ test('execute - static require downstream from dynamic require', async (t) => {
   })
   t.is(output.stdout, '{"b":42,"c":42}\n')
 })
+
+test('policy - package with falsy main field', async (t) => {
+  const projectRoot = path.join(__dirname, 'projects', 'falsy-main')
+  const entryId = path.join(projectRoot, 'index.js')
+
+  const policy = await parseForPolicy({ entryId, projectRoot })
+  t.deepEqual(policy, {
+    resources: {
+      a: {
+        packages: {
+          events: true,
+        },
+      },
+      b: {
+        builtin: {
+          'events.EventEmitter': true,
+        },
+      },
+      events: {
+        globals: {
+          console: true,
+        },
+      },
+    },
+  })
+})

@@ -6,6 +6,21 @@
   * dependencies
     * @lavamoat/aa bumped from ^4.0.1 to ^4.1.0
 
+## [3.3.4](https://github.com/LavaMoat/LavaMoat/compare/allow-scripts-v3.3.3...allow-scripts-v3.3.4) (2025-06-24)
+
+
+### Bug Fixes
+
+* add Node.js v24.0.0 to supported engines ([ad9cdcd](https://github.com/LavaMoat/LavaMoat/commit/ad9cdcdf83ccbda8bf2eba427d0c80f761f47a0a))
+* **deps:** update dependency type-fest to v4.41.0 ([#1657](https://github.com/LavaMoat/LavaMoat/issues/1657)) ([19e9bf1](https://github.com/LavaMoat/LavaMoat/commit/19e9bf144c8c43f530501bc500480fed16f995ac))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @lavamoat/aa bumped from ^4.3.2 to ^4.3.3
+
 ## [3.3.3](https://github.com/LavaMoat/LavaMoat/compare/allow-scripts-v3.3.2...allow-scripts-v3.3.3) (2025-05-01)
 
 

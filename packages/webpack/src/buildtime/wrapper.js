@@ -110,7 +110,7 @@ function validateSource(source) {
     // but function constructor should suffice to report parsing errors
     Function(source)
   } catch (e) {
-    diag.run(1, () => {
+    diag.run(2, () => {
       fs.writeFileSync(
         validityFlag + '.js',
         source +
@@ -121,6 +121,6 @@ ${e}
         `
       )
     })
-    throw Error(validityFlag + 'wrapped module is not valid JS\n' + e)
+    throw Error(validityFlag + ': wrapped module is not valid JS\n' + e)
   }
 }

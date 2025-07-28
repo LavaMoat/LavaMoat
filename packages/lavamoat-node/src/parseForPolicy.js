@@ -285,7 +285,9 @@ function makeImportHook({
         const packageJson = JSON.parse(
           await fs.readFile(path.join(packageRoot, 'package.json'), 'utf8')
         )
-        const main = packageJson.main ?? 'index.js'
+        // a falsy `main` means we will attempt to resolve the default entry point
+        // TODO: this should maybe support `index.node`/`index.json` as well
+        const main = packageJson.main || 'index.js'
         const mainPath = path.resolve(packageRoot, main)
         importMap[packageName] = mainPath
       })

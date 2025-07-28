@@ -11,7 +11,7 @@ const defaultLmOptions = {
   policyLocation: path.resolve(__dirname, 'policy'),
   readableResourceIds: true,
   runChecks: true,
-  diagnosticsVerbosity: 0,
+  diagnosticsVerbosity: 1,
   HtmlWebpackPluginInterop: true,
 }
 
@@ -74,7 +74,7 @@ function makeConfig(lmOptions = {}) {
           sideEffects: true,
         },
         {
-          // this explicitly allows svg assets to be emited from dependencies
+          // when a loader is explicitly used to emit assets they are allowed for backwards compatibility
           test: /\.svg$/,
           use: [
             {
@@ -84,6 +84,16 @@ function makeConfig(lmOptions = {}) {
               },
             },
           ],
+        },
+        {
+          test: /\.gif$/,
+          type: 'asset',
+          // This explicit configuration is here so that the setting could be found. Webpack applies a default threshold if not stated
+          parser: {
+            dataUrlCondition: {
+              maxSize: Infinity,
+            },
+          },
         },
       ],
     },

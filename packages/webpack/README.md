@@ -26,7 +26,7 @@ The LavaMoat plugin takes an options object with the following properties (all o
 | `HtmlWebpackPluginInterop` | Boolean to add a script tag to the HTML output for `./lockdown` file if `HtmlWebpackPlugin` is in use.                                                                                                                                                                                                                | `false`                  |
 | `inlineLockdown`           | A RegExp for matching files to be prepended with lockdown (instead of adding it as a file to the output directory).                                                                                                                                                                                                   |
 | `runChecks`                | Boolean property to indicate whether to check resulting code with wrapping for correctness.                                                                                                                                                                                                                           | `false`                  |
-| `diagnosticsVerbosity`     | Number property to represent diagnostics output verbosity. A larger number means more overwhelming diagnostics output. Setting a positive verbosity will enable `runChecks`.                                                                                                                                          | `0`                      |
+| `diagnosticsVerbosity`     | Number property to represent diagnostics output verbosity. A larger number means more overwhelming diagnostics output.                                                                                                                                                                                                | `0`                      |
 | `debugRuntime`             | Only for local debugging use - Enables debugging tools that help detect gaps in generated policy and add missing entries to overrides                                                                                                                                                                                 | `false`                  |
 | `policy`                   | The LavaMoat policy object (if not loading from file; see `policyLocation`)                                                                                                                                                                                                                                           | `undefined`              |
 
@@ -78,6 +78,14 @@ Example: avoid wrapping CSS modules:
 
 See: `examples/webpack.config.js` for a complete example.
 
+### diagnosticsVerbosity
+
+| level | description                                                                                                            |
+| ----- | ---------------------------------------------------------------------------------------------------------------------- |
+| 1     | Prints more detailed warnings from compilation and wrapping of modules.                                                |
+| 2     | Enables verbose error output for all compilation errors and syntax checks. Logs the steps the plugin is going through. |
+| 3+    | Debugging logs for the plugin internals.                                                                               |
+
 ### Gotchas
 
 #### Implicit modules
@@ -105,7 +113,8 @@ This plugin will skip policy enforcement for such ignored modules.
 
 #### HMR
 
-LavaMoat is not compatible with Hot Module Replacement (HMR). Disable LavaMoat for development builds where HMR is required while keeping it enabled for production builds.
+LavaMoat is not compatible with Hot Module Replacement (HMR) and is highly unlikely to ever be; HMR is the antithesis of sandboxing. If you wish to use HMR for development, disable LavaMoat in your dev configuration while keeping it enabled for production builds.
+You could keep lockdown added to the page if you wish to detect incompatibilities with the hardened environment early.
 
 # Security
 
@@ -122,7 +131,7 @@ LavaMoat is not compatible with Hot Module Replacement (HMR). Disable LavaMoat f
 
 - Webpack itself is considered trusted.
 - All plugins can bypass LavaMoat protections intentionally.
-- It's unlikely _but possible_ that a plugin can bypass LavaMoat protections _unintentionally_.
+- It's unlikely _but possible_ that a plugin can bypass LavaMoat protections _unintentionally_. Some of the warnings LavaMoat Plugin reports can help detect that.
 - It should not be possible for loaders to bypass LavaMoat protections.
 - Some plugins (eg. MiniCssExtractPlugin) execute code from the bundle at build time. To make the plugin work you need to trust it and the modules it runs and add the LavaMoat.exclude loader for them.
 - This Webpack plugin _does not_ protect against malicious execution by other third-party plugins at runtime (use [LavaMoat](https://npm.im/lavamoat) for that).
@@ -131,11 +140,17 @@ LavaMoat is not compatible with Hot Module Replacement (HMR). Disable LavaMoat f
 
 Elements of the Webpack runtime (e.g., `__webpack_require__.*`) are currently mostly left intact. To avoid opening up potential bypasses, some functionality of the Webpack runtime is not available.
 
-# Testing
+Module Federation depends on extending runtime in ways we would not expose to modules. We're open to contributions or collaboration on carefully enabling it.
+
+# Contributing
+
+See [DEVELOPMENT.md](./DEVELOPMENT.md) for notes on plans and roadmap. Refer to the main CONTRIBUTING.md for general guidelines on how to contribute.
+
+## Testing
 
 Run `npm test` to start the automated tests.
 
-## Manual testing
+### Manual testing
 
 - Navigate to `example/`
 - Run `npm ci` and `npm test`

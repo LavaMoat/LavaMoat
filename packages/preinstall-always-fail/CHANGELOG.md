@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.1](https://github.com/LavaMoat/LavaMoat/compare/preinstall-always-fail-v2.1.0...preinstall-always-fail-v2.1.1) (2025-06-24)
+
+
+### Bug Fixes
+
+* add Node.js v24.0.0 to supported engines ([ad9cdcd](https://github.com/LavaMoat/LavaMoat/commit/ad9cdcdf83ccbda8bf2eba427d0c80f761f47a0a))
+
 ## [2.1.0](https://github.com/LavaMoat/LavaMoat/compare/preinstall-always-fail-v2.0.0...preinstall-always-fail-v2.1.0) (2024-07-11)
 
 

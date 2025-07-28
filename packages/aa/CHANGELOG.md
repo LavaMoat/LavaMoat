@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.3.3](https://github.com/LavaMoat/LavaMoat/compare/aa-v4.3.2...aa-v4.3.3) (2025-06-24)
+
+
+### Bug Fixes
+
+* add Node.js v24.0.0 to supported engines ([ad9cdcd](https://github.com/LavaMoat/LavaMoat/commit/ad9cdcdf83ccbda8bf2eba427d0c80f761f47a0a))
+
 ## [4.3.2](https://github.com/LavaMoat/LavaMoat/compare/aa-v4.3.1...aa-v4.3.2) (2025-03-11)
 
 

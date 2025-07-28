@@ -22,3 +22,14 @@ jobs:
         uses: ./.github/actions/prepare
       - name: Build & Test
         uses: ./.github/actions/test
+  rerun:
+    name: Rerun flaky macOS tests
+    needs: compatibility-test-macos
+    if: needs.compatibility-test-macos.result == 'failure' && fromJSON(github.run_attempt) < 3
+    runs-on: macos-15
+    steps:
+      - env:
+          GH_REPO: ${{ github.repository }}
+          GH_TOKEN: ${{ github.token }}
+          GH_DEBUG: api
+        run: gh workflow run rerun.yml -f run_id=${{ github.run_id }} -f runner=macos-15
