@@ -18,6 +18,19 @@
   * dependencies
     * lavamoat-core bumped from ^15.2.0 to ^15.2.1
 
+## [1.1.0](https://github.com/LavaMoat/LavaMoat/compare/webpack-v1.0.0...webpack-v1.1.0) (2025-07-28)
+
+
+### Features
+
+* **webpack:** defend webpack runtime from scuttling ([#1740](https://github.com/LavaMoat/LavaMoat/issues/1740)) ([0f094bd](https://github.com/LavaMoat/LavaMoat/commit/0f094bd38a1a2c159d5f49864ef97ec57403a43f))
+* **webpack:** properly expose types for the plugin ([#1741](https://github.com/LavaMoat/LavaMoat/issues/1741)) ([abd4450](https://github.com/LavaMoat/LavaMoat/commit/abd445066bd698ada041bc717b8ebcee5ea6b296))
+
+
+### Bug Fixes
+
+* **webpack:** fix how ambient asset files requests are filtered ([#1739](https://github.com/LavaMoat/LavaMoat/issues/1739)) ([3f914cf](https://github.com/LavaMoat/LavaMoat/commit/3f914cf3716d3a4978a80f419fb265db10fc0ae6))
+
 ## [1.0.0](https://github.com/LavaMoat/LavaMoat/compare/webpack-v1.0.0...webpack-v1.0.0) (2025-06-24)
 
 
