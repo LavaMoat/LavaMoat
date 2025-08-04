@@ -44,6 +44,7 @@ function endowmentsToolkit({
     // public API
     getEndowmentsForConfig,
     copyWrappedGlobals,
+    endowAll,
     getBuiltinForConfig,
     createFunctionWrapper,
     // internals exposed for core
@@ -132,6 +133,39 @@ function endowmentsToolkit({
       unwrapTo,
       unwrapFrom,
       explicitlyBanned,
+      allowedWriteFields
+    )
+  }
+
+  /**
+   * Creates an object populated with all properties of the source, but applies
+   * all the wrapping and writable mapping
+   *
+   * @template {object} T Deep properties specified in the packagePolicy
+   * @param {T} sourceRef - Object from which to copy properties
+   * @param {object} unwrapTo - For getters and setters, when the this-value is
+   *   unwrapFrom, is replaced as unwrapTo
+   * @param {object} unwrapFrom - For getters and setters, the this-value to
+   *   replace (default: targetRef)
+   * @returns {Partial<T>} - The targetRef
+   */
+  function endowAll(sourceRef, unwrapTo, unwrapFrom) {
+    const proto = Object.getPrototypeOf(sourceRef)
+    if (proto !== null && proto !== Object.prototype) {
+      throw new Error(
+        `LavaMoat - endowAll does not support sourceRefs with custom prototype`
+      )
+    }
+    const whitelistedReads = Object.getOwnPropertyNames(sourceRef).sort(
+      (a, b) => a.length - b.length
+    )
+    const allowedWriteFields = knownWritableFields
+    return makeMinimalViewOfRef(
+      sourceRef,
+      whitelistedReads,
+      unwrapTo,
+      unwrapFrom,
+      [], // nothing is explicitly banned
       allowedWriteFields
     )
   }
