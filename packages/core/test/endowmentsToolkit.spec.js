@@ -2,11 +2,12 @@ const test = require('ava')
 const endowmentsToolkit = require('../src/endowmentsToolkit.js')
 
 function prepareTest({ knownWritable } = {}) {
-  const { getEndowmentsForConfig, copyWrappedGlobals } = endowmentsToolkit({
-    handleGlobalWrite: !!knownWritable,
-    knownWritableFields: knownWritable,
-  })
-  return { getEndowmentsForConfig, copyWrappedGlobals }
+  const { getEndowmentsForConfig, copyWrappedGlobals, endowAll } =
+    endowmentsToolkit({
+      handleGlobalWrite: !!knownWritable,
+      knownWritableFields: knownWritable,
+    })
+  return { getEndowmentsForConfig, copyWrappedGlobals, endowAll }
 }
 
 test('getEndowmentsForConfig', (t) => {
@@ -142,6 +143,75 @@ test('instrumentDynamicValueAtPath puts a getter at path', (t) => {
   t.is(target.a.b.c, 1)
   source.a.b.c = 2
   t.is(target.a.b.c, 2)
+})
+
+test('copyWrappedGlobals - writable fields get updated in compartments and in root but not globally', (t) => {
+  const knownWritable = new Set(['a'])
+  const { getEndowmentsForConfig, copyWrappedGlobals, endowAll } = prepareTest({
+    knownWritable,
+  })
+
+  const originalSource = { a: 1, b: 2 }
+
+  const config = {
+    globals: {
+      a: 'write',
+    },
+  }
+  // A way to separate the root compartment endowment from the store for globals
+  // in lavamoat. Note that endowAll uses the same optional references for unwrapping
+
+  // Storage for globals we cache in lavamoat
+  const goldenMasterRecordGlobal = copyWrappedGlobals(originalSource, {})
+  // root compartment global
+  const rootGlobal = endowAll(goldenMasterRecordGlobal)
+  // non-root compartments
+  const endowments = getEndowmentsForConfig(goldenMasterRecordGlobal, config)
+  const endowments2 = getEndowmentsForConfig(goldenMasterRecordGlobal, config)
+  endowments.a = 42
+
+  t.is(rootGlobal.a, 42)
+  t.is(endowments2.a, 42)
+  t.is(goldenMasterRecordGlobal.a, 42)
+  t.is(originalSource.a, 1)
+})
+
+test('copyWrappedGlobals - nested writable fields get updated in compartments and in root but not globally', (t) => {
+  const knownWritable = new Set(['a'])
+  const { getEndowmentsForConfig, copyWrappedGlobals, endowAll } = prepareTest({
+    knownWritable,
+  })
+  const originalSource = { a: { b: { c: 1 }, no: 1 }, d: 2 }
+
+  const config1 = {
+    globals: {
+      'a.b.c': true,
+    },
+  }
+  const config2 = {
+    globals: {
+      a: 'write',
+    },
+  }
+
+  // Storage for globals we cache in lavamoat
+  const goldenMasterRecordGlobal = copyWrappedGlobals(originalSource, {})
+  // root compartment global
+  const rootGlobal = endowAll(goldenMasterRecordGlobal)
+  // non-root compartments
+  const endowments = getEndowmentsForConfig(goldenMasterRecordGlobal, config1)
+  const endowments2 = getEndowmentsForConfig(goldenMasterRecordGlobal, config2)
+
+  endowments2.a = { b: { c: 42, no: 2 } }
+
+  t.is(rootGlobal.a.b.c, 42)
+  t.is(rootGlobal.a.b.no, 2)
+  t.is(endowments.a.b.c, 42)
+  t.is(endowments.a.b.no, undefined)
+  t.is(endowments2.a.b.c, 42)
+  t.is(endowments2.a.b.no, 2)
+  t.is(goldenMasterRecordGlobal.a.b.c, 42)
+  t.is(originalSource.a.b.c, 1)
 })
 
 test('getEndowmentsForConfig - knownWritable and tightening access with false', (t) => {
@@ -400,6 +470,30 @@ test('getEndowmentsForConfig - specify unwrap from, unwrap to', (t) => {
   t.is(getter.call(), globalThis)
 })
 
+test('endowAll - specify unwrap from, unwrap to', (t) => {
+  'use strict'
+  // compartment.globalThis.document would error because 'this' value is not window
+  const unwrapTo = {}
+  const unwrapFrom = {}
+  const { endowAll } = prepareTest()
+  const sourceGlobal = {
+    get xyz() {
+      return this
+    },
+  }
+  const resultGlobal = endowAll(sourceGlobal, unwrapTo, unwrapFrom)
+  process._rawDebug(1, Object.getOwnPropertyDescriptors(resultGlobal))
+  const getter = Reflect.getOwnPropertyDescriptor(resultGlobal, 'xyz').get
+
+  t.is(resultGlobal.xyz, resultGlobal)
+  t.is(getter.call(resultGlobal), resultGlobal)
+  t.is(getter.call(sourceGlobal), sourceGlobal)
+  t.is(getter.call(unwrapTo), unwrapTo)
+  t.is(getter.call(unwrapFrom), unwrapTo)
+  // ava seems to be forcing sloppy mode
+  t.is(getter.call(), globalThis)
+})
+
 // eslint-disable-next-line ava/no-async-fn-without-await
 test('getEndowmentsForConfig - endowing bind of a function', async (t) => {
   'use strict'
@@ -456,4 +550,38 @@ test('copyWrappedGlobals - copy from prototype too', (t) => {
   copyWrappedGlobals(source, target, ['window'])
 
   t.is(Object.keys(target).sort().join(), 'onTheObj,onTheProto,window')
+})
+
+test('copyWrappedGlobals+endowAll - ends up including fields from prototype too', (t) => {
+  'use strict'
+  const { copyWrappedGlobals, endowAll } = prepareTest()
+  const sourceProto = {
+    onTheProto: function () {},
+  }
+  const source = Object.create(sourceProto)
+  source.onTheObj = function () {}
+  const target = Object.create(null)
+  copyWrappedGlobals(source, target, ['window'])
+  const endowments = endowAll(target, {}, {})
+
+  t.is(Object.keys(endowments).sort().join(), 'onTheObj,onTheProto,window')
+})
+
+test('endowAll - refuses to accept objects with custom proto', (t) => {
+  'use strict'
+  const { endowAll } = prepareTest()
+  const sourceProto = {
+    onTheProto: function () {},
+  }
+  const source = Object.create(sourceProto)
+  source.onTheObj = function () {}
+
+  t.throws(
+    () => {
+      endowAll(source, {}, {})
+    },
+    {
+      message: `LavaMoat - endowAll does not support sourceRefs with custom prototype`,
+    }
+  )
 })
