@@ -1,6 +1,11 @@
 const test = require('ava')
 const endowmentsToolkit = require('../src/endowmentsToolkit.js')
 
+/**
+ * @param {Object} [options]
+ * @param {Set<string>} [options].knownWritable]
+ * @returns {ReturnType<typeof endowmentsToolkit>}
+ */
 function prepareTest({ knownWritable } = {}) {
   const { getEndowmentsForConfig, copyWrappedGlobals, endowAll } =
     endowmentsToolkit({
