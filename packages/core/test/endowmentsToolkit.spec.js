@@ -557,7 +557,7 @@ test('copyWrappedGlobals - copy from prototype too', (t) => {
   t.is(Object.keys(target).sort().join(), 'onTheObj,onTheProto,window')
 })
 
-test('copyWrappedGlobals+endowAll - ends up including fields from prototype too', (t) => {
+test('copyWrappedGlobals+endowAll - includes fields from source prototype', (t) => {
   'use strict'
   const { copyWrappedGlobals, endowAll } = prepareTest()
   const sourceProto = {
