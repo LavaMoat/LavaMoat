@@ -3,7 +3,7 @@ const endowmentsToolkit = require('../src/endowmentsToolkit.js')
 
 /**
  * @param {Object} [options]
- * @param {Set<string>} [options].knownWritable]
+ * @param {Set<string>}
  * @returns {ReturnType<typeof endowmentsToolkit>}
  */
 function prepareTest({ knownWritable } = {}) {
@@ -15,7 +15,11 @@ function prepareTest({ knownWritable } = {}) {
   return { getEndowmentsForConfig, copyWrappedGlobals, endowAll }
 }
 
+// Note: All tests are in strict mode because the endowments will be used in that mode only.
+// Some of the tests would fail in sloppy mode and that's expected.
+
 test('getEndowmentsForConfig', (t) => {
+  'use strict'
   const { getEndowmentsForConfig } = prepareTest()
   const sourceGlobal = {
     namespace: {
@@ -33,6 +37,7 @@ test('getEndowmentsForConfig', (t) => {
 })
 
 test('getEndowmentsForConfig - function on proto', (t) => {
+  'use strict'
   const { getEndowmentsForConfig } = prepareTest()
   const assertMe = Symbol('assertMe')
   const appendChild = () => assertMe
@@ -52,6 +57,7 @@ test('getEndowmentsForConfig - function on proto', (t) => {
 })
 
 test('getEndowmentsForConfig - siblings', (t) => {
+  'use strict'
   const { getEndowmentsForConfig } = prepareTest()
   const sourceGlobal = { Buffer }
   const config = {
@@ -102,6 +108,7 @@ test('getEndowmentsForConfig - siblings', (t) => {
 })
 
 test('getEndowmentsForConfig - knownWritable', (t) => {
+  'use strict'
   const knownWritable = new Set(['a', 'b', 'x'])
   const { getEndowmentsForConfig } = prepareTest({ knownWritable })
   const sourceGlobal = {
@@ -132,6 +139,7 @@ test('getEndowmentsForConfig - knownWritable', (t) => {
 })
 
 test('instrumentDynamicValueAtPath puts a getter at path', (t) => {
+  'use strict'
   const { instrumentDynamicValueAtPath } = endowmentsToolkit._test
 
   const source = {
@@ -150,7 +158,8 @@ test('instrumentDynamicValueAtPath puts a getter at path', (t) => {
   t.is(target.a.b.c, 2)
 })
 
-test('copyWrappedGlobals - writable fields get updated in compartments and in root but not globally', (t) => {
+test('endowAll - writable fields get updated in compartments and in root but not globally', (t) => {
+  'use strict'
   const knownWritable = new Set(['a'])
   const { getEndowmentsForConfig, copyWrappedGlobals, endowAll } = prepareTest({
     knownWritable,
@@ -173,6 +182,7 @@ test('copyWrappedGlobals - writable fields get updated in compartments and in ro
   // non-root compartments
   const endowments = getEndowmentsForConfig(goldenMasterRecordGlobal, config)
   const endowments2 = getEndowmentsForConfig(goldenMasterRecordGlobal, config)
+
   endowments.a = 42
 
   t.is(rootGlobal.a, 42)
@@ -181,7 +191,55 @@ test('copyWrappedGlobals - writable fields get updated in compartments and in ro
   t.is(originalSource.a, 1)
 })
 
+test('endowAll - non-writable fields create independent copies', (t) => {
+  'use strict'
+  // we need strict mode to get errors when attempting to set on a getter-only property
+  const knownWritable = new Set(['a'])
+  const { getEndowmentsForConfig, copyWrappedGlobals, endowAll } = prepareTest({
+    knownWritable,
+  })
+
+  const originalSource = { a: 1, b: 2 }
+
+  const config = {
+    globals: {
+      // Note that despite regular endowment `a` is a getter because it was listed in knownWritable
+      a: true,
+    },
+  }
+
+  // Storage for globals we cache in lavamoat
+  const goldenMasterRecordGlobal = copyWrappedGlobals(originalSource, {})
+  // root compartment global
+  const rootGlobal = endowAll(goldenMasterRecordGlobal)
+  // non-root compartments
+  const endowments = getEndowmentsForConfig(goldenMasterRecordGlobal, config)
+  const endowments2 = getEndowmentsForConfig(goldenMasterRecordGlobal, config)
+
+  t.throws(
+    () => {
+      endowments.a = 42
+    },
+    { message: 'Cannot set property a of #<Object> which has only a getter' }
+  )
+
+  t.is(rootGlobal.a, 1)
+  t.is(endowments.a, 1)
+  t.is(endowments2.a, 1)
+  t.is(goldenMasterRecordGlobal.a, 1)
+  t.is(originalSource.a, 1)
+
+  rootGlobal.a = 44
+
+  t.is(rootGlobal.a, 44)
+  t.is(endowments.a, 44)
+  t.is(endowments2.a, 44)
+  t.is(goldenMasterRecordGlobal.a, 44)
+  t.is(originalSource.a, 1)
+})
+
 test('copyWrappedGlobals - nested writable fields get updated in compartments and in root but not globally', (t) => {
+  'use strict'
   const knownWritable = new Set(['a'])
   const { getEndowmentsForConfig, copyWrappedGlobals, endowAll } = prepareTest({
     knownWritable,
@@ -220,6 +278,7 @@ test('copyWrappedGlobals - nested writable fields get updated in compartments an
 })
 
 test('getEndowmentsForConfig - knownWritable and tightening access with false', (t) => {
+  'use strict'
   const knownWritable = new Set(['a'])
   const { getEndowmentsForConfig } = prepareTest({ knownWritable })
   const sourceGlobal = {
@@ -246,6 +305,7 @@ test('getEndowmentsForConfig - knownWritable and tightening access with false', 
 })
 
 test('getEndowmentsForConfig - knownWritable and invalid nesting', (t) => {
+  'use strict'
   const knownWritable = new Set(['a'])
   const { getEndowmentsForConfig } = prepareTest({ knownWritable })
   const sourceGlobal = {
@@ -264,6 +324,7 @@ test('getEndowmentsForConfig - knownWritable and invalid nesting', (t) => {
 })
 
 test('getEndowmentsForConfig - read-write', (t) => {
+  'use strict'
   const knownWritable = new Set(['a', 'b'])
   const { getEndowmentsForConfig } = prepareTest({ knownWritable })
   const sourceGlobal = {
@@ -301,6 +362,7 @@ test('getEndowmentsForConfig - read-write', (t) => {
 })
 
 test('getEndowmentsForConfig - basic getter', (t) => {
+  'use strict'
   const { getEndowmentsForConfig } = prepareTest()
   const sourceGlobal = {
     get abc() {
@@ -332,6 +394,7 @@ test('getEndowmentsForConfig - basic getter', (t) => {
 })
 
 test('getEndowmentsForConfig - traversing with getters', (t) => {
+  'use strict'
   // getEndowmentsForConfig traverses intermediate getters and preserves the leaf getter
   const { getEndowmentsForConfig } = prepareTest()
   let dynamicValue = 42
@@ -393,6 +456,8 @@ test('getEndowmentsForConfig - traversing with getters', (t) => {
 
 test('getEndowmentsForConfig - ensure window.document getter behavior support', (t) => {
   'use strict'
+  // we need strict mode for the getter behavior in the last assertion
+
   // compartment.globalThis.document would error because 'this' value is not window
   const { getEndowmentsForConfig } = prepareTest()
   const sourceGlobal = {
@@ -412,7 +477,7 @@ test('getEndowmentsForConfig - ensure window.document getter behavior support', 
   t.is(resultGlobal.xyz, sourceGlobal)
   t.is(getter.call(resultGlobal), sourceGlobal)
   t.is(getter.call(sourceGlobal), sourceGlobal)
-  // ava seems to be forcing sloppy mode
+  // would not work in sloppy mode
   t.is(getter.call(), globalThis)
 })
 
@@ -438,7 +503,7 @@ test('getEndowmentsForConfig - specify unwrap to', (t) => {
   t.is(getter.call(resultGlobal), unwrapTo)
   t.is(getter.call(sourceGlobal), sourceGlobal)
   t.is(getter.call(unwrapTo), unwrapTo)
-  // ava seems to be forcing sloppy mode
+  // would not work in sloppy mode
   t.is(getter.call(), globalThis)
 })
 
@@ -471,7 +536,7 @@ test('getEndowmentsForConfig - specify unwrap from, unwrap to', (t) => {
   t.is(getter.call(sourceGlobal), sourceGlobal)
   t.is(getter.call(unwrapTo), unwrapTo)
   t.is(getter.call(unwrapFrom), unwrapTo)
-  // ava seems to be forcing sloppy mode
+  // would not work in sloppy mode
   t.is(getter.call(), globalThis)
 })
 
@@ -487,7 +552,6 @@ test('endowAll - specify unwrap from, unwrap to', (t) => {
     },
   }
   const resultGlobal = endowAll(sourceGlobal, unwrapTo, unwrapFrom)
-  process._rawDebug(1, Object.getOwnPropertyDescriptors(resultGlobal))
   const getter = Reflect.getOwnPropertyDescriptor(resultGlobal, 'xyz').get
 
   t.is(resultGlobal.xyz, resultGlobal)
@@ -495,7 +559,7 @@ test('endowAll - specify unwrap from, unwrap to', (t) => {
   t.is(getter.call(sourceGlobal), sourceGlobal)
   t.is(getter.call(unwrapTo), unwrapTo)
   t.is(getter.call(unwrapFrom), unwrapTo)
-  // ava seems to be forcing sloppy mode
+  // would not work in sloppy mode
   t.is(getter.call(), globalThis)
 })
 
