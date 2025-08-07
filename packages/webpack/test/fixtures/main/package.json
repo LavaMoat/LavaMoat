@@ -14,6 +14,7 @@
     "flag-package": "1.0.0",
     "globals-package": "1.0.0",
     "loader-hack": "1.0.0",
+    "message-package": "1.0.0",
     "nodejs-package": "1.0.0",
     "polyfill-package": "1.0.0",
     "prototype-poisoning-package": "1.0.0",

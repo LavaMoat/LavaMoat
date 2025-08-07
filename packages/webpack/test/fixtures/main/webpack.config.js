@@ -4,10 +4,6 @@ const HtmlWebpackPlugin = require('html-webpack-plugin')
 const path = require('path')
 
 const defaultLmOptions = {
-  lockdown: {
-    errorTaming: 'unsafe',
-    consoleTaming: 'unsafe',
-  },
   policyLocation: path.resolve(__dirname, 'policy'),
   readableResourceIds: true,
   runChecks: true,
