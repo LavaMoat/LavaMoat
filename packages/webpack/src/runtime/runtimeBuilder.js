@@ -5,6 +5,7 @@ const path = require('node:path')
 
 /** @import {LavaMoatPluginOptions} from '../buildtime/types' */
 /** @import {LavaMoatPolicy} from 'lavamoat-core' */
+/** @import {RuntimeModule} from './assemble.js' */
 
 module.exports = {
   /**
@@ -77,6 +78,7 @@ module.exports = {
           externals,
         },
       }) {
+        /** @type {RuntimeModule[]} */
         let runtimeChunks = []
         if (
           currentChunkName &&
@@ -99,6 +101,9 @@ module.exports = {
           ]
         } else {
           diag.rawDebug(2, `adding runtime for chunk ${currentChunkName}`)
+          const repairs = require('./repairsBuilder.js').buildRepairs(
+            policyData
+          )
 
           runtimeChunks = [
             // the string used to indicate root resource id
@@ -161,6 +166,11 @@ module.exports = {
             {
               name: 'endowmentsToolkit',
               shimRequire: 'lavamoat-core/src/endowmentsToolkit.js',
+            },
+            // repairs
+            {
+              name: 'repairs',
+              rawSource: repairs,
             },
             // main lavamoat runtime
             {

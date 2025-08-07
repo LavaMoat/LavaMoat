@@ -24,5 +24,6 @@ export interface RuntimeNamespace {
   ENUM: Record<string, string>
   endowmentsToolkit: typeof EndowmentsToolkitFactory
   defaultExport: (...args: any[]) => unknown
+  repairs: Record<string, Function>
   debug: DebugTools | undefined
 }
