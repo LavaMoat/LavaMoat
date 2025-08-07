@@ -143,6 +143,9 @@ const theRealGlobalThis = globalThis
 /** @type {any} */
 let rootCompartmentGlobalThis
 const globalAliases = ['window', 'self', 'global', 'globalThis', 'frames']
+
+const repairsAvailable = keys(LAVAMOAT.repairs || {})
+
 /**
  * Installs globals for a specific policy resource.
  *
@@ -163,12 +166,29 @@ const installGlobalsForPolicy = (resourceId, packageCompartmentGlobal) => {
       LAVAMOAT.options?.scuttleGlobalThis
     )
   } else {
+    const packagePolicy = LAVAMOAT.policy.resources[resourceId] || {}
     const endowments = getEndowmentsForConfig(
       rootCompartmentGlobalThis,
-      LAVAMOAT.policy.resources[resourceId] || {},
+      packagePolicy,
       globalThis,
       packageCompartmentGlobal
     )
+    // Applies custom repairs to the endowments known to be used in the policy
+    // Premature optimization opportunity: choose to iterate repairs or endowments depending on which is shorter
+    if (
+      repairsAvailable.length > 0 &&
+      packagePolicy.globals &&
+      keys(packagePolicy.globals).length > 0
+    ) {
+      repairsAvailable.forEach((repairName) => {
+        if (endowments[repairName]) {
+          const repair = LAVAMOAT.repairs[repairName]
+          if (repair) {
+            repair(endowments, theRealGlobalThis, packageCompartmentGlobal)
+          }
+        }
+      })
+    }
 
     defineProperties(packageCompartmentGlobal, {
       ...getOwnPropertyDescriptors(endowments),
