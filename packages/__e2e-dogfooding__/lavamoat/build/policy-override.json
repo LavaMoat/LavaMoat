@@ -1,0 +1,262 @@
+{
+  "resources": {
+    "webpack>graceful-fs": {
+      "globals": {
+        "___graceful-fs_queue": "write",
+        "___graceful-fs_previous": "write"
+      },
+      "builtin": {
+        "fs": true
+      }
+    },
+    "webpack": {
+      "builtin": {
+        "path": true,
+        "url": true,
+        "fs": true,
+        "util": true
+      }
+    },
+    "html-webpack-plugin": {
+      "packages": {
+        "webpack>loader-runner": true
+      },
+      "builtin": {
+        "url": true
+      }
+    },
+    "html-webpack-plugin>lodash": {
+      "builtin": {
+        "util": true
+      }
+    },
+    "webpack>enhanced-resolve": {
+      "builtin": {
+        "path": true,
+        "process": true
+      }
+    },
+    "@lavamoat/node>lavamoat-core>merge-deep>clone-deep": {
+      "packages": {
+        "@lavamoat/node>lavamoat-core>merge-deep>clone-deep>is-plain-object": true,
+        "@lavamoat/node>lavamoat-core>merge-deep>clone-deep>shallow-clone": true,
+        "@lavamoat/node>lavamoat-core>merge-deep>kind-of": true
+      }
+    },
+    "@lavamoat/node>lavamoat-core>merge-deep>clone-deep>shallow-clone": {
+      "packages": {
+        "@lavamoat/node>lavamoat-core>merge-deep>clone-deep>shallow-clone>is-extendable": true,
+        "@lavamoat/node>lavamoat-core>merge-deep>clone-deep>shallow-clone>mixin-object": true,
+        "@lavamoat/node>lavamoat-core>merge-deep>clone-deep>shallow-clone>kind-of": true
+      }
+    },
+    "webpack>loader-runner": {
+      "packages": {
+        "babel-loader": true,
+        "mini-css-extract-plugin": true,
+        "html-webpack-plugin": true
+      }
+    },
+    "babel-loader>find-up": {
+      "packages": {
+        "babel-loader>find-up>locate-path": true,
+        "babel-loader>find-up>path-exists": true
+      },
+      "builtin": {
+        "path": true
+      }
+    },
+    "babel-loader>find-up>path-exists": {
+      "builtin": {
+        "fs": true,
+        "util": true
+      }
+    },
+    "babel-loader>find-up>locate-path": {
+      "packages": {
+        "babel-loader>find-up>locate-path>p-locate": true
+      },
+      "builtin": {
+        "fs": true,
+        "util": true,
+        "path": true
+      }
+    },
+    "babel-loader>find-up>locate-path>p-locate": {
+      "packages": {
+        "babel-loader>find-up>locate-path>p-locate>p-limit": true
+      }
+    },
+    "babel-loader>find-up>locate-path>p-locate>p-limit": {
+      "packages": {
+        "babel-loader>find-up>locate-path>p-locate>p-limit>yocto-queue": true
+      }
+    },
+    "babel-loader": {
+      "packages": {
+        "@babel/core": true,
+        "babel-loader>find-up": true
+      },
+      "builtin": {
+        "path": true,
+        "os": true,
+        "zlib": true,
+        "util": true,
+        "fs/promises": true,
+        "crypto": true
+      }
+    },
+    "@babel/preset-typescript": {
+      "packages": {
+        "@babel/preset-env>@babel/helper-plugin-utils": true,
+        "@babel/preset-env>@babel/helper-validator-option": true,
+        "@babel/preset-typescript>@babel/plugin-syntax-jsx": true,
+        "@babel/preset-typescript>@babel/plugin-transform-typescript": true,
+        "@babel/preset-env>@babel/plugin-transform-modules-commonjs": true
+      }
+    },
+    "@babel/preset-env": {
+      "packages": {
+        "@babel/core": true
+      }
+    },
+    "@babel/preset-typescript>@babel/plugin-transform-typescript": {
+      "packages": { "@babel/preset-env>@babel/helper-plugin-utils": true }
+    },
+    "@babel/core": {
+      "packages": {
+        "@babel/core>@ampproject/remapping": true,
+        "@babel/core>@babel/code-frame": true,
+        "@babel/core>@babel/generator": true,
+        "@babel/core>@babel/helper-compilation-targets": true,
+        "@babel/core>@babel/helper-module-transforms": true,
+        "@babel/core>@babel/helpers": true,
+        "@babel/core>@babel/parser": true,
+        "@babel/core>@babel/template": true,
+        "@babel/core>@babel/traverse": true,
+        "@babel/core>@babel/types": true,
+        "@babel/core>convert-source-map": true,
+        "@babel/core>debug": true,
+        "@babel/core>gensync": true,
+        "@babel/core>json5": true,
+        "@babel/core>semver": true,
+        "@babel/preset-typescript": true
+      },
+      "builtin": {
+        "fs": true,
+        "path": true,
+        "url": true,
+        "module": true,
+        "assert": true,
+        "process": true,
+        "v8": true,
+        "util": true
+      },
+      "globals": {
+        "process.versions": true,
+        "process.env": true
+      }
+    },
+    "@babel/core>@babel/traverse": {
+      "packages": {
+        "@babel/core>@babel/types": true,
+        "@babel/core>debug": true,
+        "@babel/core>@babel/generator": true,
+        "@lavamoat/node>@endo/compartment-mapper>@endo/module-source>@babel/traverse>globals": true,
+        "@babel/core>@babel/code-frame": true,
+        "@babel/core>@babel/parser": true,
+        "@babel/core>@babel/template": true
+      }
+    },
+    "@babel/core>@babel/types": {
+      "packages": {
+        "@babel/core>@babel/types>@babel/helper-validator-identifier": true,
+        "@babel/core>@babel/types>@babel/helper-string-parser": true
+      }
+    },
+    "@babel/core>@babel/helper-module-transforms": {
+      "packages": {
+        "@babel/core": true,
+        "@babel/core>@babel/helper-module-transforms>@babel/helper-module-imports": true,
+        "@babel/core>@babel/helper-module-transforms>@babel/traverse": true
+      },
+      "builtin": {
+        "assert": true
+      }
+    },
+    "@babel/core>@babel/helpers": {
+      "packages": {
+        "@babel/core>@babel/template": true,
+        "@babel/core>@babel/helpers>@babel/types": true
+      }
+    },
+    "@babel/core>@babel/helpers>@babel/types": {
+      "packages": {
+        "@babel/core>@babel/types>@babel/helper-validator-identifier": true
+      }
+    },
+    "@babel/core>@babel/helper-module-transforms>@babel/traverse": {
+      "packages": {
+        "@babel/core>@babel/types": true,
+        "@babel/core>debug": true,
+        "@babel/core>@babel/generator": true,
+        "@lavamoat/node>@endo/compartment-mapper>@endo/module-source>@babel/traverse>globals": true,
+        "@babel/core>@babel/code-frame": true,
+        "@babel/core>@babel/helper-module-transforms>@babel/traverse>@babel/parser": true,
+        "@babel/core>@babel/template": true
+      },
+      "builtin": {
+        "path": true
+      }
+    },
+    "@babel/core>@babel/helper-module-transforms>@babel/helper-module-imports": {
+      "packages": {
+        "@babel/core>@babel/types": true
+      },
+      "builtin": {
+        "assert": true
+      }
+    },
+    "@babel/core>@babel/helper-compilation-targets": {
+      "packages": {
+        "webpack>browserslist": true,
+        "@babel/core>@babel/helper-compilation-targets>lru-cache": true,
+        "@babel/core>@babel/helper-compilation-targets>semver": true
+      }
+    },
+    "@babel/core>@babel/helper-compilation-targets>lru-cache": {
+      "packages": {
+        "@babel/core>@babel/helper-compilation-targets>lru-cache>yallist": true
+      }
+    },
+    "@babel/core>@ampproject/remapping": {
+      "packages": {
+        "@babel/core>@babel/generator>@jridgewell/gen-mapping": true,
+        "@babel/core>@babel/generator>@jridgewell/trace-mapping": true
+      }
+    },
+    "@babel/preset-react": {
+      "packages": {
+        "@babel/core": true
+      }
+    },
+    "webpack-cli": {
+      "packages": {
+        "webpack-cli>webpack-merge": true
+      }
+    }
+  },
+  "include": [
+    "webpack",
+    "@lavamoat/webpack",
+    "babel-loader",
+    "css-loader",
+    "html-webpack-plugin",
+    "mini-css-extract-plugin",
+    "webpack-cli",
+    "@babel/preset-env",
+    "@babel/preset-react",
+    "@babel/preset-typescript",
+    "@babel/core"
+  ]
+}
