@@ -130,6 +130,114 @@ test(
   }
 )
 
+test('hints', testPolicyForJSON, 'hints.json', {
+  jsonEntrypoint: '/node_modules/tool/index.js',
+  policyOverride: {
+    resources: {},
+    hints: {
+      winken: ['blinken'],
+    },
+  },
+  expected: {
+    hints: {
+      winken: ['blinken'],
+    },
+    resources: {
+      winken: {
+        builtin: {
+          'node:util.format': true,
+        },
+        packages: {
+          'winken>fred': true,
+          'winken>blinken': true,
+        },
+      },
+      'winken>blinken': {
+        builtin: {
+          'node:util.format': true,
+        },
+      },
+      'winken>fred': {
+        builtin: {
+          'node:util.format': true,
+        },
+      },
+    },
+  },
+})
+
+test(
+  'hints - no support for builtins',
+  testPolicyForJSON,
+  'hints-builtin.json',
+  {
+    jsonEntrypoint: '/node_modules/tool/index.js',
+    policyOverride: {
+      resources: {},
+      hints: {
+        winken: ['node:net'],
+      },
+    },
+    expected: {
+      hints: {
+        winken: ['node:net'],
+      },
+      resources: {
+        winken: {
+          builtin: {
+            'node:util.format': true,
+          },
+          packages: {
+            'winken>fred': true,
+          },
+        },
+        'winken>fred': {
+          builtin: {
+            'node:util.format': true,
+          },
+        },
+      },
+    },
+  }
+)
+
+test('hints - external resources', testPolicyForJSON, 'hints-ext.json', {
+  jsonEntrypoint: '/node_modules/tool/index.js',
+  trustRoot: false,
+  dev: true,
+  policyOverride: {
+    resources: {},
+    hints: {
+      './node_modules/tool/index.js': ['/tool.config.js'],
+    },
+  },
+  expected: {
+    resources: {
+      fugs: {
+        builtin: {
+          'node:util.format': true,
+        },
+      },
+      'hints-ext': {
+        packages: {
+          fugs: true,
+        },
+      },
+      tool: {
+        packages: {
+          'hints-ext': true,
+        },
+      },
+    },
+    root: {
+      usePolicy: 'tool',
+    },
+    hints: {
+      './node_modules/tool/index.js': ['/tool.config.js'],
+    },
+  },
+})
+
 test.failing('path stability', async (t) => {
   // no plan; this should fail on the first assertion failure
 

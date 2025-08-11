@@ -1,0 +1,37 @@
+{
+  "hints": {
+    "winken": [
+      "blinken"
+    ]
+  },
+  "resources": {
+    "winken>blinken": {
+      "builtin": {
+        "node:fs.read": true,
+        "node:util.format": true
+      }
+    },
+    "winken>fred": {
+      "builtin": {
+        "node:util.format": true
+      }
+    },
+    "tool": {
+      "packages": {
+        "winken": true
+      }
+    },
+    "winken": {
+      "builtin": {
+        "node:util.format": true
+      },
+      "packages": {
+        "winken>blinken": true,
+        "winken>fred": true
+      }
+    }
+  },
+  "root": {
+    "usePolicy": "tool"
+  }
+}

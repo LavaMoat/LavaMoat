@@ -1,0 +1,124 @@
+[
+  0,
+  {},
+  {
+    "README.md": [
+      1,
+      {},
+      "data:application/octet-stream;base64,VGhpcyBmaXh0dXJlIHNob3dzIGhvdyB0byB1c2UgYExhdmFNb2F0UG9saWN5LmhpbnRzYCB0byB0ZWxsIHBvbGljeSBnZW4gYWJvdXQgZHluYW1pYyByZXF1aXJlcyBvZiBwYWNrYWdlcy4K"
+    ],
+    "lavamoat": [
+      0,
+      {},
+      {
+        "node": [
+          0,
+          {},
+          {
+            "policy-override.json": [
+              1,
+              {},
+              "data:application/octet-stream;base64,ewogICJyZXNvdXJjZXMiOiB7CiAgICAid2lua2VuPmJsaW5rZW4iOiB7CiAgICAgICJidWlsdGluIjogewogICAgICAgICJub2RlOmZzLnJlYWQiOiB0cnVlCiAgICAgIH0KICAgIH0KICB9LAogICJoaW50cyI6IHsKICAgICJ3aW5rZW4iOiBbIm5vZGU6bmV0Il0KICB9Cn0K"
+            ],
+            "policy.json": [
+              1,
+              {},
+              "data:application/octet-stream;base64,ewogICJoaW50cyI6IHsKICAgICJ3aW5rZW4iOiBbCiAgICAgICJibGlua2VuIgogICAgXQogIH0sCiAgInJlc291cmNlcyI6IHsKICAgICJ3aW5rZW4+YmxpbmtlbiI6IHsKICAgICAgImJ1aWx0aW4iOiB7CiAgICAgICAgIm5vZGU6ZnMucmVhZCI6IHRydWUsCiAgICAgICAgIm5vZGU6dXRpbC5mb3JtYXQiOiB0cnVlCiAgICAgIH0KICAgIH0sCiAgICAid2lua2VuPmZyZWQiOiB7CiAgICAgICJidWlsdGluIjogewogICAgICAgICJub2RlOnV0aWwuZm9ybWF0IjogdHJ1ZQogICAgICB9CiAgICB9LAogICAgInRvb2wiOiB7CiAgICAgICJwYWNrYWdlcyI6IHsKICAgICAgICAid2lua2VuIjogdHJ1ZQogICAgICB9CiAgICB9LAogICAgIndpbmtlbiI6IHsKICAgICAgImJ1aWx0aW4iOiB7CiAgICAgICAgIm5vZGU6dXRpbC5mb3JtYXQiOiB0cnVlCiAgICAgIH0sCiAgICAgICJwYWNrYWdlcyI6IHsKICAgICAgICAid2lua2VuPmJsaW5rZW4iOiB0cnVlLAogICAgICAgICJ3aW5rZW4+ZnJlZCI6IHRydWUKICAgICAgfQogICAgfQogIH0sCiAgInJvb3QiOiB7CiAgICAidXNlUG9saWN5IjogInRvb2wiCiAgfQp9"
+            ]
+          }
+        ]
+      }
+    ],
+    "node_modules": [
+      0,
+      {},
+      {
+        "blinken": [
+          0,
+          {},
+          {
+            "index.js": [
+              1,
+              {},
+              "data:application/octet-stream;base64,Y29uc3Qge2Zvcm1hdH0gPSByZXF1aXJlKCdub2RlOnV0aWwnKQoKbW9kdWxlLmV4cG9ydHMgPSBmb3JtYXQoJyVzJywgJ25vZCcpCg=="
+            ],
+            "package.json": [
+              1,
+              {},
+              "data:application/octet-stream;base64,ewogICJuYW1lIjogImJsaW5rZW4iLAogICJ2ZXJzaW9uIjogIjAuMC4wIiwKICAiZGVzY3JpcHRpb24iOiAibmVlZHMgcG9saWN5Igp9Cg=="
+            ]
+          }
+        ],
+        "fred": [
+          0,
+          {},
+          {
+            "index.js": [
+              1,
+              {},
+              "data:application/octet-stream;base64,Y29uc3Qge2Zvcm1hdH0gPSByZXF1aXJlKCdub2RlOnV0aWwnKQoKbW9kdWxlLmV4cG9ydHMgPSBmb3JtYXQoJyVzJywgJ2ZyZWQnKQo="
+            ],
+            "package.json": [
+              1,
+              {},
+              "data:application/octet-stream;base64,ewogICJuYW1lIjogImZyZWQiLAogICJ2ZXJzaW9uIjogIjAuMC4wIiwKICAiZGVzY3JpcHRpb24iOiAibm90aGluZyBzcGVjaWFsIGhlcmUiCn0K"
+            ]
+          }
+        ],
+        "fugs": [
+          0,
+          {},
+          {
+            "index.js": [
+              1,
+              {},
+              "data:application/octet-stream;base64,Y29uc3Qge2Zvcm1hdH0gPSByZXF1aXJlKCdub2RlOnV0aWwnKQoKbW9kdWxlLmV4cG9ydHMgPSBmb3JtYXQoJyVzJywgJ2ZyZWQnKQo="
+            ],
+            "package.json": [
+              1,
+              {},
+              "data:application/octet-stream;base64,ewogICJuYW1lIjogImZ1Z3MiLAogICJ2ZXJzaW9uIjogIjAuMC4wIiwKICAiZGVzY3JpcHRpb24iOiAib25seSByZWZlcmVuY2VkIGluIHBvbGljeSBvdmVycmlkZSIKfQo="
+            ]
+          }
+        ],
+        "tool": [
+          0,
+          {},
+          {
+            "index.js": [
+              1,
+              {},
+              "data:application/octet-stream;base64,aW1wb3J0IG5vZCBmcm9tICd3aW5rZW4nCmV4cG9ydCBjb25zdCBoZWxsbyA9IGB3aW5rZW4sIGJsaW5rZW4gJiAke25vZH1gCg=="
+            ],
+            "package.json": [
+              1,
+              {},
+              "data:application/octet-stream;base64,ewogICJuYW1lIjogInRvb2wiLAogICJ2ZXJzaW9uIjogIjAuMC4wIiwKICAidHlwZSI6ICJtb2R1bGUiLAogICJkZXNjcmlwdGlvbiI6ICIiLAogICJwcml2YXRlIjogdHJ1ZSwKICAibWFpbiI6ICJpbmRleC5qcyIsCiAgImRlcGVuZGVuY2llcyI6IHsKICAgICJmdWdzIjogIjAuMC4wIiwKICAgICJ3aW5rZW4iOiAiMC4wLjAiCiAgfQp9Cg=="
+            ]
+          }
+        ],
+        "winken": [
+          0,
+          {},
+          {
+            "index.js": [
+              1,
+              {},
+              "data:application/octet-stream;base64,Y29uc3Qge2Zvcm1hdH0gPSByZXF1aXJlKCdub2RlOnV0aWwnKQpjb25zdCBibGlua2VuID0gJ2JsaW5rZW4nCnJlcXVpcmUoJ2ZyZWQnKQptb2R1bGUuZXhwb3J0cyA9IGZvcm1hdCgnJXMnLCByZXF1aXJlKGJsaW5rZW4pKTsK"
+            ],
+            "package.json": [
+              1,
+              {},
+              "data:application/octet-stream;base64,ewogICJuYW1lIjogIndpbmtlbiIsCiAgInZlcnNpb24iOiAiMC4wLjAiLAogICJkZXBlbmRlbmNpZXMiOiB7CiAgICAiYmxpbmtlbiI6ICIwLjAuMCIsCiAgICAiZnJlZCI6ICIwLjAuMCIKICB9LAogICJkZXNjcmlwdGlvbiI6ICJyZXF1aXJlcyBibGlua2VuIHZpYSByZWxhdGl2ZSBwYXRoIgp9Cg=="
+            ]
+          }
+        ]
+      }
+    ],
+    "package.json": [
+      1,
+      {},
+      "data:application/octet-stream;base64,ewogICJuYW1lIjogImhpbnRzLWJ1aWx0aW4iLAogICJ2ZXJzaW9uIjogIjAuMC4wIiwKICAidHlwZSI6ICJtb2R1bGUiLAogICJkZXNjcmlwdGlvbiI6ICIiLAogICJwcml2YXRlIjogdHJ1ZSwKICAiZGV2RGVwZW5kZW5jaWVzIjogewogICAgInRvb2wiOiAiMC4wLjAiCiAgfSwKICAic2NyaXB0cyI6IHsKICAgICJzdGFydCI6ICJucHggc25hcHNob3QtZnMgXCIkbnBtX2NvbmZpZ19sb2NhbF9wcmVmaXgvLi4vanNvbi1maXh0dXJlLyRucG1fcGFja2FnZV9uYW1lLmpzb25cIiIKICB9Cn0K"
+    ]
+  }
+]

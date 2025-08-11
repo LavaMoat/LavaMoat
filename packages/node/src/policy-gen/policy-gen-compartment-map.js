@@ -21,7 +21,7 @@ import { makePolicyGenCompartment } from './policy-gen-compartment-class.js'
 /**
  * @import {CompartmentDescriptorData, CompartmentDescriptorDataMap, CompleteCompartmentDescriptorDataMap} from '../types.js'
  * @import {LoadCompartmentMapForPolicyOptions, LoadCompartmentMapResult} from '../internal.js'
- * @import {CaptureLiteOptions, CompartmentMapDescriptor} from '@endo/compartment-mapper'
+ * @import {AdditionalPackageDetailsMap, CaptureLiteOptions, CompartmentMapDescriptor} from '@endo/compartment-mapper'
  */
 
 const { entries } = Object
@@ -74,6 +74,7 @@ export const loadCompartmentMapForPolicy = async (
     decorators = [],
     dev,
     onNodeModulesMapped = noop,
+    projectRoot = process.cwd(),
     ...captureOpts
   } = {}
 ) => {
@@ -81,16 +82,20 @@ export const loadCompartmentMapForPolicy = async (
   let nodeCompartmentMap
   /** @type {CompleteCompartmentDescriptorDataMap} */
   let nodeDataMap
+  /** @type {AdditionalPackageDetailsMap} */
+  let additionalPackageDetails
 
   try {
-    ;({ nodeCompartmentMap, nodeDataMap } =
+    ;({ nodeCompartmentMap, nodeDataMap, additionalPackageDetails } =
       // eslint-disable-next-line @jessie.js/safe-await-separator
       await makeNodeCompartmentMap(entrypointPath, {
+        projectRoot,
         readPowers,
         dev,
         decorators,
         log,
         trustRoot,
+        policyOverride,
       }))
   } catch (err) {
     throw new GenerationError(
@@ -120,6 +125,7 @@ export const loadCompartmentMapForPolicy = async (
     ...DEFAULT_ENDO_OPTIONS,
     importHook: nullImportHook,
     Compartment: PolicyGenCompartment,
+    additionalPackageDetails,
     ...captureOpts,
   }
 
