@@ -40,7 +40,7 @@ npm run lint
 npm run rebuild
 ```
 
-**CRITICAL:** Test failures with exit code 1 are expected behavior due to security policy validation tests. Individual package tests should pass when run separately.
+**CRITICAL:** Tests may output expected error messages to STDERR as part of security policy validation, but the test runner (AVA) should exit with code 0 when tests pass. Exit code 1 indicates actual test failures, not expected behavior.
 
 ## Validation Requirements
 
@@ -192,7 +192,7 @@ node packages/node/src/cli.js app.js --policy ./lavamoat/node/policy.json
 
 ### Common Issues
 
-- **"Tests fail with exit code 1"** - Expected for security validation tests
+- **"Tests fail with exit code 1"** - Indicates actual test failures, not normal behavior
 - **"Long build/test times"** - Normal, DO NOT CANCEL operations
 - **"Policy generation warnings"** - Expected for dynamic requires and primordial mutations
 - **"TypeScript version warning"** - Non-blocking, project uses newer TypeScript than officially supported by eslint
