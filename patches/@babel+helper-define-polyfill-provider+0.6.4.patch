@@ -1,0 +1,28 @@
+diff --git a/node_modules/@babel/helper-define-polyfill-provider/esm/index.node.mjs b/node_modules/@babel/helper-define-polyfill-provider/esm/index.node.mjs
+index e8d6030..f7b0d9b 100644
+--- a/node_modules/@babel/helper-define-polyfill-provider/esm/index.node.mjs
++++ b/node_modules/@babel/helper-define-polyfill-provider/esm/index.node.mjs
+@@ -1,10 +1,10 @@
+-import { declare } from '@babel/helper-plugin-utils';
+-import _getTargets, { prettifyTargets, getInclusionReasons, isRequired } from '@babel/helper-compilation-targets';
+ import * as _babel from '@babel/core';
+-import path from 'path';
++import _getTargets, { getInclusionReasons, isRequired, prettifyTargets } from '@babel/helper-compilation-targets';
++import { declare } from '@babel/helper-plugin-utils';
+ import debounce from 'lodash.debounce';
+-import requireResolve from 'resolve';
+ import { createRequire } from 'module';
++import path from 'path';
++import requireResolve from 'resolve';
+ 
+ const {
+   types: t$1,
+@@ -500,7 +500,7 @@ var entry = (callProvider => ({
+ }));
+ 
+ const nativeRequireResolve = parseFloat(process.versions.node) >= 8.9;
+-const require = createRequire(import /*::(_)*/.meta.url); // eslint-disable-line
++const require = createRequire(import.meta.url); // eslint-disable-line
+ 
+ function myResolve(name, basedir) {
+   if (nativeRequireResolve) {
