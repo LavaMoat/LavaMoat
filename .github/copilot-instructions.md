@@ -42,8 +42,6 @@ npm run rebuild
 
 **CRITICAL:** Tests may output expected error messages to STDERR as part of security policy validation, but the test runner (AVA) should exit with code 0 when tests pass. Exit code 1 indicates actual test failures, not expected behavior.
 
-## Validation Requirements
-
 ALWAYS manually validate changes using these scenarios:
 
 ### Core Functionality Test
@@ -52,8 +50,11 @@ ALWAYS manually validate changes using these scenarios:
 # Test allow-scripts CLI functionality
 node packages/allow-scripts/src/cli.js --help
 
-# Test LavaMoat Node CLI functionality
+# Test lavamoat-node CLI functionality
 node packages/lavamoat-node/src/cli.js --help
+
+# Test @lavamoat/node CLI functionality
+node packages/node/src/cli.js --help
 
 # Create test project to validate allow-scripts
 cd /tmp && mkdir test-project && cd test-project && npm init -y
@@ -88,6 +89,10 @@ npm run --workspace=packages/webpack test
 - `packages/browserify/` - Browserify integration plugin
 - `packages/webpack/` - Webpack integration plugin
 - `packages/aa/` - Archive analysis utilities
+- `packages/git-safe-dependencies/` - Git-based dependency safety utilities
+- `packages/lavapack/` - Package bundling utilities
+- `packages/laverna/` - Documentation and analysis tools
+- `packages/react-native-lockdown/` - React Native security lockdown
 - `packages/tofu/` - JavaScript analysis tools
 
 ### Important Files
@@ -119,7 +124,6 @@ npm run build:types     # TypeScript compilation
 
 ### Debugging Failed Tests
 
-- Exit code 1 from `npm test` is expected due to security validation tests
 - Check individual package tests if main test suite reports issues
 - Allow-scripts tests may show intentional policy violation errors - this is correct behavior
 - Check test output for "known failures" and "tests skipped" - these are expected
@@ -141,12 +145,11 @@ node packages/allow-scripts/src/cli.js auto     # Generate policy
 node packages/allow-scripts/src/cli.js run      # Execute allowed scripts
 ```
 
-### LavaMoat Node Development
+### @lavamoat/node Development
 
 ```bash
 # CLI location
 packages/node/src/cli.js
-packages/lavamoat-node/src/cli.js  # Legacy version
 
 # Generate policy for a Node.js application
 node packages/node/src/cli.js --writeAutoPolicy app.js
@@ -192,7 +195,6 @@ node packages/node/src/cli.js app.js --policy ./lavamoat/node/policy.json
 
 ### Common Issues
 
-- **"Tests fail with exit code 1"** - Indicates actual test failures, not normal behavior
 - **"Long build/test times"** - Normal, DO NOT CANCEL operations
 - **"Policy generation warnings"** - Expected for dynamic requires and primordial mutations
 - **"TypeScript version warning"** - Non-blocking, project uses newer TypeScript than officially supported by eslint
@@ -200,7 +202,7 @@ node packages/node/src/cli.js app.js --policy ./lavamoat/node/policy.json
 ### Build Issues
 
 ```bash
-# Clean and rebuild if encountering issues
+# npm run setup & run rebuild will typically be sufficient
 npm run clean:types
 npm run rebuild
 ```
