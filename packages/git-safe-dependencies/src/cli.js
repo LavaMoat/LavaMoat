@@ -4,24 +4,25 @@ const { runAllValidations } = require('./index')
 const { filterIgnores } = require('./ignore')
 const path = require('node:path')
 
-const options = {
-  projectRoot: {
-    type: 'string',
-    default: process.cwd(),
-  },
-  type: {
-    type: 'string',
-  },
-  ignore: {
-    type: 'string',
-  },
-  help: {
-    type: 'boolean',
-  },
-}
 const {
   values: { type, ignore, help, projectRoot },
-} = parseArgs({ options })
+} = parseArgs({
+  options: {
+    projectRoot: {
+      type: 'string',
+      default: process.cwd(),
+    },
+    type: {
+      type: 'string',
+    },
+    ignore: {
+      type: 'string',
+    },
+    help: {
+      type: 'boolean',
+    },
+  },
+})
 
 if (help) {
   console.error(
@@ -32,7 +33,7 @@ if (help) {
 const cwd = path.resolve(projectRoot)
 
 console.error(`[git-safe] Validating: package.json and lockfile at ${cwd}`)
-runAllValidations({ cwd, type })
+void runAllValidations({ cwd, type })
   .then((errors) => {
     if (ignore) {
       errors = filterIgnores(errors, ignore)
@@ -53,9 +54,9 @@ runAllValidations({ cwd, type })
         .sort()
         .join('\n')
     )
-    process.exit(1)
+    process.exitCode = 1
   })
   .catch((error) => {
     console.error('[git-safe] An error occurred during validation:', error)
-    process.exit(2)
+    process.exitCode = 2
   })
