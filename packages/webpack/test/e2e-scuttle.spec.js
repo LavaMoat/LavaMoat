@@ -88,6 +88,7 @@ test(`webpack/scuttled - webpackChunk global is transparently added to exception
   t.notThrows(() => {
     t.context.globalThis.webpackChunkTEST
   }, 'Unexpected error in scenario')
+  t.truthy(t.context.globalThis.webpackChunkTEST)
 })
 
 test(`webpack/scuttled - webpackChunk global is transparently added to exceptions even when not specified 1`, async (t) => {
@@ -96,6 +97,7 @@ test(`webpack/scuttled - webpackChunk global is transparently added to exception
   t.notThrows(() => {
     t.context.globalThis.webpackChunkTEST
   }, 'Unexpected error in scenario')
+  t.truthy(t.context.globalThis.webpackChunkTEST)
 })
 
 test(`webpack/scuttled - webpackChunk global is transparently added to exceptions even when not specified 2`, async (t) => {
@@ -104,6 +106,7 @@ test(`webpack/scuttled - webpackChunk global is transparently added to exception
   t.notThrows(() => {
     t.context.globalThis.webpackChunkTEST
   }, 'Unexpected error in scenario')
+  t.truthy(t.context.globalThis.webpackChunkTEST)
 })
 
 test(`webpack/scuttled - provided scuttlerName successfully invoked defined scuttlerFunc`, async (t) => {
