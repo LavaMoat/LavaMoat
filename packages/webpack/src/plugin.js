@@ -93,15 +93,22 @@ class VirtualRuntimeModule extends RuntimeModule {
 const PLUGIN_NAME = 'LavaMoatPlugin'
 /** @satisfies {LockdownOptions} */
 const lockdownDefaults = /** @type {const} */ ({
-  // lets code observe call stack, but easier debuggability
+  // avoids freezing console (libraries like to patch it)
+  consoleTaming: 'unsafe',
+  // lets code observe call stack, easier debuggability
   errorTaming: 'unsafe',
   // shows the full call stack
   stackFiltering: 'verbose',
+  // avoid instrumenting for catching uncaught errors
+  errorTrapping: 'none',
+  unhandledRejectionTrapping: 'none',
   // prevents most common override mistake cases from tripping up users
   overrideTaming: 'severe',
   // preserves JS locale methods, to avoid confusing users
   // prevents aliasing: toLocaleString() to toString(), etc
   localeTaming: 'unsafe',
+  // leave it untamed for compatibility
+  regExpTaming: 'unsafe',
 })
 
 class LavaMoatPlugin {
