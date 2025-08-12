@@ -11,11 +11,11 @@ const { default: ava } = require('ava')
  * @property {boolean} scuttler_func_called
  */
 
-const test = /** @type {import('ava').TestFn<ScuttlingTestContext>} */(ava)
+const test = /** @type {import('ava').TestFn<ScuttlingTestContext>} */ (ava)
 const path = require('node:path')
 // eslint-disable-next-line ava/no-import-test-files
 const { scaffold, runScriptWithSES } = require('./scaffold.js')
-const {makeConfig} = require('./fixtures/main/webpack.config.js')
+const { makeConfig } = require('./fixtures/main/webpack.config.js')
 
 const err = (intrinsic) =>
   'LavaMoat - property "' +
@@ -36,9 +36,17 @@ async function scuttle(t, scuttleGlobalThis, globals) {
       app: './simple.js',
     },
   }
+  // force webpack into creating chunks so that testing chunkApp globals is possible
+  webpackConfig.optimization.runtimeChunk = 'single'
+  // specify the chunk global namefor tests
+  webpackConfig.output.chunkLoadingGlobal = 'webpackChunkTEST'
+
   await t.notThrowsAsync(async () => {
     t.context.build = await scaffold(webpackConfig)
-    t.context.bundle = t.context.build.snapshot['/dist/app.js']
+    // Load both chunks effectively
+    t.context.bundle =
+      t.context.build.snapshot['/dist/runtime.js'] +
+      t.context.build.snapshot['/dist/app.js']
     t.context.globalThis = runScriptWithSES(t.context.bundle, globals).context
   }, 'Expected the build to succeed')
 }
@@ -47,7 +55,7 @@ test(`webpack/scuttled - hosting globalThis's environment is not scuttled`, asyn
   await scuttle(t)
   t.notThrows(() => {
     const global = t.context.globalThis
-    Object.getOwnPropertyNames(global).forEach(name => global[name])
+    Object.getOwnPropertyNames(global).forEach((name) => global[name])
   }, 'Unexpected error in scenario')
 })
 
@@ -68,22 +76,50 @@ test(`webpack/scuttled - hosting globalThis's "Function" is scuttled`, async (t)
 })
 
 test(`webpack/scuttled - hosting globalThis's "Function" is scuttled excepted`, async (t) => {
-  await scuttle(t, {enabled: true, exceptions: ['Function']})
+  await scuttle(t, { enabled: true, exceptions: ['Function'] })
   t.notThrows(() => {
     t.is(new t.context.globalThis.Function('return 1')(), 1)
   }, 'Unexpected error in scenario')
 })
 
+test(`webpack/scuttled - webpackChunk global is transparently added to exceptions`, async (t) => {
+  await scuttle(t, { enabled: true, exceptions: ['Function'] })
+
+  t.notThrows(() => {
+    t.context.globalThis.webpackChunkTEST
+  }, 'Unexpected error in scenario')
+})
+
+test(`webpack/scuttled - webpackChunk global is transparently added to exceptions even when not specified 1`, async (t) => {
+  await scuttle(t, { enabled: true })
+
+  t.notThrows(() => {
+    t.context.globalThis.webpackChunkTEST
+  }, 'Unexpected error in scenario')
+})
+
+test(`webpack/scuttled - webpackChunk global is transparently added to exceptions even when not specified 2`, async (t) => {
+  await scuttle(t, true)
+
+  t.notThrows(() => {
+    t.context.globalThis.webpackChunkTEST
+  }, 'Unexpected error in scenario')
+})
+
 test(`webpack/scuttled - provided scuttlerName successfully invoked defined scuttlerFunc`, async (t) => {
-  const scuttlerName = 'SCUTTLER';
-  await scuttle(t, {
-    enabled: true,
-    scuttlerName,
-  }, {
-    [scuttlerName]: (globalRef, scuttle) => {
-      t.context.scuttler_func_called = true
-      scuttle(globalRef)
+  const scuttlerName = 'SCUTTLER'
+  await scuttle(
+    t,
+    {
+      enabled: true,
+      scuttlerName,
+    },
+    {
+      [scuttlerName]: (globalRef, scuttle) => {
+        t.context.scuttler_func_called = true
+        scuttle(globalRef)
+      },
     }
-  })
-  t.true(t.context.scuttler_func_called);
+  )
+  t.true(t.context.scuttler_func_called)
 })
