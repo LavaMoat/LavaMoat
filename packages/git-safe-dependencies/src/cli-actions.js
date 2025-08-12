@@ -5,21 +5,22 @@ const path = require('node:path')
 
 const { validateWorkflows } = require('./workflow')
 
-const options = {
-  workflows: {
-    type: 'string',
-    default: path.join(process.cwd(), '.github'),
-  },
-  ignore: {
-    type: 'string',
-  },
-  help: {
-    type: 'boolean',
-  },
-}
 const {
   values: { ignore, help, workflows },
-} = parseArgs({ options })
+} = parseArgs({
+  options: {
+    workflows: {
+      type: 'string',
+      default: path.join(process.cwd(), '.github'),
+    },
+    ignore: {
+      type: 'string',
+    },
+    help: {
+      type: 'boolean',
+    },
+  },
+})
 
 if (help) {
   console.error(
@@ -29,7 +30,7 @@ if (help) {
 }
 
 console.error(`[git-safe] Validating workflows at ${workflows}`)
-validateWorkflows(workflows)
+void validateWorkflows(workflows)
   .then(({ errors, info }) => {
     console.error(`[git-safe] `, ...info)
     if (ignore) {
@@ -52,9 +53,9 @@ validateWorkflows(workflows)
         .sort()
         .join('\n')
     )
-    process.exit(1)
+    process.exitCode = 1
   })
   .catch((error) => {
     console.error('[git-safe] An error occurred during validation:', error)
-    process.exit(2)
+    process.exitCode = 2
   })

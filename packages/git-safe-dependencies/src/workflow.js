@@ -9,16 +9,38 @@ const { checksum } = require('./ignore')
 
 const defaultDir = path.join(process.cwd(), '.github')
 
+/**
+ * @typedef WorkflowErrorData
+ * @property {string} message
+ * @property {string[]} files
+ * @property {string} action
+ * @property {string} id
+ */
+
+/**
+ * @param {Partial<WorkflowErrorData>[]} errors
+ * @returns {WorkflowErrorData[]}
+ */
 const sortErrors = (errors) => {
   errors.forEach((result) => {
-    result.id = `${result.action}:${checksum(result.files.join() + result.message)}`
+    result.id = `${result.action}:${checksum((result.files ?? []).join() + result.message)}`
   })
-  return errors.sort((a, b) => a.id.localeCompare(b.id))
+  return /** @type {WorkflowErrorData[]} */ (errors).sort((a, b) =>
+    a.id.localeCompare(b.id)
+  )
 }
 
+/**
+ * @param {string} [workflowsDir]
+ * @returns {Promise<{
+ *   errors: WorkflowErrorData[]
+ *   info: string[]
+ * }>}
+ */
 exports.validateWorkflows = async function (workflowsDir = defaultDir) {
   const actions = new Map()
   const info = []
+  /** @type {Partial<WorkflowErrorData>[]} */
   const errors = []
 
   // Find all workflow files in the .github directory
@@ -26,6 +48,7 @@ exports.validateWorkflows = async function (workflowsDir = defaultDir) {
 
   files.forEach((file) => {
     const fileContent = fs.readFileSync(file, 'utf8')
+    /** @type {any} */
     let workflow
     try {
       workflow = yaml.load(fileContent)
@@ -97,10 +120,8 @@ exports.validateWorkflows = async function (workflowsDir = defaultDir) {
     }
   }
 
-  sortErrors(errors)
-
   return {
-    errors,
+    errors: sortErrors(errors),
     info,
   }
 }
