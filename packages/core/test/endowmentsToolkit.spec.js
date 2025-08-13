@@ -7,12 +7,12 @@ const endowmentsToolkit = require('../src/endowmentsToolkit.js')
  * @returns {ReturnType<typeof endowmentsToolkit>}
  */
 function prepareTest({ knownWritable } = {}) {
-  const { getEndowmentsForConfig, copyWrappedGlobals, endowAll } =
+  const { getEndowmentsForConfig, copyWrappedGlobals, createDonor } =
     endowmentsToolkit({
       handleGlobalWrite: !!knownWritable,
       knownWritableFields: knownWritable,
     })
-  return { getEndowmentsForConfig, copyWrappedGlobals, endowAll }
+  return { getEndowmentsForConfig, copyWrappedGlobals, createDonor }
 }
 
 // Note: All tests are in strict mode because the endowments will be used in that mode only.
@@ -158,10 +158,10 @@ test('instrumentDynamicValueAtPath puts a getter at path', (t) => {
   t.is(target.a.b.c, 2)
 })
 
-test('endowAll - writable fields get updated in compartments and in root but not globally', (t) => {
+test('donor - writable fields get updated in compartments and in root but not globally', (t) => {
   'use strict'
   const knownWritable = new Set(['a'])
-  const { getEndowmentsForConfig, copyWrappedGlobals, endowAll } = prepareTest({
+  const { createDonor } = prepareTest({
     knownWritable,
   })
 
@@ -176,26 +176,25 @@ test('endowAll - writable fields get updated in compartments and in root but not
   // in lavamoat. Note that endowAll uses the same optional references for unwrapping
 
   // Storage for globals we cache in lavamoat
-  const goldenMasterRecordGlobal = copyWrappedGlobals(originalSource, {})
+  const donor = createDonor(originalSource)
   // root compartment global
-  const rootGlobal = endowAll(goldenMasterRecordGlobal)
+  const rootGlobal = donor.endowAll()
   // non-root compartments
-  const endowments = getEndowmentsForConfig(goldenMasterRecordGlobal, config)
-  const endowments2 = getEndowmentsForConfig(goldenMasterRecordGlobal, config)
+  const endowments = donor.endowSpecified(config)
+  const endowments2 = donor.endowSpecified(config)
 
   endowments.a = 42
 
   t.is(rootGlobal.a, 42)
   t.is(endowments2.a, 42)
-  t.is(goldenMasterRecordGlobal.a, 42)
   t.is(originalSource.a, 1)
 })
 
-test('endowAll - non-writable fields create independent copies', (t) => {
+test('donor - non-writable fields create independent copies', (t) => {
   'use strict'
   // we need strict mode to get errors when attempting to set on a getter-only property
   const knownWritable = new Set(['a'])
-  const { getEndowmentsForConfig, copyWrappedGlobals, endowAll } = prepareTest({
+  const { createDonor } = prepareTest({
     knownWritable,
   })
 
@@ -209,12 +208,12 @@ test('endowAll - non-writable fields create independent copies', (t) => {
   }
 
   // Storage for globals we cache in lavamoat
-  const goldenMasterRecordGlobal = copyWrappedGlobals(originalSource, {})
+  const donor = createDonor(originalSource)
   // root compartment global
-  const rootGlobal = endowAll(goldenMasterRecordGlobal)
+  const rootGlobal = donor.endowAll()
   // non-root compartments
-  const endowments = getEndowmentsForConfig(goldenMasterRecordGlobal, config)
-  const endowments2 = getEndowmentsForConfig(goldenMasterRecordGlobal, config)
+  const endowments = donor.endowSpecified(config)
+  const endowments2 = donor.endowSpecified(config)
 
   t.throws(
     () => {
@@ -226,7 +225,6 @@ test('endowAll - non-writable fields create independent copies', (t) => {
   t.is(rootGlobal.a, 1)
   t.is(endowments.a, 1)
   t.is(endowments2.a, 1)
-  t.is(goldenMasterRecordGlobal.a, 1)
   t.is(originalSource.a, 1)
 
   rootGlobal.a = 44
@@ -234,14 +232,13 @@ test('endowAll - non-writable fields create independent copies', (t) => {
   t.is(rootGlobal.a, 44)
   t.is(endowments.a, 44)
   t.is(endowments2.a, 44)
-  t.is(goldenMasterRecordGlobal.a, 44)
   t.is(originalSource.a, 1)
 })
 
 test('copyWrappedGlobals - nested writable fields get updated in compartments and in root but not globally', (t) => {
   'use strict'
   const knownWritable = new Set(['a'])
-  const { getEndowmentsForConfig, copyWrappedGlobals, endowAll } = prepareTest({
+  const { createDonor } = prepareTest({
     knownWritable,
   })
   const originalSource = { a: { b: { c: 1 }, no: 1 }, d: 2 }
@@ -258,13 +255,12 @@ test('copyWrappedGlobals - nested writable fields get updated in compartments an
   }
 
   // Storage for globals we cache in lavamoat
-  const goldenMasterRecordGlobal = copyWrappedGlobals(originalSource, {})
+  const donor = createDonor(originalSource)
   // root compartment global
-  const rootGlobal = endowAll(goldenMasterRecordGlobal)
+  const rootGlobal = donor.endowAll()
   // non-root compartments
-  const endowments = getEndowmentsForConfig(goldenMasterRecordGlobal, config1)
-  const endowments2 = getEndowmentsForConfig(goldenMasterRecordGlobal, config2)
-
+  const endowments = donor.endowSpecified(config1)
+  const endowments2 = donor.endowSpecified(config2)
   endowments2.a = { b: { c: 42, no: 2 } }
 
   t.is(rootGlobal.a.b.c, 42)
@@ -273,7 +269,6 @@ test('copyWrappedGlobals - nested writable fields get updated in compartments an
   t.is(endowments.a.b.no, undefined)
   t.is(endowments2.a.b.c, 42)
   t.is(endowments2.a.b.no, 2)
-  t.is(goldenMasterRecordGlobal.a.b.c, 42)
   t.is(originalSource.a.b.c, 1)
 })
 
@@ -470,7 +465,11 @@ test('getEndowmentsForConfig - ensure window.document getter behavior support', 
       xyz: true,
     },
   }
-  const resultGlobal = getEndowmentsForConfig(sourceGlobal, config)
+  const resultGlobal = getEndowmentsForConfig(
+    sourceGlobal,
+    config,
+    sourceGlobal
+  )
 
   const getter = Reflect.getOwnPropertyDescriptor(resultGlobal, 'xyz').get
 
@@ -479,6 +478,38 @@ test('getEndowmentsForConfig - ensure window.document getter behavior support', 
   t.is(getter.call(sourceGlobal), sourceGlobal)
   // would not work in sloppy mode
   t.is(getter.call(), globalThis)
+})
+test('getEndowmentsForConfig - ensure correct default unwrapping', (t) => {
+  'use strict'
+  // we need strict mode for the getter behavior in the last assertion
+
+  // compartment.globalThis.document would error because 'this' value is not window
+  const { getEndowmentsForConfig } = prepareTest()
+  Object.defineProperty(globalThis, 'xyz', {
+    get() {
+      if (this !== globalThis) {
+        throw Error('emulated illegal invocation')
+      }
+      return this
+    },
+    configurable: true,
+  })
+  const config = {
+    globals: {
+      xyz: true,
+    },
+  }
+  const resultGlobal = getEndowmentsForConfig(globalThis, config)
+
+  const getter = Reflect.getOwnPropertyDescriptor(resultGlobal, 'xyz').get
+
+  t.is(resultGlobal.xyz, globalThis)
+  t.is(getter.call(resultGlobal), globalThis)
+  t.is(getter.call(globalThis), globalThis)
+  // would not work in sloppy mode
+  t.is(getter.call(), globalThis)
+
+  delete globalThis.xyz
 })
 
 test('getEndowmentsForConfig - specify unwrap to', (t) => {
@@ -545,13 +576,14 @@ test('endowAll - specify unwrap from, unwrap to', (t) => {
   // compartment.globalThis.document would error because 'this' value is not window
   const unwrapTo = {}
   const unwrapFrom = {}
-  const { endowAll } = prepareTest()
+  const { createDonor } = prepareTest()
   const sourceGlobal = {
     get xyz() {
       return this
     },
   }
-  const resultGlobal = endowAll(sourceGlobal, unwrapTo, unwrapFrom)
+  const donor = createDonor(sourceGlobal)
+  const resultGlobal = donor.endowAll(unwrapTo, unwrapFrom)
   const getter = Reflect.getOwnPropertyDescriptor(resultGlobal, 'xyz').get
 
   t.is(resultGlobal.xyz, resultGlobal)
@@ -589,22 +621,54 @@ test('getEndowmentsForConfig - endowing bind of a function', async (t) => {
   t.is(resultGlobal.abc.bind(xyz)(), xyz)
 })
 
-test('getEndowmentsForConfig - ensure setTimeout calls dont trigger illegal invocation', (t) => {
+test('unwrapping - ensure setTimeout calls dont trigger illegal invocation', (t) => {
   'use strict'
   // compartment.globalThis.document would error because 'this' value is not window
-  const { getEndowmentsForConfig } = prepareTest()
+  const { getEndowmentsForConfig, copyWrappedGlobals, createDonor } =
+    prepareTest()
   const sourceGlobal = {
     setTimeout() {
+      if (this !== sourceGlobal) {
+        throw Error('emulated illegal invocation')
+      }
       return this
     },
   }
+  Object.defineProperty(sourceGlobal, 'circularGetter', {
+    get: function () {
+      if (this !== sourceGlobal) {
+        throw Error('emulated illegal invocation')
+      }
+      return this
+    },
+    enumerable: true,
+  })
   const config = {
     globals: {
       setTimeout: true,
+      circularGetter: true,
     },
   }
   const resultGlobal = getEndowmentsForConfig(sourceGlobal, config)
   t.is(resultGlobal.setTimeout(), sourceGlobal)
+  t.is(resultGlobal.circularGetter, sourceGlobal)
+
+  const resultGlobal2 = {}
+  copyWrappedGlobals(sourceGlobal, resultGlobal2)
+  t.is(resultGlobal2.setTimeout(), sourceGlobal)
+  t.is(resultGlobal2.circularGetter, sourceGlobal)
+
+  const resultGlobal3 = {}
+  const donor = createDonor(sourceGlobal)
+  const endowments = donor.endowAll(sourceGlobal, resultGlobal3)
+  Object.defineProperties(
+    resultGlobal3,
+    Object.getOwnPropertyDescriptors(endowments)
+  )
+
+  // Should we censor function output?
+  t.is(resultGlobal3.setTimeout(), sourceGlobal)
+  t.is(resultGlobal3.circularGetter, sourceGlobal)
 })
 
 test('copyWrappedGlobals - copy from prototype too', (t) => {
@@ -621,36 +685,19 @@ test('copyWrappedGlobals - copy from prototype too', (t) => {
   t.is(Object.keys(target).sort().join(), 'onTheObj,onTheProto,window')
 })
 
-test('copyWrappedGlobals+endowAll - includes fields from source prototype', (t) => {
+test('endowAll - includes fields from source prototype, skips circular fields', (t) => {
   'use strict'
-  const { copyWrappedGlobals, endowAll } = prepareTest()
+  const { createDonor } = prepareTest()
   const sourceProto = {
     onTheProto: function () {},
   }
   const source = Object.create(sourceProto)
   source.onTheObj = function () {}
-  const target = Object.create(null)
-  copyWrappedGlobals(source, target, ['window'])
-  const endowments = endowAll(target, {}, {})
+  source.window = source
 
-  t.is(Object.keys(endowments).sort().join(), 'onTheObj,onTheProto,window')
-})
+  const donor = createDonor(source)
 
-test('endowAll - refuses to accept objects with custom proto', (t) => {
-  'use strict'
-  const { endowAll } = prepareTest()
-  const sourceProto = {
-    onTheProto: function () {},
-  }
-  const source = Object.create(sourceProto)
-  source.onTheObj = function () {}
+  const endowments = donor.endowAll()
 
-  t.throws(
-    () => {
-      endowAll(source, {}, {})
-    },
-    {
-      message: `LavaMoat - endowAll does not support sourceRefs with custom prototype`,
-    }
-  )
+  t.is(Object.keys(endowments).sort().join(), 'onTheObj,onTheProto')
 })
