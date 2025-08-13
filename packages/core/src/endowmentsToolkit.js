@@ -58,9 +58,9 @@ function endowmentsToolkit({
 } = {}) {
   return {
     // public API
+    createDonor,
     getEndowmentsForConfig,
     copyWrappedGlobals,
-    endowAll,
     getBuiltinForConfig,
     createFunctionWrapper,
     // internals exposed for core
@@ -69,6 +69,73 @@ function endowmentsToolkit({
     copyValueAtPath,
     applyGetSetPropDescTransforms,
     applyEndowmentPropDescTransforms,
+  }
+
+  /**
+   * Creates a donor object for the specified global reference.
+   *
+   * @param {any} globalRef
+   */
+  function createDonor(globalRef) {
+    const endowmentDescriptorsFlat = collectAllDescriptors(globalRef)
+
+    // expose all own properties of globalRef, including non-enumerable
+    const globalBackup = create(null)
+    for (const key in endowmentDescriptorsFlat) {
+      const desc = endowmentDescriptorsFlat[key]
+      if (desc.value && desc.value === globalRef) {
+        continue
+      }
+      defineProperty(globalBackup, key, desc)
+    }
+
+    return {
+      /**
+       * Creates an object populated with all properties of the global backup,
+       * but applies this-wrapping and writables by reusing the same
+       * implementation as getEndowmentsForConfig. The way to use this is:
+       *
+       * - Create a cache of globals by calling copyWrappedGlobals
+       * - Call endowAll on that cache for root compartment
+       * - Call getEndowmentsForConfig on that cache for other compartments
+       *
+       * @param {object} [unwrapTo] - For getters and setters, when the
+       *   this-value is unwrapFrom, is replaced as unwrapTo
+       * @param {object} [unwrapFrom] - For getters and setters, the this-value
+       *   to replace (default: targetRef)
+       */
+      endowAll(unwrapTo, unwrapFrom) {
+        const whitelistedReads = getOwnPropertyNames(globalBackup)
+        const allowedWriteFields = knownWritableFields
+        return makeMinimalViewOfRef(
+          globalBackup,
+          whitelistedReads,
+          unwrapTo,
+          unwrapFrom,
+          [], // nothing is explicitly banned
+          allowedWriteFields
+        )
+      },
+      /**
+       * Creates an object populated with only the deep properties specified in
+       * the packagePolicy
+       *
+       * @param {LMPolicy.PackagePolicy} packagePolicy - LavaMoat policy item
+       *   representing a package
+       * @param {object} [unwrapTo] - For getters and setters, when the
+       *   this-value is unwrapFrom, is replaced as unwrapTo
+       * @param {object} [unwrapFrom] - For getters and setters, the this-value
+       *   to replace (default: targetRef)
+       */
+      endowSpecified: (packagePolicy, unwrapTo, unwrapFrom) => {
+        return getEndowmentsForConfig(
+          globalBackup,
+          packagePolicy,
+          unwrapTo,
+          unwrapFrom
+        )
+      },
+    }
   }
 
   /**
@@ -147,42 +214,6 @@ function endowmentsToolkit({
       unwrapTo,
       unwrapFrom,
       explicitlyBanned,
-      allowedWriteFields
-    )
-  }
-
-  /**
-   * Creates an object populated with all properties of the source, but applies
-   * this-wrapping and writables by reusing the same implementation as
-   * getEndowmentsForConfig. The way to use this is:
-   *
-   * - Create a cache of globals by calling copyWrappedGlobals
-   * - Call endowAll on that cache for root compartment
-   * - Call getEndowmentsForConfig on that cache for other compartments
-   *
-   * @template {object} T Deep properties specified in the packagePolicy
-   * @param {T} sourceRef - Object from which to copy properties
-   * @param {object} [unwrapTo] - For getters and setters, when the this-value
-   *   is unwrapFrom, is replaced as unwrapTo
-   * @param {object} [unwrapFrom] - For getters and setters, the this-value to
-   *   replace (default: targetRef)
-   * @returns {Partial<T>} - The targetRef
-   */
-  function endowAll(sourceRef, unwrapTo, unwrapFrom) {
-    const proto = getPrototypeOf(sourceRef)
-    if (proto !== null && proto !== prototype) {
-      throw new Error(
-        `LavaMoat - endowAll does not support sourceRefs with custom prototype`
-      )
-    }
-    const whitelistedReads = getOwnPropertyNames(sourceRef)
-    const allowedWriteFields = knownWritableFields
-    return makeMinimalViewOfRef(
-      sourceRef,
-      whitelistedReads,
-      unwrapTo,
-      unwrapFrom,
-      [], // nothing is explicitly banned
       allowedWriteFields
     )
   }
@@ -483,6 +514,9 @@ function endowmentsToolkit({
             (thisValue) => thisValue === unwrapFromGlobalThis,
             unwrapToGlobalThis
           )
+          // NOTE: Should we censor/wrap return values?
+          // } else if (result === receiverRef) {
+          //   return unwrapToGlobalThis
         } else {
           return result
         }
@@ -571,27 +605,25 @@ function endowmentsToolkit({
   }
 
   /**
-   * @type {CopyWrappedGlobals}
+   * Extracts descriptors of own properties and properties on the prototype
+   * chain into a flat collection of descriptors
+   *
+   * @param {any} sourceGlobal
    */
-  function copyWrappedGlobals(
-    globalRef,
-    target,
-    globalThisRefs = ['globalThis']
-  ) {
+  function collectAllDescriptors(sourceGlobal) {
     // find the relevant endowment sources
-    const globalProtoChain = getPrototypeChain(globalRef)
+    const globalProtoChain = getPrototypeChain(sourceGlobal)
     // the index for the common prototypal ancestor, prototype
     // this should always be the last index, but we check just in case
     const commonPrototypeIndex = globalProtoChain.findIndex(
       (globalProtoChainEntry) => globalProtoChainEntry === prototype
     )
     if (commonPrototypeIndex === -1) {
-      // TODO: fix this error message
       throw new Error(
-        'Lavamoat - unable to find common prototype between Compartment and globalRef'
+        'Lavamoat - sourceGlobal is not a descendant of the shared Object.prototype. Might be from a different Realm.'
       )
     }
-    // we will copy endowments from all entries in the prototype chain, excluding prototype
+    // we will copy endowments from all entries in the prototype chain, excluding Object.prototype
     const endowmentSources = globalProtoChain.slice(0, commonPrototypeIndex)
 
     // call all getters, in case of behavior change (such as with FireFox lazy getters)
@@ -599,10 +631,11 @@ function endowmentsToolkit({
     endowmentSources.forEach((source) => {
       const descriptors = getOwnPropertyDescriptors(source)
       values(descriptors).forEach((desc) => {
+        // TODO: reconsider this. We have facilities to wrap and unwrap getters, maybe improving the fidelity there would be nough to keep the getters alive
         if ('get' in desc && desc.get) {
           try {
             // calling getters can potentially throw (e.g. localStorage inside a sandboxed iframe)
-            apply(desc.get, globalRef, [])
+            apply(desc.get, sourceGlobal, [])
           } catch {}
         }
       })
@@ -612,11 +645,32 @@ function endowmentsToolkit({
       (globalProtoChainEntry) =>
         getOwnPropertyDescriptors(globalProtoChainEntry)
     )
-    // flatten propDesc collections with precedence for globalThis-end of the prototype chain
+    // flatten propDesc collections in the order in which properties overshadowing the ones on prototype chain will overwrite them.
     const endowmentDescriptorsFlat = assign(
       create(null),
       ...endowmentSourceDescriptors.reverse()
     )
+
+    return endowmentDescriptorsFlat
+  }
+
+  /**
+   * Makes a copy of all globals from the global ref to a target and wraps them
+   * with the wrapper this endowmentsToolkit was configured to use. It also
+   * copies all circular references to the root package compartment globalThis.
+   *
+   * @param {object} globalRef
+   * @param {Record<PropertyKey, any>} target - The object to copy the
+   *   properties to, recursively (hence any not unknown type)
+   * @param {string[]} globalThisRefs
+   * @returns {Record<PropertyKey, any>}
+   */
+  function copyWrappedGlobals(
+    globalRef,
+    target,
+    globalThisRefs = ['globalThis']
+  ) {
+    const endowmentDescriptorsFlat = collectAllDescriptors(globalRef)
     // expose all own properties of globalRef, including non-enumerable
     entries(endowmentDescriptorsFlat)
       // ignore properties already defined on compartment global
@@ -633,7 +687,6 @@ function endowmentsToolkit({
         )
         defineProperty(target, key, wrappedPropDesc)
       })
-    // global circular references otherwise added by prepareCompartmentGlobalFromConfig
     // Add all circular refs to root package compartment globalThis
     for (const ref of globalThisRefs) {
       if (ref in target) {
@@ -793,19 +846,6 @@ function defaultCreateFunctionWrapper(sourceValue, unwrapTest, unwrapTo) {
  * @param {(value: any) => boolean} unwrapTest
  * @param {object} unwrapTo
  * @returns {(...args: any[]) => any}
- */
-
-/**
- * Makes a copy of all globals from the global ref to a target and wraps them
- * with the wrapper this endowmentsToolkit was configured to use. It also copies
- * all circular references to the root package compartment globalThis.
- *
- * @callback CopyWrappedGlobals
- * @param {object} globalRef
- * @param {Record<PropertyKey, any>} target - The object to copy the properties
- *   to, recursively (hence any not unknown type)
- * @param {string[]} globalThisRefs
- * @returns {Record<PropertyKey, any>}
  */
 
 /**
