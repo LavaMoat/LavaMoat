@@ -41,8 +41,8 @@ exports.osIndependentSymlink = async (target, path) => {
 /**
  * @returns {Promise<string>} Path to symlink
  */
-exports.createProject4Symlink = async () => {
-  const src = path.join(__dirname, 'projects', '4', 'node_modules', 'aaa')
+exports.createProject4Symlink = async (name = 'aaa') => {
+  const src = path.join(__dirname, 'projects', '4', 'node_modules', name)
   const target = path.join(__dirname, 'projects', '4', 'packages', 'aaa')
   await exports.osIndependentSymlink(target, src)
   return src
