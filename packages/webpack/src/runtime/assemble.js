@@ -20,7 +20,7 @@ function removeMultilineComments(source) {
  */
 const assembleRuntime = (KEY, runtimeModules) => {
   let assembly = 'const LAVAMOAT = Object.create(null);'
-  runtimeModules.map(({ file, data, name, json, shimRequire }) => {
+  runtimeModules.map(({ file, data, name, json, rawSource, shimRequire }) => {
     let sourceString
     if (file) {
       sourceString = readFileSync(file, 'utf-8')
@@ -32,8 +32,13 @@ const assembleRuntime = (KEY, runtimeModules) => {
     if (json) {
       sourceString = `LAVAMOAT['${name}'] = (${sourceString});`
     }
+    if (rawSource) {
+      sourceString = rawSource
+    }
     if (shimRequire) {
       sourceString = readFileSync(require.resolve(shimRequire), 'utf-8')
+    }
+    if ((rawSource || shimRequire) && sourceString) {
       sourceString = removeMultilineComments(sourceString)
       sourceString = `;(()=>{
         const module = {exports: {}};
@@ -59,6 +64,7 @@ const assembleRuntime = (KEY, runtimeModules) => {
  * @property {unknown} [data]
  * @property {string} [name]
  * @property {boolean} [json]
+ * @property {string} [rawSource]
  * @property {string} [shimRequire]
  */
 
