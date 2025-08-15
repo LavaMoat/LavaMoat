@@ -8,15 +8,17 @@
 import chalk from 'chalk'
 import { Searcher, sortKind } from 'fast-fuzzy'
 import { toKeypath } from 'to-keypath'
+
 import { SES_VIOLATION_TYPES } from '../constants.js'
 import { hrCode, hrLabel, hrPath } from '../format.js'
 import { log as defaultLog } from '../log.js'
+
 /**
  * @import {ReportInvalidOverridesOptions, ReportSesViolationsOptions, SesViolationType} from '../internal.js'
  * @import {LavaMoatPolicy} from 'lavamoat-core'
  */
 
-const { keys, entries } = Object
+const { entries, keys } = Object
 
 /**
  * Default number of suggestions to make when reporting invalid overrides
@@ -38,10 +40,10 @@ const DEFAULT_MAX_OVERRIDE_SUGGESTIONS = 3
 export const reportInvalidOverrides = (
   canonicalNameMap,
   {
-    policyOverride,
-    policyOverridePath,
     log = defaultLog,
     maxSuggestions = DEFAULT_MAX_OVERRIDE_SUGGESTIONS,
+    policyOverride,
+    policyOverridePath,
   }
 ) => {
   if (!policyOverride) {
@@ -79,8 +81,8 @@ export const reportInvalidOverrides = (
    * Deduped `Set` of all canonical names found in policy overrides
    */
   const policyOverrideCanonicalNames = new Set([
-    ...resourceCanonicalNames,
     ...packagePolicyCanonicalNames,
+    ...resourceCanonicalNames,
   ])
 
   // /**
@@ -108,12 +110,13 @@ export const reportInvalidOverrides = (
       return { fullName: name, name: `${sliced.pop()}` }
     })
     const searcher = new Searcher(searchObjects, {
+      keySelector: ({ name }) => name,
       returnMatchData: true,
       sortBy: sortKind.bestMatch,
-      keySelector: ({ name }) => name,
       // 1 would be exact match. I hope this corrects for typos
       threshold: 0.9,
     })
+
     /** @type {Map<string, string[]>} */
     const suggestions = new Map()
     for (const { name: invalidOverride } of invalidOverrides) {
@@ -121,7 +124,7 @@ export const reportInvalidOverrides = (
       const invalidOverridePackageName = `${slicedOverride.pop()}`
       const matches = searcher.search(invalidOverridePackageName)
       if (matches.length) {
-        for (const { score, item } of matches) {
+        for (const { item, score } of matches) {
           log.debug(
             `Found match for ${hrLabel(invalidOverride)}: ${hrLabel(item.fullName)} with score ${score}`
           )
@@ -135,9 +138,9 @@ export const reportInvalidOverrides = (
       }
     }
 
-    let msg = `The following entries(s) found in policy overrides`
+    let msg = 'The following entries(s) found in policy overrides'
     msg += policyOverridePath ? ` (${hrPath(policyOverridePath)})` : ''
-    msg += ` were not associated with any Compartment and may be invalid:\n`
+    msg += ' were not associated with any Compartment and may be invalid:\n'
     msg += invalidOverrides
       .map(({ name, source }) => {
         if (suggestions.has(name)) {

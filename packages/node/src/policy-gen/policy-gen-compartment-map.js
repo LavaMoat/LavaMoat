@@ -7,6 +7,7 @@
  */
 
 import { captureFromMap } from '@endo/compartment-mapper/capture-lite.js'
+
 import { nullImportHook } from '../compartment/import-hook.js'
 import { makeNodeCompartmentMap } from '../compartment/node-compartment-map.js'
 import { DEFAULT_ENDO_OPTIONS } from '../compartment/options.js'
@@ -40,11 +41,11 @@ const { entries } = Object
 export const loadCompartmentMapForPolicy = async (
   entrypointPath,
   {
-    readPowers = defaultReadPowers,
-    policyOverride,
-    trustRoot = DEFAULT_TRUST_ROOT_COMPARTMENT,
-    log = defaultLog,
     dev,
+    log = defaultLog,
+    policyOverride,
+    readPowers = defaultReadPowers,
+    trustRoot = DEFAULT_TRUST_ROOT_COMPARTMENT,
     ...captureOpts
   } = {}
 ) => {
@@ -66,17 +67,17 @@ export const loadCompartmentMapForPolicy = async (
   let compartmentNameToCanonicalNameMap
   try {
     ;({
-      nodeCompartmentMap,
       canonicalNameMap: compartmentNameToCanonicalNameMap,
+      nodeCompartmentMap,
     } =
       // eslint-disable-next-line @jessie.js/safe-await-separator
       await makeNodeCompartmentMap(entrypointPath, {
-        readPowers,
         dev,
-        log,
-        trustRoot,
         endoPolicyOverride,
         include: policyOverride?.include,
+        log,
+        readPowers,
+        trustRoot,
       }))
   } catch (err) {
     throw new GenerationError(
@@ -99,14 +100,14 @@ export const loadCompartmentMapForPolicy = async (
   const PolicyGenCompartment = makePolicyGenCompartment(
     nodeCompartmentMap,
     compartmentNameToCanonicalNameMap,
-    { policyOverride, log }
+    { log, policyOverride }
   )
 
   /** @type {CaptureLiteOptions} */
   const captureLiteOptions = {
     ...DEFAULT_ENDO_OPTIONS,
-    importHook: nullImportHook,
     Compartment: PolicyGenCompartment,
+    importHook: nullImportHook,
     log: log.debug.bind(log),
     ...captureOpts,
   }
@@ -115,8 +116,8 @@ export const loadCompartmentMapForPolicy = async (
   const {
     captureCompartmentMap: compartmentMap,
     captureSources: sources,
-    oldToNewCompartmentNames,
     newToOldCompartmentNames: renames,
+    oldToNewCompartmentNames,
   } = await captureFromMap(readPowers, nodeCompartmentMap, captureLiteOptions)
 
   const canonicalNameMap = new Map(
@@ -138,10 +139,10 @@ export const loadCompartmentMapForPolicy = async (
   )
 
   return {
+    canonicalNameMap,
     compartmentMap,
-    sources,
     packageJsonMap,
     renames,
-    canonicalNameMap,
+    sources,
   }
 }

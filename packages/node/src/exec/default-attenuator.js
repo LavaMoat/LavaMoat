@@ -7,6 +7,7 @@
 
 import { endowmentsToolkit } from 'lavamoat-core'
 import { scuttle } from 'lavamoat-core/src/scuttle.js'
+
 import {
   ENDO_POLICY_ITEM_ROOT,
   GLOBAL_THIS_REFS,
@@ -22,11 +23,11 @@ import { isObjectyObject } from '../util.js'
  */
 
 const {
-  values,
+  defineProperties,
   entries,
   fromEntries,
-  defineProperties,
   getOwnPropertyDescriptors,
+  values,
 } = Object
 
 /**
@@ -75,7 +76,7 @@ export const makeGlobalsAttenuator = ({
     scuttleGlobalThis = { enabled: scuttleGlobalThis }
   }
 
-  const { getEndowmentsForConfig, copyWrappedGlobals } = endowmentsToolkit({
+  const { copyWrappedGlobals, getEndowmentsForConfig } = endowmentsToolkit({
     handleGlobalWrite: knownWritableFields.size > 0,
     knownWritableFields,
   })
@@ -128,6 +129,7 @@ export const makeGlobalsAttenuator = ({
       }
       const endowments = getEndowmentsForConfig(
         rootCompartmentGlobalThis,
+
         /**
          * **HAZARD**: In this block, `policy` is of type
          * `Omit<GlobalAttenuatorParams, RootPolicy>` (a.k.a.

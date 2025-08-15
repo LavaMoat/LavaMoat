@@ -5,6 +5,7 @@
  * @packageDocumentation
  */
 import nodeFs from 'node:fs'
+
 import { makeReadPowers } from '../compartment/power.js'
 import {
   DEFAULT_ATTENUATOR,
@@ -39,11 +40,11 @@ export const run = async (
   entrypoint,
   {
     dev = false,
-    trustRoot,
+    log = defaultLog,
     projectRoot,
     readFile = nodeFs.promises.readFile,
-    log = defaultLog,
     scuttleGlobalThis,
+    trustRoot,
     ...options
   } = {}
 ) => {
@@ -55,8 +56,8 @@ export const run = async (
    * @type {LoadPoliciesOptions}
    */
   const loadPoliciesOptions = {
-    readFile,
     projectRoot,
+    readFile,
     ...('policyOverride' in options
       ? {
           policyOverride: options.policyOverride,
@@ -79,6 +80,9 @@ export const run = async (
   /** @type {ExecuteOptions} */
   const executeOptions = {
     Compartment: makeExecutionCompartment(globalThis),
+    dev,
+    endoPolicy,
+    log,
     modules: {
       [DEFAULT_ATTENUATOR]: {
         attenuateGlobals: makeGlobalsAttenuator({
@@ -88,9 +92,6 @@ export const run = async (
         attenuateModule,
       },
     },
-    endoPolicy,
-    dev,
-    log,
     readPowers: makeReadPowers(options),
     trustRoot,
   }

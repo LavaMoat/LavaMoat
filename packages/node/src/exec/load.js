@@ -8,6 +8,7 @@
  */
 
 import { loadFromMap } from '@endo/compartment-mapper/import-lite.js'
+
 import { makeNodeCompartmentMap } from '../compartment/node-compartment-map.js'
 import { DEFAULT_ENDO_OPTIONS } from '../compartment/options.js'
 import { defaultReadPowers } from '../compartment/power.js'
@@ -38,18 +39,19 @@ import { noop } from '../util.js'
 export const load = async (
   entrypointPath,
   {
-    log = defaultLog,
-    dev,
     decorators = [],
-    trustRoot,
+    dev,
     endoPolicy,
-    readPowers = defaultReadPowers,
+    log = defaultLog,
     onNodeModulesMapped = noop,
+    readPowers = defaultReadPowers,
+    trustRoot,
     ...otherOptions
   } = {}
 ) => {
   /** @type {CompartmentMapDescriptor} */
   let nodeCompartmentMap
+
   /** @type {CompleteCompartmentDescriptorDataMap} */
   let nodeDataMap
   try {
@@ -57,12 +59,12 @@ export const load = async (
     ;({ nodeCompartmentMap, nodeDataMap } = await makeNodeCompartmentMap(
       entrypointPath,
       {
-        readPowers,
-        dev,
-        log,
-        trustRoot,
         decorators,
+        dev,
         endoPolicy,
+        log,
+        readPowers,
+        trustRoot,
       }
     ))
   } catch (err) {
@@ -75,7 +77,7 @@ export const load = async (
   try {
     onNodeModulesMapped(nodeCompartmentMap, nodeDataMap)
   } catch (err) {
-    throw new ExecutionError(`onNodeModulesMapped callback failed`, {
+    throw new ExecutionError('onNodeModulesMapped callback failed', {
       cause: err,
     })
   }
@@ -85,8 +87,8 @@ export const load = async (
     ...DEFAULT_ENDO_OPTIONS,
     ...otherOptions,
     dev,
-    policy: endoPolicy,
     log: log.debug.bind(log),
+    policy: endoPolicy,
   }
 
   const { import: importApp, sha512 } = await loadFromMap(

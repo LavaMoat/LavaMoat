@@ -1,6 +1,7 @@
 import '../../../src/preamble.js'
 
 import chalk from 'chalk'
+
 import { run } from '../../../src/exec/run.js'
 import {
   DEFAULT_JSON_FIXTURE_ENTRY_POINT,
@@ -54,8 +55,8 @@ export const createExecMacros = (test) => {
         fixtureFilename,
         expected,
         {
-          policy = DEFAULT_POLICY,
           jsonEntrypoint = DEFAULT_JSON_FIXTURE_ENTRY_POINT,
+          policy = DEFAULT_POLICY,
         } = {}
       ) => {
         const { readPowers, vol } = await loadJSONFixture(
@@ -103,7 +104,7 @@ export const createExecMacros = (test) => {
   )
 
   return {
-    testExecForJSON,
     testExec,
+    testExecForJSON,
   }
 }
