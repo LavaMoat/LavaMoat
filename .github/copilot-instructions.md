@@ -17,9 +17,6 @@ npm --version
 
 # Install dependencies - takes 6 minutes. NEVER CANCEL. Set timeout to 10+ minutes.
 npm ci --foreground-scripts
-
-# Setup development environment - takes 10 seconds
-npm run setup
 ```
 
 ## Build and Test Commands
@@ -113,10 +110,9 @@ npm run --workspace=packages/tofu test
 
 ### Making Changes
 
-1. **ALWAYS run setup first:** `npm run setup`
-2. **Build before testing:** `npm run build`
-3. **Test your changes:** Run relevant package tests
-4. **Lint before committing:** `npm run lint` - must pass for CI
+1. **Build before testing:** `npm run build`
+2. **Test your changes:** Run relevant package tests
+3. **Lint before committing:** `npm run lint` - must pass for CI
 
 ### CI Validation Commands
 
@@ -177,7 +173,6 @@ node packages/node/src/cli.js app.js --policy ./lavamoat/node/policy.json
 
 - `npm ci --foreground-scripts`: 6 minutes (set 10+ minute timeout)
 - `npm test`: 6 minutes (set 10+ minute timeout)
-- `npm run setup`: 10 seconds
 - `npm run build`: 2 seconds
 - `npm run lint`: 20 seconds
 - `npm run rebuild`: 10 seconds
@@ -208,7 +203,7 @@ node packages/node/src/cli.js app.js --policy ./lavamoat/node/policy.json
 ### Build Issues
 
 ```bash
-# npm run setup & run rebuild will typically be sufficient
+# npm run rebuild will typically be sufficient
 npm run clean:types
 npm run rebuild
 ```
