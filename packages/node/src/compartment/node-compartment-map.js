@@ -10,8 +10,8 @@ import {
   defaultCompartmentMapTransforms,
   mapNodeModules,
 } from '@endo/compartment-mapper/node-modules.js'
+import { defaultLog } from '@lavamoat/vog'
 import { hrLabel } from '../format.js'
-import { log as defaultLog } from '../log.js'
 import { toFileURLString } from '../util.js'
 import { DEFAULT_ENDO_OPTIONS } from './options.js'
 import { defaultReadPowers } from './power.js'

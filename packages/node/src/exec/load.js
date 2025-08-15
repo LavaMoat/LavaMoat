@@ -8,11 +8,11 @@
  */
 
 import { loadFromMap } from '@endo/compartment-mapper/import-lite.js'
+import { defaultLog } from '@lavamoat/vog'
 import { makeNodeCompartmentMap } from '../compartment/node-compartment-map.js'
 import { DEFAULT_ENDO_OPTIONS } from '../compartment/options.js'
 import { defaultReadPowers } from '../compartment/power.js'
 import { ExecutionError } from '../error.js'
-import { log as defaultLog } from '../log.js'
 import { noop } from '../util.js'
 
 /**

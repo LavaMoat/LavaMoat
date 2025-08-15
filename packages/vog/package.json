@@ -1,0 +1,50 @@
+{
+  "name": "@lavamoat/vog",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "CLI utilities for LavaMoat",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LavaMoat/LavaMoat.git",
+    "directory": "packages/vog"
+  },
+  "homepage": "https://lavamoat.github.io",
+  "bugs": "https://github.com/LavaMoat/LavaMoat/issues",
+  "author": "LavaMoat Project",
+  "license": "MIT",
+  "engines": {
+    "node": "^18.0.0 || ^20.0.0 || ^22.0.0 || ^24.0.0",
+    "npm": ">=9.0.0"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "lint:deps": "depcheck",
+    "test": "npm run test:run",
+    "test:cover": "c8 --check-coverage ava",
+    "test:run": "ava",
+    "test:update-snapshots": "ava -u"
+  },
+  "dependencies": {
+    "consola": "3.4.2",
+    "ora": "8.2.0",
+    "progress-estimator": "0.3.1"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "ava": {
+    "files": [
+      "test/**/*.spec.js"
+    ],
+    "timeout": "10s"
+  }
+}

@@ -7,21 +7,19 @@
  */
 
 import { captureFromMap } from '@endo/compartment-mapper/capture-lite.js'
+import { createSpinner, defaultLog } from '@lavamoat/vog'
 import { nullImportHook } from '../compartment/import-hook.js'
 import { makeNodeCompartmentMap } from '../compartment/node-compartment-map.js'
 import { DEFAULT_ENDO_OPTIONS } from '../compartment/options.js'
 import { defaultReadPowers } from '../compartment/power.js'
 import { DEFAULT_TRUST_ROOT_COMPARTMENT } from '../constants.js'
 import { GenerationError } from '../error.js'
-import { log as defaultLog } from '../log.js'
-import { toEndoPolicy } from '../policy-converter.js'
-import { mergePolicies } from '../policy-util.js'
 import { makePolicyGenCompartment } from './policy-gen-compartment-class.js'
 
 /**
  * @import {LavaMoatEndoPolicy} from '../types.js'
  * @import {LoadCompartmentMapForPolicyOptions, LoadCompartmentMapResult} from '../internal.js'
- * @import {CaptureLiteOptions, CompartmentMapDescriptor} from '@endo/compartment-mapper'
+ * @import {CaptureLiteOptions, CompartmentMapDescriptor, Sources} from '@endo/compartment-mapper'
  * @import {PackageJson} from 'type-fest'
  */
 
@@ -50,20 +48,9 @@ export const loadCompartmentMapForPolicy = async (
 ) => {
   /** @type {CompartmentMapDescriptor} */
   let nodeCompartmentMap
-
-  /** @type {LavaMoatEndoPolicy | undefined} */
-  let endoPolicyOverride
-
-  await Promise.resolve()
-
-  if (policyOverride) {
-    endoPolicyOverride = await toEndoPolicy(mergePolicies(policyOverride), {
-      log,
-    })
-  }
-
-  /** @type {Map<string, string>} */
-  let compartmentNameToCanonicalNameMap
+  /** @type {CompleteCompartmentDescriptorDataMap} */
+  let nodeDataMap
+  const spinner = createSpinner('Graphing node_modules…').start()
   try {
     ;({
       nodeCompartmentMap,
@@ -78,7 +65,9 @@ export const loadCompartmentMapForPolicy = async (
         endoPolicyOverride,
         include: policyOverride?.include,
       }))
+    spinner.succeed('Graphing node_modules complete')
   } catch (err) {
+    spinner.fail('Graphing node_modules failed')
     throw new GenerationError(
       `Failed to create compartment map for policy generation: ${err.stack}`,
       { cause: err }
@@ -111,13 +100,38 @@ export const loadCompartmentMapForPolicy = async (
     ...captureOpts,
   }
 
-  // captureFromMap finalizes the compartment map descriptor, but does not provide for execution."file:///Users/boneskull/projects/lavamoat/lavamoat/node_modules/@babel/plugin-transform-object-super/"
-  const {
-    captureCompartmentMap: compartmentMap,
-    captureSources: sources,
-    oldToNewCompartmentNames,
-    newToOldCompartmentNames: renames,
-  } = await captureFromMap(readPowers, nodeCompartmentMap, captureLiteOptions)
+  spinner.start('Optimizing compartment map…')
+
+  /** @type {CompartmentMapDescriptor} */
+  let compartmentMap
+  /** @type {Sources} */
+  let sources
+  /** @type {Record<string, string>} */
+  let renames
+  /** @type {Record<string, string>} */
+  let dataMapRenames
+  // captureFromMap finalizes the compartment map descriptor, but does not provide for execution.
+  try {
+    ;({
+      captureCompartmentMap: compartmentMap,
+      captureSources: sources,
+      // TODO: this could be more narrowly typed (though not super-straightforward)
+      newToOldCompartmentNames: renames,
+      // TODO: this too (see type assertion below)
+      oldToNewCompartmentNames: dataMapRenames,
+    } = await captureFromMap(
+      readPowers,
+      nodeCompartmentMap,
+      captureLiteOptions
+    ))
+    spinner.succeed('Optimizing compartment map complete')
+  } catch (err) {
+    spinner.fail('Optimizing compartment map failed')
+    throw new GenerationError(
+      `Failed to optimize compartment map for policy generation`,
+      { cause: err }
+    )
+  }
 
   const canonicalNameMap = new Map(
     [...compartmentNameToCanonicalNameMap].map(([location, canonicalName]) => [
