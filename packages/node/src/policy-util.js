@@ -12,22 +12,41 @@ import { jsonStringifySortedPolicy, mergePolicy } from 'lavamoat-core'
 import nodeFs from 'node:fs'
 import nodePath from 'node:path'
 import * as constants from './constants.js'
+import {
+  DEFAULT_POLICY_DEBUG_FILENAME,
+  DEFAULT_POLICY_DIR,
+  DEFAULT_POLICY_FILENAME,
+  DEFAULT_POLICY_OVERRIDE_FILENAME,
+  LAVAMOAT_PKG_POLICY_ROOT,
+} from './constants.js'
 import { InvalidPolicyError, NoPolicyError } from './error.js'
+import { hrCode, hrPath } from './format.js'
 import { readJsonFile } from './fs.js'
 import { log } from './log.js'
 import {
   hasValue,
-  hrPath,
   isObjectyObject,
   isPathLike,
+  toAbsolutePath,
   toPath,
 } from './util.js'
 
 /**
+ * @import {CompartmentDescriptor} from '@endo/compartment-mapper'
  * @import {RootPolicy, LavaMoatPolicy} from 'lavamoat-core'
- * @import {LavaMoatPolicyDebug, LoadPoliciesOptions, WritableFsInterface} from './types.js'
+ * @import {MergedLavaMoatPolicy, CanonicalName, LavaMoatPolicyDebug, LoadPoliciesOptions, WritableFsInterface} from './types.js'
  * @import {ReadPolicyOptions, ReadPolicyOverrideOptions} from './internal.js'
  */
+
+/**
+ * Returns `true` if the compartment descriptor is the entry compartment
+ *
+ * By definition, this is a `CompartmentDescriptor` with an empty `path`.
+ *
+ * @param {CompartmentDescriptor} compartment
+ * @returns {boolean}
+ */
+const isEntryCompartment = (compartment) => compartment.path?.length === 0
 
 /**
  * Reads a `policy.json` from disk
@@ -69,6 +88,7 @@ export const readPolicy = async (
   }
   try {
     assertPolicy(allegedPolicy)
+    log.debug(`Read policy from ${hrPath(policyPath)}`)
     return allegedPolicy
   } catch (err) {
     throw new InvalidPolicyError(
@@ -84,6 +104,7 @@ export const readPolicy = async (
  * @param {string | URL} policyOverridePath Path to policy override
  * @param {ReadPolicyOverrideOptions} [options] Options
  * @returns {Promise<LavaMoatPolicy | undefined>}
+ * @public
  */
 export const maybeReadPolicyOverride = async (
   policyOverridePath,
@@ -118,6 +139,7 @@ export const maybeReadPolicyOverride = async (
 
   try {
     assertPolicy(allegedPolicy)
+    log.debug(`Read policy override from ${hrPath(policyOverridePath)}`)
     return allegedPolicy
   } catch (err) {
     throw new InvalidPolicyError(
@@ -140,7 +162,7 @@ export const maybeReadPolicyOverride = async (
  *   `./lavamoat/node/policy.json` relative to
  *   {@link LoadPoliciesOptions.projectRoot}
  * @param {LoadPoliciesOptions} [options] Options
- * @returns {Promise<LavaMoatPolicy>}
+ * @returns {Promise<MergedLavaMoatPolicy>}
  * @throws If a policy is invalid
  * @public
  */
@@ -152,10 +174,7 @@ export const loadPolicies = async (
     ...options
   } = {}
 ) => {
-  policyOrPolicyPath ??= nodePath.resolve(
-    projectRoot,
-    constants.DEFAULT_POLICY_PATH
-  )
+  policyOrPolicyPath ??= makeDefaultPolicyPath(projectRoot)
 
   /**
    * Path to policy
@@ -212,12 +231,10 @@ export const loadPolicies = async (
   } else {
     // if the user specified a policy path, resolve as its sibling;
     // otherwise resolve from `projectRoot` since that's about all we can do.
-    policyOverridePath = policyPath
-      ? nodePath.join(
-          nodePath.dirname(policyPath),
-          constants.DEFAULT_POLICY_OVERRIDE_FILENAME
-        )
-      : nodePath.resolve(projectRoot, constants.DEFAULT_POLICY_OVERRIDE_PATH)
+    policyOverridePath = makeDefaultPolicyOverridePath({
+      policyPath,
+      projectRoot,
+    })
   }
 
   /**
@@ -230,51 +247,57 @@ export const loadPolicies = async (
    * {@link maybeReadPolicyOverride}—make these following conditionals painful to
    * abstract into a type-safe function. So I didn't.
    * @type {[
-   *   policy: Promise<LavaMoatPolicy>,
-   *   policyOverride: Promise<LavaMoatPolicy | undefined>,
+   *   policy: Promise<LavaMoatPolicy> | LavaMoatPolicy,
+   *   policyOverride:
+   *     | Promise<LavaMoatPolicy | undefined>
+   *     | LavaMoatPolicy
+   *     | undefined,
    * ]}
    */
-  const promises = /** @type {any} */ ([])
+  const jobs = /** @type {any} */ ([])
   if (policyPath) {
-    promises.push(readPolicy(policyPath, { readFile }))
+    jobs.push(readPolicy(policyPath, { readFile }))
   } else {
-    promises.push(
-      Promise.resolve().then(() => {
+    jobs.push(
+      (() => {
         assertPolicy(
           allegedPolicy,
           `Invalid LavaMoat policy; does not match expected schema`
         )
 
         return allegedPolicy
-      })
+      })()
     )
   }
   if (policyOverridePath) {
-    promises.push(
+    jobs.push(
       maybeReadPolicyOverride(policyOverridePath, {
         readFile,
       })
     )
   } else {
-    promises.push(
-      Promise.resolve().then(() => {
+    jobs.push(
+      (() => {
         assertPolicy(
           allegedPolicyOverride,
           `Invalid LavaMoat policy overrides; does not match expected schema`
         )
         return allegedPolicyOverride
-      })
+      })()
     )
   }
 
   /**
    * This type is only here for documentation purposes and is not needed
    *
-   * @type {[LavaMoatPolicy, LavaMoatPolicy | undefined]}
+   * @type {[
+   *   policy: LavaMoatPolicy,
+   *   policyOverride: LavaMoatPolicy | undefined,
+   * ]}
    */
-  const policies = await Promise.all(promises)
+  const policies = await Promise.all(jobs)
 
-  return mergePolicy(...policies)
+  return mergePolicies(...policies)
 }
 
 /**
@@ -283,6 +306,7 @@ export const loadPolicies = async (
  * @param {unknown} allegedPolicy
  * @param {string} [message] Assertion failure message
  * @returns {asserts allegedPolicy is LavaMoatPolicy}
+ * @public
  */
 export const assertPolicy = (
   allegedPolicy,
@@ -303,7 +327,7 @@ export const assertPolicy = (
  *   policy
  * @param {{ fs?: WritableFsInterface }} opts Options
  * @returns {Promise<void>}
- * @internal
+ * @public
  */
 export const writePolicy = async (file, policy, { fs = nodeFs } = {}) => {
   const filepath = toPath(file)
@@ -365,8 +389,162 @@ export const isPolicy = (value) => {
  *
  * @param {LavaMoatPolicy} policy
  * @returns {boolean}
- * @internal
+ * @public
  */
 export const isTrusted = (policy) => {
   return !policy.root?.usePolicy
 }
+
+/**
+ * Determine the canonical name for a compartment descriptor
+ *
+ * @param {CompartmentDescriptor} compartment Compartment descriptor
+ * @param {boolean} [trustRoot=true] If `false`, never return a canonical name
+ *   of {@link LAVAMOAT_PKG_POLICY_ROOT}. Default is `true`
+ * @returns {CanonicalName} Canonical name
+ * @throws {ReferenceError} If compartment has no path
+ * @internal
+ */
+export const getCanonicalName = (
+  compartment,
+  trustRoot = constants.DEFAULT_TRUST_ROOT_COMPARTMENT
+) => {
+  // NOTE: the algorithm creating paths happens to be identical to the one in @lavamoat/aa package. Not that it matters because policies cannot be reused between this and other lavamoat tools.
+  if (!compartment.path) {
+    throw new ReferenceError(
+      `Computing canonical name failed: compartment "${compartment.name}" (${compartment.location}) has no "path" property; this is a bug`
+    )
+  }
+  if (isEntryCompartment(compartment)) {
+    if (trustRoot) {
+      return LAVAMOAT_PKG_POLICY_ROOT
+    }
+    return compartment.name
+  }
+  return compartment.path.join('>')
+}
+
+/**
+ * Merges two LavaMoat policies into a single policy.
+ *
+ * Wraps {@link mergePolicy}.
+ *
+ * @param {LavaMoatPolicy} policyA A policy
+ * @param {LavaMoatPolicy} [policyB] Usually an override policy
+ * @returns {MergedLavaMoatPolicy} Merged policy
+ * @public
+ */
+export const mergePolicies = (policyA, policyB) => ({
+  ...mergePolicy(policyA, policyB),
+  [constants.MERGED_POLICY_FIELD]: true,
+})
+
+/**
+ * Computes a default path based on a policy path (or not) or a project root
+ * path (or not).
+ *
+ * @remarks
+ * Use of `hrCode` in the assertion failure messages is intentional, since
+ * `hrPath` could conceivably convert a relative path to an absolute one.
+ * @param {string} defaultDir Default directory to use
+ * @param {string} defaultFilename Default filename to use
+ * @param {Object} options
+ * @param {string | URL} [options.policyPath] Path to the policy file
+ * @param {string | URL} [options.projectRoot]
+ * @returns {string}
+ * @internal
+ */
+const makeDefaultPath = (
+  defaultDir,
+  defaultFilename,
+  { policyPath, projectRoot }
+) => {
+  /** @type {string} */
+  let dir
+  if (policyPath) {
+    policyPath = toAbsolutePath(
+      policyPath,
+      `Policy path must be an absolute path; got ${hrCode(policyPath)}`
+    )
+    dir = nodePath.dirname(policyPath)
+  } else if (projectRoot) {
+    projectRoot = toAbsolutePath(
+      projectRoot,
+      `Project root must be an absolute path; got ${hrCode(projectRoot)}`
+    )
+    dir = nodePath.join(projectRoot, defaultDir)
+  } else {
+    dir = nodePath.join(process.cwd(), defaultDir)
+  }
+  return nodePath.join(dir, defaultFilename)
+}
+
+/**
+ * Given path to a policy file, returns the sibling path to the policy override
+ * file
+ *
+ * @param {Object} options
+ * @param {string | URL} [options.policyPath] Path to the policy file
+ * @param {string | URL} [options.projectRoot]
+ * @returns {string}
+ * @internal
+ */
+
+export const makeDefaultPolicyOverridePath = ({ policyPath, projectRoot }) => {
+  const path = makeDefaultPath(
+    DEFAULT_POLICY_DIR,
+    DEFAULT_POLICY_OVERRIDE_FILENAME,
+    { policyPath, projectRoot }
+  )
+  log.debug(`Guessed policy override path: ${hrPath(path)}`)
+  return path
+}
+/**
+ * Given path to a policy file, returns the sibling path to the policy debug
+ * file
+ *
+ * @param {Object} options
+ * @param {string | URL} [options.policyPath] Path to the policy file
+ * @param {string | URL} [options.projectRoot]
+ * @returns {string}
+ * @internal
+ */
+
+export const makeDefaultPolicyDebugPath = ({ policyPath, projectRoot }) => {
+  const path = makeDefaultPath(
+    DEFAULT_POLICY_DIR,
+    DEFAULT_POLICY_DEBUG_FILENAME,
+    { policyPath, projectRoot }
+  )
+  log.debug(`Using debug policy path: ${hrPath(path)}`)
+  return path
+}
+
+/**
+ * Computes a default path to the policy file, based on the project root
+ * directory.
+ *
+ * @param {string | URL} [projectRoot=process.cwd()] Project root directory.
+ *   Default is `process.cwd()`
+ * @returns {string}
+ * @internal
+ */
+export const makeDefaultPolicyPath = (projectRoot = process.cwd()) => {
+  const path = makeDefaultPath(DEFAULT_POLICY_DIR, DEFAULT_POLICY_FILENAME, {
+    projectRoot,
+  })
+  log.debug(`Using default policy path: ${hrPath(path)}`)
+  return path
+}
+
+/**
+ * Type guard for a merged LavaMoat policy.
+ *
+ * @param {unknown} policy
+ * @returns {policy is MergedLavaMoatPolicy} Whether the policy is a merged
+ *   LavaMoat policy
+ */
+export const isMergedPolicy = (policy) =>
+  isPolicy(policy) &&
+  constants.MERGED_POLICY_FIELD in policy &&
+  policy[constants.MERGED_POLICY_FIELD] === true
