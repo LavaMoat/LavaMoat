@@ -2,6 +2,7 @@ import '../../src/preamble.js'
 
 import test from 'ava'
 import { fs, vol } from 'memfs'
+
 import * as constants from '../../src/constants.js'
 import { ErrorCodes } from '../../src/error-code.js'
 import {
@@ -67,14 +68,14 @@ test('readPolicyOverride - reads and validates policy override from disk (defaul
 
 test('loadPolicies - loads and merges policies from disk', async (t) => {
   vol.fromJSON({
-    '/policy.json': JSON.stringify({ resources: {} }),
     '/policy-override.json': JSON.stringify({ resources: {} }),
+    '/policy.json': JSON.stringify({ resources: {} }),
   })
   const policy = await loadPolicies('/policy.json', {
     policyOverridePath: '/policy-override.json',
     readFile: /** @type {any} */ (fs.promises.readFile),
   })
-  t.deepEqual(policy, { resources: {}, [constants.MERGED_POLICY_FIELD]: true })
+  t.deepEqual(policy, { [constants.MERGED_POLICY_FIELD]: true, resources: {} })
 })
 
 test('isPolicy - returns true for valid policy', (t) => {
@@ -108,17 +109,17 @@ test('isTrusted - returns true for implicitly trusted policy', (t) => {
 })
 
 test('isTrusted - returns true for empty root policy', (t) => {
-  t.true(isTrusted({ root: {}, resources: {} }))
+  t.true(isTrusted({ resources: {}, root: {} }))
 })
 
 test('isTrusted - returns false for root policy w/ usePolicy', (t) => {
-  t.false(isTrusted({ root: { usePolicy: 'foo' }, resources: {} }))
+  t.false(isTrusted({ resources: {}, root: { usePolicy: 'foo' } }))
 })
 
 test('getCanonicalName - returns canonical name for entry compartment with trustRoot=true', (t) => {
   const compartment = /** @type {any} */ ({
-    name: 'entry',
     location: '/path/to/entry',
+    name: 'entry',
     path: [],
   })
   const result = getCanonicalName(compartment, true)
@@ -127,8 +128,8 @@ test('getCanonicalName - returns canonical name for entry compartment with trust
 
 test('getCanonicalName - returns compartment name for entry compartment with trustRoot=false', (t) => {
   const compartment = /** @type {any} */ ({
-    name: 'entry-compartment',
     location: '/path/to/entry',
+    name: 'entry-compartment',
     path: [],
   })
   const result = getCanonicalName(compartment, false)
@@ -137,8 +138,8 @@ test('getCanonicalName - returns compartment name for entry compartment with tru
 
 test('getCanonicalName - returns joined path for non-entry compartment', (t) => {
   const compartment = /** @type {any} */ ({
-    name: 'non-entry-compartment',
     location: '/path/to/non-entry',
+    name: 'non-entry-compartment',
     path: ['non', 'entry'],
   })
   const result = getCanonicalName(compartment)
@@ -147,8 +148,8 @@ test('getCanonicalName - returns joined path for non-entry compartment', (t) => 
 
 test('getCanonicalName - throws ReferenceError if compartment has no path', (t) => {
   const compartment = /** @type {any} */ ({
-    name: 'invalid-compartment',
     location: '/path/to/invalid',
+    name: 'invalid-compartment',
   })
   t.throws(() => getCanonicalName(compartment), {
     instanceOf: ReferenceError,

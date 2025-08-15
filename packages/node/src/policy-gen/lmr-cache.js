@@ -5,6 +5,7 @@
  */
 
 import { LavamoatModuleRecord } from 'lavamoat-core'
+
 import { GenerationError } from '../error.js'
 
 /** @type {unique symbol} */
@@ -39,21 +40,9 @@ export class LMRCache {
   constructor(key) {
     if (key !== kCtor) {
       throw new TypeError(
-        `LMRCache cannot be instantiated directly; use LMRCache.create()`
+        'LMRCache cannot be instantiated directly; use LMRCache.create()'
       )
     }
-  }
-
-  /**
-   * Computes the cache key for a given {@link LavamoatModuleRecord} or its
-   * options.
-   *
-   * @param {SimpleLavamoatModuleRecordOptions | LavamoatModuleRecord} moduleRecord
-   * @returns {string}
-   * @todo Determine if this is appropriately unique
-   */
-  static #keyFor({ specifier, file }) {
-    return `${specifier}:${file}`
   }
 
   /**
@@ -66,14 +55,15 @@ export class LMRCache {
   }
 
   /**
-   * Returns `true` if the cache has a {@link LavamoatModuleRecord} for the given
-   * options or record.
+   * Computes the cache key for a given {@link LavamoatModuleRecord} or its
+   * options.
    *
    * @param {SimpleLavamoatModuleRecordOptions | LavamoatModuleRecord} moduleRecord
-   * @returns {boolean}
+   * @returns {string}
+   * @todo Determine if this is appropriately unique
    */
-  has(moduleRecord) {
-    return this.#cache.has(LMRCache.#keyFor(moduleRecord))
+  static #keyFor({ file, specifier }) {
+    return `${specifier}:${file}`
   }
 
   /**
@@ -108,5 +98,16 @@ export class LMRCache {
   get(opts) {
     const key = LMRCache.#keyFor(opts)
     return this.#cache.get(key)
+  }
+
+  /**
+   * Returns `true` if the cache has a {@link LavamoatModuleRecord} for the given
+   * options or record.
+   *
+   * @param {SimpleLavamoatModuleRecordOptions | LavamoatModuleRecord} moduleRecord
+   * @returns {boolean}
+   */
+  has(moduleRecord) {
+    return this.#cache.has(LMRCache.#keyFor(moduleRecord))
   }
 }

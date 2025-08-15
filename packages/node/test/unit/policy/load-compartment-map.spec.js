@@ -2,6 +2,7 @@ import '../../../src/preamble.js'
 
 import test from 'ava'
 import stringify from 'json-stable-stringify'
+
 import { DEFAULT_TRUST_ROOT_COMPARTMENT } from '../../../src/constants.js'
 import { loadCompartmentMapForPolicy } from '../../../src/policy-gen/policy-gen-compartment-map.js'
 import {
@@ -17,7 +18,7 @@ test('result is deterministic', async (t) => {
     new URL('./kitchen-sink.json', JSON_FIXTURE_DIR_URL)
   )
 
-  const { compartmentMap, renames, dataMap } =
+  const { compartmentMap, dataMap, renames } =
     await loadCompartmentMapForPolicy(DEFAULT_JSON_FIXTURE_ENTRY_POINT, {
       readPowers,
       trustRoot: DEFAULT_TRUST_ROOT_COMPARTMENT,
@@ -26,7 +27,7 @@ test('result is deterministic', async (t) => {
   t.snapshot(
     JSON.parse(
       /** @type {string} */ (
-        stringify({ compartmentMap, renames, dataMap: fromEntries(dataMap) })
+        stringify({ compartmentMap, dataMap: fromEntries(dataMap), renames })
       )
     )
   )

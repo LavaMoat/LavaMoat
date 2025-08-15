@@ -69,7 +69,7 @@ const makeApplyHint = (moduleDescriptor) => {
 
   if (!moduleSource) {
     throw new GenerationError(
-      `Unsupported module descriptor type; this is a bug`
+      'Unsupported module descriptor type; this is a bug'
     )
   }
 
@@ -115,7 +115,7 @@ const makeApplyHint = (moduleDescriptor) => {
         moduleDescriptor.source = moduleSource
       } else {
         throw new GenerationError(
-          `Unsupported module descriptor type; this is a bug`
+          'Unsupported module descriptor type; this is a bug'
         )
       }
       return true
@@ -148,7 +148,7 @@ const makeApplyHint = (moduleDescriptor) => {
 export const makePolicyGenCompartment = (
   compartmentMap,
   canonicalNameMap,
-  { policyOverride, log = defaultLog } = {}
+  { log = defaultLog, policyOverride } = {}
 ) => {
   if (!policyOverride?.resources) {
     return Compartment
