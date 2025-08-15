@@ -7,15 +7,17 @@
  * @packageDocumentation
  */
 
-import { loadLocation } from '@endo/compartment-mapper'
+import { loadFromMap } from '@endo/compartment-mapper/import-lite.js'
+import { makeNodeCompartmentMap } from '../compartment/node-compartment-map.js'
 import { DEFAULT_ENDO_OPTIONS } from '../compartment/options.js'
 import { defaultReadPowers } from '../compartment/power.js'
+import { ExecutionError } from '../error.js'
 import { log as defaultLog } from '../log.js'
-import { toEndoURL } from '../util.js'
+import { noop } from '../util.js'
 
 /**
- * @import {ReadNowPowers, LoadLocationOptions} from '@endo/compartment-mapper'
- * @import {ApplicationLoader, ExecuteOptions} from '../types.js'
+ * @import {ImportLocationOptions, SyncImportLocationOptions, CompartmentMapDescriptor} from '@endo/compartment-mapper'
+ * @import {ApplicationLoader, CompleteCompartmentDescriptorDataMap, ExecuteOptions} from '../types.js'
  */
 
 /**
@@ -29,36 +31,74 @@ import { toEndoURL } from '../util.js'
  *
  * @template [T=unknown] Exports of module, if known. Default is `unknown`
  * @param {string | URL} entrypointPath Entry point of application
- * @param {ReadNowPowers} [readPowers] Read powers
  * @param {ExecuteOptions} [options] Options
  * @returns {Promise<ApplicationLoader<T>>} Object with `import()` method
  * @public
  */
 export const load = async (
   entrypointPath,
-  readPowers = defaultReadPowers,
-  { log = defaultLog, ...options } = {}
+  {
+    log = defaultLog,
+    dev,
+    decorators = [],
+    trustRoot,
+    endoPolicy,
+    readPowers = defaultReadPowers,
+    onNodeModulesMapped = noop,
+    ...otherOptions
+  } = {}
 ) => {
-  await Promise.resolve()
+  /** @type {CompartmentMapDescriptor} */
+  let nodeCompartmentMap
+  /** @type {CompleteCompartmentDescriptorDataMap} */
+  let nodeDataMap
+  try {
+    // eslint-disable-next-line @jessie.js/safe-await-separator
+    ;({ nodeCompartmentMap, nodeDataMap } = await makeNodeCompartmentMap(
+      entrypointPath,
+      {
+        readPowers,
+        dev,
+        log,
+        trustRoot,
+        decorators,
+        endoPolicy,
+      }
+    ))
+  } catch (err) {
+    throw new ExecutionError(
+      `Failed to create compartment map for ${entrypointPath}: ${err}`,
+      { cause: err }
+    )
+  }
 
-  const entrypoint = toEndoURL(entrypointPath)
+  try {
+    onNodeModulesMapped(nodeCompartmentMap, nodeDataMap)
+  } catch (err) {
+    throw new ExecutionError(`onNodeModulesMapped callback failed`, {
+      cause: err,
+    })
+  }
 
-  /** @type {LoadLocationOptions} */
-  const opts = {
+  /** @type {ImportLocationOptions | SyncImportLocationOptions} */
+  const loadFromMapOptions = {
     ...DEFAULT_ENDO_OPTIONS,
-    ...options,
+    ...otherOptions,
+    dev,
+    policy: endoPolicy,
     log: log.debug.bind(log),
   }
 
-  const { import: importApp, sha512 } = await loadLocation(
+  const { import: importApp, sha512 } = await loadFromMap(
     readPowers,
-    entrypoint,
-    opts
+    nodeCompartmentMap,
+    loadFromMapOptions
   )
 
   return {
     // TODO: update Endo's type here
-    import: () => /** @type {Promise<{ namespace: T }>} */ (importApp(opts)),
+    import: () =>
+      /** @type {Promise<{ namespace: T }>} */ (importApp(loadFromMapOptions)),
     sha512,
   }
 }

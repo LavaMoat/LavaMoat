@@ -44,18 +44,21 @@
   "scripts": {
     "lint:deps": "depcheck",
     "test": "npm run test:run",
+    "test:cover": "c8 --check-coverage ava",
     "test:run": "ava",
     "test:update-snapshots": "ava -u"
   },
   "dependencies": {
-    "@endo/compartment-mapper": "1.6.2",
+    "@endo/compartment-mapper": "1.6.3",
     "@endo/evasive-transform": "2.0.0",
     "@types/node": "18.19.112",
     "chalk": "4.1.2",
+    "fast-fuzzy": "1.12.0",
     "lavamoat-core": "^16.5.0",
     "loggerr": "4.2.0",
-    "ses": "1.12.0",
+    "ses": "1.14.0",
     "terminal-link": "3.0.0",
+    "to-keypath": "0.1.2",
     "type-fest": "4.41.0",
     "yargs": "17.7.2"
   },
