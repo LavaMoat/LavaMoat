@@ -13,7 +13,7 @@
   "author": "LavaMoat Project",
   "license": "MIT",
   "engines": {
-    "node": "^18.18.0 || ^20.0.0 || ^22.0.0 || ^24.0.0",
+    "node": "^22.0.0 || ^24.0.0",
     "npm": ">=9.0.0"
   },
   "exports": {
@@ -34,7 +34,7 @@
     "build": "tsx ./scripts/create-policy-schema.ts",
     "lint:deps": "depcheck",
     "rebuild": "npm run build",
-    "test": "npm run test:run",
+    "test": "node ./scripts/test.js",
     "test:cover": "c8 npm test",
     "test:run": "node --import tsx --test \"test/*.spec.ts\"",
     "test:update-snapshots": "node --import tsx --test --test-update-snapshots \"test/*.spec.ts\""
