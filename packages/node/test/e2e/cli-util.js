@@ -15,7 +15,7 @@ export const execFileAsync = promisify(execFile)
  */
 
 export const CLI_PATH = fileURLToPath(
-  new URL('../../src/cli.js', import.meta.url)
+  new URL('../../src/cli/cli.js', import.meta.url)
 )
 
 /**
