@@ -74,8 +74,15 @@ node /path/to/LavaMoat/packages/lavamoat-node/src/cli.js hello.js
 npm run --workspace=packages/core test
 npm run --workspace=packages/allow-scripts test
 npm run --workspace=packages/node test
+npm run --workspace=packages/lavamoat-node test
 npm run --workspace=packages/browserify test
 npm run --workspace=packages/webpack test
+npm run --workspace=packages/aa test
+npm run --workspace=packages/git-safe-dependencies test
+npm run --workspace=packages/lavapack test
+npm run --workspace=packages/laverna test
+npm run --workspace=packages/react-native-lockdown test
+npm run --workspace=packages/tofu test
 ```
 
 ## Repository Structure
@@ -109,8 +116,7 @@ npm run --workspace=packages/webpack test
 1. **ALWAYS run setup first:** `npm run setup`
 2. **Build before testing:** `npm run build`
 3. **Test your changes:** Run relevant package tests
-4. **Validate manually:** Execute the validation scenarios above
-5. **Lint before committing:** `npm run lint` - must pass for CI
+4. **Lint before committing:** `npm run lint` - must pass for CI
 
 ### CI Validation Commands
 
@@ -152,7 +158,7 @@ node packages/allow-scripts/src/cli.js run      # Execute allowed scripts
 packages/node/src/cli.js
 
 # Generate policy for a Node.js application
-node packages/node/src/cli.js --writeAutoPolicy app.js
+node packages/node/src/cli.js generate app.js
 
 # Run application with LavaMoat protection
 node packages/node/src/cli.js app.js --policy ./lavamoat/node/policy.json
@@ -217,4 +223,4 @@ npm run test:prep
 npm run test:workspaces
 ```
 
-**Always check that your changes don't break the core security functionality by running the validation scenarios before submitting code.**
+**Always check that your changes don't break the core security functionality by running the CI test suite before submitting code.**
