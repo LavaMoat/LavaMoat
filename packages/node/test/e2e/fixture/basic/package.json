@@ -3,6 +3,5 @@
   "version": "1.0.0",
   "type": "module",
   "license": "ISC",
-  "private": true,
-  "main": "app.js"
+  "private": true
 }

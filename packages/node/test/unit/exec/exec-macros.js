@@ -62,9 +62,7 @@ export const createExecMacros = (test) => {
           new URL(fixtureFilename, JSON_FIXTURE_DIR_URL)
         )
         try {
-          const result = await run(jsonEntrypoint, policy, {
-            readPowers,
-          })
+          const result = await run(jsonEntrypoint, { policy, readPowers })
           t.deepEqual(
             { .../** @type {any} */ (result) },
             expected,
@@ -96,7 +94,7 @@ export const createExecMacros = (test) => {
         expected,
         { policy = DEFAULT_POLICY } = {}
       ) => {
-        const result = await run(entrypoint, policy)
+        const result = await run(entrypoint, { policy })
         t.deepEqual({ .../** @type {any} */ (result) }, expected)
       },
       title: (title) =>
