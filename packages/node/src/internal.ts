@@ -8,32 +8,39 @@
 
 import type {
   CompartmentDescriptor,
-  CompartmentMapDescriptor,
+  CompartmentMapTransformFn,
+  DigestedCompartmentMapDescriptor,
+  SomePolicy as EndoPolicy,
+  ModuleDescriptor,
+  PackageCompartmentDescriptorName,
+  PackageCompartmentMapDescriptor,
   ReadNowPowers,
   ReadNowPowersProp,
   Sources,
 } from '@endo/compartment-mapper'
-import { type LavaMoatPolicy } from '@lavamoat/types'
+import type { LavaMoatPolicy, Resources } from '@lavamoat/types'
 import type { LavamoatModuleRecordOptions } from 'lavamoat-core'
-import type { Except, LiteralUnion, Simplify } from 'type-fest'
+import type { PackageJson, SetFieldType, ValueOf } from 'type-fest'
+import type { SES_VIOLATION_TYPES } from './constants.js'
 import type {
-  ATTENUATORS_COMPARTMENT,
-  LAVAMOAT_PKG_POLICY_ROOT,
-} from './constants.js'
-import type {
-  BaseLoadCompartmentMapOptions,
-  BuildModuleRecordsOptions,
+  ComposeOptions,
   GeneratePolicyOptions,
+  MergedLavaMoatPolicy,
+  WithCaptureLiteOptions,
   WithDebug,
+  WithDev,
+  WithEndoPolicy,
   WithFs,
   WithIsBuiltin,
   WithLog,
   WithPolicyOverride,
-  WithPolicyOverridePath,
+  WithPolicyOverrideOnly,
+  WithProjectRoot,
   WithReadFile,
   WithReadPowers,
+  WithScuttleGlobalThis,
   WithTrustRoot,
-  WritePolicyOptions,
+  WithWritePolicyOptions,
 } from './types.js'
 
 /**
@@ -52,23 +59,24 @@ export type ContextTestFn = (context: object) => boolean
  *
  * @internal
  */
-export type GenerateOptions = Except<
+export type GenerateOptions = Omit<
   GeneratePolicyOptions,
-  keyof WritePolicyOptions
+  keyof WithWritePolicyOptions
 >
 
 /**
- * Options for `loadCompartmentMap()`
+ * Options for `loadCompartmentMapForPolicy()`
  *
  * @internal
  */
-export type LoadCompartmentMapOptions = Simplify<
-  BaseLoadCompartmentMapOptions &
-    WithReadPowers &
-    WithPolicyOverride &
-    WithTrustRoot & {
-      compartmentDescriptorTransforms?: CompartmentDescriptorTransform[]
-    }
+export type LoadCompartmentMapForPolicyOptions = ComposeOptions<
+  [
+    WithCaptureLiteOptions,
+    WithReadPowers,
+    WithPolicyOverride,
+    WithTrustRoot,
+    WithProjectRoot,
+  ]
 >
 
 /**
@@ -82,16 +90,21 @@ export type LoadCompartmentMapOptions = Simplify<
  */
 export type PolicyGeneratorContextOptions<
   RootModule extends string | void = void,
-> = Simplify<
-  WithReadPowers &
-    WithIsBuiltin &
-    WithLog & {
+> = ComposeOptions<
+  [
+    WithReadPowers,
+    WithIsBuiltin,
+    WithLog,
+    {
       /**
        * If set, this implies the associated {@link CompartmentDescriptor} is the
        * entry descriptor.
        */
       rootModule?: RootModule
-    }
+
+      packageJson?: PackageJson
+    },
+  ]
 >
 
 /**
@@ -136,45 +149,66 @@ export type SomeParameters<T extends SomeFunction> = T extends new (
 /**
  * Options for `readPolicy()`
  *
- * @interal
+ * @internal
  */
-export type ReadPolicyOptions = WithReadFile
+export type ReadPolicyOptions = ComposeOptions<[WithReadFile]>
 
 /**
- * Options for `readPolicyoverride()`
+ * Options for `readPolicyOverride()`
  *
- * @interal
+ * @internal
  */
-export type ReadPolicyOverrideOptions = WithReadFile
+export type ReadPolicyOverrideOptions = ComposeOptions<[WithReadFile]>
 
 /**
  * Options for `resolveBinScript()`
  *
- * @interal
+ * @internal
  */
-export type ResolveBinScriptOptions = Simplify<
-  WithFs & {
-    /**
-     * Directory to begin looking for the script in
-     */
-    from?: string
-  }
->
+export type ResolveBinScriptOptions = ComposeOptions<[WithFs, WithFrom]>
+
+/**
+ * Options containing a `from` property; used for path resolution
+ *
+ * @internal
+ */
+export interface WithFrom {
+  /**
+   * Where to resolve from
+   */
+  from?: string | URL
+}
+
+/**
+ * Options for `resolveEntrypoint()`
+ */
+export type ResolveEntrypointOptions = ComposeOptions<[WithFrom]>
 
 /**
  * Options for `resolveWorkspace()`
  *
- * @interal
+ * @internal
  */
 export type ResolveWorkspaceOptions = ResolveBinScriptOptions
 
 /**
  * Options for `inspectModuleRecords()`
  *
- * @interal
+ * @internal
  */
-export type InspectModuleRecordsOptions = Simplify<
-  WithLog & WithDebug & WithTrustRoot
+export type ModuleRecordsToPolicyOptions = ComposeOptions<
+  [WithLog, WithDebug, WithTrustRoot, WithPolicyOverride, WithIsBuiltin]
+>
+
+/**
+ * Options for `inspectModuleRecords()` with `debug` set to `true`
+ *
+ * @internal
+ */
+export type ModuleRecordsToDebugPolicyOptions = SetFieldType<
+  ModuleRecordsToPolicyOptions,
+  'debug',
+  true
 >
 
 /**
@@ -184,8 +218,6 @@ export type InspectModuleRecordsOptions = Simplify<
  * - `moduleInitializer` is only used by the `lavamoat-core` kernel;
  *   `@endo/compartment-mapper`'s parsers handle this for us
  * - `ast` is created internally by the module inspector and we needn't provide it
- *
- * @interal
  */
 export type SimpleLavamoatModuleRecordOptions = Omit<
   // eslint-disable-next-line @typescript-eslint/ban-types
@@ -194,21 +226,9 @@ export type SimpleLavamoatModuleRecordOptions = Omit<
 >
 
 /**
- * The canonical name of a package as used in policy
- *
- * {@link ATTENUATORS_COMPARTMENT} does not appear in policy and is an Endo-ism.
- *
- * @interal
- */
-export type CanonicalName = LiteralUnion<
-  typeof LAVAMOAT_PKG_POLICY_ROOT | typeof ATTENUATORS_COMPARTMENT,
-  string
->
-
-/**
  * N array of required properties for {@link ReadNowPowers}
  *
- * @interal
+ * @internal
  */
 export type RequiredReadNowPowers = ReadonlyArray<
   {
@@ -220,47 +240,253 @@ export type RequiredReadNowPowers = ReadonlyArray<
 /**
  * Options for `reportInvalidOverrides()`
  *
- * @interal
+ * @internal
  */
-export type ReportInvalidOverridesOptions = WithPolicyOverride &
-  WithPolicyOverridePath &
-  WithLog
+export type ReportInvalidOverridesOptions = ComposeOptions<
+  [
+    WithPolicy,
+    /**
+     * `policyOverridePath` is used only for display purposes; we do not
+     * actually attempt to read the policy override file
+     */
+    WithPolicyPath,
+    WithLog,
+    {
+      maxSuggestions?: number
+      canonicalNameMap?: Map<string, string>
+      what?: 'policy' | 'policy overrides'
+    },
+  ]
+>
+
+/**
+ * Options for `reportSesViolations()`
+ *
+ * @internal
+ */
+export type ReportSesViolationsOptions = ComposeOptions<[WithLog]>
 
 /**
  * Result of `generatePolicy()`
  *
- * @interal
+ * @internal
  */
-export type GenerateResult<T extends LavaMoatPolicy = LavaMoatPolicy> = {
+export interface GenerateResult<
+  T extends MergedLavaMoatPolicy = MergedLavaMoatPolicy,
+  U extends DigestedCompartmentMapDescriptor = DigestedCompartmentMapDescriptor,
+> {
+  canonicalNameMap: Map<string, string>
   policy: T
-  compartmentMap: CompartmentMapDescriptor
+  compartmentMap: U
 }
-
-/**
- * Options for `compartmentMapToPolicy()`
- *
- * @interal
- */
-export type CompartmentMapToPolicyOptions = Simplify<
-  BuildModuleRecordsOptions & WithPolicyOverride & WithDebug & WithTrustRoot
->
 
 /**
  * Result of `loadCompartmentMap()`
  *
  * @internal
  */
-export interface LoadCompartmentMapResult {
-  compartmentMap: CompartmentMapDescriptor
+export interface LoadCompartmentMapResult<
+  T extends DigestedCompartmentMapDescriptor = DigestedCompartmentMapDescriptor,
+> {
+  /**
+   * The final compartment map descriptor, having been run through
+   * `captureFromMap()`.
+   */
+  compartmentMap: T
+  /**
+   * The final mapping of compartment name to `CompartmentSources`, having been
+   * run through `captureFromMap()`
+   */
   sources: Sources
+  /**
+   * Mapping of original compartment names (from `mapNodeModules()`) to
+   * normalized compartment names (from `captureFromMap()`)
+   */
   renames: Record<string, string>
+
+  packageJsonMap: Map<PackageCompartmentDescriptorName, PackageJson>
 }
 
-export type CompartmentDescriptorTransform = (
-  compartmentDescriptor: CompartmentDescriptor,
-  options?: CompartmentDescriptorTransformOptions
-) => void
-
-export type CompartmentDescriptorTransformOptions = Simplify<
-  WithTrustRoot & WithLog
+/**
+ * Options for `makeNodeCompartmentMap()`
+ *
+ * @internal
+ */
+export type MakeNodeCompartmentMapOptions = ComposeOptions<
+  [
+    WithLog,
+    WithReadPowers,
+    WithDev,
+    WithTrustRoot,
+    WithEndoPolicy,
+    WithEndoPolicyOverride,
+    WithPolicyOverrideOnly,
+    WithCompartmentMapTransforms,
+  ]
 >
+
+/**
+ * @internal
+ */
+export interface WithCompartmentMapTransforms {
+  compartmentMapTransforms?: CompartmentMapTransformFn[]
+}
+
+/**
+ * @internal
+ */
+export interface WithInclude {
+  include?: string[]
+}
+
+/**
+ * @internal
+ */
+export interface WithEndoPolicyOverride {
+  endoPolicyOverride?: EndoPolicy
+}
+
+/**
+ * Result of `makeNodeCompartmentMap()`
+ *
+ * @internal
+ */
+export interface MakeNodeCompartmentMapResult {
+  canonicalNameMap: Map<string, string>
+  /**
+   * Denormalized compartment map descriptor having Endo-style URLs for
+   * `CompartmentDescriptor` names and rough `ModuleDescriptor`s. May contain
+   * more `CompartmentDescriptor`s than will actually be used.
+   */
+  nodeCompartmentMap: PackageCompartmentMapDescriptor
+}
+
+/**
+ * Proper names of SES violation types
+ *
+ * @internal
+ */
+export type SesViolationType = ValueOf<typeof SES_VIOLATION_TYPES>
+
+/**
+ * Options for `makeGlobalsAttenuator()`
+ *
+ * @internal
+ */
+export type MakeGlobalsAttenuatorOptions = ComposeOptions<
+  [WithPolicy, WithScuttleGlobalThis]
+>
+
+/**
+ * Options containing a `policy` prop
+ *
+ * @template T The type of the resources in the policy
+ * @internal
+ */
+export interface WithPolicy<T extends Resources = Resources> {
+  policy?: LavaMoatPolicy<T>
+}
+
+export interface WithPolicyPath {
+  policyPath?: string | URL
+}
+
+/**
+ * A function which attempts to get a related comaprtment descriptor by name
+ * (from a given compartment descriptor).
+ *
+ * @internal
+ */
+export type GetValidCompartmentDescriptorFn = (
+  currentCompartmentDescriptor: CompartmentDescriptor,
+  compartmentName: string
+) => CompartmentDescriptor | undefined
+
+/**
+ * Options for `makePolicyGenCompartment()`
+ *
+ * @internal
+ */
+export type MakePolicyGenCompartmentOptions = ComposeOptions<
+  [WithPolicyOverrideOnly, WithLog]
+>
+
+/**
+ * Options for `makeGetHints()`
+ *
+ * @internal
+ */
+export type MakeGetHintsOptions = ComposeOptions<
+  [WithPolicyOverrideOnly, WithLog]
+>
+
+/**
+ * Options for `buildModuleRecords()`
+ *
+ * @remarks
+ * Exported due to use within {@link CompartmentMapToPolicyOptions}
+ * @internal
+ */
+
+export type BuildModuleRecordsOptions = ComposeOptions<
+  [WithReadPowers, WithIsBuiltin, WithLog]
+>
+
+/**
+ * Options for `compartmentMapToPolicy()`
+ *
+ * @internal
+ */
+export type CompartmentMapToPolicyOptions = ComposeOptions<
+  [BuildModuleRecordsOptions, WithPolicyOverride, WithDebug, WithTrustRoot]
+>
+
+/**
+ * Options for `compartmentMapToPolicy()` wherein a `LavaMoatDebugPolicy` will
+ * be generated
+ *
+ * @internal
+ */
+export type CompartmentMapToDebugPolicyOptions = SetFieldType<
+  CompartmentMapToPolicyOptions,
+  'debug',
+  true
+>
+
+/**
+ * Options for `makeModuleResolver()`
+ *
+ * @internal
+ */
+export type MakeModuleResolverOptions = ComposeOptions<
+  [WithLog, WithReadPowers]
+>
+
+/**
+ * A function which accepts a `ModuleDescriptor` and returns an absolute path to
+ * the module it represents
+ *
+ * @internal
+ */
+export type ResolveModuleDescriptorFn = (
+  descriptor: ModuleDescriptor
+) => string | undefined
+
+/**
+ * A function which accepts a compartment label and returns an absolute path to
+ * the compartment
+ *
+ * @internal
+ */
+export type ResolveCompartmentFn = (label: string) => string | undefined
+
+/**
+ * Object used by `PolicyGeneratorContext` to resolve modules for translation
+ * into `LavamoatModuleRecord`s `importMap`s
+ *
+ * @internal
+ */
+export interface ModuleResolver {
+  resolveModuleDescriptor: ResolveModuleDescriptorFn
+  resolveCompartment: ResolveCompartmentFn
+}

@@ -7,6 +7,8 @@
  */
 import path from 'node:path'
 
+const { freeze } = Object
+
 /**
  * Const string to identify the internal attenuators compartment
  *
@@ -71,11 +73,6 @@ export const DEFAULT_POLICY_OVERRIDE_PATH = path.normalize(
 export const ENDO_GLOBAL_POLICY_ITEM_WRITE = 'write'
 
 /**
- * The `attenuate` prop of an Endo policy
- */
-export const ENDO_POLICY_ITEM_ATTENUATE = 'attenuate'
-
-/**
  * Policy item for the root entry
  */
 export const ENDO_POLICY_ITEM_ROOT = 'root'
@@ -84,11 +81,6 @@ export const ENDO_POLICY_ITEM_ROOT = 'root'
  * Policy item for any access
  */
 export const ENDO_POLICY_ITEM_WILDCARD = 'any'
-
-/**
- * The `params` prop of an Endo policy
- */
-export const ENDO_POLICY_ITEM_PARAMS = 'params'
 
 /**
  * The `defaultAttenuator` prop of an Endo policy
@@ -188,6 +180,19 @@ export const DEFAULT_TRUST_ROOT_COMPARTMENT = true
  */
 export const PACKAGE_JSON = 'package.json'
 
-export const GLOBAL_THIS_REFS = Object.freeze(
+export const GLOBAL_THIS_REFS = freeze(
   /** @type {const} */ (['global', 'globalThis'])
 )
+
+/**
+ * The variations of SES compatibility problems
+ */
+export const SES_VIOLATION_TYPES = freeze(
+  /** @type {const} */ ({
+    DynamicRequires: 'dynamic requires',
+    PrimordialMutation: 'primordial mutation',
+    StrictModeViolation: 'strict-mode violation',
+  })
+)
+
+export const MERGED_POLICY_FIELD = Symbol.for('@lavamoat/core/mergedPolicy')
