@@ -33,7 +33,7 @@ const { fs } = memfs(vol)
 
 const readPowers = makeReadPowers({ fs: /** @type {FsInterface} */ (fs) })
 
-void run(entryPath, policy, { scuttleGlobalThis, readPowers }).catch((err) => {
+void run(entryPath, { policy, scuttleGlobalThis, readPowers }).catch((err) => {
   // eslint-disable-next-line no-console
   log.error(err)
   process.exitCode = 1

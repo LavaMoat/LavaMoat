@@ -1,3 +1,4 @@
+import { type StringKeyOf } from 'type-fest'
 import { type LavamoatModuleRecord } from '../moduleRecord'
 
 /**
@@ -39,6 +40,8 @@ export interface LavaMoatPolicy<T extends Resources = Resources> {
    * a matching policy in {@link LavaMoatPolicy.resources}
    */
   root?: RootPolicy<T>
+
+  include?: StringKeyOf<T>[]
 }
 
 /**
