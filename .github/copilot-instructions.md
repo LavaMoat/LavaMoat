@@ -95,7 +95,7 @@ npm run --workspace=packages/tofu test
 - `packages/aa/` - Archive analysis utilities
 - `packages/git-safe-dependencies/` - Git-based dependency safety utilities
 - `packages/lavapack/` - Package bundling utilities
-- `packages/laverna/` - Documentation and analysis tools
+- `packages/laverna/` - Publishing tool
 - `packages/react-native-lockdown/` - React Native security lockdown
 - `packages/tofu/` - utility for "trust on first use" policy generation
 
