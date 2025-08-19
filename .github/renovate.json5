@@ -61,5 +61,9 @@
       matchUpdateTypes: ['major'],
       enabled: false,
     },
+    {
+      matchPackageNames: ['@endo/*', 'ses'],
+      groupName: 'endo',
+    },
   ],
 }
