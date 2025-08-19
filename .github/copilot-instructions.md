@@ -120,7 +120,6 @@ npm run --workspace=packages/tofu test
 # These must pass before committing - mirrors CI pipeline
 npm run lint:eslint     # ESLint checks
 npm run lint:deps       # Dependency analysis
-npm run lint:lockfile   # Package lock validation
 npm run build:types     # TypeScript compilation
 ```
 
