@@ -17,6 +17,7 @@
 - @lavamoat/node
   - [🟢] dogfooding (enough ecosystem compatibility to run webpack with @lavamoat/webpack)
 - @lavamoat/webpack
+  - [⚪] refactor how scuttling and snow are integrated, allow for other global repairs/shims along with scuttling to happen at the same time.
   - support for vetted shims
   - grow the number of repairs for browser compatibility and security
     - all postmessage infrastructure repairs
