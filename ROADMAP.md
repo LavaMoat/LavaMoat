@@ -13,6 +13,7 @@
 - new tools
   - kipuka
   - [❔] additional global hardening for node and the browser (think: lockdown-more or sesaw) - could go into core
+  - [⚪] config instead of just policy-override
 - @lavamoat/node
   - [🟢] dogfooding (enough ecosystem compatibility to run webpack with @lavamoat/webpack)
 - @lavamoat/webpack
