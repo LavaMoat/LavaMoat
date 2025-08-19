@@ -14,16 +14,42 @@ const {
   values,
 } = Object
 
-const { lockdown, Proxy, Math, Date } = globalThis
+const { Proxy, Math, Date } = globalThis
 
 const warn = typeof console === 'object' ? console.warn : () => {}
 
 // Avoid running any wrapped code or using compartment if lockdown was not called.
 // This is for when the bundle ends up running despite SES being missing.
 // It was previously useful for sub-compilations running an incomplete bundle as part of the build, but currently that is being skipped. We might go back to it for the sake of build time security if it's deemed worthwihile in absence of lockdown.
-const LOCKDOWN_ON = typeof lockdown !== 'undefined'
+const LOCKDOWN_ON = typeof repairIntrinsics !== 'undefined'
 if (LOCKDOWN_ON) {
-  lockdown(LAVAMOAT.options.lockdown)
+  repairIntrinsics(LAVAMOAT.options.lockdown)
+
+  // accept shims here
+
+  hardenIntrinsics()
+
+const { freeze, defineProperty, getOwnPropertyDescriptor } = Object
+
+  const protoOwners = Reflect.ownKeys(globalThis).filter(
+    (key) => globalThis[key] && globalThis[key].prototype
+  )
+
+  console.log({protoOwners, k:Reflect.ownKeys(globalThis)})
+
+  for (const propertyName of protoOwners) {
+    const desc = getOwnPropertyDescriptor(globalThis[propertyName], 'prototype')
+    freeze(globalThis[propertyName].prototype)
+    console.log('frozen', propertyName)
+    if (desc && desc.configurable) {
+      defineProperty(globalThis[propertyName], 'prototype', {
+        configurable: false,
+        writable: false,
+      })
+    }
+  }
+
+  // harden further here
 } else {
   warn(
     'LavaMoatPlugin: runtime execution started without SES present, switching to no-op.'
