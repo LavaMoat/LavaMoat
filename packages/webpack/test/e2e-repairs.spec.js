@@ -42,9 +42,12 @@ test('webpack/repairs - MessageEvent repair is applied when in use', async (t) =
   )
 
   t.notThrows(() => {
-    runScriptWithSES(mock + t.context.build.snapshot['/dist/app.js'], {
-      console,
-    })
+    runScriptWithSES(
+      mock + '\n;\n' + t.context.build.snapshot['/dist/app.js'],
+      {
+        console,
+      }
+    )
   }, 'Expected the script to run without throwing an error')
 })
 

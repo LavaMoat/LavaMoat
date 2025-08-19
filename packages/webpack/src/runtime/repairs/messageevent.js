@@ -1,9 +1,37 @@
 const { defineProperty } = Object
 const { call } = Function.prototype
 
-// TODO:
-// - implement wider support for messageable realms matching (parent, top, opener)
-// - once other realm reference are emulated, match and return the right references from the getter as well
+const messageToGlobalMap = new WeakMap()
+const theRealGlobalThis = globalThis
+// TODO: enabe after further testing:
+// const realms = new Map()
+// realms.set(globalThis.top || {}, 'top')
+// realms.set(globalThis.parent || {}, 'parent')
+// realms.set(globalThis.opener || {}, 'opener')
+
+const mep = MessageEvent.prototype
+// eslint-disable-next-line no-undef
+const lastResortGlobal = new Compartment().globalThis
+
+const original = Object.getOwnPropertyDescriptor(mep, 'source')
+if (original && original.get) {
+  const sourceGetter = call.bind(original.get)
+
+  defineProperty(mep, 'source', {
+    ...original,
+    get() {
+      const w = sourceGetter(this)
+      if (w === theRealGlobalThis) {
+        return messageToGlobalMap.get(this) || lastResortGlobal
+        // } else if (w && typeof w === 'object' && realms.has(w)) {
+        //   return messageToGlobalMap.get(this)[realms.get(w)] || lastResortGlobal
+      } else {
+        return w
+      }
+    },
+    configurable: false,
+  })
+}
 
 /**
  * Wraps the source getter on MessageEvent prototype with conversion from actual
@@ -18,22 +46,48 @@ exports.MessageEvent = (
   theRealGlobalThis,
   packageCompartmentGlobal
 ) => {
-  const original = Object.getOwnPropertyDescriptor(
-    endowments['MessageEvent'].prototype,
-    'source'
-  )
-  if (original && original.get) {
-    const sourceGetter = call.bind(original.get)
-    defineProperty(endowments['MessageEvent'].prototype, 'source', {
-      ...original,
-      get() {
-        const w = sourceGetter(this)
-        if (w === theRealGlobalThis) {
-          return packageCompartmentGlobal
-        } else {
-          return w
-        }
-      },
-    })
+  const originalListener = endowments.addEventListener
+  const originalConstructor = endowments.MessageEvent
+
+  /**
+   * @param {string} type
+   * @param {any} eventInitDict
+   */
+  endowments.MessageEvent = function MessageEvent(type, eventInitDict) {
+    const nestedResult = new originalConstructor(type, eventInitDict)
+    messageToGlobalMap.set(nestedResult, packageCompartmentGlobal)
+    return nestedResult
+  }
+  endowments.MessageEvent.prototype = originalConstructor.prototype
+  // WARNING: fidelity breaks down at MessageEvent.prototype.constructor,
+  // which runs the original constructor and does not pin the resulting object
+  // to a matching global in the WeakMap
+
+  /**
+   * @param {string} type
+   * @param {function} listener
+   * @param {any} [options]
+   */
+  endowments.addEventListener = (type, listener, options) => {
+    if (type === 'message') {
+      const wrappedListener = (/** @type {MessageEvent} */ event) => {
+        messageToGlobalMap.set(event, packageCompartmentGlobal)
+        return listener.call(packageCompartmentGlobal, event)
+      }
+      return originalListener.call(
+        theRealGlobalThis,
+        type,
+        wrappedListener,
+        options
+      )
+    } else {
+      // calling it on actual global will work even if it was wrapped for endowments
+      return originalListener.call(
+        packageCompartmentGlobal,
+        type,
+        listener,
+        options
+      )
+    }
   }
 }
