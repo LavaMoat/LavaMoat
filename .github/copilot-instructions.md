@@ -92,7 +92,7 @@ npm run --workspace=packages/tofu test
 - `packages/allow-scripts/` - Dependency install script management
 - `packages/browserify/` - Browserify integration plugin
 - `packages/webpack/` - Webpack integration plugin
-- `packages/aa/` - Archive analysis utilities
+- `packages/aa/` - LavaMoat's canonical package name convention.
 - `packages/git-safe-dependencies/` - validator for git dependencies and github actions
 - `packages/lavapack/` - Package bundling utilities internal to browserify plugin
 - `packages/laverna/` - Publishing tool
