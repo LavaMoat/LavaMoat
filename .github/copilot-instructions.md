@@ -93,7 +93,7 @@ npm run --workspace=packages/tofu test
 - `packages/browserify/` - Browserify integration plugin
 - `packages/webpack/` - Webpack integration plugin
 - `packages/aa/` - Archive analysis utilities
-- `packages/git-safe-dependencies/` - Git-based dependency safety utilities
+- `packages/git-safe-dependencies/` - validator for git dependencies and github actions
 - `packages/lavapack/` - Package bundling utilities internal to browserify plugin
 - `packages/laverna/` - Publishing tool
 - `packages/react-native-lockdown/` - React Native security lockdown
