@@ -97,7 +97,7 @@ npm run --workspace=packages/tofu test
 - `packages/lavapack/` - Package bundling utilities
 - `packages/laverna/` - Documentation and analysis tools
 - `packages/react-native-lockdown/` - React Native security lockdown
-- `packages/tofu/` - JavaScript analysis tools
+- `packages/tofu/` - utility for "trust on first use" policy generation
 
 ### Important Files
 
