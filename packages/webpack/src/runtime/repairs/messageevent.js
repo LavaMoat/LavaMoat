@@ -46,8 +46,10 @@ exports.MessageEvent = (
   theRealGlobalThis,
   packageCompartmentGlobal
 ) => {
-  const originalListener = endowments.addEventListener
   const originalConstructor = endowments.MessageEvent
+  if (!originalConstructor) {
+    return
+  }
 
   /**
    * @param {string} type
@@ -62,7 +64,24 @@ exports.MessageEvent = (
   // WARNING: fidelity breaks down at MessageEvent.prototype.constructor,
   // which runs the original constructor and does not pin the resulting object
   // to a matching global in the WeakMap
-
+}
+/**
+ * Wraps the source getter on MessageEvent prototype with conversion from actual
+ * global to compartment global
+ *
+ * @param {{ [key: string]: any }} endowments
+ * @param {any} theRealGlobalThis
+ * @param {any} packageCompartmentGlobal
+ */
+exports.addEventListener = (
+  endowments,
+  theRealGlobalThis,
+  packageCompartmentGlobal
+) => {
+  const originalListener = endowments.addEventListener
+  if (!originalListener) {
+    return
+  }
   /**
    * @param {string} type
    * @param {function} listener
