@@ -260,7 +260,7 @@ class LavaMoatPlugin {
         // Adjust scuttling configuration to not scuttle webpack chunk loading facilities
         if (
           typeof STORE.options.scuttleGlobalThis === 'object' &&
-          STORE.options.scuttleGlobalThis.exceptions
+          Array.isArray(STORE.options.scuttleGlobalThis.exceptions)
         ) {
           STORE.options.scuttleGlobalThis.exceptions.push(
             compilation.outputOptions.chunkLoadingGlobal || 'webpackChunk'
