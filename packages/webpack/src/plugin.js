@@ -110,12 +110,14 @@ class LavaMoatPlugin {
    */
   constructor(options = {}) {
     if (options.scuttleGlobalThis === true) {
-      options.scuttleGlobalThis = { enabled: true }
+      options.scuttleGlobalThis = { enabled: true, exceptions: [] }
     } else if (typeof options.scuttleGlobalThis === 'object') {
       options.scuttleGlobalThis = { ...options.scuttleGlobalThis }
       if (Array.isArray(options.scuttleGlobalThis.exceptions)) {
         options.scuttleGlobalThis.exceptions =
           options.scuttleGlobalThis.exceptions.map((e) => e.toString())
+      } else {
+        options.scuttleGlobalThis.exceptions = []
       }
     }
 
@@ -254,6 +256,16 @@ class LavaMoatPlugin {
             'LavaMoatPlugin: Concatenation of modules disabled - not compatible with LavaMoat wrapped modules.'
           )
         )
+
+        // Adjust scuttling configuration to not scuttle webpack chunk loading facilities
+        if (
+          typeof STORE.options.scuttleGlobalThis === 'object' &&
+          Array.isArray(STORE.options.scuttleGlobalThis.exceptions)
+        ) {
+          STORE.options.scuttleGlobalThis.exceptions.push(
+            compilation.outputOptions.chunkLoadingGlobal || 'webpackChunk'
+          )
+        }
 
         compilation.hooks.optimizeAssets.tap(PLUGIN_NAME, () => {
           // By the time assets are being optimized we should have finished.
