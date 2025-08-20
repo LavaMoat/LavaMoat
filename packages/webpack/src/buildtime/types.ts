@@ -19,6 +19,7 @@ export interface CompleteLavaMoatPluginOptions {
   scuttleGlobalThis?: ScuttlerConfig
   debugRuntime?: boolean
   unlockedChunksUnsafe?: RegExp
+  isolateLocations?: Record<string, string>
 }
 
 export type LavaMoatPluginOptions = Partial<CompleteLavaMoatPluginOptions>
