@@ -1,6 +1,16 @@
 const { isGitUrl, gitInfo, isCommitHash } = require('./isgit')
+const cache = require('./cache')
 
-let githubCache = new Map()
+const fetchRetry5xx = (url, options = {}, retries = 1) => {
+  return fetch(url, options).then((res) => {
+    if (res.status >= 500 && res.status < 600 && retries > 0) {
+      return fetchRetry5xx(url, options, retries - 1)
+    }
+    return res
+  })
+}
+
+let githubCache = cache.init('gh')
 
 // TODO: this might be slow. Would be nice to indicate progress somehow. Maybe some concurrency too if we're careful not to trip up API limits
 const belongs = async (user, project, commit) => {
@@ -9,7 +19,7 @@ const belongs = async (user, project, commit) => {
   if (githubCache.has(url)) {
     return githubCache.get(url)
   }
-  return await fetch(url, {
+  return await fetchRetry5xx(url, {
     headers: {
       Accept: 'application/json',
     },
@@ -36,7 +46,7 @@ const tag2commit = async (user, project, tag) => {
   if (githubCache.has(url)) {
     return githubCache.get(url)
   }
-  return await fetch(url, {
+  return await fetchRetry5xx(url, {
     headers: {
       Accept: 'application/json',
     },
@@ -61,8 +71,13 @@ const tag2commit = async (user, project, tag) => {
 }
 
 class ValidateGitUrl {
-  constructor({ packages }) {
-    githubCache = new Map() // TODO: instantiate properly, this is a temporary cludge to minimize memory leaks in case it's used programatically.
+  constructor({ packages, cacheOnDisk = true } = {}) {
+    // TODO: instantiate properly, this is a temporary cludge to minimize memory leaks in case it's used programatically.
+    if (cacheOnDisk) {
+      githubCache = cache.init('gh')
+    } else if (githubCache === cache) {
+      githubCache = new Map()
+    }
     this.packages = packages
   }
 
