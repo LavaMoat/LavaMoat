@@ -7,6 +7,12 @@ test('webpack/repairs - MessageEvent repair is applied when in use', async (t) =
     generatePolicy: false,
     policy: {
       resources: {
+        'another-message-package': {
+          globals: {
+            console: true,
+            MessageEvent: true,
+          },
+        },
         'message-package': {
           globals: {
             console: true,

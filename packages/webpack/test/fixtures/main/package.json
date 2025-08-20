@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "dependencies": {
+    "another-message-package": "1.0.0",
     "commonjs-package": "1.0.0",
     "commonjs-quirks": "1.0.0",
     "dynamic-importer": "1.0.0",
