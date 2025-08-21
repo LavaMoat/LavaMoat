@@ -16,6 +16,7 @@ export interface CompleteLavaMoatPluginOptions {
   policy?: LavaMoatPolicy
   runChecks?: boolean
   isBuiltin: (specifier: string) => boolean
+  skipRepairs?: true | string[]
   scuttleGlobalThis?: ScuttlerConfig
   debugRuntime?: boolean
   unlockedChunksUnsafe?: RegExp

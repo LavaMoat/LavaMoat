@@ -101,9 +101,15 @@ module.exports = {
           ]
         } else {
           diag.rawDebug(2, `adding runtime for chunk ${currentChunkName}`)
-          const repairs = require('./repairsBuilder.js').buildRepairs(
-            policyData
-          )
+          let repairs
+          if (options.skipRepairs === true) {
+            repairs = ''
+          } else {
+            repairs = require('./repairsBuilder.js').buildRepairs(
+              policyData,
+              options.skipRepairs
+            )
+          }
 
           runtimeChunks = [
             // the string used to indicate root resource id

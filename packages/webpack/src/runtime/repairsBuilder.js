@@ -5,8 +5,18 @@ const { repairs } = require('./repairs/index')
  * Combines the sources of only the repairs that are needed based on the policy
  *
  * @param {import('lavamoat-core').LavaMoatPolicy} policy
+ * @param {string[]} [skipRepairs]
  */
-exports.buildRepairs = (policy) => {
+exports.buildRepairs = (policy, skipRepairs) => {
+  const repairsAvailable =
+    Array.isArray(skipRepairs) && skipRepairs.length > 0
+      ? repairs.filter(
+          (repair) =>
+            !repair.target.some((target) => {
+              return skipRepairs.includes(target)
+            })
+        )
+      : repairs
   const allGlobalsInvolved = new Set()
   for (const resource of Object.values(policy.resources)) {
     if (resource.globals) {
@@ -16,7 +26,7 @@ exports.buildRepairs = (policy) => {
       }
     }
   }
-  const repairsToInclude = repairs.filter((repair) =>
+  const repairsToInclude = repairsAvailable.filter((repair) =>
     repair.target.some((target) => {
       return allGlobalsInvolved.has(target)
     })
