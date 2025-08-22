@@ -9,10 +9,6 @@ function isSymlink(location) {
   const info = lstatSync(location)
   return info.isSymbolicLink()
 }
-
-const symlink = path.normalize(
-  path.join(__dirname, './projects/4/node_modules/aaa')
-)
 const notsymlink = path.normalize(
   path.join(__dirname, './projects/4/node_modules/bbb')
 )
@@ -47,16 +43,16 @@ if (process.platform === 'darwin') {
   ;(process.env.CI ? test.skip : test)(
     '[bench] isSymlink is significantly faster than realpathSync in a naive microbenchmark',
     async (t) => {
-      symlinkPath = await createProject4Symlink()
+      symlinkPath = await createProject4Symlink('ccc')
       const results = {
         ...simpleBench(() => {
-          isSymlink(symlink)
+          isSymlink(symlinkPath)
         }, 'isSymlink(symlink)').current,
         ...simpleBench(() => {
           isSymlink(notsymlink)
         }, 'isSymlink(notsymlink)').current,
         ...simpleBench(() => {
-          realpathSync(symlink)
+          realpathSync(symlinkPath)
         }, 'realpathSync(symlink)').current,
         ...simpleBench(() => {
           realpathSync(notsymlink)
