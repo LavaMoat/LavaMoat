@@ -5,6 +5,7 @@
  */
 import chalk from 'chalk'
 import { isBuiltin as nodeIsBuiltin } from 'node:module'
+
 import { defaultReadPowers } from '../compartment/power.js'
 import {
   LMR_TYPE_BUILTIN,
@@ -36,7 +37,7 @@ import { log as fallbackLog } from '../log.js'
  * @import {PackageJson} from 'type-fest'
  */
 
-const { entries, keys, hasOwn } = Object
+const { entries, hasOwn, keys } = Object
 
 /**
  * @param {StaticModuleType} value
@@ -56,11 +57,9 @@ const isModuleSource = (value) =>
  */
 export class PolicyGeneratorContext {
   /**
-   * Internal cache for {@link LavamoatModuleRecord} objects
-   *
-   * @type {Readonly<LMRCache>}
+   * Used for reading source files
    */
-  #lmrCache
+  static #decoder = new TextDecoder()
 
   /**
    * Compartment descriptor
@@ -73,18 +72,16 @@ export class PolicyGeneratorContext {
   compartmentDescriptor
 
   /**
-   * Read powers
+   * Determine the canonical name for this context's compartment descriptor
    *
-   * Specifically, we need a {@link FileURLToPathFn}
-   *
-   * @type {ReadNowPowers}
+   * @returns {CanonicalName} Package name or special name for entrypoint
    */
-  #readPowers
+  get canonicalName() {
+    return this.#canonicalName
+  }
 
-  /**
-   * An {@link IsBuiltinFn}
-   */
-  #isBuiltin
+  /** @type {CanonicalName} */
+  #canonicalName
 
   /**
    * A mapping of compartment names to missing module specifiers encountered
@@ -93,15 +90,19 @@ export class PolicyGeneratorContext {
    * @type {Readonly<Set<string>>}
    */
 
-  #missingModules
-
-  /** @type {Readonly<Loggerr>} */
-  #log
+  #filepaths
 
   /**
-   * Used for reading source files
+   * An {@link IsBuiltinFn}
    */
-  static #decoder = new TextDecoder()
+  #isBuiltin
+
+  /**
+   * Internal cache for {@link LavamoatModuleRecord} objects
+   *
+   * @type {Readonly<LMRCache>}
+   */
+  #lmrCache
 
   /**
    * Cache of specifier to filepath (or lack thereof)
@@ -113,26 +114,35 @@ export class PolicyGeneratorContext {
    * @type {Readonly<Map<string, string | null | undefined>>}
    */
 
-  #filepaths
+  /** @type {Readonly<Loggerr>} */
+  #log
+
+  #missingModules
+
+  /** @type {PackageJson | undefined} */
+  #packageJson
 
   /**
-   * @type {RootModule | undefined}
+   * Read powers
+   *
+   * Specifically, we need a {@link FileURLToPathFn}
+   *
+   * @type {ReadNowPowers}
    */
-  #rootModule
-
-  /** @type {CanonicalName} */
-  #canonicalName
-
-  /** @type {ResolveModuleDescriptorFn} */
-  #resolveModuleDescriptor
+  #readPowers
 
   /**
    * @type {ResolveCompartmentFn}
    */
   #resolveCompartment
 
-  /** @type {PackageJson | undefined} */
-  #packageJson
+  /** @type {ResolveModuleDescriptorFn} */
+  #resolveModuleDescriptor
+
+  /**
+   * @type {RootModule | undefined}
+   */
+  #rootModule
 
   /**
    * Sets some properties
@@ -153,14 +163,14 @@ export class PolicyGeneratorContext {
   constructor(
     compartmentDescriptor,
     canonicalName,
-    { resolveModuleDescriptor, resolveCompartment },
+    { resolveCompartment, resolveModuleDescriptor },
     lmrCache,
     {
-      packageJson,
-      rootModule,
-      readPowers = defaultReadPowers,
       isBuiltin = nodeIsBuiltin,
       log = fallbackLog,
+      packageJson,
+      readPowers = defaultReadPowers,
+      rootModule,
     } = {}
   ) {
     this.#lmrCache = lmrCache
@@ -175,6 +185,185 @@ export class PolicyGeneratorContext {
     this.#resolveModuleDescriptor = resolveModuleDescriptor
     this.#resolveCompartment = resolveCompartment
     this.#packageJson = packageJson
+  }
+
+  /**
+   * Factory to create a new {@link PolicyGeneratorContext}
+   *
+   * @template {string | void} [RootModule=void] Default is `void`
+   * @param {Readonly<CompartmentDescriptor>} compartmentDescriptor
+   * @param {CanonicalName} canonicalName
+   * @param {ModuleResolver} moduleResolver
+   * @param {Readonly<LMRCache>} lmrCache
+   * @param {Readonly<PolicyGeneratorContextOptions<RootModule>>} options
+   * @returns {PolicyGeneratorContext<RootModule>}
+   */
+  static create(
+    compartmentDescriptor,
+    canonicalName,
+    moduleResolver,
+    lmrCache,
+    options = {}
+  ) {
+    return new PolicyGeneratorContext(
+      compartmentDescriptor,
+      canonicalName,
+      moduleResolver,
+      lmrCache,
+      options
+    )
+  }
+
+  /**
+   * Builds an import map for a {@link LavamoatModuleRecord} from a list of
+   * import specifiers.
+   *
+   * These specifiers can come from either `StaticModuleType` (as found in
+   * `Sources`) or `ModuleDescriptor` objects.
+   *
+   * Relative-path specifiers do not need an import map entry.
+   *
+   * @param {string[]} imports
+   * @returns {LavamoatModuleRecord['importMap']}
+   */
+  buildImportMap(imports = []) {
+    return imports.reduce((acc, specifier) => {
+      const filepath = this.resolveSpecifier(specifier)
+      if (filepath) {
+        acc[specifier] = filepath
+      }
+      return acc
+    }, /** @type {LavamoatModuleRecord['importMap']} */ ({}))
+  }
+
+  /**
+   * Creates {@link LavamoatModuleRecord}s from {@link CompartmentSources}.
+   *
+   * @param {CompartmentSources} sources
+   * @returns {LavamoatModuleRecord[]}
+   */
+  buildModuleRecords(sources) {
+    const records = entries(sources).flatMap((entry) =>
+      this.buildModuleRecordsForSource(...entry)
+    )
+
+    if (this.#missingModules.size) {
+      const nicePath = hrPath(
+        `${this.#resolveCompartment(this.compartmentDescriptor.location)}`
+      )
+      let msg = `Package ${hrLabel(this.canonicalName)} (${nicePath}) references unresolvable module(s). This may be due to the module(s) not being installed, "optional" dependencies, or implcit dependencies unreferenced in ${hrPath(PACKAGE_JSON)}. ${chalk.italic('Execution will most likely fail')} unless accounted for in policy overrides:`
+      for (const missingModule of this.#missingModules) {
+        msg += `\n- ${chalk.yellow(missingModule)}`
+      }
+      this.#log.warning(msg)
+    }
+
+    return records
+  }
+
+  /**
+   * Creates one or more {@link LavamoatModuleRecord LavamoatModuleRecords} from
+   * a single `ModuleSource`.
+   *
+   * The resulting array will contain--at minimum--a LMR of the source itself.
+   * It will also contain zero (0) or more LMRs for any builtins the module
+   * references.
+   *
+   * @param {string} specifier
+   * @param {ModuleSourceWrapper} moduleSource
+   * @returns {LavamoatModuleRecord[]}
+   */
+  buildModuleRecordsForSource(specifier, moduleSource) {
+    if (!('record' in moduleSource)) {
+      throw new GenerationError(
+        `Source descriptor "${specifier}" in compartment "${this.canonicalName}" missing prop: record`
+      )
+    }
+    const { bytes, parser, record, sourceLocation } = moduleSource
+
+    // `record` can be several different types, but for our purposes,
+    // we can use `imports` as the discriminator
+    if (!isModuleSource(record)) {
+      // XXX: under what circumstances does this occur?
+      throw new GenerationError(
+        `StaticModuleType for source descriptor "${specifier}" in compartment "${this.canonicalName} missing prop: imports`
+      )
+    }
+
+    const content = PolicyGeneratorContext.#decoder.decode(bytes)
+
+    /**
+     * The {@link LavamoatModuleRecord.file} prop
+     *
+     * @type {LavamoatModuleRecord['file']}
+     */
+    const file = this.#readPowers.fileURLToPath(new URL(sourceLocation))
+
+    // TODO: add a "trace" loglevel
+    // this.#log.debug(`Building module record for "${specifier}" (${file})`)
+
+    /**
+     * The {@link LavamoatModuleRecord.importMap} prop
+     */
+    const importMap = this.buildImportMap(record.imports)
+
+    // careful with the distinction between the root MODULE and the root COMPARTMENT
+    const isRoot = file === this.#rootModule
+
+    /** @type {SimpleLavamoatModuleRecordOptions} */
+    const lmrOptions = {
+      content,
+      file,
+      importMap,
+      isRoot,
+      packageName: this.canonicalName,
+      specifier: file,
+      type: parser === NATIVE_PARSER_NAME ? LMR_TYPE_NATIVE : LMR_TYPE_SOURCE,
+    }
+
+    if (isRoot) {
+      this.#log.debug(`Found root module: ${hrPath(file)}`)
+    }
+
+    if (!this.#lmrCache.has(lmrOptions)) {
+      this.#lmrCache.add(lmrOptions)
+    }
+
+    // because builtins do not have their own compartments, we need to
+    // look into the `importMap` and create LMRs for each builtin.
+    // we will add the source LMR to this array as the last step
+    return [
+      ...this.buildModuleRecordsFromImportedBuiltins(importMap),
+      /** @type {LavamoatModuleRecord} */ (this.#lmrCache.get(lmrOptions)),
+    ]
+  }
+
+  /**
+   * Given an import map, creates an array of {@link LavamoatModuleRecord}s for
+   * each builtin found in there.
+   *
+   * @param {LavamoatModuleRecord['importMap']} importMap
+   * @returns {LavamoatModuleRecord[]} Zero or more LMRs
+   */
+  buildModuleRecordsFromImportedBuiltins(importMap) {
+    return keys(importMap).reduce((acc, specifier) => {
+      if (this.isBuiltin(specifier)) {
+        /** @type {SimpleLavamoatModuleRecordOptions} */
+        const lmrOpts = {
+          file: specifier,
+          packageName: specifier,
+          specifier,
+          type: LMR_TYPE_BUILTIN,
+        }
+        if (!this.#lmrCache.has(lmrOpts)) {
+          this.#lmrCache.add(lmrOpts)
+        }
+        acc.push(
+          /** @type {LavamoatModuleRecord} */ (this.#lmrCache.get(lmrOpts))
+        )
+      }
+      return acc
+    }, /** @type {LavamoatModuleRecord[]} */ ([]))
   }
 
   /**
@@ -275,193 +464,5 @@ export class PolicyGeneratorContext {
     filepaths.set(specifier, null)
 
     return null
-  }
-
-  /**
-   * Builds an import map for a {@link LavamoatModuleRecord} from a list of
-   * import specifiers.
-   *
-   * These specifiers can come from either `StaticModuleType` (as found in
-   * `Sources`) or `ModuleDescriptor` objects.
-   *
-   * Relative-path specifiers do not need an import map entry.
-   *
-   * @param {string[]} imports
-   * @returns {LavamoatModuleRecord['importMap']}
-   */
-  buildImportMap(imports = []) {
-    return imports.reduce((acc, specifier) => {
-      const filepath = this.resolveSpecifier(specifier)
-      if (filepath) {
-        acc[specifier] = filepath
-      }
-      return acc
-    }, /** @type {LavamoatModuleRecord['importMap']} */ ({}))
-  }
-
-  /**
-   * Factory to create a new {@link PolicyGeneratorContext}
-   *
-   * @template {string | void} [RootModule=void] Default is `void`
-   * @param {Readonly<CompartmentDescriptor>} compartmentDescriptor
-   * @param {CanonicalName} canonicalName
-   * @param {ModuleResolver} moduleResolver
-   * @param {Readonly<LMRCache>} lmrCache
-   * @param {Readonly<PolicyGeneratorContextOptions<RootModule>>} options
-   * @returns {PolicyGeneratorContext<RootModule>}
-   */
-  static create(
-    compartmentDescriptor,
-    canonicalName,
-    moduleResolver,
-    lmrCache,
-    options = {}
-  ) {
-    return new PolicyGeneratorContext(
-      compartmentDescriptor,
-      canonicalName,
-      moduleResolver,
-      lmrCache,
-      options
-    )
-  }
-
-  /**
-   * Given an import map, creates an array of {@link LavamoatModuleRecord}s for
-   * each builtin found in there.
-   *
-   * @param {LavamoatModuleRecord['importMap']} importMap
-   * @returns {LavamoatModuleRecord[]} Zero or more LMRs
-   */
-  buildModuleRecordsFromImportedBuiltins(importMap) {
-    return keys(importMap).reduce((acc, specifier) => {
-      if (this.isBuiltin(specifier)) {
-        /** @type {SimpleLavamoatModuleRecordOptions} */
-        const lmrOpts = {
-          type: LMR_TYPE_BUILTIN,
-          file: specifier,
-          specifier,
-          packageName: specifier,
-        }
-        if (!this.#lmrCache.has(lmrOpts)) {
-          this.#lmrCache.add(lmrOpts)
-        }
-        acc.push(
-          /** @type {LavamoatModuleRecord} */ (this.#lmrCache.get(lmrOpts))
-        )
-      }
-      return acc
-    }, /** @type {LavamoatModuleRecord[]} */ ([]))
-  }
-
-  /**
-   * Creates one or more {@link LavamoatModuleRecord LavamoatModuleRecords} from
-   * a single `ModuleSource`.
-   *
-   * The resulting array will contain--at minimum--a LMR of the source itself.
-   * It will also contain zero (0) or more LMRs for any builtins the module
-   * references.
-   *
-   * @param {string} specifier
-   * @param {ModuleSourceWrapper} moduleSource
-   * @returns {LavamoatModuleRecord[]}
-   */
-  buildModuleRecordsForSource(specifier, moduleSource) {
-    if (!('record' in moduleSource)) {
-      throw new GenerationError(
-        `Source descriptor "${specifier}" in compartment "${this.canonicalName}" missing prop: record`
-      )
-    }
-    const { record, sourceLocation, bytes, parser } = moduleSource
-
-    // `record` can be several different types, but for our purposes,
-    // we can use `imports` as the discriminator
-    if (!isModuleSource(record)) {
-      // XXX: under what circumstances does this occur?
-      throw new GenerationError(
-        `StaticModuleType for source descriptor "${specifier}" in compartment "${this.canonicalName} missing prop: imports`
-      )
-    }
-
-    const content = PolicyGeneratorContext.#decoder.decode(bytes)
-
-    /**
-     * The {@link LavamoatModuleRecord.file} prop
-     *
-     * @type {LavamoatModuleRecord['file']}
-     */
-    const file = this.#readPowers.fileURLToPath(new URL(sourceLocation))
-
-    // TODO: add a "trace" loglevel
-    // this.#log.debug(`Building module record for "${specifier}" (${file})`)
-
-    /**
-     * The {@link LavamoatModuleRecord.importMap} prop
-     */
-    const importMap = this.buildImportMap(record.imports)
-
-    // careful with the distinction between the root MODULE and the root COMPARTMENT
-    const isRoot = file === this.#rootModule
-
-    /** @type {SimpleLavamoatModuleRecordOptions} */
-    const lmrOptions = {
-      specifier: file,
-      file,
-      packageName: this.canonicalName,
-      importMap,
-      content,
-      type: parser === NATIVE_PARSER_NAME ? LMR_TYPE_NATIVE : LMR_TYPE_SOURCE,
-      isRoot,
-    }
-
-    if (isRoot) {
-      this.#log.debug(`Found root module: ${hrPath(file)}`)
-    }
-
-    if (!this.#lmrCache.has(lmrOptions)) {
-      this.#lmrCache.add(lmrOptions)
-    }
-
-    // because builtins do not have their own compartments, we need to
-    // look into the `importMap` and create LMRs for each builtin.
-    // we will add the source LMR to this array as the last step
-    return [
-      ...this.buildModuleRecordsFromImportedBuiltins(importMap),
-      /** @type {LavamoatModuleRecord} */ (this.#lmrCache.get(lmrOptions)),
-    ]
-  }
-
-  /**
-   * Determine the canonical name for this context's compartment descriptor
-   *
-   * @returns {CanonicalName} Package name or special name for entrypoint
-   */
-  get canonicalName() {
-    return this.#canonicalName
-  }
-
-  /**
-   * Creates {@link LavamoatModuleRecord}s from {@link CompartmentSources}.
-   *
-   * @param {CompartmentSources} sources
-   * @returns {LavamoatModuleRecord[]}
-   */
-  buildModuleRecords(sources) {
-    const records = entries(sources).flatMap((entry) =>
-      this.buildModuleRecordsForSource(...entry)
-    )
-
-    if (this.#missingModules.size) {
-      const nicePath = hrPath(
-        `${this.#resolveCompartment(this.compartmentDescriptor.location)}`
-      )
-      let msg = `Package ${hrLabel(this.canonicalName)} (${nicePath}) references unresolvable module(s). This may be due to the module(s) not being installed, "optional" dependencies, or implcit dependencies unreferenced in ${hrPath(PACKAGE_JSON)}. ${chalk.italic('Execution will most likely fail')} unless accounted for in policy overrides:`
-      for (const missingModule of this.#missingModules) {
-        msg += `\n- ${chalk.yellow(missingModule)}`
-      }
-      this.#log.warning(msg)
-    }
-
-    return records
   }
 }

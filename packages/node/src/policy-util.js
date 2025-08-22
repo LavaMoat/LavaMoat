@@ -11,6 +11,7 @@
 import { jsonStringifySortedPolicy, mergePolicy } from 'lavamoat-core'
 import nodeFs from 'node:fs'
 import nodePath from 'node:path'
+
 import * as constants from './constants.js'
 import {
   DEFAULT_POLICY_DEBUG_FILENAME,
@@ -169,8 +170,8 @@ export const maybeReadPolicyOverride = async (
 export const loadPolicies = async (
   policyOrPolicyPath,
   {
-    readFile = nodeFs.promises.readFile,
     projectRoot = process.cwd(),
+    readFile = nodeFs.promises.readFile,
     ...options
   } = {}
 ) => {
@@ -185,6 +186,7 @@ export const loadPolicies = async (
    * @type {string | undefined}
    */
   let policyPath
+
   /**
    * Path to policy override
    *
@@ -262,7 +264,7 @@ export const loadPolicies = async (
       (() => {
         assertPolicy(
           allegedPolicy,
-          `Invalid LavaMoat policy; does not match expected schema`
+          'Invalid LavaMoat policy; does not match expected schema'
         )
 
         return allegedPolicy
@@ -280,7 +282,7 @@ export const loadPolicies = async (
       (() => {
         assertPolicy(
           allegedPolicyOverride,
-          `Invalid LavaMoat policy overrides; does not match expected schema`
+          'Invalid LavaMoat policy overrides; does not match expected schema'
         )
         return allegedPolicyOverride
       })()
@@ -332,6 +334,7 @@ export const assertPolicy = (
 export const writePolicy = async (file, policy, { fs = nodeFs } = {}) => {
   const filepath = toPath(file)
   const policyDir = nodePath.dirname(filepath)
+
   /**
    * @type {string | undefined}
    */
@@ -499,6 +502,7 @@ export const makeDefaultPolicyOverridePath = ({ policyPath, projectRoot }) => {
   log.debug(`Guessed policy override path: ${hrPath(path)}`)
   return path
 }
+
 /**
  * Given path to a policy file, returns the sibling path to the policy debug
  * file

@@ -6,6 +6,7 @@
  * @packageDocumentation
  */
 import nodeFs from 'node:fs'
+
 import { defaultReadPowers } from '../compartment/power.js'
 import { DEFAULT_TRUST_ROOT_COMPARTMENT } from '../constants.js'
 import { hrCode, hrPath } from '../format.js'
@@ -42,7 +43,7 @@ import { compartmentMapToPolicy } from './to-policy.js'
  */
 const shouldWriteDebugPolicy = (
   policyDebugPath,
-  { shouldWrite = false, debug = false } = {}
+  { debug = false, shouldWrite = false } = {}
 ) => !!(shouldWrite && debug && policyDebugPath)
 
 /**
@@ -78,35 +79,35 @@ const shouldWriteDebugPolicy = (
 const generate = async (
   entrypoint,
   {
-    readPowers = defaultReadPowers,
     debug = false,
-    policyOverride,
+    dev = false,
     isBuiltin,
     log = defaultLog,
-    dev = false,
-    trustRoot = DEFAULT_TRUST_ROOT_COMPARTMENT,
+    policyOverride,
     projectRoot = process.cwd(),
+    readPowers = defaultReadPowers,
+    trustRoot = DEFAULT_TRUST_ROOT_COMPARTMENT,
     ...archiveOpts
   } = {}
 ) => {
   log.debug('Loading compartment map…')
-  const { compartmentMap, sources, renames, packageJsonMap } =
+  const { compartmentMap, packageJsonMap, renames, sources } =
     await loadCompartmentMapForPolicy(entrypoint, {
       ...archiveOpts,
-      log,
       dev,
-      readPowers,
+      log,
       policyOverride,
-      trustRoot,
       projectRoot,
+      readPowers,
+      trustRoot,
     })
 
   /** @type {CompartmentMapToPolicyOptions} */
   const baseOpts = {
-    readPowers,
-    policyOverride,
     isBuiltin,
     log,
+    policyOverride,
+    readPowers,
     trustRoot,
   }
 
@@ -122,7 +123,7 @@ const generate = async (
     opts
   )
 
-  return { policy, compartmentMap }
+  return { compartmentMap, policy }
 }
 
 /**
@@ -137,18 +138,18 @@ const generate = async (
 export const generatePolicy = async (
   entrypoint,
   {
-    policyDebugPath: rawPolicyDebugPath,
-    policyPath: rawPolicyPath,
-    policyOverridePath: rawPolicyOverridePath,
-    policyOverride,
-    writableFs = nodeFs,
-    readPowers = defaultReadPowers,
-    write: shouldWrite = false,
     debug,
-    readFile = nodeFs.promises.readFile,
     log = defaultLog,
-    trustRoot = DEFAULT_TRUST_ROOT_COMPARTMENT,
+    policyDebugPath: rawPolicyDebugPath,
+    policyOverride,
+    policyOverridePath: rawPolicyOverridePath,
+    policyPath: rawPolicyPath,
     projectRoot: rawProjectRootPath = process.cwd(),
+    readFile = nodeFs.promises.readFile,
+    readPowers = defaultReadPowers,
+    trustRoot = DEFAULT_TRUST_ROOT_COMPARTMENT,
+    writableFs = nodeFs,
+    write: shouldWrite = false,
     ...generateOpts
   } = {}
 ) => {
@@ -235,17 +236,18 @@ export const generatePolicy = async (
    * then extract everything except the `debugInfo` prop, and write _that_ to
    * {@link policy}
    */
-  if (shouldWriteDebugPolicy(policyDebugPath, { shouldWrite, debug })) {
+  if (shouldWriteDebugPolicy(policyDebugPath, { debug, shouldWrite })) {
     log.info(`Generating "debug" LavaMoat policy from ${niceEntrypointPath}`)
+
     /** @type {MergedLavaMoatPolicyDebug} */
     let debugPolicy
-    ;({ policy: debugPolicy, compartmentMap } = await generate(entrypointPath, {
+    ;({ compartmentMap, policy: debugPolicy } = await generate(entrypointPath, {
       ...generateOpts,
-      readPowers,
-      trustRoot,
       debug: true,
       policyOverride,
       projectRoot,
+      readPowers,
+      trustRoot,
     }))
     await writePolicy(policyDebugPath, debugPolicy, { fs: writableFs })
     const nicePolicyDebugPath = hrPath(policyDebugPath)
@@ -256,12 +258,12 @@ export const generatePolicy = async (
     policy = corePolicy
   } else {
     log.info(`Generating LavaMoat policy from ${niceEntrypointPath}…`)
-    ;({ policy, compartmentMap } = await generate(entrypointPath, {
+    ;({ compartmentMap, policy } = await generate(entrypointPath, {
       ...generateOpts,
-      trustRoot,
-      readPowers,
       policyOverride,
       projectRoot,
+      readPowers,
+      trustRoot,
     }))
   }
 

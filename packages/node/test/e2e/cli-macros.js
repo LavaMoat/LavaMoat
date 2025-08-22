@@ -4,6 +4,7 @@
  */
 
 import { stripVTControlCharacters } from 'node:util'
+
 import { runCLI } from './cli-util.js'
 
 const { values } = Object
@@ -33,10 +34,8 @@ export const createCLIMacros = (test) => {
      *   [args: string[], expected?: TestCLIExpectation]
      * >}
      */ ({
-      title: (title) =>
-        title ?? `program output matches expected (${genericTitleIndex++}`,
       exec: async (t, args, expected) => {
-        const { stdout, stderr, code, hrCommand } = await runCLI(args, t)
+        const { code, hrCommand, stderr, stdout } = await runCLI(args, t)
 
         /**
          * Human-readable command
@@ -57,20 +56,12 @@ export const createCLIMacros = (test) => {
         )
 
         switch (typeof expected) {
-          case 'string':
-            t.plan(1)
-            t.is(
-              trimmedStdout,
-              expected,
-              `STDOUT of command "${command}" does not match expected value`
-            )
-            break
           case 'function':
             // the caller provided a function to perform custom assertions
             await expected(t, {
-              stdout: trimmedStdout,
-              stderr: trimmedStderr,
               code,
+              stderr: trimmedStderr,
+              stdout: trimmedStdout,
             })
             break
           case 'object': {
@@ -148,14 +139,24 @@ export const createCLIMacros = (test) => {
 
             break
           }
+          case 'string':
+            t.plan(1)
+            t.is(
+              trimmedStdout,
+              expected,
+              `STDOUT of command "${command}" does not match expected value`
+            )
+            break
           default:
             t.plan(1)
             t.snapshot(
-              { trimmedStderr, trimmedStdout, code },
+              { code, trimmedStderr, trimmedStdout },
               `output of command "${command}" does not match expected snapshot`
             )
         }
       },
+      title: (title) =>
+        title ?? `program output matches expected (${genericTitleIndex++}`,
     })
   )
 
