@@ -8,10 +8,10 @@
     "directory": "packages/allow-scripts"
   },
   "homepage": "https://github.com/LavaMoat/LavaMoat/tree/main/packages/allow-scripts",
-  "author": "",
+  "author": "LavaMoat Team",
   "license": "MIT",
   "engines": {
-    "node": "^16.20.0 || ^18.0.0 || ^20.0.0 || ^22.0.0 || ^24.0.0"
+    "node": "^18.13.0 || ^20.0.0 || ^22.0.0 || ^24.0.0"
   },
   "bin": {
     "allow-scripts": "src/cli.js"
