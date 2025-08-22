@@ -84,12 +84,13 @@ exports.addEventListener = (
   }
   /**
    * @param {string} type
-   * @param {function} listener
+   * @param {(event: MessageEvent) => void} listener
    * @param {any} [options]
    */
   endowments.addEventListener = (type, listener, options) => {
     if (type === 'message') {
-      const wrappedListener = (/** @type {MessageEvent} */ event) => {
+      /** @type {typeof listener} */
+      const wrappedListener = (event) => {
         messageToGlobalMap.set(event, packageCompartmentGlobal)
         return listener.call(packageCompartmentGlobal, event)
       }

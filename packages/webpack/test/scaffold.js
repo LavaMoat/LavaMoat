@@ -116,9 +116,12 @@ const defaultGlobals = () => ({
   URL,
 })
 
+
+/** @import {Context} from 'node:vm' */
+
 /**
  * @typedef {object} RunReturn
- * @property {import('vm').Context} context - VM context object
+ * @property {Context} context - VM context object
  * @property {any} result - Return value from the executed code
  */
 
