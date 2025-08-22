@@ -24,12 +24,6 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - node-version: 16.x
-            workspaces: >-
-              --workspace=packages/aa
-              --workspace=packages/allow-scripts
-              --workspace=packages/preinstall-always-fail
-              --workspace=packages/yarn-plugin-allow-scripts
           - node-version: 18.x
             workspaces: >-
               --workspace=packages/aa
@@ -85,8 +79,6 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - name: Build & Test
         uses: ./.github/actions/test
-        with:
-          workspaces: ${{ matrix.workspaces }}
       - name: Dirty Check
         run: node ./scripts/dirty-check.js
 
