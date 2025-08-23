@@ -14,6 +14,28 @@ const {
   getParents,
 } = require('./util')
 
+/**
+ * @import {AST} from '../../core/src/generatePolicy'
+ * @import {GlobalPolicyValue} from '../../core/src/schema'
+ * @import {Node,
+ *  Identifier,
+ *  ThisExpression,
+ *  CallExpression,
+ *  ImportDeclaration,
+ *  ExportNamedDeclaration,
+ *  ObjectPattern,
+ *  ArrayPattern,
+ *  PatternLike,
+ *  AssignmentPattern,
+ *  LVal,
+ *  Expression,
+ *  VoidPattern,
+ *  ObjectProperty} from '@babel/types'
+ * @import {NodePath} from '@babel/traverse'
+ * @import {IdentifierOrThisExpressionNodePath} from './findGlobals'
+ * @import {MemberLikeExpression} from './inspectPrimordialAssignments'
+ */
+
 module.exports = {
   inspectGlobals,
   inspectRequires,
@@ -30,7 +52,7 @@ module.exports = {
  */
 
 /**
- * @param {import('../../core/src/generatePolicy').AST | string} source
+ * @param {AST | string} source
  * @param {InspectGlobalsOpts} options
  * @returns
  */
@@ -59,7 +81,7 @@ function inspectGlobals(
 
   /**
    * @param {string} name
-   * @param {import('./findGlobals').IdentifierOrThisExpressionNodePath[]} paths
+   * @param {IdentifierOrThisExpressionNodePath[]} paths
    */
   function inspectDetectedGlobalVariables(name, paths) {
     // skip if module global
@@ -76,9 +98,7 @@ function inspectGlobals(
       } = inspectIdentifierForDirectMembershipChain(
         name,
         path.node,
-        /** @type {import('./inspectPrimordialAssignments').MemberLikeExpression[]} */ (
-          parents
-        )
+        /** @type {MemberLikeExpression[]} */ (parents)
       )
       // if nested API lookup begins with a globalRef, drop it
       if (globalRefs.includes(keyPath[0])) {
@@ -111,9 +131,8 @@ function inspectGlobals(
 
   /**
    * @param {string} variableName
-   * @param {import('@babel/types').Identifier
-   *   | import('@babel/types').ThisExpression} identifierNode
-   * @param {import('./inspectPrimordialAssignments').MemberLikeExpression[]} parents
+   * @param {Identifier | ThisExpression} identifierNode
+   * @param {MemberLikeExpression[]} parents
    * @returns
    */
   function inspectIdentifierForDirectMembershipChain(
@@ -121,7 +140,7 @@ function inspectGlobals(
     identifierNode,
     parents
   ) {
-    /** @type {import('../../core/src/schema').GlobalPolicyValue} */
+    /** @type {GlobalPolicyValue} */
     let identifierUse = 'read'
     const { memberExpressions, parentOfMembershipChain, topmostMember } =
       getMemberExpressionNesting(identifierNode, parents)
@@ -151,7 +170,7 @@ function inspectGlobals(
 
   /**
    * @param {string} identifierPath
-   * @param {import('../../core/src/schema').GlobalPolicyValue} identifierUse
+   * @param {GlobalPolicyValue} identifierUse
    * @returns
    */
   function maybeAddGlobalUsage(identifierPath, identifierUse) {
@@ -175,7 +194,7 @@ function inspectGlobals(
  * This finds all modules `import`ed into the AST, as well as any re-exported
  * modules.
  *
- * @param {import('@babel/types').Node} ast
+ * @param {Node} ast
  * @param {string[]} [packagesToInspect] - List of module IDs to look for; if
  *   omitted, will inspect all imports
  * @returns {string[]} - List of imported identifiers
@@ -188,10 +207,7 @@ function inspectEsmImports(ast, packagesToInspect) {
   const esmImports = new Set()
 
   /**
-   * @param {import('@babel/traverse').NodePath<
-   *   | import('@babel/types').ImportDeclaration
-   *   | import('@babel/types').ExportNamedDeclaration
-   * >} path
+   * @param {NodePath<ImportDeclaration | ExportNamedDeclaration>} path
    */
   const handleNodePath = (path) => {
     const importSource = path.node.source?.value
@@ -212,13 +228,11 @@ function inspectEsmImports(ast, packagesToInspect) {
 }
 
 /**
- * @typedef {import('@babel/traverse').NodePath<
- *   import('@babel/types').CallExpression
- * >} RequireCallResult
+ * @typedef {NodePath<CallExpression>} RequireCallResult
  */
 
 /**
- * @param {import('@babel/types').Node} ast
+ * @param {Node} ast
  * @returns {RequireCallResult[]}
  */
 function findAllCallsToRequire(ast) {
@@ -245,7 +259,7 @@ function findAllCallsToRequire(ast) {
 }
 
 /**
- * @param {import('@babel/types').Node} ast
+ * @param {Node} ast
  * @returns {RequireCallResult[]}
  */
 function inspectDynamicRequires(ast) {
@@ -273,7 +287,7 @@ function inspectDynamicRequires(ast) {
  * This finds all modules `required`ed into the AST, as well as any re-exported
  * modules.
  *
- * @param {import('@babel/types').Node} ast
+ * @param {Node} ast
  * @param {string[]} [packagesToInspect]
  * @param {boolean} [deep]
  * @returns {{ cjsImports: string[] }}
@@ -357,15 +371,13 @@ function inspectRequires(ast, packagesToInspect, deep = true) {
 
 /**
  * @typedef {{
- *   node:
- *     | import('@babel/types').PatternLike
- *     | import('@babel/types').AssignmentPattern['left']
+ *   node: PatternLike | AssignmentPattern['left']
  *   keyPath: string[]
  * }} Declaration
  */
 
 /**
- * @param {import('@babel/types').LVal | import('@babel/types').Expression} node
+ * @param {VoidPattern | LVal | Expression} node
  * @param {string[]} keyPath
  * @returns {Declaration[]} }
  */
@@ -388,7 +400,7 @@ function inspectPatternElementForDeclarations(node, keyPath = []) {
 }
 
 /**
- * @param {import('@babel/types').ObjectPattern} node
+ * @param {ObjectPattern} node
  * @param {string[]} keyPath
  * @returns {Declaration[]}
  */
@@ -397,7 +409,7 @@ function inspectObjectPatternForDeclarations(node, keyPath) {
   // return the node with the current path
   const expansionForbidden = node.properties.some(
     (prop) =>
-      /** @type {import('@babel/types').ObjectProperty} */ (prop).computed ||
+      /** @type {ObjectProperty} */ (prop).computed ||
       prop.type === 'RestElement'
   )
   if (expansionForbidden) {
@@ -422,7 +434,7 @@ function inspectObjectPatternForDeclarations(node, keyPath) {
 }
 
 /**
- * @param {import('@babel/types').ArrayPattern} node
+ * @param {ArrayPattern} node
  * @param {string[]} keyPath
  * @returns {Declaration[]}
  */
@@ -452,7 +464,7 @@ function inspectArrayPatternForDeclarations(node, keyPath) {
 }
 
 /**
- * @param {import('@babel/types').Node | import('@babel/types').PatternLike} child
+ * @param {Node | PatternLike} child
  * @returns
  */
 function inspectPatternElementForKeys(child) {
@@ -474,7 +486,7 @@ function inspectPatternElementForKeys(child) {
 }
 
 /**
- * @param {import('@babel/types').ObjectPattern} node
+ * @param {ObjectPattern} node
  * @returns
  */
 function inspectObjectPatternForKeys(node) {
@@ -482,7 +494,7 @@ function inspectObjectPatternForKeys(node) {
   // so return a single empty path, meaning "one result, the whole thing"
   const expansionForbidden = node.properties.some(
     (prop) =>
-      /** @type {import('@babel/types').ObjectProperty} */ (prop).computed ||
+      /** @type {ObjectProperty} */ (prop).computed ||
       prop.type === 'RestElement'
   )
   if (expansionForbidden) {
@@ -491,9 +503,7 @@ function inspectObjectPatternForKeys(node) {
   // expand each property into a path, recursively
   /** @type {string[][]} */
   let keys = []
-  const properties = /** @type {import('@babel/types').ObjectProperty[]} */ (
-    node.properties
-  )
+  const properties = /** @type {ObjectProperty[]} */ (node.properties)
   properties.forEach((prop) => {
     if ('name' in prop.key) {
       const propName = prop.key.name
@@ -510,7 +520,7 @@ function inspectObjectPatternForKeys(node) {
 }
 
 /**
- * @param {import('@babel/types').ArrayPattern} node
+ * @param {ArrayPattern} node
  * @returns {string[][]}
  */
 function inspectArrayPatternForKeys(node) {
