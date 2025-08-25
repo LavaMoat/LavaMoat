@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "dependencies": {
+    "another-message-package": "1.0.0",
     "commonjs-package": "1.0.0",
     "commonjs-quirks": "1.0.0",
     "dynamic-importer": "1.0.0",
@@ -14,6 +15,7 @@
     "flag-package": "1.0.0",
     "globals-package": "1.0.0",
     "loader-hack": "1.0.0",
+    "message-package": "1.0.0",
     "nodejs-package": "1.0.0",
     "polyfill-package": "1.0.0",
     "prototype-poisoning-package": "1.0.0",
