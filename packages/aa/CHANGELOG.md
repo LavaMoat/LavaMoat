@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.3.4](https://github.com/LavaMoat/LavaMoat/compare/aa-v4.3.3...aa-v4.3.4) (2025-08-25)
+
+
+### Bug Fixes
+
+* **aa:** avoid colliding symlinks between tests - cleanup was async and overlapping ([#1747](https://github.com/LavaMoat/LavaMoat/issues/1747)) ([f246c74](https://github.com/LavaMoat/LavaMoat/commit/f246c747efc020192fc76d2c49ad16455bdc15ca))
+
 ## [4.3.3](https://github.com/LavaMoat/LavaMoat/compare/aa-v4.3.2...aa-v4.3.3) (2025-06-24)
 
 
