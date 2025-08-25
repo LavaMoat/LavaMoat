@@ -116,12 +116,21 @@ const defaultGlobals = () => ({
   URL,
 })
 
+
+/** @import {Context} from 'node:vm' */
+
+/**
+ * @typedef {object} RunReturn
+ * @property {Context} context - VM context object
+ * @property {any} result - Return value from the executed code
+ */
+
 /**
  * Run a script in a new context, without SES
  *
  * @param {string} code
  * @param {Record<string, any>} globals
- * @returns {any}
+ * @returns {RunReturn}
  */
 function runScript(code, globals = defaultGlobals()) {
   if (typeof code !== 'string' || code === '') {
@@ -141,7 +150,7 @@ exports.runScript = runScript
  *
  * @param {string} bundle
  * @param {Record<string, any>} globals
- * @returns {any}
+ * @returns {RunReturn}
  */
 function runScriptWithSES(bundle, globals = defaultGlobals()) {
   if (typeof bundle !== 'string' || bundle === '') {
