@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/LavaMoat/LavaMoat/compare/git-safe-dependencies-v0.2.2...git-safe-dependencies-v0.3.0) (2025-08-25)
+
+
+### Features
+
+* **git-safe:** increase resilience against network conditions and gi… ([#1766](https://github.com/LavaMoat/LavaMoat/issues/1766)) ([5a6f9f7](https://github.com/LavaMoat/LavaMoat/commit/5a6f9f73f3ee9a791bbbf2c5426d4403d2f9882a))
+
 ## [0.2.2](https://github.com/LavaMoat/LavaMoat/compare/git-safe-dependencies-v0.2.1...git-safe-dependencies-v0.2.2) (2025-05-01)
 
 

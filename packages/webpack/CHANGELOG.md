@@ -18,6 +18,27 @@
   * dependencies
     * lavamoat-core bumped from ^15.2.0 to ^15.2.1
 
+## [1.2.0](https://github.com/LavaMoat/LavaMoat/compare/webpack-v1.1.0...webpack-v1.2.0) (2025-08-25)
+
+
+### Features
+
+* **webpack:** repairs for globals that need more than unwrap from core ([#1751](https://github.com/LavaMoat/LavaMoat/issues/1751)) ([86ad964](https://github.com/LavaMoat/LavaMoat/commit/86ad964f6b1d33950aea10849052e8cfc8459663))
+
+
+### Bug Fixes
+
+* **deps:** update dependency ses to v1.14.0 ([#1746](https://github.com/LavaMoat/LavaMoat/issues/1746)) ([3e4b834](https://github.com/LavaMoat/LavaMoat/commit/3e4b834df3430d9f919e7df31f42d23e9b6bb352))
+* **webpack:** avoid scuttling the global Webpack uses for sharing chunks ([#1762](https://github.com/LavaMoat/LavaMoat/issues/1762)) ([6f39c95](https://github.com/LavaMoat/LavaMoat/commit/6f39c95407a280aa13bf90adb634f8b86821e0f0))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @lavamoat/aa bumped from ^4.3.3 to ^4.3.4
+    * lavamoat-core bumped from ^16.5.0 to ^16.5.1
+
 ## [1.1.0](https://github.com/LavaMoat/LavaMoat/compare/webpack-v1.0.0...webpack-v1.1.0) (2025-07-28)
 
 

@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.4.0](https://github.com/LavaMoat/LavaMoat/compare/node-v0.3.1...node-v0.4.0) (2025-08-25)
+
+
+### Features
+
+* **git-safe:** increase resilience against network conditions and gi… ([#1766](https://github.com/LavaMoat/LavaMoat/issues/1766)) ([5a6f9f7](https://github.com/LavaMoat/LavaMoat/commit/5a6f9f73f3ee9a791bbbf2c5426d4403d2f9882a))
+
+
+### Bug Fixes
+
+* **deps:** update dependency ses to v1.14.0 ([#1746](https://github.com/LavaMoat/LavaMoat/issues/1746)) ([3e4b834](https://github.com/LavaMoat/LavaMoat/commit/3e4b834df3430d9f919e7df31f42d23e9b6bb352))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-core bumped from ^16.5.0 to ^16.5.1
+
 ## [0.3.1](https://github.com/LavaMoat/LavaMoat/compare/node-v0.3.0...node-v0.3.1) (2025-06-25)
 
 

@@ -6,6 +6,15 @@
   * dependencies
     * @lavamoat/aa bumped from ^4.0.1 to ^4.1.0
 
+## [3.3.5](https://github.com/LavaMoat/LavaMoat/compare/allow-scripts-v3.3.4...allow-scripts-v3.3.5) (2025-08-25)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @lavamoat/aa bumped from ^4.3.3 to ^4.3.4
+
 ## [3.3.4](https://github.com/LavaMoat/LavaMoat/compare/allow-scripts-v3.3.3...allow-scripts-v3.3.4) (2025-06-24)
 
 

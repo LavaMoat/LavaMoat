@@ -6,6 +6,13 @@
   * dependencies
     * lavamoat-tofu bumped from ^7.2.1 to ^7.2.2
 
+## [16.5.1](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v16.5.0...lavamoat-core-v16.5.1) (2025-08-25)
+
+
+### Bug Fixes
+
+* **deps:** update dependency ses to v1.14.0 ([#1746](https://github.com/LavaMoat/LavaMoat/issues/1746)) ([3e4b834](https://github.com/LavaMoat/LavaMoat/commit/3e4b834df3430d9f919e7df31f42d23e9b6bb352))
+
 ## [16.5.0](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v16.4.0...lavamoat-core-v16.5.0) (2025-06-24)
 
 
