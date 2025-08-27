@@ -659,16 +659,84 @@ test('unwrapping - ensure setTimeout calls dont trigger illegal invocation', (t)
   t.is(resultGlobal2.circularGetter, sourceGlobal)
 
   const resultGlobal3 = {}
+  const resultGlobal4 = {}
   const donor = createDonor(sourceGlobal)
-  const endowments = donor.endowAll(sourceGlobal, resultGlobal3)
+  const endowments3 = donor.endowAll(sourceGlobal, resultGlobal3)
   Object.defineProperties(
     resultGlobal3,
-    Object.getOwnPropertyDescriptors(endowments)
+    Object.getOwnPropertyDescriptors(endowments3)
+  )
+  const endowments4 = donor.endowSpecified(config, sourceGlobal, resultGlobal4)
+  Object.defineProperties(
+    resultGlobal4,
+    Object.getOwnPropertyDescriptors(endowments4)
   )
 
   // Should we censor function output?
   t.is(resultGlobal3.setTimeout(), sourceGlobal)
   t.is(resultGlobal3.circularGetter, sourceGlobal)
+  t.is(resultGlobal4.setTimeout(), sourceGlobal)
+  t.is(resultGlobal4.circularGetter, sourceGlobal)
+})
+
+test('unwrapping - ensure setTimeout calls dont trigger illegal invocation - with write', (t) => {
+  'use strict'
+  // compartment.globalThis.document would error because 'this' value is not window
+  const { getEndowmentsForConfig, copyWrappedGlobals, createDonor } =
+    prepareTest({
+      knownWritable: new Set(['setTimeout', 'circularGetter']),
+    })
+  const sourceGlobal = {
+    setTimeout() {
+      if (this !== sourceGlobal) {
+        throw Error('emulated illegal invocation')
+      }
+      return this
+    },
+  }
+  Object.defineProperty(sourceGlobal, 'circularGetter', {
+    get: function () {
+      if (this !== sourceGlobal) {
+        throw Error('emulated illegal invocation')
+      }
+      return this
+    },
+    enumerable: true,
+  })
+  const config = {
+    globals: {
+      setTimeout: true,
+      circularGetter: true,
+    },
+  }
+  const resultGlobal = getEndowmentsForConfig(sourceGlobal, config)
+  t.is(resultGlobal.setTimeout(), sourceGlobal)
+  t.is(resultGlobal.circularGetter, sourceGlobal)
+
+  const resultGlobal2 = {}
+  copyWrappedGlobals(sourceGlobal, resultGlobal2)
+  t.is(resultGlobal2.setTimeout(), sourceGlobal)
+  t.is(resultGlobal2.circularGetter, sourceGlobal)
+
+  const resultGlobal3 = {}
+  const resultGlobal4 = {}
+  const donor = createDonor(sourceGlobal)
+  const endowments3 = donor.endowAll(sourceGlobal, resultGlobal3)
+  Object.defineProperties(
+    resultGlobal3,
+    Object.getOwnPropertyDescriptors(endowments3)
+  )
+  const endowments4 = donor.endowSpecified(config, sourceGlobal, resultGlobal4)
+  Object.defineProperties(
+    resultGlobal4,
+    Object.getOwnPropertyDescriptors(endowments4)
+  )
+
+  // Should we censor function output?
+  t.is(resultGlobal3.setTimeout(), sourceGlobal)
+  t.is(resultGlobal3.circularGetter, sourceGlobal)
+  t.is(resultGlobal4.setTimeout(), sourceGlobal)
+  t.is(resultGlobal4.circularGetter, sourceGlobal)
 })
 
 test('copyWrappedGlobals - copy from prototype too', (t) => {
@@ -700,4 +768,43 @@ test('endowAll - includes fields from source prototype, skips circular fields', 
   const endowments = donor.endowAll()
 
   t.is(Object.keys(endowments).sort().join(), 'onTheObj,onTheProto')
+})
+
+// minimal repro of window.event with write in react-dom
+test('writable and unwrap not clashing', (t) => {
+  'use strict'
+  const { createDonor } = prepareTest({
+    knownWritable: new Set(['event']),
+  })
+  const source = { a: 1 }
+  Object.defineProperty(source, 'event', {
+    get() {
+      return 1
+    },
+    set(value) {
+      'use strict'
+      console.log(1, this, this === source)
+      Object.defineProperty(this, 'event', { value })
+    },
+    configurable: true,
+  })
+
+  const donor = createDonor(source)
+
+  const compartmentGlobal = Object.create(null)
+  const endowments = donor.endowSpecified(
+    {
+      globals: { event: 'write' },
+    },
+    source,
+    compartmentGlobal
+  )
+
+  Object.defineProperties(compartmentGlobal, endowments)
+
+  Object.defineProperty(source, 'event', { value: {}, configurable: false })
+
+  t.throws(() => {
+    endowments.event = {}
+  })
 })
