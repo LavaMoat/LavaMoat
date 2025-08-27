@@ -1,5 +1,7 @@
 import test from 'ava'
+
 import { LMRCache } from '../../../src/policy-gen/lmr-cache.js'
+
 /**
  * @import {SimpleLavamoatModuleRecordOptions} from '../../../src/internal.js'
  */
@@ -10,10 +12,10 @@ import { LMRCache } from '../../../src/policy-gen/lmr-cache.js'
  * @returns {SimpleLavamoatModuleRecordOptions}
  */
 const createLavamoatModuleRecord = () => ({
-  specifier: './module.js',
   file: '/path/to/module.js',
-  type: 'js',
   packageName: 'test-package',
+  specifier: './module.js',
+  type: 'js',
 })
 
 test('LMRCache - cannot be instantiated via new keyword', (t) => {
