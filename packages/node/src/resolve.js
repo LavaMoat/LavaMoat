@@ -7,6 +7,7 @@
 import nodeFs from 'node:fs'
 import Module from 'node:module'
 import path from 'node:path'
+
 import { PACKAGE_JSON } from './constants.js'
 import { NoBinScriptError, NoWorkspaceError } from './error.js'
 import { hrLabel, hrPath } from './format.js'
@@ -92,6 +93,7 @@ export const resolveBinScript = (
   { from = process.cwd(), fs = nodeFs } = {}
 ) => {
   from = toPath(from)
+
   /** @type {string} */
   let workspace
   const niceFrom = hrPath(from)
@@ -129,7 +131,7 @@ export const resolveBinScript = (
       )
     }
     if (next === current) {
-      log.debug(`Reached filesystem root; stopping search`)
+      log.debug('Reached filesystem root; stopping search')
       throw new NoBinScriptError(
         `Could not find executable ${niceBin} from ${niceFrom}`
       )
