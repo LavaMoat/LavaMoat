@@ -8,6 +8,7 @@
 
 import { createModuleInspector } from 'lavamoat-core'
 import { isBuiltin as defaultIsBuiltin } from 'node:module'
+
 import { defaultReadPowers } from '../compartment/power.js'
 import { DEFAULT_TRUST_ROOT_COMPARTMENT } from '../constants.js'
 import { GenerationError } from '../error.js'
@@ -73,18 +74,19 @@ const moduleRecordsToPolicy = (
     debug: includeDebugInfo = false,
     isBuiltin = defaultIsBuiltin,
     log = defaultLog,
-    trustRoot = DEFAULT_TRUST_ROOT_COMPARTMENT,
     policyOverride,
+    trustRoot = DEFAULT_TRUST_ROOT_COMPARTMENT,
   } = {}
 ) => {
   const inspector = createModuleInspector({
-    isBuiltin,
     includeDebugInfo,
+    isBuiltin,
     trustRoot,
   })
 
   /** @type {Map<string, Partial<Record<SesViolationType, string[]>>>} */
   const perPackageWarnings = new Map()
+
   /** @type {Set<SesViolationType>} */
   const foundViolationTypes = new Set()
 
@@ -132,9 +134,9 @@ export const buildModuleRecords = (
   renames,
   packageJsonMap,
   {
-    readPowers = defaultReadPowers,
     isBuiltin = defaultIsBuiltin,
     log = defaultLog,
+    readPowers = defaultReadPowers,
   } = {}
 ) => {
   const lmrCache = LMRCache.create()
@@ -156,7 +158,7 @@ export const buildModuleRecords = (
   const moduleResolver = makeModuleResolver(
     compartmentMap,
     compartmentRenames,
-    { readPowers, log }
+    { log, readPowers }
   )
   log.debug(`Building records for ${keys(compartments).length} compartments…`)
 
@@ -174,11 +176,11 @@ export const buildModuleRecords = (
           moduleResolver,
           lmrCache,
           {
-            packageJson: packageJsonMap.get(canonicalName),
-            rootModule,
-            readPowers,
             isBuiltin,
             log,
+            packageJson: packageJsonMap.get(canonicalName),
+            readPowers,
+            rootModule,
           }
         )
 
@@ -297,11 +299,11 @@ export function compartmentMapToPolicy(
   renames,
   packageJsonMap,
   {
-    readPowers,
-    policyOverride,
     debug = false,
     isBuiltin = defaultIsBuiltin,
     log = defaultLog,
+    policyOverride,
+    readPowers,
     trustRoot = DEFAULT_TRUST_ROOT_COMPARTMENT,
   } = {}
 ) {
@@ -312,9 +314,9 @@ export function compartmentMapToPolicy(
     renames,
     packageJsonMap,
     {
-      readPowers,
       isBuiltin,
       log,
+      readPowers,
     }
   )
   log.debug(`Built ${moduleRecords.length} module records`)
@@ -323,7 +325,7 @@ export function compartmentMapToPolicy(
     debug,
     isBuiltin,
     log,
-    trustRoot,
     policyOverride,
+    trustRoot,
   })
 }
