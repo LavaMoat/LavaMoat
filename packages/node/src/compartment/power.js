@@ -15,10 +15,10 @@ import nodeUrl from 'node:url'
  * @type {ReadNowPowers}
  */
 export const defaultReadPowers = makeReadNowPowers({
-  fs: nodeFs,
-  url: nodeUrl,
   crypto: nodeCrypto,
+  fs: nodeFs,
   path: nodePath,
+  url: nodeUrl,
 })
 
 /**
@@ -36,10 +36,10 @@ export const makeReadPowers = (options) => {
   // with non-default fs passed in. Some assumptions about path resolution are used in url
   if (fs) {
     return makeReadNowPowers({
-      fs,
-      url,
       crypto,
+      fs,
       path,
+      url,
     })
   }
   if (readPowers) {

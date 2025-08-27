@@ -70,15 +70,16 @@ export const ENDO_POLICY_BOILERPLATE = Object.freeze(
  * @internal
  */
 export const ENDO_POLICY_ENTRY_TRUSTED = Object.freeze(
+
   /**
    * @type {const}
    * @satisfies {LavaMoatEndoPolicy['entry']}
    */
   ({
-    [ENDO_PKG_POLICY_GLOBALS]: [ENDO_POLICY_ITEM_ROOT],
-    [ENDO_PKG_POLICY_PACKAGES]: ENDO_POLICY_ITEM_WILDCARD,
     [ENDO_PKG_POLICY_BUILTINS]: ENDO_POLICY_ITEM_WILDCARD,
+    [ENDO_PKG_POLICY_GLOBALS]: [ENDO_POLICY_ITEM_ROOT],
     [ENDO_PKG_POLICY_NO_GLOBAL_FREEZE]: true,
+    [ENDO_PKG_POLICY_PACKAGES]: ENDO_POLICY_ITEM_WILDCARD,
   })
 )
 
@@ -93,6 +94,7 @@ const convertToEndoPackagePolicyBuiltins = (item) => {
   if (!item) {
     return undefined
   }
+
   /**
    * @type {NonNullable<LavaMoatEndoPackagePolicy['builtins']>}
    */
@@ -136,6 +138,7 @@ const convertToEndoPackagePolicyPackages = (item) => {
   if (!item) {
     return undefined
   }
+
   /**
    * @type {NonNullable<LavaMoatEndoPackagePolicy['packages']>}
    */
@@ -167,6 +170,7 @@ const convertToEndoPackagePolicyOptions = (resources) => {
   if (!resources) {
     return undefined
   }
+
   /** @type {LavaMoatEndoPackagePolicyOptions | undefined} */
   let pkgPolicyOptions
   // the "native" prop of a LavaMoat package policy corresponds to the "native"
@@ -306,8 +310,8 @@ export const toEndoPolicy = async (policyOrPolicyPath, options = {}) => {
   /** @type {LavaMoatEndoPolicy} */
   const endoPolicy = {
     ...ENDO_POLICY_BOILERPLATE,
-    [ENDO_POLICY_RESOURCES]: resources,
     [ENDO_POLICY_ENTRY]: entry,
+    [ENDO_POLICY_RESOURCES]: resources,
   }
 
   return endoPolicy

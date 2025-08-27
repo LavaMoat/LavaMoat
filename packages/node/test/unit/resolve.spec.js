@@ -2,18 +2,19 @@ import '../../src/preamble.js'
 
 import test from 'ava'
 import { memfs } from 'memfs'
+
 import { ErrorCodes } from '../../src/error-code.js'
 import { resolveBinScript, resolveWorkspace } from '../../src/resolve.js'
 
 test('resolveBinScript - resolves real bin script path', (t) => {
-  const { vol, fs } = memfs()
+  const { fs, vol } = memfs()
   vol.fromJSON({
-    '/workspace/package.json': JSON.stringify({ name: 'test-app' }),
-    '/workspace/node_modules/test-package/test-bin': 'content',
+    '/workspace/node_modules/.bin': null,
     '/workspace/node_modules/test-package/package.json': JSON.stringify({
       bin: 'test-bin',
     }),
-    '/workspace/node_modules/.bin': null,
+    '/workspace/node_modules/test-package/test-bin': 'content',
+    '/workspace/package.json': JSON.stringify({ name: 'test-app' }),
   })
   // not possible to use fromJSON to create a symlink
   fs.symlinkSync(
@@ -35,7 +36,7 @@ test('resolveBinScript - throws error if workspace not found', (t) => {
 })
 
 test('resolveWorkspace - resolves workspace path', (t) => {
-  const { vol, fs } = memfs()
+  const { fs, vol } = memfs()
   vol.fromJSON({
     '/workspace/package.json': JSON.stringify({}),
   })

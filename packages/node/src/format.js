@@ -7,6 +7,7 @@
 import chalk from 'chalk'
 import nodePath from 'node:path'
 import { stripVTControlCharacters as stripAnsi } from 'node:util'
+
 import { toPath } from './util.js'
 
 export { stripAnsi }
@@ -32,8 +33,8 @@ export { stripAnsi }
 const colorSplit = (
   value,
   {
-    delimiter = '>',
     color = chalk.whiteBright,
+    delimiter = '>',
     delimiterColor = chalk.gray,
   } = {}
 ) =>
@@ -74,8 +75,8 @@ export const hrPath = (filepath) => {
     }
   }
   return colorSplit(filepath, {
-    delimiter: nodePath.sep,
     color: chalk.greenBright,
+    delimiter: nodePath.sep,
     delimiterColor: chalk.green,
   })
 }
@@ -89,8 +90,8 @@ export const hrPath = (filepath) => {
  */
 export const hrLabel = (name, dim = false) =>
   colorSplit(name, {
-    delimiter: '>',
     color: dim ? chalk.magentaBright.dim : chalk.magentaBright,
+    delimiter: '>',
     delimiterColor: dim ? chalk.magenta.dim : chalk.magenta,
   })
 

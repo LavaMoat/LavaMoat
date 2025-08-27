@@ -5,6 +5,7 @@ import anyTest from 'ava'
 import { mkdtemp, realpath, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
+
 import { resolveEntrypoint } from '../../src/resolve.js'
 
 /**
@@ -25,7 +26,7 @@ test.beforeEach(async (t) => {
 })
 
 test.afterEach(async (t) => {
-  await rm(t.context.tempdir, { recursive: true, force: true })
+  await rm(t.context.tempdir, { force: true, recursive: true })
 })
 
 test('resolveEntrypoint - resolves entrypoint path', async (t) => {

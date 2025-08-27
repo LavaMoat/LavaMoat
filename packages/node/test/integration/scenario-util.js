@@ -1,12 +1,13 @@
 import { mergePolicy } from 'lavamoat-core'
-import util from 'node:util'
 // @ts-expect-error - needs types
 import { prepareScenarioOnDisk } from 'lavamoat-core/test/util.js'
 import { memfs } from 'memfs'
 import { once } from 'node:events'
 import path from 'node:path'
 import { pathToFileURL } from 'node:url'
+import util from 'node:util'
 import { Worker } from 'node:worker_threads'
+
 import {
   DEFAULT_POLICY_FILENAME,
   DEFAULT_POLICY_OVERRIDE_FILENAME,
@@ -40,6 +41,127 @@ const RUNNER_MODULE_PATH = (
 ).pathname
 
 /**
+ * Bootstraps the scenario runner.
+ *
+ * Return value should be provided to `lavamoat-core`'s `runAndTestScenario`
+ *
+ * @template [Result=unknown] Default is `unknown`
+ * @param {(...args: any) => void} log Logger
+ * @returns {PlatformRunScenario<Result>}
+ */
+export function createScenarioRunner(log = fallbackLog.error.bind(console)) {
+  /**
+   * Runs a scenario from `lavamoat-core`.
+   *
+   * The idea here is to establish feature-compatibility with `lavamoat-node`.
+   *
+   * @remarks
+   * The runner in e.g., `lavamoat-node` spawns a child process for each
+   * scenario; I don't feel that is necessary for our purposes. It _is_ useful
+   * and necessary to test the CLI, but I'm not convinced there's added value in
+   * doing so for _every scenario_.
+   * @param {{ scenario: any }} opts
+   * @returns {Promise<Result>} Result of the stdout of the scenario parsed as
+   *   JSON
+   * @todo Scenario needs a type definition
+   */
+  return async ({ scenario }) => {
+    const { fs, vol } = memfs()
+
+    const readFile = /** @type {ReadFn} */ (fs.promises.readFile)
+
+    /** @type {string} */
+    let projectDir
+
+    /** @type {string} */
+    let policyDir
+
+    // for eslint
+    await Promise.resolve()
+
+    try {
+      ;({ policyDir, projectDir } = await prepareScenarioOnDisk({
+        fs: fs.promises,
+        policyName: 'lavamoat-node',
+        scenario,
+      }))
+    } catch (e) {
+      dumpError(e, vol, { log })
+      throw e
+    }
+
+    /** @type {LavaMoatPolicy} */
+    let lavamoatPolicy
+    try {
+      lavamoatPolicy = await readPolicy(readFile, policyDir)
+    } catch (err) {
+      dumpError(err, vol, { log })
+      throw err
+    }
+
+    /** @type {string} */
+    let stdout
+
+    /** @type {string} */
+    let stderr
+
+    /** @type {ReturnType<typeof trapOutput> | undefined} */
+    let outputPromise
+
+    try {
+      const entryPath = path.join(projectDir, scenario.entries[0])
+      const worker = new Worker(RUNNER_MODULE_PATH, {
+        stderr: true,
+        stdout: true,
+        workerData: {
+          entryPath,
+          policy: lavamoatPolicy,
+          scuttleGlobalThis: scenario?.opts?.scuttleGlobalThis,
+          vol: vol.toJSON(),
+        },
+      })
+      outputPromise = trapOutput(worker.stdout, worker.stderr)
+      const [code] = await once(worker, 'exit')
+      if (code !== 0) {
+        try {
+          ;[stdout, stderr] = await outputPromise
+        } catch {
+          stdout = ''
+          stderr = ''
+        }
+        let msg = `Worker exited with code ${code} trying to run scenario ${scenario.name ?? '(unknown)'}`
+        if (stderr) {
+          msg += '\nSTDERR:\n' + stderr
+        }
+        if (stdout) {
+          msg += '\n\nSTDOUT:\n' + stdout
+        }
+        throw new Error(msg)
+      }
+      ;[stdout, stderr] = await outputPromise
+    } catch (err) {
+      if (!scenario.expectedFailure) {
+        dumpError(err, vol, { lavamoatPolicy, log })
+      }
+      throw err
+    } finally {
+      // TODO use AbortController
+      outputPromise?.catch(() => {})
+    }
+
+    // nothing should output to stderr. except a debugger
+    if (stderr && stderr.trim() !== 'Debugger attached.') {
+      throw new Error(`Unexpected output in standard err: \n${stderr}`)
+    }
+    try {
+      return JSON.parse(stdout)
+    } catch {
+      throw new Error(`Unexpected output in standard out: \n${stdout}`)
+    }
+  }
+}
+
+/**
  * Dumps a bunch of information about an error and the virtual FS volume.
  * Optionally, policies
  *
@@ -53,7 +175,7 @@ const RUNNER_MODULE_PATH = (
 function dumpError(
   err,
   vol,
-  { lavamoatPolicy, endoPolicy, log = fallbackLog.error.bind(fallbackLog) } = {}
+  { endoPolicy, lavamoatPolicy, log = fallbackLog.error.bind(fallbackLog) } = {}
 ) {
   log()
   log(util.inspect(err, { depth: null }))
@@ -113,6 +235,7 @@ async function readPolicy(readPower, policyDir) {
 async function trapOutput(stdout, stderr) {
   /** @type {Buffer[]} */
   const stdoutChunks = []
+
   /** @type {Buffer[]} */
   const stderrChunks = []
 
@@ -138,122 +261,4 @@ async function trapOutput(stdout, stderr) {
         .on('error', reject)
     }),
   ])
-}
-
-/**
- * Bootstraps the scenario runner.
- *
- * Return value should be provided to `lavamoat-core`'s `runAndTestScenario`
- *
- * @template [Result=unknown] Default is `unknown`
- * @param {(...args: any) => void} log Logger
- * @returns {PlatformRunScenario<Result>}
- */
-export function createScenarioRunner(log = fallbackLog.error.bind(console)) {
-  /**
-   * Runs a scenario from `lavamoat-core`.
-   *
-   * The idea here is to establish feature-compatibility with `lavamoat-node`.
-   *
-   * @remarks
-   * The runner in e.g., `lavamoat-node` spawns a child process for each
-   * scenario; I don't feel that is necessary for our purposes. It _is_ useful
-   * and necessary to test the CLI, but I'm not convinced there's added value in
-   * doing so for _every scenario_.
-   * @param {{ scenario: any }} opts
-   * @returns {Promise<Result>} Result of the stdout of the scenario parsed as
-   *   JSON
-   * @todo Scenario needs a type definition
-   */
-  return async ({ scenario }) => {
-    const { fs, vol } = memfs()
-
-    const readFile = /** @type {ReadFn} */ (fs.promises.readFile)
-
-    /** @type {string} */
-    let projectDir
-    /** @type {string} */
-    let policyDir
-
-    // for eslint
-    await Promise.resolve()
-
-    try {
-      ;({ projectDir, policyDir } = await prepareScenarioOnDisk({
-        fs: fs.promises,
-        scenario,
-        policyName: 'lavamoat-node',
-      }))
-    } catch (e) {
-      dumpError(e, vol, { log })
-      throw e
-    }
-
-    /** @type {LavaMoatPolicy} */
-    let lavamoatPolicy
-    try {
-      lavamoatPolicy = await readPolicy(readFile, policyDir)
-    } catch (err) {
-      dumpError(err, vol, { log })
-      throw err
-    }
-
-    /** @type {string} */
-    let stdout
-    /** @type {string} */
-    let stderr
-    /** @type {ReturnType<typeof trapOutput> | undefined} */
-    let outputPromise
-
-    try {
-      const entryPath = path.join(projectDir, scenario.entries[0])
-      const worker = new Worker(RUNNER_MODULE_PATH, {
-        stdout: true,
-        stderr: true,
-        workerData: {
-          scuttleGlobalThis: scenario?.opts?.scuttleGlobalThis,
-          entryPath,
-          policy: lavamoatPolicy,
-          vol: vol.toJSON(),
-        },
-      })
-      outputPromise = trapOutput(worker.stdout, worker.stderr)
-      const [code] = await once(worker, 'exit')
-      if (code !== 0) {
-        try {
-          ;[stdout, stderr] = await outputPromise
-        } catch {
-          stdout = ''
-          stderr = ''
-        }
-        let msg = `Worker exited with code ${code} trying to run scenario ${scenario.name ?? '(unknown)'}`
-        if (stderr) {
-          msg += '\nSTDERR:\n' + stderr
-        }
-        if (stdout) {
-          msg += '\n\nSTDOUT:\n' + stdout
-        }
-        throw new Error(msg)
-      }
-      ;[stdout, stderr] = await outputPromise
-    } catch (err) {
-      if (!scenario.expectedFailure) {
-        dumpError(err, vol, { lavamoatPolicy, log })
-      }
-      throw err
-    } finally {
-      // TODO use AbortController
-      outputPromise?.catch(() => {})
-    }
-
-    // nothing should output to stderr. except a debugger
-    if (stderr && stderr.trim() !== 'Debugger attached.') {
-      throw new Error(`Unexpected output in standard err: \n${stderr}`)
-    }
-    try {
-      return JSON.parse(stdout)
-    } catch {
-      throw new Error(`Unexpected output in standard out: \n${stdout}`)
-    }
-  }
 }

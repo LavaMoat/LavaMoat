@@ -1,6 +1,7 @@
 import '../../../src/preamble.js'
 
 import test from 'ava'
+
 import { run } from '../../../src/exec/run.js'
 
 test('root trust mismatch (untrusted root)', async (t) => {

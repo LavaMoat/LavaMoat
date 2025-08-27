@@ -1,6 +1,7 @@
 import '../../../src/preamble.js'
 
 import test from 'ava'
+
 import { run } from '../../../src/exec/run.js'
 import { JSON_FIXTURE_DIR_URL, loadJSONFixture } from '../json-fixture-util.js'
 import { createExecMacros } from './exec-macros.js'
@@ -22,14 +23,14 @@ test(
   {
     policy: {
       resources: {
-        'dynamic-require': {
-          packages: {
-            dummy: true,
-          },
-        },
         dummy: {
           packages: {
             'dummy>muddy': true,
+          },
+        },
+        'dynamic-require': {
+          packages: {
+            dummy: true,
           },
         },
       },
@@ -111,23 +112,15 @@ test(
     policy: {
       resources: {
         'hello-world': {
-          packages: {
-            'hello-world>node-gyp-build': true,
-          },
           globals: {
             __dirname: true,
           },
           native: true,
+          packages: {
+            'hello-world>node-gyp-build': true,
+          },
         },
         'hello-world>node-gyp-build': {
-          globals: {
-            __webpack_require__: true,
-            __non_webpack_require__: true,
-            process: true,
-          },
-          packages: {
-            'hello-world': true,
-          },
           builtin: {
             'fs.existsSync': true,
             'fs.readdirSync': true,
@@ -136,6 +129,14 @@ test(
             'path.dirname': true,
             'path.join': true,
             'path.resolve': true,
+          },
+          globals: {
+            __non_webpack_require__: true,
+            __webpack_require__: true,
+            process: true,
+          },
+          packages: {
+            'hello-world': true,
           },
         },
       },
@@ -165,7 +166,7 @@ test(
   'do not fail if missing optional dependencies',
   testExec,
   new URL('../fixture/optional/node_modules/app/index.js', import.meta.url),
-  { value: 'hello world', default: { value: 'hello world' } },
+  { default: { value: 'hello world' }, value: 'hello world' },
   {}
 )
 
