@@ -3,6 +3,7 @@ import { fromJsonSnapshot } from 'memfs/lib/snapshot/index.js'
 import { Volume } from 'memfs/lib/volume.js'
 import fs from 'node:fs'
 import { scheduler } from 'node:timers/promises'
+
 import { makeReadPowers } from '../../src/compartment/power.js'
 import { isString } from '../../src/util.js'
 
@@ -124,7 +125,7 @@ export async function loadJSONFixture(
       return maybeRead(specifier)
     }
   }
-  return { vol, readPowers }
+  return { readPowers, vol }
 }
 
 /**
@@ -133,6 +134,7 @@ export async function loadJSONFixture(
  * @type {Map<string | URL, DirectoryJSON>}
  */
 loadJSONFixture.dirJsonCache = new Map()
+
 /**
  * Cache of filepath/URL to {@link JsonUint8Array} (for snapshots).
  *
