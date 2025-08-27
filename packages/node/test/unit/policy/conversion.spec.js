@@ -2,6 +2,7 @@ import '../../../src/preamble.js'
 
 import test from 'ava'
 import stringify from 'json-stable-stringify'
+
 import { MERGED_POLICY_FIELD } from '../../../src/constants.js'
 import { ErrorCodes } from '../../../src/error-code.js'
 import { readJsonFile } from '../../../src/fs.js'
@@ -49,11 +50,12 @@ const DEFAULT_POLICY = Object.freeze(
     resources: {},
   })
 )
+
 /** @satisfies {MergedLavaMoatPolicy} */
 const DEFAULT_MERGED_POLICY = Object.freeze(
   /** @type {const} */ ({
-    resources: {},
     [MERGED_POLICY_FIELD]: true,
+    resources: {},
   })
 )
 
