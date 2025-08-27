@@ -444,6 +444,24 @@ test('getEndowmentsForConfig - ensure setTimeout calls dont trigger illegal invo
   t.is(resultGlobal.setTimeout(), sourceGlobal)
 })
 
+test('copyWrappedGlobals - support other realm prototype chains', (t) => {
+  'use strict'
+  const { copyWrappedGlobals } = prepareTest()
+  const forkedProto = Object.create(null)
+
+  const sourceProto = Object.create(forkedProto)
+  sourceProto.onTheProto = function () {}
+  const source = Object.create(sourceProto)
+  source.onTheObj = function () {}
+  const target = Object.create(null)
+
+  // used to throw
+  // Error: Lavamoat - unable to find common prototype between Compartment and globalRef
+  copyWrappedGlobals(source, target, ['window'])
+
+  t.is(Object.keys(target).sort().join(), 'onTheObj,onTheProto,window')
+})
+
 test('copyWrappedGlobals - copy from prototype too', (t) => {
   'use strict'
   const { copyWrappedGlobals } = prepareTest()
