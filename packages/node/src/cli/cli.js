@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-
 /**
  * Main CLI entry point
  *
@@ -14,37 +13,39 @@
  * @packageDocumentation
  */
 
-import './preamble.js'
+import '../preamble.js'
 
+import { validateLavaMoatPolicy } from '@lavamoat/policy'
 import { jsonStringifySortedPolicy } from 'lavamoat-core'
-import fs from 'node:fs'
 import path from 'node:path'
 import terminalLink from 'terminal-link'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
-import * as constants from './constants.js'
-import { run } from './exec/run.js'
-import { readJsonFile } from './fs.js'
-import { log } from './log.js'
-import { generatePolicy } from './policy-gen/generate.js'
-import { loadPolicies } from './policy-util.js'
-import { resolveBinScript, resolveEntrypoint } from './resolve.js'
-import { hrPath, toPath } from './util.js'
+import * as constants from '../constants.js'
+import { InvalidPolicyError, NoPolicyError } from '../error.js'
+import { run } from '../exec/run.js'
+import { hrPath } from '../format.js'
+import { readJsonFile } from '../fs.js'
+import { log } from '../log.js'
+import { generatePolicy } from '../policy-gen/generate.js'
+import { loadPolicies } from '../policy-util.js'
+import { toPath } from '../util.js'
+import {
+  resolveEntrypointMiddleware,
+  resolvePolicyPathsMiddleware,
+  setLogLevelMiddleware,
+} from './middleware.js'
+import {
+  BEHAVIOR_GROUP,
+  behaviorOptions,
+  globalOptions,
+  pathOptions,
+} from './options.js'
 
 /**
  * @import {PackageJson} from 'type-fest';
  * @import {LavaMoatPolicy} from '@lavamoat/types';
  */
-
-/**
- * "Behavior options" group name for `--help` output
- */
-const BEHAVIOR_GROUP = 'Behavior Options:'
-
-/**
- * "Path options" group name for `--help` output
- */
-const PATH_GROUP = 'Path Options:'
 
 /**
  * Strip out all `lavamoat` CLI args from `process.argv` so that the entrypoint
@@ -109,7 +110,7 @@ const main = async (args = hideBin(process.argv)) => {
   // TODO: Use import attributes instead
   // #region use import attributes instead
   const pkgJson = /** @type {PackageJson} */ (
-    await readJsonFile(toPath(new URL('../package.json', import.meta.url)))
+    await readJsonFile(toPath(new URL('../../package.json', import.meta.url)))
   )
   const version = `${pkgJson.version}`
   const homepage = `${pkgJson.homepage}`
@@ -129,36 +130,6 @@ const main = async (args = hideBin(process.argv)) => {
    * could opt-in to the "click here to report this bug" behavior.
    */
   const reportThisBug = `please ${terminalLink('report this bug', bugs)}`
-
-  /**
-   * A middleware shared between `run` and `generate` commands.
-   *
-   * @remarks
-   * It is too painful to use `yargs`'s types to determine the shape of the
-   * expected options, so it needs to be done manually and kept in sync.
-   * `entrypoint` is the only property here which is specific to a command; it
-   * just so happens that both commands have idential `entrypoint` arguments
-   * (positionals). All _other_ properties are defined as global options; if
-   * _all_ properties were global, this could just live in global middleware.
-   *
-   * In other words, this is here to avoid the inevitable future bug when a new
-   * command is added.
-   * @param {{
-   *   entrypoint: string
-   *   bin?: boolean
-   *   root: string
-   * }} argv
-   * @returns {void}
-   */
-  const processEntrypointMiddleware = (argv) => {
-    const { entrypoint } = argv
-    argv.entrypoint = argv.bin
-      ? resolveBinScript(argv.entrypoint, { from: argv.root })
-      : resolveEntrypoint(argv.entrypoint, argv.root)
-    if (hrPath(entrypoint) !== hrPath(argv.entrypoint)) {
-      log.warning(`Resolved ${hrPath(entrypoint)} → ${hrPath(argv.entrypoint)}`)
-    }
-  }
 
   /**
    * @remarks
@@ -203,144 +174,8 @@ const main = async (args = hideBin(process.argv)) => {
   📖 Read ${terminalLink(`the LavaMoat docs`, homepage)}
 `
     )
-    .options({
-      bin: {
-        alias: ['b'],
-        type: 'boolean',
-        description: 'Resolve entrypoint as a bin script',
-        global: true,
-        group: BEHAVIOR_GROUP,
-      },
-
-      // #region path args
-
-      /**
-       * The three `policy*` options below are used for both reading and
-       * writing.
-       *
-       * Note that `coerce: path.resolve` is _only_ appropriate for the `root`
-       * option, as the others are computed from it!
-       */
-
-      policy: {
-        alias: ['p'],
-        describe: 'Filepath to a policy file',
-        type: 'string',
-        normalize: true,
-        default: constants.DEFAULT_POLICY_PATH,
-        nargs: 1,
-        requiresArg: true,
-        global: true,
-        group: PATH_GROUP,
-      },
-      'policy-override': {
-        alias: ['o'],
-        describe: 'Filepath to a policy override file',
-        type: 'string',
-        normalize: true,
-        defaultDescription: constants.DEFAULT_POLICY_OVERRIDE_PATH,
-        nargs: 1,
-        requiresArg: true,
-        global: true,
-        group: PATH_GROUP,
-      },
-      'policy-debug': {
-        describe: 'Filepath to a policy debug file',
-        defaultDescription: constants.DEFAULT_POLICY_DEBUG_PATH,
-        nargs: 1,
-        type: 'string',
-        requiresArg: true,
-        global: true,
-        group: PATH_GROUP,
-      },
-      root: {
-        describe: 'Path to application root directory',
-        type: 'string',
-        nargs: 1,
-        requiresArg: true,
-        normalize: true,
-        default: process.cwd(),
-        defaultDescription: '(current directory)',
-        coerce: path.resolve,
-        global: true,
-        group: PATH_GROUP,
-      },
-      // #endregion
-
-      dev: {
-        describe: 'Include development dependencies',
-        type: 'boolean',
-        global: true,
-        group: BEHAVIOR_GROUP,
-      },
-      verbose: {
-        describe: 'Enable verbose logging',
-        type: 'boolean',
-        global: true,
-        group: BEHAVIOR_GROUP,
-      },
-      quiet: {
-        describe: 'Disable all logging',
-        type: 'boolean',
-        global: true,
-        group: BEHAVIOR_GROUP,
-      },
-    })
+    .options(globalOptions)
     .conflicts('quiet', 'verbose')
-    .middleware(
-      /**
-       * This _global_ middleware:
-       *
-       * - Ensures `policy`, `policy-debug` and `policy-override` paths are
-       *   absolute
-       * - If necessary, calculates default path(s) for `policy-debug` and
-       *   `policy-override` (relative to `policy`) and sets it
-       * - Configures the global logger based on `verbose` and `quiet` flags
-       *
-       * It will throw an exception if the user _explicitly_ provided a path to
-       * a policy override file and that file is unreadable (since this is
-       * really the only time it is feasible to do so).
-       */
-      async (argv) => {
-        await Promise.resolve()
-
-        argv.policy = path.resolve(argv.root, argv.policy)
-
-        // TODO: this mini-algorithm should be extracted to a function since it's used elsewhere too
-        argv['policy-debug'] = argv['policy-debug']
-          ? path.resolve(argv.root, argv['policy-debug'])
-          : path.join(
-              path.dirname(argv.policy),
-              constants.DEFAULT_POLICY_DEBUG_FILENAME
-            )
-
-        if (argv['policy-override']) {
-          argv['policy-override'] = path.resolve(
-            argv.root,
-            argv['policy-override']
-          )
-          try {
-            await fs.promises.access(argv['policy-override'], fs.constants.R_OK)
-          } catch (err) {
-            throw new Error(
-              `Cannot read specified policy override file: ${argv['policy-override']}`,
-              { cause: err }
-            )
-          }
-        } else {
-          argv['policy-override'] = path.join(
-            path.dirname(argv.policy),
-            constants.DEFAULT_POLICY_OVERRIDE_FILENAME
-          )
-        }
-        if (argv.verbose) {
-          log.setLevel('debug')
-        } else if (argv.quiet) {
-          // This assumes that we will never use the "emergency" log level!
-          log.setLevel('emergency')
-        }
-      }
-    )
     /**
      * Default command (no command)
      */
@@ -366,6 +201,8 @@ const main = async (args = hideBin(process.argv)) => {
            * a single call to `options()`.
            */
           .options({
+            ...pathOptions,
+            ...behaviorOptions,
             /**
              * @experimental
              */
@@ -407,7 +244,11 @@ const main = async (args = hideBin(process.argv)) => {
           /**
            * Resolve entrypoint from `root`
            */
-          .middleware(processEntrypointMiddleware),
+          .middleware([
+            setLogLevelMiddleware,
+            resolveEntrypointMiddleware,
+            resolvePolicyPathsMiddleware,
+          ]),
       /**
        * Default command handler.
        *
@@ -488,6 +329,8 @@ const main = async (args = hideBin(process.argv)) => {
       (yargs) =>
         yargs
           .options({
+            ...pathOptions,
+            ...behaviorOptions,
             debug: {
               type: 'boolean',
               describe: 'Additionally write a debug policy',
@@ -508,7 +351,11 @@ const main = async (args = hideBin(process.argv)) => {
             describe: 'Application entry point',
             type: 'string',
           })
-          .middleware(processEntrypointMiddleware),
+          .middleware([
+            setLogLevelMiddleware,
+            resolveEntrypointMiddleware,
+            resolvePolicyPathsMiddleware,
+          ]),
       async ({
         entrypoint,
         debug,
@@ -540,6 +387,42 @@ const main = async (args = hideBin(process.argv)) => {
           // eslint-disable-next-line no-console
           console.log(jsonStringifySortedPolicy(policy))
         }
+      }
+    )
+    .command(
+      'validate [policy]',
+      'Validate a LavaMoat policy file',
+      (yargs) =>
+        yargs.positional('policy', {
+          describe: 'Path to a policy or policy override file',
+          default: constants.DEFAULT_POLICY_PATH,
+          coerce: path.resolve,
+        }),
+      async (argv) => {
+        await Promise.resolve()
+
+        const { policy: policyPath } = argv
+
+        /** @type {unknown} */
+        let policy
+        try {
+          policy = await readJsonFile(policyPath)
+        } catch (err) {
+          throw new NoPolicyError(
+            `Could not read policy file at ${hrPath(policyPath)}`,
+            { cause: err }
+          )
+        }
+
+        const result = validateLavaMoatPolicy(policy)
+
+        if (!result.success) {
+          throw new InvalidPolicyError(
+            `Policy at ${hrPath(policyPath)} is invalid`
+          )
+        }
+
+        log.info(`Policy at ${hrPath(policyPath)} is valid`)
       }
     )
     .fail((msg, err, yargs) => {

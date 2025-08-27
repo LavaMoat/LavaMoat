@@ -33,6 +33,9 @@
     },
     {
       "path": "./packages/react-native-lockdown"
+    },
+    {
+      "path": "packages/policy"
     }
   ]
 }

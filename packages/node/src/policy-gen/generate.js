@@ -12,12 +12,11 @@ import {
   DEFAULT_POLICY_FILENAME,
   DEFAULT_TRUST_ROOT_COMPARTMENT,
 } from '../constants.js'
+import { hrLabel, hrPath } from '../format.js'
 import { assertAbsolutePath } from '../fs.js'
 import { log as defaultLog } from '../log.js'
 import { maybeReadPolicyOverride, writePolicy } from '../policy-util.js'
 import {
-  hrLabel,
-  hrPath,
   makeDefaultPolicyDebugPath,
   makeDefaultPolicyOverridePath,
   toPath,
