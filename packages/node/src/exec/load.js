@@ -8,6 +8,7 @@
  */
 
 import { loadFromMap } from '@endo/compartment-mapper/import-lite.js'
+
 import { makeNodeCompartmentMap } from '../compartment/node-compartment-map.js'
 import { DEFAULT_ENDO_OPTIONS } from '../compartment/options.js'
 import { defaultReadPowers } from '../compartment/power.js'
@@ -38,12 +39,12 @@ import { noop } from '../util.js'
 export const load = async (
   entrypointPath,
   {
-    log = defaultLog,
     dev,
-    trustRoot,
     endoPolicy,
-    readPowers = defaultReadPowers,
+    log = defaultLog,
     onNodeModulesMapped = noop,
+    readPowers = defaultReadPowers,
+    trustRoot,
     ...otherOptions
   } = {}
 ) => {
@@ -53,11 +54,11 @@ export const load = async (
   try {
     // eslint-disable-next-line @jessie.js/safe-await-separator
     ;({ nodeCompartmentMap } = await makeNodeCompartmentMap(entrypointPath, {
-      readPowers,
       dev,
-      log,
-      trustRoot,
       endoPolicy,
+      log,
+      readPowers,
+      trustRoot,
     }))
   } catch (err) {
     throw new ExecutionError(
@@ -69,7 +70,7 @@ export const load = async (
   try {
     onNodeModulesMapped(nodeCompartmentMap)
   } catch (err) {
-    throw new ExecutionError(`onNodeModulesMapped callback failed`, {
+    throw new ExecutionError('onNodeModulesMapped callback failed', {
       cause: err,
     })
   }
@@ -79,8 +80,8 @@ export const load = async (
     ...DEFAULT_ENDO_OPTIONS,
     ...otherOptions,
     dev,
-    policy: endoPolicy,
     log: log.debug.bind(log),
+    policy: endoPolicy,
   }
 
   const { import: importApp, sha512 } = await loadFromMap(

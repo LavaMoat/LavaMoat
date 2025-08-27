@@ -7,6 +7,7 @@
  */
 
 import { mapNodeModules } from '@endo/compartment-mapper/node-modules.js'
+
 import { log as defaultLog } from '../log.js'
 import { toFileURLString } from '../util.js'
 import { DEFAULT_ENDO_OPTIONS } from './options.js'
@@ -38,12 +39,12 @@ const DEFAULT_CONDITIONS = /** @type {const} */ (['node'])
 export const makeNodeCompartmentMap = async (
   entrypointPath,
   {
-    readPowers = defaultReadPowers,
+    compartmentMapTransforms,
     dev,
-    log = defaultLog,
     endoPolicy,
     endoPolicyOverride,
-    compartmentMapTransforms,
+    log = defaultLog,
+    readPowers = defaultReadPowers,
   } = {}
 ) => {
   log.debug(
@@ -57,17 +58,17 @@ export const makeNodeCompartmentMap = async (
   const entrypoint = toFileURLString(entrypointPath)
 
   const nodeCompartmentMap = await mapNodeModules(readPowers, entrypoint, {
+    compartmentMapTransforms,
     conditions,
     dev,
     languageForExtension: DEFAULT_ENDO_OPTIONS.languageForExtension,
+    log: log.debug.bind(log),
     policy: endoPolicy,
     policyOverride: endoPolicyOverride,
-    log: log.debug.bind(log),
-    compartmentMapTransforms,
   })
 
   return {
-    nodeCompartmentMap,
     canonicalNameMap,
+    nodeCompartmentMap,
   }
 }

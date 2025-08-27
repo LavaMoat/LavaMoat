@@ -27,6 +27,7 @@ import type { Loggerr } from 'loggerr'
 import type nodeFs from 'node:fs'
 import type { PathLike, Stats } from 'node:fs'
 import type { LiteralUnion, Simplify } from 'type-fest'
+
 import type {
   ATTENUATORS_COMPARTMENT,
   ENDO_GLOBAL_POLICY_ITEM_WRITE,
@@ -54,227 +55,30 @@ export interface ApplicationLoader<T = unknown> {
   sha512?: string
 }
 
-/**
- * Custom data potentially assigned to the `options` prop of an
- * {@link PackagePolicy.options Endo package policy}
- */
-export interface LavaMoatEndoPackagePolicyOptions {
-  /**
-   * If this is `true`, then the package is allowed to run native modules
-   */
-  native?: boolean
-}
+export type CanonicalName = LiteralUnion<
+  typeof ATTENUATORS_COMPARTMENT | typeof LAVAMOAT_PKG_POLICY_ROOT,
+  string
+>
 
 /**
- * A "create a debug policy" flag
- */
-export interface WithDebug {
-  /**
-   * If `true`, generate a debug policy.
-   */
-  debug?: boolean
-}
-
-export interface WithDev {
-  dev?: boolean
-}
-
-/**
- * Options having an {@link IsBuiltinFn}
- */
-export interface WithIsBuiltin {
-  /**
-   * A function which returns `true` if the given specfifier references a
-   * builtin module.
-   *
-   * Used during policy generation.
-   */
-  isBuiltin?: IsBuiltinFn
-}
-
-export interface WithLog {
-  /**
-   * `Loggerr` instance for logging
-   */
-  log?: Loggerr
-}
-
-export interface WithPolicyOnly {
-  /**
-   * A {@link LavaMoatPolicy} object.
-   */
-  policy?: LavaMoatPolicy
-  /**
-   * Disallowed in lieu of {@link policy}
-   */
-  policyPath?: never
-}
-
-export interface WithPolicyPathOnly {
-  /**
-   * Disallowed in lieu of {@link policy}
-   */
-  policy?: never
-  /**
-   * Path to a policy file.
-   */
-  policyPath?: string | URL
-}
-
-export type WithPolicyOrPath = WithPolicyOnly | WithPolicyPathOnly
-
-/**
- * Options having a `policyOverride` property and _not_ a `policyOverridePath`
- */
-export type WithPolicyOverrideOnly = {
-  /**
-   * Disallowed in lieu of {@link policyOverride}
-   */
-  policyOverridePath?: never
-  /**
-   * A policy override object.
-   */
-  policyOverride?: LavaMoatPolicy
-}
-
-/**
- * Options having a `policyOverridePath` property and _not_ a `policyOverride`
- */
-export type WithPolicyOverridePathOnly = {
-  /**
-   * Path to a policy override file.
-   */
-  policyOverridePath?: string | URL
-
-  /**
-   * Disallowed in lieu of {@link policyOverridePath}
-   */
-  policyOverride?: never
-}
-
-/**
- * Options having a `policyOverride` or `policyOverridePath` property (not both
- * at once!)
- */
-export type WithPolicyOverrideOrPath =
-  | WithPolicyOverrideOnly
-  | WithPolicyOverridePathOnly
-
-export interface WithPolicyOverride {
-  policyOverride?: LavaMoatPolicy
-}
-
-export interface WithPolicyOverridePath {
-  policyOverridePath?: string | URL
-}
-
-/**
- * Raw powers which can be converted to a {@link ReadNowPowers} object.
+ * Safely composes properties from each object in `T` into a single, simplified
+ * type.
  *
- * For this to work, {@link WithRawPowers.fs} _must_ be defined. It cannot
- * contain a `readPowers` property.
- */
-export interface WithRawPowers {
-  crypto?: CryptoInterface
-  fs: FsInterface
-  path?: PathInterface
-  readPowers?: never
-  url?: UrlInterface
-}
-
-/**
- * Options having a `readPowers` property.
- */
-export interface WithReadPowers {
-  crypto?: never
-  fs?: never
-  path?: never
-
-  /**
-   * Read powers to use when loading the compartment map.
-   */
-  readPowers?: ReadNowPowers
-  url?: never
-}
-
-export interface WithTrustRoot {
-  trustRoot?: boolean
-}
-
-export interface ScuttleGlobalThisOptions {
-  enabled?: boolean
-  exceptions?: string[]
-  scuttlerName?: string
-}
-
-export interface WithScuttleGlobalThis {
-  scuttleGlobalThis?: boolean | ScuttleGlobalThisOptions
-}
-
-/**
- * Superset of {@link FsInterface} necessary to write a policy to disk
- */
-export interface WritableFsInterface {
-  promises: WritePowers
-}
-
-/**
- * Options available when writing a policy
- */
-export interface WithWritePolicyOptions {
-  /**
-   * Path to a {@link LavaMoatPolicyDebug} file
-   */
-  policyDebugPath?: string | URL
-
-  /**
-   * Path to a {@link LavaMoatPolicy} file
-   */
-  policyPath?: string | URL
-
-  /**
-   * `fs` interface to write policy to disk.
-   *
-   * This is _only_ used to read and write policy to disk and does not affect
-   * runtime operation.
-   */
-  writableFs?: WritableFsInterface
-
-  /**
-   * Whether or not to actually perform the write operation.
-   *
-   * @defaultValue false
-   */
-  write?: boolean
-}
-
-/**
- * Powers necessary to write a policy to disk
- */
-export interface WritePowers {
-  mkdir: (
-    path: string,
-    { recursive }: { recursive: true }
-  ) => Promise<string | undefined>
-  writeFile: (path: string, data: string) => Promise<void>
-
-  rm: (path: string, { recursive }: { recursive: true }) => Promise<void>
-}
-
-/**
- * Options to pass-through to Endo.
+ * If `T` contains objects with non-exclusive keys, then the type will resolve
+ * to `never`.
  *
- * Used by {@link GeneratePolicyOptions}.
- *
- * The {@link CaptureLiteOptions.dev dev} property defaults to `true`.
+ * Drawback: this is a little slow.
  */
-
-export type WithCaptureLiteOptions = ComposeOptions<
-  [
-    Omit<CaptureLiteOptions, 'importHook' | 'moduleTransforms' | 'log'>,
-    WithLog,
-    WithDev,
-  ]
+export type ComposeOptions<T extends object[]> = Simplify<
+  T extends [infer First, ...infer Rest]
+    ? First extends object
+      ? Rest extends object[]
+        ? keyof First extends keyof ComposeOptions<Rest>
+          ? never
+          : ComposeOptions<Rest> & First
+        : never
+      : never
+    : object
 >
 
 /**
@@ -290,7 +94,7 @@ export type ExecuteOptions = ComposeOptions<
   [
     Omit<
       ImportLocationOptions | SyncImportLocationOptions,
-      'log' | 'dev' | 'policy'
+      'dev' | 'log' | 'policy'
     >,
     WithEndoPolicy,
     WithLog,
@@ -301,8 +105,28 @@ export type ExecuteOptions = ComposeOptions<
   ]
 >
 
-export interface WithOnNodeModulesMapped {
-  onNodeModulesMapped?: (compartmentMap: CompartmentMapDescriptor) => void
+/**
+ * Extra bits of the `fs` module that we need for internal utilities.
+ */
+export interface FsUtilInterface {
+  accessSync: (path: PathLike, mode?: number) => void
+  constants: Pick<typeof nodeFs.constants, 'R_OK' | 'X_OK'>
+  lstatSync: (
+    path: PathLike,
+    options?: {
+      throwIfNoEntry?: boolean
+    }
+  ) => Pick<Stats, 'isFile' | 'isSymbolicLink'>
+  promises: {
+    readFile: ReadFileFn
+  }
+  realpathSync: (path: PathLike, encoding?: BufferEncoding) => Buffer | string
+  statSync: (
+    path: PathLike,
+    options?: {
+      throwIfNoEntry?: boolean
+    }
+  ) => Pick<Stats, 'isFile' | 'isSymbolicLink'>
 }
 
 /**
@@ -359,6 +183,17 @@ export type LavaMoatEndoPackagePolicy = PackagePolicy<
 export type LavaMoatEndoPackagePolicyItem = LavaMoatEndoRootPolicy
 
 /**
+ * Custom data potentially assigned to the `options` prop of an
+ * {@link PackagePolicy.options Endo package policy}
+ */
+export interface LavaMoatEndoPackagePolicyOptions {
+  /**
+   * If this is `true`, then the package is allowed to run native modules
+   */
+  native?: boolean
+}
+
+/**
  * `@lavamoat/node`'s customized Endo policy, with support for our global
  * attenuator.
  */
@@ -381,7 +216,14 @@ export type LavaMoatEndoRootPolicy = typeof ENDO_POLICY_ITEM_ROOT
  */
 export type LavaMoatEndoWritablePropertyPolicy = Record<
   string,
-  EndoWritePolicy | boolean
+  boolean | EndoWritePolicy
+>
+
+/**
+ * Options for `loadPolicies()`
+ */
+export type LoadPoliciesOptions = ComposeOptions<
+  [WithProjectRoot, WithReadFile, WithPolicyOverrideOrPath]
 >
 
 /**
@@ -389,9 +231,23 @@ export type LavaMoatEndoWritablePropertyPolicy = Record<
  */
 export type MakeReadPowersOptions = WithRawReadPowers
 
+export type MergedLavaMoatPolicy = LavaMoatPolicy & {
+  [MERGED_POLICY_FIELD]: true
+}
+
+export type MergedLavaMoatPolicyDebug = LavaMoatPolicyDebug & {
+  [MERGED_POLICY_FIELD]: true
+}
+
+export interface PolicyCanonicalNameInfo {
+  name: CanonicalName
+  source: string
+}
+
 /**
- * Options for `run()`
+ * This is ever-so-slightly different than `ReadFn`.
  */
+export type ReadFileFn = (path: PathLike) => Promise<Buffer | string>
 
 export type RunOptions = ComposeOptions<
   [
@@ -408,15 +264,17 @@ export type RunOptions = ComposeOptions<
 >
 
 /**
- * Options containing a `cwd` property
+ * Options to pass-through to Endo.
+ *
+ * Used by {@link GeneratePolicyOptions}.
+ *
+ * The {@link CaptureLiteOptions.dev dev} property defaults to `true`.
  */
-export interface WithProjectRoot {
-  /**
-   * Project root directory
-   *
-   * @defaultValue `process.cwd()`
-   */
-  projectRoot?: string
+
+export interface ScuttleGlobalThisOptions {
+  enabled?: boolean
+  exceptions?: string[]
+  scuttlerName?: string
 }
 
 /**
@@ -432,21 +290,150 @@ export type ToEndoPolicyOptions = ComposeOptions<
  */
 export type ToEndoPolicyOptionsWithoutPolicyOverride = ComposeOptions<
   [
-    Omit<ToEndoPolicyOptions, 'policyOverridePath' | 'policyOverride'>,
+    Omit<ToEndoPolicyOptions, 'policyOverride' | 'policyOverridePath'>,
     { policyOverride?: never; policyOverridePath?: never },
   ]
 >
 
-/**
- * Options which may either {@link WithReadPowers} or {@link WithRawPowers} but
- * not both.
- */
-export type WithRawReadPowers = WithReadPowers | WithRawPowers
+export type UnmergedLavaMoatPolicy = LavaMoatPolicy & {
+  [MERGED_POLICY_FIELD]?: never
+}
 
-export type CanonicalName = LiteralUnion<
-  typeof LAVAMOAT_PKG_POLICY_ROOT | typeof ATTENUATORS_COMPARTMENT,
-  string
+export type WithCaptureLiteOptions = ComposeOptions<
+  [
+    Omit<CaptureLiteOptions, 'importHook' | 'log' | 'moduleTransforms'>,
+    WithLog,
+    WithDev,
+  ]
 >
+
+/**
+ * A "create a debug policy" flag
+ */
+export interface WithDebug {
+  /**
+   * If `true`, generate a debug policy.
+   */
+  debug?: boolean
+}
+
+export interface WithDev {
+  dev?: boolean
+}
+
+export interface WithEndoPolicy {
+  endoPolicy?: EndoPolicy
+}
+
+/**
+ * Options bucket containing an `fs` prop (for internal utilities; not for use
+ * with {@link WithRawPowers})
+ */
+export interface WithFs {
+  fs?: FsUtilInterface
+}
+
+/**
+ * Options having an {@link IsBuiltinFn}
+ */
+export interface WithIsBuiltin {
+  /**
+   * A function which returns `true` if the given specfifier references a
+   * builtin module.
+   *
+   * Used during policy generation.
+   */
+  isBuiltin?: IsBuiltinFn
+}
+
+export interface WithLog {
+  /**
+   * `Loggerr` instance for logging
+   */
+  log?: Loggerr
+}
+
+export interface WithOnNodeModulesMapped {
+  onNodeModulesMapped?: (compartmentMap: CompartmentMapDescriptor) => void
+}
+
+export interface WithPolicyOnly {
+  /**
+   * A {@link LavaMoatPolicy} object.
+   */
+  policy?: LavaMoatPolicy
+
+  /**
+   * Disallowed in lieu of {@link policy}
+   */
+  policyPath?: never
+}
+
+/**
+ * Options for `run()`
+ */
+
+export type WithPolicyOrPath = WithPolicyOnly | WithPolicyPathOnly
+
+export interface WithPolicyOverride {
+  policyOverride?: LavaMoatPolicy
+}
+
+/**
+ * Options having a `policyOverride` property and _not_ a `policyOverridePath`
+ */
+export type WithPolicyOverrideOnly = {
+  /**
+   * A policy override object.
+   */
+  policyOverride?: LavaMoatPolicy
+
+  /**
+   * Disallowed in lieu of {@link policyOverride}
+   */
+  policyOverridePath?: never
+}
+
+/**
+ * Options having a `policyOverride` or `policyOverridePath` property (not both
+ * at once!)
+ */
+export type WithPolicyOverrideOrPath =
+  | WithPolicyOverrideOnly
+  | WithPolicyOverridePathOnly
+
+export interface WithPolicyOverridePath {
+  policyOverridePath?: string | URL
+}
+
+/**
+ * Options having a `policyOverridePath` property and _not_ a `policyOverride`
+ */
+export type WithPolicyOverridePathOnly = {
+  /**
+   * Disallowed in lieu of {@link policyOverridePath}
+   */
+  policyOverride?: never
+
+  /**
+   * Path to a policy override file.
+   */
+  policyOverridePath?: string | URL
+}
+
+export type * from './errors.js'
+
+export interface WithPolicyPathOnly {
+  /**
+   * Disallowed in lieu of {@link policy}
+   */
+  policy?: never
+
+  /**
+   * Path to a policy file.
+   */
+  policyPath?: string | URL
+}
 
 // re-export schema
 // TODO: make this less bad
@@ -467,14 +454,37 @@ export type {
   RootPolicy,
 } from '@lavamoat/types'
 
-export type * from './errors.js'
+/**
+ * Options containing a `cwd` property
+ */
+export interface WithProjectRoot {
+  /**
+   * Project root directory
+   *
+   * @defaultValue `process.cwd()`
+   */
+  projectRoot?: string
+}
 
 /**
- * Options for `loadPolicies()`
+ * Raw powers which can be converted to a {@link ReadNowPowers} object.
+ *
+ * For this to work, {@link WithRawPowers.fs} _must_ be defined. It cannot
+ * contain a `readPowers` property.
  */
-export type LoadPoliciesOptions = ComposeOptions<
-  [WithProjectRoot, WithReadFile, WithPolicyOverrideOrPath]
->
+export interface WithRawPowers {
+  crypto?: CryptoInterface
+  fs: FsInterface
+  path?: PathInterface
+  readPowers?: never
+  url?: UrlInterface
+}
+
+/**
+ * Options which may either {@link WithReadPowers} or {@link WithRawPowers} but
+ * not both.
+ */
+export type WithRawReadPowers = WithRawPowers | WithReadPowers
 
 /**
  * Options bucket containing a `readFile` prop
@@ -484,76 +494,74 @@ export interface WithReadFile {
 }
 
 /**
- * This is ever-so-slightly different than `ReadFn`.
+ * Options having a `readPowers` property.
  */
-export type ReadFileFn = (path: PathLike) => Promise<string | Buffer>
+export interface WithReadPowers {
+  crypto?: never
+  fs?: never
+  path?: never
 
-/**
- * Extra bits of the `fs` module that we need for internal utilities.
- */
-export interface FsUtilInterface {
-  lstatSync: (
-    path: PathLike,
-    options?: {
-      throwIfNoEntry?: boolean
-    }
-  ) => Pick<Stats, 'isFile' | 'isSymbolicLink'>
-  statSync: (
-    path: PathLike,
-    options?: {
-      throwIfNoEntry?: boolean
-    }
-  ) => Pick<Stats, 'isFile' | 'isSymbolicLink'>
-  accessSync: (path: PathLike, mode?: number) => void
-  constants: Pick<typeof nodeFs.constants, 'R_OK' | 'X_OK'>
-  promises: {
-    readFile: ReadFileFn
-  }
-  realpathSync: (path: PathLike, encoding?: BufferEncoding) => Buffer | string
+  /**
+   * Read powers to use when loading the compartment map.
+   */
+  readPowers?: ReadNowPowers
+  url?: never
+}
+
+export interface WithScuttleGlobalThis {
+  scuttleGlobalThis?: boolean | ScuttleGlobalThisOptions
+}
+
+export interface WithTrustRoot {
+  trustRoot?: boolean
 }
 
 /**
- * Options bucket containing an `fs` prop (for internal utilities; not for use
- * with {@link WithRawPowers})
+ * Options available when writing a policy
  */
-export interface WithFs {
-  fs?: FsUtilInterface
+export interface WithWritePolicyOptions {
+  /**
+   * Path to a {@link LavaMoatPolicyDebug} file
+   */
+  policyDebugPath?: string | URL
+
+  /**
+   * Path to a {@link LavaMoatPolicy} file
+   */
+  policyPath?: string | URL
+
+  /**
+   * `fs` interface to write policy to disk.
+   *
+   * This is _only_ used to read and write policy to disk and does not affect
+   * runtime operation.
+   */
+  writableFs?: WritableFsInterface
+
+  /**
+   * Whether or not to actually perform the write operation.
+   *
+   * @defaultValue false
+   */
+  write?: boolean
 }
 
 /**
- * Safely composes properties from each object in `T` into a single, simplified
- * type.
- *
- * If `T` contains objects with non-exclusive keys, then the type will resolve
- * to `never`.
- *
- * Drawback: this is a little slow.
+ * Superset of {@link FsInterface} necessary to write a policy to disk
  */
-export type ComposeOptions<T extends object[]> = Simplify<
-  T extends [infer First, ...infer Rest]
-    ? First extends object
-      ? Rest extends object[]
-        ? keyof First extends keyof ComposeOptions<Rest>
-          ? never
-          : First & ComposeOptions<Rest>
-        : never
-      : never
-    : object
->
-
-export type MergedLavaMoatPolicy = LavaMoatPolicy & {
-  [MERGED_POLICY_FIELD]: true
+export interface WritableFsInterface {
+  promises: WritePowers
 }
 
-export type UnmergedLavaMoatPolicy = LavaMoatPolicy & {
-  [MERGED_POLICY_FIELD]?: never
-}
+/**
+ * Powers necessary to write a policy to disk
+ */
+export interface WritePowers {
+  mkdir: (
+    path: string,
+    { recursive }: { recursive: true }
+  ) => Promise<string | undefined>
+  rm: (path: string, { recursive }: { recursive: true }) => Promise<void>
 
-export type MergedLavaMoatPolicyDebug = LavaMoatPolicyDebug & {
-  [MERGED_POLICY_FIELD]: true
-}
-
-export interface PolicyCanonicalNameInfo {
-  name: CanonicalName
-  source: string
+  writeFile: (path: string, data: string) => Promise<void>
 }

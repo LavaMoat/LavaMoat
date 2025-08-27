@@ -15,10 +15,10 @@ import nodeUrl from 'node:url'
  * @type {ReadNowPowers}
  */
 export const defaultReadPowers = makeReadNowPowers({
-  fs: nodeFs,
-  url: nodeUrl,
   crypto: nodeCrypto,
+  fs: nodeFs,
   path: nodePath,
+  url: nodeUrl,
 })
 
 /**
@@ -31,13 +31,13 @@ export const defaultReadPowers = makeReadNowPowers({
  */
 export const makeReadPowers = (options) => {
   const { readPowers } = options
-  const { fs, url = nodeUrl, path = nodePath, crypto = nodeCrypto } = options
+  const { crypto = nodeCrypto, fs, path = nodePath, url = nodeUrl } = options
   if (fs) {
     return makeReadNowPowers({
-      fs,
-      url,
       crypto,
+      fs,
       path,
+      url,
     })
   }
   if (readPowers) {

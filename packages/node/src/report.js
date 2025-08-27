@@ -5,6 +5,7 @@
  */
 
 import chalk from 'chalk'
+
 import { SES_VIOLATION_TYPES } from './constants.js'
 import { InvalidArgumentsError } from './error.js'
 import { hrCode, hrLabel, hrPath } from './format.js'
@@ -39,10 +40,10 @@ const DEFAULT_MAX_INVALID_CANONICAL_NAME_SUGGESTIONS = 3
 export const reportInvalidCanonicalNames = (
   compartmentMap,
   {
-    policy,
-    policyPath,
     log = defaultLog,
     maxSuggestions = DEFAULT_MAX_INVALID_CANONICAL_NAME_SUGGESTIONS,
+    policy,
+    policyPath,
     what = 'policy',
   }
 ) => {
@@ -83,7 +84,7 @@ export const reportInvalidCanonicalNames = (
 
     let msg = `The following entries(s) found in ${what}`
     msg += policyPath ? ` (${hrPath(policyPath)})` : ''
-    msg += ` were not associated with any Compartment and may be invalid:\n`
+    msg += ' were not associated with any Compartment and may be invalid:\n'
     msg += invalidCanonicalNames
       .map(({ name, source }) => {
         if (suggestions.has(name)) {
