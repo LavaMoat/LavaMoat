@@ -2,6 +2,7 @@ import '../../../src/preamble.js'
 
 import { Loggerr } from 'loggerr'
 import { fileURLToPath } from 'node:url'
+
 import { defaultReadPowers } from '../../../src/compartment/power.js'
 import { log as defaultLog } from '../../../src/log.js'
 import { generatePolicy } from '../../../src/policy-gen/generate.js'
@@ -82,6 +83,7 @@ export function createGeneratePolicyMacros(test) {
       { expectedPolicy = {}, sourceType = InlineSourceTypes.Module } = {}
     ) => {
       const { readPowers } = await scaffoldFixture(content, { sourceType })
+
       /** @type {Loggerr} */
       let log
       if (!isPolicy(expectedPolicy) && expectedPolicy.log) {
@@ -95,11 +97,11 @@ export function createGeneratePolicyMacros(test) {
 
       const actualPolicy = await generatePolicy('/entry.js', {
         log,
-        readPowers,
         policyOverride:
           'policyOverride' in expectedPolicy
             ? expectedPolicy.policyOverride
             : undefined,
+        readPowers,
       })
 
       if (isPolicy(expectedPolicy)) {
@@ -128,6 +130,7 @@ export function createGeneratePolicyMacros(test) {
    * otherwise a snapshot is taken.
    */
   const testPolicyForInlineModule = test.macro(
+
     /**
      * @type {MacroDeclarationOptions<
      *   [
@@ -272,6 +275,7 @@ export function createGeneratePolicyMacros(test) {
         if (title) {
           return title
         }
+
         /** @type {TestPolicyForJSONOptions['expected']} */
         let expected
         if (isPolicy(expectedPolicyOrOptions)) {
@@ -338,15 +342,15 @@ export function createGeneratePolicyMacros(test) {
           log.setLevel(Loggerr.EMERGENCY)
         }
 
-        const { entrypoint: entrypointPath, dir: projectRoot } = fixture(name, {
+        const { dir: projectRoot, entrypoint: entrypointPath } = fixture(name, {
           entrypoint,
           entrypointFilename,
         })
         const actualPolicy = await generatePolicy(entrypointPath, {
           ...otherOptions,
+          log,
           projectRoot,
           readPowers,
-          log,
         })
 
         // if overrides provided, then we will make a second check that
@@ -383,6 +387,7 @@ export function createGeneratePolicyMacros(test) {
         if (title) {
           return title
         }
+
         /** @type {TestPolicyForFixtureOptions['expected']} */
         let expected
         if (isPolicy(expectedPolicyOrOptions)) {
@@ -457,7 +462,7 @@ const SCAFFOLD_SCRIPT_FIXTURE = fileURLToPath(
 async function scaffoldFixture(content, { sourceType = 'module' } = {}) {
   const fixturePath =
     sourceType === 'module' ? SCAFFOLD_MODULE_FIXTURE : SCAFFOLD_SCRIPT_FIXTURE
-  const { vol, readPowers } = await loadJSONFixture(
+  const { readPowers, vol } = await loadJSONFixture(
     new URL(fixturePath, import.meta.url)
   )
 
@@ -465,5 +470,5 @@ async function scaffoldFixture(content, { sourceType = 'module' } = {}) {
     encoding: 'utf8',
   })
 
-  return { vol, readPowers }
+  return { readPowers, vol }
 }
