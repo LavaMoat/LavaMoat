@@ -30,7 +30,12 @@ module.exports = {
  */
 
 /**
- * @param {import('../../core/src/generatePolicy').AST | string} source
+ * @typedef {import('@babel/parser').ParseResult<import('@babel/types').File>
+ *   | import('@babel/types').File} AST
+ */
+
+/**
+ * @param {AST | string} source
  * @param {InspectGlobalsOpts} options
  * @returns
  */
@@ -121,7 +126,7 @@ function inspectGlobals(
     identifierNode,
     parents
   ) {
-    /** @type {import('../../core/src/schema').GlobalPolicyValue} */
+    /** @type {import('@lavamoat/types').GlobalPolicyValue} */
     let identifierUse = 'read'
     const { memberExpressions, parentOfMembershipChain, topmostMember } =
       getMemberExpressionNesting(identifierNode, parents)
@@ -151,7 +156,7 @@ function inspectGlobals(
 
   /**
    * @param {string} identifierPath
-   * @param {import('../../core/src/schema').GlobalPolicyValue} identifierUse
+   * @param {import('@lavamoat/types').GlobalPolicyValue} identifierUse
    * @returns
    */
   function maybeAddGlobalUsage(identifierPath, identifierUse) {

@@ -4,7 +4,6 @@ ignores:
   # monorepo deps
   - 'ava'
   - '@typescript-eslint/parser'
-  - 'expect-type'
   # tests - fake packages
   - 'abc'
   - 'xyz'
@@ -17,3 +16,5 @@ ignores:
   - '@types/json-stable-stringify'
   - '@types/merge-deep'
   - '@babel/types'
+  - '@lavamoat/types'
+  - 'type-fest'

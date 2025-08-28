@@ -8,8 +8,12 @@
     "rootDir": "src",
     "outDir": "types",
     "paths": {
-      "lavamoat-core": ["../core"]
+      "lavamoat-core": ["../core"],
+      "@lavamoat/types": ["../types"]
     }
   },
-  "references": [{ "path": "../core/tsconfig.json" }]
+  "references": [
+    { "path": "../core/tsconfig.json" },
+    { "path": "../types/tsconfig.json" }
+  ]
 }
