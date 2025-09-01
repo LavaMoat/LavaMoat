@@ -6,7 +6,7 @@ const path = require('path')
 test.before(async (t) => {
   const webpackConfig = makeConfig({
     inlineLockdown: /app/,
-    staticShims: [
+    staticShims_experimental: [
       path.join(__dirname, 'fixtures/static-shims/shim-before.js'),
       path.join(__dirname, 'fixtures/static-shims/shim-lockdown.js'),
     ],

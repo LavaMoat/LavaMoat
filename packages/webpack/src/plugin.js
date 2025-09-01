@@ -553,17 +553,17 @@ class LavaMoatPlugin {
                 )
 
                 if (
-                  STORE.options.staticShims &&
-                  Array.isArray(STORE.options.staticShims)
+                  STORE.options.staticShims_experimental &&
+                  Array.isArray(STORE.options.staticShims_experimental)
                 ) {
                   const staticShimsWrapped = getStaticShims(
-                    STORE.options.staticShims
+                    STORE.options.staticShims_experimental
                   )
 
                   compilation.addRuntimeModule(
                     chunk,
                     new VirtualRuntimeModule({
-                      name: 'LavaMoat/staticShims',
+                      name: 'LavaMoat/staticShims_experimental',
                       source: staticShimsWrapped,
                       stage: RuntimeModule.STAGE_BASIC, // after Normal
                     })
