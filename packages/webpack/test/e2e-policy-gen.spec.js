@@ -71,3 +71,11 @@ test('webpack/policy-gen - handles excludes', async (t) => {
   }
   t.pass()
 })
+
+test('webpack/policy-gen - generatePolicyOnly skips emitting assets', async (t) => {
+  const webpackConfig = makeConfig({
+    generatePolicyOnly: true,
+  })
+  const build = await scaffold(webpackConfig)
+  t.deepEqual(Object.keys(build.snapshot), [], 'no files were emitted')
+})
