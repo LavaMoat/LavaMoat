@@ -6,7 +6,9 @@ import 'resource-hack'
 import 'side-effects-package/styles.css'
 import { hello as helloTypeScript } from 'typescript-package'
 import { hello as helloUMD } from 'umd-package'
+import { slop as slop1 } from './slop/index.js'
 import { what } from './src/hello.ts'
+import { slop as slop2 } from './src/moreslop/index.js'
 import { thing } from './src/other.mjs'
 
 // This is a webpack feature where the file referenced here is included in the
@@ -25,7 +27,9 @@ function run() {
     helloUMD(),
     thing(),
     what,
-    globals
+    globals,
+    slop1,
+    slop2
   )
 }
 
