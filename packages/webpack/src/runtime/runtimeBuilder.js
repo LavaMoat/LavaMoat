@@ -1,6 +1,6 @@
 const { RUNTIME_KEY } = require('../ENUM.json')
 const diag = require('../buildtime/diagnostics.js')
-const { assembleRuntime } = require('./assemble.js')
+const { assembleRuntime, prepareSource } = require('./assemble.js')
 const path = require('node:path')
 
 /** @import {LavaMoatPluginOptions} from '../buildtime/types' */
@@ -38,8 +38,52 @@ module.exports = {
           'trustedTypes', // GetTrustedTypesPolicyRuntimeModule.js
           'self',
         ]
-        return `var ${globals.map((g) => `${g} = globalThis.${g}`).join(',')};`
+        return `var ${globals.map((g) => `${g} = globalThis.${g}`).join(',')};
+const LOCKDOWN_SHIMS = [];`
       },
+
+      /**
+       * Prepares the static shims to be included in the runtime chunk.
+       *
+       * @param {string[]} dependencies - The module specifiers to prepare.
+       * @returns {string} The prepared runtime dependencies source.
+       */
+      getStaticShims(dependencies) {
+        /**
+         * Wraps static shim source code to capture the lockdown shim it sets
+         * (if any) Makes LOCKDOWN_SHIMS unreachable in its scope and freezes so
+         * no other runtime modules can add any new shims to it.
+         *
+         * @param {string} source - The source code to wrap.
+         * @returns {string} The wrapped source code.
+         */
+        const shimWrap = (source) => `;{
+          let LOCKDOWN_SHIM;((LOCKDOWN_SHIMS)=>{
+            ${source}
+          ;
+          })();
+          if(typeof LOCKDOWN_SHIM === 'function') {
+            LOCKDOWN_SHIMS.push(LOCKDOWN_SHIM)
+          };
+        }`
+
+        const shims = dependencies.map((dep) => {
+          const source = prepareSource(dep)
+          try {
+            new Function(source)
+          } catch (e) {
+            throw new Error(
+              `LavaMoatPlugin: Static shim ${dep} is not valid JS`,
+              { cause: e }
+            )
+          }
+          return shimWrap(source)
+        })
+
+        return `${shims.join('\n')}
+        Object.freeze(LOCKDOWN_SHIMS);`
+      },
+
       /**
        * Generates the LavaMoat runtime source code based on chunk configuration
        *

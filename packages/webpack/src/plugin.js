@@ -474,10 +474,13 @@ class LavaMoatPlugin {
         const onceForChunkSet = new WeakSet()
         const chunkRuntimeWarningsDedupe = new Set()
 
-        const { getLavaMoatRuntimeSource, getDefensiveCodingPreamble } =
-          runtimeBuilder({
-            options: STORE.options,
-          })
+        const {
+          getLavaMoatRuntimeSource,
+          getDefensiveCodingPreamble,
+          getStaticShims,
+        } = runtimeBuilder({
+          options: STORE.options,
+        })
 
         // Define a handler function to be called for each chunk in the compilation.
         compilation.hooks.additionalChunkRuntimeRequirements.tap(
@@ -539,6 +542,34 @@ class LavaMoatPlugin {
 
                 const defensivePreamble = getDefensiveCodingPreamble()
 
+                compilation.addRuntimeModule(
+                  chunk,
+                  new VirtualRuntimeModule({
+                    name: 'LavaMoat/defensive',
+                    source: defensivePreamble,
+                    stage: RuntimeModule.STAGE_NORMAL, // before all other runtime modules
+                    withoutClosure: true, // run in the scope of the runtime closure
+                  })
+                )
+
+                if (
+                  STORE.options.staticShims &&
+                  Array.isArray(STORE.options.staticShims)
+                ) {
+                  const staticShimsWrapped = getStaticShims(
+                    STORE.options.staticShims
+                  )
+
+                  compilation.addRuntimeModule(
+                    chunk,
+                    new VirtualRuntimeModule({
+                      name: 'LavaMoat/staticShims',
+                      source: staticShimsWrapped,
+                      stage: RuntimeModule.STAGE_BASIC, // after Normal
+                    })
+                  )
+                }
+
                 // Add the runtime modules to the chunk, which handles
                 // the runtime logic for wrapping with lavamoat.
                 compilation.addRuntimeModule(
@@ -547,16 +578,6 @@ class LavaMoatPlugin {
                     name: 'LavaMoat/runtime',
                     source: lavaMoatRuntime,
                     stage: RuntimeModule.STAGE_TRIGGER, // after all other stages
-                  })
-                )
-
-                compilation.addRuntimeModule(
-                  chunk,
-                  new VirtualRuntimeModule({
-                    name: 'LavaMoat/defensive',
-                    source: defensivePreamble,
-                    stage: RuntimeModule.STAGE_BASIC, // before all other runtime modules
-                    withoutClosure: true, // run in the scope of the runtime closure
                   })
                 )
 
