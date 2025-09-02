@@ -115,6 +115,7 @@ const defaultGlobals = () => ({
   location: { href: 'https://localhost/' }, // necessary for webpack's runtime
   URL,
 })
+exports.defaultGlobalsForRunScript = defaultGlobals
 
 
 /** @import {Context} from 'node:vm' */
