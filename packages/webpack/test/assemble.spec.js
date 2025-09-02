@@ -152,3 +152,22 @@ test('removes multiple comments in nested closures', (t) => {
 })();`
   t.is(removeMultilineComments(input), expected)
 })
+
+test('handles lone surrogates in comments', (t) => {
+  const input = `const a = /* comment with \uD800 high surrogate */ 5; const b = /* \uDC00 low surrogate */ 6;`
+  const expected = `const a =  5; const b =  6;`
+  t.is(removeMultilineComments(input), expected)
+})
+
+test('handles surrogate pairs in and around comments', (t) => {
+  const input = `const x = /* \uD800\uDC00 surrogate pair in comment */ "\uD800\uDC00"; /* comment */ const y = '\uD800'; /* \uD800 */ const z = '\uDC00';`
+  const expected = `const x =  "\uD800\uDC00";  const y = '\uD800';  const z = '\uDC00';`
+  t.is(removeMultilineComments(input), expected)
+})
+
+test('handles non-BMP characters in comments', (t) => {
+  // Using a mathematical symbol outside BMP: 𝄞 (U+1D11E, MUSICAL SYMBOL G CLEF)
+  const input = `const music = /* 𝄞 musical clef comment 𝄞 */ "𝄞";`
+  const expected = `const music =  "𝄞";`
+  t.is(removeMultilineComments(input), expected)
+})
