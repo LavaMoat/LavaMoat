@@ -1,5 +1,8 @@
 /// <reference path="./lavamoat.d.ts" />
 /* global Compartment */
+/* global LAVAMOAT */
+/* global LOCKDOWN_SHIMS */
+/* global hardenIntrinsics */
 const {
   keys,
   create,
@@ -13,14 +16,14 @@ const {
   values,
 } = Object
 
-const { lockdown, Proxy, Math, Date } = globalThis
+const { repairIntrinsics, Proxy, Math, Date } = globalThis
 
 const warn = typeof console === 'object' ? console.warn : () => {}
 
 // Avoid running any wrapped code or using compartment if lockdown was not called.
 // This is for when the bundle ends up running despite SES being missing.
 // It was previously useful for sub-compilations running an incomplete bundle as part of the build, but currently that is being skipped. We might go back to it for the sake of build time security if it's deemed worthwihile in absence of lockdown.
-const LOCKDOWN_ON = typeof lockdown !== 'undefined'
+const LOCKDOWN_ON = typeof repairIntrinsics !== 'undefined'
 if (LOCKDOWN_ON) {
   repairIntrinsics(LAVAMOAT.options.lockdown)
 
