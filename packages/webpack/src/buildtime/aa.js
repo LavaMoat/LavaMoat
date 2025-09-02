@@ -79,16 +79,20 @@ exports.generateIdentifierLookup = ({
   readableResourceIds,
 }) => {
   /**
-   * @typedef {Record<string, { aa: string; moduleId: number | string }>} PathMapping
+   * @typedef {Record<string, { aa: string; moduleIds: (number | string)[] }>} PathMapping
    */
   const pathsToIdentifiers = () => {
     /** @type {PathMapping} */
     const mapping = {}
     for (const p of paths) {
       if (p.path) {
-        mapping[p.path] = {
-          aa: getPackageNameForModulePath(canonicalNameMap, p.path),
-          moduleId: p.moduleId,
+        if (mapping[p.path]) {
+          mapping[p.path].moduleIds.push(p.moduleId)
+        } else {
+          mapping[p.path] = {
+            aa: getPackageNameForModulePath(canonicalNameMap, p.path),
+            moduleIds: [p.moduleId],
+          }
         }
       }
     }
@@ -102,7 +106,7 @@ exports.generateIdentifierLookup = ({
       if (resourceId && !mapping[c.context]) {
         mapping[c.context] = {
           aa: resourceId,
-          moduleId: c.moduleId,
+          moduleIds: [c.moduleId],
         }
       }
     }
@@ -136,12 +140,12 @@ exports.generateIdentifierLookup = ({
   crossReference(identifiersWithKnownPaths, usedIdentifiers)
 
   const identifiersForModuleIds = Object.entries(
-    Object.entries(pathLookup).reduce((acc, [, { aa, moduleId }]) => {
+    Object.entries(pathLookup).reduce((acc, [, { aa, moduleIds }]) => {
       const key = translate(aa)
       if (acc[key] === undefined) {
         acc[key] = []
       }
-      acc[key].push(moduleId)
+      acc[key].push(...moduleIds)
       return acc
     }, /** @type {Record<string, (string | number)[]>} */ ({}))
   )
