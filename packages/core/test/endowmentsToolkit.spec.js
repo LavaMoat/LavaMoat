@@ -448,6 +448,7 @@ test('copyWrappedGlobals - support other realm prototype chains', (t) => {
   'use strict'
   const { copyWrappedGlobals } = prepareTest()
   const forkedProto = Object.create(null)
+  forkedProto.hasOwnProperty = () => true
 
   const sourceProto = Object.create(forkedProto)
   sourceProto.onTheProto = function () {}

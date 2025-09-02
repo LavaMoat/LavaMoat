@@ -534,10 +534,20 @@ function endowmentsToolkit({
     let commonPrototypeIndex = globalProtoChain.findIndex(
       (globalProtoChainEntry) => globalProtoChainEntry === Object.prototype
     )
-    if (commonPrototypeIndex === -1) {
-      // "Why would a global have no reference in prototype chain that matches Object.prototype?" you might ask.
-      // It's when the global is partially from a different Realm. And that's possible in extension contentscript in FireFox
+    // "Why would a global have no reference in prototype chain that matches Object.prototype?" you might ask.
+    // It's when the global is partially from a different Realm. And that's possible in extension contentscript in FireFox
+    const noSharedPrototype = commonPrototypeIndex === -1
+    if (noSharedPrototype) {
+      // take the entire prototype chain
       commonPrototypeIndex = globalProtoChain.length
+      // Skip overriding Object.prototype keys in case it's the other realm Object.prototype
+      const possiblyObjectProto = globalProtoChain.pop()
+      const replacement = Object.fromEntries(
+        Object.entries(possiblyObjectProto).filter(
+          ([key]) => key in Object.prototype
+        )
+      )
+      globalProtoChain.push(replacement)
     }
     // we will copy endowments from all entries in the prototype chain, excluding Object.prototype
     const endowmentSources = globalProtoChain.slice(0, commonPrototypeIndex)
