@@ -5,13 +5,14 @@ export type ScuttlerConfig = LavaMoatScuttleOpts | boolean | undefined
 
 export interface CompleteLavaMoatPluginOptions {
   generatePolicy?: boolean
+  generatePolicyOnly?: boolean
   rootDir?: string
   policyLocation: string
   emitPolicySnapshot?: boolean
   readableResourceIds?: boolean
   HtmlWebpackPluginInterop?: boolean
   inlineLockdown?: RegExp
-  diagnosticsVerbosity?: number
+  diagnosticsVerbosity: number
   lockdown: LockdownOptions
   policy?: LavaMoatPolicy
   runChecks?: boolean

@@ -51,6 +51,12 @@ const JAVASCRIPT_MODULE_TYPE_AUTO = 'javascript/auto'
 const JAVASCRIPT_MODULE_TYPE_DYNAMIC = 'javascript/dynamic'
 const JAVASCRIPT_MODULE_TYPE_ESM = 'javascript/esm'
 
+const COVERED_MODULE_TYPES = [
+  JAVASCRIPT_MODULE_TYPE_AUTO,
+  JAVASCRIPT_MODULE_TYPE_DYNAMIC,
+  JAVASCRIPT_MODULE_TYPE_ESM,
+]
+
 const POLICY_SNAPSHOT_FILENAME = 'policy-snapshot.json'
 
 const { wrapGenerator } = require('./buildtime/generator.js')
@@ -127,10 +133,14 @@ class LavaMoatPlugin {
       lockdown: lockdownDefaults,
       isBuiltin: () => false,
       runChecks: true,
+      diagnosticsVerbosity: 0,
       ...options,
     }
+    if (this.options.generatePolicyOnly) {
+      this.options.generatePolicy = true
+    }
 
-    diag.level = options.diagnosticsVerbosity || 0
+    diag.level = this.options.diagnosticsVerbosity
   }
   /**
    * @param {import('webpack').Compiler} compiler The compiler instance
@@ -196,21 +206,24 @@ class LavaMoatPlugin {
       STORE.options.readableResourceIds = compiler.options.mode !== 'production'
     }
 
+    let FORCED_CONCATENATEMODULES_OFF = false
+    if (compiler.options.optimization.concatenateModules) {
+      FORCED_CONCATENATEMODULES_OFF = true
+    }
     // Concatenation won't work with wrapped modules. Have to disable it.
     compiler.options.optimization.concatenateModules = false
+
     // TODO: Research. If we fiddle a little with how we wrap the module, it might be possible to get inlining to work eventually by adding a closure that returns the module namespace. I just don't want to get into the compatibility of it all yet.
     // TODO: explore how these settings affect the Compartment wrapping etc.
-    // compiler.options.optimization.runtimeChunk = false; // that one is ok, checked
     // compiler.options.optimization.mangleExports = false;
     // compiler.options.optimization.usedExports = false;
     // compiler.options.optimization.providedExports = false;
     // compiler.options.optimization.sideEffects = false;
-    // compiler.options.optimization.moduleIds = "hashed";
-    // compiler.options.optimization.chunkIds = "named";
     Object.freeze(STORE.options)
 
     // =======================================
 
+    // loadCanonicalNameMap depends on having a resolver. It'd be best to use webpack's own, but it's problematic and the discrepancies between resolvers are not on the package level, but individual exports, which has not tripped us up yet.
     // sadly regular webpack compilation doesn't allow for synchronous resolver.
     //  Error: Cannot 'resolveSync' because the fileSystem is not sync. Use 'resolve'!
     // function adapterFunction(resolver) {
@@ -250,12 +263,28 @@ class LavaMoatPlugin {
         // Wire up error and warning collection
         PROGRESS.reportErrorsTo(compilation.errors)
         STORE.mainCompilationWarnings = compilation.warnings
-        assertFields(STORE, ['mainCompilationWarnings'])
-        STORE.mainCompilationWarnings.push(
-          new WebpackError(
-            'LavaMoatPlugin: Concatenation of modules disabled - not compatible with LavaMoat wrapped modules.'
+        assertFields(STORE, ['mainCompilationWarnings', 'options'])
+
+        if (STORE.options.generatePolicyOnly) {
+          compiler.options.devtool = false // source maps are expensive to make and unnecessary
+          compiler.hooks.shouldEmit.tap(PLUGIN_NAME, () => false)
+          compilation.hooks.shouldGenerateChunkAssets.tap(
+            PLUGIN_NAME,
+            () => false
           )
-        )
+          // replacing generator with something returning an empty string could shave off some extra time, but is too invasive to seem worth it
+        }
+
+        if (
+          FORCED_CONCATENATEMODULES_OFF ||
+          STORE.options.diagnosticsVerbosity > 0
+        ) {
+          STORE.mainCompilationWarnings.push(
+            new WebpackError(
+              'LavaMoatPlugin: Concatenation of modules disabled - not compatible with LavaMoat wrapped modules.'
+            )
+          )
+        }
 
         // Adjust scuttling configuration to not scuttle webpack chunk loading facilities
         if (
@@ -276,19 +305,13 @@ class LavaMoatPlugin {
         // =================================================================
         // javascript modules generator tweaks installation
 
-        const coveredModuleTypes = [
-          JAVASCRIPT_MODULE_TYPE_AUTO,
-          JAVASCRIPT_MODULE_TYPE_DYNAMIC,
-          JAVASCRIPT_MODULE_TYPE_ESM,
-        ]
-
         const generatorWrapper = wrapGenerator({
           excludes: STORE.excludes,
           runChecks: STORE.options.runChecks,
           PROGRESS,
         })
 
-        for (const moduleType of coveredModuleTypes) {
+        for (const moduleType of COVERED_MODULE_TYPES) {
           normalModuleFactory.hooks.generator
             .for(moduleType)
             .tap(PLUGIN_NAME, generatorWrapper.generatorHookHandler)
@@ -368,6 +391,12 @@ class LavaMoatPlugin {
                   policyFromOptions: STORE.options.policy,
                   location: STORE.options.policyLocation,
                 })
+
+            if (STORE.options.generatePolicyOnly) {
+              PROGRESS.cancel() // prevents progress errors
+              compilation.clearAssets() // causes most further compilation work to be skipped
+              return
+            }
 
             if (STORE.options.emitPolicySnapshot) {
               compilation.emitAsset(
