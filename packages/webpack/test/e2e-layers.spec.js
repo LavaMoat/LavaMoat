@@ -3,10 +3,24 @@ const {
   scaffold,
   runScriptWithSES,
   runScript,
-  defaultGlobalsForRunScript,
+  getDefaultGlobalsForRunScript,
 } = require('./scaffold.js')
 const LavaMoatPlugin = require('../src/plugin.js')
 const { makeConfig } = require('./fixtures/main/webpack.config.js')
+
+/**
+ * Concatenates chunks to pretend they have loaded successfully, avoids attempts
+ * by webpack to dynamically load
+ *
+ * @param {string[]} chunks
+ * @returns
+ */
+function pretendLoadingChunks(chunks) {
+  return chunks.join('\n;')
+}
+
+// It's not actually a chunk, but an asset that gets emitted from the URL
+// const COMMON_CHUNK_FILE = '/dist/4892327f4fdaee1a826b.js'
 
 test.before(async (t) => {
   const webpackConfig = makeConfig({
@@ -55,23 +69,37 @@ test.before(async (t) => {
   await t.notThrowsAsync(async () => {
     t.context.build = await scaffold(config)
   }, 'Expected the build to succeed')
+})
 
-  t.context.bundleApp = t.context.build.snapshot['/dist/app.js']
-  t.context.bundleBootstrap = t.context.build.snapshot['/dist/bootstrap.js']
+test('webpack/layers - bundle files complete', (t) => {
+  t.snapshot(Object.keys(t.context.build.snapshot))
 })
 
 test('webpack/layers - app bundle runs with lavamoat', (t) => {
   t.notThrows(() => {
-    runScriptWithSES(t.context.bundleApp, { console })
+    runScriptWithSES(
+      pretendLoadingChunks([
+        t.context.build.snapshot['/dist/runtime.js'],
+        // t.context.build.snapshot[COMMON_CHUNK_FILE], // the chunk gets inlined in both layers separately. Not sure how to fix that yet
+        t.context.build.snapshot['/dist/app.js'],
+      ]),
+      { console }
+    )
   }, 'Should run app bundle without errors')
 })
 
 test('webpack/layers - bootstrap bundle runs without lavamoat', (t) => {
   t.notThrows(() => {
     // Not using SES here as bootstrap should not be wrapped in LavaMoat
-    runScript(t.context.bundleBootstrap, {
-      ...defaultGlobalsForRunScript,
-      console,
-    })
+    runScript(
+      pretendLoadingChunks([
+        // t.context.build.snapshot[COMMON_CHUNK_FILE], // the chunk gets inlined in both layers separately. Not sure how to fix that yet
+        t.context.build.snapshot['/dist/bootstrap.js'],
+      ]),
+      {
+        ...getDefaultGlobalsForRunScript(),
+        console,
+      }
+    )
   }, 'Should run bootstrap bundle without errors')
 })

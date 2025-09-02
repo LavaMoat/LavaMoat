@@ -88,6 +88,7 @@ exports.generateIdentifierLookup = ({
       if (p.path) {
         if (mapping[p.path]) {
           mapping[p.path].moduleIds.push(p.moduleId)
+          diag.rawDebug(2, `Duplicated moduleId at path ${ p.path }, moduleIds: ${ mapping[p.path].moduleIds.join(', ') }`)
         } else {
           mapping[p.path] = {
             aa: getPackageNameForModulePath(canonicalNameMap, p.path),
