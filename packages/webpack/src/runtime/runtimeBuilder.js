@@ -338,23 +338,27 @@ const LOCKDOWN_SHIMS = [];`
               `adding UNLOCKED runtime for chunk ${currentChunkName}`
             )
 
-            new VirtualRuntimeModule({
-              name: 'LavaMoat/runtime',
-              source: getUnlockedRuntime(),
-              stage: RuntimeModule.STAGE_TRIGGER, // after all other stages
-            })
+            lavamoatRuntimeModules.push(
+              new VirtualRuntimeModule({
+                name: 'LavaMoat/runtime',
+                source: getUnlockedRuntime(),
+                stage: RuntimeModule.STAGE_TRIGGER, // after all other stages
+              })
+            )
             break
           case 'safe':
             diag.rawDebug(2, `adding runtime for chunk ${currentChunkName}`)
-            new VirtualRuntimeModule({
-              name: 'LavaMoat/runtime',
-              source: getLavaMoatRuntimeSource({
-                chunkIds,
-                policyData,
-                identifiers,
-              }),
-              stage: RuntimeModule.STAGE_TRIGGER, // after all other stages
-            })
+            lavamoatRuntimeModules.push(
+              new VirtualRuntimeModule({
+                name: 'LavaMoat/runtime',
+                source: getLavaMoatRuntimeSource({
+                  chunkIds,
+                  policyData,
+                  identifiers,
+                }),
+                stage: RuntimeModule.STAGE_TRIGGER, // after all other stages
+              })
+            )
             break
         }
 
