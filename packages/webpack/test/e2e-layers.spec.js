@@ -3,7 +3,6 @@ const {
   scaffold,
   runScriptWithSES,
   runScript,
-  getDefaultGlobalsForRunScript,
 } = require('./scaffold.js')
 const LavaMoatPlugin = require('../src/plugin.js')
 const { makeConfig } = require('./fixtures/main/webpack.config.js')
@@ -19,13 +18,23 @@ function pretendLoadingChunks(chunks) {
   return chunks.join('\n;')
 }
 
-// It's not actually a chunk, but an asset that gets emitted from the URL
-// const COMMON_CHUNK_FILE = '/dist/4892327f4fdaee1a826b.js'
-
 test.before(async (t) => {
   const webpackConfig = makeConfig({
     generatePolicy: false,
-    policy: { resources: {} },
+    policy: {
+      resources: {
+        'commonjs-package': {
+          packages: {
+            'umd-package': true,
+          },
+        },
+        'umd-package': {
+          globals: {
+            define: true,
+          },
+        },
+      },
+    },
   })
   const config = {
     ...webpackConfig,
@@ -67,39 +76,33 @@ test.before(async (t) => {
   }
 
   await t.notThrowsAsync(async () => {
-    t.context.build = await scaffold(config)
+    t.context.build = await scaffold(config, { writeFS: false })
   }, 'Expected the build to succeed')
 })
 
-test('webpack/layers - bundle files complete', (t) => {
+test('webpack/path-moduleId - bundle files complete', (t) => {
+  // Note '/dist/4892327f4fdaee1a826b.js' is not actually a chunk, but an asset that gets emitted from the URL constructor
   t.snapshot(Object.keys(t.context.build.snapshot))
 })
 
-test('webpack/layers - app bundle runs with lavamoat', (t) => {
+test('webpack/path-moduleId - app bundle runs with lavamoat', (t) => {
   t.notThrows(() => {
     runScriptWithSES(
       pretendLoadingChunks([
         t.context.build.snapshot['/dist/runtime.js'],
-        // t.context.build.snapshot[COMMON_CHUNK_FILE], // the chunk gets inlined in both layers separately. Not sure how to fix that yet
         t.context.build.snapshot['/dist/app.js'],
-      ]),
-      { console }
+      ])
     )
   }, 'Should run app bundle without errors')
 })
 
-test('webpack/layers - bootstrap bundle runs without lavamoat', (t) => {
+test('webpack/path-moduleId - bootstrap bundle runs without lavamoat', (t) => {
   t.notThrows(() => {
     // Not using SES here as bootstrap should not be wrapped in LavaMoat
     runScript(
       pretendLoadingChunks([
-        // t.context.build.snapshot[COMMON_CHUNK_FILE], // the chunk gets inlined in both layers separately. Not sure how to fix that yet
         t.context.build.snapshot['/dist/bootstrap.js'],
-      ]),
-      {
-        ...getDefaultGlobalsForRunScript(),
-        console,
-      }
+      ])
     )
   }, 'Should run bootstrap bundle without errors')
 })
