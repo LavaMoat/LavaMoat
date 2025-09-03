@@ -60,11 +60,6 @@ module.exports = {
    *   options
    */
   runtimeBuilder({ options }) {
-    const runtimeOptions = {
-      scuttleGlobalThis: options.scuttleGlobalThis,
-      lockdown: options.lockdown,
-    }
-
     /**
      * Generates the preamble that caches selected globals to protect runtime
      * from scuttling. The set of cached globals is limited to ones known to be
@@ -150,6 +145,9 @@ const LOCKDOWN_SHIMS = [];`
      * Generates the LavaMoat runtime source code based on chunk configuration
      *
      * @param {Object} params - The parameters object
+     * @param {LavaMoatChunkRuntimeConfiguration['embeddedOptions']} params.embeddedOptions
+     *   - The options to embed in the
+     *
      * @param {(string | number)[]} params.chunkIds - Array of chunk identifiers
      * @param {LavaMoatPolicy} params.policyData - LavaMoat security policy
      *   configuration
@@ -158,6 +156,7 @@ const LOCKDOWN_SHIMS = [];`
      * @returns {string} The assembled runtime source code
      */
     function getLavaMoatRuntimeSource({
+      embeddedOptions,
       chunkIds,
       policyData,
       identifiers: {
@@ -217,12 +216,12 @@ const LOCKDOWN_SHIMS = [];`
           json: true,
         },
         // options to turn on scuttling
-        { name: 'options', data: runtimeOptions, json: true },
+        { name: 'options', data: embeddedOptions, json: true },
         // scuttling module, if needed
-        (typeof runtimeOptions?.scuttleGlobalThis === 'boolean' &&
-          runtimeOptions.scuttleGlobalThis === true) ||
-        (typeof runtimeOptions?.scuttleGlobalThis === 'object' &&
-          runtimeOptions.scuttleGlobalThis.enabled === true)
+        (typeof embeddedOptions?.scuttleGlobalThis === 'boolean' &&
+          embeddedOptions.scuttleGlobalThis === true) ||
+        (typeof embeddedOptions?.scuttleGlobalThis === 'object' &&
+          embeddedOptions.scuttleGlobalThis.enabled === true)
           ? {
               name: 'scuttling',
               shimRequire: 'lavamoat-core/src/scuttle.js',
@@ -306,6 +305,10 @@ const LOCKDOWN_SHIMS = [];`
         let runtimeConfiguration = {
           mode: 'safe',
           staticShims: options.staticShims_experimental,
+          embeddedOptions: {
+            scuttleGlobalThis: options.scuttleGlobalThis,
+            lockdown: options.lockdown,
+          },
         }
 
         // plugin options decide the mode
@@ -326,6 +329,11 @@ const LOCKDOWN_SHIMS = [];`
               mode: chunkConfig.mode || runtimeConfiguration.mode,
               staticShims:
                 chunkConfig.staticShims || runtimeConfiguration.staticShims,
+              embeddedOptions: Object.assign(
+                {},
+                runtimeConfiguration.embeddedOptions,
+                chunkConfig.embeddedOptions
+              ),
             }
           }
         }
@@ -355,6 +363,7 @@ const LOCKDOWN_SHIMS = [];`
                   chunkIds,
                   policyData,
                   identifiers,
+                  embeddedOptions: runtimeConfiguration.embeddedOptions,
                 }),
                 stage: RuntimeModule.STAGE_TRIGGER, // after all other stages
               })
