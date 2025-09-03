@@ -7,7 +7,6 @@ const assert = require('node:assert')
 
 const {
   WebpackError,
-  RuntimeModule,
   Compilation,
   sources: { RawSource },
 } = require('webpack')
@@ -56,35 +55,6 @@ const POLICY_SNAPSHOT_FILENAME = 'policy-snapshot.json'
 const { wrapGenerator } = require('./buildtime/generator.js')
 const { sesEmitHook, sesPrefixFiles } = require('./buildtime/emitSes.js')
 const EXCLUDE_LOADER = path.join(__dirname, './excludeLoader.js')
-
-class VirtualRuntimeModule extends RuntimeModule {
-  /**
-   * @param {Object} options - The options for the VirtualRuntimeModule.
-   * @param {string} options.name - The name of the module.
-   * @param {string} options.source - The source code of the module.
-   * @param {number} [options.stage] - The stage of runtime. One of
-   *   RuntimeModule.STAGE_*.
-   * @param {boolean} [options.withoutClosure] - Make the source code run
-   *   outside the closure for a runtime module
-   */
-  constructor({
-    name,
-    source,
-    stage = RuntimeModule.STAGE_NORMAL,
-    withoutClosure = false,
-  }) {
-    super(name, stage)
-    this.withoutClosure = withoutClosure
-    this.virtualSource = `;${source};`
-  }
-  shouldIsolate() {
-    return !this.withoutClosure
-  }
-
-  generate() {
-    return this.virtualSource
-  }
-}
 
 // =================================================================
 // Plugin code
@@ -474,11 +444,7 @@ class LavaMoatPlugin {
         const onceForChunkSet = new WeakSet()
         const chunkRuntimeWarningsDedupe = new Set()
 
-        const {
-          getLavaMoatRuntimeSource,
-          getDefensiveCodingPreamble,
-          getStaticShims,
-        } = runtimeBuilder({
+        const { getLavaMoatRuntimeModules } = runtimeBuilder({
           options: STORE.options,
         })
 
@@ -527,8 +493,8 @@ class LavaMoatPlugin {
                   'runtimeOptimizedPolicy',
                 ])
 
-                const lavaMoatRuntime = getLavaMoatRuntimeSource({
-                  currentChunkName: chunk.name,
+                const lavaMoatRuntimeModules = getLavaMoatRuntimeModules({
+                  currentChunk: chunk,
                   chunkIds: STORE.chunkIds,
                   policyData: STORE.runtimeOptimizedPolicy,
                   identifiers: {
@@ -540,46 +506,11 @@ class LavaMoatPlugin {
                   },
                 })
 
-                const defensivePreamble = getDefensiveCodingPreamble()
-
-                compilation.addRuntimeModule(
-                  chunk,
-                  new VirtualRuntimeModule({
-                    name: 'LavaMoat/defensive',
-                    source: defensivePreamble,
-                    stage: RuntimeModule.STAGE_NORMAL, // before all other runtime modules
-                    withoutClosure: true, // run in the scope of the runtime closure
-                  })
-                )
-
-                if (
-                  STORE.options.staticShims_experimental &&
-                  Array.isArray(STORE.options.staticShims_experimental)
-                ) {
-                  const staticShimsWrapped = getStaticShims(
-                    STORE.options.staticShims_experimental
-                  )
-
-                  compilation.addRuntimeModule(
-                    chunk,
-                    new VirtualRuntimeModule({
-                      name: 'LavaMoat/staticShims_experimental',
-                      source: staticShimsWrapped,
-                      stage: RuntimeModule.STAGE_BASIC, // after Normal
-                    })
-                  )
-                }
-
                 // Add the runtime modules to the chunk, which handles
                 // the runtime logic for wrapping with lavamoat.
-                compilation.addRuntimeModule(
-                  chunk,
-                  new VirtualRuntimeModule({
-                    name: 'LavaMoat/runtime',
-                    source: lavaMoatRuntime,
-                    stage: RuntimeModule.STAGE_TRIGGER, // after all other stages
-                  })
-                )
+                lavaMoatRuntimeModules.forEach((module) => {
+                  compilation.addRuntimeModule(chunk, module)
+                })
 
                 // set.add(RuntimeGlobals.onChunksLoaded); // TODO: develop an understanding of what this line does and why it was a part of the runtime setup for module federation
 

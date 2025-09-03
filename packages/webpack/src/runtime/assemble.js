@@ -66,7 +66,7 @@ function prepareSource(specifier) {
 
 /**
  * @param {string} KEY
- * @param {RuntimeModule[]} runtimeModules
+ * @param {RuntimeFragment[]} runtimeModules
  * @returns {string}
  */
 const assembleRuntime = (KEY, runtimeModules) => {
@@ -103,7 +103,7 @@ const assembleRuntime = (KEY, runtimeModules) => {
 }
 
 /**
- * @typedef RuntimeModule
+ * @typedef RuntimeFragment
  * @property {string} [file]
  * @property {unknown} [data]
  * @property {string} [name]
