@@ -1,5 +1,10 @@
 import type { LavaMoatPolicy, LavaMoatScuttleOpts } from 'lavamoat-core'
 import type { LockdownOptions } from 'ses'
+import type { Chunk } from 'webpack'
+export interface LavaMoatChunkRuntimeConfiguration {
+  mode: 'safe' | 'unlocked_unsafe'
+  staticShims?: string[]
+}
 
 export type ScuttlerConfig = LavaMoatScuttleOpts | boolean | undefined
 
@@ -22,6 +27,7 @@ export interface CompleteLavaMoatPluginOptions {
   debugRuntime?: boolean
   unlockedChunksUnsafe?: RegExp
   staticShims_experimental?: string[]
+  runtimeConfigurationPerChunk_experimental?: (chunk: Chunk) => LavaMoatChunkRuntimeConfiguration
 }
 
 export type LavaMoatPluginOptions = Partial<CompleteLavaMoatPluginOptions>
