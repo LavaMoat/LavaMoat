@@ -3,7 +3,8 @@ import type { LockdownOptions } from 'ses'
 import type { Chunk } from 'webpack'
 export interface LavaMoatChunkRuntimeConfiguration {
   mode: 'safe' | 'unlocked_unsafe'
-  staticShims?: string[]
+  staticShims?: string[],
+  embeddedOptions?: Partial<Pick<CompleteLavaMoatPluginOptions, 'lockdown' | 'scuttleGlobalThis'>>
 }
 
 export type ScuttlerConfig = LavaMoatScuttleOpts | boolean | undefined
