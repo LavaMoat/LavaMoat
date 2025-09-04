@@ -1,22 +1,7 @@
 const test = /** @type {import('ava').TestFn} */ (require('ava'))
-const {
-  scaffold,
-  runScriptWithSES,
-  runScript,
-} = require('./scaffold.js')
+const { scaffold, runChunksWithSES, runScript } = require('./scaffold.js')
 const LavaMoatPlugin = require('../src/plugin.js')
 const { makeConfig } = require('./fixtures/main/webpack.config.js')
-
-/**
- * Concatenates chunks to pretend they have loaded successfully, avoids attempts
- * by webpack to dynamically load
- *
- * @param {string[]} chunks
- * @returns
- */
-function pretendLoadingChunks(chunks) {
-  return chunks.join('\n;')
-}
 
 test.before(async (t) => {
   const webpackConfig = makeConfig({
@@ -87,22 +72,16 @@ test('webpack/path-moduleId - bundle files complete', (t) => {
 
 test('webpack/path-moduleId - app bundle runs with lavamoat', (t) => {
   t.notThrows(() => {
-    runScriptWithSES(
-      pretendLoadingChunks([
-        t.context.build.snapshot['/dist/runtime.js'],
-        t.context.build.snapshot['/dist/app.js'],
-      ])
-    )
+    runChunksWithSES([
+      t.context.build.snapshot['/dist/runtime.js'],
+      t.context.build.snapshot['/dist/app.js'],
+    ])
   }, 'Should run app bundle without errors')
 })
 
 test('webpack/path-moduleId - bootstrap bundle runs without lavamoat', (t) => {
   t.notThrows(() => {
     // Not using SES here as bootstrap should not be wrapped in LavaMoat
-    runScript(
-      pretendLoadingChunks([
-        t.context.build.snapshot['/dist/bootstrap.js'],
-      ])
-    )
+    runScript(t.context.build.snapshot['/dist/bootstrap.js'])
   }, 'Should run bootstrap bundle without errors')
 })
