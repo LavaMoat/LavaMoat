@@ -75,6 +75,9 @@ The static shims are executed in order before any other code runs.
 A shim can also run code between the repair and harden phases of SES lockdown. To do that, assign a synchronous function to LOCKDOWN_SHIM variable that exists in the scope of the shim.
 It's the only way to polyfill functionality on intrinsics.
 
+> [!IMPORTANT]
+> You must _assign_ to `LOCKDOWN_SHIM` without re-declaring it.
+
 ```js
 // lockdown-shim.js
 LOCKDOWN_SHIM = () => {
