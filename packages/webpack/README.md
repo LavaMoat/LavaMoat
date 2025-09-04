@@ -29,7 +29,7 @@ The LavaMoat plugin takes an options object with the following properties (all o
 | `diagnosticsVerbosity`     | Number property to represent diagnostics output verbosity. A larger number means more overwhelming diagnostics output.                                                                                                                                                                                                | `0`                      |
 | `debugRuntime`             | Only for local debugging use - Enables debugging tools that help detect gaps in generated policy and add missing entries to overrides                                                                                                                                                                                 | `false`                  |
 | `policy`                   | The LavaMoat policy object (if not loading from file; see `policyLocation`)                                                                                                                                                                                                                                           | `undefined`              |
-| `staticShims_experimental` | Standalone JS files to be added to the runtime chunk before lavamoat runtime starts and executes lockdown.                                                                                                                                                                                        | `undefined`              |
+| `staticShims_experimental` | Standalone JS files to be added to the runtime chunk before lavamoat runtime starts and executes lockdown.                                                                                                                                                                                                            | `undefined`              |
 
 ```js
 const LavaMoatPlugin = require('@lavamoat/webpack')
@@ -63,26 +63,20 @@ module.exports = {
   plugins: [
     new LavaMoatPlugin({
       staticShims_experimental: [
-        'package-name', 
-        path.join(__dirname, './local/file.js')
-      ]
+        'package-name', // a package whose main export is a built standalone script
+        path.join(__dirname, './local/file.js'),
+      ],
     }),
   ],
 }
 ```
 
-The static shims are executed in order before any other code runs.
-A shim can also run code between the repair and harden phases of SES lockdown. To do that, assign a synchronous function to LOCKDOWN_SHIM variable that exists in the scope of the shim.
-It's the only way to polyfill functionality on intrinsics.
-
-> [!IMPORTANT]
-> You must _assign_ to `LOCKDOWN_SHIM` without re-declaring it.
+The static shims are executed between the repair and harden phases of SES lockdown.
+It's the only way to polyfill functionality on intrinsics or run any privileged code outside of LavaMoat protections.
 
 ```js
-// lockdown-shim.js
-LOCKDOWN_SHIM = () => {
+// resolvers-shim.js
   Promise.withResolvers = ...
-}
 ```
 
 ### Excluding modules

@@ -7,7 +7,6 @@ test('webpack/static-shims - bundle runs and uses static shims', async (t) => {
   const webpackConfig = makeConfig({
     inlineLockdown: /app/,
     staticShims_experimental: [
-      path.join(__dirname, 'fixtures/static-shims/shim-before.js'),
       path.join(__dirname, 'fixtures/static-shims/shim-lockdown.js'),
     ],
   })
@@ -35,7 +34,6 @@ test('webpack/static-shims - staticShims via runtimeConfigurationPerChunk_experi
       if (chunk.name === 'app') {
         return {
           staticShims: [
-            path.join(__dirname, 'fixtures/static-shims/shim-before.js'),
             path.join(__dirname, 'fixtures/static-shims/shim-lockdown.js'),
           ],
         }

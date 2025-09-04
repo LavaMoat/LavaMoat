@@ -95,15 +95,11 @@ const LOCKDOWN_SHIMS = [];`
        * @param {string} source - The source code to wrap.
        * @returns {string} The wrapped source code.
        */
-      const shimWrap = (source) => `;{
-          let LOCKDOWN_SHIM;((LOCKDOWN_SHIMS)=>{
+      const shimWrap = (source) => `
+          LOCKDOWN_SHIMS.push((LOCKDOWN_SHIMS)=>{
             ${source}
           ;
-          })();
-          if(typeof LOCKDOWN_SHIM === 'function') {
-            LOCKDOWN_SHIMS.push(LOCKDOWN_SHIM)
-          };
-        }`
+          })`
 
       const shims = dependencies.map((dep) => {
         const source = prepareSource(dep)
