@@ -119,8 +119,8 @@ const LOCKDOWN_SHIMS = [];`
     }
 
     function getUnlockedRuntime() {
-      /** @type {RuntimeFragment[]} */
-      const runtimeFragments = [
+      /** @satisfies {RuntimeFragment[]} */
+      const runtimeFragments = /** @type {const} */([
         {
           name: 'ENUM',
           file: require.resolve('../ENUM.json'),
@@ -130,7 +130,7 @@ const LOCKDOWN_SHIMS = [];`
           name: 'runtime',
           file: require.resolve('./runtimeUnlocked.js'),
         },
-      ]
+      ])
 
       const unlockedRuntime = assembleRuntime(RUNTIME_KEY, runtimeFragments)
 
