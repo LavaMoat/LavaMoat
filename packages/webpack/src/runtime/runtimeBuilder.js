@@ -7,13 +7,13 @@ const { RuntimeModule } = require('webpack')
 
 class VirtualRuntimeModule extends RuntimeModule {
   /**
-   * @param {Object} options - The options for the VirtualRuntimeModule.
-   * @param {string} options.name - The name of the module.
-   * @param {string} options.source - The source code of the module.
-   * @param {number} [options.stage] - The stage of runtime. One of
+   * @param {Object} options The options for the VirtualRuntimeModule.
+   * @param {string} options.name The name of the module.
+   * @param {string} options.source The source code of the module.
+   * @param {number} [options.stage] The stage of runtime. One of
    *   RuntimeModule.STAGE_*.
-   * @param {boolean} [options.withoutClosure] - Make the source code run
-   *   outside the closure for a runtime module
+   * @param {boolean} [options.withoutClosure] Make the source code run outside
+   *   the closure for a runtime module
    */
   constructor({
     name,
@@ -29,6 +29,12 @@ class VirtualRuntimeModule extends RuntimeModule {
     return !this.withoutClosure
   }
 
+  /**
+   * Returns the virtual source code.
+   *
+   * @returns {string} Virtual source code string
+   * @override
+   */
   generate() {
     return this.virtualSource
   }
@@ -41,13 +47,13 @@ class VirtualRuntimeModule extends RuntimeModule {
 
 /**
  * @typedef {Object} LavaMoatRuntimeIdentifiers
- * @property {string} root - Root identifier
- * @property {[string, (string | number)[]][]} identifiersForModuleIds - Module
- *   ID to identifier mappings
- * @property {(string | number)[]} unenforceableModuleIds - IDs of modules that
+ * @property {string} root Root identifier
+ * @property {[string, (string | number)[]][]} identifiersForModuleIds Module ID
+ *   to identifier mappings
+ * @property {(string | number)[]} unenforceableModuleIds IDs of modules that
  *   cannot be enforced
- * @property {(string | number)[]} [contextModuleIds] - Context module IDs
- * @property {Record<string | number, string>} [externals] - External module
+ * @property {(string | number)[]} [contextModuleIds] Context module IDs
+ * @property {Record<string | number, string>} [externals] External module
  *   configurations
  */
 
@@ -55,9 +61,8 @@ module.exports = {
   /**
    * Builds the LavaMoat runtime configuration and generates runtime source code
    *
-   * @param {Object} params - The parameters object
-   * @param {LavaMoatPluginOptions} params.options - Runtime configuration
-   *   options
+   * @param {Object} params The parameters object
+   * @param {LavaMoatPluginOptions} params.options Runtime configuration options
    */
   runtimeBuilder({ options }) {
     /**
@@ -83,7 +88,7 @@ const LOCKDOWN_SHIMS = [];`
     /**
      * Prepares the static shims to be included in the runtime chunk.
      *
-     * @param {string[]} dependencies - The module specifiers to prepare.
+     * @param {string[]} dependencies The module specifiers to prepare.
      * @returns {string} The prepared runtime dependencies source.
      */
     function getStaticShims(dependencies) {
@@ -92,7 +97,7 @@ const LOCKDOWN_SHIMS = [];`
        * any) Makes LOCKDOWN_SHIMS unreachable in its scope and freezes so no
        * other runtime modules can add any new shims to it.
        *
-       * @param {string} source - The source code to wrap.
+       * @param {string} source The source code to wrap.
        * @returns {string} The wrapped source code.
        */
       const shimWrap = (source) => `
@@ -119,8 +124,8 @@ const LOCKDOWN_SHIMS = [];`
     }
 
     function getUnlockedRuntime() {
-      /** @satisfies {RuntimeFragment[]} */
-      const runtimeFragments = /** @type {const} */([
+      /** @satisfies {readonly RuntimeFragment[]} */
+      const runtimeFragments = /** @type {const} */ ([
         {
           name: 'ENUM',
           file: require.resolve('../ENUM.json'),
@@ -140,15 +145,14 @@ const LOCKDOWN_SHIMS = [];`
     /**
      * Generates the LavaMoat runtime source code based on chunk configuration
      *
-     * @param {Object} params - The parameters object
+     * @param {Object} params The parameters object
      * @param {LavaMoatChunkRuntimeConfiguration['embeddedOptions']} params.embeddedOptions
-     *   - The options to embed in the
-     *
-     * @param {(string | number)[]} params.chunkIds - Array of chunk identifiers
-     * @param {LavaMoatPolicy} params.policyData - LavaMoat security policy
+     *   The options to embed in the runtime (a selection of plugin options)
+     * @param {(string | number)[]} params.chunkIds Array of chunk identifiers
+     * @param {LavaMoatPolicy} params.policyData LavaMoat security policy
      *   configuration
-     * @param {LavaMoatRuntimeIdentifiers} params.identifiers - Object
-     *   containing module identifier mappings
+     * @param {LavaMoatRuntimeIdentifiers} params.identifiers Object containing
+     *   module identifier mappings
      * @returns {string} The assembled runtime source code
      */
     function getLavaMoatRuntimeSource({
@@ -173,8 +177,8 @@ const LOCKDOWN_SHIMS = [];`
         )
       }
 
-      /** @type {RuntimeFragment[]} */
-      const runtimeFragments = [
+      /** @satisfies {readonly RuntimeFragment[]} */
+      const runtimeFragments = /** @type {const} */ ([
         // the string used to indicate root resource id
         {
           name: 'root',
@@ -214,15 +218,17 @@ const LOCKDOWN_SHIMS = [];`
         // options to turn on scuttling
         { name: 'options', data: embeddedOptions, json: true },
         // scuttling module, if needed
-        (typeof embeddedOptions?.scuttleGlobalThis === 'boolean' &&
+        ...((typeof embeddedOptions?.scuttleGlobalThis === 'boolean' &&
           embeddedOptions.scuttleGlobalThis === true) ||
         (typeof embeddedOptions?.scuttleGlobalThis === 'object' &&
           embeddedOptions.scuttleGlobalThis.enabled === true)
-          ? {
-              name: 'scuttling',
-              shimRequire: 'lavamoat-core/src/scuttle.js',
-            }
-          : {},
+          ? [
+              {
+                name: 'scuttling',
+                shimRequire: 'lavamoat-core/src/scuttle.js',
+              },
+            ]
+          : []),
         // the policy itself
         { name: 'policy', data: policyData, json: true },
         // enum for keys to match the generated ones in wrapper
@@ -246,15 +252,16 @@ const LOCKDOWN_SHIMS = [];`
           name: 'runtime',
           file: require.resolve('./runtime.js'),
         },
-      ]
-
-      if (options.debugRuntime) {
-        // optional debug helpers
-        runtimeFragments.push({
-          name: 'debug',
-          shimRequire: path.join(__dirname, 'debug.js'),
-        })
-      }
+        // Optional debug helpers
+        ...(options.debugRuntime
+          ? [
+              {
+                name: 'debug',
+                shimRequire: path.join(__dirname, 'debug.js'),
+              },
+            ]
+          : []),
+      ])
 
       const lavaMoatRuntime = assembleRuntime(RUNTIME_KEY, runtimeFragments)
       const size = lavaMoatRuntime.length / 1024
@@ -270,13 +277,12 @@ const LOCKDOWN_SHIMS = [];`
       /**
        * Generates the LavaMoat runtime source code based on chunk configuration
        *
-       * @param {Object} params - The parameters object
-       * @param {Chunk} params.currentChunk - The webpack chunk
-       * @param {(string | number)[]} params.chunkIds - Array of chunk
-       *   identifiers
-       * @param {LavaMoatPolicy} params.policyData - LavaMoat security policy
+       * @param {Object} params The parameters object
+       * @param {Chunk} params.currentChunk The webpack chunk
+       * @param {(string | number)[]} params.chunkIds Array of chunk identifiers
+       * @param {LavaMoatPolicy} params.policyData LavaMoat security policy
        *   configuration
-       * @param {LavaMoatRuntimeIdentifiers} params.identifiers - Object
+       * @param {LavaMoatRuntimeIdentifiers} params.identifiers Object
        *   containing module identifier mappings
        * @returns {VirtualRuntimeModule[]} The assembled runtime source code
        */

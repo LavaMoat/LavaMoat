@@ -70,7 +70,7 @@ function prepareSource(specifier) {
 
 /**
  * @param {string} KEY
- * @param {RuntimeFragment[]} runtimeModules
+ * @param {readonly RuntimeFragment[]} runtimeModules
  * @returns {string}
  */
 const assembleRuntime = (KEY, runtimeModules) => {
