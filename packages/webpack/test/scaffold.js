@@ -116,7 +116,6 @@ const defaultGlobals = () => ({
   URL,
 })
 
-
 /** @import {Context} from 'node:vm' */
 
 /**
