@@ -6,6 +6,15 @@ const { createContext, runInNewContext } = require('node:vm')
 const { readFileSync } = require('node:fs')
 
 /**
+ * Concatenates chunks to pretend they have loaded successfully, avoids attempts
+ * by webpack to dynamically load
+ *
+ * @param {string[]} chunks
+ * @returns
+ */
+const pretendLoadingChunks = (chunks) => chunks.join('\n;')
+
+/**
  * Run a webpack build and return the output
  *
  * @param {import('webpack').Configuration} webpackConfig
@@ -131,11 +140,11 @@ const defaultGlobals = () => ({
  * @param {Record<string, any>} globals
  * @returns {RunReturn}
  */
-function runScript(code, globals = defaultGlobals()) {
+function runScript(code, globals) {
   if (typeof code !== 'string' || code === '') {
     throw new Error('runScript requires a bundle string as the first argument')
   }
-  const context = createContext(globals)
+  const context = createContext(Object.assign({}, defaultGlobals(), globals))
   context.self = context // minimal browser emulation
   return {
     context,
@@ -145,13 +154,22 @@ function runScript(code, globals = defaultGlobals()) {
 exports.runScript = runScript
 
 /**
+ * @param {string[]} chunks
+ * @param {Record<string, any>} globals
+ */
+exports.runChunks = (chunks, globals) => {
+  const code = pretendLoadingChunks(chunks)
+  return runScript(code, globals)
+}
+
+/**
  * Run a script with SES
  *
  * @param {string} bundle
  * @param {Record<string, any>} globals
  * @returns {RunReturn}
  */
-function runScriptWithSES(bundle, globals = defaultGlobals()) {
+function runScriptWithSES(bundle, globals) {
   if (typeof bundle !== 'string' || bundle === '') {
     throw new Error(
       'runScriptWithSES requires a bundle string as the first argument'
@@ -168,3 +186,11 @@ function runScriptWithSES(bundle, globals = defaultGlobals()) {
   return runScript(code, globals)
 }
 exports.runScriptWithSES = runScriptWithSES
+/**
+ * @param {string[]} chunks
+ * @param {Record<string, any>} globals
+ */
+exports.runChunksWithSES = (chunks, globals) => {
+  const code = pretendLoadingChunks(chunks)
+  return runScriptWithSES(code, globals)
+}
