@@ -3,20 +3,8 @@
 /* global LAVAMOAT */
 /* global LOCKDOWN_SHIMS */
 /* global hardenIntrinsics */
-const {
-  keys,
-  create,
-  freeze,
-  assign,
-  defineProperty,
-  defineProperties,
-  getOwnPropertyDescriptors,
-  fromEntries,
-  entries,
-  values,
-} = Object
 
-const { repairIntrinsics, Proxy, Math, Date } = globalThis
+const { repairIntrinsics, } = globalThis
 
 const warn = typeof console === 'object' ? console.warn : () => {}
 
@@ -37,6 +25,21 @@ if (LOCKDOWN_ON) {
     'LavaMoatPlugin: runtime execution started without SES present, switching to no-op.'
   )
 }
+
+const {
+  keys,
+  create,
+  freeze,
+  assign,
+  defineProperty,
+  defineProperties,
+  getOwnPropertyDescriptors,
+  fromEntries,
+  entries,
+  values,
+} = Object
+
+const { Proxy, Math, Date } = globalThis
 
 // harden appears on globalThis only after lockdown is called
 const { harden } = globalThis

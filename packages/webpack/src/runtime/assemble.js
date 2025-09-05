@@ -2,6 +2,10 @@ const { readFileSync } = require('node:fs')
 const { parse } = require('@babel/parser')
 
 /**
+ * Webpack adds a multiline comment in front of every line of the runtime code.
+ * They break actually-multiline comments as a result. This is a necessary step
+ * to prevent a runtime error in development mode.
+ *
  * @param {string} source
  * @returns {string}
  */
