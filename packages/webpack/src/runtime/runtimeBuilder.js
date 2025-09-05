@@ -350,6 +350,12 @@ const LOCKDOWN_SHIMS = [];`
               })
             )
             break
+          case 'null_unsafe':
+            diag.rawDebug(
+              1,
+              `Skipped adding runtime for chunk ${currentChunkName}`
+            )
+            break
           case 'safe':
             diag.rawDebug(2, `adding runtime for chunk ${currentChunkName}`)
             lavamoatRuntimeModules.push(
