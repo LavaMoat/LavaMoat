@@ -18,6 +18,18 @@
   * dependencies
     * lavamoat-core bumped from ^15.2.0 to ^15.2.1
 
+## [1.3.0](https://github.com/LavaMoat/LavaMoat/compare/webpack-v1.2.0...webpack-v1.3.0) (2025-09-05)
+
+
+### Features
+
+* **webpack:** static shims for runtime, runtimeConfigurationPerChunk_experimental to control embedded runtime options ([#1792](https://github.com/LavaMoat/LavaMoat/issues/1792)) ([c69a08d](https://github.com/LavaMoat/LavaMoat/commit/c69a08d5af47e20ee0580fa5f0fcc804cb6d6928))
+
+
+### Bug Fixes
+
+* **webpack:** MessageEvent repair should not prevent further overrides ([#1787](https://github.com/LavaMoat/LavaMoat/issues/1787)) ([0c8fc19](https://github.com/LavaMoat/LavaMoat/commit/0c8fc1914e0e7a8432edbf6d9e8d2604ee17d291))
+
 ## [1.2.0](https://github.com/LavaMoat/LavaMoat/compare/webpack-v1.1.0...webpack-v1.2.0) (2025-08-25)
 
 
