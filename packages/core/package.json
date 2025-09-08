@@ -34,7 +34,7 @@
   "scripts": {
     "lib:ses": "cp ../../node_modules/ses/dist/lockdown.umd.js ./lib/lockdown.umd.js",
     "lint:deps": "depcheck",
-    "test": "ava && npm run test:ses",
+    "test": "npm run test:ses && ava",
     "test:ses": "bash ./test/ses.sh"
   },
   "dependencies": {
