@@ -4,7 +4,7 @@
 /* global LOCKDOWN_SHIMS */
 /* global hardenIntrinsics */
 
-const { repairIntrinsics, } = globalThis
+const { repairIntrinsics } = globalThis
 
 const warn = typeof console === 'object' ? console.warn : () => {}
 
@@ -37,6 +37,8 @@ const {
   fromEntries,
   entries,
   values,
+  getPrototypeOf,
+  getOwnPropertyNames,
 } = Object
 
 const { Proxy, Math, Date } = globalThis
@@ -80,6 +82,51 @@ const stricterScopeTerminator = freeze(
   )
 )
 
+const branded = new WeakSet()
+/**
+ * Brands a namespace as exported.
+ *
+ * @param {any} namespace - The namespace to brand.
+ */
+const brandExport = (namespace) => {
+  if (typeof namespace === 'object' && namespace !== null) {
+    branded.add(namespace)
+  }
+}
+/**
+ * Checks if namespace has been branded if applicable
+ *
+ * @param {string} specifier
+ * @param {any} namespace
+ * @param {string} referrer
+ * @param {string} requestedResourceId
+ * @returns
+ */
+const brandCheck = (specifier, namespace, referrer, requestedResourceId) => {
+  if (
+    // !LAVAMOAT.options.paranoid ||
+    // ignore primitives
+    typeof namespace !== 'object' ||
+    // tolerate empty objects from webpack's raw module
+    (getOwnPropertyNames(namespace).length === 0 &&
+      getPrototypeOf(namespace) === Object.prototype) ||
+    // skip known ctx modules
+    LAVAMOAT.ctxm.includes(specifier) ||
+    // check the branding otherwise
+    branded.has(namespace)
+  ) {
+    return namespace
+  }
+  console.warn(
+    referrer +
+      ' attempted to import an unwrapped module: "' +
+      specifier +
+      '" from ' + requestedResourceId
+      , namespace
+  )
+  return namespace
+}
+
 /**
  * Enforces the policy for resource imports.
  *
@@ -96,12 +143,18 @@ const enforcePolicy = (specifier, referrerResourceId, wrappedRequire) => {
     throw Error(`Requested specifier is undefined`)
   }
   // skip enforcing what we determined at build time we cannot
-  if (
-    LAVAMOAT.unenforceable.includes(specifier) ||
-    // implicitly allow all for root
-    referrerResourceId === LAVAMOAT.root
-  ) {
+  if (LAVAMOAT.unenforceable.includes(specifier)) {
     return wrappedRequire()
+  }
+  const requestedResourceId = findResourceId(specifier)
+
+  // implicitly allow all for root
+  if (referrerResourceId === LAVAMOAT.root) {
+    if (requestedResourceId) {
+      return brandCheck(specifier, wrappedRequire(), referrerResourceId, requestedResourceId)
+    } else {
+      return wrappedRequire()
+    }
   }
 
   const referrerPolicy = LAVAMOAT.policy.resources[referrerResourceId] || {}
@@ -125,7 +178,6 @@ const enforcePolicy = (specifier, referrerResourceId, wrappedRequire) => {
       )
     }
   }
-  const requestedResourceId = findResourceId(specifier)
   if (!requestedResourceId) {
     if (LAVAMOAT.ctxm.includes(specifier)) {
       throw Error(
@@ -138,10 +190,10 @@ const enforcePolicy = (specifier, referrerResourceId, wrappedRequire) => {
   }
   // allow imports internal to the package
   if (requestedResourceId === referrerResourceId) {
-    return wrappedRequire()
+    return brandCheck(specifier, wrappedRequire(), referrerResourceId, requestedResourceId)
   }
   if (referrerPolicy.packages?.[requestedResourceId]) {
-    return wrappedRequire()
+    return brandCheck(specifier, wrappedRequire(), referrerResourceId, requestedResourceId)
   }
 
   // This error message does not refer to specifier directly so it won't be confusing for a ContextModule either.
@@ -305,8 +357,8 @@ const lavamoatRuntimeWrapper = (resourceId, runtimeKit) => {
   const overrides = create(null)
 
   // modules may reference `require` dynamically, but that's something we don't want to allow
-  const { __webpack_require__ } = runtimeKit
-  let { module } = runtimeKit
+  const { __webpack_require__, exports } = runtimeKit
+  let { module = {} } = runtimeKit
 
   if (__webpack_require__) {
     // wrap webpack runtime for policy check and hardening
@@ -379,14 +431,20 @@ const lavamoatRuntimeWrapper = (resourceId, runtimeKit) => {
     set: () => {},
   })
   // Make it possible to overwrite `exports` locally despite runtimeHandler being frozen
-  let exportsReference = runtimeHandler.exports
-  defineProperty(runtimeHandler, 'exports', {
+  let exportsReference = runtimeHandler.exports || exports || {}
+  
+  const exportsWireup = {
     get: () => exportsReference,
     set: (value) => {
+      brandExport(value)
       exportsReference = value
     },
-  })
+  }
+  defineProperty(runtimeHandler, 'exports', exportsWireup)
+  defineProperty(module, 'exports', exportsWireup)
   freeze(runtimeHandler)
+
+  brandExport(exportsReference)
 
   return freeze(
     assign(create(null), {
