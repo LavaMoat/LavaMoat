@@ -1,4 +1,5 @@
 /// <reference path="./lavamoat.d.ts" />
+
 /* global Compartment */
 /* global LAVAMOAT */
 /* global LOCKDOWN_SHIMS */
@@ -37,8 +38,6 @@ const {
   fromEntries,
   entries,
   values,
-  getPrototypeOf,
-  getOwnPropertyNames,
 } = Object
 
 const { Proxy, Math, Date } = globalThis
@@ -82,50 +81,15 @@ const stricterScopeTerminator = freeze(
   )
 )
 
-const branded = new WeakSet()
 /**
- * Brands a namespace as exported.
- *
- * @param {any} namespace - The namespace to brand.
+ * @param {any} a
+ * @param {any} _
  */
-const brandExport = (namespace) => {
-  if (typeof namespace === 'object' && namespace !== null) {
-    branded.add(namespace)
-  }
-}
+let brandCheck = (a, _) => a
 /**
- * Checks if namespace has been branded if applicable
- *
- * @param {string} specifier
- * @param {any} namespace
- * @param {string} referrer
- * @param {string} requestedResourceId
- * @returns
+ * @param {any} a
  */
-const brandCheck = (specifier, namespace, referrer, requestedResourceId) => {
-  if (
-    // !LAVAMOAT.options.paranoid ||
-    // ignore primitives
-    typeof namespace !== 'object' ||
-    // tolerate empty objects from webpack's raw module
-    (getOwnPropertyNames(namespace).length === 0 &&
-      getPrototypeOf(namespace) === Object.prototype) ||
-    // skip known ctx modules
-    LAVAMOAT.ctxm.includes(specifier) ||
-    // check the branding otherwise
-    branded.has(namespace)
-  ) {
-    return namespace
-  }
-  console.warn(
-    referrer +
-      ' attempted to import an unwrapped module: "' +
-      specifier +
-      '" from ' + requestedResourceId
-      , namespace
-  )
-  return namespace
-}
+let brandExport = (a) => {}
 
 /**
  * Enforces the policy for resource imports.
@@ -151,7 +115,11 @@ const enforcePolicy = (specifier, referrerResourceId, wrappedRequire) => {
   // implicitly allow all for root
   if (referrerResourceId === LAVAMOAT.root) {
     if (requestedResourceId) {
-      return brandCheck(specifier, wrappedRequire(), referrerResourceId, requestedResourceId)
+      return brandCheck(wrappedRequire(), {
+        specifier,
+        referrerResourceId,
+        requestedResourceId,
+      })
     } else {
       return wrappedRequire()
     }
@@ -190,10 +158,18 @@ const enforcePolicy = (specifier, referrerResourceId, wrappedRequire) => {
   }
   // allow imports internal to the package
   if (requestedResourceId === referrerResourceId) {
-    return brandCheck(specifier, wrappedRequire(), referrerResourceId, requestedResourceId)
+    return brandCheck(wrappedRequire(), {
+      specifier,
+      referrerResourceId,
+      requestedResourceId,
+    })
   }
   if (referrerPolicy.packages?.[requestedResourceId]) {
-    return brandCheck(specifier, wrappedRequire(), referrerResourceId, requestedResourceId)
+    return brandCheck(wrappedRequire(), {
+      specifier,
+      referrerResourceId,
+      requestedResourceId,
+    })
   }
 
   // This error message does not refer to specifier directly so it won't be confusing for a ContextModule either.
@@ -270,6 +246,8 @@ const installGlobalsForPolicy = (resourceId, packageCompartmentGlobal) => {
         rootCompartmentGlobalThis,
         resourceId
       )
+      brandCheck = LAVAMOAT.debug.brandCheck
+      brandExport = LAVAMOAT.debug.brandExport
     }
   }
 }
@@ -432,7 +410,7 @@ const lavamoatRuntimeWrapper = (resourceId, runtimeKit) => {
   })
   // Make it possible to overwrite `exports` locally despite runtimeHandler being frozen
   let exportsReference = runtimeHandler.exports || exports || {}
-  
+
   const exportsWireup = {
     get: () => exportsReference,
     set: (value) => {

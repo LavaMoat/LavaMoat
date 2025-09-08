@@ -48,6 +48,12 @@ function addToPolicy(hint, key) {
  * @returns {object} - The recursive proxy object.
  */
 function recursiveProxy(hint, path) {
+  if (path.length > 10) {
+    console.warn(
+      `LavaMoatPlugin: excessive property access depth for ${hint}: ${path.join('.')}`
+    )
+    return {}
+  }
   return new Proxy(
     function () {}, //makes it callable to survive a few more lines before we cause an error and stop collecting further policy updates.
     {
@@ -101,6 +107,57 @@ const debugProxy = (target, source, hint) => {
   }
 }
 
+const branded = new WeakSet()
+/**
+ * Brands a namespace as exported.
+ *
+ * @param {any} namespace - The namespace to brand.
+ */
+const brandExport = (namespace) => {
+  if (typeof namespace === 'object' && namespace !== null) {
+    branded.add(namespace)
+  }
+}
+/**
+ * Checks if namespace has been branded if applicable
+ *
+ * @param {any} namespace
+ * @param {object} options
+ * @param {string} options.specifier
+ * @param {string} options.referrer
+ * @param {string} options.requestedResourceId
+ * @returns
+ */
+const brandCheck = (
+  namespace,
+  { specifier, referrer, requestedResourceId }
+) => {
+  if (
+    // ignore primitives
+    typeof namespace !== 'object' ||
+    // tolerate empty objects from webpack's raw module
+    (Object.getOwnPropertyNames(namespace).length === 0 &&
+      Object.getPrototypeOf(namespace) === Object.prototype) ||
+    // skip known ctx modules
+    LAVAMOAT.ctxm.includes(specifier) ||
+    // check the branding otherwise
+    branded.has(namespace)
+  ) {
+    return namespace
+  }
+  console.warn(
+    referrer +
+      ' attempted to import an unwrapped module: "' +
+      specifier +
+      '" from ' +
+      requestedResourceId,
+    namespace
+  )
+  return namespace
+}
+
 module.exports = {
   debugProxy,
+  brandExport,
+  brandCheck,
 }
