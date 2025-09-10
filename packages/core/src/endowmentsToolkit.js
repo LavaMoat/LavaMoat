@@ -544,7 +544,7 @@ function endowmentsToolkit({
       const possiblyObjectProto = globalProtoChain.pop()
       const replacement = Object.fromEntries(
         Object.entries(possiblyObjectProto).filter(
-          ([key]) => key in Object.prototype
+          ([key]) => !(key in Object.prototype)
         )
       )
       globalProtoChain.push(replacement)
