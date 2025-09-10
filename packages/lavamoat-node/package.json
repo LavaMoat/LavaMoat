@@ -1,6 +1,6 @@
 {
   "name": "lavamoat",
-  "version": "9.0.10",
+  "version": "9.0.11",
   "description": "",
   "repository": {
     "type": "git",
@@ -35,11 +35,11 @@
   "dependencies": {
     "@babel/code-frame": "7.27.1",
     "@babel/highlight": "7.25.9",
-    "@lavamoat/aa": "^4.3.3",
+    "@lavamoat/aa": "^4.3.4",
     "bindings": "1.5.0",
     "corepack": "0.33.0",
     "htmlescape": "1.1.1",
-    "lavamoat-core": "^16.5.0",
+    "lavamoat-core": "^16.5.1",
     "lavamoat-tofu": "^8.0.8",
     "node-gyp-build": "4.8.4",
     "resolve": "1.22.10",
