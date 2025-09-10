@@ -10,7 +10,7 @@ const { readFileSync } = require('node:fs')
  * by webpack to dynamically load
  *
  * @param {string[]} chunks
- * @returns
+ * @returns {string}
  */
 const pretendLoadingChunks = (chunks) => chunks.join('\n;')
 
@@ -144,7 +144,7 @@ function runScript(code, globals) {
   if (typeof code !== 'string' || code === '') {
     throw new Error('runScript requires a bundle string as the first argument')
   }
-  const context = createContext(Object.assign({}, defaultGlobals(), globals))
+  const context = createContext({...defaultGlobals(), ...globals})
   context.self = context // minimal browser emulation
   return {
     context,
