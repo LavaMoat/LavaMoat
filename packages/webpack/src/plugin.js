@@ -51,11 +51,11 @@ const JAVASCRIPT_MODULE_TYPE_AUTO = 'javascript/auto'
 const JAVASCRIPT_MODULE_TYPE_DYNAMIC = 'javascript/dynamic'
 const JAVASCRIPT_MODULE_TYPE_ESM = 'javascript/esm'
 
-const COVERED_MODULE_TYPES = [
+const COVERED_MODULE_TYPES = /** @type {const} */([
   JAVASCRIPT_MODULE_TYPE_AUTO,
   JAVASCRIPT_MODULE_TYPE_DYNAMIC,
   JAVASCRIPT_MODULE_TYPE_ESM,
-]
+])
 
 const POLICY_SNAPSHOT_FILENAME = 'policy-snapshot.json'
 
