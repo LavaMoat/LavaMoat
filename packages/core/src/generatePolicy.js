@@ -8,7 +8,6 @@ const {
   inspectGlobals,
   inspectImports,
   inspectSesCompat,
-  codeSampleFromAstNode,
   utils: {
     mergePolicy: mergeGlobalsPolicy,
     mapToObj,
@@ -19,8 +18,21 @@ const {
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore cycle causes this to be an error sometimes
 } = require('lavamoat-tofu')
+const { codeSampleFromAstNode } = require('./codeSampleFromAstNode')
 const { mergePolicy } = require('./mergePolicy')
 const { DEFAULT_GLOBAL_THIS_REFS, POLICY_WRITE } = require('./constants')
+
+/**
+ * @import {DebugInfo,
+ *   LavamoatModuleRecord,
+ *   LavaMoatPolicy,
+ *   LavaMoatPolicyDebug,
+ *   ResourcePolicy,
+ *   Resources,
+ *   SesCompat} from '@lavamoat/types'
+ * @import {ParseResult} from '@babel/parser'
+ * @import {File} from '@babel/types'
+ */
 
 const rootSlug = '$root$'
 
@@ -61,12 +73,12 @@ function createModuleInspector(opts) {
   /** @type {Map<string, string[]>} */
   const packageToBuiltinImports = new Map()
   const packageToNativeModules = new Map()
-  /** @type {Record<string, import('./schema').DebugInfo>} */
+  /** @type {Record<string, DebugInfo>} */
   const debugInfo = {}
   /**
    * The module record for the root package. May not be used
    *
-   * @type {import('./moduleRecord').LavamoatModuleRecord | undefined}
+   * @type {import('@lavamoat/types').LavamoatModuleRecord | undefined}
    */
   let root
 
@@ -85,7 +97,7 @@ function createModuleInspector(opts) {
   return inspector
 
   /**
-   * @param {import('./moduleRecord').LavamoatModuleRecord} moduleRecord
+   * @param {LavamoatModuleRecord} moduleRecord
    * @param {ModuleInspectorOptions} opts
    */
   function inspectModule(
@@ -125,7 +137,7 @@ function createModuleInspector(opts) {
   }
 
   /**
-   * @param {import('./moduleRecord').LavamoatModuleRecord} moduleRecord
+   * @param {LavamoatModuleRecord} moduleRecord
    * @param {Partial<ModuleInspectorOptions>} opts
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -135,7 +147,7 @@ function createModuleInspector(opts) {
   }
 
   /**
-   * @param {import('./moduleRecord').LavamoatModuleRecord} moduleRecord
+   * @param {LavamoatModuleRecord} moduleRecord
    * @param {Partial<ModuleInspectorOptions>} opts
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -152,14 +164,14 @@ function createModuleInspector(opts) {
 
   /**
    * @param {AST} ast
-   * @returns {ast is import('@babel/parser').ParseResult<import('@babel/types').File>}
+   * @returns {ast is ParseResult<File>}
    */
   function isParsedAST(ast) {
     return 'errors' in ast
   }
 
   /**
-   * @param {import('./moduleRecord').LavamoatModuleRecord} moduleRecord
+   * @param {LavamoatModuleRecord} moduleRecord
    * @param {ModuleInspectorOptions} opts
    */
   function inspectJsModule(
@@ -252,7 +264,7 @@ function createModuleInspector(opts) {
 
   /**
    * @param {AST} ast
-   * @param {import('./moduleRecord').LavamoatModuleRecord} moduleRecord
+   * @param {LavamoatModuleRecord} moduleRecord
    * @param {boolean} includeDebugInfo
    * @returns
    */
@@ -263,7 +275,7 @@ function createModuleInspector(opts) {
 
     const { primordialMutations, strictModeViolations, dynamicRequires } =
       // @ts-expect-error `SesCompat` / `InspectSesCompatResult` mismatch
-      /** @type {import('./schema').SesCompat} */ (compatWarnings)
+      /** @type {SesCompat} */ (compatWarnings)
     const hasResults =
       primordialMutations.length > 0 ||
       strictModeViolations.length > 0 ||
@@ -273,7 +285,7 @@ function createModuleInspector(opts) {
     }
     if (includeDebugInfo) {
       const moduleDebug = debugInfo[moduleRecord.specifier]
-      moduleDebug.sesCompat = {
+      moduleDebug.sesCompat = /** @type {SesCompat} */ ({
         // FIXME: I don't think this is needed, since it appears we overwrite all properties
         ...compatWarnings,
         // fix serialization
@@ -286,7 +298,7 @@ function createModuleInspector(opts) {
         dynamicRequires: dynamicRequires.map(({ node: { loc } }) => ({
           node: { loc },
         })),
-      }
+      })
     } else {
       // warn if non-compatible code found
       if (inspector.listenerCount('compat-warning') > 0) {
@@ -302,7 +314,7 @@ function createModuleInspector(opts) {
             codeSampleFromAstNode(node, moduleRecord)
           ),
           dynamicRequires: dynamicRequires.map(({ node }) =>
-            // @ts-expect-error `SesCompatNode` / `Node.loc` mismatch
+            // @ts-expect-error mismatch between SesCompat and inspectSesCompat()
             codeSampleFromAstNode(node, moduleRecord)
           ),
         })
@@ -314,7 +326,7 @@ function createModuleInspector(opts) {
 
   /**
    * @param {AST} ast
-   * @param {import('./moduleRecord').LavamoatModuleRecord} moduleRecord
+   * @param {LavamoatModuleRecord} moduleRecord
    * @param {string} packageName
    * @param {boolean} includeDebugInfo
    */
@@ -359,7 +371,7 @@ function createModuleInspector(opts) {
 
   /**
    * @param {AST} ast
-   * @param {import('./moduleRecord').LavamoatModuleRecord} moduleRecord
+   * @param {LavamoatModuleRecord} moduleRecord
    * @param {string} packageName
    * @param {(value: string) => boolean} isBuiltin
    * @param {boolean} includeDebugInfo
@@ -415,22 +427,21 @@ function createModuleInspector(opts) {
     moduleToPackageFallback,
     trustRoot = true,
   }) {
-    /** @type {import('./schema').Resources} */
+    /** @type {Resources} */
     const resources = {}
     /**
-     * @type {import('./schema').LavaMoatPolicyDebug
-     *   | import('./schema').LavaMoatPolicy}
+     * @type {LavaMoatPolicyDebug | LavaMoatPolicy}
      */
     const policy = { resources }
     packageToModules.forEach((packageModules, packageName) => {
       // the policy fields for each package
-      /** @type {import('./schema').ResourcePolicy['globals']} */
+      /** @type {ResourcePolicy['globals']} */
       let globals
-      /** @type {import('./schema').ResourcePolicy['builtin']} */
+      /** @type {ResourcePolicy['builtin']} */
       let builtin
-      /** @type {import('./schema').ResourcePolicy['packages']} */
+      /** @type {ResourcePolicy['packages']} */
       let packages
-      /** @type {import('./schema').ResourcePolicy['native']} */
+      /** @type {ResourcePolicy['native']} */
       let native
       // skip for root modules (modules not from deps)
       const isRootModule = root && packageName === root.packageName
@@ -508,7 +519,7 @@ function createModuleInspector(opts) {
     if (includeDebugInfo) {
       // this is here because we should be using semicolons :D
       // prettier-ignore
-      ;(/** @type {import('./schema').LavaMoatPolicyDebug} */(policy).debugInfo = debugInfo)
+      ;(/** @type {LavaMoatPolicyDebug} */(policy).debugInfo = debugInfo)
     }
 
     // merge override policy
@@ -526,8 +537,8 @@ function createModuleInspector(opts) {
 
 /**
  * @typedef {Object} AggregateDepsOptions
- * @property {Record<string, import('./moduleRecord').LavamoatModuleRecord>} packageModules
- * @property {Map<string, import('./moduleRecord').LavamoatModuleRecord>} moduleIdToModuleRecord
+ * @property {Record<string, LavamoatModuleRecord>} packageModules
+ * @property {Map<string, LavamoatModuleRecord>} moduleIdToModuleRecord
  * @property {ModuleToPackageFallbackFn} [moduleToPackageFallback]
  */
 
@@ -610,17 +621,16 @@ function getDefaultPaths(policyName) {
 /**
  * @callback GeneratePolicyFn
  * @param {Partial<ModuleInspectorOptions> & {
- *   policyOverride?: import('./schema').LavaMoatPolicyOverrides
+ *   policyOverride?: LavaMoatPolicy
  *   moduleToPackageFallback?: (value: string) => string | undefined
  * }} opts
  *
- * @returns {import('./schema').LavaMoatPolicy
- *   | import('./schema').LavaMoatPolicyDebug}
+ * @returns {LavaMoatPolicy | LavaMoatPolicyDebug}
  */
 
 /**
  * @callback InspectModuleFn
- * @param {import('./moduleRecord').LavamoatModuleRecord} moduleRecord
+ * @param {LavamoatModuleRecord} moduleRecord
  * @param {Partial<ModuleInspectorOptions>} [opts]
  */
 
@@ -639,10 +649,9 @@ function getDefaultPaths(policyName) {
  */
 
 /**
- * @typedef {import('node:events').EventEmitter & ModuleInspectorMembers} ModuleInspector
+ * @typedef {EventEmitter & ModuleInspectorMembers} ModuleInspector
  */
 
 /**
- * @typedef {import('@babel/parser').ParseResult<import('@babel/types').File>
- *   | import('@babel/types').File} AST
+ * @typedef {ParseResult<File> | File} AST
  */

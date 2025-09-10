@@ -1,4 +1,5 @@
-import type { LavaMoatPolicy, LavaMoatScuttleOpts } from 'lavamoat-core'
+import type { LavaMoatPolicy } from '@lavamoat/types'
+import type { LavaMoatScuttleOpts } from 'lavamoat-core'
 import type { LockdownOptions } from 'ses'
 import type { Chunk } from 'webpack'
 export interface LavaMoatChunkRuntimeConfiguration {

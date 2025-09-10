@@ -19,7 +19,7 @@ import { isObjectyObject } from '../util.js'
  * @import {MakeGlobalsAttenuatorOptions} from '../types.js'
  * @import {GlobalAttenuatorFn, ModuleAttenuatorFn} from '@endo/compartment-mapper'
  * @import {GlobalAttenuatorParams} from '../types.js'
- * @import {LavaMoatPolicy} from 'lavamoat-core'
+ * @import {LavaMoatPolicy} from '@lavamoat/types'
  */
 
 const {
