@@ -18,10 +18,12 @@ Object.defineProperty(module.exports, 'makeConfig', {
   value: makeConfig,
 })
 
+/** @import {LavaMoatPluginOptions} from '../../../src/plugin.js' */
+/** @import {Configuration as WebpackConfiguration} from 'webpack' */
+
 /**
- *
- * @param {import('../../../src/plugin.js').LavaMoatPluginOptions} lmOptions
- * @returns {import('webpack').Configuration}
+ * @param {LavaMoatPluginOptions} lmOptions
+ * @returns {WebpackConfiguration}
  */
 function makeConfig(lmOptions = {}) {
   return {
