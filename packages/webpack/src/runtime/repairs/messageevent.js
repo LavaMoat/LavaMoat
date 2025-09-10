@@ -29,7 +29,8 @@ if (original && original.get) {
         return w
       }
     },
-    configurable: false,
+    // left configurable because replacing it with original is impossible after and we 
+    // want to allow further wrapping (eg by Snow)
   })
 }
 

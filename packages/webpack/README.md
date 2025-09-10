@@ -30,6 +30,7 @@ The LavaMoat plugin takes an options object with the following properties (all o
 | `diagnosticsVerbosity`     | Number property to represent diagnostics output verbosity. A larger number means more overwhelming diagnostics output.                                                                                                                                                                                                | `0`                      |
 | `debugRuntime`             | Only for local debugging use - Enables debugging tools that help detect gaps in generated policy and add missing entries to overrides                                                                                                                                                                                 | `false`                  |
 | `policy`                   | The LavaMoat policy object (if not loading from file; see `policyLocation`)                                                                                                                                                                                                                                           | `undefined`              |
+| `staticShims_experimental` | Standalone JS files to be added to the runtime chunk before lavamoat runtime starts and executes lockdown.                                                                                                                                                                                                            | `undefined`              |
 
 ```js
 const LavaMoatPlugin = require('@lavamoat/webpack')
@@ -47,6 +48,37 @@ module.exports = {
 ```
 
 One important thing to note when using the LavaMoat plugin is that it disables the `concatenateModules` optimization in webpack. This is because concatenation won't work with wrapped modules.
+
+### Using static shims
+
+Static shims are a way to include additional code in the runtime chunk before LavaMoat starts.
+
+> [!WARNING]
+> Shims cannot use import or require, they must be standalone scripts.
+
+```js
+const LavaMoatPlugin = require('@lavamoat/webpack')
+const path = require('path')
+
+module.exports = {
+  plugins: [
+    new LavaMoatPlugin({
+      staticShims_experimental: [
+        'package-name', // a package whose main export is a built standalone script
+        path.join(__dirname, './local/file.js'),
+      ],
+    }),
+  ],
+}
+```
+
+The static shims are executed between the repair and harden phases of SES lockdown.
+It's the only way to polyfill functionality on intrinsics or run any privileged code outside of LavaMoat protections.
+
+```js
+// resolvers-shim.js
+  Promise.withResolvers = ...
+```
 
 ### Excluding modules
 
