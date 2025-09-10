@@ -14,7 +14,7 @@ const { default: ava } = require('ava')
 const test = /** @type {import('ava').TestFn<ScuttlingTestContext>} */ (ava)
 const path = require('node:path')
 // eslint-disable-next-line ava/no-import-test-files
-const { scaffold, runScriptWithSES } = require('./scaffold.js')
+const { scaffold, runChunksWithSES } = require('./scaffold.js')
 const { makeConfig } = require('./fixtures/main/webpack.config.js')
 
 const err = (intrinsic) =>
@@ -44,10 +44,13 @@ async function scuttle(t, scuttleGlobalThis, globals) {
   await t.notThrowsAsync(async () => {
     t.context.build = await scaffold(webpackConfig)
     // Load both chunks effectively
-    t.context.bundle =
-      t.context.build.snapshot['/dist/runtime.js'] +
-      t.context.build.snapshot['/dist/app.js']
-    t.context.globalThis = runScriptWithSES(t.context.bundle, globals).context
+    t.context.globalThis = runChunksWithSES(
+      [
+        t.context.build.snapshot['/dist/runtime.js'],
+        t.context.build.snapshot['/dist/app.js'],
+      ],
+      globals
+    ).context
   }, 'Expected the build to succeed')
 }
 

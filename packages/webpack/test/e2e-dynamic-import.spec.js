@@ -1,5 +1,9 @@
 const test = /** @type {import('ava').TestFn} */ (require('ava'))
-const { scaffold, runScriptWithSES } = require('./scaffold.js')
+const {
+  scaffold,
+  runScriptWithSES,
+  runChunksWithSES,
+} = require('./scaffold.js')
 const { makeConfig } = require('./fixtures/main/webpack.config.js')
 
 test.before(async (t) => {
@@ -150,11 +154,13 @@ test('webpack/dynamic - valid dynamic import capabilities work with chunks', asy
       },
     },
   }
-  const appWithDynamicChunkPreloaded =
-    t.context.build2.snapshot['/dist/app2.js'] +
-    ';;' +
-    t.context.build2.snapshot['/dist/dynamicchunk.js']
-  runScriptWithSES(appWithDynamicChunkPreloaded, global)
+  runChunksWithSES(
+    [
+      t.context.build2.snapshot['/dist/app2.js'],
+      t.context.build2.snapshot['/dist/dynamicchunk.js'],
+    ],
+    global
+  )
 
   await new Promise((resolve) => setTimeout(resolve, 0))
   t.assert(logs.includes('Dynamic module loaded successfully'))
@@ -183,12 +189,13 @@ test('webpack/dynamic - valid dynamic import capabilities work through context m
     )
   )
 
-  const appWithDynamicChunkPreloaded =
-    t.context.build2.snapshot['/dist/dynamicchunk.js'] +
-    ';;' +
-    t.context.build2.snapshot['/dist/app1.js']
-
-  runScriptWithSES(appWithDynamicChunkPreloaded, global)
+  runChunksWithSES(
+    [
+      t.context.build2.snapshot['/dist/dynamicchunk.js'],
+      t.context.build2.snapshot['/dist/app1.js'],
+    ],
+    global
+  )
 
   await new Promise((resolve) => setTimeout(resolve, 0)) // there's an async gap in chunk loading even if chunk is already there
   t.assert(logs.includes('Dynamic module loaded successfully'))
@@ -199,14 +206,15 @@ test('webpack/dynamic - policy enforcement on dependency from chunk', async (t) 
 
   const global = globalWithDocumentOnWhichDynamicchunkScriptExists()
 
-  const appWithDynamicChunkPreloaded =
-    buildWithStricterPolicy['/dist/dynamicchunk.js'] +
-    ';;' +
-    buildWithStricterPolicy['/dist/app2.js']
-
   await t.throwsAsync(
     withUnhandledRejectionCaptured(() => {
-      runScriptWithSES(appWithDynamicChunkPreloaded, global)
+      runChunksWithSES(
+        [
+          buildWithStricterPolicy['/dist/dynamicchunk.js'],
+          buildWithStricterPolicy['/dist/app2.js'],
+        ],
+        global
+      )
     }),
     {
       message:
@@ -218,14 +226,16 @@ test('webpack/dynamic - policy enforcement on dependency from context module', a
   const buildWithStricterPolicy = t.context.build1.snapshot
 
   const global = globalWithDocumentOnWhichDynamicchunkScriptExists()
-  const appWithDynamicChunkPreloaded =
-    buildWithStricterPolicy['/dist/dynamicchunk.js'] +
-    ';;' +
-    buildWithStricterPolicy['/dist/app1.js']
 
   await t.throwsAsync(
     withUnhandledRejectionCaptured(() => {
-      runScriptWithSES(appWithDynamicChunkPreloaded, global)
+      runChunksWithSES(
+        [
+          buildWithStricterPolicy['/dist/dynamicchunk.js'],
+          buildWithStricterPolicy['/dist/app1.js'],
+        ],
+        global
+      )
     }),
     {
       message:
@@ -236,14 +246,12 @@ test('webpack/dynamic - policy enforcement on dependency from context module', a
 test('webpack/dynamic - policy enforcement on dependency from context module when allowed elsewhere', async (t) => {
   const buildWithSelectivePolicy = t.context.build3.snapshot
 
-  const appWithDynamicChunkPreloaded =
-    buildWithSelectivePolicy['/dist/dynamicchunk0.js'] +
-    ';;' +
-    buildWithSelectivePolicy['/dist/app1.js']
-
   await t.throwsAsync(
     withUnhandledRejectionCaptured(() => {
-      runScriptWithSES(appWithDynamicChunkPreloaded)
+      runChunksWithSES([
+        buildWithSelectivePolicy['/dist/dynamicchunk0.js'],
+        buildWithSelectivePolicy['/dist/app1.js'],
+      ])
     }),
     {
       message:
@@ -261,7 +269,7 @@ function globalWithDocumentOnWhichDynamicchunkScriptExists() {
   return {
     console,
     setTimeout: (fn, ms) => {
-      // avoid leaving the test runner hanging 
+      // avoid leaving the test runner hanging
       return setTimeout(fn, ms).unref()
     },
     clearTimeout,
