@@ -48,8 +48,8 @@
     "test:update-snapshots": "ava -u"
   },
   "dependencies": {
-    "@endo/compartment-mapper": "1.6.2",
-    "@endo/evasive-transform": "2.0.0",
+    "@endo/compartment-mapper": "1.6.3",
+    "@endo/evasive-transform": "2.0.2",
     "@lavamoat/types": "0.0.0",
     "@types/node": "18.19.112",
     "chalk": "4.1.2",
@@ -61,7 +61,7 @@
     "yargs": "17.7.2"
   },
   "devDependencies": {
-    "@endo/eslint-plugin": "2.3.2",
+    "@endo/eslint-plugin": "2.4.0",
     "@jessie.js/eslint-plugin": "0.4.2",
     "json-stable-stringify": "1.3.0",
     "memfs": "4.17.2"
