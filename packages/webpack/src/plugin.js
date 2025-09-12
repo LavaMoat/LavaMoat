@@ -50,7 +50,7 @@ const JAVASCRIPT_MODULE_TYPE_AUTO = 'javascript/auto'
 const JAVASCRIPT_MODULE_TYPE_DYNAMIC = 'javascript/dynamic'
 const JAVASCRIPT_MODULE_TYPE_ESM = 'javascript/esm'
 
-const COVERED_MODULE_TYPES = /** @type {const} */([
+const COVERED_MODULE_TYPES = /** @type {const} */ ([
   JAVASCRIPT_MODULE_TYPE_AUTO,
   JAVASCRIPT_MODULE_TYPE_DYNAMIC,
   JAVASCRIPT_MODULE_TYPE_ESM,
@@ -176,19 +176,24 @@ class LavaMoatPlugin {
       STORE.options.readableResourceIds = compiler.options.mode !== 'production'
     }
 
-    let FORCED_CONCATENATEMODULES_OFF = false
+    /** @type {string[]} */
+    const FORCED_CONFIG = []
     if (compiler.options.optimization.concatenateModules) {
-      FORCED_CONCATENATEMODULES_OFF = true
+      FORCED_CONFIG.push('concatenateModules: false')
+    }
+    if (compiler.options.optimization.sideEffects) {
+      FORCED_CONFIG.push('sideEffects: false')
     }
     // Concatenation won't work with wrapped modules. Have to disable it.
     compiler.options.optimization.concatenateModules = false
+    // package policy enforcement won't work if webpack takes shortcuts
+    compiler.options.optimization.sideEffects = false
 
     // TODO: Research. If we fiddle a little with how we wrap the module, it might be possible to get inlining to work eventually by adding a closure that returns the module namespace. I just don't want to get into the compatibility of it all yet.
     // TODO: explore how these settings affect the Compartment wrapping etc.
     // compiler.options.optimization.mangleExports = false;
     // compiler.options.optimization.usedExports = false;
     // compiler.options.optimization.providedExports = false;
-    // compiler.options.optimization.sideEffects = false;
     Object.freeze(STORE.options)
 
     // =======================================
@@ -245,13 +250,11 @@ class LavaMoatPlugin {
           // replacing generator with something returning an empty string could shave off some extra time, but is too invasive to seem worth it
         }
 
-        if (
-          FORCED_CONCATENATEMODULES_OFF ||
-          STORE.options.diagnosticsVerbosity > 0
-        ) {
+        if (FORCED_CONFIG || STORE.options.diagnosticsVerbosity > 0) {
           STORE.mainCompilationWarnings.push(
             new WebpackError(
-              'LavaMoatPlugin: Concatenation of modules disabled - not compatible with LavaMoat wrapped modules.'
+              'LavaMoatPlugin: Following options had to be overriden for security: ' +
+                FORCED_CONFIG.join(', ')
             )
           )
         }
