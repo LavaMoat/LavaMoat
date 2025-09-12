@@ -4,7 +4,7 @@
 /* global LOCKDOWN_SHIMS */
 /* global hardenIntrinsics */
 
-const { repairIntrinsics, } = globalThis
+const { repairIntrinsics } = globalThis
 
 const warn = typeof console === 'object' ? console.warn : () => {}
 
@@ -144,10 +144,18 @@ const enforcePolicy = (specifier, referrerResourceId, wrappedRequire) => {
     return wrappedRequire()
   }
 
-  // This error message does not refer to specifier directly so it won't be confusing for a ContextModule either.
-  throw Error(
-    `Policy does not allow importing ${requestedResourceId} from ${referrerResourceId}`
-  )
+  if (LAVAMOAT.debug) {
+    LAVAMOAT.debug.debugPackage(
+      requestedResourceId,
+      referrerResourceId
+    )
+    return {}
+  } else {
+    // This error message does not refer to specifier directly so it won't be confusing for a ContextModule either.
+    throw Error(
+      `Policy does not allow importing ${requestedResourceId} from ${referrerResourceId}`
+    )
+  }
 }
 
 const theRealGlobalThis = globalThis
