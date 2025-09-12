@@ -4,7 +4,7 @@
 import { type ReadNowPowers } from '@endo/compartment-mapper'
 import type { LavaMoatPolicy } from '@lavamoat/types'
 import type { ExecutionContext } from 'ava'
-import { type Volume } from 'memfs/lib/volume.js'
+import { type Volume } from 'memfs'
 import type { Simplify } from 'type-fest'
 import type { GeneratePolicyOptions } from '../../../src/types.js'
 
