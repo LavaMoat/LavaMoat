@@ -1,5 +1,8 @@
 /**
- * @type {Record<string, { globals: Record<string, boolean> }>}
+ * @type {Record<
+ *   string,
+ *   { globals?: Record<string, boolean>; packages?: Record<string, boolean> }
+ * >}
  */
 const incrementalPolicy = {}
 
@@ -7,7 +10,11 @@ const printPolicyDebug = () => {
   const policy = JSON.stringify(incrementalPolicy, null, 2)
   console.dir(policy)
 }
-globalThis.LM_printPolicyDebug = printPolicyDebug
+Object.defineProperty(globalThis, 'LM_printPolicyDebug', {
+  configurable: false,
+  enumerable: false,
+  value: printPolicyDebug,
+})
 
 /**
  * @type {NodeJS.Timeout}
@@ -23,9 +30,11 @@ const PRINT_AFTER_NO_NEW_POLICY_DISCOVERED_MS = 3000
  * @param {string} key - The key to be added to the incremental policy.
  * @returns {void}
  */
-function addToPolicy(hint, key) {
+function addGlobalToPolicy(hint, key) {
   if (!Object.hasOwn(incrementalPolicy, hint)) {
     incrementalPolicy[hint] = { globals: Object.create(null) }
+  } else if (!Object.hasOwn(incrementalPolicy[hint], 'globals')) {
+    incrementalPolicy[hint].globals = Object.create(null)
   }
   if (!Object.hasOwn(incrementalPolicy[hint].globals, key)) {
     incrementalPolicy[hint].globals[key] = true
@@ -40,6 +49,26 @@ function addToPolicy(hint, key) {
   }
 }
 /**
+ * Adds a key to the incremental policy.
+ *
+ * @param {string} parent - The parent package.
+ * @param {string} key - The imported package.
+ * @returns {void}
+ */
+function addPkgToPolicy(parent, key) {
+  if (!Object.hasOwn(incrementalPolicy, parent)) {
+    incrementalPolicy[parent] = { packages: Object.create(null) }
+  } else if (!Object.hasOwn(incrementalPolicy[parent], 'packages')) {
+    incrementalPolicy[parent].packages = Object.create(null)
+  }
+  if (!Object.hasOwn(incrementalPolicy[parent].packages, key)) {
+    incrementalPolicy[parent].packages[key] = true
+     const informativeStack =
+      '\n' + (Error().stack || '').split('\n').slice(2).join('\n')
+    console.log(`-- missing package ${key} from ${parent}`, informativeStack)
+  }
+}
+/**
  * Creates a recursive proxy object that lets us tap into nested field lookups
  * at runtime.
  *
@@ -48,6 +77,10 @@ function addToPolicy(hint, key) {
  * @returns {object} - The recursive proxy object.
  */
 function recursiveProxy(hint, path) {
+  if (path.length > 5) {
+    // prevent infinite recursion
+    return {}
+  }
   return new Proxy(
     function () {}, //makes it callable to survive a few more lines before we cause an error and stop collecting further policy updates.
     {
@@ -56,7 +89,7 @@ function recursiveProxy(hint, path) {
           key = key.toString()
         }
         path = [...path, key]
-        addToPolicy(hint, path.join('.'))
+        addGlobalToPolicy(hint, path.join('.'))
         return recursiveProxy(hint, path)
       },
     }
@@ -77,6 +110,9 @@ function getAllKeys(obj) {
   return keys
 }
 
+let prevSource = {}
+let prevKeys = []
+
 /**
  * Creates a debug proxy for a target object by replacing all own keys and
  * overshadowing the ones from the prototype chain.
@@ -88,12 +124,19 @@ function getAllKeys(obj) {
 const debugProxy = (target, source, hint) => {
   const inheritedFromObj = Object.getOwnPropertyNames(Object.prototype)
 
-  const keys = getAllKeys(source)
+  let keys = []
+  if (source === prevSource) {
+    keys = prevKeys
+  } else {
+    keys = getAllKeys(source)
+    prevSource = source
+    prevKeys = keys
+  }
   for (const key of keys) {
     if (!Object.hasOwn(target, key) && !inheritedFromObj.includes(key)) {
       Object.defineProperty(target, key, {
         get() {
-          addToPolicy(hint, key)
+          addGlobalToPolicy(hint, key)
           return recursiveProxy(hint, [key])
         },
       })
@@ -101,6 +144,11 @@ const debugProxy = (target, source, hint) => {
   }
 }
 
+const debugPackage = (requestedResourceId, referrerResourceId) => {
+  addPkgToPolicy(referrerResourceId, requestedResourceId)
+}
+
 module.exports = {
   debugProxy,
+  debugPackage,
 }
