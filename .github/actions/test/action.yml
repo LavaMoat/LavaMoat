@@ -16,8 +16,8 @@ runs:
     - name: Build & Test
       shell: ${{ inputs.shell }}
       run: |
-        npm run --if-present ${{ inputs.workspaces }} build
         npm run build:types
+        npm run --if-present ${{ inputs.workspaces }} build
         npm run --if-present ${{ inputs.workspaces }} test:prep
         npm run --if-present ${{ inputs.workspaces }} test
   using: composite
