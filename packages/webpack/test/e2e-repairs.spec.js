@@ -56,16 +56,16 @@ test('webpack/repairs - MessageEvent repair is applied when in use', async (t) =
   }, 'Expected the script to run without throwing an error')
 
   t.notThrows(() => {
-    runScriptWithSES(
-      mock +
-        '\n;\n' +
-        t.context.build.snapshot['/dist/app.js'] +
-        '\n;\n' +
+    runChunksWithSES(
+      [
+        mock,
+        t.context.build.snapshot['/dist/app.js'],
         `
         if(!Object.getOwnPropertyDescriptor(globalThis.MessageEvent.prototype, 'source').configurable) {
         throw new Error('MessageEvent source is not configurable');
         }
         `,
+      ],
       {
         console,
       }

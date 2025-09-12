@@ -1,8 +1,9 @@
-import type { LavaMoatPolicy, LavaMoatScuttleOpts } from 'lavamoat-core'
+import type { LavaMoatPolicy } from '@lavamoat/types'
+import type { LavaMoatScuttleOpts } from 'lavamoat-core'
 import type { LockdownOptions } from 'ses'
 import type { Chunk } from 'webpack'
 export interface LavaMoatChunkRuntimeConfiguration {
-  mode: 'safe' | 'unlocked_unsafe' | 'null_unsafe'
+  mode: 'safe' | 'unlocked_unsafe'
   staticShims?: string[],
   embeddedOptions?: Partial<Pick<CompleteLavaMoatPluginOptions, 'lockdown' | 'scuttleGlobalThis'>>
 }

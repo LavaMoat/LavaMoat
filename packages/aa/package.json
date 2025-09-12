@@ -28,9 +28,6 @@
     "test": "npm run test:run",
     "test:run": "ava"
   },
-  "dependencies": {
-    "resolve": "1.22.10"
-  },
   "devDependencies": {
     "@types/resolve": "1.20.6"
   },
@@ -42,5 +39,8 @@
       "test/*.spec.js"
     ],
     "timeout": "30s"
+  },
+  "dependencies": {
+    "resolve": "1.22.10"
   }
 }

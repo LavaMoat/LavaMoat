@@ -13,7 +13,8 @@ import type {
   ReadNowPowersProp,
   Sources,
 } from '@endo/compartment-mapper'
-import type { LavamoatModuleRecordOptions, LavaMoatPolicy } from 'lavamoat-core'
+import { type LavaMoatPolicy } from '@lavamoat/types'
+import type { LavamoatModuleRecordOptions } from 'lavamoat-core'
 import type { Except, LiteralUnion, Simplify } from 'type-fest'
 import type {
   ATTENUATORS_COMPARTMENT,

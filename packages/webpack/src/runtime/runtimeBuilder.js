@@ -41,7 +41,7 @@ class VirtualRuntimeModule extends RuntimeModule {
 }
 
 /** @import {LavaMoatPluginOptions, LavaMoatChunkRuntimeConfiguration} from '../buildtime/types' */
-/** @import {LavaMoatPolicy} from 'lavamoat-core' */
+/** @import {LavaMoatPolicy} from '@lavamoat/types' */
 /** @import {RuntimeFragment} from './assemble.js' */
 /** @import {Chunk} from 'webpack' */
 
@@ -354,12 +354,6 @@ const LOCKDOWN_SHIMS = [];`
                 source: getUnlockedRuntime(),
                 stage: RuntimeModule.STAGE_TRIGGER, // after all other stages
               })
-            )
-            break
-          case 'null_unsafe':
-            diag.rawDebug(
-              1,
-              `Skipped adding runtime for chunk ${currentChunkName}`
             )
             break
           case 'safe':

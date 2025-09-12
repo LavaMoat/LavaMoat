@@ -36,7 +36,7 @@ const { loadCanonicalNameMap } = require('@lavamoat/aa')
  * @import {LockdownOptions} from 'ses'
  * @import {CompleteLavaMoatPluginOptions} from './buildtime/types'
  * @import {CanonicalNameMap} from '@lavamoat/aa'
- * @import {LavaMoatPolicy} from 'lavamoat-core'
+ * @import {LavaMoatPolicy} from '@lavamoat/types'
  */
 
 // TODO: upcoming version of webpack may expose these constants, but we want to support more versions
@@ -50,11 +50,11 @@ const JAVASCRIPT_MODULE_TYPE_AUTO = 'javascript/auto'
 const JAVASCRIPT_MODULE_TYPE_DYNAMIC = 'javascript/dynamic'
 const JAVASCRIPT_MODULE_TYPE_ESM = 'javascript/esm'
 
-const COVERED_MODULE_TYPES = [
+const COVERED_MODULE_TYPES = /** @type {const} */([
   JAVASCRIPT_MODULE_TYPE_AUTO,
   JAVASCRIPT_MODULE_TYPE_DYNAMIC,
   JAVASCRIPT_MODULE_TYPE_ESM,
-]
+])
 
 const POLICY_SNAPSHOT_FILENAME = 'policy-snapshot.json'
 

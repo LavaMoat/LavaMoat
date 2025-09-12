@@ -47,7 +47,7 @@ const crossReference = (neededIds, policyIds) => {
 }
 
 /**
- * @import {LavaMoatPolicy} from 'lavamoat-core'
+ * @import {LavaMoatPolicy} from '@lavamoat/types'
  * @import {CanonicalNameMap} from '@lavamoat/aa'
  */
 
@@ -84,15 +84,15 @@ exports.generateIdentifierLookup = ({
   const pathsToIdentifiers = () => {
     /** @type {PathMapping} */
     const mapping = {}
-    for (const p of paths) {
-      if (p.path) {
-        if (mapping[p.path]) {
-          mapping[p.path].moduleIds.push(p.moduleId)
-          diag.rawDebug(2, `Duplicated moduleId at path ${ p.path }, moduleIds: ${ mapping[p.path].moduleIds.join(', ') }`)
+    for (const {path, moduleId} of paths) {
+      if (path) {
+        if (mapping[path]) {
+          mapping[path].moduleIds.push(moduleId)
+          diag.rawDebug(2, `Duplicated moduleId at path ${path}, moduleIds: ${mapping[path].moduleIds.join(', ')}`)
         } else {
-          mapping[p.path] = {
-            aa: getPackageNameForModulePath(canonicalNameMap, p.path),
-            moduleIds: [p.moduleId],
+          mapping[path] = {
+            aa: getPackageNameForModulePath(canonicalNameMap, path),
+            moduleIds: [moduleId],
           }
         }
       }

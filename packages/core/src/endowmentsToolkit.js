@@ -60,7 +60,7 @@ function endowmentsToolkit({
    *
    * @template {object} T Deep properties specified in the packagePolicy
    * @param {T} sourceRef - Object from which to copy properties
-   * @param {LMPolicy.PackagePolicy} packagePolicy - LavaMoat policy item
+   * @param {LMPolicy.ResourcePolicy} packagePolicy - LavaMoat policy item
    *   representing a package
    * @param {object} unwrapTo - For getters and setters, when the this-value is
    *   unwrapFrom, is replaced as unwrapTo
@@ -531,14 +531,23 @@ function endowmentsToolkit({
     const globalProtoChain = getPrototypeChain(globalRef)
     // the index for the common prototypal ancestor, Object.prototype
     // this should always be the last index, but we check just in case
-    const commonPrototypeIndex = globalProtoChain.findIndex(
+    let commonPrototypeIndex = globalProtoChain.findIndex(
       (globalProtoChainEntry) => globalProtoChainEntry === Object.prototype
     )
-    if (commonPrototypeIndex === -1) {
-      // TODO: fix this error message
-      throw new Error(
-        'Lavamoat - unable to find common prototype between Compartment and globalRef'
+    // "Why would a global have no reference in prototype chain that matches Object.prototype?" you might ask.
+    // It's when the global is partially from a different Realm. And that's possible in extension contentscript in FireFox
+    const noSharedPrototype = commonPrototypeIndex === -1
+    if (noSharedPrototype) {
+      // take the entire prototype chain
+      commonPrototypeIndex = globalProtoChain.length
+      // Skip overriding Object.prototype keys in case it's the other realm Object.prototype
+      const possiblyObjectProto = globalProtoChain.pop()
+      const replacement = Object.fromEntries(
+        Object.entries(possiblyObjectProto).filter(
+          ([key]) => !(key in Object.prototype)
+        )
       )
+      globalProtoChain.push(replacement)
     }
     // we will copy endowments from all entries in the prototype chain, excluding Object.prototype
     const endowmentSources = globalProtoChain.slice(0, commonPrototypeIndex)

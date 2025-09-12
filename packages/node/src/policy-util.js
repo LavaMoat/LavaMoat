@@ -24,7 +24,7 @@ import {
 } from './util.js'
 
 /**
- * @import {RootPolicy, LavaMoatPolicy} from 'lavamoat-core'
+ * @import {RootPolicy, LavaMoatPolicy} from '@lavamoat/types'
  * @import {LavaMoatPolicyDebug, LoadPoliciesOptions, WritableFsInterface} from './types.js'
  * @import {ReadPolicyOptions, ReadPolicyOverrideOptions} from './internal.js'
  */

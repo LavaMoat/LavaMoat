@@ -19,7 +19,7 @@ const diag = require('./diagnostics')
  * @typedef {import('webpack').NormalModule | import('webpack').ExternalModule} InspectableWebpackModule
  */
 
-/** @import {LavaMoatPolicy} from 'lavamoat-core' */
+/** @import {LavaMoatPolicy} from '@lavamoat/types' */
 /** @import {CanonicalNameMap} from '@lavamoat/aa' */
 
 module.exports = {
