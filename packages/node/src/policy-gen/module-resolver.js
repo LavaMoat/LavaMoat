@@ -25,12 +25,14 @@ import { hasValue } from '../util.js'
 export const makeModuleResolver = (
   compartmentMap,
   compartmentLocationMap,
-  { readPowers = defaultReadPowers, log = defaultLog } = {}
+  { log = defaultLog, readPowers = defaultReadPowers } = {}
 ) => {
   const { compartments } = compartmentMap
   const { fileURLToPath } = readPowers
+
   /** @type {Set<string>} */
   const warned = new Set()
+
   /** @type {ResolveModuleDescriptorFn} */
   const resolveModuleDescriptor = (descriptor) => {
     // it might have a `compartment` and `module`
@@ -49,6 +51,7 @@ export const makeModuleResolver = (
             log.warning(moduleDescriptor.deferredError)
             return
           }
+
           /** @type {WeakSet<ModuleDescriptor>} */
           const seen = new WeakSet()
           // some of the module descriptors are redirects to others;
@@ -67,6 +70,7 @@ export const makeModuleResolver = (
               return
             }
             seen.add(moduleDescriptor)
+
             /** @type {string} */
             let module
             ;({ compartment: label, module } = moduleDescriptor)
@@ -102,5 +106,5 @@ export const makeModuleResolver = (
     }
   }
 
-  return { resolveModuleDescriptor, resolveCompartment }
+  return { resolveCompartment, resolveModuleDescriptor }
 }

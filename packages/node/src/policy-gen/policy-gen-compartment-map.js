@@ -7,6 +7,7 @@
  */
 
 import { captureFromMap } from '@endo/compartment-mapper/capture-lite.js'
+
 import { nullImportHook } from '../compartment/import-hook.js'
 import { makeNodeCompartmentMap } from '../compartment/node-compartment-map.js'
 import { DEFAULT_ENDO_OPTIONS } from '../compartment/options.js'
@@ -40,11 +41,11 @@ const { values } = Object
 export const loadCompartmentMapForPolicy = async (
   entrypointPath,
   {
-    readPowers = defaultReadPowers,
-    policyOverride,
-    trustRoot = DEFAULT_TRUST_ROOT_COMPARTMENT,
-    log = defaultLog,
     dev,
+    log = defaultLog,
+    policyOverride,
+    readPowers = defaultReadPowers,
+    trustRoot = DEFAULT_TRUST_ROOT_COMPARTMENT,
     ...captureOpts
   } = {}
 ) => {
@@ -66,16 +67,16 @@ export const loadCompartmentMapForPolicy = async (
   let compartmentNameToCanonicalNameMap
   try {
     ;({
-      nodeCompartmentMap,
       canonicalNameMap: compartmentNameToCanonicalNameMap,
+      nodeCompartmentMap,
     } =
       // eslint-disable-next-line @jessie.js/safe-await-separator
       await makeNodeCompartmentMap(entrypointPath, {
-        readPowers,
         dev,
-        log,
-        trustRoot,
         endoPolicyOverride,
+        log,
+        readPowers,
+        trustRoot,
       }))
   } catch (err) {
     if (isError(err)) {
@@ -112,9 +113,9 @@ export const loadCompartmentMapForPolicy = async (
   /** @type {CaptureLiteOptions} */
   const captureLiteOptions = {
     ...DEFAULT_ENDO_OPTIONS,
+    forceLoad: policyOverride?.include,
     importHook: nullImportHook,
     log: log.debug.bind(log),
-    forceLoad: policyOverride?.include,
     ...captureOpts,
   }
 
@@ -127,10 +128,10 @@ export const loadCompartmentMapForPolicy = async (
     } = await captureFromMap(readPowers, nodeCompartmentMap, captureLiteOptions)
 
     return {
-      packageJsonMap,
       compartmentMap,
-      sources,
+      packageJsonMap,
       renames,
+      sources,
     }
   } catch (err) {
     if (isError(err)) {
