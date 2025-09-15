@@ -68,7 +68,7 @@
     "prettier-plugin-pkg": "0.21.2",
     "ses": "1.14.0",
     "type-fest": "4.41.0",
-    "typescript": "5.8.3"
+    "typescript": "5.9.2"
   },
   "overrides": {
     "@babel/types": "$@babel/types",
