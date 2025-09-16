@@ -18,6 +18,7 @@ const { Object, Array, Error, RegExp, Set, console, Proxy, Reflect } =
   globalThis
 
 const {
+  freeze,
   assign,
   getOwnPropertyNames,
   getOwnPropertyDescriptor,
@@ -78,7 +79,11 @@ function scuttle(globalRef, opts) {
       )
     }
     scuttleOpts.scuttlerFunc(globalRef, (realm) =>
-      performScuttleGlobalThis(realm, scuttleOpts.exceptions)
+      performScuttleGlobalThis(
+        realm,
+        scuttleOpts.exceptions,
+        scuttleOpts.freezeExceptions
+      )
     )
   }
 }
@@ -142,7 +147,11 @@ function generateScuttleOpts(globalRef, originalOpts = create(null)) {
  * @param {(string | RegExp)[]} extraPropsToAvoid - List of additional
  *   properties to exclude from scuttling beyond the default ones.
  */
-function performScuttleGlobalThis(globalRef, extraPropsToAvoid = []) {
+function performScuttleGlobalThis(
+  globalRef,
+  extraPropsToAvoid = [],
+  freezeExceptions = false
+) {
   const props = []
   getPrototypeChain(globalRef).forEach((proto) =>
     props.push(...getOwnPropertyNames(proto))
@@ -157,6 +166,12 @@ function performScuttleGlobalThis(globalRef, extraPropsToAvoid = []) {
   props.forEach((prop) => {
     const { get, set } = generateInvokers(prop)
     if (shouldAvoidProp(propsToAvoid, prop)) {
+      if (freezeExceptions) {
+        try {
+          freeze(globalRef[prop])
+          freeze(globalRef[prop].prototype)
+        } catch (e) {}
+      }
       return
     }
     let desc = getOwnPropertyDescriptor(globalRef, prop)
