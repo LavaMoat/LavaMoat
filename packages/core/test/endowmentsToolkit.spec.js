@@ -45,6 +45,57 @@ test('getEndowmentsForConfig - function on proto', (t) => {
   t.is(resultGlobal.lookAtMyProto.appendChild(), assertMe)
 })
 
+test('getEndowmentsForConfig - function call/bind unwrapping', (t) => {
+  const getEndowmentsForConfig = prepareTest()
+
+  const sourceGlobal = {
+    checkThis: function () {
+      return this === sourceGlobal
+    },
+  }
+  const config = {
+    globals: {
+      checkThis: true,
+    },
+  }
+  const resultGlobal = getEndowmentsForConfig(sourceGlobal, config)
+  t.is(typeof resultGlobal.checkThis, 'function')
+  t.is(resultGlobal.checkThis(), true)
+  t.is(resultGlobal.checkThis.bind({})(), false)
+  t.is(resultGlobal.checkThis.bind(resultGlobal)(), true)
+  t.is(resultGlobal.checkThis.call(resultGlobal), true)
+})
+
+test.failing(
+  'getEndowmentsForConfig - function call/bind unwrapping when only methods endowed',
+  (t) => {
+    const getEndowmentsForConfig = prepareTest()
+
+    const sourceGlobal = {
+      checkThis: function () {
+        return this === sourceGlobal
+      },
+    }
+
+    const config = {
+      globals: {
+        'checkThis.bind': true,
+        'checkThis.call': true,
+      },
+    }
+    const resultGlobal = getEndowmentsForConfig(sourceGlobal, config)
+    t.is(typeof resultGlobal.checkThis, 'object') // the function is never wrapped
+
+    // This case is not supported and might be too risky to support. We should rather avoid producing it.
+    // In policy generation we could trim .bind (and probably also .call and .apply) to avoid hitting this problem.
+
+    // When a function is endowed, call and bind should work as expected because of the wrapping/unwrapping
+    // When only the call/bind methods are endowed, they are not taken from a wrapped function but from the source directly and `this` doesn't get correctly unwrapped.
+    t.is(resultGlobal.checkThis.call(resultGlobal), true)
+    t.is(resultGlobal.checkThis.bind(resultGlobal)(), true)
+  }
+)
+
 test('getEndowmentsForConfig - siblings', (t) => {
   const { getEndowmentsForConfig } = prepareTest()
   const sourceGlobal = { Buffer }
