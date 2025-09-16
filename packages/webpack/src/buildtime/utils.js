@@ -12,6 +12,7 @@ const diag = require('./diagnostics')
  *   passed is the next step. no-op if current step (reporting progress is
  *   idempotent)
  * @property {() => void} cancel - Cancels the progress monitoring.
+ * @property {() => boolean} isCancelled - true if progress monitoring was cancelled
  * @property {(errors: Error[]) => void} reportErrorsTo - Wire up the array to
  *   push errors to for compilation. Pass compilation.errors to it as soon as
  *   possible.
@@ -64,7 +65,8 @@ function progress({ steps }) {
     if (steps[currentStep + 1] !== step) {
       reportError(
         Error(
-          `LavaMoatPlugin: Progress reported '${step}' but the next step was expected to be '${steps[currentStep + 1]
+          `LavaMoatPlugin: Progress reported '${step}' but the next step was expected to be '${
+            steps[currentStep + 1]
           }'`
         )
       )
@@ -115,6 +117,8 @@ function progress({ steps }) {
     cancelled = true
     diag.rawDebug(2, `  progress: build cancelled`)
   }
+  API.isCancelled = () => cancelled
+
   diag.rawDebug(2, `  progress  ${steps[currentStep]}`)
 
   return API

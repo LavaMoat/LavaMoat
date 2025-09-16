@@ -44,6 +44,7 @@ class VirtualRuntimeModule extends RuntimeModule {
 /** @import {LavaMoatPolicy} from '@lavamoat/types' */
 /** @import {RuntimeFragment} from './assemble.js' */
 /** @import {Chunk} from 'webpack' */
+/** @import {ProgressAPI} from '../buildtime/utils.js' */
 
 /**
  * @typedef {Object} LavaMoatRuntimeIdentifiers
@@ -278,6 +279,7 @@ const LOCKDOWN_SHIMS = [];`
        * Generates the LavaMoat runtime source code based on chunk configuration
        *
        * @param {Object} params The parameters object
+       * @param {ProgressAPI} params.PROGRESS
        * @param {Chunk} params.currentChunk The webpack chunk
        * @param {(string | number)[]} params.chunkIds Array of chunk identifiers
        * @param {LavaMoatPolicy} params.policyData LavaMoat security policy
@@ -287,6 +289,7 @@ const LOCKDOWN_SHIMS = [];`
        * @returns {VirtualRuntimeModule[]} The assembled runtime source code
        */
       getLavaMoatRuntimeModules({
+        PROGRESS,
         currentChunk,
         chunkIds,
         policyData,
@@ -376,6 +379,7 @@ const LOCKDOWN_SHIMS = [];`
                 stage: RuntimeModule.STAGE_TRIGGER, // after all other stages
               })
             )
+            PROGRESS.report('runtimeAdded')
             break
         }
 

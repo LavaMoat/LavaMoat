@@ -50,7 +50,7 @@ const JAVASCRIPT_MODULE_TYPE_AUTO = 'javascript/auto'
 const JAVASCRIPT_MODULE_TYPE_DYNAMIC = 'javascript/dynamic'
 const JAVASCRIPT_MODULE_TYPE_ESM = 'javascript/esm'
 
-const COVERED_MODULE_TYPES = /** @type {const} */([
+const COVERED_MODULE_TYPES = /** @type {const} */ ([
   JAVASCRIPT_MODULE_TYPE_AUTO,
   JAVASCRIPT_MODULE_TYPE_DYNAMIC,
   JAVASCRIPT_MODULE_TYPE_ESM,
@@ -267,6 +267,22 @@ class LavaMoatPlugin {
         }
 
         compilation.hooks.optimizeAssets.tap(PLUGIN_NAME, () => {
+          if (!PROGRESS.isCancelled()) {
+            if (!PROGRESS.done('generatorCalled')) {
+              compilation.errors.push(
+                new WebpackError(
+                  'LavaMoatPlugin: Not a single module was wrapped in a compartment. Must be a configuration error.'
+                )
+              )
+            }
+            if (!PROGRESS.done('runtimeAdded')) {
+              compilation.errors.push(
+                new WebpackError(
+                  'LavaMoatPlugin: Not a single copy of LavaMoat runtime was added in the compilation. Must be a configuration error.'
+                )
+              )
+            }
+          }
           // By the time assets are being optimized we should have finished.
           // This will ensure all previous steps have been done.
           PROGRESS.report('finish')
@@ -345,6 +361,12 @@ class LavaMoatPlugin {
               JSON.stringify({ knownPaths: moduleData.knownPaths })
             )
             PROGRESS.report('pathsCollected')
+
+            if (moduleData.inspectable.length === 0) {
+              throw Error(
+                'LavaMoatPlugin: No modules to run under policy found in the compilation, must be a misconfiguration.'
+              )
+            }
 
             const policyToApply = STORE.options.generatePolicy
               ? generatePolicy({
@@ -523,6 +545,7 @@ class LavaMoatPlugin {
                 ])
 
                 const lavaMoatRuntimeModules = getLavaMoatRuntimeModules({
+                  PROGRESS,
                   currentChunk: chunk,
                   chunkIds: STORE.chunkIds,
                   policyData: STORE.runtimeOptimizedPolicy,
@@ -545,8 +568,6 @@ class LavaMoatPlugin {
 
                 // Mark the chunk as processed by adding it to the WeakSet.
                 onceForChunkSet.add(chunk)
-
-                PROGRESS.report('runtimeAdded')
               }
             }
           }
