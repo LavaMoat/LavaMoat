@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.4.1](https://github.com/LavaMoat/LavaMoat/compare/node-v0.4.0...node-v0.4.1) (2025-09-16)
+
+
+### Bug Fixes
+
+* **deps:** update endo ([#1790](https://github.com/LavaMoat/LavaMoat/issues/1790)) ([672b3bd](https://github.com/LavaMoat/LavaMoat/commit/672b3bd4673e7a7c28c043e2c94347d9b4b2e58c))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-core bumped from ^16.5.1 to ^16.6.0
+
 ## [0.4.0](https://github.com/LavaMoat/LavaMoat/compare/node-v0.3.1...node-v0.4.0) (2025-08-25)
 
 
