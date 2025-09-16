@@ -22,7 +22,7 @@ const YARN1 = {
     BINS: '--*.no-bin-links true',
   },
 }
-const YARN3 = {
+const YARN3PLUS = {
   RCFILE: '.yarnrc.yml',
   CONF: {
     SCRIPTS: 'enableScripts: false',
@@ -49,14 +49,14 @@ function areBinsBlocked({ noMemoization = false } = {}) {
     binsBlockedMemo =
       isEntryPresent(NPM.CONF.BINS, NPM.RCFILE) ||
       isEntryPresent(YARN1.CONF.BINS, YARN1.RCFILE)
-    // Once yarn3 support via plugin comes in, this function would need to detect that, or cease to exist.
+    // Once yarn3+ support via plugin comes in, this function would need to detect that, or cease to exist.
   }
   return binsBlockedMemo
 }
 
 function writeRcFile() {
   const yarnRcExists = existsSync(addInstallParentDir(YARN1.RCFILE))
-  const yarnYmlExists = existsSync(addInstallParentDir(YARN3.RCFILE))
+  const yarnYmlExists = existsSync(addInstallParentDir(YARN3PLUS.RCFILE))
   const npmRcExists = existsSync(addInstallParentDir(NPM.RCFILE))
   const yarnLockExists = existsSync(addInstallParentDir('yarn.lock'))
 
@@ -77,9 +77,9 @@ function writeRcFile() {
   }
   if (yarnYmlExists || yarnLockExists) {
     configs.push({
-      file: YARN3.RCFILE,
+      file: YARN3PLUS.RCFILE,
       exists: yarnYmlExists,
-      entry: YARN3.CONF.SCRIPTS,
+      entry: YARN3PLUS.CONF.SCRIPTS,
     })
   }
   if (configs.length === 0) {
@@ -101,15 +101,18 @@ function writeRcFile() {
   configs.forEach(writeRcFileContent)
 }
 
-function editPackageJson() {
+/**
+ * @param {string} name
+ */
+function addPackage(name) {
   let cmd, cmdArgs
 
   if (existsSync('./.npmrc')) {
     cmd = 'npm'
-    cmdArgs = ['install', '-D', '@lavamoat/preinstall-always-fail']
+    cmdArgs = ['install', '-D', name]
   } else {
     cmd = 'yarn'
-    cmdArgs = ['add', '-D', '@lavamoat/preinstall-always-fail']
+    cmdArgs = ['add', '-D', name]
   }
 
   let result = spawnSync(cmd, cmdArgs, {})
@@ -117,13 +120,18 @@ function editPackageJson() {
   if (result.status !== 0) {
     process.stderr.write(result.stderr)
     console.log(
-      '@lavamoat/allow-scripts: Could not add @lavamoat/preinstall-always-fail.'
+      `@lavamoat/allow-scripts: Could not add ${name}.`
     )
   } else {
     console.log(
-      '@lavamoat/allow-scripts: Added dependency @lavamoat/preinstall-always-fail.'
+      `@lavamoat/allow-scripts: Added dev dependency ${name}.`
     )
   }
+}
+
+function editPackageJson() {
+  addPackage('@lavamoat/preinstall-always-fail')
+  addPackage('@lavamoat/allow-scripts')
 
   if (FEATURE.bins) {
     // no motivation to fix lint here, there's a better implementation of this in a neighboring branch
