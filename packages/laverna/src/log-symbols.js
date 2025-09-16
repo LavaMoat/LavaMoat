@@ -1,6 +1,6 @@
-const { blue, yellow, red, green } = require('kleur')
+import { colors } from '@lavamoat/vog'
 
-exports.INFO = blue('ℹ')
-exports.WARN = yellow('⚠')
-exports.ERR = red('✖')
-exports.OK = green('✔')
+export const INFO = colors.blue('ℹ')
+export const WARN = colors.yellow('⚠')
+export const ERR = colors.red('✖')
+export const OK = colors.green('✔')
