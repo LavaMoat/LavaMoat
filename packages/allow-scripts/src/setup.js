@@ -101,15 +101,18 @@ function writeRcFile() {
   configs.forEach(writeRcFileContent)
 }
 
-function editPackageJson() {
+/**
+ * @param {string} name
+ */
+function addPackage(name) {
   let cmd, cmdArgs
 
   if (existsSync('./.npmrc')) {
     cmd = 'npm'
-    cmdArgs = ['install', '-d', '@lavamoat/preinstall-always-fail']
+    cmdArgs = ['install', '-d', name]
   } else {
     cmd = 'yarn'
-    cmdArgs = ['add', '-D', '@lavamoat/preinstall-always-fail']
+    cmdArgs = ['add', '-D', name]
   }
 
   let result = spawnSync(cmd, cmdArgs, {})
@@ -117,13 +120,18 @@ function editPackageJson() {
   if (result.status !== 0) {
     process.stderr.write(result.stderr)
     console.log(
-      '@lavamoat/allow-scripts: Could not add @lavamoat/preinstall-always-fail.'
+      `@lavamoat/allow-scripts: Could not add ${name}.`
     )
   } else {
     console.log(
-      '@lavamoat/allow-scripts: Added dependency @lavamoat/preinstall-always-fail.'
+      `@lavamoat/allow-scripts: Added dev dependency ${name}.`
     )
   }
+}
+
+function editPackageJson() {
+  addPackage('@lavamoat/preinstall-always-fail')
+  addPackage('@lavamoat/allow-scripts')
 
   if (FEATURE.bins) {
     // no motivation to fix lint here, there's a better implementation of this in a neighboring branch
