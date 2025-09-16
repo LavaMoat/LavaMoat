@@ -3,11 +3,20 @@
 /* eslint-disable n/shebang */
 // @ts-check
 
-const { bold, magenta, gray, italic, cyan, underline } = require('kleur')
-const util = require('node:util')
-const { Laverna } = require('./index')
-const { ERR } = require('./log-symbols')
-const { name, bugs, version, description } = require('../package.json')
+import { colors } from '@lavamoat/vog'
+import fs from 'node:fs'
+import util from 'node:util'
+import { DEFAULT_CAPS } from './defaults.js'
+import { Laverna } from './index.js'
+import { ERR } from './log-symbols.js'
+
+const pkg = /** @type {import('type-fest').PackageJson} */ (
+  DEFAULT_CAPS.parseJson(
+    fs.readFileSync(new URL('../package.json', import.meta.url), 'utf8')
+  )
+)
+const { name, bugs, version, description } = pkg
+const { cyan, bold, italic, underline, magenta, gray } = colors
 
 /**
  * CLI for `laverna`, which wraps `npm publish` to only attempt publishing
@@ -83,7 +92,7 @@ function main() {
   ${bold('--newPkg=<name>')} - Workspace <name> should be treated as a new package (repeatable)
   ${bold('--yes/-y')}        - Skip confirmation prompt (default: false; true ${italic('in CI')})
 
-  Problems? Visit ${underline(bugs.url)}
+  Problems? Visit ${underline(/** @type {{ url: string }} */ (bugs).url)}
 
   `)
   } else {
@@ -95,7 +104,9 @@ function main() {
     // must be true in CI; --yes=false is not a thing
     opts.yes = Boolean(process.env.CI) || opts.yes
 
-    console.error(`📦 ${bold(magenta(name)) + gray('@') + magenta(version)}\n`)
+    console.error(
+      `📦 ${bold(magenta(`${name}`)) + gray('@') + magenta(`${version}`)}\n`
+    )
     const laverna = new Laverna(opts)
     laverna.publishWorkspaces().catch((err) => {
       console.error(ERR, err?.message ?? err)
@@ -104,6 +115,4 @@ function main() {
   }
 }
 
-if (require.main === module) {
-  main()
-}
+void main()
