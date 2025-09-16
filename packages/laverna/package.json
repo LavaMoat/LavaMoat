@@ -1,11 +1,12 @@
 {
   "name": "@lavamoat/laverna",
   "version": "1.2.6",
+  "type": "module",
   "description": "Publish multiple workspaces (that's all)",
   "repository": {
+    "directory": "packages/laverna",
     "type": "git",
-    "url": "git+https://github.com/LavaMoat/LavaMoat.git",
-    "directory": "packages/laverna"
+    "url": "git+https://github.com/LavaMoat/LavaMoat.git"
   },
   "homepage": "https://github.com/LavaMoat/LavaMoat/blob/main/packages/laverna/README.md",
   "bugs": {
@@ -44,8 +45,8 @@
     "test": "ava --config=ava.config.js"
   },
   "dependencies": {
+    "@lavamoat/vog": "0.1.0",
     "glob": "11.1.0",
-    "kleur": "4.1.5",
     "type-fest": "4.41.0"
   },
   "devDependencies": {

@@ -1,13 +1,23 @@
 // eslint-disable-next-line ava/use-test
-const { default: test } = require('ava')
-const { promisify } = require('node:util')
-const execFile = promisify(require('node:child_process').execFile)
-const path = require('node:path')
-const { version } = require('../package.json')
+import test from 'ava'
+import childProcess from 'node:child_process'
+import fs from 'node:fs'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { promisify } from 'node:util'
+import { DEFAULT_CAPS } from '../src/defaults.js'
 
-const LAVERNA_SCRIPT = require.resolve('../src/cli.js')
+const pkg = /** @type {import('type-fest').PackageJson} */ (
+  DEFAULT_CAPS.parseJson(
+    fs.readFileSync(new URL('../package.json', import.meta.url), 'utf8')
+  )
+)
+const execFile = promisify(childProcess.execFile)
+const { version } = pkg
+
+const LAVERNA_SCRIPT = fileURLToPath(new URL('../src/cli.js', import.meta.url))
 const RELATIVE_LAVERNA_SCRIPT = path.relative(process.cwd(), LAVERNA_SCRIPT)
-const FIXTURE_DIR = path.join(__dirname, 'fixture')
+const FIXTURE_DIR = fileURLToPath(new URL('./fixture/', import.meta.url))
 
 /**
  * @typedef ProjectTestParams
