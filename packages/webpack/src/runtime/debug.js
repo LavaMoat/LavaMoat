@@ -23,6 +23,7 @@ let debounceTimer
 
 const PRINT_AFTER_NO_NEW_POLICY_DISCOVERED_MS = 3000
 
+let LIMITED_TIME_OFFER = 100
 /**
  * Adds a key to the incremental policy.
  *
@@ -46,6 +47,13 @@ function addGlobalToPolicy(hint, key) {
       printPolicyDebug,
       PRINT_AFTER_NO_NEW_POLICY_DISCOVERED_MS
     )
+  } else {
+    // the same field was reported again
+    LIMITED_TIME_OFFER-=1;
+    if(LIMITED_TIME_OFFER<0) {
+      printPolicyDebug()
+      throw Error('LavaMoat runtime debugger is under heavy load and will now stop. Apply the policy overrides found, rebuild and run again.')
+    }
   }
 }
 /**
@@ -63,11 +71,12 @@ function addPkgToPolicy(parent, key) {
   }
   if (!Object.hasOwn(incrementalPolicy[parent].packages, key)) {
     incrementalPolicy[parent].packages[key] = true
-     const informativeStack =
+    const informativeStack =
       '\n' + (Error().stack || '').split('\n').slice(2).join('\n')
     console.log(`-- missing package ${key} from ${parent}`, informativeStack)
   }
 }
+
 /**
  * Creates a recursive proxy object that lets us tap into nested field lookups
  * at runtime.
@@ -77,7 +86,7 @@ function addPkgToPolicy(parent, key) {
  * @returns {object} - The recursive proxy object.
  */
 function recursiveProxy(hint, path) {
-  if (path.length > 5) {
+  if (path.length > 5 || LIMITED_TIME_OFFER<0) {
     // prevent infinite recursion
     return {}
   }
