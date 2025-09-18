@@ -9,6 +9,7 @@
 
 import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
+
 import { NATIVE_PARSER_NAME } from '../constants.js'
 import { PermissionDeniedError } from '../error.js'
 import { hrLabel } from '../format.js'
@@ -35,8 +36,10 @@ const parseNative = (
 ) => {
   /** @type {string[]} */
   const imports = []
+
   /** @type {string[]} */
   const reexports = []
+
   /** @type {string[]} */
   const exports = ['default']
   const require = createRequire(new URL('.', import.meta.url))
@@ -70,9 +73,9 @@ const parseNative = (
   }
 
   return {
-    parser: NATIVE_PARSER_NAME,
     bytes,
-    record: freeze({ imports, exports, reexports, execute }),
+    parser: NATIVE_PARSER_NAME,
+    record: freeze({ execute, exports, imports, reexports }),
   }
 }
 
@@ -83,7 +86,7 @@ const parseNative = (
  * @internal
  */
 export default {
-  parse: parseNative,
   heuristicImports: false,
+  parse: parseNative,
   synchronous: true,
 }

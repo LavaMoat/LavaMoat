@@ -9,6 +9,7 @@
  * @packageDocumentation
  */
 import nodeUrl from 'node:url'
+
 import { assertAbsolutePath } from './fs.js'
 
 /**
@@ -108,6 +109,7 @@ export const isBoolean = (value) => typeof value === 'boolean'
  */
 export const hasValue = (obj, prop) => {
   return (
+
     /**
      * TODO:
      *
