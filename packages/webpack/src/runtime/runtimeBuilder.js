@@ -219,10 +219,7 @@ const LOCKDOWN_SHIMS = [];`
         // options to turn on scuttling
         { name: 'options', data: embeddedOptions, json: true },
         // scuttling module, if needed
-        ...((typeof embeddedOptions?.scuttleGlobalThis === 'boolean' &&
-          embeddedOptions.scuttleGlobalThis === true) ||
-        (typeof embeddedOptions?.scuttleGlobalThis === 'object' &&
-          embeddedOptions.scuttleGlobalThis.enabled === true)
+        ...(embeddedOptions?.scuttleGlobalThis?.enabled === true
           ? [
               {
                 name: 'scuttling',
