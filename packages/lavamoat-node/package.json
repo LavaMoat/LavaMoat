@@ -37,7 +37,7 @@
     "@babel/highlight": "7.25.9",
     "@lavamoat/aa": "^4.3.4",
     "bindings": "1.5.0",
-    "corepack": "0.33.0",
+    "corepack": "0.34.0",
     "htmlescape": "1.1.1",
     "lavamoat-core": "^16.6.1",
     "lavamoat-tofu": "^8.0.9",
