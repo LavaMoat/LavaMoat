@@ -29,8 +29,7 @@
     "lint:deps": "depcheck"
   },
   "dependencies": {
-    "@babel/types": "7.27.3",
-    "type-fest": "4.41.0"
+    "@babel/types": "7.27.3"
   },
   "publishConfig": {
     "access": "public"
