@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.4.2](https://github.com/LavaMoat/LavaMoat/compare/node-v0.4.1...node-v0.4.2) (2025-09-19)
+
+
+### Bug Fixes
+
+* **types:** remove global Object.hasOwn type ([ee9f86b](https://github.com/LavaMoat/LavaMoat/commit/ee9f86b764b2a18b5863cd769d545692420ebf5a)), closes [#1817](https://github.com/LavaMoat/LavaMoat/issues/1817)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @lavamoat/types bumped from 0.0.0 to 0.0.1
+    * lavamoat-core bumped from ^16.6.0 to ^16.6.1
+
 ## [0.4.1](https://github.com/LavaMoat/LavaMoat/compare/node-v0.4.0...node-v0.4.1) (2025-09-16)
 
 
