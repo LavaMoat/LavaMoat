@@ -15,8 +15,6 @@
 
 import { OmitIndexSignature } from 'type-fest'
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 // https://github.com/microsoft/TypeScript/issues/1260#issuecomment-1288111146
 // Creates a union of all keys of all objects in the Terface union
 type AllKeys<Terface> = Terface extends any
@@ -48,4 +46,5 @@ declare global {
   }
 }
 
-export {}
+export { }
+

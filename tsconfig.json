@@ -3,7 +3,7 @@
     "allowJs": true
   },
   "extends": "@tsconfig/node18/tsconfig.json",
-  "files": [],
+  "files": ["ambient-types/global.d.ts"],
   // the workspaces which are consumed as libraries by other workspaces should
   // be first in this list
   "references": [
