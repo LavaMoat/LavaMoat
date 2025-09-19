@@ -1,20 +1,15 @@
 // @ts-check
 
 /**
- * Value of the {@link LavaMoatOpts.scuttleGlobalThis} option.
- *
- * @typedef LavaMoatScuttleOpts
- * @property {boolean} [enabled]
- * @property {string[]} [exceptions]
- * @property {string} [scuttlerName]
+ * @import {LavaMoatScuttleOpts} from './scuttle'
  */
 
 /**
  * Options for LavaMoat
  *
  * @typedef LavaMoatOpts
- * @property {LavaMoatScuttleOpts} [scuttleGlobalThis] Enable or disable
- *   scuttling of `globalThis`
+ * @property {LavaMoatScuttleOpts} [scuttleGlobalThis] Enable or disable scuttling of
+ *   `globalThis`
  * @property {string[]} [scuttleGlobalThisExceptions]
  * @property {boolean} [writeAutoPolicy] Automatically write a policy file
  * @property {boolean} [writeAutoPolicyDebug] Automatically write a debug policy

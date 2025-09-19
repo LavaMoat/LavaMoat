@@ -1,6 +1,6 @@
 import type { LavaMoatPolicy } from '@lavamoat/types'
-import type { EndowmentsToolkitFactory } from 'lavamoat-core'
-import type { LavaMoatPluginOptions, ScuttlerConfig } from '../buildtime/types'
+import type { EndowmentsToolkitFactory, LavaMoatScuttleOpts } from 'lavamoat-core'
+import type { LavaMoatPluginOptions } from '../buildtime/types'
 
 type DebugTools = {
   debugProxy: (target: any, source: object, hint: string) => void
@@ -11,7 +11,7 @@ export interface RuntimeNamespace {
   scuttling: {
     scuttle: (
       globalThis: Record<string, unknown>,
-      scuttleGlobalThis: ScuttlerConfig
+      scuttleGlobalThis?: LavaMoatScuttleOpts
     ) => {}
   }
   root: string

@@ -85,16 +85,22 @@ class LavaMoatPlugin {
    * @param {LavaMoatPluginOptions} [options]
    */
   constructor(options = {}) {
-    if (options.scuttleGlobalThis === true) {
-      options.scuttleGlobalThis = { enabled: true, exceptions: [] }
-    } else if (typeof options.scuttleGlobalThis === 'object') {
+    if (typeof options.scuttleGlobalThis === 'object') {
       options.scuttleGlobalThis = { ...options.scuttleGlobalThis }
       if (Array.isArray(options.scuttleGlobalThis.exceptions)) {
         options.scuttleGlobalThis.exceptions =
-          options.scuttleGlobalThis.exceptions.map((e) => e.toString())
+          options.scuttleGlobalThis.exceptions.map(
+            /**
+             * Convert exception to string
+             * @param {string | RegExp} e
+             * @returns {string}
+             */
+            (e) => e.toString())
       } else {
         options.scuttleGlobalThis.exceptions = []
       }
+    } else {
+      options.scuttleGlobalThis = { enabled: false }
     }
 
     /** @type {CompleteLavaMoatPluginOptions} */
