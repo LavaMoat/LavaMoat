@@ -45,6 +45,9 @@ const { Proxy, Math, Date } = globalThis
 const { harden } = globalThis
 
 const knownWritableFields = new Set()
+if (LAVAMOAT.debug) {
+  LAVAMOAT.debug.addOverrides(LAVAMOAT.policy.resources)
+}
 
 values(LAVAMOAT.policy.resources).forEach((resource) => {
   if (resource.globals && typeof resource.globals === 'object') {

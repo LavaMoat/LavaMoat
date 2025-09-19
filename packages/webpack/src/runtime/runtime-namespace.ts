@@ -3,7 +3,10 @@ import type { EndowmentsToolkitFactory } from 'lavamoat-core'
 import type { LavaMoatPluginOptions, ScuttlerConfig } from '../buildtime/types'
 
 type DebugTools = {
-  debugProxy: (target: any, source: object, hint: string) => void
+  debugProxy: (target: any, source: object, hint: string) => void,
+  addOverrides: (edits: LavaMoatPolicy['resources']) => void,
+  debugPackage: (requestedResourceId: string,
+    referrerResourceId: string) => void
 }
 
 type RequiredProperty<T, K extends keyof T> = Omit<T, K> & Required<Pick<T, K>>

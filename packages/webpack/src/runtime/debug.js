@@ -1,19 +1,78 @@
 /**
- * @type {Record<
- *   string,
- *   { globals?: Record<string, boolean>; packages?: Record<string, boolean> }
- * >}
+ * @typedef {{
+ *   globals?: Record<string, boolean>
+ *   packages?: Record<string, boolean>
+ * }} PolicyResource
+ *
+ *
+ * @typedef {Record<string, PolicyResource>} PolicyResources
  */
-const incrementalPolicy = {}
 
-const printPolicyDebug = () => {
+// @ts-ignore
+const { sessionStorage } = globalThis
+
+/** @type {PolicyResources} */
+const incrementalPolicy = JSON.parse(
+  sessionStorage.getItem('LM_POLICY') || '{}'
+)
+
+const savePolicy = () => {
   const policy = JSON.stringify(incrementalPolicy, null, 2)
+  sessionStorage.setItem('LM_POLICY', policy)
   console.dir(policy)
 }
-Object.defineProperty(globalThis, 'LM_printPolicyDebug', {
+
+/**
+ * @param {PolicyResources} resources
+ */
+const addOverrides = (resources) => {
+  override(resources, incrementalPolicy)
+}
+/**
+ * @param {PolicyResources} receiver
+ * @param {PolicyResources} donor
+ */
+const override = (receiver, donor) => {
+  for (const name in donor) {
+    if (!receiver[name]) {
+      receiver[name] = donor[name]
+    } else {
+      receiver[name].globals = Object.assign(
+        receiver[name].globals || {},
+        donor[name].globals
+      )
+      receiver[name].packages = Object.assign(
+        receiver[name].packages || {},
+        donor[name].packages
+      )
+    }
+  }
+}
+
+Object.defineProperty(globalThis, 'LM_getPolicy', {
   configurable: false,
   enumerable: false,
-  value: printPolicyDebug,
+  value: savePolicy,
+})
+Object.defineProperty(globalThis, 'LM_clearPolicy', {
+  configurable: false,
+  enumerable: false,
+  value: () => {
+    sessionStorage.removeItem('LM_POLICY')
+  },
+})
+Object.defineProperty(globalThis, 'LM_addPolicy', {
+  configurable: false,
+  enumerable: false,
+  /**
+   * Add edits to a session policy
+   *
+   * @param {PolicyResources} edits
+   */
+  value: (edits) => {
+    override(incrementalPolicy, edits)
+    savePolicy()
+  },
 })
 
 /**
@@ -24,6 +83,33 @@ let debounceTimer
 const PRINT_AFTER_NO_NEW_POLICY_DISCOVERED_MS = 3000
 
 let LIMITED_TIME_OFFER = 100
+
+/**
+ * @param {string} resourceId
+ * @param {'packages' | 'globals'} field
+ * @param {string} key
+ * @returns
+ */
+const isNewToPolicy = (resourceId, field, key) => {
+  if (!Object.hasOwn(incrementalPolicy, resourceId)) {
+    incrementalPolicy[resourceId] =
+      /** @type {PolicyResource} */ Object.create(null)
+  } else if (!Object.hasOwn(incrementalPolicy[resourceId], field)) {
+    incrementalPolicy[resourceId][field] = Object.create(null)
+  }
+  if (!Object.hasOwn(incrementalPolicy[resourceId][field], key)) {
+    incrementalPolicy[resourceId][field][key] = true
+    clearTimeout(debounceTimer)
+    debounceTimer = setTimeout(
+      savePolicy,
+      PRINT_AFTER_NO_NEW_POLICY_DISCOVERED_MS
+    )
+    return true
+  } else {
+    return false
+  }
+}
+
 /**
  * Adds a key to the incremental policy.
  *
@@ -32,27 +118,18 @@ let LIMITED_TIME_OFFER = 100
  * @returns {void}
  */
 function addGlobalToPolicy(hint, key) {
-  if (!Object.hasOwn(incrementalPolicy, hint)) {
-    incrementalPolicy[hint] = { globals: Object.create(null) }
-  } else if (!Object.hasOwn(incrementalPolicy[hint], 'globals')) {
-    incrementalPolicy[hint].globals = Object.create(null)
-  }
-  if (!Object.hasOwn(incrementalPolicy[hint].globals, key)) {
-    incrementalPolicy[hint].globals[key] = true
+  if (isNewToPolicy(hint, 'globals', key)) {
     const informativeStack =
       '\n' + (Error().stack || '').split('\n').slice(2).join('\n')
     console.log(`-- missing ${key} from ${hint}`, informativeStack)
-    clearTimeout(debounceTimer)
-    debounceTimer = setTimeout(
-      printPolicyDebug,
-      PRINT_AFTER_NO_NEW_POLICY_DISCOVERED_MS
-    )
   } else {
     // the same field was reported again
-    LIMITED_TIME_OFFER-=1;
-    if(LIMITED_TIME_OFFER<0) {
-      printPolicyDebug()
-      throw Error('LavaMoat runtime debugger is under heavy load and will now stop. Apply the policy overrides found, rebuild and run again.')
+    LIMITED_TIME_OFFER -= 1
+    if (LIMITED_TIME_OFFER < 0) {
+      savePolicy()
+      throw Error(
+        'LavaMoat runtime debugger is under heavy load and will now stop. Apply the policy overrides found, rebuild and run again.'
+      )
     }
   }
 }
@@ -64,13 +141,7 @@ function addGlobalToPolicy(hint, key) {
  * @returns {void}
  */
 function addPkgToPolicy(parent, key) {
-  if (!Object.hasOwn(incrementalPolicy, parent)) {
-    incrementalPolicy[parent] = { packages: Object.create(null) }
-  } else if (!Object.hasOwn(incrementalPolicy[parent], 'packages')) {
-    incrementalPolicy[parent].packages = Object.create(null)
-  }
-  if (!Object.hasOwn(incrementalPolicy[parent].packages, key)) {
-    incrementalPolicy[parent].packages[key] = true
+  if (isNewToPolicy(parent, 'packages', key)) {
     const informativeStack =
       '\n' + (Error().stack || '').split('\n').slice(2).join('\n')
     console.log(`-- missing package ${key} from ${parent}`, informativeStack)
@@ -86,7 +157,7 @@ function addPkgToPolicy(parent, key) {
  * @returns {object} - The recursive proxy object.
  */
 function recursiveProxy(hint, path) {
-  if (path.length > 5 || LIMITED_TIME_OFFER<0) {
+  if (path.length > 5 || LIMITED_TIME_OFFER < 0) {
     // prevent infinite recursion
     return {}
   }
@@ -120,6 +191,7 @@ function getAllKeys(obj) {
 }
 
 let prevSource = {}
+/** @type {string[]} */
 let prevKeys = []
 
 /**
@@ -152,7 +224,10 @@ const debugProxy = (target, source, hint) => {
     }
   }
 }
-
+/**
+ * @param {string} requestedResourceId
+ * @param {string} referrerResourceId
+ */
 const debugPackage = (requestedResourceId, referrerResourceId) => {
   addPkgToPolicy(referrerResourceId, requestedResourceId)
 }
@@ -160,4 +235,5 @@ const debugPackage = (requestedResourceId, referrerResourceId) => {
 module.exports = {
   debugProxy,
   debugPackage,
+  addOverrides,
 }
