@@ -8,8 +8,6 @@ export interface LavaMoatChunkRuntimeConfiguration {
   embeddedOptions?: Partial<Pick<CompleteLavaMoatPluginOptions, 'lockdown' | 'scuttleGlobalThis'>>
 }
 
-export type ScuttlerConfig = LavaMoatScuttleOpts | boolean | undefined
-
 export interface CompleteLavaMoatPluginOptions {
   generatePolicy?: boolean
   generatePolicyOnly?: boolean
@@ -25,7 +23,7 @@ export interface CompleteLavaMoatPluginOptions {
   runChecks?: boolean
   isBuiltin: (specifier: string) => boolean
   skipRepairs?: true | string[]
-  scuttleGlobalThis?: ScuttlerConfig
+  scuttleGlobalThis?: LavaMoatScuttleOpts
   debugRuntime?: boolean
   unlockedChunksUnsafe?: RegExp
   staticShims_experimental?: string[]

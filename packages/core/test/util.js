@@ -290,7 +290,7 @@ function createScenarioFromScaffold({
   )
 
   if (!hasOwn(opts, 'scuttleGlobalThis')) {
-    opts.scuttleGlobalThis = {}
+    opts.scuttleGlobalThis = { enabled: false }
   }
 
   return {

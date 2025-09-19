@@ -1,7 +1,7 @@
 /**
  * Options for scuttling global properties
  */
-export interface ScuttleOpts {
+export type LavaMoatScuttleOpts = {
   enabled: boolean;
   exceptions?: Array<string | RegExp>;
   scuttlerName?: string;
@@ -19,4 +19,4 @@ export interface GlobalRef {
  * @param globalRef The global object to scuttle
  * @param [opts] Options for scuttling
  */
-export function scuttle(globalRef: GlobalRef, opts?: ScuttleOpts | boolean): void;
+export function scuttle(globalRef: GlobalRef, opts?: LavaMoatScuttleOpts | boolean): void;
