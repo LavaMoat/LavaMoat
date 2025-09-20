@@ -1,6 +1,10 @@
 // @ts-check
 
 /**
+ * @import { LMPolicy } from '@lavamoat/types/policy'
+ */
+
+/**
  * Utilities for generating the endowments object based on a `globalRef` and a
  * {@link LMPolicy.PackagePolicy}.
  *
