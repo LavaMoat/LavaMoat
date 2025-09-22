@@ -6,6 +6,13 @@
   * dependencies
     * @lavamoat/aa bumped from ^4.0.1 to ^4.1.0
 
+## [3.3.6](https://github.com/LavaMoat/LavaMoat/compare/allow-scripts-v3.3.5...allow-scripts-v3.3.6) (2025-09-22)
+
+
+### Bug Fixes
+
+* **allow-scripts:** fix [#1796](https://github.com/LavaMoat/LavaMoat/issues/1796) - correct dev flag in setup ([d4f45de](https://github.com/LavaMoat/LavaMoat/commit/d4f45de0a05360a60f8e25c4d4bdcdd960937bbd))
+
 ## [3.3.5](https://github.com/LavaMoat/LavaMoat/compare/allow-scripts-v3.3.4...allow-scripts-v3.3.5) (2025-08-25)
 
 

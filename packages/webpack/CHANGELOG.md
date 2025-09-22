@@ -18,6 +18,15 @@
   * dependencies
     * lavamoat-core bumped from ^15.2.0 to ^15.2.1
 
+## [1.3.2](https://github.com/LavaMoat/LavaMoat/compare/webpack-v1.3.1...webpack-v1.3.2) (2025-09-22)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-core bumped from ^16.6.1 to ^16.6.2
+
 ## [1.3.1](https://github.com/LavaMoat/LavaMoat/compare/webpack-v1.3.0...webpack-v1.3.1) (2025-09-19)
 
 
