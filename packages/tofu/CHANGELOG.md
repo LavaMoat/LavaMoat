@@ -1,5 +1,19 @@
 # Changelog
 
+## [8.0.10](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-tofu-v8.0.9...lavamoat-tofu-v8.0.10) (2025-09-22)
+
+
+### Bug Fixes
+
+* **tofu:** Deprecate codeSampleFromAstNode and undo breaking change ([b43a23d](https://github.com/LavaMoat/LavaMoat/commit/b43a23dbedeff3583c2425891a51f1ef0a434bc8))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * lavamoat-core bumped from >15.4.0 to >16.6.2
+
 ## [8.0.9](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-tofu-v8.0.8...lavamoat-tofu-v8.0.9) (2025-09-19)
 
 ### Breaking
