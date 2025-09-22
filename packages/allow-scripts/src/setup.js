@@ -106,7 +106,7 @@ function editPackageJson() {
 
   if (existsSync('./.npmrc')) {
     cmd = 'npm'
-    cmdArgs = ['install', '-d', '@lavamoat/preinstall-always-fail']
+    cmdArgs = ['install', '-D', '@lavamoat/preinstall-always-fail']
   } else {
     cmd = 'yarn'
     cmdArgs = ['add', '-D', '@lavamoat/preinstall-always-fail']
