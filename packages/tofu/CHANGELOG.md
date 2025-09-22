@@ -2,6 +2,13 @@
 
 ## [8.0.9](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-tofu-v8.0.8...lavamoat-tofu-v8.0.9) (2025-09-19)
 
+### Breaking
+
+> [!WARNING] 
+> Accidental breaking change was added to this release. 
+> `codeSampleFromAstNode` has been removed instead of deprecated.
+> Update to `8.0.10` for a fix
+
 
 ### Dependencies
 
