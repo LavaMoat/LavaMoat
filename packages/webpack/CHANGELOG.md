@@ -18,6 +18,40 @@
   * dependencies
     * lavamoat-core bumped from ^15.2.0 to ^15.2.1
 
+## [1.3.1](https://github.com/LavaMoat/LavaMoat/compare/webpack-v1.3.0...webpack-v1.3.1) (2025-09-19)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @lavamoat/types bumped from ^0.0.0 to ^0.0.1
+    * lavamoat-core bumped from ^16.6.0 to ^16.6.1
+
+## [1.3.0](https://github.com/LavaMoat/LavaMoat/compare/webpack-v1.2.0...webpack-v1.3.0) (2025-09-16)
+
+
+### Features
+
+* **webpack:** add explicit error messages when a compilation concludes with nothing to protect ([f12985f](https://github.com/LavaMoat/LavaMoat/commit/f12985f15a46e0d022d9caef8a0e5e646529575c))
+* **webpack:** add generatePolicyOnly option ([#1789](https://github.com/LavaMoat/LavaMoat/issues/1789)) ([72900cd](https://github.com/LavaMoat/LavaMoat/commit/72900cd22a954a15d9fe96a8bd4b2f844ba3797c))
+* **webpack:** null runtime ([4374b7a](https://github.com/LavaMoat/LavaMoat/commit/4374b7a65ef551d123396b32e78cd6fd976ecd8e))
+* **webpack:** repair for window.event deprecated leaky poperty ([#1785](https://github.com/LavaMoat/LavaMoat/issues/1785)) ([86d944b](https://github.com/LavaMoat/LavaMoat/commit/86d944bfc0f65e5d27c6f598add72016de579565))
+* **webpack:** static shims for runtime, runtimeConfigurationPerChunk_experimental to control embedded runtime options ([#1792](https://github.com/LavaMoat/LavaMoat/issues/1792)) ([c69a08d](https://github.com/LavaMoat/LavaMoat/commit/c69a08d5af47e20ee0580fa5f0fcc804cb6d6928))
+
+
+### Bug Fixes
+
+* **webpack:** fix the naive assumption that there can only be 1 module with a certain path ([#1793](https://github.com/LavaMoat/LavaMoat/issues/1793)) ([262bb3d](https://github.com/LavaMoat/LavaMoat/commit/262bb3d61016b42977d0c21c83b22cfbbd78a3e9))
+* **webpack:** MessageEvent repair should not prevent further overrides ([#1787](https://github.com/LavaMoat/LavaMoat/issues/1787)) ([0c8fc19](https://github.com/LavaMoat/LavaMoat/commit/0c8fc1914e0e7a8432edbf6d9e8d2604ee17d291))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-core bumped from ^16.5.1 to ^16.6.0
+
 ## [1.2.0](https://github.com/LavaMoat/LavaMoat/compare/webpack-v1.1.0...webpack-v1.2.0) (2025-08-25)
 
 

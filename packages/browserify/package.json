@@ -1,6 +1,6 @@
 {
   "name": "lavamoat-browserify",
-  "version": "18.1.8",
+  "version": "18.1.10",
   "description": "browserify plugin for sandboxing dependencies with LavaMoat",
   "repository": {
     "type": "git",
@@ -30,13 +30,13 @@
   },
   "dependencies": {
     "@lavamoat/aa": "^4.3.4",
-    "@lavamoat/lavapack": "^7.0.11",
+    "@lavamoat/lavapack": "^7.0.13",
     "@lavamoat/sourcemap-validator": "2.1.1",
     "browser-resolve": "2.0.0",
     "concat-stream": "2.0.0",
     "convert-source-map": "2.0.0",
     "duplexify": "4.1.3",
-    "lavamoat-core": "^16.5.1",
+    "lavamoat-core": "^16.6.1",
     "pify": "5.0.0",
     "readable-stream": "4.7.0",
     "source-map": "0.7.4",
@@ -46,7 +46,7 @@
     "@babel/code-frame": "7.27.1",
     "browserify": "17.0.1",
     "keccak": "3.0.4",
-    "lavamoat": "9.0.11",
+    "lavamoat": "9.0.13",
     "source-map-explorer": "2.5.3",
     "tmp-promise": "3.0.3",
     "watchify": "4.0.0"

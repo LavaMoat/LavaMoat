@@ -6,6 +6,23 @@
   * dependencies
     * lavamoat-tofu bumped from ^7.2.1 to ^7.2.2
 
+## [16.6.1](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v16.6.0...lavamoat-core-v16.6.1) (2025-09-19)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @lavamoat/types bumped from ^0.0.0 to ^0.0.1
+    * lavamoat-tofu bumped from ^8.0.8 to ^8.0.9
+
+## [16.6.0](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v16.5.1...lavamoat-core-v16.6.0) (2025-09-16)
+
+
+### Features
+
+* **core:** support Firefox contentscript shenanigans with cross-realm window prototypes ([#1786](https://github.com/LavaMoat/LavaMoat/issues/1786)) ([271598f](https://github.com/LavaMoat/LavaMoat/commit/271598f59161ba83f525a3d340916b32e6f4a96a))
+
 ## [16.5.1](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v16.5.0...lavamoat-core-v16.5.1) (2025-08-25)
 
 

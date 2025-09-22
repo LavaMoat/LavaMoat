@@ -16,7 +16,7 @@
   "scripts": {
     "build": "npm run --workspaces --if-present build && npm run build:types",
     "build:types": "tsc -b",
-    "clean:types": "git clean -fx -e \"**/node_modules/**\" \"packages/*/types/*.d.ts*\" \"*.tsbuildinfo\" || tsc -b --clean",
+    "clean:types": "git clean -fx -e \"**/node_modules/**\" \"packages/*/types/*.d.ts*\" \"*.tsbuildinfo\"; tsc -b --clean",
     "lint": "npm run lint:eslint && npm run lint:deps && npm run lint:lockfile",
     "lint:commit": "commitlint",
     "lint:deps": "npm run --workspaces --if-present lint:deps",
@@ -40,7 +40,7 @@
     "@babel/types": "7.27.3",
     "@commitlint/cli": "19.8.1",
     "@commitlint/config-conventional": "19.8.1",
-    "@endo/compartment-mapper": "1.6.2",
+    "@endo/compartment-mapper": "1.6.3",
     "@tsconfig/node18": "18.2.4",
     "@types/lint-staged": "13.3.0",
     "@types/node": "18.19.112",
@@ -68,7 +68,7 @@
     "prettier-plugin-pkg": "0.21.2",
     "ses": "1.14.0",
     "type-fest": "4.41.0",
-    "typescript": "5.8.3"
+    "typescript": "5.9.2"
   },
   "overrides": {
     "@babel/types": "$@babel/types",
