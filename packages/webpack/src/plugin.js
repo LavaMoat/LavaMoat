@@ -179,10 +179,10 @@ class LavaMoatPlugin {
     /** @type {string[]} */
     const FORCED_CONFIG = []
     if (compiler.options.optimization.concatenateModules) {
-      FORCED_CONFIG.push('concatenateModules: false')
+      FORCED_CONFIG.push('concatenateModules=true->false')
     }
     if (compiler.options.optimization.sideEffects) {
-      FORCED_CONFIG.push('sideEffects: false')
+      FORCED_CONFIG.push('sideEffects=true->false')
     }
     // Concatenation won't work with wrapped modules. Have to disable it.
     compiler.options.optimization.concatenateModules = false
@@ -251,8 +251,7 @@ class LavaMoatPlugin {
         }
 
         if (
-          FORCED_CONFIG.length > 0 ||
-          STORE.options.diagnosticsVerbosity > 0
+          FORCED_CONFIG.length > 0
         ) {
           STORE.mainCompilationWarnings.push(
             new WebpackError(
