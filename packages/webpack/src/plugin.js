@@ -179,10 +179,10 @@ class LavaMoatPlugin {
     /** @type {string[]} */
     const FORCED_CONFIG = []
     if (compiler.options.optimization.concatenateModules) {
-      FORCED_CONFIG.push('concatenateModules: false')
+      FORCED_CONFIG.push('concatenateModules=true->false')
     }
     if (compiler.options.optimization.sideEffects) {
-      FORCED_CONFIG.push('sideEffects: false')
+      FORCED_CONFIG.push('sideEffects=true->false')
     }
     // Concatenation won't work with wrapped modules. Have to disable it.
     compiler.options.optimization.concatenateModules = false
@@ -250,7 +250,9 @@ class LavaMoatPlugin {
           // replacing generator with something returning an empty string could shave off some extra time, but is too invasive to seem worth it
         }
 
-        if (FORCED_CONFIG || STORE.options.diagnosticsVerbosity > 0) {
+        if (
+          FORCED_CONFIG.length > 0
+        ) {
           STORE.mainCompilationWarnings.push(
             new WebpackError(
               'LavaMoatPlugin: Following options had to be overriden for security: ' +
