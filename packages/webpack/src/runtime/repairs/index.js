@@ -7,4 +7,8 @@ exports.repairs = [
     target: ['event'],
     file: require.resolve('./eventsetter'),
   },
+  {
+    target: ['globalThis'],
+    file: require.resolve('./globalthis'),
+  },
 ]

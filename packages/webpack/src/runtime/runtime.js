@@ -4,7 +4,7 @@
 /* global LOCKDOWN_SHIMS */
 /* global hardenIntrinsics */
 
-const { repairIntrinsics, } = globalThis
+const { repairIntrinsics } = globalThis
 
 const warn = typeof console === 'object' ? console.warn : () => {}
 
@@ -56,11 +56,14 @@ values(LAVAMOAT.policy.resources).forEach((resource) => {
   }
 })
 
-const { getEndowmentsForConfig, copyWrappedGlobals, getBuiltinForConfig } =
-  LAVAMOAT.endowmentsToolkit({
-    handleGlobalWrite: true,
-    knownWritableFields,
-  })
+const {
+  getEndowmentsForConfig,
+  copyWrappedGlobals,
+  getBuiltinForConfig,
+} = LAVAMOAT.endowmentsToolkit({
+  handleGlobalWrite: true,
+  knownWritableFields,
+})
 
 // These must match assumptions in the wrapper.js
 // sharedKeys are included in the runtime
