@@ -18,6 +18,26 @@
   * dependencies
     * lavamoat-core bumped from ^15.2.0 to ^15.2.1
 
+## [1.4.0](https://github.com/LavaMoat/LavaMoat/compare/webpack-v1.3.2...webpack-v1.4.0) (2025-09-25)
+
+
+### Features
+
+* **webpack:** document and officially release scuttling in webpack plugin ([#1829](https://github.com/LavaMoat/LavaMoat/issues/1829)) ([9c83030](https://github.com/LavaMoat/LavaMoat/commit/9c83030d97371478bf59b10d636e63168bd8473d))
+* **webpack:** prevent webpack from eliminating reexports and failing policy enforcement ([#1827](https://github.com/LavaMoat/LavaMoat/issues/1827)) ([5f4d4fc](https://github.com/LavaMoat/LavaMoat/commit/5f4d4fcdf6395bd749918d2b6bed7c5e822629e2))
+
+
+### Bug Fixes
+
+* **webpack:** adjust MessageEvent repair to reliably work in the bizarre context of Firefox webextension contentscript ([#1830](https://github.com/LavaMoat/LavaMoat/issues/1830)) ([33d83d7](https://github.com/LavaMoat/LavaMoat/commit/33d83d7402f9b914c7f4d7f9cd18f979c2f406c5))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-core bumped from ^16.6.2 to ^16.7.0
+
 ## [1.3.2](https://github.com/LavaMoat/LavaMoat/compare/webpack-v1.3.1...webpack-v1.3.2) (2025-09-22)
 
 
