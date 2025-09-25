@@ -540,14 +540,6 @@ function endowmentsToolkit({
     if (noSharedPrototype) {
       // take the entire prototype chain
       commonPrototypeIndex = globalProtoChain.length
-      // Skip overriding Object.prototype keys in case it's the other realm Object.prototype
-      const possiblyObjectProto = globalProtoChain.pop()
-      const replacement = Object.fromEntries(
-        Object.entries(possiblyObjectProto).filter(
-          ([key]) => !(key in Object.prototype)
-        )
-      )
-      globalProtoChain.push(replacement)
     }
     // we will copy endowments from all entries in the prototype chain, excluding Object.prototype
     const endowmentSources = globalProtoChain.slice(0, commonPrototypeIndex)
@@ -567,8 +559,22 @@ function endowmentsToolkit({
     })
 
     const endowmentSourceDescriptors = endowmentSources.map(
-      (globalProtoChainEntry) =>
-        Object.getOwnPropertyDescriptors(globalProtoChainEntry)
+      (globalProtoChainEntry, index) => {
+        const candidateDescriptors = Object.getOwnPropertyDescriptors(
+          globalProtoChainEntry
+        )
+        if (noSharedPrototype && index === endowmentSources.length - 1) {
+          // if there is no shared Object.prototype, the last entry in the endowmentSources
+          // might be an Object.prototype from another realm. In that case we want to skip overriding Object.prototype keys
+          const filteredDescriptors = Object.fromEntries(
+            Object.entries(candidateDescriptors).filter(
+              ([key]) => !(key in Object.prototype)
+            )
+          )
+          return filteredDescriptors
+        }
+        return candidateDescriptors
+      }
     )
     // flatten propDesc collections with precedence for globalThis-end of the prototype chain
     const endowmentDescriptorsFlat = Object.assign(

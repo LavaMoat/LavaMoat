@@ -49,7 +49,9 @@ function makeConfig(lmOptions = {}) {
       }),
       new HtmlWebpackPlugin(),
     ],
-    optimization: {},
+    optimization: {
+      concatenateModules: true, // only here to trigger explicit warning about being set back to false
+    },
     resolve: {
       fallback: { crypto: false },
     },

@@ -4,7 +4,23 @@ A tool for running only the dependency lifecycle hooks specified in an _allowlis
 
 > For an overview of LavaMoat tools see [the main README](https://github.com/LavaMoat/LavaMoat/tree/main/README.md)
 
-### Install
+### Install globally
+
+```sh
+npm i -g @lavamoat/allow-scripts
+```
+
+Be sure to include the `@lavamoat/` namespace in the package name
+
+Now without triggering an installation in the project you're setting up, you can go to the project folder and run:
+
+```sh
+allow-scripts setup
+```
+
+And proceed to the **Configure** section
+
+### Project-specific local installation
 
 Adds the package to start using it in your project. be sure to include the `@lavamoat/` namespace in the package name
 
@@ -18,15 +34,18 @@ or
 npm i -D @lavamoat/allow-scripts
 ```
 
+In the following steps you will continue using `yarn` or `npx --no-install` if you've installed locally. Local installation is also directly callable in your project's `"scripts"` in `package.json`
+
 ### Setup
 
 ```sh
-yarn allow-scripts setup
+allow-scripts setup
 ```
 
 or
 
 ```sh
+yarn allow-scripts setup
 npx --no-install allow-scripts setup
 ```
 
@@ -41,13 +60,7 @@ Adding this package to a project **mitigates** the likelihood of accidentally ru
 Automatically generates and writes a configuration into `package.json`, setting new policies as `false` by default. Edit this file as necessary.
 
 ```sh
-yarn allow-scripts auto
-```
-
-or
-
-```sh
-npx --no-install allow-scripts auto
+allow-scripts auto
 ```
 
 Configuration goes in `package.json`
@@ -70,16 +83,8 @@ Configuration goes in `package.json`
 Run **all** lifecycle scripts for the packages specified in `package.json`
 
 ```sh
-yarn allow-scripts
+allow-scripts run
 ```
-
-or
-
-```sh
-npx --no-install allow-scripts
-```
-
-This is a shorthand for `yarn/npx allow-scripts run`.
 
 It will fail if it detects dependencies which haven't been set up during [configuration](#Configure) of the package. You will be advised to run `yarn allow-scripts auto`.
 
@@ -88,13 +93,7 @@ It will fail if it detects dependencies which haven't been set up during [config
 Prints comprehension of configuration and dependencies with lifecycle scripts, specifying _allowed_ and _disallowed_ packages.
 
 ```sh
-yarn allow-scripts list
-```
-
-or
-
-```sh
-npx --no-install allow-scripts list
+allow-scripts list
 ```
 
 ### Improving your Workflow

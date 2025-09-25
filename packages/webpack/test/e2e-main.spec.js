@@ -23,7 +23,7 @@ test('webpack/main - dist shape', (t) => {
 })
 
 test('webpack/main - default warning gets printed', (t) => {
-  t.regex(t.context.build.stdout, /Concatenation of modules disabled/)
+  t.regex(t.context.build.stdout, /options had to be overriden.*concatenateModules/)
 })
 
 test('webpack/main - warns about excluded modules', (t) => {
