@@ -19,7 +19,7 @@ exports.buildRepairs = (policy, skipRepairs) => {
             })
         )
       : repairs
-  const allGlobalsInvolved = new Set()
+  const allGlobalsInvolved = new Set(['globalThis'])
   for (const resource of Object.values(policy.resources)) {
     if (resource.globals) {
       for (const global of Object.keys(resource.globals)) {
