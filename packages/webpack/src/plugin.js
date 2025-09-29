@@ -92,10 +92,12 @@ class LavaMoatPlugin {
           options.scuttleGlobalThis.exceptions.map(
             /**
              * Convert exception to string
+             *
              * @param {string | RegExp} e
              * @returns {string}
              */
-            (e) => e.toString())
+            (e) => e.toString()
+          )
       } else {
         options.scuttleGlobalThis.exceptions = []
       }
@@ -187,13 +189,10 @@ class LavaMoatPlugin {
     if (compiler.options.optimization.concatenateModules) {
       FORCED_CONFIG.push('concatenateModules=true->false')
     }
-    if (compiler.options.optimization.sideEffects) {
-      FORCED_CONFIG.push('sideEffects=true->false')
-    }
     // Concatenation won't work with wrapped modules. Have to disable it.
     compiler.options.optimization.concatenateModules = false
-    // package policy enforcement won't work if webpack takes shortcuts
-    compiler.options.optimization.sideEffects = false
+    // This setting creates a bit of confusion when it removes a reexport between packages and collapses the dependency tree, but it's got a potential to optimize some bundles a lot. We can support it by making sure we use the optimized connections when generating policy.
+    // compiler.options.optimization.sideEffects;
 
     // TODO: Research. If we fiddle a little with how we wrap the module, it might be possible to get inlining to work eventually by adding a closure that returns the module namespace. I just don't want to get into the compatibility of it all yet.
     // TODO: explore how these settings affect the Compartment wrapping etc.
@@ -256,9 +255,7 @@ class LavaMoatPlugin {
           // replacing generator with something returning an empty string could shave off some extra time, but is too invasive to seem worth it
         }
 
-        if (
-          FORCED_CONFIG.length > 0
-        ) {
+        if (FORCED_CONFIG.length > 0) {
           STORE.mainCompilationWarnings.push(
             new WebpackError(
               'LavaMoatPlugin: Following options had to be overriden for security: ' +

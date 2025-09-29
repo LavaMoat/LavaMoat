@@ -51,6 +51,7 @@ function makeConfig(lmOptions = {}) {
     ],
     optimization: {
       concatenateModules: true, // only here to trigger explicit warning about being set back to false
+      sideEffects: true,
     },
     resolve: {
       fallback: { crypto: false },
