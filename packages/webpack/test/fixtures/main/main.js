@@ -6,6 +6,7 @@ import 'resource-hack'
 import 'side-effects-package/styles.css'
 import { hello as helloTypeScript } from 'typescript-package'
 import { hello as helloUMD } from 'umd-package'
+import reex from 'uses-reexport-package'
 import { what } from './src/hello.ts'
 import { thing } from './src/other.mjs'
 
@@ -25,7 +26,8 @@ function run() {
     helloUMD(),
     thing(),
     what,
-    globals
+    globals,
+    reex
   )
 }
 

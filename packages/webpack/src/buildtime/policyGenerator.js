@@ -113,9 +113,49 @@ module.exports = {
         importMap: {
           // connections are a much better source of information than module.dependencies which contain
           // all imported references separately along with exports and fluff
-          ...Array.from(connections).reduce((acc, dep) => {
+          ...Array.from(connections).reduce((acc, connection) => {
+            // If module is unconditional and was never marked active, skip it.
+            if (
+              !connection.conditional &&
+              // @ts-expect-error - connection.getActiveState only needs the runtime argument if the condition is dynamic.
+              connection.getActiveState({}) === false
+            ) {
+              diag.rawDebug(4, [
+                '>>>skipping inactive connection>>>',
+                connection.originModule?.context,
+                connection.module.context,
+              ])
+              return acc
+            } // skip inactive connections, e.g. removed by tree shaking
+
+            // connection.resolvedModule is pointing to the original module instance, before optimizations. connection.module is the module instance after. If they differ, a reexport might have been collapsed into a direct import from reexported module.
+            if (connection.module !== connection.resolvedModule) {
+              // TODO: find a good place to surface this to users
+              // const a = getPackageNameForModulePath(
+              //   canonicalNameMap,
+              //   connection.resolvedModule?.userRequest
+              // )
+              // const b = getPackageNameForModulePath(
+              //   canonicalNameMap,
+              //   connection.module?.userRequest
+              // )
+              // if (a !== b) {
+              //   // put the information somewhere
+              //   diag.rawDebug(
+              //     3,
+              //     `Package ${packageName} is depending on ${a} that reexports from ${b}. The dependency tree was collapsed by webpack optimizations and now ${b} is allowed for ${packageName}.`
+              //   )
+              // }
+              diag.rawDebug(4, [
+                '>>>reexport collapsed>>>',
+                // @ts-expect-error - bad types?
+                connection.module?.userRequest,
+                // @ts-expect-error - bad types?
+                connection?.resolvedModule?.userRequest,
+              ])
+            }
             // @ts-expect-error - bad types?
-            const depSpecifier = dep.resolvedModule.userRequest
+            const depSpecifier = connection.module?.userRequest
             acc[depSpecifier] = depSpecifier
             return acc
           }, /** @type {Record<string, string>} */ ({})),

@@ -108,24 +108,33 @@ const enforcePolicy = (specifier, referrerResourceId, wrappedRequire) => {
   }
 
   const referrerPolicy = LAVAMOAT.policy.resources[referrerResourceId] || {}
-  if (referrerPolicy.builtin && LAVAMOAT.externals[specifier]) {
-    const builtinName = LAVAMOAT.externals[specifier]
-    if (referrerPolicy.builtin[builtinName]) {
-      return wrappedRequire()
-    }
-    if (
-      builtinName &&
-      !builtinName.includes('.') &&
-      keys(referrerPolicy.builtin).some((key) =>
-        key.startsWith(`${builtinName}.`)
-      )
-    ) {
-      // create minimal selection if it's a builtin and not allowed as a whole, but with subpaths
-      return getBuiltinForConfig(
-        wrappedRequire(),
-        builtinName,
-        referrerPolicy.builtin
-      )
+  if (LAVAMOAT.externals[specifier]) {
+    const externalName = LAVAMOAT.externals[specifier]
+    if (referrerPolicy.builtin) {
+      if (referrerPolicy.builtin[externalName]) {
+        return wrappedRequire()
+      }
+      if (
+        externalName &&
+        !externalName.includes('.') &&
+        keys(referrerPolicy.builtin).some((key) =>
+          key.startsWith(`${externalName}.`)
+        )
+      ) {
+        // create minimal selection if it's a builtin and not allowed as a whole, but with subpaths
+        return getBuiltinForConfig(
+          wrappedRequire(),
+          externalName,
+          referrerPolicy.builtin
+        )
+      }
+    } 
+    if (referrerPolicy.packages) {
+      // if an external was automatically generate by webpack and is not recognized as builtin, but allowed as a package, we still need to pass it in.
+      const requestedResourceId = findResourceId(externalName)
+      if (requestedResourceId && referrerPolicy.packages[requestedResourceId]) {
+        return wrappedRequire()
+      }
     }
   }
   const requestedResourceId = findResourceId(specifier)

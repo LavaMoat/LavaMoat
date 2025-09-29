@@ -16,6 +16,11 @@
         "self": true
       }
     },
+    "uses-reexport-package>reexport-package": {
+      "packages": {
+        "es6-module-package": true
+      }
+    },
     "resource-hack": {
       "globals": {
         "URL": true,
@@ -25,6 +30,14 @@
     "umd-package": {
       "globals": {
         "define": true
+      }
+    },
+    "uses-reexport-package": {
+      "globals": {
+        "console.log": true
+      },
+      "packages": {
+        "uses-reexport-package>reexport-package": true
       }
     }
   }
