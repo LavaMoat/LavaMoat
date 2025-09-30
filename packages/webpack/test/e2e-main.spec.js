@@ -35,7 +35,7 @@ test('webpack/main - warns about excluded modules', (t) => {
 
 test('webpack/main - bundle runs without throwing', (t) => {
   t.notThrows(() => {
-    runScriptWithSES(t.context.bundle, {console})
+    runScriptWithSES(t.context.bundle)
   })
 })
 

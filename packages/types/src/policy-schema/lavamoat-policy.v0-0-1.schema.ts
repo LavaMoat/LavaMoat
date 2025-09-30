@@ -135,6 +135,10 @@ export interface ResourcePolicy {
    * Allow native modules
    */
   native?: boolean
+  /**
+   * Metadata about the resource
+   */
+  meta?: Record<string, string|string[]>
 }
 
 /**
