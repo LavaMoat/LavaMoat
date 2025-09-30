@@ -16,11 +16,6 @@
         "self": true
       }
     },
-    "uses-reexport-package>reexport-package": {
-      "packages": {
-        "es6-module-package": true
-      }
-    },
     "resource-hack": {
       "globals": {
         "URL": true,
@@ -36,7 +31,13 @@
       "globals": {
         "console.log": true
       },
+      "meta": {
+        "webpack-optimization": [
+          "Dependency 'uses-reexport-package>reexport-package' reexports from 'es6-module-package' and webpack collapsed that to a direct import."
+        ]
+      },
       "packages": {
+        "es6-module-package": true,
         "uses-reexport-package>reexport-package": true
       }
     }
