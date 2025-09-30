@@ -21,6 +21,7 @@ const diag = require('./diagnostics')
 
 /** @import {LavaMoatPolicy} from '@lavamoat/types' */
 /** @import {CanonicalNameMap} from '@lavamoat/aa' */
+/** @import {NormalModule, Module} from 'webpack' */
 
 module.exports = {
   stringifyPolicyReliably: jsonStringifySortedPolicy,
@@ -77,6 +78,45 @@ module.exports = {
       debugMode: false,
     })
 
+    /** @type {Record<string, Record<string, string[]>>} } */
+    const meta = {}
+    const REEXPORT_WARNING_KEY = 'webpack-optimization'
+    /**
+     * @param {string} packageName
+     * @param {Module | NormalModule} wasModule
+     * @param {Module | NormalModule} isModule
+     */
+    const reportGraphOptimization = (packageName, wasModule, isModule) => {
+      // eliminate most cases of inner-package reexports early
+      if (wasModule.context === isModule.context) return
+      /**
+       * @param {Module} m
+       * @returns {string}
+       */
+      const getModuleSpecifierRepresentation = (m) =>
+        'userRequest' in m
+          ? /** @type {NormalModule} */ (m).userRequest
+          : m.context || '<unknown>'
+
+      const a = getPackageNameForModulePath(
+        canonicalNameMap,
+        getModuleSpecifierRepresentation(wasModule)
+      )
+      const b = getPackageNameForModulePath(
+        canonicalNameMap,
+        getModuleSpecifierRepresentation(isModule)
+      )
+      if (a !== b && packageName !== a && packageName !== b) {
+        if (!meta[packageName]) {
+          meta[packageName] = { [REEXPORT_WARNING_KEY]: [] }
+        }
+        const warning = `Dependency '${a}' reexports from '${b}' and webpack collapsed that to a direct import.`
+        if (!meta[packageName][REEXPORT_WARNING_KEY].includes(warning)) {
+          meta[packageName][REEXPORT_WARNING_KEY].push(warning)
+        }
+      }
+    }
+
     const moduleInspector = createModuleInspector({
       isBuiltin,
       includeDebugInfo: false,
@@ -113,9 +153,32 @@ module.exports = {
         importMap: {
           // connections are a much better source of information than module.dependencies which contain
           // all imported references separately along with exports and fluff
-          ...Array.from(connections).reduce((acc, dep) => {
+          ...Array.from(connections).reduce((acc, connection) => {
+            // If module is unconditional and was never marked active, skip it.
+            if (
+              !connection.conditional &&
+              // @ts-expect-error - connection.getActiveState only needs the runtime argument if the condition is dynamic.
+              connection.getActiveState({}) === false
+            ) {
+              diag.rawDebug(4, [
+                '>>>skipping inactive connection>>>',
+                connection.originModule?.context,
+                connection.module.context,
+              ])
+              // skip inactive connections, e.g. removed by tree shaking
+              return acc
+            }
+
+            // connection.resolvedModule is pointing to the original module instance, before optimizations. connection.module is the module instance after. If they differ, a reexport might have been collapsed into a direct import from reexported module.
+            if (connection.module !== connection.resolvedModule) {
+              reportGraphOptimization(
+                packageName,
+                connection.resolvedModule,
+                connection.module
+              )
+            }
             // @ts-expect-error - bad types?
-            const depSpecifier = dep.resolvedModule.userRequest
+            const depSpecifier = connection.module?.userRequest
             acc[depSpecifier] = depSpecifier
             return acc
           }, /** @type {Record<string, string>} */ ({})),
@@ -133,6 +196,12 @@ module.exports = {
     }
 
     const policy = moduleInspector.generatePolicy({})
+    Object.entries(meta).forEach(([packageName, packageMeta]) => {
+      if (!policy.resources[packageName]) {
+        return
+      }
+      policy.resources[packageName].meta = packageMeta
+    })
     mkdirSync(location, { recursive: true })
     writeFileSync(
       path.join(location, 'policy.json'),
