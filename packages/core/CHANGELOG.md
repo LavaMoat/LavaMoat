@@ -6,6 +6,18 @@
   * dependencies
     * lavamoat-tofu bumped from ^7.2.1 to ^7.2.2
 
+## [16.7.0](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v16.6.2...lavamoat-core-v16.7.0) (2025-09-25)
+
+
+### Features
+
+* **webpack:** document and officially release scuttling in webpack plugin ([#1829](https://github.com/LavaMoat/LavaMoat/issues/1829)) ([9c83030](https://github.com/LavaMoat/LavaMoat/commit/9c83030d97371478bf59b10d636e63168bd8473d))
+
+
+### Bug Fixes
+
+* **core:** noSharedPrototype case in copyWrappedGlobals must include non-enumerable properties ([592f96e](https://github.com/LavaMoat/LavaMoat/commit/592f96e1291aa31cfd6942493e40563b8680b871))
+
 ## [16.6.2](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v16.6.1...lavamoat-core-v16.6.2) (2025-09-22)
 
 

@@ -1,18 +1,4 @@
-/**
- * @typedef {object} LavaMoatScuttleOpts
- * @property {boolean} enabled - Whether scuttling is enabled or not.
- * @property {(string | RegExp)[]} exceptions - List of properties to exclude
- *   from scuttling.
- * @property {string} scuttlerName - Name of the scuttler function to use which
- *   is expected to be found as a property on the global object (e.g. if
- *   scuttlerName is 'x', scuttler function is obtained from globalThis['x']).
- */
-
-/**
- * @typedef {object} GlobalRef
- * @property {Record<string, any>} [globalThis] - Reference to the global
- *   object.
- */
+/** @import { LavaMoatScuttleOpts, GlobalRef } from './scuttle.d.ts' */
 
 const { Object, Array, Error, RegExp, Set, console, Proxy, Reflect } =
   globalThis

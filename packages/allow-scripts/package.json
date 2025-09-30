@@ -1,6 +1,6 @@
 {
   "name": "@lavamoat/allow-scripts",
-  "version": "3.3.6",
+  "version": "3.4.0",
   "description": "A tool for running only the dependency lifecycle hooks specified in an allowlist.",
   "repository": {
     "type": "git",

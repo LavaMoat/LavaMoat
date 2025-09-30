@@ -89,7 +89,13 @@ class LavaMoatPlugin {
       options.scuttleGlobalThis = { ...options.scuttleGlobalThis }
       if (Array.isArray(options.scuttleGlobalThis.exceptions)) {
         options.scuttleGlobalThis.exceptions =
-          options.scuttleGlobalThis.exceptions.map((e) => e.toString())
+          options.scuttleGlobalThis.exceptions.map(
+            /**
+             * Convert exception to string
+             * @param {string | RegExp} e
+             * @returns {string}
+             */
+            (e) => e.toString())
       } else {
         options.scuttleGlobalThis.exceptions = []
       }
