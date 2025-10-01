@@ -138,6 +138,7 @@ export interface ResourcePolicy {
    */
   native?: boolean
   /**
+   * @experimental
    * Metadata about the resource
    */
   meta?: ResourceMetadata
