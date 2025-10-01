@@ -19,7 +19,7 @@ const diag = require('./diagnostics')
  * @typedef {import('webpack').NormalModule | import('webpack').ExternalModule} InspectableWebpackModule
  */
 
-/** @import {LavaMoatPolicy} from '@lavamoat/types' */
+/** @import {LavaMoatPolicy, ResourceMetadata} from '@lavamoat/types' */
 /** @import {CanonicalNameMap} from '@lavamoat/aa' */
 /** @import {NormalModule, Module} from 'webpack' */
 
@@ -61,6 +61,9 @@ module.exports = {
    *   module: InspectableWebpackModule
    *   connections: Iterable<import('webpack').ModuleGraphConnection>
    * }} ModuleWithConnections
+   *
+   *
+   * @typedef {ResourceMetadata & Record<string, string[]>} ReexportMetaRecord
    */
 
   /**
@@ -78,7 +81,7 @@ module.exports = {
       debugMode: false,
     })
 
-    /** @type {Record<string, Record<string, string[]>>} } */
+    /** @type {Record<string, ReexportMetaRecord>} } */
     const meta = {}
     const REEXPORT_WARNING_KEY = 'webpack-optimization'
     /**

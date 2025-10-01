@@ -127,6 +127,8 @@ export interface Resources {
   [k: string]: ResourcePolicy
 }
 
+export type ResourceMetadata = Record<string, string|string[]>
+
 export interface ResourcePolicy {
   globals?: GlobalPolicy
   builtin?: BuiltinPolicy
@@ -138,7 +140,7 @@ export interface ResourcePolicy {
   /**
    * Metadata about the resource
    */
-  meta?: Record<string, string|string[]>
+  meta?: ResourceMetadata
 }
 
 /**
