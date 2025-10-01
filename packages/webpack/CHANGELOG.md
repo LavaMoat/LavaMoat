@@ -18,6 +18,27 @@
   * dependencies
     * lavamoat-core bumped from ^15.2.0 to ^15.2.1
 
+## [1.5.0](https://github.com/LavaMoat/LavaMoat/compare/webpack-v1.4.0...webpack-v1.5.0) (2025-10-01)
+
+
+### Features
+
+* **webpack,core:** Add a meta field to policy resource, report webpack optimizations to it. ([a53b434](https://github.com/LavaMoat/LavaMoat/commit/a53b434e21e074d2261a4e84b85e33fe8aa87278))
+* **webpack:** use the final module info in connections to handle the optimizations webpack sideEffect option does. wip ([9c7b305](https://github.com/LavaMoat/LavaMoat/commit/9c7b3050460b4cc79b04ac422bdfb69540893bd9))
+
+
+### Bug Fixes
+
+* **webpack:** strip policy meta from the policy that goes into the bundle, fix related tests ([645d0f2](https://github.com/LavaMoat/LavaMoat/commit/645d0f2311a9871694b6bf14bb4ce3c81b2311c8))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @lavamoat/types bumped from ^0.0.1 to ^0.1.0
+    * lavamoat-core bumped from ^16.7.0 to ^16.7.1
+
 ## [1.4.0](https://github.com/LavaMoat/LavaMoat/compare/webpack-v1.3.2...webpack-v1.4.0) (2025-09-25)
 
 

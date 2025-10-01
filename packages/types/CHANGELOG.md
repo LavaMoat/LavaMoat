@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.0](https://github.com/LavaMoat/LavaMoat/compare/types-v0.0.1...types-v0.1.0) (2025-10-01)
+
+
+### Features
+
+* **webpack,core:** Add a meta field to policy resource, report webpack optimizations to it. ([a53b434](https://github.com/LavaMoat/LavaMoat/commit/a53b434e21e074d2261a4e84b85e33fe8aa87278))
+
 ## 0.0.1 (2025-09-19)
 
 
