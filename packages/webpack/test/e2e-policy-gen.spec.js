@@ -19,6 +19,10 @@ test('webpack/policy-gen - policy shape', (t) => {
   t.snapshot(t.context.build.snapshot['/dist/policy-snapshot.json'])
 })
 
+test('webpack/policy-gen - policy meta is not included in the bundle', (t) => {
+  t.notRegex(t.context.bundle, /meta:|"meta":/u)
+})
+
 test('webpack/policy-gen - bundle runs without throwing', (t) => {
   t.notThrows(() => {
     runScriptWithSES(t.context.bundle)
