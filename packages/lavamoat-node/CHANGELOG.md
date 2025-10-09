@@ -19,6 +19,17 @@
     * lavamoat-core bumped from ^15.2.0 to ^15.2.1
     * lavamoat-tofu bumped from ^7.2.1 to ^7.2.2
 
+## [10.0.0](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-v9.0.16...lavamoat-v10.0.0) (2025-10-09)
+
+
+### ⚠ BREAKING CHANGES
+
+* indicate breaking change propagation: stop overwriting the policy file while loading. ([#1835](https://github.com/LavaMoat/LavaMoat/issues/1835))
+
+### Bug Fixes
+
+* indicate breaking change propagation: stop overwriting the policy file while loading. ([#1835](https://github.com/LavaMoat/LavaMoat/issues/1835)) ([81f2cb0](https://github.com/LavaMoat/LavaMoat/commit/81f2cb0bf00e61c9ddfb637ad20deacba95ca967))
+
 ## [9.0.16](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-v9.0.15...lavamoat-v9.0.16) (2025-10-01)
 
 
