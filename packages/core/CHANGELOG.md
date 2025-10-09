@@ -6,6 +6,17 @@
   * dependencies
     * lavamoat-tofu bumped from ^7.2.1 to ^7.2.2
 
+## [17.0.0](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v16.7.1...lavamoat-core-v17.0.0) (2025-10-09)
+
+
+### ⚠ BREAKING CHANGES
+
+* **core:** stop overwriting the policy file while loading. ([#1835](https://github.com/LavaMoat/LavaMoat/issues/1835))
+
+### Bug Fixes
+
+* **core:** stop overwriting the policy file while loading. ([#1835](https://github.com/LavaMoat/LavaMoat/issues/1835)) ([db57c1c](https://github.com/LavaMoat/LavaMoat/commit/db57c1c3a8a8822733b887edec633e3ce1f1177a))
+
 ## [16.7.1](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v16.7.0...lavamoat-core-v16.7.1) (2025-10-01)
 
 
