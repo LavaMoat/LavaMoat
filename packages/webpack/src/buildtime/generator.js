@@ -102,7 +102,7 @@ exports.wrapGenerator = ({ excludes, runChecks, PROGRESS }) => {
       /**
        * @param {NormalModule} module
        * @param {any} options - GeneratorOptions type not exported from webpack
-       * @returns {Source}
+       * @returns {ReturnType<Generator['generate']>}
        */
       generator.generate = function (module, options) {
         diag.rawDebug(5, {
@@ -117,6 +117,11 @@ exports.wrapGenerator = ({ excludes, runChecks, PROGRESS }) => {
           module,
           options
         )
+
+        if (!originalGeneratedSource) {
+          // If the original generated source is not available, we can't wrap it
+          return originalGeneratedSource
+        }
 
         // skip doing anything if marked as excluded by the excludeLoader
         // this may clean up the `tooEarly` list too

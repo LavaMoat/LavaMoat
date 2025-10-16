@@ -128,7 +128,7 @@ class LavaMoatPlugin {
     /**
      * @typedef {Object} Store
      * @property {CompleteLavaMoatPluginOptions} options
-     * @property {WebpackError[]} [mainCompilationWarnings]
+     * @property {Error[]} [mainCompilationWarnings]
      * @property {(string | number)[]} chunkIds Array of chunk ids that have
      *   been processed.
      * @property {string[]} excludes Array of module rawResource names that were
