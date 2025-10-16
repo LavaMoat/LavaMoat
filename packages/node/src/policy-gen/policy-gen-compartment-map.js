@@ -1,64 +1,59 @@
 /**
- * Provides {@link loadCompartmentMap}, which returns a compartment map
+ * Provides {@link loadCompartmentMapForPolicy}, which returns a compartment map
  * descriptor for a given entrypoint.
+ *
+ * @packageDocumentation
+ * @internal
  */
 
 import { captureFromMap } from '@endo/compartment-mapper/capture-lite.js'
-import { mapNodeModules } from '@endo/compartment-mapper/node-modules.js'
 import { nullImportHook } from '../compartment/import-hook.js'
+import { makeNodeCompartmentMap } from '../compartment/node-compartment-map.js'
 import { DEFAULT_ENDO_OPTIONS } from '../compartment/options.js'
 import { defaultReadPowers } from '../compartment/power.js'
-import { ATTENUATORS_COMPARTMENT } from '../constants.js'
+import {
+  ATTENUATORS_COMPARTMENT,
+  DEFAULT_TRUST_ROOT_COMPARTMENT,
+} from '../constants.js'
 import { GenerationError } from '../error.js'
+import { readJsonFile } from '../fs.js'
 import { log as defaultLog } from '../log.js'
-import { hrLabel, toEndoURL } from '../util.js'
-import { makePolicyGenCompartment } from './policy-gen-compartment-class.js'
-import { getCanonicalName } from './policy-gen-util.js'
+import { toEndoPolicy } from '../policy-converter.js'
+import { mergePolicies } from '../policy-util.js'
+import { isError } from '../util.js'
 
 /**
- * @import {CompartmentDescriptorTransform, LoadCompartmentMapOptions, LoadCompartmentMapResult} from '../internal.js'
+ * @import {LavaMoatEndoPolicy} from '../types.js'
+ * @import {LoadCompartmentMapForPolicyOptions, LoadCompartmentMapResult} from '../internal.js'
+ * @import {Loggerr} from 'loggerr';
+ * @import {CaptureLiteOptions, PackageCompartmentMapDescriptor} from '@endo/compartment-mapper'
+ * @import {PackageJson} from 'type-fest'
  */
 
 const { values } = Object
 
 /**
- * This compartment descriptor transform replaces the `label` field of the
- * compartment descriptor with the canonical name of the package.
- *
- * We have no use for Endo's own `label` field, which is only used for debugging
- * and/or display purposes.
- *
- * It is intended to be executed _last_ in the list of transforms.
- *
- * @privateRemarks
- * It may become necessary to keep a mapping from old to new labels in the
- * future. Why? Because stuff like that keeps being necessary.
- *
- * We may want to consider adding an option to `mapNodeModules()` which is a
- * callback to generate the `label` field.
- * @type {CompartmentDescriptorTransform}
+ * @param {PackageCompartmentMapDescriptor} compartmentMap
+ * @param {Loggerr} [log]
+ * @returns {Promise<Map<string, PackageJson>>}
  */
-const finalCompartmentDescriptorTransform = (
-  compartmentDescriptor,
-  { trustRoot = true, log = defaultLog } = {}
-) => {
-  /* c8 ignore next */
-  if (compartmentDescriptor.name === ATTENUATORS_COMPARTMENT) {
-    // should be impossible
-    throw new GenerationError(
-      `Unexpected attenuator compartment found when computing canonical package name in ${compartmentDescriptor.label} (${compartmentDescriptor.location})`
-    )
-  }
-
-  const { label } = compartmentDescriptor
-  compartmentDescriptor.label = getCanonicalName(
-    compartmentDescriptor,
-    trustRoot
+const readAllPackageJsons = async (compartmentMap, log = defaultLog) => {
+  const entries = await Promise.all(
+    values(compartmentMap.compartments)
+      .filter(({ label }) => label !== ATTENUATORS_COMPARTMENT)
+      .map(({ label, location }) =>
+        readJsonFile(new URL('./package.json', location)).then(
+          (packageJson) => {
+            log.debug(`Read package.json for "${label}" successfully`)
+            return /** @type {[canonicalName: string, packageJson: PackageJson]} */ ([
+              label,
+              packageJson,
+            ])
+          }
+        )
+      )
   )
-
-  log.debug(
-    `Replaced compartment label ${hrLabel(label)} with canonical name ${hrLabel(compartmentDescriptor.label)}`
-  )
+  return new Map(entries)
 }
 
 /**
@@ -67,62 +62,107 @@ const finalCompartmentDescriptorTransform = (
  * This is _only_ for policy gen.
  *
  * @param {string | URL} entrypointPath
- * @param {LoadCompartmentMapOptions} opts
+ * @param {LoadCompartmentMapForPolicyOptions} options
  * @returns {Promise<LoadCompartmentMapResult>}
  * @internal
  */
-export const loadCompartmentMap = async (
+export const loadCompartmentMapForPolicy = async (
   entrypointPath,
   {
     readPowers = defaultReadPowers,
     policyOverride,
-    trustRoot,
+    trustRoot = DEFAULT_TRUST_ROOT_COMPARTMENT,
     log = defaultLog,
-    compartmentDescriptorTransforms = [],
     dev,
     ...captureOpts
   } = {}
 ) => {
-  // some packages use "node" as a condition (as opposed to "browser")
-  const conditions = new Set(['node'])
+  /** @type {PackageCompartmentMapDescriptor} */
+  let nodeCompartmentMap
 
-  const entrypoint = toEndoURL(entrypointPath)
+  /** @type {LavaMoatEndoPolicy | undefined} */
+  let endoPolicyOverride
 
-  const nodeCompartmentMap = await mapNodeModules(readPowers, entrypoint, {
-    conditions,
-    dev,
-    languageForExtension: DEFAULT_ENDO_OPTIONS.languageForExtension,
-  })
+  await Promise.resolve()
 
-  compartmentDescriptorTransforms.push(finalCompartmentDescriptorTransform)
+  if (policyOverride) {
+    endoPolicyOverride = await toEndoPolicy(mergePolicies(policyOverride), {
+      log,
+    })
+  }
 
-  values(nodeCompartmentMap.compartments).forEach((compartmentDescriptor) =>
-    compartmentDescriptorTransforms.forEach((transform) =>
-      transform(compartmentDescriptor, { trustRoot, log })
+  /** @type {Map<string, string>} */
+  let compartmentNameToCanonicalNameMap
+  try {
+    ;({
+      nodeCompartmentMap,
+      canonicalNameMap: compartmentNameToCanonicalNameMap,
+    } =
+      // eslint-disable-next-line @jessie.js/safe-await-separator
+      await makeNodeCompartmentMap(entrypointPath, {
+        readPowers,
+        dev,
+        log,
+        trustRoot,
+        endoPolicyOverride,
+      }))
+  } catch (err) {
+    if (isError(err)) {
+      throw new GenerationError(
+        `Failed to create compartment map for policy generation: ${err.stack}`,
+        { cause: err }
+      )
+    }
+    throw new GenerationError(
+      `Failed to create compartment map for policy generation: ${err}`,
+      { cause: err }
     )
-  )
+  }
 
-  // we use this to inject missing imports from policy overrides into the module descriptor.
-  // TODO: Endo should allow us to hook into `importHook` directly instead
-  const PolicyGenCompartment = makePolicyGenCompartment(
-    nodeCompartmentMap,
-    policyOverride
-  )
+  if (
+    !compartmentNameToCanonicalNameMap.has(nodeCompartmentMap.entry.compartment)
+  ) {
+    compartmentNameToCanonicalNameMap.set(
+      nodeCompartmentMap.entry.compartment,
+      nodeCompartmentMap.compartments[nodeCompartmentMap.entry.compartment].name
+    )
+  }
 
-  const {
-    captureCompartmentMap: compartmentMap,
-    captureSources: sources,
-    newToOldCompartmentNames: renames,
-  } = await captureFromMap(readPowers, nodeCompartmentMap, {
+  const packageJsonMap = await readAllPackageJsons(nodeCompartmentMap, log)
+
+  /** @type {CaptureLiteOptions} */
+  const captureLiteOptions = {
     ...DEFAULT_ENDO_OPTIONS,
     importHook: nullImportHook,
-    Compartment: PolicyGenCompartment,
+    log: log.debug.bind(log),
+    forceLoad: policyOverride?.include,
     ...captureOpts,
-  })
+  }
 
-  return {
-    compartmentMap,
-    sources,
-    renames,
+  // captureFromMap finalizes the compartment map descriptor, but does not provide for execution."file:///Users/boneskull/projects/lavamoat/lavamoat/node_modules/@babel/plugin-transform-object-super/"
+  try {
+    const {
+      captureCompartmentMap: compartmentMap,
+      captureSources: sources,
+      newToOldCompartmentNames: renames,
+    } = await captureFromMap(readPowers, nodeCompartmentMap, captureLiteOptions)
+
+    return {
+      packageJsonMap,
+      compartmentMap,
+      sources,
+      renames,
+    }
+  } catch (err) {
+    if (isError(err)) {
+      throw new GenerationError(
+        `Failed to capture compartment map for policy generation: ${err.stack}`,
+        { cause: err }
+      )
+    }
+    throw new GenerationError(
+      `Failed to capture compartment map for policy generation: ${err}`,
+      { cause: err }
+    )
   }
 }
