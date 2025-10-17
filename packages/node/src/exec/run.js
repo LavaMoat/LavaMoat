@@ -94,8 +94,12 @@ export const run = async (
     log,
     readPowers: makeReadPowers(options),
     trustRoot,
-    onNodeModulesMapped: (compartmentMap) => {
-      reportInvalidCanonicalNames(compartmentMap, {
+    onNodeModulesMapped: (
+      _compartmentMap,
+      unknownCanonicalNames,
+      knownCanonicalNames
+    ) => {
+      reportInvalidCanonicalNames(unknownCanonicalNames, knownCanonicalNames, {
         policy,
         log,
         policyPath: options.policyPath,

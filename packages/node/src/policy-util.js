@@ -447,7 +447,10 @@ const getPolicyCanonicalNames = (policy) => {
  *   policyCanonicalNameInfo: PolicyCanonicalNameInfo[]
  * }}
  */
-export const getInvalidCanonicalNamesKit = (policy, compartmentDescriptors) => {
+export const createGetInvalidCanonicalNamesFn = (
+  policy,
+  compartmentDescriptors
+) => {
   const canonicalNames = new Set(
     values(compartmentDescriptors).map(({ label }) => label)
   )

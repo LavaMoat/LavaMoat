@@ -8,15 +8,13 @@
 
 import type {
   CompartmentDescriptor,
-  CompartmentMapTransformFn,
   DigestedCompartmentMapDescriptor,
-  SomePolicy as EndoPolicy,
   ModuleDescriptorConfiguration,
   PackageCompartmentMapDescriptor,
   ReadNowPowers,
   ReadNowPowersProp,
-  Sources,
 } from '@endo/compartment-mapper'
+import { type CanonicalName } from '@endo/compartment-mapper/import.js'
 import type { LavaMoatPolicy, Resources } from '@lavamoat/types'
 import type { LavamoatModuleRecordOptions } from 'lavamoat-core'
 import type { PackageJson, SetFieldType, ValueOf } from 'type-fest'
@@ -25,12 +23,12 @@ import type {
   ComposeOptions,
   GeneratePolicyOptions,
   MergedLavaMoatPolicy,
-  WithCaptureLiteOptions,
   WithDebug,
   WithDev,
   WithFs,
   WithIsBuiltin,
   WithLavaMoatEndoPolicy,
+  WithLoadForMapOptions,
   WithLog,
   WithPolicyOverride,
   WithPolicyOverrideOnly,
@@ -70,7 +68,7 @@ export type GenerateOptions = Omit<
  */
 export type LoadCompartmentMapForPolicyOptions = ComposeOptions<
   [
-    WithCaptureLiteOptions,
+    WithLoadForMapOptions,
     WithReadPowers,
     WithPolicyOverride,
     WithTrustRoot,
@@ -252,7 +250,6 @@ export type ReportInvalidOverridesOptions = ComposeOptions<
     WithLog,
     {
       maxSuggestions?: number
-      canonicalNameMap?: Map<string, string>
       what?: 'policy' | 'policy overrides'
     },
   ]
@@ -284,25 +281,8 @@ export interface GenerateResult<
  *
  * @internal
  */
-export interface LoadCompartmentMapResult<
-  T extends DigestedCompartmentMapDescriptor = DigestedCompartmentMapDescriptor,
-> {
-  /**
-   * The final compartment map descriptor, having been run through
-   * `captureFromMap()`.
-   */
-  compartmentMap: T
-  /**
-   * The final mapping of compartment name to `CompartmentSources`, having been
-   * run through `captureFromMap()`
-   */
-  sources: Sources
-  /**
-   * Mapping of original compartment names (from `mapNodeModules()`) to
-   * normalized compartment names (from `captureFromMap()`)
-   */
-  renames: Record<string, string>
-
+export interface LoadCompartmentMapResult {
+  policy: MergedLavaMoatPolicy
   packageJsonMap: Map<string, PackageJson>
 }
 
@@ -318,18 +298,9 @@ export type MakeNodeCompartmentMapOptions = ComposeOptions<
     WithDev,
     WithTrustRoot,
     WithLavaMoatEndoPolicy,
-    WithEndoPolicyOverride,
     WithPolicyOverrideOnly,
-    WithCompartmentMapTransforms,
   ]
 >
-
-/**
- * @internal
- */
-export interface WithCompartmentMapTransforms {
-  compartmentMapTransforms?: CompartmentMapTransformFn[]
-}
 
 /**
  * @internal
@@ -339,25 +310,15 @@ export interface WithInclude {
 }
 
 /**
- * @internal
- */
-export interface WithEndoPolicyOverride {
-  endoPolicyOverride?: EndoPolicy
-}
-
-/**
  * Result of `makeNodeCompartmentMap()`
  *
  * @internal
  */
 export interface MakeNodeCompartmentMapResult {
-  canonicalNameMap: Map<string, string>
-  /**
-   * Denormalized compartment map descriptor having Endo-style URLs for
-   * `CompartmentDescriptor` names and rough `ModuleDescriptor`s. May contain
-   * more `CompartmentDescriptor`s than will actually be used.
-   */
-  nodeCompartmentMap: PackageCompartmentMapDescriptor
+  packageJsonMap: Map<CanonicalName, PackageJson>
+  packageCompartmentMap: PackageCompartmentMapDescriptor
+  unknownCanonicalNames: Set<CanonicalName>
+  knownCanonicalNames: Set<CanonicalName>
 }
 
 /**
@@ -488,4 +449,31 @@ export type ResolveCompartmentFn = (label: string) => string | undefined
 export interface ModuleResolver {
   resolveModuleDescriptor: ResolveModuleDescriptorFn
   resolveCompartment: ResolveCompartmentFn
+}
+
+/**
+ * Base message type with required type property and id
+ *
+ * @internal
+ */
+export interface BaseMessage {
+  /** Message type discriminant */
+  type: string
+  /** Task identifier */
+  id: string
+}
+
+/**
+ * Options for {@link WorkerPool} constructor
+ *
+ * @template _TMessage Message type that extends BaseMessage
+ * @template _TResponse Response type that extends BaseMessage
+ * @internal
+ */
+export interface WorkerPoolOptions<
+  _TMessage extends BaseMessage = BaseMessage,
+  _TResponse extends BaseMessage = BaseMessage,
+> {
+  /** How long workers can be idle before termination (ms) */
+  idleTimeout?: number
 }

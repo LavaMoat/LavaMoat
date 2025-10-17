@@ -12,7 +12,7 @@ import nodeUrl from 'node:url'
 import { assertAbsolutePath } from './fs.js'
 
 /**
- * @import {FileURLToPathFn, ReadNowPowers} from '@endo/compartment-mapper'
+ * @import {FileUrlString, FileURLToPathFn, ReadNowPowers} from '@endo/compartment-mapper'
  * @import {RequiredReadNowPowers} from './internal.js'
  * @import {SetNonNullable} from 'type-fest'
  */
@@ -28,15 +28,17 @@ const { freeze, keys } = Object
  * @remarks
  * This is the format that `@endo/compartment-mapper` often expects.
  * @param {URL | string} url URL or path
- * @returns {string} URL-like string
+ * @returns {FileUrlString} URL-like string
  * @internal
  */
 export const toFileURLString = (url) =>
-  url instanceof URL
-    ? url.href
-    : url.startsWith('file://')
-      ? url
-      : nodeUrl.pathToFileURL(url).href
+  /** @type {FileUrlString} */ (
+    url instanceof URL
+      ? url.href
+      : url.startsWith('file://')
+        ? url
+        : nodeUrl.pathToFileURL(url).href
+  )
 
 /**
  * Type guard for an object.

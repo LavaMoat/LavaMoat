@@ -9,7 +9,6 @@
  * @packageDocumentation
  */
 import type {
-  CaptureLiteOptions,
   CompartmentMapDescriptor,
   CryptoInterface,
   Policy as EndoPolicy,
@@ -261,17 +260,9 @@ export interface WritePowers {
   rm: (path: string, { recursive }: { recursive: true }) => Promise<void>
 }
 
-/**
- * Options to pass-through to Endo.
- *
- * Used by {@link GeneratePolicyOptions}.
- *
- * The {@link CaptureLiteOptions.dev dev} property defaults to `true`.
- */
-
-export type WithCaptureLiteOptions = ComposeOptions<
+export type WithLoadForMapOptions = ComposeOptions<
   [
-    Omit<CaptureLiteOptions, 'importHook' | 'moduleTransforms' | 'log'>,
+    Omit<ImportLocationOptions, 'importHook' | 'log' | 'hooks' | 'forceLoad'>,
     WithLog,
     WithDev,
   ]
@@ -306,7 +297,11 @@ export interface WithLavaMoatEndoPolicy {
 }
 
 export interface WithOnNodeModulesMapped {
-  onNodeModulesMapped?: (compartmentMap: CompartmentMapDescriptor) => void
+  onNodeModulesMapped?: (
+    compartmentMap: CompartmentMapDescriptor,
+    unknownCanonicalNames: Set<CanonicalName>,
+    knownCanonicalNames: Set<CanonicalName>
+  ) => void
 }
 
 /**
@@ -320,7 +315,7 @@ export type GeneratePolicyOptions = ComposeOptions<
   [
     WithReadPowers,
     WithIsBuiltin,
-    WithCaptureLiteOptions,
+    WithLoadForMapOptions,
     WithWritePolicyOptions,
     WithPolicyOverrideOrPath,
     WithDebug,

@@ -16,8 +16,9 @@ import { log as defaultLog } from '../log.js'
 import { noop } from '../util.js'
 
 /**
- * @import {ImportLocationOptions, SyncImportLocationOptions, CompartmentMapDescriptor, PackageCompartmentMapDescriptor} from '@endo/compartment-mapper'
+ * @import {ImportLocationOptions, SyncImportLocationOptions, CanonicalName, PackageCompartmentMapDescriptor} from '@endo/compartment-mapper'
  * @import {ApplicationLoader, ExecuteOptions} from '../types.js'
+ * @import {PackageJson} from 'type-fest'
  */
 
 /**
@@ -48,17 +49,23 @@ export const load = async (
   } = {}
 ) => {
   /** @type {PackageCompartmentMapDescriptor} */
-  let nodeCompartmentMap
+  let packageCompartmentMap
+
+  /** @type {Set<CanonicalName>} */
+  let unknownCanonicalNames
+  /** @type {Set<CanonicalName>} */
+  let knownCanonicalNames
 
   try {
     // eslint-disable-next-line @jessie.js/safe-await-separator
-    ;({ nodeCompartmentMap } = await makeNodeCompartmentMap(entrypointPath, {
-      readPowers,
-      dev,
-      log,
-      trustRoot,
-      endoPolicy,
-    }))
+    ;({ packageCompartmentMap, unknownCanonicalNames, knownCanonicalNames } =
+      await makeNodeCompartmentMap(entrypointPath, {
+        readPowers,
+        dev,
+        log,
+        trustRoot,
+        endoPolicy,
+      }))
   } catch (err) {
     throw new ExecutionError(
       `Failed to create compartment map for ${entrypointPath}: ${err}`,
@@ -67,7 +74,11 @@ export const load = async (
   }
 
   try {
-    onNodeModulesMapped(nodeCompartmentMap)
+    onNodeModulesMapped(
+      packageCompartmentMap,
+      unknownCanonicalNames,
+      knownCanonicalNames
+    )
   } catch (err) {
     throw new ExecutionError(`onNodeModulesMapped callback failed`, {
       cause: err,
@@ -85,7 +96,7 @@ export const load = async (
 
   const { import: importApp, sha512 } = await loadFromMap(
     readPowers,
-    nodeCompartmentMap,
+    packageCompartmentMap,
     loadFromMapOptions
   )
 

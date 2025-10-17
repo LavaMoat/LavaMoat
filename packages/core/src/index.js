@@ -1,5 +1,9 @@
 const { generateKernel } = require('./generateKernel')
-const { createModuleInspector, getDefaultPaths } = require('./generatePolicy')
+const {
+  MODULE_REFS,
+  createModuleInspector,
+  getDefaultPaths,
+} = require('./generatePolicy')
 const { parseForPolicy } = require('./parseForPolicy')
 const { LavamoatModuleRecord } = require('./moduleRecord')
 const {
@@ -17,6 +21,7 @@ const { DEFAULT_GLOBAL_THIS_REFS } = require('./constants')
 
 module.exports = {
   DEFAULT_GLOBAL_THIS_REFS,
+  MODULE_REFS,
   // generating the kernel
   generateKernel,
   // generating lavamoat config

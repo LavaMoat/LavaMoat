@@ -5,15 +5,16 @@
  */
 
 import chalk from 'chalk'
+import { toKeypath } from 'to-keypath'
 import { SES_VIOLATION_TYPES } from './constants.js'
 import { InvalidArgumentsError } from './error.js'
 import { hrCode, hrLabel, hrPath } from './format.js'
 import { log as defaultLog } from './log.js'
-import { getInvalidCanonicalNamesKit } from './policy-util.js'
 
 /**
  * @import {ReportInvalidOverridesOptions, ReportSesViolationsOptions, SesViolationType} from './internal.js'
- * @import {CompartmentMapDescriptor} from '@endo/compartment-mapper'
+ * @import {CompartmentMapDescriptor, CanonicalName} from '@endo/compartment-mapper'
+ * @import {LavaMoatPolicy} from '@lavamoat/types'
  */
 
 const { entries } = Object
@@ -26,18 +27,53 @@ const { entries } = Object
 const DEFAULT_MAX_INVALID_CANONICAL_NAME_SUGGESTIONS = 3
 
 /**
+ * Gets the keypath for a canonical name within a LavaMoat policy object
+ *
+ * @param {LavaMoatPolicy} policy
+ * @param {CanonicalName} canonicalName
+ * @returns {string | undefined} The keypath as a string, or undefined if not
+ *   found
+ */
+const findCanonicalNameKeypath = (policy, canonicalName) => {
+  const { resources } = policy
+
+  // Check if it's a direct resource
+  if (canonicalName in resources) {
+    return toKeypath(['resources', canonicalName])
+  }
+
+  // Check nested packages
+  for (const [resourceName, resourcePolicy] of Object.entries(resources)) {
+    if (resourcePolicy.packages && canonicalName in resourcePolicy.packages) {
+      return toKeypath(['resources', resourceName, 'packages', canonicalName])
+    }
+  }
+
+  // Check include array
+  if (policy.include?.includes(canonicalName)) {
+    return toKeypath(['include', canonicalName])
+  }
+
+  return undefined
+}
+
+/**
  * Reports resources from policy which weren't found on disk and are thus not in
  * the compartment map descriptor.
  *
  * If no `policy` is provided, this function does nothing.
  *
- * @param {CompartmentMapDescriptor} compartmentMap
+ * @param {Set<CanonicalName>} unknownCanonicalNames - Set of canonical names
+ *   that were referenced in policy but not found
+ * @param {Set<CanonicalName>} knownCanonicalNames - Set of all canonical names
+ *   found in the compartment map
  * @param {ReportInvalidOverridesOptions} options
  * @returns {void}
  * @internal
  */
 export const reportInvalidCanonicalNames = (
-  compartmentMap,
+  unknownCanonicalNames,
+  knownCanonicalNames,
   {
     policy,
     policyPath,
@@ -46,7 +82,7 @@ export const reportInvalidCanonicalNames = (
     what = 'policy',
   }
 ) => {
-  if (!policy) {
+  if (!policy || unknownCanonicalNames.size === 0) {
     return
   }
   if (what !== 'policy' && what !== 'policy overrides') {
@@ -55,10 +91,16 @@ export const reportInvalidCanonicalNames = (
     )
   }
 
-  const { getInvalidCanonicalNames, policyCanonicalNameInfo } =
-    getInvalidCanonicalNamesKit(policy, compartmentMap.compartments)
-
-  const invalidCanonicalNames = getInvalidCanonicalNames()
+  // Create list of invalid canonical names with their keypaths and source representations
+  const invalidCanonicalNames = [...unknownCanonicalNames]
+    .map((canonicalName) => {
+      const keypath = findCanonicalNameKeypath(policy, canonicalName)
+      return {
+        name: canonicalName,
+        source: keypath || `unknown location for "${canonicalName}"`,
+      }
+    })
+    .filter(({ source }) => source !== undefined)
 
   // if we have any invalid overrides, we will search through the canonical names from the compartment map and make suggestions for the user to fix them
   if (invalidCanonicalNames.length) {
@@ -67,13 +109,13 @@ export const reportInvalidCanonicalNames = (
     for (const { name: invalidName } of invalidCanonicalNames) {
       const invalidNameParts = invalidName.split('>')
       const invalidPackageName = invalidNameParts[invalidNameParts.length - 1]
-      const matches = policyCanonicalNameInfo
-        .filter(({ name }) => name.endsWith(invalidPackageName))
-        .map(({ name }) => name)
+      const matches = [...knownCanonicalNames].filter((name) =>
+        name.endsWith(`>${invalidPackageName}`)
+      )
       if (matches.length) {
         const nameMatches = matches
           .slice(0, maxSuggestions)
-          .map((name) => hrLabel(name), true)
+          .map((name) => hrLabel(name))
         log.debug(
           `Found potential match(es) for ${hrLabel(invalidName)}: ${nameMatches.join(', ')}`
         )

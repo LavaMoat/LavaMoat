@@ -17,10 +17,9 @@ import {
   maybeReadPolicyOverride,
   writePolicy,
 } from '../policy-util.js'
-import { reportInvalidCanonicalNames } from '../report.js'
+// import { reportInvalidCanonicalNames } from '../report.js'
 import { toAbsolutePath } from '../util.js'
 import { loadCompartmentMapForPolicy } from './policy-gen-compartment-map.js'
-import { compartmentMapToPolicy } from './to-policy.js'
 
 /**
  * @import {GenerateOptions, GenerateResult, CompartmentMapToPolicyOptions} from '../internal.js'
@@ -79,7 +78,8 @@ const generate = async (
   entrypoint,
   {
     readPowers = defaultReadPowers,
-    debug = false,
+    // TODO do something about
+    debug: _debug = false,
     policyOverride,
     isBuiltin,
     log = defaultLog,
@@ -90,39 +90,15 @@ const generate = async (
   } = {}
 ) => {
   log.debug('Loading compartment map…')
-  const { compartmentMap, sources, renames, packageJsonMap } =
-    await loadCompartmentMapForPolicy(entrypoint, {
-      ...archiveOpts,
-      log,
-      dev,
-      readPowers,
-      policyOverride,
-      trustRoot,
-      projectRoot,
-    })
-
-  /** @type {CompartmentMapToPolicyOptions} */
-  const baseOpts = {
+  return loadCompartmentMapForPolicy(entrypoint, {
+    ...archiveOpts,
+    log,
+    dev,
     readPowers,
     policyOverride,
-    isBuiltin,
-    log,
     trustRoot,
-  }
-
-  // this weird thing is to make TS happy about the overload
-  const opts = debug ? { debug: true, ...baseOpts } : baseOpts
-
-  const policy = compartmentMapToPolicy(
-    entrypoint,
-    compartmentMap,
-    sources,
-    renames,
-    packageJsonMap,
-    opts
-  )
-
-  return { policy, compartmentMap }
+    projectRoot,
+  })
 }
 
 /**
@@ -224,9 +200,6 @@ export const generatePolicy = async (
    */
   let policy
 
-  /** @type {DigestedCompartmentMapDescriptor} */
-  let compartmentMap
-
   const niceEntrypointPath = hrPath(entrypointPath)
 
   /**
@@ -239,7 +212,7 @@ export const generatePolicy = async (
     log.info(`Generating "debug" LavaMoat policy from ${niceEntrypointPath}`)
     /** @type {MergedLavaMoatPolicyDebug} */
     let debugPolicy
-    ;({ policy: debugPolicy, compartmentMap } = await generate(entrypointPath, {
+    ;({ policy: debugPolicy } = await generate(entrypointPath, {
       ...generateOpts,
       readPowers,
       trustRoot,
@@ -256,7 +229,7 @@ export const generatePolicy = async (
     policy = corePolicy
   } else {
     log.info(`Generating LavaMoat policy from ${niceEntrypointPath}…`)
-    ;({ policy, compartmentMap } = await generate(entrypointPath, {
+    ;({ policy } = await generate(entrypointPath, {
       ...generateOpts,
       trustRoot,
       readPowers,
@@ -265,11 +238,11 @@ export const generatePolicy = async (
     }))
   }
 
-  reportInvalidCanonicalNames(compartmentMap, {
-    what: 'policy overrides',
-    policy: policyOverride,
-    policyPath: policyOverridePath,
-  })
+  // reportInvalidCanonicalNames(compartmentMap, {
+  //   what: 'policy overrides',
+  //   policy: policyOverride,
+  //   policyPath: policyOverridePath,
+  // })
 
   if (shouldWrite) {
     await writePolicy(policyPath, policy, { fs: writableFs })

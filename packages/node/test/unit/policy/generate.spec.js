@@ -124,8 +124,8 @@ test(
     expected: (t, policy) => {
       t.plan(2)
       t.true(
-        policy.resources.winken?.packages?.['winken>blinken'] === undefined,
-        'winken should have no policy for blinken'
+        policy.resources.winken?.packages?.['winken>blinken'] === true,
+        'winken should have a policy for blinken'
       )
       t.snapshot(policy)
     },

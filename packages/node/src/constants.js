@@ -19,6 +19,8 @@ const { freeze } = Object
  */
 export const ATTENUATORS_COMPARTMENT = '<ATTENUATORS>'
 
+export const ROOT_COMPARTMENT = '$root$'
+
 /**
  * Specifier of the default attenuator
  *
@@ -196,3 +198,16 @@ export const SES_VIOLATION_TYPES = freeze(
 )
 
 export const MERGED_POLICY_FIELD = Symbol.for('@lavamoat/core/mergedPolicy')
+
+export const SOURCE_TYPE_MODULE = 'module'
+export const SOURCE_TYPE_SCRIPT = 'script'
+export const LANGUAGE_MJS = 'mjs'
+export const LANGUAGE_CJS = 'cjs'
+
+export const MessageTypes = Object.freeze(
+  /** @type {const} */ ({
+    Inspect: 'inspect',
+    Policies: 'policies',
+    Error: 'error',
+  })
+)
