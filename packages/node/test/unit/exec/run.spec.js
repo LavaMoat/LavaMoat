@@ -5,9 +5,8 @@ import { run } from '../../../src/exec/run.js'
 
 test('root trust mismatch (untrusted root)', async (t) => {
   await t.throwsAsync(
-    run(
-      '/some/file.js',
-      {
+    run('/some/file.js', {
+      policy: {
         resources: {
           foo: {},
         },
@@ -15,10 +14,8 @@ test('root trust mismatch (untrusted root)', async (t) => {
           usePolicy: 'foo',
         },
       },
-      {
-        trustRoot: true,
-      }
-    ),
+      trustRoot: true,
+    }),
     {
       message: /policy expects an untrusted root/,
     }
@@ -27,17 +24,14 @@ test('root trust mismatch (untrusted root)', async (t) => {
 
 test('root trust mismatch (trusted root)', async (t) => {
   await t.throwsAsync(
-    run(
-      '/some/file.js',
-      {
+    run('/some/file.js', {
+      policy: {
         resources: {
           foo: {},
         },
       },
-      {
-        trustRoot: false,
-      }
-    ),
+      trustRoot: false,
+    }),
     {
       message: /policy expects a trusted root/,
     }
