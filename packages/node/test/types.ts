@@ -105,3 +105,29 @@ export interface TestExecForJSONMacroOptions extends TestExecMacroOptions {
    */
   jsonEntrypoint?: string | URL
 }
+
+/**
+ * Options for the function returned by the `fixtureFinder` factory
+ */
+export interface FixtureOptions {
+  /**
+   * Entrypoint to use _verbatim_. This is useful when combined with `--bin`
+   */
+  entrypoint?: string
+
+  /**
+   * Filename of the entrypoint which will be computed relative to the fixture
+   * dir.
+   */
+  entrypointFilename?: string
+}
+
+/**
+ * Data structure representing information about a fixture
+ */
+export interface Fixture {
+  entrypoint: string
+  policyPath: string
+  policyOverridePath: string
+  dir: string
+}
