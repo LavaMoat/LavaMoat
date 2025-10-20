@@ -64,6 +64,8 @@ module.exports = {
 
         // this plugin has trouble finding memfs
         'n/no-unpublished-import': 'off',
+        // this is wonky too
+        'n/no-missing-import': 'off'
       },
     },
     {

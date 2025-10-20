@@ -2,6 +2,7 @@ import { memfs } from 'memfs'
 import { fromJsonSnapshot } from 'memfs/lib/snapshot/index.js'
 import { Volume } from 'memfs/lib/volume.js'
 import fs from 'node:fs'
+import { scheduler } from 'node:timers/promises'
 import { makeReadPowers } from '../../src/compartment/power.js'
 import { isString } from '../../src/util.js'
 
@@ -40,6 +41,9 @@ async function createVolFromSnapshot(snapshotJson) {
   return vol
 }
 
+const MIN_DELAY = 10
+const MAX_DELAY = 200
+
 /**
  * Loads a fixture JSON file or `DirectoryJSON` object or a "Compact JSON" value
  * and resolves w/ a `Volume` and read powers.
@@ -59,6 +63,10 @@ async function createVolFromSnapshot(snapshotJson) {
  * `DirectoryJSON` object using {@link JSON.parse}.
  * @param {string | URL | DirectoryJSON | JsonUint8Array<SnapshotNode>} pathOrJson
  *   Path to fixture JSON or directory object
+ * @param {Object} [options] Options
+ * @param {boolean} [options.randomDelay=false] If `true`, adds a random delay
+ *   before reading the fixture. This is useful for testing purposes. Default is
+ *   `false`
  * @returns {Promise<{
  *   vol: Volume
  *   readPowers: ReadNowPowers
@@ -66,7 +74,10 @@ async function createVolFromSnapshot(snapshotJson) {
  * @see {@link https://github.com/streamich/memfs/blob/master/docs/snapshot/index.md}
  * @todo Standardize entry point filename and return the entry point path.
  */
-export async function loadJSONFixture(pathOrJson) {
+export async function loadJSONFixture(
+  pathOrJson,
+  { randomDelay = false } = {}
+) {
   /** @type {Volume} */
   let vol
   await Promise.resolve()
@@ -103,6 +114,16 @@ export async function loadJSONFixture(pathOrJson) {
   }
 
   const readPowers = makeReadPowers({ fs: /** @type {FsInterface} */ (vol) })
+  if (randomDelay) {
+    const { maybeRead } = readPowers
+    readPowers.maybeRead = async (specifier) => {
+      await scheduler.wait(
+        Math.floor(Math.random() * (MAX_DELAY - MIN_DELAY + 1)) + MIN_DELAY
+      )
+      // @ts-expect-error needs type fix
+      return maybeRead(specifier)
+    }
+  }
   return { vol, readPowers }
 }
 
