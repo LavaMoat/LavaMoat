@@ -15,12 +15,12 @@
     "README.md": [
       1,
       {},
-      "data:application/octet-stream;base64,VXBkYXRlIHRoZSBzbmFwc2hvdCBvZiB0aGlzIGZpeHR1cmUgYnkgcnVubmluZyB0aGUgZm9sbG93aW5nIGNvbW1hbmQ6CgpgYGBiYXNoCm5wbSBydW4gc3RhcnQKYGBgCgoqKldoZW4gdGhlcmUgYXJlIHByb2JsZW1zIHdpdGggdGVzdHMgY29uc3VtaW5nIHRoaXMgZml4dHVyZSBmYWlsaW5nIG9uIGNlcnRhaW4gYXJjaGl0ZWN0dXJlcyoqLCBfaW4gYWRkaXRpb24gdG8gdGhlIGFib3ZlXywgdHJ5IHRoaXM6CgotIE5hdmlnYXRlIHRvIGAuL25vZGVfbW9kdWxlcy9oZWxsb193b3JsZC9gCi0gRXhlY3V0ZSBgbnBtIHJ1biBidWlsZGAuIFRoaXMgd2lsbDoKICAtIEluc3RhbGwgW3ByZWJ1aWxkaWZ5XShodHRwczovL25wbS5pbS9wcmVidWlsZGlmeSkgdmlhIGBucHhgICh5b3UgbWF5IG5lZWQgdG8gYXBwcm92ZSB0aGlzIHN0ZXAgbWFudWFsbHkpCiAgLSBDcmVhdGUgcHJlYnVpbGQgYmluYXJpZXMgZm9yIGRhcndpbiwgbGludXgsIGFuZCB3aW4zMgogIC0gUnVuIGBucG0gdGVzdGAgYWZ0ZXJ3YXJkcywgYXNzdW1pbmcgeW91J3JlIHJ1bm5pbmcgb24gb25lIG9mIHRoZSB0YXJnZXRlZCBhcmNoaXRlY3R1cmVzCgoqKkRvIG5vdCBydW4gYG5wbSBydW4gYnVpbGRgIGZyb20gYC4vbm9kZV9tb2R1bGVzL2hlbGxvX3dvcmxkL2AgaW4gQ0kuKioK"
+      "data:application/octet-stream;base64,VXBkYXRlIHRoZSBzbmFwc2hvdCBvZiB0aGlzIGZpeHR1cmUgYnkgcnVubmluZyB0aGUgZm9sbG93aW5nIGNvbW1hbmQ6CgpgYGBiYXNoCm5wbSBydW4gc3RhcnQKYGBgCgoqKldoZW4gdGhlcmUgYXJlIHByb2JsZW1zIHdpdGggdGVzdHMgY29uc3VtaW5nIHRoaXMgZml4dHVyZSBmYWlsaW5nIG9uIGNlcnRhaW4gYXJjaGl0ZWN0dXJlcyoqLCBfaW4gYWRkaXRpb24gdG8gdGhlIGFib3ZlXywgdHJ5IHRoaXM6CgotIE5hdmlnYXRlIHRvIGAuL25vZGVfbW9kdWxlcy9oZWxsby13b3JsZC9gCi0gRXhlY3V0ZSBgbnBtIHJ1biBidWlsZGAuIFRoaXMgd2lsbDoKICAtIEluc3RhbGwgW3ByZWJ1aWxkaWZ5XShodHRwczovL25wbS5pbS9wcmVidWlsZGlmeSkgdmlhIGBucHhgICh5b3UgbWF5IG5lZWQgdG8gYXBwcm92ZSB0aGlzIHN0ZXAgbWFudWFsbHkpCiAgLSBDcmVhdGUgcHJlYnVpbGQgYmluYXJpZXMgZm9yIGRhcndpbiwgbGludXgsIGFuZCB3aW4zMgogIC0gUnVuIGBucG0gdGVzdGAgYWZ0ZXJ3YXJkcywgYXNzdW1pbmcgeW91J3JlIHJ1bm5pbmcgb24gb25lIG9mIHRoZSB0YXJnZXRlZCBhcmNoaXRlY3R1cmVzCgoqKkRvIG5vdCBydW4gYG5wbSBydW4gYnVpbGRgIGZyb20gYC4vbm9kZV9tb2R1bGVzL2hlbGxvLXdvcmxkL2AgaW4gQ0kuKioK"
     ],
     "index.js": [
       1,
       {},
-      "data:application/octet-stream;base64,aW1wb3J0IGFkZG9uIGZyb20gJ2hlbGxvX3dvcmxkJwpleHBvcnQgY29uc3QgaGVsbG8gPSBhZGRvbi5oZWxsbygpCg=="
+      "data:application/octet-stream;base64,aW1wb3J0IGFkZG9uIGZyb20gJ2hlbGxvLXdvcmxkJwpleHBvcnQgY29uc3QgaGVsbG8gPSBhZGRvbi5oZWxsbygpCg=="
     ],
     "node_modules": [
       0,
@@ -31,7 +31,7 @@
           {},
           "data:application/octet-stream;base64,ewogICJsb2NrZmlsZVZlcnNpb24iOiAzLAogICJyZXF1aXJlcyI6IHRydWUsCiAgInBhY2thZ2VzIjogewogICAgIm5vZGVfbW9kdWxlcy9oZWxsb193b3JsZCI6IHsKICAgICAgInZlcnNpb24iOiAiMC4wLjAiLAogICAgICAiaGFzSW5zdGFsbFNjcmlwdCI6IHRydWUsCiAgICAgICJkZXBlbmRlbmNpZXMiOiB7CiAgICAgICAgIm5vZGUtZ3lwLWJ1aWxkIjogIjQuOC40IgogICAgICB9CiAgICB9LAogICAgIm5vZGVfbW9kdWxlcy9ub2RlLWd5cC1idWlsZCI6IHsKICAgICAgInZlcnNpb24iOiAiNC44LjQiLAogICAgICAiZXh0cmFuZW91cyI6IHRydWUsCiAgICAgICJsaWNlbnNlIjogIk1JVCIsCiAgICAgICJiaW4iOiB7CiAgICAgICAgIm5vZGUtZ3lwLWJ1aWxkIjogImJpbi5qcyIsCiAgICAgICAgIm5vZGUtZ3lwLWJ1aWxkLW9wdGlvbmFsIjogIm9wdGlvbmFsLmpzIiwKICAgICAgICAibm9kZS1neXAtYnVpbGQtdGVzdCI6ICJidWlsZC10ZXN0LmpzIgogICAgICB9CiAgICB9CiAgfQp9Cg=="
         ],
-        "hello_world": [
+        "hello-world": [
           0,
           {},
           {
@@ -71,7 +71,6 @@
                     ]
                   }
                 ],
-                "linux-arm64": [0, {}, {}],
                 "linux-x64": [
                   0,
                   {},
@@ -154,7 +153,7 @@
     "package.json": [
       1,
       {},
-      "data:application/octet-stream;base64,ewogICJuYW1lIjogImhlbGxvIiwKICAidmVyc2lvbiI6ICIwLjAuMCIsCiAgInR5cGUiOiAibW9kdWxlIiwKICAiZGVzY3JpcHRpb24iOiAidGhpcyBjb2RlIGFjdHVhbGx5IHJ1bnMiLAogICJwcml2YXRlIjogdHJ1ZSwKICAic2NyaXB0cyI6IHsKICAgICJzdGFydCI6ICJucHggc25hcHNob3QtZnMgLi4vLi4vanNvbi1maXh0dXJlL25hdGl2ZS5qc29uIgogIH0sCiAgImRlcGVuZGVuY2llcyI6IHsKICAgICJoZWxsb193b3JsZCI6ICIwLjAuMCIKICB9Cn0K"
+      "data:application/octet-stream;base64,ewogICJuYW1lIjogImhlbGxvIiwKICAidmVyc2lvbiI6ICIwLjAuMCIsCiAgInR5cGUiOiAibW9kdWxlIiwKICAiZGVzY3JpcHRpb24iOiAidGhpcyBjb2RlIGFjdHVhbGx5IHJ1bnMiLAogICJwcml2YXRlIjogdHJ1ZSwKICAic2NyaXB0cyI6IHsKICAgICJzdGFydCI6ICJucHggc25hcHNob3QtZnMgLi4vLi4vanNvbi1maXh0dXJlL25hdGl2ZS5qc29uIgogIH0sCiAgImRlcGVuZGVuY2llcyI6IHsKICAgICJoZWxsby13b3JsZCI6ICIwLjAuMCIKICB9Cn0K"
     ]
   }
 ]

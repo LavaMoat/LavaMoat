@@ -8,23 +8,16 @@
  *
  * @packageDocumentation
  */
-import chalk from 'chalk'
-import nodePath from 'node:path'
 import nodeUrl from 'node:url'
-import {
-  DEFAULT_POLICY_DEBUG_FILENAME,
-  DEFAULT_POLICY_OVERRIDE_FILENAME,
-} from './constants.js'
 import { assertAbsolutePath } from './fs.js'
 
-const { isArray: isArray_ } = Array
-const { freeze, keys } = Object
-
 /**
- * @import {FileURLToPathFn, ReadNowPowers} from '@endo/compartment-mapper'
+ * @import {FileUrlString, FileURLToPathFn, ReadNowPowers} from '@endo/compartment-mapper'
  * @import {RequiredReadNowPowers} from './internal.js'
  * @import {SetNonNullable} from 'type-fest'
  */
+const { isArray: isArray_ } = Array
+const { freeze, keys } = Object
 
 /**
  * Converts a {@link URL} or `string` to a URL-like `string` starting with the
@@ -35,18 +28,22 @@ const { freeze, keys } = Object
  * @remarks
  * This is the format that `@endo/compartment-mapper` often expects.
  * @param {URL | string} url URL or path
- * @returns {string} URL-like string
+ * @returns {FileUrlString} URL-like string
  * @internal
  */
-export const toEndoURL = (url) =>
-  url instanceof URL
-    ? url.href
-    : url.startsWith('file://')
-      ? url
-      : nodeUrl.pathToFileURL(url).href
+export const toFileURLString = (url) =>
+  /** @type {FileUrlString} */ (
+    url instanceof URL
+      ? url.href
+      : url.startsWith('file://')
+        ? url
+        : nodeUrl.pathToFileURL(url).href
+  )
 
 /**
  * Type guard for an object.
+ *
+ * This includes functions and arrays, but not `null`.
  *
  * @param {unknown} value
  * @returns {value is object}
@@ -108,6 +105,7 @@ export const isBoolean = (value) => typeof value === 'boolean'
  * @param {T} obj Some object
  * @param {K} prop Some property which might be in `obj`
  * @returns {obj is Omit<T, K> & {[key in K]: SetNonNullable<T, K>}}
+ * @internal
  * @see {@link https://github.com/microsoft/TypeScript/issues/44253}
  */
 export const hasValue = (obj, prop) => {
@@ -180,51 +178,16 @@ export const keysOr = (value, defaultKeys = []) =>
  *
  * @param {unknown} value
  * @returns {value is (...args: any[]) => any}
+ * @internal
  */
 export const isFunction = (value) => typeof value === 'function'
-
-/**
- * Given a filepath, displays it as relative or absolute depending on which is
- * fewer characters. Ergo, the "human-readable" path.
- *
- * @param {string | URL} filepath
- * @returns {string}
- * @internal
- */
-export const hrPath = (filepath) => {
-  filepath = toPath(filepath)
-  if (nodePath.isAbsolute(filepath)) {
-    const relativePath = nodePath.relative(process.cwd(), filepath)
-    if (relativePath && relativePath.length < filepath.length) {
-      filepath = relativePath
-    }
-  } else {
-    const absolutePath = nodePath.resolve(filepath)
-    if (absolutePath.length < filepath.length) {
-      filepath = absolutePath
-    }
-  }
-  return chalk.greenBright(filepath)
-}
-
-/**
- * For display of package names or canonical names.
- *
- * @param {string} name
- * @returns {string}
- * @internal
- */
-export const hrLabel = (name) => {
-  return name.includes('>')
-    ? name.split('>').map(hrLabel).join(chalk.magenta('>'))
-    : chalk.magentaBright(name)
-}
 
 /**
  * Type guard for a "path-like" value
  *
  * @param {unknown} value
  * @returns {value is string | URL}
+ * @internal
  */
 export const isPathLike = (value) => isString(value) || value instanceof URL
 
@@ -235,6 +198,7 @@ export const isPathLike = (value) => isString(value) || value instanceof URL
  *   `file://` scheme
  * @param {FileURLToPathFn} [fileURLToPath] `fileURLToPath` implementation
  * @returns {string} A filepath
+ * @internal
  */
 export const toPath = (value, fileURLToPath = nodeUrl.fileURLToPath) => {
   return value instanceof URL || value.startsWith('file://')
@@ -243,45 +207,39 @@ export const toPath = (value, fileURLToPath = nodeUrl.fileURLToPath) => {
 }
 
 /**
- * Formats "code"; use when referring to code or configuration
+ * Converts a path-like value to an absolute path, asserting that it is
+ * absolute.
  *
- * @param {string} value
- * @returns {string}
+ * @param {string | URL} pathLike Path-like value to convert to an absolute
+ *   path.
+ * @param {string} [assertionMessage] Custom assertion message
+ * @returns {string} Absolute path
+ * @internal
  */
-export const hrCode = (value) => {
-  return chalk.bgGrey.whiteBright(value)
+export const toAbsolutePath = (pathLike, assertionMessage) => {
+  const path = toPath(pathLike)
+  assertAbsolutePath(
+    path,
+    assertionMessage ?? `Expected an absolute path; got ${path}`
+  )
+  return path
 }
 
 /**
- * Given path to a policy file, returns the sibling path to the policy override
- * file
- *
- * @param {string | URL} policyPath
- * @returns {string}
+ * A no-operation function.
  */
-export const makeDefaultPolicyOverridePath = (policyPath) => {
-  const path = toPath(policyPath)
-  assertAbsolutePath(
-    path,
-    `${hrCode('policyPath')} must be an absolute path; got ${path}`
-  )
-  const policyDir = nodePath.dirname(path)
-  return nodePath.join(policyDir, DEFAULT_POLICY_OVERRIDE_FILENAME)
-}
+export const noop = () => {}
 
 /**
- * Given path to a policy file, returns the sibling path to the policy debug
- * file
+ * Type guard for an `Error`
  *
- * @param {string | URL} policyPath
- * @returns {string}
+ * @param {unknown} value
+ * @returns {value is Error}
  */
-export const makeDefaultPolicyDebugPath = (policyPath) => {
-  const path = toPath(policyPath)
-  assertAbsolutePath(
-    path,
-    `${hrCode('policyPath')} must be an absolute path; got ${path}`
-  )
-  const policyDir = nodePath.dirname(path)
-  return nodePath.join(policyDir, DEFAULT_POLICY_DEBUG_FILENAME)
-}
+export const isError = (value) =>
+  isObjectyObject(value) &&
+  'name' in value &&
+  typeof value.name === 'string' &&
+  'message' in value &&
+  typeof value.message === 'string' &&
+  (!('stack' in value) || ('stack' in value && typeof value.stack === 'string'))

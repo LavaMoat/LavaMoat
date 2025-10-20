@@ -1,2 +1,2 @@
-import addon from 'hello_world'
+import addon from 'hello-world'
 export const hello = addon.hello()
