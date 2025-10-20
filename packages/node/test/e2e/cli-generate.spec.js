@@ -1,123 +1,87 @@
 import '../../src/preamble.js'
-
-import test from 'ava'
-import { mkdtemp, rm } from 'node:fs/promises'
-import { tmpdir } from 'node:os'
-import path from 'node:path'
-import { fileURLToPath } from 'node:url'
+// eslint-disable-next-line ava/use-test
+import anyTest from 'ava'
 import { DEFAULT_POLICY_FILENAME } from '../../src/constants.js'
 import { isPolicy, readPolicy } from '../../src/policy-util.js'
 import { keysOr } from '../../src/util.js'
+import { fixtureFinder } from '../test-util.js'
 import { createCLIMacros } from './cli-macros.js'
-import { runCLI } from './cli-util.js'
+import { makeTempdir, runCLI } from './cli-util.js'
 
 /**
- * Path to the "extensionless" fixture dir
+ * @import {TestFn} from 'ava'
+ * @import {Tempdir} from './cli-util.js'
  */
-const EXTENSIONLESS_FIXTURE_DIR = fileURLToPath(
-  new URL('./fixture/extensionless/', import.meta.url)
-)
 
-const BASIC_FIXTURE_DIR = fileURLToPath(
-  new URL('./fixture/basic/', import.meta.url)
-)
+const fixture = fixtureFinder(import.meta.url)
 
-/**
- * Path to the "basic" fixture entry point
- */
-const BASIC_FIXTURE_ENTRYPOINT = fileURLToPath(
-  new URL('./fixture/basic/app.js', import.meta.url)
-)
+const bin = fixture('bin', { entrypoint: 'lard-o-matic' })
+const basic = fixture('basic')
+const deptree = fixture('deptree')
+const dev = fixture('dev')
 
 /**
- * Name of the executable to use as the entrypoint within the "extensionless"
- * fixture
+ * @typedef E2EGenerateTestContext
+ * @property {Tempdir} tempdir
  */
-const BIN_ENTRY = 'lard-o-matic'
 
-/**
- * Path to `deptree` fixture entry point
- */
-const DEP_FIXTURE_ENTRYPOINT = fileURLToPath(
-  new URL('./fixture/deptree/app.js', import.meta.url)
-)
-
-/**
- * The `deptree` fixture's directory
- */
-const DEP_FIXTURE_ENTRYPOINT_DIR = path.dirname(DEP_FIXTURE_ENTRYPOINT)
+const test = /** @type {TestFn<E2EGenerateTestContext>} */ (anyTest)
 
 const { testCLI } = createCLIMacros(test)
+
+test.beforeEach('create tempdir', async (t) => {
+  t.context.tempdir = await makeTempdir(t)
+})
+
+test.afterEach('cleanup tempdir', async (t) => {
+  await t.context.tempdir[Symbol.asyncDispose]()
+})
 
 test('"generate --help" prints help', testCLI, ['generate', '--help'])
 
 test('basic policy generation', async (t) => {
   t.plan(2)
 
-  const tempdir = await mkdtemp(
-    path.join(tmpdir(), t.title.replace(/\s+/g, '-'))
-  )
-  try {
-    const policyPath = path.join(tempdir, `basic-${DEFAULT_POLICY_FILENAME}`)
+  const policyPath = t.context.tempdir.join(`basic-${DEFAULT_POLICY_FILENAME}`)
 
-    const { code } = await runCLI(
-      ['generate', BASIC_FIXTURE_ENTRYPOINT, '--policy', policyPath],
-      t,
-      { cwd: BASIC_FIXTURE_DIR }
-    )
-    t.is(code, undefined)
-    const policy = await readPolicy(policyPath)
-    t.true(isPolicy(policy))
-  } finally {
-    await rm(tempdir, { recursive: true, force: true })
-  }
+  const { code } = await runCLI(
+    ['generate', basic.entrypoint, '--policy', policyPath],
+    t,
+    { cwd: basic.dir }
+  )
+  t.is(code, undefined)
+  t.snapshot(await readPolicy(policyPath))
 })
 
 test('extensionless bin script handling', async (t) => {
   t.plan(2)
 
-  const tempdir = await mkdtemp(
-    path.join(tmpdir(), t.title.replace(/\s+/g, '-'))
+  const policyPath = t.context.tempdir.join(
+    `extensionless-${DEFAULT_POLICY_FILENAME}`
   )
-
-  try {
-    const policyPath = path.join(
-      tempdir,
-      `extensionless-${DEFAULT_POLICY_FILENAME}`
-    )
-    const { code } = await runCLI(
-      ['generate', '--bin', '--policy', policyPath, BIN_ENTRY],
-      t,
-      {
-        cwd: EXTENSIONLESS_FIXTURE_DIR,
-      }
-    )
-    t.is(code, undefined)
-
-    const policy = await readPolicy(policyPath)
-    t.true(isPolicy(policy))
-  } finally {
-    await rm(tempdir, { recursive: true, force: true })
-  }
+  const { code } = await runCLI(
+    ['generate', '--bin', '--policy', policyPath, bin.entrypoint],
+    t,
+    {
+      cwd: bin.dir,
+    }
+  )
+  t.is(code, undefined)
+  t.snapshot(await readPolicy(policyPath))
 })
 
 test('canonical names are used in policy', async (t) => {
-  t.plan(3)
+  t.plan(2)
 
-  const tempdir = await mkdtemp(
-    path.join(tmpdir(), t.title.replace(/\s+/g, '-'))
+  const policyPath = t.context.tempdir.join(
+    `canonical-${DEFAULT_POLICY_FILENAME}`
   )
 
-  const policyPath = path.join(tempdir, `canonical-${DEFAULT_POLICY_FILENAME}`)
-
-  await runCLI(
-    ['generate', DEP_FIXTURE_ENTRYPOINT, '--policy', policyPath],
-    t,
-    { cwd: DEP_FIXTURE_ENTRYPOINT_DIR }
-  )
+  await runCLI(['generate', deptree.entrypoint, '--policy', policyPath], t, {
+    cwd: deptree.dir,
+  })
 
   const policy = await readPolicy(policyPath)
-  t.true(isPolicy(policy))
 
   t.true(
     keysOr(policy.resources).includes('another-pkg>shared-pkg'),
@@ -127,25 +91,114 @@ test('canonical names are used in policy', async (t) => {
 })
 
 test('--quiet is quiet', async (t) => {
-  const tempdir = await mkdtemp(
-    path.join(tmpdir(), t.title.replace(/\s+/g, '-'))
+  const policyPath = t.context.tempdir.join(`quiet-${DEFAULT_POLICY_FILENAME}`)
+
+  const { code, stdout, stderr } = await runCLI(
+    ['generate', basic.entrypoint, '--policy', policyPath, '--quiet'],
+    t,
+    {
+      cwd: basic.dir,
+    }
+  )
+  t.deepEqual(
+    { code, stdout, stderr },
+    { code: undefined, stdout: '', stderr: '' }
+  )
+})
+
+test('overrides merged back into policy', async (t) => {
+  const policyPath = t.context.tempdir.join(
+    `override-merge-${DEFAULT_POLICY_FILENAME}`
   )
 
-  try {
-    const policyPath = path.join(tempdir, `quiet-${DEFAULT_POLICY_FILENAME}`)
+  await runCLI(
+    [
+      'generate',
+      deptree.entrypoint,
+      '--policy',
+      policyPath,
+      '--policy-override',
+      deptree.policyOverridePath,
+    ],
+    t,
+    { cwd: deptree.dir }
+  )
 
-    const { code, stdout, stderr } = await runCLI(
-      ['generate', BASIC_FIXTURE_ENTRYPOINT, '--policy', policyPath, '--quiet'],
-      t,
-      {
-        cwd: BASIC_FIXTURE_DIR,
-      }
-    )
-    t.deepEqual(
-      { code, stdout, stderr },
-      { code: undefined, stdout: '', stderr: '' }
-    )
-  } finally {
-    await rm(tempdir, { recursive: true, force: true })
-  }
+  const policy = await readPolicy(policyPath)
+
+  t.like(policy, {
+    resources: {
+      'another-pkg': {
+        globals: {
+          'console.error': true,
+          'console.log': true,
+        },
+      },
+    },
+  })
+})
+
+test('--no-write outputs to STDOUT (and does not write)', async (t) => {
+  t.plan(3)
+
+  const policyPath = t.context.tempdir.join(
+    `override-merge-no-write-${DEFAULT_POLICY_FILENAME}`
+  )
+
+  const { stdout } = await runCLI(
+    [
+      'generate',
+      deptree.entrypoint,
+      '--policy',
+      policyPath,
+      '--policy-override',
+      deptree.policyOverridePath,
+      '--no-write',
+    ],
+    t,
+    { cwd: deptree.dir }
+  )
+
+  // policy path will be unused
+  await t.throwsAsync(readPolicy(policyPath), {
+    message: /LavaMoat policy file not found at .+/,
+  })
+
+  const policy = JSON.parse(stdout)
+  // but the policy is written to stdout
+  t.true(isPolicy(policy))
+
+  t.like(policy, {
+    resources: {
+      'another-pkg': {
+        globals: {
+          'console.error': true,
+          'console.log': true,
+        },
+      },
+    },
+  })
+})
+
+test('--dev processes dev deps', async (t) => {
+  t.plan(2)
+
+  const policyPath = t.context.tempdir.join(`dev-${DEFAULT_POLICY_FILENAME}`)
+
+  const { code } = await runCLI(
+    [
+      'generate',
+      dev.entrypoint,
+      '--policy',
+      policyPath,
+      '--dev',
+      '--policy-override',
+      dev.policyOverridePath,
+    ],
+    t,
+    { cwd: dev.dir }
+  )
+  t.is(code, undefined)
+  const policy = await readPolicy(policyPath)
+  t.snapshot(policy)
 })
