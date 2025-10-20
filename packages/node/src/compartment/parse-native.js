@@ -1,5 +1,5 @@
 /**
- * Provides a "parser" for a native Node.js module (a.k.a a "Node.js addon")
+ * Provides {@link parseNative} for execution of (compiled) Node.js modules.
  *
  * Any package wanting to load a native module must have a policy flag
  * explicitly allowing the behavior.
@@ -11,7 +11,7 @@ import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
 import { NATIVE_PARSER_NAME } from '../constants.js'
 import { PermissionDeniedError } from '../error.js'
-import { hrLabel } from '../util.js'
+import { hrLabel } from '../format.js'
 
 const { freeze, keys } = Object
 
@@ -21,7 +21,11 @@ const { freeze, keys } = Object
  * @import {LavaMoatEndoPackagePolicy} from '../types.js'
  */
 
-/** @type {ParseFn} */
+/**
+ * A "parser" for a native Node.js module (a.k.a. "Node.js addon")
+ *
+ * @type {ParseFn}
+ */
 const parseNative = (
   bytes,
   _specifier,

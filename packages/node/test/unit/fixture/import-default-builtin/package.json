@@ -1,0 +1,11 @@
+{
+  "name": "import-default-builtin",
+  "version": "0.0.0",
+  "type": "module",
+  "description": "Imports the default export from a builtin module",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "start": "npx snapshot-fs ../../json-fixture/import-default-builtin.json"
+  }
+}
