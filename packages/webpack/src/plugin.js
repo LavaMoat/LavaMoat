@@ -87,20 +87,6 @@ class LavaMoatPlugin {
   constructor(options = {}) {
     if (typeof options.scuttleGlobalThis === 'object') {
       options.scuttleGlobalThis = { ...options.scuttleGlobalThis }
-      if (Array.isArray(options.scuttleGlobalThis.exceptions)) {
-        options.scuttleGlobalThis.exceptions =
-          options.scuttleGlobalThis.exceptions.map(
-            /**
-             * Convert exception to string
-             *
-             * @param {string | RegExp} e
-             * @returns {string}
-             */
-            (e) => e.toString()
-          )
-      } else {
-        options.scuttleGlobalThis.exceptions = []
-      }
     } else {
       options.scuttleGlobalThis = { enabled: false }
     }
@@ -261,16 +247,6 @@ class LavaMoatPlugin {
               'LavaMoatPlugin: Following options had to be overriden for security: ' +
                 FORCED_CONFIG.join(', ')
             )
-          )
-        }
-
-        // Adjust scuttling configuration to not scuttle webpack chunk loading facilities
-        if (
-          typeof STORE.options.scuttleGlobalThis === 'object' &&
-          Array.isArray(STORE.options.scuttleGlobalThis.exceptions)
-        ) {
-          STORE.options.scuttleGlobalThis.exceptions.push(
-            compilation.outputOptions.chunkLoadingGlobal || 'webpackChunk'
           )
         }
 
@@ -564,6 +540,9 @@ class LavaMoatPlugin {
                     contextModuleIds: STORE.contextModuleIds,
                     externals: STORE.externals,
                   },
+                  chunkLoaderName:
+                    compilation.outputOptions.chunkLoadingGlobal ||
+                    'webpackChunk',
                 })
 
                 // Add the runtime modules to the chunk, which handles
