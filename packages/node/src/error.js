@@ -1,5 +1,5 @@
 /**
- * @import {ErrorCode, LavaMoatErrorClass, LavaMoatErrorClassParams} from './errors.js'
+ * @import {ErrorCode, LavaMoatErrorClass, LavaMoatErrorClassParams, LavaMoatErrorOptions} from './errors.js'
  * @import {Class} from 'type-fest'
  */
 import { ErrorCodes } from './error-code.js'
@@ -17,7 +17,7 @@ import { ErrorCodes } from './error-code.js'
  * @param {Class<Error, LavaMoatErrorClassParams<Options>>} ctor
  * @returns {LavaMoatErrorClass<Code, Options>}
  */
-export const createLavaMoatError = (name, code, ctor) => {
+const createLavaMoatError = (name, code, ctor) => {
   Object.defineProperties(ctor, {
     code: { value: code, enumerable: true },
     name: { value: name },
@@ -66,12 +66,6 @@ export const InvalidArgumentsError = createLavaMoatError(
   class extends Error {}
 )
 
-export const InvalidCompartmentError = createLavaMoatError(
-  'InvalidCompartmentError',
-  ErrorCodes.InvalidCompartment,
-  class extends Error {}
-)
-
 export const InvalidPolicyError = createLavaMoatError(
   'InvalidPolicyError',
   ErrorCodes.InvalidPolicy,
@@ -81,9 +75,7 @@ export const InvalidPolicyError = createLavaMoatError(
 
     /**
      * @param {string} message
-     * @param {Object} options
-     * @param {unknown} [options.cause]
-     * @param {string} [options.filepath]
+     * @param {LavaMoatErrorOptions<{ filepath?: string }>} options
      */
     constructor(message, { cause, filepath } = {}) {
       super(message, { cause })
@@ -92,9 +84,12 @@ export const InvalidPolicyError = createLavaMoatError(
   }
 )
 
-export const NoExecutableError = createLavaMoatError(
-  'NoExecutableError',
-  ErrorCodes.NoExecutable,
+/**
+ * Error thrown if no bin script entrypoint could found
+ */
+export const NoBinScriptError = createLavaMoatError(
+  'NoBinScriptError',
+  ErrorCodes.NoBinScript,
   class extends Error {}
 )
 

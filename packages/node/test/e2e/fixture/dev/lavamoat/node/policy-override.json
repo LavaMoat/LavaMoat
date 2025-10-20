@@ -1,0 +1,9 @@
+{
+  "resources": {
+    "another-pkg": {
+      "globals": {
+        "console.error": true
+      }
+    }
+  }
+}

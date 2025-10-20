@@ -56,3 +56,5 @@ export type LavaMoatErrorClass<
    */
   readonly code: Code
 }
+
+export type LavaMoatErrorOptions<T> = ErrorOptions & T
