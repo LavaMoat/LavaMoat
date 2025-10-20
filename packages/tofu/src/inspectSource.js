@@ -6,6 +6,10 @@ const {
   languageRefs: defaultLanguageRefs,
 } = require('./primordials.js')
 
+/**
+ * @import {GlobalPolicyValue} from '@lavamoat/types'
+ */
+
 const {
   getMemberExpressionNesting,
   getPathFromMemberExpressionChain,
@@ -51,6 +55,7 @@ function inspectGlobals(
   const ast = typeof source === 'object' ? source : parse(source)
   const detectedGlobals = findGlobals(ast)
 
+  /** @type {Map<string, GlobalPolicyValue>} */
   const globalsConfig = new Map()
   // check for global refs with member expressions
   ;[...detectedGlobals.entries()].forEach(([name, paths]) =>
@@ -181,8 +186,8 @@ function inspectGlobals(
  * modules.
  *
  * @param {import('@babel/types').Node} ast
- * @param {string[]} [packagesToInspect] - List of module IDs to look for; if
- *   omitted, will inspect all imports
+ * @param {readonly string[]} [packagesToInspect] - List of module IDs to look
+ *   for; if omitted, will inspect all imports
  * @param {boolean} [deep] Return named exports and imports
  * @returns {string[]} - List of imported identifiers
  */
@@ -364,7 +369,7 @@ function inspectDynamicRequires(ast) {
  * modules.
  *
  * @param {import('@babel/types').Node} ast
- * @param {string[]} [packagesToInspect]
+ * @param {readonly string[]} [packagesToInspect]
  * @param {boolean} [deep]
  * @returns {{ cjsImports: string[] }}
  */
