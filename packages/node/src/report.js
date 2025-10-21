@@ -12,8 +12,8 @@ import { hrCode, hrLabel, hrPath } from './format.js'
 import { log as defaultLog } from './log.js'
 
 /**
- * @import {ReportInvalidOverridesOptions, ReportSesViolationsOptions, SesViolationType, StructuredViolation, StructuredViolationsResult} from './internal.js'
- * @import {CompartmentMapDescriptor, CanonicalName} from '@endo/compartment-mapper'
+ * @import {ReportInvalidOverridesOptions, ReportSesViolationsOptions, StructuredViolation, StructuredViolationsResult} from './internal.js'
+ * @import {CanonicalName} from '@endo/compartment-mapper'
  * @import {LavaMoatPolicy} from '@lavamoat/types'
  */
 
