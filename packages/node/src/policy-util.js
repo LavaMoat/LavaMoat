@@ -40,7 +40,6 @@ const { keys, values } = Object
  * @import {RootPolicy, LavaMoatPolicy} from '@lavamoat/types'
  * @import {MergedLavaMoatPolicy,
  *  CanonicalName,
- *  LavaMoatPolicyDebug,
  *  LoadPoliciesOptions,
  *  WritableFsInterface,
  *  PolicyCanonicalNameInfo} from './types.js'
@@ -322,8 +321,7 @@ export const assertPolicy = (
  * Creates the destination directory if it does not exist
  *
  * @param {string | URL} file Path to write to
- * @param {LavaMoatPolicy | LavaMoatPolicyDebug | LavaMoatPolicy} policy Any
- *   policy
+ * @param {LavaMoatPolicy} policy Any policy
  * @param {{ fs?: WritableFsInterface }} opts Options
  * @returns {Promise<void>}
  * @public
