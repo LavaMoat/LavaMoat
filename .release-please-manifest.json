@@ -1,7 +1,7 @@
 {
   "packages/aa": "4.3.4",
   "packages/allow-scripts": "3.4.0",
-  "packages/browserify": "19.0.0",
+  "packages/browserify": "19.0.1",
   "packages/core": "17.0.0",
   "packages/git-safe-dependencies": "0.3.0",
   "packages/lavapack": "7.0.17",

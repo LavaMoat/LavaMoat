@@ -33,6 +33,13 @@
     * @lavamoat/lavapack bumped from ^6.1.1 to ^6.1.2
     * lavamoat-core bumped from ^15.2.0 to ^15.2.1
 
+## [19.0.1](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-browserify-v19.0.0...lavamoat-browserify-v19.0.1) (2025-10-22)
+
+
+### Bug Fixes
+
+* **browserify:** hotfix for incorrect policy validation in lavamoat-browserify ([#1840](https://github.com/LavaMoat/LavaMoat/issues/1840)) ([a675e4a](https://github.com/LavaMoat/LavaMoat/commit/a675e4a301816915ddf4fb71e33370974c73ba96))
+
 ## [19.0.0](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-browserify-v18.1.13...lavamoat-browserify-v19.0.0) (2025-10-09)
 
 
