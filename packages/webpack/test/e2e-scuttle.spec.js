@@ -129,6 +129,7 @@ test(`webpack/scuttled - webpackChunk global is transparently added to exception
   await scuttleViaRuntimeConf(t, { enabled: true, exceptions: ['Function'] })
 
   t.notThrows(() => {
+    // accessing the field, if scuttled, will call the getter that throws
     t.context.globalThis.webpackChunkTEST
   }, 'Unexpected error in scenario')
   t.truthy(t.context.globalThis.webpackChunkTEST)
