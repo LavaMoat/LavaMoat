@@ -18,6 +18,13 @@
   * dependencies
     * lavamoat-core bumped from ^15.2.0 to ^15.2.1
 
+## [1.5.2](https://github.com/LavaMoat/LavaMoat/compare/webpack-v1.5.1...webpack-v1.5.2) (2025-10-23)
+
+
+### Bug Fixes
+
+* **webpack:** add j to the list of harmless fields on __webpack_require__ ([#1838](https://github.com/LavaMoat/LavaMoat/issues/1838)) ([7035a40](https://github.com/LavaMoat/LavaMoat/commit/7035a404627d038e9ff7b4d5fd2e7b7ed8928194))
+
 ## [1.5.1](https://github.com/LavaMoat/LavaMoat/compare/webpack-v1.5.0...webpack-v1.5.1) (2025-10-09)
 
 
