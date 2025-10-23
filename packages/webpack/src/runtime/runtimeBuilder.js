@@ -1,6 +1,7 @@
 const { RUNTIME_KEY } = require('../ENUM.json')
 const diag = require('../buildtime/diagnostics.js')
 const { assembleRuntime, prepareSource } = require('./assemble.js')
+const { adjustScuttleConfig } = require('./scuttlingConf.js')
 const path = require('node:path')
 
 const { RuntimeModule } = require('webpack')
@@ -283,6 +284,8 @@ const LOCKDOWN_SHIMS = [];`
        *   configuration
        * @param {LavaMoatRuntimeIdentifiers} params.identifiers Object
        *   containing module identifier mappings
+       * @param {string} params.chunkLoaderName The name of the global that
+       *   loads chunks
        * @returns {VirtualRuntimeModule[]} The assembled runtime source code
        */
       getLavaMoatRuntimeModules({
@@ -291,6 +294,7 @@ const LOCKDOWN_SHIMS = [];`
         chunkIds,
         policyData,
         identifiers,
+        chunkLoaderName,
       }) {
         const currentChunkName = currentChunk.name
 
@@ -338,6 +342,16 @@ const LOCKDOWN_SHIMS = [];`
               ),
             }
           }
+        }
+
+        if (runtimeConfiguration.embeddedOptions?.scuttleGlobalThis) {
+          runtimeConfiguration.embeddedOptions.scuttleGlobalThis =
+            adjustScuttleConfig(
+              runtimeConfiguration.embeddedOptions.scuttleGlobalThis,
+              {
+                chunkLoaderName,
+              }
+            )
         }
 
         // flesh out the modules for runtimeConfiguration

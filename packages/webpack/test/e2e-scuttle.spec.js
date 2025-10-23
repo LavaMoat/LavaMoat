@@ -50,6 +50,40 @@ async function scuttle(t, scuttleGlobalThis, globals) {
     t.context.globalThis = runScriptWithSES(t.context.bundle, globals).context
   }, 'Expected the build to succeed')
 }
+async function scuttleViaRuntimeConf(t, scuttleGlobalThis, globals) {
+  const webpackConfigDefault = makeConfig({
+    generatePolicy: true,
+    diagnosticsVerbosity: 1,
+    policyLocation: path.resolve(__dirname, 'fixtures/main/policy-scuttling'),
+    runtimeConfigurationPerChunk_experimental: (/*chunk*/) => {
+      return {
+        embeddedOptions: {
+          scuttleGlobalThis,
+        },
+      }
+    }
+
+  })
+  const webpackConfig = {
+    ...webpackConfigDefault,
+    entry: {
+      app: './simple.js',
+    },
+  }
+  // force webpack into creating chunks so that testing chunkApp globals is possible
+  webpackConfig.optimization.runtimeChunk = 'single'
+  // specify the chunk global namefor tests
+  webpackConfig.output.chunkLoadingGlobal = 'webpackChunkTEST'
+
+  await t.notThrowsAsync(async () => {
+    t.context.build = await scaffold(webpackConfig)
+    // Load both chunks effectively
+    t.context.bundle =
+      t.context.build.snapshot['/dist/runtime.js'] +
+      t.context.build.snapshot['/dist/app.js']
+    t.context.globalThis = runScriptWithSES(t.context.bundle, globals).context
+  }, 'Expected the build to succeed')
+}
 
 test(`webpack/scuttled - hosting globalThis's environment is not scuttled`, async (t) => {
   await scuttle(t)
@@ -86,6 +120,16 @@ test(`webpack/scuttled - webpackChunk global is transparently added to exception
   await scuttle(t, { enabled: true, exceptions: ['Function'] })
 
   t.notThrows(() => {
+    t.context.globalThis.webpackChunkTEST
+  }, 'Unexpected error in scenario')
+  t.truthy(t.context.globalThis.webpackChunkTEST)
+})
+
+test(`webpack/scuttled - webpackChunk global is transparently added to exceptions when configuration comes from runtimeConfigurationPerChunk`, async (t) => {
+  await scuttleViaRuntimeConf(t, { enabled: true, exceptions: ['Function'] })
+
+  t.notThrows(() => {
+    // accessing the field, if scuttled, will call the getter that throws
     t.context.globalThis.webpackChunkTEST
   }, 'Unexpected error in scenario')
   t.truthy(t.context.globalThis.webpackChunkTEST)
