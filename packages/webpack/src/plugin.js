@@ -541,7 +541,7 @@ class LavaMoatPlugin {
                     externals: STORE.externals,
                   },
                   chunkLoaderName:
-                    compilation.outputOptions.chunkLoadingGlobal ||
+                    compilation.outputOptions.chunkLoadingGlobal ??
                     'webpackChunk',
                 })
 
