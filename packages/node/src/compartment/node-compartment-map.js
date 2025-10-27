@@ -16,8 +16,6 @@ import { defaultReadPowers } from './power.js'
 /**
  * @import {CanonicalName,
  *  CompartmentMapDescriptor,
- *  HookConfiguration,
- *  MapNodeModulesHooks,
  *  PackageCompartmentMapDescriptor,
  *  PackageCompartmentDescriptorName} from '@endo/compartment-mapper'
  * @import {MakeNodeCompartmentMapOptions, MakeNodeCompartmentMapResult} from '../internal.js'
@@ -119,49 +117,47 @@ export const makeNodeCompartmentMap = async (
     languageForExtension: DEFAULT_ENDO_OPTIONS.languageForExtension,
     policy: endoPolicy,
     log: log.debug.bind(log),
-    hooks: {
-      /**
-       * Stores the `package.json` for each compartment as it is created.
-       *
-       * At this point, the compartment does not yet have a canonical name, so
-       * it will require post-processing.
-       */
-      packageDescriptor: ({ packageDescriptor, packageLocation }) => {
-        packageJsonsByLocation.set(
-          packageLocation,
-          /** @type {PackageJson} */ (packageDescriptor)
-        )
-      },
-      /**
-       * Adds any missing dependencies from `policyOverride` to the list of
-       * dependencies for a package
-       */
-      packageDependencies: ({ canonicalName, dependencies }) => {
-        if (policyOverride) {
-          const { resources } = policyOverride
-          if (canonicalName in resources) {
-            for (const dependencyCanonicalName of keys(
-              resources[canonicalName].packages ?? {}
-            )) {
-              dependencies.add(dependencyCanonicalName)
-            }
+    /**
+     * Stores the `package.json` for each compartment as it is created.
+     *
+     * At this point, the compartment does not yet have a canonical name, so it
+     * will require post-processing.
+     */
+    packageDescriptorHook: ({ packageDescriptor, packageLocation }) => {
+      packageJsonsByLocation.set(
+        packageLocation,
+        /** @type {PackageJson} */ (packageDescriptor)
+      )
+    },
+    /**
+     * Adds any missing dependencies from `policyOverride` to the list of
+     * dependencies for a package
+     */
+    packageDependenciesHook: ({ canonicalName, dependencies }) => {
+      if (policyOverride) {
+        const { resources } = policyOverride
+        if (canonicalName in resources) {
+          for (const dependencyCanonicalName of keys(
+            resources[canonicalName].packages ?? {}
+          )) {
+            dependencies.add(dependencyCanonicalName)
           }
         }
-        return { dependencies }
-      },
-      /**
-       * Collects unknown canonical names referenced in policy but not found in
-       * the compartment map
-       */
-      unknownCanonicalName: ({ canonicalName }) => {
-        unknownCanonicalNames.add(canonicalName)
-      },
-      /**
-       * Collects all known canonical names from the compartment map
-       */
-      canonicalNames: ({ canonicalNames }) => {
-        knownCanonicalNames = new Set(canonicalNames)
-      },
+      }
+      return { dependencies }
+    },
+    /**
+     * Collects unknown canonical names referenced in policy but not found in
+     * the compartment map
+     */
+    unknownCanonicalNameHook: ({ canonicalName }) => {
+      unknownCanonicalNames.add(canonicalName)
+    },
+    /**
+     * Collects all known canonical names from the compartment map
+     */
+    canonicalNamesHook: ({ canonicalNames }) => {
+      knownCanonicalNames = new Set(canonicalNames)
     },
   })
 
