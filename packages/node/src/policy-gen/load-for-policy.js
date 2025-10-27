@@ -30,7 +30,7 @@ import { WorkerPool } from '../worker-pool.js'
 
 /**
  * @import {LoadAndGeneratePolicyOptions, LoadCompartmentMapResult, InspectMessage, PoliciesMessage, ErrorMessage, SourceType, StructuredViolationsResult} from '../internal.js'
- * @import {CanonicalName, CaptureFromMapHooks, FileUrlString, HookConfiguration, Language, LocalModuleSource} from '@endo/compartment-mapper'
+ * @import {CanonicalName, FileUrlString, Language, LocalModuleSource} from '@endo/compartment-mapper'
  * @import {BuiltinPolicy, GlobalPolicy, GlobalPolicyValue, LavaMoatPolicy, PackagePolicy} from '@lavamoat/types'
  * @import {MergedLavaMoatPolicy} from '../types.js'
  * @import {Loggerr} from 'loggerr'
@@ -153,57 +153,52 @@ export const loadAndGeneratePolicy = async (
     pendingInspections
   )
 
-  /**
-   * @type {HookConfiguration<CaptureFromMapHooks>}
-   */
-  const captureFromMapHooks = {
-    /**
-     * Called for each package in the compartment map with a list of connections
-     * (which are also canonical names).
-     *
-     * We use this to build the package policies.
-     */
-    packageConnections: ({ canonicalName, connections }) => {
-      // this should be a dupe of whatever the root compartment is
-      if (canonicalName === ROOT_COMPARTMENT) {
-        return
-      }
-      const packagePolicy = packagesForPackage.get(canonicalName) ?? {}
-      for (const connection of connections) {
-        if (connection !== canonicalName) {
-          packagePolicy[connection] = true
-        }
-      }
-      // avoid empty package policies
-      if (keys(packagePolicy).length > 0) {
-        packagesForPackage.set(canonicalName, packagePolicy)
-      }
-    },
-    /**
-     * Called for each module source that Endo finds.
-     *
-     * We use this to inspect each module for globals, builtins, and SES
-     * compatibility violations.
-     */
-    moduleSource: ({ moduleSource, canonicalName }) => {
-      if (canonicalName === ROOT_COMPARTMENT) {
-        return
-      }
-      if ('location' in moduleSource) {
-        return inspectModuleSource(moduleSource, canonicalName)
-      } else if ('error' in moduleSource) {
-        throw new GenerationError(`Source loading error: ${moduleSource.error}`)
-      }
-    },
-  }
-
   try {
     await captureFromMap(readPowers, packageCompartmentMap, {
       ...DEFAULT_ENDO_OPTIONS,
       importHook: nullImportHook,
       log: log.debug.bind(log),
-      forceLoad: policyOverride?.include,
-      hooks: captureFromMapHooks,
+      preload: policyOverride?.include,
+      /**
+       * Called for each package in the compartment map with a list of
+       * connections (which are also canonical names).
+       *
+       * We use this to build the package policies.
+       */
+      packageConnectionsHook: ({ canonicalName, connections }) => {
+        // this should be a dupe of whatever the root compartment is
+        if (canonicalName === ROOT_COMPARTMENT) {
+          return
+        }
+        const packagePolicy = packagesForPackage.get(canonicalName) ?? {}
+        for (const connection of connections) {
+          if (connection !== canonicalName) {
+            packagePolicy[connection] = true
+          }
+        }
+        // avoid empty package policies
+        if (keys(packagePolicy).length > 0) {
+          packagesForPackage.set(canonicalName, packagePolicy)
+        }
+      },
+      /**
+       * Called for each module source that Endo finds.
+       *
+       * We use this to inspect each module for globals, builtins, and SES
+       * compatibility violations.
+       */
+      moduleSourceHook: ({ moduleSource, canonicalName }) => {
+        if (canonicalName === ROOT_COMPARTMENT) {
+          return
+        }
+        if ('location' in moduleSource) {
+          return inspectModuleSource(moduleSource, canonicalName)
+        } else if ('error' in moduleSource) {
+          throw new GenerationError(
+            `Source loading error: ${moduleSource.error}`
+          )
+        }
+      },
       ...options,
     })
 
