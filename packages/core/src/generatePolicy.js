@@ -56,6 +56,7 @@ const MODULE_REFS = /** @type {const} */ ({
 })
 
 module.exports = {
+  MODULE_REFS,
   rootSlug,
   createModuleInspector,
   getDefaultPaths,

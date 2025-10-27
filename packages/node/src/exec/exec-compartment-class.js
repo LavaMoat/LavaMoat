@@ -30,7 +30,7 @@ export const makeExecutionCompartment = (originalGlobalThis) => {
      * @param {CompartmentOptions} [options]
      */
     constructor(options) {
-      super(options)
+      super({ ...options, noAggregateLoadErrors: true })
 
       const { globalThis: compartmentGlobalThis } = this
 
