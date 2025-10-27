@@ -24,7 +24,7 @@ import type { IsBuiltinFn } from 'lavamoat-core'
 import type { Loggerr } from 'loggerr'
 import type nodeFs from 'node:fs'
 import type { PathLike, Stats } from 'node:fs'
-import type { LiteralUnion, Simplify } from 'type-fest'
+import type { Except, LiteralUnion, Simplify } from 'type-fest'
 import type {
   ATTENUATORS_COMPARTMENT,
   ENDO_GLOBAL_POLICY_ITEM_WRITE,
@@ -266,7 +266,7 @@ export interface WritePowers {
 
 export type WithLoadForMapOptions = ComposeOptions<
   [
-    Omit<ImportLocationOptions, 'importHook' | 'log' | 'hooks' | 'forceLoad'>,
+    Except<ImportLocationOptions, 'importHook' | 'log' | 'preload'>,
     WithLog,
     WithDev,
   ]
@@ -283,7 +283,7 @@ export type EndoWritePolicy = typeof ENDO_GLOBAL_POLICY_ITEM_WRITE
  */
 export type ExecuteOptions = ComposeOptions<
   [
-    Omit<
+    Except<
       ImportLocationOptions | SyncImportLocationOptions,
       'log' | 'dev' | 'policy'
     >,
@@ -426,7 +426,7 @@ export type ToEndoPolicyOptions = ComposeOptions<
  */
 export type ToEndoPolicyOptionsWithoutPolicyOverride = ComposeOptions<
   [
-    Omit<ToEndoPolicyOptions, 'policyOverridePath' | 'policyOverride'>,
+    Except<ToEndoPolicyOptions, 'policyOverridePath' | 'policyOverride'>,
     { policyOverride?: never; policyOverridePath?: never },
   ]
 >
