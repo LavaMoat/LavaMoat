@@ -110,6 +110,7 @@ testMerge(
       babel: {
         globals: {
           document: true,
+          window: true,
         },
       },
     },
@@ -120,6 +121,8 @@ testMerge(
         globals: {
           document: false,
           'document.createElement': true,
+          window: false,
+          'window.location.hash': true,
         },
       },
     },
@@ -128,7 +131,10 @@ testMerge(
     resources: {
       babel: {
         globals: {
+          document: false,
+          window: false,
           'document.createElement': true,
+          'window.location.hash': true,
         },
       },
     },
