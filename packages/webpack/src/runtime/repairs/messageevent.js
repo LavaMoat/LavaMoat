@@ -2,6 +2,7 @@ const { defineProperty } = Object
 const { call } = Function.prototype
 
 const messageToGlobalMap = new WeakMap()
+/** @type {any & { window: any | undefined }} */
 const theRealGlobalThis = globalThis
 // TODO: enabe after further testing:
 // const realms = new Map()
@@ -21,7 +22,8 @@ if (original && original.get) {
     ...original,
     get() {
       const w = sourceGetter(this)
-      if (w === theRealGlobalThis) {
+      // How the hell would globalThis !== globalThis.window? Ask FF contentscripts
+      if (w === theRealGlobalThis || w === theRealGlobalThis.window) {
         return messageToGlobalMap.get(this) || lastResortGlobal
         // } else if (w && typeof w === 'object' && realms.has(w)) {
         //   return messageToGlobalMap.get(this)[realms.get(w)] || lastResortGlobal
@@ -29,7 +31,8 @@ if (original && original.get) {
         return w
       }
     },
-    configurable: false,
+    // left configurable because replacing it with original is impossible after and we
+    // want to allow further wrapping (eg by Snow)
   })
 }
 

@@ -1,5 +1,5 @@
 const test = /** @type {import('ava').TestFn} */ (require('ava'))
-const { scaffold, runScriptWithSES } = require('./scaffold.js')
+const { scaffold, runChunksWithSES } = require('./scaffold.js')
 const { makeConfig } = require('./fixtures/main/webpack.config.js')
 
 test('webpack/repairs - MessageEvent repair is applied when in use', async (t) => {
@@ -35,12 +35,14 @@ test('webpack/repairs - MessageEvent repair is applied when in use', async (t) =
   }, 'Expected the build to succeed')
 
   const mock = `
-    globalThis.MessageEvent = class MessageEvent {
-      get source() {
-        return globalThis
-      }
-    };
-  `
+  globalThis.MessageEvent = function MessageEvent(){};
+  Object.defineProperty(MessageEvent.prototype, 'source', {
+    get() {
+      return globalThis;
+    },
+    configurable: true
+  });
+`
 
   t.true(
     t.context.build.snapshot['/dist/app.js'].includes('exports.MessageEvent'),
@@ -48,8 +50,22 @@ test('webpack/repairs - MessageEvent repair is applied when in use', async (t) =
   )
 
   t.notThrows(() => {
-    runScriptWithSES(
-      mock + '\n;\n' + t.context.build.snapshot['/dist/app.js'],
+    runChunksWithSES([mock, t.context.build.snapshot['/dist/app.js']], {
+      console,
+    })
+  }, 'Expected the script to run without throwing an error')
+
+  t.notThrows(() => {
+    runChunksWithSES(
+      [
+        mock,
+        t.context.build.snapshot['/dist/app.js'],
+        `
+        if(!Object.getOwnPropertyDescriptor(globalThis.MessageEvent.prototype, 'source').configurable) {
+        throw new Error('MessageEvent source is not configurable');
+        }
+        `,
+      ],
       {
         console,
       }

@@ -1,6 +1,10 @@
 // @ts-check
 
 /**
+ * @import {LavamoatModuleRecord as LMR,
+ *   DefaultModuleInitArgs,
+ *   ModuleInitializer,
+ *   ModuleRecordType} from '@lavamoat/types'
  * @import {File} from '@babel/types'
  */
 
@@ -15,6 +19,7 @@ const ROOT_SLUG = '$root$'
  * @template {readonly [any, ...any[]]} [InitArgs=DefaultModuleInitArgs] -
  *   Arguments for {@link LavamoatModuleRecord.moduleInitializer}. Default is
  *   `DefaultModuleInitArgs`
+ * @implements {LMR<InitArgs>}
  */
 class LavamoatModuleRecord {
   /**
@@ -84,7 +89,7 @@ class LavamoatModuleRecord {
   /**
    * Assigns properties!
    *
-   * @param {LavamoatModuleRecordOptions<InitArgs>} opts
+   * @param {LavamoatModuleRecordOptions<InitArgs>} params
    */
   constructor({
     specifier,
@@ -114,44 +119,14 @@ module.exports = { LavamoatModuleRecord }
 /**
  * Options for {@link LavamoatModuleRecord} constructor.
  *
- * @template {readonly [any, ...any[]]} [InitArgs=DefaultModuleInitArgs] -
- *   Arguments for {@link LavamoatModuleRecordOptions.moduleInitializer}. Default
- *   is `DefaultModuleInitArgs`
- * @typedef LavamoatModuleRecordOptions
- * @property {string} specifier - Module specifier
- * @property {string} file - Path to module file (or specifier)
- * @property {ModuleRecordType} type - Module type
- * @property {string} packageName - Package containing module (or specifier)
- * @property {string} [content] - Content of module (source)
- * @property {Record<string, string>} [importMap] - Import map
- * @property {File} [ast] - Parsed AST
- * @property {ModuleInitializer<InitArgs>} [moduleInitializer] - Module
- *   initializer function
- * @property {boolean} [isRoot] - Whether the module is a root module
- */
-
-/**
- * Possible value of {@link LavamoatModuleRecord.type}.
+ * The only difference between this type and the
+ * {@link LMR LavamoatModuleRecord interface} is that `importMap` is optional
+ * here.
  *
- * _Note:_ `js` means "source code", **not** "JavaScript source code"
- *
- * @typedef {'builtin' | 'native' | 'js'} ModuleRecordType
- */
-
-/**
- * Default {@link ModuleInitializer} arguments
- *
- * @typedef {[
- *   exports: Record<string, unknown>,
- *   require: (specifier: string) => unknown,
- *   module: Record<string, unknown>,
- * ]} DefaultModuleInitArgs
- */
-
-/**
- * Module initializer function; provides non-global variables to module scope
- *
- * @template {readonly [any, ...any[]]} [InitArgs=DefaultModuleInitArgs] -
- *   Arguments for the function. Default is `DefaultModuleInitArgs`
- * @typedef {(...args: InitArgs) => void} ModuleInitializer
+ * @template {readonly any[]} [InitArgs=DefaultModuleInitArgs] - Arguments for
+ *   {@link LavamoatModuleRecordOptions.moduleInitializer}. Default is
+ *   `DefaultModuleInitArgs`
+ * @typedef {Omit<LMR<InitArgs>, 'importMap'> & {
+ *   importMap?: LMR['importMap']
+ * }} LavamoatModuleRecordOptions
  */

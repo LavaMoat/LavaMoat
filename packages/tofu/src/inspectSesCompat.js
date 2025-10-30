@@ -19,11 +19,25 @@ const strictModeViolationErrorCues = /** @type {const} */ ([
 
 /**
  * Babel doesn't type `ParseError` very well.
- * @typedef {import('@babel/parser').ParseError & Error & {loc: {line: number, column: number, index: number}, pos: number}} ParseError
+ *
+ * @typedef {import('@babel/parser').ParseError &
+ *   Error & {
+ *     loc: { line: number; column: number; index: number }
+ *     pos: number
+ *   }} ParseError
  */
 
 /**
- * @typedef {Omit<import('@babel/parser').ParseResult<import('@babel/types').File>, 'errors'> & {errors?: Array<import('@babel/parser').ParseError & Error & {loc: {line: number, column: number, index: number}, pos: number}>}} ParseResult
+ * @typedef {Omit<
+ *   import('@babel/parser').ParseResult<import('@babel/types').File>,
+ *   'errors'
+ * > & {
+ *   errors?: (import('@babel/parser').ParseError &
+ *     Error & {
+ *       loc: { line: number; column: number; index: number }
+ *       pos: number
+ *     })[]
+ * }} ParseResult
  */
 
 /**
@@ -41,7 +55,6 @@ const strictModeViolationErrorCues = /** @type {const} */ ([
  */
 
 /**
- *
  * @param {ParseResult} ast
  * @returns {InspectSesCompatResult}
  */
@@ -90,7 +103,6 @@ function inspectSesCompat(ast) {
 }
 
 /**
- *
  * @param {string[]} memberPath
  * @returns {boolean}
  */

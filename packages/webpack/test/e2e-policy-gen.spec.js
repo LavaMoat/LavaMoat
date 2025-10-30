@@ -19,6 +19,10 @@ test('webpack/policy-gen - policy shape', (t) => {
   t.snapshot(t.context.build.snapshot['/dist/policy-snapshot.json'])
 })
 
+test('webpack/policy-gen - policy meta is not included in the bundle', (t) => {
+  t.notRegex(t.context.bundle, /meta:|"meta":/u)
+})
+
 test('webpack/policy-gen - bundle runs without throwing', (t) => {
   t.notThrows(() => {
     runScriptWithSES(t.context.bundle)
@@ -70,4 +74,12 @@ test('webpack/policy-gen - handles excludes', async (t) => {
     )
   }
   t.pass()
+})
+
+test('webpack/policy-gen - generatePolicyOnly skips emitting assets', async (t) => {
+  const webpackConfig = makeConfig({
+    generatePolicyOnly: true,
+  })
+  const build = await scaffold(webpackConfig)
+  t.deepEqual(Object.keys(build.snapshot), [], 'no files were emitted')
 })

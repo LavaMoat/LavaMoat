@@ -6,6 +6,65 @@
   * dependencies
     * lavamoat-tofu bumped from ^7.2.1 to ^7.2.2
 
+## [17.0.0](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v16.7.1...lavamoat-core-v17.0.0) (2025-10-09)
+
+
+### ⚠ BREAKING CHANGES
+
+* **core:** stop overwriting the policy file while loading. ([#1835](https://github.com/LavaMoat/LavaMoat/issues/1835))
+
+### Bug Fixes
+
+* **core:** stop overwriting the policy file while loading. ([#1835](https://github.com/LavaMoat/LavaMoat/issues/1835)) ([db57c1c](https://github.com/LavaMoat/LavaMoat/commit/db57c1c3a8a8822733b887edec633e3ce1f1177a))
+
+## [16.7.1](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v16.7.0...lavamoat-core-v16.7.1) (2025-10-01)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @lavamoat/types bumped from ^0.0.1 to ^0.1.0
+    * lavamoat-tofu bumped from ^8.0.10 to ^8.0.11
+
+## [16.7.0](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v16.6.2...lavamoat-core-v16.7.0) (2025-09-25)
+
+
+### Features
+
+* **webpack:** document and officially release scuttling in webpack plugin ([#1829](https://github.com/LavaMoat/LavaMoat/issues/1829)) ([9c83030](https://github.com/LavaMoat/LavaMoat/commit/9c83030d97371478bf59b10d636e63168bd8473d))
+
+
+### Bug Fixes
+
+* **core:** noSharedPrototype case in copyWrappedGlobals must include non-enumerable properties ([592f96e](https://github.com/LavaMoat/LavaMoat/commit/592f96e1291aa31cfd6942493e40563b8680b871))
+
+## [16.6.2](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v16.6.1...lavamoat-core-v16.6.2) (2025-09-22)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-tofu bumped from ^8.0.9 to ^8.0.10
+
+## [16.6.1](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v16.6.0...lavamoat-core-v16.6.1) (2025-09-19)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @lavamoat/types bumped from ^0.0.0 to ^0.0.1
+    * lavamoat-tofu bumped from ^8.0.8 to ^8.0.9
+
+## [16.6.0](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v16.5.1...lavamoat-core-v16.6.0) (2025-09-16)
+
+
+### Features
+
+* **core:** support Firefox contentscript shenanigans with cross-realm window prototypes ([#1786](https://github.com/LavaMoat/LavaMoat/issues/1786)) ([271598f](https://github.com/LavaMoat/LavaMoat/commit/271598f59161ba83f525a3d340916b32e6f4a96a))
+
 ## [16.5.1](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v16.5.0...lavamoat-core-v16.5.1) (2025-08-25)
 
 

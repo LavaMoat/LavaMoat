@@ -18,6 +18,107 @@
   * dependencies
     * lavamoat-core bumped from ^15.2.0 to ^15.2.1
 
+## [1.5.2](https://github.com/LavaMoat/LavaMoat/compare/webpack-v1.5.1...webpack-v1.5.2) (2025-10-27)
+
+
+### Bug Fixes
+
+* **webpack:** adapt scuttling config for runtime regardless of where it comes from ([#1839](https://github.com/LavaMoat/LavaMoat/issues/1839)) ([b1ad321](https://github.com/LavaMoat/LavaMoat/commit/b1ad321cb8b3e36a44fa661a7d2f5899f7a08fdc))
+* **webpack:** add j to the list of harmless fields on __webpack_require__ ([#1838](https://github.com/LavaMoat/LavaMoat/issues/1838)) ([7035a40](https://github.com/LavaMoat/LavaMoat/commit/7035a404627d038e9ff7b4d5fd2e7b7ed8928194))
+
+## [1.5.1](https://github.com/LavaMoat/LavaMoat/compare/webpack-v1.5.0...webpack-v1.5.1) (2025-10-09)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-core bumped from ^16.7.1 to ^17.0.0
+
+## [1.5.0](https://github.com/LavaMoat/LavaMoat/compare/webpack-v1.4.0...webpack-v1.5.0) (2025-10-01)
+
+
+### Features
+
+* **webpack,core:** Add a meta field to policy resource, report webpack optimizations to it. ([a53b434](https://github.com/LavaMoat/LavaMoat/commit/a53b434e21e074d2261a4e84b85e33fe8aa87278))
+* **webpack:** use the final module info in connections to handle the optimizations webpack sideEffect option does. wip ([9c7b305](https://github.com/LavaMoat/LavaMoat/commit/9c7b3050460b4cc79b04ac422bdfb69540893bd9))
+
+
+### Bug Fixes
+
+* **webpack:** strip policy meta from the policy that goes into the bundle, fix related tests ([645d0f2](https://github.com/LavaMoat/LavaMoat/commit/645d0f2311a9871694b6bf14bb4ce3c81b2311c8))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @lavamoat/types bumped from ^0.0.1 to ^0.1.0
+    * lavamoat-core bumped from ^16.7.0 to ^16.7.1
+
+## [1.4.0](https://github.com/LavaMoat/LavaMoat/compare/webpack-v1.3.2...webpack-v1.4.0) (2025-09-25)
+
+
+### Features
+
+* **webpack:** document and officially release scuttling in webpack plugin ([#1829](https://github.com/LavaMoat/LavaMoat/issues/1829)) ([9c83030](https://github.com/LavaMoat/LavaMoat/commit/9c83030d97371478bf59b10d636e63168bd8473d))
+* **webpack:** prevent webpack from eliminating reexports and failing policy enforcement ([#1827](https://github.com/LavaMoat/LavaMoat/issues/1827)) ([5f4d4fc](https://github.com/LavaMoat/LavaMoat/commit/5f4d4fcdf6395bd749918d2b6bed7c5e822629e2))
+
+
+### Bug Fixes
+
+* **webpack:** adjust MessageEvent repair to reliably work in the bizarre context of Firefox webextension contentscript ([#1830](https://github.com/LavaMoat/LavaMoat/issues/1830)) ([33d83d7](https://github.com/LavaMoat/LavaMoat/commit/33d83d7402f9b914c7f4d7f9cd18f979c2f406c5))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-core bumped from ^16.6.2 to ^16.7.0
+
+## [1.3.2](https://github.com/LavaMoat/LavaMoat/compare/webpack-v1.3.1...webpack-v1.3.2) (2025-09-22)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-core bumped from ^16.6.1 to ^16.6.2
+
+## [1.3.1](https://github.com/LavaMoat/LavaMoat/compare/webpack-v1.3.0...webpack-v1.3.1) (2025-09-19)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @lavamoat/types bumped from ^0.0.0 to ^0.0.1
+    * lavamoat-core bumped from ^16.6.0 to ^16.6.1
+
+## [1.3.0](https://github.com/LavaMoat/LavaMoat/compare/webpack-v1.2.0...webpack-v1.3.0) (2025-09-16)
+
+
+### Features
+
+* **webpack:** add explicit error messages when a compilation concludes with nothing to protect ([f12985f](https://github.com/LavaMoat/LavaMoat/commit/f12985f15a46e0d022d9caef8a0e5e646529575c))
+* **webpack:** add generatePolicyOnly option ([#1789](https://github.com/LavaMoat/LavaMoat/issues/1789)) ([72900cd](https://github.com/LavaMoat/LavaMoat/commit/72900cd22a954a15d9fe96a8bd4b2f844ba3797c))
+* **webpack:** null runtime ([4374b7a](https://github.com/LavaMoat/LavaMoat/commit/4374b7a65ef551d123396b32e78cd6fd976ecd8e))
+* **webpack:** repair for window.event deprecated leaky poperty ([#1785](https://github.com/LavaMoat/LavaMoat/issues/1785)) ([86d944b](https://github.com/LavaMoat/LavaMoat/commit/86d944bfc0f65e5d27c6f598add72016de579565))
+* **webpack:** static shims for runtime, runtimeConfigurationPerChunk_experimental to control embedded runtime options ([#1792](https://github.com/LavaMoat/LavaMoat/issues/1792)) ([c69a08d](https://github.com/LavaMoat/LavaMoat/commit/c69a08d5af47e20ee0580fa5f0fcc804cb6d6928))
+
+
+### Bug Fixes
+
+* **webpack:** fix the naive assumption that there can only be 1 module with a certain path ([#1793](https://github.com/LavaMoat/LavaMoat/issues/1793)) ([262bb3d](https://github.com/LavaMoat/LavaMoat/commit/262bb3d61016b42977d0c21c83b22cfbbd78a3e9))
+* **webpack:** MessageEvent repair should not prevent further overrides ([#1787](https://github.com/LavaMoat/LavaMoat/issues/1787)) ([0c8fc19](https://github.com/LavaMoat/LavaMoat/commit/0c8fc1914e0e7a8432edbf6d9e8d2604ee17d291))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-core bumped from ^16.5.1 to ^16.6.0
+
 ## [1.2.0](https://github.com/LavaMoat/LavaMoat/compare/webpack-v1.1.0...webpack-v1.2.0) (2025-08-25)
 
 

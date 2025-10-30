@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "allowJs": false,
+    "checkJs": false,
+    "emitDeclarationOnly": false,
+    "erasableSyntaxOnly": true,
+    "module": "NodeNext",
+    "rewriteRelativeImportExtensions": true,
+    "exactOptionalPropertyTypes": true,
+    "strict": true,
+    "stripInternal": true,
+    "target": "esnext",
+    "verbatimModuleSyntax": true
+  },
+  "exclude": ["*.d.ts", "*.js"],
+  "extends": "../../../.config/tsconfig.src.json",
+  "include": ["*.ts"]
+}

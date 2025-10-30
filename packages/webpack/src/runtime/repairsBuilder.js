@@ -1,7 +1,7 @@
 const { readFileSync } = require('node:fs')
 const { repairs } = require('./repairs/index')
 
-/** @import {LavaMoatPolicy} from 'lavamoat-core' */
+/** @import {LavaMoatPolicy} from '@lavamoat/types' */
 
 /**
  * Combines the sources of only the repairs that are needed based on the policy
@@ -19,7 +19,7 @@ exports.buildRepairs = (policy, skipRepairs) => {
             })
         )
       : repairs
-  const allGlobalsInvolved = new Set()
+  const allGlobalsInvolved = new Set(['globalThis'])
   for (const resource of Object.values(policy.resources)) {
     if (resource.globals) {
       for (const global of Object.keys(resource.globals)) {

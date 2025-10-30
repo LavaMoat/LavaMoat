@@ -18,6 +18,13 @@ Object.defineProperty(module.exports, 'makeConfig', {
   value: makeConfig,
 })
 
+/** @import {LavaMoatPluginOptions} from '../../../src/plugin.js' */
+/** @import {Configuration as WebpackConfiguration} from 'webpack' */
+
+/**
+ * @param {LavaMoatPluginOptions} lmOptions
+ * @returns {WebpackConfiguration}
+ */
 function makeConfig(lmOptions = {}) {
   return {
     cache: false,
@@ -42,7 +49,10 @@ function makeConfig(lmOptions = {}) {
       }),
       new HtmlWebpackPlugin(),
     ],
-    optimization: {},
+    optimization: {
+      concatenateModules: true, // only here to trigger explicit warning about being set back to false
+      sideEffects: true,
+    },
     resolve: {
       fallback: { crypto: false },
     },

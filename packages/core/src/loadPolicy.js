@@ -1,17 +1,19 @@
 // @ts-check
 
-const fs = require('node:fs/promises')
 const { readFileSync } = require('node:fs')
 const { mergePolicy } = require('./mergePolicy')
-const { jsonStringifySortedPolicy } = require('./stringifyPolicy')
 
 module.exports = { loadPolicy, loadPolicyAndApplyOverrides, loadPoliciesSync }
+
+/**
+ * @import {LavaMoatPolicy} from '@lavamoat/types'
+ */
 
 /**
  * Reads a policy file from disk, if present
  *
  * @param {PolicyOpts} opts
- * @returns {import('./schema').LavaMoatPolicy | undefined}
+ * @returns {LavaMoatPolicy | undefined}
  */
 function readPolicyFileSync({ debugMode, policyPath }) {
   if (debugMode) {
@@ -49,14 +51,13 @@ function readPolicyFileSync({ debugMode, policyPath }) {
  * Loads a policy from disk, returning a default empty policy if not found.
  *
  * @param {PolicyOpts} opts
- * @returns {Promise<import('./schema').LavaMoatPolicy>}
+ * @returns {Promise<LavaMoatPolicy>}
  * @todo Because there is no validation taking place, the resulting value could
- *   be literally anything `JSON.parse()` could return. Also note that this
- *   returns a `LavaMoatPolicy` when we could be asking for a
- *   `LavaMoatPolicyOverrides`; make your type assertions accordingly!
+ *   be literally anything `JSON.parse()` could return. We do no validation
+ *   here, and we should.
  */
 async function loadPolicy({ debugMode, policyPath }) {
-  /** @type {import('./schema').LavaMoatPolicy} */
+  /** @type {LavaMoatPolicy} */
   let policy = { resources: {} }
   try {
     const rawPolicy = readPolicyFileSync({ debugMode, policyPath })
@@ -72,12 +73,32 @@ async function loadPolicy({ debugMode, policyPath }) {
 }
 
 /**
+ * Checks if all resources from overrides exist in policy
+ *
+ * @param {LavaMoatPolicy} policy
+ * @param {LavaMoatPolicy} override
+ * @returns {boolean}
+ */
+const wasOverrideIncluded = (policy, override) => {
+  // all keys from override.resources exist in policy.resources
+  if (!override.resources) {
+    return true
+  }
+  if (!policy.resources) {
+    return false
+  }
+  return Object.keys(override.resources).every((key) =>
+    Object.hasOwn(policy.resources, key)
+  )
+}
+
+/**
  * Loads policy and policy overrides from disk and merges them.
  *
- * If overrides exist, writes the overrides _back_ into the policy file.
+ * Warns if new overrides are detected.
  *
  * @param {PolicyOpts & { policyOverridePath: string }} opts
- * @returns {Promise<import('./schema').LavaMoatPolicy>}
+ * @returns {Promise<LavaMoatPolicy>}
  */
 async function loadPolicyAndApplyOverrides({
   debugMode,
@@ -86,10 +107,10 @@ async function loadPolicyAndApplyOverrides({
 }) {
   const policy = await loadPolicy({ debugMode, policyPath })
 
-  const policyOverride =
-    /** @type {import('./schema').LavaMoatPolicyOverrides | undefined} */ (
-      readPolicyFileSync({ debugMode, policyPath: policyOverridePath })
-    )
+  const policyOverride = readPolicyFileSync({
+    debugMode,
+    policyPath: policyOverridePath,
+  })
 
   if (!policyOverride) {
     return policy
@@ -101,10 +122,12 @@ async function loadPolicyAndApplyOverrides({
 
   const finalPolicy = mergePolicy(policy, policyOverride)
 
-  // TODO: Only write if merge results in changes.
-  // Would have to make a deep equal check on whole policy, which is a waste of time.
-  // mergePolicy() should be able to do it in one pass.
-  await fs.writeFile(policyPath, jsonStringifySortedPolicy(finalPolicy))
+  // If overrides contain resources that were not included, it's possible that policy generation could use them to detect new items.
+  if (!wasOverrideIncluded(policy, policyOverride)) {
+    console.warn(
+      'LavaMoat: A new policy override was added since the policy was last generated. Please run policy generation again to make sure all is up to date.'
+    )
+  }
 
   return finalPolicy
 }
@@ -116,10 +139,8 @@ async function loadPolicyAndApplyOverrides({
  *
  * @param {PolicyOpts & { policyOverridePath: string }} opts
  * @returns {{
- *   policy: import('./schema').LavaMoatPolicy | undefined
- *   applyOverride: (
- *     main: import('./schema').LavaMoatPolicy
- *   ) => import('./schema').LavaMoatPolicy
+ *   policy: LavaMoatPolicy | undefined
+ *   applyOverride: (main: LavaMoatPolicy) => LavaMoatPolicy
  * }}
  */
 function loadPoliciesSync({ debugMode, policyPath, policyOverridePath }) {

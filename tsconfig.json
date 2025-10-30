@@ -1,35 +1,41 @@
 {
-  "extends": "@tsconfig/node18/tsconfig.json",
-  "files": [],
   "compilerOptions": {
     "allowJs": true
   },
+  "extends": "@tsconfig/node18/tsconfig.json",
+  "files": [],
   // the workspaces which are consumed as libraries by other workspaces should
   // be first in this list
   "references": [
     {
-      "path": "./packages/allow-scripts"
+      "path": "packages/vog"
     },
     {
-      "path": "./packages/aa"
+      "path": "packages/types"
     },
     {
-      "path": "./packages/core"
+      "path": "packages/allow-scripts"
     },
     {
-      "path": "./packages/laverna"
+      "path": "packages/aa"
     },
     {
-      "path": "./packages/tofu"
+      "path": "packages/core"
     },
     {
-      "path": "./packages/webpack"
+      "path": "packages/tofu"
     },
     {
-      "path": "./packages/node"
+      "path": "packages/laverna"
     },
     {
-      "path": "./packages/react-native-lockdown"
+      "path": "packages/webpack"
+    },
+    {
+      "path": "packages/node"
+    },
+    {
+      "path": "packages/react-native-lockdown"
     }
   ]
 }

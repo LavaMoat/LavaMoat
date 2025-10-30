@@ -1,0 +1,39 @@
+{
+  "name": "@lavamoat/types",
+  "version": "0.1.0",
+  "description": "Common types for LavaMoat packages",
+  "repository": {
+    "directory": "packages/types",
+    "type": "git",
+    "url": "git+https://github.com/LavaMoat/lavamoat.git"
+  },
+  "homepage": "https://github.com/LavaMoat/LavaMoat/blob/main/packages/types/README.md",
+  "bugs": {
+    "url": "https://github.com/LavaMoat/lavamoat/issues"
+  },
+  "author": "boneskull",
+  "license": "MIT",
+  "engines": {
+    "node": "^18.0.0 || ^20.0.0 || ^22.0.0 || ^24.0.0"
+  },
+  "exports": {
+    ".": {
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./package.json": "./package.json",
+    "./policy": {
+      "require": "./dist/policy-schema/index.js",
+      "types": "./dist/policy-schema/index.d.ts"
+    }
+  },
+  "scripts": {
+    "lint:deps": "depcheck"
+  },
+  "dependencies": {
+    "@babel/types": "7.27.3"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

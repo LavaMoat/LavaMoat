@@ -6,11 +6,11 @@ const {
   inspectEsmImports,
   inspectDynamicRequires,
 } = require('./inspectSource')
+const { codeSampleFromAstNode } = require('./codeSampleFromAstNode')
 const {
   inspectPrimordialAssignments,
 } = require('./inspectPrimordialAssignments')
 const { inspectSesCompat } = require('./inspectSesCompat.js')
-const { codeSampleFromAstNode } = require('./codeSampleFromAstNode.js')
 const utils = require('./util')
 
 module.exports = {

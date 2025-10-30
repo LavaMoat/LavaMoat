@@ -1,6 +1,10 @@
 const fs = require('node:fs')
 const path = require('node:path')
-const { getDefaultPaths, jsonStringifySortedPolicy, DEFAULT_GLOBAL_THIS_REFS } = require('lavamoat-core')
+const {
+  getDefaultPaths,
+  jsonStringifySortedPolicy,
+  DEFAULT_GLOBAL_THIS_REFS,
+} = require('lavamoat-core')
 const { createModuleInspectorSpy } = require('./createModuleInspectorSpy.js')
 const { createPackageDataStream } = require('./createPackageDataStream.js')
 const createLavaPack = require('@lavamoat/lavapack')
@@ -311,6 +315,7 @@ function createLavamoatPacker(configuration = {}) {
   return customPack
 }
 
+// FIXME: replace with modern policy validation 
 function validatePolicy(policy) {
   if (typeof policy !== 'object') {
     throw new Error(
@@ -328,7 +333,7 @@ function validatePolicy(policy) {
     const packageOptions = Object.keys(packageOpts)
     const packageEntries = Object.values(packageOpts)
     const optionsWhitelist = ['globals', 'packages']
-    const valuesWhitelist = [true, 'write']
+    const valuesWhitelist = [true, false, 'write']
 
     if (
       !packageOptions.every((packageOpt) =>
@@ -341,10 +346,10 @@ function validatePolicy(policy) {
     }
 
     packageEntries.forEach((entry) => {
-      Object.values(entry).forEach((value) => {
+      Object.entries(entry).forEach(([key, value]) => {
         if (!valuesWhitelist.includes(value)) {
           throw new Error(
-            "LavaMoat - Globals or packages endowments must be equal to 'true'"
+            `LavaMoat - expected ${key} to be one of ${JSON.stringify(valuesWhitelist)}, got "${value}"`
           )
         }
       })

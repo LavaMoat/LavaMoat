@@ -7,7 +7,6 @@ const assert = require('node:assert')
 
 const {
   WebpackError,
-  RuntimeModule,
   Compilation,
   sources: { RawSource },
 } = require('webpack')
@@ -37,7 +36,7 @@ const { loadCanonicalNameMap } = require('@lavamoat/aa')
  * @import {LockdownOptions} from 'ses'
  * @import {CompleteLavaMoatPluginOptions} from './buildtime/types'
  * @import {CanonicalNameMap} from '@lavamoat/aa'
- * @import {LavaMoatPolicy} from 'lavamoat-core'
+ * @import {LavaMoatPolicy} from '@lavamoat/types'
  */
 
 // TODO: upcoming version of webpack may expose these constants, but we want to support more versions
@@ -51,40 +50,17 @@ const JAVASCRIPT_MODULE_TYPE_AUTO = 'javascript/auto'
 const JAVASCRIPT_MODULE_TYPE_DYNAMIC = 'javascript/dynamic'
 const JAVASCRIPT_MODULE_TYPE_ESM = 'javascript/esm'
 
+const COVERED_MODULE_TYPES = /** @type {const} */ ([
+  JAVASCRIPT_MODULE_TYPE_AUTO,
+  JAVASCRIPT_MODULE_TYPE_DYNAMIC,
+  JAVASCRIPT_MODULE_TYPE_ESM,
+])
+
 const POLICY_SNAPSHOT_FILENAME = 'policy-snapshot.json'
 
 const { wrapGenerator } = require('./buildtime/generator.js')
 const { sesEmitHook, sesPrefixFiles } = require('./buildtime/emitSes.js')
 const EXCLUDE_LOADER = path.join(__dirname, './excludeLoader.js')
-
-class VirtualRuntimeModule extends RuntimeModule {
-  /**
-   * @param {Object} options - The options for the VirtualRuntimeModule.
-   * @param {string} options.name - The name of the module.
-   * @param {string} options.source - The source code of the module.
-   * @param {number} [options.stage] - The stage of runtime. One of
-   *   RuntimeModule.STAGE_*.
-   * @param {boolean} [options.withoutClosure] - Make the source code run
-   *   outside the closure for a runtime module
-   */
-  constructor({
-    name,
-    source,
-    stage = RuntimeModule.STAGE_NORMAL,
-    withoutClosure = false,
-  }) {
-    super(name, stage)
-    this.withoutClosure = withoutClosure
-    this.virtualSource = `;${source};`
-  }
-  shouldIsolate() {
-    return !this.withoutClosure
-  }
-
-  generate() {
-    return this.virtualSource
-  }
-}
 
 // =================================================================
 // Plugin code
@@ -109,16 +85,10 @@ class LavaMoatPlugin {
    * @param {LavaMoatPluginOptions} [options]
    */
   constructor(options = {}) {
-    if (options.scuttleGlobalThis === true) {
-      options.scuttleGlobalThis = { enabled: true, exceptions: [] }
-    } else if (typeof options.scuttleGlobalThis === 'object') {
+    if (typeof options.scuttleGlobalThis === 'object') {
       options.scuttleGlobalThis = { ...options.scuttleGlobalThis }
-      if (Array.isArray(options.scuttleGlobalThis.exceptions)) {
-        options.scuttleGlobalThis.exceptions =
-          options.scuttleGlobalThis.exceptions.map((e) => e.toString())
-      } else {
-        options.scuttleGlobalThis.exceptions = []
-      }
+    } else {
+      options.scuttleGlobalThis = { enabled: false }
     }
 
     /** @type {CompleteLavaMoatPluginOptions} */
@@ -127,10 +97,14 @@ class LavaMoatPlugin {
       lockdown: lockdownDefaults,
       isBuiltin: () => false,
       runChecks: true,
+      diagnosticsVerbosity: 0,
       ...options,
     }
+    if (this.options.generatePolicyOnly) {
+      this.options.generatePolicy = true
+    }
 
-    diag.level = options.diagnosticsVerbosity || 0
+    diag.level = this.options.diagnosticsVerbosity
   }
   /**
    * @param {import('webpack').Compiler} compiler The compiler instance
@@ -140,7 +114,7 @@ class LavaMoatPlugin {
     /**
      * @typedef {Object} Store
      * @property {CompleteLavaMoatPluginOptions} options
-     * @property {WebpackError[]} [mainCompilationWarnings]
+     * @property {Error[]} [mainCompilationWarnings]
      * @property {(string | number)[]} chunkIds Array of chunk ids that have
      *   been processed.
      * @property {string[]} excludes Array of module rawResource names that were
@@ -196,21 +170,26 @@ class LavaMoatPlugin {
       STORE.options.readableResourceIds = compiler.options.mode !== 'production'
     }
 
+    /** @type {string[]} */
+    const FORCED_CONFIG = []
+    if (compiler.options.optimization.concatenateModules) {
+      FORCED_CONFIG.push('concatenateModules=true->false')
+    }
     // Concatenation won't work with wrapped modules. Have to disable it.
     compiler.options.optimization.concatenateModules = false
+    // This setting creates a bit of confusion when it removes a reexport between packages and collapses the dependency tree, but it's got a potential to optimize some bundles a lot. We can support it by making sure we use the optimized connections when generating policy.
+    // compiler.options.optimization.sideEffects;
+
     // TODO: Research. If we fiddle a little with how we wrap the module, it might be possible to get inlining to work eventually by adding a closure that returns the module namespace. I just don't want to get into the compatibility of it all yet.
     // TODO: explore how these settings affect the Compartment wrapping etc.
-    // compiler.options.optimization.runtimeChunk = false; // that one is ok, checked
     // compiler.options.optimization.mangleExports = false;
     // compiler.options.optimization.usedExports = false;
     // compiler.options.optimization.providedExports = false;
-    // compiler.options.optimization.sideEffects = false;
-    // compiler.options.optimization.moduleIds = "hashed";
-    // compiler.options.optimization.chunkIds = "named";
     Object.freeze(STORE.options)
 
     // =======================================
 
+    // loadCanonicalNameMap depends on having a resolver. It'd be best to use webpack's own, but it's problematic and the discrepancies between resolvers are not on the package level, but individual exports, which has not tripped us up yet.
     // sadly regular webpack compilation doesn't allow for synchronous resolver.
     //  Error: Cannot 'resolveSync' because the fileSystem is not sync. Use 'resolve'!
     // function adapterFunction(resolver) {
@@ -250,24 +229,44 @@ class LavaMoatPlugin {
         // Wire up error and warning collection
         PROGRESS.reportErrorsTo(compilation.errors)
         STORE.mainCompilationWarnings = compilation.warnings
-        assertFields(STORE, ['mainCompilationWarnings'])
-        STORE.mainCompilationWarnings.push(
-          new WebpackError(
-            'LavaMoatPlugin: Concatenation of modules disabled - not compatible with LavaMoat wrapped modules.'
-          )
-        )
+        assertFields(STORE, ['mainCompilationWarnings', 'options'])
 
-        // Adjust scuttling configuration to not scuttle webpack chunk loading facilities
-        if (
-          typeof STORE.options.scuttleGlobalThis === 'object' &&
-          Array.isArray(STORE.options.scuttleGlobalThis.exceptions)
-        ) {
-          STORE.options.scuttleGlobalThis.exceptions.push(
-            compilation.outputOptions.chunkLoadingGlobal || 'webpackChunk'
+        if (STORE.options.generatePolicyOnly) {
+          compiler.options.devtool = false // source maps are expensive to make and unnecessary
+          compiler.hooks.shouldEmit.tap(PLUGIN_NAME, () => false)
+          compilation.hooks.shouldGenerateChunkAssets.tap(
+            PLUGIN_NAME,
+            () => false
+          )
+          // replacing generator with something returning an empty string could shave off some extra time, but is too invasive to seem worth it
+        }
+
+        if (FORCED_CONFIG.length > 0) {
+          STORE.mainCompilationWarnings.push(
+            new WebpackError(
+              'LavaMoatPlugin: Following options had to be overriden for security: ' +
+                FORCED_CONFIG.join(', ')
+            )
           )
         }
 
         compilation.hooks.optimizeAssets.tap(PLUGIN_NAME, () => {
+          if (!PROGRESS.isCancelled()) {
+            if (!PROGRESS.done('generatorCalled')) {
+              compilation.errors.push(
+                new WebpackError(
+                  'LavaMoatPlugin: Not a single module was wrapped in a compartment. Must be a configuration error.'
+                )
+              )
+            }
+            if (!PROGRESS.done('runtimeAdded')) {
+              compilation.errors.push(
+                new WebpackError(
+                  'LavaMoatPlugin: Not a single copy of LavaMoat runtime was added in the compilation. Must be a configuration error.'
+                )
+              )
+            }
+          }
           // By the time assets are being optimized we should have finished.
           // This will ensure all previous steps have been done.
           PROGRESS.report('finish')
@@ -276,19 +275,13 @@ class LavaMoatPlugin {
         // =================================================================
         // javascript modules generator tweaks installation
 
-        const coveredModuleTypes = [
-          JAVASCRIPT_MODULE_TYPE_AUTO,
-          JAVASCRIPT_MODULE_TYPE_DYNAMIC,
-          JAVASCRIPT_MODULE_TYPE_ESM,
-        ]
-
         const generatorWrapper = wrapGenerator({
           excludes: STORE.excludes,
           runChecks: STORE.options.runChecks,
           PROGRESS,
         })
 
-        for (const moduleType of coveredModuleTypes) {
+        for (const moduleType of COVERED_MODULE_TYPES) {
           normalModuleFactory.hooks.generator
             .for(moduleType)
             .tap(PLUGIN_NAME, generatorWrapper.generatorHookHandler)
@@ -353,6 +346,12 @@ class LavaMoatPlugin {
             )
             PROGRESS.report('pathsCollected')
 
+            if (moduleData.inspectable.length === 0) {
+              throw Error(
+                'LavaMoatPlugin: No modules to run under policy found in the compilation, must be a misconfiguration.'
+              )
+            }
+
             const policyToApply = STORE.options.generatePolicy
               ? generatePolicy({
                   location: STORE.options.policyLocation,
@@ -368,6 +367,12 @@ class LavaMoatPlugin {
                   policyFromOptions: STORE.options.policy,
                   location: STORE.options.policyLocation,
                 })
+
+            if (STORE.options.generatePolicyOnly) {
+              PROGRESS.cancel() // prevents progress errors
+              compilation.clearAssets() // causes most further compilation work to be skipped
+              return
+            }
 
             if (STORE.options.emitPolicySnapshot) {
               compilation.emitAsset(
@@ -474,10 +479,9 @@ class LavaMoatPlugin {
         const onceForChunkSet = new WeakSet()
         const chunkRuntimeWarningsDedupe = new Set()
 
-        const { getLavaMoatRuntimeSource, getDefensiveCodingPreamble } =
-          runtimeBuilder({
-            options: STORE.options,
-          })
+        const { getLavaMoatRuntimeModules } = runtimeBuilder({
+          options: STORE.options,
+        })
 
         // Define a handler function to be called for each chunk in the compilation.
         compilation.hooks.additionalChunkRuntimeRequirements.tap(
@@ -524,8 +528,9 @@ class LavaMoatPlugin {
                   'runtimeOptimizedPolicy',
                 ])
 
-                const lavaMoatRuntime = getLavaMoatRuntimeSource({
-                  currentChunkName: chunk.name,
+                const lavaMoatRuntimeModules = getLavaMoatRuntimeModules({
+                  PROGRESS,
+                  currentChunk: chunk,
                   chunkIds: STORE.chunkIds,
                   policyData: STORE.runtimeOptimizedPolicy,
                   identifiers: {
@@ -535,37 +540,21 @@ class LavaMoatPlugin {
                     contextModuleIds: STORE.contextModuleIds,
                     externals: STORE.externals,
                   },
+                  chunkLoaderName:
+                    compilation.outputOptions.chunkLoadingGlobal ??
+                    'webpackChunk',
                 })
-
-                const defensivePreamble = getDefensiveCodingPreamble()
 
                 // Add the runtime modules to the chunk, which handles
                 // the runtime logic for wrapping with lavamoat.
-                compilation.addRuntimeModule(
-                  chunk,
-                  new VirtualRuntimeModule({
-                    name: 'LavaMoat/runtime',
-                    source: lavaMoatRuntime,
-                    stage: RuntimeModule.STAGE_TRIGGER, // after all other stages
-                  })
-                )
-
-                compilation.addRuntimeModule(
-                  chunk,
-                  new VirtualRuntimeModule({
-                    name: 'LavaMoat/defensive',
-                    source: defensivePreamble,
-                    stage: RuntimeModule.STAGE_BASIC, // before all other runtime modules
-                    withoutClosure: true, // run in the scope of the runtime closure
-                  })
-                )
+                lavaMoatRuntimeModules.forEach((module) => {
+                  compilation.addRuntimeModule(chunk, module)
+                })
 
                 // set.add(RuntimeGlobals.onChunksLoaded); // TODO: develop an understanding of what this line does and why it was a part of the runtime setup for module federation
 
                 // Mark the chunk as processed by adding it to the WeakSet.
                 onceForChunkSet.add(chunk)
-
-                PROGRESS.report('runtimeAdded')
               }
             }
           }

@@ -95,6 +95,28 @@ test('getEndowmentsForConfig - siblings', (t) => {
   }
 })
 
+
+test('getEndowmentsForConfig - tightening access with false', (t) => {
+  const { getEndowmentsForConfig } = prepareTest()
+  const sourceGlobal = {
+    a: { b: { c: 2, d: 3 }, q: 1 },
+  }
+
+  const config = {
+    globals: {
+      'a': false,
+      'a.q': true,
+    },
+  }
+
+  const resultGlobal = getEndowmentsForConfig(sourceGlobal, config)
+  {
+    t.is(typeof resultGlobal.a, 'object')
+    t.is(resultGlobal.a.b, undefined)
+    t.is(resultGlobal.a.q, 1)
+  }
+})
+
 test('getEndowmentsForConfig - knownWritable', (t) => {
   const knownWritable = new Set(['a', 'b', 'x'])
   const { getEndowmentsForConfig } = prepareTest({ knownWritable })
@@ -444,16 +466,44 @@ test('getEndowmentsForConfig - ensure setTimeout calls dont trigger illegal invo
   t.is(resultGlobal.setTimeout(), sourceGlobal)
 })
 
+test('copyWrappedGlobals - support other realm prototype chains', (t) => {
+  'use strict'
+  const { copyWrappedGlobals } = prepareTest()
+  const forkedProto = Object.create(null)
+  forkedProto.hasOwnProperty = () => true
+  forkedProto.legitimateValue = 1
+  Object.defineProperty(forkedProto, 'aNonEnumerableValue', {
+    value: 2,
+    enumerable: false,
+  })
+
+  const sourceProto = Object.create(forkedProto)
+  sourceProto.onTheProto = function () {}
+  const source = Object.create(sourceProto)
+  source.onTheObj = function () {}
+  const target = Object.create(null)
+
+  // used to throw
+  // Error: Lavamoat - unable to find common prototype between Compartment and globalRef
+  copyWrappedGlobals(source, target, ['window'])
+
+  t.is(Object.getOwnPropertyNames(target).sort().join(), 'aNonEnumerableValue,legitimateValue,onTheObj,onTheProto,window')
+})
+
 test('copyWrappedGlobals - copy from prototype too', (t) => {
   'use strict'
   const { copyWrappedGlobals } = prepareTest()
   const sourceProto = {
     onTheProto: function () {},
   }
+  Object.defineProperty(sourceProto, 'aNonEnumerableValue', {
+    value: 2,
+    enumerable: false,
+  })
   const source = Object.create(sourceProto)
   source.onTheObj = function () {}
   const target = Object.create(null)
   copyWrappedGlobals(source, target, ['window'])
 
-  t.is(Object.keys(target).sort().join(), 'onTheObj,onTheProto,window')
+  t.is(Object.getOwnPropertyNames(target).sort().join(), 'aNonEnumerableValue,onTheObj,onTheProto,window')
 })

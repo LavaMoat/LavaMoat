@@ -1,18 +1,4 @@
-/**
- * @typedef {object} ScuttleOpts
- * @property {boolean} enabled - Whether scuttling is enabled or not.
- * @property {(string | RegExp)[]} exceptions - List of properties to exclude
- *   from scuttling.
- * @property {string} scuttlerName - Name of the scuttler function to use which
- *   is expected to be found as a property on the global object (e.g. if
- *   scuttlerName is 'x', scuttler function is obtained from globalThis['x']).
- */
-
-/**
- * @typedef {object} GlobalRef
- * @property {Record<string, any>} [globalThis] - Reference to the global
- *   object.
- */
+/** @import { LavaMoatScuttleOpts, GlobalRef } from './scuttle.d.ts' */
 
 const { Object, Array, Error, RegExp, Set, console, Proxy, Reflect } =
   globalThis
@@ -66,7 +52,7 @@ function generateInvokers(prop) {
  * create the root package compartment.
  *
  * @param {GlobalRef} globalRef - Reference to the global object.
- * @param {ScuttleOpts} opts - Scuttling options.
+ * @param {LavaMoatScuttleOpts} opts - Scuttling options.
  */
 function scuttle(globalRef, opts) {
   const scuttleOpts = generateScuttleOpts(globalRef, opts)
@@ -85,9 +71,9 @@ function scuttle(globalRef, opts) {
 
 /**
  * @param {GlobalRef} globalRef - Reference to the global object.
- * @param {ScuttleOpts | boolean} originalOpts - Scuttling options. Accepts
+ * @param {LavaMoatScuttleOpts | boolean} originalOpts - Scuttling options. Accepts
  *   `true` for backwards compatibility.
- * @returns {ScuttleOpts} - Final scuttling options.
+ * @returns {LavaMoatScuttleOpts} - Final scuttling options.
  */
 function generateScuttleOpts(globalRef, originalOpts = create(null)) {
   const defaultOpts = {

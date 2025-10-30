@@ -19,6 +19,65 @@
     * lavamoat-core bumped from ^15.2.0 to ^15.2.1
     * lavamoat-tofu bumped from ^7.2.1 to ^7.2.2
 
+## [10.0.0](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-v9.0.16...lavamoat-v10.0.0) (2025-10-09)
+
+
+### ⚠ BREAKING CHANGES
+
+* indicate breaking change propagation: stop overwriting the policy file while loading. ([#1835](https://github.com/LavaMoat/LavaMoat/issues/1835))
+
+### Bug Fixes
+
+* indicate breaking change propagation: stop overwriting the policy file while loading. ([#1835](https://github.com/LavaMoat/LavaMoat/issues/1835)) ([81f2cb0](https://github.com/LavaMoat/LavaMoat/commit/81f2cb0bf00e61c9ddfb637ad20deacba95ca967))
+
+## [9.0.16](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-v9.0.15...lavamoat-v9.0.16) (2025-10-01)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-core bumped from ^16.7.0 to ^16.7.1
+    * lavamoat-tofu bumped from ^8.0.10 to ^8.0.11
+
+## [9.0.15](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-v9.0.14...lavamoat-v9.0.15) (2025-09-25)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-core bumped from ^16.6.2 to ^16.7.0
+
+## [9.0.14](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-v9.0.13...lavamoat-v9.0.14) (2025-09-22)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-core bumped from ^16.6.1 to ^16.6.2
+    * lavamoat-tofu bumped from ^8.0.9 to ^8.0.10
+
+## [9.0.13](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-v9.0.12...lavamoat-v9.0.13) (2025-09-19)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-core bumped from ^16.6.0 to ^16.6.1
+    * lavamoat-tofu bumped from ^8.0.8 to ^8.0.9
+
+## [9.0.12](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-v9.0.11...lavamoat-v9.0.12) (2025-09-16)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-core bumped from ^16.5.1 to ^16.6.0
+
 ## [9.0.11](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-v9.0.10...lavamoat-v9.0.11) (2025-08-25)
 
 

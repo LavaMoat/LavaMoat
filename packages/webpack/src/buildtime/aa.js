@@ -47,7 +47,7 @@ const crossReference = (neededIds, policyIds) => {
 }
 
 /**
- * @import {LavaMoatPolicy} from 'lavamoat-core'
+ * @import {LavaMoatPolicy, ResourcePolicy} from '@lavamoat/types'
  * @import {CanonicalNameMap} from '@lavamoat/aa'
  */
 
@@ -79,16 +79,24 @@ exports.generateIdentifierLookup = ({
   readableResourceIds,
 }) => {
   /**
-   * @typedef {Record<string, { aa: string; moduleId: number | string }>} PathMapping
+   * @typedef {Record<string, { aa: string; moduleIds: (number | string)[] }>} PathMapping
    */
   const pathsToIdentifiers = () => {
     /** @type {PathMapping} */
     const mapping = {}
-    for (const p of paths) {
-      if (p.path) {
-        mapping[p.path] = {
-          aa: getPackageNameForModulePath(canonicalNameMap, p.path),
-          moduleId: p.moduleId,
+    for (const { path, moduleId } of paths) {
+      if (path) {
+        if (mapping[path]) {
+          mapping[path].moduleIds.push(moduleId)
+          diag.rawDebug(
+            2,
+            `Duplicated moduleId at path ${path}, moduleIds: ${mapping[path].moduleIds.join(', ')}`
+          )
+        } else {
+          mapping[path] = {
+            aa: getPackageNameForModulePath(canonicalNameMap, path),
+            moduleIds: [moduleId],
+          }
         }
       }
     }
@@ -102,7 +110,7 @@ exports.generateIdentifierLookup = ({
       if (resourceId && !mapping[c.context]) {
         mapping[c.context] = {
           aa: resourceId,
-          moduleId: c.moduleId,
+          moduleIds: [c.moduleId],
         }
       }
     }
@@ -136,12 +144,12 @@ exports.generateIdentifierLookup = ({
   crossReference(identifiersWithKnownPaths, usedIdentifiers)
 
   const identifiersForModuleIds = Object.entries(
-    Object.entries(pathLookup).reduce((acc, [, { aa, moduleId }]) => {
+    Object.entries(pathLookup).reduce((acc, [, { aa, moduleIds }]) => {
       const key = translate(aa)
       if (acc[key] === undefined) {
         acc[key] = []
       }
-      acc[key].push(moduleId)
+      acc[key].push(...moduleIds)
       return acc
     }, /** @type {Record<string, (string | number)[]>} */ ({}))
   )
@@ -164,6 +172,31 @@ exports.generateIdentifierLookup = ({
       ),
   })
 
+  /**
+   * @param {ResourcePolicy} resource
+   * @returns
+   */
+  const stripMetaFromResource = (resource) => {
+    // eslint-disable-next-line no-unused-vars
+    const { meta, ...rest } = resource
+    return rest
+  }
+  /**
+   * @param {LavaMoatPolicy} policy
+   * @returns {LavaMoatPolicy}
+   */
+  const stripMeta = (policy) => {
+    const { resources = Object.create(null) } = policy
+    const strippedPolicy = {
+      resources: Object.fromEntries(
+        Object.entries(resources)
+          .filter(([id]) => identifiersWithKnownPaths.has(id)) // only saves resources that are actually used
+          .map(([id, resource]) => [id, stripMetaFromResource(resource)])
+      ),
+    }
+    return strippedPolicy
+  }
+
   return {
     root: translate(ROOT_IDENTIFIER),
     identifiersForModuleIds,
@@ -180,7 +213,7 @@ exports.generateIdentifierLookup = ({
     policyIdentifierToResourceId: (id) => translate(id),
     getTranslatedPolicy: () => {
       if (readableResourceIds) {
-        return policy
+        return stripMeta(policy)
       }
       const { resources = Object.create(null) } = policy
       const translatedPolicy = {
@@ -189,7 +222,7 @@ exports.generateIdentifierLookup = ({
             .filter(([id]) => identifiersWithKnownPaths.has(id)) // only saves resources that are actually used
             .map(([id, resource]) => [
               translate(id),
-              translateResource(resource),
+              stripMetaFromResource(translateResource(resource)),
             ])
         ),
       }

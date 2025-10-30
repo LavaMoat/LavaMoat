@@ -1,10 +1,17 @@
-module.exports = { codeSampleFromAstNode }
+// @ts-check
 
+module.exports = { codeSampleFromAstNode }
 /**
- *
- * @param {import('@babel/types').Node & {loc: import('@babel/types').SourceLocation}} node
- * @param {import('lavamoat-core').LavamoatModuleRecord} moduleRecord
- * @returns
+ * @import {NodeWithLocation} from './types'
+ */
+
+
+// dumbed down the types to avoid circular dep on @lavamoat/types or lavamoat-core
+/**
+ * @deprecated - moved to lavamoat-core - use the same function from there for better types
+ * @param {NodeWithLocation} node
+ * @param {{content: string|undefined}} moduleRecord
+ * @returns {{ range: string; sample: string }}
  */
 function codeSampleFromAstNode(node, moduleRecord) {
   const result = {}
@@ -19,15 +26,6 @@ function codeSampleFromAstNode(node, moduleRecord) {
   const startLine = lines[start.line - 1]
   const sample = startLine.slice(start.column, start.column + 70)
   result.sample = sample
-  // add npmfs link if possible
-  // need to separately specify npm name if possible
-  // if (packageName && packageVersion && specifier) {
-  //   // https://npmfs.com/package/bluebird/3.5.5/js/browser/bluebird.core.js#L2714:22-L27:2414
-  //   const relativeFile = specifier.split(`${packageName}/`)[1]
-  //   let rangePart = `L${start.line}:${start.column}`
-  //   if (end) rangePart += `-L${end.line}:${end.column}`
-  //   const url = `https://npmfs.com/package/${packageName}/${packageVersion}/${relativeFile}#${rangePart}`
-  //   result.npmfs = url
-  // }
+ 
   return result
 }

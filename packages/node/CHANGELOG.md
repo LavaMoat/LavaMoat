@@ -1,5 +1,71 @@
 # Changelog
 
+## [0.4.6](https://github.com/LavaMoat/LavaMoat/compare/node-v0.4.5...node-v0.4.6) (2025-10-09)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-core bumped from ^16.7.1 to ^17.0.0
+
+## [0.4.5](https://github.com/LavaMoat/LavaMoat/compare/node-v0.4.4...node-v0.4.5) (2025-10-01)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @lavamoat/types bumped from 0.0.1 to 0.1.0
+    * lavamoat-core bumped from ^16.7.0 to ^16.7.1
+
+## [0.4.4](https://github.com/LavaMoat/LavaMoat/compare/node-v0.4.3...node-v0.4.4) (2025-09-25)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-core bumped from ^16.6.2 to ^16.7.0
+
+## [0.4.3](https://github.com/LavaMoat/LavaMoat/compare/node-v0.4.2...node-v0.4.3) (2025-09-22)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-core bumped from ^16.6.1 to ^16.6.2
+
+## [0.4.2](https://github.com/LavaMoat/LavaMoat/compare/node-v0.4.1...node-v0.4.2) (2025-09-19)
+
+
+### Bug Fixes
+
+* **types:** remove global Object.hasOwn type ([ee9f86b](https://github.com/LavaMoat/LavaMoat/commit/ee9f86b764b2a18b5863cd769d545692420ebf5a)), closes [#1817](https://github.com/LavaMoat/LavaMoat/issues/1817)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @lavamoat/types bumped from 0.0.0 to 0.0.1
+    * lavamoat-core bumped from ^16.6.0 to ^16.6.1
+
+## [0.4.1](https://github.com/LavaMoat/LavaMoat/compare/node-v0.4.0...node-v0.4.1) (2025-09-16)
+
+
+### Bug Fixes
+
+* **deps:** update endo ([#1790](https://github.com/LavaMoat/LavaMoat/issues/1790)) ([672b3bd](https://github.com/LavaMoat/LavaMoat/commit/672b3bd4673e7a7c28c043e2c94347d9b4b2e58c))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-core bumped from ^16.5.1 to ^16.6.0
+
 ## [0.4.0](https://github.com/LavaMoat/LavaMoat/compare/node-v0.3.1...node-v0.4.0) (2025-08-25)
 
 

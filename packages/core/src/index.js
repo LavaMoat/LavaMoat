@@ -10,6 +10,7 @@ const {
 const { mergePolicy } = require('./mergePolicy')
 const { applySourceTransforms } = require('./sourceTransforms')
 const { makeInitStatsHook } = require('./makeInitStatsHook')
+const { codeSampleFromAstNode } = require('./codeSampleFromAstNode')
 const endowmentsToolkit = require('./endowmentsToolkit')
 const { jsonStringifySortedPolicy } = require('./stringifyPolicy')
 const { DEFAULT_GLOBAL_THIS_REFS } = require('./constants')
@@ -32,5 +33,6 @@ module.exports = {
   LavamoatModuleRecord,
   // utils
   makeInitStatsHook,
+  codeSampleFromAstNode,
   endowmentsToolkit,
 }

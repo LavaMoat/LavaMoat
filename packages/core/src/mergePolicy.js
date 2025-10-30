@@ -7,32 +7,39 @@ const {
 } = require('lavamoat-tofu/src/util')
 const mergeDeep = require('merge-deep')
 
-const { values, hasOwn } = Object
+const { entries, hasOwn } = Object
 
 /**
- * @import {LavaMoatPolicy, LavaMoatPolicyOverrides, GlobalPolicy, BuiltinPolicy, GlobalPolicyValue} from './schema'
+ * @import {LavaMoatPolicy, GlobalPolicy, BuiltinPolicy, GlobalPolicyValue} from '@lavamoat/types'
  */
 
 /**
- * Merges two policies together.
+ * Merges two policies together with priority to stricter decisions made in
+ * policyOverride
  *
- * `policyB` overwrites `policyA` where concatenation is not possible
+ * `policyOverride` overwrites `policyA` where concatenation is not possible
  *
  * @param {LavaMoatPolicy} policyA First policy
- * @param {LavaMoatPolicy | LavaMoatPolicyOverrides} [policyB] Second policy or
- *   policy override
- * @returns {LavaMoatPolicy} Merged policy or `policyA` if `policyB` not
+ * @param {LavaMoatPolicy} [policyOverride] Second policy or policy override
+ * @returns {LavaMoatPolicy} Merged policy or `policyA` if `policyOverride` not
  *   provided
  */
-function mergePolicy(policyA, policyB) {
-  if (policyB) {
-    const mergedPolicy = mergeDeep(policyA, policyB)
-    values(mergedPolicy.resources ?? {}).forEach((packagePolicy) => {
+function mergePolicy(policyA, policyOverride) {
+  if (policyOverride) {
+    const mergedPolicy = mergeDeep(policyA, policyOverride)
+    entries(mergedPolicy.resources ?? {}).forEach(([path, packagePolicy]) => {
+      const currentOverride = policyOverride.resources?.[path] ?? {}
       if (hasOwn(packagePolicy, 'globals') && packagePolicy.globals) {
-        packagePolicy.globals = dedupePolicyPaths(packagePolicy.globals)
+        packagePolicy.globals = dedupePolicyPaths(
+          packagePolicy.globals,
+          currentOverride.globals
+        )
       }
       if (hasOwn(packagePolicy, 'builtin') && packagePolicy.builtin) {
-        packagePolicy.builtin = dedupePolicyPaths(packagePolicy.builtin)
+        packagePolicy.builtin = dedupePolicyPaths(
+          packagePolicy.builtin,
+          currentOverride.builtin
+        )
       }
     })
     return /** @type {LavaMoatPolicy} */ (mergedPolicy)
@@ -41,16 +48,39 @@ function mergePolicy(policyA, policyB) {
 }
 
 /**
- * @template {BuiltinPolicy | GlobalPolicy} T
- * @param {T} packagePolicy
- * @returns {T}
+ * @overload
+ * @param {BuiltinPolicy} policyItems
+ * @param {BuiltinPolicy} [overrideItems]
+ * @returns {BuiltinPolicy}
  */
-function dedupePolicyPaths(packagePolicy) {
+/**
+ * @overload
+ * @param {GlobalPolicy} policyItems
+ * @param {GlobalPolicy} [overrideItems]
+ * @returns {GlobalPolicy}
+ */
+/**
+ * @param {BuiltinPolicy | GlobalPolicy} policyItems
+ * @param {BuiltinPolicy | GlobalPolicy} [overrideItems]
+ * @returns {BuiltinPolicy | GlobalPolicy}
+ */
+function dedupePolicyPaths(policyItems, overrideItems) {
   const itemMap = /** @type {Map<string, GlobalPolicyValue>} */ (
-    objToMap(packagePolicy)
+    objToMap(policyItems)
   )
+
   reduceToTopmostApiCalls(itemMap)
-  return /** @type {T} */ (mapToObj(itemMap))
+
+  // After we've removed all nesting to ensure denying a top-level field denies all generated sub-fields, we need to add back in the sub-fields explicitly allowed in overrides.
+  if (overrideItems) {
+    entries(overrideItems).forEach(([path, value]) => {
+      if (value !== false && !itemMap.has(path)) {
+        itemMap.set(path, value)
+      }
+    })
+  }
+
+  return /** @type {BuiltinPolicy | GlobalPolicy} */ (mapToObj(itemMap))
 }
 
 module.exports = { mergePolicy }

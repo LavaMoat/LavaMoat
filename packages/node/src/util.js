@@ -112,14 +112,6 @@ export const isBoolean = (value) => typeof value === 'boolean'
  */
 export const hasValue = (obj, prop) => {
   return (
-    /**
-     * TODO:
-     *
-     * - [ ] Use `Object.hasOwn`; this type def should eventually live in
-     *   `@lavamoat/types` (it's currently a declaration in core and not
-     *   exported) while it does not exist in TypeScript libs.
-     */
-
     prop in obj &&
     /**
      * @privateRemarks

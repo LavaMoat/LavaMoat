@@ -18,8 +18,10 @@ The LavaMoat plugin takes an options object with the following properties (all o
 
 | Property                   | Description                                                                                                                                                                                                                                                                                                           | Default                  |
 | -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------ |
+| `scuttleGlobalThis`        | Configure scuttling of global object properties using `{ enabled: true, exceptions: ['globalName'] }` where exceptions specify which globals should not be scuttled. Removes access to potentially dangerous globals while preserving access to essential APIs.                                                       | `undefined`              |
 | `policyLocation`           | Directory to store policy files in.                                                                                                                                                                                                                                                                                   | `./lavamoat/webpack`     |
 | `generatePolicy`           | Whether to generate the `policy.json` file. Generated policy is used in the build immediately. `policy-override.json` is applied before bundling, if present.                                                                                                                                                         | `false`                  |
+| `generatePolicyOnly`       | Enables `generatePolicy` and skips finishing the build (useful if you only need to regenerate policy files)                                                                                                                                                                                                           | `false`                  |
 | `emitPolicySnapshot`       | If enabled, emits the result of merging policy with overrides into the output directory of Webpack build for inspection. The file is not used by the bundle.                                                                                                                                                          | `false`                  |
 | `readableResourceIds`      | Boolean to decide whether to keep resource IDs human readable (possibly regardless of production/development mode). If `false`, they are replaced with a sequence of numbers. Keeping them readable may be useful for debugging when a policy violation error is thrown. By default, follows the Webpack config mode. | `(mode==='development')` |
 | `lockdown`                 | Configuration for [SES lockdown][]. Setting the option replaces defaults from LavaMoat.                                                                                                                                                                                                                               | reasonable defaults      |
@@ -29,6 +31,7 @@ The LavaMoat plugin takes an options object with the following properties (all o
 | `diagnosticsVerbosity`     | Number property to represent diagnostics output verbosity. A larger number means more overwhelming diagnostics output.                                                                                                                                                                                                | `0`                      |
 | `debugRuntime`             | Only for local debugging use - Enables debugging tools that help detect gaps in generated policy and add missing entries to overrides                                                                                                                                                                                 | `false`                  |
 | `policy`                   | The LavaMoat policy object (if not loading from file; see `policyLocation`)                                                                                                                                                                                                                                           | `undefined`              |
+| `staticShims_experimental` | Standalone JS files to be added to the runtime chunk before lavamoat runtime starts and executes lockdown.                                                                                                                                                                                                            | `undefined`              |
 
 ```js
 const LavaMoatPlugin = require('@lavamoat/webpack')
@@ -46,6 +49,37 @@ module.exports = {
 ```
 
 One important thing to note when using the LavaMoat plugin is that it disables the `concatenateModules` optimization in webpack. This is because concatenation won't work with wrapped modules.
+
+### Using static shims
+
+Static shims are a way to include additional code in the runtime chunk before LavaMoat starts.
+
+> [!WARNING]
+> Shims cannot use import or require, they must be standalone scripts.
+
+```js
+const LavaMoatPlugin = require('@lavamoat/webpack')
+const path = require('path')
+
+module.exports = {
+  plugins: [
+    new LavaMoatPlugin({
+      staticShims_experimental: [
+        'package-name', // a package whose main export is a built standalone script
+        path.join(__dirname, './local/file.js'),
+      ],
+    }),
+  ],
+}
+```
+
+The static shims are executed between the repair and harden phases of SES lockdown.
+It's the only way to polyfill functionality on intrinsics or run any privileged code outside of LavaMoat protections.
+
+```js
+// resolvers-shim.js
+  Promise.withResolvers = ...
+```
 
 ### Excluding modules
 
@@ -77,6 +111,24 @@ Example: avoid wrapping CSS modules:
 ```
 
 See: `examples/webpack.config.js` for a complete example.
+
+### Scuttling GlobalThis
+
+With defense-in-depth in mind, you can also make the actual `globalThis` unusable in case a reference to it is accidentally made accessible for a package. When enabled, this feature removes access to all globals after their copies were captured and passed to Compartments in LavaMoat. You can specify exceptions to maintain access to specific globals that are deliberately used outside of LavaMoat.
+
+Configure scuttling using:
+
+```js
+new LavaMoatPlugin({
+  scuttleGlobalThis: {
+    enabled: true,
+    exceptions: [
+      'yourRequiredGlobal',
+      /RegExp matching globals that a webdriver depends on for running your tests/,
+    ], // list of globals that should remain accessible
+  },
+})
+```
 
 ### diagnosticsVerbosity
 
