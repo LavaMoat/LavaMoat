@@ -103,6 +103,44 @@ testMerge(
   }
 )
 
+testMerge(
+  'overrides to disallow - real usecas',
+  {
+    resources: {
+      babel: {
+        globals: {
+          document: true,
+          window: true,
+        },
+      },
+    },
+  },
+  {
+    resources: {
+      babel: {
+        globals: {
+          document: false,
+          'document.createElement': true,
+          window: false,
+          'window.location.hash': true,
+        },
+      },
+    },
+  },
+  {
+    resources: {
+      babel: {
+        globals: {
+          document: false,
+          window: false,
+          'document.createElement': true,
+          'window.location.hash': true,
+        },
+      },
+    },
+  }
+)
+
 function testMerge(label, configA, configB, expectedResultObj) {
   test(label, (t) => {
     const result = mergePolicy(configA, configB)

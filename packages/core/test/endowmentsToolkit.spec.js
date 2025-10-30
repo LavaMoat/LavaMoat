@@ -95,6 +95,28 @@ test('getEndowmentsForConfig - siblings', (t) => {
   }
 })
 
+
+test('getEndowmentsForConfig - tightening access with false', (t) => {
+  const { getEndowmentsForConfig } = prepareTest()
+  const sourceGlobal = {
+    a: { b: { c: 2, d: 3 }, q: 1 },
+  }
+
+  const config = {
+    globals: {
+      'a': false,
+      'a.q': true,
+    },
+  }
+
+  const resultGlobal = getEndowmentsForConfig(sourceGlobal, config)
+  {
+    t.is(typeof resultGlobal.a, 'object')
+    t.is(resultGlobal.a.b, undefined)
+    t.is(resultGlobal.a.q, 1)
+  }
+})
+
 test('getEndowmentsForConfig - knownWritable', (t) => {
   const knownWritable = new Set(['a', 'b', 'x'])
   const { getEndowmentsForConfig } = prepareTest({ knownWritable })
