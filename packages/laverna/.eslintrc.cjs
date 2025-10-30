@@ -6,7 +6,10 @@
 module.exports = {
   overrides: [
     {
-      files: ['src/**/*.js'],
+      files: ['**/*.js'],
+      parserOptions: {
+        sourceType: 'module',
+      },
       rules: {
         'no-restricted-globals': [
           'error',
@@ -23,6 +26,7 @@ module.exports = {
             message: 'Use parseJson from capabilities object',
           },
         ],
+        'n/no-missing-import': 'off',
       },
     },
   ],
