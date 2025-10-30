@@ -48,10 +48,21 @@ function mergePolicy(policyA, policyOverride) {
 }
 
 /**
- * @template {BuiltinPolicy | GlobalPolicy} T
- * @param {T} policyItems
- * @param {T} [overrideItems]
- * @returns {T}
+ * @overload
+ * @param {BuiltinPolicy} policyItems
+ * @param {BuiltinPolicy} [overrideItems]
+ * @returns {BuiltinPolicy}
+ */
+/**
+ * @overload
+ * @param {GlobalPolicy} policyItems
+ * @param {GlobalPolicy} [overrideItems]
+ * @returns {GlobalPolicy}
+ */
+/**
+ * @param {BuiltinPolicy | GlobalPolicy} policyItems
+ * @param {BuiltinPolicy | GlobalPolicy} [overrideItems]
+ * @returns {BuiltinPolicy | GlobalPolicy}
  */
 function dedupePolicyPaths(policyItems, overrideItems) {
   const itemMap = /** @type {Map<string, GlobalPolicyValue>} */ (
@@ -69,7 +80,7 @@ function dedupePolicyPaths(policyItems, overrideItems) {
     })
   }
 
-  return /** @type {T} */ (mapToObj(itemMap))
+  return /** @type {BuiltinPolicy | GlobalPolicy} */ (mapToObj(itemMap))
 }
 
 module.exports = { mergePolicy }
