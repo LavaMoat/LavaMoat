@@ -6,6 +6,13 @@
   * dependencies
     * lavamoat-tofu bumped from ^7.2.1 to ^7.2.2
 
+## [17.0.1](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v17.0.0...lavamoat-core-v17.0.1) (2025-10-30)
+
+
+### Bug Fixes
+
+* **core:** fix policy narrowing logic in the policy merge  ([#1843](https://github.com/LavaMoat/LavaMoat/issues/1843)) ([ea5f3d4](https://github.com/LavaMoat/LavaMoat/commit/ea5f3d46aa8db8ee8e51115ca4b46c5fd00a89b6))
+
 ## [17.0.0](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v16.7.1...lavamoat-core-v17.0.0) (2025-10-09)
 
 
