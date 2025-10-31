@@ -7,7 +7,6 @@
  */
 
 import type {
-  FileUrlString,
   PackageCompartmentMapDescriptor,
   ReadNowPowers,
   ReadNowPowersProp,
@@ -28,6 +27,7 @@ import type {
 } from './constants.js'
 import type {
   ComposeOptions,
+  FileUrlString,
   MergedLavaMoatPolicy,
   WithDev,
   WithFs,
