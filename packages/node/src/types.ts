@@ -33,6 +33,8 @@ import type {
   MERGED_POLICY_FIELD,
 } from './constants.js'
 
+export type { FileUrlString } from '@endo/compartment-mapper'
+
 /**
  * A loaded application which has not yet been executed
  */
