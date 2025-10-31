@@ -6,5 +6,8 @@
     "source.formatDocument": "explicit"
   },
   "prettier.useEditorConfig": true,
-  "files.insertFinalNewline": false
+  "files.insertFinalNewline": false,
+  "search.exclude": {
+    "**/packages/*/types/**": true
+  }
 }
