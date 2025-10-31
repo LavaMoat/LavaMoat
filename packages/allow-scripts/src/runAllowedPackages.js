@@ -3,6 +3,16 @@
  *
  * @module
  */
+
+/**
+ * @import {
+ *   BinInfo,
+ *   PkgInfo,
+ *   RunAllowedPackagesParams,
+ *   RunScriptParams
+ * } from './types/common.js'
+ */
+
 const path = require('node:path')
 const npmRunScript = require('@npmcli/run-script')
 const { loadAllPackageConfigurations } = require('./config.js')
