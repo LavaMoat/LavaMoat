@@ -30,9 +30,9 @@ import { WorkerPool } from '../worker-pool.js'
 
 /**
  * @import {LoadAndGeneratePolicyOptions, LoadCompartmentMapResult, InspectMessage, PoliciesMessage, ErrorMessage, SourceType, StructuredViolationsResult} from '../internal.js'
- * @import {CanonicalName, FileUrlString, Language, LocalModuleSource} from '@endo/compartment-mapper'
+ * @import {CanonicalName, Language, LocalModuleSource} from '@endo/compartment-mapper'
  * @import {BuiltinPolicy, GlobalPolicy, GlobalPolicyValue, LavaMoatPolicy, PackagePolicy} from '@lavamoat/types'
- * @import {MergedLavaMoatPolicy} from '../types.js'
+ * @import {MergedLavaMoatPolicy, FileUrlString} from '../types.js'
  * @import {Loggerr} from 'loggerr'
  */
 
