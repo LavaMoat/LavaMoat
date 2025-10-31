@@ -12,9 +12,10 @@ import nodeUrl from 'node:url'
 import { assertAbsolutePath } from './fs.js'
 
 /**
- * @import {FileUrlString, FileURLToPathFn, ReadNowPowers} from '@endo/compartment-mapper'
+ * @import {FileURLToPathFn, ReadNowPowers} from '@endo/compartment-mapper'
  * @import {RequiredReadNowPowers} from './internal.js'
  * @import {SetNonNullable} from 'type-fest'
+ * @import {FileUrlString} from './types.js'
  */
 const { isArray: isArray_ } = Array
 const { freeze, keys } = Object
