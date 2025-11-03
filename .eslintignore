@@ -17,3 +17,6 @@ packages/yarn-plugin-allow-scripts/bundles
 packages/*/types
 packages/*/dist
 !/.github
+packages/vog/src/**/*.js
+packages/vog/src/**/*.d.ts
+packages/vog/src/**/*.map

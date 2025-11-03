@@ -1,0 +1,2 @@
+ignores:
+  - '@typescript-eslint/parser'

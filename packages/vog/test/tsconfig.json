@@ -1,19 +1,17 @@
 {
   "compilerOptions": {
+    "allowJs": false,
+    "checkJs": false,
     "erasableSyntaxOnly": true,
-    "exactOptionalPropertyTypes": true,
     "module": "NodeNext",
     "rewriteRelativeImportExtensions": true,
-    "rootDir": "..",
+    "exactOptionalPropertyTypes": true,
     "strict": true,
+    "stripInternal": true,
     "target": "esnext",
-    "verbatimModuleSyntax": true
+    "verbatimModuleSyntax": true,
+    "rootDir": ".."
   },
   "extends": "../../../.config/tsconfig.test.json",
-  "include": ["."],
-  "references": [
-    {
-      "path": "../src/tsconfig.json"
-    }
-  ]
+  "include": ["*.ts", "../src/*.ts"]
 }
