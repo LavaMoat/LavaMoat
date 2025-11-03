@@ -183,37 +183,122 @@ function inspectGlobals(
  * @param {import('@babel/types').Node} ast
  * @param {string[]} [packagesToInspect] - List of module IDs to look for; if
  *   omitted, will inspect all imports
+ * @param {boolean} [deep] Return named exports and imports
  * @returns {string[]} - List of imported identifiers
  */
-function inspectEsmImports(ast, packagesToInspect) {
+function inspectEsmImports(ast, packagesToInspect, deep = true) {
   const shouldInspectAll = !packagesToInspect
   const pkgsToInspect = new Set(packagesToInspect)
 
   /** @type {Set<string>} */
-  const esmImports = new Set()
-
-  /**
-   * @param {import('@babel/traverse').NodePath<
-   *   | import('@babel/types').ImportDeclaration
-   *   | import('@babel/types').ExportNamedDeclaration
-   * >} path
-   */
-  const handleNodePath = (path) => {
-    const importSource = path.node.source?.value
-
-    if (importSource && (shouldInspectAll || pkgsToInspect.has(importSource))) {
-      esmImports.add(importSource)
-    }
-  }
+  const result = new Set()
 
   traverse(ast, {
-    ExportNamedDeclaration: (path) => {
-      handleNodePath(path)
+    ImportDeclaration: (path) => {
+      const importSource = path.node.source.value
+      if (!shouldInspectAll && !pkgsToInspect.has(importSource)) {
+        return
+      }
+
+      if (!deep) {
+        result.add(importSource)
+        return
+      }
+
+      const { specifiers } = path.node
+
+      const hasNamespaceImport = specifiers.some(
+        (spec) => spec.type === 'ImportNamespaceSpecifier'
+      )
+
+      const hasOnlyDefaultImport = specifiers.every(
+        (spec) => spec.type === 'ImportDefaultSpecifier'
+      )
+
+      if (
+        hasNamespaceImport ||
+        hasOnlyDefaultImport ||
+        specifiers.length === 0
+      ) {
+        // import * as foo from 'bar', import foo from 'baz', import 'quux'
+        result.add(importSource)
+      } else {
+        // Mixed or named imports
+        specifiers.forEach((spec) => {
+          if (spec.type === 'ImportSpecifier') {
+            // it can be an identifier or a string literal, to my amazement
+            const importedName =
+              spec.imported.type === 'Identifier'
+                ? spec.imported.name
+                : spec.imported.value
+            result.add(`${importSource}.${importedName}`)
+          } else if (spec.type === 'ImportDefaultSpecifier') {
+            // import foo, {bar} from 'baz'
+            result.add(importSource)
+          }
+        })
+      }
     },
-    ImportDeclaration: handleNodePath,
+
+    ExportNamedDeclaration: (path) => {
+      const exportSource = path.node.source?.value
+      if (
+        !exportSource ||
+        (!shouldInspectAll && !pkgsToInspect.has(exportSource))
+      ) {
+        return
+      }
+
+      if (!deep) {
+        result.add(exportSource)
+        return
+      }
+
+      const { specifiers } = path.node
+
+      const hasNamespaceExport = specifiers.some(
+        (spec) => spec.type === 'ExportNamespaceSpecifier'
+      )
+
+      if (hasNamespaceExport || specifiers.length === 0) {
+        // namespace exports or export * from
+        result.add(exportSource)
+      } else {
+        specifiers.forEach((spec) => {
+          if (spec.type === 'ExportSpecifier') {
+            // Handle both Identifier and StringLiteral (for arbitrary module namespace identifier names)
+            const exportedName =
+              // @ts-expect-error - @babel/types is wrong, but the parser handles string literals
+              spec.local.type === 'StringLiteral'
+                ? // @ts-expect-error - @babel/types is wrong, but the parser handles string literals
+                  spec.local.value
+                : spec.local.name
+            if (exportedName === 'default') {
+              // export { default as name } from 'module'
+              result.add(exportSource)
+            } else {
+              // export { name } from 'module'
+              result.add(`${exportSource}.${exportedName}`)
+            }
+          }
+        })
+      }
+    },
+
+    /**
+     * Handles `export * from 'module'`
+     */
+    ExportAllDeclaration: (path) => {
+      const exportSource = path.node.source.value
+      if (!shouldInspectAll && !pkgsToInspect.has(exportSource)) {
+        return
+      }
+
+      result.add(exportSource)
+    },
   })
 
-  return [...esmImports]
+  return [...result]
 }
 
 /**
