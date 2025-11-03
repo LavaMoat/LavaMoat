@@ -1,8 +1,5 @@
 const { generateKernel } = require('./generateKernel')
-const {
-  createModuleInspector,
-  getDefaultPaths,
-} = require('./generatePolicy')
+const { createModuleInspector, getDefaultPaths } = require('./generatePolicy')
 const { parseForPolicy } = require('./parseForPolicy')
 const { LavamoatModuleRecord } = require('./moduleRecord')
 const {
@@ -16,7 +13,7 @@ const { makeInitStatsHook } = require('./makeInitStatsHook')
 const { codeSampleFromAstNode } = require('./codeSampleFromAstNode')
 const endowmentsToolkit = require('./endowmentsToolkit')
 const { jsonStringifySortedPolicy } = require('./stringifyPolicy')
-const { DEFAULT_GLOBAL_THIS_REFS } = require('./constants')
+const { MODULE_REFS, DEFAULT_GLOBAL_THIS_REFS } = require('./constants')
 
 module.exports = {
   DEFAULT_GLOBAL_THIS_REFS,
