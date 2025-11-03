@@ -20,7 +20,11 @@ const {
 } = require('lavamoat-tofu')
 const { codeSampleFromAstNode } = require('./codeSampleFromAstNode')
 const { mergePolicy } = require('./mergePolicy')
-const { DEFAULT_GLOBAL_THIS_REFS, POLICY_WRITE } = require('./constants')
+const {
+  DEFAULT_GLOBAL_THIS_REFS,
+  POLICY_WRITE,
+  MODULE_REFS,
+} = require('./constants')
 
 /**
  * @import {DebugInfo,
@@ -46,14 +50,6 @@ const {
   assign,
   create,
 } = Object
-
-/**
- * Symbols that look like globals but aren't; indexed by source type.
- */
-const MODULE_REFS = /** @type {const} */ ({
-  module: ['arguments', 'import', 'export'],
-  script: ['arguments', 'require', 'module', 'exports'],
-})
 
 module.exports = {
   rootSlug,
