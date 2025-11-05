@@ -2,6 +2,7 @@
 
 const {
   reduceToTopmostApiCalls,
+  validateHierarchy,
   objToMap,
   mapToObj,
 } = require('lavamoat-tofu/src/util')
@@ -27,44 +28,54 @@ const { entries, hasOwn } = Object
 function mergePolicy(policyA, policyOverride) {
   if (policyOverride) {
     const mergedPolicy = mergeDeep(policyA, policyOverride)
-    entries(mergedPolicy.resources ?? {}).forEach(([path, packagePolicy]) => {
-      const currentOverride = policyOverride.resources?.[path] ?? {}
-      if (hasOwn(packagePolicy, 'globals') && packagePolicy.globals) {
-        packagePolicy.globals = dedupePolicyPaths(
-          packagePolicy.globals,
-          currentOverride.globals
-        )
+    entries(mergedPolicy.resources ?? {}).forEach(
+      ([resourceId, packagePolicy]) => {
+        const currentOverride = policyOverride.resources?.[resourceId] ?? {}
+        if (hasOwn(packagePolicy, 'globals') && packagePolicy.globals) {
+          packagePolicy.globals = dedupePolicyPaths({
+            policyItems: packagePolicy.globals,
+            overrideItems: currentOverride.globals,
+            resourceId,
+          })
+        }
+        if (hasOwn(packagePolicy, 'builtin') && packagePolicy.builtin) {
+          packagePolicy.builtin = dedupePolicyPaths({
+            policyItems: packagePolicy.builtin,
+            overrideItems: currentOverride.builtin,
+            resourceId,
+          })
+        }
       }
-      if (hasOwn(packagePolicy, 'builtin') && packagePolicy.builtin) {
-        packagePolicy.builtin = dedupePolicyPaths(
-          packagePolicy.builtin,
-          currentOverride.builtin
-        )
-      }
-    })
+    )
     return /** @type {LavaMoatPolicy} */ (mergedPolicy)
   }
   return policyA
 }
 
 /**
+ * @typedef {Object} DedupePolicyPathsOptions
+ * @property {BuiltinPolicy | GlobalPolicy} policyItems - The primary policy
+ *   items
+ * @property {BuiltinPolicy | GlobalPolicy} [overrideItems] - Optional override
+ *   items
+ * @property {string} resourceId - The resource identifier
+ */
+
+/**
  * @overload
- * @param {BuiltinPolicy} policyItems
- * @param {BuiltinPolicy} [overrideItems]
+ * @param {DedupePolicyPathsOptions & { policyItems: BuiltinPolicy }} options
  * @returns {BuiltinPolicy}
  */
 /**
  * @overload
- * @param {GlobalPolicy} policyItems
- * @param {GlobalPolicy} [overrideItems]
+ * @param {DedupePolicyPathsOptions & { policyItems: GlobalPolicy }} options
  * @returns {GlobalPolicy}
  */
 /**
- * @param {BuiltinPolicy | GlobalPolicy} policyItems
- * @param {BuiltinPolicy | GlobalPolicy} [overrideItems]
+ * @param {DedupePolicyPathsOptions} options
  * @returns {BuiltinPolicy | GlobalPolicy}
  */
-function dedupePolicyPaths(policyItems, overrideItems) {
+function dedupePolicyPaths({ policyItems, overrideItems, resourceId }) {
   const itemMap = /** @type {Map<string, GlobalPolicyValue>} */ (
     objToMap(policyItems)
   )
@@ -78,6 +89,18 @@ function dedupePolicyPaths(policyItems, overrideItems) {
         itemMap.set(path, value)
       }
     })
+  }
+
+  const violations = validateHierarchy(itemMap)
+  if (violations.length > 0) {
+    const violationMessages = violations.map(({ path, parent }) => {
+      return `"${path}" is invalid when "${parent}" is also present in policy"`
+    })
+    throw new Error(
+      `LavaMoat - Policy hierarchy validation failed for resource "${resourceId}"
+  ${violationMessages.join('\n  ')}
+You could set the parent "${violations[0].parent}" to false if you intended to override to a less permissive policy.`
+    )
   }
 
   return /** @type {BuiltinPolicy | GlobalPolicy} */ (mapToObj(itemMap))
