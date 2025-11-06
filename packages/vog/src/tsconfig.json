@@ -10,7 +10,8 @@
     "strict": true,
     "stripInternal": true,
     "target": "esnext",
-    "verbatimModuleSyntax": true
+    "verbatimModuleSyntax": true,
+    "rootDir": ".."
   },
   "exclude": ["*.d.ts", "*.js"],
   "extends": "../../../.config/tsconfig.src.json",
