@@ -12,6 +12,7 @@ import { jsonStringifySortedPolicy, mergePolicy } from 'lavamoat-core'
 import nodeFs from 'node:fs'
 import nodePath from 'node:path'
 import { toKeypath } from 'to-keypath'
+
 import * as constants from './constants.js'
 import {
   ATTENUATORS_COMPARTMENT,
@@ -167,8 +168,8 @@ export const maybeReadPolicyOverride = async (
 export const loadPolicies = async (
   policyOrPolicyPath,
   {
-    readFile = nodeFs.promises.readFile,
     projectRoot = process.cwd(),
+    readFile = nodeFs.promises.readFile,
     ...options
   } = {}
 ) => {
@@ -183,6 +184,7 @@ export const loadPolicies = async (
    * @type {string | undefined}
    */
   let policyPath
+
   /**
    * Path to policy override
    *
@@ -260,7 +262,7 @@ export const loadPolicies = async (
       (() => {
         assertPolicy(
           allegedPolicy,
-          `Invalid LavaMoat policy; does not match expected schema`
+          'Invalid LavaMoat policy; does not match expected schema'
         )
 
         return allegedPolicy
@@ -278,7 +280,7 @@ export const loadPolicies = async (
       (() => {
         assertPolicy(
           allegedPolicyOverride,
-          `Invalid LavaMoat policy overrides; does not match expected schema`
+          'Invalid LavaMoat policy overrides; does not match expected schema'
         )
         return allegedPolicyOverride
       })()
@@ -329,6 +331,7 @@ export const assertPolicy = (
 export const writePolicy = async (file, policy, { fs = nodeFs } = {}) => {
   const filepath = toPath(file)
   const policyDir = nodePath.dirname(filepath)
+
   /**
    * @type {string | undefined}
    */
@@ -425,11 +428,11 @@ const getPolicyCanonicalNames = (policy) => {
    */
   const policyCanonicalNames = /** @type {PolicyCanonicalNameInfo[]} */ ([
     ...new Set([
-      ...resourceCanonicalNames,
-      ...packagePolicyCanonicalNames,
-      ...includeCanonicalNames,
-      LAVAMOAT_PKG_POLICY_ROOT,
       ATTENUATORS_COMPARTMENT,
+      LAVAMOAT_PKG_POLICY_ROOT,
+      ...includeCanonicalNames,
+      ...packagePolicyCanonicalNames,
+      ...resourceCanonicalNames,
     ]),
   ])
   return policyCanonicalNames
@@ -564,6 +567,7 @@ export const makeDefaultPolicyOverridePath = ({ policyPath, projectRoot }) => {
   log.debug(`Guessed policy override path: ${hrPath(path)}`)
   return path
 }
+
 /**
  * Given path to a policy file, returns the sibling path to the policy debug
  * file
