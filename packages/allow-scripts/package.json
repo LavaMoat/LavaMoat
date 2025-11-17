@@ -40,7 +40,7 @@
   },
   "dependencies": {
     "@lavamoat/aa": "^4.3.4",
-    "@npmcli/run-script": "8.1.0",
+    "@npmcli/run-script": "10.0.3",
     "bin-links": "4.0.4",
     "npm-normalize-package-bin": "3.0.1",
     "type-fest": "4.41.0",

@@ -42,7 +42,7 @@
     "test:update": "ava --update-snapshots"
   },
   "dependencies": {
-    "glob": "11.0.0",
+    "glob": "11.1.0",
     "hosted-git-info": "8.1.0",
     "js-yaml": "4.1.1",
     "lockfile-lint-api": "5.9.2"
