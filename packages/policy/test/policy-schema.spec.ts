@@ -1,6 +1,9 @@
 import { type LavaMoatPolicy } from '@lavamoat/types'
 import assert from 'node:assert/strict'
+import fs from 'node:fs'
+import path from 'node:path'
 import { describe, it } from 'node:test'
+import { fileURLToPath } from 'node:url'
 import {
   assertLavaMoatPolicy,
   createLavaMoatPolicyJSONSchema,
@@ -70,6 +73,10 @@ const invalidGlobalWriteDotPolicy = {
   },
 }
 
+const FAILING_FIXTURES = new Set(['test/fixture/policy-3.json'])
+
+const __dirname__ = path.dirname(fileURLToPath(import.meta.url))
+
 describe('isLavaMoatPolicy()', () => {
   it('returns true for valid policy', () => {
     assert.equal(isLavaMoatPolicy(validPolicy), true)
@@ -94,6 +101,21 @@ describe('isLavaMoatPolicy()', () => {
   it('returns false for global property with dot and value write', () => {
     assert.equal(isLavaMoatPolicy(invalidGlobalWriteDotPolicy), false)
   })
+
+  for (const file of fs.readdirSync(path.join(__dirname__, 'fixture'))) {
+    const filepath = path.join(__dirname__, 'fixture', file)
+    const relativeFilepath = path.relative(process.cwd(), filepath)
+    const shouldFail = FAILING_FIXTURES.has(relativeFilepath)
+    it(`returns ${shouldFail ? 'false' : 'true'} for ${relativeFilepath}`, () => {
+      const policyFile = fs.readFileSync(filepath, 'utf8')
+      const policy = JSON.parse(policyFile) as unknown
+      if (shouldFail) {
+        assert.equal(isLavaMoatPolicy(policy), false)
+      } else {
+        assert.equal(isLavaMoatPolicy(policy), true)
+      }
+    })
+  }
 })
 
 describe('validateLavaMoatPolicy()', () => {
@@ -133,6 +155,23 @@ describe('validateLavaMoatPolicy()', () => {
       '✖ Writable properties of globals are currently unsupported\n  → at resources.foo.globals["foo.bar"]'
     )
   })
+
+  for (const file of fs.readdirSync(path.join(__dirname__, 'fixture'))) {
+    const filepath = path.join(__dirname__, 'fixture', file)
+    const relativeFilepath = path.relative(process.cwd(), filepath)
+    const shouldFail = FAILING_FIXTURES.has(relativeFilepath)
+    it(`validates policy ${relativeFilepath} as ${shouldFail ? 'invalid' : 'valid'}`, () => {
+      const policyFile = fs.readFileSync(filepath, 'utf8')
+      const policy = JSON.parse(policyFile) as unknown
+      if (shouldFail) {
+        const result = validateLavaMoatPolicy(policy)
+        assert.equal(result.success, false)
+        console.error(result.message)
+      } else {
+        assert.equal(validateLavaMoatPolicy(policy)?.success, true)
+      }
+    })
+  }
 })
 
 describe('assertLavaMoatPolicy()', () => {
@@ -159,6 +198,21 @@ describe('assertLavaMoatPolicy()', () => {
   it('throws for global property with dot and value write', () => {
     assert.throws(() => assertLavaMoatPolicy(invalidGlobalWriteDotPolicy))
   })
+
+  for (const file of fs.readdirSync(path.join(__dirname__, 'fixture'))) {
+    const filepath = path.join(__dirname__, 'fixture', file)
+    const relativeFilepath = path.relative(process.cwd(), filepath)
+    const shouldFail = FAILING_FIXTURES.has(relativeFilepath)
+    it(`asserts policy ${relativeFilepath} is ${shouldFail ? 'invalid' : 'valid'}`, () => {
+      const policyFile = fs.readFileSync(filepath, 'utf8')
+      const policy = JSON.parse(policyFile) as unknown
+      if (shouldFail) {
+        assert.throws(() => assertLavaMoatPolicy(policy))
+      } else {
+        assert.doesNotThrow(() => assertLavaMoatPolicy(policy))
+      }
+    })
+  }
 })
 
 describe('createLavaMoatPolicyJSONSchema()', () => {
