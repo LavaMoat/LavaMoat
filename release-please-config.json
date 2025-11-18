@@ -44,6 +44,10 @@
     },
     "packages/webpack": {
       "package-name": "@lavamoat/webpack"
+    },
+    "packages/policy": {
+      "package-name": "@lavamoat/policy",
+      "initial-version": "0.1.0"
     }
   },
   "plugins": ["node-workspace"]
