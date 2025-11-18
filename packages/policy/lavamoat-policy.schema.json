@@ -1,0 +1,258 @@
+{
+  "$defs": {
+    "builtinName": {
+      "description": "Name of a builtin module or property thereof; dot notation allowed",
+      "type": "string"
+    },
+    "builtinPolicy": {
+      "description": "`true` to allow access and `false` to deny access",
+      "type": "boolean"
+    },
+    "canonicalName": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/canonicalNameRegex"
+        },
+        {
+          "$ref": "#/$defs/rootName"
+        }
+      ],
+      "description": "Canonical name of a package representing the shortest path via the dependency tree (or $root$ for a trusted root package)"
+    },
+    "canonicalNameRegex": {
+      "description": "Regex for a canonical name",
+      "minLength": 1,
+      "pattern": "^(?:(?:@[a-z0-9-~][a-z0-9-._~]*\\/)?[a-z0-9-~][a-z0-9-._~]*)(?:>(?:@[a-z0-9-~][a-z0-9-._~]*\\/)?[a-z0-9-~][a-z0-9-._~]*)*$",
+      "type": "string"
+    },
+    "globalPolicy": {
+      "additionalProperties": {
+        "$ref": "#/$defs/globalPolicyValue"
+      },
+      "description": "Globals (including properties using \"dot\" notation) accessible to the resource; `true` to allow and `false` to deny",
+      "propertyNames": {
+        "$ref": "#/$defs/globalProperty"
+      },
+      "type": "object"
+    },
+    "globalPolicyBoolean": {
+      "description": "`true` for \"read\" capability; `false` for none",
+      "type": "boolean"
+    },
+    "globalPolicyRead": {
+      "const": "read",
+      "description": "DEPRECATED; use a boolean instead",
+      "type": "string"
+    },
+    "globalPolicyRedefine": {
+      "const": "redefine",
+      "description": "Policy value for a global with \"redefine\" capability",
+      "type": "string"
+    },
+    "globalPolicyValue": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/globalPolicyBoolean"
+        },
+        {
+          "$ref": "#/$defs/globalPolicyWrite"
+        },
+        {
+          "$ref": "#/$defs/globalPolicyRedefine"
+        },
+        {
+          "$ref": "#/$defs/globalPolicyRead"
+        }
+      ],
+      "description": "Global policy value"
+    },
+    "globalPolicyWrite": {
+      "const": "write",
+      "description": "Policy value for a global with \"write\" capability",
+      "type": "string"
+    },
+    "globalProperty": {
+      "description": "Global property key or property thereof; dot notation allowed",
+      "type": "string"
+    },
+    "include": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/includeEntryName"
+        },
+        {
+          "$ref": "#/$defs/includeEntryByName"
+        },
+        {
+          "$ref": "#/$defs/includeEntryByLocation"
+        }
+      ],
+      "description": "List of canonical names (or $root$) and/or entry paths to forcefully include in the policy"
+    },
+    "includeEntryByLocation": {
+      "additionalProperties": false,
+      "description": "List of locations and optionally relative module paths to forcefully include in the policy",
+      "properties": {
+        "location": {
+          "$ref": "#/$defs/includeEntryByLocationLocation"
+        },
+        "modules": {
+          "$ref": "#/$defs/includeEntryModules"
+        }
+      },
+      "required": ["location"],
+      "type": "object"
+    },
+    "includeEntryByLocationLocation": {
+      "description": "Relative path to directory containing a `package.json`, relative to the policy override file; cannot ascend above project root",
+      "minLength": 1,
+      "type": "string"
+    },
+    "includeEntryByName": {
+      "additionalProperties": false,
+      "description": "List of canonical names and optionally relative module paths to forcefully include in the policy",
+      "properties": {
+        "modules": {
+          "$ref": "#/$defs/includeEntryModules"
+        },
+        "name": {
+          "$ref": "#/$defs/includeEntryName"
+        }
+      },
+      "required": ["name"],
+      "type": "object"
+    },
+    "includeEntryModules": {
+      "description": "Module paths relative to the policy override file to forcefully include in generated policy; if omitted, the `.` path is implied",
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "includeEntryName": {
+      "$ref": "#/$defs/canonicalName",
+      "description": "Canonical name of package (must be present in dependency tree)"
+    },
+    "nativePolicy": {
+      "description": "`true` to allow loading of native modules; `false` for none",
+      "type": "boolean"
+    },
+    "packagePolicy": {
+      "description": "Additional external packages (in their entirety) accessible to the module; `true` to allow and `false` to deny",
+      "type": "boolean"
+    },
+    "resourceMetadata": {
+      "additionalProperties": {
+        "$ref": "#/$defs/resourceMetadataValue"
+      },
+      "description": "Metadata about the resource (EXPERIMENTAL)",
+      "propertyNames": {
+        "$ref": "#/$defs/resourceMetadataKey"
+      },
+      "type": "object"
+    },
+    "resourceMetadataKey": {
+      "description": "Key for a resource metadata entry",
+      "type": "string"
+    },
+    "resourceMetadataValue": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      ],
+      "description": "Value for a resource metadata entry"
+    },
+    "resourcePolicy": {
+      "additionalProperties": false,
+      "description": "Policy for a given resource",
+      "properties": {
+        "builtin": {
+          "additionalProperties": {
+            "$ref": "#/$defs/builtinPolicy"
+          },
+          "description": "Mapping of builtin module name to builtin policy value",
+          "propertyNames": {
+            "$ref": "#/$defs/builtinName"
+          },
+          "type": "object"
+        },
+        "globals": {
+          "$ref": "#/$defs/globalPolicy"
+        },
+        "meta": {
+          "$ref": "#/$defs/resourceMetadata"
+        },
+        "native": {
+          "$ref": "#/$defs/nativePolicy"
+        },
+        "packages": {
+          "additionalProperties": {
+            "$ref": "#/$defs/packagePolicy"
+          },
+          "description": "Mapping of canonical package name (or $root$) to package policy value",
+          "propertyNames": {
+            "$ref": "#/$defs/canonicalName"
+          },
+          "type": "object"
+        }
+      },
+      "type": "object"
+    },
+    "resources": {
+      "additionalProperties": {
+        "$ref": "#/$defs/resourcePolicy"
+      },
+      "description": "Mapping of canonical package name (or \"$root$\") to resource policy value",
+      "propertyNames": {
+        "$ref": "#/$defs/canonicalName"
+      },
+      "type": "object"
+    },
+    "root": {
+      "additionalProperties": false,
+      "description": "Root policy configuration",
+      "properties": {
+        "usePolicy": {
+          "$ref": "#/$defs/usePolicy"
+        }
+      },
+      "type": "object"
+    },
+    "rootName": {
+      "const": "$root$",
+      "description": "Resource name of the entry package ($root$)",
+      "type": "string"
+    },
+    "usePolicy": {
+      "$ref": "#/$defs/canonicalName",
+      "description": "Reference to resource policy to use for the application root"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "LavaMoat Policy",
+  "properties": {
+    "include": {
+      "items": {
+        "$ref": "#/$defs/include"
+      },
+      "type": "array"
+    },
+    "resources": {
+      "$ref": "#/$defs/resources"
+    },
+    "root": {
+      "$ref": "#/$defs/root"
+    }
+  },
+  "required": ["resources"],
+  "type": "object"
+}
