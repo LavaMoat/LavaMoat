@@ -1,0 +1,45 @@
+{
+  "resources": {
+    "commonjs-package": {
+      "packages": {
+        "umd-package": true
+      }
+    },
+    "es6-module-package": {
+      "packages": {
+        "umd-package": true
+      }
+    },
+    "globals-package": {
+      "globals": {
+        "console": true,
+        "self": true
+      }
+    },
+    "resource-hack": {
+      "globals": {
+        "URL": true,
+        "console.log": true
+      }
+    },
+    "umd-package": {
+      "globals": {
+        "define": true
+      }
+    },
+    "uses-reexport-package": {
+      "globals": {
+        "console.log": true
+      },
+      "meta": {
+        "webpack-optimization": [
+          "Dependency 'uses-reexport-package>reexport-package' reexports from 'es6-module-package' and webpack collapsed that to a direct import."
+        ]
+      },
+      "packages": {
+        "es6-module-package": true,
+        "uses-reexport-package>reexport-package": true
+      }
+    }
+  }
+}
