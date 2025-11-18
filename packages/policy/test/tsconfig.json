@@ -1,0 +1,13 @@
+{
+  "extends": "../../../.config/tsconfig.test.json",
+  "compilerOptions": {
+    "rootDir": "..",
+    "module": "NodeNext",
+    "types": ["node"],
+    "strict": true,
+    "erasableSyntaxOnly": true,
+    "allowImportingTsExtensions": true
+  },
+  "include": ["."],
+  "references": [{ "path": "../src/tsconfig.json" }]
+}
