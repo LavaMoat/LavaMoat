@@ -1,0 +1,18 @@
+{
+  "resources": {
+    "polyfill-package": {
+      "globals": {
+        "console.log": true,
+        "fancyCapability": "write"
+      },
+      "packages": {
+        "polyfill-package>polyfill-user-package": true
+      }
+    },
+    "polyfill-package>polyfill-user-package": {
+      "globals": {
+        "fancyCapability.doSomething": true
+      }
+    }
+  }
+}
