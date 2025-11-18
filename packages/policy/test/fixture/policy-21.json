@@ -1,0 +1,12 @@
+{
+  "resources": {
+    "prototype-poisoning-package": {
+      "builtin": {
+        "path": true
+      },
+      "globals": {
+        "console.trace": true
+      }
+    }
+  }
+}

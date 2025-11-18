@@ -1,0 +1,19 @@
+{
+  "resources": {
+    "a": {
+      "packages": {
+        "events": true
+      }
+    },
+    "b": {
+      "builtin": {
+        "events.EventEmitter": true
+      }
+    },
+    "events": {
+      "globals": {
+        "console": true
+      }
+    }
+  }
+}

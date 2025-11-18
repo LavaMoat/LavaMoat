@@ -1,0 +1,60 @@
+{
+  "name": "@lavamoat/policy",
+  "version": "0.0.0",
+  "type": "module",
+  "description": "LavaMoat policy schema and validation",
+  "repository": {
+    "directory": "packages/policy",
+    "type": "git",
+    "url": "git+https://github.com/LavaMoat/LavaMoat.git"
+  },
+  "homepage": "https://lavamoat.github.io",
+  "bugs": "https://github.com/LavaMoat/LavaMoat/issues",
+  "author": "LavaMoat Project",
+  "license": "MIT",
+  "engines": {
+    "node": "^22.0.0 || ^24.0.0",
+    "npm": ">=9.0.0"
+  },
+  "exports": {
+    ".": {
+      "import": "./src/index.js",
+      "types": "./src/index.d.ts"
+    },
+    "./package.json": "./package.json",
+    "./schema.json": "./lavamoat-policy.schema.json"
+  },
+  "files": [
+    "CHANGELOG.md",
+    "lavamoat-policy.schema.json",
+    "src",
+    "!*.tsbuildinfo",
+    "!src/tsconfig.json"
+  ],
+  "scripts": {
+    "build": "tsx ./scripts/create-policy-schema.ts",
+    "lint:deps": "depcheck",
+    "rebuild": "npm run build",
+    "test": "node ./scripts/test.js",
+    "test:cover": "c8 npm test",
+    "test:run": "node --import tsx --test \"test/*.spec.ts\"",
+    "test:update-snapshots": "node --import tsx --test --test-update-snapshots \"test/*.spec.ts\""
+  },
+  "dependencies": {
+    "@lavamoat/types": "^0.1.0",
+    "zod": "4.3.6"
+  },
+  "devDependencies": {
+    "json-stable-stringify": "1.3.0",
+    "tsx": "4.21.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "ava": {
+    "files": [
+      "test/**/*.spec.js"
+    ],
+    "timeout": "10s"
+  }
+}
