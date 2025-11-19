@@ -6,6 +6,25 @@
   * dependencies
     * lavamoat-tofu bumped from ^7.2.1 to ^7.2.2
 
+## [17.1.0](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v17.0.1...lavamoat-core-v17.1.0) (2025-11-19)
+
+
+### Features
+
+* **core:** add informative errors when the result of policy merge contains invalid entries ([#1848](https://github.com/LavaMoat/LavaMoat/issues/1848)) ([fefd457](https://github.com/LavaMoat/LavaMoat/commit/fefd457d53c2944fe3d2ee719cd741f5eafb8987))
+
+
+### Bug Fixes
+
+* **core:** transfer prototype over to a wraped function ([#1847](https://github.com/LavaMoat/LavaMoat/issues/1847)) ([14e3c66](https://github.com/LavaMoat/LavaMoat/commit/14e3c66957a8700fbf3a423e67f5785e7172e008))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-tofu bumped from ^8.0.11 to ^8.1.0
+
 ## [17.0.1](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v17.0.0...lavamoat-core-v17.0.1) (2025-10-30)
 
 

@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.6](https://github.com/LavaMoat/LavaMoat/compare/laverna-v1.2.5...laverna-v1.2.6) (2025-11-19)
+
+
+### Bug Fixes
+
+* **deps:** fix npm audit issues ([#1853](https://github.com/LavaMoat/LavaMoat/issues/1853)) ([5ba0f2d](https://github.com/LavaMoat/LavaMoat/commit/5ba0f2de62aa4feca86d7f96bcce24f76d6aa624))
+
 ## [1.2.5](https://github.com/LavaMoat/LavaMoat/compare/laverna-v1.2.4...laverna-v1.2.5) (2025-06-24)
 
 
