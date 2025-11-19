@@ -1,5 +1,20 @@
 # Changelog
 
+## [8.1.0](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-tofu-v8.0.11...lavamoat-tofu-v8.1.0) (2025-11-19)
+
+
+### Features
+
+* **core:** add informative errors when the result of policy merge contains invalid entries ([#1848](https://github.com/LavaMoat/LavaMoat/issues/1848)) ([fefd457](https://github.com/LavaMoat/LavaMoat/commit/fefd457d53c2944fe3d2ee719cd741f5eafb8987))
+* **tofu:** enable deep dependency analysis of ES modules ([e5d1818](https://github.com/LavaMoat/LavaMoat/commit/e5d181806788134b9b0b37ef58b0576056ac215a))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * lavamoat-core bumped from >15.4.0 to >17.1.0
+
 ## [8.0.11](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-tofu-v8.0.10...lavamoat-tofu-v8.0.11) (2025-10-01)
 
 

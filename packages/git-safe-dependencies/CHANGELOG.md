@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.3.1](https://github.com/LavaMoat/LavaMoat/compare/git-safe-dependencies-v0.3.0...git-safe-dependencies-v0.3.1) (2025-11-19)
+
+
+### Bug Fixes
+
+* **deps:** fix npm audit issues ([#1853](https://github.com/LavaMoat/LavaMoat/issues/1853)) ([5ba0f2d](https://github.com/LavaMoat/LavaMoat/commit/5ba0f2de62aa4feca86d7f96bcce24f76d6aa624))
+* **deps:** update dependency js-yaml to v4.1.1 [security] ([#1851](https://github.com/LavaMoat/LavaMoat/issues/1851)) ([495b1cf](https://github.com/LavaMoat/LavaMoat/commit/495b1cf99723260be117950428ece7d0893dc932))
+
 ## [0.3.0](https://github.com/LavaMoat/LavaMoat/compare/git-safe-dependencies-v0.2.2...git-safe-dependencies-v0.3.0) (2025-08-25)
 
 
