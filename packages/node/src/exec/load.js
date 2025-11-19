@@ -7,15 +7,18 @@
  * @packageDocumentation
  */
 
-import { loadLocation } from '@endo/compartment-mapper'
+import { loadFromMap } from '@endo/compartment-mapper/import-lite.js'
+import { makeNodeCompartmentMap } from '../compartment/node-compartment-map.js'
 import { DEFAULT_ENDO_OPTIONS } from '../compartment/options.js'
 import { defaultReadPowers } from '../compartment/power.js'
+import { ExecutionError } from '../error.js'
 import { log as defaultLog } from '../log.js'
-import { toEndoURL } from '../util.js'
+import { reportInvalidCanonicalNames } from '../report.js'
 
 /**
- * @import {ReadNowPowers, LoadLocationOptions} from '@endo/compartment-mapper'
+ * @import {ImportLocationOptions, SyncImportLocationOptions, CanonicalName, PackageCompartmentMapDescriptor} from '@endo/compartment-mapper'
  * @import {ApplicationLoader, ExecuteOptions} from '../types.js'
+ * @import {PackageJson} from 'type-fest'
  */
 
 /**
@@ -29,36 +32,73 @@ import { toEndoURL } from '../util.js'
  *
  * @template [T=unknown] Exports of module, if known. Default is `unknown`
  * @param {string | URL} entrypointPath Entry point of application
- * @param {ReadNowPowers} [readPowers] Read powers
  * @param {ExecuteOptions} [options] Options
  * @returns {Promise<ApplicationLoader<T>>} Object with `import()` method
  * @public
  */
 export const load = async (
   entrypointPath,
-  readPowers = defaultReadPowers,
-  { log = defaultLog, ...options } = {}
+  {
+    log = defaultLog,
+    dev,
+    trustRoot,
+    endoPolicy,
+    readPowers = defaultReadPowers,
+    policy,
+    ...otherOptions
+  } = {}
 ) => {
+  /** @type {PackageCompartmentMapDescriptor} */
+  let packageCompartmentMap
+
+  /** @type {Set<CanonicalName>} */
+  let unknownCanonicalNames
+  /** @type {Set<CanonicalName>} */
+  let knownCanonicalNames
+
   await Promise.resolve()
+  try {
+    ;({ packageCompartmentMap, unknownCanonicalNames, knownCanonicalNames } =
+      await makeNodeCompartmentMap(entrypointPath, {
+        readPowers,
+        dev,
+        log,
+        trustRoot,
+        endoPolicy,
+      }))
+    if (policy) {
+      reportInvalidCanonicalNames(unknownCanonicalNames, knownCanonicalNames, {
+        policy,
+        log,
+        what: 'policy',
+      })
+    }
+  } catch (err) {
+    throw new ExecutionError(
+      `Failed to create compartment map for ${entrypointPath}: ${err}`,
+      { cause: err }
+    )
+  }
 
-  const entrypoint = toEndoURL(entrypointPath)
-
-  /** @type {LoadLocationOptions} */
-  const opts = {
+  /** @type {ImportLocationOptions | SyncImportLocationOptions} */
+  const loadFromMapOptions = {
     ...DEFAULT_ENDO_OPTIONS,
-    ...options,
+    ...otherOptions,
+    dev,
+    policy: endoPolicy,
     log: log.debug.bind(log),
   }
 
-  const { import: importApp, sha512 } = await loadLocation(
+  const { import: importApp, sha512 } = await loadFromMap(
     readPowers,
-    entrypoint,
-    opts
+    packageCompartmentMap,
+    loadFromMapOptions
   )
 
   return {
     // TODO: update Endo's type here
-    import: () => /** @type {Promise<{ namespace: T }>} */ (importApp(opts)),
+    import: () =>
+      /** @type {Promise<{ namespace: T }>} */ (importApp(loadFromMapOptions)),
     sha512,
   }
 }

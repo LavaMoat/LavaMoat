@@ -28,7 +28,7 @@ import {
   LAVAMOAT_PKG_POLICY_ROOT,
 } from './constants.js'
 import { ConversionError } from './error.js'
-import { loadPolicies } from './policy-util.js'
+import { isMergedPolicy, loadPolicies } from './policy-util.js'
 import { isArray, isBoolean } from './util.js'
 
 const { create, entries, fromEntries } = Object
@@ -42,7 +42,10 @@ const { create, entries, fromEntries } = Object
  *   LavaMoatEndoPackagePolicyOptions,
  *   LavaMoatEndoPolicy,
  *   ToEndoPolicyOptions,
- * Resources} from './types.js'
+ * Resources,
+ * MergedLavaMoatPolicy,
+ * ToEndoPolicyOptionsWithoutPolicyOverride,
+ * UnmergedLavaMoatPolicy} from './types.js'
  */
 
 /**
@@ -224,13 +227,14 @@ const convertToEndoPackagePolicy = (resources) => {
 /**
  * Converts a LavaMoat policy to an Endo policy.
  *
- * Takes policy overrides into account, if provided.
+ * **Will not** read policy overrides; assumes `policy` has already been merged.
  *
- * Performs validation of policy and policy overrides.
+ * Performs validation of policy.
  *
  * @overload
- * @param {LavaMoatPolicy} policy LavaMoat policy to convert
- * @param {ToEndoPolicyOptions} [options] Options for conversion
+ * @param {MergedLavaMoatPolicy} policy LavaMoat policy to convert
+ * @param {ToEndoPolicyOptionsWithoutPolicyOverride} [options] Options for
+ *   conversion
  * @returns {Promise<LavaMoatEndoPolicy>}
  * @public
  */
@@ -243,7 +247,8 @@ const convertToEndoPackagePolicy = (resources) => {
  * Performs validation of policy and policy overrides.
  *
  * @overload
- * @param {string | URL} policyPath Path or URL to policy file)
+ * @param {string | URL | UnmergedLavaMoatPolicy} policyPath Path or URL to
+ *   policy file)
  * @param {ToEndoPolicyOptions} [options] Options for conversion
  * @returns {Promise<LavaMoatEndoPolicy>}
  * @public
@@ -252,23 +257,24 @@ const convertToEndoPackagePolicy = (resources) => {
 /**
  * Converts a LavaMoat policy to an Endo policy.
  *
- * Takes policy overrides into account, if provided.
- *
  * Performs validation of policy and policy overrides.
  *
  * @privateRemarks
  * The overloads aren't strictly necessary, but they're a little nicer to
  * understand for consumers.
- * @param {LavaMoatPolicy | string | URL} [policyOrPolicyPath] LavaMoat policy
- *   to convert (or path to policy file)
- * @param {ToEndoPolicyOptions} [options] Options for conversion
+ * @param {MergedLavaMoatPolicy | LavaMoatPolicy | string | URL} [policyOrPolicyPath]
+ *   LavaMoat policy to convert (or path to policy file)
+ * @param {ToEndoPolicyOptions | ToEndoPolicyOptionsWithoutPolicyOverride} [options]
+ *   Options for conversion
  * @returns {Promise<LavaMoatEndoPolicy>}
  * @public
  */
 export const toEndoPolicy = async (policyOrPolicyPath, options = {}) => {
   await Promise.resolve()
 
-  const policy = await loadPolicies(policyOrPolicyPath, options)
+  const policy = isMergedPolicy(policyOrPolicyPath)
+    ? policyOrPolicyPath
+    : await loadPolicies(policyOrPolicyPath, options)
 
   const lavamoatResources = /** @type {Resources} */ (
     policy.resources ?? create(null)
