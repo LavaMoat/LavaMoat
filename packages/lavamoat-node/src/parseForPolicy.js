@@ -21,7 +21,8 @@ const { checkForResolutionOverride } = require('./resolutions')
 
 // file extension omitted can be omitted, eg https://npmfs.com/package/yargs/17.0.1/yargs
 const commonjsExtensions = ['', '.js', '.cjs']
-const resolutionOmittedExtensions = ['.js', '.json']
+// extensions we want the resolver to look for when given just the file name (it defaults to .js only)
+const resolutionOmittedExtensions = ['.js', '.cjs', '.json']
 
 /**
  * Allow use of `node:` prefixed builtins.
@@ -235,6 +236,7 @@ function makeImportHook({
     // parse
     const ast = parseModule(content, specifier)
     // get imports
+    // TODO: ts support means this would need to understand esm syntax too?
     const { cjsImports } = inspectImports(ast, null, false)
     // build import map
     const importMap = Object.fromEntries(
@@ -362,6 +364,8 @@ function parseModule(moduleSrc, filename = '<unknown file>') {
       sourceType: 'unambiguous',
       // someone must have been doing this
       allowReturnOutsideFunction: true,
+      // allow typescript syntax
+      plugins: ['typescript'],
       // plugins: [
       //   '@babel/plugin-transform-literals',
       //   // '@babel/plugin-transform-reserved-words',

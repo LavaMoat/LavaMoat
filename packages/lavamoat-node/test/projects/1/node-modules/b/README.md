@@ -1,0 +1,2 @@
+Note that the package uses `exports` field to point to the index.cjs and `resolve` package doesn't support that. The only reason this works is `.cjs` added to the extensions resolve is looking for and it would not work if the file was not called index.
+It improves the situation slightly, but is not a complete fix for `resolve` not supporting the exports syntax.  
