@@ -62,30 +62,40 @@ test('parseForPolicy - resolutions', async (t) => {
   )
 })
 
+const policy4 = {
+  resources: {
+    a: {
+      packages: {
+        events: true,
+      },
+    },
+    b: {
+      builtin: {
+        'events.EventEmitter': true,
+      },
+    },
+    events: {
+      globals: {
+        console: true,
+      },
+    },
+  },
+}
+
 test('parseForPolicy - require a userspace package with a builtin name', async (t) => {
   const projectRoot = path.join(__dirname, 'projects', '4')
   const entryId = path.join(projectRoot, 'index.js')
 
   const policy = await parseForPolicy({ entryId, projectRoot })
-  t.deepEqual(policy, {
-    resources: {
-      a: {
-        packages: {
-          events: true,
-        },
-      },
-      b: {
-        builtin: {
-          'events.EventEmitter': true,
-        },
-      },
-      events: {
-        globals: {
-          console: true,
-        },
-      },
-    },
-  })
+  t.deepEqual(policy, policy4)
+})
+
+test('parseForPolicy - typescript', async (t) => {
+  const projectRoot = path.join(__dirname, 'projects', '4')
+  const entryId = path.join(projectRoot, 'index.ts')
+
+  const policy = await parseForPolicy({ entryId, projectRoot })
+  t.deepEqual(policy, policy4)
 })
 
 test("parseForPolicy - indirectly used packages are included in parent's allowlist", async (t) => {

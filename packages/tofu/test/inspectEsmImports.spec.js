@@ -27,7 +27,7 @@ testInspect(
   import "package10";
   var promise = import("package11");
   export * as name3 from "package12";
-  export { name4 } from "package13";
+  export { name4 as default } from "package13";
   export { default as name5 } from "package14";
   export const foo = "bar";
 `,
