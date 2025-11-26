@@ -24,15 +24,16 @@ function parseArgs() {
       })
       yargsFlags(yargs, defaults)
     })
+    .parserConfiguration({
+      'populate--': true,
+    })
     .help()
 
   const parsedArgs = argsParser.parse()
 
-  // patch process.argv so it matches the normal pattern
-  // e.g. [runtime path, entrypoint, ...args]
-  // we'll use the LavaMoat path as the runtime
-  // so we just remove the node path
-  process.argv.shift()
+  // Rebuild process.argv to pass only entry args
+  const entryArgs = parsedArgs['--'] || []
+  process.argv = [process.argv[0], parsedArgs.entryPath, ...entryArgs]
 
   return parsedArgs
 }
