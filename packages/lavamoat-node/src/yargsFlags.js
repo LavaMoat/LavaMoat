@@ -1,4 +1,9 @@
 module.exports = (yargs, defaults) => {
+  yargs.positional('entryPath', {
+    describe:
+      'the path to the entry file for your application. same as node.js',
+    type: 'string',
+  })
   // the path for the policy file
   yargs.option('policy', {
     alias: ['p', 'policyPath'],

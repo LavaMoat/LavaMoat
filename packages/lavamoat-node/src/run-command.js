@@ -20,18 +20,30 @@ function parseArgs() {
     .usage(
       '$0',
       'lavamoat-run-command [flags for lavamoat] -- command [args for the command]',
-      (yarn) => yargsFlags(yarn, defaults)
+      (yargs) => yargsFlags(yargs, defaults)
     )
+    .parserConfiguration({
+      'populate--': true,
+    })
     .help()
 
   const parsedArgs = argsParser.parse()
-  const commandName = parsedArgs._[0]
+  const passDownArgs = parsedArgs['--'] || []
+  const commandName = passDownArgs[0]
+
+  if (!commandName) {
+    console.error(
+      'Error: No command specified. Usage: lavamoat-run-command [lavamoat-flags] -- command [command-args]'
+    )
+    process.exit(2)
+  }
 
   const binEntry = path.resolve(
     process.cwd(),
     './node_modules/.bin/',
     commandName
   )
+
   if (!fs.existsSync(binEntry)) {
     console.error(`Error: '${commandName}' is not one of the locally installed commands. Missing: '${binEntry}'
     Possible reasons for this error:
@@ -51,7 +63,7 @@ function parseArgs() {
   // e.g. [runtime path, entrypoint, ...args]
   // we'll use the LavaMoat path as the runtime
   // so we just remove the node path
-  process.argv = [process.argv[0], ...parsedArgs._]
+  process.argv = [process.argv[0], ...passDownArgs]
 
   return parsedArgs
 }
