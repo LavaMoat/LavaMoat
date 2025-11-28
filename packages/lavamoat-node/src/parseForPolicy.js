@@ -236,7 +236,6 @@ function makeImportHook({
     // parse
     const ast = parseModule(content, specifier)
     // get imports
-    // TODO: ts support means this would need to understand esm syntax too?
     const { cjsImports } = inspectImports(ast, null, false)
     // build import map
     const importMap = Object.fromEntries(
