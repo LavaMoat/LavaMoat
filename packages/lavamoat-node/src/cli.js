@@ -40,6 +40,7 @@ function parseArgs() {
   // so we just remove the node path
   process.argv.shift()
   } else {
+    // Rebuild process.argv to pass only entry args
     process.argv = [process.argv[0], parsedArgs.entryPath, ...entryArgs]
   }
 
