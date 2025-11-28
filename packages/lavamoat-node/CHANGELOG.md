@@ -19,6 +19,14 @@
     * lavamoat-core bumped from ^15.2.0 to ^15.2.1
     * lavamoat-tofu bumped from ^7.2.1 to ^7.2.2
 
+## [10.0.3](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-v10.0.2...lavamoat-v10.0.3) (2025-11-28)
+
+
+### Bug Fixes
+
+* **lavamoat-node:** cli entry args ([#1857](https://github.com/LavaMoat/LavaMoat/issues/1857)) ([#1859](https://github.com/LavaMoat/LavaMoat/issues/1859)) ([f949577](https://github.com/LavaMoat/LavaMoat/commit/f9495777dc0fe853064fe1de241a0421e925b212))
+* **lavamoat-node:** fix missing cjs extension in the list of extensions to resolve ([#1856](https://github.com/LavaMoat/LavaMoat/issues/1856)) ([f2eeced](https://github.com/LavaMoat/LavaMoat/commit/f2eecedbcf6f501e4f7163f47b97821b9e5dc8a1))
+
 ## [10.0.2](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-v10.0.1...lavamoat-v10.0.2) (2025-11-19)
 
 
