@@ -364,8 +364,6 @@ function parseModule(moduleSrc, filename = '<unknown file>') {
       sourceType: 'unambiguous',
       // someone must have been doing this
       allowReturnOutsideFunction: true,
-      // allow typescript syntax
-      plugins: ['typescript'],
       // plugins: [
       //   '@babel/plugin-transform-literals',
       //   // '@babel/plugin-transform-reserved-words',
