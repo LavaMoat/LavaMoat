@@ -3,6 +3,16 @@
  *
  * @module
  */
+
+/**
+ * @import {
+ *   BinsConfig,
+ *   ScriptsConfig,
+ *   PrintPackagesListParams,
+ *   PrintMissingPoliciesIfAnyParams
+ * } from './types/common.js'
+ */
+
 const { loadAllPackageConfigurations } = require('./config.js')
 
 /**
