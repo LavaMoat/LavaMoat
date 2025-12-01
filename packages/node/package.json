@@ -41,6 +41,12 @@
   "directories": {
     "test": "test"
   },
+  "files": [
+    "CHANGELOG.md",
+    "src",
+    "types",
+    "!*.tsbuildinfo"
+  ],
   "scripts": {
     "lint:deps": "depcheck",
     "test": "npm run test:run",

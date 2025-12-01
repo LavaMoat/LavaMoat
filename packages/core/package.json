@@ -17,7 +17,7 @@
     "node": "^18.0.0 || ^20.0.0 || ^22.0.0 || ^24.0.0"
   },
   "bin": {
-    "lavamoat-sort-policy": "./src/policy-sort-cli.js"
+    "lavamoat-sort-policy": "src/policy-sort-cli.js"
   },
   "main": "src/index.js",
   "types": "./types/src/types.d.ts",

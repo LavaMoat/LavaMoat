@@ -25,6 +25,11 @@
     "example": "examples",
     "test": "test"
   },
+  "files": [
+    "CHANGELOG.md",
+    "examples",
+    "src"
+  ],
   "scripts": {
     "lint:deps": "depcheck",
     "test": "npm run test:npm && npm run test:yarn1",
