@@ -1,16 +1,16 @@
 {
   "packages/aa": "4.3.4",
   "packages/allow-scripts": "3.4.1",
-  "packages/browserify": "19.0.4",
-  "packages/core": "17.1.0",
+  "packages/browserify": "19.0.5",
+  "packages/core": "17.1.1",
   "packages/git-safe-dependencies": "0.3.1",
-  "packages/lavapack": "7.0.19",
+  "packages/lavapack": "7.0.20",
   "packages/laverna": "1.2.6",
-  "packages/lavamoat-node": "10.0.3",
-  "packages/node": "0.4.8",
+  "packages/lavamoat-node": "10.0.4",
+  "packages/node": "0.4.9",
   "packages/preinstall-always-fail": "2.1.1",
   "packages/react-native-lockdown": "0.1.0",
   "packages/tofu": "8.1.0",
-  "packages/webpack": "1.5.4",
+  "packages/webpack": "1.5.5",
   "packages/types": "0.1.0"
 }
