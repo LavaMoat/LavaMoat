@@ -31,6 +31,8 @@ import type {
   ENDO_POLICY_ITEM_ROOT,
   LAVAMOAT_PKG_POLICY_ROOT,
   MERGED_POLICY_FIELD,
+  SOURCE_TYPE_MODULE,
+  SOURCE_TYPE_SCRIPT,
 } from './constants.js'
 
 export type { FileUrlString } from '@endo/compartment-mapper'
@@ -279,6 +281,11 @@ export type WithLoadForMapOptions = ComposeOptions<
  * Endo policy
  */
 export type EndoWritePolicy = typeof ENDO_GLOBAL_POLICY_ITEM_WRITE
+
+/**
+ * A module source type
+ */
+export type SourceType = typeof SOURCE_TYPE_MODULE | typeof SOURCE_TYPE_SCRIPT
 
 /**
  * Options for `execute()`
