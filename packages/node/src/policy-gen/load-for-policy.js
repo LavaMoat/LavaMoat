@@ -29,10 +29,10 @@ import { reportInvalidCanonicalNames, reportSesViolations } from '../report.js'
 import { WorkerPool } from '../worker-pool.js'
 
 /**
- * @import {LoadAndGeneratePolicyOptions, LoadCompartmentMapResult, InspectMessage, PoliciesMessage, ErrorMessage, SourceType, StructuredViolationsResult} from '../internal.js'
+ * @import {LoadAndGeneratePolicyOptions, LoadCompartmentMapResult, InspectMessage, PoliciesMessage, ErrorMessage, StructuredViolationsResult} from '../internal.js'
  * @import {CanonicalName, Language, LocalModuleSource} from '@endo/compartment-mapper'
  * @import {BuiltinPolicy, GlobalPolicy, GlobalPolicyValue, LavaMoatPolicy, PackagePolicy} from '@lavamoat/types'
- * @import {MergedLavaMoatPolicy, FileUrlString} from '../types.js'
+ * @import {MergedLavaMoatPolicy, FileUrlString, SourceType} from '../types.js'
  * @import {Loggerr} from 'loggerr'
  */
 
