@@ -109,7 +109,7 @@ export const makeNodeCompartmentMap = async (
   /**
    * @type {Set<CanonicalName>}
    */
-  let knownCanonicalNames = new Set()
+  const knownCanonicalNames = new Set()
 
   const packageCompartmentMap = await mapNodeModules(readPowers, entrypoint, {
     conditions: new Set(DEFAULT_CONDITIONS),
@@ -123,11 +123,18 @@ export const makeNodeCompartmentMap = async (
      * At this point, the compartment does not yet have a canonical name, so it
      * will require post-processing.
      */
-    packageDescriptorHook: ({ packageDescriptor, packageLocation }) => {
-      packageJsonsByLocation.set(
-        packageLocation,
-        /** @type {PackageJson} */ (packageDescriptor)
-      )
+    packageDataHook: ({ packageData }) => {
+      for (const {
+        packageDescriptor,
+        location,
+        canonicalName,
+      } of packageData.values()) {
+        knownCanonicalNames.add(canonicalName)
+        packageJsonsByLocation.set(
+          location,
+          /** @type {PackageJson} */ (packageDescriptor)
+        )
+      }
     },
     /**
      * Adds any missing dependencies from `policyOverride` to the list of
@@ -152,12 +159,6 @@ export const makeNodeCompartmentMap = async (
      */
     unknownCanonicalNameHook: ({ canonicalName }) => {
       unknownCanonicalNames.add(canonicalName)
-    },
-    /**
-     * Collects all known canonical names from the compartment map
-     */
-    canonicalNamesHook: ({ canonicalNames }) => {
-      knownCanonicalNames = new Set(canonicalNames)
     },
   })
 
