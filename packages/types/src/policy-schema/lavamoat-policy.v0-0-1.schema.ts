@@ -68,7 +68,7 @@ export interface DebugInfo {
    * @todo Move these types into lavamoat-tofu
    */
   sesCompat: SesCompat
-  globals: Record<string, boolean>
+  globals: Record<string, GlobalPolicyValue>
 
   builtin: string[]
 }
