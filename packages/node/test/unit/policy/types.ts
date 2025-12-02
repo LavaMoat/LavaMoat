@@ -9,6 +9,7 @@ import type {
   ComposeOptions,
   GeneratePolicyOptions,
   MergedLavaMoatPolicy,
+  SourceType,
   WithLog,
   WithPolicyOverrideOnly,
 } from '../../../src/types.js'
@@ -109,5 +110,5 @@ export type ScaffoldFixtureOptions = {
    *
    * @defaultValue 'module'
    */
-  sourceType?: 'module' | 'script'
+  sourceType?: SourceType
 }
