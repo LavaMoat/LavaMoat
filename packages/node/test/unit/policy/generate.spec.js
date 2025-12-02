@@ -72,15 +72,19 @@ test('override expansion', testPolicyForJSON, 'override-expansion.json', {
         packages: {
           // is dynamically required by winken
           'winken>blinken': true,
-          // is not required by anything at all, but is present in the fixture's package.json. should not appear in the final policy for winken since it cannot be detected.
+          // is not required by anything at all, but is present in the fixture's
+          // package.json. should not appear in the final policy for winken
+          // since it cannot be detected.
           fugs: true,
         },
       },
       'winken>blinken': {
         builtin: {
-          // this does not appear in the source, but this override
-          // forces it to be in the resulting policy.
+          // this does not appear in the source, but this override forces it to
+          // be in the resulting policy.
           'node:fs.read': true,
+          // actually used in blinken
+          'node:util.format': true,
         },
       },
     },
