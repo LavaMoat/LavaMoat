@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.4.10](https://github.com/LavaMoat/LavaMoat/compare/node-v0.4.9...node-v0.4.10) (2025-12-02)
+
+
+### Bug Fixes
+
+* **browserify,core,lavamoat-node,node:** do not publish extraneous files ([#1866](https://github.com/LavaMoat/LavaMoat/issues/1866)) ([e7666d8](https://github.com/LavaMoat/LavaMoat/commit/e7666d804e2f9af71fb0cd948af04a283458b6d1)), closes [#1865](https://github.com/LavaMoat/LavaMoat/issues/1865)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-core bumped from ^17.1.1 to ^17.1.2
+
 ## [0.4.9](https://github.com/LavaMoat/LavaMoat/compare/node-v0.4.8...node-v0.4.9) (2025-12-01)
 
 

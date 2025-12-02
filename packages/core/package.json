@@ -1,6 +1,6 @@
 {
   "name": "lavamoat-core",
-  "version": "17.1.1",
+  "version": "17.1.2",
   "description": "LavaMoat kernel and utils",
   "repository": {
     "type": "git",
