@@ -153,12 +153,20 @@ export const loadAndGeneratePolicy = async (
     pendingInspections
   )
 
+  // preprocess include array to match Endo's _preload format;
+  // `compartment` is `name` in policy.
+  const preload = policyOverride?.include?.map((include) =>
+    typeof include === 'string'
+      ? { compartment: include, entry: '.' }
+      : { compartment: include.name, entry: include.entry }
+  )
+
   try {
     await captureFromMap(readPowers, packageCompartmentMap, {
       ...DEFAULT_ENDO_OPTIONS,
       importHook: nullImportHook,
       log: log.debug.bind(log),
-      preload: policyOverride?.include,
+      _preload: preload,
       /**
        * Called for each package in the compartment map with a list of
        * connections (which are also canonical names).
