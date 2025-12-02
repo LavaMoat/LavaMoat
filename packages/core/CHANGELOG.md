@@ -6,6 +6,13 @@
   * dependencies
     * lavamoat-tofu bumped from ^7.2.1 to ^7.2.2
 
+## [17.1.2](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v17.1.1...lavamoat-core-v17.1.2) (2025-12-02)
+
+
+### Bug Fixes
+
+* **browserify,core,lavamoat-node,node:** do not publish extraneous files ([#1866](https://github.com/LavaMoat/LavaMoat/issues/1866)) ([e7666d8](https://github.com/LavaMoat/LavaMoat/commit/e7666d804e2f9af71fb0cd948af04a283458b6d1)), closes [#1865](https://github.com/LavaMoat/LavaMoat/issues/1865)
+
 ## [17.1.1](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v17.1.0...lavamoat-core-v17.1.1) (2025-12-01)
 
 

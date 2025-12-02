@@ -1,6 +1,6 @@
 {
   "name": "@lavamoat/webpack",
-  "version": "1.5.5",
+  "version": "1.5.6",
   "description": "LavaMoat Webpack plugin for running dependencies in Compartments without eval",
   "repository": {
     "type": "git",
@@ -50,7 +50,7 @@
     "@lavamoat/types": "^0.1.0",
     "browser-resolve": "2.0.0",
     "json-stable-stringify": "1.3.0",
-    "lavamoat-core": "^17.1.1",
+    "lavamoat-core": "^17.1.2",
     "ses": "1.14.0"
   },
   "devDependencies": {
