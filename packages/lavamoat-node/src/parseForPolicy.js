@@ -21,7 +21,8 @@ const { checkForResolutionOverride } = require('./resolutions')
 
 // file extension omitted can be omitted, eg https://npmfs.com/package/yargs/17.0.1/yargs
 const commonjsExtensions = ['', '.js', '.cjs']
-const resolutionOmittedExtensions = ['.js', '.json']
+// extensions we want the resolver to look for when given just the file name (it defaults to .js only)
+const resolutionOmittedExtensions = ['.js', '.cjs', '.json']
 
 /**
  * Allow use of `node:` prefixed builtins.

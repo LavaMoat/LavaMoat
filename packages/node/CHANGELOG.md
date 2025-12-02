@@ -1,5 +1,74 @@
 # Changelog
 
+## [0.4.10](https://github.com/LavaMoat/LavaMoat/compare/node-v0.4.9...node-v0.4.10) (2025-12-02)
+
+
+### Bug Fixes
+
+* **browserify,core,lavamoat-node,node:** do not publish extraneous files ([#1866](https://github.com/LavaMoat/LavaMoat/issues/1866)) ([e7666d8](https://github.com/LavaMoat/LavaMoat/commit/e7666d804e2f9af71fb0cd948af04a283458b6d1)), closes [#1865](https://github.com/LavaMoat/LavaMoat/issues/1865)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-core bumped from ^17.1.1 to ^17.1.2
+
+## [0.4.9](https://github.com/LavaMoat/LavaMoat/compare/node-v0.4.8...node-v0.4.9) (2025-12-01)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-core bumped from ^17.1.0 to ^17.1.1
+
+## [0.4.8](https://github.com/LavaMoat/LavaMoat/compare/node-v0.4.7...node-v0.4.8) (2025-11-19)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-core bumped from ^17.0.1 to ^17.1.0
+
+## [0.4.7](https://github.com/LavaMoat/LavaMoat/compare/node-v0.4.6...node-v0.4.7) (2025-10-30)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-core bumped from ^17.0.0 to ^17.0.1
+
+## [0.4.6](https://github.com/LavaMoat/LavaMoat/compare/node-v0.4.5...node-v0.4.6) (2025-10-09)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-core bumped from ^16.7.1 to ^17.0.0
+
+## [0.4.5](https://github.com/LavaMoat/LavaMoat/compare/node-v0.4.4...node-v0.4.5) (2025-10-01)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @lavamoat/types bumped from 0.0.1 to 0.1.0
+    * lavamoat-core bumped from ^16.7.0 to ^16.7.1
+
+## [0.4.4](https://github.com/LavaMoat/LavaMoat/compare/node-v0.4.3...node-v0.4.4) (2025-09-25)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-core bumped from ^16.6.2 to ^16.7.0
+
 ## [0.4.3](https://github.com/LavaMoat/LavaMoat/compare/node-v0.4.2...node-v0.4.3) (2025-09-22)
 
 

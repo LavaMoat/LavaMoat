@@ -56,7 +56,8 @@ const isAmbientAsset = (m) =>
  */
 
 /**
- * Recognize an AssetParser bu constructor name for the lack of ability to get the type from Webpack
+ * Recognize an AssetParser bu constructor name for the lack of ability to get
+ * the type from Webpack
  *
  * @param {Parser} parser
  * @returns {parser is AssetParser}
@@ -94,8 +95,8 @@ const isInspectableModule = (m, moduleClass) =>
  * their properties
  *
  * @param {Object} opts
- * @param {WebpackError[]} opts.mainCompilationWarnings - Array to store
- *   compilation warnings
+ * @param {Error[]} opts.mainCompilationWarnings - Array to store compilation
+ *   warnings
  * @param {IdentifiedModule[]} opts.allIdentifiedModules
  * @returns {{
  *   inspectable: InspectableWebpackModule[]
@@ -167,9 +168,12 @@ exports.analyzeModules = ({
     // TODO: refactor to move random hardening of the build somewhere it's easier to track.
     if (
       isAmbientAsset(module) &&
-      (module?.resourceResolveData?.context?.issuer
-        ? module.resourceResolveData.context.issuer.includes('node_modules') // resourceResolveData.context.issuer is the module that requested the asset to be present (eg. contained a `new URL(asset)`)
-        : module.resource.includes('node_modules'))
+      (module?.resourceResolveData?.context &&
+      'issuer' in module.resourceResolveData.context
+        ? // @ts-expect-error - webpack shipped a type for context that's just `object` which is useless
+          module.resourceResolveData.context.issuer.includes('node_modules') // resourceResolveData.context.issuer is the module that requested the asset to be present (eg. contained a `new URL(asset)`)
+        : typeof module.resource === 'string' &&
+          module.resource.includes('node_modules'))
       // FIXME: would be better to use canonicalName lookup and match with root
     ) {
       // TODO: design a capability that would represent a permission to emit an asset from a dependency when custom capabilities in policy.json arrive.

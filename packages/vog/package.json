@@ -18,21 +18,21 @@
   },
   "exports": {
     ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "import": "./src/index.js",
+      "types": "./src/index.d.ts"
     },
     "./log": {
-      "import": "./dist/log.js",
-      "types": "./dist/log.d.ts"
+      "import": "./src/log.js",
+      "types": "./src/log.d.ts"
     },
     "./package.json": "./package.json",
     "./progress": {
-      "import": "./dist/progress.js",
-      "types": "./dist/progress.d.ts"
+      "import": "./src/progress.js",
+      "types": "./src/progress.d.ts"
     },
     "./spinner": {
-      "import": "./dist/spinner.js",
-      "types": "./dist/spinner.d.ts"
+      "import": "./src/spinner.js",
+      "types": "./src/spinner.d.ts"
     }
   },
   "directories": {
@@ -40,7 +40,6 @@
   },
   "files": [
     "CHANGELOG.md",
-    "dist/**/*",
     "src/**/*",
     "!*.tsbuildinfo",
     "!tsconfig.json"

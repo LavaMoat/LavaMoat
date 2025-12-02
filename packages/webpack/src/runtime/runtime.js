@@ -4,7 +4,7 @@
 /* global LOCKDOWN_SHIMS */
 /* global hardenIntrinsics */
 
-const { repairIntrinsics, } = globalThis
+const { repairIntrinsics } = globalThis
 
 const warn = typeof console === 'object' ? console.warn : () => {}
 
@@ -56,11 +56,14 @@ values(LAVAMOAT.policy.resources).forEach((resource) => {
   }
 })
 
-const { getEndowmentsForConfig, copyWrappedGlobals, getBuiltinForConfig } =
-  LAVAMOAT.endowmentsToolkit({
-    handleGlobalWrite: true,
-    knownWritableFields,
-  })
+const {
+  getEndowmentsForConfig,
+  copyWrappedGlobals,
+  getBuiltinForConfig,
+} = LAVAMOAT.endowmentsToolkit({
+  handleGlobalWrite: true,
+  knownWritableFields,
+})
 
 // These must match assumptions in the wrapper.js
 // sharedKeys are included in the runtime
@@ -105,24 +108,33 @@ const enforcePolicy = (specifier, referrerResourceId, wrappedRequire) => {
   }
 
   const referrerPolicy = LAVAMOAT.policy.resources[referrerResourceId] || {}
-  if (referrerPolicy.builtin && LAVAMOAT.externals[specifier]) {
-    const builtinName = LAVAMOAT.externals[specifier]
-    if (referrerPolicy.builtin[builtinName]) {
-      return wrappedRequire()
-    }
-    if (
-      builtinName &&
-      !builtinName.includes('.') &&
-      keys(referrerPolicy.builtin).some((key) =>
-        key.startsWith(`${builtinName}.`)
-      )
-    ) {
-      // create minimal selection if it's a builtin and not allowed as a whole, but with subpaths
-      return getBuiltinForConfig(
-        wrappedRequire(),
-        builtinName,
-        referrerPolicy.builtin
-      )
+  if (LAVAMOAT.externals[specifier]) {
+    const externalName = LAVAMOAT.externals[specifier]
+    if (referrerPolicy.builtin) {
+      if (referrerPolicy.builtin[externalName]) {
+        return wrappedRequire()
+      }
+      if (
+        externalName &&
+        !externalName.includes('.') &&
+        keys(referrerPolicy.builtin).some((key) =>
+          key.startsWith(`${externalName}.`)
+        )
+      ) {
+        // create minimal selection if it's a builtin and not allowed as a whole, but with subpaths
+        return getBuiltinForConfig(
+          wrappedRequire(),
+          externalName,
+          referrerPolicy.builtin
+        )
+      }
+    } 
+    if (referrerPolicy.packages) {
+      // if an external was automatically generate by webpack and is not recognized as builtin, but allowed as a package, we still need to pass it in.
+      const requestedResourceId = findResourceId(externalName)
+      if (requestedResourceId && referrerPolicy.packages[requestedResourceId]) {
+        return wrappedRequire()
+      }
     }
   }
   const requestedResourceId = findResourceId(specifier)
@@ -332,11 +344,11 @@ const lavamoatRuntimeWrapper = (resourceId, runtimeKit) => {
     // It's a case-by-case basis decision.
     // TODO: print a warning for other functions on the __webpack_require__ namespace that we're not supporting.
     //   It's probably best served at build time though - with runtimeRequirements or looking at the items in webpack runtime when adding lavamoat runtime.
-    // The following seem harmless and are used by default: ['O', 'n', 'd', 'o', 'r', 's', 't', 'b']
+    // The following seem harmless and are used by default: ['O', 'n', 'd', 'o', 'r', 's', 't', 'b', 'j']
     // To discover more, go to https://github.com/webpack/webpack/blob/main/lib/RuntimeGlobals.js and/or look at implementations here https://github.com/webpack/webpack/tree/main/lib/runtime/
     // Looking at the runtime chunk in the built bundle is probably the fastest way to learn what these do.
 
-    const supportedRuntimeItems = ['O', 'n', 'd', 'o', 'r', 's', 't', 'b']
+    const supportedRuntimeItems = ['O', 'n', 'd', 'o', 'r', 's', 't', 'b', 'j']
     for (const item of supportedRuntimeItems) {
       policyRequire[item] = harden(__webpack_require__[item])
     }

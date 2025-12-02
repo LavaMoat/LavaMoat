@@ -6,6 +6,20 @@
   * dependencies
     * @lavamoat/aa bumped from ^4.0.1 to ^4.1.0
 
+## [3.4.1](https://github.com/LavaMoat/LavaMoat/compare/allow-scripts-v3.4.0...allow-scripts-v3.4.1) (2025-11-19)
+
+
+### Bug Fixes
+
+* **deps:** fix npm audit issues ([#1853](https://github.com/LavaMoat/LavaMoat/issues/1853)) ([5ba0f2d](https://github.com/LavaMoat/LavaMoat/commit/5ba0f2de62aa4feca86d7f96bcce24f76d6aa624))
+
+## [3.4.0](https://github.com/LavaMoat/LavaMoat/compare/allow-scripts-v3.3.6...allow-scripts-v3.4.0) (2025-09-25)
+
+
+### Features
+
+* **allow-scripts:** change the recommended use of allow-scripts to global install ([#1823](https://github.com/LavaMoat/LavaMoat/issues/1823)) ([48a1d98](https://github.com/LavaMoat/LavaMoat/commit/48a1d98bae5c6b38e5fe7c7d7ddadb9b77892034))
+
 ## [3.3.6](https://github.com/LavaMoat/LavaMoat/compare/allow-scripts-v3.3.5...allow-scripts-v3.3.6) (2025-09-22)
 
 

@@ -260,7 +260,7 @@ function endowmentsToolkit({
       // dont attempt to extend a getter or trigger a setter
       if (!('value' in targetPropDesc)) {
         throw new Error(
-          `unable to copy on to targetRef, targetRef has a getter at "${nextPart}"`
+          `unable to copy on to targetRef, targetRef has a getter at "${currentPath}"`
         )
       }
       // value must be extensible (cant write properties onto it)
@@ -268,7 +268,7 @@ function endowmentsToolkit({
       const valueType = typeof targetValue
       if (valueType !== 'object' && valueType !== 'function') {
         throw new Error(
-          `unable to copy on to targetRef, targetRef value is not an obj or func "${nextPart}"`
+          `unable to copy on to targetRef, targetRef value is not an obj or func at "${currentPath}"`
         )
       }
     }
@@ -755,6 +755,12 @@ function defaultCreateFunctionWrapper(sourceValue, unwrapTest, unwrapTo) {
     newValue,
     Object.getOwnPropertyDescriptors(sourceValue)
   )
+  // Global functions can have static fields on a prototype. eg. Uint8Array.from
+  if (
+    Reflect.getPrototypeOf(newValue) !== Reflect.getPrototypeOf(sourceValue)
+  ) {
+    Object.setPrototypeOf(newValue, Reflect.getPrototypeOf(sourceValue))
+  }
   return newValue
 }
 

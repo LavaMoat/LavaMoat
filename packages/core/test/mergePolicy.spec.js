@@ -103,9 +103,101 @@ testMerge(
   }
 )
 
+testMerge(
+  'overrides to disallow - real usecas',
+  {
+    resources: {
+      babel: {
+        globals: {
+          document: true,
+          window: true,
+        },
+      },
+    },
+  },
+  {
+    resources: {
+      babel: {
+        globals: {
+          document: false,
+          'document.createElement': true,
+          window: false,
+          'window.location.hash': true,
+        },
+      },
+    },
+  },
+  {
+    resources: {
+      babel: {
+        globals: {
+          document: false,
+          window: false,
+          'document.createElement': true,
+          'window.location.hash': true,
+        },
+      },
+    },
+  }
+)
+
 function testMerge(label, configA, configB, expectedResultObj) {
   test(label, (t) => {
     const result = mergePolicy(configA, configB)
     t.deepEqual(result, expectedResultObj)
   })
 }
+
+test('merge with empty', (t) => {
+  const configA = {
+    resources: {
+      babel: {
+        globals: {
+          abc: true,
+          xyz: false,
+          'a.b.c': true,
+        },
+        builtin: {
+          derp: true,
+          qwerty: false,
+        },
+      },
+    },
+  }
+  const configB = {}
+  const result = mergePolicy(configA, configB)
+  t.deepEqual(result, configA)
+})
+
+test('merge results in invalid nesting', (t) => {
+  const configA = {
+    resources: {
+      babel: {
+        globals: {
+          abc: true,
+          qwe: true,
+        },
+      },
+    },
+  }
+  const configB = {
+    resources: {
+      babel: {
+        globals: {
+          'abc.z': true,
+          'qwe.z': true,
+        },
+      },
+    },
+  }
+  try {
+    mergePolicy(configA, configB)
+  } catch(err) {
+    t.regex(err.message, /"babel"/)
+    t.regex(err.message, /"abc.z" is invalid when "abc" is also present/)
+    t.regex(err.message, /"qwe.z" is invalid when "qwe" is also present/)
+    t.snapshot(err.message)
+    return
+  }
+  t.fail('Expected mergePolicy to throw')
+})

@@ -6,6 +6,7 @@ module.exports = {
   getTailmostMatchingChain,
   reduceToTopmostApiCalls,
   reduceToTopmostApiCallsFromStrings,
+  validateHierarchy,
   addGlobalUsage,
   mergePolicy,
   objToMap,
@@ -158,6 +159,40 @@ function reduceToTopmostApiCalls(globalsConfig) {
     // if no parents found, ok to include
   })
 }
+/**
+ * If array contains 'x' and 'x.y' just keep 'x'
+ *
+ * @param {Map<string, import('@lavamoat/types').GlobalPolicyValue>} globalsConfig
+ * @returns {{ path: string, parent: string }[]}
+ */
+function validateHierarchy(globalsConfig) {
+  const truthyPaths = Array.from(globalsConfig.keys())
+    .filter((k) => globalsConfig.get(k) !== false)
+    .sort()
+  return truthyPaths.reduce((acc, path) => {
+    const parts = path.split('.')
+    // only one part, safe to keep
+    if (parts.length === 1) {
+      return acc
+    }
+    // 'x.y.z' has parents 'x' and 'x.y'
+    const parentParts = parts.slice(0, -1)
+    const parents = parentParts.map((_, index) =>
+      parentParts.slice(0, index + 1).join('.')
+    )
+    // dont include this if a parent appears in the array
+    const parent = parents.find((parent) =>
+      truthyPaths.includes(parent)
+    )
+    if (parent) {
+      acc.push({
+        path,
+        parent,
+      })
+    }
+    return acc
+  }, /** @type {{ path: string, parent: string }[]} */ ([]))
+}
 
 /**
  * If array contains 'x' and 'x.y' just keep 'x'
@@ -206,8 +241,10 @@ function addGlobalUsage(globalsConfig, identifierPath, identifierUse) {
 }
 
 /**
- * Merge two global policy configs (as `Map`s) together
+ * Minimal policy merge util for use in module inspector of policy generation
+ * only
  *
+ * @deprecated
  * @param {Map<string, import('@lavamoat/types').GlobalPolicyValue>} configA
  * @param {Map<string, import('@lavamoat/types').GlobalPolicyValue>} configB
  * @returns

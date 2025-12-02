@@ -1,9 +1,7 @@
 // @ts-check
 
-const fs = require('node:fs/promises')
 const { readFileSync } = require('node:fs')
 const { mergePolicy } = require('./mergePolicy')
-const { jsonStringifySortedPolicy } = require('./stringifyPolicy')
 
 module.exports = { loadPolicy, loadPolicyAndApplyOverrides, loadPoliciesSync }
 
@@ -75,9 +73,29 @@ async function loadPolicy({ debugMode, policyPath }) {
 }
 
 /**
+ * Checks if all resources from overrides exist in policy
+ *
+ * @param {LavaMoatPolicy} policy
+ * @param {LavaMoatPolicy} override
+ * @returns {boolean}
+ */
+const wasOverrideIncluded = (policy, override) => {
+  // all keys from override.resources exist in policy.resources
+  if (!override.resources) {
+    return true
+  }
+  if (!policy.resources) {
+    return false
+  }
+  return Object.keys(override.resources).every((key) =>
+    Object.hasOwn(policy.resources, key)
+  )
+}
+
+/**
  * Loads policy and policy overrides from disk and merges them.
  *
- * If overrides exist, writes the overrides _back_ into the policy file.
+ * Warns if new overrides are detected.
  *
  * @param {PolicyOpts & { policyOverridePath: string }} opts
  * @returns {Promise<LavaMoatPolicy>}
@@ -104,10 +122,12 @@ async function loadPolicyAndApplyOverrides({
 
   const finalPolicy = mergePolicy(policy, policyOverride)
 
-  // TODO: Only write if merge results in changes.
-  // Would have to make a deep equal check on whole policy, which is a waste of time.
-  // mergePolicy() should be able to do it in one pass.
-  await fs.writeFile(policyPath, jsonStringifySortedPolicy(finalPolicy))
+  // If overrides contain resources that were not included, it's possible that policy generation could use them to detect new items.
+  if (!wasOverrideIncluded(policy, policyOverride)) {
+    console.warn(
+      'LavaMoat: A new policy override was added since the policy was last generated. Please run policy generation again to make sure all is up to date.'
+    )
+  }
 
   return finalPolicy
 }

@@ -6,6 +6,79 @@
   * dependencies
     * lavamoat-tofu bumped from ^7.2.1 to ^7.2.2
 
+## [17.1.2](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v17.1.1...lavamoat-core-v17.1.2) (2025-12-02)
+
+
+### Bug Fixes
+
+* **browserify,core,lavamoat-node,node:** do not publish extraneous files ([#1866](https://github.com/LavaMoat/LavaMoat/issues/1866)) ([e7666d8](https://github.com/LavaMoat/LavaMoat/commit/e7666d804e2f9af71fb0cd948af04a283458b6d1)), closes [#1865](https://github.com/LavaMoat/LavaMoat/issues/1865)
+
+## [17.1.1](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v17.1.0...lavamoat-core-v17.1.1) (2025-12-01)
+
+
+### Bug Fixes
+
+* typescript got confused into creating a cyclic reference in types for scuttling in core ([5e25a36](https://github.com/LavaMoat/LavaMoat/commit/5e25a361094a7b3ed7ae2744cd405910f9dc3baa))
+
+## [17.1.0](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v17.0.1...lavamoat-core-v17.1.0) (2025-11-19)
+
+
+### Features
+
+* **core:** add informative errors when the result of policy merge contains invalid entries ([#1848](https://github.com/LavaMoat/LavaMoat/issues/1848)) ([fefd457](https://github.com/LavaMoat/LavaMoat/commit/fefd457d53c2944fe3d2ee719cd741f5eafb8987))
+
+
+### Bug Fixes
+
+* **core:** transfer prototype over to a wraped function ([#1847](https://github.com/LavaMoat/LavaMoat/issues/1847)) ([14e3c66](https://github.com/LavaMoat/LavaMoat/commit/14e3c66957a8700fbf3a423e67f5785e7172e008))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-tofu bumped from ^8.0.11 to ^8.1.0
+
+## [17.0.1](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v17.0.0...lavamoat-core-v17.0.1) (2025-10-30)
+
+
+### Bug Fixes
+
+* **core:** fix policy narrowing logic in the policy merge  ([#1843](https://github.com/LavaMoat/LavaMoat/issues/1843)) ([ea5f3d4](https://github.com/LavaMoat/LavaMoat/commit/ea5f3d46aa8db8ee8e51115ca4b46c5fd00a89b6))
+
+## [17.0.0](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v16.7.1...lavamoat-core-v17.0.0) (2025-10-09)
+
+
+### ⚠ BREAKING CHANGES
+
+* **core:** stop overwriting the policy file while loading. ([#1835](https://github.com/LavaMoat/LavaMoat/issues/1835))
+
+### Bug Fixes
+
+* **core:** stop overwriting the policy file while loading. ([#1835](https://github.com/LavaMoat/LavaMoat/issues/1835)) ([db57c1c](https://github.com/LavaMoat/LavaMoat/commit/db57c1c3a8a8822733b887edec633e3ce1f1177a))
+
+## [16.7.1](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v16.7.0...lavamoat-core-v16.7.1) (2025-10-01)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @lavamoat/types bumped from ^0.0.1 to ^0.1.0
+    * lavamoat-tofu bumped from ^8.0.10 to ^8.0.11
+
+## [16.7.0](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v16.6.2...lavamoat-core-v16.7.0) (2025-09-25)
+
+
+### Features
+
+* **webpack:** document and officially release scuttling in webpack plugin ([#1829](https://github.com/LavaMoat/LavaMoat/issues/1829)) ([9c83030](https://github.com/LavaMoat/LavaMoat/commit/9c83030d97371478bf59b10d636e63168bd8473d))
+
+
+### Bug Fixes
+
+* **core:** noSharedPrototype case in copyWrappedGlobals must include non-enumerable properties ([592f96e](https://github.com/LavaMoat/LavaMoat/commit/592f96e1291aa31cfd6942493e40563b8680b871))
+
 ## [16.6.2](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v16.6.1...lavamoat-core-v16.6.2) (2025-09-22)
 
 

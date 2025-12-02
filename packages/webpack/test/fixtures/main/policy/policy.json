@@ -26,6 +26,20 @@
       "globals": {
         "define": true
       }
+    },
+    "uses-reexport-package": {
+      "globals": {
+        "console.log": true
+      },
+      "meta": {
+        "webpack-optimization": [
+          "Dependency 'uses-reexport-package>reexport-package' reexports from 'es6-module-package' and webpack collapsed that to a direct import."
+        ]
+      },
+      "packages": {
+        "es6-module-package": true,
+        "uses-reexport-package>reexport-package": true
+      }
     }
   }
 }
