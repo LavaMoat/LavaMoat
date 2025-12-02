@@ -65,8 +65,6 @@
     "lavamoat-tofu": "^8.0.11",
     "loggerr": "4.2.0",
     "ses": "1.14.0",
-    "set.prototype.difference": "1.1.7",
-    "set.prototype.issubsetof": "1.1.4",
     "terminal-link": "3.0.0",
     "to-keypath": "0.1.2",
     "type-fest": "4.41.0",
