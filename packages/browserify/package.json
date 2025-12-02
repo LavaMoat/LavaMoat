@@ -21,6 +21,10 @@
     "lib": "lib",
     "test": "test"
   },
+  "files": [
+    "CHANGELOG.md",
+    "src"
+  ],
   "scripts": {
     "build:ses": "(cd ./node_modules/ses && npm install && npm run build && cp ./dist/ses.umd.js ../../lib/)",
     "lint:deps": "depcheck",
