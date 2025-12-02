@@ -16,7 +16,7 @@ export { execute } from './exec/execute.js'
 export { load } from './exec/load.js'
 export { run } from './exec/run.js'
 export { toEndoPolicy } from './policy-converter.js'
-export { loadAndGeneratePolicy as generatePolicy } from './policy-gen/generate.js'
+export { generatePolicy } from './policy-gen/generate.js'
 export {
   assertPolicy,
   isPolicy,

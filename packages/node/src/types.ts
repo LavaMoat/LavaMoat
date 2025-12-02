@@ -270,7 +270,7 @@ export interface WritePowers {
 
 export type WithLoadForMapOptions = ComposeOptions<
   [
-    Except<ImportLocationOptions, 'importHook' | 'log' | 'preload'>,
+    Except<ImportLocationOptions, 'importHook' | 'log' | '_preload'>,
     WithLog,
     WithDev,
   ]
