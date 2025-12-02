@@ -19,16 +19,12 @@ import type {
   Resources,
 } from '@lavamoat/types'
 import type { PackageJson, ValueOf } from 'type-fest'
-import type {
-  MessageTypes,
-  SES_VIOLATION_TYPES,
-  SOURCE_TYPE_MODULE,
-  SOURCE_TYPE_SCRIPT,
-} from './constants.js'
+import type { MessageTypes, SES_VIOLATION_TYPES } from './constants.js'
 import type {
   ComposeOptions,
   FileUrlString,
   MergedLavaMoatPolicy,
+  SourceType,
   WithDev,
   WithFs,
   WithLavaMoatEndoPolicy,
@@ -287,13 +283,6 @@ export interface WorkerPoolOptions<
   /** How long workers can be idle before termination (ms) */
   idleTimeout?: number
 }
-
-/**
- * A module source type
- *
- * @internal
- */
-export type SourceType = typeof SOURCE_TYPE_MODULE | typeof SOURCE_TYPE_SCRIPT
 
 /**
  * Message type for requesting inspection
