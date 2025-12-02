@@ -16,8 +16,8 @@ import {
 } from '../json-fixture-util.js'
 
 /**
- * @import {SourceType} from '../../../src/internal.js'
  * @import {TestPolicyMacroOptions, TestPolicyForJSONOptions, ScaffoldFixtureResult, ScaffoldFixtureOptions, TestPolicyForFixtureOptions} from './types.js'
+ * @import {SourceType} from '../../../src/types.js'
  * @import {TestFn, MacroDeclarationOptions} from 'ava'
  * @import {LavaMoatPolicy} from '@lavamoat/types'
  */
