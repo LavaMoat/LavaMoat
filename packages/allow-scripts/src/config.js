@@ -3,6 +3,21 @@
  *
  * @module
  */
+
+/**
+ * @import {
+ *   PkgConfs,
+ *   ScriptsConfig,
+ *   BinsConfig,
+ *   LavamoatPackageJson,
+ *   BinInfo,
+ *   BinCandidates,
+ *   SetDefaultConfigurationParams,
+ *   SavePackageConfigurationsParams,
+ *   GetOptionsForBinParams
+ * } from './types/common.js'
+ */
+
 const { existsSync, promises: fs } = require('node:fs')
 const path = require('node:path')
 const { FEATURE } = require('./toggles')
