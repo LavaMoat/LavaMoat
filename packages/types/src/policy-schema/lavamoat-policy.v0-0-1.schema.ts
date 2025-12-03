@@ -39,6 +39,18 @@ export interface LavaMoatPolicy<T extends Resources = Resources> {
    * a matching policy in {@link LavaMoatPolicy.resources}
    */
   root?: RootPolicy<T>
+
+  /**
+   * List of canonical names to forcefully include in the policy
+   *
+   * If an array of strings is provided, the entry is assumed to be the
+   * entrypoint of the package. Otherwise, name is the canonical name of the
+   * package and entry is the relative path from the package root to the desired
+   * module.
+   */
+  include?:
+    | Array<Extract<keyof T, string>>
+    | Array<{ name: Extract<keyof T, string>; entry: string }>
 }
 
 /**
@@ -65,7 +77,7 @@ export interface DebugInfo {
    * @todo Move these types into lavamoat-tofu
    */
   sesCompat: SesCompat
-  globals: Record<string, boolean>
+  globals: Record<string, GlobalPolicyValue>
 
   builtin: string[]
 }
@@ -127,7 +139,7 @@ export interface Resources {
   [k: string]: ResourcePolicy
 }
 
-export type ResourceMetadata = Record<string, string|string[]>
+export type ResourceMetadata = Record<string, string | string[]>
 
 export interface ResourcePolicy {
   globals?: GlobalPolicy

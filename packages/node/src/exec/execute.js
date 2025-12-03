@@ -8,7 +8,6 @@
  * @packageDocumentation
  */
 
-import { defaultReadPowers } from '../compartment/power.js'
 import { load } from './load.js'
 
 /**
@@ -32,12 +31,9 @@ import { load } from './load.js'
  * @public
  */
 
-export const execute = async (
-  entrypointPath,
-  { readPowers = defaultReadPowers, ...options } = {}
-) => {
+export const execute = async (entrypointPath, options = {}) => {
   const application = /** @type {ApplicationLoader<T>} */ (
-    await load(entrypointPath, readPowers, options)
+    await load(entrypointPath, options)
   )
   const { namespace } = await application.import()
   return namespace
