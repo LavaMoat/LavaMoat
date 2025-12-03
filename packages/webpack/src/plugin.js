@@ -214,6 +214,14 @@ class LavaMoatPlugin {
         resolve: browserResolve,
       })
         .then((map) => {
+          if (this.options.isolateLocations_experimental) {
+            const root = STORE.options.rootDir || compiler.context
+            Object.entries(this.options.isolateLocations_experimental).forEach(
+              ([location, id]) => {
+                map.set(path.join(root, location), id)
+              }
+            )
+          }
           STORE.canonicalNameMap = map
           PROGRESS.report('canonicalNameMap')
           callback()
