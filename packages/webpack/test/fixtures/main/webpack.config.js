@@ -9,7 +9,7 @@ const defaultLmOptions = {
   runChecks: true,
   diagnosticsVerbosity: 1,
   HtmlWebpackPluginInterop: true,
-  isolateLocations: {
+  isolateLocations_experimental: {
     slop: '$lop1',
     'src/moreslop': '$lop2',
   },

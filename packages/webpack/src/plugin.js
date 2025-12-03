@@ -214,9 +214,9 @@ class LavaMoatPlugin {
         resolve: browserResolve,
       })
         .then((map) => {
-          if (this.options.isolateLocations) {
+          if (this.options.isolateLocations_experimental) {
             const root = STORE.options.rootDir || compiler.context
-            Object.entries(this.options.isolateLocations).forEach(
+            Object.entries(this.options.isolateLocations_experimental).forEach(
               ([location, id]) => {
                 map.set(path.join(root, location), id)
               }
