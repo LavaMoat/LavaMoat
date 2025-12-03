@@ -1,6 +1,7 @@
 import '../../src/preamble.js'
 
 import test from 'ava'
+
 import { readJsonFile } from '../../src/fs.js'
 import { createCLIMacros } from './cli-macros.js'
 
