@@ -94,7 +94,7 @@ async function runLava(options) {
     })
 
     // run entrypoint
-    kernel.internalRequire(entryId)
+    return kernel.internalRequire(entryId)
   }
 }
 
