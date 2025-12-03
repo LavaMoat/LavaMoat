@@ -10,6 +10,7 @@ import { makeTempdir, runCLI } from './cli-util.js'
 const fixture = fixtureFinder(import.meta.url)
 
 const basic = fixture('basic')
+const echo = fixture('basic', { entrypoint: 'echo.js' })
 const bin = fixture('bin', { entrypoint: 'lard-o-matic' })
 const deptree = fixture('deptree')
 
@@ -63,6 +64,20 @@ test(
     '--yelling',
   ],
   'HOWDY WORLD'
+)
+test(
+  'extra non-option arguments are passed cleanly (positionals and options)',
+  testCLI,
+  [
+    'run',
+    echo.entrypoint,
+    '--project-root',
+    echo.dir,
+    '--',
+    'howdy',
+    '--yelling',
+  ],
+  'howdy --yelling'
 )
 
 test(
