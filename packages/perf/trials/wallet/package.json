@@ -1,7 +1,7 @@
 {
   "devDependencies": {
     "browserify": "17.0.1",
-    "serve": "14.2.4"
+    "serve": "14.2.5"
   },
   "scripts": {
     "start": "yarn stats && yarn chart",

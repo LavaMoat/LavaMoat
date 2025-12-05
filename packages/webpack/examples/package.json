@@ -19,7 +19,7 @@
   "devDependencies": {
     "@types/webpack": "^5.28.1",
     "css-loader": "^6.7.3",
-    "esbuild-loader": "^3.0.1",
+    "esbuild-loader": "^4.4.0",
     "html-webpack-plugin": "^5.5.1",
     "mini-css-extract-plugin": "^2.7.5",
     "ts-loader": "^9.4.2",
