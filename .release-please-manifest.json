@@ -7,7 +7,7 @@
   "packages/lavapack": "7.0.22",
   "packages/laverna": "1.2.7",
   "packages/lavamoat-node": "11.0.0",
-  "packages/node": "0.0.1",
+  "packages/node": "0.1.0",
   "packages/preinstall-always-fail": "2.1.1",
   "packages/react-native-lockdown": "0.2.0",
   "packages/tofu": "8.2.0",
