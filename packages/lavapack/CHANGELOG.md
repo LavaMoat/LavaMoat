@@ -24,6 +24,23 @@
   * dependencies
     * lavamoat-core bumped from ^15.2.0 to ^15.2.1
 
+## [7.0.22](https://github.com/PEAC337/LavaMoat/compare/lavapack-v7.0.21...lavapack-v7.0.22) (2025-12-05)
+
+
+### Bug Fixes
+
+* add Node.js v24.0.0 to supported engines ([ad9cdcd](https://github.com/PEAC337/LavaMoat/commit/ad9cdcdf83ccbda8bf2eba427d0c80f761f47a0a))
+* **core:** block circular global object endowments ([#1505](https://github.com/PEAC337/LavaMoat/issues/1505)) ([6745a0e](https://github.com/PEAC337/LavaMoat/commit/6745a0edee85171e4062aaec31d7f25bf3a97e46))
+* **deps:** update dependency json-stable-stringify to v1.3.0 ([#1613](https://github.com/PEAC337/LavaMoat/issues/1613)) ([f9314d1](https://github.com/PEAC337/LavaMoat/commit/f9314d1a238d31a0164356c1c6bd6f6e36246d56))
+* **deps:** update dependency readable-stream to v4.7.0 ([#1617](https://github.com/PEAC337/LavaMoat/issues/1617)) ([9cb1e4b](https://github.com/PEAC337/LavaMoat/commit/9cb1e4be3547de0763be5055ac50eb211d658af5))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lavamoat-core bumped from ^17.1.2 to ^18.0.0
+
 ## [7.0.21](https://github.com/LavaMoat/LavaMoat/compare/lavapack-v7.0.20...lavapack-v7.0.21) (2025-12-02)
 
 

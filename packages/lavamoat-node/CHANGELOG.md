@@ -19,6 +19,44 @@
     * lavamoat-core bumped from ^15.2.0 to ^15.2.1
     * lavamoat-tofu bumped from ^7.2.1 to ^7.2.2
 
+## [11.0.0](https://github.com/PEAC337/LavaMoat/compare/lavamoat-v10.0.5...lavamoat-v11.0.0) (2025-12-05)
+
+
+### ⚠ BREAKING CHANGES
+
+* indicate breaking change propagation: stop overwriting the policy file while loading. ([#1835](https://github.com/PEAC337/LavaMoat/issues/1835))
+
+### Bug Fixes
+
+* 2 bugs manifested in walking content from policy-overrides ([#1471](https://github.com/PEAC337/LavaMoat/issues/1471)) ([7599146](https://github.com/PEAC337/LavaMoat/commit/7599146f6412777dd13d681283e1b5344297d0eb))
+* add Node.js v24.0.0 to supported engines ([ad9cdcd](https://github.com/PEAC337/LavaMoat/commit/ad9cdcdf83ccbda8bf2eba427d0c80f761f47a0a))
+* **browserify,core,lavamoat-node,node:** do not publish extraneous files ([#1866](https://github.com/PEAC337/LavaMoat/issues/1866)) ([e7666d8](https://github.com/PEAC337/LavaMoat/commit/e7666d804e2f9af71fb0cd948af04a283458b6d1)), closes [#1865](https://github.com/PEAC337/LavaMoat/issues/1865)
+* **core:** block circular global object endowments ([#1505](https://github.com/PEAC337/LavaMoat/issues/1505)) ([6745a0e](https://github.com/PEAC337/LavaMoat/commit/6745a0edee85171e4062aaec31d7f25bf3a97e46))
+* **deps:** update babel monorepo ([afc9fe5](https://github.com/PEAC337/LavaMoat/commit/afc9fe5fef98c53abe014ff657a1d4f59883abe8))
+* **deps:** update babel monorepo ([e6f4e70](https://github.com/PEAC337/LavaMoat/commit/e6f4e70cffe8237c27126046bb0cfa5515c2d138))
+* **deps:** update babel monorepo to v7.25.9 ([6d9d5a3](https://github.com/PEAC337/LavaMoat/commit/6d9d5a3336444fada49e239756ffc3c207d3ff5d))
+* **deps:** update babel monorepo to v7.26.2 ([9bac12a](https://github.com/PEAC337/LavaMoat/commit/9bac12abd602632a6bd0ad3af5026cc627bf2b31))
+* **deps:** update dependency corepack to v0.30.0 ([4f4fd6e](https://github.com/PEAC337/LavaMoat/commit/4f4fd6e503a79a2acee6347605be5b888f070d3b))
+* **deps:** update dependency corepack to v0.32.0 ([#1611](https://github.com/PEAC337/LavaMoat/issues/1611)) ([854bf40](https://github.com/PEAC337/LavaMoat/commit/854bf40c464686bf866542dd2278d3121def064f))
+* **deps:** update dependency corepack to v0.33.0 ([#1682](https://github.com/PEAC337/LavaMoat/issues/1682)) ([0de2351](https://github.com/PEAC337/LavaMoat/commit/0de235120f3ad41d55462ebda645ded45d86accc))
+* **deps:** update dependency node-gyp-build to v4.8.4 ([1c21367](https://github.com/PEAC337/LavaMoat/commit/1c21367dff7d83bc94cdcfb8b0245a27d3e32bd0))
+* **deps:** update dependency resolve to v1.22.10 ([#1535](https://github.com/PEAC337/LavaMoat/issues/1535)) ([17bee26](https://github.com/PEAC337/LavaMoat/commit/17bee26ef5d24f8bcc48d4aac0a7e066a8bbf7af))
+* indicate breaking change propagation: stop overwriting the policy file while loading. ([#1835](https://github.com/PEAC337/LavaMoat/issues/1835)) ([81f2cb0](https://github.com/PEAC337/LavaMoat/commit/81f2cb0bf00e61c9ddfb637ad20deacba95ca967))
+* **lavamoat-node:** cli entry args ([#1857](https://github.com/PEAC337/LavaMoat/issues/1857)) ([#1859](https://github.com/PEAC337/LavaMoat/issues/1859)) ([f949577](https://github.com/PEAC337/LavaMoat/commit/f9495777dc0fe853064fe1de241a0421e925b212))
+* **lavamoat-node:** fix missing cjs extension in the list of extensions to resolve ([#1856](https://github.com/PEAC337/LavaMoat/issues/1856)) ([f2eeced](https://github.com/PEAC337/LavaMoat/commit/f2eecedbcf6f501e4f7163f47b97821b9e5dc8a1))
+* **lavamoat-node:** fix the bug that prevented following dependency relationships listed in policy overrides ([61df9ed](https://github.com/PEAC337/LavaMoat/commit/61df9edc47bca3c47d2975032d7db30de833b458))
+* **lavamoat-node:** support packages with falsy main field ([e8c489c](https://github.com/PEAC337/LavaMoat/commit/e8c489c5fe3054bf6099658b3e9f3d1da07f7bc2)), closes [#1706](https://github.com/PEAC337/LavaMoat/issues/1706)
+* make policy ordering consistntly manifest itself in json files produced ([a149a7d](https://github.com/PEAC337/LavaMoat/commit/a149a7d16d65bc4255cf32211a671823356565da))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @lavamoat/aa bumped from ^4.3.4 to ^4.3.5
+    * lavamoat-core bumped from ^17.1.2 to ^18.0.0
+    * lavamoat-tofu bumped from ^8.1.0 to ^8.2.0
+
 ## [10.0.5](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-v10.0.4...lavamoat-v10.0.5) (2025-12-02)
 
 

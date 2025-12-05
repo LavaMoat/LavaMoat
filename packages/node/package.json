@@ -1,6 +1,6 @@
 {
   "name": "@lavamoat/node",
-  "version": "0.4.10",
+  "version": "0.0.1",
   "type": "module",
   "description": "Next-gen LavaMoat for Node.js",
   "repository": {
@@ -56,10 +56,10 @@
   "dependencies": {
     "@endo/compartment-mapper": "1.6.3",
     "@endo/evasive-transform": "2.0.2",
-    "@lavamoat/types": "0.1.0",
+    "@lavamoat/types": "0.2.0",
     "@types/node": "18.19.112",
     "chalk": "4.1.2",
-    "lavamoat-core": "^17.1.2",
+    "lavamoat-core": "^18.0.0",
     "loggerr": "4.2.0",
     "ses": "1.14.0",
     "terminal-link": "3.0.0",

@@ -6,6 +6,73 @@
   * dependencies
     * lavamoat-tofu bumped from ^7.2.1 to ^7.2.2
 
+## [18.0.0](https://github.com/PEAC337/LavaMoat/compare/lavamoat-core-v17.1.2...lavamoat-core-v18.0.0) (2025-12-05)
+
+
+### ⚠ BREAKING CHANGES
+
+* **core:** stop overwriting the policy file while loading. ([#1835](https://github.com/PEAC337/LavaMoat/issues/1835))
+
+### Features
+
+* **core:** add "redefine" global policy value to schema ([09d78ba](https://github.com/PEAC337/LavaMoat/commit/09d78badd3b3cc2e982ce690e84133d9959f43b2)), closes [#1583](https://github.com/PEAC337/LavaMoat/issues/1583)
+* **core:** add informative errors when the result of policy merge contains invalid entries ([#1848](https://github.com/PEAC337/LavaMoat/issues/1848)) ([fefd457](https://github.com/PEAC337/LavaMoat/commit/fefd457d53c2944fe3d2ee719cd741f5eafb8987))
+* **core:** export endowmentsToolkit from the root ([4abfade](https://github.com/PEAC337/LavaMoat/commit/4abfade71ca4f7473ead3d2c48426dd4a7293f76))
+* **core:** policy sorting cli for cleaner sort order migration ([#1467](https://github.com/PEAC337/LavaMoat/issues/1467)) ([b2cf7c3](https://github.com/PEAC337/LavaMoat/commit/b2cf7c33fe59adcab888c72164818bd590cf11c7))
+* **core:** relax scuttling by skipping intrinsics ([#1645](https://github.com/PEAC337/LavaMoat/issues/1645)) ([5040521](https://github.com/PEAC337/LavaMoat/commit/5040521a089e10a03dcb882d37b0129b8d64a2c3))
+* **core:** second param to mergePolicy is now explicitly optional ([f2302aa](https://github.com/PEAC337/LavaMoat/commit/f2302aa1e805456e17bf966193676c1466bb98ca))
+* **core:** sort policy in a diff-friendly way ([#1350](https://github.com/PEAC337/LavaMoat/issues/1350)) - sort order remains unchanged even if path to dependency changed. ([4af8ad7](https://github.com/PEAC337/LavaMoat/commit/4af8ad7559e1ab12c541488cf537ecc18ce0d6dc))
+* **core:** support Firefox contentscript shenanigans with cross-realm window prototypes ([#1786](https://github.com/PEAC337/LavaMoat/issues/1786)) ([271598f](https://github.com/PEAC337/LavaMoat/commit/271598f59161ba83f525a3d340916b32e6f4a96a))
+* **core:** support untrusted entrypoints ([36018de](https://github.com/PEAC337/LavaMoat/commit/36018dea2bbe9b7d16588e0333974dd98ee2d02d))
+* **node:** add support in scuttling ([#1627](https://github.com/PEAC337/LavaMoat/issues/1627)) ([587644f](https://github.com/PEAC337/LavaMoat/commit/587644fb8ec59499b181d0e8c8d2660257d04015))
+* **webpack:** document and officially release scuttling in webpack plugin ([#1829](https://github.com/PEAC337/LavaMoat/issues/1829)) ([9c83030](https://github.com/PEAC337/LavaMoat/commit/9c83030d97371478bf59b10d636e63168bd8473d))
+* **webpack:** policy debugging capabilities and tighter tests ([20b12ad](https://github.com/PEAC337/LavaMoat/commit/20b12ad38a78678c8291b4841e8c4d00b349c1aa))
+
+
+### Bug Fixes
+
+* 2 bugs manifested in walking content from policy-overrides ([#1471](https://github.com/PEAC337/LavaMoat/issues/1471)) ([7599146](https://github.com/PEAC337/LavaMoat/commit/7599146f6412777dd13d681283e1b5344297d0eb))
+* add Node.js v24.0.0 to supported engines ([ad9cdcd](https://github.com/PEAC337/LavaMoat/commit/ad9cdcdf83ccbda8bf2eba427d0c80f761f47a0a))
+* **browserify,core,lavamoat-node,node:** do not publish extraneous files ([#1866](https://github.com/PEAC337/LavaMoat/issues/1866)) ([e7666d8](https://github.com/PEAC337/LavaMoat/commit/e7666d804e2f9af71fb0cd948af04a283458b6d1)), closes [#1865](https://github.com/PEAC337/LavaMoat/issues/1865)
+* **core,webpack:** remove deprecated lockdown options ([efec539](https://github.com/PEAC337/LavaMoat/commit/efec5391eec838689ce2426de617571d0f276f2c)), closes [#1578](https://github.com/PEAC337/LavaMoat/issues/1578)
+* **core:** block circular global object endowments ([#1505](https://github.com/PEAC337/LavaMoat/issues/1505)) ([6745a0e](https://github.com/PEAC337/LavaMoat/commit/6745a0edee85171e4062aaec31d7f25bf3a97e46))
+* **core:** fix broken references, type checking for mergePolicy.js ([b08adef](https://github.com/PEAC337/LavaMoat/commit/b08adef9bdfaf19e3e5951cfe2019271d689124a))
+* **core:** fix policy narrowing logic in the policy merge  ([#1843](https://github.com/PEAC337/LavaMoat/issues/1843)) ([ea5f3d4](https://github.com/PEAC337/LavaMoat/commit/ea5f3d46aa8db8ee8e51115ca4b46c5fd00a89b6))
+* **core:** ignore global Function in policy ([55f8c7b](https://github.com/PEAC337/LavaMoat/commit/55f8c7bd07de7f51fc2db81972f6f7d447f33e9e))
+* **core:** move ses to production dependencies ([27c0e8b](https://github.com/PEAC337/LavaMoat/commit/27c0e8b191c8a8145e90dd5487cd09cad75500de))
+* **core:** noSharedPrototype case in copyWrappedGlobals must include non-enumerable properties ([592f96e](https://github.com/PEAC337/LavaMoat/commit/592f96e1291aa31cfd6942493e40563b8680b871))
+* **core:** stop overwriting the policy file while loading. ([#1835](https://github.com/PEAC337/LavaMoat/issues/1835)) ([db57c1c](https://github.com/PEAC337/LavaMoat/commit/db57c1c3a8a8822733b887edec633e3ce1f1177a))
+* **core:** transfer prototype over to a wraped function ([#1847](https://github.com/PEAC337/LavaMoat/issues/1847)) ([14e3c66](https://github.com/PEAC337/LavaMoat/commit/14e3c66957a8700fbf3a423e67f5785e7172e008))
+* **core:** update vendored lockdown.umd.js ([41a2d54](https://github.com/PEAC337/LavaMoat/commit/41a2d541f80956b2623d6176d8580825df29b52d))
+* **deps:** update babel monorepo ([afc9fe5](https://github.com/PEAC337/LavaMoat/commit/afc9fe5fef98c53abe014ff657a1d4f59883abe8))
+* **deps:** update babel monorepo ([e6f4e70](https://github.com/PEAC337/LavaMoat/commit/e6f4e70cffe8237c27126046bb0cfa5515c2d138))
+* **deps:** update babel monorepo to v7.25.8 ([1dcb35e](https://github.com/PEAC337/LavaMoat/commit/1dcb35e023823710343b5f0a4ca589cdfe647e7d))
+* **deps:** update babel monorepo to v7.25.9 ([6d9d5a3](https://github.com/PEAC337/LavaMoat/commit/6d9d5a3336444fada49e239756ffc3c207d3ff5d))
+* **deps:** update babel monorepo to v7.26.10 ([#1561](https://github.com/PEAC337/LavaMoat/issues/1561)) ([2757717](https://github.com/PEAC337/LavaMoat/commit/275771754578647346da1ece0f86afaabdd5de36))
+* **deps:** update babel monorepo to v7.26.5 ([#1501](https://github.com/PEAC337/LavaMoat/issues/1501)) ([4e1e19d](https://github.com/PEAC337/LavaMoat/commit/4e1e19d4f585fb730f32b581ed44d448b9d03122))
+* **deps:** update babel monorepo to v7.26.7 ([#1524](https://github.com/PEAC337/LavaMoat/issues/1524)) ([7285fdf](https://github.com/PEAC337/LavaMoat/commit/7285fdf6ce5c337443840525b79c7653708b541f))
+* **deps:** update babel monorepo to v7.26.9 ([6a9dc73](https://github.com/PEAC337/LavaMoat/commit/6a9dc735f18a5b95e82b86ec2bd466ee4433172f))
+* **deps:** update babel monorepo to v7.27.0 ([#1589](https://github.com/PEAC337/LavaMoat/issues/1589)) ([efd83d7](https://github.com/PEAC337/LavaMoat/commit/efd83d7ea7a5f5f9d2157248d4e2f8b7f9c48c56))
+* **deps:** update babel monorepo to v7.27.3 ([#1672](https://github.com/PEAC337/LavaMoat/issues/1672)) ([72cb642](https://github.com/PEAC337/LavaMoat/commit/72cb6424bb5acb16655562deaefff8ef2cf2168e))
+* **deps:** update definitelytyped ([#1574](https://github.com/PEAC337/LavaMoat/issues/1574)) ([6c2d54e](https://github.com/PEAC337/LavaMoat/commit/6c2d54e851ea24a9482a52018b5e0d84716f87b6))
+* **deps:** update dependency json-stable-stringify to v1.3.0 ([#1613](https://github.com/PEAC337/LavaMoat/issues/1613)) ([f9314d1](https://github.com/PEAC337/LavaMoat/commit/f9314d1a238d31a0164356c1c6bd6f6e36246d56))
+* **deps:** update dependency ses to v1.10.0 ([#1422](https://github.com/PEAC337/LavaMoat/issues/1422)) ([b6f0589](https://github.com/PEAC337/LavaMoat/commit/b6f0589cf9730fac8173a3fca0c4a031bd64f12f))
+* **deps:** update dependency ses to v1.12.0 [security] ([#1605](https://github.com/PEAC337/LavaMoat/issues/1605)) ([881ae86](https://github.com/PEAC337/LavaMoat/commit/881ae86b9a4c27ab60a3c76a4a69f5de246eb2ed))
+* **deps:** update dependency ses to v1.14.0 ([#1746](https://github.com/PEAC337/LavaMoat/issues/1746)) ([3e4b834](https://github.com/PEAC337/LavaMoat/commit/3e4b834df3430d9f919e7df31f42d23e9b6bb352))
+* **deps:** update dependency ses to v1.9.0 ([75cae74](https://github.com/PEAC337/LavaMoat/commit/75cae74063c444184fea3370bf9925bc7946846a))
+* **deps:** update dependency type-fest to v4.30.0 ([6528665](https://github.com/PEAC337/LavaMoat/commit/6528665e2e99221366444c23a0e52be447e04071))
+* make policy ordering consistntly manifest itself in json files produced ([a149a7d](https://github.com/PEAC337/LavaMoat/commit/a149a7d16d65bc4255cf32211a671823356565da))
+* typescript got confused into creating a cyclic reference in types for scuttling in core ([5e25a36](https://github.com/PEAC337/LavaMoat/commit/5e25a361094a7b3ed7ae2744cd405910f9dc3baa))
+* upgrade ses to v1.11.0 ([a12dae1](https://github.com/PEAC337/LavaMoat/commit/a12dae13e8c7f70082199ba186659ea413e82ded))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @lavamoat/types bumped from ^0.1.0 to ^0.2.0
+    * lavamoat-tofu bumped from ^8.1.0 to ^8.2.0
+
 ## [17.1.2](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-core-v17.1.1...lavamoat-core-v17.1.2) (2025-12-02)
 
 

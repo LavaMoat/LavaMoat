@@ -18,6 +18,74 @@
   * dependencies
     * lavamoat-core bumped from ^15.2.0 to ^15.2.1
 
+## [1.6.0](https://github.com/PEAC337/LavaMoat/compare/webpack-v1.5.6...webpack-v1.6.0) (2025-12-05)
+
+
+### Features
+
+* **webpack,core:** Add a meta field to policy resource, report webpack optimizations to it. ([a53b434](https://github.com/PEAC337/LavaMoat/commit/a53b434e21e074d2261a4e84b85e33fe8aa87278))
+* **webpack:** add explicit error messages when a compilation concludes with nothing to protect ([f12985f](https://github.com/PEAC337/LavaMoat/commit/f12985f15a46e0d022d9caef8a0e5e646529575c))
+* **webpack:** add generatePolicyOnly option ([#1789](https://github.com/PEAC337/LavaMoat/issues/1789)) ([72900cd](https://github.com/PEAC337/LavaMoat/commit/72900cd22a954a15d9fe96a8bd4b2f844ba3797c))
+* **webpack:** add undocumented __unsafeAllowContextModules flag to allow experimenting with contextmodules without leaving them vulnerable by default ([8eca7f1](https://github.com/PEAC337/LavaMoat/commit/8eca7f16dc0270875f99e329b46fd5555c8e1e9d))
+* **webpack:** avoid emiting resource assets from packages by default ([#1451](https://github.com/PEAC337/LavaMoat/issues/1451)) ([325bf2a](https://github.com/PEAC337/LavaMoat/commit/325bf2a1dc5c9c048ef36148d5611a2a5112ec0d))
+* **webpack:** defend webpack runtime from scuttling ([#1740](https://github.com/PEAC337/LavaMoat/issues/1740)) ([0f094bd](https://github.com/PEAC337/LavaMoat/commit/0f094bd38a1a2c159d5f49864ef97ec57403a43f))
+* **webpack:** document and officially release scuttling in webpack plugin ([#1829](https://github.com/PEAC337/LavaMoat/issues/1829)) ([9c83030](https://github.com/PEAC337/LavaMoat/commit/9c83030d97371478bf59b10d636e63168bd8473d))
+* **webpack:** enable syntax checks by default, check prior to concatenation. ([e74a55b](https://github.com/PEAC337/LavaMoat/commit/e74a55bdc7f83739d8d1fec0b3c5f6852470c6cc))
+* **webpack:** null runtime ([4374b7a](https://github.com/PEAC337/LavaMoat/commit/4374b7a65ef551d123396b32e78cd6fd976ecd8e))
+* **webpack:** policy debugging capabilities and tighter tests ([20b12ad](https://github.com/PEAC337/LavaMoat/commit/20b12ad38a78678c8291b4841e8c4d00b349c1aa))
+* **webpack:** prevent webpack from eliminating reexports and failing policy enforcement ([#1827](https://github.com/PEAC337/LavaMoat/issues/1827)) ([5f4d4fc](https://github.com/PEAC337/LavaMoat/commit/5f4d4fcdf6395bd749918d2b6bed7c5e822629e2))
+* **webpack:** properly expose types for the plugin ([#1741](https://github.com/PEAC337/LavaMoat/issues/1741)) ([abd4450](https://github.com/PEAC337/LavaMoat/commit/abd445066bd698ada041bc717b8ebcee5ea6b296))
+* **webpack:** repair for window.event deprecated leaky poperty ([#1785](https://github.com/PEAC337/LavaMoat/issues/1785)) ([86d944b](https://github.com/PEAC337/LavaMoat/commit/86d944bfc0f65e5d27c6f598add72016de579565))
+* **webpack:** repairs for globals that need more than unwrap from core ([#1751](https://github.com/PEAC337/LavaMoat/issues/1751)) ([86ad964](https://github.com/PEAC337/LavaMoat/commit/86ad964f6b1d33950aea10849052e8cfc8459663))
+* **webpack:** static shims for runtime, runtimeConfigurationPerChunk_experimental to control embedded runtime options ([#1792](https://github.com/PEAC337/LavaMoat/issues/1792)) ([c69a08d](https://github.com/PEAC337/LavaMoat/commit/c69a08d5af47e20ee0580fa5f0fcc804cb6d6928))
+* **webpack:** support scuttling ([#1298](https://github.com/PEAC337/LavaMoat/issues/1298)) ([9630600](https://github.com/PEAC337/LavaMoat/commit/963060078d16fab80f24d49ea945a08fc51b9384))
+* **webpack:** unlockedChunksUnsafe option to refrain from protecting selected chunks ([#1375](https://github.com/PEAC337/LavaMoat/issues/1375)) ([1f24683](https://github.com/PEAC337/LavaMoat/commit/1f24683e2e6cddefbc492c0925d0d7d5e3b995c0))
+* **webpack:** use the final module info in connections to handle the optimizations webpack sideEffect option does. wip ([9c7b305](https://github.com/PEAC337/LavaMoat/commit/9c7b3050460b4cc79b04ac422bdfb69540893bd9))
+* **webpack:** webpack context modules and chunk lazy loading support ([#1553](https://github.com/PEAC337/LavaMoat/issues/1553)) ([3602f65](https://github.com/PEAC337/LavaMoat/commit/3602f6598196ec99287fe239aa1708d9f80c0e0c))
+
+
+### Bug Fixes
+
+* add Node.js v24.0.0 to supported engines ([ad9cdcd](https://github.com/PEAC337/LavaMoat/commit/ad9cdcdf83ccbda8bf2eba427d0c80f761f47a0a))
+* **core,webpack:** remove deprecated lockdown options ([efec539](https://github.com/PEAC337/LavaMoat/commit/efec5391eec838689ce2426de617571d0f276f2c)), closes [#1578](https://github.com/PEAC337/LavaMoat/issues/1578)
+* **core:** block circular global object endowments ([#1505](https://github.com/PEAC337/LavaMoat/issues/1505)) ([6745a0e](https://github.com/PEAC337/LavaMoat/commit/6745a0edee85171e4062aaec31d7f25bf3a97e46))
+* **deps:** update babel monorepo ([afc9fe5](https://github.com/PEAC337/LavaMoat/commit/afc9fe5fef98c53abe014ff657a1d4f59883abe8))
+* **deps:** update babel monorepo ([e6f4e70](https://github.com/PEAC337/LavaMoat/commit/e6f4e70cffe8237c27126046bb0cfa5515c2d138))
+* **deps:** update babel monorepo to v7.25.8 ([1dcb35e](https://github.com/PEAC337/LavaMoat/commit/1dcb35e023823710343b5f0a4ca589cdfe647e7d))
+* **deps:** update babel monorepo to v7.25.9 ([6d9d5a3](https://github.com/PEAC337/LavaMoat/commit/6d9d5a3336444fada49e239756ffc3c207d3ff5d))
+* **deps:** update babel monorepo to v7.26.7 ([#1524](https://github.com/PEAC337/LavaMoat/issues/1524)) ([7285fdf](https://github.com/PEAC337/LavaMoat/commit/7285fdf6ce5c337443840525b79c7653708b541f))
+* **deps:** update babel monorepo to v7.26.9 ([6a9dc73](https://github.com/PEAC337/LavaMoat/commit/6a9dc735f18a5b95e82b86ec2bd466ee4433172f))
+* **deps:** update babel monorepo to v7.27.0 ([#1589](https://github.com/PEAC337/LavaMoat/issues/1589)) ([efd83d7](https://github.com/PEAC337/LavaMoat/commit/efd83d7ea7a5f5f9d2157248d4e2f8b7f9c48c56))
+* **deps:** update dependency json-stable-stringify to v1.3.0 ([#1613](https://github.com/PEAC337/LavaMoat/issues/1613)) ([f9314d1](https://github.com/PEAC337/LavaMoat/commit/f9314d1a238d31a0164356c1c6bd6f6e36246d56))
+* **deps:** update dependency ses to v1.10.0 ([#1422](https://github.com/PEAC337/LavaMoat/issues/1422)) ([b6f0589](https://github.com/PEAC337/LavaMoat/commit/b6f0589cf9730fac8173a3fca0c4a031bd64f12f))
+* **deps:** update dependency ses to v1.12.0 [security] ([#1605](https://github.com/PEAC337/LavaMoat/issues/1605)) ([881ae86](https://github.com/PEAC337/LavaMoat/commit/881ae86b9a4c27ab60a3c76a4a69f5de246eb2ed))
+* **deps:** update dependency ses to v1.14.0 ([#1746](https://github.com/PEAC337/LavaMoat/issues/1746)) ([3e4b834](https://github.com/PEAC337/LavaMoat/commit/3e4b834df3430d9f919e7df31f42d23e9b6bb352))
+* **deps:** update dependency ses to v1.9.0 ([75cae74](https://github.com/PEAC337/LavaMoat/commit/75cae74063c444184fea3370bf9925bc7946846a))
+* make policy ordering consistntly manifest itself in json files produced ([a149a7d](https://github.com/PEAC337/LavaMoat/commit/a149a7d16d65bc4255cf32211a671823356565da))
+* typescript got confused into creating a cyclic reference in types for scuttling in core ([5e25a36](https://github.com/PEAC337/LavaMoat/commit/5e25a361094a7b3ed7ae2744cd405910f9dc3baa))
+* upgrade ses to v1.11.0 ([a12dae1](https://github.com/PEAC337/LavaMoat/commit/a12dae13e8c7f70082199ba186659ea413e82ded))
+* **webpack:** adapt scuttling config for runtime regardless of where it comes from ([#1839](https://github.com/PEAC337/LavaMoat/issues/1839)) ([b1ad321](https://github.com/PEAC337/LavaMoat/commit/b1ad321cb8b3e36a44fa661a7d2f5899f7a08fdc))
+* **webpack:** add j to the list of harmless fields on __webpack_require__ ([#1838](https://github.com/PEAC337/LavaMoat/issues/1838)) ([7035a40](https://github.com/PEAC337/LavaMoat/commit/7035a404627d038e9ff7b4d5fd2e7b7ed8928194))
+* **webpack:** adjust MessageEvent repair to reliably work in the bizarre context of Firefox webextension contentscript ([#1830](https://github.com/PEAC337/LavaMoat/issues/1830)) ([33d83d7](https://github.com/PEAC337/LavaMoat/commit/33d83d7402f9b914c7f4d7f9cd18f979c2f406c5))
+* **webpack:** avoid scuttling the global Webpack uses for sharing chunks ([#1762](https://github.com/PEAC337/LavaMoat/issues/1762)) ([6f39c95](https://github.com/PEAC337/LavaMoat/commit/6f39c95407a280aa13bf90adb634f8b86821e0f0))
+* **webpack:** fix how ambient asset files requests are filtered ([#1739](https://github.com/PEAC337/LavaMoat/issues/1739)) ([3f914cf](https://github.com/PEAC337/LavaMoat/commit/3f914cf3716d3a4978a80f419fb265db10fc0ae6))
+* **webpack:** fix the naive assumption that there can only be 1 module with a certain path ([#1793](https://github.com/PEAC337/LavaMoat/issues/1793)) ([262bb3d](https://github.com/PEAC337/LavaMoat/commit/262bb3d61016b42977d0c21c83b22cfbbd78a3e9))
+* **webpack:** import types from ses ([78aca55](https://github.com/PEAC337/LavaMoat/commit/78aca5583adc5366c8717fd196b72bdd828b38ed))
+* **webpack:** MessageEvent repair should not prevent further overrides ([#1787](https://github.com/PEAC337/LavaMoat/issues/1787)) ([0c8fc19](https://github.com/PEAC337/LavaMoat/commit/0c8fc1914e0e7a8432edbf6d9e8d2604ee17d291))
+* **webpack:** prevent toString manipulation on a specifier ([1163085](https://github.com/PEAC337/LavaMoat/commit/1163085b29bcc5a78f08b840393bf1edbe099045))
+* **webpack:** strip policy meta from the policy that goes into the bundle, fix related tests ([645d0f2](https://github.com/PEAC337/LavaMoat/commit/645d0f2311a9871694b6bf14bb4ce3c81b2311c8))
+* **webpack:** support regex in scuttling exceptions ([#1529](https://github.com/PEAC337/LavaMoat/issues/1529)) ([45c0308](https://github.com/PEAC337/LavaMoat/commit/45c0308c655c9903f9bdfa17a30460b10f22a219))
+* **webpack:** undo the forced overwrite of parent and top references ([#1666](https://github.com/PEAC337/LavaMoat/issues/1666)) ([adec627](https://github.com/PEAC337/LavaMoat/commit/adec627069e201a7353a89876d0964dd54e1fa9b))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @lavamoat/aa bumped from ^4.3.4 to ^4.3.5
+    * @lavamoat/types bumped from ^0.1.0 to ^0.2.0
+    * lavamoat-core bumped from ^17.1.2 to ^18.0.0
+
 ## [1.5.6](https://github.com/LavaMoat/LavaMoat/compare/webpack-v1.5.5...webpack-v1.5.6) (2025-12-02)
 
 

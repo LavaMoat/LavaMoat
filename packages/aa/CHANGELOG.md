@@ -1,5 +1,15 @@
 # Changelog
 
+## [4.3.5](https://github.com/PEAC337/LavaMoat/compare/aa-v4.3.4...aa-v4.3.5) (2025-12-05)
+
+
+### Bug Fixes
+
+* **aa:** avoid colliding symlinks between tests - cleanup was async and overlapping ([#1747](https://github.com/PEAC337/LavaMoat/issues/1747)) ([f246c74](https://github.com/PEAC337/LavaMoat/commit/f246c747efc020192fc76d2c49ad16455bdc15ca))
+* **aa:** only require used sync submodule from resolve package ([517efa8](https://github.com/PEAC337/LavaMoat/commit/517efa8f7e3222e6172dc075430eafa5a5961f47))
+* add Node.js v24.0.0 to supported engines ([ad9cdcd](https://github.com/PEAC337/LavaMoat/commit/ad9cdcdf83ccbda8bf2eba427d0c80f761f47a0a))
+* **deps:** update dependency resolve to v1.22.10 ([#1535](https://github.com/PEAC337/LavaMoat/issues/1535)) ([17bee26](https://github.com/PEAC337/LavaMoat/commit/17bee26ef5d24f8bcc48d4aac0a7e066a8bbf7af))
+
 ## [4.3.4](https://github.com/LavaMoat/LavaMoat/compare/aa-v4.3.3...aa-v4.3.4) (2025-08-25)
 
 

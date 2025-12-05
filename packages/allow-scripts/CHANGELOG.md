@@ -6,6 +6,32 @@
   * dependencies
     * @lavamoat/aa bumped from ^4.0.1 to ^4.1.0
 
+## [3.5.0](https://github.com/PEAC337/LavaMoat/compare/allow-scripts-v3.4.1...allow-scripts-v3.5.0) (2025-12-05)
+
+
+### Features
+
+* **allow-scripts:** change the recommended use of allow-scripts to global install ([#1823](https://github.com/PEAC337/LavaMoat/issues/1823)) ([48a1d98](https://github.com/PEAC337/LavaMoat/commit/48a1d98bae5c6b38e5fe7c7d7ddadb9b77892034))
+
+
+### Bug Fixes
+
+* add Node.js v24.0.0 to supported engines ([ad9cdcd](https://github.com/PEAC337/LavaMoat/commit/ad9cdcdf83ccbda8bf2eba427d0c80f761f47a0a))
+* **allow-scripts:** fix [#1796](https://github.com/PEAC337/LavaMoat/issues/1796) - correct dev flag in setup ([d4f45de](https://github.com/PEAC337/LavaMoat/commit/d4f45de0a05360a60f8e25c4d4bdcdd960937bbd))
+* **allow-scripts:** include type-fest as prod dep ([10d67f7](https://github.com/PEAC337/LavaMoat/commit/10d67f79b08f2bb14b7056be7f964c5e16195407))
+* **deps:** fix npm audit issues ([#1853](https://github.com/PEAC337/LavaMoat/issues/1853)) ([5ba0f2d](https://github.com/PEAC337/LavaMoat/commit/5ba0f2de62aa4feca86d7f96bcce24f76d6aa624))
+* **deps:** update dependency type-fest to v4.30.0 ([6528665](https://github.com/PEAC337/LavaMoat/commit/6528665e2e99221366444c23a0e52be447e04071))
+* **deps:** update dependency type-fest to v4.40.0 ([#1619](https://github.com/PEAC337/LavaMoat/issues/1619)) ([4e20306](https://github.com/PEAC337/LavaMoat/commit/4e20306371ae605fc414dd645b8e422a68c71b93))
+* **deps:** update dependency type-fest to v4.40.1 ([#1624](https://github.com/PEAC337/LavaMoat/issues/1624)) ([b918dcc](https://github.com/PEAC337/LavaMoat/commit/b918dcc7d7ea2b0a4779eecaa7a853c73ecc5246))
+* **deps:** update dependency type-fest to v4.41.0 ([#1657](https://github.com/PEAC337/LavaMoat/issues/1657)) ([19e9bf1](https://github.com/PEAC337/LavaMoat/commit/19e9bf144c8c43f530501bc500480fed16f995ac))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @lavamoat/aa bumped from ^4.3.4 to ^4.3.5
+
 ## [3.4.1](https://github.com/LavaMoat/LavaMoat/compare/allow-scripts-v3.4.0...allow-scripts-v3.4.1) (2025-11-19)
 
 

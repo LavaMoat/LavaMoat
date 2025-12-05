@@ -1,5 +1,45 @@
 # Changelog
 
+## [8.2.0](https://github.com/PEAC337/LavaMoat/compare/lavamoat-tofu-v8.1.0...lavamoat-tofu-v8.2.0) (2025-12-05)
+
+
+### Features
+
+* **core:** add informative errors when the result of policy merge contains invalid entries ([#1848](https://github.com/PEAC337/LavaMoat/issues/1848)) ([fefd457](https://github.com/PEAC337/LavaMoat/commit/fefd457d53c2944fe3d2ee719cd741f5eafb8987))
+* **tofu:** enable deep dependency analysis of ES modules ([e5d1818](https://github.com/PEAC337/LavaMoat/commit/e5d181806788134b9b0b37ef58b0576056ac215a))
+
+
+### Bug Fixes
+
+* add Node.js v24.0.0 to supported engines ([ad9cdcd](https://github.com/PEAC337/LavaMoat/commit/ad9cdcdf83ccbda8bf2eba427d0c80f761f47a0a))
+* **deps:** update babel monorepo ([afc9fe5](https://github.com/PEAC337/LavaMoat/commit/afc9fe5fef98c53abe014ff657a1d4f59883abe8))
+* **deps:** update babel monorepo ([e6f4e70](https://github.com/PEAC337/LavaMoat/commit/e6f4e70cffe8237c27126046bb0cfa5515c2d138))
+* **deps:** update babel monorepo to v7.25.8 ([1dcb35e](https://github.com/PEAC337/LavaMoat/commit/1dcb35e023823710343b5f0a4ca589cdfe647e7d))
+* **deps:** update babel monorepo to v7.25.9 ([6d9d5a3](https://github.com/PEAC337/LavaMoat/commit/6d9d5a3336444fada49e239756ffc3c207d3ff5d))
+* **deps:** update babel monorepo to v7.26.10 ([#1561](https://github.com/PEAC337/LavaMoat/issues/1561)) ([2757717](https://github.com/PEAC337/LavaMoat/commit/275771754578647346da1ece0f86afaabdd5de36))
+* **deps:** update babel monorepo to v7.26.2 ([9bac12a](https://github.com/PEAC337/LavaMoat/commit/9bac12abd602632a6bd0ad3af5026cc627bf2b31))
+* **deps:** update babel monorepo to v7.26.5 ([#1501](https://github.com/PEAC337/LavaMoat/issues/1501)) ([4e1e19d](https://github.com/PEAC337/LavaMoat/commit/4e1e19d4f585fb730f32b581ed44d448b9d03122))
+* **deps:** update babel monorepo to v7.26.7 ([#1524](https://github.com/PEAC337/LavaMoat/issues/1524)) ([7285fdf](https://github.com/PEAC337/LavaMoat/commit/7285fdf6ce5c337443840525b79c7653708b541f))
+* **deps:** update babel monorepo to v7.26.9 ([6a9dc73](https://github.com/PEAC337/LavaMoat/commit/6a9dc735f18a5b95e82b86ec2bd466ee4433172f))
+* **deps:** update babel monorepo to v7.27.0 ([#1589](https://github.com/PEAC337/LavaMoat/issues/1589)) ([efd83d7](https://github.com/PEAC337/LavaMoat/commit/efd83d7ea7a5f5f9d2157248d4e2f8b7f9c48c56))
+* **deps:** update babel monorepo to v7.27.3 ([#1672](https://github.com/PEAC337/LavaMoat/issues/1672)) ([72cb642](https://github.com/PEAC337/LavaMoat/commit/72cb6424bb5acb16655562deaefff8ef2cf2168e))
+* **deps:** update definitelytyped ([#1574](https://github.com/PEAC337/LavaMoat/issues/1574)) ([6c2d54e](https://github.com/PEAC337/LavaMoat/commit/6c2d54e851ea24a9482a52018b5e0d84716f87b6))
+* **deps:** update dependency type-fest to v4.30.0 ([6528665](https://github.com/PEAC337/LavaMoat/commit/6528665e2e99221366444c23a0e52be447e04071))
+* **deps:** update dependency type-fest to v4.40.0 ([#1619](https://github.com/PEAC337/LavaMoat/issues/1619)) ([4e20306](https://github.com/PEAC337/LavaMoat/commit/4e20306371ae605fc414dd645b8e422a68c71b93))
+* **deps:** update dependency type-fest to v4.40.1 ([#1624](https://github.com/PEAC337/LavaMoat/issues/1624)) ([b918dcc](https://github.com/PEAC337/LavaMoat/commit/b918dcc7d7ea2b0a4779eecaa7a853c73ecc5246))
+* **deps:** update dependency type-fest to v4.41.0 ([#1657](https://github.com/PEAC337/LavaMoat/issues/1657)) ([19e9bf1](https://github.com/PEAC337/LavaMoat/commit/19e9bf144c8c43f530501bc500480fed16f995ac))
+* make policy ordering consistntly manifest itself in json files produced ([a149a7d](https://github.com/PEAC337/LavaMoat/commit/a149a7d16d65bc4255cf32211a671823356565da))
+* **tofu:** Deprecate codeSampleFromAstNode and undo breaking change ([b43a23d](https://github.com/PEAC337/LavaMoat/commit/b43a23dbedeff3583c2425891a51f1ef0a434bc8))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @lavamoat/types bumped from ^0.1.0 to ^0.2.0
+  * peerDependencies
+    * lavamoat-core bumped from >15.4.0 to >18.0.0
+
 ## [8.1.0](https://github.com/LavaMoat/LavaMoat/compare/lavamoat-tofu-v8.0.11...lavamoat-tofu-v8.1.0) (2025-11-19)
 
 
