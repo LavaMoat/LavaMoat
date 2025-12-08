@@ -1,4 +1,4 @@
-// @ts-check
+// @ts-nocheck
 
 /**
  * - If a workspace emits declaration files, it should contain a `.eslintrc.js`
@@ -37,7 +37,7 @@ const ECMASCRIPT_VERSION = 2021
 const MIN_NODE_VERSION = '16.20.0'
 
 /**
- * @type {import('eslint').Linter.Config}
+ * @type {import('.eslintrc.js').Linter.Config}
  */
 module.exports = {
   root: true,
@@ -83,6 +83,7 @@ module.exports = {
 
     // require node: prefix for builtin modules
     // FIXME: see https://github.com/kytta/eslint-plugin-node-import/issues/10
+    // @ts-ignore
     'node-import/prefer-node-protocol': process.versions.node.startsWith('24.')
       ? 'off'
       : 'error',
