@@ -23,6 +23,15 @@
 
 module.exports = endowmentsToolkit
 
+// Utility to prevent prototype pollution
+function isSafePropertyKey(key) {
+  return (
+    key !== '__proto__' &&
+    key !== 'constructor' &&
+    key !== 'prototype'
+  )
+}
+
 // Exports for testing
 module.exports._test = { instrumentDynamicValueAtPath }
 
@@ -711,6 +720,9 @@ function instrumentDynamicValueAtPath(pathParts, sourceRef, targetRef) {
   for (let depth = 0; depth < pathParts.length - 1; depth++) {
     currentPath = extendPath(currentPath, pathParts[depth])
     const nextPart = pathParts[depth]
+    if (!isSafePropertyKey(nextPart)) {
+      throw new Error(`Prototype-polluting key "${nextPart}" is not allowed in endowment paths.`)
+    }
     if (Reflect.getOwnPropertyDescriptor(currentTarget, nextPart)?.get) {
       // We could silently ignore this, but it could introduce a false sense of security in the policy file
       throw Error(
