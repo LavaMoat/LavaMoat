@@ -6,10 +6,10 @@
 
 import chalk from 'chalk'
 import { stripVTControlCharacters } from 'node:util'
-import { toKeypath } from 'to-keypath'
 import { InvalidArgumentsError } from './error.js'
 import { hrCode, hrLabel, hrPath } from './format.js'
 import { log as defaultLog } from './log.js'
+import { isObjectyObject, toKeypath } from './util.js'
 
 /**
  * @import {ReportInvalidOverridesOptions, ReportSesViolationsOptions, StructuredViolation, StructuredViolationsResult} from './internal.js'
@@ -48,8 +48,13 @@ const findCanonicalNameKeypath = (policy, canonicalName) => {
   }
 
   // Check include array
-  if (policy.include?.includes(canonicalName)) {
-    return toKeypath(['include', canonicalName])
+  for (const include of policy.include ?? []) {
+    if (isObjectyObject(include) && include.name === canonicalName) {
+      return toKeypath(['include', include.name])
+    }
+    if (canonicalName === include) {
+      return toKeypath(['include', canonicalName])
+    }
   }
 
   return undefined
@@ -89,42 +94,45 @@ export const reportInvalidCanonicalNames = (
     )
   }
 
-  // Create list of invalid canonical names with their keypaths and source representations
-  const invalidCanonicalNames = [...unknownCanonicalNames]
-    .map((canonicalName) => {
+  // Create list of invalid canonical names with their keypaths and source
+  // representations
+  const unknownCanonicalNameMap = [...unknownCanonicalNames].map(
+    (canonicalName) => {
       const keypath = findCanonicalNameKeypath(policy, canonicalName)
       return {
         name: canonicalName,
         source: keypath || `unknown location for "${canonicalName}"`,
       }
-    })
-    .filter(({ source }) => source !== undefined)
+    }
+  )
 
-  // if we have any invalid overrides, we will search through the canonical names from the compartment map and make suggestions for the user to fix them
-  if (invalidCanonicalNames.length) {
+  // if we have any invalid overrides, we will search through the canonical
+  // names from the compartment map and make suggestions for the user to fix
+  // them
+  if (unknownCanonicalNameMap.length) {
     /** @type {Map<string, string[]>} */
     const suggestions = new Map()
-    for (const { name: invalidName } of invalidCanonicalNames) {
-      const invalidNameParts = invalidName.split('>')
-      const invalidPackageName = invalidNameParts[invalidNameParts.length - 1]
+    for (const { name: unknownName } of unknownCanonicalNameMap) {
+      const unknownNameParts = unknownName.split('>')
+      const unknownPackageName = unknownNameParts[unknownNameParts.length - 1]
       const matches = [...knownCanonicalNames].filter((name) =>
-        name.endsWith(`>${invalidPackageName}`)
+        name.endsWith(`>${unknownPackageName}`)
       )
       if (matches.length) {
         const nameMatches = matches
           .slice(0, maxSuggestions)
           .map((name) => hrLabel(name))
         log.debug(
-          `Found potential match(es) for ${hrLabel(invalidName)}: ${nameMatches.join(', ')}`
+          `Found potential match(es) for ${hrLabel(unknownName)}: ${nameMatches.join(', ')}`
         )
-        suggestions.set(invalidName, nameMatches)
+        suggestions.set(unknownName, nameMatches)
       }
     }
 
     let msg = `The following entries(s) found in ${what}`
     msg += policyPath ? ` (${hrPath(policyPath)})` : ''
     msg += ` were not associated with any Compartment and may be invalid:\n`
-    msg += invalidCanonicalNames
+    msg += unknownCanonicalNameMap
       .map(({ name, source }) => {
         if (suggestions.has(name)) {
           const suggestion = /** @type {string[]} */ (suggestions.get(name))

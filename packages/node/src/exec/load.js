@@ -18,7 +18,6 @@ import { reportInvalidCanonicalNames } from '../report.js'
 /**
  * @import {ImportLocationOptions, SyncImportLocationOptions, CanonicalName, PackageCompartmentMapDescriptor} from '@endo/compartment-mapper'
  * @import {ApplicationLoader, ExecuteOptions} from '../types.js'
- * @import {PackageJson} from 'type-fest'
  */
 
 /**

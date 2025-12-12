@@ -95,7 +95,8 @@ export const NoBinScriptError = createLavaMoatError(
 
 /**
  * Error thrown if policy cannot be found
- */ export const NoPolicyError = createLavaMoatError(
+ */
+export const NoPolicyError = createLavaMoatError(
   'NoPolicyError',
   ErrorCodes.NoPolicy,
   class extends Error {}
