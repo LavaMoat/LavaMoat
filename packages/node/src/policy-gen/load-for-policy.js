@@ -22,7 +22,6 @@ import {
   SOURCE_TYPE_MODULE,
   SOURCE_TYPE_SCRIPT,
 } from '../constants.js'
-import { GenerationError } from '../error.js'
 import { log as defaultLog } from '../log.js'
 import { mergePolicies } from '../policy-util.js'
 import { reportInvalidCanonicalNames, reportSesViolations } from '../report.js'
@@ -73,6 +72,7 @@ export const loadAndGeneratePolicy = async (
     dev,
     log,
     trustRoot,
+    policyOverride,
   })
 
   /**
@@ -130,7 +130,7 @@ export const loadAndGeneratePolicy = async (
    *
    * @type {Map<CanonicalName, PackagePolicy>}
    */
-  const packagesForPackage = new Map()
+  const packagePoliciesMap = new Map()
 
   /**
    * Stores SES compatibility violations for each package.
@@ -178,7 +178,7 @@ export const loadAndGeneratePolicy = async (
         if (canonicalName === ROOT_COMPARTMENT) {
           return
         }
-        const packagePolicy = packagesForPackage.get(canonicalName) ?? {}
+        const packagePolicy = packagePoliciesMap.get(canonicalName) ?? {}
         for (const connection of connections) {
           if (connection !== canonicalName) {
             packagePolicy[connection] = true
@@ -186,7 +186,7 @@ export const loadAndGeneratePolicy = async (
         }
         // avoid empty package policies
         if (keys(packagePolicy).length > 0) {
-          packagesForPackage.set(canonicalName, packagePolicy)
+          packagePoliciesMap.set(canonicalName, packagePolicy)
         }
       },
       /**
@@ -199,13 +199,7 @@ export const loadAndGeneratePolicy = async (
         if (canonicalName === ROOT_COMPARTMENT) {
           return
         }
-        if ('location' in moduleSource) {
-          return inspectModuleSource(moduleSource, canonicalName)
-        } else if ('error' in moduleSource) {
-          throw new GenerationError(
-            `Source loading error: ${moduleSource.error}`
-          )
-        }
+        return inspectModuleSource(moduleSource, canonicalName)
       },
       ...options,
     })
@@ -243,7 +237,7 @@ export const loadAndGeneratePolicy = async (
     const policy = compilePolicy(
       globalsForPackage,
       builtinsForPackage,
-      packagesForPackage,
+      packagePoliciesMap,
       policyOverride
     )
     return { policy, packageJsonMap }
