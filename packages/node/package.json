@@ -66,7 +66,6 @@
     "loggerr": "4.2.0",
     "ses": "1.14.0",
     "terminal-link": "3.0.0",
-    "to-keypath": "0.1.2",
     "type-fest": "4.41.0",
     "yargs": "17.7.2"
   },

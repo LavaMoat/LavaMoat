@@ -39,6 +39,7 @@ import {
   SOURCE_TYPE_MODULE,
   SOURCE_TYPE_SCRIPT,
 } from '../constants.js'
+import { GenerationError, InvalidArgumentsError } from '../error.js'
 
 // Set up the worker thread message handler
 if (!isMainThread && parentPort) {
@@ -153,18 +154,15 @@ const globalMapToGlobalPolicy = (globalMap) => {
 }
 
 /**
- * Performs global inspection on source code.
+ * Performs global inspection on a parsed AST.
  *
  * This function:
  *
- * 1. Decodes the bytes into a string using `TextDecoder` (utf-8 encoding).
- * 2. Uses `MODULE_REFS[sourceType]` concatenated with `globalObjPropertyRefs` to
- *    build the `ignoredRefs` option of `inspectGlobals()`.
- * 3. Uses `DEFAULT_GLOBAL_THIS_REFS` as the `globalRefs` option of
- *    `inspectGlobals()`.
- * 4. Calls `inspectGlobals()` with the decoded source code and the options defined
- *    above; `inspectGlobals()` returns a `Map<string, GlobalPolicyValue>`
- * 5. Calls `postProcessGlobalMap()` with the map from step 4 to get a
+ * 1. Gets module-specific ignored references from `MODULE_REFS[sourceType]`
+ * 2. Builds `ignoredRefs` by combining module refs with `globalObjPrototypeRefs`
+ * 3. Calls `inspectGlobals()` with the AST, `ignoredRefs`, and
+ *    `DEFAULT_GLOBAL_THIS_REFS` as `globalRefs`
+ * 4. Calls `globalMapToGlobalPolicy()` to convert the resulting map to a
  *    {@link GlobalPolicy}
  *
  * @param {ParseResult} ast The parsed AST
@@ -174,7 +172,7 @@ const globalMapToGlobalPolicy = (globalMap) => {
 const createGlobalPolicy = (ast, sourceType) => {
   const moduleRefs = MODULE_REFS[sourceType]
   if (!moduleRefs) {
-    throw new TypeError(`Unknown sourceType: ${sourceType}`)
+    throw new InvalidArgumentsError(`Unknown sourceType: ${sourceType}`)
   }
   const ignoredRefs = [...moduleRefs, ...globalObjPrototypeRefs]
 
@@ -249,7 +247,7 @@ const inspectListener = ({ source, sourceType, id }) => {
   try {
     ast = parseAst(source, sourceType)
   } catch (error) {
-    throw new Error(
+    throw new GenerationError(
       `Failed to parse AST for ${id}: ${error instanceof Error ? error.message : `${error}`}`,
       { cause: error }
     )
@@ -265,7 +263,7 @@ const inspectListener = ({ source, sourceType, id }) => {
   try {
     globalPolicy = createGlobalPolicy(ast, sourceType)
   } catch (error) {
-    throw new Error(
+    throw new GenerationError(
       `Failed to create global policy for ${id}: ${error instanceof Error ? error.message : `${error}`}`,
       { cause: error }
     )
@@ -273,7 +271,7 @@ const inspectListener = ({ source, sourceType, id }) => {
   try {
     builtinPolicy = createBuiltinPolicy(ast)
   } catch (error) {
-    throw new Error(
+    throw new GenerationError(
       `Failed to create builtin policy for ${id}: ${error instanceof Error ? error.message : `${error}`}`,
       { cause: error }
     )
@@ -281,7 +279,7 @@ const inspectListener = ({ source, sourceType, id }) => {
   try {
     violations = inspectViolations(ast, id)
   } catch (error) {
-    throw new Error(
+    throw new GenerationError(
       `Failed to inspect violations for ${id}: ${error instanceof Error ? error.message : `${error}`}`,
       { cause: error }
     )
