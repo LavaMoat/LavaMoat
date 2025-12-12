@@ -9,6 +9,7 @@ import chalk from 'chalk'
 import nodeFs from 'node:fs'
 import { defaultReadPowers } from '../compartment/power.js'
 import { DEFAULT_TRUST_ROOT_COMPARTMENT } from '../constants.js'
+import { InvalidArgumentsError } from '../error.js'
 import { hrCode, hrPath } from '../format.js'
 import { log as defaultLog } from '../log.js'
 import {
@@ -25,7 +26,7 @@ import { loadAndGeneratePolicy } from './load-for-policy.js'
  */
 
 /**
- * Generates a LavaMoat policy or debug policy from a given entry point using
+ * Generates a LavaMoat policy from a given entry point using
  * `@endo/compartment-mapper`
  *
  * @param {string | URL} entrypoint
@@ -95,7 +96,7 @@ export const generatePolicy = async (
       readFile,
     })
   } else if (rawPolicyOverridePath) {
-    log.warning(
+    throw new InvalidArgumentsError(
       `Ignoring user-provided policy override path ${hrPath(rawPolicyOverridePath)} because a policy override object was provided`
     )
   }

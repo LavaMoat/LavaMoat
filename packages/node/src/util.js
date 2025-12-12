@@ -4,8 +4,6 @@
  * @remraks
  * This is an anti-pattern. Or so I've heard.
  *
- * TODO: Everything here should support capabilities in one form or another
- *
  * @packageDocumentation
  */
 import nodeUrl from 'node:url'
@@ -53,7 +51,7 @@ export const toFileURLString = (url) =>
 export const isObject = (value) => Object(value) === value
 
 /**
- * Type guard for a non-array object
+ * Type guard for a non-array object. Functions OK
  *
  * @param {unknown} value
  * @returns {value is object & {length?: never}}
@@ -226,21 +224,56 @@ export const toAbsolutePath = (pathLike, assertionMessage) => {
   return path
 }
 
+// #region to-keypath
 /**
- * A no-operation function.
+ * Matches a string that can be displayed as an integer when converted to a
+ * string (via `toString()`). This would represent the index of an array.
+ *
+ * It may not be a
+ * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/isSafeInteger safe integer},
+ * but it's an integer.
  */
-export const noop = () => {}
+const INT_STRING_REGEXP = /^(?:0|[1-9][0-9]*)$/
 
 /**
- * Type guard for an `Error`
- *
- * @param {unknown} value
- * @returns {value is Error}
+ * Anything matching this will need to be in
  */
-export const isError = (value) =>
-  isObjectyObject(value) &&
-  'name' in value &&
-  typeof value.name === 'string' &&
-  'message' in value &&
-  typeof value.message === 'string' &&
-  (!('stack' in value) || ('stack' in value && typeof value.stack === 'string'))
+const DOT_NOTATION_ALLOWED = /^[a-zA-Z_$][a-zA-Z0-9_$]*$/
+
+/**
+ * Matches a string wrapped in single or double quotes
+ */
+const WRAPPED_QUOTE_REGEXP = /^["'](?<content>.+)["']$/
+
+/**
+ * Returns `true` if `key` can be coerced to an integer, which will cause it to
+ * be wrapped in brackets (`[${key}]`) when used as a key in an object
+ *
+ * @param {string} key Some string
+ * @returns {boolean} `true` if `key` can be coerced to an integer
+ */
+const isIntegerLike = (key) => INT_STRING_REGEXP.test(key)
+
+/**
+ * Converts a "keypath" array to a string using dots or braces as appropriate
+ *
+ * @template {readonly string[]} const T Array of strings
+ * @param {T} path "keypath" array
+ * @returns {string}
+ */
+export const toKeypath = (path) => {
+  if (!path?.length) {
+    return ''
+  }
+  return path.reduce((output, key) => {
+    key = key.replace(WRAPPED_QUOTE_REGEXP, '$<content>')
+
+    if (isIntegerLike(key)) {
+      return `${output}[${key}]`
+    }
+    return DOT_NOTATION_ALLOWED.test(key)
+      ? `${output}.${key}`
+      : `${output}["${key}"]`
+  })
+}
+// #endregion

@@ -17,7 +17,8 @@ import { defaultReadPowers } from './power.js'
  * @import {CanonicalName,
  *  CompartmentMapDescriptor,
  *  PackageCompartmentMapDescriptor,
- *  PackageCompartmentDescriptorName} from '@endo/compartment-mapper'
+ *  PackageCompartmentDescriptorName,
+ * MapNodeModulesOptions} from '@endo/compartment-mapper'
  * @import {MakeNodeCompartmentMapOptions, MakeNodeCompartmentMapResult} from '../internal.js'
  * @import {Entries, PackageJson} from 'type-fest';
  * @import {Loggerr} from 'loggerr';
@@ -65,6 +66,7 @@ const createPackageJsonMap = (
   }
   return packageJsonMap
 }
+
 /**
  * Creates a compartment map descriptor for a given entrypoint generated from
  * its dependency graph.
@@ -111,7 +113,8 @@ export const makeNodeCompartmentMap = async (
    */
   const knownCanonicalNames = new Set()
 
-  const packageCompartmentMap = await mapNodeModules(readPowers, entrypoint, {
+  /** @type {MapNodeModulesOptions} */
+  const mapNodeModulesOptions = {
     conditions: new Set(DEFAULT_CONDITIONS),
     dev,
     languageForExtension: DEFAULT_ENDO_OPTIONS.languageForExtension,
@@ -137,10 +140,23 @@ export const makeNodeCompartmentMap = async (
       }
     },
     /**
+     * Collects unknown canonical names referenced in policy but not found in
+     * the compartment map
+     */
+    unknownCanonicalNameHook: ({ canonicalName }) => {
+      unknownCanonicalNames.add(canonicalName)
+    },
+  }
+
+  if (policyOverride) {
+    /**
      * Adds any missing dependencies from `policyOverride` to the list of
      * dependencies for a package
      */
-    packageDependenciesHook: ({ canonicalName, dependencies }) => {
+    mapNodeModulesOptions.packageDependenciesHook = ({
+      canonicalName,
+      dependencies,
+    }) => {
       if (policyOverride) {
         const { resources } = policyOverride
         if (canonicalName in resources) {
@@ -152,15 +168,14 @@ export const makeNodeCompartmentMap = async (
         }
       }
       return { dependencies }
-    },
-    /**
-     * Collects unknown canonical names referenced in policy but not found in
-     * the compartment map
-     */
-    unknownCanonicalNameHook: ({ canonicalName }) => {
-      unknownCanonicalNames.add(canonicalName)
-    },
-  })
+    }
+  }
+
+  const packageCompartmentMap = await mapNodeModules(
+    readPowers,
+    entrypoint,
+    mapNodeModulesOptions
+  )
 
   /**
    * @type {Map<CanonicalName, PackageJson>}

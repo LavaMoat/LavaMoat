@@ -11,7 +11,6 @@
 import { jsonStringifySortedPolicy, mergePolicy } from 'lavamoat-core'
 import nodeFs from 'node:fs'
 import nodePath from 'node:path'
-import { toKeypath } from 'to-keypath'
 import * as constants from './constants.js'
 import {
   ATTENUATORS_COMPARTMENT,
@@ -29,7 +28,9 @@ import {
   hasValue,
   isObjectyObject,
   isPathLike,
+  isString,
   toAbsolutePath,
+  toKeypath,
   toPath,
 } from './util.js'
 
@@ -415,10 +416,18 @@ const getPolicyCanonicalNames = (policy) => {
    * Canonical names from the `LavaMoatPolicy.include` array
    */
   const includeCanonicalNames =
-    policy.include?.map((name) => ({
-      name,
-      source: toKeypath(['include', name]),
-    })) ?? []
+    policy.include?.map((value) => {
+      if (isString(value)) {
+        return {
+          name: value,
+          source: toKeypath(['include', value]),
+        }
+      }
+      return {
+        name: value.name,
+        source: toKeypath(['include', value.entry]),
+      }
+    }) ?? []
 
   /**
    * Deduped array of all canonical names found in policy
