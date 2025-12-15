@@ -71,10 +71,6 @@ export const makeGlobalsAttenuator = ({
     }
   }
 
-  if (typeof scuttleGlobalThis === 'boolean') {
-    scuttleGlobalThis = { enabled: scuttleGlobalThis }
-  }
-
   const { getEndowmentsForConfig, copyWrappedGlobals } = endowmentsToolkit({
     handleGlobalWrite: knownWritableFields.size > 0,
     knownWritableFields,
@@ -110,10 +106,7 @@ export const makeGlobalsAttenuator = ({
         'globalThis',
         'global',
       ])
-      scuttle(originalGlobalThis, {
-        ...scuttleGlobalThis,
-        enabled: !!scuttleGlobalThis.enabled,
-      })
+      scuttle(originalGlobalThis, scuttleGlobalThis)
     } else {
       if (!rootCompartmentGlobalThis) {
         rootCompartmentGlobalThis = new Compartment().globalThis

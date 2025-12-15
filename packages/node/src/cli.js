@@ -33,6 +33,7 @@ import { toPath } from './util.js'
 
 /**
  * @import {PackageJson} from 'type-fest';
+ * @import {LavaMoatScuttleOpts} from 'lavamoat-core';
  * @import {LavaMoatPolicy} from '@lavamoat/types';
  */
 
@@ -393,7 +394,15 @@ const main = async (args = hideBin(process.argv)) => {
               type: 'boolean',
               describe: 'Enable scuttling of globalThis',
               group: BEHAVIOR_GROUP,
-              coerce: Boolean,
+              coerce:
+                /**
+                 * This is just about all we can do on the CLI without further
+                 * options for a `LavaMoatScuttleOpts` object
+                 *
+                 * @param {boolean} value
+                 * @returns {LavaMoatScuttleOpts}
+                 */
+                (value) => (value ? { enabled: true } : { enabled: false }),
             },
           })
           /**
