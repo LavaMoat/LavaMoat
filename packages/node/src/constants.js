@@ -228,7 +228,7 @@ export const LANGUAGE_CJS = 'cjs'
 export const MessageTypes = Object.freeze(
   /** @type {const} */ ({
     Inspect: 'inspect',
-    Policies: 'policies',
+    InspectionResults: 'inspectionResults',
     Error: 'error',
   })
 )

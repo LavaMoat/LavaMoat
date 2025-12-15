@@ -12,7 +12,13 @@ import { log as defaultLog } from './log.js'
 import { isObjectyObject, toKeypath } from './util.js'
 
 /**
- * @import {ReportInvalidOverridesOptions, ReportSesViolationsOptions, StructuredViolation, StructuredViolationsResult} from './internal.js'
+ * @import {ReportInvalidOverridesOptions,
+ * ReportModuleInspectionProgressFn,
+ * ModuleInspectionProgressReporter,
+ * ReportModuleInspectionProgressEndFn,
+ * ReportSesViolationsOptions,
+ * StructuredViolation,
+ * StructuredViolationsResult} from './internal.js'
  * @import {CanonicalName} from '@endo/compartment-mapper'
  * @import {LavaMoatPolicy} from '@lavamoat/types'
  */
@@ -228,5 +234,77 @@ export const reportSesViolations = (
     log.warning(
       `${typeMsg} will likely fail at runtime under LavaMoat; patching is advised.`
     )
+  }
+}
+
+/**
+ * Creates a pair of functions for reporting module inspection progress.
+ *
+ * If the console is not a TTY, this function will return a pair of functions
+ * that do nothing.
+ *
+ * @returns {ModuleInspectionProgressReporter}
+ */
+export const createModuleInspectionProgressReporter = () => {
+  if (!process.stderr.isTTY) {
+    return {
+      reportModuleInspectionProgress: () => 0,
+      reportModuleInspectionProgressEnd: () => {},
+    }
+  }
+
+  /**
+   * Reports progress of the module inspection process to the console.
+   *
+   * Displays a progress indicator on a single line, overwriting it as it
+   * progresses.
+   *
+   * @type {ReportModuleInspectionProgressFn}
+   */
+  const reportModuleInspectionProgress = (
+    messageCount,
+    inspectedModules,
+    modulesToInspect
+  ) => {
+    messageCount++
+    const trianglePos = ((messageCount - 1) % 3) + 1
+    const prefix = '   '.split('')
+
+    // Style the triangle based on position
+    let styledTriangle
+    if (trianglePos === 1) {
+      styledTriangle = chalk.dim('▶')
+    } else if (trianglePos === 2) {
+      styledTriangle = chalk.white('▶')
+    } else {
+      styledTriangle = chalk.whiteBright('▶')
+    }
+
+    prefix[trianglePos - 1] = styledTriangle
+    const prefixStr = prefix.join('')
+    process.stderr.write(
+      `\r        ${chalk.dim('›')} ${prefixStr} ${chalk.white('Inspecting modules: ')}${chalk.whiteBright(inspectedModules.size)}${chalk.dim('/')}${chalk.white(modulesToInspect.size)}`
+    )
+    return messageCount
+  }
+
+  /**
+   * Reports the end of the module inspection process to the console.
+   *
+   * @type {ReportModuleInspectionProgressEndFn}
+   */
+  const reportModuleInspectionProgressEnd = (
+    inspectedModules,
+    modulesToInspect
+  ) => {
+    const prefix = `        ${chalk.dim('›')} `
+    process.stderr.write(
+      `\r${prefix}${chalk.dim('▶')}${chalk.white('▶')}${chalk.whiteBright('▶')} ${chalk.white('Inspecting modules: ')}${chalk.whiteBright(inspectedModules.size)}${chalk.dim('/')}${chalk.white(modulesToInspect.size)} ${chalk.greenBright('✓')}\n`
+    )
+  }
+
+  return {
+    reportModuleInspectionProgress,
+    reportModuleInspectionProgressEnd,
   }
 }
