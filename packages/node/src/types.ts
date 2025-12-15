@@ -20,7 +20,7 @@ import type {
   UrlInterface,
 } from '@endo/compartment-mapper'
 import type { LavaMoatPolicy } from '@lavamoat/types'
-import type { IsBuiltinFn } from 'lavamoat-core'
+import type { IsBuiltinFn, LavaMoatScuttleOpts } from 'lavamoat-core'
 import type { Loggerr } from 'loggerr'
 import type nodeFs from 'node:fs'
 import type { PathLike, Stats } from 'node:fs'
@@ -203,19 +203,10 @@ export interface WithTrustRoot {
 }
 
 /**
- * Options for `scuttleGlobalThis`
- */
-export interface ScuttleGlobalThisOptions {
-  enabled?: boolean
-  exceptions?: string[]
-  scuttlerName?: string
-}
-
-/**
  * Options having a `scuttleGlobalThis` property
  */
 export interface WithScuttleGlobalThis {
-  scuttleGlobalThis?: boolean | ScuttleGlobalThisOptions
+  scuttleGlobalThis?: LavaMoatScuttleOpts
 }
 
 /**
